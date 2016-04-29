@@ -1,0 +1,10 @@
+script: 
+language: c
+compiler:
+  - clang
+  - gcc
+before_install:
+  - sudo apt-get -qq update
+  - sudo apt-get install -y gsl-bin libgsl0-dev
+install: make && make tests
+script: tests/ccl_test_utils
