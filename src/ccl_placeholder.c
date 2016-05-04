@@ -7,6 +7,7 @@
 #include "gsl/gsl_integration.h"
 #include "gsl/gsl_spline.h"
 
+//TODO: why is all of this not in ccl_power?
 static
 double Tsqr_BBKS(ccl_parameters * params, double k)
 {
@@ -26,6 +27,7 @@ struct sigma8_args {
     int * status;
 };
 
+//TODO: couldn't this be done from a generic sigma(R) routine?
 static
 double sigma8_integrand(double k, void * args)
 {

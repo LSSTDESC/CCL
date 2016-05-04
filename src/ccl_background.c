@@ -8,24 +8,35 @@
 #include "gsl/gsl_spline.h"
 #include "gsl/gsl_integration.h"
 
-static
-double h_over_h0(double a, ccl_parameters * params){
-    double v = params->Omega_l * exp(-3.0*((params->w0+params->wa+1.0)*log(a)+params->wa*(1-a)));
-    return sqrt(params->Omega_m/a/a/a + params->Omega_k/a/a + params->Omega_g/a/a/a/a + v);
+//TODO: is it worth separating between cases for speed purposes?
+//E.g. flat vs non-flat, LDCM vs wCDM
+//CHANGED: modified this to include non-flat cosmologies
+static double h_over_h0(double a, ccl_parameters * params)
+{
+  return sqrt((params->Omega_m+params->Omega_l*pow(aa,-3*(params->w0+params->wa))*
+	       exp(3*params->wa*(aa-1))+params->Omega_k*aa)/(aa*aa*aa));
 }
 
-
-double chi_integrand(double a, void * cosmo_void){
-    ccl_cosmology * cosmo = cosmo_void;
-    return 1.0/(a*a*h_over_h0(a, &cosmo->params));
+static doube omega_m(double a,ccl_parameters * params)
+{
+  return params->Omega_m/(params->Omega_m+params->Omega_l*pow(aa,-3*(params->w0+params->wa))*
+			  exp(3*params->wa*(aa-1))+params->Omega_k*aa);
 }
 
+//TODO: check length units
+static double chi_integrand(double a, void * cosmo_void)
+{
+  ccl_cosmology * cosmo = cosmo_void;
+  return 1.0/(a*a*h_over_h0(a, &(cosmo->params)));
+}
 
-//c%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 // Growth function for w0-wa models  - PLACEHOLDER CODE!
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+//CHANGED: generalized to non-flat cosmologies
 
+/*
 //function for growfac (DGL)
 int growth_integrand(double a,const double y[],double f[],void *params)
 {
@@ -42,6 +53,7 @@ int growth_integrand(double a,const double y[],double f[],void *params)
     f[1]=y[0]*3.*p[0]/(2.*hub*aa*aa*a)-y[1]/a*(2.-(omegam+(3.*(p[2]+p[3]*(1.-a))+1)*omegav)/(2.*hub));
     return GSL_SUCCESS;
 }
+//TODO: check this
 
 static
 int growth_function_array(double *a, double *table, int na, ccl_parameters * params)
@@ -74,157 +86,256 @@ int growth_function_array(double *a, double *table, int na, ccl_parameters * par
 
   return status;
 }
+//TODO: check this
+*/
 
+static int growth_ode_system(double a,const double y[],double dydt[],void *params)
+{
+  ccl_cosmology * cosmo = params;
+  double hnorm=h_over_h0(a,&(cosmo->params));
+  double om=omega_m(a,&(cosmo->params));
 
+  dydt[0]=y[1]/(a*a*a*hnorm);
+  dydt[1]=1.5*hnorm*a*om*y[0];
 
-void ccl_cosmology_compute_distances(ccl_cosmology * cosmo, int *status){
+  return GSL_SUCCESS;
+}
 
-    //either:
-    // if (cosmo->computed_distances) return; // if immutable
-    //or
-    // if (!ccl_needs_recomputation(cosmo)) return; // if immutable
+static int growth_factor_and_growth_rate(double a,double *gf,double *fg,ccl_cosmology *cosmo)
+{
+  if(a<EPS_SCALEFAC_GROWTH) {
+    *gf=aa;
+    *fg=1;
+    return 0;
+  }
+  else {
+    double y[2];
+    double ainit=EPS_SCALEFAC_GROWTH;
+    gsl_odeiv2_system sys={growth_ode_system,NULL,2,cosmo};
+    gsl_odeiv2_driver *d=
+      gsl_odeiv2_driver_alloc_y_new(&sys,gsl_odeiv2_step_rkck,0.1*EPS_SCALEFAC_GROWTH,0,EPSREL_GROWTH);
 
-    // Fill in the H
-    // We use fixed sizes for these grids based on code comparison results
+    y[0]=EPS_SCALEFAC_GROWTH;
+    y[1]=EPS_SCALEFAC_GROWTH*EPS_SCALEFAC_GROWTH*EPS_SCALEFAC_GROWTH*
+      h_over_h0(EPS_SCALEFAC_GROWTH,&(cosmo->params));
 
-    int na=0;
-    double * a = ccl_linear_spacing(A_SPLINE_MIN, A_SPLINE_MAX, A_SPLINE_DELTA, &na);
-    if (a==NULL || 
-        (fabs(a[0]-A_SPLINE_MIN)>1e-5) || 
-        (fabs(a[na-1]-A_SPLINE_MAX)>1e-5) || 
-        (a[na-1]>1.0)
-        ) {
-        fprintf(stderr, "Error creating linear spacing.\n");        
-        *status = 1;
-        return;
+    int status=gsl_odeiv2_driver_apply(d,&ainit,aa,y);
+    if(status!=GSL_SUCCESS) {
+      fprintf(stderr,"ODE didn't converge when computing growth\n");
+      return 1;
     }
-
-
-    // allocate space for y, which will be all three
-    // of E(a), chi(a), and G(a) in turn.
-    double *y = malloc(sizeof(double)*na);
-
-    // Compute E spline values
-    for (int i=0; i<na; i++){
-        y[i] = h_over_h0(a[i], &cosmo->params);
-    }
-
-    // Allocate and fill E spline with values we just got
-    gsl_spline * E = gsl_spline_alloc(A_SPLINE_TYPE, na);
-    *status = gsl_spline_init(E, a, y, na);
-
-    // Check for errors in creating the spline
-    if (*status){
-        free(a);
-        free(y);
-        gsl_spline_free(E);
-        fprintf(stderr, "Error creating E(a) spline\n");
-        return;
-    }
-
-
-    gsl_integration_cquad_workspace * workspace = gsl_integration_cquad_workspace_alloc (1000);
     
-    gsl_function F;
-    F.function = &chi_integrand;
-    F.params = cosmo;
+    *gf=y[0];
+    *fg=y[1]/(a*a*h_over_h0(a,&(cosmo->params))*y[0]);
 
-    for (int i=0; i<na; i++){
-        *status |= gsl_integration_cquad(&F, a[i], 1.0, 0.0, 1e-5, workspace, &y[i], NULL, NULL); 
-    }
+    return 0;
+  }
+}
 
-    gsl_integration_cquad_workspace_free(workspace);
-
-    if (*status){
-        free(a);
-        free(y);
-        gsl_spline_free(E);        
-        fprintf(stderr, "Error integrating to get chi(a)\n");
-        return;
-    }
-
-    gsl_spline * chi = gsl_spline_alloc(A_SPLINE_TYPE, na);
-    *status = gsl_spline_init(chi, a, y, na);
-
-    if (*status){
-        free(a);
-        free(y);
-        gsl_spline_free(E);
-        gsl_spline_free(chi);
-        fprintf(stderr, "Error creating chi(a) spline\n");
-        return;
-    }
-
-
-    *status = growth_function_array(a, y, na, &cosmo->params);
-
-    if (*status){
-        free(a);
-        free(y);
-        gsl_spline_free(E);
-        gsl_spline_free(chi);
-        fprintf(stderr, "Error creating growth array\n");
-        return;
-    }
-
-    gsl_spline * growth = gsl_spline_alloc(A_SPLINE_TYPE, na);
-    *status = gsl_spline_init(growth, a, y, na);
-
-
-
-    if (*status){
-        free(a);
-        free(y);
-        gsl_spline_free(E);
-        gsl_spline_free(chi);
-        gsl_spline_free(growth);
-        fprintf(stderr, "Error creating growth spline\n");
-        return;
-    }
-
-
-    cosmo->data.E = E;
-    cosmo->data.chi = chi;
-    cosmo->data.growth = growth;
-    cosmo->computed_distances = true;
-
-    free(a);
-    free(y);
-
+void ccl_cosmology_compute_distances(ccl_cosmology * cosmo, int *status)
+{
+  //CHANGED: Using immutable model for the time being
+  if(cosmo->computed_distances)
     return;
 
+  // Create linearly-spaced values of the scale factor
+  int na=0;
+  double * a = ccl_linear_spacing(A_SPLINE_MIN, A_SPLINE_MAX, A_SPLINE_DELTA, &na);
+  if (a==NULL || 
+      (fabs(a[0]-A_SPLINE_MIN)>1e-5) || 
+      (fabs(a[na-1]-A_SPLINE_MAX)>1e-5) || 
+      (a[na-1]>1.0)
+      ) {
+    fprintf(stderr, "Error creating linear spacing.\n");        
+    *status = 1;
+    return;
+  }
+
+  // allocate space for y, which will be all three
+  // of E(a), chi(a), D(a) and f(a) in turn.
+  double *y = malloc(sizeof(double)*na);
+
+  // Fill in E(a)
+  for (int i=0; i<na; i++){
+    y[i] = h_over_h0(a[i], &cosmo->params);
+  }
+
+  // Allocate and fill E spline with values we just got
+  gsl_spline * E = gsl_spline_alloc(A_SPLINE_TYPE, na);
+  *status = gsl_spline_init(E, a, y, na);
+  // Check for errors in creating the spline
+  if (*status){
+    free(a);
+    free(y);
+    gsl_spline_free(E);
+    fprintf(stderr, "Error creating E(a) spline\n");
+    return;
+  }
+
+  //Fill in chi(a)
+  //TODO: CQUAD is great, but slower than other methods. This could be sped up if it becomes an issue.
+  //TODO: check length units
+  gsl_integration_cquad_workspace * workspace = gsl_integration_cquad_workspace_alloc (1000);
+  gsl_function F;
+  F.function = &chi_integrand;
+  F.params = cosmo;
+  for (int i=0; i<na; i++){
+    *status |= gsl_integration_cquad(&F, a[i], 1.0, 0.0,EPSREL_DIST,workspace,&y[i], NULL, NULL); 
+  }
+  gsl_integration_cquad_workspace_free(workspace);
+  if (*status){
+    free(a);
+    free(y);
+    gsl_spline_free(E);        
+    fprintf(stderr, "Error integrating to get chi(a)\n");
+    return;
+  }
+
+  gsl_spline * chi = gsl_spline_alloc(A_SPLINE_TYPE, na);
+  *status = gsl_spline_init(chi, a, y, na);
+  if (*status){
+    free(a);
+    free(y);
+    gsl_spline_free(E);
+    gsl_spline_free(chi);
+    fprintf(stderr, "Error creating chi(a) spline\n");
+    return;
+  }
+
+  //Fill in D(a) and f(a)
+  double *y2 = malloc(sizeof(double)*na);
+  for (int i=0; i<na; i++){
+    *status |= growth_factor_and_growth_rate(a[i],&(y[i]),&(y2[i]),cosmo);
+  }
+  if (*status){
+    free(a);
+    free(y);
+    free(y2);
+    gsl_spline_free(E);
+    gsl_spline_free(chi);
+    fprintf(stderr, "Error creating growth array\n");
+    return;
+  }
+
+  gsl_spline * growth = gsl_spline_alloc(A_SPLINE_TYPE, na);
+  *status = gsl_spline_init(growth, a, y, na);
+  if (*status){
+    free(a);
+    free(y);
+    free(y2);
+    gsl_spline_free(E);
+    gsl_spline_free(chi);
+    gsl_spline_free(growth);
+    fprintf(stderr, "Error creating growth spline\n");
+    return;
+  }
+  gsl_spline * fgrowth = gsl_spline_alloc(A_SPLINE_TYPE, na);
+  *status = gsl_spline_init(growth, a, y2, na);
+  if (*status){
+    free(a);
+    free(y);
+    free(y2);
+    gsl_spline_free(E);
+    gsl_spline_free(chi);
+    gsl_spline_free(growth);
+    gsl_spline_free(fgrowth);
+    fprintf(stderr, "Error creating growth spline\n");
+    return;
+  }
+
+
+  //TODO: why are we not using interpolation accelerators?
+  //gsl_interp_accel *intacc=gsl_interp_accel_alloc();
+  //cosmo->intacc=gsl_interp_accel_alloc();
+  cosmo->data.E = E;
+  cosmo->data.chi = chi;
+  cosmo->data.growth = growth;
+  cosmo->data.fgrowth = fgrowth;
+  cosmo->computed_distances = true;
+  
+  free(a);
+  free(y);
+  free(y2);
+
+  return;
 }
 
 // Distance-like function examples
 
-double ccl_comoving_radial_distance(ccl_cosmology * cosmo, double a){
-    return gsl_spline_eval(cosmo->data.chi, a, NULL);
+double ccl_comoving_radial_distance(ccl_cosmology * cosmo, double a)
+{
+  //TODO: Why are we not using interpolation accelerators?
+  //    return gsl_spline_eval(cosmo->data.chi, a, cosmo->data.intacc);
+  return gsl_spline_eval(cosmo->data.chi, a, NULL);
 }
 
 int ccl_comoving_radial_distances(ccl_cosmology * cosmo, int na, double a[na], double output[na])
 {
-    return 0;
+  for (int i=0; i<na; i++){
+    //TODO: Why are we not using interpolation accelerators?
+    //output[i]=gsl_spline_eval(cosmo->data.chi, a[i], cosmo->data.intacc);
+    output[i]=gsl_spline_eval(cosmo->data.chi,a[i],NULL);
+  }
+
+  return 0;
 }
+//TODO: do this
 
 double ccl_luminosity_distance(ccl_cosmology * cosmo, double a)
 {
     return ccl_comoving_radial_distance(cosmo, a) / a;
 }
+//TODO: this is not valid for curved cosmologies
 
 int ccl_luminosity_distances(ccl_cosmology * cosmo, int na, double a[na], double output[na])
 {
-    return 0;
+  for (int i=0; i<na; i++){
+    //TODO: Why are we not using interpolation accelerators?
+    //output[i]=gsl_spline_eval(cosmo->data.chi, a[i], cosmo->data.intacc);
+    output[i]=gsl_spline_eval(cosmo->data.chi,a[i],NULL)/a[i];
+  }
+
+  return 0;
 }
+//TODO: do this
 
 double ccl_growth_factor(ccl_cosmology * cosmo, double a, int * status)
 {
+  //TODO: Why are we not using interpolation accelerators?
+  //    return gsl_spline_eval(cosmo->data.growth, a, cosmo->data.intacc);
     return gsl_spline_eval(cosmo->data.growth, a, NULL);
 }
 
 int ccl_growth_factors(ccl_cosmology * cosmo, int na, double a[na], double output[na])
 {
-    return 0;
+  for (int i=0; i<na; i++){
+    //TODO: Why are we not using interpolation accelerators?
+    //output[i]=gsl_spline_eval(cosmo->data.growth, a[i], cosmo->data.intacc);
+    output[i]=gsl_spline_eval(cosmo->data.growth,a[i],NULL);
+  }
+
+  return 0;
 }
+//TODO: do this
+
+double ccl_growth_rate(ccl_cosmology * cosmo, double a, int * status)
+{
+  //TODO: Why are we not using interpolation accelerators?
+  //    return gsl_spline_eval(cosmo->data.fgrowth, a, cosmo->data.intacc);
+    return gsl_spline_eval(cosmo->data.fgrowth, a, NULL);
+}
+
+int ccl_growth_rates(ccl_cosmology * cosmo, int na, double a[na], double output[na])
+{
+  for (int i=0; i<na; i++){
+    //TODO: Why are we not using interpolation accelerators?
+    //output[i]=gsl_spline_eval(cosmo->data.fgrowth, a[i], cosmo->data.intacc);
+    output[i]=gsl_spline_eval(cosmo->data.fgrowth,a[i],NULL);
+  }
+
+  return 0;
+}
+//TODO: do this
 
 
 // Power function examples

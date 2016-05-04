@@ -18,3 +18,9 @@
 #define K_MAX 1e3
 #define K_MIN 1e-4
 #define N_K 500
+
+//TODO: created constants for precision parameters
+//Precision parameters
+#define EPSREL_DIST 1E-6
+#define EPSREL_GROWTH 1E-6
+#define EPS_SCALEFAC_GROWTH 1E-6

@@ -8,7 +8,7 @@
 
 typedef struct ccl_parameters {
     // Densities
-	double Omega_c;
+    double Omega_c;
     double Omega_b;
     double Omega_m;
     double Omega_n;
@@ -42,9 +42,14 @@ typedef struct ccl_parameters {
 typedef struct ccl_data{
     // These are all functions of the scale factor a.
     // Distances are defined in EITHER Mpc or Mpc/h (TBC)
-    gsl_spline * chi;
-    gsl_spline * growth;
-    gsl_spline * E;
+  gsl_spline * chi;
+  gsl_spline * growth;
+  //CHANGED: added growth rate
+  gsl_spline * fgrowth;
+  gsl_spline * E;
+  //TODO: For LSS it would be important to have the growth rate too
+  //gsl_interp_accel *intacc;
+  //TODO: why not use interpolation accelerators?
 
     // Function of Halo mass M
     gsl_spline * sigma;

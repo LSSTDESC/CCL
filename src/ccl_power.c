@@ -109,6 +109,7 @@ double ccl_linear_matter_power(ccl_cosmology * cosmo, double a, double k, int * 
         return p_1;
     }
 
+    //TODO: this is valid in the linear regime.
     double D = ccl_growth_factor(cosmo, a, status);
     double p = D*D*p_1;
     if (*status){
