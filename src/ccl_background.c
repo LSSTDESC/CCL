@@ -24,11 +24,11 @@ static double omega_m(double a,ccl_parameters * params)
 			  exp(3*params->wa*(a-1))+params->Omega_k*a);
 }
 
-//TODO: check length units
 static double chi_integrand(double a, void * cosmo_void)
 {
   ccl_cosmology * cosmo = cosmo_void;
-  return 1.0/(a*a*h_over_h0(a, &(cosmo->params)));
+  //TODO: length units here are Mpc/h
+  return CLIGHT_HMPC/(a*a*h_over_h0(a, &(cosmo->params)));
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -243,7 +243,6 @@ void ccl_cosmology_compute_distances(ccl_cosmology * cosmo, int *status)
     fprintf(stderr, "Error creating growth spline\n");
     return;
   }
-
 
   //TODO: why are we not using interpolation accelerators?
   //gsl_interp_accel *intacc=gsl_interp_accel_alloc();

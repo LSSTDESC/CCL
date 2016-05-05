@@ -19,6 +19,9 @@
 #define K_MIN 1e-4
 #define N_K 500
 
+//Lightspeed / H0 in units of Mpc/h
+#define CLIGHT_HMPC 2997.92458 //H0^-1 in Mpc/h                                                                                                                                                                                                                                 
+
 //TODO: created constants for precision parameters
 //Precision parameters
 #define EPSREL_DIST 1E-6
