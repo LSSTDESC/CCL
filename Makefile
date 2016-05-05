@@ -1,5 +1,6 @@
 CC=gcc
 CFLAGS=-Wall -g -O0 -Iinclude -std=c99
+CFLAGS+=-I/home/damonge/include
 LDFLAGS=-lgsl -lgslcblas   -lm
 
 

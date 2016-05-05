@@ -4,7 +4,8 @@
 #include <math.h>
 #include <stdio.h>
 #include "gsl/gsl_errno.h"
-#include "gsl/gsl_odeiv.h"
+//#include "gsl/gsl_odeiv.h"
+#include "gsl/gsl_odeiv2.h"
 #include "gsl/gsl_spline.h"
 #include "gsl/gsl_integration.h"
 
@@ -13,14 +14,14 @@
 //CHANGED: modified this to include non-flat cosmologies
 static double h_over_h0(double a, ccl_parameters * params)
 {
-  return sqrt((params->Omega_m+params->Omega_l*pow(aa,-3*(params->w0+params->wa))*
-	       exp(3*params->wa*(aa-1))+params->Omega_k*aa)/(aa*aa*aa));
+  return sqrt((params->Omega_m+params->Omega_l*pow(a,-3*(params->w0+params->wa))*
+	       exp(3*params->wa*(a-1))+params->Omega_k*a)/(a*a*a));
 }
 
-static doube omega_m(double a,ccl_parameters * params)
+static double omega_m(double a,ccl_parameters * params)
 {
-  return params->Omega_m/(params->Omega_m+params->Omega_l*pow(aa,-3*(params->w0+params->wa))*
-			  exp(3*params->wa*(aa-1))+params->Omega_k*aa);
+  return params->Omega_m/(params->Omega_m+params->Omega_l*pow(a,-3*(params->w0+params->wa))*
+			  exp(3*params->wa*(a-1))+params->Omega_k*a);
 }
 
 //TODO: check length units
@@ -104,7 +105,7 @@ static int growth_ode_system(double a,const double y[],double dydt[],void *param
 static int growth_factor_and_growth_rate(double a,double *gf,double *fg,ccl_cosmology *cosmo)
 {
   if(a<EPS_SCALEFAC_GROWTH) {
-    *gf=aa;
+    *gf=a;
     *fg=1;
     return 0;
   }
@@ -119,7 +120,7 @@ static int growth_factor_and_growth_rate(double a,double *gf,double *fg,ccl_cosm
     y[1]=EPS_SCALEFAC_GROWTH*EPS_SCALEFAC_GROWTH*EPS_SCALEFAC_GROWTH*
       h_over_h0(EPS_SCALEFAC_GROWTH,&(cosmo->params));
 
-    int status=gsl_odeiv2_driver_apply(d,&ainit,aa,y);
+    int status=gsl_odeiv2_driver_apply(d,&ainit,a,y);
     if(status!=GSL_SUCCESS) {
       fprintf(stderr,"ODE didn't converge when computing growth\n");
       return 1;
@@ -230,7 +231,7 @@ void ccl_cosmology_compute_distances(ccl_cosmology * cosmo, int *status)
     return;
   }
   gsl_spline * fgrowth = gsl_spline_alloc(A_SPLINE_TYPE, na);
-  *status = gsl_spline_init(growth, a, y2, na);
+  *status = gsl_spline_init(fgrowth, a, y2, na);
   if (*status){
     free(a);
     free(y);

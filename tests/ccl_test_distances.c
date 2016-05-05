@@ -1,6 +1,6 @@
 #include "ccl.h"
 #include <stdio.h>
-
+#include <math.h>
 
 int main(int argc, char * argv[]){
 
@@ -16,12 +16,17 @@ int main(int argc, char * argv[]){
 	int status; 
 	ccl_cosmology_compute_distances(cosmo, &status);
 
+	printf("[0]z, [1]chi(z), [2]dL(z), [3]mu(z), [4]D(z), [5]f(z)\n");
 	for (double z=0.0; z<=1.0; z+=0.01){
+	  int st;
 		double a = 1/(1.+z);
 		double DL = 2997.0/h * ccl_luminosity_distance(cosmo, a);
 		double DL_pc = DL*1e6;
 		double mu = 5*log10(DL_pc)-5;
-		printf("%le  %le\n", z, mu);
+		double chi=ccl_comoving_radial_distance(cosmo,a);
+		double gf=ccl_growth_factor(cosmo,a,&st);
+		double fg=ccl_growth_rate(cosmo,a,&st);
+		printf("%le  %le %le %le %le %le\n", z, chi,DL,mu,gf,fg);
 	}
 
 
