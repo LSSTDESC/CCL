@@ -20,7 +20,17 @@
 #define N_K 500
 
 //Lightspeed / H0 in units of Mpc/h
-#define CLIGHT_HMPC 2997.92458 //H0^-1 in Mpc/h                                                                                                                                                                                                                                 
+#define CLIGHT_HMPC 2997.92458 //H0^-1 in Mpc/h
+
+//Newton's gravitational constant
+#define GNEWT 6.6738e-11    //(from PDG 2013) in m^3/Kg/s^2
+
+//Solar mass
+#define SOLAR_MASS 1.9885e30 //in kg (from PDG 2013)
+
+//Distance conversions
+#define MPC_TO_METER 3.08567758149e22  //(from PDG 2013) Mpc to m 
+#define PC_TO_METER 3.08567758149e16   //(from PDG 2013) pc to m
 
 //TODO: created constants for precision parameters
 //Precision parameters

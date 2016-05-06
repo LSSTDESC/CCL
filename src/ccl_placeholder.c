@@ -11,6 +11,7 @@
 static
 double Tsqr_BBKS(ccl_parameters * params, double k)
 {
+  //TODO: Watch out for k here: if in units of h/Mpc, we need to change the definition of q:
     double q = k/(params->Omega_m*params->h*params->h)*exp(-params->Omega_b*(1.0+pow(2.*params->h,.5)/params->Omega_m));
     return pow(log(1.+2.34*q)/(2.34*q),2.0)/pow(1.+3.89*q+pow(16.1*q,2.0)+pow(5.46*q,3.0)+pow(6.71*q,4.0),0.5);
 }
@@ -28,6 +29,8 @@ struct sigma8_args {
 };
 
 //TODO: couldn't this be done from a generic sigma(R) routine?
+//TODO: Sorry, but shouldn't kR be k*8/h? It looks like you are multiplying by h.
+//TODO: Also, what units is k? If [k]=Mpc/h, then we should remove h from kR.
 static
 double sigma8_integrand(double k, void * args)
 {
@@ -36,7 +39,7 @@ double sigma8_integrand(double k, void * args)
     double kR = k*8.0*s_args->h; // r=8 Mpc/h
     double x = 3.*(sin(kR) - kR*cos(kR))/pow(kR,3.0);
     double p = exp(gsl_spline_eval(spline, log(k), NULL));
-    double res = p*x*x*k*k/(2.*M_PI*M_PI);
+    double res = p*x*x*k*k/(2.*M_PI*M_PI); //TODO: Why not pass 2M_PIM_PI to the next function to save time?
     return res;
 }
 
@@ -56,5 +59,6 @@ double ccl_sigma8(gsl_spline * P, double h, int * status){
     *status |= gsl_integration_cquad(&F, K_MIN*1.1, K_MAX/1.1, 0.0, 1e-5, workspace, &sigma_8, NULL, NULL);
     gsl_integration_cquad_workspace_free(workspace);
 
+    //TODO: Check whether you are printing sigma_8 or sigma_8^2
     return sigma_8;
 }
