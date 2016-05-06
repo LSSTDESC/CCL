@@ -51,18 +51,18 @@ void ccl_parameters_fill_initial(ccl_parameters *params)
   params->z_star = NAN;
 }
 
-ccl_parameters ccl_parameters_flat_lcdm(double Omega_c, double Omega_b, double h, double A_s, double n_s)
-{
+
+ccl_parameters ccl_parameters_create(double Omega_c, double Omega_b, double Omega_k, double Omega_n, double w0, double wa, double h, double A_s, double n_s){
   ccl_parameters params;
   params.Omega_c = Omega_c;
   params.Omega_b = Omega_b;
   params.Omega_m = Omega_b + Omega_c;
-  params.Omega_n = 0.0;
-  params.Omega_k = 0.0;
+  params.Omega_n = Omega_n;
+  params.Omega_k = Omega_k;
 
   // Dark Energy
-  params.w0 = -1.0;
-  params.wa = 0.0;
+  params.w0 = w0;
+  params.wa = wa;
 
   // Hubble parameters
   params.h = h;
@@ -75,9 +75,42 @@ ccl_parameters ccl_parameters_flat_lcdm(double Omega_c, double Omega_b, double h
   // Set remaining standard and easily derived parameters
   ccl_parameters_fill_initial(&params);
   
+  return params;  
+}
+
+ccl_parameters ccl_parameters_create_flat_lcdm(double Omega_c, double Omega_b, double h, double A_s, double n_s)
+{
+  double Omega_k = 0.0;
+  double Omega_n = 0.0;
+  double w0 = 0.0;
+  double wa = 0.0;
+  ccl_parameters params = ccl_parameters_create(Omega_c, Omega_b, Omega_k, Omega_n, w0, wa, h, A_s, n_s);
   return params;
 
+
 }
+
+ccl_parameters ccl_parameters_create_lcdm(double Omega_c, double Omega_b, double Omega_k, double h, double A_s, double n_s)
+{
+  double Omega_n = 0.0;
+  double w0 = 0.0;
+  double wa = 0.0;
+  ccl_parameters params = ccl_parameters_create(Omega_c, Omega_b, Omega_k, Omega_n, w0, wa, h, A_s, n_s);
+  return params;
+
+
+}
+
+ccl_parameters ccl_parameters_create_flat_wcdm(double Omega_c, double Omega_b, double w0, double h, double A_s, double n_s)
+{
+
+  double Omega_k = 0.0;
+  double Omega_n = 0.0;
+  double wa = 0.0;
+  ccl_parameters params = ccl_parameters_create(Omega_c, Omega_b, Omega_k, Omega_n, w0, wa, h, A_s, n_s);
+  return params;
+}
+
 
 void ccl_data_free(ccl_data * data)
 {
