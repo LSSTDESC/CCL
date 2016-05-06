@@ -20,7 +20,7 @@ ccl_cosmology * ccl_cosmology_create(ccl_parameters params, ccl_configuration co
   cosmo->data.growth = NULL;
   cosmo->data.fgrowth = NULL;
   cosmo->data.E = NULL;
-  //cosmo->data.intacc=NULL;
+  cosmo->data.accelerator=NULL;
 
   cosmo->data.sigma = NULL;
   
@@ -84,7 +84,7 @@ void ccl_data_free(ccl_data * data)
   gsl_spline_free(data->chi);
   gsl_spline_free(data->growth);
   gsl_spline_free(data->fgrowth);
-  //  gsl_interp_accel_free(data->intacc);
+  gsl_interp_accel_free(data->accelerator);
   gsl_spline_free(data->E);
   gsl_spline_free(data->sigma);
   gsl_spline_free(data->p_lin);

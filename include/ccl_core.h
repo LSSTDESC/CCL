@@ -44,11 +44,13 @@ typedef struct ccl_data{
     // Distances are defined in EITHER Mpc or Mpc/h (TBC)
   gsl_spline * chi;
   gsl_spline * growth;
-  //CHANGED: added growth rate
   gsl_spline * fgrowth;
   gsl_spline * E;
-  //TODO: For LSS it would be important to have the growth rate too
-  //gsl_interp_accel *intacc;
+
+  // All these splines use the same accelerator so that
+  // if one calls them successively with the same a value
+  // they will be much faster.
+  gsl_interp_accel *accelerator;
   //TODO: why not use interpolation accelerators?
 
     // Function of Halo mass M

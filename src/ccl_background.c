@@ -244,9 +244,9 @@ void ccl_cosmology_compute_distances(ccl_cosmology * cosmo, int *status)
     return;
   }
 
-  //TODO: why are we not using interpolation accelerators?
-  //gsl_interp_accel *intacc=gsl_interp_accel_alloc();
-  //cosmo->intacc=gsl_interp_accel_alloc();
+  // Initialize the accelerator which speeds the splines and 
+  // assign all the splines we've just made to the structure.
+  cosmo->data.accelerator=gsl_interp_accel_alloc();
   cosmo->data.E = E;
   cosmo->data.chi = chi;
   cosmo->data.growth = growth;
@@ -264,17 +264,13 @@ void ccl_cosmology_compute_distances(ccl_cosmology * cosmo, int *status)
 
 double ccl_comoving_radial_distance(ccl_cosmology * cosmo, double a)
 {
-  //TODO: Why are we not using interpolation accelerators?
-  //    return gsl_spline_eval(cosmo->data.chi, a, cosmo->data.intacc);
-  return gsl_spline_eval(cosmo->data.chi, a, NULL);
+   return gsl_spline_eval(cosmo->data.chi, a, cosmo->data.accelerator);
 }
 
 int ccl_comoving_radial_distances(ccl_cosmology * cosmo, int na, double a[na], double output[na])
 {
   for (int i=0; i<na; i++){
-    //TODO: Why are we not using interpolation accelerators?
-    //output[i]=gsl_spline_eval(cosmo->data.chi, a[i], cosmo->data.intacc);
-    output[i]=gsl_spline_eval(cosmo->data.chi,a[i],NULL);
+    output[i]=gsl_spline_eval(cosmo->data.chi,a[i],cosmo->data.accelerator);
   }
 
   return 0;
@@ -290,9 +286,7 @@ double ccl_luminosity_distance(ccl_cosmology * cosmo, double a)
 int ccl_luminosity_distances(ccl_cosmology * cosmo, int na, double a[na], double output[na])
 {
   for (int i=0; i<na; i++){
-    //TODO: Why are we not using interpolation accelerators?
-    //output[i]=gsl_spline_eval(cosmo->data.chi, a[i], cosmo->data.intacc);
-    output[i]=gsl_spline_eval(cosmo->data.chi,a[i],NULL)/a[i];
+    output[i]=gsl_spline_eval(cosmo->data.chi,a[i],cosmo->data.accelerator)/a[i];
   }
 
   return 0;
@@ -301,17 +295,14 @@ int ccl_luminosity_distances(ccl_cosmology * cosmo, int na, double a[na], double
 
 double ccl_growth_factor(ccl_cosmology * cosmo, double a, int * status)
 {
-  //TODO: Why are we not using interpolation accelerators?
-  //    return gsl_spline_eval(cosmo->data.growth, a, cosmo->data.intacc);
-    return gsl_spline_eval(cosmo->data.growth, a, NULL);
+    return gsl_spline_eval(cosmo->data.growth, a, cosmo->data.accelerator);
 }
+
 
 int ccl_growth_factors(ccl_cosmology * cosmo, int na, double a[na], double output[na])
 {
   for (int i=0; i<na; i++){
-    //TODO: Why are we not using interpolation accelerators?
-    //output[i]=gsl_spline_eval(cosmo->data.growth, a[i], cosmo->data.intacc);
-    output[i]=gsl_spline_eval(cosmo->data.growth,a[i],NULL);
+    output[i]=gsl_spline_eval(cosmo->data.growth,a[i],cosmo->data.accelerator);
   }
 
   return 0;
@@ -320,17 +311,13 @@ int ccl_growth_factors(ccl_cosmology * cosmo, int na, double a[na], double outpu
 
 double ccl_growth_rate(ccl_cosmology * cosmo, double a, int * status)
 {
-  //TODO: Why are we not using interpolation accelerators?
-  //    return gsl_spline_eval(cosmo->data.fgrowth, a, cosmo->data.intacc);
-    return gsl_spline_eval(cosmo->data.fgrowth, a, NULL);
+    return gsl_spline_eval(cosmo->data.fgrowth, a, cosmo->data.accelerator);
 }
 
 int ccl_growth_rates(ccl_cosmology * cosmo, int na, double a[na], double output[na])
 {
   for (int i=0; i<na; i++){
-    //TODO: Why are we not using interpolation accelerators?
-    //output[i]=gsl_spline_eval(cosmo->data.fgrowth, a[i], cosmo->data.intacc);
-    output[i]=gsl_spline_eval(cosmo->data.fgrowth,a[i],NULL);
+    output[i]=gsl_spline_eval(cosmo->data.fgrowth,a[i],cosmo->data.accelerator);
   }
 
   return 0;
