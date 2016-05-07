@@ -4,8 +4,6 @@
 #include "ccl_constants.h"
 #include <stdbool.h>
 
-
-
 typedef struct ccl_parameters {
     // Densities
     double Omega_c;
@@ -83,9 +81,9 @@ ccl_cosmology * ccl_cosmology_create(ccl_parameters params, ccl_configuration co
 // Most general case
 ccl_parameters ccl_parameters_create(double Omega_c, double Omega_b, double Omega_k, double Omega_n, double w0, double wa, double h, double A_s, double n_s);
 // Specific sub-models
-ccl_parameters ccl_parameters_flat_lcdm(double Omega_c, double Omega_b, double h, double A_s, double n_s);
-ccl_parameters ccl_parameters_flat_wcdm(double Omega_c, double Omega_b, double w0, double h, double A_s, double n_s);
-ccl_parameters ccl_parameters_lcdm(double Omega_c, double Omega_b, double Omega_k, double h, double A_s, double n_s);
+ccl_parameters ccl_parameters_create_flat_lcdm(double Omega_c, double Omega_b, double h, double A_s, double n_s);
+ccl_parameters ccl_parameters_create_flat_wcdm(double Omega_c, double Omega_b, double w0, double h, double A_s, double n_s);
+ccl_parameters ccl_parameters_create_lcdm(double Omega_c, double Omega_b, double Omega_k, double h, double A_s, double n_s);
 
 
 void ccl_cosmology_free(ccl_cosmology * cosmo);
