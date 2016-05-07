@@ -14,7 +14,7 @@ $(LIB): $(OBJECTS)
 	ar rc $(LIB) $(OBJECTS)
 
 $(DYLIB): $(OBJECTS)
-	$(CC) -shared -o $(DYLIB) $(OBJECTS) $(LDFLAGS)
+	$(CC) -shared -o $(DYLIB) $(OBJECTS) $(CFLAGS) $(LDFLAGS)
 
 
 tests: tests/ccl_test_utils tests/ccl_test_power
