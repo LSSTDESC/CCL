@@ -5,7 +5,7 @@ LDFLAGS=-lgsl -lgslcblas   -lm
 
 
 OBJECTS=src/ccl_core.o src/ccl_utils.o src/ccl_power.o src/ccl_placeholder.o src/ccl_background.o
-TESTS=tests/ccl_test_utils tests/ccl_test_power
+TESTS=tests/ccl_test_utils tests/ccl_test_power tests/ccl_test_distances
 LIB=lib/libccl.a
 DYLIB=lib/libccl.so
 INC_CCL=
@@ -31,6 +31,6 @@ src/%.o: src/%.c
 
 
 clean:
-	rm -rf *.dSYM *.o *.a  test_core_cosmo src/*.o lib/*.a
+	rm -rf *.dSYM *.o *.a $(TESTS) test_core_cosmo src/*.o lib/*.a lib/*.so lib/*.dSYM  tests/*.dSYM
 
 .PHONY: all tests clean
