@@ -1,6 +1,7 @@
 #include "ccl.h"
 #include <assert.h>
 #include <math.h>
+#include <stdio.h>
 
 
 int test_ccl_linear_spacing(){
@@ -14,6 +15,7 @@ int test_ccl_linear_spacing(){
     free(m1);
 
     int n2;
+    fprintf(stderr, "NOTE: Expect two errors after this line:\n");
     double * m2 = ccl_linear_spacing(0.0, 1.0, 0.75, &n2);
     assert (n2==0);
     assert (m2==NULL);

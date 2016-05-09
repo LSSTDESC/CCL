@@ -20,8 +20,14 @@ $(DYLIB): $(OBJECTS)
 
 
 test: $(TESTS)
-
-tests: $(TESTS)
+	@echo
+	@echo "Running test programs"
+	@echo "---------------------"
+	tests/ccl_test_utils > /dev/null
+	tests/ccl_test_power > /dev/null
+	tests/ccl_test_distances > /dev/null
+	@echo "---------------------"
+	@echo
 
 tests/% : tests/%.c $(LIB)
 	$(CC)  $(CFLAGS) $< -o $@ -Llib -lccl $(LDFLAGS) 
@@ -33,4 +39,4 @@ src/%.o: src/%.c
 clean:
 	rm -rf *.dSYM *.o *.a $(TESTS) test_core_cosmo src/*.o lib/*.a lib/*.so lib/*.dSYM  tests/*.dSYM
 
-.PHONY: all tests clean
+.PHONY: all tests clean test

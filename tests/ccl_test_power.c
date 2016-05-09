@@ -25,7 +25,7 @@ int main(int argc, char * argv[]){
 		printf("%le    %le\n", k, p);
 	}
 
-	fprintf(stderr, "status = %d\n", status);
+	printf("#status = %d\n", status);
 	return status;
 
 }
