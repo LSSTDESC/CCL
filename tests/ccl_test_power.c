@@ -13,7 +13,7 @@ int main(int argc, char * argv[]){
 	config.transfer_function_method = bbks;
 	double sigma_8 = 0.8;
 
-	ccl_parameters params = ccl_parameters_flat_lcdm(Omega_c, Omega_b, h, A_s, n_s);
+	ccl_parameters params = ccl_parameters_create_flat_lcdm(Omega_c, Omega_b, h, A_s, n_s);
 	params.sigma_8 = sigma_8;
 	ccl_cosmology * cosmo = ccl_cosmology_create(params, config);
 
