@@ -69,10 +69,7 @@ void ccl_cosmology_compute_power_bbks(ccl_cosmology * cosmo, int *status){
 
 
 void ccl_cosmology_compute_power(ccl_cosmology * cosmo, int *status){
-    //either:
-    // if (cosmo->computed_distances) return; // if immutable
-    //or
-    // if (!ccl_needs_recomputation(cosmo)) return; // if immutable
+    if (cosmo->computed_power) return;
 
     ccl_cosmology_compute_distances(cosmo, status);
 
@@ -90,6 +87,7 @@ void ccl_cosmology_compute_power(ccl_cosmology * cosmo, int *status){
             *status =1;
             return;
     }
+    cosmo->computed_power = true;
     return;
 
 }

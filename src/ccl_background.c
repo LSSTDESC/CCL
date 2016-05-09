@@ -120,7 +120,10 @@ static int growth_factor_and_growth_rate(double a,double *gf,double *fg,ccl_cosm
     y[1]=EPS_SCALEFAC_GROWTH*EPS_SCALEFAC_GROWTH*EPS_SCALEFAC_GROWTH*
       h_over_h0(EPS_SCALEFAC_GROWTH,&(cosmo->params));
 
+
     int status=gsl_odeiv2_driver_apply(d,&ainit,a,y);
+    gsl_odeiv2_driver_free(d);
+    
     if(status!=GSL_SUCCESS) {
       fprintf(stderr,"ODE didn't converge when computing growth\n");
       return 1;
@@ -135,7 +138,6 @@ static int growth_factor_and_growth_rate(double a,double *gf,double *fg,ccl_cosm
 
 void ccl_cosmology_compute_distances(ccl_cosmology * cosmo, int *status)
 {
-  //CHANGED: Using immutable model for the time being
   if(cosmo->computed_distances)
     return;
 
