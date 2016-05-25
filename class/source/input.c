@@ -2255,7 +2255,7 @@ int input_read_parameters(
                errmsg,
                errmsg);
 
-    if ((flag1 == _TRUE_)) {
+    if (flag1 == _TRUE_) {
       if ((strstr(string1,"analytic") != NULL))
         ptr->has_nz_analytic = _TRUE_;
       else{
@@ -2272,7 +2272,7 @@ int input_read_parameters(
                errmsg,
                errmsg);
 
-    if ((flag1 == _TRUE_)) {
+    if (flag1 == _TRUE_) {
       if ((strstr(string1,"analytic") != NULL))
         ptr->has_nz_evo_analytic = _TRUE_;
       else{
@@ -3539,16 +3539,16 @@ int input_try_unknown_parameters(double * unknown_parameter,
     input_verbose = 0;
   // Optimise flags for sigma8 calculation.
   pt.k_max_for_pk=1.0;
-  pt.has_pk_matter=TRUE;
-  pt.has_perturbations = TRUE;
-  pt.has_cl_cmb_temperature = FALSE;
-  pt.has_cls = FALSE;
-  pt.has_cl_cmb_polarization = FALSE;
-  pt.has_cl_cmb_lensing_potential = FALSE;
-  pt.has_cl_number_count = FALSE;
-  pt.has_cl_lensing_potential=FALSE;
-  pt.has_density_transfers=FALSE;
-  pt.has_velocity_transfers=FALSE;
+  pt.has_pk_matter=_TRUE_;
+  pt.has_perturbations = _TRUE_;
+  pt.has_cl_cmb_temperature = _FALSE_;
+  pt.has_cls = _FALSE_;
+  pt.has_cl_cmb_polarization = _FALSE_;
+  pt.has_cl_cmb_lensing_potential = _FALSE_;
+  pt.has_cl_number_count = _FALSE_;
+  pt.has_cl_lensing_potential=_FALSE_;
+  pt.has_density_transfers=_FALSE_;
+  pt.has_velocity_transfers=_FALSE_;
 
 
   /** - Do computations */
