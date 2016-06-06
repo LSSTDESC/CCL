@@ -11,7 +11,7 @@ LIB=lib/libccl.a
 DYLIB=lib/libccl.so
 INC_CCL=
 
-all: $(LIB) $(DYLIB) test
+all: $(LIB) $(DYLIB)
 
 $(LIB): $(OBJECTS)
 	ar rc $(LIB) $(OBJECTS)
