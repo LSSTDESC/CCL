@@ -28,9 +28,9 @@ struct sigma8_args {
     int * status;
 };
 
-//TODO: couldn't this be done from a generic sigma(R) routine?
 //TODO: Sorry, but shouldn't kR be k*8/h? It looks like you are multiplying by h.
 //TODO: Also, what units is k? If [k]=Mpc/h, then we should remove h from kR.
+//TODO: It seems in the constants.h file thtat [k]=Mpc
 static
 double sigma8_integrand(double k, void * args)
 {
@@ -39,7 +39,7 @@ double sigma8_integrand(double k, void * args)
     double kR = k*8.0*s_args->h; // r=8 Mpc/h
     double x = 3.*(sin(kR) - kR*cos(kR))/pow(kR,3.0);
     double p = exp(gsl_spline_eval(spline, log(k), NULL));
-    double res = p*x*x*k*k/(2.*M_PI*M_PI); //TODO: Why not pass 2M_PIM_PI to the next function to save time?
+    double res = p*x*x*k*k; 
     return res;
 }
 
@@ -56,9 +56,54 @@ double ccl_sigma8(gsl_spline * P, double h, int * status){
     F.params = &s_args;
 
     double sigma_8;
-    *status |= gsl_integration_cquad(&F, K_MIN*1.1, K_MAX/1.1, 0.0, 1e-5, workspace, &sigma_8, NULL, NULL);
+    //TODO: Why not integrating in ln space?
+    *status |= gsl_integration_cquad(&F, K_MIN_INT, K_MAX_INT, 0.0, 1e-5, workspace, &sigma_8, NULL, NULL);
     gsl_integration_cquad_workspace_free(workspace);
 
     //TODO: Check whether you are printing sigma_8 or sigma_8^2
-    return sigma_8;
+    return sigma_8/(2.*M_PI*M_PI);
+}
+
+//--------------------NEW: sigmaR for generic radius----------------------
+//TODO: Same comments as above. We need to resolve these discrepancies.
+
+struct sigmaR_args {
+    gsl_spline* P;
+    double R;
+    double h;
+    int * status;
+};
+
+static
+double sigmaR_integrand(double k, void * args)
+{
+    struct sigmaR_args * s_args = (struct sigmaR_args*) args;
+    gsl_spline * spline = s_args->P;
+    double kR = k*s_args->R/s_args->h; // r=R in Mpc/h; k in 1/Mpc
+    double x = 3.*(sin(kR) - kR*cos(kR))/pow(kR,3.0);
+    double p = exp(gsl_spline_eval(spline, log(k), NULL)); //is k in spline in 1/Mpc?
+    double res = p*x*x*k*k;
+    return res;
+}
+
+double ccl_sigmaR(gsl_spline * P, double R, double h, int * status){
+  
+    struct sigmaR_args s_args;
+    s_args.P = P;
+    s_args.status = status;
+    s_args.h = h;
+    s_args.R = R; //in Mpc/h
+
+    gsl_integration_cquad_workspace * workspace = gsl_integration_cquad_workspace_alloc (1000);
+    
+    gsl_function F;
+    F.function = &sigmaR_integrand;
+    F.params = &s_args;
+
+    double sigma_R;
+    *status |= gsl_integration_cquad(&F, K_MIN_INT, K_MAX_INT, 0.0, 1e-5, workspace, &sigma_R, NULL, NULL);
+    gsl_integration_cquad_workspace_free(workspace);
+
+    //TODO: I think there should be the sqrt here
+    return pow(sigma_R/(2.*M_PI*M_PI),0.5);
 }
