@@ -336,9 +336,9 @@ void ccl_cosmology_compute_power(ccl_cosmology * cosmo, int *status){
         case ccl_bbks:
             ccl_cosmology_compute_power_bbks(cosmo, status);
             break;
-        //case boltzmann_class:
-        //    ccl_cosmology_compute_power_class(cosmo, status);
-        //    break;
+        case ccl_boltzmann_class:
+           ccl_cosmology_compute_power_class(cosmo, status);
+           break;
 
         default:
             fprintf(stderr, "Unknown or non-implemented transfer function method\n");
