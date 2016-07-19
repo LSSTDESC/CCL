@@ -34,7 +34,7 @@ void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int *status){
   // CLASS configuration parameters will be passed through this strcuture,
   // to avoid writing and reading .ini files for every call
   if (parser_init(&fc,15,"none",errmsg) == _FAILURE_){
-    printf("\n\nparser_init\n=>%s\n",errmsg);
+    fprintf(stderr,"\n\nparser_init\n=>%s\n",errmsg);
     *status = 1;
     return;   
   }
@@ -75,75 +75,82 @@ void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int *status){
   strcpy(fc.name[10],"n_s");
   sprintf(fc.value[10],"%e",cosmo->params.n_s);
 
-  strcpy(fc.name[11],"A_s");
-  sprintf(fc.value[11],"%e",cosmo->params.A_s);
-
-  strcpy(fc.name[12],"modes");
-  strcpy(fc.value[12],"s");
-
-  strcpy(fc.name[13],"lensing");
-  strcpy(fc.value[13],"no");
+  if (isfinite(cosmo->params.sigma_8) && isfinite(cosmo->params.A_s)){
+      fprintf(stderr,"\n\nError initialzing pararmeters: both sigma_8 and A_s defined\n\n");
+    *status = 1;
+    return;
+  }
+  if (isfinite(cosmo->params.sigma_8)){
+    strcpy(fc.name[11],"sigma_8");
+    sprintf(fc.value[11],"%e",cosmo->params.sigma_8);
+  }
+  else if (isfinite(cosmo->params.A_s)){ 
+    strcpy(fc.name[11],"A_s");
+    sprintf(fc.value[11],"%e",cosmo->params.A_s);
+  }
+  else{
+       fprintf(stderr,"\n\nError initialzing pararmeters: neither sigma_8 nor A_sdefined\n\n");
+    *status = 1;
+    return;
+  }
 
 //cosmological constant?
-  if ((cosmo->params.w0 ==-1.0) && (cosmo->params.wa ==0)){
-    strcpy(fc.name[14],"Omega_fld");
-    sprintf(fc.value[14],"%e",0.);
-  }
-  else{ // set Omega_Lambda = 0.0 if w !=-1
-    strcpy(fc.name[14],"Omega_Lambda");
-    sprintf(fc.value[14],"%e",0.0);
+// set Omega_Lambda = 0.0 if w !=-1
+  if ((cosmo->params.w0 !=-1.0) || (cosmo->params.wa !=0)){
+    strcpy(fc.name[12],"Omega_Lambda");
+    sprintf(fc.value[12],"%e",0.0);
 
-    strcpy(fc.name[15],"w0_fld");
-    sprintf(fc.value[15],"%e",cosmo->params.w0);
+    strcpy(fc.name[13],"w0_fld");
+    sprintf(fc.value[13],"%e",cosmo->params.w0);
 
-    strcpy(fc.name[16],"wa_fld");
-    sprintf(fc.value[16],"%e",cosmo->params.wa);
+    strcpy(fc.name[14],"wa_fld");
+    sprintf(fc.value[14],"%e",cosmo->params.wa);
   }
 
 
   if (input_init(&fc,&pr,&ba,&th,&pt,&tr,&pm,&sp,&nl,&le,&op,errmsg) == _FAILURE_) {
-    printf("\n\nError running input_init\n=>%s\n",errmsg);
+    fprintf(stderr,"\n\nError running input_init\n=>%s\n",errmsg);
     *status = 1;
     return;
   }
 
   if (background_init(&pr,&ba) == _FAILURE_) {
-    printf("\n\nError running background_init \n=>%s\n",ba.error_message);
+    fprintf(stderr,"\n\nError running background_init \n=>%s\n",ba.error_message);
     *status = 1;
     return;
   }
 
   if (thermodynamics_init(&pr,&ba,&th) == _FAILURE_) {
-    printf("\n\nError in thermodynamics_init \n=>%s\n",th.error_message);
+    fprintf(stderr,"\n\nError in thermodynamics_init \n=>%s\n",th.error_message);
     *status = 1;
     return;
   }
 
   if (perturb_init(&pr,&ba,&th,&pt) == _FAILURE_) {
-    printf("\n\nError in perturb_init \n=>%s\n",pt.error_message);
+    fprintf(stderr,"\n\nError in perturb_init \n=>%s\n",pt.error_message);
     *status = 1;
     return;
   }
 
   if (primordial_init(&pr,&pt,&pm) == _FAILURE_) {
-    printf("\n\nError in primordial_init \n=>%s\n",pm.error_message);
+    fprintf(stderr,"\n\nError in primordial_init \n=>%s\n",pm.error_message);
     *status = 1;
     return;
   }
 
   if (nonlinear_init(&pr,&ba,&th,&pt,&pm,&nl) == _FAILURE_) {
-    printf("\n\nError in nonlinear_init \n=>%s\n",nl.error_message);
+    fprintf(stderr,"\n\nError in nonlinear_init \n=>%s\n",nl.error_message);
     *status = 1;
     return;
   }
   if (transfer_init(&pr,&ba,&th,&pt,&nl,&tr) == _FAILURE_) {
-     printf("\n\nError in transfer_init \n=>%s\n",tr.error_message);
+     fprintf(stderr,"\n\nError in transfer_init \n=>%s\n",tr.error_message);
     *status = 1;
      return;
   }
 
  if (spectra_init(&pr,&ba,&pt,&pm,&nl,&tr,&sp) == _FAILURE_) {
-     printf("\n\nError in spectra_init \n=>%s\n",sp.error_message);
+     fprintf(stderr,"\n\nError in spectra_init \n=>%s\n",sp.error_message);
     *status = 1;
      return;
   }
@@ -182,26 +189,13 @@ void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int *status){
         s =spectra_pk_at_k_and_z(&ba, &pm, &sp,x[i],0.0, &Z,&ic);
         z[i] = log(Z);
         //TODO: add loop over a for P_nl once 2D interpolation works!
-        s = spectra_pk_nl_at_k_and_z(&ba, &pm, &sp,0.001,0.0, &Z);
+        s = spectra_pk_nl_at_k_and_z(&ba, &pm, &sp,x[i],0.0, &Z);
         y[i] = log(Z);
         x[i] = log(x[i]);
     }
 
     gsl_spline * log_power_lin = gsl_spline_alloc(K_SPLINE_TYPE, nk);
     *status = gsl_spline_init(log_power_lin, x, z, nk);
-
-//if specified, sigma_8  is already ensured by shooting method, no need to normalize again
-//    double sigma_8 = ccl_sigma8(log_power_lin, cosmo->params.h, status);
-//    double log_sigma_8 = log(cosmo->params.sigma_8) - log(sigma_8);
-//    for (int i=0; i<nk; i++){
-//        z[i] += log_sigma_8;
-//        y[i] += log_sigma_8;
-//    }
-//
-//    gsl_spline_free(log_power_lin);
-//    log_power_lin = gsl_spline_alloc(K_SPLINE_TYPE, nk);
-//    *status = gsl_spline_init(log_power_lin, x, y, nk);    
-
 
 
     gsl_spline * log_power_nl = gsl_spline_alloc(K_SPLINE_TYPE, nk);
@@ -214,47 +208,47 @@ void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int *status){
     cosmo->data.p_lin = log_power_lin;
     cosmo->data.p_nl = log_power_nl;
   if (spectra_free(&sp) == _FAILURE_) {
-     printf("\n\nError in spectra_free \n=>%s\n",sp.error_message);
+     fprintf(stderr,"\n\nError in spectra_free \n=>%s\n",sp.error_message);
      *status = 1;
      return;
   }
 
   if (transfer_free(&tr) == _FAILURE_) {
-     printf("\n\nError in transfer_free \n=>%s\n",tr.error_message);
+     fprintf(stderr,"\n\nError in transfer_free \n=>%s\n",tr.error_message);
      *status = 1;
      return;
   }
   if (nonlinear_free(&nl) == _FAILURE_) {
-    printf("\n\nError in nonlinear_free \n=>%s\n",nl.error_message);
+    fprintf(stderr,"\n\nError in nonlinear_free \n=>%s\n",nl.error_message);
      *status = 1;
      return;
   }
 
   if (primordial_free(&pm) == _FAILURE_) {
-    printf("\n\nError in primordial_free \n=>%s\n",pm.error_message);
+    fprintf(stderr,"\n\nError in primordial_free \n=>%s\n",pm.error_message);
      *status = 1;
      return;
   }
 
   if (perturb_free(&pt) == _FAILURE_) {
-    printf("\n\nError in perturb_free \n=>%s\n",pt.error_message);
+    fprintf(stderr,"\n\nError in perturb_free \n=>%s\n",pt.error_message);
      *status = 1;
      return;
   }
 
   if (thermodynamics_free(&th) == _FAILURE_) {
-    printf("\n\nError in thermodynamics_free \n=>%s\n",th.error_message);
+    fprintf(stderr,"\n\nError in thermodynamics_free \n=>%s\n",th.error_message);
      *status = 1;
      return;
   }
 
   if (background_free(&ba) == _FAILURE_) {
-    printf("\n\nError in background_free \n=>%s\n",ba.error_message);
+    fprintf(stderr,"\n\nError in background_free \n=>%s\n",ba.error_message);
      *status = 1;
      return;
   }
   if (parser_free(&fc)== _FAILURE_) {
-    printf("\n\nError in background_free \n=>%s\n",ba.error_message);
+    fprintf(stderr,"\n\nError in background_free \n=>%s\n",ba.error_message);
      *status = 1;
      return;
   }

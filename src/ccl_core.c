@@ -44,11 +44,12 @@ void ccl_parameters_fill_initial(ccl_parameters *params)
 
   // Derived parameters
   params->Omega_l = 1.0 - params->Omega_m - params->Omega_g - params->Omega_n - params->Omega_k;
-
-  // Initially undetermined parameters - set to nan to trigger
+    // Initially undetermined parameters - set to nan to trigger
   // problems if they are mistakenly used.
-  params->sigma_8 = NAN;
+  if (isfinite(params->sigma_8)){params->A_s = NAN;}
+  if (isfinite(params->A_s)){params->sigma_8 = NAN;}
   params->z_star = NAN;
+
 }
 
 
@@ -82,7 +83,7 @@ ccl_parameters ccl_parameters_create_flat_lcdm(double Omega_c, double Omega_b, d
 {
   double Omega_k = 0.0;
   double Omega_n = 0.0;
-  double w0 = 0.0;
+  double w0 = -1.0;
   double wa = 0.0;
   ccl_parameters params = ccl_parameters_create(Omega_c, Omega_b, Omega_k, Omega_n, w0, wa, h, A_s, n_s);
   return params;
@@ -93,7 +94,7 @@ ccl_parameters ccl_parameters_create_flat_lcdm(double Omega_c, double Omega_b, d
 ccl_parameters ccl_parameters_create_lcdm(double Omega_c, double Omega_b, double Omega_k, double h, double A_s, double n_s)
 {
   double Omega_n = 0.0;
-  double w0 = 0.0;
+  double w0 = -1.0;
   double wa = 0.0;
   ccl_parameters params = ccl_parameters_create(Omega_c, Omega_b, Omega_k, Omega_n, w0, wa, h, A_s, n_s);
   return params;
