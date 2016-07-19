@@ -12,7 +12,7 @@
 #include "ccl_background.h"
 #include "../class/include/class.h"
 
-/*void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int *status){
+void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int *status){
 
     if (*status){
         return;
@@ -152,15 +152,15 @@
     double amin = A_MIN;
     double amax = A_MAX;
     int ak = N_A;
-    double Z,ic;
-//The 2D interpolation routines access the function values z_{ij} with the following ordering:
-//z_ij = za[j*xsize + i]
-//with i = 0,...,xsize-1 and j = 0,...,ysize-1.
+
     // The x array is initially k, but will later
     // be overwritten with log(k)
     double * x = ccl_log_spacing(kmin, kmax, nk);
-    double * y = malloc(sizeof(double)*nk);
     double * z = malloc(sizeof(double)*nk);
+    //The 2D interpolation routines access the function values y_{a_ik_j} with the following ordering:
+    //y_ij = ya[j*N_a + i]
+    //with i = 0,...,N_a-1 and j = 0,...,N_k-1.
+    double * y = malloc(sizeof(double)*nk);
 
     if (z==NULL||y==NULL|| x==NULL){
         fprintf(stderr, "Could not allocate memory for power spectra\n");
@@ -256,7 +256,7 @@
      return;
   }
 }
-*/
+
 
 void ccl_cosmology_compute_power_bbks(ccl_cosmology * cosmo, int *status){
 
