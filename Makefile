@@ -12,12 +12,14 @@ INC_CCL=
 
 all: $(LIB) $(DYLIB) test
 
-$(LIB): $(OBJECTS)
+$(LIB): $(OBJECTS) class
 	ar rc $(LIB) $(OBJECTS)
 
 $(DYLIB): $(OBJECTS)
 	$(CC) -shared -o $(DYLIB) $(OBJECTS) $(CFLAGS) $(LDFLAGS)
 
+class:
+	cd class; $(MAKE)
 
 test: $(TESTS)
 
@@ -32,5 +34,6 @@ src/%.o: src/%.c
 
 clean:
 	rm -rf *.dSYM *.o *.a $(TESTS) test_core_cosmo src/*.o lib/*.a lib/*.so lib/*.dSYM  tests/*.dSYM
+	cd class; $(MAKE) clean
 
-.PHONY: all tests clean
+.PHONY: all tests clean class
