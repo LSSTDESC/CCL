@@ -19,7 +19,7 @@ typedef enum transfer_function_t
 
 typedef enum matter_power_spectrum_t
 {
-    linear           = 0,
+    plin           = 0,
 
     halofit          = 1,
     // more?

@@ -4,25 +4,28 @@
 #include "stdio.h"
 #include "stdlib.h"
 #include "gsl/gsl_integration.h"
+#include "gsl/gsl_interp.h"
 #include "gsl/gsl_spline.h"
+//#include "gsl/gsl_interp2d.h"
+//#include "gsl/gsl_spline2d.h"
 #include "ccl_placeholder.h"
 #include "ccl_background.h"
 #include "../class/include/class.h"
 
-void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int *status){
+/*void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int *status){
 
     if (*status){
         return;
     }
-  struct precision pr;        /* for precision parameters */
-  struct background ba;       /* for cosmological background */
-  struct thermo th;           /* for thermodynamics */
-  struct perturbs pt;         /* for source functions */
-  struct transfers tr;        /* for transfer functions */
-  struct primordial pm;       /* for primordial spectra */
-  struct spectra sp;          /* for output spectra */
-  struct nonlinear nl;        /* for non-linear spectra */
-  ErrorMsg errmsg;            /* for error messages */
+  struct precision pr;        // for precision parameters 
+  struct background ba;       // for cosmological background 
+  struct thermo th;           // for thermodynamics 
+  struct perturbs pt;         // for source functions 
+  struct transfers tr;        // for transfer functions 
+  struct primordial pm;       // for primordial spectra 
+  struct spectra sp;          // for output spectra 
+  struct nonlinear nl;        // for non-linear spectra 
+  ErrorMsg errmsg;            // for error messages 
   struct file_content fc;   
   // generate file_content structure 
   // CLASS configuration parameters will be passed through this strcuture,
@@ -30,7 +33,7 @@ void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int *status){
   if (parser_init(&fc,15,"none",errmsg) == _FAILURE_){
     printf("\n\nparser_init\n=>%s\n",errmsg);
     *status = 1;
-    return _FAILURE_;   
+    return;   
   }
   // basic CLASS configuration parameters
   // these need to be decided once, and they unchanged for (most) CLASS calls from CCL
@@ -38,13 +41,14 @@ void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int *status){
   strcpy(fc.value[0],"mPk");
 
   strcpy(fc.name[1],"non linear");
-  strcpy(fc.value[1],"Halofit");
+  if (cosmo->config.matter_power_spectrum_method == halofit){ strcpy(fc.value[1],"Halofit"); }
+  else {strcpy(fc.value[1]," ");}
 
   strcpy(fc.name[2],"P_k_max_1/Mpc");
-  strcpy(fc.value[2],"%e",K_MAX);
+  sprintf(fc.value[2],"%e",K_MAX);
 
   strcpy(fc.name[3],"z_max_pk");
-  strcpy(fc.value[3],"%e",1./A_MIN-1.);
+  sprintf(fc.value[3],"%e",1./A_MIN-1.);
 
   strcpy(fc.name[4],"modes");
   strcpy(fc.value[4],"s");
@@ -155,20 +159,28 @@ void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int *status){
     // The x array is initially k, but will later
     // be overwritten with log(k)
     double * x = ccl_log_spacing(kmin, kmax, nk);
+    double * y = malloc(sizeof(double)*nk);
     double * z = malloc(sizeof(double)*nk);
 
-    if (z==NULL|| x==NULL){
-        fprintf(stderr, "Could not allocate memory for linear power spectra\n");
+    if (z==NULL||y==NULL|| x==NULL){
+        fprintf(stderr, "Could not allocate memory for power spectra\n");
         free(x);
+        free(y);
         free(z);
         *status = 1;
         return;
     }
 
-    // After this loop k will contain 
+    // After this loop x will contain log(k), y will contain log(P_nl), z will contain log(P_lin)
+    // all in Mpc, not Mpc/h units!
+    double Z, ic;
+    int s;
     for (int i=0; i<nk; i++){
-      spectra_pk_at_k_and_z(&ba, &pm, &sp,x[i],0.0, &Z,&ic);
-        z[i] = log(Z);//TODO: evalute CLASS power spectra, getting units right...
+        s =spectra_pk_at_k_and_z(&ba, &pm, &sp,x[i],0.0, &Z,&ic);
+        z[i] = log(Z);
+        //TODO: add loop over a for P_nl once 2D interpolation works!
+        s = spectra_pk_nl_at_k_and_z(&ba, &pm, &sp,0.001,0.0, &Z);
+        y[i] = log(Z);
         x[i] = log(x[i]);
     }
 
@@ -176,22 +188,24 @@ void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int *status){
     *status = gsl_spline_init(log_power_lin, x, z, nk);
 
 //if specified, sigma_8  is already ensured by shooting method, no need to normalize again
-/*    double sigma_8 = ccl_sigma8(log_power_lin, cosmo->params.h, status);
-    double log_sigma_8 = log(cosmo->params.sigma_8) - log(sigma_8);
-    for (int i=0; i<nk; i++){
-        z[i] += log_sigma_8;
-    }
-
-    gsl_spline_free(log_power_lin);
-    log_power_lin = gsl_spline_alloc(K_SPLINE_TYPE, nk);
-    *status = gsl_spline_init(log_power_lin, x, y, nk); */   
+//    double sigma_8 = ccl_sigma8(log_power_lin, cosmo->params.h, status);
+//    double log_sigma_8 = log(cosmo->params.sigma_8) - log(sigma_8);
+//    for (int i=0; i<nk; i++){
+//        z[i] += log_sigma_8;
+//        y[i] += log_sigma_8;
+//    }
+//
+//    gsl_spline_free(log_power_lin);
+//    log_power_lin = gsl_spline_alloc(K_SPLINE_TYPE, nk);
+//    *status = gsl_spline_init(log_power_lin, x, y, nk);    
 
 
 
     gsl_spline * log_power_nl = gsl_spline_alloc(K_SPLINE_TYPE, nk);
-    *status = gsl_spline_init(log_power_nl, x, z, nk);
+    *status = gsl_spline_init(log_power_nl, x, y, nk);
 
     free(x);
+    free(y);
     free(z);
 
     cosmo->data.p_lin = log_power_lin;
@@ -241,8 +255,9 @@ void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int *status){
      *status = 1;
      return;
   }
-
 }
+*/
+
 void ccl_cosmology_compute_power_bbks(ccl_cosmology * cosmo, int *status){
 
     if (*status){
@@ -286,7 +301,9 @@ void ccl_cosmology_compute_power_bbks(ccl_cosmology * cosmo, int *status){
     log_power_lin = gsl_spline_alloc(K_SPLINE_TYPE, nk);
     *status = gsl_spline_init(log_power_lin, x, y, nk);    
 
-
+    if (cosmo->config.matter_power_spectrum_method != plin){
+      printf("WARNING: BBKS + config.matter_power_spectrum_method = %d not yet supported\n continuing with linear power spectrum\n",cosmo->config.matter_power_spectrum_method);
+    }
 
     gsl_spline * log_power_nl = gsl_spline_alloc(K_SPLINE_TYPE, nk);
     *status = gsl_spline_init(log_power_nl, x, y, nk);
@@ -316,9 +333,9 @@ void ccl_cosmology_compute_power(ccl_cosmology * cosmo, int *status){
         case bbks:
             ccl_cosmology_compute_power_bbks(cosmo, status);
             break;
-        case class:
-            ccl_cosmology_compute_power_class(cosmo, status);
-            break;
+        //case boltzmann_class:
+        //    ccl_cosmology_compute_power_class(cosmo, status);
+        //    break;
 
         default:
             fprintf(stderr, "Unknown or non-implemented transfer function method\n");
@@ -334,10 +351,13 @@ void ccl_cosmology_compute_power(ccl_cosmology * cosmo, int *status){
 double ccl_linear_matter_power(ccl_cosmology * cosmo, double a, double k, int * status){
     ccl_cosmology_compute_power(cosmo, status);
     if (*status) return NAN;
-
+    double log_p_1;
     // log power at a=1 (z=0)
-    double log_p_1 = gsl_spline_eval(cosmo->data.p_lin, log(k), NULL);
-    // TODO: GSL spline error handling
+    *status = gsl_spline_eval_e(cosmo->data.p_lin, log(k), NULL,&log_p_1);
+    if (*status){
+       return NAN;
+    // TODO: GSL spline error message
+    }
 
     double p_1 = exp(log_p_1);
 
@@ -345,7 +365,6 @@ double ccl_linear_matter_power(ccl_cosmology * cosmo, double a, double k, int * 
         return p_1;
     }
 
-    //TODO: this is valid in the linear regime.
     double D = ccl_growth_factor(cosmo, a, status);
     double p = D*D*p_1;
     if (*status){
@@ -354,3 +373,27 @@ double ccl_linear_matter_power(ccl_cosmology * cosmo, double a, double k, int * 
     return p;
 }
 
+double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double a, double k, int * status){
+    ccl_cosmology_compute_power(cosmo, status);
+    if (*status) return NAN;
+    double log_p_1;
+    // log power at a=1 (z=0)
+    *status = gsl_spline_eval_e(cosmo->data.p_nl, log(k), NULL,&log_p_1);
+    if (*status){
+       return NAN;
+    // TODO: GSL spline error message
+    }
+
+    double p_1 = exp(log_p_1);
+
+    if (a==1){
+        return p_1;
+    }
+    // WARNING: NOT CORRECT, but 2d interpolation in gsl is still flaky!
+    double D = ccl_growth_factor(cosmo, a, status);
+    double p = D*D*p_1;
+    if (*status){
+        p = NAN;
+    }
+    return p;
+}
