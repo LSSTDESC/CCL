@@ -3,34 +3,34 @@
 typedef enum transfer_function_t
 {
     // If using an emulator for P_NL
-    emulator          = 0,
-    none              = 0,
+    ccl_emulator          = 0,
+    ccl_none              = 0,
 
-    fitting_function  = 1,
-    eisenstein_hu     = 1,
+    ccl_fitting_function  = 1,
+    ccl_eisenstein_hu     = 1,
 
-    bbks              = 2,
+    ccl_bbks              = 2,
 
-    boltzmann         = 3,
-    boltzmann_class   = 3,
+    ccl_boltzmann         = 3,
+    ccl_boltzmann_class   = 3,
 
-    boltzmann_camb    = 4
+    ccl_boltzmann_camb    = 4
 } transfer_function_t;
 
 typedef enum matter_power_spectrum_t
 {
-    plin           = 0,
+    ccl_linear           = 0,
 
-    halofit          = 1,
+    ccl_halofit          = 1,
     // more?
-    halo_model       = 3
+    ccl_halo_model       = 3
     // even more kinds ...
 
 } matter_power_spectrum_t;
 
 typedef enum mass_function_t
 {
-    tinker      = 1
+    ccl_tinker      = 1
 } mass_function_t;
 
 
