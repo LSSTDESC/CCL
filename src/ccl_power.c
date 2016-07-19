@@ -7,6 +7,7 @@
 #include "gsl/gsl_spline.h"
 #include "ccl_placeholder.h"
 #include "ccl_background.h"
+#include "../class/include/class.h"
 
 void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int *status){
 
@@ -19,6 +20,7 @@ void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int *status){
   struct perturbs pt;         /* for source functions */
   struct transfers tr;        /* for transfer functions */
   struct primordial pm;       /* for primordial spectra */
+  struct spectra sp;          /* for output spectra */
   struct nonlinear nl;        /* for non-linear spectra */
   ErrorMsg errmsg;            /* for error messages */
   struct file_content fc;   
@@ -27,6 +29,7 @@ void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int *status){
   // to avoid writing and reading .ini files for every call
   if (parser_init(&fc,15,"none",errmsg) == _FAILURE_){
     printf("\n\nparser_init\n=>%s\n",errmsg);
+    *status = 1;
     return _FAILURE_;   
   }
   // basic CLASS configuration parameters
@@ -38,10 +41,10 @@ void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int *status){
   strcpy(fc.value[1],"Halofit");
 
   strcpy(fc.name[2],"P_k_max_1/Mpc");
-  strcpy(fc.value[2],"100.");
+  strcpy(fc.value[2],"%e",K_MAX);
 
   strcpy(fc.name[3],"z_max_pk");
-  strcpy(fc.value[3],"3.");
+  strcpy(fc.value[3],"%e",1./A_MIN-1.);
 
   strcpy(fc.name[4],"modes");
   strcpy(fc.value[4],"s");
@@ -54,7 +57,7 @@ void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int *status){
   sprintf(fc.value[6],"%e",cosmo->params.h);
 
   strcpy(fc.name[7],"Omega_cdm");
-  sprintf(fc.value[7],"%e",cosmo->Omega_cdm);
+  sprintf(fc.value[7],"%e",cosmo->Omega_c);
 
   strcpy(fc.name[8],"Omega_b");
   sprintf(fc.value[8],"%e",cosmo->Omega_b);
@@ -68,128 +71,175 @@ void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int *status){
   strcpy(fc.name[11],"A_s");
   sprintf(fc.value[11],"%e",cosmo->A_s);
 
-  // set Omega_Lambda = 0.0 if w !=-1
+  strcpy(fc.name[12],"modes");
+  strcpy(fc.value[12],"s");
+
+  strcpy(fc.name[13],"lensing");
+  strcpy(fc.value[13],"no");
+
+//cosmological constant?
   if ((cosmo->w0 ==-1.0) && (cosmo->wa ==0)){
-    strcpy(fc.name[12],"Omega_Lambda");
-    sprintf(fc.value[12],"%e",1.0-cosmo->Omega_m-cosmo->Omega_n-cosmo->Omega_k);
+    strcpy(fc.name[14],"Omega_fld");
+    sprintf(fc.value[14],"%e",0.);
   }
-  else{
-    strcpy(fc.name[12],"Omega_Lambda");
-    sprintf(fc.value[12],"%e",0.0);
+  else{ // set Omega_Lambda = 0.0 if w !=-1
+    strcpy(fc.name[14],"Omega_Lambda");
+    sprintf(fc.value[14],"%e",0.0);
 
-    strcpy(fc.name[13],"w0_fld");
-    sprintf(fc.value[13],"%e",cosmo->w0);
+    strcpy(fc.name[15],"w0_fld");
+    sprintf(fc.value[15],"%e",cosmo->w0);
 
-    strcpy(fc.name[14],"wa_fld");
-    sprintf(fc.value[14],"%e",cosmo->wa);
+    strcpy(fc.name[16],"wa_fld");
+    sprintf(fc.value[16],"%e",cosmo->wa);
   }
-
-
 
 
   if (input_init(&fc,&pr,&ba,&th,&pt,&tr,&pm,&sp,&nl,&le,&op,errmsg) == _FAILURE_) {
     printf("\n\nError running input_init\n=>%s\n",errmsg);
-    return _FAILURE_;
+    *status = 1;
+    return;
   }
 
   if (background_init(&pr,&ba) == _FAILURE_) {
     printf("\n\nError running background_init \n=>%s\n",ba.error_message);
-    return _FAILURE_;
+    *status = 1;
+    return;
   }
 
   if (thermodynamics_init(&pr,&ba,&th) == _FAILURE_) {
     printf("\n\nError in thermodynamics_init \n=>%s\n",th.error_message);
-    return _FAILURE_;
+    *status = 1;
+    return;
   }
 
   if (perturb_init(&pr,&ba,&th,&pt) == _FAILURE_) {
     printf("\n\nError in perturb_init \n=>%s\n",pt.error_message);
-    return _FAILURE_;
+    *status = 1;
+    return;
   }
 
   if (primordial_init(&pr,&pt,&pm) == _FAILURE_) {
     printf("\n\nError in primordial_init \n=>%s\n",pm.error_message);
-    return _FAILURE_;
+    *status = 1;
+    return;
   }
 
   if (nonlinear_init(&pr,&ba,&th,&pt,&pm,&nl) == _FAILURE_) {
     printf("\n\nError in nonlinear_init \n=>%s\n",nl.error_message);
-    return _FAILURE_;
+    *status = 1;
+    return;
   }
+  if (transfer_init(&pr,&ba,&th,&pt,&nl,&tr) == _FAILURE_) {
+     printf("\n\nError in transfer_init \n=>%s\n",tr.error_message);
+    *status = 1;
+     return;
+  }
+
+ if (spectra_init(&pr,&ba,&pt,&pm,&nl,&tr,&sp) == _FAILURE_) {
+     printf("\n\nError in spectra_init \n=>%s\n",sp.error_message);
+    *status = 1;
+     return;
+  }
+
     //CLASS calculations done - now allocate CCL splines
     double kmin = K_MIN;
     double kmax = K_MAX;
     int nk = N_K;
-
+    double amin = A_MIN;
+    double amax = A_MAX;
+    int ak = N_A;
+    double Z,ic;
+//The 2D interpolation routines access the function values z_{ij} with the following ordering:
+//z_ij = za[j*xsize + i]
+//with i = 0,...,xsize-1 and j = 0,...,ysize-1.
     // The x array is initially k, but will later
     // be overwritten with log(k)
     double * x = ccl_log_spacing(kmin, kmax, nk);
-    double * y = malloc(sizeof(double)*nk);
+    double * z = malloc(sizeof(double)*nk);
 
-    if (y==NULL|| x==NULL){
-        fprintf(stderr, "Could not allocate memory for power\n");
+    if (z==NULL|| x==NULL){
+        fprintf(stderr, "Could not allocate memory for linear power spectra\n");
         free(x);
-        free(y);
+        free(z);
         *status = 1;
         return;
     }
 
     // After this loop k will contain 
     for (int i=0; i<nk; i++){
-        y[i] = 0.;//TODO: evalute CLASS power spectra, getting units right...
+      spectra_pk_at_k_and_z(&ba, &pm, &sp,x[i],0.0, &Z,&ic);
+        z[i] = log(Z);//TODO: evalute CLASS power spectra, getting units right...
         x[i] = log(x[i]);
     }
 
     gsl_spline * log_power_lin = gsl_spline_alloc(K_SPLINE_TYPE, nk);
-    *status = gsl_spline_init(log_power_lin, x, y, nk);
+    *status = gsl_spline_init(log_power_lin, x, z, nk);
 
-    double sigma_8 = ccl_sigma8(log_power_lin, cosmo->params.h, status);
+//if specified, sigma_8  is already ensured by shooting method, no need to normalize again
+/*    double sigma_8 = ccl_sigma8(log_power_lin, cosmo->params.h, status);
     double log_sigma_8 = log(cosmo->params.sigma_8) - log(sigma_8);
     for (int i=0; i<nk; i++){
-        y[i] += log_sigma_8;
+        z[i] += log_sigma_8;
     }
 
     gsl_spline_free(log_power_lin);
     log_power_lin = gsl_spline_alloc(K_SPLINE_TYPE, nk);
-    *status = gsl_spline_init(log_power_lin, x, y, nk);    
+    *status = gsl_spline_init(log_power_lin, x, y, nk); */   
 
 
 
     gsl_spline * log_power_nl = gsl_spline_alloc(K_SPLINE_TYPE, nk);
-    *status = gsl_spline_init(log_power_nl, x, y, nk);
+    *status = gsl_spline_init(log_power_nl, x, z, nk);
 
     free(x);
-    free(y);
+    free(z);
 
     cosmo->data.p_lin = log_power_lin;
     cosmo->data.p_nl = log_power_nl;
- if (nonlinear_free(&nl) == _FAILURE_) {
+  if (spectra_free(&sp) == _FAILURE_) {
+     printf("\n\nError in spectra_free \n=>%s\n",sp.error_message);
+     *status = 1;
+     return;
+  }
+
+  if (transfer_free(&tr) == _FAILURE_) {
+     printf("\n\nError in transfer_free \n=>%s\n",tr.error_message);
+     *status = 1;
+     return;
+  }
+  if (nonlinear_free(&nl) == _FAILURE_) {
     printf("\n\nError in nonlinear_free \n=>%s\n",nl.error_message);
-    return _FAILURE_;
+     *status = 1;
+     return;
   }
 
   if (primordial_free(&pm) == _FAILURE_) {
     printf("\n\nError in primordial_free \n=>%s\n",pm.error_message);
-    return _FAILURE_;
+     *status = 1;
+     return;
   }
 
   if (perturb_free(&pt) == _FAILURE_) {
     printf("\n\nError in perturb_free \n=>%s\n",pt.error_message);
-    return _FAILURE_;
+     *status = 1;
+     return;
   }
 
   if (thermodynamics_free(&th) == _FAILURE_) {
     printf("\n\nError in thermodynamics_free \n=>%s\n",th.error_message);
-    return _FAILURE_;
+     *status = 1;
+     return;
   }
 
   if (background_free(&ba) == _FAILURE_) {
     printf("\n\nError in background_free \n=>%s\n",ba.error_message);
-    return _FAILURE_;
+     *status = 1;
+     return;
   }
   if (parser_free(&fc)== _FAILURE_) {
     printf("\n\nError in background_free \n=>%s\n",ba.error_message);
-    return _FAILURE_;
+     *status = 1;
+     return;
   }
 
 }
