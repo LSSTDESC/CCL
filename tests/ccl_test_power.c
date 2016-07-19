@@ -20,6 +20,11 @@ int main(int argc, char * argv[]){
 	int status; 
 	ccl_cosmology_compute_power(cosmo, &status);
 
+	if (status) {
+		fprintf(stderr, "Error %d in ccl_cosmology_compute_power\n", status);
+		return status;
+	}
+
 	for (double k = 1e-3; k<10; k*=1.1){
 		double p = ccl_linear_matter_power(cosmo, 1.0, k, &status);
 		printf("%le    %le\n", k, p);
