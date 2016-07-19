@@ -12,7 +12,7 @@
 #include "ccl_background.h"
 #include "../class/include/class.h"
 
-/*
+
 void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int *status){
 
     if (*status){
@@ -26,6 +26,8 @@ void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int *status){
   struct primordial pm;       // for primordial spectra 
   struct spectra sp;          // for output spectra 
   struct nonlinear nl;        // for non-linear spectra 
+  struct lensing le;
+  struct output op;
   ErrorMsg errmsg;            // for error messages 
   struct file_content fc;   
   // generate file_content structure 
@@ -49,7 +51,7 @@ void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int *status){
   sprintf(fc.value[2],"%e",K_MAX);
 
   strcpy(fc.name[3],"z_max_pk");
-  sprintf(fc.value[3],"%e",1./A_MIN-1.);
+  sprintf(fc.value[3],"%e",1./A_SPLINE_MIN-1.);
 
   strcpy(fc.name[4],"modes");
   strcpy(fc.value[4],"s");
@@ -62,19 +64,19 @@ void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int *status){
   sprintf(fc.value[6],"%e",cosmo->params.h);
 
   strcpy(fc.name[7],"Omega_cdm");
-  sprintf(fc.value[7],"%e",cosmo->Omega_c);
+  sprintf(fc.value[7],"%e",cosmo->params.Omega_c);
 
   strcpy(fc.name[8],"Omega_b");
-  sprintf(fc.value[8],"%e",cosmo->Omega_b);
+  sprintf(fc.value[8],"%e",cosmo->params.Omega_b);
 
   strcpy(fc.name[9],"Omega_k");
-  sprintf(fc.value[9],"%e",cosmo->Omega_k);
+  sprintf(fc.value[9],"%e",cosmo->params.Omega_k);
 
   strcpy(fc.name[10],"n_s");
-  sprintf(fc.value[10],"%e",cosmo->n_s);
+  sprintf(fc.value[10],"%e",cosmo->params.n_s);
 
   strcpy(fc.name[11],"A_s");
-  sprintf(fc.value[11],"%e",cosmo->A_s);
+  sprintf(fc.value[11],"%e",cosmo->params.A_s);
 
   strcpy(fc.name[12],"modes");
   strcpy(fc.value[12],"s");
@@ -83,7 +85,7 @@ void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int *status){
   strcpy(fc.value[13],"no");
 
 //cosmological constant?
-  if ((cosmo->w0 ==-1.0) && (cosmo->wa ==0)){
+  if ((cosmo->params.w0 ==-1.0) && (cosmo->params.wa ==0)){
     strcpy(fc.name[14],"Omega_fld");
     sprintf(fc.value[14],"%e",0.);
   }
@@ -92,10 +94,10 @@ void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int *status){
     sprintf(fc.value[14],"%e",0.0);
 
     strcpy(fc.name[15],"w0_fld");
-    sprintf(fc.value[15],"%e",cosmo->w0);
+    sprintf(fc.value[15],"%e",cosmo->params.w0);
 
     strcpy(fc.name[16],"wa_fld");
-    sprintf(fc.value[16],"%e",cosmo->wa);
+    sprintf(fc.value[16],"%e",cosmo->params.wa);
   }
 
 
@@ -150,8 +152,8 @@ void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int *status){
     double kmin = K_MIN;
     double kmax = K_MAX;
     int nk = N_K;
-    double amin = A_MIN;
-    double amax = A_MAX;
+    double amin = A_SPLINE_MIN;
+    double amax = A_SPLINE_MAX;
     int ak = N_A;
 
     // The x array is initially k, but will later
@@ -257,7 +259,7 @@ void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int *status){
      return;
   }
 }
-*/
+
 
 void ccl_cosmology_compute_power_bbks(ccl_cosmology * cosmo, int *status){
 
