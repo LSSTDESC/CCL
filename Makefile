@@ -2,7 +2,7 @@ CC=gcc
 CFLAGS=-Wall -Wpedantic -g -O0 -Iinclude -std=c99 -fPIC
 CFLAGS+=-I/home/damonge/include
 CFLAGS+=-I/opt/local/include
-LDFLAGS=-lgsl -lgslcblas   -lm
+LDFLAGS=-lgsl -lgslcblas   -lm -Lclass -lclass
 
 
 OBJECTS=src/ccl_core.o src/ccl_utils.o src/ccl_power.o src/ccl_placeholder.o src/ccl_background.o
@@ -13,12 +13,14 @@ INC_CCL=
 
 all: $(LIB) $(DYLIB)
 
-$(LIB): $(OBJECTS)
+$(LIB): $(OBJECTS) class
 	ar rc $(LIB) $(OBJECTS)
 
 $(DYLIB): $(OBJECTS)
 	$(CC) -shared -o $(DYLIB) $(OBJECTS) $(CFLAGS) $(LDFLAGS)
 
+class:
+	cd class; $(MAKE)
 
 test: $(TESTS)
 	@echo
@@ -39,5 +41,6 @@ src/%.o: src/%.c
 
 clean:
 	rm -rf *.dSYM *.o *.a $(TESTS) test_core_cosmo src/*.o lib/*.a lib/*.so lib/*.dSYM  tests/*.dSYM
+	cd class; $(MAKE) clean
 
-.PHONY: all tests clean test
+.PHONY: all tests clean class

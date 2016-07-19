@@ -10,8 +10,12 @@
 #define A_SPLINE_DELTA 0.001
 #define A_SPLINE_MIN   0.1
 #define A_SPLINE_MAX   1.0
+//for 2D SPLINE, e.g. P_NL, use coarser binning
+#define N_A 50
+
 #define A_SPLINE_TYPE gsl_interp_akima
 #define K_SPLINE_TYPE gsl_interp_akima
+#define PNL_SPLINE_TYPE gsl_interp2d_bicubic
 
 // These are in units of Mpc (no factor of h)
 #define K_PIVOT 0.05
