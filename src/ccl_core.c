@@ -46,8 +46,8 @@ void ccl_parameters_fill_initial(ccl_parameters *params)
   params->Omega_l = 1.0 - params->Omega_m - params->Omega_g - params->Omega_n - params->Omega_k;
     // Initially undetermined parameters - set to nan to trigger
   // problems if they are mistakenly used.
-  if (isfinite(params->sigma_8)){params->A_s = NAN;}
   if (isfinite(params->A_s)){params->sigma_8 = NAN;}
+  if (isfinite(params->sigma_8)){params->A_s = NAN;}
   params->z_star = NAN;
 
 }
@@ -55,6 +55,8 @@ void ccl_parameters_fill_initial(ccl_parameters *params)
 
 ccl_parameters ccl_parameters_create(double Omega_c, double Omega_b, double Omega_k, double Omega_n, double w0, double wa, double h, double A_s, double n_s){
   ccl_parameters params;
+  params.sigma_8 = NAN;
+  params.A_s = NAN;
   params.Omega_c = Omega_c;
   params.Omega_b = Omega_b;
   params.Omega_m = Omega_b + Omega_c;

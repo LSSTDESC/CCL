@@ -285,9 +285,18 @@ void ccl_cosmology_compute_power_bbks(ccl_cosmology * cosmo, int *status){
         x[i] = log(x[i]);
     }
 
+    // now normalize to cosmo->params.sigma_8
+    printf("test %e\n",cosmo->params.sigma_8);
+    if (isnan(cosmo->params.sigma_8)){
+        fprintf(stderr, "\nsigma_8 not set; required for BBKS power spectra\n");
+        free(x);
+        free(y);
+        *status = 1;
+        return;
+
+    }
     gsl_spline * log_power_lin = gsl_spline_alloc(K_SPLINE_TYPE, nk);
     *status = gsl_spline_init(log_power_lin, x, y, nk);
-
     double sigma_8 = ccl_sigma8(log_power_lin, cosmo->params.h, status);
     double log_sigma_8 = log(cosmo->params.sigma_8) - log(sigma_8);
     for (int i=0; i<nk; i++){
