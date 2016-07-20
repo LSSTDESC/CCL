@@ -6,6 +6,7 @@
 #include "stdlib.h"
 #include "gsl/gsl_integration.h"
 #include "gsl/gsl_spline.h"
+#include "ccl_background.h"
 
 // ---- LSST redshift distributions & current specs -----
 // ---- Tests pending 
@@ -17,7 +18,7 @@ static double dNdz_clustering(double z)
 {
   //What is the redshift range of validity?
   double z0=0.3; //probably move this to the cosmo params file
-  zdivz0=z/z0;
+  double zdivz0=z/z0;
   return 0.5/z0*zdivz0*zdivz0*exp(-zdivz0);
 }
 
@@ -28,30 +29,31 @@ static double dNdz_sources(double z)
   double alpha=1.24; //These probably need to move to the cosmo params file
   double beta=1.01;
   double z0=0.51;
-  zdivz0=z/z0;
+  double zdivz0=z/z0;
   double zmin_sources=0.1;
   double zmax_sources=3.0;
   if((z>=zmin_sources) && (z<=zmax_sources)){
-    return double pow(z,alpha)*exp(-pow(zdivz0,beta));
+    return pow(z,alpha)*exp(-pow(zdivz0,beta));
   } else {
-    return double 0.
+    return 0.;
   }
 }
 
 //sigma(z) photoz errors for clustering (assuming Gaussian)
 static double sigmaz_clustering(double z)
 {
-  return 0.03*(1.0+z)
+  return 0.03*(1.0+z);
 }
 
 //sigma(z) photoz errors for sources
 static double sigmaz_sources(double z)
 {
-  return 0.05*(1.0+z)
+  return 0.05*(1.0+z);
 }
 
 //Bias of the clustering sample
-static double bias_clustering(ccl_cosmology * cosmo, double a)
+//What is the purpose of "status"?
+static double bias_clustering(ccl_cosmology * cosmo, double a, int * status)
 {
   //Growth is currently normalized to 1 today, is this what LSS needs?
   double D = ccl_growth_factor(cosmo, a, status);
