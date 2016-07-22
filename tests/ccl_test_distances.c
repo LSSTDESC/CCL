@@ -92,11 +92,11 @@ int main(int argc, char * argv[]){
 		double fg=ccl_growth_rate(cosmo,a,&st);
                 diffchi = (chi - chi_comp[i]) / chi_comp[i];
                 diffgf = (gf - gf_comp[i]) / gf_comp[i];
-                if((diffchi >= 1e-4) && (z>0.0)){
+                if((fabs(diffchi >= 1e-4)) && (z>0.0)){
                   testflag=1;
                   printf("CHI FAIL: z:%lf, chi:%le, chi_comp: %le\n", z, chi, chi_comp[i]);
                 }
-                if((diffgf >= 1e-4)){
+                if((fabs(diffgf) >= 1e-4)){
                   testflag=1;
                   printf("GROWTH FAIL: z:%lf, gf:%le, gf_comp: %le\n", z, gf, gf_comp[i]);
                 }
