@@ -9,8 +9,12 @@ int main(int argc, char * argv[]){
 	double h = 0.7;
 	double A_s = 2.1e-9;
 	double n_s = 0.96;
+	double wa = 0.01;
+	double w0 = -1.0;
 
-	ccl_parameters params = ccl_parameters_create_flat_lcdm(Omega_c, Omega_b, h, A_s, n_s);
+//	ccl_parameters params = ccl_parameters_create_flat_lcdm(Omega_c, Omega_b, h, A_s, n_s);
+	ccl_parameters params = ccl_parameters_create_flat_wacdm(Omega_c, Omega_b, w0,wa, h, A_s, n_s);
+
 	ccl_cosmology * cosmo = ccl_cosmology_create(params, default_config);
 
 	int status; 

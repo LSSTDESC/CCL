@@ -114,6 +114,14 @@ ccl_parameters ccl_parameters_create_flat_wcdm(double Omega_c, double Omega_b, d
   return params;
 }
 
+ccl_parameters ccl_parameters_create_flat_wacdm(double Omega_c, double Omega_b, double w0, double wa, double h, double A_s, double n_s)
+{
+
+  double Omega_k = 0.0;
+  double Omega_n = 0.0;
+  ccl_parameters params = ccl_parameters_create(Omega_c, Omega_b, Omega_k, Omega_n, w0, wa, h, A_s, n_s);
+  return params;
+}
 
 void ccl_data_free(ccl_data * data)
 {
