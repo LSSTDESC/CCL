@@ -4,10 +4,14 @@
 
 int main(int argc, char * argv[]){
         if(argv[1]==NULL){
-          printf("No model argument given - program exiting!\n");
+          printf("No model argument given - program exiting!\n Integer arguments between 1 and 5 are allowed.\n");
           return 0;
         }
         int i_model=atoi(argv[1]);
+        if( (i_model>5) || (i_model<1)){
+          printf("Model argument not between 1 and 5 - program exiting!\n Integer arguments between 1 and 5 are allowed.\n");
+          return 0;
+        }
         int i, testflag=0;
 	double Omega_c = 0.25;
 	double Omega_b = 0.05;
@@ -19,22 +23,31 @@ int main(int argc, char * argv[]){
         double w_a[5] = {0.0, 0.0, 0.1, 0.1, 0.1};
         double Omega_n = 0.0;
         double Omega_k;
-        double z_comp[6], chi_comp[6], diffchi;
+        double z_comp[6], chi_comp[6], gf_comp[6], diffchi, diffgf;
 //        const char *fname[5];       
         double temp[5];
         char str[1024];
-        FILE * file;
+        FILE * chifile, * gffile;
         
-        file = fopen("./benchmark/chi_model1-5.txt", "r");
-        fgets(str, 1024, file);
-        if (file) {
+        chifile = fopen("./benchmark/chi_model1-5.txt", "r");
+        fgets(str, 1024, chifile);
+        if (chifile) {
           i=0;
-          while (fscanf(file, "%le %le %le %le %le %le\n", &z_comp[i], &temp[0], &temp[1], &temp[2], &temp[3], &temp[4])!=EOF){
+          while (fscanf(chifile, "%le %le %le %le %le %le\n", &z_comp[i], &temp[0], &temp[1], &temp[2], &temp[3], &temp[4])!=EOF){
             chi_comp[i] = temp[i_model-1];
             i++;
           }
         }
  
+        gffile = fopen("./benchmark/growth_model1-5.txt", "r");
+        fgets(str, 1024, gffile);
+        if (gffile) {
+          i=0;
+          while (fscanf(gffile, "%le %le %le %le %le %le\n", &z_comp[i], &temp[0], &temp[1], &temp[2], &temp[3], &temp[4])!=EOF){
+            gf_comp[i] = temp[i_model-1];
+            i++;
+          }
+        }
 /* 
         fname[0]="./benchmark/model1_chi.txt";
         fname[1]="./benchmark/model2_chi.txt";
@@ -78,9 +91,14 @@ int main(int argc, char * argv[]){
 		double gf=ccl_growth_factor(cosmo,a,&st);
 		double fg=ccl_growth_rate(cosmo,a,&st);
                 diffchi = (chi - chi_comp[i]) / chi_comp[i];
+                diffgf = (gf - gf_comp[i]) / gf_comp[i];
                 if((diffchi >= 1e-4) && (z>0.0)){
                   testflag=1;
-                  printf("FAIL: z:%lf, chi:%le, chi_comp: %le\n", z, chi, chi_comp[i]);
+                  printf("CHI FAIL: z:%lf, chi:%le, chi_comp: %le\n", z, chi, chi_comp[i]);
+                }
+                if((diffgf >= 1e-4)){
+                  testflag=1;
+                  printf("GROWTH FAIL: z:%lf, gf:%le, gf_comp: %le\n", z, gf, gf_comp[i]);
                 }
                 i++;
 		//printf("%le  %le %le %le %le %le\n", z, chi,h*DL,mu,gf,fg);
