@@ -1,6 +1,5 @@
 CC=gcc
-#CFLAGS=-Wall -Wpedantic -g -O0 -Iinclude -std=c99 -fPIC
-CFLAGS=-Wall -g -O0 -Iinclude -std=c99 -fPIC
+CFLAGS=-Wall -Wpedantic -g -O0 -Iinclude -std=c99 -fPIC
 CFLAGS+=-I/home/damonge/include
 CFLAGS+=-I/opt/local/include
 LDFLAGS=-lgsl -lgslcblas   -lm -Lclass -lclass
@@ -30,6 +29,7 @@ test: $(TESTS)
 	tests/ccl_test_utils > /dev/null
 	tests/ccl_test_power > /dev/null
 	tests/ccl_test_distances > /dev/null
+	tests/ccl_test_bbks > /dev/null
 	@echo "---------------------"
 	@echo
 

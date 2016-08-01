@@ -28,15 +28,15 @@ struct sigma8_args {
     int * status;
 };
 
-//TODO: Sorry, but shouldn't kR be k*8/h? It looks like you are multiplying by h.
+//TODO: Sorry, but shouldn't kR be k*8/h? It looks like you are multiplying by h, so I changed that.
 //TODO: Also, what units is k? If [k]=Mpc/h, then we should remove h from kR.
-//TODO: It seems in the constants.h file thtat [k]=Mpc
+//TODO: It seems in the constants.h file that [k]=Mpc
 static
 double sigma8_integrand(double k, void * args)
 {
     struct sigma8_args * s_args = (struct sigma8_args*) args;
     gsl_spline * spline = s_args->P;
-    double kR = k*8.0*s_args->h; // r=8 Mpc/h
+    double kR = k*8.0/s_args->h; // r=8 Mpc/h
     double x = 3.*(sin(kR) - kR*cos(kR))/pow(kR,3.0);
     double p = exp(gsl_spline_eval(spline, log(k), NULL));
     double res = p*x*x*k*k; 
@@ -44,6 +44,7 @@ double sigma8_integrand(double k, void * args)
 }
 
 double ccl_sigma8(gsl_spline * P, double h, int * status){
+  
     struct sigma8_args s_args;
     s_args.P = P;
     s_args.status = status;
@@ -58,9 +59,10 @@ double ccl_sigma8(gsl_spline * P, double h, int * status){
     double sigma_8;
     //TODO: Why not integrating in ln space?
     *status |= gsl_integration_cquad(&F, K_MIN_INT, K_MAX_INT, 0.0, 1e-5, workspace, &sigma_8, NULL, NULL);
+    
     gsl_integration_cquad_workspace_free(workspace);
 
-    //TODO: Check whether you are printing sigma_8 or sigma_8^2
+    //TODO: Printing sigma_8^2
     return sigma_8/(2.*M_PI*M_PI);
 }
 
