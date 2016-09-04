@@ -140,7 +140,10 @@ void ccl_cosmology_compute_distances(ccl_cosmology * cosmo, int *status)
 {
   if(cosmo->computed_distances)
     return;
-
+  
+  if (cosmo->data.nu_pspace_int==NULL)
+    cosmo->data.nu_pspace_int=ccl_calculate_nu_phasespace_spline();
+  
   // Create linearly-spaced values of the scale factor
   int na=0;
   double * a = ccl_linear_spacing(A_SPLINE_MIN, A_SPLINE_MAX, A_SPLINE_DELTA, &na);

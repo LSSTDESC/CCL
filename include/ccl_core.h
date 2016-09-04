@@ -24,7 +24,7 @@ typedef struct ccl_parameters {
     double Neff_partial[CCL_MAX_NU_SPECIES];
     double mnu[CCL_MAX_NU_SPECIES];
     
-    // Radiation parameters
+    // Radiation parameters, Omega_g is radiation in CMB only, other Neff is above
     double Omega_g;
     double T_CMB;
 

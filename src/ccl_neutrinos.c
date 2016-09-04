@@ -12,7 +12,7 @@ static double ccl_nu_integrand(double x, void *r)
 }
 
 
-void ccl_calculate_nu_phasespace_spline(gsl_spline* spl) {
+gsl_spline* ccl_calculate_nu_phasespace_spline() {
   int N=CCL_NU_MNUT_N;
   double *mnut = ccl_linear_spacing(log(CCL_NU_MNUT_MIN),
 				    log(CCL_NU_MNUT_MAX),
@@ -27,12 +27,13 @@ void ccl_calculate_nu_phasespace_spline(gsl_spline* spl) {
   for (int i=0; i<CCL_NU_MNUT_N; i++) {
     double mnut_=exp(mnut[i]);
     F.params = &(mnut_);
-    status |= gsl_integration_cquad(&F, 0, 1000.0, 1e-6, 0.0, workspace,&y[i], NULL, NULL); 
+    status |= gsl_integration_cquad(&F, 0, 1000.0, 1e-7, 1e-7, workspace,&y[i], NULL, NULL); 
   }
   gsl_integration_cquad_workspace_free(workspace);
   double renorm=1./y[0];
   for (int i=0; i<CCL_NU_MNUT_N; i++) y[i]*=renorm;
-  spl = gsl_spline_alloc(A_SPLINE_TYPE, CCL_NU_MNUT_N);
+  //  for (int i=0; i<CCL_NU_MNUT_N; i++) printf("%g %g \n",mnut[i],y[i]);
+  gsl_spline* spl = gsl_spline_alloc(A_SPLINE_TYPE, CCL_NU_MNUT_N);
   status = gsl_spline_init(spl, mnut, y, CCL_NU_MNUT_N);
   // Check for errors in creating the spline
   if (status){
@@ -40,9 +41,18 @@ void ccl_calculate_nu_phasespace_spline(gsl_spline* spl) {
     free(y);
     gsl_spline_free(spl);
     fprintf(stderr, "Error creating mnu/T neutrino spline\n");
-    return;
+    return NULL;
   }
   free(mnut);
+  free(y);
+  return spl;
+}
+
+
+double ccl_nu_phasespace_intg(gsl_spline* spl, double mnuOT) {
+  if (mnuOT<CCL_NU_MNUT_MIN) return 7./8.;
+  else if (mnuOT>CCL_NU_MNUT_MAX) return 0.2776566337*mnuOT; //evalf(45*Zeta(3)/(2*Pi^4));
+  return gsl_spline_eval(spl, log(mnuOT),NULL)*7./8.;
 }
 
 // returns density if one neutrino species at a scale factor a, given this particular
@@ -64,10 +74,7 @@ double Omeganuh2 (double a, double Neff, double mnu, double TCMB, gsl_spline* ps
   // (1 eV) / (Boltzmann constant * 1 kelvin) =
   // 11 604.5193
   double mnuOT=mnuone/(Tnu_eff/a)*11604.519;
-  double intval;
-  if (mnuOT<CCL_NU_MNUT_MIN) intval=7./8.;
-  else if (mnuOT>CCL_NU_MNUT_MAX) intval=0.2776566337*mnuOT; //evalf(45*Zeta(3)/(2*Pi^4));
-  else intval=gsl_spline_eval(psi, mnuOT,NULL)*7./8.;
+  double intval=ccl_nu_phasespace_intg(psi,mnuOT);
   return Neff*intval*prefix/a4;
 }
 

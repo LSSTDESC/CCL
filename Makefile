@@ -6,7 +6,7 @@ LDFLAGS=-lgsl -lgslcblas   -lm -Lclass -lclass
 
 
 OBJECTS=src/ccl_core.o src/ccl_utils.o src/ccl_power.o src/ccl_placeholder.o src/ccl_background.o src/ccl_neutrinos.o
-TESTS=tests/ccl_test_utils tests/ccl_test_power tests/ccl_test_distances
+TESTS=tests/ccl_test_utils tests/ccl_test_power tests/ccl_test_distances tests/ccl_test_neutrinos
 LIB=lib/libccl.a
 DYLIB=lib/libccl.so
 INC_CCL=
@@ -29,6 +29,7 @@ test: $(TESTS)
 	tests/ccl_test_utils > /dev/null
 	tests/ccl_test_power > /dev/null
 	tests/ccl_test_distances > /dev/null
+	tests/ccl_test_neutrinos > /dev/null	
 	@echo "---------------------"
 	@echo
 
