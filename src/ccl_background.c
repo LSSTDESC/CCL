@@ -14,13 +14,13 @@
 //CHANGED: modified this to include non-flat cosmologies
 static double h_over_h0(double a, ccl_parameters * params)
 {
-  return sqrt((params->Omega_m+params->Omega_l*pow(a,-3*(params->w0+params->wa))*
+  return sqrt((params->Omega_g/a+params->Omega_m+params->Omega_l*pow(a,-3*(params->w0+params->wa))*
 	       exp(3*params->wa*(a-1))+params->Omega_k*a)/(a*a*a));
 }
 
 static double omega_m(double a,ccl_parameters * params)
 {
-  return params->Omega_m/(params->Omega_m+params->Omega_l*pow(a,-3*(params->w0+params->wa))*
+  return params->Omega_m/(params->Omega_g/a+params->Omega_m+params->Omega_l*pow(a,-3*(params->w0+params->wa))*
 			  exp(3*params->wa*(a-1))+params->Omega_k*a);
 }
 

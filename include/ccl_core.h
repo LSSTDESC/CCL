@@ -1,32 +1,40 @@
 #pragma once
 #include "gsl/gsl_spline.h"
 #include "ccl_config.h"
+#include "ccl_neutrinos.h"
 #include "ccl_constants.h"
 #include <stdbool.h>
 
 typedef struct ccl_parameters {
-    // Densities
+
+  // Densities
     double Omega_c;
     double Omega_b;
     double Omega_m;
     double Omega_n;
     double Omega_k;
 
-    // Dark Energy
-    double w0;
-    double wa;
-
     // Hubble parameters
     double H0;
     double h;
 
-    // Primordial power spectra
-    double A_s;
-    double n_s;
-
+    // Neutrino properties
+    // Number of different species of neutrinos (i.e. 1 for one massive neutrinos)
+    int N_nu_species;
+    double Neff_partial[CCL_MAX_NU_SPECIES];
+    double mnu[CCL_MAX_NU_SPECIES];
+    
     // Radiation parameters
     double Omega_g;
     double T_CMB;
+
+    // Dark Energy
+    double w0;
+    double wa;
+
+    // Primordial power spectra
+    double A_s;
+    double n_s;
 
     // Derived parameters
     double sigma_8;
@@ -38,8 +46,8 @@ typedef struct ccl_parameters {
 
 
 typedef struct ccl_data{
-    // These are all functions of the scale factor a.
-    // Distances are defined in EITHER Mpc or Mpc/h (TBC)
+  // These are all functions of the scale factor a.
+  // Distances are defined in EITHER Mpc or Mpc/h (TBC)
   gsl_spline * chi;
   gsl_spline * growth;
   gsl_spline * fgrowth;
@@ -51,12 +59,15 @@ typedef struct ccl_data{
   gsl_interp_accel *accelerator;
   //TODO: why not use interpolation accelerators?
 
-    // Function of Halo mass M
-    gsl_spline * sigma;
+  // Function of Halo mass M
+  gsl_spline * sigma;
 
-    // These are all functions of the wavenumber k and the scale factor a.
-    gsl_spline * p_lin;
-    gsl_spline * p_nl;
+  // These are all functions of the wavenumber k and the scale factor a.
+  gsl_spline * p_lin;
+  gsl_spline * p_nl;
+
+  // neutrino phase-space integral splined in mnu/T units
+  gsl_spline * nu_pspace_int;
 
 } ccl_data;
 

@@ -1,4 +1,5 @@
 #include "ccl_core.h"
+#include "ccl_neutrinos.h"
 #include "ccl_utils.h"
 #include <stdlib.h>
 #include <math.h>
@@ -23,10 +24,9 @@ ccl_cosmology * ccl_cosmology_create(ccl_parameters params, ccl_configuration co
   cosmo->data.accelerator=NULL;
 
   cosmo->data.sigma = NULL;
-  
   cosmo->data.p_lin = NULL;
   cosmo->data.p_nl = NULL;
-  
+  cosmo->data.nu_pspace_int = NULL;
   cosmo->computed_distances = false;
   cosmo->computed_power = false;
   cosmo->computed_sigma = false;
@@ -38,9 +38,12 @@ void ccl_parameters_fill_initial(ccl_parameters *params)
 {
   // Fixed radiation parameters
   // Omega_g * h**2 is known from T_CMB
-  double omega_g = 1.71e-5;
-  params->Omega_g = omega_g/params->h/params->h;
+  // type this into google
+  // 8*pi^5*(boltzmann constant)^4/(15*(h*c)^3))*(1 Kelvin)**4/(3*(100 km/s/Mpc)^2/(8*Pi*G)*(speed of light)^2)
+  // to get omrad_g
   params->T_CMB =  2.726;
+  double omega_g = 4.48130979e-7*pow(params->T_CMB,4.);
+  params->Omega_g = omega_g/params->h/params->h;
 
   // Derived parameters
   params->Omega_l = 1.0 - params->Omega_m - params->Omega_g - params->Omega_n - params->Omega_k;
