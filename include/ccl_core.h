@@ -5,7 +5,7 @@
 #include <stdbool.h>
 
 typedef struct ccl_parameters {
-    // Densities
+    // Densities: CDM, baryons, total matter, neutrinos, curvature
     double Omega_c;
     double Omega_b;
     double Omega_m;
