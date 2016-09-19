@@ -26,9 +26,9 @@ test: $(TESTS)
 	@echo
 	@echo "Running test programs"
 	@echo "---------------------"
-	tests/ccl_test_utils > /dev/null
-	tests/ccl_test_power > /dev/null
-	tests/ccl_test_distances > /dev/null
+	LD_LIBRARY_PATH=lib:$(LD_LIBRARY_PATH) tests/ccl_test_utils > /dev/null
+	LD_LIBRARY_PATH=lib:$(LD_LIBRARY_PATH) tests/ccl_test_power > /dev/null
+	LD_LIBRARY_PATH=lib:$(LD_LIBRARY_PATH) tests/ccl_test_distances > /dev/null
 	@echo "---------------------"
 	@echo
 
