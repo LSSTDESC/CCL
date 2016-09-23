@@ -1,8 +1,19 @@
 #include "ccl.h"
-#include <assert.h>
+#include <check.h>
 #include <math.h>
 #include <stdio.h>
 
+START_TEST(test_money_create)
+{
+    int n1;
+    double * m1 = ccl_linear_spacing(0.0, 1.0, 1.0, &n1);
+    ck_assert_int_eq(n1,2);
+    ck_assert_ptr_eq(m1,NULL);
+    cr_assert_float_eq(m1[0],0.01,e-10);
+    assert (m1[1]==1.0);
+    free(m1);
+
+}
 
 int test_ccl_linear_spacing(){
     
@@ -43,7 +54,6 @@ int test_ccl_linear_spacing(){
 
 
 
-int main(int argc, char * argv[]){
-    test_ccl_linear_spacing();
+int main(void){
     return 0;
 }
