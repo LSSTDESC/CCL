@@ -235,10 +235,13 @@ void ccl_cosmology_compute_growth(ccl_cosmology * cosmo, int *status)
 
   // allocate space for y, which will be all three
   // of E(a), chi(a), D(a) and f(a) in turn.
+  double growth0,fgrowth0;
   double *y = malloc(sizeof(double)*na);
   double *y2 = malloc(sizeof(double)*na);
+  growth_factor_and_growth_rate(1.,&growth0,&fgrowth0,cosmo);
   for (int i=0; i<na; i++){
     *status |= growth_factor_and_growth_rate(a[i],&(y[i]),&(y2[i]),cosmo);
+    y[i]/=growth0;
   }
   if (*status){
     free(a);
@@ -276,6 +279,7 @@ void ccl_cosmology_compute_growth(ccl_cosmology * cosmo, int *status)
     cosmo->data.accelerator=gsl_interp_accel_alloc();
   cosmo->data.growth = growth;
   cosmo->data.fgrowth = fgrowth;
+  cosmo->data.growth0 = growth0;
   cosmo->computed_growth = true;
   
   free(a);
@@ -327,6 +331,20 @@ int ccl_growth_factors(ccl_cosmology * cosmo, int na, double a[na], double outpu
 {
   for (int i=0; i<na; i++){
     output[i]=gsl_spline_eval(cosmo->data.growth,a[i],cosmo->data.accelerator);
+  }
+
+  return 0;
+}
+
+double ccl_growth_factor_unnorm(ccl_cosmology * cosmo, double a, int * status)
+{
+    return cosmo->data.growth0*gsl_spline_eval(cosmo->data.growth, a, cosmo->data.accelerator);
+}
+
+int ccl_growth_factors_unnorm(ccl_cosmology * cosmo, int na, double a[na], double output[na])
+{
+  for (int i=0; i<na; i++){
+    output[i]=cosmo->data.growth0*gsl_spline_eval(cosmo->data.growth,a[i],cosmo->data.accelerator);
   }
 
   return 0;
