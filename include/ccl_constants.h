@@ -21,8 +21,8 @@
 #define K_PIVOT 0.05
 #define K_MAX 1e3
 #define K_MIN 1e-4
-#define K_MAX_INT 1e3/1.1 //minimum integration range
-#define K_MIN_INT 1e-4*1.1 //maximum integration range
+#define K_MAX_INT (1e3/1.1) //minimum integration range
+#define K_MIN_INT (1e-4*1.1) //maximum integration range
 #define N_K 500
 
 //Lightspeed / H0 in units of Mpc/h
