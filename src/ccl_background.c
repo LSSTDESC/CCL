@@ -205,7 +205,37 @@ void ccl_cosmology_compute_distances(ccl_cosmology * cosmo, int *status)
     return;
   }
 
-  //Fill in D(a) and f(a)
+  if(cosmo->data.accelerator==NULL)
+    cosmo->data.accelerator=gsl_interp_accel_alloc();
+  cosmo->data.E = E;
+  cosmo->data.chi = chi;
+  cosmo->computed_distances = true;
+  
+  free(a);
+  free(y);
+}
+
+void ccl_cosmology_compute_growth(ccl_cosmology * cosmo, int *status)
+{
+  if(cosmo->computed_growth)
+    return;
+
+  // Create linearly-spaced values of the scale factor
+  int na=0;
+  double * a = ccl_linear_spacing(A_SPLINE_MIN, A_SPLINE_MAX, A_SPLINE_DELTA, &na);
+  if (a==NULL || 
+      (fabs(a[0]-A_SPLINE_MIN)>1e-5) || 
+      (fabs(a[na-1]-A_SPLINE_MAX)>1e-5) || 
+      (a[na-1]>1.0)
+      ) {
+    fprintf(stderr, "Error creating linear spacing.\n");        
+    *status = 1;
+    return;
+  }
+
+  // allocate space for y, which will be all three
+  // of E(a), chi(a), D(a) and f(a) in turn.
+  double *y = malloc(sizeof(double)*na);
   double *y2 = malloc(sizeof(double)*na);
   for (int i=0; i<na; i++){
     *status |= growth_factor_and_growth_rate(a[i],&(y[i]),&(y2[i]),cosmo);
@@ -214,8 +244,6 @@ void ccl_cosmology_compute_distances(ccl_cosmology * cosmo, int *status)
     free(a);
     free(y);
     free(y2);
-    gsl_spline_free(E);
-    gsl_spline_free(chi);
     fprintf(stderr, "Error creating growth array\n");
     return;
   }
@@ -226,8 +254,6 @@ void ccl_cosmology_compute_distances(ccl_cosmology * cosmo, int *status)
     free(a);
     free(y);
     free(y2);
-    gsl_spline_free(E);
-    gsl_spline_free(chi);
     gsl_spline_free(growth);
     fprintf(stderr, "Error creating growth spline\n");
     return;
@@ -238,8 +264,6 @@ void ccl_cosmology_compute_distances(ccl_cosmology * cosmo, int *status)
     free(a);
     free(y);
     free(y2);
-    gsl_spline_free(E);
-    gsl_spline_free(chi);
     gsl_spline_free(growth);
     gsl_spline_free(fgrowth);
     fprintf(stderr, "Error creating growth spline\n");
@@ -248,12 +272,11 @@ void ccl_cosmology_compute_distances(ccl_cosmology * cosmo, int *status)
 
   // Initialize the accelerator which speeds the splines and 
   // assign all the splines we've just made to the structure.
-  cosmo->data.accelerator=gsl_interp_accel_alloc();
-  cosmo->data.E = E;
-  cosmo->data.chi = chi;
+  if(cosmo->data.accelerator==NULL)
+    cosmo->data.accelerator=gsl_interp_accel_alloc();
   cosmo->data.growth = growth;
   cosmo->data.fgrowth = fgrowth;
-  cosmo->computed_distances = true;
+  cosmo->computed_growth = true;
   
   free(a);
   free(y);
@@ -299,7 +322,6 @@ double ccl_growth_factor(ccl_cosmology * cosmo, double a, int * status)
 {
     return gsl_spline_eval(cosmo->data.growth, a, cosmo->data.accelerator);
 }
-
 
 int ccl_growth_factors(ccl_cosmology * cosmo, int na, double a[na], double output[na])
 {

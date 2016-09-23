@@ -19,6 +19,7 @@ int main(int argc, char * argv[]){
 
 	int status; 
 	ccl_cosmology_compute_distances(cosmo, &status);
+	ccl_cosmology_compute_growth(cosmo, &status);
 
 	printf("[0]z, [1]chi(z), [2]dL(z), [3]mu(z), [4]D(z), [5]f(z)\n");
 	for (double z=0.0; z<=1.0; z+=0.01){
