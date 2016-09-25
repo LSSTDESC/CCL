@@ -21,6 +21,7 @@ ccl_cosmology * ccl_cosmology_create(ccl_parameters params, ccl_configuration co
   cosmo->data.fgrowth = NULL;
   cosmo->data.E = NULL;
   cosmo->data.accelerator=NULL;
+  cosmo->data.growth0 = 1.;
 
   cosmo->data.sigma = NULL;
   
@@ -28,6 +29,7 @@ ccl_cosmology * ccl_cosmology_create(ccl_parameters params, ccl_configuration co
   cosmo->data.p_nl = NULL;
   
   cosmo->computed_distances = false;
+  cosmo->computed_growth = false;
   cosmo->computed_power = false;
   cosmo->computed_sigma = false;
   

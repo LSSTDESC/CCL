@@ -330,6 +330,7 @@ void ccl_cosmology_compute_power(ccl_cosmology * cosmo, int *status){
     if (cosmo->computed_power) return;
 
     ccl_cosmology_compute_distances(cosmo, status);
+    ccl_cosmology_compute_growth(cosmo, status);
 
     if (*status){
         return;
