@@ -297,8 +297,8 @@ void ccl_cosmology_compute_power_bbks(ccl_cosmology * cosmo, int *status){
     }
     gsl_spline * log_power_lin = gsl_spline_alloc(K_SPLINE_TYPE, nk);
     *status = gsl_spline_init(log_power_lin, x, y, nk);
-    double sigma_8 = ccl_sigma8(log_power_lin, cosmo->params.h, status);
-    double log_sigma_8 = log(cosmo->params.sigma_8) - log(sigma_8);
+    double sigma_8 = ccl_sigma8(log_power_lin, cosmo->params.h, status); //this is sigma_8^2!
+    double log_sigma_8 = log(cosmo->params.sigma_8*cosmo->params.sigma_8) - log(sigma_8);
     for (int i=0; i<nk; i++){
         y[i] += log_sigma_8;
     }
