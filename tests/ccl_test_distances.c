@@ -1,6 +1,7 @@
 #include "ccl.h"
 #include "ctest.h"
 #include <stdio.h>
+#include <math.h>
 
 // The tolerance in chi for all the
 #define DISTANCES_TOLERANCE 1.0e-4
@@ -97,7 +98,9 @@ static void compare_distances(int model, struct distances_data * data)
 	for (int j=0; j<6; j++){
 		double a = 1/(1.+data->z[j]);
 		double chi_ij=ccl_comoving_radial_distance(cosmo,a);
-		ASSERT_DBL_NEAR_TOL(data->chi[model][j], chi_ij, DISTANCES_TOLERANCE);
+		double absolute_tolerance = DISTANCES_TOLERANCE*data->chi[model][j];
+		if (fabs(absolute_tolerance)<1e-12) absolute_tolerance = 1e-12;
+		ASSERT_DBL_NEAR_TOL(data->chi[model][j], chi_ij, absolute_tolerance);
 	}
 
 	free(cosmo);
