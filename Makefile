@@ -2,12 +2,15 @@ CC=gcc
 CFLAGS=-Wall -Wpedantic -g -O0 -Iinclude -std=c99 -fPIC
 CFLAGS+=-I/home/damonge/include
 CFLAGS+=-I/opt/local/include
-LDFLAGS=-lgsl -lgslcblas   -lm -Lclass -lclass
+LDFLAGS=-L/home/damonge/lib -lgsl -lgslcblas   -lm -Lclass -lclass
 
 
 OBJECTS=src/ccl_core.o src/ccl_utils.o src/ccl_power.o src/ccl_placeholder.o src/ccl_background.o
+
 TESTS=tests/ccl_test.c tests/ccl_test_utils.c tests/ccl_test_params.c tests/ccl_test_distances.c
-#TESTS=tests/ccl_test_utils tests/ccl_test_power tests/ccl_test_distances
+#
+# Tests to include at some point:
+# tests/ccl_test_power.c  tests/ccl_test_bbks.c
 LIB=lib/libccl.a
 DYLIB=lib/libccl.so
 INC_CCL=
@@ -25,16 +28,7 @@ class:
 
 test: $(TESTS)
 	$(CC) $(CFLAGS) $(TESTS) -o tests/ccl_test -Llib -lccl $(LDFLAGS)
-
-
-# @echo
-# @echo "Running test programs"
-# @echo "---------------------"
-# LD_LIBRARY_PATH=lib:$(LD_LIBRARY_PATH) tests/ccl_test_utils > /dev/null
-# LD_LIBRARY_PATH=lib:$(LD_LIBRARY_PATH) tests/ccl_test_power > /dev/null
-# LD_LIBRARY_PATH=lib:$(LD_LIBRARY_PATH) tests/ccl_test_distances > /dev/null
-# @echo "---------------------"
-# @echo
+	tests/ccl_test
 
 tests/% : tests/%.c $(LIB)
 	$(CC)  $(CFLAGS) $< -o $@ -Llib -lccl $(LDFLAGS)
