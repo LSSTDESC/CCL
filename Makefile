@@ -6,7 +6,8 @@ LDFLAGS=-lgsl -lgslcblas   -lm -Lclass -lclass
 
 
 OBJECTS=src/ccl_core.o src/ccl_utils.o src/ccl_power.o src/ccl_placeholder.o src/ccl_background.o
-TESTS=tests/ccl_test_utils tests/ccl_test_power tests/ccl_test_distances
+TESTS=tests/ccl_test.c tests/ccl_test_utils.c tests/ccl_test_params.c tests/ccl_test_distances.c
+#TESTS=tests/ccl_test_utils tests/ccl_test_power tests/ccl_test_distances
 LIB=lib/libccl.a
 DYLIB=lib/libccl.so
 INC_CCL=
@@ -23,17 +24,20 @@ class:
 	cd class; $(MAKE)
 
 test: $(TESTS)
-	@echo
-	@echo "Running test programs"
-	@echo "---------------------"
-	LD_LIBRARY_PATH=lib:$(LD_LIBRARY_PATH) tests/ccl_test_utils > /dev/null
-	LD_LIBRARY_PATH=lib:$(LD_LIBRARY_PATH) tests/ccl_test_power > /dev/null
-	LD_LIBRARY_PATH=lib:$(LD_LIBRARY_PATH) tests/ccl_test_distances > /dev/null
-	@echo "---------------------"
-	@echo
+	$(CC) $(CFLAGS) $(TESTS) -o tests/ccl_test -Llib -lccl $(LDFLAGS)
+
+
+# @echo
+# @echo "Running test programs"
+# @echo "---------------------"
+# LD_LIBRARY_PATH=lib:$(LD_LIBRARY_PATH) tests/ccl_test_utils > /dev/null
+# LD_LIBRARY_PATH=lib:$(LD_LIBRARY_PATH) tests/ccl_test_power > /dev/null
+# LD_LIBRARY_PATH=lib:$(LD_LIBRARY_PATH) tests/ccl_test_distances > /dev/null
+# @echo "---------------------"
+# @echo
 
 tests/% : tests/%.c $(LIB)
-	$(CC)  $(CFLAGS) $< -o $@ -Llib -lccl $(LDFLAGS) 
+	$(CC)  $(CFLAGS) $< -o $@ -Llib -lccl $(LDFLAGS)
 
 src/%.o: src/%.c
 	$(CC) -c $(CFLAGS) $< -o $@
