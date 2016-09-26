@@ -26,12 +26,9 @@ $(DYLIB): $(OBJECTS)
 class:
 	cd class; $(MAKE)
 
-test: $(TESTS)
+test: $(TESTS) $(LIB)
 	$(CC) $(CFLAGS) $(TESTS) -o tests/ccl_test -Llib -lccl $(LDFLAGS)
-	tests/ccl_test
-
-tests/% : tests/%.c $(LIB)
-	$(CC)  $(CFLAGS) $< -o $@ -Llib -lccl $(LDFLAGS)
+	LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:lib/ tests/ccl_test
 
 src/%.o: src/%.c
 	$(CC) -c $(CFLAGS) $< -o $@
