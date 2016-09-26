@@ -38,7 +38,7 @@ src/%.o: src/%.c
 
 
 clean:
-	rm -rf *.dSYM *.o *.a $(TESTS) test_core_cosmo src/*.o lib/*.a lib/*.so lib/*.dSYM  tests/*.dSYM
+	rm -rf *.dSYM *.o *.a tests/ccl_test test_core_cosmo src/*.o lib/*.a lib/*.so lib/*.dSYM  tests/*.dSYM
 	cd class; $(MAKE) clean
 
 .PHONY: all tests clean class

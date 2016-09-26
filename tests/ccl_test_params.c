@@ -2,7 +2,8 @@
 #include "ctest.h"
 
 // We can define any constants we want to use in a set of tests here.
-// They are accessible as data->Omega_c, etc. , in the test itself 
+// They are accessible as data->Omega_c, etc., in the test itself 
+// "params" is the name of the whole suite of tests.
 CTEST_DATA(params) {
     double Omega_c;
     double Omega_b;
@@ -30,11 +31,14 @@ CTEST_SETUP(params){
 // The 2 on the end of CTEST2 means that for this test we use 
 // the data defined above in CTEST_DATA and given values in CTEST_SETUP function.  
 // We could also define CTEST_TEARDOWN(params) that would be run after the tests.
+
+// This adds a new test called "create_lcdm" to the suite (collection) called "params"
 CTEST2(params, create_lcdm){
     ccl_parameters params = ccl_parameters_create_flat_lcdm(data->Omega_c, data->Omega_b, data->h, data->A_s, data->n_s);
     ASSERT_DBL_NEAR_TOL(params.Omega_c, data->Omega_c, 1e-10);
     ASSERT_DBL_NEAR_TOL(params.w0, -1.0, 1e-10);
     ASSERT_DBL_NEAR_TOL(params.wa, 0.0, 1e-10);
+    ASSERT_DBL_NEAR_TOL(params.Omega_n, 0.0, 1e-10);
 }
 
 CTEST2(params, create_wacdm){

@@ -321,7 +321,7 @@ void assert_dbl_near(double exp, double real, double tol, const char* caller, in
       absdiff *= -1;
     }
     if (absdiff > tol) {
-        CTEST_ERR("%s:%d  expected %0.3e, got %0.3e (diff %0.3e, tol %0.3e)", caller, line, exp, real, diff, tol);
+        CTEST_ERR("%s:%d  expected %0.6e, got %0.6e (diff %0.6e, tol %0.6e)", caller, line, exp, real, diff, tol);
     }
 }
 
@@ -333,7 +333,7 @@ void assert_dbl_far(double exp, double real, double tol, const char* caller, int
       absdiff *= -1;
     }
     if (absdiff <= tol) {
-        CTEST_ERR("%s:%d  expected %0.3e, got %0.3e (diff %0.3e, tol %0.3e)", caller, line, exp, real, diff, tol);
+        CTEST_ERR("%s:%d  expected %0.6e, got %0.6e (diff %0.6e, tol %0.6e)", caller, line, exp, real, diff, tol);
     }
 }
 
