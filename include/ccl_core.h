@@ -5,7 +5,7 @@
 #include <stdbool.h>
 
 typedef struct ccl_parameters {
-    // Densities
+    // Densities: CDM, baryons, total matter, neutrinos, curvature
     double Omega_c;
     double Omega_b;
     double Omega_m;
@@ -40,6 +40,7 @@ typedef struct ccl_parameters {
 typedef struct ccl_data{
     // These are all functions of the scale factor a.
     // Distances are defined in EITHER Mpc or Mpc/h (TBC)
+  double growth0;
   gsl_spline * chi;
   gsl_spline * growth;
   gsl_spline * fgrowth;
@@ -51,26 +52,27 @@ typedef struct ccl_data{
   gsl_interp_accel *accelerator;
   //TODO: why not use interpolation accelerators?
 
-    // Function of Halo mass M
-    gsl_spline * sigma;
-
-    // These are all functions of the wavenumber k and the scale factor a.
-    gsl_spline * p_lin;
-    gsl_spline * p_nl;
+  // Function of Halo mass M
+  gsl_spline * sigma;
+  
+  // These are all functions of the wavenumber k and the scale factor a.
+  gsl_spline * p_lin;
+  gsl_spline * p_nl;
 
 } ccl_data;
 
 typedef struct ccl_cosmology
 {
-    ccl_parameters    params;
-    ccl_configuration config;
-    ccl_data          data;
+  ccl_parameters    params;
+  ccl_configuration config;
+  ccl_data          data;
+  
+  bool computed_distances;
+  bool computed_growth;
+  bool computed_power;
+  bool computed_sigma;
 
-    bool computed_distances;
-    bool computed_power;
-    bool computed_sigma;
-
-    // other flags?
+  // other flags?
 } ccl_cosmology;
 
 
@@ -83,12 +85,14 @@ ccl_parameters ccl_parameters_create(double Omega_c, double Omega_b, double Omeg
 // Specific sub-models
 ccl_parameters ccl_parameters_create_flat_lcdm(double Omega_c, double Omega_b, double h, double A_s, double n_s);
 ccl_parameters ccl_parameters_create_flat_wcdm(double Omega_c, double Omega_b, double w0, double h, double A_s, double n_s);
+ccl_parameters ccl_parameters_create_flat_wacdm(double Omega_c, double Omega_b, double w0,double wa, double h, double A_s, double n_s);
 ccl_parameters ccl_parameters_create_lcdm(double Omega_c, double Omega_b, double Omega_k, double h, double A_s, double n_s);
 
 
 void ccl_cosmology_free(ccl_cosmology * cosmo);
 
 void ccl_cosmology_compute_distances(ccl_cosmology * cosmo, int *status);
+void ccl_cosmology_compute_growth(ccl_cosmology * cosmo, int *status);
 void ccl_cosmology_compute_power(ccl_cosmology * cosmo, int *status);
 // Internal(?)
 

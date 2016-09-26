@@ -21,6 +21,7 @@ ccl_cosmology * ccl_cosmology_create(ccl_parameters params, ccl_configuration co
   cosmo->data.fgrowth = NULL;
   cosmo->data.E = NULL;
   cosmo->data.accelerator=NULL;
+  cosmo->data.growth0 = 1.;
 
   cosmo->data.sigma = NULL;
   
@@ -28,6 +29,7 @@ ccl_cosmology * ccl_cosmology_create(ccl_parameters params, ccl_configuration co
   cosmo->data.p_nl = NULL;
   
   cosmo->computed_distances = false;
+  cosmo->computed_growth = false;
   cosmo->computed_power = false;
   cosmo->computed_sigma = false;
   
@@ -114,6 +116,14 @@ ccl_parameters ccl_parameters_create_flat_wcdm(double Omega_c, double Omega_b, d
   return params;
 }
 
+ccl_parameters ccl_parameters_create_flat_wacdm(double Omega_c, double Omega_b, double w0, double wa, double h, double A_s, double n_s)
+{
+
+  double Omega_k = 0.0;
+  double Omega_n = 0.0;
+  ccl_parameters params = ccl_parameters_create(Omega_c, Omega_b, Omega_k, Omega_n, w0, wa, h, A_s, n_s);
+  return params;
+}
 
 void ccl_data_free(ccl_data * data)
 {

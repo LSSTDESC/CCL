@@ -2,11 +2,11 @@ CC=gcc
 CFLAGS=-Wall -Wpedantic -g -O0 -Iinclude -std=c99 -fPIC
 CFLAGS+=-I/home/damonge/include
 CFLAGS+=-I/opt/local/include
-LDFLAGS=-lgsl -lgslcblas   -lm -Lclass -lclass
+LDFLAGS=-L/home/damonge/lib -lgsl -lgslcblas   -lm -Lclass -lclass
 
 
 OBJECTS=src/ccl_core.o src/ccl_utils.o src/ccl_power.o src/ccl_placeholder.o src/ccl_background.o
-TESTS=tests/ccl_test_utils tests/ccl_test_power tests/ccl_test_distances
+TESTS=tests/ccl_test_utils tests/ccl_test_power tests/ccl_test_distances tests/ccl_test_bbks
 LIB=lib/libccl.a
 DYLIB=lib/libccl.so
 INC_CCL=
@@ -26,9 +26,10 @@ test: $(TESTS)
 	@echo
 	@echo "Running test programs"
 	@echo "---------------------"
-	tests/ccl_test_utils > /dev/null
-	tests/ccl_test_power > /dev/null
-	tests/ccl_test_distances > /dev/null
+	LD_LIBRARY_PATH=lib:$(LD_LIBRARY_PATH) tests/ccl_test_utils > /dev/null
+	LD_LIBRARY_PATH=lib:$(LD_LIBRARY_PATH) tests/ccl_test_power > /dev/null
+	LD_LIBRARY_PATH=lib:$(LD_LIBRARY_PATH) tests/ccl_test_distances > /dev/null
+	LD_LIBRARY_PATH=lib:$(LD_LIBRARY_PATH) tests/ccl_test_bbks > /dev/null
 	@echo "---------------------"
 	@echo
 
