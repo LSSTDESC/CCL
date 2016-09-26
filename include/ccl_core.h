@@ -72,6 +72,10 @@ typedef struct ccl_cosmology
   bool computed_power;
   bool computed_sigma;
 
+  int status;
+  //this is optional - less tedious than tracking all numerical values for status in error handler function
+  char status_message[500];
+
   // other flags?
 } ccl_cosmology;
 
