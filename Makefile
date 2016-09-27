@@ -1,8 +1,7 @@
 CC=gcc
 CFLAGS=-Wall -Wpedantic -g -O0 -Iinclude -std=c99 -fPIC
-CFLAGS+=-I/home/damonge/include
 CFLAGS+=-I/opt/local/include
-LDFLAGS=-L/home/damonge/lib -lgsl -lgslcblas   -lm -Lclass -lclass
+LDFLAGS=-lgsl -lgslcblas   -lm -Lclass -lclass
 
 
 OBJECTS=src/ccl_core.o src/ccl_utils.o src/ccl_power.o src/ccl_placeholder.o src/ccl_background.o
