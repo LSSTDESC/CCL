@@ -22,13 +22,48 @@ static double dNdz_clustering(double z)
   return 0.5/z0*zdivz0*zdivz0*exp(-zdivz0);
 }
 
-//This is the redshift distribution of Chang et al.
+//This is the fiducial redshift distribution of Chang et al.
 //Table 2, column corresponding to k=1 (fiducial case)
-static double dNdz_sources(double z)
+static double dNdz_sources_k1(double z)
 {
   double alpha=1.24; //These probably need to move to the cosmo params file
   double beta=1.01;
   double z0=0.51;
+  double zdivz0=z/z0;
+  double zmin_sources=0.1;
+  double zmax_sources=3.0;
+  if((z>=zmin_sources) && (z<=zmax_sources)){
+    return pow(z,alpha)*exp(-pow(zdivz0,beta));
+  } else {
+    return 0.;
+  }
+}
+
+//This is a non-fiducial redshift distribution from Chang et al.
+//Table 2, column corresponding to k=2
+static double dNdz_sources_k2(double z)
+{
+  double alpha=1.23; //These probably need to move to the cosmo params file
+  double beta=1.05;
+  double z0=0.59;
+  double zdivz0=z/z0;
+  double zmin_sources=0.1;
+  double zmax_sources=3.0;
+  if((z>=zmin_sources) && (z<=zmax_sources)){
+    return pow(z,alpha)*exp(-pow(zdivz0,beta));
+  } else {
+    return 0.;
+  }
+}
+
+
+//This is a non-fiducial redshift distribution from Chang et al.
+//Table 2, column corresponding to k=0.5
+static double dNdz_sources_k0pt5(double z)
+{
+  double alpha=1.28; //These probably need to move to the cosmo params file
+  double beta=0.97;
+  double z0=0.41;
   double zdivz0=z/z0;
   double zmin_sources=0.1;
   double zmax_sources=3.0;
