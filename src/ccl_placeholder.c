@@ -14,7 +14,8 @@
 // ---- Consider spline for input dN/dz - pending
 
 //dN/dz for clustering sample
-static double dNdz_clustering(double z)
+//static double dNdz_clustering(double z)
+double dNdz_clustering(double z)
 {
   //What is the redshift range of validity?
   double z0=0.3; //probably move this to the cosmo params file
@@ -24,7 +25,9 @@ static double dNdz_clustering(double z)
 
 //This is the fiducial redshift distribution of Chang et al.
 //Table 2, column corresponding to k=1 (fiducial case)
-static double dNdz_sources_k1(double z)
+// This is unnormalised.
+// static double dNdz_sources_k1(double z)
+double dNdz_sources_k1(double z)
 {
   double alpha=1.24; //These probably need to move to the cosmo params file
   double beta=1.01;
@@ -41,7 +44,9 @@ static double dNdz_sources_k1(double z)
 
 //This is a non-fiducial redshift distribution from Chang et al.
 //Table 2, column corresponding to k=2
-static double dNdz_sources_k2(double z)
+// This is unnormalised
+// static double dNdz_sources_k2(double z)
+double dNdz_sources_k2(double z)
 {
   double alpha=1.23; //These probably need to move to the cosmo params file
   double beta=1.05;
@@ -59,7 +64,9 @@ static double dNdz_sources_k2(double z)
 
 //This is a non-fiducial redshift distribution from Chang et al.
 //Table 2, column corresponding to k=0.5
-static double dNdz_sources_k0pt5(double z)
+// This is unnormalised.
+// static double dNdz_sources_k0pt5
+double dNdz_sources_k0pt5(double z)
 {
   double alpha=1.28; //These probably need to move to the cosmo params file
   double beta=0.97;
@@ -75,20 +82,23 @@ static double dNdz_sources_k0pt5(double z)
 }
 
 //sigma(z) photoz errors for clustering (assuming Gaussian)
-static double sigmaz_clustering(double z)
+//static double sigmaz_clustering(double z)
+double sigmaz_clustering(double z)
 {
   return 0.03*(1.0+z);
 }
 
 //sigma(z) photoz errors for sources
-static double sigmaz_sources(double z)
+//static double sigmaz_sources(double z)
+double sigmaz_sources(double z)
 {
   return 0.05*(1.0+z);
 }
 
 //Bias of the clustering sample
 //What is the purpose of "status"?
-static double bias_clustering(ccl_cosmology * cosmo, double a, int * status)
+//static double bias_clustering(ccl_cosmology * cosmo, double a, int * status)
+double bias_clustering(ccl_cosmology * cosmo, double a, int * status)
 {
   //Growth is currently normalized to 1 today, is this what LSS needs?
   double D = ccl_growth_factor(cosmo, a, status);
