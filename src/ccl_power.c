@@ -12,6 +12,10 @@
 #include "ccl_background.h"
 #include "../class/include/class.h"
 
+/*------ ROUTINE: ccl_cosmology_compute_power_class ----- 
+INPUT: ccl_cosmology * cosmo
+TASK: call CLASS to obtain power spectra
+*/
 
 void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int *status){
 
@@ -29,9 +33,9 @@ void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int *status){
   struct lensing le;
   struct output op;
   ErrorMsg errmsg;            // for error messages 
-  struct file_content fc;   
+  struct file_content fc;
   // generate file_content structure 
-  // CLASS configuration parameters will be passed through this strcuture,
+  // CLASS configuration parameters will be passed through this structure,
   // to avoid writing and reading .ini files for every call
   if (parser_init(&fc,15,"none",errmsg) == _FAILURE_){
     fprintf(stderr,"\n\nparser_init\n=>%s\n",errmsg);
@@ -48,7 +52,7 @@ void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int *status){
   else {strcpy(fc.value[1]," ");}
 
   strcpy(fc.name[2],"P_k_max_1/Mpc");
-  sprintf(fc.value[2],"%e",K_MAX);
+  sprintf(fc.value[2],"%e",K_MAX); //in units of 1/Mpc, corroborated with ccl_constants.h
 
   strcpy(fc.name[3],"z_max_pk");
   sprintf(fc.value[3],"%e",1./A_SPLINE_MIN-1.);
@@ -255,6 +259,11 @@ void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int *status){
 }
 
 
+/*------ ROUTINE: ccl_cosmology_compute_bbks_power ----- 
+INPUT: cosmology
+TASK: provide spline for the BBKS power spectrum with baryonic correction
+*/
+
 void ccl_cosmology_compute_power_bbks(ccl_cosmology * cosmo, int *status){
 
     if (*status){
@@ -325,6 +334,10 @@ void ccl_cosmology_compute_power_bbks(ccl_cosmology * cosmo, int *status){
 
 
 
+/*------ ROUTINE: ccl_cosmology_compute_power ----- 
+INPUT: ccl_cosmology * cosmo
+TASK: compute distances, compute growth, compute power spectrum
+*/
 
 void ccl_cosmology_compute_power(ccl_cosmology * cosmo, int *status){
     if (cosmo->computed_power) return;
@@ -355,6 +368,12 @@ void ccl_cosmology_compute_power(ccl_cosmology * cosmo, int *status){
 }
 
 
+/*------ ROUTINE: ccl_linear_matter_power ----- 
+INPUT: ccl_cosmology * cosmo, a, k [1/Mpc]
+TASK: compute the linear power spectrum at a given redshift
+      by rescaling using the growth function
+*/
+
 double ccl_linear_matter_power(ccl_cosmology * cosmo, double a, double k, int * status){
     ccl_cosmology_compute_power(cosmo, status);
     if (*status) return NAN;
@@ -380,6 +399,13 @@ double ccl_linear_matter_power(ccl_cosmology * cosmo, double a, double k, int * 
     return p;
 }
 
+
+/*------ ROUTINE: ccl_nonlin_matter_power ----- 
+INPUT: ccl_cosmology * cosmo, a, k [1/Mpc]
+TASK: compute the nonlinear power spectrum at a given redshift
+      by rescaling using the growth function
+*/
+
 double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double a, double k, int * status){
     ccl_cosmology_compute_power(cosmo, status);
     if (*status) return NAN;
@@ -404,3 +430,5 @@ double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double a, double k, int * 
     }
     return p;
 }
+
+

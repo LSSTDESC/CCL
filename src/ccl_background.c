@@ -12,23 +12,36 @@
 //TODO: is it worth separating between cases for speed purposes?
 //E.g. flat vs non-flat, LDCM vs wCDM
 //CHANGED: modified this to include non-flat cosmologies
+
+/* --------- ROUTINE: h_over_h0 ---------
+INPUT: scale factor, cosmological parameters
+TASK: Compute E(z)=H(z)/H0
+*/
 static double h_over_h0(double a, ccl_parameters * params)
 {
   return sqrt((params->Omega_m+params->Omega_l*pow(a,-3*(params->w0+params->wa))*
 	       exp(3*params->wa*(a-1))+params->Omega_k*a)/(a*a*a));
 }
 
-static double omega_m(double a,ccl_parameters * params)
+/* --------- ROUTINE: omega_m_z ---------
+INPUT: scale factor, cosmological parameters
+TASK: Compute Omega_m(z)
+*/
+static double omega_m_z(double a,ccl_parameters * params)
 {
   return params->Omega_m/(params->Omega_m+params->Omega_l*pow(a,-3*(params->w0+params->wa))*
 			  exp(3*params->wa*(a-1))+params->Omega_k*a);
 }
 
+/* --------- ROUTINE: chi_integrand ---------
+INPUT: scale factor
+TASK: compute the integrand of the comoving distance
+DAVID: I have changed this to output chi in Mpc, not Mpc/h - cross-check
+*/
 static double chi_integrand(double a, void * cosmo_void)
 {
   ccl_cosmology * cosmo = cosmo_void;
-  //TODO: length units here are Mpc/h
-  return CLIGHT_HMPC/(a*a*h_over_h0(a, &(cosmo->params)));
+  return CLIGHT_HMPC/(cosmo->params.h)/(a*a*h_over_h0(a, &(cosmo->params)));
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -90,11 +103,15 @@ int growth_function_array(double *a, double *table, int na, ccl_parameters * par
 //TODO: check this
 */
 
+/* --------- ROUTINE: growth_ode_system ---------
+INPUT: scale factor
+TASK: Define the ODE system to be solved in order to compute the growth (of the density)
+*/
 static int growth_ode_system(double a,const double y[],double dydt[],void *params)
 {
   ccl_cosmology * cosmo = params;
   double hnorm=h_over_h0(a,&(cosmo->params));
-  double om=omega_m(a,&(cosmo->params));
+  double om=omega_m_z(a,&(cosmo->params));
 
   dydt[0]=y[1]/(a*a*a*hnorm);
   dydt[1]=1.5*hnorm*a*om*y[0];
@@ -102,6 +119,11 @@ static int growth_ode_system(double a,const double y[],double dydt[],void *param
   return GSL_SUCCESS;
 }
 
+
+/* --------- ROUTINE: growth_factor_and_growth_rate ---------
+INPUT: scale factor, cosmology
+TASK: compute the growth (D(z)) and the growth rate, logarithmic derivative (f?)
+*/
 static int growth_factor_and_growth_rate(double a,double *gf,double *fg,ccl_cosmology *cosmo)
 {
   if(a<EPS_SCALEFAC_GROWTH) {
@@ -135,6 +157,11 @@ static int growth_factor_and_growth_rate(double a,double *gf,double *fg,ccl_cosm
     return 0;
   }
 }
+
+/* ----- ROUTINE: ccl_cosmology_compute_distances ------
+INPUT: cosmology
+TASK: if not already there, make a table of comoving distances and of E(a)
+*/
 
 void ccl_cosmology_compute_distances(ccl_cosmology * cosmo, int *status)
 {
@@ -177,7 +204,6 @@ void ccl_cosmology_compute_distances(ccl_cosmology * cosmo, int *status)
 
   //Fill in chi(a)
   //TODO: CQUAD is great, but slower than other methods. This could be sped up if it becomes an issue.
-  //TODO: check length units
   gsl_integration_cquad_workspace * workspace = gsl_integration_cquad_workspace_alloc (1000);
   gsl_function F;
   F.function = &chi_integrand;
@@ -195,7 +221,7 @@ void ccl_cosmology_compute_distances(ccl_cosmology * cosmo, int *status)
   }
 
   gsl_spline * chi = gsl_spline_alloc(A_SPLINE_TYPE, na);
-  *status = gsl_spline_init(chi, a, y, na);
+  *status = gsl_spline_init(chi, a, y, na); //in Mpc
   if (*status){
     free(a);
     free(y);
@@ -214,6 +240,13 @@ void ccl_cosmology_compute_distances(ccl_cosmology * cosmo, int *status)
   free(a);
   free(y);
 }
+
+
+/* ----- ROUTINE: ccl_cosmology_compute_growth ------
+INPUT: cosmology
+TASK: if not already there, make a table of growth function and growth rate
+      normalize growth to input parameter growth0
+*/
 
 void ccl_cosmology_compute_growth(ccl_cosmology * cosmo, int *status)
 {
@@ -289,7 +322,7 @@ void ccl_cosmology_compute_growth(ccl_cosmology * cosmo, int *status)
   return;
 }
 
-// Distance-like function examples
+// Distance-like function examples, all in Mpc
 
 double ccl_comoving_radial_distance(ccl_cosmology * cosmo, double a)
 {
