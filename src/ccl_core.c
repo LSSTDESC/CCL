@@ -60,8 +60,6 @@ INPUT: ccl_parameters: params
 TASK: fill parameters not set by ccl_parameters_create with some initial values
 DEFINITIONS:
 Omega_g = (Omega_g*h^2)/h^2 is the radiation parameter; "g" is for photons, as in CLASS
-DAVID: check omega_g value, I think this is the fiducial for neutrinos, not photons. See
-       the CLASS documentation: https://arxiv.org/pdf/1104.2932v2.pdf
 T_CMB: CMB temperature in Kelvin
 Omega_l: Lambda 
 A_s: amplitude of the primordial PS, enforced here to initially set to NaN
@@ -73,9 +71,8 @@ void ccl_parameters_fill_initial(ccl_parameters *params)
 {
   // Fixed radiation parameters
   // Omega_g * h**2 is known from T_CMB
-  double omega_g = 1.71e-5; 
-  params->Omega_g = omega_g/params->h/params->h;
   params->T_CMB =  2.726;
+  params->Omega_g = M_PI*M_PI*pow((params->T_CMB/11605.),4.)/(15*8.098E-11*params->h*params->h);
 
   // Derived parameters
   params->Omega_l = 1.0 - params->Omega_m - params->Omega_g - params->Omega_n - params->Omega_k;

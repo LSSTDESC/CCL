@@ -18,10 +18,10 @@ TASK: call CLASS to obtain power spectra
 */
 
 void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int *status){
-
-    if (*status){
-        return;
-    }
+  
+  if (*status){
+    return;
+  }
   struct precision pr;        // for precision parameters 
   struct background ba;       // for cosmological background 
   struct thermo th;           // for thermodynamics 
@@ -153,108 +153,108 @@ void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int *status){
      return;
   }
 
- if (spectra_init(&pr,&ba,&pt,&pm,&nl,&tr,&sp) == _FAILURE_) {
-     fprintf(stderr,"\n\nError in spectra_init \n=>%s\n",sp.error_message);
+  if (spectra_init(&pr,&ba,&pt,&pm,&nl,&tr,&sp) == _FAILURE_) {
+    fprintf(stderr,"\n\nError in spectra_init \n=>%s\n",sp.error_message);
     *status = 1;
-     return;
+    return;
   }
 
-    //CLASS calculations done - now allocate CCL splines
-    double kmin = K_MIN;
-    double kmax = K_MAX;
-    int nk = N_K;
-    double amin = A_SPLINE_MIN;
-    double amax = A_SPLINE_MAX;
-    int ak = N_A;
-
-    // The x array is initially k, but will later
-    // be overwritten with log(k)
-    double * x = ccl_log_spacing(kmin, kmax, nk);
-    double * z = malloc(sizeof(double)*nk);
-    //The 2D interpolation routines access the function values y_{a_ik_j} with the following ordering:
-    //y_ij = ya[j*N_a + i]
-    //with i = 0,...,N_a-1 and j = 0,...,N_k-1.
-    double * y = malloc(sizeof(double)*nk);
-
-    if (z==NULL||y==NULL|| x==NULL){
-        fprintf(stderr, "Could not allocate memory for power spectra\n");
-        free(x);
-        free(y);
-        free(z);
-        *status = 1;
-        return;
-    }
-
-    // After this loop x will contain log(k), y will contain log(P_nl), z will contain log(P_lin)
-    // all in Mpc, not Mpc/h units!
-    double Z, ic;
-    int s;
-    for (int i=0; i<nk; i++){
-        s =spectra_pk_at_k_and_z(&ba, &pm, &sp,x[i],0.0, &Z,&ic);
-        z[i] = log(Z);
-        //TODO: add loop over a for P_nl once 2D interpolation works!
-        s = spectra_pk_nl_at_k_and_z(&ba, &pm, &sp,x[i],0.0, &Z);
-        y[i] = log(Z);
-        x[i] = log(x[i]);
-    }
-
-    gsl_spline * log_power_lin = gsl_spline_alloc(K_SPLINE_TYPE, nk);
-    *status = gsl_spline_init(log_power_lin, x, z, nk);
-
-
-    gsl_spline * log_power_nl = gsl_spline_alloc(K_SPLINE_TYPE, nk);
-    *status = gsl_spline_init(log_power_nl, x, y, nk);
-
+  //CLASS calculations done - now allocate CCL splines
+  double kmin = K_MIN;
+  double kmax = K_MAX;
+  int nk = N_K;
+  double amin = A_SPLINE_MIN;
+  double amax = A_SPLINE_MAX;
+  int ak = N_A;
+  
+  // The x array is initially k, but will later
+  // be overwritten with log(k)
+  double * x = ccl_log_spacing(kmin, kmax, nk);
+  double * z = malloc(sizeof(double)*nk);
+  //The 2D interpolation routines access the function values y_{a_ik_j} with the following ordering:
+  //y_ij = ya[j*N_a + i]
+  //with i = 0,...,N_a-1 and j = 0,...,N_k-1.
+  double * y = malloc(sizeof(double)*nk);
+  
+  if (z==NULL||y==NULL|| x==NULL){
+    fprintf(stderr, "Could not allocate memory for power spectra\n");
     free(x);
     free(y);
     free(z);
-
-    cosmo->data.p_lin = log_power_lin;
-    cosmo->data.p_nl = log_power_nl;
-  if (spectra_free(&sp) == _FAILURE_) {
-     fprintf(stderr,"\n\nError in spectra_free \n=>%s\n",sp.error_message);
-     *status = 1;
-     return;
+    *status = 1;
+    return;
   }
-
+  
+  // After this loop x will contain log(k), y will contain log(P_nl), z will contain log(P_lin)
+  // all in Mpc, not Mpc/h units!
+  double Z, ic;
+  int s;
+  for (int i=0; i<nk; i++){
+    s =spectra_pk_at_k_and_z(&ba, &pm, &sp,x[i],0.0, &Z,&ic);
+    z[i] = log(Z);
+    //TODO: add loop over a for P_nl once 2D interpolation works!
+    s = spectra_pk_nl_at_k_and_z(&ba, &pm, &sp,x[i],0.0, &Z);
+    y[i] = log(Z);
+    x[i] = log(x[i]);
+  }
+  
+  gsl_spline * log_power_lin = gsl_spline_alloc(K_SPLINE_TYPE, nk);
+  *status = gsl_spline_init(log_power_lin, x, z, nk);
+  
+  
+  gsl_spline * log_power_nl = gsl_spline_alloc(K_SPLINE_TYPE, nk);
+  *status = gsl_spline_init(log_power_nl, x, y, nk);
+  
+  free(x);
+  free(y);
+  free(z);
+  
+  cosmo->data.p_lin = log_power_lin;
+  cosmo->data.p_nl = log_power_nl;
+  if (spectra_free(&sp) == _FAILURE_) {
+    fprintf(stderr,"\n\nError in spectra_free \n=>%s\n",sp.error_message);
+    *status = 1;
+    return;
+  }
+  
   if (transfer_free(&tr) == _FAILURE_) {
-     fprintf(stderr,"\n\nError in transfer_free \n=>%s\n",tr.error_message);
-     *status = 1;
-     return;
+    fprintf(stderr,"\n\nError in transfer_free \n=>%s\n",tr.error_message);
+    *status = 1;
+    return;
   }
   if (nonlinear_free(&nl) == _FAILURE_) {
     fprintf(stderr,"\n\nError in nonlinear_free \n=>%s\n",nl.error_message);
-     *status = 1;
-     return;
+    *status = 1;
+    return;
   }
-
+  
   if (primordial_free(&pm) == _FAILURE_) {
     fprintf(stderr,"\n\nError in primordial_free \n=>%s\n",pm.error_message);
-     *status = 1;
-     return;
+    *status = 1;
+    return;
   }
-
+  
   if (perturb_free(&pt) == _FAILURE_) {
     fprintf(stderr,"\n\nError in perturb_free \n=>%s\n",pt.error_message);
-     *status = 1;
-     return;
+    *status = 1;
+    return;
   }
-
+  
   if (thermodynamics_free(&th) == _FAILURE_) {
     fprintf(stderr,"\n\nError in thermodynamics_free \n=>%s\n",th.error_message);
-     *status = 1;
-     return;
+    *status = 1;
+    return;
   }
 
   if (background_free(&ba) == _FAILURE_) {
     fprintf(stderr,"\n\nError in background_free \n=>%s\n",ba.error_message);
-     *status = 1;
-     return;
+    *status = 1;
+    return;
   }
   if (parser_free(&fc)== _FAILURE_) {
     fprintf(stderr,"\n\nError in background_free \n=>%s\n",ba.error_message);
-     *status = 1;
-     return;
+    *status = 1;
+    return;
   }
 }
 
@@ -306,8 +306,8 @@ void ccl_cosmology_compute_power_bbks(ccl_cosmology * cosmo, int *status){
     }
     gsl_spline * log_power_lin = gsl_spline_alloc(K_SPLINE_TYPE, nk);
     *status = gsl_spline_init(log_power_lin, x, y, nk);
-    double sigma_8 = ccl_sigma8(log_power_lin, cosmo->params.h, status); //this is sigma_8^2!
-    double log_sigma_8 = log(cosmo->params.sigma_8*cosmo->params.sigma_8) - log(sigma_8);
+    double sigma_8 = ccl_sigma8(log_power_lin, cosmo->params.h, status);
+    double log_sigma_8 = 2*(log(cosmo->params.sigma_8) - log(sigma_8));
     for (int i=0; i<nk; i++){
         y[i] += log_sigma_8;
     }
@@ -430,5 +430,3 @@ double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double a, double k, int * 
     }
     return p;
 }
-
-

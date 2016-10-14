@@ -36,12 +36,11 @@ static double omega_m_z(double a,ccl_parameters * params)
 /* --------- ROUTINE: chi_integrand ---------
 INPUT: scale factor
 TASK: compute the integrand of the comoving distance
-DAVID: I have changed this to output chi in Mpc, not Mpc/h - cross-check
 */
 static double chi_integrand(double a, void * cosmo_void)
 {
   ccl_cosmology * cosmo = cosmo_void;
-  return CLIGHT_HMPC/(cosmo->params.h)/(a*a*h_over_h0(a, &(cosmo->params)));
+  return CLIGHT_HMPC/(a*a*h_over_h0(a, &(cosmo->params)));
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -210,6 +209,7 @@ void ccl_cosmology_compute_distances(ccl_cosmology * cosmo, int *status)
   F.params = cosmo;
   for (int i=0; i<na; i++){
     *status |= gsl_integration_cquad(&F, a[i], 1.0, 0.0,EPSREL_DIST,workspace,&y[i], NULL, NULL); 
+    y[i]/=cosmo->params.h;
   }
   gsl_integration_cquad_workspace_free(workspace);
   if (*status){
