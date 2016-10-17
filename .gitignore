@@ -5,3 +5,4 @@
 tests/ccl_test_distances
 tests/ccl_test_power
 tests/ccl_test_utils
+class/build
