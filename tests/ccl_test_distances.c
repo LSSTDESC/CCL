@@ -87,7 +87,7 @@ int main(int argc, char * argv[]){
 		//double DL_pc = DL*1e6;
 		//double mu = 5*log10(DL_pc)-5;
 		double chi=ccl_comoving_radial_distance(cosmo,a);
-		double gf=ccl_growth_factor(cosmo,a,&st);
+		double gf=ccl_growth_factor(cosmo,a);
 		//double fg=ccl_growth_rate(cosmo,a,&st);
                 diffchi = (chi - chi_comp[i]) / chi_comp[i];
                 diffgf = (gf - gf_comp[i]) / gf_comp[i];

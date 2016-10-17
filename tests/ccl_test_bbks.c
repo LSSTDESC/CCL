@@ -63,9 +63,9 @@ int main(int argc, char * argv[]){
 	ccl_cosmology * cosmo = ccl_cosmology_create(params, default_config);
 
 	int status; 
-        ccl_cosmology_compute_distances(cosmo, &status);
+  // remove this once ccl_power is switched to implicit computation!
 	ccl_cosmology_compute_power_bbks(cosmo, &status); //it should already be normalized to correct sigma_8
-	double D_z0 = ccl_growth_factor(cosmo, 1., &status);
+	double D_z0 = ccl_growth_factor(cosmo, 1.);
 	
         for (int i=0; i<nk ; i++){
 
@@ -75,7 +75,7 @@ int main(int argc, char * argv[]){
 	    
 	    pk_comp[j][i]/=pow(cosmo->params.h,3.);
 	    double a = 1/(1.+z);
-	    double D = ccl_growth_factor(cosmo, a, &status);
+	    double D = ccl_growth_factor(cosmo, a);
 	    status = gsl_spline_eval_e(cosmo->data.p_lin, log(k_comp[i]), NULL,&log_pk_z);
 	    
             pk_z = exp(log_pk_z)*D*D/D_z0/D_z0;
