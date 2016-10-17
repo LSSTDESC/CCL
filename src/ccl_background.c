@@ -1,8 +1,10 @@
 #include "ccl_background.h"
 #include "ccl_utils.h"
+#include "ccl_error.h"
 #include <stdlib.h>
 #include <math.h>
 #include <stdio.h>
+#include <string.h>
 #include "gsl/gsl_errno.h"
 //#include "gsl/gsl_odeiv.h"
 #include "gsl/gsl_odeiv2.h"
@@ -48,7 +50,6 @@ static void growth_factor_and_growth_rate(double a,double *gf,double *fg,ccl_cos
   if(a<EPS_SCALEFAC_GROWTH) {
     *gf=a;
     *fg=1;
-    return 0;
   }
   else {
     double y[2];
@@ -67,12 +68,11 @@ static void growth_factor_and_growth_rate(double a,double *gf,double *fg,ccl_cos
     
     if(status!=GSL_SUCCESS) {
       cosmo->status = 1;
-      cosmo->status_message ="ccl_background.c: growth_factor_and_growth_rate(): ODE for growth factor didn't converge\n";
+      strcpy(cosmo->status_message ,"ccl_background.c: growth_factor_and_growth_rate(): ODE for growth factor didn't converge\n");
     }
     
     *gf=y[0];
     *fg=y[1]/(a*a*h_over_h0(a,&(cosmo->params))*y[0]);
-    ccl_check_status(&cosmo);
   }
 }
 
@@ -90,7 +90,7 @@ void ccl_cosmology_compute_distances(ccl_cosmology * cosmo)
       (a[na-1]>1.0)
       ) {
     cosmo->status = 2;
-    cosmo->status_message ="ccl_background.c: ccl_cosmology_compute_distances(): Error creating linear spacing in a\n";
+    strcpy(cosmo->status_message,"ccl_background.c: ccl_cosmology_compute_distances(): Error creating linear spacing in a\n");
     return;
   }
 
@@ -112,7 +112,7 @@ void ccl_cosmology_compute_distances(ccl_cosmology * cosmo)
     free(y);
     gsl_spline_free(E);
     cosmo->status = 4;
-    cosmo->status_message ="ccl_background.c: ccl_cosmology_compute_distances(): Error creating  E(a) spline\n";
+    strcpy(cosmo->status_message,"ccl_background.c: ccl_cosmology_compute_distances(): Error creating  E(a) spline\n");
     return;
   }
 
@@ -132,7 +132,7 @@ void ccl_cosmology_compute_distances(ccl_cosmology * cosmo)
     free(y);
     gsl_spline_free(E);        
     cosmo->status = 5;
-    cosmo->status_message ="ccl_background.c: ccl_cosmology_compute_distances(): chi(a) integration error \n";
+    strcpy(cosmo->status_message,"ccl_background.c: ccl_cosmology_compute_distances(): chi(a) integration error \n");
     return;
   }
 
@@ -144,7 +144,7 @@ void ccl_cosmology_compute_distances(ccl_cosmology * cosmo)
     gsl_spline_free(E);
     gsl_spline_free(chi);
     cosmo->status = 4;
-    cosmo->status_message ="ccl_background.c: ccl_cosmology_compute_distances(): Error creating  chi(a) spline\n";
+    strcpy(cosmo->status_message,"ccl_background.c: ccl_cosmology_compute_distances(): Error creating  chi(a) spline\n");
     return;
   }
 
@@ -172,7 +172,7 @@ void ccl_cosmology_compute_growth(ccl_cosmology * cosmo)
       (a[na-1]>1.0)
       ) {
     cosmo->status = 2;
-    cosmo->status_message ="ccl_background.c: ccl_cosmology_compute_growth(): Error creating linear spacing in a\n";
+    strcpy(cosmo->status_message,"ccl_background.c: ccl_cosmology_compute_growth(): Error creating linear spacing in a\n");
     fprintf(stderr, "Error creating linear spacing.\n");        
     return;
   }
@@ -190,19 +190,18 @@ void ccl_cosmology_compute_growth(ccl_cosmology * cosmo)
     free(a);
     free(y);
     free(y2);
-    ccl_check_status(&cosmo);
     return;
   }
 
   gsl_spline * growth = gsl_spline_alloc(A_SPLINE_TYPE, na);
   int status = gsl_spline_init(growth, a, y, na);
-  if (*status){
+  if (status){
     free(a);
     free(y);
     free(y2);
     gsl_spline_free(growth);
     cosmo->status = 4;
-    cosmo->status_message ="ccl_background.c: ccl_cosmology_compute_growth(): Error creating D(a) spline\n";
+    strcpy(cosmo->status_message,"ccl_background.c: ccl_cosmology_compute_growth(): Error creating D(a) spline\n");
     return;
   }
   gsl_spline * fgrowth = gsl_spline_alloc(A_SPLINE_TYPE, na);
@@ -214,7 +213,7 @@ void ccl_cosmology_compute_growth(ccl_cosmology * cosmo)
     gsl_spline_free(growth);
     gsl_spline_free(fgrowth);
     cosmo->status = 4;
-    cosmo->status_message ="ccl_background.c: ccl_cosmology_compute_growth(): Error creating f(a) spline\n";
+    strcpy(cosmo->status_message,"ccl_background.c: ccl_cosmology_compute_growth(): Error creating f(a) spline\n");
     return;
   }
 
@@ -239,8 +238,8 @@ void ccl_cosmology_compute_growth(ccl_cosmology * cosmo)
 double ccl_comoving_radial_distance(ccl_cosmology * cosmo, double a)
 {
   if (!cosmo->computed_distances){
-    ccl_cosmology_compute_distances(&cosmo);
-    ccl_check_status(&cosmo);    
+    ccl_cosmology_compute_distances(cosmo);
+    ccl_check_status(cosmo);    
   }
    return gsl_spline_eval(cosmo->data.chi, a, cosmo->data.accelerator);
 }
@@ -248,8 +247,8 @@ double ccl_comoving_radial_distance(ccl_cosmology * cosmo, double a)
 void ccl_comoving_radial_distances(ccl_cosmology * cosmo, int na, double a[na], double output[na])
 {
   if (!cosmo->computed_distances){
-    ccl_cosmology_compute_distances(&cosmo);
-    ccl_check_status(&cosmo);    
+    ccl_cosmology_compute_distances(cosmo);
+    ccl_check_status(cosmo);    
   }
   for (int i=0; i<na; i++){
     output[i]=gsl_spline_eval(cosmo->data.chi,a[i],cosmo->data.accelerator);
@@ -260,8 +259,8 @@ void ccl_comoving_radial_distances(ccl_cosmology * cosmo, int na, double a[na], 
 double ccl_luminosity_distance(ccl_cosmology * cosmo, double a)
 {
   if (!cosmo->computed_distances){
-    ccl_cosmology_compute_distances(&cosmo);
-    ccl_check_status(&cosmo);    
+    ccl_cosmology_compute_distances(cosmo);
+    ccl_check_status(cosmo);    
   }
     return ccl_comoving_radial_distance(cosmo, a) / a;
 }
@@ -270,8 +269,8 @@ double ccl_luminosity_distance(ccl_cosmology * cosmo, double a)
 void ccl_luminosity_distances(ccl_cosmology * cosmo, int na, double a[na], double output[na])
 {
   if (!cosmo->computed_distances){
-    ccl_cosmology_compute_distances(&cosmo);
-    ccl_check_status(&cosmo);    
+    ccl_cosmology_compute_distances(cosmo);
+    ccl_check_status(cosmo);    
   }
   for (int i=0; i<na; i++){
     output[i]=gsl_spline_eval(cosmo->data.chi,a[i],cosmo->data.accelerator)/a[i];
@@ -282,8 +281,8 @@ void ccl_luminosity_distances(ccl_cosmology * cosmo, int na, double a[na], doubl
 double ccl_growth_factor(ccl_cosmology * cosmo, double a)
 {
   if (!cosmo->computed_growth){
-    ccl_cosmology_compute_growth(&cosmo);
-    ccl_check_status(&cosmo);    
+    ccl_cosmology_compute_growth(cosmo);
+    ccl_check_status(cosmo);    
   }
   return gsl_spline_eval(cosmo->data.growth, a, cosmo->data.accelerator);
 }
@@ -291,8 +290,8 @@ double ccl_growth_factor(ccl_cosmology * cosmo, double a)
 void ccl_growth_factors(ccl_cosmology * cosmo, int na, double a[na], double output[na])
 {
   if (!cosmo->computed_growth){
-    ccl_cosmology_compute_growth(&cosmo);
-    ccl_check_status(&cosmo);    
+    ccl_cosmology_compute_growth(cosmo);
+    ccl_check_status(cosmo);    
   }
   for (int i=0; i<na; i++){
     output[i]=gsl_spline_eval(cosmo->data.growth,a[i],cosmo->data.accelerator);
@@ -302,17 +301,17 @@ void ccl_growth_factors(ccl_cosmology * cosmo, int na, double a[na], double outp
 double ccl_growth_factor_unnorm(ccl_cosmology * cosmo, double a)
 {
   if (!cosmo->computed_growth){
-    ccl_cosmology_compute_growth(&cosmo);
-    ccl_check_status(&cosmo);    
+    ccl_cosmology_compute_growth(cosmo);
+    ccl_check_status(cosmo);    
   }
     return cosmo->data.growth0*gsl_spline_eval(cosmo->data.growth, a, cosmo->data.accelerator);
 }
 
-int ccl_growth_factors_unnorm(ccl_cosmology * cosmo, int na, double a[na], double output[na])
+void ccl_growth_factors_unnorm(ccl_cosmology * cosmo, int na, double a[na], double output[na])
 {
   if (!cosmo->computed_growth){
-    ccl_cosmology_compute_growth(&cosmo);
-    ccl_check_status(&cosmo);    
+    ccl_cosmology_compute_growth(cosmo);
+    ccl_check_status(cosmo);    
   }
   for (int i=0; i<na; i++){
     output[i]=cosmo->data.growth0*gsl_spline_eval(cosmo->data.growth,a[i],cosmo->data.accelerator);
@@ -323,17 +322,17 @@ int ccl_growth_factors_unnorm(ccl_cosmology * cosmo, int na, double a[na], doubl
 double ccl_growth_rate(ccl_cosmology * cosmo, double a)
 {
   if (!cosmo->computed_growth){
-    ccl_cosmology_compute_growth(&cosmo);
-    ccl_check_status(&cosmo);    
+    ccl_cosmology_compute_growth(cosmo);
+    ccl_check_status(cosmo);    
   }
     return gsl_spline_eval(cosmo->data.fgrowth, a, cosmo->data.accelerator);
 }
 
-int ccl_growth_rates(ccl_cosmology * cosmo, int na, double a[na], double output[na])
+void ccl_growth_rates(ccl_cosmology * cosmo, int na, double a[na], double output[na])
 {
   if (!cosmo->computed_growth){
-    ccl_cosmology_compute_growth(&cosmo);
-    ccl_check_status(&cosmo);    
+    ccl_cosmology_compute_growth(cosmo);
+    ccl_check_status(cosmo);    
   }
   for (int i=0; i<na; i++){
     output[i]=gsl_spline_eval(cosmo->data.fgrowth,a[i],cosmo->data.accelerator);

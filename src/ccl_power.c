@@ -329,13 +329,7 @@ void ccl_cosmology_compute_power_bbks(ccl_cosmology * cosmo, int *status){
 void ccl_cosmology_compute_power(ccl_cosmology * cosmo, int *status){
     if (cosmo->computed_power) return;
 
-    ccl_cosmology_compute_distances(cosmo, status);
-    ccl_cosmology_compute_growth(cosmo, status);
-
-    if (*status){
-        return;
-    }
-
+   
     switch(cosmo->config.transfer_function_method){
         case ccl_bbks:
             ccl_cosmology_compute_power_bbks(cosmo, status);
@@ -372,7 +366,7 @@ double ccl_linear_matter_power(ccl_cosmology * cosmo, double a, double k, int * 
         return p_1;
     }
 
-    double D = ccl_growth_factor(cosmo, a, status);
+    double D = ccl_growth_factor(cosmo, a);
     double p = D*D*p_1;
     if (*status){
         p = NAN;
@@ -397,7 +391,7 @@ double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double a, double k, int * 
         return p_1;
     }
     // WARNING: NOT CORRECT, but 2d interpolation in gsl is still flaky!
-    double D = ccl_growth_factor(cosmo, a, status);
+    double D = ccl_growth_factor(cosmo, a);
     double p = D*D*p_1;
     if (*status){
         p = NAN;

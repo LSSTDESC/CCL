@@ -75,9 +75,6 @@ int main(int argc, char * argv[]){
         }
 	ccl_cosmology * cosmo = ccl_cosmology_create(params, default_config);
 
-	int status; 
-	ccl_cosmology_compute_distances(cosmo, &status);
-	ccl_cosmology_compute_growth(cosmo, &status);
 
         printf("i_model == %i\n", i_model);
         printf("Omega_v == %lf, w_0 == %lf, w_a == %lf\n", Omega_v[i_model-1], w_0[i_model-1], w_a[i_model-1]);

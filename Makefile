@@ -5,7 +5,7 @@ CFLAGS+=-I/opt/local/include
 LDFLAGS=-L/home/damonge/lib -lgsl -lgslcblas   -lm -Lclass -lclass
 
 
-OBJECTS=src/ccl_core.o src/ccl_utils.o src/ccl_power.o src/ccl_placeholder.o src/ccl_background.o
+OBJECTS=src/ccl_core.o src/ccl_utils.o src/ccl_power.o src/ccl_placeholder.o src/ccl_background.o src/ccl_error.o
 TESTS=tests/ccl_test_utils tests/ccl_test_power tests/ccl_test_distances tests/ccl_test_bbks
 LIB=lib/libccl.a
 DYLIB=lib/libccl.so
