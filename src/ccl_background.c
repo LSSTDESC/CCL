@@ -43,65 +43,6 @@ static double chi_integrand(double a, void * cosmo_void)
   return CLIGHT_HMPC/(a*a*h_over_h0(a, &(cosmo->params)));
 }
 
-//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-// Growth function for w0-wa models  - PLACEHOLDER CODE!
-//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-//CHANGED: generalized to non-flat cosmologies
-
-/*
-//function for growfac (DGL)
-int growth_integrand(double a,const double y[],double f[],void *params)
-{
-    double *p=(double *)params;
-    if (a == 0) {
-        fprintf(stderr, "a=0 in function 'func_for_growfac'!\n");
-        return 1;
-    }
-    double aa=a*a;
-    double omegam=p[0]/(aa*a);
-    double omegav=p[1]*exp(-3.*((p[2]+p[3]+1)*log(a)+p[3]*(1.-a)));
-    double hub=omegam+(1-p[0]-p[1])/(a*a)+omegav;
-    f[0]=y[1];
-    f[1]=y[0]*3.*p[0]/(2.*hub*aa*aa*a)-y[1]/a*(2.-(omegam+(3.*(p[2]+p[3]*(1.-a))+1)*omegav)/(2.*hub));
-    return GSL_SUCCESS;
-}
-//TODO: check this
-
-static
-int growth_function_array(double *a, double *table, int na, ccl_parameters * params)
-{
-  
-    const gsl_odeiv_step_type *T=gsl_odeiv_step_rkf45;
-    gsl_odeiv_step *s=gsl_odeiv_step_alloc(T,2);
-    gsl_odeiv_control *c=gsl_odeiv_control_y_new(1.e-6,0.0);
-    gsl_odeiv_evolve *e=gsl_odeiv_evolve_alloc(2);
-
-    double t=1e-6;            //start a
-    double h=1.e-6;           //initial step size
-    double y[2]={t,t};        //initial conditions
-    double par[4]={params->Omega_m,params->Omega_l,params->w0,params->wa};
-    gsl_odeiv_system sys={growth_integrand,NULL,2,&par};
-    int status = 0;
-    for (int i=0; i<na; i++) {
-        while(t<a[i]){
-            status |= gsl_odeiv_evolve_apply(e,c,s,&sys,&t,a[i],&h,y);
-            if (status) break;
-        }
-        table[i]=y[0];
-    }
-    for (int i=0; i<na; i++) {
-        table[i] /= table[na-1];
-    }    
-    gsl_odeiv_evolve_free(e);
-    gsl_odeiv_control_free(c);
-    gsl_odeiv_step_free(s);
-
-  return status;
-}
-//TODO: check this
-*/
-
 /* --------- ROUTINE: growth_ode_system ---------
 INPUT: scale factor
 TASK: Define the ODE system to be solved in order to compute the growth (of the density)
@@ -118,6 +59,20 @@ static int growth_ode_system(double a,const double y[],double dydt[],void *param
   return GSL_SUCCESS;
 }
 
+/* --------- ROUTINE: df_integrand ---------
+INPUT: scale factor, spline object
+TASK: Compute integrand from modified growth function
+*/
+static double df_integrand(double a,void * spline_void)
+{
+  if(a<=0)
+    return 0;
+  else {
+    gsl_spline *df_a_spline=(gsl_spline *)spline_void;
+    
+    return gsl_spline_eval(df_a_spline,a,NULL)/a;
+  }
+}
 
 /* --------- ROUTINE: growth_factor_and_growth_rate ---------
 INPUT: scale factor, cosmology
@@ -266,6 +221,53 @@ void ccl_cosmology_compute_growth(ccl_cosmology * cosmo, int *status)
     return;
   }
 
+  gsl_integration_cquad_workspace * workspace=NULL;
+  gsl_function F;
+  gsl_spline *df_a_spline=NULL;
+  if(cosmo->params.has_mgrowth) {
+    double *df_arr=malloc(na*sizeof(double));
+    //Generate spline for Delta f(z) that we will then interpolate into an array of a
+    gsl_spline *df_z_spline=gsl_spline_alloc(A_SPLINE_TYPE,cosmo->params.nz_mgrowth);
+    *status=gsl_spline_init(df_z_spline,cosmo->params.z_mgrowth,cosmo->params.df_mgrowth,
+			    cosmo->params.nz_mgrowth);
+    if(*status) {
+      free(a);
+      free(df_arr);
+      gsl_spline_free(df_z_spline);
+      fprintf(stderr,"Error creating MG spline\n");
+    }
+    for (int i=0; i<na; i++){
+      if(a[i]>0) {
+	double z=1./a[i]-1.;
+	if(z<=cosmo->params.z_mgrowth[0]) 
+	  df_arr[i]=cosmo->params.df_mgrowth[0];
+	else if(z>cosmo->params.z_mgrowth[cosmo->params.nz_mgrowth-1]) 
+	  df_arr[i]=cosmo->params.df_mgrowth[cosmo->params.nz_mgrowth-1];
+	else
+	  df_arr[i]=gsl_spline_eval(df_z_spline,z,NULL);
+      }
+      else
+	df_arr[i]=0;
+    }
+    gsl_spline_free(df_z_spline);
+
+    //Generate Delta(f) spline
+    df_a_spline=gsl_spline_alloc(A_SPLINE_TYPE,na);
+    *status=gsl_spline_init(df_a_spline,a,df_arr,na);
+    if (*status){
+      free(a);
+      free(df_arr);
+      gsl_spline_free(df_a_spline);
+      fprintf(stderr, "Error creating MG spline\n");
+      return;
+    }
+    free(df_arr);
+
+    workspace=gsl_integration_cquad_workspace_alloc(1000);
+    F.function=&df_integrand;
+    F.params=df_a_spline;
+  }
+
   // allocate space for y, which will be all three
   // of E(a), chi(a), D(a) and f(a) in turn.
   double growth0,fgrowth0;
@@ -274,14 +276,33 @@ void ccl_cosmology_compute_growth(ccl_cosmology * cosmo, int *status)
   growth_factor_and_growth_rate(1.,&growth0,&fgrowth0,cosmo);
   for (int i=0; i<na; i++){
     *status |= growth_factor_and_growth_rate(a[i],&(y[i]),&(y2[i]),cosmo);
+    if(cosmo->params.has_mgrowth) {
+      if(a[i]>0) {
+	double df,integ;
+	//Add modification to f
+	df=gsl_spline_eval(df_a_spline,a[i],NULL);
+	y2[i]+=df;
+	//Multiply D by exp(-int(df))
+	*status |= gsl_integration_cquad(&F,a[i],1.0,0.0,EPSREL_DIST,workspace,&integ,NULL,NULL);
+	y[i]*=exp(-integ);
+      }
+    }
     y[i]/=growth0;
   }
   if (*status){
     free(a);
     free(y);
     free(y2);
+    if(df_a_spline!=NULL)
+      gsl_spline_free(df_a_spline);
+    if(workspace!=NULL)
+      gsl_integration_cquad_workspace_free(workspace);
     fprintf(stderr, "Error creating growth array\n");
     return;
+  }
+  if(cosmo->params.has_mgrowth) {
+    gsl_spline_free(df_a_spline);
+    gsl_integration_cquad_workspace_free(workspace);
   }
 
   gsl_spline * growth = gsl_spline_alloc(A_SPLINE_TYPE, na);
