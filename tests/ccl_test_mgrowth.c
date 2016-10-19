@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include <math.h>
 
+//This test code compares the modified growth function computed by CCL
+//against the exact result for a particular modification of the growth rate.
 int main(int argc, char * argv[])
 {
   int status=0;
@@ -26,6 +28,9 @@ int main(int argc, char * argv[])
   ccl_cosmology_compute_growth(cosmo1,&status);
   ccl_cosmology_compute_growth(cosmo2,&status);
 
+  //We have included a growth modification \delta f = K*a (with K==0.1 arbitrarily)
+  //This case has an analytic solution, given by D(a) = D_0(a)*exp(K*(a-1))
+  //Here we check the growth computed by the library with the analytic solution.
   for(ii=0;ii<nz_mg;ii++) {
     double a=1./(1+z_mg[ii]);
     double d1=ccl_growth_factor(cosmo1,a,&status);
