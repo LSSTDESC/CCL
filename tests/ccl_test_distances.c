@@ -81,8 +81,8 @@ static void compare_distances(int model, struct distances_data * data)
 	// Make the parameter set from the input data
 	// Values of some parameters depend on the model index
 	ccl_parameters params = ccl_parameters_create(data->Omega_c, data->Omega_b, 
-		data->Omega_k[model], data->Omega_n, 
-		data->w_0[model], data->w_a[model], data->h, data->A_s, data->n_s);
+						      data->Omega_k[model], data->Omega_n, 
+						      data->w_0[model], data->w_a[model], data->h, data->A_s, data->n_s,-1,NULL,NULL);
 
 	// Make a cosmology object from the parameters with the default configuration
 	ccl_cosmology * cosmo = ccl_cosmology_create(params, default_config);

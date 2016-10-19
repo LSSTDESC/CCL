@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <stdio.h>
+#include <string.h>
 #include "gsl/gsl_errno.h"
 #include "gsl/gsl_odeiv.h"
 #include "gsl/gsl_spline.h"
@@ -81,7 +82,6 @@ void ccl_parameters_fill_initial(ccl_parameters *params)
   if (isfinite(params->A_s)){params->sigma_8 = NAN;}
   if (isfinite(params->sigma_8)){params->A_s = NAN;}
   params->z_star = NAN;
-
 }
 
 /* ------ ROUTINE: ccl_parameters_create -------
@@ -102,7 +102,7 @@ A_s: amplitude of the primordial PS
 n_s: index of the primordial PS
  */
 
-ccl_parameters ccl_parameters_create(double Omega_c, double Omega_b, double Omega_k, double Omega_n, double w0, double wa, double h, double A_s, double n_s){
+ccl_parameters ccl_parameters_create(double Omega_c, double Omega_b, double Omega_k, double Omega_n, double w0, double wa, double h, double A_s, double n_s,int nz_mgrowth,double *zarr_mgrowth,double *dfarr_mgrowth){
   ccl_parameters params;
   params.sigma_8 = NAN;
   params.A_s = NAN;
@@ -126,6 +126,22 @@ ccl_parameters ccl_parameters_create(double Omega_c, double Omega_b, double Omeg
 
   // Set remaining standard and easily derived parameters
   ccl_parameters_fill_initial(&params);
+
+  //Trigger modified growth function if nz>0
+  if(nz_mgrowth>0) {
+    params.has_mgrowth=true;
+    params.nz_mgrowth=nz_mgrowth;
+    params.z_mgrowth=malloc(params.nz_mgrowth*sizeof(double));
+    params.df_mgrowth=malloc(params.nz_mgrowth*sizeof(double));
+    memcpy(params.z_mgrowth,zarr_mgrowth,params.nz_mgrowth*sizeof(double));
+    memcpy(params.df_mgrowth,dfarr_mgrowth,params.nz_mgrowth*sizeof(double));
+  }
+  else {
+    params.has_mgrowth=false;
+    params.nz_mgrowth=0;
+    params.z_mgrowth=NULL;
+    params.df_mgrowth=NULL;
+  }
   
   return params;  
 }
@@ -141,7 +157,7 @@ ccl_parameters ccl_parameters_create_flat_lcdm(double Omega_c, double Omega_b, d
   double Omega_n = 0.0;
   double w0 = -1.0;
   double wa = 0.0;
-  ccl_parameters params = ccl_parameters_create(Omega_c, Omega_b, Omega_k, Omega_n, w0, wa, h, A_s, n_s);
+  ccl_parameters params = ccl_parameters_create(Omega_c, Omega_b, Omega_k, Omega_n, w0, wa, h, A_s, n_s, -1, NULL, NULL);
   return params;
 
 }
@@ -157,7 +173,7 @@ ccl_parameters ccl_parameters_create_lcdm(double Omega_c, double Omega_b, double
   double Omega_n = 0.0;
   double w0 = -1.0;
   double wa = 0.0;
-  ccl_parameters params = ccl_parameters_create(Omega_c, Omega_b, Omega_k, Omega_n, w0, wa, h, A_s, n_s);
+  ccl_parameters params = ccl_parameters_create(Omega_c, Omega_b, Omega_k, Omega_n, w0, wa, h, A_s, n_s,-1,NULL,NULL);
   return params;
 
 }
@@ -175,7 +191,7 @@ ccl_parameters ccl_parameters_create_flat_wcdm(double Omega_c, double Omega_b, d
   double Omega_k = 0.0;
   double Omega_n = 0.0;
   double wa = 0.0;
-  ccl_parameters params = ccl_parameters_create(Omega_c, Omega_b, Omega_k, Omega_n, w0, wa, h, A_s, n_s);
+  ccl_parameters params = ccl_parameters_create(Omega_c, Omega_b, Omega_k, Omega_n, w0, wa, h, A_s, n_s,-1,NULL,NULL);
   return params;
 }
 
@@ -190,7 +206,7 @@ ccl_parameters ccl_parameters_create_flat_wacdm(double Omega_c, double Omega_b, 
 
   double Omega_k = 0.0;
   double Omega_n = 0.0;
-  ccl_parameters params = ccl_parameters_create(Omega_c, Omega_b, Omega_k, Omega_n, w0, wa, h, A_s, n_s);
+  ccl_parameters params = ccl_parameters_create(Omega_c, Omega_b, Omega_k, Omega_n, w0, wa, h, A_s, n_s,-1,NULL,NULL);
   return params;
 }
 
