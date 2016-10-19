@@ -3,11 +3,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+/* ------- ROUTINE: ccl_linear spacing ------
+INPUTS: [xmin,xmax] of the interval to be divided in bins of width dx
+TASK: divide an interval in even bins of width dx; if this doesn't result in even bins, then ?
+OUTPUT: bin edges in range [xmin,xmax]
+*/
 
 double * ccl_linear_spacing(double xmin, double xmax, double dx, int * N){
     int n = trunc((xmax-xmin)/dx) + 1;
-
-    if (fabs(1-(xmax-xmin)/((n-1)*dx))>0.001){
+    //is 0.001 this sufficient for our purposes? why not use n as input and determine dx?
+    if (fabs(1-(xmax-xmin)/((n-1)*dx))>0.001){ 
         *N = 0;
         fprintf(stderr, "ERROR: Could not evenly divide range [%le, %le] with dx=%le\n", xmin, xmax, dx);
         return NULL;
@@ -27,6 +32,12 @@ double * ccl_linear_spacing(double xmin, double xmax, double dx, int * N){
 
     return x;
 }
+
+/* ------- ROUTINE: ccl_log spacing ------
+INPUTS: [xmin,xmax] of the interval to be divided logarithmically in N bins
+TASK: divide an interval in N logarithmic bins
+OUTPUT: bin edges in range [xmin,xmax]
+*/
 
 double * ccl_log_spacing(double xmin, double xmax, int N){
 

@@ -54,7 +54,7 @@ int main(int argc, char * argv[]){
 	
         if(i_model > 1){
           Omega_k = 1.0 - Omega_c - Omega_b - Omega_n - Omega_v[i_model-1];
-          params = ccl_parameters_create(Omega_c, Omega_b, Omega_k, Omega_n, w_0[i_model-1], w_a[i_model-1], h, A_s, n_s);
+          params = ccl_parameters_create(Omega_c, Omega_b, Omega_k, Omega_n, w_0[i_model-1], w_a[i_model-1], h, A_s, n_s,-1,NULL,NULL);
         }
 	
 	//overwritting sigma_8 for this test only
