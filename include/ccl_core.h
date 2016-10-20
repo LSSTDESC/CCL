@@ -51,12 +51,13 @@ typedef struct ccl_data{
   gsl_spline * growth;
   gsl_spline * fgrowth;
   gsl_spline * E;
+  gsl_spline * achi;
 
   // All these splines use the same accelerator so that
   // if one calls them successively with the same a value
   // they will be much faster.
   gsl_interp_accel *accelerator;
-  //TODO: why not use interpolation accelerators?
+  gsl_interp_accel *accelerator_achi;
 
   // Function of Halo mass M
   gsl_spline * sigma;

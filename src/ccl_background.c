@@ -8,6 +8,7 @@
 #include "gsl/gsl_odeiv2.h"
 #include "gsl/gsl_spline.h"
 #include "gsl/gsl_integration.h"
+#include "gsl/gsl_roots.h"
 
 //TODO: is it worth separating between cases for speed purposes?
 //E.g. flat vs non-flat, LDCM vs wCDM
@@ -112,6 +113,85 @@ static int growth_factor_and_growth_rate(double a,double *gf,double *fg,ccl_cosm
   }
 }
 
+/* --------- ROUTINE: compute_chi ---------
+INPUT: scale factor, cosmology
+OUTPUT: chi -> radial comoving distance
+TASK: compute radial comoving distance at a
+*/
+static int compute_chi(double a,ccl_cosmology *cosmo,double *chi)
+{
+  int status;
+  double result;
+  gsl_integration_cquad_workspace * workspace = gsl_integration_cquad_workspace_alloc (1000);
+  gsl_function F;
+  F.function = &chi_integrand;
+  F.params = cosmo;
+  //TODO: CQUAD is great, but slower than other methods. This could be sped up if it becomes an issue.
+  status=gsl_integration_cquad(&F, a, 1.0, 0.0,EPSREL_DIST,workspace,&result, NULL, NULL); 
+  *chi=result/cosmo->params.h;
+  gsl_integration_cquad_workspace_free(workspace);
+  return status;
+}
+
+//Root finding for a(chi)
+typedef struct {
+  double chi;
+  ccl_cosmology *cosmo;
+} Fpar;
+
+static double fzero(double a,void *params)
+{
+  double chi,chia,a_use=a;
+  chi=((Fpar *)params)->chi;
+  compute_chi(a_use,((Fpar *)params)->cosmo,&chia);
+
+  return chi-chia;
+}
+
+static double dfzero(double a,void *params)
+{
+  ccl_cosmology *cosmo=((Fpar *)params)->cosmo;
+  
+  return chi_integrand(a,cosmo)/cosmo->params.h;
+}
+
+static void fdfzero(double a,void *params,double *f,double *df)
+{
+  *f=fzero(a,params);
+  *df=dfzero(a,params);
+}
+
+static double a_of_chi(double chi,ccl_cosmology *cosmo,double *a_old,gsl_root_fdfsolver *s)
+{
+  if(chi==0)
+    return 1.;
+  else {
+    Fpar p;
+    gsl_function_fdf FDF;
+    double a_previous,a_current=*a_old;
+
+    p.cosmo=cosmo;
+    p.chi=chi;
+    FDF.f=&fzero;
+    FDF.df=&dfzero;
+    FDF.fdf=&fdfzero;
+    FDF.params=&p;
+    gsl_root_fdfsolver_set(s,&FDF,a_current);
+
+    int iter=0,status;
+    do {
+      iter++;
+      status=gsl_root_fdfsolver_iterate(s);
+      a_previous=a_current;
+      a_current=gsl_root_fdfsolver_root(s);
+      status=gsl_root_test_delta(a_current,a_previous,1E-6,0);
+    } while(status==GSL_CONTINUE);
+
+    *a_old=a_current;
+    return a_current;
+  }
+}
+
 /* ----- ROUTINE: ccl_cosmology_compute_distances ------
 INPUT: cosmology
 TASK: if not already there, make a table of comoving distances and of E(a)
@@ -137,7 +217,7 @@ void ccl_cosmology_compute_distances(ccl_cosmology * cosmo, int *status)
 
   // allocate space for y, which will be all three
   // of E(a), chi(a), D(a) and f(a) in turn.
-  double *y = malloc(sizeof(double)*na);
+  double *y = malloc(sizeof(double)*na); //TODO: check for bad allocation
 
   // Fill in E(a)
   for (int i=0; i<na; i++){
@@ -157,16 +237,8 @@ void ccl_cosmology_compute_distances(ccl_cosmology * cosmo, int *status)
   }
 
   //Fill in chi(a)
-  //TODO: CQUAD is great, but slower than other methods. This could be sped up if it becomes an issue.
-  gsl_integration_cquad_workspace * workspace = gsl_integration_cquad_workspace_alloc (1000);
-  gsl_function F;
-  F.function = &chi_integrand;
-  F.params = cosmo;
-  for (int i=0; i<na; i++){
-    *status |= gsl_integration_cquad(&F, a[i], 1.0, 0.0,EPSREL_DIST,workspace,&y[i], NULL, NULL); 
-    y[i]/=cosmo->params.h;
-  }
-  gsl_integration_cquad_workspace_free(workspace);
+  for (int i=0; i<na; i++)
+    *status |= compute_chi(a[i],cosmo,&(y[i]));
   if (*status){
     free(a);
     free(y);
@@ -186,10 +258,54 @@ void ccl_cosmology_compute_distances(ccl_cosmology * cosmo, int *status)
     return;
   }
 
+  //Spline for a(chi)
+  double dchi=3.,chi0=y[na-1],chif=y[0],a0=a[na-1],af=a[0];
+  //TODO: The interval in chi (3. Mpc) should probably be made a macro
+  free(y); free(a);
+  na=(int)((chif-chi0)/dchi); dchi=(chif-chi0)/na; na=0;
+  y=ccl_linear_spacing(chi0,chif,dchi,&na);
+  if(y==NULL || (fabs(y[0]-chi0)>1E-5) || (fabs(y[na-1]-chif)>1e-5)) {
+    fprintf(stderr,"Error creating linear spacing\n");
+    *status=1;
+    gsl_spline_free(E);
+    gsl_spline_free(chi);
+    return;
+  }
+  a=malloc(sizeof(double)*na);
+  if(a==NULL) {
+    fprintf(stderr,"Out of memory\n");
+    *status=1;
+    free(y);
+    gsl_spline_free(E);
+    gsl_spline_free(chi);
+    return;
+  }
+  a[0]=a0; a[na-1]=af;
+  const gsl_root_fdfsolver_type *T=gsl_root_fdfsolver_newton;
+  gsl_root_fdfsolver *s=gsl_root_fdfsolver_alloc(T);
+  for(int i=1;i<na-1;i++) {
+    a[i]=a_of_chi(y[i],cosmo,&a0,s);
+  }
+  gsl_root_fdfsolver_free(s);
+  //TODO: check for errors in solver
+  gsl_spline * achi=gsl_spline_alloc(A_SPLINE_TYPE,na);
+  *status=gsl_spline_init(achi,y,a,na);
+  if(*status) {
+    fprintf(stderr,"Out of memory\n");
+    *status=1;
+    free(y);
+    free(a);
+    gsl_spline_free(E);
+    gsl_spline_free(chi);
+    gsl_spline_free(achi);
+    return;
+  }
+
   if(cosmo->data.accelerator==NULL)
     cosmo->data.accelerator=gsl_interp_accel_alloc();
   cosmo->data.E = E;
   cosmo->data.chi = chi;
+  cosmo->data.achi=achi;
   cosmo->computed_distances = true;
   
   free(a);
@@ -269,7 +385,7 @@ void ccl_cosmology_compute_growth(ccl_cosmology * cosmo, int *status)
   }
 
   // allocate space for y, which will be all three
-  // of E(a), chi(a), D(a) and f(a) in turn.
+  // of D(a) and f(a) in turn.
   double growth0,fgrowth0;
   double *y = malloc(sizeof(double)*na);
   double *y2 = malloc(sizeof(double)*na);
@@ -331,6 +447,8 @@ void ccl_cosmology_compute_growth(ccl_cosmology * cosmo, int *status)
   // assign all the splines we've just made to the structure.
   if(cosmo->data.accelerator==NULL)
     cosmo->data.accelerator=gsl_interp_accel_alloc();
+  if(cosmo->data.accelerator_achi==NULL)
+    cosmo->data.accelerator_achi=gsl_interp_accel_alloc();
   cosmo->data.growth = growth;
   cosmo->data.fgrowth = fgrowth;
   cosmo->data.growth0 = growth0;
@@ -341,6 +459,22 @@ void ccl_cosmology_compute_growth(ccl_cosmology * cosmo, int *status)
   free(y2);
 
   return;
+}
+
+//Expansion rate normalized to 1 today
+
+double ccl_h_over_h0(ccl_cosmology * cosmo, double a)
+{
+   return gsl_spline_eval(cosmo->data.E, a, cosmo->data.accelerator);
+}
+
+int ccl_h_over_h0s(ccl_cosmology * cosmo, int na, double a[na], double output[na])
+{
+  for (int i=0; i<na; i++){
+    output[i]=gsl_spline_eval(cosmo->data.E,a[i],cosmo->data.accelerator);
+  }
+
+  return 0;
 }
 
 // Distance-like function examples, all in Mpc
@@ -420,6 +554,17 @@ int ccl_growth_rates(ccl_cosmology * cosmo, int na, double a[na], double output[
 }
 //TODO: do this
 
+//Scale factor for a given distance
+double ccl_scale_factor_of_chi(ccl_cosmology * cosmo, double chi)
+{
+  return gsl_spline_eval(cosmo->data.achi, chi,cosmo->data.accelerator_achi);
+}
 
-// Power function examples
+int ccl_scale_factor_of_chis(ccl_cosmology * cosmo, int nchi, double chi[nchi], double output[nchi])
+{
+  for (int i=0; i<nchi; i++) {
+    output[i]=gsl_spline_eval(cosmo->data.achi,chi[i],cosmo->data.accelerator_achi);
+  }
 
+  return 0;
+}

@@ -147,6 +147,7 @@ void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int *status){
     *status = 1;
     return;
   }
+
   if (transfer_init(&pr,&ba,&th,&pt,&nl,&tr) == _FAILURE_) {
      fprintf(stderr,"\n\nError in transfer_init \n=>%s\n",tr.error_message);
     *status = 1;
