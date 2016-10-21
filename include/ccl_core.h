@@ -33,6 +33,12 @@ typedef struct ccl_parameters {
     double Omega_l;
     double z_star;
 
+    //Modified growth rate
+  bool has_mgrowth;
+  int nz_mgrowth;
+  double *z_mgrowth;
+  double *df_mgrowth;
+
 } ccl_parameters;
 
 
@@ -85,7 +91,7 @@ ccl_cosmology * ccl_cosmology_create(ccl_parameters params, ccl_configuration co
 
 // User-facing creation routines
 // Most general case
-ccl_parameters ccl_parameters_create(double Omega_c, double Omega_b, double Omega_k, double Omega_n, double w0, double wa, double h, double A_s, double n_s);
+ccl_parameters ccl_parameters_create(double Omega_c, double Omega_b, double Omega_k, double Omega_n, double w0, double wa, double h, double A_s, double n_s,int nz_mgrowth,double *zarr_mgrowth,double *dfarr_mgrowth);
 // Specific sub-models
 ccl_parameters ccl_parameters_create_flat_lcdm(double Omega_c, double Omega_b, double h, double A_s, double n_s);
 ccl_parameters ccl_parameters_create_flat_wcdm(double Omega_c, double Omega_b, double w0, double h, double A_s, double n_s);
