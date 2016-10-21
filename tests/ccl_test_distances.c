@@ -88,12 +88,6 @@ static void compare_distances(int model, struct distances_data * data)
 	ccl_cosmology * cosmo = ccl_cosmology_create(params, default_config);
 	ASSERT_NOT_NULL(cosmo);
 
-	// Compute the distance splines we will be testing here.
-	int status;
-	ccl_cosmology_compute_distances(cosmo, &status);
-	ASSERT_EQUAL(0, status);
-
-
 	// Compare to benchmark data
 	for (int j=0; j<6; j++){
 		double a = 1/(1.+data->z[j]);

@@ -1,8 +1,10 @@
 #include "ccl_background.h"
 #include "ccl_utils.h"
+#include "ccl_error.h"
 #include <stdlib.h>
 #include <math.h>
 #include <stdio.h>
+#include <string.h>
 #include "gsl/gsl_errno.h"
 //#include "gsl/gsl_odeiv.h"
 #include "gsl/gsl_odeiv2.h"
@@ -83,7 +85,7 @@ static void growth_factor_and_growth_rate(double a,double *gf,double *fg,ccl_cos
   if(a<EPS_SCALEFAC_GROWTH) {
     *gf=a;
     *fg=1;
-    return 0;
+    return;
   }
   else {
     double y[2];
@@ -315,8 +317,8 @@ void ccl_cosmology_compute_growth(ccl_cosmology * cosmo)
   }
 
   gsl_spline * growth = gsl_spline_alloc(A_SPLINE_TYPE, na);
-  *status = gsl_spline_init(growth, a, y, na);
-  if (*status){
+  status = gsl_spline_init(growth, a, y, na);
+  if (status){
     free(a);
     free(y);
     free(y2);
@@ -326,8 +328,8 @@ void ccl_cosmology_compute_growth(ccl_cosmology * cosmo)
     return;
   }
   gsl_spline * fgrowth = gsl_spline_alloc(A_SPLINE_TYPE, na);
-  *status = gsl_spline_init(fgrowth, a, y2, na);
-  if (*status){
+  status = gsl_spline_init(fgrowth, a, y2, na);
+  if (status){
     free(a);
     free(y);
     free(y2);
@@ -365,7 +367,7 @@ double ccl_comoving_radial_distance(ccl_cosmology * cosmo, double a)
    return gsl_spline_eval(cosmo->data.chi, a, cosmo->data.accelerator);
 }
 
-int ccl_comoving_radial_distances(ccl_cosmology * cosmo, int na, double a[na], double output[na])
+void ccl_comoving_radial_distances(ccl_cosmology * cosmo, int na, double a[na], double output[na])
 {  
   if (!cosmo->computed_distances){
     ccl_cosmology_compute_distances(cosmo);
@@ -374,8 +376,6 @@ int ccl_comoving_radial_distances(ccl_cosmology * cosmo, int na, double a[na], d
   for (int i=0; i<na; i++){
     output[i]=gsl_spline_eval(cosmo->data.chi,a[i],cosmo->data.accelerator);
   }
-
-  return 0;
 }
 //TODO: do this
 
@@ -389,7 +389,7 @@ double ccl_luminosity_distance(ccl_cosmology * cosmo, double a)
 }
 //TODO: this is not valid for curved cosmologies
 
-int ccl_luminosity_distances(ccl_cosmology * cosmo, int na, double a[na], double output[na])
+void ccl_luminosity_distances(ccl_cosmology * cosmo, int na, double a[na], double output[na])
 {
   if (!cosmo->computed_distances){
     ccl_cosmology_compute_distances(cosmo);
@@ -398,12 +398,10 @@ int ccl_luminosity_distances(ccl_cosmology * cosmo, int na, double a[na], double
   for (int i=0; i<na; i++){
     output[i]=gsl_spline_eval(cosmo->data.chi,a[i],cosmo->data.accelerator)/a[i];
   }
-
-  return 0;
 }
 //TODO: do this
 
-double ccl_growth_factor(ccl_cosmology * cosmo, double a, int * status)
+double ccl_growth_factor(ccl_cosmology * cosmo, double a)
 {
   if (!cosmo->computed_growth){
     ccl_cosmology_compute_growth(cosmo);
@@ -412,7 +410,7 @@ double ccl_growth_factor(ccl_cosmology * cosmo, double a, int * status)
     return gsl_spline_eval(cosmo->data.growth, a, cosmo->data.accelerator);
 }
 
-int ccl_growth_factors(ccl_cosmology * cosmo, int na, double a[na], double output[na])
+void ccl_growth_factors(ccl_cosmology * cosmo, int na, double a[na], double output[na])
 {
   if (!cosmo->computed_growth){
     ccl_cosmology_compute_growth(cosmo);
@@ -422,11 +420,9 @@ int ccl_growth_factors(ccl_cosmology * cosmo, int na, double a[na], double outpu
   for (int i=0; i<na; i++){
     output[i]=gsl_spline_eval(cosmo->data.growth,a[i],cosmo->data.accelerator);
   }
-
-  return 0;
 }
 
-double ccl_growth_factor_unnorm(ccl_cosmology * cosmo, double a, int * status)
+double ccl_growth_factor_unnorm(ccl_cosmology * cosmo, double a)
 {
   if (!cosmo->computed_growth){
     ccl_cosmology_compute_growth(cosmo);
@@ -435,7 +431,7 @@ double ccl_growth_factor_unnorm(ccl_cosmology * cosmo, double a, int * status)
     return cosmo->data.growth0*gsl_spline_eval(cosmo->data.growth, a, cosmo->data.accelerator);
 }
 
-int ccl_growth_factors_unnorm(ccl_cosmology * cosmo, int na, double a[na], double output[na])
+void ccl_growth_factors_unnorm(ccl_cosmology * cosmo, int na, double a[na], double output[na])
 {
   if (!cosmo->computed_growth){
     ccl_cosmology_compute_growth(cosmo);
@@ -444,12 +440,10 @@ int ccl_growth_factors_unnorm(ccl_cosmology * cosmo, int na, double a[na], doubl
   for (int i=0; i<na; i++){
     output[i]=cosmo->data.growth0*gsl_spline_eval(cosmo->data.growth,a[i],cosmo->data.accelerator);
   }
-
-  return 0;
 }
 //TODO: do this
 
-double ccl_growth_rate(ccl_cosmology * cosmo, double a, int * status)
+double ccl_growth_rate(ccl_cosmology * cosmo, double a)
 {
   if (!cosmo->computed_growth){
     ccl_cosmology_compute_growth(cosmo);
@@ -458,7 +452,7 @@ double ccl_growth_rate(ccl_cosmology * cosmo, double a, int * status)
     return gsl_spline_eval(cosmo->data.fgrowth, a, cosmo->data.accelerator);
 }
 
-int ccl_growth_rates(ccl_cosmology * cosmo, int na, double a[na], double output[na])
+void ccl_growth_rates(ccl_cosmology * cosmo, int na, double a[na], double output[na])
 {
   if (!cosmo->computed_growth){
     ccl_cosmology_compute_growth(cosmo);
@@ -467,6 +461,4 @@ int ccl_growth_rates(ccl_cosmology * cosmo, int na, double a[na], double output[
   for (int i=0; i<na; i++){
     output[i]=gsl_spline_eval(cosmo->data.fgrowth,a[i],cosmo->data.accelerator);
   }
-
-  return 0;
 }
