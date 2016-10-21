@@ -78,6 +78,10 @@ typedef struct ccl_cosmology
   bool computed_power;
   bool computed_sigma;
 
+  int status;
+  //this is optional - less tedious than tracking all numerical values for status in error handler function
+  char status_message[500];
+
   // other flags?
 } ccl_cosmology;
 
@@ -97,9 +101,9 @@ ccl_parameters ccl_parameters_create_lcdm(double Omega_c, double Omega_b, double
 
 void ccl_cosmology_free(ccl_cosmology * cosmo);
 
-void ccl_cosmology_compute_distances(ccl_cosmology * cosmo, int *status);
-void ccl_cosmology_compute_growth(ccl_cosmology * cosmo, int *status);
-void ccl_cosmology_compute_power(ccl_cosmology * cosmo, int *status);
+void ccl_cosmology_compute_distances(ccl_cosmology * cosmo);
+void ccl_cosmology_compute_growth(ccl_cosmology * cosmo);
+void ccl_cosmology_compute_power(ccl_cosmology * cosmo);
 // Internal(?)
 
 // Distance-like function examples
