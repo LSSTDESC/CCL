@@ -27,14 +27,17 @@ double dNdz_clustering(double z)
 //Table 2, column corresponding to k=1 (fiducial case)
 // This is unnormalised.
 // static double dNdz_sources_k1(double z)
-double dNdz_sources_k1(double z)
+double dNdz_sources_k1(double z, void* params)
 {
+  // Argument void * params makes this function suitable for integration.
+  // It might be good to actually pass some parameters here, i.e., turn the currently useless *params to something holding alpha, beta, z0, zmin_sources, zmax_sources. This would allow merging of all dNdz_sources functions with the same form, if that's what we want.
   double alpha=1.24; //These probably need to move to the cosmo params file
   double beta=1.01;
   double z0=0.51;
   double zdivz0=z/z0;
   double zmin_sources=0.1;
   double zmax_sources=3.0;
+
   if((z>=zmin_sources) && (z<=zmax_sources)){
     return pow(z,alpha)*exp(-pow(zdivz0,beta));
   } else {
@@ -46,14 +49,18 @@ double dNdz_sources_k1(double z)
 //Table 2, column corresponding to k=2
 // This is unnormalised
 // static double dNdz_sources_k2(double z)
-double dNdz_sources_k2(double z)
+double dNdz_sources_k2(double z, void* params)
 {
+  // Argument void * params makes this function suitable for integration.
+  // It might be good to actually pass some parameters here, i.e., turn the currently useless *params to something holding alpha, beta, z0, zmin_sources, zmax_sources. This would allow merging of all dNdz_sources functions with the same form, if that's what we want.
+
   double alpha=1.23; //These probably need to move to the cosmo params file
   double beta=1.05;
   double z0=0.59;
   double zdivz0=z/z0;
   double zmin_sources=0.1;
   double zmax_sources=3.0;
+
   if((z>=zmin_sources) && (z<=zmax_sources)){
     return pow(z,alpha)*exp(-pow(zdivz0,beta));
   } else {
@@ -66,14 +73,18 @@ double dNdz_sources_k2(double z)
 //Table 2, column corresponding to k=0.5
 // This is unnormalised.
 // static double dNdz_sources_k0pt5
-double dNdz_sources_k0pt5(double z)
+double dNdz_sources_k0pt5(double z, void *params)
 {
+  // Argument void * params is to makes this function suitable for integration.
+  // It might be good to actually pass some parameters here, i.e., turn the currently useless *params to something holding alpha, beta, z0, zmin_sources, zmax_sources. This would allow merging of all dNdz_sources functions with the same form, if that's what we want.
+
   double alpha=1.28; //These probably need to move to the cosmo params file
   double beta=0.97;
   double z0=0.41;
   double zdivz0=z/z0;
   double zmin_sources=0.1;
   double zmax_sources=3.0;
+
   if((z>=zmin_sources) && (z<=zmax_sources)){
     return pow(z,alpha)*exp(-pow(zdivz0,beta));
   } else {
@@ -104,21 +115,42 @@ double bias_clustering(ccl_cosmology * cosmo, double a)
 }
 
 // This is a toy photometric redshift model which assumes perfect photo-zs, to test dNdz_sources_tomog
-double photoz_dNdz(double z, double (*dndz_func)(double))
+double photoz_dNdz(double z, void * pass_params, double (*dndz_func)(double, void*))
 {
-return (*dndz_func)(z);
+return (*dndz_func)(z,pass_params);
 }
 
 //dNdz in a redshift bin, for tomographic binning
-// the output of this is not necessarily properly normalised
-double dNdz_sources_tomog(double z, double zmin, double zmax, double (*dndz_func)(double), double (*photoz_func)(double, double (double) ))
+// This is currently in the wrong form to be a gsl_function i.e. you can't get the normalising factor with norm_dNdz.
+double dNdz_sources_tomog(double z, double zmin, double zmax, void* pass_params, double (*dndz_func)(double, void*), double (*photoz_func)(double, void*, double (double, void*) ))
 {
   if ((z<=zmax) && (z>=zmin)){
-     return (*photoz_func)(z, (*dndz_func));
+     return (*photoz_func)(z, pass_params, (*dndz_func));
   }else{
      return 0;
   } 
 }
+
+// Get the factor which normalises a dNdz over a redshift range
+double norm_dNdz(double zmin, double zmax, void* pass_params, double (*dndz_func)(double, void*))
+{
+        double *norm;
+        double init = 0.0; // Just to initialise the pointer to the answer.
+ 
+        norm = &init;
+
+ 	// Allocate workspace for integral
+ 	gsl_integration_cquad_workspace * workspace = gsl_integration_cquad_workspace_alloc (1000);
+ 	gsl_function F;
+  	F.function = dndz_func;
+	F.params = pass_params;
+	gsl_integration_cquad(&F, zmin, zmax, 0.0,EPSREL_GROWTH,workspace,norm, NULL, NULL);
+	gsl_integration_cquad_workspace_free(workspace);
+
+	return *norm;
+
+}
+
 
 //----------------------------------------
 
