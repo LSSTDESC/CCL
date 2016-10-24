@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <math.h>
 
-int main(){
+int main(int argc,char **argv){
 
 	double z_test, a_test;
 	double dNdzk2, dNdzk1, dNdzk0pt5;
@@ -51,9 +51,8 @@ int main(){
 		sigz_src = sigmaz_sources(z_test);
 		sigz_clust = sigmaz_clustering(z_test);
 		printf("atest=%f, &status=%p, cosmo_1=%p\n", a_test, (void*)&status, (void*)cosmo_1);
-		// cosmo_1 should be a pointer to a ccl_cosmology struct, a_test should be a double, and &status should be the address of an integer.
-		clust_bias = bias_clustering(cosmo_1, a_test, &status);
-		fprintf(output, "%f %f %f %f %f %f %f \n", z_test,dNdzk2, dNdzk1, dNdzk0pt5, dNdz_clust, sigz_src, sigz_clust);
+		clust_bias = bias_clustering(cosmo_1, a_test);
+		// cosmo_1 should be a pointer to a ccl_cosmology struct, a_test should be a double, and &status should be the address of an integer.		fprintf(output, "%f %f %f %f %f %f %f \n", z_test,dNdzk2, dNdzk1, dNdzk0pt5, dNdz_clust, sigz_src, sigz_clust);
 	}
 
 	fclose(output);

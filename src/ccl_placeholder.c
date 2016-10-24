@@ -96,12 +96,10 @@ double sigmaz_sources(double z)
 }
 
 //Bias of the clustering sample
-//What is the purpose of "status"?
-//static double bias_clustering(ccl_cosmology * cosmo, double a, int * status)
-double bias_clustering(ccl_cosmology * cosmo, double a, int * status)
+double bias_clustering(ccl_cosmology * cosmo, double a)
 {
   //Growth is currently normalized to 1 today, is this what LSS needs?
-  double D = ccl_growth_factor(cosmo, a, status);
+  double D = ccl_growth_factor(cosmo, a);
   return 0.95/D;
 }
 

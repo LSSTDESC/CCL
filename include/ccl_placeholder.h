@@ -9,5 +9,5 @@ double dNdz_sources_k2(double z);
 double dNdz_sources_k0pt5(double z);
 double sigmaz_clustering(double z);
 double sigmaz_sources(double z);
-double bias_clustering(ccl_cosmology * cosmo, double a, int * status); 
+double bias_clustering(ccl_cosmology * cosmo, double a); 
 
