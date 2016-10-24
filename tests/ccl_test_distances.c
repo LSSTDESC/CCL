@@ -26,7 +26,8 @@ CTEST_DATA(distances) {
 // distance benchmarks
 static void read_chi_test_file(double z[6], double chi[5][6])
 {
-	FILE * f = fopen("./tests/benchmark/chi_model1-5.txt", "r");
+  //Distances are in Mpc/h
+        FILE * f = fopen("./tests/benchmark/chi_model1-5.txt", "r");
 	ASSERT_NOT_NULL(f);
 
 	// Ignore header line
@@ -91,7 +92,7 @@ static void compare_distances(int model, struct distances_data * data)
 	// Compare to benchmark data
 	for (int j=0; j<6; j++){
 		double a = 1/(1.+data->z[j]);
-		double chi_ij=ccl_comoving_radial_distance(cosmo,a);
+		double chi_ij=ccl_comoving_radial_distance(cosmo,a)*data->h;
 		double absolute_tolerance = DISTANCES_TOLERANCE*data->chi[model][j];
 		if (fabs(absolute_tolerance)<1e-12) absolute_tolerance = 1e-12;
 		ASSERT_DBL_NEAR_TOL(data->chi[model][j], chi_ij, absolute_tolerance);
