@@ -103,6 +103,23 @@ double bias_clustering(ccl_cosmology * cosmo, double a)
   return 0.95/D;
 }
 
+// This is a toy photometric redshift model which assumes perfect photo-zs, to test dNdz_sources_tomog
+double photoz_dNdz(double z, double (*dndz_func)(double))
+{
+return (*dndz_func)(z);
+}
+
+//dNdz in a redshift bin, for tomographic binning
+// the output of this is not necessarily properly normalised
+double dNdz_sources_tomog(double z, double zmin, double zmax, double (*dndz_func)(double), double (*photoz_func)(double, double (double) ))
+{
+  if ((z<=zmax) && (z>=zmin)){
+     return (*photoz_func)(z, (*dndz_func));
+  }else{
+     return 0;
+  } 
+}
+
 //----------------------------------------
 
 

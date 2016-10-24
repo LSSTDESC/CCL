@@ -10,4 +10,5 @@ double dNdz_sources_k0pt5(double z);
 double sigmaz_clustering(double z);
 double sigmaz_sources(double z);
 double bias_clustering(ccl_cosmology * cosmo, double a); 
-
+double dNdz_sources_tomog(double z, double zmin, double zmax, double (*dndz_func)(double), double (*photoz_func)(double, double (double) ));
+double photoz_dNdz(double z, double (*dndz_func)(double));
