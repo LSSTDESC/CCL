@@ -26,5 +26,5 @@ typedef struct {
 CCL_ClTracer *ccl_cl_tracer_new(ccl_cosmology *cosmo,int tracer_type,
 				int nz_n,double *z_n,double *n,
 				int nz_b,double *z_b,double *b);
-void ccl_tracer_free(CCL_ClTracer *clt);
+void ccl_cl_tracer_free(CCL_ClTracer *clt);
 double ccl_angular_cl(ccl_cosmology *cosmo,int l,CCL_ClTracer *clt1,CCL_ClTracer *clt2);

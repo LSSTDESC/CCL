@@ -27,10 +27,6 @@ int main(int argc, char * argv[])
   ccl_parameters params = ccl_parameters_create_flat_lcdm(Omega_c, Omega_b, h, A_s, n_s);
   params.sigma_8=0.8;
   ccl_cosmology * cosmo = ccl_cosmology_create(params, config);
-  
-  //  ccl_cosmology_compute_distances(cosmo,&status);
-  //  ccl_cosmology_compute_growth(cosmo,&status);
-  //  ccl_cosmology_compute_power(cosmo, &status);
 
   //Create arrays for N(z)
   int nz=256;
@@ -48,8 +44,8 @@ int main(int argc, char * argv[])
   }
 
   //Create tracers
-  ClTracer *tr_nc=ccl_tracer_new(cosmo,CL_TRACER_NC,nz,zarr,pzarr,nz,zarr,bzarr); //Number counts tracer
-  ClTracer *tr_wl=ccl_tracer_new(cosmo,CL_TRACER_WL,nz,zarr,pzarr,nz,NULL,NULL);  //Lensing tracer
+  CCL_ClTracer *tr_nc=ccl_cl_tracer_new(cosmo,CL_TRACER_NC,nz,zarr,pzarr,nz,zarr,bzarr); //Number counts tracer
+  CCL_ClTracer *tr_wl=ccl_cl_tracer_new(cosmo,CL_TRACER_WL,nz,zarr,pzarr,nz,NULL,NULL );  //Lensing tracer
 
   FILE *fi=fopen("lj_test_cl_dd.txt","r");
   int nl=linecount(fi); rewind(fi);
@@ -105,8 +101,8 @@ int main(int argc, char * argv[])
   }
   fclose(fi);
 
-  ccl_tracer_free(tr_nc);
-  ccl_tracer_free(tr_wl);
+  ccl_cl_tracer_free(tr_nc);
+  ccl_cl_tracer_free(tr_wl);
   free(zarr);
   free(pzarr);
   free(bzarr);

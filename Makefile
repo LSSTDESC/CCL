@@ -4,7 +4,7 @@ CFLAGS+=-I/opt/local/include -I/home/damonge/include
 LDFLAGS=-L/home/damonge/lib -lgsl -lgslcblas   -lm -Lclass -lclass
 
 
-OBJECTS=src/ccl_core.o src/ccl_utils.o src/ccl_power.o src/ccl_cls.o src/ccl_placeholder.o src/ccl_background.o
+OBJECTS=src/ccl_core.o src/ccl_utils.o src/ccl_error.o src/ccl_power.o src/ccl_cls.o src/ccl_placeholder.o src/ccl_background.o
 
 TESTS=tests/ccl_test.c tests/ccl_test_utils.c tests/ccl_test_params.c tests/ccl_test_distances.c
 #

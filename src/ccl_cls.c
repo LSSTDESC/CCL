@@ -1,6 +1,7 @@
 #include "ccl_cls.h"
 #include "ccl_power.h"
 #include "ccl_background.h"
+#include "ccl_error.h"
 #include "ccl_utils.h"
 #include <stdlib.h>
 #include <math.h>
@@ -92,25 +93,22 @@ static int window_lensing(double chi,ccl_cosmology *cosmo,SplPar *spl_pz,double 
   status=gsl_integration_qag(&F,chi,chi_max,0,1E-4,1000,GSL_INTEG_GAUSS41,w,&result,&eresult);
   *win=result;
   gsl_integration_workspace_free(w);
-  if(status!=GSL_SUCCESS) {
-    cosmo->status=1;
-    strcpy(cosmo->status_message,"ccl_cls.c: window_lensing(): Integral didn't converge\n");
+  if(status!=GSL_SUCCESS)
     return 1;
-  }
   //TODO: chi_max should be changed to chi_horizon
   //we should precompute this quantity and store it in cosmo by default
 
   return 0;
 }
 
-CCL_ClTracer *ccl_cl_tracer_new(ccl_cosmology *cosmo,int tracer_type,
-				int nz_n,double *z_n,double *n,
-				int nz_b,double *z_b,double *b)
+static CCL_ClTracer *cl_tracer_new(ccl_cosmology *cosmo,int tracer_type,
+			    int nz_n,double *z_n,double *n,
+			    int nz_b,double *z_b,double *b)
 {
   int status=0;
   CCL_ClTracer *clt=malloc(sizeof(CCL_ClTracer));
   if(clt==NULL) {
-    cosmo->status=4;
+    cosmo->status=CCL_ERROR_MEMORY;
     strcpy(cosmo->status_message,"ccl_cls.c: ccl_cl_tracer_new(): memory allocation\n");
     return NULL;
   }
@@ -124,8 +122,8 @@ CCL_ClTracer *ccl_cl_tracer_new(ccl_cosmology *cosmo,int tracer_type,
     clt->spl_nz=spline_init(nz_n,z_n,n,0,0);
     if(clt->spl_nz==NULL) {
       free(clt);
-      cosmo->status=4;
-      strcpy(cosmo->status_message,"ccl_cls.c: ccl_cl_tracer_new(): spline initialization error\n");
+      cosmo->status=CCL_ERROR_SPLINE;
+      strcpy(cosmo->status_message,"ccl_cls.c: ccl_cl_tracer_new(): error initializing spline for N(z)\n");
       return NULL;
     }
 
@@ -136,7 +134,7 @@ CCL_ClTracer *ccl_cl_tracer_new(ccl_cosmology *cosmo,int tracer_type,
     if(nz_normalized==NULL) {
       spline_free(clt->spl_nz);
       free(clt);
-      cosmo->status=4;
+      cosmo->status=CCL_ERROR_MEMORY;
       strcpy(cosmo->status_message,"ccl_cls.c: ccl_cl_tracer_new(): memory allocation\n");
       return NULL;
     }
@@ -149,8 +147,8 @@ CCL_ClTracer *ccl_cl_tracer_new(ccl_cosmology *cosmo,int tracer_type,
     if(status!=GSL_SUCCESS) {
       spline_free(clt->spl_nz);
       free(clt);
-      cosmo->status=4;
-      strcpy(cosmo->status_message,"ccl_cls.c: ccl_cl_tracer_new(): integration error\n");
+      cosmo->status=CCL_ERROR_INTEG;
+      strcpy(cosmo->status_message,"ccl_cls.c: ccl_cl_tracer_new(): integration error when normalizing N(z)\n");
       return NULL;
     }
     for(int ii=0;ii<nz_n;ii++)
@@ -160,8 +158,8 @@ CCL_ClTracer *ccl_cl_tracer_new(ccl_cosmology *cosmo,int tracer_type,
     free(nz_normalized);
     if(clt->spl_nz==NULL) {
       free(clt);
-      cosmo->status=4;
-      strcpy(cosmo->status_message,"ccl_cls.c: ccl_cl_tracer_new(): spline initialization error\n");
+      cosmo->status=CCL_ERROR_SPLINE;
+      strcpy(cosmo->status_message,"ccl_cls.c: ccl_cl_tracer_new(): error initializing normalized spline for N(z)\n");
       return NULL;
     }
 
@@ -171,8 +169,8 @@ CCL_ClTracer *ccl_cl_tracer_new(ccl_cosmology *cosmo,int tracer_type,
       if(clt->spl_bz==NULL) {
 	spline_free(clt->spl_nz);
 	free(clt);
-	cosmo->status=4;
-	strcpy(cosmo->status_message,"ccl_cls.c: ccl_cl_tracer_new(): spline initialization error\n");
+	cosmo->status=CCL_ERROR_SPLINE;
+	strcpy(cosmo->status_message,"ccl_cls.c: ccl_cl_tracer_new(): error initializing spline for b(z)\n");
 	return NULL;
       }
       clt->chimin=ccl_comoving_radial_distance(cosmo,1./(1+z_n[0]));
@@ -191,7 +189,7 @@ CCL_ClTracer *ccl_cl_tracer_new(ccl_cosmology *cosmo,int tracer_type,
       if(x==NULL || (fabs(x[0]-0)>1E-5) || (fabs(x[nchi-1]-chimax)>1e-5)) {
 	spline_free(clt->spl_nz);
 	free(clt);
-	cosmo->status=2;
+	cosmo->status=CCL_ERROR_LINSPACE;
 	strcpy(cosmo->status_message,"ccl_cls.c: ccl_cl_tracer_new(): Error creating linear spacing in chi\n");
 	return NULL;
       }
@@ -200,7 +198,7 @@ CCL_ClTracer *ccl_cl_tracer_new(ccl_cosmology *cosmo,int tracer_type,
 	free(x);
 	spline_free(clt->spl_nz);
 	free(clt);
-	cosmo->status=4;
+	cosmo->status=CCL_ERROR_MEMORY;
 	strcpy(cosmo->status_message,"ccl_cls.c: ccl_cl_tracer_new(): memory allocation\n");
 	return NULL;
       }
@@ -212,7 +210,7 @@ CCL_ClTracer *ccl_cl_tracer_new(ccl_cosmology *cosmo,int tracer_type,
 	free(x);
 	spline_free(clt->spl_nz);
 	free(clt);
-	cosmo->status=5;
+	cosmo->status=CCL_ERROR_INTEG;
 	strcpy(cosmo->status_message,"ccl_cls.c: ccl_cl_tracer_new(): error computing lensing window\n");
 	return NULL;
       }
@@ -223,15 +221,15 @@ CCL_ClTracer *ccl_cl_tracer_new(ccl_cosmology *cosmo,int tracer_type,
 	free(x);
 	spline_free(clt->spl_nz);
 	free(clt);
-	cosmo->status=5;
-	strcpy(cosmo->status_message,"ccl_cls.c: ccl_cl_tracer_new(): spline initialization error\n");
+	cosmo->status=CCL_ERROR_SPLINE;
+	strcpy(cosmo->status_message,"ccl_cls.c: ccl_cl_tracer_new(): error initializing spline for lensing window\n");
 	return NULL;
       }
       free(x); free(y);
     }
   }
   else {
-    cosmo->status=6;
+    cosmo->status=CCL_ERROR_INCONSISTENT;
     strcpy(cosmo->status_message,"ccl_cls.c: ccl_cl_tracer_new(): unknown tracer type\n");
     return NULL;
   }
@@ -239,7 +237,16 @@ CCL_ClTracer *ccl_cl_tracer_new(ccl_cosmology *cosmo,int tracer_type,
   return clt;
 }
 
-void ccl_tracer_free(CCL_ClTracer *clt)
+CCL_ClTracer *ccl_cl_tracer_new(ccl_cosmology *cosmo,int tracer_type,
+				       int nz_n,double *z_n,double *n,
+				       int nz_b,double *z_b,double *b)
+{
+  CCL_ClTracer *clt=cl_tracer_new(cosmo,tracer_type,nz_n,z_n,n,nz_b,z_b,b);
+  ccl_check_status(cosmo);
+  return clt;
+}
+
+void ccl_cl_tracer_free(CCL_ClTracer *clt)
 {
   spline_free(clt->spl_nz);
   if(clt->tracer_type==CL_TRACER_NC)
@@ -367,10 +374,11 @@ double ccl_angular_cl(ccl_cosmology *cosmo,int l,CCL_ClTracer *clt1,CCL_ClTracer
   status=gsl_integration_qag(&F,lkmin,lkmax,0,1E-4,1000,GSL_INTEG_GAUSS41,w,&result,&eresult);
   gsl_integration_workspace_free(w);
   if(status!=GSL_SUCCESS) {
-    cosmo->status=7;
-    strcpy(cosmo->status_message,"ccl_cls.c: ccl_angular_cl(): integration error\n");
+    cosmo->status=CCL_ERROR_INTEG;
+    strcpy(cosmo->status_message,"ccl_cls.c: ccl_angular_cl(): error integrating over k\n");
     return -1;
   }
+  ccl_check_status(cosmo);
 
   return M_LN10*result/(l+0.5);
 }
