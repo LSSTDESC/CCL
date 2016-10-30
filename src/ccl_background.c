@@ -293,7 +293,7 @@ void ccl_cosmology_compute_distances(ccl_cosmology * cosmo)
   gsl_root_fdfsolver *s=gsl_root_fdfsolver_alloc(T);
   for(int i=1;i<na-1;i++) {
     status|=a_of_chi(y[i],cosmo,&a0,s);
-    a[i]=&a0;
+    a[i]=a0;
   }
   gsl_root_fdfsolver_free(s);
   if(status) {

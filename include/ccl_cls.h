@@ -21,10 +21,10 @@ typedef struct {
   SplPar *spl_nz;
   SplPar *spl_bz;
   SplPar *spl_wL;
-} ClTracer;
+} CCL_ClTracer;
 
-ClTracer *ccl_tracer_new(ccl_cosmology *cosmo,int tracer_type,
-			 int nz_n,double *z_n,double *n,
-			 int nz_b,double *z_b,double *b);
-void ccl_tracer_free(ClTracer *clt);
-double ccl_angular_cl(ccl_cosmology *cosmo,int l,ClTracer *clt1,ClTracer *clt2,int *status);
+CCL_ClTracer *ccl_cl_tracer_new(ccl_cosmology *cosmo,int tracer_type,
+				int nz_n,double *z_n,double *n,
+				int nz_b,double *z_b,double *b);
+void ccl_tracer_free(CCL_ClTracer *clt);
+double ccl_angular_cl(ccl_cosmology *cosmo,int l,CCL_ClTracer *clt1,CCL_ClTracer *clt2);

@@ -28,11 +28,9 @@ int main(int argc, char * argv[])
   params.sigma_8=0.8;
   ccl_cosmology * cosmo = ccl_cosmology_create(params, config);
   
-  int status;
-  ccl_cosmology_compute_distances(cosmo,&status);
-  ccl_cosmology_compute_growth(cosmo,&status);
-
-  ccl_cosmology_compute_power(cosmo, &status);
+  //  ccl_cosmology_compute_distances(cosmo,&status);
+  //  ccl_cosmology_compute_growth(cosmo,&status);
+  //  ccl_cosmology_compute_power(cosmo, &status);
 
   //Create arrays for N(z)
   int nz=256;
@@ -63,7 +61,7 @@ int main(int argc, char * argv[])
       fprintf(stderr,"error reading file\n");
       exit(1);
     }
-    cl_ccl=ccl_angular_cl(cosmo,l,tr_nc,tr_nc,&status);
+    cl_ccl=ccl_angular_cl(cosmo,l,tr_nc,tr_nc);
     if(l>0) {
       if(fabs(cl_ccl/cl_lj-1)>1E-4)
 	printf("%d %lE\n",l,cl_ccl/cl_lj-1);
@@ -81,7 +79,7 @@ int main(int argc, char * argv[])
       fprintf(stderr,"error reading file\n");
       exit(1);
     }
-    cl_ccl=ccl_angular_cl(cosmo,l,tr_nc,tr_wl,&status);
+    cl_ccl=ccl_angular_cl(cosmo,l,tr_nc,tr_wl);
     if(l>0) {
       if(fabs(cl_ccl/cl_lj-1)>1E-4)
 	printf("%d %lE\n",l,cl_ccl/cl_lj-1);
@@ -99,7 +97,7 @@ int main(int argc, char * argv[])
       fprintf(stderr,"error reading file\n");
       exit(1);
     }
-    cl_ccl=ccl_angular_cl(cosmo,l,tr_wl,tr_wl,&status);
+    cl_ccl=ccl_angular_cl(cosmo,l,tr_wl,tr_wl);
     if(l>0) {
       if(fabs(cl_ccl/cl_lj-1)>1E-4)
 	printf("%d %lE\n",l,cl_ccl/cl_lj-1);
@@ -124,5 +122,5 @@ int main(int argc, char * argv[])
   }
   printf("SUCCESS\n");
 
-  return status;
+  return 0;
 }
