@@ -1,8 +1,10 @@
 #include "ccl_background.h"
 #include "ccl_utils.h"
+#include "ccl_error.h"
 #include <stdlib.h>
 #include <math.h>
 #include <stdio.h>
+#include <string.h>
 #include "gsl/gsl_errno.h"
 //#include "gsl/gsl_odeiv.h"
 #include "gsl/gsl_odeiv2.h"
@@ -79,12 +81,12 @@ static double df_integrand(double a,void * spline_void)
 INPUT: scale factor, cosmology
 TASK: compute the growth (D(z)) and the growth rate, logarithmic derivative (f?)
 */
-static int growth_factor_and_growth_rate(double a,double *gf,double *fg,ccl_cosmology *cosmo)
+static void growth_factor_and_growth_rate(double a,double *gf,double *fg,ccl_cosmology *cosmo)
 {
   if(a<EPS_SCALEFAC_GROWTH) {
     *gf=a;
     *fg=1;
-    return 0;
+    return;
   }
   else {
     double y[2];
@@ -102,14 +104,12 @@ static int growth_factor_and_growth_rate(double a,double *gf,double *fg,ccl_cosm
     gsl_odeiv2_driver_free(d);
     
     if(status!=GSL_SUCCESS) {
-      fprintf(stderr,"ODE didn't converge when computing growth\n");
-      return 1;
+      cosmo->status = 1;
+      strcpy(cosmo->status_message ,"ccl_background.c: growth_factor_and_growth_rate(): ODE for growth factor didn't converge\n");
     }
     
     *gf=y[0];
     *fg=y[1]/(a*a*h_over_h0(a,&(cosmo->params))*y[0]);
-
-    return 0;
   }
 }
 
@@ -130,7 +130,13 @@ static int compute_chi(double a,ccl_cosmology *cosmo,double *chi)
   status=gsl_integration_cquad(&F, a, 1.0, 0.0,EPSREL_DIST,workspace,&result, NULL, NULL); 
   *chi=result/cosmo->params.h;
   gsl_integration_cquad_workspace_free(workspace);
-  return status;
+
+  if(status!=GSL_SUCCESS) {
+    cosmo->status=1;
+    strcpy(cosmo->status_message,"ccl_background.c: compute_chi(): Integral didn't converge\n");
+    return 1;
+  }
+  return 0;
 }
 
 //Root finding for a(chi)
@@ -161,10 +167,12 @@ static void fdfzero(double a,void *params,double *f,double *df)
   *df=dfzero(a,params);
 }
 
-static double a_of_chi(double chi,ccl_cosmology *cosmo,double *a_old,gsl_root_fdfsolver *s)
+static int a_of_chi(double chi,ccl_cosmology *cosmo,double *a_old,gsl_root_fdfsolver *s)
 {
-  if(chi==0)
-    return 1.;
+  if(chi==0) {
+    *a_old=1;
+    return 0;
+  }
   else {
     Fpar p;
     gsl_function_fdf FDF;
@@ -188,7 +196,12 @@ static double a_of_chi(double chi,ccl_cosmology *cosmo,double *a_old,gsl_root_fd
     } while(status==GSL_CONTINUE);
 
     *a_old=a_current;
-    return a_current;
+
+    if(status!=GSL_SUCCESS) {
+      return 1;
+    }
+
+    return 0;
   }
 }
 
@@ -197,7 +210,7 @@ INPUT: cosmology
 TASK: if not already there, make a table of comoving distances and of E(a)
 */
 
-void ccl_cosmology_compute_distances(ccl_cosmology * cosmo, int *status)
+void ccl_cosmology_compute_distances(ccl_cosmology * cosmo)
 {
   if(cosmo->computed_distances)
     return;
@@ -210,14 +223,14 @@ void ccl_cosmology_compute_distances(ccl_cosmology * cosmo, int *status)
       (fabs(a[na-1]-A_SPLINE_MAX)>1e-5) || 
       (a[na-1]>1.0)
       ) {
-    fprintf(stderr, "Error creating linear spacing.\n");        
-    *status = 1;
+    cosmo->status = 2;
+    strcpy(cosmo->status_message,"ccl_background.c: ccl_cosmology_compute_distances(): Error creating linear spacing in a\n");
     return;
   }
 
   // allocate space for y, which will be all three
   // of E(a), chi(a), D(a) and f(a) in turn.
-  double *y = malloc(sizeof(double)*na); //TODO: check for bad allocation
+  double *y = malloc(sizeof(double)*na);
 
   // Fill in E(a)
   for (int i=0; i<na; i++){
@@ -226,78 +239,82 @@ void ccl_cosmology_compute_distances(ccl_cosmology * cosmo, int *status)
 
   // Allocate and fill E spline with values we just got
   gsl_spline * E = gsl_spline_alloc(A_SPLINE_TYPE, na);
-  *status = gsl_spline_init(E, a, y, na);
+  int status = gsl_spline_init(E, a, y, na);
   // Check for errors in creating the spline
-  if (*status){
+  if (status){
     free(a);
     free(y);
     gsl_spline_free(E);
-    fprintf(stderr, "Error creating E(a) spline\n");
+    cosmo->status = 4;
+    strcpy(cosmo->status_message,"ccl_background.c: ccl_cosmology_compute_distances(): Error creating  E(a) spline\n");
     return;
   }
 
   //Fill in chi(a)
   for (int i=0; i<na; i++)
-    *status |= compute_chi(a[i],cosmo,&(y[i]));
-  if (*status){
+    status |= compute_chi(a[i],cosmo,&(y[i]));
+  if (status){
     free(a);
     free(y);
     gsl_spline_free(E);        
-    fprintf(stderr, "Error integrating to get chi(a)\n");
+    cosmo->status = 5;
+    strcpy(cosmo->status_message,"ccl_background.c: ccl_cosmology_compute_distances(): chi(a) integration error \n");
     return;
   }
 
   gsl_spline * chi = gsl_spline_alloc(A_SPLINE_TYPE, na);
-  *status = gsl_spline_init(chi, a, y, na); //in Mpc
-  if (*status){
+  status = gsl_spline_init(chi, a, y, na); //in Mpc
+  if (status){
     free(a);
     free(y);
     gsl_spline_free(E);
     gsl_spline_free(chi);
-    fprintf(stderr, "Error creating chi(a) spline\n");
+    cosmo->status = 4;
+    strcpy(cosmo->status_message,"ccl_background.c: ccl_cosmology_compute_distances(): Error creating  chi(a) spline\n");
     return;
   }
 
   //Spline for a(chi)
-  double dchi=3.,chi0=y[na-1],chif=y[0],a0=a[na-1],af=a[0];
-  //TODO: The interval in chi (3. Mpc) should probably be made a macro
+  double dchi=5.,chi0=y[na-1],chif=y[0],a0=a[na-1],af=a[0];
+  //TODO: The interval in chi (5. Mpc) should be made a macro
   free(y); free(a);
   na=(int)((chif-chi0)/dchi); dchi=(chif-chi0)/na; na=0;
   y=ccl_linear_spacing(chi0,chif,dchi,&na);
   if(y==NULL || (fabs(y[0]-chi0)>1E-5) || (fabs(y[na-1]-chif)>1e-5)) {
-    fprintf(stderr,"Error creating linear spacing\n");
-    *status=1;
     gsl_spline_free(E);
     gsl_spline_free(chi);
+    cosmo->status = 2;
+    strcpy(cosmo->status_message,"ccl_background.c: ccl_cosmology_compute_distances(): Error creating linear spacing in a\n");
     return;
   }
   a=malloc(sizeof(double)*na);
-  if(a==NULL) {
-    fprintf(stderr,"Out of memory\n");
-    *status=1;
-    free(y);
-    gsl_spline_free(E);
-    gsl_spline_free(chi);
-    return;
-  }
   a[0]=a0; a[na-1]=af;
   const gsl_root_fdfsolver_type *T=gsl_root_fdfsolver_newton;
   gsl_root_fdfsolver *s=gsl_root_fdfsolver_alloc(T);
   for(int i=1;i<na-1;i++) {
-    a[i]=a_of_chi(y[i],cosmo,&a0,s);
+    status|=a_of_chi(y[i],cosmo,&a0,s);
+    a[i]=&a0;
   }
   gsl_root_fdfsolver_free(s);
-  //TODO: check for errors in solver
-  gsl_spline * achi=gsl_spline_alloc(A_SPLINE_TYPE,na);
-  *status=gsl_spline_init(achi,y,a,na);
-  if(*status) {
-    fprintf(stderr,"Out of memory\n");
-    *status=1;
-    free(y);
+  if(status) {
     free(a);
+    free(y);
+    gsl_spline_free(E);
+    gsl_spline_free(chi);
+    cosmo->status = 5;
+    strcpy(cosmo->status_message,"ccl_background.c: ccl_cosmology_compute_distances(): a(chi) root-finding error \n");
+  }
+
+  gsl_spline * achi=gsl_spline_alloc(A_SPLINE_TYPE,na);
+  status=gsl_spline_init(achi,y,a,na);
+  if (status){
+    free(a);
+    free(y);
     gsl_spline_free(E);
     gsl_spline_free(chi);
     gsl_spline_free(achi);
+    cosmo->status = 4;
+    strcpy(cosmo->status_message,"ccl_background.c: ccl_cosmology_compute_distances(): Error creating  a(chi) spline\n");
     return;
   }
 
@@ -319,21 +336,22 @@ TASK: if not already there, make a table of growth function and growth rate
       normalize growth to input parameter growth0
 */
 
-void ccl_cosmology_compute_growth(ccl_cosmology * cosmo, int *status)
+void ccl_cosmology_compute_growth(ccl_cosmology * cosmo)
 {
   if(cosmo->computed_growth)
     return;
 
   // Create linearly-spaced values of the scale factor
-  int na=0;
+  int na=0, status = 0;
   double * a = ccl_linear_spacing(A_SPLINE_MIN, A_SPLINE_MAX, A_SPLINE_DELTA, &na);
   if (a==NULL || 
       (fabs(a[0]-A_SPLINE_MIN)>1e-5) || 
       (fabs(a[na-1]-A_SPLINE_MAX)>1e-5) || 
       (a[na-1]>1.0)
       ) {
+    cosmo->status = 2;
+    strcpy(cosmo->status_message,"ccl_background.c: ccl_cosmology_compute_growth(): Error creating linear spacing in a\n");
     fprintf(stderr, "Error creating linear spacing.\n");        
-    *status = 1;
     return;
   }
 
@@ -344,37 +362,40 @@ void ccl_cosmology_compute_growth(ccl_cosmology * cosmo, int *status)
     double *df_arr=malloc(na*sizeof(double));
     //Generate spline for Delta f(z) that we will then interpolate into an array of a
     gsl_spline *df_z_spline=gsl_spline_alloc(A_SPLINE_TYPE,cosmo->params.nz_mgrowth);
-    *status=gsl_spline_init(df_z_spline,cosmo->params.z_mgrowth,cosmo->params.df_mgrowth,
+    status=gsl_spline_init(df_z_spline,cosmo->params.z_mgrowth,cosmo->params.df_mgrowth,
 			    cosmo->params.nz_mgrowth);
-    if(*status) {
+    if(status) {
       free(a);
       free(df_arr);
       gsl_spline_free(df_z_spline);
-      fprintf(stderr,"Error creating MG spline\n");
+      cosmo->status = 4;
+      strcpy(cosmo->status_message,"ccl_background.c: ccl_cosmology_compute_growth(): Error creating Delta f(z) spline\n");
+      return;
     }
     for (int i=0; i<na; i++){
       if(a[i]>0) {
-	double z=1./a[i]-1.;
-	if(z<=cosmo->params.z_mgrowth[0]) 
-	  df_arr[i]=cosmo->params.df_mgrowth[0];
-	else if(z>cosmo->params.z_mgrowth[cosmo->params.nz_mgrowth-1]) 
-	  df_arr[i]=cosmo->params.df_mgrowth[cosmo->params.nz_mgrowth-1];
-	else
-	  df_arr[i]=gsl_spline_eval(df_z_spline,z,NULL);
+	       double z=1./a[i]-1.;
+	       if(z<=cosmo->params.z_mgrowth[0]) 
+	          df_arr[i]=cosmo->params.df_mgrowth[0];
+	       else if(z>cosmo->params.z_mgrowth[cosmo->params.nz_mgrowth-1]) 
+	          df_arr[i]=cosmo->params.df_mgrowth[cosmo->params.nz_mgrowth-1];
+	       else
+	          df_arr[i]=gsl_spline_eval(df_z_spline,z,NULL);
       }
       else
-	df_arr[i]=0;
+	       df_arr[i]=0;
     }
     gsl_spline_free(df_z_spline);
 
     //Generate Delta(f) spline
     df_a_spline=gsl_spline_alloc(A_SPLINE_TYPE,na);
-    *status=gsl_spline_init(df_a_spline,a,df_arr,na);
-    if (*status){
+    status=gsl_spline_init(df_a_spline,a,df_arr,na);
+    if (status){
       free(a);
       free(df_arr);
       gsl_spline_free(df_a_spline);
-      fprintf(stderr, "Error creating MG spline\n");
+      cosmo->status = 4;
+      strcpy(cosmo->status_message,"ccl_background.c: ccl_cosmology_compute_growth(): Error creating Delta f(a) spline\n");
       return;
     }
     free(df_arr);
@@ -385,27 +406,27 @@ void ccl_cosmology_compute_growth(ccl_cosmology * cosmo, int *status)
   }
 
   // allocate space for y, which will be all three
-  // of D(a) and f(a) in turn.
+  // of E(a), chi(a), D(a) and f(a) in turn.
   double growth0,fgrowth0;
   double *y = malloc(sizeof(double)*na);
   double *y2 = malloc(sizeof(double)*na);
   growth_factor_and_growth_rate(1.,&growth0,&fgrowth0,cosmo);
   for (int i=0; i<na; i++){
-    *status |= growth_factor_and_growth_rate(a[i],&(y[i]),&(y2[i]),cosmo);
+    growth_factor_and_growth_rate(a[i],&(y[i]),&(y2[i]),cosmo);
     if(cosmo->params.has_mgrowth) {
       if(a[i]>0) {
-	double df,integ;
-	//Add modification to f
-	df=gsl_spline_eval(df_a_spline,a[i],NULL);
-	y2[i]+=df;
-	//Multiply D by exp(-int(df))
-	*status |= gsl_integration_cquad(&F,a[i],1.0,0.0,EPSREL_DIST,workspace,&integ,NULL,NULL);
-	y[i]*=exp(-integ);
+	       double df,integ;
+	       //Add modification to f
+	       df=gsl_spline_eval(df_a_spline,a[i],NULL);
+	       y2[i]+=df;
+	       //Multiply D by exp(-int(df))
+	       status |= gsl_integration_cquad(&F,a[i],1.0,0.0,EPSREL_DIST,workspace,&integ,NULL,NULL);
+	       y[i]*=exp(-integ);
       }
     }
     y[i]/=growth0;
   }
-  if (*status){
+  if (status || cosmo->status){
     free(a);
     free(y);
     free(y2);
@@ -413,33 +434,39 @@ void ccl_cosmology_compute_growth(ccl_cosmology * cosmo, int *status)
       gsl_spline_free(df_a_spline);
     if(workspace!=NULL)
       gsl_integration_cquad_workspace_free(workspace);
-    fprintf(stderr, "Error creating growth array\n");
+    if (status){
+      cosmo->status = 5;
+      strcpy(cosmo->status_message ,"ccl_background.c: ccl_cosmology_compute_growth(): integral for MG growth factor didn't converge\n");
+    }
     return;
   }
+   
   if(cosmo->params.has_mgrowth) {
     gsl_spline_free(df_a_spline);
     gsl_integration_cquad_workspace_free(workspace);
   }
 
   gsl_spline * growth = gsl_spline_alloc(A_SPLINE_TYPE, na);
-  *status = gsl_spline_init(growth, a, y, na);
-  if (*status){
+  status = gsl_spline_init(growth, a, y, na);
+  if (status){
     free(a);
     free(y);
     free(y2);
     gsl_spline_free(growth);
-    fprintf(stderr, "Error creating growth spline\n");
+    cosmo->status = 4;
+    strcpy(cosmo->status_message,"ccl_background.c: ccl_cosmology_compute_growth(): Error creating D(a) spline\n");
     return;
   }
   gsl_spline * fgrowth = gsl_spline_alloc(A_SPLINE_TYPE, na);
-  *status = gsl_spline_init(fgrowth, a, y2, na);
-  if (*status){
+  status = gsl_spline_init(fgrowth, a, y2, na);
+  if (status){
     free(a);
     free(y);
     free(y2);
     gsl_spline_free(growth);
     gsl_spline_free(fgrowth);
-    fprintf(stderr, "Error creating growth spline\n");
+    cosmo->status = 4;
+    strcpy(cosmo->status_message,"ccl_background.c: ccl_cosmology_compute_growth(): Error creating f(a) spline\n");
     return;
   }
 
@@ -447,8 +474,6 @@ void ccl_cosmology_compute_growth(ccl_cosmology * cosmo, int *status)
   // assign all the splines we've just made to the structure.
   if(cosmo->data.accelerator==NULL)
     cosmo->data.accelerator=gsl_interp_accel_alloc();
-  if(cosmo->data.accelerator_achi==NULL)
-    cosmo->data.accelerator_achi=gsl_interp_accel_alloc();
   cosmo->data.growth = growth;
   cosmo->data.fgrowth = fgrowth;
   cosmo->data.growth0 = growth0;
@@ -465,106 +490,143 @@ void ccl_cosmology_compute_growth(ccl_cosmology * cosmo, int *status)
 
 double ccl_h_over_h0(ccl_cosmology * cosmo, double a)
 {
-   return gsl_spline_eval(cosmo->data.E, a, cosmo->data.accelerator);
+  if (!cosmo->computed_distances){
+    ccl_cosmology_compute_distances(cosmo);
+    ccl_check_status(cosmo);    
+  }
+  return gsl_spline_eval(cosmo->data.E, a, cosmo->data.accelerator);
 }
 
-int ccl_h_over_h0s(ccl_cosmology * cosmo, int na, double a[na], double output[na])
+void ccl_h_over_h0s(ccl_cosmology * cosmo, int na, double a[na], double output[na])
 {
+  if (!cosmo->computed_distances){
+    ccl_cosmology_compute_distances(cosmo);
+    ccl_check_status(cosmo);    
+  }
   for (int i=0; i<na; i++){
     output[i]=gsl_spline_eval(cosmo->data.E,a[i],cosmo->data.accelerator);
   }
-
-  return 0;
 }
 
 // Distance-like function examples, all in Mpc
-
 double ccl_comoving_radial_distance(ccl_cosmology * cosmo, double a)
 {
-   return gsl_spline_eval(cosmo->data.chi, a, cosmo->data.accelerator);
+  if (!cosmo->computed_distances){
+    ccl_cosmology_compute_distances(cosmo);
+    ccl_check_status(cosmo);    
+  }
+  return gsl_spline_eval(cosmo->data.chi, a, cosmo->data.accelerator);
 }
 
-int ccl_comoving_radial_distances(ccl_cosmology * cosmo, int na, double a[na], double output[na])
+void ccl_comoving_radial_distances(ccl_cosmology * cosmo, int na, double a[na], double output[na])
 {
+  if (!cosmo->computed_distances){
+    ccl_cosmology_compute_distances(cosmo);
+    ccl_check_status(cosmo);    
+  }
   for (int i=0; i<na; i++){
     output[i]=gsl_spline_eval(cosmo->data.chi,a[i],cosmo->data.accelerator);
   }
-
-  return 0;
 }
-//TODO: do this
 
 double ccl_luminosity_distance(ccl_cosmology * cosmo, double a)
 {
-    return ccl_comoving_radial_distance(cosmo, a) / a;
+  if (!cosmo->computed_distances){
+    ccl_cosmology_compute_distances(cosmo);
+    ccl_check_status(cosmo);    
+  }
+  return ccl_comoving_radial_distance(cosmo, a) / a;
 }
 //TODO: this is not valid for curved cosmologies
 
-int ccl_luminosity_distances(ccl_cosmology * cosmo, int na, double a[na], double output[na])
+void ccl_luminosity_distances(ccl_cosmology * cosmo, int na, double a[na], double output[na])
 {
+  if (!cosmo->computed_distances){
+    ccl_cosmology_compute_distances(cosmo);
+    ccl_check_status(cosmo);    
+  }
   for (int i=0; i<na; i++){
     output[i]=gsl_spline_eval(cosmo->data.chi,a[i],cosmo->data.accelerator)/a[i];
   }
-
-  return 0;
 }
-//TODO: do this
-
-double ccl_growth_factor(ccl_cosmology * cosmo, double a, int * status)
-{
-    return gsl_spline_eval(cosmo->data.growth, a, cosmo->data.accelerator);
-}
-
-int ccl_growth_factors(ccl_cosmology * cosmo, int na, double a[na], double output[na])
-{
-  for (int i=0; i<na; i++){
-    output[i]=gsl_spline_eval(cosmo->data.growth,a[i],cosmo->data.accelerator);
-  }
-
-  return 0;
-}
-
-double ccl_growth_factor_unnorm(ccl_cosmology * cosmo, double a, int * status)
-{
-    return cosmo->data.growth0*gsl_spline_eval(cosmo->data.growth, a, cosmo->data.accelerator);
-}
-
-int ccl_growth_factors_unnorm(ccl_cosmology * cosmo, int na, double a[na], double output[na])
-{
-  for (int i=0; i<na; i++){
-    output[i]=cosmo->data.growth0*gsl_spline_eval(cosmo->data.growth,a[i],cosmo->data.accelerator);
-  }
-
-  return 0;
-}
-//TODO: do this
-
-double ccl_growth_rate(ccl_cosmology * cosmo, double a, int * status)
-{
-    return gsl_spline_eval(cosmo->data.fgrowth, a, cosmo->data.accelerator);
-}
-
-int ccl_growth_rates(ccl_cosmology * cosmo, int na, double a[na], double output[na])
-{
-  for (int i=0; i<na; i++){
-    output[i]=gsl_spline_eval(cosmo->data.fgrowth,a[i],cosmo->data.accelerator);
-  }
-
-  return 0;
-}
-//TODO: do this
 
 //Scale factor for a given distance
 double ccl_scale_factor_of_chi(ccl_cosmology * cosmo, double chi)
 {
+  if (!cosmo->computed_distances){
+    ccl_cosmology_compute_distances(cosmo);
+    ccl_check_status(cosmo);    
+  }
   return gsl_spline_eval(cosmo->data.achi, chi,cosmo->data.accelerator_achi);
 }
 
-int ccl_scale_factor_of_chis(ccl_cosmology * cosmo, int nchi, double chi[nchi], double output[nchi])
+void ccl_scale_factor_of_chis(ccl_cosmology * cosmo, int nchi, double chi[nchi], double output[nchi])
 {
+  if (!cosmo->computed_distances){
+    ccl_cosmology_compute_distances(cosmo);
+    ccl_check_status(cosmo);    
+  }
   for (int i=0; i<nchi; i++) {
     output[i]=gsl_spline_eval(cosmo->data.achi,chi[i],cosmo->data.accelerator_achi);
   }
+}
 
-  return 0;
+double ccl_growth_factor(ccl_cosmology * cosmo, double a)
+{
+  if (!cosmo->computed_growth){
+    ccl_cosmology_compute_growth(cosmo);
+    ccl_check_status(cosmo);    
+  }
+  return gsl_spline_eval(cosmo->data.growth, a, cosmo->data.accelerator);
+}
+
+void ccl_growth_factors(ccl_cosmology * cosmo, int na, double a[na], double output[na])
+{
+  if (!cosmo->computed_growth){
+    ccl_cosmology_compute_growth(cosmo);
+    ccl_check_status(cosmo);    
+  }
+  for (int i=0; i<na; i++){
+    output[i]=gsl_spline_eval(cosmo->data.growth,a[i],cosmo->data.accelerator);
+  }
+}
+
+double ccl_growth_factor_unnorm(ccl_cosmology * cosmo, double a)
+{
+  if (!cosmo->computed_growth){
+    ccl_cosmology_compute_growth(cosmo);
+    ccl_check_status(cosmo);    
+  }
+  return cosmo->data.growth0*gsl_spline_eval(cosmo->data.growth, a, cosmo->data.accelerator);
+}
+
+void ccl_growth_factors_unnorm(ccl_cosmology * cosmo, int na, double a[na], double output[na])
+{
+  if (!cosmo->computed_growth){
+    ccl_cosmology_compute_growth(cosmo);
+    ccl_check_status(cosmo);    
+  }
+  for (int i=0; i<na; i++){
+    output[i]=cosmo->data.growth0*gsl_spline_eval(cosmo->data.growth,a[i],cosmo->data.accelerator);
+  }
+}
+
+double ccl_growth_rate(ccl_cosmology * cosmo, double a)
+{
+  if (!cosmo->computed_growth){
+    ccl_cosmology_compute_growth(cosmo);
+    ccl_check_status(cosmo);    
+  }
+  return gsl_spline_eval(cosmo->data.fgrowth, a, cosmo->data.accelerator);
+}
+
+void ccl_growth_rates(ccl_cosmology * cosmo, int na, double a[na], double output[na])
+{
+  if (!cosmo->computed_growth){
+    ccl_cosmology_compute_growth(cosmo);
+    ccl_check_status(cosmo);    
+  }
+  for (int i=0; i<na; i++){
+    output[i]=gsl_spline_eval(cosmo->data.fgrowth,a[i],cosmo->data.accelerator);
+  }
 }
