@@ -45,7 +45,7 @@ typedef struct ccl_parameters {
 
 typedef struct ccl_data{
   // These are all functions of the scale factor a.
-  // Distances are defined in EITHER Mpc or Mpc/h (TBC)
+  // Distances are defined in Mpc
   double growth0;
   gsl_spline * chi;
   gsl_spline * growth;

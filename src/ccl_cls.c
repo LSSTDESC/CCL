@@ -7,10 +7,14 @@
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
-#include <string.h>
 #include "gsl/gsl_errno.h"
 #include "gsl/gsl_integration.h"
 
+//Spline creator
+//n     -> number of points
+//x     -> x-axis
+//y     -> f(x)-axis
+//y0,yf -> values of f(x) to use beyond the interpolation range
 static SplPar *spline_init(int n,double *x,double *y,double y0,double yf)
 {
   SplPar *spl=malloc(sizeof(SplPar));
@@ -34,6 +38,7 @@ static SplPar *spline_init(int n,double *x,double *y,double y0,double yf)
   return spl;
 }
 
+//Evaluates spline at x checking for bound errors
 static double spline_eval(double x,SplPar *spl)
 {
   if(x<=spl->x0)
@@ -44,11 +49,13 @@ static double spline_eval(double x,SplPar *spl)
     return gsl_spline_eval(spl->spline,x,spl->intacc);
 }
 
+//Wrapper around spline_eval with GSL function syntax
 static double speval_bis(double x,void *params)
 {
   return spline_eval(x,(SplPar *)params);
 }
 
+//Spline destructor
 static void spline_free(SplPar *spl)
 {
   gsl_spline_free(spl->spline);
@@ -56,12 +63,14 @@ static void spline_free(SplPar *spl)
   free(spl);
 }
 
+//Params for lensing kernel integrand
 typedef struct {
   double chi;
   SplPar *spl_pz;
   ccl_cosmology *cosmo;
 } IntLensPar;
 
+//Integrand for lensing kernel
 static double integrand_wl(double chip,void *params)
 {
   IntLensPar *p=(IntLensPar *)params;
@@ -77,6 +86,12 @@ static double integrand_wl(double chip,void *params)
     return h*pz*(chip-chi)/chip;
 }
 
+//Integral to compute lensing window function
+//chi     -> comoving distance
+//cosmo   -> ccl_cosmology object
+//spl_pz  -> normalized N(z) spline
+//chi_max -> maximum comoving distance to which the integral is computed
+//win     -> result is stored here
 static int window_lensing(double chi,ccl_cosmology *cosmo,SplPar *spl_pz,double chi_max,double *win)
 {
   int status;
@@ -101,9 +116,20 @@ static int window_lensing(double chi,ccl_cosmology *cosmo,SplPar *spl_pz,double 
   return 0;
 }
 
+//CCL_ClTracer creator
+//cosmo   -> ccl_cosmology object
+//tracer_type -> type of tracer. Supported: CL_TRACER_NC, CL_TRACER_WL
+//nz_n -> number of points for N(z)
+//z_n  -> array of z-values for N(z)
+//n    -> corresponding N(z)-values. Normalization is irrelevant
+//        N(z) will be set to zero outside the range covered by z_n
+//nz_b -> number of points for b(z)
+//z_b  -> array of z-values for b(z)
+//b    -> corresponding b(z)-values.
+//        b(z) will be assumed constant outside the range covered by z_n
 static CCL_ClTracer *cl_tracer_new(ccl_cosmology *cosmo,int tracer_type,
-			    int nz_n,double *z_n,double *n,
-			    int nz_b,double *z_b,double *b)
+				   int nz_n,double *z_n,double *n,
+				   int nz_b,double *z_b,double *b)
 {
   int status=0;
   CCL_ClTracer *clt=malloc(sizeof(CCL_ClTracer));
@@ -237,15 +263,27 @@ static CCL_ClTracer *cl_tracer_new(ccl_cosmology *cosmo,int tracer_type,
   return clt;
 }
 
+//CCL_ClTracer constructor with error checking
+//cosmo   -> ccl_cosmology object
+//tracer_type -> type of tracer. Supported: CL_TRACER_NC, CL_TRACER_WL
+//nz_n -> number of points for N(z)
+//z_n  -> array of z-values for N(z)
+//n    -> corresponding N(z)-values. Normalization is irrelevant
+//        N(z) will be set to zero outside the range covered by z_n
+//nz_b -> number of points for b(z)
+//z_b  -> array of z-values for b(z)
+//b    -> corresponding b(z)-values.
+//        b(z) will be assumed constant outside the range covered by z_n
 CCL_ClTracer *ccl_cl_tracer_new(ccl_cosmology *cosmo,int tracer_type,
-				       int nz_n,double *z_n,double *n,
-				       int nz_b,double *z_b,double *b)
+				int nz_n,double *z_n,double *n,
+				int nz_b,double *z_b,double *b)
 {
   CCL_ClTracer *clt=cl_tracer_new(cosmo,tracer_type,nz_n,z_n,n,nz_b,z_b,b);
   ccl_check_status(cosmo);
   return clt;
 }
 
+//CCL_ClTracer destructor
 void ccl_cl_tracer_free(CCL_ClTracer *clt)
 {
   spline_free(clt->spl_nz);
@@ -256,6 +294,11 @@ void ccl_cl_tracer_free(CCL_ClTracer *clt)
   free(clt);
 }
 
+//Transfer function for number counts
+//l -> angular multipole
+//k -> wavenumber modulus
+//cosmo -> ccl_cosmology object
+//clt -> CCL_ClTracer object (must be of the CL_TRACER_NC type)
 static double transfer_nc(int l,double k,ccl_cosmology *cosmo,CCL_ClTracer *clt)
 {
   double chi=(l+0.5)/k;
@@ -277,6 +320,11 @@ static double transfer_nc(int l,double k,ccl_cosmology *cosmo,CCL_ClTracer *clt)
   }
 }
 
+//Transfer function for shear
+//l -> angular multipole
+//k -> wavenumber modulus
+//cosmo -> ccl_cosmology object
+//clt -> CCL_ClTracer object (must be of the CL_TRACER_WL type)
 static double transfer_wl(int l,double k,ccl_cosmology *cosmo,CCL_ClTracer *clt)
 {
   double chi=(l+0.5)/k;
@@ -294,6 +342,11 @@ static double transfer_wl(int l,double k,ccl_cosmology *cosmo,CCL_ClTracer *clt)
     return 0;
 }
 
+//Wrapper for transfer function
+//l -> angular multipole
+//k -> wavenumber modulus
+//cosmo -> ccl_cosmology object
+//clt -> CCL_ClTracer object
 static double transfer_wrap(int l,double k,ccl_cosmology *cosmo,CCL_ClTracer *clt)
 {
   if(clt->tracer_type==CL_TRACER_NC)
@@ -304,6 +357,7 @@ static double transfer_wrap(int l,double k,ccl_cosmology *cosmo,CCL_ClTracer *cl
     return -1;
 }
 
+//Params for power spectrum integrand
 typedef struct {
   int l;
   ccl_cosmology *cosmo;
@@ -311,6 +365,7 @@ typedef struct {
   CCL_ClTracer *clt2;
 } IntClPar;
 
+//Integrand for integral power spectrum
 static double cl_integrand(double lk,void *params)
 {
   double t1,t2;
@@ -324,6 +379,10 @@ static double cl_integrand(double lk,void *params)
 }
 
 //Figure out k intervals where the Limber kernel has support
+//clt1 -> tracer #1
+//clt2 -> tracer #2
+//l    -> angular multipole
+//lkmin, lkmax -> log10 of the range of scales where the transfer functions have support
 static void get_k_interval(CCL_ClTracer *clt1,CCL_ClTracer *clt2,int l,
 			   double *lkmin,double *lkmax)
 {
@@ -354,6 +413,11 @@ static void get_k_interval(CCL_ClTracer *clt1,CCL_ClTracer *clt2,int l,
   *lkmin=fmax(-4,log10(0.5*(l+0.5)/chimax));
 }
 
+//Compute angular power spectrum between two bins
+//cosmo -> ccl_cosmology object
+//l -> angular multipole
+//clt1 -> tracer #1
+//clt2 -> tracer #2
 double ccl_angular_cl(ccl_cosmology *cosmo,int l,CCL_ClTracer *clt1,CCL_ClTracer *clt2)
 {
   int status=0;
@@ -383,4 +447,4 @@ double ccl_angular_cl(ccl_cosmology *cosmo,int l,CCL_ClTracer *clt1,CCL_ClTracer
   return M_LN10*result/(l+0.5);
 }
 //TODO: implement RSD? magnification? IA?
-//TODO: using linear power spectrum
+//TODO: currently using linear power spectrum
