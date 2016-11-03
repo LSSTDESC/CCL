@@ -43,3 +43,6 @@
 #define EPSREL_DIST 1E-6
 #define EPSREL_GROWTH 1E-6
 #define EPS_SCALEFAC_GROWTH 1E-6
+
+//Pi
+#define pi 3.14159265358979
