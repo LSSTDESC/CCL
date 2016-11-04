@@ -405,15 +405,14 @@ void ccl_cosmology_compute_power(ccl_cosmology * cosmo){
    
     switch(cosmo->config.transfer_function_method){
         case ccl_bbks:
-            ccl_cosmology_compute_power_bbks(cosmo);
-            break;
+	  ccl_cosmology_compute_power_bbks(cosmo);
+	  break;
         case ccl_boltzmann_class:
-           ccl_cosmology_compute_power_class(cosmo);
-           break;
+	  ccl_cosmology_compute_power_class(cosmo);
+	  break;
         default:
 	  cosmo->status = CCL_ERROR_INCONSISTENT;
 	  sprintf(cosmo->status_message ,"ccl_power.c: ccl_cosmology_compute_power(): Unknown or non-implemented transfer function method: %d \n",cosmo->config.transfer_function_method);
-	  return;
     }
     cosmo->computed_power = true;
     ccl_check_status(cosmo);

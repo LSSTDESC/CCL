@@ -101,7 +101,7 @@ static void compare_bbks(int i_model,struct bbks_data * data)
   }
   fclose(f);
 
-  free(cosmo);
+  ccl_cosmology_free(cosmo);
 }
 
 CTEST2(bbks,model_1) {
