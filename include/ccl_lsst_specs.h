@@ -12,6 +12,9 @@ double dNdz_sources_unnormed(double z, void *params);
 double dNdz_sources_tomog(double z, void * dNdz_params, double bin_zmin, double bin_zmax);
 double photoz(double z_ph, void * params);
 static double norm_integrand(double z, void* params);
+double dNdz_clustering_tomog(double z, double bin_zmin, double bin_zmax);
+static double norm_integrand_clustering(double z, void* params);
+double photoz_clustering(double z_ph, void *params);
 
 // Structures for the parameters of integrands related to the WL source redshift distribution
 struct dNdz_sources_params{

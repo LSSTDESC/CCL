@@ -51,11 +51,11 @@ int main(int argc,char **argv){
 
 	fclose(output);
 
-	//Try splitting dNdz into 5 redshift bins
+	//Try splitting dNdz (lensing) into 5 redshift bins
 	double tmp1,tmp2,tmp3,tmp4,tmp5;
-	output = fopen("./tests/specs_test_tomo.out", "w");     
+	output = fopen("./tests/specs_test_tomo_lens.out", "w");     
 	for (z=0; z<100; z=z+1){
-		z_test = 0.05*z;
+		z_test = 0.035*z;
 		dNdz_tomo = dNdz_sources_tomog(z_test, p_test, 0.,6.); 
 		tmp1 = dNdz_sources_tomog(z_test, p_test, 0.,0.6); 
 		tmp2 = dNdz_sources_tomog(z_test, p_test, 0.6,1.2); 
@@ -66,6 +66,23 @@ int main(int argc,char **argv){
 	}
 
 	fclose(output);
+
+
+	//Try splitting dNdz (clustering) into 5 redshift bins
+	output = fopen("./tests/specs_test_tomo_clu.out", "w");     
+	for (z=0; z<100; z=z+1){
+		z_test = 0.035*z;
+		dNdz_tomo = dNdz_clustering_tomog(z_test, 0.,6.); 
+		tmp1 = dNdz_clustering_tomog(z_test, 0.,0.6); 
+		tmp2 = dNdz_clustering_tomog(z_test, 0.6,1.2); 
+		tmp3 = dNdz_clustering_tomog(z_test, 1.2,1.8); 
+		tmp4 = dNdz_clustering_tomog(z_test, 1.8,2.4); 
+		tmp5 = dNdz_clustering_tomog(z_test, 2.4,3.0); 
+		fprintf(output, "%f %f %f %f %f %f %f\n", z_test,tmp1,tmp2,tmp3,tmp4,tmp5,dNdz_tomo);
+	}
+
+	fclose(output);
+
 
 }
 
