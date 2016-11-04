@@ -1,4 +1,4 @@
-#include "ccl_placeholder.h"
+#include "ccl_lsst_specs.h"
 #include <stdio.h>
 #include <math.h>
 
@@ -25,13 +25,16 @@ int main(int argc,char **argv){
 	val_params.type_ = 1;  // Set type 
 	p_test = &val_params;
 
-	/* Call the dNdz for weak lensing sources, the clustering dNdz, and the photometric redshift errors for src and clustering galaxies at each z and save the output */
+	/* Call the dNdz for weak lensing sources, the clustering dNdz, 
+           and the photometric redshift errors for src and clustering 
+           galaxies at each z and save the output */
 	// This is to test that the functions can be called and give something reasonable.
 
 	// Open file for writing:
-	output = fopen("./tests/specs_output_test.dat", "w");	
+	output = fopen("./tests/specs_test.out", "w");	
 
-	// Test also the function for the bias in the clustering sample (requires setting up a cosmology to get the growth rate)
+	// Test also the function for the bias in the clustering sample 
+	// (requires setting up a cosmology to get the growth rate)
 	ccl_parameters params = ccl_parameters_create_flat_lcdm(Omega_c, Omega_b, h, A_s, n_s);
 	cosmo_1 = ccl_cosmology_create(params, default_config);
 
@@ -47,6 +50,23 @@ int main(int argc,char **argv){
 	}
 
 	fclose(output);
+
+	//Try splitting dNdz into 5 redshift bins
+	double tmp1,tmp2,tmp3,tmp4,tmp5;
+	output = fopen("./tests/specs_test_tomo.out", "w");     
+	for (z=0; z<100; z=z+1){
+		z_test = 0.05*z;
+		dNdz_tomo = dNdz_sources_tomog(z_test, p_test, 0.,6.); 
+		tmp1 = dNdz_sources_tomog(z_test, p_test, 0.,0.6); 
+		tmp2 = dNdz_sources_tomog(z_test, p_test, 0.6,1.2); 
+		tmp3 = dNdz_sources_tomog(z_test, p_test, 1.2,1.8); 
+		tmp4 = dNdz_sources_tomog(z_test, p_test, 1.8,2.4); 
+		tmp5 = dNdz_sources_tomog(z_test, p_test, 2.4,3.0); 
+		fprintf(output, "%f %f %f %f %f %f %f\n", z_test,tmp1,tmp2,tmp3,tmp4,tmp5,dNdz_tomo);
+	}
+
+	fclose(output);
+
 }
 
 
