@@ -163,21 +163,19 @@ void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo){
   int nk = N_K;
   double amin = A_SPLINE_MIN;
   double amax = A_SPLINE_MAX;
-  int ak = N_A;
+  int na = N_A;
   
   // The x array is initially k, but will later
   // be overwritten with log(k)
   double * x = ccl_log_spacing(kmin, kmax, nk);
-  double * z = malloc(sizeof(double)*nk);
-  //The 2D interpolation routines access the function values y_{a_ik_j} with the following ordering:
-  //y_ij = ya[j*N_a + i]
-  //with i = 0,...,N_a-1 and j = 0,...,N_k-1.
   double * y = malloc(sizeof(double)*nk);
-  
-  if (z==NULL||y==NULL|| x==NULL){
+  double * z = ccl_linear_spacing(amin,amax, na);
+  double * y2d = malloc(nk * na * sizeof(double));
+  if (z==NULL||y==NULL|| x==NULL || y2d==0){
     free(x);
     free(y);
     free(z);
+    free(y2d);
     cosmo->status = 4;
     strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_class(): memory allocation error\n");
   }
@@ -188,15 +186,12 @@ void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo){
     int s;
     for (int i=0; i<nk; i++){
       s =spectra_pk_at_k_and_z(&ba, &pm, &sp,x[i],0.0, &Z,&ic);
-      z[i] = log(Z);
-      //TODO: add loop over a for P_nl once 2D interpolation works!
-      s = spectra_pk_nl_at_k_and_z(&ba, &pm, &sp,x[i],0.0, &Z);
       y[i] = log(Z);
       x[i] = log(x[i]);
     }
   
     gsl_spline * log_power_lin = gsl_spline_alloc(K_SPLINE_TYPE, nk);
-    int status = gsl_spline_init(log_power_lin, x, z, nk);
+    int status = gsl_spline_init(log_power_lin, x, y, nk);
     if (status){
       gsl_spline_free(log_power_lin);
       cosmo->status = 4;
@@ -208,10 +203,20 @@ void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo){
  
 
   
-    gsl_spline * log_power_nl = gsl_spline_alloc(K_SPLINE_TYPE, nk);
-    status = gsl_spline_init(log_power_nl, x, y, nk);
+    gsl_spline2d * log_power_nl = gsl_spline2d_alloc(PNL_SPLINE_TYPE, nk,na);
+    for (int i=0; i<nk; i++){
+      for (int j = 0; j < na; j++){
+      //The 2D interpolation routines access the function values y_{k_ia_j} with the following ordering:
+      //y_ij = y2d[j*N_k + i]
+      //with i = 0,...,N_k-1 and j = 0,...,N_a-1.
+          s = spectra_pk_nl_at_k_and_z(&ba, &pm, &sp,exp(x[i]),1./z[j]-1., &Z);
+          y2d[j*nk+i] = log(Z);
+      }
+    }
+
+    status = gsl_spline2d_init(log_power_nl, x, z, y2d,nk,na);
     if (status){
-      gsl_spline_free(log_power_nl);
+      gsl_spline2d_free(log_power_nl);
       cosmo->status = 4;
       strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_class(): Error creating log_power_nl spline\n");
       return;
@@ -222,7 +227,6 @@ void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo){
     free(x);
     free(y);
     free(z);
-  
   }
   if (spectra_free(&sp) == _FAILURE_) {
     cosmo->status = 12;
@@ -279,23 +283,28 @@ TASK: provide spline for the BBKS power spectrum with baryonic correction
 
 void ccl_cosmology_compute_power_bbks(ccl_cosmology * cosmo){
 
-
-    double kmin = K_MIN;
-    double kmax = K_MAX;
-    int nk = N_K;
-
-    // The x array is initially k, but will later
-    // be overwritten with log(k)
-    double * x = ccl_log_spacing(kmin, kmax, nk);
-    double * y = malloc(sizeof(double)*nk);
-
-    if (y==NULL|| x==NULL){
-        free(x);
-        free(y);
-        cosmo->status = 4;
-        strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_bbks(): memory allocation error\n");
-        return;
-    }
+  double kmin = K_MIN;
+  double kmax = K_MAX;
+  int nk = N_K;
+  double amin = A_SPLINE_MIN;
+  double amax = A_SPLINE_MAX;
+  int na = N_A;
+  
+  // The x array is initially k, but will later
+  // be overwritten with log(k)
+  double * x = ccl_log_spacing(kmin, kmax, nk);
+  double * y = malloc(sizeof(double)*nk);
+  double * z = ccl_linear_spacing(amin,amax, na);
+  double * y2d = malloc(nk * na * sizeof(double));
+  if (z==NULL||y==NULL|| x==NULL || y2d==0){
+    free(x);
+    free(y);
+    free(z);
+    free(y2d);
+    cosmo->status = 4;
+    strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_bbks(): memory allocation error\n");
+    return;
+  }
 
     // After this loop k will contain 
     for (int i=0; i<nk; i++){
@@ -308,6 +317,8 @@ void ccl_cosmology_compute_power_bbks(ccl_cosmology * cosmo){
     if (isnan(cosmo->params.sigma_8)){
         free(x);
         free(y);
+        free(z);
+        free(y2d);
         cosmo->status = 11;
         strcpy(cosmo->status_message ,"ccl_power.c: ccl_cosmology_compute_power_bbks(): sigma_8 not set, required for BBKS\n");
         return;
@@ -318,6 +329,8 @@ void ccl_cosmology_compute_power_bbks(ccl_cosmology * cosmo){
     if (status){
       free(x);
       free(y);
+      free(z);
+      free(y2d);
       gsl_spline_free(log_power_lin);
       cosmo->status = 4;
       strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_bbks(): Error creating log_power_lin spline\n");
@@ -328,6 +341,8 @@ void ccl_cosmology_compute_power_bbks(ccl_cosmology * cosmo){
     if (status){
       free(x);
       free(y);
+      free(z);
+      free(y2d);
       gsl_spline_free(log_power_lin);
       cosmo->status = 10;
       strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_bbks(): error calling ccl_sigma8()\n");
@@ -354,10 +369,19 @@ void ccl_cosmology_compute_power_bbks(ccl_cosmology * cosmo){
       printf("WARNING: BBKS + config.matter_power_spectrum_method = %d not yet supported\n continuing with linear power spectrum\n",cosmo->config.matter_power_spectrum_method);
     }
 
-    gsl_spline * log_power_nl = gsl_spline_alloc(K_SPLINE_TYPE, nk);
-    status = gsl_spline_init(log_power_nl, x, y, nk);
+
+    gsl_spline2d * log_power_nl = gsl_spline2d_alloc(PNL_SPLINE_TYPE, nk,na);
+    for (int j = 0; j < na; j++){
+      double g2 = 2.*log(ccl_growth_factor(cosmo,z[j]));
+      for (int i=0; i<nk; i++){
+          y2d[j*nk+i] = y[i]+g2;
+      }
+    }
+
+    status = gsl_spline2d_init(log_power_nl, x, z, y2d,nk,na);
+
     if (status){
-      gsl_spline_free(log_power_nl);
+      gsl_spline2d_free(log_power_nl);
       cosmo->status = 4;
       strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_bbks(): Error creating log_power_nl spline\n");
     }
@@ -366,6 +390,8 @@ void ccl_cosmology_compute_power_bbks(ccl_cosmology * cosmo){
 
     free(x);
     free(y);
+    free(z);
+    free(y2d);
 }
 
 
@@ -431,14 +457,13 @@ double ccl_linear_matter_power(ccl_cosmology * cosmo, double a, double k){
 /*------ ROUTINE: ccl_nonlin_matter_power ----- 
 INPUT: ccl_cosmology * cosmo, a, k [1/Mpc]
 TASK: compute the nonlinear power spectrum at a given redshift
-      by rescaling using the growth function
 */
 
 double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double a, double k){
     ccl_cosmology_compute_power(cosmo);
     double log_p_1;
     // log power at a=1 (z=0)
-    int status = gsl_spline_eval_e(cosmo->data.p_nl, log(k), NULL,&log_p_1);
+    int status =  gsl_spline2d_eval_e(cosmo->data.p_nl, log(k),a,cosmo->data.accelerator_k ,cosmo->data.accelerator_a ,&log_p_1);
     if (status){
        cosmo->status = 13;
        sprintf(cosmo->status_message ,"ccl_power.c: ccl_nonlin_matter_power(): Spline evaluation error\n");
@@ -446,12 +471,5 @@ double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double a, double k){
     }
 
     double p_1 = exp(log_p_1);
-
-    if (a==1){
-        return p_1;
-    }
-    // WARNING: NOT CORRECT, but 2d interpolation in gsl is still flaky!
-    double D = ccl_growth_factor(cosmo, a);
-    double p = D*D*p_1;
-    return p;
+    return p_1;
 }
