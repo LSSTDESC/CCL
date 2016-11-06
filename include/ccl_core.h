@@ -57,7 +57,7 @@ typedef struct ccl_data{
   // All these splines use the same accelerator so that
   // if one calls them successively with the same a value
   // they will be much faster.
-  gsl_interp_accel *accelerator_a;
+  gsl_interp_accel *accelerator;
   gsl_interp_accel *accelerator_k;
   //TODO: why not use interpolation accelerators?
 

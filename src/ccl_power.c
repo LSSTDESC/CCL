@@ -463,7 +463,7 @@ double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double a, double k){
     ccl_cosmology_compute_power(cosmo);
     double log_p_1;
     // log power at a=1 (z=0)
-    int status =  gsl_spline2d_eval_e(cosmo->data.p_nl, log(k),a,cosmo->data.accelerator_k ,cosmo->data.accelerator_a ,&log_p_1);
+    int status =  gsl_spline2d_eval_e(cosmo->data.p_nl, log(k),a,cosmo->data.accelerator_k ,cosmo->data.accelerator ,&log_p_1);
     if (status){
        cosmo->status = 13;
        sprintf(cosmo->status_message ,"ccl_power.c: ccl_nonlin_matter_power(): Spline evaluation error\n");
