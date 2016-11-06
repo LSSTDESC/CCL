@@ -306,14 +306,13 @@ void ccl_cosmology_compute_power_bbks(ccl_cosmology * cosmo){
     return;
   }
 
-    // After this loop k will contain 
+    // After this loop x will contain log(k)
     for (int i=0; i<nk; i++){
         y[i] = log(ccl_bbks_power(&cosmo->params, x[i]));
         x[i] = log(x[i]);
     }
 
     // now normalize to cosmo->params.sigma_8
-    printf("test %e\n",cosmo->params.sigma_8);
     if (isnan(cosmo->params.sigma_8)){
         free(x);
         free(y);
@@ -368,7 +367,6 @@ void ccl_cosmology_compute_power_bbks(ccl_cosmology * cosmo){
     if (cosmo->config.matter_power_spectrum_method != ccl_linear){
       printf("WARNING: BBKS + config.matter_power_spectrum_method = %d not yet supported\n continuing with linear power spectrum\n",cosmo->config.matter_power_spectrum_method);
     }
-
 
     gsl_spline2d * log_power_nl = gsl_spline2d_alloc(PNL_SPLINE_TYPE, nk,na);
     for (int j = 0; j < na; j++){
@@ -434,8 +432,7 @@ TASK: compute the linear power spectrum at a given redshift
 double ccl_linear_matter_power(ccl_cosmology * cosmo, double a, double k){
     ccl_cosmology_compute_power(cosmo);
     double log_p_1;
-    // log power at a=1 (z=0)
-    int status = gsl_spline_eval_e(cosmo->data.p_lin, log(k), NULL,&log_p_1);
+    int status = gsl_spline_eval_e(cosmo->data.p_lin, log(k),NULL,&log_p_1);
     if (status){
         cosmo->status = 13;
         sprintf(cosmo->status_message ,"ccl_power.c: ccl_linear_matter_power(): Spline evaluation error\n");
@@ -463,7 +460,7 @@ double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double a, double k){
     ccl_cosmology_compute_power(cosmo);
     double log_p_1;
     // log power at a=1 (z=0)
-    int status =  gsl_spline2d_eval_e(cosmo->data.p_nl, log(k),a,cosmo->data.accelerator_k ,cosmo->data.accelerator ,&log_p_1);
+    int status =  gsl_spline2d_eval_e(cosmo->data.p_nl, log(k),a,NULL ,NULL ,&log_p_1);
     if (status){
        cosmo->status = 13;
        sprintf(cosmo->status_message ,"ccl_power.c: ccl_nonlin_matter_power(): Spline evaluation error\n");

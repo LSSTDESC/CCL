@@ -2,7 +2,6 @@
 #include "ctest.h"
 
 CTEST(spacing_tests, linear_spacing_simple){
-    int n;
     double * m = ccl_linear_spacing(0.0, 1.0, 2);
     ASSERT_NOT_NULL(m);
     ASSERT_DBL_NEAR_TOL(0.0, m[0], 1e-10);
