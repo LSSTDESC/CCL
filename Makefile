@@ -32,7 +32,7 @@ class:
 
 test: $(TESTS) $(LIB)
 	$(CC) $(CFLAGS) $(TESTS) -o tests/example -Llib -lccl $(LDFLAGS)
-	LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:lib/ tests/ccl_test_specs
+	LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:lib/ tests/example
 #	$(CC) $(CFLAGS) $(TESTS) -o tests/ccl_test -Llib -lccl $(LDFLAGS)
 #	LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:lib/ tests/ccl_test
 

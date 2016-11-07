@@ -23,11 +23,17 @@
 
 int main(int argc,char **argv)
 {
+  printf("Example program which goes through basic of CCL library. For more information see file 'tutorial.md'\n\n");
+  
   //Initialize cosmological parameters
-  printf("Initializing cosmological parameters with call for <ccl_parameters_create>\n\n");
+  printf("Initialize cosmological parameters with call for <ccl_parameters_create>\n\n");
   printf("\tccl_parameters params=ccl_parameters_create(0.25,0.05,0.00,0.00,-1.00,0.00,0.70,2.1E-9,0.96,-1,NULL,NULL);\n\n");
-  system("read");
   ccl_parameters params=ccl_parameters_create(OC,OB,OK,ON,W0,WA,HH,AS,NS,-1,NULL,NULL);
 
+  //Initialize cosmology object given cosmo params
+  printf("Initialize cosmology with call for <ccl_cosmology_create>\n\n");
+  printf("\tccl_cosmology *cosmo=ccl_cosmology_create(params,default_config);\n\n");
+  ccl_cosmology *cosmo=ccl_cosmology_create(params,default_config);
+  
   return 0;
 }
