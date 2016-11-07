@@ -1,7 +1,7 @@
 #pragma once
 #include "ccl_core.h"
-double bias_clustering(ccl_cosmology * cosmo, double a); 
-double dNdz_tomog(double z, void * params, double bin_zmin, double bin_zmax, double (*dNdz)(double,void *), double (*sigmazin)(double));
+double ccl_specs_bias_clustering(ccl_cosmology * cosmo, double a); 
+int ccl_specs_dNdz_tomog(double z, int dNdz_type, double bin_zmin, double bin_zmax,double *tomoout);
 
 // Structures for the parameters of integrands related to the WL source redshift distribution
 struct dNdz_sources_params{
@@ -18,3 +18,12 @@ struct norm_params{
   double (*sigmaz)(double); //Calls the photo-z scatter model
   double (*unnormedfunc)(double,void *); 
 };
+
+// Specifying the dNdz
+// lensing (Chang et al 2013)
+#define DNDZ_WL_CONS 1  //k=0.5
+#define DNDZ_WL_FID 2  //k=1
+#define DNDZ_WL_OPT 3 //k=2
+// Clustering
+#define DNDZ_NC 4
+
