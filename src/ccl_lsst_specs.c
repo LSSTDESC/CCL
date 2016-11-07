@@ -67,6 +67,11 @@ WARNING:  This is not the function to call directly and use (that is dNdz_source
 TODO: if incorrect type, use ccl_error to exit.
 */
 
+// struct of params to pass to ccl_specs_dNdz_sources_unnormed
+struct dNdz_sources_params{
+  int type_; // Sets which Chang et al. 2013 dNdz you are using; pick 1 for k=5, 2 for k=1, and 3 for k=2.
+};
+
 static double ccl_specs_dNdz_sources_unnormed(double z, void *params)
 {
 	double alpha, beta, z0=0.0, zdivz0;
@@ -106,6 +111,12 @@ TASK:  Returns the value of p(z_photo, z). Change this function to
        change the way true-z and photo-z's are related.
        This has to be in a form that gsl can integrate.
 */
+// struct of parameters to pass to photo_z
+struct pz_params{
+  double z_true; // Gives the true redshift at which to evaluate 
+  double (*sigmaz)(double); //Calls the photo-z scatter model
+};
+
 static double ccl_specs_photoz(double z_ph, void *params){
 	
 	struct pz_params * p = (struct pz_params *) params;
@@ -123,6 +134,17 @@ TASK:  Returns the integrand which is integrated to get the normalization of
        dNdz in a given photometric redshift bin (the denominator from dNdz_sources_tomog). 
        This has to be an separate function that gsl can integrate.
 */
+
+// struct of parameters to pass to norm_integrand
+struct norm_params{
+  double bin_zmin_;
+  double bin_zmax_;
+  int type_;
+  double (*sigmaz)(double); //Calls the photo-z scatter model
+  double (*unnormedfunc)(double,void *);
+};
+
+
 static double ccl_specs_norm_integrand(double z, void* params){
 	
 	struct pz_params *pz_p, valparams; // parameters for the photoz pdf wrt true-z
