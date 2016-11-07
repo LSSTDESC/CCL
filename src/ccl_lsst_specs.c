@@ -13,51 +13,51 @@
 // ---- LSST redshift distributions & current specs -----
 // ---- Consider spline for input dN/dz - pending
 
-/*------ ROUTINE: dNdz_clustering -----
+/*------ ROUTINE: ccl_specs_dNdz_clustering -----
 INPUT: double z
 TASK: Return unnormalized dN/dz for clustering sample
 TODO: Tomography/convolution with photo-z/redshift range of validity?
 */
-double dNdz_clustering(double z, void* params)
+static double ccl_specs_dNdz_clustering(double z, void* params)
 {
   double z0=0.3; //probably move this to the cosmo params file
   double zdivz0=z/z0;
   return 0.5/z0*zdivz0*zdivz0*exp(-zdivz0);
 }
 
-/*------ ROUTINE: sigmaz_clustering -----
+/*------ ROUTINE: ccl_specs_sigmaz_clustering -----
 INPUT: double z
 TASK: Return sigma(z), the photo-z dispersion, for the clustering sample
       We are assuming Gaussian uncertainties.
 */
-double sigmaz_clustering(double z)
+static double ccl_specs_sigmaz_clustering(double z)
 {
   return 0.03*(1.0+z);
 }
 
-/*------ ROUTINE: sigmaz_sources -----
+/*------ ROUTINE: ccl_specs_sigmaz_sources -----
 INPUT: double z
 TASK: Return sigma(z), the photo-z dispersion, for the lensing sample
       We are assuming Gaussian uncertainties.
 */
-double sigmaz_sources(double z)
+static double ccl_specs_sigmaz_sources(double z)
 {
   return 0.05*(1.0+z);
 }
 
-/*------ ROUTINE: bias_clustering -----
+/*------ ROUTINE: ccl_specs_bias_clustering -----
 INPUT: ccl_cosmology * cosmo, double a
 TASK: Return b(z), the bias of the clustering sample.
       This is input from LSS group.
 TODO: Check normalization of growth is consistent with LSS input.
 */
-double bias_clustering(ccl_cosmology * cosmo, double a)
+double ccl_specs_bias_clustering(ccl_cosmology * cosmo, double a)
 {
   double D = ccl_growth_factor(cosmo, a);
   return 0.95/D;
 }
 
-/*------ ROUTINE: dNdz_sources_unnormed -----
+/*------ ROUTINE: ccl_specs_dNdz_sources_unnormed -----
 INPUT: double z, void* params
        void * params includes "type", indicating which Chang et al 2013 dNdz we want.
        type = 1 <-> k=0.5, type = 2 <-> k=1, type =3 <-> k=2.
@@ -67,7 +67,7 @@ WARNING:  This is not the function to call directly and use (that is dNdz_source
 TODO: if incorrect type, use ccl_error to exit.
 */
 
-double dNdz_sources_unnormed(double z, void *params)
+static double ccl_specs_dNdz_sources_unnormed(double z, void *params)
 {
 	double alpha, beta, z0, zdivz0;
  
@@ -102,13 +102,13 @@ double dNdz_sources_unnormed(double z, void *params)
   }
 }
 
-/*------ ROUTINE: photoz -----
+/*------ ROUTINE: ccl_specs_photoz -----
 INPUT: double z_ph, void *params
 TASK:  Returns the value of p(z_photo, z). Change this function to 
        change the way true-z and photo-z's are related.
        This has to be in a form that gsl can integrate.
 */
-double photoz(double z_ph, void *params){
+static double ccl_specs_photoz(double z_ph, void *params){
 	
 	struct pz_params * p = (struct pz_params *) params;
         double z_tr = p->z_true;
@@ -119,13 +119,13 @@ double photoz(double z_ph, void *params){
 	return result;
 	}
 
-/*------ ROUTINE: norm_integrand -----
+/*------ ROUTINE: ccl_specs_norm_integrand -----
 INPUT: double z_ph, void *params
 TASK:  Returns the integrand which is integrated to get the normalization of 
        dNdz in a given photometric redshift bin (the denominator from dNdz_sources_tomog). 
        This has to be an separate function that gsl can integrate.
 */
-static double norm_integrand(double z, void* params){
+static double ccl_specs_norm_integrand(double z, void* params){
 	
 	struct pz_params *pz_p, valparams; // parameters for the photoz pdf wrt true-z
 	double * pz_int; // pointer to the value of the integral over the photoz model
@@ -153,7 +153,7 @@ static double norm_integrand(double z, void* params){
 	// Do the intermediary integral over the model relating  photo-z to true-z	
         gsl_integration_cquad_workspace * workspace = gsl_integration_cquad_workspace_alloc (1000);
         gsl_function F;
-        F.function = photoz;
+        F.function = ccl_specs_photoz;
         F.params = pz_p;
         gsl_integration_cquad(&F, z_min, z_max, 0.0,EPSREL_DNDZ,workspace,pz_int, NULL, NULL);
         gsl_integration_cquad_workspace_free(workspace);
@@ -164,14 +164,14 @@ static double norm_integrand(double z, void* params){
 }
 
 
-/*------ ROUTINE: dNdz_tomog -----
+/*------ ROUTINE: ccl_specs_dNdz_tomog -----
 INPUT: double z, , double bin_zmin, double bin_zmax, dNdz function pointer, sigma_z function pointer
        tomographic boundaries are [bin_zmin,bin_zmax]
 TASK:  dNdz in a particular tomographic bin, 
        convolved with a photo-z model (defined in photoz function), and normalized.
 */
 
-double dNdz_tomog(double z, void * dNdz_params, double bin_zmin, double bin_zmax, double (*dNdz)(double,void *), double (*sigmazin)(double)){
+double ccl_specs_dNdz_tomog(double z, void * dNdz_params, double bin_zmin, double bin_zmax, double (*dNdz)(double,void *), double (*sigmazin)(double)){
 
 	// This uses equation 33 of Joachimi & Schneider 2009, arxiv:0905.0393
 
@@ -203,7 +203,7 @@ double dNdz_tomog(double z, void * dNdz_params, double bin_zmin, double bin_zmax
 	numerator_integrand = &init_num;
 	gsl_integration_cquad_workspace * workspace_two = gsl_integration_cquad_workspace_alloc (1000);
         gsl_function G;
-        G.function = photoz;
+        G.function = ccl_specs_photoz;
         G.params = pz_p;
         gsl_integration_cquad(&G, bin_zmin, bin_zmax, 0.0,EPSREL_DNDZ,workspace_two,numerator_integrand, NULL, NULL);
         gsl_integration_cquad_workspace_free(workspace_two);	
@@ -212,7 +212,7 @@ double dNdz_tomog(double z, void * dNdz_params, double bin_zmin, double bin_zmax
 	denom_integrand =&init_denom;
 	gsl_integration_cquad_workspace * workspace_three = gsl_integration_cquad_workspace_alloc (1000);
         gsl_function H;
-        H.function = norm_integrand;
+        H.function = ccl_specs_norm_integrand;
         H.params = norm_p;
         gsl_integration_cquad(&H, z_min_sources, z_max_sources, 0.0,EPSREL_DNDZ,workspace_three,denom_integrand, NULL, NULL);
         gsl_integration_cquad_workspace_free(workspace_three);	

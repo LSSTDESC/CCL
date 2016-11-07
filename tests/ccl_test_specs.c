@@ -38,30 +38,17 @@ int main(int argc,char **argv){
 	ccl_parameters params = ccl_parameters_create_flat_lcdm(Omega_c, Omega_b, h, A_s, n_s);
 	cosmo_1 = ccl_cosmology_create(params, default_config);
 
-	for (z=0; z<100; z=z+1){
-		z_test = 0.03*z;
-		a_test = 1./ (1 + z_test);
-		dNdz_clust = dNdz_clustering(z_test,NULL);
-		sigz_src = sigmaz_sources(z_test);
-		sigz_clust = sigmaz_clustering(z_test);	
-		clust_bias = bias_clustering(cosmo_1, a_test);
-		dNdz_tomo = dNdz_tomog(z_test, p_test, 0.6, 1.2,dNdz_sources_unnormed,sigmaz_sources);  // The last two arguments here are the photo-z edges of the bins.
-		fprintf(output, "%f %f %f %f %f %f \n", z_test,dNdz_clust, sigz_src, sigz_clust, clust_bias, dNdz_tomo );
-	}
-
-	fclose(output);
-
 	//Try splitting dNdz (lensing) into 5 redshift bins
 	double tmp1,tmp2,tmp3,tmp4,tmp5;
 	output = fopen("./tests/specs_test_tomo_lens.out", "w");     
 	for (z=0; z<100; z=z+1){
 		z_test = 0.035*z;
-		dNdz_tomo = dNdz_tomog(z_test, p_test, 0.,6.,dNdz_sources_unnormed,sigmaz_sources); 
-		tmp1 = dNdz_tomog(z_test, p_test, 0.,0.6,dNdz_sources_unnormed,sigmaz_sources); 
-		tmp2 = dNdz_tomog(z_test, p_test, 0.6,1.2,dNdz_sources_unnormed,sigmaz_sources); 
-		tmp3 = dNdz_tomog(z_test, p_test, 1.2,1.8,dNdz_sources_unnormed,sigmaz_sources); 
-		tmp4 = dNdz_tomog(z_test, p_test, 1.8,2.4,dNdz_sources_unnormed,sigmaz_sources); 
-		tmp5 = dNdz_tomog(z_test, p_test, 2.4,3.0,dNdz_sources_unnormed,sigmaz_sources); 
+		dNdz_tomo = ccl_specs_dNdz_tomog(z_test, p_test, 0.,6.,dNdz_sources_unnormed,sigmaz_sources); 
+		tmp1 = ccl_specs_dNdz_tomog(z_test, p_test, 0.,0.6,dNdz_sources_unnormed,sigmaz_sources); 
+		tmp2 = ccl_specs_dNdz_tomog(z_test, p_test, 0.6,1.2,dNdz_sources_unnormed,sigmaz_sources); 
+		tmp3 = ccl_specs_dNdz_tomog(z_test, p_test, 1.2,1.8,dNdz_sources_unnormed,sigmaz_sources); 
+		tmp4 = ccl_specs_dNdz_tomog(z_test, p_test, 1.8,2.4,dNdz_sources_unnormed,sigmaz_sources); 
+		tmp5 = ccl_specs_dNdz_tomog(z_test, p_test, 2.4,3.0,dNdz_sources_unnormed,sigmaz_sources); 
 		fprintf(output, "%f %f %f %f %f %f %f\n", z_test,tmp1,tmp2,tmp3,tmp4,tmp5,dNdz_tomo);
 	}
 
@@ -71,12 +58,12 @@ int main(int argc,char **argv){
 	output = fopen("./tests/specs_test_tomo_clu.out", "w");     
 	for (z=0; z<100; z=z+1){
 		z_test = 0.035*z;
-		dNdz_tomo = dNdz_tomog(z_test, NULL,0.,6.,dNdz_clustering,sigmaz_clustering); 
-		tmp1 = dNdz_tomog(z_test, NULL,0.,0.6,dNdz_clustering,sigmaz_clustering); 
-		tmp2 = dNdz_tomog(z_test, NULL,0.6,1.2,dNdz_clustering,sigmaz_clustering); 
-		tmp3 = dNdz_tomog(z_test, NULL,1.2,1.8,dNdz_clustering,sigmaz_clustering);  
-		tmp4 = dNdz_tomog(z_test, NULL,1.8,2.4,dNdz_clustering,sigmaz_clustering); 
-		tmp5 = dNdz_tomog(z_test, NULL,2.4,3.0,dNdz_clustering,sigmaz_clustering); 
+		dNdz_tomo = ccl_specs_dNdz_tomog(z_test, NULL,0.,6.,dNdz_clustering,sigmaz_clustering); 
+		tmp1 = ccl_specs_dNdz_tomog(z_test, NULL,0.,0.6,dNdz_clustering,sigmaz_clustering); 
+		tmp2 = ccl_specs_dNdz_tomog(z_test, NULL,0.6,1.2,dNdz_clustering,sigmaz_clustering); 
+		tmp3 = ccl_specs_dNdz_tomog(z_test, NULL,1.2,1.8,dNdz_clustering,sigmaz_clustering);  
+		tmp4 = ccl_specs_dNdz_tomog(z_test, NULL,1.8,2.4,dNdz_clustering,sigmaz_clustering); 
+		tmp5 = ccl_specs_dNdz_tomog(z_test, NULL,2.4,3.0,dNdz_clustering,sigmaz_clustering); 
 		fprintf(output, "%f %f %f %f %f %f %f\n", z_test,tmp1,tmp2,tmp3,tmp4,tmp5,dNdz_tomo);
 	}
 
