@@ -57,29 +57,6 @@ double bias_clustering(ccl_cosmology * cosmo, double a)
   return 0.95/D;
 }
 
-/*------ ROUTINE: dNdz_sources_basic -----
-INPUT: double z, void* params
-       Argument void * params is not needed here but is required for gsl integration purposes, 
-       just pass NULL.
-TASK: Return fiducial (unnormalised) source redshift distribution from Chang et al. 2013 (k=1).
-WARNING: THIS IS NOT THE UP TO DATE VERSION, JUST A BASIC FUNCTION IN CASE YOU DON'T WANT TO USE dNdz_sources_tomog BELOW
-TODO: Probably remove this function eventually! 
-*/
-double dNdz_sources_basic(double z, void* params)
-{
-  
-  double alpha=1.24; 
-  double beta=1.01;
-  double z0=0.51;
-  double zdivz0=z/z0;
-
-  if((z>=z_min_sources) && (z<=z_max_sources)){
-    return pow(z,alpha)*exp(-pow(zdivz0,beta));
-  } else {
-    return 0.;
-  }
-}
-
 /*------ ROUTINE: dNdz_sources_unnormed -----
 INPUT: double z, void* params
        void * params includes "type", indicating which Chang et al 2013 dNdz we want.
@@ -137,7 +114,7 @@ double photoz(double z_ph, void *params){
         double z_tr = p->z_true;
 	double result;
 
-	result = exp(- (z_ph-z_tr)*(z_ph-z_tr) / (2.*p->sigmaz(z_tr)*p->sigmaz(z_tr))) / (pow(2.*pi,0.5)*p->sigmaz(z_tr)*p->sigmaz(z_tr));	
+	result = exp(- (z_ph-z_tr)*(z_ph-z_tr) / (2.*p->sigmaz(z_tr)*p->sigmaz(z_tr))) / (pow(2.*M_PI,0.5)*p->sigmaz(z_tr)*p->sigmaz(z_tr));	
 
 	return result;
 	}

@@ -44,9 +44,6 @@
 #define EPSREL_DNDZ 1E-6
 #define EPS_SCALEFAC_GROWTH 1E-6
 
-//Pi
-#define pi 3.14159265358979
-
 //LSST specific numbers
 #define z_min_sources 0.1
 #define z_max_sources 3.0
