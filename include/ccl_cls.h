@@ -20,6 +20,7 @@ typedef struct {
   double prefac_lensing; //3*O_M*H_0^2/2
   double chimax; //Limits in chi where we care about this tracer
   double chimin;
+  int has_rsd;
   SplPar *spl_nz; //Spline for normalized N(z)
   SplPar *spl_bz; //Spline for linear bias
   SplPar *spl_wL; //Spline for lensing kernel
@@ -28,7 +29,7 @@ typedef struct {
 //CCL_ClTracer creator
 CCL_ClTracer *ccl_cl_tracer_new(ccl_cosmology *cosmo,int tracer_type,
 				int nz_n,double *z_n,double *n,
-				int nz_b,double *z_b,double *b);
+				int nz_b,double *z_b,double *b,int has_rsd);
 //CCL_ClTracer destructor
 void ccl_cl_tracer_free(CCL_ClTracer *clt);
 //Computes limber power spectrum for two different tracers

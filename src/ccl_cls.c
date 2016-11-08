@@ -129,7 +129,7 @@ static int window_lensing(double chi,ccl_cosmology *cosmo,SplPar *spl_pz,double 
 //        b(z) will be assumed constant outside the range covered by z_n
 static CCL_ClTracer *cl_tracer_new(ccl_cosmology *cosmo,int tracer_type,
 				   int nz_n,double *z_n,double *n,
-				   int nz_b,double *z_b,double *b)
+				   int nz_b,double *z_b,double *b,int has_rsd)
 {
   int status=0;
   CCL_ClTracer *clt=malloc(sizeof(CCL_ClTracer));
@@ -192,6 +192,7 @@ static CCL_ClTracer *cl_tracer_new(ccl_cosmology *cosmo,int tracer_type,
     if(tracer_type==CL_TRACER_NC) {
       //Initialize bias spline
       clt->spl_bz=spline_init(nz_b,z_b,b,b[0],b[nz_b-1]);
+      clt->has_rsd=has_rsd;
       if(clt->spl_bz==NULL) {
 	spline_free(clt->spl_nz);
 	free(clt);
@@ -276,9 +277,9 @@ static CCL_ClTracer *cl_tracer_new(ccl_cosmology *cosmo,int tracer_type,
 //        b(z) will be assumed constant outside the range covered by z_n
 CCL_ClTracer *ccl_cl_tracer_new(ccl_cosmology *cosmo,int tracer_type,
 				int nz_n,double *z_n,double *n,
-				int nz_b,double *z_b,double *b)
+				int nz_b,double *z_b,double *b,int has_rsd)
 {
-  CCL_ClTracer *clt=cl_tracer_new(cosmo,tracer_type,nz_n,z_n,n,nz_b,z_b,b);
+  CCL_ClTracer *clt=cl_tracer_new(cosmo,tracer_type,nz_n,z_n,n,nz_b,z_b,b,has_rsd);
   ccl_check_status(cosmo);
   return clt;
 }
@@ -294,12 +295,12 @@ void ccl_cl_tracer_free(CCL_ClTracer *clt)
   free(clt);
 }
 
-//Transfer function for number counts
+//Transfer function for density contribution in number counts
 //l -> angular multipole
 //k -> wavenumber modulus
 //cosmo -> ccl_cosmology object
 //clt -> CCL_ClTracer object (must be of the CL_TRACER_NC type)
-static double transfer_nc(int l,double k,ccl_cosmology *cosmo,CCL_ClTracer *clt)
+static double transfer_dens(int l,double k,ccl_cosmology *cosmo,CCL_ClTracer *clt)
 {
   double chi=(l+0.5)/k;
   if(chi<=clt->chimax) {
@@ -314,6 +315,45 @@ static double transfer_nc(int l,double k,ccl_cosmology *cosmo,CCL_ClTracer *clt)
     gf=ccl_growth_factor(cosmo,a);
     h=cosmo->params.h*ccl_h_over_h0(cosmo,a)/CLIGHT_HMPC;
     return pz*bz*gf*h;
+  }
+  else {
+    return 0;
+  }
+}
+
+//Transfer function for RSD contribution in number counts
+//l -> angular multipole
+//k -> wavenumber modulus
+//cosmo -> ccl_cosmology object
+//clt -> CCL_ClTracer object (must be of the CL_TRACER_NC type)
+static double transfer_rsd(int l,double k,ccl_cosmology *cosmo,CCL_ClTracer *clt)
+{
+  double chi0=(l+0.5)/k;
+  double chi1=(l+1.5)/k;
+  if((chi0<=clt->chimax) || (chi1<=clt->chimax)) {
+    double z0,z1,pz0,pz1,gf0,gf1,fg0,fg1,h0,h1,term0,term1;
+    double a0=ccl_scale_factor_of_chi(cosmo,chi0);
+    double a1=ccl_scale_factor_of_chi(cosmo,chi1);
+    if(a0>0)
+      z0=1./a0-1;
+    else
+      z0=1E6;
+    if(a1>0)
+      z1=1./a1-1;
+    else
+      z1=1E6;
+    pz0=spline_eval(z0,clt->spl_nz);
+    pz1=spline_eval(z1,clt->spl_nz);
+    gf0=ccl_growth_factor(cosmo,a0);
+    gf1=ccl_growth_factor(cosmo,a1);
+    fg0=ccl_growth_rate(cosmo,a0);
+    fg1=ccl_growth_rate(cosmo,a1);
+    h0=cosmo->params.h*ccl_h_over_h0(cosmo,a0)/CLIGHT_HMPC;
+    h1=cosmo->params.h*ccl_h_over_h0(cosmo,a1)/CLIGHT_HMPC;
+    term0=pz0*fg0*gf0*h0*(1+8.*l)/((2*l+1.)*(2*l+1.));
+    term1=pz1*fg1*gf1*h1*sqrt((l+0.5)/(l+1.5))*4./(2*l+3);
+
+    return term0-term1;
   }
   else {
     return 0;
@@ -351,12 +391,18 @@ static double transfer_wl(int l,double k,ccl_cosmology *cosmo,CCL_ClTracer *clt)
 //clt -> CCL_ClTracer object
 static double transfer_wrap(int l,double k,ccl_cosmology *cosmo,CCL_ClTracer *clt)
 {
-  if(clt->tracer_type==CL_TRACER_NC)
-    return transfer_nc(l,k,cosmo,clt);
+  double transfer_out=0;
+  if(clt->tracer_type==CL_TRACER_NC) {
+    transfer_out+=transfer_dens(l,k,cosmo,clt);
+    if(clt->has_rsd)
+      transfer_out+=transfer_rsd(l,k,cosmo,clt);
+  }
   else if(clt->tracer_type==CL_TRACER_WL)
-    return transfer_wl(l,k,cosmo,clt);
+    transfer_out=transfer_wl(l,k,cosmo,clt);
   else
-    return -1;
+    transfer_out=-1;
+
+  return transfer_out;
 }
 
 //Params for power spectrum integrand
