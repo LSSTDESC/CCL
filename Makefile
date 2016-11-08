@@ -1,10 +1,6 @@
 CC=gcc
 CFLAGS=-Wall -Wpedantic -g -O0 -Iinclude -std=c99 -fPIC
 CFLAGS+=-I/opt/local/include
-#Elisa----
-CFLAGS+=-I/opt/local/include/gsl/
-CFLAGS+=-L /opt/local/lib
-#Elisa----
 LDFLAGS=-lgsl -lgslcblas   -lm -Lclass -lclass
 
 
