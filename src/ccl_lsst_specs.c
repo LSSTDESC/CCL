@@ -98,7 +98,7 @@ static double ccl_specs_dNdz_sources_unnormed(double z, void *params)
 
 	zdivz0= z/z0;
 
-	if((z>=z_min_sources) && (z<=z_max_sources)){
+	if((z>=Z_MIN_SOURCES) && (z<=Z_MAX_SOURCES)){
     		return pow(z,alpha)*exp(-pow(zdivz0,beta));
   	}else{
     		return 0.;
@@ -259,7 +259,7 @@ int ccl_specs_dNdz_tomog(double z, int dNdz_type, double bin_zmin, double bin_zm
         gsl_function H;
         H.function = ccl_specs_norm_integrand;
         H.params = norm_p;
-        gsl_integration_cquad(&H, z_min_sources, z_max_sources, 0.0,EPSREL_DNDZ,workspace_three,denom_integrand, NULL, NULL);
+        gsl_integration_cquad(&H, Z_MIN_SOURCES, Z_MAX_SOURCES, 0.0,EPSREL_DNDZ,workspace_three,denom_integrand, NULL, NULL);
         gsl_integration_cquad_workspace_free(workspace_three);	
 
 	*tomoout = dNdz_t * (*numerator_integrand) / (*denom_integrand);
