@@ -37,10 +37,10 @@ int ask_to_con(){
 int main(int argc,char **argv)
 {
 	int err;
-	printf("\n********************");
-	printf("\n* CCL TEST PROGRAM *");
-	printf("\n********************\n\n");
-	printf("* Example program which goes through basic of CCL library. For more information see file 'tutorial.md'\n*\n");
+	printf("\n***********************");
+	printf("\n* CCL EXAMPLE PROGRAM *");
+	printf("\n***********************\n\n");
+	printf("* Example program which goes through basic of CCL library. For more information see file 'readne.md' in root directory.\n*\n");
   
 	//Initialize cosmological parameters
 	printf("* Initialize cosmological parameters with\n*\n");
@@ -71,18 +71,7 @@ int main(int argc,char **argv)
 	printf("* Luminosity distance to z = %.3lf is chi = %.3lf Mpc/h\n",ZD,ccl_luminosity_distance(cosmo,1./(1+ZD)));
 	printf("* Growth factor and growth rate at z = %.3lf are D = %.3lf and f = %.3lf\n",ZD, ccl_growth_factor(cosmo,1./(1+ZD)),ccl_growth_rate(cosmo,1./(1+ZD)));
 	//Compute sigma_8
-  printf("* sigma_8 = %.3lf\n", ccl_sigma8(cosmo));
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
+	printf("* Computing sigma_8 (this may take a while)...\n");
+	printf("* sigma_8 = %.3lf\n", ccl_sigma8(cosmo));
 	return 0;
 }

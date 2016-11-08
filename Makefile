@@ -7,7 +7,7 @@ LDFLAGS=-lgsl -lgslcblas   -lm -Lclass -lclass
 OBJECTS=src/ccl_core.o src/ccl_utils.o src/ccl_error.o src/ccl_power.o src/ccl_cls.o src/ccl_placeholder.o src/ccl_background.o
 
 #TESTS=tests/ccl_test.c tests/ccl_test_utils.c tests/ccl_test_params.c tests/ccl_test_distances.c tests/ccl_test_growth.c tests/ccl_test_bbks.c
-TESTS=tests/ccl_sample_run.c
+TESTS=tests/min_code.c
 #
 # Tests to include at some point:
 # tests/ccl_test_power.c  tests/ccl_test_bbks.c
@@ -27,8 +27,11 @@ class:
 	cd class; $(MAKE)
 
 test: $(TESTS) $(LIB)
-	$(CC) $(CFLAGS) $(TESTS) -o tests/ccl_test -Llib -lccl $(LDFLAGS)
-	LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:lib/ tests/ccl_test
+	$(CC) $(CFLAGS) $(TESTS) -o tests/min_code -Llib -lccl $(LDFLAGS)
+	LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:lib/ tests/min_code
+
+example: tests/example.c
+	$(CC) $(CFLAGS) tests/example.c -o tests/example -Llib -lccl $(LDFLAGS)
 
 src/%.o: src/%.c
 	$(CC) -c $(CFLAGS) $< -o $@

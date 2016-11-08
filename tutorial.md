@@ -1,5 +1,5 @@
 # Documentation
-This documentat contains basic information about used structures and functions. At the end of document is provided code which implements these basic functions. See also test *ccl_sample_run.c*
+This document contains basic information about used structures and functions. At the end of document is provided code which implements these basic functions (also in *tests/min_code.c*). You can also try **make example**.
 ### Cosmological parameters
 Start by defining cosmological parameters defined in structure **ccl_parameters**. This structure (exact definition in *include/ccl_core.h*) contains densities of matter, parameters of dark energy (*w0, wa*), Hubble parameters, primordial poer spectra, radiation parameters, derived parameters (*sigma_8, Omega_1, z_star*) and modified growth rate.
 
@@ -26,11 +26,11 @@ where:
 
 For some specific cosmologies you can also use functions **ccl_parameters_create_flat_lcdm, ccl_parameters_create_flat_wcdm, ccl_parameters_create_flat_wacdm, ccl_parameters_create_lcdm**, which automatically set some parameters. For more information, see file *include/ccl_core.c*
 ### Cosmology object
-For CCL`s functions you need an object of type **ccl_cosmology**, which can be initalize by function **ccl_cosmology_create**
+For majority of CCL`s functions you need an object of type **ccl_cosmology**, which can be initalize by function **ccl_cosmology_create**
 ````c
 ccl_cosmology * ccl_cosmology_create(ccl_parameters params, ccl_configuration config);
 ````
-Note that the function returns pointer. Variable **params** of type **ccl_parameters** contains cosmological parameters created in previous step. Structure **ccl_configuration** contains information about methods for computing transfer function, matter power spectrum and mass function (for available methods see *include/ccl_config.h*). For now, you should use default configuration **default_config**
+Note that the function returns a pointer. Variable **params** of type **ccl_parameters** contains cosmological parameters created in previous step. Structure **ccl_configuration** contains information about methods for computing transfer function, matter power spectrum and mass function (for available methods see *include/ccl_config.h*). For now, you should use default configuration **default_config**
 ````c
 const ccl_configuration default_config = {ccl_fitting_function, ccl_halofit, ccl_tinker};
 ````
@@ -47,7 +47,7 @@ which also returns distance in units of Mpc/h. For growth factor (normalized to 
 ````c
 double ccl_growth_factor(ccl_cosmology * cosmo, double a);
 ````
-For more routines to compute distances and growth rates (e.g. at multiple times) see file *include/ccl_background.h*
+For more routines to compute distances and growth rates (e.g. at multiple times at once) see file *include/ccl_background.h*
 ###  Matter power spectra and sigma_8
 For given cosmology we can compute linear and non-linear matter power spectra using functions **ccl_linear_matter_power** and **ccl_nonlin_matter_power**
 ````c
@@ -82,17 +82,20 @@ int main(int argc,char **argv){
     // Initialize cosmological parameters
     ccl_parameters params=ccl_parameters_create(OC,OB,OK,ON,W0,WA,HH,AS,NS,-1,NULL,NULL);
     
-    //Initialize cosmology object given cosmo params
+    // Initialize cosmology object given cosmo params
     ccl_cosmology *cosmo=ccl_cosmology_create(params,default_config);
     
-    //Compute radial distance
+    // Compute radial distances
     printf("Comoving distance to z = %.3lf is chi = %.3lf Mpc/h\n",
 		ZD,ccl_comoving_radial_distance(cosmo,1./(1+ZD)));
 	printf("Luminosity distance to z = %.3lf is chi = %.3lf Mpc/h\n",
 		ZD,ccl_luminosity_distance(cosmo,1./(1+ZD)));
-	 //Compute growth factor and growth rate
+		
+	// Compute growth factor and growth rate
 	printf("Growth factor and growth rate at z = %.3lf are D = %.3lf and f = %.3lf\n",
-		ZD, ccl_growth_factor(cosmo,1./(1+ZD)),ccl_growth_rate(cosmo,1./(1+ZD)));    
+		ZD, ccl_growth_factor(cosmo,1./(1+ZD)),ccl_growth_rate(cosmo,1./(1+ZD)));  
+		
     // Compute sigma_8
 	printf("* sigma_8 = %.3lf\n", ccl_sigma8(cosmo));
+}
 ````
