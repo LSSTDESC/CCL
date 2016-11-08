@@ -35,7 +35,7 @@ Note that the function returns pointer. Variable **params** of type **ccl_parame
 const ccl_configuration default_config = {ccl_fitting_function, ccl_halofit, ccl_tinker};
 ````
 ### Distances and Growth factor
-With our cosmology we can now compute distances, growth factor (and rate) or sigma_8. For comoving radial distance you can call function **ccl_comoving_radial_distance**
+With defined cosmology we can now compute distances, growth factor (and rate) or sigma_8. For comoving radial distance you can call function **ccl_comoving_radial_distance**
 ````c
 double ccl_comoving_radial_distance(ccl_cosmology * cosmo, double a);
 ````
@@ -90,9 +90,9 @@ int main(int argc,char **argv){
 		ZD,ccl_comoving_radial_distance(cosmo,1./(1+ZD)));
 	printf("Luminosity distance to z = %.3lf is chi = %.3lf Mpc/h\n",
 		ZD,ccl_luminosity_distance(cosmo,1./(1+ZD)));
+	 //Compute growth factor and growth rate
 	printf("Growth factor and growth rate at z = %.3lf are D = %.3lf and f = %.3lf\n",
-		ZD, ccl_growth_factor(cosmo,1./(1+ZD)),ccl_growth_rate(cosmo,1./(1+ZD)));
-    
-    //Compute sigma_8
+		ZD, ccl_growth_factor(cosmo,1./(1+ZD)),ccl_growth_rate(cosmo,1./(1+ZD)));    
+    // Compute sigma_8
 	printf("* sigma_8 = %.3lf\n", ccl_sigma8(cosmo));
 ````
