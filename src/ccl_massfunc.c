@@ -9,6 +9,8 @@
 #include "gsl/gsl_spline.h"
 #include "ccl_power.h"
 
+// to avoid any implicit declarations, should be cleaned up in the future!
+double ccl_massfunc(ccl_cosmology *cosmo);
 double ccl_massfunc_tinker(ccl_cosmology * cosmo, void *params, double halo_mass_low, double halo_mass_high, double redshift);
 double ccl_massfunc_ftinker(ccl_cosmology * cosmo, void *params, double halo_mass, double redshift);
 double ccl_massfunc_halomtor(ccl_cosmology * cosmo, void *params, double halo_mass);
@@ -26,33 +28,45 @@ void ccl_massfunc(ccl_cosmology *cosmo)
 }
 */
 
-double ccl_massfunc_halomtor(ccl_cosmology * cosmo, void *params, double halo_mass){
-    double rho_m;
+/*---- ROUTINE: ccl_massfunc_halomtor -----
+INPUT: ccl_cosmology * cosmo, void *params, halo_mass in units of Msun/h
+TASK: takes smoothing halo mass and converts to smoothing halo radius
+  in units of Mpc.
+*/
 
-    rho_m = (3.0*cosmo->params.H0*cosmo->params.H0)/(8.0*M_PI*GNEWT);
+double ccl_massfunc_halomtor(ccl_cosmology * cosmo, void *params, double halo_mass){
+    double rho_m, rho_crit;
+
+    // critical density of matter used as rho_m
+    rho_crit = (3.0*100.0*100.0*cosmo->params.h*cosmo->params.h)/(8.0*M_PI*GNEWT);
+    rho_crit = rho_crit*1000.0*1000.0*MPC_TO_METER/SOLAR_MASS;
+    rho_m = rho_crit*(cosmo->params.Omega_b+cosmo->params.Omega_c);
 
     return pow((3.0*halo_mass) / (4*M_PI*rho_m), (1.0/3.0));
 }
 
 
 /*----- ROUTINE: ccl_massfunc_tinker -----
-INPUT: whatever it takes to calculate Tinker (2008) hmf
-TASK: output Tinker (2008) hmf
+INPUT: cosmology+parameters, some halo mass bin edges, and a redshift
+TASK: outputs dn/dM assuming the mass binning is fairly flat. No
+  derivatives calculated!
 */
 
 double ccl_massfunc_tinker(ccl_cosmology *cosmo, void *params, double halo_mass_low, double halo_mass_high, double redshift)
 {
-// Tinker (2008) HMF of the form dn/dM = f(sigma)*rho_m*(d ln sigma^-1/dM)
-// will need to calculate the f(sigma) and the d ln sigma^-1/dM. The rest
-// pretty straightforward. So something here will logicall call for f(sigma).
 
     double ftinker_low, ftinker_high, ftinker_avg;
     double halo_radius_low, halo_radius_high;
     double sigma_low, sigma_high, dlninvsigma;
-    double rho_m, dmass;
+    double rho_m, rho_crit, dmass;
+    double massavg;
 
-    rho_m = (3.0*cosmo->params.H0*cosmo->params.H0)/(8.0*M_PI*GNEWT);
+    rho_crit = (3.0*100.0*100.0*cosmo->params.h*cosmo->params.h)/(8.0*M_PI*GNEWT);
+    rho_crit = rho_crit*1000.0*1000.0*MPC_TO_METER/SOLAR_MASS;
+    rho_m = rho_crit*(cosmo->params.Omega_b+cosmo->params.Omega_c);
+
     dmass = halo_mass_high - halo_mass_low;
+    massavg = (halo_mass_high + halo_mass_low) / 2.0;
 
     halo_radius_low = ccl_massfunc_halomtor(cosmo, &params, halo_mass_low);
     halo_radius_high = ccl_massfunc_halomtor(cosmo, &params, halo_mass_high);
@@ -63,27 +77,29 @@ double ccl_massfunc_tinker(ccl_cosmology *cosmo, void *params, double halo_mass_
 
     sigma_low = ccl_sigmaR(cosmo, halo_radius_low);
     sigma_high = ccl_sigmaR(cosmo, halo_radius_high);
-    dlninvsigma = log10(1.0/sigma_high) - log10(1.0/sigma_low);
+    dlninvsigma = log(1.0/sigma_high) - log(1.0/sigma_low);
 
-    printf("ftinkers: %lf %lf %lf\n", ftinker_low, ftinker_high, ftinker_avg);
-    printf("sigmas: %lf %lf\n", sigma_low, sigma_high);
+    printf("halor: %lf %lf\n", halo_radius_low, halo_radius_high);
+    printf("f: %lf %lf %lf\n", ftinker_low, ftinker_high, ftinker_avg);
+    printf("lnf: %lf %lf %lf\n", log(ftinker_low), log(ftinker_high), log(ftinker_avg));
+    printf("log10f: %lf %lf %lf\n", log10(ftinker_low), log10(ftinker_high), log10(ftinker_avg));
+    printf("lninvsigmas: %lf %lf %lf\n", log(1.0/sigma_low), log(1.0/sigma_high), dlninvsigma);
+    printf("log10invs: %lf %lf\n", log10(1.0/sigma_low), log10(1.0/sigma_high));
     printf("dmass: %le\n", dmass);
 
-    return ftinker_avg*rho_m*dlninvsigma/dmass;
+// ftinker_avg*rho_m*dlninvsigma/dmass;
+    return log(massavg*massavg*ftinker_avg*dlninvsigma/dmass);
 }
 
 
 /*----- ROUTINE: ccl_massfunc_ftinker -----
-INPUT: cosmology so that it can calculate sigma(R) and possibly
-convert this into sigma(M). Probably needs a specific M.
-TASK: output f(sigma) as a single number.
+INPUT: cosmology+parameters, a mass smoothing scale, and a redshift
+TASK: outputs ftinker for calculation in the halo mass function. Assumes
+  Tinker mass function from tinker et al 2008!
 */
-
 
 double ccl_massfunc_ftinker(ccl_cosmology *cosmo, void *params, double halo_mass, double redshift)
 {
-// here we will need to call for sigma(R) and slap it together
-// with the fit parameters A, a, b, and c from simulation. 
     double tinker_A, tinker_a, tinker_b, tinker_c;
     double ftinker, sigmaR;
     double halo_radius, alpha;
@@ -92,29 +108,20 @@ double ccl_massfunc_ftinker(ccl_cosmology *cosmo, void *params, double halo_mass
 // on demand.
     tinker_A = 0.186*pow(1+redshift, -0.14);
     tinker_a = 1.47*pow(1+redshift, -0.06);
-    alpha = pow(10, -1.0*pow(0.75 / log10(200 / 75), 1.2 ));
+    alpha = pow(10, -1.0*pow(0.75 / log(200.0 / 75.0), 1.2 ));
     tinker_b = 2.57*pow(1+redshift, -1.0*alpha);
     tinker_c = 1.19;
-
-// probably can find rho_m as an existing cosmological parameter. If not,
-// calculate it!
 
     halo_radius = ccl_massfunc_halomtor(cosmo, &params, halo_mass);
 
     sigmaR = ccl_sigmaR(cosmo, halo_radius);
 
-    //printf("SigmaR calculated. LogInvSig: %lf\n", log10(1.0/sigmaR));
-    //printf("LogSig: %lf\n", log10(sigmaR));
-
-    ftinker = tinker_A*( pow( (sigmaR / tinker_b), -1.0*tinker_a)+1.0)*(exp(-1.0*tinker_c / (sigmaR*sigmaR) ) );
-
-    //printf("log10 ftinker = %lf\n", log10(ftinker));
+    ftinker = tinker_A*(pow(sigmaR/tinker_b,-tinker_a)+1.0)*exp(-tinker_c/sigmaR/sigmaR);
 
     return ftinker;
 }
 
-
-// just a test main function until things are working.
+// just a test main function until things are working. Not for final dist.
 int main(){
     // set base cosmology for testing purposes
     double test, halo_mass_low, halo_mass_high, redshift;
@@ -132,15 +139,13 @@ int main(){
 
     ccl_cosmology * cosmo = ccl_cosmology_create(params, config);
 
-    printf("Cosmology Generated.\n");
-
-    halo_mass_low = 5.0E12;
-    halo_mass_high = 1.0E13;
+    halo_mass_low = 1.0E14; // units of Msun/h
+    halo_mass_high = 1.0001E14; // units of Msun/h
     redshift = 0.0;
 
     test = ccl_massfunc_tinker(cosmo, &params, halo_mass_low, halo_mass_high, redshift);
 
-    printf("dn/dM = %lf\n", test);
+    printf("dn/dM = %le\n", test);
 
     return 0;
 }
