@@ -15,6 +15,7 @@
 
 #define A_SPLINE_TYPE gsl_interp_akima
 #define K_SPLINE_TYPE gsl_interp_akima
+#define L_SPLINE_TYPE gsl_interp_akima
 #define PNL_SPLINE_TYPE gsl_interp2d_bicubic
 
 // These are in units of Mpc (no factor of h)
@@ -43,6 +44,10 @@
 #define EPSREL_DIST 1E-6
 #define EPSREL_GROWTH 1E-6
 #define EPS_SCALEFAC_GROWTH 1E-6
-#define EPSREL_CORR_FUNC 1E-4
 
+//Correlation function related parameters
+#define EPSREL_CORR_FUNC 1E-4
 #define GSL_INTEGRATION_LIMIT 1000
+#define L_MIN_INT 10
+#define L_MAX_INT 3E4
+#define NL 1000

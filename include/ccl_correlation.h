@@ -1,3 +1,3 @@
-static double corr_integrand(double l, void *params);
-void get_corr(SplPar *cl, double *theta,double *corr_func, int n_theta,int l_min,int l_max,int i_bessel);
+#pragma once
 
+int ccl_tracer_corr(ccl_cosmo *cosmo, int n_theta, double *theta, CCL_ClTracer ct1, CCL_ClTracer ct2, int i_bessel, double *corr_func)
