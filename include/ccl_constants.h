@@ -38,15 +38,8 @@
 #define MPC_TO_METER 3.08567758149e22  //(from PDG 2013) Mpc to m 
 #define PC_TO_METER 3.08567758149e16   //(from PDG 2013) pc to m
 
+//TODO: created constants for precision parameters
 //Precision parameters
 #define EPSREL_DIST 1E-6
 #define EPSREL_GROWTH 1E-6
-#define EPSREL_DNDZ 1E-6
 #define EPS_SCALEFAC_GROWTH 1E-6
-
-//Pi
-#define pi 3.14159265358979
-
-//LSST specific numbers
-#define z_min_sources 0.1
-#define z_max_sources 3.0

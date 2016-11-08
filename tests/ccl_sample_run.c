@@ -70,5 +70,7 @@ int main(int argc,char **argv)
 		ccl_comoving_radial_distance(cosmo,1./(1+ZD)), ccl_scale_factor_of_chi(cosmo,ccl_comoving_radial_distance(cosmo,1./(1+ZD))));
 	printf("* Luminosity distance to z = %.3lf is chi = %.3lf Mpc/h\n",ZD,ccl_luminosity_distance(cosmo,1./(1+ZD)));
 	printf("* Growth factor and growth rate at z = %.3lf are D = %.3lf and f = %.3lf\n",ZD, ccl_growth_factor(cosmo,1./(1+ZD)),ccl_growth_rate(cosmo,1./(1+ZD)));
+	//Compute sigma_8
+  printf("* sigma_8 = %.3lf\n", ccl_sigma8(cosmo));
 	return 0;
 }

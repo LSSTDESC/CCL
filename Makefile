@@ -1,16 +1,12 @@
 CC=gcc
 CFLAGS=-Wall -Wpedantic -g -O0 -Iinclude -std=c99 -fPIC
 CFLAGS+=-I/opt/local/include
-#Elisa----
-CFLAGS+=-I/opt/local/include/gsl/
-CFLAGS+=-L /opt/local/lib
-#Elisa----
 LDFLAGS=-lgsl -lgslcblas   -lm -Lclass -lclass
 
 
-OBJECTS=src/ccl_core.o src/ccl_error.o src/ccl_utils.o src/ccl_power.o src/ccl_placeholder.o src/ccl_lsst_specs.o src/ccl_background.o
+OBJECTS=src/ccl_core.o src/ccl_utils.o src/ccl_error.o src/ccl_power.o src/ccl_cls.o src/ccl_placeholder.o src/ccl_background.o
 
-#TESTS=tests/ccl_test.c tests/ccl_test_utils.c tests/ccl_test_params.c tests/ccl_test_distances.c tests/ccl_test_specs.c
+#TESTS=tests/ccl_test.c tests/ccl_test_utils.c tests/ccl_test_params.c tests/ccl_test_distances.c tests/ccl_test_growth.c tests/ccl_test_bbks.c
 TESTS=tests/ccl_sample_run.c
 #
 # Tests to include at some point:
@@ -31,10 +27,8 @@ class:
 	cd class; $(MAKE)
 
 test: $(TESTS) $(LIB)
-	$(CC) $(CFLAGS) $(TESTS) -o tests/example -Llib -lccl $(LDFLAGS)
-	LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:lib/ tests/example
-#	$(CC) $(CFLAGS) $(TESTS) -o tests/ccl_test -Llib -lccl $(LDFLAGS)
-#	LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:lib/ tests/ccl_test
+	$(CC) $(CFLAGS) $(TESTS) -o tests/ccl_test -Llib -lccl $(LDFLAGS)
+	LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:lib/ tests/ccl_test
 
 src/%.o: src/%.c
 	$(CC) -c $(CFLAGS) $< -o $@

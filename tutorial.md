@@ -1,5 +1,5 @@
 # Documentation
-This documentat contains basic information about used structures and functions. At the end of document is provided code which implements these basic functions. See also test **ccl_sample_run.c**
+This documentat contains basic information about used structures and functions. At the end of document is provided code which implements these basic functions. See also test *ccl_sample_run.c*
 ### Cosmological parameters
 Start by defining cosmological parameters defined in structure **ccl_parameters**. This structure (exact definition in *include/ccl_core.h*) contains densities of matter, parameters of dark energy (*w0, wa*), Hubble parameters, primordial poer spectra, radiation parameters, derived parameters (*sigma_8, Omega_1, z_star*) and modified growth rate.
 
@@ -33,3 +33,38 @@ Note that the function returns pointer. Variable **params** of type **ccl_parame
 ````c
 const ccl_configuration default_config = {ccl_fitting_function, ccl_halofit, ccl_tinker};
 ````
+### Distances and Growth factor
+With our cosmology we can now compute distances, growth factor (and rate) or sigma_8. For comoving radial distance you can call function **ccl_comoving_radial_distance**
+````c
+double ccl_comoving_radial_distance(ccl_cosmology * cosmo, double a);
+````
+which returns distance to scale factor **a** in units of Mpc/h. For luminosity distance call function **ccl_luminosity_distance**
+````c
+double ccl_luminosity_distance(ccl_cosmology * cosmo, double a);
+````
+which also returns distance in units of Mpc/h. For growth factor (normalized to 1 at **z** = 0) at sale factor **a** call **ccl_growth_factor**
+````c
+double ccl_growth_factor(ccl_cosmology * cosmo, double a);
+````
+For more routines to compute distances and growth rates (e.g. at multiple times) see file *include/ccl_background.h*
+###  Matter power spectra and sigma_8
+For given cosmology we can compute linear and non-linear matter power spectra using functions **ccl_linear_matter_power** and **ccl_nonlin_matter_power**
+````c
+double ccl_linear_matter_power(ccl_cosmology * cosmo, double a, double k);
+double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double a, double k);
+````
+Sigma_8 can be calculated by function **ccl_sigma8**, or more generally by function **ccl_sigmaR**
+````c
+double ccl_sigmaR(ccl_cosmology *cosmo, double R);
+double ccl_sigma8(ccl_cosmology *cosmo);
+````
+These and other functions for different matter power spectra can be found in file *include/ccl_power.h*.
+
+
+
+
+
+
+
+
+
