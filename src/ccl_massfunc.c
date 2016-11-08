@@ -87,8 +87,8 @@ double ccl_massfunc_tinker(ccl_cosmology *cosmo, void *params, double halo_mass_
     printf("log10invs: %lf %lf\n", log10(1.0/sigma_low), log10(1.0/sigma_high));
     printf("dmass: %le\n", dmass);
 
-// ftinker_avg*rho_m*dlninvsigma/dmass;
-    return log(massavg*massavg*ftinker_avg*dlninvsigma/dmass);
+// ftinker_avg*rho_m*dlninvsigma/dmass/massavg;
+    return log(massavg*ftinker_avg*dlninvsigma/dmass);
 }
 
 
