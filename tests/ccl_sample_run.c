@@ -12,6 +12,7 @@
 #define W0 -1.0
 #define WA 0.00
 #define NS 0.96
+#define S8 0.80
 #define AS 2.1E-9
 #define ZD 0.5
 #define NZ 128
@@ -24,9 +25,12 @@
 int main(int argc,char **argv)
 {
   //Initialize cosmological parameters
+  ccl_configuration config=default_config;
+  config.transfer_function_method=ccl_bbks;
   ccl_parameters params=ccl_parameters_create(OC,OB,OK,ON,W0,WA,HH,AS,NS,-1,NULL,NULL);
+  params.sigma_8=S8;
   //Initialize cosmology object given cosmo params
-  ccl_cosmology *cosmo=ccl_cosmology_create(params,default_config);
+  ccl_cosmology *cosmo=ccl_cosmology_create(params,config);
   
   //Compute radial distance (see include/ccl_background.h for more routines)
   printf("Comoving distance to z=%.3lf is chi=%.3lf Mpc\n",ZD,ccl_comoving_radial_distance(cosmo,1./(1+ZD)));
@@ -52,9 +56,11 @@ int main(int argc,char **argv)
     nz_arr_sh[i]=exp(-0.5*pow((z_arr_sh[i]-Z0_SH)/SZ_SH,2));
   }
   //Galaxy clustering tracer
-  CCL_ClTracer *ct_gc=ccl_cl_tracer_new(cosmo,CL_TRACER_NC,NZ,z_arr_gc,nz_arr_gc,NZ,z_arr_gc,bz_arr);
+  CCL_ClTracer *ct_gc=ccl_cl_tracer_new(cosmo,CL_TRACER_NC,NZ,z_arr_gc,nz_arr_gc,NZ,z_arr_gc,bz_arr,
+					0,0,-1,NULL,NULL);
   //Cosmic shear tracer
-  CCL_ClTracer *ct_wl=ccl_cl_tracer_new(cosmo,CL_TRACER_WL,NZ,z_arr_sh,nz_arr_sh,-1,NULL,NULL);
+  CCL_ClTracer *ct_wl=ccl_cl_tracer_new(cosmo,CL_TRACER_WL,NZ,z_arr_sh,nz_arr_sh,
+					-1,NULL,NULL,0,0,-1,NULL,NULL);
   printf("ell C_ell(g,g) C_ell(g,s) C_ell(s,s) | r(g,s)\n");
   for(int l=2;l<NL;l+=10) {
     double cl_gg=ccl_angular_cl(cosmo,l,ct_gc,ct_gc); //Galaxy-galaxy

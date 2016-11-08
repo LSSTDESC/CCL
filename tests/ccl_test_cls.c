@@ -5,6 +5,7 @@
 #include <math.h>
 #include <string.h>
 
+#define SZ_VAL 0.4 //This will cancel the magnification contribution
 #define CLS_TOLERANCE 1E-3
 #define CLS_FRACTION 1E-3
 
@@ -49,7 +50,7 @@ static void compare_cls(char *compare_type,struct cls_data * data)
   ASSERT_NOT_NULL(cosmo);
 
   int nz;
-  double *zarr_1,*pzarr_1,*zarr_2,*pzarr_2,*bzarr;
+  double *zarr_1,*pzarr_1,*zarr_2,*pzarr_2,*bzarr,*szarr;
   if(!strcmp(compare_type,"analytic")) {
     //Create arrays for N(z)
     double zmean_1=1.0,sigz_1=0.15;
@@ -60,6 +61,7 @@ static void compare_cls(char *compare_type,struct cls_data * data)
     zarr_2=malloc(nz*sizeof(double));
     pzarr_2=malloc(nz*sizeof(double));
     bzarr=malloc(nz*sizeof(double));
+    szarr=malloc(nz*sizeof(double));
     for(int ii=0;ii<nz;ii++) {
       double z1=zmean_1-5*sigz_1+10*sigz_1*(ii+0.5)/nz;
       double z2=zmean_2-5*sigz_2+10*sigz_2*(ii+0.5)/nz;
@@ -70,6 +72,7 @@ static void compare_cls(char *compare_type,struct cls_data * data)
       pzarr_1[ii]=pz1;
       pzarr_2[ii]=pz2;
       bzarr[ii]=1.;
+      szarr[ii]=SZ_VAL;
     }
   }
   else {
@@ -84,6 +87,7 @@ static void compare_cls(char *compare_type,struct cls_data * data)
     zarr_2=malloc(nz*sizeof(double));
     pzarr_2=malloc(nz*sizeof(double));
     bzarr=malloc(nz*sizeof(double));
+    szarr=malloc(nz*sizeof(double));
     fgets(str,1024,fnz1);
     fgets(str,1024,fnz2);
     for(int ii=0;ii<nz;ii++) {
@@ -93,18 +97,19 @@ static void compare_cls(char *compare_type,struct cls_data * data)
       zarr_1[ii]=z1; zarr_2[ii]=z2;
       pzarr_1[ii]=nz1; pzarr_2[ii]=nz2;
       bzarr[ii]=1.;
+      szarr[ii]=SZ_VAL;
     }
   }
 
   char fname[256];
   FILE *fi_dd_11,*fi_dd_12,*fi_dd_22,*fi_ll_11,*fi_ll_12,*fi_ll_22;
-  CCL_ClTracer *tr_nc_1=ccl_cl_tracer_new(cosmo,CL_TRACER_NC,nz,zarr_1,pzarr_1,nz,zarr_1,bzarr);
+  CCL_ClTracer *tr_nc_1=ccl_cl_tracer_new(cosmo,CL_TRACER_NC,nz,zarr_1,pzarr_1,nz,zarr_1,bzarr,0,1,nz,zarr_1,szarr);
   ASSERT_NOT_NULL(tr_nc_1);
-  CCL_ClTracer *tr_nc_2=ccl_cl_tracer_new(cosmo,CL_TRACER_NC,nz,zarr_2,pzarr_2,nz,zarr_2,bzarr);
+  CCL_ClTracer *tr_nc_2=ccl_cl_tracer_new(cosmo,CL_TRACER_NC,nz,zarr_2,pzarr_2,nz,zarr_2,bzarr,0,1,nz,zarr_2,szarr);
   ASSERT_NOT_NULL(tr_nc_2);
-  CCL_ClTracer *tr_wl_1=ccl_cl_tracer_new(cosmo,CL_TRACER_WL,nz,zarr_1,pzarr_1,nz,NULL,NULL );
+  CCL_ClTracer *tr_wl_1=ccl_cl_tracer_new(cosmo,CL_TRACER_WL,nz,zarr_1,pzarr_1,nz,NULL,NULL,0,0,nz,NULL,NULL);
   ASSERT_NOT_NULL(tr_wl_1);
-  CCL_ClTracer *tr_wl_2=ccl_cl_tracer_new(cosmo,CL_TRACER_WL,nz,zarr_2,pzarr_2,nz,NULL,NULL );
+  CCL_ClTracer *tr_wl_2=ccl_cl_tracer_new(cosmo,CL_TRACER_WL,nz,zarr_2,pzarr_2,nz,NULL,NULL,0,0,nz,NULL,NULL);
   ASSERT_NOT_NULL(tr_wl_2);
 
   sprintf(fname,"tests/benchmark/codecomp_step2_outputs/run_b1b1%s_log_cl_dd.txt",compare_type);
@@ -171,6 +176,7 @@ static void compare_cls(char *compare_type,struct cls_data * data)
   free(pzarr_1);
   free(pzarr_2);
   free(bzarr);
+  free(szarr);
   ccl_cosmology_free(cosmo);
 }
 
