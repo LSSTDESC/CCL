@@ -6,7 +6,8 @@ Start by defining cosmological parameters defined in structure **ccl_parameters*
 You can initialize this structure through function **ccl_parameters_create** which returns object of type **ccl_parameters**.
 ````c
 ccl_parameters ccl_parameters_create(
-double Omega_c, double Omega_b, double Omega_k, double Omega_n, double w0, double wa, double h, double A_s, double n_s,int nz_mgrowth,double *zarr_mgrowth,double *dfarr_mgrowth
+	double Omega_c, double Omega_b, double Omega_k, double Omega_n, double w0, double wa, double h,
+	double A_s, double n_s, int nz_mgrowth, double *zarr_mgrowth, double *dfarr_mgrowth
 );
 ````
 where:
@@ -68,7 +69,6 @@ These and other functions for different matter power spectra can be found in fil
 
 #define OC 0.25
 #define OB 0.05
-#define OL 0.70
 #define OK 0.00
 #define ON 0.00
 #define HH 0.70
@@ -77,12 +77,6 @@ These and other functions for different matter power spectra can be found in fil
 #define NS 0.96
 #define AS 2.1E-9
 #define ZD 0.5
-#define NZ 128
-#define Z0_GC 0.50
-#define SZ_GC 0.05
-#define Z0_SH 0.65
-#define SZ_SH 0.05
-#define NL 500
 
 int main(int argc,char **argv){
     // Initialize cosmological parameters
@@ -92,9 +86,12 @@ int main(int argc,char **argv){
     ccl_cosmology *cosmo=ccl_cosmology_create(params,default_config);
     
     //Compute radial distance
-    printf("Comoving distance to z = %.3lf is chi = %.3lf Mpc/h\n",ZD,ccl_comoving_radial_distance(cosmo,1./(1+ZD))); ccl_scale_factor_of_chi(cosmo,ccl_comoving_radial_distance(cosmo,1./(1+ZD))));
-	printf("Luminosity distance to z = %.3lf is chi = %.3lf Mpc/h\n",ZD,ccl_luminosity_distance(cosmo,1./(1+ZD)));
-	printf("Growth factor and growth rate at z = %.3lf are D = %.3lf and f = %.3lf\n",ZD, ccl_growth_factor(cosmo,1./(1+ZD)),ccl_growth_rate(cosmo,1./(1+ZD)));
+    printf("Comoving distance to z = %.3lf is chi = %.3lf Mpc/h\n",
+		ZD,ccl_comoving_radial_distance(cosmo,1./(1+ZD)));
+	printf("Luminosity distance to z = %.3lf is chi = %.3lf Mpc/h\n",
+		ZD,ccl_luminosity_distance(cosmo,1./(1+ZD)));
+	printf("Growth factor and growth rate at z = %.3lf are D = %.3lf and f = %.3lf\n",
+		ZD, ccl_growth_factor(cosmo,1./(1+ZD)),ccl_growth_rate(cosmo,1./(1+ZD)));
     
     //Compute sigma_8
 	printf("* sigma_8 = %.3lf\n", ccl_sigma8(cosmo));
