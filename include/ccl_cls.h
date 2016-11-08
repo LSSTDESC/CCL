@@ -22,19 +22,24 @@ typedef struct {
   double chimin;
   int has_rsd;
   int has_magnification;
+  int has_intrinsic_alignment;
   SplPar *spl_nz; //Spline for normalized N(z)
   SplPar *spl_bz; //Spline for linear bias
   SplPar *spl_sz; //Spline for magnification bias
+  SplPar *spl_rf; //Spline for red fraction
+  SplPar *spl_ba; //Spline for red fraction
   SplPar *spl_wL; //Spline for lensing kernel
   SplPar *spl_wM; //Spline for magnification
 } CCL_ClTracer;
 
 //CCL_ClTracer creator
 CCL_ClTracer *ccl_cl_tracer_new(ccl_cosmology *cosmo,int tracer_type,
+				int has_rsd,int has_magnification,int has_intrinsic_alignment,
 				int nz_n,double *z_n,double *n,
 				int nz_b,double *z_b,double *b,
-				int has_rsd,int has_magnification,
-				int nz_s,double *z_s,double *s);
+				int nz_s,double *z_s,double *s,
+				int nz_ba,double *z_ba,double *ba,
+				int nz_rf,double *z_rf,double *rf);
 //CCL_ClTracer destructor
 void ccl_cl_tracer_free(CCL_ClTracer *clt);
 //Computes limber power spectrum for two different tracers
