@@ -72,5 +72,17 @@ int main(int argc,char **argv)
 	printf("* Growth factor and growth rate at z = %.3lf are D = %.3lf and f = %.3lf\n",ZD, ccl_growth_factor(cosmo,1./(1+ZD)),ccl_growth_rate(cosmo,1./(1+ZD)));
 	//Compute sigma_8
   printf("* sigma_8 = %.3lf\n", ccl_sigma8(cosmo));
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
 	return 0;
 }

@@ -29,7 +29,7 @@ For CCL`s functions you need an object of type **ccl_cosmology**, which can be i
 ````c
 ccl_cosmology * ccl_cosmology_create(ccl_parameters params, ccl_configuration config);
 ````
-Note that the function returns pointer. Variable **params** of type **ccl_parameters** contains cosmological parameters created in previous step. Object **config** of type **ccl_configuration**. Structure **ccl_configuration** contains information about methods for computing transfer function, matter power spectrum and mass function (for available methods see *include/ccl_config.h*). For now, you should use default configuration **default_config**
+Note that the function returns pointer. Variable **params** of type **ccl_parameters** contains cosmological parameters created in previous step. Structure **ccl_configuration** contains information about methods for computing transfer function, matter power spectrum and mass function (for available methods see *include/ccl_config.h*). For now, you should use default configuration **default_config**
 ````c
 const ccl_configuration default_config = {ccl_fitting_function, ccl_halofit, ccl_tinker};
 ````
@@ -59,12 +59,4 @@ double ccl_sigmaR(ccl_cosmology *cosmo, double R);
 double ccl_sigma8(ccl_cosmology *cosmo);
 ````
 These and other functions for different matter power spectra can be found in file *include/ccl_power.h*.
-
-
-
-
-
-
-
-
 
