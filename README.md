@@ -3,7 +3,19 @@ DESC Core Cosmology Library: cosmology routines with validated numerical accurac
 
 The library is written in C99 and all functionality is directly callable from C and C++ code.  We also provide python bindings for higher-level functions.
 # Installation
+In order to compile CCL you need GSL. You can get GSL here: https://www.gnu.org/software/gsl/. To install it you need to be the admin of your computer.
 
+To compile CCL, go to the directory where you installed it and type "make".
+
+## Known installation issues
+1. You need to link to GSL in your local version of the Makefile. The default Makefile links to the library path, but it might be the case that your version of GSL is not there. 
+2. Sometimes, "make test" can fail. In that case, go to "ccl_test.c" and comment out "define CTEST_SEGFAULT"
+3. If you are planning to compile your own file that calls CCL, then you should add the following to your .bashrc:
+````
+export LD_LIBRARY_PATH=/path/to/where/ccl/is/installed/lib:$LD_LIBRARY_PATH
+````
+
+ 
 # Documentation
 This document contains basic information about used structures and functions. At the end of document is provided code which implements these basic functions (also in *tests/min_code.c*). You can also try **make example**.
 ### Cosmological parameters
@@ -103,7 +115,13 @@ int main(int argc,char **argv){
 		
     // Compute sigma_8
 	printf("* sigma_8 = %.3lf\n", ccl_sigma8(cosmo));
+	
+	//Always clean up!!
+	ccl_cosmology_free(cosmo);
+
+	return 0;
 }
 ````
 
 # License
+CCL is now under development.
