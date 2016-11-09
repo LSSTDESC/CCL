@@ -2,8 +2,22 @@
 DESC Core Cosmology Library: cosmology routines with validated numerical accuracy.
 
 The library is written in C99 and all functionality is directly callable from C and C++ code.  We also provide python bindings for higher-level functions.
-# Installation
 
+See also our wiki https://github.com/DarkEnergyScienceCollaboration/CCL/wiki
+# Installation
+In order to compile CCL you need GSL. You can get GSL here: https://www.gnu.org/software/gsl/. To install it you need to be the admin of your computer.
+
+To compile CCL, go to the directory where you installed it and type "make".
+
+## Known installation issues
+1. You need to link to GSL in your local version of the Makefile. The default Makefile links to the library path, but it might be the case that your version of GSL is not there. 
+2. Sometimes, "make test" can fail. In that case, go to "*tests/ccl_test.c*" and comment out "**define CTEST_SEGFAULT**"
+3. If you are planning to compile your own file that calls CCL, then you should add the following to your .bashrc:
+````sh
+export LD_LIBRARY_PATH=/path/to/where/ccl/is/installed/lib:$LD_LIBRARY_PATH
+````
+
+ 
 # Documentation
 This document contains basic information about used structures and functions. At the end of document is provided code which implements these basic functions (also in *tests/min_code.c*). You can also try **make example**.
 ### Cosmological parameters
@@ -39,6 +53,10 @@ ccl_cosmology * ccl_cosmology_create(ccl_parameters params, ccl_configuration co
 Note that the function returns a pointer. Variable **params** of type **ccl_parameters** contains cosmological parameters created in previous step. Structure **ccl_configuration** contains information about methods for computing transfer function, matter power spectrum and mass function (for available methods see *include/ccl_config.h*). For now, you should use default configuration **default_config**
 ````c
 const ccl_configuration default_config = {ccl_fitting_function, ccl_halofit, ccl_tinker};
+````
+After you are done working with this cosmology object, you should free its work space by **ccl_cosmology_free**
+````c
+void ccl_cosmology_free(ccl_cosmology * cosmo);
 ````
 ### Distances and Growth factor
 With defined cosmology we can now compute distances, growth factor (and rate) or sigma_8. For comoving radial distance you can call function **ccl_comoving_radial_distance**
@@ -107,7 +125,13 @@ int main(int argc,char **argv){
 		
     // Compute sigma_8
 	printf("* sigma_8 = %.3lf\n", ccl_sigma8(cosmo));
+	
+	//Always clean up!!
+	ccl_cosmology_free(cosmo);
+
+	return 0;
 }
 ````
 
 # License
+CCL is now under development.
