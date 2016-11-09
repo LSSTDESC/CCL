@@ -84,12 +84,11 @@ double ccl_sigmaR(ccl_cosmology *cosmo, double R);
 double ccl_sigma8(ccl_cosmology *cosmo);
 ````
 These and other functions for different matter power spectra can be found in file *include/ccl_power.h*.
-You can run the following example code. For this you will need to compite with:
+### Example code
+This code can also be found in *tests/min_code.h* You can run the following example code. For this you will need to compile with:
 ````c
 gcc -Wall -Wpedantic -g -O0 -I./include -std=c99 -fPIC tests/example.c -o tests/example -L./lib -L/usr/local/lib -lgsl -lgslcblas -lm -Lclass -lclass -lccl
 ````
-### Example code
-This code can also be found in *tests/min_code.h*
 
 ````c
 #include <stdlib.h>
