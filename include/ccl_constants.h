@@ -17,7 +17,6 @@
 
 //for 2D SPLINE, e.g. P_NL, use coarser binning
 #define N_A 50
-#define N_M 200
 
 #define A_SPLINE_TYPE gsl_interp_akima
 #define K_SPLINE_TYPE gsl_interp_akima

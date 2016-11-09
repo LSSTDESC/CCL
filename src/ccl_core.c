@@ -41,6 +41,7 @@ ccl_cosmology * ccl_cosmology_create(ccl_parameters params, ccl_configuration co
   cosmo->data.fgrowth = NULL;
   cosmo->data.E = NULL;
   cosmo->data.accelerator=NULL;
+  cosmo->data.accelerator_m=NULL;
   cosmo->data.growth0 = 1.;
 
   cosmo->data.sigma = NULL;
