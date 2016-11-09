@@ -107,9 +107,11 @@ int ccl_tracer_corr(ccl_cosmology *cosmo, int n_theta, double *theta, CCL_ClTrac
     strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_class(): Error creating Cl spline\n");
   } else {
     //And compute correlation function
-    ccl_general_corr(clspl,theta,corr_func,n_theta,i_bessel);
-    gsl_spline_free(clspl);
+    //ccl_general_corr(clspl,theta,corr_func,n_theta,i_bessel);
+    //gsl_spline_free(clspl);
   }
+ 
+  fftlog_ComputeXiLM(i_bessel , 2 , NL , l_arr, cl_arr, theta,corr_func);
 
   return status;
 
