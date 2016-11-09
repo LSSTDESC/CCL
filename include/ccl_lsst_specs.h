@@ -5,7 +5,7 @@
 #include "gsl/gsl_spline.h"
 
 typedef struct {
-        double (* your_pz_func)(double, double, void *);
+        double (* your_pz_func)(double, double, void *); //first double corresponds to photo-z, second to spec-z
         void *  your_pz_params;
 } user_pz_info;
 
