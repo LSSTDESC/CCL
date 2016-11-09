@@ -11,7 +11,7 @@
 #include <string.h>
 #include "ccl_power.h"
 #include "ccl.h"
-
+#include "fftlog.h"
 typedef struct
 {
   gsl_spline *cl; 

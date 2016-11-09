@@ -4,7 +4,7 @@ CFLAGS+=-I/usr/local/include
 LDFLAGS=-L/usr/local/lib -lgsl -lgslcblas   -lm -Lclass -lclass
 
 
-OBJECTS=src/ccl_core.o src/ccl_utils.o src/ccl_error.o src/ccl_power.o src/ccl_cls.o src/ccl_placeholder.o src/ccl_background.o src/ccl_correlation.o tests/ccl_corr_sample.o
+OBJECTS=src/ccl_core.o src/ccl_utils.o src/ccl_error.o src/ccl_power.o src/ccl_cls.o src/ccl_placeholder.o src/ccl_background.o src/ccl_correlation.o src/fftlog.o tests/ccl_corr_sample.o
 
 #CORR_SAMPLE_OBJECTS=tests/ccl_corr_sample.o
 
