@@ -1,7 +1,7 @@
 CC=gcc
 CFLAGS=-Wall -Wpedantic -g -O0 -Iinclude -std=c99 -fPIC
 CFLAGS+=-I/usr/local/include
-LDFLAGS=-L/usr/local/lib -lgsl -lgslcblas   -lm -Lclass -lclass
+LDFLAGS=-L/usr/local/lib -lfftw3 -lgsl -lgslcblas  -lm -Lclass -lclass
 
 
 OBJECTS=src/ccl_core.o src/ccl_utils.o src/ccl_error.o src/ccl_power.o src/ccl_cls.o src/ccl_placeholder.o src/ccl_background.o src/ccl_correlation.o src/fftlog.o tests/ccl_corr_sample.o
