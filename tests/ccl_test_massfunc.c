@@ -34,7 +34,7 @@ int main(){
        fprintf(fp, "%le ", mass);
        redshift = 0;
        for(j=0; j<7; j++){
-          test = ccl_massfunc(cosmo, mass, redshift);
+          test = ccl_sigmaM(cosmo, mass, redshift);
           fprintf(fp, "%le ", test);
           redshift += 0.2;
        }

@@ -131,6 +131,7 @@ double ccl_massfunc_halomtor(ccl_cosmology * cosmo, double halo_mass)
     rho_crit = rho_crit*1000.0*1000.0*MPC_TO_METER/SOLAR_MASS;
     rho_m = rho_crit*cosmo->params.Omega_m;
 
+    halo_mass = halo_mass*cosmo->params.h;
     halo_radius = pow((3.0*halo_mass) / (4*M_PI*rho_m), (1.0/3.0));
 
     return halo_radius/cosmo->params.h;
@@ -160,8 +161,6 @@ double ccl_massfunc_tinker(ccl_cosmology *cosmo, double halo_mass, double redshi
     rho_crit = (3.0*100.0*100.0)/(8.0*M_PI*GNEWT);
     rho_crit = rho_crit*1000.0*1000.0*MPC_TO_METER/SOLAR_MASS;
     rho_m = rho_crit*cosmo->params.Omega_m;
-    // and redshift scaling
-    //rho_m = rho_m * pow(1.0+redshift,3);
 
     ftinker = ccl_massfunc_ftinker(cosmo, halo_mass, redshift);
 
@@ -202,4 +201,17 @@ double ccl_massfunc_ftinker(ccl_cosmology *cosmo, double halo_mass, double redsh
 
     ftinker = tinker_A*(pow(sigma/tinker_b,-tinker_a)+1.0)*exp(-tinker_c/sigma/sigma);
     return ftinker;
+}
+double ccl_sigmaM(ccl_cosmology * cosmo, double halo_mass, double redshift){
+    double sigmaM;
+
+    if (!cosmo->computed_sigma){
+        ccl_cosmology_compute_sigma(cosmo);
+        ccl_check_status(cosmo);
+    }
+
+    sigmaM = pow(10,gsl_spline_eval(cosmo->data.logsigma, log10(halo_mass), cosmo->data.accelerator_m));
+    sigmaM = sigmaM*ccl_growth_factor(cosmo, 1.0/(1.0+redshift));
+
+    return sigmaM;
 }
