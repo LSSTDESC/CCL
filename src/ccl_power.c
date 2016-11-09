@@ -425,7 +425,6 @@ TASK: compute distances, compute growth, compute power spectrum
 void ccl_cosmology_compute_power(ccl_cosmology * cosmo){
     if (cosmo->computed_power) return;
 
-   
     switch(cosmo->config.transfer_function_method){
         case ccl_bbks:
             ccl_cosmology_compute_power_bbks(cosmo);
@@ -437,7 +436,6 @@ void ccl_cosmology_compute_power(ccl_cosmology * cosmo){
         default:
         cosmo->status = 11;
         sprintf(cosmo->status_message ,"ccl_power.c: ccl_cosmology_compute_power(): Unknown or non-implemented transfer function method: %d \n",cosmo->config.transfer_function_method);
-        return;
     }
     cosmo->computed_power = true;
     ccl_check_status(cosmo);
