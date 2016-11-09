@@ -33,4 +33,9 @@ int main(int argc,char **argv){
 
 	// Compute sigma_8
 	printf("sigma_8 = %.3lf\n", ccl_sigma8(cosmo));
+
+	//Always clean up!!
+	ccl_cosmology_free(cosmo);
+
+	return 0;
 }

@@ -9,7 +9,7 @@
 #include "gsl/gsl_spline.h"
 #include "gsl/gsl_integration.h"
 
-const ccl_configuration default_config = {ccl_fitting_function, ccl_halofit, ccl_tinker};
+const ccl_configuration default_config = {ccl_boltzmann_class, ccl_halofit, ccl_tinker};
 
 /* ------- ROUTINE: ccl_cosmology_create ------
 INPUTS: ccl_parameters params
