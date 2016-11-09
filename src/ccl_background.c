@@ -22,7 +22,7 @@ TASK: Compute E(z)=H(z)/H0
 static double h_over_h0(double a, ccl_parameters * params)
 {
   return sqrt((params->Omega_m+params->Omega_l*pow(a,-3*(params->w0+params->wa))*
-	       exp(3*params->wa*(a-1))+params->Omega_k*a)/(a*a*a));
+	       exp(3*params->wa*(a-1))+params->Omega_k*a+params->Omega_g/a)/(a*a*a));
 }
 
 /* --------- ROUTINE: omega_m_z ---------
@@ -32,7 +32,7 @@ TASK: Compute Omega_m(z)
 static double omega_m_z(double a,ccl_parameters * params)
 {
   return params->Omega_m/(params->Omega_m+params->Omega_l*pow(a,-3*(params->w0+params->wa))*
-			  exp(3*params->wa*(a-1))+params->Omega_k*a);
+			  exp(3*params->wa*(a-1))+params->Omega_g/a+params->Omega_k*a);
 }
 
 /* --------- ROUTINE: chi_integrand ---------
