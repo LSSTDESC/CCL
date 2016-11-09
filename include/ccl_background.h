@@ -2,14 +2,14 @@
 #include "ccl_core.h"
 
 //TODO: why is there no status here?
-// Comoving radial distance in Mpc/h from today to scale factor a
+// Comoving radial distance in Mpc from today to scale factor a
 double ccl_comoving_radial_distance(ccl_cosmology * cosmo, double a);
-// Comoving radial distances in Mpc/h to scale factors as given in list a[0..na-1]
+// Comoving radial distances in Mpc to scale factors as given in list a[0..na-1]
 void ccl_comoving_radial_distances(ccl_cosmology * cosmo, int na, double a[na], double output[na]);
 
-// Comoving luminosity distance in Mpc/h from today to scale factor a
+// Comoving luminosity distance in Mpc from today to scale factor a
 double ccl_luminosity_distance(ccl_cosmology * cosmo, double a);
-// Comoving luminosity distances in Mpc/h to scale factors as given in list a[0..na-1]
+// Comoving luminosity distances in Mpc to scale factors as given in list a[0..na-1]
 void ccl_luminosity_distances(ccl_cosmology * cosmo, int na, double a[na], double output[na]);
 
 // Growth factor at scale factor a normalized to 1 at z=0
