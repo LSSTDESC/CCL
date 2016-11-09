@@ -2,6 +2,8 @@
 DESC Core Cosmology Library: cosmology routines with validated numerical accuracy.
 
 The library is written in C99 and all functionality is directly callable from C and C++ code.  We also provide python bindings for higher-level functions.
+
+See also our wiki https://github.com/DarkEnergyScienceCollaboration/CCL/wiki
 # Installation
 In order to compile CCL you need GSL. You can get GSL here: https://www.gnu.org/software/gsl/. To install it you need to be the admin of your computer.
 
@@ -52,7 +54,7 @@ Note that the function returns a pointer. Variable **params** of type **ccl_para
 ````c
 const ccl_configuration default_config = {ccl_fitting_function, ccl_halofit, ccl_tinker};
 ````
-After you are done working with this comsmology objetc, you should free its work space by **ccl_cosmology_free**
+After you are done working with this cosmology object, you should free its work space by **ccl_cosmology_free**
 ````c
 void ccl_cosmology_free(ccl_cosmology * cosmo);
 ````
