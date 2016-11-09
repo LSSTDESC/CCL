@@ -38,20 +38,39 @@ TODO: Check normalization of correlation function.
 static void ccl_general_corr(gsl_spline *cl, double *theta, double *corr_func, int n_theta, int i_bessel)
 {
   gsl_function F;
-  gsl_integration_workspace *w=gsl_integration_workspace_alloc(GSL_INTEGRATION_LIMIT);
   corr_int_par cp;
   double result,eresult;
 
   cp.i_bessel=i_bessel;
   cp.cl=cl;
+
+  gsl_integration_workspace *w=gsl_integration_workspace_alloc(GSL_INTEGRATION_LIMIT);
+  /*Alternative QAWO integration, but omega should be revised:
+  const double omega = 1;
+  const double L = L_MAX_INT-L_MIN_INT;
+  gsl_integration_qawo_table* wf = gsl_integration_qawo_table_alloc(omega, L, GSL_INTEG_SINE, GSL_INTEGRATION_LIMIT);*/
+  /* Alternative cquag integrator 
+     gsl_integration_cquad_workspace * w = gsl_integration_cquad_workspace_alloc (1000);
+  */
+
   for (int i=0;i<n_theta;i++)
     {
       cp.theta=theta[i];
       F.function=&ccl_corr_integrand;
       F.params=&cp;
+      //This is another integration option: qawo is supposedly better for oscillatory functions but it isn't working either.
+      //int status = gsl_integration_qawo (&F,L_MIN_INT,0,EPSREL_CORR_FUNC,GSL_INTEGRATION_LIMIT,w,wf,&result,&eresult);
+      //Original integrator
       gsl_integration_qag(&F,L_MIN_INT,L_MAX_INT,0,EPSREL_CORR_FUNC,GSL_INTEGRATION_LIMIT,GSL_INTEG_GAUSS41,w,&result,&eresult);
+      /*Integrator we are using for photo-z
+	gsl_integration_cquad(&F,L_MIN_INT,L_MAX_INT,0,EPSREL_CORR_FUNC,w, &result, &eresult, NULL);*/
       corr_func[i]=result/(2*M_PI);
     }
+  
+  //gsl_integration_qawo_table_free(wf);
+  //gsl_integration_cquad_workspace_free(w);
+  gsl_integration_workspace_free(w);
+
   return;
 }
 
