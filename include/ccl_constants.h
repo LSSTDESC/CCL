@@ -46,7 +46,7 @@
 #define EPS_SCALEFAC_GROWTH 1E-6
 
 //Correlation function related parameters
-#define EPSREL_CORR_FUNC 1E-4
+#define EPSREL_CORR_FUNC 1E-3
 #define GSL_INTEGRATION_LIMIT 1000
 #define L_MIN_INT 10
 #define L_MAX_INT 3E4
