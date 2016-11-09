@@ -37,7 +37,7 @@ int main(int argc,char **argv)
     nz_arr_sh[i]=exp(-0.5*pow((z_arr_sh[i]-Z0_SH)/SZ_SH,2));
   }
   static int n_theta=10;
-  double *theta=(double *)malloc(n_theta);
+  double *theta=(double *)malloc(sizeof(double)*n_theta);
 
   double d_theta=1;
   double theta_min=1;
@@ -53,9 +53,11 @@ int main(int argc,char **argv)
   CCL_ClTracer *ct_wl=ccl_cl_tracer_new(cosmo,CL_TRACER_WL,NZ,z_arr_sh,nz_arr_sh,-1,NULL,NULL);
   printf("ell C_ell(g,g) C_ell(g,s) C_ell(s,s) | r(g,s)\n");
 
-  double *clustering_corr=(double *)malloc(n_theta);
+  double *clustering_corr=(double *)malloc(sizeof(double)*n_theta);
   int i_bessel=0;
   ccl_tracer_corr(cosmo,n_theta,theta,ct_gc,ct_gc,i_bessel,clustering_corr); //clustering
+
+  //prinf("theta,corr",theta,clustering_corr);
 
   //Free up tracers
   ccl_cl_tracer_free(ct_gc);
