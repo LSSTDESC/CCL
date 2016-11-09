@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <math.h>
 #include "ccl.h"
+#include <string.h>
 
 #define OC 0.25
 #define OB 0.05
@@ -36,7 +37,6 @@ int ask_to_con(){
 
 int main(int argc,char **argv)
 {
-	int err;
 	printf("\n***********************");
 	printf("\n* CCL EXAMPLE PROGRAM *");
 	printf("\n***********************\n\n");
@@ -73,7 +73,7 @@ int main(int argc,char **argv)
 	//Compute sigma_8
 	printf("* Computing sigma_8 (this may take a while)...\n");
 	printf("* sigma_8 = %.3lf\n", ccl_sigma8(cosmo));
-	printf("* Cleaning up\n")
+	printf("* Cleaning up\n");
 	ccl_cosmology_free(cosmo);
 	return 0;
 }
