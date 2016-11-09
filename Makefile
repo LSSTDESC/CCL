@@ -4,7 +4,9 @@ CFLAGS+=-I/usr/local/include
 LDFLAGS=-L/usr/local/lib -lgsl -lgslcblas   -lm -Lclass -lclass
 
 
-OBJECTS=src/ccl_core.o src/ccl_utils.o src/ccl_error.o src/ccl_power.o src/ccl_cls.o src/ccl_placeholder.o src/ccl_background.o src/ccl_correlation.o
+OBJECTS=src/ccl_core.o src/ccl_utils.o src/ccl_error.o src/ccl_power.o src/ccl_cls.o src/ccl_placeholder.o src/ccl_background.o src/ccl_correlation.o tests/ccl_corr_sample.o
+
+#CORR_SAMPLE_OBJECTS=tests/ccl_corr_sample.o
 
 TESTS=tests/ccl_test.c tests/ccl_test_utils.c tests/ccl_test_params.c tests/ccl_test_distances.c tests/ccl_test_growth.c tests/ccl_test_bbks.c tests/ccl_test_cls.c #tests/ccl_corr_sample.c
 #
@@ -32,6 +34,8 @@ test: $(TESTS) $(LIB)
 src/%.o: src/%.c
 	$(CC) -c $(CFLAGS) $< -o $@
 
+corr_sample : $(OBJECTS)
+		$(CC) $(OBJECTS) $(CFLAGS) $(LDFLAGS) -o tests/corr_sample
 
 clean:
 	rm -rf *.dSYM *.o *.a tests/ccl_test test_core_cosmo src/*.o lib/*.a lib/*.so lib/*.dSYM  tests/*.dSYM
