@@ -173,10 +173,6 @@ void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo){
   double * z = ccl_linear_spacing(amin,amax, na);
   double * y2d = malloc(nk * na * sizeof(double));
   if (z==NULL||y==NULL|| x==NULL || y2d==0){
-    free(x);
-    free(y);
-    free(z);
-    free(y2d);
     cosmo->status = 4;
     strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_class(): memory allocation error\n");
   }
@@ -205,8 +201,8 @@ void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo){
 
   
     gsl_spline2d * log_power_nl = gsl_spline2d_alloc(PNL_SPLINE_TYPE, nk,na);
-    for (int i=0; i<nk; i++){
-      for (int j = 0; j < na; j++){
+    for (int j = 0; j < na; j++){
+      for (int i=0; i<nk; i++){
       //The 2D interpolation routines access the function values y_{k_ia_j} with the following ordering:
       //y_ij = y2d[j*N_k + i]
       //with i = 0,...,N_k-1 and j = 0,...,N_a-1.
@@ -217,6 +213,9 @@ void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo){
 
     status = gsl_spline2d_init(log_power_nl, x, z, y2d,nk,na);
     if (status){
+      free(x);
+      free(y);
+      free(z);
       gsl_spline2d_free(log_power_nl);
       cosmo->status = 4;
       strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_class(): Error creating log_power_nl spline\n");
@@ -320,10 +319,6 @@ void ccl_cosmology_compute_power_bbks(ccl_cosmology * cosmo){
   double * z = ccl_linear_spacing(amin,amax, na);
   double * y2d = malloc(nk * na * sizeof(double));
   if (z==NULL||y==NULL|| x==NULL || y2d==0){
-    free(x);
-    free(y);
-    free(z);
-    free(y2d);
     cosmo->status = 4;
     strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_bbks(): memory allocation error\n");
     return;
