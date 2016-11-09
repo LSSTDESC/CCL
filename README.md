@@ -11,7 +11,7 @@ To compile CCL, go to the directory where you installed it and type "make".
 1. You need to link to GSL in your local version of the Makefile. The default Makefile links to the library path, but it might be the case that your version of GSL is not there. 
 2. Sometimes, "make test" can fail. In that case, go to "ccl_test.c" and comment out "define CTEST_SEGFAULT"
 3. If you are planning to compile your own file that calls CCL, then you should add the following to your .bashrc:
-````
+````sh
 export LD_LIBRARY_PATH=/path/to/where/ccl/is/installed/lib:$LD_LIBRARY_PATH
 ````
 
