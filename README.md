@@ -2,6 +2,7 @@
 DESC Core Cosmology Library: cosmology routines with validated numerical accuracy.
 
 The library is written in C99 and all functionality is directly callable from C and C++ code.  We also provide python bindings for higher-level functions.
+# Installation
 
 # Documentation
 This document contains basic information about used structures and functions. At the end of document is provided code which implements these basic functions (also in *tests/min_code.c*). You can also try **make example**.
@@ -104,3 +105,5 @@ int main(int argc,char **argv){
 	printf("* sigma_8 = %.3lf\n", ccl_sigma8(cosmo));
 }
 ````
+
+# License

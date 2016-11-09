@@ -30,6 +30,12 @@ test: $(TESTS) $(LIB)
 	$(CC) $(CFLAGS) $(TESTS) -o tests/ccl_test -Llib -lccl $(LDFLAGS)
 	LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:lib/ tests/ccl_test
 
+example: tests/example.c
+	$(CC) $(CFLAGS) tests/example.c -o tests/example -Llib -lccl $(LDFLAGS)
+
+min: tests/min_code.c
+	$(CC) $(CFLAGS) tests/min_code.c -o tests/min_code -Llib -lccl $(LDFLAGS)
+
 src/%.o: src/%.c
 	$(CC) -c $(CFLAGS) $< -o $@
 
