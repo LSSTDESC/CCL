@@ -96,13 +96,23 @@ INPUT: ccl_cosmology * cosmo, ccl_config to decide on which mass func
 TASK: return dn/dM according to some methodology
 */
 
-/*
-void ccl_massfunc(ccl_cosmology *cosmo)
+void ccl_massfunc(ccl_cosmology *cosmo, double halo_mass, double redshift)
 {
-// code here determines which methodology has been asked for and
-// then goes about calculating it, calling a further function.
+    switch(cosmo->config.mass_function_method){
+        case ccl_tinker:
+            ccl_massfunc_tinker(cosmo, halo_mass, redshift);
+            break;
+
+        default:
+        cosmo->status = 11;
+
+        sprintf(cosmo->status_message ,"ccl_massfunc.c: ccl_massfunc(): Unknown or non-implemented mass function method: %d \n",cosmo->config.mass_function_method);
+        return;
+    }
+    ccl_check_status(cosmo);
+    return;
+
 }
-*/
 
 /*---- ROUTINE: ccl_massfunc_halomtor -----
 INPUT: ccl_cosmology * cosmo, halo_mass in units of Msun/h
