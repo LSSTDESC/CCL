@@ -5,13 +5,6 @@
 
 // This is a test file to include a user-defined photo-z function
 
-// Function for sigma_z that is required as a parameter of the user-defined photo_z function (here a Gaussian).
-double sigmaz_sources(double z)
-{
-  return 0.05*(1.0+z);
-}
-
-
 // The user defines a structure of parameters to the user-defined function for the photo-z probability 
 struct user_func_params{
 	double (* sigma_z) (double);
@@ -32,7 +25,7 @@ int main(int argc,char **argv){
 
 	// The user declares and sets an instance of parameters to their photo_z function:
 	struct user_func_params my_params_example;
-	my_params_example.sigma_z = sigmaz_sources;
+	my_params_example.sigma_z = ccl_specs_sigmaz_sources;
 
 	// Declare a variable of the type of user_pz_info to hold the struct to be created.
 	user_pz_info * my_info;

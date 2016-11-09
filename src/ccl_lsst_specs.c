@@ -108,8 +108,8 @@ static double ccl_specs_dNdz_sources_unnormed(double z, void *params)
 /*------ ROUTINE: ccl_specs_create_photoz_info ------
 INPUT: void * user_pz_params, (double *) user_pz_func (double, double, void *)
 TASK: create a structure amalgamating the user-input information on the photo-z model.
-The structure holds a pointer to the function which returns the probability of getting a certain z_ph given a z_spec,
-and a pointer to the parameters which get passed to that function (other than z_ph and z_sp); */
+The structure holds a pointer to the function which returns the probability of getting a certain z_ph (first double) 
+given a z_spec (second double), and a pointer to the parameters which get passed to that function (other than z_ph and z_sp); */
 user_pz_info* ccl_specs_create_photoz_info(void * user_params, double (*user_pz_func)(double, double,void*)){
 	
 	user_pz_info * this_user_info = malloc(sizeof(user_pz_info));
@@ -165,7 +165,6 @@ struct norm_params{
   double bin_zmin_;
   double bin_zmax_;
   int type_;
-  //double (*sigmaz)(double); //Calls the photo-z scatter model
   user_pz_info * user_information;
   double (*unnormedfunc)(double,void *);
 };
