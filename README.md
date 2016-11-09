@@ -52,6 +52,10 @@ Note that the function returns a pointer. Variable **params** of type **ccl_para
 ````c
 const ccl_configuration default_config = {ccl_fitting_function, ccl_halofit, ccl_tinker};
 ````
+After you are done working with this comsmology objetc, you should free its work space by **ccl_cosmology_free**
+````c
+void ccl_cosmology_free(ccl_cosmology * cosmo);
+````
 ### Distances and Growth factor
 With defined cosmology we can now compute distances, growth factor (and rate) or sigma_8. For comoving radial distance you can call function **ccl_comoving_radial_distance**
 ````c
