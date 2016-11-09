@@ -9,13 +9,42 @@
 #include "gsl/gsl_interp.h"
 #include "gsl/gsl_spline.h"
 #include "ccl_power.h"
+#include "ccl_massfunc.h"
 #include "ccl_error.h"
 
-// to avoid any implicit declarations, should be cleaned up in the future!
-double ccl_massfunc(ccl_cosmology *cosmo, double halo_mass, double redshift);
-double ccl_massfunc_tinker(ccl_cosmology * cosmo, double halo_mass, double redshift);
-double ccl_massfunc_ftinker(ccl_cosmology * cosmo, double halo_mass, double redshift);
-double ccl_massfunc_halomtor(ccl_cosmology * cosmo, double halo_mass);
+/*----- ROUTINE: ccl_massfunc_ftinker -----
+INPUT: cosmology+parameters, a smoothing scale, and a redshift
+TASK: outputs ftinker for calculation in the halo mass function. Assumes
+  Tinker 2008 Fitting Function (arxiv 0803.2706 )
+*/
+
+static double massfunc_f(ccl_cosmology *cosmo, double halo_mass,double redshift)
+{
+  double tinker_A, tinker_a, tinker_b, tinker_c;
+  double alpha, overdensity_delta;
+  double sigma=ccl_sigmaM(cosmo,halo_mass,redshift);
+
+  switch(cosmo->config.mass_function_method){
+  case ccl_tinker:
+    
+    //TODO: maybe use macros for numbers
+    overdensity_delta = 200.0;
+    tinker_A = 0.186*pow(1+redshift, -0.14);
+    tinker_a = 1.47*pow(1+redshift, -0.06);
+    alpha = pow(10, -1.0*pow(0.75 / log10(overdensity_delta / 75.0), 1.2 ));
+    tinker_b = 2.57*pow(1+redshift, -1.0*alpha);
+    tinker_c = 1.19;
+
+    return tinker_A*(pow(sigma/tinker_b,-tinker_a)+1.0)*exp(-tinker_c/sigma/sigma);
+    break;
+  default:
+    cosmo->status = 11;
+    sprintf(cosmo->status_message ,
+	    "ccl_massfunc.c: ccl_massfunc(): Unknown or non-implemented mass function method: %d \n",
+	    cosmo->config.mass_function_method);
+    return 0;
+  }
+}
 
 void ccl_cosmology_compute_sigma(ccl_cosmology * cosmo)
 {
@@ -41,7 +70,7 @@ void ccl_cosmology_compute_sigma(ccl_cosmology * cosmo)
    
    // fill in sigma
    for (int i=0; i<nm; i++){
-     haloradius = ccl_massfunc_halomtor(cosmo, pow(10,m[i]));
+     haloradius = ccl_massfunc_m2r(cosmo, pow(10,m[i]));
      y[i] = log10(ccl_sigmaR(cosmo, haloradius));
    }
    gsl_spline * logsigma = gsl_spline_alloc(M_SPLINE_TYPE, nm);
@@ -95,41 +124,34 @@ void ccl_cosmology_compute_sigma(ccl_cosmology * cosmo)
 INPUT: ccl_cosmology * cosmo, ccl_config to decide on which mass func
 TASK: return dn/dM according to some methodology
 */
-
 double ccl_massfunc(ccl_cosmology *cosmo, double halo_mass, double redshift)
 {
-    switch(cosmo->config.mass_function_method){
-        case ccl_tinker:
-            return ccl_massfunc_tinker(cosmo, halo_mass, redshift);
-            break;
-
-        default:
-        cosmo->status = 11;
-
-        sprintf(cosmo->status_message ,"ccl_massfunc.c: ccl_massfunc(): Unknown or non-implemented mass function method: %d \n",cosmo->config.mass_function_method);
-        return 0;
-    }
+  if (!cosmo->computed_sigma){
+    ccl_cosmology_compute_sigma(cosmo);
     ccl_check_status(cosmo);
-    return 0;
+  }
 
+  double f,deriv,rho_m,logmass;
+  
+  logmass = log10(halo_mass);
+  rho_m = RHO_CRITICAL*cosmo->params.Omega_m;
+  f=massfunc_f(cosmo,halo_mass,redshift);
+  deriv = gsl_spline_eval(cosmo->data.dlnsigma_dlogm, logmass, cosmo->data.accelerator_m);
+
+  return f*rho_m*deriv/halo_mass;
 }
 
-/*---- ROUTINE: ccl_massfunc_halomtor -----
+/*---- ROUTINE: ccl_massfunc_m2r -----
 INPUT: ccl_cosmology * cosmo, halo_mass in units of Msun/h
 TASK: takes smoothing halo mass and converts to smoothing halo radius
   in units of Mpc.
 */
-
-double ccl_massfunc_halomtor(ccl_cosmology * cosmo, double halo_mass)
+double ccl_massfunc_m2r(ccl_cosmology * cosmo, double halo_mass)
 {
     double rho_m, rho_crit, halo_radius;
 
-    // critical density of matter used as rho_m.
-    // units in this step: km^2 Mpc^-2 m^-3 kg^1 h^2
-    rho_crit = (3.0*100.0*100.0)/(8.0*M_PI*GNEWT);
-    // units of Msun Mpc^-3 h^2
-    rho_crit = rho_crit*1000.0*1000.0*MPC_TO_METER/SOLAR_MASS;
-    rho_m = rho_crit*cosmo->params.Omega_m;
+    //TODO: make this neater
+    rho_m = RHO_CRITICAL*cosmo->params.Omega_m;
 
     halo_mass = halo_mass*cosmo->params.h;
     halo_radius = pow((3.0*halo_mass) / (4*M_PI*rho_m), (1.0/3.0));
@@ -137,72 +159,8 @@ double ccl_massfunc_halomtor(ccl_cosmology * cosmo, double halo_mass)
     return halo_radius/cosmo->params.h;
 }
 
-
-/*----- ROUTINE: ccl_massfunc_tinker -----
-INPUT: cosmology+parameters, halo mass in Msun/h, and a redshift
-TASK: outputs dn/dM assuming the mass binning is fairly flat. No
-  derivatives calculated!
-*/
-
-double ccl_massfunc_tinker(ccl_cosmology *cosmo, double halo_mass, double redshift)
+double ccl_sigmaM(ccl_cosmology * cosmo, double halo_mass, double redshift)
 {
-    double ftinker;
-    double deriv;
-    double rho_m, rho_crit;
-    double logmass;
-
-    if (!cosmo->computed_sigma){
-        ccl_cosmology_compute_sigma(cosmo);
-        ccl_check_status(cosmo);
-    }
-
-    logmass = log10(halo_mass);
-
-    rho_crit = (3.0*100.0*100.0)/(8.0*M_PI*GNEWT);
-    rho_crit = rho_crit*1000.0*1000.0*MPC_TO_METER/SOLAR_MASS;
-    rho_m = rho_crit*cosmo->params.Omega_m;
-
-    ftinker = ccl_massfunc_ftinker(cosmo, halo_mass, redshift);
-
-    deriv = gsl_spline_eval(cosmo->data.dlnsigma_dlogm, logmass, cosmo->data.accelerator_m);
-    return ftinker*rho_m*deriv/halo_mass;
-}
-
-
-/*----- ROUTINE: ccl_massfunc_ftinker -----
-INPUT: cosmology+parameters, a smoothing scale, and a redshift
-TASK: outputs ftinker for calculation in the halo mass function. Assumes
-  Tinker 2008 Fitting Function (arxiv 0803.2706 )
-*/
-
-double ccl_massfunc_ftinker(ccl_cosmology *cosmo, double halo_mass, double redshift)
-{
-    double tinker_A, tinker_a, tinker_b, tinker_c;
-    double ftinker, sigma;
-    double alpha, overdensity_delta;
-
-    if (!cosmo->computed_sigma){
-        ccl_cosmology_compute_sigma(cosmo);
-        ccl_check_status(cosmo);
-    }
-
-// probably should set these up as a data structure that can be called
-// on demand.
-    overdensity_delta = 200.0;
-    tinker_A = 0.186*pow(1+redshift, -0.14);
-    tinker_a = 1.47*pow(1+redshift, -0.06);
-    alpha = pow(10, -1.0*pow(0.75 / log10(overdensity_delta / 75.0), 1.2 ));
-    tinker_b = 2.57*pow(1+redshift, -1.0*alpha);
-    tinker_c = 1.19;
-
-    sigma = pow(10,gsl_spline_eval(cosmo->data.logsigma, log10(halo_mass), cosmo->data.accelerator_m));
-    // should rescale by growth function here
-    sigma = sigma*ccl_growth_factor(cosmo, 1.0/(1.0+redshift));
-
-    ftinker = tinker_A*(pow(sigma/tinker_b,-tinker_a)+1.0)*exp(-tinker_c/sigma/sigma);
-    return ftinker;
-}
-double ccl_sigmaM(ccl_cosmology * cosmo, double halo_mass, double redshift){
     double sigmaM;
 
     if (!cosmo->computed_sigma){
