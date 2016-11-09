@@ -28,9 +28,9 @@ static double ccl_specs_dNdz_clustering(double z, void* params)
 /*------ ROUTINE: ccl_specs_sigmaz_clustering -----
 INPUT: double z
 TASK: Return sigma(z), the photo-z dispersion, for the clustering sample
-      We are assuming Gaussian uncertainties.
+      This is if you want to assume Gaussian uncertainties.
 */
-static double ccl_specs_sigmaz_clustering(double z)
+double ccl_specs_sigmaz_clustering(double z)
 {
   return 0.03*(1.0+z);
 }
@@ -38,9 +38,9 @@ static double ccl_specs_sigmaz_clustering(double z)
 /*------ ROUTINE: ccl_specs_sigmaz_sources -----
 INPUT: double z
 TASK: Return sigma(z), the photo-z dispersion, for the lensing sample
-      We are assuming Gaussian uncertainties.
+      This is if you want to assume Gaussian uncertainties.
 */
-static double ccl_specs_sigmaz_sources(double z)
+double ccl_specs_sigmaz_sources(double z)
 {
   return 0.05*(1.0+z);
 }
@@ -104,6 +104,30 @@ static double ccl_specs_dNdz_sources_unnormed(double z, void *params)
     		return 0.;
   }
 }
+
+/*------ ROUTINE: ccl_specs_create_photoz_info ------
+INPUT: void * user_pz_params, (double *) user_pz_func (double, double, void *)
+TASK: create a structure amalgamating the user-input information on the photo-z model.
+The structure holds a pointer to the function which returns the probability of getting a certain z_ph given a z_spec,
+and a pointer to the parameters which get passed to that function (other than z_ph and z_sp); */
+user_pz_info* ccl_specs_create_photoz_info(void * user_params, double (*user_pz_func)(double, double,void*)){
+	
+	user_pz_info * this_user_info = malloc(sizeof(user_pz_info));
+	this_user_info ->your_pz_params = user_params;
+	this_user_info -> your_pz_func = user_pz_func;
+	
+	return this_user_info;
+}
+
+
+/* ------ ROUTINE: ccl_specs_free_photoz_info -------
+INPUT: user_pz_info my_photoz_info
+TASK: free memory holding the structure containing user-input photoz information */
+
+void ccl_specs_free_photoz_info(user_pz_info *my_photoz_info){
+	free(my_photoz_info);
+}
+
 
 /*------ ROUTINE: ccl_specs_photoz -----
 INPUT: double z_ph, void *params
@@ -197,12 +221,12 @@ static double ccl_specs_norm_integrand(double z, void* params){
 INPUT: double z, , double bin_zmin, double bin_zmax, dNdz function pointer, sigma_z function pointer
        tomographic boundaries are [bin_zmin,bin_zmax]
 TASK:  dNdz in a particular tomographic bin, 
-       convolved with a photo-z model (defined in photoz function), and normalized.
+       convolved with a photo-z model (defined by the user), and normalized.
+       returns a status integer 0 if called with an allowable type of dNdz, non-zero otherwise
+       (this is different from the regular status handling procedure because we don't pass a cosmology to this function)
 */
 
 int ccl_specs_dNdz_tomog(double z, int dNdz_type, double bin_zmin, double bin_zmax, user_pz_info * user_info, double *tomoout){
-
-
 
 	// This uses equation 33 of Joachimi & Schneider 2009, arxiv:0905.0393
 
@@ -271,7 +295,9 @@ int ccl_specs_dNdz_tomog(double z, int dNdz_type, double bin_zmin, double bin_zm
         H.function = ccl_specs_norm_integrand;
         H.params = norm_p;
         gsl_integration_cquad(&H, Z_MIN_SOURCES, Z_MAX_SOURCES, 0.0,EPSREL_DNDZ,workspace_three,denom_integrand, NULL, NULL);
-        gsl_integration_cquad_workspace_free(workspace_three);	
+        gsl_integration_cquad_workspace_free(workspace_three);
+
+
 
 	*tomoout = dNdz_t * (*numerator_integrand) / (*denom_integrand);
 	return 0;
