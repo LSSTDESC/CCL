@@ -1,10 +1,6 @@
 CC=gcc
 CFLAGS=-Wall -Wpedantic -g -O0 -Iinclude -std=c99 -fPIC
 CFLAGS+=-I/opt/local/include
-#Elisa----
-CFLAGS+=-I/opt/local/include/gsl/
-CFLAGS+=-L /opt/local/lib
-#Elisa----
 LDFLAGS=-lgsl -lgslcblas   -lm -Lclass -lclass
 
 
@@ -31,10 +27,8 @@ class:
 	cd class; $(MAKE)
 
 test: $(TESTS) $(LIB)
-	$(CC) $(CFLAGS) $(TESTS) -o tests/ccl_example_specs -Llib -lccl $(LDFLAGS)
-	LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:lib/ tests/ccl_example_specs
-#	$(CC) $(CFLAGS) $(TESTS) -o tests/ccl_test -Llib -lccl $(LDFLAGS)
-#	LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:lib/ tests/ccl_test
+	$(CC) $(CFLAGS) $(TESTS) -o tests/ccl_test -Llib -lccl $(LDFLAGS)
+	LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:lib/ tests/ccl_test
 
 src/%.o: src/%.c
 	$(CC) -c $(CFLAGS) $< -o $@
