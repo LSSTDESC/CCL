@@ -12,7 +12,7 @@
 #include "ccl_error.h"
 
 // to avoid any implicit declarations, should be cleaned up in the future!
-double ccl_massfunc(ccl_cosmology *cosmo);
+double ccl_massfunc(ccl_cosmology *cosmo, double halo_mass, double redshift);
 double ccl_massfunc_tinker(ccl_cosmology * cosmo, double halo_mass, double redshift);
 double ccl_massfunc_ftinker(ccl_cosmology * cosmo, double halo_mass, double redshift);
 double ccl_massfunc_halomtor(ccl_cosmology * cosmo, double halo_mass);
@@ -42,7 +42,7 @@ void ccl_cosmology_compute_sigma(ccl_cosmology * cosmo)
    // fill in sigma
    for (int i=0; i<nm; i++){
      haloradius = ccl_massfunc_halomtor(cosmo, pow(10,m[i]));
-     y[i] = log10(ccl_sigmaR(cosmo, haloradius/cosmo->params.h));
+     y[i] = log10(ccl_sigmaR(cosmo, haloradius));
    }
    gsl_spline * logsigma = gsl_spline_alloc(M_SPLINE_TYPE, nm);
    int status = gsl_spline_init(logsigma, m, y, nm);
@@ -96,21 +96,21 @@ INPUT: ccl_cosmology * cosmo, ccl_config to decide on which mass func
 TASK: return dn/dM according to some methodology
 */
 
-void ccl_massfunc(ccl_cosmology *cosmo, double halo_mass, double redshift)
+double ccl_massfunc(ccl_cosmology *cosmo, double halo_mass, double redshift)
 {
     switch(cosmo->config.mass_function_method){
         case ccl_tinker:
-            ccl_massfunc_tinker(cosmo, halo_mass, redshift);
+            return ccl_massfunc_tinker(cosmo, halo_mass, redshift);
             break;
 
         default:
         cosmo->status = 11;
 
         sprintf(cosmo->status_message ,"ccl_massfunc.c: ccl_massfunc(): Unknown or non-implemented mass function method: %d \n",cosmo->config.mass_function_method);
-        return;
+        return 0;
     }
     ccl_check_status(cosmo);
-    return;
+    return 0;
 
 }
 
@@ -151,7 +151,7 @@ double ccl_massfunc_tinker(ccl_cosmology *cosmo, double halo_mass, double redshi
     double logmass;
 
     if (!cosmo->computed_sigma){
-        ccl_cosmology_compute_sigma(cosmo, &params);
+        ccl_cosmology_compute_sigma(cosmo);
         ccl_check_status(cosmo);
     }
 
@@ -183,7 +183,7 @@ double ccl_massfunc_ftinker(ccl_cosmology *cosmo, double halo_mass, double redsh
     double alpha, overdensity_delta;
 
     if (!cosmo->computed_sigma){
-        ccl_cosmology_compute_sigma(cosmo, &params);
+        ccl_cosmology_compute_sigma(cosmo);
         ccl_check_status(cosmo);
     }
 

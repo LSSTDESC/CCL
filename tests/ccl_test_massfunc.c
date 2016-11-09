@@ -1,3 +1,9 @@
+#include "ccl.h"
+#include "ccl_core.h"
+#include "ccl_utils.h"
+#include "ccl_massfunc.h"
+#include <math.h>
+#include <stdio.h>
 
 // just a test main function until things are working. Not for final dist.
 int main(){
@@ -12,7 +18,7 @@ int main(){
     int i, j;
     FILE * fp;
 
-    fp = fopen("test.txt", "w");
+    fp = fopen("test_massfunc.txt", "w");
 
     ccl_configuration config = default_config;
     config.transfer_function_method = ccl_bbks;
@@ -28,7 +34,7 @@ int main(){
        fprintf(fp, "%le ", mass);
        redshift = 0;
        for(j=0; j<7; j++){
-          test = ccl_massfunc_tinker(cosmo, &params, mass, redshift);
+          test = ccl_massfunc(cosmo, mass, redshift);
           fprintf(fp, "%le ", test);
           redshift += 0.2;
        }
