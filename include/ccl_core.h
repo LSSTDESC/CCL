@@ -56,11 +56,14 @@ typedef struct ccl_data{
   // if one calls them successively with the same a value
   // they will be much faster.
   gsl_interp_accel *accelerator;
+  gsl_interp_accel *accelerator_m;
+
   //TODO: why not use interpolation accelerators?
 
   // Function of Halo mass M
-  gsl_spline * sigma;
-  
+  gsl_spline * logsigma;
+  gsl_spline * dlnsigma_dlogm; 
+ 
   // These are all functions of the wavenumber k and the scale factor a.
   gsl_spline * p_lin;
   gsl_spline * p_nl;
