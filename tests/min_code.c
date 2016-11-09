@@ -22,9 +22,9 @@ int main(int argc,char **argv){
 	ccl_cosmology *cosmo=ccl_cosmology_create(params,default_config);
 
 	// Compute radial distances
-	printf("Comoving distance to z = %.3lf is chi = %.3lf Mpc/h\n",
+	printf("Comoving distance to z = %.3lf is chi = %.3lf Mpc\n",
 		ZD,ccl_comoving_radial_distance(cosmo,1./(1+ZD)));
-	printf("Luminosity distance to z = %.3lf is chi = %.3lf Mpc/h\n",
+	printf("Luminosity distance to z = %.3lf is chi = %.3lf Mpc\n",
 		ZD,ccl_luminosity_distance(cosmo,1./(1+ZD)));
 
 	// Compute growth factor and growth rate

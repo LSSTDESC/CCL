@@ -19,7 +19,7 @@ export LD_LIBRARY_PATH=/path/to/where/ccl/is/installed/lib:$LD_LIBRARY_PATH
 
  
 # Documentation
-This document contains basic information about used structures and functions. At the end of document is provided code which implements these basic functions (also in *tests/min_code.c*). You can also try **make example**.
+This document contains basic information about used structures and functions. At the end of document is provided code which implements these basic functions (also in *tests/min_code.c*).
 ### Cosmological parameters
 Start by defining cosmological parameters defined in structure **ccl_parameters**. This structure (exact definition in *include/ccl_core.h*) contains densities of matter, parameters of dark energy (*w0, wa*), Hubble parameters, primordial poer spectra, radiation parameters, derived parameters (*sigma_8, Omega_1, z_star*) and modified growth rate.
 
@@ -52,7 +52,7 @@ ccl_cosmology * ccl_cosmology_create(ccl_parameters params, ccl_configuration co
 ````
 Note that the function returns a pointer. Variable **params** of type **ccl_parameters** contains cosmological parameters created in previous step. Structure **ccl_configuration** contains information about methods for computing transfer function, matter power spectrum and mass function (for available methods see *include/ccl_config.h*). For now, you should use default configuration **default_config**
 ````c
-const ccl_configuration default_config = {ccl_fitting_function, ccl_halofit, ccl_tinker};
+const ccl_configuration default_config = {ccl_boltzmann_class, ccl_halofit, ccl_tinker};
 ````
 After you are done working with this cosmology object, you should free its work space by **ccl_cosmology_free**
 ````c
@@ -63,11 +63,11 @@ With defined cosmology we can now compute distances, growth factor (and rate) or
 ````c
 double ccl_comoving_radial_distance(ccl_cosmology * cosmo, double a);
 ````
-which returns distance to scale factor **a** in units of Mpc/h. For luminosity distance call function **ccl_luminosity_distance**
+which returns distance to scale factor **a** in units of Mpc. For luminosity distance call function **ccl_luminosity_distance**
 ````c
 double ccl_luminosity_distance(ccl_cosmology * cosmo, double a);
 ````
-which also returns distance in units of Mpc/h. For growth factor (normalized to 1 at **z** = 0) at sale factor **a** call **ccl_growth_factor**
+which also returns distance in units of Mpc. For growth factor (normalized to 1 at **z** = 0) at sale factor **a** call **ccl_growth_factor**
 ````c
 double ccl_growth_factor(ccl_cosmology * cosmo, double a);
 ````
@@ -78,13 +78,15 @@ For given cosmology we can compute linear and non-linear matter power spectra us
 double ccl_linear_matter_power(ccl_cosmology * cosmo, double a, double k);
 double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double a, double k);
 ````
-Sigma_8 can be calculated by function **ccl_sigma8**, or more generally by function **ccl_sigmaR**
+Sigma_8 can be calculated by function **ccl_sigma8**, or more generally by function **ccl_sigmaR**, which computes the variance of the density field smoothed by spherical top-hat window function on a comoving distance **R** (in Mpc).
 ````c
 double ccl_sigmaR(ccl_cosmology *cosmo, double R);
 double ccl_sigma8(ccl_cosmology *cosmo);
 ````
 These and other functions for different matter power spectra can be found in file *include/ccl_power.h*.
 ### Example code
+This code can also be found in *tests/min_code.h*
+
 ````c
 #include <stdlib.h>
 #include <stdio.h>
@@ -110,9 +112,9 @@ int main(int argc,char **argv){
     ccl_cosmology *cosmo=ccl_cosmology_create(params,default_config);
     
     // Compute radial distances
-    printf("Comoving distance to z = %.3lf is chi = %.3lf Mpc/h\n",
+    printf("Comoving distance to z = %.3lf is chi = %.3lf Mpc\n",
 		ZD,ccl_comoving_radial_distance(cosmo,1./(1+ZD)));
-	printf("Luminosity distance to z = %.3lf is chi = %.3lf Mpc/h\n",
+	printf("Luminosity distance to z = %.3lf is chi = %.3lf Mpc\n",
 		ZD,ccl_luminosity_distance(cosmo,1./(1+ZD)));
 		
 	// Compute growth factor and growth rate
