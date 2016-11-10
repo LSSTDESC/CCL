@@ -160,85 +160,83 @@ static void compare_corr(char *compare_type,struct corrs_data * data)
   ccl_tracer_corr(cosmo,NL,&theta_arr,tr_wl_1,tr_wl_2,4,&wt_ll_12_h_mm);
   ccl_tracer_corr(cosmo,NL,&theta_arr,tr_wl_2,tr_wl_2,4,&wt_ll_22_h_mm);
 
+  //Re-scale theta from radians to degrees
+  for (int i=0;i<NL;i++){theta_arr[i]=theta_arr[i]*180/M_PI;}
+
+  
   FILE *output2 = fopen("cc_test_corr_out_fftlog.dat", "w");
-  for (int i=0;i<NL;i++)
-    {
-      //theta_arr[i]*=sqrt(4*M_PI);
-      theta_arr[i]=theta_arr[i]*180/M_PI;
-      fprintf(output2,"%lf %lf %lf \n",theta_arr[i],wt_dd_11_h[i],wt_ll_11_h_pp[i]);
-    }
+  for (int ii=0;ii<NL;ii++){
+    fprintf(output2,"%.10e %.10e %.10e %.10e %.10e %.10e %.10e \n",theta_arr[ii],wt_ll_11_h_pp[ii],wt_ll_12_h_pp[ii],wt_ll_22_h_pp[ii],wt_ll_11_h_mm[ii],wt_ll_12_h_mm[ii],wt_ll_22_h_mm[ii]);
+  }
   fclose(output2);
 
   //Spline
-  gsl_spline * spl_wt_dd_11_h = gsl_spline_alloc(K_SPLINE_TYPE,NL);
+  gsl_spline * spl_wt_dd_11_h = gsl_spline_alloc(L_SPLINE_TYPE,NL);
   int status = gsl_spline_init(spl_wt_dd_11_h, theta_arr, wt_dd_11_h, NL);
-  gsl_spline * spl_wt_dd_12_h = gsl_spline_alloc(K_SPLINE_TYPE,NL);
+  gsl_spline * spl_wt_dd_12_h = gsl_spline_alloc(L_SPLINE_TYPE,NL);
   status = gsl_spline_init(spl_wt_dd_12_h, theta_arr, wt_dd_12_h, NL);
-  gsl_spline * spl_wt_dd_22_h = gsl_spline_alloc(K_SPLINE_TYPE,NL);
+  gsl_spline * spl_wt_dd_22_h = gsl_spline_alloc(L_SPLINE_TYPE,NL);
   status = gsl_spline_init(spl_wt_dd_22_h, theta_arr, wt_dd_22_h, NL);
-  gsl_spline * spl_wt_ll_11_h_pp = gsl_spline_alloc(K_SPLINE_TYPE,NL);
-  status = gsl_spline_init(spl_wt_dd_11_h, theta_arr, wt_ll_11_h_pp, NL);
-  gsl_spline * spl_wt_ll_12_h_pp = gsl_spline_alloc(K_SPLINE_TYPE,NL);
-  status = gsl_spline_init(spl_wt_dd_12_h, theta_arr, wt_ll_12_h_pp, NL);
-  gsl_spline * spl_wt_ll_22_h_pp = gsl_spline_alloc(K_SPLINE_TYPE,NL);
-  status = gsl_spline_init(spl_wt_dd_22_h, theta_arr, wt_ll_22_h_pp, NL);
-  gsl_spline * spl_wt_ll_11_h_mm = gsl_spline_alloc(K_SPLINE_TYPE,NL);
-  status = gsl_spline_init(spl_wt_dd_11_h, theta_arr, wt_ll_11_h_mm, NL);
-  gsl_spline * spl_wt_ll_12_h_mm = gsl_spline_alloc(K_SPLINE_TYPE,NL);
-  status = gsl_spline_init(spl_wt_dd_12_h, theta_arr, wt_ll_12_h_mm, NL);
-  gsl_spline * spl_wt_ll_22_h_mm = gsl_spline_alloc(K_SPLINE_TYPE,NL);
-  status = gsl_spline_init(spl_wt_dd_22_h, theta_arr, wt_ll_22_h_mm, NL);
+  gsl_spline * spl_wt_ll_11_h_pp = gsl_spline_alloc(L_SPLINE_TYPE,NL);
+  status = gsl_spline_init(spl_wt_ll_11_h_pp, theta_arr, wt_ll_11_h_pp, NL);
+  gsl_spline * spl_wt_ll_12_h_pp = gsl_spline_alloc(L_SPLINE_TYPE,NL);
+  status = gsl_spline_init(spl_wt_ll_12_h_pp, theta_arr, wt_ll_12_h_pp, NL);
+  gsl_spline * spl_wt_ll_22_h_pp = gsl_spline_alloc(L_SPLINE_TYPE,NL);
+  status = gsl_spline_init(spl_wt_ll_22_h_pp, theta_arr, wt_ll_22_h_pp, NL);
+  gsl_spline * spl_wt_ll_11_h_mm = gsl_spline_alloc(L_SPLINE_TYPE,NL);
+  status = gsl_spline_init(spl_wt_ll_11_h_mm, theta_arr, wt_ll_11_h_mm, NL);
+  gsl_spline * spl_wt_ll_12_h_mm = gsl_spline_alloc(L_SPLINE_TYPE,NL);
+  status = gsl_spline_init(spl_wt_ll_12_h_mm, theta_arr, wt_ll_12_h_mm, NL);
+  gsl_spline * spl_wt_ll_22_h_mm = gsl_spline_alloc(L_SPLINE_TYPE,NL);
+  status = gsl_spline_init(spl_wt_ll_22_h_mm, theta_arr, wt_ll_22_h_mm, NL);
 
   double tmp;
   FILE *output = fopen("cc_test_corr_out.dat", "w");
-  printf("theta min max  %f  %f \n",theta_arr[0],theta_arr[NL-1]);
   for(int ii=0;ii<nofl;ii++) {
     tmp=gsl_spline_eval(spl_wt_dd_11_h, theta_in[ii], NULL);
     if(fabs(tmp/wt_dd_11[ii]-1)>CORR_TOLERANCE)
       fraction_failed++;
-    fprintf(output,"%lf %lf %lf",theta_in[ii],tmp,wt_dd_11[ii]);
+    fprintf(output,"%.10e %.10e %.10e",theta_in[ii],tmp,wt_dd_11[ii]);
 
     tmp=gsl_spline_eval(spl_wt_dd_12_h, theta_in[ii], NULL);
     if(fabs(tmp/wt_dd_12[ii]-1)>CORR_TOLERANCE)
       fraction_failed++;
-    fprintf(output," %lf %lf",tmp,wt_dd_12[ii]);
-
-    printf("%i %lf %lf %lf\n",ii,theta_in[ii],tmp,wt_dd_12[ii]);
+    fprintf(output," %.10e %.10e",tmp,wt_dd_12[ii]);
 
     tmp=gsl_spline_eval(spl_wt_dd_22_h, theta_in[ii], NULL);
     if(fabs(tmp/wt_dd_22[ii]-1)>CORR_TOLERANCE)
       fraction_failed++;
-    fprintf(output," %lf %lf",tmp,wt_dd_22[ii]);
+    fprintf(output," %.10e %.10e",tmp,wt_dd_22[ii]);
 
     gsl_spline_eval_e(spl_wt_ll_11_h_pp, theta_in[ii], NULL,&tmp);
     if(fabs(tmp/wt_ll_11_pp[ii]-1)>CORR_TOLERANCE)
       fraction_failed++;
-    fprintf(output," %lf %lf",tmp,wt_ll_11_h_pp[ii]);
+    fprintf(output," %.10e %.10e",tmp,wt_ll_11_h_pp[ii]);
     
     gsl_spline_eval_e(spl_wt_ll_12_h_pp, theta_in[ii], NULL,&tmp);
     if(fabs(tmp/wt_ll_12_pp[ii]-1)>CORR_TOLERANCE)
       fraction_failed++;
-    fprintf(output," %lf %lf",tmp,wt_ll_12_h_pp[ii]);
+    fprintf(output," %.10e %.10e",tmp,wt_ll_12_h_pp[ii]);
 
     gsl_spline_eval_e(spl_wt_ll_22_h_pp, theta_in[ii], NULL,&tmp);
     if(fabs(tmp/wt_ll_22_pp[ii]-1)>CORR_TOLERANCE)
       fraction_failed++;
-    fprintf(output," %lf %lf",tmp,wt_ll_22_h_pp[ii]);
+    fprintf(output," %.10e %.10e",tmp,wt_ll_22_h_pp[ii]);
 
     gsl_spline_eval_e(spl_wt_ll_11_h_mm, theta_in[ii], NULL,&tmp);
     if(fabs(tmp/wt_ll_11_mm[ii]-1)>CORR_TOLERANCE)
       fraction_failed++;
-    fprintf(output," %lf %lf",tmp,wt_ll_11_h_mm[ii]);
+    fprintf(output," %.10e %.10e",tmp,wt_ll_11_h_mm[ii]);
 
     gsl_spline_eval_e(spl_wt_ll_12_h_mm, theta_in[ii], NULL,&tmp);
     if(fabs(tmp/wt_ll_12_mm[ii]-1)>CORR_TOLERANCE)
       fraction_failed++;
-    fprintf(output," %lf %lf",tmp,wt_ll_12_h_mm[ii]);
+    fprintf(output," %.10e %.10e",tmp,wt_ll_12_h_mm[ii]);
 
     gsl_spline_eval_e(spl_wt_ll_22_h_mm, theta_in[ii], NULL,&tmp);
     if(fabs(tmp/wt_ll_22_mm[ii]-1)>CORR_TOLERANCE)
       fraction_failed++;
-    fprintf(output," %lf %lf \n",tmp,wt_ll_22_h_mm[ii]);
+    fprintf(output," %.10e %.10e \n",tmp,wt_ll_22_h_mm[ii]);
   }
   fclose(output);
   gsl_spline_free(spl_wt_dd_11_h);

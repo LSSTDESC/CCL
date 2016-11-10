@@ -48,6 +48,6 @@
 //Correlation function related parameters
 #define EPSREL_CORR_FUNC 1E-3
 #define GSL_INTEGRATION_LIMIT 1000
-#define L_MIN_INT 10
-#define L_MAX_INT 3E4
-#define NL 1000
+#define L_MIN_INT 2.0
+#define L_MAX_INT 3.0E4
+#define NL 5000
