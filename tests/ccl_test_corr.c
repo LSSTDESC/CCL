@@ -161,6 +161,23 @@ static void compare_corr(char *compare_type,struct corrs_data * data)
   ccl_tracer_corr(cosmo,NL,&theta_arr,tr_wl_1,tr_wl_2,4,&wt_ll_12_h_mm);
   ccl_tracer_corr(cosmo,NL,&theta_arr,tr_wl_2,tr_wl_2,4,&wt_ll_22_h_mm);
 
+  FILE *output2 = fopen("cc_test_corr_out_fftlog.dat", "w");
+  for (int i=0;i<NL;i++)
+    {
+      theta_arr[i]*=sqrt(4*M_PI);
+      theta_arr[i]=theta_arr[i]*180/M_PI;
+      fprintf(output2,"%lf %lf %lf \n",theta_arr[i],wt_dd_11_h[i],wt_ll_11_h_pp[i]);
+    }
+  fclose(output2);
+  /*
+  double *theta_arr_inv=(double *)malloc(sizeof(double)*NL);
+  double *wt_dd_11_h_inv=(double *)malloc(sizeof(double)*NL);
+  for (int i=0;i<NL;i++)
+    {
+      theta_arr_inv[NL-1-i]=theta_arr[i];
+      wt_dd_11_h_inv[NL-1-i]=wt_dd_11_h[i];
+    }
+  */
   //Spline
   gsl_spline * spl_wt_dd_11_h = gsl_spline_alloc(K_SPLINE_TYPE,NL);
   int status = gsl_spline_init(spl_wt_dd_11_h, theta_arr, wt_dd_11_h, NL);
@@ -183,20 +200,21 @@ static void compare_corr(char *compare_type,struct corrs_data * data)
 
   double tmp;
   FILE *output = fopen("cc_test_corr_out.dat", "w");
-
+  printf("theta min max  %f  %f \n",theta_arr[0],theta_arr[NL-1]);
   for(int ii=0;ii<nofl;ii++) {
-    gsl_spline_eval_e(spl_wt_dd_11_h, theta_in[ii], NULL,&tmp);
+    tmp=gsl_spline_eval(spl_wt_dd_11_h, theta_in[ii], NULL);
     if(fabs(tmp/wt_dd_11[ii]-1)>CORR_TOLERANCE)
       fraction_failed++;
     fprintf(output,"%lf %lf %lf",theta_in[ii],tmp,wt_dd_11[ii]);
 
-    gsl_spline_eval_e(spl_wt_dd_12_h, theta_in[ii], NULL,&tmp);
+    tmp=gsl_spline_eval(spl_wt_dd_12_h, theta_in[ii], NULL);
     if(fabs(tmp/wt_dd_12[ii]-1)>CORR_TOLERANCE)
       fraction_failed++;
     fprintf(output," %lf %lf",tmp,wt_dd_12[ii]);
-    printf("%lf %lf\n",tmp,wt_dd_12[ii]);
 
-    gsl_spline_eval_e(spl_wt_dd_22_h, theta_in[ii], NULL,&tmp);
+    printf("%i %lf %lf %lf\n",ii,theta_in[ii],tmp,wt_dd_12[ii]);
+
+    tmp=gsl_spline_eval(spl_wt_dd_22_h, theta_in[ii], NULL);
     if(fabs(tmp/wt_dd_22[ii]-1)>CORR_TOLERANCE)
       fraction_failed++;
     fprintf(output," %lf %lf",tmp,wt_dd_22[ii]);
