@@ -17,27 +17,37 @@ INPUT: cosmology+parameters, a smoothing mass, and a redshift
 TASK: Outputs fitting function for use in halo mass function calculation;
   currently only supports:
     ccl_tinker - Tinker 2008 (arxiv 0803.2706 )
+    ccl_watson - Behroozi 2012 (arxiv 1212.0095 )
 */
 
 static double massfunc_f(ccl_cosmology *cosmo, double halo_mass,double redshift)
 {
-  double tinker_A, tinker_a, tinker_b, tinker_c;
-  double alpha, overdensity_delta;
-  double sigma=ccl_sigmaM(cosmo,halo_mass,redshift);
+  double fit_A, fit_a, fit_b, fit_c, fit_d, overdensity_delta;
+  double Omega_mz;
 
+  double sigma=ccl_sigmaM(cosmo,halo_mass,redshift);
   switch(cosmo->config.mass_function_method){
   case ccl_tinker:
     
     //TODO: maybe use macros for numbers
     overdensity_delta = 200.0;
-    tinker_A = 0.186*pow(1+redshift, -0.14);
-    tinker_a = 1.47*pow(1+redshift, -0.06);
-    alpha = pow(10, -1.0*pow(0.75 / log10(overdensity_delta / 75.0), 1.2 ));
-    tinker_b = 2.57*pow(1+redshift, -1.0*alpha);
-    tinker_c = 1.19;
+    fit_A = 0.186*pow(1+redshift, -0.14);
+    fit_a = 1.47*pow(1+redshift, -0.06);
+    fit_d = pow(10, -1.0*pow(0.75 / log10(overdensity_delta / 75.0), 1.2 ));
+    fit_b = 2.57*pow(1+redshift, -1.0*fit_d);
+    fit_c = 1.19;
 
-    return tinker_A*(pow(sigma/tinker_b,-tinker_a)+1.0)*exp(-tinker_c/sigma/sigma);
+    return fit_A*(pow(sigma/fit_b,-fit_a)+1.0)*exp(-fit_c/sigma/sigma);
     break;
+  case ccl_watson:
+
+    fit_A = 0.282;
+    fit_a = 2.163;
+    fit_b = 1.406;
+    fit_c = 1.210;
+
+    return fit_A*(pow(fit_b/sigma,fit_a)+1.0)*exp(-fit_c/sigma/sigma);
+
   default:
     cosmo->status = 11;
     sprintf(cosmo->status_message ,
