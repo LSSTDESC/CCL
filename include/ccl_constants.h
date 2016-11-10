@@ -8,10 +8,11 @@
 // NB: Need to calculate chi_star separated from the process
 // of filling these splines
 #define A_SPLINE_DELTA 0.001
+#define A_SPLINE_NA    1000
 #define A_SPLINE_MIN   0.1
 #define A_SPLINE_MAX   1.0
 //for 2D SPLINE, e.g. P_NL, use coarser binning
-#define N_A 50
+#define N_A 20
 
 #define A_SPLINE_TYPE gsl_interp_akima
 #define K_SPLINE_TYPE gsl_interp_akima

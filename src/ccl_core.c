@@ -226,7 +226,7 @@ void ccl_data_free(ccl_data * data)
   gsl_spline_free(data->E);
   gsl_spline_free(data->sigma);
   gsl_spline_free(data->p_lin);
-  gsl_spline_free(data->p_nl);
+  gsl_spline2d_free(data->p_nl);
 }
 
 
