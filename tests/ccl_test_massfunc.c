@@ -101,7 +101,9 @@ static void compare_massfunc(int model, struct massfunc_data * data)
     redshift = 0;
     
     for (int i=0; i<7; i++){
-      double massfunc_ij = ccl_massfunc(cosmo, mass/cosmo->params.h, redshift)/cosmo->params.h/cosmo->params.h/cosmo->params.h;
+//      double massfunc_ij = ccl_massfunc(cosmo, mass/cosmo->params.h, redshift)/cosmo->params.h/cosmo->params.h/cosmo->params.h;
+      double massfunc_ij = ccl_massfunc(cosmo, mass/cosmo->params.h, redshift);
+      printf("%lf %lf %le\n", logmass, redshift, massfunc_ij/data->massfunc[i][j]);
       double absolute_tolerance = MASSFUNC_TOLERANCE*data->massfunc[i][j];
       if (fabs(absolute_tolerance)<1e-12) absolute_tolerance = 1e-12;
       ASSERT_DBL_NEAR_TOL(data->massfunc[i][j], massfunc_ij, absolute_tolerance);
