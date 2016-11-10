@@ -5,7 +5,7 @@
 #include <math.h>
 
 // the tolerance in dn/dm
-#define MASSFUNC_TOLERANCE 1e-3
+#define MASSFUNC_TOLERANCE 5e-4
 
 CTEST_DATA(massfunc) {
   double Omega_c;
@@ -96,7 +96,6 @@ static void compare_massfunc(int model, struct massfunc_data * data)
 
   // compare to benchmark data
   for (int j=0; j<9; j++){
-    printf("j=%i\n", j);
     double mass = pow(10,logmass);
     redshift = 0;
     
