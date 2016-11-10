@@ -12,10 +12,11 @@
 #include "ccl_massfunc.h"
 #include "ccl_error.h"
 
-/*----- ROUTINE: ccl_massfunc_ftinker -----
-INPUT: cosmology+parameters, a smoothing scale, and a redshift
-TASK: outputs ftinker for calculation in the halo mass function. Assumes
-  Tinker 2008 Fitting Function (arxiv 0803.2706 )
+/*----- ROUTINE: ccl_massfunc_f -----
+INPUT: cosmology+parameters, a smoothing mass, and a redshift
+TASK: Outputs fitting function for use in halo mass function calculation;
+  currently only supports:
+    ccl_tinker - Tinker 2008 (arxiv 0803.2706 )
 */
 
 static double massfunc_f(ccl_cosmology *cosmo, double halo_mass,double redshift)
@@ -121,9 +122,10 @@ void ccl_cosmology_compute_sigma(ccl_cosmology * cosmo)
 }
 
 /*----- ROUTINE: ccl_massfunc -----
-INPUT: ccl_cosmology * cosmo, ccl_config to decide on which mass func
-TASK: return dn/dM according to some methodology
+INPUT: ccl_cosmology * cosmo, mass smoothing scale, double redshift
+TASK: return dn/dM.
 */
+
 double ccl_massfunc(ccl_cosmology *cosmo, double halo_mass, double redshift)
 {
   if (!cosmo->computed_sigma){
