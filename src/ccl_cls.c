@@ -469,6 +469,45 @@ void ccl_cl_tracer_free(CCL_ClTracer *clt)
   free(clt);
 }
 
+CCL_ClTracer *ccl_cl_tracer_number_counts_new(ccl_cosmology *cosmo,
+					      int has_rsd,int has_magnification,
+					      int nz_n,double *z_n,double *n,
+					      int nz_b,double *z_b,double *b,
+					      int nz_s,double *z_s,double *s)
+{
+  return ccl_cl_tracer_new(cosmo,CL_TRACER_NC,has_rsd,has_magnification,0,
+			   nz_n,z_n,n,nz_b,z_b,b,nz_s,z_s,s,
+			   -1,NULL,NULL,-1,NULL,NULL);
+}
+
+CCL_ClTracer *ccl_cl_tracer_number_counts_simple_new(ccl_cosmology *cosmo,
+						     int nz_n,double *z_n,double *n,
+						     int nz_b,double *z_b,double *b)
+{
+  return ccl_cl_tracer_new(cosmo,CL_TRACER_NC,0,0,0,
+			   nz_n,z_n,n,nz_b,z_b,b,-1,NULL,NULL,
+			   -1,NULL,NULL,-1,NULL,NULL);
+}
+
+CCL_ClTracer *ccl_cl_tracer_lensing_new(ccl_cosmology *cosmo,
+					int has_alignment,
+					int nz_n,double *z_n,double *n,
+					int nz_ba,double *z_ba,double *ba,
+					int nz_rf,double *z_rf,double *rf)
+{
+  return ccl_cl_tracer_new(cosmo,CL_TRACER_WL,0,0,has_alignment,
+			   nz_n,z_n,n,-1,NULL,NULL,-1,NULL,NULL,
+			   nz_ba,z_ba,ba,nz_rf,z_rf,rf);
+}
+
+CCL_ClTracer *ccl_cl_tracer_lensing_simple_new(ccl_cosmology *cosmo,
+					       int nz_n,double *z_n,double *n)
+{
+  return ccl_cl_tracer_new(cosmo,CL_TRACER_WL,0,0,0,
+			   nz_n,z_n,n,-1,NULL,NULL,-1,NULL,NULL,
+			   -1,NULL,NULL,-1,NULL,NULL);
+}
+
 //Transfer function for density contribution in number counts
 //l -> angular multipole
 //k -> wavenumber modulus

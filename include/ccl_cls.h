@@ -32,7 +32,19 @@ typedef struct {
   SplPar *spl_wM; //Spline for magnification
 } CCL_ClTracer;
 
-//CCL_ClTracer creator
+//Generic CCL_ClTracer creator
+// Tracer_type: pass CL_TRACER_NC (number counts) or CL_TRACER_WL (weak lensing)
+// * has_rsd -> set to 1 if you want to compute the RSD contribution to number counts (0 otherwise)
+// * has_magnification -> set to 1 if you want to compute the magnification contribution to
+//   number counts (0 otherwise)
+// * has_intrinsic_alignment -> set to 1 if you want to compute the IA contribution to shear
+// * nz_n, z_n, n -> z_n and n are arrays for the number count of objects per redshift interval
+//                   (arbitrary normalization - renormalized inside).
+//                   These arrays should contain nz_n elements each.
+// * nz_b, z_b, b -> same as above for the clustering bias
+// * nz_s, z_s, s -> same as above for the magnification bias
+// * nz_ba, z_ba, ba -> same as above for the alignment bias
+// * nz_rf, z_rf, rf -> same as above for the aligned (red) fraction
 CCL_ClTracer *ccl_cl_tracer_new(ccl_cosmology *cosmo,int tracer_type,
 				int has_rsd,int has_magnification,int has_intrinsic_alignment,
 				int nz_n,double *z_n,double *n,
@@ -40,6 +52,25 @@ CCL_ClTracer *ccl_cl_tracer_new(ccl_cosmology *cosmo,int tracer_type,
 				int nz_s,double *z_s,double *s,
 				int nz_ba,double *z_ba,double *ba,
 				int nz_rf,double *z_rf,double *rf);
+//Simplified version of the above for number counts
+CCL_ClTracer *ccl_cl_tracer_number_counts_new(ccl_cosmology *cosmo,
+					      int has_rsd,int has_magnification,
+					      int nz_n,double *z_n,double *n,
+					      int nz_b,double *z_b,double *b,
+					      int nz_s,double *z_s,double *s);
+//More simplified version (no RSD, no magnification) of the above for number counts
+CCL_ClTracer *ccl_cl_tracer_number_counts_simple_new(ccl_cosmology *cosmo,
+						     int nz_n,double *z_n,double *n,
+						     int nz_b,double *z_b,double *b);
+//Simplified version of the above for shear
+CCL_ClTracer *ccl_cl_tracer_lensing_new(ccl_cosmology *cosmo,
+					int has_alignment,
+					int nz_n,double *z_n,double *n,
+					int nz_ba,double *z_ba,double *ba,
+					int nz_rf,double *z_rf,double *rf);
+//More simplified version (no IA) of the above for shear
+CCL_ClTracer *ccl_cl_tracer_lensing_simple_new(ccl_cosmology *cosmo,
+					       int nz_n,double *z_n,double *n);
 //CCL_ClTracer destructor
 void ccl_cl_tracer_free(CCL_ClTracer *clt);
 //Computes limber power spectrum for two different tracers
