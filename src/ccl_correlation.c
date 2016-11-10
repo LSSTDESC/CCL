@@ -102,7 +102,7 @@ int ccl_tracer_corr(ccl_cosmology *cosmo, int n_theta, double **theta, CCL_ClTra
 
   for(int i=0;i<n_theta;i++)
     {
-      (*theta)[i]=1./l_arr[n_theta-i-1];
+      (*theta)[i]=1./l_arr[n_theta-i-1]*4*M_PI; //check this relation
     }
   
   fftlog_ComputeXiLM(i_bessel , 1 , n_theta , l_arr, cl_arr, *theta,*corr_func);
