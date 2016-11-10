@@ -11,7 +11,7 @@
 #define A_SPLINE_MIN   0.1
 #define A_SPLINE_MAX   1.0
 
-#define LOGM_SPLINE_DELTA    0.05
+#define LOGM_SPLINE_DELTA    0.025
 #define LOGM_SPLINE_MIN   6
 #define LOGM_SPLINE_MAX   17
 

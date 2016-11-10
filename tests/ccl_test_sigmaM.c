@@ -87,6 +87,7 @@ static void compare_sigmam(int i_model,struct sigmam_data * data)
     m=m_h/data->h;
     sm_h=ccl_sigmaM(cosmo,m,0.);
     err=sm_h/sm_bench-1;
+    //printf("%le\n", err);
     ASSERT_DBL_NEAR_TOL(err,0.,1E-4);
   }
   fclose(f);
