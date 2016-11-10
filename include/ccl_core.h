@@ -1,5 +1,7 @@
 #pragma once
 #include "gsl/gsl_spline.h"
+#include "gsl/gsl_interp2d.h"
+#include "gsl/gsl_spline2d.h"
 #include "ccl_config.h"
 #include "ccl_constants.h"
 #include <stdbool.h>
@@ -57,7 +59,7 @@ typedef struct ccl_data{
   // they will be much faster.
   gsl_interp_accel *accelerator;
   gsl_interp_accel *accelerator_m;
-
+  gsl_interp_accel *accelerator_k;
   //TODO: why not use interpolation accelerators?
 
   // Function of Halo mass M
@@ -66,7 +68,7 @@ typedef struct ccl_data{
  
   // These are all functions of the wavenumber k and the scale factor a.
   gsl_spline * p_lin;
-  gsl_spline * p_nl;
+  gsl_spline2d * p_nl;
 
 } ccl_data;
 
