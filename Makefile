@@ -1,16 +1,15 @@
 CC=gcc
-CFLAGS=-Wall -pedantic -g -O0 -Iinclude -std=c99 -fPIC
+CFLAGS=-Wall -Wpedantic -g -O0 -Iinclude -std=c99 -fPIC
 CFLAGS+=-I/opt/local/include
 LDFLAGS=-lgsl -lgslcblas   -lm -Lclass -lclass
 
 
 OBJECTS=src/ccl_core.o src/ccl_error.o src/ccl_utils.o src/ccl_power.o src/ccl_placeholder.o src/ccl_background.o src/ccl_massfunc.o
 
-TESTS=tests/ccl_test.c tests/ccl_test_utils.c tests/ccl_test_params.c tests/ccl_test_distances.c tests/ccl_test_growth.c tests/ccl_test_bbks.c tests/ccl_test_massfunc.c 
-#tests/ccl_test_sigmaM.c
+TESTS=tests/ccl_test.c tests/ccl_test_utils.c tests/ccl_test_params.c tests/ccl_test_distances.c tests/ccl_test_growth.c tests/ccl_test_bbks.c tests/ccl_test_sigmaM.c tests/ccl_test_massfunc.c
 #
 # Tests to include at some point:
-# tests/ccl_test_power.c  tests/ccl_test_bbks.c
+# tests/ccl_test_power.c
 LIB=lib/libccl.a
 DYLIB=lib/libccl.so
 INC_CCL=
