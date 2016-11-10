@@ -84,7 +84,7 @@ static void compare_growth(int model, struct growth_data * data)
 						data->Omega_k[model], data->Omega_n, 
 						data->w_0[model], data->w_a[model],
 						data->h, data->A_s, data->n_s,-1,NULL,NULL);
-
+  params.Omega_g=0;
   // Make a cosmology object from the parameters with the default configuration
   ccl_cosmology * cosmo = ccl_cosmology_create(params, default_config);
   ASSERT_NOT_NULL(cosmo);

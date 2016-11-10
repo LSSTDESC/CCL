@@ -64,6 +64,7 @@ static void compare_bbks(int i_model,struct bbks_data * data)
 						data->w_0[i_model-1],data->w_a[i_model-1],
 						data->h,data->A_s,data->n_s,-1,NULL,NULL);
   params.sigma_8=data->sigma_8;
+  params.Omega_g=0;
   ccl_cosmology * cosmo = ccl_cosmology_create(params, config);
   ASSERT_NOT_NULL(cosmo);
   
