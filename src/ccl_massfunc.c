@@ -134,10 +134,9 @@ double ccl_massfunc(ccl_cosmology *cosmo, double halo_mass, double redshift)
   double f,deriv,rho_m,logmass;
   
   logmass = log10(halo_mass);
-  rho_m = RHO_CRITICAL*cosmo->params.Omega_m;
+  rho_m = RHO_CRITICAL*cosmo->params.Omega_m*cosmo->params.h*cosmo->params.h;
   f=massfunc_f(cosmo,halo_mass,redshift);
   deriv = gsl_spline_eval(cosmo->data.dlnsigma_dlogm, logmass, cosmo->data.accelerator_m);
-
   return f*rho_m*deriv/halo_mass;
 }
 
