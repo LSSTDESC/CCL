@@ -1,6 +1,6 @@
 CC=gcc
 CFLAGS=-Wall -Wpedantic -g -O0 -Iinclude -std=c99 -fPIC
-CFLAGS+=-I/opt/local/include
+CFLAGS+=-I/home/damonge/include
 LDFLAGS=-lgsl -lgslcblas   -lm -Lclass -lclass
 
 
