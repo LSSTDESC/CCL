@@ -9,7 +9,7 @@
 #include "gsl/gsl_spline.h"
 #include "gsl/gsl_integration.h"
 
-const ccl_configuration default_config = {ccl_fitting_function, ccl_halofit, ccl_tinker};
+const ccl_configuration default_config = {ccl_boltzmann_class, ccl_halofit, ccl_tinker};
 
 /* ------- ROUTINE: ccl_cosmology_create ------
 INPUTS: ccl_parameters params
@@ -75,7 +75,7 @@ void ccl_parameters_fill_initial(ccl_parameters *params)
   // Fixed radiation parameters
   // Omega_g * h**2 is known from T_CMB
   params->T_CMB =  2.726;
-  params->Omega_g = M_PI*M_PI*pow((params->T_CMB/11605.),4.)/(15*8.098E-11*params->h*params->h);
+  params->Omega_g = M_PI*M_PI*pow((params->T_CMB/11604.5),4.)/(15*8.098E-11*params->h*params->h);
 
   // Derived parameters
   params->Omega_l = 1.0 - params->Omega_m - params->Omega_g - params->Omega_n - params->Omega_k;
