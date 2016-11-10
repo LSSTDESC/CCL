@@ -80,12 +80,12 @@ static double df_integrand(double a,void * spline_void)
 INPUT: scale factor, cosmology
 TASK: compute the growth (D(z)) and the growth rate, logarithmic derivative (f?)
 */
-static void growth_factor_and_growth_rate(double a,double *gf,double *fg,ccl_cosmology *cosmo)
+static int growth_factor_and_growth_rate(double a,double *gf,double *fg,ccl_cosmology *cosmo)
 {
   if(a<EPS_SCALEFAC_GROWTH) {
     *gf=a;
     *fg=1;
-    return;
+    return 0;
   }
   else {
     double y[2];
@@ -276,8 +276,9 @@ void ccl_cosmology_compute_distances(ccl_cosmology * cosmo)
   double dchi=5.,chi0=y[na-1],chif=y[0],a0=a[na-1],af=a[0];
   //TODO: The interval in chi (5. Mpc) should be made a macro
   free(y); free(a);
-  na=(int)((chif-chi0)/dchi); dchi=(chif-chi0)/na; na=0;
-  y=ccl_linear_spacing(chi0,chif,dchi,&na);
+  na=(int)((chif-chi0)/dchi);
+  y=ccl_linear_spacing(chi0,chif,na);
+  dchi=(chif-chi0)/na;
   if(y==NULL || (fabs(y[0]-chi0)>1E-5) || (fabs(y[na-1]-chif)>1e-5)) {
     gsl_spline_free(E);
     gsl_spline_free(chi);

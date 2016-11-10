@@ -173,10 +173,9 @@ struct norm_params{
 static double ccl_specs_norm_integrand(double z, void* params){
 	
 	// This is a struct that contains a true redshift and a pointer to the user_defined information about the photo_z model
-	struct pz_params *pz_p, valparams; // parameters for the photoz pdf wrt true-z
+	struct pz_params valparams; // parameters for the photoz pdf wrt true-z
 	
-	double * pz_int; // pointer to the value of the integral over the photoz model
-	double init; // just for initializing the result of the intermediary integratl
+	double pz_int=0; // pointer to the value of the integral over the photoz model
 	struct norm_params *p = (struct norm_params *) params; // parameters of the current function (because of form required for gsl integration)
 
 	double z_min = p->bin_zmin_;
@@ -185,33 +184,28 @@ static double ccl_specs_norm_integrand(double z, void* params){
 
 	// Extract "type" (which denotes which Chang et al 2013 dndz we use) 
         // and pass it to dNdz params.
-	struct dNdz_sources_params * dNdz_pointer, dNdz_vals; // parameters of dNdz unnormalized function.
+	struct dNdz_sources_params dNdz_vals; // parameters of dNdz unnormalized function.
 	dNdz_vals.type_=type;
-	dNdz_pointer=&dNdz_vals;
 
 	// Set up parameters for the intermediary integral.
-	init=0;
-	pz_int = &init;
 	valparams.z_true = z;
 	valparams.user_information = p-> user_information;
-        pz_p = &valparams;
 
 	// Do the intermediary integral over the model relating  photo-z to true-z	
         gsl_integration_cquad_workspace * workspace = gsl_integration_cquad_workspace_alloc (1000);
         gsl_function F;
         F.function = ccl_specs_photoz;
-        F.params = pz_p;
-        gsl_integration_cquad(&F, z_min, z_max, 0.0,EPSREL_DNDZ,workspace,pz_int, NULL, NULL);
+        F.params = &valparams;
+        gsl_integration_cquad(&F, z_min, z_max, 0.0,EPSREL_DNDZ,workspace,&pz_int, NULL, NULL);
         gsl_integration_cquad_workspace_free(workspace);
 
 
 
 	// Now return this value with the value of dNdz at z, to be integrated itself elsewhere
-	if ((dNdz_pointer-> type_!= DNDZ_NC) ){ 
-
-		return p->unnormedfunc(z, dNdz_pointer) * (*pz_int);
+	if ((dNdz_vals.type_!= DNDZ_NC) ){ 
+		return p->unnormedfunc(z, &dNdz_vals) * pz_int;
 	}else{
-		return p->unnormedfunc(z,NULL) *(*pz_int);
+		return p->unnormedfunc(z,NULL) * pz_int;
 	}
 }
 
@@ -229,14 +223,12 @@ int ccl_specs_dNdz_tomog(double z, int dNdz_type, double bin_zmin, double bin_zm
 
 	// This uses equation 33 of Joachimi & Schneider 2009, arxiv:0905.0393
 
-	double *numerator_integrand, *denom_integrand, dNdz_t;
-        double init_num = 0.0; // Just to initialise the pointer to the answer.
-	double init_denom = 0.0; 
+	double numerator_integrand=0, denom_integrand=0, dNdz_t;
 	
 	// This struct contains a spec redshift and a pointer to a user information struct.
-	struct pz_params *pz_p, valparams; //parameters for the integral over the photoz's
-	struct norm_params *norm_p, norm_p_val;	
-	struct dNdz_sources_params *dNdz_p, dNdz_p_val; 
+	struct pz_params valparams; //parameters for the integral over the photoz's
+	struct norm_params norm_p_val;	
+	struct dNdz_sources_params dNdz_p_val; 
 
 	// Set up the parameters to pass to the normalising integral (of type struct norm_params
 	norm_p_val.bin_zmin_=bin_zmin;
@@ -255,52 +247,43 @@ int ccl_specs_dNdz_tomog(double z, int dNdz_type, double bin_zmin, double bin_zm
 	} else {
 	  return 1;
 	}
-	norm_p=&norm_p_val;
-	dNdz_p =&dNdz_p_val;
 
 
 
 	// First get the value of dNdz(true) at z
 	if((dNdz_type==DNDZ_WL_OPT) ||(dNdz_type==DNDZ_WL_FID) || (dNdz_type==DNDZ_WL_CONS)){
-		dNdz_t = ccl_specs_dNdz_sources_unnormed(z, dNdz_p);
+	  dNdz_t = ccl_specs_dNdz_sources_unnormed(z, &dNdz_p_val);
 	}else {
-		dNdz_t = ccl_specs_dNdz_clustering(z, NULL);
+	  dNdz_t = ccl_specs_dNdz_clustering(z, NULL);
 	}
 
 
 	// Set up the parameters for the integral over the photo z function in the numerator (of type struct pz_params)
 	valparams.z_true = z;
 	valparams.user_information = user_info; // pointer to user information
-	pz_p = &valparams;
 
 
 	
 	// Integrate over the assumed pdf of photo-z wrt true-z in this bin (this goes in the numerator of the result):
-	numerator_integrand = &init_num;
-	gsl_integration_cquad_workspace * workspace_two = gsl_integration_cquad_workspace_alloc (1000);
-        gsl_function G;
-        G.function = ccl_specs_photoz;
-        G.params = pz_p;
-        gsl_integration_cquad(&G, bin_zmin, bin_zmax, 0.0,EPSREL_DNDZ,workspace_two,numerator_integrand, NULL, NULL);
-        gsl_integration_cquad_workspace_free(workspace_two);	
+	gsl_integration_cquad_workspace * workspace = gsl_integration_cquad_workspace_alloc (1000);
+        gsl_function F;
+        F.function = ccl_specs_photoz;
+        F.params = &valparams;
+        gsl_integration_cquad(&F, bin_zmin, bin_zmax, 0.0,EPSREL_DNDZ,workspace,&numerator_integrand, NULL, NULL);
+        gsl_integration_cquad_workspace_free(workspace);	
 
 
 
 
 	// Now get the denominator, which normalizes dNdz over the photometric bin
-	denom_integrand =&init_denom;
-	gsl_integration_cquad_workspace * workspace_three = gsl_integration_cquad_workspace_alloc (1000);
-        gsl_function H;
-        H.function = ccl_specs_norm_integrand;
-        H.params = norm_p;
-        gsl_integration_cquad(&H, Z_MIN_SOURCES, Z_MAX_SOURCES, 0.0,EPSREL_DNDZ,workspace_three,denom_integrand, NULL, NULL);
-        gsl_integration_cquad_workspace_free(workspace_three);
+	workspace = gsl_integration_cquad_workspace_alloc (1000);
+        F.function = ccl_specs_norm_integrand;
+        F.params = &norm_p_val;
+        gsl_integration_cquad(&F, Z_MIN_SOURCES, Z_MAX_SOURCES, 0.0,EPSREL_DNDZ,workspace,&denom_integrand, NULL, NULL);
+        gsl_integration_cquad_workspace_free(workspace);
 
 
 
-	*tomoout = dNdz_t * (*numerator_integrand) / (*denom_integrand);
+	*tomoout = dNdz_t * numerator_integrand / denom_integrand;
 	return 0;
 }
-
-
-

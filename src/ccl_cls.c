@@ -283,8 +283,9 @@ static CCL_ClTracer *cl_tracer_new(ccl_cosmology *cosmo,int tracer_type,
 	}
 
 	clt->chimin=0;
-	nchi=(int)(chimax/dchi)+1; dchi=chimax/nchi; nchi=0;
-	x=ccl_linear_spacing(0.,chimax,dchi,&nchi);
+	nchi=(int)(chimax/dchi)+1;
+	x=ccl_linear_spacing(0.,chimax,nchi);
+	dchi=chimax/nchi;
 	if(x==NULL || (fabs(x[0]-0)>1E-5) || (fabs(x[nchi-1]-chimax)>1e-5)) {
 	  spline_free(clt->spl_nz);
 	  spline_free(clt->spl_bz);
@@ -347,8 +348,9 @@ static CCL_ClTracer *cl_tracer_new(ccl_cosmology *cosmo,int tracer_type,
       double chimax=ccl_comoving_radial_distance(cosmo,1./(1+zmax));
       //TODO: The interval in chi (5. Mpc) should be made a macro
       clt->chimin=0;
-      nchi=(int)(chimax/dchi)+1; dchi=chimax/nchi; nchi=0;
-      x=ccl_linear_spacing(0.,chimax,dchi,&nchi);
+      nchi=(int)(chimax/dchi)+1;
+      x=ccl_linear_spacing(0.,chimax,nchi);
+      dchi=chimax/nchi;
       if(x==NULL || (fabs(x[0]-0)>1E-5) || (fabs(x[nchi-1]-chimax)>1e-5)) {
 	spline_free(clt->spl_nz);
 	free(clt);
