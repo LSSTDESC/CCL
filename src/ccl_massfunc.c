@@ -23,7 +23,7 @@ TASK: Outputs fitting function for use in halo mass function calculation;
 static double massfunc_f(ccl_cosmology *cosmo, double halo_mass,double redshift)
 {
   double fit_A, fit_a, fit_b, fit_c, fit_d, overdensity_delta;
-  double Omega_mz;
+  double scale, Omega_m_z;
 
   double sigma=ccl_sigmaM(cosmo,halo_mass,redshift);
   switch(cosmo->config.mass_function_method){
@@ -40,11 +40,13 @@ static double massfunc_f(ccl_cosmology *cosmo, double halo_mass,double redshift)
     return fit_A*(pow(sigma/fit_b,-fit_a)+1.0)*exp(-fit_c/sigma/sigma);
     break;
   case ccl_watson:
-
-    fit_A = 0.282;
-    fit_a = 2.163;
-    fit_b = 1.406;
-    fit_c = 1.210;
+    scale = 1.0/(1.0+redshift);
+    Omega_m_z = ccl_omega_m_z(cosmo, scale);
+    
+    fit_A = Omega_m_z*(0.990*pow(1+redshift,-3.216)+0.074);
+    fit_a = Omega_m_z*(5.907*pow(1+redshift,-3.599)+2.344);
+    fit_b = Omega_m_z*(3.136*pow(1+redshift,-3.058)+2.349);
+    fit_c = 1.318;
 
     return fit_A*(pow(fit_b/sigma,fit_a)+1.0)*exp(-fit_c/sigma/sigma);
 
