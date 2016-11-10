@@ -130,7 +130,7 @@ void fht(int N, const double r[], const double complex a[], double k[], double c
     free(ulocal);
 }
 
-void fftlog_ComputeXiLM(int l, int m, int N, const double k[], const double pk[], double r[], double xi[]) {
+void fftlog_ComputeXiLM(double l, int m, int N, const double k[], const double pk[], double r[], double xi[]) {
   double complex* a = malloc(sizeof(complex double)*N);
   double complex* b = malloc(sizeof(complex double)*N);
 
