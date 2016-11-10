@@ -36,34 +36,24 @@ int main(int argc,char **argv)
     z_arr_sh[i]=Z0_SH-5*SZ_SH+10*SZ_SH*(i+0.5)/NZ;
     nz_arr_sh[i]=exp(-0.5*pow((z_arr_sh[i]-Z0_SH)/SZ_SH,2));
   }
-  static int n_theta=10;
-  double *theta=(double *)malloc(sizeof(double)*n_theta);
-
-  double d_theta=1;
-  double theta_min=1;
-  for(int i=0;i<n_theta;i++)
-    {
-      theta[i]=theta_min;
-      theta_min+=d_theta;
-    }
+  static int n_theta=NL; //they have to be the same
 
   //Galaxy clustering tracer
   CCL_ClTracer *ct_gc=ccl_cl_tracer_new(cosmo,CL_TRACER_NC,NZ,z_arr_gc,nz_arr_gc,NZ,z_arr_gc,bz_arr);
   //Cosmic shear tracer
   CCL_ClTracer *ct_wl=ccl_cl_tracer_new(cosmo,CL_TRACER_WL,NZ,z_arr_sh,nz_arr_sh,-1,NULL,NULL);
-  printf("ell C_ell(g,g) C_ell(g,s) C_ell(s,s) | r(g,s)\n");
+  
+  double *clustering_corr;
+  double *theta;
 
-  double *clustering_corr=(double *)malloc(sizeof(double)*n_theta);
   int i_bessel=0;
-  ccl_tracer_corr(cosmo,n_theta,theta,ct_gc,ct_gc,i_bessel,clustering_corr); //clustering
-
-  //prinf("theta,corr",theta,clustering_corr);
+  ccl_tracer_corr(cosmo,n_theta,&theta,ct_gc,ct_gc,i_bessel,&clustering_corr); //clustering
 
   //Free up tracers
   ccl_cl_tracer_free(ct_gc);
   ccl_cl_tracer_free(ct_wl);
-
   //Free up cosmology
   ccl_cosmology_free(cosmo);
+
   return 0;
 }
