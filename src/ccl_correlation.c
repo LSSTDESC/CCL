@@ -115,7 +115,6 @@ int ccl_tracer_corr(ccl_cosmology *cosmo, int n_theta, double **theta, CCL_ClTra
     
   for(int i=0;i<n_theta;i++)
     {
-      //(*theta)[i]=M_PI*(*theta)[i]; //check this
       (*corr_func)[i]=M_PI*(*corr_func)[i]*sqrt(2.0*(*theta)[i]/M_PI); 
     }
   
