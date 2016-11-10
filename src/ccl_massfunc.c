@@ -16,8 +16,9 @@
 INPUT: cosmology+parameters, a smoothing mass, and a redshift
 TASK: Outputs fitting function for use in halo mass function calculation;
   currently only supports:
-    ccl_tinker - Tinker 2008 (arxiv 0803.2706 )
-    ccl_watson - Behroozi 2012 (arxiv 1212.0095 )
+    ccl_tinker (arxiv 0803.2706 )
+    ccl_angulo (arxiv 1203.3216 ) 
+    ccl_watson (arxiv 1212.0095 )
 */
 
 static double massfunc_f(ccl_cosmology *cosmo, double halo_mass,double redshift)
@@ -49,6 +50,14 @@ static double massfunc_f(ccl_cosmology *cosmo, double halo_mass,double redshift)
     fit_c = 1.318;
 
     return fit_A*(pow(fit_b/sigma,fit_a)+1.0)*exp(-fit_c/sigma/sigma);
+
+  case ccl_angulo:
+    fit_A = 0.201;
+    fit_a = 2.08;
+    fit_b = 1.7;
+    fit_c = 1.172;
+
+    return fit_A*pow( (fit_a/sigma)+1.0, fit_b)*exp(-fit_c/sigma/sigma);
 
   default:
     cosmo->status = 11;
