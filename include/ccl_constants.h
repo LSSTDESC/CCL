@@ -8,10 +8,11 @@
 // NB: Need to calculate chi_star separated from the process
 // of filling these splines
 #define A_SPLINE_DELTA 0.001
+#define A_SPLINE_NA    1000
 #define A_SPLINE_MIN   0.1
 #define A_SPLINE_MAX   1.0
 //for 2D SPLINE, e.g. P_NL, use coarser binning
-#define N_A 50
+#define N_A 20
 
 #define A_SPLINE_TYPE gsl_interp_akima
 #define K_SPLINE_TYPE gsl_interp_akima
@@ -38,8 +39,12 @@
 #define MPC_TO_METER 3.08567758149e22  //(from PDG 2013) Mpc to m 
 #define PC_TO_METER 3.08567758149e16   //(from PDG 2013) pc to m
 
-//TODO: created constants for precision parameters
 //Precision parameters
 #define EPSREL_DIST 1E-6
 #define EPSREL_GROWTH 1E-6
+#define EPSREL_DNDZ 1E-6
 #define EPS_SCALEFAC_GROWTH 1E-6
+
+//LSST specific numbers
+#define Z_MIN_SOURCES 0.1
+#define Z_MAX_SOURCES 3.0

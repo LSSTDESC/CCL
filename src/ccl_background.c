@@ -22,7 +22,7 @@ TASK: Compute E(z)=H(z)/H0
 static double h_over_h0(double a, ccl_parameters * params)
 {
   return sqrt((params->Omega_m+params->Omega_l*pow(a,-3*(params->w0+params->wa))*
-	       exp(3*params->wa*(a-1))+params->Omega_k*a)/(a*a*a));
+	       exp(3*params->wa*(a-1))+params->Omega_k*a+params->Omega_g/a)/(a*a*a));
 }
 
 /* --------- ROUTINE: omega_m_z ---------
@@ -32,7 +32,7 @@ TASK: Compute Omega_m(z)
 static double omega_m_z(double a,ccl_parameters * params)
 {
   return params->Omega_m/(params->Omega_m+params->Omega_l*pow(a,-3*(params->w0+params->wa))*
-			  exp(3*params->wa*(a-1))+params->Omega_k*a);
+			  exp(3*params->wa*(a-1))+params->Omega_g/a+params->Omega_k*a);
 }
 
 /* --------- ROUTINE: chi_integrand ---------
@@ -80,12 +80,12 @@ static double df_integrand(double a,void * spline_void)
 INPUT: scale factor, cosmology
 TASK: compute the growth (D(z)) and the growth rate, logarithmic derivative (f?)
 */
-static int growth_factor_and_growth_rate(double a,double *gf,double *fg,ccl_cosmology *cosmo)
+static void growth_factor_and_growth_rate(double a,double *gf,double *fg,ccl_cosmology *cosmo)
 {
   if(a<EPS_SCALEFAC_GROWTH) {
     *gf=a;
     *fg=1;
-    return 0;
+    return;
   }
   else {
     double y[2];
@@ -100,7 +100,7 @@ static int growth_factor_and_growth_rate(double a,double *gf,double *fg,ccl_cosm
 
     int status=gsl_odeiv2_driver_apply(d,&ainit,a,y);
     gsl_odeiv2_driver_free(d);
-    
+
     if(status!=GSL_SUCCESS)
       return 1;
     
@@ -209,8 +209,8 @@ void ccl_cosmology_compute_distances(ccl_cosmology * cosmo)
     return;
 
   // Create linearly-spaced values of the scale factor
-  int na=0;
-  double * a = ccl_linear_spacing(A_SPLINE_MIN, A_SPLINE_MAX, A_SPLINE_DELTA, &na);
+  int na = A_SPLINE_NA;
+  double * a = ccl_linear_spacing(A_SPLINE_MIN, A_SPLINE_MAX, na);
   if (a==NULL || 
       (fabs(a[0]-A_SPLINE_MIN)>1e-5) || 
       (fabs(a[na-1]-A_SPLINE_MAX)>1e-5) || 
@@ -349,8 +349,8 @@ void ccl_cosmology_compute_growth(ccl_cosmology * cosmo)
     return;
 
   // Create linearly-spaced values of the scale factor
-  int na=0, status = 0;
-  double * a = ccl_linear_spacing(A_SPLINE_MIN, A_SPLINE_MAX, A_SPLINE_DELTA, &na);
+  int status = 0, na = A_SPLINE_NA;
+  double * a = ccl_linear_spacing(A_SPLINE_MIN, A_SPLINE_MAX, na);
   if (a==NULL || 
       (fabs(a[0]-A_SPLINE_MIN)>1e-5) || 
       (fabs(a[na-1]-A_SPLINE_MAX)>1e-5) || 
@@ -386,16 +386,16 @@ void ccl_cosmology_compute_growth(ccl_cosmology * cosmo)
     }
     for (int i=0; i<na; i++){
       if(a[i]>0) {
-	double z=1./a[i]-1.;
-	if(z<=cosmo->params.z_mgrowth[0]) 
-	  df_arr[i]=cosmo->params.df_mgrowth[0];
-	else if(z>cosmo->params.z_mgrowth[cosmo->params.nz_mgrowth-1]) 
-	  df_arr[i]=cosmo->params.df_mgrowth[cosmo->params.nz_mgrowth-1];
-	else
-	  df_arr[i]=gsl_spline_eval(df_z_spline,z,NULL);
+	       double z=1./a[i]-1.;
+	       if(z<=cosmo->params.z_mgrowth[0]) 
+	          df_arr[i]=cosmo->params.df_mgrowth[0];
+	       else if(z>cosmo->params.z_mgrowth[cosmo->params.nz_mgrowth-1]) 
+	          df_arr[i]=cosmo->params.df_mgrowth[cosmo->params.nz_mgrowth-1];
+	       else
+	          df_arr[i]=gsl_spline_eval(df_z_spline,z,NULL);
       }
       else
-	df_arr[i]=0;
+	       df_arr[i]=0;
     }
     gsl_spline_free(df_z_spline);
 
@@ -615,6 +615,7 @@ void ccl_growth_factors(ccl_cosmology * cosmo, int na, double a[na], double outp
     ccl_cosmology_compute_growth(cosmo);
     ccl_check_status(cosmo);    
   }
+
   for (int i=0; i<na; i++){
     output[i]=gsl_spline_eval(cosmo->data.growth,a[i],cosmo->data.accelerator);
   }
