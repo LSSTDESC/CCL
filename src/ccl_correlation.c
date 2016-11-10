@@ -94,7 +94,8 @@ int ccl_tracer_corr(ccl_cosmology *cosmo, int n_theta, double **theta, CCL_ClTra
 
   l_arr=ccl_log_spacing(L_MIN_INT,L_MAX_INT,n_theta);
   for(int i=0;i<n_theta;i+=1) {
-    cl_arr[i]=ccl_angular_cl(cosmo,l_arr[i],ct1,ct2); 
+    //Re-scaling the power-spectrum due to Bessel function missing factor
+    cl_arr[i]=ccl_angular_cl(cosmo,l_arr[i],ct1,ct2)*sqrt(l_arr[i]); 
   }
 
   *theta=(double *)malloc(sizeof(double)*n_theta);
@@ -102,10 +103,22 @@ int ccl_tracer_corr(ccl_cosmology *cosmo, int n_theta, double **theta, CCL_ClTra
 
   for(int i=0;i<n_theta;i++)
     {
-      (*theta)[i]=1./l_arr[n_theta-i-1]*4*M_PI; //check this relation
+      (*theta)[i]=1./l_arr[n_theta-i-1]; 
     }
   
-  fftlog_ComputeXiLM(i_bessel , 1 , n_theta , l_arr, cl_arr, *theta,*corr_func);
+  /* This function uses spherical bessel functions
+     To compensate for the difference, we use the relation
+     j_n(x) = sqrt(Pi/2x)J_{n+1/2}(x)
+     J_{m}(x) = sqrt(2x/Pi) j_{m-1/2}(x)
+     Note that the following routine only takes integers */
+  fftlog_ComputeXiLM(i_bessel-0.5, 1 , n_theta , l_arr, cl_arr, *theta,*corr_func);
+    
+  for(int i=0;i<n_theta;i++)
+    {
+      //(*theta)[i]=M_PI*(*theta)[i]; //check this
+      (*corr_func)[i]=M_PI*(*corr_func)[i]*sqrt(2.0*(*theta)[i]/M_PI); 
+    }
+  
 
   return 0;
 

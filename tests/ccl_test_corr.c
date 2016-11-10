@@ -148,7 +148,6 @@ static void compare_corr(char *compare_type,struct corrs_data * data)
     fscanf(fi_ll_11_mm,"%*lf %lf",&wt_ll_11_mm[ii]);
     fscanf(fi_ll_12_mm,"%*lf %lf",&wt_ll_12_mm[ii]);
     fscanf(fi_ll_22_mm,"%*lf %lf",&wt_ll_22_mm[ii]);
-    printf("%i %e %e %e \n",ii,theta_in[ii],wt_ll_12_mm[ii],wt_ll_11_pp[ii]);
   }
   
   ccl_tracer_corr(cosmo,NL,&theta_arr,tr_nc_1,tr_nc_1,0,&wt_dd_11_h);
@@ -164,20 +163,12 @@ static void compare_corr(char *compare_type,struct corrs_data * data)
   FILE *output2 = fopen("cc_test_corr_out_fftlog.dat", "w");
   for (int i=0;i<NL;i++)
     {
-      theta_arr[i]*=sqrt(4*M_PI);
+      //theta_arr[i]*=sqrt(4*M_PI);
       theta_arr[i]=theta_arr[i]*180/M_PI;
       fprintf(output2,"%lf %lf %lf \n",theta_arr[i],wt_dd_11_h[i],wt_ll_11_h_pp[i]);
     }
   fclose(output2);
-  /*
-  double *theta_arr_inv=(double *)malloc(sizeof(double)*NL);
-  double *wt_dd_11_h_inv=(double *)malloc(sizeof(double)*NL);
-  for (int i=0;i<NL;i++)
-    {
-      theta_arr_inv[NL-1-i]=theta_arr[i];
-      wt_dd_11_h_inv[NL-1-i]=wt_dd_11_h[i];
-    }
-  */
+
   //Spline
   gsl_spline * spl_wt_dd_11_h = gsl_spline_alloc(K_SPLINE_TYPE,NL);
   int status = gsl_spline_init(spl_wt_dd_11_h, theta_arr, wt_dd_11_h, NL);
