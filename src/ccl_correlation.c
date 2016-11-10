@@ -76,10 +76,9 @@ static void ccl_general_corr(gsl_spline *cl, double *theta, double *corr_func, i
 
 /*--------ROUTINE: ccl_tracer_corr ------
 TASK: For a given tracer, get the correlation function
-INPUT: type of tracer, number of theta values to evaluate, theta vector
-TODO: Check Cl spline limits and make sure it is not evaluated outside limits.
+INPUT: type of tracer, number of theta values to evaluate = NL, theta vector
  */
-int ccl_tracer_corr(ccl_cosmology *cosmo, int n_theta, double *theta, CCL_ClTracer *ct1, CCL_ClTracer *ct2, int i_bessel,double *corr_func){
+int ccl_tracer_corr(ccl_cosmology *cosmo, int n_theta, double **theta, CCL_ClTracer *ct1, CCL_ClTracer *ct2, int i_bessel,double **corr_func){
 
   if((ct1->tracer_type==CL_TRACER_WL) && (ct2->tracer_type==CL_TRACER_WL)){
     if((i_bessel!=0) && (i_bessel!=4)) return 1;
@@ -91,29 +90,24 @@ int ccl_tracer_corr(ccl_cosmology *cosmo, int n_theta, double *theta, CCL_ClTrac
     if(i_bessel!=2) return 1;
   }  
 
-  double *l_arr,cl_arr[NL];
+  double *l_arr,cl_arr[n_theta];
 
-  l_arr=ccl_log_spacing(L_MIN_INT,L_MAX_INT,NL);
-  for(int i=0;i<NL;i+=1) {
+  l_arr=ccl_log_spacing(L_MIN_INT,L_MAX_INT,n_theta);
+  for(int i=0;i<n_theta;i+=1) {
     cl_arr[i]=ccl_angular_cl(cosmo,l_arr[i],ct1,ct2); 
   }
 
-  //Now spline
-  gsl_spline * clspl = gsl_spline_alloc(L_SPLINE_TYPE, NL);
-  int status = gsl_spline_init(clspl, l_arr, cl_arr, NL);
-  if (status){
-    gsl_spline_free(clspl);
-    cosmo->status = CCL_ERROR_SPLINE;
-    strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_class(): Error creating Cl spline\n");
-  } else {
-    //And compute correlation function
-    //ccl_general_corr(clspl,theta,corr_func,n_theta,i_bessel);
-    //gsl_spline_free(clspl);
-  }
- 
-  fftlog_ComputeXiLM(i_bessel , 2 , NL , l_arr, cl_arr, theta,corr_func);
+  *theta=(double *)malloc(sizeof(double)*n_theta);
+  *corr_func=(double *)malloc(sizeof(double)*n_theta);
 
-  return status;
+  for(int i=0;i<n_theta;i++)
+    {
+      (*theta)[i]=1./l_arr[n_theta-i-1];
+    }
+  
+  fftlog_ComputeXiLM(i_bessel , 1 , n_theta , l_arr, cl_arr, *theta,*corr_func);
+
+  return 0;
 
 }
 

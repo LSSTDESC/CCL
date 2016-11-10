@@ -1,6 +1,6 @@
 CC=gcc
 CFLAGS=-Wall -Wpedantic -g -O0 -Iinclude -std=c99 -fPIC
-CFLAGS+=-I/usr/local/include
+CFLAGS+=-I/usr/local/include 
 LDFLAGS=-L/usr/local/lib -lfftw3 -lgsl -lgslcblas  -lm -Lclass -lclass
 
 
