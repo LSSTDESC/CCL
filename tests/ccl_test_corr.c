@@ -166,7 +166,7 @@ static void compare_corr(char *compare_type,struct corrs_data * data)
   
   FILE *output2 = fopen("cc_test_corr_out_fftlog.dat", "w");
   for (int ii=0;ii<NL;ii++){
-    fprintf(output2,"%.10e %.10e %.10e %.10e %.10e %.10e %.10e \n",theta_arr[ii],wt_ll_11_h_pp[ii],wt_ll_12_h_pp[ii],wt_ll_22_h_pp[ii],wt_ll_11_h_mm[ii],wt_ll_12_h_mm[ii],wt_ll_22_h_mm[ii]);
+    fprintf(output2,"%.10e %.10e %.10e %.10e %.10e %.10e %.10e %.10e %.10e %.10e \n",theta_arr[ii],wt_dd_11_h[ii],wt_dd_12_h[ii],wt_dd_22_h[ii],wt_ll_11_h_pp[ii],wt_ll_12_h_pp[ii],wt_ll_22_h_pp[ii],wt_ll_11_h_mm[ii],wt_ll_12_h_mm[ii],wt_ll_22_h_mm[ii]);
   }
   fclose(output2);
 
@@ -193,6 +193,8 @@ static void compare_corr(char *compare_type,struct corrs_data * data)
   double tmp;
   FILE *output = fopen("cc_test_corr_out.dat", "w");
   for(int ii=0;ii<nofl;ii++) {
+    //if (theta_in[ii]<0.1)
+    //continue;
     tmp=gsl_spline_eval(spl_wt_dd_11_h, theta_in[ii], NULL);
     if(fabs(tmp/wt_dd_11[ii]-1)>CORR_TOLERANCE)
       fraction_failed++;
@@ -211,32 +213,32 @@ static void compare_corr(char *compare_type,struct corrs_data * data)
     gsl_spline_eval_e(spl_wt_ll_11_h_pp, theta_in[ii], NULL,&tmp);
     if(fabs(tmp/wt_ll_11_pp[ii]-1)>CORR_TOLERANCE)
       fraction_failed++;
-    fprintf(output," %.10e %.10e",tmp,wt_ll_11_h_pp[ii]);
+    fprintf(output," %.10e %.10e",tmp,wt_ll_11_pp[ii]);
     
     gsl_spline_eval_e(spl_wt_ll_12_h_pp, theta_in[ii], NULL,&tmp);
     if(fabs(tmp/wt_ll_12_pp[ii]-1)>CORR_TOLERANCE)
       fraction_failed++;
-    fprintf(output," %.10e %.10e",tmp,wt_ll_12_h_pp[ii]);
+    fprintf(output," %.10e %.10e",tmp,wt_ll_12_pp[ii]);
 
     gsl_spline_eval_e(spl_wt_ll_22_h_pp, theta_in[ii], NULL,&tmp);
     if(fabs(tmp/wt_ll_22_pp[ii]-1)>CORR_TOLERANCE)
       fraction_failed++;
-    fprintf(output," %.10e %.10e",tmp,wt_ll_22_h_pp[ii]);
+    fprintf(output," %.10e %.10e",tmp,wt_ll_22_pp[ii]);
 
     gsl_spline_eval_e(spl_wt_ll_11_h_mm, theta_in[ii], NULL,&tmp);
     if(fabs(tmp/wt_ll_11_mm[ii]-1)>CORR_TOLERANCE)
       fraction_failed++;
-    fprintf(output," %.10e %.10e",tmp,wt_ll_11_h_mm[ii]);
+    fprintf(output," %.10e %.10e",tmp,wt_ll_11_mm[ii]);
 
     gsl_spline_eval_e(spl_wt_ll_12_h_mm, theta_in[ii], NULL,&tmp);
     if(fabs(tmp/wt_ll_12_mm[ii]-1)>CORR_TOLERANCE)
       fraction_failed++;
-    fprintf(output," %.10e %.10e",tmp,wt_ll_12_h_mm[ii]);
+    fprintf(output," %.10e %.10e",tmp,wt_ll_12_mm[ii]);
 
     gsl_spline_eval_e(spl_wt_ll_22_h_mm, theta_in[ii], NULL,&tmp);
     if(fabs(tmp/wt_ll_22_mm[ii]-1)>CORR_TOLERANCE)
       fraction_failed++;
-    fprintf(output," %.10e %.10e \n",tmp,wt_ll_22_h_mm[ii]);
+    fprintf(output," %.10e %.10e \n",tmp,wt_ll_22_mm[ii]);
   }
   fclose(output);
   gsl_spline_free(spl_wt_dd_11_h);
