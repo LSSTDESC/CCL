@@ -119,5 +119,5 @@ int main(int argc,char **argv){
 	// Free the photo_z information
 	ccl_specs_free_photoz_info(my_info);
 	
-
+	return 0;
 }
