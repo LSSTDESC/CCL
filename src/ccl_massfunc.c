@@ -49,7 +49,7 @@ static double massfunc_f(ccl_cosmology *cosmo, double halo_mass,double redshift)
     fit_b = Omega_m_z*(3.136*pow(1+redshift,-3.058)+2.349);
     fit_c = 1.318;
 
-    return fit_A*(pow(fit_b/sigma,fit_a)+1.0)*exp(-fit_c/sigma/sigma);
+    return fit_A*(pow(sigma/fit_b,-fit_a)+1.0)*exp(-fit_c/sigma/sigma);
 
   case ccl_angulo:
     fit_A = 0.201;
