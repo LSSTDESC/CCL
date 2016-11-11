@@ -170,7 +170,7 @@ TASK: takes smoothing halo mass and converts to smoothing halo radius
 */
 double ccl_massfunc_m2r(ccl_cosmology * cosmo, double halo_mass)
 {
-    double rho_m, rho_crit, halo_radius;
+    double rho_m, halo_radius;
 
     //TODO: make this neater
     rho_m = RHO_CRITICAL*cosmo->params.Omega_m;
