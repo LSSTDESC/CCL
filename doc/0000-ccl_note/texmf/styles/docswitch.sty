@@ -1,0 +1,125 @@
+% 
+% This file provides the functionality for switching between journals.
+% \setjournal{<journalname>}
+%
+% Class names:
+% revtex
+% aastex
+% emulateapj
+% mnras
+%
+% Journal names:
+% apj (aastex)
+% apjl (emulateapj)
+% prl (revtex)
+% prd (revtex)
+% mnras (mnras)
+%
+% Alex Drlica-Wagner <kadrlica@fnal.gov>
+%
+
+\RequirePackage{etoolbox}
+
+\newcommand{\setjournal}[1]{
+
+  % Set the default values
+  \providecommand\docopts{aps,prl,reprint,superscriptaddress,
+    floatfix,nofootinbib,showkeys,showpacs}
+  \providecommand\docclass{revtex4-1}
+  \providecommand\docmacros{aps_macros}
+  \providecommand\doctitle{
+    \input{\authlist}
+    \date{\today}
+    \maketitle
+  }    
+  \providecommand\maketitlepre{}
+  \providecommand\maketitlepost{\doctitle}
+  \providecommand\dockeys{\keywords}
+
+  \ifdef{\authlist}{}{
+    \providecommand\authlist{authors}
+  }
+  \providecommand\tabletype{table}
+  \providecommand\hypopts{all}
+  \providecommand\bibsty{apsrev4-1}
+  \providecommand\linenums{}
+
+  % Use the defaults for revtex
+  \ifdefstring{#1}{revtex}{}{}
+
+  % Use the defaults for PRL
+  \ifdefstring{#1}{prl}{}{}
+
+  % Set the values for PRD
+  \ifdefstring{#1}{prd}{
+    \renewcommand\docopts{aps,prd,preprint,superscriptaddress,floatfix,nofootinbib,
+    showkeys}
+  }{}
+
+  % Set the values for emulateapj
+  \ifdefstring{#1}{emulateapj}{
+    \renewcommand\docopts{iop,revtex4-1}
+    \renewcommand\docclass{emulateapj}
+    \renewcommand\docmacros{aas_macros}
+    \renewcommand\doctitle{
+      \input{\authlist}
+      \maketitle
+    }    
+    \renewcommand\hypopts{figure,figure*}
+    \renewcommand\tabletype{deluxetable*}
+    \renewcommand\bibsty{apj}
+  }{}
+
+  % Set the values for emulateapj
+  \ifdefstring{#1}{apjl}{
+    \renewcommand\docopts{iop,revtex4-1}
+    \renewcommand\docclass{emulateapj}
+    \renewcommand\docmacros{aas_macros}
+    \renewcommand\doctitle{
+      \input{\authlist}
+      \maketitle
+    }    
+    \renewcommand\hypopts{figure,figure*}
+    \renewcommand\tabletype{deluxetable*}
+    \renewcommand\bibsty{apj}
+  }{}
+
+  % Set the values for aastex
+  \ifdefstring{#1}{aastex}{
+    \renewcommand\docopts{preprint}
+    \renewcommand\docclass{aastex}
+    \renewcommand\docmacros{aas_macros}
+    \renewcommand\doctitle{
+      \input{\authlist}
+      \maketitle
+    }    
+    \renewcommand\tabletype{deluxetable}
+    \renewcommand\bibsty{apj}
+  }{}
+
+  % Set the values for apj (this is bad because it duplicates aastex code)
+  \ifdefstring{#1}{apj}{
+    \renewcommand\docopts{preprint}
+    \renewcommand\docclass{aastex}
+    \renewcommand\docmacros{aas_macros}
+    \renewcommand\doctitle{
+      \input{\authlist}
+      \maketitle
+    }    
+    \renewcommand\tabletype{deluxetable}
+    \renewcommand\bibsty{apj}
+  }{}    
+
+  % Set the values for MNRAS
+  \ifdefstring{#1}{mnras}{
+    \renewcommand\docopts{a4paper,fleqn,usenatbib}
+    \renewcommand\docclass{mnras}
+    \renewcommand\docmacros{aas_macros}
+    \renewcommand\dockeys[1]{\begin{keywords}{##1}\end{keywords}}
+
+    \renewcommand\bibsty{mnras}
+    \renewcommand\maketitlepre{\doctitle}
+    \renewcommand\maketitlepost{}
+  }{}
+}
+% 
