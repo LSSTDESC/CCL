@@ -74,8 +74,8 @@ void ccl_cosmology_compute_sigma(ccl_cosmology * cosmo)
         return;
 
     // create linearly-spaced values of the halo mass.
-    int nm=0;
-    double * m = ccl_linear_spacing(LOGM_SPLINE_MIN, LOGM_SPLINE_MAX, LOGM_SPLINE_DELTA, &nm);
+    int nm=LOGM_SPLINE_NM;
+    double * m = ccl_linear_spacing(LOGM_SPLINE_MIN, LOGM_SPLINE_MAX, nm);
     if (m==NULL ||
         (fabs(m[0]-LOGM_SPLINE_MIN)>1e-5) ||
         (fabs(m[nm-1]-LOGM_SPLINE_MAX)>1e-5) ||
