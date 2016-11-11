@@ -20,72 +20,102 @@
 
 \begin{document} 
 
-\title{LSST DESC Document Template}
+\title{Core Cosmology Library: Precision Cosmological Predictions for LSST}
 
 \maketitlepre
 
 \begin{abstract}
  
-This is going to be a fantastic paper!
+The Core Cosmology Library (CCL) provides routines which make precision theoretical predictions of cosmological observables for LSST. These routines have been validated to a $10^{-4}$ accuracy level against the results of the Code Comparsion Project. In the current version, predictions are provided for distances, angular auto- and cross-spectra of cosmic shear and galaxy number counts, and correlation functions of the same. The halo mass function is incorporated, and fiducial specifications for the expected LSST galaxy distributions and clustering bias are included. The facility is provided for a user-defined photo-z model. In this note, we explain the functionality of the first public release of the library. 
 
 \end{abstract}
 
 % Keywords for paper
-\dockeys{latex: templates, papers: awesome}
+%\dockeys{latex: templates, papers: awesome}
 
 \maketitlepost
 
 \section{Introduction}
 \label{sec:intro}
+In preparation for constraining cosmology with the Large Synoptic Survey Telescope (LSST), it is necessary to be able to produce theoretical predictions for the cosmological quantities which will be measured. The core cosmology library (CCL) aims to provide, in one library, predictions which are validated to a numerical accuracy of $10^{-4}$ or better for the purpose of constraining cosmology with LSST. By constructing a library with LSST in mind, it is possible to ensure that it is flexible, adaptable, appropriate, and validated for all cases of interest, as well as user-friendly and available for the needs of all working groups. 
 
-This is a paper and note template for the LSST DESC \citep{Overview,ScienceBook,WhitePaper}.  
-Eventually it will be possible to switch between various \LaTeX\xspace styles for internal notes and peer reviewed journals templates.
-The base switch is between \code{aastex.cls} and \code{revtex.cls}; however, facilities are also provided for \code{emulateapj.cls} and \code{mnras.cls}.\footnote{The \code{mnras.cls} class file is a bit odd...}  
-Documents can be compiled using the provided \code{Makefile} with several options: \code{make apj}, \code{make apjl}, \code{make prd}, and \code{make mnras}. 
-There are some oddities when changing between templates, so please be patient while we try to work these out. 
+The core cosmology library is written in C, which provides speed as well as allows the incorporation of the CLASS \cite{class} code. In the future, it is anticipated that python wrappers will be provided for improved ease of use. 
 
-\section{Commands}
-\label{sec:commands}
+%This is a paper and note template for the LSST DESC \citep{Overview,ScienceBook,WhitePaper}.  
+%Eventually it will be possible to switch between various \LaTeX\xspace styles for internal notes and peer reviewed journals templates.
+%The base switch is between \code{aastex.cls} and \code{revtex.cls}; however, facilities are also provided for \code{emulateapj.cls} and \code{mnras.cls}.\footnote{The \code{mnras.cls} class file is a bit odd...}  
+%Documents can be compiled using the provided \code{Makefile} with several options: \code{make apj}, \code{make apjl}, \code{make prd}, and \code{make mnras}. 
+%There are some oddities when changing between templates, so please be patient while we try to work these out. 
 
-There are a number of useful \LaTeX\xspace commands predefined in \code{macros.tex}.
-Notice that the section labels are prefixed with \code{sec:} to allow the use of the \verb=\secref= command to reference a section (\ie, \secref{intro}).
-Figures can be referenced with the \verb=\figref= command, which assumes that the figure label is prefixed with \code{fig:}.
-In \figref{example} we show an example figure.
-You'll notice that the actual figure file is found in the \code{figures} directory. 
-However, because we have specified this directory in our \verb=\graphicspath= we do not need to explicitly specify the path to the image. 
+%There are a number of useful \LaTeX\xspace commands predefined in \code{macros.tex}.
+%Notice that the section labels are prefixed with \code{sec:} to allow the use of the \verb=\secref= command to reference a section (\ie, \secref{intro}).
+%Figures can be referenced with the \verb=\figref= command, which assumes that the figure label is prefixed with \code{fig:}.
+%In \figref{example} we show an example figure.
+%You'll notice that the actual figure file is found in the \code{figures} directory. 
+%However, because we have specified this directory in our \verb=\graphicspath= we do not need to explicitly specify the path to the image. 
 
-The \code{macros.tex} package also contains some conventional scientific units like \angstrom, \GeV, \Msun, etc. and some editorial tools for highlighting \FIXME{issues}, \CHECK{text to be checked}, \COMMENT{comments}, and \NEW{new additions}.
+%The \code{macros.tex} package also contains some conventional scientific units like \angstrom, \GeV, \Msun, etc. and some editorial tools for highlighting \FIXME{issues}, \CHECK{text to be checked}, \COMMENT{comments}, and \NEW{new additions}.
+\section{Functionality}
+
+\subsection{Permissible cosmological models}
+\label{sec:cosmologies}
+The user may be interested in producing cosmological constraints on $\Lambda$CDM parameters, or perhaps on some extension to the standard cosmological model. CCL handles this by allowing the user to create a cosmology object. (... more here ...) Functions exist to create general cosmologies, as well as for flat $\Lambda$CDM, curved $\Lambda$CDM, $\Lambda$CDM with and without neutrinos, wCDM, and the CPL model ($w_0$ + $w_a$).
+
+%Similar to the figure before, here we have included a table of data from \code{tables/table.tex}.  
+%Notice that again we are able to reference \tabref{example} with the \verb=\tabref= command using the \code{tab:} prefix. 
+%Also notice that we haven't needed to specify the full path to the table because in the \code{Makefile} we include \code{./tables} directory in the \code{\$TEXINPUTS} environment variable.
+
+%\input{table}
+
+\subsection{Distances}
+\label{sec:distances}
+
+The Hubble parameter is calculated via ... The comoving distance is calculated via ... (...more here...)
+
+%If you are planning on committing your paper to github, it's a good idea to write your tex as one sentence per line. 
+%This allows for an easier \code{diff} of changes.
+
+\subsection{LSST Specifications}
+\label{sec:specs}
+
+CCL includes specifications for the fiducial expected redshift distributions of lensing sources and clustering galaxies for LSST, as well as bias clustering for galaxy tracers. (...more here...) This is to enable forecasts of LSST constraints. ... 
+
+Photometric redshift effects are incorporated via a user-defined function (... more here... , describe functionality of user-defined photo-z and equation used.)
+
+\subsection{Angular $C_\ell$'s}
+\label{sec:cl}
+
+$C_\ell$'s are produced using ... (...more here...)
 
 
-\section{Methods}
-\label{sec:methods}
 
-Similar to the figure before, here we have included a table of data from \code{tables/table.tex}.  
-Notice that again we are able to reference \tabref{example} with the \verb=\tabref= command using the \code{tab:} prefix. 
-Also notice that we haven't needed to specify the full path to the table because in the \code{Makefile} we include \code{./tables} directory in the \code{\$TEXINPUTS} environment variable.
+%And still not much.
 
-\input{table}
+\subsection{Correlation functions}
+\label{sec:corr}
 
-\section{Results}
-\label{sec:results}
+To produce correlation functions, we make use of the public code FFTlog (... cite ...). (... more here ... describe correlation function calculation).
 
-If you are planning on committing your paper to github, it's a good idea to write your tex as one sentence per line. 
-This allows for an easier \code{diff} of changes.
+%In conclusion, there are no conclusions.
 
-\section{Discussion}
-\label{sec:discussion}
+%\begin{figure}
+%\includegraphics[width=\columnwidth]{example.jpg}
+%\caption{An example figure. \label{fig:example}}
+%\end{figure}
 
-And still not much.
+\subsection{Halo mass function}
+\label{sec:hmf}
 
-\section{Conclusions}
-\label{sec:conclusions}
+The halo mass function is incorporated using the (Tinker 2008? cite) definition ... (...more here...).
 
-In conclusion, there are no conclusions.
+\section{Tests and validation}
+\label{sec:tests}
 
-\begin{figure}
-\includegraphics[width=\columnwidth]{example.jpg}
-\caption{An example figure. \label{fig:example}}
-\end{figure}
+Outputs of CCL have been validated against the results of the code comparison project down to a $10^{-4}$ or better accuracy level. (... more here ..., describe tests).
+
+\section{Future functionality to be included}
+
+In the future, we hope that CCL will include (... more here ...)
 
 \input{acknowledgments}
 
