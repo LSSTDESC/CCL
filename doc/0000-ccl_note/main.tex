@@ -85,8 +85,82 @@ Photometric redshift effects are incorporated via a user-defined function (... m
 \subsection{Angular $C_\ell$'s}
 \label{sec:cl}
 
-$C_\ell$'s are produced using ... (...more here...)
+In this section we will distinguish between {\sl observables} (inseparable quantities observed on the sky, such as number counts, shear or CMB temperature fluctuations) and {\sl contributions} to the total observed fluctuations of these observables (such as the main density term in number counts, redshift-space distortions, magnification, ISW, etc.).
 
+\subsubsection{Exact expressions}
+The angular power spectrum between two observables $a$ and $b$ can be written as:
+\begin{equation}
+ C^{ab}_\ell=4\pi\int_0^\infty \frac{dk}{k}\,\mathcal{P}_\Phi(k)\Delta^a_\ell(k)\Delta^b_\ell(k),
+\end{equation}
+where $\Delta^a$ and $\Delta^b$ are, using the terminology of CLASS, the transfer functions corresponding to these observables. Each transfer function will receive contributions from different terms. Currently CCL supports two observables, number counts and cosmic shear, with the following contributions:
+\paragraph{\bf Number counts.} The transfer function for number counts can be decomposed into three terms: $\Delta^{\rm NC}=\Delta^{\rm D}+\Delta^{\rm RSD}+\Delta^{\rm M}$, where
+\begin{itemize}
+  \item $\Delta^{\rm D}$ is the standard density term proportional to the matter density:
+        \begin{equation}
+          \Delta^{\rm D}_\ell(k)=\int dz\,p_z(z)\,b(z)\,T_\delta(k,z)\,j_\ell(k\chi(z)),
+        \end{equation}
+        where $T_\delta$ is the matter transfer function. Note that CCL currently does not support non-linear or scale-independent bias. Here, $p_z(z)$ is the normalized distribution of sources in redshift (selection function). Thus CCL understand each individual redshift bin as a separate ``observable''.
+  \item $\Delta^{\rm RSD}$ is the linear contribution from redshift-space distortions:
+        \begin{equation}
+          \Delta^{\rm RSD}_\ell(k)=\int dz\,p_z(z)\frac{(1+z) p_z(z)}{H(z)}T_\theta(k,z) j_\ell''(k\chi(z)),
+        \end{equation}
+        where $T_\theta(k,z)$ is the transfer function of $\theta$, the divergence of the comoving velocity field {\bf TODO: check that it's the comoving one - I'm 90\% sure of this}.
+  \item $\Delta^{\rm M}$ is the contribution from magnification lensing:
+        \begin{equation}
+          \Delta_\ell^{\rm M}(k)=-\ell(\ell+1)\int \frac{dz}{H(z)} W^{\rm M}(z) T_{\phi+\psi}(k,z) j_\ell(k\chi(z)),
+        \end{equation}
+        where $T_{\phi+\psi}$ is the transfer function for the Newtonian-gauge scalar metric perturbations, and $W^{\rm M}$ is the magnification window function:
+        \begin{equation}
+           W^{\rm M}(z)\equiv\int_z^\infty dz' p_z(z')\frac{2-5s(z')}{2}\frac{\chi(z')-\chi(z)}{\chi(z')}.
+        \end{equation}
+        Here $s(z)$ is the magnification bias, given as the logarithmic derivative of the number of sources with magnitude limit.
+          
+        Note that CCL currently does not compute relativistic corrections to number counts {\bf TODO: add references}. Although these should be included in the future, their contribution to the total fluctuation is largely subdominant, and therefore it is safe to work without them for the time being {\bf TODO: add references?}.
+\end{itemize}
+
+\paragraph{\bf Cosmic shear.} The transfer function for cosmic shear is currently decomposed into two terms: $\Delta^{\rm SH}=\Delta^{\rm WL}+\Delta^{\rm IA}$, where
+\begin{itemize}
+  \item $\Delta^{\rm L}$ is the standard lensing contribution:
+        \begin{equation}
+          \Delta_\ell^{\rm L}(k)=-\frac{1}{2}\sqrt{\frac{(\ell+2)!}{(\ell-2)!}}\int \frac{dz}{H(z)} W^{\rm L}(z) T_{\phi+\psi}(k,z) j_\ell(k\chi(z)),
+        \end{equation}
+        where $W^{\rm L}$ is the lensing kernel, given by
+        \begin{equation}
+          W^L(z)\equiv\int_z^\infty dz' p_z(z')\frac{\chi(z')-\chi(z)}{\chi(z')}.
+        \end{equation}
+  \item $\Delta^{\rm IA}$ is the transfer function for intrinsic galaxy alignments. CCL currently supports the so-called ``linear alignment model'', according to which the galaxy inertia tensor is proportional the local tidal tensor.
+        \begin{equation}
+          \Delta_\ell^{\rm IA}(k)=\sqrt{\frac{(\ell+2)!}{(\ell-2)!}}\int dz\,p_z(z)\,b_{\rm IA}(z)\,f_{\rm red}(z)\,T_\delta(k,z)\,\frac{j_\ell(k\chi(z))}{(k\chi(z))^2}.
+        \end{equation}
+\end{itemize}
+
+\subsubsection{The Limber approximation}
+As shown above, computing each transfer function involves a radial projection (i.e. an integral over redshift or $\chi$), and thus computing full power spectrum consists of a triple integral for each $\ell$. This can be computationally intensive, but can be significantly simplified in certain regimes by using the Limber approximation, given by:
+\begin{equation}
+ j_\ell(x)\simeq\sqrt{\frac{\pi}{2\ell+1}}\,\delta\left(\ell+\frac{1}{2}-x\right).
+\end{equation}
+Thus for each $k$ and $\ell$ we can define a radial distance $\chi_\ell\equiv(\ell+1/2)/k$, and we will write the corresponding redshift as $z_\ell$. {\bf TODO: do we want to show why this is a good approximation with a plot?} This approximation works best for wide radial kernels and high multipoles.
+
+Substituting this in the expressions above, it is possible to see that the The expressions above can be written as follows in the Limber approximation. First, the power spectrum
+can be rewritten as
+\begin{equation}
+ C^{ab}_\ell=\frac{2}{2\ell+1}\int_0^\infty dk\,P_\delta\left(k,z_\ell\right)
+ \tilde{\Delta}^a_\ell(k)\tilde{\Delta}^b_\ell(k).
+\end{equation}
+where
+\begin{align}
+ &\tilde{\Delta}_\ell^{\rm D}(k)=p_z(z_\ell)\,b(z_\ell)\,H(z_\ell)\\
+ &\tilde{\Delta}_\ell^{\rm RSD}(k)=
+ \frac{1+8\ell}{(2\ell+1)^2}\,p_z(z_\ell)\,f(z_\ell)\,H(z_\ell)-\\
+ &\hspace{48pt}\frac{4}{2\ell+3}\sqrt{\frac{2\ell+1}{2\ell+3}}p_z(z_{\ell+1})\,f(z_{\ell+1})\,H(z_{\ell+1})\\
+ &\tilde{\Delta}_\ell^{\rm M}(k)=3\Omega_{M,0}H_0^2\frac{\ell(\ell+1)}{k^2}\,
+ \frac{(1+z_\ell)}{\chi_\ell}W^{\rm M}(z_\ell)\\
+ &\tilde{\Delta}_\ell^{\rm L}(k)=\frac{3}{2}\Omega_{M,0}H_0^2\sqrt{\frac{(\ell+2)!}{(\ell-2)}}\frac{1}{k^2}\,
+ \frac{1+z_\ell}{\chi_\ell}W^{\rm L}(z_\ell)\\
+ &\tilde{\Delta}_\ell^{\rm IA}(k)=\sqrt{\frac{(\ell+2)!}{(\ell-2)!}}\frac{p_z(z_\ell)\,b_{\rm IA}(z_\ell)f_{\rm red}(z_\ell)H(z_\ell)}{(\ell+1/2)^2}
+\end{align}
+
+To be continued...
 
 
 %And still not much.
