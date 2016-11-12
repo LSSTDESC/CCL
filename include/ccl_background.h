@@ -27,3 +27,4 @@ double ccl_growth_rate(ccl_cosmology * cosmo, double a);
 // Logarithmic rates of d ln g/d lna a at alist of  scale factor a [0..na-1]
 void ccl_growth_rates(ccl_cosmology * cosmo, int na, double a[na], double output[na]);
 
+double ccl_omega_m_z(ccl_cosmology * cosmo, double a);

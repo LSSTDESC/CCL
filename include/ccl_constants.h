@@ -11,20 +11,30 @@
 #define A_SPLINE_NA    1000
 #define A_SPLINE_MIN   0.1
 #define A_SPLINE_MAX   1.0
+
+#define LOGM_SPLINE_DELTA 0.025
+#define LOGM_SPLINE_NM    440
+#define LOGM_SPLINE_MIN   6
+#define LOGM_SPLINE_MAX   17
+
 //for 2D SPLINE, e.g. P_NL, use coarser binning
 #define N_A 20
 
 #define A_SPLINE_TYPE gsl_interp_akima
 #define K_SPLINE_TYPE gsl_interp_akima
+#define M_SPLINE_TYPE gsl_interp_akima
 #define PNL_SPLINE_TYPE gsl_interp2d_bicubic
 
 // These are in units of Mpc (no factor of h)
 #define K_PIVOT 0.05
 #define K_MAX 1e3
-#define K_MIN 1e-4
+#define K_MIN 1e-5
 #define K_MAX_INT (1e3/1.1) //minimum integration range
-#define K_MIN_INT (1e-4*1.1) //maximum integration range
-#define N_K 500
+#define K_MIN_INT (1e-5*1.1) //maximum integration range
+#define N_K 1000
+
+//Rho critical in units of M_sun/h / (Mpc/h)^3
+#define RHO_CRITICAL 2.7744948E11
 
 //Lightspeed / H0 in units of Mpc/h
 #define CLIGHT_HMPC 2997.92458 //H0^-1 in Mpc/h
