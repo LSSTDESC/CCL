@@ -7,8 +7,7 @@
 # To tar up a flat version of a specific format:
 # > make <format> tar
 #
-# Alex Drlica-Wagner <kadrlica@fnal.gov>
-#
+# Alex Drlica-Wagner: https://github.com/DarkEnergyScienceCollaboration/start_paper/issues/new?body=@kadrlica
 
 # Primary file names
 main=main
@@ -18,11 +17,11 @@ outname=0000-ccl_note
 export TEXINPUTS:=.:./texmf/styles/:./tables/:
 export BSTINPUTS:=.:./texmf/bib/:
 
-# Journal class switcher flags
+# LaTeX journal class switcher flags
 # apj=\def\flag{apj}
 # apjl=\def
 # mnras=\def\flag{mnras}
-# note=\def\flag{note}
+# tex=\def\flag{tex}
 
 # Submission flags (these need some thought)
 # arxiv=\def\flag{emulateapj}
@@ -44,18 +43,18 @@ tarfiles=$(figures) $(tables) $(styles) $(bibs) $(source)
 all: export flag = ${draft}
 all: main
 
-copy: 
+copy:
 	cp ${main}.pdf ${outname}.pdf
 
 touch:
 	touch ${main}.tex
 
-# 
-main : 
+# {% raw %}
+main :
 	latexmk -g -pdf  \
 	-pdflatex='pdflatex %O -interaction=nonstopmode "${flag}\input{%S}"'  \
 	${main}
-# 
+# {% endraw %}
 
 tar : main
 	mkdir -p ${tardir}
@@ -65,9 +64,9 @@ tar : main
 	rm -rf ${tardir}
 
 # http://stackoverflow.com/q/8028314/
-TARGETS=apj apjl prd prl mnras note
+TARGETS=apj apjl prd prl mnras tex
 $(TARGETS): export flag = \def\flag{$(@)}
-$(TARGETS): 
+$(TARGETS):
 	$(MAKE) -e main
 	$(MAKE) -e tar
 
@@ -77,3 +76,69 @@ tidy:
 
 clean: tidy
 	rm -f ${main}.pdf ${main}.tar.gz
+
+# Update the tex styles etc:
+
+baseurl=https://raw.githubusercontent.com/DarkEnergyScienceCollaboration/start_paper/master/%7B%7Bcookiecutter.folder_name%7D%7D
+
+UPDATES=\
+texmf/bib/apj.bst \
+texmf/bib/mnras.bst \
+texmf/styles/aas_macros.sty \
+texmf/styles/aastex.cls \
+texmf/styles/aastex61.cls \
+texmf/styles/aps_macros.sty \
+texmf/styles/docswitch.sty \
+texmf/styles/emulateapj.cls \
+texmf/styles/mnras.cls \
+.logos/desc-logo-small.png \
+.logos/desc-logo.png \
+.logos/header.png
+
+.PHONY: $(UPDATES)
+$(UPDATES):
+	curl -s -S -o $(@) ${baseurl}/$(@)
+	@echo " "
+
+update:
+	@echo "\nOver-writing LaTeX style files with the latest versions: \n"
+	$(MAKE) $(UPDATES)
+
+# Get fresh copies of the templates etc, for reference:
+
+TEMPLATES=\
+acknowledgments.tex \
+authors.tex \
+macros.tex \
+main.bib \
+main.ipynb \
+main.md \
+main.rst \
+main.tex
+
+.PHONY: $(TEMPLATES) templates
+$(TEMPLATES):
+	curl -s -S -o templates/$(@) ${baseurl}/$(@)
+	@echo " "
+
+templates:
+	@echo "\nDownloading the latest versions of the template files, for reference: \n"
+	@mkdir -p templates
+	$(MAKE) $(TEMPLATES)
+	$(MAKE) new
+	ls templates/*
+
+# Get a template copy of the latest Makefile, for reference:
+.PHONY: new
+new:
+	@echo "\nDownloading the latest version of the Makefile, for reference: \n"
+	@mkdir -p templates
+	curl -s -S -o templates/Makefile ${baseurl}/Makefile
+	@echo " "
+
+# Over-write this Makefile with the latest version:
+.PHONY: upgrade
+upgrade:
+	@echo "\nDownloading the latest version of the Makefile: \n"
+	curl -s -S -o Makefile ${baseurl}/Makefile
+	@echo "\nNow get the latest styles and templates with\n\n    make update\n    make templates\n"
