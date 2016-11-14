@@ -1,12 +1,15 @@
 %% {% raw %}
 %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% lsstdescnote.cls                                  %%
+%% November, 2016
+%% adapted from:
 %% AASTeX61.cls                                  %%
 %% October 5, 2016                               %%
 %% Copyright 2016 American Astronomical Society  %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\def\currversion{6.1}
+\def\currversion{0.1}
 
 %%
 %%    These files are distributed
@@ -49,11 +52,15 @@
 %%%  http://www.latex-project.org/lppl.txt
 %%% and version 1.3 or later is part of all distributions of LaTeX
 %%% version 2005/12/01 or later.
-%
-%%% This work has the LPPL maintenance status `maintained'.
-%
-%%% The Current Maintainer of this work is Greg Schwarz <greg.schwarz@aas.org>
-%%% This work consists of the file aastex.cls
+
+%%% This work consists of the file lsstdescnote.cls
+%%% which should have the LPPL maintenance status `maintained'.
+%%% The Current Maintainer of lsstdescnote.cls is Phil Marshall,
+%%% https://github.com/DarkEnergyScienceCollaboration/start_paper/issues/new?body=@drphilmarshall
+
+%%% This work is adapted from aastex.cls,
+%%% which has the LPPL maintenance status `maintained'.
+%%% The Current Maintainer of aastex.cls is Greg Schwarz <greg.schwarz@aas.org>
 
 %%%     copyright       = "Copyright (C) 2016 American Astronomical Society
 %%%
@@ -82,8 +89,8 @@
 %%%     abstract        = "formatter for AAS journal submissions",
 %%%  }
 
-\ProvidesClass{aastex61}%%%
- [2016/04/16 Version 6.1/AAS markup document class]%
+\ProvidesClass{lsstdescnote}%%%
+ [2016/11/12 Version 0.1/LSST DESC Note markup document class]%
 {}
 \ClassInfo{aastex}{%
 ^^J
@@ -210,9 +217,13 @@ access fonts for the \string\astro\space command
 ^^J^^J
 }\stop}
 
-   \def\apjsecfont{\normalsize}
-   \def\secnum@size{\small}
-   \def\subsecnum@size{\normalsize}
+% LSST DESC Notes: big, bold section headings:
+%   \def\apjsecfont{\normalsize}
+%   \def\secnum@size{\small}
+%   \def\subsecnum@size{\normalsize}
+   \def\apjsecfont{\bf}
+   \def\secnum@size{\Large}
+   \def\subsecnum@size{\large}
 
     \def\AppendixApjSectionMarkInTitle#1{\relax}
 \newif\ifletteredappendix
@@ -268,6 +279,10 @@ access fonts for the \string\astro\space command
 %% default fonts:
 \usepackage{times}
  \fi
+
+%% LSST DESC Notes: use fonts that look like GitHub-presented Markdown:
+\usepackage{helvet,mathpple}
+\renewcommand{\familydefault}{\sfdefault}
 
 %%%%%%%%%%%%%
 
@@ -637,10 +652,12 @@ revtex4-1.cls^^J^^J}\stop
 \ifmodern
 \vglue-18pt
 {\footnotesize
-\raggedright
-{\sc Draft version \today}\\[2pt]
-{\footnotesize
-Typeset using \LaTeX\ {\bf modern} style in AASTeX61}
+% \raggedright
+% {\sc Draft version \today}\\[2pt]
+% {\footnotesize
+% Typeset using \LaTeX\ {\bf modern} style in AASTeX61}
+% LSST DESC Notes have a header image instead!
+\includegraphics[width=\textwidth]{.logos/header.png}
 \vskip48pt
 }
 \else
@@ -739,7 +756,12 @@ Typeset using \LaTeX\ {\bf modern} style in AASTeX61}
 %%
 \renewcommand\title[2][]{%
 \def\@title{\setbox0=\vbox{\let\footnote\tempfootnote #2}%
-{\let\footnote\tempfootnoteintitle\uppercase{#2}}
+% LSST DESC Notes don't have uppercase titles:
+% {\let\footnote\tempfootnoteintitle\uppercase{#2}}
+% \kickoutfootnotes
+% \ifdoublespace\vskip 3\baselineskip\fi
+% }%
+{\let\footnote\tempfootnoteintitle{#2}}
 \kickoutfootnotes
 \ifdoublespace\vskip 3\baselineskip\fi
 }%
@@ -748,11 +770,11 @@ Typeset using \LaTeX\ {\bf modern} style in AASTeX61}
 }%
 
 
-\def\frontmatter@title@format{\normalsize\centering}
+\def\frontmatter@title@format{\huge\bf\centering}
 
 \def\frontmatter@title@below{\vskip12pt}%
 
-\def\frontmatter@authorformat{\small\scshape
+\def\frontmatter@authorformat{\small\itshape%\scshape
 \ifmodern
 \vskip48pt
 \centering
@@ -811,7 +833,7 @@ Typeset using \LaTeX\ {\bf modern} style in AASTeX61}
 \def\frontmatter@preabstractspace{12pt}
 \def\frontmatter@postabstractspace{12pt}
 
-\def\abstractname{ABSTRACT}
+\def\abstractname{}%{ABSTRACT} # No Abstract marker in LSST DESC Notes
 \long\def\frontmatter@abstractheading{%
  \begingroup
   \centering
@@ -890,28 +912,45 @@ Typeset using \LaTeX\ {\bf modern} style in AASTeX61}
 %  *             KEYWORDS                 *
 %  ****************************************
 
-
-  \def\@keys@name{\textit{Keywords:}\/~\mbox{}}%
+% No keywords in LSST DESC Notes! We use the slot for the date instead:
+%   \def\@keys@name{\textit{Keywords:}\/~\mbox{}}%
+\def\@keys@name{This Note was generated on: \today}%
 
 \newlength{\keys@width}
 \def\frontmatter@keys@format{\ifmodern\vskip0pt\else\vspace*{0.5mm}\fi%
   \settowidth{\keys@width}{\normalsize\@keys@name}%
-  \rightskip=0.5in\leftskip=\rightskip\parindent=0pt%
-    \hangindent=\keys@width\hangafter=1\normalsize}%
+  % LSST DESC Notes have a centered date statement:
+  % \rightskip=0.5in\leftskip=\rightskip\parindent=0pt%
+  %    \hangindent=\keys@width\hangafter=1\normalsize}%
+  \rightskip=0.0in\leftskip=\rightskip\parindent=0pt}%
+
 \def\@keywords@produce#1{%
  \showKEYS@sw{%
   \begingroup%
    \frontmatter@keys@format%
-   \@keys@name#1\par
+   % No keywords in LSST DESC Notes!
+   % \@keys@name#1\par
+   \@keys@name\par
   \endgroup
  }{%
-  \@if@empty{#1}{}{%
-   \class@warn{If you want your keywords to appear in your output, use document class option showkeys}%
-  }%
+  % \@if@empty{#1}{}{%
+   % \class@warn{If you want your keywords to appear in your output, use document class option showkeys}% No keywords warnings in LSST DESC Notes!
+  % }%
+  % LSST DESC Notes uses the keywords space to show the date!
+   \begingroup%
+    \frontmatter@keys@format%
+    % No keywords in LSST DESC Notes!
+    % \@keys@name#1\par
+    \@keys@name\par
+   \endgroup
  }%
 }%
 
 \let\subjectheadings=\keywords
+
+%  ****************************************
+%  *             DATE                     *
+%  ****************************************
 
 
 %  ****************************************
@@ -990,32 +1029,40 @@ Typeset using \LaTeX\ {\bf modern} style in AASTeX61}
 \newif\if@firstsection \@firstsectiontrue
 
 \def\section{%
-\if@firstsection
-      \maketitle
-\global\@firstsectionfalse
-     \setcounter{footnote}{\thefront@matter@foot@note}%
-     \let\footnotetext=\old@foot@note@text
-     \let\footnotemark=\old@foot@note@mark
-   \clearpage
-   \if@two@col
-   \twocolumngrid
-   \fi
-\fi
-    \@startsection{section}{1}{\z@}{9pt plus 1pt minus
-    1pt}{4pt}{\apjsecfont\center}}
 
-\def\subsection{\@startsection{subsection}{2}{\z@}{9pt plus 1pt minus 1pt}{4pt}%
-  {\normalsize\itshape \center}}
+% LSST DESC Notes don't have this extra page at the front:
+% \if@firstsection
+%       \maketitle
+% \global\@firstsectionfalse
+%      \setcounter{footnote}{\thefront@matter@foot@note}%
+%      \let\footnotetext=\old@foot@note@text
+%      \let\footnotemark=\old@foot@note@mark
+%    \clearpage
+%    \if@two@col
+%    \twocolumngrid
+%    \fi
+% \fi
 
+% LSST DESC Notes: big, bold section headings:
+% \@startsection{section}{1}{\z@}{9pt plus 1pt minus
+% 1pt}{4pt}{\apjsecfont\center}}
+\@startsection{section}{1}{\z@}{9pt plus 1pt minus 1pt}{4pt}{\bf\Large}}
+
+% LSST DESC Notes: big, bold section headings:
+% \def\subsection{\@startsection{subsection}{2}{\z@}{9pt plus 1pt minus 1pt}{4pt}{\normalsize\itshape \center}}
+\def\subsection{\@startsection{subsection}{2}{\z@}{9pt plus 1pt minus 1pt}{4pt}{\bf\large}}
+
+% LSST DESC Notes: big, bold section headings:
+% \def\subsubsection{\@startsection{subsubsection}{3}{\z@}%
+%   {2ex plus 1ex minus .2ex}{1ex plus .2ex}{\small\itshape \center}}
 \def\subsubsection{\@startsection{subsubsection}{3}{\z@}%
-  {2ex plus 1ex minus .2ex}{1ex plus .2ex}{\small\itshape \center}}
+  {2ex plus 1ex minus .2ex}{1ex plus .2ex}{\bf\normalsize}}
 
 \def\paragraph{\@startsection{paragraph}{4}{\z@}%
   {1.5ex plus 1ex minus .2ex}{0pt}{\small\itshape}}
 
 \def\subparagraph{\@startsection{subparagraph}{5}{\z@}%
   {1ex plus 1ex minus .2ex}{-0.5\parindent}{\small\itshape}}
-
 
 \def\thesection{\arabic{section}}
 \def\thesubsection{\thesection.\arabic{subsection}}
@@ -1027,13 +1074,15 @@ Typeset using \LaTeX\ {\bf modern} style in AASTeX61}
 \def\p@paragraph      {}
 \def\p@subparagraph   {}
 
-
-\def\sec@upcase#1{\uppercase{#1}}
+% LSST DESC Notes don't have uppercase section headings:
+% \def\sec@upcase#1{\uppercase{#1}}
+\def\sec@upcase#1{\relax{#1}}
 \def\subsec@upcase#1{\relax{#1}}
 
-%
 % How the section number will appear in the section title - AV
-\def\ApjSectionMarkInTitle#1{#1.\ }
+% LSST DESC Notes: no section numbering!
+% \def\ApjSectionMarkInTitle#1{#1.\ }
+\def\ApjSectionMarkInTitle#1{\!\!}
 \def\ApjSectionpenalty{0}
 
 
@@ -1111,7 +1160,9 @@ the#1\endcsname}
 %\clearpage
 % \vrule used for extra space; otherwise revtex4-1 sometimes eats
 % away the last line before appendix
-        \noindent\mbox{}\vrule height 24pt width0pt\hfill{\apjsecfont APPENDIX}\hfill\mbox{}\par
+        % \noindent\mbox{}\vrule height 24pt width0pt\hfill{\apjsecfont APPENDIX}\hfill\mbox{}\par
+        % LSST DESC Notes: no appendix marker, author does it themselves:
+        \noindent\mbox{}\vrule height 24pt width0pt\hfill{}\hfill\mbox{}\par
         \nopagebreak\medskip\@nobreaktrue\def\ApjSectionpenalty{\@M}
         \@firstsectionfalse
           \setcounter{section}{0}
@@ -1132,9 +1183,14 @@ the#1\endcsname}
 %\setcounter{equation}{0}
           \def\thesection{\Alph{section}}
           \def\theequation{\hbox{\Alph{section}\arabic{equation}}}
-          \def\section{
-\@startsection {section}{1}{\z@}
-            {10pt}{5pt}{\centering\scshape\apjsecfont}}
+% LSST DESC Notes: Big, bold section headings:
+%           \def\section{
+% \@startsection {section}{1}{\z@}
+%             {10pt}{5pt}{\centering\scshape\apjsecfont}}
+            \def\section{
+  \@startsection {section}{1}{\z@}
+              {10pt}{5pt}{\bf\Large}}
+
 \else
 % Do not use appendix numbers in the titles
           \def\ApjSectionMarkInTitle{\AppendixApjSectionMarkInTitle}
@@ -1182,7 +1238,9 @@ the#1\endcsname}
 \onecolumngrid
 \vspace{20pt}
 \goodbreak
-    \hbox to\textwidth{\hss\normalsize REFERENCES\hss}
+% LSST DESC Notes: References is just another \subsection
+%    \hbox to\textwidth{\hss\normalsize REFERENCES\hss}
+    \hbox to\textwidth{\large\bf References}
 \vspace{6pt}\parskip=0pt
 \twocolumngrid
 \par
@@ -1895,10 +1953,11 @@ width0pt\relax#1$}\ignorespaces}
 \usepackage{longtable}
 
 %% for editing changes
-\usepackage{xcolor}
+\usepackage[dvipsnames,svgnames]{xcolor}
 % hyperref link defaults to "blue" (0000ff) as this matches our publisher produced pdf style
-\definecolor{xlinkcolor}{cmyk}{1,1,0,0}
-
+% \definecolor{xlinkcolor}{cmyk}{1,1,0,0}
+% LSST DESC presents notes on GitHub, which uses the following color for links:
+\definecolor{xlinkcolor}{rgb}{0.251,0.471,0.753}
 
 %% In response to request from AAS
  \usepackage[bookmarks=false,         % show bookmarks bar?
@@ -5850,7 +5909,7 @@ on page
 \expandafter\@firstofone\fi
 {\@dblarg {\Hy@tempa \@captype}}[]}
 
-
+% LSST DESC Notes: make sure captions have correct font, by adding \normalfont before #3:
 \def\@caption#1[#2]#3{{\small\rm\expandafter \ifx \csname if@capstart\expandafter \endcsname
 \csname iftrue\endcsname \global \let \@currentHref \hc@currentHref \else \hyper@makecurrent {\@captype }\fi
 \@ifundefined {NR@gettitle}{\def \@currentlabelname{\thesection\relax #2}}
@@ -5859,11 +5918,11 @@ on page
 \begingroup \@parboxrestore \if@minipage \@setminipage \fi \normalsize
 \expandafter\ifx \csname if@capstart\expandafter \endcsname
 \csname iftrue\endcsname \global \@capstartfalse
-\@makecaption {\bf\csname fnum@#1\endcsname }{\ignorespaces #3}
+\@makecaption {\bf\csname fnum@#1\endcsname }{\ignorespaces \normalfont #3}
 \else \@makecaption {\bf\csname fnum@#1\endcsname }{\ignorespaces \ifHy@nesting
-\expandafter \hyper@@anchor \expandafter {\@currentHref }{#3}\else
+\expandafter \hyper@@anchor \expandafter {\@currentHref }{\normalfont #3}\else
 \Hy@raisedlink {\expandafter \hyper@@anchor \expandafter
-{\@currentHref }{\relax }}{#3}\fi }\fi \par \endgroup}}
+{\@currentHref }{\relax }}{\normalfont #3}\fi }\fi \par \endgroup}}
 
 
 \newcommand\tablebreak{\\[-11pt]\noalign{\break}\\ }
@@ -6204,8 +6263,10 @@ needed. It will not do anything.^^J Please use
 \if@firstsection
   \let\abstract\@undefined\let\endabstract\@undefined
   \titlepage@sw{%
-   \vfil
-   \clearpage
+   % LSST DESC Notes have first section right after title page material - well, after a little bit of space:
+   % \vfil
+   % \clearpage
+   \vspace{2\baselineskip}
   }{}%
 \fi
 }%
@@ -6263,7 +6324,12 @@ Affiliations\vrule depth 18pt width0pt}\nobreak
 \setlength{\topmargin}{-\headsep}
 \setlength{\oddsidemargin}{0.25in}
 \setlength{\evensidemargin}{0.25in}
-\setlength{\parindent}{0.54\baselineskip}
+% LSST DESC Notes don't have indented paragraphs:
+% \setlength{\parindent}{0.54\baselineskip}
+\setlength{\parindent}{0in}
+% But LSST DESC Notes do have well-separated paragraphs:
+\setlength{\parsep}{\baselineskip}
+\setlength{\parskip}{\baselineskip}
 \sloppy\sloppypar
 \fi
 
@@ -6320,7 +6386,7 @@ width 0pt\relax\fi}}}
 
 
 %% get rid of \jobname Notes being sent to .aux file:
-% Commented out to avoid .bib cache creation (we hope):
+% Commented out to avoid .bib cache creation (we hope): 
 % http://journals.aas.org/authors/aastex/linux.html
 % \let\bibdata@app\relax
 % \def\pre@bibdata{}

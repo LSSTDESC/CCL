@@ -1,4 +1,4 @@
-%% 
+%% {% raw %}
 %%+
 %%  Name:
 %%     mnras.bst
@@ -1829,4 +1829,4 @@ FUNCTION {end.bib}
 }
 
 EXECUTE {end.bib}
-%% 
+%% {% endraw %}

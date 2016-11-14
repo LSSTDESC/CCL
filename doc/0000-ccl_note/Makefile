@@ -9,19 +9,19 @@
 #
 # Alex Drlica-Wagner: https://github.com/DarkEnergyScienceCollaboration/start_paper/issues/new?body=@kadrlica
 
-# Primary file names
+# Primary file names - avoid cookiecutter variables, to enable `make
+# upgrade` to cleanly over-write this Makefile...
 main=main
-outname=0000-ccl_note
+outname=$(notdir $(shell pwd))
 
 # LATEX environment variables
-export TEXINPUTS:=.:./texmf/styles/:./tables/:
-export BSTINPUTS:=.:./texmf/bib/:
+export TEXINPUTS:=./texmf/styles/:./tables/:
+export BSTINPUTS:=./texmf/bib/:
 
 # LaTeX journal class switcher flags
 # apj=\def\flag{apj}
 # apjl=\def
 # mnras=\def\flag{mnras}
-# tex=\def\flag{tex}
 
 # Submission flags (these need some thought)
 # arxiv=\def\flag{emulateapj}
@@ -36,12 +36,12 @@ tabdir=./tables
 tables=$(tabdir)/*.tex
 styles=./texmf/styles/*.{sty,cls}
 bibs=./texmf/bib/*.bst
-source=$(main).{tex,bbl,bib} macros.tex authors.tex acknowledgments.tex
+source=$(main).{tex,bbl,bib} lsstdesc.bib macros.tex authors.tex acknowledgments.tex
 
 tarfiles=$(figures) $(tables) $(styles) $(bibs) $(source)
 
 all: export flag = ${draft}
-all: main
+all: main copy
 
 copy:
 	cp ${main}.pdf ${outname}.pdf
@@ -49,33 +49,39 @@ copy:
 touch:
 	touch ${main}.tex
 
+#http://journals.aas.org/authors/aastex/linux.html
+#change the compiler call to allow a "." file
 # {% raw %}
 main :
 	latexmk -g -pdf  \
-	-pdflatex='pdflatex %O -interaction=nonstopmode "${flag}\input{%S}"'  \
+	-pdflatex='openout_any=a pdflatex %O -interaction=nonstopmode "${flag}\input{%S}"'  \
 	${main}
 # {% endraw %}
 
 tar : main
 	mkdir -p ${tardir}
 	cp ${tarfiles} ${tardir} | true
-	cp ${main}.pdf ${tardir}/${main}.pdf
-	cd ${tardir} && tar -czf ../${main}.tar.gz . && cd ..
+	cp ${outname}.pdf ${tardir}/${outname}.pdf
+	cd ${tardir} && tar -czf ../${outname}.tar.gz . && cd ..
 	rm -rf ${tardir}
 
 # http://stackoverflow.com/q/8028314/
-TARGETS=apj apjl prd prl mnras tex
+TARGETS=apj apjl prd prl mnras   tex
 $(TARGETS): export flag = \def\flag{$(@)}
 $(TARGETS):
 	$(MAKE) -e main
 	$(MAKE) -e tar
+# NB. the 'tex' target doesn't actually do anything in docswitch - make
+# with no target compiles PDF out of main.tex using lsstdescnote.cls
+# (which is to say, by default we assume you are writing an LSST
+# DESC Note in latex format).
 
 tidy:
 	rm -f *.log *.aux *.out *.dvi *.synctex.gz *.fdb_latexmk *.fls
-	rm -f *.bbl *.blg *Notes.bib
+	rm -f *.bbl *.blg *Notes.bib ${main}.pdf
 
 clean: tidy
-	rm -f ${main}.pdf ${main}.tar.gz
+	rm -f ${outname}.pdf ${outname}.tar.gz
 
 # Update the tex styles etc:
 
@@ -91,9 +97,13 @@ texmf/styles/aps_macros.sty \
 texmf/styles/docswitch.sty \
 texmf/styles/emulateapj.cls \
 texmf/styles/mnras.cls \
+texmf/styles/lsstdescnote.cls \
 .logos/desc-logo-small.png \
 .logos/desc-logo.png \
-.logos/header.png
+.logos/header.png \
+lsstdesc.bib \
+.travis.yml \
+figures/example.png
 
 .PHONY: $(UPDATES)
 $(UPDATES):
@@ -102,6 +112,7 @@ $(UPDATES):
 
 update:
 	@echo "\nOver-writing LaTeX style files with the latest versions: \n"
+	@mkdir -p .logos figures texmf/styles texmf/bib
 	$(MAKE) $(UPDATES)
 
 # Get fresh copies of the templates etc, for reference:
@@ -110,11 +121,11 @@ TEMPLATES=\
 acknowledgments.tex \
 authors.tex \
 macros.tex \
-main.bib \
 main.ipynb \
 main.md \
 main.rst \
-main.tex
+main.tex \
+main.bib
 
 .PHONY: $(TEMPLATES) templates
 $(TEMPLATES):
