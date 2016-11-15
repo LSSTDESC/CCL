@@ -27,7 +27,7 @@ typedef struct {
   SplPar *spl_bz; //Spline for linear bias
   SplPar *spl_sz; //Spline for magnification bias
   SplPar *spl_rf; //Spline for red fraction
-  SplPar *spl_ba; //Spline for red fraction
+  SplPar *spl_ba; //Spline for alignment bias
   SplPar *spl_wL; //Spline for lensing kernel
   SplPar *spl_wM; //Spline for magnification
 } CCL_ClTracer;
