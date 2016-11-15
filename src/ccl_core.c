@@ -241,8 +241,8 @@ void ccl_data_free(ccl_data * data)
     gsl_spline_free(data->E);
   if(data->achi!=NULL)
     gsl_spline_free(data->achi);
-  if(data->sigma!=NULL)
-    gsl_spline_free(data->sigma);
+  if(data->logsigma!=NULL)
+    gsl_spline_free(data->logsigma);
   if(data->p_lin!=NULL)
     gsl_spline_free(data->p_lin);
   if(data->p_nl!=NULL)
