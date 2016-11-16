@@ -8,10 +8,10 @@ void ccl_check_status(ccl_cosmology *cosmo){
 	switch (cosmo->status){
 		case 0: //all good, nothing to do
 			return;
-		case 2:	// spacing allocation error, always terminate		
+		case CCL_ERROR_LINSPACE:	// spacing allocation error, always terminate		
 			fprintf(stderr,"%s",cosmo->status_message);
 			exit(1);	
-		case 4:	// spline allocation error, always terminate	
+		case CCL_ERROR_SPLINE:	// spline allocation error, always terminate	
 			fprintf(stderr,"%s",cosmo->status_message);
 			exit(1);
 

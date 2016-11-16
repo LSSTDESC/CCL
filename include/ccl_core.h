@@ -46,21 +46,23 @@ typedef struct ccl_parameters {
 
 
 typedef struct ccl_data{
-    // These are all functions of the scale factor a.
-    // Distances are defined in EITHER Mpc or Mpc/h (TBC)
+  // These are all functions of the scale factor a.
+  // Distances are defined in Mpc
   double growth0;
   gsl_spline * chi;
   gsl_spline * growth;
   gsl_spline * fgrowth;
   gsl_spline * E;
+  gsl_spline * achi;
 
   // All these splines use the same accelerator so that
   // if one calls them successively with the same a value
   // they will be much faster.
   gsl_interp_accel *accelerator;
+  gsl_interp_accel *accelerator_achi;
   gsl_interp_accel *accelerator_m;
+  //TODO: it seems like we're not really using this accelerator, and we should
   gsl_interp_accel *accelerator_k;
-  //TODO: why not use interpolation accelerators?
 
   // Function of Halo mass M
   gsl_spline * logsigma;
