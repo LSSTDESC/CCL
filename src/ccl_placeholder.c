@@ -6,4 +6,3 @@
 #include "stdlib.h"
 #include "gsl/gsl_integration.h"
 #include "gsl/gsl_spline.h"
-
