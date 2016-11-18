@@ -20,7 +20,7 @@ TASK: call CLASS to obtain power spectra
 */
 
 void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo){
-  
+
   struct precision pr;        // for precision parameters 
   struct background ba;       // for cosmological background 
   struct thermo th;           // for thermodynamics 
@@ -37,7 +37,7 @@ void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo){
   // CLASS configuration parameters will be passed through this structure,
   // to avoid writing and reading .ini files for every call
   if (parser_init(&fc,15,"none",errmsg) == _FAILURE_){
-    cosmo->status = 12;
+    cosmo->status = CCL_ERROR_CLASS;
     sprintf(cosmo->status_message ,"ccl_power.c: ccl_cosmology_compute_power_class(): parser init error:%s\n",errmsg);
     return;
   }
@@ -79,7 +79,7 @@ void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo){
   sprintf(fc.value[10],"%e",cosmo->params.n_s);
 
   if (isfinite(cosmo->params.sigma_8) && isfinite(cosmo->params.A_s)){
-      cosmo->status = 11;
+      cosmo->status = CCL_ERROR_INCONSISTENT;
       strcpy(cosmo->status_message ,"ccl_power.c: ccl_cosmology_compute_power_class(): Error initialzing CLASS pararmeters: both sigma_8 and A_s defined\n");
     return;
   }
@@ -92,7 +92,7 @@ void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo){
     sprintf(fc.value[11],"%e",cosmo->params.A_s);
   }
   else{
-      cosmo->status = 11;
+      cosmo->status = CCL_ERROR_INCONSISTENT;
       strcpy(cosmo->status_message ,"ccl_power.c: ccl_cosmology_compute_power_class(): Error initialzing CLASS pararmeters: neither sigma_8 nor A_s defined\n");
     return;
   }
@@ -112,48 +112,49 @@ void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo){
 
 
   if (input_init(&fc,&pr,&ba,&th,&pt,&tr,&pm,&sp,&nl,&le,&op,errmsg) == _FAILURE_) {
-    cosmo->status = 12;
+    cosmo->status = CCL_ERROR_CLASS;
     sprintf(cosmo->status_message ,"ccl_power.c: ccl_cosmology_compute_power_class(): Error running CLASS input:%s\n",errmsg);
     return;
   }
 
   if (background_init(&pr,&ba) == _FAILURE_) {
-    cosmo->status = 12;
+    cosmo->status = CCL_ERROR_CLASS;
     sprintf(cosmo->status_message ,"ccl_power.c: ccl_cosmology_compute_power_class(): Error running CLASS background:%s\n",errmsg);
     return;
   }
 
   if (thermodynamics_init(&pr,&ba,&th) == _FAILURE_) {
-    cosmo->status = 12;
+    cosmo->status = CCL_ERROR_CLASS;
     sprintf(cosmo->status_message ,"ccl_power.c: ccl_cosmology_compute_power_class(): Error running CLASS thermodynamics:%s\n",errmsg);
     return;
   }
 
   if (perturb_init(&pr,&ba,&th,&pt) == _FAILURE_) {
-    cosmo->status = 12;
+    cosmo->status = CCL_ERROR_CLASS;
     sprintf(cosmo->status_message ,"ccl_power.c: ccl_cosmology_compute_power_class(): Error running CLASS pertub:%s\n",errmsg);
     return;
   }
 
   if (primordial_init(&pr,&pt,&pm) == _FAILURE_) {
-    cosmo->status = 12;
+    cosmo->status = CCL_ERROR_CLASS;
     sprintf(cosmo->status_message ,"ccl_power.c: ccl_cosmology_compute_power_class(): Error running CLASS primordial:%s\n",errmsg);
     return;
   }
 
   if (nonlinear_init(&pr,&ba,&th,&pt,&pm,&nl) == _FAILURE_) {
-    cosmo->status = 12;
+    cosmo->status = CCL_ERROR_CLASS;
     sprintf(cosmo->status_message ,"ccl_power.c: ccl_cosmology_compute_power_class(): Error running CLASS nonlinear:%s\n",errmsg);
     return;
   }
+
   if (transfer_init(&pr,&ba,&th,&pt,&nl,&tr) == _FAILURE_) {
-    cosmo->status = 12;
+    cosmo->status = CCL_ERROR_CLASS;
     sprintf(cosmo->status_message ,"ccl_power.c: ccl_cosmology_compute_power_class(): Error running CLASS transfer:%s\n",errmsg);
     return;
   }
 
   if (spectra_init(&pr,&ba,&pt,&pm,&nl,&tr,&sp) == _FAILURE_) {
-    cosmo->status = 12;
+    cosmo->status = CCL_ERROR_CLASS;
     sprintf(cosmo->status_message ,"ccl_power.c: ccl_cosmology_compute_power_class(): Error running CLASS spectra:%s\n",errmsg);
     return;
   }
@@ -223,53 +224,53 @@ void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo){
     }
     else
       cosmo->data.p_nl = log_power_nl;
-  
     free(x);
     free(y);
     free(z);
   }
   if (spectra_free(&sp) == _FAILURE_) {
-    cosmo->status = 12;
+    cosmo->status = CCL_ERROR_CLASS;
     sprintf(cosmo->status_message ,"ccl_power.c: ccl_cosmology_compute_power_class(): Error freeing CLASS spectra:%s\n",sp.error_message);
     return;
   }
   
   if (transfer_free(&tr) == _FAILURE_) {
-    cosmo->status = 12;
+    cosmo->status = CCL_ERROR_CLASS;
     sprintf(cosmo->status_message ,"ccl_power.c: ccl_cosmology_compute_power_class(): Error freeing CLASS transfer:%s\n",tr.error_message);
     return;
   }
+
   if (nonlinear_free(&nl) == _FAILURE_) {
-    cosmo->status = 12;
+    cosmo->status = CCL_ERROR_CLASS;
     sprintf(cosmo->status_message ,"ccl_power.c: ccl_cosmology_compute_power_class(): Error freeing CLASS nonlinear:%s\n",nl.error_message);
     return;
   }
   
   if (primordial_free(&pm) == _FAILURE_) {
-    cosmo->status = 12;
+    cosmo->status = CCL_ERROR_CLASS;
     sprintf(cosmo->status_message ,"ccl_power.c: ccl_cosmology_compute_power_class(): Error freeing CLASS pm:%s\n",pm.error_message);
     return;
   }
   
   if (perturb_free(&pt) == _FAILURE_) {
-      cosmo->status = 12;
+      cosmo->status = CCL_ERROR_CLASS;
     sprintf(cosmo->status_message ,"ccl_power.c: ccl_cosmology_compute_power_class(): Error freeing CLASS pt:%s\n",pt.error_message);
     return;
   }
   
   if (thermodynamics_free(&th) == _FAILURE_) {
-    cosmo->status = 12;
+    cosmo->status = CCL_ERROR_CLASS;
     sprintf(cosmo->status_message ,"ccl_power.c: ccl_cosmology_compute_power_class(): Error freeing CLASS thermo:%s\n",th.error_message);
     return;
   }
 
   if (background_free(&ba) == _FAILURE_) {
-    cosmo->status = 12;
+    cosmo->status = CCL_ERROR_CLASS;
     sprintf(cosmo->status_message ,"ccl_power.c: ccl_cosmology_compute_power_class(): Error freeing CLASS bg:%s\n",ba.error_message);
     return;
   }
   if (parser_free(&fc)== _FAILURE_) {
-    cosmo->status = 12;
+    cosmo->status = CCL_ERROR_CLASS;
     strcpy(cosmo->status_message ,"ccl_power.c: ccl_cosmology_compute_power_class(): Error freeing CLASS parser\n");
     return;
   }
@@ -286,7 +287,6 @@ static double tsqr_BBKS(ccl_parameters * params, double k)
   return pow(log(1.+2.34*q)/(2.34*q),2.0)/pow(1.+3.89*q+pow(16.1*q,2.0)+pow(5.46*q,3.0)+pow(6.71*q,4.0),0.5);
 }
 
-
 /*------ ROUTINE: bbks_power ----- 
 INPUT: ccl_parameters and k wavenumber in 1/Mpc
 TASK: provide the BBKS power spectrum with baryonic correction at single k
@@ -296,7 +296,6 @@ TASK: provide the BBKS power spectrum with baryonic correction at single k
 static double bbks_power(ccl_parameters * params, double k){
   return pow(k,params->n_s)*tsqr_BBKS(params, k);
 }
-
 
 /*------ ROUTINE: ccl_cosmology_compute_bbks_power ----- 
 INPUT: cosmology
@@ -336,7 +335,7 @@ void ccl_cosmology_compute_power_bbks(ccl_cosmology * cosmo){
         free(y);
         free(z);
         free(y2d);
-        cosmo->status = 11;
+        cosmo->status = CCL_ERROR_INCONSISTENT;
         strcpy(cosmo->status_message ,"ccl_power.c: ccl_cosmology_compute_power_bbks(): sigma_8 not set, required for BBKS\n");
         return;
     }
@@ -349,7 +348,7 @@ void ccl_cosmology_compute_power_bbks(ccl_cosmology * cosmo){
       free(z);
       free(y2d);
       gsl_spline_free(log_power_lin);
-      cosmo->status = 4;
+      cosmo->status = CCL_ERROR_SPLINE;
       strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_bbks(): Error creating log_power_lin spline\n");
       return;
     }
@@ -364,7 +363,7 @@ void ccl_cosmology_compute_power_bbks(ccl_cosmology * cosmo){
       free(z);
       free(y2d);
       gsl_spline_free(log_power_lin);
-      cosmo->status = 10;
+      cosmo->status = CCL_ERROR_INTEG;
       strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_bbks(): error calling ccl_sigma8()\n");
       return;
     }
@@ -380,7 +379,7 @@ void ccl_cosmology_compute_power_bbks(ccl_cosmology * cosmo){
       free(x);
       free(y);
       gsl_spline_free(log_power_lin);
-      cosmo->status = 4;
+      cosmo->status = CCL_ERROR_SPLINE;
       strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_bbks(): Error creating log_power_lin spline\n");
     }
     else
@@ -403,7 +402,7 @@ void ccl_cosmology_compute_power_bbks(ccl_cosmology * cosmo){
 
     if (status){
       gsl_spline2d_free(log_power_nl);
-      cosmo->status = 4;
+      cosmo->status = CCL_ERROR_SPLINE;
       strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_bbks(): Error creating log_power_nl spline\n");
     }
     else
@@ -424,18 +423,16 @@ TASK: compute distances, compute growth, compute power spectrum
 
 void ccl_cosmology_compute_power(ccl_cosmology * cosmo){
     if (cosmo->computed_power) return;
-
     switch(cosmo->config.transfer_function_method){
         case ccl_bbks:
-            ccl_cosmology_compute_power_bbks(cosmo);
-            break;
+	  ccl_cosmology_compute_power_bbks(cosmo);
+	  break;
         case ccl_boltzmann_class:
-           ccl_cosmology_compute_power_class(cosmo);
-           break;
-
+	  ccl_cosmology_compute_power_class(cosmo);
+	  break;
         default:
-        cosmo->status = 11;
-        sprintf(cosmo->status_message ,"ccl_power.c: ccl_cosmology_compute_power(): Unknown or non-implemented transfer function method: %d \n",cosmo->config.transfer_function_method);
+	  cosmo->status = CCL_ERROR_INCONSISTENT;
+	  sprintf(cosmo->status_message ,"ccl_power.c: ccl_cosmology_compute_power(): Unknown or non-implemented transfer function method: %d \n",cosmo->config.transfer_function_method);
     }
     cosmo->computed_power = true;
     ccl_check_status(cosmo);
@@ -453,9 +450,9 @@ TASK: compute the linear power spectrum at a given redshift
 double ccl_linear_matter_power(ccl_cosmology * cosmo, double a, double k){
     ccl_cosmology_compute_power(cosmo);
     double log_p_1;
-    int status = gsl_spline_eval_e(cosmo->data.p_lin, log(k),NULL,&log_p_1);
+    int status = gsl_spline_eval_e(cosmo->data.p_lin, log(k), NULL,&log_p_1);
     if (status){
-        cosmo->status = 13;
+        cosmo->status = CCL_ERROR_SPLINE_EV;
         sprintf(cosmo->status_message ,"ccl_power.c: ccl_linear_matter_power(): Spline evaluation error\n");
        return NAN;
     }
@@ -483,7 +480,7 @@ double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double a, double k){
     // log power at a=1 (z=0)
     int status =  gsl_spline2d_eval_e(cosmo->data.p_nl, log(k),a,NULL ,NULL ,&log_p_1);
     if (status){
-       cosmo->status = 13;
+       cosmo->status = CCL_ERROR_SPLINE_EV;
        sprintf(cosmo->status_message ,"ccl_power.c: ccl_nonlin_matter_power(): Spline evaluation error\n");
        return NAN;
     }

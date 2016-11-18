@@ -99,7 +99,7 @@ static void compare_distances(int model, struct distances_data * data)
     ASSERT_DBL_NEAR_TOL(data->chi[model][j], chi_ij, absolute_tolerance);
   }
   
-  free(cosmo);
+  ccl_cosmology_free(cosmo);
 }
 
 CTEST2(distances, model_1){

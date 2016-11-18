@@ -63,6 +63,7 @@ static void compare_bbks(int i_model,struct bbks_data * data)
 						data->Omega_k[i_model-1],data->Omega_n,
 						data->w_0[i_model-1],data->w_a[i_model-1],
 						data->h,data->A_s,data->n_s,-1,NULL,NULL);
+  params.Omega_g=0;
   params.sigma_8=data->sigma_8;
   params.Omega_g=0;
   ccl_cosmology * cosmo = ccl_cosmology_create(params, config);
@@ -97,12 +98,12 @@ static void compare_bbks(int i_model,struct bbks_data * data)
       pk_bench=pk_h/pow(data->h,3);
       pk_ccl=ccl_linear_matter_power(cosmo,1./(1+z),k);
       err=fabs(pk_ccl/pk_bench-1);
-      ASSERT_DBL_NEAR_TOL(err,0.,1E-4);
+      ASSERT_DBL_NEAR_TOL(err,0.,BBKS_TOLERANCE);
     }
   }
   fclose(f);
 
-  free(cosmo);
+  ccl_cosmology_free(cosmo);
 }
 
 CTEST2(bbks,model_1) {
