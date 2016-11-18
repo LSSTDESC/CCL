@@ -20,7 +20,8 @@ chi: comoving distance [Mpc]
 growth: growth function (density)
 fgrowth: logarithmic derivative of the growth (density) (dlnD/da?)
 E: E(a)=H(a)/H0 
-accelerator: ?
+accelerator: interpolation accelerator for functions of a
+accelerator_achi: interpolation accelerator for functions of chi
 growth0: growth at z=0, defined to be 1
 sigma: ?
 p_lin: linear matter power spectrum at z=0?
@@ -41,9 +42,12 @@ ccl_cosmology * ccl_cosmology_create(ccl_parameters params, ccl_configuration co
   cosmo->data.fgrowth = NULL;
   cosmo->data.E = NULL;
   cosmo->data.accelerator=NULL;
+  cosmo->data.accelerator_achi=NULL;
+  cosmo->data.accelerator_m=NULL;
   cosmo->data.growth0 = 1.;
+  cosmo->data.achi=NULL;
 
-  cosmo->data.sigma = NULL;
+  cosmo->data.logsigma = NULL;
   
   cosmo->data.p_lin = NULL;
   cosmo->data.p_nl = NULL;
@@ -219,14 +223,30 @@ TASK: free the input data
 
 void ccl_data_free(ccl_data * data)
 {
-  gsl_spline_free(data->chi);
-  gsl_spline_free(data->growth);
-  gsl_spline_free(data->fgrowth);
-  gsl_interp_accel_free(data->accelerator);
-  gsl_spline_free(data->E);
-  gsl_spline_free(data->sigma);
-  gsl_spline_free(data->p_lin);
-  gsl_spline2d_free(data->p_nl);
+  //We cannot assume that all of these have been allocated
+  //TODO: it would actually make more sense to do this within ccl_cosmology_free,
+  //where we could make use of the flags "computed_distances" etc. to figure out
+  //what to free up
+  if(data->chi!=NULL)
+    gsl_spline_free(data->chi);
+  if(data->growth!=NULL)
+    gsl_spline_free(data->growth);
+  if(data->fgrowth!=NULL)
+    gsl_spline_free(data->fgrowth);
+  if(data->accelerator!=NULL)
+    gsl_interp_accel_free(data->accelerator);
+  if(data->accelerator_achi!=NULL)
+    gsl_interp_accel_free(data->accelerator_achi);
+  if(data->E!=NULL)
+    gsl_spline_free(data->E);
+  if(data->achi!=NULL)
+    gsl_spline_free(data->achi);
+  if(data->logsigma!=NULL)
+    gsl_spline_free(data->logsigma);
+  if(data->p_lin!=NULL)
+    gsl_spline_free(data->p_lin);
+  if(data->p_nl!=NULL)
+    gsl_spline2d_free(data->p_nl);
 }
 
 
