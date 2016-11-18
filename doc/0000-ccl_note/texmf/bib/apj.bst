@@ -1,4 +1,4 @@
-%% 
+%% {% raw %}
 %%
 %% $Log: apj.bst,v $
 %% Revision 1.10 2013/03/11 13:01:55 alberto
@@ -1680,4 +1680,4 @@ EXECUTE {end.bib}
 %% End of customized bst file
 %%
 %% End of file `apj.bst'.
-%% 
+%% {% endraw %}

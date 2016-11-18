@@ -1,4 +1,4 @@
-%% 
+%% {% raw %}
 %%
 %% This is file `aastex.cls',
 %% generated with the docstrip utility.
@@ -2304,4 +2304,4 @@
 \endinput
 %%
 %% End of file `aastex.cls'.
-%% 
+%% {% endraw %}

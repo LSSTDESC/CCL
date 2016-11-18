@@ -1,4 +1,4 @@
-%% 
+%% {% raw %}
 %% This is emulateapj.cls, version January 23, 2015
 %% For the latest version check http://hea-www.harvard.edu/~alexey/emulateapj
 %%
@@ -1893,4 +1893,4 @@
 %% 01/23/15 \apjl with the iop option expands to ApJL
 %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% 
+%% {% endraw %}
