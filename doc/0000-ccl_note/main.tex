@@ -78,9 +78,39 @@ The Hubble parameter is calculated via ... The comoving distance is calculated v
 \subsection{LSST Specifications}
 \label{sec:specs}
 
-CCL includes specifications for the fiducial expected redshift distributions of lensing sources and clustering galaxies for LSST, as well as bias clustering for galaxy tracers. (...more here...) This is to enable forecasts of LSST constraints. ... 
+CCL includes LSST specifications for the expected galaxy distributions of the full galaxy clustering sample and the lensing source galaxy sample. These enable the user to easily make predictions or forecasts for LSST.
 
-Photometric redshift effects are incorporated via a user-defined function (... more here... , describe functionality of user-defined photo-z and equation used.)
+The functional forms of the expected $\frac{dN}{dz}$ for clustering galaxies and lensing source galaxies are provided. Here, $\frac{dN}{dz}$ is the number density of galaxies as a function of spectroscopic redshift. 
+
+In the case of lensing source galaxies, these forms are given in \cite{Chang2013}, wherein three different cases are considered: fiducial, optimistic, and conservative. All three are included in CCL, and are indicated via a label of DNDZ\_WL\_OPT, DNDZ\_WL\_FID, and DNDZ\_WL\_CONS as appropriate. The functional form of $\frac{dN}{dz}$ for lensing source galaxies is given as:
+\begin{equation}
+\frac{dN}{dz} \propto z^\alpha {\rm exp}\left(-\frac{z}{z_0}^\beta\right).
+\label{dndz_src}
+\end{equation}
+The parameters, in the fiducial case, are given as $\alpha=1.24$, $\beta=1.01$, and $z_0=0.51$. In the optimistic case, this becomes $\alpha=1.23$, $\beta=1.05$, and $z_0=0.59$. The conservative case is given by $\alpha=1.28$, $\beta=0.97$, and $z_0=0.41$. 
+
+For the case of the clustering galaxy sample, the functional form is given by \cite{ScienceBook}:
+\begin{equation}
+\frac{dN}{dz} \propto \frac{1}{2z_0}\left(\frac{z}{z_0}\right)^2 {\rm exp}\left(-\frac{z}{z_0}\right)
+\label{dndz_clust}
+\end{equation}
+with $z_0=0.3$. The above $\frac{dN}{dz}$ for lensing sources in fact represents a subset of the $\frac{dN}{dz}$ for clustering.
+
+In order to be incorporated into forecasts or predictions, the above expressions for $\frac{dN}{dz}$ must be normalized, and the value of $\frac{dN}{dz}$ must be provided in a given photometric redshift bin. Support is provided for the user to input a flexible photometric redshift model, as described further in Section \ref{sec:photoz} below. This takes the form of a function which returns the probability $p(z,z')$of measuring a particular photometric redshift $z$, given a spectroscopic redshift $z'$ and other relevant parameters. Also provided are functions to output $\sigma_z$ at a given redshift for both lensing sources and clustering galaxies, for the case in which the user wishes the assume a Gaussian photo-z model.
+
+With this, $\frac{dN^i}{dz}$ of lensing or clustering galaxies in a particular photometric redshift bin $i$ is given by:
+\begin{equation}
+\frac{dN^i}{dz} = \frac{\frac{dN}{dz}\int_{z_i}^{z_{i+1}} dz' p(z,z')}{\int_{z_{\rm min}}^{z_{\rm max}}dz \frac{dN}{dz} \int_{z_i}^{z_{i+1}}dz' p(z, z')}
+\label{photoz}
+\end{equation}
+where $z_{i}$ and $z_{i+1}$ are the photo-z edges of the bin in question. 
+
+Finally, the expected (linear, scale-independent) bias of galaxies in the clustering sample is also provided. It is given by \cite{ScienceBook}:
+\begin{equation}
+b(z) = \frac{0.95}{D(z)}
+\label{clustbias}
+\end{equation}
+where $D(z)$ in the linear growth rate of structure.
 
 \subsection{Angular $C_\ell$'s}
 \label{sec:cl}
@@ -183,19 +213,12 @@ The halo mass function is incorporated using the (Tinker 2008? cite) definition 
 
 \subsection{Photo-$z$ implementation}
 \label{sec:photoz}
+LSST galaxy redshifts will be obtained using photometry. However, analytic forms of galaxy redshift distributions are usually known in terms of spectroscopic redshifts, obtained as fits from a spectroscopic subsample (or extrapolation thereof). A model is therefore required for the probability of measuring a particular photometric redshift given a spectroscopic redshift. CCL allows the user to flexibly provide their own such photometric redshift model.
 
-LSST galaxy redshifts will be obtained using photometry. However, analytic forms of galaxy redshift distributions are usually known in terms of spectroscopic redshifts, obtained as fits from a spectroscopic subsample. A model is therefore required which gives the probability of measuring a given photometric redshift given a spectroscopic redshift. CCL allows the user to flexibly provide their own such photometric redshift model.
+The user provides a function, which accepts a photometric redshift, a spectroscopic redshift, and a void pointer which points to a structure containing any further parameters of the photo-z model. The user then also provides this structure of parameters.
 
-The user provides a function, which accepts a photometric redshift, a spectroscopic redshift, and a void pointer which points to a structure containing any further parameters of the photo-z model. The user then also provides this structure of parameters. 
+This user-provided model is incorporated when computing $\frac{dN}{dz}^i$ in photometric redshift bin $i$, as given by equation \ref{photoz}, above.
 
-This user-provided model is incorporated when computing the $dN/dz$ in terms of spectroscopic redshifts for a given photometric redshift bin. This is given by:
-\begin{equation}
-\frac{dN^i}{dz} = \frac{\frac{dN}{dz}\int_{z_i}^{z_{i+1}} dz' p(z,z')}{\int_{z_{\rm min}}^{z_{\rm max}}dz \frac{dN}{dz} \int_{z_i}^{z_{i+1}}dz' p(z, z')}
-\label{photoz}
-\end{equation}
-where $dN/dz$ is the full redshift distribution in terms of spectroscopic redshifts, $p(z,z')$ is the probability of getting a photo-z $z'$ given a spectroscopic redshift $z$, and $z_{i}$ and $z_{i+1}$ are the photo-z edges of the bin in quesiton. $p(z,z')$ represents the user-defined function, and can contain other parameters in the form of a void pointer.
-
- 
 
 \section{Tests and validation}
 \label{sec:tests}
