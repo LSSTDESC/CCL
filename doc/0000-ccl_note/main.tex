@@ -75,6 +75,14 @@ The Hubble parameter is calculated via ... The comoving distance is calculated v
 %If you are planning on committing your paper to github, it's a good idea to write your tex as one sentence per line. 
 %This allows for an easier \code{diff} of changes.
 
+
+\subsection{Growth function}
+\label{sec:growth}
+
+
+\subsection{Matter power spectrum}
+\label{sec:distances}
+
 \subsection{LSST Specifications}
 \label{sec:specs}
 
@@ -223,7 +231,67 @@ This user-provided model is incorporated when computing $\frac{dN}{dz}^i$ in pho
 \section{Tests and validation}
 \label{sec:tests}
 
-Outputs of CCL have been validated against the results of the code comparison project down to a $10^{-4}$ or better accuracy level. (... more here ..., describe tests).
+Our goal is for outputs of CCL to be validated against the results of the code comparison project down to a $10^{-4}$ or better accuracy level. {\bf TODO: Currently having problems validating the correlation functions to this level. Also, we need a discussion of why this accuracy level is needed.} 
+
+A code comparison project was carried out among members of TJP where the following outputs of cosmological forecast codes were compared and validated:
+\begin{enumerate}
+\item growth factor at $z = 0,1,2,3,4,5$,
+\item comoving radial distance $[$Mpc$/h]$ at the same redshifts, 
+\item linear matter power spectrum, $P(k)$, from BBKS \citealt{BBKS}) in units of $($Mpc$/h)^3$ at $z=0,2$ in the range $10^{-3} \leq k \leq 10 h/$Mpc with 10 bins per decade, and
+\item the mass variance at $z=0$, $\sigma(M,z=0)$ for $M =\{10^6, 10^8, 10^{10}, 10^{12}, 10^{14}, 10^{16}\} $M$_\odot/h$.
+\end{enumerate}
+These forecasts were produced and compared for different cosmologies, which are listed in the table below. The results agree to better than $0.1\%$ relative accuracy for comoving distance and growth factor among all submissions (with one exception), and for $P(k)$ and $\sigma(M)$ among codes which use the same BBKS conventions. 
+
+\begin{center}
+  \begin{tabular}{ c | c c c c c c c c }
+    \hline
+    \multicolumn{9}{|c|}{Cosmological models for code comparison project} \\
+    \hline
+    \hline
+    Model & $\Omega_m$ & $\Omega_b$ & $\Omega_\Lambda$ & $h_0$ & $\sigma_8$ & $n_s$ & $w_0$ & $w_a$ \\
+    \hline
+    flat LCDM & 0.3 & 0.05 & 0.7 & 0.7 & 0.8 & 0.96 & -1 & 0 \\ 
+    $w_0$ LCDM & 0.3 & 0.05 & 0.7 & 0.7 & 0.8 & 0.96 & -0.9 & 0  \\ 
+    $w_a$ LCDM & 0.3 & 0.05 & 0.7 & 0.7 & 0.8 & 0.96 & -0.9 & 0.1  \\ 
+    open $w_a$ LCDM & 0.3 & 0.05 & 0.65 & 0.7 & 0.8 & 0.96 & -0.9 & 0.1  \\ 
+    closed $w_a$ LCDM & 0.3 & 0.05 & 0.75 & 0.7 & 0.8 & 0.96 & -0.9 & 0.1  \\
+    \hline
+  \end{tabular}
+\end{center}
+
+We noticed that there are 2 typos for the BBKS transfer function in ``Modern Cosmology'' \citep{DodelsonBook} compared to the original BBKS paper. The quadratic term should be $(16.1q)^2$ and the cubic term should be $(5.46q)^3$. On the other hand, the BBKS equation is correct in Peacock’s ``Cosmological physics'' book \citep{PeacockBook}. Using the wrong equation can give differences in the results above the $10^{-4}$ level.
+
+From the comparison, we were also able to identify some typical issues which affect convergence at the desired level:
+\begin{itemize}
+\item For achieving $10^{-4}$ precision in $\sigma(M)$ and the normalisation of the power spectrum, one should check that the integral of $\sigma_8$ and $\sigma(M)$ has converged for the chosen values of $\{k_{\rm min},k_{\rm max}\}$. After checking convergence, we achieved the desired precision.
+\item Also note that for $\sigma(M)$, it is important to set the desired precision level correctly for the numerical integrator. The integral usually yields $\sigma^2(M)$, and not $\sigma(M)$. Hence, one has to set the desired precision taking the exponent into account.
+\item The value of the gravitational constant, $G$, enters into the critical density. We found that failure to define $G$ with sufficient precision would result in lack of convergence at the $10^{-4}$ level between the different submissions. Importantly, note that CAMB barely has $10^{-4}$ precision in $G$ (and similarly, there might be other constants within CAMB/CLASS for which one should check the precision level). {\bf TODO: For CCL we are using the value from the Particle Physics Handbook, how does it compare?}
+\item Including/excluding radiation in the computation of the comoving distances and the growth function can easily make a difference of $10^{-4}$ at the redshifts required in this submission.
+\end{itemize}
+
+In a second stage, we used the BBKS linear matter power spectrum from the previous step to compare two-point statistics for two redshift bins, resulting in three tomography combinations, ($1-1$),($1-2$),($2-2$). We adopted the following analytic redshift distributions: a Gaussian with $\sigma = 0.15$, centered at $z_1 = 1$; and another Gaussian with the same dispersion but centered at $z_2 = 1.5$. We repeated the exercise for two redshift distribution histograms shown in Figure \ref{fig:zhistos}. 
+
+%------------------------
+\begin{figure}
+\centering
+\includegraphics[width=0.6\textwidth]{zdist.eps}
+\caption{Binned redshift distributions used for code comparison project.}
+\label{fig:zhistos}
+\end{figure}
+%------------------------
+
+In this second step, only 2 codes have been compared so far. More outputs are needed to guarantee convergence. Preliminarily, from these outputs, we have concluded that:
+\begin{itemize}
+\item The cross-correlation between bins is particularly sensitive to having enough points to sample the lensing kernel. 
+\item The nonlinear behaviour is sensitive to $l_{\rm max}$, we had to go up to 30,000 to get convergence (and we could not achieve $0.01\%$ convergence).
+\item The large scales are sensitive to $l_{\rm min}$ (which also prompts a question about using the Limber approximation or not).
+\item Because we are using BBKS, evaluating the $P(k)$ at arbitrary $k_{\rm max}$ is not a problem, but we will need to test convergence in other cases.
+\item The correlation functions are sensitive to how the power spectrum is interpolated. For example, in one case we had fewer $l$'s and we had to use an order $5$ spline. If we sample at all $l$'s then a linear interpolation is enough.
+\end{itemize}
+
+{\bf TODO: Describe additional comparisons I know of, but which were not part of the code comparison:} David compared the HMF of one of the cases to his own outputs. Elisabeth was planning on producing outputs for correlation function as well.
+
+CCL has a suite of test routines which, upon compilation, compare its outputs to the benchmarks from code comparison. These are run with ``make test''.
 
 \section{Future functionality to be included}
 
