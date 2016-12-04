@@ -64,6 +64,10 @@ double Omeganuh2 (double a, double Neff, double mnu, double TCMB, gsl_spline* ps
   // effective neutrino temperature, very academic, but required for consistency with CLASS
   double Tnu_eff = Tnu*pow(3.046/3.,0.25);
   double a4=a*a*a*a;
+  // prefix number is given by
+  // type this into google:
+  // 8*pi^5*(boltzmann constant)^4/(15*(h*c)^3))*(1 Kelvin)**4/(3*(100 km/s/Mpc)^2/(8*Pi*G)*(speed of light)^2)
+  //
   double prefix = 4.48130979e-7*Tnu*Tnu*Tnu*Tnu;
   if (mnu==0) return Neff*prefix*7./8./a4;
   // mass of one
