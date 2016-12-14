@@ -12,7 +12,7 @@
 #include "ccl_background.h"
 #include "ccl_power.h"
 #include "ccl_error.h"
-#include "../class/include/class.h"
+//#include "../class/include/class.h"
 
 /*------ ROUTINE: ccl_cosmology_compute_power_class ----- 
 INPUT: ccl_cosmology * cosmo
