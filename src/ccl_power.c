@@ -12,12 +12,12 @@
 #include "ccl_background.h"
 #include "ccl_power.h"
 #include "ccl_error.h"
-//#include "../class/include/class.h"
+#include "../class/include/class.h"
 
 /*------ ROUTINE: ccl_cosmology_compute_power_class ----- 
 INPUT: ccl_cosmology * cosmo
 */
-void ccl_free_class_structs(
+static void ccl_free_class_structs(
                ccl_cosmology *cosmo,               
                struct background *ba,
                struct thermo *th,
@@ -70,7 +70,7 @@ void ccl_free_class_structs(
   }
 }
 
-void ccl_run_class(
+static void ccl_run_class(
                ccl_cosmology *cosmo, 
                struct file_content *fc,
                struct precision* pr,
@@ -128,7 +128,7 @@ void ccl_run_class(
     return;
   }
 }
-double ccl_get_class_As(ccl_cosmology *cosmo, struct file_content *fc, int position_As,double sigma8){
+static double ccl_get_class_As(ccl_cosmology *cosmo, struct file_content *fc, int position_As,double sigma8){
 //structures for class test run
   struct precision pr;        // for precision parameters 
   struct background ba;       // for cosmological background 
@@ -163,7 +163,7 @@ double ccl_get_class_As(ccl_cosmology *cosmo, struct file_content *fc, int posit
   return A_s_guess;
 }
 
-void ccl_fill_class_parameters(ccl_cosmology * cosmo, struct file_content * fc,int parser_length){
+static void ccl_fill_class_parameters(ccl_cosmology * cosmo, struct file_content * fc,int parser_length){
   strcpy(fc->name[0],"output");
   strcpy(fc->value[0],"mPk");
 
@@ -232,7 +232,7 @@ void ccl_fill_class_parameters(ccl_cosmology * cosmo, struct file_content * fc,i
     return;
   }
 }
-void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo){
+static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo){
 
   struct precision pr;        // for precision parameters 
   struct background ba;       // for cosmological background 
@@ -365,7 +365,7 @@ INPUT: cosmology
 TASK: provide spline for the BBKS power spectrum with baryonic correction
 */
 
-void ccl_cosmology_compute_power_bbks(ccl_cosmology * cosmo){
+static void ccl_cosmology_compute_power_bbks(ccl_cosmology * cosmo){
 
   double kmin = K_MIN;
   double kmax = K_MAX;
@@ -483,7 +483,6 @@ void ccl_cosmology_compute_power_bbks(ccl_cosmology * cosmo){
 INPUT: ccl_cosmology * cosmo
 TASK: compute distances, compute growth, compute power spectrum
 */
-
 void ccl_cosmology_compute_power(ccl_cosmology * cosmo){
     if (cosmo->computed_power) return;
     switch(cosmo->config.transfer_function_method){
