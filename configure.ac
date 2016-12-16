@@ -34,7 +34,7 @@ AC_CHECK_FUNCS([pow sqrt])
 
 AC_CONFIG_FILES([Makefile
 		 include/Makefile
-		 src/Makefile])
+		 class/Makefile])
 
 AC_OUTPUT
 
