@@ -128,6 +128,7 @@ static void ccl_run_class(
     return;
   }
 }
+
 static double ccl_get_class_As(ccl_cosmology *cosmo, struct file_content *fc, int position_As,double sigma8){
 //structures for class test run
   struct precision pr;        // for precision parameters 
@@ -232,6 +233,7 @@ static void ccl_fill_class_parameters(ccl_cosmology * cosmo, struct file_content
     return;
   }
 }
+
 static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo){
 
   struct precision pr;        // for precision parameters 
