@@ -151,6 +151,7 @@ static void compare_corr(char *compare_type,struct corrs_data * data)
   }
   
   ccl_tracer_corr(cosmo,NL,&theta_arr,tr_nc_1,tr_nc_1,0,&wt_dd_11_h);
+  printf("CCL correlation first calculation done. More in progress...\n");
   ccl_tracer_corr(cosmo,NL,&theta_arr,tr_nc_1,tr_nc_2,0,&wt_dd_12_h);
   ccl_tracer_corr(cosmo,NL,&theta_arr,tr_nc_2,tr_nc_2,0,&wt_dd_22_h);
   ccl_tracer_corr(cosmo,NL,&theta_arr,tr_wl_1,tr_wl_1,0,&wt_ll_11_h_pp);
@@ -169,6 +170,7 @@ static void compare_corr(char *compare_type,struct corrs_data * data)
     fprintf(output2,"%.10e %.10e %.10e %.10e %.10e %.10e %.10e %.10e %.10e %.10e \n",theta_arr[ii],wt_dd_11_h[ii],wt_dd_12_h[ii],wt_dd_22_h[ii],wt_ll_11_h_pp[ii],wt_ll_12_h_pp[ii],wt_ll_22_h_pp[ii],wt_ll_11_h_mm[ii],wt_ll_12_h_mm[ii],wt_ll_22_h_mm[ii]);
   }
   fclose(output2);
+  printf("CCL correlation output done. Comparison in progress...\n");
 
   //Spline
   gsl_spline * spl_wt_dd_11_h = gsl_spline_alloc(L_SPLINE_TYPE,NL);
@@ -189,10 +191,27 @@ static void compare_corr(char *compare_type,struct corrs_data * data)
   status = gsl_spline_init(spl_wt_ll_12_h_mm, theta_arr, wt_ll_12_h_mm, NL);
   gsl_spline * spl_wt_ll_22_h_mm = gsl_spline_alloc(L_SPLINE_TYPE,NL);
   status = gsl_spline_init(spl_wt_ll_22_h_mm, theta_arr, wt_ll_22_h_mm, NL);
+  printf("Splines for correlation done. Spline evaluation in progress...\n");
 
+  int ii,istart=0,iend=nofl;
+  if(theta_in[0]<theta_arr[0] || theta_in[nofl-1]>theta_arr[NL-1]){
+    printf("theta_in range: [%e,%e]\n",theta_in[0],theta_in[nofl-1]);
+    printf("theta_arr range: [%e,%e]\n",theta_arr[0],theta_arr[NL-1]);
+    printf("This code would crash because gsl will attempt to extrapolate.\n");
+    printf("Temporary solution: reducing the range for comparison to avoid extralpolation.\n");
+    ii=0;
+    while(theta_in[ii]<theta_arr[NL-1]){ii++;}
+    iend=ii-1;
+    ii=nofl-1;
+    while(theta_in[ii]>theta_arr[0]){ii=ii-1;}
+    istart=ii+1;
+    printf("Corrected theta_in range: [%e,%e]\n",theta_in[istart],theta_in[iend]);
+    printf("This correction avoids crash, but does not\n compare correlation in the full range of angles needed.\n");
+  }
+  
   double tmp;
   FILE *output = fopen("cc_test_corr_out.dat", "w");
-  for(int ii=0;ii<nofl;ii++) {
+  for(ii=istart;ii<iend;ii++) {
     //if (theta_in[ii]<0.1)
     //continue;
     tmp=gsl_spline_eval(spl_wt_dd_11_h, theta_in[ii], NULL);
@@ -273,10 +292,11 @@ static void compare_corr(char *compare_type,struct corrs_data * data)
   ccl_cosmology_free(cosmo);
 }
 
-CTEST2(corrs,analytic) {
-  compare_corr("analytic",data);
-}
 
 CTEST2(corrs,histo) {
   compare_corr("histo",data);
+}
+
+CTEST2(corrs,analytic) {
+  compare_corr("analytic",data);
 }
