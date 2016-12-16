@@ -1,12 +1,12 @@
 #pragma once
 #include "ccl_core.h"
 
-// Comoving radial distance in Mpc from today to scale factor a
+// Normalized expansion rate at scale factor a
 double ccl_h_over_h0(ccl_cosmology * cosmo, double a);
-// Comoving radial distances in Mpc to scale factors as given in list a[0..na-1]
+// Normalized expansion rate at scale factors as given in list a[0..na-1]
 void ccl_h_over_h0s(ccl_cosmology * cosmo, int na, double a[na], double output[na]);
 
-// Comoving radial distance in Mph from today to scale factor a
+// Comoving radial distance in Mpc from today to scale factor a
 double ccl_comoving_radial_distance(ccl_cosmology * cosmo, double a);
 // Comoving radial distances in Mpc to scale factors as given in list a[0..na-1]
 void ccl_comoving_radial_distances(ccl_cosmology * cosmo, int na, double a[na], double output[na]);
