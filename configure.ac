@@ -2,8 +2,8 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.4])
-AC_INIT([CCL], [0.0], [david.alonso@physics.ox.ac.uk])
-AM_INIT_AUTOMAKE([-Wall subdir-objects foreign])
+AC_INIT([CCL], [0.0], [github.com/LSSTDESC/CCL])
+AM_INIT_AUTOMAKE([-Wall subdir-objects foreign serial-tests])
 AM_PROG_AR
 LT_PREREQ([2.2])
 LT_INIT([dlopen])
