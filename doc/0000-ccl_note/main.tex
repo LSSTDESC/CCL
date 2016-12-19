@@ -205,7 +205,33 @@ To be continued...
 \subsection{Correlation functions}
 \label{sec:corr}
 
-To produce correlation functions, we make use of the public code FFTlog (... cite ...). (... more here ... describe correlation function calculation).
+In the Limber approximation, the angular correlation function betwee any two tracers $1$ and $2$ is given by\footnote{See Bartelmann and Schneider (1999) weak lensing review, page 44. See also Joachimi \& Bridle (2010)}
+%
+\begin{equation}
+C_{12}(\theta) = \int d\chi'q_1(\chi')q_2(\chi')\int dk\frac{k}{2\pi}P_{\delta}(k,\chi')J_0[f_K(\chi')\theta k],
+\end{equation}
+%
+where $J_0$ is the Bessel function of order 0, $\chi$ is the comoving distance and $f_K(\chi)$ is the radial function that multiplies the spatial metric element, which is different from $\chi$ in the case of a cosmology with non-zero curvature. {\bf TODO. Need to verify $f_K$ implementation in CCL.}
+
+{\bf Clustering.} For clustering, the relevant weight is given by $q_1(\chi)=b_1(\chi)dN_1/d\chi(\chi)$, the comoving distance probability distribution times the bias. The angular correlation function can also be re-written as
+\begin{equation}
+C_{12}(\theta) = \int dl \frac{l}{2\pi} C_{gg}(l) J_0(l\theta),
+\end{equation}
+where $C_{gg}$ is the galaxy clustering angular power spectrum.
+
+{\bf Lensing.} Lensing correlation functions are \footnote{from Schneider 2002 and Bartelmann \& Schneider section 6.4.1}
+%
+\begin{eqnarray}
+\xi_{+}(\theta)&=&\int_0^{\infty}dl\frac{l}{2\pi}J_0(l\theta)P_\kappa(l),\\
+\xi_{-}(\theta)&=&\int_0^{\infty}dl\frac{l}{2\pi}J_4(l\theta)P_\kappa(l),
+\end{eqnarray}
+%
+where the angular lensing convergence power spectrum is given by
+\begin{eqnarray}
+P_\kappa(l) &=& \frac{9H_0^4\Omega_m^2}{4c^4}\int_{0}^{\chi_h}\frac{d\chi}{a^2(\chi)}P_\delta\left(\frac{l}{f_K(\chi)},\chi\right)\left[\int_\chi^{\chi_h}d\chi'p_\chi(\chi')\frac{f_K(\chi'-\chi)}{f_K(\chi')}\right]^2\\
+\end{eqnarray}
+
+For numerical integration of the correlation functions, we make use of the public code FFTlog (... cite ...). (... more here ... describe correlation function calculation).
 
 %In conclusion, there are no conclusions.
 
