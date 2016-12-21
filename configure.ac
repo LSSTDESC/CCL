@@ -19,8 +19,8 @@ AM_PROG_CC_C_O
 
 # Checks for libraries.
 AC_SEARCH_LIBS([pow],[m],[],AC_MSG_ERROR(Couldn't find libm. Required.))
-AC_SEARCH_LIBS([cblas_dgemm],[gslcblas],[],AC_MSG_ERROR(Couldn't find libgslcblas. Required.))
-AC_SEARCH_LIBS([gsl_spline2d_eval_e],[gsl],[],AC_MSG_ERROR(Couldn't find libgsl. Required))
+AC_SEARCH_LIBS([cblas_dgemm],[gslcblas],[],AC_MSG_ERROR(Couldn't find libgslcblas. GSL V2+ required.))
+AC_SEARCH_LIBS([gsl_spline2d_eval_e],[gsl],[],AC_MSG_ERROR(Couldn't find libgsl. GSL V2+ required.))
 
 # Checks for header files.
 AC_CHECK_HEADERS([stdlib.h string.h math.h])
