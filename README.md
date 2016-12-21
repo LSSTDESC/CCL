@@ -5,7 +5,7 @@ The library is written in C99 and all functionality is directly callable from C 
 
 See also our wiki https://github.com/DarkEnergyScienceCollaboration/CCL/wiki
 # Installation
-In order to compile CCL you need GSL. You can get GSL here: https://www.gnu.org/software/gsl/. To install it you need to be the admin of your computer.
+In order to compile CCL you need GSL. You can get GSL here: https://www.gnu.org/software/gsl/. Note that CCL uses version 2+ of GSL (which is not yet standard in all systems).
 
 To install CCL, from the base directory (the one where this file is located) run:
 ````sh
