@@ -51,7 +51,9 @@ echo \
  Now type 'make @<:@<target>@:>@', where the optional
  target may be:
 
-   all     : to build everything
+   all     : to build everything (currently libccl)
+             this is the default target
+   check   : runs the library's unit tests   
    install : to put everything in the installation
              directories ('include', 'lib' and 
 	     'bin' from prefix). Root privileges may
