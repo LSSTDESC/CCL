@@ -12807,7 +12807,7 @@ if test "$ac_res" != no; then :
   test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
 
 else
-  as_fn_error $? "Couldn't find libgslcblas. Required." "$LINENO" 5
+  as_fn_error $? "Couldn't find libgslcblas. GSL V2+ required." "$LINENO" 5
 fi
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing gsl_spline2d_eval_e" >&5
@@ -12865,7 +12865,7 @@ if test "$ac_res" != no; then :
   test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
 
 else
-  as_fn_error $? "Couldn't find libgsl. Required" "$LINENO" 5
+  as_fn_error $? "Couldn't find libgsl. GSL V2+ required." "$LINENO" 5
 fi
 
 
