@@ -243,7 +243,17 @@ For numerical integration of the correlation functions, we make use of the publi
 \subsection{Halo mass function}
 \label{sec:hmf}
 
-The halo mass function is incorporated using the (Tinker 2008? cite) definition ... (...more here...).
+The halo mass function is incorporated using several definitions from the literature: \citet{Tinker2008}, \citet{Angulo2012}, and \citet{Watson2013}. All three models are tuned to simulation data and tested against observational results. We attempt to keep a common form to the multiplicity function whenever possible for ease of extension, in the form of:
+\begin{equation}
+A\Big[\Big(\frac{\sigma}{b}\Big)^{-a}+1\Big]e^{-c/{\sigma}^2},
+\end{equation}
+where $A$, $a$, $b$, and $c$ are fitting parameters that have additional redshift scaling and $\sigma$ is the RMS variance of the density field smoothed on some scale $M$ at some redshift $z$. This basic form is modified for the Angulo formulation. The resulting form is
+\begin{equation}
+A\Big[\Big(\frac{b}{\sigma}+1\Big)^{-a}\Big]e^{-c/{\sigma}^2},
+\end{equation}
+where the only change is in the formulation of the second term. Note that the fitting parameters in the Angulo formulation do not contain any redshift dependency and the use of it is primarily for testing and benchmark purposes.
+
+Each call to the halo mass function requires an assumed model chosen during initialization of cosmological parameters, in addition to a value of the halo mass and redshift for which to evaluate the halo mass function. It returns the number of halos in logarithmic mass bins, in the form $\frac{dN}{d\log10{M}}$, where $N$ is the number of halos of a given mass and $M$ is the input halo mass.
 
 \subsection{Photo-$z$ implementation}
 \label{sec:photoz}
