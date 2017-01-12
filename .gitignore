@@ -1,8 +1,25 @@
+# Ignore autoconf build files.
+Makefile
+config.h
+config.log
+config.status
+libtool
+stamp-h1
+
+# Ignore compile and link build files.
 *.o
 *.a
+*.lo
+*.la
 *.so
 *.dSYM
+.libs
+.deps
+.dirstamp
+class/build
+
+# Ignore test outputs
 tests/ccl_test_distances
 tests/ccl_test_power
 tests/ccl_test_utils
-class/build
+tests/check_ccl
