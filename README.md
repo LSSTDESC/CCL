@@ -84,34 +84,6 @@ double ccl_sigmaR(ccl_cosmology *cosmo, double R);
 double ccl_sigma8(ccl_cosmology *cosmo);
 ````
 These and other functions for different matter power spectra can be found in file *include/ccl_power.h*.
-
-### Angular power spectra
-CCL can compute angular power spectra for two tracer types: galaxy number counts and galaxy weak lensing. Tracer parameters are defined in structure **CCL_ClTracer**. In general, you can create this object with function **ccl_cl_tracer_new**
-````c
-CCL_ClTracer *ccl_cl_tracer_new(ccl_cosmology *cosmo,int tracer_type,
-				int has_rsd,int has_magnification,int has_intrinsic_alignment,
-				int nz_n,double *z_n,double *n,
-				int nz_b,double *z_b,double *b,
-				int nz_s,double *z_s,double *s,
-				int nz_ba,double *z_ba,double *ba,
-				int nz_rf,double *z_rf,double *rf);
-````
-Exact definition of these parameters are described in file *include/ccl_cls.h*. Usually you can use simplified versions of this function, namely **ccl_cl_tracer_number_counts_new, ccl_cl_tracer_number_counts_simple_new, ccl_cl_tracer_lensing_new** or **ccl_cl_tracer_lensing_simple_new**. Two most simplified versions (one for number counts and one for shear) take parameters:
-````c
-CCL_ClTracer *ccl_cl_tracer_number_counts_simple_new(ccl_cosmology *cosmo, int nz_n,double *z_n,double *n, int nz_b,double *z_b,double *b);
-CCL_ClTracer *ccl_cl_tracer_lensing_simple_new(ccl_cosmology *cosmo, int nz_n,double *z_n,double *n);
-
-````
-where **nz_n** is dimension of arrays **z_n** and **n**. **z_n** and **n** are arrays for the number count of objects per redshift interval (arbitrary normalization - renormalized inside). **nz_b, z_b** and **b** are the same for the clustering bias.
-With initialized tracers you can compute limber power spectrum with **ccl_angular_cl**
-````c
-double ccl_angular_cl(ccl_cosmology *cosmo,int l,CCL_ClTracer *clt1,CCL_ClTracer *clt2);
-````
-After you are done working with tracers, you should free its work space by **ccl_cl_tracer_free**
-````c
-void ccl_cl_tracer_free(CCL_ClTracer *clt);
-````
-
 ### Example code
 This code can also be found in *tests/min_code.h* You can run the following example code. For this you will need to compile with:
 ````c
