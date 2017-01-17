@@ -61,7 +61,6 @@ typedef char FileName[_FILENAMESIZE_];
 #define _DELIMITER_ "\t" /**< character used for delimiting titles in the title strings */
 
 
-
 #ifndef __CLASSDIR__
 #define __CLASSDIR__ "." /**< The directory of CLASS. This is set to the absolute path to the CLASS directory so this is just a failsafe. */
 #endif
