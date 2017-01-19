@@ -55,18 +55,25 @@ int main(int argc,char **argv)
     z_arr_sh[i]=Z0_SH-5*SZ_SH+10*SZ_SH*(i+0.5)/NZ;
     nz_arr_sh[i]=exp(-0.5*pow((z_arr_sh[i]-Z0_SH)/SZ_SH,2));
   }
+  /*CCL_ClTracer *ccl_cl_tracer_new(ccl_cosmology *cosmo,int tracer_type,
+				int has_rsd,int has_magnification,int has_intrinsic_alignment,
+				int nz_n,double *z_n,double *n,
+				int nz_b,double *z_b,double *b,
+				int nz_s,double *z_s,double *s,
+				int nz_ba,double *z_ba,double *ba,
+				int nz_rf,double *z_rf,double *rf);*/
   //Galaxy clustering tracer
-  CCL_ClTracer *ct_gc=ccl_cl_tracer_new(cosmo,CL_TRACER_NC,NZ,z_arr_gc,nz_arr_gc,NZ,z_arr_gc,bz_arr,
-					0,0,-1,NULL,NULL);
+  CCL_ClTracer *ct_gc=ccl_cl_tracer_new(cosmo,CL_TRACER_NC,0,0,0,NZ,z_arr_gc,nz_arr_gc,NZ,z_arr_gc,bz_arr,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL);
+
   //Cosmic shear tracer
-  CCL_ClTracer *ct_wl=ccl_cl_tracer_new(cosmo,CL_TRACER_WL,NZ,z_arr_sh,nz_arr_sh,
-					-1,NULL,NULL,0,0,-1,NULL,NULL);
-  printf("ell C_ell(g,g) C_ell(g,s) C_ell(s,s) | r(g,s)\n");
+  CCL_ClTracer *ct_wl=ccl_cl_tracer_new(cosmo,CL_TRACER_WL,0,0,0,NZ,z_arr_sh,nz_arr_sh,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL);
+  
+  printf("ell C_ell(g,g) C_ell(g,s) C_ell(s,s) r(g,s)\n");
   for(int l=2;l<NL;l+=10) {
     double cl_gg=ccl_angular_cl(cosmo,l,ct_gc,ct_gc); //Galaxy-galaxy
     double cl_gs=ccl_angular_cl(cosmo,l,ct_gc,ct_wl); //Galaxy-lensing
     double cl_ss=ccl_angular_cl(cosmo,l,ct_wl,ct_wl); //Lensing-lensing
-    printf("%d %.3lE %.3lE %.3lE | %.3lE\n",l,cl_gg,cl_gs,cl_ss,cl_gs/sqrt(cl_gg*cl_ss));
+    printf("%d %.3lE %.3lE %.3lE %.3lE\n",l,cl_gg,cl_gs,cl_ss,cl_gs/sqrt(cl_gg*cl_ss));
   }
   //Free up tracers
   ccl_cl_tracer_free(ct_gc);
