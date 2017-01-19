@@ -15,7 +15,7 @@ except AttributeError:
 
 # CCL extension module
 _ccllib = Extension("_ccllib",
-                   ["ccl.i", 
+                   ["ccl.i",
                     "../src/ccl_core.c",
                     "../src/ccl_background.c",
                     "../src/ccl_cls.c",
@@ -27,7 +27,20 @@ _ccllib = Extension("_ccllib",
                     "../src/ccl_power_dummy.c",],
                    libraries = ['m', 'gsl', 'gslcblas',],
                    include_dirs = [numpy_include, "../include/"],
+                   extra_compile_args=['-O4',]
                    )
+
+#"ccl_background.i",
+#                    "ccl_cls.i",
+#                    "ccl_config.i",
+#                    "ccl_constants.i",
+#                    "ccl_core.i",
+#                    "ccl_error.i",
+#                    "ccl_lsst_specs.i",
+#                    "ccl_massfunc.i",
+#                    "ccl_placeholder.i",
+#                    "ccl_power.i",
+#                    "ccl_utils.i", 
 
 # CCL setup
 setup(  name        = "CCL",
