@@ -81,7 +81,7 @@ The Hubble parameter is calculated via ... The comoving distance is calculated v
 
 
 \subsection{Matter power spectrum}
-\label{sec:distances}
+\label{sec:power}
 
 \subsection{LSST Specifications}
 \label{sec:specs}
@@ -327,14 +327,24 @@ In this second step, only 2 codes have been compared so far. More outputs are ne
 
 {\bf TODO: Describe additional comparisons I know of, but which were not part of the code comparison:} David compared the HMF of one of the cases to his own outputs. Elisabeth was planning on producing outputs for correlation function as well.
 
-CCL has a suite of test routines which, upon compilation, compare its outputs to the benchmarks from code comparison. These are run with ``make test''.
+CCL has a suite of test routines which, upon compilation, compare its outputs to the benchmarks from code comparison. These are run with ``make check''.
 
 \section{Future functionality to be included}
 
 In the future, we hope that CCL will include (... more here ...)
 
+\section{Python wrapping}
+\label{sec:python}
+
+
+
 \section{Examples}
 \label{sec:example}
+
+Examples of how to run CCL are provided in the {\tt tests} sub-directory of the library. The first resource for a new user should be the {\tt ccl\_sample\_run.c} file. This starts by setting up the CCL default configuration. Then, it creates the ``cosmo'' structure, which contains distances and power spectra splines, for example. There are example calls for routines that output comoving radial distances, the scale factor, the growth factor and $\sigma_8$. Toy models are created for the redshift distributions of galaxies in the clustering and lensing samples, and for the bias of the clustering sample ($b(z)=1+z$). These are used for constructing the ``tracer'' structures via {\tt CCL\_Cltracer}, which can then be called to obtain the angular power spectra for clustering, cosmic shear and galaxy lensing.
+
+\section{License}
+\label{sec:license}
 
 \input{acknowledgments}
 
