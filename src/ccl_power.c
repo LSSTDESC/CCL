@@ -544,7 +544,7 @@ double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double a, double k){
   ccl_cosmology_compute_power(cosmo);
   
   double log_p_1;
-  double deltak=0.01;
+  double deltak=1e-4;
   double deriv_pnl_kmid,deriv2_pnl_kmid;
   
   if(k<=K_MAX_SPLINE){
