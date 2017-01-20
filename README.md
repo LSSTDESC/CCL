@@ -133,11 +133,11 @@ void ccl_cl_tracer_free(CCL_ClTracer *clt);
 ````
 
 ### Halo mass function
-The halo mass function *dN/dz* can be obtained by function **ccl_massfunc**
+The halo mass function *dN/dM* can be obtained by function **ccl_massfunc**
 ````c
 double ccl_massfunc(ccl_cosmology * cosmo, double halo_mass, double redshift)
 ````
-where **halo_mass** is mass smoothing scale. For more details (or other functions like *sigma_M*) see *include/ccl_massfunc.h* and *src/mass_func.c*.
+where **halo_mass** is mass smoothing scale (in units of *M_sun/h*. For more details (or other functions like *sigma_M*) see *include/ccl_massfunc.h* and *src/mass_func.c*.
 
 ## Example code
 >>>>>>> halo mass func
