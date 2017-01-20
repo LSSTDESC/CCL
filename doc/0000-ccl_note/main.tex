@@ -83,6 +83,40 @@ The Hubble parameter is calculated via ... The comoving distance is calculated v
 \subsection{Matter power spectrum}
 \label{sec:power}
 
+
+\subsubsection{Nonlinear extrapolation}
+\label{sec:NLextrapol}
+
+The computation of the nonlinear power spectrum from from {\tt CLASS} can be significantly sped up by extrapolating in the range $k>${\tt K\_MAX\_SPLINE}. In this section, we describe the implementation of the extrapolation and the accuracy attained.
+
+The introduction of the parameter {\tt K\_MAX\_SPLINE} allows us to spline the nonlinear matter power spectrum within the {\tt cosmo} structure up to that value of $k$ (in units of $1/$Mpc). A separate {\tt K\_MAX} parameter sets the limit for evaluation of the matter power spectrum. The range between {\tt K\_MAX\_SPLINE}$<k<${\tt K\_MAX} is evaluated by performing a second order Taylor expansion within the routine {\tt ccl\_nonlin\_matter\_power}.
+
+First, we compute the first and second derivative of the $\ln P(k,z)$ at $k_0={\rm \tt K\_MAX}-2\Delta\ln k$ by computing the following numerical derivatives by finite differences:
+%
+\begin{eqnarray}
+  \frac{d\ln P}{d\ln k}(k_0)&=& \frac{-\ln P(k_0+2\Delta\ln k)+8\ln P(k_0+\Delta\ln k)-8\ln P(k_0-\Delta\ln k)+\ln P(k_0-2\Delta\ln k)}{2\Delta \ln k},\\
+  \frac{d^2\ln P}{d\ln k^2}(k_0)&=& \frac{\ln P(k_0+\Delta\ln k)-2\ln P(k_0)+\ln P(k_0-\Delta\ln k)}{\Delta\ln k^2}.
+  \label{eq:numderiv_dlnP}
+\end{eqnarray}
+%
+We then apply a second order Taylor expansion to extrapolate the matter power spectrum to $k>${\tt K\_MAX\_SPLINE}. The Taylor expansion gives
+%
+\begin{equation}
+  \ln P(k) \simeq \ln P(k_0) + \frac{d\ln P}{d\ln k}(\ln k_0) (\ln k-\ln k_0)  + \frac{1}{2}  \frac{d^2\ln P}{d\ln k^2}(\ln k_0) (\ln k-\ln k_0)^2.
+  \label{eq:NLPSTaylor}
+\end{equation}
+
+The results of this approximation are shown in Figure \ref{fig:NLextrapol}. We compare the nonlinear matter power spectrum at $z=0$ computed with the previously described approximation, to the matter power spectrum obtained by directly evaluating {\tt CLASS} at the desired $k$ value. Our fiducial choice for $\Delta \ln k$ is $10^{-4}$, beyond which the case with {\tt K\_MAX\_SPLINE}$=50$/Mpc seems to have converged. Our results show that the approximation is good to within $5\%$ up to $k=10^4/$Mpc if {\tt K\_MAX\_SPLINE}$=50$/Mpc; and to within $0.1\%$ up to $k=10^4/$Mpc if {\tt K\_MAX\_SPLINE}$=500$/Mpc. The lower {\tt K\_MAX\_SPLINE} is, the faster CCL will run. The optimum choice of {\tt K\_MAX\_SPLINE} is left to the user for their particular application. If needed, the $\Delta\ln k$ parameter chan be changed within {\tt ccl\_power.c}.
+
+%------------------------
+\begin{figure}
+\centering
+\includegraphics[width=0.8\textwidth]{note_KMAX_extrapol.eps}
+\caption{The relative error produced by splining the nonlinear matter power spectrum up to {\tt K\_MAX\_SPLINE} and extrapolating beyond this value with a second order Taylor expansion the natural logarithm of the matter power spectrum.}
+\label{fig:NLextrapol}
+\end{figure}
+%------------------------
+
 \subsection{LSST Specifications}
 \label{sec:specs}
 
