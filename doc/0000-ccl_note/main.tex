@@ -106,14 +106,20 @@ We then apply a second order Taylor expansion to extrapolate the matter power sp
   \label{eq:NLPSTaylor}
 \end{equation}
 
-The results of this approximation are shown in Figure \ref{fig:NLextrapol}. We compare the nonlinear matter power spectrum at $z=0$ computed with the previously described approximation, to the matter power spectrum obtained by directly evaluating {\tt CLASS} at the desired $k$ value. Our fiducial choice for $\Delta \ln k$ is $10^{-4}$, beyond which the case with {\tt K\_MAX\_SPLINE}$=50$/Mpc seems to have converged. Our results show that the approximation is good to within $5\%$ up to $k=10^4/$Mpc if {\tt K\_MAX\_SPLINE}$=50$/Mpc; and to within $0.1\%$ up to $k=10^4/$Mpc if {\tt K\_MAX\_SPLINE}$=500$/Mpc. The lower {\tt K\_MAX\_SPLINE} is, the faster CCL will run. The optimum choice of {\tt K\_MAX\_SPLINE} is left to the user for their particular application. If needed, the $\Delta\ln k$ parameter chan be changed within {\tt ccl\_power.c}.
+The results of this approximation are shown in Figure \ref{fig:NLextrapol_z0}. We compare the nonlinear matter power spectrum at $z=0$ computed with the previously described approximation, to the matter power spectrum obtained by directly evaluating {\tt CLASS} at the desired $k$ value. Our fiducial choice for $\Delta \ln k$ is $10^{-4}$, beyond which the case with {\tt K\_MAX\_SPLINE}$=50$/Mpc seems to have converged. Our results show that the approximation is good to within $5\%$ up to $k=10^4/$Mpc if {\tt K\_MAX\_SPLINE}$=50$/Mpc; and to within $0.1\%$ up to $k=10^4/$Mpc if {\tt K\_MAX\_SPLINE}$=500$/Mpc. The lower {\tt K\_MAX\_SPLINE} is, the faster CCL will run. Figure \ref{fig:NLextrapol_z3} shows similar results at $z=3$. In this case, {\tt K\_MAX\_SPLINE}$=500$/Mpc is required to maintain good accuracy. To span the approximate redshift range of LSST, we thus settle on a fiducial value of {\tt K\_MAX\_SPLINE}$=500$/Mpc. The optimum choice of {\tt K\_MAX\_SPLINE} is left to the user for their particular application. If needed, the $\Delta\ln k$ parameter chan be changed within {\tt ccl\_power.c}.
 
 %------------------------
 \begin{figure}
 \centering
 \includegraphics[width=0.8\textwidth]{note_KMAX_extrapol.eps}
 \caption{The relative error produced by splining the nonlinear matter power spectrum up to {\tt K\_MAX\_SPLINE} and extrapolating beyond this value with a second order Taylor expansion the natural logarithm of the matter power spectrum.}
-\label{fig:NLextrapol}
+\label{fig:NLextrapol_z0}
+\end{figure}
+\begin{figure}
+\centering
+\includegraphics[width=0.8\textwidth]{note_KMAX_extrapol_z3.eps}
+\caption{Similar to Figure \ref{fig:NLextrapol_z0} but at $z=3$.}
+\label{fig:NLextrapol_z3}
 \end{figure}
 %------------------------
 
