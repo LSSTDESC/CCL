@@ -102,6 +102,22 @@ class Parameters(object):
         
         # Set value
         setattr(self.parameters, key, val)
+        # FIXME: Should trigger update process in CCL to ensure all stored data 
+        # are consistent
+    
+    def __str__(self):
+        """
+        Output the parameters that were set, and their values.
+        """
+        params = ['Omega_c', 'Omega_b', 'Omega_m', 'Omega_n', 'Omega_k', 
+                  'w0', 'wa', 'H0', 'h', 'A_s', 'n_s', 'Omega_g', 'T_CMB', 
+                  'sigma_8', 'Omega_l', 'z_star', 'has_mgrowth']
+  
+        vals = ["%15s: %s" % (p, getattr(self.parameters, p)) for p in params]
+        string = "Parameters\n----------\n"
+        string += "\n".join(vals)
+        return string
+        
 
 
 class Cosmology(object):
