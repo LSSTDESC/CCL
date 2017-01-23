@@ -4,17 +4,11 @@
 
 #define SWIG_FILE_WITH_INIT
 #include "../include/ccl.h"
-#include "../include/ccl_background.h"
-#include "../include/ccl_cls.h"
 #include "../include/ccl_config.h"
-#include "../include/ccl_constants.h"
-#include "../include/ccl_core.h"
 #include "../include/ccl_error.h"
-#include "../include/ccl_lsst_specs.h"
-#include "../include/ccl_massfunc.h"
-#include "../include/ccl_placeholder.h"
 #include "../include/ccl_utils.h"
-#include "../include/ccl_power.h"
+
+#include "../class/include/class.h"
 
 %}
 
@@ -24,10 +18,6 @@
     import_array();
 %}
 
-// Enable vectorised arguments for arrays
-%apply (double* IN_ARRAY1, int DIM1) {(double* a, int na)};
-%apply (double* ARGOUT_ARRAY1, int DIM1) {(double* output, int nout)};
-
 // Automatically document arguments and output types of all functions
 %feature("autodoc", "1");
 
@@ -35,17 +25,21 @@
 %rename("%(strip:[ccl_])s") "";
 
 %include "../include/ccl.h"
-%include "../include/ccl_background.h"
-%include "../include/ccl_cls.h"
+//%include "../include/ccl_background.h"
+
+%include "ccl_core.i"
+%include "ccl_background.i"
+%include "ccl_power.i"
+%include "ccl_massfunc.i"
+%include "ccl_cls.i"
+%include "ccl_constants.i"
+%include "ccl_lsst_specs.i"
+
 %include "../include/ccl_config.h"
-%include "../include/ccl_constants.h"
-%include "../include/ccl_core.h"
 %include "../include/ccl_error.h"
-%include "../include/ccl_lsst_specs.h"
-%include "../include/ccl_massfunc.h"
-%include "../include/ccl_placeholder.h"
 %include "../include/ccl_utils.h"
-%include "../include/ccl_power.h"
+
+%import "../class/include/class.h"
 
 // We need this construct to handle some memory allocation scariness. By 
 // specifying the size of the output array in advance, we can avoid having to 
@@ -55,11 +49,13 @@
 // have to pass an integer specifying the output array size every time. So, 
 // this requires an extra level of wrapping, in which we just pass the size of 
 // the input array in as that argument.
+/*
 %inline %{
-void growth_factor_vec(ccl_cosmology * cosmo, 
+void function_vec(ccl_cosmology * cosmo, 
                                double* a, int na,
                                double* output, int nout) {
-    ccl_growth_factors(cosmo, na, a, output);
+    ccl_function(cosmo, na, a, output);
 }
 %}
+*/
 
