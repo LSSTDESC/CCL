@@ -139,10 +139,37 @@ double ccl_massfunc(ccl_cosmology * cosmo, double halo_mass, double redshift)
 ````
 where **halo_mass** is mass smoothing scale (in units of *M_sun/h*. For more details (or other functions like *sigma_M*) see *include/ccl_massfunc.h* and *src/mass_func.c*.
 
+### LSST Specifications
+CCL includes LSST specifications for the expected galaxy distributions of the full galaxy clustering sample and the lensing source galaxy sample. Start by defining a flexible photometric redshift model given by function
+````c
+double (* your_pz_func)(double photo_z, double spec_z, void *param);
+````
+which returns the probability of measuring a particular photometric redshift, given a spectroscopic redshift and other relevant parameters. Then you call function **ccl_specs_create_photoz_info**
+````c
+user_pz_info* ccl_specs_create_photoz_info(void * user_params, double(*user_pz_func)(double, double,void*));
+````
+which creates a strcture **user_pz_info** which holds information needed to compute *dN/dz*
+````c
+typedef struct {
+        double (* your_pz_func)(double, double, void *); //first double corresponds to photo-z, second to spec-z
+        void *  your_pz_params;
+} user_pz_info;
+````
+The expected *dN/dz* for lensing or clustering galaxies with given binnig can be obtained by function **ccl_specs_dNdz_tomog**
+````c
+int ccl_specs_dNdz_tomog(double z, int dNdz_type, double bin_zmin, double bin_zmax, user_pz_info * user_info,  double *tomoout);
+````
+Result is returned in **tomoout**. This function returns zero if called with an allowable type of dNdz, non-zero otherwise. Allowed types of dNdz (currently one for clustering and three for lensing - fiducial, optimistic, and conservative - cases are considered) and other information and functions like bias clustering or sigma_z are specified in file *include/ccl_lsst_specs.h* 
+
+After you are done working with photo_z, you should free its work space by **ccl_specs_create_photoz_info**
+````c
+user_pz_info* ccl_specs_create_photoz_info(void * user_params, double(*user_pz_func)(double, double,void*));
+````
+
 ## Example code
 >>>>>>> halo mass func
 This code can also be found in *tests/min_code.h* You can run the following example code. For this you will need to compile with:
-````c
+````sh
 gcc -Wall -Wpedantic -g -O0 -I./include -std=c99 -fPIC tests/min_code.c -o tests/min_code -L./lib -L/usr/local/lib -lgsl -lgslcblas -lm -Lclass -lclass -lccl
 ````
 
@@ -167,7 +194,7 @@ gcc -Wall -Wpedantic -g -O0 -I./include -std=c99 -fPIC tests/min_code.c -o tests
 #define SZ_GC 0.05
 #define Z0_SH 0.65
 #define SZ_SH 0.05
-#define NL 500
+#define NL 512
 
 int main(int argc,char **argv){
 	// Initialize cosmological parameters
@@ -188,7 +215,7 @@ int main(int argc,char **argv){
 
 	// Compute sigma_8
 	printf("Initializing power spectrum...\n");
-	printf("sigma_8 = %.3lf\n", ccl_sigma8(cosmo));
+	printf("sigma_8 = %.3lf\n\n", ccl_sigma8(cosmo));
 
 	//Create tracers for angular power spectra
 	double z_arr_gc[NZ],z_arr_sh[NZ],nz_arr_gc[NZ],nz_arr_sh[NZ],bz_arr[NZ];
@@ -207,13 +234,27 @@ int main(int argc,char **argv){
 	//Cosmic shear tracer
 	CCL_ClTracer *ct_wl=ccl_cl_tracer_lensing_simple_new(cosmo,NZ,z_arr_sh,nz_arr_sh);
 	printf("ell C_ell(g,g) C_ell(g,s) C_ell(s,s) | r(g,s)\n");
-	for(int l=2;l<NL;l+=10)
+	for(int l=2;l<=NL;l*=2)
 	{
 		double cl_gg=ccl_angular_cl(cosmo,l,ct_gc,ct_gc); //Galaxy-galaxy
 		double cl_gs=ccl_angular_cl(cosmo,l,ct_gc,ct_wl); //Galaxy-lensing
 		double cl_ss=ccl_angular_cl(cosmo,l,ct_wl,ct_wl); //Lensing-lensing
 		printf("%d %.3lE %.3lE %.3lE | %.3lE\n",l,cl_gg,cl_gs,cl_ss,cl_gs/sqrt(cl_gg*cl_ss));
-  }
+	}
+	printf("\n");
+
+	//Halo mass function
+	printf("M\tdN/dM(z = 0, 0.5, 1))\n");
+	for(int logM=9;logM<=15;logM+=1)
+	{
+		printf("%.1e\t",pow(10,logM));
+		for(double z=0; z<=1; z+=0.5)
+		{
+			printf("%e\t", ccl_massfunc(cosmo, pow(10,logM),z));
+		}
+		printf("\n");
+	}
+	printf("\n");
 
 	//Free up tracers
 	ccl_cl_tracer_free(ct_gc);
