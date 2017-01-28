@@ -26,7 +26,7 @@
 
 \begin{abstract}
  
-The Core Cosmology Library (CCL) provides routines which make precision theoretical predictions of cosmological observables for LSST. These routines have been validated to a $10^{-4}$ accuracy level against the results of the Code Comparsion Project. In the current version, predictions are provided for distances, angular auto- and cross-spectra of cosmic shear and galaxy number counts, and correlation functions of the same. The halo mass function is incorporated, and fiducial specifications for the expected LSST galaxy distributions and clustering bias are included. The facility is provided for a user-defined photo-z model. In this note, we explain the functionality of the first public release of the library. 
+The Core Cosmology Library ({\tt CCL}) provides routines which make precision theoretical predictions of cosmological observables for LSST. These routines have been validated to a hereby documented accuracy level against the results of the Code Comparsion Project. In the current version, predictions are provided for distances, angular auto- and cross-spectra of cosmic shear and clustering. The halo mass function is incorporated, and fiducial specifications for the expected LSST galaxy distributions and clustering bias are included. The facility is provided for a user-defined photometric redshift model. {\tt CCL} is written in C with a Python interface. In this note, we explain the functionality of the first release of the library. 
 
 \end{abstract}
 
@@ -37,9 +37,12 @@ The Core Cosmology Library (CCL) provides routines which make precision theoreti
 
 \section{Introduction}
 \label{sec:intro}
-In preparation for constraining cosmology with the Large Synoptic Survey Telescope (LSST), it is necessary to be able to produce theoretical predictions for the cosmological quantities which will be measured. The core cosmology library (CCL) aims to provide, in one library, predictions which are validated to a numerical accuracy of $10^{-4}$ or better for the purpose of constraining cosmology with LSST. By constructing a library with LSST in mind, it is possible to ensure that it is flexible, adaptable, appropriate, and validated for all cases of interest, as well as user-friendly and available for the needs of all working groups. 
 
-The core cosmology library is written in C, which provides speed as well as allows the incorporation of the CLASS \cite{class} code. In the future, it is anticipated that python wrappers will be provided for improved ease of use. 
+In preparation for constraining cosmology with the Large Synoptic Survey Telescope (LSST), it is necessary to be able to produce theoretical predictions for the cosmological quantities which will be measured. The core cosmology library ({\tt CCL}) aims to provide, in one library, predictions which are validated to a well-documented numerical accuracy for the purpose of constraining cosmology with LSST. By constructing a library with LSST in mind, it is possible to ensure that it is flexible, adaptable, appropriate, and validated for all cases of interest, as well as user-friendly and available for the needs of all working groups. 
+
+The core cosmology library is written in C, which provides speed as well as allows the incorporation of the CLASS \cite{class} code. A Python wrapper is also provided for improved ease of use. 
+
+This note describes how to install {\tt CCL} (Section \ref{sec:install}), its functionalty (Section \ref{sec:func}), the relevant tests (Section \ref{sec:tests}), the default configuration (Section \ref{sec:default}), the Python wrapper (Section \ref{sec:python}), a {\tt CCL} example run (Section \ref{sec:example}), future plans (Section \ref{sec:future}) and the license under which {\tt CCL} is released (Section \ref{sec:license}).
 
 %This is a paper and note template for the LSST DESC \citep{Overview,ScienceBook,WhitePaper}.  
 %Eventually it will be possible to switch between various \LaTeX\xspace styles for internal notes and peer reviewed journals templates.
@@ -55,11 +58,18 @@ The core cosmology library is written in C, which provides speed as well as allo
 %However, because we have specified this directory in our \verb=\graphicspath= we do not need to explicitly specify the path to the image. 
 
 %The \code{macros.tex} package also contains some conventional scientific units like \angstrom, \GeV, \Msun, etc. and some editorial tools for highlighting \FIXME{issues}, \CHECK{text to be checked}, \COMMENT{comments}, and \NEW{new additions}.
+
+\section{Installation}
+\label{sec:install}
+
+{\tt CCL} can be installed via {\tt autotools} with the following commands: {\tt ./configure}; {\tt make}; {\tt make install}. If you do not have admin status in the system where you are making the installation, you will need to specify a prefix path for the configure command. The installation has been successfully tested in different OS. A set of tests (described in Section \ref{sec:tests}) can be run upon installation through {\tt make check}. Failed tests are indicative of inaccurate results compared to benchmark values which were the result of the Code Comparison Project carried out by TJP. The Python wrapper has a separate installation which is described in Section \ref{sec:python}.
+
 \section{Functionality}
+\label{sec:func}
 
 \subsection{Permissible cosmological models}
 \label{sec:cosmologies}
-The user may be interested in producing cosmological constraints on $\Lambda$CDM parameters, or perhaps on some extension to the standard cosmological model. CCL handles this by allowing the user to create a cosmology object. (... more here ...) Functions exist to create general cosmologies, as well as for flat $\Lambda$CDM, curved $\Lambda$CDM, $\Lambda$CDM with and without neutrinos, wCDM, and the CPL model ($w_0$ + $w_a$).
+The user may be interested in producing cosmological constraints on $\Lambda$CDM parameters, or perhaps on some extension to the standard cosmological model. {\tt CCL} handles this by allowing the user to create a cosmology object. {\bf (... more here ...)} Functions exist to create general cosmologies, as well as for flat $\Lambda$CDM, curved $\Lambda$CDM, $\Lambda$CDM with and without neutrinos, wCDM, and the CPL model ($w_0$ + $w_a$).
 
 %Similar to the figure before, here we have included a table of data from \code{tables/table.tex}.  
 %Notice that again we are able to reference \tabref{example} with the \verb=\tabref= command using the \code{tab:} prefix. 
@@ -70,7 +80,20 @@ The user may be interested in producing cosmological constraints on $\Lambda$CDM
 \subsection{Distances}
 \label{sec:distances}
 
-The Hubble parameter is calculated via ... The comoving distance is calculated via ... (...more here...)
+The Hubble parameter is calculated via
+%
+\begin{equation}
+\frac{H(a)}{H_0} = a^{-3/2}\sqrt{\Omega_m+\Omega_\Lambda a^{-3(w_0+w_a)}
+    \exp[3 w_a (a-1)]+\Omega_K a +\Omega_g a^{-1}}.
+\end{equation}
+
+The comoving distance is calculated via a numerical integral of
+%
+\begin{equation}
+D_C(a)= c \int_a^1 \frac{da'}{a'^2 H(a')}.
+\end{equation}
+%
+{\bf (...more here...)}
 
 %If you are planning on committing your paper to github, it's a good idea to write your tex as one sentence per line. 
 %This allows for an easier \code{diff} of changes.
@@ -79,10 +102,26 @@ The Hubble parameter is calculated via ... The comoving distance is calculated v
 \subsection{Growth function}
 \label{sec:growth}
 
+To compute the growth function, $D(a)$, {\tt CCL} solves the following differential equation in {\tt ccl\_background.c}:
+
+{\bf Which growth is being computed? Density or potential? What about growth rate}
+{\bf What normalization do we use for the growth?}
+{\bf What about the modified gravity growth we incorporated?}
+{\bf Why do we always solve the differential eq.?}
 
 \subsection{Matter power spectrum}
 \label{sec:power}
 
+There are several options for obtaining the matter power spectrum in {\tt CCL}. First, we have included the analytical BBKS approximation to the transfer function \citep{BBKS}, given by
+%
+\begin{equation}
+T(q\equiv k/\Gamma h {\rm Mpc}^{-1}) = \frac{\ln[1+2.34q]}{2.34q}[1+3.89q+(16.2q)^2+(5.47q)^3+(6.71q)^4]^{-0.25}
+\end{equation}
+where $\Gamma = \Omega_m h$.
+The power spectrum is related to the transfer function by $\Delta(k)\propto T^2(k)k^{3+n}$
+and $\Delta^2(k)\propto k^3P(k)$. The normalization of the power spectrum is achieved at $z=0$ by setting $\sigma_8$ to its value today. This option mainly serves the purpose of comparing {\tt CCL} outputs to benchmark files and thus it is not recommended for other uses. 
+
+Secondly, there is the option to call the {\tt CLASS} software \citep{class} within {\tt CCL} to obtain either linear or nonlinear matter power spectra at given redshifts. For speed, the linear power spectrum is obtained at redshift $z=0$ and re-scaled to a different redshift using the growth function. In the case of the nonlinear matter power spectrum, upon setting up the cosmology object, we construct a bi-dimensional spline in $k$ and the scale-facor which is then called by the relevant routines to obtain the matter power spectrum at the desired wavenumber and redshift. The relevant routines can be found within {\tt ccl\_power.c}. 
 
 \subsubsection{Nonlinear extrapolation}
 \label{sec:NLextrapol}
@@ -91,22 +130,31 @@ The computation of the nonlinear power spectrum from from {\tt CLASS} can be sig
 
 The introduction of the parameter {\tt K\_MAX\_SPLINE} allows us to spline the nonlinear matter power spectrum within the {\tt cosmo} structure up to that value of $k$ (in units of $1/$Mpc). A separate {\tt K\_MAX} parameter sets the limit for evaluation of the matter power spectrum. The range between {\tt K\_MAX\_SPLINE}$<k<${\tt K\_MAX} is evaluated by performing a second order Taylor expansion within the routine {\tt ccl\_nonlin\_matter\_power}.
 
-First, we compute the first and second derivative of the $\ln P(k,z)$ at $k_0={\rm \tt K\_MAX}-2\Delta\ln k$ by computing the following numerical derivatives by finite differences:
+First, we compute the first and second derivative of the $\ln P(k,z)$ at $k_0={\rm \tt K\_MAX}-2\Delta\ln k$ by computing the numerical derivatives by finite differences. We define the following $k$ values:
 %
 \begin{eqnarray}
-  \frac{d\ln P}{d\ln k}(k_0)&=& \frac{-\ln P(k_0+2\Delta\ln k)+8\ln P(k_0+\Delta\ln k)-8\ln P(k_0-\Delta\ln k)+\ln P(k_0-2\Delta\ln k)}{2\Delta \ln k},\\
-  \frac{d^2\ln P}{d\ln k^2}(k_0)&=& \frac{\ln P(k_0+\Delta\ln k)-2\ln P(k_0)+\ln P(k_0-\Delta\ln k)}{\Delta\ln k^2}.
+k_0^{+}&=&k_0+\Delta\ln k,\\
+k_0^{++}&=&k_0+2\Delta\ln k,\\
+k_0^{-}&=&k_0-\Delta\ln k,\\
+k_0^{--}&=&k_0-2\Delta\ln k,
+\end{eqnarray}
+%
+where we evaluate the power spectra for computing the suitable numerical derivatives as
+%
+\begin{eqnarray}
+  \frac{d\ln P}{d\ln k}(k_0,z)&=& \frac{-\ln P(k_0^{++},z)+8\ln P(k_0^{+},z)-8\ln P(k_0^{-},z)+\ln P(k_0^{--},z)}{2\Delta \ln k},\\
+  \frac{d^2\ln P}{d\ln k^2}(k_0,z)&=& \frac{\ln P(k_0^{+},z)-2\ln P(k_0)+\ln P(k_0^{-},z)}{\Delta\ln k^2}.
   \label{eq:numderiv_dlnP}
 \end{eqnarray}
 %
 We then apply a second order Taylor expansion to extrapolate the matter power spectrum to $k>${\tt K\_MAX\_SPLINE}. The Taylor expansion gives
 %
 \begin{equation}
-  \ln P(k) \simeq \ln P(k_0) + \frac{d\ln P}{d\ln k}(\ln k_0) (\ln k-\ln k_0)  + \frac{1}{2}  \frac{d^2\ln P}{d\ln k^2}(\ln k_0) (\ln k-\ln k_0)^2.
+  \ln P(k,z) \simeq \ln P(k_0,z) + \frac{d\ln P}{d\ln k}(\ln k_0) (\ln k-\ln k_0)  + \frac{1}{2}  \frac{d^2\ln P}{d\ln k^2}(\ln k_0,z) (\ln k-\ln k_0)^2.
   \label{eq:NLPSTaylor}
 \end{equation}
 
-The results of this approximation are shown in Figure \ref{fig:NLextrapol_z0}. We compare the nonlinear matter power spectrum at $z=0$ computed with the previously described approximation, to the matter power spectrum obtained by directly evaluating {\tt CLASS} at the desired $k$ value. Our fiducial choice for $\Delta \ln k$ is $10^{-4}$, beyond which the case with {\tt K\_MAX\_SPLINE}$=50$/Mpc seems to have converged. Our results show that the approximation is good to within $5\%$ up to $k=10^4/$Mpc if {\tt K\_MAX\_SPLINE}$=50$/Mpc; and to within $0.1\%$ up to $k=10^4/$Mpc if {\tt K\_MAX\_SPLINE}$=500$/Mpc. The lower {\tt K\_MAX\_SPLINE} is, the faster CCL will run. Figure \ref{fig:NLextrapol_z3} shows similar results at $z=3$. In this case, {\tt K\_MAX\_SPLINE}$=500$/Mpc is required to maintain good accuracy. To span the approximate redshift range of LSST, we thus settle on a fiducial value of {\tt K\_MAX\_SPLINE}$=500$/Mpc. The optimum choice of {\tt K\_MAX\_SPLINE} is left to the user for their particular application. If needed, the $\Delta\ln k$ parameter chan be changed within {\tt ccl\_power.c}.
+The results of this approximation are shown in Figure \ref{fig:NLextrapol_z0}. We compare the nonlinear matter power spectrum at $z=0$ computed with the previously described approximation, to the matter power spectrum obtained by directly evaluating {\tt CLASS} at the desired $k$ value. Our fiducial choice for $\Delta \ln k$ is $10^{-4}$, beyond which the case with {\tt K\_MAX\_SPLINE}$=50$/Mpc seems to have converged. Our results show that the approximation is good to within $5\%$ up to $k=10^4/$Mpc if {\tt K\_MAX\_SPLINE}$=50$/Mpc; and to within $0.1\%$ up to $k=10^4/$Mpc if {\tt K\_MAX\_SPLINE}$=500$/Mpc. The lower {\tt K\_MAX\_SPLINE} is, the faster {\tt CCL} will run. Figure \ref{fig:NLextrapol_z3} shows similar results at $z=3$. In this case, {\tt K\_MAX\_SPLINE}$=500$/Mpc is required to maintain good accuracy. To span the approximate redshift range of LSST, we thus settle on a fiducial value of {\tt K\_MAX\_SPLINE}$=500$/Mpc. The optimum choice of {\tt K\_MAX\_SPLINE} is left to the user for their particular application. If needed, the $\Delta\ln k$ parameter chan be changed within {\tt ccl\_power.c}.
 
 %------------------------
 \begin{figure}
@@ -123,14 +171,31 @@ The results of this approximation are shown in Figure \ref{fig:NLextrapol_z0}. W
 \end{figure}
 %------------------------
 
+\subsubsection{Normalization of the power spectrum}
+\label{sec:PSnorm}
+
+There are two alternative schemes for normalization of the matter power spectrum. The first one is to specify the value of $A_s$, the amplitude of the primordial power spectrum, which is passed directly to {\tt CLASS}. This option is available in the case of the linear/nonlinear matter power spectrum implementation. For these, as well as for BBKS, there is the additional option to set the normalization of the matter power spectrum by specifying $\sigma_8$, the rms density constrast averaged over spheres of radius $8h^{-1}$Mpc. In general, for a given sphere of radius $R$, the average rms density constrast is given by
+%
+\begin{equation}
+  \sigma_R^2 = \int \frac{dk}{k}\Delta^2(k)\tilde{W}_R^2(k)
+  \label{eq:sigR}
+\end{equation}
+%
+where $\tilde{W}_R$ is the Fourier transform of a top hat,
+\begin{equation}
+\tilde{W}_R(k) = \frac{3}{(kR)^3}[\sin(kR)-kR\cos(kR)]
+\end{equation}
+%
+This function is directly implemented in {\tt CCL} as well as a specific $\sigma_8$ function. {\bf Doesn't CLASS only take $A_s$ as input? Clarify how $\sigma_8$ was implemented.}
+
 \subsection{LSST Specifications}
 \label{sec:specs}
 
-CCL includes LSST specifications for the expected galaxy distributions of the full galaxy clustering sample and the lensing source galaxy sample. These enable the user to easily make predictions or forecasts for LSST.
+{\tt CCL} includes LSST specifications for the expected galaxy distributions of the full galaxy clustering sample and the lensing source galaxy sample. These enable the user to easily make predictions or forecasts for LSST.
 
 The functional forms of the expected $\frac{dN}{dz}$ for clustering galaxies and lensing source galaxies are provided. Here, $\frac{dN}{dz}$ is the number density of galaxies as a function of spectroscopic redshift. 
 
-In the case of lensing source galaxies, these forms are given in \cite{Chang2013}, wherein three different cases are considered: fiducial, optimistic, and conservative. All three are included in CCL, and are indicated via a label of DNDZ\_WL\_OPT, DNDZ\_WL\_FID, and DNDZ\_WL\_CONS as appropriate. The functional form of $\frac{dN}{dz}$ for lensing source galaxies is given as:
+In the case of lensing source galaxies, these forms are given in \cite{Chang2013}, wherein three different cases are considered: fiducial, optimistic, and conservative. All three are included in {\tt CCL}, and are indicated via a label of DNDZ\_WL\_OPT, DNDZ\_WL\_FID, and DNDZ\_WL\_CONS as appropriate. The functional form of $\frac{dN}{dz}$ for lensing source galaxies is given as:
 \begin{equation}
 \frac{dN}{dz} \propto z^\alpha {\rm exp}\left(-\frac{z}{z_0}^\beta\right).
 \label{dndz_src}
@@ -170,14 +235,14 @@ The angular power spectrum between two observables $a$ and $b$ can be written as
 \begin{equation}
  C^{ab}_\ell=4\pi\int_0^\infty \frac{dk}{k}\,\mathcal{P}_\Phi(k)\Delta^a_\ell(k)\Delta^b_\ell(k),
 \end{equation}
-where $\Delta^a$ and $\Delta^b$ are, using the terminology of CLASS, the transfer functions corresponding to these observables. Each transfer function will receive contributions from different terms. Currently CCL supports two observables, number counts and cosmic shear, with the following contributions:
+where $\Delta^a$ and $\Delta^b$ are, using the terminology of CLASS, the transfer functions corresponding to these observables. Each transfer function will receive contributions from different terms. Currently {\tt CCL} supports two observables, number counts and cosmic shear, with the following contributions:
 \paragraph{\bf Number counts.} The transfer function for number counts can be decomposed into three terms: $\Delta^{\rm NC}=\Delta^{\rm D}+\Delta^{\rm RSD}+\Delta^{\rm M}$, where
 \begin{itemize}
   \item $\Delta^{\rm D}$ is the standard density term proportional to the matter density:
         \begin{equation}
           \Delta^{\rm D}_\ell(k)=\int dz\,p_z(z)\,b(z)\,T_\delta(k,z)\,j_\ell(k\chi(z)),
         \end{equation}
-        where $T_\delta$ is the matter transfer function. Note that CCL currently does not support non-linear or scale-independent bias. Here, $p_z(z)$ is the normalized distribution of sources in redshift (selection function). Thus CCL understand each individual redshift bin as a separate ``observable''.
+        where $T_\delta$ is the matter transfer function. Note that {\tt CCL} currently does not support non-linear or scale-independent bias. Here, $p_z(z)$ is the normalized distribution of sources in redshift (selection function). Thus {\tt CCL} understand each individual redshift bin as a separate ``observable''.
   \item $\Delta^{\rm RSD}$ is the linear contribution from redshift-space distortions:
         \begin{equation}
           \Delta^{\rm RSD}_\ell(k)=\int dz\,p_z(z)\frac{(1+z) p_z(z)}{H(z)}T_\theta(k,z) j_\ell''(k\chi(z)),
@@ -193,7 +258,7 @@ where $\Delta^a$ and $\Delta^b$ are, using the terminology of CLASS, the transfe
         \end{equation}
         Here $s(z)$ is the magnification bias, given as the logarithmic derivative of the number of sources with magnitude limit.
           
-        Note that CCL currently does not compute relativistic corrections to number counts {\bf TODO: add references}. Although these should be included in the future, their contribution to the total fluctuation is largely subdominant, and therefore it is safe to work without them for the time being {\bf TODO: add references?}.
+        Note that {\tt CCL} currently does not compute relativistic corrections to number counts {\bf TODO: add references}. Although these should be included in the future, their contribution to the total fluctuation is largely subdominant, and therefore it is safe to work without them for the time being {\bf TODO: add references?}.
 \end{itemize}
 
 \paragraph{\bf Cosmic shear.} The transfer function for cosmic shear is currently decomposed into two terms: $\Delta^{\rm SH}=\Delta^{\rm WL}+\Delta^{\rm IA}$, where
@@ -206,7 +271,7 @@ where $\Delta^a$ and $\Delta^b$ are, using the terminology of CLASS, the transfe
         \begin{equation}
           W^L(z)\equiv\int_z^\infty dz' p_z(z')\frac{\chi(z')-\chi(z)}{\chi(z')}.
         \end{equation}
-  \item $\Delta^{\rm IA}$ is the transfer function for intrinsic galaxy alignments. CCL currently supports the so-called ``linear alignment model'', according to which the galaxy inertia tensor is proportional the local tidal tensor.
+  \item $\Delta^{\rm IA}$ is the transfer function for intrinsic galaxy alignments. {\tt CCL} currently supports the so-called ``linear alignment model'', according to which the galaxy inertia tensor is proportional the local tidal tensor.
         \begin{equation}
           \Delta_\ell^{\rm IA}(k)=\sqrt{\frac{(\ell+2)!}{(\ell-2)!}}\int dz\,p_z(z)\,b_{\rm IA}(z)\,f_{\rm red}(z)\,T_\delta(k,z)\,\frac{j_\ell(k\chi(z))}{(k\chi(z))^2}.
         \end{equation}
@@ -238,7 +303,7 @@ where
  &\tilde{\Delta}_\ell^{\rm IA}(k)=\sqrt{\frac{(\ell+2)!}{(\ell-2)!}}\frac{p_z(z_\ell)\,b_{\rm IA}(z_\ell)f_{\rm red}(z_\ell)H(z_\ell)}{(\ell+1/2)^2}
 \end{align}
 
-To be continued...
+{\bf To be continued...}
 
 %And still not much.
 
@@ -251,7 +316,7 @@ In the Limber approximation, the angular correlation function betwee any two tra
 C_{12}(\theta) = \int d\chi'q_1(\chi')q_2(\chi')\int dk\frac{k}{2\pi}P_{\delta}(k,\chi')J_0[f_K(\chi')\theta k],
 \end{equation}
 %
-where $J_0$ is the Bessel function of order 0, $\chi$ is the comoving distance and $f_K(\chi)$ is the radial function that multiplies the spatial metric element, which is different from $\chi$ in the case of a cosmology with non-zero curvature. {\bf TODO. Need to verify $f_K$ implementation in CCL.}
+where $J_0$ is the Bessel function of order 0, $\chi$ is the comoving distance and $f_K(\chi)$ is the radial function that multiplies the spatial metric element, which is different from $\chi$ in the case of a cosmology with non-zero curvature. {\bf TODO. Need to verify $f_K$ implementation in {\tt CCL}.}
 
 {\bf Clustering.} For clustering, the relevant weight is given by $q_1(\chi)=b_1(\chi)dN_1/d\chi(\chi)$, the comoving distance probability distribution times the bias. The angular correlation function can also be re-written as
 \begin{equation}
@@ -297,7 +362,7 @@ Each call to the halo mass function requires an assumed model chosen during init
 
 \subsection{Photo-$z$ implementation}
 \label{sec:photoz}
-LSST galaxy redshifts will be obtained using photometry. However, analytic forms of galaxy redshift distributions are usually known in terms of spectroscopic redshifts, obtained as fits from a spectroscopic subsample (or extrapolation thereof). A model is therefore required for the probability of measuring a particular photometric redshift given a spectroscopic redshift. CCL allows the user to flexibly provide their own such photometric redshift model.
+LSST galaxy redshifts will be obtained using photometry. However, analytic forms of galaxy redshift distributions are usually known in terms of spectroscopic redshifts, obtained as fits from a spectroscopic subsample (or extrapolation thereof). A model is therefore required for the probability of measuring a particular photometric redshift given a spectroscopic redshift. {\tt CCL} allows the user to flexibly provide their own such photometric redshift model.
 
 The user provides a function, which accepts a photometric redshift, a spectroscopic redshift, and a void pointer which points to a structure containing any further parameters of the photo-z model. The user then also provides this structure of parameters.
 
@@ -307,7 +372,7 @@ This user-provided model is incorporated when computing $\frac{dN}{dz}^i$ in pho
 \section{Tests and validation}
 \label{sec:tests}
 
-Our goal is for outputs of CCL to be validated against the results of the code comparison project down to a $10^{-4}$ or better accuracy level. {\bf TODO: Currently having problems validating the correlation functions to this level. Also, we need a discussion of why this accuracy level is needed.} 
+Our goal is for outputs of {\tt CCL} to be validated against the results of the code comparison project down to a $10^{-4}$ or better accuracy level. {\bf TODO: Currently having problems validating the correlation functions to this level. Also, we need a discussion of why this accuracy level is needed.} 
 
 A code comparison project was carried out among members of TJP where the following outputs of cosmological forecast codes were compared and validated:
 \begin{enumerate}
@@ -341,7 +406,7 @@ From the comparison, we were also able to identify some typical issues which aff
 \begin{itemize}
 \item For achieving $10^{-4}$ precision in $\sigma(M)$ and the normalisation of the power spectrum, one should check that the integral of $\sigma_8$ and $\sigma(M)$ has converged for the chosen values of $\{k_{\rm min},k_{\rm max}\}$. After checking convergence, we achieved the desired precision.
 \item Also note that for $\sigma(M)$, it is important to set the desired precision level correctly for the numerical integrator. The integral usually yields $\sigma^2(M)$, and not $\sigma(M)$. Hence, one has to set the desired precision taking the exponent into account.
-\item The value of the gravitational constant, $G$, enters into the critical density. We found that failure to define $G$ with sufficient precision would result in lack of convergence at the $10^{-4}$ level between the different submissions. Importantly, note that CAMB barely has $10^{-4}$ precision in $G$ (and similarly, there might be other constants within CAMB/CLASS for which one should check the precision level). {\bf TODO: For CCL we are using the value from the Particle Physics Handbook, how does it compare?}
+\item The value of the gravitational constant, $G$, enters into the critical density. We found that failure to define $G$ with sufficient precision would result in lack of convergence at the $10^{-4}$ level between the different submissions. Importantly, note that CAMB barely has $10^{-4}$ precision in $G$ (and similarly, there might be other constants within CAMB/CLASS for which one should check the precision level). {\bf TODO: For {\tt CCL} we are using the value from the Particle Physics Handbook, how does it compare?}
 \item Including/excluding radiation in the computation of the comoving distances and the growth function can easily make a difference of $10^{-4}$ at the redshifts required in this submission.
 \end{itemize}
 
@@ -361,27 +426,29 @@ In this second step, only 2 codes have been compared so far. More outputs are ne
 \item The cross-correlation between bins is particularly sensitive to having enough points to sample the lensing kernel. 
 \item The nonlinear behaviour is sensitive to $l_{\rm max}$, we had to go up to 30,000 to get convergence (and we could not achieve $0.01\%$ convergence).
 \item The large scales are sensitive to $l_{\rm min}$ (which also prompts a question about using the Limber approximation or not).
-\item Because we are using BBKS, evaluating the $P(k)$ at arbitrary $k_{\rm max}$ is not a problem, but we will need to test convergence in other cases.
+%\item Because we are using BBKS, evaluating the $P(k)$ at arbitrary $k_{\rm max}$ is not a problem, but we will need to test convergence in other cases.
 \item The correlation functions are sensitive to how the power spectrum is interpolated. For example, in one case we had fewer $l$'s and we had to use an order $5$ spline. If we sample at all $l$'s then a linear interpolation is enough.
 \end{itemize}
 
 {\bf TODO: Describe additional comparisons I know of, but which were not part of the code comparison:} David compared the HMF of one of the cases to his own outputs. Elisabeth was planning on producing outputs for correlation function as well.
 
-CCL has a suite of test routines which, upon compilation, compare its outputs to the benchmarks from code comparison. These are run with ``make check''.
+{\tt CCL} has a suite of test routines which, upon compilation, compare its outputs to the benchmarks from code comparison. These are run with ``make check''.
 
-\section{Future functionality to be included}
 
-In the future, we hope that CCL will include (... more here ...)
+\section{Default configuration}
+\label{sec:default}
+
+In its default configuration, {\tt CCL} adopts the nonlinear matter power spectrum from {\tt CLASS} through the Halofit implementation and the Tinker mass function for number counts.
 
 \section{Python wrapper}
 \label{sec:python}
 
-A Python wrapper for CCL is provided through a module called {\tt pyccl}. The whole CCL interface can be accessed through regular Python functions and classes, with all of the computation happening in the background through the C code. The functions all support {\tt numpy} arrays as inputs and outputs, with any loops being performed in the C code for speed.
+A Python wrapper for {\tt CCL} is provided through a module called {\tt pyccl}. The whole {\tt CCL} interface can be accessed through regular Python functions and classes, with all of the computation happening in the background through the C code. The functions all support {\tt numpy} arrays as inputs and outputs, with any loops being performed in the C code for speed.
 
 \subsection{Installation}
 \label{sec:python:install}
 
-At the moment, {\tt pyccl} needs to be compiled separately from the main CCL library. The wrapper's build tools currently assume that your C compiler is {\tt gcc} (with OpenMP enabled), and that you have a working Python 2.x installation with {\tt numpy} and {\tt distutils} with {\tt swig}. To build and install the {\tt pyccl} module, go to the root CCL directory and choose one of the following options:
+At the moment, {\tt pyccl} needs to be compiled separately from the main {\tt CCL} library. The wrapper's build tools currently assume that your C compiler is {\tt gcc} (with OpenMP enabled), and that you have a working Python 2.x installation with {\tt numpy} and {\tt distutils} with {\tt swig}. To build and install the {\tt pyccl} module, go to the root {\tt CCL} directory and choose one of the following options:
 \begin{itemize}
  \item To build and install the wrapper for the current user only, run \\
  {\tt \$ python setup.py install --user}
@@ -390,7 +457,7 @@ At the moment, {\tt pyccl} needs to be compiled separately from the main CCL lib
  \item To build the wrapper in-place in the source directory (for testing), run \\
  {\tt \$ python setup.py build\_ext --inplace}
 \end{itemize}
-If you choose either of the first two options, the {\tt pyccl} module will be installed into a sensible location in your {\tt PYTHONPATH}, and so should be automatically picked up by your Python interpreter. You can then simply import the module using {\tt import pyccl}. If you use the last option, however, you must either start your interpreter from the root CCL directory, or manually add the root CCL directory to your {\tt PYTHONPATH}.
+If you choose either of the first two options, the {\tt pyccl} module will be installed into a sensible location in your {\tt PYTHONPATH}, and so should be automatically picked up by your Python interpreter. You can then simply import the module using {\tt import pyccl}. If you use the last option, however, you must either start your interpreter from the root {\tt CCL} directory, or manually add the root {\tt CCL} directory to your {\tt PYTHONPATH}.
 
 \subsection{Example}
 \label{sec:python:example}
@@ -428,12 +495,12 @@ print cls
 \subsection{Technical notes on how the Python wrapper is implemented}
 \label{sec:python:technical}
 
-The Python wrapper is built using the {\tt swig} tool, which automatically scans the CCL C headers and builds a matching interface in Python. The default autogenerated {\tt swig} interface can be accessed through the {\tt pyccl.lib} module if necessary. A more user-friendly wrapper has been written on top of this to provide more structure to the module, allow {\tt numpy} vectorization, and provide more natural Python objects to use (instead of opaque {\tt swig}-generate objects).
+The Python wrapper is built using the {\tt swig} tool, which automatically scans the {\tt CCL} C headers and builds a matching interface in Python. The default autogenerated {\tt swig} interface can be accessed through the {\tt pyccl.lib} module if necessary. A more user-friendly wrapper has been written on top of this to provide more structure to the module, allow {\tt numpy} vectorization, and provide more natural Python objects to use (instead of opaque {\tt swig}-generate objects).
 
 The key parts of the wrapper are as follows:
 \paragraph{{\tt setup.py}} This instructs {\tt swig} and other build tools on how to find the right source files and set compile-time variables correctly.
 
-Some of the default {\tt setup.py} behavior has been overridden, to allow the CLASS-dependent components of CCL to be built correctly. This is necessary because CLASS requires the variable {\tt \_\_CLASSDIR\_\_} to be set at compile-time. This variable contains the path to the root directory containing various data files needed by CLASS. If it is not set to the location where these files will eventually be installed, a segfault will occur whenever any CLASS functions are accessed inside the wrapper. The {\tt setup.py} script handles finding the (system-dependent) installation location, installing the data files there, and passing the correct option to the compiler when the CLASS sources are compiled.
+Some of the default {\tt setup.py} behavior has been overridden, to allow the CLASS-dependent components of {\tt CCL} to be built correctly. This is necessary because CLASS requires the variable {\tt \_\_CLASSDIR\_\_} to be set at compile-time. This variable contains the path to the root directory containing various data files needed by CLASS. If it is not set to the location where these files will eventually be installed, a segfault will occur whenever any CLASS functions are accessed inside the wrapper. The {\tt setup.py} script handles finding the (system-dependent) installation location, installing the data files there, and passing the correct option to the compiler when the CLASS sources are compiled.
 
 Note that certain compiler flags, like {\tt -fopenmp}, are also set in {\tt setup.py}. If you are not using {\tt gcc}, you may need to modify these flags (see the {\tt extra\_compile\_args} argument of the {\tt setup()} function).
 
@@ -441,11 +508,11 @@ Note that certain compiler flags, like {\tt -fopenmp}, are also set in {\tt setu
 
 The interface files also contain code that tells {\tt swig} how to convert C array arguments to {\tt numpy} arrays. For certain functions, this code may also contain a simple loop to effectively vectorize the function.
 
-The main interface file is {\tt pyccl/ccl.i}, which imports all of the other interface files. Most of the CCL source files (e.g. {\tt core.c}) have their own interface file too. For other files, mostly containing support/utility functions, {\tt swig} only needs the C header ({\tt .h}) file to be specified in the main {\tt ccl.i} file, however. (The C source file must also be added to the list in {\tt setup.py} for it to be compiled successfully.)
+The main interface file is {\tt pyccl/ccl.i}, which imports all of the other interface files. Most of the {\tt CCL} source files (e.g. {\tt core.c}) have their own interface file too. For other files, mostly containing support/utility functions, {\tt swig} only needs the C header ({\tt .h}) file to be specified in the main {\tt ccl.i} file, however. (The C source file must also be added to the list in {\tt setup.py} for it to be compiled successfully.)
 
 \paragraph{Python module files} The structure of the Python module, as seen by the user, is organized through the {\tt pyccl/\_\_init\_\_.py} file, which imports only the parts of the {\tt swig} wrapper that are useful to the user. The complete autogenerated {\tt swig} interface can be accessed through the {\tt pyccl.lib} sub-module if necessary.
 
-Individual sub-modules from CCL are wrapped in their own Python scripts (e.g. {\tt power.py}), which typically provide a nicer ``Pythonic'' interface to the underlying CCL functions and objects. This includes automatically choosing whether to use the vectorized C function or not, as well as some conversions from Python objects to the autogenerated {\tt swig} objects. Most of the core Python objects, like {\tt Parameters} and {\tt Cosmology}, are defined in {\tt core.py}. These objects also do some basic memory management, like calling the corresponding {\tt ccl\_free\_*} C function when the Python object is destroyed.
+Individual sub-modules from {\tt CCL} are wrapped in their own Python scripts (e.g. {\tt power.py}), which typically provide a nicer ``Pythonic'' interface to the underlying {\tt CCL} functions and objects. This includes automatically choosing whether to use the vectorized C function or not, as well as some conversions from Python objects to the autogenerated {\tt swig} objects. Most of the core Python objects, like {\tt Parameters} and {\tt Cosmology}, are defined in {\tt core.py}. These objects also do some basic memory management, like calling the corresponding {\tt ccl\_free\_*} C function when the Python object is destroyed.
 
 \paragraph{Auto-generated wrapper files} The {\tt swig} command is triggered when you run {\tt setup.py}, and automatically generates a number of C and Python wrapper files in the {\tt pyccl/} directory. These typically have names like {\tt ccl\_*.c} and {\tt ccl\_*.py}, and should not be edited directly, as {\tt swig} will overwrite them when it next runs.
 
@@ -455,10 +522,18 @@ The build process will also create a {\tt pyccl/ccllib.py} file, which is the ra
 \section{Examples}
 \label{sec:example}
 
-Examples of how to run CCL are provided in the {\tt tests} sub-directory of the library. The first resource for a new user should be the {\tt ccl\_sample\_run.c} file. This starts by setting up the CCL default configuration. Then, it creates the ``cosmo'' structure, which contains distances and power spectra splines, for example. There are example calls for routines that output comoving radial distances, the scale factor, the growth factor and $\sigma_8$. Toy models are created for the redshift distributions of galaxies in the clustering and lensing samples, and for the bias of the clustering sample ($b(z)=1+z$). These are used for constructing the ``tracer'' structures via {\tt CCL\_Cltracer}, which can then be called to obtain the angular power spectra for clustering, cosmic shear and galaxy lensing.
+Examples of how to run {\tt CCL} are provided in the {\tt tests} sub-directory of the library. The first resource for a new user should be the {\tt ccl\_sample\_run.c} file. This starts by setting up the {\tt CCL} default configuration. Then, it creates the ``cosmo'' structure, which contains distances and power spectra splines, for example. There are example calls for routines that output comoving radial distances, the scale factor, the growth factor and $\sigma_8$. Toy models are created for the redshift distributions of galaxies in the clustering and lensing samples, and for the bias of the clustering sample ($b(z)=1+z$). These are used for constructing the ``tracer'' structures via {\tt CCL\_Cltracer}, which can then be called to obtain the angular power spectra for clustering, cosmic shear and galaxy lensing.
+
+
+\section{Future functionality to be included}
+\label{sec:future}
+
+In the future, we hope that {\tt CCL} will include {\bf (... more here ...)}
 
 \section{License}
 \label{sec:license}
+
+{\bf Pending}
 
 \input{acknowledgments}
 
