@@ -356,7 +356,7 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo){
   double * z = ccl_linear_spacing(amin,amax, na);
   double * y2d = malloc(nk * na * sizeof(double));
   if (z==NULL||y==NULL|| x==NULL || y2d==0){
-    cosmo->status = 4;
+    cosmo->status = CCL_ERROR_SPLINE;
     strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_class(): memory allocation error\n");
   }
   else{  
@@ -375,9 +375,8 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo){
     if (status){
       gsl_spline_free(log_power_lin);
       ccl_free_class_structs(cosmo, &ba,&th,&pt,&tr,&pm,&sp,&nl,&le);
-      cosmo->status = 4;
+      cosmo->status = CCL_ERROR_SPLINE;
       strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_class(): Error creating log_power_lin spline\n");
-      ccl_free_class_structs(cosmo, &ba,&th,&pt,&tr,&pm,&sp,&nl,&le);
       return;
     }
     else
@@ -403,7 +402,7 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo){
       free(y);
       free(z);
       gsl_spline2d_free(log_power_nl);
-      cosmo->status = 4;
+      cosmo->status = CCL_ERROR_SPLINE;
       strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_class(): Error creating log_power_nl spline\n");
       return;
     }
