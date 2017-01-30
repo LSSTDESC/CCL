@@ -171,6 +171,20 @@ The results of this approximation are shown in Figure \ref{fig:NLextrapol_z0}. W
 \end{figure}
 %------------------------
 
+\subsubsection{Linear extrapolation}
+\label{sec:Lextrapol}
+
+With the implementation described in the previous section, the power spectrum splines are initialized up to {\tt K\_MAX\_SPLINE}. This is also true for the linear matter power spectrum, which is used within {\tt CCL} in particular to obtain $\sigma_8$. We have tested here how the procedure described in the previous section affects the convergence of the linear matter power spectrum. We compare the fiducial {\tt CCL} output to the case where we set {\tt K\_MAX\_SPLINE}$=10^4/Mpc$. The result is shown in Figure \ref{fig:plinconv}. Although there is a significant difference ($\gtrsim 10\%$) between the linear power spectra at large $k$, we have confirmed that the difference in $\sigma_8$ is negligible. Nevertheless, for other applications that use the linear power spectrum, the user might need to increase the value of {\tt K\_MAX\_SPLINE}.
+
+%------------------------
+\begin{figure}
+\centering
+\includegraphics[width=0.8\textwidth]{figures/test_lin_extrapol.eps}
+\caption{Convergence of the linear matter power spectrum by adopting {\tt K\_MAX\_SPLINE}$=500/Mpc$ compared to the case with {\tt K\_MAX\_SPLINE}$=10^4/Mpc$.}
+\label{fig:plinconv}
+\end{figure}
+%------------------------
+
 \subsubsection{Normalization of the power spectrum}
 \label{sec:PSnorm}
 
