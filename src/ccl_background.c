@@ -11,6 +11,12 @@
 #include "gsl/gsl_integration.h"
 #include "gsl/gsl_roots.h"
 
+//PHIL: We need to create a function here for cosmoving angular distance
+//that takes curvature into account. This function needs to then be called
+//by the computation of the transfer functions for the angular power spectra
+//in ccl_cls.c. This includes the conversion from ell to k.
+//See 1411.0115v2
+
 //TODO: is it worth separating between cases for speed purposes?
 //E.g. flat vs non-flat, LDCM vs wCDM
 //CHANGED: modified this to include non-flat cosmologies
@@ -110,6 +116,9 @@ static int growth_factor_and_growth_rate(double a,double *gf,double *fg,ccl_cosm
   }
 }
 
+//PHIL: We need a new function which takes chi
+//and converts it into the angular comoving
+//distance f_K(chi), Eq. (2) of 1411.0115v2.
 /* --------- ROUTINE: compute_chi ---------
 INPUT: scale factor, cosmology
 OUTPUT: chi -> radial comoving distance

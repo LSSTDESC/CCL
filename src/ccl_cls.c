@@ -10,6 +10,11 @@
 #include "gsl/gsl_errno.h"
 #include "gsl/gsl_integration.h"
 
+//PHIL: Several transfer functions will need to be modified.
+//They are currently calling chi (the radial comoving distance)
+//but they should be calling f_K, the angular comoving distance.
+//Also, when going from ell to k, chi should be replaced by f_K(chi).
+
 //Spline creator
 //n     -> number of points
 //x     -> x-axis
