@@ -513,13 +513,65 @@ TASK: compute the linear power spectrum at a given redshift
 */
 
 double ccl_linear_matter_power(ccl_cosmology * cosmo, double a, double k){
+  
     ccl_cosmology_compute_power(cosmo);
     double log_p_1;
-    int status = gsl_spline_eval_e(cosmo->data.p_lin, log(k), NULL,&log_p_1);
-    if (status){
+    double deltak=1e-4;
+    double deriv_plin_kmid,deriv2_plin_kmid;
+
+    if(k<=K_MAX_SPLINE){
+      int status = gsl_spline_eval_e(cosmo->data.p_lin, log(k), NULL,&log_p_1);
+      if (status){
         cosmo->status = CCL_ERROR_SPLINE_EV;
         sprintf(cosmo->status_message ,"ccl_power.c: ccl_linear_matter_power(): Spline evaluation error\n");
-       return NAN;
+	return NAN;
+      }
+    } else { //Extrapolate NL regime using log derivative
+      
+      double lkmid=log(K_MAX_SPLINE)-2*deltak;
+      double lkmid_minus_2delta=lkmid-2*deltak;
+      double lkmid_plus_2delta=log(K_MAX_SPLINE);
+      double lkmid_minus_delta=lkmid-deltak;
+      double lkmid_plus_delta=lkmid+deltak;
+      double lplin_plus_2delta;
+      int status =  gsl_spline_eval_e(cosmo->data.p_lin, lkmid_plus_2delta, NULL ,&lplin_plus_2delta);
+      if (status){
+	cosmo->status = CCL_ERROR_SPLINE_EV;
+	sprintf(cosmo->status_message ,"ccl_power.c: ccl_linear_matter_power(): Spline evaluation error\n");
+	return NAN;
+      }
+      double lplin_minus_2delta;
+      status =  gsl_spline_eval_e(cosmo->data.p_lin, lkmid_minus_2delta, NULL ,&lplin_minus_2delta);
+      if (status){
+	cosmo->status = CCL_ERROR_SPLINE_EV;
+	sprintf(cosmo->status_message ,"ccl_power.c: ccl_linear_matter_power(): Spline evaluation error\n");
+	return NAN;
+      }
+      double lplin_plus_delta;
+      status =  gsl_spline_eval_e(cosmo->data.p_lin, lkmid_plus_delta,NULL ,&lplin_plus_delta);
+      if (status){
+	cosmo->status = CCL_ERROR_SPLINE_EV;
+	sprintf(cosmo->status_message ,"ccl_power.c: ccl_linear_matter_power(): Spline evaluation error\n");
+	return NAN;
+      }
+      double lplin_minus_delta;
+      status =  gsl_spline_eval_e(cosmo->data.p_lin, lkmid_minus_delta,NULL,&lplin_minus_delta);
+      if (status){
+	cosmo->status = CCL_ERROR_SPLINE_EV;
+	sprintf(cosmo->status_message ,"ccl_power.c: ccl_linear_matter_power(): Spline evaluation error\n");
+	return NAN;
+      }
+      double lplin_kmid;
+      status =  gsl_spline_eval_e(cosmo->data.p_lin, lkmid,NULL,&lplin_kmid);
+      if (status){
+	cosmo->status = CCL_ERROR_SPLINE_EV;
+	sprintf(cosmo->status_message ,"ccl_power.c: ccl_linear_matter_power(): Spline evaluation error\n");
+	return NAN;
+      }
+      deriv_plin_kmid=(-lplin_plus_2delta+8.0*lplin_plus_delta-8.0*lplin_minus_delta+lplin_minus_2delta)/(12*deltak);
+      deriv2_plin_kmid=(lplin_plus_delta-2*lplin_kmid+lplin_minus_delta)/deltak/deltak;
+      log_p_1=lplin_kmid+deriv_plin_kmid*(log(k)-lkmid)+deriv2_plin_kmid/2.*(log(k)-lkmid)*(log(k)-lkmid);
+
     }
 
     double p_1 = exp(log_p_1);
