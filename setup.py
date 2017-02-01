@@ -107,11 +107,11 @@ _ccllib = Extension(
                include_dirs = [numpy_include, "include/", "class/include"],
                extra_compile_args=['-O4', '-fopenmp', '-std=gnu99',
                                    '-D__CLASSDIR__="%s"' % CLASS_DATA_DIR],
-               #extra_compile_args=['-g', '-O0', '-Q',], # For debugging
+               #extra_compile_args=['-g', '-O0', '-Q', '-std=gnu99'], # Debug
                swig_opts=['-threads'],
            )
-           # N.B. Needs -std=gnu99 to allow for loop initial declarations *and* 
-           # for M_PI to be defined in math.h (it's not deined in C99)
+           # N.B. Needs -std=gnu99 to allow for loop variables to be declared 
+           # in-line *and* for M_PI to be defined in math.h (it's not in C99)
 
 # CCL setup script
 setup(  name         = "pyccl",

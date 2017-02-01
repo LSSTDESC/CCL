@@ -21,7 +21,7 @@ from massfunction import massfunc, massfunc_m2r, sigmaM
 from cls import angular_cl, ClTracer, ClTracerNumberCounts, ClTracerLensing
 
 from lsst_specs import bias_clustering, sigmaz_clustering, sigmaz_sources, \
-                       specs_dNdz_tomog
+                       dNdz_tomog, PhotoZFunction
 
 # Useful constants and unit conversions
 from constants import CLIGHT_HMPC, MPC_TO_METER, PC_TO_METER, \
