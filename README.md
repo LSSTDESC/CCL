@@ -34,9 +34,26 @@ make check
 1. You need to link to GSL-2 in your local version of the Makefile.
 2. Sometimes, "make check" can fail. In that case, go to "*tests/ccl_test.c*" and comment out "**define CTEST_SEGFAULT**"
 
- 
+## Python wrapper installation
+A Python wrapper for CCL is provided through a module called *pyccl*. At the moment, *pyccl* needs to be compiled separately from the main CCL library. The wrapper’s build tools currently assume that your C compiler is *gcc* (with OpenMP enabled), and that you have a working Python 2.x installation with *numpy* and *distutils* with *swig*. To build and install the *pyccl* module, go to the root CCL directory and choose one of the following options:
+
+* To build and install the wrapper for the current user only, run
+````sh
+python setup.py install --user
+````
+* To build install the wrapper for all users, run
+````sh
+sudo python setup.py install
+````
+* To build the wrapper in-place in the source directory (for testing), run
+````sh
+python setup.py build_ext --inplace
+````
+If you choose either of the first two options, the *pyccl* module will be installed into a sensible location in your *PYTHONPATH*, and so should be automatically picked up by your Python interpreter. You can then simply import the module using *import pyccl*. If you use the last option, however, you must either start your interpreter from the root CCL directory, or manually add the root CCL directory to your *PYTHONPATH*.
+
+
 # Documentation
-This document contains basic information about used structures and functions. At the end of document is provided code which implements these basic functions (also in *tests/min_code.c*).
+This document contains basic information about used structures and functions. At the end of document is provided code which implements these basic functions (also in *tests/ccl_sample_run.c*). More information about CCL functions and implemetation can be found in *doc/ccl_note.pdf*.
 ### Cosmological parameters
 Start by defining cosmological parameters defined in structure **ccl_parameters**. This structure (exact definition in *include/ccl_core.h*) contains densities of matter, parameters of dark energy (*w0, wa*), Hubble parameters, primordial poer spectra, radiation parameters, derived parameters (*sigma_8, Omega_1, z_star*) and modified growth rate.
 
@@ -101,9 +118,6 @@ double ccl_sigmaR(ccl_cosmology *cosmo, double R);
 double ccl_sigma8(ccl_cosmology *cosmo);
 ````
 These and other functions for different matter power spectra can be found in file *include/ccl_power.h*.
-<<<<<<< b57cc2940e42eed4b11c528eafdbabca66c1460b
-### Example code
-=======
 
 ### Angular power spectra
 CCL can compute angular power spectra for two tracer types: galaxy number counts and galaxy weak lensing. Tracer parameters are defined in structure **CCL_ClTracer**. In general, you can create this object with function **ccl_cl_tracer_new**
@@ -167,10 +181,9 @@ user_pz_info* ccl_specs_create_photoz_info(void * user_params, double(*user_pz_f
 ````
 
 ## Example code
->>>>>>> halo mass func
-This code can also be found in *tests/min_code.h* You can run the following example code. For this you will need to compile with:
+This code can also be found in *tests/ccl_sample_run.c* You can run the following example code. For this you will need to compile with:
 ````sh
-gcc -Wall -Wpedantic -g -O0 -I./include -std=c99 -fPIC tests/min_code.c -o tests/min_code -L./lib -L/usr/local/lib -lgsl -lgslcblas -lm -Lclass -lclass -lccl
+gcc -Wall -Wpedantic -g -O0 -I./include -std=c99 -fPIC tests/ccl_sample_run.c -o tests/ccl_sample_run -L./lib -L/usr/local/lib -lgsl -lgslcblas -lm -Lclass -lclass -lccl
 ````
 
 ````c
@@ -178,6 +191,7 @@ gcc -Wall -Wpedantic -g -O0 -I./include -std=c99 -fPIC tests/min_code.c -o tests
 #include <stdio.h>
 #include <math.h>
 #include "ccl.h"
+#include "ccl_lsst_specs.h"
 
 #define OC 0.25
 #define OB 0.05
@@ -187,6 +201,7 @@ gcc -Wall -Wpedantic -g -O0 -I./include -std=c99 -fPIC tests/min_code.c -o tests
 #define W0 -1.0
 #define WA 0.00
 #define NS 0.96
+#define S8 0.80
 #define AS 2.1E-9
 #define ZD 0.5
 #define NZ 128
@@ -195,21 +210,36 @@ gcc -Wall -Wpedantic -g -O0 -I./include -std=c99 -fPIC tests/min_code.c -o tests
 #define Z0_SH 0.65
 #define SZ_SH 0.05
 #define NL 512
+#define PS 0.1 
+
+double pz_func_example (double photo_z, double spec_z, void *param){
+	double delta_z = photo_z - spec_z;
+	return 1.0 / sqrt(PS*2*M_PI) * exp(-delta_z*delta_z / (2.0 * PS));
+}
 
 int main(int argc,char **argv){
+
 	// Initialize cosmological parameters
+	ccl_configuration config=default_config;
+	config.transfer_function_method=ccl_bbks;
 	ccl_parameters params=ccl_parameters_create(OC,OB,OK,ON,W0,WA,HH,AS,NS,-1,NULL,NULL);
+	params.sigma_8=S8;
 
 	// Initialize cosmology object given cosmo params
-	ccl_cosmology *cosmo=ccl_cosmology_create(params,default_config);
+	ccl_cosmology *cosmo=ccl_cosmology_create(params,config);
 
-	// Compute radial distances
+	// Compute radial distances (see include/ccl_background.h for more routines)
 	printf("Comoving distance to z = %.3lf is chi = %.3lf Mpc\n",
 		ZD,ccl_comoving_radial_distance(cosmo,1./(1+ZD)));
 	printf("Luminosity distance to z = %.3lf is chi = %.3lf Mpc\n",
 		ZD,ccl_luminosity_distance(cosmo,1./(1+ZD)));
-
-	// Compute growth factor and growth rate
+	
+	//Consistency check
+	printf("Scale factor at chi=%.3lf Mpc is a=%.3lf Mpc\n",
+	ccl_comoving_radial_distance(cosmo,1./(1+ZD)),
+	ccl_scale_factor_of_chi(cosmo,ccl_comoving_radial_distance(cosmo,1./(1+ZD))));
+	 
+	// Compute growth factor and growth rate (see include/ccl_background.h for more routines)
 	printf("Growth factor and growth rate at z = %.3lf are D = %.3lf and f = %.3lf\n",
 		ZD, ccl_growth_factor(cosmo,1./(1+ZD)),ccl_growth_rate(cosmo,1./(1+ZD)));
 
@@ -243,6 +273,10 @@ int main(int argc,char **argv){
 	}
 	printf("\n");
 
+	//Free up tracers
+	ccl_cl_tracer_free(ct_gc);
+	ccl_cl_tracer_free(ct_wl);
+	
 	//Halo mass function
 	printf("M\tdN/dM(z = 0, 0.5, 1))\n");
 	for(int logM=9;logM<=15;logM+=1)
@@ -256,16 +290,90 @@ int main(int argc,char **argv){
 	}
 	printf("\n");
 
-	//Free up tracers
-	ccl_cl_tracer_free(ct_gc);
-	ccl_cl_tracer_free(ct_wl);
+	// LSST Specification
+	user_pz_info* pz_info_example = ccl_specs_create_photoz_info(NULL, pz_func_example);
+	
+	double z_test;
+	double dNdz_tomo;
+	int z,status;
+	FILE * output;
+	
+	//Try splitting dNdz (lensing) into 5 redshift bins
+	double tmp1,tmp2,tmp3,tmp4,tmp5;
+	printf("Trying splitting dNdz (lensing) into 5 redshift bins. Output written into file tests/specs_example_tomo_lens.out\n");
+	output = fopen("./tests/specs_example_tomo_lens.out", "w");     
+	for (z=0; z<100; z=z+1){
+		z_test = 0.035*z;
+		status = ccl_specs_dNdz_tomog(z_test, DNDZ_WL_FID, 0.,6., pz_info_example,&dNdz_tomo); 
+		status = ccl_specs_dNdz_tomog(z_test, DNDZ_WL_FID, 0.,0.6, pz_info_example,&tmp1); 
+		status = ccl_specs_dNdz_tomog(z_test, DNDZ_WL_FID, 0.6,1.2, pz_info_example,&tmp2);
+		status = ccl_specs_dNdz_tomog(z_test, DNDZ_WL_FID, 1.2,1.8, pz_info_example,&tmp3);
+		status = ccl_specs_dNdz_tomog(z_test, DNDZ_WL_FID, 1.8,2.4, pz_info_example,&tmp4); 
+		status = ccl_specs_dNdz_tomog(z_test, DNDZ_WL_FID, 2.4,3.0, pz_info_example,&tmp5);
+		fprintf(output, "%f %f %f %f %f %f %f\n", z_test,tmp1,tmp2,tmp3,tmp4,tmp5,dNdz_tomo);
+	}
+
+	fclose(output);
+
+	//Try splitting dNdz (clustering) into 5 redshift bins
+	printf("Trying splitting dNdz (clustering) into 5 redshift bins. Output written into file tests/specs_example_tomo_lens.out\n");
+	output = fopen("./tests/specs_example_tomo_clu.out", "w");     
+	for (z=0; z<100; z=z+1){
+		z_test = 0.035*z;
+		status = ccl_specs_dNdz_tomog(z_test, DNDZ_NC,0.,6., pz_info_example,&dNdz_tomo); 
+		status = ccl_specs_dNdz_tomog(z_test, DNDZ_NC,0.,0.6, pz_info_example,&tmp1);
+		status = ccl_specs_dNdz_tomog(z_test, DNDZ_NC,0.6,1.2, pz_info_example,&tmp2);
+		status = ccl_specs_dNdz_tomog(z_test, DNDZ_NC,1.2,1.8, pz_info_example,&tmp3);
+		status = ccl_specs_dNdz_tomog(z_test, DNDZ_NC,1.8,2.4, pz_info_example,&tmp4);
+		status = ccl_specs_dNdz_tomog(z_test, DNDZ_NC,2.4,3.0, pz_info_example,&tmp5);
+		fprintf(output, "%f %f %f %f %f %f %f\n", z_test,tmp1,tmp2,tmp3,tmp4,tmp5,dNdz_tomo);
+	}
+
+	fclose(output);
+	
+	//Free up photo-z info
+	ccl_specs_free_photoz_info(pz_info_example);
 
 	//Always clean up!!
 	ccl_cosmology_free(cosmo);
 
 	return 0;
 }
+
 ````
 
+## Python wrapper
+A Python wrapper for CCL is provided through a module called *pyccl*. The whole CCL interface can be accessed through regular Python functions and classes, with all of the computation happening in the background through the C code. The functions all support *numpy* arrays as inputs and outputs, with any loops being performed in the C code for speed.
+
+The Python module has essentially the same functions as the C library, just presented in a more standard Python-like way. You can inspect the available functions and their arguments by using the built-in Python **help()** function, as with any Python module.
+
+Below is a simple example Python script that creates a new **Cosmology** object, and then uses it to calculate the angular power spectra for a simple lensing cross-correlation. It should
+take a few seconds on a typical laptop.
+
+````python
+import pyccl as ccl
+import numpy as np
+
+# Create new Parameters object, containing cosmo parameter values
+p = ccl.Parameters(Omega_c=0.27, Omega_b=0.045, h=0.67, A_s=1e-10, n_s=0.96)
+
+# Create new Cosmology object with these parameters. This keeps track of
+# previously-computed cosmological functions
+cosmo = ccl.Cosmology(p)
+
+# Define a simple binned galaxy number density curve as a function of redshift
+z_n = np.linspace(0., 1., 200)
+n = np.ones(z_n.shape)
+
+# Create objects to represent tracers of the weak lensing signal with this
+# number density (with has_intrinsic_alignment=False)
+lens1 = ccl.ClTracerLensing(cosmo, False, z_n, n)
+lens2 = ccl.ClTracerLensing(cosmo, False, z_n, n)
+
+# Calculate the angular cross-spectrum of the two tracers as a function of ell
+ell = np.arange(2, 10)
+cls = ccl.angular_cl(cosmo, lens1, lens2, ell)
+print cls
+````
 # License
 CCL is now under development.
