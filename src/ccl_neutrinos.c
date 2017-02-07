@@ -8,7 +8,7 @@
 static double ccl_nu_integrand(double x, void *r)
 {
   double rat=*((double*)(r));
-  return sqrt(x*x+rat*rat)/(exp(x)+1.0)*x*x;
+  return sqrt(x*x+rat*rat)/(exp(x)+1.0)*x*x; 
 }
 
 
@@ -61,24 +61,35 @@ double ccl_nu_phasespace_intg(gsl_spline* spl, double mnuOT) {
 double Omeganuh2 (double a, double Neff, double mnu, double TCMB, gsl_spline* psi) {
   if (Neff==0) return 0.0;
   double Tnu=TCMB*pow(4./11.,1./3.);
-  // effective neutrino temperature, very academic, but required for consistency with CLASS
-  double Tnu_eff = Tnu*pow(3.046/3.,0.25);
+  // Tnu_eff is used in the massive case because CLASS uses an effective temperature of nonLCDM components to match to mnu / Omeganu =93.14eV. Tnu_eff = T_ncdm * TCMB = 0.71611 * TCMB
+  double Tnu_eff = Tnu * 0.71611 / (pow(4./11.,1./3.)); 
   double a4=a*a*a*a;
   // prefix number is given by
   // type this into google:
   // 8*pi^5*(boltzmann constant)^4/(15*(h*c)^3))*(1 Kelvin)**4/(3*(100 km/s/Mpc)^2/(8*Pi*G)*(speed of light)^2)
   //
-  double prefix = 4.48130979e-7*Tnu*Tnu*Tnu*Tnu;
-  if (mnu==0) return Neff*prefix*7./8./a4;
-  // mass of one
+  //double prefix = 4.48130979e-7*Tnu*Tnu*Tnu*Tnu;
+  // DL: I have updated the constant to use the exact same values used by CLASS, but it doesn't matter at a 10^{-4} level.
+  double prefix_massless = 4.481627251529075e-7*Tnu*Tnu*Tnu*Tnu;
+  
+  // Massless case:
+  if (mnu==0){ 
+	return Neff*prefix_massless*7./8./a4;
+  }
+  // get the mass of one species
   double mnuone=mnu/Neff;
-  // mass over T
-  // This returns the density at a normalized so that
-  // we get nuh2 at a=0
-  // (1 eV) / (Boltzmann constant * 1 kelvin) =
-  // 11 604.5193
-  double mnuOT=mnuone/(Tnu_eff/a)*11604.519;
+  // Get mass over T (mass (eV) / ((kb eV/s/K) Tnu_eff (K)) 
+  // This returns the density at a normalized so that we get nuh2 at a=0
+  // (1 eV) / (Boltzmann constant * 1 kelvin) = 11 604.5193 
+  // DL: I have updated the constant to exactly match CLASS
+  //double mnuOT=mnuone/(Tnu_eff/a)*11604.519; 
+  double mnuOT=mnuone/(Tnu_eff/a)*11604.505289680865;
+
+  // Get the value of the phase-space integral 
   double intval=ccl_nu_phasespace_intg(psi,mnuOT);
-  return Neff*intval*prefix/a4;
+  
+  // Define the prefix using the effective temperature (to get mnu / Omega = 93.14 eV) for the massive case:
+  double prefix_massive = 4.481627251529075e-7*Tnu_eff*Tnu_eff*Tnu_eff*Tnu_eff;
+  return Neff*intval*prefix_massive/a4;
 }
 
