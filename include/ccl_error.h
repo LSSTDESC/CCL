@@ -10,4 +10,4 @@
 #define CCL_ERROR_ROOT 7
 #define CCL_ERROR_CLASS 8
 
-void ccl_check_status(ccl_cosmology *cosmo);
+void ccl_check_status(ccl_cosmology *cosmo, int* status);
