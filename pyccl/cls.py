@@ -115,9 +115,9 @@ def angular_cl(cosmo, cltracer1, cltracer2, ell):
     clt2 = _cltracer_obj(cltracer2)
     
     # Return Cl values, according to whether ell is an array or not
-    if isinstance(ell, float):
+    if isinstance(ell, float) or isinstance(ell, int) :
         # Use single-value function
-        return lib.angular_cl(cosmo, clt1, clt2, ell)
+        return lib.angular_cl(cosmo, ell, clt1, clt2)
     elif isinstance(ell, np.ndarray):
         # Use vectorised function
         return lib.angular_cl_vec(cosmo, clt1, clt2, ell, ell.size)
