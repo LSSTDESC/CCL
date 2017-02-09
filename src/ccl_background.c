@@ -11,12 +11,6 @@
 #include "gsl/gsl_integration.h"
 #include "gsl/gsl_roots.h"
 
-//PHIL: We need to create a function here for cosmoving angular distance
-//that takes curvature into account. This function needs to then be called
-//by the computation of the transfer functions for the angular power spectra
-//in ccl_cls.c. This includes the conversion from ell to k.
-//See 1411.0115v2
-
 //TODO: is it worth separating between cases for speed purposes?
 //E.g. flat vs non-flat, LDCM vs wCDM
 //CHANGED: modified this to include non-flat cosmologies
@@ -116,9 +110,6 @@ static int growth_factor_and_growth_rate(double a,double *gf,double *fg,ccl_cosm
   }
 }
 
-//PHIL: We need a new function which takes chi
-//and converts it into the angular comoving
-//distance f_K(chi), Eq. (2) of 1411.0115v2.
 /* --------- ROUTINE: compute_chi ---------
 INPUT: scale factor, cosmology
 OUTPUT: chi -> radial comoving distance
@@ -568,22 +559,18 @@ void ccl_comoving_radial_distances(ccl_cosmology * cosmo, int na, double a[na], 
   }
 }
 
-static double sinn(double x,int sign)
+double ccl_sinn(ccl_cosmology *cosmo,double chi)
 {
   //////
   //         { sin(x)  , if k==1
   // sinn(x)={  x      , if k==0
   //         { sinh(x) , if k==-1
-  double dum;
-
-  if(sign==-1)
-    dum=sinh(x);
+  if(cosmo->params.k_sign==-1)
+    return sinh(cosmo->params.sqrtk*chi)/cosmo->params.sqrtk;
   else if(sign==1)
-    dum=sin(x);
+    return sin(cosmo->params.sqrtk*chi)/cosmo->params.sqrtk;
   else
-    dum=x;
-
-  return dum;
+    return chi;
 }
 
 double ccl_comoving_angular_distance(ccl_cosmology * cosmo, double a)
@@ -592,10 +579,7 @@ double ccl_comoving_angular_distance(ccl_cosmology * cosmo, double a)
     ccl_cosmology_compute_distances(cosmo);
     ccl_check_status(cosmo);    
   }
-  double ksq=sqrt(fabs(cosmo->params.Omega_k))*cosmo->params.h/CLIGHT_HMPC;
-  double chi=gsl_spline_eval(cosmo->data.chi, a, cosmo->data.accelerator);
-
-  return sinn(ksq*chi,cosmo->params.k_sign)/ksq;
+  return ccl_sinn(cosmo,gsl_spline_eval(cosmo->data.chi,a,cosmo->data.accelerator));
 }
 
 void ccl_comoving_angular_distances(ccl_cosmology * cosmo, int na, double a[na], double output[na])
@@ -604,11 +588,8 @@ void ccl_comoving_angular_distances(ccl_cosmology * cosmo, int na, double a[na],
     ccl_cosmology_compute_distances(cosmo);
     ccl_check_status(cosmo);    
   }
-  double ksq=sqrt(fabs(cosmo->params.Omega_k))/CLIGHT_HMPC;
-  for (int i=0; i<na; i++){
-    double chi=gsl_spline_eval(cosmo->data.chi, a[i], cosmo->data.accelerator);
-    output[i]=sinn(ksq*chi,cosmo->params.k_sign)/ksq;
-  }
+  for (int i=0; i<na; i++)
+    output[i]=ccl_sinn(cosmo,gsl_spline_eval(cosmo->data.chi, a[i], cosmo->data.accelerator));
 }
 
 double ccl_luminosity_distance(ccl_cosmology * cosmo, double a)

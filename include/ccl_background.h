@@ -21,6 +21,9 @@ double ccl_luminosity_distance(ccl_cosmology * cosmo, double a);
 // Comoving luminosity distances in Mpc to scale factors as given in list a[0..na-1]
 void ccl_luminosity_distances(ccl_cosmology * cosmo, int na, double a[na], double output[na]);
 
+//Transforms between radial and angular distances
+double ccl_sinn(ccl_cosmology *cosmo,double chi);
+
 // Growth factor at scale factor a normalized to 1 at z=0
 double ccl_growth_factor(ccl_cosmology * cosmo, double a);
 // Growth factors at a list of scale factor given in a[0..na-1] normalized to 1 at z=0

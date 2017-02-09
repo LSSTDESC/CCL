@@ -10,11 +10,6 @@
 #include "gsl/gsl_errno.h"
 #include "gsl/gsl_integration.h"
 
-//PHIL: Several transfer functions will need to be modified.
-//They are currently calling chi (the radial comoving distance)
-//but they should be calling f_K, the angular comoving distance.
-//Also, when going from ell to k, chi should be replaced by f_K(chi).
-
 //Spline creator
 //n     -> number of points
 //x     -> x-axis
@@ -88,7 +83,7 @@ static double integrand_wl(double chip,void *params)
   if(chi==0)
     return h*pz;
   else
-    return h*pz*(chip-chi)/chip;
+    return h*pz*ccl_sinn(p->cosmo,chip-chi)/ccl_sinn(p->cosmo,chip);
 }
 
 //Integral to compute lensing window function
@@ -143,7 +138,7 @@ static double integrand_mag(double chip,void *params)
   if(chi==0)
     return h*pz*(1-2.5*sz);
   else
-    return h*pz*(1-2.5*sz)*(chip-chi)/chip;
+    return h*pz*(1-2.5*sz)*ccl_sinn(p->cosmo,chip-chi)/ccl_sinn(p->cosmo,chip);
 }
 
 //Integral to compute magnification window function
