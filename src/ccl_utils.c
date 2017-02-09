@@ -3,30 +3,32 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+/* ------- ROUTINE: ccl_linear spacing ------
+INPUTS: [xmin,xmax] of the interval to be divided in N bins
+OUTPUT: bin edges in range [xmin,xmax]
+*/
 
-double * ccl_linear_spacing(double xmin, double xmax, double dx, int * N){
-    int n = trunc((xmax-xmin)/dx) + 1;
+double * ccl_linear_spacing(double xmin, double xmax, int N){
+    double dx = (xmax-xmin)/(N -1.);
 
-    if (fabs(1-(xmax-xmin)/((n-1)*dx))>0.001){
-        *N = 0;
-        fprintf(stderr, "ERROR: Could not evenly divide range [%le, %le] with dx=%le\n", xmin, xmax, dx);
-        return NULL;
-    }
-
-    double * x = malloc(sizeof(double)*n);
+    double * x = malloc(sizeof(double)*N);
     if (x==NULL){
-        fprintf(stderr, "ERROR: Could not allocate memory for linear-spaced array (N=%d)\n", n);
-        *N=0;
+        fprintf(stderr, "ERROR: Could not allocate memory for linear-spaced array (N=%d)\n", N);
         return x;
     }
-    *N=n;
 
-    for (int i=0; i<n; i++){
+    for (int i=0; i<N; i++){
         x[i] = xmin + dx*i;
     }
 
     return x;
 }
+
+/* ------- ROUTINE: ccl_log spacing ------
+INPUTS: [xmin,xmax] of the interval to be divided logarithmically in N bins
+TASK: divide an interval in N logarithmic bins
+OUTPUT: bin edges in range [xmin,xmax]
+*/
 
 double * ccl_log_spacing(double xmin, double xmax, int N){
 
@@ -43,7 +45,7 @@ double * ccl_log_spacing(double xmin, double xmax, int N){
 
     double log_xmax = log(xmax);
     double log_xmin = log(xmin);
-    double dlog_x = (log_xmax - log_xmin) /  (N-1);
+    double dlog_x = (log_xmax - log_xmin) /  (N-1.);
 
 
     double * x = malloc(sizeof(double)*N);

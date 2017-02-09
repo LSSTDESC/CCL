@@ -14,10 +14,7 @@ static double ccl_nu_integrand(double x, void *r)
 
 gsl_spline* ccl_calculate_nu_phasespace_spline() {
   int N=CCL_NU_MNUT_N;
-  double *mnut = ccl_linear_spacing(log(CCL_NU_MNUT_MIN),
-				    log(CCL_NU_MNUT_MAX),
-				    (log(CCL_NU_MNUT_MAX)-log(CCL_NU_MNUT_MIN))/(CCL_NU_MNUT_N-1),
-				    &N);
+  double *mnut = ccl_linear_spacing(log(CCL_NU_MNUT_MIN),log(CCL_NU_MNUT_MAX),&N);
   double *y=malloc(sizeof(double)*CCL_NU_MNUT_N);
   
   int status=0;
