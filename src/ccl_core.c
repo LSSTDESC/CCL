@@ -116,6 +116,12 @@ ccl_parameters ccl_parameters_create(double Omega_c, double Omega_b, double Omeg
   params.Omega_m = Omega_b + Omega_c;
   params.Omega_n = Omega_n;
   params.Omega_k = Omega_k;
+  if(params.Omega_k==0)
+    params.k_sign=0;
+  else if(params.Omega_k>0)
+    params.k_sign=-1;
+  else
+    params.k_sign=1;
 
   // Dark Energy
   params.w0 = w0;
