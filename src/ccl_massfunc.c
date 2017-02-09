@@ -25,6 +25,7 @@ static double massfunc_f(ccl_cosmology *cosmo, double smooth_mass,double redshif
 {
   double fit_A, fit_a, fit_b, fit_c, fit_d, overdensity_delta;
   double scale, Omega_m_z;
+  double delta_c_Tinker, nu;
 
   double sigma=ccl_sigmaM(cosmo,smooth_mass,redshift);
   switch(cosmo->config.mass_function_method){
@@ -40,6 +41,25 @@ static double massfunc_f(ccl_cosmology *cosmo, double smooth_mass,double redshif
 
     return fit_A*(pow(sigma/fit_b,-fit_a)+1.0)*exp(-fit_c/sigma/sigma);
     break;
+    //this version uses f(nu) parameterization from Eq. 8 in Tinker et al. 2010
+    // use this for consistency with Tinker et al. 2010 fitting function for halo bias
+  case ccl_tinker10:
+    
+    overdensity_delta = 200.0;
+    //critical collapse overdensity assumed in this model
+    delta_c_Tinker = 1.686;
+    //peak height - note that this factorization is incorrect for e.g. massive neutrino cosmologies
+    nu = delta_c_Tinker/(sigma*ccl_growth_factor(cosmo,1./(1+redshift)));
+
+    fit_A = 0.368; //alpha in Eq. 8
+    fit_a = 0.864*pow(1+redshift, 0.27); //eta in Eq. 8
+    fit_b = 0.589*pow(1+redshift, 0.20); //beta in Eq. 8
+    fit_c = 0.864*pow(1+redshift, -0.01); //gamma in Eq. 8
+    fit_d = -0.729*pow(1+redshift, -0.08); //phi in Eq. 8;
+
+    return fit_A*(1.+pow(fit_a*nu,-2.*fit_d))*pow(nu, 2.*fit_a)*exp(-0.5*fit_c*nu*nu);
+    break;
+
   case ccl_watson:
     scale = 1.0/(1.0+redshift);
     Omega_m_z = ccl_omega_m_z(cosmo, scale);
@@ -67,7 +87,44 @@ static double massfunc_f(ccl_cosmology *cosmo, double smooth_mass,double redshif
     return 0;
   }
 }
+static double ccl_halo_b1(ccl_cosmology *cosmo, double smooth_mass,double redshift)
+{
+  double fit_A, fit_B, fit_C, fit_a, fit_b, fit_c, overdensity_delta, y;
+  double scale, Omega_m_z;
+  double delta_c_Tinker, nu;
 
+  double sigma=ccl_sigmaM(cosmo,smooth_mass,redshift);
+  switch(cosmo->config.mass_function_method){
+
+    //this version uses b(nu) parameterization, Eq. 6 in Tinker et al. 2010
+    // use this for consistency with Tinker et al. 2010 fitting function for halo bias
+  case ccl_tinker10:
+    
+    overdensity_delta = 200.0;
+    y = log10(overdensity_delta);
+    //critical collapse overdensity assumed in this model
+    delta_c_Tinker = 1.686;
+    //peak height - note that this factorization is incorrect for e.g. massive neutrino cosmologies
+    nu = delta_c_Tinker/(sigma*ccl_growth_factor(cosmo,1./(1+redshift)));
+    // Table 2 in https://arxiv.org/pdf/1001.3162.pdf
+    fit_A = 1.0 + 0.24*y*exp(-pow(4./y,4.)); 
+    fit_a = 0.44*y-0.88; 
+    fit_B = 0.183; 
+    fit_b = 1.5; 
+    fit_C = 0.019+0.107*y+0.19*exp(-pow(4./y,4.)); 
+    fit_c = 2.4; 
+
+    return 1.-fit_A*pow(nu,fit_a)/(pow(nu,fit_a)+pow(delta_c_Tinker,fit_a))+fit_B*pow(nu,fit_b)+fit_C*pow(nu,fit_c);
+    break;
+
+  default:
+    cosmo->status = 11;
+    sprintf(cosmo->status_message ,
+      "ccl_massfunc.c: ccl_halo_b1(): No b(M) fitting function implemented for mass_function_method: %d \n",
+      cosmo->config.mass_function_method);
+    return 0;
+  }
+}
 void ccl_cosmology_compute_sigma(ccl_cosmology * cosmo)
 {
     if(cosmo->computed_sigma)
@@ -163,6 +220,22 @@ double ccl_massfunc(ccl_cosmology *cosmo, double smooth_mass, double redshift)
   return f*rho_m*deriv/smooth_mass;
 }
 
+/*----- ROUTINE: ccl_halob1 -----
+INPUT: ccl_cosmology * cosmo, double smoothing mass in units of Msun, double redshift
+TASK: returns linear halo bias
+*/
+
+double ccl_halo_bias(ccl_cosmology *cosmo, double smooth_mass, double redshift)
+{
+  if (!cosmo->computed_sigma){
+    ccl_cosmology_compute_sigma(cosmo);
+    ccl_check_status(cosmo);
+  }
+
+  double f;
+  f = ccl_halo_b1(cosmo,smooth_mass,redshift);  
+  return f;
+}
 /*---- ROUTINE: ccl_massfunc_m2r -----
 INPUT: ccl_cosmology * cosmo, smooth_mass in units of Msun
 TASK: takes smoothing halo mass and converts to smoothing halo radius
