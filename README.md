@@ -5,17 +5,34 @@ The library is written in C99 and all functionality is directly callable from C 
 
 See also our wiki https://github.com/DarkEnergyScienceCollaboration/CCL/wiki
 # Installation
-In order to compile CCL you need GSL. You can get GSL here: https://www.gnu.org/software/gsl/. To install it you need to be the admin of your computer.
+In order to compile CCL you need GSL. You can get GSL here: https://www.gnu.org/software/gsl/. Note that CCL uses version 2+ of GSL (which is not yet standard in all systems).
 
-To compile CCL, go to the directory where you installed it and type "make".
+To install CCL, from the base directory (the one where this file is located) run:
+````sh
+./configure
+make
+make install
+````
+Often admin privileges will be needed to install the library. If you have those just type:
+````sh
+sudo make install
+````
+If you don't have admin privileges, you can still install the library by running
+````sh
+./configure --prefix=/path/to/install
+make
+make install
+````
+where /path/to/install is the absolute path to the directory where you want the library to be installed. If non-existing, this will create two directories, /path/to/install/include and /path/to/install/lib, and the library and header files will be installed there. Note that, in order to use CCL with your own scripts you'll have to add /path/to/install/lib to your LD_LIBRARY_PATH.
+
+All unit tests can be run after installation by running
+````sh
+make check
+````
 
 ## Known installation issues
-1. You need to link to GSL in your local version of the Makefile. The default Makefile links to the library path, but it might be the case that your version of GSL is not there. 
-2. Sometimes, "make test" can fail. In that case, go to "*tests/ccl_test.c*" and comment out "**define CTEST_SEGFAULT**"
-3. If you are planning to compile your own file that calls CCL, then you should add the following to your .bashrc:
-````sh
-export LD_LIBRARY_PATH=/path/to/where/ccl/is/installed/lib:$LD_LIBRARY_PATH
-````
+1. You need to link to GSL-2 in your local version of the Makefile.
+2. Sometimes, "make check" can fail. In that case, go to "*tests/ccl_test.c*" and comment out "**define CTEST_SEGFAULT**"
 
  
 # Documentation

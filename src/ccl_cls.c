@@ -517,7 +517,7 @@ static double transfer_dens(int l,double k,ccl_cosmology *cosmo,CCL_ClTracer *cl
 {
   double chi=(l+0.5)/k;
   if(chi<=clt->chimax) {
-    double z,pz,bz,gf,h;
+    double z,pz,bz,h;
     double a=ccl_scale_factor_of_chi(cosmo,chi);
     if(a>0)
       z=1./a-1;
@@ -525,9 +525,8 @@ static double transfer_dens(int l,double k,ccl_cosmology *cosmo,CCL_ClTracer *cl
       z=1E6;
     pz=spline_eval(z,clt->spl_nz);
     bz=spline_eval(z,clt->spl_bz);
-    gf=ccl_growth_factor(cosmo,a);
     h=cosmo->params.h*ccl_h_over_h0(cosmo,a)/CLIGHT_HMPC;
-    return pz*bz*gf*h;
+    return pz*bz*h;
   }
   else {
     return 0;
@@ -555,8 +554,8 @@ static double transfer_rsd(int l,double k,ccl_cosmology *cosmo,CCL_ClTracer *clt
     else z1=1E6;
     pz0=spline_eval(z0,clt->spl_nz);
     pz1=spline_eval(z1,clt->spl_nz);
-    gf0=ccl_growth_factor(cosmo,a0);
-    gf1=ccl_growth_factor(cosmo,a1);
+    gf0=1;
+    gf1=ccl_growth_factor(cosmo,a1)/ccl_growth_factor(cosmo,a0);
     fg0=ccl_growth_rate(cosmo,a0);
     fg1=ccl_growth_rate(cosmo,a1);
     h0=cosmo->params.h*ccl_h_over_h0(cosmo,a0)/CLIGHT_HMPC;
@@ -581,13 +580,12 @@ static double transfer_mag(int l,double k,ccl_cosmology *cosmo,CCL_ClTracer *clt
   double chi=(l+0.5)/k;
   if(chi<=clt->chimax) {
     double a=ccl_scale_factor_of_chi(cosmo,chi);
-    double gf=ccl_growth_factor(cosmo,a);
     double wM=spline_eval(chi,clt->spl_wM);
     
     if(wM<=0)
       return 0;
     else
-      return -2*clt->prefac_lensing*l*(l+1)*gf*wM/(a*chi*k*k);
+      return -2*clt->prefac_lensing*l*(l+1)*wM/(a*chi*k*k);
     //The actual prefactor on large scales should be sqrt((l+2.)*(l+1.)*l*(l-1.)) instead of l*(l+1)
     //      return clt->prefac_lensing*sqrt((l+2.)*(l+1.)*l*(l-1.))*gf*wL/(a*chi*k*k);
   }
@@ -605,13 +603,12 @@ static double transfer_wl(int l,double k,ccl_cosmology *cosmo,CCL_ClTracer *clt)
   double chi=(l+0.5)/k;
   if(chi<=clt->chimax) {
     double a=ccl_scale_factor_of_chi(cosmo,chi);
-    double gf=ccl_growth_factor(cosmo,a);
     double wL=spline_eval(chi,clt->spl_wL);
     
     if(wL<=0)
       return 0;
     else
-      return clt->prefac_lensing*l*(l+1)*gf*wL/(a*chi*k*k);
+      return clt->prefac_lensing*l*(l+1)*wL/(a*chi*k*k);
     //The actual prefactor on large scales should be sqrt((l+2.)*(l+1.)*l*(l-1.)) instead of l*(l+1)
     //      return clt->prefac_lensing*sqrt((l+2.)*(l+1.)*l*(l-1.))*gf*wL/(a*chi*k*k);
   }
@@ -628,7 +625,7 @@ static double transfer_IA_NLA(int l,double k,ccl_cosmology *cosmo,CCL_ClTracer *
 {
   double chi=(l+0.5)/k;
   if(chi<=clt->chimax) {
-    double z,pz,ba,rf,gf,h;
+    double z,pz,ba,rf,h;
     double a=ccl_scale_factor_of_chi(cosmo,chi);
     if(a>0)
       z=1./a-1;
@@ -637,9 +634,8 @@ static double transfer_IA_NLA(int l,double k,ccl_cosmology *cosmo,CCL_ClTracer *
     pz=spline_eval(z,clt->spl_nz);
     ba=spline_eval(z,clt->spl_ba);
     rf=spline_eval(z,clt->spl_rf);
-    gf=ccl_growth_factor(cosmo,a);
     h=cosmo->params.h*ccl_h_over_h0(cosmo,a)/CLIGHT_HMPC;
-    return pz*ba*rf*gf*h*sqrt((l+2.)*(l+1.)*l*(l-1.))/((l+0.5)*(l+0.5));
+    return pz*ba*rf*h*sqrt((l+2.)*(l+1.)*l*(l-1.))/((l+0.5)*(l+0.5));
   }
   else {
     return 0;
@@ -683,14 +679,21 @@ typedef struct {
 //Integrand for integral power spectrum
 static double cl_integrand(double lk,void *params)
 {
-  double t1,t2;
   IntClPar *p=(IntClPar *)params;
   double k=pow(10.,lk);
-  double pk=ccl_linear_matter_power(p->cosmo,1.,k);
-  t1=transfer_wrap(p->l,k,p->cosmo,p->clt1);
-  t2=transfer_wrap(p->l,k,p->cosmo,p->clt2);
+  double chimax=fmax(p->clt1->chimax,p->clt2->chimax);
+  double chi=(p->l+0.5)/k;
+  if(chi>chimax)
+    return 0;
+  else {
+    double t1,t2;
+    double a=ccl_scale_factor_of_chi(p->cosmo,chi); //Limber
+    double pk=ccl_nonlin_matter_power(p->cosmo,a,k);
+    t1=transfer_wrap(p->l,k,p->cosmo,p->clt1);
+    t2=transfer_wrap(p->l,k,p->cosmo,p->clt2);
 
-  return k*t1*t2*pk;
+    return k*t1*t2*pk;
+  }
 }
 
 //Figure out k intervals where the Limber kernel has support
@@ -761,5 +764,4 @@ double ccl_angular_cl(ccl_cosmology *cosmo,int l,CCL_ClTracer *clt1,CCL_ClTracer
 
   return M_LN10*result/(l+0.5);
 }
-//TODO: implement RSD? magnification? IA?
 //TODO: currently using linear power spectrum
