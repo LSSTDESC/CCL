@@ -11,11 +11,15 @@ LT_INIT([dlopen])
 AC_CONFIG_SRCDIR([src/ccl_core.c])
 AC_CONFIG_HEADERS([config.h])
 
+# Avoid problem with git timestamps
+AM_MAINTAINER_MODE
+
 # Checks for programs.
 AC_PROG_CC
 AC_PROG_CC_STDC
 AC_PROG_INSTALL
 AM_PROG_CC_C_O
+AM_MAINTAINER_MODE
 
 # Checks for libraries.
 AC_SEARCH_LIBS([pow],[m],[],AC_MSG_ERROR(Couldn't find libm. Required.))
