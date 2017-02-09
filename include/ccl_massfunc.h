@@ -4,5 +4,6 @@
 
 void ccl_cosmology_compute_sigma(ccl_cosmology * cosmo);
 double ccl_massfunc(ccl_cosmology * cosmo, double smooth_mass, double redshift);
+double ccl_halo_bias(ccl_cosmology *cosmo, double smooth_mass, double redshift);
 double ccl_massfunc_m2r(ccl_cosmology * cosmo, double smooth_mass);
 double ccl_sigmaM(ccl_cosmology * cosmo, double smooth_mass, double redshift);
