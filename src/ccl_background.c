@@ -90,7 +90,7 @@ static int * growth_factor_and_growth_rate(double a,double *gf,double *fg,ccl_co
   else {
     double y[2];
     double ainit=EPS_SCALEFAC_GROWTH;
-    gsl_odeiv2_system sys={growth_ode_system,NULL,2,cosmo, status}; /* RH */
+    gsl_odeiv2_system sys={growth_ode_system,NULL,2,cosmo}; /* RH */
     gsl_odeiv2_driver *d=
       gsl_odeiv2_driver_alloc_y_new(&sys,gsl_odeiv2_step_rkck,0.1*EPS_SCALEFAC_GROWTH,0,EPSREL_GROWTH);
 
@@ -98,18 +98,16 @@ static int * growth_factor_and_growth_rate(double a,double *gf,double *fg,ccl_co
     y[1]=EPS_SCALEFAC_GROWTH*EPS_SCALEFAC_GROWTH*EPS_SCALEFAC_GROWTH*
       h_over_h0(EPS_SCALEFAC_GROWTH,&(cosmo->params));
 
-    int *status=gsl_odeiv2_driver_apply(d,&ainit,a,y);
+    int status=gsl_odeiv2_driver_apply(d,&ainit,a,y);
     gsl_odeiv2_driver_free(d);
 
-    if(*status!=GSL_SUCCESS)
+    if(status!=GSL_SUCCESS)
       // RH made big change here
-      * status=1;
-      return status;
+      return 1;
     
-    *gf=y[0];
-    *fg=y[1]/(a*a*h_over_h0(a,&(cosmo->params))*y[0]);
-    * status=0;
-    return status;
+    gf=y[0];
+    fg=y[1]/(a*a*h_over_h0(a,&(cosmo->params))*y[0]);
+    return 0;
   }
 }
 
