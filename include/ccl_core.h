@@ -67,7 +67,7 @@ typedef struct ccl_data{
   // Function of Halo mass M
   gsl_spline * logsigma;
   gsl_spline * dlnsigma_dlogm; 
- 
+
   // These are all functions of the wavenumber k and the scale factor a.
   gsl_spline * p_lin;
   gsl_spline2d * p_nl;
@@ -111,7 +111,3 @@ void ccl_cosmology_free(ccl_cosmology * cosmo);
 void ccl_cosmology_compute_distances(ccl_cosmology * cosmo);
 void ccl_cosmology_compute_growth(ccl_cosmology * cosmo);
 void ccl_cosmology_compute_power(ccl_cosmology * cosmo);
-// Internal(?)
-
-// Distance-like function examples
-
