@@ -567,7 +567,7 @@ double ccl_sinn(ccl_cosmology *cosmo,double chi)
   //         { sinh(x) , if k==-1
   if(cosmo->params.k_sign==-1)
     return sinh(cosmo->params.sqrtk*chi)/cosmo->params.sqrtk;
-  else if(sign==1)
+  else if(cosmo->params.k_sign==1)
     return sin(cosmo->params.sqrtk*chi)/cosmo->params.sqrtk;
   else
     return chi;

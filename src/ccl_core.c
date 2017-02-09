@@ -94,7 +94,7 @@ void ccl_parameters_fill_initial(ccl_parameters *params)
     params->k_sign=-1;
   else
     params->k_sign=1;
-  params.sqrtk=sqrt(fabs(params->Omega_k))*params->h/CLIGHT_MPC;
+  params->sqrtk=sqrt(fabs(params->Omega_k))*params->h/CLIGHT_HMPC;
 }
 
 /* ------ ROUTINE: ccl_parameters_create -------
