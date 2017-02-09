@@ -1,6 +1,7 @@
 #include "ccl_background.h"
 #include "ccl_utils.h"
 #include "ccl_error.h"
+#include "ccl_neutrinos.h"
 #include <stdlib.h>
 #include <math.h>
 #include <stdio.h>
