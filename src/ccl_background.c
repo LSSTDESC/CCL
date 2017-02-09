@@ -80,7 +80,9 @@ static double df_integrand(double a,void * spline_void)
 INPUT: scale factor, cosmology
 TASK: compute the growth (D(z)) and the growth rate, logarithmic derivative (f?)
 */
-static int  growth_factor_and_growth_rate(double a,double *gf,double *fg,ccl_cosmology *cosmo) 
+
+// RH had issuse here
+static int   growth_factor_and_growth_rate(double a,double *gf,double *fg,ccl_cosmology *cosmo, int * status) 
 {
   if(a<EPS_SCALEFAC_GROWTH) {
     *gf=a;
@@ -98,10 +100,10 @@ static int  growth_factor_and_growth_rate(double a,double *gf,double *fg,ccl_cos
     y[1]=EPS_SCALEFAC_GROWTH*EPS_SCALEFAC_GROWTH*EPS_SCALEFAC_GROWTH*
       h_over_h0(EPS_SCALEFAC_GROWTH,&(cosmo->params));
 
-    int status=gsl_odeiv2_driver_apply(d,&ainit,a,y);
+    * status=gsl_odeiv2_driver_apply(d,&ainit,a,y);
     gsl_odeiv2_driver_free(d);
 
-    if(status!=GSL_SUCCESS)
+    if(*status!=GSL_SUCCESS)
       return 1;
     
     *gf=y[0];
