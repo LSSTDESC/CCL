@@ -7,35 +7,35 @@
 #include <stdbool.h>
 
 typedef struct ccl_parameters {
-  // Densities: CDM, baryons, total matter, neutrinos, curvature
-  double Omega_c;
-  double Omega_b;
-  double Omega_m;
-  double Omega_n;
-  double Omega_k;
-  
-  // Dark Energy
-  double w0;
-  double wa;
-  
-  // Hubble parameters
-  double H0;
-  double h;
-  
-  // Primordial power spectra
-  double A_s;
-  double n_s;
-  
-  // Radiation parameters
-  double Omega_g;
-  double T_CMB;
-  
-  // Derived parameters
-  double sigma_8;
-  double Omega_l;
-  double z_star;
-  
-  //Modified growth rate
+    // Densities: CDM, baryons, total matter, neutrinos, curvature
+    double Omega_c;
+    double Omega_b;
+    double Omega_m;
+    double Omega_n;
+    double Omega_k;
+
+    // Dark Energy
+    double w0;
+    double wa;
+
+    // Hubble parameters
+    double H0;
+    double h;
+
+    // Primordial power spectra
+    double A_s;
+    double n_s;
+
+    // Radiation parameters
+    double Omega_g;
+    double T_CMB;
+
+    // Derived parameters
+    double sigma_8;
+    double Omega_l;
+    double z_star;
+
+    //Modified growth rate
   bool has_mgrowth;
   int nz_mgrowth;
   double *z_mgrowth;

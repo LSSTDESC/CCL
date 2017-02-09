@@ -55,14 +55,13 @@ int main(int argc,char **argv)
     z_arr_sh[i]=Z0_SH-5*SZ_SH+10*SZ_SH*(i+0.5)/NZ;
     nz_arr_sh[i]=exp(-0.5*pow((z_arr_sh[i]-Z0_SH)/SZ_SH,2));
   }
-  
   //Galaxy clustering tracer
-  CCL_ClTracer *ct_gc=ccl_cl_tracer_new(cosmo,CL_TRACER_NC,0,0,0,NZ,z_arr_gc,nz_arr_gc,NZ,z_arr_gc,bz_arr,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL);
-
+  CCL_ClTracer *ct_gc=ccl_cl_tracer_new(cosmo,CL_TRACER_NC,NZ,z_arr_gc,nz_arr_gc,NZ,z_arr_gc,bz_arr,
+					0,0,-1,NULL,NULL);
   //Cosmic shear tracer
-  CCL_ClTracer *ct_wl=ccl_cl_tracer_new(cosmo,CL_TRACER_WL,0,0,0,NZ,z_arr_sh,nz_arr_sh,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,NULL,NULL);
-  
-  printf("ell C_ell(g,g) C_ell(g,s) C_ell(s,s) r(g,s)\n");
+  CCL_ClTracer *ct_wl=ccl_cl_tracer_new(cosmo,CL_TRACER_WL,NZ,z_arr_sh,nz_arr_sh,
+					-1,NULL,NULL,0,0,-1,NULL,NULL);
+  printf("ell C_ell(g,g) C_ell(g,s) C_ell(s,s) | r(g,s)\n");
   for(int l=2;l<NL;l+=10) {
     double cl_gg=ccl_angular_cl(cosmo,l,ct_gc,ct_gc); //Galaxy-galaxy
     double cl_gs=ccl_angular_cl(cosmo,l,ct_gc,ct_wl); //Galaxy-lensing
