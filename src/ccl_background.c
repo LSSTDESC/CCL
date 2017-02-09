@@ -559,56 +559,13 @@ void ccl_comoving_radial_distances(ccl_cosmology * cosmo, int na, double a[na], 
   }
 }
 
-static double sinn(double x,int sign)
-{
-  //////
-  //         { sin(x)  , if k==1
-  // sinn(x)={  x      , if k==0
-  //         { sinh(x) , if k==-1
-  double dum;
-
-  if(sign==-1)
-    dum=sinh(x);
-  else if(sign==1)
-    dum=sin(x);
-  else
-    dum=x;
-
-  return dum;
-}
-
-double ccl_comoving_angular_distance(ccl_cosmology * cosmo, double a)
-{
-  if (!cosmo->computed_distances){
-    ccl_cosmology_compute_distances(cosmo);
-    ccl_check_status(cosmo);    
-  }
-  double ksq=sqrt(fabs(cosmo->params.Omega_k))*cosmo->params.h/CLIGHT_HMPC;
-  double chi=gsl_spline_eval(cosmo->data.chi, a, cosmo->data.accelerator);
-
-  return sinn(ksq*chi,cosmo->params.k_sign)/ksq;
-}
-
-void ccl_comoving_angular_distances(ccl_cosmology * cosmo, int na, double a[na], double output[na])
-{
-  if (!cosmo->computed_distances){
-    ccl_cosmology_compute_distances(cosmo);
-    ccl_check_status(cosmo);    
-  }
-  double ksq=sqrt(fabs(cosmo->params.Omega_k))/CLIGHT_HMPC;
-  for (int i=0; i<na; i++){
-    double chi=gsl_spline_eval(cosmo->data.chi, a[i], cosmo->data.accelerator);
-    output[i]=sinn(ksq*chi,cosmo->params.k_sign)/ksq;
-  }
-}
-
 double ccl_luminosity_distance(ccl_cosmology * cosmo, double a)
 {
   if (!cosmo->computed_distances){
     ccl_cosmology_compute_distances(cosmo);
     ccl_check_status(cosmo);    
   }
-  return ccl_comoving_angular_distance(cosmo, a) / a;
+  return ccl_comoving_radial_distance(cosmo, a) / a;
 }
 //TODO: this is not valid for curved cosmologies
 
@@ -618,9 +575,8 @@ void ccl_luminosity_distances(ccl_cosmology * cosmo, int na, double a[na], doubl
     ccl_cosmology_compute_distances(cosmo);
     ccl_check_status(cosmo);    
   }
-  ccl_comoving_angular_distances(cosmo,na,a,output);
   for (int i=0; i<na; i++){
-    output[i]/=a[i];
+    output[i]=gsl_spline_eval(cosmo->data.chi,a[i],cosmo->data.accelerator)/a[i];
   }
 }
 
