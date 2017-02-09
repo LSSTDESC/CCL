@@ -87,6 +87,14 @@ void ccl_parameters_fill_initial(ccl_parameters *params)
   if (isfinite(params->A_s)){params->sigma_8 = NAN;}
   if (isfinite(params->sigma_8)){params->A_s = NAN;}
   params->z_star = NAN;
+
+  if(fabs(params->Omega_k)<1E-6)
+    params->k_sign=0;
+  else if(params->Omega_k>0)
+    params->k_sign=-1;
+  else
+    params->k_sign=1;
+  params.sqrtk=sqrt(fabs(params->Omega_k))*params->h/CLIGHT_MPC;
 }
 
 /* ------ ROUTINE: ccl_parameters_create -------
@@ -116,12 +124,6 @@ ccl_parameters ccl_parameters_create(double Omega_c, double Omega_b, double Omeg
   params.Omega_m = Omega_b + Omega_c;
   params.Omega_n = Omega_n;
   params.Omega_k = Omega_k;
-  if(params.Omega_k==0)
-    params.k_sign=0;
-  else if(params.Omega_k>0)
-    params.k_sign=-1;
-  else
-    params.k_sign=1;
 
   // Dark Energy
   params.w0 = w0;
