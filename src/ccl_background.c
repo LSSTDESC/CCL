@@ -22,8 +22,8 @@ TASK: Compute E(z)=H(z)/H0
 */
 static double h_over_h0(double a, ccl_parameters * params)
 {
-  return sqrt((params->Omega_m+params->Omega_l*pow(a,-3*(params->w0+params->wa))*
-	       exp(3*params->wa*(a-1))+params->Omega_k*a+params->Omega_g/a)/(a*a*a));
+  return sqrt((params->Omega_m+params->Omega_l*pow(a,-3*(params->w0+params->wa))*exp(3*params->wa*(a-1))+params->Omega_k*a+(params->Omega_g + params-> Omega_n_rel)/a)/(a*a*a));
+
 }
 
 /* --------- ROUTINE: ccl_omega_m_z ---------
@@ -32,8 +32,7 @@ TASK: Compute Omega_m(z)
 */
 double ccl_omega_m_z(ccl_cosmology * cosmo, double a)
 {
-  return cosmo->params.Omega_m/(cosmo->params.Omega_m+cosmo->params.Omega_l*pow(a,-3*(cosmo->params.w0+cosmo->params.wa))*
-			  exp(3*cosmo->params.wa*(a-1))+cosmo->params.Omega_k*a);
+  return cosmo->params.Omega_m/(cosmo->params.Omega_m+cosmo->params.Omega_l*pow(a,-3*(cosmo->params.w0+cosmo->params.wa))*exp(3*cosmo->params.wa*(a-1))+cosmo->params.Omega_k*a + (cosmo->params.Omega_g + cosmo->params.Omega_n_rel) / a);
 }
 
 /* --------- ROUTINE: chi_integrand ---------
