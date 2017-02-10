@@ -30,11 +30,7 @@ ccl_parameters parameters_create_vec(
                         double* dfarr, int nf)
 {
     assert(nz == nf);
-    if (nz == 0){
-        nz = -1;
-    }
-    printf("nz = %d, nf = %d\n", nz, nf);
-    
+    if (nz == 0){ nz = -1; }
     return ccl_parameters_create(Omega_c, Omega_b, Omega_k, Omega_n, 
                                  w0, wa, h, A_s, n_s, 
                                  nz, zarr, dfarr);
