@@ -69,7 +69,72 @@ static void ccl_free_class_structs(
     return;
   }
 }
+static void ccl_class_preinit(
+               struct background *ba,
+               struct thermo *th,
+               struct perturbs *pt,
+               struct transfers *tr,
+               struct primordial *pm,
+               struct spectra *sp,
+               struct nonlinear *nl,
+               struct lensing *le){
+//pre-initialize all fields that are freed by *_free() routine
+//prevents crashes if *_init()failed and did not initialize all tables freed by *_free()
 
+  //init for background_free
+  ba->tau_table = NULL;
+  ba->z_table = NULL;
+  ba->d2tau_dz2_table = NULL;
+  ba->background_table = NULL;
+  ba->d2background_dtau2_table = NULL;
+
+  //init for thermodynamics_free
+  th->z_table = NULL;
+  th->thermodynamics_table = NULL;
+  th->d2thermodynamics_dz2_table = NULL;
+
+  //init for perturb_free
+  pt->tau_sampling = NULL;
+  pt->tp_size = NULL;
+  pt->ic_size = NULL;
+  pt->k = NULL;
+  pt->k_size_cmb = NULL;
+  pt->k_size_cl = NULL;
+  pt->k_size = NULL;
+  pt->sources = NULL;
+
+  //init for primordial_free
+  pm->amplitude = NULL;
+  pm->tilt = NULL;
+  pm->running = NULL;
+  pm->lnpk = NULL;
+  pm->ddlnpk = NULL;
+  pm->is_non_zero = NULL;
+  pm->ic_size = NULL;
+  pm->ic_ic_size = NULL;
+  pm->lnk = NULL;
+
+  //init for nonlinear_free
+  nl->k = NULL;
+  nl->tau = NULL;
+  nl->nl_corr_density = NULL;
+  nl->k_nl = NULL;
+
+  //init for transfer_free
+  tr->tt_size = NULL;
+  tr->l_size_tt = NULL;
+  tr->l_size = NULL;
+  tr->l = NULL;
+  tr->q = NULL;
+  tr->k = NULL;
+  tr->transfer = NULL;
+
+  //init for spectra_free
+  //spectra_free checks all other data fields before freeing
+  sp->is_non_zero = NULL;
+  sp->ic_size = NULL;
+  sp->ic_ic_size = NULL;
+}
 static void ccl_run_class(
                ccl_cosmology *cosmo, 
                struct file_content *fc,
@@ -84,6 +149,8 @@ static void ccl_run_class(
                struct lensing* le,
                struct output* op){
   ErrorMsg errmsg;            // for error messages 
+  ccl_class_preinit(ba,th,pt,tr,pm,sp,nl,le);
+  
   if(input_init(fc,pr,ba,th,pt,tr,pm,sp,nl,le,op,errmsg) == _FAILURE_) {
     cosmo->status = CCL_ERROR_CLASS;
     sprintf(cosmo->status_message ,"ccl_power.c: ccl_cosmology_compute_power_class(): Error running CLASS input:%s\n",errmsg);
@@ -155,7 +222,7 @@ static double ccl_get_class_As(ccl_cosmology *cosmo, struct file_content *fc, in
 
   ccl_run_class(cosmo, fc,&pr,&ba,&th,&pt,&tr,&pm,&sp,&nl,&le,&op);
 //  printf("ran shooting for sigma_8 method\n Target sigma_8 = %e;\nGuessed A_s = %e -> sigma_8 = %e\nuse A_s = %e",sigma8,A_s_guess,sp.sigma8,A_s_guess*sigma8/sp.sigma8);
-  A_s_guess*=pow(sigma8/sp.sigma8,2.);
+  if (cosmo->status != CCL_ERROR_CLASS) A_s_guess*=pow(sigma8/sp.sigma8,2.);
   ccl_free_class_structs(cosmo, &ba,&th,&pt,&tr,&pm,&sp,&nl,&le);
 
   if (k_max_old >0){
@@ -260,10 +327,16 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo){
   }
 
   ccl_fill_class_parameters(cosmo,&fc,parser_length);
-  ccl_run_class(cosmo, &fc,&pr,&ba,&th,&pt,&tr,&pm,&sp,&nl,&le,&op);
+  if (cosmo->status != CCL_ERROR_CLASS) ccl_run_class(cosmo, &fc,&pr,&ba,&th,&pt,&tr,&pm,&sp,&nl,&le,&op);
+  if (cosmo->status == CCL_ERROR_CLASS){
+    //printed error message while running CLASS
+    ccl_free_class_structs(cosmo, &ba,&th,&pt,&tr,&pm,&sp,&nl,&le);
+    return;
+  }
   if (parser_free(&fc)== _FAILURE_) {
     cosmo->status = CCL_ERROR_CLASS;
     strcpy(cosmo->status_message ,"ccl_power.c: ccl_cosmology_compute_power_class(): Error freeing CLASS parser\n");
+    ccl_free_class_structs(cosmo, &ba,&th,&pt,&tr,&pm,&sp,&nl,&le);
     return;
   }
 
@@ -283,7 +356,7 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo){
   double * z = ccl_linear_spacing(amin,amax, na);
   double * y2d = malloc(nk * na * sizeof(double));
   if (z==NULL||y==NULL|| x==NULL || y2d==0){
-    cosmo->status = 4;
+    cosmo->status = CCL_ERROR_SPLINE;
     strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_class(): memory allocation error\n");
   }
   else{  
@@ -302,7 +375,7 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo){
     if (status){
       gsl_spline_free(log_power_lin);
       ccl_free_class_structs(cosmo, &ba,&th,&pt,&tr,&pm,&sp,&nl,&le);
-      cosmo->status = 4;
+      cosmo->status = CCL_ERROR_SPLINE;
       strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_class(): Error creating log_power_lin spline\n");
       return;
     }
@@ -329,7 +402,7 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo){
       free(y);
       free(z);
       gsl_spline2d_free(log_power_nl);
-      cosmo->status = 4;
+      cosmo->status = CCL_ERROR_SPLINE;
       strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_class(): Error creating log_power_nl spline\n");
       return;
     }
