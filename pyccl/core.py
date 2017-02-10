@@ -74,10 +74,18 @@ class Parameters(object):
                                  "(or set to None)." % nm)
         
         # Create new instance of ccl_parameters object
-        self.parameters = lib.parameters_create(
-                                Omega_c, Omega_b, Omega_k, Omega_n, 
-                                w0, wa, h, A_s, n_s, 
-                                nz_mgrowth, zarr_mgrowth, dfarr_mgrowth)
+        if nz_mgrowth == -1:
+            # Create ccl_parameters without modified growth
+            self.parameters = lib.parameters_create(
+                                    Omega_c, Omega_b, Omega_k, Omega_n, 
+                                    w0, wa, h, A_s, n_s, 
+                                    -1, None, None)
+        else:
+            # Create ccl_parameters with modified growth arrays
+            self.parameters = lib.parameters_create_vec(
+                                    Omega_c, Omega_b, Omega_k, Omega_n, 
+                                    w0, wa, h, A_s, n_s, 
+                                    zarr_mgrowth, dfarr_mgrowth)
     
     def __getitem__(self, key):
         """
