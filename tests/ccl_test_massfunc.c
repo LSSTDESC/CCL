@@ -30,6 +30,7 @@ static void read_massfunc_test_file(double mass[9], double massfunc[7][9])
    FILE * f = fopen("./tests/benchmark/mfunc.txt", "r");
    ASSERT_NOT_NULL(f);
 
+
    // Ignore header line
    char str[1024];
    fgets(str, 1024, f);
@@ -77,6 +78,7 @@ static void compare_massfunc(int model, struct massfunc_data * data)
 {
   // make the parameter set from input data
 
+  int * status=0;
   ccl_parameters params = ccl_parameters_create(data->Omega_c, data->Omega_b,
                                                 data->Omega_k[model], data->Omega_n,
                                                 data->w_0[model], data->w_a[model], data->h,
@@ -102,7 +104,7 @@ static void compare_massfunc(int model, struct massfunc_data * data)
     redshift = 0;
     
     for (int i=0; i<7; i++){
-      double massfunc_ij = ccl_massfunc(cosmo, mass/cosmo->params.h, redshift)/cosmo->params.h/cosmo->params.h/cosmo->params.h;
+      double massfunc_ij = ccl_massfunc(cosmo, mass/cosmo->params.h, redshift,status)/cosmo->params.h/cosmo->params.h/cosmo->params.h;
       //printf("%lf %lf %le %le\n", logmass, redshift, massfunc_ij, data->massfunc[i][j]);
       double absolute_tolerance = MASSFUNC_TOLERANCE*data->massfunc[i][j];
       if (fabs(absolute_tolerance)<1e-12) absolute_tolerance = 1e-12;
