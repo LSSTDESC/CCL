@@ -77,7 +77,8 @@ CTEST_SETUP(distances){
 
 
 
-static void compare_distances(int model, struct distances_data * data)
+static void compare_distances(int model, struct distances_data * data, int * status)
+
 {
   // Make the parameter set from the input data
   // Values of some parameters depend on the model index
@@ -93,7 +94,7 @@ static void compare_distances(int model, struct distances_data * data)
   // Compare to benchmark data
   for (int j=0; j<6; j++){
     double a = 1/(1.+data->z[j]);
-    double chi_ij=ccl_comoving_radial_distance(cosmo,a)*data->h;
+    double chi_ij=ccl_comoving_radial_distance(cosmo,a, status)*data->h;
     double absolute_tolerance = DISTANCES_TOLERANCE*data->chi[model][j];
     if (fabs(absolute_tolerance)<1e-12) absolute_tolerance = 1e-12;
     ASSERT_DBL_NEAR_TOL(data->chi[model][j], chi_ij, absolute_tolerance);
@@ -102,27 +103,27 @@ static void compare_distances(int model, struct distances_data * data)
   ccl_cosmology_free(cosmo);
 }
 
-CTEST2(distances, model_1){
+CTEST2(distances, model_1, status){
   int model = 0;
-  compare_distances(model, data);
+  compare_distances(model, data,status);
 }
 
-CTEST2(distances, model_2){
+CTEST2(distances, model_2,status){
   int model = 1;
-  compare_distances(model, data);
+  compare_distances(model, data,status);
 }
 
-CTEST2(distances, model_3){
+CTEST2(distances, model_3,status){
   int model = 2;
-  compare_distances(model, data);
+  compare_distances(model, data,status);
 }
 
-CTEST2(distances, model_4){
+CTEST2(distances, model_4,status){
   int model = 3;
-  compare_distances(model, data);
+  compare_distances(model, data,status);
 }
 
-CTEST2(distances, model_5){
+CTEST2(distances, model_5,status){
   int model = 4;
-  compare_distances(model, data);
+  compare_distances(model, data,status);
 }

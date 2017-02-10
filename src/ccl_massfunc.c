@@ -21,12 +21,12 @@ TASK: Outputs fitting function for use in halo mass function calculation;
     ccl_watson (arxiv 1212.0095 )
 */
 
-static double massfunc_f(ccl_cosmology *cosmo, double halo_mass,double redshift)
+static double massfunc_f(ccl_cosmology *cosmo, double halo_mass,double redshift, int * status)
 {
   double fit_A, fit_a, fit_b, fit_c, fit_d, overdensity_delta;
   double scale, Omega_m_z;
 
-  double sigma=ccl_sigmaM(cosmo,halo_mass,redshift);
+  double sigma=ccl_sigmaM(cosmo,halo_mass,redshift, status);
   switch(cosmo->config.mass_function_method){
   case ccl_tinker:
     
@@ -147,18 +147,18 @@ INPUT: ccl_cosmology * cosmo, mass smoothing scale, double redshift
 TASK: return dn/dM.
 */
 
-double ccl_massfunc(ccl_cosmology *cosmo, double halo_mass, double redshift)
+double ccl_massfunc(ccl_cosmology *cosmo, double halo_mass, double redshift, int * status)
 {
   if (!cosmo->computed_sigma){
     ccl_cosmology_compute_sigma(cosmo);
-    ccl_check_status(cosmo);
+    ccl_check_status(cosmo, status);
   }
 
   double f,deriv,rho_m,logmass;
   
   logmass = log10(halo_mass);
   rho_m = RHO_CRITICAL*cosmo->params.Omega_m*cosmo->params.h*cosmo->params.h;
-  f=massfunc_f(cosmo,halo_mass,redshift);
+  f=massfunc_f(cosmo,halo_mass,redshift,status);
   deriv = gsl_spline_eval(cosmo->data.dlnsigma_dlogm, logmass, cosmo->data.accelerator_m);
   return f*rho_m*deriv/halo_mass;
 }
@@ -181,17 +181,17 @@ double ccl_massfunc_m2r(ccl_cosmology * cosmo, double halo_mass)
     return halo_radius/cosmo->params.h;
 }
 
-double ccl_sigmaM(ccl_cosmology * cosmo, double halo_mass, double redshift)
+double ccl_sigmaM(ccl_cosmology * cosmo, double halo_mass, double redshift, int * status)
 {
     double sigmaM;
 
     if (!cosmo->computed_sigma){
         ccl_cosmology_compute_sigma(cosmo);
-        ccl_check_status(cosmo);
+        ccl_check_status(cosmo, status);
     }
 
     sigmaM = pow(10,gsl_spline_eval(cosmo->data.logsigma, log10(halo_mass), cosmo->data.accelerator_m));
-    sigmaM = sigmaM*ccl_growth_factor(cosmo, 1.0/(1.0+redshift));
+    sigmaM = sigmaM*ccl_growth_factor(cosmo, 1.0/(1.0+redshift), status);
 
     return sigmaM;
 }
