@@ -48,6 +48,13 @@ void comoving_radial_distance_vec(ccl_cosmology * cosmo,
     ccl_comoving_radial_distances(cosmo, na, a, output);
 }
 
+void comoving_angular_distance_vec(ccl_cosmology * cosmo, 
+                       double* a, int na,
+                       double* output, int nout) {
+    assert(nout == na);
+    ccl_comoving_angular_distances(cosmo, na, a, output);
+}
+
 void h_over_h0_vec(ccl_cosmology * cosmo, 
                        double* a, int na,
                        double* output, int nout) {

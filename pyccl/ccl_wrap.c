@@ -3031,6 +3031,16 @@ SWIG_AsVal_double (PyObject *obj, double *val)
   #define SWIG_From_double   PyFloat_FromDouble 
 
 
+#include <limits.h>
+#if !defined(SWIG_NO_LLONG_MAX)
+# if !defined(LLONG_MAX) && defined(__GNUC__) && defined (__LONG_LONG_MAX__)
+#   define LLONG_MAX __LONG_LONG_MAX__
+#   define LLONG_MIN (-LLONG_MAX - 1LL)
+#   define ULLONG_MAX (LLONG_MAX * 2ULL + 1ULL)
+# endif
+#endif
+
+
 #include <float.h>
 
 
@@ -3107,34 +3117,6 @@ SWIG_AsVal_long (PyObject *obj, long* val)
 
 
 SWIGINTERN int
-SWIG_AsVal_bool (PyObject *obj, bool *val)
-{
-  int r = PyObject_IsTrue(obj);
-  if (r == -1)
-    return SWIG_ERROR;
-  if (val) *val = r ? true : false;
-  return SWIG_OK;
-}
-
-
-SWIGINTERNINLINE PyObject*
-  SWIG_From_bool  (bool value)
-{
-  return PyBool_FromLong(value ? 1 : 0);
-}
-
-
-#include <limits.h>
-#if !defined(SWIG_NO_LLONG_MAX)
-# if !defined(LLONG_MAX) && defined(__GNUC__) && defined (__LONG_LONG_MAX__)
-#   define LLONG_MAX __LONG_LONG_MAX__
-#   define LLONG_MIN (-LLONG_MAX - 1LL)
-#   define ULLONG_MAX (LLONG_MAX * 2ULL + 1ULL)
-# endif
-#endif
-
-
-SWIGINTERN int
 SWIG_AsVal_int (PyObject * obj, int *val)
 {
   long v;
@@ -3154,6 +3136,24 @@ SWIGINTERNINLINE PyObject*
   SWIG_From_int  (int value)
 {
   return PyInt_FromLong((long) value);
+}
+
+
+SWIGINTERN int
+SWIG_AsVal_bool (PyObject *obj, bool *val)
+{
+  int r = PyObject_IsTrue(obj);
+  if (r == -1)
+    return SWIG_ERROR;
+  if (val) *val = r ? true : false;
+  return SWIG_OK;
+}
+
+
+SWIGINTERNINLINE PyObject*
+  SWIG_From_bool  (bool value)
+{
+  return PyBool_FromLong(value ? 1 : 0);
 }
 
 
@@ -4374,6 +4374,126 @@ SWIGINTERN PyObject *_wrap_parameters_Omega_k_get(PyObject *SWIGUNUSEDPARM(self)
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
   resultobj = SWIG_From_double((double)(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_parameters_sqrtk_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  struct ccl_parameters *arg1 = (struct ccl_parameters *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:parameters_sqrtk_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_parameters, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "parameters_sqrtk_set" "', argument " "1"" of type '" "struct ccl_parameters *""'"); 
+  }
+  arg1 = (struct ccl_parameters *)(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "parameters_sqrtk_set" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = (double)(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->sqrtk = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_parameters_sqrtk_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  struct ccl_parameters *arg1 = (struct ccl_parameters *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  double result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:parameters_sqrtk_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_parameters, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "parameters_sqrtk_get" "', argument " "1"" of type '" "struct ccl_parameters *""'"); 
+  }
+  arg1 = (struct ccl_parameters *)(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double) ((arg1)->sqrtk);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double((double)(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_parameters_k_sign_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  struct ccl_parameters *arg1 = (struct ccl_parameters *) 0 ;
+  int arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:parameters_k_sign_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_parameters, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "parameters_k_sign_set" "', argument " "1"" of type '" "struct ccl_parameters *""'"); 
+  }
+  arg1 = (struct ccl_parameters *)(argp1);
+  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "parameters_k_sign_set" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = (int)(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->k_sign = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_parameters_k_sign_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  struct ccl_parameters *arg1 = (struct ccl_parameters *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  int result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:parameters_k_sign_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_parameters, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "parameters_k_sign_get" "', argument " "1"" of type '" "struct ccl_parameters *""'"); 
+  }
+  arg1 = (struct ccl_parameters *)(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (int) ((arg1)->k_sign);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_int((int)(result));
   return resultobj;
 fail:
   return NULL;
@@ -7625,6 +7745,41 @@ SWIGINTERN PyObject *_wrap_luminosity_distances(PyObject *SWIGUNUSEDPARM(self), 
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
   resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_sinn(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  ccl_cosmology *arg1 = (ccl_cosmology *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  double result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:sinn",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_cosmology, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "sinn" "', argument " "1"" of type '" "ccl_cosmology *""'"); 
+  }
+  arg1 = (ccl_cosmology *)(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "sinn" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = (double)(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double)ccl_sinn(arg1,arg2);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double((double)(result));
   return resultobj;
 fail:
   return NULL;
@@ -12947,6 +13102,10 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"parameters_Omega_n_get", _wrap_parameters_Omega_n_get, METH_VARARGS, (char *)"parameters_Omega_n_get(parameters self) -> double"},
 	 { (char *)"parameters_Omega_k_set", _wrap_parameters_Omega_k_set, METH_VARARGS, (char *)"parameters_Omega_k_set(parameters self, double Omega_k)"},
 	 { (char *)"parameters_Omega_k_get", _wrap_parameters_Omega_k_get, METH_VARARGS, (char *)"parameters_Omega_k_get(parameters self) -> double"},
+	 { (char *)"parameters_sqrtk_set", _wrap_parameters_sqrtk_set, METH_VARARGS, (char *)"parameters_sqrtk_set(parameters self, double sqrtk)"},
+	 { (char *)"parameters_sqrtk_get", _wrap_parameters_sqrtk_get, METH_VARARGS, (char *)"parameters_sqrtk_get(parameters self) -> double"},
+	 { (char *)"parameters_k_sign_set", _wrap_parameters_k_sign_set, METH_VARARGS, (char *)"parameters_k_sign_set(parameters self, int k_sign)"},
+	 { (char *)"parameters_k_sign_get", _wrap_parameters_k_sign_get, METH_VARARGS, (char *)"parameters_k_sign_get(parameters self) -> int"},
 	 { (char *)"parameters_w0_set", _wrap_parameters_w0_set, METH_VARARGS, (char *)"parameters_w0_set(parameters self, double w0)"},
 	 { (char *)"parameters_w0_get", _wrap_parameters_w0_get, METH_VARARGS, (char *)"parameters_w0_get(parameters self) -> double"},
 	 { (char *)"parameters_wa_set", _wrap_parameters_wa_set, METH_VARARGS, (char *)"parameters_wa_set(parameters self, double wa)"},
@@ -13052,6 +13211,7 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"comoving_radial_distances", _wrap_comoving_radial_distances, METH_VARARGS, (char *)"comoving_radial_distances(cosmology cosmo, int na, double [na] a, double [na] output)"},
 	 { (char *)"luminosity_distance", _wrap_luminosity_distance, METH_VARARGS, (char *)"luminosity_distance(cosmology cosmo, double a) -> double"},
 	 { (char *)"luminosity_distances", _wrap_luminosity_distances, METH_VARARGS, (char *)"luminosity_distances(cosmology cosmo, int na, double [na] a, double [na] output)"},
+	 { (char *)"sinn", _wrap_sinn, METH_VARARGS, (char *)"sinn(cosmology cosmo, double chi) -> double"},
 	 { (char *)"growth_factor", _wrap_growth_factor, METH_VARARGS, (char *)"growth_factor(cosmology cosmo, double a) -> double"},
 	 { (char *)"growth_factors", _wrap_growth_factors, METH_VARARGS, (char *)"growth_factors(cosmology cosmo, int na, double [na] a, double [na] output)"},
 	 { (char *)"growth_factor_unnorm", _wrap_growth_factor_unnorm, METH_VARARGS, (char *)"growth_factor_unnorm(cosmology cosmo, double a) -> double"},
