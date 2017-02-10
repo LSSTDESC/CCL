@@ -1,6 +1,7 @@
 #include "ccl_core.h"
 #include "ccl_neutrinos.h"
 #include "ccl_utils.h"
+#include "ccl_constants.h"
 #include <stdlib.h>
 #include <math.h>
 #include <stdio.h>
@@ -77,9 +78,8 @@ void ccl_parameters_fill_initial(ccl_parameters *params)
 {
   // Fixed radiation parameters
   // Omega_g * h**2 is known from T_CMB
-  params->T_CMB =  2.7255;
-  params->Omega_g = M_PI*M_PI*pow((params->T_CMB/11604.5),4.)/(15*8.098E-11*params->h*params->h);
-
+  params->T_CMB =  2.7255; 
+  params->Omega_g = 4. * STBOLTZ / CLIGHT *pow(params->T_CMB,4.)/(3. * pow(10., 10.) * CLIGHT * CLIGHT *params->h* params->h / (8. * M_PI * GNEWT * MPC_TO_METER * MPC_TO_METER));
   // Neutrino parameters
   gsl_spline *temp; // Define a temp parameter to hold the phase space integral to get massive neutrinos
   temp = ccl_calculate_nu_phasespace_spline(); // Calculate the phase space integral

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "gsl/gsl_const_mksa.h"
+
 // Parameters for grids and related things
 // one day to be determined by a long careful process.
 // At the moment we are just thinking that:
@@ -49,6 +51,24 @@
 //Distance conversions
 #define MPC_TO_METER 3.08567758149e22  //(from PDG 2013) Mpc to m 
 #define PC_TO_METER 3.08567758149e16   //(from PDG 2013) pc to m
+
+// Boltzmann constant in units of J/K
+#define KBOLTZ  GSL_CONST_MKSA_BOLTZMANN
+
+// Stefan-Boltzmann constant in units of kg/s^3 / K^4
+#define STBOLTZ GSL_CONST_MKSA_STEFAN_BOLTZMANN_CONSTANT
+
+// Planck's constant in units kg m^2 / s
+#define HPLANCK  GSL_CONST_MKSA_PLANCKS_CONSTANT_H 
+
+// The speed of light in m/s
+#define CLIGHT   GSL_CONST_MKSA_SPEED_OF_LIGHT
+
+// Electron volt to Joules convestion
+#define EV_IN_J  GSL_CONST_MKSA_ELECTRON_VOLT
+
+// T_ncdm, as taken from CLASS, explanatory.ini
+#define TNCDM 0.71611
 
 //Precision parameters
 #define EPSREL_DIST 1E-6
