@@ -105,7 +105,9 @@ The first step to use CCL is to generate a {\tt ccl\_cosmology} object, containi
  \item {\tt ccl\_parameters\_create\_lcdm(...)}: curved $\Lambda$CDM cosmologies.
 \end{itemize}
 
-{\tt ccl\_configuration} objects contain information about the prescriptions to be used to compute transfer functions, power spectra, mass functions etc. A defaul {\tt ccl\_configuration} object is made readily available as {\tt default\_config}, for which transfer functions are computed with CLASS, the HaloFit prediction is used for the matter power spectrum and the prescription by \cite{Tinker2008} is used for the halo mass function.
+If you wish to include neutrinos in your cosmology, the suffix `{\tt \_nu}' may be appended to the latter four {\tt ccl\_configuration} objects above (for example: {\tt ccl\_parameters\_create\_lcdm\_nu(...)}). Note that utilizing the corresponding {\tt ccl\_configuration} object without this {\tt \_nu} suffix will set the contribution from both massless and massive neutrinos to zero.
+
+{\tt ccl\_configuration} objects contain information about the prescriptions to be used to compute transfer functions, power spectra, mass functions etc. A default {\tt ccl\_configuration} object is made readily available as {\tt default\_config}, for which transfer functions are computed with CLASS, the HaloFit prediction is used for the matter power spectrum and the prescription by \cite{Tinker2008} is used for the halo mass function.
 
 After initializing an instance of {\tt ccl\_parameters} and {\tt ccl\_configuration}, the function {\tt ccl\_cosmology\_create(ccl\_parameters,ccl\_configuration)} returns a pointer to a {\tt ccl\_cosmology} structure, which you'll need to pass around to every CCL function.
 
@@ -116,7 +118,7 @@ The Hubble parameter is calculated via
 %
 \begin{equation}
 \frac{H(a)}{H_0} = a^{-3/2}\sqrt{\Omega_m+\Omega_\Lambda a^{-3(w_0+w_a)}
-    \exp[3 w_a (a-1)]+\Omega_K a +\Omega_g a^{-1}}.
+    \exp[3 w_a (a-1)]+\Omega_K a +(\Omega_g+\Omega_\nu^{\rm rel}) a^{-1}}.
 \end{equation}
 
 The radial comoving distance is calculated via a numerical integral of
@@ -229,7 +231,7 @@ With the implementation described in the previous section, the power spectrum sp
 \end{figure}
 %------------------------
 
-\subsubsection{Whishlist for the future}
+\subsubsection{Wishlist for the future}
 \label{Pk_whishlist}
 This is a list of power spectrum methods that we plan to implement in the future:
 \begin{itemize}
@@ -388,11 +390,13 @@ This function is directly implemented in {\tt CCL} as well as a specific $\sigma
 
 \subsection{Photo-$z$ implementation}
 \label{sec:photoz}
-LSST galaxy redshifts will be obtained using photometry. However, analytic forms of galaxy redshift distributions are usually known in terms of spectroscopic redshifts, obtained as fits from a spectroscopic subsample (or extrapolation thereof). A model is therefore required for the probability of measuring a particular photometric redshift given a spectroscopic redshift. {\tt CCL} allows the user to flexibly provide their own such photometric redshift model.
+LSST galaxy redshifts will be obtained using photometry. However, analytic forms of galaxy redshift distributions are usually known in terms of spectroscopic redshifts. A model is therefore required for the probability of measuring a particular photometric redshift given a spectroscopic redshift. {\tt CCL} allows you to flexibly provide your own photometric redshift model.
 
-The user provides a function, which accepts a photometric redshift, a spectroscopic redshift, and a void pointer which points to a structure containing any further parameters of the photo-z model. The user then also provides this structure of parameters.
+To do so, you will write a function which accepts as input a photometric redshift, a spectroscopic redshift, and a void pointer to a structure containing any further parameters of your photo-z model. This function will return the probability of measuring the input photometric redshift given the input spectroscopic redshift. Explicitly, this function should take the form:
 
-This user-provided model is incorporated when computing $\frac{dN}{dz}^i$ in photometric redshift bin $i$, as given by equation \ref{photoz}, above.
+{\tt user\_pz\_probability(double z\_ph, double z\_s, void * user\_par)\{...\}}
+ 
+You must then also provides the structure of further parameters ({\tt user\_par}). This model can be incorporated when computing $\frac{dN}{dz}^i$ in photometric redshift bin $i$, as given by equation \ref{photoz}, below.
 
 
 
@@ -403,7 +407,7 @@ This user-provided model is incorporated when computing $\frac{dN}{dz}^i$ in pho
 
 The functional forms of the expected $\frac{dN}{dz}$ for clustering galaxies and lensing source galaxies are provided. Here, $\frac{dN}{dz}$ is the number density of galaxies as a function of spectroscopic redshift. 
 
-In the case of lensing source galaxies, these forms are given in \cite{Chang2013}, wherein three different cases are considered: fiducial, optimistic, and conservative. All three are included in {\tt CCL}, and are indicated via a label of DNDZ\_WL\_OPT, DNDZ\_WL\_FID, and DNDZ\_WL\_CONS as appropriate. The functional form of $\frac{dN}{dz}$ for lensing source galaxies is given as:
+In the case of lensing source galaxies, these forms are given in \cite{Chang2013}, wherein three different cases are considered: fiducial, optimistic, and conservative. All three are included in {\tt CCL}, and are indicated via a label of {\tt DNDZ\_WL\_OPT}, {\tt DNDZ\_WL\_FID}, and {\tt DNDZ\_WL\_CONS} as appropriate. The functional form of $\frac{dN}{dz}$ for lensing source galaxies is given as:
 \begin{equation}
 \frac{dN}{dz} \propto z^\alpha {\rm exp}\left(-\frac{z}{z_0}^\beta\right).
 \label{dndz_src}
@@ -417,7 +421,7 @@ For the case of the clustering galaxy sample, the functional form is given by \c
 \end{equation}
 with $z_0=0.3$. The above $\frac{dN}{dz}$ for lensing sources in fact represents a subset of the $\frac{dN}{dz}$ for clustering.
 
-In order to be incorporated into forecasts or predictions, the above expressions for $\frac{dN}{dz}$ must be normalized, and the value of $\frac{dN}{dz}$ must be provided in a given photometric redshift bin. Support is provided for the user to input a flexible photometric redshift model, as described further in Section \ref{sec:photoz} below. This takes the form of a function which returns the probability $p(z,z')$of measuring a particular photometric redshift $z$, given a spectroscopic redshift $z'$ and other relevant parameters. Also provided are functions to output $\sigma_z$ at a given redshift for both lensing sources and clustering galaxies, for the case in which the user wishes the assume a Gaussian photo-z model.
+In order to be incorporated into forecasts or predictions, the above expressions for $\frac{dN}{dz}$ must be normalized, and the value of $\frac{dN}{dz}$ must be provided in a given photometric redshift bin. Support is provided for the user to input a flexible photometric redshift model, as described in Section \ref{sec:photoz}. This takes the form of a function which returns the probability $p(z,z')$of measuring a particular photometric redshift $z$, given a spectroscopic redshift $z'$ and other relevant parameters. Also provided are functions to return $\sigma_z$ at a given redshift for both lensing sources and clustering galaxies, for the case in which the user wishes the assume a Gaussian photo-z model.
 
 With this, $\frac{dN^i}{dz}$ of lensing or clustering galaxies in a particular photometric redshift bin $i$ is given by:
 \begin{equation}
@@ -498,7 +502,7 @@ In this second step, only 2 codes have been compared so far. More outputs are ne
 
 Additionally, independent codes were utilized to test the accuracy of halo mass function predictions. For the halo mass function, we compare the value of $\sigma$, $\log(\sigma^{-1})$, and the value of the halo mass function in the form used in \citep{Tinker2008},
 \begin{equation}
-\log[(M^2/\bar{rho_m})dn/dM].
+\log[(M^2/\bar{\rho}_m)dn/dM].
 \end{equation}
 We note that while we maintain the $10^{-4}$ for our evaluations of $\sigma$, the accuracy degrades to a value of $5\times10^{-3}$ for the halo mass function evaluation, primarily at the high halo mass and high redshift domains. We find that this increased error is acceptable, as the level of precision is significantly better than the accuracy of current halo mass function models. 
 
@@ -604,7 +608,7 @@ In the future, we hope that {\tt CCL} will include other functionalities. Functi
 	\item Non-Limber capability
 	\item Link to FAST-PT
 	\item Photo-z model
-	\item more power spectrum methods (see \ref{Pk_whishlist})
+	\item More power spectrum methods (see \ref{Pk_whishlist})
 \end{itemize}
 
 \section{License}
