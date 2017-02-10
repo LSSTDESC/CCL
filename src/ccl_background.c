@@ -82,7 +82,7 @@ TASK: compute the growth (D(z)) and the growth rate, logarithmic derivative (f?)
 */
 
 // RH had issuse here
-static int   growth_factor_and_growth_rate(double a,double *gf,double *fg,ccl_cosmology *cosmo, int * status) 
+static int  growth_factor_and_growth_rate(double a,double *gf,double *fg,ccl_cosmology *cosmo, int * status) 
 {
   if(a<EPS_SCALEFAC_GROWTH) {
     *gf=a;
