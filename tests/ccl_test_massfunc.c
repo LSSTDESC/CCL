@@ -14,6 +14,9 @@ CTEST_DATA(massfunc) {
   double A_s;
   double n_s;
   double Omega_n;
+  double N_nu_rel;
+  double N_nu_mass;
+  double mnu;
   double Omega_v[1];
   double Omega_k[1];
   double w_0[1];
@@ -77,11 +80,7 @@ static void compare_massfunc(int model, struct massfunc_data * data)
 {
   // make the parameter set from input data
 
-  ccl_parameters params = ccl_parameters_create(data->Omega_c, data->Omega_b,
-                                                data->Omega_k[model], data->Omega_n,
-                                                data->w_0[model], data->w_a[model], data->h,
-                                                data->A_s, data->n_s, -1,
-                                                NULL, NULL);
+  ccl_parameters params = ccl_parameters_create(data->Omega_c, data->Omega_b,data->Omega_k[model], data->N_nu_rel, data->N_nu_mass, data->mnu,data->w_0[model], data->w_a[model], data->h,data->A_s, data->n_s, -1, NULL, NULL);
 
 
   params.sigma_8 = data->sigma_8;

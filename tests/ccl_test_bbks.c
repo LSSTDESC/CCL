@@ -13,6 +13,9 @@ CTEST_DATA(bbks) {
   double n_s;
   double sigma_8;
   double Omega_n;
+  double N_nu_rel;
+  double N_nu_mass;
+  double mnu;
   double Omega_v[5];
   double Omega_k[5];
   double w_0[5];
@@ -59,10 +62,7 @@ static void compare_bbks(int i_model,struct bbks_data * data)
   FILE *f;
   ccl_configuration config = default_config;
   config.transfer_function_method = ccl_bbks;
-  ccl_parameters params = ccl_parameters_create(data->Omega_c,data->Omega_b,
-						data->Omega_k[i_model-1],data->Omega_n,
-						data->w_0[i_model-1],data->w_a[i_model-1],
-						data->h,data->A_s,data->n_s,-1,NULL,NULL);
+  ccl_parameters params = ccl_parameters_create(data->Omega_c,data->Omega_b,data->Omega_k[i_model-1],data->N_nu_rel, data->N_nu_mass, data->mnu,data->w_0[i_model-1],data->w_a[i_model-1],data->h,data->A_s,data->n_s,-1,NULL,NULL);
   params.Omega_g=0;
   params.sigma_8=data->sigma_8;
   params.Omega_g=0;

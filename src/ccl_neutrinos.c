@@ -4,13 +4,19 @@
 #include "gsl/gsl_errno.h"
 #include "gsl/gsl_spline.h"
 #include "gsl/gsl_integration.h"
-
+/* ------- ROUTINE: ccl_nu_integrand ------
+INPUTS: x: dimensionless momentum, *r: pointer to a dimensionless mass / temperature
+TASK: Integrand of phase-space massive neutrino integral
+*/
 static double ccl_nu_integrand(double x, void *r)
 {
   double rat=*((double*)(r));
   return sqrt(x*x+rat*rat)/(exp(x)+1.0)*x*x; 
 }
 
+/* ------- ROUTINE: ccl_calculate_nu_phasespace_spline ------
+TASK: Get the spline of the result of the phase-space integral required for massive neutrinos.
+*/
 
 gsl_spline* ccl_calculate_nu_phasespace_spline() {
   int N=CCL_NU_MNUT_N;
@@ -45,16 +51,21 @@ gsl_spline* ccl_calculate_nu_phasespace_spline() {
   return spl;
 }
 
+/* ------- ROUTINE: ccl_nu_phasespace_intg ------
+INPUTS: spl: the gsl spline of the phase space integral, mnuOT: the dimensionless mass / temperature of a single massive neutrino
+TASK: Get the value of the phase space integral at muOT
+*/
 
 double ccl_nu_phasespace_intg(gsl_spline* spl, double mnuOT) {
   if (mnuOT<CCL_NU_MNUT_MIN) return 7./8.;
   else if (mnuOT>CCL_NU_MNUT_MAX) return 0.2776566337*mnuOT; //evalf(45*Zeta(3)/(2*Pi^4));
   return gsl_spline_eval(spl, log(mnuOT),NULL)*7./8.;
 }
+/* -------- ROUTINE: Omeganuh2 ---------
+INPUTS: a: scale factor, Neff: number of neutrino species, mnu: total mass in eV of neutrinos, TCMB: CMB temperature, psi: gsl spline of phase-space integral.
+TASK: Compute the fractional energy density of neutrinos at scale factor a.
+*/
 
-// returns density if one neutrino species at a scale factor a, given this particular
-// species' Neff and sum_mnu
-// work out which units do you want
 double Omeganuh2 (double a, double Neff, double mnu, double TCMB, gsl_spline* psi) {
   if (Neff==0) return 0.0;
   double Tnu=TCMB*pow(4./11.,1./3.);
@@ -81,12 +92,10 @@ double Omeganuh2 (double a, double Neff, double mnu, double TCMB, gsl_spline* ps
   // DL: I have updated the constant to exactly match CLASS
   //double mnuOT=mnuone/(Tnu_eff/a)*11604.519; 
   double mnuOT=mnuone/(Tnu_eff/a)*11604.505289680865;
-
   // Get the value of the phase-space integral 
   double intval=ccl_nu_phasespace_intg(psi,mnuOT);
-  
   // Define the prefix using the effective temperature (to get mnu / Omega = 93.14 eV) for the massive case:
-  double prefix_massive = 4.481627251529075e-7*Tnu_eff*Tnu_eff*Tnu_eff*Tnu_eff;
+  double prefix_massive = 4.481627251529075e-7*Tnu_eff*Tnu_eff*Tnu_eff*Tnu_eff; 
   return Neff*intval*prefix_massive/a4;
 }
 
