@@ -496,6 +496,12 @@ In this second step, only 2 codes have been compared so far. More outputs are ne
 
 {\bf TODO: Describe additional comparisons I know of, but which were not part of the code comparison:} David compared the HMF of one of the cases to his own outputs. Elisabeth was planning on producing outputs for correlation function as well.
 
+Additionally, independent codes were utilized to test the accuracy of halo mass function predictions. For the halo mass function, we compare the value of $\sigma$, $\log(\sigma^{-1})$, and the value of the halo mass function in the form used in \citep{tinker08},
+\begin{equation}
+\log[(M^2/\bar{rho_m})dn/dM].
+\end{equation}
+We note that while we maintain the $10^{-4}$ for our evaluations of $\sigma$, the accuracy degrades to a value of $5\times10^{-3}$ for the halo mass function evaluation, primarily at the high halo mass and high redshift domains. We find that this increased error is acceptable, as the level of precision is significantly better than the accuracy of current halo mass function models. 
+
 {\tt CCL} has a suite of test routines which, upon compilation, compare its outputs to the benchmarks from code comparison. These are run with ``make check''.
 
 
