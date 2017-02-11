@@ -399,7 +399,7 @@ This function is directly implemented in {\tt CCL} as well as a specific $\sigma
 
 \subsection{Photo-$z$ implementation}
 \label{sec:photoz}
-LSST galaxy redshifts will be obtained using photometry. However, analytic forms of galaxy redshift distributions are usually known in terms of spectroscopic redshifts. A model is therefore required for the probability of measuring a particular photometric redshift given a spectroscopic redshift. {\tt CCL} allows you to flexibly provide your own photometric redshift model.
+LSST galaxy redshifts will be obtained using photometry. However, analytic forms of galaxy redshift distributions are usually known in terms of spectroscopic redshifts. A model is therefore required for the probability of measuring a photometric redshift $z_{\rm ph}$ for an object with hypothetical spectroscopic redshift $z_{\rm s}$. {\tt CCL} allows you to flexibly provide your own photometric redshift model.
 
 To do so, you will write a function which accepts as input a photometric redshift, a spectroscopic redshift, and a void pointer to a structure containing any further parameters of your photo-z model. This function will return the probability of measuring the input photometric redshift given the input spectroscopic redshift. Explicitly, this function should take the form:
 
