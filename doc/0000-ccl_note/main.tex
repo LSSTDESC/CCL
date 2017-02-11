@@ -113,7 +113,7 @@ The first step to use CCL is to generate a {\tt ccl\_cosmology} object, containi
 
 If you wish to include neutrinos in your cosmology, the suffix `{\tt \_nu}' may be appended to the latter four {\tt ccl\_configuration} objects above (for example: {\tt ccl\_parameters\_create\_lcdm\_nu(...)}). Note that utilizing the corresponding {\tt ccl\_configuration} object without this {\tt \_nu} suffix will set the contribution from both massless and massive neutrinos to zero.
 
-{\tt ccl\_configuration} objects contain information about the prescriptions to be used to compute transfer functions, power spectra, mass functions, etc. A default {\tt ccl\_configuration} object is made readily available as {\tt default\_config}, for which transfer functions are computed with CLASS, the HaloFit prediction is used for the matter power spectrum and the prescription by \cite{Tinker2008} is used for the halo mass function.
+{\tt ccl\_configuration} objects contain information about the prescriptions to be used to compute transfer functions, power spectra, mass functions, etc. A default {\tt ccl\_configuration} object is made readily available as {\tt default\_config}, for which transfer functions are computed with CLASS, the HaloFit prediction is used for the matter power spectrum and a number of prescriptions can be used to compute the halo mass function.
 
 After initializing an instance of {\tt ccl\_parameters} and {\tt ccl\_configuration}, the function {\tt ccl\_cosmology\_create(ccl\_parameters,ccl\_configuration)} returns a pointer to a {\tt ccl\_cosmology} structure, which you will need to pass around to every CCL function.
 
@@ -288,7 +288,7 @@ where $\mathcal{P}_\Phi(k)$ is the dimensionless power spectrum of of the primor
         \end{equation}
         Here $s(z)$ is the magnification bias, given as the logarithmic derivative of the number of sources with magnitude limit, and $r(\chi)$ is the angular comoving distance (see Eq. \ref{eq:angdist}).
           
-        Note that {\tt CCL} currently does not compute relativistic corrections to number counts {\bf TODO: add references}. Although these should be included in the future, their contribution to the total fluctuation is largely subdominant, and therefore it is safe to work without them for the time being {\bf TODO: add references?}.
+        Note that {\tt CCL} currently does not compute relativistic corrections to number counts \cite{2011PhRvD..84d3516C,2011PhRvD..84f3505B}. Although these should be included in the future, their contribution to the total fluctuation is largely subdominant, and therefore it is safe to work without them for the time being.
 \end{itemize}
 
 \paragraph{\bf Cosmic shear.} The transfer function for cosmic shear is currently decomposed into two terms: $\Delta^{\rm SH}=\Delta^{\rm WL}+\Delta^{\rm IA}$, where
@@ -301,20 +301,20 @@ where $\mathcal{P}_\Phi(k)$ is the dimensionless power spectrum of of the primor
         \begin{equation}
           W^L(z)\equiv\int_z^\infty dz' p_z(z')\frac{r(\chi(z')-\chi(z))}{r(\chi(z'))}.
         \end{equation}
-  \item $\Delta^{\rm IA}$ is the transfer function for intrinsic galaxy alignments. {\tt CCL} currently supports the so-called ``linear alignment model'', according to which the galaxy inertia tensor is proportional the local tidal tensor.
+  \item $\Delta^{\rm IA}$ is the transfer function for intrinsic galaxy alignments. {\tt CCL} currently supports the so-called ``linear alignment model'', according to which the galaxy inertia tensor is proportional the local tidal tensor \cite{2004PhRvD..70f3526H,2007MNRAS.381.1197H}.
         \begin{equation}
           \Delta_\ell^{\rm IA}(k)=\sqrt{\frac{(\ell+2)!}{(\ell-2)!}}\int dz\,p_z(z)\,b_{\rm IA}(z)\,f_{\rm red}(z)\,T_\delta(k,z)\,\frac{j_\ell(k\chi(z))}{(k\chi(z))^2}.
         \end{equation}
 \end{itemize}
 
-It is worth noting that the equations above should be modified for non-flat cosmologies by replacing the spherical Bessel functions $j_\ell$ with their hyperspherical counterparts {\bf CITE}. Since the library currently only uses the Limber approximation documented below, this is not an issue for the time being, but it will be revisited in future versions of CCL.
+It is worth noting that the equations above should be modified for non-flat cosmologies by replacing the spherical Bessel functions $j_\ell$ with their hyperspherical counterparts \cite{1994ApJ...432....7K}. Since the library currently only uses the Limber approximation documented below, this is not an issue for the time being, but it will be revisited in future versions of CCL.
 
 \subsubsection{The Limber approximation}
 As shown above, computing each transfer function involves a radial projection (i.e. an integral over redshift or $\chi$), and thus computing full power spectrum consists of a triple integral for each $\ell$. This can be computationally intensive, but can be significantly simplified in certain regimes by using the Limber approximation, given by:
 \begin{equation}
  j_\ell(x)\simeq\sqrt{\frac{\pi}{2\ell+1}}\,\delta\left(\ell+\frac{1}{2}-x\right).
 \end{equation}
-Thus for each $k$ and $\ell$ we can define a radial distance $\chi_\ell\equiv(\ell+1/2)/k$, and we will write the corresponding redshift as $z_\ell$. {\bf TODO: do we want to show why this is a good approximation with a plot?} This approximation works best for wide radial kernels and high multipoles.
+Thus for each $k$ and $\ell$ we can define a radial distance $\chi_\ell\equiv(\ell+1/2)/k$, and we will write the corresponding redshift as $z_\ell$. This approximation works best for wide radial kernels and high multipoles.
 
 Substituting this in the expressions above, it is possible to see that they can be written as follows in the Limber approximation. First, the power spectrum can be rewritten as
 \begin{equation}
