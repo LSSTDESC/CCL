@@ -98,6 +98,7 @@ static void compare_bbks(int i_model,struct bbks_data * data)
       }
       pk_bench=pk_h/pow(data->h,3);
       pk_ccl=ccl_linear_matter_power(cosmo,1./(1+z),k,&status);
+      if (status) printf("%s\n",cosmo->status_message);
       err=fabs(pk_ccl/pk_bench-1);
       ASSERT_DBL_NEAR_TOL(err,0.,BBKS_TOLERANCE);
     }

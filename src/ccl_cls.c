@@ -71,14 +71,16 @@ typedef struct {
 } IntLensPar;
 
 //Integrand for lensing kernel
-static double integrand_wl(double chip,void *params, int * status)
+static double integrand_wl(double chip,void *params)
 {
+//EK: added local status here as the status testing is done in routines called from this function
+  int status;
   IntLensPar *p=(IntLensPar *)params;
   double chi=p->chi;
-  double a=ccl_scale_factor_of_chi(p->cosmo,chip, status);
+  double a=ccl_scale_factor_of_chi(p->cosmo,chip, &status);
   double z=1./a-1;
   double pz=spline_eval(z,p->spl_pz);
-  double h=p->cosmo->params.h*ccl_h_over_h0(p->cosmo,a, status)/CLIGHT_HMPC;
+  double h=p->cosmo->params.h*ccl_h_over_h0(p->cosmo,a, &status)/CLIGHT_HMPC;
 
   if(chi==0)
     return h*pz;
@@ -125,15 +127,17 @@ typedef struct {
 } IntMagPar;
 
 //Integrand for magnification kernel
-static double integrand_mag(double chip,void *params, int * status)
+static double integrand_mag(double chip,void *params)
 {
   IntMagPar *p=(IntMagPar *)params;
+//EK: added local status here as the status testing is done in routines called from this function
+  int status;
   double chi=p->chi;
-  double a=ccl_scale_factor_of_chi(p->cosmo,chip, status);
+  double a=ccl_scale_factor_of_chi(p->cosmo,chip, &status);
   double z=1./a-1;
   double pz=spline_eval(z,p->spl_pz);
   double sz=spline_eval(z,p->spl_sz);
-  double h=p->cosmo->params.h*ccl_h_over_h0(p->cosmo,a, status)/CLIGHT_HMPC;
+  double h=p->cosmo->params.h*ccl_h_over_h0(p->cosmo,a, &status)/CLIGHT_HMPC;
 
   if(chi==0)
     return h*pz*(1-2.5*sz);
@@ -310,7 +314,7 @@ static CCL_ClTracer *cl_tracer_new(ccl_cosmology *cosmo,int tracer_type,
       
 	for(int j=0;j<nchi;j++)
 	  clstatus|=window_magnification(x[j],cosmo,clt->spl_nz,clt->spl_sz,chimax,&(y[j]));
-	if(status) {
+	if(clstatus) {
 	  free(y);
 	  free(x);
 	  spline_free(clt->spl_nz);
@@ -370,7 +374,7 @@ static CCL_ClTracer *cl_tracer_new(ccl_cosmology *cosmo,int tracer_type,
       
       for(int j=0;j<nchi;j++)
 	clstatus|=window_lensing(x[j],cosmo,clt->spl_nz,chimax,&(y[j]));
-      if(status) {
+      if(clstatus) {
 	free(y);
 	free(x);
 	spline_free(clt->spl_nz);
@@ -650,6 +654,7 @@ static double transfer_IA_NLA(int l,double k,ccl_cosmology *cosmo,CCL_ClTracer *
 static double transfer_wrap(int l,double k,ccl_cosmology *cosmo,CCL_ClTracer *clt, int * status)
 {
   double transfer_out=0;
+
   if(clt->tracer_type==CL_TRACER_NC) {
     transfer_out=transfer_dens(l,k,cosmo,clt, status);
     if(clt->has_rsd)
@@ -664,7 +669,6 @@ static double transfer_wrap(int l,double k,ccl_cosmology *cosmo,CCL_ClTracer *cl
   }
   else
     transfer_out=-1;
-
   return transfer_out;
 }
 
@@ -674,10 +678,11 @@ typedef struct {
   ccl_cosmology *cosmo;
   CCL_ClTracer *clt1;
   CCL_ClTracer *clt2;
+  int *status;
 } IntClPar;
 
 //Integrand for integral power spectrum
-static double cl_integrand(double lk,void *params, int * status)
+static double cl_integrand(double lk,void *params)
 {
   IntClPar *p=(IntClPar *)params;
   double k=pow(10.,lk);
@@ -687,11 +692,10 @@ static double cl_integrand(double lk,void *params, int * status)
     return 0;
   else {
     double t1,t2;
-    double a=ccl_scale_factor_of_chi(p->cosmo,chi, status); //Limber
-    double pk=ccl_nonlin_matter_power(p->cosmo,a,k, status);
-    t1=transfer_wrap(p->l,k,p->cosmo,p->clt1, status);
-    t2=transfer_wrap(p->l,k,p->cosmo,p->clt2, status);
-
+    double a=ccl_scale_factor_of_chi(p->cosmo,chi, p->status); //Limber
+    double pk=ccl_nonlin_matter_power(p->cosmo,a,k, p->status);
+    t1=transfer_wrap(p->l,k,p->cosmo,p->clt1, p->status);
+    t2=transfer_wrap(p->l,k,p->cosmo,p->clt2, p->status);
     return k*t1*t2*pk;
   }
 }
@@ -738,7 +742,7 @@ static void get_k_interval(CCL_ClTracer *clt1,CCL_ClTracer *clt2,int l,
 //clt2 -> tracer #2
 double ccl_angular_cl(ccl_cosmology *cosmo,int l,CCL_ClTracer *clt1,CCL_ClTracer *clt2, int * status)
 {
-  int clastatus=0;
+  int clastatus=0, qagstatus;
   IntClPar ipar;
   double result=0,eresult;
   double lkmin,lkmax;
@@ -751,11 +755,12 @@ double ccl_angular_cl(ccl_cosmology *cosmo,int l,CCL_ClTracer *clt1,CCL_ClTracer
   ipar.cosmo=cosmo;
   ipar.clt1=clt1;
   ipar.clt2=clt2;
+  ipar.status = &clastatus;
   F.function=&cl_integrand;
   F.params=&ipar;
-  status=gsl_integration_qag(&F,lkmin,lkmax,0,1E-4,1000,GSL_INTEG_GAUSS41,w,&result,&eresult);
+  qagstatus=gsl_integration_qag(&F,lkmin,lkmax,0,1E-4,1000,GSL_INTEG_GAUSS41,w,&result,&eresult);
   gsl_integration_workspace_free(w);
-  if(clastatus!=GSL_SUCCESS) {
+  if(qagstatus!=GSL_SUCCESS || *ipar.status) {
     *status=CCL_ERROR_INTEG;
     strcpy(cosmo->status_message,"ccl_cls.c: ccl_angular_cl(): error integrating over k\n");
     return -1;

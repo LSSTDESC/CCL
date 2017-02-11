@@ -60,7 +60,7 @@ static double massfunc_f(ccl_cosmology *cosmo, double halo_mass,double redshift,
     return fit_A*pow( (fit_a/sigma)+1.0, fit_b)*exp(-fit_c/sigma/sigma);
 
   default:
-    cosmo->status = 11;
+    *status = CCL_ERROR_MF;
     sprintf(cosmo->status_message ,
 	    "ccl_massfunc.c: ccl_massfunc(): Unknown or non-implemented mass function method: %d \n",
 	    cosmo->config.mass_function_method);
@@ -68,7 +68,7 @@ static double massfunc_f(ccl_cosmology *cosmo, double halo_mass,double redshift,
   }
 }
 
-void ccl_cosmology_compute_sigma(ccl_cosmology * cosmo)
+void ccl_cosmology_compute_sigma(ccl_cosmology * cosmo, int *status)
 {
     if(cosmo->computed_sigma)
         return;
@@ -81,7 +81,7 @@ void ccl_cosmology_compute_sigma(ccl_cosmology * cosmo)
         (fabs(m[nm-1]-LOGM_SPLINE_MAX)>1e-5) ||
         (m[nm-1]>10E17)
         ) {
-       cosmo->status =2;
+       *status =CCL_ERROR_LINSPACE;
        strcpy(cosmo->status_message,"ccl_cosmology_compute_sigmas(): Error creating linear spacing in m\n");
        return;
     }
@@ -96,16 +96,15 @@ void ccl_cosmology_compute_sigma(ccl_cosmology * cosmo)
      y[i] = log10(ccl_sigmaR(cosmo, haloradius));
    }
    gsl_spline * logsigma = gsl_spline_alloc(M_SPLINE_TYPE, nm);
-   int status = gsl_spline_init(logsigma, m, y, nm);
-   if (status){
+   *status = gsl_spline_init(logsigma, m, y, nm);
+   if (*status){
      free(m);
      free(y);
      gsl_spline_free(logsigma);
-     cosmo->status = 4;
+     *status = CCL_ERROR_SPLINE ;
      strcpy(cosmo->status_message, "ccl_massfunc.c: ccl_cosmology_compute_sigma(): Error creating sigma(M) spline\n");
      return;
    }
-
    for (int i=0; i<nm; i++){
      if(i==0){
        y[i] = log(pow(10, gsl_spline_eval(logsigma, m[i], NULL)))-log(pow(10,gsl_spline_eval(logsigma, m[i]+LOGM_SPLINE_DELTA/2., NULL)));
@@ -122,12 +121,12 @@ void ccl_cosmology_compute_sigma(ccl_cosmology * cosmo)
    }
 
    gsl_spline * dlnsigma_dlogm = gsl_spline_alloc(M_SPLINE_TYPE, nm);
-   status = gsl_spline_init(dlnsigma_dlogm, m, y, nm);
-   if (status){
+   *status = gsl_spline_init(dlnsigma_dlogm, m, y, nm);
+   if (*status){
      free(m);
      free(y);
      gsl_spline_free(logsigma);
-     cosmo->status = 4;
+     *status = CCL_ERROR_SPLINE ;
      strcpy(cosmo->status_message, "ccl_massfunc.c: ccl_cosmology_compute_sigma(): Error creating dlnsigma/dlogM spline\n");
      return;
    }
@@ -150,7 +149,7 @@ TASK: return dn/dM.
 double ccl_massfunc(ccl_cosmology *cosmo, double halo_mass, double redshift, int * status)
 {
   if (!cosmo->computed_sigma){
-    ccl_cosmology_compute_sigma(cosmo);
+    ccl_cosmology_compute_sigma(cosmo, status);
     ccl_check_status(cosmo, status);
   }
 
@@ -186,7 +185,7 @@ double ccl_sigmaM(ccl_cosmology * cosmo, double halo_mass, double redshift, int 
     double sigmaM;
 
     if (!cosmo->computed_sigma){
-        ccl_cosmology_compute_sigma(cosmo);
+        ccl_cosmology_compute_sigma(cosmo, status);
         ccl_check_status(cosmo, status);
     }
 
