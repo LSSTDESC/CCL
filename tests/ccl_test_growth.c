@@ -91,9 +91,9 @@ static void compare_growth(int model, struct growth_data * data)
   
   // Compare to benchmark data
   for (int j=0; j<6; j++){
-    int * status=0;
+    int status=0;
     double a = 1/(1.+data->z[j]);
-    double gf_ij=ccl_growth_factor_unnorm(cosmo,a, status);
+    double gf_ij=ccl_growth_factor_unnorm(cosmo,a, &status);
     double absolute_tolerance = GROWTH_TOLERANCE*data->gf[model][j];
     if (fabs(absolute_tolerance)<1e-12) absolute_tolerance = 1e-12;
     ASSERT_DBL_NEAR_TOL(data->gf[model][j], gf_ij, absolute_tolerance);
@@ -110,7 +110,7 @@ static void check_mgrowth(void)
   double *z_mg,*df_mg;
   ccl_parameters params1,params2;
   ccl_cosmology *cosmo1,*cosmo2;
-  int * status=0;
+  int status=0;
   z_mg=malloc(nz_mg*sizeof(double));
   df_mg=malloc(nz_mg*sizeof(double));
   for(ii=0;ii<nz_mg;ii++) {
@@ -127,10 +127,10 @@ static void check_mgrowth(void)
   //Here we check the growth computed by the library with the analytic solution.
   for(ii=0;ii<nz_mg;ii++) {
     double a=1./(1+z_mg[ii]);
-    double d1=ccl_growth_factor(cosmo1,a,status);
-    double d2=ccl_growth_factor(cosmo2,a,status);
-    double f1=ccl_growth_rate(cosmo1,a,status);
-    double f2=ccl_growth_rate(cosmo2,a,status);
+    double d1=ccl_growth_factor(cosmo1,a,&status);
+    double d2=ccl_growth_factor(cosmo2,a,&status);
+    double f1=ccl_growth_rate(cosmo1,a,&status);
+    double f2=ccl_growth_rate(cosmo2,a,&status);
     double f2r=f1+0.1*a;
     double d2r=d1*exp(0.1*(a-1));
     ASSERT_DBL_NEAR_TOL(d2r/d2,1.,GROWTH_TOLERANCE);
