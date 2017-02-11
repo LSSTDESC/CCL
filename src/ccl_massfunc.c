@@ -48,16 +48,15 @@ static double massfunc_f(ccl_cosmology *cosmo, double smooth_mass,double redshif
     overdensity_delta = 200.0;
     //critical collapse overdensity assumed in this model
     delta_c_Tinker = 1.686;
-    //peak height - note that this factorization is incorrect for e.g. massive neutrino cosmologies
-    nu = delta_c_Tinker/(sigma*ccl_growth_factor(cosmo,1./(1+redshift)));
+    nu = delta_c_Tinker/(sigma);
 
     fit_A = 0.368; //alpha in Eq. 8
-    fit_a = 0.864*pow(1+redshift, 0.27); //eta in Eq. 8
+    fit_a = -0.243*pow(1+redshift, 0.27); //eta in Eq. 8
     fit_b = 0.589*pow(1+redshift, 0.20); //beta in Eq. 8
     fit_c = 0.864*pow(1+redshift, -0.01); //gamma in Eq. 8
     fit_d = -0.729*pow(1+redshift, -0.08); //phi in Eq. 8;
 
-    return fit_A*(1.+pow(fit_a*nu,-2.*fit_d))*pow(nu, 2.*fit_a)*exp(-0.5*fit_c*nu*nu);
+    return nu*fit_A*(1.+pow(fit_b*nu,-2.*fit_d))*pow(nu, 2.*fit_a)*exp(-0.5*fit_c*nu*nu);
     break;
 
   case ccl_watson:
@@ -105,7 +104,7 @@ static double ccl_halo_b1(ccl_cosmology *cosmo, double smooth_mass,double redshi
     //critical collapse overdensity assumed in this model
     delta_c_Tinker = 1.686;
     //peak height - note that this factorization is incorrect for e.g. massive neutrino cosmologies
-    nu = delta_c_Tinker/(sigma*ccl_growth_factor(cosmo,1./(1+redshift)));
+    nu = delta_c_Tinker/(sigma);
     // Table 2 in https://arxiv.org/pdf/1001.3162.pdf
     fit_A = 1.0 + 0.24*y*exp(-pow(4./y,4.)); 
     fit_a = 0.44*y-0.88; 
