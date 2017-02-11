@@ -57,7 +57,7 @@ static void compare_sigmam(int i_model,struct sigmam_data * data)
   int nm,i,j;
   char fname[256],str[1024];
   FILE *f;
-  int * status=0;
+  int status=0;
   ccl_configuration config = default_config;
   config.transfer_function_method = ccl_bbks;
   ccl_parameters params = ccl_parameters_create(data->Omega_c,data->Omega_b,
@@ -86,7 +86,8 @@ static void compare_sigmam(int i_model,struct sigmam_data * data)
       exit(1);
     }
     m=m_h/data->h;
-    sm_h=ccl_sigmaM(cosmo,m,0.,status);
+    sm_h=ccl_sigmaM(cosmo,m,0.,&status);
+    if (status) printf("%s\n",cosmo->status_message);
     err=sm_h/sm_bench-1;
     //printf("%le\n", err);
     ASSERT_DBL_NEAR_TOL(err,0.,1E-4);

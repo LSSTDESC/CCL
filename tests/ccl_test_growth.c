@@ -94,6 +94,7 @@ static void compare_growth(int model, struct growth_data * data)
     int status=0;
     double a = 1/(1.+data->z[j]);
     double gf_ij=ccl_growth_factor_unnorm(cosmo,a, &status);
+    if (status) printf("%s\n",cosmo->status_message);
     double absolute_tolerance = GROWTH_TOLERANCE*data->gf[model][j];
     if (fabs(absolute_tolerance)<1e-12) absolute_tolerance = 1e-12;
     ASSERT_DBL_NEAR_TOL(data->gf[model][j], gf_ij, absolute_tolerance);
