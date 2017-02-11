@@ -53,7 +53,7 @@ If you choose either of the first two options, the *pyccl* module will be instal
 
 
 # Documentation
-This document contains basic information about used structures and functions. At the end of document is provided code which implements these basic functions (also in *tests/ccl_sample_run.c*). More information about CCL functions and implemetation can be found in *doc/ccl_note.pdf*.
+This document contains basic information about used structures and functions. At the end of document is provided code which implements these basic functions (also in *tests/ccl_sample_run.c*). More information about CCL functions and implemetation can be found in *doc/0000-ccl_note/0000-ccl_note.pdf*.
 ### Cosmological parameters
 Start by defining cosmological parameters defined in structure **ccl_parameters**. This structure (exact definition in *include/ccl_core.h*) contains densities of matter, parameters of dark energy (*w0, wa*), Hubble parameters, primordial poer spectra, radiation parameters, derived parameters (*sigma_8, Omega_1, z_star*) and modified growth rate.
 
@@ -183,7 +183,7 @@ user_pz_info* ccl_specs_create_photoz_info(void * user_params, double(*user_pz_f
 ## Example code
 This code can also be found in *tests/ccl_sample_run.c* You can run the following example code. For this you will need to compile with:
 ````sh
-gcc -Wall -Wpedantic -g -O0 -I./include -std=c99 -fPIC tests/ccl_sample_run.c -o tests/ccl_sample_run -L./lib -L/usr/local/lib -lgsl -lgslcblas -lm -Lclass -lclass -lccl
+gcc -Wall -Wpedantic -g -O0 -I./include -std=gnu99 -fPIC tests/ccl_sample_run.c -o tests/ccl_sample_run -L./lib -L/usr/local/lib -lgsl -lgslcblas -lm -Lclass -lclass -lccl
 ````
 
 ````c
