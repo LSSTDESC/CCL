@@ -1,5 +1,7 @@
 
 import ccllib as lib
+import numpy as np
+from warnings import warn
 
 # Configuration types
 transfer_function_types = {
@@ -55,11 +57,19 @@ class Parameters(object):
         # Set nz_mgrowth (no. of redshift bins for modified growth fns.)
         if zarr_mgrowth is not None and dfarr_mgrowth is not None:
             # Get growth array size and do sanity check
+            zarr_mgrowth = np.atleast_1d(zarr_mgrowth)
+            dfarr_mgrowth = np.atleast_1d(dfarr_mgrowth)
             assert zarr_mgrowth.size == dfarr_mgrowth.size
             nz_mgrowth = zarr_mgrowth.size
         else:
             # If one or both of the MG growth arrays are set to zero, disable 
             # all of them
+            if zarr_mgrowth is not None:
+                warn("zarr_mgrowth ignored; must also specify dfarr_mgrowth.",
+                     UserWarning)
+            if dfarr_mgrowth is not None:
+                warn("dfarr_mgrowth ignored; must also specify zarr_mgrowth.",
+                     UserWarning)
             zarr_mgrowth = None
             dfarr_mgrowth = None
             nz_mgrowth = -1

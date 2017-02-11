@@ -122,26 +122,26 @@ def test_parameters_mgrowth():
                                        dfarr_mgrowth=[0.1, 0.1, 0.1])
     
     # Invalid constructions
-    assert_warns(Warning, ccl.Parameters, 0.25, 0.05, 0.7, 2.1e-9, 0.96, 
-                                          zarr_mgrowth=zarr)
-    assert_warns(Warning, ccl.Parameters, 0.25, 0.05, 0.7, 2.1e-9, 0.96, 
-                                          dfarr_mgrowth=dfarr)
-    assert_warns(Warning, ccl.Parameters, 0.25, 0.05, 0.7, 2.1e-9, 0.96, 
-                                          zarr_mgrowth=None,
-                                          dfarr_mgrowth=dfarr)
-    assert_raises(ValueError, ccl.Parameters, 0.25, 0.05, 0.7, 2.1e-9, 0.96, 
-                                              zarr_mgrowth=zarr,
-                                              dfarr_mgrowth=0.1)
-    assert_raises(ValueError, ccl.Parameters, 0.25, 0.05, 0.7, 2.1e-9, 0.96, 
-                                              zarr_mgrowth=zarr,
-                                              dfarr_mgrowth=f_func)
+    assert_warns(UserWarning, ccl.Parameters, 0.25, 0.05, 0.7, 2.1e-9, 0.96, 
+                                              zarr_mgrowth=zarr)
+    assert_warns(UserWarning, ccl.Parameters, 0.25, 0.05, 0.7, 2.1e-9, 0.96, 
+                                              dfarr_mgrowth=dfarr)
+    assert_warns(UserWarning, ccl.Parameters, 0.25, 0.05, 0.7, 2.1e-9, 0.96, 
+                                              zarr_mgrowth=None,
+                                              dfarr_mgrowth=dfarr)
+    assert_raises(AssertionError, ccl.Parameters, 0.25, 0.05, 0.7, 2.1e-9, 0.96, 
+                                                  zarr_mgrowth=zarr,
+                                                  dfarr_mgrowth=0.1)
+    assert_raises(AssertionError, ccl.Parameters, 0.25, 0.05, 0.7, 2.1e-9, 0.96, 
+                                                  zarr_mgrowth=zarr,
+                                                  dfarr_mgrowth=f_func)
     
     # Mis-matched array sizes and dimensionality
-    assert_raises(ValueError, ccl.Parameters, 0.25, 0.05, 0.7, 2.1e-9, 0.96, 
-                                              zarr_mgrowth=zarr,
-                                              dfarr_mgrowth=dfarr[1:])
-    assert_raises(ValueError, ccl.Parameters, 0.25, 0.05, 0.7, 2.1e-9, 0.96, 
-                                              zarr_mgrowth=zarr,
+    assert_raises(AssertionError, ccl.Parameters, 0.25, 0.05, 0.7, 2.1e-9, 0.96, 
+                                                  zarr_mgrowth=zarr,
+                                                  dfarr_mgrowth=dfarr[1:])
+    assert_raises(AssertionError, ccl.Parameters, 0.25, 0.05, 0.7, 2.1e-9, 0.96, 
+                                                  zarr_mgrowth=zarr,
                                  dfarr_mgrowth=np.column_stack((dfarr, dfarr)) )
 
 
