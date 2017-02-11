@@ -90,14 +90,14 @@ static void compare_bbks(int i_model,struct bbks_data * data)
     for(j=0;j<6;j++) {
       double pk_h,pk_bench,pk_ccl,err;
       double z=j+0.;
-      int * status=0;
+      int status=0;
       stat=fscanf(f,"%lf",&pk_h);
       if(stat!=1) {
 	fprintf(stderr,"Error reading file %s, line %d\n",fname,i+2);
 	exit(1);
       }
       pk_bench=pk_h/pow(data->h,3);
-      pk_ccl=ccl_linear_matter_power(cosmo,1./(1+z),k,status);
+      pk_ccl=ccl_linear_matter_power(cosmo,1./(1+z),k,&status);
       err=fabs(pk_ccl/pk_bench-1);
       ASSERT_DBL_NEAR_TOL(err,0.,BBKS_TOLERANCE);
     }

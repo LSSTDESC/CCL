@@ -91,12 +91,11 @@ static void compare_distances(int model, struct distances_data * data)
   ccl_cosmology * cosmo = ccl_cosmology_create(params, default_config);
   ASSERT_NOT_NULL(cosmo);
   
-
   // Compare to benchmark data
   for (int j=0; j<6; j++){
-    int * status=0;
+    int status=0;
     double a = 1/(1.+data->z[j]);
-    double chi_ij=ccl_comoving_radial_distance(cosmo,a, status)*data->h;
+    double chi_ij=ccl_comoving_radial_distance(cosmo,a, &status)*data->h;
     double absolute_tolerance = DISTANCES_TOLERANCE*data->chi[model][j];
     if (fabs(absolute_tolerance)<1e-12) absolute_tolerance = 1e-12;
     ASSERT_DBL_NEAR_TOL(data->chi[model][j], chi_ij, absolute_tolerance);
