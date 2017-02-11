@@ -49,7 +49,7 @@ static void compare_cls(char *compare_type,struct cls_data * data)
   params.Omega_g=0;
   params.sigma_8=data->sigma_8;
   ccl_cosmology * cosmo = ccl_cosmology_create(params, config);
-  int * status=0;
+  int status=0;
   ASSERT_NOT_NULL(cosmo);
 
   int nz;
@@ -102,15 +102,13 @@ static void compare_cls(char *compare_type,struct cls_data * data)
 
   char fname[256];
   FILE *fi_dd_11,*fi_dd_12,*fi_dd_22,*fi_ll_11,*fi_ll_12,*fi_ll_22;
-  CCL_ClTracer *tr_nc_1=ccl_cl_tracer_number_counts_simple_new(cosmo,nz,zarr_1,pzarr_1,nz,zarr_1,bzarr,status);
+  CCL_ClTracer *tr_nc_1=ccl_cl_tracer_number_counts_simple_new(cosmo,nz,zarr_1,pzarr_1,nz,zarr_1,bzarr,&status);
   ASSERT_NOT_NULL(tr_nc_1);
-  CCL_ClTracer *tr_nc_2=ccl_cl_tracer_number_counts_simple_new(cosmo,nz,zarr_2,pzarr_2,nz,zarr_2,bzarr,status);
+  CCL_ClTracer *tr_nc_2=ccl_cl_tracer_number_counts_simple_new(cosmo,nz,zarr_2,pzarr_2,nz,zarr_2,bzarr,&status);
   ASSERT_NOT_NULL(tr_nc_2);
-  CCL_ClTracer *tr_wl_1=ccl_cl_tracer_lensing_simple_new(cosmo,nz,zarr_1,pzarr_1,status);
+  CCL_ClTracer *tr_wl_1=ccl_cl_tracer_lensing_simple_new(cosmo,nz,zarr_1,pzarr_1,&status);
   ASSERT_NOT_NULL(tr_wl_1);
-  CCL_ClTracer *tr_wl_2=ccl_cl_tracer_lensing_simple_new(cosmo,nz,zarr_2,pzarr_2,status);
-  ASSERT_NOT_NULL(tr_wl_2);
-
+  CCL_ClTracer *tr_wl_2=ccl_cl_tracer_lensing_simple_new(cosmo,nz,zarr_2,pzarr_2,&status);
   sprintf(fname,"tests/benchmark/codecomp_step2_outputs/run_b1b1%s_log_cl_dd.txt",compare_type);
   fi_dd_11=fopen(fname,"r"); ASSERT_NOT_NULL(fi_dd_11);
   sprintf(fname,"tests/benchmark/codecomp_step2_outputs/run_b1b2%s_log_cl_dd.txt",compare_type);
@@ -138,12 +136,12 @@ static void compare_cls(char *compare_type,struct cls_data * data)
     fscanf(fi_ll_12,"%d %lf",&l,&cl_ll_12);
     fscanf(fi_ll_22,"%d %lf",&l,&cl_ll_22);
 
-    cl_dd_11_h=ccl_angular_cl(cosmo,l,tr_nc_1,tr_nc_1,status);
-    cl_dd_12_h=ccl_angular_cl(cosmo,l,tr_nc_1,tr_nc_2,status);
-    cl_dd_22_h=ccl_angular_cl(cosmo,l,tr_nc_2,tr_nc_2,status);
-    cl_ll_11_h=ccl_angular_cl(cosmo,l,tr_wl_1,tr_wl_1,status);
-    cl_ll_12_h=ccl_angular_cl(cosmo,l,tr_wl_1,tr_wl_2,status);
-    cl_ll_22_h=ccl_angular_cl(cosmo,l,tr_wl_2,tr_wl_2,status);
+    cl_dd_11_h=ccl_angular_cl(cosmo,l,tr_nc_1,tr_nc_1,&status);
+    cl_dd_12_h=ccl_angular_cl(cosmo,l,tr_nc_1,tr_nc_2,&status);
+    cl_dd_22_h=ccl_angular_cl(cosmo,l,tr_nc_2,tr_nc_2,&status);
+    cl_ll_11_h=ccl_angular_cl(cosmo,l,tr_wl_1,tr_wl_1,&status);
+    cl_ll_12_h=ccl_angular_cl(cosmo,l,tr_wl_1,tr_wl_2,&status);
+    cl_ll_22_h=ccl_angular_cl(cosmo,l,tr_wl_2,tr_wl_2,&status);
 
     if(fabs(cl_dd_11_h/cl_dd_11-1)>CLS_TOLERANCE)
       fraction_failed++;
