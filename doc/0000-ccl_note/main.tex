@@ -40,7 +40,7 @@
 
 \begin{abstract}
  
-The Core Cosmology Library ({\tt CCL}) provides routines which make precise theoretical predictions of cosmological observables for LSST. These routines have been validated to a hereby documented accuracy level against the results of the Code Comparsion Project. In the current version, predictions are provided for distances and background quantities, angular auto- and cross-spectra of cosmic shear and clustering and the halo mass function. Fiducial specifications for the expected LSST galaxy distributions and clustering bias are also included, together with a facility to compute redshift distributions for a user-defined photometric redshift model. {\tt CCL} is written in C with a Python interface. In this note, we explain the functionality of the first release ({\tt CCL} v0.1) of the library. 
+The Core Cosmology Library ({\tt CCL}) provides routines to compute basic cosmological observables with validated numerical accuracy. These routines have been validated to a hereby documented accuracy level against the results of the Code Comparsion Project. In the current version, predictions are provided for distances and background quantities, angular auto- and cross-spectra of cosmic shear and clustering and the halo mass function. Fiducial specifications for the expected LSST galaxy distributions and clustering bias are also included, together with a facility to compute redshift distributions for a user-defined photometric redshift model. {\tt CCL} is written in C with a Python interface. In this note, we explain the functionality of the first release ({\tt CCL} v0.1) of the library. 
 
 \end{abstract}
 
@@ -77,7 +77,7 @@ This note describes how to install {\tt CCL} (Section \ref{sec:install}), its fu
  $ make
  $ make install
 \end{verbatim}
-This will create two directories (if not present already): {\tt /home/desc\_fan/include} and {\tt /home/desc\_fan/lib} where the header and lib files will be placed after running {\tt make install}. CCL has been successfully installed in different Linux and Mac OS X systems\footnote{We know of one case with Mac OS where libtools had the ``lock'' function set to ``yes'' and this caused the installition to stall. However, this is very rare. If this happens, after {\tt make}, edit libtool to set the ``lock'' to ``no''.}.
+This will create two directories (if not present already): {\tt /home/desc\_fan/include} and {\tt /home/desc\_fan/lib} where the header and lib files will be placed after running {\tt make install}. CCL has been successfully installed in different Linux and Mac OS X systems\footnote{We know of one case with Mac OS where libtools had the ``lock'' function set to ``yes'' and this caused the installition to stall. However, this is very rare. If this happens, after the {\tt configure} step, edit libtool to set the ``lock'' to ``no''.}.
 
 After installing the C library you can make sure it is running as it should by typing {\tt make check}, which will run the unit tests described in Section \ref{sec:tests}. You are now ready to install the Python wrapper following the steps described in Section \ref{sec:python}.
 
@@ -98,9 +98,9 @@ Ultimately, CCL will aim to incorporate theoretical predictions for all cosmolog
 Not all functionalities are available for all models. For a reference of what 
 predictions are available for each model, see Table \ref{tab:cosmo}.
 
-The first step to use CCL is to generate a {\tt ccl\_cosmology} object, containing all of the information required to compute cosmological observables. A {\tt ccl\_cosmology} object is generated using the information from a {\tt ccl\_parameters} object and a {\tt ccl\_configuration} object. 
+The first step to use CCL is to generate a {\tt ccl\_cosmology} structure, containing all of the information required to compute cosmological observables. A {\tt ccl\_cosmology} structure is generated using the information from a {\tt ccl\_parameters} object and a {\tt ccl\_configuration} object. 
 
-\input{table_cosmo}\label{tab:cosmo}
+\input{table_cosmo}
 
 {\tt ccl\_parameters} objects contain information about the cosmological parameters, and are initialized using one of the following routines (the full syntax for each function can be found in the header file {\tt ccl\_core.h}):
 \begin{itemize}
@@ -122,6 +122,8 @@ Directions to an example of {\tt CCL} script are provided in Section \ref{sec:ex
 \subsection{Distances}
 \label{sec:distances}
 
+The routines described in this subsection are implemented in {\tt ccl\_background.c}.
+
 The Hubble parameter is calculated via
 %
 \begin{equation}
@@ -133,7 +135,7 @@ The radial comoving distance is calculated via a numerical integral of
 \begin{equation}
  \chi(a)= c \int_a^1 \frac{da'}{a'^2 H(a')}.
 \end{equation}
-The radial comoving distance is computed in terms of the radial comoving distance as:
+The transverse comoving distance is computed in terms of the radial comoving distance as:
 \begin{equation}\label{eq:angdist}
  r(\chi)=\left\{\begin{array}{cc}
                  k^{-1/2}\sin(k^{1/2}\chi) & k>0\\
@@ -149,11 +151,13 @@ CCL also contains capability to compute $a(\chi)$ (i.e. the inverse of $\chi(a)$
 
 \subsection{Growth function}
 \label{sec:growth}
-To compute the growth function, $D(a)$, the growth factor of matter perturbations, {\tt CCL} solves the following differential equation in {\tt ccl\_background.c}:
+
+The routines described in this subsection are implemented in {\tt ccl\_background.c}. 
+To compute the growth function, $D(a)$, the growth factor of matter perturbations, {\tt CCL} solves the following differential equation:
 \begin{equation}
   \frac{d}{da}\left(a^3H(a)\frac{dD}{da}\right)=\frac{3}{2}\Omega_M(a)H(a)D.
 \end{equation}
-In doing this, CCL simultaneously computes the so-called growth rate $f(a)$, defined as:
+In doing this, {\tt CCL} simultaneously computes the so-called growth rate $f(a)$, defined as:
 \begin{equation}
   f(a)=\frac{d\ln D}{d\ln a}.
 \end{equation}
@@ -165,6 +169,7 @@ Currently CCL allows for an alternative cosmological model defined by a regular 
 \label{sec:power}
 
 There are several options for obtaining the matter power spectrum in {\tt CCL}. 
+The routines described in this subsection are implemented in {\tt ccl\_power.c}.
 
 \subsubsection{BBKS}
 CCL implements the analytical BBKS approximation to the transfer function \citep{BBKS}, given by
@@ -172,7 +177,8 @@ CCL implements the analytical BBKS approximation to the transfer function \citep
 T(q\equiv k/\Gamma h {\rm Mpc}^{-1}) = \frac{\ln[1+2.34q]}{2.34q}[1+3.89q+(16.2q)^2+(5.47q)^3+(6.71q)^4]^{-0.25}
 \end{equation}
 where $\Gamma = \Omega_m h$.
-The power spectrum is related to the transfer function by $\Delta(k)\propto T^2(k)k^{3+n}$ and $\Delta^2(k)\propto k^3P(k)$. The normalization of the power spectrum is achieved at $z=0$ by setting $\sigma_8$ to its value today. This option mainly serves the purpose of comparing {\tt CCL} outputs to benchmark files and thus it is not recommended for other uses. 
+The power spectrum is related to the transfer function by $\Delta(k)\propto T^2(k)k^{3+n}$ and $\Delta^2(k)\propto k^3P(k)$. The normalization of the power spectrum is achieved at $z=0$ by setting $\sigma_8$ to its value today. 
+The BBKS power spectrum option is primarily used as a precisely defined input for testing the numerical accuracy of {\tt CCL} routines (as described in Sect.~\ref{sec:tests}), and it is not recommended for other uses.
 
 \subsubsection{CLASS}
 Secondly, there is the option to call the {\tt CLASS} software \citep{class} within {\tt CCL} to obtain either linear or nonlinear matter power spectra at given redshifts. For speed, the linear power spectrum is obtained at redshift $z=0$ and re-scaled to a different redshift using the growth function. In the case of the nonlinear matter power spectrum, upon setting up the cosmology object, we construct a bi-dimensional spline in $k$ and the scale-facor which is then called by the relevant routines to obtain the matter power spectrum at the desired wavenumber and redshift. The relevant routines can be found within {\tt ccl\_power.c}. Currently CLASS computes the non-linear power spectrum using the HaloFit prescription of \cite{CLASS_halofit}.
@@ -259,6 +265,7 @@ There are two alternative schemes for normalization of the matter power spectrum
 \label{sec:cl}
 
 In this section we will distinguish between {\sl observables} (inseparable quantities observed on the sky, such as number counts in a redshift bin, shear or CMB temperature fluctuations) and {\sl contributions} to the total observed fluctuations of these observables (such as the main density term in number counts, redshift-space distortions, magnification, ISW, etc.).
+The routines described in this subsection are implemented in {\tt ccl\_cls.c}.
 
 \subsubsection{Exact expressions}
 The angular power spectrum between two observables $a$ and $b$ can be written as:
@@ -367,8 +374,11 @@ where
 %For numerical integration of the correlation functions, we make use of the public code FFTlog (... cite ...). (... more here ... describe correlation function calculation).
 
 
-\subsection{Halo mass function}
+\subsection{Halo mass \& halo bias functions}
 \label{sec:hmf}
+
+The routines described in this subsection are implemented in {\tt ccl\_massfunc.c}.
+
 The halo mass function is incorporated using several definitions from the literature: \citet{Tinker2008}, \citet{Angulo2012}, and \citet{Watson2013}. All three models are tuned to simulation data and tested against observational results. We attempt to keep a common form to the multiplicity function whenever possible for ease of extension:
 \begin{equation}
 f(\sigma)=A\Big[\Big(\frac{\sigma}{b}\Big)^{-a}+1\Big]e^{-c/{\sigma}^2},
