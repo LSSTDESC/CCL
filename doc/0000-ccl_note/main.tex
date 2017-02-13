@@ -56,7 +56,7 @@ The Core Cosmology Library ({\tt CCL}) provides routines to compute basic cosmol
 \section{Introduction}
 \label{sec:intro}
 
-In preparation for constraining cosmology with the Large Synoptic Survey Telescope (LSST), it is necessary to be able to produce theoretical predictions for the cosmological quantities which will be measured. The Core Cosmology Library\footnote{\url{https://github.com/LSSTDESC/CCL}} ({\tt CCL}) aims to provide, in one library, predictions which are validated to a well-documented numerical accuracy for the purpose of constraining cosmology with LSST. By constructing a library with LSST in mind, it is possible to ensure that it is flexible, adaptable, appropriate, and validated for all cases of interest, as well as user-friendly and available for the needs of all working groups. 
+In preparation for constraining cosmology with the Large Synoptic Survey Telescope (LSST), it is necessary to be able to produce theoretical predictions for the cosmological quantities which will be measured. The Core Cosmology Library\footnote{\url{https://github.com/LSSTDESC/CCL}} ({\tt CCL}) aims to provide, in one library, predictions which are validated to a well-documented numerical accuracy for the purpose of constraining cosmology with LSST. By constructing a cosmology library with LSST in mind, it is possible to ensure that it is flexible, adaptable, and validated for all cases of interest, as well as user-friendly and available for the needs of all working groups. 
 
 The Core Cosmology Library is written in C and incorporates the CLASS code \cite{class} to provide predictions for the matter power spectrum\footnote{Future versions of the library will incorporate other power-spectrum libraries and methods.}. A Python wrapper is also provided for improved ease of use. 
 
@@ -64,7 +64,9 @@ This note describes how to install {\tt CCL} (Section \ref{sec:install}), its fu
 
 \section{Installation}
 \label{sec:install}
-
+\subsection{Dependencies}
+{\tt CCL} requires the GNU Scientific Library \tt{GSL}\footnote{\url{https://www.gnu.org/software/gsl/}}, {\tt GSL-2.1} or higher.
+\subsection{Installation Procedure}
 {\tt CCL} can be installed through an {\tt autotools}-generated configuration file. UNIX users should be familiar with the process: navigate to the directory containing the library and type
 \begin{verbatim}
  $ ./configure
@@ -131,7 +133,7 @@ The Hubble parameter is calculated via
     \exp[3 w_a (a-1)]+\Omega_K a +(\Omega_g+\Omega_\nu^{\rm rel}) a^{-1}}.
 \end{equation}
 
-The radial comoving distance is calculated via a numerical integral of
+The radial comoving distance is calculated via a numerical integral
 \begin{equation}
  \chi(a)= c \int_a^1 \frac{da'}{a'^2 H(a')}.
 \end{equation}
