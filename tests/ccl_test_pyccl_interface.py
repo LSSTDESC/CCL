@@ -230,6 +230,60 @@ def check_lsst_specs(cosmo):
     assert_raises(TypeError, ccl.dNdz_tomog, z_scl, 'nc', zmin, zmax, pz1)
     assert_raises(TypeError, ccl.dNdz_tomog, z_scl, 'nc', zmin, zmax, z_arr)
     assert_raises(TypeError, ccl.dNdz_tomog, z_scl, 'nc', zmin, zmax, None)
+
+
+def check_cls(cosmo):
+    """
+    Check that cls functions can be run.
+    """
+    #angular_cl
+    
+    # Number density input
+    z_n = np.linspace(0., 1., 200)
+    n = np.ones(z_n.shape)
+    
+    # Bias input
+    z_b = z_n
+    b = np.sqrt(1. + z_b)
+    
+    # ell range input
+    ell_scl = 4
+    ell_lst = [2, 3, 4, 5, 6, 7, 8, 9]
+    ell_arr = np.arange(2, 10)
+    
+    # ClTracer test objects
+    lens1 = ccl.ClTracerLensing(cosmo, False, z_n, n)
+    lens2 = ccl.ClTracerLensing(cosmo, True, z_n, n, 
+                                z_ba=z_n, ba=n, z_rf=z_n, rf=n)
+    nc1 = ccl.ClTracerNumberCounts(cosmo, False, False, z_n, n, z_b, b)
+    nc2 = ccl.ClTracerNumberCounts(cosmo, True, False, z_n, n, z_b, b)
+    nc3 = ccl.ClTracerNumberCounts(cosmo, True, True, z_n, n, z_b, b,
+                                   z_s=z_n, s=n)
+    
+    # Check valid ell input is accepted
+    assert_( all_finite(ccl.angular_cl(cosmo, lens1, lens1, ell_scl)) )
+    assert_( all_finite(ccl.angular_cl(cosmo, lens1, lens1, ell_lst)) )
+    assert_( all_finite(ccl.angular_cl(cosmo, lens1, lens1, ell_arr)) )
+    
+    assert_( all_finite(ccl.angular_cl(cosmo, nc1, nc1, ell_scl)) )
+    assert_( all_finite(ccl.angular_cl(cosmo, nc1, nc1, ell_lst)) )
+    assert_( all_finite(ccl.angular_cl(cosmo, nc1, nc1, ell_arr)) )
+    
+    # Check various cross-correlation combinations
+    assert_( all_finite(ccl.angular_cl(cosmo, lens1, lens2, ell_arr)) )
+    assert_( all_finite(ccl.angular_cl(cosmo, lens1, nc1, ell_arr)) )
+    assert_( all_finite(ccl.angular_cl(cosmo, lens1, nc2, ell_arr)) )
+    assert_( all_finite(ccl.angular_cl(cosmo, lens1, nc3, ell_arr)) )
+    assert_( all_finite(ccl.angular_cl(cosmo, lens2, nc1, ell_arr)) )
+    assert_( all_finite(ccl.angular_cl(cosmo, lens2, nc2, ell_arr)) )
+    assert_( all_finite(ccl.angular_cl(cosmo, lens2, nc3, ell_arr)) )
+    assert_( all_finite(ccl.angular_cl(cosmo, nc1, nc2, ell_arr)) )
+    assert_( all_finite(ccl.angular_cl(cosmo, nc1, nc3, ell_arr)) )
+    assert_( all_finite(ccl.angular_cl(cosmo, nc2, nc3, ell_arr)) )
+    
+    # Check that reversing order of ClTracer inputs works
+    assert_( all_finite(ccl.angular_cl(cosmo, nc1, lens1, ell_arr)) )
+    assert_( all_finite(ccl.angular_cl(cosmo, nc1, lens2, ell_arr)) )
     
 
 def test_background():
@@ -244,44 +298,28 @@ def test_power():
     Test power spectrum and sigma functions in ccl.power.
     """
     for cosmo in reference_models():
-        pass # FIXME yield check_power, cosmo
+        yield check_power, cosmo
 
 def test_massfunc():
     """
     Test mass function and supporting functions.
     """
     for cosmo in reference_models():
-        pass #yield check_massfunc, cosmo
+        yield check_massfunc, cosmo
 
 def test_lsst_specs():
     """
-    Test lsst specs.
+    Test lsst specs module.
     """
     for cosmo in reference_models():
         yield check_lsst_specs, cosmo
 
-"""
-# Background cosmology functions and growth functions
-from background import growth_factor, growth_factor_unnorm, growth_rate, \
-                       comoving_radial_distance, h_over_h0, \
-                       luminosity_distance, scale_factor_of_chi, omega_m_z
-
-# Power spectrum calculations and sigma8
-from power import linear_matter_power, nonlin_matter_power, sigmaR, sigma8
-
-# Halo mass function
-from massfunction import massfunc, massfunc_m2r, sigmaM
-
-# Cl's and tracers
-from cls import angular_cl, ClTracer, ClTracerNumberCounts, ClTracerLensing
-
-from lsst_specs import bias_clustering, sigmaz_clustering, sigmaz_sources, \
-                       dNdz_tomog, PhotoZFunction
-
-# Useful constants and unit conversions
-from constants import CLIGHT_HMPC, MPC_TO_METER, PC_TO_METER, \
-                      GNEWT, RHO_CRITICAL, SOLAR_MASS
-"""
+def test_cls():
+    """
+    Test top-level functions in pyccl.cls module.
+    """
+    for cosmo in reference_models():
+        yield check_cls, cosmo
 
 if __name__ == '__main__':
     run_module_suite()
