@@ -46,11 +46,13 @@ def bias_clustering(cosmo, a):
 
 def sigmaz_clustering(z):
     return _vectorize_fn_simple(lib.specs_sigmaz_clustering, 
-                                lib.specs_sigmaz_clustering_vec, z)
+                                lib.specs_sigmaz_clustering_vec, z,
+                                returns_status=False)
 
 def sigmaz_sources(z):
     return _vectorize_fn_simple(lib.specs_sigmaz_sources, 
-                                lib.specs_sigmaz_sources_vec, z)
+                                lib.specs_sigmaz_sources_vec, z,
+                                returns_status=False)
 
 
 def dNdz_tomog(z, dNdz_type, zmin, zmax, pz_func):
