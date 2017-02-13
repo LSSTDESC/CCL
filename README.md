@@ -353,8 +353,7 @@ A Python wrapper for CCL is provided through a module called *pyccl*. The whole 
 
 The Python module has essentially the same functions as the C library, just presented in a more standard Python-like way. You can inspect the available functions and their arguments by using the built-in Python **help()** function, as with any Python module.
 
-Below is a simple example Python script that creates a new **Cosmology** object, and then uses it to calculate the angular power spectra for a simple lensing cross-correlation. It should
-take a few seconds on a typical laptop.
+Below is a simple example Python script that creates a new **Cosmology** object, and then uses it to calculate the angular power spectra for a simple lensing cross-correlation. It should take a few seconds on a typical laptop.
 
 ````python
 import pyccl as ccl
@@ -384,7 +383,6 @@ print cls
 
 
 # License, Credits, Feedback etc
-
 The CCL is still under development and should be considered research in progress. You are welcome to re-use the code, which is open source and available under the modified BSD license. If you make use of any of the ideas or software in this package in your own research, please cite them as "(LSST DESC, in preparation)" and provide a link to this repository: https://github.com/LSSTDESC/CCL If you have comments, questions, or feedback, please [write us an issue](https://github.com/LSSTDESC/CCL/issues).
-=======
+
 
