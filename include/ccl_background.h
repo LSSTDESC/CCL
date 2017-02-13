@@ -9,7 +9,15 @@ void ccl_h_over_h0s(ccl_cosmology * cosmo, int na, double a[na], double output[n
 // Comoving radial distance in Mpc from today to scale factor a
 double ccl_comoving_radial_distance(ccl_cosmology * cosmo, double a, int* status);
 // Comoving radial distances in Mpc to scale factors as given in list a[0..na-1]
-void ccl_comoving_radial_distances(ccl_cosmology * cosmo, int na, double a[na], double output[na], int*status);
+void ccl_comoving_radial_distances(ccl_cosmology * cosmo, int na, double a[na], double output[na], int* status);
+
+//Transforms between radial and angular distances
+double ccl_sinn(ccl_cosmology *cosmo,double chi);
+
+// Comoving angular distance in Mpc from today to scale factor a
+double ccl_comoving_angular_distance(ccl_cosmology * cosmo, double a, int* status);
+// Comoving angular distances in Mpc to scale factors as given in list a[0..na-1]
+void ccl_comoving_angular_distances(ccl_cosmology * cosmo, int na, double a[na], double output[na], int* status);
 
 // Comoving luminosity distance in Mpc from today to scale factor a
 double ccl_luminosity_distance(ccl_cosmology * cosmo, double a, int * status);
