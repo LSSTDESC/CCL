@@ -13,6 +13,8 @@ typedef struct ccl_parameters {
   double Omega_m;
   double Omega_n;
   double Omega_k;
+  double sqrtk;
+  int k_sign;
   
   // Dark Energy
   double w0;

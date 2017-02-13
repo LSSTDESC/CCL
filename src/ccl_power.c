@@ -742,12 +742,15 @@ double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double a, double k, int * 
 typedef struct {
   ccl_cosmology *cosmo;
   double R;
-  int *status;
+  int* status;
 } SigmaR_pars;
 
 static double sigmaR_integrand(double lk,void *params)
 {
   SigmaR_pars *par=(SigmaR_pars *)params;
+  int stat = 0;
+  par->status = &stat;
+  
   double k=pow(10.,lk);
   double pk=ccl_linear_matter_power(par->cosmo,1.,k, par->status);
   double kR=k*par->R;
@@ -765,6 +768,9 @@ static double sigmaR_integrand(double lk,void *params)
 double ccl_sigmaR(ccl_cosmology *cosmo,double R)
 {
   SigmaR_pars par;
+  int stat = 0;
+  par.status = &stat;
+  
   par.cosmo=cosmo;
   par.R=R;
   gsl_integration_cquad_workspace *workspace=gsl_integration_cquad_workspace_alloc(1000);

@@ -34,6 +34,10 @@ def comoving_radial_distance(cosmo, a):
     return _vectorize_fn(lib.comoving_radial_distance, 
                          lib.comoving_radial_distance_vec, cosmo, a)
 
+def comoving_angular_distance(cosmo, a):
+    return _vectorize_fn(lib.comoving_angular_distance, 
+                         lib.comoving_angular_distance_vec, cosmo, a)
+
 def h_over_h0(cosmo, a):
     return _vectorize_fn(lib.h_over_h0, 
                          lib.h_over_h0_vec, cosmo, a)
