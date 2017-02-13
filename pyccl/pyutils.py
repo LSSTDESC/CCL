@@ -3,6 +3,23 @@ import ccllib as lib
 import numpy as np
 import core
 
+def check(status):
+    """
+    Check the status returned by a ccllib function.
+    """
+    # Check for normal status (no action required)
+    if status == 0: return
+    
+    # Check for known error status
+    if status in core.error_types.keys():
+        raise RuntimeError("Error %d: %s" % (status, core.error_types[status]))
+    
+    # Check for unknown error
+    if status != 0:
+        raise RuntimeError("Error %d: Unnamed error returned by CCL C library." \
+                           % status)
+
+
 def _cosmology_obj(cosmo):
     """
     Returns a ccl_cosmology object, given an input object which may be 
@@ -40,6 +57,9 @@ def _vectorize_fn_simple(fn, fn_vec, x, returns_status=True):
             f, status = fn_vec(x, len(x), status)
         else:
             f = fn_vec(x, len(x))
+    
+    # Check result and return
+    check(status)
     return f
 
 
@@ -70,6 +90,9 @@ def _vectorize_fn(fn, fn_vec, cosmo, x, returns_status=True):
             f, status = fn_vec(cosmo, x, len(x), status)
         else:
             f = fn_vec(cosmo, x, len(x))
+    
+    # Check result and return
+    check(status)
     return f
 
 
@@ -100,5 +123,8 @@ def _vectorize_fn2(fn, fn_vec, cosmo, x, z, returns_status=True):
             f, status = fn_vec(cosmo, z, x, len(x), status)
         else:
             f = fn_vec(cosmo, z, x, len(x))
+    
+    # Check result and return
+    check(status)
     return f
     
