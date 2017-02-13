@@ -1,38 +1,39 @@
 # CCL
-DESC Core Cosmology Library: cosmology routines with validated numerical accuracy.
+LSST DESC Core Cosmology Library: cosmology routines with validated numerical accuracy.
 
 The library is written in C99 and all functionality is directly callable from C and C++ code.  We also provide python bindings for higher-level functions.
 
-See also our wiki https://github.com/DarkEnergyScienceCollaboration/CCL/wiki
+See also our wiki: https://github.com/LSSTDESC/CCL/wiki
+
 # Installation
 In order to compile CCL you need GSL. You can get GSL here: https://www.gnu.org/software/gsl/. Note that CCL uses version 2+ of GSL (which is not yet standard in all systems).
 
 To install CCL, from the base directory (the one where this file is located) run:
-````sh
+```sh
 ./configure
 make
 make install
-````
+```
 Often admin privileges will be needed to install the library. If you have those just type:
-````sh
+```sh
 sudo make install
-````
+```
 If you don't have admin privileges, you can still install the library by running
-````sh
+```sh
 ./configure --prefix=/path/to/install
 make
 make install
-````
-where /path/to/install is the absolute path to the directory where you want the library to be installed. If non-existing, this will create two directories, /path/to/install/include and /path/to/install/lib, and the library and header files will be installed there. Note that, in order to use CCL with your own scripts you'll have to add /path/to/install/lib to your LD_LIBRARY_PATH.
+```
+where `/path/to/install` is the absolute path to the directory where you want the library to be installed. If non-existing, this will create two directories, `/path/to/install/include` and `/path/to/install/lib`, and the library and header files will be installed there. Note that, in order to use `CCL` with your own scripts you'll have to add `/path/to/install/lib` to your LD_LIBRARY_PATH.
 
 All unit tests can be run after installation by running
-````sh
+```sh
 make check
-````
+```
 
 ## Known installation issues
 1. You need to link to GSL-2 in your local version of the Makefile.
-2. Sometimes, "make check" can fail. In that case, go to "*tests/ccl_test.c*" and comment out "**define CTEST_SEGFAULT**"
+2. Sometimes, "make check" can fail. In that case, go to `tests/ccl_test.c` and comment out `define CTEST_SEGFAULT`
 
 ## Python wrapper installation
 A Python wrapper for CCL is provided through a module called *pyccl*. At the moment, *pyccl* needs to be compiled separately from the main CCL library. The wrapper’s build tools currently assume that your C compiler is *gcc* (with OpenMP enabled), and that you have a working Python 2.x installation with *numpy* and *distutils* with *swig*. To build and install the *pyccl* module, go to the root CCL directory and choose one of the following options:
@@ -53,69 +54,75 @@ If you choose either of the first two options, the *pyccl* module will be instal
 
 
 # Documentation
-This document contains basic information about used structures and functions. At the end of document is provided code which implements these basic functions (also in *tests/ccl_sample_run.c*). More information about CCL functions and implemetation can be found in *doc/0000-ccl_note/0000-ccl_note.pdf*.
-### Cosmological parameters
-Start by defining cosmological parameters defined in structure **ccl_parameters**. This structure (exact definition in *include/ccl_core.h*) contains densities of matter, parameters of dark energy (*w0, wa*), Hubble parameters, primordial poer spectra, radiation parameters, derived parameters (*sigma_8, Omega_1, z_star*) and modified growth rate.
 
-You can initialize this structure through function **ccl_parameters_create** which returns object of type **ccl_parameters**.
-````c
+This document contains basic information about used structures and functions. At the end of document is provided code which implements these basic functions (also in *tests/ccl_sample_run.c*). More information about CCL functions and implemetation can be found in *doc/0000-ccl_note/0000-ccl_note.pdf*.
+
+### Cosmological parameters
+Start by defining cosmological parameters defined in structure **`ccl_parameters`**. This structure (exact definition in `include/ccl_core.h`) contains densities of matter, parameters of dark energy (`w0`, `wa`), Hubble parameters, primordial poer spectra, radiation parameters, derived parameters (`sigma_8`, `Omega_1`, `z_star`) and modified growth rate.
+
+You can initialize this structure through function **`ccl_parameters_create`** which returns object of type **`ccl_parameters`**.
+```c
 ccl_parameters ccl_parameters_create(
 	double Omega_c, double Omega_b, double Omega_k, double Omega_n, double w0, double wa, double h,
 	double A_s, double n_s, int nz_mgrowth, double *zarr_mgrowth, double *dfarr_mgrowth
 );
-````
+```
 where:
-* Omega_c: cold dark matter
-* Omega_b: baryons
-* Omega_m: matter
-* Omega_n: neutrinos
-* Omega_k: curvature
-* little omega_x means Omega_x*h^2
-* w0: Dark energy eq of state parameter
-* wa: Dark energy eq of state parameter, time variation
-* H0: Hubble's constant in km/s/Mpc.
-* h: Hubble's constant divided by (100 km/s/Mpc).
-* A_s: amplitude of the primordial PS
-* n_s: index of the primordial PS
+* `Omega_c`: cold dark matter
+* `Omega_b`: baryons
+* `Omega_m`: matter
+* `Omega_n`: neutrinos
+* `Omega_k`: curvature
+* little `omega_x` means "Omega_x h^2"
+* `w0`: Dark energy eq of state parameter
+* `wa`: Dark energy eq of state parameter, time variation
+* `H0`: Hubble's constant in km/s/Mpc.
+* `h`: Hubble's constant divided by (100 km/s/Mpc).
+* `A_s`: amplitude of the primordial PS
+* `n_s`: index of the primordial PS
 
-For some specific cosmologies you can also use functions **ccl_parameters_create_flat_lcdm, ccl_parameters_create_flat_wcdm, ccl_parameters_create_flat_wacdm, ccl_parameters_create_lcdm**, which automatically set some parameters. For more information, see file *include/ccl_core.c*
-### Cosmology object
-For majority of CCL`s functions you need an object of type **ccl_cosmology**, which can be initalize by function **ccl_cosmology_create**
-````c
+For some specific cosmologies you can also use functions **`ccl_parameters_create_flat_lcdm`**, **`ccl_parameters_create_flat_wcdm`**, **`ccl_parameters_create_flat_wacdm`**, **`ccl_parameters_create_lcdm`**, which automatically set some parameters. For more information, see file `include/ccl_core.c`.
+
+### The `ccl_cosmology` object
+For the majority of CCL's functions you need an object of type **`ccl_cosmology`**, which can be initalize by function **`ccl_cosmology_create`**
+```c
 ccl_cosmology * ccl_cosmology_create(ccl_parameters params, ccl_configuration config);
-````
-Note that the function returns a pointer. Variable **params** of type **ccl_parameters** contains cosmological parameters created in previous step. Structure **ccl_configuration** contains information about methods for computing transfer function, matter power spectrum and mass function (for available methods see *include/ccl_config.h*). For now, you should use default configuration **default_config**
-````c
+```
+Note that the function returns a pointer. Variable **`params`** of type **`ccl_parameters`** contains cosmological parameters created in previous step. Structure **`ccl_configuration`** contains information about methods for computing transfer function, matter power spectrum and mass function (for available methods see `include/ccl_config.h`). For now, you should use default configuration **`default_config`**
+```c
 const ccl_configuration default_config = {ccl_boltzmann_class, ccl_halofit, ccl_tinker};
-````
-After you are done working with this cosmology object, you should free its work space by **ccl_cosmology_free**
-````c
+```
+After you are done working with this cosmology object, you should free its work space by **`ccl_cosmology_free`**
+```c
 void ccl_cosmology_free(ccl_cosmology * cosmo);
-````
+```
+
 ### Distances and Growth factor
-With defined cosmology we can now compute distances, growth factor (and rate) or sigma_8. For comoving radial distance you can call function **ccl_comoving_radial_distance**
-````c
+With defined cosmology we can now compute distances, growth factor (and rate) or sigma_8. For comoving radial distance you can call function **`ccl_comoving_radial_distance`**
+```c
 double ccl_comoving_radial_distance(ccl_cosmology * cosmo, double a);
-````
-which returns distance to scale factor **a** in units of Mpc. For luminosity distance call function **ccl_luminosity_distance**
-````c
+```
+which returns distance to scale factor **`a`** in units of Mpc. For luminosity distance call function **`ccl_luminosity_distance`**
+```c
 double ccl_luminosity_distance(ccl_cosmology * cosmo, double a);
-````
-which also returns distance in units of Mpc. For growth factor (normalized to 1 at **z** = 0) at sale factor **a** call **ccl_growth_factor**
-````c
+```
+which also returns distance in units of Mpc. For growth factor (normalized to 1 at **`z`** = 0) at sale factor **`a`** call **`ccl_growth_factor`**
+```c
 double ccl_growth_factor(ccl_cosmology * cosmo, double a);
-````
-For more routines to compute distances and growth rates (e.g. at multiple times at once) see file *include/ccl_background.h*
+```
+For more routines to compute distances and growth rates (e.g. at multiple times at once) see file `include/ccl_background.h`
+
 ###  Matter power spectra and sigma_8
-For given cosmology we can compute linear and non-linear matter power spectra using functions **ccl_linear_matter_power** and **ccl_nonlin_matter_power**
-````c
+For given cosmology we can compute linear and non-linear matter power spectra using functions **`ccl_linear_matter_power`** and **`ccl_nonlin_matter_power`**
+```c
 double ccl_linear_matter_power(ccl_cosmology * cosmo, double a, double k);
 double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double a, double k);
-````
-Sigma_8 can be calculated by function **ccl_sigma8**, or more generally by function **ccl_sigmaR**, which computes the variance of the density field smoothed by spherical top-hat window function on a comoving distance **R** (in Mpc).
-````c
+```
+Sigma_8 can be calculated by function **`ccl_sigma8`**, or more generally by function **`ccl_sigmaR`**, which computes the variance of the density field smoothed by spherical top-hat window function on a comoving distance **`R`** (in Mpc).
+```c
 double ccl_sigmaR(ccl_cosmology *cosmo, double R);
 double ccl_sigma8(ccl_cosmology *cosmo);
+
 ````
 These and other functions for different matter power spectra can be found in file *include/ccl_power.h*.
 
@@ -186,7 +193,7 @@ This code can also be found in *tests/ccl_sample_run.c* You can run the followin
 gcc -Wall -Wpedantic -g -O0 -I./include -std=gnu99 -fPIC tests/ccl_sample_run.c -o tests/ccl_sample_run -L./lib -L/usr/local/lib -lgsl -lgslcblas -lm -Lclass -lclass -lccl
 ````
 
-````c
+```c
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
@@ -346,8 +353,7 @@ A Python wrapper for CCL is provided through a module called *pyccl*. The whole 
 
 The Python module has essentially the same functions as the C library, just presented in a more standard Python-like way. You can inspect the available functions and their arguments by using the built-in Python **help()** function, as with any Python module.
 
-Below is a simple example Python script that creates a new **Cosmology** object, and then uses it to calculate the angular power spectra for a simple lensing cross-correlation. It should
-take a few seconds on a typical laptop.
+Below is a simple example Python script that creates a new **Cosmology** object, and then uses it to calculate the angular power spectra for a simple lensing cross-correlation. It should take a few seconds on a typical laptop.
 
 ````python
 import pyccl as ccl
@@ -374,5 +380,9 @@ ell = np.arange(2, 10)
 cls = ccl.angular_cl(cosmo, lens1, lens2, ell)
 print cls
 ````
-# License
-CCL is now under development.
+
+
+# License, Credits, Feedback etc
+The CCL is still under development and should be considered research in progress. You are welcome to re-use the code, which is open source and available under the modified BSD license. If you make use of any of the ideas or software in this package in your own research, please cite them as "(LSST DESC, in preparation)" and provide a link to this repository: https://github.com/LSSTDESC/CCL If you have comments, questions, or feedback, please [write us an issue](https://github.com/LSSTDESC/CCL/issues).
+
+
