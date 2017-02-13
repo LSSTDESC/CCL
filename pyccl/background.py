@@ -48,5 +48,6 @@ def scale_factor_of_chi(cosmo, a):
 
 def omega_m_z(cosmo, a):
     return _vectorize_fn(lib.omega_m_z, 
-                         lib.omega_m_z_vec, cosmo, a)
+                         lib.omega_m_z_vec, cosmo, a,
+                         returns_status=False)
 

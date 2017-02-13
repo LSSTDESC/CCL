@@ -36,7 +36,8 @@ CCL_ClTracer* cl_tracer_new_wrapper(ccl_cosmology *cosmo,int tracer_type,
 				int nz_b, double *z_b, int nb, double *b,
 				int nz_s, double *z_s, int ns, double *s,
 				int nz_ba, double *z_ba, int nba, double *ba,
-				int nz_rf, double *z_rf, int nrf, double *rf){
+				int nz_rf, double *z_rf, int nrf, double *rf,
+				int* status){
     
     assert(nz_n == nn);
     assert(nz_b == nb);
@@ -54,18 +55,20 @@ CCL_ClTracer* cl_tracer_new_wrapper(ccl_cosmology *cosmo,int tracer_type,
 				             nz_b, z_b, b,
 				             nz_s, z_s, s,
 				             nz_ba, z_ba, ba,
-				             nz_rf, z_rf, rf);
+				             nz_rf, z_rf, rf, 
+				             status);
 }
 
 
 void angular_cl_vec(ccl_cosmology * cosmo,
                     CCL_ClTracer *clt1, CCL_ClTracer *clt2,
                     double* ell, int nell,
-                    double* output, int nout)
+                    double* output, int nout,
+                    int* status)
 {
     assert(nout == nell);
     for(int i=0; i < nell; i++){
-        output[i] = ccl_angular_cl(cosmo, ell[i], clt1, clt2);
+        output[i] = ccl_angular_cl(cosmo, ell[i], clt1, clt2, status);
     }
 }
 
