@@ -272,7 +272,7 @@ The angular power spectrum between two observables $a$ and $b$ can be written as
 \begin{equation}
  C^{ab}_\ell=4\pi\int_0^\infty \frac{dk}{k}\,\mathcal{P}_\Phi(k)\Delta^a_\ell(k)\Delta^b_\ell(k),
 \end{equation}
-where $\mathcal{P}_\Phi(k)$ is the dimensionless power spectrum of of the primordial curvature perturbations, and $\Delta^a$ and $\Delta^b$ are, using the terminology of CLASS, the transfer functions corresponding to these observables. Each transfer function will receive contributions from different terms. Currently {\tt CCL} supports two observables (also labelled ``tracers''), number counts and cosmic shear, with the following contributions:
+where $\mathcal{P}_\Phi(k)$ is the dimensionless power spectrum of of the primordial curvature perturbations, and $\Delta^a$ and $\Delta^b$ are, using the terminology of CLASS, the transfer functions corresponding to these observables. Each transfer function will receive contributions from different terms. Currently {\tt CCL} supports two observables (also labelled ``tracers''), number counts and galaxy shape distortions, with the following contributions:
 \paragraph{\bf Number counts.} The transfer function for number counts can be decomposed into three terms: $\Delta^{\rm NC}=\Delta^{\rm D}+\Delta^{\rm RSD}+\Delta^{\rm M}$, where
 \begin{itemize}
   \item $\Delta^{\rm D}$ is the standard density term proportional to the matter density:
@@ -298,7 +298,7 @@ where $\mathcal{P}_\Phi(k)$ is the dimensionless power spectrum of of the primor
         Note that {\tt CCL} currently does not compute relativistic corrections to number counts \cite{2011PhRvD..84d3516C,2011PhRvD..84f3505B}. Although these should be included in the future, their contribution to the total fluctuation is largely subdominant, and therefore it is safe to work without them for the time being.
 \end{itemize}
 
-\paragraph{\bf Cosmic shear.} The transfer function for cosmic shear is currently decomposed into two terms: $\Delta^{\rm SH}=\Delta^{\rm WL}+\Delta^{\rm IA}$, where
+\paragraph{\bf Galaxy shape distortions.} The transfer function for shape distortions is currently decomposed into two terms: $\Delta^{\rm SH}=\Delta^{\rm WL}+\Delta^{\rm IA}$, where
 \begin{itemize}
   \item $\Delta^{\rm L}$ is the standard lensing contribution:
         \begin{equation}
