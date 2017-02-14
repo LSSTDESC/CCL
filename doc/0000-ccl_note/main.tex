@@ -385,7 +385,14 @@ where
 
 The routines described in this subsection are implemented in {\tt ccl\_massfunc.c}.
 
-The halo mass function is incorporated using several definitions from the literature: \citet{Tinker2008}, \citet{Tinker2010}, \citet{Angulo2012}, and \citet{Watson2013}. All four models are tuned to simulation data and tested against observational results. With the exception of the Tinker 2010 model, we attempt to keep a common form to the multiplicity function whenever possible for ease of extension:
+The halo mass function is incorporated using several definitions from the literature: \citet{Tinker2008}, \citet{Tinker2010}, \citet{Angulo2012}, and \citet{Watson2013}. All four models are tuned to simulation data and tested against observational results. In addition, each of these fits has been implemented using the common halo definition of $\Delta = 200$, where a halo is defined with:
+\begin{equation}
+\bar{\rho}(r_{\Delta}) = \Delta*\rho_m.
+\end{equation}
+We look toward extending to more general halo definitions in the future, though this implementation is not yet in practice.
+
+
+With the exception of the Tinker 2010 model, we attempt to keep a common form to the multiplicity function whenever possible for ease of extension:
 \begin{equation}
 f(\sigma)=A\Big[\Big(\frac{\sigma}{b}\Big)^{-a}+1\Big]e^{-c/{\sigma}^2},
 \end{equation}
