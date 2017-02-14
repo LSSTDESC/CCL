@@ -167,30 +167,35 @@ double (* your_pz_func)(double photo_z, double spec_z, void *param);
 ````
 which returns the probability of measuring a particular photometric redshift, given a spectroscopic redshift and other relevant parameters. Then you call function **ccl_specs_create_photoz_info**
 ````c
-user_pz_info* ccl_specs_create_photoz_info(void * user_params, double(*user_pz_func)(double, double,void*));
+user_pz_info* ccl_specs_create_photoz_info(void * user_params, 
+double(*user_pz_func)(double, double,void*));
 ````
 which creates a strcture **user_pz_info** which holds information needed to compute *dN/dz*
 ````c
 typedef struct {
-        double (* your_pz_func)(double, double, void *); //first double corresponds to photo-z, second to spec-z
+	//first double corresponds to photo-z, second to spec-z
+        double (* your_pz_func)(double, double, void *); 
         void *  your_pz_params;
 } user_pz_info;
 ````
 The expected *dN/dz* for lensing or clustering galaxies with given binnig can be obtained by function **ccl_specs_dNdz_tomog**
 ````c
-int ccl_specs_dNdz_tomog(double z, int dNdz_type, double bin_zmin, double bin_zmax, user_pz_info * user_info,  double *tomoout);
+int ccl_specs_dNdz_tomog(double z, int dNdz_type, double bin_zmin, double bin_zmax, 
+user_pz_info * user_info,  double *tomoout);
 ````
 Result is returned in **tomoout**. This function returns zero if called with an allowable type of dNdz, non-zero otherwise. Allowed types of dNdz (currently one for clustering and three for lensing - fiducial, optimistic, and conservative - cases are considered) and other information and functions like bias clustering or sigma_z are specified in file *include/ccl_lsst_specs.h* 
 
 After you are done working with photo_z, you should free its work space by **ccl_specs_create_photoz_info**
 ````c
-user_pz_info* ccl_specs_create_photoz_info(void * user_params, double(*user_pz_func)(double, double,void*));
+user_pz_info* ccl_specs_create_photoz_info(void * user_params, 
+double(*user_pz_func)(double, double,void*));
 ````
 
 ## Example code
 This code can also be found in *tests/ccl_sample_run.c* You can run the following example code. For this you will need to compile with the following command:
 ````sh
-gcc -Wall -Wpedantic -g -I/path/to/ccl/header -std=gnu99 -fPIC tests/ccl_sample_run.c -o tests/ccl_sample_run -L/path/to/ccl/lib -L/usr/local/lib -lgsl -lgslcblas -lm -lccl
+gcc -Wall -Wpedantic -g -I/path/to/ccl/header -std=gnu99 -fPIC tests/ccl_sample_run.c 
+-o tests/ccl_sample_run -L/path/to/ccl/lib -L/usr/local/lib -lgsl -lgslcblas -lm -lccl
 ````
 where */path/to/ccl/* is the path to the location where the library has been installed.
 
