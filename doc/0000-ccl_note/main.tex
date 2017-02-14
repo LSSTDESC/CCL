@@ -109,14 +109,15 @@ The first step to use CCL is to generate a {\tt ccl\_cosmology} structure, conta
 
 {\tt ccl\_parameters} objects contain information about the cosmological parameters, and are initialized using one of the following routines (the full syntax for each function can be found in the header file {\tt ccl\_core.h}):
 \begin{itemize}
- \item {\tt ccl\_parameters\_create(...)}: general {\tt ccl\_parameters} constructor supporting all the models described above.
+ \item {\tt ccl\_parameters\_create(double Omega\_c, double Omega\_b, double Omega\_k, double N\_nu\_rel, double N\_nu\_mass, double mnu, double w0, double wa, double h, double {\color{blue}norm\_pk}, double n\_s,int nz\_mgrowth,double *zarr\_mgrowth,double *dfarr\_mgrowth)}: general {\tt ccl\_parameters} constructor supporting all the models described above.
  \item {\tt ccl\_parameters\_create\_flat\_lcdm(...)}: particular constructor for flat $\Lambda$CDM cosmologies.
  \item {\tt ccl\_parameters\_create\_flat\_wcdm(...)}: constant $w$ cosmologies.
  \item {\tt ccl\_parameters\_create\_flat\_wacdm(...)}: $w_0+w_a$.
  \item {\tt ccl\_parameters\_create\_lcdm(...)}: curved $\Lambda$CDM cosmologies.
 \end{itemize}
+The argument ${\tt {\color{blue}norm\_pk}}$ can be passed the power spectrum normalization parameterized by $\sigma_8$ or $A_\mathrm{s}$, {\tt ccl\_parameters\_create} switches to $\sigma_8$ normalization if ${\tt {\color{blue}norm\_pk}} > 1.e-5$, and to $A_{\mathrm s}$ normalization otherwise.
 
-If you wish to include neutrinos in your cosmology, the suffix `{\tt \_nu}' may be appended to the latter four {\tt ccl\_configuration} objects above (for example: {\tt ccl\_parameters\_create\_lcdm\_nu(...)}). Note that utilizing the corresponding {\tt ccl\_configuration} object without this {\tt \_nu} suffix will set the contribution from both massless and massive neutrinos to zero.
+To include massive neutrinos in your cosmology, the suffix `{\tt \_nu}' may be appended to the latter four {\tt ccl\_configuration} objects above (for example: {\tt ccl\_parameters\_create\_lcdm\_nu(...)}). Note that utilizing the corresponding {\tt ccl\_configuration} object without this {\tt \_nu} suffix will set the contribution from both massless and massive neutrinos to zero.
 
 {\tt ccl\_configuration} objects contain information about the prescriptions to be used to compute transfer functions, power spectra, mass functions, etc. A default {\tt ccl\_configuration} object is made readily available as {\tt default\_config}, for which transfer functions are computed with CLASS, the HaloFit prediction is used for the matter power spectrum and a number of prescriptions can be used to compute the halo mass function.
 
