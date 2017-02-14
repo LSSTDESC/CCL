@@ -188,10 +188,11 @@ user_pz_info* ccl_specs_create_photoz_info(void * user_params, double(*user_pz_f
 ````
 
 ## Example code
-This code can also be found in *tests/ccl_sample_run.c* You can run the following example code. For this you will need to compile with:
+This code can also be found in *tests/ccl_sample_run.c* You can run the following example code. For this you will need to compile with the following command:
 ````sh
-gcc -Wall -Wpedantic -g -O0 -I./include -std=gnu99 -fPIC tests/ccl_sample_run.c -o tests/ccl_sample_run -L./lib -L/usr/local/lib -lgsl -lgslcblas -lm -Lclass -lclass -lccl
+gcc -Wall -Wpedantic -g -I/path/to/ccl/header -std=gnu99 -fPIC tests/ccl_sample_run.c -o tests/ccl_sample_run -L/path/to/ccl/lib -L/usr/local/lib -lgsl -lgslcblas -lm -lccl
 ````
+where */path/to/ccl/* is the path to the location where the library has been installed.
 
 ```c
 #include <stdlib.h>
