@@ -191,7 +191,6 @@ static void ccl_run_class(
     sprintf(cosmo->status_message ,"ccl_power.c: ccl_cosmology_compute_power_class(): Error running CLASS spectra:%s\n",sp->error_message);
     return;
   }
-  printf("done\n");
 }
 
 static double ccl_get_class_As(ccl_cosmology *cosmo, struct file_content *fc, int position_As,double sigma8){
@@ -572,7 +571,6 @@ void ccl_cosmology_compute_power(ccl_cosmology * cosmo){
 	  break;
         case ccl_boltzmann_class:
 	  ccl_cosmology_compute_power_class(cosmo);
-	  printf("CLASS done\n");
 	  break;
         default:
 	  cosmo->status = CCL_ERROR_INCONSISTENT;
@@ -594,7 +592,7 @@ TASK: compute the linear power spectrum at a given redshift
 double ccl_linear_matter_power(ccl_cosmology * cosmo, double a, double k){
   
     ccl_cosmology_compute_power(cosmo);
-    printf("HERE\n");
+    
     double log_p_1;
     double deltak=1e-4;
     double deriv_plin_kmid,deriv2_plin_kmid;
@@ -750,9 +748,7 @@ static double sigmaR_integrand(double lk,void *params)
 {
   SigmaR_pars *par=(SigmaR_pars *)params;
   double k=pow(10.,lk);
-  printf("lk=%.3lf\t",lk);
   double pk=ccl_linear_matter_power(par->cosmo,1.,k);
-  printf("lk=%.3lf pk=%.3lf\t",lk,pk);
   double kR=k*par->R;
   double w;
   if(kR<0.1) {
@@ -788,6 +784,5 @@ double ccl_sigmaR(ccl_cosmology *cosmo,double R)
 
 double ccl_sigma8(ccl_cosmology *cosmo)
 {
-  printf("Entering sigma8 computation\n");
   return ccl_sigmaR(cosmo,8/cosmo->params.h);
 }
