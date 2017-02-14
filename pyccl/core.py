@@ -27,6 +27,7 @@ matter_power_spectrum_types = {
 mass_function_types = {
     'angulo':   lib.angulo,
     'tinker':   lib.tinker,
+    'tinker10': lib.tinker10,
     'watson':   lib.watson
 }
 
@@ -46,7 +47,7 @@ error_types = {
 class Parameters(object):
     
     def __init__(self, Omega_c=None, Omega_b=None, h=None, A_s=None, n_s=None, 
-                 Omega_k=0., Omega_n=0., w0=-1., wa=0.,
+                 Omega_k=0., Omega_n=0., w0=-1., wa=0., sigma8=None,
                  zarr_mgrowth=None, dfarr_mgrowth=None):
         """
         Class containing a set of cosmological parameters.
@@ -54,7 +55,7 @@ class Parameters(object):
         # Set current ccl_parameters object to None
         self.parameters = None
         
-        # Set nz_mgrowth (no. of redshift bins for modified growth fns.)
+         # Set nz_mgrowth (no. of redshift bins for modified growth fns.)
         if zarr_mgrowth is not None and dfarr_mgrowth is not None:
             # Get growth array size and do sanity check
             zarr_mgrowth = np.atleast_1d(zarr_mgrowth)
@@ -74,10 +75,26 @@ class Parameters(object):
             dfarr_mgrowth = None
             nz_mgrowth = -1
         
+        # Check to make sure specified amplitude parameter is consistent
+        if (A_s is None and sigma8 is None) \
+        or (A_s is not None and sigma8 is not None):
+            raise ValueError("Must set either A_s or sigma8.")
+        
+        # Set norm_pk to either A_s or sigma8
+        norm_pk = A_s if A_s is not None else sigma8
+        
+        # The C library decides whether A_s or sigma8 was the input parameter 
+        # based on value, so we need to make sure this is consistent too
+        if norm_pk >= 1e-5 and A_s is not None:
+            raise ValueError("A_s must be less than 1e-5.")
+            
+        if norm_pk < 1e-5 and sigma8 is not None:
+            raise ValueError("sigma8 must be greater than 1e-5.")
+        
         # Check if any compulsory parameters are not set
-        compul = [Omega_c, Omega_b, Omega_k, Omega_n, w0, wa, h, A_s, n_s]
+        compul = [Omega_c, Omega_b, Omega_k, Omega_n, w0, wa, h, norm_pk, n_s]
         names = ['Omega_c', 'Omega_b', 'Omega_k', 'Omega_n', 'w0', 'wa', 
-                 'h', 'A_s', 'n_s']
+                 'h', 'norm_pk', 'n_s']
         for nm, item in zip(names, compul):
             if item is None:
                 raise ValueError("Necessary parameter '%s' was not set "
@@ -88,13 +105,13 @@ class Parameters(object):
             # Create ccl_parameters without modified growth
             self.parameters = lib.parameters_create(
                                     Omega_c, Omega_b, Omega_k, Omega_n, 
-                                    w0, wa, h, A_s, n_s, 
+                                    w0, wa, h, norm_pk, n_s, 
                                     -1, None, None)
         else:
             # Create ccl_parameters with modified growth arrays
             self.parameters = lib.parameters_create_vec(
                                     Omega_c, Omega_b, Omega_k, Omega_n, 
-                                    w0, wa, h, A_s, n_s, 
+                                    w0, wa, h, norm_pk, n_s, 
                                     zarr_mgrowth, dfarr_mgrowth)
     
     def __getitem__(self, key):
