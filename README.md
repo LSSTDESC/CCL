@@ -186,10 +186,10 @@ int ccl_specs_dNdz_tomog(double z, int dNdz_type, double bin_zmin, double bin_zm
 ````
 Result is returned in **tomoout**. This function returns zero if called with an allowable type of dNdz, non-zero otherwise. Allowed types of dNdz (currently one for clustering and three for lensing - fiducial, optimistic, and conservative - cases are considered) and other information and functions like bias clustering or sigma_z are specified in file *include/ccl_lsst_specs.h* 
 
-After you are done working with photo_z, you should free its work space by **ccl_specs_create_photoz_info**
+After you are done working with photo_z, you should free its work space by **ccl_specs_free_photoz_info**
 ````c
-user_pz_info* ccl_specs_create_photoz_info(void * user_params, 
-                                           double(*user_pz_func)(double, double,void*));
+user_pz_info* ccl_specs_free_photoz_info(void * user_params, 
+                                         double(*user_pz_func)(double, double,void*));
 ````
 
 ## Example code
