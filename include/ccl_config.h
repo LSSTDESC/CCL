@@ -31,8 +31,9 @@ typedef enum matter_power_spectrum_t
 typedef enum mass_function_t
 {
     ccl_tinker      = 1,
-    ccl_watson      = 2,
-    ccl_angulo      = 3
+    ccl_tinker10    = 2,
+    ccl_watson      = 3,
+    ccl_angulo      = 4
 } mass_function_t;
 
 
