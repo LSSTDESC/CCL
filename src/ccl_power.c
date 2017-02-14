@@ -339,7 +339,6 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo){
     return;
   }
 
-  printf("starting spline\n");
 
   //CLASS calculations done - now allocate CCL splines
   double kmin = K_MIN;
@@ -384,40 +383,39 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo){
     if(cosmo->config.matter_power_spectrum_method==ccl_halofit){
       double * y2d = malloc(nk * na * sizeof(double));
       if (y2d==0){
-	cosmo->status = CCL_ERROR_SPLINE;
-	strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_class(): memory allocation error\n");
+        cosmo->status = CCL_ERROR_SPLINE;
+        strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_class(): memory allocation error\n");
       }
-      gsl_spline2d * log_power_nl = gsl_spline2d_alloc(PNL_SPLINE_TYPE, nk,na);
-      for (int j = 0; j < na; j++){
-	for (int i=0; i<nk; i++){
-	  //The 2D interpolation routines access the function values y_{k_ia_j} with the following ordering:
-	  //y_ij = y2d[j*N_k + i]
-	  //with i = 0,...,N_k-1 and j = 0,...,N_a-1.
-	  s = spectra_pk_nl_at_k_and_z(&ba, &pm, &sp,exp(x[i]),1./z[j]-1., &Z);
-	  y2d[j*nk+i] = log(Z);
-	}
-      }
-    }
-
-    ccl_free_class_structs(cosmo, &ba,&th,&pt,&tr,&pm,&sp,&nl,&le);
-
-    if(cosmo->config.matter_power_spectrum_method==ccl_halofit){
-      status = gsl_spline2d_init(log_power_nl, x, z, y2d,nk,na);
-      if (status){
-	free(x);
-	free(y);
-	free(z);
-	gsl_spline2d_free(log_power_nl);
-	cosmo->status = CCL_ERROR_SPLINE;
-	strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_class(): Error creating log_power_nl spline\n");
-	return;
+      else{
+        gsl_spline2d * log_power_nl = gsl_spline2d_alloc(PNL_SPLINE_TYPE, nk,na);
+        for (int j = 0; j < na; j++){
+          for (int i=0; i<nk; i++){
+      	   //The 2D interpolation routines access the function values y_{k_ia_j} with the following ordering:
+	         //y_ij = y2d[j*N_k + i]
+	         //with i = 0,...,N_k-1 and j = 0,...,N_a-1.
+	         s = spectra_pk_nl_at_k_and_z(&ba, &pm, &sp,exp(x[i]),1./z[j]-1., &Z);
+	         y2d[j*nk+i] = log(Z);
+         }
+       }
+       status = gsl_spline2d_init(log_power_nl, x, z, y2d,nk,na);
+       if (status){
+        free(x);
+        free(y);
+        free(z);
+        gsl_spline2d_free(log_power_nl);
+        ccl_free_class_structs(cosmo, &ba,&th,&pt,&tr,&pm,&sp,&nl,&le);
+        cosmo->status = CCL_ERROR_SPLINE;
+        strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_class(): Error creating log_power_nl spline\n");
+        return;
       }
       else
-	cosmo->data.p_nl = log_power_nl;
+        cosmo->data.p_nl = log_power_nl;
     }
-    free(x);
-    free(y);
-    free(z);
+  }
+  ccl_free_class_structs(cosmo, &ba,&th,&pt,&tr,&pm,&sp,&nl,&le);
+  free(x);
+  free(y);
+  free(z);
   }
 }
 
