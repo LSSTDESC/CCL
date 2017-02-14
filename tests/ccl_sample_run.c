@@ -100,6 +100,17 @@ int main(int argc,char **argv){
 	}
 	printf("\n");
 
+	//Halo bias
+	printf("Halo bias: z, M, b1(M,z)\n");
+	for(int logM=9;logM<=15;logM+=1)
+	{
+		for(double z=0; z<=1; z+=0.5)
+		{
+		  printf("%.1e %.1e %.2e\n",z,pow(10,logM),ccl_halo_bias(cosmo,pow(10,logM),z));
+		}
+	}
+	printf("\n");
+
 	// LSST Specification
 	user_pz_info* pz_info_example = ccl_specs_create_photoz_info(NULL, pz_func_example);
 	
