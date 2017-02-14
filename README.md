@@ -56,8 +56,8 @@ python setup.py build_ext --inplace
 If you choose either of the first two options, the *pyccl* module will be installed into a sensible location in your *PYTHONPATH*, and so should be automatically picked up by your Python interpreter. You can then simply import the module using `import pyccl`. If you use the last option, however, you must either start your interpreter from the root CCL directory, or manually add the root CCL directory to your *PYTHONPATH*.
 
 These options assume that the C library (`libccl`) has been installed somewhere in the default library path. If this isn’t the case, you will need to tell the Python build tools where to find the library. This can be achieved by running the following command first, before any of the commands above:
-````python setup.py build ext --library-dirs=/path/to/install/lib/ \
-    --rpath=/path/to/install/lib/
+````sh
+python setup.py build_ext --library-dirs=/path/to/install/lib/ --rpath=/path/to/install/lib/
 ````
 Here, `/path/to/install/lib/` should point to the directory where you installed the C library. For example, if you ran `./configure --prefix=/path/to/install/` before you compiled the C library, the correct path would be `/path/to/install/lib/`. The command above will build the Python wrapper in-place; you can then run one of the install commands, as listed above, to actually install the wrapper. Note that the `rpath` switch makes sure that the CCL C library can be found at runtime, even if it is not in the default library path. If you use this option, there should therefore be no need to modify the library path yourself.
 
