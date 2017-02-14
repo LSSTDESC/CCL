@@ -171,19 +171,16 @@ static void ccl_run_class(
     sprintf(cosmo->status_message ,"ccl_power.c: ccl_cosmology_compute_power_class(): Error running CLASS pertubations:%s\n",pt->error_message);
     return;
   }
-
   if (primordial_init(pr,pt,pm) == _FAILURE_) {
     cosmo->status = CCL_ERROR_CLASS;
     sprintf(cosmo->status_message ,"ccl_power.c: ccl_cosmology_compute_power_class(): Error running CLASS primordial:%s\n",pm->error_message);
     return;
- }
-
+  }
   if (nonlinear_init(pr,ba,th,pt,pm,nl) == _FAILURE_) {
     cosmo->status = CCL_ERROR_CLASS;
     sprintf(cosmo->status_message ,"ccl_power.c: ccl_cosmology_compute_power_class(): Error running CLASS nonlinear:%s\n",nl->error_message);
     return;
   }
-
   if (transfer_init(pr,ba,th,pt,nl,tr) == _FAILURE_) {
     cosmo->status = CCL_ERROR_CLASS;
     sprintf(cosmo->status_message ,"ccl_power.c: ccl_cosmology_compute_power_class(): Error running CLASS transfer:%s\n",tr->error_message);
@@ -194,6 +191,7 @@ static void ccl_run_class(
     sprintf(cosmo->status_message ,"ccl_power.c: ccl_cosmology_compute_power_class(): Error running CLASS spectra:%s\n",sp->error_message);
     return;
   }
+  printf("done\n");
 }
 
 static double ccl_get_class_As(ccl_cosmology *cosmo, struct file_content *fc, int position_As,double sigma8){
@@ -327,6 +325,7 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo){
   }
 
   ccl_fill_class_parameters(cosmo,&fc,parser_length);
+
   if (cosmo->status != CCL_ERROR_CLASS) ccl_run_class(cosmo, &fc,&pr,&ba,&th,&pt,&tr,&pm,&sp,&nl,&le,&op);
   if (cosmo->status == CCL_ERROR_CLASS){
     //printed error message while running CLASS
@@ -340,6 +339,7 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo){
     return;
   }
 
+  printf("starting spline\n");
 
   //CLASS calculations done - now allocate CCL splines
   double kmin = K_MIN;
@@ -354,8 +354,7 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo){
   double * x = ccl_log_spacing(kmin, kmax, nk);
   double * y = malloc(sizeof(double)*nk);
   double * z = ccl_linear_spacing(amin,amax, na);
-  double * y2d = malloc(nk * na * sizeof(double));
-  if (z==NULL||y==NULL|| x==NULL || y2d==0){
+  if (z==NULL||y==NULL|| x==NULL){
     cosmo->status = CCL_ERROR_SPLINE;
     strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_class(): memory allocation error\n");
   }
@@ -381,33 +380,41 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo){
     }
     else
       cosmo->data.p_lin = log_power_lin;
- 
 
-  
-    gsl_spline2d * log_power_nl = gsl_spline2d_alloc(PNL_SPLINE_TYPE, nk,na);
-    for (int j = 0; j < na; j++){
-      for (int i=0; i<nk; i++){
-      //The 2D interpolation routines access the function values y_{k_ia_j} with the following ordering:
-      //y_ij = y2d[j*N_k + i]
-      //with i = 0,...,N_k-1 and j = 0,...,N_a-1.
-          s = spectra_pk_nl_at_k_and_z(&ba, &pm, &sp,exp(x[i]),1./z[j]-1., &Z);
-          y2d[j*nk+i] = log(Z);
+    if(cosmo->config.matter_power_spectrum_method==ccl_halofit){
+      double * y2d = malloc(nk * na * sizeof(double));
+      if (y2d==0){
+	cosmo->status = CCL_ERROR_SPLINE;
+	strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_class(): memory allocation error\n");
+      }
+      gsl_spline2d * log_power_nl = gsl_spline2d_alloc(PNL_SPLINE_TYPE, nk,na);
+      for (int j = 0; j < na; j++){
+	for (int i=0; i<nk; i++){
+	  //The 2D interpolation routines access the function values y_{k_ia_j} with the following ordering:
+	  //y_ij = y2d[j*N_k + i]
+	  //with i = 0,...,N_k-1 and j = 0,...,N_a-1.
+	  s = spectra_pk_nl_at_k_and_z(&ba, &pm, &sp,exp(x[i]),1./z[j]-1., &Z);
+	  y2d[j*nk+i] = log(Z);
+	}
       }
     }
 
     ccl_free_class_structs(cosmo, &ba,&th,&pt,&tr,&pm,&sp,&nl,&le);
-    status = gsl_spline2d_init(log_power_nl, x, z, y2d,nk,na);
-    if (status){
-      free(x);
-      free(y);
-      free(z);
-      gsl_spline2d_free(log_power_nl);
-      cosmo->status = CCL_ERROR_SPLINE;
-      strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_class(): Error creating log_power_nl spline\n");
-      return;
+
+    if(cosmo->config.matter_power_spectrum_method==ccl_halofit){
+      status = gsl_spline2d_init(log_power_nl, x, z, y2d,nk,na);
+      if (status){
+	free(x);
+	free(y);
+	free(z);
+	gsl_spline2d_free(log_power_nl);
+	cosmo->status = CCL_ERROR_SPLINE;
+	strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_class(): Error creating log_power_nl spline\n");
+	return;
+      }
+      else
+	cosmo->data.p_nl = log_power_nl;
     }
-    else
-      cosmo->data.p_nl = log_power_nl;
     free(x);
     free(y);
     free(z);
@@ -567,6 +574,7 @@ void ccl_cosmology_compute_power(ccl_cosmology * cosmo){
 	  break;
         case ccl_boltzmann_class:
 	  ccl_cosmology_compute_power_class(cosmo);
+	  printf("CLASS done\n");
 	  break;
         default:
 	  cosmo->status = CCL_ERROR_INCONSISTENT;
@@ -588,6 +596,7 @@ TASK: compute the linear power spectrum at a given redshift
 double ccl_linear_matter_power(ccl_cosmology * cosmo, double a, double k){
   
     ccl_cosmology_compute_power(cosmo);
+    printf("HERE\n");
     double log_p_1;
     double deltak=1e-4;
     double deriv_plin_kmid,deriv2_plin_kmid;
@@ -649,13 +658,13 @@ double ccl_linear_matter_power(ccl_cosmology * cosmo, double a, double k){
 
     double p_1 = exp(log_p_1);
 
-    if (a==1){
-        return p_1;
+    if (fabs(a-1.)<1.e-9){
+      return p_1;
+    } else {
+      double D = ccl_growth_factor(cosmo, a);
+      double p = D*D*p_1;
+      return p;
     }
-
-    double D = ccl_growth_factor(cosmo, a);
-    double p = D*D*p_1;
-    return p;
 }
 
 
@@ -743,7 +752,9 @@ static double sigmaR_integrand(double lk,void *params)
 {
   SigmaR_pars *par=(SigmaR_pars *)params;
   double k=pow(10.,lk);
+  printf("lk=%.3lf\t",lk);
   double pk=ccl_linear_matter_power(par->cosmo,1.,k);
+  printf("lk=%.3lf pk=%.3lf\t",lk,pk);
   double kR=k*par->R;
   double w;
   if(kR<0.1) {
@@ -779,5 +790,6 @@ double ccl_sigmaR(ccl_cosmology *cosmo,double R)
 
 double ccl_sigma8(ccl_cosmology *cosmo)
 {
+  printf("Entering sigma8 computation\n");
   return ccl_sigmaR(cosmo,8/cosmo->params.h);
 }
