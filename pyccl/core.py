@@ -25,6 +25,7 @@ matter_power_spectrum_types = {
 mass_function_types = {
     'angulo':   lib.angulo,
     'tinker':   lib.tinker,
+    'tinker10': lib.tinker10,
     'watson':   lib.watson
 }
 
@@ -65,9 +66,9 @@ class Parameters(object):
             nz_mgrowth = -1
         
         # Check if any compulsory parameters are not set
-        compul = [Omega_c, Omega_b, Omega_k, Omega_n, w0, wa, h, A_s, n_s]
+        compul = [Omega_c, Omega_b, Omega_k, Omega_n, w0, wa, h, norm_pk, n_s]
         names = ['Omega_c', 'Omega_b', 'Omega_k', 'Omega_n', 'w0', 'wa', 
-                 'h', 'A_s', 'n_s']
+                 'h', 'norm_pk', 'n_s']
         for nm, item in zip(names, compul):
             if item is None:
                 raise ValueError("Necessary parameter '%s' was not set "
@@ -76,7 +77,7 @@ class Parameters(object):
         # Create new instance of ccl_parameters object
         self.parameters = lib.parameters_create(
                                 Omega_c, Omega_b, Omega_k, Omega_n, 
-                                w0, wa, h, A_s, n_s, 
+                                w0, wa, h, norm_pk, n_s, 
                                 nz_mgrowth, zarr_mgrowth, dfarr_mgrowth)
     
     def __getitem__(self, key):
