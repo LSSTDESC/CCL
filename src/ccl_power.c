@@ -280,6 +280,26 @@ static void ccl_fill_class_parameters(ccl_cosmology * cosmo, struct file_content
     strcpy(fc->name[13],"wa_fld");
     sprintf(fc->value[13],"%e",cosmo->params.wa);
   }
+  //neutrino parameters
+  //massless neutrinos
+  if (cosmo->params.N_nu_rel > 1.e-4){
+    strcpy(fc->name[14],"N_ur");
+    sprintf(fc->value[14],"%e",cosmo->params.N_nu_rel);
+  }
+  if (cosmo->params.N_nu_mass > 0){
+    strcpy(fc->name[15],"N_ncdm");
+    sprintf(fc->value[15],"%e",cosmo->params.N_nu_mass);
+    strcpy(fc->name[16],"m_ncdm");
+    sprintf(fc->value[16],"%e",cosmo->params.mnu/cosmo->params.N_nu_mass);
+    //assume equal mass neutrino species for now!
+    for (int i = 1; i < cosmo->params.N_nu_mass; i++){
+      char tmp[20];
+      sprintf(tmp,", %e",cosmo->params.mnu/cosmo->params.N_nu_mass);
+      strcat(fc->value[16],tmp);
+    }
+    printf("\n\nneutrino masses passed to CLASS: %s\n\n",fc->value[16]);
+    exit(1);
+  }
   //normalization comes last, so that all other parameters are filled in for determining A_s if sigma_8 is specified
   if (isfinite(cosmo->params.sigma_8) && isfinite(cosmo->params.A_s)){
       cosmo->status = CCL_ERROR_INCONSISTENT;
