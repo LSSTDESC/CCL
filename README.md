@@ -194,7 +194,7 @@ void ccl_specs_free_photoz_info(user_pz_info *my_photoz_info);
 ## Example code
 This code can also be found in *tests/ccl_sample_run.c* You can run the following example code. For this you will need to compile with the following command:
 ````sh
-gcc -Wall -Wpedantic -g -I/path/to/install/header -std=gnu99 -fPIC tests/ccl_sample_run.c 
+gcc -Wall -Wpedantic -g -I/path/to/install/include -std=gnu99 -fPIC tests/ccl_sample_run.c \
 -o tests/ccl_sample_run -L/path/to/install/lib -L/usr/local/lib -lgsl -lgslcblas -lm -lccl
 ````
 where */path/to/install/* is the path to the location where the library has been installed.
