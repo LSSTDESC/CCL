@@ -188,8 +188,7 @@ Result is returned in **tomoout**. This function returns zero if called with an 
 
 After you are done working with photo_z, you should free its work space by **ccl_specs_free_photoz_info**
 ````c
-user_pz_info* ccl_specs_free_photoz_info(void * user_params, 
-                                         double(*user_pz_func)(double, double,void*));
+void ccl_specs_free_photoz_info(user_pz_info *my_photoz_info);
 ````
 
 ## Example code
