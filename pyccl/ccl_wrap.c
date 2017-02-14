@@ -3031,6 +3031,16 @@ SWIG_AsVal_double (PyObject *obj, double *val)
   #define SWIG_From_double   PyFloat_FromDouble 
 
 
+#include <limits.h>
+#if !defined(SWIG_NO_LLONG_MAX)
+# if !defined(LLONG_MAX) && defined(__GNUC__) && defined (__LONG_LONG_MAX__)
+#   define LLONG_MAX __LONG_LONG_MAX__
+#   define LLONG_MIN (-LLONG_MAX - 1LL)
+#   define ULLONG_MAX (LLONG_MAX * 2ULL + 1ULL)
+# endif
+#endif
+
+
 #include <float.h>
 
 
@@ -3107,34 +3117,6 @@ SWIG_AsVal_long (PyObject *obj, long* val)
 
 
 SWIGINTERN int
-SWIG_AsVal_bool (PyObject *obj, bool *val)
-{
-  int r = PyObject_IsTrue(obj);
-  if (r == -1)
-    return SWIG_ERROR;
-  if (val) *val = r ? true : false;
-  return SWIG_OK;
-}
-
-
-SWIGINTERNINLINE PyObject*
-  SWIG_From_bool  (bool value)
-{
-  return PyBool_FromLong(value ? 1 : 0);
-}
-
-
-#include <limits.h>
-#if !defined(SWIG_NO_LLONG_MAX)
-# if !defined(LLONG_MAX) && defined(__GNUC__) && defined (__LONG_LONG_MAX__)
-#   define LLONG_MAX __LONG_LONG_MAX__
-#   define LLONG_MIN (-LLONG_MAX - 1LL)
-#   define ULLONG_MAX (LLONG_MAX * 2ULL + 1ULL)
-# endif
-#endif
-
-
-SWIGINTERN int
 SWIG_AsVal_int (PyObject * obj, int *val)
 {
   long v;
@@ -3154,6 +3136,24 @@ SWIGINTERNINLINE PyObject*
   SWIG_From_int  (int value)
 {
   return PyInt_FromLong((long) value);
+}
+
+
+SWIGINTERN int
+SWIG_AsVal_bool (PyObject *obj, bool *val)
+{
+  int r = PyObject_IsTrue(obj);
+  if (r == -1)
+    return SWIG_ERROR;
+  if (val) *val = r ? true : false;
+  return SWIG_OK;
+}
+
+
+SWIGINTERNINLINE PyObject*
+  SWIG_From_bool  (bool value)
+{
+  return PyBool_FromLong(value ? 1 : 0);
 }
 
 
@@ -3322,6 +3322,13 @@ void comoving_radial_distance_vec(ccl_cosmology * cosmo,
                         double* output, int nout) {
     assert(nout == na);
     ccl_comoving_radial_distances(cosmo, na, a, output);
+}
+
+void comoving_angular_distance_vec(ccl_cosmology * cosmo, 
+                       double* a, int na,
+                       double* output, int nout) {
+    assert(nout == na);
+    ccl_comoving_angular_distances(cosmo, na, a, output);
 }
 
 void h_over_h0_vec(ccl_cosmology * cosmo, 
@@ -3902,6 +3909,17 @@ void sigmaM_vec(ccl_cosmology * cosmo,
     }
 }
 
+void halo_bias_vec(ccl_cosmology * cosmo,
+                       double redshift,
+                       double* halo_mass, int nm,
+                       double* output, int nout)
+{
+    assert(nout == nm);
+    for(int i=0; i < nm; i++){
+        output[i] = ccl_halo_bias(cosmo, halo_mass[i], redshift);
+    }
+}
+
 
 #define SWIG_FILE_WITH_INIT
 #include "../include/ccl_cls.h"
@@ -4374,6 +4392,126 @@ SWIGINTERN PyObject *_wrap_parameters_Omega_k_get(PyObject *SWIGUNUSEDPARM(self)
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
   resultobj = SWIG_From_double((double)(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_parameters_sqrtk_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  struct ccl_parameters *arg1 = (struct ccl_parameters *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:parameters_sqrtk_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_parameters, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "parameters_sqrtk_set" "', argument " "1"" of type '" "struct ccl_parameters *""'"); 
+  }
+  arg1 = (struct ccl_parameters *)(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "parameters_sqrtk_set" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = (double)(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->sqrtk = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_parameters_sqrtk_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  struct ccl_parameters *arg1 = (struct ccl_parameters *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  double result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:parameters_sqrtk_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_parameters, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "parameters_sqrtk_get" "', argument " "1"" of type '" "struct ccl_parameters *""'"); 
+  }
+  arg1 = (struct ccl_parameters *)(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double) ((arg1)->sqrtk);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double((double)(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_parameters_k_sign_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  struct ccl_parameters *arg1 = (struct ccl_parameters *) 0 ;
+  int arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:parameters_k_sign_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_parameters, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "parameters_k_sign_set" "', argument " "1"" of type '" "struct ccl_parameters *""'"); 
+  }
+  arg1 = (struct ccl_parameters *)(argp1);
+  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "parameters_k_sign_set" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = (int)(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->k_sign = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_parameters_k_sign_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  struct ccl_parameters *arg1 = (struct ccl_parameters *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  int result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:parameters_k_sign_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_parameters, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "parameters_k_sign_get" "', argument " "1"" of type '" "struct ccl_parameters *""'"); 
+  }
+  arg1 = (struct ccl_parameters *)(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (int) ((arg1)->k_sign);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_int((int)(result));
   return resultobj;
 fail:
   return NULL;
@@ -7544,6 +7682,128 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_sinn(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  ccl_cosmology *arg1 = (ccl_cosmology *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  double result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:sinn",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_cosmology, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "sinn" "', argument " "1"" of type '" "ccl_cosmology *""'"); 
+  }
+  arg1 = (ccl_cosmology *)(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "sinn" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = (double)(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double)ccl_sinn(arg1,arg2);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double((double)(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_comoving_angular_distance(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  ccl_cosmology *arg1 = (ccl_cosmology *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  double result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:comoving_angular_distance",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_cosmology, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "comoving_angular_distance" "', argument " "1"" of type '" "ccl_cosmology *""'"); 
+  }
+  arg1 = (ccl_cosmology *)(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "comoving_angular_distance" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = (double)(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double)ccl_comoving_angular_distance(arg1,arg2);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double((double)(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_comoving_angular_distances(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  ccl_cosmology *arg1 = (ccl_cosmology *) 0 ;
+  int arg2 ;
+  double *arg3 ;
+  double *arg4 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  void *argp3 = 0 ;
+  int res3 = 0 ;
+  void *argp4 = 0 ;
+  int res4 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  PyObject * obj3 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOOO:comoving_angular_distances",&obj0,&obj1,&obj2,&obj3)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_cosmology, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "comoving_angular_distances" "', argument " "1"" of type '" "ccl_cosmology *""'"); 
+  }
+  arg1 = (ccl_cosmology *)(argp1);
+  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "comoving_angular_distances" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = (int)(val2);
+  res3 = SWIG_ConvertPtr(obj2, &argp3,SWIGTYPE_p_double, 0 |  0 );
+  if (!SWIG_IsOK(res3)) {
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "comoving_angular_distances" "', argument " "3"" of type '" "double [na]""'"); 
+  } 
+  arg3 = (double *)(argp3);
+  res4 = SWIG_ConvertPtr(obj3, &argp4,SWIGTYPE_p_double, 0 |  0 );
+  if (!SWIG_IsOK(res4)) {
+    SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "comoving_angular_distances" "', argument " "4"" of type '" "double [na]""'"); 
+  } 
+  arg4 = (double *)(argp4);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    ccl_comoving_angular_distances(arg1,arg2,arg3,arg4);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_luminosity_distance(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   ccl_cosmology *arg1 = (ccl_cosmology *) 0 ;
@@ -8298,6 +8558,83 @@ SWIGINTERN PyObject *_wrap_comoving_radial_distance_vec(PyObject *SWIGUNUSEDPARM
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
     comoving_radial_distance_vec(arg1,arg2,arg3,arg4,arg5);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    resultobj = SWIG_Python_AppendOutput(resultobj,(PyObject*)array4);
+  }
+  {
+    if (is_new_object2 && array2)
+    {
+      Py_DECREF(array2); 
+    }
+  }
+  return resultobj;
+fail:
+  {
+    if (is_new_object2 && array2)
+    {
+      Py_DECREF(array2); 
+    }
+  }
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_comoving_angular_distance_vec(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  ccl_cosmology *arg1 = (ccl_cosmology *) 0 ;
+  double *arg2 = (double *) 0 ;
+  int arg3 ;
+  double *arg4 = (double *) 0 ;
+  int arg5 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyArrayObject *array2 = NULL ;
+  int is_new_object2 = 0 ;
+  PyObject *array4 = NULL ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOO:comoving_angular_distance_vec",&obj0,&obj1,&obj2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_cosmology, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "comoving_angular_distance_vec" "', argument " "1"" of type '" "ccl_cosmology *""'"); 
+  }
+  arg1 = (ccl_cosmology *)(argp1);
+  {
+    npy_intp size[1] = {
+      -1 
+    };
+    array2 = obj_to_array_contiguous_allow_conversion(obj1,
+      NPY_DOUBLE,
+      &is_new_object2);
+    if (!array2 || !require_dimensions(array2, 1) ||
+      !require_size(array2, size, 1)) SWIG_fail;
+    arg2 = (double*) array_data(array2);
+    arg3 = (int) array_size(array2,0);
+  }
+  {
+    npy_intp dims[1];
+    if (!PyInt_Check(obj2))
+    {
+      const char* typestring = pytype_string(obj2);
+      PyErr_Format(PyExc_TypeError,
+        "Int dimension expected.  '%s' given.",
+        typestring);
+      SWIG_fail;
+    }
+    arg5 = (int) PyInt_AsLong(obj2);
+    dims[0] = (npy_intp) arg5;
+    array4 = PyArray_SimpleNew(1, dims, NPY_DOUBLE);
+    if (!array4) SWIG_fail;
+    arg4 = (double*) array_data(array4);
+  }
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    comoving_angular_distance_vec(arg1,arg2,arg3,arg4,arg5);
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
   resultobj = SWIG_Py_Void();
@@ -9097,6 +9434,50 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_halo_bias(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  ccl_cosmology *arg1 = (ccl_cosmology *) 0 ;
+  double arg2 ;
+  double arg3 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  double val3 ;
+  int ecode3 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  double result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOO:halo_bias",&obj0,&obj1,&obj2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_cosmology, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "halo_bias" "', argument " "1"" of type '" "ccl_cosmology *""'"); 
+  }
+  arg1 = (ccl_cosmology *)(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "halo_bias" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = (double)(val2);
+  ecode3 = SWIG_AsVal_double(obj2, &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "halo_bias" "', argument " "3"" of type '" "double""'");
+  } 
+  arg3 = (double)(val3);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double)ccl_halo_bias(arg1,arg2,arg3);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double((double)(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_massfunc_m2r(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   ccl_cosmology *arg1 = (ccl_cosmology *) 0 ;
@@ -9401,6 +9782,92 @@ SWIGINTERN PyObject *_wrap_sigmaM_vec(PyObject *SWIGUNUSEDPARM(self), PyObject *
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
     sigmaM_vec(arg1,arg2,arg3,arg4,arg5,arg6);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    resultobj = SWIG_Python_AppendOutput(resultobj,(PyObject*)array5);
+  }
+  {
+    if (is_new_object3 && array3)
+    {
+      Py_DECREF(array3); 
+    }
+  }
+  return resultobj;
+fail:
+  {
+    if (is_new_object3 && array3)
+    {
+      Py_DECREF(array3); 
+    }
+  }
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_halo_bias_vec(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  ccl_cosmology *arg1 = (ccl_cosmology *) 0 ;
+  double arg2 ;
+  double *arg3 = (double *) 0 ;
+  int arg4 ;
+  double *arg5 = (double *) 0 ;
+  int arg6 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyArrayObject *array3 = NULL ;
+  int is_new_object3 = 0 ;
+  PyObject *array5 = NULL ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  PyObject * obj3 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOOO:halo_bias_vec",&obj0,&obj1,&obj2,&obj3)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_cosmology, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "halo_bias_vec" "', argument " "1"" of type '" "ccl_cosmology *""'"); 
+  }
+  arg1 = (ccl_cosmology *)(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "halo_bias_vec" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = (double)(val2);
+  {
+    npy_intp size[1] = {
+      -1 
+    };
+    array3 = obj_to_array_contiguous_allow_conversion(obj2,
+      NPY_DOUBLE,
+      &is_new_object3);
+    if (!array3 || !require_dimensions(array3, 1) ||
+      !require_size(array3, size, 1)) SWIG_fail;
+    arg3 = (double*) array_data(array3);
+    arg4 = (int) array_size(array3,0);
+  }
+  {
+    npy_intp dims[1];
+    if (!PyInt_Check(obj3))
+    {
+      const char* typestring = pytype_string(obj3);
+      PyErr_Format(PyExc_TypeError,
+        "Int dimension expected.  '%s' given.",
+        typestring);
+      SWIG_fail;
+    }
+    arg6 = (int) PyInt_AsLong(obj3);
+    dims[0] = (npy_intp) arg6;
+    array5 = PyArray_SimpleNew(1, dims, NPY_DOUBLE);
+    if (!array5) SWIG_fail;
+    arg5 = (double*) array_data(array5);
+  }
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    halo_bias_vec(arg1,arg2,arg3,arg4,arg5,arg6);
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
   resultobj = SWIG_Py_Void();
@@ -12947,6 +13414,10 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"parameters_Omega_n_get", _wrap_parameters_Omega_n_get, METH_VARARGS, (char *)"parameters_Omega_n_get(parameters self) -> double"},
 	 { (char *)"parameters_Omega_k_set", _wrap_parameters_Omega_k_set, METH_VARARGS, (char *)"parameters_Omega_k_set(parameters self, double Omega_k)"},
 	 { (char *)"parameters_Omega_k_get", _wrap_parameters_Omega_k_get, METH_VARARGS, (char *)"parameters_Omega_k_get(parameters self) -> double"},
+	 { (char *)"parameters_sqrtk_set", _wrap_parameters_sqrtk_set, METH_VARARGS, (char *)"parameters_sqrtk_set(parameters self, double sqrtk)"},
+	 { (char *)"parameters_sqrtk_get", _wrap_parameters_sqrtk_get, METH_VARARGS, (char *)"parameters_sqrtk_get(parameters self) -> double"},
+	 { (char *)"parameters_k_sign_set", _wrap_parameters_k_sign_set, METH_VARARGS, (char *)"parameters_k_sign_set(parameters self, int k_sign)"},
+	 { (char *)"parameters_k_sign_get", _wrap_parameters_k_sign_get, METH_VARARGS, (char *)"parameters_k_sign_get(parameters self) -> int"},
 	 { (char *)"parameters_w0_set", _wrap_parameters_w0_set, METH_VARARGS, (char *)"parameters_w0_set(parameters self, double w0)"},
 	 { (char *)"parameters_w0_get", _wrap_parameters_w0_get, METH_VARARGS, (char *)"parameters_w0_get(parameters self) -> double"},
 	 { (char *)"parameters_wa_set", _wrap_parameters_wa_set, METH_VARARGS, (char *)"parameters_wa_set(parameters self, double wa)"},
@@ -13035,13 +13506,13 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"cosmology_create", _wrap_cosmology_create, METH_VARARGS, (char *)"cosmology_create(parameters params, configuration config) -> cosmology"},
 	 { (char *)"parameters_create", _wrap_parameters_create, METH_VARARGS, (char *)"\n"
 		"parameters_create(double Omega_c, double Omega_b, double Omega_k, double Omega_n, double w0, double wa, \n"
-		"    double h, double A_s, double n_s, int nz_mgrowth, double * zarr_mgrowth, \n"
+		"    double h, double norm_pk, double n_s, int nz_mgrowth, double * zarr_mgrowth, \n"
 		"    double * dfarr_mgrowth) -> parameters\n"
 		""},
-	 { (char *)"parameters_create_flat_lcdm", _wrap_parameters_create_flat_lcdm, METH_VARARGS, (char *)"parameters_create_flat_lcdm(double Omega_c, double Omega_b, double h, double A_s, double n_s) -> parameters"},
-	 { (char *)"parameters_create_flat_wcdm", _wrap_parameters_create_flat_wcdm, METH_VARARGS, (char *)"parameters_create_flat_wcdm(double Omega_c, double Omega_b, double w0, double h, double A_s, double n_s) -> parameters"},
-	 { (char *)"parameters_create_flat_wacdm", _wrap_parameters_create_flat_wacdm, METH_VARARGS, (char *)"parameters_create_flat_wacdm(double Omega_c, double Omega_b, double w0, double wa, double h, double A_s, double n_s) -> parameters"},
-	 { (char *)"parameters_create_lcdm", _wrap_parameters_create_lcdm, METH_VARARGS, (char *)"parameters_create_lcdm(double Omega_c, double Omega_b, double Omega_k, double h, double A_s, double n_s) -> parameters"},
+	 { (char *)"parameters_create_flat_lcdm", _wrap_parameters_create_flat_lcdm, METH_VARARGS, (char *)"parameters_create_flat_lcdm(double Omega_c, double Omega_b, double h, double norm_pk, double n_s) -> parameters"},
+	 { (char *)"parameters_create_flat_wcdm", _wrap_parameters_create_flat_wcdm, METH_VARARGS, (char *)"parameters_create_flat_wcdm(double Omega_c, double Omega_b, double w0, double h, double norm_pk, double n_s) -> parameters"},
+	 { (char *)"parameters_create_flat_wacdm", _wrap_parameters_create_flat_wacdm, METH_VARARGS, (char *)"parameters_create_flat_wacdm(double Omega_c, double Omega_b, double w0, double wa, double h, double norm_pk, double n_s) -> parameters"},
+	 { (char *)"parameters_create_lcdm", _wrap_parameters_create_lcdm, METH_VARARGS, (char *)"parameters_create_lcdm(double Omega_c, double Omega_b, double Omega_k, double h, double norm_pk, double n_s) -> parameters"},
 	 { (char *)"cosmology_free", _wrap_cosmology_free, METH_VARARGS, (char *)"cosmology_free(cosmology cosmo)"},
 	 { (char *)"cosmology_compute_distances", _wrap_cosmology_compute_distances, METH_VARARGS, (char *)"cosmology_compute_distances(cosmology cosmo)"},
 	 { (char *)"cosmology_compute_growth", _wrap_cosmology_compute_growth, METH_VARARGS, (char *)"cosmology_compute_growth(cosmology cosmo)"},
@@ -13050,6 +13521,9 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"h_over_h0s", _wrap_h_over_h0s, METH_VARARGS, (char *)"h_over_h0s(cosmology cosmo, int na, double [na] a, double [na] output)"},
 	 { (char *)"comoving_radial_distance", _wrap_comoving_radial_distance, METH_VARARGS, (char *)"comoving_radial_distance(cosmology cosmo, double a) -> double"},
 	 { (char *)"comoving_radial_distances", _wrap_comoving_radial_distances, METH_VARARGS, (char *)"comoving_radial_distances(cosmology cosmo, int na, double [na] a, double [na] output)"},
+	 { (char *)"sinn", _wrap_sinn, METH_VARARGS, (char *)"sinn(cosmology cosmo, double chi) -> double"},
+	 { (char *)"comoving_angular_distance", _wrap_comoving_angular_distance, METH_VARARGS, (char *)"comoving_angular_distance(cosmology cosmo, double a) -> double"},
+	 { (char *)"comoving_angular_distances", _wrap_comoving_angular_distances, METH_VARARGS, (char *)"comoving_angular_distances(cosmology cosmo, int na, double [na] a, double [na] output)"},
 	 { (char *)"luminosity_distance", _wrap_luminosity_distance, METH_VARARGS, (char *)"luminosity_distance(cosmology cosmo, double a) -> double"},
 	 { (char *)"luminosity_distances", _wrap_luminosity_distances, METH_VARARGS, (char *)"luminosity_distances(cosmology cosmo, int na, double [na] a, double [na] output)"},
 	 { (char *)"growth_factor", _wrap_growth_factor, METH_VARARGS, (char *)"growth_factor(cosmology cosmo, double a) -> double"},
@@ -13065,6 +13539,7 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"growth_factor_unnorm_vec", _wrap_growth_factor_unnorm_vec, METH_VARARGS, (char *)"growth_factor_unnorm_vec(cosmology cosmo, double * a, double * output)"},
 	 { (char *)"growth_rate_vec", _wrap_growth_rate_vec, METH_VARARGS, (char *)"growth_rate_vec(cosmology cosmo, double * a, double * output)"},
 	 { (char *)"comoving_radial_distance_vec", _wrap_comoving_radial_distance_vec, METH_VARARGS, (char *)"comoving_radial_distance_vec(cosmology cosmo, double * a, double * output)"},
+	 { (char *)"comoving_angular_distance_vec", _wrap_comoving_angular_distance_vec, METH_VARARGS, (char *)"comoving_angular_distance_vec(cosmology cosmo, double * a, double * output)"},
 	 { (char *)"h_over_h0_vec", _wrap_h_over_h0_vec, METH_VARARGS, (char *)"h_over_h0_vec(cosmology cosmo, double * a, double * output)"},
 	 { (char *)"luminosity_distance_vec", _wrap_luminosity_distance_vec, METH_VARARGS, (char *)"luminosity_distance_vec(cosmology cosmo, double * a, double * output)"},
 	 { (char *)"scale_factor_of_chi_vec", _wrap_scale_factor_of_chi_vec, METH_VARARGS, (char *)"scale_factor_of_chi_vec(cosmology cosmo, double * chi, double * output)"},
@@ -13077,12 +13552,14 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"nonlin_matter_power_vec", _wrap_nonlin_matter_power_vec, METH_VARARGS, (char *)"nonlin_matter_power_vec(cosmology cosmo, double a, double * k, double * output)"},
 	 { (char *)"sigmaR_vec", _wrap_sigmaR_vec, METH_VARARGS, (char *)"sigmaR_vec(cosmology cosmo, double * R, double * output)"},
 	 { (char *)"cosmology_compute_sigma", _wrap_cosmology_compute_sigma, METH_VARARGS, (char *)"cosmology_compute_sigma(cosmology cosmo)"},
-	 { (char *)"massfunc", _wrap_massfunc, METH_VARARGS, (char *)"massfunc(cosmology cosmo, double halo_mass, double redshift) -> double"},
-	 { (char *)"massfunc_m2r", _wrap_massfunc_m2r, METH_VARARGS, (char *)"massfunc_m2r(cosmology cosmo, double halo_mass) -> double"},
-	 { (char *)"sigmaM", _wrap_sigmaM, METH_VARARGS, (char *)"sigmaM(cosmology cosmo, double halo_mass, double redshift) -> double"},
+	 { (char *)"massfunc", _wrap_massfunc, METH_VARARGS, (char *)"massfunc(cosmology cosmo, double smooth_mass, double redshift) -> double"},
+	 { (char *)"halo_bias", _wrap_halo_bias, METH_VARARGS, (char *)"halo_bias(cosmology cosmo, double smooth_mass, double redshift) -> double"},
+	 { (char *)"massfunc_m2r", _wrap_massfunc_m2r, METH_VARARGS, (char *)"massfunc_m2r(cosmology cosmo, double smooth_mass) -> double"},
+	 { (char *)"sigmaM", _wrap_sigmaM, METH_VARARGS, (char *)"sigmaM(cosmology cosmo, double smooth_mass, double redshift) -> double"},
 	 { (char *)"massfunc_vec", _wrap_massfunc_vec, METH_VARARGS, (char *)"massfunc_vec(cosmology cosmo, double redshift, double * halo_mass, double * output)"},
 	 { (char *)"massfunc_m2r_vec", _wrap_massfunc_m2r_vec, METH_VARARGS, (char *)"massfunc_m2r_vec(cosmology cosmo, double * halo_mass, double * output)"},
 	 { (char *)"sigmaM_vec", _wrap_sigmaM_vec, METH_VARARGS, (char *)"sigmaM_vec(cosmology cosmo, double redshift, double * halo_mass, double * output)"},
+	 { (char *)"halo_bias_vec", _wrap_halo_bias_vec, METH_VARARGS, (char *)"halo_bias_vec(cosmology cosmo, double redshift, double * halo_mass, double * output)"},
 	 { (char *)"SplPar_intacc_set", _wrap_SplPar_intacc_set, METH_VARARGS, (char *)"SplPar_intacc_set(SplPar self, gsl_interp_accel * intacc)"},
 	 { (char *)"SplPar_intacc_get", _wrap_SplPar_intacc_get, METH_VARARGS, (char *)"SplPar_intacc_get(SplPar self) -> gsl_interp_accel *"},
 	 { (char *)"SplPar_spline_set", _wrap_SplPar_spline_set, METH_VARARGS, (char *)"SplPar_spline_set(SplPar self, gsl_spline * spline)"},
@@ -14003,6 +14480,7 @@ SWIG_init(void) {
   SWIG_Python_SetConstant(d, "halofit",SWIG_From_int((int)(ccl_halofit)));
   SWIG_Python_SetConstant(d, "halo_model",SWIG_From_int((int)(ccl_halo_model)));
   SWIG_Python_SetConstant(d, "tinker",SWIG_From_int((int)(ccl_tinker)));
+  SWIG_Python_SetConstant(d, "tinker10",SWIG_From_int((int)(ccl_tinker10)));
   SWIG_Python_SetConstant(d, "watson",SWIG_From_int((int)(ccl_watson)));
   SWIG_Python_SetConstant(d, "angulo",SWIG_From_int((int)(ccl_angulo)));
   PyDict_SetItemString(md,(char*)"cvar", SWIG_globals());

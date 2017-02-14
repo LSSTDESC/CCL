@@ -5,7 +5,9 @@
 #include <math.h>
 
 // the tolerance in dn/dm
-#define MASSFUNC_TOLERANCE 1e-3
+#define SIGMA_TOLERANCE 1e-4
+#define INVSIGMA_TOLERANCE 5e-3
+#define MASSFUNC_TOLERANCE 5e-3
 
 CTEST_DATA(massfunc) {
   double Omega_c;
@@ -23,28 +25,26 @@ CTEST_DATA(massfunc) {
   double w_a[1];
   double sigma_8;
 
-  double mass[9];
-  double massfunc[7][9];
+  double mass[13];
+  double massfunc[3][13];
 };
 
-static void read_massfunc_test_file(double mass[9], double massfunc[7][9])
+static void read_massfunc_test_file(double mass[13], double massfunc[3][13])
 {
    // Masses are in Msun/h
-   FILE * f = fopen("./tests/benchmark/mfunc.txt", "r");
+   FILE * f = fopen("./tests/benchmark/model1_hmf.txt", "r");
    ASSERT_NOT_NULL(f);
 
    // Ignore header line
    char str[1024];
    fgets(str, 1024, f);
 
-   // File is in fixed format - nine rows and eight columns
-   for (int i=0; i<9; i++){
-     int count = fscanf(f, "%le %le %le %le %le %le %le %le\n", &mass[i],
-                        &massfunc[0][i], &massfunc[1][i], &massfunc[2][i],
-                        &massfunc[3][i], &massfunc[4][i], &massfunc[5][i],
-                        &massfunc[6][i]);
+   // file is in fixed format - logmass, sigma, invsigma, and hmf, w/ 13 rows
+   for (int i=0; i<13; i++){
+     int count = fscanf(f, "%le %le %le %le\n", &mass[i],
+                        &massfunc[0][i], &massfunc[1][i], &massfunc[2][i]);
      // Check that all the stuff in the benchmark is there
-     ASSERT_EQUAL(8, count);
+     ASSERT_EQUAL(4, count);
    }
    fclose(f);
 }
@@ -64,7 +64,6 @@ CTEST_SETUP(massfunc){
   double Omega_v[1] = { 0.7 };
   double w_0[1]     = {-1.0 };
   double w_a[1]     = { 0.0 };
-
   for (int i=0; i<1; i++){
     data->Omega_v[i] = Omega_v[i];
     data->w_0[i] = w_0[i];
@@ -93,21 +92,28 @@ static void compare_massfunc(int model, struct massfunc_data * data)
   ASSERT_NOT_NULL(cosmo);
 
   double redshift = 0;
-  double logmass = 11;
+  double logmass = 10;
+  double rho_m = RHO_CRITICAL*cosmo->params.Omega_m*cosmo->params.h*cosmo->params.h;
 
   // compare to benchmark data
-  for (int j=0; j<9; j++){
+  for (int j=0; j<13; j++){
     double mass = pow(10,logmass);
-    redshift = 0;
+    double sigma_j = ccl_sigmaM(cosmo, mass, redshift);
+    double loginvsigma_j = log10(1./sigma_j);
+    double logmassfunc_j = log10(ccl_massfunc(cosmo, mass, redshift)*mass/(rho_m*log(10.)));
+
+    double absolute_tolerance = SIGMA_TOLERANCE*data->massfunc[0][j];
+    if (fabs(absolute_tolerance)<1e-12) absolute_tolerance = 1e-12;
+    ASSERT_DBL_NEAR_TOL(data->massfunc[0][j], sigma_j, absolute_tolerance);
+
+    absolute_tolerance = INVSIGMA_TOLERANCE*fabs(data->massfunc[1][j]);
+    if (fabs(absolute_tolerance)<1e-12) absolute_tolerance = 1e-12;
+    ASSERT_DBL_NEAR_TOL(fabs(data->massfunc[1][j]), fabs(loginvsigma_j), absolute_tolerance);
+
+    absolute_tolerance = MASSFUNC_TOLERANCE*fabs(data->massfunc[2][j]);
+    if (fabs(absolute_tolerance)<1e-12) absolute_tolerance = 1e-12;
+    ASSERT_DBL_NEAR_TOL(fabs(data->massfunc[2][j]), fabs(logmassfunc_j), absolute_tolerance);
     
-    for (int i=0; i<7; i++){
-      double massfunc_ij = ccl_massfunc(cosmo, mass/cosmo->params.h, redshift)/cosmo->params.h/cosmo->params.h/cosmo->params.h;
-      //printf("%lf %lf %le %le\n", logmass, redshift, massfunc_ij, data->massfunc[i][j]);
-      double absolute_tolerance = MASSFUNC_TOLERANCE*data->massfunc[i][j];
-      if (fabs(absolute_tolerance)<1e-12) absolute_tolerance = 1e-12;
-      ASSERT_DBL_NEAR_TOL(data->massfunc[i][j], massfunc_ij, absolute_tolerance);
-      redshift += 0.2;
-    }
     logmass += 0.5;
   }
   free(cosmo);
