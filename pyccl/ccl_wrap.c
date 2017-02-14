@@ -3910,15 +3910,16 @@ void sigmaM_vec(ccl_cosmology * cosmo,
 }
 
 void halo_bias_vec(ccl_cosmology * cosmo,
-                    double redshift,
-                    double* halo_mass, int nm,
-                    double* output, int nout)
+                       double redshift,
+                       double* halo_mass, int nm,
+                       double* output, int nout)
 {
     assert(nout == nm);
     for(int i=0; i < nm; i++){
         output[i] = ccl_halo_bias(cosmo, halo_mass[i], redshift);
     }
 }
+
 
 #define SWIG_FILE_WITH_INIT
 #include "../include/ccl_cls.h"
@@ -9433,6 +9434,50 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_halo_bias(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  ccl_cosmology *arg1 = (ccl_cosmology *) 0 ;
+  double arg2 ;
+  double arg3 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  double val3 ;
+  int ecode3 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  double result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOO:halo_bias",&obj0,&obj1,&obj2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_cosmology, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "halo_bias" "', argument " "1"" of type '" "ccl_cosmology *""'"); 
+  }
+  arg1 = (ccl_cosmology *)(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "halo_bias" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = (double)(val2);
+  ecode3 = SWIG_AsVal_double(obj2, &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "halo_bias" "', argument " "3"" of type '" "double""'");
+  } 
+  arg3 = (double)(val3);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double)ccl_halo_bias(arg1,arg2,arg3);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double((double)(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_massfunc_m2r(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   ccl_cosmology *arg1 = (ccl_cosmology *) 0 ;
@@ -9511,48 +9556,6 @@ fail:
   return NULL;
 }
 
-SWIGINTERN PyObject *_wrap_halo_bias(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  ccl_cosmology *arg1 = (ccl_cosmology *) 0 ;
-  double arg2 ;
-  double arg3 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  double val2 ;
-  int ecode2 = 0 ;
-  double val3 ;
-  int ecode3 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  PyObject * obj2 = 0 ;
-  double result;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OOO:halo_bias",&obj0,&obj1,&obj2)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_cosmology, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "halo_bias" "', argument " "1"" of type '" "ccl_cosmology *""'"); 
-  }
-  arg1 = (ccl_cosmology *)(argp1);
-  ecode2 = SWIG_AsVal_double(obj1, &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "halo_bias" "', argument " "2"" of type '" "double""'");
-  } 
-  arg2 = (double)(val2);
-  ecode3 = SWIG_AsVal_double(obj2, &val3);
-  if (!SWIG_IsOK(ecode3)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "halo_bias" "', argument " "3"" of type '" "double""'");
-  } 
-  arg3 = (double)(val3);
-  {
-    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    result = (double)ccl_halo_bias(arg1,arg2,arg3);
-    SWIG_PYTHON_THREAD_END_ALLOW;
-  }
-  resultobj = SWIG_From_double((double)(result));
-  return resultobj;
-fail:
-  return NULL;
-}
 
 SWIGINTERN PyObject *_wrap_massfunc_vec(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
@@ -9802,6 +9805,7 @@ fail:
   return NULL;
 }
 
+
 SWIGINTERN PyObject *_wrap_halo_bias_vec(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   ccl_cosmology *arg1 = (ccl_cosmology *) 0 ;
@@ -9886,6 +9890,7 @@ fail:
   }
   return NULL;
 }
+
 
 SWIGINTERN PyObject *_wrap_SplPar_intacc_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
@@ -13547,10 +13552,10 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"nonlin_matter_power_vec", _wrap_nonlin_matter_power_vec, METH_VARARGS, (char *)"nonlin_matter_power_vec(cosmology cosmo, double a, double * k, double * output)"},
 	 { (char *)"sigmaR_vec", _wrap_sigmaR_vec, METH_VARARGS, (char *)"sigmaR_vec(cosmology cosmo, double * R, double * output)"},
 	 { (char *)"cosmology_compute_sigma", _wrap_cosmology_compute_sigma, METH_VARARGS, (char *)"cosmology_compute_sigma(cosmology cosmo)"},
-	 { (char *)"massfunc", _wrap_massfunc, METH_VARARGS, (char *)"massfunc(cosmology cosmo, double halo_mass, double redshift) -> double"},
-	 { (char *)"massfunc_m2r", _wrap_massfunc_m2r, METH_VARARGS, (char *)"massfunc_m2r(cosmology cosmo, double halo_mass) -> double"},
-	 { (char *)"sigmaM", _wrap_sigmaM, METH_VARARGS, (char *)"sigmaM(cosmology cosmo, double halo_mass, double redshift) -> double"},
-	 { (char *)"halo_bias", _wrap_halo_bias, METH_VARARGS, (char *)"halo_bias(cosmology cosmo, double halo_mass, double redshift) -> double"},
+	 { (char *)"massfunc", _wrap_massfunc, METH_VARARGS, (char *)"massfunc(cosmology cosmo, double smooth_mass, double redshift) -> double"},
+	 { (char *)"halo_bias", _wrap_halo_bias, METH_VARARGS, (char *)"halo_bias(cosmology cosmo, double smooth_mass, double redshift) -> double"},
+	 { (char *)"massfunc_m2r", _wrap_massfunc_m2r, METH_VARARGS, (char *)"massfunc_m2r(cosmology cosmo, double smooth_mass) -> double"},
+	 { (char *)"sigmaM", _wrap_sigmaM, METH_VARARGS, (char *)"sigmaM(cosmology cosmo, double smooth_mass, double redshift) -> double"},
 	 { (char *)"massfunc_vec", _wrap_massfunc_vec, METH_VARARGS, (char *)"massfunc_vec(cosmology cosmo, double redshift, double * halo_mass, double * output)"},
 	 { (char *)"massfunc_m2r_vec", _wrap_massfunc_m2r_vec, METH_VARARGS, (char *)"massfunc_m2r_vec(cosmology cosmo, double * halo_mass, double * output)"},
 	 { (char *)"sigmaM_vec", _wrap_sigmaM_vec, METH_VARARGS, (char *)"sigmaM_vec(cosmology cosmo, double redshift, double * halo_mass, double * output)"},
