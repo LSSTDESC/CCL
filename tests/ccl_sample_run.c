@@ -20,11 +20,18 @@
 #define Z0_SH 0.65
 #define SZ_SH 0.05
 #define NL 512
-#define PS 0.1 
 
-double pz_func_example (double photo_z, double spec_z, void *param){
-	double delta_z = photo_z - spec_z;
-	return 1.0 / sqrt(PS*2*M_PI) * exp(-delta_z*delta_z / (2.0 * PS));
+// The user defines a structure of parameters to the user-defined function for the photo-z probability 
+struct user_func_params
+{
+	double (* sigma_z) (double);
+};
+
+// The user defines a function of the form double function ( z_ph, z_spec, void * user_pz_params) where user_pz_params is a pointer to the parameters of the user-defined function. This returns the probabilty of obtaining a given photo-z given a particular spec_z.
+double user_pz_probability(double z_ph, double z_s, void * user_par)
+{
+        struct user_func_params * p = (struct user_func_params *) user_par;
+        return exp(- (z_ph-z_s)*(z_ph-z_s) / (2.*(p->sigma_z(z_s))*(p->sigma_z(z_s)))) / (pow(2.*M_PI,0.5)*(p->sigma_z(z_s))*(p->sigma_z(z_s)));
 }
 
 int main(int argc,char **argv){
@@ -101,7 +108,15 @@ int main(int argc,char **argv){
 	printf("\n");
 
 	// LSST Specification
-	user_pz_info* pz_info_example = ccl_specs_create_photoz_info(NULL, pz_func_example);
+	// The user declares and sets an instance of parameters to their photo_z function:
+	struct user_func_params my_params_example;
+	my_params_example.sigma_z = ccl_specs_sigmaz_sources;
+
+	// Declare a variable of the type of user_pz_info to hold the struct to be created.
+	user_pz_info * pz_info_example;
+
+	// Create the struct to hold the user information about photo_z's.
+	pz_info_example = ccl_specs_create_photoz_info(&my_params_example, &user_pz_probability); 
 	
 	double z_test;
 	double dNdz_tomo;
@@ -126,7 +141,7 @@ int main(int argc,char **argv){
 	fclose(output);
 
 	//Try splitting dNdz (clustering) into 5 redshift bins
-	printf("Trying splitting dNdz (clustering) into 5 redshift bins. Output written into file tests/specs_example_tomo_lens.out\n");
+	printf("Trying splitting dNdz (clustering) into 5 redshift bins. Output written into file tests/specs_example_tomo_clu.out\n");
 	output = fopen("./tests/specs_example_tomo_clu.out", "w");     
 	for (z=0; z<100; z=z+1){
 		z_test = 0.035*z;
@@ -149,4 +164,3 @@ int main(int argc,char **argv){
 
 	return 0;
 }
-
