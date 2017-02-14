@@ -34,9 +34,12 @@ make check
 ## Known installation issues
 1. You need to link to GSL-2 in your local version of the Makefile.
 2. Sometimes, "make check" can fail. In that case, go to `tests/ccl_test.c` and comment out `define CTEST_SEGFAULT`
+3. If you move or delete the source directory after installing CCL, some functions may fail. The source directory contains files needed by *CLASS* (which is contained within CCL) at run-time.
 
 ## Python wrapper installation
-A Python wrapper for CCL is provided through a module called *pyccl*. At the moment, *pyccl* needs to be compiled separately from the main CCL library. The wrapper’s build tools currently assume that your C compiler is *gcc* (with OpenMP enabled), and that you have a working Python 2.x installation with *numpy* and *distutils* with *swig*. To build and install the *pyccl* module, go to the root CCL directory and choose one of the following options:
+The Python wrapper is called *pyccl*. Before you can build it, you must have compiled and installed the C version of CCL, as *pyccl* will be dynamically linked to it. The Python wrapper's build tools currently assume that your C compiler is *gcc* (with OpenMP enabled), and that you have a working Python 2.x installation with *numpy* and *distutils* with *swig*.
+
+To build and install the *pyccl* module, go to the root CCL source directory and choose one of the following options:
 
 * To build and install the wrapper for the current user only, run
 ````sh
@@ -50,7 +53,13 @@ sudo python setup.py install
 ````sh
 python setup.py build_ext --inplace
 ````
-If you choose either of the first two options, the *pyccl* module will be installed into a sensible location in your *PYTHONPATH*, and so should be automatically picked up by your Python interpreter. You can then simply import the module using *import pyccl*. If you use the last option, however, you must either start your interpreter from the root CCL directory, or manually add the root CCL directory to your *PYTHONPATH*.
+If you choose either of the first two options, the *pyccl* module will be installed into a sensible location in your *PYTHONPATH*, and so should be automatically picked up by your Python interpreter. You can then simply import the module using `import pyccl`. If you use the last option, however, you must either start your interpreter from the root CCL directory, or manually add the root CCL directory to your *PYTHONPATH*.
+
+These options assume that the C library (`libccl`) has been installed somewhere in the default library path. If this isn’t the case, you will need to tell the Python build tools where to find the library. This can be achieved by running the following command first, before any of the commands above:
+````python setup.py build ext --library-dirs=/path/to/install/lib/ \
+    --rpath=/path/to/install/lib/
+````
+Here, `/path/to/install/lib/` should point to the directory where you installed the C library. For example, if you ran `./configure --prefix=/path/to/install/` before you compiled the C library, the correct path would be `/path/to/install/lib/`. The command above will build the Python wrapper in-place; you can then run one of the install commands, as listed above, to actually install the wrapper. Note that the `rpath` switch makes sure that the CCL C library can be found at runtime, even if it is not in the default library path. If you use this option, there should therefore be no need to modify the library path yourself.
 
 
 # Documentation
