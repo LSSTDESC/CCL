@@ -83,7 +83,7 @@ static double integrand_wl(double chip,void *params)
   if(chi==0)
     return h*pz;
   else
-    return h*pz*(chip-chi)/chip;
+    return h*pz*ccl_sinn(p->cosmo,chip-chi)/ccl_sinn(p->cosmo,chip);
 }
 
 //Integral to compute lensing window function
@@ -138,7 +138,7 @@ static double integrand_mag(double chip,void *params)
   if(chi==0)
     return h*pz*(1-2.5*sz);
   else
-    return h*pz*(1-2.5*sz)*(chip-chi)/chip;
+    return h*pz*(1-2.5*sz)*ccl_sinn(p->cosmo,chip-chi)/ccl_sinn(p->cosmo,chip);
 }
 
 //Integral to compute magnification window function
