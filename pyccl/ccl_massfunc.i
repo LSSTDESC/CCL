@@ -49,4 +49,15 @@ void sigmaM_vec(ccl_cosmology * cosmo,
         output[i] = ccl_sigmaM(cosmo, halo_mass[i], redshift);
     }
 }
+
+void halo_bias_vec(ccl_cosmology * cosmo,
+                       double redshift,
+                       double* halo_mass, int nm,
+                       double* output, int nout)
+{
+    assert(nout == nm);
+    for(int i=0; i < nm; i++){
+        output[i] = ccl_halo_bias(cosmo, halo_mass[i], redshift);
+    }
+}
 %}

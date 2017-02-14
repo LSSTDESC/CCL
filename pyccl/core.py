@@ -25,6 +25,7 @@ matter_power_spectrum_types = {
 mass_function_types = {
     'angulo':   lib.angulo,
     'tinker':   lib.tinker,
+    'tinker10': lib.tinker10,
     'watson':   lib.watson
 }
 
