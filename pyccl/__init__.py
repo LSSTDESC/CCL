@@ -15,7 +15,7 @@ from background import growth_factor, growth_factor_unnorm, growth_rate, \
 from power import linear_matter_power, nonlin_matter_power, sigmaR, sigma8
 
 # Halo mass function
-from massfunction import massfunc, massfunc_m2r, sigmaM
+from massfunction import massfunc, massfunc_m2r, sigmaM, halo_bias
 
 # Cl's and tracers
 from cls import angular_cl, ClTracer, ClTracerNumberCounts, ClTracerLensing
