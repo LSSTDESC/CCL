@@ -246,12 +246,11 @@ double ccl_massfunc_m2r(ccl_cosmology * cosmo, double smooth_mass)
     double rho_m, smooth_radius;
 
     //TODO: make this neater
-    rho_m = RHO_CRITICAL*cosmo->params.Omega_m;
+    rho_m = RHO_CRITICAL*cosmo->params.Omega_m*cosmo->params.h*cosmo->params.h;
 
-    smooth_mass = smooth_mass*cosmo->params.h;
     smooth_radius = pow((3.0*smooth_mass) / (4*M_PI*rho_m), (1.0/3.0));
 
-    return smooth_radius/cosmo->params.h;
+    return smooth_radius;
 }
 
 /*----- ROUTINE: ccl_sigma_M -----
