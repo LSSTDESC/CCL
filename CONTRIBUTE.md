@@ -41,13 +41,13 @@ quite straightforward in most instances.
 
 To do this, examine the following files (where <modulename> is the name of the 
 CCL module that your new/modified function belongs to; e.g. 'background', if the 
-function is in ccl_background.c):
+function is in ccl\_background.c):
 
  - pyccl/<modulename>.i: These are the SWIG interface files, and mostly handle 
    things like vectorizing C functions. This is usually done by adding a loop 
    over the indices of the input array, and by providing a function call 
    signature that can be used to accept numpy arrays. See function names ending 
-   in '_vec' in the interface file for examples. If you changed the call 
+   in '\_vec' in the interface file for examples. If you changed the call 
    signature of a function, there is a good chance you'll have to also change 
    it in the corresponding interface file.
  - pyccl/<modulename>.py: These are Python wrappers around the auto-generated 
@@ -61,7 +61,7 @@ function is in ccl_background.c):
    functions provided through the basic SWIG wrapper. Ideally, you would also 
    provide some type checking and error checking code in this part of the 
    wrapper.
- - pyccl/__init__.py: This file is used to define the top-level user interface 
+ - pyccl/\_\_init\_\_.py: This file is used to define the top-level user interface 
    of the pyccl module. You should make sure that your new/modified functions 
    are imported.
 
@@ -83,7 +83,7 @@ everything is operational by running the Python unit tests in the tests/
 directory. From the top-level directory of the CCL sources, and assuming that 
 you have recompiled and reinstalled the C library and the Python wrapper, run:
 
-  $ python tests/run_tests.py
+  $ python tests/run\_tests.py
 
 This may take some time to run in its entirety. If you changed the API, you may 
 have to modify the tests to account for this. You should also add your own 
