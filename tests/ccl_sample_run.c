@@ -36,7 +36,7 @@ double user_pz_probability(double z_ph, double z_s, void * user_par)
 
 int main(int argc,char **argv){
 	//status flag
-	int status;
+	int status =0;
 	// Initialize cosmological parameters
 	ccl_configuration config=default_config;
 	config.transfer_function_method=ccl_bbks;
