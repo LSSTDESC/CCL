@@ -13,3 +13,7 @@ def massfunc_m2r(cosmo, halo_mass):
 def sigmaM(cosmo, halo_mass, redshift):
     return _vectorize_fn2(lib.sigmaM, 
                           lib.sigmaM_vec, cosmo, halo_mass, redshift)
+
+def halo_bias(cosmo, halo_mass, redshift):
+    return _vectorize_fn2(lib.halo_bias, 
+                          lib.halo_bias_vec, cosmo, halo_mass, redshift)
