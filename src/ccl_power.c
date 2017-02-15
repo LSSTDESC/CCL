@@ -672,7 +672,7 @@ TASK: compute the nonlinear power spectrum at a given redshift
 double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double a, double k){
 
   //If the matter PS specified was linear, then do the linear compuation
-  if(cosmo->config.matter_power_spectrum_method==0){
+  if(cosmo->config.matter_power_spectrum_method==ccl_linear){
     
     return ccl_linear_matter_power(cosmo,a,k);
   
