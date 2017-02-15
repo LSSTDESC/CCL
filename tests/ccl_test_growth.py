@@ -25,7 +25,7 @@ def read_growth_test_file():
     (distances are in Mpc/h)
     """
     # Load data from file
-    dat = np.genfromtxt("./tests/benchmark/growth_model1-5.txt").T
+    dat = np.genfromtxt("./benchmark/growth_model1-5.txt").T
     assert(dat.shape == (6,6))
     
     # Split into redshift column and growth(z) columns

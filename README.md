@@ -59,7 +59,7 @@ python setup.py build_ext --library-dirs=/path/to/install/lib/ --rpath=/path/to/
 ````
 Here, `/path/to/install/lib/` should point to the directory where you installed the C library. For example, if you ran `./configure --prefix=/path/to/install/` before you compiled the C library, the correct path would be `/path/to/install/lib/`. The command above will build the Python wrapper in-place; you can then run one of the install commands, as listed above, to actually install the wrapper. Note that the `rpath` switch makes sure that the CCL C library can be found at runtime, even if it is not in the default library path. If you use this option, there should therefore be no need to modify the library path yourself.
 
-You can quickly check whether *pyccl* has been installed correctly by running `python -c "import pyccl"` and checking that no errors are returned. For a more in-depth test to make sure everything is working, go to the root of the *CCL* source directory and run `python tests/run_tests.py`. These tests will take approximately 10 minutes to run.
+You can quickly check whether *pyccl* has been installed correctly by running `python -c "import pyccl"` and checking that no errors are returned. For a more in-depth test to make sure everything is working, change to the `tests/` sub-directory and run `python run_tests.py`. These tests will take a few minutes.
 
 
 # Documentation
