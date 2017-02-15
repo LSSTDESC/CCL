@@ -234,6 +234,7 @@ double ccl_halo_bias(ccl_cosmology *cosmo, double smooth_mass, double redshift, 
 
   double f;
   f = ccl_halo_b1(cosmo,smooth_mass,redshift, status);  
+  ccl_check_status(cosmo, status);  
   return f;
 }
 /*---- ROUTINE: ccl_massfunc_m2r -----
