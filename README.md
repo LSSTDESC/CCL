@@ -32,9 +32,7 @@ make check
 ```
 
 ## Known installation issues
-1. You need to link to GSL-2 in your local version of the Makefile.
-2. Sometimes, "make check" can fail. In that case, go to `tests/ccl_test.c` and comment out `define CTEST_SEGFAULT`
-3. If you move or delete the source directory after installing CCL, some functions may fail. The source directory contains files needed by *CLASS* (which is contained within CCL) at run-time.
+1. If you move or delete the source directory after installing CCL, some functions may fail. The source directory contains files needed by *CLASS* (which is contained within CCL) at run-time.
 
 ## Python wrapper installation
 The Python wrapper is called *pyccl*. Before you can build it, you must have compiled and installed the C version of CCL, as *pyccl* will be dynamically linked to it. The Python wrapper's build tools currently assume that your C compiler is *gcc* (with OpenMP enabled), and that you have a working Python 2.x installation with *numpy* and *distutils* with *swig*.
