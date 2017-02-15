@@ -25,7 +25,7 @@ def read_chi_test_file():
     (distances are in Mpc/h)
     """
     # Load data from file
-    dat = np.genfromtxt("./tests/benchmark/chi_model1-5.txt").T
+    dat = np.genfromtxt("./benchmark/chi_model1-5.txt").T
     assert(dat.shape == (6,6))
     
     # Split into redshift column and chi(z) columns

@@ -22,8 +22,8 @@ def reference_models():
                         n_s=0.96, w0=-0.95, wa=0.05)
     cosmo3 = ccl.Cosmology(p3)
     
-    # Return
-    return cosmo1, cosmo2, cosmo3
+    # Return (only do one cosmology for now, for speed reasons)
+    return [cosmo1,] # cosmo2, cosmo3
 
 def all_finite(vals):
     """
