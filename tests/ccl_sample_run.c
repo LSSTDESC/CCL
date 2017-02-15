@@ -136,7 +136,13 @@ int main(int argc,char **argv){
 	//Try splitting dNdz (lensing) into 5 redshift bins
 	double tmp1,tmp2,tmp3,tmp4,tmp5;
 	printf("Trying splitting dNdz (lensing) into 5 redshift bins. Output written into file tests/specs_example_tomo_lens.out\n");
-	output = fopen("./tests/specs_example_tomo_lens.out", "w");     
+	output = fopen("./tests/specs_example_tomo_lens.out", "w"); 
+
+	if(!output){
+		fprintf(stderr, "Could not write to 'tests' subdirectory - please run this program from the main CCL directory\n");
+		exit(1);
+	}
+
 	for (z=0; z<100; z=z+1){
 		z_test = 0.035*z;
 		status = ccl_specs_dNdz_tomog(z_test, DNDZ_WL_FID, 0.,6., pz_info_example,&dNdz_tomo); 
