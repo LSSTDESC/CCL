@@ -12,7 +12,7 @@
 #define W0 -1.0
 #define WA 0.00
 #define NS 0.96
-#define S8 0.80
+#define NORMPS 0.80
 #define ZD 0.5
 #define NZ 128
 #define Z0_GC 0.50
@@ -39,8 +39,7 @@ int main(int argc,char **argv){
 	// Initialize cosmological parameters
 	ccl_configuration config=default_config;
 	config.transfer_function_method=ccl_bbks;
-	ccl_parameters params=ccl_parameters_create(OC,OB,OK,ON,W0,WA,HH,NAN,NS,-1,NULL,NULL);
-	params.sigma_8=S8;
+	ccl_parameters params=ccl_parameters_create(OC,OB,OK,ON,W0,WA,HH,NORMPS,NS,-1,NULL,NULL);
 
 	// Initialize cosmology object given cosmo params
 	ccl_cosmology *cosmo=ccl_cosmology_create(params,config);
