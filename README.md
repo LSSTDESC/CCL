@@ -139,7 +139,8 @@ CCL_ClTracer *ccl_cl_tracer_new(ccl_cosmology *cosmo,int tracer_type,
 ````
 Exact definition of these parameters are described in file *include/ccl_cls.h*. Usually you can use simplified versions of this function, namely **ccl_cl_tracer_number_counts_new, ccl_cl_tracer_number_counts_simple_new, ccl_cl_tracer_lensing_new** or **ccl_cl_tracer_lensing_simple_new**. Two most simplified versions (one for number counts and one for shear) take parameters:
 ````c
-CCL_ClTracer *ccl_cl_tracer_number_counts_simple_new(ccl_cosmology *cosmo, int nz_n,double *z_n,double *n, int nz_b,double *z_b,double *b);
+CCL_ClTracer *ccl_cl_tracer_number_counts_simple_new(ccl_cosmology *cosmo, int nz_n,double *z_n,
+                                                     double *n, int nz_b,double *z_b,double *b);
 CCL_ClTracer *ccl_cl_tracer_lensing_simple_new(ccl_cosmology *cosmo, int nz_n,double *z_n,double *n);
 
 ````
@@ -167,31 +168,36 @@ double (* your_pz_func)(double photo_z, double spec_z, void *param);
 ````
 which returns the probability of measuring a particular photometric redshift, given a spectroscopic redshift and other relevant parameters. Then you call function **ccl_specs_create_photoz_info**
 ````c
-user_pz_info* ccl_specs_create_photoz_info(void * user_params, double(*user_pz_func)(double, double,void*));
+user_pz_info* ccl_specs_create_photoz_info(void * user_params, 
+                                           double(*user_pz_func)(double, double,void*));
 ````
 which creates a strcture **user_pz_info** which holds information needed to compute *dN/dz*
 ````c
 typedef struct {
-        double (* your_pz_func)(double, double, void *); //first double corresponds to photo-z, second to spec-z
+	//first double corresponds to photo-z, second to spec-z
+        double (* your_pz_func)(double, double, void *); 
         void *  your_pz_params;
 } user_pz_info;
 ````
 The expected *dN/dz* for lensing or clustering galaxies with given binnig can be obtained by function **ccl_specs_dNdz_tomog**
 ````c
-int ccl_specs_dNdz_tomog(double z, int dNdz_type, double bin_zmin, double bin_zmax, user_pz_info * user_info,  double *tomoout);
+int ccl_specs_dNdz_tomog(double z, int dNdz_type, double bin_zmin, double bin_zmax, 
+                         user_pz_info * user_info,  double *tomoout);
 ````
 Result is returned in **tomoout**. This function returns zero if called with an allowable type of dNdz, non-zero otherwise. Allowed types of dNdz (currently one for clustering and three for lensing - fiducial, optimistic, and conservative - cases are considered) and other information and functions like bias clustering or sigma_z are specified in file *include/ccl_lsst_specs.h* 
 
-After you are done working with photo_z, you should free its work space by **ccl_specs_create_photoz_info**
+After you are done working with photo_z, you should free its work space by **ccl_specs_free_photoz_info**
 ````c
-user_pz_info* ccl_specs_create_photoz_info(void * user_params, double(*user_pz_func)(double, double,void*));
+void ccl_specs_free_photoz_info(user_pz_info *my_photoz_info);
 ````
 
 ## Example code
-This code can also be found in *tests/ccl_sample_run.c* You can run the following example code. For this you will need to compile with:
+This code can also be found in *tests/ccl_sample_run.c* You can run the following example code. For this you will need to compile with the following command:
 ````sh
-gcc -Wall -Wpedantic -g -O0 -I./include -std=gnu99 -fPIC tests/ccl_sample_run.c -o tests/ccl_sample_run -L./lib -L/usr/local/lib -lgsl -lgslcblas -lm -Lclass -lclass -lccl
+gcc -Wall -Wpedantic -g -I/path/to/install/include -std=gnu99 -fPIC tests/ccl_sample_run.c \
+-o tests/ccl_sample_run -L/path/to/install/lib -L/usr/local/lib -lgsl -lgslcblas -lm -lccl
 ````
+where */path/to/install/* is the path to the location where the library has been installed.
 
 ```c
 #include <stdlib.h>
@@ -216,11 +222,18 @@ gcc -Wall -Wpedantic -g -O0 -I./include -std=gnu99 -fPIC tests/ccl_sample_run.c 
 #define Z0_SH 0.65
 #define SZ_SH 0.05
 #define NL 512
-#define PS 0.1 
 
-double pz_func_example (double photo_z, double spec_z, void *param){
-	double delta_z = photo_z - spec_z;
-	return 1.0 / sqrt(PS*2*M_PI) * exp(-delta_z*delta_z / (2.0 * PS));
+// The user defines a structure of parameters to the user-defined function for the photo-z probability 
+struct user_func_params
+{
+	double (* sigma_z) (double);
+};
+
+// The user defines a function of the form double function ( z_ph, z_spec, void * user_pz_params) where user_pz_params is a pointer to the parameters of the user-defined function. This returns the probabilty of obtaining a given photo-z given a particular spec_z.
+double user_pz_probability(double z_ph, double z_s, void * user_par)
+{
+        struct user_func_params * p = (struct user_func_params *) user_par;
+        return exp(- (z_ph-z_s)*(z_ph-z_s) / (2.*(p->sigma_z(z_s))*(p->sigma_z(z_s)))) / (pow(2.*M_PI,0.5)*(p->sigma_z(z_s))*(p->sigma_z(z_s)));
 }
 
 int main(int argc,char **argv){
@@ -297,7 +310,15 @@ int main(int argc,char **argv){
 	printf("\n");
 
 	// LSST Specification
-	user_pz_info* pz_info_example = ccl_specs_create_photoz_info(NULL, pz_func_example);
+	// The user declares and sets an instance of parameters to their photo_z function:
+	struct user_func_params my_params_example;
+	my_params_example.sigma_z = ccl_specs_sigmaz_sources;
+
+	// Declare a variable of the type of user_pz_info to hold the struct to be created.
+	user_pz_info * pz_info_example;
+
+	// Create the struct to hold the user information about photo_z's.
+	pz_info_example = ccl_specs_create_photoz_info(&my_params_example, &user_pz_probability); 
 	
 	double z_test;
 	double dNdz_tomo;
@@ -322,7 +343,7 @@ int main(int argc,char **argv){
 	fclose(output);
 
 	//Try splitting dNdz (clustering) into 5 redshift bins
-	printf("Trying splitting dNdz (clustering) into 5 redshift bins. Output written into file tests/specs_example_tomo_lens.out\n");
+	printf("Trying splitting dNdz (clustering) into 5 redshift bins. Output written into file tests/specs_example_tomo_clu.out\n");
 	output = fopen("./tests/specs_example_tomo_clu.out", "w");     
 	for (z=0; z<100; z=z+1){
 		z_test = 0.035*z;
@@ -345,7 +366,6 @@ int main(int argc,char **argv){
 
 	return 0;
 }
-
 ````
 
 ## Python wrapper
