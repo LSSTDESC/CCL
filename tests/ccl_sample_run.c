@@ -35,7 +35,8 @@ double user_pz_probability(double z_ph, double z_s, void * user_par)
 }
 
 int main(int argc,char **argv){
-
+	//status flag
+	int status =0;
 	// Initialize cosmological parameters
 	ccl_configuration config=default_config;
 	config.transfer_function_method=ccl_bbks;
@@ -43,21 +44,20 @@ int main(int argc,char **argv){
 
 	// Initialize cosmology object given cosmo params
 	ccl_cosmology *cosmo=ccl_cosmology_create(params,config);
-
 	// Compute radial distances (see include/ccl_background.h for more routines)
 	printf("Comoving distance to z = %.3lf is chi = %.3lf Mpc\n",
-		ZD,ccl_comoving_radial_distance(cosmo,1./(1+ZD)));
+		ZD,ccl_comoving_radial_distance(cosmo,1./(1+ZD), &status));
 	printf("Luminosity distance to z = %.3lf is chi = %.3lf Mpc\n",
-		ZD,ccl_luminosity_distance(cosmo,1./(1+ZD)));
+		ZD,ccl_luminosity_distance(cosmo,1./(1+ZD), &status));
 	
 	//Consistency check
 	printf("Scale factor at chi=%.3lf Mpc is a=%.3lf Mpc\n",
-	ccl_comoving_radial_distance(cosmo,1./(1+ZD)),
-	ccl_scale_factor_of_chi(cosmo,ccl_comoving_radial_distance(cosmo,1./(1+ZD))));
+	ccl_comoving_radial_distance(cosmo,1./(1+ZD), &status),
+	ccl_scale_factor_of_chi(cosmo,ccl_comoving_radial_distance(cosmo,1./(1+ZD), &status), &status));
 	 
 	// Compute growth factor and growth rate (see include/ccl_background.h for more routines)
 	printf("Growth factor and growth rate at z = %.3lf are D = %.3lf and f = %.3lf\n",
-		ZD, ccl_growth_factor(cosmo,1./(1+ZD)),ccl_growth_rate(cosmo,1./(1+ZD)));
+		ZD, ccl_growth_factor(cosmo,1./(1+ZD), &status),ccl_growth_rate(cosmo,1./(1+ZD), &status));
 
 	// Compute sigma_8
 	printf("Initializing power spectrum...\n");
@@ -75,16 +75,16 @@ int main(int argc,char **argv){
 	}
 
 	//Galaxy clustering tracer
-	CCL_ClTracer *ct_gc=ccl_cl_tracer_number_counts_simple_new(cosmo,NZ,z_arr_gc,nz_arr_gc,NZ,z_arr_gc,bz_arr);
+	CCL_ClTracer *ct_gc=ccl_cl_tracer_number_counts_simple_new(cosmo,NZ,z_arr_gc,nz_arr_gc,NZ,z_arr_gc,bz_arr, &status);
 
 	//Cosmic shear tracer
-	CCL_ClTracer *ct_wl=ccl_cl_tracer_lensing_simple_new(cosmo,NZ,z_arr_sh,nz_arr_sh);
+	CCL_ClTracer *ct_wl=ccl_cl_tracer_lensing_simple_new(cosmo,NZ,z_arr_sh,nz_arr_sh, &status);
 	printf("ell C_ell(g,g) C_ell(g,s) C_ell(s,s) | r(g,s)\n");
 	for(int l=2;l<=NL;l*=2)
 	{
-		double cl_gg=ccl_angular_cl(cosmo,l,ct_gc,ct_gc); //Galaxy-galaxy
-		double cl_gs=ccl_angular_cl(cosmo,l,ct_gc,ct_wl); //Galaxy-lensing
-		double cl_ss=ccl_angular_cl(cosmo,l,ct_wl,ct_wl); //Lensing-lensing
+		double cl_gg=ccl_angular_cl(cosmo,l,ct_gc,ct_gc, &status); //Galaxy-galaxy
+		double cl_gs=ccl_angular_cl(cosmo,l,ct_gc,ct_wl, &status); //Galaxy-lensing
+		double cl_ss=ccl_angular_cl(cosmo,l,ct_wl,ct_wl, &status); //Lensing-lensing
 		printf("%d %.3lE %.3lE %.3lE | %.3lE\n",l,cl_gg,cl_gs,cl_ss,cl_gs/sqrt(cl_gg*cl_ss));
 	}
 	printf("\n");
@@ -100,7 +100,7 @@ int main(int argc,char **argv){
 		printf("%.1e\t",pow(10,logM));
 		for(double z=0; z<=1; z+=0.5)
 		{
-			printf("%e\t", ccl_massfunc(cosmo, pow(10,logM),z));
+			printf("%e\t", ccl_massfunc(cosmo, pow(10,logM),z, &status));
 		}
 		printf("\n");
 	}
@@ -112,7 +112,7 @@ int main(int argc,char **argv){
 	{
 		for(double z=0; z<=1; z+=0.5)
 		{
-		  printf("%.1e %.1e %.2e\n",z,pow(10,logM),ccl_halo_bias(cosmo,pow(10,logM),z));
+		  printf("%.1e %.1e %.2e\n",z,pow(10,logM),ccl_halo_bias(cosmo,pow(10,logM),z, &status));
 		}
 	}
 	printf("\n");
@@ -130,13 +130,19 @@ int main(int argc,char **argv){
 	
 	double z_test;
 	double dNdz_tomo;
-	int z,status;
+	int z;
 	FILE * output;
 	
 	//Try splitting dNdz (lensing) into 5 redshift bins
 	double tmp1,tmp2,tmp3,tmp4,tmp5;
 	printf("Trying splitting dNdz (lensing) into 5 redshift bins. Output written into file tests/specs_example_tomo_lens.out\n");
-	output = fopen("./tests/specs_example_tomo_lens.out", "w");     
+	output = fopen("./tests/specs_example_tomo_lens.out", "w"); 
+
+	if(!output){
+		fprintf(stderr, "Could not write to 'tests' subdirectory - please run this program from the main CCL directory\n");
+		exit(1);
+	}
+
 	for (z=0; z<100; z=z+1){
 		z_test = 0.035*z;
 		status = ccl_specs_dNdz_tomog(z_test, DNDZ_WL_FID, 0.,6., pz_info_example,&dNdz_tomo); 
@@ -155,15 +161,15 @@ int main(int argc,char **argv){
 	output = fopen("./tests/specs_example_tomo_clu.out", "w");     
 	for (z=0; z<100; z=z+1){
 		z_test = 0.035*z;
-		status = ccl_specs_dNdz_tomog(z_test, DNDZ_NC,0.,6., pz_info_example,&dNdz_tomo); 
-		status = ccl_specs_dNdz_tomog(z_test, DNDZ_NC,0.,0.6, pz_info_example,&tmp1);
-		status = ccl_specs_dNdz_tomog(z_test, DNDZ_NC,0.6,1.2, pz_info_example,&tmp2);
-		status = ccl_specs_dNdz_tomog(z_test, DNDZ_NC,1.2,1.8, pz_info_example,&tmp3);
-		status = ccl_specs_dNdz_tomog(z_test, DNDZ_NC,1.8,2.4, pz_info_example,&tmp4);
-		status = ccl_specs_dNdz_tomog(z_test, DNDZ_NC,2.4,3.0, pz_info_example,&tmp5);
+		status|= ccl_specs_dNdz_tomog(z_test, DNDZ_NC,0.,6., pz_info_example,&dNdz_tomo); 
+		status|= ccl_specs_dNdz_tomog(z_test, DNDZ_NC,0.,0.6, pz_info_example,&tmp1);
+		status|= ccl_specs_dNdz_tomog(z_test, DNDZ_NC,0.6,1.2, pz_info_example,&tmp2);
+		status|= ccl_specs_dNdz_tomog(z_test, DNDZ_NC,1.2,1.8, pz_info_example,&tmp3);
+		status|= ccl_specs_dNdz_tomog(z_test, DNDZ_NC,1.8,2.4, pz_info_example,&tmp4);
+		status|= ccl_specs_dNdz_tomog(z_test, DNDZ_NC,2.4,3.0, pz_info_example,&tmp5);
 		fprintf(output, "%f %f %f %f %f %f %f\n", z_test,tmp1,tmp2,tmp3,tmp4,tmp5,dNdz_tomo);
 	}
-
+	printf("ccl_sample_run completed, status = %d\n",status);
 	fclose(output);
 	
 	//Free up photo-z info
