@@ -94,7 +94,6 @@ After installing the C library you can make sure it is running as it should by t
 Ultimately, CCL will aim to incorporate theoretical predictions for all cosmological models of interest to LSST. Currently, however, only a few families of models are supported:
 \begin{itemize}
  \item Flat, vanilla $\Lambda$CDM.
- \item Massive neutrinos ($\nu$)
  \item wCDM and the CPL model ($w_0+w_a$)
  \item Non-zero curvature ($K$)
  \item All the above plus an arbitrary, user-defined, modified growth function (see description in Section \ref{sec:growth}).
@@ -109,7 +108,7 @@ The first step to use CCL is to generate a {\tt ccl\_cosmology} structure, conta
 
 {\tt ccl\_parameters} objects contain information about the cosmological parameters, and are initialized using one of the following routines (the full syntax for each function can be found in the header file {\tt ccl\_core.h}):
 \begin{itemize}
- \item {\tt ccl\_parameters\_create(double Omega\_c, double Omega\_b, double Omega\_k, double N\_nu\_rel, double N\_nu\_mass, double mnu, double w0, double wa, double h, double {\color{blue}norm\_pk}, double n\_s,int nz\_mgrowth,double *zarr\_mgrowth,double *dfarr\_mgrowth)}: general {\tt ccl\_parameters} constructor supporting all the models described above.
+ \item {\tt ccl\_parameters\_create(double Omega\_c, double Omega\_b, double Omega\_k, double w0, double wa, double h, double {\color{blue}norm\_pk}, double n\_s,int nz\_mgrowth,double *zarr\_mgrowth,double *dfarr\_mgrowth)}: general {\tt ccl\_parameters} constructor supporting all the models described above.
  \item {\tt ccl\_parameters\_create\_flat\_lcdm(...)}: particular constructor for flat $\Lambda$CDM cosmologies.
  \item {\tt ccl\_parameters\_create\_flat\_wcdm(...)}: constant $w$ cosmologies.
  \item {\tt ccl\_parameters\_create\_flat\_wacdm(...)}: $w_0+w_a$.
@@ -117,7 +116,7 @@ The first step to use CCL is to generate a {\tt ccl\_cosmology} structure, conta
 \end{itemize}
 The argument ${\tt {\color{blue}norm\_pk}}$ can be passed the power spectrum normalization parameterized by $\sigma_8$ or $A_\mathrm{s}$, {\tt ccl\_parameters\_create} switches to $\sigma_8$ normalization if ${\tt {\color{blue}norm\_pk}} > 1.e-5$, and to $A_{\mathrm s}$ normalization otherwise.
 
-To include massive neutrinos in your cosmology, the suffix `{\tt \_nu}' may be appended to the latter four {\tt ccl\_configuration} objects above (for example: {\tt ccl\_parameters\_create\_lcdm\_nu(...)}). Note that utilizing the corresponding {\tt ccl\_configuration} object without this {\tt \_nu} suffix will set the contribution from both massless and massive neutrinos to zero.
+%To include massive neutrinos in your cosmology, the suffix `{\tt \_nu}' may be appended to the latter four {\tt ccl\_configuration} objects above (for example: {\tt ccl\_parameters\_create\_lcdm\_nu(...)}). Note that utilizing the corresponding {\tt ccl\_configuration} object without this {\tt \_nu} suffix will set the contribution from both massless and massive neutrinos to zero.
 
 {\tt ccl\_configuration} objects contain information about the prescriptions to be used to compute transfer functions, power spectra, mass functions, etc. A default {\tt ccl\_configuration} object is made readily available as {\tt default\_config}, for which transfer functions are computed with CLASS, the HaloFit prediction is used for the matter power spectrum and a number of prescriptions can be used to compute the halo mass function.
 
@@ -134,7 +133,7 @@ The Hubble parameter is calculated via
 %
 \begin{equation}
 \frac{H(a)}{H_0} = a^{-3/2}\sqrt{\Omega_m+\Omega_\Lambda a^{-3(w_0+w_a)}
-    \exp[3 w_a (a-1)]+\Omega_K a +(\Omega_g+\Omega_\nu^{\rm rel}) a^{-1}}.
+    \exp[3 w_a (a-1)]+\Omega_K a +\Omega_g a^{-1}}.
 \end{equation}
 
 The radial comoving distance is calculated via a numerical integral
@@ -169,7 +168,7 @@ In doing this, {\tt CCL} simultaneously computes the so-called growth rate $f(a)
 \end{equation}
 CCL provides different functions that return the growth normalized to $D(a=1)=1$ and to $D(a\ll1)\rightarrow a$.
 
-Currently CCL allows for an alternative cosmological model defined by a regular background $(w_0+w_a)$CDM (with arbitrary $k$ and neutrino mass) as well as a user-defined $\Delta f(a)$, such that the true growth rate in this model is given by $f(a)=f_0(a)+\Delta f(a)$, where $f_0(a)$ is the growth rate in the background model. Note that this model is only consistently implemented with regards to the computation of the linear growth factor and growth rates (which will also scale the linear power spectrum), however all other CCL functions (including the non-linear power spectrum) will ignore these modifications. This model, and the interpretation of the predictions given by CCL should therefore be used with care.
+Currently CCL allows for an alternative cosmological model defined by a regular background $(w_0+w_a)$CDM (with arbitrary $k$) as well as a user-defined $\Delta f(a)$, such that the true growth rate in this model is given by $f(a)=f_0(a)+\Delta f(a)$, where $f_0(a)$ is the growth rate in the background model. Note that this model is only consistently implemented with regards to the computation of the linear growth factor and growth rates (which will also scale the linear power spectrum), however all other CCL functions (including the non-linear power spectrum) will ignore these modifications. This model, and the interpretation of the predictions given by CCL should therefore be used with care.
 
 \subsection{Matter power spectrum}
 \label{sec:power}
@@ -265,7 +264,7 @@ This is a list of some power spectrum methods that we would like to implement in
 \subsubsection{Normalization of the power spectrum}
 \label{sec:PSnorm}
 
-There are two alternative schemes for normalization of the matter power spectrum. The first one is to specify the value of $A_s$, the amplitude of the primordial power spectrum, which is passed directly to {\tt CLASS}. This option is available in the case of the linear/nonlinear matter power spectrum implementation. For these, as well as for BBKS, there is the additional option to set the normalization of the matter power spectrum by specifying $\sigma_8$, the RMS density constrast averaged over spheres of radius $8h^{-1}$Mpc. {\bf make sure we document how to use each option.} The computation of $\sigma_8$ is described in Section \ref{sec:hmf}
+There are two alternative schemes for normalization of the matter power spectrum. The first one is to specify the value of $A_s$, the amplitude of the primordial power spectrum, which is passed directly to {\tt CLASS}. This option is available in the case of the linear/nonlinear matter power spectrum implementation. For these, as well as for BBKS, there is the additional option to set the normalization of the matter power spectrum by specifying $\sigma_8$, the RMS density constrast averaged over spheres of radius $8h^{-1}$Mpc. The computation of $\sigma_8$ is described in Section \ref{sec:hmf}
 
 \subsection{Angular power spectra}
 \label{sec:cl}
@@ -423,7 +422,7 @@ This function is directly implemented in {\tt CCL} as well as a specific $\sigma
 The \citet{Tinker2010} model parameterizes both the halo mass function and the halo bias in terms of the peak height, $\nu = \delta_c / \sigma(M)$, where $\delta_c$ is the critical density for collapse and is chosen to be $1.686$ for this particular parameterization. We can then parameterize the halo function and halo bias as
 \begin{equation}
   \b(\nu) = 1 - A\frac{\nu^a}{\nu^a + {\delta_c}^a} + B\nu^b+C\nu^c,
-  \f(\nu) = \alpha[1+(\beta\nu)^{-2\phi}]\nu^{2\eta}e(-\gamma\nu^2/2).
+  f(\nu) = \alpha[1+(\beta\nu)^{-2\phi}]\nu^{2\eta}e(-\gamma\nu^2/2).
 \end{equation}
 The currently implemented model in {\tt CCL} does not account for changes in halo definition, though this remains an area of active work to improve upon.
 
@@ -655,6 +654,7 @@ In the future, we hope that {\tt CCL} will include other functionalities. Functi
 	\item the non-Limber capability,
 	\item a link to FAST-PT \citep{FASTPT} for implementation of perturbation theory,
 	\item a photo-z model,
+	\item support for cosmologies with neutrinos,
 	\item and more power spectrum methods (see \ref{Pk_whishlist}).
 \end{itemize}
 
