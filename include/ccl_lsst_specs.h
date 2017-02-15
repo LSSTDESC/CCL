@@ -9,7 +9,7 @@ typedef struct {
         void *  your_pz_params;
 } user_pz_info;
 
-double ccl_specs_bias_clustering(ccl_cosmology * cosmo, double a); 
+double ccl_specs_bias_clustering(ccl_cosmology * cosmo, double a, int * status); 
 int ccl_specs_dNdz_tomog(double z, int dNdz_type, double bin_zmin, double bin_zmax, user_pz_info * user_info,  double *tomoout);
 user_pz_info* ccl_specs_create_photoz_info(void * user_params, double(*user_pz_func)(double, double,void*));
 void ccl_specs_free_photoz_info(user_pz_info *my_photoz_info);

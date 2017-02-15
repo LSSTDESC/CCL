@@ -24,6 +24,9 @@
 // Strip the ccl_ prefix from function names
 %rename("%(strip:[ccl_])s") "";
 
+// Flag status variable as input/output variable
+%apply (int* INOUT) {(int * status)};
+
 %include "../include/ccl.h"
 //%include "../include/ccl_background.h"
 

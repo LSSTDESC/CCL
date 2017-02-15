@@ -51,27 +51,27 @@ CCL_ClTracer *ccl_cl_tracer_new(ccl_cosmology *cosmo,int tracer_type,
 				int nz_b,double *z_b,double *b,
 				int nz_s,double *z_s,double *s,
 				int nz_ba,double *z_ba,double *ba,
-				int nz_rf,double *z_rf,double *rf);
+				int nz_rf,double *z_rf,double *rf, int * status);
 //Simplified version of the above for number counts
 CCL_ClTracer *ccl_cl_tracer_number_counts_new(ccl_cosmology *cosmo,
 					      int has_rsd,int has_magnification,
 					      int nz_n,double *z_n,double *n,
 					      int nz_b,double *z_b,double *b,
-					      int nz_s,double *z_s,double *s);
+					      int nz_s,double *z_s,double *s, int * status);
 //More simplified version (no RSD, no magnification) of the above for number counts
 CCL_ClTracer *ccl_cl_tracer_number_counts_simple_new(ccl_cosmology *cosmo,
 						     int nz_n,double *z_n,double *n,
-						     int nz_b,double *z_b,double *b);
+						     int nz_b,double *z_b,double *b, int * status);
 //Simplified version of the above for shear
 CCL_ClTracer *ccl_cl_tracer_lensing_new(ccl_cosmology *cosmo,
 					int has_alignment,
 					int nz_n,double *z_n,double *n,
 					int nz_ba,double *z_ba,double *ba,
-					int nz_rf,double *z_rf,double *rf);
+					int nz_rf,double *z_rf,double *rf, int * status);
 //More simplified version (no IA) of the above for shear
 CCL_ClTracer *ccl_cl_tracer_lensing_simple_new(ccl_cosmology *cosmo,
-					       int nz_n,double *z_n,double *n);
+					       int nz_n,double *z_n,double *n, int * status);
 //CCL_ClTracer destructor
 void ccl_cl_tracer_free(CCL_ClTracer *clt);
 //Computes limber power spectrum for two different tracers
-double ccl_angular_cl(ccl_cosmology *cosmo,int l,CCL_ClTracer *clt1,CCL_ClTracer *clt2);
+double ccl_angular_cl(ccl_cosmology *cosmo,int l,CCL_ClTracer *clt1,CCL_ClTracer *clt2, int * status);

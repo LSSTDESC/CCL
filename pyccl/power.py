@@ -12,7 +12,8 @@ def nonlin_matter_power(cosmo, a, k):
 
 def sigmaR(cosmo, R):
     return _vectorize_fn(lib.sigmaR, 
-                         lib.sigmaR_vec, cosmo, R)
+                         lib.sigmaR_vec, cosmo, R,
+                         returns_status=False)
 
 def sigma8(cosmo):
     return lib.sigma8(cosmo.cosmo)

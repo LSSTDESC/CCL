@@ -21,13 +21,14 @@ TASK: Outputs fitting function for use in halo mass function calculation;
     ccl_watson (arxiv 1212.0095 )
 */
 
-static double massfunc_f(ccl_cosmology *cosmo, double smooth_mass,double redshift)
+static double massfunc_f(ccl_cosmology *cosmo, double smooth_mass,double redshift, int * status)
 {
   double fit_A, fit_a, fit_b, fit_c, fit_d, overdensity_delta;
   double scale, Omega_m_z;
   double delta_c_Tinker, nu;
 
-  double sigma=ccl_sigmaM(cosmo,smooth_mass,redshift);
+  double sigma=ccl_sigmaM(cosmo,smooth_mass,redshift, status);
+
   switch(cosmo->config.mass_function_method){
   case ccl_tinker:
     
@@ -79,20 +80,19 @@ static double massfunc_f(ccl_cosmology *cosmo, double smooth_mass,double redshif
     return fit_A*pow( (fit_a/sigma)+1.0, fit_b)*exp(-fit_c/sigma/sigma);
 
   default:
-    cosmo->status = 11;
+    *status = CCL_ERROR_MF;
     sprintf(cosmo->status_message ,
 	    "ccl_massfunc.c: ccl_massfunc(): Unknown or non-implemented mass function method: %d \n",
 	    cosmo->config.mass_function_method);
     return 0;
   }
 }
-static double ccl_halo_b1(ccl_cosmology *cosmo, double smooth_mass,double redshift)
+static double ccl_halo_b1(ccl_cosmology *cosmo, double smooth_mass,double redshift, int * status)
 {
   double fit_A, fit_B, fit_C, fit_a, fit_b, fit_c, overdensity_delta, y;
   double scale, Omega_m_z;
   double delta_c_Tinker, nu;
-
-  double sigma=ccl_sigmaM(cosmo,smooth_mass,redshift);
+  double sigma=ccl_sigmaM(cosmo,smooth_mass,redshift, status);
   switch(cosmo->config.mass_function_method){
 
     //this version uses b(nu) parameterization, Eq. 6 in Tinker et al. 2010
@@ -117,6 +117,7 @@ static double ccl_halo_b1(ccl_cosmology *cosmo, double smooth_mass,double redshi
     break;
 
   default:
+    *status = CCL_ERROR_MF;
     cosmo->status = 11;
     sprintf(cosmo->status_message ,
       "ccl_massfunc.c: ccl_halo_b1(): No b(M) fitting function implemented for mass_function_method: %d \n",
@@ -124,7 +125,8 @@ static double ccl_halo_b1(ccl_cosmology *cosmo, double smooth_mass,double redshi
     return 0;
   }
 }
-void ccl_cosmology_compute_sigma(ccl_cosmology * cosmo)
+
+void ccl_cosmology_compute_sigma(ccl_cosmology * cosmo, int *status)
 {
     if(cosmo->computed_sigma)
         return;
@@ -137,7 +139,7 @@ void ccl_cosmology_compute_sigma(ccl_cosmology * cosmo)
         (fabs(m[nm-1]-LOGM_SPLINE_MAX)>1e-5) ||
         (m[nm-1]>10E17)
         ) {
-       cosmo->status =2;
+       *status =CCL_ERROR_LINSPACE;
        strcpy(cosmo->status_message,"ccl_cosmology_compute_sigmas(): Error creating linear spacing in m\n");
        return;
     }
@@ -148,20 +150,19 @@ void ccl_cosmology_compute_sigma(ccl_cosmology * cosmo)
    
    // fill in sigma
    for (int i=0; i<nm; i++){
-     smooth_radius = ccl_massfunc_m2r(cosmo, pow(10,m[i]));
+     smooth_radius = ccl_massfunc_m2r(cosmo, pow(10,m[i]), status);
      y[i] = log10(ccl_sigmaR(cosmo, smooth_radius));
    }
    gsl_spline * logsigma = gsl_spline_alloc(M_SPLINE_TYPE, nm);
-   int status = gsl_spline_init(logsigma, m, y, nm);
-   if (status){
+   *status = gsl_spline_init(logsigma, m, y, nm);
+   if (*status){
      free(m);
      free(y);
      gsl_spline_free(logsigma);
-     cosmo->status = 4;
+     *status = CCL_ERROR_SPLINE ;
      strcpy(cosmo->status_message, "ccl_massfunc.c: ccl_cosmology_compute_sigma(): Error creating sigma(M) spline\n");
      return;
    }
-
    for (int i=0; i<nm; i++){
      if(i==0){
        y[i] = log(pow(10, gsl_spline_eval(logsigma, m[i], NULL)))-log(pow(10,gsl_spline_eval(logsigma, m[i]+LOGM_SPLINE_DELTA/2., NULL)));
@@ -178,12 +179,12 @@ void ccl_cosmology_compute_sigma(ccl_cosmology * cosmo)
    }
 
    gsl_spline * dlnsigma_dlogm = gsl_spline_alloc(M_SPLINE_TYPE, nm);
-   status = gsl_spline_init(dlnsigma_dlogm, m, y, nm);
-   if (status){
+   *status = gsl_spline_init(dlnsigma_dlogm, m, y, nm);
+   if (*status){
      free(m);
      free(y);
      gsl_spline_free(logsigma);
-     cosmo->status = 4;
+     *status = CCL_ERROR_SPLINE ;
      strcpy(cosmo->status_message, "ccl_massfunc.c: ccl_cosmology_compute_sigma(): Error creating dlnsigma/dlogM spline\n");
      return;
    }
@@ -203,18 +204,18 @@ INPUT: ccl_cosmology * cosmo, double smoothing mass in units of Msun, double red
 TASK: returns halo mass function as dn / dlog10 m
 */
 
-double ccl_massfunc(ccl_cosmology *cosmo, double smooth_mass, double redshift)
+double ccl_massfunc(ccl_cosmology *cosmo, double smooth_mass, double redshift, int * status)
 {
   if (!cosmo->computed_sigma){
-    ccl_cosmology_compute_sigma(cosmo);
-    ccl_check_status(cosmo);
+    ccl_cosmology_compute_sigma(cosmo, status);
+    ccl_check_status(cosmo, status);
   }
 
   double f,deriv,rho_m,logmass;
   
   logmass = log10(smooth_mass);
   rho_m = RHO_CRITICAL*cosmo->params.Omega_m*cosmo->params.h*cosmo->params.h;
-  f=massfunc_f(cosmo,smooth_mass,redshift);
+  f=massfunc_f(cosmo,smooth_mass,redshift, status);
   deriv = gsl_spline_eval(cosmo->data.dlnsigma_dlogm, logmass, cosmo->data.accelerator_m);
   return f*rho_m*deriv/smooth_mass;
 }
@@ -224,16 +225,16 @@ INPUT: ccl_cosmology * cosmo, double smoothing mass in units of Msun, double red
 TASK: returns linear halo bias
 */
 
-double ccl_halo_bias(ccl_cosmology *cosmo, double smooth_mass, double redshift)
+double ccl_halo_bias(ccl_cosmology *cosmo, double smooth_mass, double redshift, int * status)
 {
   if (!cosmo->computed_sigma){
-    ccl_cosmology_compute_sigma(cosmo);
-    ccl_check_status(cosmo);
+    ccl_cosmology_compute_sigma(cosmo, status);
+    ccl_check_status(cosmo, status);
   }
 
   double f;
-  f = ccl_halo_b1(cosmo,smooth_mass,redshift);
-  ccl_check_status(cosmo);  
+  f = ccl_halo_b1(cosmo,smooth_mass,redshift, status);  
+  ccl_check_status(cosmo, status);  
   return f;
 }
 /*---- ROUTINE: ccl_massfunc_m2r -----
@@ -241,7 +242,7 @@ INPUT: ccl_cosmology * cosmo, smooth_mass in units of Msun
 TASK: takes smoothing halo mass and converts to smoothing halo radius
   in units of Mpc.
 */
-double ccl_massfunc_m2r(ccl_cosmology * cosmo, double smooth_mass)
+double ccl_massfunc_m2r(ccl_cosmology * cosmo, double smooth_mass, int * status)
 {
     double rho_m, smooth_radius;
 
@@ -259,17 +260,17 @@ TASK: returns sigma from the sigmaM interpolation. Also computes the sigma inter
 necessary.
 */
 
-double ccl_sigmaM(ccl_cosmology * cosmo, double smooth_mass, double redshift)
+double ccl_sigmaM(ccl_cosmology * cosmo, double smooth_mass, double redshift, int * status)
 {
     double sigmaM;
 
     if (!cosmo->computed_sigma){
-        ccl_cosmology_compute_sigma(cosmo);
-        ccl_check_status(cosmo);
+        ccl_cosmology_compute_sigma(cosmo, status);
+        ccl_check_status(cosmo, status);
     }
 
     sigmaM = pow(10,gsl_spline_eval(cosmo->data.logsigma, log10(smooth_mass), cosmo->data.accelerator_m));
-    sigmaM = sigmaM*ccl_growth_factor(cosmo, 1.0/(1.0+redshift));
+    sigmaM = sigmaM*ccl_growth_factor(cosmo, 1.0/(1.0+redshift), status);
 
     return sigmaM;
 }
