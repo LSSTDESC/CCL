@@ -139,8 +139,8 @@ ccl_parameters ccl_parameters_create(double Omega_c, double Omega_b, double Omeg
   // Neutrinos
   params.N_nu_mass = N_nu_mass;
   params.N_nu_rel = N_nu_rel;
-  params.mnu = mnu;
-
+  params.mnu = mnu; 
+  
   // Dark Energy
   params.w0 = w0;
   params.wa = wa;
@@ -173,7 +173,7 @@ ccl_parameters ccl_parameters_create(double Omega_c, double Omega_b, double Omeg
     params.nz_mgrowth=0;
     params.z_mgrowth=NULL;
     params.df_mgrowth=NULL;
-  }
+  } 
   
   return params;  
 }
@@ -242,8 +242,10 @@ ccl_parameters ccl_parameters_create_lcdm_nu(double Omega_c, double Omega_b, dou
 {
   //double Omega_n = 0.0;
   double w0 = -1.0;
-  double wa = 0.0;
+  double wa = 0.0; 
+
   ccl_parameters params = ccl_parameters_create(Omega_c, Omega_b, Omega_k, N_nu_rel, N_nu_mass, mnu, w0, wa, h, norm_pk, n_s,-1,NULL,NULL);
+
   return params;
 
 }

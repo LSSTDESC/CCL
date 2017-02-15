@@ -13,8 +13,9 @@ int main(int argc, char * argv[]){
 //	config.transfer_function_method = ccl_bbks;
 	config.transfer_function_method = ccl_boltzmann;
 
-	ccl_parameters params = ccl_parameters_create_flat_lcdm(Omega_c, Omega_b, h, A_s, n_s);
-	ccl_cosmology * cosmo = ccl_cosmology_create(params, config);
+	//ccl_parameters params = ccl_parameters_create_flat_lcdm(Omega_c, Omega_b, h, A_s, n_s);
+	ccl_parameters params = ccl_parameters_create_lcdm_nu(Omega_c, Omega_b, 0.0,h, A_s, n_s, 2.0328, 1, 0.5);
+        ccl_cosmology * cosmo = ccl_cosmology_create(params, config);
 
 	ccl_cosmology_compute_power(cosmo);
 	

@@ -233,7 +233,7 @@ static double ccl_get_class_As(ccl_cosmology *cosmo, struct file_content *fc, in
 
 static void ccl_fill_class_parameters(ccl_cosmology * cosmo, struct file_content * fc,int parser_length){
   strcpy(fc->name[0],"output");
-  strcpy(fc->value[0],"mPk");
+  strcpy(fc->value[0],"mPk"); 
 
   strcpy(fc->name[1],"non linear");
   if (cosmo->config.matter_power_spectrum_method == ccl_halofit){ strcpy(fc->value[1],"Halofit"); }
@@ -298,7 +298,10 @@ static void ccl_fill_class_parameters(ccl_cosmology * cosmo, struct file_content
       strcat(fc->value[16],tmp);
     }
     printf("\n\nneutrino masses passed to CLASS: %s\n\n",fc->value[16]);
-    exit(1);
+    printf("\n\nNur masses passed to CLASS: %s\n\n",fc->value[14]);
+    printf("\n\nNncdm passed to CLASS: %s\n\n",fc->value[15]);
+
+  
   }
   //normalization comes last, so that all other parameters are filled in for determining A_s if sigma_8 is specified
   if (isfinite(cosmo->params.sigma_8) && isfinite(cosmo->params.A_s)){

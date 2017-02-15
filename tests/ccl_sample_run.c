@@ -21,6 +21,9 @@
 #define SZ_SH 0.05
 #define NL 512
 #define PS 0.1 
+#define NREL 0.00641
+#define NMAS 3
+#define MNU 0.12
 
 double pz_func_example (double photo_z, double spec_z, void *param){
 	double delta_z = photo_z - spec_z;
@@ -31,8 +34,10 @@ int main(int argc,char **argv){
 
 	// Initialize cosmological parameters
 	ccl_configuration config=default_config;
-	config.transfer_function_method=ccl_bbks;
-	ccl_parameters params=ccl_parameters_create(OC,OB,OK,ON,W0,WA,HH,NAN,NS,-1,NULL,NULL);
+	config.transfer_function_method=ccl_boltzmann_class;
+	//ccl_parameters params=ccl_parameters_create(OC,OB,OK,ON,W0,WA,HH,NAN,NS,-1,NULL,NULL);
+	ccl_parameters params = ccl_parameters_create(OC, OB, OK, NREL, NMAS, MNU, W0, WA, HH, NAN, NS,-1,NULL,NULL);
+        printf("in sample run w0=%1.12f, wa=%1.12f\n", W0, WA);
 	params.sigma_8=S8;
 
 	// Initialize cosmology object given cosmo params
@@ -56,7 +61,6 @@ int main(int argc,char **argv){
 	// Compute sigma_8
 	printf("Initializing power spectrum...\n");
 	printf("sigma_8 = %.3lf\n\n", ccl_sigma8(cosmo));
-
 	//Create tracers for angular power spectra
 	double z_arr_gc[NZ],z_arr_sh[NZ],nz_arr_gc[NZ],nz_arr_sh[NZ],bz_arr[NZ];
 	for(int i=0;i<NZ;i++)
