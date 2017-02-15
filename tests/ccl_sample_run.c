@@ -95,7 +95,7 @@ int main(int argc,char **argv){
 	ccl_cl_tracer_free(ct_wl);
 	
 	//Halo mass function
-	printf("M\tdN/dM(z = 0, 0.5, 1))\n");
+	printf("M\tdN/dlog10M(z = 0, 0.5, 1))\n");
 	for(int logM=9;logM<=15;logM+=1)
 	{
 		printf("%.1e\t",pow(10,logM));
