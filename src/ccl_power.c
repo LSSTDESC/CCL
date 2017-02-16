@@ -678,9 +678,10 @@ double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double a, double k, int *s
 
 	switch(cosmo->config.matter_power_spectrum_method){
 	//If the matter PS specified was linear, then do the linear compuation
-    case: ccl_linear
+    case ccl_linear:
 		return ccl_linear_matter_power(cosmo,a,k,status);
-    case: ccl_halofit
+		
+    case ccl_halofit:
 
     ccl_cosmology_compute_power(cosmo,status);
     
