@@ -4,11 +4,11 @@ from pyutils import _vectorize_fn, _vectorize_fn2
 
 def linear_matter_power(cosmo, a, k):
     return _vectorize_fn2(lib.linear_matter_power, 
-                          lib.linear_matter_power_vec, cosmo, k, a)
+                          lib.linear_matter_power_vec, cosmo, k, a,switch_xz=False)
 
 def nonlin_matter_power(cosmo, a, k):
     return _vectorize_fn2(lib.nonlin_matter_power, 
-                          lib.nonlin_matter_power_vec, cosmo, k, a)
+                          lib.nonlin_matter_power_vec, cosmo, k, a,switch_xz=False)
 
 def sigmaR(cosmo, R):
     return _vectorize_fn(lib.sigmaR, 
