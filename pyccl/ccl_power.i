@@ -23,11 +23,12 @@ void linear_matter_power_vec(
                         ccl_cosmology * cosmo,
                         double a,
                         double* k, int nk,
-                        double* output, int nout)
+                        double* output, int nout,
+                        int* status)
 {
     assert(nout == nk);
     for(int i=0; i < nk; i++){
-        output[i] = ccl_linear_matter_power(cosmo, a, k[i]);
+        output[i] = ccl_linear_matter_power(cosmo, a, k[i], status);
     }
 }
 
@@ -35,11 +36,12 @@ void nonlin_matter_power_vec(
                         ccl_cosmology * cosmo,
                         double a,
                         double* k, int nk,
-                        double* output, int nout)
+                        double* output, int nout,
+                        int* status)
 {
     assert(nout == nk);
     for(int i=0; i < nk; i++){
-        output[i] = ccl_nonlin_matter_power(cosmo, a, k[i]);
+        output[i] = ccl_nonlin_matter_power(cosmo, a, k[i], status);
     }
 }
 
