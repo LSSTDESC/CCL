@@ -96,7 +96,7 @@ def _vectorize_fn(fn, fn_vec, cosmo, x, returns_status=True):
     return f
 
 
-def _vectorize_fn2(fn, fn_vec, cosmo, x, z, returns_status=True):
+def _vectorize_fn2(fn, fn_vec, cosmo, x, z, returns_status=True,switch_xz=True):
     """
     Generic wrapper to allow vectorized (1D array) access to CCL functions with 
     one vector argument and one scalar argument.
@@ -108,9 +108,15 @@ def _vectorize_fn2(fn, fn_vec, cosmo, x, z, returns_status=True):
     if isinstance(x, float):
         # Use single-value function
         if returns_status:
-            f, status = fn(cosmo, x, z, status) # Note order of x,z switched
+            if switch_xz :
+                f, status = fn(cosmo, x, z, status) # Note order of x,z switched
+            else :
+                f, status = fn(cosmo, z, x, status) # Note order of not switched
         else:
-            f = fn(cosmo, x, z)
+            if switch_xz :
+                f = fn(cosmo, x, z)
+            else :
+                f = fn(cosmo, z, x)
     elif isinstance(x, np.ndarray):
         # Use vectorised function
         if returns_status:
