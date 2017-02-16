@@ -1,0 +1,94 @@
+% 
+\usepackage{soul} 
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{xspace}
+\usepackage{xifthen}
+\usepackage[dvipsnames,svgnames]{xcolor} 
+
+% General formatting
+\newcommand{\ie}{i.e.\xspace}
+\newcommand{\eg}{e.g.\xspace}
+\newcommand{\etc}{etc.\xspace}
+\newcommand{\etal}{et al.\xspace}
+\newcommand{\vs}{vs.\xspace}
+\newcommand{\super}[1]{\ensuremath{^{\textrm{#1}}}}
+\newcommand{\sub}[1]{\ensuremath{_{\textrm{#1}}}}
+
+\newcommand{\FIXME}[1]{{\bf \textcolor{red}{#1}}}
+%\newcommand{\FIXME}[1]{{#1}}
+\newcommand{\CHECK}[1]{{\bf \textcolor{orange}{#1}}}
+%\newcommand{\CHECK}[1]{{#1}}
+\newcommand{\COMMENT}[1]{{\it \textcolor{blue}{#1}}}
+%\newcommand{\COMMENT}[1]{{#1}}
+\newcommand{\NEW}[1]{{\textcolor{blue}{#1}}}
+%\newcommand{\NEW}[1]{{#1}}
+
+% Math
+\mathchardef\mhyphen="2D
+\newcommand{\vect}[1]{\boldsymbol{#1}}
+\newcommand{\roughly}{\ensuremath{ {\sim}\,} }
+\newcommand{\gtr}{\ensuremath{ {>}\,} }
+\newcommand{\less}{\ensuremath{ {<}\,} }
+\newlength{\dhatheight}
+\newcommand{\doublehat}[1]{%
+    \settoheight{\dhatheight}{\ensuremath{\hat{#1}}}%
+    \addtolength{\dhatheight}{-0.35ex}%
+    \hat{\vphantom{\rule{1pt}{\dhatheight}}%
+    \smash{\hat{#1}}}}
+\newcommand{\code}[1]{\texttt{#1}\xspace}
+\newcommand{\dd}{\ensuremath{\rm d}}
+\newcommand{\var}[1]{\ensuremath{#1}\xspace}
+
+
+% Referencing 
+\newcommand{\secref}[1]{Section~\ref{sec:#1}}
+\newcommand{\appref}[1]{Appendix~\ref{app:#1}}
+\newcommand{\tabref}[1]{Table~\ref{tab:#1}}
+\newcommand{\tabrefs}[2]{Tables~\ref{tab:#1} and \ref{tab:#2}}
+\newcommand{\figref}[1]{Figure~\ref{fig:#1}}
+\newcommand{\figrefs}[2]{Figures~\ref{fig:#1} and \ref{fig:#2}}
+\newcommand{\eqnref}[1]{Equation~\eqref{eqn:#1}}
+
+% Astronomy
+\newcommand{\LCDM}{\ensuremath{\rm \Lambda CDM}\xspace}
+\newcommand{\ra}{{\ensuremath{\alpha_{2000}}}\xspace}
+\newcommand{\dec}{{\ensuremath{\delta_{2000}}}\xspace}
+\newcommand{\glon}{{\ensuremath{\ell}}\xspace}
+\newcommand{\glat}{{\ensuremath{b}}\xspace}
+
+% Units
+\newcommand{\unit}[1]{\ensuremath{\mathrm{\,#1}}\xspace}
+\newcommand{\Gyr}{\unit{Gyr}}
+\newcommand{\MeV}{\unit{MeV}}
+\newcommand{\GeV}{\unit{GeV}}
+\newcommand{\TeV}{\unit{TeV}}
+\newcommand{\degree}{\ensuremath{{}^{\circ}}\xspace}
+\newcommand{\mas}{\unit{mas}}
+\newcommand{\amin}{\unit{arcmin}}
+\newcommand{\asec}{\unit{arcsec}}
+\newcommand{\angstrom}{\unit{\AA}}
+\newcommand{\um}{\unit{$\mu$m}}
+\newcommand{\cm}{\unit{cm}}
+\newcommand{\km}{\unit{km}}
+\newcommand{\pc}{\unit{pc}}
+\newcommand{\kpc}{\unit{kpc}}
+\newcommand{\second}{\unit{s}}
+\newcommand{\us}{\unit{$\mu$s}}
+\newcommand{\photons}{\unit{ph}}
+\newcommand{\photon}{\unit{ph}}
+\newcommand{\sr}{\unit{sr}}
+\newcommand{\Msolar}{\ensuremath{M_\odot}}
+\newcommand{\Msun}{\ensuremath{M_\odot}}
+\newcommand{\Mstar}{\ensuremath{M_{*}}}
+\newcommand{\Lsolar}{\ensuremath{L_\odot}}
+\newcommand{\Lsun}{\ensuremath{L_\odot}}
+\newcommand{\Lstar}{\ensuremath{L_{*}}}
+\newcommand{\Lum}{\ensuremath{ L }\xspace}
+\newcommand{\cmcubes}{\ensuremath{\cm^{3}\second^{-1}}\xspace}
+\newcommand{\magn}{\unit{mag}}
+\newcommand{\mmag}{\unit{mmag}}
+\providecommand{\deg}{}
+\renewcommand{\deg}{\unit{deg}}
+\newcommand{\kms}{{\km\second^{-1}}}
+% 

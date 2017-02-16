@@ -1,7 +1,7 @@
 
 import ccllib as lib
 import constants as const
-from pyutils import _cosmology_obj
+from pyutils import _cosmology_obj, check
 import numpy as np
 
 # Mapping between names for tracers and internal CCL tracer types
@@ -46,13 +46,14 @@ class ClTracer(object):
         if z_rf is None: z_rf = NoneArr
         
         # Construct new ccl_cl_tracer
-        self.cltracer = lib.cl_tracer_new_wrapper(
+        status = 0
+        self.cltracer, status = lib.cl_tracer_new_wrapper(
                             cosmo, 
                             tracer_types[tracer_type],
                             int(has_rsd), 
                             int(has_magnification), 
                             int(has_intrinsic_alignment),
-                            z_n, n, z_b, b, z_s, s, z_ba, ba, z_rf, rf )
+                            z_n, n, z_b, b, z_s, s, z_ba, ba, z_rf, rf, status )
         
     def __del__(self):
         """
@@ -65,6 +66,11 @@ class ClTracerNumberCounts(ClTracer):
     
     def __init__(self, cosmo, has_rsd, has_magnification, 
                  z_n, n, z_b, b, z_s=None, s=None):
+        
+        # Sanity check on input arguments
+        if has_magnification and (z_s is None or s is None):
+                raise ValueError("Keyword args (z_s, s) must be specified if "
+                                 "has_magnification=True.")
         
         # Call ClTracer constructor with appropriate arguments
         super(ClTracerNumberCounts, self).__init__(
@@ -79,6 +85,12 @@ class ClTracerLensing(ClTracer):
     
     def __init__(self, cosmo, has_intrinsic_alignment, 
                  z_n, n, z_ba=None, ba=None, z_rf=None, rf=None):
+        
+        # Sanity check on input arguments
+        if has_intrinsic_alignment \
+        and (z_ba is None or ba is None or z_rf is None or rf is None):
+                raise ValueError("Keyword args (z_ba, ba, z_rf, rf) must be "
+                                 "specified if has_intrinsic_alignment=True.")
         
         # Call ClTracer constructor with appropriate arguments
         super(ClTracerLensing, self).__init__(
@@ -114,14 +126,16 @@ def angular_cl(cosmo, cltracer1, cltracer2, ell):
     clt1 = _cltracer_obj(cltracer1)
     clt2 = _cltracer_obj(cltracer2)
     
+    status = 0
     # Return Cl values, according to whether ell is an array or not
     if isinstance(ell, float) or isinstance(ell, int) :
         # Use single-value function
-        return lib.angular_cl(cosmo, ell, clt1, clt2)
+        cl, status = lib.angular_cl(cosmo, ell, clt1, clt2, status)
     elif isinstance(ell, np.ndarray):
         # Use vectorised function
-        return lib.angular_cl_vec(cosmo, clt1, clt2, ell, ell.size)
+        cl, status = lib.angular_cl_vec(cosmo, clt1, clt2, ell, ell.size, status)
     else:
         # Use vectorised function
-        return lib.angular_cl_vec(cosmo, clt1, clt2, ell, len(ell))
-
+        cl, status = lib.angular_cl_vec(cosmo, clt1, clt2, ell, len(ell), status)
+    check(status)
+    return cl
