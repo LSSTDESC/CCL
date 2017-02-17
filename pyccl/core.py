@@ -272,13 +272,13 @@ class Cosmology(object):
         return self.params.__getitem__(key)
     
     def compute_distances(self):
-        lib.cosmology_compute_distances(self.cosmo)
+        lib.cosmology_compute_distances(self.cosmo,self.cosmo.status)
     
     def compute_growth(self):
-        lib.cosmology_compute_growth(self.cosmo)
+        lib.cosmology_compute_growth(self.cosmo,self.cosmo.status)
     
     def compute_power(self):
-        lib.cosmology_compute_power(self.cosmo)
+        lib.cosmology_compute_power(self.cosmo,self.cosmo.status)
     
     # Check which data have been precomputed
     def has_distances(self):
