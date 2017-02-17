@@ -35,6 +35,7 @@ static void read_massfunc_test_file(double mass[13], double massfunc[3][13])
    FILE * f = fopen("./tests/benchmark/model1_hmf.txt", "r");
    ASSERT_NOT_NULL(f);
 
+
    // Ignore header line
    char str[1024];
    fgets(str, 1024, f);
@@ -80,7 +81,9 @@ static void compare_massfunc(int model, struct massfunc_data * data)
   // make the parameter set from input data
 
   ccl_parameters params = ccl_parameters_create(data->Omega_c, data->Omega_b,data->Omega_k[model], data->N_nu_rel, data->N_nu_mass, data->mnu,data->w_0[model], data->w_a[model], data->h,data->A_s, data->n_s, -1, NULL, NULL);
-
+  
+  int stat = 0;
+  int* status = &stat;
 
   params.sigma_8 = data->sigma_8;
   ccl_configuration config = default_config;
@@ -98,9 +101,9 @@ static void compare_massfunc(int model, struct massfunc_data * data)
   // compare to benchmark data
   for (int j=0; j<13; j++){
     double mass = pow(10,logmass);
-    double sigma_j = ccl_sigmaM(cosmo, mass, redshift);
+    double sigma_j = ccl_sigmaM(cosmo, mass, redshift, status);
     double loginvsigma_j = log10(1./sigma_j);
-    double logmassfunc_j = log10(ccl_massfunc(cosmo, mass, redshift)*mass/(rho_m*log(10.)));
+    double logmassfunc_j = log10(ccl_massfunc(cosmo, mass, redshift, status)*mass/(rho_m*log(10.)));
 
     double absolute_tolerance = SIGMA_TOLERANCE*data->massfunc[0][j];
     if (fabs(absolute_tolerance)<1e-12) absolute_tolerance = 1e-12;
@@ -113,7 +116,7 @@ static void compare_massfunc(int model, struct massfunc_data * data)
     absolute_tolerance = MASSFUNC_TOLERANCE*fabs(data->massfunc[2][j]);
     if (fabs(absolute_tolerance)<1e-12) absolute_tolerance = 1e-12;
     ASSERT_DBL_NEAR_TOL(fabs(data->massfunc[2][j]), fabs(logmassfunc_j), absolute_tolerance);
-    
+   
     logmass += 0.5;
   }
   free(cosmo);

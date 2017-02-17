@@ -25,11 +25,12 @@
 void specs_bias_clustering_vec(
                         ccl_cosmology * cosmo,
                         double* a, int na,
-                        double* output, int nout)
+                        double* output, int nout,
+                        int* status)
 {
     assert(nout == na);
     for(int i=0; i < na; i++){
-        output[i] = ccl_specs_bias_clustering(cosmo, a[i]);
+        output[i] = ccl_specs_bias_clustering(cosmo, a[i], status);
     }
 }
 

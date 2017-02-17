@@ -94,7 +94,6 @@ After installing the C library you can make sure it is running as it should by t
 Ultimately, CCL will aim to incorporate theoretical predictions for all cosmological models of interest to LSST. Currently, however, only a few families of models are supported:
 \begin{itemize}
  \item Flat, vanilla $\Lambda$CDM.
- \item Massive neutrinos ($\nu$)
  \item wCDM and the CPL model ($w_0+w_a$)
  \item Non-zero curvature ($K$)
  \item All the above plus an arbitrary, user-defined, modified growth function (see description in Section \ref{sec:growth}).
@@ -109,7 +108,7 @@ The first step to use CCL is to generate a {\tt ccl\_cosmology} structure, conta
 
 {\tt ccl\_parameters} objects contain information about the cosmological parameters, and are initialized using one of the following routines (the full syntax for each function can be found in the header file {\tt ccl\_core.h}):
 \begin{itemize}
- \item {\tt ccl\_parameters\_create(double Omega\_c, double Omega\_b, double Omega\_k, double N\_nu\_rel, double N\_nu\_mass, double mnu, double w0, double wa, double h, double {\color{blue}norm\_pk}, double n\_s,int nz\_mgrowth,double *zarr\_mgrowth,double *dfarr\_mgrowth)}: general {\tt ccl\_parameters} constructor supporting all the models described above.
+ \item {\tt ccl\_parameters\_create(double Omega\_c, double Omega\_b, double Omega\_k, double w0, double wa, double h, double {\color{blue}norm\_pk}, double n\_s,int nz\_mgrowth,double *zarr\_mgrowth,double *dfarr\_mgrowth)}: general {\tt ccl\_parameters} constructor supporting all the models described above.
  \item {\tt ccl\_parameters\_create\_flat\_lcdm(...)}: particular constructor for flat $\Lambda$CDM cosmologies.
  \item {\tt ccl\_parameters\_create\_flat\_wcdm(...)}: constant $w$ cosmologies.
  \item {\tt ccl\_parameters\_create\_flat\_wacdm(...)}: $w_0+w_a$.
@@ -117,7 +116,7 @@ The first step to use CCL is to generate a {\tt ccl\_cosmology} structure, conta
 \end{itemize}
 The argument ${\tt {\color{blue}norm\_pk}}$ can be passed the power spectrum normalization parameterized by $\sigma_8$ or $A_\mathrm{s}$, {\tt ccl\_parameters\_create} switches to $\sigma_8$ normalization if ${\tt {\color{blue}norm\_pk}} > 1.e-5$, and to $A_{\mathrm s}$ normalization otherwise.
 
-To include massive neutrinos in your cosmology, the suffix `{\tt \_nu}' may be appended to the latter four {\tt ccl\_configuration} objects above (for example: {\tt ccl\_parameters\_create\_lcdm\_nu(...)}). Note that utilizing the corresponding {\tt ccl\_configuration} object without this {\tt \_nu} suffix will set the contribution from both massless and massive neutrinos to zero.
+%To include massive neutrinos in your cosmology, the suffix `{\tt \_nu}' may be appended to the latter four {\tt ccl\_configuration} objects above (for example: {\tt ccl\_parameters\_create\_lcdm\_nu(...)}). Note that utilizing the corresponding {\tt ccl\_configuration} object without this {\tt \_nu} suffix will set the contribution from both massless and massive neutrinos to zero.
 
 {\tt ccl\_configuration} objects contain information about the prescriptions to be used to compute transfer functions, power spectra, mass functions, etc. A default {\tt ccl\_configuration} object is made readily available as {\tt default\_config}, for which transfer functions are computed with CLASS, the HaloFit prediction is used for the matter power spectrum and a number of prescriptions can be used to compute the halo mass function.
 
@@ -134,7 +133,7 @@ The Hubble parameter is calculated via
 %
 \begin{equation}
 \frac{H(a)}{H_0} = a^{-3/2}\sqrt{\Omega_m+\Omega_\Lambda a^{-3(w_0+w_a)}
-    \exp[3 w_a (a-1)]+\Omega_K a +(\Omega_g+\Omega_\nu^{\rm rel}) a^{-1}}.
+    \exp[3 w_a (a-1)]+\Omega_K a +\Omega_g a^{-1}}.
 \end{equation}
 
 The radial comoving distance is calculated via a numerical integral
@@ -169,7 +168,7 @@ In doing this, {\tt CCL} simultaneously computes the so-called growth rate $f(a)
 \end{equation}
 CCL provides different functions that return the growth normalized to $D(a=1)=1$ and to $D(a\ll1)\rightarrow a$.
 
-Currently CCL allows for an alternative cosmological model defined by a regular background $(w_0+w_a)$CDM (with arbitrary $k$ and neutrino mass) as well as a user-defined $\Delta f(a)$, such that the true growth rate in this model is given by $f(a)=f_0(a)+\Delta f(a)$, where $f_0(a)$ is the growth rate in the background model. Note that this model is only consistently implemented with regards to the computation of the linear growth factor and growth rates (which will also scale the linear power spectrum), however all other CCL functions (including the non-linear power spectrum) will ignore these modifications. This model, and the interpretation of the predictions given by CCL should therefore be used with care.
+Currently CCL allows for an alternative cosmological model defined by a regular background $(w_0+w_a)$CDM (with arbitrary $k$) as well as a user-defined $\Delta f(a)$, such that the true growth rate in this model is given by $f(a)=f_0(a)+\Delta f(a)$, where $f_0(a)$ is the growth rate in the background model. Note that this model is only consistently implemented with regards to the computation of the linear growth factor and growth rates (which will also scale the linear power spectrum), however all other CCL functions (including the non-linear power spectrum) will ignore these modifications. This model, and the interpretation of the predictions given by CCL should therefore be used with care.
 
 \subsection{Matter power spectrum}
 \label{sec:power}
@@ -265,7 +264,7 @@ This is a list of some power spectrum methods that we would like to implement in
 \subsubsection{Normalization of the power spectrum}
 \label{sec:PSnorm}
 
-There are two alternative schemes for normalization of the matter power spectrum. The first one is to specify the value of $A_s$, the amplitude of the primordial power spectrum, which is passed directly to {\tt CLASS}. This option is available in the case of the linear/nonlinear matter power spectrum implementation. For these, as well as for BBKS, there is the additional option to set the normalization of the matter power spectrum by specifying $\sigma_8$, the RMS density constrast averaged over spheres of radius $8h^{-1}$Mpc. {\bf make sure we document how to use each option.} The computation of $\sigma_8$ is described in Section \ref{sec:hmf}
+There are two alternative schemes for normalization of the matter power spectrum. The first one is to specify the value of $A_s$, the amplitude of the primordial power spectrum, which is passed directly to {\tt CLASS}. This option is available in the case of the linear/nonlinear matter power spectrum implementation. For these, as well as for BBKS, there is the additional option to set the normalization of the matter power spectrum by specifying $\sigma_8$, the RMS density constrast averaged over spheres of radius $8h^{-1}$Mpc. The computation of $\sigma_8$ is described in Section \ref{sec:hmf}
 
 \subsection{Angular power spectra}
 \label{sec:cl}
@@ -423,7 +422,7 @@ This function is directly implemented in {\tt CCL} as well as a specific $\sigma
 The \citet{Tinker2010} model parameterizes both the halo mass function and the halo bias in terms of the peak height, $\nu = \delta_c / \sigma(M)$, where $\delta_c$ is the critical density for collapse and is chosen to be $1.686$ for this particular parameterization. We can then parameterize the halo function and halo bias as
 \begin{equation}
   \b(\nu) = 1 - A\frac{\nu^a}{\nu^a + {\delta_c}^a} + B\nu^b+C\nu^c,
-  \f(\nu) = \alpha[1+(\beta\nu)^{-2\phi}]\nu^{2\eta}e(-\gamma\nu^2/2).
+  f(\nu) = \alpha[1+(\beta\nu)^{-2\phi}]\nu^{2\eta}e(-\gamma\nu^2/2).
 \end{equation}
 The currently implemented model in {\tt CCL} does not account for changes in halo definition, though this remains an area of active work to improve upon.
 
@@ -567,7 +566,7 @@ A Python wrapper for {\tt CCL} is provided through a module called {\tt pyccl}. 
 \subsection{Python installation}
 \label{sec:python:install}
 
-At the moment, {\tt pyccl} needs to be compiled separately from the main {\tt CCL} library. The wrapper's build tools currently assume that your C compiler is {\tt gcc} (with OpenMP enabled), and that you have a working Python 2.x installation with {\tt numpy} and {\tt distutils} with {\tt swig}. To build and install the {\tt pyccl} module, go to the root {\tt CCL} directory and choose one of the following options:
+Before you can build the Python wrapper, you must have compiled and installed the C version of {\tt CCL}, as {\tt pyccl} will be dynamically linked to it. The Python wrapper's build tools currently assume that your C compiler is {\tt gcc} (with OpenMP enabled), and that you have a working Python 2.x installation with {\tt numpy} and {\tt distutils} with {\tt swig}. To build and install the {\tt pyccl} module, go to the root {\tt CCL} directory and choose one of the following options:
 \begin{itemize}
  \item To build and install the wrapper for the current user only, run \\
  {\tt \$ python setup.py install --user}
@@ -577,6 +576,14 @@ At the moment, {\tt pyccl} needs to be compiled separately from the main {\tt CC
  {\tt \$ python setup.py build\_ext --inplace}
 \end{itemize}
 If you choose either of the first two options, the {\tt pyccl} module will be installed into a sensible location in your {\tt PYTHONPATH}, and so should be automatically picked up by your Python interpreter. You can then simply import the module using {\tt import pyccl}. If you use the last option, however, you must either start your interpreter from the root {\tt CCL} directory, or manually add the root {\tt CCL} directory to your {\tt PYTHONPATH}.
+
+These options assume that the C library ({\tt libccl}) has been installed somewhere in the default library path. If this isn't the case, you will need to tell the Python build tools where to find the library. This can be achieved by running the following command first, before any of the commands above:
+
+\texttt{python setup.py build\_ext --library-dirs=/path/to/lib/ --rpath=/path/to/lib/}
+
+Here, {\tt /path/to/lib/} should point to the directory where you installed the C library. For example, if you ran {\tt ./configure --prefix=/my/path/} before you compiled the C library, the correct path would be {\tt /my/path/lib/}. The command above will build the Python wrapper in-place; you can then run one of the {\tt install} commands, as listed above, to actually install the wrapper. Note that the {\tt rpath} switch makes sure that the CCL C library can be found at runtime, even if it is not in the default library path. If you use this option, there should therefore be no need to modify the library path yourself.
+
+You can quickly check whether {\tt pyccl} has been installed correctly by running {\tt python -c "import pyccl"} and checking that no errors are returned. For a more in-depth test to make sure everything is working, change to the {\tt tests/} sub-directory and run {\tt python run\_tests.py}. These tests will take a few minutes.
 
 \subsection{Python example}
 \label{sec:python:example}
@@ -590,7 +597,7 @@ import pyccl as ccl
 import numpy as np
 
 # Create new Parameters object, containing cosmo parameter values
-p = ccl.Parameters(Omega_c=0.27, Omega_b=0.045, h=0.67, A_s=1e-10, n_s=0.96)
+p = ccl.Parameters(Omega_c=0.27, Omega_b=0.045, h=0.67, A_s=2e-9, n_s=0.96)
 
 # Create new Cosmology object with these parameters. This keeps track of 
 # previously-computed cosmological functions
@@ -614,12 +621,10 @@ print cls
 \subsection{Technical notes on how the Python wrapper is implemented}
 \label{sec:python:technical}
 
-The Python wrapper is built using the {\tt swig} tool, which automatically scans the {\tt CCL} C headers and builds a matching interface in Python. The default autogenerated {\tt swig} interface can be accessed through the {\tt pyccl.lib} module if necessary. A more user-friendly wrapper has been written on top of this to provide more structure to the module, allow {\tt numpy} vectorization, and provide more natural Python objects to use (instead of opaque {\tt swig}-generate objects).
+The Python wrapper is built using the {\tt swig} tool, which automatically scans the {\tt CCL} C headers and builds a matching interface in Python. The default autogenerated {\tt swig} interface can be accessed through the {\tt pyccl.lib} module if necessary. A more user-friendly wrapper has been written on top of this to provide more structure to the module, allow {\tt numpy} vectorization, and provide more natural Python objects to use (instead of opaque {\tt swig}-generated objects).
 
 The key parts of the wrapper are as follows:
-\paragraph{{\tt setup.py}} This instructs {\tt swig} and other build tools on how to find the right source files and set compile-time variables correctly.
-
-Some of the default {\tt setup.py} behavior has been overridden, to allow the CLASS-dependent components of {\tt CCL} to be built correctly. This is necessary because CLASS requires the variable {\tt \_\_CLASSDIR\_\_} to be set at compile-time. This variable contains the path to the root directory containing various data files needed by CLASS. If it is not set to the location where these files will eventually be installed, a segfault will occur whenever any CLASS functions are accessed inside the wrapper. The {\tt setup.py} script handles finding the (system-dependent) installation location, installing the data files there, and passing the correct option to the compiler when the CLASS sources are compiled.
+\paragraph{{\tt setup.py}} This instructs {\tt swig} and other build tools on how to find the right source files and set compile-time variables correctly. Most of this information is provided by header files and SWIG interface files that are included through the {\tt pyccl/ccl.i} interface file.
 
 Note that certain compiler flags, like {\tt -fopenmp}, are also set in {\tt setup.py}. If you are not using {\tt gcc}, you may need to modify these flags (see the {\tt extra\_compile\_args} argument of the {\tt setup()} function).
 
@@ -635,7 +640,10 @@ Individual sub-modules from {\tt CCL} are wrapped in their own Python scripts (e
 
 \paragraph{Auto-generated wrapper files} The {\tt swig} command is triggered when you run {\tt setup.py}, and automatically generates a number of C and Python wrapper files in the {\tt pyccl/} directory. These typically have names like {\tt ccl\_*.c} and {\tt ccl\_*.py}, and should not be edited directly, as {\tt swig} will overwrite them when it next runs.
 
-The build process will also create a {\tt pyccl/ccllib.py} file, which is the raw autogenerated Python interface, and {\tt \_ccllib.so}, which is a C library containing all of the C functions and their Python bindings. A {\tt build/} directory and {\tt pyccl.egg-info/} directory will also be created in the same directory as {\tt setup.py} when you compile {\tt pyccl}. These (plus the {\tt pyccl/\_ccllib.so} file) should be removed if you want to do a clean recompilation. Running {\tt python setup.py clean} will remove some, but not all, of the generated files.
+\paragraph{{\tt pyccl/pyutils.py}} This file contains several generic helper functions for passing {\tt numpy} arrays in and out of Python functions in a convenient way, and for performing error checking and some type conversions.
+
+The build process will also create a {\tt pyccl/ccllib.py} file, which is the raw autogenerated Python interface, and {\tt \_ccllib.so}, which is a C library containing all of the C functions and their Python bindings. A {\tt build/} directory and {\tt pyccl.egg-info/} directory will also be created in the same directory as {\tt setup.py} when you compile {\tt pyccl}. These (plus the {\tt pyccl/\_ccllib.so} file) should be removed if you want to do a clean recompilation. Running {\tt python setup.py clean --all} will remove some, but not all, of the generated files.
+
 
 \section{Future functionality to be included}
 \label{sec:future}
@@ -646,6 +654,7 @@ In the future, we hope that {\tt CCL} will include other functionalities. Functi
 	\item the non-Limber capability,
 	\item a link to FAST-PT \citep{FASTPT} for implementation of perturbation theory,
 	\item a photo-z model,
+	\item support for cosmologies with neutrinos,
 	\item and more power spectrum methods (see \ref{Pk_whishlist}).
 \end{itemize}
 

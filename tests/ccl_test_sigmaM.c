@@ -60,6 +60,7 @@ static void compare_sigmam(int i_model,struct sigmam_data * data)
   int nm,i,j;
   char fname[256],str[1024];
   FILE *f;
+  int status=0;
   ccl_configuration config = default_config;
   config.transfer_function_method = ccl_bbks;
   ccl_parameters params = ccl_parameters_create(data->Omega_c,data->Omega_b,data->Omega_k[i_model-1],data->N_nu_rel, data->N_nu_mass, data->mnu,data->w_0[i_model-1],data->w_a[i_model-1],data->h,data->A_s,data->n_s,-1,NULL,NULL);
@@ -85,7 +86,8 @@ static void compare_sigmam(int i_model,struct sigmam_data * data)
       exit(1);
     }
     m=m_h/data->h;
-    sm_h=ccl_sigmaM(cosmo,m,0.);
+    sm_h=ccl_sigmaM(cosmo,m,0.,&status);
+    if (status) printf("%s\n",cosmo->status_message);
     err=sm_h/sm_bench-1;
     //printf("%le\n", err);
     ASSERT_DBL_NEAR_TOL(err,0.,1E-4);

@@ -32,11 +32,12 @@ make check
 ```
 
 ## Known installation issues
-1. You need to link to GSL-2 in your local version of the Makefile.
-2. Sometimes, "make check" can fail. In that case, go to `tests/ccl_test.c` and comment out `define CTEST_SEGFAULT`
+1. If you move or delete the source directory after installing CCL, some functions may fail. The source directory contains files needed by *CLASS* (which is contained within CCL) at run-time.
 
 ## Python wrapper installation
-A Python wrapper for CCL is provided through a module called *pyccl*. At the moment, *pyccl* needs to be compiled separately from the main CCL library. The wrapper’s build tools currently assume that your C compiler is *gcc* (with OpenMP enabled), and that you have a working Python 2.x installation with *numpy* and *distutils* with *swig*. To build and install the *pyccl* module, go to the root CCL directory and choose one of the following options:
+The Python wrapper is called *pyccl*. Before you can build it, you must have compiled and installed the C version of CCL, as *pyccl* will be dynamically linked to it. The Python wrapper's build tools currently assume that your C compiler is *gcc* (with OpenMP enabled), and that you have a working Python 2.x installation with *numpy* and *distutils* with *swig*.
+
+To build and install the *pyccl* module, go to the root CCL source directory and choose one of the following options:
 
 * To build and install the wrapper for the current user only, run
 ````sh
@@ -50,7 +51,15 @@ sudo python setup.py install
 ````sh
 python setup.py build_ext --inplace
 ````
-If you choose either of the first two options, the *pyccl* module will be installed into a sensible location in your *PYTHONPATH*, and so should be automatically picked up by your Python interpreter. You can then simply import the module using *import pyccl*. If you use the last option, however, you must either start your interpreter from the root CCL directory, or manually add the root CCL directory to your *PYTHONPATH*.
+If you choose either of the first two options, the *pyccl* module will be installed into a sensible location in your *PYTHONPATH*, and so should be automatically picked up by your Python interpreter. You can then simply import the module using `import pyccl`. If you use the last option, however, you must either start your interpreter from the root CCL directory, or manually add the root CCL directory to your *PYTHONPATH*.
+
+These options assume that the C library (`libccl`) has been installed somewhere in the default library path. If this isn’t the case, you will need to tell the Python build tools where to find the library. This can be achieved by running the following command first, before any of the commands above:
+````sh
+python setup.py build_ext --library-dirs=/path/to/install/lib/ --rpath=/path/to/install/lib/
+````
+Here, `/path/to/install/lib/` should point to the directory where you installed the C library. For example, if you ran `./configure --prefix=/path/to/install/` before you compiled the C library, the correct path would be `/path/to/install/lib/`. The command above will build the Python wrapper in-place; you can then run one of the install commands, as listed above, to actually install the wrapper. Note that the `rpath` switch makes sure that the CCL C library can be found at runtime, even if it is not in the default library path. If you use this option, there should therefore be no need to modify the library path yourself.
+
+You can quickly check whether *pyccl* has been installed correctly by running `python -c "import pyccl"` and checking that no errors are returned. For a more in-depth test to make sure everything is working, change to the `tests/` sub-directory and run `python run_tests.py`. These tests will take a few minutes.
 
 
 # Documentation
@@ -194,7 +203,7 @@ void ccl_specs_free_photoz_info(user_pz_info *my_photoz_info);
 ## Example code
 This code can also be found in *tests/ccl_sample_run.c* You can run the following example code. For this you will need to compile with the following command:
 ````sh
-gcc -Wall -Wpedantic -g -I/path/to/install/header -std=gnu99 -fPIC tests/ccl_sample_run.c 
+gcc -Wall -Wpedantic -g -I/path/to/install/include -std=gnu99 -fPIC tests/ccl_sample_run.c \
 -o tests/ccl_sample_run -L/path/to/install/lib -L/usr/local/lib -lgsl -lgslcblas -lm -lccl
 ````
 where */path/to/install/* is the path to the location where the library has been installed.
@@ -222,11 +231,18 @@ where */path/to/install/* is the path to the location where the library has been
 #define Z0_SH 0.65
 #define SZ_SH 0.05
 #define NL 512
-#define PS 0.1 
 
-double pz_func_example (double photo_z, double spec_z, void *param){
-	double delta_z = photo_z - spec_z;
-	return 1.0 / sqrt(PS*2*M_PI) * exp(-delta_z*delta_z / (2.0 * PS));
+// The user defines a structure of parameters to the user-defined function for the photo-z probability 
+struct user_func_params
+{
+	double (* sigma_z) (double);
+};
+
+// The user defines a function of the form double function ( z_ph, z_spec, void * user_pz_params) where user_pz_params is a pointer to the parameters of the user-defined function. This returns the probabilty of obtaining a given photo-z given a particular spec_z.
+double user_pz_probability(double z_ph, double z_s, void * user_par)
+{
+        struct user_func_params * p = (struct user_func_params *) user_par;
+        return exp(- (z_ph-z_s)*(z_ph-z_s) / (2.*(p->sigma_z(z_s))*(p->sigma_z(z_s)))) / (pow(2.*M_PI,0.5)*(p->sigma_z(z_s))*(p->sigma_z(z_s)));
 }
 
 int main(int argc,char **argv){
@@ -303,7 +319,15 @@ int main(int argc,char **argv){
 	printf("\n");
 
 	// LSST Specification
-	user_pz_info* pz_info_example = ccl_specs_create_photoz_info(NULL, pz_func_example);
+	// The user declares and sets an instance of parameters to their photo_z function:
+	struct user_func_params my_params_example;
+	my_params_example.sigma_z = ccl_specs_sigmaz_sources;
+
+	// Declare a variable of the type of user_pz_info to hold the struct to be created.
+	user_pz_info * pz_info_example;
+
+	// Create the struct to hold the user information about photo_z's.
+	pz_info_example = ccl_specs_create_photoz_info(&my_params_example, &user_pz_probability); 
 	
 	double z_test;
 	double dNdz_tomo;
@@ -328,7 +352,7 @@ int main(int argc,char **argv){
 	fclose(output);
 
 	//Try splitting dNdz (clustering) into 5 redshift bins
-	printf("Trying splitting dNdz (clustering) into 5 redshift bins. Output written into file tests/specs_example_tomo_lens.out\n");
+	printf("Trying splitting dNdz (clustering) into 5 redshift bins. Output written into file tests/specs_example_tomo_clu.out\n");
 	output = fopen("./tests/specs_example_tomo_clu.out", "w");     
 	for (z=0; z<100; z=z+1){
 		z_test = 0.035*z;
@@ -351,7 +375,6 @@ int main(int argc,char **argv){
 
 	return 0;
 }
-
 ````
 
 ## Python wrapper

@@ -51,9 +51,9 @@ TASK: Return b(z), the bias of the clustering sample.
       This is input from LSS group.
 TODO: Check normalization of growth is consistent with LSS input.
 */
-double ccl_specs_bias_clustering(ccl_cosmology * cosmo, double a)
+double ccl_specs_bias_clustering(ccl_cosmology * cosmo, double a, int * status)
 {
-  double D = ccl_growth_factor(cosmo, a);
+  double D = ccl_growth_factor(cosmo, a, status);
   return 0.95/D;
 }
 

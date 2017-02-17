@@ -132,6 +132,6 @@ ccl_parameters ccl_parameters_create_lcdm_nu(double Omega_c, double Omega_b, dou
 
 void ccl_cosmology_free(ccl_cosmology * cosmo);
 
-void ccl_cosmology_compute_distances(ccl_cosmology * cosmo);
-void ccl_cosmology_compute_growth(ccl_cosmology * cosmo);
-void ccl_cosmology_compute_power(ccl_cosmology * cosmo);
+void ccl_cosmology_compute_distances(ccl_cosmology * cosmo,int *status);
+void ccl_cosmology_compute_growth(ccl_cosmology * cosmo, int * status);
+void ccl_cosmology_compute_power(ccl_cosmology * cosmo, int* status);
