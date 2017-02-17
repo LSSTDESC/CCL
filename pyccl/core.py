@@ -45,12 +45,33 @@ error_types = {
 
 
 class Parameters(object):
+    """The Parameters class contains cosmological parameters.
+
+    """
     
     def __init__(self, Omega_c=None, Omega_b=None, h=None, A_s=None, n_s=None, 
                  Omega_k=0., Omega_n=0., w0=-1., wa=0., sigma8=None,
                  zarr_mgrowth=None, dfarr_mgrowth=None):
-        """
-        Class containing a set of cosmological parameters.
+        """The __init__ method for the Parameters class.
+
+        Note:
+            Although some arguments default to `None`, they will raise
+            a ValueError inside this function, so they are not optional.
+        
+        Args:
+            Omega_c (float): Cold dark matter density fraction.
+            Omega_b (float): Baryonic matter density fraction.
+            h (float): Hubble constant divided by 100 km/s/Mpc; unitless.
+            A_s (float): Power spectrum normalization; Mpc^-3 CHECKTHIS - PHIL BULL. Optional if sigma8 is specified.
+            n_s (float): Power spectrum index.
+            Omega_k (float, optional): Curvature density fraction. Defaults to 0.
+            Omega_n (float, optional): Massless neutrino density fracton. Defaults to 0.
+            w0 (float, optional): First order term of dark energy equation of state. Defaults to -1.
+            wa (float, optional): Second order term of dark energy equation of state. Defaults to 0.
+            sigma8 (float): Mass variance at 8 Mpc scale. Optional if A_s is specified.
+            zarr_mgrowth (UNKNOWN): UNKNOWN - PHIL BULL.
+            dfarr_mgrowth (UNKNOWN): UNKNOWN - PHIL BULL.
+
         """
         # Set current ccl_parameters object to None
         self.parameters = None
