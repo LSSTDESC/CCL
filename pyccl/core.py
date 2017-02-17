@@ -175,18 +175,28 @@ class Parameters(object):
         string = "Parameters\n----------\n"
         string += "\n".join(vals)
         return string
-        
 
 
 class Cosmology(object):
+    """Wrapper for the ccl_cosmology object.
+
+    Includes cosmological parameters and cached data.
+
+    """
     
     def __init__(self, params, config=None, 
                  transfer_function='boltzmann_class',
                  matter_power_spectrum='halofit',
                  mass_function='tinker'):
-        """
-        Class containing a ccl_cosmology object, including cosmological 
-        parameters and cached data.
+        """Creates a wrapper for ccl_cosmology.
+
+        Args:
+            params (:obj:`Parameters`): Cosmological parameters object.
+            config (:obj:`ccl_configuration`, optional): Configuration for how to use CCL. Takes precident over any other passed in configuration. Defaults to None.
+            transfer_function (:obj:`str`, optional): The transfer function to use. Defaults to `boltzmann_class`.
+            matter_power_spectrum (:obj:`str`, optional): The matter power spectrum to use. Defaults to `halofit`.
+            mass_function (:obj:`str`, optional): The mass function to use. Defaults to `tinker` (2010).
+
         """
         # Check the type of the input params object
         if isinstance(params, lib.parameters):
@@ -253,14 +263,16 @@ class Cosmology(object):
                                % (self.cosmo.status, self.cosmo.status_message))
     
     def __del__(self):
-        """
-        Free the ccl_cosmology instance that this Cosmology object is managing.
+        """Free the ccl_cosmology instance that this Cosmology object is managing.
+
         """
         lib.cosmology_free(self.cosmo)
     
     def __str__(self):
-        """
-        Output the cosmological parameters that were set, and their values.
+        """Output the cosmological parameters that were set, and their values,
+        as well as the status of precomputed quantities and the internal CCL
+        status.
+
         """
         # String of cosmo parameters, from self.params (Parameters object)
         param_str = self.params.__str__()
@@ -287,37 +299,79 @@ class Cosmology(object):
         return string
     
     def __getitem__(self, key):
-        """
-        Access cosmological parameter values by name.
+        """Access cosmological parameter values by name.
+
         """
         return self.params.__getitem__(key)
     
     def compute_distances(self):
+        """Interfaces with src/compute_background.c: ccl_cosmology_compute_distances().
+        Sets up the splines for the distances.
+
+        """
         lib.cosmology_compute_distances(self.cosmo)
+        return
     
     def compute_growth(self):
+        """Interfaces with src/ccl_background.c: ccl_cosmology_compute_growth().
+        Sets up the splines for the growth function.
+
+        """
         lib.cosmology_compute_growth(self.cosmo)
+        return
     
     def compute_power(self):
+        """Interfaces with src/ccl_power.c: ccl_cosmology_compute_power().
+        Sets up the splines for the power spectrum.
+
+        """
         lib.cosmology_compute_power(self.cosmo)
-    
-    # Check which data have been precomputed
+        return
+
     def has_distances(self):
+        """Checks if the distances have been precomputed.
+
+        Returns:
+            True if precomputed, False otherwise.
+
+        """
         return bool(self.cosmo.computed_distances)
     
     def has_growth(self):
+        """Checks if the growth function has been precomputed.
+
+        Returns:
+            True if precomputed, False otherwise.
+
+        """
         return bool(self.cosmo.computed_growth)
     
     def has_power(self):
+        """Checks if the power spectra have been precomputed.
+
+        Returns:
+            True if precomputed, False otherwise.
+
+        """
         return bool(self.cosmo.computed_power)
     
     def has_sigma(self):
+        """Checks if sigma8 has been computed.
+
+        Returns:
+            True if precomputed, False otherwise.
+
+        """
         return bool(self.cosmo.computed_sigma)
     
-    # Return status (for error checking)
     def status(self):
-        """
-        Get error status of the ccl_cosmology object.
+        """Get error status of the ccl_cosmology object.
+
+        Note: error status is all currently under development.
+
+        Returns:
+            :obj:`str` containing the status message.
+
         """
         # Get status ID string if one exists
         if self.cosmo.status in error_types.keys():
