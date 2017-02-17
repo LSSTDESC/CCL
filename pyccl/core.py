@@ -52,7 +52,7 @@ class Parameters(object):
     def __init__(self, Omega_c=None, Omega_b=None, h=None, A_s=None, n_s=None, 
                  Omega_k=0., Omega_n=0., w0=-1., wa=0., sigma8=None,
                  zarr_mgrowth=None, dfarr_mgrowth=None):
-        """The __init__ method for the Parameters class.
+        """Creates a set of cosmological parameters.
 
         Note:
             Although some arguments default to `None`, they will raise
@@ -136,8 +136,8 @@ class Parameters(object):
                                     zarr_mgrowth, dfarr_mgrowth)
     
     def __getitem__(self, key):
-        """
-        Access parameter values by name.
+        """Access parameter values by name.
+
         """
         try:
             val = getattr(self.parameters, key)
@@ -146,8 +146,8 @@ class Parameters(object):
         return val
     
     def __setitem__(self, key, val):
-        """
-        Set parameter values by name.
+        """Set parameter values by name.
+
         """
         raise NotImplementedError("Parameters objects are immutable; create a "
                                   "new Parameters() instance instead.")
@@ -164,8 +164,8 @@ class Parameters(object):
         # FIXME: Should update/replace CCL objects appropriately
     
     def __str__(self):
-        """
-        Output the parameters that were set, and their values.
+        """Output the parameters that were set, and their values.
+
         """
         params = ['Omega_c', 'Omega_b', 'Omega_m', 'Omega_n', 'Omega_k', 
                   'w0', 'wa', 'H0', 'h', 'A_s', 'n_s', 'Omega_g', 'T_CMB', 
