@@ -86,7 +86,7 @@ static void compare_sigmam(int i_model,struct sigmam_data * data)
       exit(1);
     }
     m=m_h/data->h;
-    sm_h=ccl_sigmaM(cosmo,m,0.,&status);
+    sm_h=ccl_sigmaM(cosmo,m,1.,&status);
     if (status) printf("%s\n",cosmo->status_message);
     err=sm_h/sm_bench-1;
     //printf("%le\n", err);

@@ -13,31 +13,32 @@
 #include "ccl_error.h"
 
 /*----- ROUTINE: ccl_massfunc_f -----
-INPUT: cosmology+parameters, a smoothing mass, and a redshift
+INPUT: cosmology+parameters, a smoothing mass, and scale factor
 TASK: Outputs fitting function for use in halo mass function calculation;
   currently only supports:
     ccl_tinker (arxiv 0803.2706 )
+    ccl_tinker10 (arxiv ???    )
     ccl_angulo (arxiv 1203.3216 ) 
     ccl_watson (arxiv 1212.0095 )
 */
 
-static double massfunc_f(ccl_cosmology *cosmo, double smooth_mass,double redshift, int * status)
+static double massfunc_f(ccl_cosmology *cosmo, double smooth_mass,double a, int * status)
 {
   double fit_A, fit_a, fit_b, fit_c, fit_d, overdensity_delta;
-  double scale, Omega_m_z;
+  double Omega_m_z;
   double delta_c_Tinker, nu;
 
-  double sigma=ccl_sigmaM(cosmo,smooth_mass,redshift, status);
+  double sigma=ccl_sigmaM(cosmo, smooth_mass, a, status);
 
   switch(cosmo->config.mass_function_method){
   case ccl_tinker:
     
     //TODO: maybe use macros for numbers
     overdensity_delta = 200.0;
-    fit_A = 0.186*pow(1+redshift, -0.14);
-    fit_a = 1.47*pow(1+redshift, -0.06);
+    fit_A = 0.186*pow(a, 0.14);
+    fit_a = 1.47*pow(a, 0.06);
     fit_d = pow(10, -1.0*pow(0.75 / log10(overdensity_delta / 75.0), 1.2 ));
-    fit_b = 2.57*pow(1+redshift, -1.0*fit_d);
+    fit_b = 2.57*pow(a, 1.0*fit_d);
     fit_c = 1.19;
 
     return fit_A*(pow(sigma/fit_b,-fit_a)+1.0)*exp(-fit_c/sigma/sigma);
@@ -52,21 +53,20 @@ static double massfunc_f(ccl_cosmology *cosmo, double smooth_mass,double redshif
     nu = delta_c_Tinker/(sigma);
 
     fit_A = 0.368; //alpha in Eq. 8
-    fit_a = -0.243*pow(1+redshift, 0.27); //eta in Eq. 8
-    fit_b = 0.589*pow(1+redshift, 0.20); //beta in Eq. 8
-    fit_c = 0.864*pow(1+redshift, -0.01); //gamma in Eq. 8
-    fit_d = -0.729*pow(1+redshift, -0.08); //phi in Eq. 8;
+    fit_a = -0.243*pow(a, -0.27); //eta in Eq. 8
+    fit_b = 0.589*pow(a, -0.20); //beta in Eq. 8
+    fit_c = 0.864*pow(a, 0.01); //gamma in Eq. 8
+    fit_d = -0.729*pow(a, 0.08); //phi in Eq. 8;
 
     return nu*fit_A*(1.+pow(fit_b*nu,-2.*fit_d))*pow(nu, 2.*fit_a)*exp(-0.5*fit_c*nu*nu);
     break;
 
   case ccl_watson:
-    scale = 1.0/(1.0+redshift);
-    Omega_m_z = ccl_omega_m_z(cosmo, scale);
+    Omega_m_z = ccl_omega_m_z(cosmo, a);
     
-    fit_A = Omega_m_z*(0.990*pow(1+redshift,-3.216)+0.074);
-    fit_a = Omega_m_z*(5.907*pow(1+redshift,-3.599)+2.344);
-    fit_b = Omega_m_z*(3.136*pow(1+redshift,-3.058)+2.349);
+    fit_A = Omega_m_z*(0.990*pow(a,3.216)+0.074);
+    fit_a = Omega_m_z*(5.907*pow(a,3.599)+2.344);
+    fit_b = Omega_m_z*(3.136*pow(a,3.058)+2.349);
     fit_c = 1.318;
 
     return fit_A*(pow(sigma/fit_b,-fit_a)+1.0)*exp(-fit_c/sigma/sigma);
@@ -87,12 +87,12 @@ static double massfunc_f(ccl_cosmology *cosmo, double smooth_mass,double redshif
     return 0;
   }
 }
-static double ccl_halo_b1(ccl_cosmology *cosmo, double smooth_mass,double redshift, int * status)
+static double ccl_halo_b1(ccl_cosmology *cosmo, double smooth_mass,double a, int * status)
 {
   double fit_A, fit_B, fit_C, fit_a, fit_b, fit_c, overdensity_delta, y;
-  double scale, Omega_m_z;
+  double Omega_m_z;
   double delta_c_Tinker, nu;
-  double sigma=ccl_sigmaM(cosmo,smooth_mass,redshift, status);
+  double sigma=ccl_sigmaM(cosmo,smooth_mass,a, status);
   switch(cosmo->config.mass_function_method){
 
     //this version uses b(nu) parameterization, Eq. 6 in Tinker et al. 2010
@@ -200,11 +200,11 @@ void ccl_cosmology_compute_sigma(ccl_cosmology * cosmo, int *status)
 }
 
 /*----- ROUTINE: ccl_massfunc -----
-INPUT: ccl_cosmology * cosmo, double smoothing mass in units of Msun, double redshift
+INPUT: ccl_cosmology * cosmo, double smoothing mass in units of Msun, double scale factor
 TASK: returns halo mass function as dn / dlog10 m
 */
 
-double ccl_massfunc(ccl_cosmology *cosmo, double smooth_mass, double redshift, int * status)
+double ccl_massfunc(ccl_cosmology *cosmo, double smooth_mass, double a, int * status)
 {
   if (!cosmo->computed_sigma){
     ccl_cosmology_compute_sigma(cosmo, status);
@@ -215,17 +215,17 @@ double ccl_massfunc(ccl_cosmology *cosmo, double smooth_mass, double redshift, i
   
   logmass = log10(smooth_mass);
   rho_m = RHO_CRITICAL*cosmo->params.Omega_m*cosmo->params.h*cosmo->params.h;
-  f=massfunc_f(cosmo,smooth_mass,redshift, status);
+  f=massfunc_f(cosmo,smooth_mass,a, status);
   deriv = gsl_spline_eval(cosmo->data.dlnsigma_dlogm, logmass, cosmo->data.accelerator_m);
   return f*rho_m*deriv/smooth_mass;
 }
 
 /*----- ROUTINE: ccl_halob1 -----
-INPUT: ccl_cosmology * cosmo, double smoothing mass in units of Msun, double redshift
+INPUT: ccl_cosmology * cosmo, double smoothing mass in units of Msun, double scale factor
 TASK: returns linear halo bias
 */
 
-double ccl_halo_bias(ccl_cosmology *cosmo, double smooth_mass, double redshift, int * status)
+double ccl_halo_bias(ccl_cosmology *cosmo, double smooth_mass, double a, int * status)
 {
   if (!cosmo->computed_sigma){
     ccl_cosmology_compute_sigma(cosmo, status);
@@ -233,7 +233,7 @@ double ccl_halo_bias(ccl_cosmology *cosmo, double smooth_mass, double redshift, 
   }
 
   double f;
-  f = ccl_halo_b1(cosmo,smooth_mass,redshift, status);  
+  f = ccl_halo_b1(cosmo,smooth_mass,a, status);  
   ccl_check_status(cosmo, status);  
   return f;
 }
@@ -255,12 +255,12 @@ double ccl_massfunc_m2r(ccl_cosmology * cosmo, double smooth_mass, int * status)
 }
 
 /*----- ROUTINE: ccl_sigma_M -----
-INPUT: ccl_cosmology * cosmo, double smoothing mass in units of Msun, double redshift
+INPUT: ccl_cosmology * cosmo, double smoothing mass in units of Msun, double scale factor
 TASK: returns sigma from the sigmaM interpolation. Also computes the sigma interpolation if
 necessary.
 */
 
-double ccl_sigmaM(ccl_cosmology * cosmo, double smooth_mass, double redshift, int * status)
+double ccl_sigmaM(ccl_cosmology * cosmo, double smooth_mass, double a, int * status)
 {
     double sigmaM;
 
@@ -270,7 +270,7 @@ double ccl_sigmaM(ccl_cosmology * cosmo, double smooth_mass, double redshift, in
     }
 
     sigmaM = pow(10,gsl_spline_eval(cosmo->data.logsigma, log10(smooth_mass), cosmo->data.accelerator_m));
-    sigmaM = sigmaM*ccl_growth_factor(cosmo, 1.0/(1.0+redshift), status);
+    sigmaM = sigmaM*ccl_growth_factor(cosmo, a, status);
 
     return sigmaM;
 }
