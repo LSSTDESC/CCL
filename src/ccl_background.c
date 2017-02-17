@@ -27,12 +27,53 @@ static double h_over_h0(double a, ccl_parameters * params)
 
 /* --------- ROUTINE: ccl_omega_m_z ---------
 INPUT: cosmology object, scale factor
-TASK: Compute Omega_m(z)
+TASK: Compute Omega_m(a)
 */
 double ccl_omega_m_z(ccl_cosmology * cosmo, double a)
 {
   return cosmo->params.Omega_m/(cosmo->params.Omega_m+cosmo->params.Omega_l*pow(a,-3*(cosmo->params.w0+cosmo->params.wa))*
-			  exp(3*cosmo->params.wa*(a-1))+cosmo->params.Omega_k*a);
+	 exp(3*cosmo->params.wa*(a-1))+cosmo->params.Omega_k*a+cosmo->params.Omega_g/a);
+}
+
+/* --------- ROUTINE: ccl_omega_l_z ---------
+INPUT: cosmology object, scale factor
+TASK: Compute Omega_l(a)
+*/
+double ccl_omega_l_z(ccl_cosmology * cosmo, double a)
+{
+  return cosmo->params.Omega_l*pow(a,-3*(cosmo->params.w0+cosmo->params.wa))*
+    exp(3*cosmo->params.wa*(a-1))/(cosmo->params.Omega_m+
+	     cosmo->params.Omega_l*pow(a,-3*(cosmo->params.w0+cosmo->params.wa))*
+	     exp(3*cosmo->params.wa*(a-1))+cosmo->params.Omega_k*a+cosmo->params.Omega_g/a);
+}
+
+/* --------- ROUTINE: ccl_omega_g_z ---------
+INPUT: cosmology object, scale factor
+TASK: Compute Omega_g(a)
+*/
+double ccl_omega_g_z(ccl_cosmology * cosmo, double a)
+{
+  return cosmo->params.Omega_g/(cosmo->params.Omega_m*a+cosmo->params.Omega_l*pow(a,-3*(cosmo->params.w0+cosmo->params.wa))*
+	 exp(3*cosmo->params.wa*(a-1))*a+cosmo->params.Omega_k*a*a+cosmo->params.Omega_g);
+}
+
+/* --------- ROUTINE: ccl_omega_k_z ---------
+INPUT: cosmology object, scale factor
+TASK: Compute Omega_k(a)
+*/
+double ccl_omega_k_z(ccl_cosmology * cosmo, double a)
+{
+  return cosmo->params.Omega_k*a/(cosmo->params.Omega_m+cosmo->params.Omega_l*pow(a,-3*(cosmo->params.w0+cosmo->params.wa))*
+	 exp(3*cosmo->params.wa*(a-1))+cosmo->params.Omega_k*a+cosmo->params.Omega_g/a);
+}
+
+/* --------- ROUTINE: ccl_omega_tot_z ---------
+INPUT: cosmology object, scale factor
+TASK: Compute Omega_tot(a)
+*/
+double ccl_omega_tot_z(ccl_cosmology * cosmo, double a)
+{
+  return ccl_omega_m_z(cosmo,a)+ccl_omega_l_z(cosmo,a)+ccl_omega_k_z(cosmo,a)+ccl_omega_g_z(cosmo,a);
 }
 
 /* --------- ROUTINE: chi_integrand ---------
