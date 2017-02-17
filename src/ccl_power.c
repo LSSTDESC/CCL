@@ -284,6 +284,9 @@ static void ccl_fill_class_parameters(ccl_cosmology * cosmo, struct file_content
   if (cosmo->params.N_nu_rel > 1.e-4){
     strcpy(fc->name[14],"N_ur");
     sprintf(fc->value[14],"%e",cosmo->params.N_nu_rel);
+  }else{
+    strcpy(fc->name[14],"N_ur");
+    sprintf(fc->value[14],"%e", 0.);
   }
   if (cosmo->params.N_nu_mass > 0){
     strcpy(fc->name[15],"N_ncdm");
@@ -296,11 +299,7 @@ static void ccl_fill_class_parameters(ccl_cosmology * cosmo, struct file_content
       sprintf(tmp,", %e",cosmo->params.mnu/cosmo->params.N_nu_mass);
       strcat(fc->value[16],tmp);
     }
-    printf("\n\nneutrino masses passed to CLASS: %s\n\n",fc->value[16]);
-    printf("\n\nNur masses passed to CLASS: %s\n\n",fc->value[14]);
-    printf("\n\nNncdm passed to CLASS: %s\n\n",fc->value[15]);
-
-  
+   
   }
   //normalization comes last, so that all other parameters are filled in for determining A_s if sigma_8 is specified
   if (isfinite(cosmo->params.sigma_8) && isfinite(cosmo->params.A_s)){
@@ -349,7 +348,7 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int * statu
   }
 
   ccl_fill_class_parameters(cosmo,&fc,parser_length, status);
-
+  
   if (*status != CCL_ERROR_CLASS) ccl_run_class(cosmo, &fc,&pr,&ba,&th,&pt,&tr,&pm,&sp,&nl,&le,&op, status);
   if (*status == CCL_ERROR_CLASS){
     //printed error message while running CLASS
@@ -362,8 +361,7 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int * statu
     ccl_free_class_structs(cosmo, &ba,&th,&pt,&tr,&pm,&sp,&nl,&le, status);
     return;
   }
-
-
+ 
   //CLASS calculations done - now allocate CCL splines
   double kmin = K_MIN;
   double kmax = K_MAX_SPLINE;
