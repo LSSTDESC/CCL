@@ -15,11 +15,23 @@ except AttributeError:
 _ccllib = Extension(
             "_ccllib",
                ["pyccl/ccl.i",],
-               libraries = ['m', 'gsl', 'gslcblas', 'gomp', 'ccl'],
+               libraries = ['m', 'gsl', 'gslcblas', 'ccl'],
                include_dirs = [numpy_include, "include/", "class/include"],
                extra_compile_args=['-O4', '-std=c99'],
                swig_opts=['-threads'],
            )
+
+#Creating the PyTest command
+class PyTest(Command):
+    user_options = []
+    def initialize_options(self):
+        pass
+    def finalize_options(self):
+        pass
+    def run(self):
+        import sys,subprocess
+        errno = subprocess.call([sys.executable,'tests/test_suite.py'])
+        raise SystemExit(errno)
 
 # CCL setup script
 setup(  name         = "pyccl",
@@ -28,4 +40,5 @@ setup(  name         = "pyccl",
         version      = "0.1",
         packages     = ['pyccl'],
         ext_modules  = [_ccllib,],
+        cmdclass = {'test': PyTest},
         )
