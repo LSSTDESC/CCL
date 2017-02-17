@@ -17,7 +17,7 @@
 
 /* --------- ROUTINE: h_over_h0 ---------
 INPUT: scale factor, cosmological parameters
-TASK: Compute E(z)=H(z)/H0
+TASK: Compute E(a)=H(a)/H0
 */
 static double h_over_h0(double a, ccl_parameters * params)
 {
@@ -25,21 +25,21 @@ static double h_over_h0(double a, ccl_parameters * params)
 	       exp(3*params->wa*(a-1))+params->Omega_k*a+params->Omega_g/a)/(a*a*a));
 }
 
-/* --------- ROUTINE: ccl_omega_m_z ---------
+/* --------- ROUTINE: ccl_omega_m_a ---------
 INPUT: cosmology object, scale factor
 TASK: Compute Omega_m(a)
 */
-double ccl_omega_m_z(ccl_cosmology * cosmo, double a)
+double ccl_omega_m_a(ccl_cosmology * cosmo, double a)
 {
   return cosmo->params.Omega_m/(cosmo->params.Omega_m+cosmo->params.Omega_l*pow(a,-3*(cosmo->params.w0+cosmo->params.wa))*
 	 exp(3*cosmo->params.wa*(a-1))+cosmo->params.Omega_k*a+cosmo->params.Omega_g/a);
 }
 
-/* --------- ROUTINE: ccl_omega_l_z ---------
+/* --------- ROUTINE: ccl_omega_l_a ---------
 INPUT: cosmology object, scale factor
 TASK: Compute Omega_l(a)
 */
-double ccl_omega_l_z(ccl_cosmology * cosmo, double a)
+double ccl_omega_l_a(ccl_cosmology * cosmo, double a)
 {
   return cosmo->params.Omega_l*pow(a,-3*(cosmo->params.w0+cosmo->params.wa))*
     exp(3*cosmo->params.wa*(a-1))/(cosmo->params.Omega_m+
@@ -47,33 +47,33 @@ double ccl_omega_l_z(ccl_cosmology * cosmo, double a)
 	     exp(3*cosmo->params.wa*(a-1))+cosmo->params.Omega_k*a+cosmo->params.Omega_g/a);
 }
 
-/* --------- ROUTINE: ccl_omega_g_z ---------
+/* --------- ROUTINE: ccl_omega_g_a ---------
 INPUT: cosmology object, scale factor
 TASK: Compute Omega_g(a)
 */
-double ccl_omega_g_z(ccl_cosmology * cosmo, double a)
+double ccl_omega_g_a(ccl_cosmology * cosmo, double a)
 {
   return cosmo->params.Omega_g/(cosmo->params.Omega_m*a+cosmo->params.Omega_l*pow(a,-3*(cosmo->params.w0+cosmo->params.wa))*
 	 exp(3*cosmo->params.wa*(a-1))*a+cosmo->params.Omega_k*a*a+cosmo->params.Omega_g);
 }
 
-/* --------- ROUTINE: ccl_omega_k_z ---------
+/* --------- ROUTINE: ccl_omega_k_a ---------
 INPUT: cosmology object, scale factor
 TASK: Compute Omega_k(a)
 */
-double ccl_omega_k_z(ccl_cosmology * cosmo, double a)
+double ccl_omega_k_a(ccl_cosmology * cosmo, double a)
 {
   return cosmo->params.Omega_k*a/(cosmo->params.Omega_m+cosmo->params.Omega_l*pow(a,-3*(cosmo->params.w0+cosmo->params.wa))*
 	 exp(3*cosmo->params.wa*(a-1))+cosmo->params.Omega_k*a+cosmo->params.Omega_g/a);
 }
 
-/* --------- ROUTINE: ccl_omega_tot_z ---------
+/* --------- ROUTINE: ccl_omega_tot_a ---------
 INPUT: cosmology object, scale factor
 TASK: Compute Omega_tot(a)
 */
-double ccl_omega_tot_z(ccl_cosmology * cosmo, double a)
+double ccl_omega_tot_a(ccl_cosmology * cosmo, double a)
 {
-  return ccl_omega_m_z(cosmo,a)+ccl_omega_l_z(cosmo,a)+ccl_omega_k_z(cosmo,a)+ccl_omega_g_z(cosmo,a);
+  return ccl_omega_m_a(cosmo,a)+ccl_omega_l_a(cosmo,a)+ccl_omega_k_a(cosmo,a)+ccl_omega_g_a(cosmo,a);
 }
 
 /* --------- ROUTINE: chi_integrand ---------
@@ -94,7 +94,7 @@ static int growth_ode_system(double a,const double y[],double dydt[],void *param
 {
   ccl_cosmology * cosmo = params;
   double hnorm=h_over_h0(a,&(cosmo->params));
-  double om=ccl_omega_m_z(cosmo, a);
+  double om=ccl_omega_m_a(cosmo, a);
 
   dydt[0]=y[1]/(a*a*a*hnorm);
   dydt[1]=1.5*hnorm*a*om*y[0];

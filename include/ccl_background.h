@@ -43,4 +43,9 @@ void ccl_growth_rates(ccl_cosmology * cosmo, int na, double a[na], double output
 double ccl_scale_factor_of_chi(ccl_cosmology * cosmo, double chi, int * status);
 // Scale factors for a given list of comoving distances
 void ccl_scale_factor_of_chis(ccl_cosmology * cosmo, int nchi, double chi[nchi], double output[nchi], int* status);
-double ccl_omega_m_z(ccl_cosmology * cosmo, double a);
+// Omega functions of a
+double ccl_omega_m_a(ccl_cosmology * cosmo, double a);
+double ccl_omega_l_a(ccl_cosmology * cosmo, double a);
+double ccl_omega_g_a(ccl_cosmology * cosmo, double a);
+double ccl_omega_k_a(ccl_cosmology * cosmo, double a);
+double ccl_omega_tot_a(ccl_cosmology * cosmo, double a);
