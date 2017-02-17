@@ -29,7 +29,7 @@ static double h_over_h0(double a, ccl_parameters * params)
 INPUT: cosmology object, scale factor
 TASK: Compute Omega_m(z)
 */
-double ccl_omega_m_z(ccl_cosmology * cosmo, double a)
+double ccl_omega_m_a(ccl_cosmology * cosmo, double a)
 {
   return cosmo->params.Omega_m/(cosmo->params.Omega_m+cosmo->params.Omega_l*pow(a,-3*(cosmo->params.w0+cosmo->params.wa))*
 			  exp(3*cosmo->params.wa*(a-1))+cosmo->params.Omega_k*a);
@@ -53,7 +53,7 @@ static int growth_ode_system(double a,const double y[],double dydt[],void *param
 {
   ccl_cosmology * cosmo = params;
   double hnorm=h_over_h0(a,&(cosmo->params));
-  double om=ccl_omega_m_z(cosmo, a);
+  double om=ccl_omega_m_a(cosmo, a);
 
   dydt[0]=y[1]/(a*a*a*hnorm);
   dydt[1]=1.5*hnorm*a*om*y[0];

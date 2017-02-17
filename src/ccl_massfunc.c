@@ -25,7 +25,7 @@ TASK: Outputs fitting function for use in halo mass function calculation;
 static double massfunc_f(ccl_cosmology *cosmo, double smooth_mass,double a, int * status)
 {
   double fit_A, fit_a, fit_b, fit_c, fit_d, overdensity_delta;
-  double Omega_m_z;
+  double Omega_m_a;
   double delta_c_Tinker, nu;
 
   double sigma=ccl_sigmaM(cosmo, smooth_mass, a, status);
@@ -62,11 +62,11 @@ static double massfunc_f(ccl_cosmology *cosmo, double smooth_mass,double a, int 
     break;
 
   case ccl_watson:
-    Omega_m_z = ccl_omega_m_z(cosmo, a);
+    Omega_m_a = ccl_omega_m_a(cosmo, a);
     
-    fit_A = Omega_m_z*(0.990*pow(a,3.216)+0.074);
-    fit_a = Omega_m_z*(5.907*pow(a,3.599)+2.344);
-    fit_b = Omega_m_z*(3.136*pow(a,3.058)+2.349);
+    fit_A = Omega_m_a*(0.990*pow(a,3.216)+0.074);
+    fit_a = Omega_m_a*(5.907*pow(a,3.599)+2.344);
+    fit_b = Omega_m_a*(3.136*pow(a,3.058)+2.349);
     fit_c = 1.318;
 
     return fit_A*(pow(sigma/fit_b,-fit_a)+1.0)*exp(-fit_c/sigma/sigma);
@@ -90,7 +90,6 @@ static double massfunc_f(ccl_cosmology *cosmo, double smooth_mass,double a, int 
 static double ccl_halo_b1(ccl_cosmology *cosmo, double smooth_mass,double a, int * status)
 {
   double fit_A, fit_B, fit_C, fit_a, fit_b, fit_c, overdensity_delta, y;
-  double Omega_m_z;
   double delta_c_Tinker, nu;
   double sigma=ccl_sigmaM(cosmo,smooth_mass,a, status);
   switch(cosmo->config.mass_function_method){
