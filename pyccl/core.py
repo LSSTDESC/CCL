@@ -2,6 +2,7 @@
 import ccllib as lib
 import numpy as np
 from warnings import warn
+from pyutils import check
 
 # Configuration types
 transfer_function_types = {
@@ -272,13 +273,19 @@ class Cosmology(object):
         return self.params.__getitem__(key)
     
     def compute_distances(self):
-        lib.cosmology_compute_distances(self.cosmo,self.cosmo.status)
+        status = 0
+        lib.cosmology_compute_distances(self.cosmo, status)
+        check(status)
     
     def compute_growth(self):
-        lib.cosmology_compute_growth(self.cosmo,self.cosmo.status)
+        status = 0
+        lib.cosmology_compute_growth(self.cosmo, status)
+        check(status)
     
     def compute_power(self):
-        lib.cosmology_compute_power(self.cosmo,self.cosmo.status)
+        status = 0
+        lib.cosmology_compute_power(self.cosmo, status)
+        check(status)
     
     # Check which data have been precomputed
     def has_distances(self):
