@@ -69,7 +69,7 @@ class Parameters(object):
             w0 (float, optional): First order term of dark energy equation of state. Defaults to -1.
             wa (float, optional): Second order term of dark energy equation of state. Defaults to 0.
             sigma8 (float): Mass variance at 8 Mpc scale. Optional if A_s is specified.
-            zarr_mgrowth (UNKNOWN): UNKNOWN - PHIL BULL.
+            zarr_mgrowth (:obj: list of floats): UNKNOWN - PHIL BULL.
             dfarr_mgrowth (UNKNOWN): UNKNOWN - PHIL BULL.
 
         """
