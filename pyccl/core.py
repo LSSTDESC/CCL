@@ -161,7 +161,7 @@ class Parameters(object):
         
         # Set value of parameter
         setattr(self.parameters, key, val)
-        # FIXME: Should update/replace CCL objects appropriately
+        # TODO: Should update/replace CCL objects appropriately
     
     def __str__(self):
         """Output the parameters that were set, and their values.
