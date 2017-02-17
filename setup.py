@@ -30,7 +30,7 @@ class PyTest(Command):
         pass
     def run(self):
         import sys,subprocess
-        errno = subprocess.call([sys.executable,'tests/test_suite.py'])
+        errno = subprocess.call([sys.executable,'tests/run_tests.py'])
         raise SystemExit(errno)
 
 # CCL setup script
