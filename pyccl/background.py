@@ -1,6 +1,6 @@
 
 import ccllib as lib
-from pyutils import _vectorize_fn
+from pyutils import _vectorize_fn, _vectorize_fn2
 
 def growth_factor(cosmo, a):
     """
@@ -50,28 +50,7 @@ def scale_factor_of_chi(cosmo, a):
     return _vectorize_fn(lib.scale_factor_of_chi, 
                          lib.scale_factor_of_chi_vec, cosmo, a)
 
-def omega_m_a(cosmo, a):
-    return _vectorize_fn(lib.omega_m_a, 
-                         lib.omega_m_a_vec, cosmo, a,
+def omega_x_a(cosmo, a, label):
+    return _vectorize_fn2(lib.omega_x_a, 
+                          lib.omega_x_a_vec, cosmo, a, label,
                          returns_status=False)
-
-def omega_l_a(cosmo, a):
-    return _vectorize_fn(lib.omega_l_a, 
-                         lib.omega_l_a_vec, cosmo, a,
-                         returns_status=False)
-
-def omega_g_a(cosmo, a):
-    return _vectorize_fn(lib.omega_g_a, 
-                         lib.omega_g_a_vec, cosmo, a,
-                         returns_status=False)
-
-def omega_k_a(cosmo, a):
-    return _vectorize_fn(lib.omega_k_a, 
-                         lib.omega_k_a_vec, cosmo, a,
-                         returns_status=False)
-
-def omega_tot_a(cosmo, a):
-    return _vectorize_fn(lib.omega_tot_a, 
-                         lib.omega_tot_a_vec, cosmo, a,
-                         returns_status=False)
-

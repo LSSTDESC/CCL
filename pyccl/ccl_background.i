@@ -86,49 +86,14 @@ void scale_factor_of_chi_vec(ccl_cosmology * cosmo,
     ccl_scale_factor_of_chis(cosmo, nchi, chi, output, status);
 }
 
-void omega_m_a_vec(ccl_cosmology * cosmo, 
-                       double* a, int na,
-                       double* output, int nout) {
+void omega_x_a_vec(ccl_cosmology * cosmo, int label, 
+		       double* a,  int na,
+		   double* output, int nout) {
     assert(nout == na);
     for(int i=0; i < na; i++){
-        output[i] = ccl_omega_m_a(cosmo, a[i]);
+      output[i] = ccl_omega_x_a(cosmo, a[i], label);
     }
 }
 
-void omega_l_a_vec(ccl_cosmology * cosmo, 
-                       double* a, int na,
-                       double* output, int nout) {
-    assert(nout == na);
-    for(int i=0; i < na; i++){
-        output[i] = ccl_omega_l_a(cosmo, a[i]);
-    }
-}
-
-void omega_g_a_vec(ccl_cosmology * cosmo, 
-                       double* a, int na,
-                       double* output, int nout) {
-    assert(nout == na);
-    for(int i=0; i < na; i++){
-        output[i] = ccl_omega_g_a(cosmo, a[i]);
-    }
-}
-
-void omega_k_a_vec(ccl_cosmology * cosmo, 
-                       double* a, int na,
-                       double* output, int nout) {
-    assert(nout == na);
-    for(int i=0; i < na; i++){
-        output[i] = ccl_omega_k_a(cosmo, a[i]);
-    }
-}
-
-void omega_tot_a_vec(ccl_cosmology * cosmo, 
-                       double* a, int na,
-                       double* output, int nout) {
-    assert(nout == na);
-    for(int i=0; i < na; i++){
-        output[i] = ccl_omega_tot_a(cosmo, a[i]);
-    }
-}
 
 %}
