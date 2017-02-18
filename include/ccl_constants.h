@@ -49,5 +49,5 @@
 #define EPSREL_CORR_FUNC 1E-3
 #define GSL_INTEGRATION_LIMIT 1000
 #define L_MIN_INT 2.0
-#define L_MAX_INT 3.0E4
+#define L_MAX_INT 3.0E4 //for corr: 1e7 
 #define NL 5000
