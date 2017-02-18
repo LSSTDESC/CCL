@@ -44,11 +44,19 @@ ccl_cosmology * ccl_cosmology_create(ccl_parameters params, ccl_configuration co
   cosmo->data.accelerator=NULL;
   cosmo->data.accelerator_achi=NULL;
   cosmo->data.accelerator_m=NULL;
+  cosmo->data.accelerator_d=NULL;
   cosmo->data.growth0 = 1.;
   cosmo->data.achi=NULL;
 
   cosmo->data.logsigma = NULL;
-  
+
+  // hmf parameter for interpolation
+  cosmo->data.alphahmf = NULL;
+  cosmo->data.betahmf = NULL;
+  cosmo->data.gammahmf = NULL;
+  cosmo->data.phihmf = NULL;
+  cosmo->data.etahmf = NULL;
+
   cosmo->data.p_lin = NULL;
   cosmo->data.p_nl = NULL;
   
@@ -56,6 +64,7 @@ ccl_cosmology * ccl_cosmology_create(ccl_parameters params, ccl_configuration co
   cosmo->computed_growth = false;
   cosmo->computed_power = false;
   cosmo->computed_sigma = false;
+  cosmo->computed_hmfparams = false;
   cosmo->status = 0;
   
   return cosmo;
