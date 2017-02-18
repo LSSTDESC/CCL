@@ -112,7 +112,7 @@ def scale_factor_of_chi(cosmo, chi):
 
     """
     return _vectorize_fn(lib.scale_factor_of_chi, 
-                         lib.scale_factor_of_chi_vec, cosmo, a)
+                         lib.scale_factor_of_chi_vec, cosmo, chi)
 
 def omega_m_z(cosmo, a):
     """Matter density fraction at a redshift different than z=0.
