@@ -1,7 +1,5 @@
 #!/usr/bin/env python
-""
-Copied mostly from healpy's setup.py and adapted to CCL
-""
+# This setup file has been adapted from healpy's setup file
 import shlex
 import os
 import fnmatch
@@ -19,7 +17,6 @@ from distutils.dir_util import mkpath
 from distutils.file_util import copy_file
 from distutils import log
 from setuptools.command.build_ext import build_ext
-#from setuptools import Extension
 from distutils.core import Extension
 import numpy
 try:
@@ -157,13 +154,7 @@ class build_external_clib(build_clib):
         env = self.env()
         PKG_CONFIG = tuple(shlex.split(
             env['PKG_CONFIG'], posix=(os.sep == '/')))
-        kw = {}
-        #index_key_flag = (
-        #    (2, '--cflags-only-I', ('include_dirs',)), 
-        #    (0, '--cflags-only-other', ('extra_compile_args', 'extra_link_args')),
-        #    (2, '--libs-only-L', ('library_dirs', 'runtime_library_dirs')),
-        #    (2, '--libs-only-l', ('libraries',)),
-        #    (0, '--libs-only-other', ('extra_link_args',)))
+        kw = {} 
         index_key_flag = ()
         for index, flag, keys in index_key_flag:
             cmd = PKG_CONFIG + (flag,) + tuple(packages)

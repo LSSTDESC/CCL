@@ -1,7 +1,7 @@
 import numpy as np
 from numpy.testing import assert_allclose, run_module_suite
 import pyccl as ccl
-from os.path import dirname
+from os.path import dirname,join
 # Set tolerances
 DISTANCES_TOLERANCE = 1e-4
 
@@ -25,7 +25,7 @@ def read_chi_test_file():
     (distances are in Mpc/h)
     """
     # Load data from file
-    dat = np.genfromtxt(dirname(__file__)+"/benchmark/chi_model1-5.txt").T
+    dat = np.genfromtxt(join(dirname(__file__),"benchmark/chi_model1-5.txt")).T
     assert(dat.shape == (6,6))
     
     # Split into redshift column and chi(z) columns
