@@ -38,15 +38,15 @@ class PyTest(Command):
 class PyInstall(DistutilsInstall):
     def run(self):
         import sys,subprocess
-        errno = subprocess.call(['./configure'])
-        if(errno):
-            raise SystemExit(errno)
-        errno = subprocess.call(['make'])
-        if(errno):
-            raise SystemExit(errno)
-        errno = subprocess.call(['sudo', 'make', 'install'])
-        if(errno):
-            raise SystemExit(errno)
+        #errno = subprocess.call(['./configure'])
+        #if(errno):
+        #    raise SystemExit(errno)
+        #errno = subprocess.call(['make'])
+        #if(errno):
+        #    raise SystemExit(errno)
+        #errno = subprocess.call(['sudo', 'make', 'install'])
+        #if(errno):
+        #    raise SystemExit(errno)
         DistutilsInstall.run(self)
 
 # CCL setup script
