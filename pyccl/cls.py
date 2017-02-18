@@ -17,12 +17,12 @@ tracer_types = {
 NoneArr = np.array([])
 
 class ClTracer(object):
-    """CLTracer class used to wrap the cl_tracer found
+    """ClTracer class used to wrap the cl_tracer found
     in CCL.
 
-    A CLTracer is a data structure that contains (presumably)
-    all possible information needed to create the angular
-    power spectrum.
+    A ClTracer is a data structure that contains all information
+    describing the transfer functon of one tracer of the matter
+    distribution.
 
     """
 
@@ -31,7 +31,7 @@ class ClTracer(object):
                  z_n=None, n=None, z_b=None, b=None, 
                  z_s=None, s=None, z_ba=None, ba=None, 
                  z_rf=None, rf=None):
-        """Creates the CLTracer.
+        """Creates the ClTracer.
 
         Note: unless otherwise stated defaults are None.
 
@@ -91,13 +91,13 @@ class ClTracer(object):
 
 
 class ClTracerNumberCounts(ClTracer):
-    """CLTracer for N(z).
+    """ClTracer for galaxy clustering, N(z).
 
     """
     
     def __init__(self, cosmo, has_rsd, has_magnification, 
                  z_n, n, z_b, b, z_s=None, s=None):
-        """CLTracer for N(z).
+        """ClTracer for galaxy clustering, N(z).
 
         Args:
             cosmo (:obj:`Cosmology`): Either a ccl_cosmology or a Cosmology object.
@@ -127,13 +127,13 @@ class ClTracerNumberCounts(ClTracer):
 
 
 class ClTracerLensing(ClTracer):
-    """CLTracer for lensing, s(z).
+    """ClTracer for lensing shapes, s(z).
 
     """
     
     def __init__(self, cosmo, has_intrinsic_alignment, 
                  z_n, n, z_ba=None, ba=None, z_rf=None, rf=None):
-        """CLTracer for lensing, s(z).
+        """ClTracer for lensing shapes, s(z).
         
         Args:
             cosmo (:obj:`Cosmology`): Either a ccl_cosmology or a Cosmology object.

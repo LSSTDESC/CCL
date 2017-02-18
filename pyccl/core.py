@@ -190,6 +190,9 @@ class Cosmology(object):
                  mass_function='tinker'):
         """Creates a wrapper for ccl_cosmology.
 
+        TODO: enumerate transfer_function and 
+        matter_power_spectrum options.
+
         Args:
             params (:obj:`Parameters`): Cosmological parameters object.
             config (:obj:`ccl_configuration`, optional): Configuration for how to use CCL. Takes precident over any other passed in configuration. Defaults to None.
