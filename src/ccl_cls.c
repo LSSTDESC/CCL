@@ -411,8 +411,17 @@ static void get_k_interval(CCL_ClTracer *clt1,CCL_ClTracer *clt2,int l,
   if(chimin<=0)
     chimin=0.5*(l+0.5)/K_MAX_INT;
 
+  //TODO: Should we replace 2 and -4 by log10 of K_MIN_INT and K_MAX_INT
+  //*lkmax = log10(K_MAX_INT); //=3, breaks Cl test
   *lkmax=fmin( 2,log10(2  *(l+0.5)/chimin));
-  *lkmin=fmax(-4,log10(0.5*(l+0.5)/chimax));
+  //*lkmin=log10(K_MIN_INT); //=-4, breaks Cl test
+  /*if(l<1e4){
+      *lkmin=fmax(-4,log10(0.5*(l+0.5)/chimax)); //fiduc
+   } else {
+      *lkmin=-4;
+   }*/
+  //Try other scalings
+  *lkmin=fmax(-4,log10(0.1*(l+0.5)/chimax));
 }
 
 //Compute angular power spectrum between two bins
@@ -430,6 +439,7 @@ double ccl_angular_cl(ccl_cosmology *cosmo,int l,CCL_ClTracer *clt1,CCL_ClTracer
   gsl_integration_workspace *w=gsl_integration_workspace_alloc(1000);
 
   get_k_interval(clt1,clt2,l,&lkmin,&lkmax);
+  //printf("log10kmin %e log10kmax %e\n",lkmin,lkmax);
 
   ipar.l=l;
   ipar.cosmo=cosmo;
