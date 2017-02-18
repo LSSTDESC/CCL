@@ -43,8 +43,8 @@ class ClTracer(object):
             has_intrinsic_alignment (bool, optional): Flag to incorporate intrinsic alignment into the model. Defaults to False.
             z_n (array_like, optional): Array of redshifts for N(z).
             n (array_like, optional): Array of N(z)-values.
-            z_b (array_like, optional): Array of redshifts for biases, b(z).
-            b (array_like, optional): Array of biases.
+            z_b (array_like, optional): Array of redshifts for alignment biases, b(z).
+            b (array_like, optional): Array of alignment biases.
             z_s (array_like, optional): Array of redshifts for shapes, s(z).
             s (array_like, optional): Array of shapes.
             z_ba (array_like, optional): Array of redshifts for intrinsic alignment amplitudes.
