@@ -23,6 +23,7 @@ CTEST_SETUP(bbks) {
   data->Omega_c = 0.25;
   data->Omega_b = 0.05;
   data->h = 0.7;
+  //TODO: Don't we have to change this to normpk?
   data->A_s = 2.1e-9;
   data->sigma_8=0.8;
   data->n_s = 0.96;
@@ -65,7 +66,7 @@ static void compare_bbks(int i_model,struct bbks_data * data)
 						data->h,data->A_s,data->n_s,-1,NULL,NULL);
   params.Omega_g=0;
   params.sigma_8=data->sigma_8;
-  params.Omega_g=0;
+  params.Omega_g=0; //TODO: duplicate line?
   ccl_cosmology * cosmo = ccl_cosmology_create(params, config);
   ASSERT_NOT_NULL(cosmo);
   
