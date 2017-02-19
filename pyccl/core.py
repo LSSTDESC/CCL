@@ -48,32 +48,28 @@ class Parameters(object):
     
     def __init__(self, Omega_c=None, Omega_b=None, h=None, A_s=None, n_s=None, 
                  Omega_k=0., Omega_n=0., w0=-1., wa=0., sigma8=None,
-                 zarr_mgrowth=None, dfarr_mgrowth=None):
+                 z_mg=None, df_mg=None):
         """
         Class containing a set of cosmological parameters.
         """
         # Set current ccl_parameters object to None
         self.parameters = None
         
-         # Set nz_mgrowth (no. of redshift bins for modified growth fns.)
-        if zarr_mgrowth is not None and dfarr_mgrowth is not None:
+         # Set nz_mg (no. of redshift bins for modified growth fns.)
+        if z_mg is not None and df_mg is not None:
             # Get growth array size and do sanity check
-            zarr_mgrowth = np.atleast_1d(zarr_mgrowth)
-            dfarr_mgrowth = np.atleast_1d(dfarr_mgrowth)
-            assert zarr_mgrowth.size == dfarr_mgrowth.size
-            nz_mgrowth = zarr_mgrowth.size
+            z_mg = np.atleast_1d(z_mg)
+            df_mg = np.atleast_1d(df_mg)
+            assert z_mg.size == df_mg.size
+            nz_mg = z_mg.size
         else:
             # If one or both of the MG growth arrays are set to zero, disable 
             # all of them
-            if zarr_mgrowth is not None:
-                warn("zarr_mgrowth ignored; must also specify dfarr_mgrowth.",
-                     UserWarning)
-            if dfarr_mgrowth is not None:
-                warn("dfarr_mgrowth ignored; must also specify zarr_mgrowth.",
-                     UserWarning)
-            zarr_mgrowth = None
-            dfarr_mgrowth = None
-            nz_mgrowth = -1
+            if z_mg is not None or df_mg is not None:
+                raise ValueError("Must specify both z_mg and df_mg.")
+            z_mg = None
+            df_mg = None
+            nz_mg = -1
         
         # Check to make sure specified amplitude parameter is consistent
         if (A_s is None and sigma8 is None) \
@@ -101,7 +97,7 @@ class Parameters(object):
                                  "(or set to None)." % nm)
         
         # Create new instance of ccl_parameters object
-        if nz_mgrowth == -1:
+        if nz_mg == -1:
             # Create ccl_parameters without modified growth
             self.parameters = lib.parameters_create(
                                     Omega_c, Omega_b, Omega_k, Omega_n, 
@@ -112,7 +108,7 @@ class Parameters(object):
             self.parameters = lib.parameters_create_vec(
                                     Omega_c, Omega_b, Omega_k, Omega_n, 
                                     w0, wa, h, norm_pk, n_s, 
-                                    zarr_mgrowth, dfarr_mgrowth)
+                                    z_mg, df_mg)
     
     def __getitem__(self, key):
         """
@@ -167,12 +163,14 @@ class Cosmology(object):
         Class containing a ccl_cosmology object, including cosmological 
         parameters and cached data.
         """
-        # Check the type of the input params object
+        
+        # Check how to process cosmology input parameters
         if isinstance(params, lib.parameters):
-            self.params = {} # Set to empty dict if ccl_parameters given directly
+            # Raise an error if ccl_parameters given directly
+            raise TypeError("Must pass a Parameters() object, not ccl_parameters.")
         elif isinstance(params, Parameters):
+            # Parameters() object was given directly
             self.params = params
-            params = params.parameters # We only need the ccl_parameters object
         else:
             raise TypeError("'params' is not a valid ccl_parameters or "
                             "Parameters object.")
@@ -224,7 +222,7 @@ class Cosmology(object):
             self.configuration = config
         
         # Create new ccl_cosmology instance
-        self.cosmo = lib.cosmology_create(params, config)
+        self.cosmo = lib.cosmology_create(self.params.parameters, config)
         
         # Check status
         if self.cosmo.status != 0:
