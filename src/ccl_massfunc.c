@@ -119,14 +119,72 @@ static double massfunc_f(ccl_cosmology *cosmo, double halomass, double a, double
 
   switch(cosmo->config.mass_function_method){
   case ccl_tinker:
-    printf("Interpolation not yet supported.\nDefaulting to Delta=200.\n");
-    //TODO: maybe use macros for numbers
-    odelta = 200;
-    fit_A = 0.186*pow(a, 0.14);
-    fit_a = 1.47*pow(a, 0.06);
-    fit_d = pow(10, -1.0*pow(0.75 / log10(odelta / 75.0), 1.2 ));
-    fit_b = 2.57*pow(a, 1.0*fit_d);
-    fit_c = 1.19;
+    if (odelta == 200.0){
+      fit_A = 0.186;
+      fit_a = 1.47;
+      fit_b = 2.57; 
+      fit_c = 1.19;
+    }
+    else if (odelta == 300.0){
+      fit_A = 0.200;
+      fit_a = 1.52;
+      fit_b = 2.25;
+      fit_c = 1.27;
+    }
+    else if (odelta == 400.0){
+      fit_A = 0.212;
+      fit_a = 1.56;
+      fit_b = 2.05;
+      fit_c = 1.34;
+    }
+    else if (odelta == 600.0){
+      fit_A = 0.218;
+      fit_a = 1.61;
+      fit_b = 1.87;
+      fit_c = 1.45;
+    }
+    else if (odelta == 800.0){
+      fit_A = 0.248;
+      fit_a = 1.87;
+      fit_b = 1.59;
+      fit_c = 1.58;
+    }
+    else if (odelta == 1200.0){
+      fit_A = 0.255;
+      fit_a = 2.13;
+      fit_b = 1.51;
+      fit_c = 1.80;
+    }
+    else if (odelta == 1600.0){
+      fit_A = 0.260;
+      fit_a = 2.30;
+      fit_b = 1.46;
+      fit_c = 1.97;
+    }
+    else if (odelta == 2400.0){
+      fit_A = 0.260;
+      fit_a = 2.53;
+      fit_b = 1.44;
+      fit_c = 2.24;
+    }
+    else if (odelta == 3200.0){
+      fit_A = 0.260;
+      fit_a = 2.66;
+      fit_b = 1.41;
+      fit_c = 2.44;
+    }
+    else{
+      printf("Tinker Mass Function only supported for Delta = {200, 300, 400, 600, 800, 1200, 1600, 2400, and 3200. Continuing calculation assuming Delta = 200.\n");
+      odelta = 200;
+      fit_A = 0.186;
+      fit_a = 1.47;
+      fit_b = 2.57; 
+      fit_c = 1.19;
+    }
+
+    fit_a = fit_a*pow(a, 0.06);
+    fit_d = pow(10, -1.0*pow(0.75 / log10(odelta / 75.0), 1.2));
+    fit_b = fit_b*pow(a, fit_d);
 
     return fit_A*(pow(sigma/fit_b,-fit_a)+1.0)*exp(-fit_c/sigma/sigma);
     break;
@@ -147,12 +205,14 @@ static double massfunc_f(ccl_cosmology *cosmo, double halomass, double a, double
     fit_c = gsl_spline_eval(cosmo->data.gammahmf, odelta, cosmo->data.accelerator_d)*pow(a, 0.01); //gamma in Eq. 8
     fit_d = gsl_spline_eval(cosmo->data.phihmf, odelta, cosmo->data.accelerator_d)*pow(a, 0.08); //phi in Eq. 8;
 
+    printf("%le %le %le %le %le\n", fit_A, fit_a, fit_b, fit_c, fit_d);
+
     return nu*fit_A*(1.+pow(fit_b*nu,-2.*fit_d))*pow(nu, 2.*fit_a)*exp(-0.5*fit_c*nu*nu);
     break;
 
   case ccl_watson:
 
-    printf("Interpolation not yet supported.\nDefaulting to Delta=200.\n");
+    printf("Interpolation not supported.\nDefaulting to Delta=200.\n");
     Omega_m_a = ccl_omega_m_a(cosmo, a);
     
     fit_A = Omega_m_a*(0.990*pow(a,3.216)+0.074);

@@ -6,8 +6,8 @@
 
 // the tolerance in dn/dm
 #define SIGMA_TOLERANCE 1e-4
-#define INVSIGMA_TOLERANCE 5e-1
-#define MASSFUNC_TOLERANCE 5e-1
+#define INVSIGMA_TOLERANCE 5e-3
+#define MASSFUNC_TOLERANCE 5e-3
 
 CTEST_DATA(massfunc) {
   double Omega_c;
@@ -91,7 +91,7 @@ static void compare_massfunc(int model, struct massfunc_data * data)
   ccl_configuration config = default_config;
   config.transfer_function_method = ccl_bbks;
   // test file generated using tinker 2008 currently
-  config.mass_function_method = ccl_tinker10;
+  config.mass_function_method = ccl_tinker;
   ccl_cosmology * cosmo = ccl_cosmology_create(params, config);
   
   ASSERT_NOT_NULL(cosmo);
@@ -106,8 +106,6 @@ static void compare_massfunc(int model, struct massfunc_data * data)
     double sigma_j = ccl_sigmaM(cosmo, mass, a, status);
     double loginvsigma_j = log10(1./sigma_j);
     double logmassfunc_j = log10(ccl_massfunc(cosmo, mass, a, 200.,status)*mass/(rho_m*log(10.)));
-
-    printf("%le %le\n", mass, logmassfunc_j);
 
     double absolute_tolerance = SIGMA_TOLERANCE*data->massfunc[0][j];
     if (fabs(absolute_tolerance)<1e-12) absolute_tolerance = 1e-12;
