@@ -1,6 +1,7 @@
 #include "ccl_background.h"
 #include "ccl_utils.h"
 #include "ccl_error.h"
+#include "ccl_constants.h"
 #include <stdlib.h>
 #include <math.h>
 #include <stdio.h>
@@ -25,7 +26,7 @@ static double h_over_h0(double a, ccl_parameters * params)
 	       exp(3*params->wa*(a-1))+params->Omega_k*a+params->Omega_g/a)/(a*a*a));
 }
 
-/* --------- ROUTINE: ccl_omega_x_a ---------
+/* --------- ROUTINE: ccl_omega_x ---------
 INPUT: cosmology object, scale factor, species label
 TASK: Compute Omega_x(a), with x defined by species label:
 0: Omega_m
@@ -33,19 +34,20 @@ TASK: Compute Omega_x(a), with x defined by species label:
 2: Omega_g
 3: Omega_k
 */
-double ccl_omega_x_a(ccl_cosmology * cosmo, double a, int label)
+double ccl_omega_x(ccl_cosmology * cosmo, double a, enum omega_x_label label)
 {
-  if(label == 0){
+  switch(label) {
+  case omega_m_label :
     return cosmo->params.Omega_m/(cosmo->params.Omega_m+cosmo->params.Omega_l*pow(a,-3*(cosmo->params.w0+cosmo->params.wa))*
 	 exp(3*cosmo->params.wa*(a-1))+cosmo->params.Omega_k*a+cosmo->params.Omega_g/a);
-  } else if(label == 1) {
+  case omega_l_label :
     return cosmo->params.Omega_l*pow(a,-3*(cosmo->params.w0+cosmo->params.wa))*
     exp(3*cosmo->params.wa*(a-1))/(cosmo->params.Omega_m+
 	     cosmo->params.Omega_l*pow(a,-3*(cosmo->params.w0+cosmo->params.wa))*exp(3*cosmo->params.wa*(a-1))+cosmo->params.Omega_k*a+cosmo->params.Omega_g/a);
-  } else if(label == 2) {
+  case omega_g_label :
     return cosmo->params.Omega_g/(cosmo->params.Omega_m*a+cosmo->params.Omega_l*pow(a,-3*(cosmo->params.w0+cosmo->params.wa))*
 	 exp(3*cosmo->params.wa*(a-1))*a+cosmo->params.Omega_k*a*a+cosmo->params.Omega_g);
-  } else if(label == 3) {
+  case omega_k_label :
     return cosmo->params.Omega_k*a/(cosmo->params.Omega_m+cosmo->params.Omega_l*pow(a,-3*(cosmo->params.w0+cosmo->params.wa))*
 	 exp(3*cosmo->params.wa*(a-1))+cosmo->params.Omega_k*a+cosmo->params.Omega_g/a);
   }
@@ -69,7 +71,8 @@ static int growth_ode_system(double a,const double y[],double dydt[],void *param
 {
   ccl_cosmology * cosmo = params;
   double hnorm=h_over_h0(a,&(cosmo->params));
-  double om=ccl_omega_x_a(cosmo, a, 0);
+  enum omega_x_label label = omega_m_label;
+  double om=ccl_omega_x(cosmo, a, label);
 
   dydt[0]=y[1]/(a*a*a*hnorm);
   dydt[1]=1.5*hnorm*a*om*y[0];

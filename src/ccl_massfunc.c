@@ -62,7 +62,8 @@ static double massfunc_f(ccl_cosmology *cosmo, double smooth_mass,double redshif
 
   case ccl_watson:
     scale = 1.0/(1.0+redshift);
-    Omega_m_a = ccl_omega_x_a(cosmo, scale, 0);
+    enum omega_x_label label = omega_m_label;
+    Omega_m_a = ccl_omega_x(cosmo, scale, label);
     
     fit_A = Omega_m_a*(0.990*pow(1+redshift,-3.216)+0.074);
     fit_a = Omega_m_a*(5.907*pow(1+redshift,-3.599)+2.344);
