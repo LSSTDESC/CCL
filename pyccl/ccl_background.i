@@ -86,12 +86,12 @@ void scale_factor_of_chi_vec(ccl_cosmology * cosmo,
     ccl_scale_factor_of_chis(cosmo, nchi, chi, output, status);
 }
 
-void omega_x_a_vec(ccl_cosmology * cosmo, int label, 
+void omega_x_vec(ccl_cosmology * cosmo, int label, 
 		       double* a,  int na,
 		   double* output, int nout) {
     assert(nout == na);
     for(int i=0; i < na; i++){
-      output[i] = ccl_omega_x_a(cosmo, a[i], label);
+      output[i] = ccl_omega_x(cosmo, a[i], label);
     }
 }
 

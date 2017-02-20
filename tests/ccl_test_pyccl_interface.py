@@ -76,9 +76,9 @@ def check_background(cosmo):
     assert_( all_finite(ccl.scale_factor_of_chi(cosmo, a_arr)) )
     
     # omega_m_a
-    assert_( all_finite(ccl.omega_x_a(cosmo, a_scl, 0)) )
-    assert_( all_finite(ccl.omega_x_a(cosmo, a_lst, 0)) )
-    assert_( all_finite(ccl.omega_x_a(cosmo, a_arr, 0)) )
+    assert_( all_finite(ccl.omega_x(cosmo, a_scl, 0)) )
+    assert_( all_finite(ccl.omega_x(cosmo, a_lst, 0)) )
+    assert_( all_finite(ccl.omega_x(cosmo, a_arr, 0)) )
 
 
 def check_power(cosmo):
