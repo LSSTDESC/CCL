@@ -155,7 +155,11 @@ class Parameters(object):
 
 class Cosmology(object):
     
-    def __init__(self, params, config=None, 
+    def __init__(self, 
+                 params=None, config=None,
+                 Omega_c=None, Omega_b=None, h=None, A_s=None, n_s=None, 
+                 Omega_k=0., Omega_n=0., w0=-1., wa=0., sigma8=None,
+                 z_mg=None, df_mg=None, 
                  transfer_function='boltzmann_class',
                  matter_power_spectrum='halofit',
                  mass_function='tinker'):
@@ -164,16 +168,33 @@ class Cosmology(object):
         parameters and cached data.
         """
         
-        # Check how to process cosmology input parameters
-        if isinstance(params, lib.parameters):
+        # Use either input cosmology parameters or Parameters() object
+        if params is None:
+            # Create new Parameters object
+            params = Parameters(Omega_c=Omega_c, Omega_b=Omega_b, h=h, A_s=A_s, 
+                                n_s=n_s, Omega_k=Omega_k, Omega_n=Omega_n, 
+                                w0=w0, wa=wa, sigma8=sigma8, z_mg=z_mg, 
+                                df_mg=df_mg)
+            self.params = params
+            params = params.parameters # We only need the ccl_parameters object
+        elif isinstance(params, lib.parameters):
             # Raise an error if ccl_parameters given directly
             raise TypeError("Must pass a Parameters() object, not ccl_parameters.")
         elif isinstance(params, Parameters):
-            # Parameters() object was given directly
+            # Parameters object given directly
             self.params = params
+            
+            # Warn if any cosmological parameters were specified at the same 
+            # time as a Parameters() object; they will be ignored
+            argtest = [Omega_c==None, Omega_b==None, h==None, A_s==None, 
+                       n_s==None, Omega_k==0., Omega_n==0., w0==-1., wa==0., 
+                       sigma8==None, z_mg==None, df_mg==None]
+            
+            if not all(arg == True for arg in argtest):
+                warn("Cosmological parameter kwargs are ignored if 'params' is "
+                     "not None", UserWarning)
         else:
-            raise TypeError("'params' is not a valid ccl_parameters or "
-                            "Parameters object.")
+            raise TypeError("'params' is not a valid Parameters object.")
         
         # Check that the ccl_configuration-related arguments are valid
         if config is not None:
