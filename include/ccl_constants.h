@@ -59,3 +59,6 @@
 //LSST specific numbers
 #define Z_MIN_SOURCES 0.1
 #define Z_MAX_SOURCES 3.0
+
+//Omega_x labels
+enum omega_x_label { omega_m_label=0, omega_l_label=1, omega_g_label=2, omega_k_label=3 };
