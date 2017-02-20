@@ -127,4 +127,37 @@ def _vectorize_fn2(fn, fn_vec, cosmo, x, z, returns_status=True):
     # Check result and return
     check(status)
     return f
+
+
+def _vectorize_fn3(fn, fn_vec, cosmo, x, n, returns_status=True):
+    """
+    Generic wrapper to allow vectorized (1D array) access to CCL functions with 
+    one vector argument and one integer argument.
+    """
+    # Access ccl_cosmology object
+    cosmo = _cosmology_obj(cosmo)
+    status = 0
+    
+    if isinstance(x, float):
+        # Use single-value function
+        if returns_status:
+            f, status = fn(cosmo, x, n, status) # Note order of x,n switched
+        else:
+            f = fn(cosmo, x, n)
+    elif isinstance(x, np.ndarray):
+        # Use vectorised function
+        if returns_status:
+            f, status = fn_vec(cosmo, n, x, x.size, status)
+        else:
+            f = fn_vec(cosmo, n, x, x.size)
+    else:
+        # Use vectorised function
+        if returns_status:
+            f, status = fn_vec(cosmo, n, x, len(x), status)
+        else:
+            f = fn_vec(cosmo, n, x, len(x))
+    
+    # Check result and return
+    check(status)
+    return f
     
