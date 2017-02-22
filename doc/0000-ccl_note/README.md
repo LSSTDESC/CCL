@@ -10,7 +10,7 @@ An overview of the core cosmology library, providing routines for cosmological p
 ## Editing this Paper
 
 Fork and/or clone the project repo, and then
-edit the primary file. The name of this file will vary according to its format, but it should be one of either `main.rst` (if it's a [`reStructuredText`](http://docutils.sourceforge.net/rst.html) Note), `main.md` (if it's a [`Markdown`](https://github.com/adam-p/Markdown-here/wiki/Markdown-Cheatsheet) Note), `main.ipynb` (if it's an [`IPython Notebook`](https://ipython.org/notebook.html)) or `main.tex` (if it's a latex Note or paper).
+edit the primary file, `main.tex`.
 Please use the `figures` folder for your images.
 
 ## Building this Paper
@@ -22,7 +22,10 @@ You can compile latex papers locally with
 ```
 make  [apj|apjl|prd|prl|mnras]
 ```
-(`make` with no arguments compiles latex in LSST DESC Note style.)
+(`make` with no arguments compiles latex in LSST DESC Note style, and uses Alex
+Drlica-Wagner's `mkauthlist` program to compile the author list from the
+information stored in `authors.csv`.)
+
 
 ## Updating the Styles and Templates
 
@@ -58,4 +61,3 @@ To enable this service, you need to follow these steps:
 4. Copy the `.travis.yml` file in this folder to the top level of your repo (or merge its contents with your existing `.travis.yml` file).
 Edit the final `git push` command with your GitHub username.  
 Commit and push to trigger your travis build, but note that the PDF will only be deployed if the master branch is updated.
-
