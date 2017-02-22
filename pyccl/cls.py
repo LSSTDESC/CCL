@@ -91,7 +91,7 @@ class ClTracer(object):
 
 
 class ClTracerNumberCounts(ClTracer):
-    """ClTracer for galaxy clustering, N(z).
+    """ClTracer for galaxy clustering.
 
     """
     
@@ -133,7 +133,7 @@ class ClTracerLensing(ClTracer):
     
     def __init__(self, cosmo, has_intrinsic_alignment, 
                  z_n, n, z_ba=None, ba=None, z_rf=None, rf=None):
-        """ClTracer for lensing shapes, s(z).
+        """ClTracer for lensing shapes.
         
         Args:
             cosmo (:obj:`Cosmology`): Either a ccl_cosmology or a Cosmology object.
