@@ -151,10 +151,14 @@ class build_external_clib(build_clib):
 #Creating the PyTest command
 class PyTest(Command):
     import sys
-    #I assume that the package is located in the default prefix.
+    import platform
+    #This assumes that the package is located in the default prefix.
     #If not, you have to add the path where you installed the C library
-    #To DYLD_LIBRARY_PATH (unless it is /usr/local/lib)
-    os.environ['DYLD_LIBRARY_PATH']+= os.pathsep + os.path.join(sys.prefix,'lib')
+    #To DYLD_LIBRARY_PATH or LD_LIBRARY_PATH depending on your platform
+    if 'Linux' in platform.system():
+        os.environ['LD_LIBRARY_PATH']+= os.pathsep + os.path.join(sys.prefix,'lib')
+    if 'Darwin' in platform.system():
+        os.environ['DYLD_LIBRARY_PATH']+= os.pathsep + os.path.join(sys.prefix,'lib')
     user_options = []
     def initialize_options(self):
         pass
