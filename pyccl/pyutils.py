@@ -104,14 +104,14 @@ def _vectorize_fn2(fn, fn_vec, cosmo, x, z, returns_status=True):
     # Access ccl_cosmology object
     cosmo = _cosmology_obj(cosmo)
     status = 0
+    scalar = False
     
+    # If a scalar was passed, convert to an array
     if isinstance(x, float):
-        # Use single-value function
-        if returns_status:
-            f, status = fn(cosmo, x, z, status) # Note order of x,z switched
-        else:
-            f = fn(cosmo, x, z)
-    elif isinstance(x, np.ndarray):
+        scalar = True
+        x = np.array([x,])
+    
+    if isinstance(x, np.ndarray):
         # Use vectorised function
         if returns_status:
             f, status = fn_vec(cosmo, z, x, x.size, status)
@@ -126,8 +126,10 @@ def _vectorize_fn2(fn, fn_vec, cosmo, x, z, returns_status=True):
     
     # Check result and return
     check(status)
-    return f
-
+    if scalar:
+        return f[0]
+    else:
+        return f
 
 def _vectorize_fn3(fn, fn_vec, cosmo, x, n, returns_status=True):
     """
