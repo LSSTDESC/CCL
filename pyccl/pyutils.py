@@ -159,7 +159,7 @@ def _vectorize_fn3(fn, fn_vec, cosmo, x, n, returns_status=True):
     
     # Check result and return
     check(status)
-    if scalar :
+    if scalar:
         return f[0]
     else:
         return f
