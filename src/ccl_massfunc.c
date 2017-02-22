@@ -22,15 +22,21 @@ void ccl_cosmology_compute_hmfparams(ccl_cosmology * cosmo, int *status)
   case ccl_tinker10:
     printf("");
     double delta[9] = {200.0, 300.0, 400.0, 600.0, 800.0, 1200.0, 1600.0, 2400.0, 3200.0};
+    double lgdelta[9];
     double alpha[9] = {0.368, 0.363, 0.385, 0.389, 0.393, 0.365, 0.379, 0.355, 0.327};
     double beta[9] = {0.589, 0.585, 0.544, 0.543, 0.564, 0.623, 0.637, 0.673, 0.702};
     double gamma[9] ={0.864, 0.922, 0.987, 1.09, 1.20, 1.34, 1.50, 1.68, 1.81};
     double phi[9] = {-0.729, -0.789, -0.910, -1.05, -1.20, -1.26, -1.45, -1.50, -1.49};
     double eta[9] = {-0.243, -0.261, -0.261, -0.273, -0.278, -0.301, -0.301, -0.319, -0.336};
     int nd = 9;
+    int i;
+
+    for(i=0; i<nd; i++){
+      lgdelta[i] = log10(delta[i]);
+    }
 
     gsl_spline * alphahmf = gsl_spline_alloc(D_SPLINE_TYPE, nd);
-    *status = gsl_spline_init(alphahmf, delta, alpha, nd);
+    *status = gsl_spline_init(alphahmf, lgdelta, alpha, nd);
     if (*status){
       free(delta);
       free(alpha);
@@ -41,7 +47,7 @@ void ccl_cosmology_compute_hmfparams(ccl_cosmology * cosmo, int *status)
     }
 
     gsl_spline * betahmf  = gsl_spline_alloc(D_SPLINE_TYPE, nd);
-    *status = gsl_spline_init(betahmf, delta, beta, nd);
+    *status = gsl_spline_init(betahmf, lgdelta, beta, nd);
     if (*status){
       free(delta);
       free(beta);
@@ -52,7 +58,7 @@ void ccl_cosmology_compute_hmfparams(ccl_cosmology * cosmo, int *status)
     }
 
     gsl_spline * gammahmf = gsl_spline_alloc(D_SPLINE_TYPE, nd);
-    *status = gsl_spline_init(gammahmf, delta, gamma, nd);
+    *status = gsl_spline_init(gammahmf, lgdelta, gamma, nd);
     if (*status){
       free(delta);
       free(gamma);
@@ -63,7 +69,7 @@ void ccl_cosmology_compute_hmfparams(ccl_cosmology * cosmo, int *status)
     }
 
     gsl_spline * phihmf   = gsl_spline_alloc(D_SPLINE_TYPE, nd);
-    *status = gsl_spline_init(phihmf, delta, phi, nd);
+    *status = gsl_spline_init(phihmf, lgdelta, phi, nd);
     if (*status){
       free(delta);
       free(phi);
@@ -74,7 +80,7 @@ void ccl_cosmology_compute_hmfparams(ccl_cosmology * cosmo, int *status)
     }
 
     gsl_spline * etahmf   = gsl_spline_alloc(D_SPLINE_TYPE, nd);
-    *status = gsl_spline_init(etahmf, delta, eta, nd);
+    *status = gsl_spline_init(etahmf, lgdelta, eta, nd);
     if (*status){
       free(delta);
       free(eta);
@@ -199,11 +205,11 @@ static double massfunc_f(ccl_cosmology *cosmo, double halomass, double a, double
     delta_c_Tinker = 1.686;
     nu = delta_c_Tinker/(sigma);
 
-    fit_A = gsl_spline_eval(cosmo->data.alphahmf, odelta, cosmo->data.accelerator_d); //alpha in Eq. 8
-    fit_a = gsl_spline_eval(cosmo->data.etahmf, odelta, cosmo->data.accelerator_d)*pow(a, -0.27); //eta in Eq. 8
-    fit_b = gsl_spline_eval(cosmo->data.betahmf, odelta, cosmo->data.accelerator_d)*pow(a, -0.20); //beta in Eq. 8
-    fit_c = gsl_spline_eval(cosmo->data.gammahmf, odelta, cosmo->data.accelerator_d)*pow(a, 0.01); //gamma in Eq. 8
-    fit_d = gsl_spline_eval(cosmo->data.phihmf, odelta, cosmo->data.accelerator_d)*pow(a, 0.08); //phi in Eq. 8;
+    fit_A = gsl_spline_eval(cosmo->data.alphahmf, log10(odelta), cosmo->data.accelerator_d); //alpha in Eq. 8
+    fit_a = gsl_spline_eval(cosmo->data.etahmf, log10(odelta), cosmo->data.accelerator_d)*pow(a, -0.27); //eta in Eq. 8
+    fit_b = gsl_spline_eval(cosmo->data.betahmf, log10(odelta), cosmo->data.accelerator_d)*pow(a, -0.20); //beta in Eq. 8
+    fit_c = gsl_spline_eval(cosmo->data.gammahmf, log10(odelta), cosmo->data.accelerator_d)*pow(a, 0.01); //gamma in Eq. 8
+    fit_d = gsl_spline_eval(cosmo->data.phihmf, log10(odelta), cosmo->data.accelerator_d)*pow(a, 0.08); //phi in Eq. 8;
 
     printf("%le %le %le %le %le\n", fit_A, fit_a, fit_b, fit_c, fit_d);
 
