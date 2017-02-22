@@ -1,0 +1,9 @@
+*.aux
+*.blg
+*.dvi
+*.log
+*Notes.bib
+*fdb_latexmk
+*.fls
+*.toc
+*.tar.gz

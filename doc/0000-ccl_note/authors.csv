@@ -1,0 +1,31 @@
+# =============================================================================
+# authors.csv
+#
+# While we wait for the LSST DESC publications system to generate files
+# like this from its database, we'll need to edit authors.csv by hand.
+# Below are some example entries.
+#
+# Notes:
+#   - If someone has two affiliations, they get two rows, and the last row is
+#     is used for their contribution.
+#   - Cannot deal with empty rows...
+#   - BUG: contributions are re-formatted into Title case, removing all other
+#     capitalizations...
+#
+# =============================================================================
+Lastname,Firstname,Authorname,AuthorType,Affiliation,Contribution,Email
+Alonso,David,"David Alonso",Contributor,"David's institute address","wrote code, wrote text for paper.",name@email.server
+Blazek,Jonathan,"Jonathan Blazek",Contributor,"Jonathan's institute address","wrote code, wrote text for paper.",name@email.server
+Bull,Phil,"Phil Bull",Contributor,"Phil's institute address","wrote code, wrote text for paper.",name@email.server
+Chisari,Elisa,"N. Elisa Chisari",Contributor,"Elisa's institute address","wrote code, wrote text for paper.",name@email.server
+Eifler,Tim,"Tim Eifler",Contributor,"Tim's institute address","wrote code, wrote text for paper.",name@email.server
+Hlozek,Ren\'ee,"Ren\'ee Hlozek",Contributor,"Renee's institute address","wrote code, wrote text for paper.",name@email.server
+Kirkby,David,"David Kirkby",Contributor,"David K's institute address","wrote code, wrote text for paper.",name@email.server
+Krause,Elisabeth,"Elisabeth Krause",Contributor,"Elisabeth's institute address","wrote code, wrote text for paper.",name@email.server
+Leonard,Danielle,"C. Danielle Leonard",Contributor,"Danielle's institute address","wrote code, wrote text for paper.",name@email.server
+Marshall,Phil,"Phil Marshall",Contributor,"SLAC National Accelerator Laboratory, Menlo Park, CA 94025, USA","helped with document preparation.",pjm@slac.stanford.edu
+Singh,Sukhdeep,"Sukhdeep Singh",Contributor,"Sukhdeep's institute address","wrote code, wrote text for paper.",name@email.server
+Slosar,Anze,"An\v{z}e Slosar",Contributor,"Anze's institute address","wrote code, wrote text for paper.",name@email.server
+Villareal,Antonio,"Antonio Villarreal",Contributor,"Antonio's institute address","wrote code, wrote text for paper.",name@email.server
+Vrastil,Michal,"Michal Vrastil",Contributor,"Michal's institute address","wrote code, wrote text for paper.",name@email.server
+Zuntz,Joe,"Joe Zuntz",Contributor,"Joe's institute address","wrote code, wrote text for paper.",name@email.server

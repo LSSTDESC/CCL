@@ -1,4 +1,4 @@
-% 
+%
 \RequirePackage{docswitch}
 \setjournal{\flag}
 
@@ -13,18 +13,18 @@
 \graphicspath{{./}{./figures/}}
 \bibliographystyle{apj}
 
-%This is a paper and note template for the LSST DESC \citep{Overview,ScienceBook,WhitePaper}.  
+%This is a paper and note template for the LSST DESC \citep{Overview,ScienceBook,WhitePaper}.
 %Eventually it will be possible to switch between various \LaTeX\xspace styles for internal notes and peer reviewed journals templates.
-%The base switch is between \code{aastex.cls} and \code{revtex.cls}; however, facilities are also provided for \code{emulateapj.cls} and \code{mnras.cls}.\footnote{The \code{mnras.cls} class file is a bit odd...}  
-%Documents can be compiled using the provided \code{Makefile} with several options: \code{make apj}, \code{make apjl}, \code{make prd}, and \code{make mnras}. 
-%There are some oddities when changing between templates, so please be patient while we try to work these out. 
+%The base switch is between \code{aastex.cls} and \code{revtex.cls}; however, facilities are also provided for \code{emulateapj.cls} and \code{mnras.cls}.\footnote{The \code{mnras.cls} class file is a bit odd...}
+%Documents can be compiled using the provided \code{Makefile} with several options: \code{make apj}, \code{make apjl}, \code{make prd}, and \code{make mnras}.
+%There are some oddities when changing between templates, so please be patient while we try to work these out.
 
 %There are a number of useful \LaTeX\xspace commands predefined in \code{macros.tex}.
 %Notice that the section labels are prefixed with \code{sec:} to allow the use of the \verb=\secref= command to reference a section (\ie, \secref{intro}).
 %Figures can be referenced with the \verb=\figref= command, which assumes that the figure label is prefixed with \code{fig:}.
 %In \figref{example} we show an example figure.
-%You'll notice that the actual figure file is found in the \code{figures} directory. 
-%However, because we have specified this directory in our \verb=\graphicspath= we do not need to explicitly specify the path to the image. 
+%You'll notice that the actual figure file is found in the \code{figures} directory.
+%However, because we have specified this directory in our \verb=\graphicspath= we do not need to explicitly specify the path to the image.
 
 %The \code{macros.tex} package also contains some conventional scientific units like \angstrom, \GeV, \Msun, etc. and some editorial tools for highlighting \FIXME{issues}, \CHECK{text to be checked}, \COMMENT{comments}, and \NEW{new additions}.
 
@@ -32,15 +32,15 @@
 %% Start the Document %%
 %%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{document} 
+\begin{document}
 
 \title{Core Cosmology Library: Precision Cosmological Predictions for LSST}
 
 \maketitlepre
 
 \begin{abstract}
- 
-The Core Cosmology Library ({\tt CCL}) provides routines to compute basic cosmological observables with validated numerical accuracy. These routines have been validated to a hereby documented accuracy level against the results of the Code Comparsion Project. In the current version, predictions are provided for distances and background quantities, angular auto- and cross-spectra of cosmic shear and clustering and the halo mass function. Fiducial specifications for the expected LSST galaxy distributions and clustering bias are also included, together with a facility to compute redshift distributions for a user-defined photometric redshift model. {\tt CCL} is written in C with a Python interface. In this note, we explain the functionality of the first release ({\tt CCL} v0.1) of the library. 
+
+The Core Cosmology Library ({\tt CCL}) provides routines to compute basic cosmological observables with validated numerical accuracy. These routines have been validated to a hereby documented accuracy level against the results of the Code Comparsion Project. In the current version, predictions are provided for distances and background quantities, angular auto- and cross-spectra of cosmic shear and clustering and the halo mass function. Fiducial specifications for the expected LSST galaxy distributions and clustering bias are also included, together with a facility to compute redshift distributions for a user-defined photometric redshift model. {\tt CCL} is written in C with a Python interface. In this note, we explain the functionality of the first release ({\tt CCL} v0.1) of the library.
 
 \end{abstract}
 
@@ -56,16 +56,16 @@ The Core Cosmology Library ({\tt CCL}) provides routines to compute basic cosmol
 \section{Introduction}
 \label{sec:intro}
 
-In preparation for constraining cosmology with the Large Synoptic Survey Telescope (LSST), it is necessary to be able to produce theoretical predictions for the cosmological quantities which will be measured. The Core Cosmology Library\footnote{\url{https://github.com/LSSTDESC/CCL}} ({\tt CCL}) aims to provide, in one library, predictions which are validated to a well-documented numerical accuracy for the purpose of constraining cosmology with LSST. By constructing a cosmology library with LSST in mind, it is possible to ensure that it is flexible, adaptable, and validated for all cases of interest, as well as user-friendly and available for the needs of all working groups. 
+In preparation for constraining cosmology with the Large Synoptic Survey Telescope (LSST), it is necessary to be able to produce theoretical predictions for the cosmological quantities which will be measured. The Core Cosmology Library\footnote{\url{https://github.com/LSSTDESC/CCL}} ({\tt CCL}) aims to provide, in one library, predictions which are validated to a well-documented numerical accuracy for the purpose of constraining cosmology with LSST. By constructing a cosmology library with LSST in mind, it is possible to ensure that it is flexible, adaptable, and validated for all cases of interest, as well as user-friendly and available for the needs of all working groups.
 
-The Core Cosmology Library is written in C and incorporates the CLASS code \cite{class} to provide predictions for the matter power spectrum\footnote{Future versions of the library will incorporate other power-spectrum libraries and methods.}. A Python wrapper is also provided for improved ease of use. 
+The Core Cosmology Library is written in C and incorporates the CLASS code \cite{class} to provide predictions for the matter power spectrum\footnote{Future versions of the library will incorporate other power-spectrum libraries and methods.}. A Python wrapper is also provided for improved ease of use.
 
 This note describes how to install {\tt CCL} (Section \ref{sec:install}), its functionality (Section \ref{sec:func}), the relevant unit tests (Section \ref{sec:tests}), the default configuration (Section \ref{sec:default}), directions for finding a {\tt CCL} example (Section \ref{sec:example}), the Python wrapper (Section \ref{sec:python}), future plans (Section \ref{sec:future}), means to contact the developers (Section \ref{sec:feedback}) and the license under which {\tt CCL} is released (Section \ref{sec:license}).
 
 \section{Installation}
 \label{sec:install}
 \subsection{Dependencies}
-\begin{itemize} 
+\begin{itemize}
 \item GNU Scientific Library {\tt GSL}\footnote{\url{https://www.gnu.org/software/gsl/}}, {\tt GSL-2.1} or higher
 \item Simplified Wrapper and Interface Generator {\tt SWIG}\footnote{\url{http://www.swig.org/}}
 \end{itemize}
@@ -99,10 +99,10 @@ Ultimately, CCL will aim to incorporate theoretical predictions for all cosmolog
  \item All the above plus an arbitrary, user-defined, modified growth function (see description in Section \ref{sec:growth}).
 \end{itemize}
 
-Not all functionalities are available for all models. For a reference of what 
+Not all functionalities are available for all models. For a reference of what
 predictions are available for each model, see Table \ref{tab:cosmo}.
 
-The first step to use CCL is to generate a {\tt ccl\_cosmology} structure, containing all of the information required to compute cosmological observables. A {\tt ccl\_cosmology} structure is generated using the information from a {\tt ccl\_parameters} object and a {\tt ccl\_configuration} object. 
+The first step to use CCL is to generate a {\tt ccl\_cosmology} structure, containing all of the information required to compute cosmological observables. A {\tt ccl\_cosmology} structure is generated using the information from a {\tt ccl\_parameters} object and a {\tt ccl\_configuration} object.
 
 \input{table_cosmo}
 
@@ -157,7 +157,7 @@ CCL also contains capability to compute $a(\chi)$ (i.e. the inverse of $\chi(a)$
 \subsection{Growth function}
 \label{sec:growth}
 
-The routines described in this subsection are implemented in {\tt ccl\_background.c}. 
+The routines described in this subsection are implemented in {\tt ccl\_background.c}.
 To compute the growth function, $D(a)$, the growth factor of matter perturbations, {\tt CCL} solves the following differential equation:
 \begin{equation}
   \frac{d}{da}\left(a^3H(a)\frac{dD}{da}\right)=\frac{3}{2}\Omega_M(a)H(a)D.
@@ -173,7 +173,7 @@ Currently CCL allows for an alternative cosmological model defined by a regular 
 \subsection{Matter power spectrum}
 \label{sec:power}
 
-There are several options for obtaining the matter power spectrum in {\tt CCL}. 
+There are several options for obtaining the matter power spectrum in {\tt CCL}.
 The routines described in this subsection are implemented in {\tt ccl\_power.c}.
 
 \subsubsection{BBKS}
@@ -182,7 +182,7 @@ CCL implements the analytical BBKS approximation to the transfer function \citep
 T(q\equiv k/\Gamma h {\rm Mpc}^{-1}) = \frac{\ln[1+2.34q]}{2.34q}[1+3.89q+(16.2q)^2+(5.47q)^3+(6.71q)^4]^{-0.25}
 \end{equation}
 where $\Gamma = \Omega_m h$.
-The power spectrum is related to the transfer function by $\Delta(k)\propto T^2(k)k^{3+n}$ and $\Delta^2(k)\propto k^3P(k)$. The normalization of the power spectrum is achieved at $z=0$ by setting $\sigma_8$ to its value today. 
+The power spectrum is related to the transfer function by $\Delta(k)\propto T^2(k)k^{3+n}$ and $\Delta^2(k)\propto k^3P(k)$. The normalization of the power spectrum is achieved at $z=0$ by setting $\sigma_8$ to its value today.
 The BBKS power spectrum option is primarily used as a precisely defined input for testing the numerical accuracy of {\tt CCL} routines (as described in Sect.~\ref{sec:tests}), and it is not recommended for other uses.
 
 \subsubsection{CLASS}
@@ -299,7 +299,7 @@ where $\mathcal{P}_\Phi(k)$ is the dimensionless power spectrum of of the primor
            W^{\rm M}(z)\equiv\int_z^\infty dz' p_z(z')\frac{2-5s(z')}{2}\frac{r(\chi(z')-\chi(z))}{r(\chi(z'))}.
         \end{equation}
         Here $s(z)$ is the magnification bias, given as the logarithmic derivative of the number of sources with magnitude limit, and $r(\chi)$ is the angular comoving distance (see Eq. \ref{eq:angdist}).
-          
+
         Note that {\tt CCL} currently does not compute relativistic corrections to number counts \cite{2011PhRvD..84d3516C,2011PhRvD..84f3505B}. Although these should be included in the future, their contribution to the total fluctuation is largely subdominant, and therefore it is safe to work without them for the time being.
 \end{itemize}
 
@@ -418,7 +418,7 @@ where $P_k$ is the matter power spectrum and $\tilde{W}(kR)$ is the Fourier tran
 \end{equation}
 %
 This function is directly implemented in {\tt CCL} as well as a specific $\sigma_8$ function.
- 
+
 The \citet{Tinker2010} model parameterizes both the halo mass function and the halo bias in terms of the peak height, $\nu = \delta_c / \sigma(M)$, where $\delta_c$ is the critical density for collapse and is chosen to be $1.686$ for this particular parameterization. We can then parameterize the halo function and halo bias as
 \begin{equation}
   \b(\nu) = 1 - A\frac{\nu^a}{\nu^a + {\delta_c}^a} + B\nu^b+C\nu^c,
@@ -433,7 +433,7 @@ LSST galaxy redshifts will be obtained using photometry. However, analytic forms
 To do so, you will write a function which accepts as input a photometric redshift, a spectroscopic redshift, and a void pointer to a structure containing any further parameters of your photo-z model. This function will return the probability of measuring the input photometric redshift given the input spectroscopic redshift. Explicitly, this function should take the form:
 
 {\tt user\_pz\_probability(double z\_ph, double z\_s, void * user\_par)\{...\}}
- 
+
 You must then also provides the structure of further parameters ({\tt user\_par}). This model can be incorporated when computing $\frac{dN}{dz}^i$ in photometric redshift bin $i$, as given by equation \ref{photoz}, below.
 
 
@@ -443,14 +443,14 @@ You must then also provides the structure of further parameters ({\tt user\_par}
 
 {\tt CCL} includes LSST specifications for the expected galaxy distributions of the full galaxy clustering sample and the lensing source galaxy sample. These enable the user to easily make predictions or forecasts for LSST.
 
-The functional forms of the expected $\frac{dN}{dz}$ for clustering galaxies and lensing source galaxies are provided. Here, $\frac{dN}{dz}$ is the number density of galaxies as a function of spectroscopic redshift. 
+The functional forms of the expected $\frac{dN}{dz}$ for clustering galaxies and lensing source galaxies are provided. Here, $\frac{dN}{dz}$ is the number density of galaxies as a function of spectroscopic redshift.
 
 In the case of lensing source galaxies, these forms are given in \cite{Chang2013}, wherein three different cases are considered: fiducial, optimistic, and conservative. All three are included in {\tt CCL}, and are indicated via a label of {\tt DNDZ\_WL\_OPT}, {\tt DNDZ\_WL\_FID}, and {\tt DNDZ\_WL\_CONS} as appropriate. The functional form of $\frac{dN}{dz}$ for lensing source galaxies is given as:
 \begin{equation}
 \frac{dN}{dz} \propto z^\alpha {\rm exp}\left(-\frac{z}{z_0}^\beta\right).
 \label{dndz_src}
 \end{equation}
-The parameters, in the fiducial case, are given as $\alpha=1.24$, $\beta=1.01$, and $z_0=0.51$. In the optimistic case, this becomes $\alpha=1.23$, $\beta=1.05$, and $z_0=0.59$. The conservative case is given by $\alpha=1.28$, $\beta=0.97$, and $z_0=0.41$. 
+The parameters, in the fiducial case, are given as $\alpha=1.24$, $\beta=1.01$, and $z_0=0.51$. In the optimistic case, this becomes $\alpha=1.23$, $\beta=1.05$, and $z_0=0.59$. The conservative case is given by $\alpha=1.28$, $\beta=0.97$, and $z_0=0.41$.
 
 For the case of the clustering galaxy sample, the functional form is given by \cite{ScienceBook}:
 \begin{equation}
@@ -466,7 +466,7 @@ With this, $\frac{dN^i}{dz}$ of lensing or clustering galaxies in a particular p
 \frac{dN^i}{dz} = \frac{\frac{dN}{dz}\int_{z_i}^{z_{i+1}} dz' p(z,z')}{\int_{z_{\rm min}}^{z_{\rm max}}dz \frac{dN}{dz} \int_{z_i}^{z_{i+1}}dz' p(z, z')}
 \label{photoz}
 \end{equation}
-where $z_{i}$ and $z_{i+1}$ are the photo-z edges of the bin in question. 
+where $z_{i}$ and $z_{i+1}$ are the photo-z edges of the bin in question.
 
 Finally, the expected (linear, scale-independent) bias of galaxies in the clustering sample is also provided. It is given by \cite{ScienceBook}:
 \begin{equation}
@@ -478,17 +478,17 @@ where $D(z)$ in the linear growth rate of structure.
 \section{Tests and validation}
 \label{sec:tests}
 
-Our goal is for outputs of {\tt CCL} to be validated against the results of the code comparison project down to a $10^{-4}$ or better accuracy level if possible. In some cases, this level of accuracy is not necessary, as other systematics which have not been considered in this version of {\tt CCL} yet are expected to have a larger fractional impact. In the cases where this applies, we make it clear below. 
-%{\bf TODO: Currently having problems validating the correlation functions to this level. Also, we need a discussion of why this accuracy level is needed.} 
+Our goal is for outputs of {\tt CCL} to be validated against the results of the code comparison project down to a $10^{-4}$ or better accuracy level if possible. In some cases, this level of accuracy is not necessary, as other systematics which have not been considered in this version of {\tt CCL} yet are expected to have a larger fractional impact. In the cases where this applies, we make it clear below.
+%{\bf TODO: Currently having problems validating the correlation functions to this level. Also, we need a discussion of why this accuracy level is needed.}
 
 A code comparison project was carried out among members of TJP where the following outputs of cosmological forecast codes were compared and validated:
 \begin{enumerate}
 \item growth factor at $z = 0,1,2,3,4,5$,
-\item comoving radial distance $[$Mpc$/h]$ at the same redshifts, 
+\item comoving radial distance $[$Mpc$/h]$ at the same redshifts,
 \item linear matter power spectrum, $P(k)$, from BBKS \citealt{BBKS}) in units of $($Mpc$/h)^3$ at $z=0,2$ in the range $10^{-3} \leq k \leq 10 h/$Mpc with 10 bins per decade, and
 \item the mass variance at $z=0$, $\sigma(M,z=0)$ for $M =\{10^6, 10^8, 10^{10}, 10^{12}, 10^{14}, 10^{16}\} $M$_\odot/h$.
 \end{enumerate}
-These forecasts were produced and compared for different cosmologies, which are listed in the table below. The results agree to better than $0.1\%$ relative accuracy for comoving distance and growth factor among all submissions (with one exception), and for $P(k)$ and $\sigma(M)$ among codes which use the same BBKS conventions. 
+These forecasts were produced and compared for different cosmologies, which are listed in the table below. The results agree to better than $0.1\%$ relative accuracy for comoving distance and growth factor among all submissions (with one exception), and for $P(k)$ and $\sigma(M)$ among codes which use the same BBKS conventions.
 
 \begin{center}
   \begin{tabular}{ c | c c c c c c c c }
@@ -498,10 +498,10 @@ These forecasts were produced and compared for different cosmologies, which are 
     \hline
     Model & $\Omega_m$ & $\Omega_b$ & $\Omega_\Lambda$ & $h_0$ & $\sigma_8$ & $n_s$ & $w_0$ & $w_a$ \\
     \hline
-    flat LCDM & 0.3 & 0.05 & 0.7 & 0.7 & 0.8 & 0.96 & -1 & 0 \\ 
-    $w_0$ LCDM & 0.3 & 0.05 & 0.7 & 0.7 & 0.8 & 0.96 & -0.9 & 0  \\ 
-    $w_a$ LCDM & 0.3 & 0.05 & 0.7 & 0.7 & 0.8 & 0.96 & -0.9 & 0.1  \\ 
-    open $w_a$ LCDM & 0.3 & 0.05 & 0.65 & 0.7 & 0.8 & 0.96 & -0.9 & 0.1  \\ 
+    flat LCDM & 0.3 & 0.05 & 0.7 & 0.7 & 0.8 & 0.96 & -1 & 0 \\
+    $w_0$ LCDM & 0.3 & 0.05 & 0.7 & 0.7 & 0.8 & 0.96 & -0.9 & 0  \\
+    $w_a$ LCDM & 0.3 & 0.05 & 0.7 & 0.7 & 0.8 & 0.96 & -0.9 & 0.1  \\
+    open $w_a$ LCDM & 0.3 & 0.05 & 0.65 & 0.7 & 0.8 & 0.96 & -0.9 & 0.1  \\
     closed $w_a$ LCDM & 0.3 & 0.05 & 0.75 & 0.7 & 0.8 & 0.96 & -0.9 & 0.1  \\
     \hline
   \end{tabular}
@@ -517,7 +517,7 @@ From the comparison, we were also able to identify some typical issues which aff
 \item Including/excluding radiation in the computation of the comoving distances and the growth function can easily make a difference of $10^{-4}$ at the redshifts required in this submission.
 \end{itemize}
 
-In a second stage, we used the BBKS linear matter power spectrum from the previous step to compare two-point statistics for two redshift bins, resulting in three tomography combinations, ($1-1$),($1-2$),($2-2$). We adopted the following analytic redshift distributions: a Gaussian with $\sigma = 0.15$, centered at $z_1 = 1$; and another Gaussian with the same dispersion but centered at $z_2 = 1.5$. We repeated the exercise for two redshift distribution histograms shown in Figure \ref{fig:zhistos}. 
+In a second stage, we used the BBKS linear matter power spectrum from the previous step to compare two-point statistics for two redshift bins, resulting in three tomography combinations, ($1-1$),($1-2$),($2-2$). We adopted the following analytic redshift distributions: a Gaussian with $\sigma = 0.15$, centered at $z_1 = 1$; and another Gaussian with the same dispersion but centered at $z_2 = 1.5$. We repeated the exercise for two redshift distribution histograms shown in Figure \ref{fig:zhistos}.
 
 %------------------------
 \begin{figure}
@@ -530,7 +530,7 @@ In a second stage, we used the BBKS linear matter power spectrum from the previo
 
 In this second step, only 2 codes have been compared so far. More outputs are needed to guarantee convergence. Preliminarily, from these outputs, we have concluded that:
 \begin{itemize}
-\item The cross-correlation between bins is particularly sensitive to having enough points to sample the lensing kernel. 
+\item The cross-correlation between bins is particularly sensitive to having enough points to sample the lensing kernel.
 \item The nonlinear behaviour is sensitive to $l_{\rm max}$, we had to go up to 30,000 to get convergence (and we could not achieve $0.01\%$ convergence).
 \item The large scales are sensitive to $l_{\rm min}$ (which also prompts a question about using the Limber approximation or not).
 %\item Because we are using BBKS, evaluating the $P(k)$ at arbitrary $k_{\rm max}$ is not a problem, but we will need to test convergence in other cases.
@@ -541,7 +541,7 @@ Additionally, independent codes were utilized to test the accuracy of halo mass 
 \begin{equation}
 \log[(M^2/\bar{\rho}_m)dn/dM].
 \end{equation}
-We note that while we maintain the $10^{-4}$ for our evaluations of $\sigma$, the accuracy degrades to a value of $5\times10^{-3}$ for the halo mass function evaluation, primarily at the high halo mass and high redshift domains. We find that this increased error is acceptable, as the level of precision is significantly better than the accuracy of current halo mass function models. 
+We note that while we maintain the $10^{-4}$ for our evaluations of $\sigma$, the accuracy degrades to a value of $5\times10^{-3}$ for the halo mass function evaluation, primarily at the high halo mass and high redshift domains. We find that this increased error is acceptable, as the level of precision is significantly better than the accuracy of current halo mass function models.
 
 {\tt CCL} has a suite of test routines which, upon compilation, compare its outputs to the benchmarks from code comparison. These are run with {\tt make check}.
 
@@ -599,7 +599,7 @@ import numpy as np
 # Create new Parameters object, containing cosmo parameter values
 p = ccl.Parameters(Omega_c=0.27, Omega_b=0.045, h=0.67, A_s=2e-9, n_s=0.96)
 
-# Create new Cosmology object with these parameters. This keeps track of 
+# Create new Cosmology object with these parameters. This keeps track of
 # previously-computed cosmological functions
 cosmo = ccl.Cosmology(p)
 
@@ -607,7 +607,7 @@ cosmo = ccl.Cosmology(p)
 z_n = np.linspace(0., 1., 200)
 n = np.ones(z_n.shape)
 
-# Create objects to represent tracers of the weak lensing signal with this 
+# Create objects to represent tracers of the weak lensing signal with this
 # number density (with has_intrinsic_alignment=False)
 lens1 = ccl.ClTracerLensing(cosmo, False, z_n, n)
 lens2 = ccl.ClTracerLensing(cosmo, False, z_n, n)
@@ -698,9 +698,12 @@ Contact GitHub API Training Shop Blog About \textcopyright 2017 GitHub, Inc. Ter
 
 \input{acknowledgments}
 
+\input{contributions}
+
+
 %{\it Facilities:} \facility{LSST}
 
 \bibliography{main}
 
 \end{document}
-% 
+%

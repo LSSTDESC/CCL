@@ -1,0 +1,12 @@
+{
+    "author": "David Alonso",
+    "affiliation": "University of Oxford",
+    "email": "--",
+    "title": "Core Cosmology Library: Precision Cosmological Predictions for LSST",
+    "description": "The Core Cosmology Library ({\tt CCL}) provides routines to compute basic cosmological observables with validated numerical accuracy. These routines have been validated to a hereby documented accuracy level against the results of the Code Comparsion Project. In the current version, predictions are provided for distances and background quantities, angular auto- and cross-spectra of cosmic shear and clustering and the halo mass function. Fiducial specifications for the expected LSST galaxy distributions and clustering bias are also included, together with a facility to compute redshift distributions for a user-defined photometric redshift model. {\tt CCL} is written in C with a Python interface. In this note, we explain the functionality of the first release ({\tt CCL} v0.1) of the library. ",
+    "repo_name": "CCL",
+    "serial_number": "0000",
+    "short_title": "note",
+    "folder_name": "0000-ccl-note",
+    "default_format": "tex"
+}
