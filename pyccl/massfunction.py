@@ -3,7 +3,9 @@ import ccllib as lib
 from pyutils import _vectorize_fn, _vectorize_fn2
 
 def massfunc(cosmo, halo_mass, redshift):
-    """Tinker (2010) halo mass function.
+    """Halo mass function.
+
+    Note: only Tinker (2010) is implemented right now.
 
     TODO: verify 2010 vs 2008 mass function.
     TODO: check that output is dndM or dnd_lnM
@@ -14,7 +16,7 @@ def massfunc(cosmo, halo_mass, redshift):
         redshift (float): Redshift.
 
     Returns:
-        massfunc (float or array_like): Tinker halo mass function; dndM.
+        massfunc (float or array_like): Halo mass function; dndM.
 
     """
     return _vectorize_fn2(lib.massfunc, 
@@ -35,7 +37,7 @@ def massfunc_m2r(cosmo, halo_mass):
                          lib.massfunc_m2r_vec, cosmo, halo_mass)
 
 def sigmaM(cosmo, halo_mass, redshift):
-    """RMS variance for the given halo mass of the linear power spectrum; Mpc.
+    """RMS variance for the given halo mass of the linear power spectrum; Msun.
 
     Args:
         cosmo (:obj:`ccl.cosmology`): Cosmological parameters.
@@ -43,14 +45,16 @@ def sigmaM(cosmo, halo_mass, redshift):
         redshift (float): Redshift.
 
     Returns:
-        sigmaM (float or array_like): RMS variance of halo mass; Mpc.
+        sigmaM (float or array_like): RMS variance of halo mass.
 
     """
     return _vectorize_fn2(lib.sigmaM, 
                           lib.sigmaM_vec, cosmo, halo_mass, redshift)
 
 def halo_bias(cosmo, halo_mass, redshift):
-    """Tinker (2010) halo bias.
+    """Halo bias.
+
+    Note: only Tinker (2010) halo bias is implemented right now.
 
     Args:
         cosmo (:obj:`ccl.cosmology`): Cosmological parameters.

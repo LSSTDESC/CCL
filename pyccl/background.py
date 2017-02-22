@@ -24,7 +24,7 @@ def growth_factor_unnorm(cosmo, a):
         a (float or array_like): Scale factor(s), normalized to 1 today.
 
     Returns:
-        growth_factor_unnorm (float or array_like): Unnormalized growth factor.
+        growth_factor_unnorm (float or array_like): Unnormalized growth factor, normalized to the scale factor at early times.
 
     """
     return _vectorize_fn(lib.growth_factor_unnorm, 
