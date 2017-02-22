@@ -107,8 +107,8 @@ class ClTracerNumberCounts(ClTracer):
             n (array_like): Array of N(z)-values.
             z_b (array_like): Array of redshifts for biases, b(z).
             b (array_like): Array of biases.
-            z_s (array_like, optional): Array of redshifts for shapes, s(z). Not optional if has_magnification is True.
-            s (array_like, optional): Array of shapes. Not optional if has_magnification is True.
+            z_s (array_like, optional): Array of redshifts for magnification bias. Not optional if has_magnification is True.
+            s (array_like, optional): Array of magnification bias. Not optional if has_magnification is True.
 
         """
         
@@ -127,7 +127,7 @@ class ClTracerNumberCounts(ClTracer):
 
 
 class ClTracerLensing(ClTracer):
-    """ClTracer for lensing shapes, s(z).
+    """ClTracer for lensing shapes.
 
     """
     
