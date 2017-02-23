@@ -612,7 +612,7 @@ void ccl_cosmology_compute_power(ccl_cosmology * cosmo, int * status){
 INPUT: ccl_cosmology * cosmo, a, k [1/Mpc]
 TASK: extrapolate power spectrum at high k
 */
-static double ccl_power_extrapol_highk(ccl_cosmology * cosmo, gsl_spline2d * powerspl,double a, double k, int * status){
+static double ccl_power_extrapol_highk(ccl_cosmology * cosmo, double k, double a, gsl_spline2d * powerspl, int * status){
 
   double log_p_1;
   double deltak=1e-4;
@@ -671,12 +671,12 @@ static double ccl_power_extrapol_highk(ccl_cosmology * cosmo, gsl_spline2d * pow
 
 
 /*------ ROUTINE: ccl_linear_matter_power ----- 
-INPUT: ccl_cosmology * cosmo, a, k [1/Mpc]
+INPUT: ccl_cosmology * cosmo, k [1/Mpc],a
 TASK: compute the linear power spectrum at a given redshift
       by rescaling using the growth function
 */
 
-double ccl_linear_matter_power(ccl_cosmology * cosmo, double a, double k, int * status){
+double ccl_linear_matter_power(ccl_cosmology * cosmo, double k, double a, int * status){
  
   if (!cosmo->computed_power) ccl_cosmology_compute_power(cosmo, status);
   double log_p_1;
@@ -693,7 +693,7 @@ double ccl_linear_matter_power(ccl_cosmology * cosmo, double a, double k, int * 
 	return exp(log_p_1);
       }
     } else { //Extrapolate NL regime using log derivative
-      log_p_1 = ccl_power_extrapol_highk(cosmo,cosmo->data.p_lin,a,k,status);
+      log_p_1 = ccl_power_extrapol_highk(cosmo,k,a,cosmo->data.p_lin,status);
       return exp(log_p_1);
     }
 
@@ -716,12 +716,12 @@ INPUT: ccl_cosmology * cosmo, a, k [1/Mpc]
 TASK: compute the nonlinear power spectrum at a given redshift
 */
 
-double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double a, double k, int *status){
+double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double k, double a, int *status){
 
   switch(cosmo->config.matter_power_spectrum_method){
     //If the matter PS specified was linear, then do the linear compuation
   case ccl_linear:
-    return ccl_linear_matter_power(cosmo,a,k,status);
+    return ccl_linear_matter_power(cosmo,k,a,status);
     
   case ccl_halofit:
     
@@ -740,14 +740,14 @@ double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double a, double k, int *s
 	return exp(log_p_1);
       }
     } else { //Extrapolate NL regime using log derivative
-      log_p_1 = ccl_power_extrapol_highk(cosmo,cosmo->data.p_nl,a,k,status);
+      log_p_1 = ccl_power_extrapol_highk(cosmo,k,a,cosmo->data.p_nl,status);
       return exp(log_p_1);
     }
 
     default:
       printf("WARNING:  config.matter_power_spectrum_method = %d not yet supported\n continuing with linear power spectrum\n",cosmo->config.matter_power_spectrum_method);
       cosmo->config.matter_power_spectrum_method=ccl_linear;
-      return ccl_linear_matter_power(cosmo,a,k,status);
+      return ccl_linear_matter_power(cosmo,k,a,status);
   }
 }
 
@@ -766,7 +766,7 @@ static double sigmaR_integrand(double lk,void *params)
   par->status = &stat;
   
   double k=pow(10.,lk);
-  double pk=ccl_linear_matter_power(par->cosmo,1.,k, par->status);
+  double pk=ccl_linear_matter_power(par->cosmo,k, 1.,par->status);
   double kR=k*par->R;
   double w;
   if(kR<0.1) {
