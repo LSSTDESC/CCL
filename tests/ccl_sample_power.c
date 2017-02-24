@@ -12,7 +12,7 @@ int main(int argc, char * argv[])
   double normp = 0.8; //2.1e-9
   double n_s = 0.96;
   ccl_configuration config = default_config;
-  config.transfer_function_method = ccl_bbks;
+  //config.transfer_function_method = ccl_bbks;
   
   ccl_parameters params = ccl_parameters_create_flat_lcdm(Omega_c, Omega_b, h, normp, n_s);
   ccl_cosmology * cosmo = ccl_cosmology_create(params, config);
@@ -33,7 +33,7 @@ int main(int argc, char * argv[])
     }
   } else {
     if(cosmo->config.matter_power_spectrum_method==ccl_halofit){
-      for (k = 1e-4; k<1e3; k*=1.05){
+      for (k = K_MIN; k<K_MAX; k*=1.05){
 	p = ccl_nonlin_matter_power(cosmo, k,1.0,&status);
 	p1 = ccl_nonlin_matter_power(cosmo,k, a_at_z1,&status);
 	p2 = ccl_nonlin_matter_power(cosmo,k, a_at_z2,&status);
