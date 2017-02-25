@@ -1,8 +1,11 @@
 script:
-language: c
-compiler:
-  - clang
-  - gcc
+language: python
+python:
+  - "2.6"
+  - "2.7"
+  - "3.2"
+  - "3.3"
+  - "3.4"
 before_install:
   - sudo apt-get -qq update
   - sudo apt-get install -y gsl-bin libgsl0-dev
@@ -14,9 +17,9 @@ addons:
             - texlive-fonts-recommended
             - texlive-fonts-extra
             - dvipng
-install: make
+install: pip install .
 script:
-    - make test
+    - python setup.py test
     - make -C doc/0000-ccl_note
 after_success: |
     if [[ -n "$GITHUB_API_KEY" ]; then
