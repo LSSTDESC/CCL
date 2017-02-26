@@ -20,7 +20,7 @@ static SplPar *spline_init(int n,double *x,double *y,double y0,double yf)
   SplPar *spl=malloc(sizeof(SplPar));
   if(spl==NULL)
     return NULL;
-  
+
   spl->intacc=gsl_interp_accel_alloc();
   spl->spline=gsl_spline_alloc(gsl_interp_cspline,n);
   int parstatus=gsl_spline_init(spl->spline,x,y,n);
@@ -43,7 +43,7 @@ static double spline_eval(double x,SplPar *spl)
 {
   if(x<=spl->x0)
     return spl->y0;
-  else if(x>=spl->xf) 
+  else if(x>=spl->xf)
     return spl->yf;
   else
     return gsl_spline_eval(spl->spline,x,spl->intacc);
@@ -311,7 +311,7 @@ static CCL_ClTracer *cl_tracer_new(ccl_cosmology *cosmo,int tracer_type,
 	  strcpy(cosmo->status_message,"ccl_cls.c: ccl_cl_tracer_new(): memory allocation\n");
 	  return NULL;
 	}
-      
+
 	for(int j=0;j<nchi;j++)
 	  clstatus|=window_magnification(x[j],cosmo,clt->spl_nz,clt->spl_sz,chimax,&(y[j]));
 	if(clstatus) {
@@ -371,7 +371,7 @@ static CCL_ClTracer *cl_tracer_new(ccl_cosmology *cosmo,int tracer_type,
 	strcpy(cosmo->status_message,"ccl_cls.c: ccl_cl_tracer_new(): memory allocation\n");
 	return NULL;
       }
-      
+
       for(int j=0;j<nchi;j++)
 	clstatus|=window_lensing(x[j],cosmo,clt->spl_nz,chimax,&(y[j]));
       if(clstatus) {
@@ -395,7 +395,7 @@ static CCL_ClTracer *cl_tracer_new(ccl_cosmology *cosmo,int tracer_type,
 	return NULL;
       }
       free(x); free(y);
-      
+
       clt->has_intrinsic_alignment=has_intrinsic_alignment;
       if(clt->has_intrinsic_alignment) {
 	clt->spl_rf=spline_init(nz_rf,z_rf,rf,rf[0],rf[nz_rf-1]);
@@ -585,7 +585,7 @@ static double transfer_mag(int l,double k,ccl_cosmology *cosmo,CCL_ClTracer *clt
   if(chi<=clt->chimax) {
     double a=ccl_scale_factor_of_chi(cosmo,chi,status);
     double wM=spline_eval(chi,clt->spl_wM);
-    
+
     if(wM<=0)
       return 0;
     else
@@ -608,7 +608,7 @@ static double transfer_wl(int l,double k,ccl_cosmology *cosmo,CCL_ClTracer *clt,
   if(chi<=clt->chimax) {
     double a=ccl_scale_factor_of_chi(cosmo,chi, status);
     double wL=spline_eval(chi,clt->spl_wL);
-    
+
     if(wL<=0)
       return 0;
     else

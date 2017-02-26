@@ -75,7 +75,7 @@ static void compare_sigmam(int i_model,struct sigmam_data * data)
     exit(1);
   }
   nm=linecount(f)-1; rewind(f);
-  
+
   fgets(str, 1024, f);
   for(i=0;i<nm;i++) {
     double m,m_h,sm_bench,sm_h,err;

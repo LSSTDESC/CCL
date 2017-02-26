@@ -18,4 +18,3 @@ CTEST(spacing_tests, linear_spacing_spline_limits){
     ASSERT_TRUE(m[A_SPLINE_NA-1]<=1.0);
     free(m);
 }
-

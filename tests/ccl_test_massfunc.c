@@ -76,10 +76,10 @@ CTEST_SETUP(massfunc){
 static void compare_massfunc(int model, struct massfunc_data * data)
 {
   // make the parameter set from input data
-  
+
   int stat = 0;
   int* status = &stat;
-  
+
   ccl_parameters params = ccl_parameters_create(data->Omega_c, data->Omega_b,
                                                 data->Omega_k[model], data->Omega_n,
                                                 data->w_0[model], data->w_a[model], data->h,
@@ -93,7 +93,7 @@ static void compare_massfunc(int model, struct massfunc_data * data)
   // test file generated using tinker 2008 currently
   config.mass_function_method = ccl_tinker;
   ccl_cosmology * cosmo = ccl_cosmology_create(params, config);
-  
+
   ASSERT_NOT_NULL(cosmo);
 
   double redshift = 0;
@@ -118,7 +118,7 @@ static void compare_massfunc(int model, struct massfunc_data * data)
     absolute_tolerance = MASSFUNC_TOLERANCE*fabs(data->massfunc[2][j]);
     if (fabs(absolute_tolerance)<1e-12) absolute_tolerance = 1e-12;
     ASSERT_DBL_NEAR_TOL(fabs(data->massfunc[2][j]), fabs(logmassfunc_j), absolute_tolerance);
-   
+
     logmass += 0.5;
   }
   free(cosmo);

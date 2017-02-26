@@ -17,7 +17,7 @@ CTEST_DATA(distances) {
   double Omega_k[5];
   double w_0[5];
   double w_a[5];
-  
+
   double z[6];
   double chi[5][6];
 };
@@ -29,11 +29,11 @@ static void read_chi_test_file(double z[6], double chi[5][6])
   //Distances are in Mpc/h
   FILE * f = fopen("./tests/benchmark/chi_model1-5.txt", "r");
   ASSERT_NOT_NULL(f);
-  
+
   // Ignore header line
   char str[1024];
   fgets(str, 1024, f);
-  
+
   // File is fixed format - five rows and six columns
   for (int i=0; i<6; i++){
     int count = fscanf(f, "%le %le %le %le %le %le\n", &z[i],
@@ -72,7 +72,7 @@ CTEST_SETUP(distances){
 
   // The file of benchmark data.
   read_chi_test_file(data->z, data->chi);
-	
+
 }
 
 
@@ -82,15 +82,15 @@ static void compare_distances(int model, struct distances_data * data)
 {
   // Make the parameter set from the input data
   // Values of some parameters depend on the model index
-  ccl_parameters params = ccl_parameters_create(data->Omega_c, data->Omega_b, 
-						data->Omega_k[model], data->Omega_n, 
+  ccl_parameters params = ccl_parameters_create(data->Omega_c, data->Omega_b,
+						data->Omega_k[model], data->Omega_n,
 						data->w_0[model], data->w_a[model],
 						data->h, data->A_s, data->n_s,-1,NULL,NULL);
   params.Omega_g=0;
   // Make a cosmology object from the parameters with the default configuration
   ccl_cosmology * cosmo = ccl_cosmology_create(params, default_config);
   ASSERT_NOT_NULL(cosmo);
-  
+
   // Compare to benchmark data
   for (int j=0; j<6; j++){
     int status=0;
@@ -101,7 +101,7 @@ static void compare_distances(int model, struct distances_data * data)
     if (fabs(absolute_tolerance)<1e-12) absolute_tolerance = 1e-12;
     ASSERT_DBL_NEAR_TOL(data->chi[model][j], chi_ij, absolute_tolerance);
   }
-  
+
   ccl_cosmology_free(cosmo);
 }
 

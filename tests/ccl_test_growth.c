@@ -17,7 +17,7 @@ CTEST_DATA(growth) {
   double Omega_k[5];
   double w_0[5];
   double w_a[5];
-  
+
   double z[6];
   double gf[5][6];
 };
@@ -29,11 +29,11 @@ static void read_growth_test_file(double z[6], double gf[5][6])
   //Growth is normalized to ~a at early times
   FILE * f = fopen("./tests/benchmark/growth_model1-5.txt", "r");
   ASSERT_NOT_NULL(f);
-  
+
   // Ignore header line
   char str[1024];
   fgets(str, 1024, f);
-  
+
     // File is fixed format - five rows and six columns
   for (int i=0; i<6; i++){
     int count = fscanf(f, "%le %le %le %le %le %le\n", &z[i],
@@ -55,13 +55,13 @@ CTEST_SETUP(growth){
   data->A_s = 2.1e-9;
   data->n_s = 0.96;
   data->Omega_n = 0.0;
-  
-  
+
+
   // Values that are different for the different models
   double Omega_v[5] = {  0.7,  0.7,  0.7,  0.65, 0.75 };
   double w_0[5]     = { -1.0, -0.9, -0.9, -0.9, -0.9  };
   double w_a[5]     = {  0.0,  0.0,  0.1,  0.1,  0.1  };
-  
+
   // Fill in the values from these constant arrays.
   for (int i=0; i<5; i++){
     data->Omega_v[i] = Omega_v[i];
@@ -80,15 +80,15 @@ static void compare_growth(int model, struct growth_data * data)
 {
   // Make the parameter set from the input data
   // Values of some parameters depend on the model index
-  ccl_parameters params = ccl_parameters_create(data->Omega_c, data->Omega_b, 
-						data->Omega_k[model], data->Omega_n, 
+  ccl_parameters params = ccl_parameters_create(data->Omega_c, data->Omega_b,
+						data->Omega_k[model], data->Omega_n,
 						data->w_0[model], data->w_a[model],
 						data->h, data->A_s, data->n_s,-1,NULL,NULL);
   params.Omega_g=0;
   // Make a cosmology object from the parameters with the default configuration
   ccl_cosmology * cosmo = ccl_cosmology_create(params, default_config);
   ASSERT_NOT_NULL(cosmo);
-  
+
   // Compare to benchmark data
   for (int j=0; j<6; j++){
     int status=0;

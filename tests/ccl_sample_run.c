@@ -21,7 +21,7 @@
 #define SZ_SH 0.05
 #define NL 512
 
-// The user defines a structure of parameters to the user-defined function for the photo-z probability 
+// The user defines a structure of parameters to the user-defined function for the photo-z probability
 struct user_func_params
 {
 	double (* sigma_z) (double);
@@ -49,12 +49,12 @@ int main(int argc,char **argv){
 		ZD,ccl_comoving_radial_distance(cosmo,1./(1+ZD), &status));
 	printf("Luminosity distance to z = %.3lf is chi = %.3lf Mpc\n",
 		ZD,ccl_luminosity_distance(cosmo,1./(1+ZD), &status));
-	
+
 	//Consistency check
 	printf("Scale factor at chi=%.3lf Mpc is a=%.3lf Mpc\n",
 	ccl_comoving_radial_distance(cosmo,1./(1+ZD), &status),
 	ccl_scale_factor_of_chi(cosmo,ccl_comoving_radial_distance(cosmo,1./(1+ZD), &status), &status));
-	 
+
 	// Compute growth factor and growth rate (see include/ccl_background.h for more routines)
 	printf("Growth factor and growth rate at z = %.3lf are D = %.3lf and f = %.3lf\n",
 		ZD, ccl_growth_factor(cosmo,1./(1+ZD), &status),ccl_growth_rate(cosmo,1./(1+ZD), &status));
@@ -92,7 +92,7 @@ int main(int argc,char **argv){
 	//Free up tracers
 	ccl_cl_tracer_free(ct_gc);
 	ccl_cl_tracer_free(ct_wl);
-	
+
 	//Halo mass function
 	printf("M\tdN/dlog10M(z = 0, 0.5, 1))\n");
 	for(int logM=9;logM<=15;logM+=1)
@@ -126,17 +126,17 @@ int main(int argc,char **argv){
 	user_pz_info * pz_info_example;
 
 	// Create the struct to hold the user information about photo_z's.
-	pz_info_example = ccl_specs_create_photoz_info(&my_params_example, &user_pz_probability); 
-	
+	pz_info_example = ccl_specs_create_photoz_info(&my_params_example, &user_pz_probability);
+
 	double z_test;
 	double dNdz_tomo;
 	int z;
 	FILE * output;
-	
+
 	//Try splitting dNdz (lensing) into 5 redshift bins
 	double tmp1,tmp2,tmp3,tmp4,tmp5;
 	printf("Trying splitting dNdz (lensing) into 5 redshift bins. Output written into file tests/specs_example_tomo_lens.out\n");
-	output = fopen("./tests/specs_example_tomo_lens.out", "w"); 
+	output = fopen("./tests/specs_example_tomo_lens.out", "w");
 
 	if(!output){
 		fprintf(stderr, "Could not write to 'tests' subdirectory - please run this program from the main CCL directory\n");
@@ -145,11 +145,11 @@ int main(int argc,char **argv){
 
 	for (z=0; z<100; z=z+1){
 		z_test = 0.035*z;
-		status = ccl_specs_dNdz_tomog(z_test, DNDZ_WL_FID, 0.,6., pz_info_example,&dNdz_tomo); 
-		status = ccl_specs_dNdz_tomog(z_test, DNDZ_WL_FID, 0.,0.6, pz_info_example,&tmp1); 
+		status = ccl_specs_dNdz_tomog(z_test, DNDZ_WL_FID, 0.,6., pz_info_example,&dNdz_tomo);
+		status = ccl_specs_dNdz_tomog(z_test, DNDZ_WL_FID, 0.,0.6, pz_info_example,&tmp1);
 		status = ccl_specs_dNdz_tomog(z_test, DNDZ_WL_FID, 0.6,1.2, pz_info_example,&tmp2);
 		status = ccl_specs_dNdz_tomog(z_test, DNDZ_WL_FID, 1.2,1.8, pz_info_example,&tmp3);
-		status = ccl_specs_dNdz_tomog(z_test, DNDZ_WL_FID, 1.8,2.4, pz_info_example,&tmp4); 
+		status = ccl_specs_dNdz_tomog(z_test, DNDZ_WL_FID, 1.8,2.4, pz_info_example,&tmp4);
 		status = ccl_specs_dNdz_tomog(z_test, DNDZ_WL_FID, 2.4,3.0, pz_info_example,&tmp5);
 		fprintf(output, "%f %f %f %f %f %f %f\n", z_test,tmp1,tmp2,tmp3,tmp4,tmp5,dNdz_tomo);
 	}
@@ -158,10 +158,10 @@ int main(int argc,char **argv){
 
 	//Try splitting dNdz (clustering) into 5 redshift bins
 	printf("Trying splitting dNdz (clustering) into 5 redshift bins. Output written into file tests/specs_example_tomo_clu.out\n");
-	output = fopen("./tests/specs_example_tomo_clu.out", "w");     
+	output = fopen("./tests/specs_example_tomo_clu.out", "w");
 	for (z=0; z<100; z=z+1){
 		z_test = 0.035*z;
-		status|= ccl_specs_dNdz_tomog(z_test, DNDZ_NC,0.,6., pz_info_example,&dNdz_tomo); 
+		status|= ccl_specs_dNdz_tomog(z_test, DNDZ_NC,0.,6., pz_info_example,&dNdz_tomo);
 		status|= ccl_specs_dNdz_tomog(z_test, DNDZ_NC,0.,0.6, pz_info_example,&tmp1);
 		status|= ccl_specs_dNdz_tomog(z_test, DNDZ_NC,0.6,1.2, pz_info_example,&tmp2);
 		status|= ccl_specs_dNdz_tomog(z_test, DNDZ_NC,1.2,1.8, pz_info_example,&tmp3);
@@ -171,7 +171,7 @@ int main(int argc,char **argv){
 	}
 	printf("ccl_sample_run completed, status = %d\n",status);
 	fclose(output);
-	
+
 	//Free up photo-z info
 	ccl_specs_free_photoz_info(pz_info_example);
 

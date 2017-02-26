@@ -15,28 +15,28 @@ typedef struct ccl_parameters {
   double Omega_k;
   double sqrtk;
   int k_sign;
-  
+
   // Dark Energy
   double w0;
   double wa;
-  
+
   // Hubble parameters
   double H0;
   double h;
-  
+
   // Primordial power spectra
   double A_s;
   double n_s;
-  
+
   // Radiation parameters
   double Omega_g;
   double T_CMB;
-  
+
   // Derived parameters
   double sigma_8;
   double Omega_l;
   double z_star;
-  
+
   //Modified growth rate
   bool has_mgrowth;
   int nz_mgrowth;
@@ -68,7 +68,7 @@ typedef struct ccl_data{
 
   // Function of Halo mass M
   gsl_spline * logsigma;
-  gsl_spline * dlnsigma_dlogm; 
+  gsl_spline * dlnsigma_dlogm;
 
   // These are all functions of the wavenumber k and the scale factor a.
   gsl_spline * p_lin;
@@ -81,7 +81,7 @@ typedef struct ccl_cosmology
   ccl_parameters    params;
   ccl_configuration config;
   ccl_data          data;
-  
+
   bool computed_distances;
   bool computed_growth;
   bool computed_power;

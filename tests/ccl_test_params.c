@@ -2,7 +2,7 @@
 #include "ctest.h"
 
 // We can define any constants we want to use in a set of tests here.
-// They are accessible as data->Omega_c, etc., in the tests themselves below. 
+// They are accessible as data->Omega_c, etc., in the tests themselves below.
 // "params" is the name of the whole suite of tests.
 CTEST_DATA(params) {
     double Omega_c;
@@ -28,8 +28,8 @@ CTEST_SETUP(params){
     data->w0 = -1.0;
 }
 
-// The 2 on the end of CTEST2 means that for this test we use 
-// the data defined above in CTEST_DATA and given values in CTEST_SETUP function.  
+// The 2 on the end of CTEST2 means that for this test we use
+// the data defined above in CTEST_DATA and given values in CTEST_SETUP function.
 // We could also define CTEST_TEARDOWN(params) that would be run after the tests.
 
 // This adds a new test called "create_lcdm" to the suite called "params".

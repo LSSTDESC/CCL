@@ -68,7 +68,7 @@ static void compare_bbks(int i_model,struct bbks_data * data)
   params.Omega_g=0;
   ccl_cosmology * cosmo = ccl_cosmology_create(params, config);
   ASSERT_NOT_NULL(cosmo);
-  
+
   sprintf(fname,"./tests/benchmark/model%d_pk.txt",i_model);
   f=fopen(fname,"r");
   if(f==NULL) {
@@ -76,7 +76,7 @@ static void compare_bbks(int i_model,struct bbks_data * data)
     exit(1);
   }
   nk=linecount(f)-1; rewind(f);
-  
+
   fgets(str, 1024, f);
   for(i=0;i<nk;i++) {
     double k_h,k;

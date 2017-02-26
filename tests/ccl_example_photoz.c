@@ -5,7 +5,7 @@
 
 // This is a test file to include a user-defined photo-z function
 
-// The user defines a structure of parameters to the user-defined function for the photo-z probability 
+// The user defines a structure of parameters to the user-defined function for the photo-z probability
 struct user_func_params{
 	double (* sigma_z) (double);
 };
@@ -20,7 +20,7 @@ double user_pz_probability(double z_ph, double z_s, void * user_par){
 
         }
 
-// Beginning of test 
+// Beginning of test
 int main(int argc,char **argv){
 
 	// The user declares and sets an instance of parameters to their photo_z function:
@@ -31,7 +31,7 @@ int main(int argc,char **argv){
 	user_pz_info * my_info;
 
 	// Create the struct to hold the user information about photo_z's.
-	my_info = ccl_specs_create_photoz_info(&my_params_example, &user_pz_probability); 
+	my_info = ccl_specs_create_photoz_info(&my_params_example, &user_pz_probability);
 
 	int status = 0;
 	double z_test;
@@ -40,7 +40,7 @@ int main(int argc,char **argv){
 	double dNdz_tomo;
 	FILE * output;
         output = fopen("./tests/specs_example_tomo_lens_user_pz.out", "w");
-        for (z=0; z<100; z=z+1){ 
+        for (z=0; z<100; z=z+1){
 		z_test = 0.035*z;
                 status = ccl_specs_dNdz_tomog(z_test, DNDZ_WL_FID, 0.,6.,my_info,&dNdz_tomo);
 		if (status!=0){
@@ -51,7 +51,7 @@ int main(int argc,char **argv){
                 if (status!=0){
                         printf("You have selected an unsupported dNdz type. Exiting.\n");
                         exit(1);
-                }	
+                }
 		status = ccl_specs_dNdz_tomog(z_test, DNDZ_WL_FID, 0.6,1.2,my_info, &tmp2);
                 if (status!=0){
                         printf("You have selected an unsupported dNdz type. Exiting.\n");
@@ -78,7 +78,7 @@ int main(int argc,char **argv){
 
 	output = fopen("./tests/specs_example_tomo_clust_user_pz.out", "w");
         for (z=0; z<100; z=z+1){
-		z_test = 0.035*z;	
+		z_test = 0.035*z;
                 status = ccl_specs_dNdz_tomog(z_test, DNDZ_NC, 0.,6.,my_info,&dNdz_tomo);
                 if (status!=0){
                         printf("You have selected an unsupported dNdz type. Exiting.\n");
@@ -118,6 +118,6 @@ int main(int argc,char **argv){
 
 	// Free the photo_z information
 	ccl_specs_free_photoz_info(my_info);
-	
+
 
 }

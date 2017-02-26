@@ -4,15 +4,15 @@
 #include "stdio.h"
 #include "stdlib.h"
 
-// RH 
+// RH
 void ccl_check_status(ccl_cosmology *cosmo, int * status){
 	switch (*status){
 		case 0: //all good, nothing to do
 			return;
-		case CCL_ERROR_LINSPACE:	// spacing allocation error, always terminate		
+		case CCL_ERROR_LINSPACE:	// spacing allocation error, always terminate
 			fprintf(stderr,"%s",cosmo->status_message);
-			exit(1);	
-		case CCL_ERROR_SPLINE:	// spline allocation error, always terminate	
+			exit(1);
+		case CCL_ERROR_SPLINE:	// spline allocation error, always terminate
 			fprintf(stderr,"%s",cosmo->status_message);
 			exit(1);
 		case CCL_ERROR_COMPUTECHI:	// compute_chi error //RH
@@ -20,8 +20,8 @@ void ccl_check_status(ccl_cosmology *cosmo, int * status){
 			exit(1);
 
 		// implement softer error handling, e.g. for integral convergence here
-			
-		default:		
+
+		default:
 			fprintf(stderr,"%s",cosmo->status_message);
 			exit(1);
 	}

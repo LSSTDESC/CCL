@@ -47,7 +47,7 @@
 #define SOLAR_MASS 1.9885e30 //in kg (from PDG 2013)
 
 //Distance conversions
-#define MPC_TO_METER 3.08567758149e22  //(from PDG 2013) Mpc to m 
+#define MPC_TO_METER 3.08567758149e22  //(from PDG 2013) Mpc to m
 #define PC_TO_METER 3.08567758149e16   //(from PDG 2013) pc to m
 
 //Precision parameters

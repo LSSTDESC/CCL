@@ -34,7 +34,7 @@ double ccl_growth_factor_unnorm(ccl_cosmology * cosmo, double a, int * status);
 // Growth factors at a list of scale factor given in a[0..na-1] normalized to a in matter domination
 void ccl_growth_factors_unnorm(ccl_cosmology * cosmo, int na, double a[na], double output[na], int * status);
 
-// Logarithmic rate of d ln g/d lna a at scale factor a 
+// Logarithmic rate of d ln g/d lna a at scale factor a
 double ccl_growth_rate(ccl_cosmology * cosmo, double a, int* status);
 // Logarithmic rates of d ln g/d lna a at alist of  scale factor a [0..na-1]
 void ccl_growth_rates(ccl_cosmology * cosmo, int na, double a[na], double output[na], int * status);
