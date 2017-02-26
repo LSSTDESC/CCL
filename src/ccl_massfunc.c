@@ -17,7 +17,7 @@ INPUT: cosmology+parameters, a smoothing mass, and a redshift
 TASK: Outputs fitting function for use in halo mass function calculation;
   currently only supports:
     ccl_tinker (arxiv 0803.2706 )
-    ccl_angulo (arxiv 1203.3216 ) 
+    ccl_angulo (arxiv 1203.3216 )
     ccl_watson (arxiv 1212.0095 )
 */
 
@@ -31,7 +31,7 @@ static double massfunc_f(ccl_cosmology *cosmo, double smooth_mass,double redshif
 
   switch(cosmo->config.mass_function_method){
   case ccl_tinker:
-    
+
     //TODO: maybe use macros for numbers
     overdensity_delta = 200.0;
     fit_A = 0.186*pow(1+redshift, -0.14);
@@ -45,7 +45,7 @@ static double massfunc_f(ccl_cosmology *cosmo, double smooth_mass,double redshif
     //this version uses f(nu) parameterization from Eq. 8 in Tinker et al. 2010
     // use this for consistency with Tinker et al. 2010 fitting function for halo bias
   case ccl_tinker10:
-    
+
     overdensity_delta = 200.0;
     //critical collapse overdensity assumed in this model
     delta_c_Tinker = 1.686;
@@ -63,7 +63,7 @@ static double massfunc_f(ccl_cosmology *cosmo, double smooth_mass,double redshif
   case ccl_watson:
     scale = 1.0/(1.0+redshift);
     Omega_m_z = ccl_omega_m_z(cosmo, scale);
-    
+
     fit_A = Omega_m_z*(0.990*pow(1+redshift,-3.216)+0.074);
     fit_a = Omega_m_z*(5.907*pow(1+redshift,-3.599)+2.344);
     fit_b = Omega_m_z*(3.136*pow(1+redshift,-3.058)+2.349);
@@ -82,8 +82,8 @@ static double massfunc_f(ccl_cosmology *cosmo, double smooth_mass,double redshif
   default:
     *status = CCL_ERROR_MF;
     sprintf(cosmo->status_message ,
-	    "ccl_massfunc.c: ccl_massfunc(): Unknown or non-implemented mass function method: %d \n",
-	    cosmo->config.mass_function_method);
+        "ccl_massfunc.c: ccl_massfunc(): Unknown or non-implemented mass function method: %d \n",
+        cosmo->config.mass_function_method);
     return 0;
   }
 }
@@ -98,7 +98,7 @@ static double ccl_halo_b1(ccl_cosmology *cosmo, double smooth_mass,double redshi
     //this version uses b(nu) parameterization, Eq. 6 in Tinker et al. 2010
     // use this for consistency with Tinker et al. 2010 fitting function for halo bias
   case ccl_tinker10:
-    
+
     overdensity_delta = 200.0;
     y = log10(overdensity_delta);
     //critical collapse overdensity assumed in this model
@@ -106,12 +106,12 @@ static double ccl_halo_b1(ccl_cosmology *cosmo, double smooth_mass,double redshi
     //peak height - note that this factorization is incorrect for e.g. massive neutrino cosmologies
     nu = delta_c_Tinker/(sigma);
     // Table 2 in https://arxiv.org/pdf/1001.3162.pdf
-    fit_A = 1.0 + 0.24*y*exp(-pow(4./y,4.)); 
-    fit_a = 0.44*y-0.88; 
-    fit_B = 0.183; 
-    fit_b = 1.5; 
-    fit_C = 0.019+0.107*y+0.19*exp(-pow(4./y,4.)); 
-    fit_c = 2.4; 
+    fit_A = 1.0 + 0.24*y*exp(-pow(4./y,4.));
+    fit_a = 0.44*y-0.88;
+    fit_B = 0.183;
+    fit_b = 1.5;
+    fit_C = 0.019+0.107*y+0.19*exp(-pow(4./y,4.));
+    fit_c = 2.4;
 
     return 1.-fit_A*pow(nu,fit_a)/(pow(nu,fit_a)+pow(delta_c_Tinker,fit_a))+fit_B*pow(nu,fit_b)+fit_C*pow(nu,fit_c);
     break;
@@ -143,11 +143,11 @@ void ccl_cosmology_compute_sigma(ccl_cosmology * cosmo, int *status)
        strcpy(cosmo->status_message,"ccl_cosmology_compute_sigmas(): Error creating linear spacing in m\n");
        return;
     }
-    
+
     // allocate space for y, to be filled with sigma and dlnsigma_dlogm
     double *y = malloc(sizeof(double)*nm);
-    double smooth_radius; 
-   
+    double smooth_radius;
+
    // fill in sigma
    for (int i=0; i<nm; i++){
      smooth_radius = ccl_massfunc_m2r(cosmo, pow(10,m[i]), status);
@@ -212,7 +212,7 @@ double ccl_massfunc(ccl_cosmology *cosmo, double smooth_mass, double redshift, i
   }
 
   double f,deriv,rho_m,logmass;
-  
+
   logmass = log10(smooth_mass);
   rho_m = RHO_CRITICAL*cosmo->params.Omega_m*cosmo->params.h*cosmo->params.h;
   f=massfunc_f(cosmo,smooth_mass,redshift, status);
@@ -233,8 +233,8 @@ double ccl_halo_bias(ccl_cosmology *cosmo, double smooth_mass, double redshift, 
   }
 
   double f;
-  f = ccl_halo_b1(cosmo,smooth_mass,redshift, status);  
-  ccl_check_status(cosmo, status);  
+  f = ccl_halo_b1(cosmo,smooth_mass,redshift, status);
+  ccl_check_status(cosmo, status);
   return f;
 }
 /*---- ROUTINE: ccl_massfunc_m2r -----

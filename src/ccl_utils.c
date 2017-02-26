@@ -61,5 +61,3 @@ double * ccl_log_spacing(double xmin, double xmax, int N){
 
     return x;
 }
-
-

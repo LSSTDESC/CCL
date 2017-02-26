@@ -19,14 +19,14 @@ DEFINITIONS:
 chi: comoving distance [Mpc]
 growth: growth function (density)
 fgrowth: logarithmic derivative of the growth (density) (dlnD/da?)
-E: E(a)=H(a)/H0 
+E: E(a)=H(a)/H0
 accelerator: interpolation accelerator for functions of a
 accelerator_achi: interpolation accelerator for functions of chi
 growth0: growth at z=0, defined to be 1
 sigma: ?
 p_lin: linear matter power spectrum at z=0?
 p_lnl: nonlinear matter power spectrum at z=0?
-computed_distances, computed_growth, 
+computed_distances, computed_growth,
 computed_power, computed_sigma: store status of the computations
 */
 
@@ -48,16 +48,16 @@ ccl_cosmology * ccl_cosmology_create(ccl_parameters params, ccl_configuration co
   cosmo->data.achi=NULL;
 
   cosmo->data.logsigma = NULL;
-  
+
   cosmo->data.p_lin = NULL;
   cosmo->data.p_nl = NULL;
-  
+
   cosmo->computed_distances = false;
   cosmo->computed_growth = false;
   cosmo->computed_power = false;
   cosmo->computed_sigma = false;
   cosmo->status = 0;
-  
+
   return cosmo;
 }
 
@@ -67,7 +67,7 @@ TASK: fill parameters not set by ccl_parameters_create with some initial values
 DEFINITIONS:
 Omega_g = (Omega_g*h^2)/h^2 is the radiation parameter; "g" is for photons, as in CLASS
 T_CMB: CMB temperature in Kelvin
-Omega_l: Lambda 
+Omega_l: Lambda
 A_s: amplitude of the primordial PS, enforced here to initially set to NaN
 sigma_8: variance in 8 Mpc/h spheres for normalization of matter PS, enforced here to initially set to NaN
 z_star: recombination redshift
@@ -158,12 +158,12 @@ ccl_parameters ccl_parameters_create(double Omega_c, double Omega_b, double Omeg
     params.z_mgrowth=NULL;
     params.df_mgrowth=NULL;
   }
-  
-  return params;  
+
+  return params;
 }
 
-/* ------- ROUTINE: ccl_parameters_create_flat_lcdm -------- 
-INPUT: some cosmological parameters needed to create a flat LCDM model 
+/* ------- ROUTINE: ccl_parameters_create_flat_lcdm --------
+INPUT: some cosmological parameters needed to create a flat LCDM model
 TASK: call ccl_parameters_create to produce an LCDM model
 */
 
@@ -179,8 +179,8 @@ ccl_parameters ccl_parameters_create_flat_lcdm(double Omega_c, double Omega_b, d
 }
 
 
-/* ------- ROUTINE: ccl_parameters_create_lcdm -------- 
-INPUT: some cosmological parameters needed to create an LCDM model with curvature 
+/* ------- ROUTINE: ccl_parameters_create_lcdm --------
+INPUT: some cosmological parameters needed to create an LCDM model with curvature
 TASK: call ccl_parameters_create for this specific model
 */
 
@@ -195,7 +195,7 @@ ccl_parameters ccl_parameters_create_lcdm(double Omega_c, double Omega_b, double
 }
 
 
-/* ------- ROUTINE: ccl_parameters_create_wcdm -------- 
+/* ------- ROUTINE: ccl_parameters_create_wcdm --------
 INPUT: some cosmological parameters needed to create an LCDM model with curvature and wa=0 but w0!=-1
 TASK: call ccl_parameters_create for this specific model
 */
@@ -212,7 +212,7 @@ ccl_parameters ccl_parameters_create_flat_wcdm(double Omega_c, double Omega_b, d
 }
 
 
-/* ------- ROUTINE: ccl_parameters_create_wacdm -------- 
+/* ------- ROUTINE: ccl_parameters_create_wacdm --------
 INPUT: some cosmological parameters needed to create an LCDM model with curvature wa!=0 and and w0!=-1
 TASK: call ccl_parameters_create for this specific model
 */
@@ -227,7 +227,7 @@ ccl_parameters ccl_parameters_create_flat_wacdm(double Omega_c, double Omega_b, 
 }
 
 
-/* ------- ROUTINE: ccl_data_free -------- 
+/* ------- ROUTINE: ccl_data_free --------
 INPUT: ccl_data
 TASK: free the input data
 */
@@ -261,7 +261,7 @@ void ccl_data_free(ccl_data * data)
 }
 
 
-/* ------- ROUTINE: ccl_cosmology_free -------- 
+/* ------- ROUTINE: ccl_cosmology_free --------
 INPUT: ccl_cosmology struct
 TASK: free the input data and the cosmology struct
 */

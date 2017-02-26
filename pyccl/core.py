@@ -45,8 +45,8 @@ error_types = {
 
 
 class Parameters(object):
-    
-    def __init__(self, Omega_c=None, Omega_b=None, h=None, A_s=None, n_s=None, 
+
+    def __init__(self, Omega_c=None, Omega_b=None, h=None, A_s=None, n_s=None,
                  Omega_k=0., Omega_n=0., w0=-1., wa=0., sigma8=None,
                  zarr_mgrowth=None, dfarr_mgrowth=None):
         """
@@ -54,7 +54,7 @@ class Parameters(object):
         """
         # Set current ccl_parameters object to None
         self.parameters = None
-        
+
          # Set nz_mgrowth (no. of redshift bins for modified growth fns.)
         if zarr_mgrowth is not None and dfarr_mgrowth is not None:
             # Get growth array size and do sanity check
@@ -63,7 +63,7 @@ class Parameters(object):
             assert zarr_mgrowth.size == dfarr_mgrowth.size
             nz_mgrowth = zarr_mgrowth.size
         else:
-            # If one or both of the MG growth arrays are set to zero, disable 
+            # If one or both of the MG growth arrays are set to zero, disable
             # all of them
             if zarr_mgrowth is not None:
                 warn("zarr_mgrowth ignored; must also specify dfarr_mgrowth.",
@@ -74,46 +74,46 @@ class Parameters(object):
             zarr_mgrowth = None
             dfarr_mgrowth = None
             nz_mgrowth = -1
-        
+
         # Check to make sure specified amplitude parameter is consistent
         if (A_s is None and sigma8 is None) \
         or (A_s is not None and sigma8 is not None):
             raise ValueError("Must set either A_s or sigma8.")
-        
+
         # Set norm_pk to either A_s or sigma8
         norm_pk = A_s if A_s is not None else sigma8
-        
-        # The C library decides whether A_s or sigma8 was the input parameter 
+
+        # The C library decides whether A_s or sigma8 was the input parameter
         # based on value, so we need to make sure this is consistent too
         if norm_pk >= 1e-5 and A_s is not None:
             raise ValueError("A_s must be less than 1e-5.")
-            
+
         if norm_pk < 1e-5 and sigma8 is not None:
             raise ValueError("sigma8 must be greater than 1e-5.")
-        
+
         # Check if any compulsory parameters are not set
         compul = [Omega_c, Omega_b, Omega_k, Omega_n, w0, wa, h, norm_pk, n_s]
-        names = ['Omega_c', 'Omega_b', 'Omega_k', 'Omega_n', 'w0', 'wa', 
+        names = ['Omega_c', 'Omega_b', 'Omega_k', 'Omega_n', 'w0', 'wa',
                  'h', 'norm_pk', 'n_s']
         for nm, item in zip(names, compul):
             if item is None:
                 raise ValueError("Necessary parameter '%s' was not set "
                                  "(or set to None)." % nm)
-        
+
         # Create new instance of ccl_parameters object
         if nz_mgrowth == -1:
             # Create ccl_parameters without modified growth
             self.parameters = lib.parameters_create(
-                                    Omega_c, Omega_b, Omega_k, Omega_n, 
-                                    w0, wa, h, norm_pk, n_s, 
+                                    Omega_c, Omega_b, Omega_k, Omega_n,
+                                    w0, wa, h, norm_pk, n_s,
                                     -1, None, None)
         else:
             # Create ccl_parameters with modified growth arrays
             self.parameters = lib.parameters_create_vec(
-                                    Omega_c, Omega_b, Omega_k, Omega_n, 
-                                    w0, wa, h, norm_pk, n_s, 
+                                    Omega_c, Omega_b, Omega_k, Omega_n,
+                                    w0, wa, h, norm_pk, n_s,
                                     zarr_mgrowth, dfarr_mgrowth)
-    
+
     def __getitem__(self, key):
         """
         Access parameter values by name.
@@ -123,48 +123,48 @@ class Parameters(object):
         except AttributeError:
             raise KeyError("Parameter '%s' not recognized." % key)
         return val
-    
+
     def __setitem__(self, key, val):
         """
         Set parameter values by name.
         """
         raise NotImplementedError("Parameters objects are immutable; create a "
                                   "new Parameters() instance instead.")
-        
+
         try:
-            # First check if the key already exists (otherwise the parameter 
+            # First check if the key already exists (otherwise the parameter
             # would be silently added to the ccl_parameters class instance)
             getattr(self.parameters, key)
         except AttributeError:
             raise KeyError("Parameter '%s' not recognized." % key)
-        
+
         # Set value of parameter
         setattr(self.parameters, key, val)
         # FIXME: Should update/replace CCL objects appropriately
-    
+
     def __str__(self):
         """
         Output the parameters that were set, and their values.
         """
-        params = ['Omega_c', 'Omega_b', 'Omega_m', 'Omega_n', 'Omega_k', 
-                  'w0', 'wa', 'H0', 'h', 'A_s', 'n_s', 'Omega_g', 'T_CMB', 
+        params = ['Omega_c', 'Omega_b', 'Omega_m', 'Omega_n', 'Omega_k',
+                  'w0', 'wa', 'H0', 'h', 'A_s', 'n_s', 'Omega_g', 'T_CMB',
                   'sigma_8', 'Omega_l', 'z_star', 'has_mgrowth']
-  
+
         vals = ["%15s: %s" % (p, getattr(self.parameters, p)) for p in params]
         string = "Parameters\n----------\n"
         string += "\n".join(vals)
         return string
-        
+
 
 
 class Cosmology(object):
-    
-    def __init__(self, params, config=None, 
+
+    def __init__(self, params, config=None,
                  transfer_function='boltzmann_class',
                  matter_power_spectrum='halofit',
                  mass_function='tinker'):
         """
-        Class containing a ccl_cosmology object, including cosmological 
+        Class containing a ccl_cosmology object, including cosmological
         parameters and cached data.
         """
         # Check the type of the input params object
@@ -176,74 +176,74 @@ class Cosmology(object):
         else:
             raise TypeError("'params' is not a valid ccl_parameters or "
                             "Parameters object.")
-        
+
         # Check that the ccl_configuration-related arguments are valid
         if config is not None:
-            # User passed a ccl_configuration object; ignore other arguments 
+            # User passed a ccl_configuration object; ignore other arguments
             # and use this
-            
+
             # Check that input object is of the correct type
             if not isinstance(config, lib.configuration):
                 raise TypeError("'config' is not a valid ccl_configuration "
                                 "object.")
-            
+
             # Store ccl_configuration for later access
             self.configuration = config
-            
+
         else:
             # Construct a new ccl_configuration object from kwargs
-            
+
             # Check validity of configuration-related arguments
             if transfer_function not in transfer_function_types.keys():
                 raise ValueError( "'%s' is not a valid transfer_function type. "
                                   "Available options are: %s" \
-                                 % (transfer_function, 
+                                 % (transfer_function,
                                     transfer_function_types.keys()) )
             if matter_power_spectrum not in matter_power_spectrum_types.keys():
                 raise ValueError( "'%s' is not a valid matter_power_spectrum "
                                   "type. Available options are: %s" \
-                                 % (matter_power_spectrum, 
+                                 % (matter_power_spectrum,
                                     matter_power_spectrum_types.keys()) )
             if mass_function not in mass_function_types.keys():
                 raise ValueError( "'%s' is not a valid mass_function type. "
                                   "Available options are: %s" \
-                                 % (mass_function, 
+                                 % (mass_function,
                                     mass_function_types.keys()) )
-            
+
             # Assign values to new ccl_configuration object
             config = lib.configuration()
-            
+
             config.transfer_function_method = \
                             transfer_function_types[transfer_function]
             config.matter_power_spectrum_method = \
                             matter_power_spectrum_types[matter_power_spectrum]
             config.mass_function_method = \
                             mass_function_types[mass_function]
-            
+
             # Store ccl_configuration for later access
             self.configuration = config
-        
+
         # Create new ccl_cosmology instance
         self.cosmo = lib.cosmology_create(params, config)
-        
+
         # Check status
         if self.cosmo.status != 0:
             raise RuntimeError("(%d): %s" \
                                % (self.cosmo.status, self.cosmo.status_message))
-    
+
     def __del__(self):
         """
         Free the ccl_cosmology instance that this Cosmology object is managing.
         """
         lib.cosmology_free(self.cosmo)
-    
+
     def __str__(self):
         """
         Output the cosmological parameters that were set, and their values.
         """
         # String of cosmo parameters, from self.params (Parameters object)
         param_str = self.params.__str__()
-        
+
         # String containing precomputation statuses
         precomp_stats = [
             ('has_distances', self.has_distances()),
@@ -253,10 +253,10 @@ class Cosmology(object):
             ]
         precomp_stat = ["%15s: %s" % stat for stat in precomp_stats]
         precomp_str = "\n".join(precomp_stat)
-        
+
         # String from internal CCL status
         status_str = self.status()
-        
+
         # Return composite string
         string = param_str
         string += "\n\nPrecomputed data\n----------------\n"
@@ -264,35 +264,35 @@ class Cosmology(object):
         string += "\n\nStatus\n------\n"
         string += status_str
         return string
-    
+
     def __getitem__(self, key):
         """
         Access cosmological parameter values by name.
         """
         return self.params.__getitem__(key)
-    
+
     def compute_distances(self):
         lib.cosmology_compute_distances(self.cosmo)
-    
+
     def compute_growth(self):
         lib.cosmology_compute_growth(self.cosmo)
-    
+
     def compute_power(self):
         lib.cosmology_compute_power(self.cosmo)
-    
+
     # Check which data have been precomputed
     def has_distances(self):
         return bool(self.cosmo.computed_distances)
-    
+
     def has_growth(self):
         return bool(self.cosmo.computed_growth)
-    
+
     def has_power(self):
         return bool(self.cosmo.computed_power)
-    
+
     def has_sigma(self):
         return bool(self.cosmo.computed_sigma)
-    
+
     # Return status (for error checking)
     def status(self):
         """
@@ -303,10 +303,9 @@ class Cosmology(object):
             status = error_types[self.cosmo.status]
         else:
             status = self.cosmo.status
-        
+
         # Get status message
         msg = self.cosmo.status_message
-        
+
         # Return status information
         return "status(%s): %s" % (status, msg)
-        
