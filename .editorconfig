@@ -1,0 +1,15 @@
+# Basic whitespace conventions.  Many editors can automatically
+# follow the conventions specified here.  Check http://EditorConfig.org
+# for details.
+
+# This is the top-most EditorConfig file.
+root = true
+
+# C-code conventions.
+[*.{c,h}]
+# C code uses 4-space indentation
+indent_style = space
+indent_size = 4
+# Do not add trailing white space at the end of lines.
+trim_trailing_whitespace = true
+insert_final_newline = true
