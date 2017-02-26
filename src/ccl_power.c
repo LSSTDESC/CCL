@@ -393,11 +393,12 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int * statu
     double Z, ic;
     int s;
     for (int i=0; i<nk; i++){
-      s =spectra_pk_at_k_and_z(&ba, &pm, &sp,x[i],0.0, &Z,&ic);
-      y[i] = log(Z);
+      //s =spectra_pk_at_k_and_z(&ba, &pm, &sp,x[i],0.0, &Z,&ic);
+      //y[i] = log(Z);
       x[i] = log(x[i]);
     }
 
+    /***
     gsl_spline * log_power_lin = gsl_spline_alloc(K_SPLINE_TYPE, nk);
     int classstatus = gsl_spline_init(log_power_lin, x, y, nk);
     if (classstatus){
@@ -409,6 +410,7 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int * statu
     }
     //else
       //cosmo->data.p_lin = log_power_lin;
+    **/
 
     if(cosmo->config.matter_power_spectrum_method==ccl_halofit){
       double * y2d = malloc(nk * na * sizeof(double));
