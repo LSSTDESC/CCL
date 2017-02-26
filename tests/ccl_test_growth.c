@@ -37,8 +37,8 @@ static void read_growth_test_file(double z[6], double gf[5][6])
     // File is fixed format - five rows and six columns
   for (int i=0; i<6; i++){
     int count = fscanf(f, "%le %le %le %le %le %le\n", &z[i],
-		       &gf[0][i], &gf[1][i], &gf[2][i], &gf[3][i], &gf[4][i]);
-    	// Check that all the stuff in the benchmark is there
+               &gf[0][i], &gf[1][i], &gf[2][i], &gf[3][i], &gf[4][i]);
+        // Check that all the stuff in the benchmark is there
     ASSERT_EQUAL(6, count);
   }
   fclose(f);
@@ -81,9 +81,9 @@ static void compare_growth(int model, struct growth_data * data)
   // Make the parameter set from the input data
   // Values of some parameters depend on the model index
   ccl_parameters params = ccl_parameters_create(data->Omega_c, data->Omega_b,
-						data->Omega_k[model], data->Omega_n,
-						data->w_0[model], data->w_a[model],
-						data->h, data->A_s, data->n_s,-1,NULL,NULL);
+                        data->Omega_k[model], data->Omega_n,
+                        data->w_0[model], data->w_a[model],
+                        data->h, data->A_s, data->n_s,-1,NULL,NULL);
   params.Omega_g=0;
   // Make a cosmology object from the parameters with the default configuration
   ccl_cosmology * cosmo = ccl_cosmology_create(params, default_config);

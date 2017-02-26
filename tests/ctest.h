@@ -201,16 +201,16 @@ typedef int (*filter_func)(struct ctest*);
 static CTEST(suite, test) { }
 
 inline static void vprint_errormsg(const char* const fmt, va_list ap) {
-	// (v)snprintf returns the number that would have been written
+    // (v)snprintf returns the number that would have been written
     const int ret = vsnprintf(ctest_errormsg, ctest_errorsize, fmt, ap);
     if (ret < 0) {
-		ctest_errormsg[0] = 0x00;
+        ctest_errormsg[0] = 0x00;
     } else {
-    	const size_t size = (size_t) ret;
-    	const size_t s = (ctest_errorsize <= size ? size -ctest_errorsize : size);
-    	// ctest_errorsize may overflow at this point
-		ctest_errorsize -= s;
-		ctest_errormsg += s;
+        const size_t size = (size_t) ret;
+        const size_t s = (ctest_errorsize <= size ? size -ctest_errorsize : size);
+        // ctest_errorsize may overflow at this point
+        ctest_errorsize -= s;
+        ctest_errormsg += s;
     }
 }
 
@@ -223,14 +223,14 @@ inline static void print_errormsg(const char* const fmt, ...) {
 
 static void msg_start(const char* color, const char* title) {
     if (color_output) {
-    	print_errormsg("%s", color);
+        print_errormsg("%s", color);
     }
     print_errormsg("  %s: ", title);
 }
 
 static void msg_end() {
     if (color_output) {
-    	print_errormsg(ANSI_NORMAL);
+        print_errormsg(ANSI_NORMAL);
     }
     print_errormsg("\n");
 }
