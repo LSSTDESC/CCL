@@ -1,5 +1,6 @@
 #include "ccl_core.h"
 #include "ccl_utils.h"
+#include "assert.h"
 #include "math.h"
 #include "stdio.h"
 #include "stdlib.h"
@@ -349,6 +350,34 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int * statu
   double amax = A_SPLINE_MAX;
   int na = N_A;
 
+  // Ensure that we do not need to extrapolate beyond the (k,Pk) already
+  // tabulated by CLASS.
+  if(kmin < exp(sp.ln_k[0]) || kmax > exp(sp.ln_k[sp.ln_k_size - 1])) {
+      *status = CCL_ERROR_SPLINE;
+      strcpy(cosmo->status_message, "ccl_power.c: ccl_cosmology_compute_power_class(): extrapolation in k not supported.\n");
+  }
+  else {
+      double *ln_Pk = (double *)malloc(sp.ln_k_size * sizeof(double));
+      if(ln_Pk == NULL) {
+          *status=CCL_ERROR_SPLINE;
+          strcpy(cosmo->status_message, "ccl_power.c: ccl_cosmology_compute_power_class(): memory allocation error\n");
+      }
+      else {
+          int class_status = spectra_pk_at_z(&ba, &sp, logarithmic, 0.0, ln_Pk, NULL);
+          if(class_status != 0) {
+              *status = CCL_ERROR_SPLINE;
+              strcpy(cosmo->status_message, sp.error_message);
+          }
+          else {
+              gsl_spline *log_power_lin = gsl_spline_alloc(K_SPLINE_TYPE, sp.ln_k_size);
+              assert(log_power_lin != NULL);
+              int gsl_status = gsl_spline_init(log_power_lin, sp.ln_k, ln_Pk, sp.ln_k_size);
+              assert(gsl_status == 0);
+              cosmo->data.p_lin = log_power_lin;
+          }
+      }
+  }
+
   // The x array is initially k, but will later
   // be overwritten with log(k)
   double * x = ccl_log_spacing(kmin, kmax, nk);
@@ -364,11 +393,12 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int * statu
     double Z, ic;
     int s;
     for (int i=0; i<nk; i++){
-      s =spectra_pk_at_k_and_z(&ba, &pm, &sp,x[i],0.0, &Z,&ic);
-      y[i] = log(Z);
+      //s =spectra_pk_at_k_and_z(&ba, &pm, &sp,x[i],0.0, &Z,&ic);
+      //y[i] = log(Z);
       x[i] = log(x[i]);
     }
 
+    /***
     gsl_spline * log_power_lin = gsl_spline_alloc(K_SPLINE_TYPE, nk);
     int classstatus = gsl_spline_init(log_power_lin, x, y, nk);
     if (classstatus){
@@ -378,8 +408,9 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int * statu
       strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_class(): Error creating log_power_lin spline\n");
       return;
     }
-    else
-      cosmo->data.p_lin = log_power_lin;
+    //else
+      //cosmo->data.p_lin = log_power_lin;
+    **/
 
     if(cosmo->config.matter_power_spectrum_method==ccl_halofit){
       double * y2d = malloc(nk * na * sizeof(double));
