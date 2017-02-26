@@ -22,7 +22,7 @@ TASK: Compute E(z)=H(z)/H0
 static double h_over_h0(double a, ccl_parameters * params)
 {
   return sqrt((params->Omega_m+params->Omega_l*pow(a,-3*(params->w0+params->wa))*
-	       exp(3*params->wa*(a-1))+params->Omega_k*a+params->Omega_g/a)/(a*a*a));
+           exp(3*params->wa*(a-1))+params->Omega_k*a+params->Omega_g/a)/(a*a*a));
 }
 
 /* --------- ROUTINE: ccl_omega_m_z ---------
@@ -32,7 +32,7 @@ TASK: Compute Omega_m(z)
 double ccl_omega_m_z(ccl_cosmology * cosmo, double a)
 {
   return cosmo->params.Omega_m/(cosmo->params.Omega_m+cosmo->params.Omega_l*pow(a,-3*(cosmo->params.w0+cosmo->params.wa))*
-			  exp(3*cosmo->params.wa*(a-1))+cosmo->params.Omega_k*a);
+              exp(3*cosmo->params.wa*(a-1))+cosmo->params.Omega_k*a);
 }
 
 /* --------- ROUTINE: chi_integrand ---------
@@ -390,7 +390,7 @@ void ccl_cosmology_compute_growth(ccl_cosmology * cosmo, int * status)
     //Generate spline for Delta f(z) that we will then interpolate into an array of a
     gsl_spline *df_z_spline=gsl_spline_alloc(A_SPLINE_TYPE,cosmo->params.nz_mgrowth);
     chistatus=gsl_spline_init(df_z_spline,cosmo->params.z_mgrowth,cosmo->params.df_mgrowth,
-			    cosmo->params.nz_mgrowth);
+                cosmo->params.nz_mgrowth);
     //RH has issues here
     if(chistatus) {
       free(a);
@@ -402,16 +402,16 @@ void ccl_cosmology_compute_growth(ccl_cosmology * cosmo, int * status)
     }
     for (int i=0; i<na; i++){
       if(a[i]>0) {
-	       double z=1./a[i]-1.;
-	       if(z<=cosmo->params.z_mgrowth[0])
-	          df_arr[i]=cosmo->params.df_mgrowth[0];
-	       else if(z>cosmo->params.z_mgrowth[cosmo->params.nz_mgrowth-1])
-	          df_arr[i]=cosmo->params.df_mgrowth[cosmo->params.nz_mgrowth-1];
-	       else
-	          df_arr[i]=gsl_spline_eval(df_z_spline,z,NULL);
+           double z=1./a[i]-1.;
+           if(z<=cosmo->params.z_mgrowth[0])
+              df_arr[i]=cosmo->params.df_mgrowth[0];
+           else if(z>cosmo->params.z_mgrowth[cosmo->params.nz_mgrowth-1])
+              df_arr[i]=cosmo->params.df_mgrowth[cosmo->params.nz_mgrowth-1];
+           else
+              df_arr[i]=gsl_spline_eval(df_z_spline,z,NULL);
       }
       else
-	       df_arr[i]=0;
+           df_arr[i]=0;
     }
     gsl_spline_free(df_z_spline);
 
@@ -441,7 +441,7 @@ void ccl_cosmology_compute_growth(ccl_cosmology * cosmo, int * status)
   if(y==NULL) {
     free(a);
         *status=CCL_ERROR_MEMORY;
-	  strcpy(cosmo->status_message,"ccl_background.c: ccl_cosmology_compute_distances(): ran out of memory\n");
+      strcpy(cosmo->status_message,"ccl_background.c: ccl_cosmology_compute_distances(): ran out of memory\n");
     return;
   }
   double *y2 = malloc(sizeof(double)*na);
@@ -458,14 +458,14 @@ void ccl_cosmology_compute_growth(ccl_cosmology * cosmo, int * status)
     chistatus|=growth_factor_and_growth_rate(a[i],&(y[i]),&(y2[i]),cosmo);
     if(cosmo->params.has_mgrowth) {
       if(a[i]>0) {
-	double df,integ;
-	//Add modification to f
-	df=gsl_spline_eval(df_a_spline,a[i],NULL);
-	y2[i]+=df;
-	//Multiply D by exp(-int(df))
-	// RH has issues here
-	status_mg |= gsl_integration_cquad(&F,a[i],1.0,0.0,EPSREL_DIST,workspace,&integ,NULL,NULL);
-	y[i]*=exp(-integ);
+    double df,integ;
+    //Add modification to f
+    df=gsl_spline_eval(df_a_spline,a[i],NULL);
+    y2[i]+=df;
+    //Multiply D by exp(-int(df))
+    // RH has issues here
+    status_mg |= gsl_integration_cquad(&F,a[i],1.0,0.0,EPSREL_DIST,workspace,&integ,NULL,NULL);
+    y[i]*=exp(-integ);
       }
     }
     y[i]/=growth0;

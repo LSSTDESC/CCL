@@ -82,8 +82,8 @@ static double massfunc_f(ccl_cosmology *cosmo, double smooth_mass,double redshif
   default:
     *status = CCL_ERROR_MF;
     sprintf(cosmo->status_message ,
-	    "ccl_massfunc.c: ccl_massfunc(): Unknown or non-implemented mass function method: %d \n",
-	    cosmo->config.mass_function_method);
+        "ccl_massfunc.c: ccl_massfunc(): Unknown or non-implemented mass function method: %d \n",
+        cosmo->config.mass_function_method);
     return 0;
   }
 }
