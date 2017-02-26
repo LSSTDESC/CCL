@@ -5,11 +5,11 @@
 # This is the top-most EditorConfig file.
 root = true
 
-# C-code conventions.
-[*.{c,h}]
-# C code uses 4-space indentation
+# C-code and python conventions:
+# - 4-space indentation
+# - no trailing whitespace
+[**.{c,h,pp}]
 indent_style = space
 indent_size = 4
-# Do not add trailing white space at the end of lines.
 trim_trailing_whitespace = true
 insert_final_newline = true

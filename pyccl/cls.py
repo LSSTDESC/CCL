@@ -17,22 +17,22 @@ tracer_types = {
 NoneArr = np.array([])
 
 class ClTracer(object):
-    
-    def __init__(self, cosmo, tracer_type=None, has_rsd=False, 
-                 has_magnification=False, has_intrinsic_alignment=False, 
-                 z_n=None, n=None, z_b=None, b=None, 
-                 z_s=None, s=None, z_ba=None, ba=None, 
+
+    def __init__(self, cosmo, tracer_type=None, has_rsd=False,
+                 has_magnification=False, has_intrinsic_alignment=False,
+                 z_n=None, n=None, z_b=None, b=None,
+                 z_s=None, s=None, z_ba=None, ba=None,
                  z_rf=None, rf=None):
         """
         Object handling a ClTracer (tracer with an angular power spectrum).
         """
         # Verify cosmo object
         cosmo = _cosmology_obj(cosmo)
-        
+
         # Check tracer type
         if tracer_type not in tracer_types.keys():
             raise KeyError("'%s' is not a valid tracer_type." % tracer_type)
-        
+
         # Convert array arguments that are 'None' into 'NoneArr' type
         if n is None: n = NoneArr
         if b is None: b = NoneArr
@@ -44,17 +44,17 @@ class ClTracer(object):
         if z_s is None: z_s = NoneArr
         if z_ba is None: z_ba = NoneArr
         if z_rf is None: z_rf = NoneArr
-        
+
         # Construct new ccl_cl_tracer
         status = 0
         self.cltracer, status = lib.cl_tracer_new_wrapper(
-                            cosmo, 
+                            cosmo,
                             tracer_types[tracer_type],
-                            int(has_rsd), 
-                            int(has_magnification), 
+                            int(has_rsd),
+                            int(has_magnification),
                             int(has_intrinsic_alignment),
                             z_n, n, z_b, b, z_s, s, z_ba, ba, z_rf, rf, status )
-        
+
     def __del__(self):
         """
         Free memory associated with CCL_ClTracer object.
@@ -63,47 +63,47 @@ class ClTracer(object):
 
 
 class ClTracerNumberCounts(ClTracer):
-    
-    def __init__(self, cosmo, has_rsd, has_magnification, 
+
+    def __init__(self, cosmo, has_rsd, has_magnification,
                  z_n, n, z_b, b, z_s=None, s=None):
-        
+
         # Sanity check on input arguments
         if has_magnification and (z_s is None or s is None):
                 raise ValueError("Keyword args (z_s, s) must be specified if "
                                  "has_magnification=True.")
-        
+
         # Call ClTracer constructor with appropriate arguments
         super(ClTracerNumberCounts, self).__init__(
-                 cosmo=cosmo, tracer_type='nc', 
-                 has_rsd=has_rsd, has_magnification=has_magnification, 
-                 has_intrinsic_alignment=False, 
-                 z_n=z_n, n=n, z_b=z_b, b=b, z_s=z_s, s=s, 
+                 cosmo=cosmo, tracer_type='nc',
+                 has_rsd=has_rsd, has_magnification=has_magnification,
+                 has_intrinsic_alignment=False,
+                 z_n=z_n, n=n, z_b=z_b, b=b, z_s=z_s, s=s,
                  z_ba=None, ba=None, z_rf=None, rf=None)
 
 
 class ClTracerLensing(ClTracer):
-    
-    def __init__(self, cosmo, has_intrinsic_alignment, 
+
+    def __init__(self, cosmo, has_intrinsic_alignment,
                  z_n, n, z_ba=None, ba=None, z_rf=None, rf=None):
-        
+
         # Sanity check on input arguments
         if has_intrinsic_alignment \
         and (z_ba is None or ba is None or z_rf is None or rf is None):
                 raise ValueError("Keyword args (z_ba, ba, z_rf, rf) must be "
                                  "specified if has_intrinsic_alignment=True.")
-        
+
         # Call ClTracer constructor with appropriate arguments
         super(ClTracerLensing, self).__init__(
-                 cosmo=cosmo, tracer_type='wl', 
-                 has_rsd=False, has_magnification=False, 
-                 has_intrinsic_alignment=has_intrinsic_alignment, 
-                 z_n=z_n, n=n, z_b=None, b=None, z_s=None, s=None, 
+                 cosmo=cosmo, tracer_type='wl',
+                 has_rsd=False, has_magnification=False,
+                 has_intrinsic_alignment=has_intrinsic_alignment,
+                 z_n=z_n, n=n, z_b=None, b=None, z_s=None, s=None,
                  z_ba=z_ba, ba=ba, z_rf=z_rf, rf=rf)
 
 
 def _cltracer_obj(cltracer):
     """
-    Returns a CCL_ClTracer object, given an input object which may be 
+    Returns a CCL_ClTracer object, given an input object which may be
     CCL_ClTracer, the ClTracer wrapper class, or an invalid type.
     """
     # FIXME: Is ClTracer a valid type?
@@ -121,11 +121,11 @@ def angular_cl(cosmo, cltracer1, cltracer2, ell):
     """
     # Access ccl_cosmology object
     cosmo = _cosmology_obj(cosmo)
-    
+
     # Access CCL_ClTracer objects
     clt1 = _cltracer_obj(cltracer1)
     clt2 = _cltracer_obj(cltracer2)
-    
+
     status = 0
     # Return Cl values, according to whether ell is an array or not
     if isinstance(ell, float) or isinstance(ell, int) :
