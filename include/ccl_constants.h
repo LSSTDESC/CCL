@@ -43,7 +43,9 @@
 #define CLIGHT_HMPC 2997.92458 //H0^-1 in Mpc/h
 
 //Newton's gravitational constant
-#define GNEWT 6.6738e-11    //(from PDG 2013) in m^3/Kg/s^2
+//#define GNEWT 6.6738e-11    //(from PDG 2013) in m^3/Kg/s^2
+#define GNEWT 6.67428e-11 // CLASS VALUE
+
 
 //Solar mass
 #define SOLAR_MASS 1.9885e30 //in kg (from PDG 2013)

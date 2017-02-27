@@ -9,11 +9,15 @@ int main(int argc, char * argv[])
   double h = 0.7;
   double A_s = 2.1e-9;
   double n_s = 0.96;
+  double Omega_k = 0.;
+  double Neff = 0.;
+  double Nmass = 1;
+  double mnu = 0.5;
   ccl_configuration config = default_config;
   //	config.transfer_function_method = ccl_bbks;
   config.transfer_function_method = ccl_boltzmann;
   
-  ccl_parameters params = ccl_parameters_create_lcdm_nu(Omega_c, Omega_b, 0.0,h, A_s, n_s, 2.0328, 1, 0.5);
+  ccl_parameters params = ccl_parameters_create_lcdm_nu(Omega_c, Omega_b, Omega_k,h, A_s, n_s, Neff, Nmass, mnu);
   ccl_cosmology * cosmo = ccl_cosmology_create(params, config);
   
   ccl_cosmology_compute_power(cosmo,&status);

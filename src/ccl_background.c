@@ -17,12 +17,12 @@
 //CHANGED: modified this to include non-flat cosmologies
 
 /* --------- ROUTINE: h_over_h0 ---------
-INPUT: scale factor, cosmological parameters
+INPUT: scale factor, cosmology
 TASK: Compute E(z)=H(z)/H0
 */
-static double h_over_h0(double a, ccl_parameters * params)
-{
-  return sqrt((params->Omega_m+params->Omega_l*pow(a,-3*(params->w0+params->wa))*exp(3*params->wa*(a-1))+params->Omega_k*a+(params->Omega_g + params-> Omega_n_rel)/a)/(a*a*a));
+static double h_over_h0(double a, ccl_cosmology * cosmo)
+{ 
+  return sqrt((cosmo->params.Omega_m+cosmo->params.Omega_l*pow(a,-3*(cosmo->params.w0+cosmo->params.wa))*exp(3*cosmo->params.wa*(a-1))+cosmo->params.Omega_k*a+(cosmo->params.Omega_g + cosmo->params.Omega_n_rel)/a +Omeganuh2(a, cosmo->params.N_nu_mass, cosmo->params.mnu, cosmo->params.T_CMB, cosmo->data.nu_pspace_int)*a*a*a / (cosmo->params.h) / (cosmo->params.h))/(a*a*a));
 
 }
 
@@ -42,7 +42,7 @@ TASK: compute the integrand of the comoving distance
 static double chi_integrand(double a, void * cosmo_void)
 {
   ccl_cosmology * cosmo = cosmo_void;
-  return CLIGHT_HMPC/(a*a*h_over_h0(a, &(cosmo->params)));
+  return CLIGHT_HMPC/(a*a*h_over_h0(a, cosmo));
 }
 
 /* --------- ROUTINE: growth_ode_system ---------
@@ -52,7 +52,7 @@ TASK: Define the ODE system to be solved in order to compute the growth (of the 
 static int growth_ode_system(double a,const double y[],double dydt[],void *params)
 {
   ccl_cosmology * cosmo = params;
-  double hnorm=h_over_h0(a,&(cosmo->params));
+  double hnorm=h_over_h0(a,cosmo);
   double om=ccl_omega_m_z(cosmo, a);
 
   dydt[0]=y[1]/(a*a*a*hnorm);
@@ -98,7 +98,7 @@ static int  growth_factor_and_growth_rate(double a,double *gf,double *fg,ccl_cos
 
     y[0]=EPS_SCALEFAC_GROWTH;
     y[1]=EPS_SCALEFAC_GROWTH*EPS_SCALEFAC_GROWTH*EPS_SCALEFAC_GROWTH*
-      h_over_h0(EPS_SCALEFAC_GROWTH,&(cosmo->params));
+      h_over_h0(EPS_SCALEFAC_GROWTH,cosmo);
 
     int status=gsl_odeiv2_driver_apply(d,&ainit,a,y);
     gsl_odeiv2_driver_free(d);
@@ -107,7 +107,7 @@ static int  growth_factor_and_growth_rate(double a,double *gf,double *fg,ccl_cos
       return 1;
     
     *gf=y[0];
-    *fg=y[1]/(a*a*h_over_h0(a,&(cosmo->params))*y[0]);
+    *fg=y[1]/(a*a*h_over_h0(a,cosmo)*y[0]);
     return 0;
   }
 }
@@ -209,6 +209,7 @@ TASK: if not already there, make a table of comoving distances and of E(a)
 
 void ccl_cosmology_compute_distances(ccl_cosmology * cosmo, int *status)
 {
+
   if(cosmo->computed_distances)
     return;
   
@@ -217,6 +218,7 @@ void ccl_cosmology_compute_distances(ccl_cosmology * cosmo, int *status)
   
   // Create linearly-spaced values of the scale factor
   int na = A_SPLINE_NA;
+ 
   double * a = ccl_linear_spacing(A_SPLINE_MIN, A_SPLINE_MAX, na);
   if (a==NULL || 
       (fabs(a[0]-A_SPLINE_MIN)>1e-5) || 
@@ -241,11 +243,12 @@ void ccl_cosmology_compute_distances(ccl_cosmology * cosmo, int *status)
   }
   // Fill in E(a)
   for (int i=0; i<na; i++){
-    y[i] = h_over_h0(a[i], &cosmo->params);
-  }
-
+    y[i] = h_over_h0(a[i], cosmo);
+  } 
+  
   // Allocate and fill E spline with values we just got
   gsl_spline * E = gsl_spline_alloc(A_SPLINE_TYPE, na);
+
   int chistatus = gsl_spline_init(E, a, y, na);
   // Check for errors in creating the spline
   if (chistatus){
@@ -260,7 +263,8 @@ void ccl_cosmology_compute_distances(ccl_cosmology * cosmo, int *status)
 
   //Fill in chi(a)
   for (int i=0; i<na; i++)
-    chistatus |= compute_chi(a[i],cosmo,&(y[i])); 
+    chistatus |= compute_chi(a[i],cosmo,&(y[i]));
+
   if (chistatus){
     free(a);
     free(y);
@@ -269,6 +273,7 @@ void ccl_cosmology_compute_distances(ccl_cosmology * cosmo, int *status)
     strcpy(cosmo->status_message,"ccl_background.c: ccl_cosmology_compute_distances(): chi(a) integration error \n");
     return;
   }
+
 
   gsl_spline * chi = gsl_spline_alloc(A_SPLINE_TYPE, na);
   chistatus = gsl_spline_init(chi, a, y, na); //in Mpc
@@ -287,7 +292,7 @@ void ccl_cosmology_compute_distances(ccl_cosmology * cosmo, int *status)
   double dchi=5.,chi0=y[na-1],chif=y[0],a0=a[na-1],af=a[0];
   //TODO: The interval in chi (5. Mpc) should be made a macro
   free(y); free(a);
-  na=(int)((chif-chi0)/dchi);
+  na=(int)((chif-chi0)/dchi);  
   y=ccl_linear_spacing(chi0,chif,na);
   dchi=(chif-chi0)/na;
   if(y==NULL || (fabs(y[0]-chi0)>1E-5) || (fabs(y[na-1]-chif)>1e-5)) {
@@ -299,6 +304,7 @@ void ccl_cosmology_compute_distances(ccl_cosmology * cosmo, int *status)
     //strcpy(cosmo->status_message,"ccl_background.c: ccl_cosmology_compute_distances(): Error creating linear spacing in chi\n"); //RH
     return;
   }
+
   a=malloc(sizeof(double)*na);
   if(a==NULL) {
     free(y);
@@ -309,6 +315,7 @@ void ccl_cosmology_compute_distances(ccl_cosmology * cosmo, int *status)
     strcpy(cosmo->status_message,"ccl_background.c: ccl_cosmology_compute_distances(): ran out of memory\n");
     return; // RH
   }
+
   a[0]=a0; a[na-1]=af;
   const gsl_root_fdfsolver_type *T=gsl_root_fdfsolver_newton;
   gsl_root_fdfsolver *s=gsl_root_fdfsolver_alloc(T);
@@ -329,7 +336,8 @@ void ccl_cosmology_compute_distances(ccl_cosmology * cosmo, int *status)
   }
 
   gsl_spline * achi=gsl_spline_alloc(A_SPLINE_TYPE,na);
- chistatus=gsl_spline_init(achi,y,a,na);
+  chistatus=gsl_spline_init(achi,y,a,na);
+
  //RH has issues here
   if (chistatus){
     free(a);
@@ -342,15 +350,15 @@ void ccl_cosmology_compute_distances(ccl_cosmology * cosmo, int *status)
     return;
   }
 
-  if(cosmo->data.accelerator==NULL)
-    cosmo->data.accelerator=gsl_interp_accel_alloc();
+  if(cosmo->data.accelerator==NULL) cosmo->data.accelerator=gsl_interp_accel_alloc();
   cosmo->data.E = E;
   cosmo->data.chi = chi;
   cosmo->data.achi=achi;
   cosmo->computed_distances = true;
-  
+    
   free(a);
   free(y);
+
 }
 
 
@@ -364,6 +372,9 @@ void ccl_cosmology_compute_growth(ccl_cosmology * cosmo, int * status)
 {
   if(cosmo->computed_growth)
     return;
+
+  // Check if we have already computed the spline for the phase-space neutrinos integral. If not, get this. 
+  if (cosmo->data.nu_pspace_int==NULL) cosmo->data.nu_pspace_int=ccl_calculate_nu_phasespace_spline();
 
   // Create linearly-spaced values of the scale factor
   int  chistatus = 0, na = A_SPLINE_NA;
@@ -552,7 +563,7 @@ double ccl_h_over_h0(ccl_cosmology * cosmo, double a, int* status)
 {
   if (!cosmo->computed_distances){
     ccl_cosmology_compute_distances(cosmo,status);
-  ccl_check_status(cosmo, status);    
+    ccl_check_status(cosmo, status);   
   }
   return gsl_spline_eval(cosmo->data.E, a, cosmo->data.accelerator);
 }

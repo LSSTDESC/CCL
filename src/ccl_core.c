@@ -89,10 +89,10 @@ void ccl_parameters_fill_initial(ccl_parameters *params)
   params->Omega_n = params->Omega_n_rel + params->Omega_n_mass;
 
   // Now get the total Omega matter, after computing massive neutrinos
-  params->Omega_m = params->Omega_b + params-> Omega_c + params-> Omega_n_mass; 
+  params->Omega_m = params->Omega_b + params-> Omega_c;
 
   // Derived parameters
-  params->Omega_l = 1.0 - params->Omega_m - params->Omega_g - params->Omega_n_rel - params->Omega_k;
+  params->Omega_l = 1.0 - params->Omega_m - params->Omega_g - params->Omega_n_rel -params->Omega_n_mass- params->Omega_k;
   // Initially undetermined parameters - set to nan to trigger
   // problems if they are mistakenly used.
   if (isfinite(params->A_s)){params->sigma_8 = NAN;}
