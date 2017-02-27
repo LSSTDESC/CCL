@@ -18,7 +18,7 @@
 #define LOGM_SPLINE_MAX   17
 
 //for 2D SPLINE, e.g. P_NL, use coarser binning
-#define N_A 20
+#define N_A 40
 
 #define A_SPLINE_TYPE gsl_interp_akima
 #define K_SPLINE_TYPE gsl_interp_akima
