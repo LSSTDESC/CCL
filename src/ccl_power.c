@@ -615,7 +615,7 @@ TASK: extrapolate power spectrum at high k
 static double ccl_power_extrapol_highk(ccl_cosmology * cosmo, double k, double a, gsl_spline2d * powerspl, int * status){
 
   double log_p_1;
-  double deltak=1e-4;
+  double deltak=DELTA_LOGK;
   double deriv_pk_kmid,deriv2_pk_kmid;
 
   double lkmid=log(K_MAX_SPLINE)-2*deltak;
