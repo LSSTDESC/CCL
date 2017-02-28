@@ -1,6 +1,7 @@
 #include "ccl_background.h"
 #include "ccl_utils.h"
 #include "ccl_error.h"
+#include "ccl_constants.h"
 #include <stdlib.h>
 #include <math.h>
 #include <stdio.h>
@@ -17,7 +18,7 @@
 
 /* --------- ROUTINE: h_over_h0 ---------
 INPUT: scale factor, cosmological parameters
-TASK: Compute E(z)=H(z)/H0
+TASK: Compute E(a)=H(a)/H0
 */
 static double h_over_h0(double a, ccl_parameters * params)
 {
@@ -25,14 +26,32 @@ static double h_over_h0(double a, ccl_parameters * params)
 	       exp(3*params->wa*(a-1))+params->Omega_k*a+params->Omega_g/a)/(a*a*a));
 }
 
-/* --------- ROUTINE: ccl_omega_m_z ---------
-INPUT: cosmology object, scale factor
-TASK: Compute Omega_m(z)
+/* --------- ROUTINE: ccl_omega_x ---------
+INPUT: cosmology object, scale factor, species label
+TASK: Compute Omega_x(a), with x defined by species label.
+Possible values for "label":
+ccl_omega_m_label <- matter
+ccl_omega_l_label <- DE
+ccl_omega_g_label <- radiation
+ccl_omega_k_label <- curvature
 */
-double ccl_omega_m_z(ccl_cosmology * cosmo, double a)
+double ccl_omega_x(ccl_cosmology * cosmo, double a, ccl_omega_x_label label)
 {
-  return cosmo->params.Omega_m/(cosmo->params.Omega_m+cosmo->params.Omega_l*pow(a,-3*(cosmo->params.w0+cosmo->params.wa))*
-			  exp(3*cosmo->params.wa*(a-1))+cosmo->params.Omega_k*a);
+  switch(label) {
+  case ccl_omega_m_label :
+    return cosmo->params.Omega_m/(cosmo->params.Omega_m+cosmo->params.Omega_l*pow(a,-3*(cosmo->params.w0+cosmo->params.wa))*
+	 exp(3*cosmo->params.wa*(a-1))+cosmo->params.Omega_k*a+cosmo->params.Omega_g/a);
+  case ccl_omega_l_label :
+    return cosmo->params.Omega_l*pow(a,-3*(cosmo->params.w0+cosmo->params.wa))*
+    exp(3*cosmo->params.wa*(a-1))/(cosmo->params.Omega_m+
+	     cosmo->params.Omega_l*pow(a,-3*(cosmo->params.w0+cosmo->params.wa))*exp(3*cosmo->params.wa*(a-1))+cosmo->params.Omega_k*a+cosmo->params.Omega_g/a);
+  case ccl_omega_g_label :
+    return cosmo->params.Omega_g/(cosmo->params.Omega_m*a+cosmo->params.Omega_l*pow(a,-3*(cosmo->params.w0+cosmo->params.wa))*
+	 exp(3*cosmo->params.wa*(a-1))*a+cosmo->params.Omega_k*a*a+cosmo->params.Omega_g);
+  case ccl_omega_k_label :
+    return cosmo->params.Omega_k*a/(cosmo->params.Omega_m+cosmo->params.Omega_l*pow(a,-3*(cosmo->params.w0+cosmo->params.wa))*
+	 exp(3*cosmo->params.wa*(a-1))+cosmo->params.Omega_k*a+cosmo->params.Omega_g/a);
+  }
 }
 
 /* --------- ROUTINE: chi_integrand ---------
@@ -53,7 +72,7 @@ static int growth_ode_system(double a,const double y[],double dydt[],void *param
 {
   ccl_cosmology * cosmo = params;
   double hnorm=h_over_h0(a,&(cosmo->params));
-  double om=ccl_omega_m_z(cosmo, a);
+  double om=ccl_omega_x(cosmo, a, ccl_omega_m_label);
 
   dydt[0]=y[1]/(a*a*a*hnorm);
   dydt[1]=1.5*hnorm*a*om*y[0];

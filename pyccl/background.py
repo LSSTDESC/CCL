@@ -1,6 +1,13 @@
 
 import ccllib as lib
-from pyutils import _vectorize_fn
+from pyutils import _vectorize_fn, _vectorize_fn2, _vectorize_fn3
+
+species_types = {
+    'matter':      lib.omega_m_label,
+    'dark_energy': lib.omega_l_label,
+    'radiation':   lib.omega_g_label,
+    'curvature':   lib.omega_k_label
+}
 
 def growth_factor(cosmo, a):
     """Growth factor.
@@ -114,21 +121,45 @@ def scale_factor_of_chi(cosmo, chi):
     return _vectorize_fn(lib.scale_factor_of_chi, 
                          lib.scale_factor_of_chi_vec, cosmo, chi)
 
-def omega_m_z(cosmo, a):
-    """Matter density fraction at a redshift different than z=0.
+<<<<<<< HEAD
+def omega_x(cosmo, a, label):
+    """Density fraction of a given species at a redshift different than z=0.
+=======
+
+def omega_x(cosmo, a, label):
+  """Density parameters at a redshift different than z=0.
 
     Note: the name of this function (_z) is inconsistent with its 
     input names (a; scale factor) and same for the C-code.
+>>>>>>> 983ea8bc8f04563e611140534db70fe13b95711d
 
     Args:
         cosmo (:obj:`ccl.cosmology`): Cosmological parameters.
         a (float or array_like): Scale factor(s), normalized to 1 today.
+<<<<<<< HEAD
+        label (string): species type. Available: 'matter', 'dark_energy',
+                        'radiation' and 'curvature'
 
     Returns:
-        omega_m_z (float or array_like): Matter density fraction at a scale factor.
+        omega_x (float or array_like): Density fraction of a given species
+        at a scale factor.
 
     """
-    return _vectorize_fn(lib.omega_m_z, 
-                         lib.omega_m_z_vec, cosmo, a,
-                         returns_status=False)
+    if label not in species_types.keys() :
+        raise ValueError( "'%s' is not a valid species type. "
+                          "Available options are: %s" \
+                         % (label,species_types.keys()) )
 
+    return _vectorize_fn3(lib.omega_x, 
+                          lib.omega_x_vec, cosmo, a, species_types[label],
+=======
+        label (int): 0 for Omega_m, 1 for Omega_l, 2 for Omega_g and 3 for Omega_k 
+
+    Returns:
+        omega_x (float or array_like): density parameter value at a scale factor.
+
+    """
+    return _vectorize_fn3(lib.omega_x, 
+                          lib.omega_x_vec, cosmo, a, label,
+>>>>>>> 983ea8bc8f04563e611140534db70fe13b95711d
+                          returns_status=False)

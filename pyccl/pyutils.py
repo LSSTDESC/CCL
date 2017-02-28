@@ -158,4 +158,45 @@ def _vectorize_fn2(fn, fn_vec, cosmo, x, z, returns_status=True):
         return f[0]
     else:
         return f
+
+def _vectorize_fn3(fn, fn_vec, cosmo, x, n, returns_status=True):
+    """Generic wrapper to allow vectorized (1D array) access to CCL functions with 
+    one vector argument and one integer argument, with a cosmology dependence.
+
+    Args:
+        fn (callable): Function with a single argument.
+        fn_vec (callable): Function that has a vectorized implementation in a .i file.
+        cosmo (ccl_cosmology or Cosmology): The input cosmology which gets converted to a ccl_cosmology.
+        x (float or array_like): Argument to fn.
+        n (int): Integer argument to fn.
+        returns_stats (bool): Indicates whether fn returns a status.
+
+    """
+   # Access ccl_cosmology object
+    cosmo = _cosmology_obj(cosmo)
+    status = 0
+    scalar = False
     
+    if isinstance(x, float):
+        scalar = True
+        x=np.array([x,])
+
+    if isinstance(x, np.ndarray):
+        # Use vectorised function
+        if returns_status:
+            f, status = fn_vec(cosmo, n, x, x.size, status)
+        else:
+            f = fn_vec(cosmo, n, x, x.size)
+    else:
+        # Use vectorised function
+        if returns_status:
+            f, status = fn_vec(cosmo, n, x, len(x), status)
+        else:
+            f = fn_vec(cosmo, n, x, len(x))
+    
+    # Check result and return
+    check(status)
+    if scalar:
+        return f[0]
+    else:
+        return f
