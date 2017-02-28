@@ -46,12 +46,33 @@ error_types = {
 
 
 class Parameters(object):
+    """The Parameters class contains cosmological parameters.
+
+    """
     
     def __init__(self, Omega_c=None, Omega_b=None, h=None, A_s=None, n_s=None, 
                  Omega_k=0., Omega_n=0., w0=-1., wa=0., sigma8=None,
                  zarr_mgrowth=None, dfarr_mgrowth=None):
-        """
-        Class containing a set of cosmological parameters.
+        """Creates a set of cosmological parameters.
+
+        Note:
+            Although some arguments default to `None`, they will raise
+            a ValueError inside this function, so they are not optional.
+        
+        Args:
+            Omega_c (float): Cold dark matter density fraction.
+            Omega_b (float): Baryonic matter density fraction.
+            h (float): Hubble constant divided by 100 km/s/Mpc; unitless.
+            A_s (float): Power spectrum normalization; Mpc^-3 CHECKTHIS - PHIL BULL. Optional if sigma8 is specified.
+            n_s (float): Power spectrum index.
+            Omega_k (float, optional): Curvature density fraction. Defaults to 0.
+            Omega_n (float, optional): Massless neutrino density fracton. Defaults to 0.
+            w0 (float, optional): First order term of dark energy equation of state. Defaults to -1.
+            wa (float, optional): Second order term of dark energy equation of state. Defaults to 0.
+            sigma8 (float): Mass variance at 8 Mpc scale. Optional if A_s is specified.
+            zarr_mgrowth (:obj: list of floats): UNKNOWN - PHIL BULL.
+            dfarr_mgrowth (UNKNOWN): UNKNOWN - PHIL BULL.
+
         """
         # Set current ccl_parameters object to None
         self.parameters = None
@@ -116,8 +137,8 @@ class Parameters(object):
                                     zarr_mgrowth, dfarr_mgrowth)
     
     def __getitem__(self, key):
-        """
-        Access parameter values by name.
+        """Access parameter values by name.
+
         """
         try:
             val = getattr(self.parameters, key)
@@ -126,8 +147,8 @@ class Parameters(object):
         return val
     
     def __setitem__(self, key, val):
-        """
-        Set parameter values by name.
+        """Set parameter values by name.
+
         """
         raise NotImplementedError("Parameters objects are immutable; create a "
                                   "new Parameters() instance instead.")
@@ -141,11 +162,11 @@ class Parameters(object):
         
         # Set value of parameter
         setattr(self.parameters, key, val)
-        # FIXME: Should update/replace CCL objects appropriately
+        # TODO: Should update/replace CCL objects appropriately
     
     def __str__(self):
-        """
-        Output the parameters that were set, and their values.
+        """Output the parameters that were set, and their values.
+
         """
         params = ['Omega_c', 'Omega_b', 'Omega_m', 'Omega_n', 'Omega_k', 
                   'w0', 'wa', 'H0', 'h', 'A_s', 'n_s', 'Omega_g', 'T_CMB', 
@@ -155,18 +176,31 @@ class Parameters(object):
         string = "Parameters\n----------\n"
         string += "\n".join(vals)
         return string
-        
 
 
 class Cosmology(object):
+    """Wrapper for the ccl_cosmology object.
+
+    Includes cosmological parameters and cached data.
+
+    """
     
     def __init__(self, params, config=None, 
                  transfer_function='boltzmann_class',
                  matter_power_spectrum='halofit',
                  mass_function='tinker'):
-        """
-        Class containing a ccl_cosmology object, including cosmological 
-        parameters and cached data.
+        """Creates a wrapper for ccl_cosmology.
+
+        TODO: enumerate transfer_function and 
+        matter_power_spectrum options.
+
+        Args:
+            params (:obj:`Parameters`): Cosmological parameters object.
+            config (:obj:`ccl_configuration`, optional): Configuration for how to use CCL. Takes precident over any other passed in configuration. Defaults to None.
+            transfer_function (:obj:`str`, optional): The transfer function to use. Defaults to `boltzmann_class`.
+            matter_power_spectrum (:obj:`str`, optional): The matter power spectrum to use. Defaults to `halofit`.
+            mass_function (:obj:`str`, optional): The mass function to use. Defaults to `tinker` (2010).
+
         """
         # Check the type of the input params object
         if isinstance(params, lib.parameters):
@@ -233,14 +267,16 @@ class Cosmology(object):
                                % (self.cosmo.status, self.cosmo.status_message))
     
     def __del__(self):
-        """
-        Free the ccl_cosmology instance that this Cosmology object is managing.
+        """Free the ccl_cosmology instance that this Cosmology object is managing.
+
         """
         lib.cosmology_free(self.cosmo)
     
     def __str__(self):
-        """
-        Output the cosmological parameters that were set, and their values.
+        """Output the cosmological parameters that were set, and their values,
+        as well as the status of precomputed quantities and the internal CCL
+        status.
+
         """
         # String of cosmo parameters, from self.params (Parameters object)
         param_str = self.params.__str__()
@@ -267,43 +303,83 @@ class Cosmology(object):
         return string
     
     def __getitem__(self, key):
-        """
-        Access cosmological parameter values by name.
+        """Access cosmological parameter values by name.
+
         """
         return self.params.__getitem__(key)
     
     def compute_distances(self):
+      """Interfaces with src/compute_background.c: ccl_cosmology_compute_distances().
+        Sets up the splines for the distances.
+
+        """
         status = 0
         lib.cosmology_compute_distances(self.cosmo, status)
         check(status)
     
     def compute_growth(self):
+      """Interfaces with src/ccl_background.c: ccl_cosmology_compute_growth().
+        Sets up the splines for the growth function.
+
+        """
         status = 0
         lib.cosmology_compute_growth(self.cosmo, status)
         check(status)
     
     def compute_power(self):
+      """Interfaces with src/ccl_power.c: ccl_cosmology_compute_power().
+        Sets up the splines for the power spectrum.
+
+        """
         status = 0
         lib.cosmology_compute_power(self.cosmo, status)
         check(status)
     
     # Check which data have been precomputed
     def has_distances(self):
+        """Checks if the distances have been precomputed.
+
+        Returns:
+            True if precomputed, False otherwise.
+
+        """
         return bool(self.cosmo.computed_distances)
     
     def has_growth(self):
+        """Checks if the growth function has been precomputed.
+
+        Returns:
+            True if precomputed, False otherwise.
+
+        """
         return bool(self.cosmo.computed_growth)
     
     def has_power(self):
+        """Checks if the power spectra have been precomputed.
+
+        Returns:
+            True if precomputed, False otherwise.
+
+        """
         return bool(self.cosmo.computed_power)
     
     def has_sigma(self):
+        """Checks if sigma8 has been computed.
+
+        Returns:
+            True if precomputed, False otherwise.
+
+        """
         return bool(self.cosmo.computed_sigma)
     
-    # Return status (for error checking)
     def status(self):
-        """
-        Get error status of the ccl_cosmology object.
+        """Get error status of the ccl_cosmology object.
+
+        Note: error status is all currently under development.
+
+        Returns:
+            :obj:`str` containing the status message.
+
         """
         # Get status ID string if one exists
         if self.cosmo.status in error_types.keys():
