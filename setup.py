@@ -157,8 +157,13 @@ class PyTest(Command):
     #To DYLD_LIBRARY_PATH or LD_LIBRARY_PATH depending on your platform
     if 'Linux' in platform.system():
         os.environ['LD_LIBRARY_PATH']+= os.pathsep + os.path.join(sys.prefix,'lib')
-    if 'Darwin' in platform.system():
-        os.environ['DYLD_LIBRARY_PATH']+= os.pathsep + os.path.join(sys.prefix,'lib')
+    if 'Darwin' in platform.system(): 
+        if not 'DYLD_LIBRARY_PATH' is os.environ:
+            libpath = os.getenv('DYLD_LIBARY_PATH',os.path.join(sys.prefix,'lib'))
+            os.environ['DYLD_LIBRARY_PATH']=libpath 
+        else:
+            os.environ['DYLD_LIBRARY_PATH']+= os.pathsep + os.path.join(sys.prefix,'lib')
+            print(os.environ['DYLD_LIBRARY_PATH'])
     user_options = []
     def initialize_options(self):
         pass
@@ -283,8 +288,8 @@ setup(  name         = "pyccl",
                swig_opts=['-threads'],
            )],
         cmdclass = {
-            'test': PyTest,
             'install': PyInstall,
             'build_clib': build_external_clib,
+            'test': PyTest
         },
         )
