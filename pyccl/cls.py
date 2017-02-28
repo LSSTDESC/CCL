@@ -17,14 +17,41 @@ tracer_types = {
 NoneArr = np.array([])
 
 class ClTracer(object):
-    
+    """ClTracer class used to wrap the cl_tracer found
+    in CCL.
+
+    A ClTracer is a data structure that contains all information
+    describing the transfer functon of one tracer of the matter
+    distribution.
+
+    """
+
     def __init__(self, cosmo, tracer_type=None, has_rsd=False, 
                  has_magnification=False, has_intrinsic_alignment=False, 
                  z_n=None, n=None, z_b=None, b=None, 
                  z_s=None, s=None, z_ba=None, ba=None, 
                  z_rf=None, rf=None):
-        """
-        Object handling a ClTracer (tracer with an angular power spectrum).
+        """Creates the ClTracer.
+
+        Note: unless otherwise stated defaults are None.
+
+        Args:
+            cosmo (:obj:`Cosmology`): Either a ccl_cosmology or a Cosmology object.
+            tracer_type (:obj:`str`): Specifies what tracer to use.
+            has_rsd (bool, optional): Flag to incorporate RSD into the model for CL. Defaults to False.
+            has_magnification (bool, optional): Flag to incorporate magnification into the model for Cl. Defaults to False.
+            has_intrinsic_alignment (bool, optional): Flag to incorporate intrinsic alignment into the model. Defaults to False.
+            z_n (array_like, optional): Array of redshifts for N(z).
+            n (array_like, optional): Array of N(z)-values.
+            z_b (array_like, optional): Array of redshifts for alignment biases, b(z).
+            b (array_like, optional): Array of alignment biases.
+            z_s (array_like, optional): Array of redshifts for shapes, s(z).
+            s (array_like, optional): Array of shapes.
+            z_ba (array_like, optional): Array of redshifts for intrinsic alignment amplitudes.
+            ba (array_like, optional): Array of intrinsic alignment amplitudes.
+            z_rf (array_like, optional): Array of redshifts for the red fraction, rf(z).
+            rf (array_like, optional): Array of red fractions.
+
         """
         # Verify cosmo object
         cosmo = _cosmology_obj(cosmo)
@@ -54,18 +81,36 @@ class ClTracer(object):
                             int(has_magnification), 
                             int(has_intrinsic_alignment),
                             z_n, n, z_b, b, z_s, s, z_ba, ba, z_rf, rf, status )
+        # TODO: worry about the status
         
     def __del__(self):
-        """
-        Free memory associated with CCL_ClTracer object.
+        """Free memory associated with CCL_ClTracer object.
+
         """
         lib.cl_tracer_free(self.cltracer)
 
 
 class ClTracerNumberCounts(ClTracer):
+    """ClTracer for galaxy clustering.
+
+    """
     
     def __init__(self, cosmo, has_rsd, has_magnification, 
                  z_n, n, z_b, b, z_s=None, s=None):
+        """ClTracer for galaxy clustering, N(z).
+
+        Args:
+            cosmo (:obj:`Cosmology`): Either a ccl_cosmology or a Cosmology object.
+            has_rsd (bool, optional): Flag to incorporate RSD into the model for CL. Defaults to False.
+            has_magnification (bool, optional): Flag to incorporate magnification into the model for Cl. Defaults to False.
+            z_n (array_like): Array of redshifts for N(z).
+            n (array_like): Array of N(z)-values.
+            z_b (array_like): Array of redshifts for biases, b(z).
+            b (array_like): Array of biases.
+            z_s (array_like, optional): Array of redshifts for magnification bias. Not optional if has_magnification is True.
+            s (array_like, optional): Array of magnification bias. Not optional if has_magnification is True.
+
+        """
         
         # Sanity check on input arguments
         if has_magnification and (z_s is None or s is None):
@@ -82,9 +127,25 @@ class ClTracerNumberCounts(ClTracer):
 
 
 class ClTracerLensing(ClTracer):
+    """ClTracer for lensing shapes.
+
+    """
     
     def __init__(self, cosmo, has_intrinsic_alignment, 
                  z_n, n, z_ba=None, ba=None, z_rf=None, rf=None):
+        """ClTracer for lensing shapes.
+        
+        Args:
+            cosmo (:obj:`Cosmology`): Either a ccl_cosmology or a Cosmology object.
+            has_intrinsic_alignment (bool, optional): Flag to incorporate intrinsic alignment into the model. Defaults to False.
+            z_n (array_like): Array of redshifts for N(z).
+            n (array_like): Array of N(z)-values.
+            z_ba (array_like, optional): Array of redshifts for biases, b(z). Not optional if has_intrinsic_alignment is True.
+            ba (array_like, optional): Array of biases. Not optional if has_intrinsic_alignment is True.
+            z_rf (array_like, optional): Array of redshifts for the red fraction, rf(z). Not optional if has_intrinsic_alignment is True.
+            rf (array_like, optional): Array of red fractions. Not optional if has_intrinsic_alignment is True.
+
+        """
         
         # Sanity check on input arguments
         if has_intrinsic_alignment \
@@ -102,11 +163,17 @@ class ClTracerLensing(ClTracer):
 
 
 def _cltracer_obj(cltracer):
-    """
-    Returns a CCL_ClTracer object, given an input object which may be 
+    """Returns a CCL_ClTracer object, given an input object which may be 
     CCL_ClTracer, the ClTracer wrapper class, or an invalid type.
+
+    Args:
+        cltracer (:obj:): Either a CCL_ClTracer or the ClTracer wrapper class.
+
+    Returns:
+        cltracer (:obj:): Either a CCL_ClTracer or the ClTracer wrapper class.
+
     """
-    # FIXME: Is ClTracer a valid type?
+    # TODO: Is ClTracer a valid type?
     if isinstance(cltracer, lib.CCL_ClTracer):
         return cltracer
     elif isinstance(cltracer, ClTracer):
@@ -116,8 +183,17 @@ def _cltracer_obj(cltracer):
 
 
 def angular_cl(cosmo, cltracer1, cltracer2, ell):
-    """
-    Calculate angular power spectrum for two tracers.
+    """Calculate angular power spectrum for two tracers.
+
+    Args:
+        cosmo (:obj:`Cosmology`): Either a ccl_cosmology or a Cosmology object
+        cltracer1 (:obj:): A Cl tracer.
+        cltracer2 (:obj:): A Cl tracer.
+        ell (float or array_like): Angular wavenumber to evaluate the tracers at.
+
+    Returns:
+        cl (float or array_like): Cl values for the tracers at `ell`.
+
     """
     # Access ccl_cosmology object
     cosmo = _cosmology_obj(cosmo)
