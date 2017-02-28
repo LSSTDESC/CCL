@@ -62,7 +62,7 @@ static double massfunc_f(ccl_cosmology *cosmo, double smooth_mass,double a, int 
     break;
 
   case ccl_watson:
-    Omega_m_a = ccl_omega_m_a(cosmo, a);
+    Omega_m_a = ccl_omega_x(cosmo, a, ccl_omega_m_label);
     
     fit_A = Omega_m_a*(0.990*pow(a,3.216)+0.074);
     fit_a = Omega_m_a*(5.907*pow(a,3.599)+2.344);

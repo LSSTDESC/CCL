@@ -131,9 +131,9 @@ The routines described in this subsection are implemented in {\tt ccl\_backgroun
 
 The Hubble parameter is calculated via
 %
-\begin{equation}
-\frac{H(a)}{H_0} = a^{-3/2}\sqrt{\Omega_m+\Omega_\Lambda a^{-3(w_0+w_a)}
-    \exp[3 w_a (a-1)]+\Omega_K a +\Omega_g a^{-1}}.
+\begin{equation}\label{eq:Ha}
+\frac{H(a)}{H_0} = a^{-3/2}\sqrt{\Omega_{M,0}+\Omega_{\Lambda,0} a^{-3(w_0+w_a)}
+    \exp[3 w_a (a-1)]+\Omega_{K,0} a +\Omega_{g,0} a^{-1}}.
 \end{equation}
 
 The radial comoving distance is calculated via a numerical integral
@@ -153,6 +153,19 @@ $d_L=r(a)/a$.
 
 CCL also contains capability to compute $a(\chi)$ (i.e. the inverse of $\chi(a)$).
 
+
+\subsection{Density parameter functions}
+
+The routines described in this subsection are implemented in {\tt ccl\_background.c}.
+
+The density parameter functions $\Omega_X(a)$ are calculated for four components:
+\begin{itemize}
+\item matter density parameter $\Omega_M(a) = \Omega_{M,0} H_0^2 / (a^3 H^2(a) )$.
+\item dark energy density parameter $\Omega_\Lambda(a) = \Omega_{\Lambda,0} H_0^2 / H^2(a)$.
+\item radiation density parameter $\Omega_g(a) = \Omega_{g,0} H_0^2 / (a^4 H^2(a) )$.
+\item curvature density parameter $\Omega_K(a) = \Omega_{K,0} H_0^2 / (a^2 H^2(a) )$.
+\end{itemize}
+using the Hubble parameter defined equation~\ref{eq:Ha}.
 
 \subsection{Growth function}
 \label{sec:growth}

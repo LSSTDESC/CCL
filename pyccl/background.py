@@ -1,6 +1,13 @@
 
 import ccllib as lib
-from pyutils import _vectorize_fn
+from pyutils import _vectorize_fn, _vectorize_fn2, _vectorize_fn3
+
+species_types = {
+    'matter':      lib.omega_m_label,
+    'dark_energy': lib.omega_l_label,
+    'radiation':   lib.omega_g_label,
+    'curvature':   lib.omega_k_label
+}
 
 def growth_factor(cosmo, a):
     """Growth factor.
@@ -114,17 +121,24 @@ def scale_factor_of_chi(cosmo, chi):
     return _vectorize_fn(lib.scale_factor_of_chi, 
                          lib.scale_factor_of_chi_vec, cosmo, chi)
 
-def omega_m_a(cosmo, a):
-    """Matter density fraction at a redshift different than z=0.
+def omega_x(cosmo, a, label):
+    """Density fraction of a given species at a redshift different than z=0.
 
     Args:
         cosmo (:obj:`ccl.cosmology`): Cosmological parameters.
         a (float or array_like): Scale factor(s), normalized to 1 today.
+        label (string): species type. Available: 'matter', 'dark_energy',
+                        'radiation' and 'curvature'
 
     Returns:
         omega_m_a (float or array_like): Matter density fraction at a scale factor.
 
     """
-    return _vectorize_fn(lib.omega_m_a, 
-                         lib.omega_m_a_vec, cosmo, a,
-                         returns_status=False)
+    if label not in species_types.keys() :
+        raise ValueError( "'%s' is not a valid species type. "
+                          "Available options are: %s" \
+                         % (label,species_types.keys()) )
+
+    return _vectorize_fn3(lib.omega_x, 
+                          lib.omega_x_vec, cosmo, a, species_types[label],
+                          returns_status=False)

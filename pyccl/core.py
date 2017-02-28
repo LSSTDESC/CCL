@@ -2,6 +2,7 @@
 import ccllib as lib
 import numpy as np
 from warnings import warn
+from pyutils import check
 
 # Configuration types
 transfer_function_types = {
@@ -312,25 +313,28 @@ class Cosmology(object):
         Sets up the splines for the distances.
 
         """
-        lib.cosmology_compute_distances(self.cosmo)
-        return
+        status = 0
+        lib.cosmology_compute_distances(self.cosmo, status)
+        check(status)
     
     def compute_growth(self):
         """Interfaces with src/ccl_background.c: ccl_cosmology_compute_growth().
         Sets up the splines for the growth function.
 
         """
-        lib.cosmology_compute_growth(self.cosmo)
-        return
+        status = 0
+        lib.cosmology_compute_growth(self.cosmo, status)
+        check(status)
     
     def compute_power(self):
         """Interfaces with src/ccl_power.c: ccl_cosmology_compute_power().
         Sets up the splines for the power spectrum.
 
         """
-        lib.cosmology_compute_power(self.cosmo)
-        return
-
+        status = 0
+        lib.cosmology_compute_power(self.cosmo, status)
+        check(status)
+    
     def has_distances(self):
         """Checks if the distances have been precomputed.
 
