@@ -28,26 +28,27 @@ static double h_over_h0(double a, ccl_parameters * params)
 
 /* --------- ROUTINE: ccl_omega_x ---------
 INPUT: cosmology object, scale factor, species label
-TASK: Compute Omega_x(a), with x defined by species label:
-0: Omega_m
-1: Omega_l
-2: Omega_g
-3: Omega_k
+TASK: Compute Omega_x(a), with x defined by species label.
+Possible values for "label":
+ccl_omega_m_label <- matter
+ccl_omega_l_label <- DE
+ccl_omega_g_label <- radiation
+ccl_omega_k_label <- curvature
 */
-double ccl_omega_x(ccl_cosmology * cosmo, double a, enum omega_x_label label)
+double ccl_omega_x(ccl_cosmology * cosmo, double a, ccl_omega_x_label label)
 {
   switch(label) {
-  case omega_m_label :
+  case ccl_omega_m_label :
     return cosmo->params.Omega_m/(cosmo->params.Omega_m+cosmo->params.Omega_l*pow(a,-3*(cosmo->params.w0+cosmo->params.wa))*
 	 exp(3*cosmo->params.wa*(a-1))+cosmo->params.Omega_k*a+cosmo->params.Omega_g/a);
-  case omega_l_label :
+  case ccl_omega_l_label :
     return cosmo->params.Omega_l*pow(a,-3*(cosmo->params.w0+cosmo->params.wa))*
     exp(3*cosmo->params.wa*(a-1))/(cosmo->params.Omega_m+
 	     cosmo->params.Omega_l*pow(a,-3*(cosmo->params.w0+cosmo->params.wa))*exp(3*cosmo->params.wa*(a-1))+cosmo->params.Omega_k*a+cosmo->params.Omega_g/a);
-  case omega_g_label :
+  case ccl_omega_g_label :
     return cosmo->params.Omega_g/(cosmo->params.Omega_m*a+cosmo->params.Omega_l*pow(a,-3*(cosmo->params.w0+cosmo->params.wa))*
 	 exp(3*cosmo->params.wa*(a-1))*a+cosmo->params.Omega_k*a*a+cosmo->params.Omega_g);
-  case omega_k_label :
+  case ccl_omega_k_label :
     return cosmo->params.Omega_k*a/(cosmo->params.Omega_m+cosmo->params.Omega_l*pow(a,-3*(cosmo->params.w0+cosmo->params.wa))*
 	 exp(3*cosmo->params.wa*(a-1))+cosmo->params.Omega_k*a+cosmo->params.Omega_g/a);
   }
@@ -71,8 +72,7 @@ static int growth_ode_system(double a,const double y[],double dydt[],void *param
 {
   ccl_cosmology * cosmo = params;
   double hnorm=h_over_h0(a,&(cosmo->params));
-  enum omega_x_label label = omega_m_label;
-  double om=ccl_omega_x(cosmo, a, label);
+  double om=ccl_omega_x(cosmo, a, ccl_omega_m_label);
 
   dydt[0]=y[1]/(a*a*a*hnorm);
   dydt[1]=1.5*hnorm*a*om*y[0];

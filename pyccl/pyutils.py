@@ -4,8 +4,11 @@ import numpy as np
 import core
 
 def check(status):
-    """
-    Check the status returned by a ccllib function.
+    """Check the status returned by a ccllib function.
+
+    Args:
+        status (int or core.error_types): Flag or error describing the success of a function.
+    
     """
     # Check for normal status (no action required)
     if status == 0: return
@@ -21,9 +24,12 @@ def check(status):
 
 
 def _cosmology_obj(cosmo):
-    """
-    Returns a ccl_cosmology object, given an input object which may be 
+    """Returns a ccl_cosmology object, given an input object which may be 
     ccl_cosmology, the Cosmology wrapper class, or an invalid type.
+
+    Args:
+        cosmo (ccl_cosmology or Cosmology): The input cosmology which gets converted to a ccl_cosmology.
+
     """
     if isinstance(cosmo, lib.cosmology):
         return cosmo
@@ -34,9 +40,15 @@ def _cosmology_obj(cosmo):
 
 
 def _vectorize_fn_simple(fn, fn_vec, x, returns_status=True):    
-    """
-    Generic wrapper to allow vectorized (1D array) access to CCL functions with 
+    """Generic wrapper to allow vectorized (1D array) access to CCL functions with 
     one vector argument (but no dependence on cosmology).
+
+    Args:
+        fn (callable): Function with a single argument.
+        fn_vec (callable): Function that has a vectorized implementation in a .i file.
+        x (float or array_like): Argument to fn.
+        returns_stats (bool): Indicates whether fn returns a status.
+
     """
     status = 0
     if isinstance(x, float):
@@ -64,9 +76,16 @@ def _vectorize_fn_simple(fn, fn_vec, x, returns_status=True):
 
 
 def _vectorize_fn(fn, fn_vec, cosmo, x, returns_status=True):
-    """
-    Generic wrapper to allow vectorized (1D array) access to CCL functions with 
-    one vector argument.
+    """Generic wrapper to allow vectorized (1D array) access to CCL functions with 
+    one vector argument, with a cosmology dependence.
+
+    Args:
+        fn (callable): Function with a single argument.
+        fn_vec (callable): Function that has a vectorized implementation in a .i file.
+        cosmo (ccl_cosmology or Cosmology): The input cosmology which gets converted to a ccl_cosmology.
+        x (float or array_like): Argument to fn.
+        returns_stats (bool): Indicates whether fn returns a status.
+
     """
     # Access ccl_cosmology object
     cosmo = _cosmology_obj(cosmo)
@@ -97,9 +116,18 @@ def _vectorize_fn(fn, fn_vec, cosmo, x, returns_status=True):
 
 
 def _vectorize_fn2(fn, fn_vec, cosmo, x, z, returns_status=True):
-    """
-    Generic wrapper to allow vectorized (1D array) access to CCL functions with 
-    one vector argument and one scalar argument.
+
+    """Generic wrapper to allow vectorized (1D array) access to CCL functions with 
+    one vector argument and one scalar argument, with a cosmology dependence.
+
+    Args:
+        fn (callable): Function with a single argument.
+        fn_vec (callable): Function that has a vectorized implementation in a .i file.
+        cosmo (ccl_cosmology or Cosmology): The input cosmology which gets converted to a ccl_cosmology.
+        x (float or array_like): Argument to fn.
+        z (float): Scalar argument to fn.
+        returns_stats (bool): Indicates whether fn returns a status.
+
     """
     # Access ccl_cosmology object
     cosmo = _cosmology_obj(cosmo)
@@ -139,14 +167,13 @@ def _vectorize_fn3(fn, fn_vec, cosmo, x, n, returns_status=True):
     # Access ccl_cosmology object
     cosmo = _cosmology_obj(cosmo)
     status = 0
+    scalar = False
     
     if isinstance(x, float):
-        # Use single-value function
-        if returns_status:
-            f, status = fn(cosmo, x, n, status) # Note order of x,n switched
-        else:
-            f = fn(cosmo, x, n)
-    elif isinstance(x, np.ndarray):
+        scalar = True
+        x=np.array([x,])
+
+    if isinstance(x, np.ndarray):
         # Use vectorised function
         if returns_status:
             f, status = fn_vec(cosmo, n, x, x.size, status)
@@ -165,4 +192,3 @@ def _vectorize_fn3(fn, fn_vec, cosmo, x, n, returns_status=True):
         return f[0]
     else:
         return f
-    
