@@ -78,7 +78,7 @@ tar : main
 	cd ${tardir} && tar -czf ../${outname}.tar.gz . && cd ..
 	rm -rf ${tardir}
 
-authlist : authors.csv
+authlist :
 	pip install --upgrade mkauthlist
 	mkauthlist -j ${style} -f -c "LSST Dark Energy Science Collaboration" \
 		--cntrb contributions.tex authors.csv authors.tex
