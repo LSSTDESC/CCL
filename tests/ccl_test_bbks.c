@@ -63,7 +63,9 @@ static void compare_bbks(int i_model,struct bbks_data * data)
 						data->Omega_k[i_model-1],data->Omega_n,
 						data->w_0[i_model-1],data->w_a[i_model-1],
 						data->h,data->A_s,data->n_s,-1,NULL,NULL);
+  params.Omega_g=0;
   params.sigma_8=data->sigma_8;
+  params.Omega_g=0;
   ccl_cosmology * cosmo = ccl_cosmology_create(params, config);
   ASSERT_NOT_NULL(cosmo);
   
@@ -88,13 +90,15 @@ static void compare_bbks(int i_model,struct bbks_data * data)
     for(j=0;j<6;j++) {
       double pk_h,pk_bench,pk_ccl,err;
       double z=j+0.;
+      int status=0;
       stat=fscanf(f,"%lf",&pk_h);
       if(stat!=1) {
 	fprintf(stderr,"Error reading file %s, line %d\n",fname,i+2);
 	exit(1);
       }
       pk_bench=pk_h/pow(data->h,3);
-      pk_ccl=ccl_linear_matter_power(cosmo,1./(1+z),k);
+      pk_ccl=ccl_linear_matter_power(cosmo,1./(1+z),k,&status);
+      if (status) printf("%s\n",cosmo->status_message);
       err=fabs(pk_ccl/pk_bench-1);
       ASSERT_DBL_NEAR_TOL(err,0.,BBKS_TOLERANCE);
     }

@@ -9,7 +9,7 @@
 #include "gsl/gsl_spline.h"
 #include "gsl/gsl_integration.h"
 
-const ccl_configuration default_config = {ccl_boltzmann_class, ccl_halofit, ccl_tinker};
+const ccl_configuration default_config = {ccl_boltzmann_class, ccl_halofit, ccl_tinker10};
 
 /* ------- ROUTINE: ccl_cosmology_create ------
 INPUTS: ccl_parameters params
@@ -43,10 +43,11 @@ ccl_cosmology * ccl_cosmology_create(ccl_parameters params, ccl_configuration co
   cosmo->data.E = NULL;
   cosmo->data.accelerator=NULL;
   cosmo->data.accelerator_achi=NULL;
+  cosmo->data.accelerator_m=NULL;
   cosmo->data.growth0 = 1.;
   cosmo->data.achi=NULL;
 
-  cosmo->data.sigma = NULL;
+  cosmo->data.logsigma = NULL;
   
   cosmo->data.p_lin = NULL;
   cosmo->data.p_nl = NULL;
@@ -77,7 +78,7 @@ void ccl_parameters_fill_initial(ccl_parameters *params)
   // Fixed radiation parameters
   // Omega_g * h**2 is known from T_CMB
   params->T_CMB =  2.726;
-  params->Omega_g = M_PI*M_PI*pow((params->T_CMB/11605.),4.)/(15*8.098E-11*params->h*params->h);
+  params->Omega_g = M_PI*M_PI*pow((params->T_CMB/11604.5),4.)/(15*8.098E-11*params->h*params->h);
 
   // Derived parameters
   params->Omega_l = 1.0 - params->Omega_m - params->Omega_g - params->Omega_n - params->Omega_k;
@@ -86,6 +87,14 @@ void ccl_parameters_fill_initial(ccl_parameters *params)
   if (isfinite(params->A_s)){params->sigma_8 = NAN;}
   if (isfinite(params->sigma_8)){params->A_s = NAN;}
   params->z_star = NAN;
+
+  if(fabs(params->Omega_k)<1E-6)
+    params->k_sign=0;
+  else if(params->Omega_k>0)
+    params->k_sign=-1;
+  else
+    params->k_sign=1;
+  params->sqrtk=sqrt(fabs(params->Omega_k))*params->h/CLIGHT_HMPC;
 }
 
 /* ------ ROUTINE: ccl_parameters_create -------
@@ -106,7 +115,7 @@ A_s: amplitude of the primordial PS
 n_s: index of the primordial PS
  */
 
-ccl_parameters ccl_parameters_create(double Omega_c, double Omega_b, double Omega_k, double Omega_n, double w0, double wa, double h, double A_s, double n_s,int nz_mgrowth,double *zarr_mgrowth,double *dfarr_mgrowth){
+ccl_parameters ccl_parameters_create(double Omega_c, double Omega_b, double Omega_k, double Omega_n, double w0, double wa, double h, double norm_pk, double n_s,int nz_mgrowth,double *zarr_mgrowth,double *dfarr_mgrowth){
   ccl_parameters params;
   params.sigma_8 = NAN;
   params.A_s = NAN;
@@ -125,7 +134,10 @@ ccl_parameters ccl_parameters_create(double Omega_c, double Omega_b, double Omeg
   params.H0 = h*100;
 
   // Primordial power spectra
-  params.A_s = A_s;
+  if(norm_pk<1E-5)
+    params.A_s=norm_pk;
+  else
+    params.sigma_8=norm_pk;
   params.n_s = n_s;
 
   // Set remaining standard and easily derived parameters
@@ -155,13 +167,13 @@ INPUT: some cosmological parameters needed to create a flat LCDM model
 TASK: call ccl_parameters_create to produce an LCDM model
 */
 
-ccl_parameters ccl_parameters_create_flat_lcdm(double Omega_c, double Omega_b, double h, double A_s, double n_s)
+ccl_parameters ccl_parameters_create_flat_lcdm(double Omega_c, double Omega_b, double h, double norm_pk, double n_s)
 {
   double Omega_k = 0.0;
   double Omega_n = 0.0;
   double w0 = -1.0;
   double wa = 0.0;
-  ccl_parameters params = ccl_parameters_create(Omega_c, Omega_b, Omega_k, Omega_n, w0, wa, h, A_s, n_s, -1, NULL, NULL);
+  ccl_parameters params = ccl_parameters_create(Omega_c, Omega_b, Omega_k, Omega_n, w0, wa, h, norm_pk, n_s, -1, NULL, NULL);
   return params;
 
 }
@@ -172,12 +184,12 @@ INPUT: some cosmological parameters needed to create an LCDM model with curvatur
 TASK: call ccl_parameters_create for this specific model
 */
 
-ccl_parameters ccl_parameters_create_lcdm(double Omega_c, double Omega_b, double Omega_k, double h, double A_s, double n_s)
+ccl_parameters ccl_parameters_create_lcdm(double Omega_c, double Omega_b, double Omega_k, double h, double norm_pk, double n_s)
 {
   double Omega_n = 0.0;
   double w0 = -1.0;
   double wa = 0.0;
-  ccl_parameters params = ccl_parameters_create(Omega_c, Omega_b, Omega_k, Omega_n, w0, wa, h, A_s, n_s,-1,NULL,NULL);
+  ccl_parameters params = ccl_parameters_create(Omega_c, Omega_b, Omega_k, Omega_n, w0, wa, h, norm_pk, n_s,-1,NULL,NULL);
   return params;
 
 }
@@ -189,13 +201,13 @@ TASK: call ccl_parameters_create for this specific model
 */
 
 
-ccl_parameters ccl_parameters_create_flat_wcdm(double Omega_c, double Omega_b, double w0, double h, double A_s, double n_s)
+ccl_parameters ccl_parameters_create_flat_wcdm(double Omega_c, double Omega_b, double w0, double h, double norm_pk, double n_s)
 {
 
   double Omega_k = 0.0;
   double Omega_n = 0.0;
   double wa = 0.0;
-  ccl_parameters params = ccl_parameters_create(Omega_c, Omega_b, Omega_k, Omega_n, w0, wa, h, A_s, n_s,-1,NULL,NULL);
+  ccl_parameters params = ccl_parameters_create(Omega_c, Omega_b, Omega_k, Omega_n, w0, wa, h, norm_pk, n_s,-1,NULL,NULL);
   return params;
 }
 
@@ -205,12 +217,12 @@ INPUT: some cosmological parameters needed to create an LCDM model with curvatur
 TASK: call ccl_parameters_create for this specific model
 */
 
-ccl_parameters ccl_parameters_create_flat_wacdm(double Omega_c, double Omega_b, double w0, double wa, double h, double A_s, double n_s)
+ccl_parameters ccl_parameters_create_flat_wacdm(double Omega_c, double Omega_b, double w0, double wa, double h, double norm_pk, double n_s)
 {
 
   double Omega_k = 0.0;
   double Omega_n = 0.0;
-  ccl_parameters params = ccl_parameters_create(Omega_c, Omega_b, Omega_k, Omega_n, w0, wa, h, A_s, n_s,-1,NULL,NULL);
+  ccl_parameters params = ccl_parameters_create(Omega_c, Omega_b, Omega_k, Omega_n, w0, wa, h, norm_pk, n_s,-1,NULL,NULL);
   return params;
 }
 
@@ -240,12 +252,12 @@ void ccl_data_free(ccl_data * data)
     gsl_spline_free(data->E);
   if(data->achi!=NULL)
     gsl_spline_free(data->achi);
-  if(data->sigma!=NULL)
-    gsl_spline_free(data->sigma);
+  if(data->logsigma!=NULL)
+    gsl_spline_free(data->logsigma);
   if(data->p_lin!=NULL)
     gsl_spline_free(data->p_lin);
   if(data->p_nl!=NULL)
-    gsl_spline_free(data->p_nl);
+    gsl_spline2d_free(data->p_nl);
 }
 
 
