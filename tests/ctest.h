@@ -61,7 +61,7 @@ struct ctest {
     static struct ctest __TNAME(sname, tname) __Test_Section = { \
         .ssname=#sname, \
         .ttname=#tname, \
-        .run = __FNAME(sname, tname), \
+        .run = __FNAME(sname, tname),		\
         .skip = _skip, \
         .data = __data, \
         .setup = (SetupFunc)__setup,					\
