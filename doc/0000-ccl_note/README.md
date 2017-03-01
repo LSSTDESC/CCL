@@ -2,7 +2,7 @@
 ## 0000-ccl_note
 # Core Cosmology Library: Precision Cosmological Predictions for LSST
 
-*David Alonso, Nora Elisa Chisari, Elizabeth Krause, C. Danielle Leonard, Sukhdeep Singh, Antonio Villarreal, Michal Vrastil, Joe Zuntz, TJP Working Group*
+*David Alonso, Nora Elisa Chisari, Elizabeth Krause, C. Danielle Leonard, Sukhdeep Singh, Antonio Villarreal, Michal Vrastil, Joe Zuntz,  and others from the TJP Working Group*
 
 An overview of the core cosmology library, providing routines for cosmological predictions with validated numerical accuracy.
 
@@ -22,9 +22,7 @@ You can compile latex papers locally with
 ```
 make  [apj|apjl|prd|prl|mnras]
 ```
-(`make` with no arguments compiles latex in LSST DESC Note style, and uses Alex
-Drlica-Wagner's `mkauthlist` program to compile the author list from the
-information stored in `authors.csv`.)
+`make` with no arguments compiles latex in LSST DESC Note style, and uses Alex Drlica-Wagner's `mkauthlist` program to compile the author list from the information stored in `authors.csv`. The Makefile includes the `pip install` command needed to obtain `mkauthlist`, but this does mean that you'll need to have `pip` installed and able to install python packages on your system.
 
 
 ## Updating the Styles and Templates
@@ -49,15 +47,15 @@ make upgrade
 
 ## Automatic PDF Sharing
 
-If this project is in a public GitHub repo, you can use the `.travis.yml` file in this folder to cause [travis-ci](http://travis-ci.org) to compile your paper into a PDF in the base repo at GitHub every time you push a commit to the master branch. The paper should appear as:
+Once this project is in a public GitHub repo, we'll be able to use the `.travis.yml` file in this folder to cause [travis-ci](http://travis-ci.org) to compile the CCL Note into a PDF in the base repo at GitHub every time we push a commit to the master branch. The paper should then appear as:
 
-**https://github.com/DarkEnergyScienceCollaboration/{{ cookiecutter.repo_name }}/tree/pdf{{ cookiecutter.folder_name }}.pdf**
+**https://github.com/LSSTDESC/CCL/tree/pdf/0000-ccl_note.pdf**
 
-To enable this service, you need to follow these steps:
+To enable this service, we need to follow these steps:
 
-1. Turn on travis continuous integration, by [toggling your repo on your travis profile](https://travis-ci.org/profile). If you don't see your repo listed, you may not have permission to do this: in this case, [contact an admin via the issues](https://github.com/DarkEnergyScienceCollaboration/{{ cookiecutter.repo_name }}/issues/new?body=@DarkEnergyScienceCollaboration/admin).
-2. Get a [GitHub "personal access token"](https://github.com/settings/tokens). Choose the "repo" option.
-3. Set the `GITHUB_API_KEY` environment variable with the value of this token at your repo's [travis settings page](https://travis-ci.org/DarkEnergyScienceCollaboration/{{ cookiecutter.repo_name }}/settings).
-4. Copy the `.travis.yml` file in this folder to the top level of your repo (or merge its contents with your existing `.travis.yml` file).
-Edit the final `git push` command with your GitHub username.  
-Commit and push to trigger your travis build, but note that the PDF will only be deployed if the master branch is updated.
+1. Turn on travis continuous integration, by [toggling your repo on your travis profile](https://travis-ci.org/profile). If we don't see your repo listed, we may not have permission to do this: in this case, [we'll need to contact an admin via the issues](https://github.com/LSSTDESC/CCL/issues/new?body=@LSSTDESC/admin).
+2. Get a [GitHub "personal access token"](https://github.com/settings/tokens), choosing the "repo" option.
+3. Set the `GITHUB_API_KEY` environment variable with the value of this token at the CCL repo's [travis settings page](https://travis-ci.org/LSSTDESC/CCL/settings).
+4. Merge the contents of the `.travis.yml` file in this folder with the existing CCL `.travis.yml` file).
+5. Edit the final `git push` command with a repo admin GitHub username.  
+6. Commit and push to trigger the travis build. Note that the PDF will only be deployed if the master branch is updated.
