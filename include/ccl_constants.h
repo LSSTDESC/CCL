@@ -67,7 +67,7 @@
 #define L_MIN_INT 2.0
 #define L_MAX_INT 3.0E4 //for corr: 1e7 
 #define NL 5000
-=======
+//=======
 //LSST specific numbers
 #define Z_MIN_SOURCES 0.1
 #define Z_MAX_SOURCES 3.0
