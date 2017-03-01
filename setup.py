@@ -239,7 +239,10 @@ class PyInstall(DistutilsInstall):
 
     def build_library(self,library):
         plat_specifier = ".%s-%s" % (get_platform(), sys.version[0:3])
-        self.build_temp = os.path.join(self.prefix,'temp' + plat_specifier)
+        if self.user:
+            self.build_temp = os.path.join(self.install_userbase,'temp' + plat_specifier)
+        else:
+            self.build_temp = os.path.join(self.prefix,'temp' + plat_specifier)
         env = dict(os.environ)
         cc, cxx, opt, cflags = get_config_vars('CC', 'CXX', 'OPT', 'CFLAGS')
         cxxflags = cflags
@@ -254,7 +257,10 @@ class PyInstall(DistutilsInstall):
         # Use a subdirectory of build_temp as the build directory.
         build_temp = os.path.realpath(os.path.join(self.build_temp, library))
         # Destination for headers and libraries is build_clib.
-        build_clib = os.path.realpath(self.prefix)
+        if self.user:
+            build_clib = os.path.realpath(self.install_userbase)
+        else:
+            build_clib = os.path.realpath(self.prefix)
 
         # Create build directories if they do not yet exist.
         mkpath(build_temp)
