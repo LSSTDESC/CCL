@@ -156,14 +156,18 @@ class PyTest(Command):
     #If not, you have to add the path where you installed the C library
     #To DYLD_LIBRARY_PATH or LD_LIBRARY_PATH depending on your platform
     if 'Linux' in platform.system():
-        os.environ['LD_LIBRARY_PATH']+= os.pathsep + os.path.join(sys.prefix,'lib')
+        if not 'LD_LIBRARY_PATH' is os.environ:
+            libpath = os.getenv('LD_LIBARY_PATH',os.path.join(sys.prefix,'lib'))
+            os.environ['LD_LIBRARY_PATH']=libpath
+        else:
+            os.environ['LD_LIBRARY_PATH']+= os.pathsep + os.path.join(sys.prefix,'lib')
     if 'Darwin' in platform.system(): 
         if not 'DYLD_LIBRARY_PATH' is os.environ:
             libpath = os.getenv('DYLD_LIBARY_PATH',os.path.join(sys.prefix,'lib'))
             os.environ['DYLD_LIBRARY_PATH']=libpath 
         else:
             os.environ['DYLD_LIBRARY_PATH']+= os.pathsep + os.path.join(sys.prefix,'lib')
-            print(os.environ['DYLD_LIBRARY_PATH'])
+    
     user_options = []
     def initialize_options(self):
         pass
