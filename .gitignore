@@ -13,16 +13,6 @@ stamp-h1
 *.la
 *.so
 *.dSYM
-#<<<<<<< HEAD
-*~
-*.dat
-tests/ccl_test_distances
-tests/ccl_test_power
-tests/ccl_test_utils
-class/build
-tests/corr_sample
-*.ipyn*
-#=======
 .libs
 .deps
 .dirstamp
@@ -40,4 +30,4 @@ build/*
 pyccl/ccl_*.py
 pyccl/ccllib.py
 tests/.ipynb_checkpoints/
-#>>>>>>> master
+
