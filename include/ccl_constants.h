@@ -31,7 +31,7 @@
 #define K_PIVOT 0.05
 #define K_MAX_SPLINE 500.
 #define K_MAX 1e3
-#define K_MIN 1e-5
+#define K_MIN 1e-6
 #define K_MAX_INT (1e3/1.1) //minimum integration range
 #define K_MIN_INT (1e-5*1.1) //maximum integration range
 #define N_K 1000
