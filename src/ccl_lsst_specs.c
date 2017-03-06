@@ -8,6 +8,7 @@
 #include "gsl/gsl_spline.h"
 #include "ccl_background.h"
 #include "ccl_constants.h"
+#include "ccl_error.h"
 #include "ccl_lsst_specs.h"
 
 // ---- LSST redshift distributions & current specs -----
@@ -219,12 +220,10 @@ TASK:  dNdz in a particular tomographic bin,
        (this is different from the regular status handling procedure because we don't pass a cosmology to this function)
 */
 
-int ccl_specs_dNdz_tomog(double z, int dNdz_type, double bin_zmin, double bin_zmax, user_pz_info * user_info, double *tomoout){
+void ccl_specs_dNdz_tomog(double z, int dNdz_type, double bin_zmin, double bin_zmax, user_pz_info * user_info, double *tomoout, int *status){
 
 	// This uses equation 33 of Joachimi & Schneider 2009, arxiv:0905.0393
-
 	double numerator_integrand=0, denom_integrand=0, dNdz_t;
-	
 	// This struct contains a spec redshift and a pointer to a user information struct.
 	struct pz_params valparams; //parameters for the integral over the photoz's
 	struct norm_params norm_p_val;	
@@ -236,7 +235,6 @@ int ccl_specs_dNdz_tomog(double z, int dNdz_type, double bin_zmin, double bin_zm
  	norm_p_val.user_information = user_info;	
 
 
-
 	if((dNdz_type==DNDZ_WL_OPT) ||(dNdz_type==DNDZ_WL_FID) || (dNdz_type==DNDZ_WL_CONS)){ 
 	  dNdz_p_val.type_ = dNdz_type;
 	  norm_p_val.type_=dNdz_type;
@@ -245,7 +243,8 @@ int ccl_specs_dNdz_tomog(double z, int dNdz_type, double bin_zmin, double bin_zm
 	  norm_p_val.type_= dNdz_type;
 	  norm_p_val.unnormedfunc = ccl_specs_dNdz_clustering;
 	} else {
-	  return 1;
+	  *status = CCL_ERROR_PARAMETERS;
+	  return;
 	}
 
 
@@ -269,7 +268,7 @@ int ccl_specs_dNdz_tomog(double z, int dNdz_type, double bin_zmin, double bin_zm
         gsl_function F;
         F.function = ccl_specs_photoz;
         F.params = &valparams;
-        gsl_integration_cquad(&F, bin_zmin, bin_zmax, 0.0,EPSREL_DNDZ,workspace,&numerator_integrand, NULL, NULL);
+        *status |=gsl_integration_cquad(&F, bin_zmin, bin_zmax, 0.0,EPSREL_DNDZ,workspace,&numerator_integrand, NULL, NULL);
         gsl_integration_cquad_workspace_free(workspace);	
 
 
@@ -279,11 +278,11 @@ int ccl_specs_dNdz_tomog(double z, int dNdz_type, double bin_zmin, double bin_zm
 	workspace = gsl_integration_cquad_workspace_alloc (1000);
         F.function = ccl_specs_norm_integrand;
         F.params = &norm_p_val;
-        gsl_integration_cquad(&F, Z_MIN_SOURCES, Z_MAX_SOURCES, 0.0,EPSREL_DNDZ,workspace,&denom_integrand, NULL, NULL);
+        *status |=gsl_integration_cquad(&F, Z_MIN_SOURCES, Z_MAX_SOURCES, 0.0,EPSREL_DNDZ,workspace,&denom_integrand, NULL, NULL);
         gsl_integration_cquad_workspace_free(workspace);
-
-
-
+    if (*status){
+	  *status = CCL_ERROR_INTEG;
+	  return;
+    }
 	*tomoout = dNdz_t * numerator_integrand / denom_integrand;
-	return 0;
 }
