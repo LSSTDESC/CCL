@@ -61,7 +61,7 @@ int main(int argc,char **argv){
 
 	// Compute sigma_8
 	printf("Initializing power spectrum...\n");
-	printf("sigma_8 = %.3lf\n\n", ccl_sigma8(cosmo));
+	printf("sigma_8 = %.3lf\n\n", ccl_sigma8(cosmo, &status));
 
 	//Create tracers for angular power spectra
 	double z_arr_gc[NZ],z_arr_sh[NZ],nz_arr_gc[NZ],nz_arr_sh[NZ],bz_arr[NZ];
