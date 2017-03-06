@@ -516,18 +516,6 @@ static void ccl_cosmology_compute_power_bbks(ccl_cosmology * cosmo, int * status
   cosmo->computed_power=true;
   double sigma_8 = ccl_sigma8(cosmo);
   cosmo->computed_power=false;
-
-  //TODO: When was splinstatus updated?
-  if (splinstatus){
-    free(x);
-    free(y);
-    free(z);
-    free(y2d);
-    gsl_spline2d_free(log_power_lin);
-    *status = CCL_ERROR_INTEG;
-    strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_bbks(): error calling ccl_sigma8()\n");
-    return;
-  }
   
   double log_sigma_8 = 2*(log(cosmo->params.sigma_8) - log(sigma_8));
   for (int i=0; i<nk; i++){
@@ -556,6 +544,7 @@ static void ccl_cosmology_compute_power_bbks(ccl_cosmology * cosmo, int * status
   } else {
     cosmo->data.p_lin=log_power_lin;
   }
+  
 
   gsl_spline2d * log_power_nl = gsl_spline2d_alloc(PNL_SPLINE_TYPE, nk,na);
   splinstatus = gsl_spline2d_init(log_power_nl, x, z, y2d,nk,na);
