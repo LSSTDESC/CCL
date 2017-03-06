@@ -95,7 +95,7 @@ static double integrand_wl(double chip,void *params)
 //win     -> result is stored here
 static int window_lensing(double chi,ccl_cosmology *cosmo,SplPar *spl_pz,double chi_max,double *win)
 {
-  int status;
+  int gslstatus =0, status =0;
   double result,eresult;
   IntLensPar ip;
   gsl_function F;
@@ -104,13 +104,13 @@ static int window_lensing(double chi,ccl_cosmology *cosmo,SplPar *spl_pz,double 
   ip.chi=chi;
   ip.cosmo=cosmo;
   ip.spl_pz=spl_pz;
-  ip.status = 0;
+  ip.status = &status;
   F.function=&integrand_wl;
   F.params=&ip;
-  status=gsl_integration_qag(&F,chi,chi_max,0,1E-4,1000,GSL_INTEG_GAUSS41,w,&result,&eresult);
+  gslstatus=gsl_integration_qag(&F,chi,chi_max,0,1E-4,1000,GSL_INTEG_GAUSS41,w,&result,&eresult);
   *win=result;
   gsl_integration_workspace_free(w);
-  if(status!=GSL_SUCCESS || ip.status)
+  if(gslstatus!=GSL_SUCCESS || *ip.status)
     return 1;
   //TODO: chi_max should be changed to chi_horizon
   //we should precompute this quantity and store it in cosmo by default
@@ -156,7 +156,7 @@ static double integrand_mag(double chip,void *params)
 static int window_magnification(double chi,ccl_cosmology *cosmo,SplPar *spl_pz,SplPar *spl_sz,
 				double chi_max,double *win)
 {
-  int status;
+  int gslstatus =0, status =0;
   double result,eresult;
   IntMagPar ip;
   gsl_function F;
@@ -166,13 +166,13 @@ static int window_magnification(double chi,ccl_cosmology *cosmo,SplPar *spl_pz,S
   ip.cosmo=cosmo;
   ip.spl_pz=spl_pz;
   ip.spl_sz=spl_sz;
-  ip.status = 0;
+  ip.status = &status;
   F.function=&integrand_mag;
   F.params=&ip;
-  status=gsl_integration_qag(&F,chi,chi_max,0,1E-4,1000,GSL_INTEG_GAUSS41,w,&result,&eresult);
+  gslstatus=gsl_integration_qag(&F,chi,chi_max,0,1E-4,1000,GSL_INTEG_GAUSS41,w,&result,&eresult);
   *win=result;
   gsl_integration_workspace_free(w);
-  if(status!=GSL_SUCCESS || ip.status)
+  if(gslstatus!=GSL_SUCCESS || *ip.status)
     return 1;
   //TODO: chi_max should be changed to chi_horizon
   //we should precompute this quantity and store it in cosmo by default
