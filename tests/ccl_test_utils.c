@@ -1,5 +1,6 @@
 #include "ccl.h"
 #include "ctest.h"
+#include "ccl_params.h"
 
 CTEST(spacing_tests, linear_spacing_simple){
     double * m = ccl_linear_spacing(0.0, 1.0, 2);

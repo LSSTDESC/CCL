@@ -11,6 +11,7 @@
 #include "gsl/gsl_spline.h"
 #include "gsl/gsl_integration.h"
 #include "gsl/gsl_roots.h"
+#include "ccl_params.h"
 
 //TODO: is it worth separating between cases for speed purposes?
 //E.g. flat vs non-flat, LDCM vs wCDM

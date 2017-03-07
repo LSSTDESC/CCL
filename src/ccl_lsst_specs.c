@@ -9,6 +9,7 @@
 #include "ccl_background.h"
 #include "ccl_constants.h"
 #include "ccl_lsst_specs.h"
+#include "ccl_params.h"
 
 // ---- LSST redshift distributions & current specs -----
 // ---- Consider spline for input dN/dz - pending

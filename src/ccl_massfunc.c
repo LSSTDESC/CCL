@@ -11,6 +11,7 @@
 #include "ccl_power.h"
 #include "ccl_massfunc.h"
 #include "ccl_error.h"
+#include "ccl_params.h"
 
 /*----- ROUTINE: ccl_massfunc_f -----
 INPUT: cosmology+parameters, a smoothing mass, and a redshift

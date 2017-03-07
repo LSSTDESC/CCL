@@ -9,6 +9,7 @@
 #include <string.h>
 #include "gsl/gsl_errno.h"
 #include "gsl/gsl_integration.h"
+#include "ccl_params.h"
 
 //Spline creator
 //n     -> number of points
