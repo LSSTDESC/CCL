@@ -117,7 +117,7 @@ TASK: Outputs fitting function for use in halo mass function calculation;
 
 static double massfunc_f(ccl_cosmology *cosmo, double halomass, double a, double odelta, int *status)
 {
-  double fit_A, fit_a, fit_b, fit_c, fit_d;
+  double fit_A, fit_a, fit_b, fit_c, fit_d, overdensity_delta;
   double Omega_m_a;
   double delta_c_Tinker, nu;
 
@@ -217,10 +217,8 @@ static double massfunc_f(ccl_cosmology *cosmo, double halomass, double a, double
     break;
 
   case ccl_watson:
-
     printf("Interpolation not supported.\nDefaulting to Delta=200.\n");
-    Omega_m_a = ccl_omega_m_a(cosmo, a);
-    
+    Omega_m_a = ccl_omega_x(cosmo, scale, ccl_omega_m_label);
     fit_A = Omega_m_a*(0.990*pow(a,3.216)+0.074);
     fit_a = Omega_m_a*(5.907*pow(a,3.599)+2.344);
     fit_b = Omega_m_a*(3.136*pow(a,3.058)+2.349);
