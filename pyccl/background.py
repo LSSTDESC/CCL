@@ -131,7 +131,8 @@ def omega_x(cosmo, a, label):
                         'radiation' and 'curvature'
 
     Returns:
-        omega_m_a (float or array_like): Matter density fraction at a scale factor.
+        omega_x (float or array_like): Density fraction of a given species
+        at a scale factor.
 
     """
     if label not in species_types.keys() :
