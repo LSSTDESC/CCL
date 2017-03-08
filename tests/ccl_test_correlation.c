@@ -99,13 +99,15 @@ static void compare_corr(char *compare_type,struct corrs_data * data)
   FILE *fi_dd_11,*fi_dd_12,*fi_dd_22;
   FILE *fi_ll_11_pp,*fi_ll_12_pp,*fi_ll_22_pp;
   FILE *fi_ll_11_mm,*fi_ll_12_mm,*fi_ll_22_mm;
-  CCL_ClTracer *tr_nc_1=ccl_cl_tracer_new(cosmo,CL_TRACER_NC,nz,zarr_1,pzarr_1,nz,zarr_1,bzarr);
+  int has_rsd=0,has_magnification=0, has_intrinsic_alignment=0;
+  int status2=0;
+  CCL_ClTracer *tr_nc_1=ccl_cl_tracer_number_counts_simple_new(cosmo,nz,zarr_1,pzarr_1,nz,zarr_1,bzarr,&status2);
   ASSERT_NOT_NULL(tr_nc_1);
-  CCL_ClTracer *tr_nc_2=ccl_cl_tracer_new(cosmo,CL_TRACER_NC,nz,zarr_2,pzarr_2,nz,zarr_2,bzarr);
+  CCL_ClTracer *tr_nc_2=ccl_cl_tracer_number_counts_simple_new(cosmo,nz,zarr_2,pzarr_2,nz,zarr_2,bzarr,&status2);
   ASSERT_NOT_NULL(tr_nc_2);
-  CCL_ClTracer *tr_wl_1=ccl_cl_tracer_new(cosmo,CL_TRACER_WL,nz,zarr_1,pzarr_1,nz,NULL,NULL );
+  CCL_ClTracer *tr_wl_1=ccl_cl_tracer_lensing_simple_new(cosmo,nz,zarr_1,pzarr_1,&status2);
   ASSERT_NOT_NULL(tr_wl_1);
-  CCL_ClTracer *tr_wl_2=ccl_cl_tracer_new(cosmo,CL_TRACER_WL,nz,zarr_2,pzarr_2,nz,NULL,NULL );
+  CCL_ClTracer *tr_wl_2=ccl_cl_tracer_lensing_simple_new(cosmo,nz,zarr_2,pzarr_2,&status2 );
   ASSERT_NOT_NULL(tr_wl_2);
 
   sprintf(fname,"tests/benchmark/codecomp_step2_outputs/run_b1b1%s_log_wt_dd.txt",compare_type);

@@ -93,9 +93,10 @@ int ccl_tracer_corr(ccl_cosmology *cosmo, int n_theta, double **theta, CCL_ClTra
   double *l_arr,cl_arr[n_theta];
 
   l_arr=ccl_log_spacing(L_MIN_INT,L_MAX_INT,n_theta);
+  int status=0;
   for(int i=0;i<n_theta;i+=1) {
     //Re-scaling the power-spectrum due to Bessel function missing factor
-    cl_arr[i]=ccl_angular_cl(cosmo,l_arr[i],ct1,ct2)*sqrt(l_arr[i]); 
+    cl_arr[i]=ccl_angular_cl(cosmo,l_arr[i],ct1,ct2,status)*sqrt(l_arr[i]); 
   }
 
   *theta=(double *)malloc(sizeof(double)*n_theta);
