@@ -1,5 +1,5 @@
 # Ignore autoconf build files.
-Makefile
+#Makefile
 config.h
 config.log
 config.status
