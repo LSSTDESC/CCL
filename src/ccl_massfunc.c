@@ -110,7 +110,7 @@ INPUT: cosmology+parameters, a halo mass, and scale factor
 TASK: Outputs fitting function for use in halo mass function calculation;
   currently only supports:
     ccl_tinker (arxiv 0803.2706 )
-    ccl_tinker10 (arxiv ???    )
+    ccl_tinker10 (arxiv 1001.3162 )
     ccl_angulo (arxiv 1203.3216 ) 
     ccl_watson (arxiv 1212.0095 )
 */
