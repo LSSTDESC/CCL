@@ -49,6 +49,18 @@ int main(int argc,char **argv){
 		ZD,ccl_comoving_radial_distance(cosmo,1./(1+ZD), &status));
 	printf("Luminosity distance to z = %.3lf is chi = %.3lf Mpc\n",
 		ZD,ccl_luminosity_distance(cosmo,1./(1+ZD), &status));
+
+	// Test of array argument
+	ccl_comoving_radial_distance(cosmo,0.09,&status);
+	double a[5];
+	for(int i=0; i<5; i++)
+	  a[i] = 1.0/(1+i);
+	double out[5];
+	for(int i=0; i<5; i++)
+	  printf("%.5lf, %.5lf\n", a[i],out[i]);
+	ccl_comoving_angular_distances(cosmo, 5, a, out, &status);
+	for(int i=0; i<5; i++)
+	  printf("%.5lf, %.5lf\n", a[i],out[i]);
 	
 	//Consistency check
 	printf("Scale factor at chi=%.3lf Mpc is a=%.3lf Mpc\n",

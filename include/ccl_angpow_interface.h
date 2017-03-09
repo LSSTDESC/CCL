@@ -3,7 +3,9 @@
 #include <math.h>
 
 // CCL includes
-#include "ccl_core.h"
+extern "C" {
+#include "ccl.h"
+}
 
 // Angpow includes
 /* #include <iostream> */
@@ -16,12 +18,16 @@
 
 /* #include "angpow_numbers.h" */
 /* #include "angpow_func.h" */
-#include "angpow_tools.h" 
 /* #include "angpow_cosmo.h" */
+#include "angpow_tools.h"
+#include "angpow_parameters.h"
+#include "angpow_pk2cl.h"
 #include "angpow_powspec_base.h"
 #include "angpow_cosmo_base.h"
+#include "angpow_radial.h"
 #include "angpow_radial_base.h"
 #include "angpow_clbase.h"
+#include "angpow_ctheta.h"
 
 
 // CCL inputs :
@@ -48,13 +54,32 @@ namespace Angpow {
 class PowerSpecCCL : public PowerSpecBase {
  public:
   //! Constructor
-  PowerSpecCCL(ccl_cosmology * cosmo, double a, double kmin, double kmax);
+ PowerSpecCCL(ccl_cosmology * cosmo, double kmin=1e-5, double kmax=10, int nk=1000) : ccl_cosmo_(cosmo) {
+    int status =0;
+    double * ks = ccl_log_spacing(kmin,kmax,N_K);
+    double Pks[N_K];
+    double aref = 1.; // z=0
+    for(int i=0; i<nk; i++) {
+      Pks[i] = ccl_linear_matter_power(cosmo, aref, ks[i], &status);
+    }
+    
+    std::vector<double> vx;
+    std::vector<double> vy;
+    
+    for(int i=0;i<N_K;i++){
+      vx.push_back(ks[i]);
+      vy.push_back(Pks[i]);
+    }
+    double vxmin = *(std::min_element(vx.begin(), vx.end()));
+    double vxmax = *(std::max_element(vx.begin(), vx.end()));
+    Pk_ = new SLinInterp1D(vx,vy,vxmin,vxmax,0);
+  }
   //! Destructor
   virtual ~PowerSpecCCL() {}
   
   //! Used to delete explicitly the local pointers
   virtual void ExplicitDestroy() { 
-    //if(mypGE_) delete mypGE_;
+    if(ccl_cosmo_) delete ccl_cosmo_;
     if(Pk_) delete Pk_;
   }
 
@@ -66,33 +91,86 @@ class PowerSpecCCL : public PowerSpecBase {
   }
   
   /*! called by angpow_kinteg.cc to fix the value of some function
-    at fixed z value (and l too if necessayr)
+    at fixed z value (and l too if necessary)
    */
-  void Init(int, r_8 z) {}
+  void Init(int, double z) {int status=0; double tmp= ccl_growth_factor(ccl_cosmo_,1.0/(1+z), &status); growth2_ = tmp*tmp;}
 
   //Main operator
-  virtual r_8 operator()(int, r_8 k, r_8 z) {
-     return (Pk_->operator()(k));
+  virtual r_8 operator()(int, double k, double z) {
+     return growth2_*(Pk_->operator()(k));
   }
 
 
  private:
 
   SLinInterp1D* Pk_;          //!< access to  Pk(k)
-  //GrowthEisenstein* mypGE_;   //!< access tp  D(z)
-  //r_8 growth2_;               //!< D(zi)^2
+  ccl_cosmology* ccl_cosmo_;   //!< access to CCL cosmology
+  double growth2_;               //!< D(zi)^2
 
   //forbid for the time beeing the assignment operator
   PowerSpecCCL& operator=(const PowerSpecCCL& copy);
   
   //Minimal copy to allow Main operator(int, r_8, r_8) to work
   PowerSpecCCL(const PowerSpecCCL& copy) :
-    Pk_(copy.Pk_) {} //, mypGE_(copy.mypGE_), growth2_(copy.growth2_)
+    Pk_(copy.Pk_), ccl_cosmo_(copy.ccl_cosmo_), growth2_(copy.growth2_) {} 
 };
 
+
+
+
+class CosmoCoordCCL : public CosmoCoordBase {
+public:
+  //! Ctor
+CosmoCoordCCL(ccl_cosmology * cosmo, double zmin=0., double zmax=9., size_t npts=1000)
+  : ccl_cosmo_(cosmo), zmin_(zmin), zmax_(zmax), npts_(npts) // cosmofunc_(prec), , double prec=0.001
+  {
+    int status = 0;
+    std::vector<double> vlos(npts_);
+    std::vector<double> vz(npts_);
+    for(size_t i=0; i<npts_; i++) {
+      vz[i]=i*(zmax-zmin)/(double)npts_;
+      vlos[i]=ccl_comoving_radial_distance(cosmo, 1.0/(1+vz[i]), &status);
+    }
+    rofzfunc_.DefinePoints(vz,vlos); //r(z0)
+    zofrfunc_.DefinePoints(vlos,vz); //z(r0) = r^{-1}(r0)
+  }//Ctor
+
+  //! Dtor
+  virtual ~CosmoCoordCCL() {}
+
+
+  //! r(z): radial comoving distance Mpc
+  inline double getLOS(double z) const { return  r(z); } 
+  inline virtual double r(double z) const { return rofzfunc_.YInterp(z); } 
+  //! z(r): the inverse of radial comoving distance (Mpc)
+  inline virtual double z(double r) const { return zofrfunc_.YInterp(r); }
+  inline double getInvLOS(double r) const { return z(r); }
+  
+  //!Hubble Cte
+  inline double h() const { return ccl_cosmo_->params.h; }
+  //!Hubble function
+  inline double Ez(double z) const { int status=0; return ccl_h_over_h0(ccl_cosmo_,1.0/(1+z),&status); }
+  //inline double EzMpcm1(double z) const {int status=0; double HL=cosmofunc_.HubbleLengthMpc(); return Ez(z)/HL; }
+
+  //! z=0 matter density 
+  inline double OmegaMatter() const { return ccl_cosmo_->params.Omega_m; }
+  //! z=0 cosmological constant density 
+  inline double OmegaLambda() const { return ccl_cosmo_->params.Omega_l; }
+
+  
+    
+ protected:
+  ccl_cosmology* ccl_cosmo_;  //!< access to CCL cosmology
+  //CosmoFuncImp  cosmofunc_;  //!< Cosmological functions
+  SLinInterp1D  rofzfunc_; //!< linear interpolation r(z0)
+  SLinInterp1D  zofrfunc_; //!< linear interpolation z(r0) = r^{-1}(r0)
+  double zmin_;           //!< minimal z
+  double zmax_;           //!< maximal z
+  size_t npts_;        //!< number of points to define the interpolation in [zmin, zmax]
+};// CosmoCoordCCL
+
+
+
+
+ 
 }//end namespace
-
-
-// Do the computation with :
-//  Pk2Cl()
-//  Compute()
