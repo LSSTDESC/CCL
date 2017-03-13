@@ -43,11 +43,7 @@ def sigmaM(cosmo, halo_mass, a):
     Args:
         cosmo (:obj:`ccl.cosmology`): Cosmological parameters.
         halo_mass (float or array_like): Halo masses; Msun.
-<<<<<<< HEAD
-        a (float): Scale factor.
-=======
         a (float): scale factor.
->>>>>>> master
 
     Returns:
         sigmaM (float or array_like): RMS variance of halo mass.
