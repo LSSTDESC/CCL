@@ -25,6 +25,7 @@ AM_MAINTAINER_MODE
 AC_SEARCH_LIBS([pow],[m],[],AC_MSG_ERROR(Couldn't find libm. Required.))
 AC_SEARCH_LIBS([cblas_dgemm],[gslcblas],[],AC_MSG_ERROR(Couldn't find libgslcblas.))
 AC_SEARCH_LIBS([gsl_spline2d_eval_e],[gsl],[],AC_MSG_ERROR(Couldn't find libgsl. GSL V2+ required.))
+AC_SEARCH_LIBS([fftw_plan_dft_1d],[fftw3],[],AC_MSG_ERROR(Couldn't find fftw3. Required.))
 
 # Checks for header files.
 AC_CHECK_HEADERS([stdlib.h string.h math.h])
