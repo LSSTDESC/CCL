@@ -38,8 +38,6 @@ void ccl_cosmology_compute_hmfparams(ccl_cosmology * cosmo, int *status)
     gsl_spline * alphahmf = gsl_spline_alloc(D_SPLINE_TYPE, nd);
     *status = gsl_spline_init(alphahmf, lgdelta, alpha, nd);
     if (*status){
-      free(delta);
-      free(alpha);
       gsl_spline_free(alphahmf);
       *status = CCL_ERROR_SPLINE ;
       strcpy(cosmo->status_message, "ccl_massfunc.c: ccl_cosmology_compute_hmfparams(): Error creating alpha(D) spline\n");
@@ -49,8 +47,7 @@ void ccl_cosmology_compute_hmfparams(ccl_cosmology * cosmo, int *status)
     gsl_spline * betahmf  = gsl_spline_alloc(D_SPLINE_TYPE, nd);
     *status = gsl_spline_init(betahmf, lgdelta, beta, nd);
     if (*status){
-      free(delta);
-      free(beta);
+      gsl_spline_free(alphahmf);
       gsl_spline_free(betahmf);
       *status = CCL_ERROR_SPLINE ;
       strcpy(cosmo->status_message, "ccl_massfunc.c: ccl_cosmology_compute_hmfparams(): Error creating beta(D) spline\n");
@@ -60,8 +57,8 @@ void ccl_cosmology_compute_hmfparams(ccl_cosmology * cosmo, int *status)
     gsl_spline * gammahmf = gsl_spline_alloc(D_SPLINE_TYPE, nd);
     *status = gsl_spline_init(gammahmf, lgdelta, gamma, nd);
     if (*status){
-      free(delta);
-      free(gamma);
+      gsl_spline_free(alphahmf);
+      gsl_spline_free(betahmf);
       gsl_spline_free(gammahmf);
       *status = CCL_ERROR_SPLINE ;
       strcpy(cosmo->status_message, "ccl_massfunc.c: ccl_cosmology_compute_hmfparams(): Error creating gamma(D) spline\n");
@@ -71,8 +68,9 @@ void ccl_cosmology_compute_hmfparams(ccl_cosmology * cosmo, int *status)
     gsl_spline * phihmf   = gsl_spline_alloc(D_SPLINE_TYPE, nd);
     *status = gsl_spline_init(phihmf, lgdelta, phi, nd);
     if (*status){
-      free(delta);
-      free(phi);
+      gsl_spline_free(alphahmf);
+      gsl_spline_free(betahmf);
+      gsl_spline_free(gammahmf);
       gsl_spline_free(phihmf);
       *status = CCL_ERROR_SPLINE ;
       strcpy(cosmo->status_message, "ccl_massfunc.c: ccl_cosmology_compute_hmfparams(): Error creating phi(D) spline\n");
@@ -82,8 +80,6 @@ void ccl_cosmology_compute_hmfparams(ccl_cosmology * cosmo, int *status)
     gsl_spline * etahmf   = gsl_spline_alloc(D_SPLINE_TYPE, nd);
     *status = gsl_spline_init(etahmf, lgdelta, eta, nd);
     if (*status){
-      free(delta);
-      free(eta);
       gsl_spline_free(etahmf);
       *status = CCL_ERROR_SPLINE ;
       strcpy(cosmo->status_message, "ccl_massfunc.c: ccl_cosmology_compute_hmfparams(): Error creating eta(D) spline\n");
