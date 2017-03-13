@@ -93,7 +93,7 @@ class PowerSpecCCL : public PowerSpecBase {
   /*! called by angpow_kinteg.cc to fix the value of some function
     at fixed z value (and l too if necessary)
    */
-  void Init(int, double z) {int status=0; double tmp= ccl_growth_factor(ccl_cosmo_,1.0/(1+z), &status); growth2_ = tmp*tmp;}
+  void Init(int, double z, double bias=1.0) {int status=0; double tmp= bias*ccl_growth_factor(ccl_cosmo_,1.0/(1+z), &status); growth2_ = tmp*tmp;}
 
   //Main operator
   virtual r_8 operator()(int, double k, double z) {
@@ -122,7 +122,7 @@ class CosmoCoordCCL : public CosmoCoordBase {
 public:
   //! Ctor
 CosmoCoordCCL(ccl_cosmology * cosmo, double zmin=0., double zmax=9., size_t npts=1000)
-  : ccl_cosmo_(cosmo), zmin_(zmin), zmax_(zmax), npts_(npts) // cosmofunc_(prec), , double prec=0.001
+  : ccl_cosmo_(cosmo), zmin_(zmin), zmax_(zmax), npts_(npts) 
   {
     int status = 0;
     std::vector<double> vlos(npts_);
