@@ -97,7 +97,7 @@ int ccl_tracer_corr(ccl_cosmology *cosmo, int n_theta, double **theta, CCL_ClTra
   int status=0;
   for(int i=0;i<n_theta;i+=1) {
     //Re-scaling the power-spectrum due to Bessel function missing factor
-    cl_arr[i]=ccl_angular_cl(cosmo,l_arr[i],ct1,ct2,status)*sqrt(l_arr[i]); 
+    cl_arr[i]=ccl_angular_cl(cosmo,l_arr[i],ct1,ct2,&status)*sqrt(l_arr[i]); 
     /*=======
   for(int i=0;i<n_theta;i+=1) {
     //Re-scaling the power-spectrum due to Bessel function missing factor
