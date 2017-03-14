@@ -180,7 +180,8 @@ static double massfunc_f(ccl_cosmology *cosmo, double halomass, double a, double
       fit_c = 2.44;
     }
     else{
-      printf("Tinker Mass Function only supported for Delta = {200, 300, 400, 600, 800, 1200, 1600, 2400, and 3200. Continuing calculation assuming Delta = 200.\n");
+      *status = CCL_ERROR_HMF_INTERP;
+      strcpy(cosmo->status_message, "ccl_massfunc.c: ccl_massfunc_f(): Tinker 2008 only supported for Delta = {200, 300, 400, 600, 800, 1200, 1600, 2400, and 3200. Calculation continues assuming Delta =200.\n");
       odelta = 200;
       fit_A = 0.186;
       fit_a = 1.47;
@@ -217,7 +218,8 @@ static double massfunc_f(ccl_cosmology *cosmo, double halomass, double a, double
     break;
 
   case ccl_watson:
-    printf("Interpolation not supported.\nDefaulting to Delta=200.\n");
+    *status = CCL_ERROR_HMF_INTERP;
+    strcpy(cosmo->status_message, "ccl_massfunc.c: ccl_massfunc_f(): Watson HMF only supported for Delta = 200. Calculation continues assuming Delta = 200.\n");
     Omega_m_a = ccl_omega_x(cosmo, a, ccl_omega_m_label);
     fit_A = Omega_m_a*(0.990*pow(a,3.216)+0.074);
     fit_a = Omega_m_a*(5.907*pow(a,3.599)+2.344);
@@ -227,7 +229,8 @@ static double massfunc_f(ccl_cosmology *cosmo, double halomass, double a, double
     return fit_A*(pow(sigma/fit_b,-fit_a)+1.0)*exp(-fit_c/sigma/sigma);
 
   case ccl_angulo:
-    printf("Interpolation not yet supported.\nDefaulting to Delta=200.\n");
+    *status = CCL_ERROR_HMF_INTERP;
+    strcpy(cosmo->status_message, "ccl_massfunc.c: ccl_massfunc_f(): Angulo HMF only supported for Delta = 200. Calculation continues assuming Delta = 200.\n");
     fit_A = 0.201;
     fit_a = 2.08;
     fit_b = 1.7;
@@ -370,6 +373,7 @@ double ccl_massfunc(ccl_cosmology *cosmo, double halomass, double a, double odel
   logmass = log10(halomass);
   rho_m = RHO_CRITICAL*cosmo->params.Omega_m*cosmo->params.h*cosmo->params.h;
   f=massfunc_f(cosmo,halomass,a,odelta,status);
+  ccl_check_status(cosmo, status);
   deriv = gsl_spline_eval(cosmo->data.dlnsigma_dlogm, logmass, cosmo->data.accelerator_m);
   return f*rho_m*deriv/halomass;
 }

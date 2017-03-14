@@ -11,4 +11,5 @@
 #define CCL_ERROR_CLASS 8
 #define CCL_ERROR_COMPUTECHI 9
 #define CCL_ERROR_MF 10
+#define CCL_ERROR_HMF_INTERP 11
 void ccl_check_status(ccl_cosmology *cosmo, int* status);
