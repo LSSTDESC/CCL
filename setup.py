@@ -152,6 +152,7 @@ class build_external_clib(build_clib):
 class PyTest(Command):
     import sys
     import platform
+    import site
     #This assumes that the package is located in the default prefix.
     #If not, you have to add the path where you installed the C library
     #To DYLD_LIBRARY_PATH or LD_LIBRARY_PATH depending on your platform
@@ -159,15 +160,23 @@ class PyTest(Command):
         if not 'LD_LIBRARY_PATH' is os.environ:
             libpath = os.getenv('LD_LIBARY_PATH',os.path.join(sys.prefix,'lib'))
             os.environ['LD_LIBRARY_PATH']=libpath
+            libpath2 = os.path.realpath(os.path.join(site.USER_BASE,'lib'))
+            os.environ['LD_LIBRARY_PATH']+=os.path.join(libpath2)
         else:
             os.environ['LD_LIBRARY_PATH']+= os.pathsep + os.path.join(sys.prefix,'lib')
-    if 'Darwin' in platform.system(): 
+            libpath2 = os.path.realpath(os.path.join(site.USER_BASE,'lib'))
+            os.environ['LD_LIBRARY_PATH']+=os.path.join(libpath2)
+    if 'Darwin' in platform.system():
         if not 'DYLD_LIBRARY_PATH' is os.environ:
             libpath = os.getenv('DYLD_LIBARY_PATH',os.path.join(sys.prefix,'lib'))
-            os.environ['DYLD_LIBRARY_PATH']=libpath 
+            os.environ['DYLD_LIBRARY_PATH']=libpath
+            libpath2 = os.path.realpath(os.path.join(site.USER_BASE,'lib'))
+            os.environ['DYLD_LIBRARY_PATH']+=os.path.join(libpath2)
         else:
             os.environ['DYLD_LIBRARY_PATH']+= os.pathsep + os.path.join(sys.prefix,'lib')
-    
+            libpath2 = os.path.realpath(os.path.join(site.USER_BASE,'lib'))
+            os.environ['DYLD_LIBRARY_PATH']+=os.path.join(libpath2)
+
     user_options = []
     def initialize_options(self):
         pass
