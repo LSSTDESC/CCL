@@ -24,6 +24,20 @@ make  [apj|apjl|prd|prl|mnras]
 ```
 `make` with no arguments compiles latex in LSST DESC Note style, and uses Alex Drlica-Wagner's `mkauthlist` program to compile the author list from the information stored in `authors.csv`. The Makefile includes the `pip install` command needed to obtain `mkauthlist`, but this does mean that you'll need to have `pip` installed and able to install python packages on your system.
 
+## Known building issues
+
+If you are not admin of your system, you might need to edit the following line of the Makefile, replacing:
+```
+pip install --upgrade mkauthlist
+```
+by
+```
+pip install --user --upgrade mkauthlist
+```
+
+In this case, make sure that the directory where `mkauthlist` is installed is placed at the beginning of the `$PYTHONPATH`.
+
+Also, `pip` might be installed in your system under a different alias. If so, you will need to replace `pip` above by the correct alias.
 
 ## Updating the Styles and Templates
 
