@@ -19,14 +19,14 @@
 
 %inline %{
 void massfunc_vec(ccl_cosmology * cosmo,
-                    double redshift,
+                    double a,
                     double* halo_mass, int nm,
                     double* output, int nout,
                     int* status)
 {
     assert(nout == nm);
     for(int i=0; i < nm; i++){
-        output[i] = ccl_massfunc(cosmo, halo_mass[i], redshift, status);
+        output[i] = ccl_massfunc(cosmo, halo_mass[i], a, status);
     }
 }
 
@@ -42,26 +42,26 @@ void massfunc_m2r_vec(ccl_cosmology * cosmo,
 }
 
 void sigmaM_vec(ccl_cosmology * cosmo,
-                    double redshift,
+                    double a,
                     double* halo_mass, int nm,
                     double* output, int nout,
                     int* status)
 {
     assert(nout == nm);
     for(int i=0; i < nm; i++){
-        output[i] = ccl_sigmaM(cosmo, halo_mass[i], redshift, status);
+        output[i] = ccl_sigmaM(cosmo, halo_mass[i], a, status);
     }
 }
 
 void halo_bias_vec(ccl_cosmology * cosmo,
-                       double redshift,
+                       double a,
                        double* halo_mass, int nm,
                        double* output, int nout,
                        int* status)
 {
     assert(nout == nm);
     for(int i=0; i < nm; i++){
-        output[i] = ccl_halo_bias(cosmo, halo_mass[i], redshift, status);
+        output[i] = ccl_halo_bias(cosmo, halo_mass[i], a, status);
     }
 }
 %}
