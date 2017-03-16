@@ -16,8 +16,9 @@
 Lastname,Firstname,Authorname,AuthorType,Affiliation,Contribution,Email
 Alonso,David,"David Alonso",Contributor,"David's institute address","wrote code, wrote text for paper.",name@email.server
 Blazek,Jonathan,"Jonathan Blazek",Contributor,"Jonathan's institute address","wrote code, wrote text for paper.",name@email.server
-Bull,Phil,"Phil Bull",Contributor,"Phil's institute address","wrote code, wrote text for paper.",name@email.server
-Chisari,Elisa,"N. Elisa Chisari",Contributor,"Elisa's institute address","wrote code, wrote text for paper.",name@email.server
+Bull,Philip,"Philip Bull",Contributor,"California Institute of Technology, Pasadena, CA 91125, USA","",philbull@gmail.com
+Bull,Philip,"Philip Bull",Contributor,"Jet Propulsion Laboratory, California Institute of Technology, 4800 Oak Grove Drive, Pasadena, California, USA","Implemented the Python wrapper and wrote documentation for it.",philbull@gmail.com
+Chisari,Elisa,"N. Elisa Chisari",Contributor,"Department of Physics, University of Oxford, Denys Wilkinson building, Keble Road, Oxford OX1 3RH, United Kingdom","Wrote and reviewed code, wrote documentation.",elisa.chisari@physics.ox.ac.uk
 Eifler,Tim,"Tim Eifler",Contributor,"Tim's institute address","wrote code, wrote text for paper.",name@email.server
 Hlozek,Ren\'ee,"Ren\'ee Hlozek",Contributor,"Renee's institute address","wrote code, wrote text for paper.",name@email.server
 Kirkby,David,"David Kirkby",Contributor,"David K's institute address","wrote code, wrote text for paper.",name@email.server
@@ -25,7 +26,7 @@ Krause,Elisabeth,"Elisabeth Krause",Contributor,"Elisabeth's institute address",
 Leonard,Danielle,"C. Danielle Leonard",Contributor,"Danielle's institute address","wrote code, wrote text for paper.",name@email.server
 Marshall,Phil,"Phil Marshall",Contributor,"SLAC National Accelerator Laboratory, Menlo Park, CA 94025, USA","helped with document preparation.",pjm@slac.stanford.edu
 Singh,Sukhdeep,"Sukhdeep Singh",Contributor,"Sukhdeep's institute address","wrote code, wrote text for paper.",name@email.server
-Slosar,Anze,"An\v{z}e Slosar",Contributor,"Anze's institute address","wrote code, wrote text for paper.",name@email.server
+Slosar,Anze,"An\v{z}e Slosar",Contributor,"Brookhaven National Laboratory, Physics Department, Upton, NY 11973, USA","Wrote code, reviewed code.",anze@bnl.gov
 Villareal,Antonio,"Antonio Villarreal",Contributor,"Antonio's institute address","wrote code, wrote text for paper.",name@email.server
 Vrastil,Michal,"Michal Vrastil",Contributor,"Michal's institute address","wrote code, wrote text for paper.",name@email.server
 Zuntz,Joe,"Joe Zuntz",Contributor,"Joe's institute address","wrote code, wrote text for paper.",name@email.server
