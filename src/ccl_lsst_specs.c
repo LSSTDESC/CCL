@@ -111,7 +111,7 @@ INPUT: void * user_pz_params, (double *) user_pz_func (double, double, void *)
 TASK: create a structure amalgamating the user-input information on the photo-z model.
 The structure holds a pointer to the function which returns the probability of getting a certain z_ph (first double) 
 given a z_spec (second double), and a pointer to the parameters which get passed to that function (other than z_ph and z_sp); */
-user_pz_info* ccl_specs_create_photoz_info(void * user_params, double (*user_pz_func)(double, double,void*)){
+user_pz_info* ccl_specs_create_photoz_info(void * user_params, double (*user_pz_func)(double, double,void*, int*)){
 	
 	user_pz_info * this_user_info = malloc(sizeof(user_pz_info));
 	this_user_info ->your_pz_params = user_params;
@@ -140,6 +140,7 @@ TASK:  Returns the value of p(z_photo, z). Change this function to
 struct pz_params{
   double z_true; // Gives the true redshift at which to evaluate 
   user_pz_info * user_information; //Calls the photo-z scatter model
+  int *status;
 };
 
 static double ccl_specs_photoz(double z_ph, void * params){
@@ -150,7 +151,7 @@ static double ccl_specs_photoz(double z_ph, void * params){
 	// user_stuff contains a pointer to the user function for the photo_z and to the user struct for the parameters of that function 
 	//void * user_stuff = p->user_information;	
 
-	return (user_stuff->your_pz_func)(z_ph, z_s, user_stuff->your_pz_params);
+	return (user_stuff->your_pz_func)(z_ph, z_s, user_stuff->your_pz_params,p->status);
 
 	}
 
@@ -168,6 +169,7 @@ struct norm_params{
   int type_;
   user_pz_info * user_information;
   double (*unnormedfunc)(double,void *);
+  int *status;
 };
 
 
@@ -190,6 +192,7 @@ static double ccl_specs_norm_integrand(double z, void* params){
 
 	// Set up parameters for the intermediary integral.
 	valparams.z_true = z;
+	valparams.status = p->status;
 	valparams.user_information = p-> user_information;
 
 	// Do the intermediary integral over the model relating  photo-z to true-z	
@@ -233,6 +236,7 @@ void ccl_specs_dNdz_tomog(double z, int dNdz_type, double bin_zmin, double bin_z
 	norm_p_val.bin_zmin_=bin_zmin;
 	norm_p_val.bin_zmax_=bin_zmax;
  	norm_p_val.user_information = user_info;	
+ 	norm_p_val.status = status;	
 
 
 	if((dNdz_type==DNDZ_WL_OPT) ||(dNdz_type==DNDZ_WL_FID) || (dNdz_type==DNDZ_WL_CONS)){ 
@@ -243,7 +247,7 @@ void ccl_specs_dNdz_tomog(double z, int dNdz_type, double bin_zmin, double bin_z
 	  norm_p_val.type_= dNdz_type;
 	  norm_p_val.unnormedfunc = ccl_specs_dNdz_clustering;
 	} else {
-	  *status = CCL_ERROR_PARAMETERS;
+	  *status |= CCL_ERROR_PARAMETERS;
 	  return;
 	}
 
@@ -259,6 +263,7 @@ void ccl_specs_dNdz_tomog(double z, int dNdz_type, double bin_zmin, double bin_z
 
 	// Set up the parameters for the integral over the photo z function in the numerator (of type struct pz_params)
 	valparams.z_true = z;
+	valparams.status = status;
 	valparams.user_information = user_info; // pointer to user information
 
 

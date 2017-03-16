@@ -28,7 +28,7 @@ struct user_func_params
 };
 
 // The user defines a function of the form double function ( z_ph, z_spec, void * user_pz_params) where user_pz_params is a pointer to the parameters of the user-defined function. This returns the probabilty of obtaining a given photo-z given a particular spec_z.
-double user_pz_probability(double z_ph, double z_s, void * user_par)
+double user_pz_probability(double z_ph, double z_s, void * user_par, int *status)
 {
 		double sigma_z = ((struct user_func_params *) user_par)->sigma_z(z_s);
         return exp(- (z_ph-z_s)*(z_ph-z_s) / (2.*sigma_z*sigma_z)) / (pow(2.*M_PI,0.5)*sigma_z);
