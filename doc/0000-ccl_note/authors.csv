@@ -8,25 +8,35 @@
 # Notes:
 #   - If someone has two affiliations, they get two rows, and the last row is
 #     is used for their contribution.
-#   - Cannot deal with empty rows...
+#   - mkauthlist cannot deal with empty rows, so please avoid them!
+#   - Try to make your one-sentence contribution statement as informative as 
+#     possible, so that it's clear who did what.  
 #   - BUG: contributions are re-formatted into Title case, removing all other
 #     capitalizations...
 #
+# Example rows for you to adapt:
+#
+# Drlica-Wagner,Alex,A.~Drlica-Wagner,Contact,"Fermi National Accelerator Laboratory, P. O. Box 500, Batavia, IL 60510, USA","Developed algorithms for switching between document styles and generating author lists, implemented and tested software.",kadrlica@fnal.gov
+# Marshall,Phil,P.~Marshall,Contributor,"SLAC National Accelerator Laboratory, Menlo Park, CA 94025, USA","Initiated and led project.",dr.phil.marshall@gmail.com
+# Marshall,Phil,P.~Marshall,Contributor,"Kavli Institute for Particle Astrophysics \& Cosmology, P. O. Box 2450, Stanford University, Stanford, CA 94305, USA","Initiated and led project, designed templates, tested system.",dr.phil.marshall@gmail.com
+# Digel,Seth,S.~Digel,Builder,"SLAC National Accelerator Laboratory, Menlo Park, CA 94025, USA","Advised on LSST DESC publication system requirements.",digel@stanford.edu
+# Digel,Seth,S.~Digel,Builder,"Kavli Institute for Particle Astrophysics \& Cosmology, P. O. Box 2450, Stanford University, Stanford, CA 94305, USA","Advised on LSST DESC publication system requirements.",digel@stanford.edu
+#
 # =============================================================================
 Lastname,Firstname,Authorname,AuthorType,Affiliation,Contribution,Email
-Alonso,David,"David Alonso",Contributor,"David's institute address","wrote code, wrote text for paper.",name@email.server
-Blazek,Jonathan,"Jonathan Blazek",Contributor,"Jonathan's institute address","wrote code, wrote text for paper.",name@email.server
+Alonso,David,"David Alonso",Contributor,"David's institute address","hasn't written a contribution statement yet.",name@email.server
+Blazek,Jonathan,"Jonathan Blazek",Contributor,"Jonathan's institute address","hasn't written a contribution statement yet.",name@email.server
 Bull,Philip,"Philip Bull",Contributor,"California Institute of Technology, Pasadena, CA 91125, USA","",philbull@gmail.com
 Bull,Philip,"Philip Bull",Contributor,"Jet Propulsion Laboratory, California Institute of Technology, 4800 Oak Grove Drive, Pasadena, California, USA","Implemented the Python wrapper and wrote documentation for it.",philbull@gmail.com
-Chisari,Elisa,"N. Elisa Chisari",Contributor,"Department of Physics, University of Oxford, Denys Wilkinson building, Keble Road, Oxford OX1 3RH, United Kingdom","Wrote and reviewed code, wrote documentation.",elisa.chisari@physics.ox.ac.uk
-Eifler,Tim,"Tim Eifler",Contributor,"Tim's institute address","wrote code, wrote text for paper.",name@email.server
-Hlozek,Ren\'ee,"Ren\'ee Hlozek",Contributor,"Renee's institute address","wrote code, wrote text for paper.",name@email.server
-Kirkby,David,"David Kirkby",Contributor,"David K's institute address","wrote code, wrote text for paper.",name@email.server
-Krause,Elisabeth,"Elisabeth Krause",Contributor,"Elisabeth's institute address","wrote code, wrote text for paper.",name@email.server
-Leonard,Danielle,"C. Danielle Leonard",Contributor,"Danielle's institute address","wrote code, wrote text for paper.",name@email.server
+Chisari,Elisa,"N. Elisa Chisari",Contributor,"Department of Physics, University of Oxford, Denys Wilkinson building, Keble Road, Oxford OX1 3RH, United Kingdom","wrote and reviewed code, wrote documentation.",elisa.chisari@physics.ox.ac.uk
+Eifler,Tim,"Tim Eifler",Contributor,"Tim's institute address","hasn't written a contribution statement yet.",name@email.server
+Hlozek,Ren\'ee,"Ren\'ee Hlozek",Contributor,"Renee's institute address","hasn't written a contribution statement yet.",name@email.server
+Kirkby,David,"David Kirkby",Contributor,"David K's institute address","hasn't written a contribution statement yet.",name@email.server
+Krause,Elisabeth,"Elisabeth Krause",Contributor,"Elisabeth's institute address","hasn't written a contribution statement yet.",name@email.server
+Leonard,Danielle,"C. Danielle Leonard",Contributor,"Danielle's institute address","hasn't written a contribution statement yet.",name@email.server
 Marshall,Phil,"Phil Marshall",Contributor,"SLAC National Accelerator Laboratory, Menlo Park, CA 94025, USA","helped with document preparation.",pjm@slac.stanford.edu
-Singh,Sukhdeep,"Sukhdeep Singh",Contributor,"Sukhdeep's institute address","wrote code, wrote text for paper.",name@email.server
-Slosar,Anze,"An\v{z}e Slosar",Contributor,"Brookhaven National Laboratory, Physics Department, Upton, NY 11973, USA","Wrote code, reviewed code.",anze@bnl.gov
-Villareal,Antonio,"Antonio Villarreal",Contributor,"Antonio's institute address","wrote code, wrote text for paper.",name@email.server
-Vrastil,Michal,"Michal Vrastil",Contributor,"Michal's institute address","wrote code, wrote text for paper.",name@email.server
-Zuntz,Joe,"Joe Zuntz",Contributor,"Institute for Astronomy, Royal Observatory Edinburgh, Edinburgh EH9 3HJ, UK","Wrote initial infrastructure, C testing setup, and reviewed code.",joezuntz@googlemail.com
+Singh,Sukhdeep,"Sukhdeep Singh",Contributor,"Sukhdeep's institute address","hasn't written a contribution statement yet.",name@email.server
+Slosar,Anze,"An\v{z}e Slosar",Contributor,"Brookhaven National Laboratory, Physics Department, Upton, NY 11973, USA","wrote and reviewed code.",anze@bnl.gov
+Villareal,Antonio,"Antonio Villarreal",Contributor,"Antonio's institute address","hasn't written a contribution statement yet.",name@email.server
+Vrastil,Michal,"Michal Vrastil",Contributor,"Michal's institute address","hasn't written a contribution statement yet.",name@email.server
+Zuntz,Joe,"Joe Zuntz",Contributor,"Institute for Astronomy, Royal Observatory Edinburgh, Edinburgh EH9 3HJ, UK","wrote initial infrastructure, C testing setup, and reviewed code.",joezuntz@googlemail.com
