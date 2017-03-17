@@ -61,9 +61,8 @@ void specs_dNdz_tomog_vec(
                         double bin_zmin, double bin_zmax, 
                         user_pz_info* user_info, 
                         double* z, int nz, 
-                        double* output, int nout)
+                        double* output, int nout, int *status)
 {
-    int status;
     double val = 0.;
     assert(nout == nz);
     
@@ -71,8 +70,8 @@ void specs_dNdz_tomog_vec(
     for(int i=0; i < nz; i++){
         
         // Calculate dNdz value
-        status = ccl_specs_dNdz_tomog(z[i], dNdz_type, bin_zmin, bin_zmax,
-                                      user_info, &val);
+        ccl_specs_dNdz_tomog(z[i], dNdz_type, bin_zmin, bin_zmax,
+                                      user_info, &val, status);
         // Check status
         if (status != 0){
             fprintf(stderr, "%s", 
