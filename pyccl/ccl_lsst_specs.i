@@ -89,7 +89,7 @@ void specs_dNdz_tomog_vec(
 
 // C callback function, to call a pre-specified Python function with 
 // call signature def fn(double, double): return double
-static double call_py_photoz_fn(double z_ph, double z_s, void *py_func_obj)
+static double call_py_photoz_fn(double z_ph, double z_s, void *py_func_obj, int *status)
 {
     PyObject *func, *arglist;
     PyObject *result;
