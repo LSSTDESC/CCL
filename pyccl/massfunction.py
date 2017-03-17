@@ -1,6 +1,6 @@
 
 import ccllib as lib
-from pyutils import _vectorize_fn, _vectorize_fn2
+from pyutils import _vectorize_fn, _vectorize_fn2, _vectorize_fn3
 
 def massfunc(cosmo, halo_mass, a, odelta):
     """Halo mass function.
@@ -8,7 +8,6 @@ def massfunc(cosmo, halo_mass, a, odelta):
     Note: only Tinker (2010) is implemented right now.
 
     TODO: verify 2010 vs 2008 mass function.
-    TODO: check that output is dndM or dnd_lnM
     
     Args:
         cosmo (:obj:`ccl.cosmology`): Cosmological parameters.
@@ -17,10 +16,10 @@ def massfunc(cosmo, halo_mass, a, odelta):
         odelta (float): overdensity parameter
 
     Returns:
-        massfunc (float or array_like): Halo mass function; dn/dlogM.
+        massfunc (float or array_like): Halo mass function; dn/dlog10M.
 
     """
-    return _vectorize_fn2(lib.massfunc, 
+    return _vectorize_fn3(lib.massfunc, 
                           lib.massfunc_vec, cosmo, halo_mass, a, odelta)
 
 def massfunc_m2r(cosmo, halo_mass):
@@ -67,5 +66,5 @@ def halo_bias(cosmo, halo_mass, a, odelta):
         halo_bias (float or array_like): Halo bias.
 
     """
-    return _vectorize_fn2(lib.halo_bias, 
+    return _vectorize_fn3(lib.halo_bias, 
                           lib.halo_bias_vec, cosmo, halo_mass, a, odelta)
