@@ -387,8 +387,8 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int * statu
     for (int i=0; i<nk; i++){
       s =spectra_pk_at_k_and_z(&ba, &pm, &sp,x[i],0.0, &Z,&ic);
       y[i] = log(Z);
-      x[i] = log(x[i]);
-    }
+      x[i] = log(x[i]); 
+    } 
   
     gsl_spline * log_power_lin = gsl_spline_alloc(K_SPLINE_TYPE, nk);
     int classstatus = gsl_spline_init(log_power_lin, x, y, nk);
@@ -401,6 +401,12 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int * statu
     }
     else
       cosmo->data.p_lin = log_power_lin;
+
+    // Workaround to deal with the fact that kmin can't be less than CLASS's kmin in the nonlinear case. 
+    if (kmin<(exp(sp.ln_k[0]))){
+	printf("KMIN is smaller than CLASS'S kmin - cannot compute nonlinear matter power spectrum.\nExiting.\n");
+	exit(1);
+	}
 
     if(cosmo->config.matter_power_spectrum_method==ccl_halofit){
       double * y2d = malloc(nk * na * sizeof(double));
@@ -416,9 +422,9 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int * statu
 	         //y_ij = y2d[j*N_k + i]
 	         //with i = 0,...,N_k-1 and j = 0,...,N_a-1.
 	         s = spectra_pk_nl_at_k_and_z(&ba, &pm, &sp,exp(x[i]),1./z[j]-1., &Z);
-	         y2d[j*nk+i] = log(Z);
+	         y2d[j*nk+i] = log(Z);  		                
          }
-       }
+       } 
        int pwstatus = gsl_spline2d_init(log_power_nl, x, z, y2d,nk,na);
        if (pwstatus){
         free(x);
@@ -696,6 +702,7 @@ TASK: compute the nonlinear power spectrum at a given redshift
 */
 
 double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double a, double k, int *status){
+ 
 
 	switch(cosmo->config.matter_power_spectrum_method){
 	//If the matter PS specified was linear, then do the linear compuation
