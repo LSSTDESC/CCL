@@ -224,6 +224,16 @@ static double massfunc_f(ccl_cosmology *cosmo, double halomass, double a, double
     //this version uses f(nu) parameterization from Eq. 8 in Tinker et al. 2010
     // use this for consistency with Tinker et al. 2010 fitting function for halo bias
   case ccl_tinker10:
+    if (odelta < 200){
+    *status = CCL_ERROR_HMF_INTERP;
+    strcpy(cosmo->status_message, "ccl_massfunc.c: ccl_massfunc_f(): Tinker 2010 only supported in range of Delta = 200 to Delta = 3200. Calculation continues assuming Delta = 200.\n");
+    odelta = 200;
+    }
+    if (odelta > 3200){
+      * status = CCL_ERROR_HMF_INTERP;
+      strcpy(cosmo->status_message, "ccl_massfunc.c: ccl_massfunc_f(): Tinker 2010 only supported in range of Delta = 200 to Delta = 3200. Calculation continues assuming Delta = 3200.\n");
+      odelta = 3200;
+    }
     if (!cosmo->computed_hmfparams){
         ccl_cosmology_compute_hmfparams(cosmo, status);
         ccl_check_status(cosmo, status);
