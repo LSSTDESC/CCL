@@ -19,89 +19,157 @@ void ccl_cosmology_compute_hmfparams(ccl_cosmology * cosmo, int *status)
 
   // declare parameter splines on case-by-case basis
   switch(cosmo->config.mass_function_method){
-  case ccl_tinker10:
-    printf("");
-    double delta[9] = {200.0, 300.0, 400.0, 600.0, 800.0, 1200.0, 1600.0, 2400.0, 3200.0};
-    double lgdelta[9];
-    double alpha[9] = {0.368, 0.363, 0.385, 0.389, 0.393, 0.365, 0.379, 0.355, 0.327};
-    double beta[9] = {0.589, 0.585, 0.544, 0.543, 0.564, 0.623, 0.637, 0.673, 0.702};
-    double gamma[9] ={0.864, 0.922, 0.987, 1.09, 1.20, 1.34, 1.50, 1.68, 1.81};
-    double phi[9] = {-0.729, -0.789, -0.910, -1.05, -1.20, -1.26, -1.45, -1.50, -1.49};
-    double eta[9] = {-0.243, -0.261, -0.261, -0.273, -0.278, -0.301, -0.301, -0.319, -0.336};
-    int nd = 9;
-    int i;
+    case ccl_tinker10:{
+      printf("");
+      double delta[9] = {200.0, 300.0, 400.0, 600.0, 800.0, 1200.0, 1600.0, 2400.0, 3200.0};
+      double lgdelta[9];
+      double alpha[9] = {0.368, 0.363, 0.385, 0.389, 0.393, 0.365, 0.379, 0.355, 0.327};
+      double beta[9] = {0.589, 0.585, 0.544, 0.543, 0.564, 0.623, 0.637, 0.673, 0.702};
+      double gamma[9] ={0.864, 0.922, 0.987, 1.09, 1.20, 1.34, 1.50, 1.68, 1.81};
+      double phi[9] = {-0.729, -0.789, -0.910, -1.05, -1.20, -1.26, -1.45, -1.50, -1.49};
+      double eta[9] = {-0.243, -0.261, -0.261, -0.273, -0.278, -0.301, -0.301, -0.319, -0.336};
+      int nd = 9;
+      int i;
 
-    for(i=0; i<nd; i++){
-      lgdelta[i] = log10(delta[i]);
+      for(i=0; i<nd; i++){
+        lgdelta[i] = log10(delta[i]);
+      }
+
+      gsl_spline * alphahmf = gsl_spline_alloc(D_SPLINE_TYPE, nd);
+      *status = gsl_spline_init(alphahmf, lgdelta, alpha, nd);
+      if (*status){
+        gsl_spline_free(alphahmf);
+        *status = CCL_ERROR_SPLINE ;
+        strcpy(cosmo->status_message, "ccl_massfunc.c: ccl_cosmology_compute_hmfparams(): Error creating alpha(D) spline\n");
+        return;
+      }
+
+      gsl_spline * betahmf  = gsl_spline_alloc(D_SPLINE_TYPE, nd);
+      *status = gsl_spline_init(betahmf, lgdelta, beta, nd);
+      if (*status){
+        gsl_spline_free(alphahmf);
+        gsl_spline_free(betahmf);
+        *status = CCL_ERROR_SPLINE ;
+        strcpy(cosmo->status_message, "ccl_massfunc.c: ccl_cosmology_compute_hmfparams(): Error creating beta(D) spline\n");
+        return;
+      }
+
+      gsl_spline * gammahmf = gsl_spline_alloc(D_SPLINE_TYPE, nd);
+      *status = gsl_spline_init(gammahmf, lgdelta, gamma, nd);
+      if (*status){
+        gsl_spline_free(alphahmf);
+        gsl_spline_free(betahmf);
+        gsl_spline_free(gammahmf);
+        *status = CCL_ERROR_SPLINE ;
+        strcpy(cosmo->status_message, "ccl_massfunc.c: ccl_cosmology_compute_hmfparams(): Error creating gamma(D) spline\n");
+        return;
+      }
+
+      gsl_spline * phihmf   = gsl_spline_alloc(D_SPLINE_TYPE, nd);
+      *status = gsl_spline_init(phihmf, lgdelta, phi, nd);
+      if (*status){
+        gsl_spline_free(alphahmf);
+        gsl_spline_free(betahmf);
+        gsl_spline_free(gammahmf);
+        gsl_spline_free(phihmf);
+        *status = CCL_ERROR_SPLINE ;
+        strcpy(cosmo->status_message, "ccl_massfunc.c: ccl_cosmology_compute_hmfparams(): Error creating phi(D) spline\n");
+        return;
+      }
+
+      gsl_spline * etahmf   = gsl_spline_alloc(D_SPLINE_TYPE, nd);
+      *status = gsl_spline_init(etahmf, lgdelta, eta, nd);
+      if (*status){
+        gsl_spline_free(alphahmf);
+        gsl_spline_free(betahmf);
+        gsl_spline_free(gammahmf);
+        gsl_spline_free(phihmf);
+        gsl_spline_free(etahmf);
+        *status = CCL_ERROR_SPLINE ;
+        strcpy(cosmo->status_message, "ccl_massfunc.c: ccl_cosmology_compute_hmfparams(): Error creating eta(D) spline\n");
+        return;
+      }
+      if(cosmo->data.accelerator_d==NULL)
+        cosmo->data.accelerator_d=gsl_interp_accel_alloc();
+      cosmo->data.alphahmf = alphahmf;
+      cosmo->data.betahmf = betahmf;
+      cosmo->data.gammahmf = gammahmf;
+      cosmo->data.phihmf = phihmf;
+      cosmo->data.etahmf = etahmf;
+      cosmo->computed_hmfparams = true;
+
+      break;
     }
+    case ccl_tinker:{
+      printf("");
+      double delta[9] = {200.0, 300.0, 400.0, 600.0, 800.0, 1200.0, 1600.0, 2400.0, 3200.0};
+      double lgdelta[9];
+      double alpha[9] = {0.186, 0.200, 0.212, 0.218, 0.248, 0.255, 0.260, 0.260, 0.260};
+      double beta[9] = {1.47, 1.52, 1.56, 1.61, 1.87, 2.13, 2.30, 2.53, 2.66};
+      double gamma[9] ={2.57, 2.25, 2.05, 1.87, 1.59, 1.51, 1.46, 1.44, 1.41};
+      double phi[9] = {1.19, 1.27, 1.34, 1.45, 1.58, 1.80, 1.97, 2.24, 2.44};
+      int nd = 9;
+      int i;
 
-    gsl_spline * alphahmf = gsl_spline_alloc(D_SPLINE_TYPE, nd);
-    *status = gsl_spline_init(alphahmf, lgdelta, alpha, nd);
-    if (*status){
-      gsl_spline_free(alphahmf);
-      *status = CCL_ERROR_SPLINE ;
-      strcpy(cosmo->status_message, "ccl_massfunc.c: ccl_cosmology_compute_hmfparams(): Error creating alpha(D) spline\n");
-      return;
+      for(i=0; i<nd; i++){
+        lgdelta[i] = log10(delta[i]);
+      }
+
+      gsl_spline * alphahmf = gsl_spline_alloc(D_SPLINE_TYPE, nd);
+      *status = gsl_spline_init(alphahmf, lgdelta, alpha, nd);
+      if (*status){
+        gsl_spline_free(alphahmf);
+        *status = CCL_ERROR_SPLINE ;
+        strcpy(cosmo->status_message, "ccl_massfunc.c: ccl_cosmology_compute_hmfparams(): Error creating alpha(D) spline\n");
+        return;
+      }
+
+      gsl_spline * betahmf  = gsl_spline_alloc(D_SPLINE_TYPE, nd);
+      *status = gsl_spline_init(betahmf, lgdelta, beta, nd);
+      if (*status){
+        gsl_spline_free(alphahmf);
+        gsl_spline_free(betahmf);
+        *status = CCL_ERROR_SPLINE ;
+        strcpy(cosmo->status_message, "ccl_massfunc.c: ccl_cosmology_compute_hmfparams(): Error creating beta(D) spline\n");
+        return;
+      }
+
+      gsl_spline * gammahmf = gsl_spline_alloc(D_SPLINE_TYPE, nd);
+      *status = gsl_spline_init(gammahmf, lgdelta, gamma, nd);
+      if (*status){
+        gsl_spline_free(alphahmf);
+        gsl_spline_free(betahmf);
+        gsl_spline_free(gammahmf);
+        *status = CCL_ERROR_SPLINE ;
+        strcpy(cosmo->status_message, "ccl_massfunc.c: ccl_cosmology_compute_hmfparams(): Error creating gamma(D) spline\n");
+        return;
+      }
+
+      gsl_spline * phihmf   = gsl_spline_alloc(D_SPLINE_TYPE, nd);
+      *status = gsl_spline_init(phihmf, lgdelta, phi, nd);
+      if (*status){
+        gsl_spline_free(alphahmf);
+        gsl_spline_free(betahmf);
+        gsl_spline_free(gammahmf);
+        gsl_spline_free(phihmf);
+        *status = CCL_ERROR_SPLINE ;
+        strcpy(cosmo->status_message, "ccl_massfunc.c: ccl_cosmology_compute_hmfparams(): Error creating phi(D) spline\n");
+        return;
+      }
+
+      if(cosmo->data.accelerator_d==NULL)
+        cosmo->data.accelerator_d=gsl_interp_accel_alloc();
+      cosmo->data.alphahmf = alphahmf;
+      cosmo->data.betahmf = betahmf;
+      cosmo->data.gammahmf = gammahmf;
+      cosmo->data.phihmf = phihmf;
+      cosmo->computed_hmfparams = true;
+
+      break;
     }
-
-    gsl_spline * betahmf  = gsl_spline_alloc(D_SPLINE_TYPE, nd);
-    *status = gsl_spline_init(betahmf, lgdelta, beta, nd);
-    if (*status){
-      gsl_spline_free(alphahmf);
-      gsl_spline_free(betahmf);
-      *status = CCL_ERROR_SPLINE ;
-      strcpy(cosmo->status_message, "ccl_massfunc.c: ccl_cosmology_compute_hmfparams(): Error creating beta(D) spline\n");
-      return;
-    }
-
-    gsl_spline * gammahmf = gsl_spline_alloc(D_SPLINE_TYPE, nd);
-    *status = gsl_spline_init(gammahmf, lgdelta, gamma, nd);
-    if (*status){
-      gsl_spline_free(alphahmf);
-      gsl_spline_free(betahmf);
-      gsl_spline_free(gammahmf);
-      *status = CCL_ERROR_SPLINE ;
-      strcpy(cosmo->status_message, "ccl_massfunc.c: ccl_cosmology_compute_hmfparams(): Error creating gamma(D) spline\n");
-      return;
-    }
-
-    gsl_spline * phihmf   = gsl_spline_alloc(D_SPLINE_TYPE, nd);
-    *status = gsl_spline_init(phihmf, lgdelta, phi, nd);
-    if (*status){
-      gsl_spline_free(alphahmf);
-      gsl_spline_free(betahmf);
-      gsl_spline_free(gammahmf);
-      gsl_spline_free(phihmf);
-      *status = CCL_ERROR_SPLINE ;
-      strcpy(cosmo->status_message, "ccl_massfunc.c: ccl_cosmology_compute_hmfparams(): Error creating phi(D) spline\n");
-      return;
-    }
-
-    gsl_spline * etahmf   = gsl_spline_alloc(D_SPLINE_TYPE, nd);
-    *status = gsl_spline_init(etahmf, lgdelta, eta, nd);
-    if (*status){
-      gsl_spline_free(alphahmf);
-      gsl_spline_free(betahmf);
-      gsl_spline_free(gammahmf);
-      gsl_spline_free(phihmf);
-      gsl_spline_free(etahmf);
-      *status = CCL_ERROR_SPLINE ;
-      strcpy(cosmo->status_message, "ccl_massfunc.c: ccl_cosmology_compute_hmfparams(): Error creating eta(D) spline\n");
-      return;
-    }
-    if(cosmo->data.accelerator_d==NULL)
-      cosmo->data.accelerator_d=gsl_interp_accel_alloc();
-    cosmo->data.alphahmf = alphahmf;
-    cosmo->data.betahmf = betahmf;
-    cosmo->data.gammahmf = gammahmf;
-    cosmo->data.phihmf = phihmf;
-    cosmo->data.etahmf = etahmf;
-    cosmo->computed_hmfparams = true;
-
-    break;
-  default:
-  //TODO: Error message goes here.
-    break;
+    default:
+  //TODO: Error message goes here. Currently has no way to ever come up.
+      break;
   }
 }
 
@@ -125,72 +193,30 @@ static double massfunc_f(ccl_cosmology *cosmo, double halomass, double a, double
 
   switch(cosmo->config.mass_function_method){
   case ccl_tinker:
-    if (odelta == 200.0){
-      fit_A = 0.186;
-      fit_a = 1.47;
-      fit_b = 2.57; 
-      fit_c = 1.19;
-    }
-    else if (odelta == 300.0){
-      fit_A = 0.200;
-      fit_a = 1.52;
-      fit_b = 2.25;
-      fit_c = 1.27;
-    }
-    else if (odelta == 400.0){
-      fit_A = 0.212;
-      fit_a = 1.56;
-      fit_b = 2.05;
-      fit_c = 1.34;
-    }
-    else if (odelta == 600.0){
-      fit_A = 0.218;
-      fit_a = 1.61;
-      fit_b = 1.87;
-      fit_c = 1.45;
-    }
-    else if (odelta == 800.0){
-      fit_A = 0.248;
-      fit_a = 1.87;
-      fit_b = 1.59;
-      fit_c = 1.58;
-    }
-    else if (odelta == 1200.0){
-      fit_A = 0.255;
-      fit_a = 2.13;
-      fit_b = 1.51;
-      fit_c = 1.80;
-    }
-    else if (odelta == 1600.0){
-      fit_A = 0.260;
-      fit_a = 2.30;
-      fit_b = 1.46;
-      fit_c = 1.97;
-    }
-    else if (odelta == 2400.0){
-      fit_A = 0.260;
-      fit_a = 2.53;
-      fit_b = 1.44;
-      fit_c = 2.24;
-    }
-    else if (odelta == 3200.0){
-      fit_A = 0.260;
-      fit_a = 2.66;
-      fit_b = 1.41;
-      fit_c = 2.44;
-    }
-    else{
+
+    if (odelta < 200){
       *status = CCL_ERROR_HMF_INTERP;
-      strcpy(cosmo->status_message, "ccl_massfunc.c: ccl_massfunc_f(): Tinker 2008 only supported for Delta = {200, 300, 400, 600, 800, 1200, 1600, 2400, and 3200. Calculation continues assuming Delta =200.\n");
+      strcpy(cosmo->status_message, "ccl_massfunc.c: ccl_massfunc_f(): Tinker 2008 only supported in range of Delta = 200 to Delta = 3200. Calculation continues assuming Delta = 200.\n");
       odelta = 200;
-      fit_A = 0.186;
-      fit_a = 1.47;
-      fit_b = 2.57; 
-      fit_c = 1.19;
+    }
+    if (odelta > 3200){
+      * status = CCL_ERROR_HMF_INTERP;
+      strcpy(cosmo->status_message, "ccl_massfunc.c: ccl_massfunc_f(): Tinker 2008 only supported in range of Delta = 200 to Delta = 3200. Calculation continues assuming Delta = 3200.\n");
+      odelta = 3200;
     }
 
-    fit_a = fit_a*pow(a, 0.06);
+    if (!cosmo->computed_hmfparams){
+        ccl_cosmology_compute_hmfparams(cosmo, status);
+        ccl_check_status(cosmo, status);
+    }
+
+    fit_A = gsl_spline_eval(cosmo->data.alphahmf, log10(odelta), cosmo->data.accelerator_d);
+    fit_a = gsl_spline_eval(cosmo->data.betahmf, log10(odelta), cosmo->data.accelerator_d);
+    fit_b = gsl_spline_eval(cosmo->data.gammahmf, log10(odelta), cosmo->data.accelerator_d);
+    fit_c = gsl_spline_eval(cosmo->data.phihmf, log10(odelta), cosmo->data.accelerator_d);
     fit_d = pow(10, -1.0*pow(0.75 / log10(odelta / 75.0), 1.2));
+
+    fit_a = fit_a*pow(a, 0.06);
     fit_b = fit_b*pow(a, fit_d);
 
     return fit_A*(pow(sigma/fit_b,-fit_a)+1.0)*exp(-fit_c/sigma/sigma);
