@@ -277,8 +277,6 @@ void ccl_specs_dNdz_tomog(double z, int dNdz_type, double bin_zmin, double bin_z
         gsl_integration_cquad_workspace_free(workspace);	
 
 
-
-
 	// Now get the denominator, which normalizes dNdz over the photometric bin
 	workspace = gsl_integration_cquad_workspace_alloc (1000);
         F.function = ccl_specs_norm_integrand;
