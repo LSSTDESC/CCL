@@ -179,7 +179,7 @@ def check_lsst_specs(cosmo):
     z_arr = np.array(z_lst)
     
     # p(z) function for dNdz_tomog
-    def pz1(z_ph, z_s, args):
+    def pz1(z_ph, z_s, args, status):
         return np.exp(- (z_ph - z_s)**2. / 2.)
     
     # Lambda function p(z) function for dNdz_tomog

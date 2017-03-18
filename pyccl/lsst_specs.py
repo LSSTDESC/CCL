@@ -119,8 +119,10 @@ def dNdz_tomog(z, dNdz_type, zmin, zmax, pz_func):
         raise ValueError("'%s' not a valid dNdz_type." % dNdz_type)
     
     # Call dNdz tomography function
+    status = 0
     dNdz = lib.specs_dNdz_tomog_vec( dNdz_types[dNdz_type], zmin, zmax, 
-                                     pz_func.pz_func, z, z.size )
+                                     pz_func.pz_func, z, z.size, status)
+    check(status)
     return dNdz
 
 # Provide aliases for functions to retain consistency with C API

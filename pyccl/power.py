@@ -44,8 +44,7 @@ def sigmaR(cosmo, R):
 
     """
     return _vectorize_fn(lib.sigmaR, 
-                         lib.sigmaR_vec, cosmo, R,
-                         returns_status=False)
+                         lib.sigmaR_vec, cosmo, R)
 
 def sigma8(cosmo):
     """RMS variance in a top-hat sphere of radius 8 Mpc.
