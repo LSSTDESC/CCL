@@ -604,7 +604,7 @@ static void ccl_cosmology_compute_power_eh(ccl_cosmology * cosmo, int * status)
 
   // After this loop x will contain log(k)
   for (int i=0; i<nk; i++){
-    y[i] = log(eh_power(&cosmo->params,eh,x[i],0));
+    y[i] = log(eh_power(&cosmo->params,eh,x[i],1));
     x[i] = log(x[i]);
   }
 
