@@ -79,7 +79,7 @@ TASK: For a given tracer, get the correlation function
 INPUT: type of tracer, number of theta values to evaluate = NL, theta vector
  */
 int ccl_tracer_corr(ccl_cosmology *cosmo, int n_theta, double **theta, CCL_ClTracer *ct1, CCL_ClTracer *ct2, int i_bessel,double **corr_func){
-
+  /* do we need to input i_bessel? could just be set here based on tracer..*/
   if((ct1->tracer_type==CL_TRACER_WL) && (ct2->tracer_type==CL_TRACER_WL)){
     if((i_bessel!=0) && (i_bessel!=4)) return 1;
   }
@@ -91,18 +91,15 @@ int ccl_tracer_corr(ccl_cosmology *cosmo, int n_theta, double **theta, CCL_ClTra
   }  
 
   double *l_arr,cl_arr[n_theta];
+  
+  
+    l_arr=ccl_log_spacing(L_MIN_INT,L_MAX_INT,n_theta);
+  //  l_arr=ccl_log_spacing(.01,1000000,n_theta); //this ell range lowers the ringing.. ccl_angular_cl seems to behave nicely also and sets values to 0 if ell is outside sensible range.
 
-  l_arr=ccl_log_spacing(L_MIN_INT,L_MAX_INT,n_theta);
-  //<<<<<<< HEAD
   int status=0;
   for(int i=0;i<n_theta;i+=1) {
     //Re-scaling the power-spectrum due to Bessel function missing factor
     cl_arr[i]=ccl_angular_cl(cosmo,l_arr[i],ct1,ct2,&status)*sqrt(l_arr[i]); 
-    /*=======
-  for(int i=0;i<n_theta;i+=1) {
-    //Re-scaling the power-spectrum due to Bessel function missing factor
-    cl_arr[i]=ccl_angular_cl(cosmo,l_arr[i],ct1,ct2)*sqrt(l_arr[i]); 
-    >>>>>>> 93c51f66c65d9e9b54639dbc10d9fa5f8ae61594*/
   }
 
   *theta=(double *)malloc(sizeof(double)*n_theta);
@@ -124,9 +121,6 @@ int ccl_tracer_corr(ccl_cosmology *cosmo, int n_theta, double **theta, CCL_ClTra
     {
       (*corr_func)[i]=M_PI*(*corr_func)[i]*sqrt(2.0*(*theta)[i]/M_PI); 
     }
-  
-
   return 0;
-
 }
 
