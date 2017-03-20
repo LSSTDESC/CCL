@@ -461,8 +461,8 @@ static eh_struct *eh_struct_new(ccl_parameters *params)
 
   double Req,Rd;
   //EH actually says 1100 instead of 1000...
-  Req=31.5*OBh2*1100/(eh->zeq*pow(th2p7,4));
-  Rd=31.5*OBh2*1100/(eh->zdrag*pow(th2p7,4));
+  Req=31.5*OBh2*1000./(eh->zeq*pow(th2p7,4));
+  Rd=31.5*OBh2*1000./(eh->zdrag*pow(th2p7,4));
   eh->rsound=2/(3*eh->keq)*sqrt(6/Req)*
     log((sqrt(1+Rd)+sqrt(Rd+Req))/(1+sqrt(Req)));
 
@@ -508,7 +508,7 @@ static double tkEH_c(eh_struct *eh,double k)
 {
   //////
   // Eisenstein & Hu's Tk_c
-  double f=1/(1+pow(k*eh->rsound*0.185185185185,4));
+  double f=1/(1+pow(k*eh->rsound/5.4,4));
   return f*tkEH_0(eh->keq,k,1,eh->betac)+
     (1-f)*tkEH_0(eh->keq,k,eh->alphac,eh->betac);
 }
@@ -534,11 +534,11 @@ static double tkEH_b(eh_struct *eh,double k)
 
   if(k==0) x_bessel=0;
   else {
-    x_bessel=x*pow(1+eh->bnode*eh->bnode*eh->bnode
-		   /(x*x*x),-0.3333333333333333333);
+    x_bessel=x*pow(1+eh->bnode*eh->bnode*eh->bnode/(x*x*x),
+		   -0.3333333333333333333);
   }
 
-  part1=tkEH_0(eh->keq,k,1,1)/(1+0.03698224852*x*x);
+  part1=tkEH_0(eh->keq,k,1,1)/(1+pow(x/5.2,2));
 
   if(k==0) part2=0;
   else part2=eh->alphab/(1+pow(eh->betab/x,3))*
