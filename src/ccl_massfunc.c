@@ -20,7 +20,6 @@ void ccl_cosmology_compute_hmfparams(ccl_cosmology * cosmo, int *status)
   // declare parameter splines on case-by-case basis
   switch(cosmo->config.mass_function_method){
     case ccl_tinker10:{
-      printf("");
       double delta[9] = {200.0, 300.0, 400.0, 600.0, 800.0, 1200.0, 1600.0, 2400.0, 3200.0};
       double lgdelta[9];
       double alpha[9] = {0.368, 0.363, 0.385, 0.389, 0.393, 0.365, 0.379, 0.355, 0.327};
@@ -101,7 +100,6 @@ void ccl_cosmology_compute_hmfparams(ccl_cosmology * cosmo, int *status)
       break;
     }
     case ccl_tinker:{
-      printf("");
       double delta[9] = {200.0, 300.0, 400.0, 600.0, 800.0, 1200.0, 1600.0, 2400.0, 3200.0};
       double lgdelta[9];
       double alpha[9] = {0.186, 0.200, 0.212, 0.218, 0.248, 0.255, 0.260, 0.260, 0.260};
