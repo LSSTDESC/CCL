@@ -267,6 +267,18 @@ void ccl_data_free(ccl_data * data)
     gsl_spline_free(data->p_lin);
   if(data->p_nl!=NULL)
     gsl_spline2d_free(data->p_nl);
+  if(data->alphahmf!=NULL)
+    gsl_spline_free(data->alphahmf)
+  if(data->betahmf!=NULL)
+    gsl_spline_free(data->betahmf)
+  if(data->gammahmf!=NULL)
+    gsl_spline_free(data->gammahmf)
+  if(data->phihmf!=NULL)
+    gsl_spline_free(data->phihmf)
+  if(data->etahmf!=NULL)
+    gsl_spline_free(data->etahmf)
+  if(data->accelerator_d!=NULL)
+    gsl_spline_free(data->accelerator_d);
 }
 
 
