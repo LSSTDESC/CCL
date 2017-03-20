@@ -139,6 +139,7 @@ def check_massfunc(cosmo):
     mhalo_scl = 1e13
     mhalo_lst = [1e11, 1e12, 1e13, 1e14, 1e15, 1e16]
     mhalo_arr = np.array([1e11, 1e12, 1e13, 1e14, 1e15, 1e16])
+    odelta = 200.
     
     # massfunc
     assert_( all_finite(ccl.massfunc(cosmo, mhalo_scl, a, odelta)) )
