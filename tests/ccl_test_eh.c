@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <math.h>
 
-#define EH_TOLERANCE 1.0E4
+#define EH_TOLERANCE 1.0E-4
 
 CTEST_DATA(eh) {
   double Omega_c;
@@ -63,13 +63,12 @@ static void compare_eh(int i_model,struct eh_data * data)
 						data->Omega_k[i_model-1],data->Omega_n,
 						data->w_0[i_model-1],data->w_a[i_model-1],
 						data->h,data->A_s,data->n_s,-1,NULL,NULL);
-  params.Omega_g=0;
   params.sigma_8=data->sigma_8;
   params.Omega_g=0;
   ccl_cosmology * cosmo = ccl_cosmology_create(params, config);
   ASSERT_NOT_NULL(cosmo);
   
-  sprintf(fname,"./tests/benchmark/model%d_pk_eh.txt",i_model);
+  sprintf(fname,"./tests/benchmark/model%d_pk_eh_david.txt",i_model);
   f=fopen(fname,"r");
   if(f==NULL) {
     fprintf(stderr,"Error opening file %s\n",fname);
@@ -87,7 +86,7 @@ static void compare_eh(int i_model,struct eh_data * data)
       exit(1);
     }
     k=k_h*data->h;
-    for(j=0;j<2;j++) {
+    for(j=0;j<1;j++) {
       double pk_h,pk_bench,pk_ccl,err;
       double z=2*j+0.;
       int status=0;
@@ -98,7 +97,6 @@ static void compare_eh(int i_model,struct eh_data * data)
       }
       pk_bench=pk_h/pow(data->h,3);
       pk_ccl=ccl_linear_matter_power(cosmo,1./(1+z),k,&status);
-      printf("%lE %lE %lE \n",k_h,z,pk_ccl/pk_bench-1);
       if (status) printf("%s\n",cosmo->status_message);
       err=fabs(pk_ccl/pk_bench-1);
       ASSERT_DBL_NEAR_TOL(err,0.,EH_TOLERANCE);

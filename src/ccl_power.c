@@ -450,24 +450,21 @@ static eh_struct *eh_struct_new(ccl_parameters *params)
   OBh2=params->Omega_b*params->h*params->h;
   th2p7=params->T_CMB/2.7;
   eh->th2p7=th2p7;
-  eh->zeq=25000*OMh2/pow(th2p7,4);
+  eh->zeq=2.5E4*OMh2/pow(th2p7,4);
   eh->keq=0.0746*OMh2/(params->h*th2p7*th2p7);
 
   double b1,b2;
   b1=0.313*pow(OMh2,-0.419)*(1+0.607*pow(OMh2,0.674));
   b2=0.238*pow(OMh2,0.223);
-  eh->zdrag=1291*pow(OMh2,0.251)*(1+b1*pow(OBh2,b2))/
-    (1+0.659*pow(OMh2,0.828));
+  eh->zdrag=1291*pow(OMh2,0.251)*(1+b1*pow(OBh2,b2))/(1+0.659*pow(OMh2,0.828));
 
   double Req,Rd;
-  //EH actually says 1100 instead of 1000...
   Req=31.5*OBh2*1000./(eh->zeq*pow(th2p7,4));
   Rd=31.5*OBh2*1000./(eh->zdrag*pow(th2p7,4));
   eh->rsound=2/(3*eh->keq)*sqrt(6/Req)*
     log((sqrt(1+Rd)+sqrt(Rd+Req))/(1+sqrt(Req)));
-
-  eh->kSilk=1.6*pow(OBh2,0.52)*pow(OMh2,0.73)*
-    (1+pow(10.4*OMh2,-0.95))/params->h;
+  
+  eh->kSilk=1.6*pow(OBh2,0.52)*pow(OMh2,0.73)*(1+pow(10.4*OMh2,-0.95))/params->h;
 
   double a1,a2,b_frac;
   a1=pow(46.9*OMh2,0.670)*(1+pow(32.1*OMh2,-0.532));
