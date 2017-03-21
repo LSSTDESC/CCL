@@ -381,6 +381,7 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int * statu
       *status = CCL_ERROR_CLASS;
       strcpy(cosmo->status_message ,"ccl_power.c: ccl_cosmology_compute_power_class(): Error computing CLASS power spectrum\n");
       ccl_free_class_structs(cosmo, &ba,&th,&pt,&tr,&pm,&sp,&nl,&le,status);
+      return;
     }
     gsl_spline2d * log_power = gsl_spline2d_alloc(PLIN_SPLINE_TYPE, nk,na);
     int pwstatus = gsl_spline2d_init(log_power, x, z, y2d_lin,nk,na);
@@ -415,6 +416,7 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int * statu
 	*status = CCL_ERROR_CLASS;
 	strcpy(cosmo->status_message ,"ccl_power.c: ccl_cosmology_compute_power_class(): Error computing CLASS power spectrum\n");
 	ccl_free_class_structs(cosmo, &ba,&th,&pt,&tr,&pm,&sp,&nl,&le,status);
+	return;
       }
 
       gsl_spline2d * log_power_nl = gsl_spline2d_alloc(PNL_SPLINE_TYPE, nk,na);
@@ -440,6 +442,7 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int * statu
     free(y2d_lin);
     free(z);
   }
+
 }
 
 /*------ ROUTINE: tsqr_BBKS ----- 
