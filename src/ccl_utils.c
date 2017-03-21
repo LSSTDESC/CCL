@@ -20,6 +20,8 @@ double * ccl_linear_spacing(double xmin, double xmax, int N){
     for (int i=0; i<N; i++){
         x[i] = xmin + dx*i;
     }
+    x[0]=xmin; //Make sure roundoff errors don't spoil edges
+    x[N-1]=xmax; //Make sure roundoff errors don't spoil edges
 
     return x;
 }
@@ -58,6 +60,8 @@ double * ccl_log_spacing(double xmin, double xmax, int N){
     for (int i=0; i<N; i++){
         x[i] = exp(log_xmin + dlog_x*i);
     }
+    x[0]=xmin; //Make sure roundoff errors don't spoil edges
+    x[N-1]=xmax; //Make sure roundoff errors don't spoil edges
 
     return x;
 }
