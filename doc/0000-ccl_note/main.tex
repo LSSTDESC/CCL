@@ -131,9 +131,9 @@ The routines described in this subsection are implemented in {\tt ccl\_backgroun
 
 The Hubble parameter is calculated via
 %
-\begin{equation}
-\frac{H(a)}{H_0} = a^{-3/2}\sqrt{\Omega_m+\Omega_\Lambda a^{-3(w_0+w_a)}
-    \exp[3 w_a (a-1)]+\Omega_K a +\Omega_g a^{-1}}.
+\begin{equation}\label{eq:Ha}
+\frac{H(a)}{H_0} = a^{-3/2}\sqrt{\Omega_{M,0}+\Omega_{\Lambda,0} a^{-3(w_0+w_a)}
+    \exp[3 w_a (a-1)]+\Omega_{K,0} a +\Omega_{g,0} a^{-1}}.
 \end{equation}
 
 The radial comoving distance is calculated via a numerical integral
@@ -153,6 +153,19 @@ $d_L=r(a)/a$.
 
 CCL also contains capability to compute $a(\chi)$ (i.e. the inverse of $\chi(a)$).
 
+
+\subsection{Density parameter functions}
+
+The routines described in this subsection are implemented in {\tt ccl\_background.c}.
+
+The density parameter functions $\Omega_X(a)$ are calculated for four components:
+\begin{itemize}
+\item matter density parameter $\Omega_M(a) = \Omega_{M,0} H_0^2 / (a^3 H^2(a) )$.
+\item dark energy density parameter $\Omega_\Lambda(a) = \Omega_{\Lambda,0} H_0^2 / H^2(a)$.
+\item radiation density parameter $\Omega_g(a) = \Omega_{g,0} H_0^2 / (a^4 H^2(a) )$.
+\item curvature density parameter $\Omega_K(a) = \Omega_{K,0} H_0^2 / (a^2 H^2(a) )$.
+\end{itemize}
+using the Hubble parameter defined equation~\ref{eq:Ha}.
 
 \subsection{Growth function}
 \label{sec:growth}
@@ -395,13 +408,13 @@ With the exception of the Tinker 2010 model, we attempt to keep a common form to
 \begin{equation}
 f(\sigma)=A\Big[\Big(\frac{\sigma}{b}\Big)^{-a}+1\Big]e^{-c/{\sigma}^2},
 \end{equation}
-where $A$, $a$, $b$, and $c$ are fitting parameters that have additional redshift scaling and $\sigma$ is the RMS variance of the density field smoothed on some scale $M$ at some redshift $z$. This basic form is modified for the \citet{Angulo2012} formulation. The resulting form is
+where $A$, $a$, $b$, and $c$ are fitting parameters that have additional redshift scaling and $\sigma$ is the RMS variance of the density field smoothed on some scale $M$ at some scale factor $a$. This basic form is modified for the \citet{Angulo2012} formulation. The resulting form is
 \begin{equation}
 f(\sigma)=A\Big[\Big(\frac{b}{\sigma}+1\Big)^{-a}\Big]e^{-c/{\sigma}^2},
 \end{equation}
-where the only change is in the formulation of the second term. Note that the fitting parameters in the \citet{Angulo2012} formulation do not contain any redshift dependency and the use of it is primarily for testing and benchmark purposes.
+where the only change is in the formulation of the second term. Note that the fitting parameters in the \citet{Angulo2012} formulation do not contain any redshift dependence and the use of it is primarily for testing and benchmark purposes.
 
-Each call to the halo mass function requires an assumed model (defined within the {\tt ccl\_configuration} structure contained in {\tt ccl\_cosmology}), in addition to a value of the halo mass and redshift for which to evaluate the halo mass function. The currently implemented models can be called with the tags {\tt config.mass\_function\_method = ccl\_tinker}, {\tt ccl\_tinker10}, {\tt ccl\_angulo}, or {\tt ccl\_watson}. It returns the number density of halos in logarithmic mass bins, in the form $dn/d\log_{10}{M}$, where $n$ is the number density of halos of a given mass and $M$ is the input halo mass.
+Each call to the halo mass function requires an assumed model (defined within the {\tt ccl\_configuration} structure contained in {\tt ccl\_cosmology}), in addition to a value of the halo mass and scale factor for which to evaluate the halo mass function. The currently implemented models can be called with the tags {\tt config.mass\_function\_method = ccl\_tinker}, {\tt ccl\_tinker10}, {\tt ccl\_angulo}, or {\tt ccl\_watson}. It returns the number density of halos in logarithmic mass bins, in the form $dn/d\log_{10}{M}$, where $n$ is the number density of halos of a given mass and $M$ is the input halo mass.
 
 The halo mass $M$ is related to $\sigma$ by first computing the radius $R$ that would enclose a mass $M$ in a homogeneous Universe at $z=0$:
 \begin{equation}

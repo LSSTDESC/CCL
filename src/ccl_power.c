@@ -27,49 +27,66 @@ static void ccl_free_class_structs(
                struct spectra *sp,
                struct nonlinear *nl,
                struct lensing *le,
+	       int *init_arr,
 	       int * status){
-  if (spectra_free(sp) == _FAILURE_) {
-    *status = CCL_ERROR_CLASS;
-    sprintf(cosmo->status_message ,"ccl_power.c: ccl_free_class_structs(): Error freeing CLASS spectra:%s\n",sp->error_message);
-    return;
-  }
-  
-  if (transfer_free(tr) == _FAILURE_) {
-    *status = CCL_ERROR_CLASS;
-    sprintf(cosmo->status_message ,"ccl_power.c: ccl_free_class_structs(): Error freeing CLASS transfer:%s\n",tr->error_message);
-    return;
-  }
-
-  if (nonlinear_free(nl) == _FAILURE_) {
-    *status = CCL_ERROR_CLASS;
-    sprintf(cosmo->status_message ,"ccl_power.c: ccl_free_class_structs(): Error freeing CLASS nonlinear:%s\n",nl->error_message);
-    return;
-  }
-  
-  if (primordial_free(pm) == _FAILURE_) {
-    *status = CCL_ERROR_CLASS;
-    sprintf(cosmo->status_message ,"ccl_power.c: ccl_free_class_structs(): Error freeing CLASS pm:%s\n",pm->error_message);
-    return;
-  }
-  
-  if (perturb_free(pt) == _FAILURE_) {
+  int i_init=6;
+  if(init_arr[i_init--]) {
+    if (spectra_free(sp) == _FAILURE_) {
       *status = CCL_ERROR_CLASS;
-    sprintf(cosmo->status_message ,"ccl_power.c: ccl_free_class_structs(): Error freeing CLASS pt:%s\n",pt->error_message);
-    return;
+      sprintf(cosmo->status_message ,"ccl_power.c: ccl_free_class_structs(): Error freeing CLASS spectra:%s\n",sp->error_message);
+      return;
+    }
   }
   
-  if (thermodynamics_free(th) == _FAILURE_) {
-    *status = CCL_ERROR_CLASS;
-    sprintf(cosmo->status_message ,"ccl_power.c: ccl_free_class_structs(): Error freeing CLASS thermo:%s\n",th->error_message);
-    return;
+  if(init_arr[i_init--]) {
+    if (transfer_free(tr) == _FAILURE_) {
+      *status = CCL_ERROR_CLASS;
+      sprintf(cosmo->status_message ,"ccl_power.c: ccl_free_class_structs(): Error freeing CLASS transfer:%s\n",tr->error_message);
+      return;
+    }
   }
 
-  if (background_free(ba) == _FAILURE_) {
-    *status = CCL_ERROR_CLASS;
-    sprintf(cosmo->status_message ,"ccl_power.c: ccl_free_class_structs(): Error freeing CLASS bg:%s\n",ba->error_message);
-    return;
+  if(init_arr[i_init--]) {
+    if (nonlinear_free(nl) == _FAILURE_) {
+      *status = CCL_ERROR_CLASS;
+      sprintf(cosmo->status_message ,"ccl_power.c: ccl_free_class_structs(): Error freeing CLASS nonlinear:%s\n",nl->error_message);
+      return;
+    }
+  }
+  
+  if(init_arr[i_init--]) {
+    if (primordial_free(pm) == _FAILURE_) {
+      *status = CCL_ERROR_CLASS;
+      sprintf(cosmo->status_message ,"ccl_power.c: ccl_free_class_structs(): Error freeing CLASS pm:%s\n",pm->error_message);
+      return;
+    }
+  }
+  
+  if(init_arr[i_init--]) {
+    if (perturb_free(pt) == _FAILURE_) {
+      *status = CCL_ERROR_CLASS;
+      sprintf(cosmo->status_message ,"ccl_power.c: ccl_free_class_structs(): Error freeing CLASS pt:%s\n",pt->error_message);
+      return;
+    }
+  }
+  
+  if(init_arr[i_init--]) {
+    if (thermodynamics_free(th) == _FAILURE_) {
+      *status = CCL_ERROR_CLASS;
+      sprintf(cosmo->status_message ,"ccl_power.c: ccl_free_class_structs(): Error freeing CLASS thermo:%s\n",th->error_message);
+      return;
+    }
+  }
+
+  if(init_arr[i_init--]) {
+    if (background_free(ba) == _FAILURE_) {
+      *status = CCL_ERROR_CLASS;
+      sprintf(cosmo->status_message ,"ccl_power.c: ccl_free_class_structs(): Error freeing CLASS bg:%s\n",ba->error_message);
+      return;
+    }
   }
 }
+
 static void ccl_class_preinit(
                struct background *ba,
                struct thermo *th,
@@ -149,8 +166,10 @@ static void ccl_run_class(
                struct nonlinear* nl,
                struct lensing* le,
                struct output* op, 
+	       int *init_arr,
 	       int * status){
   ErrorMsg errmsg;            // for error messages 
+  int i_init=0;
   ccl_class_preinit(ba,th,pt,tr,pm,sp,nl,le);
   
   if(input_init(fc,pr,ba,th,pt,tr,pm,sp,nl,le,op,errmsg) == _FAILURE_) {
@@ -163,31 +182,37 @@ static void ccl_run_class(
     sprintf(cosmo->status_message ,"ccl_power.c: ccl_cosmology_compute_power_class(): Error running CLASS background:%s\n",ba->error_message);
     return;
   }
+  init_arr[i_init++]=1;
   if (thermodynamics_init(pr,ba,th) == _FAILURE_) {
     *status = CCL_ERROR_CLASS;
     sprintf(cosmo->status_message ,"ccl_power.c: ccl_cosmology_compute_power_class(): Error running CLASS thermodynamics:%s\n",th->error_message);
     return;
   }
+  init_arr[i_init++]=1;
   if (perturb_init(pr,ba,th,pt) == _FAILURE_) {
     *status = CCL_ERROR_CLASS;
     sprintf(cosmo->status_message ,"ccl_power.c: ccl_cosmology_compute_power_class(): Error running CLASS pertubations:%s\n",pt->error_message);
     return;
   }
+  init_arr[i_init++]=1;
   if (primordial_init(pr,pt,pm) == _FAILURE_) {
     *status = CCL_ERROR_CLASS;
     sprintf(cosmo->status_message ,"ccl_power.c: ccl_cosmology_compute_power_class(): Error running CLASS primordial:%s\n",pm->error_message);
     return;
   }
+  init_arr[i_init++]=1;
   if (nonlinear_init(pr,ba,th,pt,pm,nl) == _FAILURE_) {
     *status = CCL_ERROR_CLASS;
     sprintf(cosmo->status_message ,"ccl_power.c: ccl_cosmology_compute_power_class(): Error running CLASS nonlinear:%s\n",nl->error_message);
     return;
   }
+  init_arr[i_init++]=1;
   if (transfer_init(pr,ba,th,pt,nl,tr) == _FAILURE_) {
     *status = CCL_ERROR_CLASS;
     sprintf(cosmo->status_message ,"ccl_power.c: ccl_cosmology_compute_power_class(): Error running CLASS transfer:%s\n",tr->error_message);
     return;
   }
+  init_arr[i_init++]=1;
   if (spectra_init(pr,ba,pt,pm,nl,tr,sp) == _FAILURE_) {
     *status = CCL_ERROR_CLASS;
     sprintf(cosmo->status_message ,"ccl_power.c: ccl_cosmology_compute_power_class(): Error running CLASS spectra:%s\n",sp->error_message);
@@ -212,6 +237,8 @@ static double ccl_get_class_As(ccl_cosmology *cosmo, struct file_content *fc, in
   double k_max_old = 0.;
   int position_kmax =2;
   double A_s_guess;
+  int init_arr[7]={0,0,0,0,0,0,0};
+
   if (strcmp(fc->name[position_kmax],"P_k_max_1/Mpc")){
     k_max_old = strtof(fc->value[position_kmax],NULL);
     sprintf(fc->value[position_kmax],"%e",10.);  
@@ -219,10 +246,10 @@ static double ccl_get_class_As(ccl_cosmology *cosmo, struct file_content *fc, in
   A_s_guess = 2.43e-9/0.87659*sigma8;
   sprintf(fc->value[position_As],"%e",A_s_guess);
 
-  ccl_run_class(cosmo, fc,&pr,&ba,&th,&pt,&tr,&pm,&sp,&nl,&le,&op,status);
+  ccl_run_class(cosmo, fc,&pr,&ba,&th,&pt,&tr,&pm,&sp,&nl,&le,&op,init_arr,status);
 //  printf("ran shooting for sigma_8 method\n Target sigma_8 = %e;\nGuessed A_s = %e -> sigma_8 = %e\nuse A_s = %e",sigma8,A_s_guess,sp.sigma8,A_s_guess*sigma8/sp.sigma8);
   if (cosmo->status != CCL_ERROR_CLASS) A_s_guess*=pow(sigma8/sp.sigma8,2.);
-  ccl_free_class_structs(cosmo, &ba,&th,&pt,&tr,&pm,&sp,&nl,&le, status);
+  ccl_free_class_structs(cosmo, &ba,&th,&pt,&tr,&pm,&sp,&nl,&le,init_arr,status);
 
   if (k_max_old >0){
     sprintf(fc->value[position_kmax],"%e",k_max_old);      
@@ -341,6 +368,7 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int * statu
   // CLASS configuration parameters will be passed through this structure,
   // to avoid writing and reading .ini files for every call
   int parser_length = 20;
+  int init_arr[7]={0,0,0,0,0,0,0};
   if (parser_init(&fc,parser_length,"none",errmsg) == _FAILURE_){
     *status = CCL_ERROR_CLASS;
     sprintf(cosmo->status_message ,"ccl_power.c: ccl_cosmology_compute_power_class(): parser init error:%s\n",errmsg);
@@ -348,17 +376,19 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int * statu
   }
 
   ccl_fill_class_parameters(cosmo,&fc,parser_length, status);
-  
-  if (*status != CCL_ERROR_CLASS) ccl_run_class(cosmo, &fc,&pr,&ba,&th,&pt,&tr,&pm,&sp,&nl,&le,&op, status);
+
+  if (*status != CCL_ERROR_CLASS)
+    ccl_run_class(cosmo, &fc,&pr,&ba,&th,&pt,&tr,&pm,&sp,&nl,&le,&op,init_arr,status);
+
   if (*status == CCL_ERROR_CLASS){
     //printed error message while running CLASS
-    ccl_free_class_structs(cosmo, &ba,&th,&pt,&tr,&pm,&sp,&nl,&le, status);
+    ccl_free_class_structs(cosmo, &ba,&th,&pt,&tr,&pm,&sp,&nl,&le,init_arr,status);
     return;
   }
   if (parser_free(&fc)== _FAILURE_) {
     *status = CCL_ERROR_CLASS;
     strcpy(cosmo->status_message ,"ccl_power.c: ccl_cosmology_compute_power_class(): Error freeing CLASS parser\n");
-    ccl_free_class_structs(cosmo, &ba,&th,&pt,&tr,&pm,&sp,&nl,&le, status);
+    ccl_free_class_structs(cosmo, &ba,&th,&pt,&tr,&pm,&sp,&nl,&le,init_arr,status);
     return;
   }
  
@@ -394,7 +424,7 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int * statu
     int classstatus = gsl_spline_init(log_power_lin, x, y, nk);
     if (classstatus){
       gsl_spline_free(log_power_lin);
-      ccl_free_class_structs(cosmo, &ba,&th,&pt,&tr,&pm,&sp,&nl,&le, status);
+      ccl_free_class_structs(cosmo, &ba,&th,&pt,&tr,&pm,&sp,&nl,&le,init_arr,status);
       *status = CCL_ERROR_SPLINE;
       strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_class(): Error creating log_power_lin spline\n");
       return;
@@ -431,16 +461,16 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int * statu
         free(y);
         free(z);
         gsl_spline2d_free(log_power_nl);
-        ccl_free_class_structs(cosmo, &ba,&th,&pt,&tr,&pm,&sp,&nl,&le,status);
+        ccl_free_class_structs(cosmo, &ba,&th,&pt,&tr,&pm,&sp,&nl,&le,init_arr,status);
         strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_class(): Error creating log_power_nl spline\n");
         return;
       }
       else
         cosmo->data.p_nl = log_power_nl;
     }
-
+      
   }
-  ccl_free_class_structs(cosmo, &ba,&th,&pt,&tr,&pm,&sp,&nl,&le, status);
+  ccl_free_class_structs(cosmo, &ba,&th,&pt,&tr,&pm,&sp,&nl,&le,init_arr,status);
   free(x);
   free(y);
   free(z);
@@ -561,7 +591,10 @@ static void ccl_cosmology_compute_power_bbks(ccl_cosmology * cosmo, int * status
 
 
     if (cosmo->config.matter_power_spectrum_method != ccl_linear){
-      printf("WARNING: BBKS + config.matter_power_spectrum_method = %d not yet supported\n continuing with linear power spectrum\n",cosmo->config.matter_power_spectrum_method);
+      sprintf(cosmo->status_message,
+	      "WARNING: BBKS + config.matter_power_spectrum_method = %d not yet supported\n"
+	      "continuing with linear power spectrum\n",
+	      cosmo->config.matter_power_spectrum_method);
     }
 
     gsl_spline2d * log_power_nl = gsl_spline2d_alloc(PNL_SPLINE_TYPE, nk,na);
