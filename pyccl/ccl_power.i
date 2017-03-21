@@ -28,7 +28,7 @@ void linear_matter_power_vec(
 {
     assert(nout == nk);
     for(int i=0; i < nk; i++){
-        output[i] = ccl_linear_matter_power(cosmo, a, k[i], status);
+      output[i] = ccl_linear_matter_power(cosmo, k[i], a, status);
     }
 }
 
@@ -41,7 +41,7 @@ void nonlin_matter_power_vec(
 {
     assert(nout == nk);
     for(int i=0; i < nk; i++){
-        output[i] = ccl_nonlin_matter_power(cosmo, a, k[i], status);
+      output[i] = ccl_nonlin_matter_power(cosmo, k[i], a, status);
     }
 }
 

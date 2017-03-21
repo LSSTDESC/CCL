@@ -79,7 +79,7 @@ typedef struct ccl_data{
   gsl_spline * etahmf;
 
   // These are all functions of the wavenumber k and the scale factor a.
-  gsl_spline * p_lin;
+  gsl_spline2d * p_lin;
   gsl_spline2d * p_nl;
 
 } ccl_data;

@@ -206,61 +206,40 @@ Secondly, there is the option to call the {\tt CLASS} software \citep{class} wit
 
 The computation of the nonlinear power spectrum from {\tt CLASS} can be significantly sped up by extrapolating in the range $k>${\tt K\_MAX\_SPLINE}. In this section, we describe the implementation of the extrapolation and the accuracy attained.
 
-The introduction of the parameter {\tt K\_MAX\_SPLINE} allows us to spline the nonlinear matter power spectrum within the {\tt cosmo} structure up to that value of $k$ (in units of $1/$Mpc). A separate {\tt K\_MAX} parameter sets the limit for evaluation of the matter power spectrum. The range between {\tt K\_MAX\_SPLINE}$<k<${\tt K\_MAX} is evaluated by performing a second order Taylor expansion within the routine {\tt ccl\_nonlin\_matter\_power}.
+The introduction of the parameter {\tt K\_MAX\_SPLINE} allows us to spline the nonlinear matter power spectrum within the {\tt cosmo} structure up to that value of $k$ (in units of $1/$Mpc). A separate {\tt K\_MAX} parameter sets the limit for evaluation of the matter power spectrum. The range between {\tt K\_MAX\_SPLINE}$<k<${\tt K\_MAX} is evaluated by performing a second order Taylor expansion within the static routine {\tt ccl\_power\_extrapol\_highk}.
 
-First, we compute the first and second derivative of the $\ln P(k,z)$ at $k_0={\rm \tt K\_MAX}-2\Delta\ln k$ by computing the numerical derivatives by finite differences. We define the following $k$ values:
-%
-\begin{eqnarray}
-k_0^{+}&=&k_0+\Delta\ln k,\\
-k_0^{++}&=&k_0+2\Delta\ln k,\\
-k_0^{-}&=&k_0-\Delta\ln k,\\
-k_0^{--}&=&k_0-2\Delta\ln k,
-\end{eqnarray}
-%
-where we evaluate the power spectra for computing the suitable numerical derivatives as
-%
-\begin{eqnarray}
-  \frac{d\ln P}{d\ln k}(k_0,z)&=& \frac{-\ln P(k_0^{++},z)+8\ln P(k_0^{+},z)-8\ln P(k_0^{-},z)+\ln P(k_0^{--},z)}{2\Delta \ln k},\\
-  \frac{d^2\ln P}{d\ln k^2}(k_0,z)&=& \frac{\ln P(k_0^{+},z)-2\ln P(k_0)+\ln P(k_0^{-},z)}{\Delta\ln k^2}.
-  \label{eq:numderiv_dlnP}
-\end{eqnarray}
-%
-We then apply a second order Taylor expansion to extrapolate the matter power spectrum to $k>${\tt K\_MAX\_SPLINE}. The Taylor expansion gives
+First, we compute the first and second derivative of the $\ln P(k,z)$ at $k_0={\rm \tt K\_MAX}-2\Delta\ln k$ by computing the numerical derivatives by finite differences using GSL. We then apply a second order Taylor expansion to extrapolate the matter power spectrum to $k>${\tt K\_MAX\_SPLINE}. The Taylor expansion gives
 %
 \begin{equation}
-  \ln P(k,z) \simeq \ln P(k_0,z) + \frac{d\ln P}{d\ln k}(\ln k_0) (\ln k-\ln k_0)  + \frac{1}{2}  \frac{d^2\ln P}{d\ln k^2}(\ln k_0,z) (\ln k-\ln k_0)^2.
+  \ln P(k,z) \simeq \ln P(k_0,z) + \frac{d\ln P}{d\ln k}(\ln k_0,z) (\ln k-\ln k_0)  + \frac{1}{2}  \frac{d^2\ln P}{d\ln k^2}(\ln k_0,z) (\ln k-\ln k_0)^2.
   \label{eq:NLPSTaylor}
 \end{equation}
 
-The results of this approximation are shown in Figure \ref{fig:NLextrapol_z0}. We compare the nonlinear matter power spectrum at $z=0$ computed with the previously described approximation, to the matter power spectrum obtained by directly evaluating {\tt CLASS} at the desired $k$ value. Our fiducial choice for $\Delta \ln k$ is $10^{-4}$, beyond which the case with {\tt K\_MAX\_SPLINE}$=50$/Mpc seems to have converged. Our results show that the approximation is good to within $5\%$ up to $k=10^4/$Mpc if {\tt K\_MAX\_SPLINE}$=50$/Mpc; and to within $0.1\%$ up to $k=10^4/$Mpc if {\tt K\_MAX\_SPLINE}$=500$/Mpc. The lower {\tt K\_MAX\_SPLINE} is, the faster {\tt CCL} will run. Figure \ref{fig:NLextrapol_z3} shows similar results at $z=3$. In this case, {\tt K\_MAX\_SPLINE}$=500$/Mpc is required to maintain good accuracy. To span the approximate redshift range of LSST, we thus settle on a fiducial value of {\tt K\_MAX\_SPLINE}$=500$/Mpc. The optimum choice of {\tt K\_MAX\_SPLINE} is left to the user for their particular application. If needed, the $\Delta\ln k$ parameter chan be changed within {\tt ccl\_power.c}.
+The results of this approximation are shown in Figure \ref{fig:NLextrapol} for redshifts $z=0$ and $z=3$. We compare the nonlinear matter power spectrum at $z=0$ computed with the previously described approximation, to the matter power spectrum obtained by directly evaluating {\tt CLASS} at the desired $k$ value. (The benchmark in reality uses a value of {\tt K\_MAX\_SPLINE}$=10^3$/Mpc, well beyond our range of application.) We find that for typical values of  $\Delta \ln k$ is $10^{-2}$ and {\tt K\_MAX\_SPLINE}$=50$/Mpc has converged to an accuracy that surpases the expected impact of baryonic effects on the matter power spectrum at $k>10/$Mpc. (For a plot showing the impact of baryons on the matter power spectrum, see \citealt{Schneider15}.) The lower {\tt K\_MAX\_SPLINE} is, the faster {\tt CCL} will run. The optimum choice of {\tt K\_MAX\_SPLINE} is left to the user for their particular application. 
 
 %------------------------
-\begin{figure}
+\begin{figure*}
 \centering
-\includegraphics[width=0.8\textwidth]{note_KMAX_extrapol.eps}
-\caption{The relative error produced by splining the nonlinear matter power spectrum up to {\tt K\_MAX\_SPLINE} and extrapolating beyond this value with a second order Taylor expansion the natural logarithm of the matter power spectrum.}
-\label{fig:NLextrapol_z0}
-\end{figure}
-\begin{figure}
-\centering
-\includegraphics[width=0.8\textwidth]{note_KMAX_extrapol_z3.eps}
-\caption{Similar to Figure \ref{fig:NLextrapol_z0} but at $z=3$.}
-\label{fig:NLextrapol_z3}
-\end{figure}
+\includegraphics[width=0.45\textwidth]{PS_converge_nonlin.eps}
+\includegraphics[width=0.45\textwidth]{PS_converge_nonlin_z3.eps}
+\caption{The relative error produced by splining the nonlinear matter power spectrum up to {\tt K\_MAX\_SPLINE} and extrapolating beyond this value with a second order Taylor expansion the natural logarithm of the matter power spectrum. The left panel shows the results at $z=0$. The right panel shows the results at $z=3$. The fiducial parameters adopted are those corresponding to the magenta curve.}
+\label{fig:NLextrapol}
+\end{figure*}
 %------------------------
 
 \subsubsection{Linear extrapolation}
 \label{sec:Lextrapol}
 
-With the implementation described in the previous section, the power spectrum splines are initialized up to {\tt K\_MAX\_SPLINE}. This is also true for the linear matter power spectrum, which is used within {\tt CCL} in particular to obtain $\sigma_8$. We have tested here how the procedure described in the previous section affects the convergence of the linear matter power spectrum. We compare the fiducial {\tt CCL} output to the case where we set {\tt K\_MAX\_SPLINE}$=10^4/Mpc$. The result is shown in Figure \ref{fig:plinconv}. Although there is a significant difference ($\gtrsim 10\%$) between the linear power spectra at large $k$, we have confirmed that the difference in $\sigma_8$ is negligible. Nevertheless, for other applications that use the linear power spectrum, the user might need to increase the value of {\tt K\_MAX\_SPLINE}.
+With the implementation described in the previous section, the power spectrum splines are initialized up to {\tt K\_MAX\_SPLINE}. This is also true for the linear matter power spectrum, which is used within {\tt CCL} in particular to obtain $\sigma_8$. We have tested here how the procedure described in the previous section affects the convergence of the linear matter power spectrum. We compare the fiducial {\tt CCL} output to the case where we set {\tt K\_MAX\_SPLINE}$=10^3/$Mpc. The result is shown in Figure \ref{fig:Lextrapol}. Although there is a significant difference ($\gtrsim 10\%$) between the linear power spectra at large $k$, we have confirmed that the difference in $\sigma_8$ is negligible. Nevertheless, for other applications that use the linear power spectrum, the user might need to increase the value of {\tt K\_MAX\_SPLINE}.
 
 %------------------------
-\begin{figure}
+\begin{figure*}
 \centering
-\includegraphics[width=0.8\textwidth]{figures/test_lin_extrapol.eps}
-\caption{Convergence of the linear matter power spectrum by adopting {\tt K\_MAX\_SPLINE}$=500/Mpc$ compared to the case with {\tt K\_MAX\_SPLINE}$=10^4/Mpc$.}
-\label{fig:plinconv}
-\end{figure}
+\includegraphics[width=0.45\textwidth]{PS_converge_linear.eps}
+\includegraphics[width=0.45\textwidth]{PS_converge_linear_z3.eps}
+\caption{Same as Fig. \ref{fig:NLextrapol} but for the linear matter power spectrum at $z=0$ (left) and $z=3$ (right).}
+\label{fig:Lextrapol}
+\end{figure*}
 %------------------------
 
 \subsubsection{Wishlist for the future}
