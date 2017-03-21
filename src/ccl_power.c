@@ -362,8 +362,7 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int * statu
     // After this loop x will contain log(k), y will contain log(P_nl), z will contain log(P_lin)
     // all in Mpc, not Mpc/h units!
     double psout_l,ic;
-    int s;
-  
+    int s=0;
     for (int i=0; i<nk; i++){
       for (int j = 0; j < na; j++){
 	//The 2D interpolation routines access the function values y_{k_ia_j} with the following ordering:
@@ -372,6 +371,7 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int * statu
 	s |= spectra_pk_at_k_and_z(&ba, &pm, &sp,x[i],1./z[j]-1., &psout_l,&ic);
 	y2d_lin[j*nk+i] = log(psout_l);
       }
+      x[i] = log(x[i]);
     }
     if(s){
       free(x); 
@@ -382,10 +382,6 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int * statu
       strcpy(cosmo->status_message ,"ccl_power.c: ccl_cosmology_compute_power_class(): Error computing CLASS power spectrum\n");
       ccl_free_class_structs(cosmo, &ba,&th,&pt,&tr,&pm,&sp,&nl,&le,status);
     }
-    for (int i=0; i<nk; i++)
-      x[i] = log(x[i]);
-
-    
     gsl_spline2d * log_power = gsl_spline2d_alloc(PLIN_SPLINE_TYPE, nk,na);
     int pwstatus = gsl_spline2d_init(log_power, x, z, y2d_lin,nk,na);
     if (pwstatus){
@@ -420,7 +416,7 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int * statu
 	strcpy(cosmo->status_message ,"ccl_power.c: ccl_cosmology_compute_power_class(): Error computing CLASS power spectrum\n");
 	ccl_free_class_structs(cosmo, &ba,&th,&pt,&tr,&pm,&sp,&nl,&le,status);
       }
-      
+
       gsl_spline2d * log_power_nl = gsl_spline2d_alloc(PNL_SPLINE_TYPE, nk,na);
       pwstatus = gsl_spline2d_init(log_power_nl, x, z, y2d_nl,nk,na);
 
@@ -497,7 +493,6 @@ static void ccl_cosmology_compute_power_bbks(ccl_cosmology * cosmo, int * status
   for (int i=0; i<nk; i++){
     y[i] = log(bbks_power(&cosmo->params, x[i]));
     x[i] = log(x[i]);
-    //printf("%.3le %.3le\n",x[i],y[i]);
   }
 
   // now normalize to cosmo->params.sigma_8
