@@ -69,6 +69,7 @@ static void compare_eh(int i_model,struct eh_data * data)
   ASSERT_NOT_NULL(cosmo);
   
   sprintf(fname,"./tests/benchmark/model%d_pk_eh_david.txt",i_model);
+  //  sprintf(fname,"./tests/benchmark/model%d_pk_eh.txt",i_model);
   f=fopen(fname,"r");
   if(f==NULL) {
     fprintf(stderr,"Error opening file %s\n",fname);
@@ -99,6 +100,7 @@ static void compare_eh(int i_model,struct eh_data * data)
       pk_ccl=ccl_linear_matter_power(cosmo,1./(1+z),k,&status);
       if (status) printf("%s\n",cosmo->status_message);
       err=fabs(pk_ccl/pk_bench-1);
+      //      printf("%lE %lE %lE\n",k,z,err);
       ASSERT_DBL_NEAR_TOL(err,0.,EH_TOLERANCE);
     }
   }

@@ -460,10 +460,10 @@ static eh_struct *eh_struct_new(ccl_parameters *params)
 
   double Req,Rd;
   Req=31.5*OBh2*1000./(eh->zeq*pow(th2p7,4));
-  Rd=31.5*OBh2*1000./(eh->zdrag*pow(th2p7,4));
+  Rd=31.5*OBh2*1000./((1+eh->zdrag)*pow(th2p7,4));
   eh->rsound=2/(3*eh->keq)*sqrt(6/Req)*
     log((sqrt(1+Rd)+sqrt(Rd+Req))/(1+sqrt(Req)));
-  
+
   eh->kSilk=1.6*pow(OBh2,0.52)*pow(OMh2,0.73)*(1+pow(10.4*OMh2,-0.95))/params->h;
 
   double a1,a2,b_frac;
@@ -477,8 +477,9 @@ static eh_struct *eh_struct_new(ccl_parameters *params)
   bb2=pow(0.395*OMh2,-0.0266);
   eh->betac=1/(1+bb1*(pow(1-b_frac,bb2)-1));
 
-  double y=(1+eh->zeq)/(1+eh->zdrag);
-  double gy=y*(-6*sqrt(1+y)+(2+3*y)*log((sqrt(1+y)+1)/(sqrt(1+y)-1)));
+  double y=eh->zeq/(1+eh->zdrag);
+  double sqy=sqrt(1+y);
+  double gy=y*(-6*sqy+(2+3*y)*log((sqy+1)/(sqy-1)));
   eh->alphab=2.07*eh->keq*eh->rsound*pow(1+Rd,-0.75)*gy;
 
   eh->betab=0.5+b_frac+(3-2*b_frac)*sqrt(pow(17.2*OMh2,2)+1);
@@ -487,6 +488,16 @@ static eh_struct *eh_struct_new(ccl_parameters *params)
 
   eh->rsound_approx=params->h*44.5*log(9.83/OMh2)/
     sqrt(1+10*pow(OBh2,0.75));
+
+  printf("\n");
+  printf("zeq           %lE\n",eh->zeq);
+  printf("keq           %lE\n",eh->keq*params->h);
+  printf("ksilk         %lE\n",eh->kSilk*params->h);
+  printf("zd            %lE\n",eh->zdrag);
+  printf("rsound        %lE\n",eh->rsound/params->h);
+  printf("rsound_approx %lE\n",eh->rsound_approx/params->h);
+  printf("Rd            %lE\n",Rd);
+  printf("\n");
 
   return eh;
 }
@@ -515,10 +526,10 @@ static double jbes0(double x)
   double jl;
   double ax=fabs(x);
   double ax2=ax*ax;
-
-  if(ax<0.1) jl=1-ax2*(1-ax2/20.)/6.;
+  
+  if(ax<0.01) jl=1-ax2*(1-ax2/20.)/6.;
   else jl=sin(x)/x;
-
+  
   return jl;
 }
 
@@ -531,8 +542,7 @@ static double tkEH_b(eh_struct *eh,double k)
 
   if(k==0) x_bessel=0;
   else {
-    x_bessel=x*pow(1+eh->bnode*eh->bnode*eh->bnode/(x*x*x),
-		   -0.3333333333333333333);
+    x_bessel=x*pow(1+eh->bnode*eh->bnode*eh->bnode/(x*x*x),-1./3.);
   }
 
   part1=tkEH_0(eh->keq,k,1,1)/(1+pow(x/5.2,2));
