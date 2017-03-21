@@ -68,8 +68,8 @@ static void compare_eh(int i_model,struct eh_data * data)
   ccl_cosmology * cosmo = ccl_cosmology_create(params, config);
   ASSERT_NOT_NULL(cosmo);
   
-  sprintf(fname,"./tests/benchmark/model%d_pk_eh_david.txt",i_model);
-  //  sprintf(fname,"./tests/benchmark/model%d_pk_eh.txt",i_model);
+  sprintf(fname,"./tests/benchmark/model%d_pk_eh.txt",i_model);
+  //  sprintf(fname,"./tests/benchmark/model%d_pk_eh_ekrause.txt",i_model);
   f=fopen(fname,"r");
   if(f==NULL) {
     fprintf(stderr,"Error opening file %s\n",fname);
@@ -97,10 +97,9 @@ static void compare_eh(int i_model,struct eh_data * data)
 	exit(1);
       }
       pk_bench=pk_h/pow(data->h,3);
-      pk_ccl=ccl_linear_matter_power(cosmo,1./(1+z),k,&status);
+      pk_ccl=ccl_linear_matter_power(cosmo,k,1./(1+z),&status);
       if (status) printf("%s\n",cosmo->status_message);
       err=fabs(pk_ccl/pk_bench-1);
-      //      printf("%lE %lE %lE\n",k,z,err);
       ASSERT_DBL_NEAR_TOL(err,0.,EH_TOLERANCE);
     }
   }
@@ -113,15 +112,3 @@ CTEST2(eh,model_1) {
   int model=1;
   compare_eh(model,data);
 }
-
-/*
-CTEST2(eh,model_2) {
-  int model=2;
-  compare_eh(model,data);
-}
-
-CTEST2(eh,model_3) {
-  int model=3;
-  compare_eh(model,data);
-}
-*/
