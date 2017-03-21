@@ -693,7 +693,7 @@ static double cl_integrand(double lk,void *params)
   else {
     double t1,t2;
     double a=ccl_scale_factor_of_chi(p->cosmo,chi, p->status); //Limber
-    double pk=ccl_nonlin_matter_power(p->cosmo,a,k, p->status);
+    double pk=ccl_nonlin_matter_power(p->cosmo,k,a, p->status);
     t1=transfer_wrap(p->l,k,p->cosmo,p->clt1, p->status);
     t2=transfer_wrap(p->l,k,p->cosmo,p->clt2, p->status);
     return k*t1*t2*pk;

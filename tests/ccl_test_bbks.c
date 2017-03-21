@@ -23,6 +23,7 @@ CTEST_SETUP(bbks) {
   data->Omega_c = 0.25;
   data->Omega_b = 0.05;
   data->h = 0.7;
+  //TODO: Don't we have to change this to normpk?
   data->A_s = 2.1e-9;
   data->sigma_8=0.8;
   data->n_s = 0.96;
@@ -96,7 +97,7 @@ static void compare_bbks(int i_model,struct bbks_data * data)
 	exit(1);
       }
       pk_bench=pk_h/pow(data->h,3);
-      pk_ccl=ccl_linear_matter_power(cosmo,1./(1+z),k,&status);
+      pk_ccl=ccl_linear_matter_power(cosmo,k,1./(1+z),&status);
       if (status) printf("%s\n",cosmo->status_message);
       err=fabs(pk_ccl/pk_bench-1);
       ASSERT_DBL_NEAR_TOL(err,0.,BBKS_TOLERANCE);
