@@ -136,7 +136,9 @@ class build_external_clib(build_clib):
         return build_clib
 
     def run(self):
-        ret_val = self.check_extensions()
+        #Uncomment the line below if you want to check if the C library
+        #is installed and in your path.
+        #ret_val = self.check_extensions()
         build_path = self.build_library('ccl')
         build_clib.run(self)
         #if ret_val==None:
@@ -288,7 +290,9 @@ class PyInstall(DistutilsInstall):
             CC=cc, CXX=cxx, CFLAGS=cflags, CXXFLAGS=cxxflags))
         return build_clib
     def run(self):
-        ret_val = self.check_extensions()
+        #Uncomment the line below if you want to check if the C library
+        #is installed and in your path.
+        #ret_val = self.check_extensions()
         lib_path = self.build_library('ccl')
         DistutilsInstall.run(self)
 
