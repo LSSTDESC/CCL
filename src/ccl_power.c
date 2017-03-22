@@ -977,6 +977,25 @@ static double ccl_power_extrapol_highk(ccl_cosmology * cosmo, double k, double a
     
 }
 
+/*------ ROUTINE: ccl_power_extrapol_hxighk ----- 
+INPUT: ccl_cosmology * cosmo, a, k [1/Mpc]
+TASK: extrapolate power spectrum at high k
+*/
+static double ccl_power_extrapol_lowk(ccl_cosmology * cosmo, double k, double a, gsl_spline2d * powerspl, int * status)
+{
+  double log_p_1;
+  double deltak=1e-2; //safety step
+  double lkmin=log(K_MIN)+deltak;
+  double lpk_kmin;
+  int pwstatus=gsl_spline2d_eval_e(powerspl,lkmin,a,NULL,NULL,&lpk_kmin);
+  if (pwstatus){
+    *status=CCL_ERROR_SPLINE_EV;
+    sprintf(cosmo->status_message,"ccl_power.c: ccl_nonlin_matter_power(): Spline evaluation error\n");
+    return NAN;
+  }
+  return lpk_kmin+cosmo->params.n_s*(log(k)-lkmin);
+}
+
 
 /*------ ROUTINE: ccl_linear_matter_power ----- 
 INPUT: ccl_cosmology * cosmo, k [1/Mpc],a
@@ -984,45 +1003,30 @@ TASK: compute the linear power spectrum at a given redshift
       by rescaling using the growth function
 */
 
-double ccl_linear_matter_power(ccl_cosmology * cosmo, double k, double a, int * status){
- 
+double ccl_linear_matter_power(ccl_cosmology * cosmo, double k, double a, int * status)
+{
   if (!cosmo->computed_power) ccl_cosmology_compute_power(cosmo, status);
   double log_p_1;
   int pkstatus;
-  
-  switch(cosmo->config.transfer_function_method){
-
-  case ccl_bbks :
-    
+ 
+  if(k<=K_MIN) {
+    log_p_1=ccl_power_extrapol_lowk(cosmo,k,a,cosmo->data.p_lin,status);
+    return exp(log_p_1);
+  }
+  else if(k<K_MAX_SPLINE){
     pkstatus = gsl_spline2d_eval_e(cosmo->data.p_lin, log(k), a,NULL,NULL,&log_p_1);
     if (pkstatus){
       *status = CCL_ERROR_SPLINE_EV;
       sprintf(cosmo->status_message ,"ccl_power.c: ccl_linear_matter_power(): Spline evaluation error\n");
       return NAN;
-    } else {
-      return exp(log_p_1);
     }
-    break;
-    
-  default : 
-
-    if(k<=K_MAX_SPLINE){
-      pkstatus = gsl_spline2d_eval_e(cosmo->data.p_lin, log(k), a,NULL,NULL,&log_p_1);
-      if (pkstatus){
-	*status = CCL_ERROR_SPLINE_EV;
-	sprintf(cosmo->status_message ,"ccl_power.c: ccl_linear_matter_power(): Spline evaluation error\n");
-	return NAN;
-      } else {
-	return exp(log_p_1);
-      }
-    } else { //Extrapolate NL regime using log derivative
-      log_p_1 = ccl_power_extrapol_highk(cosmo,k,a,cosmo->data.p_lin,status);
+    else
       return exp(log_p_1);
-    }
-    break;
-    
-  } 
-  
+  }
+  else { //Extrapolate NL regime using log derivative
+    log_p_1 = ccl_power_extrapol_highk(cosmo,k,a,cosmo->data.p_lin,status);
+    return exp(log_p_1);
+  }
 }
 
 
@@ -1031,9 +1035,9 @@ INPUT: ccl_cosmology * cosmo, a, k [1/Mpc]
 TASK: compute the nonlinear power spectrum at a given redshift
 */
 
-double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double k, double a, int *status){
-
-  switch(cosmo->config.matter_power_spectrum_method){
+double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double k, double a, int *status)
+{
+  switch(cosmo->config.matter_power_spectrum_method) {
     //If the matter PS specified was linear, then do the linear compuation
   case ccl_linear:
     return ccl_linear_matter_power(cosmo,k,a,status);
@@ -1044,25 +1048,30 @@ double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double k, double a, int *s
     
     double log_p_1;
     
-    if(k<=K_MAX_SPLINE){
+    if(k<=K_MIN) {
+      log_p_1=ccl_power_extrapol_lowk(cosmo,k,a,cosmo->data.p_nl,status);
+      return exp(log_p_1);
+    }
+    else if(k<K_MAX_SPLINE){
       
       int pwstatus =  gsl_spline2d_eval_e(cosmo->data.p_nl, log(k),a,NULL ,NULL ,&log_p_1);
       if (pwstatus){
 	*status = CCL_ERROR_SPLINE_EV;
 	sprintf(cosmo->status_message ,"ccl_power.c: ccl_nonlin_matter_power(): Spline evaluation error\n");
 	return NAN;
-      } else {
-	return exp(log_p_1);
       }
-    } else { //Extrapolate NL regime using log derivative
+      else
+	return exp(log_p_1);
+    }
+    else { //Extrapolate NL regime using log derivative
       log_p_1 = ccl_power_extrapol_highk(cosmo,k,a,cosmo->data.p_nl,status);
       return exp(log_p_1);
     }
 
-    default:
-      printf("WARNING:  config.matter_power_spectrum_method = %d not yet supported\n continuing with linear power spectrum\n",cosmo->config.matter_power_spectrum_method);
-      cosmo->config.matter_power_spectrum_method=ccl_linear;
-      return ccl_linear_matter_power(cosmo,k,a,status);
+  default:
+    printf("WARNING:  config.matter_power_spectrum_method = %d not yet supported\n continuing with linear power spectrum\n",cosmo->config.matter_power_spectrum_method);
+    cosmo->config.matter_power_spectrum_method=ccl_linear;
+    return ccl_linear_matter_power(cosmo,k,a,status);
   }
 }
 
@@ -1107,7 +1116,7 @@ double ccl_sigmaR(ccl_cosmology *cosmo,double R)
   F.function=&sigmaR_integrand;
   F.params=&par;
   double sigma_R;
-  gsl_integration_cquad(&F,log10(K_MIN_INT),log10(K_MAX_INT),0.0,1E-5,workspace,&sigma_R,NULL,NULL);
+  gsl_integration_cquad(&F,log10(K_MIN),log10(K_MAX),0.0,1E-5,workspace,&sigma_R,NULL,NULL);
   //TODO: log10 could be taken already in the macros.
   //TODO: 1E-5 should be a macro
   //TODO: we should check for integration success
