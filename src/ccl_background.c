@@ -276,7 +276,7 @@ void ccl_cosmology_compute_distances(ccl_cosmology * cosmo, int *status)
 
   //Fill in chi(a)
   for (int i=0; i<na; i++)
-    chistatus |= compute_chi(a[i],cosmo,&(y[i])); 
+    chistatus |= compute_chi(a[i],cosmo,&(y[i]));
   if (chistatus){
     free(a);
     free(y);
@@ -589,11 +589,15 @@ void ccl_h_over_h0s(ccl_cosmology * cosmo, int na, double a[na], double output[n
 // Distance-like function examples, all in Mpc
 double ccl_comoving_radial_distance(ccl_cosmology * cosmo, double a, int * status)
 {
-  if (!cosmo->computed_distances){
-    ccl_cosmology_compute_distances(cosmo, status);
-    ccl_check_status(cosmo,status);    
+  if(fabs(a-1.)<1.e-8){
+    return 0.;
+  } else {
+    if (!cosmo->computed_distances){
+      ccl_cosmology_compute_distances(cosmo, status);
+      ccl_check_status(cosmo,status);    
+    }
+    return gsl_spline_eval(cosmo->data.chi, a, cosmo->data.accelerator);
   }
-  return gsl_spline_eval(cosmo->data.chi, a, cosmo->data.accelerator);
 }
 
 void ccl_comoving_radial_distances(ccl_cosmology * cosmo, int na, double a[na], double output[na], int* status)
@@ -603,8 +607,10 @@ void ccl_comoving_radial_distances(ccl_cosmology * cosmo, int na, double a[na], 
     ccl_check_status(cosmo,status);    
   }
   for (int i=0; i<na; i++){
-    output[i]=gsl_spline_eval(cosmo->data.chi,a[i],cosmo->data.accelerator);
+    if(fabs(a[i]-1.)<1.e-8) output[i]=0.;
+    else output[i]=gsl_spline_eval(cosmo->data.chi,a[i],cosmo->data.accelerator);
   }
+  
 }
 
 double ccl_sinn(ccl_cosmology *cosmo, double chi)
