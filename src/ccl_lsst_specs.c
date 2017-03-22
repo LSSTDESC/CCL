@@ -267,7 +267,6 @@ void ccl_specs_dNdz_tomog(double z, int dNdz_type, double bin_zmin, double bin_z
 	valparams.user_information = user_info; // pointer to user information
 
 
-	
 	// Integrate over the assumed pdf of photo-z wrt true-z in this bin (this goes in the numerator of the result):
 	gsl_integration_cquad_workspace * workspace = gsl_integration_cquad_workspace_alloc (1000);
         gsl_function F;
@@ -276,16 +275,15 @@ void ccl_specs_dNdz_tomog(double z, int dNdz_type, double bin_zmin, double bin_z
         *status |=gsl_integration_cquad(&F, bin_zmin, bin_zmax, 0.0,EPSREL_DNDZ,workspace,&numerator_integrand, NULL, NULL);
         gsl_integration_cquad_workspace_free(workspace);	
 
-
 	// Now get the denominator, which normalizes dNdz over the photometric bin
 	workspace = gsl_integration_cquad_workspace_alloc (1000);
         F.function = ccl_specs_norm_integrand;
         F.params = &norm_p_val;
         *status |=gsl_integration_cquad(&F, Z_MIN_SOURCES, Z_MAX_SOURCES, 0.0,EPSREL_DNDZ,workspace,&denom_integrand, NULL, NULL);
         gsl_integration_cquad_workspace_free(workspace);
-    if (*status){
+	if (*status){
 	  *status = CCL_ERROR_INTEG;
 	  return;
-    }
+	}
 	*tomoout = dNdz_t * numerator_integrand / denom_integrand;
 }

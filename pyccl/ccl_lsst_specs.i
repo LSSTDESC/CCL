@@ -71,19 +71,20 @@ void specs_dNdz_tomog_vec(
         
         // Calculate dNdz value
         ccl_specs_dNdz_tomog(z[i], dNdz_type, bin_zmin, bin_zmax,
-                                      user_info, &val, status);
+			     user_info, &val, status);
         // Check status
-        if (status != 0){
+        if (*status != 0){
             fprintf(stderr, "%s", 
                     "specs_dNdz_tomog_vec: You have selected an unsupported "
                     "dNdz type. Exiting.\n");
-            exit(1);
+            return;
         } // End status check
         
         // Add return value to output array
         output[i] = val;
         
     } // End loop over z values
+
     return;
 }
 

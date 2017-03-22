@@ -1,6 +1,6 @@
 
 import ccllib as lib
-from pyutils import _vectorize_fn, _vectorize_fn_simple, np
+from pyutils import _vectorize_fn, _vectorize_fn_simple, np, check
 
 dNdz_types = {
     'nc':           lib.DNDZ_NC,
@@ -120,8 +120,8 @@ def dNdz_tomog(z, dNdz_type, zmin, zmax, pz_func):
     
     # Call dNdz tomography function
     status = 0
-    dNdz = lib.specs_dNdz_tomog_vec( dNdz_types[dNdz_type], zmin, zmax, 
-                                     pz_func.pz_func, z, z.size, status)
+    dNdz,status = lib.specs_dNdz_tomog_vec( dNdz_types[dNdz_type], zmin, zmax, 
+                                            pz_func.pz_func, z, z.size, status)
     check(status)
     return dNdz
 

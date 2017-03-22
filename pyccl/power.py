@@ -56,5 +56,6 @@ def sigma8(cosmo):
         sigma8 (float): RMS variance in top-hat sphere of radius 8 Mpc.
 
     """
-    return lib.sigma8(cosmo.cosmo)
+    print cosmo['h']
+    return sigmaR(cosmo,8./cosmo['h'])
 
