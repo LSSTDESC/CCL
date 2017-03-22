@@ -110,7 +110,8 @@ int ccl_tracer_corr(ccl_cosmology *cosmo, int n_theta, double **theta, CCL_ClTra
       (*theta)[i]=1./l_arr[n_theta-i-1]; 
     }
   
-  /* This function uses spherical bessel functions
+  /* FFTlog uses spherical bessel functions, j_n, but for projected 
+     correlations we need bessel functions of first order, J_n.
      To compensate for the difference, we use the relation
      j_n(x) = sqrt(Pi/2x)J_{n+1/2}(x)
      J_{m}(x) = sqrt(2x/Pi) j_{m-1/2}(x)
