@@ -1,6 +1,6 @@
 
 import ccllib as lib
-from pyutils import _vectorize_fn, _vectorize_fn_simple, np
+from pyutils import _vectorize_fn, _vectorize_fn_simple, np, check
 
 dNdz_types = {
     'nc':           lib.DNDZ_NC,
@@ -119,8 +119,10 @@ def dNdz_tomog(z, dNdz_type, zmin, zmax, pz_func):
         raise ValueError("'%s' not a valid dNdz_type." % dNdz_type)
     
     # Call dNdz tomography function
-    dNdz = lib.specs_dNdz_tomog_vec( dNdz_types[dNdz_type], zmin, zmax, 
-                                     pz_func.pz_func, z, z.size )
+    status = 0
+    dNdz,status = lib.specs_dNdz_tomog_vec( dNdz_types[dNdz_type], zmin, zmax, 
+                                            pz_func.pz_func, z, z.size, status)
+    check(status)
     return dNdz
 
 # Provide aliases for functions to retain consistency with C API

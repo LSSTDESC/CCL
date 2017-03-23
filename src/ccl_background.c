@@ -35,7 +35,7 @@ ccl_omega_l_label <- DE
 ccl_omega_g_label <- radiation
 ccl_omega_k_label <- curvature
 */
-double ccl_omega_x(ccl_cosmology * cosmo, double a, ccl_omega_x_label label)
+double ccl_omega_x(ccl_cosmology * cosmo, double a, ccl_omega_x_label label, int *status)
 {
   switch(label) {
   case ccl_omega_m_label :
@@ -51,6 +51,10 @@ double ccl_omega_x(ccl_cosmology * cosmo, double a, ccl_omega_x_label label)
   case ccl_omega_k_label :
     return cosmo->params.Omega_k*a/(cosmo->params.Omega_m+cosmo->params.Omega_l*pow(a,-3*(cosmo->params.w0+cosmo->params.wa))*
 	 exp(3*cosmo->params.wa*(a-1))+cosmo->params.Omega_k*a+cosmo->params.Omega_g/a);
+  default:
+    *status = CCL_ERROR_PARAMETERS;
+    sprintf(cosmo->status_message,"ccl_background.c: ccl_omega_x(): Species %d not supported\n",label);
+    return 0.;
   }
 }
 
@@ -70,14 +74,15 @@ TASK: Define the ODE system to be solved in order to compute the growth (of the 
 */
 static int growth_ode_system(double a,const double y[],double dydt[],void *params)
 {
+  int status = 0;
   ccl_cosmology * cosmo = params;
   double hnorm=h_over_h0(a,&(cosmo->params));
-  double om=ccl_omega_x(cosmo, a, ccl_omega_m_label);
+  double om=ccl_omega_x(cosmo, a, ccl_omega_m_label, &status);
 
   dydt[0]=y[1]/(a*a*a*hnorm);
   dydt[1]=1.5*hnorm*a*om*y[0];
 
-  return GSL_SUCCESS;
+  return status;
 }
 
 /* --------- ROUTINE: df_integrand ---------
@@ -607,18 +612,24 @@ void ccl_comoving_radial_distances(ccl_cosmology * cosmo, int na, double a[na], 
   }
 }
 
-double ccl_sinn(ccl_cosmology *cosmo, double chi)
+double ccl_sinn(ccl_cosmology *cosmo, double chi, int * status)
 {
   //////
   //         { sin(x)  , if k==1
   // sinn(x)={  x      , if k==0
   //         { sinh(x) , if k==-1
-  if(cosmo->params.k_sign == -1)
+  switch(cosmo->params.k_sign){
+  case -1:
     return sinh(cosmo->params.sqrtk * chi) / cosmo->params.sqrtk;
-  else if(cosmo->params.k_sign == 1)
+  case 1:
     return sin(cosmo->params.sqrtk*chi) / cosmo->params.sqrtk;
-  else
+  case 0:
     return chi;
+  default:
+    *status = CCL_ERROR_PARAMETERS;
+    sprintf(cosmo->status_message,"ccl_background.c: ccl_sinn: ill-defined cosmo->params.k_sign = %d",cosmo->params.k_sign);
+    return 0.;
+  }
 }
 
 double ccl_comoving_angular_distance(ccl_cosmology * cosmo, double a, int* status)
@@ -629,7 +640,8 @@ double ccl_comoving_angular_distance(ccl_cosmology * cosmo, double a, int* statu
   }
   return ccl_sinn(cosmo, 
                   gsl_spline_eval(cosmo->data.chi, a, 
-                                  cosmo->data.accelerator)
+                                  cosmo->data.accelerator),
+                  status
                  );
 }
 
@@ -643,7 +655,8 @@ void ccl_comoving_angular_distances(ccl_cosmology * cosmo, int na, double a[na],
   for (int i=0; i < na; i++)
     output[i] = ccl_sinn(cosmo, 
                          gsl_spline_eval(cosmo->data.chi, a[i], 
-                                         cosmo->data.accelerator)
+                                         cosmo->data.accelerator),
+                         status
                         );
 }
 
