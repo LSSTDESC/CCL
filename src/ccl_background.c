@@ -52,9 +52,9 @@ double ccl_omega_x(ccl_cosmology * cosmo, double a, ccl_omega_x_label label, int
     return cosmo->params.Omega_k*a/(cosmo->params.Omega_m+cosmo->params.Omega_l*pow(a,-3*(cosmo->params.w0+cosmo->params.wa))*
 	 exp(3*cosmo->params.wa*(a-1))+cosmo->params.Omega_k*a+cosmo->params.Omega_g/a);
   default:
-    return 0.;
     *status = CCL_ERROR_PARAMETERS;
     sprintf(cosmo->status_message,"ccl_background.c: ccl_omega_x(): Species %d not supported\n",label);
+    return 0.;
   }
 }
 
