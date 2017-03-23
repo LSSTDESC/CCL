@@ -61,6 +61,78 @@ ccl_cosmology * ccl_cosmology_create(ccl_parameters params, ccl_configuration co
   return cosmo;
 }
 
+
+/* ------- ROUTINE: ccl_cosmology_create_with_params ------
+INPUTS: 
+        Numbers for the basic cosmological parameters needed by CCL
+        ccl_configuration config
+TASK: Creates ccl_cosmology struct directly from a set of input cosmological 
+      parameter values, without the need to create a separate ccl_parameters 
+      struct.
+DEFINITIONS:
+Omega_c: cold dark matter
+Omega_b: baryons
+Omega_n: neutrinos
+Omega_k: curvature
+w0: Dark energy eqn. of state parameter
+wa: Dark energy eqn. of state parameter, time variation
+h: Hubble's constant divided by (100 km/s/Mpc).
+norm_pk: amplitude of the primordial PS (either A_s or sigma_8)
+n_s: index of the primordial PS
+*/
+
+ccl_cosmology * ccl_cosmology_create_with_params(
+        double Omega_c, double Omega_b, double Omega_k, double Omega_n, 
+        double w0, double wa, double h, double norm_pk, double n_s,
+        int nz_mgrowth, double *zarr_mgrowth, double *dfarr_mgrowth, 
+        ccl_configuration config)
+{
+    // Create ccl_parameters struct from input parameters
+    ccl_parameters params;
+    params = ccl_parameters_create(Omega_c, Omega_b, Omega_k, Omega_n, w0, wa, 
+                                   h, norm_pk, n_s, nz_mgrowth, zarr_mgrowth, 
+                                   dfarr_mgrowth);
+    
+    // Create  ccl_cosmology struct
+    ccl_cosmology *cosmo;
+    cosmo = ccl_cosmology_create(params, config);
+    return cosmo;
+}
+
+
+/* ------- ROUTINE: ccl_cosmology_create_with_lcdm_params ------
+INPUTS: 
+        Numbers for the basic LCDM cosmological parameters needed by CCL
+        ccl_configuration config
+TASK: Creates ccl_cosmology struct directly from a set of input cosmological 
+      parameter values (for a flat LCDM model), without the need to create a 
+      separate ccl_parameters struct.
+DEFINITIONS:
+Omega_c: cold dark matter
+Omega_b: baryons
+Omega_k: curvature
+h: Hubble's constant divided by (100 km/s/Mpc).
+norm_pk: amplitude of the primordial PS (either A_s or sigma_8)
+n_s: index of the primordial PS
+*/
+
+ccl_cosmology * ccl_cosmology_create_with_lcdm_params(
+        double Omega_c, double Omega_b, double Omega_k, double h, 
+        double norm_pk, double n_s,
+        ccl_configuration config)
+{
+    // Create ccl_parameters struct from input parameters
+    ccl_parameters params;
+    params = ccl_parameters_create_lcdm(Omega_c, Omega_b, Omega_k, h, 
+                                        norm_pk, n_s);
+    
+    // Create  ccl_cosmology struct
+    ccl_cosmology *cosmo;
+    cosmo = ccl_cosmology_create(params, config);
+    return cosmo;
+}
+
+
 /* ------ ROUTINE: ccl_parameters_fill_initial -------
 INPUT: ccl_parameters: params
 TASK: fill parameters not set by ccl_parameters_create with some initial values
