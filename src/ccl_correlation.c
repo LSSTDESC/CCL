@@ -23,6 +23,14 @@ typedef struct
 TASK: Compute the integrand of the correlation function
 INPUT: ell-value and a params structure defined above.
  */
+
+/*
+To Do:
+- Implement tapering function, to taper cls at both low ell and high ell regime. 
+  This will reduce the ringing
+- Implement a binning function
+- Optional: Implement a function to use GSL implementation of hankel transform.
+ */
 static double ccl_corr_integrand(double l, void *params)
 {
   corr_int_par *p=(corr_int_par *) params;
