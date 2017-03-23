@@ -54,7 +54,11 @@ namespace Angpow {
 class PowerSpecCCL : public PowerSpecBase {
  public:
   //! Constructor
- PowerSpecCCL(ccl_cosmology * cosmo, double kmin=1e-5, double kmax=10, int nk=1000) : ccl_cosmo_(cosmo) {
+ PowerSpecCCL(ccl_cosmology * cosmo, double kmin=1e-5, double kmax=10, int nk=1000, bool use_rsd=true) : ccl_cosmo_(cosmo) {
+    if(use_rsd) {
+      has_rsd_ = true;
+      use_rsd_ = true;
+    }
     int status =0;
     double * ks = ccl_log_spacing(kmin,kmax,N_K);
     double Pks[N_K];
@@ -86,17 +90,23 @@ class PowerSpecCCL : public PowerSpecBase {
   /*! Explicit to get a clone of the primary object via shallow copy
     using the Copy Ctor
    */
-  virtual PowerSpecBase* clone() const {
+  virtual PowerSpecCCL* clone() const {
     return new PowerSpecCCL(static_cast<const PowerSpecCCL&>(*this));
   }
   
   /*! called by angpow_kinteg.cc to fix the value of some function
     at fixed z value (and l too if necessary)
    */
-  void Init(int, double z, double bias=1.0) {int status=0; double tmp= bias*ccl_growth_factor(ccl_cosmo_,1.0/(1+z), &status); growth2_ = tmp*tmp;}
+  void Init(double z) {
+    if(use_rsd_) has_rsd_=true;
+    int status=0; double bias=1.0;
+    double tmp= bias*ccl_growth_factor(ccl_cosmo_,1.0/(1+z), &status);
+    growth2_ = tmp*tmp;
+    fz_=ccl_growth_rate(ccl_cosmo_,1.0/(1+z), &status);
+  }
 
   //Main operator
-  virtual r_8 operator()(int, double k, double z) {
+  virtual r_8 operator()(double k, double z) {
      return growth2_*(Pk_->operator()(k));
   }
 
@@ -106,13 +116,15 @@ class PowerSpecCCL : public PowerSpecBase {
   SLinInterp1D* Pk_;          //!< access to  Pk(k)
   ccl_cosmology* ccl_cosmo_;   //!< access to CCL cosmology
   double growth2_;               //!< D(zi)^2
+  //double fz_; //! growth rate f(z)
+  bool use_rsd_;
 
   //forbid for the time beeing the assignment operator
   PowerSpecCCL& operator=(const PowerSpecCCL& copy);
   
   //Minimal copy to allow Main operator(int, r_8, r_8) to work
   PowerSpecCCL(const PowerSpecCCL& copy) :
-    Pk_(copy.Pk_), ccl_cosmo_(copy.ccl_cosmo_), growth2_(copy.growth2_) {} 
+  Pk_(copy.Pk_), ccl_cosmo_(copy.ccl_cosmo_), growth2_(copy.growth2_) {}  // , fz_(copy.fz_)
 };
 
 
