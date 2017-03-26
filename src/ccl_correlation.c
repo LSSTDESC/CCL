@@ -12,6 +12,11 @@
 #include "ccl_power.h"
 #include "ccl.h"
 #include "fftlog.h"
+
+#ifndef M_PI
+    #define M_PI 3.14159265358979323846
+#endif
+
 typedef struct
 {
   gsl_spline *cl; 
@@ -82,6 +87,69 @@ static void ccl_general_corr(gsl_spline *cl, double *theta, double *corr_func, i
   return;
 }
 
+int bin_corr(int n_theta, double *theta, double *corr_func,int n_theta_bins, 
+	     double *theta_bins, double *corr_func_binned)
+{
+  double theta_integrand_lim[2]={0,0};
+  double bin_norm=0;
+  int j_start=0;
+  for (int i=0;i<n_theta_bins-1;i++)
+    {
+      bin_norm=0;
+      theta_integrand_lim[0]=theta_bins[i];
+      for (int j=j_start;j<n_theta;j++)
+	{
+	  if (theta[j]<theta_bins[i])
+	      continue;
+	  if (theta[j]>theta_bins[i+1])
+	    {	    
+	      corr_func_binned[i]/=bin_norm;
+	      j_start=j;//this assumes theta is monotonically increasing
+	      break;//move onto next bin
+	    }
+	  if (j!=n_theta-1)
+	    if (theta[j+1]<theta_bins[i+1])//min(theta[j+1],theta_bins[i+1])
+	      theta_integrand_lim[1]=theta[j+1];
+	    else
+	      theta_integrand_lim[1]=theta_bins[i+1];
+	  else
+	    theta_integrand_lim[1]=theta_bins[i+1];
+	  corr_func_binned[i]+=theta[j]*corr_func[j]*(theta_integrand_lim[1]-
+						      theta_integrand_lim[0]);
+	  bin_norm+=theta[j]*(theta_integrand_lim[1]-
+				  theta_integrand_lim[0]);
+	  theta_integrand_lim[0]=theta_integrand_lim[1];
+	  if(j==n_theta-1)
+	    corr_func_binned[i]/=bin_norm;
+	}
+    }
+  return 0;
+}
+
+int taper_cl(int n_ell,double *ell,double *cl, double *low_ell_limit,double *high_ell_limit)
+{
+  for (int i=0;i<n_ell;i++)
+    {
+      if (ell[i]<low_ell_limit[0] || ell[i]>high_ell_limit[1])
+	{
+	  cl[i]=0;//ell outside desirable range
+	  continue;
+	}
+      if (ell[i]>=low_ell_limit[1] && ell[i]<=high_ell_limit[0])
+	continue;//ell within good ell range
+      //printf("tapering %.3e %.3e ",ell[i],cl[i]);
+      if (ell[i]<low_ell_limit[1])//tapering low ell
+	cl[i]*=cos((ell[i]-low_ell_limit[1])/(low_ell_limit[1]-
+						low_ell_limit[0])*M_PI/2.);
+  
+      if (ell[i]>high_ell_limit[0])//tapering high ell
+	  cl[i]*=cos((ell[i]-high_ell_limit[0])/(high_ell_limit[1]-
+						   high_ell_limit[0])*M_PI/2.);
+      //printf(" %.3e\n",cl[i]);
+    }
+  return 0;
+}
+
 /*--------ROUTINE: ccl_tracer_corr ------
 TASK: For a given tracer, get the correlation function
 INPUT: type of tracer, number of theta values to evaluate = NL, theta vector
@@ -100,15 +168,25 @@ int ccl_tracer_corr(ccl_cosmology *cosmo, int n_theta, double **theta, CCL_ClTra
 
   double *l_arr,cl_arr[n_theta];
   
-  
-    l_arr=ccl_log_spacing(L_MIN_INT,L_MAX_INT,n_theta);
-  //  l_arr=ccl_log_spacing(.01,1000000,n_theta); //this ell range lowers the ringing.. ccl_angular_cl seems to behave nicely also and sets values to 0 if ell is outside sensible range.
+  // l_arr=ccl_log_spacing(L_MIN_INT,L_MAX_INT,n_theta);
+  l_arr=ccl_log_spacing(.5,60000,n_theta); 
+  /*Zero padding rule of thumb: Extend ell range by ~ factor of 3 (e)
+    on both low and high ell end. Then use the tapering 
+    function to smoothly set cl to zero outside the sensible range.
+   */
 
   int status=0;
   for(int i=0;i<n_theta;i+=1) {
     //Re-scaling the power-spectrum due to Bessel function missing factor
     cl_arr[i]=ccl_angular_cl(cosmo,l_arr[i],ct1,ct2,&status)*sqrt(l_arr[i]); 
+    //    printf("ell cl %.3e %.3e",l_arr[i],cl_arr[i]);
   }
+  
+  double taper_low_ell_limit[2]={1,2};
+  double taper_high_ell_limit[2]={30000,50000};
+
+  status=taper_cl(n_theta,l_arr,cl_arr, taper_low_ell_limit, taper_high_ell_limit);
+
 
   *theta=(double *)malloc(sizeof(double)*n_theta);
   *corr_func=(double *)malloc(sizeof(double)*n_theta);
