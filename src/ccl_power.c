@@ -368,8 +368,9 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int * statu
     return;
   }
 
+  cosmo->data.k_min=2*exp(sp.ln_k[0]);
   //CLASS calculations done - now allocate CCL splines
-  double kmin = K_MIN;
+  double kmin = cosmo->data.k_min;
   double kmax = K_MAX_SPLINE;
   int nk = N_K;
   double amin = A_SPLINE_MIN;
@@ -638,7 +639,8 @@ static double eh_power(ccl_parameters *params,eh_struct *eh,double k,int wiggled
 
 static void ccl_cosmology_compute_power_eh(ccl_cosmology * cosmo, int * status)
 {
-  double kmin = K_MIN;
+  cosmo->data.k_min=K_MIN_DEFAULT;
+  double kmin = cosmo->data.k_min;
   double kmax = K_MAX;
   int nk = N_K;
   double amin = A_SPLINE_MIN;
@@ -790,9 +792,10 @@ INPUT: cosmology
 TASK: provide spline for the BBKS power spectrum with baryonic correction
 */
 
-static void ccl_cosmology_compute_power_bbks(ccl_cosmology * cosmo, int * status){
-
-  double kmin = K_MIN;
+static void ccl_cosmology_compute_power_bbks(ccl_cosmology * cosmo, int * status)
+{
+  cosmo->data.k_min=K_MIN_DEFAULT;
+  double kmin = cosmo->data.k_min;
   double kmax = K_MAX;
   int nk = N_K;
   double amin = A_SPLINE_MIN;
@@ -985,7 +988,7 @@ static double ccl_power_extrapol_lowk(ccl_cosmology * cosmo, double k, double a,
 {
   double log_p_1;
   double deltak=1e-2; //safety step
-  double lkmin=log(K_MIN)+deltak;
+  double lkmin=log(cosmo->data.k_min)+deltak;
   double lpk_kmin;
   int pwstatus=gsl_spline2d_eval_e(powerspl,lkmin,a,NULL,NULL,&lpk_kmin);
   if (pwstatus){
@@ -1009,7 +1012,7 @@ double ccl_linear_matter_power(ccl_cosmology * cosmo, double k, double a, int * 
   double log_p_1;
   int pkstatus;
  
-  if(k<=K_MIN) {
+  if(k<=cosmo->data.k_min) {
     log_p_1=ccl_power_extrapol_lowk(cosmo,k,a,cosmo->data.p_lin,status);
     return exp(log_p_1);
   }
@@ -1048,7 +1051,7 @@ double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double k, double a, int *s
     
     double log_p_1;
     
-    if(k<=K_MIN) {
+    if(k<=cosmo->data.k_min) {
       log_p_1=ccl_power_extrapol_lowk(cosmo,k,a,cosmo->data.p_nl,status);
       return exp(log_p_1);
     }
@@ -1116,7 +1119,7 @@ double ccl_sigmaR(ccl_cosmology *cosmo,double R)
   F.function=&sigmaR_integrand;
   F.params=&par;
   double sigma_R;
-  gsl_integration_cquad(&F,log10(K_MIN),log10(K_MAX),0.0,1E-5,workspace,&sigma_R,NULL,NULL);
+  gsl_integration_cquad(&F,log10(cosmo->data.k_min),log10(K_MAX),0.0,1E-5,workspace,&sigma_R,NULL,NULL);
   //TODO: log10 could be taken already in the macros.
   //TODO: 1E-5 should be a macro
   //TODO: we should check for integration success

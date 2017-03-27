@@ -705,7 +705,7 @@ static double cl_integrand(double lk,void *params)
 //clt2 -> tracer #2
 //l    -> angular multipole
 //lkmin, lkmax -> log10 of the range of scales where the transfer functions have support
-static void get_k_interval(CCL_ClTracer *clt1,CCL_ClTracer *clt2,int l,
+static void get_k_interval(ccl_cosmology *cosmo,CCL_ClTracer *clt1,CCL_ClTracer *clt2,int l,
 			   double *lkmin,double *lkmax)
 {
   double chimin,chimax;
@@ -725,7 +725,7 @@ static void get_k_interval(CCL_ClTracer *clt1,CCL_ClTracer *clt2,int l,
   }
   else {
     chimin=0.5*(l+0.5)/K_MAX;
-    chimax=2*(l+0.5)/K_MIN;
+    chimax=2*(l+0.5)/K_MIN_DEFAULT;
   }
 
   if(chimin<=0)
@@ -749,7 +749,7 @@ double ccl_angular_cl(ccl_cosmology *cosmo,int l,CCL_ClTracer *clt1,CCL_ClTracer
   gsl_function F;
   gsl_integration_workspace *w=gsl_integration_workspace_alloc(1000);
 
-  get_k_interval(clt1,clt2,l,&lkmin,&lkmax);
+  get_k_interval(cosmo,clt1,clt2,l,&lkmin,&lkmax);
 
   ipar.l=l;
   ipar.cosmo=cosmo;
