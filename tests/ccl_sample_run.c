@@ -52,10 +52,11 @@ int main(int argc,char **argv){
 		ZD,ccl_luminosity_distance(cosmo,1./(1+ZD), &status));
 	
 	//Consistency check
-	printf("Scale factor at chi=%.3lf Mpc is a=%.3lf Mpc\n",
-	ccl_comoving_radial_distance(cosmo,1./(1+ZD), &status),
-	ccl_scale_factor_of_chi(cosmo,ccl_comoving_radial_distance(cosmo,1./(1+ZD), &status), &status));
-	 
+	printf("Scale factor is a=%.3lf \n",1./(1+ZD));
+	printf("Consistency: Scale factor at chi=%.3lf Mpc is a=%.3lf\n",
+	       ccl_comoving_radial_distance(cosmo,1./(1+ZD), &status),
+	       ccl_scale_factor_of_chi(cosmo,ccl_comoving_radial_distance(cosmo,1./(1+ZD), &status), &status));
+	
 	// Compute growth factor and growth rate (see include/ccl_background.h for more routines)
 	printf("Growth factor and growth rate at z = %.3lf are D = %.3lf and f = %.3lf\n",
 		ZD, ccl_growth_factor(cosmo,1./(1+ZD), &status),ccl_growth_rate(cosmo,1./(1+ZD), &status));

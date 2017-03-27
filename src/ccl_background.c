@@ -236,6 +236,12 @@ void ccl_cosmology_compute_distances(ccl_cosmology * cosmo, int *status)
   if(cosmo->computed_distances)
     return;
 
+  if(A_SPLINE_MAX>1.){
+    *status = CCL_ERROR_COMPUTECHI; 
+    strcpy(cosmo->status_message,"ccl_background.c: scale factor cannot be larger than 1.\n");
+    return;
+  }
+
   // Create linearly-spaced values of the scale factor
   int na = A_SPLINE_NA;
   double * a = ccl_linear_spacing(A_SPLINE_MIN, A_SPLINE_MAX, na);
@@ -281,7 +287,7 @@ void ccl_cosmology_compute_distances(ccl_cosmology * cosmo, int *status)
 
   //Fill in chi(a)
   for (int i=0; i<na; i++)
-    chistatus |= compute_chi(a[i],cosmo,&(y[i])); 
+    chistatus |= compute_chi(a[i],cosmo,&(y[i]));
   if (chistatus){
     free(a);
     free(y);
@@ -594,11 +600,20 @@ void ccl_h_over_h0s(ccl_cosmology * cosmo, int na, double a[na], double output[n
 // Distance-like function examples, all in Mpc
 double ccl_comoving_radial_distance(ccl_cosmology * cosmo, double a, int * status)
 {
-  if (!cosmo->computed_distances){
-    ccl_cosmology_compute_distances(cosmo, status);
-    ccl_check_status(cosmo,status);    
+  if((a > (1.0 - 1.e-8)) && (a<=1.0)){
+    return 0.;
+  } else if(a>1.){
+    *status = CCL_ERROR_COMPUTECHI; 
+    strcpy(cosmo->status_message,"ccl_background.c: scale factor cannot be larger than 1.\n");
+    ccl_check_status(cosmo,status);
+    return 0.;
+  } else {
+    if (!cosmo->computed_distances){
+      ccl_cosmology_compute_distances(cosmo, status);
+      ccl_check_status(cosmo,status);   
+    }
+    return gsl_spline_eval(cosmo->data.chi, a, cosmo->data.accelerator);
   }
-  return gsl_spline_eval(cosmo->data.chi, a, cosmo->data.accelerator);
 }
 
 void ccl_comoving_radial_distances(ccl_cosmology * cosmo, int na, double a[na], double output[na], int* status)
@@ -608,8 +623,14 @@ void ccl_comoving_radial_distances(ccl_cosmology * cosmo, int na, double a[na], 
     ccl_check_status(cosmo,status);    
   }
   for (int i=0; i<na; i++){
-    output[i]=gsl_spline_eval(cosmo->data.chi,a[i],cosmo->data.accelerator);
+    if((a[i] > (1. - 1.e-8)) && (a[i]<=1.)) output[i]=0.;
+    else if(a[i]>1.){
+      *status = CCL_ERROR_COMPUTECHI; 
+      strcpy(cosmo->status_message,"ccl_background.c: scale factor cannot be larger than 1.\n");
+      ccl_check_status(cosmo,status);
+    } else output[i]=gsl_spline_eval(cosmo->data.chi,a[i],cosmo->data.accelerator);
   }
+  
 }
 
 double ccl_sinn(ccl_cosmology *cosmo, double chi, int * status)
