@@ -21,21 +21,7 @@ const ccl_configuration default_config = {ccl_boltzmann_class, ccl_halofit, ccl_
    The following are the relevant global variables:
 */
 
-double A_SPLINE_DELTA;
-int A_SPLINE_NA;
-double A_SPLINE_MIN;
-double A_SPLINE_MAX;
-double LOGM_SPLINE_DELTA;
-int LOGM_SPLINE_NM;
-double LOGM_SPLINE_MIN;
-double LOGM_SPLINE_MAX;
-int N_A;
-double K_MAX_SPLINE;
-double K_MAX;
-double K_MIN;
-double K_MAX_INT; //eventually will be removed
-double K_MIN_INT;
-int N_K;
+ccl_spline_params * ccl_splines;
 
 void ccl_cosmology_read_config(){
 
@@ -45,7 +31,9 @@ void ccl_cosmology_read_config(){
   char buf[CONFIG_LINE_BUFFER_SIZE];
   char var_name[MAX_CONFIG_VAR_LEN];
   double var_dbl;
-
+  
+  ccl_splines = malloc(sizeof(ccl_spline_params));
+  
   if ((fconfig=fopen("include/ccl_params.ini", "r")) == NULL) {
     fprintf(stderr, "ccl_core.c: Failed to open config file ccl_params.ini\n");
     exit(EXIT_FAILURE);
@@ -57,21 +45,21 @@ void ccl_cosmology_read_config(){
     continue;
   } else {
     sscanf(buf, "%99[^=]=%le\n",var_name, &var_dbl);
-    if(strcmp(var_name,"A_SPLINE_DELTA")==0) A_SPLINE_DELTA=var_dbl;
-    if(strcmp(var_name,"A_SPLINE_NA")==0) A_SPLINE_NA=(int) var_dbl;
-    if(strcmp(var_name,"A_SPLINE_MIN")==0) A_SPLINE_MIN=var_dbl;
-    if(strcmp(var_name,"A_SPLINE_MAX")==0) A_SPLINE_MAX=var_dbl;
-    if(strcmp(var_name,"LOGM_SPLINE_DELTA")==0) LOGM_SPLINE_DELTA=var_dbl;
-    if(strcmp(var_name,"LOGM_SPLINE_NM")==0) LOGM_SPLINE_NM=(int) var_dbl;
-    if(strcmp(var_name,"LOGM_SPLINE_MIN")==0) LOGM_SPLINE_MIN=var_dbl;
-    if(strcmp(var_name,"LOGM_SPLINE_MAX")==0) LOGM_SPLINE_MAX=var_dbl;
-    if(strcmp(var_name,"N_A")==0) N_A=(int) var_dbl;
-    if(strcmp(var_name,"K_MAX_SPLINE")==0) K_MAX_SPLINE=var_dbl;
-    if(strcmp(var_name,"K_MAX")==0) K_MAX=var_dbl;
-    if(strcmp(var_name,"K_MIN")==0) K_MIN=var_dbl;
-    if(strcmp(var_name,"K_MAX_INT")==0) K_MAX_INT=var_dbl;
-    if(strcmp(var_name,"K_MIN_INT")==0) K_MIN_INT=var_dbl;
-    if(strcmp(var_name,"N_K")==0) N_K=(int) var_dbl;     
+    if(strcmp(var_name,"A_SPLINE_DELTA")==0) ccl_splines->A_SPLINE_DELTA=var_dbl;
+    if(strcmp(var_name,"A_SPLINE_NA")==0) ccl_splines->A_SPLINE_NA=(int) var_dbl;
+    if(strcmp(var_name,"A_SPLINE_MIN")==0) ccl_splines->A_SPLINE_MIN=var_dbl;
+    if(strcmp(var_name,"A_SPLINE_MAX")==0) ccl_splines->A_SPLINE_MAX=var_dbl;
+    if(strcmp(var_name,"LOGM_SPLINE_DELTA")==0) ccl_splines->LOGM_SPLINE_DELTA=var_dbl;
+    if(strcmp(var_name,"LOGM_SPLINE_NM")==0) ccl_splines->LOGM_SPLINE_NM=(int) var_dbl;
+    if(strcmp(var_name,"LOGM_SPLINE_MIN")==0) ccl_splines->LOGM_SPLINE_MIN=var_dbl;
+    if(strcmp(var_name,"LOGM_SPLINE_MAX")==0) ccl_splines->LOGM_SPLINE_MAX=var_dbl;
+    if(strcmp(var_name,"N_A")==0) ccl_splines->N_A=(int) var_dbl;
+    if(strcmp(var_name,"K_MAX_SPLINE")==0) ccl_splines->K_MAX_SPLINE=var_dbl;
+    if(strcmp(var_name,"K_MAX")==0) ccl_splines->K_MAX=var_dbl;
+    if(strcmp(var_name,"K_MIN")==0) ccl_splines->K_MIN=var_dbl;
+    if(strcmp(var_name,"K_MAX_INT")==0) ccl_splines->K_MAX_INT=var_dbl;
+    if(strcmp(var_name,"K_MIN_INT")==0) ccl_splines->K_MIN_INT=var_dbl;
+    if(strcmp(var_name,"N_K")==0) ccl_splines->N_K=(int) var_dbl;     
     }
   }
 
@@ -101,7 +89,7 @@ computed_power, computed_sigma: store status of the computations
 ccl_cosmology * ccl_cosmology_create(ccl_parameters params, ccl_configuration config)
 {
   
-  ccl_cosmology_read_config();
+  if(ccl_splines==NULL) ccl_cosmology_read_config();
 
   ccl_cosmology * cosmo = malloc(sizeof(ccl_cosmology));
   cosmo->params = params;

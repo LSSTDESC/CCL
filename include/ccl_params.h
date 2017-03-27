@@ -1,15 +1,30 @@
-extern double A_SPLINE_DELTA;
-extern int A_SPLINE_NA;
-extern double A_SPLINE_MIN;
-extern double A_SPLINE_MAX;
-extern double LOGM_SPLINE_DELTA;
-extern int LOGM_SPLINE_NM;
-extern double LOGM_SPLINE_MIN;
-extern double LOGM_SPLINE_MAX;
-extern int N_A;
-extern double K_MAX_SPLINE;
-extern double K_MAX;
-extern double K_MIN;
-extern double K_MAX_INT;
-extern double K_MIN_INT;
-extern int N_K;
+#pragma once
+
+typedef struct ccl_spline_params {
+  
+   //Scale factor splines
+  double A_SPLINE_DELTA;
+  int  A_SPLINE_NA;
+  double A_SPLINE_MIN;
+  double  A_SPLINE_MAX;
+  
+  //Mass splines
+  double LOGM_SPLINE_DELTA;
+  int LOGM_SPLINE_NM;
+  double LOGM_SPLINE_MIN;
+  double LOGM_SPLINE_MAX;
+  
+  //PS a and k spline
+  int N_A;
+
+  //k-splines and integrals
+  double K_MAX_SPLINE;
+  double K_MAX;
+  double K_MIN;
+  double K_MAX_INT;
+  double K_MIN_INT;
+  int N_K;
+  
+} ccl_spline_params;
+
+extern ccl_spline_params * ccl_splines;

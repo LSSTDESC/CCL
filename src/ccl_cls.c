@@ -725,12 +725,12 @@ static void get_k_interval(CCL_ClTracer *clt1,CCL_ClTracer *clt2,int l,
     chimax=clt2->chimax;
   }
   else {
-    chimin=0.5*(l+0.5)/K_MAX_INT;
-    chimax=2*(l+0.5)/K_MIN_INT;
+    chimin=0.5*(l+0.5)/ccl_splines->K_MAX_INT;
+    chimax=2*(l+0.5)/ccl_splines->K_MIN_INT;
   }
 
   if(chimin<=0)
-    chimin=0.5*(l+0.5)/K_MAX_INT;
+    chimin=0.5*(l+0.5)/ccl_splines->K_MAX_INT;
 
   *lkmax=fmin( 2,log10(2  *(l+0.5)/chimin));
   *lkmin=fmax(-4,log10(0.5*(l+0.5)/chimax));

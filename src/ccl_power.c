@@ -240,10 +240,10 @@ static void ccl_fill_class_parameters(ccl_cosmology * cosmo, struct file_content
   else {strcpy(fc->value[1],"none");}
 
   strcpy(fc->name[2],"P_k_max_1/Mpc");
-  sprintf(fc->value[2],"%e",K_MAX_SPLINE); //in units of 1/Mpc, corroborated with ccl_constants.h
+  sprintf(fc->value[2],"%e",ccl_splines->K_MAX_SPLINE); //in units of 1/Mpc, corroborated with ccl_constants.h
 
   strcpy(fc->name[3],"z_max_pk");
-  sprintf(fc->value[3],"%e",1./A_SPLINE_MIN-1.);
+  sprintf(fc->value[3],"%e",1./ccl_splines->A_SPLINE_MIN-1.);
 
   strcpy(fc->name[4],"modes");
   strcpy(fc->value[4],"s");
@@ -343,12 +343,12 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int * statu
 
 
   //CLASS calculations done - now allocate CCL splines
-  double kmin = K_MIN;
-  double kmax = K_MAX_SPLINE;
-  int nk = N_K;
-  double amin = A_SPLINE_MIN;
-  double amax = A_SPLINE_MAX;
-  int na = N_A;
+  double kmin = ccl_splines->K_MIN;
+  double kmax = ccl_splines->K_MAX_SPLINE;
+  int nk = ccl_splines->N_K;
+  double amin = ccl_splines->A_SPLINE_MIN;
+  double amax = ccl_splines->A_SPLINE_MAX;
+  int na = ccl_splines->N_A;
   
   // The x array is initially k, but will later
   // be overwritten with log(k)
@@ -449,12 +449,12 @@ TASK: provide spline for the BBKS power spectrum with baryonic correction
 
 static void ccl_cosmology_compute_power_bbks(ccl_cosmology * cosmo, int * status){
 
-  double kmin = K_MIN;
-  double kmax = K_MAX;
-  int nk = N_K;
-  double amin = A_SPLINE_MIN;
-  double amax = A_SPLINE_MAX;
-  int na = N_A;
+  double kmin = ccl_splines->K_MIN;
+  double kmax = ccl_splines->K_MAX;
+  int nk = ccl_splines->N_K;
+  double amin = ccl_splines->A_SPLINE_MIN;
+  double amax = ccl_splines->A_SPLINE_MAX;
+  int na = ccl_splines->N_A;
   
   // The x array is initially k, but will later
   // be overwritten with log(k)
@@ -602,7 +602,7 @@ double ccl_linear_matter_power(ccl_cosmology * cosmo, double a, double k, int * 
     double deltak=1e-4;
     double deriv_plin_kmid,deriv2_plin_kmid;
 
-    if(k<=K_MAX_SPLINE){
+    if(k<=ccl_splines->K_MAX_SPLINE){
       int pkstatus = gsl_spline_eval_e(cosmo->data.p_lin, log(k), NULL,&log_p_1);
       if (pkstatus){
         *status = CCL_ERROR_SPLINE_EV;
@@ -611,9 +611,9 @@ double ccl_linear_matter_power(ccl_cosmology * cosmo, double a, double k, int * 
       }
     } else { //Extrapolate NL regime using log derivative
       
-      double lkmid=log(K_MAX_SPLINE)-2*deltak;
+      double lkmid=log(ccl_splines->K_MAX_SPLINE)-2*deltak;
       double lkmid_minus_2delta=lkmid-2*deltak;
-      double lkmid_plus_2delta=log(K_MAX_SPLINE);
+      double lkmid_plus_2delta=log(ccl_splines->K_MAX_SPLINE);
       double lkmid_minus_delta=lkmid-deltak;
       double lkmid_plus_delta=lkmid+deltak;
       double lplin_plus_2delta;
@@ -690,7 +690,7 @@ double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double a, double k, int *s
     double deltak=1e-4;
     double deriv_pnl_kmid,deriv2_pnl_kmid;
     
-    if(k<=K_MAX_SPLINE){
+    if(k<=ccl_splines->K_MAX_SPLINE){
       
       int pwstatus =  gsl_spline2d_eval_e(cosmo->data.p_nl, log(k),a,NULL ,NULL ,&log_p_1);
       if (pwstatus){
@@ -700,9 +700,9 @@ double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double a, double k, int *s
       }
     } else { //Extrapolate NL regime using log derivative
       
-      double lkmid=log(K_MAX_SPLINE)-2*deltak;
+      double lkmid=log(ccl_splines->K_MAX_SPLINE)-2*deltak;
       double lkmid_minus_2delta=lkmid-2*deltak;
-      double lkmid_plus_2delta=log(K_MAX_SPLINE);
+      double lkmid_plus_2delta=log(ccl_splines->K_MAX_SPLINE);
       double lkmid_minus_delta=lkmid-deltak;
       double lkmid_plus_delta=lkmid+deltak;
       double lpnl_plus_2delta;
@@ -798,7 +798,7 @@ double ccl_sigmaR(ccl_cosmology *cosmo,double R)
   F.params=&par;
 
   double sigma_R;
-  gsl_integration_cquad(&F,log10(K_MIN_INT),log10(K_MAX_INT),0.0,1E-5,workspace,&sigma_R,NULL,NULL);
+  gsl_integration_cquad(&F,log10(ccl_splines->K_MIN_INT),log10(ccl_splines->K_MAX_INT),0.0,1E-5,workspace,&sigma_R,NULL,NULL);
   //TODO: log10 could be taken already in the macros.
   //TODO: 1E-5 should be a macro
   //TODO: we should check for integration success
