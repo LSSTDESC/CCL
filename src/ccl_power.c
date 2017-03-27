@@ -709,7 +709,7 @@ static void ccl_cosmology_compute_power_eh(ccl_cosmology * cosmo, int * status)
   cosmo->data.p_lin=log_power_lin;
 
   cosmo->computed_power=true;
-  double sigma_8 = ccl_sigma8(cosmo);
+  double sigma_8 = ccl_sigma8(cosmo,status);
   cosmo->computed_power=false;
 
   double log_sigma_8 = 2*(log(cosmo->params.sigma_8) - log(sigma_8));
