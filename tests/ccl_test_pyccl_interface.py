@@ -21,9 +21,18 @@ def reference_models():
     p3 = ccl.Parameters(Omega_c=0.27, Omega_b=0.045, h=0.67, A_s=1e-10, 
                         n_s=0.96, w0=-0.95, wa=0.05)
     cosmo3 = ccl.Cosmology(p3)
+
+    # BBKS Pk
+    p4 = ccl.Parameters(Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96)
+    cosmo4 = ccl.Cosmology(p4,transfer_function='bbks')
+
+    # E&H Pk
+    p5 = ccl.Parameters(Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96)
+    cosmo5 = ccl.Cosmology(p5,transfer_function='eisenstein_hu')
+
     
     # Return (only do one cosmology for now, for speed reasons)
-    return [cosmo1,] # cosmo2, cosmo3
+    return [cosmo1,cosmo4,cosmo5] # cosmo2, cosmo3
 
 def all_finite(vals):
     """
