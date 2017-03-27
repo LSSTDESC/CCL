@@ -451,8 +451,11 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int * statu
       	   //The 2D interpolation routines access the function values y_{k_ia_j} with the following ordering:
 	         //y_ij = y2d[j*N_k + i]
 	         //with i = 0,...,N_k-1 and j = 0,...,N_a-1.
-	         s = spectra_pk_nl_at_k_and_z(&ba, &pm, &sp,exp(x[i]),1./z[j]-1., &Z);
-	         y2d[j*nk+i] = log(Z);  		                
+	         s = spectra_pk_nl_at_k_and_z(&ba, &pm, &sp,exp(x[i]),1./z[na-1]-1., &Z);
+	         //s = spectra_pk_nl_at_k_and_z(&ba, &pm, &sp, 1.054171428519e+00*0.7 ,1./z[na-1]-1., &Z);
+	         y2d[j*nk+i] = log(Z);  
+	         //printf("z=%1.12le, k=%1.12le, pk=%1.12le\n", 1./z[na-1]-1., 1.054171428519e+00, Z*0.7*0.7*0.7);
+	         //exit(1);		                
          }
        } 
        int pwstatus = gsl_spline2d_init(log_power_nl, x, z, y2d,nk,na);
