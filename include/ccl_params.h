@@ -1,0 +1,15 @@
+extern double A_SPLINE_DELTA;
+extern int A_SPLINE_NA;
+extern double A_SPLINE_MIN;
+extern double A_SPLINE_MAX;
+extern double LOGM_SPLINE_DELTA;
+extern int LOGM_SPLINE_NM;
+extern double LOGM_SPLINE_MIN;
+extern double LOGM_SPLINE_MAX;
+extern int N_A;
+extern double K_MAX_SPLINE;
+extern double K_MAX;
+extern double K_MIN;
+extern double K_MAX_INT;
+extern double K_MIN_INT;
+extern int N_K;

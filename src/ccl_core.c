@@ -14,10 +14,11 @@
 const ccl_configuration default_config = {ccl_boltzmann_class, ccl_halofit, ccl_tinker10};
 
 /* ------- ROUTINE: ccl_cosmology_read_config ------
-INPUTS: none, but will look for ini file in include/ dir
-TASK: fill out global variables fo splines with user defined input
-
-The following are the relevant global variables:
+   INPUTS: none, but will look for ini file in include/ dir
+   TASK: fill out global variables fo splines with user defined input
+   those are defined in ccl_params.h
+   
+   The following are the relevant global variables:
 */
 
 double A_SPLINE_DELTA;
@@ -26,8 +27,8 @@ double A_SPLINE_MIN;
 double A_SPLINE_MAX;
 double LOGM_SPLINE_DELTA;
 int LOGM_SPLINE_NM;
-int LOGM_SPLINE_MIN;
-int LOGM_SPLINE_MAX;
+double LOGM_SPLINE_MIN;
+double LOGM_SPLINE_MAX;
 int N_A;
 double K_MAX_SPLINE;
 double K_MAX;
@@ -35,15 +36,14 @@ double K_MIN;
 double K_MAX_INT; //eventually will be removed
 double K_MIN_INT;
 int N_K;
-static int CONFIG_LINE_BUFFER_SIZE=100;
-static int MAX_CONFIG_VAR_LEN=100;
 
-static void ccl_cosmology_read_config(){
-  
+void ccl_cosmology_read_config(){
+
+  int CONFIG_LINE_BUFFER_SIZE=100;
+  int MAX_CONFIG_VAR_LEN=100;
   FILE *fconfig;
   char buf[CONFIG_LINE_BUFFER_SIZE];
   char var_name[MAX_CONFIG_VAR_LEN];
-  int var_int;
   double var_dbl;
 
   if ((fconfig=fopen("include/ccl_params.ini", "r")) == NULL) {
@@ -52,34 +52,26 @@ static void ccl_cosmology_read_config(){
   } 
 
   while(! feof(fconfig)) {
-    fgets(buf, CONFIG_LINE_BUFFER_SIZE, fconfig);
-    if (buf[0]=='#' || buf[0]=='\n') {
-      continue;
-    } else {
-      if(buf[0]=='i'){
-	sscanf(buf, "%s %d\n", var_name, &var_int);
-      } else if(buf[0]=='d'){
-	sscanf(buf, "%s %le\n",var_name, &var_dbl);
-      } else {
-	fprintf(stderr, "ccl_core.c: Failed to read line from config file ccl_params.ini\n");
-	exit(EXIT_FAILURE);
-      } 
-      if(strcmp(var_name,"dbl_A_SPLINE_DELTA:")==0) A_SPLINE_DELTA=var_dbl;
-      if(strcmp(var_name,"int_A_SPLINE_NA:")==0) A_SPLINE_NA=var_int;
-      if(strcmp(var_name,"dbl_A_SPLINE_MIN:")==0) A_SPLINE_MIN=var_dbl;
-      if(strcmp(var_name,"dbl_A_SPLINE_MAX:")==0) A_SPLINE_MAX=var_dbl;
-      if(strcmp(var_name,"dbl_LOGM_SPLINE_DELTA:")==0) LOGM_SPLINE_DELTA=var_dbl;
-      if(strcmp(var_name,"int_LOGM_SPLINE_NM:")==0) LOGM_SPLINE_NM=var_int;
-      if(strcmp(var_name,"int_LOGM_SPLINE_MIN:")==0) LOGM_SPLINE_MIN=var_int;
-      if(strcmp(var_name,"int_LOGM_SPLINE_MAX:")==0) LOGM_SPLINE_MAX=var_int;
-      if(strcmp(var_name,"int_N_A:")==0) N_A=var_int;
-      if(strcmp(var_name,"dbl_K_MAX_SPLINE:")==0) K_MAX_SPLINE=var_dbl;
-      if(strcmp(var_name,"dbl_K_MAX:")==0) K_MAX=var_dbl;
-      if(strcmp(var_name,"dbl_K_MIN:")==0) K_MIN=var_dbl;
-      if(strcmp(var_name,"dbl_K_MAX_INT:")==0) K_MAX_INT=var_dbl;
-      if(strcmp(var_name,"dbl_K_MIN_INT:")==0) K_MIN_INT=var_dbl;
-      if(strcmp(var_name,"int_N_K:")==0) N_K=var_int;     
-      
+  fgets(buf, CONFIG_LINE_BUFFER_SIZE, fconfig);
+  if (buf[0]==';' || buf[0]=='[' || buf[0]=='\n') {
+    continue;
+  } else {
+    sscanf(buf, "%99[^=]=%le\n",var_name, &var_dbl);
+    if(strcmp(var_name,"A_SPLINE_DELTA")==0) A_SPLINE_DELTA=var_dbl;
+    if(strcmp(var_name,"A_SPLINE_NA")==0) A_SPLINE_NA=(int) var_dbl;
+    if(strcmp(var_name,"A_SPLINE_MIN")==0) A_SPLINE_MIN=var_dbl;
+    if(strcmp(var_name,"A_SPLINE_MAX")==0) A_SPLINE_MAX=var_dbl;
+    if(strcmp(var_name,"LOGM_SPLINE_DELTA")==0) LOGM_SPLINE_DELTA=var_dbl;
+    if(strcmp(var_name,"LOGM_SPLINE_NM")==0) LOGM_SPLINE_NM=(int) var_dbl;
+    if(strcmp(var_name,"LOGM_SPLINE_MIN")==0) LOGM_SPLINE_MIN=var_dbl;
+    if(strcmp(var_name,"LOGM_SPLINE_MAX")==0) LOGM_SPLINE_MAX=var_dbl;
+    if(strcmp(var_name,"N_A")==0) N_A=(int) var_dbl;
+    if(strcmp(var_name,"K_MAX_SPLINE")==0) K_MAX_SPLINE=var_dbl;
+    if(strcmp(var_name,"K_MAX")==0) K_MAX=var_dbl;
+    if(strcmp(var_name,"K_MIN")==0) K_MIN=var_dbl;
+    if(strcmp(var_name,"K_MAX_INT")==0) K_MAX_INT=var_dbl;
+    if(strcmp(var_name,"K_MIN_INT")==0) K_MIN_INT=var_dbl;
+    if(strcmp(var_name,"N_K")==0) N_K=(int) var_dbl;     
     }
   }
 
