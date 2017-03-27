@@ -856,7 +856,7 @@ static void ccl_cosmology_compute_power_bbks(ccl_cosmology * cosmo, int * status
   cosmo->data.p_lin=log_power_lin;
   
   cosmo->computed_power=true;
-  double sigma_8 = ccl_sigma8(cosmo);
+  double sigma_8 = ccl_sigma8(cosmo,status);
   cosmo->computed_power=false;
   
   double log_sigma_8 = 2*(log(cosmo->params.sigma_8) - log(sigma_8));
@@ -1089,8 +1089,6 @@ typedef struct {
 static double sigmaR_integrand(double lk,void *params)
 {
   SigmaR_pars *par=(SigmaR_pars *)params;
-  int stat = 0;
-  par->status = &stat;
   
   double k=pow(10.,lk);
   double pk=ccl_linear_matter_power(par->cosmo,k, 1.,par->status);
@@ -1106,11 +1104,10 @@ static double sigmaR_integrand(double lk,void *params)
   return pk*k*k*k*w*w;
 }
 
-double ccl_sigmaR(ccl_cosmology *cosmo,double R)
+double ccl_sigmaR(ccl_cosmology *cosmo,double R, int *status)
 {
   SigmaR_pars par;
-  int stat = 0;
-  par.status = &stat;
+  par.status = status;
   
   par.cosmo=cosmo;
   par.R=R;
@@ -1128,7 +1125,7 @@ double ccl_sigmaR(ccl_cosmology *cosmo,double R)
   return sqrt(sigma_R*M_LN10/(2*M_PI*M_PI));
 }
 
-double ccl_sigma8(ccl_cosmology *cosmo)
+double ccl_sigma8(ccl_cosmology *cosmo, int *status)
 {
-  return ccl_sigmaR(cosmo,8/cosmo->params.h);
+  return ccl_sigmaR(cosmo,8/cosmo->params.h, status);
 }
