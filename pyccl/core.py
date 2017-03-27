@@ -41,7 +41,9 @@ error_types = {
     lib.CCL_ERROR_SPLINE_EV:    'CCL_ERROR_SPLINE_EV',
     lib.CCL_ERROR_INTEG:        'CCL_ERROR_INTEG',
     lib.CCL_ERROR_ROOT:         'CCL_ERROR_ROOT',
-    lib.CCL_ERROR_CLASS:        'CCL_ERROR_CLASS'
+    lib.CCL_ERROR_CLASS:        'CCL_ERROR_CLASS',
+    lib.CCL_ERROR_COMPUTECHI:   'CCL_ERROR_COMPUTECHI',
+    lib.CCL_ERROR_MF:           'CCL_ERROR_MF'
 }
 
 

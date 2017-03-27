@@ -124,8 +124,8 @@ For more routines to compute distances and growth rates (e.g. at multiple times 
 ###  Matter power spectra and sigma_8
 For given cosmology we can compute linear and non-linear matter power spectra using functions **`ccl_linear_matter_power`** and **`ccl_nonlin_matter_power`**
 ```c
-double ccl_linear_matter_power(ccl_cosmology * cosmo, double a, double k);
-double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double a, double k);
+double ccl_linear_matter_power(ccl_cosmology * cosmo, double k, double a);
+double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double k, double a);
 ```
 Sigma_8 can be calculated by function **`ccl_sigma8`**, or more generally by function **`ccl_sigmaR`**, which computes the variance of the density field smoothed by spherical top-hat window function on a comoving distance **`R`** (in Mpc).
 ```c
@@ -261,11 +261,12 @@ int main(int argc,char **argv){
 		ZD,ccl_comoving_radial_distance(cosmo,1./(1+ZD)));
 	printf("Luminosity distance to z = %.3lf is chi = %.3lf Mpc\n",
 		ZD,ccl_luminosity_distance(cosmo,1./(1+ZD)));
-	
-	//Consistency check
-	printf("Scale factor at chi=%.3lf Mpc is a=%.3lf Mpc\n",
-	ccl_comoving_radial_distance(cosmo,1./(1+ZD)),
-	ccl_scale_factor_of_chi(cosmo,ccl_comoving_radial_distance(cosmo,1./(1+ZD))));
+
+        //Consistency check
+        printf("Scale factor is a=%.3lf \n",1./(1+ZD));
+        printf("Consistency: Scale factor at chi=%.3lf Mpc is a=%.3lf\n",
+               ccl_comoving_radial_distance(cosmo,1./(1+ZD), &status),
+               ccl_scale_factor_of_chi(cosmo,ccl_comoving_radial_distance(cosmo,1./(1+ZD), &status), &status));
 	 
 	// Compute growth factor and growth rate (see include/ccl_background.h for more routines)
 	printf("Growth factor and growth rate at z = %.3lf are D = %.3lf and f = %.3lf\n",

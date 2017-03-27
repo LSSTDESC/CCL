@@ -61,9 +61,8 @@ void specs_dNdz_tomog_vec(
                         double bin_zmin, double bin_zmax, 
                         user_pz_info* user_info, 
                         double* z, int nz, 
-                        double* output, int nout)
+                        double* output, int nout, int *status)
 {
-    int status;
     double val = 0.;
     assert(nout == nz);
     
@@ -71,26 +70,27 @@ void specs_dNdz_tomog_vec(
     for(int i=0; i < nz; i++){
         
         // Calculate dNdz value
-        status = ccl_specs_dNdz_tomog(z[i], dNdz_type, bin_zmin, bin_zmax,
-                                      user_info, &val);
+        ccl_specs_dNdz_tomog(z[i], dNdz_type, bin_zmin, bin_zmax,
+			     user_info, &val, status);
         // Check status
-        if (status != 0){
+        if (*status != 0){
             fprintf(stderr, "%s", 
                     "specs_dNdz_tomog_vec: You have selected an unsupported "
                     "dNdz type. Exiting.\n");
-            exit(1);
+            return;
         } // End status check
         
         // Add return value to output array
         output[i] = val;
         
     } // End loop over z values
+
     return;
 }
 
 // C callback function, to call a pre-specified Python function with 
 // call signature def fn(double, double): return double
-static double call_py_photoz_fn(double z_ph, double z_s, void *py_func_obj)
+static double call_py_photoz_fn(double z_ph, double z_s, void *py_func_obj, int *status)
 {
     PyObject *func, *arglist;
     PyObject *result;
