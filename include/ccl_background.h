@@ -20,7 +20,7 @@ double ccl_comoving_radial_distance(ccl_cosmology * cosmo, double a, int* status
 void ccl_comoving_radial_distances(ccl_cosmology * cosmo, int na, double a[], double output[], int* status);
 
 //Transforms between radial and angular distances
-double ccl_sinn(ccl_cosmology *cosmo,double chi);
+double ccl_sinn(ccl_cosmology *cosmo,double chi, int *status);
 
 // Comoving angular distance in Mpc from today to scale factor a
 double ccl_comoving_angular_distance(ccl_cosmology * cosmo, double a, int* status);
@@ -53,4 +53,4 @@ double ccl_scale_factor_of_chi(ccl_cosmology * cosmo, double chi, int * status);
 void ccl_scale_factor_of_chis(ccl_cosmology * cosmo, int nchi, double chi[], double output[], int* status);
 
 // Omega functions of a
-double ccl_omega_x(ccl_cosmology * cosmo, double a, ccl_omega_x_label label);
+double ccl_omega_x(ccl_cosmology * cosmo, double a, ccl_omega_x_label label, int* status);

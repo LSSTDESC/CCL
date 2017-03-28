@@ -10,9 +10,9 @@ struct user_func_params{
 	double (* sigma_z) (double);
 };
 
-// The user defines a function of the form double function ( z_ph, z_spec, void * user_pz_params) where user_pz_params is a pointer to the parameters of the user-defined function. This returns the probabilty of obtaining a given photo-z given a particular spec_z.
+// The user defines a function of the form double function ( z_ph, z_spec, void * user_pz_params, int *status) where user_pz_params is a pointer to the parameters of the user-defined function. This returns the probabilty of obtaining a given photo-z given a particular spec_z.
 
-double user_pz_probability(double z_ph, double z_s, void * user_par){
+double user_pz_probability(double z_ph, double z_s, void * user_par, int *status){
 
         struct user_func_params * p = (struct user_func_params *) user_par;
 
@@ -42,32 +42,32 @@ int main(int argc,char **argv){
         output = fopen("./tests/specs_example_tomo_lens_user_pz.out", "w");
         for (z=0; z<100; z=z+1){ 
 		z_test = 0.035*z;
-                status = ccl_specs_dNdz_tomog(z_test, DNDZ_WL_FID, 0.,6.,my_info,&dNdz_tomo);
+                ccl_specs_dNdz_tomog(z_test, DNDZ_WL_FID, 0.,6.,my_info,&dNdz_tomo, &status);
 		if (status!=0){
 			printf("You have selected an unsupported dNdz type. Exiting.\n");
 			exit(1);
 		}
-                status = ccl_specs_dNdz_tomog(z_test, DNDZ_WL_FID, 0.,0.6,my_info, &tmp1);
+                ccl_specs_dNdz_tomog(z_test, DNDZ_WL_FID, 0.,0.6,my_info, &tmp1, &status);
                 if (status!=0){
                         printf("You have selected an unsupported dNdz type. Exiting.\n");
                         exit(1);
                 }	
-		status = ccl_specs_dNdz_tomog(z_test, DNDZ_WL_FID, 0.6,1.2,my_info, &tmp2);
+		ccl_specs_dNdz_tomog(z_test, DNDZ_WL_FID, 0.6,1.2,my_info, &tmp2, &status);
                 if (status!=0){
                         printf("You have selected an unsupported dNdz type. Exiting.\n");
                         exit(1);
                 }
-		status = ccl_specs_dNdz_tomog(z_test, DNDZ_WL_FID, 1.2,1.8,my_info, &tmp3);
+		ccl_specs_dNdz_tomog(z_test, DNDZ_WL_FID, 1.2,1.8,my_info, &tmp3, &status);
                 if (status!=0){
                         printf("You have selected an unsupported dNdz type. Exiting.\n");
                         exit(1);
                 }
-		status = ccl_specs_dNdz_tomog(z_test, DNDZ_WL_FID, 1.8,2.4,my_info, &tmp4);
+		ccl_specs_dNdz_tomog(z_test, DNDZ_WL_FID, 1.8,2.4,my_info, &tmp4, &status);
                 if (status!=0){
                         printf("You have selected an unsupported dNdz type. Exiting.\n");
                         exit(1);
                 }
-		status = ccl_specs_dNdz_tomog(z_test, DNDZ_WL_FID, 2.4,3.0,my_info, &tmp5);
+		ccl_specs_dNdz_tomog(z_test, DNDZ_WL_FID, 2.4,3.0,my_info, &tmp5, &status);
                 if (status!=0){
                         printf("You have selected an unsupported dNdz type. Exiting.\n");
                         exit(1);
@@ -79,32 +79,32 @@ int main(int argc,char **argv){
 	output = fopen("./tests/specs_example_tomo_clust_user_pz.out", "w");
         for (z=0; z<100; z=z+1){
 		z_test = 0.035*z;	
-                status = ccl_specs_dNdz_tomog(z_test, DNDZ_NC, 0.,6.,my_info,&dNdz_tomo);
+                ccl_specs_dNdz_tomog(z_test, DNDZ_NC, 0.,6.,my_info,&dNdz_tomo, &status);
                 if (status!=0){
                         printf("You have selected an unsupported dNdz type. Exiting.\n");
                         exit(1);
                 }
-		status = ccl_specs_dNdz_tomog(z_test, DNDZ_NC, 0.,0.6,my_info, &tmp1);
+		ccl_specs_dNdz_tomog(z_test, DNDZ_NC, 0.,0.6,my_info, &tmp1, &status);
                 if (status!=0){
                         printf("You have selected an unsupported dNdz type. Exiting.\n");
                         exit(1);
                 }
-		status = ccl_specs_dNdz_tomog(z_test, DNDZ_NC, 0.6,1.2,my_info, &tmp2);
+		ccl_specs_dNdz_tomog(z_test, DNDZ_NC, 0.6,1.2,my_info, &tmp2, &status);
                 if (status!=0){
                         printf("You have selected an unsupported dNdz type. Exiting.\n");
                         exit(1);
                 }
-		status = ccl_specs_dNdz_tomog(z_test, DNDZ_NC, 1.2,1.8, my_info, &tmp3);
+		ccl_specs_dNdz_tomog(z_test, DNDZ_NC, 1.2,1.8, my_info, &tmp3, &status);
                 if (status!=0){
                         printf("You have selected an unsupported dNdz type. Exiting.\n");
                         exit(1);
                 }
-		status = ccl_specs_dNdz_tomog(z_test, DNDZ_NC, 1.8,2.4, my_info, &tmp4);
+		ccl_specs_dNdz_tomog(z_test, DNDZ_NC, 1.8,2.4, my_info, &tmp4, &status);
                 if (status!=0){
                         printf("You have selected an unsupported dNdz type. Exiting.\n");
                         exit(1);
                 }
-		status = ccl_specs_dNdz_tomog(z_test, DNDZ_NC, 2.4,3.0, my_info, &tmp5);
+		ccl_specs_dNdz_tomog(z_test, DNDZ_NC, 2.4,3.0, my_info, &tmp5, &status);
                 if (status!=0){
                         printf("You have selected an unsupported dNdz type. Exiting.\n");
                         exit(1);

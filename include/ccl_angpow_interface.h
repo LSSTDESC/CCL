@@ -102,7 +102,8 @@ class PowerSpecCCL : public PowerSpecBase {
     int status=0; double bias=1.0;
     double tmp= bias*ccl_growth_factor(ccl_cosmo_,1.0/(1+z), &status);
     growth2_ = tmp*tmp;
-    fz_=ccl_growth_rate(ccl_cosmo_,1.0/(1+z), &status);
+    // WARNING: here we want to store dlnD/dln(+1z) = - dlnD/dlna
+    fz_= - ccl_growth_rate(ccl_cosmo_,1.0/(1+z), &status);
   }
 
   //Main operator
