@@ -1,36 +1,50 @@
-Summary of changes wrt the pre-autotools version:
----------------------------------------------------------
- - No Makefile: everything is now defined in
-     Makefile.am
-     include/Makefile.am
-     class/Makefile.am
- - When adding new files to src, the new file should
-   be listed under libccl_la_SOURCES in Makefile.am
- - When adding new files to include, the new file 
-   should be listed under include_HEADERS in
-   include/Makefile.am
- - When adding new unit test files, they should be
-   listed under check_ccl_SOURCES in Makefile.am
- - Any other new files that should be included with
-   the library (e.g. documentation files) should be
-   listed under EXTRA_DIST in Makefile.am.
- - The file configure.ac may have to be modified when
-   adding new features, but not too often.
- - After making changes to any of these files, developers
-   should run:
+Reviewing a pull request (PR) on github
+---------------------------------------
+1. Checkout the branch
+2. Make sure you can install the C library
+3. Make sure you can install the python module
+4. Make sure the C unit tests pass (i.e. run "make check" successfully)
+5. Make sure the python tests pass (i.e. run "python run_tests.py" from the "tests" directory)
+6. Look at the code (see "Files changed" on the top of this page) and check that the changes make sense to you
+7. If new science has been implemented, and if possible, try to compare the output of the code against your own predictions. Possibly, ask the developer to implement a unit test for it.
+
+
+Things to do if you are adding new features to the CCL C lib
+------------------------------------------------------------
+ 1. If you haven't created a new files (i.e. you only edited
+    an existing one), you don't need to do any of this.
+ 2. When adding a new source file (.c), put it in src. The
+    the new file should be listed under libccl_la_SOURCES in
+    Makefile.am.
+ 3. When adding a new header file (.h), put it in include.
+    The new file should be listed under include_HEADERS in
+    include/Makefile.am
+ 4. When adding new unit test files, they should be listed
+    under check_ccl_SOURCES in Makefile.am
+ 5. Any other new files that should be included with the
+    library (e.g. documentation files) should be listed
+    under EXTRA_DIST in Makefile.am.
+ 6. The file configure.ac may have to be modified when 
+    adding new features (e.g. adding a new dependency), but
+    not too often.
+ 7. After making changes to any of these files, developers
+    should run:
       $> autoreconf -i
-   and commit any modified files (some files will be
-   automatically modified by this command).
- - From now on, to install the library, users will run:
+    and commit any modified files (some files will be
+    automatically modified by this command).
+
+More autotools fun:
+ - To install the library, users will run:
      $> configure <options>
      $> make
      $> make install
- - Once the library is installed, all unit tests are
-   run by typing:
+ - Once the library is compiled, all unit tests are run by
+   typing:
      $> make check
  - A tarball with all files needed to install the library
    can be created automatically by typing:
      $> make dist
+
 
 Modifying the Python wrapper
 ---------------------------------------------------------
