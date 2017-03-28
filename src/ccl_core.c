@@ -135,7 +135,7 @@ void ccl_parameters_fill_initial(ccl_parameters *params)
 {
   // Fixed radiation parameters
   // Omega_g * h**2 is known from T_CMB
-  params->T_CMB =  2.726;
+  params->T_CMB =  2.725;
   params->Omega_g = M_PI*M_PI*pow((params->T_CMB/11604.5),4.)/(15*8.098E-11*params->h*params->h);
 
   // Derived parameters
