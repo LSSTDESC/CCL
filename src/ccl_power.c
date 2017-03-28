@@ -640,7 +640,7 @@ static double eh_power(ccl_parameters *params,eh_struct *eh,double k,int wiggled
 
 static void ccl_cosmology_compute_power_eh(ccl_cosmology * cosmo, int * status)
 {
-  cosmo->data.k_min=K_MIN_DEFAULT;
+  cosmo->data.k_min=ccl_splines->K_MIN_DEFAULT;
   double kmin = cosmo->data.k_min;
   double kmax = ccl_splines->K_MAX;
   int nk = ccl_splines->N_K;
@@ -795,7 +795,7 @@ TASK: provide spline for the BBKS power spectrum with baryonic correction
 
 static void ccl_cosmology_compute_power_bbks(ccl_cosmology * cosmo, int * status)
 {
-  cosmo->data.k_min=K_MIN_DEFAULT;
+  cosmo->data.k_min=ccl_splines->K_MIN_DEFAULT;
   double kmin = cosmo->data.k_min;
   double kmax = ccl_splines->K_MAX;
   int nk = ccl_splines->N_K;
@@ -1117,7 +1117,7 @@ double ccl_sigmaR(ccl_cosmology *cosmo,double R, int *status)
   F.function=&sigmaR_integrand;
   F.params=&par;
   double sigma_R;
-  gsl_integration_cquad(&F,log10(cosmo->data.k_min),log10(K_MAX),0.0,1E-5,workspace,&sigma_R,NULL,NULL);
+  gsl_integration_cquad(&F,log10(cosmo->data.k_min),log10(ccl_splines->K_MAX),0.0,1E-5,workspace,&sigma_R,NULL,NULL);
   //TODO: log10 could be taken already in the macros.
   //TODO: 1E-5 should be a macro
   //TODO: we should check for integration success

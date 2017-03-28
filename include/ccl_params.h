@@ -20,9 +20,7 @@ typedef struct ccl_spline_params {
   //k-splines and integrals
   double K_MAX_SPLINE;
   double K_MAX;
-  double K_MIN;
-  double K_MAX_INT;
-  double K_MIN_INT;
+  double K_MIN_DEFAULT;
   int N_K;
   
 } ccl_spline_params;

@@ -56,9 +56,7 @@ void ccl_cosmology_read_config(){
     if(strcmp(var_name,"N_A")==0) ccl_splines->N_A=(int) var_dbl;
     if(strcmp(var_name,"K_MAX_SPLINE")==0) ccl_splines->K_MAX_SPLINE=var_dbl;
     if(strcmp(var_name,"K_MAX")==0) ccl_splines->K_MAX=var_dbl;
-    if(strcmp(var_name,"K_MIN")==0) ccl_splines->K_MIN=var_dbl;
-    if(strcmp(var_name,"K_MAX_INT")==0) ccl_splines->K_MAX_INT=var_dbl;
-    if(strcmp(var_name,"K_MIN_INT")==0) ccl_splines->K_MIN_INT=var_dbl;
+    if(strcmp(var_name,"K_MIN_DEFAULT")==0) ccl_splines->K_MIN_DEFAULT=var_dbl;
     if(strcmp(var_name,"N_K")==0) ccl_splines->N_K=(int) var_dbl;     
     }
   }
