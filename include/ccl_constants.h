@@ -1,9 +1,11 @@
 #pragma once
 
+//Spline types
 #define A_SPLINE_TYPE gsl_interp_akima
 #define K_SPLINE_TYPE gsl_interp_akima
 #define M_SPLINE_TYPE gsl_interp_akima
 #define PNL_SPLINE_TYPE gsl_interp2d_bicubic
+#define PLIN_SPLINE_TYPE gsl_interp2d_bicubic
 
 // These are in units of Mpc (no factor of h)
 #define K_PIVOT 0.05

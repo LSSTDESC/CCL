@@ -134,18 +134,20 @@ def check_massfunc(cosmo):
     """
     z = 0.
     z_arr = np.linspace(0., 2., 10)
+    a = 1.
+    a_arr = 1. / (1.+z_arr)
     mhalo_scl = 1e13
     mhalo_lst = [1e11, 1e12, 1e13, 1e14, 1e15, 1e16]
     mhalo_arr = np.array([1e11, 1e12, 1e13, 1e14, 1e15, 1e16])
     
     # massfunc
-    assert_( all_finite(ccl.massfunc(cosmo, mhalo_scl, z)) )
-    assert_( all_finite(ccl.massfunc(cosmo, mhalo_lst, z)) )
-    assert_( all_finite(ccl.massfunc(cosmo, mhalo_arr, z)) )
+    assert_( all_finite(ccl.massfunc(cosmo, mhalo_scl, a)) )
+    assert_( all_finite(ccl.massfunc(cosmo, mhalo_lst, a)) )
+    assert_( all_finite(ccl.massfunc(cosmo, mhalo_arr, a)) )
     
-    assert_raises(TypeError, ccl.massfunc, cosmo, mhalo_scl, z_arr)
-    assert_raises(TypeError, ccl.massfunc, cosmo, mhalo_lst, z_arr)
-    assert_raises(TypeError, ccl.massfunc, cosmo, mhalo_arr, z_arr)
+    assert_raises(TypeError, ccl.massfunc, cosmo, mhalo_scl, a_arr)
+    assert_raises(TypeError, ccl.massfunc, cosmo, mhalo_lst, a_arr)
+    assert_raises(TypeError, ccl.massfunc, cosmo, mhalo_arr, a_arr)
     
     # massfunc_m2r
     assert_( all_finite(ccl.massfunc_m2r(cosmo, mhalo_scl)) )
@@ -153,13 +155,13 @@ def check_massfunc(cosmo):
     assert_( all_finite(ccl.massfunc_m2r(cosmo, mhalo_arr)) )
     
     # sigmaM
-    assert_( all_finite(ccl.sigmaM(cosmo, mhalo_scl, z)) )
-    assert_( all_finite(ccl.sigmaM(cosmo, mhalo_lst, z)) )
-    assert_( all_finite(ccl.sigmaM(cosmo, mhalo_arr, z)) )
+    assert_( all_finite(ccl.sigmaM(cosmo, mhalo_scl, a)) )
+    assert_( all_finite(ccl.sigmaM(cosmo, mhalo_lst, a)) )
+    assert_( all_finite(ccl.sigmaM(cosmo, mhalo_arr, a)) )
     
-    assert_raises(TypeError, ccl.sigmaM, cosmo, mhalo_scl, z_arr)
-    assert_raises(TypeError, ccl.sigmaM, cosmo, mhalo_lst, z_arr)
-    assert_raises(TypeError, ccl.sigmaM, cosmo, mhalo_arr, z_arr)
+    assert_raises(TypeError, ccl.sigmaM, cosmo, mhalo_scl, a_arr)
+    assert_raises(TypeError, ccl.sigmaM, cosmo, mhalo_lst, a_arr)
+    assert_raises(TypeError, ccl.sigmaM, cosmo, mhalo_arr, a_arr)
     
 
 def check_lsst_specs(cosmo):

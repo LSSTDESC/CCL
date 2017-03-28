@@ -69,24 +69,23 @@ typedef struct {
   double chi;
   SplPar *spl_pz;
   ccl_cosmology *cosmo;
+  int *status;
 } IntLensPar;
 
 //Integrand for lensing kernel
 static double integrand_wl(double chip,void *params)
 {
-//EK: added local status here as the status testing is done in routines called from this function
-  int status;
   IntLensPar *p=(IntLensPar *)params;
   double chi=p->chi;
-  double a=ccl_scale_factor_of_chi(p->cosmo,chip, &status);
+  double a=ccl_scale_factor_of_chi(p->cosmo,chip, p->status);
   double z=1./a-1;
   double pz=spline_eval(z,p->spl_pz);
-  double h=p->cosmo->params.h*ccl_h_over_h0(p->cosmo,a, &status)/CLIGHT_HMPC;
+  double h=p->cosmo->params.h*ccl_h_over_h0(p->cosmo,a, p->status)/CLIGHT_HMPC;
 
   if(chi==0)
     return h*pz;
   else
-    return h*pz*ccl_sinn(p->cosmo,chip-chi)/ccl_sinn(p->cosmo,chip);
+    return h*pz*ccl_sinn(p->cosmo,chip-chi,p->status)/ccl_sinn(p->cosmo,chip,p->status);
 }
 
 //Integral to compute lensing window function
@@ -97,7 +96,7 @@ static double integrand_wl(double chip,void *params)
 //win     -> result is stored here
 static int window_lensing(double chi,ccl_cosmology *cosmo,SplPar *spl_pz,double chi_max,double *win)
 {
-  int status;
+  int gslstatus =0, status =0;
   double result,eresult;
   IntLensPar ip;
   gsl_function F;
@@ -106,12 +105,13 @@ static int window_lensing(double chi,ccl_cosmology *cosmo,SplPar *spl_pz,double 
   ip.chi=chi;
   ip.cosmo=cosmo;
   ip.spl_pz=spl_pz;
+  ip.status = &status;
   F.function=&integrand_wl;
   F.params=&ip;
-  status=gsl_integration_qag(&F,chi,chi_max,0,1E-4,1000,GSL_INTEG_GAUSS41,w,&result,&eresult);
+  gslstatus=gsl_integration_qag(&F,chi,chi_max,0,1E-4,1000,GSL_INTEG_GAUSS41,w,&result,&eresult);
   *win=result;
   gsl_integration_workspace_free(w);
-  if(status!=GSL_SUCCESS)
+  if(gslstatus!=GSL_SUCCESS || *ip.status)
     return 1;
   //TODO: chi_max should be changed to chi_horizon
   //we should precompute this quantity and store it in cosmo by default
@@ -125,6 +125,7 @@ typedef struct {
   SplPar *spl_pz;
   SplPar *spl_sz;
   ccl_cosmology *cosmo;
+  int *status;
 } IntMagPar;
 
 //Integrand for magnification kernel
@@ -134,16 +135,16 @@ static double integrand_mag(double chip,void *params)
 //EK: added local status here as the status testing is done in routines called from this function
   int status;
   double chi=p->chi;
-  double a=ccl_scale_factor_of_chi(p->cosmo,chip, &status);
+  double a=ccl_scale_factor_of_chi(p->cosmo,chip, p->status);
   double z=1./a-1;
   double pz=spline_eval(z,p->spl_pz);
   double sz=spline_eval(z,p->spl_sz);
-  double h=p->cosmo->params.h*ccl_h_over_h0(p->cosmo,a, &status)/CLIGHT_HMPC;
+  double h=p->cosmo->params.h*ccl_h_over_h0(p->cosmo,a, p->status)/CLIGHT_HMPC;
 
   if(chi==0)
     return h*pz*(1-2.5*sz);
   else
-    return h*pz*(1-2.5*sz)*ccl_sinn(p->cosmo,chip-chi)/ccl_sinn(p->cosmo,chip);
+    return h*pz*(1-2.5*sz)*ccl_sinn(p->cosmo,chip-chi,p->status)/ccl_sinn(p->cosmo,chip,p->status);
 }
 
 //Integral to compute magnification window function
@@ -156,7 +157,7 @@ static double integrand_mag(double chip,void *params)
 static int window_magnification(double chi,ccl_cosmology *cosmo,SplPar *spl_pz,SplPar *spl_sz,
 				double chi_max,double *win)
 {
-  int status;
+  int gslstatus =0, status =0;
   double result,eresult;
   IntMagPar ip;
   gsl_function F;
@@ -166,12 +167,13 @@ static int window_magnification(double chi,ccl_cosmology *cosmo,SplPar *spl_pz,S
   ip.cosmo=cosmo;
   ip.spl_pz=spl_pz;
   ip.spl_sz=spl_sz;
+  ip.status = &status;
   F.function=&integrand_mag;
   F.params=&ip;
-  status=gsl_integration_qag(&F,chi,chi_max,0,1E-4,1000,GSL_INTEG_GAUSS41,w,&result,&eresult);
+  gslstatus=gsl_integration_qag(&F,chi,chi_max,0,1E-4,1000,GSL_INTEG_GAUSS41,w,&result,&eresult);
   *win=result;
   gsl_integration_workspace_free(w);
-  if(status!=GSL_SUCCESS)
+  if(gslstatus!=GSL_SUCCESS || *ip.status)
     return 1;
   //TODO: chi_max should be changed to chi_horizon
   //we should precompute this quantity and store it in cosmo by default
@@ -694,7 +696,7 @@ static double cl_integrand(double lk,void *params)
   else {
     double t1,t2;
     double a=ccl_scale_factor_of_chi(p->cosmo,chi, p->status); //Limber
-    double pk=ccl_nonlin_matter_power(p->cosmo,a,k, p->status);
+    double pk=ccl_nonlin_matter_power(p->cosmo,k,a, p->status);
     t1=transfer_wrap(p->l,k,p->cosmo,p->clt1, p->status);
     t2=transfer_wrap(p->l,k,p->cosmo,p->clt2, p->status);
     return k*t1*t2*pk;

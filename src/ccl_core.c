@@ -313,7 +313,7 @@ void ccl_data_free(ccl_data * data)
   if(data->logsigma!=NULL)
     gsl_spline_free(data->logsigma);
   if(data->p_lin!=NULL)
-    gsl_spline_free(data->p_lin);
+    gsl_spline2d_free(data->p_lin);
   if(data->p_nl!=NULL)
     gsl_spline2d_free(data->p_nl);
 }
