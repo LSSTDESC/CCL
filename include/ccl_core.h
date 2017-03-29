@@ -63,6 +63,7 @@ typedef struct ccl_data{
   gsl_interp_accel *accelerator;
   gsl_interp_accel *accelerator_achi;
   gsl_interp_accel *accelerator_m;
+  gsl_interp_accel *accelerator_d;
   //TODO: it seems like we're not really using this accelerator, and we should
   gsl_interp_accel *accelerator_k;
 
@@ -70,9 +71,17 @@ typedef struct ccl_data{
   gsl_spline * logsigma;
   gsl_spline * dlnsigma_dlogm; 
 
+  // splines for halo mass function
+  gsl_spline * alphahmf;
+  gsl_spline * betahmf;
+  gsl_spline * gammahmf;
+  gsl_spline * phihmf;
+  gsl_spline * etahmf;
+
   // These are all functions of the wavenumber k and the scale factor a.
   gsl_spline2d * p_lin;
   gsl_spline2d * p_nl;
+  double k_min; //k_min  [1/Mpc] <- minimum wavenumber that the power spectrum has been computed to 
 
 } ccl_data;
 
@@ -86,6 +95,7 @@ typedef struct ccl_cosmology
   bool computed_growth;
   bool computed_power;
   bool computed_sigma;
+  bool computed_hmfparams;
 
   int status;
   //this is optional - less tedious than tracking all numerical values for status in error handler function

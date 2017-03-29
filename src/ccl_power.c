@@ -247,7 +247,6 @@ static double ccl_get_class_As(ccl_cosmology *cosmo, struct file_content *fc, in
   sprintf(fc->value[position_As],"%e",A_s_guess);
 
   ccl_run_class(cosmo, fc,&pr,&ba,&th,&pt,&tr,&pm,&sp,&nl,&le,&op,init_arr,status);
-//  printf("ran shooting for sigma_8 method\n Target sigma_8 = %e;\nGuessed A_s = %e -> sigma_8 = %e\nuse A_s = %e",sigma8,A_s_guess,sp.sigma8,A_s_guess*sigma8/sp.sigma8);
   if (cosmo->status != CCL_ERROR_CLASS) A_s_guess*=pow(sigma8/sp.sigma8,2.);
   ccl_free_class_structs(cosmo, &ba,&th,&pt,&tr,&pm,&sp,&nl,&le,init_arr,status);
 
@@ -369,8 +368,9 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int * statu
     return;
   }
 
+  cosmo->data.k_min=2*exp(sp.ln_k[0]);
   //CLASS calculations done - now allocate CCL splines
-  double kmin = K_MIN;
+  double kmin = cosmo->data.k_min;
   double kmax = K_MAX_SPLINE;
   int nk = N_K;
   double amin = A_SPLINE_MIN;
@@ -476,6 +476,296 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int * statu
 
 }
 
+typedef struct {
+  double rsound;
+  double zeq;
+  double keq;
+  double zdrag;
+  double kSilk;
+  double rsound_approx;
+  double th2p7;
+  double alphac;
+  double alphab;
+  double betac;
+  double betab;
+  double bnode;
+} eh_struct;
+
+static eh_struct *eh_struct_new(ccl_parameters *params)
+{
+  //////
+  // Computes Eisenstein & Hu parameters for
+  // P_k and r_sound
+  double OMh2,OBh2;
+  double th2p7;
+  eh_struct *eh=malloc(sizeof(eh_struct));
+  if(eh==NULL)
+    return NULL;
+
+  OMh2=params->Omega_m*params->h*params->h;
+  OBh2=params->Omega_b*params->h*params->h;
+  th2p7=params->T_CMB/2.7;
+  eh->th2p7=th2p7;
+  eh->zeq=2.5E4*OMh2/pow(th2p7,4);
+  eh->keq=0.0746*OMh2/(params->h*th2p7*th2p7);
+
+  double b1,b2;
+  b1=0.313*pow(OMh2,-0.419)*(1+0.607*pow(OMh2,0.674));
+  b2=0.238*pow(OMh2,0.223);
+  eh->zdrag=1291*pow(OMh2,0.251)*(1+b1*pow(OBh2,b2))/(1+0.659*pow(OMh2,0.828));
+
+  double Req,Rd;
+  Req=31.5*OBh2*1000./(eh->zeq*pow(th2p7,4));
+  Rd=31.5*OBh2*1000./((1+eh->zdrag)*pow(th2p7,4));
+  eh->rsound=2/(3*eh->keq)*sqrt(6/Req)*
+    log((sqrt(1+Rd)+sqrt(Rd+Req))/(1+sqrt(Req)));
+
+  eh->kSilk=1.6*pow(OBh2,0.52)*pow(OMh2,0.73)*(1+pow(10.4*OMh2,-0.95))/params->h;
+
+  double a1,a2,b_frac;
+  a1=pow(46.9*OMh2,0.670)*(1+pow(32.1*OMh2,-0.532));
+  a2=pow(12.0*OMh2,0.424)*(1+pow(45.0*OMh2,-0.582));
+  b_frac=OBh2/OMh2;
+  eh->alphac=pow(a1,-b_frac)*pow(a2,-b_frac*b_frac*b_frac);
+
+  double bb1,bb2;
+  bb1=0.944/(1+pow(458*OMh2,-0.708));
+  bb2=pow(0.395*OMh2,-0.0266);
+  eh->betac=1/(1+bb1*(pow(1-b_frac,bb2)-1));
+
+  double y=eh->zeq/(1+eh->zdrag);
+  double sqy=sqrt(1+y);
+  double gy=y*(-6*sqy+(2+3*y)*log((sqy+1)/(sqy-1)));
+  eh->alphab=2.07*eh->keq*eh->rsound*pow(1+Rd,-0.75)*gy;
+
+  eh->betab=0.5+b_frac+(3-2*b_frac)*sqrt(pow(17.2*OMh2,2)+1);
+
+  eh->bnode=8.41*pow(OMh2,0.435);
+
+  eh->rsound_approx=params->h*44.5*log(9.83/OMh2)/
+    sqrt(1+10*pow(OBh2,0.75));
+
+  //  printf("\n");
+  //  printf("zeq           %lE\n",eh->zeq);
+  //  printf("keq           %lE\n",eh->keq*params->h);
+  //  printf("ksilk         %lE\n",eh->kSilk*params->h);
+  //  printf("zd            %lE\n",eh->zdrag);
+  //  printf("rsound        %lE\n",eh->rsound/params->h);
+  //  printf("rsound_approx %lE\n",eh->rsound_approx/params->h);
+  //  printf("Rd            %lE\n",Rd);
+  //  printf("\n");
+
+  return eh;
+}
+
+static double tkEH_0(double keq,double k,double a,double b)
+{
+  //////
+  // Eisentstein & Hu's Tk_0
+  double q=k/(13.41*keq);
+  double c=14.2/a+386./(1+69.9*pow(q,1.08));
+  double l=log(M_E+1.8*b*q);
+  return l/(l+c*q*q);
+}
+
+static double tkEH_c(eh_struct *eh,double k)
+{
+  //////
+  // Eisenstein & Hu's Tk_c
+  double f=1/(1+pow(k*eh->rsound/5.4,4));
+  return f*tkEH_0(eh->keq,k,1,eh->betac)+
+    (1-f)*tkEH_0(eh->keq,k,eh->alphac,eh->betac);
+}
+
+static double jbes0(double x)
+{
+  double jl;
+  double ax=fabs(x);
+  double ax2=ax*ax;
+  
+  if(ax<0.01) jl=1-ax2*(1-ax2/20.)/6.;
+  else jl=sin(x)/x;
+  
+  return jl;
+}
+
+static double tkEH_b(eh_struct *eh,double k)
+{
+  //////
+  // Eisenstein & Hu's Tk_b
+  double x_bessel,part1,part2,jbes;
+  double x=k*eh->rsound;
+
+  if(k==0) x_bessel=0;
+  else {
+    x_bessel=x*pow(1+eh->bnode*eh->bnode*eh->bnode/(x*x*x),-1./3.);
+  }
+
+  part1=tkEH_0(eh->keq,k,1,1)/(1+pow(x/5.2,2));
+
+  if(k==0) part2=0;
+  else part2=eh->alphab/(1+pow(eh->betab/x,3))*
+	 exp(-pow(k/eh->kSilk,1.4));
+  
+  return jbes0(x_bessel)*(part1+part2);
+}
+
+static double tsqr_EH(ccl_parameters *params,eh_struct * eh,double k,int wiggled)
+{
+  double tk;
+  double b_frac=params->Omega_b/params->Omega_m;
+  if(wiggled)
+    tk=b_frac*tkEH_b(eh,k)+(1-b_frac)*tkEH_c(eh,k);
+  else {
+    double OMh2=params->Omega_m*params->h*params->h;
+    double alpha_gamma=1-0.328*log(431*OMh2)*b_frac+0.38*log(22.3*OMh2)*b_frac*b_frac;
+    double gamma_eff=params->Omega_m*params->h*(alpha_gamma+(1-alpha_gamma)/
+						(1+pow(0.43*k*eh->rsound_approx,4)));
+    double q=k*eh->th2p7*eh->th2p7/gamma_eff;
+    double l0=log(2*M_E+1.8*q);
+    double c0=14.2+731/(1+62.5*q);
+    tk=l0/(l0+c0*q*q);
+  }
+
+  return tk*tk;
+}
+
+static double eh_power(ccl_parameters *params,eh_struct *eh,double k,int wiggled)
+{
+  //Wavenumber in units of Mpc^-1
+  double kinvh=k/params->h;
+  return pow(k,params->n_s)*tsqr_EH(params,eh,kinvh,wiggled);
+}
+
+static void ccl_cosmology_compute_power_eh(ccl_cosmology * cosmo, int * status)
+{
+  cosmo->data.k_min=K_MIN_DEFAULT;
+  double kmin = cosmo->data.k_min;
+  double kmax = K_MAX;
+  int nk = N_K;
+  double amin = A_SPLINE_MIN;
+  double amax = A_SPLINE_MAX;
+  int na = N_A;
+  eh_struct *eh=eh_struct_new(&(cosmo->params));
+  if (eh==NULL) {
+    *status=CCL_ERROR_MEMORY;
+    strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_eh(): memory allocation error\n");
+    return;
+  }
+
+  // The x array is initially k, but will later
+  // be overwritten with log(k)
+  double * x = ccl_log_spacing(kmin, kmax, nk);
+  double * y = malloc(sizeof(double)*nk);
+  double * z = ccl_linear_spacing(amin,amax, na);
+  double * y2d = malloc(nk * na * sizeof(double));
+  if (z==NULL||y==NULL|| x==NULL || y2d==NULL){
+    free(eh);
+    *status=CCL_ERROR_MEMORY;
+    strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_eh(): memory allocation error\n");
+    return;
+  }
+
+  // After this loop x will contain log(k)
+  for (int i=0; i<nk; i++){
+    y[i] = log(eh_power(&cosmo->params,eh,x[i],1));
+    x[i] = log(x[i]);
+  }
+
+  // now normalize to cosmo->params.sigma_8
+  if (isnan(cosmo->params.sigma_8)){
+    free(eh);
+    free(x);
+    free(y);
+    free(z);
+    free(y2d);
+    *status = CCL_ERROR_INCONSISTENT;
+    strcpy(cosmo->status_message ,"ccl_power.c: ccl_cosmology_compute_power_eh(): sigma_8 not set, required for E&H\n");
+    return;
+  }
+
+  gsl_spline2d * log_power_lin = gsl_spline2d_alloc(PLIN_SPLINE_TYPE, nk,na);
+  for (int j = 0; j < na; j++){
+    double g2 = 2.*log(ccl_growth_factor(cosmo,z[j], status));
+    for (int i=0; i<nk; i++){
+      y2d[j*nk+i] = y[i]+g2;
+    }
+
+  }
+
+  int splinstatus = gsl_spline2d_init(log_power_lin, x, z, y2d,nk,na);
+
+  if (splinstatus) {
+    free(eh);
+    free(x);
+    free(y);
+    free(z);
+    free(y2d);
+    gsl_spline2d_free(log_power_lin);
+    *status = CCL_ERROR_SPLINE;
+    strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_eh(): Error creating log_power_lin spline\n");
+    return;
+  }
+  cosmo->data.p_lin=log_power_lin;
+
+  cosmo->computed_power=true;
+  double sigma_8 = ccl_sigma8(cosmo,status);
+  cosmo->computed_power=false;
+
+  double log_sigma_8 = 2*(log(cosmo->params.sigma_8) - log(sigma_8));
+  for (int i=0; i<nk; i++){
+    y[i] += log_sigma_8;
+  }
+
+  for (int j = 0; j < na; j++){
+    double g2 = 2.*log(ccl_growth_factor(cosmo,z[j], status));
+    for (int i=0; i<nk; i++){
+      y2d[j*nk+i] = y[i]+g2;
+    }
+  }
+
+  gsl_spline2d_free(log_power_lin);
+  log_power_lin = gsl_spline2d_alloc(PLIN_SPLINE_TYPE, nk,na);
+  splinstatus = gsl_spline2d_init(log_power_lin, x, z, y2d,nk,na);
+  if (splinstatus){
+    free(eh);
+    free(x);
+    free(y);
+    free(z);
+    free(y2d);
+    gsl_spline2d_free(log_power_lin);
+    *status = CCL_ERROR_SPLINE;
+    strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_eh(): Error creating log_power_lin spline\n");
+    return;
+  }
+  else
+    cosmo->data.p_lin = log_power_lin;
+
+  gsl_spline2d * log_power_nl = gsl_spline2d_alloc(PNL_SPLINE_TYPE, nk,na);
+  splinstatus = gsl_spline2d_init(log_power_nl, x, z, y2d,nk,na);
+
+  if (splinstatus){
+    free(eh);
+    free(x);
+    free(y);
+    free(z);
+    free(y2d);
+    gsl_spline2d_free(log_power_lin);
+    gsl_spline2d_free(log_power_nl);
+    *status = CCL_ERROR_SPLINE;
+    strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_eh(): Error creating log_power_nl spline\n");
+    return;
+  }
+  else
+    cosmo->data.p_nl = log_power_nl;
+
+  free(eh);
+  free(x);
+  free(y);
+  free(z);
+  free(y2d);
+}
+
 /*------ ROUTINE: tsqr_BBKS ----- 
 INPUT: ccl_parameters and k wavenumber in 1/Mpc
 TASK: provide the square of the BBKS transfer function with baryonic correction
@@ -502,9 +792,10 @@ INPUT: cosmology
 TASK: provide spline for the BBKS power spectrum with baryonic correction
 */
 
-static void ccl_cosmology_compute_power_bbks(ccl_cosmology * cosmo, int * status){
-
-  double kmin = K_MIN;
+static void ccl_cosmology_compute_power_bbks(ccl_cosmology * cosmo, int * status)
+{
+  cosmo->data.k_min=K_MIN_DEFAULT;
+  double kmin = cosmo->data.k_min;
   double kmax = K_MAX;
   int nk = N_K;
   double amin = A_SPLINE_MIN;
@@ -517,8 +808,8 @@ static void ccl_cosmology_compute_power_bbks(ccl_cosmology * cosmo, int * status
   double * y = malloc(sizeof(double)*nk);
   double * z = ccl_linear_spacing(amin,amax, na);
   double * y2d = malloc(nk * na * sizeof(double));
-  if (z==NULL||y==NULL|| x==NULL || y2d==NULL){
-    int bbksstatus = 4;
+  if (z==NULL||y==NULL|| x==NULL || y2d==0){
+    *status=CCL_ERROR_MEMORY;
     strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_bbks(): memory allocation error\n");
     return;
   }
@@ -561,11 +852,11 @@ static void ccl_cosmology_compute_power_bbks(ccl_cosmology * cosmo, int * status
     strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_bbks(): Error creating log_power_lin spline\n");
     return;
 
-    }
+  }
   cosmo->data.p_lin=log_power_lin;
   
   cosmo->computed_power=true;
-  double sigma_8 = ccl_sigma8(cosmo);
+  double sigma_8 = ccl_sigma8(cosmo,status);
   cosmo->computed_power=false;
   
   double log_sigma_8 = 2*(log(cosmo->params.sigma_8) - log(sigma_8));
@@ -634,6 +925,9 @@ void ccl_cosmology_compute_power(ccl_cosmology * cosmo, int * status){
         case ccl_bbks:
 	  ccl_cosmology_compute_power_bbks(cosmo,status);
 	  break;
+        case ccl_eisenstein_hu:
+	  ccl_cosmology_compute_power_eh(cosmo,status);
+	  break;
         case ccl_boltzmann_class:
 	  ccl_cosmology_compute_power_class(cosmo,status);
 	  break;
@@ -686,6 +980,25 @@ static double ccl_power_extrapol_highk(ccl_cosmology * cosmo, double k, double a
     
 }
 
+/*------ ROUTINE: ccl_power_extrapol_hxighk ----- 
+INPUT: ccl_cosmology * cosmo, a, k [1/Mpc]
+TASK: extrapolate power spectrum at high k
+*/
+static double ccl_power_extrapol_lowk(ccl_cosmology * cosmo, double k, double a, gsl_spline2d * powerspl, int * status)
+{
+  double log_p_1;
+  double deltak=1e-2; //safety step
+  double lkmin=log(cosmo->data.k_min)+deltak;
+  double lpk_kmin;
+  int pwstatus=gsl_spline2d_eval_e(powerspl,lkmin,a,NULL,NULL,&lpk_kmin);
+  if (pwstatus){
+    *status=CCL_ERROR_SPLINE_EV;
+    sprintf(cosmo->status_message,"ccl_power.c: ccl_nonlin_matter_power(): Spline evaluation error\n");
+    return NAN;
+  }
+  return lpk_kmin+cosmo->params.n_s*(log(k)-lkmin);
+}
+
 
 /*------ ROUTINE: ccl_linear_matter_power ----- 
 INPUT: ccl_cosmology * cosmo, k [1/Mpc],a
@@ -693,45 +1006,30 @@ TASK: compute the linear power spectrum at a given redshift
       by rescaling using the growth function
 */
 
-double ccl_linear_matter_power(ccl_cosmology * cosmo, double k, double a, int * status){
- 
+double ccl_linear_matter_power(ccl_cosmology * cosmo, double k, double a, int * status)
+{
   if (!cosmo->computed_power) ccl_cosmology_compute_power(cosmo, status);
   double log_p_1;
   int pkstatus;
-  
-  switch(cosmo->config.transfer_function_method){
-
-  case ccl_bbks :
-    
+ 
+  if(k<=cosmo->data.k_min) {
+    log_p_1=ccl_power_extrapol_lowk(cosmo,k,a,cosmo->data.p_lin,status);
+    return exp(log_p_1);
+  }
+  else if(k<K_MAX_SPLINE){
     pkstatus = gsl_spline2d_eval_e(cosmo->data.p_lin, log(k), a,NULL,NULL,&log_p_1);
     if (pkstatus){
       *status = CCL_ERROR_SPLINE_EV;
       sprintf(cosmo->status_message ,"ccl_power.c: ccl_linear_matter_power(): Spline evaluation error\n");
       return NAN;
-    } else {
-      return exp(log_p_1);
     }
-    break;
-    
-  default : 
-
-    if(k<=K_MAX_SPLINE){
-      pkstatus = gsl_spline2d_eval_e(cosmo->data.p_lin, log(k), a,NULL,NULL,&log_p_1);
-      if (pkstatus){
-	*status = CCL_ERROR_SPLINE_EV;
-	sprintf(cosmo->status_message ,"ccl_power.c: ccl_linear_matter_power(): Spline evaluation error\n");
-	return NAN;
-      } else {
-	return exp(log_p_1);
-      }
-    } else { //Extrapolate NL regime using log derivative
-      log_p_1 = ccl_power_extrapol_highk(cosmo,k,a,cosmo->data.p_lin,status);
+    else
       return exp(log_p_1);
-    }
-    break;
-    
-  } 
-  
+  }
+  else { //Extrapolate NL regime using log derivative
+    log_p_1 = ccl_power_extrapol_highk(cosmo,k,a,cosmo->data.p_lin,status);
+    return exp(log_p_1);
+  }
 }
 
 
@@ -740,9 +1038,9 @@ INPUT: ccl_cosmology * cosmo, a, k [1/Mpc]
 TASK: compute the nonlinear power spectrum at a given redshift
 */
 
-double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double k, double a, int *status){
-
-  switch(cosmo->config.matter_power_spectrum_method){
+double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double k, double a, int *status)
+{
+  switch(cosmo->config.matter_power_spectrum_method) {
     //If the matter PS specified was linear, then do the linear compuation
   case ccl_linear:
     return ccl_linear_matter_power(cosmo,k,a,status);
@@ -753,25 +1051,30 @@ double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double k, double a, int *s
     
     double log_p_1;
     
-    if(k<=K_MAX_SPLINE){
+    if(k<=cosmo->data.k_min) {
+      log_p_1=ccl_power_extrapol_lowk(cosmo,k,a,cosmo->data.p_nl,status);
+      return exp(log_p_1);
+    }
+    else if(k<K_MAX_SPLINE){
       
       int pwstatus =  gsl_spline2d_eval_e(cosmo->data.p_nl, log(k),a,NULL ,NULL ,&log_p_1);
       if (pwstatus){
 	*status = CCL_ERROR_SPLINE_EV;
 	sprintf(cosmo->status_message ,"ccl_power.c: ccl_nonlin_matter_power(): Spline evaluation error\n");
 	return NAN;
-      } else {
-	return exp(log_p_1);
       }
-    } else { //Extrapolate NL regime using log derivative
+      else
+	return exp(log_p_1);
+    }
+    else { //Extrapolate NL regime using log derivative
       log_p_1 = ccl_power_extrapol_highk(cosmo,k,a,cosmo->data.p_nl,status);
       return exp(log_p_1);
     }
 
-    default:
-      printf("WARNING:  config.matter_power_spectrum_method = %d not yet supported\n continuing with linear power spectrum\n",cosmo->config.matter_power_spectrum_method);
-      cosmo->config.matter_power_spectrum_method=ccl_linear;
-      return ccl_linear_matter_power(cosmo,k,a,status);
+  default:
+    printf("WARNING:  config.matter_power_spectrum_method = %d not yet supported\n continuing with linear power spectrum\n",cosmo->config.matter_power_spectrum_method);
+    cosmo->config.matter_power_spectrum_method=ccl_linear;
+    return ccl_linear_matter_power(cosmo,k,a,status);
   }
 }
 
@@ -786,8 +1089,6 @@ typedef struct {
 static double sigmaR_integrand(double lk,void *params)
 {
   SigmaR_pars *par=(SigmaR_pars *)params;
-  int stat = 0;
-  par->status = &stat;
   
   double k=pow(10.,lk);
   double pk=ccl_linear_matter_power(par->cosmo,k, 1.,par->status);
@@ -803,11 +1104,10 @@ static double sigmaR_integrand(double lk,void *params)
   return pk*k*k*k*w*w;
 }
 
-double ccl_sigmaR(ccl_cosmology *cosmo,double R)
+double ccl_sigmaR(ccl_cosmology *cosmo,double R, int *status)
 {
   SigmaR_pars par;
-  int stat = 0;
-  par.status = &stat;
+  par.status = status;
   
   par.cosmo=cosmo;
   par.R=R;
@@ -816,7 +1116,7 @@ double ccl_sigmaR(ccl_cosmology *cosmo,double R)
   F.function=&sigmaR_integrand;
   F.params=&par;
   double sigma_R;
-  gsl_integration_cquad(&F,log10(K_MIN_INT),log10(K_MAX_INT),0.0,1E-5,workspace,&sigma_R,NULL,NULL);
+  gsl_integration_cquad(&F,log10(cosmo->data.k_min),log10(K_MAX),0.0,1E-5,workspace,&sigma_R,NULL,NULL);
   //TODO: log10 could be taken already in the macros.
   //TODO: 1E-5 should be a macro
   //TODO: we should check for integration success
@@ -825,7 +1125,7 @@ double ccl_sigmaR(ccl_cosmology *cosmo,double R)
   return sqrt(sigma_R*M_LN10/(2*M_PI*M_PI));
 }
 
-double ccl_sigma8(ccl_cosmology *cosmo)
+double ccl_sigma8(ccl_cosmology *cosmo, int *status)
 {
-  return ccl_sigmaR(cosmo,8/cosmo->params.h);
+  return ccl_sigmaR(cosmo,8/cosmo->params.h, status);
 }

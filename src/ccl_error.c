@@ -18,6 +18,9 @@ void ccl_check_status(ccl_cosmology *cosmo, int * status){
 		case CCL_ERROR_COMPUTECHI:	// compute_chi error //RH
 			fprintf(stderr,"%s",cosmo->status_message);
 			exit(1);
+                case CCL_ERROR_HMF_INTERP: // continue computation w/ Delta=200
+                        fprintf(stderr,"%s",cosmo->status_message);
+                        return;
 
 		// implement softer error handling, e.g. for integral convergence here
 			

@@ -44,11 +44,19 @@ ccl_cosmology * ccl_cosmology_create(ccl_parameters params, ccl_configuration co
   cosmo->data.accelerator=NULL;
   cosmo->data.accelerator_achi=NULL;
   cosmo->data.accelerator_m=NULL;
+  cosmo->data.accelerator_d=NULL;
   cosmo->data.growth0 = 1.;
   cosmo->data.achi=NULL;
 
   cosmo->data.logsigma = NULL;
-  
+
+  // hmf parameter for interpolation
+  cosmo->data.alphahmf = NULL;
+  cosmo->data.betahmf = NULL;
+  cosmo->data.gammahmf = NULL;
+  cosmo->data.phihmf = NULL;
+  cosmo->data.etahmf = NULL;
+
   cosmo->data.p_lin = NULL;
   cosmo->data.p_nl = NULL;
   
@@ -56,6 +64,7 @@ ccl_cosmology * ccl_cosmology_create(ccl_parameters params, ccl_configuration co
   cosmo->computed_growth = false;
   cosmo->computed_power = false;
   cosmo->computed_sigma = false;
+  cosmo->computed_hmfparams = false;
   cosmo->status = 0;
   
   return cosmo;
@@ -149,7 +158,7 @@ void ccl_parameters_fill_initial(ccl_parameters *params)
 {
   // Fixed radiation parameters
   // Omega_g * h**2 is known from T_CMB
-  params->T_CMB =  2.726;
+  params->T_CMB =  2.725;
   params->Omega_g = M_PI*M_PI*pow((params->T_CMB/11604.5),4.)/(15*8.098E-11*params->h*params->h);
 
   // Derived parameters
@@ -330,6 +339,18 @@ void ccl_data_free(ccl_data * data)
     gsl_spline2d_free(data->p_lin);
   if(data->p_nl!=NULL)
     gsl_spline2d_free(data->p_nl);
+  if(data->alphahmf!=NULL)
+    gsl_spline_free(data->alphahmf);
+  if(data->betahmf!=NULL)
+    gsl_spline_free(data->betahmf);
+  if(data->gammahmf!=NULL)
+    gsl_spline_free(data->gammahmf);
+  if(data->phihmf!=NULL)
+    gsl_spline_free(data->phihmf);
+  if(data->etahmf!=NULL)
+    gsl_spline_free(data->etahmf);
+  if(data->accelerator_d!=NULL)
+    gsl_interp_accel_free(data->accelerator_d);
 }
 
 
