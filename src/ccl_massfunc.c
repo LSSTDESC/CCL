@@ -62,7 +62,7 @@ static double massfunc_f(ccl_cosmology *cosmo, double smooth_mass,double a, int 
     break;
 
   case ccl_watson:
-    Omega_m_a = ccl_omega_x(cosmo, a, ccl_omega_m_label);
+    Omega_m_a = ccl_omega_x(cosmo, a, ccl_omega_m_label,status);
     
     fit_A = Omega_m_a*(0.990*pow(a,3.216)+0.074);
     fit_a = Omega_m_a*(5.907*pow(a,3.599)+2.344);
@@ -150,7 +150,7 @@ void ccl_cosmology_compute_sigma(ccl_cosmology * cosmo, int *status)
    // fill in sigma
    for (int i=0; i<nm; i++){
      smooth_radius = ccl_massfunc_m2r(cosmo, pow(10,m[i]), status);
-     y[i] = log10(ccl_sigmaR(cosmo, smooth_radius));
+     y[i] = log10(ccl_sigmaR(cosmo, smooth_radius, status));
    }
    gsl_spline * logsigma = gsl_spline_alloc(M_SPLINE_TYPE, nm);
    *status = gsl_spline_init(logsigma, m, y, nm);

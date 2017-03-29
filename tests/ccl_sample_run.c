@@ -28,9 +28,10 @@ struct user_func_params
 };
 
 // The user defines a function of the form double function ( z_ph, z_spec, void * user_pz_params) where user_pz_params is a pointer to the parameters of the user-defined function. This returns the probabilty of obtaining a given photo-z given a particular spec_z.
-double user_pz_probability(double z_ph, double z_s, void * user_par)
+double user_pz_probability(double z_ph, double z_s, void * user_par, int * status)
 {
 		double sigma_z = ((struct user_func_params *) user_par)->sigma_z(z_s);
+//		*(status) = 10;
         return exp(- (z_ph-z_s)*(z_ph-z_s) / (2.*sigma_z*sigma_z)) / (pow(2.*M_PI,0.5)*sigma_z);
 }
 
@@ -51,17 +52,18 @@ int main(int argc,char **argv){
 		ZD,ccl_luminosity_distance(cosmo,1./(1+ZD), &status));
 	
 	//Consistency check
-	printf("Scale factor at chi=%.3lf Mpc is a=%.3lf Mpc\n",
-	ccl_comoving_radial_distance(cosmo,1./(1+ZD), &status),
-	ccl_scale_factor_of_chi(cosmo,ccl_comoving_radial_distance(cosmo,1./(1+ZD), &status), &status));
-	 
+	printf("Scale factor is a=%.3lf \n",1./(1+ZD));
+	printf("Consistency: Scale factor at chi=%.3lf Mpc is a=%.3lf\n",
+	       ccl_comoving_radial_distance(cosmo,1./(1+ZD), &status),
+	       ccl_scale_factor_of_chi(cosmo,ccl_comoving_radial_distance(cosmo,1./(1+ZD), &status), &status));
+	
 	// Compute growth factor and growth rate (see include/ccl_background.h for more routines)
 	printf("Growth factor and growth rate at z = %.3lf are D = %.3lf and f = %.3lf\n",
 		ZD, ccl_growth_factor(cosmo,1./(1+ZD), &status),ccl_growth_rate(cosmo,1./(1+ZD), &status));
 
 	// Compute sigma_8
 	printf("Initializing power spectrum...\n");
-	printf("sigma_8 = %.3lf\n\n", ccl_sigma8(cosmo));
+	printf("sigma_8 = %.3lf\n\n", ccl_sigma8(cosmo, &status));
 
 	//Create tracers for angular power spectra
 	double z_arr_gc[NZ],z_arr_sh[NZ],nz_arr_gc[NZ],nz_arr_sh[NZ],bz_arr[NZ];
@@ -142,15 +144,15 @@ int main(int argc,char **argv){
 		fprintf(stderr, "Could not write to 'tests' subdirectory - please run this program from the main CCL directory\n");
 		exit(1);
 	}
-
+	status = 0;
 	for (z=0; z<100; z=z+1){
 		z_test = 0.035*z;
-		status = ccl_specs_dNdz_tomog(z_test, DNDZ_WL_FID, 0.,6., pz_info_example,&dNdz_tomo); 
-		status = ccl_specs_dNdz_tomog(z_test, DNDZ_WL_FID, 0.,0.6, pz_info_example,&tmp1); 
-		status = ccl_specs_dNdz_tomog(z_test, DNDZ_WL_FID, 0.6,1.2, pz_info_example,&tmp2);
-		status = ccl_specs_dNdz_tomog(z_test, DNDZ_WL_FID, 1.2,1.8, pz_info_example,&tmp3);
-		status = ccl_specs_dNdz_tomog(z_test, DNDZ_WL_FID, 1.8,2.4, pz_info_example,&tmp4); 
-		status = ccl_specs_dNdz_tomog(z_test, DNDZ_WL_FID, 2.4,3.0, pz_info_example,&tmp5);
+		ccl_specs_dNdz_tomog(z_test, DNDZ_WL_FID, 0.,6., pz_info_example,&dNdz_tomo,&status); 
+		ccl_specs_dNdz_tomog(z_test, DNDZ_WL_FID, 0.,0.6, pz_info_example,&tmp1,&status); 
+		ccl_specs_dNdz_tomog(z_test, DNDZ_WL_FID, 0.6,1.2, pz_info_example,&tmp2,&status);
+		ccl_specs_dNdz_tomog(z_test, DNDZ_WL_FID, 1.2,1.8, pz_info_example,&tmp3,&status);
+		ccl_specs_dNdz_tomog(z_test, DNDZ_WL_FID, 1.8,2.4, pz_info_example,&tmp4,&status); 
+		ccl_specs_dNdz_tomog(z_test, DNDZ_WL_FID, 2.4,3.0, pz_info_example,&tmp5,&status);
 		fprintf(output, "%f %f %f %f %f %f %f\n", z_test,tmp1,tmp2,tmp3,tmp4,tmp5,dNdz_tomo);
 	}
 
@@ -161,12 +163,12 @@ int main(int argc,char **argv){
 	output = fopen("./tests/specs_example_tomo_clu.out", "w");     
 	for (z=0; z<100; z=z+1){
 		z_test = 0.035*z;
-		status|= ccl_specs_dNdz_tomog(z_test, DNDZ_NC,0.,6., pz_info_example,&dNdz_tomo); 
-		status|= ccl_specs_dNdz_tomog(z_test, DNDZ_NC,0.,0.6, pz_info_example,&tmp1);
-		status|= ccl_specs_dNdz_tomog(z_test, DNDZ_NC,0.6,1.2, pz_info_example,&tmp2);
-		status|= ccl_specs_dNdz_tomog(z_test, DNDZ_NC,1.2,1.8, pz_info_example,&tmp3);
-		status|= ccl_specs_dNdz_tomog(z_test, DNDZ_NC,1.8,2.4, pz_info_example,&tmp4);
-		status|= ccl_specs_dNdz_tomog(z_test, DNDZ_NC,2.4,3.0, pz_info_example,&tmp5);
+		ccl_specs_dNdz_tomog(z_test, DNDZ_NC,0.,6., pz_info_example,&dNdz_tomo,&status); 
+		ccl_specs_dNdz_tomog(z_test, DNDZ_NC,0.,0.6, pz_info_example,&tmp1,&status);
+		ccl_specs_dNdz_tomog(z_test, DNDZ_NC,0.6,1.2, pz_info_example,&tmp2,&status);
+		ccl_specs_dNdz_tomog(z_test, DNDZ_NC,1.2,1.8, pz_info_example,&tmp3,&status);
+		ccl_specs_dNdz_tomog(z_test, DNDZ_NC,1.8,2.4, pz_info_example,&tmp4,&status);
+		ccl_specs_dNdz_tomog(z_test, DNDZ_NC,2.4,3.0, pz_info_example,&tmp5,&status);
 		fprintf(output, "%f %f %f %f %f %f %f\n", z_test,tmp1,tmp2,tmp3,tmp4,tmp5,dNdz_tomo);
 	}
 	printf("ccl_sample_run completed, status = %d\n",status);
