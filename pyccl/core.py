@@ -56,50 +56,56 @@ class Parameters(object):
     
     def __init__(self, Omega_c=None, Omega_b=None, h=None, A_s=None, n_s=None, 
                  Omega_k=0., Omega_n=0., w0=-1., wa=0., sigma8=None,
-                 zarr_mgrowth=None, dfarr_mgrowth=None):
-        """Creates a set of cosmological parameters.
+                 z_mg=None, df_mg=None):
+        """
+        Creates a set of cosmological parameters.
 
         Note:
-            Although some arguments default to `None`, they will raise
-            a ValueError inside this function, so they are not optional.
+            Although some arguments default to `None`, they will raise a 
+            ValueError inside this function if not specified, so they are not 
+            optional.
         
         Args:
             Omega_c (float): Cold dark matter density fraction.
             Omega_b (float): Baryonic matter density fraction.
             h (float): Hubble constant divided by 100 km/s/Mpc; unitless.
-            A_s (float): Power spectrum normalization; Mpc^-3 CHECKTHIS - PHIL BULL. Optional if sigma8 is specified.
-            n_s (float): Power spectrum index.
+            A_s (float): Power spectrum normalization. Optional if sigma8 is 
+                         specified.
+            n_s (float): Primordial scalar perturbation spectral index.
             Omega_k (float, optional): Curvature density fraction. Defaults to 0.
-            Omega_n (float, optional): Massless neutrino density fracton. Defaults to 0.
-            w0 (float, optional): First order term of dark energy equation of state. Defaults to -1.
-            wa (float, optional): Second order term of dark energy equation of state. Defaults to 0.
-            sigma8 (float): Mass variance at 8 Mpc scale. Optional if A_s is specified.
-            zarr_mgrowth (:obj: list of floats): UNKNOWN - PHIL BULL.
-            dfarr_mgrowth (UNKNOWN): UNKNOWN - PHIL BULL.
+            Omega_n (float, optional): Massless neutrino density fraction. 
+                                       Defaults to 0.
+            w0 (float, optional): First order term of dark energy equation of 
+                                  state. Defaults to -1.
+            wa (float, optional): Second order term of dark energy equation of 
+                                  state. Defaults to 0.
+            sigma8 (float): Variance of matter density perturbations at 8 Mpc/h
+                            scale. Optional if A_s is specified.
+            df_mg (:obj: array_like): Perturbations to the GR growth rate as a 
+                                      function of redshift, Delta f. Used to 
+                                      implement simple modified growth 
+                                      scenarios.
+            z_mg (:obj: array_like): Array of redshifts corresponding to df_mg.
 
         """
         # Set current ccl_parameters object to None
         self.parameters = None
         
-         # Set nz_mgrowth (no. of redshift bins for modified growth fns.)
-        if zarr_mgrowth is not None and dfarr_mgrowth is not None:
+         # Set nz_mg (no. of redshift bins for modified growth fns.)
+        if z_mg is not None and df_mg is not None:
             # Get growth array size and do sanity check
-            zarr_mgrowth = np.atleast_1d(zarr_mgrowth)
-            dfarr_mgrowth = np.atleast_1d(dfarr_mgrowth)
-            assert zarr_mgrowth.size == dfarr_mgrowth.size
-            nz_mgrowth = zarr_mgrowth.size
+            z_mg = np.atleast_1d(z_mg)
+            df_mg = np.atleast_1d(df_mg)
+            assert z_mg.size == df_mg.size
+            nz_mg = z_mg.size
         else:
             # If one or both of the MG growth arrays are set to zero, disable 
             # all of them
-            if zarr_mgrowth is not None:
-                warn("zarr_mgrowth ignored; must also specify dfarr_mgrowth.",
-                     UserWarning)
-            if dfarr_mgrowth is not None:
-                warn("dfarr_mgrowth ignored; must also specify zarr_mgrowth.",
-                     UserWarning)
-            zarr_mgrowth = None
-            dfarr_mgrowth = None
-            nz_mgrowth = -1
+            if z_mg is not None or df_mg is not None:
+                raise ValueError("Must specify both z_mg and df_mg.")
+            z_mg = None
+            df_mg = None
+            nz_mg = -1
         
         # Check to make sure specified amplitude parameter is consistent
         if (A_s is None and sigma8 is None) \
@@ -127,7 +133,7 @@ class Parameters(object):
                                  "(or set to None)." % nm)
         
         # Create new instance of ccl_parameters object
-        if nz_mgrowth == -1:
+        if nz_mg == -1:
             # Create ccl_parameters without modified growth
             self.parameters = lib.parameters_create(
                                     Omega_c, Omega_b, Omega_k, Omega_n, 
@@ -138,7 +144,7 @@ class Parameters(object):
             self.parameters = lib.parameters_create_vec(
                                     Omega_c, Omega_b, Omega_k, Omega_n, 
                                     w0, wa, h, norm_pk, n_s, 
-                                    zarr_mgrowth, dfarr_mgrowth)
+                                    z_mg, df_mg)
     
     def __getitem__(self, key):
         """Access parameter values by name.
@@ -189,7 +195,11 @@ class Cosmology(object):
 
     """
     
-    def __init__(self, params, config=None, 
+    def __init__(self, 
+                 params=None, config=None,
+                 Omega_c=None, Omega_b=None, h=None, A_s=None, n_s=None, 
+                 Omega_k=0., Omega_n=0., w0=-1., wa=0., sigma8=None,
+                 z_mg=None, df_mg=None, 
                  transfer_function='boltzmann_class',
                  matter_power_spectrum='halofit',
                  mass_function='tinker'):
@@ -200,21 +210,45 @@ class Cosmology(object):
 
         Args:
             params (:obj:`Parameters`): Cosmological parameters object.
-            config (:obj:`ccl_configuration`, optional): Configuration for how to use CCL. Takes precident over any other passed in configuration. Defaults to None.
-            transfer_function (:obj:`str`, optional): The transfer function to use. Defaults to `boltzmann_class`.
-            matter_power_spectrum (:obj:`str`, optional): The matter power spectrum to use. Defaults to `halofit`.
-            mass_function (:obj:`str`, optional): The mass function to use. Defaults to `tinker` (2010).
+            config (:obj:`ccl_configuration`, optional): Configuration for how 
+            to use CCL. Takes precident over any other passed in configuration. 
+            Defaults to None.
+            transfer_function (:obj:`str`, optional): The transfer function to 
+            use. Defaults to `boltzmann_class`.
+            matter_power_spectrum (:obj:`str`, optional): The matter power 
+            spectrum to use. Defaults to `halofit`.
+            mass_function (:obj:`str`, optional): The mass function to use. 
+            Defaults to `tinker` (2010).
 
         """
-        # Check the type of the input params object
-        if isinstance(params, lib.parameters):
-            self.params = {} # Set to empty dict if ccl_parameters given directly
-        elif isinstance(params, Parameters):
+        
+        # Use either input cosmology parameters or Parameters() object
+        if params is None:
+            # Create new Parameters object
+            params = Parameters(Omega_c=Omega_c, Omega_b=Omega_b, h=h, A_s=A_s, 
+                                n_s=n_s, Omega_k=Omega_k, Omega_n=Omega_n, 
+                                w0=w0, wa=wa, sigma8=sigma8, z_mg=z_mg, 
+                                df_mg=df_mg)
             self.params = params
             params = params.parameters # We only need the ccl_parameters object
+        elif isinstance(params, lib.parameters):
+            # Raise an error if ccl_parameters given directly
+            raise TypeError("Must pass a Parameters() object, not ccl_parameters.")
+        elif isinstance(params, Parameters):
+            # Parameters object given directly
+            self.params = params
+            
+            # Warn if any cosmological parameters were specified at the same 
+            # time as a Parameters() object; they will be ignored
+            argtest = [Omega_c==None, Omega_b==None, h==None, A_s==None, 
+                       n_s==None, Omega_k==0., Omega_n==0., w0==-1., wa==0., 
+                       sigma8==None, z_mg==None, df_mg==None]
+            
+            if not all(arg == True for arg in argtest):
+                warn("Cosmological parameter kwargs are ignored if 'params' is "
+                     "not None", UserWarning)
         else:
-            raise TypeError("'params' is not a valid ccl_parameters or "
-                            "Parameters object.")
+            raise TypeError("'params' is not a valid Parameters object.")
         
         # Check that the ccl_configuration-related arguments are valid
         if config is not None:
@@ -263,7 +297,7 @@ class Cosmology(object):
             self.configuration = config
         
         # Create new ccl_cosmology instance
-        self.cosmo = lib.cosmology_create(params, config)
+        self.cosmo = lib.cosmology_create(self.params.parameters, config)
         
         # Check status
         if self.cosmo.status != 0:
@@ -318,7 +352,7 @@ class Cosmology(object):
 
         """
         status = 0
-        lib.cosmology_compute_distances(self.cosmo, status)
+        status = lib.cosmology_compute_distances(self.cosmo, status)
         check(status)
     
     def compute_growth(self):
@@ -327,7 +361,7 @@ class Cosmology(object):
 
         """
         status = 0
-        lib.cosmology_compute_growth(self.cosmo, status)
+        status = lib.cosmology_compute_growth(self.cosmo, status)
         check(status)
     
     def compute_power(self):
@@ -336,7 +370,7 @@ class Cosmology(object):
 
         """
         status = 0
-        lib.cosmology_compute_power(self.cosmo, status)
+        status = lib.cosmology_compute_power(self.cosmo, status)
         check(status)
     
     def has_distances(self):

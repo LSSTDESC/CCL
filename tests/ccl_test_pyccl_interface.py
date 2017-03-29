@@ -1,6 +1,6 @@
 import numpy as np
 from numpy.testing import assert_raises, assert_warns, assert_no_warnings, \
-                          assert_, run_module_suite
+                          assert_, decorators, run_module_suite
 import pyccl as ccl
 
 
@@ -94,8 +94,6 @@ def check_power(cosmo):
     """
     Check that power spectrum and sigma functions can be run.
     """
-    #from power import linear_matter_power, nonlin_matter_power, sigmaR, sigma8
-    
     # Types of scale factor
     a = 0.9
     a_arr = np.linspace(0.2, 1., 5.)
@@ -252,15 +250,12 @@ def check_cls(cosmo):
     """
     Check that cls functions can be run.
     """
-    #angular_cl
-    
     # Number density input
-    z_n = np.linspace(0., 1., 200)
-    n = np.ones(z_n.shape)
+    z = np.linspace(0., 1., 200)
+    n = np.ones(z.shape)
     
     # Bias input
-    z_b = z_n
-    b = np.sqrt(1. + z_b)
+    b = np.sqrt(1. + z)
     
     # ell range input
     ell_scl = 4
@@ -268,13 +263,12 @@ def check_cls(cosmo):
     ell_arr = np.arange(2, 10)
     
     # ClTracer test objects
-    lens1 = ccl.ClTracerLensing(cosmo, False, z_n, n)
-    lens2 = ccl.ClTracerLensing(cosmo, True, z_n, n, 
-                                z_ba=z_n, ba=n, z_rf=z_n, rf=n)
-    nc1 = ccl.ClTracerNumberCounts(cosmo, False, False, z_n, n, z_b, b)
-    nc2 = ccl.ClTracerNumberCounts(cosmo, True, False, z_n, n, z_b, b)
-    nc3 = ccl.ClTracerNumberCounts(cosmo, True, True, z_n, n, z_b, b,
-                                   z_s=z_n, s=n)
+    lens1 = ccl.ClTracerLensing(cosmo, False, n=n, z=z)
+    lens2 = ccl.ClTracerLensing(cosmo, True, n=(z,n), bias_ia=(z,n), f_red=(z,n))
+    nc1 = ccl.ClTracerNumberCounts(cosmo, False, False, n=(z,n), bias=(z,b))
+    nc2 = ccl.ClTracerNumberCounts(cosmo, True, False, n=(z,n), bias=(z,b))
+    nc3 = ccl.ClTracerNumberCounts(cosmo, True, True, n=(z,n), bias=(z,b),
+                                   mag_bias=(z,b))
     
     # Check valid ell input is accepted
     assert_( all_finite(ccl.angular_cl(cosmo, lens1, lens1, ell_scl)) )
@@ -309,6 +303,7 @@ def test_background():
     for cosmo in reference_models():
         yield check_background, cosmo
 
+@decorators.slow
 def test_power():
     """
     Test power spectrum and sigma functions in ccl.power.
@@ -316,6 +311,7 @@ def test_power():
     for cosmo in reference_models():
         yield check_power, cosmo
 
+@decorators.slow
 def test_massfunc():
     """
     Test mass function and supporting functions.
