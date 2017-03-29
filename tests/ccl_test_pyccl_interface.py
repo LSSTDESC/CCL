@@ -159,6 +159,10 @@ def check_massfunc(cosmo):
     assert_raises(TypeError, ccl.massfunc, cosmo, mhalo_lst, a_arr, odelta)
     assert_raises(TypeError, ccl.massfunc, cosmo, mhalo_arr, a_arr, odelta)
     
+    # Check whether odelta out of bounds
+    assert_raises(RuntimeError, ccl.massfunc, cosmo, mhalo_scl, a, 199.)
+    assert_raises(RuntimeError, ccl.massfunc, cosmo, mhalo_scl, a, 5000.)
+    
     # massfunc_m2r
     assert_( all_finite(ccl.massfunc_m2r(cosmo, mhalo_scl)) )
     assert_( all_finite(ccl.massfunc_m2r(cosmo, mhalo_lst)) )

@@ -2,7 +2,7 @@
 import ccllib as lib
 from pyutils import _vectorize_fn, _vectorize_fn2, _vectorize_fn4
 
-def massfunc(cosmo, halo_mass, a, odelta):
+def massfunc(cosmo, halo_mass, a, odelta=200):
     """Halo mass function.
 
     Note: only Tinker (2010) is implemented right now.
@@ -13,7 +13,7 @@ def massfunc(cosmo, halo_mass, a, odelta):
         cosmo (:obj:`ccl.cosmology`): Cosmological parameters.
         halo_mass (float or array_like): Halo masses; Msun.
         a (float): scale factor.
-        odelta (float): overdensity parameter
+        odelta (float): overdensity parameter (default: 200)
 
     Returns:
         massfunc (float or array_like): Halo mass function; dn/dlog10M.
@@ -51,7 +51,7 @@ def sigmaM(cosmo, halo_mass, a):
     return _vectorize_fn2(lib.sigmaM, 
                           lib.sigmaM_vec, cosmo, halo_mass, a)
 
-def halo_bias(cosmo, halo_mass, a, odelta):
+def halo_bias(cosmo, halo_mass, a, odelta=200):
     """Halo bias.
 
     Note: only Tinker (2010) halo bias is implemented right now.
@@ -60,7 +60,7 @@ def halo_bias(cosmo, halo_mass, a, odelta):
         cosmo (:obj:`ccl.cosmology`): Cosmological parameters.
         halo_mass (float or array_like): Halo masses; Msun.
         a (float): Scale factor.
-        odelta (float): overdensity parameter
+        odelta (float): overdensity parameter (default: 200)
 
     Returns:
         halo_bias (float or array_like): Halo bias.

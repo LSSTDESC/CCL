@@ -43,7 +43,9 @@ error_types = {
     lib.CCL_ERROR_ROOT:         'CCL_ERROR_ROOT',
     lib.CCL_ERROR_CLASS:        'CCL_ERROR_CLASS',
     lib.CCL_ERROR_COMPUTECHI:   'CCL_ERROR_COMPUTECHI',
-    lib.CCL_ERROR_MF:           'CCL_ERROR_MF'
+    lib.CCL_ERROR_MF:           'CCL_ERROR_MF',
+    lib.CCL_ERROR_HMF_INTERP:   'CCL_ERROR_HMF_INTERP',
+    lib.CCL_ERROR_PARAMETERS:   'CCL_ERROR_PARAMETERS',
 }
 
 
