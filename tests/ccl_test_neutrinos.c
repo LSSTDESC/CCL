@@ -4,19 +4,29 @@
 #include <math.h>
 
 int main(int argc, char * argv[]){
+	
+	double Omega_c = 0.25;
+	double Omega_b = 0.05;
+	double h = 0.7;
+	double A_s = 2.1e-9;
+	double n_s = 0.96;
+	double Omega_k = 0.;
+	double Neff = 2.0328;
+	double Nmass = 1;
+	double mnu = 0.1;
 
 	// Set up parameters for the case of three massive neutrinos, example below.
-	ccl_parameters params = ccl_parameters_create_lcdm_nu(0.3, 0.05, 0.0,0.7, 2.215e-9, 0.9619, 0.00641, 3., 0.12);
-	//ccl_cosmology * cosmo = ccl_cosmology_create(params, default_config);	
-	int ai;
-	double a, omnuh2_3massless, omnuh2_3massive; //, OmegaMcheck;
+	ccl_parameters params = ccl_parameters_create_lcdm_nu(Omega_c, Omega_b, Omega_k,h, A_s,n_s, Neff, Nmass, mnu);
+	ccl_cosmology * cosmo = ccl_cosmology_create(params, default_config);	
+
+	double a, omnuh2_3massless, omnuh2_3massive;
 	FILE * output;
 	gsl_spline *temp_spline;
 
  	// Get the spline of the phase-space integral
 	temp_spline = ccl_calculate_nu_phasespace_spline();
 
-	/// Print parameters to check against CLASS
+	// Print parameters 
 	printf("OmegaL=%1.12f\n",params.Omega_l);
 	printf("OmegaNuRel=%1.12f\n", params.Omega_n_rel);
 	printf("OmegaNuMass=%1.12f\n", params.Omega_n_mass);
@@ -25,14 +35,10 @@ int main(int argc, char * argv[]){
 	printf("Omegak=%1.12f\n", params.Omega_k);
 	printf("Omegac=%1.12f\n", params.Omega_c);
 	printf("Omegab=%1.12f\n", params.Omega_b);
-	
-	// To check Omega_m(z) against CLASS.
-	//OmegaMcheck = ccl_omega_m_z(cosmo, (1./(1.+0.99925023933)));
-	//printf("OmM= %1.12f\n", OmegaMcheck); 
 
 	// Get Omeganuh^2 at several values of a
 	output = fopen("./neutrinos_example.out", "w"); 
-	for(ai=1; ai<=50; ai++){
+	for(int ai=1; ai<=50; ai++){
 		a= ai*0.02;
    		// Examples of calling Omeganuh2 for different neutrino configurations:
 		// All neutrinos massless:	 

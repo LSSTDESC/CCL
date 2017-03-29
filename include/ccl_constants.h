@@ -11,7 +11,7 @@
 // of filling these splines
 #define A_SPLINE_DELTA 0.001
 #define A_SPLINE_NA    1000
-#define A_SPLINE_MIN   0.1
+#define A_SPLINE_MIN   0.001
 #define A_SPLINE_MAX   1.0
 
 #define LOGM_SPLINE_DELTA 0.025
@@ -32,7 +32,7 @@
 #define K_PIVOT 0.05
 #define K_MAX_SPLINE 50. 
 #define K_MAX 1e3
-#define K_MIN 7.19730416688957e-06
+#define K_MIN  7.19730416688957e-06
 #define K_MAX_INT (1e3/1.1) //minimum integration range
 #define K_MIN_INT (1e-6*1.1) //maximum integration range
 #define N_K 1000

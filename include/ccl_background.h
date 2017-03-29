@@ -6,7 +6,9 @@ typedef enum ccl_omega_x_label {
   ccl_omega_m_label=0,
   ccl_omega_l_label=1,
   ccl_omega_g_label=2,
-  ccl_omega_k_label=3
+  ccl_omega_k_label=3,
+  ccl_omega_ur_label=4,
+  ccl_omega_nu_label=5
 } ccl_omega_x_label;
 
 // Normalized expansion rate at scale factor a
