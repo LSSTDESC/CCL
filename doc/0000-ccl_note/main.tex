@@ -380,7 +380,7 @@ The halo mass function is incorporated using several definitions from the litera
 \begin{equation}
 \bar{\rho}(r_{\Delta}) = \Delta*\rho_m.
 \end{equation}
-We look toward extending to more general halo definitions in the future, though this implementation is not yet in practice.
+In addition to the usage of the most common definition, we have implemented an extension for two of the models. The Tinker 2010 model allows for a value of $\Delta$ to be given between the values of 200 and 3200 and interpolates the fitting parameters within this range in a space of $\log \Delta$ using splines. We also have implemented interpolation in the same range of Tinker 2008 $\Delta$ values. We choose not to use the interpolation fitting functions included in this work due to the introduced inaccuracies from the specified values at distinct $\Delta$ values and instead utilize a spline fitting method. We look toward extending to more general halo definitions in the future, though this implementation is not yet in practice.
 
 
 With the exception of the Tinker 2010 model, we attempt to keep a common form to the multiplicity function whenever possible for ease of extension:
@@ -416,7 +416,7 @@ The \citet{Tinker2010} model parameterizes both the halo mass function and the h
   \b(\nu) = 1 - A\frac{\nu^a}{\nu^a + {\delta_c}^a} + B\nu^b+C\nu^c,
   f(\nu) = \alpha[1+(\beta\nu)^{-2\phi}]\nu^{2\eta}e(-\gamma\nu^2/2).
 \end{equation}
-The currently implemented model in {\tt CCL} does not account for changes in halo definition, though this remains an area of active work to improve upon.
+The currently implemented model in {\tt CCL} allows for an arbitrary overdensity $\Delta$ to be chosen, using the fitting functions provided in \citet{Tinker2010}. Other halo model definitions are not included in the halo bias calculation, though this remains an area of active work to improve upon.
 
 \subsection{Photo-$z$ implementation}
 \label{sec:photoz}

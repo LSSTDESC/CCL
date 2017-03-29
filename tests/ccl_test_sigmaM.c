@@ -54,7 +54,7 @@ static int linecount(FILE *f)
 
 static void compare_sigmam(int i_model,struct sigmam_data * data)
 {
-  int nm,i,j;
+  int nm,i;
   char fname[256],str[1024];
   FILE *f;
   int status=0;

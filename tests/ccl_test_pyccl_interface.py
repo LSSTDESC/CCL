@@ -148,15 +148,20 @@ def check_massfunc(cosmo):
     mhalo_scl = 1e13
     mhalo_lst = [1e11, 1e12, 1e13, 1e14, 1e15, 1e16]
     mhalo_arr = np.array([1e11, 1e12, 1e13, 1e14, 1e15, 1e16])
+    odelta = 200.
     
     # massfunc
-    assert_( all_finite(ccl.massfunc(cosmo, mhalo_scl, a)) )
-    assert_( all_finite(ccl.massfunc(cosmo, mhalo_lst, a)) )
-    assert_( all_finite(ccl.massfunc(cosmo, mhalo_arr, a)) )
+    assert_( all_finite(ccl.massfunc(cosmo, mhalo_scl, a, odelta)) )
+    assert_( all_finite(ccl.massfunc(cosmo, mhalo_lst, a, odelta)) )
+    assert_( all_finite(ccl.massfunc(cosmo, mhalo_arr, a, odelta)) )
     
-    assert_raises(TypeError, ccl.massfunc, cosmo, mhalo_scl, a_arr)
-    assert_raises(TypeError, ccl.massfunc, cosmo, mhalo_lst, a_arr)
-    assert_raises(TypeError, ccl.massfunc, cosmo, mhalo_arr, a_arr)
+    assert_raises(TypeError, ccl.massfunc, cosmo, mhalo_scl, a_arr, odelta)
+    assert_raises(TypeError, ccl.massfunc, cosmo, mhalo_lst, a_arr, odelta)
+    assert_raises(TypeError, ccl.massfunc, cosmo, mhalo_arr, a_arr, odelta)
+    
+    # Check whether odelta out of bounds
+    assert_raises(RuntimeError, ccl.massfunc, cosmo, mhalo_scl, a, 199.)
+    assert_raises(RuntimeError, ccl.massfunc, cosmo, mhalo_scl, a, 5000.)
     
     # massfunc_m2r
     assert_( all_finite(ccl.massfunc_m2r(cosmo, mhalo_scl)) )
