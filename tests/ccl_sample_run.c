@@ -102,7 +102,7 @@ int main(int argc,char **argv){
 		printf("%.1e\t",pow(10,logM));
 		for(double z=0; z<=1; z+=0.5)
 		{
-			printf("%e\t", ccl_massfunc(cosmo, pow(10,logM),1.0/(1.0+z), &status));
+			printf("%e\t", ccl_massfunc(cosmo, pow(10,logM),1.0/(1.0+z), 200., &status));
 		}
 		printf("\n");
 	}
@@ -114,7 +114,7 @@ int main(int argc,char **argv){
 	{
 		for(double z=0; z<=1; z+=0.5)
 		{
-		  printf("%.1e %.1e %.2e\n",1.0/(1.0+z),pow(10,logM),ccl_halo_bias(cosmo,pow(10,logM),1.0/(1.0+z), &status));
+		  printf("%.1e %.1e %.2e\n",1.0/(1.0+z),pow(10,logM),ccl_halo_bias(cosmo,pow(10,logM),1.0/(1.0+z), 200., &status));
 		}
 	}
 	printf("\n");

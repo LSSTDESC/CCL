@@ -110,11 +110,19 @@ ccl_cosmology * ccl_cosmology_create(ccl_parameters params, ccl_configuration co
   cosmo->data.accelerator=NULL;
   cosmo->data.accelerator_achi=NULL;
   cosmo->data.accelerator_m=NULL;
+  cosmo->data.accelerator_d=NULL;
   cosmo->data.growth0 = 1.;
   cosmo->data.achi=NULL;
 
   cosmo->data.logsigma = NULL;
-  
+
+  // hmf parameter for interpolation
+  cosmo->data.alphahmf = NULL;
+  cosmo->data.betahmf = NULL;
+  cosmo->data.gammahmf = NULL;
+  cosmo->data.phihmf = NULL;
+  cosmo->data.etahmf = NULL;
+
   cosmo->data.p_lin = NULL;
   cosmo->data.p_nl = NULL;
   
@@ -122,10 +130,83 @@ ccl_cosmology * ccl_cosmology_create(ccl_parameters params, ccl_configuration co
   cosmo->computed_growth = false;
   cosmo->computed_power = false;
   cosmo->computed_sigma = false;
+  cosmo->computed_hmfparams = false;
   cosmo->status = 0;
   
   return cosmo;
 }
+
+
+/* ------- ROUTINE: ccl_cosmology_create_with_params ------
+INPUTS: 
+        Numbers for the basic cosmological parameters needed by CCL
+        ccl_configuration config
+TASK: Creates ccl_cosmology struct directly from a set of input cosmological 
+      parameter values, without the need to create a separate ccl_parameters 
+      struct.
+DEFINITIONS:
+Omega_c: cold dark matter
+Omega_b: baryons
+Omega_n: neutrinos
+Omega_k: curvature
+w0: Dark energy eqn. of state parameter
+wa: Dark energy eqn. of state parameter, time variation
+h: Hubble's constant divided by (100 km/s/Mpc).
+norm_pk: amplitude of the primordial PS (either A_s or sigma_8)
+n_s: index of the primordial PS
+*/
+
+ccl_cosmology * ccl_cosmology_create_with_params(
+        double Omega_c, double Omega_b, double Omega_k, double Omega_n, 
+        double w0, double wa, double h, double norm_pk, double n_s,
+        int nz_mgrowth, double *zarr_mgrowth, double *dfarr_mgrowth, 
+        ccl_configuration config)
+{
+    // Create ccl_parameters struct from input parameters
+    ccl_parameters params;
+    params = ccl_parameters_create(Omega_c, Omega_b, Omega_k, Omega_n, w0, wa, 
+                                   h, norm_pk, n_s, nz_mgrowth, zarr_mgrowth, 
+                                   dfarr_mgrowth);
+    
+    // Create  ccl_cosmology struct
+    ccl_cosmology *cosmo;
+    cosmo = ccl_cosmology_create(params, config);
+    return cosmo;
+}
+
+
+/* ------- ROUTINE: ccl_cosmology_create_with_lcdm_params ------
+INPUTS: 
+        Numbers for the basic LCDM cosmological parameters needed by CCL
+        ccl_configuration config
+TASK: Creates ccl_cosmology struct directly from a set of input cosmological 
+      parameter values (for a flat LCDM model), without the need to create a 
+      separate ccl_parameters struct.
+DEFINITIONS:
+Omega_c: cold dark matter
+Omega_b: baryons
+Omega_k: curvature
+h: Hubble's constant divided by (100 km/s/Mpc).
+norm_pk: amplitude of the primordial PS (either A_s or sigma_8)
+n_s: index of the primordial PS
+*/
+
+ccl_cosmology * ccl_cosmology_create_with_lcdm_params(
+        double Omega_c, double Omega_b, double Omega_k, double h, 
+        double norm_pk, double n_s,
+        ccl_configuration config)
+{
+    // Create ccl_parameters struct from input parameters
+    ccl_parameters params;
+    params = ccl_parameters_create_lcdm(Omega_c, Omega_b, Omega_k, h, 
+                                        norm_pk, n_s);
+    
+    // Create  ccl_cosmology struct
+    ccl_cosmology *cosmo;
+    cosmo = ccl_cosmology_create(params, config);
+    return cosmo;
+}
+
 
 /* ------ ROUTINE: ccl_parameters_fill_initial -------
 INPUT: ccl_parameters: params
@@ -324,6 +405,18 @@ void ccl_data_free(ccl_data * data)
     gsl_spline2d_free(data->p_lin);
   if(data->p_nl!=NULL)
     gsl_spline2d_free(data->p_nl);
+  if(data->alphahmf!=NULL)
+    gsl_spline_free(data->alphahmf);
+  if(data->betahmf!=NULL)
+    gsl_spline_free(data->betahmf);
+  if(data->gammahmf!=NULL)
+    gsl_spline_free(data->gammahmf);
+  if(data->phihmf!=NULL)
+    gsl_spline_free(data->phihmf);
+  if(data->etahmf!=NULL)
+    gsl_spline_free(data->etahmf);
+  if(data->accelerator_d!=NULL)
+    gsl_interp_accel_free(data->accelerator_d);
 }
 
 

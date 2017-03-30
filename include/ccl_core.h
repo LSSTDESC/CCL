@@ -67,12 +67,20 @@ typedef struct ccl_data{
   gsl_interp_accel *accelerator;
   gsl_interp_accel *accelerator_achi;
   gsl_interp_accel *accelerator_m;
+  gsl_interp_accel *accelerator_d;
   //TODO: it seems like we're not really using this accelerator, and we should
   gsl_interp_accel *accelerator_k;
 
   // Function of Halo mass M
   gsl_spline * logsigma;
   gsl_spline * dlnsigma_dlogm; 
+
+  // splines for halo mass function
+  gsl_spline * alphahmf;
+  gsl_spline * betahmf;
+  gsl_spline * gammahmf;
+  gsl_spline * phihmf;
+  gsl_spline * etahmf;
 
   // These are all functions of the wavenumber k and the scale factor a.
   gsl_spline2d * p_lin;
@@ -91,6 +99,7 @@ typedef struct ccl_cosmology
   bool computed_growth;
   bool computed_power;
   bool computed_sigma;
+  bool computed_hmfparams;
 
   int status;
   //this is optional - less tedious than tracking all numerical values for status in error handler function
@@ -103,6 +112,19 @@ typedef struct ccl_cosmology
 // Initialization and life cycle of objects
 void ccl_cosmology_read_config();
 ccl_cosmology * ccl_cosmology_create(ccl_parameters params, ccl_configuration config);
+
+
+// Helper functions to create ccl_cosmology structs directly given a set of params
+ccl_cosmology * ccl_cosmology_create_with_params(
+        double Omega_c, double Omega_b, double Omega_k, double Omega_n, 
+        double w0, double wa, double h, double norm_pk, double n_s,
+        int nz_mgrowth, double *zarr_mgrowth, double *dfarr_mgrowth, 
+        ccl_configuration config);
+
+ccl_cosmology * ccl_cosmology_create_with_lcdm_params(
+        double Omega_c, double Omega_b, double Omega_k, double h, 
+        double norm_pk, double n_s,
+        ccl_configuration config);
 
 // User-facing creation routines
 // Most general case

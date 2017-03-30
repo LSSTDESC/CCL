@@ -4,6 +4,7 @@
 #define A_SPLINE_TYPE gsl_interp_akima
 #define K_SPLINE_TYPE gsl_interp_akima
 #define M_SPLINE_TYPE gsl_interp_akima
+#define D_SPLINE_TYPE gsl_interp_akima
 #define PNL_SPLINE_TYPE gsl_interp2d_bicubic
 #define PLIN_SPLINE_TYPE gsl_interp2d_bicubic
 
