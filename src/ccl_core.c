@@ -15,13 +15,13 @@ const ccl_configuration default_config = {ccl_boltzmann_class, ccl_halofit, ccl_
 
 /* ------- ROUTINE: ccl_cosmology_read_config ------
    INPUTS: none, but will look for ini file in include/ dir
-   TASK: fill out global variables fo splines with user defined input
-   those are defined in ccl_params.h
+   TASK: fill out global variables of splines with user defined input.
+   The variables are defined in ccl_params.h.
    
    The following are the relevant global variables:
 */
 
-ccl_spline_params * ccl_splines;
+ccl_spline_params * ccl_splines; // Global variable
 
 void ccl_cosmology_read_config(){
 
@@ -34,8 +34,10 @@ void ccl_cosmology_read_config(){
   
   ccl_splines = malloc(sizeof(ccl_spline_params));
   
-  if ((fconfig=fopen("include/ccl_params.ini", "r")) == NULL) {
-    fprintf(stderr, "ccl_core.c: Failed to open config file ccl_params.ini\n");
+  if ((fconfig=fopen(EXPAND_STR(__CCL_DATA_DIR__) "/ccl_params.ini", "r")) == NULL) {
+    fprintf(stderr, "ccl_core.c: Failed to open config file " 
+                    EXPAND_STR(__CCL_DATA_DIR__) 
+                    "ccl_params.ini\n");
     exit(EXIT_FAILURE);
   } 
 
