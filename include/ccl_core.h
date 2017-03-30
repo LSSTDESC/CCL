@@ -108,6 +108,19 @@ typedef struct ccl_cosmology
 // Initialization and life cycle of objects
 ccl_cosmology * ccl_cosmology_create(ccl_parameters params, ccl_configuration config);
 
+
+// Helper functions to create ccl_cosmology structs directly given a set of params
+ccl_cosmology * ccl_cosmology_create_with_params(
+        double Omega_c, double Omega_b, double Omega_k, double Omega_n, 
+        double w0, double wa, double h, double norm_pk, double n_s,
+        int nz_mgrowth, double *zarr_mgrowth, double *dfarr_mgrowth, 
+        ccl_configuration config);
+
+ccl_cosmology * ccl_cosmology_create_with_lcdm_params(
+        double Omega_c, double Omega_b, double Omega_k, double h, 
+        double norm_pk, double n_s,
+        ccl_configuration config);
+
 // User-facing creation routines
 // Most general case
 ccl_parameters ccl_parameters_create(double Omega_c, double Omega_b, double Omega_k, double Omega_n, double w0, double wa, double h, double norm_pk, double n_s,int nz_mgrowth,double *zarr_mgrowth,double *dfarr_mgrowth);
