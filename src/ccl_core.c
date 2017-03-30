@@ -34,10 +34,18 @@ void ccl_cosmology_read_config(){
   
   ccl_splines = malloc(sizeof(ccl_spline_params));
   
-  if ((fconfig=fopen(EXPAND_STR(__CCL_DATA_DIR__) "/ccl_params.ini", "r")) == NULL) {
-    fprintf(stderr, "ccl_core.c: Failed to open config file " 
-                    EXPAND_STR(__CCL_DATA_DIR__) 
-                    "ccl_params.ini\n");
+  // Get parameter .ini filename from environment variable or default location
+  char* param_file;
+  const char* param_file_env = getenv("CCL_PARAM_FILE");
+  if (param_file_env != NULL){
+    param_file = param_file_env;
+  } else {
+    // Use default ini file
+    param_file = EXPAND_STR(__CCL_DATA_DIR__) "/ccl_params.ini";
+  }
+  
+  if ((fconfig=fopen(param_file, "r")) == NULL) {
+    fprintf(stderr, "ccl_core.c: Failed to open config file %s\n", param_file);
     exit(EXIT_FAILURE);
   } 
 
