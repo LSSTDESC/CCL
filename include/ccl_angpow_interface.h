@@ -100,11 +100,13 @@ class PowerSpecCCL : public PowerSpecBase {
     at fixed z value (and l too if necessary)
    */
   void Init(double z) {
-    int status=0; double bias=1.0;
-    double tmp= bias*ccl_growth_factor(ccl_cosmo_,1.0/(1+z), &status);
+    int status=0; 
+    double tmp= ccl_growth_factor(ccl_cosmo_,1.0/(1+z), &status);
     growth2_ = tmp*tmp;
     // WARNING: here we want to store dlnD/dln(+1z) = - dlnD/dlna
     fz_= - ccl_growth_rate(ccl_cosmo_,1.0/(1+z), &status);
+    // TO SET with CCL
+    bias_ = 1.;
   }
 
   //Main operator
@@ -116,6 +118,7 @@ class PowerSpecCCL : public PowerSpecBase {
 
   virtual bool get_has_rsd() { return has_rsd_; }
   virtual r_8 get_fz() { return fz_; }
+  virtual r_8 get_bias() { return bias_; }
 
  private:
 
@@ -126,6 +129,7 @@ class PowerSpecCCL : public PowerSpecBase {
   bool use_rsd_;
   bool has_rsd_;
   r_8 fz_;
+  r_8 bias_;
 
   //forbid for the time beeing the assignment operator
   PowerSpecCCL& operator=(const PowerSpecCCL& copy);
