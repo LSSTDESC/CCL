@@ -149,6 +149,9 @@ void init_windows(Parameters para, RadSelectBase*& Z1win, RadSelectBase*& Z2win)
 // Exemple of processing from P(k) to Cl
 //------------------------------
 int main(int argc,char **argv){
+
+  int rc=0;
+  try {
   //status flag
   //int status =0;
   // Initialize cosmological parameters
@@ -226,5 +229,21 @@ int main(int argc,char **argv){
     ct.WriteApodCls(outName);
   }
 
+  }//try
+    catch (std::exception& sex) {
+      std::cerr << "\n job std::exception :"  << (std::string)typeid(sex).name() 
+         << "\n msg= " << sex.what() << std::endl;
+    rc = 78;
+  }
+    catch ( std::string str ) {
+    std::cerr << "job Exception raised: " << str << std::endl;
+  }
+  catch (...) {
+    std::cerr << " job catched unknown (...) exception  " << std::endl; 
+    rc = 79; 
+  } 
+
+  std::cout << ">>>> job ------- END ----------- RC=" << rc << std::endl;
+  return rc;
   
 }

@@ -19,15 +19,16 @@ extern "C" {
 /* #include "angpow_numbers.h" */
 /* #include "angpow_func.h" */
 /* #include "angpow_cosmo.h" */
-#include "angpow_tools.h"
-#include "angpow_parameters.h"
-#include "angpow_pk2cl.h"
-#include "angpow_powspec_base.h"
-#include "angpow_cosmo_base.h"
-#include "angpow_radial.h"
-#include "angpow_radial_base.h"
-#include "angpow_clbase.h"
-#include "angpow_ctheta.h"
+#include "Angpow/angpow_tools.h"
+#include "Angpow/angpow_parameters.h"
+#include "Angpow/angpow_pk2cl.h"
+#include "Angpow/angpow_powspec_base.h"
+#include "Angpow/angpow_cosmo_base.h"
+#include "Angpow/angpow_radial.h"
+#include "Angpow/angpow_radial_base.h"
+#include "Angpow/angpow_clbase.h"
+#include "Angpow/angpow_ctheta.h"
+#include "Angpow/angpow_exceptions.h"  //exceptions
 
 
 // CCL inputs :
@@ -54,17 +55,18 @@ namespace Angpow {
 class PowerSpecCCL : public PowerSpecBase {
  public:
   //! Constructor
- PowerSpecCCL(ccl_cosmology * cosmo, double kmin=1e-5, double kmax=10, int nk=1000, bool use_rsd=true) : ccl_cosmo_(cosmo) {
-    if(use_rsd) {
-      has_rsd_ = true;
-      use_rsd_ = true;
-    }
+ PowerSpecCCL(ccl_cosmology * cosmo, double kmin=1e-5, double kmax=10, int nk=1000, bool use_rsd=true)
+   : ccl_cosmo_(cosmo), use_rsd_(use_rsd), has_rsd_(true) {
+    /* if(use_rsd) { */
+    /*   has_rsd_ = true; */
+    /*   use_rsd_ = true; */
+    /* } */
     int status =0;
     double * ks = ccl_log_spacing(kmin,kmax,N_K);
     double Pks[N_K];
     double aref = 1.; // z=0
     for(int i=0; i<nk; i++) {
-      Pks[i] = ccl_linear_matter_power(cosmo, aref, ks[i], &status);
+      Pks[i] = ccl_linear_matter_power(cosmo, ks[i], aref, &status);
     }
     
     std::vector<double> vx;
@@ -98,7 +100,6 @@ class PowerSpecCCL : public PowerSpecBase {
     at fixed z value (and l too if necessary)
    */
   void Init(double z) {
-    if(use_rsd_) has_rsd_=true;
     int status=0; double bias=1.0;
     double tmp= bias*ccl_growth_factor(ccl_cosmo_,1.0/(1+z), &status);
     growth2_ = tmp*tmp;
@@ -108,9 +109,13 @@ class PowerSpecCCL : public PowerSpecBase {
 
   //Main operator
   virtual r_8 operator()(double k, double z) {
-     return growth2_*(Pk_->operator()(k));
+    r_8 pk = (Pk_->operator()(k));
+    if(pk<0) pk=0.; // P(k) values can be negative because of poor interpolation below kmin
+    return growth2_*pk;
   }
 
+  virtual bool get_has_rsd() { return has_rsd_; }
+  virtual r_8 get_fz() { return fz_; }
 
  private:
 
@@ -119,13 +124,15 @@ class PowerSpecCCL : public PowerSpecBase {
   double growth2_;               //!< D(zi)^2
   //double fz_; //! growth rate f(z)
   bool use_rsd_;
+  bool has_rsd_;
+  r_8 fz_;
 
   //forbid for the time beeing the assignment operator
   PowerSpecCCL& operator=(const PowerSpecCCL& copy);
   
   //Minimal copy to allow Main operator(int, r_8, r_8) to work
-  PowerSpecCCL(const PowerSpecCCL& copy) :
-  Pk_(copy.Pk_), ccl_cosmo_(copy.ccl_cosmo_), growth2_(copy.growth2_) {}  // , fz_(copy.fz_)
+ PowerSpecCCL(const PowerSpecCCL& copy) : 
+  Pk_(copy.Pk_), ccl_cosmo_(copy.ccl_cosmo_), growth2_(copy.growth2_), has_rsd_(copy.has_rsd_), fz_(copy.fz_) {} 
 };
 
 

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 CCLINCLUDE='./include/'
-AngPowINCLUDE='../AngPow/inc/Angpow/'
+AngPowINCLUDE='../AngPow/inc/'
 AngPowLIB='../AngPow/lib/'
 FFTWLIB='/opt/local/lib'
 GSLINCLUDE='/opt/local/include/'
