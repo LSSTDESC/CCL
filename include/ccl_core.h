@@ -6,6 +6,10 @@
 #include "ccl_constants.h"
 #include <stdbool.h>
 
+// Macros for replacing relative paths
+#define EXPAND_STR(s) STRING(s)
+#define STRING(s) #s
+
 typedef struct ccl_parameters {
   // Densities: CDM, baryons, total matter, neutrinos, curvature
   double Omega_c;
@@ -106,6 +110,7 @@ typedef struct ccl_cosmology
 
 
 // Initialization and life cycle of objects
+void ccl_cosmology_read_config();
 ccl_cosmology * ccl_cosmology_create(ccl_parameters params, ccl_configuration config);
 
 

@@ -11,6 +11,7 @@
 #include "ccl_power.h"
 #include "ccl_massfunc.h"
 #include "ccl_error.h"
+#include "ccl_params.h"
 
 void ccl_cosmology_compute_hmfparams(ccl_cosmology * cosmo, int *status)
 {
@@ -327,11 +328,11 @@ void ccl_cosmology_compute_sigma(ccl_cosmology * cosmo, int *status)
         return;
 
     // create linearly-spaced values of the mass.
-    int nm=LOGM_SPLINE_NM;
-    double * m = ccl_linear_spacing(LOGM_SPLINE_MIN, LOGM_SPLINE_MAX, nm);
+    int nm=ccl_splines->LOGM_SPLINE_NM;
+    double * m = ccl_linear_spacing(ccl_splines->LOGM_SPLINE_MIN, ccl_splines->LOGM_SPLINE_MAX, nm);
     if (m==NULL ||
-        (fabs(m[0]-LOGM_SPLINE_MIN)>1e-5) ||
-        (fabs(m[nm-1]-LOGM_SPLINE_MAX)>1e-5) ||
+        (fabs(m[0]-ccl_splines->LOGM_SPLINE_MIN)>1e-5) ||
+        (fabs(m[nm-1]-ccl_splines->LOGM_SPLINE_MAX)>1e-5) ||
         (m[nm-1]>10E17)
         ) {
        *status =CCL_ERROR_LINSPACE;
@@ -360,16 +361,16 @@ void ccl_cosmology_compute_sigma(ccl_cosmology * cosmo, int *status)
    }
    for (int i=0; i<nm; i++){
      if(i==0){
-       y[i] = log(pow(10, gsl_spline_eval(logsigma, m[i], NULL)))-log(pow(10,gsl_spline_eval(logsigma, m[i]+LOGM_SPLINE_DELTA/2., NULL)));
-       y[i] = 2.*y[i] / LOGM_SPLINE_DELTA;
+       y[i] = log(pow(10, gsl_spline_eval(logsigma, m[i], NULL)))-log(pow(10,gsl_spline_eval(logsigma, m[i]+ccl_splines->LOGM_SPLINE_DELTA/2., NULL)));
+       y[i] = 2.*y[i] / ccl_splines->LOGM_SPLINE_DELTA;
      }
      else if (i==nm-1){
-       y[i] = log(pow(10, gsl_spline_eval(logsigma, m[i]-LOGM_SPLINE_DELTA/2., NULL)))-log(pow(10,gsl_spline_eval(logsigma, m[i], NULL)));
-       y[i] = 2.*y[i] / LOGM_SPLINE_DELTA;
+       y[i] = log(pow(10, gsl_spline_eval(logsigma, m[i]-ccl_splines->LOGM_SPLINE_DELTA/2., NULL)))-log(pow(10,gsl_spline_eval(logsigma, m[i], NULL)));
+       y[i] = 2.*y[i] / ccl_splines->LOGM_SPLINE_DELTA;
      }
      else{
-       y[i] = (log(pow(10,gsl_spline_eval(logsigma, m[i]-LOGM_SPLINE_DELTA/2., NULL)))-log(pow(10,gsl_spline_eval(logsigma, m[i]+LOGM_SPLINE_DELTA/2., NULL))));
-       y[i] = y[i] / LOGM_SPLINE_DELTA;
+       y[i] = (log(pow(10,gsl_spline_eval(logsigma, m[i]-ccl_splines->LOGM_SPLINE_DELTA/2., NULL)))-log(pow(10,gsl_spline_eval(logsigma, m[i]+ccl_splines->LOGM_SPLINE_DELTA/2., NULL))));
+       y[i] = y[i] / ccl_splines->LOGM_SPLINE_DELTA;
      }
    }
 

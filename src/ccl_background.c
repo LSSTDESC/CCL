@@ -11,6 +11,7 @@
 #include "gsl/gsl_spline.h"
 #include "gsl/gsl_integration.h"
 #include "gsl/gsl_roots.h"
+#include "ccl_params.h"
 
 //TODO: is it worth separating between cases for speed purposes?
 //E.g. flat vs non-flat, LDCM vs wCDM
@@ -236,18 +237,18 @@ void ccl_cosmology_compute_distances(ccl_cosmology * cosmo, int *status)
   if(cosmo->computed_distances)
     return;
 
-  if(A_SPLINE_MAX>1.){
+  if(ccl_splines->A_SPLINE_MAX>1.){
     *status = CCL_ERROR_COMPUTECHI; 
     strcpy(cosmo->status_message,"ccl_background.c: scale factor cannot be larger than 1.\n");
     return;
   }
 
   // Create linearly-spaced values of the scale factor
-  int na = A_SPLINE_NA;
-  double * a = ccl_linear_spacing(A_SPLINE_MIN, A_SPLINE_MAX, na);
+  int na = ccl_splines->A_SPLINE_NA;
+  double * a = ccl_linear_spacing(ccl_splines->A_SPLINE_MIN, ccl_splines->A_SPLINE_MAX, na);
   if (a==NULL || 
-      (fabs(a[0]-A_SPLINE_MIN)>1e-5) || 
-      (fabs(a[na-1]-A_SPLINE_MAX)>1e-5) || 
+      (fabs(a[0]-ccl_splines->A_SPLINE_MIN)>1e-5) || 
+      (fabs(a[na-1]-ccl_splines->A_SPLINE_MAX)>1e-5) || 
       (a[na-1]>1.0)
       ) {
     // old:    cosmo->status = CCL_ERROR_LINSPACE;
@@ -393,11 +394,11 @@ void ccl_cosmology_compute_growth(ccl_cosmology * cosmo, int * status)
     return;
 
   // Create linearly-spaced values of the scale factor
-  int  chistatus = 0, na = A_SPLINE_NA;
-  double * a = ccl_linear_spacing(A_SPLINE_MIN, A_SPLINE_MAX, na);
+  int  chistatus = 0, na = ccl_splines->A_SPLINE_NA;
+  double * a = ccl_linear_spacing(ccl_splines->A_SPLINE_MIN, ccl_splines->A_SPLINE_MAX, na);
   if (a==NULL || 
-      (fabs(a[0]-A_SPLINE_MIN)>1e-5) || 
-      (fabs(a[na-1]-A_SPLINE_MAX)>1e-5) || 
+      (fabs(a[0]-ccl_splines->A_SPLINE_MIN)>1e-5) || 
+      (fabs(a[na-1]-ccl_splines->A_SPLINE_MAX)>1e-5) || 
       (a[na-1]>1.0)
       ) {
     *status = CCL_ERROR_LINSPACE;

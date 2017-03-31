@@ -1,25 +1,6 @@
 #pragma once
 
-// Parameters for grids and related things
-// one day to be determined by a long careful process.
-// At the moment we are just thinking that:
-//    the only high-z thing we need is CMB lensing
-//    the contribution to this from W*P is very small above z=10 ish
-// NB: Need to calculate chi_star separated from the process
-// of filling these splines
-#define A_SPLINE_DELTA 0.001
-#define A_SPLINE_NA    1000
-#define A_SPLINE_MIN   0.1
-#define A_SPLINE_MAX   1.0
-
-#define LOGM_SPLINE_DELTA 0.025
-#define LOGM_SPLINE_NM    440
-#define LOGM_SPLINE_MIN   6
-#define LOGM_SPLINE_MAX   17
-
-//for 2D SPLINE, e.g. P_NL, use coarser binning
-#define N_A 50
-
+//Spline types
 #define A_SPLINE_TYPE gsl_interp_akima
 #define K_SPLINE_TYPE gsl_interp_akima
 #define M_SPLINE_TYPE gsl_interp_akima
@@ -29,10 +10,6 @@
 
 // These are in units of Mpc (no factor of h)
 #define K_PIVOT 0.05
-#define K_MAX_SPLINE 50. 
-#define K_MAX 1e3
-#define K_MIN_DEFAULT 5e-5
-#define N_K 1000
 
 //Rho critical in units of M_sun/h / (Mpc/h)^3
 #define RHO_CRITICAL 2.7744948E11
