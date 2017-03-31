@@ -35,9 +35,9 @@ make check
 1. If you move or delete the source directory after installing CCL, some functions may fail. The source directory contains files needed by *CLASS* (which is contained within CCL) at run-time.
 
 ## Python wrapper installation
-The Python wrapper is called *pyccl*. Before you can build it, you must have compiled and installed the C version of CCL, as *pyccl* will be dynamically linked to it. The Python wrapper's build tools currently assume that your C compiler is *gcc* (with OpenMP enabled), and that you have a working Python 2.x installation with *numpy* and *distutils* with *swig*.
+The Python wrapper is called *pyccl*. Before you can build it, you must have compiled and installed the C version of CCL, as *pyccl* will be dynamically linked to it. The Python wrapper's build tools currently assume that your C compiler is *gcc*, and that you have a working Python 2.x installation with *numpy* and *distutils* with *swig*.
 
-To build and install the *pyccl* module, go to the root CCL source directory and choose one of the following options:
+If you have installed CCL in your default library path, you can build and install the *pyccl* module by going to the root CCL source directory and choosing one of the following options:
 
 * To build and install the wrapper for the current user only, run
 ````sh
@@ -51,23 +51,33 @@ sudo python setup.py install
 ````sh
 python setup.py build_ext --inplace
 ````
-If you choose either of the first two options, the *pyccl* module will be installed into a sensible location in your *PYTHONPATH*, and so should be automatically picked up by your Python interpreter. You can then simply import the module using `import pyccl`. If you use the last option, however, you must either start your interpreter from the root CCL directory, or manually add the root CCL directory to your *PYTHONPATH*.
+If you choose either of the first two options, the *pyccl* module will be installed into a sensible location in your *PYTHONPATH*, and so should be picked up automatically by your Python interpreter. You can then simply import the module using `import pyccl`. If you use the last option, however, you must either start your interpreter from the root CCL directory, or manually add the root CCL directory to your *PYTHONPATH*.
 
-These options assume that the C library (`libccl`) has been installed somewhere in the default library path. If this isn’t the case, you will need to tell the Python build tools where to find the library. This can be achieved by running the following command first, before any of the commands above:
+These options assume that the C library (`libccl`) has been installed somewhere in the default library path. If this isn’t the case, you will need to tell the Python build tools where to find the library. This can be achieved by running the following command first, before any of the install commands above:
 ````sh
 python setup.py build_ext --library-dirs=/path/to/install/lib/ --rpath=/path/to/install/lib/
 ````
-Here, `/path/to/install/lib/` should point to the directory where you installed the C library. For example, if you ran `./configure --prefix=/path/to/install/` before you compiled the C library, the correct path would be `/path/to/install/lib/`. The command above will build the Python wrapper in-place; you can then run one of the install commands, as listed above, to actually install the wrapper. Note that the `rpath` switch makes sure that the CCL C library can be found at runtime, even if it is not in the default library path. If you use this option, there should therefore be no need to modify the library path yourself.
+Here, `/path/to/install/lib/` should point to the directory where you installed the C library. For example, if you ran `./configure --prefix=/path/to/install/` before you compiled the C library, the correct path would be `/path/to/install/lib/`. The command above will build the Python wrapper in-place; you can then run one of the install commands, as listed above, to actually install the wrapper. Note that the `rpath` switch makes sure that the CCL C library can be found at runtime, even if it is not in the default library path. If you use this option, there should therefore be no need to modify the system library path yourself.
+
+On some systems, building or installing the Python wrapper fails with a message similar to
+````sh
+fatal error: 'gsl/gsl_interp2d.h' file not found.
+````
+This happens when the build tools fail to find the directory containing the GSL header files, e.g. when they have been installed in a non-standard directory. To work around this problem, use the `--include-dirs` option when running the `setup.py build_ext` step above, i.e. if the GSL header files are in the directory `/path/to/include/`, you would run
+````sh
+python setup.py build_ext --library-dirs=/path/to/install/lib/ --rpath=/path/to/install/lib/ --include-dirs=/path/to/include/
+````
+and then run one of the `setup.py install` commands listed above. (Note: As an alternative to the `--include-dirs` option, you can use `-I/path/to/include` instead.)
 
 You can quickly check whether *pyccl* has been installed correctly by running `python -c "import pyccl"` and checking that no errors are returned. For a more in-depth test to make sure everything is working, change to the `tests/` sub-directory and run `python run_tests.py`. These tests will take a few minutes.
 
 
 # Documentation
 
-This document contains basic information about used structures and functions. At the end of document is provided code which implements these basic functions (also in *tests/ccl_sample_run.c*). More information about CCL functions and implemetation can be found in *doc/0000-ccl_note/0000-ccl_note.pdf*.
+This document contains basic information about used structures and functions. At the end of document is provided code which implements these basic functions (also in *tests/ccl_sample_run.c*). More information about CCL functions and implementation can be found in *doc/0000-ccl_note/0000-ccl_note.pdf*.
 
 ### Cosmological parameters
-Start by defining cosmological parameters defined in structure **`ccl_parameters`**. This structure (exact definition in `include/ccl_core.h`) contains densities of matter, parameters of dark energy (`w0`, `wa`), Hubble parameters, primordial poer spectra, radiation parameters, derived parameters (`sigma_8`, `Omega_1`, `z_star`) and modified growth rate.
+Start by defining cosmological parameters defined in structure **`ccl_parameters`**. This structure (exact definition in `include/ccl_core.h`) contains densities of matter, parameters of dark energy (`w0`, `wa`), Hubble parameters, primordial power spectra, radiation parameters, derived parameters (`sigma_8`, `Omega_1`, `z_star`) and modified growth rate.
 
 You can initialize this structure through function **`ccl_parameters_create`** which returns object of type **`ccl_parameters`**.
 ```c
@@ -83,8 +93,8 @@ where:
 * `Omega_n`: neutrinos
 * `Omega_k`: curvature
 * little `omega_x` means "Omega_x h^2"
-* `w0`: Dark energy eq of state parameter
-* `wa`: Dark energy eq of state parameter, time variation
+* `w0`: Dark energy eqn of state parameter
+* `wa`: Dark energy eqn of state parameter, time variation
 * `H0`: Hubble's constant in km/s/Mpc.
 * `h`: Hubble's constant divided by (100 km/s/Mpc).
 * `A_s`: amplitude of the primordial PS
@@ -238,7 +248,7 @@ struct user_func_params
 	double (* sigma_z) (double);
 };
 
-// The user defines a function of the form double function ( z_ph, z_spec, void * user_pz_params) where user_pz_params is a pointer to the parameters of the user-defined function. This returns the probabilty of obtaining a given photo-z given a particular spec_z.
+// The user defines a function of the form double function ( z_ph, z_spec, void * user_pz_params) where user_pz_params is a pointer to the parameters of the user-defined function. This returns the probability of obtaining a given photo-z given a particular spec_z.
 double user_pz_probability(double z_ph, double z_s, void * user_par)
 {
         struct user_func_params * p = (struct user_func_params *) user_par;

@@ -558,7 +558,7 @@ A Python wrapper for {\tt CCL} is provided through a module called {\tt pyccl}. 
 \subsection{Python installation}
 \label{sec:python:install}
 
-Before you can build the Python wrapper, you must have compiled and installed the C version of {\tt CCL}, as {\tt pyccl} will be dynamically linked to it. The Python wrapper's build tools currently assume that your C compiler is {\tt gcc} (with OpenMP enabled), and that you have a working Python 2.x installation with {\tt numpy} and {\tt distutils} with {\tt swig}. To build and install the {\tt pyccl} module, go to the root {\tt CCL} directory and choose one of the following options:
+Before you can build the Python wrapper, you must have compiled and installed the C version of {\tt CCL}, as {\tt pyccl} will be dynamically linked to it. The Python wrapper's build tools currently assume that your C compiler is {\tt gcc} (with OpenMP enabled), and that you have a working Python 2.x installation with {\tt numpy} and {\tt distutils} with {\tt swig}. If you have installed CCL in your default library path, you can build and install the {\tt pyccl} module by going to the root {\tt CCL} directory and choosing one of the following options:
 \begin{itemize}
  \item To build and install the wrapper for the current user only, run \\
  {\tt \$ python setup.py install --user}
@@ -574,6 +574,16 @@ These options assume that the C library ({\tt libccl}) has been installed somewh
 \texttt{python setup.py build\_ext --library-dirs=/path/to/lib/ --rpath=/path/to/lib/}
 
 Here, {\tt /path/to/lib/} should point to the directory where you installed the C library. For example, if you ran {\tt ./configure --prefix=/my/path/} before you compiled the C library, the correct path would be {\tt /my/path/lib/}. The command above will build the Python wrapper in-place; you can then run one of the {\tt install} commands, as listed above, to actually install the wrapper. Note that the {\tt rpath} switch makes sure that the CCL C library can be found at runtime, even if it is not in the default library path. If you use this option, there should therefore be no need to modify the library path yourself.
+
+On some systems, building or installing the Python wrapper fails with a message similar to:
+
+\texttt{fatal error: 'gsl/gsl_interp2d.h' file not found.}
+
+This happens when the build tools fail to find the directory containing the GSL header files, e.g. when they have been installed in a non-standard directory. To work around this problem, use the {\tt --include-dirs} option when running the {\tt setup.py build_ext} step above, i.e. if the GSL header files are in the directory {\tt /path/to/include/}, you would run
+
+\texttt{python setup.py build_ext --library-dirs=/path/to/install/lib/ --rpath=/path/to/install/lib/ --include-dirs=/path/to/include/}
+
+and then run one of the {\tt setup.py install} commands listed above. (Note: As an alternative to the {\tt --include-dirs} option, you can use {\tt -I/path/to/include} instead.)
 
 You can quickly check whether {\tt pyccl} has been installed correctly by running {\tt python -c "import pyccl"} and checking that no errors are returned. For a more in-depth test to make sure everything is working, change to the {\tt tests/} sub-directory and run {\tt python run\_tests.py}. These tests will take a few minutes.
 
