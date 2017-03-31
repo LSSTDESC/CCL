@@ -35,7 +35,7 @@ void ccl_cosmology_read_config(){
   ccl_splines = malloc(sizeof(ccl_spline_params));
   
   // Get parameter .ini filename from environment variable or default location
-  char* param_file;
+  const char* param_file;
   const char* param_file_env = getenv("CCL_PARAM_FILE");
   if (param_file_env != NULL){
     param_file = param_file_env;
