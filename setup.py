@@ -188,11 +188,21 @@ class PyTest(Command):
         import sys,subprocess
         errno = subprocess.call([sys.executable,'tests/run_tests.py'])
         raise SystemExit(errno)
-
+class PyUninstall(DistutilsInstall):
+    def __init__(self,dist):
+        DistutilsInstall.__init__(self,dist)
+        self.build_args = {}
+        if self.record==None:
+            self.record='install-record.txt'
+    def run(self):
+        print "Removing..."
+        os.system("cat %s | xargs rm -rfv" % self.record)
 class PyInstall(DistutilsInstall):
     def __init__(self, dist):
         DistutilsInstall.__init__(self, dist)
         self.build_args = {}
+        if self.record==None:
+            self.record='install-record.txt'
     def check_extensions(self):
         """check if the C module can be built by trying to compile a small
         program against ccl"""
@@ -313,6 +323,7 @@ setup(  name         = "pyccl",
         cmdclass = {
             'install': PyInstall,
             'build_clib': build_external_clib,
-            'test': PyTest
+            'test': PyTest,
+            'uninstall': PyUninstall
         },
         )
