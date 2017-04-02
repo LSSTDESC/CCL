@@ -92,6 +92,12 @@ the following files:
    these if possible, instead of writing your own wrapper code for individual 
    functions.
 
+After these changes have been made, you should recreate pyccl/ccl_wrap.c and
+pyccl/ccllib.py by running swig:
+
+~$ swig -python -threads -o pyccl/ccl_wrap.c pyccl/ccl.i
+
+
 Once you have finished making changes to the wrapper, check to make sure 
 everything is operational by running the Python unit tests in the tests/ 
 directory. From the top-level directory of the CCL sources, and assuming that 

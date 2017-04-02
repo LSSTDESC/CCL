@@ -110,7 +110,7 @@ typedef struct ccl_cosmology
 
 
 // Initialization and life cycle of objects
-void ccl_cosmology_read_config();
+void ccl_cosmology_read_config(void);
 ccl_cosmology * ccl_cosmology_create(ccl_parameters params, ccl_configuration config);
 
 
