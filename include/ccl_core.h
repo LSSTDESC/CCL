@@ -134,7 +134,7 @@ ccl_cosmology * ccl_cosmology_create(ccl_parameters params, ccl_configuration co
 
 // Helper functions to create ccl_cosmology structs directly given a set of params
 ccl_cosmology * ccl_cosmology_create_with_params(
-        double Omega_c, double Omega_b, double Omega_k, double Omega_n, 
+        double Omega_c, double Omega_b, double Omega_k, double N_nu_rel, double N_nu_mass, double mnu, 
         double w0, double wa, double h, double norm_pk, double n_s,
         int nz_mgrowth, double *zarr_mgrowth, double *dfarr_mgrowth, 
         ccl_configuration config);

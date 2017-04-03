@@ -41,12 +41,16 @@ ccl_omega_nu_label <- massive neutrinos
 */
 double ccl_omega_x(ccl_cosmology * cosmo, double a, ccl_omega_x_label label, int *status){
 	
-	// Check if neutrino phase space function is calculated. If not, calculate.
-	if (cosmo->data.nu_pspace_int==NULL) cosmo->data.nu_pspace_int=ccl_calculate_nu_phasespace_spline();
-    
-	// Call the massive neutrino density function just once at this redshift.
+	// If massive neutrinos are present, compute the phase-space integral and get OmegaNuh2. If not, set OmegaNuh2 to zero.
 	double OmNuh2;
-	OmNuh2 = Omeganuh2(a, cosmo->params.N_nu_mass, cosmo->params.mnu, cosmo->params.T_CMB, cosmo->data.nu_pspace_int);
+	if ((cosmo->params.N_nu_mass) > 0.0001){
+		// Check if neutrino phase space function is calculated. If not, calculate.
+		if (cosmo->data.nu_pspace_int==NULL) cosmo->data.nu_pspace_int=ccl_calculate_nu_phasespace_spline();
+		// Call the massive neutrino density function just once at this redshift.
+		OmNuh2 = Omeganuh2(a, cosmo->params.N_nu_mass, cosmo->params.mnu, cosmo->params.T_CMB, cosmo->data.nu_pspace_int);
+	}else{
+		OmNuh2 = 0.;
+	}
 	
 	switch(label) {
 	case ccl_omega_m_label :

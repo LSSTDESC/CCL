@@ -1,5 +1,8 @@
 #pragma once
 
+
+#include "gsl/gsl_const_mksa.h"
+
 //Spline types
 #define A_SPLINE_TYPE gsl_interp_akima
 #define K_SPLINE_TYPE gsl_interp_akima
