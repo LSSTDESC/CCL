@@ -5,16 +5,18 @@
 #include "ccl_config.h"
 #include "ccl_constants.h"
 #include <stdbool.h>
-
+/**
+ * Struct containing the parameters defining a cosmology
+ */
 typedef struct ccl_parameters {
   // Densities: CDM, baryons, total matter, neutrinos, curvature
-  double Omega_c;
-  double Omega_b;
-  double Omega_m;
-  double Omega_n;
-  double Omega_k;
-  double sqrtk;
-  int k_sign;
+  double Omega_c; /**< Density of CDM relative to the critical density*/
+  double Omega_b; /**< Density of baryons relative to the critical density*/
+  double Omega_m; /**< Density of all matter relative to the critical density*/
+  double Omega_n; /**< Density of neutrinos relative to the critical density*/
+  double Omega_k; /**< Density of curvature relative to the critical density*/
+  double sqrtk; /**< Square root of the magnitude of curvature, k */ //TODO check
+  int k_sign; /**<Sign of the curvature k */
   
   // Dark Energy
   double w0;
