@@ -1,6 +1,7 @@
 #include "ccl.h"
 #include <math.h>
 #include <stdio.h>
+#include "ccl_params.h"
 
 int main(int argc, char * argv[])
 {
@@ -12,8 +13,7 @@ int main(int argc, char * argv[])
   double n_s = 0.96;
 
   ccl_configuration config = default_config;
-
-  //config.transfer_function_method = ccl_bbks;
+  config.transfer_function_method = ccl_bbks;
   //config.matter_power_spectrum_method=ccl_linear;
 
   ccl_parameters params = ccl_parameters_create_flat_lcdm(Omega_c, Omega_b, h, normp, n_s);
@@ -26,7 +26,7 @@ int main(int argc, char * argv[])
   double a_at_z2=1./3.;
   double a_at_z3=0.25;
   if(cosmo->config.matter_power_spectrum_method==ccl_linear){
-    for (k = K_MIN; k<K_MAX; k*=1.05){
+    for (k = ccl_splines->K_MIN_DEFAULT; k<ccl_splines->K_MAX; k*=1.05){
       p = ccl_linear_matter_power(cosmo, k,1.0, &status);
       p1 = ccl_linear_matter_power(cosmo,k, a_at_z1,&status);
       p2 = ccl_linear_matter_power(cosmo,k, a_at_z2,&status);
@@ -35,7 +35,7 @@ int main(int argc, char * argv[])
     }
   } else {
     if(cosmo->config.matter_power_spectrum_method==ccl_halofit){
-      for (k = K_MIN; k<K_MAX; k*=1.05){
+      for (k = ccl_splines->K_MIN_DEFAULT; k<ccl_splines->K_MAX; k*=1.05){
 	p = ccl_nonlin_matter_power(cosmo, k,1.0,&status);
 	p1 = ccl_nonlin_matter_power(cosmo,k, a_at_z1,&status);
 	p2 = ccl_nonlin_matter_power(cosmo,k, a_at_z2,&status);
@@ -47,8 +47,8 @@ int main(int argc, char * argv[])
       return NAN;
     }
   }
-  printf("sigma_8 = %.6lE\n", ccl_sigmaR(cosmo,8./h));
-  printf("Consistency check: sigma_8 = %.6lE\n", ccl_sigma8(cosmo));
+  printf("sigma_8 = %.6lE\n", ccl_sigmaR(cosmo,8./h,&status));
+  printf("Consistency check: sigma_8 = %.6lE\n", ccl_sigma8(cosmo,&status));
   printf("Completed. Status = %d\n",status);
   
   ccl_cosmology_free(cosmo);

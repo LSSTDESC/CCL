@@ -15,6 +15,7 @@
 @SET_MAKE@
 
 
+
 VPATH = @srcdir@
 am__is_gnu_make = { \
   if test -z '$(MAKELEVEL)'; then \
@@ -131,7 +132,7 @@ am__uninstall_files_from_dir = { \
     || { echo " ( cd '$$dir' && rm -f" $$files ")"; \
          $(am__cd) "$$dir" && rm -f $$files; }; \
   }
-am__installdirs = "$(DESTDIR)$(libdir)"
+am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(ccldir)"
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libccl_la_DEPENDENCIES = class/libclass.la
 am__dirstamp = $(am__leading_dot)dirstamp
@@ -150,9 +151,11 @@ PROGRAMS = $(noinst_PROGRAMS)
 am_tests_check_ccl_OBJECTS = tests/tests_check_ccl-ccl_test.$(OBJEXT) \
 	tests/tests_check_ccl-ccl_test_utils.$(OBJEXT) \
 	tests/tests_check_ccl-ccl_test_params.$(OBJEXT) \
+	tests/tests_check_ccl-ccl_test_cosmology.$(OBJEXT) \
 	tests/tests_check_ccl-ccl_test_distances.$(OBJEXT) \
 	tests/tests_check_ccl-ccl_test_growth.$(OBJEXT) \
 	tests/tests_check_ccl-ccl_test_bbks.$(OBJEXT) \
+	tests/tests_check_ccl-ccl_test_eh.$(OBJEXT) \
 	tests/tests_check_ccl-ccl_test_cls.$(OBJEXT) \
 	tests/tests_check_ccl-ccl_test_sigmaM.$(OBJEXT) \
 	tests/tests_check_ccl-ccl_test_massfunc.$(OBJEXT)
@@ -211,6 +214,7 @@ am__can_run_installinfo = \
     n|no|NO) false;; \
     *) (install-info --version) >/dev/null 2>&1;; \
   esac
+DATA = $(ccl_DATA)
 RECURSIVE_CLEAN_TARGETS = mostlyclean-recursive clean-recursive	\
   distclean-recursive maintainer-clean-recursive
 am__recursive_targets = \
@@ -425,12 +429,18 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 SUBDIRS = include class
+<<<<<<< HEAD
 EXTRA_DIST = doc sandbox README.md tests/benchmark tests/ccl_example_photoz.c tests/ccl_example_specs.c tests/ccl_sample_power.c tests/ctest.h tests/min_code.c tests/readme.md tests/ccl_test_neutrinos.c
+=======
+EXTRA_DIST = doc sandbox README.md tests/benchmark tests/ccl_example_photoz.c tests/ccl_example_specs.c tests/ccl_sample_power.c tests/ctest.h tests/min_code.c tests/readme.md include/ccl_params.ini
+ccldir = $(datadir)/ccl
+ccl_DATA = include/ccl_params.ini
+>>>>>>> master
 lib_LTLIBRARIES = libccl.la
 libccl_la_SOURCES = src/ccl_background.c src/ccl_core.c src/ccl_error.c src/ccl_lsst_specs.c src/ccl_placeholder.c src/ccl_power.c src/ccl_utils.c src/ccl_cls.c src/ccl_massfunc.c src/ccl_neutrinos.c
 libccl_la_LIBADD = class/libclass.la
-libccl_la_CPPFLAGS = -I./include/ -I./class/include
-tests_check_ccl_SOURCES = tests/ccl_test.c tests/ccl_test_utils.c tests/ccl_test_params.c tests/ccl_test_distances.c tests/ccl_test_growth.c tests/ccl_test_bbks.c tests/ccl_test_cls.c tests/ccl_test_sigmaM.c tests/ccl_test_massfunc.c
+libccl_la_CPPFLAGS = -I./include/ -I./class/include -D__CCL_DATA_DIR__=$(datadir)/ccl
+tests_check_ccl_SOURCES = tests/ccl_test.c tests/ccl_test_utils.c tests/ccl_test_params.c tests/ccl_test_cosmology.c tests/ccl_test_distances.c tests/ccl_test_growth.c tests/ccl_test_bbks.c tests/ccl_test_eh.c tests/ccl_test_cls.c tests/ccl_test_sigmaM.c tests/ccl_test_massfunc.c
 tests_check_ccl_CPPFLAGS = -I./tests/ -I./include/
 tests_check_ccl_LDFLAGS = -L./ -lccl -lgsl -lgslcblas
 all: config.h
@@ -571,11 +581,15 @@ tests/tests_check_ccl-ccl_test_utils.$(OBJEXT): tests/$(am__dirstamp) \
 	tests/$(DEPDIR)/$(am__dirstamp)
 tests/tests_check_ccl-ccl_test_params.$(OBJEXT):  \
 	tests/$(am__dirstamp) tests/$(DEPDIR)/$(am__dirstamp)
+tests/tests_check_ccl-ccl_test_cosmology.$(OBJEXT):  \
+	tests/$(am__dirstamp) tests/$(DEPDIR)/$(am__dirstamp)
 tests/tests_check_ccl-ccl_test_distances.$(OBJEXT):  \
 	tests/$(am__dirstamp) tests/$(DEPDIR)/$(am__dirstamp)
 tests/tests_check_ccl-ccl_test_growth.$(OBJEXT):  \
 	tests/$(am__dirstamp) tests/$(DEPDIR)/$(am__dirstamp)
 tests/tests_check_ccl-ccl_test_bbks.$(OBJEXT): tests/$(am__dirstamp) \
+	tests/$(DEPDIR)/$(am__dirstamp)
+tests/tests_check_ccl-ccl_test_eh.$(OBJEXT): tests/$(am__dirstamp) \
 	tests/$(DEPDIR)/$(am__dirstamp)
 tests/tests_check_ccl-ccl_test_cls.$(OBJEXT): tests/$(am__dirstamp) \
 	tests/$(DEPDIR)/$(am__dirstamp)
@@ -610,7 +624,9 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/tests_check_ccl-ccl_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/tests_check_ccl-ccl_test_bbks.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/tests_check_ccl-ccl_test_cls.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/tests_check_ccl-ccl_test_cosmology.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/tests_check_ccl-ccl_test_distances.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/tests_check_ccl-ccl_test_eh.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/tests_check_ccl-ccl_test_growth.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/tests_check_ccl-ccl_test_massfunc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/tests_check_ccl-ccl_test_params.Po@am__quote@
@@ -753,6 +769,20 @@ tests/tests_check_ccl-ccl_test_params.obj: tests/ccl_test_params.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(tests_check_ccl_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o tests/tests_check_ccl-ccl_test_params.obj `if test -f 'tests/ccl_test_params.c'; then $(CYGPATH_W) 'tests/ccl_test_params.c'; else $(CYGPATH_W) '$(srcdir)/tests/ccl_test_params.c'; fi`
 
+tests/tests_check_ccl-ccl_test_cosmology.o: tests/ccl_test_cosmology.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(tests_check_ccl_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT tests/tests_check_ccl-ccl_test_cosmology.o -MD -MP -MF tests/$(DEPDIR)/tests_check_ccl-ccl_test_cosmology.Tpo -c -o tests/tests_check_ccl-ccl_test_cosmology.o `test -f 'tests/ccl_test_cosmology.c' || echo '$(srcdir)/'`tests/ccl_test_cosmology.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) tests/$(DEPDIR)/tests_check_ccl-ccl_test_cosmology.Tpo tests/$(DEPDIR)/tests_check_ccl-ccl_test_cosmology.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='tests/ccl_test_cosmology.c' object='tests/tests_check_ccl-ccl_test_cosmology.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(tests_check_ccl_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o tests/tests_check_ccl-ccl_test_cosmology.o `test -f 'tests/ccl_test_cosmology.c' || echo '$(srcdir)/'`tests/ccl_test_cosmology.c
+
+tests/tests_check_ccl-ccl_test_cosmology.obj: tests/ccl_test_cosmology.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(tests_check_ccl_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT tests/tests_check_ccl-ccl_test_cosmology.obj -MD -MP -MF tests/$(DEPDIR)/tests_check_ccl-ccl_test_cosmology.Tpo -c -o tests/tests_check_ccl-ccl_test_cosmology.obj `if test -f 'tests/ccl_test_cosmology.c'; then $(CYGPATH_W) 'tests/ccl_test_cosmology.c'; else $(CYGPATH_W) '$(srcdir)/tests/ccl_test_cosmology.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) tests/$(DEPDIR)/tests_check_ccl-ccl_test_cosmology.Tpo tests/$(DEPDIR)/tests_check_ccl-ccl_test_cosmology.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='tests/ccl_test_cosmology.c' object='tests/tests_check_ccl-ccl_test_cosmology.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(tests_check_ccl_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o tests/tests_check_ccl-ccl_test_cosmology.obj `if test -f 'tests/ccl_test_cosmology.c'; then $(CYGPATH_W) 'tests/ccl_test_cosmology.c'; else $(CYGPATH_W) '$(srcdir)/tests/ccl_test_cosmology.c'; fi`
+
 tests/tests_check_ccl-ccl_test_distances.o: tests/ccl_test_distances.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(tests_check_ccl_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT tests/tests_check_ccl-ccl_test_distances.o -MD -MP -MF tests/$(DEPDIR)/tests_check_ccl-ccl_test_distances.Tpo -c -o tests/tests_check_ccl-ccl_test_distances.o `test -f 'tests/ccl_test_distances.c' || echo '$(srcdir)/'`tests/ccl_test_distances.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) tests/$(DEPDIR)/tests_check_ccl-ccl_test_distances.Tpo tests/$(DEPDIR)/tests_check_ccl-ccl_test_distances.Po
@@ -794,6 +824,20 @@ tests/tests_check_ccl-ccl_test_bbks.obj: tests/ccl_test_bbks.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='tests/ccl_test_bbks.c' object='tests/tests_check_ccl-ccl_test_bbks.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(tests_check_ccl_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o tests/tests_check_ccl-ccl_test_bbks.obj `if test -f 'tests/ccl_test_bbks.c'; then $(CYGPATH_W) 'tests/ccl_test_bbks.c'; else $(CYGPATH_W) '$(srcdir)/tests/ccl_test_bbks.c'; fi`
+
+tests/tests_check_ccl-ccl_test_eh.o: tests/ccl_test_eh.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(tests_check_ccl_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT tests/tests_check_ccl-ccl_test_eh.o -MD -MP -MF tests/$(DEPDIR)/tests_check_ccl-ccl_test_eh.Tpo -c -o tests/tests_check_ccl-ccl_test_eh.o `test -f 'tests/ccl_test_eh.c' || echo '$(srcdir)/'`tests/ccl_test_eh.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) tests/$(DEPDIR)/tests_check_ccl-ccl_test_eh.Tpo tests/$(DEPDIR)/tests_check_ccl-ccl_test_eh.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='tests/ccl_test_eh.c' object='tests/tests_check_ccl-ccl_test_eh.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(tests_check_ccl_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o tests/tests_check_ccl-ccl_test_eh.o `test -f 'tests/ccl_test_eh.c' || echo '$(srcdir)/'`tests/ccl_test_eh.c
+
+tests/tests_check_ccl-ccl_test_eh.obj: tests/ccl_test_eh.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(tests_check_ccl_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT tests/tests_check_ccl-ccl_test_eh.obj -MD -MP -MF tests/$(DEPDIR)/tests_check_ccl-ccl_test_eh.Tpo -c -o tests/tests_check_ccl-ccl_test_eh.obj `if test -f 'tests/ccl_test_eh.c'; then $(CYGPATH_W) 'tests/ccl_test_eh.c'; else $(CYGPATH_W) '$(srcdir)/tests/ccl_test_eh.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) tests/$(DEPDIR)/tests_check_ccl-ccl_test_eh.Tpo tests/$(DEPDIR)/tests_check_ccl-ccl_test_eh.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='tests/ccl_test_eh.c' object='tests/tests_check_ccl-ccl_test_eh.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(tests_check_ccl_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o tests/tests_check_ccl-ccl_test_eh.obj `if test -f 'tests/ccl_test_eh.c'; then $(CYGPATH_W) 'tests/ccl_test_eh.c'; else $(CYGPATH_W) '$(srcdir)/tests/ccl_test_eh.c'; fi`
 
 tests/tests_check_ccl-ccl_test_cls.o: tests/ccl_test_cls.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(tests_check_ccl_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT tests/tests_check_ccl-ccl_test_cls.o -MD -MP -MF tests/$(DEPDIR)/tests_check_ccl-ccl_test_cls.Tpo -c -o tests/tests_check_ccl-ccl_test_cls.o `test -f 'tests/ccl_test_cls.c' || echo '$(srcdir)/'`tests/ccl_test_cls.c
@@ -847,6 +891,27 @@ clean-libtool:
 
 distclean-libtool:
 	-rm -f libtool config.lt
+install-cclDATA: $(ccl_DATA)
+	@$(NORMAL_INSTALL)
+	@list='$(ccl_DATA)'; test -n "$(ccldir)" || list=; \
+	if test -n "$$list"; then \
+	  echo " $(MKDIR_P) '$(DESTDIR)$(ccldir)'"; \
+	  $(MKDIR_P) "$(DESTDIR)$(ccldir)" || exit 1; \
+	fi; \
+	for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  echo "$$d$$p"; \
+	done | $(am__base_list) | \
+	while read files; do \
+	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(ccldir)'"; \
+	  $(INSTALL_DATA) $$files "$(DESTDIR)$(ccldir)" || exit $$?; \
+	done
+
+uninstall-cclDATA:
+	@$(NORMAL_UNINSTALL)
+	@list='$(ccl_DATA)'; test -n "$(ccldir)" || list=; \
+	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
+	dir='$(DESTDIR)$(ccldir)'; $(am__uninstall_files_from_dir)
 
 # This directory's subdirectories are mostly independent; you can cd
 # into them and run 'make' without going through this Makefile.
@@ -1241,10 +1306,10 @@ distcleancheck: distclean
 check-am: all-am
 	$(MAKE) $(AM_MAKEFLAGS) check-TESTS
 check: check-recursive
-all-am: Makefile $(LTLIBRARIES) $(PROGRAMS) config.h
+all-am: Makefile $(LTLIBRARIES) $(PROGRAMS) $(DATA) config.h
 installdirs: installdirs-recursive
 installdirs-am:
-	for dir in "$(DESTDIR)$(libdir)"; do \
+	for dir in "$(DESTDIR)$(libdir)" "$(DESTDIR)$(ccldir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: install-recursive
@@ -1305,7 +1370,7 @@ info: info-recursive
 
 info-am:
 
-install-data-am:
+install-data-am: install-cclDATA
 
 install-dvi: install-dvi-recursive
 
@@ -1353,7 +1418,7 @@ ps: ps-recursive
 
 ps-am:
 
-uninstall-am: uninstall-libLTLIBRARIES
+uninstall-am: uninstall-cclDATA uninstall-libLTLIBRARIES
 
 .MAKE: $(am__recursive_targets) all check-am install-am install-strip
 
@@ -1366,15 +1431,16 @@ uninstall-am: uninstall-libLTLIBRARIES
 	distclean-compile distclean-generic distclean-hdr \
 	distclean-libtool distclean-tags distcleancheck distdir \
 	distuninstallcheck dvi dvi-am html html-am info info-am \
-	install install-am install-data install-data-am install-dvi \
-	install-dvi-am install-exec install-exec-am install-html \
-	install-html-am install-info install-info-am \
-	install-libLTLIBRARIES install-man install-pdf install-pdf-am \
-	install-ps install-ps-am install-strip installcheck \
-	installcheck-am installdirs installdirs-am maintainer-clean \
-	maintainer-clean-generic mostlyclean mostlyclean-compile \
-	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
-	tags tags-am uninstall uninstall-am uninstall-libLTLIBRARIES
+	install install-am install-cclDATA install-data \
+	install-data-am install-dvi install-dvi-am install-exec \
+	install-exec-am install-html install-html-am install-info \
+	install-info-am install-libLTLIBRARIES install-man install-pdf \
+	install-pdf-am install-ps install-ps-am install-strip \
+	installcheck installcheck-am installdirs installdirs-am \
+	maintainer-clean maintainer-clean-generic mostlyclean \
+	mostlyclean-compile mostlyclean-generic mostlyclean-libtool \
+	pdf pdf-am ps ps-am tags tags-am uninstall uninstall-am \
+	uninstall-cclDATA uninstall-libLTLIBRARIES
 
 .PRECIOUS: Makefile
 
