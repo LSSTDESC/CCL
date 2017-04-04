@@ -713,6 +713,7 @@ double ccl_distance_modulus(ccl_cosmology * cosmo, double a, int* status)
     return 5*(log10(ccl_luminosity_distance(cosmo, a, status))*6-1);
 }
 
+
 void ccl_distance_moduli(ccl_cosmology * cosmo, int na, double a[na], double output[na], int * status)
 {
     if (!cosmo->computed_distances){
