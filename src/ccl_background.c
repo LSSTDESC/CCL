@@ -35,7 +35,7 @@ ccl_omega_l_label <- DE
 ccl_omega_g_label <- radiation
 ccl_omega_k_label <- curvature
 */
-double ccl_omega_x(ccl_cosmology * cosmo, double a, ccl_omega_x_label label, int *status)
+double ccl_omega_x(ccl_cosmology * cosmo, double a, ccl_omega_x_label label)
 {
   switch(label) {
   case ccl_omega_m_label :
@@ -633,7 +633,7 @@ void ccl_comoving_radial_distances(ccl_cosmology * cosmo, int na, double a[na], 
   
 }
 
-double ccl_sinn(ccl_cosmology *cosmo, double chi, int * status)
+double ccl_sinn(ccl_cosmology *cosmo, double chi)
 {
   //////
   //         { sin(x)  , if k==1
