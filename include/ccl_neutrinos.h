@@ -1,4 +1,5 @@
-#pragma once
+//#pragma once
+#include "ccl_core.h"
 #include "gsl/gsl_spline.h"
 
 // maximum number of species
@@ -11,14 +12,8 @@
 #define CCL_NU_MNUT_N 1000
 
 // precalculate the phase space integral
-gsl_spline* ccl_calculate_nu_phasespace_spline();
+gsl_spline* ccl_calculate_nu_phasespace_spline(int *status);
 
-// returns the value of the neutrino phase-space integral * 7/8 fermion factor
-double ccl_nu_phasespace_intg(gsl_spline* spl, double mnuOT);
-
-  
-// returns density if one neutrino species at a scale factor a, given this particular
-// species' Neff and sum_mnu and TCMB
-// the output is neutrino density in the units of Omega_nu_h^2 today
+// Returns density of one neutrino species at a scale factor a.
 double Omeganuh2 (double a, double Neff, double mnu, double TCMB, gsl_spline* psi);
 

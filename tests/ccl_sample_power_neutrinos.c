@@ -21,7 +21,7 @@ int main(int argc, char * argv[])
   ccl_configuration config = default_config;
   config.transfer_function_method = ccl_boltzmann;
   
-  ccl_parameters params = ccl_parameters_create_lcdm_nu(Omega_c, Omega_b, Omega_k,h, A_s, n_s, Neff, Nmass, mnu);
+  ccl_parameters params = ccl_parameters_create_lcdm_nu(Omega_c, Omega_b, Omega_k,h, A_s, n_s, Neff, Nmass, mnu, &status);
   ccl_cosmology * cosmo = ccl_cosmology_create(params, config);
 
 

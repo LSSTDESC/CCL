@@ -59,11 +59,12 @@ static int linecount(FILE *f)
 static void compare_bbks(int i_model,struct bbks_data * data)
 {
   int nk,i,j;
+  int status=0;
   char fname[256],str[1024];
   FILE *f;
   ccl_configuration config = default_config;
   config.transfer_function_method = ccl_bbks;
-  ccl_parameters params = ccl_parameters_create(data->Omega_c,data->Omega_b,data->Omega_k[i_model-1],data->N_nu_rel, data->N_nu_mass, data->mnu,data->w_0[i_model-1],data->w_a[i_model-1],data->h,data->A_s,data->n_s,-1,NULL,NULL);
+  ccl_parameters params = ccl_parameters_create(data->Omega_c,data->Omega_b,data->Omega_k[i_model-1],data->N_nu_rel, data->N_nu_mass, data->mnu,data->w_0[i_model-1],data->w_a[i_model-1],data->h,data->A_s,data->n_s,-1,NULL,NULL, &status);
   params.Omega_g=0;
   params.sigma_8=data->sigma_8;
   ccl_cosmology * cosmo = ccl_cosmology_create(params, config);
@@ -90,7 +91,7 @@ static void compare_bbks(int i_model,struct bbks_data * data)
     for(j=0;j<6;j++) {
       double pk_h,pk_bench,pk_ccl,err;
       double z=j+0.;
-      int status=0;
+      
       stat=fscanf(f,"%lf",&pk_h);
       if(stat!=1) {
 	fprintf(stderr,"Error reading file %s, line %d\n",fname,i+2);
