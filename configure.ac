@@ -36,9 +36,29 @@ AC_FUNC_MALLOC
 # Checks for library functions.
 AC_CHECK_FUNCS([pow sqrt])
 
+# Allows building against an external copy of CLASS
+AC_ARG_VAR([CLASSDIR], [Location of external CLASS directory, to be used instead of the built-in one])
+if test "$CLASSDIR" != ""; then
+    AC_MSG_NOTICE([Using the version of CLASS from $CLASSDIR])
+    CLASS_LIB="-L${CLASSDIR} -lclass"
+    AC_SUBST(CLASS_LIB, ["-L${CLASSDIR} -lclass -Wl,-rpath,${CLASSDIR}"])
+    CLASS_MAKEFILE=""
+    localclass=false
+else
+    AC_MSG_NOTICE([Using the built-in version of CLASS.])
+    CLASSDIR="./class"
+    CLASS_LIB=""
+    CLASS_MAKEFILE="class/Makefile"
+    localclass=true
+fi
+AM_CONDITIONAL([LOCALCLASS], [test x$localclass = xtrue])
+
+# Includes Makefiles
 AC_CONFIG_FILES([Makefile
 		 include/Makefile
-		 class/Makefile])
+		 $CLASS_MAKEFILE])
+
+#AC_CHECK_FILE ("${CLASSDIR}/", [], [AC_MSG_ERROR(Couldn't find libgslcblas.)])
 
 AC_OUTPUT
 
@@ -51,6 +71,7 @@ echo \
  
  - Prefix: '${prefix}'
  - Compiler: '${CC} ${CFLAGS} ${CPPFLAGS}'
+ - CLASS: '${CLASSDIR}'
 
  Now type 'make @<:@<target>@:>@', where the optional
  target may be:
