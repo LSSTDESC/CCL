@@ -50,6 +50,9 @@ int main(int argc,char **argv){
 		ZD,ccl_comoving_radial_distance(cosmo,1./(1+ZD), &status));
 	printf("Luminosity distance to z = %.3lf is chi = %.3lf Mpc\n",
 		ZD,ccl_luminosity_distance(cosmo,1./(1+ZD), &status));
+    printf("Distance modulus to z = %.3lf is mu = %.3lf Mpc\n",
+		ZD,ccl_distance_modulus(cosmo,1./(1+ZD), &status));
+
 	
 	//Consistency check
 	printf("Scale factor is a=%.3lf \n",1./(1+ZD));

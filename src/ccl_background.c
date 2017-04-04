@@ -688,9 +688,8 @@ double ccl_luminosity_distance(ccl_cosmology * cosmo, double a, int* status)
     ccl_cosmology_compute_distances(cosmo, status);
     ccl_check_status(cosmo, status);
   }
-  return ccl_comoving_radial_distance(cosmo, a, status) / a;
+  return ccl_comoving_angular_distance(cosmo, a, status) / a;
 }
-//TODO: this is not valid for curved cosmologies
 
 // RH
 void ccl_luminosity_distances(ccl_cosmology * cosmo, int na, double a[na], double output[na], int * status)
@@ -700,8 +699,30 @@ void ccl_luminosity_distances(ccl_cosmology * cosmo, int na, double a[na], doubl
     ccl_check_status(cosmo, status);
   }
   for (int i=0; i<na; i++){
-    output[i]=gsl_spline_eval(cosmo->data.chi,a[i],cosmo->data.accelerator)/a[i];
+      output[i]=ccl_comoving_angular_distance(cosmo, a[i], status);
+    //output[i]=gsl_spline_eval(cosmo->data.chi,a[i],cosmo->data.accelerator)/a[i];
   }
+}
+
+double ccl_distance_modulus(ccl_cosmology * cosmo, double a, int* status)
+{
+    if (!cosmo->computed_distances){
+        ccl_cosmology_compute_distances(cosmo, status);
+        ccl_check_status(cosmo, status);
+    }
+    return 5*(log10(ccl_luminosity_distance(cosmo, a, status))*6-1);
+}
+
+void ccl_distance_moduli(ccl_cosmology * cosmo, int na, double a[na], double output[na], int * status)
+{
+    if (!cosmo->computed_distances){
+        ccl_cosmology_compute_distances(cosmo, status);
+        ccl_check_status(cosmo, status);
+    }
+    for (int i=0; i<na; i++){
+        output[i]=5*(log10(ccl_luminosity_distance(cosmo, a[i], status) )-1);
+        //output[i]=gsl_spline_eval(cosmo->data.chi,a[i],cosmo->data.accelerator)/a[i];
+    }
 }
 
 //Scale factor for a given distance
