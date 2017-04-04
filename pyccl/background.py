@@ -115,7 +115,7 @@ def distance_modulus(cosmo, a):
         a (float or array_like): Scale factor(s), normalized to 1 today.
 
     Returns:
-        distance_modulus (float or array_like): Luminosity distance; Mpc. 
+        distance_modulus (float or array_like): Distance modulus at a.  
     """
     return _vectorize_fn(lib.distance_modulus,
                          lib.distance_modulus_vec, cosmo, a)
