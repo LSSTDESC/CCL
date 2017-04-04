@@ -143,5 +143,4 @@ def omega_x(cosmo, a, label):
                          % (label,species_types.keys()) )
 
     return _vectorize_fn3(lib.omega_x, 
-                          lib.omega_x_vec, cosmo, a, species_types[label],
-                          returns_status=False)
+                          lib.omega_x_vec, cosmo, a, species_types[label])
