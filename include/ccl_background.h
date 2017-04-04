@@ -32,9 +32,10 @@ double ccl_luminosity_distance(ccl_cosmology * cosmo, double a, int * status);
 // Comoving luminosity distances in Mpc to scale factors as given in list a[0..na-1]
 void ccl_luminosity_distances(ccl_cosmology * cosmo, int na, double a[na], double output[na], int * status);
 
-// Distance modulus for object at scale factor a
+// Distance modulus for object at scale factor a. Note the factor of 6 arises from the conversion from Mpc to pc.
 double ccl_distance_modulus(ccl_cosmology * cosmo, double a, int * status);
-// Distance moduli for objects at scale factors as given in list a[0..na-1]
+// Distance moduli for objects at scale factors as given in list a[0..na-1].
+// Note the factor of 6 arises from the conversion from Mpc to pc.
 void ccl_distance_moduli(ccl_cosmology * cosmo, int na, double a[na], double output[na], int * status);
 
 // Growth factor at scale factor a normalized to 1 at z=0

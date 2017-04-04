@@ -706,7 +706,7 @@ void ccl_luminosity_distances(ccl_cosmology * cosmo, int na, double a[na], doubl
 
 double ccl_distance_modulus(ccl_cosmology * cosmo, double a, int* status)
 {
-    if (!cosmo->computed_distances){
+    if (!cosmo->computed_distances) {
         ccl_cosmology_compute_distances(cosmo, status);
         ccl_check_status(cosmo, status);
     }
@@ -721,7 +721,7 @@ void ccl_distance_moduli(ccl_cosmology * cosmo, int na, double a[na], double out
         ccl_check_status(cosmo, status);
     }
     for (int i=0; i<na; i++){
-        output[i]=5*(log10(ccl_luminosity_distance(cosmo, a[i], status) )-1);
+        output[i]=5*(log10(ccl_luminosity_distance(cosmo, a[i], status)*6 )-1);
         //output[i]=gsl_spline_eval(cosmo->data.chi,a[i],cosmo->data.accelerator)/a[i];
     }
 }
