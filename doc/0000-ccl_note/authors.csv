@@ -29,7 +29,7 @@
 #
 # =============================================================================
 Lastname,Firstname,Authorname,AuthorType,Affiliation,Contribution,Email
-Alonso,David,"David Alonso",Contributor,"David's institute address","hasn't written a contribution statement yet.",name@email.server
+Alonso,David,"David Alonso",Contributor,"Department of Physics, University of Oxford, Denys Wilkinson building, Keble Road, Oxford OX1 3RH, United Kingdom","Co-led project; developed structure for angular power spectra; implemented autotools; integrated into LSS pipeline; contributed to: background, power spectrum, mass function, documentation and benchmarks; reviewed code",david.alonso@physics.ox.ac.uk
 Blazek,Jonathan,"Jonathan Blazek",Contributor,"Jonathan's institute address","hasn't written a contribution statement yet.",name@email.server
 Bull,Philip,"Philip Bull",Contributor,"California Institute of Technology, Pasadena, CA 91125, USA","Implemented the Python wrapper and wrote documentation for it.",philbull@gmail.com
 Bull,Philip,"Philip Bull",Contributor,"Jet Propulsion Laboratory, California Institute of Technology, 4800 Oak Grove Drive, Pasadena, California, USA","Implemented the Python wrapper and wrote documentation for it.",philbull@gmail.com
