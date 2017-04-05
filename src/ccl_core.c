@@ -228,7 +228,7 @@ void ccl_parameters_fill_initial(ccl_parameters * params, int *status)
   // Neutrinos: if massive neutrinos are present, calculate the phase_space integral.
   if((params->N_nu_mass)>0.0001){
 	gsl_spline *temp; // Define a temp parameter to hold the phase space integral to get massive neutrinos
-	temp = ccl_calculate_nu_phasespace_spline(status); // Calculate the phase space integral
+	temp = calculate_nu_phasespace_spline(status); // Calculate the phase space integral
 	params->Omega_n_mass = Omeganuh2(1.0, params->N_nu_mass, params->mnu, params->T_CMB, temp) / ((params->h)*(params->h));
   } else{
 	params->Omega_n_mass = 0.;

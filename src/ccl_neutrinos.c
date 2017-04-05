@@ -21,7 +21,7 @@ static double nu_integrand(double x, void *r)
 TASK: Get the spline of the result of the phase-space integral required for massive neutrinos.
 */
 
-gsl_spline* ccl_calculate_nu_phasespace_spline(int *status) {
+gsl_spline* calculate_nu_phasespace_spline(int *status) {
   int N=CCL_NU_MNUT_N;
   double *mnut = ccl_linear_spacing(log(CCL_NU_MNUT_MIN),log(CCL_NU_MNUT_MAX),N);
   double *y=malloc(sizeof(double)*CCL_NU_MNUT_N);

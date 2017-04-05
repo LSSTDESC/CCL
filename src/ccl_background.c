@@ -52,7 +52,7 @@ double ccl_omega_x(ccl_cosmology * cosmo, double a, ccl_omega_x_label label, int
 	double OmNuh2;
 	if ((cosmo->params.N_nu_mass) > 0.0001){
 		// Check if neutrino phase space function is calculated. If not, calculate.
-		if (cosmo->data.nu_pspace_int==NULL) cosmo->data.nu_pspace_int=ccl_calculate_nu_phasespace_spline(status);
+		if (cosmo->data.nu_pspace_int==NULL) cosmo->data.nu_pspace_int=calculate_nu_phasespace_spline(status);
 		// Call the massive neutrino density function just once at this redshift.
 		OmNuh2 = Omeganuh2(a, cosmo->params.N_nu_mass, cosmo->params.mnu, cosmo->params.T_CMB, cosmo->data.nu_pspace_int);
 	}else{
@@ -264,7 +264,7 @@ void ccl_cosmology_compute_distances(ccl_cosmology * cosmo, int *status)
   
   // Check if massive neutrinos are present; if so, compute the phase-space integral spline
   if ((cosmo->params.N_nu_mass)>0.0001){
-	  if (cosmo->data.nu_pspace_int==NULL)  cosmo->data.nu_pspace_int=ccl_calculate_nu_phasespace_spline(status);
+	  if (cosmo->data.nu_pspace_int==NULL)  cosmo->data.nu_pspace_int=calculate_nu_phasespace_spline(status);
 	}
 
   if(ccl_splines->A_SPLINE_MAX>1.){
@@ -432,7 +432,7 @@ void ccl_cosmology_compute_growth(ccl_cosmology * cosmo, int * status)
 
   // Check if massive neutrinos are present; if so, compute the phase-space integral spline
   if ((cosmo->params.N_nu_mass)>0.0001){
-	  if (cosmo->data.nu_pspace_int==NULL)  cosmo->data.nu_pspace_int=ccl_calculate_nu_phasespace_spline(status);
+	  if (cosmo->data.nu_pspace_int==NULL)  cosmo->data.nu_pspace_int=calculate_nu_phasespace_spline(status);
 	}
 
   // Create linearly-spaced values of the scale factor

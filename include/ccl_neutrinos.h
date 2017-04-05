@@ -12,7 +12,7 @@
 #define CCL_NU_MNUT_N 1000
 
 // precalculate the phase space integral
-gsl_spline* ccl_calculate_nu_phasespace_spline(int *status);
+gsl_spline* calculate_nu_phasespace_spline(int *status);
 
 // Returns density of one neutrino species at a scale factor a.
 double Omeganuh2 (double a, double Neff, double mnu, double TCMB, gsl_spline* psi);

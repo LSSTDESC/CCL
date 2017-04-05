@@ -2,7 +2,7 @@
 import ccllib as lib
 import numpy as np
 from warnings import warn
-from pyutils import check
+from pyutils import check, _vectorize_fn13_simple
 
 # Configuration types
 transfer_function_types = {
@@ -46,7 +46,44 @@ error_types = {
     lib.CCL_ERROR_MF:           'CCL_ERROR_MF',
     lib.CCL_ERROR_HMF_INTERP:   'CCL_ERROR_HMF_INTERP',
     lib.CCL_ERROR_PARAMETERS:   'CCL_ERROR_PARAMETERS',
+    lib.CCL_ERROR_NU_INT:		'CCL_ERROR_NU_INT',
 }
+
+# Define a function that allows the C library's parameters_create function to take a status variable.
+def parameters_make(Omega_c, Omega_b, Omega_k, N_nu_rel, N_nu_mass, m_nu, 
+                                    w0, wa, h, norm_pk, n_s, 
+                                    z_mg, df_mg):
+    """Creates a parameters object with status checking.
+
+    Args:
+        Omega_c (float): Cold dark matter density fraction.
+        Omega_b (float): Baryonic matter density fraction.
+        h (float): Hubble constant divided by 100 km/s/Mpc; unitless.
+        A_s (float): Power spectrum normalization. Optional if sigma8 is 
+                         specified.
+        n_s (float): Primordial scalar perturbation spectral index.
+        Omega_k (float, optional): Curvature density fraction. Defaults to 0.
+        N_nu_rel (float, optional): Number of massless neutrinos present. Defaults to 0.
+        N_nu_mass (float, optional): Number of massive neutrinos present. Defaults to 0.
+        m_nu (float, optional): total mass in eV of the massive neutrinos present (current must be equal mass). Defaults to 0.
+        w0 (float, optional): First order term of dark energy equation of 
+                                  state. Defaults to -1.
+        wa (float, optional): Second order term of dark energy equation of 
+                                  state. Defaults to 0.
+        sigma8 (float): Variance of matter density perturbations at 8 Mpc/h
+                            scale. Optional if A_s is specified.
+        df_mg (:obj: array_like): Perturbations to the GR growth rate as a 
+                                      function of redshift, Delta f. Used to 
+                                      implement simple modified growth 
+                                      scenarios.
+        z_mg (:obj: array_like): Array of redshifts corresponding to df_mg.
+
+    Returns:
+        A parameters object.
+
+    """
+    return _vectorize_fn13_simple(lib.parameters_create, lib.parameters_create_vec, z_mg, df_mg, Omega_c, Omega_b, Omega_k, N_nu_rel, N_nu_mass, m_nu, 
+                                    w0, wa, h, norm_pk, n_s, True)
 
 
 class Parameters(object):
@@ -55,7 +92,7 @@ class Parameters(object):
     """
     
     def __init__(self, Omega_c=None, Omega_b=None, h=None, A_s=None, n_s=None, 
-                 Omega_k=0., Omega_n=0., w0=-1., wa=0., sigma8=None,
+                 Omega_k=0., N_nu_rel =3.046, N_nu_mass=0., m_nu=0.,w0=-1., wa=0., sigma8=None,
                  z_mg=None, df_mg=None):
         """
         Creates a set of cosmological parameters.
@@ -73,8 +110,9 @@ class Parameters(object):
                          specified.
             n_s (float): Primordial scalar perturbation spectral index.
             Omega_k (float, optional): Curvature density fraction. Defaults to 0.
-            Omega_n (float, optional): Massless neutrino density fraction. 
-                                       Defaults to 0.
+            N_nu_rel (float, optional): Number of massless neutrinos present. Defaults to 3.046
+            N_nu_mass (float, optional): Number of massive neutrinos present. Defaults to 0.
+            m_nu (float, optional): total mass in eV of the massive neutrinos present (current must be equal mass). Defaults to 0.
             w0 (float, optional): First order term of dark energy equation of 
                                   state. Defaults to -1.
             wa (float, optional): Second order term of dark energy equation of 
@@ -124,8 +162,8 @@ class Parameters(object):
             raise ValueError("sigma8 must be greater than 1e-5.")
         
         # Check if any compulsory parameters are not set
-        compul = [Omega_c, Omega_b, Omega_k, Omega_n, w0, wa, h, norm_pk, n_s]
-        names = ['Omega_c', 'Omega_b', 'Omega_k', 'Omega_n', 'w0', 'wa', 
+        compul = [Omega_c, Omega_b, Omega_k, N_nu_rel, N_nu_mass, m_nu, w0, wa, h, norm_pk, n_s]
+        names = ['Omega_c', 'Omega_b', 'Omega_k', 'N_nu_rel', 'N_nu_mass', 'm_nu', 'w0', 'wa', 
                  'h', 'norm_pk', 'n_s']
         for nm, item in zip(names, compul):
             if item is None:
@@ -135,16 +173,10 @@ class Parameters(object):
         # Create new instance of ccl_parameters object
         if nz_mg == -1:
             # Create ccl_parameters without modified growth
-            self.parameters = lib.parameters_create(
-                                    Omega_c, Omega_b, Omega_k, Omega_n, 
-                                    w0, wa, h, norm_pk, n_s, 
-                                    -1, None, None)
+            self.parameters = parameters_make(Omega_c, Omega_b, Omega_k, N_nu_rel, N_nu_mass, m_nu, w0, wa, h, norm_pk, n_s, None, None)
         else:
             # Create ccl_parameters with modified growth arrays
-            self.parameters = lib.parameters_create_vec(
-                                    Omega_c, Omega_b, Omega_k, Omega_n, 
-                                    w0, wa, h, norm_pk, n_s, 
-                                    z_mg, df_mg)
+            self.parameters = parameters_make(Omega_c, Omega_b, Omega_k, N_nu_rel, N_nu_mass, m_nu, w0, wa, h, norm_pk, n_s, z_mg, df_mg)
     
     def __getitem__(self, key):
         """Access parameter values by name.
@@ -178,7 +210,7 @@ class Parameters(object):
         """Output the parameters that were set, and their values.
 
         """
-        params = ['Omega_c', 'Omega_b', 'Omega_m', 'Omega_n', 'Omega_k', 
+        params = ['Omega_c', 'Omega_b', 'Omega_m', 'N_nu_rel', 'N_nu_mass', 'm_nu', 'Omega_k', 
                   'w0', 'wa', 'H0', 'h', 'A_s', 'n_s', 'Omega_g', 'T_CMB', 
                   'sigma_8', 'Omega_l', 'z_star', 'has_mgrowth']
   
@@ -198,7 +230,7 @@ class Cosmology(object):
     def __init__(self, 
                  params=None, config=None,
                  Omega_c=None, Omega_b=None, h=None, A_s=None, n_s=None, 
-                 Omega_k=0., Omega_n=0., w0=-1., wa=0., sigma8=None,
+                 Omega_k=0., N_nu_rel=0., N_nu_mass=0., m_nu=0., w0=-1., wa=0., sigma8=None,
                  z_mg=None, df_mg=None, 
                  transfer_function='boltzmann_class',
                  matter_power_spectrum='halofit',
@@ -226,7 +258,7 @@ class Cosmology(object):
         if params is None:
             # Create new Parameters object
             params = Parameters(Omega_c=Omega_c, Omega_b=Omega_b, h=h, A_s=A_s, 
-                                n_s=n_s, Omega_k=Omega_k, Omega_n=Omega_n, 
+                                n_s=n_s, Omega_k=Omega_k, N_nu_rel = N_nu_rel, N_nu_mass=N_nu_mass, m_nu=m_nu, 
                                 w0=w0, wa=wa, sigma8=sigma8, z_mg=z_mg, 
                                 df_mg=df_mg)
             self.params = params
@@ -241,7 +273,7 @@ class Cosmology(object):
             # Warn if any cosmological parameters were specified at the same 
             # time as a Parameters() object; they will be ignored
             argtest = [Omega_c==None, Omega_b==None, h==None, A_s==None, 
-                       n_s==None, Omega_k==0., Omega_n==0., w0==-1., wa==0., 
+                       n_s==None, Omega_k==0., N_nu_rel==0., N_nu_mass==0., m_nu==0., w0==-1., wa==0., 
                        sigma8==None, z_mg==None, df_mg==None]
             
             if not all(arg == True for arg in argtest):
