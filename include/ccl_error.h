@@ -13,4 +13,11 @@
 #define CCL_ERROR_MF 10
 #define CCL_ERROR_HMF_INTERP 11
 #define CCL_ERROR_PARAMETERS 12
+
+typedef enum {
+    CCL_ERRORHANDLING_POLICY_ABORT = 0,
+    CCL_ERRORHANDLING_POLICY_UNWIND = 1,
+} CCLErrorHandlingPolicy;
+
 void ccl_check_status(ccl_cosmology *cosmo, int* status);
+void ccl_errorhandling_set_policy(CCLErrorHandlingPolicy policy);
