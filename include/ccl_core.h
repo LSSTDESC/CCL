@@ -10,6 +10,11 @@
 #define EXPAND_STR(s) STRING(s)
 #define STRING(s) #s
 
+// Global error state (not thread safe) and switch for whether errors are fatal
+extern int global_error_state;
+extern int global_error_continue;
+extern char global_error_message[512];
+
 typedef struct ccl_parameters {
   // Densities: CDM, baryons, total matter, neutrinos, curvature
   double Omega_c;

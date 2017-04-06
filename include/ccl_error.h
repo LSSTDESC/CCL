@@ -13,4 +13,13 @@
 #define CCL_ERROR_MF 10
 #define CCL_ERROR_HMF_INTERP 11
 #define CCL_ERROR_PARAMETERS 12
+#define CCL_ERROR_UNKNOWN 99
+
 void ccl_check_status(ccl_cosmology *cosmo, int* status);
+
+int check_exception(void);
+void clear_exception(void);
+void throw_exception(int err, char* msg);
+
+char* get_error_message(void);
+void set_continue_on_error(void);

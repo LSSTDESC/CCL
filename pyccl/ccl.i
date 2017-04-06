@@ -12,10 +12,13 @@
 
 %}
 
-// Enable numpy array support
+// Enable numpy array support and Python exception handling
 %include "numpy.i"
 %init %{
     import_array();
+    // Tell CCL library not to quit when an error is thrown (to let Python 
+    // exception handler take over)
+    set_continue_on_error();
 %}
 
 // Automatically document arguments and output types of all functions
@@ -26,6 +29,29 @@
 
 // Flag status variable as input/output variable
 %apply (int* INOUT) {(int * status)};
+
+// Handle exceptions in C library by raising a Python exception
+// (this block must come before any .i imports)
+%exception {
+  int err;
+  char* msg;
+  $action
+  
+  // Raise Python exception if error code is non-zero
+  if ((err = check_exception())) {
+  
+    // Raise Python exception with error code and message
+    msg = get_error_message();
+    PyObject* errcode = PyInt_FromLong(err);
+    PyObject* errmsg = PyString_FromString(msg);
+    PyObject* rtn = Py_BuildValue("OO", errcode, errmsg);
+    PyErr_SetObject(PyExc_RuntimeError, rtn);
+    
+    // Clear error code and let SWIG clean up
+    clear_exception();
+    SWIG_fail;
+  } // end check_exception test
+}
 
 %include "../include/ccl.h"
 //%include "../include/ccl_background.h"
@@ -43,6 +69,7 @@
 %include "../include/ccl_utils.h"
 
 %import "../class/include/class.h"
+
 
 // We need this construct to handle some memory allocation scariness. By 
 // specifying the size of the output array in advance, we can avoid having to 

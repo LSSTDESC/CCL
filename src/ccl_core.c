@@ -11,6 +11,12 @@
 #include "ccl_params.h"
 #include <stdlib.h>
 
+// Initialise flag containing global error state, and switch for whether errors 
+// are fatal (needed for Python exception handling)
+int global_error_state = 0;
+int global_error_continue = 0;
+char global_error_message[512];
+
 const ccl_configuration default_config = {ccl_boltzmann_class, ccl_halofit, ccl_tinker10};
 
 /* ------- ROUTINE: ccl_cosmology_read_config ------
@@ -46,7 +52,7 @@ void ccl_cosmology_read_config(){
   
   if ((fconfig=fopen(param_file, "r")) == NULL) {
     fprintf(stderr, "ccl_core.c: Failed to open config file %s\n", param_file);
-    exit(EXIT_FAILURE);
+    throw_exception(EXIT_FAILURE, "ccl_core.c: Failed to open config file");
   } 
 
   while(! feof(fconfig)) {
