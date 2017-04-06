@@ -22,11 +22,12 @@
 INPUT: scale factor, cosmology
 TASK: Compute E(a)=H(a)/H0
 */
-static double h_over_h0(double a, ccl_cosmology * cosmo)
+static double h_over_h0(double a, ccl_cosmology * cosmo, int *status)
 { 
-	// check if massive neutrinos are present - if not, we don't need to compute their contribution
+	// Check if massive neutrinos are present - if not, we don't need to compute their contribution
 	double Om_mass_nu;
 	if ((cosmo->params.N_nu_mass)>0.0001){
+		if (cosmo->data.nu_pspace_int==NULL)  cosmo->data.nu_pspace_int=calculate_nu_phasespace_spline(status);
 		Om_mass_nu = Omeganuh2(a, cosmo->params.N_nu_mass, cosmo->params.mnu, cosmo->params.T_CMB, cosmo->data.nu_pspace_int) / (cosmo->params.h) / (cosmo->params.h);
 	}else{
 		Om_mass_nu = 0;
@@ -81,14 +82,22 @@ double ccl_omega_x(ccl_cosmology * cosmo, double a, ccl_omega_x_label label, int
   }
 }
 
+// Structure to hold parameters of chi_integrand
+typedef struct {
+  ccl_cosmology *cosmo;
+  int * status;
+} chipar;
+
 /* --------- ROUTINE: chi_integrand ---------
 INPUT: scale factor
 TASK: compute the integrand of the comoving distance
 */
-static double chi_integrand(double a, void * cosmo_void)
-{
-  ccl_cosmology * cosmo = cosmo_void;
-  return CLIGHT_HMPC/(a*a*h_over_h0(a, cosmo));
+static double chi_integrand(double a, void * params_void)
+{	
+  ccl_cosmology * cosmo = ((chipar *)params_void)->cosmo;
+  int *status = ((chipar *)params_void)->status;
+ 
+  return CLIGHT_HMPC/(a*a*h_over_h0(a, cosmo, status));
 }
 
 /* --------- ROUTINE: growth_ode_system ---------
@@ -100,7 +109,7 @@ static int growth_ode_system(double a,const double y[],double dydt[],void *param
   int status = 0;
   ccl_cosmology * cosmo = params;
 
-  double hnorm=h_over_h0(a,cosmo);
+  double hnorm=h_over_h0(a,cosmo, &status);
   double om=ccl_omega_x(cosmo, a, ccl_omega_m_label, &status);
 
 
@@ -131,7 +140,7 @@ TASK: compute the growth (D(z)) and the growth rate, logarithmic derivative (f?)
 */
 
 // RH had issuse here
-static int  growth_factor_and_growth_rate(double a,double *gf,double *fg,ccl_cosmology *cosmo) 
+static int  growth_factor_and_growth_rate(double a,double *gf,double *fg,ccl_cosmology *cosmo, int *stat) 
 {
   if(a<EPS_SCALEFAC_GROWTH) {
     *gf=a;
@@ -147,7 +156,7 @@ static int  growth_factor_and_growth_rate(double a,double *gf,double *fg,ccl_cos
 
     y[0]=EPS_SCALEFAC_GROWTH;
     y[1]=EPS_SCALEFAC_GROWTH*EPS_SCALEFAC_GROWTH*EPS_SCALEFAC_GROWTH*
-      h_over_h0(EPS_SCALEFAC_GROWTH,cosmo);
+      h_over_h0(EPS_SCALEFAC_GROWTH,cosmo, stat);
 
     int status=gsl_odeiv2_driver_apply(d,&ainit,a,y);
     gsl_odeiv2_driver_free(d);
@@ -156,24 +165,31 @@ static int  growth_factor_and_growth_rate(double a,double *gf,double *fg,ccl_cos
       return 1;
     
     *gf=y[0];
-    *fg=y[1]/(a*a*h_over_h0(a,cosmo)*y[0]);
+    *fg=y[1]/(a*a*h_over_h0(a,cosmo, stat)*y[0]);
     return 0;
   }
 }
+
 
 /* --------- ROUTINE: compute_chi ---------
 INPUT: scale factor, cosmology
 OUTPUT: chi -> radial comoving distance
 TASK: compute radial comoving distance at a
 */
-static int compute_chi(double a,ccl_cosmology *cosmo,double * chi) 
+static int compute_chi(double a,ccl_cosmology *cosmo,double * chi, int * stat) 
 {
   int  status;
   double result;
+  chipar p;
+  
+  p.cosmo=cosmo;
+  p.status=stat;
+  
   gsl_integration_cquad_workspace * workspace = gsl_integration_cquad_workspace_alloc (1000);
   gsl_function F;
   F.function = &chi_integrand;
-  F.params = cosmo;
+  //F.params = cosmo;
+  F.params = &p;
   //TODO: CQUAD is great, but slower than other methods. This could be sped up if it becomes an issue.
   status=gsl_integration_cquad(&F, a, 1.0, 0.0,EPSREL_DIST,workspace,&result, NULL, NULL); 
   *chi=result/cosmo->params.h;
@@ -189,13 +205,15 @@ static int compute_chi(double a,ccl_cosmology *cosmo,double * chi)
 typedef struct {
   double chi;
   ccl_cosmology *cosmo;
+  int * status;
 } Fpar;
 
 static double fzero(double a,void *params)
 {
-  double chi,chia,a_use=a;
+  double chi,chia,a_use=a;;
+  
   chi=((Fpar *)params)->chi;
-  compute_chi(a_use,((Fpar *)params)->cosmo,&chia);
+  compute_chi(a_use,((Fpar *)params)->cosmo,&chia, ((Fpar *)params)->status);
 
   return chi-chia;
 }
@@ -203,8 +221,13 @@ static double fzero(double a,void *params)
 static double dfzero(double a,void *params)
 {
   ccl_cosmology *cosmo=((Fpar *)params)->cosmo;
+  int *stat = ((Fpar *)params)->status;
   
-  return chi_integrand(a,cosmo)/cosmo->params.h;
+  chipar p;
+  p.cosmo=cosmo;
+  p.status=stat;
+  
+  return chi_integrand(a,&p)/cosmo->params.h;
 }
 
 static void fdfzero(double a,void *params,double *f,double *df)
@@ -213,7 +236,7 @@ static void fdfzero(double a,void *params,double *f,double *df)
   *df=dfzero(a,params);
 }
 
-static int  a_of_chi(double chi,ccl_cosmology *cosmo,double *a_old,gsl_root_fdfsolver *s)
+static int  a_of_chi(double chi,ccl_cosmology *cosmo, int* stat, double *a_old,gsl_root_fdfsolver *s)
 {
   if(chi==0) {
     *a_old=1;
@@ -226,6 +249,7 @@ static int  a_of_chi(double chi,ccl_cosmology *cosmo,double *a_old,gsl_root_fdfs
 
     p.cosmo=cosmo;
     p.chi=chi;
+    p.status=stat;
     FDF.f=&fzero;
     FDF.df=&dfzero;
     FDF.fdf=&fdfzero;
@@ -244,6 +268,9 @@ static int  a_of_chi(double chi,ccl_cosmology *cosmo,double *a_old,gsl_root_fdfs
 
     *a_old=a_current;
 
+	// Allows us to pass a status to h_over_h0 for the neutrino integral calculation.
+	if (status==GSL_SUCCESS) status= *(p.status);
+
     if(status!=GSL_SUCCESS)
       return 1;
 
@@ -261,11 +288,6 @@ void ccl_cosmology_compute_distances(ccl_cosmology * cosmo, int *status)
 
   if(cosmo->computed_distances)
     return;
-  
-  // Check if massive neutrinos are present; if so, compute the phase-space integral spline
-  if ((cosmo->params.N_nu_mass)>0.0001){
-	  if (cosmo->data.nu_pspace_int==NULL)  cosmo->data.nu_pspace_int=calculate_nu_phasespace_spline(status);
-	}
 
   if(ccl_splines->A_SPLINE_MAX>1.){
     *status = CCL_ERROR_COMPUTECHI; 
@@ -300,7 +322,7 @@ void ccl_cosmology_compute_distances(ccl_cosmology * cosmo, int *status)
   }
   // Fill in E(a)
   for (int i=0; i<na; i++){
-    y[i] = h_over_h0(a[i], cosmo);
+    y[i] = h_over_h0(a[i], cosmo, status);
   } 
   
   // Allocate and fill E spline with values we just got
@@ -320,8 +342,7 @@ void ccl_cosmology_compute_distances(ccl_cosmology * cosmo, int *status)
 
   //Fill in chi(a)
   for (int i=0; i<na; i++)
-    chistatus |= compute_chi(a[i],cosmo,&(y[i]));
-
+    chistatus |= compute_chi(a[i],cosmo,&(y[i]), status);
   if (chistatus){
     free(a);
     free(y);
@@ -377,9 +398,10 @@ void ccl_cosmology_compute_distances(ccl_cosmology * cosmo, int *status)
   const gsl_root_fdfsolver_type *T=gsl_root_fdfsolver_newton;
   gsl_root_fdfsolver *s=gsl_root_fdfsolver_alloc(T);
   for(int i=1;i<na-1;i++) {
-    chistatus|=a_of_chi(y[i],cosmo,&a0,s);
+    chistatus|=a_of_chi(y[i],cosmo, status, &a0,s);
     a[i]=a0;
   }
+
   gsl_root_fdfsolver_free(s);
   if(chistatus) {
     free(a);
@@ -429,11 +451,6 @@ void ccl_cosmology_compute_growth(ccl_cosmology * cosmo, int * status)
 {
   if(cosmo->computed_growth)
     return;
-
-  // Check if massive neutrinos are present; if so, compute the phase-space integral spline
-  if ((cosmo->params.N_nu_mass)>0.0001){
-	  if (cosmo->data.nu_pspace_int==NULL)  cosmo->data.nu_pspace_int=calculate_nu_phasespace_spline(status);
-	}
 
   // Create linearly-spaced values of the scale factor
   int  chistatus = 0, na = ccl_splines->A_SPLINE_NA;
@@ -526,9 +543,9 @@ void ccl_cosmology_compute_growth(ccl_cosmology * cosmo, int * status)
     return;
   }
   //RH has issues here
-  chistatus|=growth_factor_and_growth_rate(1.,&growth0,&fgrowth0,cosmo);
+  chistatus|=growth_factor_and_growth_rate(1.,&growth0,&fgrowth0,cosmo, status);
   for (int i=0; i<na; i++){
-    chistatus|=growth_factor_and_growth_rate(a[i],&(y[i]),&(y2[i]),cosmo);
+    chistatus|=growth_factor_and_growth_rate(a[i],&(y[i]),&(y2[i]),cosmo, status);
     if(cosmo->params.has_mgrowth) {
       if(a[i]>0) {
 	double df,integ;
