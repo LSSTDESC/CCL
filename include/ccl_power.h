@@ -23,9 +23,7 @@ double ccl_linear_matter_power(ccl_cosmology * cosmo, double k, double a,int * s
  * For specific cases see documentation for ccl_error.c
  * @return P_NL(k,a).
  */
-ddouble ccl_nonlin_matter_power(ccl_cosmology * cosmo, double k, double a,int * status);
-//void ccl_linear_matter_powers(ccl_cosmology * cosmo, int n, double a[n], double k[n], double output[n]);         
-// FIXME: Not implemented?                                                                                         
+double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double k, double a,int * status);
 
 /**
  * Variance of the matter density field with (top-hat) smoothing scale R [Mpc].
@@ -37,11 +35,11 @@ ddouble ccl_nonlin_matter_power(ccl_cosmology * cosmo, double k, double a,int * 
  * @return sigma(R).
  */
 double ccl_sigmaR(ccl_cosmology *cosmo, double R, int * status);
+
 /**
  * Computes sigma_8, variance of the matter density field with (top-hat) smoothing scale R = 8 Mpc/h, from linear power spectrum.
  * Returns sigma_8 for specified cosmology.
  * @param cosmo Cosmology parameters and configurations
- * @param R Smoothing scale, in [Mpc] units
  * @param status Status flag. 0 if there are no errors, nonzero otherwise.
  * For specific cases see documentation for ccl_error.c
  * @return sigma_8.
