@@ -72,6 +72,18 @@ and then run one of the `setup.py install` commands listed above. (Note: As an a
 You can quickly check whether *pyccl* has been installed correctly by running `python -c "import pyccl"` and checking that no errors are returned. For a more in-depth test to make sure everything is working, change to the `tests/` sub-directory and run `python run_tests.py`. These tests will take a few minutes.
 
 
+## Docker image installation
+**NOTE THAT AT THIS TIME DOCKER IMAGES ARE NOT SECURE AND SHOULD NOT BE SHARED UNDER ANY CIRCUMSTANCES. EACH INDIVIDUAL SHOULD GENERATE THEIR OWN DOCKER IMAGES AND NEVER SHARE THEM.** This will be changed at Public Release.
+
+The Dockerfile to generate a Docker image is included in the CCL repository as Dockerfile. This can be used to create an image that Docker can spool up as a virtual machine, allowing you to utilize CCL on any infrastructure with minimal hassle. The details of Docker and the installation process can be found at [https://www.docker.com/](https://www.docker.com/). Once Docker is installed, it is a simple process to create an image!
+1. Enter the Dockerfile with the editor of your choice. Replace <GITUSERHERE> and <GITPASSHERE> with your Git information. This is a temporary measure that will be removed upon public release of the repository. **DO NOT SHARE THE RESULTING IMAGE WITH ANYONE.**
+2. In a terminal of your choosing (with Docker running), type the command `docker build -t ccl .` in the CCL directory.
+3. To spool up a docker container, we recommend entering in interactive mode with bash. This can be done with `docker run -rm -it ccl bash`. This command will remove the container once it is closed and enter this Docker container in bash.
+
+This Dockerfile currently contains all installed C libraries and the Python wrapper. It currently uses Python2.7-dev and does not yet support ipython or Jupyter notebooks. This all runs on a virtual Ubuntu machine and should exhibit minimal slowdown.
+
+**AGAIN DO NOT SHARE THIS IMAGE UNDER ANY CIRCUMSTANCES.** Images will be safe upon public release.
+
 # Documentation
 
 This document contains basic information about used structures and functions. At the end of document is provided code which implements these basic functions (also in *tests/ccl_sample_run.c*). More information about CCL functions and implementation can be found in *doc/0000-ccl_note/0000-ccl_note.pdf*.
