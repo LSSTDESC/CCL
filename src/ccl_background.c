@@ -734,14 +734,25 @@ void ccl_luminosity_distances(ccl_cosmology * cosmo, int na, double a[na], doubl
     else ccl_comoving_angular_distance(cosmo, a[i], status);
       //output[i]=gsl_spline_eval(cosmo->data.chi,a[i],cosmo->data.accelerator)/a[i];  }
 }
-//TODO checks like in the above
 double ccl_distance_modulus(ccl_cosmology * cosmo, double a, int* status)
 {
-    if (!cosmo->computed_distances) {
-        ccl_cosmology_compute_distances(cosmo, status);
-        ccl_check_status(cosmo, status);
-    }
-    return 5*(log10(ccl_luminosity_distance(cosmo, a, status))+5);
+
+    if((a > (1.0 - 1.e-8)) && (a<=1.0)){
+        *status = CCL_ERROR_COMPUTECHI;
+        strcpy(cosmo->status_message,"ccl_background.c: distance_modulus undefined for a=1.\n");
+        ccl_check_status(cosmo,status);
+        return NAN;
+    } else if(a>1.){
+        *status = CCL_ERROR_COMPUTECHI;
+        strcpy(cosmo->status_message,"ccl_background.c: scale factor cannot be larger than 1.\n");
+        ccl_check_status(cosmo,status);
+        return NAN;
+    } else {
+        if (!cosmo->computed_distances){
+            ccl_cosmology_compute_distances(cosmo, status);
+            ccl_check_status(cosmo, status);
+        }
+    return 5*log10(ccl_luminosity_distance(cosmo, a, status)) + 25;
 }
 
 
@@ -752,8 +763,17 @@ void ccl_distance_moduli(ccl_cosmology * cosmo, int na, double a[na], double out
         ccl_check_status(cosmo, status);
     }
     for (int i=0; i<na; i++){
-        output[i]=5*(log10(ccl_luminosity_distance(cosmo, a[i], status)))+25;
-        //output[i]=gsl_spline_eval(cosmo->data.chi,a[i],cosmo->data.accelerator)/a[i];
+        if((a[i] > (1. - 1.e-8)) && (a[i]<=1.)){
+            *status = CCL_ERROR_COMPUTECHI;
+            strcpy(cosmo->status_message,"ccl_background.c: distance_modulus undefined for a=1.\n");
+            ccl_check_status(cosmo,status);
+        }
+        else if(a[i]>1.){
+            *status = CCL_ERROR_COMPUTECHI;
+            strcpy(cosmo->status_message,"ccl_background.c: scale factor cannot be larger than 1.\n");
+            ccl_check_status(cosmo,status);
+        }
+        else output[i]=5*log10(ccl_luminosity_distance(cosmo, a[i], status))+25;
     }
 }
 
