@@ -195,13 +195,13 @@ static double massfunc_f(ccl_cosmology *cosmo, double halomass, double a, double
 
     if (odelta < 200){
       *status = CCL_ERROR_HMF_INTERP;
-      strcpy(cosmo->status_message, "ccl_massfunc.c: ccl_massfunc_f(): Tinker 2008 only supported in range of Delta = 200 to Delta = 3200. Calculation continues assuming Delta = 200.\n");
-      odelta = 200;
+      strcpy(cosmo->status_message, "ccl_massfunc.c: ccl_massfunc_f(): Tinker 2008 only supported in range of Delta = 200 to Delta = 3200.\n");
+      return 0;
     }
     if (odelta > 3200){
       * status = CCL_ERROR_HMF_INTERP;
-      strcpy(cosmo->status_message, "ccl_massfunc.c: ccl_massfunc_f(): Tinker 2008 only supported in range of Delta = 200 to Delta = 3200. Calculation continues assuming Delta = 3200.\n");
-      odelta = 3200;
+      strcpy(cosmo->status_message, "ccl_massfunc.c: ccl_massfunc_f(): Tinker 2008 only supported in range of Delta = 200 to Delta = 3200.\n");
+      return 0;
     }
 
     if (!cosmo->computed_hmfparams){
@@ -224,14 +224,14 @@ static double massfunc_f(ccl_cosmology *cosmo, double halomass, double a, double
     // use this for consistency with Tinker et al. 2010 fitting function for halo bias
   case ccl_tinker10:
     if (odelta < 200){
-    *status = CCL_ERROR_HMF_INTERP;
-    strcpy(cosmo->status_message, "ccl_massfunc.c: ccl_massfunc_f(): Tinker 2010 only supported in range of Delta = 200 to Delta = 3200. Calculation continues assuming Delta = 200.\n");
-    odelta = 200;
+      *status = CCL_ERROR_HMF_INTERP;
+      strcpy(cosmo->status_message, "ccl_massfunc.c: ccl_massfunc_f(): Tinker 2010 only supported in range of Delta = 200 to Delta = 3200.\n");
+      return 0;
     }
     if (odelta > 3200){
       * status = CCL_ERROR_HMF_INTERP;
-      strcpy(cosmo->status_message, "ccl_massfunc.c: ccl_massfunc_f(): Tinker 2010 only supported in range of Delta = 200 to Delta = 3200. Calculation continues assuming Delta = 3200.\n");
-      odelta = 3200;
+      strcpy(cosmo->status_message, "ccl_massfunc.c: ccl_massfunc_f(): Tinker 2010 only supported in range of Delta = 200 to Delta = 3200.\n");
+      return 0;
     }
     if (!cosmo->computed_hmfparams){
         ccl_cosmology_compute_hmfparams(cosmo, status);
@@ -255,7 +255,8 @@ static double massfunc_f(ccl_cosmology *cosmo, double halomass, double a, double
   case ccl_watson:
     if(odelta!=200.) {
       *status = CCL_ERROR_HMF_INTERP;
-      strcpy(cosmo->status_message, "ccl_massfunc.c: ccl_massfunc_f(): Watson HMF only supported for Delta = 200. Calculation continues assuming Delta = 200.\n");
+      strcpy(cosmo->status_message, "ccl_massfunc.c: ccl_massfunc_f(): Watson HMF only supported for Delta = 200.\n");
+      return 0;
     }
     Omega_m_a = ccl_omega_x(cosmo, a, ccl_omega_m_label,status);
     fit_A = Omega_m_a*(0.990*pow(a,3.216)+0.074);
@@ -268,7 +269,8 @@ static double massfunc_f(ccl_cosmology *cosmo, double halomass, double a, double
   case ccl_angulo:
     if(odelta!=200.) {
       *status = CCL_ERROR_HMF_INTERP;
-      strcpy(cosmo->status_message, "ccl_massfunc.c: ccl_massfunc_f(): Angulo HMF only supported for Delta = 200. Calculation continues assuming Delta = 200.\n");
+      strcpy(cosmo->status_message, "ccl_massfunc.c: ccl_massfunc_f(): Angulo HMF only supported for Delta = 200.\n");
+      return 0;
     }
     fit_A = 0.201;
     fit_a = 2.08;
