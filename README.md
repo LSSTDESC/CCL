@@ -78,9 +78,10 @@ You can quickly check whether *pyccl* has been installed correctly by running `p
 The Dockerfile to generate a Docker image is included in the CCL repository as Dockerfile. This can be used to create an image that Docker can spool up as a virtual machine, allowing you to utilize CCL on any infrastructure with minimal hassle. The details of Docker and the installation process can be found at [https://www.docker.com/](https://www.docker.com/). Once Docker is installed, it is a simple process to create an image!
 1. Enter the Dockerfile with the editor of your choice. Replace <GITUSERHERE> and <GITPASSHERE> with your Git information. This is a temporary measure that will be removed upon public release of the repository. **DO NOT SHARE THE RESULTING IMAGE WITH ANYONE.**
 2. In a terminal of your choosing (with Docker running), type the command `docker build -t ccl .` in the CCL directory.
-3. To spool up a docker container, we recommend entering in interactive mode with bash. This can be done with `docker run -rm -it ccl bash`. This command will remove the container once it is closed and enter this Docker container in bash.
 
-This Dockerfile currently contains all installed C libraries and the Python wrapper. It currently uses Python2.7-dev and does not yet support ipython or Jupyter notebooks. This all runs on a virtual Ubuntu machine and should exhibit minimal slowdown.
+The resulting Docker image has two primary functionalities. The first is a CMD that will open Jupyter notebook tied to a port on your local machine. This can be used with the following run command: `docker run -p 8888:8888 ccl`. You can then access the notebook in the browser of your choice at `localhost:8888`. The second is to access the bash itself, which can be done using `docker run -it ccl bash.`
+
+This Dockerfile currently contains all installed C libraries and the Python wrapper. It currently uses continuumio/anaconda as the base image and supports ipython and Jupyter notebook. There should be minimal slowdown due to the virtualization.
 
 **AGAIN DO NOT SHARE THIS IMAGE UNDER ANY CIRCUMSTANCES.** Images will be safe upon public release.
 

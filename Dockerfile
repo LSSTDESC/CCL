@@ -1,12 +1,12 @@
-FROM ubuntu:14.04
+FROM continuumio/anaconda
 LABEL maintainer "asv13@pitt.edu"
 
 RUN apt-get update && apt-get upgrade -y
-RUN apt-get install -y git make g++ gcc python2.7-dev wget python-pip swig libtool autoconf
-RUN pip install numpy
+RUN apt-get install -y git make g++ gcc wget swig libtool autoconf
 
 ENV GSL_TAR="gsl-2.3.tar.gz"
 ENV GSL_DL="http://ftp.wayne.edu/gnu/gsl/$GSL_TAR"
+
 ENV LD_LIBRARY_PATH=/usr/local/lib
 
 WORKDIR /gnu
@@ -30,6 +30,7 @@ RUN ./configure \
     && make \
     && make install \
     && autoreconf -i \
+    && python setup.py install \
     && python setup.py install
 
-CMD echo Welcome to CCL-Docker. Please enter this container using a command such as: 'docker run -it ccl bash'! This image is not secure and should not be shared under any circumstances.
+CMD jupyter notebook --no-browser --port=8888 --ip=0.0.0.0
