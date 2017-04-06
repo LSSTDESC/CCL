@@ -68,11 +68,14 @@ def compare_distances(z, chi_bench,dm_bench, Omega_v, w0, wa):
     # Calculate distance using pyccl
     a = 1. / (1. + z)
     chi = ccl.comoving_radial_distance(cosmo, a) * h
-    dm = ccl.distance_modulus(cosmo,a)
-
     # Compare to benchmark data
     assert_allclose(chi, chi_bench, atol=1e-12, rtol=DISTANCES_TOLERANCE)
-    assert_allclose(dm, dm_bench, atol=1e-3, rtol = DISTANCES_TOLERANCE*10)
+
+    #compare distance moudli where a!=1
+    a_not_one = (a!=1).nonzero()
+    dm = ccl.distance_modulus(cosmo,a[a_not_one])
+
+    assert_allclose(dm, dm_bench[a_not_one], atol=1e-3, rtol = DISTANCES_TOLERANCE*10)
 
 def test_distance_model_0():
     i = 0
