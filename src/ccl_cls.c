@@ -15,7 +15,7 @@
 //x     -> x-axis
 //y     -> f(x)-axis
 //y0,yf -> values of f(x) to use beyond the interpolation range
-static SplPar *spline_init(int n,double *x,double *y,double y0,double yf)
+SplPar *spline_init(int n,double *x,double *y,double y0,double yf)
 {
   SplPar *spl=malloc(sizeof(SplPar));
   if(spl==NULL)

@@ -325,10 +325,9 @@ private:
 //ls -> list of multipole value (output)
 //clt1 -> tracer #1
 //clt2 -> tracer #2
-void ccl_angular_cls_angpow(ccl_cosmology *ccl_cosmo, int lmax, CCL_ClTracer *clt_gc1, CCL_ClTracer *clt_gc2, int * status)
+SplPar * ccl_angular_cls_angpow(ccl_cosmology *ccl_cosmo, int lmax, CCL_ClTracer *clt_gc1, CCL_ClTracer *clt_gc2, int * status)
 {
   // Initialize the Angpow parameters
-  using namespace Angpow;
   Angpow::Parameters para = Angpow::Param::Instance().GetParam();
   para.wtype1 = Angpow::Parameters::Dirac; para.wtype2 = Angpow::Parameters::Dirac;
   para.mean1 = 1.0; para.mean2 = 1.0;
@@ -358,36 +357,44 @@ void ccl_angular_cls_angpow(ccl_cosmology *ccl_cosmo, int lmax, CCL_ClTracer *cl
   pk2cl.PrintParam();
   pk2cl.Compute(int1, int2, cosmo, &Z1win, &Z2win, Lmax, clout);
 
-  {//save the Cls
-    std::fstream ofs;
-    std::string outName = para.output_dir + para.common_file_tag + "cl.txt";
-    ofs.open(outName, std::fstream::out);
-    for(int index_l=0;index_l<clout.Size();index_l++){
-      ofs << std::setprecision(20) << clout[index_l].first << " " << clout[index_l].second << std::endl;
-    }
-    ofs.close();
+  int n_l = clout.Size();
+  std::vector<double> ls(n_l);
+  std::vector<double> cls(n_l);
+  for(int index_l=0; index_l<n_l; index_l++) {
+    ls[index_l]=clout[index_l].first; cls[index_l]=clout[index_l].second; 
   }
+  SplPar * spl_cl = spline_init(clout.Size(), &ls[0], &cls[0], 0., 0. );
+
+  /* {//save the Cls */
+  /*   std::fstream ofs; */
+  /*   std::string outName = para.output_dir + para.common_file_tag + "cl.txt"; */
+  /*   ofs.open(outName, std::fstream::out); */
+  /*   for(int index_l=0;index_l<clout.Size();index_l++){ */
+  /*     ofs << std::setprecision(20) << clout[index_l].first << " " << clout[index_l].second << std::endl; */
+  /*   } */
+  /*   ofs.close(); */
+  /* } */
   
-  {//save ctheta
+  /* {//save ctheta */
 
-    CTheta ct(clout,para.apod);
+  /*   Angpow::CTheta ct(clout,para.apod); */
 
-    std::fstream ofs;
-    std::string outName = para.output_dir + para.common_file_tag + "ctheta.txt";
-    //define theta values
-    const int Npts=100;
-    const double theta_max=para.theta_max*M_PI/180;
-    double step=theta_max/(Npts-1);
+  /*   std::fstream ofs; */
+  /*   std::string outName = para.output_dir + para.common_file_tag + "ctheta.txt"; */
+  /*   //define theta values */
+  /*   const int Npts=100; */
+  /*   const double theta_max=para.theta_max*M_PI/180; */
+  /*   double step=theta_max/(Npts-1); */
       
-    ofs.open(outName, std::fstream::out);
-    for (size_t i=0;i<Npts;i++){
-      double t=i*step;
-      ofs << std::setprecision(20) << t << " " << ct(t) << std::endl;
-    }
-    ofs.close();
+  /*   ofs.open(outName, std::fstream::out); */
+  /*   for (size_t i=0;i<Npts;i++){ */
+  /*     double t=i*step; */
+  /*     ofs << std::setprecision(20) << t << " " << ct(t) << std::endl; */
+  /*   } */
+  /*   ofs.close(); */
     
-    outName = para.output_dir + para.common_file_tag + "apod_cl.txt";
-    ct.WriteApodCls(outName);
-  }
-
+  /*   outName = para.output_dir + para.common_file_tag + "apod_cl.txt"; */
+  /*   ct.WriteApodCls(outName); */
+  /* } */
+  return spl_cl;
 }

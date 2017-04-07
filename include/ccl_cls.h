@@ -33,6 +33,7 @@ typedef struct {
 } CCL_ClTracer;
 
 
+SplPar * spline_init(int n,double *x,double *y,double y0,double yf);
 double spline_eval(double x, SplPar *spl);
 double speval_bis(double x,void *params);
 void spline_free(SplPar *spl);
