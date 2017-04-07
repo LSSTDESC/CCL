@@ -28,6 +28,7 @@ static double h_over_h0(double a, ccl_cosmology * cosmo, int *status)
 	double Om_mass_nu;
 	if ((cosmo->params.N_nu_mass)>0.0001){
 		if (cosmo->data.nu_pspace_int==NULL)  cosmo->data.nu_pspace_int=calculate_nu_phasespace_spline(status);
+		ccl_check_status(cosmo, status);
 		Om_mass_nu = Omeganuh2(a, cosmo->params.N_nu_mass, cosmo->params.mnu, cosmo->params.T_CMB, cosmo->data.nu_pspace_int) / (cosmo->params.h) / (cosmo->params.h);
 	}else{
 		Om_mass_nu = 0;
@@ -54,6 +55,7 @@ double ccl_omega_x(ccl_cosmology * cosmo, double a, ccl_omega_x_label label, int
 	if ((cosmo->params.N_nu_mass) > 0.0001){
 		// Check if neutrino phase space function is calculated. If not, calculate.
 		if (cosmo->data.nu_pspace_int==NULL) cosmo->data.nu_pspace_int=calculate_nu_phasespace_spline(status);
+		ccl_check_status(cosmo, status);
 		// Call the massive neutrino density function just once at this redshift.
 		OmNuh2 = Omeganuh2(a, cosmo->params.N_nu_mass, cosmo->params.mnu, cosmo->params.T_CMB, cosmo->data.nu_pspace_int);
 	}else{
@@ -210,7 +212,7 @@ typedef struct {
 
 static double fzero(double a,void *params)
 {
-  double chi,chia,a_use=a;;
+  double chi,chia,a_use=a;
   
   chi=((Fpar *)params)->chi;
   compute_chi(a_use,((Fpar *)params)->cosmo,&chia, ((Fpar *)params)->status);
@@ -320,6 +322,7 @@ void ccl_cosmology_compute_distances(ccl_cosmology * cosmo, int *status)
     strcpy(cosmo->status_message,"ccl_background.c: ccl_cosmology_compute_distances(): ran out of memory\n");
     return;
   }
+  
   // Fill in E(a)
   for (int i=0; i<na; i++){
     y[i] = h_over_h0(a[i], cosmo, status);
@@ -341,9 +344,11 @@ void ccl_cosmology_compute_distances(ccl_cosmology * cosmo, int *status)
   }
 
   //Fill in chi(a)
-  for (int i=0; i<na; i++)
+  for (int i=0; i<na; i++){
     chistatus |= compute_chi(a[i],cosmo,&(y[i]), status);
-  if (chistatus){
+   }
+   
+  if (chistatus || *status){
     free(a);
     free(y);
     gsl_spline_free(E);        
@@ -351,12 +356,13 @@ void ccl_cosmology_compute_distances(ccl_cosmology * cosmo, int *status)
     strcpy(cosmo->status_message,"ccl_background.c: ccl_cosmology_compute_distances(): chi(a) integration error \n");
     return;
   }
-
+  
 
   gsl_spline * chi = gsl_spline_alloc(A_SPLINE_TYPE, na);
   chistatus = gsl_spline_init(chi, a, y, na); //in Mpc
+
   // RH has issue here
-  if (chistatus){
+  if (chistatus || *status){
     free(a);
     free(y);
     gsl_spline_free(E);
@@ -401,7 +407,7 @@ void ccl_cosmology_compute_distances(ccl_cosmology * cosmo, int *status)
     chistatus|=a_of_chi(y[i],cosmo, status, &a0,s);
     a[i]=a0;
   }
-
+  
   gsl_root_fdfsolver_free(s);
   if(chistatus) {
     free(a);
@@ -560,7 +566,7 @@ void ccl_cosmology_compute_growth(ccl_cosmology * cosmo, int * status)
     }
     y[i]/=growth0;
   }
-  if (chistatus || status_mg){
+  if (chistatus || status_mg || *status){
     free(a);
     free(y);
     free(y2);

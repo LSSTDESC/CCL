@@ -42,7 +42,7 @@ gsl_spline* calculate_nu_phasespace_spline(int *status) {
   double renorm=1./y[0];
   for (int i=0; i<CCL_NU_MNUT_N; i++) y[i]*=renorm;
   gsl_spline* spl = gsl_spline_alloc(A_SPLINE_TYPE, CCL_NU_MNUT_N);
-  stat = gsl_spline_init(spl, mnut, y, CCL_NU_MNUT_N);
+  stat |= gsl_spline_init(spl, mnut, y, CCL_NU_MNUT_N);
   
   // Check for errors in creating the spline
   if (stat){
