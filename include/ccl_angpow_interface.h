@@ -20,94 +20,116 @@ extern "C" {
 #include "Angpow/angpow_exceptions.h"  //exceptions
 
 
+
+//Compute angular power spectrum between two bins
+//lmax -> maximum angular multipole
+//clt1 -> tracer #1
+//clt2 -> tracer #2
+//double * ccl_angular_cls_angpow(int lmax, CCL_ClTracer *clt1, CCL_ClTracer *clt2, int * status);
+
+
+
 namespace Angpow {
 
-class PowerSpecCCL : public PowerSpecBase {
+   //! Selection window with array input 
+class RadSplineSelect : public RadSelectBase {
  public:
-  //! Constructor
- PowerSpecCCL(ccl_cosmology * cosmo, double kmin=1e-5, double kmax=10, int nk=1000, bool use_rsd=true)
-   : ccl_cosmo_(cosmo), use_rsd_(use_rsd), has_rsd_(true) {
-    /* if(use_rsd) { */
-    /*   has_rsd_ = true; */
-    /*   use_rsd_ = true; */
-    /* } */
-    int status =0;
-    double * ks = ccl_log_spacing(kmin,kmax,N_K);
-    double Pks[N_K];
-    double aref = 1.; // z=0
-    for(int i=0; i<nk; i++) {
-      Pks[i] = ccl_linear_matter_power(cosmo, ks[i], aref, &status);
-    }
-    
-    std::vector<double> vx;
-    std::vector<double> vy;
-    
-    for(int i=0;i<N_K;i++){
-      vx.push_back(ks[i]);
-      vy.push_back(Pks[i]);
-    }
-    double vxmin = *(std::min_element(vx.begin(), vx.end()));
-    double vxmax = *(std::max_element(vx.begin(), vx.end()));
-    Pk_ = new SLinInterp1D(vx,vy,vxmin,vxmax,0);
-  }
-  //! Destructor
-  virtual ~PowerSpecCCL() {}
-  
-  //! Used to delete explicitly the local pointers
-  virtual void ExplicitDestroy() { 
-    if(ccl_cosmo_) delete ccl_cosmo_;
-    if(Pk_) delete Pk_;
-  }
+ RadSplineSelect(SplPar* spl): 
+  RadSelectBase(spl->x0, spl->xf), spl_(spl) {}
 
-  /*! Explicit to get a clone of the primary object via shallow copy
-    using the Copy Ctor
-   */
-  virtual PowerSpecCCL* clone() const {
-    return new PowerSpecCCL(static_cast<const PowerSpecCCL&>(*this));
-  }
-  
-  /*! called by angpow_kinteg.cc to fix the value of some function
-    at fixed z value (and l too if necessary)
-   */
-  void Init(double z) {
-    int status=0; 
-    double tmp= ccl_growth_factor(ccl_cosmo_,1.0/(1+z), &status);
-    growth2_ = tmp*tmp;
-    // WARNING: here we want to store dlnD/dln(+1z) = - dlnD/dlna
-    fz_= - ccl_growth_rate(ccl_cosmo_,1.0/(1+z), &status);
-    // TO SET with CCL
-    bias_ = 1.;
-  }
 
-  //Main operator
-  virtual r_8 operator()(double k, double z) {
-    r_8 pk = (Pk_->operator()(k));
-    if(pk<0) pk=0.; // P(k) values can be negative because of poor interpolation below kmin
-    return growth2_*pk;
+  virtual r_8 operator()(r_8 z) const {
+    return spline_eval(z,spl_);
   }
-
-  virtual bool get_has_rsd() { return has_rsd_; }
-  virtual r_8 get_fz() { return fz_; }
-  virtual r_8 get_bias() { return bias_; }
 
  private:
+  SplPar* spl_;
+};//RadArraySelect
 
-  SLinInterp1D* Pk_;          //!< access to  Pk(k)
-  ccl_cosmology* ccl_cosmo_;   //!< access to CCL cosmology
-  double growth2_;               //!< D(zi)^2
-  //double fz_; //! growth rate f(z)
-  bool use_rsd_;
-  bool has_rsd_;
-  r_8 fz_;
-  r_8 bias_;
 
-  //forbid for the time beeing the assignment operator
-  PowerSpecCCL& operator=(const PowerSpecCCL& copy);
+
+/* class PowerSpecCCL : public PowerSpecBase { */
+/*  public: */
+/*   //! Constructor */
+/*  PowerSpecCCL(ccl_cosmology * cosmo, double kmin=1e-5, double kmax=10, int nk=1000, bool use_rsd=true) */
+/*    : ccl_cosmo_(cosmo), use_rsd_(use_rsd), has_rsd_(true) { */
+/*     int status =0; */
+/*     double * ks = ccl_log_spacing(kmin,kmax,N_K); */
+/*     double Pks[N_K]; */
+/*     double aref = 1.; // z=0 */
+/*     for(int i=0; i<nk; i++) { */
+/*       Pks[i] = ccl_linear_matter_power(cosmo, ks[i], aref, &status); */
+/*     } */
+    
+/*     std::vector<double> vx; */
+/*     std::vector<double> vy; */
+    
+/*     for(int i=0;i<N_K;i++){ */
+/*       vx.push_back(ks[i]); */
+/*       vy.push_back(Pks[i]); */
+/*     } */
+/*     double vxmin = *(std::min_element(vx.begin(), vx.end())); */
+/*     double vxmax = *(std::max_element(vx.begin(), vx.end())); */
+/*     Pk_ = new SLinInterp1D(vx,vy,vxmin,vxmax,0); */
+/*   } */
+/*   //! Destructor */
+/*   virtual ~PowerSpecCCL() {} */
   
-  //Minimal copy to allow Main operator(int, r_8, r_8) to work
- PowerSpecCCL(const PowerSpecCCL& copy) : 
-  Pk_(copy.Pk_), ccl_cosmo_(copy.ccl_cosmo_), growth2_(copy.growth2_), has_rsd_(copy.has_rsd_), fz_(copy.fz_) {} 
-};
+/*   //! Used to delete explicitly the local pointers */
+/*   virtual void ExplicitDestroy() {  */
+/*     if(ccl_cosmo_) delete ccl_cosmo_; */
+/*     if(Pk_) delete Pk_; */
+/*   } */
+
+/*   /\*! Explicit to get a clone of the primary object via shallow copy */
+/*     using the Copy Ctor */
+/*    *\/ */
+/*   virtual PowerSpecCCL* clone() const { */
+/*     return new PowerSpecCCL(static_cast<const PowerSpecCCL&>(*this)); */
+/*   } */
+  
+/*   /\*! called by angpow_kinteg.cc to fix the value of some function */
+/*     at fixed z value (and l too if necessary) */
+/*    *\/ */
+/*   void Init(double z) { */
+/*     int status=0;  */
+/*     double tmp= ccl_growth_factor(ccl_cosmo_,1.0/(1+z), &status); */
+/*     growth2_ = tmp*tmp; */
+/*     // WARNING: here we want to store dlnD/dln(+1z) = - dlnD/dlna */
+/*     fz_= - ccl_growth_rate(ccl_cosmo_,1.0/(1+z), &status); */
+/*     // TO SET with CCL */
+/*     bias_ = 1.; */
+/*   } */
+
+/*   //Main operator */
+/*   virtual r_8 operator()(double k, double z) { */
+/*     r_8 pk = (Pk_->operator()(k)); */
+/*     if(pk<0) pk=0.; // P(k) values can be negative because of poor interpolation below kmin */
+/*     return growth2_*pk; */
+/*   } */
+
+/*   virtual bool get_has_rsd() { return has_rsd_; } */
+/*   virtual r_8 get_fz() { return fz_; } */
+/*   virtual r_8 get_bias() { return bias_; } */
+
+/*  private: */
+
+/*   SLinInterp1D* Pk_;          //!< access to  Pk(k) */
+/*   ccl_cosmology* ccl_cosmo_;   //!< access to CCL cosmology */
+/*   double growth2_;               //!< D(zi)^2 */
+/*   //double fz_; //! growth rate f(z) */
+/*   bool use_rsd_; */
+/*   bool has_rsd_; */
+/*   r_8 fz_; */
+/*   r_8 bias_; */
+
+/*   //forbid for the time beeing the assignment operator */
+/*   PowerSpecCCL& operator=(const PowerSpecCCL& copy); */
+  
+/*   //Minimal copy to allow Main operator(int, r_8, r_8) to work */
+/*  PowerSpecCCL(const PowerSpecCCL& copy) :  */
+/*   Pk_(copy.Pk_), ccl_cosmo_(copy.ccl_cosmo_), growth2_(copy.growth2_), has_rsd_(copy.has_rsd_), fz_(copy.fz_) {}  */
+/* }; */
 
 
 
@@ -292,3 +314,80 @@ private:
 
  
 }//end namespace
+
+
+
+
+
+
+//Compute angular power spectrum between two bins
+//lmax -> maximum angular multipole
+//ls -> list of multipole value (output)
+//clt1 -> tracer #1
+//clt2 -> tracer #2
+void ccl_angular_cls_angpow(ccl_cosmology *ccl_cosmo, int lmax, CCL_ClTracer *clt_gc1, CCL_ClTracer *clt_gc2, int * status)
+{
+  // Initialize the Angpow parameters
+  using namespace Angpow;
+  Angpow::Parameters para = Angpow::Param::Instance().GetParam();
+  para.wtype1 = Angpow::Parameters::Dirac; para.wtype2 = Angpow::Parameters::Dirac;
+  para.mean1 = 1.0; para.mean2 = 1.0;
+  //para.cosmo_zmax = 9.0;
+  //para.cosmo_npts = 1000;
+  para.chebyshev_order_1 = 9;
+  para.chebyshev_order_2 = 9;
+  para.cl_kmax = 10;
+
+  // Initialize the radial selection windows
+  Angpow::RadSplineSelect Z1win(clt_gc1->spl_nz);
+  Angpow::RadSplineSelect Z2win(clt_gc2->spl_nz);
+
+  //The cosmological distance tool 
+  Angpow::CosmoCoordCCL cosmo(ccl_cosmo, 1./A_SPLINE_MAX-1, 1./A_SPLINE_MIN-1, A_SPLINE_NA); //, para.cosmo_precision);
+
+  // Integrand functions
+  Angpow::IntegrandCCL int1(clt_gc1, ccl_cosmo);
+  Angpow::IntegrandCCL int2(clt_gc2, ccl_cosmo);
+
+  //Initialize the Cl with parameters to select the ell set which is interpolated after the processing
+  int Lmax = 500; //para.Lmax; //ell in [0, Lmax-1]
+  Angpow::Clbase clout(Lmax,para.linearStep, para.logStep);
+
+  //Main class
+  Angpow::Pk2Cl pk2cl; //Default: the user parameters are used in the Constructor 
+  pk2cl.PrintParam();
+  pk2cl.Compute(int1, int2, cosmo, &Z1win, &Z2win, Lmax, clout);
+
+  {//save the Cls
+    std::fstream ofs;
+    std::string outName = para.output_dir + para.common_file_tag + "cl.txt";
+    ofs.open(outName, std::fstream::out);
+    for(int index_l=0;index_l<clout.Size();index_l++){
+      ofs << std::setprecision(20) << clout[index_l].first << " " << clout[index_l].second << std::endl;
+    }
+    ofs.close();
+  }
+  
+  {//save ctheta
+
+    CTheta ct(clout,para.apod);
+
+    std::fstream ofs;
+    std::string outName = para.output_dir + para.common_file_tag + "ctheta.txt";
+    //define theta values
+    const int Npts=100;
+    const double theta_max=para.theta_max*M_PI/180;
+    double step=theta_max/(Npts-1);
+      
+    ofs.open(outName, std::fstream::out);
+    for (size_t i=0;i<Npts;i++){
+      double t=i*step;
+      ofs << std::setprecision(20) << t << " " << ct(t) << std::endl;
+    }
+    ofs.close();
+    
+    outName = para.output_dir + para.common_file_tag + "apod_cl.txt";
+    ct.WriteApodCls(outName);
+  }
+
+}
