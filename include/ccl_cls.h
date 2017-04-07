@@ -32,6 +32,14 @@ typedef struct {
   SplPar *spl_wM; //Spline for magnification
 } CCL_ClTracer;
 
+
+double spline_eval(double x, SplPar *spl);
+double speval_bis(double x,void *params);
+void spline_free(SplPar *spl);
+
+
+
+
 //Generic CCL_ClTracer creator
 // Tracer_type: pass CL_TRACER_NC (number counts) or CL_TRACER_WL (weak lensing)
 // * has_rsd -> set to 1 if you want to compute the RSD contribution to number counts (0 otherwise)

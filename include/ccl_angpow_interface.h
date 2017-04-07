@@ -8,17 +8,6 @@ extern "C" {
 }
 
 // Angpow includes
-/* #include <iostream> */
-/* #include <fstream>  */
-/* #include <string>  */
-/* #include <vector> */
-/* #include <numeric>  */
-/* #include <math.h> */
-
-
-/* #include "angpow_numbers.h" */
-/* #include "angpow_func.h" */
-/* #include "angpow_cosmo.h" */
 #include "Angpow/angpow_tools.h"
 #include "Angpow/angpow_parameters.h"
 #include "Angpow/angpow_pk2cl.h"
@@ -30,25 +19,6 @@ extern "C" {
 #include "Angpow/angpow_ctheta.h"
 #include "Angpow/angpow_exceptions.h"  //exceptions
 
-
-// CCL inputs :
-// comoving radial distance
-// ccl_comoving_radial_distance
-// P(k)
-
-// growth ? RSD ? P(k,z) ?
-// ccl_growth_factor
-// ...
-// redshift windows
-
-// Angpow classes to feed
-//CosmoCoordBase * coscoord;
-//RadSelecBase * Z1win;
-//RadSelecBase * Z2win;
-//PowerSpecBase * pk;
-//Clbase * clout;
-
-// Write new classes PkCCL, CosmoCCL... that inherit from PkBase, CosmoBase
 
 namespace Angpow {
 
@@ -192,6 +162,130 @@ CosmoCoordCCL(ccl_cosmology * cosmo, double zmin=0., double zmax=9., size_t npts
   double zmax_;           //!< maximal z
   size_t npts_;        //!< number of points to define the interpolation in [zmin, zmax]
 };// CosmoCoordCCL
+
+
+
+
+
+/*   //! Base class of half the integrand function */
+/* class IntegrandCCL : public IntegrandBase { */
+/*  public: */
+/*  IntegrandCCL(PowerSpecCCL& PSpec, CosmoCoordCCL& cosmo, int ell=0, r_8 z=0.): */
+/*   PSpec_(PSpec), cosmo_(cosmo), ell_(ell), z_(z) { */
+/*     R_ = cosmo_.r(z_); */
+/*     jlR_ = new JBess1(ell_,R_); */
+/*     jlp1R_ = new JBess1(ell_+1,R_); */
+/*   } */
+/*   void Init(int ell, r_8 z){ */
+/*     ell_=ell; z_=z; */
+/*     PSpec_.Init(z_); */
+/*     R_ = cosmo_.r(z_); */
+/*     jlR_ = new JBess1(ell_,R_); */
+/*     jlp1R_ = new JBess1(ell_+1,R_); */
+/*   } */
+/*   virtual ~IntegrandCCL() {} */
+/*   virtual r_8 operator()(r_8 k) const { */
+/*     r_8 x = k*R_; */
+/*     r_8 jlRk = (*jlR_)(k); */
+/*     r_8 delta = PSpec_.get_bias()*jlRk; */
+/*     r_8 jlRksecond = 0.; */
+/*     if(PSpec_.get_has_rsd()){ */
+/*       if(x<1e-40) { */
+/*     	if(ell_==0) { */
+/*     	  jlRksecond = -1./3. + x*x/10.; */
+/*     	} else if(ell_==2) { */
+/*     	  jlRksecond = 2./15. - 2*x*x/35.; */
+/*     	} else { */
+/*     	  jlRksecond = 0.; */
+/*     	} */
+/*       } else { */
+/*     	jlRksecond = 2.*(*jlp1R_)(k)/x + (ell_*(ell_-1.)/(x*x) - 1.)*jlRk; */
+/*       } */
+/*       delta += PSpec_.get_fz()*jlRksecond; */
+/*     } */
+/*     return(k*sqrt(fabs(PSpec_(k,z_)))*delta); */
+/*   } */
+/*   virtual IntegrandCCL* clone() const { */
+/*     return new IntegrandCCL(static_cast<const IntegrandCCL&>(*this)); */
+/*   } */
+/*   virtual void ExplicitDestroy() { */
+/*     if(jlR_) delete jlR_; */
+/*     if(jlp1R_) delete jlp1R_; */
+/*   } */
+/* private: */
+/*   PowerSpecCCL& PSpec_;  //no ownership */
+/*   CosmoCoordCCL& cosmo_;  //no ownership */
+/*   int ell_; */
+/*   r_8 z_; */
+/*   r_8 R_; */
+/*   JBess1* jlR_;  // j_ell(k*R) */
+/*   JBess1* jlp1R_;   // j_(ell+1)(k*R) */
+/* };//IntegrandCCL */
+
+
+ 
+
+  //! Base class of half the integrand function
+class IntegrandCCL : public IntegrandBase {
+ public:
+ IntegrandCCL(CCL_ClTracer* clt, ccl_cosmology* cosmo, int ell=0, r_8 z=0.):
+  clt_(clt), cosmo_(cosmo), ell_(ell), z_(z) {
+    Init(ell,z);
+  }
+  void Init(int ell, r_8 z){
+    int status=0;
+    ell_=ell; z_=z;
+    R_ = ccl_comoving_radial_distance(cosmo_, 1.0/(1+z), &status);
+    jlR_ = new JBess1(ell_,R_);
+    jlp1R_ = new JBess1(ell_+1,R_);
+    if(clt_->has_rsd) {
+      // WARNING: here we want to store dlnD/dln(+1z) = - dlnD/dlna
+      fz_= - ccl_growth_rate(cosmo_,1.0/(1+z), &status);
+    }
+    bz_ = spline_eval(z,clt_->spl_bz);
+  }
+  virtual ~IntegrandCCL() {}
+  virtual r_8 operator()(r_8 k) const {
+    int status=0;
+    r_8 Pk = ccl_linear_matter_power(cosmo_, k , 1./(1+z_), &status);
+    r_8 x = k*R_;
+    r_8 jlRk = (*jlR_)(k);
+    r_8 delta = bz_*jlRk;
+    r_8 jlRksecond = 0.;
+    if(clt_->has_rsd){
+      if(x<1e-40) {
+    	if(ell_==0) {
+    	  jlRksecond = -1./3. + x*x/10.;
+    	} else if(ell_==2) {
+    	  jlRksecond = 2./15. - 2*x*x/35.;
+    	} else {
+    	  jlRksecond = 0.;
+    	}
+      } else {
+    	jlRksecond = 2.*(*jlp1R_)(k)/x + (ell_*(ell_-1.)/(x*x) - 1.)*jlRk;
+      }
+      delta += fz_*jlRksecond;
+    }
+    return(k*sqrt(fabs(Pk))*delta);
+  }
+  virtual IntegrandCCL* clone() const {
+    return new IntegrandCCL(static_cast<const IntegrandCCL&>(*this));
+  }
+  virtual void ExplicitDestroy() {
+    if(jlR_) delete jlR_;
+    if(jlp1R_) delete jlp1R_;
+  }
+private:
+  CCL_ClTracer* clt_;  //no ownership
+  ccl_cosmology* cosmo_;  //no ownership
+  int ell_; 
+  r_8 z_;   // redshift z
+  r_8 R_;   // radial comoving distance r(z)
+  r_8 fz_;  // growth rate f(z)
+  r_8 bz_;  // bias b(z)
+  JBess1* jlR_;  // j_ell(k*R)
+  JBess1* jlp1R_;   // j_(ell+1)(k*R)
+};//IntegrandCCL
 
 
 

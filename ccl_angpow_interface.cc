@@ -11,8 +11,8 @@
 #define NORMPS 2.215e-9
 #define ZD 0.5
 #define NZ 128
-#define Z0_GC 0.50
-#define SZ_GC 0.05
+#define Z0_GC 1.0 
+#define SZ_GC 0.000001 // 0.05
 #define Z0_SH 0.65
 #define SZ_SH 0.05
 #define NL 512
@@ -152,8 +152,9 @@ int main(int argc,char **argv){
 
   int rc=0;
   try {
-  //status flag
-  //int status =0;
+  // Status flag
+  int status =0;
+  
   // Initialize cosmological parameters
 
   ccl_configuration ccl_config=default_config;
@@ -162,30 +163,60 @@ int main(int argc,char **argv){
 
   // Initialize cosmology object given cosmo params
   ccl_cosmology *ccl_cosmo=ccl_cosmology_create(ccl_params,ccl_config);
+
+  //Create tracers for angular power spectra
+  double z_arr_gc[NZ],nz_arr_gc[NZ],bz_arr[NZ],sz_arr[NZ];
+  for(int i=0;i<NZ;i++)
+    {
+      z_arr_gc[i]=Z0_GC-5*SZ_GC+10*SZ_GC*(i+0.5)/NZ;
+      nz_arr_gc[i]=exp(-0.5*pow((z_arr_gc[i]-Z0_GC)/SZ_GC,2));
+      bz_arr[i]=1;//+z_arr_gc[i];
+      sz_arr[i]=exp(-0.5*pow((z_arr_gc[i]-Z0_GC)/SZ_GC,2));
+    }
+  
+  //Galaxy clustering tracer
+  bool has_rsd = true;
+  bool has_magnification = false;
+  CCL_ClTracer *clt_gc1=ccl_cl_tracer_number_counts_new(ccl_cosmo,has_rsd,has_magnification,NZ,z_arr_gc,nz_arr_gc,NZ,z_arr_gc,bz_arr,NZ,z_arr_gc,sz_arr, &status);
+  CCL_ClTracer *clt_gc2=ccl_cl_tracer_number_counts_new(ccl_cosmo,has_rsd,has_magnification,NZ,z_arr_gc,nz_arr_gc,NZ,z_arr_gc,bz_arr,NZ,z_arr_gc,sz_arr, &status);
+
   
   // Initialize the Angpow parameters
   //Angpow::Param::Instance().SetToDefault();
   Angpow::Parameters para = Angpow::Param::Instance().GetParam();
   para.wtype1 = Angpow::Parameters::Dirac; para.wtype2 = Angpow::Parameters::Dirac;
   para.mean1 = 1.0; para.mean2 = 1.0;
-  para.cosmo_zmax = 9.0;
-  para.cosmo_npts = 1000;
+  //para.cosmo_zmax = 9.0;
+  //para.cosmo_npts = 1000;
   para.chebyshev_order_1 = 9;
   para.chebyshev_order_2 = 9;
 
   // Initialize the radial selection windows
-  Angpow::RadSelectBase* Z1win = 0;
-  Angpow::RadSelectBase* Z2win = 0;
-  Angpow::init_windows(para, Z1win, Z2win);
+  //Angpow::RadSelectBase* Z1win = 0;
+  //Angpow::RadSelectBase* Z2win = 0;
+  //Angpow::init_windows(para, Z1win, Z2win);
+  Angpow::RadArraySelect Z1win(NZ,z_arr_gc,nz_arr_gc);
+  Angpow::RadArraySelect Z2win(NZ,z_arr_gc,nz_arr_gc);
 
   //The cosmological distance tool 
-  Angpow::CosmoCoordCCL cosmo(ccl_cosmo, para.cosmo_zmin, para.cosmo_zmax, para.cosmo_npts); //, para.cosmo_precision);
+  Angpow::CosmoCoordCCL cosmo(ccl_cosmo, 1./A_SPLINE_MAX-1, 1./A_SPLINE_MIN-1, A_SPLINE_NA); //, para.cosmo_precision);
+  //Angpow::CosmoCoord cosmo(para.cosmo_zmin, para.cosmo_zmax, para.cosmo_npts, para.cosmo_precision);
 
   // Define Pk
-  double kmin = 1e-5; //para.pw_kmin;
-  double kmax = 10; //para.pw_kmax;
-  int nk = 1000;
-  Angpow::PowerSpecCCL pws(ccl_cosmo, kmin, kmax, nk);
+  //double kmin = 1e-5; //para.pw_kmin;
+  //double kmax = 10; //para.pw_kmax;
+  //int nk = 1000;
+  //Angpow::PowerSpecCCL pws(ccl_cosmo, kmin, kmax, nk);
+  //Angpow::PowerSpecFile pws(cosmo,"/Users/jneveu/Documents/LSST/TJP/AngPow/data/classgal_pk_z0.dat",0,kmin,kmax,true,true,false);
+
+  // Integrand functions
+  //Angpow::IntegrandCCL int1(pws, cosmo);
+  //Angpow::IntegrandCCL int2(pws, cosmo);
+  //Angpow::IntegrandDens int1(pws, cosmo);
+  //Angpow::IntegrandDens int2(pws, cosmo);
+  Angpow::IntegrandCCL int1(clt_gc1, ccl_cosmo);
+  Angpow::IntegrandCCL int2(clt_gc2, ccl_cosmo);
+
 
   //Initialize the Cl with parameters to select the ell set which is interpolated after the processing
   int Lmax = 500; //para.Lmax; //ell in [0, Lmax-1]
@@ -195,7 +226,8 @@ int main(int argc,char **argv){
   Angpow::Pk2Cl pk2cl; //Default: the user parameters are used in the Constructor 
   pk2cl.PrintParam();
   //  pk2cl.Compute(pws, Z1win, Z2win, Lmax, clout);
-  pk2cl.Compute(pws, cosmo, Z1win, Z2win, Lmax, clout);
+  //pk2cl.Compute(pws, cosmo, Z1win, Z2win, Lmax, clout);
+  pk2cl.Compute(int1, int2, cosmo, &Z1win, &Z2win, Lmax, clout);
 
   {//save the Cls
     std::fstream ofs;

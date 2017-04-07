@@ -38,8 +38,9 @@ static SplPar *spline_init(int n,double *x,double *y,double y0,double yf)
   return spl;
 }
 
+
 //Evaluates spline at x checking for bound errors
-static double spline_eval(double x,SplPar *spl)
+double spline_eval(double x,SplPar *spl)
 {
   if(x<=spl->x0)
     return spl->y0;
@@ -50,18 +51,19 @@ static double spline_eval(double x,SplPar *spl)
 }
 
 //Wrapper around spline_eval with GSL function syntax
-static double speval_bis(double x,void *params)
+double speval_bis(double x,void *params)
 {
   return spline_eval(x,(SplPar *)params);
 }
 
 //Spline destructor
-static void spline_free(SplPar *spl)
+void spline_free(SplPar *spl)
 {
   gsl_spline_free(spl->spline);
   gsl_interp_accel_free(spl->intacc);
   free(spl);
 }
+
 
 //Params for lensing kernel integrand
 typedef struct {
