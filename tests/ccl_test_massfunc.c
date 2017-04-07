@@ -9,6 +9,7 @@
 #define INVSIGMA_TOLERANCE 5e-3
 #define MASSFUNC_TOLERANCE 5e-3
 
+
 CTEST_DATA(massfunc) {
   double Omega_c;
   double Omega_b;
@@ -96,16 +97,17 @@ static void compare_massfunc(int model, struct massfunc_data * data)
   
   ASSERT_NOT_NULL(cosmo);
 
-  double redshift = 0;
+  double a = 1.0;
   double logmass = 10;
+  double odelta = 200;
   double rho_m = RHO_CRITICAL*cosmo->params.Omega_m*cosmo->params.h*cosmo->params.h;
 
   // compare to benchmark data
   for (int j=0; j<13; j++){
     double mass = pow(10,logmass);
-    double sigma_j = ccl_sigmaM(cosmo, mass, redshift, status);
+    double sigma_j = ccl_sigmaM(cosmo, mass, a, status);
     double loginvsigma_j = log10(1./sigma_j);
-    double logmassfunc_j = log10(ccl_massfunc(cosmo, mass, redshift, status)*mass/(rho_m*log(10.)));
+    double logmassfunc_j = log10(ccl_massfunc(cosmo, mass, a, odelta, status)*mass/(rho_m*log(10.)));
 
     double absolute_tolerance = SIGMA_TOLERANCE*data->massfunc[0][j];
     if (fabs(absolute_tolerance)<1e-12) absolute_tolerance = 1e-12;

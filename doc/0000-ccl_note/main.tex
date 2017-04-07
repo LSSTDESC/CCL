@@ -131,9 +131,9 @@ The routines described in this subsection are implemented in {\tt ccl\_backgroun
 
 The Hubble parameter is calculated via
 %
-\begin{equation}
-\frac{H(a)}{H_0} = a^{-3/2}\sqrt{\Omega_m+\Omega_\Lambda a^{-3(w_0+w_a)}
-    \exp[3 w_a (a-1)]+\Omega_K a +\Omega_g a^{-1}}.
+\begin{equation}\label{eq:Ha}
+\frac{H(a)}{H_0} = a^{-3/2}\sqrt{\Omega_{M,0}+\Omega_{\Lambda,0} a^{-3(w_0+w_a)}
+    \exp[3 w_a (a-1)]+\Omega_{K,0} a +\Omega_{g,0} a^{-1}}.
 \end{equation}
 
 The radial comoving distance is calculated via a numerical integral
@@ -153,6 +153,19 @@ $d_L=r(a)/a$.
 
 CCL also contains capability to compute $a(\chi)$ (i.e. the inverse of $\chi(a)$).
 
+
+\subsection{Density parameter functions}
+
+The routines described in this subsection are implemented in {\tt ccl\_background.c}.
+
+The density parameter functions $\Omega_X(a)$ are calculated for four components:
+\begin{itemize}
+\item matter density parameter $\Omega_M(a) = \Omega_{M,0} H_0^2 / (a^3 H^2(a) )$.
+\item dark energy density parameter $\Omega_\Lambda(a) = \Omega_{\Lambda,0} H_0^2 / H^2(a)$.
+\item radiation density parameter $\Omega_g(a) = \Omega_{g,0} H_0^2 / (a^4 H^2(a) )$.
+\item curvature density parameter $\Omega_K(a) = \Omega_{K,0} H_0^2 / (a^2 H^2(a) )$.
+\end{itemize}
+using the Hubble parameter defined equation~\ref{eq:Ha}.
 
 \subsection{Growth function}
 \label{sec:growth}
@@ -193,61 +206,40 @@ Secondly, there is the option to call the {\tt CLASS} software \citep{class} wit
 
 The computation of the nonlinear power spectrum from {\tt CLASS} can be significantly sped up by extrapolating in the range $k>${\tt K\_MAX\_SPLINE}. In this section, we describe the implementation of the extrapolation and the accuracy attained.
 
-The introduction of the parameter {\tt K\_MAX\_SPLINE} allows us to spline the nonlinear matter power spectrum within the {\tt cosmo} structure up to that value of $k$ (in units of $1/$Mpc). A separate {\tt K\_MAX} parameter sets the limit for evaluation of the matter power spectrum. The range between {\tt K\_MAX\_SPLINE}$<k<${\tt K\_MAX} is evaluated by performing a second order Taylor expansion within the routine {\tt ccl\_nonlin\_matter\_power}.
+The introduction of the parameter {\tt K\_MAX\_SPLINE} allows us to spline the nonlinear matter power spectrum within the {\tt cosmo} structure up to that value of $k$ (in units of $1/$Mpc). A separate {\tt K\_MAX} parameter sets the limit for evaluation of the matter power spectrum. The range between {\tt K\_MAX\_SPLINE}$<k<${\tt K\_MAX} is evaluated by performing a second order Taylor expansion within the static routine {\tt ccl\_power\_extrapol\_highk}.
 
-First, we compute the first and second derivative of the $\ln P(k,z)$ at $k_0={\rm \tt K\_MAX}-2\Delta\ln k$ by computing the numerical derivatives by finite differences. We define the following $k$ values:
-%
-\begin{eqnarray}
-k_0^{+}&=&k_0+\Delta\ln k,\\
-k_0^{++}&=&k_0+2\Delta\ln k,\\
-k_0^{-}&=&k_0-\Delta\ln k,\\
-k_0^{--}&=&k_0-2\Delta\ln k,
-\end{eqnarray}
-%
-where we evaluate the power spectra for computing the suitable numerical derivatives as
-%
-\begin{eqnarray}
-  \frac{d\ln P}{d\ln k}(k_0,z)&=& \frac{-\ln P(k_0^{++},z)+8\ln P(k_0^{+},z)-8\ln P(k_0^{-},z)+\ln P(k_0^{--},z)}{2\Delta \ln k},\\
-  \frac{d^2\ln P}{d\ln k^2}(k_0,z)&=& \frac{\ln P(k_0^{+},z)-2\ln P(k_0)+\ln P(k_0^{-},z)}{\Delta\ln k^2}.
-  \label{eq:numderiv_dlnP}
-\end{eqnarray}
-%
-We then apply a second order Taylor expansion to extrapolate the matter power spectrum to $k>${\tt K\_MAX\_SPLINE}. The Taylor expansion gives
+First, we compute the first and second derivative of the $\ln P(k,z)$ at $k_0={\rm \tt K\_MAX}-2\Delta\ln k$ by computing the numerical derivatives by finite differences using GSL. We then apply a second order Taylor expansion to extrapolate the matter power spectrum to $k>${\tt K\_MAX\_SPLINE}. The Taylor expansion gives
 %
 \begin{equation}
-  \ln P(k,z) \simeq \ln P(k_0,z) + \frac{d\ln P}{d\ln k}(\ln k_0) (\ln k-\ln k_0)  + \frac{1}{2}  \frac{d^2\ln P}{d\ln k^2}(\ln k_0,z) (\ln k-\ln k_0)^2.
+  \ln P(k,z) \simeq \ln P(k_0,z) + \frac{d\ln P}{d\ln k}(\ln k_0,z) (\ln k-\ln k_0)  + \frac{1}{2}  \frac{d^2\ln P}{d\ln k^2}(\ln k_0,z) (\ln k-\ln k_0)^2.
   \label{eq:NLPSTaylor}
 \end{equation}
 
-The results of this approximation are shown in Figure \ref{fig:NLextrapol_z0}. We compare the nonlinear matter power spectrum at $z=0$ computed with the previously described approximation, to the matter power spectrum obtained by directly evaluating {\tt CLASS} at the desired $k$ value. Our fiducial choice for $\Delta \ln k$ is $10^{-4}$, beyond which the case with {\tt K\_MAX\_SPLINE}$=50$/Mpc seems to have converged. Our results show that the approximation is good to within $5\%$ up to $k=10^4/$Mpc if {\tt K\_MAX\_SPLINE}$=50$/Mpc; and to within $0.1\%$ up to $k=10^4/$Mpc if {\tt K\_MAX\_SPLINE}$=500$/Mpc. The lower {\tt K\_MAX\_SPLINE} is, the faster {\tt CCL} will run. Figure \ref{fig:NLextrapol_z3} shows similar results at $z=3$. In this case, {\tt K\_MAX\_SPLINE}$=500$/Mpc is required to maintain good accuracy. To span the approximate redshift range of LSST, we thus settle on a fiducial value of {\tt K\_MAX\_SPLINE}$=500$/Mpc. The optimum choice of {\tt K\_MAX\_SPLINE} is left to the user for their particular application. If needed, the $\Delta\ln k$ parameter chan be changed within {\tt ccl\_power.c}.
+The results of this approximation are shown in Figure \ref{fig:NLextrapol} for redshifts $z=0$ and $z=3$. We compare the nonlinear matter power spectrum at $z=0$ computed with the previously described approximation, to the matter power spectrum obtained by directly evaluating {\tt CLASS} at the desired $k$ value. (The benchmark in reality uses a value of {\tt K\_MAX\_SPLINE}$=10^3$/Mpc, well beyond our range of application.) We find that for typical values of  $\Delta \ln k$ is $10^{-2}$ and {\tt K\_MAX\_SPLINE}$=50$/Mpc has converged to an accuracy that surpases the expected impact of baryonic effects on the matter power spectrum at $k>10/$Mpc. (For a plot showing the impact of baryons on the matter power spectrum, see \citealt{Schneider15}.) The lower {\tt K\_MAX\_SPLINE} is, the faster {\tt CCL} will run. The optimum choice of {\tt K\_MAX\_SPLINE} is left to the user for their particular application. 
 
 %------------------------
-\begin{figure}
+\begin{figure*}
 \centering
-\includegraphics[width=0.8\textwidth]{note_KMAX_extrapol.eps}
-\caption{The relative error produced by splining the nonlinear matter power spectrum up to {\tt K\_MAX\_SPLINE} and extrapolating beyond this value with a second order Taylor expansion the natural logarithm of the matter power spectrum.}
-\label{fig:NLextrapol_z0}
-\end{figure}
-\begin{figure}
-\centering
-\includegraphics[width=0.8\textwidth]{note_KMAX_extrapol_z3.eps}
-\caption{Similar to Figure \ref{fig:NLextrapol_z0} but at $z=3$.}
-\label{fig:NLextrapol_z3}
-\end{figure}
+\includegraphics[width=0.45\textwidth]{PS_converge_nonlin.eps}
+\includegraphics[width=0.45\textwidth]{PS_converge_nonlin_z3.eps}
+\caption{The relative error produced by splining the nonlinear matter power spectrum up to {\tt K\_MAX\_SPLINE} and extrapolating beyond this value with a second order Taylor expansion the natural logarithm of the matter power spectrum. The left panel shows the results at $z=0$. The right panel shows the results at $z=3$. The fiducial parameters adopted are those corresponding to the magenta curve.}
+\label{fig:NLextrapol}
+\end{figure*}
 %------------------------
 
 \subsubsection{Linear extrapolation}
 \label{sec:Lextrapol}
 
-With the implementation described in the previous section, the power spectrum splines are initialized up to {\tt K\_MAX\_SPLINE}. This is also true for the linear matter power spectrum, which is used within {\tt CCL} in particular to obtain $\sigma_8$. We have tested here how the procedure described in the previous section affects the convergence of the linear matter power spectrum. We compare the fiducial {\tt CCL} output to the case where we set {\tt K\_MAX\_SPLINE}$=10^4/Mpc$. The result is shown in Figure \ref{fig:plinconv}. Although there is a significant difference ($\gtrsim 10\%$) between the linear power spectra at large $k$, we have confirmed that the difference in $\sigma_8$ is negligible. Nevertheless, for other applications that use the linear power spectrum, the user might need to increase the value of {\tt K\_MAX\_SPLINE}.
+With the implementation described in the previous section, the power spectrum splines are initialized up to {\tt K\_MAX\_SPLINE}. This is also true for the linear matter power spectrum, which is used within {\tt CCL} in particular to obtain $\sigma_8$. We have tested here how the procedure described in the previous section affects the convergence of the linear matter power spectrum. We compare the fiducial {\tt CCL} output to the case where we set {\tt K\_MAX\_SPLINE}$=10^3/$Mpc. The result is shown in Figure \ref{fig:Lextrapol}. Although there is a significant difference ($\gtrsim 10\%$) between the linear power spectra at large $k$, we have confirmed that the difference in $\sigma_8$ is negligible. Nevertheless, for other applications that use the linear power spectrum, the user might need to increase the value of {\tt K\_MAX\_SPLINE}.
 
 %------------------------
-\begin{figure}
+\begin{figure*}
 \centering
-\includegraphics[width=0.8\textwidth]{figures/test_lin_extrapol.eps}
-\caption{Convergence of the linear matter power spectrum by adopting {\tt K\_MAX\_SPLINE}$=500/Mpc$ compared to the case with {\tt K\_MAX\_SPLINE}$=10^4/Mpc$.}
-\label{fig:plinconv}
-\end{figure}
+\includegraphics[width=0.45\textwidth]{PS_converge_linear.eps}
+\includegraphics[width=0.45\textwidth]{PS_converge_linear_z3.eps}
+\caption{Same as Fig. \ref{fig:NLextrapol} but for the linear matter power spectrum at $z=0$ (left) and $z=3$ (right).}
+\label{fig:Lextrapol}
+\end{figure*}
 %------------------------
 
 \subsubsection{Wishlist for the future}
@@ -388,20 +380,20 @@ The halo mass function is incorporated using several definitions from the litera
 \begin{equation}
 \bar{\rho}(r_{\Delta}) = \Delta*\rho_m.
 \end{equation}
-We look toward extending to more general halo definitions in the future, though this implementation is not yet in practice.
+In addition to the usage of the most common definition, we have implemented an extension for two of the models. The Tinker 2010 model allows for a value of $\Delta$ to be given between the values of 200 and 3200 and interpolates the fitting parameters within this range in a space of $\log \Delta$ using splines. We also have implemented interpolation in the same range of Tinker 2008 $\Delta$ values. We choose not to use the interpolation fitting functions included in this work due to the introduced inaccuracies from the specified values at distinct $\Delta$ values and instead utilize a spline fitting method. We look toward extending to more general halo definitions in the future, though this implementation is not yet in practice.
 
 
 With the exception of the Tinker 2010 model, we attempt to keep a common form to the multiplicity function whenever possible for ease of extension:
 \begin{equation}
 f(\sigma)=A\Big[\Big(\frac{\sigma}{b}\Big)^{-a}+1\Big]e^{-c/{\sigma}^2},
 \end{equation}
-where $A$, $a$, $b$, and $c$ are fitting parameters that have additional redshift scaling and $\sigma$ is the RMS variance of the density field smoothed on some scale $M$ at some redshift $z$. This basic form is modified for the \citet{Angulo2012} formulation. The resulting form is
+where $A$, $a$, $b$, and $c$ are fitting parameters that have additional redshift scaling and $\sigma$ is the RMS variance of the density field smoothed on some scale $M$ at some scale factor $a$. This basic form is modified for the \citet{Angulo2012} formulation. The resulting form is
 \begin{equation}
 f(\sigma)=A\Big[\Big(\frac{b}{\sigma}+1\Big)^{-a}\Big]e^{-c/{\sigma}^2},
 \end{equation}
-where the only change is in the formulation of the second term. Note that the fitting parameters in the \citet{Angulo2012} formulation do not contain any redshift dependency and the use of it is primarily for testing and benchmark purposes.
+where the only change is in the formulation of the second term. Note that the fitting parameters in the \citet{Angulo2012} formulation do not contain any redshift dependence and the use of it is primarily for testing and benchmark purposes.
 
-Each call to the halo mass function requires an assumed model (defined within the {\tt ccl\_configuration} structure contained in {\tt ccl\_cosmology}), in addition to a value of the halo mass and redshift for which to evaluate the halo mass function. The currently implemented models can be called with the tags {\tt config.mass\_function\_method = ccl\_tinker}, {\tt ccl\_tinker10}, {\tt ccl\_angulo}, or {\tt ccl\_watson}. It returns the number density of halos in logarithmic mass bins, in the form $dn/d\log_{10}{M}$, where $n$ is the number density of halos of a given mass and $M$ is the input halo mass.
+Each call to the halo mass function requires an assumed model (defined within the {\tt ccl\_configuration} structure contained in {\tt ccl\_cosmology}), in addition to a value of the halo mass and scale factor for which to evaluate the halo mass function. The currently implemented models can be called with the tags {\tt config.mass\_function\_method = ccl\_tinker}, {\tt ccl\_tinker10}, {\tt ccl\_angulo}, or {\tt ccl\_watson}. It returns the number density of halos in logarithmic mass bins, in the form $dn/d\log_{10}{M}$, where $n$ is the number density of halos of a given mass and $M$ is the input halo mass.
 
 The halo mass $M$ is related to $\sigma$ by first computing the radius $R$ that would enclose a mass $M$ in a homogeneous Universe at $z=0$:
 \begin{equation}
@@ -424,7 +416,7 @@ The \citet{Tinker2010} model parameterizes both the halo mass function and the h
   \b(\nu) = 1 - A\frac{\nu^a}{\nu^a + {\delta_c}^a} + B\nu^b+C\nu^c,
   f(\nu) = \alpha[1+(\beta\nu)^{-2\phi}]\nu^{2\eta}e(-\gamma\nu^2/2).
 \end{equation}
-The currently implemented model in {\tt CCL} does not account for changes in halo definition, though this remains an area of active work to improve upon.
+The currently implemented model in {\tt CCL} allows for an arbitrary overdensity $\Delta$ to be chosen, using the fitting functions provided in \citet{Tinker2010}. Other halo model definitions are not included in the halo bias calculation, though this remains an area of active work to improve upon.
 
 \subsection{Photo-$z$ implementation}
 \label{sec:photoz}
@@ -566,7 +558,7 @@ A Python wrapper for {\tt CCL} is provided through a module called {\tt pyccl}. 
 \subsection{Python installation}
 \label{sec:python:install}
 
-Before you can build the Python wrapper, you must have compiled and installed the C version of {\tt CCL}, as {\tt pyccl} will be dynamically linked to it. The Python wrapper's build tools currently assume that your C compiler is {\tt gcc} (with OpenMP enabled), and that you have a working Python 2.x installation with {\tt numpy} and {\tt distutils} with {\tt swig}. To build and install the {\tt pyccl} module, go to the root {\tt CCL} directory and choose one of the following options:
+Before you can build the Python wrapper, you must have compiled and installed the C version of {\tt CCL}, as {\tt pyccl} will be dynamically linked to it. The Python wrapper's build tools currently assume that your C compiler is {\tt gcc} (with OpenMP enabled), and that you have a working Python 2.x installation with {\tt numpy} and {\tt distutils} with {\tt swig}. If you have installed CCL in your default library path, you can build and install the {\tt pyccl} module by going to the root {\tt CCL} directory and choosing one of the following options:
 \begin{itemize}
  \item To build and install the wrapper for the current user only, run \\
  {\tt \$ python setup.py install --user}
@@ -582,6 +574,16 @@ These options assume that the C library ({\tt libccl}) has been installed somewh
 \texttt{python setup.py build\_ext --library-dirs=/path/to/lib/ --rpath=/path/to/lib/}
 
 Here, {\tt /path/to/lib/} should point to the directory where you installed the C library. For example, if you ran {\tt ./configure --prefix=/my/path/} before you compiled the C library, the correct path would be {\tt /my/path/lib/}. The command above will build the Python wrapper in-place; you can then run one of the {\tt install} commands, as listed above, to actually install the wrapper. Note that the {\tt rpath} switch makes sure that the CCL C library can be found at runtime, even if it is not in the default library path. If you use this option, there should therefore be no need to modify the library path yourself.
+
+On some systems, building or installing the Python wrapper fails with a message similar to:
+
+\texttt{fatal error: 'gsl/gsl_interp2d.h' file not found.}
+
+This happens when the build tools fail to find the directory containing the GSL header files, e.g. when they have been installed in a non-standard directory. To work around this problem, use the {\tt --include-dirs} option when running the {\tt setup.py build_ext} step above, i.e. if the GSL header files are in the directory {\tt /path/to/include/}, you would run
+
+\texttt{python setup.py build_ext --library-dirs=/path/to/install/lib/ --rpath=/path/to/install/lib/ --include-dirs=/path/to/include/}
+
+and then run one of the {\tt setup.py install} commands listed above. (Note: As an alternative to the {\tt --include-dirs} option, you can use {\tt -I/path/to/include} instead.)
 
 You can quickly check whether {\tt pyccl} has been installed correctly by running {\tt python -c "import pyccl"} and checking that no errors are returned. For a more in-depth test to make sure everything is working, change to the {\tt tests/} sub-directory and run {\tt python run\_tests.py}. These tests will take a few minutes.
 

@@ -1,6 +1,14 @@
 #pragma once
 #include "ccl_core.h"
 
+//Omega_x labels
+typedef enum ccl_omega_x_label {
+  ccl_omega_m_label=0,
+  ccl_omega_l_label=1,
+  ccl_omega_g_label=2,
+  ccl_omega_k_label=3
+} ccl_omega_x_label;
+
 // Normalized expansion rate at scale factor a
 double ccl_h_over_h0(ccl_cosmology * cosmo, double a, int * status);
 // Normalized expansion rate at scale factors as given in list a[0..na-1]
@@ -12,7 +20,7 @@ double ccl_comoving_radial_distance(ccl_cosmology * cosmo, double a, int* status
 void ccl_comoving_radial_distances(ccl_cosmology * cosmo, int na, double a[na], double output[na], int* status);
 
 //Transforms between radial and angular distances
-double ccl_sinn(ccl_cosmology *cosmo,double chi);
+double ccl_sinn(ccl_cosmology *cosmo,double chi, int *status);
 
 // Comoving angular distance in Mpc from today to scale factor a
 double ccl_comoving_angular_distance(ccl_cosmology * cosmo, double a, int* status);
@@ -43,4 +51,6 @@ void ccl_growth_rates(ccl_cosmology * cosmo, int na, double a[na], double output
 double ccl_scale_factor_of_chi(ccl_cosmology * cosmo, double chi, int * status);
 // Scale factors for a given list of comoving distances
 void ccl_scale_factor_of_chis(ccl_cosmology * cosmo, int nchi, double chi[nchi], double output[nchi], int* status);
-double ccl_omega_m_z(ccl_cosmology * cosmo, double a);
+
+// Omega functions of a
+double ccl_omega_x(ccl_cosmology * cosmo, double a, ccl_omega_x_label label, int* status);

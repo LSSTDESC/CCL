@@ -98,7 +98,7 @@ def test_mgrowth():
                         w0=-1., wa=0., h=0.7, A_s=2.1e-9, n_s=0.96)
     p2 = ccl.Parameters(Omega_c=0.25, Omega_b=0.05, Omega_k=0., Omega_n=0., 
                         w0=-1., wa=0., h=0.7, A_s=2.1e-9, n_s=0.96, 
-                        zarr_mgrowth=z_mg, dfarr_mgrowth=df_mg)
+                        z_mg=z_mg, df_mg=df_mg)
     cosmo1 = ccl.Cosmology(p1)
     cosmo2 = ccl.Cosmology(p2)
     
