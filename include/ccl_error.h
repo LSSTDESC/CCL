@@ -15,3 +15,4 @@
 #define CCL_ERROR_PARAMETERS 12
 #define CCL_ERROR_NU_INT 13
 void ccl_check_status(ccl_cosmology *cosmo, int* status);
+void ccl_check_status_nocosmo(int* status);

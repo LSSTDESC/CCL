@@ -3,7 +3,6 @@
 #include "gsl/gsl_interp2d.h"
 #include "gsl/gsl_spline2d.h"
 #include "ccl_config.h"
-//#include "ccl_neutrinos.h"
 #include "ccl_constants.h"
 #include <stdbool.h>
 
@@ -100,10 +99,6 @@ typedef struct ccl_data{
   gsl_spline2d * p_lin;
   gsl_spline2d * p_nl;
   double k_min; //k_min  [1/Mpc] <- minimum wavenumber that the power spectrum has been computed to 
-
-  // neutrino phase-space integral splined in mnu/T units
-  gsl_spline * nu_pspace_int;
-
 
 } ccl_data;
 

@@ -27,9 +27,8 @@ static double h_over_h0(double a, ccl_cosmology * cosmo, int *status)
 	// Check if massive neutrinos are present - if not, we don't need to compute their contribution
 	double Om_mass_nu;
 	if ((cosmo->params.N_nu_mass)>0.0001){
-		if (cosmo->data.nu_pspace_int==NULL)  cosmo->data.nu_pspace_int=calculate_nu_phasespace_spline(status);
+		Om_mass_nu = Omeganuh2(a, cosmo->params.N_nu_mass, cosmo->params.mnu, cosmo->params.T_CMB, cosmo->data.accelerator, status) / (cosmo->params.h) / (cosmo->params.h);
 		ccl_check_status(cosmo, status);
-		Om_mass_nu = Omeganuh2(a, cosmo->params.N_nu_mass, cosmo->params.mnu, cosmo->params.T_CMB, cosmo->data.nu_pspace_int) / (cosmo->params.h) / (cosmo->params.h);
 	}else{
 		Om_mass_nu = 0;
 	}
@@ -53,11 +52,9 @@ double ccl_omega_x(ccl_cosmology * cosmo, double a, ccl_omega_x_label label, int
 	// If massive neutrinos are present, compute the phase-space integral and get OmegaNuh2. If not, set OmegaNuh2 to zero.
 	double OmNuh2;
 	if ((cosmo->params.N_nu_mass) > 0.0001){
-		// Check if neutrino phase space function is calculated. If not, calculate.
-		if (cosmo->data.nu_pspace_int==NULL) cosmo->data.nu_pspace_int=calculate_nu_phasespace_spline(status);
-		ccl_check_status(cosmo, status);
 		// Call the massive neutrino density function just once at this redshift.
-		OmNuh2 = Omeganuh2(a, cosmo->params.N_nu_mass, cosmo->params.mnu, cosmo->params.T_CMB, cosmo->data.nu_pspace_int);
+		OmNuh2 = Omeganuh2(a, cosmo->params.N_nu_mass, cosmo->params.mnu, cosmo->params.T_CMB, cosmo->data.accelerator, status);
+		ccl_check_status(cosmo, status);
 	}else{
 		OmNuh2 = 0.;
 	}

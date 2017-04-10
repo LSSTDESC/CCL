@@ -7,6 +7,10 @@
 #include "gsl/gsl_const_mksa.h"
 #include "ccl_error.h"
 #include "ccl_core.h"
+
+// Global variable to hold the neutrino phase-space spline
+gsl_spline* nu_spline;
+
 /* ------- ROUTINE: nu_integrand ------
 INPUTS: x: dimensionless momentum, *r: pointer to a dimensionless mass / temperature
 TASK: Integrand of phase-space massive neutrino integral
@@ -58,30 +62,36 @@ gsl_spline* calculate_nu_phasespace_spline(int *status) {
 }
 
 /* ------- ROUTINE: ccl_nu_phasespace_intg ------
-INPUTS: spl: the gsl spline of the phase space integral, mnuOT: the dimensionless mass / temperature of a single massive neutrino
-TASK: Get the value of the phase space integral at muOT
+INPUTS: accel: pointer to an accelerator which will evaluate the neutrino phasespace spline if defined, mnuOT: the dimensionless mass / temperature of a single massive neutrino
+TASK: Get the value of the phase space integral at mnuOT
 */
 
-double nu_phasespace_intg(gsl_spline* spl, double mnuOT) {
+double nu_phasespace_intg(gsl_interp_accel* accel, double mnuOT, int* status) {
 	
-	double spline_val=0.;
+	// Check if the global variable for the phasespace spline has been defined yet:
+	if (nu_spline==NULL) nu_spline =calculate_nu_phasespace_spline(status);
+	ccl_check_status_nocosmo(status);
+	
+	double integral_value =0.;
 	
 	// First check the cases where we are in the limits.
     if (mnuOT<CCL_NU_MNUT_MIN){
-		return 7./8.;
+		integral_value = 7./8.;
     }else if (mnuOT>CCL_NU_MNUT_MAX){
-		return 0.2776566337*mnuOT; 
+		integral_value = 0.2776566337*mnuOT; 
 	}
-	spline_val = gsl_spline_eval(spl, log(mnuOT),NULL)*7./8.;
+	
+	// Evaluate the spline - this will use the accelerator if it has been defined.
+	integral_value = gsl_spline_eval(nu_spline, log(mnuOT),accel)*7./8.;
 
-  return spline_val;
+  return integral_value;
 }
 /* -------- ROUTINE: Omeganuh2 ---------
-INPUTS: a: scale factor, Neff: number of neutrino species, mnu: total mass in eV of neutrinos, TCMB: CMB temperature, psi: gsl spline of phase-space integral.
+INPUTS: a: scale factor, Neff: number of neutrino species, mnu: total mass in eV of neutrinos, TCMB: CMB temperature, accel: pointer to an accelerator which will evaluate the neutrino phasespace spline if defined, status: pointer to status integer.
 TASK: Compute Omeganu * h^2 as a function of time.
 */
 
-double Omeganuh2 (double a, double Neff, double mnu, double TCMB, gsl_spline* psi) {
+double Omeganuh2 (double a, double Neff, double mnu, double TCMB, gsl_interp_accel* accel, int* status) {
 	
 	double Tnu, a4, prefix_massless, mnuone;
 	double Tnu_eff, mnuOT, intval, prefix_massive;
@@ -93,7 +103,7 @@ double Omeganuh2 (double a, double Neff, double mnu, double TCMB, gsl_spline* ps
 	Tnu=TCMB*pow(4./11.,1./3.);
 	a4=a*a*a*a;  
 	if ( mnu < 0.00000000000001 ){
-		prefix_massless = 8. * pow(M_PI,5) *pow((KBOLTZ/ HPLANCK),3)* KBOLTZ/(15. *pow( CLIGHT,3))* (8. * M_PI * GNEWT) / (3. * 100.*100.*1000.*1000. /MPC_TO_METER /MPC_TO_METER  * CLIGHT * CLIGHT)  * Tnu * Tnu * Tnu * Tnu; 
+		prefix_massless = NU_CONST  * Tnu * Tnu * Tnu * Tnu; 
 		return Neff*prefix_massless*7./8./a4;
 	}
 	
@@ -107,10 +117,10 @@ double Omeganuh2 (double a, double Neff, double mnu, double TCMB, gsl_spline* ps
     mnuOT = mnuone / (Tnu_eff/a) * (EV_IN_J / (KBOLTZ)); 
 
     // Get the value of the phase-space integral 
-    intval=nu_phasespace_intg(psi,mnuOT);
+    intval=nu_phasespace_intg(accel,mnuOT, status);
 		
     // Define the prefix using the effective temperature (to get mnu / Omega = 93.14 eV) for the massive case: 
-    prefix_massive = 8. * pow(M_PI,5) *pow((KBOLTZ/ HPLANCK),3)* KBOLTZ/(15. *pow( CLIGHT,3))* (8. * M_PI * GNEWT) / (3. * 100.*100.*1000.*1000. /MPC_TO_METER /MPC_TO_METER  * CLIGHT * CLIGHT) * Tnu_eff * Tnu_eff * Tnu_eff * Tnu_eff;
+    prefix_massive = NU_CONST * Tnu_eff * Tnu_eff * Tnu_eff * Tnu_eff;
     
     return Neff*intval*prefix_massive/a4;
 }
