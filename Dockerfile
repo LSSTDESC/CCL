@@ -9,6 +9,9 @@ ENV GSL_DL="http://ftp.wayne.edu/gnu/gsl/$GSL_TAR"
 
 ENV LD_LIBRARY_PATH=/usr/local/lib
 
+ENV GITUSER=YOURGITUSERNAME
+ENV GITPASS=YOURGITPASSWORD
+
 WORKDIR /gnu
 
 RUN wget -q $GSL_DL \
@@ -22,7 +25,7 @@ RUN ./configure \
     && make install
 
 WORKDIR /home
-RUN git clone https://<GITUSERHERE>:<GITPASSHERE>@github.com/LSSTDESC/CCL.git
+RUN git clone https://$GITUSER:$GITPASS@github.com/LSSTDESC/CCL.git
 
 WORKDIR /home/CCL
 
