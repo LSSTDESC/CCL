@@ -1,8 +1,9 @@
-FROM continuumio/anaconda
+FROM python:2.7
 LABEL maintainer "asv13@pitt.edu"
 
 RUN apt-get update && apt-get upgrade -y
 RUN apt-get install -y git make g++ gcc wget swig libtool autoconf
+RUN pip install numpy ipython[all]
 
 ENV GSL_TAR="gsl-2.3.tar.gz"
 ENV GSL_DL="http://ftp.wayne.edu/gnu/gsl/$GSL_TAR"
@@ -36,4 +37,4 @@ RUN ./configure \
     && python setup.py install \
     && python setup.py install
 
-CMD jupyter notebook --no-browser --port=8888 --ip=0.0.0.0
+CMD jupyter notebook --no-browser --allow-root --port=8888 --ip=0.0.0.0
