@@ -56,6 +56,7 @@ static void compare_sigmam(int i_model,struct sigmam_data * data)
 {
   int nm,i;
   char fname[256],str[1024];
+  char* rtn;
   FILE *f;
   int status=0;
   ccl_configuration config = default_config;
@@ -76,7 +77,7 @@ static void compare_sigmam(int i_model,struct sigmam_data * data)
   }
   nm=linecount(f)-1; rewind(f);
   
-  fgets(str, 1024, f);
+  rtn = fgets(str, 1024, f);
   for(i=0;i<nm;i++) {
     double m,m_h,sm_bench,sm_h,err;
     int stat;

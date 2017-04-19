@@ -36,7 +36,8 @@ static void read_massfunc_test_file(double mass[13], double massfunc[3][13])
 
    // Ignore header line
    char str[1024];
-   fgets(str, 1024, f);
+   char* rtn;
+   rtn = fgets(str, 1024, f);
 
    // file is in fixed format - logmass, sigma, invsigma, and hmf, w/ 13 rows
    for (int i=0; i<13; i++){

@@ -57,6 +57,7 @@ static void compare_bbks(int i_model,struct bbks_data * data)
 {
   int nk,i,j;
   char fname[256],str[1024];
+  char* rtn;
   FILE *f;
   ccl_configuration config = default_config;
   config.transfer_function_method = ccl_bbks;
@@ -77,7 +78,7 @@ static void compare_bbks(int i_model,struct bbks_data * data)
   }
   nk=linecount(f)-1; rewind(f);
   
-  fgets(str, 1024, f);
+  rtn = fgets(str, 1024, f);
   for(i=0;i<nk;i++) {
     double k_h,k;
     int stat;
