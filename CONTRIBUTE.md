@@ -126,6 +126,8 @@ and after a new login
 If you need to modify the note, the files to modify are:
   
   -authors.csv: to document your contribution
+
   -main.tex: to detail the changes to the library
+
   -main.bib: to add new references
 
