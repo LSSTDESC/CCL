@@ -114,17 +114,18 @@ To compile the note, type
 in that directory. If you do not have pip installed, please edit the
 Makefile to agree with your setup. If you do not have admin permission,
 then you will need to setup a virtual environment to install the note.
-This is done as follows:
-
-  # Once
+This is done as follows. Set up the virtual environment once:
+  
   $virtualenv CCL
 
-  # After a new login
+and after a new login
+
   $source CCL/activate
   $make
 
 If you need to modify the note, the files to modify are:
-  (1) authors.csv - to document your contribution
-  (2) main.tex - to detail the changes to the library
-  (3) main.bib - to add new references
+  
+  -authors.csv: to document your contribution
+  -main.tex: to detail the changes to the library
+  -main.bib: to add new references
 
