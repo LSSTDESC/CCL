@@ -154,6 +154,7 @@ am_tests_check_ccl_OBJECTS = tests/tests_check_ccl-ccl_test.$(OBJEXT) \
 	tests/tests_check_ccl-ccl_test_distances.$(OBJEXT) \
 	tests/tests_check_ccl-ccl_test_growth.$(OBJEXT) \
 	tests/tests_check_ccl-ccl_test_bbks.$(OBJEXT) \
+	tests/tests_check_ccl-ccl_test_cls.$(OBJEXT) \
 	tests/tests_check_ccl-ccl_test_sigmaM.$(OBJEXT) \
 	tests/tests_check_ccl-ccl_test_massfunc.$(OBJEXT) \
 	tests/tests_check_ccl-ccl_test_correlation.$(OBJEXT)
@@ -431,7 +432,7 @@ lib_LTLIBRARIES = libccl.la
 libccl_la_SOURCES = src/ccl_background.c src/ccl_core.c src/ccl_error.c src/ccl_lsst_specs.c src/ccl_placeholder.c src/ccl_power.c src/ccl_utils.c src/ccl_cls.c src/ccl_massfunc.c src/ccl_correlation.c src/fftlog.c
 libccl_la_LIBADD = class/libclass.la
 libccl_la_CPPFLAGS = -I./include/ -I./class/include 
-tests_check_ccl_SOURCES = tests/ccl_test.c tests/ccl_test_utils.c tests/ccl_test_params.c tests/ccl_test_distances.c tests/ccl_test_growth.c tests/ccl_test_bbks.c tests/ccl_test_sigmaM.c tests/ccl_test_massfunc.c tests/ccl_test_correlation.c
+tests_check_ccl_SOURCES = tests/ccl_test.c tests/ccl_test_utils.c tests/ccl_test_params.c tests/ccl_test_distances.c tests/ccl_test_growth.c tests/ccl_test_bbks.c tests/ccl_test_cls.c tests/ccl_test_sigmaM.c tests/ccl_test_massfunc.c tests/ccl_test_correlation.c
 tests_check_ccl_CPPFLAGS = -I./tests/ -I./include/
 tests_check_ccl_LDFLAGS = -L./ -lccl -lgsl -lgslcblas -lfftw3
 all: config.h
@@ -615,7 +616,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/libccl_la-fftlog.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/tests_check_ccl-ccl_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/tests_check_ccl-ccl_test_bbks.Po@am__quote@
-#@AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/tests_check_ccl-ccl_test_cls.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/tests_check_ccl-ccl_test_cls.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/tests_check_ccl-ccl_test_correlation.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/tests_check_ccl-ccl_test_distances.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/tests_check_ccl-ccl_test_growth.Po@am__quote@

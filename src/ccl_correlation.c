@@ -87,6 +87,13 @@ static void ccl_general_corr(gsl_spline *cl, double *theta, double *corr_func, i
   return;
 }
 
+/*ccl_angular_cl like function for test case. Hankel tranform of 1./l is 1./theta (uto factors of 2\pi)*/
+double angluar_l_inv(ccl_cosmology *cosmo,double l,CCL_ClTracer *clt1,CCL_ClTracer *clt2, int * status)
+{
+  return 1./l;
+}
+
+/*Binning the computed correlation function*/
 int bin_corr(int n_theta, double *theta, double *corr_func,int n_theta_bins, 
 	     double *theta_bins, double *corr_func_binned)
 {
@@ -126,6 +133,7 @@ int bin_corr(int n_theta, double *theta, double *corr_func,int n_theta_bins,
   return 0;
 }
 
+/*Applying cosine tapering to cls to reduce aliasing*/
 int taper_cl(int n_ell,double *ell,double *cl, double *low_ell_limit,double *high_ell_limit)
 {
   for (int i=0;i<n_ell;i++)
@@ -154,7 +162,16 @@ int taper_cl(int n_ell,double *ell,double *cl, double *low_ell_limit,double *hig
 TASK: For a given tracer, get the correlation function
 INPUT: type of tracer, number of theta values to evaluate = NL, theta vector
  */
-int ccl_tracer_corr(ccl_cosmology *cosmo, int n_theta, double **theta, CCL_ClTracer *ct1, CCL_ClTracer *ct2, int i_bessel,double **corr_func){
+
+int ccl_tracer_corr(ccl_cosmology *cosmo, int n_theta, double **theta,
+                    CCL_ClTracer *ct1, CCL_ClTracer *ct2, int i_bessel,double **corr_func)
+{
+  return ccl_tracer_corr2(cosmo, n_theta,theta,ct1,ct2,i_bessel,corr_func,&ccl_angular_cl);
+}
+/*Following function takes a function to calculate angular cl as well. By default above function will call it using ccl_angular_cl*/
+int ccl_tracer_corr2(ccl_cosmology *cosmo, int n_theta, double **theta, 
+		    CCL_ClTracer *ct1, CCL_ClTracer *ct2, int i_bessel,double **corr_func, 
+		    double (*angluar_cl)(ccl_cosmology *cosmo,int l,CCL_ClTracer *clt1,CCL_ClTracer *clt2, int * status) ){
   /* do we need to input i_bessel? could just be set here based on tracer..*/
   if((ct1->tracer_type==CL_TRACER_WL) && (ct2->tracer_type==CL_TRACER_WL)){
     if((i_bessel!=0) && (i_bessel!=4)) return 1;
@@ -167,6 +184,7 @@ int ccl_tracer_corr(ccl_cosmology *cosmo, int n_theta, double **theta, CCL_ClTra
   }  
 
   double *l_arr,cl_arr[n_theta];
+  //PROBLEM: ccl_angular_cl expects ell to be integer... there can be some type conversion issues here
   
   // l_arr=ccl_log_spacing(L_MIN_INT,L_MAX_INT,n_theta);
   l_arr=ccl_log_spacing(.5,60000,n_theta); 
@@ -178,14 +196,15 @@ int ccl_tracer_corr(ccl_cosmology *cosmo, int n_theta, double **theta, CCL_ClTra
   int status=0;
   for(int i=0;i<n_theta;i+=1) {
     //Re-scaling the power-spectrum due to Bessel function missing factor
-    cl_arr[i]=ccl_angular_cl(cosmo,l_arr[i],ct1,ct2,&status)*sqrt(l_arr[i]); 
-    //    printf("ell cl %.3e %.3e",l_arr[i],cl_arr[i]);
+    //cl_arr[i]=angular_cl(cosmo,l_arr[i],ct1,ct2,&status)*sqrt(l_arr[i]); //Sukhdeep: This is what we ideally want but it crashes on my machine
+    //cl_arr[i]=ccl_angular_cl(cosmo,l_arr[i],ct1,ct2,&status)*sqrt(l_arr[i]);//default option
+    cl_arr[i]=angluar_l_inv(cosmo,l_arr[i],ct1,ct2,&status)*sqrt(l_arr[i]);//this function takes l_arr as double..not consistent with ccl_angular_cl
   }
   
   double taper_low_ell_limit[2]={1,2};
   double taper_high_ell_limit[2]={30000,50000};
 
-  status=taper_cl(n_theta,l_arr,cl_arr, taper_low_ell_limit, taper_high_ell_limit);
+  //  status=taper_cl(n_theta,l_arr,cl_arr, taper_low_ell_limit, taper_high_ell_limit);
 
 
   *theta=(double *)malloc(sizeof(double)*n_theta);
