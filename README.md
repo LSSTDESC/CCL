@@ -75,11 +75,14 @@ You can quickly check whether *pyccl* has been installed correctly by running `p
 
 *CCL* has a built-in version of *CLASS* that is used to calculate power spectra and other cosmological functions. This is compiled by default. Optionally, you can also link *CCL* against an external version of *CLASS*. This is useful if you want to use a modified version of *CLASS*, or a different or more up-to-date version of the standard *CLASS*.
 
-To compile *CCL* with an external version of *CLASS*, you must first prepare the external copy so that it can be linked as a shared library. By default, the *CLASS* build tools create a static library. After compiling *CLASS* in the usual way (by running `make`), look for a static library file called `libclass.a` that should have been placed in the root source directory. Then, run the following command from that directory:
+To compile *CCL* with an external version of *CLASS*, you must first prepare the external copy so that it can be linked as a shared library. By default, the *CLASS* build tools create a static library. After compiling *CLASS* in the usual way (by running `make`), look for a static library file called `libclass.a` that should have been placed in the root source directory. Then, run the following command from that directory (Linux only):
 ````sh
 gcc -shared -o libclass.so -Wl,--whole-archive libclass.a -Wl,--no-whole-archive
 ````
-This should create a new shared library, `libclass.so`.
+This should create a new shared library, `libclass.so`. If you are running Mac OS X, use the following command instead:
+````sh
+gcc -fpic -shared -Wl,-all\_load libclass.a -Wl,-noall\_load -o libclass.dylib
+````
 
 Next, change to the root *CCL* directory and run `make clean` if you have previously run the compilation process. Then, set the `CLASSDIR` environment variable to point to the directory containing `libclass.so`:
 ````sh
