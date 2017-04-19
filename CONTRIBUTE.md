@@ -103,3 +103,28 @@ This may take some time to run in its entirety. If you changed the API, you may
 have to modify the tests to account for this. You should also add your own 
 tests for any new functions or behaviors that were added.
 
+Compiling the CCL note
+--------------------------------------------
+After making changes to the library, you should document them in the
+CCL note. The note is found in the directory doc/0000-ccl_note/.
+To compile the note, type 
+
+  $make
+
+in that directory. If you do not have pip installed, please edit the
+Makefile to agree with your setup. If you do not have admin permission,
+then you will need to setup a virtual environment to install the note.
+This is done as follows:
+
+  # Once
+  $virtualenv CCL
+
+  # After a new login
+  $source CCL/activate
+  $make
+
+If you need to modify the note, the files to modify are:
+  (1) authors.csv - to document your contribution
+  (2) main.tex - to detail the changes to the library
+  (3) main.bib - to add new references
+
