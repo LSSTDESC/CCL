@@ -41,9 +41,12 @@ AC_ARG_VAR([CLASSDIR], [Location of external CLASS directory, to be used instead
 if test "$CLASSDIR" != ""; then
     AC_MSG_NOTICE([Using the version of CLASS from $CLASSDIR])
     CLASS_LIB="-L${CLASSDIR} -lclass"
-    AC_SUBST(CLASS_LIB, ["-L${CLASSDIR} -lclass -Wl,-rpath,${CLASSDIR}"])
     CLASS_MAKEFILE=""
+    LDFLAGS="$LDFLAGS $CLASS_LIB"
     localclass=false
+    
+    AC_SUBST(CLASS_LIB, ["-L${CLASSDIR} -lclass -Wl,-rpath,${CLASSDIR}"])
+    AC_SEARCH_LIBS([background_free],[class],[],AC_MSG_ERROR(Couldn't find libclass.))
 else
     AC_MSG_NOTICE([Using the built-in version of CLASS.])
     CLASSDIR="./class"
@@ -57,8 +60,6 @@ AM_CONDITIONAL([LOCALCLASS], [test x$localclass = xtrue])
 AC_CONFIG_FILES([Makefile
 		 include/Makefile
 		 $CLASS_MAKEFILE])
-
-#AC_CHECK_FILE ("${CLASSDIR}/", [], [AC_MSG_ERROR(Couldn't find libgslcblas.)])
 
 AC_OUTPUT
 

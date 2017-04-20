@@ -92,11 +92,11 @@ After installing the C library you can make sure it is running as it should by t
 
 To compile {\tt CCL} with an external version of {\tt CLASS}, you must first prepare the external copy so that it can be linked as a shared library. By default, the {\tt CLASS} build tools create a static library. After compiling {\tt CLASS} in the usual way (by running {\tt make}), look for a static library file called {\tt libclass.a} that should have been placed in the root source directory. Then, run the following command from that directory (Linux only):
 \begin{verbatim}
- $ gcc -shared -o libclass.so -Wl,--whole-archive libclass.a -Wl,--no-whole-archive
+ $ gcc -shared -o libclass.so -Wl,--whole-archive libclass.a -Wl,--no-whole-archive -lgomp
 \end{verbatim}
-This should create a new shared library, {\tt libclass.so}. If you are running Mac OS X, use the following command instead:
+This should create a new shared library, {\tt libclass.so}, in the same directory. (N.B. The {\tt -lgomp} flag has to appear at the end of the command; otherwise the linker can fail.) If you are running Mac OS X, use the following command instead:
 \begin{verbatim}
- $ gcc -fpic -shared -Wl,-all_load libclass.a -Wl,-noall_load -o libclass.dylib
+ $ gcc -fpic -shared -o libclass.dylib -Wl,-all_load libclass.a -Wl,-noall_load
 \end{verbatim}
 
 Next, change to the root {\tt CCL} directory and run {\tt make clean} if you have previously run the compilation process. Then, set the {\tt CLASSDIR} environment variable to point to the directory containing {\tt libclass.so}:
