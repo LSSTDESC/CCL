@@ -7,8 +7,8 @@ species_types = {
     'dark_energy': lib.omega_l_label,
     'radiation':   lib.omega_g_label,
     'curvature':   lib.omega_k_label,
-    'relativistic neutrinos': lib.omega_ur_label,
-    'massive neutrinos': lib.omega_nu_label,
+    'neutrinos_rel': lib.omega_ur_label,
+    'neutrinos_massive': lib.omega_nu_label,
 }
 
 def growth_factor(cosmo, a):
@@ -130,7 +130,7 @@ def omega_x(cosmo, a, label):
         cosmo (:obj:`ccl.cosmology`): Cosmological parameters.
         a (float or array_like): Scale factor(s), normalized to 1 today.
         label (string): species type. Available: 'matter', 'dark_energy',
-                        'radiation', 'curvature', 'relativistic neutrinos', and 'massive neutrinos'
+                        'radiation', 'curvature', 'neutrinos_rel', and 'neutrinos_massive'
 
     Returns:
         omega_x (float or array_like): Density fraction of a given species

@@ -73,68 +73,6 @@ def _vectorize_fn_simple(fn, fn_vec, x, returns_status=True):
     # Check result and return
     check(status)
     return f
-    
-def _vectorize_fn13_simple(fn, fn_vec, x, y, a, b, c, d, e, f, g, h, i, j, k, returns_status=True):    
-	"""Generic wrapper to allow vectorized (1D array) access to CCL functions with two vector arguments of the same length, one integer argument which gives the length of the vector arguments, and eleven float arguments (but no dependence on cosmology).
-
-	Args:
-		fn (callable): Function with 11 float arguments and 2 vector arguments.
-		fn_vec (callable): Function that has a vectorized implementation in a .i file.
-		x (float or array_like): Argument to fn.
-		y (float or array_like): Argument to fn.
-		a (float): Scalar argument to fn.
-		b (float): Scalar argument to fn.
-		c (float): Scalar argument to fn.
-		d (float): Scalar argument to fn.
-		e (float): Scalar argument to fn.
-		f (float): Scalar argument to fn.
-		g (float): Scalar argument to fn.
-		h (float): Scalar argument to fn.
-		i (float): Scalar argument to fn.
-		j (float): Scalar argument to fn.
-		k (float): Scalar argument to fn.
-		returns_stats (bool): Indicates whether fn returns a status.
-
-	"""
-	status = 0
-	
-	# If x and y aren't of the same type, error and exit:
-	if ( (isinstance(x,float) and isinstance(y,float)==False) or (isinstance(y,float) and isinstance(x,float)==False) or (isinstance(x,np.ndarray) and isinstance(y,np.ndarray)==False) or (isinstance(y,np.ndarray) and isinstance(x,np.ndarray)==False) or ((y is None) and (x is None)==False) or (x is None and (y is None)==False)):
-		print "Error in _vectorize_fn13_simple. Arguments x and y must have the same type. Exiting."
-		exit()
-	
-	# If x and y are both floats, or both None, using the single-value function.
-	if (isinstance(x, float) or (x is None)):
-		if returns_status:
-			f, status = fn(a, b, c, d, e, f, g, h, i, j, k, -1, x, y, status)
-		else:
-			f = fn(x, b, c, d, e, f, g, h, i, j, k, x, y)
-	# If x and y are both None, use the single-vaue case:
-	elif isinstance(x, np.ndarray):
-		# Check that y has the same length as x
-		if ((x.size==y.size)==False):
-			print "Error in _vectorize_fn13_simple. Arguments x and y must have the same length. Exiting."
-			exit()
-		# Use vectorised function
-		if returns_status:
-			f, status = fn_vec(a, b, c, d, e, f, g, h, i, j, k, x, y, status)
-		else:
-			f = fn_vec(a, b, c, d, e, f, g, h, i, j, k, x, y)
-	else:
-		# Check that y has the same length as x
-		if ((len(x)==len(y))==False):
-			print "Error in _vectorize_fn13_simple. Arguments x and y must have the same length. Exiting."
-			exit()
-		# Use vectorised function
-		if returns_status:
-			f, status = fn_vec(a, b, c, d, e, f, g, h, i, j, k, x, y, status)
-		else:
-			f = fn_vec(a, b, c, d, e, f, g, h, i, j, k, x, y)
-    
-	# Check result and return
-	check(status)
-	return f
-
 
 def _vectorize_fn(fn, fn_vec, cosmo, x, returns_status=True):
     """Generic wrapper to allow vectorized (1D array) access to CCL functions with 

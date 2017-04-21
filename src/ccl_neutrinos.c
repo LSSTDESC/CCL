@@ -102,7 +102,7 @@ double Omeganuh2 (double a, double Neff, double mnu, double TCMB, gsl_interp_acc
 	// Now handle the massless case
 	Tnu=TCMB*pow(4./11.,1./3.);
 	a4=a*a*a*a;  
-	if ( mnu < 0.00000000000001 ){
+	if ( mnu < 1e-12){
 		prefix_massless = NU_CONST  * Tnu * Tnu * Tnu * Tnu; 
 		return Neff*prefix_massless*7./8./a4;
 	}

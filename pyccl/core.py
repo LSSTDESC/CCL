@@ -2,7 +2,7 @@
 import ccllib as lib
 import numpy as np
 from warnings import warn
-from pyutils import check, _vectorize_fn13_simple
+from pyutils import check 
 
 # Configuration types
 transfer_function_types = {
@@ -48,43 +48,6 @@ error_types = {
     lib.CCL_ERROR_PARAMETERS:   'CCL_ERROR_PARAMETERS',
     lib.CCL_ERROR_NU_INT:		'CCL_ERROR_NU_INT',
 }
-
-# Define a function that allows the C library's parameters_create function to take a status variable.
-def parameters_make(Omega_c, Omega_b, Omega_k, N_nu_rel, N_nu_mass, m_nu, 
-                                    w0, wa, h, norm_pk, n_s, 
-                                    z_mg, df_mg):
-    """Creates a parameters object with status checking.
-
-    Args:
-        Omega_c (float): Cold dark matter density fraction.
-        Omega_b (float): Baryonic matter density fraction.
-        h (float): Hubble constant divided by 100 km/s/Mpc; unitless.
-        A_s (float): Power spectrum normalization. Optional if sigma8 is 
-                         specified.
-        n_s (float): Primordial scalar perturbation spectral index.
-        Omega_k (float, optional): Curvature density fraction. Defaults to 0.
-        N_nu_rel (float, optional): Number of massless neutrinos present. Defaults to 0.
-        N_nu_mass (float, optional): Number of massive neutrinos present. Defaults to 0.
-        m_nu (float, optional): total mass in eV of the massive neutrinos present (current must be equal mass). Defaults to 0.
-        w0 (float, optional): First order term of dark energy equation of 
-                                  state. Defaults to -1.
-        wa (float, optional): Second order term of dark energy equation of 
-                                  state. Defaults to 0.
-        sigma8 (float): Variance of matter density perturbations at 8 Mpc/h
-                            scale. Optional if A_s is specified.
-        df_mg (:obj: array_like): Perturbations to the GR growth rate as a 
-                                      function of redshift, Delta f. Used to 
-                                      implement simple modified growth 
-                                      scenarios.
-        z_mg (:obj: array_like): Array of redshifts corresponding to df_mg.
-
-    Returns:
-        A parameters object.
-
-    """
-    return _vectorize_fn13_simple(lib.parameters_create, lib.parameters_create_vec, z_mg, df_mg, Omega_c, Omega_b, Omega_k, N_nu_rel, N_nu_mass, m_nu, 
-                                    w0, wa, h, norm_pk, n_s, True)
-
 
 class Parameters(object):
     """The Parameters class contains cosmological parameters.
@@ -171,12 +134,14 @@ class Parameters(object):
                                  "(or set to None)." % nm)
         
         # Create new instance of ccl_parameters object
+        status = 0 # Create an internal status variable; needed to check massive neutrino integral.
         if nz_mg == -1:
             # Create ccl_parameters without modified growth
-            self.parameters = parameters_make(Omega_c, Omega_b, Omega_k, N_nu_rel, N_nu_mass, m_nu, w0, wa, h, norm_pk, n_s, None, None)
+            self.parameters, status = lib.parameters_create(Omega_c, Omega_b, Omega_k, N_nu_rel, N_nu_mass, m_nu, w0, wa, h, norm_pk, n_s, -1, None, None, status)
         else:
             # Create ccl_parameters with modified growth arrays
-            self.parameters = parameters_make(Omega_c, Omega_b, Omega_k, N_nu_rel, N_nu_mass, m_nu, w0, wa, h, norm_pk, n_s, z_mg, df_mg)
+            self.parameters, status = lib.parameters_create_vec(Omega_c, Omega_b, Omega_k, N_nu_rel, N_nu_mass, m_nu, w0, wa, h, norm_pk, n_s, z_mg, df_mg, status)
+        check(status)    
     
     def __getitem__(self, key):
         """Access parameter values by name.

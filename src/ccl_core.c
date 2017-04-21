@@ -158,7 +158,11 @@ norm_pk: amplitude of the primordial PS (either A_s or sigma_8)
 n_s: index of the primordial PS
 */
 
-ccl_cosmology * ccl_cosmology_create_with_params(double Omega_c, double Omega_b, double Omega_k, double N_nu_rel, double N_nu_mass, double M_nu, double w0, double wa, double h, double norm_pk, double n_s, int nz_mgrowth, double *zarr_mgrowth, double *dfarr_mgrowth, ccl_configuration config, int *status)
+ccl_cosmology * ccl_cosmology_create_with_params(
+	double Omega_c, double Omega_b, double Omega_k, double N_nu_rel, 
+	double N_nu_mass, double M_nu, double w0, double wa, double h, 
+	double norm_pk, double n_s, int nz_mgrowth, double *zarr_mgrowth, 
+	double *dfarr_mgrowth, ccl_configuration config, int *status)
 {
     // Create ccl_parameters struct from input parameters
     ccl_parameters params;
