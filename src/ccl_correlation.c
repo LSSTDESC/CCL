@@ -88,7 +88,7 @@ static void ccl_general_corr(gsl_spline *cl, double *theta, double *corr_func, i
 }
 
 /*ccl_angular_cl like function for test case. Hankel tranform of 1./l is 1./theta (uto factors of 2\pi)*/
-double angluar_l_inv(ccl_cosmology *cosmo,double l,CCL_ClTracer *clt1,CCL_ClTracer *clt2, int * status)
+double angular_l_inv(ccl_cosmology *cosmo,double l,CCL_ClTracer *clt1,CCL_ClTracer *clt2, int * status)
 {
   return 1./l;
 }
@@ -171,7 +171,7 @@ int ccl_tracer_corr(ccl_cosmology *cosmo, int n_theta, double **theta,
 /*Following function takes a function to calculate angular cl as well. By default above function will call it using ccl_angular_cl*/
 int ccl_tracer_corr2(ccl_cosmology *cosmo, int n_theta, double **theta, 
 		    CCL_ClTracer *ct1, CCL_ClTracer *ct2, int i_bessel,double **corr_func, 
-		    double (*angluar_cl)(ccl_cosmology *cosmo,int l,CCL_ClTracer *clt1,CCL_ClTracer *clt2, int * status) ){
+		    double (*angular_cl)(ccl_cosmology *cosmo,int l,CCL_ClTracer *clt1,CCL_ClTracer *clt2, int * status) ){
   /* do we need to input i_bessel? could just be set here based on tracer..*/
   if((ct1->tracer_type==CL_TRACER_WL) && (ct2->tracer_type==CL_TRACER_WL)){
     if((i_bessel!=0) && (i_bessel!=4)) return 1;
@@ -196,9 +196,9 @@ int ccl_tracer_corr2(ccl_cosmology *cosmo, int n_theta, double **theta,
   int status=0;
   for(int i=0;i<n_theta;i+=1) {
     //Re-scaling the power-spectrum due to Bessel function missing factor
-    //cl_arr[i]=angular_cl(cosmo,l_arr[i],ct1,ct2,&status)*sqrt(l_arr[i]); //Sukhdeep: This is what we ideally want but it crashes on my machine
+    cl_arr[i]=angular_cl(cosmo,l_arr[i],ct1,ct2,&status)*sqrt(l_arr[i]); 
     //cl_arr[i]=ccl_angular_cl(cosmo,l_arr[i],ct1,ct2,&status)*sqrt(l_arr[i]);//default option
-    cl_arr[i]=angluar_l_inv(cosmo,l_arr[i],ct1,ct2,&status)*sqrt(l_arr[i]);//this function takes l_arr as double..not consistent with ccl_angular_cl
+    //cl_arr[i]=angular_l_inv(cosmo,l_arr[i],ct1,ct2,&status)*sqrt(l_arr[i]);//this function takes l_arr as double..not consistent with ccl_angular_cl
   }
   
   double taper_low_ell_limit[2]={1,2};
