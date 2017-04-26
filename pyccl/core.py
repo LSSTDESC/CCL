@@ -126,7 +126,7 @@ class Parameters(object):
         
         # Check if any compulsory parameters are not set
         compul = [Omega_c, Omega_b, Omega_k, N_nu_rel, N_nu_mass, m_nu, w0, wa, h, norm_pk, n_s]
-        names = ['Omega_c', 'Omega_b', 'Omega_k', 'N_nu_rel', 'N_nu_mass', 'm_nu', 'w0', 'wa', 
+        names = ['Omega_c', 'Omega_b', 'Omega_k', 'N_nu_rel', 'N_nu_mass', 'mnu', 'w0', 'wa', 
                  'h', 'norm_pk', 'n_s']
         for nm, item in zip(names, compul):
             if item is None:
@@ -137,10 +137,16 @@ class Parameters(object):
         status = 0 # Create an internal status variable; needed to check massive neutrino integral.
         if nz_mg == -1:
             # Create ccl_parameters without modified growth
-            self.parameters, status = lib.parameters_create(Omega_c, Omega_b, Omega_k, N_nu_rel, N_nu_mass, m_nu, w0, wa, h, norm_pk, n_s, -1, None, None, status)
+            self.parameters, status \
+                = lib.parameters_create( Omega_c, Omega_b, Omega_k, N_nu_rel, 
+                                         N_nu_mass, m_nu, w0, wa, h, norm_pk, 
+                                         n_s, -1, None, None, status )
         else:
             # Create ccl_parameters with modified growth arrays
-            self.parameters, status = lib.parameters_create_vec(Omega_c, Omega_b, Omega_k, N_nu_rel, N_nu_mass, m_nu, w0, wa, h, norm_pk, n_s, z_mg, df_mg, status)
+            self.parameters, status \
+                = lib.parameters_create_vec( Omega_c, Omega_b, Omega_k, N_nu_rel, 
+                                             N_nu_mass, m_nu, w0, wa, h, norm_pk, 
+                                             n_s, z_mg, df_mg, status )
         check(status)    
     
     def __getitem__(self, key):
@@ -172,14 +178,23 @@ class Parameters(object):
         # TODO: Should update/replace CCL objects appropriately
     
     def __str__(self):
-        """Output the parameters that were set, and their values.
-
         """
-        params = ['Omega_c', 'Omega_b', 'Omega_m', 'N_nu_rel', 'N_nu_mass', 'm_nu', 'Omega_k', 
-                  'w0', 'wa', 'H0', 'h', 'A_s', 'n_s', 'Omega_g', 'T_CMB', 
-                  'sigma_8', 'Omega_l', 'z_star', 'has_mgrowth']
-  
-        vals = ["%15s: %s" % (p, getattr(self.parameters, p)) for p in params]
+        Output the parameters that were set, and their values.
+        """
+        params = ['Omega_c', 'Omega_b', 'Omega_m', 'Omega_k', 'Omega_l',
+                  'w0', 'wa', 'H0', 'h', 'A_s', 'n_s',
+                  'N_nu_rel', 'N_nu_mass', 'mnu', 'Omega_n_mass', 'Omega_n_rel',
+                  'T_CMB', 'Omega_g', 'z_star', 'has_mgrowth']
+        
+        # Get values of parameters
+        vals = []
+        for p in params:
+            try:
+                v = getattr(self.parameters, p)
+            except:
+                # Parameter name was not found in ccl_parameters struct
+                v = "Not found"
+            vals.append( "%15s: %s" % (p, v) )
         string = "Parameters\n----------\n"
         string += "\n".join(vals)
         return string
