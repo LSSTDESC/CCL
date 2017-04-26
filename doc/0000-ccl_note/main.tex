@@ -92,7 +92,8 @@ After installing the C library you can make sure it is running as it should by t
 
 To compile {\tt CCL} with an external version of {\tt CLASS}, you must first prepare the external copy so that it can be linked as a shared library. By default, the {\tt CLASS} build tools create a static library. After compiling {\tt CLASS} in the usual way (by running {\tt make}), look for a static library file called {\tt libclass.a} that should have been placed in the root source directory. Then, run the following command from that directory (Linux only):
 \begin{verbatim}
- $ gcc -shared -o libclass.so -Wl,--whole-archive libclass.a -Wl,--no-whole-archive -lgomp
+ $ gcc -shared -o libclass.so -Wl,--whole-archive libclass.a \
+                              -Wl,--no-whole-archive -lgomp
 \end{verbatim}
 This should create a new shared library, {\tt libclass.so}, in the same directory. (N.B. The {\tt -lgomp} flag has to appear at the end of the command; otherwise the linker can fail.) If you are running Mac OS X, use the following command instead:
 \begin{verbatim}
@@ -105,7 +106,7 @@ export CLASSDIR=/path/to/external/class
 \end{verbatim}
 Then, run {\tt ./configure} and compile and install {\tt CCL} as usual. The {\tt CCL} build tools should take care of linking to the external version of {\tt CLASS}.
 
-Once compilation has finished, run {\tt make check} to make sure everything is working correctly.
+Once compilation has finished, run {\tt make check} to make sure everything is working correctly. Remember to add the external {\tt CLASS} library directory to your system library path, using either {\tt export LD_LIBRARY_PATH=/path/to/external/class} (Linux) or {\tt export DYLD_FALLBACK_LIBRARY_PATH=/path/to/external/class} (Mac). The system must be able to find both the {\tt CCL} and {\tt CLASS} libraries; it is not enough to only add {\tt CCL} to the library path.
 
 \section{Functionality}
 \label{sec:func}

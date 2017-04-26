@@ -77,7 +77,8 @@ You can quickly check whether *pyccl* has been installed correctly by running `p
 
 To compile *CCL* with an external version of *CLASS*, you must first prepare the external copy so that it can be linked as a shared library. By default, the *CLASS* build tools create a static library. After compiling *CLASS* in the usual way (by running `make`), look for a static library file called `libclass.a` that should have been placed in the root source directory. Then, run the following command from that directory (Linux only):
 ````sh
-gcc -shared -o libclass.so -Wl,--whole-archive libclass.a -Wl,--no-whole-archive -lgomp
+gcc -shared -o libclass.so -Wl,--whole-archive libclass.a \
+                           -Wl,--no-whole-archive -lgomp
 ````
 This should create a new shared library, `libclass.so`, in the same directory. (N.B. The `-lgomp` flag has to appear at the end of the command; otherwise the linker can fail.) If you are running Mac OS X, use the following command instead:
 ````sh
@@ -90,7 +91,7 @@ export CLASSDIR=/path/to/external/class
 ````
 Then, run `./configure` and compile and install *CCL* as usual. The *CCL* build tools should take care of linking to the external version of *CLASS*.
 
-Once compilation has finished, run `make check` to make sure everything is working correctly.
+Once compilation has finished, run `make check` to make sure everything is working correctly. Remember to add the external *CLASS* library directory to your system library path, using either `export LD_LIBRARY_PATH=/path/to/external/class` (Linux) or `export DYLD_FALLBACK_LIBRARY_PATH=/path/to/external/class` (Mac). The system must be able to find both the *CCL* and *CLASS* libraries; it is not enough to only add *CCL* to the library path.
 
 
 # Documentation
