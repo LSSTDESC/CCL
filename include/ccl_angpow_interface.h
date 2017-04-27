@@ -228,7 +228,7 @@ SplPar * ccl_angular_cls_angpow(ccl_cosmology *ccl_cosmo, int lmax, CCL_ClTracer
   for(int index_l=0; index_l<n_l; index_l++) {
     ls[index_l]=clout[index_l].first; cls[index_l]=clout[index_l].second; 
   }
-  SplPar * spl_cl = spline_init(clout.Size(), &ls[0], &cls[0], 0., 0. );
+  SplPar * spl_cl = spline_init(clout.Size(), &ls[0], &cls[0], clout[0].second, clout[n_l-1].second );
 
   return spl_cl;
 }
