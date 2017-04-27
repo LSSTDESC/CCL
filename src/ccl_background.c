@@ -26,7 +26,7 @@ static double h_over_h0(double a, ccl_cosmology * cosmo, int *status)
 { 
 	// Check if massive neutrinos are present - if not, we don't need to compute their contribution
 	double Om_mass_nu;
-	if ((cosmo->params.N_nu_mass)>0.0001){
+	if ((cosmo->params.N_nu_mass)>1e-12){
 		Om_mass_nu = Omeganuh2(a, cosmo->params.N_nu_mass, cosmo->params.mnu, cosmo->params.T_CMB, cosmo->data.accelerator, status) / (cosmo->params.h) / (cosmo->params.h);
 		ccl_check_status(cosmo, status);
 	}else{
@@ -138,7 +138,6 @@ INPUT: scale factor, cosmology
 TASK: compute the growth (D(z)) and the growth rate, logarithmic derivative (f?)
 */
 
-// RH had issuse here
 static int  growth_factor_and_growth_rate(double a,double *gf,double *fg,ccl_cosmology *cosmo, int *stat) 
 {
   if(a<EPS_SCALEFAC_GROWTH) {
@@ -255,7 +254,6 @@ static int  a_of_chi(double chi,ccl_cosmology *cosmo, int* stat, double *a_old,g
     FDF.params=&p;
     gsl_root_fdfsolver_set(s,&FDF,a_current);
 
-    /* RH There are issues here */
     int iter=0,status;
     do {
       iter++;
@@ -304,7 +302,7 @@ void ccl_cosmology_compute_distances(ccl_cosmology * cosmo, int *status)
       (a[na-1]>1.0)
       ) {
     // old:    cosmo->status = CCL_ERROR_LINSPACE;
-    *status = CCL_ERROR_LINSPACE; //RH
+    *status = CCL_ERROR_LINSPACE; 
     strcpy(cosmo->status_message,"ccl_background.c: ccl_cosmology_compute_distances(): Error creating linear spacing in a\n");
     return;
   }
@@ -315,7 +313,7 @@ void ccl_cosmology_compute_distances(ccl_cosmology * cosmo, int *status)
   if(y==NULL) {
     free(a);
     // old:    cosmo->status=CCL_ERROR_MEMORY;
-    *status=CCL_ERROR_MEMORY; //RH
+    *status=CCL_ERROR_MEMORY; 
     strcpy(cosmo->status_message,"ccl_background.c: ccl_cosmology_compute_distances(): ran out of memory\n");
     return;
   }
@@ -358,7 +356,6 @@ void ccl_cosmology_compute_distances(ccl_cosmology * cosmo, int *status)
   gsl_spline * chi = gsl_spline_alloc(A_SPLINE_TYPE, na);
   chistatus = gsl_spline_init(chi, a, y, na); //in Mpc
 
-  // RH has issue here
   if (chistatus || *status){
     free(a);
     free(y);
@@ -379,10 +376,8 @@ void ccl_cosmology_compute_distances(ccl_cosmology * cosmo, int *status)
   if(y==NULL || (fabs(y[0]-chi0)>1E-5) || (fabs(y[na-1]-chif)>1e-5)) {
     gsl_spline_free(E);
     gsl_spline_free(chi);
-    // RH old:    cosmo->status = CCL_ERROR_LINSPACE;
-    *status = CCL_ERROR_LINSPACE; //RH
+    *status = CCL_ERROR_LINSPACE; 
     strcpy(cosmo->status_message,"ccl_background.c: ccl_cosmology_compute_distances(): Error creating linear spacing in chi\n");
-    //strcpy(cosmo->status_message,"ccl_background.c: ccl_cosmology_compute_distances(): Error creating linear spacing in chi\n"); //RH
     return;
   }
 
@@ -391,10 +386,9 @@ void ccl_cosmology_compute_distances(ccl_cosmology * cosmo, int *status)
     free(y);
     gsl_spline_free(E);
     gsl_spline_free(chi);
-    //RH old:   cosmo->status=CCL_ERROR_MEMORY;
     *status=CCL_ERROR_MEMORY;
     strcpy(cosmo->status_message,"ccl_background.c: ccl_cosmology_compute_distances(): ran out of memory\n");
-    return; // RH
+    return; 
   }
 
   a[0]=a0; a[na-1]=af;
@@ -411,8 +405,7 @@ void ccl_cosmology_compute_distances(ccl_cosmology * cosmo, int *status)
     free(y);
     gsl_spline_free(E);
     gsl_spline_free(chi);
-    //RH old:    cosmo->status = CCL_ERROR_ROOT;
-    *status = CCL_ERROR_ROOT; //RH
+    *status = CCL_ERROR_ROOT; 
     strcpy(cosmo->status_message,"ccl_background.c: ccl_cosmology_compute_distances(): a(chi) root-finding error \n");
     return;
   }
@@ -420,7 +413,6 @@ void ccl_cosmology_compute_distances(ccl_cosmology * cosmo, int *status)
   gsl_spline * achi=gsl_spline_alloc(A_SPLINE_TYPE,na);
   chistatus=gsl_spline_init(achi,y,a,na);
 
- //RH has issues here
   if (chistatus){
     free(a);
     free(y);
@@ -465,7 +457,6 @@ void ccl_cosmology_compute_growth(ccl_cosmology * cosmo, int * status)
       ) {
     *status = CCL_ERROR_LINSPACE;
     strcpy(cosmo->status_message,"ccl_background.c: ccl_cosmology_compute_growth(): Error creating linear spacing in a\n");
-    //strcpy(cosmo->status_message,"ccl_background.c: ccl_cosmology_compute_growth(): Error creating linear spacing in a\n"); //RH
     return;
   }
 
@@ -484,7 +475,7 @@ void ccl_cosmology_compute_growth(ccl_cosmology * cosmo, int * status)
     gsl_spline *df_z_spline=gsl_spline_alloc(A_SPLINE_TYPE,cosmo->params.nz_mgrowth);
     chistatus=gsl_spline_init(df_z_spline,cosmo->params.z_mgrowth,cosmo->params.df_mgrowth,
 			    cosmo->params.nz_mgrowth);
-    //RH has issues here
+    
     if(chistatus) {
       free(a);
       free(df_arr);
@@ -510,7 +501,7 @@ void ccl_cosmology_compute_growth(ccl_cosmology * cosmo, int * status)
 
     //Generate Delta(f) spline
     df_a_spline=gsl_spline_alloc(A_SPLINE_TYPE,na);
-    chistatus=gsl_spline_init(df_a_spline,a,df_arr,na); //RH
+    chistatus=gsl_spline_init(df_a_spline,a,df_arr,na); 
     free(df_arr);
     if (chistatus){
       free(a);
@@ -525,7 +516,6 @@ void ccl_cosmology_compute_growth(ccl_cosmology * cosmo, int * status)
     F.params=df_a_spline;
   }
 
-  // RH has issues coming up
   // allocate space for y, which will be all three
   // of E(a), chi(a), D(a) and f(a) in turn.
   int  status_mg=0;
@@ -545,7 +535,7 @@ void ccl_cosmology_compute_growth(ccl_cosmology * cosmo, int * status)
     strcpy(cosmo->status_message,"ccl_background.c: ccl_cosmology_compute_distances(): ran out of memory\n"); 
     return;
   }
-  //RH has issues here
+
   chistatus|=growth_factor_and_growth_rate(1.,&growth0,&fgrowth0,cosmo, status);
   for (int i=0; i<na; i++){
     chistatus|=growth_factor_and_growth_rate(a[i],&(y[i]),&(y2[i]),cosmo, status);
@@ -556,7 +546,6 @@ void ccl_cosmology_compute_growth(ccl_cosmology * cosmo, int * status)
 	df=gsl_spline_eval(df_a_spline,a[i],NULL);
 	y2[i]+=df;
 	//Multiply D by exp(-int(df))
-	// RH has issues here
 	status_mg |= gsl_integration_cquad(&F,a[i],1.0,0.0,EPSREL_DIST,workspace,&integ,NULL,NULL);
 	y[i]*=exp(-integ);
       }
@@ -575,11 +564,6 @@ void ccl_cosmology_compute_growth(ccl_cosmology * cosmo, int * status)
       *status = CCL_ERROR_INTEG;
       strcpy(cosmo->status_message ,"ccl_background.c: ccl_cosmology_compute_growth(): integral for linear growth factor didn't converge\n");
     }
-    /* RH old if (status_mg) {
-      cosmo->status = CCL_ERROR_INTEG;
-      strcpy(cosmo->cosmo->status_message ,"ccl_background.c: ccl_cosmology_compute_growth(): integral for MG growth factor didn't converge\n"); 
-    }*/
-    // RH
     if (status_mg) {
       *status = CCL_ERROR_INTEG;
       strcpy(cosmo->status_message ,"ccl_background.c: ccl_cosmology_compute_growth(): integral for MG growth factor didn't converge\n");
@@ -592,7 +576,6 @@ void ccl_cosmology_compute_growth(ccl_cosmology * cosmo, int * status)
     gsl_integration_cquad_workspace_free(workspace);
   }
 
-  // RH
   gsl_spline * growth = gsl_spline_alloc(A_SPLINE_TYPE, na);
   chistatus = gsl_spline_init(growth, a, y, na);
   if (chistatus){
@@ -605,7 +588,6 @@ void ccl_cosmology_compute_growth(ccl_cosmology * cosmo, int * status)
     return;
   }
 
-  // RH
   gsl_spline * fgrowth = gsl_spline_alloc(A_SPLINE_TYPE, na);
   chistatus = gsl_spline_init(fgrowth, a, y2, na);
   if (chistatus){
@@ -637,7 +619,6 @@ void ccl_cosmology_compute_growth(ccl_cosmology * cosmo, int * status)
 
 //Expansion rate normalized to 1 today
 
-// RH
 double ccl_h_over_h0(ccl_cosmology * cosmo, double a, int* status)
 {
   if (!cosmo->computed_distances){
@@ -648,7 +629,6 @@ double ccl_h_over_h0(ccl_cosmology * cosmo, double a, int* status)
 }
 
 
-//RH
 void ccl_h_over_h0s(ccl_cosmology * cosmo, int na, double a[na], double output[na], int * status)
 {
   if (!cosmo->computed_distances){
@@ -780,7 +760,6 @@ double ccl_luminosity_distance(ccl_cosmology * cosmo, double a, int* status)
 }
 //TODO: this is not valid for curved cosmologies
 
-// RH
 void ccl_luminosity_distances(ccl_cosmology * cosmo, int na, double a[na], double output[na], int * status)
 {
   if (!cosmo->computed_distances){
@@ -798,7 +777,6 @@ void ccl_luminosity_distances(ccl_cosmology * cosmo, int na, double a[na], doubl
 }
 
 //Scale factor for a given distance
-//RH
 double ccl_scale_factor_of_chi(ccl_cosmology * cosmo, double chi, int * status)
 {
    if((chi < 1.e-8) && (chi>=0.)){

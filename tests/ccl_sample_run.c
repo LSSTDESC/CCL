@@ -21,9 +21,9 @@
 #define SZ_SH 0.05
 #define NL 512
 #define PS 0.1 
-#define NREL 0.00641
-#define NMAS 3
-#define MNU 0.12
+#define NREL 3.046
+#define NMAS 0
+#define MNU 0.0
 
 
 
