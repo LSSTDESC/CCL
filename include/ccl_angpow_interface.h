@@ -18,6 +18,7 @@ extern "C" {
 #include "Angpow/angpow_clbase.h"
 #include "Angpow/angpow_ctheta.h"
 #include "Angpow/angpow_exceptions.h"  //exceptions
+#include "Angpow/angpow_integrand_base.h"
 
 
 
@@ -113,8 +114,8 @@ class IntegrandCCL : public IntegrandBase {
     ell_=ell; z_=z;
     R_ = ccl_comoving_radial_distance(cosmo_, 1.0/(1+z), &status);
     jlR_ = new JBess1(ell_,R_);
-    jlp1R_ = new JBess1(ell_+1,R_);
     if(clt_->has_rsd) {
+      jlp1R_ = new JBess1(ell_+1,R_);
       // WARNING: here we want to store dlnD/dln(+1z) = - dlnD/dlna
       fz_= - ccl_growth_rate(cosmo_,1.0/(1+z), &status);
     }
@@ -164,6 +165,12 @@ private:
   r_8 bz_;  // bias b(z)
   JBess1* jlR_;  // j_ell(k*R)
   JBess1* jlp1R_;   // j_(ell+1)(k*R)
+
+  //Minimal copy to allow Main operator(int, r_8, r_8) to work
+  //JEC 22/4/17 use cloning of PowerSpectrum
+ IntegrandCCL(const IntegrandCCL& copy) : clt_(copy.clt_),
+       cosmo_(copy.cosmo_), ell_(0), z_(0), jlR_(0), jlp1R_(0){} 
+
 };//IntegrandCCL
 
  
