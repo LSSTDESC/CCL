@@ -13,7 +13,7 @@
 #define CCL_NU_MNUT_N 1000
 
 // The combination of constants required in Omeganuh2
-#define NU_CONST 8. * pow(M_PI,5) *pow((KBOLTZ/ HPLANCK),3)* KBOLTZ/(15. *pow( CLIGHT,3))* (8. * M_PI * GNEWT) / (3. * 100.*100.*1000.*1000. /MPC_TO_METER /MPC_TO_METER  * CLIGHT * CLIGHT)
+#define NU_CONST (8. * pow(M_PI,5) *pow((KBOLTZ/ HPLANCK),3)* KBOLTZ/(15. *pow( CLIGHT,3))* (8. * M_PI * GNEWT) / (3. * 100.*100.*1000.*1000. /MPC_TO_METER /MPC_TO_METER  * CLIGHT * CLIGHT))
 
 // precalculate the phase space integral
 gsl_spline* calculate_nu_phasespace_spline(int *status);

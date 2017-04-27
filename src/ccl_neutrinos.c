@@ -9,7 +9,7 @@
 #include "ccl_core.h"
 
 // Global variable to hold the neutrino phase-space spline
-gsl_spline* nu_spline;
+gsl_spline* nu_spline=NULL;
 
 /* ------- ROUTINE: nu_integrand ------
 INPUTS: x: dimensionless momentum, *r: pointer to a dimensionless mass / temperature
