@@ -730,7 +730,7 @@ void ccl_luminosity_distances(ccl_cosmology * cosmo, int na, double a[na], doubl
       *status = CCL_ERROR_COMPUTECHI;
       strcpy(cosmo->status_message, "ccl_background.c: scale factor cannot be larger than 1.\n");
       ccl_check_status(cosmo, status);
-    } else ccl_comoving_angular_distance(cosmo, a[i], status);
+    } else output[i] = ccl_comoving_angular_distance(cosmo, a[i], status)/ a[i]; // fixed by MI: put result in output[i] and divide by a[i]
   }
       //output[i]=gsl_spline_eval(cosmo->data.chi,a[i],cosmo->data.accelerator)/a[i];  }
 }
