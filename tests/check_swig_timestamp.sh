@@ -13,17 +13,14 @@ msg2="Changes have been made to CCL headers or SWIG interface files since SWIG w
 swig_command="~$ swig -python -threads -o pyccl/ccl_wrap.c pyccl/ccl.i"
 
 # Time of last modification of SWIG-generated files
-t0_swig_pylib=`stat -c %Y ../pyccl/ccllib.py`
-t0_swig_cwrap=`stat -c %Y ../pyccl/ccl_wrap.c`
 t1_swig_pylib=`git log --pretty=format:%ct -n 1 ../pyccl/ccllib.py`
 t1_swig_cwrap=`git log --pretty=format:%ct -n 1 ../pyccl/ccl_wrap.c`
 
 # Test against CCL C headers, CLASS headers, and CCL interface files
 for hdr in `ls ../include/*.h ../class/include/*.h ../pyccl/*.i`;
 do
-    last_modified=`stat -c %Y $hdr`
     last_commit=`git log --pretty=format:%ct -n 1 $hdr`
-    if [ "$last_modified" -gt "$t0_swig_pylib" ] || [ "$last_modified" -gt "$t0_swig_cwrap" ] || [ "$last_commit" -gt "$t1_swig_pylib" ] || [ "$last_commit" -gt "$t1_swig_cwrap" ];
+    if [ "$last_commit" -gt "$t1_swig_pylib" ] || [ "$last_commit" -gt "$t1_swig_cwrap" ];
     then
 	echo $msg1
 	echo ""
