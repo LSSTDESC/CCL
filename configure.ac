@@ -22,6 +22,7 @@ AC_PROG_INSTALL
 AM_PROG_CC_C_O
 AC_PROG_CXX_C_O
 AM_MAINTAINER_MODE
+AC_OPENMP
 
 # Checks for libraries.
 AC_SEARCH_LIBS([pow],[m],[],AC_MSG_ERROR(Couldn't find libm. Required.))
@@ -40,7 +41,8 @@ AC_CHECK_FUNCS([pow sqrt])
 
 AC_CONFIG_FILES([Makefile
 		 include/Makefile
-		 class/Makefile])
+		 class/Makefile
+		 angpow/Makefile])
 
 AC_OUTPUT
 

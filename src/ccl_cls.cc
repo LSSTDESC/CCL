@@ -1,15 +1,32 @@
-#include "ccl_cls.h"
-#include "ccl_power.h"
-#include "ccl_background.h"
-#include "ccl_error.h"
-#include "ccl_utils.h"
 #include <stdlib.h>
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
 #include "gsl/gsl_errno.h"
 #include "gsl/gsl_integration.h"
+#ifdef __cplusplus
+extern "C"{
+#endif //__cplusplus
+#include "ccl_cls.h"
+#include "ccl_power.h"
+#include "ccl_background.h"
+#include "ccl_error.h"
+#include "ccl_utils.h"
 #include "ccl_params.h"
+#ifdef __cplusplus
+}
+#endif //__cplusplus
+#include "Angpow/angpow_tools.h"
+#include "Angpow/angpow_parameters.h"
+#include "Angpow/angpow_pk2cl.h"
+#include "Angpow/angpow_powspec_base.h"
+#include "Angpow/angpow_cosmo_base.h"
+#include "Angpow/angpow_radial.h"
+#include "Angpow/angpow_radial_base.h"
+#include "Angpow/angpow_clbase.h"
+#include "Angpow/angpow_ctheta.h"
+#include "Angpow/angpow_exceptions.h"  //exceptions
+#include "Angpow/angpow_integrand_base.h"
 
 //Spline creator
 //n     -> number of points
@@ -18,7 +35,7 @@
 //y0,yf -> values of f(x) to use beyond the interpolation range
 SplPar *spline_init(int n,double *x,double *y,double y0,double yf)
 {
-  SplPar *spl=malloc(sizeof(SplPar));
+  SplPar *spl=(SplPar *)malloc(sizeof(SplPar));
   if(spl==NULL)
     return NULL;
   
@@ -203,7 +220,7 @@ static CCL_ClTracer *cl_tracer_new(ccl_cosmology *cosmo,int tracer_type,
 				   int nz_rf,double *z_rf,double *rf, int * status)
 {
   int clstatus=0;
-  CCL_ClTracer *clt=malloc(sizeof(CCL_ClTracer));
+  CCL_ClTracer *clt=(CCL_ClTracer *)malloc(sizeof(CCL_ClTracer));
   if(clt==NULL) {
     *status=CCL_ERROR_MEMORY;
     strcpy(cosmo->status_message,"ccl_cls.c: ccl_cl_tracer_new(): memory allocation\n");
@@ -227,7 +244,7 @@ static CCL_ClTracer *cl_tracer_new(ccl_cosmology *cosmo,int tracer_type,
     //Normalize n(z)
     gsl_function F;
     double nz_norm,nz_enorm;
-    double *nz_normalized=malloc(nz_n*sizeof(double));
+    double *nz_normalized=(double *)malloc(nz_n*sizeof(double));
     if(nz_normalized==NULL) {
       spline_free(clt->spl_nz);
       free(clt);
@@ -305,7 +322,7 @@ static CCL_ClTracer *cl_tracer_new(ccl_cosmology *cosmo,int tracer_type,
 		 "ccl_cls.c: ccl_cl_tracer_new(): Error creating linear spacing in chi\n");
 	  return NULL;
 	}
-	y=malloc(nchi*sizeof(double));
+	y=(double *)malloc(nchi*sizeof(double));
 	if(y==NULL) {
 	  free(x);
 	  spline_free(clt->spl_nz);
@@ -367,7 +384,7 @@ static CCL_ClTracer *cl_tracer_new(ccl_cosmology *cosmo,int tracer_type,
 	strcpy(cosmo->status_message,"ccl_cls.c: ccl_cl_tracer_new(): Error creating linear spacing in chi\n");
 	return NULL;
       }
-      y=malloc(nchi*sizeof(double));
+      y=(double *)malloc(nchi*sizeof(double));
       if(y==NULL) {
 	free(x);
 	spline_free(clt->spl_nz);
@@ -776,18 +793,6 @@ double ccl_angular_cl(ccl_cosmology *cosmo,int l,CCL_ClTracer *clt1,CCL_ClTracer
 }
 //TODO: currently using linear power spectrum
 
-#include "Angpow/angpow_tools.h"
-#include "Angpow/angpow_parameters.h"
-#include "Angpow/angpow_pk2cl.h"
-#include "Angpow/angpow_powspec_base.h"
-#include "Angpow/angpow_cosmo_base.h"
-#include "Angpow/angpow_radial.h"
-#include "Angpow/angpow_radial_base.h"
-#include "Angpow/angpow_clbase.h"
-#include "Angpow/angpow_ctheta.h"
-#include "Angpow/angpow_exceptions.h"  //exceptions
-#include "Angpow/angpow_integrand_base.h"
-
 
 
 //! Here CCL is passed to Angpow base classes
@@ -975,7 +980,7 @@ SplPar * ccl_angular_cls_angpow(ccl_cosmology *ccl_cosmo, int lmax, CCL_ClTracer
   Angpow::RadSplineSelect Z2win(clt_gc2->spl_nz);
 
   // The cosmological distance tool to make the conversion z <-> r(z)
-  Angpow::CosmoCoordCCL cosmo(ccl_cosmo, 1./A_SPLINE_MAX-1, 1./A_SPLINE_MIN-1, A_SPLINE_NA); //, para.cosmo_precision);
+  Angpow::CosmoCoordCCL cosmo(ccl_cosmo, 1./ccl_splines->A_SPLINE_MAX-1, 1./ccl_splines->A_SPLINE_MIN-1, ccl_splines->A_SPLINE_NA); //, para.cosmo_precision);
 
   // Initilaie the two integrand functions f(ell,k,z)
   Angpow::IntegrandCCL int1(clt_gc1, ccl_cosmo);
