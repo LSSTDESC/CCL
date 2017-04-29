@@ -13,6 +13,7 @@
 #include "ccl_power.h"
 #include "ccl_error.h"
 #include "../class/include/class.h"
+#include "ccl_params.h"
 
 /*------ ROUTINE: ccl_cosmology_compute_power_class ----- 
 INPUT: ccl_cosmology * cosmo
@@ -265,10 +266,10 @@ static void ccl_fill_class_parameters(ccl_cosmology * cosmo, struct file_content
   else {strcpy(fc->value[1],"none");}
 
   strcpy(fc->name[2],"P_k_max_1/Mpc");
-  sprintf(fc->value[2],"%e",K_MAX_SPLINE); //in units of 1/Mpc, corroborated with ccl_constants.h
+  sprintf(fc->value[2],"%e",ccl_splines->K_MAX_SPLINE); //in units of 1/Mpc, corroborated with ccl_constants.h
 
   strcpy(fc->name[3],"z_max_pk");
-  sprintf(fc->value[3],"%e",1./A_SPLINE_MIN-1.);
+  sprintf(fc->value[3],"%e",1./ccl_splines->A_SPLINE_MIN-1.);
 
   strcpy(fc->name[4],"modes");
   strcpy(fc->value[4],"s");
@@ -371,11 +372,11 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int * statu
   cosmo->data.k_min=2*exp(sp.ln_k[0]);
   //CLASS calculations done - now allocate CCL splines
   double kmin = cosmo->data.k_min;
-  double kmax = K_MAX_SPLINE;
-  int nk = N_K;
-  double amin = A_SPLINE_MIN;
-  double amax = A_SPLINE_MAX;
-  int na = N_A;
+  double kmax = ccl_splines->K_MAX_SPLINE;
+  int nk = ccl_splines->N_K;
+  double amin = ccl_splines->A_SPLINE_MIN;
+  double amax = ccl_splines->A_SPLINE_MAX;
+  int na = ccl_splines->N_A;
   
   // The x array is initially k, but will later
   // be overwritten with log(k)
@@ -639,13 +640,13 @@ static double eh_power(ccl_parameters *params,eh_struct *eh,double k,int wiggled
 
 static void ccl_cosmology_compute_power_eh(ccl_cosmology * cosmo, int * status)
 {
-  cosmo->data.k_min=K_MIN_DEFAULT;
+  cosmo->data.k_min=ccl_splines->K_MIN_DEFAULT;
   double kmin = cosmo->data.k_min;
-  double kmax = K_MAX;
-  int nk = N_K;
-  double amin = A_SPLINE_MIN;
-  double amax = A_SPLINE_MAX;
-  int na = N_A;
+  double kmax = ccl_splines->K_MAX;
+  int nk = ccl_splines->N_K;
+  double amin = ccl_splines->A_SPLINE_MIN;
+  double amax = ccl_splines->A_SPLINE_MAX;
+  int na = ccl_splines->N_A;
   eh_struct *eh=eh_struct_new(&(cosmo->params));
   if (eh==NULL) {
     *status=CCL_ERROR_MEMORY;
@@ -794,14 +795,13 @@ TASK: provide spline for the BBKS power spectrum with baryonic correction
 
 static void ccl_cosmology_compute_power_bbks(ccl_cosmology * cosmo, int * status)
 {
-  cosmo->data.k_min=K_MIN_DEFAULT;
+  cosmo->data.k_min=ccl_splines->K_MIN_DEFAULT;
   double kmin = cosmo->data.k_min;
-  double kmax = K_MAX;
-  int nk = N_K;
-  double amin = A_SPLINE_MIN;
-  double amax = A_SPLINE_MAX;
-  int na = N_A;
-
+  double kmax = ccl_splines->K_MAX;
+  int nk = ccl_splines->N_K;
+  double amin = ccl_splines->A_SPLINE_MIN;
+  double amax = ccl_splines->A_SPLINE_MAX;
+  int na = ccl_splines->N_A;
   // The x array is initially k, but will later
   // be overwritten with log(k)
   double * x = ccl_log_spacing(kmin, kmax, nk);
@@ -951,7 +951,7 @@ static double ccl_power_extrapol_highk(ccl_cosmology * cosmo, double k, double a
   double deltak=1e-2; //step for numerical derivative;
   double deriv_pk_kmid,deriv2_pk_kmid;
 
-  double lkmid=log(K_MAX_SPLINE)-2*deltak;
+  double lkmid=log(ccl_splines->K_MAX_SPLINE)-2*deltak;
   double lpk_kmid;
   int pwstatus =  gsl_spline2d_eval_e(powerspl, lkmid,a,NULL ,NULL ,&lpk_kmid);
   if (pwstatus){
@@ -1014,7 +1014,7 @@ double ccl_linear_matter_power(ccl_cosmology * cosmo, double k, double a, int * 
   if(k<=cosmo->data.k_min) {
     log_p_1=ccl_power_extrapol_lowk(cosmo,k,a,cosmo->data.p_lin,status);
   }
-  else if(k<K_MAX_SPLINE){
+  else if(k<ccl_splines->K_MAX_SPLINE){
     pkstatus = gsl_spline2d_eval_e(cosmo->data.p_lin, log(k), a,NULL,NULL,&log_p_1);
     if (pkstatus){
       *status = CCL_ERROR_SPLINE_EV;
@@ -1052,7 +1052,7 @@ double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double k, double a, int *s
       log_p_1=ccl_power_extrapol_lowk(cosmo,k,a,cosmo->data.p_nl,status);
       return exp(log_p_1);
     }
-    else if(k<K_MAX_SPLINE){
+    else if(k<ccl_splines->K_MAX_SPLINE){
       
       int pwstatus =  gsl_spline2d_eval_e(cosmo->data.p_nl, log(k),a,NULL ,NULL ,&log_p_1);
       if (pwstatus){
@@ -1113,7 +1113,7 @@ double ccl_sigmaR(ccl_cosmology *cosmo,double R, int *status)
   F.function=&sigmaR_integrand;
   F.params=&par;
   double sigma_R;
-  gsl_integration_cquad(&F,log10(cosmo->data.k_min),log10(K_MAX),0.0,1E-5,workspace,&sigma_R,NULL,NULL);
+  gsl_integration_cquad(&F,log10(cosmo->data.k_min),log10(ccl_splines->K_MAX),0.0,1E-5,workspace,&sigma_R,NULL,NULL);
   //TODO: log10 could be taken already in the macros.
   //TODO: 1E-5 should be a macro
   //TODO: we should check for integration success
