@@ -49,6 +49,7 @@ ccl_cosmology * ccl_cosmology_create(ccl_parameters params, ccl_configuration co
 
   cosmo->data.logsigma = NULL;
   
+  cosmo->data.k_min=K_MIN_DEFAULT;
   cosmo->data.p_lin = NULL;
   cosmo->data.p_nl = NULL;
   

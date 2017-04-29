@@ -801,7 +801,7 @@ static void ccl_cosmology_compute_power_bbks(ccl_cosmology * cosmo, int * status
   double amin = A_SPLINE_MIN;
   double amax = A_SPLINE_MAX;
   int na = N_A;
-  
+
   // The x array is initially k, but will later
   // be overwritten with log(k)
   double * x = ccl_log_spacing(kmin, kmax, nk);
@@ -917,9 +917,8 @@ static void ccl_cosmology_compute_power_bbks(ccl_cosmology * cosmo, int * status
 INPUT: ccl_cosmology * cosmo
 TASK: compute power spectrum
 */
-void ccl_cosmology_compute_power(ccl_cosmology * cosmo, int * status){
-
-  
+void ccl_cosmology_compute_power(ccl_cosmology * cosmo, int * status)
+{
   if (cosmo->computed_power) return;
     switch(cosmo->config.transfer_function_method){
         case ccl_bbks:
@@ -1014,7 +1013,6 @@ double ccl_linear_matter_power(ccl_cosmology * cosmo, double k, double a, int * 
  
   if(k<=cosmo->data.k_min) {
     log_p_1=ccl_power_extrapol_lowk(cosmo,k,a,cosmo->data.p_lin,status);
-    return exp(log_p_1);
   }
   else if(k<K_MAX_SPLINE){
     pkstatus = gsl_spline2d_eval_e(cosmo->data.p_lin, log(k), a,NULL,NULL,&log_p_1);
@@ -1023,13 +1021,12 @@ double ccl_linear_matter_power(ccl_cosmology * cosmo, double k, double a, int * 
       sprintf(cosmo->status_message ,"ccl_power.c: ccl_linear_matter_power(): Spline evaluation error\n");
       return NAN;
     }
-    else
-      return exp(log_p_1);
   }
   else { //Extrapolate NL regime using log derivative
     log_p_1 = ccl_power_extrapol_highk(cosmo,k,a,cosmo->data.p_lin,status);
-    return exp(log_p_1);
   }
+
+  return exp(log_p_1);
 }
 
 

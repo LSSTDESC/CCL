@@ -1,12 +1,3 @@
-#include <stdlib.h>
-#include <stdio.h>
-#include <math.h>
-
-// CCL includes
-extern "C" {
-#include "ccl.h"
-}
-
 // Angpow includes
 #include "Angpow/angpow_tools.h"
 #include "Angpow/angpow_parameters.h"
