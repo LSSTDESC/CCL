@@ -93,15 +93,26 @@ int main(int argc,char **argv){
 
 	//Cosmic shear tracer
 	CCL_ClTracer *ct_wl=ccl_cl_tracer_lensing_simple_new(cosmo,NZ,z_arr_sh,nz_arr_sh, &status);
+	int *ells=malloc(NL*sizeof(int));
+	double *cells_gg=malloc(NL*sizeof(double));
+	double *cells_gs=malloc(NL*sizeof(double));
+	double *cells_ss=malloc(NL*sizeof(double));
+	ells[0]=2;
+	for(int ii=1;ii<NL;ii++)
+	  ells[ii]=ells[ii-1]*2;
+	ccl_angular_cls(cosmo,ct_gc,ct_gc,NL,ells,cells_gg,-1,&status);
+	ccl_angular_cls(cosmo,ct_gc,ct_wl,NL,ells,cells_gs,-1,&status);
+	ccl_angular_cls(cosmo,ct_wl,ct_wl,NL,ells,cells_ss,-1,&status);
+
 	printf("ell C_ell(g,g) C_ell(g,s) C_ell(s,s) | r(g,s)\n");
-	for(int l=2;l<=NL;l*=2)
-	{
-		double cl_gg=ccl_angular_cl(cosmo,l,ct_gc,ct_gc, &status); //Galaxy-galaxy
-		double cl_gs=ccl_angular_cl(cosmo,l,ct_gc,ct_wl, &status); //Galaxy-lensing
-		double cl_ss=ccl_angular_cl(cosmo,l,ct_wl,ct_wl, &status); //Lensing-lensing
-		printf("%d %.3lE %.3lE %.3lE | %.3lE\n",l,cl_gg,cl_gs,cl_ss,cl_gs/sqrt(cl_gg*cl_ss));
+	for(int ii=0;ii<NL;ii++) {
+	  double cl_gg=cells_gg[ii];
+	  double cl_gs=cells_gs[ii];
+	  double cl_ss=cells_ss[ii];
+	  printf("%d %.3lE %.3lE %.3lE | %.3lE\n",ells[ii],cl_gg,cl_gs,cl_ss,cl_gs/sqrt(cl_gg*cl_ss));
 	}
 	printf("\n");
+	free(ells); free(cells_gg); free(cells_gs); free(cells_ss);
 
 	//Free up tracers
 	ccl_cl_tracer_free(ct_gc);

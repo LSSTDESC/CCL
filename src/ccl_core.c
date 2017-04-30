@@ -23,8 +23,8 @@ const ccl_configuration default_config = {ccl_boltzmann_class, ccl_halofit, ccl_
 
 ccl_spline_params * ccl_splines; // Global variable
 
-void ccl_cosmology_read_config(){
-
+void ccl_cosmology_read_config(void)
+{
   int CONFIG_LINE_BUFFER_SIZE=100;
   int MAX_CONFIG_VAR_LEN=100;
   FILE *fconfig;

@@ -56,7 +56,6 @@ SplPar *spline_init(int n,double *x,double *y,double y0,double yf)
   return spl;
 }
 
-
 //Evaluates spline at x checking for bound errors
 double spline_eval(double x,SplPar *spl)
 {
@@ -757,44 +756,6 @@ static void get_k_interval(ccl_cosmology *cosmo,CCL_ClTracer *clt1,CCL_ClTracer 
   *lkmin=fmax(-4,log10(0.5*(l+0.5)/chimax));
 }
 
-//Compute angular power spectrum between two bins
-//cosmo -> ccl_cosmology object
-//l -> angular multipole
-//clt1 -> tracer #1
-//clt2 -> tracer #2
-double ccl_angular_cl(ccl_cosmology *cosmo,int l,CCL_ClTracer *clt1,CCL_ClTracer *clt2, int * status)
-{
-  int clastatus=0, qagstatus;
-  IntClPar ipar;
-  double result=0,eresult;
-  double lkmin,lkmax;
-  gsl_function F;
-  gsl_integration_workspace *w=gsl_integration_workspace_alloc(1000);
-
-  get_k_interval(cosmo,clt1,clt2,l,&lkmin,&lkmax);
-
-  ipar.l=l;
-  ipar.cosmo=cosmo;
-  ipar.clt1=clt1;
-  ipar.clt2=clt2;
-  ipar.status = &clastatus;
-  F.function=&cl_integrand;
-  F.params=&ipar;
-  qagstatus=gsl_integration_qag(&F,lkmin,lkmax,0,1E-4,1000,GSL_INTEG_GAUSS41,w,&result,&eresult);
-  gsl_integration_workspace_free(w);
-  if(qagstatus!=GSL_SUCCESS || *ipar.status) {
-    *status=CCL_ERROR_INTEG;
-    strcpy(cosmo->status_message,"ccl_cls.c: ccl_angular_cl(): error integrating over k\n");
-    return -1;
-  }
-  ccl_check_status(cosmo,status);
-
-  return M_LN10*result/(l+0.5);
-}
-//TODO: currently using linear power spectrum
-
-
-
 //! Here CCL is passed to Angpow base classes
 namespace Angpow {
 
@@ -949,42 +910,39 @@ private:
  
 }//end namespace
 
-
-
-
-
-
 //Compute angular power spectrum given two ClTracers from ell=0 to lmax
 //ccl_cosmo -> CCL cosmology (for P(k) and distances)
 //lmax -> maximum angular multipole
 //clt1 -> tracer #1
 //clt2 -> tracer #2
 //status -> status
-SplPar * ccl_angular_cls_angpow(ccl_cosmology *ccl_cosmo, int lmax, CCL_ClTracer *clt_gc1, CCL_ClTracer *clt_gc2, int * status)
+static SplPar *ccl_angular_cls_angpow(ccl_cosmology *ccl_cosmo,int lmax,
+				      CCL_ClTracer *clt1,CCL_ClTracer *clt2,int * status)
 {
-  if(clt_gc1->has_magnification || clt_gc2->has_magnification)
+  if(clt1->has_magnification || clt2->has_magnification)
     printf("Magnification term not implemented in Angpow yet: will be ignored");
-  if(clt_gc1->tracer_type==CL_TRACER_WL || clt_gc2->tracer_type==CL_TRACER_WL)
+  if(clt1->tracer_type==CL_TRACER_WL || clt2->tracer_type==CL_TRACER_WL)
     printf("Weak lensing functions not implemented in Agnpow yet: will fail");
   
   // Initialize the Angpow parameters
-  Angpow::Parameters para = Angpow::Param::Instance().GetParam();
-  para.chebyshev_order_1 = 9;
-  para.chebyshev_order_2 = 9;
-  para.cl_kmax = 10;
-  para.linearStep = 40;
-  para.logStep = 1.15;
+  Angpow::Parameters para=Angpow::Param::Instance().GetParam();
+  para.chebyshev_order_1=9;
+  para.chebyshev_order_2=9;
+  para.cl_kmax=10;
+  para.linearStep=40;
+  para.logStep=1.15;
 
   // Initialize the radial selection windows W(z)
-  Angpow::RadSplineSelect Z1win(clt_gc1->spl_nz);
-  Angpow::RadSplineSelect Z2win(clt_gc2->spl_nz);
+  Angpow::RadSplineSelect Z1win(clt1->spl_nz);
+  Angpow::RadSplineSelect Z2win(clt2->spl_nz);
 
   // The cosmological distance tool to make the conversion z <-> r(z)
-  Angpow::CosmoCoordCCL cosmo(ccl_cosmo, 1./ccl_splines->A_SPLINE_MAX-1, 1./ccl_splines->A_SPLINE_MIN-1, ccl_splines->A_SPLINE_NA); //, para.cosmo_precision);
+  Angpow::CosmoCoordCCL cosmo(ccl_cosmo,1./ccl_splines->A_SPLINE_MAX-1,
+			      1./ccl_splines->A_SPLINE_MIN-1,ccl_splines->A_SPLINE_NA);
 
   // Initilaie the two integrand functions f(ell,k,z)
-  Angpow::IntegrandCCL int1(clt_gc1, ccl_cosmo);
-  Angpow::IntegrandCCL int2(clt_gc2, ccl_cosmo);
+  Angpow::IntegrandCCL int1(clt1,ccl_cosmo);
+  Angpow::IntegrandCCL int2(clt2,ccl_cosmo);
 
   // Initialize the Cl with parameters to select the ell set which is interpolated after the processing
   Angpow::Clbase clout(lmax,para.linearStep, para.logStep);
@@ -992,16 +950,83 @@ SplPar * ccl_angular_cls_angpow(ccl_cosmology *ccl_cosmo, int lmax, CCL_ClTracer
   // Main class to compute Cl with Angpow
   Angpow::Pk2Cl pk2cl; //Default: the user parameters are used in the Constructor 
   pk2cl.PrintParam();
-  pk2cl.Compute(int1, int2, cosmo, &Z1win, &Z2win, lmax, clout);
+  pk2cl.Compute(int1,int2,cosmo,&Z1win,&Z2win,lmax,clout);
 
   // Pass the Clbase class values (ell and C_ell) to the output spline
-  int n_l = clout.Size();
+  int n_l=clout.Size();
   std::vector<double> ls(n_l);
   std::vector<double> cls(n_l);
   for(int index_l=0; index_l<n_l; index_l++) {
-    ls[index_l]=clout[index_l].first; cls[index_l]=clout[index_l].second; 
+    ls[index_l]=clout[index_l].first;
+    cls[index_l]=clout[index_l].second;
+    printf("%d %d %d %lf\n",index_l,clout[index_l].first,para.linearStep,para.logStep);
   }
-  SplPar * spl_cl = spline_init(clout.Size(), &ls[0], &cls[0], clout[0].second, clout[n_l-1].second );
-
+  SplPar *spl_cl=spline_init(clout.Size(),&ls[0],&cls[0],clout[0].second,clout[n_l-1].second);
+  exit(1);
+  
   return spl_cl;
+}
+
+//Compute angular power spectrum between two bins
+//cosmo -> ccl_cosmology object
+//l -> angular multipole
+//clt1 -> tracer #1
+//clt2 -> tracer #2
+static double ccl_angular_cl_limber(ccl_cosmology *cosmo,int l,CCL_ClTracer *clt1,CCL_ClTracer *clt2,
+				    int * status)
+{
+  int clastatus=0, qagstatus;
+  IntClPar ipar;
+  double result=0,eresult;
+  double lkmin,lkmax;
+  gsl_function F;
+  gsl_integration_workspace *w=gsl_integration_workspace_alloc(1000);
+
+  get_k_interval(cosmo,clt1,clt2,l,&lkmin,&lkmax);
+
+  ipar.l=l;
+  ipar.cosmo=cosmo;
+  ipar.clt1=clt1;
+  ipar.clt2=clt2;
+  ipar.status = &clastatus;
+  F.function=&cl_integrand;
+  F.params=&ipar;
+  qagstatus=gsl_integration_qag(&F,lkmin,lkmax,0,1E-4,1000,GSL_INTEG_GAUSS41,w,&result,&eresult);
+  gsl_integration_workspace_free(w);
+  if(qagstatus!=GSL_SUCCESS || *ipar.status) {
+    *status=CCL_ERROR_INTEG;
+    strcpy(cosmo->status_message,"ccl_cls.c: ccl_angular_cls(): error integrating over k\n");
+    return -1;
+  }
+  ccl_check_status(cosmo,status);
+
+  return M_LN10*result/(l+0.5);
+}
+//TODO: currently using linear power spectrum
+
+void ccl_angular_cls(ccl_cosmology *cosmo,CCL_ClTracer *clt1,CCL_ClTracer *clt2,
+		     int n_ells,int *ells,double *cls_out,int ell_min_limber,int *status)
+{
+  int ii,do_nonlimber=0;
+  //First check if non-limber is needed at all
+
+  for(ii=0;ii<n_ells;ii++) {
+    if(ells[ii]<ell_min_limber)
+      do_nonlimber=1;
+  }
+
+  SplPar *spl_angpow=NULL;
+
+  if(do_nonlimber)
+    spl_angpow=ccl_angular_cls_angpow(cosmo,ell_min_limber,clt1,clt2,status);
+
+  for(ii=0;ii<n_ells;ii++) {
+    if(ells[ii]<ell_min_limber)
+      cls_out[ii]=spline_eval((double)(ells[ii]),spl_angpow);
+    else
+      cls_out[ii]=ccl_angular_cl_limber(cosmo,ells[ii],clt1,clt2,status);
+  }
+
+  if(do_nonlimber)
+    spline_free(spl_angpow);
 }

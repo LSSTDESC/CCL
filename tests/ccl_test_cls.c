@@ -121,31 +121,71 @@ static void compare_cls(char *compare_type,struct cls_data * data)
   fi_ll_12=fopen(fname,"r"); ASSERT_NOT_NULL(fi_ll_12);
   sprintf(fname,"tests/benchmark/codecomp_step2_outputs/run_b2b2%s_log_cl_ll.txt",compare_type);
   fi_ll_22=fopen(fname,"r"); ASSERT_NOT_NULL(fi_ll_22);
-  double fraction_failed=0;
+
+  int *ells=malloc(3001*sizeof(int));
+  double *cls_dd_11_b=malloc(3001*sizeof(double));
+  double *cls_dd_12_b=malloc(3001*sizeof(double));
+  double *cls_dd_22_b=malloc(3001*sizeof(double));
+  double *cls_ll_11_b=malloc(3001*sizeof(double));
+  double *cls_ll_12_b=malloc(3001*sizeof(double));
+  double *cls_ll_22_b=malloc(3001*sizeof(double));
+  double *cls_dd_11_h=malloc(3001*sizeof(double));
+  double *cls_dd_12_h=malloc(3001*sizeof(double));
+  double *cls_dd_22_h=malloc(3001*sizeof(double));
+  double *cls_ll_11_h=malloc(3001*sizeof(double));
+  double *cls_ll_12_h=malloc(3001*sizeof(double));
+  double *cls_ll_22_h=malloc(3001*sizeof(double));
+
   for(int ii=0;ii<3001;ii++) {
     int l;
     double cl_dd_11,cl_dd_12,cl_dd_22;
     double cl_ll_11,cl_ll_12,cl_ll_22;
     double cl_dd_11_h,cl_dd_12_h,cl_dd_22_h;
     double cl_ll_11_h,cl_ll_12_h,cl_ll_22_h;
-    fscanf(fi_dd_11,"%d %lf",&l,&cl_dd_11);
-    fscanf(fi_dd_12,"%d %lf",&l,&cl_dd_12);
-    fscanf(fi_dd_22,"%d %lf",&l,&cl_dd_22);
-    fscanf(fi_ll_11,"%d %lf",&l,&cl_ll_11);
-    fscanf(fi_ll_12,"%d %lf",&l,&cl_ll_12);
-    fscanf(fi_ll_22,"%d %lf",&l,&cl_ll_22);
-    cl_dd_11_h=ccl_angular_cl(cosmo,l,tr_nc_1,tr_nc_1,&status);
-    if (status) printf("%s\n",cosmo->status_message);
-    cl_dd_12_h=ccl_angular_cl(cosmo,l,tr_nc_1,tr_nc_2,&status);
-    if (status) printf("%s\n",cosmo->status_message);
-    cl_dd_22_h=ccl_angular_cl(cosmo,l,tr_nc_2,tr_nc_2,&status);
-    if (status) printf("%s\n",cosmo->status_message);
-    cl_ll_11_h=ccl_angular_cl(cosmo,l,tr_wl_1,tr_wl_1,&status);
-    if (status) printf("%s\n",cosmo->status_message);
-    cl_ll_12_h=ccl_angular_cl(cosmo,l,tr_wl_1,tr_wl_2,&status);
-    if (status) printf("%s\n",cosmo->status_message);
-    cl_ll_22_h=ccl_angular_cl(cosmo,l,tr_wl_2,tr_wl_2,&status);
-    if (status) printf("%s\n",cosmo->status_message);
+    fscanf(fi_dd_11,"%d %lf",&l,&(cls_dd_11_b[ii]));
+    fscanf(fi_dd_12,"%d %lf",&l,&(cls_dd_12_b[ii]));
+    fscanf(fi_dd_22,"%d %lf",&l,&(cls_dd_22_b[ii]));
+    fscanf(fi_ll_11,"%d %lf",&l,&(cls_ll_11_b[ii]));
+    fscanf(fi_ll_12,"%d %lf",&l,&(cls_ll_12_b[ii]));
+    fscanf(fi_ll_22,"%d %lf",&l,&(cls_ll_22_b[ii]));
+    ells[ii]=l;
+  }
+
+  fclose(fi_dd_11);
+  fclose(fi_dd_12);
+  fclose(fi_dd_22);
+  fclose(fi_ll_11);
+  fclose(fi_ll_12);
+  fclose(fi_ll_22);
+
+  ccl_angular_cls(cosmo,tr_nc_1,tr_nc_1,3001,ells,cls_dd_11_h,-1,&status);
+  if (status) printf("%s\n",cosmo->status_message);
+  ccl_angular_cls(cosmo,tr_nc_1,tr_nc_2,3001,ells,cls_dd_12_h,-1,&status);
+  if (status) printf("%s\n",cosmo->status_message);
+  ccl_angular_cls(cosmo,tr_nc_2,tr_nc_2,3001,ells,cls_dd_22_h,-1,&status);
+  if (status) printf("%s\n",cosmo->status_message);
+  ccl_angular_cls(cosmo,tr_wl_1,tr_wl_1,3001,ells,cls_ll_11_h,-1,&status);
+  if (status) printf("%s\n",cosmo->status_message);
+  ccl_angular_cls(cosmo,tr_wl_1,tr_wl_2,3001,ells,cls_ll_12_h,-1,&status);
+  if (status) printf("%s\n",cosmo->status_message);
+  ccl_angular_cls(cosmo,tr_wl_2,tr_wl_2,3001,ells,cls_ll_22_h,-1,&status);
+  if (status) printf("%s\n",cosmo->status_message);
+
+  double fraction_failed=0;
+  for(int ii=0;ii<3001;ii++) {
+    int l=ells[ii];
+    double cl_dd_11  =cls_dd_11_b[ii];
+    double cl_dd_12  =cls_dd_12_b[ii];
+    double cl_dd_22  =cls_dd_22_b[ii];
+    double cl_ll_11  =cls_ll_11_b[ii];
+    double cl_ll_12  =cls_ll_12_b[ii];
+    double cl_ll_22  =cls_ll_22_b[ii];
+    double cl_dd_11_h=cls_dd_11_h[ii];
+    double cl_dd_12_h=cls_dd_12_h[ii];
+    double cl_dd_22_h=cls_dd_22_h[ii];
+    double cl_ll_11_h=cls_ll_11_h[ii];
+    double cl_ll_12_h=cls_ll_12_h[ii];
+    double cl_ll_22_h=cls_ll_22_h[ii];
 
     if(fabs(cl_dd_11_h/cl_dd_11-1)>CLS_TOLERANCE)
       fraction_failed++;
@@ -161,21 +201,18 @@ static void compare_cls(char *compare_type,struct cls_data * data)
       fraction_failed++;
   }
 
-  fclose(fi_dd_11);
-  fclose(fi_dd_12);
-  fclose(fi_dd_22);
-  fclose(fi_ll_11);
-  fclose(fi_ll_12);
-  fclose(fi_ll_22);
+  free(ells);
+  free(cls_dd_11_b); free(cls_dd_12_b); free(cls_dd_22_b); 
+  free(cls_ll_11_b); free(cls_ll_12_b); free(cls_ll_22_b); 
+  free(cls_dd_11_h); free(cls_dd_12_h); free(cls_dd_22_h); 
+  free(cls_ll_11_h); free(cls_ll_12_h); free(cls_ll_22_h); 
 
   fraction_failed/=6*3001;
   printf("%lf %%\n",fraction_failed*100);
   ASSERT_TRUE((fraction_failed<CLS_FRACTION));
 
-  free(zarr_1);
-  free(zarr_2);
-  free(pzarr_1);
-  free(pzarr_2);
+  free(zarr_1); free(zarr_2);
+  free(pzarr_1); free(pzarr_2);
   free(bzarr);
   ccl_cosmology_free(cosmo);
 }

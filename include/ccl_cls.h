@@ -83,4 +83,5 @@ CCL_ClTracer *ccl_cl_tracer_lensing_simple_new(ccl_cosmology *cosmo,
 //CCL_ClTracer destructor
 void ccl_cl_tracer_free(CCL_ClTracer *clt);
 //Computes limber power spectrum for two different tracers
-double ccl_angular_cl(ccl_cosmology *cosmo,int l,CCL_ClTracer *clt1,CCL_ClTracer *clt2, int * status);
+void ccl_angular_cls(ccl_cosmology *cosmo,CCL_ClTracer *clt1,CCL_ClTracer *clt2,
+		     int n_ells,int *ells,double *cls_out,int ell_min_limber,int *status);
