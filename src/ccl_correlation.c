@@ -3,6 +3,7 @@
 #include "gsl/gsl_roots.h"
 #include "gsl/gsl_spline.h"
 #include "gsl/gsl_sf_bessel.h"
+#include "gsl/gsl_sf_legendre.h"
 #include "ccl_error.h"
 #include "ccl_utils.h"
 #include <stdlib.h>
@@ -164,13 +165,19 @@ TASK: For a given tracer, get the correlation function
 INPUT: type of tracer, number of theta values to evaluate = NL, theta vector
  */
 
+
 int ccl_tracer_corr(ccl_cosmology *cosmo, int n_theta, double **theta,
                     CCL_ClTracer *ct1, CCL_ClTracer *ct2, int i_bessel,
 		    bool do_taper_cl,double *taper_cl_limits, 
 		    double **corr_func)
 {
-  return ccl_tracer_corr2(cosmo, n_theta,theta,ct1,ct2,i_bessel,do_taper_cl,taper_cl_limits,
+  /*
+   return ccl_tracer_corr2(cosmo, n_theta,theta,ct1,ct2,i_bessel,do_taper_cl,taper_cl_limits,
 			  corr_func,ccl_angular_cl);
+  */
+  return ccl_tracer_corr_legendre(cosmo, n_theta,theta,ct1,ct2,i_bessel,do_taper_cl,
+				  taper_cl_limits,corr_func,ccl_angular_cl);
+    
 }
 
 
@@ -252,3 +259,39 @@ int ccl_tracer_corr2(ccl_cosmology *cosmo, int n_theta, double **theta,
   return 0;
 }
 
+int ccl_tracer_corr_legendre(ccl_cosmology *cosmo, int n_theta, double **theta,
+		     CCL_ClTracer *ct1, CCL_ClTracer *ct2, int i_bessel,
+                     bool do_taper_cl,double *taper_cl_limits,double **corr_func,
+		     double (*angular_cl)(ccl_cosmology *cosmo,int l,CCL_ClTracer *clt1,
+					  CCL_ClTracer *clt2, int * status) ){
+  int n_L=15000,status=0;
+  int l_arr[n_L];
+  double cl_arr[n_L];
+  for(int i=1;i<n_L;i+=1) {
+    l_arr[i]=i;
+    cl_arr[i]=angular_cl(cosmo,l_arr[i],ct1,ct2,&status);
+  }
+  if (do_taper_cl)
+    status=taper_cl(n_theta,l_arr,cl_arr, taper_cl_limits);
+
+  double *theta2;//why is theta double pointer, **theta ??
+  theta2=ccl_log_spacing(0.01*M_PI/180.,10*M_PI/180.,n_theta);
+  *corr_func=(double *)malloc(sizeof(double)*n_theta);
+  *theta=(double *)malloc(sizeof(double)*n_theta);
+
+
+  double *Pl_theta;
+  //*Pl_theta=(double *)malloc(sizeof(double)*n_theta);
+  Pl_theta=malloc(sizeof(double)*n_L);
+
+  for (int i=0;i<n_theta;i++){
+    //    Pl_theta[i]=malloc(sizeof(double)*n_theta);
+    gsl_sf_legendre_Pl_array(n_L,cos(theta2[i]),Pl_theta);
+    (*corr_func)[i]=0;
+    (*theta)[i]=theta2[i];
+    for(int i_L=1;i_L<n_L;i_L+=1) {
+      (*corr_func)[i]+=cl_arr[i_L]*(2*i_L+1)*Pl_theta[i_L];
+    }
+    (*corr_func)[i]/=(M_PI*4);
+  }
+}

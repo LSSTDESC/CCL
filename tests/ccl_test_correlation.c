@@ -163,7 +163,7 @@ static void compare_corr(char *compare_type,struct corrs_data * data)
   double *wt_dd_11_h,*wt_dd_12_h,*wt_dd_22_h,*wt_dd_11_h_taper;
   double *wt_ll_11_h_mm,*wt_ll_12_h_mm,*wt_ll_22_h_mm;
   double *wt_ll_11_h_pp,*wt_ll_12_h_pp,*wt_ll_22_h_pp;
-  double theta_in[nofl],*theta_arr;
+  double theta_in[nofl],*theta_arr,*theta_arr_an;
 
 
   for(int ii=0;ii<nofl;ii++) {
@@ -180,11 +180,11 @@ static void compare_corr(char *compare_type,struct corrs_data * data)
 
   taper_cl=true;
   //computing on analytical functions
-  ccl_tracer_corr2(cosmo,NL,&theta_arr,tr_nc_1,tr_nc_1,0,taper_cl,taper_cl_limits,
+  ccl_tracer_corr2(cosmo,NL,&theta_arr_an,tr_nc_1,tr_nc_1,0,taper_cl,taper_cl_limits,
 		   &analytical_l_inv,angular_l_inv);
-  ccl_tracer_corr2(cosmo,NL,&theta_arr,tr_nc_1,tr_nc_1,0,taper_cl,taper_cl_limits,
+  ccl_tracer_corr2(cosmo,NL,&theta_arr_an,tr_nc_1,tr_nc_1,0,taper_cl,taper_cl_limits,
 		   &analytical_l2_inv,angular_l2_inv);
-  ccl_tracer_corr2(cosmo,NL,&theta_arr,tr_nc_1,tr_nc_1,0,taper_cl,taper_cl_limits,
+  ccl_tracer_corr2(cosmo,NL,&theta_arr_an,tr_nc_1,tr_nc_1,0,taper_cl,taper_cl_limits,
 		   &analytical_l2_exp,angular_l2_exp);
 
   taper_cl=true;
@@ -214,7 +214,10 @@ static void compare_corr(char *compare_type,struct corrs_data * data)
 		  &wt_ll_22_h_mm);
 
   //Re-scale theta from radians to degrees
-  for (int i=0;i<NL;i++){theta_arr[i]=theta_arr[i]*180/M_PI;}
+  for (int i=0;i<NL;i++){
+    theta_arr_an[i]=theta_arr_an[i]*180/M_PI;
+    theta_arr[i]=theta_arr[i]*180/M_PI;
+  }
 
   
   FILE *output2 = fopen("cc_test_corr_out_fftlog.dat", "w");
@@ -225,7 +228,7 @@ static void compare_corr(char *compare_type,struct corrs_data * data)
 	    wt_ll_11_h_pp[ii],wt_ll_12_h_pp[ii],wt_ll_22_h_pp[ii],wt_ll_11_h_mm[ii],
 	    wt_ll_12_h_mm[ii],wt_ll_22_h_mm[ii]);
 
-    fprintf(output_analytical,"%.10e %.10e %.10e %.10e\n",theta_arr[ii],
+    fprintf(output_analytical,"%.10e %.10e %.10e %.10e\n",theta_arr_an[ii],
 	    analytical_l_inv[ii],analytical_l2_inv[ii],analytical_l2_exp[ii]);
   }
   fclose(output2);
@@ -345,7 +348,7 @@ static void compare_corr(char *compare_type,struct corrs_data * data)
 
   fraction_failed/=9*nofl;
   printf("%lf %%\n",fraction_failed*100);
-  printf("Analytical %lf %%\n",fraction_failed_analytical/nofl/3*100);
+  printf("Analytical %lf %%\n",fraction_failed_analytical/nofl/1*100);
   ASSERT_TRUE((fraction_failed<CORR_FRACTION));
 
   free(zarr_1);
