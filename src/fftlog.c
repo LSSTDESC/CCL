@@ -130,7 +130,7 @@ void fht(int N, const double r[], const double complex a[], double k[], double c
     free(ulocal);
 }
 
-void fftlog_ComputeXiLM(double l, int m, int N, const double k[], const double pk[], double r[], double xi[]) {
+void fftlog_ComputeXiLM(double l, double m, int N, const double k[], const double pk[], double r[], double xi[]) {
   double complex* a = malloc(sizeof(complex double)*N);
   double complex* b = malloc(sizeof(complex double)*N);
 
@@ -138,7 +138,8 @@ void fftlog_ComputeXiLM(double l, int m, int N, const double k[], const double p
         a[i] = pow(k[i], m - 0.5) * pk[i];
     fht(N, k, a, r, b, l + 0.5, 0, 1, 1, NULL);
     for(int i = 0; i < N; i++)
-        xi[i] = creal(pow(2*M_PI*r[i], -1.5) * b[i]);
+      //      xi[i] = creal(pow(2*M_PI*r[i], -(m-0.5)) * b[i]);
+      xi[i] = creal(pow(2*M_PI*r[i], -1.5) * b[i]);
 
     free(a);
     free(b);
