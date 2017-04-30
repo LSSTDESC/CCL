@@ -274,7 +274,7 @@ int ccl_tracer_corr_legendre(ccl_cosmology *cosmo, int n_theta, double **theta,
   if (do_taper_cl)
     status=taper_cl(n_theta,l_arr,cl_arr, taper_cl_limits);
 
-  double *theta2;//why is theta double pointer, **theta ??
+  double *theta2;//why is theta and corr_func double pointer, **theta ??
   theta2=ccl_log_spacing(0.01*M_PI/180.,10*M_PI/180.,n_theta);
   *corr_func=(double *)malloc(sizeof(double)*n_theta);
   *theta=(double *)malloc(sizeof(double)*n_theta);
