@@ -23,8 +23,8 @@ const ccl_configuration default_config = {ccl_boltzmann_class, ccl_halofit, ccl_
 
 ccl_spline_params * ccl_splines; // Global variable
 
-void ccl_cosmology_read_config(){
-
+void ccl_cosmology_read_config(void)
+{
   int CONFIG_LINE_BUFFER_SIZE=100;
   int MAX_CONFIG_VAR_LEN=100;
   FILE *fconfig;
@@ -115,7 +115,6 @@ ccl_cosmology * ccl_cosmology_create(ccl_parameters params, ccl_configuration co
   cosmo->data.achi=NULL;
 
   cosmo->data.logsigma = NULL;
-
   // hmf parameter for interpolation
   cosmo->data.alphahmf = NULL;
   cosmo->data.betahmf = NULL;
@@ -125,6 +124,7 @@ ccl_cosmology * ccl_cosmology_create(ccl_parameters params, ccl_configuration co
 
   cosmo->data.p_lin = NULL;
   cosmo->data.p_nl = NULL;
+  cosmo->data.k_min= 5E-5;
   
   cosmo->computed_distances = false;
   cosmo->computed_growth = false;

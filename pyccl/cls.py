@@ -243,7 +243,7 @@ def _check_array_params(z, f_arg, f_name):
     return z_f, f
 
 
-def angular_cl(cosmo, cltracer1, cltracer2, ell):
+def angular_cl(cosmo, cltracer1, cltracer2, ell,ell_limber=-1):
     """
     Calculate the angular (cross-)power spectrum for a pair of tracers.
 
@@ -252,6 +252,7 @@ def angular_cl(cosmo, cltracer1, cltracer2, ell):
         cltracer1, cltracer2 (:obj:): ClTracer objects, of any kind.
         ell (float or array_like): Angular wavenumber(s) to evaluate the 
             angular power spectrum at.
+        ell_limber (float) : Angular wavenumber beyond which the Limber approximation will be used
 
     Returns:
         cl (float or array_like): Angular (cross-)power spectrum values, C_ell, 
@@ -269,12 +270,13 @@ def angular_cl(cosmo, cltracer1, cltracer2, ell):
     # Return Cl values, according to whether ell is an array or not
     if isinstance(ell, float) or isinstance(ell, int) :
         # Use single-value function
-        cl, status = lib.angular_cl(cosmo, ell, clt1, clt2, status)
+        cl_one, status = lib.angular_cl_vec(cosmo, clt1, clt2, [ell], 1, ell_limber, status)
+        cl=cl_one[0]
     elif isinstance(ell, np.ndarray):
         # Use vectorised function
-        cl, status = lib.angular_cl_vec(cosmo, clt1, clt2, ell, ell.size, status)
+        cl, status = lib.angular_cl_vec(cosmo, clt1, clt2, ell, ell.size, ell_limber, status)
     else:
         # Use vectorised function
-        cl, status = lib.angular_cl_vec(cosmo, clt1, clt2, ell, len(ell), status)
+        cl, status = lib.angular_cl_vec(cosmo, clt1, clt2, ell, len(ell), ell_limber, status)
     check(status)
     return cl

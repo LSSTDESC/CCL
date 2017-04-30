@@ -63,13 +63,21 @@ CCL_ClTracer* cl_tracer_new_wrapper(ccl_cosmology *cosmo,int tracer_type,
 void angular_cl_vec(ccl_cosmology * cosmo,
                     CCL_ClTracer *clt1, CCL_ClTracer *clt2,
                     double* ell, int nell,
+		    double ell_min_limber,
                     double* output, int nout,
                     int* status)
 {
-    assert(nout == nell);
-    for(int i=0; i < nell; i++){
-        output[i] = ccl_angular_cl(cosmo, ell[i], clt1, clt2, status);
-    }
+  assert(nout == nell);
+
+  //Cast ells as integers
+  int *ell_int=malloc(nell*sizeof(int));
+  for(int ii=0;ii<nell;ii++)
+    ell_int[ii]=(int)(ell[ii]);
+
+  //Compute C_ells
+  ccl_angular_cls(cosmo,clt1,clt2,nell,ell_int,output,ell_min_limber,status);
+
+  free(ell_int);
 }
 
 %}

@@ -32,6 +32,15 @@ typedef struct {
   SplPar *spl_wM; //Spline for magnification
 } CCL_ClTracer;
 
+
+SplPar * spline_init(int n,double *x,double *y,double y0,double yf);
+double spline_eval(double x, SplPar *spl);
+double speval_bis(double x,void *params);
+void spline_free(SplPar *spl);
+
+
+
+
 //Generic CCL_ClTracer creator
 // Tracer_type: pass CL_TRACER_NC (number counts) or CL_TRACER_WL (weak lensing)
 // * has_rsd -> set to 1 if you want to compute the RSD contribution to number counts (0 otherwise)
@@ -74,4 +83,5 @@ CCL_ClTracer *ccl_cl_tracer_lensing_simple_new(ccl_cosmology *cosmo,
 //CCL_ClTracer destructor
 void ccl_cl_tracer_free(CCL_ClTracer *clt);
 //Computes limber power spectrum for two different tracers
-double ccl_angular_cl(ccl_cosmology *cosmo,int l,CCL_ClTracer *clt1,CCL_ClTracer *clt2, int * status);
+void ccl_angular_cls(ccl_cosmology *cosmo,CCL_ClTracer *clt1,CCL_ClTracer *clt2,
+		     int n_ells,int *ells,double *cls_out,int ell_min_limber,int *status);

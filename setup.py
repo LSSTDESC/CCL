@@ -15,9 +15,9 @@ except AttributeError:
 _ccllib = Extension(
             "_ccllib",
                ["pyccl/ccl.i",],
-               libraries = ['m', 'gsl', 'gslcblas', 'ccl'],
+               libraries = ['m', 'gsl', 'gslcblas', 'ccl','fftw3','fftw3_threads','gomp'],
                include_dirs = [numpy_include, "include/", "class/include"],
-               extra_compile_args=['-O4', '-std=c99'],
+               extra_compile_args=['-O4', '-std=c99','-fopenmp'],
                swig_opts=['-threads'],
            )
 
