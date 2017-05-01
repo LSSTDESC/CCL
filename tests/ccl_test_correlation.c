@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+#include <time.h>
 #include <string.h>
 
 #define CORR_TOLERANCE 1E-3
@@ -154,7 +155,7 @@ static void compare_corr(char *compare_type,struct corrs_data * data)
   double fraction_failed=0,fraction_failed_analytical=0;
   int nofl=15;
   bool taper_cl=false;
-  double taper_cl_limits[4]={.01,1,10000,60000};//{0,0,0,0};
+  double taper_cl_limits[4]={1,2,10000,15000};//{0,0,0,0};
   double wt_dd_11[nofl],wt_dd_12[nofl],wt_dd_22[nofl];
   double wt_dd_11_taper[nofl];
   double wt_ll_11_mm[nofl],wt_ll_12_mm[nofl],wt_ll_22_mm[nofl];
@@ -177,7 +178,10 @@ static void compare_corr(char *compare_type,struct corrs_data * data)
     fscanf(fi_ll_12_mm,"%*lf %lf",&wt_ll_12_mm[ii]);
     fscanf(fi_ll_22_mm,"%*lf %lf",&wt_ll_22_mm[ii]);
   }
+  time_t start_time,end_time;
+  double time_sec=0;
 
+  time(&start_time);
   taper_cl=true;
   //computing on analytical functions
   ccl_tracer_corr_fftlog(cosmo,NL,&theta_arr_an,tr_nc_1,tr_nc_1,0,taper_cl,taper_cl_limits,
@@ -187,6 +191,11 @@ static void compare_corr(char *compare_type,struct corrs_data * data)
   ccl_tracer_corr_fftlog(cosmo,NL,&theta_arr_an,tr_nc_1,tr_nc_1,0,taper_cl,taper_cl_limits,
 		   &analytical_l2_exp,angular_l2_exp);
 
+  time(&end_time);
+  time_sec=difftime(end_time,start_time);
+  printf("CCL correlation Analytical done. More in progress... %.10e \n",time_sec);
+
+  time(&start_time);
   taper_cl=true;
   //taper_cl_limits={1,2,30000,50000};
   ccl_tracer_corr(cosmo,NL,&theta_arr,tr_nc_1,tr_nc_1,0,taper_cl,taper_cl_limits,
@@ -195,7 +204,9 @@ static void compare_corr(char *compare_type,struct corrs_data * data)
   ccl_tracer_corr(cosmo,NL,&theta_arr,tr_nc_1,tr_nc_1,0,taper_cl,taper_cl_limits,
 		  &wt_dd_11_h);
 
-  printf("CCL correlation first calculation done. More in progress...\n");
+  time(&end_time);
+  time_sec=difftime(end_time,start_time);
+  printf("CCL correlation first calculation done. More in progress... %.10e \n",time_sec);
   ccl_tracer_corr(cosmo,NL,&theta_arr,tr_nc_1,tr_nc_2,0,taper_cl,taper_cl_limits,
 		  &wt_dd_12_h);
   ccl_tracer_corr(cosmo,NL,&theta_arr,tr_nc_2,tr_nc_2,0,taper_cl,taper_cl_limits,

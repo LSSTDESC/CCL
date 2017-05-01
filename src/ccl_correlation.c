@@ -135,7 +135,7 @@ int bin_corr(int n_theta, double *theta, double *corr_func,int n_theta_bins,
 }
 
 /*Applying cosine tapering to cls to reduce aliasing*/
-int taper_cl(int n_ell,double *ell,double *cl, double *ell_limits)
+int taper_cl(int n_ell,int *ell,double *cl, double *ell_limits)
 {
   //ell_limits=[low_ell_limit_lower,low_ell_limit_upper,high_ell_limit_lower,high_ell_limit_upper ]
 
@@ -171,13 +171,13 @@ int ccl_tracer_corr(ccl_cosmology *cosmo, int n_theta, double **theta,
 		    bool do_taper_cl,double *taper_cl_limits, 
 		    double **corr_func)
 {
-  /*
-   return ccl_tracer_corr_fftlog(cosmo, n_theta,theta,ct1,ct2,i_bessel,do_taper_cl,taper_cl_limits,
+  
+  /* return ccl_tracer_corr_fftlog(cosmo, n_theta,theta,ct1,ct2,i_bessel,do_taper_cl,taper_cl_limits,
 			  corr_func,ccl_angular_cl);
-  */
+   */
   return ccl_tracer_corr_legendre(cosmo, n_theta,theta,ct1,ct2,i_bessel,do_taper_cl,
 				  taper_cl_limits,corr_func,ccl_angular_cl);
-    
+   
 }
 
 
@@ -231,7 +231,7 @@ int ccl_tracer_corr_fftlog(ccl_cosmology *cosmo, int n_theta, double **theta,
     */
   }
 
-  if (do_taper_cl)
+  if (do_taper_cl)//also takes in int l_arr
     status=taper_cl(n_theta,l_arr,cl_arr, taper_cl_limits);
  
   *theta=(double *)malloc(sizeof(double)*n_theta);
@@ -264,15 +264,16 @@ int ccl_tracer_corr_legendre(ccl_cosmology *cosmo, int n_theta, double **theta,
                      bool do_taper_cl,double *taper_cl_limits,double **corr_func,
 		     double (*angular_cl)(ccl_cosmology *cosmo,int l,CCL_ClTracer *clt1,
 					  CCL_ClTracer *clt2, int * status) ){
-  int n_L=15000,status=0;
+  int n_L=n_theta; //15000;
+  int status=0;
   int l_arr[n_L];
   double cl_arr[n_L];
 
+  l_arr[0]=0;cl_arr[0]=0;
   for(int i=1;i<n_L;i+=1) {
      l_arr[i]=i;
     cl_arr[i]=angular_cl(cosmo,l_arr[i],ct1,ct2,&status);
   }
-
   /*
   if((ct1->tracer_type==CL_TRACER_NC) && (ct2->tracer_type==CL_TRACER_NC)){
     FILE *output2 = fopen("ccl_cl_legendre.dat", "w");
@@ -283,7 +284,7 @@ int ccl_tracer_corr_legendre(ccl_cosmology *cosmo, int n_theta, double **theta,
     }*/
 
   if (do_taper_cl)
-    status=taper_cl(n_theta,l_arr,cl_arr, taper_cl_limits);
+    status=taper_cl(n_L,l_arr,cl_arr, taper_cl_limits);
 
   double *theta2;//why is theta and corr_func double pointer, **theta ??
   theta2=ccl_log_spacing(0.01*M_PI/180.,10*M_PI/180.,n_theta);
