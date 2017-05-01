@@ -172,7 +172,7 @@ int ccl_tracer_corr(ccl_cosmology *cosmo, int n_theta, double **theta,
 		    double **corr_func)
 {
   /*
-   return ccl_tracer_corr2(cosmo, n_theta,theta,ct1,ct2,i_bessel,do_taper_cl,taper_cl_limits,
+   return ccl_tracer_corr_fftlog(cosmo, n_theta,theta,ct1,ct2,i_bessel,do_taper_cl,taper_cl_limits,
 			  corr_func,ccl_angular_cl);
   */
   return ccl_tracer_corr_legendre(cosmo, n_theta,theta,ct1,ct2,i_bessel,do_taper_cl,
@@ -182,7 +182,7 @@ int ccl_tracer_corr(ccl_cosmology *cosmo, int n_theta, double **theta,
 
 
 /*Following function takes a function to calculate angular cl as well. By default above function will call it using ccl_angular_cl*/
-int ccl_tracer_corr2(ccl_cosmology *cosmo, int n_theta, double **theta, 
+int ccl_tracer_corr_fftlog(ccl_cosmology *cosmo, int n_theta, double **theta, 
 		    CCL_ClTracer *ct1, CCL_ClTracer *ct2, int i_bessel,
 		     bool do_taper_cl,double *taper_cl_limits,double **corr_func, 
 		    double (*angular_cl)(ccl_cosmology *cosmo,int l,CCL_ClTracer *clt1,
@@ -267,10 +267,20 @@ int ccl_tracer_corr_legendre(ccl_cosmology *cosmo, int n_theta, double **theta,
   int n_L=15000,status=0;
   int l_arr[n_L];
   double cl_arr[n_L];
+
   for(int i=1;i<n_L;i+=1) {
-    l_arr[i]=i;
+     l_arr[i]=i;
     cl_arr[i]=angular_cl(cosmo,l_arr[i],ct1,ct2,&status);
   }
+
+  if((ct1->tracer_type==CL_TRACER_NC) && (ct2->tracer_type==CL_TRACER_NC)){
+    FILE *output2 = fopen("ccl_cl_legendre.dat", "w");
+    for(int i=1;i<n_L;i+=1) {
+      fprintf(output2,"%d %.10e \n",l_arr[i],cl_arr[i]);
+    }
+    fclose(output2);
+  }
+
   if (do_taper_cl)
     status=taper_cl(n_theta,l_arr,cl_arr, taper_cl_limits);
 
@@ -278,7 +288,6 @@ int ccl_tracer_corr_legendre(ccl_cosmology *cosmo, int n_theta, double **theta,
   theta2=ccl_log_spacing(0.01*M_PI/180.,10*M_PI/180.,n_theta);
   *corr_func=(double *)malloc(sizeof(double)*n_theta);
   *theta=(double *)malloc(sizeof(double)*n_theta);
-
 
   double *Pl_theta;
   //*Pl_theta=(double *)malloc(sizeof(double)*n_theta);

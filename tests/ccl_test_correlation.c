@@ -180,11 +180,11 @@ static void compare_corr(char *compare_type,struct corrs_data * data)
 
   taper_cl=true;
   //computing on analytical functions
-  ccl_tracer_corr2(cosmo,NL,&theta_arr_an,tr_nc_1,tr_nc_1,0,taper_cl,taper_cl_limits,
+  ccl_tracer_corr_fftlog(cosmo,NL,&theta_arr_an,tr_nc_1,tr_nc_1,0,taper_cl,taper_cl_limits,
 		   &analytical_l_inv,angular_l_inv);
-  ccl_tracer_corr2(cosmo,NL,&theta_arr_an,tr_nc_1,tr_nc_1,0,taper_cl,taper_cl_limits,
+  ccl_tracer_corr_fftlog(cosmo,NL,&theta_arr_an,tr_nc_1,tr_nc_1,0,taper_cl,taper_cl_limits,
 		   &analytical_l2_inv,angular_l2_inv);
-  ccl_tracer_corr2(cosmo,NL,&theta_arr_an,tr_nc_1,tr_nc_1,0,taper_cl,taper_cl_limits,
+  ccl_tracer_corr_fftlog(cosmo,NL,&theta_arr_an,tr_nc_1,tr_nc_1,0,taper_cl,taper_cl_limits,
 		   &analytical_l2_exp,angular_l2_exp);
 
   taper_cl=true;
