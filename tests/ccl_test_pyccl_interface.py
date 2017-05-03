@@ -2,7 +2,7 @@ import numpy as np
 from numpy.testing import assert_raises, assert_warns, assert_no_warnings, \
                           assert_, run_module_suite
 import pyccl as ccl
-
+import math
 
 def reference_models():
     """
@@ -285,7 +285,27 @@ def check_cls(cosmo):
     assert_( all_finite(ccl.angular_cl(cosmo, nc1, lens1, ell_arr)) )
     assert_( all_finite(ccl.angular_cl(cosmo, nc1, lens2, ell_arr)) )
     
+def check_corr(cosmo):
 
+    z = np.linspace(0., 3., 200)
+    i_lim = 26. # Limiting i-band magnitude
+    z0 = 0.0417*i_lim - 0.744
+    Ngal = 46. * 100.31 * (i_lim - 25.) # Normalisation, galaxies/arcmin^2
+    pz = 1./(2.*z0) * (z / z0)**2. * np.exp(-z/z0) # Redshift distribution, p(z)
+    dNdz = Ngal * pz # Number density distribution
+    lens1 = ccl.ClTracerLensing(cosmo, False, z,dNdz)
+    lens2 = ccl.ClTracerLensing(cosmo, False, z,dNdz)
+    t=np.logspace(-2,np.log10(5.),20) #degrees
+    trad=t*math.pi/180.
+    assert_no_warnings(ccl.correlation,trad,cosmo,lens1,lens2,0)
+    assert_no_warnings(ccl.correlation,trad,cosmo,lens1,lens2,4)
+    corrfunc=ccl.correlation(trad,cosmo,lens1,lens2,0)
+    assert_( all_finite(corrfunc))
+    corrfunc=ccl.correlation(trad,cosmo,lens1,lens2,4)
+    assert_( all_finite(corrfunc))
+    
+
+    
 def test_background():
     """
     Test background and growth functions in ccl.background.
@@ -321,5 +341,14 @@ def test_cls():
     for cosmo in reference_models():
         yield check_cls, cosmo
 
+
+def test_corr():
+    """
+    Test top-level functions in pyccl.correlation module.
+    """
+    for cosmo in reference_models():
+        yield check_corr, cosmo
+
+        
 if __name__ == '__main__':
     run_module_suite()

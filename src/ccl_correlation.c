@@ -95,7 +95,8 @@ double angular_l_inv2(ccl_cosmology *cosmo,int l,CCL_ClTracer *clt1,CCL_ClTracer
   }
 
 /*Binning the computed correlation function*/
-int bin_corr(int n_theta, double *theta, double *corr_func,int n_theta_bins, 
+//used to be bin_corr
+static int bin_func(int n_theta, double *theta, double *corr_func,int n_theta_bins, 
 	     double *theta_bins, double *corr_func_binned)
 {
   double theta_integrand_lim[2]={0,0};
@@ -135,7 +136,7 @@ int bin_corr(int n_theta, double *theta, double *corr_func,int n_theta_bins,
 }
 
 /*Applying cosine tapering to cls to reduce aliasing*/
-int taper_cl(int n_ell,int *ell,double *cl, double *ell_limits)
+static int taper_cl(int n_ell,int *ell,double *cl, double *ell_limits)
 {
   //ell_limits=[low_ell_limit_lower,low_ell_limit_upper,high_ell_limit_lower,high_ell_limit_upper ]
 
@@ -181,7 +182,8 @@ int ccl_tracer_corr(ccl_cosmology *cosmo, int n_theta, double **theta,
 }
 
 
-/*Following function takes a function to calculate angular cl as well. By default above function will call it using ccl_angular_cl*/
+/*Following function takes a function to calculate angular cl as well. 
+By default above function will call it using ccl_angular_cl*/
 int ccl_tracer_corr_fftlog(ccl_cosmology *cosmo, int n_theta, double **theta, 
 		    CCL_ClTracer *ct1, CCL_ClTracer *ct2, int i_bessel,
 		     bool do_taper_cl,double *taper_cl_limits,double **corr_func, 
@@ -305,4 +307,30 @@ int ccl_tracer_corr_legendre(ccl_cosmology *cosmo, int n_theta, double **theta,
     }
     (*corr_func)[i]/=(M_PI*4);
   }
+}
+
+
+
+/*--------ROUTINE: ccl_single_tracer_corr ------
+TASK: Wrap bin_func and tracer_corr to get the correlation function at a single point
+INPUT: type of tracer, number of theta values to evaluate = NL, theta vector
+ */
+
+double ccl_single_tracer_corr(double theta_in,ccl_cosmology *cosmo,CCL_ClTracer *ct1, CCL_ClTracer *ct2, int i_bessel)
+{
+
+  double *theta,corr_func_out,*corr_func;
+  int n_theta=NL;
+  double taper_cl_limits[4]={1,2,10000,15000};
+  
+  ccl_tracer_corr_legendre(cosmo, n_theta,&theta,ct1,ct2,i_bessel,true,
+			   taper_cl_limits,&corr_func,ccl_angular_cl);
+  //ccl_tracer_corr_fftlog(cosmo, n_theta,&theta,ct1,ct2,i_bessel,true,taper_cl_limits,
+  //&corr_func,ccl_angular_cl);
+  //Spline the correlation
+  gsl_spline * corr_spline = gsl_spline_alloc(CORR_SPLINE_TYPE, n_theta);
+  int status = gsl_spline_init(corr_spline, theta,corr_func,n_theta);
+  status = gsl_spline_eval_e(corr_spline,theta_in, NULL,&corr_func_out);
+  
+  return corr_func_out;    
 }

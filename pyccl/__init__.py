@@ -1,7 +1,7 @@
 
 import ccllib as lib
 
-import core, constants, background, power, massfunction
+import core, constants, background, power, massfunction, correlation
 
 # Core data structures
 from core import Parameters, Cosmology
@@ -26,3 +26,5 @@ from lsst_specs import bias_clustering, sigmaz_clustering, sigmaz_sources, \
 # Useful constants and unit conversions
 from constants import CLIGHT_HMPC, MPC_TO_METER, PC_TO_METER, \
                       GNEWT, RHO_CRITICAL, SOLAR_MASS
+
+from correlation import correlation

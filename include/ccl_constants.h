@@ -25,6 +25,7 @@
 #define L_SPLINE_TYPE gsl_interp_akima
 #define M_SPLINE_TYPE gsl_interp_akima
 #define PNL_SPLINE_TYPE gsl_interp2d_bicubic
+#define CORR_SPLINE_TYPE gsl_interp_akima
 
 // These are in units of Mpc (no factor of h)
 #define K_PIVOT 0.05

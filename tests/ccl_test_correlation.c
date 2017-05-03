@@ -209,6 +209,13 @@ static void compare_corr(char *compare_type,struct corrs_data * data)
   printf("CCL correlation first calculation done. More in progress... %.10e \n",time_sec);
   ccl_tracer_corr(cosmo,NL,&theta_arr,tr_nc_1,tr_nc_2,0,taper_cl,taper_cl_limits,
 		  &wt_dd_12_h);
+  /*Elisa's tmp check of ccl_single_tracer_corr for link to python*
+  double tmpcorr;
+  for(int i=0;i<20;i++){
+    tmpcorr =  ccl_single_tracer_corr(theta_arr[i],cosmo,tr_nc_1,tr_nc_2,0);
+    printf("%.10e %.10e %.10e %.10e\n",theta_arr[i],wt_dd_12_h[i],tmpcorr,wt_dd_12_h[i]/tmpcorr-1.);
+  }
+  *Elisa's tmp check passes*/
   ccl_tracer_corr(cosmo,NL,&theta_arr,tr_nc_2,tr_nc_2,0,taper_cl,taper_cl_limits,
 		  &wt_dd_22_h);
   ccl_tracer_corr(cosmo,NL,&theta_arr,tr_wl_1,tr_wl_1,0,taper_cl,taper_cl_limits,
