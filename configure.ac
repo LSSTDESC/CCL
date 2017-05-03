@@ -23,19 +23,6 @@ AM_MAINTAINER_MODE
 
 # Checks for libraries.
 AC_SEARCH_LIBS([pow],[m],[],AC_MSG_ERROR(Couldn't find libm. Required.))
-AC_SEARCH_LIBS([cblas_dgemm],[gslcblas],[],AC_MSG_ERROR(Couldn't find libgslcblas.))
-AC_SEARCH_LIBS([gsl_spline2d_eval_e],[gsl],[],AC_MSG_ERROR(Couldn't find libgsl. GSL V2+ required.))
-
-# Checks for header files.
-AC_CHECK_HEADERS([stdlib.h string.h math.h])
-
-# Checks for typedefs, structures, and compiler characteristics.
-AC_TYPE_SIZE_T
-AC_FUNC_MALLOC
-
-# Checks for library functions.
-AC_CHECK_FUNCS([pow sqrt])
-
 # Allows building against an external copy of CLASS
 AC_ARG_VAR([CLASSDIR], [Location of external CLASS directory, to be used instead of the built-in one])
 if test "$CLASSDIR" != ""; then
@@ -55,6 +42,18 @@ else
     localclass=true
 fi
 AM_CONDITIONAL([LOCALCLASS], [test x$localclass = xtrue])
+AC_SEARCH_LIBS([cblas_dgemm],[gslcblas],[],AC_MSG_ERROR(Couldn't find libgslcblas.))
+AC_SEARCH_LIBS([gsl_spline2d_eval_e],[gsl],[],AC_MSG_ERROR(Couldn't find libgsl. GSL V2+ required.))
+
+# Checks for header files.
+AC_CHECK_HEADERS([stdlib.h string.h math.h])
+
+# Checks for typedefs, structures, and compiler characteristics.
+AC_TYPE_SIZE_T
+AC_FUNC_MALLOC
+
+# Checks for library functions.
+AC_CHECK_FUNCS([pow sqrt])
 
 # Includes Makefiles
 AC_CONFIG_FILES([Makefile
