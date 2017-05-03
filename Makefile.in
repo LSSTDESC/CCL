@@ -134,7 +134,7 @@ am__uninstall_files_from_dir = { \
   }
 am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(ccldir)"
 LTLIBRARIES = $(lib_LTLIBRARIES)
-libccl_la_DEPENDENCIES = class/libclass.la
+@LOCALCLASS_TRUE@libccl_la_DEPENDENCIES = class/libclass.la
 am__dirstamp = $(am__leading_dot)dirstamp
 am_libccl_la_OBJECTS = src/libccl_la-ccl_background.lo \
 	src/libccl_la-ccl_core.lo src/libccl_la-ccl_error.lo \
@@ -266,7 +266,7 @@ am__tty_colors = { \
     std='[m'; \
   fi; \
 }
-DIST_SUBDIRS = $(SUBDIRS)
+DIST_SUBDIRS = include class
 am__DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/config.h.in ar-lib \
 	compile config.guess config.sub depcomp install-sh ltmain.sh \
 	missing
@@ -323,6 +323,8 @@ AWK = @AWK@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
+CLASSDIR = @CLASSDIR@
+CLASS_LIB = @CLASS_LIB@
 CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
 CYGPATH_W = @CYGPATH_W@
@@ -420,6 +422,7 @@ pdfdir = @pdfdir@
 prefix = @prefix@
 program_transform_name = @program_transform_name@
 psdir = @psdir@
+runstatedir = @runstatedir@
 sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 srcdir = @srcdir@
@@ -428,17 +431,18 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-SUBDIRS = include class
+@LOCALCLASS_FALSE@SUBDIRS = include
+@LOCALCLASS_TRUE@SUBDIRS = include class
 EXTRA_DIST = doc sandbox README.md tests/benchmark tests/ccl_example_photoz.c tests/ccl_example_specs.c tests/ccl_sample_power.c tests/ctest.h tests/min_code.c tests/readme.md include/ccl_params.ini tests/ccl_test_neutrinos.c
 ccldir = $(datadir)/ccl
 ccl_DATA = include/ccl_params.ini
 lib_LTLIBRARIES = libccl.la
 libccl_la_SOURCES = src/ccl_background.c src/ccl_core.c src/ccl_error.c src/ccl_lsst_specs.c src/ccl_placeholder.c src/ccl_power.c src/ccl_utils.c src/ccl_cls.c src/ccl_massfunc.c src/ccl_neutrinos.c
-libccl_la_LIBADD = class/libclass.la
-libccl_la_CPPFLAGS = -I./include/ -I./class/include -D__CCL_DATA_DIR__=$(datadir)/ccl
+@LOCALCLASS_TRUE@libccl_la_LIBADD = class/libclass.la
+libccl_la_CPPFLAGS = -I./include/ -I$(CLASSDIR)/include -D__CCL_DATA_DIR__=$(datadir)/ccl
 tests_check_ccl_SOURCES = tests/ccl_test.c tests/ccl_test_utils.c tests/ccl_test_params.c tests/ccl_test_cosmology.c tests/ccl_test_distances.c tests/ccl_test_growth.c tests/ccl_test_bbks.c tests/ccl_test_eh.c tests/ccl_test_cls.c tests/ccl_test_sigmaM.c tests/ccl_test_massfunc.c
 tests_check_ccl_CPPFLAGS = -I./tests/ -I./include/
-tests_check_ccl_LDFLAGS = -L./ -lccl -lgsl -lgslcblas
+tests_check_ccl_LDFLAGS = -L./ -lccl -lgsl -lgslcblas $(CLASS_LIB)
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 
