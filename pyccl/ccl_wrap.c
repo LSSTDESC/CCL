@@ -2970,8 +2970,6 @@ static swig_module_info swig_module = {swig_types, 19, 0, 0, 0, 0};
 #include "../include/ccl_error.h"
 #include "../include/ccl_utils.h"
 
-#include "../class/include/class.h"
-
 
 
 #ifndef SWIG_FILE_WITH_INIT

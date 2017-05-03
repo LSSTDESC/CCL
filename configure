@@ -636,6 +636,10 @@ ac_subst_vars='am__EXEEXT_FALSE
 am__EXEEXT_TRUE
 LTLIBOBJS
 LIBOBJS
+LOCALCLASS_FALSE
+LOCALCLASS_TRUE
+CLASS_LIB
+CLASSDIR
 MAINT
 MAINTAINER_MODE_FALSE
 MAINTAINER_MODE_TRUE
@@ -773,7 +777,8 @@ CFLAGS
 LDFLAGS
 LIBS
 CPPFLAGS
-CPP'
+CPP
+CLASSDIR'
 
 
 # Initialize some variables set by options.
@@ -1425,6 +1430,8 @@ Some influential environment variables:
   CPPFLAGS    (Objective) C/C++ preprocessor flags, e.g. -I<include dir> if
               you have headers in a nonstandard directory <include dir>
   CPP         C preprocessor
+  CLASSDIR    Location of external CLASS directory, to be used instead of the
+              built-in one
 
 Use these variables to override the choices made by `configure' or to help
 it to find libraries and programs with nonstandard names/locations.
@@ -12807,6 +12814,92 @@ else
   as_fn_error $? "Couldn't find libm. Required." "$LINENO" 5
 fi
 
+# Allows building against an external copy of CLASS
+
+if test "$CLASSDIR" != ""; then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: Using the version of CLASS from $CLASSDIR" >&5
+$as_echo "$as_me: Using the version of CLASS from $CLASSDIR" >&6;}
+    CLASS_LIB="-L${CLASSDIR} -lclass"
+    CLASS_MAKEFILE=""
+    LDFLAGS="$LDFLAGS $CLASS_LIB"
+    localclass=false
+
+    CLASS_LIB="-L${CLASSDIR} -lclass -Wl,-rpath,${CLASSDIR}"
+
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing background_free" >&5
+$as_echo_n "checking for library containing background_free... " >&6; }
+if ${ac_cv_search_background_free+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_func_search_save_LIBS=$LIBS
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char background_free ();
+int
+main ()
+{
+return background_free ();
+  ;
+  return 0;
+}
+_ACEOF
+for ac_lib in '' class; do
+  if test -z "$ac_lib"; then
+    ac_res="none required"
+  else
+    ac_res=-l$ac_lib
+    LIBS="-l$ac_lib  $ac_func_search_save_LIBS"
+  fi
+  if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_search_background_free=$ac_res
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext
+  if ${ac_cv_search_background_free+:} false; then :
+  break
+fi
+done
+if ${ac_cv_search_background_free+:} false; then :
+
+else
+  ac_cv_search_background_free=no
+fi
+rm conftest.$ac_ext
+LIBS=$ac_func_search_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_search_background_free" >&5
+$as_echo "$ac_cv_search_background_free" >&6; }
+ac_res=$ac_cv_search_background_free
+if test "$ac_res" != no; then :
+  test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
+
+else
+  as_fn_error $? "Couldn't find libclass." "$LINENO" 5
+fi
+
+else
+    { $as_echo "$as_me:${as_lineno-$LINENO}: Using the built-in version of CLASS." >&5
+$as_echo "$as_me: Using the built-in version of CLASS." >&6;}
+    CLASSDIR="./class"
+    CLASS_LIB=""
+    CLASS_MAKEFILE="class/Makefile"
+    localclass=true
+fi
+ if test x$localclass = xtrue; then
+  LOCALCLASS_TRUE=
+  LOCALCLASS_FALSE='#'
+else
+  LOCALCLASS_TRUE='#'
+  LOCALCLASS_FALSE=
+fi
+
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing cblas_dgemm" >&5
 $as_echo_n "checking for library containing cblas_dgemm... " >&6; }
 if ${ac_cv_search_cblas_dgemm+:} false; then :
@@ -13033,7 +13126,8 @@ fi
 done
 
 
-ac_config_files="$ac_config_files Makefile include/Makefile class/Makefile"
+# Includes Makefiles
+ac_config_files="$ac_config_files Makefile include/Makefile $CLASS_MAKEFILE"
 
 
 cat >confcache <<\_ACEOF
@@ -13179,6 +13273,10 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${MAINTAINER_MODE_TRUE}" && test -z "${MAINTAINER_MODE_FALSE}"; then
   as_fn_error $? "conditional \"MAINTAINER_MODE\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${LOCALCLASS_TRUE}" && test -z "${LOCALCLASS_FALSE}"; then
+  as_fn_error $? "conditional \"LOCALCLASS\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 
@@ -14055,7 +14153,7 @@ do
     "config.h") CONFIG_HEADERS="$CONFIG_HEADERS config.h" ;;
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
     "include/Makefile") CONFIG_FILES="$CONFIG_FILES include/Makefile" ;;
-    "class/Makefile") CONFIG_FILES="$CONFIG_FILES class/Makefile" ;;
+    "$CLASS_MAKEFILE") CONFIG_FILES="$CONFIG_FILES $CLASS_MAKEFILE" ;;
 
   *) as_fn_error $? "invalid argument: \`$ac_config_target'" "$LINENO" 5;;
   esac
@@ -15422,6 +15520,7 @@ echo \
 
  - Prefix: '${prefix}'
  - Compiler: '${CC} ${CFLAGS} ${CPPFLAGS}'
+ - CLASS: '${CLASSDIR}'
 
  Now type 'make [<target>]', where the optional
  target may be:
