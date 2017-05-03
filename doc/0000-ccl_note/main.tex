@@ -83,9 +83,31 @@ This note describes how to install {\tt CCL} (Section \ref{sec:install}), its fu
  $ make
  $ make install
 \end{verbatim}
-This will create two directories (if not present already): {\tt /home/desc$\_$fan/include} and {\tt /home/desc$\_$fan/lib} where the header and lib files will be placed after running {\tt make install}. CCL has been successfully installed in different Linux and Mac OS X systems\footnote{We know of one case with Mac OS where libtools had the ``lock'' function set to ``yes'' and this caused the installition to stall. However, this is very rare. If this happens, after the {\tt configure} step, edit libtool to set the ``lock'' to ``no''.}.
+This will create two directories (if not present already): {\tt /home/desc\_fan/include} and {\tt /home/desc\_fan/lib} where the header and lib files will be placed after running {\tt make install}. CCL has been successfully installed in different Linux and Mac OS X systems\footnote{We know of one case with Mac OS where libtools had the ``lock'' function set to ``yes'' and this caused the installation to stall. However, this is very rare. If this happens, after the {\tt configure} step, edit libtool to set the ``lock'' to ``no''.}.
 
 After installing the C library you can make sure it is running as it should by typing {\tt make check}, which will run the unit tests described in Section \ref{sec:tests}. You are now ready to install the Python wrapper following the steps described in Section \ref{sec:python}.
+
+\subsection{Compiling against an external version of CLASS}
+
+{\tt CCL} has a built-in version of {\tt CLASS} that is used to calculate power spectra and other cosmological functions. This is compiled by default. Optionally, you can also link {\tt CCL} against an external version of {\tt CLASS}. This is useful if you want to use a modified version of {\tt CLASS}, or a different or more up-to-date version of the standard {\tt CLASS}.
+
+To compile {\tt CCL} with an external version of {\tt CLASS}, you must first prepare the external copy so that it can be linked as a shared library. By default, the {\tt CLASS} build tools create a static library. After compiling {\tt CLASS} in the usual way (by running {\tt make}), look for a static library file called {\tt libclass.a} that should have been placed in the root source directory. Then, run the following command from that directory (Linux only):
+\begin{verbatim}
+ $ gcc -shared -o libclass.so -Wl,--whole-archive libclass.a \
+                              -Wl,--no-whole-archive -lgomp
+\end{verbatim}
+This should create a new shared library, {\tt libclass.so}, in the same directory. (N.B. The {\tt -lgomp} flag has to appear at the end of the command; otherwise the linker can fail.) If you are running Mac OS X, use the following command instead:
+\begin{verbatim}
+ $ gcc -fpic -shared -o libclass.dylib -Wl,-all_load libclass.a -Wl,-noall_load
+\end{verbatim}
+
+Next, change to the root {\tt CCL} directory and run {\tt make clean} if you have previously run the compilation process. Then, set the {\tt CLASSDIR} environment variable to point to the directory containing {\tt libclass.so}:
+\begin{verbatim}
+export CLASSDIR=/path/to/external/class
+\end{verbatim}
+Then, run {\tt ./configure} and compile and install {\tt CCL} as usual. The {\tt CCL} build tools should take care of linking to the external version of {\tt CLASS}.
+
+Once compilation has finished, run {\tt make check} to make sure everything is working correctly. Remember to add the external {\tt CLASS} library directory to your system library path, using either {\tt export LD_LIBRARY_PATH=/path/to/external/class} (Linux) or {\tt export DYLD_FALLBACK_LIBRARY_PATH=/path/to/external/class} (Mac). The system must be able to find both the {\tt CCL} and {\tt CLASS} libraries; it is not enough to only add {\tt CCL} to the library path.
 
 \section{Functionality}
 \label{sec:func}
