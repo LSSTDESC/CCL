@@ -8,5 +8,6 @@
 #include "ccl_background.h"
 #include "ccl_config.h"
 #include "ccl_massfunc.h"
+#include "ccl_neutrinos.h"
 
 #include "ccl_placeholder.h"

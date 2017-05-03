@@ -20,6 +20,12 @@
 #define Z0_SH 0.65
 #define SZ_SH 0.05
 #define NL 512
+#define PS 0.1 
+#define NREL 3.046
+#define NMAS 0
+#define MNU 0.0
+
+
 
 // The user defines a structure of parameters to the user-defined function for the photo-z probability 
 struct user_func_params
@@ -40,8 +46,10 @@ int main(int argc,char **argv){
 	int status =0;
 	// Initialize cosmological parameters
 	ccl_configuration config=default_config;
-	config.transfer_function_method=ccl_bbks;
-	ccl_parameters params=ccl_parameters_create(OC,OB,OK,ON,W0,WA,HH,NORMPS,NS,-1,NULL,NULL);
+	config.transfer_function_method=ccl_boltzmann_class;
+	//ccl_parameters params=ccl_parameters_create(OC,OB,OK,ON,W0,WA,HH,NAN,NS,-1,NULL,NULL);
+	ccl_parameters params = ccl_parameters_create(OC, OB, OK, NREL, NMAS, MNU, W0, WA, HH, NORMPS, NS,0,NULL,NULL, &status);
+        //printf("in sample run w0=%1.12f, wa=%1.12f\n", W0, WA);
 
 	// Initialize cosmology object given cosmo params
 	ccl_cosmology *cosmo=ccl_cosmology_create(params,config);

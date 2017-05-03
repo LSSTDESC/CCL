@@ -74,7 +74,6 @@ def _vectorize_fn_simple(fn, fn_vec, x, returns_status=True):
     check(status)
     return f
 
-
 def _vectorize_fn(fn, fn_vec, cosmo, x, returns_status=True):
     """Generic wrapper to allow vectorized (1D array) access to CCL functions with 
     one vector argument, with a cosmology dependence.

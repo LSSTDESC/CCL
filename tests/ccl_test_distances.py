@@ -9,7 +9,7 @@ DISTANCES_TOLERANCE = 1e-4
 # Values that are the same for all 5 models
 Omega_c = 0.25
 Omega_b = 0.05
-Omega_n = 0.0
+N_nu_rel = 0.
 h = 0.7
 A_s = 2.1e-9
 n_s = 0.96
@@ -40,12 +40,13 @@ def compare_distances(z, chi_bench, Omega_v, w0, wa):
     """
     Compare distances calculated by pyccl with the distances in the benchmark 
     file.
+    This test is only valid when radiation is explicitly set to 0.
     """
     # Set Omega_K in a consistent way
-    Omega_k = 1.0 - Omega_c - Omega_b - Omega_n - Omega_v    
+    Omega_k = 1.0 - Omega_c - Omega_b - Omega_v    
     
     # Create new Parameters and Cosmology objects
-    p = ccl.Parameters(Omega_c=Omega_c, Omega_b=Omega_b, Omega_n=Omega_n, 
+    p = ccl.Parameters(Omega_c=Omega_c, Omega_b=Omega_b, N_nu_rel=N_nu_rel, 
                        h=h, A_s=A_s, n_s=n_s, Omega_k=Omega_k,
                        w0=w0, wa=wa)
     p.parameters.Omega_g = 0. # Hack to set to same value used for benchmarks

@@ -259,7 +259,7 @@ static double ccl_get_class_As(ccl_cosmology *cosmo, struct file_content *fc, in
 
 static void ccl_fill_class_parameters(ccl_cosmology * cosmo, struct file_content * fc,int parser_length, int * status){
   strcpy(fc->name[0],"output");
-  strcpy(fc->value[0],"mPk");
+  strcpy(fc->value[0],"mPk"); 
 
   strcpy(fc->name[1],"non linear");
   if (cosmo->config.matter_power_spectrum_method == ccl_halofit){ strcpy(fc->value[1],"Halofit"); }
@@ -305,6 +305,28 @@ static void ccl_fill_class_parameters(ccl_cosmology * cosmo, struct file_content
 
     strcpy(fc->name[13],"wa_fld");
     sprintf(fc->value[13],"%e",cosmo->params.wa);
+  }
+  //neutrino parameters
+  //massless neutrinos
+  if (cosmo->params.N_nu_rel > 1.e-4){
+    strcpy(fc->name[14],"N_ur");
+    sprintf(fc->value[14],"%e",cosmo->params.N_nu_rel);
+  }else{
+    strcpy(fc->name[14],"N_ur");
+    sprintf(fc->value[14],"%e", 0.);
+  }
+  if (cosmo->params.N_nu_mass > 0){
+    strcpy(fc->name[15],"N_ncdm");
+    sprintf(fc->value[15],"%e",cosmo->params.N_nu_mass);
+    strcpy(fc->name[16],"m_ncdm");
+    sprintf(fc->value[16],"%e",cosmo->params.mnu/cosmo->params.N_nu_mass);
+    //assume equal mass neutrino species for now!
+    for (int i = 1; i < cosmo->params.N_nu_mass; i++){
+      char tmp[20];
+      sprintf(tmp,", %e",cosmo->params.mnu/cosmo->params.N_nu_mass);
+      strcat(fc->value[16],tmp);
+    }
+   
   }
   //normalization comes last, so that all other parameters are filled in for determining A_s if sigma_8 is specified
   if (isfinite(cosmo->params.sigma_8) && isfinite(cosmo->params.A_s)){
@@ -354,9 +376,10 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int * statu
   }
 
   ccl_fill_class_parameters(cosmo,&fc,parser_length, status);
-
+  
   if (*status != CCL_ERROR_CLASS)
     ccl_run_class(cosmo, &fc,&pr,&ba,&th,&pt,&tr,&pm,&sp,&nl,&le,&op,init_arr,status);
+
   if (*status == CCL_ERROR_CLASS){
     //printed error message while running CLASS
     ccl_free_class_structs(cosmo, &ba,&th,&pt,&tr,&pm,&sp,&nl,&le,init_arr,status);
@@ -410,6 +433,7 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int * statu
       free(y2d_lin);
       *status = CCL_ERROR_CLASS;
       strcpy(cosmo->status_message ,"ccl_power.c: ccl_cosmology_compute_power_class(): Error computing CLASS power spectrum\n");
+
       ccl_free_class_structs(cosmo, &ba,&th,&pt,&tr,&pm,&sp,&nl,&le,init_arr,status);
 
       return;
@@ -429,6 +453,12 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int * statu
       cosmo->data.p_lin = log_power;
     }
 
+    // At the moment KMIN can't be less than CLASS's kmin in the nonlinear case. 
+    if (kmin<(exp(sp.ln_k[0]))){
+		*status = CCL_ERROR_CLASS;
+		strcpy(cosmo->status_message ,"ccl_power.c: ccl_cosmology_compute_power_class(): K_MIN is less than CLASS's kmin. Not yet supported for nonlinear P(k).\n");
+	}
+
     if(cosmo->config.matter_power_spectrum_method==ccl_halofit){
       
       double psout_nl;
@@ -439,7 +469,7 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int * statu
 	  y2d_nl[j*nk+i] = log(psout_nl);
 	}
       }
-
+		                
       if(s){
 	free(x); 
 	free(z);
@@ -449,6 +479,7 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int * statu
 	strcpy(cosmo->status_message ,"ccl_power.c: ccl_cosmology_compute_power_class(): Error computing CLASS power spectrum\n");
 	ccl_free_class_structs(cosmo, &ba,&th,&pt,&tr,&pm,&sp,&nl,&le,init_arr,status);
 	return;
+
       }
 
       gsl_spline2d * log_power_nl = gsl_spline2d_alloc(PNL_SPLINE_TYPE, nk,na);
@@ -466,8 +497,9 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int * statu
       } else {
 	cosmo->data.p_nl = log_power_nl;
       }
+      
       free(y2d_nl);
-    } 
+    }
 
     ccl_free_class_structs(cosmo, &ba,&th,&pt,&tr,&pm,&sp,&nl,&le,init_arr,status);
     free(x);
@@ -1042,12 +1074,13 @@ TASK: compute the nonlinear power spectrum at a given redshift
 double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double k, double a, int *status)
 {
   switch(cosmo->config.matter_power_spectrum_method) {
+
     //If the matter PS specified was linear, then do the linear compuation
   case ccl_linear:
     return ccl_linear_matter_power(cosmo,k,a,status);
     
   case ccl_halofit:
-    
+
     if (!cosmo->computed_power) ccl_cosmology_compute_power(cosmo,status);
     
     double log_p_1;
@@ -1057,7 +1090,6 @@ double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double k, double a, int *s
       return exp(log_p_1);
     }
     else if(k<ccl_splines->K_MAX_SPLINE){
-      
       int pwstatus =  gsl_spline2d_eval_e(cosmo->data.p_nl, log(k),a,NULL ,NULL ,&log_p_1);
       if (pwstatus){
 	*status = CCL_ERROR_SPLINE_EV;
@@ -1077,6 +1109,7 @@ double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double k, double a, int *s
     cosmo->config.matter_power_spectrum_method=ccl_linear;
     return ccl_linear_matter_power(cosmo,k,a,status);
   }
+
 }
 
 
