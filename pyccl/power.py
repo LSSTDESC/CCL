@@ -2,13 +2,13 @@
 import ccllib as lib
 from pyutils import _vectorize_fn, _vectorize_fn2
 
-def linear_matter_power(cosmo, a, k):
+def linear_matter_power(cosmo, k, a):
     """The linear matter power spectrum; Mpc^-3.
 
     Args:
         cosmo (:obj:`ccl.cosmology`): Cosmological parameters.
-        a (float or array_like): Scale factor.
         k (float): Wavenumber; Mpc^-1.
+        a (float or array_like): Scale factor.
 
     Returns:
         linear_matter_power (float or array_like): Linear matter power spectrum; Mpc^-3.
@@ -17,13 +17,13 @@ def linear_matter_power(cosmo, a, k):
     return _vectorize_fn2(lib.linear_matter_power, 
                           lib.linear_matter_power_vec, cosmo, k, a)
 
-def nonlin_matter_power(cosmo, a, k):
+def nonlin_matter_power(cosmo, k, a):
     """The nonlinear matter power spectrum; Mpc^-3.
 
     Args:
         cosmo (:obj:`ccl.cosmology`): Cosmological parameters.
-        a (float or array_like): Scale factor.
         k (float): Wavenumber; Mpc^-1.
+        a (float or array_like): Scale factor.
 
     Returns:
         nonlin_matter_power (float or array_like): Nonlinear matter power spectrum; Mpc^-3.

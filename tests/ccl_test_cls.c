@@ -41,15 +41,15 @@ static int linecount(FILE *f)
 
 static void compare_cls(char *compare_type,struct cls_data * data)
 {
+  int status=0;
   ccl_configuration config = default_config;
   config.transfer_function_method = ccl_bbks;
   config.matter_power_spectrum_method = ccl_linear;
   ccl_parameters params = ccl_parameters_create_flat_lcdm(data->Omega_c,data->Omega_b,data->h,
-							  data->A_s,data->n_s);
+							  data->A_s,data->n_s, &status);
   params.Omega_g=0;
   params.sigma_8=data->sigma_8;
   ccl_cosmology * cosmo = ccl_cosmology_create(params, config);
-  int status=0;
   ASSERT_NOT_NULL(cosmo);
 
   int nz;

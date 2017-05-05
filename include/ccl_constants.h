@@ -1,5 +1,8 @@
 #pragma once
 
+
+#include "gsl/gsl_const_mksa.h"
+
 //Spline types
 #define A_SPLINE_TYPE gsl_interp_akima
 #define K_SPLINE_TYPE gsl_interp_akima
@@ -18,7 +21,9 @@
 #define CLIGHT_HMPC 2997.92458 //H0^-1 in Mpc/h
 
 //Newton's gravitational constant
-#define GNEWT 6.6738e-11    //(from PDG 2013) in m^3/Kg/s^2
+//#define GNEWT 6.6738e-11    //(from PDG 2013) in m^3/Kg/s^2
+#define GNEWT 6.67428e-11 // CLASS VALUE
+
 
 //Solar mass
 #define SOLAR_MASS 1.9885e30 //in kg (from PDG 2013)
@@ -26,6 +31,24 @@
 //Distance conversions
 #define MPC_TO_METER 3.08567758149e22  //(from PDG 2013) Mpc to m 
 #define PC_TO_METER 3.08567758149e16   //(from PDG 2013) pc to m
+
+// Boltzmann constant in units of J/K
+#define KBOLTZ  GSL_CONST_MKSA_BOLTZMANN
+
+// Stefan-Boltzmann constant in units of kg/s^3 / K^4
+#define STBOLTZ GSL_CONST_MKSA_STEFAN_BOLTZMANN_CONSTANT
+
+// Planck's constant in units kg m^2 / s
+#define HPLANCK  GSL_CONST_MKSA_PLANCKS_CONSTANT_H 
+
+// The speed of light in m/s
+#define CLIGHT   GSL_CONST_MKSA_SPEED_OF_LIGHT
+
+// Electron volt to Joules convestion
+#define EV_IN_J  GSL_CONST_MKSA_ELECTRON_VOLT
+
+// T_ncdm, as taken from CLASS, explanatory.ini
+#define TNCDM 0.71611
 
 //Precision parameters
 #define EPSREL_DIST 1E-6

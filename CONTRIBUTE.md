@@ -103,7 +103,6 @@ This may take some time to run in its entirety. If you changed the API, you may
 have to modify the tests to account for this. You should also add your own 
 tests for any new functions or behaviors that were added.
 
-
 Occasionally, modifications made correctly as described above will still not function properly.
 This is because python installation files are not being properly overwritten, and 
 the interpreter is getting confused which version to use. At this point it is often best to resort 
@@ -132,4 +131,30 @@ arguments `args`. Perhaps there are files somwhere else on your system!
 3. You can now reinstall the package in the normal way, starting with the 
 C code and then the python code. 
 
+Compiling the CCL note
+--------------------------------------------
+After making changes to the library, you should document them in the
+CCL note. The note is found in the directory doc/0000-ccl_note/.
+To compile the note, type 
 
+  $make
+
+in that directory. If you do not have pip installed, please edit the
+Makefile to agree with your setup. If you do not have admin permission,
+then you will need to setup a virtual environment to install the note.
+This is done as follows. Set up the virtual environment once:
+  
+  $virtualenv CCL
+
+and after a new login
+
+  $source CCL/activate
+  $make
+
+If you need to modify the note, the files to modify are:
+  
+  -authors.csv: to document your contribution
+
+  -main.tex: to detail the changes to the library
+
+  -main.bib: to add new references

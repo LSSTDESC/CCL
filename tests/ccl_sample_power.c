@@ -11,11 +11,12 @@ int main(int argc, char * argv[])
   double h = 0.7;
   double normp = 0.8; //2.1e-9
   double n_s = 0.96;
+
   ccl_configuration config = default_config;
   config.transfer_function_method = ccl_bbks;
   //config.matter_power_spectrum_method=ccl_linear;
 
-  ccl_parameters params = ccl_parameters_create_flat_lcdm(Omega_c, Omega_b, h, normp, n_s);
+  ccl_parameters params = ccl_parameters_create_flat_lcdm(Omega_c, Omega_b, h, normp, n_s, &status);
   ccl_cosmology * cosmo = ccl_cosmology_create(params, config);
 
   printf("# k [1/Mpc],P(k,z=0),P(k,z=1),P(k,z=2),P(k,z=3)\n");
@@ -53,4 +54,5 @@ int main(int argc, char * argv[])
   ccl_cosmology_free(cosmo);
 
   return 0;
+
 }
