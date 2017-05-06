@@ -175,7 +175,7 @@ using the Hubble parameter defined equation~\ref{eq:Ha}.
 The routines described in this subsection are implemented in {\tt ccl$\_$background.c}.
 To compute the growth function, $D(a)$, the growth factor of matter perturbations, {\tt CCL} solves the following differential equation:
 \begin{equation}
-  \frac{d}{da}\left(a^3H(a)\frac{dD}{da}\right)=\frac{3}{2}\Omega_M(a)H(a)D.
+  \frac{d}{da}\left(a^3H(a)\frac{dD}{da}\right)=\frac{3}{2}\Omega_M(a)aH(a)D.
 \end{equation}
 In doing this, {\tt CCL} simultaneously computes the so-called growth rate $f(a)$, defined as:
 \begin{equation}
