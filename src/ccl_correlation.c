@@ -177,8 +177,7 @@ int ccl_tracer_corr(ccl_cosmology *cosmo, int n_theta, double **theta,
 			  corr_func,ccl_angular_cl);
    */
   return ccl_tracer_corr_legendre(cosmo, n_theta,theta,ct1,ct2,i_bessel,do_taper_cl,
-				  taper_cl_limits,corr_func,ccl_angular_cl);
-   
+				  taper_cl_limits,corr_func,ccl_angular_cl);   
 }
 
 
@@ -261,6 +260,37 @@ int ccl_tracer_corr_fftlog(ccl_cosmology *cosmo, int n_theta, double **theta,
   return 0;
 }
 
+void compute_legedre_polynomial(CCL_ClTracer *ct1, CCL_ClTracer *ct2, 
+				double **theta, int n_theta, int L_max, double **Pl_theta)
+{
+  Pl_theta=malloc( n_theta*sizeof( double*));
+  for (int i=0;i<n_theta;i++)
+    {
+      Pl_theta[i]=malloc(sizeof(double)*L_max);
+      if((ct1->tracer_type==CL_TRACER_NC) && (ct2->tracer_type==CL_TRACER_NC))
+	{
+	  gsl_sf_legendre_Pl_array(L_max,cos((*theta)[i]),Pl_theta[i]);
+	  for (int j=0;j<L_max;j++)
+	      Pl_theta[i][j]*=(2*j+1);
+	}	   
+
+      else if((ct1->tracer_type==CL_TRACER_WL) && (ct2->tracer_type==CL_TRACER_NC)
+	      ||(ct1->tracer_type==CL_TRACER_NC) && (ct2->tracer_type==CL_TRACER_WL))
+	{//https://arxiv.org/pdf/1007.4809.pdf
+	  gsl_sf_legendre_Plm_array(L_max,2,cos((*theta)[i]),Pl_theta[i]);
+	  for (int j=1;j<L_max;j++)
+	    Pl_theta[i][j]*=(2*j+1)/(j*(j+1));
+	  Pl_theta[i][0]=0;
+	}
+
+      else if((ct1->tracer_type==CL_TRACER_WL) && (ct2->tracer_type==CL_TRACER_WL))
+	{//
+	}
+      
+    }
+}
+
+
 int ccl_tracer_corr_legendre(ccl_cosmology *cosmo, int n_theta, double **theta,
 		     CCL_ClTracer *ct1, CCL_ClTracer *ct2, int i_bessel,
                      bool do_taper_cl,double *taper_cl_limits,double **corr_func,
@@ -288,22 +318,23 @@ int ccl_tracer_corr_legendre(ccl_cosmology *cosmo, int n_theta, double **theta,
   if (do_taper_cl)
     status=taper_cl(n_L,l_arr,cl_arr, taper_cl_limits);
 
-  double *theta2;//why is theta and corr_func double pointer, **theta ??
-  theta2=ccl_log_spacing(0.01*M_PI/180.,10*M_PI/180.,n_theta);
+  //double *theta2;//why is theta and corr_func double pointer, **theta ??
+  *theta=ccl_log_spacing(0.01*M_PI/180.,10*M_PI/180.,n_theta);
   *corr_func=(double *)malloc(sizeof(double)*n_theta);
-  *theta=(double *)malloc(sizeof(double)*n_theta);
+  //*theta=(double *)malloc(sizeof(double)*n_theta);
 
-  double *Pl_theta;
+  double **Pl_theta;
   //*Pl_theta=(double *)malloc(sizeof(double)*n_theta);
-  Pl_theta=malloc(sizeof(double)*n_L);
+  //  Pl_theta=malloc(sizeof(double)*n_L);
+  compute_legedre_polynomial(ct1,ct2,theta,n_theta,n_L,Pl_theta);
 
   for (int i=0;i<n_theta;i++){
     //    Pl_theta[i]=malloc(sizeof(double)*n_theta);
-    gsl_sf_legendre_Pl_array(n_L,cos(theta2[i]),Pl_theta);
+    // gsl_sf_legendre_Pl_array(n_L,cos(theta2[i]),Pl_theta);
     (*corr_func)[i]=0;
-    (*theta)[i]=theta2[i];
+    //(*theta)[i]=theta2[i];
     for(int i_L=1;i_L<n_L;i_L+=1) {
-      (*corr_func)[i]+=cl_arr[i_L]*(2*i_L+1)*Pl_theta[i_L];
+      (*corr_func)[i]+=cl_arr[i_L]*Pl_theta[i][i_L];
     }
     (*corr_func)[i]/=(M_PI*4);
   }
