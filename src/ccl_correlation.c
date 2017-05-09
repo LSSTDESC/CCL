@@ -260,34 +260,64 @@ int ccl_tracer_corr_fftlog(ccl_cosmology *cosmo, int n_theta, double **theta,
   return 0;
 }
 
-void compute_legedre_polynomial(CCL_ClTracer *ct1, CCL_ClTracer *ct2, 
+int compute_legedre_polynomial(CCL_ClTracer *ct1, CCL_ClTracer *ct2, int i_bessel,
 				double **theta, int n_theta, int L_max, double **Pl_theta)
 {
-  Pl_theta=malloc( n_theta*sizeof( double*));
+  double Nl2=0;//Nl**2
+  double *Gp,*Gm,*Plm;
+  int Plm_indx;
+  if((ct1->tracer_type==CL_TRACER_WL) && (ct2->tracer_type==CL_TRACER_WL))
+    {
+      Gp=(double *)malloc(sizeof(double)*L_max);
+      Gm=(double *)malloc(sizeof(double)*L_max);
+    }
+  if((ct1->tracer_type==CL_TRACER_WL) || (ct2->tracer_type==CL_TRACER_WL))
+    {
+      int Plm_size=gsl_sf_legendre_array_n(L_max);
+      Plm=(double *)malloc(sizeof(double)*Plm_size);
+    }
+
   for (int i=0;i<n_theta;i++)
     {
-      Pl_theta[i]=malloc(sizeof(double)*L_max);
       if((ct1->tracer_type==CL_TRACER_NC) && (ct2->tracer_type==CL_TRACER_NC))
 	{
 	  gsl_sf_legendre_Pl_array(L_max,cos((*theta)[i]),Pl_theta[i]);
 	  for (int j=0;j<L_max;j++)
-	      Pl_theta[i][j]*=(2*j+1);
+	    Pl_theta[i][j]*=(2*j+1);
 	}	   
 
-      else if((ct1->tracer_type==CL_TRACER_WL) && (ct2->tracer_type==CL_TRACER_NC)
-	      ||(ct1->tracer_type==CL_TRACER_NC) && (ct2->tracer_type==CL_TRACER_WL))
+      else if(((ct1->tracer_type==CL_TRACER_WL) && (ct2->tracer_type==CL_TRACER_NC))
+	      ||((ct1->tracer_type==CL_TRACER_NC) && (ct2->tracer_type==CL_TRACER_WL)))
 	{//https://arxiv.org/pdf/1007.4809.pdf
-	  gsl_sf_legendre_Plm_array(L_max,2,cos((*theta)[i]),Pl_theta[i]);
-	  for (int j=1;j<L_max;j++)
-	    Pl_theta[i][j]*=(2*j+1)/(j*(j+1));
+	  //gsl_sf_legendre_Plm_array(L_max,2,cos((*theta)[i]),Pl_theta[i]);//deprecated in gsl
+	  for (int j=2;j<L_max;j++)
+	    {
+	      //Pl_theta[i][j]*=(2*j+1)/(j*(j+1));//https://arxiv.org/pdf/1007.4809.pdf
+	     Nl2=2.0/((double)((j-1)*j*(j+1)*(j+2)));//https://arxiv.org/pdf/astro-ph/9611125v1.pdf
+	      Pl_theta[i][j]*=(2*j+1)*sqrt(Nl2);
+	    }
 	  Pl_theta[i][0]=0;
+	  Pl_theta[i][1]=0;
 	}
 
       else if((ct1->tracer_type==CL_TRACER_WL) && (ct2->tracer_type==CL_TRACER_WL))
-	{//
+	{//https://arxiv.org/pdf/astro-ph/9611125v1.pdf
+	  //gsl_sf_legendre_Plm_array(L_max,2,cos((*theta)[i]),Pl_theta[i]);//deprecated in gsl
+	  //gsl_sf_legendre_array(GSL_SF_LEGENDRE_NONE,L_max,cos((*theta)[i]),Plm);//too slow
+	  if (i_bessel==0)
+	    {
+	      gsl_sf_legendre_Pl_array(L_max,cos((*theta)[i]),Pl_theta[i]);
+	      for (int j=0;j<L_max;j++)
+		Pl_theta[i][j]*=(2*j+1);
+	    }
+	  else{
+	    gsl_sf_legendre_Pl_array(L_max,cos((*theta)[i]),Pl_theta[i]);
+	    for (int j=0;j<L_max;j++)
+	      Pl_theta[i][j]*=0;
+	  }
 	}
-      
     }
+  return 0;
 }
 
 
@@ -296,48 +326,39 @@ int ccl_tracer_corr_legendre(ccl_cosmology *cosmo, int n_theta, double **theta,
                      bool do_taper_cl,double *taper_cl_limits,double **corr_func,
 		     double (*angular_cl)(ccl_cosmology *cosmo,int l,CCL_ClTracer *clt1,
 					  CCL_ClTracer *clt2, int * status) ){
-  int n_L=n_theta; //15000;
+  int L_max=n_theta; //15000;
   int status=0;
-  int l_arr[n_L];
-  double cl_arr[n_L];
-
+  int l_arr[L_max];
+  double cl_arr[L_max];
+  //n_theta=100;
   l_arr[0]=0;cl_arr[0]=0;
-  for(int i=1;i<n_L;i+=1) {
+  for(int i=1;i<L_max;i+=1) {
      l_arr[i]=i;
     cl_arr[i]=angular_cl(cosmo,l_arr[i],ct1,ct2,&status);
   }
-  /*
-  if((ct1->tracer_type==CL_TRACER_NC) && (ct2->tracer_type==CL_TRACER_NC)){
-    FILE *output2 = fopen("ccl_cl_legendre.dat", "w");
-    for(int i=1;i<n_L;i+=1) {
-      fprintf(output2,"%d %.10e \n",l_arr[i],cl_arr[i]);
-    }
-    fclose(output2);
-    }*/
 
   if (do_taper_cl)
-    status=taper_cl(n_L,l_arr,cl_arr, taper_cl_limits);
+    status=taper_cl(L_max,l_arr,cl_arr, taper_cl_limits);
 
   //double *theta2;//why is theta and corr_func double pointer, **theta ??
   *theta=ccl_log_spacing(0.01*M_PI/180.,10*M_PI/180.,n_theta);
   *corr_func=(double *)malloc(sizeof(double)*n_theta);
-  //*theta=(double *)malloc(sizeof(double)*n_theta);
 
   double **Pl_theta;
-  //*Pl_theta=(double *)malloc(sizeof(double)*n_theta);
-  //  Pl_theta=malloc(sizeof(double)*n_L);
-  compute_legedre_polynomial(ct1,ct2,theta,n_theta,n_L,Pl_theta);
+  Pl_theta=(double **)malloc( n_theta*sizeof( double*));
+  for (int i=0;i<n_theta;i++)
+      Pl_theta[i]=(double *)malloc(sizeof(double)*L_max);
+ 
+  status=compute_legedre_polynomial(ct1,ct2,i_bessel,theta,n_theta,L_max,Pl_theta);
 
   for (int i=0;i<n_theta;i++){
-    //    Pl_theta[i]=malloc(sizeof(double)*n_theta);
-    // gsl_sf_legendre_Pl_array(n_L,cos(theta2[i]),Pl_theta);
     (*corr_func)[i]=0;
-    //(*theta)[i]=theta2[i];
-    for(int i_L=1;i_L<n_L;i_L+=1) {
+    for(int i_L=1;i_L<L_max;i_L+=1) {
       (*corr_func)[i]+=cl_arr[i_L]*Pl_theta[i][i_L];
     }
     (*corr_func)[i]/=(M_PI*4);
   }
+  return 0;
 }
 
 
