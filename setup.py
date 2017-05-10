@@ -13,13 +13,13 @@ except AttributeError:
 
 # CCL extension module
 _ccllib = Extension(
-            "_ccllib",
-               ["pyccl/ccl.i",],
-               libraries = ['m', 'gsl', 'gslcblas', 'ccl',],
-               include_dirs = [numpy_include, "include/"],
-               extra_compile_args=['-O4', '-std=c99'],
-               swig_opts=['-threads'],
-           )
+    "_ccllib",
+    ["pyccl/ccl_wrap.c",],
+    libraries = ['m', 'gsl', 'gslcblas', 'ccl'],
+    include_dirs = [numpy_include, "include/", "class/include"],
+    extra_compile_args=['-O4', '-std=c99'],
+    swig_opts=['-threads'],
+    )
 
 # CCL setup script
 setup(  name         = "pyccl",
