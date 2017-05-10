@@ -35,7 +35,8 @@ static void read_growth_test_file(double z[6], double gf[5][6])
   
   // Ignore header line
   char str[1024];
-  fgets(str, 1024, f);
+  char* rtn;
+  rtn = fgets(str, 1024, f);
   
     // File is fixed format - five rows and six columns
   for (int i=0; i<6; i++){

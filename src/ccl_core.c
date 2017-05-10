@@ -32,6 +32,7 @@ void ccl_cosmology_read_config(){
   FILE *fconfig;
   char buf[CONFIG_LINE_BUFFER_SIZE];
   char var_name[MAX_CONFIG_VAR_LEN];
+  char* rtn;
   double var_dbl;
   
   ccl_splines = malloc(sizeof(ccl_spline_params));
@@ -52,7 +53,7 @@ void ccl_cosmology_read_config(){
   } 
 
   while(! feof(fconfig)) {
-  fgets(buf, CONFIG_LINE_BUFFER_SIZE, fconfig);
+  rtn = fgets(buf, CONFIG_LINE_BUFFER_SIZE, fconfig);
   if (buf[0]==';' || buf[0]=='[' || buf[0]=='\n') {
     continue;
   } else {
