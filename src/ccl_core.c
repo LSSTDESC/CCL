@@ -12,6 +12,7 @@
 #include "gsl/gsl_integration.h"
 #include "ccl_params.h"
 #include <stdlib.h>
+#include "ccl_error.h"
 
 const ccl_configuration default_config = {ccl_boltzmann_class, ccl_halofit, ccl_tinker10};
 
