@@ -23,8 +23,9 @@ typedef enum matter_power_spectrum_t
 
     ccl_halofit          = 1,
     // more?
-    ccl_halo_model       = 3
+    ccl_halo_model       = 3,
     // even more kinds ...
+    ccl_emu              = 4
 
 } matter_power_spectrum_t;
 

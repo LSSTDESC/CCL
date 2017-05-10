@@ -14,6 +14,8 @@
 #include "ccl_error.h"
 #include "class.h"
 #include "ccl_params.h"
+#include "ccl_emu17.h"
+#include "ccl_emu17_params.h"
 
 /*------ ROUTINE: ccl_cosmology_compute_power_class ----- 
 INPUT: ccl_cosmology * cosmo
@@ -946,6 +948,87 @@ static void ccl_cosmology_compute_power_bbks(ccl_cosmology * cosmo, int * status
 
 
 
+/*------ ROUTINE: ccl_cosmology_compute_power_emu ----- 
+INPUT: cosmology
+TASK: provide spline for the emulated power spectrum from Cosmic EMU
+*/
+
+static void ccl_cosmology_compute_power_emu(ccl_cosmology * cosmo, int * status)
+{
+
+  /*if (isfinite(cosmo->params.sigma_8)){
+      *status = CCL_ERROR_INCONSISTENT;
+      strcpy(cosmo->status_message ,"ccl_power.c: Error initialzing EMU pararmeters: no sigma_8 defined\n");
+    return;
+    }*/
+   
+  double amin = 1./3.;
+  double amax = ccl_splines->A_SPLINE_MAX; //limit of the emulator
+  int na = ccl_splines->N_A;
+  // The x array is initially k, but will later
+  // be overwritten with log(k)
+  double * logx= malloc(351*sizeof(double));
+  double * y;
+  double * xstar = malloc(9 * sizeof(double));
+  double * z = ccl_linear_spacing(amin,amax, na);
+  double * y2d = malloc(351 * na * sizeof(double));
+  if (z==NULL || y2d==NULL || logx==NULL || xstar==NULL){
+    *status=CCL_ERROR_MEMORY;
+    strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_emu(): memory allocation error\n");
+    return;
+  }
+
+  //TMP:
+  double Omega_nu=0.;
+  //Check ranges:
+  
+  //For each redshift:
+  for (int j = 0; j < na; j++){
+    
+    //Turn cosmology into xstar:
+    xstar[0] = cosmo->params.Omega_c*cosmo->params.h*cosmo->params.h;
+    xstar[1] = cosmo->params.Omega_b*cosmo->params.h*cosmo->params.h;
+    xstar[2] = cosmo->params.sigma_8;
+    xstar[3] = cosmo->params.h;
+    xstar[4] = cosmo->params.n_s;
+    xstar[5] = cosmo->params.w0;
+    xstar[6] = cosmo->params.wa;
+    xstar[7] = Omega_nu*cosmo->params.h*cosmo->params.h;
+    xstar[8] = 1./z[j]-1;
+    //Need to have this here because otherwise overwritten by emu in each loop
+    
+    //Call emulator at this redshift
+    ccl_pkemu(xstar,&y,status);
+    // After this loop x will contain log(k)
+    for (int i=0; i<351; i++){
+      logx[i] = log(mode[i]);
+      y2d[j*351+i] = log(y[i]);
+    }
+
+  }
+
+  gsl_spline2d * log_power_lin = gsl_spline2d_alloc(PLIN_SPLINE_TYPE, 351,na);
+  int splinstatus = gsl_spline2d_init(log_power_lin, logx, z, y2d,351,na);
+  
+  if (splinstatus){
+    free(z);
+    free(y2d);
+    gsl_spline2d_free(log_power_lin);
+    *status = CCL_ERROR_SPLINE;
+    strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_emu(): Error creating log_power spline\n");
+    return;
+
+  }
+  cosmo->data.p_lin=log_power_lin; //No such thing as linear for this model
+  cosmo->data.p_nl = log_power_lin;
+  cosmo->computed_power=true;
+  
+  free(z);
+  free(y2d);
+}
+
+
+
 /*------ ROUTINE: ccl_cosmology_compute_power ----- 
 INPUT: ccl_cosmology * cosmo
 TASK: compute power spectrum
@@ -963,6 +1046,10 @@ void ccl_cosmology_compute_power(ccl_cosmology * cosmo, int * status){
 	  break;
         case ccl_boltzmann_class:
 	  ccl_cosmology_compute_power_class(cosmo,status);
+	  break;
+        case ccl_emulator:
+	  printf("Entering EMU PS computation\n\n");
+	  ccl_cosmology_compute_power_emu(cosmo,status);
 	  break;
         default:
 	  *status = CCL_ERROR_INCONSISTENT;
@@ -1111,6 +1198,7 @@ double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double k, double a, int *s
   }
 
 }
+
 
 
 //Params for sigma(R) integrand
