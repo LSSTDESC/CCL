@@ -158,18 +158,22 @@ static void compare_cls(char *compare_type,struct cls_data * data)
   fclose(fi_ll_12);
   fclose(fi_ll_22);
 
-  ccl_angular_cls(cosmo,tr_nc_1,tr_nc_1,3001,ells,cls_dd_11_h,-1,&status);
+  CCL_ClWorkspace *w=ccl_cl_workspace_new(3001,-1,1.05,20,3.,&status);
+
+  ccl_angular_cls(cosmo,w,tr_nc_1,tr_nc_1,3001,ells,cls_dd_11_h,&status);
   if (status) printf("%s\n",cosmo->status_message);
-  ccl_angular_cls(cosmo,tr_nc_1,tr_nc_2,3001,ells,cls_dd_12_h,-1,&status);
+  ccl_angular_cls(cosmo,w,tr_nc_1,tr_nc_2,3001,ells,cls_dd_12_h,&status);
   if (status) printf("%s\n",cosmo->status_message);
-  ccl_angular_cls(cosmo,tr_nc_2,tr_nc_2,3001,ells,cls_dd_22_h,-1,&status);
+  ccl_angular_cls(cosmo,w,tr_nc_2,tr_nc_2,3001,ells,cls_dd_22_h,&status);
   if (status) printf("%s\n",cosmo->status_message);
-  ccl_angular_cls(cosmo,tr_wl_1,tr_wl_1,3001,ells,cls_ll_11_h,-1,&status);
+  ccl_angular_cls(cosmo,w,tr_wl_1,tr_wl_1,3001,ells,cls_ll_11_h,&status);
   if (status) printf("%s\n",cosmo->status_message);
-  ccl_angular_cls(cosmo,tr_wl_1,tr_wl_2,3001,ells,cls_ll_12_h,-1,&status);
+  ccl_angular_cls(cosmo,w,tr_wl_1,tr_wl_2,3001,ells,cls_ll_12_h,&status);
   if (status) printf("%s\n",cosmo->status_message);
-  ccl_angular_cls(cosmo,tr_wl_2,tr_wl_2,3001,ells,cls_ll_22_h,-1,&status);
+  ccl_angular_cls(cosmo,w,tr_wl_2,tr_wl_2,3001,ells,cls_ll_22_h,&status);
   if (status) printf("%s\n",cosmo->status_message);
+
+  ccl_cl_workspace_free(w);
 
   double fraction_failed=0;
   for(int ii=0;ii<3001;ii++) {
@@ -207,12 +211,15 @@ static void compare_cls(char *compare_type,struct cls_data * data)
   free(cls_dd_11_h); free(cls_dd_12_h); free(cls_dd_22_h); 
   free(cls_ll_11_h); free(cls_ll_12_h); free(cls_ll_22_h); 
 
+  printf("%d, ",(int)fraction_failed);
   fraction_failed/=6*3001;
   printf("%lf %%\n",fraction_failed*100);
   ASSERT_TRUE((fraction_failed<CLS_FRACTION));
 
-  free(zarr_1); free(zarr_2);
-  free(pzarr_1); free(pzarr_2);
+  free(zarr_1);
+  free(zarr_2);
+  free(pzarr_1);
+  free(pzarr_2);
   free(bzarr);
   ccl_cosmology_free(cosmo);
 }

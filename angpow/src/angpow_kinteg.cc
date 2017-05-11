@@ -28,7 +28,7 @@ KIntegrator::KIntegrator(const std::vector<r_8>& radiusI, const std::vector<r_8>
 {
 
   same_sampling_=std::equal(zi_.begin(),zi_.end(),zj_.begin());
-  if(same_sampling_)std::cout<<"KIntegrator: Same redshift sampling detected" << std::endl;
+  //  if(same_sampling_)std::cout<<"KIntegrator: Same redshift sampling detected" << std::endl;
   
 
 #ifdef PROFILING

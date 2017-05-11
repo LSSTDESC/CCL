@@ -20,6 +20,8 @@ typedef struct {
   double prefac_lensing; //3*O_M*H_0^2/2
   double chimax; //Limits in chi where we care about this tracer
   double chimin;
+  double zmin; //Limits in chi where we care about this tracer
+  double zmax;
   int has_rsd;
   int has_magnification;
   int has_intrinsic_alignment;
@@ -31,15 +33,6 @@ typedef struct {
   SplPar *spl_wL; //Spline for lensing kernel
   SplPar *spl_wM; //Spline for magnification
 } CCL_ClTracer;
-
-
-SplPar * spline_init(int n,double *x,double *y,double y0,double yf);
-double spline_eval(double x, SplPar *spl);
-double speval_bis(double x,void *params);
-void spline_free(SplPar *spl);
-
-
-
 
 //Generic CCL_ClTracer creator
 // Tracer_type: pass CL_TRACER_NC (number counts) or CL_TRACER_WL (weak lensing)
@@ -82,6 +75,27 @@ CCL_ClTracer *ccl_cl_tracer_lensing_simple_new(ccl_cosmology *cosmo,
 					       int nz_n,double *z_n,double *n, int * status);
 //CCL_ClTracer destructor
 void ccl_cl_tracer_free(CCL_ClTracer *clt);
+
+
+//Workspace for C_ell computations
+typedef struct {
+  double dchi; //Spacing in comoving distance to use for the LOS integrals
+  int lmax; //Maximum multipole
+  int l_limber; //All power spectra for l>l_limber will be computed using Limber's approximation
+  double l_logstep; //Logarithmic step factor used at low l
+  int l_linstep; //Linear step used at high l
+  int n_ls; //Number of multipoles that result from the previous combination of parameters
+  int *l_arr; //Array of multipole values resulting from the previous parameters
+} CCL_ClWorkspace;
+
+//CCL_ClWorkspace constructor
+CCL_ClWorkspace *ccl_cl_workspace_new(int lmax,int l_limber,double l_logstep,int l_linstep,double dchi,int *status);
+//CCL_ClWorkspace simplified constructor
+CCL_ClWorkspace *ccl_cl_workspace_new_default(int lmax,int l_limber,int *status);
+//CCL_ClWorkspace destructor
+void ccl_cl_workspace_free(CCL_ClWorkspace *w);
+
 //Computes limber power spectrum for two different tracers
-void ccl_angular_cls(ccl_cosmology *cosmo,CCL_ClTracer *clt1,CCL_ClTracer *clt2,
-		     int n_ells,int *ells,double *cls_out,int ell_min_limber,int *status);
+void ccl_angular_cls(ccl_cosmology *cosmo,CCL_ClWorkspace *w,
+		     CCL_ClTracer *clt1,CCL_ClTracer *clt2,
+		     int nl_out,int *l,double *cl,int *status);

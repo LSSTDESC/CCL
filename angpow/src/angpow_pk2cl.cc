@@ -126,11 +126,11 @@ void Pk2Cl::Compute(IntegrandBase& int1, IntegrandBase& int2,
 
   kinteg.Compute(int1, int2 , clout);
   
-  auto init=clout.InitialElls();
-  std::cout << init.size() << " Cl values computed at l=" ;
-  std::copy(init.begin(),init.end(),std::ostream_iterator<int>(std::cout,"/"));
-  std::cout<< std::endl;
-  clout.Interpolate();
+  //  auto init=clout.InitialElls();
+  //  std::cout << init.size() << " Cl values computed at l=" ;
+  //  std::copy(init.begin(),init.end(),std::ostream_iterator<int>(std::cout,"/"));
+  //  std::cout<< std::endl;
+  //  clout.Interpolate();
 }
 
 }//namespace

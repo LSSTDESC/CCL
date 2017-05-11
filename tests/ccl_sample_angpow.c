@@ -113,9 +113,14 @@ int main(int argc,char **argv)
   double *cells_gg_limber=malloc(NL*sizeof(double));
   for(int ii=0;ii<NL;ii++)
     ells[ii]=ii;
-  ccl_angular_cls(cosmo,ct_gc,ct_gc,NL,ells,cells_gg_limber, -1,&status);
-  ccl_angular_cls(cosmo,ct_gc,ct_gc,NL,ells,cells_gg_angpow,ells[NL-1]+1,&status);
+  CCL_ClWorkspace *wnl=ccl_cl_workspace_new_default(NL+1,2*ells[NL-1],&status);
+  CCL_ClWorkspace *wyl=ccl_cl_workspace_new_default(NL+1,-1,&status);
+  ccl_angular_cls(cosmo,wyl,ct_gc,ct_gc,NL,ells,cells_gg_limber,&status);
+  ccl_angular_cls(cosmo,wnl,ct_gc,ct_gc,NL,ells,cells_gg_angpow,&status);
   //  ccl_angular_cls(cosmo,ct_gc,ct_gc,NL,ells,cells_gg_angpow,200,&status);
+  ccl_cl_workspace_free(wnl);
+  ccl_cl_workspace_free(wyl);
+
 
   FILE *fo=fopen("tests/cls_val.txt","w");
   //  printf("ell C_ell(g,g) C_ell(g,s) C_ell(s,s) | r(g,s)\n");

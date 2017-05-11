@@ -23,8 +23,7 @@ void getLlist(int l_min, int l_max, int l_linstep, double l_logstep,
   
   increment = std::max((int)(current_l * (l_logstep-1.)),1);
     
-  while (((current_l+increment) < l_max) && 
-	 (increment < l_linstep)) {
+  while ((current_l < l_max) && (increment < l_linstep)) {
       
     index_l ++;
     current_l += increment;
@@ -37,7 +36,7 @@ void getLlist(int l_min, int l_max, int l_linstep, double l_logstep,
 
   increment = l_linstep;
 
-  while ((current_l+increment) <= l_max) {
+  while (current_l < l_max) {
 
     index_l ++;
     current_l += increment;
@@ -45,13 +44,6 @@ void getLlist(int l_min, int l_max, int l_linstep, double l_logstep,
   }
 
   /** - last value set to exactly l_max */
-
-  if (current_l != l_max) {
-
-    index_l ++;
-    current_l = l_max;
-
-  } 
 
   l_size = index_l+1;
 
@@ -61,34 +53,31 @@ void getLlist(int l_min, int l_max, int l_linstep, double l_logstep,
   l.resize(l_size,0);
 
   index_l = 0;
-  l[0] = l_min;
+  current_l = l_min;
 
-  increment = std::max((int)(l[0] * (l_logstep-1.)),1);
+  increment = std::max((int)(current_l * (l_logstep-1.)),1);
 
-  while (((l[index_l]+increment) < l_max) && 
-	 (increment < l_linstep)) {
-      
+  while ((current_l < l_max) && (increment < l_linstep)) {
+
+    l[index_l]=current_l;
     index_l ++;
-    l[index_l]=l[index_l-1]+increment;
-    increment = std::max((int)(l[index_l] * (l_logstep-1.)),1);
- 
+    current_l+=increment;
+    increment = std::max((int)(current_l * (l_logstep-1.)),1);
+     
   }
 
   increment = l_linstep;
 
-  while ((l[index_l]+increment) <= l_max) {
+  while (current_l < l_max) {
 
+    l[index_l]=current_l;
     index_l ++;
-    l[index_l]=l[index_l-1]+increment;
+    current_l+=increment;
  
   }
 
-  if (l[index_l] != l_max) {
+  l[index_l]=current_l;
 
-    index_l ++;
-    l[index_l]= l_max;
-       
-  }
 }//getLlist
 
 
