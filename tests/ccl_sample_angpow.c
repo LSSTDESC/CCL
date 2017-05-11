@@ -110,26 +110,32 @@ int main(int argc,char **argv)
 						      NZ,z_arr_gc,bz_arr,-1,NULL,NULL,&status);
   int *ells=malloc(NL*sizeof(int));
   double *cells_gg_angpow=malloc(NL*sizeof(double));
+  double *cells_gg_native=malloc(NL*sizeof(double));
   double *cells_gg_limber=malloc(NL*sizeof(double));
   for(int ii=0;ii<NL;ii++)
     ells[ii]=ii;
-  CCL_ClWorkspace *wnl=ccl_cl_workspace_new_default(NL+1,2*ells[NL-1],&status);
-  CCL_ClWorkspace *wyl=ccl_cl_workspace_new_default(NL+1,-1,&status);
+  CCL_ClWorkspace *wap=ccl_cl_workspace_new(NL+1,2*ells[NL-1],CCL_NONLIMBER_METHOD_ANGPOW,1.05,20,3.,&status);
+  CCL_ClWorkspace *wnl=ccl_cl_workspace_new(NL+1,2*ells[NL-1],CCL_NONLIMBER_METHOD_NATIVE,1.05,20,3.,&status);
+  CCL_ClWorkspace *wyl=ccl_cl_workspace_new(NL+1,-1          ,CCL_NONLIMBER_METHOD_ANGPOW,1.05,1 ,3.,&status);
+  printf("Limber\n");
   ccl_angular_cls(cosmo,wyl,ct_gc,ct_gc,NL,ells,cells_gg_limber,&status);
-  ccl_angular_cls(cosmo,wnl,ct_gc,ct_gc,NL,ells,cells_gg_angpow,&status);
-  //  ccl_angular_cls(cosmo,ct_gc,ct_gc,NL,ells,cells_gg_angpow,200,&status);
+  printf("Native\n");
+  ccl_angular_cls(cosmo,wnl,ct_gc,ct_gc,NL,ells,cells_gg_native,&status);
+  printf("Angpow\n");
+  ccl_angular_cls(cosmo,wap,ct_gc,ct_gc,NL,ells,cells_gg_angpow,&status);
+  printf("Done\n");
+  ccl_cl_workspace_free(wap);
   ccl_cl_workspace_free(wnl);
   ccl_cl_workspace_free(wyl);
 
 
   FILE *fo=fopen("tests/cls_val.txt","w");
-  //  printf("ell C_ell(g,g) C_ell(g,s) C_ell(s,s) | r(g,s)\n");
   for(int ii=0;ii<NL;ii++) {
-    double cl_gg=cells_gg_limber[ii];
+    double cl_gg_yl=cells_gg_limber[ii];
+    double cl_gg_nl=cells_gg_native[ii];
     double cl_gg_ap=cells_gg_angpow[ii];
-    fprintf(fo,"%d %.3lE %.3lE\n",ells[ii],cl_gg,cl_gg_ap);
+    fprintf(fo,"%d %lE %lE %lE\n",ells[ii],cl_gg_yl,cl_gg_nl,cl_gg_ap);
   }
-  //  printf("\n");
   fclose(fo);
   free(ells); free(cells_gg_angpow); free(cells_gg_limber);
 

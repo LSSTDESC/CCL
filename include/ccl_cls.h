@@ -77,8 +77,11 @@ CCL_ClTracer *ccl_cl_tracer_lensing_simple_new(ccl_cosmology *cosmo,
 void ccl_cl_tracer_free(CCL_ClTracer *clt);
 
 
+#define CCL_NONLIMBER_METHOD_NATIVE 1
+#define CCL_NONLIMBER_METHOD_ANGPOW 2
 //Workspace for C_ell computations
 typedef struct {
+  int nlimb_method;
   double dchi; //Spacing in comoving distance to use for the LOS integrals
   int lmax; //Maximum multipole
   int l_limber; //All power spectra for l>l_limber will be computed using Limber's approximation
@@ -89,7 +92,8 @@ typedef struct {
 } CCL_ClWorkspace;
 
 //CCL_ClWorkspace constructor
-CCL_ClWorkspace *ccl_cl_workspace_new(int lmax,int l_limber,double l_logstep,int l_linstep,double dchi,int *status);
+CCL_ClWorkspace *ccl_cl_workspace_new(int lmax,int l_limber,int non_limber_method,
+				      double l_logstep,int l_linstep,double dchi,int *status);
 //CCL_ClWorkspace simplified constructor
 CCL_ClWorkspace *ccl_cl_workspace_new_default(int lmax,int l_limber,int *status);
 //CCL_ClWorkspace destructor
