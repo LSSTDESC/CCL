@@ -25,13 +25,15 @@ const ccl_configuration default_config = {ccl_boltzmann_class, ccl_halofit, ccl_
 
 ccl_spline_params * ccl_splines; // Global variable
 
-void ccl_cosmology_read_config(){
+void ccl_cosmology_read_config(void)
+{
 
   int CONFIG_LINE_BUFFER_SIZE=100;
   int MAX_CONFIG_VAR_LEN=100;
   FILE *fconfig;
   char buf[CONFIG_LINE_BUFFER_SIZE];
   char var_name[MAX_CONFIG_VAR_LEN];
+  char* rtn;
   double var_dbl;
   
   ccl_splines = malloc(sizeof(ccl_spline_params));
@@ -52,7 +54,7 @@ void ccl_cosmology_read_config(){
   } 
 
   while(! feof(fconfig)) {
-  fgets(buf, CONFIG_LINE_BUFFER_SIZE, fconfig);
+  rtn = fgets(buf, CONFIG_LINE_BUFFER_SIZE, fconfig);
   if (buf[0]==';' || buf[0]=='[' || buf[0]=='\n') {
     continue;
   } else {
