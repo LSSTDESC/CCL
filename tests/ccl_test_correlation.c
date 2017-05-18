@@ -231,7 +231,9 @@ static void compare_corr(char *compare_type,struct corrs_data * data)
 		  &wt_ll_12_h_mm);
   ccl_tracer_corr(cosmo,NL,&theta_arr,tr_wl_2,tr_wl_2,4,taper_cl,taper_cl_limits,
 		  &wt_ll_22_h_mm);
-
+  time(&end_time);
+  time_sec=difftime(end_time,start_time);
+  printf("CCL correlation all calculation done. %.10e \n",time_sec);
   //Re-scale theta from radians to degrees
   for (int i=0;i<NL;i++){
     theta_arr_an[i]=theta_arr_an[i]*180/M_PI;

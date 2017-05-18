@@ -172,11 +172,11 @@ int ccl_tracer_corr(ccl_cosmology *cosmo, int n_theta, double **theta,
 		    bool do_taper_cl,double *taper_cl_limits, 
 		    double **corr_func)
 {
-  
-  /* return ccl_tracer_corr_fftlog(cosmo, n_theta,theta,ct1,ct2,i_bessel,do_taper_cl,taper_cl_limits,
+  /*  
+  return ccl_tracer_corr_fftlog(cosmo, n_theta,theta,ct1,ct2,i_bessel,do_taper_cl,taper_cl_limits,
 			  corr_func,ccl_angular_cl);
-   */
-  return ccl_tracer_corr_legendre(cosmo, n_theta,theta,ct1,ct2,i_bessel,do_taper_cl,
+  */
+    return ccl_tracer_corr_legendre(cosmo, n_theta,theta,ct1,ct2,i_bessel,do_taper_cl,
 				  taper_cl_limits,corr_func,ccl_angular_cl);   
 }
 
@@ -219,7 +219,6 @@ int ccl_tracer_corr_fftlog(ccl_cosmology *cosmo, int n_theta, double **theta,
       }
     l_arr[i]=(int)l_arr[i];//conversion since cl function require integers
     //this leads to repeated ell in the array, especially at low ell
-
     cl_arr[i]=angular_cl(cosmo,l_arr[i],ct1,ct2,&status); 
 
     //    cl_arr[i]*=sqrt(l_arr[i]);
@@ -231,7 +230,16 @@ int ccl_tracer_corr_fftlog(ccl_cosmology *cosmo, int n_theta, double **theta,
       Update: Changed FFTlog to take in m as double.
     */
   }
-
+  /*
+  if (i_bessel==4)
+    {
+      FILE *output2 = fopen("cc_test_corr_out_cl_mm.dat", "w");
+      for(int i=0;i<n_theta;i+=1) {
+	fprintf(output2,"%.3e %.3e\n",l_arr[i],cl_arr[i]);
+      }
+      fclose(output2);
+    }
+  */
   if (do_taper_cl)//also takes in int l_arr
     status=taper_cl(n_theta,l_arr,cl_arr, taper_cl_limits);
  
@@ -263,19 +271,7 @@ int ccl_tracer_corr_fftlog(ccl_cosmology *cosmo, int n_theta, double **theta,
 int compute_legedre_polynomial(CCL_ClTracer *ct1, CCL_ClTracer *ct2, int i_bessel,
 				double **theta, int n_theta, int L_max, double **Pl_theta)
 {
-  double Nl2=0;//Nl**2
-  double *Gp,*Gm,*Plm;
-  int Plm_indx;
-  if((ct1->tracer_type==CL_TRACER_WL) && (ct2->tracer_type==CL_TRACER_WL))
-    {
-      Gp=(double *)malloc(sizeof(double)*L_max);
-      Gm=(double *)malloc(sizeof(double)*L_max);
-    }
-  if((ct1->tracer_type==CL_TRACER_WL) || (ct2->tracer_type==CL_TRACER_WL))
-    {
-      int Plm_size=gsl_sf_legendre_array_n(L_max);
-      Plm=(double *)malloc(sizeof(double)*Plm_size);
-    }
+  double Nl2=0,k=0;//Nl**2
 
   for (int i=0;i<n_theta;i++)
     {
@@ -290,30 +286,42 @@ int compute_legedre_polynomial(CCL_ClTracer *ct1, CCL_ClTracer *ct2, int i_besse
 	      ||((ct1->tracer_type==CL_TRACER_NC) && (ct2->tracer_type==CL_TRACER_WL)))
 	{//https://arxiv.org/pdf/1007.4809.pdf
 	  //gsl_sf_legendre_Plm_array(L_max,2,cos((*theta)[i]),Pl_theta[i]);//deprecated in gsl
-	  for (int j=2;j<L_max;j++)
+	  for (int j=0;j<L_max;j++)
 	    {
-	      //Pl_theta[i][j]*=(2*j+1)/(j*(j+1));//https://arxiv.org/pdf/1007.4809.pdf
-	     Nl2=2.0/((double)((j-1)*j*(j+1)*(j+2)));//https://arxiv.org/pdf/astro-ph/9611125v1.pdf
-	      Pl_theta[i][j]*=(2*j+1)*sqrt(Nl2);
+	      if(j<2){
+		Pl_theta[i][j]=0;
+		continue;
+	      }
+	      Pl_theta[i][j]=gsl_sf_legendre_Plm(j,i_bessel,cos((*theta)[i]));
+	      Pl_theta[i][j]*=(2*j+1)/j/(j+1);
 	    }
-	  Pl_theta[i][0]=0;
-	  Pl_theta[i][1]=0;
 	}
 
       else if((ct1->tracer_type==CL_TRACER_WL) && (ct2->tracer_type==CL_TRACER_WL))
 	{//https://arxiv.org/pdf/astro-ph/9611125v1.pdf
-	  //gsl_sf_legendre_Plm_array(L_max,2,cos((*theta)[i]),Pl_theta[i]);//deprecated in gsl
-	  //gsl_sf_legendre_array(GSL_SF_LEGENDRE_NONE,L_max,cos((*theta)[i]),Plm);//too slow
+	  //Kilbinger+2017
 	  if (i_bessel==0)
 	    {
 	      gsl_sf_legendre_Pl_array(L_max,cos((*theta)[i]),Pl_theta[i]);
 	      for (int j=0;j<L_max;j++)
 		Pl_theta[i][j]*=(2*j+1);
 	    }
-	  else{
-	    gsl_sf_legendre_Pl_array(L_max,cos((*theta)[i]),Pl_theta[i]);
+	  else{ //this is slow
 	    for (int j=0;j<L_max;j++)
-	      Pl_theta[i][j]*=0;
+	      {
+		if (i%(n_theta/100)!=0){///////////Some theta points thrown away for speed
+		  Pl_theta[i][j]=0;
+		  continue;
+		}
+		if (j<i_bessel){
+                  Pl_theta[i][j]=0;
+                  continue;
+                }
+		Pl_theta[i][j]=gsl_sf_legendre_Plm(j,i_bessel,cos((*theta)[i]));
+		Pl_theta[i][j]*=(2*j+1)*pow(j,4);//approximate.. Using relation between bessel and legendre functions from Steibbens96.
+		for (k=-3;k<=4;k++)
+		  Pl_theta[i][j]/=(j+k);
+	      }
 	  }
 	}
     }
@@ -330,7 +338,7 @@ int ccl_tracer_corr_legendre(ccl_cosmology *cosmo, int n_theta, double **theta,
   int status=0;
   int l_arr[L_max];
   double cl_arr[L_max];
-  //n_theta=100;
+  //  n_theta=100;
   l_arr[0]=0;cl_arr[0]=0;
   for(int i=1;i<L_max;i+=1) {
      l_arr[i]=i;
