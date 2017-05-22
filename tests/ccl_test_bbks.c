@@ -12,7 +12,6 @@ CTEST_DATA(bbks) {
   double A_s;
   double n_s;
   double sigma_8;
-  double Omega_n;
   double N_nu_rel;
   double N_nu_mass;
   double mnu;
@@ -28,8 +27,11 @@ CTEST_SETUP(bbks) {
   data->h = 0.7;
   //TODO: Don't we have to change this to normpk?
   data->A_s = 2.1e-9;
-  data->sigma_8=0.8;
   data->n_s = 0.96;
+  data->sigma_8=0.8;
+  data->N_nu_rel=0;
+  data->N_nu_mass=0;
+  data->mnu=0;
 
   double Omega_v[5]={0.7, 0.7, 0.7, 0.65, 0.75};
   double w_0[5] = {-1.0, -0.9, -0.9, -0.9, -0.9};
@@ -39,8 +41,7 @@ CTEST_SETUP(bbks) {
     data->Omega_v[i] = Omega_v[i];
     data->w_0[i] = w_0[i];
     data->w_a[i] = w_a[i];
-    data->Omega_n = 0.0;
-    data->Omega_k[i] = 1.0 - data->Omega_c - data->Omega_b - data->Omega_n - data->Omega_v[i];
+    data->Omega_k[i] = 1.0 - data->Omega_c - data->Omega_b - data->Omega_v[i];
   }
 }
 
