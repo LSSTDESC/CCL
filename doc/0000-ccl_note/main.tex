@@ -13,6 +13,7 @@
 \usepackage{graphicx}
 \graphicspath{{./}{./figures/}}
 \bibliographystyle{apj}
+\newcommand{\todo}[1]{\textcolor{magenta}{To do: #1}}
 
 %This is a paper and note template for the LSST DESC \citep{Overview,ScienceBook,WhitePaper}.
 %Eventually it will be possible to switch between various \LaTeX\xspace styles for internal notes and peer reviewed journals templates.
@@ -67,11 +68,17 @@ This note describes how to install {\tt CCL} (Section \ref{sec:install}), its fu
 \section{Installation}
 \label{sec:install}
 \subsection{Dependencies}
+
+\todo{Revisit list of dependencies. Is SWIG still a dependency? And we don't need FFTlog, right? Anything else?}
+
 \begin{itemize}
 \item GNU Scientific Library {\tt GSL}\footnote{\url{https://www.gnu.org/software/gsl/}}, {\tt GSL-2.1} or higher
 \item Simplified Wrapper and Interface Generator {\tt SWIG}\footnote{\url{http://www.swig.org/}}
 \end{itemize}
 \subsection{Installation Procedure}
+
+\todo{Javier to update if we merge the travis branch.}
+
 {\tt CCL} can be installed through an {\tt autotools}-generated configuration file. UNIX users should be familiar with the process: navigate to the directory containing the library and type
 \begin{verbatim}
  $ ./configure
@@ -89,6 +96,8 @@ This will create two directories (if not present already): {\tt /home/desc$\_$fa
 After installing the C library you can make sure it is running as it should by typing {\tt make check}, which will run the unit tests described in Section \ref{sec:tests}. You are now ready to install the Python wrapper following the steps described in Section \ref{sec:python}.
 
 \subsection{Compiling against an external version of CLASS}
+
+\todo{Please give a relevant reference which could work as example. Say we tried this with hiclass and it worked without issues.}
 
 {\tt CCL} has a built-in version of {\tt CLASS} that is used to calculate power spectra and other cosmological functions. This is compiled by default. Optionally, you can also link {\tt CCL} against an external version of {\tt CLASS}. This is useful if you want to use a modified version of {\tt CLASS}, or a different or more up-to-date version of the standard {\tt CLASS}.
 
@@ -114,8 +123,10 @@ Once compilation has finished, run {\tt make check} to make sure everything is w
 \label{sec:func}
 
 \subsection{Supported cosmological models}
+
+
 \label{sec:cosmologies}
-Ultimately, CCL will aim to incorporate theoretical predictions for all cosmological models of interest to LSST. Currently, however, only a few families of models are supported:
+Ultimately, CCL will aim to incorporate theoretical predictions for all cosmological models of interest to LSST. Currently, the following families of models are supported:
 \begin{itemize}
  \item Flat, vanilla $\Lambda$CDM 
  \item wCDM and the CPL model ($w_0+w_a$)
@@ -129,6 +140,8 @@ Not all functionalities are available for all models. For a reference of what pr
 The first step to use CCL is to generate a {\tt ccl$\_$cosmology} structure, containing all of the information required to compute cosmological observables. A {\tt ccl$\_$cosmology} structure is generated using the information from a {\tt ccl$\_$parameters} object and a {\tt ccl$\_$configuration} object.
 
 \input{table_cosmo}
+
+\todo{Why is {\tt norm\_pk} in blue below?}
 
 {\tt ccl$\_$parameters} objects contain information about the cosmological parameters, and are initialized using one of the following routines (the full syntax for each function can be found in the header file {\tt ccl$\_$core.h}):
 \begin{itemize}
@@ -150,6 +163,8 @@ Directions to an example of {\tt CCL} script are provided in Section \ref{sec:ex
 
 \subsection{Distances}
 \label{sec:distances}
+
+\todo{Add distance modulus.}
 
 The routines described in this subsection are implemented in {\tt ccl$\_$background.c}.
 
@@ -209,7 +224,7 @@ in units such that $\mu$ is dimensionless. We then conduct the phase-space integ
 \Omega_{\nu, {\rm m}}(a) = N_{\rm m}^\nu \frac{8 \pi^2(\pi k_b )^3 k_b}{15(c h_{\rm P})^3} \frac{8 \pi G}{3h^2c^2} \left(\frac{T_{\nu}^{\rm eff}}{a}\right)^4 \left(\frac{7}{8}\int_0^{x_{\rm max}} dx \, x^2 \frac{\sqrt{x^2 + \mu^2}}{\exp(x) + 1}\right)
 \label{Omnu}
 \end{equation}
-where $h_{\rm P}$ is Planck's constant and $h$ is $H_0/100$ with $H_0$ in units of km / s / Mpc. $x_{\rm max}$ is set to 1000. The final bracketed term which includes the phase-space integral can be simplified in the limit where $\mu$ is very large or very small: for small $\mu$, it is set to $\frac{7}{8}$, and for large $\mu$, it becomes $0.2776566337\mu$.
+where $h_{\rm P}$ is Planck's constant and $h$ is $H_0/100$ with $H_0$ in units of km / s / Mpc. $x_{\rm max}$ is set to 1000. The final bracketed term which includes the phase-space integral can be simplified in the limit where $\mu$ is very large or very small: for small $\mu$, it is set to $\frac{7}{8}$, and for large $\mu$, it becomes $0.2776566337\mu$.\todo{Do we need this many digits?}
 
 
 
@@ -252,6 +267,8 @@ Secondly, there is the option to call the {\tt CLASS} software \citep{class} wit
 
 \subsubsection{Nonlinear extrapolation}
 \label{sec:NLextrapol}
+
+\todo{This section needs careful checking, many things have changed here.}
 
 The computation of the nonlinear power spectrum from {\tt CLASS} can be significantly sped up by extrapolating in the range $k>${\tt K$\_$MAX$\_$SPLINE}. In this section, we describe the implementation of the extrapolation and the accuracy attained.
 
@@ -388,40 +405,44 @@ where
 \end{align}
 
 
-%\subsection{Correlation functions}
-%\label{sec:corr}
+\subsection{Correlation functions}
+\label{sec:corr}
 
-%In the Limber approximation, the angular correlation function between any two tracers $1$ and $2$ is given by\footnote{See Bartelmann and Schneider (1999) weak lensing review, page 44. See also Joachimi \& Bridle (2010)}
-%
-%\begin{equation}
-%C_{12}(\theta) = \int d\chi'q_1(\chi')q_2(\chi')\int dk\frac{k}{2\pi}P_{\delta}(k,\chi')J_0[f_K(\chi')\theta k],
-%\end{equation}
-%
-%where $J_0$ is the Bessel function of order 0, $\chi$ is the comoving distance and $f_K(\chi)$ is the radial function that multiplies the spatial metric element, which is different from $\chi$ in the case of a cosmology with non-zero curvature. {\bf TODO. Need to verify $f_K$ implementation in {\tt CCL}.}
+\todo{This section is new. Sukhdeep and Elisa to update.}
 
-%{\bf Clustering.} For clustering, the relevant weight is given by $q_1(\chi)=b_1(\chi)dN_1/d\chi(\chi)$, the comoving distance probability distribution times the bias. The angular correlation function can also be re-written as
-%\begin{equation}
-%C_{12}(\theta) = \int dl \frac{l}{2\pi} C_{gg}(l) J_0(l\theta),
-%\end{equation}
-%where $C_{gg}$ is the galaxy clustering angular power spectrum.
+In the Limber approximation, the angular correlation function between any two tracers $1$ and $2$ is given by\footnote{See Bartelmann and Schneider (1999) weak lensing review, page 44. See also Joachimi \& Bridle (2010)}
 
-%{\bf Lensing.} Lensing correlation functions are \footnote{from Schneider 2002 and Bartelmann \& Schneider section 6.4.1}
+\begin{equation}
+C_{12}(\theta) = \int d\chi'q_1(\chi')q_2(\chi')\int dk\frac{k}{2\pi}P_{\delta}(k,\chi')J_0[f_K(\chi')\theta k],
+\end{equation}
 %
-%\begin{eqnarray}
-%\xi_{+}(\theta)&=&\int_0^{\infty}dl\frac{l}{2\pi}J_0(l\theta)P_\kappa(l),\\
-%\xi_{-}(\theta)&=&\int_0^{\infty}dl\frac{l}{2\pi}J_4(l\theta)P_\kappa(l),
-%\end{eqnarray}
+where $J_0$ is the Bessel function of order 0, $\chi$ is the comoving distance and $f_K(\chi)$ is the radial function that multiplies the spatial metric element, which is different from $\chi$ in the case of a cosmology with non-zero curvature. {\bf TODO. Need to verify $f_K$ implementation in {\tt CCL}.}
+
+{\bf Clustering.} For clustering, the relevant weight is given by $q_1(\chi)=b_1(\chi)dN_1/d\chi(\chi)$, the comoving distance probability distribution times the bias. The angular correlation function can also be re-written as
+\begin{equation}
+C_{12}(\theta) = \int dl \frac{l}{2\pi} C_{gg}(l) J_0(l\theta),
+\end{equation}
+where $C_{gg}$ is the galaxy clustering angular power spectrum.
+
+{\bf Lensing.} Lensing correlation functions are \footnote{from Schneider 2002 and Bartelmann \& Schneider section 6.4.1}
 %
-%where the angular lensing convergence power spectrum is given by
-%\begin{eqnarray}
-%P_\kappa(l) &=& \frac{9H_0^4\Omega_m^2}{4c^4}\int_{0}^{\chi_h}\frac{d\chi}{a^2(\chi)}P_\delta\left(\frac{l}{f_K(\chi)},\chi\right)\left[\int_\chi^{\chi_h}d\chi'p_\chi(\chi')\frac{f_K(\chi'-\chi)}{f_K(\chi')}\right]^2\\
-%\end{eqnarray}
+\begin{eqnarray}
+\xi_{+}(\theta)&=&\int_0^{\infty}dl\frac{l}{2\pi}J_0(l\theta)P_\kappa(l),\\
+\xi_{-}(\theta)&=&\int_0^{\infty}dl\frac{l}{2\pi}J_4(l\theta)P_\kappa(l),
+\end{eqnarray}
 %
-%For numerical integration of the correlation functions, we make use of the public code FFTlog (... cite ...). (... more here ... describe correlation function calculation).
+where the angular lensing convergence power spectrum is given by
+\begin{eqnarray}
+P_\kappa(l) &=& \frac{9H_0^4\Omega_m^2}{4c^4}\int_{0}^{\chi_h}\frac{d\chi}{a^2(\chi)}P_\delta\left(\frac{l}{f_K(\chi)},\chi\right)\left[\int_\chi^{\chi_h}d\chi'p_\chi(\chi')\frac{f_K(\chi'-\chi)}{f_K(\chi')}\right]^2\\
+\end{eqnarray}
+
+For numerical integration of the correlation functions, we make use of the public code FFTlog \todo{(... cite ...). (... more here ... describe correlation function calculation)}.
 
 
 \subsection{Halo mass \& halo bias functions}
 \label{sec:hmf}
+
+\todo{Any updates here?}
 
 The routines described in this subsection are implemented in {\tt ccl$\_$massfunc.c}.
 
@@ -588,6 +609,12 @@ Finally, we note that formal tests for predictions in cosmologies with neutrinos
 
 {\tt CCL} has a suite of test routines which, upon compilation, compare its outputs to the benchmarks from code comparison. These are run with {\tt make check}.
 
+\todo{What new checks were added?}
+
+\todo{Explain that these are not the same tests as in the Python implementation}
+
+\todo{Add correlation function test (Elisabeth)}
+
 
 \section{Default configuration}
 \label{sec:default}
@@ -640,6 +667,8 @@ You can quickly check whether {\tt pyccl} has been installed correctly by runnin
 
 \subsection{Python example}
 \label{sec:python:example}
+
+\todo{Point the reader to the python notebooks available.}
 
 The Python module has essentially the same functions as the C library, just presented in a more standard Python-like way. You can inspect the available functions and their arguments by using the built-in Python {\tt help()} function, as with any Python module.
 
