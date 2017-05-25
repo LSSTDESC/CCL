@@ -109,23 +109,23 @@ def check_power(cosmo):
     R_arr = np.array([1., 5., 10., 20., 50., 100.])
     
     # linear_matter_power
-    assert_( all_finite(ccl.linear_matter_power(cosmo, a, k_scl)) )
-    assert_( all_finite(ccl.linear_matter_power(cosmo, a, k_lst)) )
-    assert_( all_finite(ccl.linear_matter_power(cosmo, a, k_arr)) )
+    assert_( all_finite(ccl.linear_matter_power(cosmo, k_scl, a)) )
+    assert_( all_finite(ccl.linear_matter_power(cosmo, k_lst, a)) )
+    assert_( all_finite(ccl.linear_matter_power(cosmo, k_arr, a)) )
     
-    assert_raises(TypeError, ccl.linear_matter_power, cosmo, a_arr, k_scl)
-    assert_raises(TypeError, ccl.linear_matter_power, cosmo, a_arr, k_lst)
-    assert_raises(TypeError, ccl.linear_matter_power, cosmo, a_arr, k_arr)
+    assert_raises(TypeError, ccl.linear_matter_power, cosmo, k_scl, a_arr)
+    assert_raises(TypeError, ccl.linear_matter_power, cosmo, k_lst, a_arr)
+    assert_raises(TypeError, ccl.linear_matter_power, cosmo, k_arr, a_arr)
     
     # nonlin_matter_power
-    assert_( all_finite(ccl.nonlin_matter_power(cosmo, a, k_scl)) )
-    assert_( all_finite(ccl.nonlin_matter_power(cosmo, a, k_lst)) )
-    assert_( all_finite(ccl.nonlin_matter_power(cosmo, a, k_arr)) )
+    assert_( all_finite(ccl.nonlin_matter_power(cosmo, k_scl, a)) )
+    assert_( all_finite(ccl.nonlin_matter_power(cosmo, k_lst, a)) )
+    assert_( all_finite(ccl.nonlin_matter_power(cosmo, k_arr, a)) )
     
-    assert_raises(TypeError, ccl.nonlin_matter_power, cosmo, a_arr, k_scl)
-    assert_raises(TypeError, ccl.nonlin_matter_power, cosmo, a_arr, k_lst)
-    assert_raises(TypeError, ccl.nonlin_matter_power, cosmo, a_arr, k_arr)
-    
+    assert_raises(TypeError, ccl.nonlin_matter_power, cosmo, k_scl, a_arr)
+    assert_raises(TypeError, ccl.nonlin_matter_power, cosmo, k_lst, a_arr)
+    assert_raises(TypeError, ccl.nonlin_matter_power, cosmo, k_arr, a_arr)
+
     # sigmaR
     assert_( all_finite(ccl.sigmaR(cosmo, R_scl)) )
     assert_( all_finite(ccl.sigmaR(cosmo, R_lst)) )
