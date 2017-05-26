@@ -11,6 +11,7 @@
 #include "gsl/gsl_spline.h"
 #include "gsl/gsl_integration.h"
 #include "ccl_params.h"
+#include "ccl_error.h"
 #include <stdlib.h>
 
 const ccl_configuration default_config = {ccl_boltzmann_class, ccl_halofit, ccl_tinker10};
@@ -151,7 +152,6 @@ TASK: Creates ccl_cosmology struct directly from a set of input cosmological
 DEFINITIONS:
 Omega_c: cold dark matter
 Omega_b: baryons
-Omega_n: neutrinos
 Omega_k: curvature
 w0: Dark energy eqn. of state parameter
 wa: Dark energy eqn. of state parameter, time variation
@@ -270,7 +270,6 @@ DEFINITIONS:
 Omega_c: cold dark matter
 Omega_b: baryons
 Omega_m: matter
-Omega_n: neutrinos
 Omega_k: curvature
 little omega_x means Omega_x*h^2
 w0: Dark energy eq of state parameter

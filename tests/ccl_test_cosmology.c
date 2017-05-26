@@ -55,7 +55,6 @@ CTEST2(cosmology, create_general_cosmo){
     ASSERT_DBL_NEAR_TOL(params.Omega_c, data->Omega_c, 1e-10);
     ASSERT_DBL_NEAR_TOL(params.w0, -1.0, 1e-10);
     ASSERT_DBL_NEAR_TOL(params.wa, data->wa, 1e-10);
-    ASSERT_DBL_NEAR_TOL(params.Omega_n, 0.0, 1e-10);
 }
 
 // Check to see if LCDM ccl_cosmology struct is initialized correctly
@@ -74,6 +73,5 @@ CTEST2(cosmology, create_lcdm_cosmo){
     ASSERT_DBL_NEAR_TOL(params.Omega_c, data->Omega_c, 1e-10);
     ASSERT_DBL_NEAR_TOL(params.w0, -1.0, 1e-10);
     ASSERT_DBL_NEAR_TOL(params.wa, 0.0, 1e-10);
-    ASSERT_DBL_NEAR_TOL(params.Omega_n, 0.0, 1e-10);
 }
 
