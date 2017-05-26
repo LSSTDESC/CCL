@@ -32,6 +32,10 @@ typedef struct {
   SplPar *spl_ba; //Spline for alignment bias
   SplPar *spl_wL; //Spline for lensing kernel
   SplPar *spl_wM; //Spline for magnification
+  int computed_transfer;
+  int n_ls;
+  int *n_k;
+  SplPar **spl_transfer;
 } CCL_ClTracer;
 
 //Generic CCL_ClTracer creator
@@ -82,7 +86,9 @@ void ccl_cl_tracer_free(CCL_ClTracer *clt);
 //Workspace for C_ell computations
 typedef struct {
   int nlimb_method;
+  double zmin;
   double dchi; //Spacing in comoving distance to use for the LOS integrals
+  double dlk; //Logarithmic spacing in wavenumber
   int lmax; //Maximum multipole
   int l_limber; //All power spectra for l>l_limber will be computed using Limber's approximation
   double l_logstep; //Logarithmic step factor used at low l
@@ -93,7 +99,8 @@ typedef struct {
 
 //CCL_ClWorkspace constructor
 CCL_ClWorkspace *ccl_cl_workspace_new(int lmax,int l_limber,int non_limber_method,
-				      double l_logstep,int l_linstep,double dchi,int *status);
+				      double l_logstep,int l_linstep,
+				      double dchi,double dlk,double zmin,int *status);
 //CCL_ClWorkspace simplified constructor
 CCL_ClWorkspace *ccl_cl_workspace_new_default(int lmax,int l_limber,int *status);
 //CCL_ClWorkspace destructor

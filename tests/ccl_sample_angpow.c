@@ -106,23 +106,26 @@ int main(int argc,char **argv)
   print_params(NL,"params_lj_nonlimber.ini","out_lj_nonlimber");
 
   //Galaxy clustering tracer
-  CCL_ClTracer *ct_gc=ccl_cl_tracer_number_counts_new(cosmo,0,0,NZ,z_arr_gc,nz_arr_gc,
-						      NZ,z_arr_gc,bz_arr,-1,NULL,NULL,&status);
+  CCL_ClTracer *ct_gc_A=ccl_cl_tracer_number_counts_new(cosmo,0,0,NZ,z_arr_gc,nz_arr_gc,
+							NZ,z_arr_gc,bz_arr,-1,NULL,NULL,&status);
+  CCL_ClTracer *ct_gc_B=ccl_cl_tracer_number_counts_new(cosmo,0,0,NZ,z_arr_gc,nz_arr_gc,
+							NZ,z_arr_gc,bz_arr,-1,NULL,NULL,&status);
   int *ells=malloc(NL*sizeof(int));
   double *cells_gg_angpow=malloc(NL*sizeof(double));
   double *cells_gg_native=malloc(NL*sizeof(double));
   double *cells_gg_limber=malloc(NL*sizeof(double));
   for(int ii=0;ii<NL;ii++)
     ells[ii]=ii;
-  CCL_ClWorkspace *wap=ccl_cl_workspace_new(NL+1,2*ells[NL-1],CCL_NONLIMBER_METHOD_ANGPOW,1.05,20,3.,&status);
-  CCL_ClWorkspace *wnl=ccl_cl_workspace_new(NL+1,2*ells[NL-1],CCL_NONLIMBER_METHOD_NATIVE,1.05,20,3.,&status);
-  CCL_ClWorkspace *wyl=ccl_cl_workspace_new(NL+1,-1          ,CCL_NONLIMBER_METHOD_ANGPOW,1.05,1 ,3.,&status);
+  CCL_ClWorkspace *wyl=ccl_cl_workspace_new(NL+1,-1          ,CCL_NONLIMBER_METHOD_ANGPOW,1.05,20,3.,0.003,0.05,&status);
+  CCL_ClWorkspace *wnl=ccl_cl_workspace_new(NL+1,2*ells[NL-1],CCL_NONLIMBER_METHOD_NATIVE,1.05,20,3.,0.003,0.05,&status);
+  CCL_ClWorkspace *wap=ccl_cl_workspace_new(NL+1,2*ells[NL-1],CCL_NONLIMBER_METHOD_ANGPOW,1.05,20,3.,0.003,0.05,&status);
   printf("Limber\n");
-  ccl_angular_cls(cosmo,wyl,ct_gc,ct_gc,NL,ells,cells_gg_limber,&status);
+  ccl_angular_cls(cosmo,wyl,ct_gc_A,ct_gc_A,NL,ells,cells_gg_limber,&status);
   printf("Native\n");
-  ccl_angular_cls(cosmo,wnl,ct_gc,ct_gc,NL,ells,cells_gg_native,&status);
+  ccl_angular_cls(cosmo,wnl,ct_gc_B,ct_gc_B,NL,ells,cells_gg_native,&status);
+  exit(1);
   printf("Angpow\n");
-  ccl_angular_cls(cosmo,wap,ct_gc,ct_gc,NL,ells,cells_gg_angpow,&status);
+  ccl_angular_cls(cosmo,wap,ct_gc_A,ct_gc_A,NL,ells,cells_gg_angpow,&status);
   printf("Done\n");
   ccl_cl_workspace_free(wap);
   ccl_cl_workspace_free(wnl);
@@ -140,7 +143,8 @@ int main(int argc,char **argv)
   free(ells); free(cells_gg_angpow); free(cells_gg_limber);
 
   //Free up tracers
-  ccl_cl_tracer_free(ct_gc);
+  ccl_cl_tracer_free(ct_gc_A);
+  ccl_cl_tracer_free(ct_gc_B);
 
   //Always clean up!!
   ccl_cosmology_free(cosmo);

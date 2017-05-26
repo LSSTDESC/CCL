@@ -158,7 +158,7 @@ static void compare_cls(char *compare_type,struct cls_data * data)
   fclose(fi_ll_12);
   fclose(fi_ll_22);
 
-  CCL_ClWorkspace *w=ccl_cl_workspace_new(3001,-1,CCL_NONLIMBER_METHOD_NATIVE,1.05,20,3.,&status);
+  CCL_ClWorkspace *w=ccl_cl_workspace_new(3001,-1,CCL_NONLIMBER_METHOD_NATIVE,1.05,20,3.,0.003,0.05,&status);
 
   ccl_angular_cls(cosmo,w,tr_nc_1,tr_nc_1,3001,ells,cls_dd_11_h,&status);
   if (status) printf("%s\n",cosmo->status_message);
