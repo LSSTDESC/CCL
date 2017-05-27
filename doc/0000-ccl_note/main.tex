@@ -411,6 +411,86 @@ where
 
 \todo{Fill out this section with a short description of angpow and how it is linked to CCL}
 
+%Text Added JECampagne 27/05/17 START
+
+%This reference to Angpow may change as soon as A&A will publish it.
+%@ARTICLE{2017arXiv170103592C,
+%   author = {{Campagne}, J.-E. and {Neveu}, J. and {Plaszczynski}, S.},
+%    title = "{Angpow: a software for the fast computation of accurate tomographic power spectra}",
+%	archivePrefix = "arXiv",
+%   eprint = {1701.03592},
+% keywords = {Astrophysics - Cosmology and Nongalactic Astrophysics},
+%     year = 2017,
+%    month = jan,
+%    journal = {to be published to \aap},
+%   adsurl = {http://adsabs.harvard.edu/abs/2017arXiv170103592C},
+%  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+%}
+
+
+
+Our aim is to compute the angular over density power spectrum  $C_{\ell}(z_1, z_2)$ as a cross-correlation between two $z$-shells with mean values ($z_1, z_2$) and also the auto-correlation $C_{\ell}(z_1)$ with $z_1 = z_2$,  taking into account, in both cases, possible redshift selection functions and physical processes as redshift space distortions without any Limber numerical approximation. This is the purpose of the \texttt{Angpow} code \citep{2017arXiv170103592C} that we describe briefly here.
+
+
+So, one computes $C_{\ell}(z_1, z_2)$ according to the following formula
+\begin{equation}
+\begin{split}
+C_{\ell}&(z_1, z_2;\sigma_1, \sigma_2)\\& = \iint_0^\infty \mathrm{d} z \mathrm{d} z^\prime \ W_1(z; z_1, \sigma_1) W_2(z^\prime; z_2, \sigma_2)\\
+&\phantom{\iint_0^\infty \mathrm{d} z \mathrm{d} z^\prime} \times \int_0^\infty \mathrm{d} k\ f_{\ell}(z, k) f_{\ell}(z^\prime, k). 
+\end{split}
+\label{eq-clz1z2-obs}
+\end{equation}
+One has introduced two normalized redshift selection functions $W_1(z;z_1,\sigma_1)$ and $W_2(z^\prime;z_2,\sigma_2)$  around $z_1$ and $z_2$ with typical width $\sigma_1$ and $\sigma_2$, respectively. The auxiliary function $f_\ell(z,k)$ can be defined without loss of generality as 
+\begin{equation}
+f_\ell(z,k) \equiv  \sqrt{\frac{2}{\pi}}\  k \sqrt{P(k,z)}\ \widetilde{\Delta}_\ell(z,k)\label{eq-fell-func}
+\end{equation}
+with 
+\begin{itemize}
+\item  $P(k,z)$ : the power spectrum at redshift $z$ which is defined either using the primordial power spectrum $P_{in}(k)$ and the transfer function $T(k,z)$ as
+\begin{equation}
+P(k,z) = P_{in}(k) T(k,z),
+\label{eq-Pkz-in}
+\end{equation} 
+either using an approximation valid at low redshift  with the power spectrum at $z=0$ ($P(k)|_{z=0}$) and the growth factor $G(z)$ as
+\begin{equation}
+P(k,z) = P(k)|_{z=0} G^2(z);
+\label{eq-Pkz-in}
+\end{equation} 
+
+\item $\widetilde{\Delta}_\ell(z,k)$ is a function describing the physical processes as matter density fluctuations, redshift space distortions as described for instance in references \citet{2008cmb..book.....D,2009PhRvD..80h3514Y,2010PhRvD..82h3508Y,2011PhRvD..84d3516C,2011PhRvD..84f3505B}. As example with a constant bias $b$ and using the growth factor rate $f_a(z) = d\log G(a(z))/d\log(a(z))$ ($a(z)=(1+z)^{-1}$)
+\begin{equation}
+ \widetilde{\Delta}_\ell(z,k) \approx b j_\ell(k r(z)) - f_a(z) j_\ell^{\prime\prime}l(k r(z)) + \dots
+\end{equation}
+with $j_\ell(x)$ and $j_\ell^{\prime\prime}(x)$ the spherical Bessel function of order $\ell$ and its second derivative, and $r(z)$ is the comoving distance at redshift $z$.
+\end{itemize}
+
+To proceed to a numerical evaluation of equation \ref{eq-clz1z2-obs}, we first conduct  inside the rectangle $ [z_{1\mrm{min}},z_{1\mrm{max}}] \times [z_{2\mrm{min}},z_{2\mrm{max}}]$ given by the $W$ selection functions a Cartesian product of one-dimensional (1D) quadrature 
+ defined by the set of sample nodes $z_i$ and weights $w_i$. In practice, we use the Clenshaw-Curtis quadrature.   The corresponding sampling points $(z_{1i},z_{2j})$ are weighted by the product  $w_i w_j$ using the 1D quadrature sample points and weights on both redshift regions with $i=0,\dots, N_{\mrm{z}_1}-1$ and $j=0,\dots,N_{\mrm{z}_2}-1$. Then, one gets the following approximation:
+\begin{equation}
+C^{\mrm{thick}}_{\ell}(z_1, z_2) \approx  \sum_{i=0}^{N_{\mrm{z}_1}-1}\sum_{j=0}^{N_{\mrm{z}_2}-1} w_i w_j W_1(z_i,z_1)W_2(z_j,z_2) \widehat{P}_\ell(r_i,r_j)
+\label{eq-cross-zquadra}
+\end{equation}
+with the notations $z_i = z_{1i}$, $z_j = z_{2j}$ and  $r_i = r(z_{1i})$, $r_j = r(z_{2j})$ and
+\begin{equation}
+\widehat{P}_\ell(z_i,z_j) =   \int_0^\infty dk\ f_\ell(z_i,k) f_\ell(z_j,k)
+\label{eq-Pellzizj}
+,\end{equation}
+defined with the $f_\ell(z,k)$ function of equation \ref{eq-fell-func}. 
+To conduct the computation of such integral of highly oscillating functions we use the 3C-algorithm described in details in reference \citep{2017arXiv170103592C}.
+
+In brief this algorithm proceeds the following way:
+\begin{enumerate}
+\item the total integration $k$ interval (eg. $[k_\mathrm{min}, k_\mathrm{max}]$) in equation (\ref{eq-Pellzizj}) is cut on several $k$-sub-intervals;
+\item  on each sub-interval the functions $f_{i\, \ell}(k) = f_\ell(z_i,k) $ and $f_{j\, \ell}(k) = f_\ell(z_j,k)$ are projected onto Chebyshev series of order $2^N$;
+\item the product of the two Chebyshev series is performed with a $2^{2N}$ Chebyshev series; 
+\item then, the integral on the sub-interval is computed thanks to the Clenshaw-Curtis quadrature.   
+\end{enumerate}
+All the Chebyshev expansions and the Clenshaw-Curtis quadrature are
+performed via the DCT-I fast transform of FFTW. 
+
+%Text Added JECampagne 27/05/17 END
+
+
 \subsection{Correlation functions}
 \label{sec:corr}
 
