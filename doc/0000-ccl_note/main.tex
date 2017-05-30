@@ -81,8 +81,6 @@ This note describes how to install {\tt CCL} (Section \ref{sec:install}), its fu
 \end{itemize}
 \subsection{Installation Procedure}
 
-\todo{Javier to update if we merge the travis branch.}
-
 {\tt CCL} can be installed through an {\tt autotools}-generated configuration file. UNIX users should be familiar with the process: navigate to the directory containing the library and type
 \begin{verbatim}
  $ ./configure
@@ -99,6 +97,22 @@ This will create two directories (if not present already): {\tt /home/desc$\_$fa
 
 After installing the C library you can make sure it is running as it should by typing {\tt make check}, which will run the unit tests described in Section \ref{sec:tests}. You are now ready to install the Python wrapper following the steps described in Section \ref{sec:python}.
 
+There exists also the possibility of installing both the C library and the Python wrapper together by running
+\begin{verbatim}
+ $ python setup.py install --prefix=/home/desc_fan
+\end{verbatim}
+This will perform automatically the aforementioned steps to install the C library and will also install the Python library in {\tt /home/desc$\_$fan/lib/python2.7/site-packages}. You might need to add this path to your environment variable {\tt \$PYTHONPATH} to be able to use it. In the near future the pacakge is planned to be {\tt pip} installable.
+
+Once installed you can check the installation status by typing
+\begin{verbatim}
+ $ python setup.py test
+\end{verbatim}
+
+This will run the embedded unit tests. Using this last method to install the Python library allows you to uninstall it just by running
+\begin{verbatim}
+ $ python setup.py uninstall
+\end{verbatim}
+ 
 \subsection{Compiling against an external version of CLASS}
 
 \todo{Please give a relevant reference which could work as example. Say we tried this with hiclass and it worked without issues.}
