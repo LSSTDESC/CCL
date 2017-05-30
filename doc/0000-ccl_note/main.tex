@@ -13,6 +13,8 @@
 \usepackage{graphicx}
 \graphicspath{{./}{./figures/}}
 \bibliographystyle{apj}
+\newcommand{\todo}[1]{\textcolor{magenta}{To do: #1}}
+\newcommand{\mrm}[1]{\mathrm{#1}}
 
 %This is a paper and note template for the LSST DESC \citep{Overview,ScienceBook,WhitePaper}.
 %Eventually it will be possible to switch between various \LaTeX\xspace styles for internal notes and peer reviewed journals templates.
@@ -59,19 +61,28 @@ The Core Cosmology Library ({\tt CCL}) provides routines to compute basic cosmol
 
 In preparation for constraining cosmology with the Large Synoptic Survey Telescope (LSST), it is necessary to be able to produce theoretical predictions for the cosmological quantities which will be measured. The Core Cosmology Library\footnote{\url{https://github.com/LSSTDESC/CCL}} ({\tt CCL}) aims to provide, in one library, predictions which are validated to a well-documented numerical accuracy for the purpose of constraining cosmology with LSST. By constructing a cosmology library with LSST in mind, it is possible to ensure that it is flexible, adaptable, and validated for all cases of interest, as well as user-friendly and available for the needs of all working groups.
 
-The Core Cosmology Library is written in C and incorporates the CLASS code \cite{class} to provide predictions for the matter power spectrum\footnote{Future versions of the library will incorporate other power-spectrum libraries and methods.}. A Python wrapper is also provided for improved ease of use.
+The Core Cosmology Library is written in C and incorporates the {\tt CLASS} code \cite{class} to provide predictions for the matter power spectrum\footnote{Future versions of the library will incorporate other power-spectrum libraries and methods.}. A Python wrapper is also provided for improved ease of use.
 
 This note describes how to install {\tt CCL} (Section \ref{sec:install}), its functionality (Section \ref{sec:func}), the relevant unit tests (Section \ref{sec:tests}), the default configuration (Section \ref{sec:default}), directions for finding a {\tt CCL} example (Section \ref{sec:example}), the Python wrapper (Section \ref{sec:python}), future plans (Section \ref{sec:future}), means to contact the developers (Section \ref{sec:feedback}) and the license under which {\tt CCL} is released (Section \ref{sec:license}).
 
 
 \section{Installation}
 \label{sec:install}
+
+\todo{Dockerfile need to be described here too.}
+
 \subsection{Dependencies}
+
+\todo{Revisit list of dependencies. Is SWIG still a dependency? And we don't need FFTlog, right? Anything else?}
+
 \begin{itemize}
 \item GNU Scientific Library {\tt GSL}\footnote{\url{https://www.gnu.org/software/gsl/}}, {\tt GSL-2.1} or higher
 \item Simplified Wrapper and Interface Generator {\tt SWIG}\footnote{\url{http://www.swig.org/}}
 \end{itemize}
 \subsection{Installation Procedure}
+
+\todo{Javier to update if we merge the travis branch.}
+
 {\tt CCL} can be installed through an {\tt autotools}-generated configuration file. UNIX users should be familiar with the process: navigate to the directory containing the library and type
 \begin{verbatim}
  $ ./configure
@@ -88,29 +99,57 @@ This will create two directories (if not present already): {\tt /home/desc$\_$fa
 
 After installing the C library you can make sure it is running as it should by typing {\tt make check}, which will run the unit tests described in Section \ref{sec:tests}. You are now ready to install the Python wrapper following the steps described in Section \ref{sec:python}.
 
+\subsection{Compiling against an external version of CLASS}
+
+\todo{Please give a relevant reference which could work as example. Say we tried this with hiclass and it worked without issues.}
+
+{\tt CCL} has a built-in version of {\tt CLASS} that is used to calculate power spectra and other cosmological functions. This is compiled by default. Optionally, you can also link {\tt CCL} against an external version of {\tt CLASS}. This is useful if you want to use a modified version of {\tt CLASS}, or a different or more up-to-date version of the standard {\tt CLASS}.
+
+To compile {\tt CCL} with an external version of {\tt CLASS}, you must first prepare the external copy so that it can be linked as a shared library. By default, the {\tt CLASS} build tools create a static library. After compiling {\tt CLASS} in the usual way (by running {\tt make}), look for a static library file called {\tt libclass.a} that should have been placed in the root source directory. Then, run the following command from that directory (Linux only):
+\begin{verbatim}
+ $ gcc -shared -o libclass.so -Wl,--whole-archive libclass.a \
+                              -Wl,--no-whole-archive -lgomp
+\end{verbatim}
+This should create a new shared library, {\tt libclass.so}, in the same directory. (N.B. The {\tt -lgomp} flag has to appear at the end of the command; otherwise the linker can fail.) If you are running Mac OS X, use the following command instead:
+\begin{verbatim}
+ $ gcc -fpic -shared -o libclass.dylib -Wl,-all_load libclass.a -Wl,-noall_load
+\end{verbatim}
+
+Next, change to the root {\tt CCL} directory and run {\tt make clean} if you have previously run the compilation process. Then, set the {\tt CLASSDIR} environment variable to point to the directory containing {\tt libclass.so}:
+\begin{verbatim}
+export CLASSDIR=/path/to/external/class
+\end{verbatim}
+Then, run {\tt ./configure} and compile and install {\tt CCL} as usual. The {\tt CCL} build tools should take care of linking to the external version of {\tt CLASS}.
+
+Once compilation has finished, run {\tt make check} to make sure everything is working correctly. Remember to add the external {\tt CLASS} library directory to your system library path, using either {\tt export LD\_LIBRARY\_PATH=/path/to/external/class} (Linux) or {\tt export DYLD\_FALLBACK\_LIBRARY\_PATH=/path/to/external/class} (Mac). The system must be able to find both the {\tt CCL} and {\tt CLASS} libraries; it is not enough to only add {\tt CCL} to the library path.
+
 \section{Functionality}
 \label{sec:func}
 
 \subsection{Supported cosmological models}
+
+
 \label{sec:cosmologies}
-Ultimately, CCL will aim to incorporate theoretical predictions for all cosmological models of interest to LSST. Currently, however, only a few families of models are supported:
+Ultimately, CCL will aim to incorporate theoretical predictions for all cosmological models of interest to LSST. Currently, the following families of models are supported:
 \begin{itemize}
- \item Flat, vanilla $\Lambda$CDM.
+ \item Flat, vanilla $\Lambda$CDM 
  \item wCDM and the CPL model ($w_0+w_a$)
  \item Non-zero curvature ($K$)
- \item All the above plus an arbitrary, user-defined, modified growth function (see description in Section \ref{sec:growth}).
+ \item All the above plus an arbitrary, user-defined, modified growth function (see description in Section \ref{sec:growth})
+  \item Relativistic neutrinos and / or a single massive neutrino or multiple equal-mass massive neutrinos
 \end{itemize}
 
-Not all functionalities are available for all models. For a reference of what
-predictions are available for each model, see Table \ref{tab:cosmo}.
+Not all functionalities are available for all models. For a reference of what predictions are available for each model, see Table \ref{tab:cosmo}.
 
 The first step to use CCL is to generate a {\tt ccl$\_$cosmology} structure, containing all of the information required to compute cosmological observables. A {\tt ccl$\_$cosmology} structure is generated using the information from a {\tt ccl$\_$parameters} object and a {\tt ccl$\_$configuration} object.
 
 \input{table_cosmo}
 
+\todo{Why is {\tt norm\_pk} in blue below?}
+
 {\tt ccl$\_$parameters} objects contain information about the cosmological parameters, and are initialized using one of the following routines (the full syntax for each function can be found in the header file {\tt ccl$\_$core.h}):
 \begin{itemize}
- \item {\tt ccl$\_$parameters$\_$create(double Omega$\_$c, double Omega$\_$b, double Omega$\_$k, double w0, double wa, double h, double {\color{blue}norm$\_$pk}, double n$\_$s,int nz$\_$mgrowth,double *zarr$\_$mgrowth,double *dfarr$\_$mgrowth)}: general {\tt ccl$\_$parameters} constructor supporting all the models described above.
+ \item {\tt ccl$\_$parameters$\_$create(double Omega$\_$c, double Omega$\_$b, double Omega$\_$k, double N\_nu\_rel, double N\_nu\_mass, double mnu, double w0, double wa, double h, double {\color{blue}norm$\_$pk}, double n$\_$s,int nz$\_$mgrowth,double *zarr$\_$mgrowth,double *dfarr$\_$mgrowth, int *status)}: general {\tt ccl$\_$parameters} constructor supporting all the models described above.
  \item {\tt ccl$\_$parameters$\_$create$\_$flat$\_$lcdm(...)}: particular constructor for flat $\Lambda$CDM cosmologies.
  \item {\tt ccl$\_$parameters$\_$create$\_$flat$\_$wcdm(...)}: constant $w$ cosmologies.
  \item {\tt ccl$\_$parameters$\_$create$\_$flat$\_$wacdm(...)}: $w_0+w_a$.
@@ -118,25 +157,27 @@ The first step to use CCL is to generate a {\tt ccl$\_$cosmology} structure, con
 \end{itemize}
 The argument ${\tt {\color{blue}norm\_pk}}$ can be passed the power spectrum normalization parameterized by $\sigma_8$ or $A_\mathrm{s}$, {\tt ccl$\_$parameters$\_$create} switches to $\sigma_8$ normalization if ${\tt {\color{blue}norm\_pk}} > 1.e-5$, and to $A_{\mathrm s}$ normalization otherwise.
 
-%To include massive neutrinos in your cosmology, the suffix `{\tt $\_$nu}' may be appended to the latter four {\tt ccl$\_$configuration} objects above (for example: {\tt ccl$\_$parameters$\_$create$\_$lcdm$\_$nu(...)}). Note that utilizing the corresponding {\tt ccl$\_$configuration} object without this {\tt $\_$nu} suffix will set the contribution from both massless and massive neutrinos to zero.
+To include neutrinos (massive or massless), the suffix `{\tt $\_$nu}' may be appended to the latter four {\tt ccl$\_$configuration} objects above (for example: {\tt ccl$\_$parameters$\_$create$\_$lcdm$\_$nu(...)}). Utilizing the corresponding {\tt ccl$\_$configuration} object without this {\tt $\_$nu} suffix will set the contribution from both massless and massive neutrinos to zero. In the case of non-zero massive neutrinos, it may be desirable to set {\tt N\_nu\_rel} such that $N_{\rm eff}=3.046$ in the early universe. In agreement with {\tt CLASS}, when using the default value of $T_{\rm NCDM}$ as described in section \ref{sec:distances} below, {\tt N\_nu\_rel} can be set to 2.0328, 1.0196, and 0.00641 for 1, 2 and 3 massive neutrinos respectively to achieve this.
 
 {\tt ccl$\_$configuration} objects contain information about the prescriptions to be used to compute transfer functions, power spectra, mass functions, etc. A default {\tt ccl$\_$configuration} object is made readily available as {\tt default$\_$config}, for which transfer functions are computed with CLASS, the HaloFit prediction is used for the matter power spectrum and a number of prescriptions can be used to compute the halo mass function.
 
 After initializing an instance of {\tt ccl$\_$parameters} and {\tt ccl$\_$configuration}, the function {\tt ccl$\_$cosmology$\_$create(ccl$\_$parameters,ccl$\_$configuration)} returns a pointer to a {\tt ccl$\_$cosmology} structure, which you will need to pass around to every CCL function.
 
-Directions to an example of {\tt CCL} script are provided in Section \ref{sec:example}. The {\tt README} file has additional extensive documentation for the example run and also, regarding the installation.
+Directions to an example of {\tt CCL} script are provided in Section \ref{sec:example}. The {\tt README} file has additional extensive documentation for the example run and also regarding the installation.
 
 \subsection{Distances}
 \label{sec:distances}
+
+\todo{Add distance modulus.}
 
 The routines described in this subsection are implemented in {\tt ccl$\_$background.c}.
 
 The Hubble parameter is calculated via
 %
-\begin{equation}\label{eq:Ha}
-\frac{H(a)}{H_0} = a^{-3/2}\sqrt{\Omega_{M,0}+\Omega_{\Lambda,0} a^{-3(w_0+w_a)}
-    \exp[3 w_a (a-1)]+\Omega_{K,0} a +\Omega_{g,0} a^{-1}}.
-\end{equation}
+\begin{align}\label{eq:Ha}
+\frac{H(a)}{H_0} &= a^{-3/2}\Big(\Omega_{M,0}+\Omega_{\Lambda,0} a^{-3(w_0+w_a)}
+    \exp[3 w_a (a-1)]+\Omega_{K,0} a \nonumber \\ &+(\Omega_{g,0} + \Omega_{\nu, {\rm rel}}) a^{-1} + \Omega_{\nu, {\rm m}}(a)a^3\Big)^{\frac{1}{2}}.
+\end{align}
 
 The radial comoving distance is calculated via a numerical integral
 \begin{equation}
@@ -164,17 +205,39 @@ CCL also contains capability to compute $a(\chi)$ (i.e. the inverse of $\chi(a)$
 
 
 \subsection{Density parameter functions}
+\label{subsec:densityparam}
 
 The routines described in this subsection are implemented in {\tt ccl$\_$background.c}.
 
-The density parameter functions $\Omega_X(a)$ are calculated for four components:
+The density parameter functions $\Omega_X(a)$ are calculated for six components:
 \begin{itemize}
-\item matter density parameter $\Omega_M(a) = \Omega_{M,0} H_0^2 / (a^3 H^2(a) )$.
-\item dark energy density parameter $\Omega_\Lambda(a) = \Omega_{\Lambda,0} H_0^2 / H^2(a)$.
-\item radiation density parameter $\Omega_g(a) = \Omega_{g,0} H_0^2 / (a^4 H^2(a) )$.
-\item curvature density parameter $\Omega_K(a) = \Omega_{K,0} H_0^2 / (a^2 H^2(a) )$.
+\item matter density parameter $\Omega_M(a) = \Omega_{M,0} H_0^2 / (a^3 H^2(a) )$,
+\item dark energy density parameter $\Omega_\Lambda(a) = \Omega_{\Lambda,0} H_0^2 / H^2(a)$,
+\item radiation density parameter $\Omega_g(a) = \Omega_{g,0} H_0^2 / (a^4 H^2(a) )$,
+\item curvature density parameter $\Omega_K(a) = \Omega_{K,0} H_0^2 / (a^2 H^2(a) )$,
+\item massless neutrino density parameter $\Omega_{\nu, {\rm rel}}(a) = \Omega_{\nu, {\rm rel},0} H_0^2 / (a^4 H^2(a) )$,
+\item massive neutrino density parameter $\Omega_{\nu, {\rm m}}(a)$,
 \end{itemize}
-using the Hubble parameter defined equation~\ref{eq:Ha}.
+using the Hubble parameter defined in equation~\ref{eq:Ha}.
+
+For massive neutrinos, $\Omega_{\nu, {\rm m}}(a)$ is calculated by calling a set of functions contained in {\tt ccl\_neutrinos.c}. First, we assume that the mass of one neutrino is equal to $m_{\nu}^{\rm tot} / N_{\rm m}^{\nu}$ (recalling that we assume a single massive neutrino or equal-mass neutrinos). We then compute a quantity called the effective temperature:
+\begin{equation}
+T_{\nu}^{\rm eff} = T_{\rm CMB} T_{\rm NCDM}.
+\label{Tnueff}
+\end{equation}
+$T_{\rm NCDM}$ here is used to explicitly set the value of $m_{\nu} / \Omega_{\nu}^0$. We choose a default value of $T_{\rm NCDM} = 0.71611$, which corresponds to $m_{\nu} / \Omega_{\nu}^0 = 93.14$ eV, to agree with the default value set by {\tt CLASS}. We define 
+\begin{equation}
+\mu = \frac{m_{\nu}^{\rm tot}a}{N_{\rm m}^\nu T_{\nu}^{\rm eff}}
+\label{mnuOT}
+\end{equation}
+in units such that $\mu$ is dimensionless. We then conduct the phase-space integral required to get the neutrino density, and multiply by appropriate factors to obtain $\Omega_{\nu, {\rm m}}(a)$:
+\begin{equation}
+\Omega_{\nu, {\rm m}}(a) = N_{\rm m}^\nu \frac{8 \pi^2(\pi k_b )^3 k_b}{15(c h_{\rm P})^3} \frac{8 \pi G}{3h^2c^2} \left(\frac{T_{\nu}^{\rm eff}}{a}\right)^4 \left(\frac{7}{8}\int_0^{x_{\rm max}} dx \, x^2 \frac{\sqrt{x^2 + \mu^2}}{\exp(x) + 1}\right)
+\label{Omnu}
+\end{equation}
+where $h_{\rm P}$ is Planck's constant and $h$ is $H_0/100$ with $H_0$ in units of km / s / Mpc. $x_{\rm max}$ is set to 1000. The final bracketed term which includes the phase-space integral can be simplified in the limit where $\mu$ is very large or very small: for small $\mu$, it is set to $\frac{7}{8}$, and for large $\mu$, it becomes $0.2776566337\mu$.\todo{Do we need this many digits?}
+
+
 
 \subsection{Growth function}
 \label{sec:growth}
@@ -182,13 +245,16 @@ using the Hubble parameter defined equation~\ref{eq:Ha}.
 The routines described in this subsection are implemented in {\tt ccl$\_$background.c}.
 To compute the growth function, $D(a)$, the growth factor of matter perturbations, {\tt CCL} solves the following differential equation:
 \begin{equation}
-  \frac{d}{da}\left(a^3H(a)\frac{dD}{da}\right)=\frac{3}{2}\Omega_M(a)H(a)D.
+  \frac{d}{da}\left(a^3H(a)\frac{dD}{da}\right)=\frac{3}{2}\Omega_M(a)aH(a)D.
 \end{equation}
+
 In doing this, {\tt CCL} simultaneously computes the so-called growth rate $f(a)$, defined as:
 \begin{equation}
   f(a)=\frac{d\ln D}{d\ln a}.
 \end{equation}
 CCL provides different functions that return the growth normalized to $D(a=1)=1$ and to $D(a\ll1)\rightarrow a$.
+
+Note that the above is strictly valid only for a Universe containing just dust-like components. A scale-independent growth rate is, for example, ill-defined in the presence of massive neutrinos.
 
 Currently CCL allows for an alternative cosmological model defined by a regular background $(w_0+w_a)$CDM (with arbitrary $k$) as well as a user-defined $\Delta f(a)$, such that the true growth rate in this model is given by $f(a)=f_0(a)+\Delta f(a)$, where $f_0(a)$ is the growth rate in the background model. Note that this model is only consistently implemented with regards to the computation of the linear growth factor and growth rates (which will also scale the linear power spectrum), however all other CCL functions (including the non-linear power spectrum) will ignore these modifications. This model, and the interpretation of the predictions given by CCL should therefore be used with care.
 
@@ -208,10 +274,12 @@ The power spectrum is related to the transfer function by $\Delta(k)\propto T^2(
 The BBKS power spectrum option is primarily used as a precisely defined input for testing the numerical accuracy of {\tt CCL} routines (as described in Sect.~\ref{sec:tests}), and it is not recommended for other uses.
 
 \subsubsection{CLASS}
-Secondly, there is the option to call the {\tt CLASS} software \citep{class} within {\tt CCL} to obtain either linear or nonlinear matter power spectra at given redshifts. For speed, the linear power spectrum is obtained at redshift $z=0$ and re-scaled to a different redshift using the growth function. In the case of the nonlinear matter power spectrum, upon setting up the cosmology object, we construct a bi-dimensional spline in $k$ and the scale-facor which is then called by the relevant routines to obtain the matter power spectrum at the desired wavenumber and redshift. The relevant routines can be found within {\tt ccl$\_$power.c}. Currently CLASS computes the non-linear power spectrum using the HaloFit prescription of \cite{CLASS_halofit}.
+Secondly, there is the option to call the {\tt CLASS} software \citep{class} within {\tt CCL} to obtain either linear or nonlinear matter power spectra at given redshifts. For speed, the linear power spectrum is obtained at redshift $z=0$ and re-scaled to a different redshift using the growth function. In the case of the nonlinear matter power spectrum, upon setting up the cosmology object, we construct a bi-dimensional spline in $k$ and the scale-factor which is then called by the relevant routines to obtain the matter power spectrum at the desired wavenumber and redshift. The relevant routines can be found within {\tt ccl$\_$power.c}. Currently CLASS computes the non-linear power spectrum using the HaloFit prescription of \cite{CLASS_halofit}.
 
 \subsubsection{Nonlinear extrapolation}
 \label{sec:NLextrapol}
+
+\todo{This section needs careful checking, many things have changed here.}
 
 The computation of the nonlinear power spectrum from {\tt CLASS} can be significantly sped up by extrapolating in the range $k>${\tt K$\_$MAX$\_$SPLINE}. In this section, we describe the implementation of the extrapolation and the accuracy attained.
 
@@ -224,7 +292,7 @@ First, we compute the first and second derivative of the $\ln P(k,z)$ at $k_0={\
   \label{eq:NLPSTaylor}
 \end{equation}
 
-The results of this approximation are shown in Figure \ref{fig:NLextrapol} for redshifts $z=0$ and $z=3$. We compare the nonlinear matter power spectrum at $z=0$ computed with the previously described approximation, to the matter power spectrum obtained by directly evaluating {\tt CLASS} at the desired $k$ value. (The benchmark in reality uses a value of {\tt K$\_$MAX$\_$SPLINE}$=10^3$/Mpc, well beyond our range of application.) We find that for typical values of  $\Delta \ln k$ is $10^{-2}$ and {\tt K$\_$MAX$\_$SPLINE}$=50$/Mpc has converged to an accuracy that surpases the expected impact of baryonic effects on the matter power spectrum at $k>10/$Mpc. (For a plot showing the impact of baryons on the matter power spectrum, see \citealt{Schneider15}.) The lower {\tt K$\_$MAX$\_$SPLINE} is, the faster {\tt CCL} will run. The optimum choice of {\tt K$\_$MAX$\_$SPLINE} is left to the user for their particular application. 
+The results of this approximation are shown in Figure \ref{fig:NLextrapol} for redshifts $z=0$ and $z=3$. We compare the nonlinear matter power spectrum at $z=0$ computed with the previously described approximation, to the matter power spectrum obtained by directly evaluating {\tt CLASS} at the desired $k$ value. (The benchmark in reality uses a value of {\tt K$\_$MAX$\_$SPLINE}$=10^3$/Mpc, well beyond our range of application.) We find that for typical values of  $\Delta \ln k$ is $10^{-2}$ and {\tt K$\_$MAX$\_$SPLINE}$=50$/Mpc has converged to an accuracy that surpasses the expected impact of baryonic effects on the matter power spectrum at $k>10/$Mpc. (For a plot showing the impact of baryons on the matter power spectrum, see \citealt{Schneider15}.) The lower {\tt K$\_$MAX$\_$SPLINE} is, the faster {\tt CCL} will run. The optimum choice of {\tt K$\_$MAX$\_$SPLINE} is left to the user for their particular application. 
 
 %------------------------
 \begin{figure*}
@@ -265,7 +333,7 @@ This is a list of some power spectrum methods that we would like to implement in
 \subsubsection{Normalization of the power spectrum}
 \label{sec:PSnorm}
 
-There are two alternative schemes for normalization of the matter power spectrum. The first one is to specify the value of $A_s$, the amplitude of the primordial power spectrum, which is passed directly to {\tt CLASS}. This option is available in the case of the linear/nonlinear matter power spectrum implementation. For these, as well as for BBKS, there is the additional option to set the normalization of the matter power spectrum by specifying $\sigma_8$, the RMS density constrast averaged over spheres of radius $8h^{-1}$Mpc. The computation of $\sigma_8$ is described in Section \ref{sec:hmf}
+There are two alternative schemes for normalization of the matter power spectrum. The first one is to specify the value of $A_s$, the amplitude of the primordial power spectrum, which is passed directly to {\tt CLASS}. This option is available in the case of the linear/nonlinear matter power spectrum implementation. For these, as well as for BBKS, there is the additional option to set the normalization of the matter power spectrum by specifying $\sigma_8$, the RMS density contrast averaged over spheres of radius $8h^{-1}$Mpc. The computation of $\sigma_8$ is described in Section \ref{sec:hmf}
 
 \subsection{Angular power spectra}
 \label{sec:cl}
@@ -290,7 +358,7 @@ where $\mathcal{P}_\Phi(k)$ is the dimensionless power spectrum of the primordia
         \begin{equation}
           \Delta^{\rm RSD}_\ell(k)=\int dz\,p_z(z)\frac{(1+z) p_z(z)}{H(z)}T_\theta(k,z) j_\ell''(k\chi(z)),
         \end{equation}
-        where $T_\theta(k,z)$ is the transfer function of $\theta$, the divergence of the comoving velocity field.
+        where $T_\theta(k,z)$ is the transfer function of $\theta$, the divergence of the comoving velocity field. $T_\theta(k,z)$ depends on the growth, which {\tt CCL} does not compute for massive neutrino cosmologies; this is why $C_\ell$ spectra involving number count tracers are not supported when massive neutrinos are present.
   \item $\Delta^{\rm M}$ is the contribution from magnification lensing:
         \begin{equation}
           \Delta_\ell^{\rm M}(k)=-\ell(\ell+1)\int \frac{dz}{H(z)} W^{\rm M}(z) T_{\phi+\psi}(k,z) j_\ell(k\chi(z)),
@@ -347,41 +415,126 @@ where
  &\tilde{\Delta}_\ell^{\rm IA}(k)=\sqrt{\frac{(\ell+2)!}{(\ell-2)!}}\frac{p_z(z_\ell)\,b_{\rm IA}(z_\ell)f_{\rm red}(z_\ell)H(z_\ell)}{(\ell+1/2)^2}
 \end{align}
 
+\subsubsection{Beyond Limber: angpow}
 
-%\subsection{Correlation functions}
-%\label{sec:corr}
+\todo{Fill out this section with a short description of angpow and how it is linked to CCL}
 
-%In the Limber approximation, the angular correlation function betwee any two tracers $1$ and $2$ is given by\footnote{See Bartelmann and Schneider (1999) weak lensing review, page 44. See also Joachimi \& Bridle (2010)}
-%
-%\begin{equation}
-%C_{12}(\theta) = \int d\chi'q_1(\chi')q_2(\chi')\int dk\frac{k}{2\pi}P_{\delta}(k,\chi')J_0[f_K(\chi')\theta k],
-%\end{equation}
-%
-%where $J_0$ is the Bessel function of order 0, $\chi$ is the comoving distance and $f_K(\chi)$ is the radial function that multiplies the spatial metric element, which is different from $\chi$ in the case of a cosmology with non-zero curvature. {\bf TODO. Need to verify $f_K$ implementation in {\tt CCL}.}
+%Text Added JECampagne 27/05/17 START
 
-%{\bf Clustering.} For clustering, the relevant weight is given by $q_1(\chi)=b_1(\chi)dN_1/d\chi(\chi)$, the comoving distance probability distribution times the bias. The angular correlation function can also be re-written as
-%\begin{equation}
-%C_{12}(\theta) = \int dl \frac{l}{2\pi} C_{gg}(l) J_0(l\theta),
-%\end{equation}
-%where $C_{gg}$ is the galaxy clustering angular power spectrum.
+%This reference to Angpow may change as soon as A&A will publish it.
+%@ARTICLE{2017arXiv170103592C,
+%   author = {{Campagne}, J.-E. and {Neveu}, J. and {Plaszczynski}, S.},
+%    title = "{Angpow: a software for the fast computation of accurate tomographic power spectra}",
+%	archivePrefix = "arXiv",
+%   eprint = {1701.03592},
+% keywords = {Astrophysics - Cosmology and Nongalactic Astrophysics},
+%     year = 2017,
+%    month = jan,
+%    journal = {to be published to \aap},
+%   adsurl = {http://adsabs.harvard.edu/abs/2017arXiv170103592C},
+%  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+%}
 
-%{\bf Lensing.} Lensing correlation functions are \footnote{from Schneider 2002 and Bartelmann \& Schneider section 6.4.1}
+
+
+Our aim is to compute the angular over density power spectrum  $C_{\ell}(z_1, z_2)$ as a cross-correlation between two $z$-shells with mean values ($z_1, z_2$) and also the auto-correlation $C_{\ell}(z_1)$ with $z_1 = z_2$,  taking into account, in both cases, possible redshift selection functions and physical processes as redshift space distortions without any Limber numerical approximation. This is the purpose of the \texttt{Angpow} code \citep{2017arXiv170103592C} that we describe briefly here.
+
+
+So, one computes $C_{\ell}(z_1, z_2)$ according to the following formula
+\begin{equation}
+\begin{split}
+C_{\ell}&(z_1, z_2;\sigma_1, \sigma_2)\\& = \iint_0^\infty \mathrm{d} z \mathrm{d} z^\prime \ W_1(z; z_1, \sigma_1) W_2(z^\prime; z_2, \sigma_2)\\
+&\phantom{\iint_0^\infty \mathrm{d} z \mathrm{d} z^\prime} \times \int_0^\infty \mathrm{d} k\ f_{\ell}(z, k) f_{\ell}(z^\prime, k). 
+\end{split}
+\label{eq-clz1z2-obs}
+\end{equation}
+One has introduced two normalized redshift selection functions $W_1(z;z_1,\sigma_1)$ and $W_2(z^\prime;z_2,\sigma_2)$  around $z_1$ and $z_2$ with typical width $\sigma_1$ and $\sigma_2$, respectively. The auxiliary function $f_\ell(z,k)$ can be defined without loss of generality as 
+\begin{equation}
+f_\ell(z,k) \equiv  \sqrt{\frac{2}{\pi}}\  k \sqrt{P(k,z)}\ \widetilde{\Delta}_\ell(z,k)\label{eq-fell-func}
+\end{equation}
+with 
+\begin{itemize}
+\item  $P(k,z)$ : the power spectrum at redshift $z$ which is defined either using the primordial power spectrum $P_{in}(k)$ and the transfer function $T(k,z)$ as
+\begin{equation}
+P(k,z) = P_{in}(k) T(k,z),
+\end{equation} 
+either using an approximation valid at low redshift  with the power spectrum at $z=0$ ($P(k)|_{z=0}$) and the growth factor $G(z)$ as
+\begin{equation}
+P(k,z) = P(k)|_{z=0} G^2(z);
+\end{equation} 
+
+\item $\widetilde{\Delta}_\ell(z,k)$ is a function describing the physical processes as matter density fluctuations, redshift space distortions as described for instance in references \citet{2008cmb..book.....D,2009PhRvD..80h3514Y,2010PhRvD..82h3508Y,2011PhRvD..84d3516C,2011PhRvD..84f3505B}. As example with a constant bias $b$ and using the growth factor rate $f_a(z) = d\log G(a(z))/d\log(a(z))$ ($a(z)=(1+z)^{-1}$)
+\begin{equation}
+ \widetilde{\Delta}_\ell(z,k) \approx b j_\ell(k r(z)) - f_a(z) j_\ell^{\prime\prime}l(k r(z)) + \dots
+\end{equation}
+with $j_\ell(x)$ and $j_\ell^{\prime\prime}(x)$ the spherical Bessel function of order $\ell$ and its second derivative, and $r(z)$ is the comoving distance at redshift $z$.
+\end{itemize}
+
+To proceed to a numerical evaluation of equation \ref{eq-clz1z2-obs}, we first conduct  inside the rectangle $ [z_{1\mrm{min}},z_{1\mrm{max}}] \times [z_{2\mrm{min}},z_{2\mrm{max}}]$ given by the $W$ selection functions a Cartesian product of one-dimensional (1D) quadrature 
+ defined by the set of sample nodes $z_i$ and weights $w_i$. In practice, we use the Clenshaw-Curtis quadrature.   The corresponding sampling points $(z_{1i},z_{2j})$ are weighted by the product  $w_i w_j$ using the 1D quadrature sample points and weights on both redshift regions with $i=0,\dots, N_{\mrm{z}_1}-1$ and $j=0,\dots,N_{\mrm{z}_2}-1$. Then, one gets the following approximation:
+\begin{equation}
+C^{\mrm{thick}}_{\ell}(z_1, z_2) \approx  \sum_{i=0}^{N_{\mrm{z}_1}-1}\sum_{j=0}^{N_{\mrm{z}_2}-1} w_i w_j W_1(z_i,z_1)W_2(z_j,z_2) \widehat{P}_\ell(r_i,r_j)
+\label{eq-cross-zquadra}
+\end{equation}
+with the notations $z_i = z_{1i}$, $z_j = z_{2j}$ and  $r_i = r(z_{1i})$, $r_j = r(z_{2j})$ and
+\begin{equation}
+\widehat{P}_\ell(z_i,z_j) =   \int_0^\infty dk\ f_\ell(z_i,k) f_\ell(z_j,k)
+\label{eq-Pellzizj}
+,\end{equation}
+defined with the $f_\ell(z,k)$ function of equation \ref{eq-fell-func}. 
+To conduct the computation of such integral of highly oscillating functions we use the 3C-algorithm described in details in reference \citep{2017arXiv170103592C}.
+
+In brief this algorithm proceeds the following way:
+\begin{enumerate}
+\item the total integration $k$ interval (eg. $[k_\mathrm{min}, k_\mathrm{max}]$) in equation (\ref{eq-Pellzizj}) is cut on several $k$-sub-intervals;
+\item  on each sub-interval the functions $f_{i\, \ell}(k) = f_\ell(z_i,k) $ and $f_{j\, \ell}(k) = f_\ell(z_j,k)$ are projected onto Chebyshev series of order $2^N$;
+\item the product of the two Chebyshev series is performed with a $2^{2N}$ Chebyshev series; 
+\item then, the integral on the sub-interval is computed thanks to the Clenshaw-Curtis quadrature.   
+\end{enumerate}
+All the Chebyshev expansions and the Clenshaw-Curtis quadrature are
+performed via the DCT-I fast transform of FFTW. 
+
+%Text Added JECampagne 27/05/17 END
+
+
+\subsection{Correlation functions}
+\label{sec:corr}
+
+\todo{This section is new. Sukhdeep and Elisa to update.}
+
+In the Limber approximation, the angular correlation function between any two tracers $1$ and $2$ is given by\footnote{See Bartelmann and Schneider (1999) weak lensing review, page 44. See also Joachimi \& Bridle (2010)}
+
+\begin{equation}
+C_{12}(\theta) = \int d\chi'q_1(\chi')q_2(\chi')\int dk\frac{k}{2\pi}P_{\delta}(k,\chi')J_0[f_K(\chi')\theta k],
+\end{equation}
 %
-%\begin{eqnarray}
-%\xi_{+}(\theta)&=&\int_0^{\infty}dl\frac{l}{2\pi}J_0(l\theta)P_\kappa(l),\\
-%\xi_{-}(\theta)&=&\int_0^{\infty}dl\frac{l}{2\pi}J_4(l\theta)P_\kappa(l),
-%\end{eqnarray}
+where $J_0$ is the Bessel function of order 0, $\chi$ is the comoving distance and $f_K(\chi)$ is the radial function that multiplies the spatial metric element, which is different from $\chi$ in the case of a cosmology with non-zero curvature. {\bf TODO. Need to verify $f_K$ implementation in {\tt CCL}.}
+
+{\bf Clustering.} For clustering, the relevant weight is given by $q_1(\chi)=b_1(\chi)dN_1/d\chi(\chi)$, the comoving distance probability distribution times the bias. The angular correlation function can also be re-written as
+\begin{equation}
+C_{12}(\theta) = \int dl \frac{l}{2\pi} C_{gg}(l) J_0(l\theta),
+\end{equation}
+where $C_{gg}$ is the galaxy clustering angular power spectrum.
+
+{\bf Lensing.} Lensing correlation functions are \footnote{from Schneider 2002 and Bartelmann \& Schneider section 6.4.1}
 %
-%where the angular lensing convergence power spectrum is given by
-%\begin{eqnarray}
-%P_\kappa(l) &=& \frac{9H_0^4\Omega_m^2}{4c^4}\int_{0}^{\chi_h}\frac{d\chi}{a^2(\chi)}P_\delta\left(\frac{l}{f_K(\chi)},\chi\right)\left[\int_\chi^{\chi_h}d\chi'p_\chi(\chi')\frac{f_K(\chi'-\chi)}{f_K(\chi')}\right]^2\\
-%\end{eqnarray}
+\begin{eqnarray}
+\xi_{+}(\theta)&=&\int_0^{\infty}dl\frac{l}{2\pi}J_0(l\theta)P_\kappa(l),\\
+\xi_{-}(\theta)&=&\int_0^{\infty}dl\frac{l}{2\pi}J_4(l\theta)P_\kappa(l),
+\end{eqnarray}
 %
-%For numerical integration of the correlation functions, we make use of the public code FFTlog (... cite ...). (... more here ... describe correlation function calculation).
+where the angular lensing convergence power spectrum is given by
+\begin{eqnarray}
+P_\kappa(l) &=& \frac{9H_0^4\Omega_m^2}{4c^4}\int_{0}^{\chi_h}\frac{d\chi}{a^2(\chi)}P_\delta\left(\frac{l}{f_K(\chi)},\chi\right)\left[\int_\chi^{\chi_h}d\chi'p_\chi(\chi')\frac{f_K(\chi'-\chi)}{f_K(\chi')}\right]^2\\
+\end{eqnarray}
+
+For numerical integration of the correlation functions, we make use of the public code FFTlog \todo{(... cite ...). (... more here ... describe correlation function calculation)}.
 
 
 \subsection{Halo mass \& halo bias functions}
 \label{sec:hmf}
+
+\todo{Any updates here?}
 
 The routines described in this subsection are implemented in {\tt ccl$\_$massfunc.c}.
 
@@ -429,20 +582,20 @@ The currently implemented model in {\tt CCL} allows for an arbitrary overdensity
 
 \subsection{Photo-$z$ implementation}
 \label{sec:photoz}
-LSST galaxy redshifts will be obtained using photometry. However, analytic forms of galaxy redshift distributions are usually known in terms of spectroscopic redshifts. A model is therefore required for the probability of measuring a photometric redshift $z_{\rm ph}$ for an object with hypothetical spectroscopic redshift $z_{\rm s}$. {\tt CCL} allows you to flexibly provide your own photometric redshift model.
+The functionality described in this section is implemented in {\tt ccl\_lsst\_specs.c}.
 
-To do so, you will write a function which accepts as input a photometric redshift, a spectroscopic redshift, and a void pointer to a structure containing any further parameters of your photo-z model. This function will return the probability of measuring the input photometric redshift given the input spectroscopic redshift. Explicitly, this function should take the form:
+LSST galaxy redshifts will be obtained using photometry. However, analytic forms of galaxy redshift distributions are usually known in terms of spectroscopic redshifts. A model is therefore required for the probability of measuring a photometric redshift $z_{\rm ph}$ for an object with hypothetical spectroscopic redshift $z_{\rm s}$. {\tt CCL} allows the user to flexibly provide their own photometric redshift model.
+
+To do so, the user writes a function which accepts as input a photometric redshift, a spectroscopic redshift, and a void pointer to a structure containing any further parameters of the photo-z model. This function will return the probability of measuring the input photometric redshift given the input spectroscopic redshift. Explicitly, this function should take the form:
 
 {\tt user$\_$pz$\_$probability(double z$\_$ph, double z$\_$s, void * user$\_$par)\{...\}}
 
-You must then also provides the structure of further parameters ({\tt user$\_$par}). This model can be incorporated when computing $\frac{dN}{dz}^i$ in photometric redshift bin $i$, as given by equation \ref{photoz}, below.
-
-
+The user must then also provides the structure of further parameters ({\tt user$\_$par}). This model can be incorporated when computing $\frac{dN}{dz}^i$ in photometric redshift bin $i$, as given by equation \ref{photoz}, below.
 
 \subsection{LSST Specifications}
 \label{sec:specs}
 
-{\tt CCL} includes LSST specifications for the expected galaxy distributions of the full galaxy clustering sample and the lensing source galaxy sample. These enable the user to easily make predictions or forecasts for LSST.
+{\tt CCL} includes LSST specifications for the expected galaxy distributions of the full galaxy clustering sample and the lensing source galaxy sample. These enable the user to easily make predictions or forecasts for LSST. The functionality described in this section is implemented in {\tt ccl\_lsst\_specs.c}.
 
 The functional forms of the expected $\frac{dN}{dz}$ for clustering galaxies and lensing source galaxies are provided. Here, $\frac{dN}{dz}$ is the number density of galaxies as a function of spectroscopic redshift.
 
@@ -544,7 +697,15 @@ Additionally, independent codes were utilized to test the accuracy of halo mass 
 \end{equation}
 We note that while we maintain the $10^{-4}$ for our evaluations of $\sigma$, the accuracy degrades to a value of $5\times10^{-3}$ for the halo mass function evaluation, primarily at the high halo mass and high redshift domains. We find that this increased error is acceptable, as the level of precision is significantly better than the accuracy of current halo mass function models.
 
+Finally, we note that formal tests for predictions in cosmologies with neutrinos are not yet included. The support for neutrino cosmologies in the current release is therefore not yet formally validated, although outputs have been informally compared against other codes where available. Formal validation of this functionality is ongoing.
+
 {\tt CCL} has a suite of test routines which, upon compilation, compare its outputs to the benchmarks from code comparison. These are run with {\tt make check}.
+
+\todo{What new checks were added?}
+
+\todo{Explain that these are not the same tests as in the Python implementation}
+
+\todo{Add correlation function test (Elisabeth)}
 
 
 \section{Default configuration}
@@ -598,6 +759,8 @@ You can quickly check whether {\tt pyccl} has been installed correctly by runnin
 
 \subsection{Python example}
 \label{sec:python:example}
+
+\todo{Point the reader to the python notebooks available.}
 
 The Python module has essentially the same functions as the C library, just presented in a more standard Python-like way. You can inspect the available functions and their arguments by using the built-in Python {\tt help()} function, as with any Python module.
 
@@ -665,7 +828,7 @@ In the future, we hope that {\tt CCL} will include other functionalities. Functi
 	\item the non-Limber capability,
 	\item a link to FAST-PT \citep{FASTPT} for implementation of perturbation theory,
 	\item a photo-z model,
-	\item support for cosmologies with neutrinos,
+	\item support for cosmologies with multiple unequal-mass neutrinos,
 	\item and more power spectrum methods (see \ref{Pk_whishlist}).
 \end{itemize}
 
@@ -678,7 +841,7 @@ If you would like to contribute to {\tt CCL} or contact the developers, please d
 \label{sec:license}
 
 Copyright \textcopyright 2017, the LSSTDESC CCL contributors are listed in the
-documentation ("research note") provided with this software. The repository can be found at \url{https://github.com/LSSTDESC/CCL}. All rights reserved.
+documentation (``research note'') provided with this software. The repository can be found at \url{https://github.com/LSSTDESC/CCL}. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -694,7 +857,7 @@ modification, are permitted provided that the following conditions are met:
   this software without specific prior written permission.
 \end{itemize}
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS ``AS IS''
 AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
 DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE

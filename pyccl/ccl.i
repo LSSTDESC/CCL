@@ -8,8 +8,6 @@
 #include "../include/ccl_error.h"
 #include "../include/ccl_utils.h"
 
-#include "../class/include/class.h"
-
 %}
 
 // Enable numpy array support
@@ -28,7 +26,6 @@
 %apply (int* INOUT) {(int * status)};
 
 %include "../include/ccl.h"
-//%include "../include/ccl_background.h"
 
 %include "ccl_core.i"
 %include "ccl_background.i"
@@ -41,8 +38,6 @@
 %include "../include/ccl_config.h"
 %include "../include/ccl_error.h"
 %include "../include/ccl_utils.h"
-
-%import "../class/include/class.h"
 
 // We need this construct to handle some memory allocation scariness. By 
 // specifying the size of the output array in advance, we can avoid having to 
