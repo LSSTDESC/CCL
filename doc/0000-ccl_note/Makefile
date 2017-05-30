@@ -66,7 +66,7 @@ touch:
 #change the compiler call to allow a "." file
 # {% raw %}
 main : authlist
-	latexmk -g -pdf  \
+	sudo latexmk -g -pdf  \
 	-pdflatex='openout_any=a pdflatex %O -interaction=nonstopmode "${flag}\input{%S}"'  \
 	${main}
 # {% endraw %}

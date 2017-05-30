@@ -153,6 +153,13 @@ The transverse comoving distance is computed in terms of the radial comoving dis
 The usual angular diameter distance is $d_A=a\,r(a)$, and the luminosity distance is
 $d_L=r(a)/a$.
 
+CCL can compute the distance modulus, as defined (with $d_L$ in units of parsecs):
+
+\begin{equation}\label{eq:distmod}
+    \mu = 5 \log_{10}(d_L)-5
+\end{equation}
+
+
 CCL also contains capability to compute $a(\chi)$ (i.e. the inverse of $\chi(a)$).
 
 
@@ -478,7 +485,7 @@ Our goal is for outputs of {\tt CCL} to be validated against the results of the 
 A code comparison project was carried out among members of TJP where the following outputs of cosmological forecast codes were compared and validated:
 \begin{enumerate}
 \item growth factor at $z = 0,1,2,3,4,5$,
-\item comoving radial distance $[$Mpc$/h]$ at the same redshifts,
+\item comoving radial distance $[$Mpc$/h]$ at the same redshifts, as well as the corresponding distance moduli
 \item linear matter power spectrum, $P(k)$, from BBKS \citealt{BBKS}) in units of $($Mpc$/h)^3$ at $z=0,2$ in the range $10^{-3} \leq k \leq 10 h/$Mpc with 10 bins per decade, and
 \item the mass variance at $z=0$, $\sigma(M,z=0)$ for $M =\{10^6, 10^8, 10^{10}, 10^{12}, 10^{14}, 10^{16}\} $M$_\odot/h$.
 \end{enumerate}
