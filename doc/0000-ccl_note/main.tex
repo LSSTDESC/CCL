@@ -14,6 +14,7 @@
 \graphicspath{{./}{./figures/}}
 \bibliographystyle{apj}
 \newcommand{\todo}[1]{\textcolor{magenta}{To do: #1}}
+\newcommand{\mrm}[1]{\mathrm{#1}}
 
 %This is a paper and note template for the LSST DESC \citep{Overview,ScienceBook,WhitePaper}.
 %Eventually it will be possible to switch between various \LaTeX\xspace styles for internal notes and peer reviewed journals templates.
@@ -449,12 +450,10 @@ with
 \item  $P(k,z)$ : the power spectrum at redshift $z$ which is defined either using the primordial power spectrum $P_{in}(k)$ and the transfer function $T(k,z)$ as
 \begin{equation}
 P(k,z) = P_{in}(k) T(k,z),
-\label{eq-Pkz-in}
 \end{equation} 
 either using an approximation valid at low redshift  with the power spectrum at $z=0$ ($P(k)|_{z=0}$) and the growth factor $G(z)$ as
 \begin{equation}
 P(k,z) = P(k)|_{z=0} G^2(z);
-\label{eq-Pkz-in}
 \end{equation} 
 
 \item $\widetilde{\Delta}_\ell(z,k)$ is a function describing the physical processes as matter density fluctuations, redshift space distortions as described for instance in references \citet{2008cmb..book.....D,2009PhRvD..80h3514Y,2010PhRvD..82h3508Y,2011PhRvD..84d3516C,2011PhRvD..84f3505B}. As example with a constant bias $b$ and using the growth factor rate $f_a(z) = d\log G(a(z))/d\log(a(z))$ ($a(z)=(1+z)^{-1}$)
