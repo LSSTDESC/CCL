@@ -137,6 +137,25 @@ Then, run {\tt ./configure} and compile and install {\tt CCL} as usual. The {\tt
 
 Once compilation has finished, run {\tt make check} to make sure everything is working correctly. Remember to add the external {\tt CLASS} library directory to your system library path, using either {\tt export LD\_LIBRARY\_PATH=/path/to/external/class} (Linux) or {\tt export DYLD\_FALLBACK\_LIBRARY\_PATH=/path/to/external/class} (Mac). The system must be able to find both the {\tt CCL} and {\tt CLASS} libraries; it is not enough to only add {\tt CCL} to the library path.
 
+\subsection{Creating a Docker Image}
+{\tt CCL} supports the use of the Docker project for the deployment of applications inside software containers. The included Dockerfile allows for quick creation of an image file that will allow for easy realization of virtual machines that require no additional dependencies beyond the Docker software. The Docker website\footnote{\url{https://www.docker.com}} details the installation process for most common operating systems.
+
+With Docker is installed, creating an image is relatively straightforward:
+\begin{verbatim}
+docker build -t ccl .
+\end{verbatim}
+This will begin the process of creating the image file for {\tt CCL} locally. This Dockerfile contains all installed C libraries in {\tt CCL} as well as the Python wrapper. It currently utilizes {\tt python:2.7} as a base image and suppoerts both ipython and Jupyter notebook. The virtualization process should have minimum impact on performance.
+
+The resulting Docker image has two primary functionalities. The first is a command that will open a Jupyter notebook tied to a port connection on your local machine. This can be utilized with the following command on run:
+\begin{verbatim}
+docker run -p 8888:8888 ccl
+\end{verbatim}
+This Jupyter notebook can be accessed on a browser of your choice at {\tt localhost:8888}. The second possible run is to access the bash itself, which can be done with the command:
+\begin{verbatim}
+docker run -it ccl bash
+\end{verbatim}
+This will allow for full access to the virtual machine for installation of any additional dependencies.
+
 \section{Functionality}
 \label{sec:func}
 
