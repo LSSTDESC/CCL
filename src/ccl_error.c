@@ -27,30 +27,17 @@ void ccl_check_status(ccl_cosmology *cosmo, int * status){
 		case 0: // all good, nothing to do
 			return;
 		case CCL_ERROR_LINSPACE:	// spacing allocation error, always terminate		
-			//fprintf(stderr,"%s",cosmo->status_message);
-			//exit(1);
 			ccl_raise_exception(*status, cosmo->status_message);
 		case CCL_ERROR_SPLINE:	// spline allocation error, always terminate	
-			//fprintf(stderr,"%s",cosmo->status_message);
-			//exit(1);
 			ccl_raise_exception(*status, cosmo->status_message);
 		case CCL_ERROR_COMPUTECHI:	// compute_chi error //RH
-			//fprintf(stderr,"%s",cosmo->status_message);
-			//exit(1);
 			ccl_raise_exception(*status, cosmo->status_message);
         case CCL_ERROR_HMF_INTERP: // terminate if hmf definition not supported
-            //fprintf(stderr,"%s",cosmo->status_message);
-            //exit(1);
             ccl_raise_exception(*status, cosmo->status_message);
-        case CCL_ERROR_NU_INT: // error in getting the neutrino integral spline: exit. No status_message in cosmo because can't pass cosmology to the function. //DL
-			//fprintf(stderr, "%s", "Error, in ccl_neutrinos.c. ccl_calculate_nu_phasespace_spline(): Error in setting neutrino phasespace spline.");
-			//exit(1);
+        case CCL_ERROR_NU_INT: // error in getting the neutrino integral spline: exit. No status_message in cosmo because can't pass cosmology to the function.
 			ccl_raise_exception(*status, "Error, in ccl_neutrinos.c. ccl_calculate_nu_phasespace_spline(): Error in setting neutrino phasespace spline.");
-        
-		// implement softer error handling, e.g. for integral convergence here	
+		// TODO: Implement softer error handling, e.g. for integral convergence here	
 		default:
-			//fprintf(stderr,"%s",cosmo->status_message);
-			//exit(1);
 			ccl_raise_exception(*status, cosmo->status_message);
 	}
 }

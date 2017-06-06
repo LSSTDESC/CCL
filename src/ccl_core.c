@@ -50,8 +50,6 @@ void ccl_cosmology_read_config(void)
   }
   
   if ((fconfig=fopen(param_file, "r")) == NULL) {
-    //fprintf(stderr, "ccl_core.c: Failed to open config file %s\n", param_file);
-    //exit(EXIT_FAILURE);
     ccl_raise_exception(EXIT_FAILURE, "ccl_core.c: Failed to open config file");
   } 
 
