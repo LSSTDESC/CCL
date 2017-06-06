@@ -55,7 +55,7 @@ class Parameters(object):
     """
     
     def __init__(self, Omega_c=None, Omega_b=None, h=None, A_s=None, n_s=None, 
-                 Omega_k=0., N_nu_rel =3.046, N_nu_mass=0., m_nu=0.,w0=-1., wa=0., sigma8=None,
+                 Omega_k=0., N_nu_rel=3.046, N_nu_mass=0., m_nu=0.,w0=-1., wa=0., sigma8=None,
                  z_mg=None, df_mg=None):
         """
         Creates a set of cosmological parameters.
@@ -210,7 +210,7 @@ class Cosmology(object):
     def __init__(self, 
                  params=None, config=None,
                  Omega_c=None, Omega_b=None, h=None, A_s=None, n_s=None, 
-                 Omega_k=0., N_nu_rel=0., N_nu_mass=0., m_nu=0., w0=-1., wa=0., sigma8=None,
+                 Omega_k=0., N_nu_rel=3.046, N_nu_mass=0., m_nu=0., w0=-1., wa=0., sigma8=None,
                  z_mg=None, df_mg=None, 
                  transfer_function='boltzmann_class',
                  matter_power_spectrum='halofit',
@@ -253,7 +253,7 @@ class Cosmology(object):
             # Warn if any cosmological parameters were specified at the same 
             # time as a Parameters() object; they will be ignored
             argtest = [Omega_c==None, Omega_b==None, h==None, A_s==None, 
-                       n_s==None, Omega_k==0., N_nu_rel==0., N_nu_mass==0., m_nu==0., w0==-1., wa==0., 
+                       n_s==None, Omega_k==0., N_nu_rel==3.046, N_nu_mass==0., m_nu==0., w0==-1., wa==0., 
                        sigma8==None, z_mg==None, df_mg==None]
             
             if not all(arg == True for arg in argtest):
