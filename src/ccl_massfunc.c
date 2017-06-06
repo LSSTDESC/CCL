@@ -195,12 +195,14 @@ static double massfunc_f(ccl_cosmology *cosmo, double halomass, double a, double
 
     if (odelta < 200){
       *status = CCL_ERROR_HMF_INTERP;
-      strcpy(cosmo->status_message, "ccl_massfunc.c: ccl_massfunc_f(): Tinker 2008 only supported in range of Delta = 200 to Delta = 3200.\n");
+      strcpy(cosmo->status_message, "ccl_massfunc.c: ccl_massfunc_f(): Tinker 2008 only supported in range of Delta = 200 to Delta = 3200.");
+      ccl_raise_exception(CCL_ERROR_HMF_INTERP, cosmo->status_message);
       return 0;
     }
     if (odelta > 3200){
       * status = CCL_ERROR_HMF_INTERP;
-      strcpy(cosmo->status_message, "ccl_massfunc.c: ccl_massfunc_f(): Tinker 2008 only supported in range of Delta = 200 to Delta = 3200.\n");
+      strcpy(cosmo->status_message, "ccl_massfunc.c: ccl_massfunc_f(): Tinker 2008 only supported in range of Delta = 200 to Delta = 3200.");
+      ccl_raise_exception(CCL_ERROR_HMF_INTERP, cosmo->status_message);
       return 0;
     }
 
