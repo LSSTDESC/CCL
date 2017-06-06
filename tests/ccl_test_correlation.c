@@ -7,6 +7,7 @@
 #include <string.h>
 
 #define CORR_TOLERANCE 1E-3
+//Notice the actual requirement is on theta/0.1*CORR_TOLERANCE
 #define CORR_FRACTION 1E-3
 
 CTEST_DATA(corrs) {
@@ -39,14 +40,14 @@ static int linecount(FILE *f)
   return i0;
 }
 
-double angular_l_inv(ccl_cosmology *cosmo,int l,CCL_ClTracer *clt1,CCL_ClTracer *clt2, int * status)
+static double angular_l_inv(ccl_cosmology *cosmo,int l,CCL_ClTracer *clt1,CCL_ClTracer *clt2, int * status)
 {
   if (l==0)
     return 0;
   return 1./l;//HT of this should give 1./theta
 }
 
-double angular_l2_inv(ccl_cosmology *cosmo,int l,CCL_ClTracer *clt1,CCL_ClTracer *clt2, int * status)
+static double angular_l2_inv(ccl_cosmology *cosmo,int l,CCL_ClTracer *clt1,CCL_ClTracer *clt2, int * status)
 {
   double l2=(double)l*(double)l;
   double z2=1.0;//z**2
@@ -54,7 +55,7 @@ double angular_l2_inv(ccl_cosmology *cosmo,int l,CCL_ClTracer *clt1,CCL_ClTracer
   return 1./sqrt(l2+z2);//HT of this should give (exp(-k|z|)/k)
 }
 
-double angular_l2_exp(ccl_cosmology *cosmo,int l,CCL_ClTracer *clt1,CCL_ClTracer *clt2, int * status)
+static double angular_l2_exp(ccl_cosmology *cosmo,int l,CCL_ClTracer *clt1,CCL_ClTracer *clt2, int * status)
 {
   double l2=(double)l*(double)l;
   double a2=1;//a**2
@@ -209,14 +210,6 @@ static void compare_corr(char *compare_type,struct corrs_data * data)
   printf("CCL correlation first calculation done. More in progress... %.10e \n",time_sec);
   ccl_tracer_corr(cosmo,NL,&theta_arr,tr_nc_1,tr_nc_2,0,taper_cl,taper_cl_limits,
 		  &wt_dd_12_h);
-
-  /*Elisa's tmp check of ccl_single_tracer_corr for link to python*
-  double tmpcorr;
-  for(int i=0;i<20;i++){
-    tmpcorr =  ccl_single_tracer_corr(theta_arr[i],cosmo,tr_nc_1,tr_nc_2,0);
-    printf("%.10e %.10e %.10e %.10e\n",theta_arr[i],wt_dd_12_h[i],tmpcorr,wt_dd_12_h[i]/tmpcorr-1.);
-  }
-  *Elisa's tmp check passes*/
   ccl_tracer_corr(cosmo,NL,&theta_arr,tr_nc_2,tr_nc_2,0,taper_cl,taper_cl_limits,
 		  &wt_dd_22_h);
   ccl_tracer_corr(cosmo,NL,&theta_arr,tr_wl_1,tr_wl_1,0,taper_cl,taper_cl_limits,
@@ -296,54 +289,66 @@ static void compare_corr(char *compare_type,struct corrs_data * data)
   double tmp;
   FILE *output = fopen("cc_test_corr_out.dat", "w");
   for(ii=istart;ii<iend;ii++) {
+
+    //by-pass small thetas, we don't have requirements on those.
     //if (theta_in[ii]<0.1)
-    //continue;
-    if (fabs(analytical_l_inv[ii]*2.0*M_PI*(theta_arr[ii]*M_PI/180.)-1)>CORR_TOLERANCE)
+    //  continue;
+
+    if (fabs(analytical_l_inv[ii]*2.0*M_PI*(theta_arr[ii]*M_PI/180.)-1)>CORR_TOLERANCE*theta_arr[ii]/0.1)
       fraction_failed_analytical++;
 
     tmp=gsl_spline_eval(spl_wt_dd_11_h, theta_in[ii], NULL);
-    if(fabs(tmp/wt_dd_11[ii]-1)>CORR_TOLERANCE)
+    if(fabs(tmp/wt_dd_11[ii]-1)>CORR_TOLERANCE*theta_in[ii]/0.1)
       fraction_failed++;
+    //columns 1,2,3
     fprintf(output,"%.10e %.10e %.10e",theta_in[ii],tmp,wt_dd_11[ii]);
 
     tmp=gsl_spline_eval(spl_wt_dd_12_h, theta_in[ii], NULL);
-    if(fabs(tmp/wt_dd_12[ii]-1)>CORR_TOLERANCE)
+    if(fabs(tmp/wt_dd_12[ii]-1)>CORR_TOLERANCE*theta_in[ii]/0.1)
       fraction_failed++;
+    //columns 4,5
     fprintf(output," %.10e %.10e",tmp,wt_dd_12[ii]);
 
     tmp=gsl_spline_eval(spl_wt_dd_22_h, theta_in[ii], NULL);
-    if(fabs(tmp/wt_dd_22[ii]-1)>CORR_TOLERANCE)
+    if(fabs(tmp/wt_dd_22[ii]-1)>CORR_TOLERANCE*theta_in[ii]/0.1)
       fraction_failed++;
+    //columns 6,7
     fprintf(output," %.10e %.10e",tmp,wt_dd_22[ii]);
 
     gsl_spline_eval_e(spl_wt_ll_11_h_pp, theta_in[ii], NULL,&tmp);
-    if(fabs(tmp/wt_ll_11_pp[ii]-1)>CORR_TOLERANCE)
+    if(fabs(tmp/wt_ll_11_pp[ii]-1)>CORR_TOLERANCE*theta_in[ii]/0.1)
       fraction_failed++;
+    //columns 8,9
     fprintf(output," %.10e %.10e",tmp,wt_ll_11_pp[ii]);
     
     gsl_spline_eval_e(spl_wt_ll_12_h_pp, theta_in[ii], NULL,&tmp);
-    if(fabs(tmp/wt_ll_12_pp[ii]-1)>CORR_TOLERANCE)
+    if(fabs(tmp/wt_ll_12_pp[ii]-1)>CORR_TOLERANCE*theta_in[ii]/0.1)
       fraction_failed++;
+    //columns 10,11
     fprintf(output," %.10e %.10e",tmp,wt_ll_12_pp[ii]);
 
     gsl_spline_eval_e(spl_wt_ll_22_h_pp, theta_in[ii], NULL,&tmp);
-    if(fabs(tmp/wt_ll_22_pp[ii]-1)>CORR_TOLERANCE)
+    if(fabs(tmp/wt_ll_22_pp[ii]-1)>CORR_TOLERANCE*theta_in[ii]/0.1)
       fraction_failed++;
+    //columns 12,13
     fprintf(output," %.10e %.10e",tmp,wt_ll_22_pp[ii]);
 
     gsl_spline_eval_e(spl_wt_ll_11_h_mm, theta_in[ii], NULL,&tmp);
-    if(fabs(tmp/wt_ll_11_mm[ii]-1)>CORR_TOLERANCE)
+    if(fabs(tmp/wt_ll_11_mm[ii]-1)>CORR_TOLERANCE*theta_in[ii]/0.1)
       fraction_failed++;
+    //columns 14,15
     fprintf(output," %.10e %.10e",tmp,wt_ll_11_mm[ii]);
 
     gsl_spline_eval_e(spl_wt_ll_12_h_mm, theta_in[ii], NULL,&tmp);
-    if(fabs(tmp/wt_ll_12_mm[ii]-1)>CORR_TOLERANCE)
+    if(fabs(tmp/wt_ll_12_mm[ii]-1)>CORR_TOLERANCE*theta_in[ii]/0.1)
       fraction_failed++;
+    //columns 16,17
     fprintf(output," %.10e %.10e",tmp,wt_ll_12_mm[ii]);
 
     gsl_spline_eval_e(spl_wt_ll_22_h_mm, theta_in[ii], NULL,&tmp);
-    if(fabs(tmp/wt_ll_22_mm[ii]-1)>CORR_TOLERANCE)
+    if(fabs(tmp/wt_ll_22_mm[ii]-1)>CORR_TOLERANCE*theta_in[ii]/0.1)
       fraction_failed++;
+    //columns 18,19
     fprintf(output," %.10e %.10e \n",tmp,wt_ll_22_mm[ii]);
   }
   fclose(output);

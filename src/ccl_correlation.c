@@ -28,11 +28,7 @@ typedef struct
 /*--------ROUTINE: ccl_corr_integrand ------
 TASK: Compute the integrand of the correlation function
 INPUT: ell-value and a params structure defined above.
- */
-
-/*
-To Do:
-- Optional: Implement a function to use GSL implementation of hankel transform.
+TODO (Optional): Implement a function to use GSL implementation of hankel transform.
  */
 static double ccl_corr_integrand(double l, void *params)
 {
@@ -43,8 +39,7 @@ static double ccl_corr_integrand(double l, void *params)
 
 /*--------ROUTINE: ccl_general_corr ------
 TASK: Compute the correlation function by passing it a spline of Cl and a bessel function index
-INPUT: Cl spline, theta-vector, correlation function vector, number of theta values, index of the bessel function. NB: length of theta and corr_func must match.
-TODO: Check normalization of correlation function. 
+INPUT: Cl spline, theta-vector, correlation function vector, number of theta values, index of the bessel function. NB: length of theta and corr_func must match and be equal to n_theta.
 */
 static void ccl_general_corr(gsl_spline *cl, double *theta, double *corr_func, int n_theta, int i_bessel)
 {
@@ -85,17 +80,23 @@ static void ccl_general_corr(gsl_spline *cl, double *theta, double *corr_func, i
   return;
 }
 
-//ccl_angular_cl like function for test case. Hankel tranform of 1./l is 1./theta (uto factors of 2\pi)
+/*--------ROUTINE: angular_l_inv2 ------
+TASK: Obtain 1./l. This is a ccl_angular_cl-like function for test case. Hankel tranform of 1./l is 1./theta (uto factors of 2\pi)
+INPUT: cosmology, l value, tracer 1, tracer 2 
+ 
 double angular_l_inv2(ccl_cosmology *cosmo,int l,CCL_ClTracer *clt1,CCL_ClTracer *clt2, int * status)
 {
   if (l==0)
     return 0;
   else
     return 1./l;
-  }
+    }*/
 
-/*Binning the computed correlation function*/
-//used to be bin_corr
+/*--------ROUTINE: bin_func ------
+TASK: Bin the correlation function
+INPUT: number of theta bins, theta vector (of n_theta length), correlation function vector (n_theta length),
+       number of output bins, output theta, output correlation.
+ */
 static int bin_func(int n_theta, double *theta, double *corr_func,int n_theta_bins, 
 	     double *theta_bins, double *corr_func_binned)
 {
@@ -135,11 +136,15 @@ static int bin_func(int n_theta, double *theta, double *corr_func,int n_theta_bi
   return 0;
 }
 
-/*Applying cosine tapering to cls to reduce aliasing*/
+
+/*--------ROUTINE: bin_func ------
+TASK:n Apply cosine tapering to Cls to reduce aliasing
+INPUT: number of ell bins for Cl, ell vector, C_ell vector, limits for tapering
+       e.g., ell_limits=[low_ell_limit_lower,low_ell_limit_upper,high_ell_limit_lower,high_ell_limit_upper]
+ */
 static int taper_cl(int n_ell,int *ell,double *cl, double *ell_limits)
 {
-  //ell_limits=[low_ell_limit_lower,low_ell_limit_upper,high_ell_limit_lower,high_ell_limit_upper ]
-
+  
   for (int i=0;i<n_ell;i++)
     {
       if (ell[i]<ell_limits[0] || ell[i]>ell_limits[3])
@@ -162,27 +167,31 @@ static int taper_cl(int n_ell,int *ell,double *cl, double *ell_limits)
 }
 
 /*--------ROUTINE: ccl_tracer_corr ------
-TASK: For a given tracer, get the correlation function
-INPUT: type of tracer, number of theta values to evaluate = NL, theta vector
+TASK: For a given tracer, get the correlation function. Do so by running 
+      ccl_angular_cls. If you already have Cls calculated, go to the next
+      function to pass them directly.
+INPUT: cosmology, number of theta values to evaluate = NL, theta vector,
+       tracer 1, tracer 2, i_bessel, key for tapering, limits of tapering
+       correlation function.
  */
-
-
 int ccl_tracer_corr(ccl_cosmology *cosmo, int n_theta, double **theta,
                     CCL_ClTracer *ct1, CCL_ClTracer *ct2, int i_bessel,
 		    bool do_taper_cl,double *taper_cl_limits, 
 		    double **corr_func)
 {
-  /*  
-  return ccl_tracer_corr_fftlog(cosmo, n_theta,theta,ct1,ct2,i_bessel,do_taper_cl,taper_cl_limits,
-			  corr_func,ccl_angular_cl);
-  */
-    return ccl_tracer_corr_legendre(cosmo, n_theta,theta,ct1,ct2,i_bessel,do_taper_cl,
-				  taper_cl_limits,corr_func,ccl_angular_cl);   
+    
+  return ccl_tracer_corr_fftlog(cosmo, n_theta,theta,ct1,ct2,i_bessel,do_taper_cl,taper_cl_limits,corr_func,ccl_angular_cl);
+  
+  //return ccl_tracer_corr_legendre(cosmo, n_theta,theta,ct1,ct2,i_bessel,do_taper_cl,taper_cl_limits,corr_func,ccl_angular_cl);   
 }
 
 
-/*Following function takes a function to calculate angular cl as well. 
-By default above function will call it using ccl_angular_cl*/
+/*--------ROUTINE: ccl_tracer_corr_fftlog ------
+TASK: For a given tracer, get the correlation function
+      Following function takes a function to calculate angular cl as well. 
+      By default above function will call it using ccl_angular_cl
+INPUT: type of tracer, number of theta values to evaluate = NL, theta vector
+ */
 int ccl_tracer_corr_fftlog(ccl_cosmology *cosmo, int n_theta, double **theta, 
 		    CCL_ClTracer *ct1, CCL_ClTracer *ct2, int i_bessel,
 		     bool do_taper_cl,double *taper_cl_limits,double **corr_func, 
@@ -201,11 +210,13 @@ int ccl_tracer_corr_fftlog(ccl_cosmology *cosmo, int n_theta, double **theta,
   }  
 
   double *l_arr;
+  int *intl_arr;
   double cl_arr[n_theta];
   //ccl_angular_cl expects ell to be integer... type conversion later
   
   // l_arr=ccl_log_spacing(L_MIN_INT,L_MAX_INT,n_theta);
   l_arr=ccl_log_spacing(.01,60000,n_theta); 
+  intl_arr=malloc(n_theta*sizeof(int));
 
   int status=0,l2=0;
   for(int i=0;i<n_theta;i+=1) {
@@ -217,40 +228,27 @@ int ccl_tracer_corr_fftlog(ccl_cosmology *cosmo, int n_theta, double **theta,
 	//cl_arr[i]=exp(-0.5*l_arr[i]*l_arr[i]*1);
 	continue;
       }
-    l_arr[i]=(int)l_arr[i];//conversion since cl function require integers
-    //this leads to repeated ell in the array, especially at low ell
-    cl_arr[i]=angular_cl(cosmo,l_arr[i],ct1,ct2,&status); 
+    intl_arr[i]=(int)l_arr[i];//conversion since cl function require integers
+    //this leads to repeated ell in the array, especially at low ell - can we filter those out to save time?
+    cl_arr[i]=angular_cl(cosmo,intl_arr[i],ct1,ct2,&status); 
 
-    //    cl_arr[i]*=sqrt(l_arr[i]);
-    /*during FFTlog, we need to multiply cl with ell. 
-      However, FFTlog only multiplies by m-0.5, where m is an int. 
-      We set m=1 and multiply here by sqrt(ell) here to compensate.
-      Whole thing can be sorted by changing m to double in FFTlog and
-      then passing m=1.5.
-      Update: Changed FFTlog to take in m as double.
+    /*Notice that this works because we have changed FFTlog to take in m as double.
+      Previously, we had to multiply cl by sqrt(l) and pass m=1 to compensate. 
+      Now that we can pass m=1.5, there is no need for that conversion.
     */
   }
-  /*
-  if (i_bessel==4)
-    {
-      FILE *output2 = fopen("cc_test_corr_out_cl_mm.dat", "w");
-      for(int i=0;i<n_theta;i+=1) {
-	fprintf(output2,"%.3e %.3e\n",l_arr[i],cl_arr[i]);
-      }
-      fclose(output2);
-    }
-  */
   if (do_taper_cl)//also takes in int l_arr
-    status=taper_cl(n_theta,l_arr,cl_arr, taper_cl_limits);
+    status=taper_cl(n_theta,intl_arr,cl_arr, taper_cl_limits);
  
   *theta=(double *)malloc(sizeof(double)*n_theta);
   *corr_func=(double *)malloc(sizeof(double)*n_theta);
 
-  
   for(int i=0;i<n_theta;i++)
     {
-      (*theta)[i]=0;//1./l_arr[n_theta-i-1]; 
-    }//theta is modified by the fftlog 
+      (*theta)[i]=0;
+    }
+  /* Although set here to 0, theta is modified by FFTlog 
+     to obtain the correlation at 1/l */
   
   /* FFTlog uses spherical bessel functions, j_n, but for projected 
      correlations we need bessel functions of first order, J_n.
@@ -261,17 +259,26 @@ int ccl_tracer_corr_fftlog(ccl_cosmology *cosmo, int n_theta, double **theta,
   fftlog_ComputeXiLM(i_bessel-0.5, 1.5 , n_theta , l_arr, cl_arr, *theta,*corr_func);
     
   for(int i=0;i<n_theta;i++)
-    {
-      //(*corr_func)[i]=M_PI*(*corr_func)[i]*sqrt(2.0*(*theta)[i]/M_PI); 
-      (*corr_func)[i]*=sqrt((*theta)[i]*2.0*M_PI);//same as above line
+    { 
+      (*corr_func)[i]*=sqrt((*theta)[i]*2.0*M_PI);
     }
+  
+  free(intl_arr);
+
   return 0;
+
 }
 
-int compute_legedre_polynomial(CCL_ClTracer *ct1, CCL_ClTracer *ct2, int i_bessel,
+
+/*--------ROUTINE: ccl_compute_legendre_polynomial ------
+TASK: Compute input factor for ccl_tracer_corr_legendre
+INPUT: tracer 1, tracer 2, i_bessel, theta array, n_theta, L_max, output Pl_theta
+ */
+static int ccl_compute_legendre_polynomial(CCL_ClTracer *ct1, CCL_ClTracer *ct2, int i_bessel,
 				double **theta, int n_theta, int L_max, double **Pl_theta)
 {
-  double Nl2=0,k=0;//Nl**2
+  double Nl2=0;//Nl**2
+  double k=0;
 
   for (int i=0;i<n_theta;i++)
     {
@@ -329,12 +336,17 @@ int compute_legedre_polynomial(CCL_ClTracer *ct1, CCL_ClTracer *ct2, int i_besse
 }
 
 
+/*--------ROUTINE: ccl_tracer_corr_legendre ------
+TASK: Compute correlation function via Legendre polynomials
+INPUT: cosmology, number of theta bins, theta array, tracer 1, tracer 2, i_bessel, boolean
+       for tapering, vector of tapering limits, correlation vector, angular_cl function.
+ */
 int ccl_tracer_corr_legendre(ccl_cosmology *cosmo, int n_theta, double **theta,
 		     CCL_ClTracer *ct1, CCL_ClTracer *ct2, int i_bessel,
                      bool do_taper_cl,double *taper_cl_limits,double **corr_func,
 		     double (*angular_cl)(ccl_cosmology *cosmo,int l,CCL_ClTracer *clt1,
 					  CCL_ClTracer *clt2, int * status) ){
-  int L_max=n_theta; //15000;
+  int L_max=n_theta; 
   int status=0;
   int l_arr[L_max];
   double cl_arr[L_max];
@@ -357,7 +369,7 @@ int ccl_tracer_corr_legendre(ccl_cosmology *cosmo, int n_theta, double **theta,
   for (int i=0;i<n_theta;i++)
       Pl_theta[i]=(double *)malloc(sizeof(double)*L_max);
  
-  status=compute_legedre_polynomial(ct1,ct2,i_bessel,theta,n_theta,L_max,Pl_theta);
+  status=ccl_compute_legendre_polynomial(ct1,ct2,i_bessel,theta,n_theta,L_max,Pl_theta);
 
   for (int i=0;i<n_theta;i++){
     (*corr_func)[i]=0;
@@ -373,20 +385,22 @@ int ccl_tracer_corr_legendre(ccl_cosmology *cosmo, int n_theta, double **theta,
 
 /*--------ROUTINE: ccl_single_tracer_corr ------
 TASK: Wrap bin_func and tracer_corr to get the correlation function at a single point
-INPUT: type of tracer, number of theta values to evaluate = NL, theta vector
+      This routine takes fewer inputs and is the one that the python interface has
+      access to. 
+INPUT: desired theta value, cosmology struct, tracer 1, tracer 2, i_bessel
  */
-
 double ccl_single_tracer_corr(double theta_in,ccl_cosmology *cosmo,CCL_ClTracer *ct1, CCL_ClTracer *ct2, int i_bessel)
 {
 
   double *theta,corr_func_out,*corr_func;
   int n_theta=NL;
-  double taper_cl_limits[4]={1,2,10000,15000};
+  double taper_cl_limits[4]={1,2,10000,15000}; //why these values?
   
   ccl_tracer_corr_legendre(cosmo, n_theta,&theta,ct1,ct2,i_bessel,true,
 			   taper_cl_limits,&corr_func,ccl_angular_cl);
   //ccl_tracer_corr_fftlog(cosmo, n_theta,&theta,ct1,ct2,i_bessel,true,taper_cl_limits,
   //&corr_func,ccl_angular_cl);
+
   //Spline the correlation
   gsl_spline * corr_spline = gsl_spline_alloc(CORR_SPLINE_TYPE, n_theta);
   int status = gsl_spline_init(corr_spline, theta,corr_func,n_theta);
