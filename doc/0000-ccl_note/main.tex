@@ -69,16 +69,16 @@ This note describes how to install {\tt CCL} (Section \ref{sec:install}), its fu
 \section{Installation}
 \label{sec:install}
 
-\todo{Dockerfile need to be described here too.}
-
 \subsection{Dependencies}
-
-\todo{Revisit list of dependencies. Is SWIG still a dependency? And we don't need FFTlog, right? Anything else?}
 
 \begin{itemize}
 \item GNU Scientific Library {\tt GSL}\footnote{\url{https://www.gnu.org/software/gsl/}}, {\tt GSL-2.1} or higher
 \item Simplified Wrapper and Interface Generator {\tt SWIG}\footnote{\url{http://www.swig.org/}}
+\item {\tt FFTlog}\footnote{\url{http://casa.colorado.edu/~ajsh/FFTLog/}} is provided within {\tt CCL} with minor modifications
+\item {\tt SWIG} is not needed to run {\tt CCL}, but if you are developing new features, you will need {\tt SWIG}.
+\item A version of {\tt Angpow} \citep{2017arXiv170103592C} is also incorporated within {\tt CCL}.
 \end{itemize}
+
 \subsection{Installation Procedure}
 
 {\tt CCL} can be installed through an {\tt autotools}-generated configuration file. UNIX users should be familiar with the process: navigate to the directory containing the library and type
@@ -101,7 +101,9 @@ There exists also the possibility of installing both the C library and the Pytho
 \begin{verbatim}
  $ python setup.py install --prefix=/home/desc_fan
 \end{verbatim}
-This will perform automatically the aforementioned steps to install the C library and will also install the Python library in {\tt /home/desc$\_$fan/lib/python2.7/site-packages}. You might need to add this path to your environment variable {\tt \$PYTHONPATH} to be able to use it. In the near future the pacakge is planned to be {\tt pip} installable.
+This will perform automatically the aforementioned steps to install the C library and will also install the Python library in {\tt /home/desc$\_$fan/lib/python2.7/site-packages}. You might need to add this path to your environment variable {\tt \$PYTHONPATH} to be able to use it. In the near future the package is planned to be {\tt pip} installable.
+
+\todo{We need an update on the pip installation before Public Release}
 
 Once installed you can check the installation status by typing
 \begin{verbatim}
@@ -115,9 +117,7 @@ This will run the embedded unit tests. Using this last method to install the Pyt
  
 \subsection{Compiling against an external version of CLASS}
 
-\todo{Please give a relevant reference which could work as example. Say we tried this with hiclass and it worked without issues.}
-
-{\tt CCL} has a built-in version of {\tt CLASS} that is used to calculate power spectra and other cosmological functions. This is compiled by default. Optionally, you can also link {\tt CCL} against an external version of {\tt CLASS}. This is useful if you want to use a modified version of {\tt CLASS}, or a different or more up-to-date version of the standard {\tt CLASS}.
+{\tt CCL} has a built-in version of {\tt CLASS} that is used to calculate power spectra and other cosmological functions. This is compiled by default. Optionally, you can also link {\tt CCL} against an external version of {\tt CLASS}. This section useful if you want to use a modified version of {\tt CLASS}, or a different or more up-to-date version of the standard {\tt CLASS}. For example, we have sucessfully compiled and ran {\tt CCL} with {\tt hiCLASS} \citep{hiclass} for Horndeski models.
 
 To compile {\tt CCL} with an external version of {\tt CLASS}, you must first prepare the external copy so that it can be linked as a shared library. By default, the {\tt CLASS} build tools create a static library. After compiling {\tt CLASS} in the usual way (by running {\tt make}), look for a static library file called {\tt libclass.a} that should have been placed in the root source directory. Then, run the following command from that directory (Linux only):
 \begin{verbatim}
@@ -144,7 +144,7 @@ With Docker is installed, creating an image is relatively straightforward:
 \begin{verbatim}
 docker build -t ccl .
 \end{verbatim}
-This will begin the process of creating the image file for {\tt CCL} locally. This Dockerfile contains all installed C libraries in {\tt CCL} as well as the Python wrapper. It currently utilizes {\tt python:2.7} as a base image and suppoerts both ipython and Jupyter notebook. The virtualization process should have minimum impact on performance.
+This will begin the process of creating the image file for {\tt CCL} locally. This Dockerfile contains all installed C libraries in {\tt CCL} as well as the Python wrapper. It currently utilizes {\tt python:2.7} as a base image and supports both ipython and Jupyter notebook. The virtualization process should have minimum impact on performance.
 
 The resulting Docker image has two primary functionalities. The first is a command that will open a Jupyter notebook tied to a port connection on your local machine. This can be utilized with the following command on run:
 \begin{verbatim}
@@ -178,17 +178,15 @@ The first step to use CCL is to generate a {\tt ccl$\_$cosmology} structure, con
 
 \input{table_cosmo}
 
-\todo{Why is {\tt norm\_pk} in blue below?}
-
 {\tt ccl$\_$parameters} objects contain information about the cosmological parameters, and are initialized using one of the following routines (the full syntax for each function can be found in the header file {\tt ccl$\_$core.h}):
 \begin{itemize}
- \item {\tt ccl$\_$parameters$\_$create(double Omega$\_$c, double Omega$\_$b, double Omega$\_$k, double N\_nu\_rel, double N\_nu\_mass, double mnu, double w0, double wa, double h, double {\color{blue}norm$\_$pk}, double n$\_$s,int nz$\_$mgrowth,double *zarr$\_$mgrowth,double *dfarr$\_$mgrowth, int *status)}: general {\tt ccl$\_$parameters} constructor supporting all the models described above.
+ \item {\tt ccl$\_$parameters$\_$create(double Omega$\_$c, double Omega$\_$b, double Omega$\_$k, double N\_nu\_rel, double N\_nu\_mass, double mnu, double w0, double wa, double h, double norm$\_$pk, double n$\_$s,int nz$\_$mgrowth,double *zarr$\_$mgrowth,double *dfarr$\_$mgrowth, int *status)}: general {\tt ccl$\_$parameters} constructor supporting all the models described above.
  \item {\tt ccl$\_$parameters$\_$create$\_$flat$\_$lcdm(...)}: particular constructor for flat $\Lambda$CDM cosmologies.
  \item {\tt ccl$\_$parameters$\_$create$\_$flat$\_$wcdm(...)}: constant $w$ cosmologies.
  \item {\tt ccl$\_$parameters$\_$create$\_$flat$\_$wacdm(...)}: $w_0+w_a$.
  \item {\tt ccl$\_$parameters$\_$create$\_$lcdm(...)}: curved $\Lambda$CDM cosmologies.
 \end{itemize}
-The argument ${\tt {\color{blue}norm\_pk}}$ can be passed the power spectrum normalization parameterized by $\sigma_8$ or $A_\mathrm{s}$, {\tt ccl$\_$parameters$\_$create} switches to $\sigma_8$ normalization if ${\tt {\color{blue}norm\_pk}} > 1.e-5$, and to $A_{\mathrm s}$ normalization otherwise.
+The argument ${\tt norm\_pk}$ can be passed the power spectrum normalization parameterized by $\sigma_8$ or $A_\mathrm{s}$, {\tt ccl$\_$parameters$\_$create} switches to $\sigma_8$ normalization if ${\tt norm\_pk} > 1.e-5$, and to $A_{\mathrm s}$ normalization otherwise.
 
 To include neutrinos (massive or massless), the suffix `{\tt $\_$nu}' may be appended to the latter four {\tt ccl$\_$configuration} objects above (for example: {\tt ccl$\_$parameters$\_$create$\_$lcdm$\_$nu(...)}). Utilizing the corresponding {\tt ccl$\_$configuration} object without this {\tt $\_$nu} suffix will set the contribution from both massless and massive neutrinos to zero. In the case of non-zero massive neutrinos, it may be desirable to set {\tt N\_nu\_rel} such that $N_{\rm eff}=3.046$ in the early universe. In agreement with {\tt CLASS}, when using the default value of $T_{\rm NCDM}$ as described in section \ref{sec:distances} below, {\tt N\_nu\_rel} can be set to 2.0328, 1.0196, and 0.00641 for 1, 2 and 3 massive neutrinos respectively to achieve this.
 
@@ -349,7 +347,7 @@ With the implementation described in the previous section, the power spectrum sp
 \label{Pk_whishlist}
 This is a list of some power spectrum methods that we would like to implement in the future:
 \begin{itemize}
- \item Eisenstein \& Hu approximation,
+ \item Eisenstein \& Hu approximation, \todo{Isn't this already there?}
  \item CAMB,
  \item Cosmic emulators,
  \item halo model/HOD.
@@ -359,7 +357,9 @@ This is a list of some power spectrum methods that we would like to implement in
 \subsubsection{Normalization of the power spectrum}
 \label{sec:PSnorm}
 
-There are two alternative schemes for normalization of the matter power spectrum. The first one is to specify the value of $A_s$, the amplitude of the primordial power spectrum, which is passed directly to {\tt CLASS}. This option is available in the case of the linear/nonlinear matter power spectrum implementation. For these, as well as for BBKS, there is the additional option to set the normalization of the matter power spectrum by specifying $\sigma_8$, the RMS density contrast averaged over spheres of radius $8h^{-1}$Mpc. The computation of $\sigma_8$ is described in Section \ref{sec:hmf}
+There are two alternative schemes for normalization of the matter power spectrum. The first one is to specify the value of $A_s$, the amplitude of the primordial power spectrum, which is passed directly to {\tt CLASS}. This option is available in the case of the linear/nonlinear matter power spectrum implementation. For these, as well as for BBKS, there is the additional option to set the normalization of the matter power spectrum by specifying $\sigma_8$, the RMS density contrast averaged over spheres of radius $8h^{-1}$Mpc. The computation of $\sigma_8$ is described in Section \ref{sec:hmf}.
+
+In practice, there is only one argument that encodes the normalization. This is the argument ${\tt norm\_pk}$, which can be passed the power spectrum normalization parameterized by $\sigma_8$ or $A_\mathrm{s}$. As noted above, {\tt ccl$\_$parameters$\_$create} switches to $\sigma_8$ normalization if ${\tt norm\_pk} > 1.e-5$, and to $A_{\mathrm s}$ normalization otherwise.
 
 \subsection{Angular power spectra}
 \label{sec:cl}
@@ -443,7 +443,7 @@ where
 
 \subsubsection{Beyond Limber: angpow}
 
-\todo{Fill out this section with a short description of angpow and how it is linked to CCL}
+\todo{Comment out this section if we don't make it to public release.}
 
 %Text Added JECampagne 27/05/17 START
 
@@ -463,10 +463,9 @@ where
 
 
 
-Our aim is to compute the angular over density power spectrum  $C_{\ell}(z_1, z_2)$ as a cross-correlation between two $z$-shells with mean values ($z_1, z_2$) and also the auto-correlation $C_{\ell}(z_1)$ with $z_1 = z_2$,  taking into account, in both cases, possible redshift selection functions and physical processes as redshift space distortions without any Limber numerical approximation. This is the purpose of the \texttt{Angpow} code \citep{2017arXiv170103592C} that we describe briefly here.
+Our aim is to compute the angular over density power spectrum  $C_{\ell}(z_1, z_2)$ as a cross-correlation between two $z$-shells with mean values ($z_1, z_2$) and also the auto-correlation $C_{\ell}(z_1)$ with $z_1 = z_2$,  taking into account, in both cases, possible redshift selection functions and physical processes as redshift space distortions without any Limber numerical approximation. For this putpose, {\tt CCL} has been linked to the\texttt{Angpow} code \citep{2017arXiv170103592C}, which is briefly described here.
 
-
-So, one computes $C_{\ell}(z_1, z_2)$ according to the following formula
+The angular power spectrum for two shells, $C_{\ell}(z_1, z_2)$, is computed according to the following expression
 \begin{equation}
 \begin{split}
 C_{\ell}&(z_1, z_2;\sigma_1, \sigma_2)\\& = \iint_0^\infty \mathrm{d} z \mathrm{d} z^\prime \ W_1(z; z_1, \sigma_1) W_2(z^\prime; z_2, \sigma_2)\\
@@ -474,7 +473,8 @@ C_{\ell}&(z_1, z_2;\sigma_1, \sigma_2)\\& = \iint_0^\infty \mathrm{d} z \mathrm{
 \end{split}
 \label{eq-clz1z2-obs}
 \end{equation}
-One has introduced two normalized redshift selection functions $W_1(z;z_1,\sigma_1)$ and $W_2(z^\prime;z_2,\sigma_2)$  around $z_1$ and $z_2$ with typical width $\sigma_1$ and $\sigma_2$, respectively. The auxiliary function $f_\ell(z,k)$ can be defined without loss of generality as 
+%
+where we have introduced two normalized redshift selection functions $W_1(z;z_1,\sigma_1)$ and $W_2(z^\prime;z_2,\sigma_2)$  around $z_1$ and $z_2$ with typical width $\sigma_1$ and $\sigma_2$, respectively. The auxiliary function $f_\ell(z,k)$ can be defined without loss of generality as 
 \begin{equation}
 f_\ell(z,k) \equiv  \sqrt{\frac{2}{\pi}}\  k \sqrt{P(k,z)}\ \widetilde{\Delta}_\ell(z,k)\label{eq-fell-func}
 \end{equation}
@@ -484,25 +484,26 @@ with
 \begin{equation}
 P(k,z) = P_{in}(k) T(k,z),
 \end{equation} 
-either using an approximation valid at low redshift  with the power spectrum at $z=0$ ($P(k)|_{z=0}$) and the growth factor $G(z)$ as
+or using an approximation valid at low redshift  with the power spectrum at $z=0$ ($P(k)|_{z=0}$) and the growth factor $G(z)$ as
 \begin{equation}
 P(k,z) = P(k)|_{z=0} G^2(z);
 \end{equation} 
+\todo{Are these two alternatives? When is each of those used?}
 
-\item $\widetilde{\Delta}_\ell(z,k)$ is a function describing the physical processes as matter density fluctuations, redshift space distortions as described for instance in references \citet{2008cmb..book.....D,2009PhRvD..80h3514Y,2010PhRvD..82h3508Y,2011PhRvD..84d3516C,2011PhRvD..84f3505B}. As example with a constant bias $b$ and using the growth factor rate $f_a(z) = d\log G(a(z))/d\log(a(z))$ ($a(z)=(1+z)^{-1}$)
+\item $\widetilde{\Delta}_\ell(z,k)$: a function describing the physical processes as matter density fluctuations, redshift space distortions as described for instance in references \citet{2008cmb..book.....D,2009PhRvD..80h3514Y,2010PhRvD..82h3508Y,2011PhRvD..84d3516C,2011PhRvD..84f3505B}. As example \todo{example for galaxy clustering?} with a constant bias $b$ and using the growth factor rate $f_a(z) = d\log G(a(z))/d\log(a(z))$, we can approximate
 \begin{equation}
- \widetilde{\Delta}_\ell(z,k) \approx b j_\ell(k r(z)) - f_a(z) j_\ell^{\prime\prime}l(k r(z)) + \dots
+ \widetilde{\Delta}_\ell(z,k) \approx b j_\ell(k \chi(z)) - f_a(z) j_\ell^{\prime\prime}l(k \chi(z)) + \dots
 \end{equation}
-with $j_\ell(x)$ and $j_\ell^{\prime\prime}(x)$ the spherical Bessel function of order $\ell$ and its second derivative, and $r(z)$ is the comoving distance at redshift $z$.
+with $j_\ell(x)$ and $j_\ell^{\prime\prime}(x)$ the spherical Bessel function of order $\ell$ and its second derivative, and $\chi(z)$ is the comoving distance at redshift $z$.
 \end{itemize}
 
 To proceed to a numerical evaluation of equation \ref{eq-clz1z2-obs}, we first conduct  inside the rectangle $ [z_{1\mrm{min}},z_{1\mrm{max}}] \times [z_{2\mrm{min}},z_{2\mrm{max}}]$ given by the $W$ selection functions a Cartesian product of one-dimensional (1D) quadrature 
  defined by the set of sample nodes $z_i$ and weights $w_i$. In practice, we use the Clenshaw-Curtis quadrature.   The corresponding sampling points $(z_{1i},z_{2j})$ are weighted by the product  $w_i w_j$ using the 1D quadrature sample points and weights on both redshift regions with $i=0,\dots, N_{\mrm{z}_1}-1$ and $j=0,\dots,N_{\mrm{z}_2}-1$. Then, one gets the following approximation:
 \begin{equation}
-C^{\mrm{thick}}_{\ell}(z_1, z_2) \approx  \sum_{i=0}^{N_{\mrm{z}_1}-1}\sum_{j=0}^{N_{\mrm{z}_2}-1} w_i w_j W_1(z_i,z_1)W_2(z_j,z_2) \widehat{P}_\ell(r_i,r_j)
+C^{\mrm{thick}}_{\ell}(z_1, z_2) \approx  \sum_{i=0}^{N_{\mrm{z}_1}-1}\sum_{j=0}^{N_{\mrm{z}_2}-1} w_i w_j W_1(z_i,z_1)W_2(z_j,z_2) \widehat{P}_\ell(\chi_i,\chi_j)
 \label{eq-cross-zquadra}
 \end{equation}
-with the notations $z_i = z_{1i}$, $z_j = z_{2j}$ and  $r_i = r(z_{1i})$, $r_j = r(z_{2j})$ and
+with the notations $z_i = z_{1i}$, $z_j = z_{2j}$ and  $\chi_i = \chi(z_{1i})$, $\chi_j = \chi(z_{2j})$ and
 \begin{equation}
 \widehat{P}_\ell(z_i,z_j) =   \int_0^\infty dk\ f_\ell(z_i,k) f_\ell(z_j,k)
 \label{eq-Pellzizj}
@@ -521,7 +522,7 @@ All the Chebyshev expansions and the Clenshaw-Curtis quadrature are
 performed via the DCT-I fast transform of FFTW. 
 
 %Text Added JECampagne 27/05/17 END
-
+\todo{Can we have a sentence or two with motivation and comparison of angpow vs other methods?}
 
 \subsection{Correlation functions}
 \label{sec:corr}
@@ -534,7 +535,7 @@ In the Limber approximation, the angular correlation function between any two tr
 C_{12}(\theta) = \int d\chi'q_1(\chi')q_2(\chi')\int dk\frac{k}{2\pi}P_{\delta}(k,\chi')J_0[f_K(\chi')\theta k],
 \end{equation}
 %
-where $J_0$ is the Bessel function of order 0, $\chi$ is the comoving distance and $f_K(\chi)$ is the radial function that multiplies the spatial metric element, which is different from $\chi$ in the case of a cosmology with non-zero curvature. {\bf TODO. Need to verify $f_K$ implementation in {\tt CCL}.}
+where $J_0$ is the Bessel function of order 0, $\chi$ is the comoving distance and $f_K(\chi)$ is the radial function that multiplies the spatial metric element, which is different from $\chi$ in the case of a cosmology with non-zero curvature.
 
 {\bf Clustering.} For clustering, the relevant weight is given by $q_1(\chi)=b_1(\chi)dN_1/d\chi(\chi)$, the comoving distance probability distribution times the bias. The angular correlation function can also be re-written as
 \begin{equation}
@@ -554,8 +555,9 @@ where the angular lensing convergence power spectrum is given by
 P_\kappa(l) &=& \frac{9H_0^4\Omega_m^2}{4c^4}\int_{0}^{\chi_h}\frac{d\chi}{a^2(\chi)}P_\delta\left(\frac{l}{f_K(\chi)},\chi\right)\left[\int_\chi^{\chi_h}d\chi'p_\chi(\chi')\frac{f_K(\chi'-\chi)}{f_K(\chi')}\right]^2\\
 \end{eqnarray}
 
-For numerical integration of the correlation functions, we make use of the public code FFTlog \todo{(... cite ...). (... more here ... describe correlation function calculation)}.
+For numerical integration of the correlation functions, we make use of the public code {\tt FFTlog}\footnote{\url{http://casa.colorado.edu/~ajsh/FFTLog/}}. A version of this code is included in {\tt CCL} with minor modifications.
 
+\todo{Describe Legendre polynomial option}
 
 \subsection{Halo mass \& halo bias functions}
 \label{sec:hmf}
@@ -729,9 +731,7 @@ Finally, we note that formal tests for predictions in cosmologies with neutrinos
 
 \todo{What new checks were added?}
 
-\todo{Explain that these are not the same tests as in the Python implementation}
-
-\todo{Add correlation function test (Elisabeth)}
+\todo{Add correlation function benchmarks (Elisabeth)}
 
 
 \section{Default configuration}
@@ -781,12 +781,10 @@ This happens when the build tools fail to find the directory containing the GSL 
 
 and then run one of the {\tt setup.py install} commands listed above. (Note: As an alternative to the {\tt --include-dirs} option, you can use {\tt -I/path/to/include} instead.)
 
-You can quickly check whether {\tt pyccl} has been installed correctly by running {\tt python -c "import pyccl"} and checking that no errors are returned. For a more in-depth test to make sure everything is working, change to the {\tt tests/} sub-directory and run {\tt python run$\_$tests.py}. These tests will take a few minutes.
-
+You can quickly check whether {\tt pyccl} has been installed correctly by running {\tt python -c "import pyccl"} and checking that no errors are returned. For a more in-depth test to make sure everything is working, change to the {\tt tests/} sub-directory and run {\tt python run$\_$tests.py}. These tests will take a few minutes. Notice that these are not the same tests that are run via {\tt make check}. In the case of the {\tt python} tests, the library will only check for finite outputs of the routines called from {\tt pyccl}. There is no benchmark comparison in this case.
+ 
 \subsection{Python example}
 \label{sec:python:example}
-
-\todo{Point the reader to the python notebooks available.}
 
 The Python module has essentially the same functions as the C library, just presented in a more standard Python-like way. You can inspect the available functions and their arguments by using the built-in Python {\tt help()} function, as with any Python module.
 
@@ -817,6 +815,18 @@ ell = np.arange(2, 10)
 cls = ccl.angular_cl(cosmo, lens1, lens2, ell)
 print cls
 \end{verbatim}
+
+Further examples are collected in several Jupyter notebooks available in the {\tt tests/} directory. These are:
+\begin{verbatim}
+Photo-z example.ipynb,
+
+Power spectrum example.ipynb,
+
+Distance Calculations Example.ipynb,
+
+Lensing angular power spectrum.ipynb.
+\end{verbatim}
+
 
 \subsection{Technical notes on how the Python wrapper is implemented}
 \label{sec:python:technical}
@@ -850,10 +860,8 @@ The build process will also create a {\tt pyccl/ccllib.py} file, which is the ra
 
 In the future, we hope that {\tt CCL} will include other functionalities. Functionalities which are currently under development:
 \begin{itemize}
-	\item correlation functions (linking to FFTlog),
-	\item the non-Limber capability,
 	\item a link to FAST-PT \citep{FASTPT} for implementation of perturbation theory,
-	\item a photo-z model,
+	\item a more realistic photo-z model,
 	\item support for cosmologies with multiple unequal-mass neutrinos,
 	\item and more power spectrum methods (see \ref{Pk_whishlist}).
 \end{itemize}
