@@ -488,8 +488,8 @@ or using an approximation valid at low redshift  with the power spectrum at $z=0
 \begin{equation}
 P(k,z) = P(k)|_{z=0} G^2(z);
 \end{equation} 
-\todo{Are these two alternatives? When is each of those used?}
-
+Their are abstract classes that one may tuned according to the use-case (see \texttt{angpow\_integrand\_base.h} and \texttt{angpow\_powspec\_base.h}). For instance we have specialized in \texttt{angpow\_powspec.h} the computation of a $P(k)$ from an external 
+file and a growth rate from \citet{1991MNRAS.251..128L, 1992ARA&A..30..499C}, and in \texttt{angpow\_integrand.h} we have included the RSD term and a constant bias.
 \item $\widetilde{\Delta}_\ell(z,k)$: a function describing the physical processes as matter density fluctuations, redshift space distortions as described for instance in references \citet{2008cmb..book.....D,2009PhRvD..80h3514Y,2010PhRvD..82h3508Y,2011PhRvD..84d3516C,2011PhRvD..84f3505B}. As example \todo{example for galaxy clustering?} with a constant bias $b$ and using the growth factor rate $f_a(z) = d\log G(a(z))/d\log(a(z))$, we can approximate
 \begin{equation}
  \widetilde{\Delta}_\ell(z,k) \approx b j_\ell(k \chi(z)) - f_a(z) j_\ell^{\prime\prime}l(k \chi(z)) + \dots
@@ -523,7 +523,16 @@ performed via the DCT-I fast transform of FFTW.
 
 %Text Added JECampagne 27/05/17 END
 \todo{Can we have a sentence or two with motivation and comparison of angpow vs other methods?}
-
+We have tested the code both on laptop (Linux, MacOSX) as well as on
+Computer Center (CCIN2P3 in France and NERSC in the USA). 
+We use OpenMP to distribute the computation of a given $C_\ell$ on a single
+thread. The code wall time  decreases reasonably well with the number of threads
+and a wall time at the $\mathcal{O}$(1s) level can be reached to
+reconstruct these accurate spectra. Such performances are much higher than those obtained
+with {\tt CLASSgal} when not using the Limber approximation.
+For instance using{\tt CLASSgal}  to compute the auto-correlation with a Gaussian selection function with ($z_\mrm{mean}=1$, $\sigma_z=0.02$, $5\sigma_z$-cut) and $k_\mrm{max}=1\ \mrm{Mpc}^{-1}$ and a radial quadrature based on $N_\mrm{pts}=139$ sample points, it takes
+about 15s on 16 threads, which is to be compared to about 0.5s with \texttt{Angpow}.
+ 
 \subsection{Correlation functions}
 \label{sec:corr}
 
