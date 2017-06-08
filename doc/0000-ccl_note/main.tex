@@ -97,13 +97,14 @@ This will create two directories (if not present already): {\tt /home/desc$\_$fa
 
 After installing the C library you can make sure it is running as it should by typing {\tt make check}, which will run the unit tests described in Section \ref{sec:tests}. You are now ready to install the Python wrapper following the steps described in Section \ref{sec:python}.
 
+\subsection{Alternative installation and pip}
+
+
 There exists also the possibility of installing both the C library and the Python wrapper together by running
 \begin{verbatim}
  $ python setup.py install --prefix=/home/desc_fan
 \end{verbatim}
 This will perform automatically the aforementioned steps to install the C library and will also install the Python library in {\tt /home/desc$\_$fan/lib/python2.7/site-packages}. You might need to add this path to your environment variable {\tt \$PYTHONPATH} to be able to use it. In the near future the package is planned to be {\tt pip} installable.
-
-\todo{We need an update on the pip installation before Public Release}
 
 Once installed you can check the installation status by typing
 \begin{verbatim}
@@ -305,14 +306,14 @@ It is worth reminding the reader that the Eisenstein \& Hu and  the BBKS approxi
 \subsubsection{CLASS}
 Secondly, there is the option to call the {\tt CLASS} software \citep{class} within {\tt CCL} to obtain either linear or nonlinear matter power spectra at given redshifts. For speed, the linear power spectrum is obtained at redshift $z=0$ and re-scaled to a different redshift using the growth function. In the case of the nonlinear matter power spectrum, upon setting up the cosmology object, we construct a bi-dimensional spline in $k$ and the scale-factor which is then called by the relevant routines to obtain the matter power spectrum at the desired wavenumber and redshift. The relevant routines can be found within {\tt ccl$\_$power.c}. Currently CLASS computes the non-linear power spectrum using the HaloFit prescription of \cite{CLASS_halofit}.
 
-\subsubsection{Nonlinear extrapolation}
+\subsubsection{Nonlinear low and high wavenumber extrapolation}
 \label{sec:NLextrapol}
 
 \todo{This section needs careful checking, many things have changed here.}
 
-The computation of the nonlinear power spectrum from {\tt CLASS} can be significantly sped up by extrapolating in the range $k>${\tt K$\_$MAX$\_$SPLINE}. In this section, we describe the implementation of the extrapolation and the accuracy attained.
+The computation of the power spectrum from {\tt CLASS} can be significantly sped up by extrapolating in the range $k>${\tt K$\_$MAX$\_$SPLINE} and $k<${\tt K$\_$MIN}. In this section, we describe the implementation of the extrapolation and the accuracy attained.
 
-The introduction of the parameter {\tt K$\_$MAX$\_$SPLINE} allows us to spline the nonlinear matter power spectrum within the {\tt cosmo} structure up to that value of $k$ (in units of $1/$Mpc). A separate {\tt K$\_$MAX} parameter sets the limit for evaluation of the matter power spectrum. The range between {\tt K$\_$MAX$\_$SPLINE}$<k<${\tt K$\_$MAX} is evaluated by performing a second order Taylor expansion within the static routine {\tt ccl$\_$power$\_$extrapol$\_$highk}.
+We describe first the extrapolation at high wavenumbers. The introduction of the parameter {\tt K$\_$MAX$\_$SPLINE} allows us to spline the matter power spectrum within the {\tt cosmo} structure up to that value of $k$ (in units of $1/$Mpc). A separate {\tt K$\_$MAX} parameter sets the limit for evaluation of the matter power spectrum. The range between {\tt K$\_$MAX$\_$SPLINE}$<k<${\tt K$\_$MAX} is evaluated by performing a second order Taylor expansion within the static routine {\tt ccl$\_$power$\_$extrapol$\_$highk}.
 
 First, we compute the first and second derivative of the $\ln P(k,z)$ at $k_0={\rm \tt K\_MAX}-2\Delta\ln k$ by computing the numerical derivatives by finite differences using GSL. We then apply a second order Taylor expansion to extrapolate the matter power spectrum to $k>${\tt K$\_$MAX$\_$SPLINE}. The Taylor expansion gives
 %
@@ -321,7 +322,14 @@ First, we compute the first and second derivative of the $\ln P(k,z)$ at $k_0={\
   \label{eq:NLPSTaylor}
 \end{equation}
 
-The results of this approximation are shown in Figure \ref{fig:NLextrapol} for redshifts $z=0$ and $z=3$. We compare the nonlinear matter power spectrum at $z=0$ computed with the previously described approximation, to the matter power spectrum obtained by directly evaluating {\tt CLASS} at the desired $k$ value. (The benchmark in reality uses a value of {\tt K$\_$MAX$\_$SPLINE}$=10^3$/Mpc, well beyond our range of application.) We find that for typical values of  $\Delta \ln k$ is $10^{-2}$ and {\tt K$\_$MAX$\_$SPLINE}$=50$/Mpc has converged to an accuracy that surpasses the expected impact of baryonic effects on the matter power spectrum at $k>10/$Mpc. (For a plot showing the impact of baryons on the matter power spectrum, see \citealt{Schneider15}.) The lower {\tt K$\_$MAX$\_$SPLINE} is, the faster {\tt CCL} will run. The optimum choice of {\tt K$\_$MAX$\_$SPLINE} is left to the user for their particular application. 
+The results of this approximation are shown in Figure \ref{fig:NLextrapol} for redshifts $z=0$ and $z=3$ \todo{This figure needs to be updated}. We compare the nonlinear matter power spectrum at $z=0$ computed with the previously described approximation, to the matter power spectrum obtained by directly evaluating {\tt CLASS} at the desired $k$ value. (The benchmark in reality uses a value of {\tt K$\_$MAX$\_$SPLINE}$=10^3$/Mpc, well beyond our range of application.) We find that for typical values of  $\Delta \ln k$ is $10^{-2}$ and {\tt K$\_$MAX$\_$SPLINE}$=50$/Mpc has converged to an accuracy that surpasses the expected impact of baryonic effects on the matter power spectrum at $k>10/$Mpc. (For a plot showing the impact of baryons on the matter power spectrum, see \citealt{Schneider15}.) The lower {\tt K$\_$MAX$\_$SPLINE} is, the faster {\tt CCL} will run. The optimum choice of {\tt K$\_$MAX$\_$SPLINE} is left to the user for their particular application. 
+
+We adopt a similar approach to extrapolate the power spectrum at small scales. In this case, the power spectrum below {\tt K$\_$MIN} is obtained by a power-law extrapolation with index $n_s$:
+\begin{equation}
+  \log P(k<{\tt K\_MIN},z) = \log P({\tt K\_MIN},z) + n_s (\log k-\log{\tt K\_MIN})
+\end{equation}
+
+\todo{Explain choice of default values for {\tt K\_MIN}.}
 
 %------------------------
 \begin{figure*}
@@ -333,7 +341,7 @@ The results of this approximation are shown in Figure \ref{fig:NLextrapol} for r
 \end{figure*}
 %------------------------
 
-\subsubsection{Linear extrapolation}
+\paragraph{Linear extrapolation}
 \label{sec:Lextrapol}
 
 With the implementation described in the previous section, the power spectrum splines are initialized up to {\tt K$\_$MAX$\_$SPLINE}. This is also true for the linear matter power spectrum, which is used within {\tt CCL} in particular to obtain $\sigma_8$. We have tested here how the procedure described in the previous section affects the convergence of the linear matter power spectrum. We compare the fiducial {\tt CCL} output to the case where we set {\tt K$\_$MAX$\_$SPLINE}$=10^3/$Mpc. The result is shown in Figure \ref{fig:Lextrapol}. Although there is a significant difference ($\gtrsim 10\%$) between the linear power spectra at large $k$, we have confirmed that the difference in $\sigma_8$ is negligible. Nevertheless, for other applications that use the linear power spectrum, the user might need to increase the value of {\tt K$\_$MAX$\_$SPLINE}.
@@ -343,10 +351,14 @@ With the implementation described in the previous section, the power spectrum sp
 \centering
 \includegraphics[width=0.45\textwidth]{PS_converge_linear.eps}
 \includegraphics[width=0.45\textwidth]{PS_converge_linear_z3.eps}
-\caption{Same as Fig. \ref{fig:NLextrapol} but for the linear matter power spectrum at $z=0$ (left) and $z=3$ (right).}
+\caption{Same as Fig. \ref{fig:NLextrapol} but for the linear matter power spectrum at $z=0$ (left) and $z=3$ (right).\todo{This figure needs to be updated and to include the low $k$ extrapolation.}}
 \label{fig:Lextrapol}
 \end{figure*}
 %------------------------
+
+As in the previous section, the power spectrum at small wavenumber is extrapolated using a power-law. \todo{Explain choice of {\tt K\_MIN} too.}
+
+\todo{Different choices of {K\_MIN} and {K\_MAX} for BBKS and EH implementations. Check whether we are using extrapolation for those cases.}
 
 \subsubsection{Wishlist for the future}
 \label{Pk_whishlist}
@@ -493,8 +505,8 @@ or using an approximation valid at low redshift  with the power spectrum at $z=0
 \begin{equation}
 P(k,z) = P(k)|_{z=0} G^2(z);
 \end{equation} 
-\todo{Are these two alternatives? When is each of those used?}
-
+Their are abstract classes that one may tuned according to the use-case (see \texttt{angpow\_integrand\_base.h} and \texttt{angpow\_powspec\_base.h}). For instance we have specialized in \texttt{angpow\_powspec.h} the computation of a $P(k)$ from an external 
+file and a growth rate from \citet{1991MNRAS.251..128L, 1992ARA&A..30..499C}, and in \texttt{angpow\_integrand.h} we have included the RSD term and a constant bias.
 \item $\widetilde{\Delta}_\ell(z,k)$: a function describing the physical processes as matter density fluctuations, redshift space distortions as described for instance in references \citet{2008cmb..book.....D,2009PhRvD..80h3514Y,2010PhRvD..82h3508Y,2011PhRvD..84d3516C,2011PhRvD..84f3505B}. As example \todo{example for galaxy clustering?} with a constant bias $b$ and using the growth factor rate $f_a(z) = d\log G(a(z))/d\log(a(z))$, we can approximate
 \begin{equation}
  \widetilde{\Delta}_\ell(z,k) \approx b j_\ell(k \chi(z)) - f_a(z) j_\ell^{\prime\prime}l(k \chi(z)) + \dots
@@ -528,7 +540,16 @@ performed via the DCT-I fast transform of FFTW.
 
 %Text Added JECampagne 27/05/17 END
 \todo{Can we have a sentence or two with motivation and comparison of angpow vs other methods?}
-
+We have tested the code both on laptop (Linux, MacOSX) as well as on
+Computer Center (CCIN2P3 in France and NERSC in the USA). 
+We use OpenMP to distribute the computation of a given $C_\ell$ on a single
+thread. The code wall time  decreases reasonably well with the number of threads
+and a wall time at the $\mathcal{O}$(1s) level can be reached to
+reconstruct these accurate spectra. Such performances are much higher than those obtained
+with {\tt CLASSgal} when not using the Limber approximation.
+For instance using{\tt CLASSgal}  to compute the auto-correlation with a Gaussian selection function with ($z_\mrm{mean}=1$, $\sigma_z=0.02$, $5\sigma_z$-cut) and $k_\mrm{max}=1\ \mrm{Mpc}^{-1}$ and a radial quadrature based on $N_\mrm{pts}=139$ sample points, it takes
+about 15s on 16 threads, which is to be compared to about 0.5s with \texttt{Angpow}.
+ 
 \subsection{Correlation functions}
 \label{sec:corr}
 

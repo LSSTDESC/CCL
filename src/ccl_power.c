@@ -1015,7 +1015,7 @@ static double ccl_power_extrapol_highk(ccl_cosmology * cosmo, double k, double a
 
 /*------ ROUTINE: ccl_power_extrapol_hxighk ----- 
 INPUT: ccl_cosmology * cosmo, a, k [1/Mpc]
-TASK: extrapolate power spectrum at high k
+TASK: extrapolate power spectrum at low k
 */
 static double ccl_power_extrapol_lowk(ccl_cosmology * cosmo, double k, double a, gsl_spline2d * powerspl, int * status)
 {
