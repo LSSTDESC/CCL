@@ -83,14 +83,14 @@ static void ccl_general_corr(gsl_spline *cl, double *theta, double *corr_func, i
 /*--------ROUTINE: angular_l_inv2 ------
 TASK: Obtain 1./l. This is a ccl_angular_cl-like function for test case. Hankel tranform of 1./l is 1./theta (uto factors of 2\pi)
 INPUT: cosmology, l value, tracer 1, tracer 2 
- 
+*/
 double angular_l_inv2(ccl_cosmology *cosmo,int l,CCL_ClTracer *clt1,CCL_ClTracer *clt2, int * status)
 {
   if (l==0)
     return 0;
   else
     return 1./l;
-    }*/
+}
 
 /*--------ROUTINE: bin_func ------
 TASK: Bin the correlation function
