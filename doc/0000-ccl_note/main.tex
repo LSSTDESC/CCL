@@ -297,6 +297,11 @@ where $\Gamma = \Omega_m h$.
 The power spectrum is related to the transfer function by $\Delta(k)\propto T^2(k)k^{3+n}$ and $\Delta^2(k)\propto k^3P(k)$. The normalization of the power spectrum is achieved at $z=0$ by setting $\sigma_8$ to its value today.
 The BBKS power spectrum option is primarily used as a precisely defined input for testing the numerical accuracy of {\tt CCL} routines (as described in Sect.~\ref{sec:tests}), and it is not recommended for other uses.
 
+\subsubsection{Eisenstein and Hu}
+CCL also provides an approximation to the matter power spectrum as implemented by \citet{1998ApJ...496..605E} (we refer the reader to this paper for a detailed discussion of the fitting formulae)\footnote{Note that the implementation in CCL modifies Eq. 5 of \citet{1998ApJ...496..605E} using $a^{-1}=1+z$ instead of the approximation $a^{-1}\sim z$. The difference in the resulting power spectra is negligible, but larger than 1 part in $10^4$ for $k<10\,h\,{\rm Mpc}^{-1}$.}.
+
+It is worth reminding the reader that the Eisenstein \& Hu and  the BBKS approximations are not accurate and should not be used to derive scientific results. They are, however, computationally faster, and therefore useful for code testing and plotting.
+
 \subsubsection{CLASS}
 Secondly, there is the option to call the {\tt CLASS} software \citep{class} within {\tt CCL} to obtain either linear or nonlinear matter power spectra at given redshifts. For speed, the linear power spectrum is obtained at redshift $z=0$ and re-scaled to a different redshift using the growth function. In the case of the nonlinear matter power spectrum, upon setting up the cosmology object, we construct a bi-dimensional spline in $k$ and the scale-factor which is then called by the relevant routines to obtain the matter power spectrum at the desired wavenumber and redshift. The relevant routines can be found within {\tt ccl$\_$power.c}. Currently CLASS computes the non-linear power spectrum using the HaloFit prescription of \cite{CLASS_halofit}.
 
