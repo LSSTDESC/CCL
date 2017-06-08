@@ -15,7 +15,7 @@
 #define ZD 0.5
 #define NZ 1024
 #define Z0_GC 0.80
-#define SZ_GC 0.05
+#define SZ_GC 0.005
 #define Z0_SH 0.65
 #define SZ_SH 0.05
 #define NL 512

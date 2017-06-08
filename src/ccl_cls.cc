@@ -28,7 +28,9 @@ extern "C"{
 #include "Angpow/angpow_exceptions.h"  //exceptions
 #include "Angpow/angpow_integrand_base.h"
 
+//#define _DEBUG
 #define CCL_FRAC_RELEVANT 5E-4
+//#define CCL_FRAC_RELEVANT 1E-3
 //Gets the x-interval where the values of y are relevant
 //(meaning, that the values of y for those x are at least above a fraction frac of its maximum)
 static void get_support_interval(int n,double *x,double *y,double frac,
@@ -139,6 +141,11 @@ CCL_ClWorkspace *ccl_cl_workspace_new(int lmax,int l_limber,int non_limber_metho
   //Set params
   w->dchi=dchi;
   w->dlk =dlk ;
+  if(zmin<=0) { //We should make sure that zmin is always strictly positive
+    free(w);
+    *status=CCL_ERROR_INCONSISTENT;
+    return NULL;
+  }
   w->zmin=zmin;
   w->lmax=lmax;
   if((non_limber_method!=CCL_NONLIMBER_METHOD_NATIVE) && (non_limber_method!=CCL_NONLIMBER_METHOD_ANGPOW)) {
@@ -671,7 +678,7 @@ CCL_ClTracer *ccl_cl_tracer_lensing_simple_new(ccl_cosmology *cosmo,
 
 static double limits_bessel(double l,double thr,double *xmin,double *xmax)
 {
-  double thrb=thr*0.44/pow(l+1,0.8);
+  double thrb=thr*0.5635/pow(l+0.53,0.834);
   *xmax=1./thrb;
   if(l<=0)
     *xmin=0;
@@ -877,6 +884,77 @@ static double transfer_wrap(int il,double lk,ccl_cosmology *cosmo,
   return transfer_out;
 }
 
+static double *get_lkarr(ccl_cosmology *cosmo,CCL_ClWorkspace *w,
+			 double l,double chimin,double chimax,int *nk,
+			 int *status)
+{
+  int ik;
+  
+  //First compute relevant k-range for this ell
+  double kmin,kmax,lkmin,lkmax;
+  if(l>w->l_limber) {
+    kmin=CCL_MAX(ccl_splines->K_MIN_DEFAULT,0.8*(l+0.5)/chimax);
+    kmax=CCL_MIN(ccl_splines->K_MAX,1.2*(l+0.5)/chimin);
+  }
+  else {
+    double xmin,xmax;
+    limits_bessel(l,CCL_FRAC_RELEVANT,&xmin,&xmax);
+    kmin=CCL_MAX(ccl_splines->K_MIN_DEFAULT,xmin/chimax);
+    kmax=CCL_MIN(ccl_splines->K_MAX,xmax/chimin);
+    //Cap by maximum meaningful argument of the Bessel function
+    kmax=CCL_MIN(kmax,2*(w->l_arr[w->n_ls-1]+0.5)/chimin); //Cap by 2 x inverse scale corresponding to l_max
+#ifdef _DEBUG
+    printf("%lf %lE %lE %lE %lE %d %.3lf\n",l,xmin,xmax,kmin,kmax,(int)(log10(kmax/kmin)/w->dlk),w->dlk);
+#endif //_DEBUG
+  }
+  lkmin=log10(kmin);
+  lkmax=log10(kmax);
+  
+  //Allocate memory for transfer function
+  double *lkarr;
+  double lknew=lkmin;
+  double k_period=2*M_PI/chimax;
+  double dklin=0.45;
+  ik=0;
+  while(lknew<=lkmax) {
+    double kk=pow(10.,lknew);
+    double dk1=k_period*dklin;
+    double dk2=kk*(pow(10.,w->dlk)-1.);
+    double dk=CCL_MIN(dk1,dk2);
+    lknew=log10(kk+dk);
+    ik++;
+  }
+
+  *nk=CCL_MAX(10,ik+1);
+  lkarr=(double *)malloc((*nk)*sizeof(double));
+  if(lkarr==NULL) {
+    return NULL;
+  }
+
+#ifdef _DEBUG
+  printf("%d\n",(*nk));
+#endif //_DEBUG
+
+  if((*nk)==10) {
+    for(ik=0;ik<(*nk);ik++)
+      lkarr[ik]=lkmin+(lkmax-lkmin)*ik/((*nk)-1.);
+  }
+  else {
+    ik=0;
+    lkarr[ik]=lkmin;
+    while(lkarr[ik]<=lkmax) {
+      double kk=pow(10.,lkarr[ik]);
+      double dk1=k_period*dklin;
+      double dk2=kk*(pow(10.,w->dlk)-1.);
+      double dk=CCL_MIN(dk1,dk2);
+      ik++;
+      lkarr[ik]=log10(kk+dk);
+    }
+  }
+  
+  return lkarr;
+}
+
 static void compute_transfer(CCL_ClTracer *clt,ccl_cosmology *cosmo,CCL_ClWorkspace *w,int *status)
 {
   int il;
@@ -884,7 +962,10 @@ static void compute_transfer(CCL_ClTracer *clt,ccl_cosmology *cosmo,CCL_ClWorksp
   double chimin=ccl_comoving_radial_distance(cosmo,1./(1+zmin),status);
   double chimax=clt->chimax;
 
+#ifdef _DEBUG
   printf("Computing transfer\n");
+#endif //_DEBUG
+
   //Get how many multipoles and allocate info for each of them
   clt->n_ls=w->n_ls;
   clt->n_k=(int *)malloc(clt->n_ls*sizeof(int));
@@ -903,36 +984,16 @@ static void compute_transfer(CCL_ClTracer *clt,ccl_cosmology *cosmo,CCL_ClWorksp
 
   //Loop over multipoles and compute transfer function for each
   for(il=0;il<clt->n_ls;il++) {
-    int ik;
+    int ik,nk;
     double l=(double)(w->l_arr[il]);
-
-    //First compute relevant k-range for this ell
-    double kmin,kmax,lkmin,lkmax;
-    if(l>w->l_limber) {
-      kmin=CCL_MAX(ccl_splines->K_MIN_DEFAULT,0.8*(l+0.5)/chimax);
-      kmax=CCL_MIN(ccl_splines->K_MAX,1.2*(l+0.5)/chimin);
-    }
-    else {
-      double xmin,xmax;
-      limits_bessel(l,CCL_FRAC_RELEVANT,&xmin,&xmax);
-      kmin=CCL_MAX(ccl_splines->K_MIN_DEFAULT,xmin/chimax);
-      kmax=CCL_MIN(ccl_splines->K_MAX,xmax/chimin);
-      printf("%lf %lE %lE %lE %lE\n",l,xmin,xmax,kmin,kmax);
-    }
-    lkmin=log10(kmin);
-    lkmax=log10(kmax);
-
-    //Allocate memory for transfer function
-    double *lkarr,*tkarr;
-    int nk=CCL_MAX(10,((int)((lkmax-lkmin)/w->dlk)));
-
-    lkarr=(double *)malloc(nk*sizeof(double));
+    double *lkarr=get_lkarr(cosmo,w,l,chimin,chimax,&nk,status);
     if(lkarr==NULL) {
       *status==CCL_ERROR_MEMORY;
       strcpy(cosmo->status_message,"ccl_cls.c: compute_transfer(): memory allocation\n");
       break;
     }
-    tkarr=(double *)malloc(nk*sizeof(double));
+	
+    double *tkarr=(double *)malloc(nk*sizeof(double));
     if(tkarr==NULL) {
       free(lkarr);
       *status==CCL_ERROR_MEMORY;
@@ -942,31 +1003,34 @@ static void compute_transfer(CCL_ClTracer *clt,ccl_cosmology *cosmo,CCL_ClWorksp
     clt->n_k[il]=nk;
 
     //Loop over k and compute transfer function
-    //    printf("%d %lE %lE %d\n",(int)l,lkmin,lkmax,nk);
+    for(ik=0;ik<nk;ik++)
+      tkarr[ik]=transfer_wrap(il,lkarr[ik],cosmo,w,clt,status);
+    if(*status) {
+      free(clt->n_k);
+      free(lkarr);
+      free(tkarr);
+      break;
+    }
+
+#ifdef _DEBUG
     char fname[256];
     FILE *fo;
     if(w->l_limber<0)
       sprintf(fname,"transfer_limber_l%05d.txt",w->l_arr[il]);
-    else 
+    else
       sprintf(fname,"transfer_nonlimber_l%05d.txt",w->l_arr[il]);
     fo=fopen(fname,"w");
     double k_should=(l+0.5)/(0.5*(chimax+chimin));
-    for(ik=0;ik<nk;ik++) {
-      lkarr[ik]=lkmin+(lkmax-lkmin)*ik/(nk-1.);
-      tkarr[ik]=transfer_wrap(il,lkarr[ik],cosmo,w,clt,status);
+    for(ik=0;ik<nk;ik++)
       fprintf(fo,"%lE %lE %lE\n",pow(10.,lkarr[ik]),k_should,tkarr[ik]);
-    }
     fclose(fo);
-    if(*status) {
-      free(clt->n_k);
-      free(lkarr);
-      break;
-    }
+#endif //_DEBUG
 
     //Initialize spline for this ell
     clt->spl_transfer[il]=spline_init(nk,lkarr,tkarr,0,0);
     if(clt->spl_transfer[il]==NULL) {
       free(lkarr);
+      free(tkarr);
       *status==CCL_ERROR_MEMORY;
       strcpy(cosmo->status_message,"ccl_cls.c: compute_transfer(): memory allocation\n");
       break;
