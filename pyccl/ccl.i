@@ -33,6 +33,7 @@
 %include "ccl_massfunc.i"
 %include "ccl_cls.i"
 %include "ccl_constants.i"
+%include "ccl_params.i"
 %include "ccl_lsst_specs.i"
 
 %include "../include/ccl_config.h"
