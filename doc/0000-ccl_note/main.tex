@@ -97,13 +97,14 @@ This will create two directories (if not present already): {\tt /home/desc$\_$fa
 
 After installing the C library you can make sure it is running as it should by typing {\tt make check}, which will run the unit tests described in Section \ref{sec:tests}. You are now ready to install the Python wrapper following the steps described in Section \ref{sec:python}.
 
+\subsection{Alternative installation and pip}
+
+
 There exists also the possibility of installing both the C library and the Python wrapper together by running
 \begin{verbatim}
  $ python setup.py install --prefix=/home/desc_fan
 \end{verbatim}
 This will perform automatically the aforementioned steps to install the C library and will also install the Python library in {\tt /home/desc$\_$fan/lib/python2.7/site-packages}. You might need to add this path to your environment variable {\tt \$PYTHONPATH} to be able to use it. In the near future the package is planned to be {\tt pip} installable.
-
-\todo{We need an update on the pip installation before Public Release}
 
 Once installed you can check the installation status by typing
 \begin{verbatim}
