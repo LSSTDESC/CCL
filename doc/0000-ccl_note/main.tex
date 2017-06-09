@@ -260,7 +260,7 @@ in units such that $\mu$ is dimensionless. We then conduct the phase-space integ
 \Omega_{\nu, {\rm m}}(a) = N_{\rm m}^\nu \frac{8 \pi^2(\pi k_b )^3 k_b}{15(c h_{\rm P})^3} \frac{8 \pi G}{3h^2c^2} \left(\frac{T_{\nu}^{\rm eff}}{a}\right)^4 \left(\frac{7}{8}\int_0^{x_{\rm max}} dx \, x^2 \frac{\sqrt{x^2 + \mu^2}}{\exp(x) + 1}\right)
 \label{Omnu}
 \end{equation}
-where $h_{\rm P}$ is Planck's constant and $h$ is $H_0/100$ with $H_0$ in units of km / s / Mpc. $x_{\rm max}$ is set to 1000. The final bracketed term which includes the phase-space integral can be simplified in the limit where $\mu$ is very large or very small: for small $\mu$, it is set to $\frac{7}{8}$, and for large $\mu$, it becomes $0.2776566337\mu$.\todo{Do we need this many digits?}
+where $h_{\rm P}$ is Planck's constant and $h$ is $H_0/100$ with $H_0$ in units of km / s / Mpc. $x_{\rm max}$ is set to 1000. The final bracketed term which includes the phase-space integral can be simplified in the limit where $\mu$ is very large or very small: for small $\mu$, it is set to $\frac{7}{8}$, and for large $\mu$, it becomes $\sim 0.2776\mu$.
 
 
 
@@ -364,7 +364,6 @@ As in the previous section, the power spectrum at small wavenumber is extrapolat
 \label{Pk_whishlist}
 This is a list of some power spectrum methods that we would like to implement in the future:
 \begin{itemize}
- \item Eisenstein \& Hu approximation, \todo{Isn't this already there?}
  \item CAMB,
  \item Cosmic emulators,
  \item halo model/HOD.
