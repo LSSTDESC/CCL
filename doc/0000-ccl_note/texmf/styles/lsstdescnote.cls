@@ -658,7 +658,7 @@ revtex4-1.cls^^J^^J}\stop
 % Typeset using \LaTeX\ {\bf modern} style in AASTeX61}
 % LSST DESC Notes have a header image instead!
 \vspace*{-1in}
-\includegraphics[width=\textwidth]{.logos/header.png}
+\includegraphics[width=\textwidth]{texmf/logos/header.png}
 \par\vspace*{-\baselineskip}\vspace*{0.625in}
 }
 \else
@@ -6383,7 +6383,7 @@ width 0pt\relax\fi}}}
 
 
 %% get rid of \jobname Notes being sent to .aux file:
-% Commented out to avoid .bib cache creation (we hope): 
+% Commented out to avoid .bib cache creation (we hope):
 % http://journals.aas.org/authors/aastex/linux.html
 % \let\bibdata@app\relax
 % \def\pre@bibdata{}
