@@ -22,8 +22,8 @@ else
 endif
 
 # LATEX environment variables
-export TEXINPUTS=:./texmf/styles/:./tables/:
-export BSTINPUTS=:./texmf/bib/:
+export TEXINPUTS:=./texmf/styles/:./tables/:
+export BSTINPUTS:=./texmf/bib/:
 
 # LaTeX journal class switcher flags
 # apj=\def\flag{apj}
@@ -66,7 +66,7 @@ touch:
 #change the compiler call to allow a "." file
 # {% raw %}
 main : authlist
-	sudo latexmk -g -pdf  \
+	latexmk -g -pdf  \
 	-pdflatex='openout_any=a pdflatex %O -interaction=nonstopmode "${flag}\input{%S}"'  \
 	${main}
 # {% endraw %}
