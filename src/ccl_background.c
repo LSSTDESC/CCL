@@ -627,11 +627,13 @@ double ccl_h_over_h0(ccl_cosmology * cosmo, double a, int* status)
   }
     
   // Bounds check
+  #ifdef CCL_BOUNDS_CHECK_INTERP
   if ((a < ccl_splines->A_SPLINE_MIN) || (a > ccl_splines->A_SPLINE_MAX)){
     *status = CCL_ERROR_SPLINE_EV;
     strcpy(cosmo->status_message, "ccl_background.c: ccl_h_over_h0(): Scale factor outside interpolation range.\n");
     return NAN;
   }
+  #endif
   
   return gsl_spline_eval(cosmo->data.E, a, cosmo->data.accelerator);
 }
@@ -646,11 +648,13 @@ void ccl_h_over_h0s(ccl_cosmology * cosmo, int na, double a[na], double output[n
   for (int i=0; i<na; i++){
     
     // Bounds check
+    #ifdef CCL_BOUNDS_CHECK_INTERP
     if ((a[i] < ccl_splines->A_SPLINE_MIN) || (a[i] > ccl_splines->A_SPLINE_MAX)){
       *status = CCL_ERROR_SPLINE_EV;
       strcpy(cosmo->status_message, "ccl_background.c: ccl_h_over_h0s(): Scale factor outside interpolation range.\n");
       return;
     }
+    #endif
     
     output[i]=gsl_spline_eval(cosmo->data.E,a[i],cosmo->data.accelerator);
   }
@@ -673,11 +677,13 @@ double ccl_comoving_radial_distance(ccl_cosmology * cosmo, double a, int * statu
     }
     
     // Bounds check
+    #ifdef CCL_BOUNDS_CHECK_INTERP
     if ((a < ccl_splines->A_SPLINE_MIN) || (a > ccl_splines->A_SPLINE_MAX)){
       *status = CCL_ERROR_SPLINE_EV;
       strcpy(cosmo->status_message, "ccl_background.c: ccl_comoving_radial_distance(): Scale factor outside interpolation range.\n");
       return NAN;
     }
+    #endif
     
     return gsl_spline_eval(cosmo->data.chi, a, cosmo->data.accelerator);
   }
@@ -698,11 +704,14 @@ void ccl_comoving_radial_distances(ccl_cosmology * cosmo, int na, double a[na], 
     } else {
       
       // Bounds check
+      #ifdef CCL_BOUNDS_CHECK_INTERP
       if ((a[i] < ccl_splines->A_SPLINE_MIN) || (a[i] > ccl_splines->A_SPLINE_MAX)){
         *status = CCL_ERROR_SPLINE_EV;
         strcpy(cosmo->status_message, "ccl_background.c: ccl_comoving_radial_distances(): Scale factor outside interpolation range.\n");
         return;
       }
+      #endif
+      
       output[i]=gsl_spline_eval(cosmo->data.chi,a[i],cosmo->data.accelerator);
     }
   }
@@ -745,11 +754,13 @@ double ccl_comoving_angular_distance(ccl_cosmology * cosmo, double a, int* statu
     }
     
     // Bounds check
+    #ifdef CCL_BOUNDS_CHECK_INTERP
     if ((a < ccl_splines->A_SPLINE_MIN) || (a > ccl_splines->A_SPLINE_MAX)){
       *status = CCL_ERROR_SPLINE_EV;
       strcpy(cosmo->status_message, "ccl_background.c: ccl_comoving_angular_distance(): Scale factor outside interpolation range.\n");
       return NAN;
     }
+    #endif
     
     return ccl_sinn(cosmo,
 		    gsl_spline_eval(cosmo->data.chi, a,
@@ -775,11 +786,13 @@ void ccl_comoving_angular_distances(ccl_cosmology * cosmo, int na, double a[na],
     } else {
       
       // Bounds check
+      #ifdef CCL_BOUNDS_CHECK_INTERP
       if ((a[i] < ccl_splines->A_SPLINE_MIN) || (a[i] > ccl_splines->A_SPLINE_MAX)){
         *status = CCL_ERROR_SPLINE_EV;
         strcpy(cosmo->status_message, "ccl_background.c: ccl_comoving_angular_distances(): Scale factor outside interpolation range.\n");
         return;
       }
+      #endif
       
       output[i] = ccl_sinn(cosmo,
                          gsl_spline_eval(cosmo->data.chi, a[i], 
@@ -919,11 +932,13 @@ double ccl_growth_factor(ccl_cosmology * cosmo, double a, int * status)
     }
     
     // Bounds check
+    #ifdef CCL_BOUNDS_CHECK_INTERP
     if ((a < ccl_splines->A_SPLINE_MIN) || (a > ccl_splines->A_SPLINE_MAX)){
       *status = CCL_ERROR_SPLINE_EV;
       strcpy(cosmo->status_message, "ccl_background.c: ccl_growth_factor(): Scale factor outside interpolation range.\n");
       return NAN;
     }
+    #endif
     
     return gsl_spline_eval(cosmo->data.growth, a, cosmo->data.accelerator);
   }
@@ -944,11 +959,13 @@ void ccl_growth_factors(ccl_cosmology * cosmo, int na, double a[na], double outp
     } else {
       
       // Bounds check
+      #ifdef CCL_BOUNDS_CHECK_INTERP
       if ((a[i] < ccl_splines->A_SPLINE_MIN) || (a[i] > ccl_splines->A_SPLINE_MAX)){
         *status = CCL_ERROR_SPLINE_EV;
         strcpy(cosmo->status_message, "ccl_background.c: ccl_growth_factors(): Scale factor outside interpolation range.\n");
         return;
       }
+      #endif
       
       output[i]=gsl_spline_eval(cosmo->data.growth,a[i],cosmo->data.accelerator);
     }
@@ -969,11 +986,13 @@ double ccl_growth_factor_unnorm(ccl_cosmology * cosmo, double a, int * status)
     }
     
     // Bounds check
+    #ifdef CCL_BOUNDS_CHECK_INTERP
     if ((a < ccl_splines->A_SPLINE_MIN) || (a > ccl_splines->A_SPLINE_MAX)){
       *status = CCL_ERROR_SPLINE_EV;
       strcpy(cosmo->status_message, "ccl_background.c: ccl_growth_factor_unnorm(): Scale factor outside interpolation range.\n");
       return NAN;
     }
+    #endif
     
     return cosmo->data.growth0*gsl_spline_eval(cosmo->data.growth, a, cosmo->data.accelerator);
   }
@@ -993,11 +1012,13 @@ void ccl_growth_factors_unnorm(ccl_cosmology * cosmo, int na, double a[na], doub
     } else {
       
       // Bounds check
+      #ifdef CCL_BOUNDS_CHECK_INTERP
       if ((a[i] < ccl_splines->A_SPLINE_MIN) || (a[i] > ccl_splines->A_SPLINE_MAX)){
         *status = CCL_ERROR_SPLINE_EV;
         strcpy(cosmo->status_message, "ccl_background.c: ccl_growth_factors_unnorm(): Scale factor outside interpolation range.\n");
         return;
       }
+      #endif
       
       output[i]=cosmo->data.growth0*gsl_spline_eval(cosmo->data.growth,a[i],cosmo->data.accelerator);
     }
@@ -1018,11 +1039,13 @@ double ccl_growth_rate(ccl_cosmology * cosmo, double a, int * status)
     }
     
     // Bounds check
+    #ifdef CCL_BOUNDS_CHECK_INTERP
     if ((a < ccl_splines->A_SPLINE_MIN) || (a > ccl_splines->A_SPLINE_MAX)){
       *status = CCL_ERROR_SPLINE_EV;
       strcpy(cosmo->status_message, "ccl_background.c: ccl_growth_rate(): Scale factor outside interpolation range.\n");
       return NAN;
     }
+    #endif
     
     return gsl_spline_eval(cosmo->data.fgrowth, a, cosmo->data.accelerator);
   }
@@ -1042,11 +1065,13 @@ void ccl_growth_rates(ccl_cosmology * cosmo, int na, double a[na], double output
     } else {
       
       // Bounds check
+      #ifdef CCL_BOUNDS_CHECK_INTERP
       if ((a[i] < ccl_splines->A_SPLINE_MIN) || (a[i] > ccl_splines->A_SPLINE_MAX)){
         *status = CCL_ERROR_SPLINE_EV;
         strcpy(cosmo->status_message, "ccl_background.c: ccl_growth_rates(): Scale factor outside interpolation range.\n");
         return;
       }
+      #endif
       
       output[i]=gsl_spline_eval(cosmo->data.fgrowth,a[i],cosmo->data.accelerator);
     }

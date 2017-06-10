@@ -1,6 +1,9 @@
 #pragma once
 #include "ccl_core.h"
 
+// Whether to do bounds checks on interpolated quantities
+#define CCL_BOUNDS_CHECK_INTERP
+
 #define CCL_ERROR_MEMORY 1
 #define CCL_ERROR_LINSPACE 2
 #define CCL_ERROR_INCONSISTENT 3
