@@ -192,18 +192,16 @@ static double massfunc_f(ccl_cosmology *cosmo, double halomass, double a, double
 
   switch(cosmo->config.mass_function_method){
   case ccl_tinker:
-
-    if (odelta < 200){
+    
+    // Check if odelta is outside the interpolated range
+    if ((odelta < 200) || (odelta > 3200)){
       *status = CCL_ERROR_HMF_INTERP;
-      strcpy(cosmo->status_message, "ccl_massfunc.c: ccl_massfunc_f(): Tinker 2008 only supported in range of Delta = 200 to Delta = 3200.\n");
-      return 0;
+      strcpy(cosmo->status_message, "ccl_massfunc.c: massfunc_f(): Tinker 2008 only supported in range of Delta = 200 to Delta = 3200.\n");
+      return NAN;
     }
-    if (odelta > 3200){
-      * status = CCL_ERROR_HMF_INTERP;
-      strcpy(cosmo->status_message, "ccl_massfunc.c: ccl_massfunc_f(): Tinker 2008 only supported in range of Delta = 200 to Delta = 3200.\n");
-      return 0;
-    }
-
+    
+    // Compute HMF parameter (alpha, beta, gamma, phi) splines if they haven't 
+    // been computed already
     if (!cosmo->computed_hmfparams){
         ccl_cosmology_compute_hmfparams(cosmo, status);
         ccl_check_status(cosmo, status);
@@ -223,16 +221,14 @@ static double massfunc_f(ccl_cosmology *cosmo, double halomass, double a, double
     //this version uses f(nu) parameterization from Eq. 8 in Tinker et al. 2010
     // use this for consistency with Tinker et al. 2010 fitting function for halo bias
   case ccl_tinker10:
-    if (odelta < 200){
+    
+    // Check if odelta is outside the interpolated range
+    if ((odelta < 200) || (odelta > 3200)){
       *status = CCL_ERROR_HMF_INTERP;
-      strcpy(cosmo->status_message, "ccl_massfunc.c: ccl_massfunc_f(): Tinker 2010 only supported in range of Delta = 200 to Delta = 3200.\n");
+      strcpy(cosmo->status_message, "ccl_massfunc.c: massfunc_f(): Tinker 2010 only supported in range of Delta = 200 to Delta = 3200.\n");
       return 0;
     }
-    if (odelta > 3200){
-      * status = CCL_ERROR_HMF_INTERP;
-      strcpy(cosmo->status_message, "ccl_massfunc.c: ccl_massfunc_f(): Tinker 2010 only supported in range of Delta = 200 to Delta = 3200.\n");
-      return 0;
-    }
+    
     if (!cosmo->computed_hmfparams){
         ccl_cosmology_compute_hmfparams(cosmo, status);
         ccl_check_status(cosmo, status);
@@ -270,7 +266,7 @@ static double massfunc_f(ccl_cosmology *cosmo, double halomass, double a, double
     if(odelta!=200.) {
       *status = CCL_ERROR_HMF_INTERP;
       strcpy(cosmo->status_message, "ccl_massfunc.c: ccl_massfunc_f(): Angulo HMF only supported for Delta = 200.\n");
-      return 0;
+      return NAN;
     }
     fit_A = 0.201;
     fit_a = 2.08;
@@ -284,7 +280,7 @@ static double massfunc_f(ccl_cosmology *cosmo, double halomass, double a, double
     sprintf(cosmo->status_message ,
 	    "ccl_massfunc.c: ccl_massfunc(): Unknown or non-implemented mass function method: %d \n",
 	    cosmo->config.mass_function_method);
-    return 0;
+    return NAN;
   }
 }
 static double ccl_halo_b1(ccl_cosmology *cosmo, double halomass, double a, double odelta, int * status)
@@ -462,13 +458,26 @@ necessary.
 double ccl_sigmaM(ccl_cosmology * cosmo, double halomass, double a, int * status)
 {
     double sigmaM;
-
+    
+    // Check if sigma has already been calculated
     if (!cosmo->computed_sigma){
         ccl_cosmology_compute_sigma(cosmo, status);
         ccl_check_status(cosmo, status);
     }
-
-    sigmaM = pow(10,gsl_spline_eval(cosmo->data.logsigma, log10(halomass), cosmo->data.accelerator_m));
+    
+    // Check interpolation bounds
+    if (   (log10(halomass) < ccl_splines->LOGM_SPLINE_MIN) 
+        || (log10(halomass) > ccl_splines->LOGM_SPLINE_MAX)){
+        *status = CCL_ERROR_SPLINE_EV;
+        strcpy(cosmo->status_message, 
+               "ccl_massfunc.c: ccl_sigmaM(): Mass outside interpolated range.");
+        return NAN;
+    }
+    
+    // Interpolate to get sigma
+    sigmaM = pow(10, gsl_spline_eval(cosmo->data.logsigma, 
+                                     log10(halomass), 
+                                     cosmo->data.accelerator_m));
     sigmaM = sigmaM*ccl_growth_factor(cosmo, a, status);
 
     return sigmaM;
