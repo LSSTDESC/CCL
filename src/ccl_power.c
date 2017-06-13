@@ -961,7 +961,8 @@ static void ccl_cosmology_compute_power_emu(ccl_cosmology * cosmo, int * status)
       strcpy(cosmo->status_message ,"ccl_power.c: Error initialzing EMU pararmeters: no sigma_8 defined\n");
     return;
     }*/
-   
+
+  cosmo->data.k_min=K_MIN_EMU; //limit of the emulator
   double amin = A_MIN_EMU; //limit of the emulator
   double amax = ccl_splines->A_SPLINE_MAX; 
   int na = ccl_splines->N_A;
@@ -1011,14 +1012,12 @@ static void ccl_cosmology_compute_power_emu(ccl_cosmology * cosmo, int * status)
     
     //Call emulator at this redshift
     ccl_pkemu(xstar,&y,status);
-    // After this loop x will contain log(k)
     for (int i=0; i<351; i++){
       logx[i] = log(mode[i]);
       y2d[j*351+i] = log(y[i]);
     }
-
   }
-
+  
   gsl_spline2d * log_power_lin = gsl_spline2d_alloc(PLIN_SPLINE_TYPE, 351,na);
   int splinstatus = gsl_spline2d_init(log_power_lin, logx, z, y2d,351,na);
   
@@ -1074,7 +1073,7 @@ void ccl_cosmology_compute_power(ccl_cosmology * cosmo, int * status){
 }
 
 
-/*------ ROUTINE: ccl_power_extrapol_hxighk ----- 
+/*------ ROUTINE: ccl_power_extrapol_highk ----- 
 INPUT: ccl_cosmology * cosmo, a, k [1/Mpc]
 TASK: extrapolate power spectrum at high k
 */
@@ -1083,26 +1082,32 @@ static double ccl_power_extrapol_highk(ccl_cosmology * cosmo, double k, double a
   double log_p_1;
   double deltak=1e-2; //step for numerical derivative;
   double deriv_pk_kmid,deriv2_pk_kmid;
-
-  double lkmid=log(ccl_splines->K_MAX_SPLINE)-2*deltak;
+  double lkmid;
   double lpk_kmid;
+
+  if(cosmo->config.transfer_function_method!=ccl_emulator){
+    lkmid=log(ccl_splines->K_MAX_SPLINE)-2*deltak;
+  } else {
+    lkmid=log(K_MAX_EMU)-2*deltak;
+  }
+  
   int pwstatus =  gsl_spline2d_eval_e(powerspl, lkmid,a,NULL ,NULL ,&lpk_kmid);
   if (pwstatus){
     *status = CCL_ERROR_SPLINE_EV;
-    sprintf(cosmo->status_message ,"ccl_power.c: ccl_nonlin_matter_power(): Spline evaluation error\n");
+    sprintf(cosmo->status_message ,"ccl_power.c: ccl_power_extrapol_highk(): Spline evaluation error\n");
     return NAN;
   }
   //GSL derivatives
   pwstatus = gsl_spline2d_eval_deriv_x_e (powerspl, lkmid, a, NULL,NULL,&deriv_pk_kmid);
   if (pwstatus){
     *status = CCL_ERROR_SPLINE_EV;
-    sprintf(cosmo->status_message ,"ccl_power.c: ccl_nonlin_matter_power(): Spline evaluation error\n");
+    sprintf(cosmo->status_message ,"ccl_power.c: ccl_power_extrapol_highk(): Spline evaluation error\n");
     return NAN;
   }
   pwstatus = gsl_spline2d_eval_deriv_xx_e (powerspl, lkmid, a, NULL,NULL,&deriv2_pk_kmid);
   if (pwstatus){
     *status = CCL_ERROR_SPLINE_EV;
-    sprintf(cosmo->status_message ,"ccl_power.c: ccl_nonlin_matter_power(): Spline evaluation error\n");
+    sprintf(cosmo->status_message ,"ccl_power.c: ccl_power_extrapol_highk(): Spline evaluation error\n");
     return NAN;
   }
   
@@ -1125,7 +1130,7 @@ static double ccl_power_extrapol_lowk(ccl_cosmology * cosmo, double k, double a,
   int pwstatus=gsl_spline2d_eval_e(powerspl,lkmin,a,NULL,NULL,&lpk_kmin);
   if (pwstatus){
     *status=CCL_ERROR_SPLINE_EV;
-    sprintf(cosmo->status_message,"ccl_power.c: ccl_nonlin_matter_power(): Spline evaluation error\n");
+    sprintf(cosmo->status_message,"ccl_power.c: ccl_power_extrapol_lowk(): Spline evaluation error\n");
     return NAN;
   }
   return lpk_kmin+cosmo->params.n_s*(log(k)-lkmin);
@@ -1154,7 +1159,7 @@ double ccl_linear_matter_power(ccl_cosmology * cosmo, double k, double a, int * 
     log_p_1=ccl_power_extrapol_lowk(cosmo,k,a,cosmo->data.p_lin,status);
     return exp(log_p_1);
   }
-  else if(k<ccl_splines->K_MAX_SPLINE){
+  else if(((cosmo->config.transfer_function_method != ccl_emulator) && (k<ccl_splines->K_MAX_SPLINE)) || ((cosmo->config.transfer_function_method == ccl_emulator) && (k<K_MAX_EMU))){
     pkstatus = gsl_spline2d_eval_e(cosmo->data.p_lin, log(k), a,NULL,NULL,&log_p_1);
     if (pkstatus){
       *status = CCL_ERROR_SPLINE_EV;
@@ -1201,7 +1206,7 @@ double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double k, double a, int *s
       log_p_1=ccl_power_extrapol_lowk(cosmo,k,a,cosmo->data.p_nl,status);
       return exp(log_p_1);
     }
-    else if(k<ccl_splines->K_MAX_SPLINE){
+    if(((cosmo->config.transfer_function_method != ccl_emulator) && (k<ccl_splines->K_MAX_SPLINE)) || ((cosmo->config.transfer_function_method == ccl_emulator) && (k<K_MAX_EMU))){
       int pwstatus =  gsl_spline2d_eval_e(cosmo->data.p_nl, log(k),a,NULL ,NULL ,&log_p_1);
       if (pwstatus){
 	*status = CCL_ERROR_SPLINE_EV;
