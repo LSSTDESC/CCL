@@ -972,6 +972,7 @@ static void ccl_cosmology_compute_power_emu(ccl_cosmology * cosmo, int * status)
   double * xstar = malloc(9 * sizeof(double));
   double * z = ccl_linear_spacing(amin,amax, na);
   double * y2d = malloc(351 * na * sizeof(double));
+  double w0wacomb;
   if (z==NULL || y2d==NULL || logx==NULL || xstar==NULL){
     *status=CCL_ERROR_MEMORY;
     strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_emu(): memory allocation error\n");
@@ -981,6 +982,17 @@ static void ccl_cosmology_compute_power_emu(ccl_cosmology * cosmo, int * status)
   //TMP:
   double Omega_nu=0.;
   //Check ranges:
+  if((cosmo->params.h<0.55) || (cosmo->params.h>0.85)){
+    *status=CCL_ERROR_INCONSISTENT;
+    strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_emu(): h is outside allowed range\n");
+    return;
+  }
+  w0wacomb=-cosmo->params.w0-cosmo->params.wa;
+  if(w0wacomb<0.3*0.3*0.3*0.3){
+    *status=CCL_ERROR_INCONSISTENT;
+    strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_emu(): w0 and wa do not satisfy the emulator bound\n");
+    return;
+  }
   
   //For each redshift:
   for (int j = 0; j < na; j++){
