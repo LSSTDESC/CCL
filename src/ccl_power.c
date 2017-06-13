@@ -333,7 +333,7 @@ static void ccl_fill_class_parameters(ccl_cosmology * cosmo, struct file_content
   //normalization comes last, so that all other parameters are filled in for determining A_s if sigma_8 is specified
   if (isfinite(cosmo->params.sigma_8) && isfinite(cosmo->params.A_s)){
       *status = CCL_ERROR_INCONSISTENT;
-      strcpy(cosmo->status_message ,"ccl_power.c: class_parameters(): Error initialzing CLASS pararmeters: both sigma_8 and A_s defined\n");
+      strcpy(cosmo->status_message ,"ccl_power.c: class_parameters(): Error initialzing CLASS parameters: both sigma_8 and A_s defined\n");
     return;
   }
   if (isfinite(cosmo->params.sigma_8)){
@@ -962,8 +962,8 @@ static void ccl_cosmology_compute_power_emu(ccl_cosmology * cosmo, int * status)
     return;
     }*/
    
-  double amin = 1./3.;
-  double amax = ccl_splines->A_SPLINE_MAX; //limit of the emulator
+  double amin = A_MIN_EMU; //limit of the emulator
+  double amax = ccl_splines->A_SPLINE_MAX; 
   int na = ccl_splines->N_A;
   // The x array is initially k, but will later
   // be overwritten with log(k)
@@ -1128,6 +1128,12 @@ TASK: compute the linear power spectrum at a given redshift
 
 double ccl_linear_matter_power(ccl_cosmology * cosmo, double k, double a, int * status)
 {
+  if ((cosmo->config.transfer_function_method == ccl_emulator) && (a<A_MIN_EMU)){
+    *status = CCL_ERROR_INCONSISTENT;
+    sprintf(cosmo->status_message ,"ccl_power.c: the cosmic emulator cannot be used above z=2\n");
+    return NAN;
+  }
+  
   if (!cosmo->computed_power) ccl_cosmology_compute_power(cosmo, status);
   double log_p_1;
   int pkstatus;
@@ -1160,6 +1166,13 @@ TASK: compute the nonlinear power spectrum at a given redshift
 
 double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double k, double a, int *status)
 {
+  
+  if ((cosmo->config.transfer_function_method == ccl_emulator) && (a<A_MIN_EMU)){
+    *status = CCL_ERROR_INCONSISTENT;
+    sprintf(cosmo->status_message ,"ccl_power.c: the cosmic emulator cannot be used above z=2\n");
+    return NAN;
+  }
+  
   switch(cosmo->config.matter_power_spectrum_method) {
 
     //If the matter PS specified was linear, then do the linear compuation
