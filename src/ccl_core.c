@@ -11,6 +11,7 @@
 #include "gsl/gsl_spline.h"
 #include "gsl/gsl_integration.h"
 #include "ccl_params.h"
+#include "ccl_error.h"
 #include <stdlib.h>
 
 const ccl_configuration default_config = {ccl_boltzmann_class, ccl_halofit, ccl_tinker10};
@@ -25,13 +26,15 @@ const ccl_configuration default_config = {ccl_boltzmann_class, ccl_halofit, ccl_
 
 ccl_spline_params * ccl_splines; // Global variable
 
-void ccl_cosmology_read_config(){
+void ccl_cosmology_read_config(void)
+{
 
   int CONFIG_LINE_BUFFER_SIZE=100;
   int MAX_CONFIG_VAR_LEN=100;
   FILE *fconfig;
   char buf[CONFIG_LINE_BUFFER_SIZE];
   char var_name[MAX_CONFIG_VAR_LEN];
+  char* rtn;
   double var_dbl;
   
   ccl_splines = malloc(sizeof(ccl_spline_params));
@@ -52,7 +55,7 @@ void ccl_cosmology_read_config(){
   } 
 
   while(! feof(fconfig)) {
-  fgets(buf, CONFIG_LINE_BUFFER_SIZE, fconfig);
+  rtn = fgets(buf, CONFIG_LINE_BUFFER_SIZE, fconfig);
   if (buf[0]==';' || buf[0]=='[' || buf[0]=='\n') {
     continue;
   } else {
@@ -149,7 +152,6 @@ TASK: Creates ccl_cosmology struct directly from a set of input cosmological
 DEFINITIONS:
 Omega_c: cold dark matter
 Omega_b: baryons
-Omega_n: neutrinos
 Omega_k: curvature
 w0: Dark energy eqn. of state parameter
 wa: Dark energy eqn. of state parameter, time variation
@@ -268,7 +270,6 @@ DEFINITIONS:
 Omega_c: cold dark matter
 Omega_b: baryons
 Omega_m: matter
-Omega_n: neutrinos
 Omega_k: curvature
 little omega_x means Omega_x*h^2
 w0: Dark energy eq of state parameter

@@ -16,7 +16,6 @@ typedef struct ccl_parameters {
   double Omega_c;
   double Omega_b;
   double Omega_m;
-  double Omega_n;
   double Omega_k;
   double sqrtk;
   int k_sign;
@@ -123,7 +122,7 @@ typedef struct ccl_cosmology
 
 
 // Initialization and life cycle of objects
-void ccl_cosmology_read_config();
+void ccl_cosmology_read_config(void);
 ccl_cosmology * ccl_cosmology_create(ccl_parameters params, ccl_configuration config);
 
 
