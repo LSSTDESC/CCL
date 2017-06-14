@@ -433,6 +433,8 @@ int ccl_tracer_corr_legendre(ccl_cosmology *cosmo, int n_theta, double **theta,
   free(cl_arr_log2);
   free(intl_arr2);
   free(Pl_theta);
+  free(l_arr);
+  free(cl_arr);
   gsl_spline_free(spl_cl);
   
   return 0;
