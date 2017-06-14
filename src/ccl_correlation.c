@@ -14,7 +14,7 @@
 #include "ccl.h"
 #include "fftlog.h"
 
-#ifndef M_PI 
+#ifndef M_PI
     #define M_PI 3.14159265358979323846
 #endif
 
@@ -270,7 +270,8 @@ int ccl_tracer_corr_fftlog(ccl_cosmology *cosmo, int n_theta, double **theta,
     }
 
   free(intl_arr);
-
+  free(l_arr);
+  free(cl_arr);
   return 0;
 
 }
@@ -360,7 +361,7 @@ int ccl_tracer_corr_legendre(ccl_cosmology *cosmo, int n_theta, double **theta,
   double *l_arr_log;
   double *cl_arr_log;//[n_log];
   int *intl_arr;
-  
+
   l_arr_log=ccl_log_spacing(1,L_max,n_log);
   intl_arr=malloc(n_log*sizeof(int));
   cl_arr_log=malloc(n_log*(sizeof(double)));
@@ -398,7 +399,7 @@ int ccl_tracer_corr_legendre(ccl_cosmology *cosmo, int n_theta, double **theta,
   double *cl_arr;;//[L_max];
   l_arr=malloc(L_max*sizeof(int));
   cl_arr=malloc(L_max*sizeof(double));
-  
+
   l_arr[0]=0;cl_arr[0]=0;
   for(int i=1;i<L_max;i+=1) {
     l_arr[i]=i;
@@ -432,11 +433,13 @@ int ccl_tracer_corr_legendre(ccl_cosmology *cosmo, int n_theta, double **theta,
   free(intl_arr);
   free(cl_arr_log2);
   free(intl_arr2);
+  for (int i=0;i<n_theta;i++)
+      free(Pl_theta[i]);
   free(Pl_theta);
   free(l_arr);
   free(cl_arr);
   gsl_spline_free(spl_cl);
-  
+
   return 0;
 }
 
