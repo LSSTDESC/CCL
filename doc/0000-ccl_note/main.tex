@@ -311,6 +311,28 @@ It is worth reminding the reader that the Eisenstein \& Hu and  the BBKS approxi
 \subsubsection{CLASS}
 Secondly, there is the option to call the {\tt CLASS} software \citep{class} within {\tt CCL} to obtain either linear or nonlinear matter power spectra at given redshifts. For speed, the linear power spectrum is obtained at redshift $z=0$ and re-scaled to a different redshift using the growth function. In the case of the nonlinear matter power spectrum, upon setting up the cosmology object, we construct a bi-dimensional spline in $k$ and the scale-factor which is then called by the relevant routines to obtain the matter power spectrum at the desired wavenumber and redshift. The relevant routines can be found within {\tt ccl$\_$power.c}. Currently CLASS computes the non-linear power spectrum using the HaloFit prescription of \cite{CLASS_halofit}.
 
+\subsubsection{Spline parameters \& the INI file}
+
+All spline and grid parameters are defined in the {\tt ccl$\_$params.ini} file included in the {\tt include} folder of the repository. This file allows the user to configure the following constants:
+
+\begin{itemize}
+\item {\tt A$\_$SPLINE$\_$DELTA}: spacing of the scale factor spline. The default is {\tt A$\_$SPLINE$\_$DELTA}$=0.001$.
+\item {\tt A$\_$SPLINE$\_$NA}: number of points in the scale factor spline. The default is {\tt A$\_$SPLINE$\_$NA}$=1000$.
+\item {\tt A$\_$SPLINE$\_$MIN}: minimum value for the scale factor spline. The default is {\tt A$\_$SPLINE$\_$MIN}$=0.1$.
+\item {\tt A$\_$SPLINE$\_$MAX}: maximum value for the scale factor spline. The default is {\tt A$\_$SPLINE$\_$MAX}$=1$.
+\item {\tt LOGM$\_$SPLINE$\_$DELTA}: spacing of the mass function spline (logarithm). The default is {\tt LOGM$\_$SPLINE$\_$DELTA}$=0.025$.
+\item {\tt LOGM$\_$SPLINE$\_$NM}: number of points in the mass function spline (logarithm). The default is {\tt LOGM$\_$SPLINE$\_$NA}$=440$.
+\item {\tt LOGM$\_$SPLINE$\_$MIN}: minimum value for the mass function spline (logarithm). The default is {\tt LOGM$\_$SPLINE$\_$MIN}$=6$.
+\item {\tt LOGM$\_$SPLINE$\_$MAX}: maximum value for the mass function spline (logarithm). The default is {\tt LOGM$\_$SPLINE$\_$MAX}$=17$.
+\item {\tt N$\_$A}: number of bins for the scale factor in the case of two-dimensional splines (where the second variable is the wavenumber). The default is {\tt N$\_$A}$=20$. 
+\item {\tt K$\_$MAX$\_$SPLINE}: The maximum value of wavenumber considered in the spline. This is explained in more detail in the coming subsections. The default is {\tt K$\_$MAX$\_$SPLINE}$=50/$Mpc.  
+\item {\tt K$\_$MAX}: The maximum value of wavenumber when integrating over $k$. The default is {\tt K$\_$MAX}$=1000$/Mpc.  
+\item {\tt K$\_$MIN$\_$DEFAULT}:  The minimum value of wavenumber when integrating over $k$. The default is {\tt K$\_$MIN$\_$DEFAULT}$=10^{-5}$/Mpc. 
+\item {\tt N$\_$K}: Number of bins for the wavenumber. The default is {\tt N$\_$K}$=1000.$.  
+\end{itemize}
+
+We emphasise that changing these constants can result in loss of accuracy. The current default values were defined by the accuracy requirements set for {\tt CCL}, as explained in the coming sections. For certain applications, it might be possible to relax some of the accuracy requirements and increase the speed of {\tt CCL}. 
+
 \subsubsection{Nonlinear low and high wavenumber extrapolation}
 \label{sec:NLextrapol}
 
@@ -334,7 +356,7 @@ We adopt a similar approach to extrapolate the power spectrum at small scales. I
   \log P(k<{\tt K\_MIN},z) = \log P({\tt K\_MIN},z) + n_s (\log k-\log{\tt K\_MIN})
 \end{equation}
 
-\todo{Explain choice of default values for {\tt K\_MIN}.}
+\todo{Explain choice of default values for {\tt K\_MIN}. Distinguish from {\tt K$\_$MIN$\_$DEFAULT}.}
 
 %------------------------
 \begin{figure*}
