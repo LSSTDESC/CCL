@@ -26,7 +26,7 @@ int main(int argc, char * argv[])
   ccl_cosmology * cosmo = ccl_cosmology_create(params, config);
 
   // Open file to read k values from CLASS at which to compute things
-  input = fopen("./only_CCL_passed_params_3massless_pk_nl.dat", "r");
+  input = fopen("./fromCLASS_3massless_pk_nl.dat", "r");
   
   // Read the header 
   fgets(line,2000, input);
