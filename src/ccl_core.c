@@ -338,7 +338,7 @@ ccl_parameters ccl_parameters_create_flat_lcdm(double Omega_c, double Omega_b, d
 {
   double Omega_k = 0.0;
   double N_nu_mass = 0.0;
-  double N_nu_rel = 0.0;
+  double N_nu_rel = 3.046;
   double mnu = 0.0;
   double w0 = -1.0;
   double wa = 0.0;
@@ -372,7 +372,7 @@ TASK: call ccl_parameters_create for this specific model
 ccl_parameters ccl_parameters_create_lcdm(double Omega_c, double Omega_b, double Omega_k, double h, double norm_pk, double n_s, int *status)
 {
   double N_nu_mass = 0.0;
-  double N_nu_rel = 0.0;
+  double N_nu_rel = 3.046;
   double mnu = 0.0;
   double w0 = -1.0;
   double wa = 0.0;
@@ -409,7 +409,7 @@ ccl_parameters ccl_parameters_create_flat_wcdm(double Omega_c, double Omega_b, d
 
   double Omega_k = 0.0;
   double N_nu_mass = 0.0;
-  double N_nu_rel = 0.0;
+  double N_nu_rel = 3.046;
   double mnu = 0.0;
   double wa = 0.0;
   ccl_parameters params = ccl_parameters_create(Omega_c, Omega_b, Omega_k, N_nu_rel, N_nu_mass, mnu, w0, wa, h, norm_pk, n_s,-1,NULL,NULL, status);
@@ -442,7 +442,7 @@ ccl_parameters ccl_parameters_create_flat_wacdm(double Omega_c, double Omega_b, 
 
   double Omega_k = 0.0;
   double N_nu_mass = 0.0;
-  double N_nu_rel = 0.0;
+  double N_nu_rel = 3.046;
   double mnu = 0.0;
   ccl_parameters params = ccl_parameters_create(Omega_c, Omega_b, Omega_k,N_nu_rel, N_nu_mass, mnu, w0, wa, h, norm_pk, n_s,-1,NULL,NULL, status);
   return params;
