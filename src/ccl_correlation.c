@@ -358,10 +358,13 @@ int ccl_tracer_corr_legendre(ccl_cosmology *cosmo, int n_theta, double **theta,
   int status=0;
   int n_log=500;//n_theta
   double *l_arr_log;
-  double cl_arr_log[n_log];
+  double *cl_arr_log;//[n_log];
   int *intl_arr;
+  
   l_arr_log=ccl_log_spacing(1,L_max,n_log);
   intl_arr=malloc(n_log*sizeof(int));
+  cl_arr_log=malloc(n_log*(sizeof(double)));
+
   int n_log2=n_log;
   int i2=0;
   intl_arr[0]=0;
@@ -376,8 +379,11 @@ int ccl_tracer_corr_legendre(ccl_cosmology *cosmo, int n_theta, double **theta,
     //printf("intl_arr[i2]=%d\n",intl_arr[i2]);
     cl_arr_log[i2]=angular_cl(cosmo,intl_arr[i2],ct1,ct2,&status);
   }
-  double cl_arr_log2[n_log2];
-  double intl_arr2[n_log2];
+
+  double *cl_arr_log2;//[n_log2];
+  double *intl_arr2;//[n_log2];
+  cl_arr_log2=malloc(n_log2*sizeof(double));
+  intl_arr2=malloc(n_log2*sizeof(double));
 
   for(int i=0;i<n_log2;i++){ //because gsl does not like non-increasing arrays
     intl_arr2[i]=(double)intl_arr[i];
@@ -388,8 +394,11 @@ int ccl_tracer_corr_legendre(ccl_cosmology *cosmo, int n_theta, double **theta,
   gsl_spline * spl_cl = gsl_spline_alloc(L_SPLINE_TYPE,n_log2);
   status = gsl_spline_init(spl_cl, intl_arr2, cl_arr_log2, n_log2);
 
-  int l_arr[L_max];
-  double cl_arr[L_max];
+  int *l_arr;//[L_max];
+  double *cl_arr;;//[L_max];
+  l_arr=malloc(L_max*sizeof(int));
+  cl_arr=malloc(L_max*sizeof(double));
+  
   l_arr[0]=0;cl_arr[0]=0;
   for(int i=1;i<L_max;i+=1) {
     l_arr[i]=i;
@@ -417,6 +426,15 @@ int ccl_tracer_corr_legendre(ccl_cosmology *cosmo, int n_theta, double **theta,
     }
     (*corr_func)[i]/=(M_PI*4);
   }
+
+  free(l_arr_log);
+  free(cl_arr_log);
+  free(intl_arr);
+  free(cl_arr_log2);
+  free(intl_arr2);
+  free(Pl_theta);
+  gsl_spline_free(spl_cl);
+  
   return 0;
 }
 
