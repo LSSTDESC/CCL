@@ -211,12 +211,14 @@ int ccl_tracer_corr_fftlog(ccl_cosmology *cosmo, int n_theta, double **theta,
 
   double *l_arr;
   int *intl_arr;
-  double cl_arr[n_theta];
+  //double cl_arr[n_theta];
+  double *cl_arr;
   //ccl_angular_cl expects ell to be integer... type conversion later
 
   // l_arr=ccl_log_spacing(L_MIN_INT,L_MAX_INT,n_theta);
   l_arr=ccl_log_spacing(.01,60000,n_theta);
   intl_arr=malloc(n_theta*sizeof(int));
+  cl_arr=malloc(n_theta*sizeof(double));
 
   int status=0,l2=0;
   for(int i=0;i<n_theta;i+=1) {
