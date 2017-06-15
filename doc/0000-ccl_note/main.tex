@@ -323,14 +323,15 @@ All spline and grid parameters are defined in the {\tt ccl$\_$params.ini} file i
 \item {\tt LOGM$\_$SPLINE$\_$NM}: number of points in the mass function spline (logarithm). The default is {\tt LOGM$\_$SPLINE$\_$NA}$=440$.
 \item {\tt LOGM$\_$SPLINE$\_$MIN}: minimum value for the mass function spline (logarithm). The default is {\tt LOGM$\_$SPLINE$\_$MIN}$=6$.
 \item {\tt LOGM$\_$SPLINE$\_$MAX}: maximum value for the mass function spline (logarithm). The default is {\tt LOGM$\_$SPLINE$\_$MAX}$=17$.
-\item {\tt N$\_$A}: number of bins for the scale factor in the case of two-dimensional splines (where the second variable is the wavenumber). The default is {\tt N$\_$A}$=20$. 
+\item {\tt N$\_$A}: number of bins for the scale factor in the case of two-dimensional splines (where the second variable is the wavenumber). The default is {\tt N$\_$A}$=50$. 
 \item {\tt K$\_$MAX$\_$SPLINE}: The maximum value of wavenumber considered in the spline. This is explained in more detail in the coming subsections. The default is {\tt K$\_$MAX$\_$SPLINE}$=50/$Mpc.  
 \item {\tt K$\_$MAX}: The maximum value of wavenumber when integrating over $k$. The default is {\tt K$\_$MAX}$=1000$/Mpc.  
-\item {\tt K$\_$MIN$\_$DEFAULT}:  The minimum value of wavenumber when integrating over $k$. The default is {\tt K$\_$MIN$\_$DEFAULT}$=10^{-5}$/Mpc. 
-\item {\tt N$\_$K}: Number of bins for the wavenumber. The default is {\tt N$\_$K}$=1000.$.  
+\item {\tt K$\_$MIN$\_$DEFAULT}:  The minimum value of wavenumber when integrating over $k$. The default is {\tt K$\_$MIN$\_$DEFAULT}$=5 \times 10^{-5}$/Mpc. 
+\item {\tt N$\_$K}: Number of bins for the wavenumber. The default is {\tt N$\_$K}$=1000$.  
 \end{itemize}
 
-We emphasise that changing these constants can result in loss of accuracy. The current default values were defined by the accuracy requirements set for {\tt CCL}, as explained in the coming sections. For certain applications, it might be possible to relax some of the accuracy requirements and increase the speed of {\tt CCL}. 
+For a test flat $\Lambda$CDM cosmology with $\Omega_c=0.25$, $\Omega_b=0.05$, $\sigma_8=0.8$, $h=0.7$ and $n_s=0.96$, we have found that changing {\tt N$\_$A} to $200$, or changing {\tt N$\_$K} to $5000$, does not affect the matter power spectrum obtained from CLASS at the $2\times 10^{-4}$ level for $k<10$/Mpc at $z=1$, for example, which is more than what is needed for our purposes. We emphasise that changing these constants can result in loss of accuracy.For certain applications, it might be possible to relax some of the accuracy requirements and increase the speed of {\tt CCL}. The choice of {\tt K$\_$MAX$\_$SPLINE} will be explained in the next subsection.
+
 
 \subsubsection{Nonlinear low and high wavenumber extrapolation}
 \label{sec:NLextrapol}
