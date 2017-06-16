@@ -117,7 +117,7 @@ This will run the embedded unit tests. Using this last method to install the Pyt
  
 \subsection{Compiling against an external version of CLASS}
 
-{\tt CCL} has a built-in version of {\tt CLASS} that is used to calculate power spectra and other cosmological functions. This is compiled by default. Optionally, you can also link {\tt CCL} against an external version of {\tt CLASS}. This section useful if you want to use a modified version of {\tt CLASS}, or a different or more up-to-date version of the standard {\tt CLASS}. For example, we have sucessfully compiled and ran {\tt CCL} with {\tt hiCLASS} \citep{hiclass} for Horndeski models.
+{\tt CCL} has a built-in version of {\tt CLASS} that is used to calculate power spectra and other cosmological functions. This is compiled by default. Optionally, you can also link {\tt CCL} against an external version of {\tt CLASS}. This section is useful if you want to use a modified version of {\tt CLASS}, or a different or more up-to-date version of the standard {\tt CLASS}. For example, we have sucessfully compiled and ran {\tt CCL} with {\tt hiCLASS} \citep{hiclass} for Horndeski models.
 
 To compile {\tt CCL} with an external version of {\tt CLASS}, you must first prepare the external copy so that it can be linked as a shared library. By default, the {\tt CLASS} build tools create a static library. After compiling {\tt CLASS} in the usual way (by running {\tt make}), look for a static library file called {\tt libclass.a} that should have been placed in the root source directory. Then, run the following command from that directory (Linux only):
 \begin{verbatim}
@@ -140,7 +140,7 @@ Once compilation has finished, run {\tt make check} to make sure everything is w
 \subsection{Creating a Docker Image}
 {\tt CCL} supports the use of the Docker project for the deployment of applications inside software containers. The included Dockerfile allows for quick creation of an image file that will allow for easy realization of virtual machines that require no additional dependencies beyond the Docker software. The Docker website\footnote{\url{https://www.docker.com}} details the installation process for most common operating systems.
 
-With Docker is installed, creating an image is relatively straightforward:
+With Docker installed, creating an image is relatively straightforward:
 \begin{verbatim}
 docker build -t ccl .
 \end{verbatim}
@@ -169,7 +169,7 @@ Ultimately, CCL will aim to incorporate theoretical predictions for all cosmolog
  \item wCDM and the CPL model ($w_0+w_a$)
  \item Non-zero curvature ($K$)
  \item All the above plus an arbitrary, user-defined, modified growth function (see description in Section \ref{sec:growth})
-  \item Relativistic neutrinos and / or a single massive neutrino or multiple equal-mass massive neutrinos
+  \item A single massive neutrino or multiple equal-mass massive neutrinos
 \end{itemize}
 
 Not all functionalities are available for all models. For a reference of what predictions are available for each model, see Table \ref{tab:cosmo}.
@@ -188,7 +188,7 @@ The first step to use CCL is to generate a {\tt ccl$\_$cosmology} structure, con
 \end{itemize}
 The argument ${\tt norm\_pk}$ can be passed the power spectrum normalization parameterized by $\sigma_8$ or $A_\mathrm{s}$, {\tt ccl$\_$parameters$\_$create} switches to $\sigma_8$ normalization if ${\tt norm\_pk} > 1.e-5$, and to $A_{\mathrm s}$ normalization otherwise.
 
-To include neutrinos (massive or massless), the suffix `{\tt $\_$nu}' may be appended to the latter four {\tt ccl$\_$configuration} objects above (for example: {\tt ccl$\_$parameters$\_$create$\_$lcdm$\_$nu(...)}). Utilizing the corresponding {\tt ccl$\_$configuration} object without this {\tt $\_$nu} suffix will set the contribution from both massless and massive neutrinos to zero. In the case of non-zero massive neutrinos, it may be desirable to set {\tt N\_nu\_rel} such that $N_{\rm eff}=3.046$ in the early universe. In agreement with {\tt CLASS}, when using the default value of $T_{\rm NCDM}$ as described in section \ref{sec:distances} below, {\tt N\_nu\_rel} can be set to 2.0328, 1.0196, and 0.00641 for 1, 2 and 3 massive neutrinos respectively to achieve this.
+To include massive neutrinos, the suffix `{\tt $\_$nu}' may be appended to the latter four {\tt ccl$\_$configuration} objects above. Utilizing the corresponding {\tt ccl$\_$configuration} object without this {\tt $\_$nu} suffix will set the number of massive neutrions to 0 and the effective number of massless neutrinos to $3.046$. In the case of non-zero massive neutrinos, it may be desirable to set {\tt N\_nu\_rel} such that $N_{\rm eff}=3.046$ in the early universe. In agreement with {\tt CLASS}, when using the default value of $T_{\rm NCDM}$ as described in section \ref{sec:distances} below, {\tt N\_nu\_rel} can be set to 2.0328, 1.0196, and 0.00641 for 1, 2 and 3 massive neutrinos respectively to achieve this.
 
 {\tt ccl$\_$configuration} objects contain information about the prescriptions to be used to compute transfer functions, power spectra, mass functions, etc. A default {\tt ccl$\_$configuration} object is made readily available as {\tt default$\_$config}, for which transfer functions are computed with CLASS, the HaloFit prediction is used for the matter power spectrum and a number of prescriptions can be used to compute the halo mass function.
 
@@ -264,7 +264,7 @@ in units such that $\mu$ is dimensionless. We then conduct the phase-space integ
 \Omega_{\nu, {\rm m}}(a) = N_{\rm m}^\nu \frac{8 \pi^2(\pi k_b )^3 k_b}{15(c h_{\rm P})^3} \frac{8 \pi G}{3h^2c^2} \left(\frac{T_{\nu}^{\rm eff}}{a}\right)^4 \left(\frac{7}{8}\int_0^{x_{\rm max}} dx \, x^2 \frac{\sqrt{x^2 + \mu^2}}{\exp(x) + 1}\right)
 \label{Omnu}
 \end{equation}
-where $h_{\rm P}$ is Planck's constant and $h$ is $H_0/100$ with $H_0$ in units of km / s / Mpc. $x_{\rm max}$ is set to 1000. The final bracketed term which includes the phase-space integral can be simplified in the limit where $\mu$ is very large or very small: for small $\mu$, it is set to $\frac{7}{8}$, and for large $\mu$, it becomes $\sim 0.2776\mu$.
+where $h_{\rm P}$ is Planck's constant and $h$ is $H_0/100$ with $H_0$ in units of km / s / Mpc. $x_{\rm max}$ is set to 1000. The final bracketed term which includes the phase-space integral can be simplified in the limit where $\mu$ is very large or very small: for small $\mu$, it is set to $\frac{7}{8}$, and for large $\mu$, it becomes $\frac{5\zeta(3)}{18\pi^4}\mu\sim 0.2776\mu$.
 
 
 
@@ -308,7 +308,7 @@ CCL also provides an approximation to the matter power spectrum as implemented b
 It is worth reminding the reader that the Eisenstein \& Hu and  the BBKS approximations are not accurate and should not be used to derive scientific results. They are, however, computationally faster, and therefore useful for code testing and plotting.
 
 \subsubsection{CLASS}
-Secondly, there is the option to call the {\tt CLASS} software \citep{class} within {\tt CCL} to obtain either linear or nonlinear matter power spectra at given redshifts. For speed, the linear power spectrum is obtained at redshift $z=0$ and re-scaled to a different redshift using the growth function. In the case of the nonlinear matter power spectrum, upon setting up the cosmology object, we construct a bi-dimensional spline in $k$ and the scale-factor which is then called by the relevant routines to obtain the matter power spectrum at the desired wavenumber and redshift. The relevant routines can be found within {\tt ccl$\_$power.c}. Currently CLASS computes the non-linear power spectrum using the HaloFit prescription of \cite{CLASS_halofit}.
+Secondly, there is the option to call the {\tt CLASS} software \citep{class} within {\tt CCL} to obtain either linear or nonlinear matter power spectra at given redshifts. Upon setting up the cosmology object, we construct a bi-dimensional spline in $k$ and the scale-factor which is then called by the relevant routines to obtain the matter power spectrum at the desired wavenumber and redshift. The relevant routines can be found within {\tt ccl$\_$power.c}. Currently CLASS computes the non-linear power spectrum using the HaloFit prescription of \cite{CLASS_halofit}.
 
 \subsubsection{Spline parameters \& the INI file}
 
@@ -330,7 +330,7 @@ All spline and grid parameters are defined in the {\tt ccl$\_$params.ini} file i
 \item {\tt N$\_$K}: Number of bins for the wavenumber. The default is {\tt N$\_$K}$=1000$.  
 \end{itemize}
 
-For a test flat $\Lambda$CDM cosmology with $\Omega_c=0.25$, $\Omega_b=0.05$, $\sigma_8=0.8$, $h=0.7$ and $n_s=0.96$, we have found that changing {\tt N$\_$A} to $200$, or changing {\tt N$\_$K} to $5000$, does not affect the matter power spectrum obtained from CLASS at the $2\times 10^{-4}$ level for $k<10$/Mpc at $z=1$, for example, which is more than what is needed for our purposes. We emphasise that changing these constants can result in loss of accuracy.For certain applications, it might be possible to relax some of the accuracy requirements and increase the speed of {\tt CCL}. The choice of {\tt K$\_$MAX$\_$SPLINE} will be explained in the next subsection.
+For a test flat $\Lambda$CDM cosmology with $\Omega_c=0.25$, $\Omega_b=0.05$, $\sigma_8=0.8$, $h=0.7$ and $n_s=0.96$, we have found that changing {\tt N$\_$A} to $200$, or changing {\tt N$\_$K} to $5000$, does not affect the matter power spectrum obtained from CLASS at the $2\times 10^{-4}$ level for $k<10$/Mpc at $z=1$, for example, which is more than what is needed for our purposes. We emphasise that changing these constants can result in loss of accuracy. For certain applications, it might be possible to relax some of the accuracy requirements and increase the speed of {\tt CCL}. The choice of {\tt K$\_$MAX$\_$SPLINE} will be explained in the next subsection.
 
 
 \subsubsection{Nonlinear low and high wavenumber extrapolation}
@@ -347,7 +347,7 @@ First, we compute the first and second derivative of the $\ln P(k,z)$ at $k_0={\
   \label{eq:NLPSTaylor}
 \end{equation}
 
-The accuracy of this approximation is shown in Figure \ref{fig:NLextrapol} for redshifts $z=0$ and $z=3$. We compare the nonlinear matter power spectrum at $z=0$ computed with the previously described approximation, to the matter power spectrum obtained by directly evaluating {\tt CLASS} at the desired $k$ value. (The benchmark in reality uses a value of {\tt K$\_$MAX$\_$SPLINE}$=5\times 10^3$/Mpc, well beyond our range of application and exceeding also the value of {\tt K\_MAX}.) We find that for typical values of  $\Delta \ln k$ is $10^{-2}$ and {\tt K$\_$MAX$\_$SPLINE}$=50$/Mpc has converged to an accuracy that surpasses the expected impact of baryonic effects on the matter power spectrum at $k>10/$Mpc. (For an estimate of the impact of baryons on the total matter power spectrum, see \citealt{Schneider15}.) The lower {\tt K$\_$MAX$\_$SPLINE} is, the faster {\tt CCL} will run. The optimum choice of {\tt K$\_$MAX$\_$SPLINE} is left to the user for their particular application. 
+The accuracy of this approximation is shown in Figure \ref{fig:NLextrapol} for redshifts $z=0$ and $z=3$. We compare the nonlinear matter power spectrum at $z=0$ computed with the previously described approximation, to the matter power spectrum obtained by directly evaluating {\tt CLASS} at the desired $k$ value. (The benchmark in reality uses a value of {\tt K$\_$MAX$\_$SPLINE}$=5\times 10^3$/Mpc, well beyond our range of application and exceeding also the value of {\tt K\_MAX}.) We find that for typical values of  $\Delta \ln k=10^{-2}$ and {\tt K$\_$MAX$\_$SPLINE}$=50$/Mpc, $\ln P$ has converged to an accuracy that surpasses the expected impact of baryonic effects on the matter power spectrum at $k>10/$Mpc. (For an estimate of the impact of baryons on the total matter power spectrum, see \citealt{Schneider15}.) The lower {\tt K$\_$MAX$\_$SPLINE} is, the faster {\tt CCL} will run. The optimum choice of {\tt K$\_$MAX$\_$SPLINE} is left to the user for their particular application. 
 
 We also extrapolate the power spectrum at small wavenumbers within the static routine {\tt ccl\_power\_extrapol\_lowk}. In this case, the power spectrum below {\tt K$\_$MIN} is obtained by a power-law extrapolation with index $n_s$:
 \begin{equation}
@@ -365,7 +365,7 @@ The value adopted for {\tt K\_MIN} depends on the choice of power spectrum metho
 \end{figure*}
 %------------------------
 
-\section{Linear extrapolation}
+\subsubsection{Linear extrapolation}
 \label{sec:Lextrapol}
 
 With the implementation described in the previous section, the power spectrum splines are initialized up to {\tt K$\_$MAX$\_$SPLINE}. This is also true for the linear matter power spectrum, which is used within {\tt CCL} in particular to obtain $\sigma_8$. We have tested here how the procedure described in the previous section affects the convergence of the linear matter power spectrum. We compare the fiducial {\tt CCL} output to the case where we set {\tt K$\_$MAX$\_$SPLINE}$=5\times 10^3/$Mpc. The result is shown in Figure \ref{fig:Lextrapol}. Although there is a significant difference ($\gtrsim 10\%$) between the linear power spectra at large $k$, we have confirmed that the difference in $\sigma_8$ is negligible. Nevertheless, for other applications that use the linear power spectrum, the user might need to increase the value of {\tt K$\_$MAX$\_$SPLINE}.
@@ -500,7 +500,7 @@ where
 
 
 
-Our aim is to compute the angular over density power spectrum  $C_{\ell}(z_1, z_2)$ as a cross-correlation between two $z$-shells with mean values ($z_1, z_2$) and also the auto-correlation $C_{\ell}(z_1)$ with $z_1 = z_2$,  taking into account, in both cases, possible redshift selection functions and physical processes as redshift space distortions without any Limber numerical approximation. For this putpose, {\tt CCL} has been linked to the\texttt{Angpow} code \citep{2017arXiv170103592C}, which is briefly described here.
+Our aim is to compute the angular over density power spectrum  $C_{\ell}(z_1, z_2)$ as a cross-correlation between two $z$-shells with mean values ($z_1, z_2$) and also the auto-correlation $C_{\ell}(z_1)$ with $z_1 = z_2$,  taking into account, in both cases, possible redshift selection functions and physical processes such as redshift-space distortions without any Limber numerical approximation. For this purpose, {\tt CCL} has been linked to the \texttt{Angpow} code \citep{2017arXiv170103592C}, which is briefly described here.
 
 The angular power spectrum for two shells, $C_{\ell}(z_1, z_2)$, is computed according to the following expression
 \begin{equation}
@@ -525,9 +525,9 @@ or using an approximation valid at low redshift  with the power spectrum at $z=0
 \begin{equation}
 P(k,z) = P(k)|_{z=0} G^2(z);
 \end{equation} 
-Their are abstract classes that one may tuned according to the use-case (see \texttt{angpow\_integrand\_base.h} and \texttt{angpow\_powspec\_base.h}). For instance we have specialized in \texttt{angpow\_powspec.h} the computation of a $P(k)$ from an external 
+There are abstract classes that one may tune according to the use-case (see \texttt{angpow\_integrand\_base.h} and \texttt{angpow\_powspec\_base.h}). For instance we have specialized in \texttt{angpow\_powspec.h} the computation of a $P(k)$ from an external 
 file and a growth rate from \citet{1991MNRAS.251..128L, 1992ARA&A..30..499C}, and in \texttt{angpow\_integrand.h} we have included the RSD term and a constant bias.
-\item $\widetilde{\Delta}_\ell(z,k)$: a function describing the physical processes as matter density fluctuations, redshift space distortions as described for instance in references \citet{2008cmb..book.....D,2009PhRvD..80h3514Y,2010PhRvD..82h3508Y,2011PhRvD..84d3516C,2011PhRvD..84f3505B}. As example \todo{example for galaxy clustering?} with a constant bias $b$ and using the growth factor rate $f_a(z) = d\log G(a(z))/d\log(a(z))$, we can approximate
+\item $\widetilde{\Delta}_\ell(z,k)$: a function describing the physical processes such as matter density fluctuations, redshift-space distortions as described for instance in references \citet{2008cmb..book.....D,2009PhRvD..80h3514Y,2010PhRvD..82h3508Y,2011PhRvD..84d3516C,2011PhRvD..84f3505B}. As example \todo{example for galaxy clustering?} with a constant bias $b$ and using the growth factor rate $f_a(z) = d\log G(a(z))/d\log(a(z))$, we can approximate
 \begin{equation}
  \widetilde{\Delta}_\ell(z,k) \approx b j_\ell(k \chi(z)) - f_a(z) j_\ell^{\prime\prime}(k \chi(z)) + \dots
 \end{equation}
@@ -800,7 +800,7 @@ A Python wrapper for {\tt CCL} is provided through a module called {\tt pyccl}. 
 \subsection{Python installation}
 \label{sec:python:install}
 
-Before you can build the Python wrapper, you must have compiled and installed the C version of {\tt CCL}, as {\tt pyccl} will be dynamically linked to it. The Python wrapper's build tools currently assume that your C compiler is {\tt gcc} (with OpenMP enabled), and that you have a working Python 2.x installation with {\tt numpy} and {\tt distutils} with {\tt swig}. If you have installed CCL in your default library path, you can build and install the {\tt pyccl} module by going to the root {\tt CCL} directory and choosing one of the following options:
+Before you can build the Python wrapper, you must have compiled and installed the C version of {\tt CCL}, as {\tt pyccl} will be dynamically linked to it. The Python wrapper's build tools currently assume that your C compiler is {\tt gcc}, and that you have a working Python 2.x installation with {\tt numpy} and {\tt distutils} with {\tt swig} (the latter is not necessary for using CCL, only for development). If you have installed CCL in your default library path, you can build and install the {\tt pyccl} module by going to the root {\tt CCL} directory and choosing one of the following options:
 \begin{itemize}
  \item To build and install the wrapper for the current user only, run \\
  {\tt \$ python setup.py install --user}
