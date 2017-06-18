@@ -385,7 +385,7 @@ int ccl_tracer_corr_legendre(ccl_cosmology *cosmo, int n_theta, double **theta,
   intl_arr=malloc(n_log*sizeof(int));
   //cl_arr_log=malloc(n_log*(sizeof(double)));
 
-//converting log space ell to integer leads to some repeated values. GSL interpolation does not like that. So we need to remove the repeated values.
+//converting log space ell to integer leads to some repeated values. This leads to repeated calls to ccl_angular_cl and also GSL interpolation done later does not like that. So we need to remove the repeated values.
   int n_log2=n_log;
   intl_arr[0]=(int)l_arr_log[0];
   int i2=0;
@@ -403,7 +403,7 @@ int ccl_tracer_corr_legendre(ccl_cosmology *cosmo, int n_theta, double **theta,
   cl_arr_log=malloc(n_log2*sizeof(double));
   intl_arr2=malloc(n_log2*sizeof(double));// double for input to gsl
 
-  for(int i=0;i<n_log2;i++){ //because gsl does not like non-increasing arrays
+  for(int i=0;i<n_log2;i++){
     intl_arr2[i]=(double)intl_arr[i];
     cl_arr_log[i]=angular_cl(cosmo,intl_arr[i],ct1,ct2,&status);
     L_max=intl_arr[i];//to avoid gsl interpolation errors. L_max should not be outside range of intl_arr2
