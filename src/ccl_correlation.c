@@ -166,6 +166,31 @@ static int taper_cl(int n_ell,int *ell,double *cl, double *ell_limits)
   return 0;
 }
 
+/*Function to check correct bessel function index for given tracers*/
+int check_i_bessel(CCL_ClTracer *ct1, CCL_ClTracer *ct2, int i_bessel)
+{
+  /* do we need to input i_bessel? could just be set here based on tracer..*/
+  if((ct1->tracer_type==CL_TRACER_WL) && (ct2->tracer_type==CL_TRACER_WL)){
+    if((i_bessel!=0) && (i_bessel!=4)){
+      printf("wrong i_bessel for WL tracers , need i_bessel=0 or 4\n");
+      return 1;
+    }
+  }
+  if((ct1->tracer_type==CL_TRACER_NC) && (ct2->tracer_type==CL_TRACER_NC)){
+    if(i_bessel!=0){
+      printf("wrong i_bessel for NC tracers , need i_bessel=0\n");
+      return 1;
+    }
+  }
+  if(((ct1->tracer_type==CL_TRACER_WL) && (ct2->tracer_type==CL_TRACER_NC)) || ((ct1->tracer_type==CL_TRACER_NC) && (ct2->tracer_type==CL_TRACER_WL))){
+    if(i_bessel!=2){
+      printf("wrong i_bessel for NC X WL tracers, need i_bessel=2\n");
+      return 1;
+    }
+  }
+return 0;
+}
+
 /*--------ROUTINE: ccl_tracer_corr ------
 TASK: For a given tracer, get the correlation function. Do so by running
       ccl_angular_cls. If you already have Cls calculated, go to the next
@@ -197,21 +222,11 @@ int ccl_tracer_corr_fftlog(ccl_cosmology *cosmo, int n_theta, double **theta,
 		     bool do_taper_cl,double *taper_cl_limits,double **corr_func,
 		    double (*angular_cl)(ccl_cosmology *cosmo,int l,CCL_ClTracer *clt1,
 					 CCL_ClTracer *clt2, int * status) ){
-
-  /* do we need to input i_bessel? could just be set here based on tracer..*/
-  if((ct1->tracer_type==CL_TRACER_WL) && (ct2->tracer_type==CL_TRACER_WL)){
-    if((i_bessel!=0) && (i_bessel!=4)) return 1;
-  }
-  if((ct1->tracer_type==CL_TRACER_NC) && (ct2->tracer_type==CL_TRACER_NC)){
-    if(i_bessel!=0) return 1;
-  }
-  if(((ct1->tracer_type==CL_TRACER_WL) && (ct2->tracer_type==CL_TRACER_NC)) || ((ct1->tracer_type==CL_TRACER_NC) && (ct2->tracer_type==CL_TRACER_WL))){
-    if(i_bessel!=2) return 1;
-  }
-
+  int status=check_i_bessel(ct1,ct2,i_bessel);
+  if (status!=0)
+    return status;
   double *l_arr;
   int *intl_arr;
-  //double cl_arr[n_theta];
   double *cl_arr;
   //ccl_angular_cl expects ell to be integer... type conversion later
 
@@ -220,7 +235,7 @@ int ccl_tracer_corr_fftlog(ccl_cosmology *cosmo, int n_theta, double **theta,
   intl_arr=malloc(n_theta*sizeof(int));
   cl_arr=malloc(n_theta*sizeof(double));
 
-  int status=0,l2=0;
+  int l2=0;
   for(int i=0;i<n_theta;i+=1) {
     if (l_arr[i]<1)
       {
@@ -237,7 +252,7 @@ int ccl_tracer_corr_fftlog(ccl_cosmology *cosmo, int n_theta, double **theta,
 	        continue;
       }
     //this leads to repeated ell in the array, especially at low ell - can we filter those out to save time?
-    //written the if statement above to reduce the calls to angular_cl. We still use l_arr in fftlog part, so keeing the repeated values
+    //written the if statement above to reduce the calls to angular_cl. We still use l_arr in fftlog part, so keeping the repeated values
     cl_arr[i]=angular_cl(cosmo,intl_arr[i],ct1,ct2,&status);
 
     /*Notice that this works because we have changed FFTlog to take in m as double.
@@ -286,7 +301,6 @@ INPUT: tracer 1, tracer 2, i_bessel, theta array, n_theta, L_max, output Pl_thet
 static int ccl_compute_legendre_polynomial(CCL_ClTracer *ct1, CCL_ClTracer *ct2, int i_bessel,
 				double **theta, int n_theta, int L_max, double **Pl_theta)
 {
-  double Nl2=0;//Nl**2
   double k=0;
 
   for (int i=0;i<n_theta;i++)
@@ -357,21 +371,25 @@ int ccl_tracer_corr_legendre(ccl_cosmology *cosmo, int n_theta, double **theta,
 		                        double (*angular_cl)(ccl_cosmology *cosmo,int l,CCL_ClTracer *clt1,
 					                                       CCL_ClTracer *clt2, int * status) )
 {
-  int L_max=60000;//n_theta;
-  int status=0;
-  int n_log=500;//n_theta
+  /*In this computation, we need to sum over all integer ell upto some ell_max. Since angular_cl calls are expensive, we only do them for some selected ell values in log space and then interpolate them to get values at every ell.*/
+  int status=check_i_bessel(ct1,ct2,i_bessel);
+  if (status!=0)
+    return status;
+  int L_max=60000;
+  int n_log=500;
   double *l_arr_log;
   double *cl_arr_log;//[n_log];
   int *intl_arr;
 
   l_arr_log=ccl_log_spacing(1,L_max,n_log);
   intl_arr=malloc(n_log*sizeof(int));
-  cl_arr_log=malloc(n_log*(sizeof(double)));
+  //cl_arr_log=malloc(n_log*(sizeof(double)));
 
+//converting log space ell to integer leads to some repeated values. GSL interpolation does not like that. So we need to remove the repeated values.
   int n_log2=n_log;
+  intl_arr[0]=(int)l_arr_log[0];
   int i2=0;
-  intl_arr[0]=0;
-  for(int i=0;i<n_log;i++){
+  for(int i=1;i<n_log;i++){
     if ((int)l_arr_log[i]==intl_arr[i2])
       {
 	      n_log2-=1;
@@ -379,23 +397,20 @@ int ccl_tracer_corr_legendre(ccl_cosmology *cosmo, int n_theta, double **theta,
       }
     i2+=1;
     intl_arr[i2]=(int)l_arr_log[i];
-    //printf("intl_arr[i2]=%d\n",intl_arr[i2]);
-    cl_arr_log[i2]=angular_cl(cosmo,intl_arr[i2],ct1,ct2,&status);
   }
 
-  double *cl_arr_log2;//[n_log2];
   double *intl_arr2;//[n_log2];
-  cl_arr_log2=malloc(n_log2*sizeof(double));
-  intl_arr2=malloc(n_log2*sizeof(double));
+  cl_arr_log=malloc(n_log2*sizeof(double));
+  intl_arr2=malloc(n_log2*sizeof(double));// double for input to gsl
 
   for(int i=0;i<n_log2;i++){ //because gsl does not like non-increasing arrays
     intl_arr2[i]=(double)intl_arr[i];
-    cl_arr_log2[i]=cl_arr_log[i];
+    cl_arr_log[i]=angular_cl(cosmo,intl_arr[i],ct1,ct2,&status);
     L_max=intl_arr[i];//to avoid gsl interpolation errors. L_max should not be outside range of intl_arr2
   }
 
   gsl_spline * spl_cl = gsl_spline_alloc(L_SPLINE_TYPE,n_log2);
-  status = gsl_spline_init(spl_cl, intl_arr2, cl_arr_log2, n_log2);
+  status = gsl_spline_init(spl_cl, intl_arr2, cl_arr_log, n_log2);
 
   int *l_arr;//[L_max];
   double *cl_arr;;//[L_max];
@@ -433,7 +448,7 @@ int ccl_tracer_corr_legendre(ccl_cosmology *cosmo, int n_theta, double **theta,
   free(l_arr_log);
   free(cl_arr_log);
   free(intl_arr);
-  free(cl_arr_log2);
+  //free(cl_arr_log2);
   free(intl_arr2);
   for (int i=0;i<n_theta;i++)
       free(Pl_theta[i]);
