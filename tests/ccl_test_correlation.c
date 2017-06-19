@@ -14,7 +14,6 @@ CTEST_DATA(corrs) {
   double Omega_c;
   double Omega_b;
   double h;
-  double A_s;
   double n_s;
   double sigma_8;
 };
@@ -23,7 +22,6 @@ CTEST_SETUP(corrs) {
   data->Omega_c = 0.30;
   data->Omega_b = 0.00;
   data->h = 0.7;
-  data->A_s = 2.1e-9;
   data->sigma_8=0.8;
   data->n_s = 0.96;
 }
@@ -51,7 +49,6 @@ static double angular_l2_inv(ccl_cosmology *cosmo,int l,CCL_ClTracer *clt1,CCL_C
 {
   double l2=(double)l*(double)l;
   double z2=1.0;//z**2
-  //printf("%.3e %.3e\n",l2,1./sqrt(l2+z2));
   return 1./sqrt(l2+z2);//HT of this should give (exp(-k|z|)/k)
 }
 
@@ -66,8 +63,7 @@ static void compare_corr(char *compare_type,struct corrs_data * data)
 {
   ccl_configuration config = default_config;
   config.transfer_function_method = ccl_bbks;
-  ccl_parameters params = ccl_parameters_create_flat_lcdm(data->Omega_c,data->Omega_b,data->h,data->A_s,data->n_s);
-  params.sigma_8=data->sigma_8;
+  ccl_parameters params = ccl_parameters_create_flat_lcdm(data->Omega_c,data->Omega_b,data->h,data->sigma_8,data->n_s);
   ccl_cosmology * cosmo = ccl_cosmology_create(params, config);
   ASSERT_NOT_NULL(cosmo);
 
