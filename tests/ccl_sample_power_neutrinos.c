@@ -27,6 +27,11 @@ int main(int argc, char * argv[])
 
   // Open file to read k values from CLASS at which to compute things
   input = fopen("./fromCLASS_3massless_pk_nl.dat", "r");
+  if(input==NULL) {
+    fprintf(stderr,"Couldn't find benchmark file. Please execute this code from the \"tests\" directory\n");
+    exit(1);
+  }
+    
   
   // Read the header 
   fgets(line,2000, input);
