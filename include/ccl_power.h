@@ -13,6 +13,7 @@
  * @return P_lin(k,a).
  */
 double ccl_linear_matter_power(ccl_cosmology * cosmo, double k, double a,int * status);
+
 /**
  * Non-linear matter power spectrum.
  * Returns P_NL(k,a) [Mpc^3] for given cosmology, using the method specified in cosmo->config.transfer_function_method and cosmo->config.matter_power_spectrum_method.
