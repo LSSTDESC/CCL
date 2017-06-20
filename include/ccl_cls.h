@@ -40,17 +40,28 @@ typedef struct {
 } CCL_ClTracer;
 
 ///Generic CCL_ClTracer constructor.
-/**Tracer_type: pass CL_TRACER_NC (number counts) or CL_TRACER_WL (weak lensing)
- * has_rsd -> set to 1 if you want to compute the RSD contribution to number counts (0 otherwise)
- * has_magnification -> set to 1 if you want to compute the magnification contribution to number counts (0 otherwise)
- * has_intrinsic_alignment -> set to 1 if you want to compute the IA contribution to shear
- * nz_n, z_n, n -> z_n and n are arrays for the number count of objects per redshift interval
- * (arbitrary normalization - renormalized inside).
- * These arrays should contain nz_n elements each.
- * nz_b, z_b, b -> same as above for the clustering bias
- * nz_s, z_s, s -> same as above for the magnification bias
- * nz_ba, z_ba, ba -> same as above for the alignment bias
- * nz_rf, z_rf, rf -> same as above for the aligned (red) fraction
+/**
+ * Constructor for a ClTracer.
+ * @param Tracer_type pass CL_TRACER_NC (number counts) or CL_TRACER_WL (weak lensing)
+ * @param has_rsd Set to 1 if you want to compute the RSD contribution to number counts (0 otherwise)
+ * @param has_magnification Set to 1 if you want to compute the magnification contribution to number counts (0 otherwise)
+ * @param has_intrinsic_alignment Set to 1 if you want to compute the IA contribution to shear
+ * @param nz_n Number of bins in z_n and n
+ * @params z_n Redshifts for each redshift interval of n
+ * @param n Number count of objects per redshift interval (Note: arbitrary normalization - renormalized inside)
+ * @param nz_b Number of bins in z_b and b
+ * @param z_b Redshifts for each redshift interval of b
+ * @param b Clustering bias in each redshift bin
+ * @param nz_s Number of bins in z_s and s
+ * @param z_s Redshifts for each redshift interval of s
+ * @param s Magnification bias in each redshift bin
+ * @param nz_ba Number of bins in z_ba and ba
+ * @param z_ba Redshifts for each redshift interval of ba
+ * @param ba Alignment bias in each redshift bin
+ * @param nz_rf Number of bins in z_f and f
+ * @param z_rf Redshifts for each redshift interval of rf
+ * @param rf Aligned red fraction in each redshift bin
+ * @return CCL_ClTracer object
  */
 CCL_ClTracer *ccl_cl_tracer_new(ccl_cosmology *cosmo,int tracer_type,
 				int has_rsd,int has_magnification,int has_intrinsic_alignment,
