@@ -9,7 +9,7 @@ typedef enum ccl_omega_x_label {
   ccl_omega_k_label=3
 } ccl_omega_x_label;
 
-// Normalized expansion rate at scale factor a
+///Normalized expansion rate at scale factor a.
 /**
  * Normalized expansion rate at scale factor a.
  * Returns H(a)/H0 in a given cosmology.
