@@ -1,3 +1,5 @@
+/** @file */
+
 #pragma once
 
 /** Transfer function typedef.
