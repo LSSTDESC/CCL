@@ -1,5 +1,13 @@
 #pragma once
 
+/** Transfer function typedef.
+ * Contains all information that describes a specific
+ * transfer function. This includes whether there is an
+ * emulator being used (Note: not implemented yet),
+ * if there is a fitting function (E&H is the only option
+ * right now), whether to use the BBKS transfer function,
+ * and what boltzmann code to use.
+ */
 typedef enum transfer_function_t
 {
     // If using an emulator for P_NL
@@ -17,6 +25,12 @@ typedef enum transfer_function_t
     ccl_boltzmann_camb    = 4
 } transfer_function_t;
 
+/** Matter power spectrum typedef.
+ * Contains all information that describes a specific
+ * matter power spectrum. This inclues whether we
+ * want the linear power spectrum, whether we use
+ * halofit, and what halo model is being used.
+ */
 typedef enum matter_power_spectrum_t
 {
     ccl_linear           = 0,
@@ -28,6 +42,12 @@ typedef enum matter_power_spectrum_t
 
 } matter_power_spectrum_t;
 
+/** Mass function typedef
+ * Contains all information that describes a specific
+ * mass function. This is basically a switch that chooses
+ * between Tinker08, Tinker10, Watson and Angulo mass
+ * functions.
+ */
 typedef enum mass_function_t
 {
     ccl_tinker      = 1,
@@ -36,7 +56,11 @@ typedef enum mass_function_t
     ccl_angulo      = 4
 } mass_function_t;
 
-
+/** Configuration typedef.
+ * This contains the transfer function,
+ * matter power spectrum, and mass function
+ * that is being used currently.
+ */
 typedef struct ccl_configuration {
     transfer_function_t      transfer_function_method;
     matter_power_spectrum_t  matter_power_spectrum_method;
@@ -44,5 +68,5 @@ typedef struct ccl_configuration {
     // TODO: Halo definition
 } ccl_configuration;
 
-// The default configuration object
+/// The default configuration object
 extern const ccl_configuration default_config;
