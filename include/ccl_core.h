@@ -48,7 +48,9 @@ typedef struct ccl_parameters {
 } ccl_parameters;
 
 
-
+/**
+ * Struct containing references to gsl splines for distance and acceleration calculations
+ */
 typedef struct ccl_data{
   // These are all functions of the scale factor a.
   // Distances are defined in Mpc
@@ -79,6 +81,9 @@ typedef struct ccl_data{
 
 } ccl_data;
 
+/**
+ * Sturct containing references to instances of the above structs, and boolean flags of precomputed values. 
+ */
 typedef struct ccl_cosmology
 {
   ccl_parameters    params;
