@@ -28,31 +28,62 @@
 
 // These are in units of Mpc (no factor of h)
 #define K_PIVOT 0.05
+/** @file */
+
 #define K_MAX_SPLINE 50. 
 #define K_MAX 1e3
 #define K_MIN_DEFAULT 5e-5
 #define N_K 1000
 
-//Rho critical in units of M_sun/h / (Mpc/h)^3
+/** 
+ * Rho critical in units of M_sun/h / (Mpc/h)^3
+ */
 #define RHO_CRITICAL 2.7744948E11
 
-//Lightspeed / H0 in units of Mpc/h
+/**
+ * Lightspeed / H0 in units of Mpc/h
+ */
 #define CLIGHT_HMPC 2997.92458 //H0^-1 in Mpc/h
 
-//Newton's gravitational constant
-#define GNEWT 6.6738e-11    //(from PDG 2013) in m^3/Kg/s^2
+/**
+ * Newton's gravitational constant in units of m^3/Kg/s^2 (from PDG 2013)
+ */
+#define GNEWT 6.6738e-11
 
-//Solar mass
-#define SOLAR_MASS 1.9885e30 //in kg (from PDG 2013)
+/**
+ * Solar mass in units ofkg (from PDG 2013)
+ */
+#define SOLAR_MASS 1.9885e30
 
-//Distance conversions
-#define MPC_TO_METER 3.08567758149e22  //(from PDG 2013) Mpc to m 
-#define PC_TO_METER 3.08567758149e16   //(from PDG 2013) pc to m
+/**
+ * Mpc to meters (from PDG 2013)
+ */
+#define MPC_TO_METER 3.08567758149e22
+
+/**
+ * pc to meters (from PDG 2013)
+ */
+#define PC_TO_METER 3.08567758149e16
 
 //Precision parameters
+/**
+ * Relative precision in distance calculations
+ */
 #define EPSREL_DIST 1E-6
+
+/**
+ * Relative precision in growth calculations
+ */
 #define EPSREL_GROWTH 1E-6
+
+/**
+ * Relative precision in dNdz calculations
+ */
 #define EPSREL_DNDZ 1E-6
+
+/**
+ * Absolute precision in growth calculations
+ */
 #define EPS_SCALEFAC_GROWTH 1E-6
 
 //LSST specific numbers
