@@ -12,4 +12,11 @@
 #define CCL_ERROR_COMPUTECHI 9
 #define CCL_ERROR_MF 10
 #define CCL_ERROR_PARAMETERS 11
+
+
+/** Check the error status
+ * Given a status, check if any errors have occurred,
+ * based on the CCL_ERRORs defined so far.
+ * @return void
+ */
 void ccl_check_status(ccl_cosmology *cosmo, int* status);
