@@ -75,7 +75,7 @@ This note describes how to install {\tt CCL} (Section \ref{sec:install}), its fu
 \item GNU Scientific Library {\tt GSL}\footnote{\url{https://www.gnu.org/software/gsl/}}, {\tt GSL-2.1} or higher
 \item Simplified Wrapper and Interface Generator {\tt SWIG}\footnote{\url{http://www.swig.org/}} is not needed to run {\tt CCL}, but if you are developing new features, you will need {\tt SWIG}.
 \item {\tt FFTlog}\footnote{\url{http://casa.colorado.edu/~ajsh/FFTLog/}} is provided within {\tt CCL} with minor modifications 
-\item A version of {\tt Angpow} \citep{2017arXiv170103592C} is also incorporated within {\tt CCL}.
+%\item A version of {\tt Angpow} \citep{2017arXiv170103592C} is also incorporated within {\tt CCL}.
 \end{itemize}
 
 \subsection{Installation Procedure}
@@ -478,9 +478,8 @@ where
  &\tilde{\Delta}_\ell^{\rm IA}(k)=\sqrt{\frac{(\ell+2)!}{(\ell-2)!}}\frac{p_z(z_\ell)\,b_{\rm IA}(z_\ell)f_{\rm red}(z_\ell)H(z_\ell)}{(\ell+1/2)^2}
 \end{align}
 
+\begin{comment}
 \subsubsection{Beyond Limber: angpow}
-
-\todo{Comment out this section if we don't make it to public release.}
 
 %Text Added JECampagne 27/05/17 START
 
@@ -569,7 +568,8 @@ reconstruct these accurate spectra. Such performances are much higher than those
 with {\tt CLASSgal} when not using the Limber approximation.
 For instance using{\tt CLASSgal}  to compute the auto-correlation with a Gaussian selection function with ($z_\mrm{mean}=1$, $\sigma_z=0.02$, $5\sigma_z$-cut) and $k_\mrm{max}=1\ \mrm{Mpc}^{-1}$ and a radial quadrature based on $N_\mrm{pts}=139$ sample points, it takes
 about 15s on 16 threads, which is to be compared to about 0.5s with \texttt{Angpow}.
- 
+\end{comment}
+
 \subsection{Correlation functions}
 \label{sec:corr}
 
@@ -706,8 +706,8 @@ where $D(z)$ in the linear growth rate of structure.
 \section{Tests and validation}
 \label{sec:tests}
 
-Our goal is for outputs of {\tt CCL} to be validated against the results of the code comparison project down to a $10^{-4}$ or better accuracy level if possible. In some cases, this level of accuracy is not necessary, as other systematics which have not been considered in this version of {\tt CCL} yet are expected to have a larger fractional impact. In the cases where this applies, we make it clear below.
-%{\bf TODO: Currently having problems validating the correlation functions to this level. Also, we need a discussion of why this accuracy level is needed.}
+Our goal is for outputs of {\tt CCL} to be validated against the results of the code comparison project down to a $10^{-4}$ or pre-established accuracy level if possible. In some cases, this level of accuracy is not necessary, as other systematics which have not been considered in this version of {\tt CCL} yet are expected to have a larger fractional impact. In the cases where this applies, we make it clear below.
+
 
 A code comparison project was carried out among members of TJP where the following outputs of cosmological forecast codes were compared and validated:
 \begin{enumerate}
@@ -906,6 +906,7 @@ The build process will also create a {\tt pyccl/ccllib.py} file, which is the ra
 
 In the future, we hope that {\tt CCL} will include other functionalities. Functionalities which are currently under development:
 \begin{itemize}
+        \item a link to {\tt angpow} \citep{2017arXiv170103592C} for going beyond the Limber approximation,
 	\item a link to FAST-PT \citep{FASTPT} for implementation of perturbation theory,
 	\item a more realistic photo-z model,
 	\item support for cosmologies with multiple unequal-mass neutrinos,
