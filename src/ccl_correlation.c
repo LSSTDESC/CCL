@@ -166,10 +166,13 @@ static int taper_cl(int n_ell,int *ell,double *cl, double *ell_limits)
   return 0;
 }
 
-/*Function to check correct bessel function index for given tracers*/
-int check_i_bessel(CCL_ClTracer *ct1, CCL_ClTracer *ct2, int i_bessel)
+/*--------ROUTINE: check_i_bessel ------
+TASK: Function to check correct bessel function index for given tracers
+INPUT: 2 CCL tracers and the bessel function index.
+*/
+static int check_i_bessel(CCL_ClTracer *ct1, CCL_ClTracer *ct2, int i_bessel)
 {
-  /* do we need to input i_bessel? could just be set here based on tracer..*/
+  /* do we need to input i_bessel? could just be set here based on tracer.*/
   if((ct1->tracer_type==CL_TRACER_WL) && (ct2->tracer_type==CL_TRACER_WL)){
     if((i_bessel!=0) && (i_bessel!=4)){
       printf("wrong i_bessel for WL tracers , need i_bessel=0 or 4\n");
@@ -303,61 +306,64 @@ static int ccl_compute_legendre_polynomial(CCL_ClTracer *ct1, CCL_ClTracer *ct2,
 {
   double k=0;
 
-  for (int i=0;i<n_theta;i++)
-    {
-      if((ct1->tracer_type==CL_TRACER_NC) && (ct2->tracer_type==CL_TRACER_NC))
-   	{
-   	  gsl_sf_legendre_Pl_array(L_max,cos((*theta)[i]),Pl_theta[i]);
-   	  for (int j=0;j<L_max;j++)
-   	    Pl_theta[i][j]*=(2*j+1);
-   	}
-
-      else if(((ct1->tracer_type==CL_TRACER_WL) && (ct2->tracer_type==CL_TRACER_NC))
-	      ||((ct1->tracer_type==CL_TRACER_NC) && (ct2->tracer_type==CL_TRACER_WL)))
-   	{//https://arxiv.org/pdf/1007.4809.pdf
-   	  //gsl_sf_legendre_Plm_array(L_max,2,cos((*theta)[i]),Pl_theta[i]);//deprecated in gsl
-	      for (int j=0;j<L_max;j++)
-	        {
-	            if(j<2){
-		                Pl_theta[i][j]=0;
-		                    continue;
-	                   }
-	            Pl_theta[i][j]=gsl_sf_legendre_Plm(j,i_bessel,cos((*theta)[i]));
-	            Pl_theta[i][j]*=(2*j+1)/j/(j+1);
-	         }
-	   }
-    else if((ct1->tracer_type==CL_TRACER_WL) && (ct2->tracer_type==CL_TRACER_WL))
-   	  {//https://arxiv.org/pdf/astro-ph/9611125v1.pdf
-   	  //Kilbinger+2017
-   	  if (i_bessel==0)
-   	    {
-   	      gsl_sf_legendre_Pl_array(L_max,cos((*theta)[i]),Pl_theta[i]);
-   	      for (int j=0;j<L_max;j++)
-   		      Pl_theta[i][j]*=(2*j+1);
-   	    }
-   	  else{ //this is slow
-   	    for (int j=0;j<L_max;j++)
-   	      {
-   		      if (i%(n_theta/50)!=0 || j>10000)
-   		        {///////////Some theta points thrown away for speed
-   		          Pl_theta[i][j]=0;
-   		          continue;
-   		        }
-   		      if (j<i_bessel){
-                Pl_theta[i][j]=0;
-                continue;
-              }
-   		      Pl_theta[i][j]=gsl_sf_legendre_Plm(j,i_bessel,cos((*theta)[i]));
-   		      Pl_theta[i][j]*=(2*j+1)*pow(j,4);//approximate.. Using relation between bessel and legendre functions from Steibbens96.
-   		      for (k=-3;k<=4;k++)
-   		         Pl_theta[i][j]/=(j+k);
-   		//printf("legendre_calc:j, i=%d  %d\n",j,i);
-          }
-   	  }
-	   }
+  //Initialize Pl_theta
+  for (int i=0;i<n_theta;i++){
+    for (int j=0;j<L_max;j++) Pl_theta[i][j]=0.;
   }
-  return 0;
-}
+  
+  //Two clustering tracers:
+  if((ct1->tracer_type==CL_TRACER_NC) && (ct2->tracer_type==CL_TRACER_NC)){
+    for (int i=0;i<n_theta;i++)
+      {
+	gsl_sf_legendre_Pl_array(L_max,cos((*theta)[i]),Pl_theta[i]);
+	for (int j=0;j<L_max;j++) Pl_theta[i][j]*=(2*j+1);
+      }
+    } else {
+      if(((ct1->tracer_type==CL_TRACER_WL) && (ct2->tracer_type==CL_TRACER_NC))
+	 ||((ct1->tracer_type==CL_TRACER_NC) && (ct2->tracer_type==CL_TRACER_WL))){
+	for (int i=0;i<n_theta;i++){//https://arxiv.org/pdf/1007.4809.pdf
+	  for (int j=2;j<L_max;j++)
+	    {
+	      Pl_theta[i][j]=gsl_sf_legendre_Plm(j,i_bessel,cos((*theta)[i]));
+	      Pl_theta[i][j]*=(2*j+1)/j/(j+1);
+	    }// for j
+	} //for theta
+      } else { // Two weak lensing tracers
+	//https://arxiv.org/pdf/astro-ph/9611125v1.pdf
+	//Kilbinger+2017
+	if (i_bessel==0){
+	  for (int i=0;i<n_theta;i++){
+	    gsl_sf_legendre_Pl_array(L_max,cos((*theta)[i]),Pl_theta[i]);
+	    for (int j=0;j<L_max;j++){
+	      Pl_theta[i][j]*=(2*j+1);
+   	    } //for j
+	  } //for i
+	} else { //i_bessel, this is slow
+	  for (int i=0;i<n_theta;i++) {
+	    for (int j=0;j<L_max;j++) {
+	      if (i%(n_theta/50)!=0 || j>10000) //If I comment this out it is very slow
+		//if(j>1e4)  
+		{///////////Some theta points thrown away for speed
+		  Pl_theta[i][j]=0;
+		  continue;
+		}
+	      if (j<i_bessel){ //If I comment this out there is a GSL domain error
+		Pl_theta[i][j]=0;
+		continue;
+	      }
+	      Pl_theta[i][j]=gsl_sf_legendre_Plm(j,i_bessel,cos((*theta)[i]));
+	      Pl_theta[i][j]*=(2*j+1)*pow(j,4);//approximate.. Using relation between bessel and legendre functions from Steibbens96.
+	      for (k=-3;k<=4;k++)
+		Pl_theta[i][j]/=(j+k);
+	    }//for j
+	  }//for theta
+	}//else i_bessel
+      }//else
+    }//else
+    
+
+    return 0;
+  }
 
 
 /*--------ROUTINE: ccl_tracer_corr_legendre ------
@@ -478,7 +484,7 @@ double ccl_single_tracer_corr(double theta_in,ccl_cosmology *cosmo,CCL_ClTracer 
   ccl_tracer_corr_legendre(cosmo, n_theta,&theta,ct1,ct2,i_bessel,true,
 			   taper_cl_limits,&corr_func,ccl_angular_cl);
   //ccl_tracer_corr_fftlog(cosmo, n_theta,&theta,ct1,ct2,i_bessel,true,taper_cl_limits,
-  //&corr_func,ccl_angular_cl);
+  //			 &corr_func,ccl_angular_cl);
 
   //Spline the correlation
   gsl_spline * corr_spline = gsl_spline_alloc(CORR_SPLINE_TYPE, n_theta);
