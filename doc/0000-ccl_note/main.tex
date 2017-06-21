@@ -10,7 +10,7 @@
 \input{macros}
 
 \usepackage[outdir=./]{epstopdf}
-\usepackage{graphicx}
+\usepackage{graphicx,verbatim}
 \graphicspath{{./}{./figures/}}
 \bibliographystyle{apj}
 \newcommand{\todo}[1]{\textcolor{magenta}{To do: #1}}
@@ -479,6 +479,7 @@ where
 \end{align}
 
 \begin{comment}
+
 \subsubsection{Beyond Limber: angpow}
 
 %Text Added JECampagne 27/05/17 START
@@ -568,6 +569,7 @@ reconstruct these accurate spectra. Such performances are much higher than those
 with {\tt CLASSgal} when not using the Limber approximation.
 For instance using{\tt CLASSgal}  to compute the auto-correlation with a Gaussian selection function with ($z_\mrm{mean}=1$, $\sigma_z=0.02$, $5\sigma_z$-cut) and $k_\mrm{max}=1\ \mrm{Mpc}^{-1}$ and a radial quadrature based on $N_\mrm{pts}=139$ sample points, it takes
 about 15s on 16 threads, which is to be compared to about 0.5s with \texttt{Angpow}.
+
 \end{comment}
 
 \subsection{Correlation functions}
