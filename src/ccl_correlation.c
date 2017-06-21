@@ -341,13 +341,12 @@ static int ccl_compute_legendre_polynomial(CCL_ClTracer *ct1, CCL_ClTracer *ct2,
 	} else { //i_bessel, this is slow
 	  for (int i=0;i<n_theta;i++) {
 	    for (int j=0;j<L_max;j++) {
-	      if (i%(n_theta/50)!=0 || j>10000) //If I comment this out it is very slow
-		//if(j>1e4)  
+	      if(j>1e4)  
 		{///////////Some theta points thrown away for speed
 		  Pl_theta[i][j]=0;
 		  continue;
 		}
-	      if (j<i_bessel){ //If I comment this out there is a GSL domain error
+	      if (j<i_bessel){ 
 		Pl_theta[i][j]=0;
 		continue;
 	      }
@@ -478,13 +477,12 @@ double ccl_single_tracer_corr(double theta_in,ccl_cosmology *cosmo,CCL_ClTracer 
 {
 
   double *theta,corr_func_out,*corr_func;
-  int n_theta=NL;
+  int n_theta=100; //NL
   double taper_cl_limits[4]={1,2,10000,15000}; //why these values?
 
-  ccl_tracer_corr_legendre(cosmo, n_theta,&theta,ct1,ct2,i_bessel,true,
-			   taper_cl_limits,&corr_func,ccl_angular_cl);
-  //ccl_tracer_corr_fftlog(cosmo, n_theta,&theta,ct1,ct2,i_bessel,true,taper_cl_limits,
-  //			 &corr_func,ccl_angular_cl);
+  //ccl_tracer_corr_legendre(cosmo, n_theta,&theta,ct1,ct2,i_bessel,true,
+  //			   taper_cl_limits,&corr_func,ccl_angular_cl);
+  ccl_tracer_corr_fftlog(cosmo, n_theta,&theta,ct1,ct2,i_bessel,true,taper_cl_limits,&corr_func,ccl_angular_cl);
 
   //Spline the correlation
   gsl_spline * corr_spline = gsl_spline_alloc(CORR_SPLINE_TYPE, n_theta);
