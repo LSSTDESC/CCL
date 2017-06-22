@@ -61,9 +61,10 @@ static double angular_l2_exp(ccl_cosmology *cosmo,int l,CCL_ClTracer *clt1,CCL_C
 
 static void compare_corr(char *compare_type,struct corrs_data * data)
 {
+  int status=0;
   ccl_configuration config = default_config;
   config.transfer_function_method = ccl_bbks;
-  ccl_parameters params = ccl_parameters_create_flat_lcdm(data->Omega_c,data->Omega_b,data->h,data->sigma_8,data->n_s);
+  ccl_parameters params = ccl_parameters_create_flat_lcdm(data->Omega_c,data->Omega_b,data->h,data->sigma_8,data->n_s,&status);
   ccl_cosmology * cosmo = ccl_cosmology_create(params, config);
   ASSERT_NOT_NULL(cosmo);
 
@@ -247,7 +248,7 @@ static void compare_corr(char *compare_type,struct corrs_data * data)
 
   //Spline
   gsl_spline * spl_wt_dd_11_h = gsl_spline_alloc(L_SPLINE_TYPE,NL);
-  int status = gsl_spline_init(spl_wt_dd_11_h, theta_arr, wt_dd_11_h, NL);
+  status = gsl_spline_init(spl_wt_dd_11_h, theta_arr, wt_dd_11_h, NL);
   gsl_spline * spl_wt_dd_12_h = gsl_spline_alloc(L_SPLINE_TYPE,NL);
   status = gsl_spline_init(spl_wt_dd_12_h, theta_arr, wt_dd_12_h, NL);
   gsl_spline * spl_wt_dd_22_h = gsl_spline_alloc(L_SPLINE_TYPE,NL);

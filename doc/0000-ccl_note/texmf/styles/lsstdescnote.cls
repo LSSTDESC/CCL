@@ -465,9 +465,9 @@ revtex4-1.cls^^J^^J}\stop
 
 \renewcommand\small{%
 \iftighten
-   \@setfontsize\small\@ixpt{12}%
-\else
    \@setfontsize\small\@ixpt{11}%
+\else
+   \@setfontsize\small\@ixpt{12}%
 \fi
    \abovedisplayskip 8.5\p@ \@plus3\p@ \@minus4\p@
    \abovedisplayshortskip \z@ \@plus2\p@
@@ -657,8 +657,9 @@ revtex4-1.cls^^J^^J}\stop
 % {\footnotesize
 % Typeset using \LaTeX\ {\bf modern} style in AASTeX61}
 % LSST DESC Notes have a header image instead!
+\vspace*{-1in}
 \includegraphics[width=\textwidth]{.logos/header.png}
-\vskip48pt
+\par\vspace*{-\baselineskip}\vspace*{0.625in}
 }
 \else
 %%
@@ -786,16 +787,10 @@ revtex4-1.cls^^J^^J}\stop
 \fi
 }%
 
+% DESC Note: shrink affiliation font size
+\def\frontmatter@affiliationfont{\normalfont\tiny\it}%
 
-\def\frontmatter@affiliationfont{\normalfont\footnotesize\it
-\ifmodern\baselineskip=14pt\fi
-\iflongauthor\else
-\rightskip-12pt plus 1fil
-\leftskip6pt \parindent-4pt
-\fi
-}%
-
-\def\frontmatter@finalspace{\vskip-24pt}%\vspace*{-\baselineskip}\vspace*{0.375in}}
+\def\frontmatter@finalspace{\vspace*{-0.5in}}
 
 \def\@separator{\\}%
 
@@ -821,7 +816,8 @@ revtex4-1.cls^^J^^J}\stop
  \move@AU\move@AF%
  \begingroup%
   \@affiliation{%\hspace*{2mm}
- #1\ifmodern\iflongauthor\baselineskip=12pt\else\vskip2pt\fi\else\baselineskip=12pt\fi}%
+% DESC Note: Shrink skip between affiliations
+ #1\ifmodern\iflongauthor\baselineskip=12pt\else\vskip-14pt\fi\fi}%
 }%
 \fi %% end switch for longauthor
 
@@ -914,7 +910,7 @@ revtex4-1.cls^^J^^J}\stop
 
 % No keywords in LSST DESC Notes! We use the slot for the date instead:
 %   \def\@keys@name{\textit{Keywords:}\/~\mbox{}}%
-\def\@keys@name{This Note was generated on: \today}%
+\def\@keys@name{\small This LSST DESC Note was generated on: \today}%
 
 \newlength{\keys@width}
 \def\frontmatter@keys@format{\ifmodern\vskip0pt\else\vspace*{0.5mm}\fi%
@@ -1031,6 +1027,7 @@ revtex4-1.cls^^J^^J}\stop
 \def\section{%
 
 % LSST DESC Notes don't have this extra page at the front:
+% ADW: I think it might actually be better to change doctitle to do this
 % \if@firstsection
 %       \maketitle
 % \global\@firstsectionfalse
@@ -1081,8 +1078,8 @@ revtex4-1.cls^^J^^J}\stop
 
 % How the section number will appear in the section title - AV
 % LSST DESC Notes: no section numbering!
-\def\ApjSectionMarkInTitle#1{#1.\ }
-%\def\ApjSectionMarkInTitle#1{\!\!}
+% \def\ApjSectionMarkInTitle#1{#1.\ }
+\def\ApjSectionMarkInTitle#1{\!\!}
 \def\ApjSectionpenalty{0}
 
 
@@ -6208,7 +6205,7 @@ needed. It will not do anything.^^J Please use
 
 \def\@affil@script#1#2#3#4{%
 %\ifmodern
-\iffirstaffil\vskip24pt
+\iffirstaffil
 \global\firstaffilfalse\fi%\fi
  \@ifnum{#1=\z@}{}{%
   \par

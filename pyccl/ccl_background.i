@@ -78,6 +78,14 @@ void luminosity_distance_vec(ccl_cosmology * cosmo,
     ccl_luminosity_distances(cosmo, na, a, output, status);
 }
 
+void distance_modulus_vec(ccl_cosmology * cosmo,
+                             double* a, int na,
+                             double* output, int nout,
+                             int* status) {
+    assert(nout == na);
+    ccl_distance_moduli(cosmo, na, a, output, status);
+}
+
 void scale_factor_of_chi_vec(ccl_cosmology * cosmo, 
                        double* chi, int nchi,
                        double* output, int nout,
@@ -88,10 +96,10 @@ void scale_factor_of_chi_vec(ccl_cosmology * cosmo,
 
 void omega_x_vec(ccl_cosmology * cosmo, int label, 
 		       double* a,  int na,
-		   double* output, int nout) {
+		   double* output, int nout, int *status) {
     assert(nout == na);
     for(int i=0; i < na; i++){
-      output[i] = ccl_omega_x(cosmo, a[i], label);
+      output[i] = ccl_omega_x(cosmo, a[i], label, status);
     }
 }
 

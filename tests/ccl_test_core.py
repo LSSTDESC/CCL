@@ -15,7 +15,9 @@ def test_parameters_valid_input():
     assert_no_warnings(ccl.Parameters, Omega_c=0.25, Omega_b=0.05, h=0.7, 
                                        A_s=2.1e-9, n_s=0.96, Omega_k=0.05)
     assert_no_warnings(ccl.Parameters, Omega_c=0.25, Omega_b=0.05, h=0.7, 
-                                       A_s=2.1e-9, n_s=0.96, Omega_n=0.05)
+                                       A_s=2.1e-9, n_s=0.96, N_nu_rel=2.046)
+    assert_no_warnings(ccl.Parameters, Omega_c=0.25, Omega_b=0.05, h=0.7, 
+                                       A_s=2.1e-9, n_s=0.96, N_nu_rel = 2.046, N_nu_mass=1., m_nu=0.05)                                   
     assert_no_warnings(ccl.Parameters, Omega_c=0.25, Omega_b=0.05, h=0.7, 
                                        A_s=2.1e-9, n_s=0.96, w0=-0.9)
     assert_no_warnings(ccl.Parameters, 0.25, 0.05, 0.7, 2.1e-9, 0.96, 
@@ -45,7 +47,11 @@ def test_parameters_missing():
     assert_raises(ValueError, ccl.Parameters, 0.25, 0.05, 0.7, 2.1e-9, 0.96, 
                                               wa=None)
     assert_raises(ValueError, ccl.Parameters, 0.25, 0.05, 0.7, 2.1e-9, 0.96, 
-                                              Omega_n=None)
+                                              N_nu_rel=None)
+    assert_raises(ValueError, ccl.Parameters, 0.25, 0.05, 0.7, 2.1e-9, 0.96, 
+                                              N_nu_mass=None)
+    assert_raises(ValueError, ccl.Parameters, 0.25, 0.05, 0.7, 2.1e-9, 0.96, 
+                                              m_nu=None)                                                                                  
     
     # Check that a single missing compulsory parameter is noticed
     assert_raises(ValueError, ccl.Parameters, Omega_c=0.25, Omega_b=0.05, 
@@ -61,14 +67,18 @@ def test_parameters_missing():
     
     # Make sure that optional parameters are optional
     assert_no_warnings(ccl.Parameters, 0.25, 0.05, 0.7, 2.1e-9, 0.96, 
-                                       zarr_mgrowth=None, dfarr_mgrowth=None)
+                                       z_mg=None, df_mg=None)
     assert_no_warnings(ccl.Parameters, 0.25, 0.05, 0.7, 2.1e-9, 0.96, 
-                                       zarr_mgrowth=None)
+                                       z_mg=None)
     assert_no_warnings(ccl.Parameters, 0.25, 0.05, 0.7, 2.1e-9, 0.96, 
-                                       dfarr_mgrowth=None)
+                                       df_mg=None)
     assert_no_warnings(ccl.Parameters, Omega_c=0.25, Omega_b=0.05, h=0.7, 
                                        A_s=2.1e-9, n_s=0.96, 
-                                       zarr_mgrowth=None, dfarr_mgrowth=None)
+                                       z_mg=None, df_mg=None)
+    
+    # Check that Cosmology() object can instantiate a Parameters() object itself
+    assert_no_warnings(ccl.Cosmology, Omega_c=0.25, Omega_b=0.05, h=0.7, 
+                                      A_s=2.1e-9, n_s=0.96)
     
 def test_parameters_spelling():
     """
@@ -112,37 +122,37 @@ def test_parameters_mgrowth():
     
     # Valid constructions
     assert_no_warnings(ccl.Parameters, 0.25, 0.05, 0.7, 2.1e-9, 0.96, 
-                                       zarr_mgrowth=zarr, dfarr_mgrowth=dfarr)
+                                       z_mg=zarr, df_mg=dfarr)
     assert_no_warnings(ccl.Parameters, 0.25, 0.05, 0.7, 2.1e-9, 0.96, 
-                                       dfarr_mgrowth=dfarr, zarr_mgrowth=zarr)
+                                       df_mg=dfarr, z_mg=zarr)
     assert_no_warnings(ccl.Parameters, 0.25, 0.05, 0.7, 2.1e-9, 0.96, w0=-1.,
-                                       zarr_mgrowth=zarr, dfarr_mgrowth=dfarr)
+                                       z_mg=zarr, df_mg=dfarr)
     assert_no_warnings(ccl.Parameters, 0.25, 0.05, 0.7, 2.1e-9, 0.96, w0=-1.,
-                                       zarr_mgrowth=[0., 0.1, 0.2], 
-                                       dfarr_mgrowth=[0.1, 0.1, 0.1])
+                                       z_mg=[0., 0.1, 0.2], 
+                                       df_mg=[0.1, 0.1, 0.1])
     
     # Invalid constructions
-    assert_warns(UserWarning, ccl.Parameters, 0.25, 0.05, 0.7, 2.1e-9, 0.96, 
-                                              zarr_mgrowth=zarr)
-    assert_warns(UserWarning, ccl.Parameters, 0.25, 0.05, 0.7, 2.1e-9, 0.96, 
-                                              dfarr_mgrowth=dfarr)
-    assert_warns(UserWarning, ccl.Parameters, 0.25, 0.05, 0.7, 2.1e-9, 0.96, 
-                                              zarr_mgrowth=None,
-                                              dfarr_mgrowth=dfarr)
+    assert_raises(ValueError, ccl.Parameters, 0.25, 0.05, 0.7, 2.1e-9, 0.96, 
+                                             z_mg=zarr)
+    assert_raises(ValueError, ccl.Parameters, 0.25, 0.05, 0.7, 2.1e-9, 0.96, 
+                                             df_mg=dfarr)
+    assert_raises(ValueError, ccl.Parameters, 0.25, 0.05, 0.7, 2.1e-9, 0.96, 
+                                             z_mg=None,
+                                             df_mg=dfarr)
     assert_raises(AssertionError, ccl.Parameters, 0.25, 0.05, 0.7, 2.1e-9, 0.96, 
-                                                  zarr_mgrowth=zarr,
-                                                  dfarr_mgrowth=0.1)
+                                                  z_mg=zarr,
+                                                  df_mg=0.1)
     assert_raises(AssertionError, ccl.Parameters, 0.25, 0.05, 0.7, 2.1e-9, 0.96, 
-                                                  zarr_mgrowth=zarr,
-                                                  dfarr_mgrowth=f_func)
+                                                  z_mg=zarr,
+                                                  df_mg=f_func)
     
     # Mis-matched array sizes and dimensionality
     assert_raises(AssertionError, ccl.Parameters, 0.25, 0.05, 0.7, 2.1e-9, 0.96, 
-                                                  zarr_mgrowth=zarr,
-                                                  dfarr_mgrowth=dfarr[1:])
+                                                  z_mg=zarr,
+                                                  df_mg=dfarr[1:])
     assert_raises(AssertionError, ccl.Parameters, 0.25, 0.05, 0.7, 2.1e-9, 0.96, 
-                                                  zarr_mgrowth=zarr,
-                                 dfarr_mgrowth=np.column_stack((dfarr, dfarr)) )
+                                                  z_mg=zarr,
+                                 df_mg=np.column_stack((dfarr, dfarr)) )
 
 
 if __name__ == '__main__':

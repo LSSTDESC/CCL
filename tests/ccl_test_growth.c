@@ -12,7 +12,9 @@ CTEST_DATA(growth) {
   double h;
   double A_s;
   double n_s;
-  double Omega_n;
+  double N_nu_rel;
+  double N_nu_mass;
+  double mnu;
   double Omega_v[5];
   double Omega_k[5];
   double w_0[5];
@@ -32,7 +34,8 @@ static void read_growth_test_file(double z[6], double gf[5][6])
   
   // Ignore header line
   char str[1024];
-  fgets(str, 1024, f);
+  char* rtn;
+  rtn = fgets(str, 1024, f);
   
     // File is fixed format - five rows and six columns
   for (int i=0; i<6; i++){
@@ -54,7 +57,9 @@ CTEST_SETUP(growth){
   data->h = 0.7;
   data->A_s = 2.1e-9;
   data->n_s = 0.96;
-  data->Omega_n = 0.0;
+  data->N_nu_rel=0;
+  data->N_nu_mass=0;
+  data->mnu=0;
   
   
   // Values that are different for the different models
@@ -67,7 +72,7 @@ CTEST_SETUP(growth){
     data->Omega_v[i] = Omega_v[i];
     data->w_0[i]     = w_0[i];
     data->w_a[i]     = w_a[i];
-    data->Omega_k[i] = 1.0 - data->Omega_c - data->Omega_b - data->Omega_n - data->Omega_v[i];
+    data->Omega_k[i] = 1.0 - data->Omega_c - data->Omega_b - data->Omega_v[i];
   }
 
   // The file of benchmark data.
@@ -78,12 +83,10 @@ CTEST_SETUP(growth){
 
 static void compare_growth(int model, struct growth_data * data)
 {
+  int status=0; 	
   // Make the parameter set from the input data
   // Values of some parameters depend on the model index
-  ccl_parameters params = ccl_parameters_create(data->Omega_c, data->Omega_b, 
-						data->Omega_k[model], data->Omega_n, 
-						data->w_0[model], data->w_a[model],
-						data->h, data->A_s, data->n_s,-1,NULL,NULL);
+  ccl_parameters params = ccl_parameters_create(data->Omega_c, data->Omega_b, data->Omega_k[model], data->N_nu_rel, data->N_nu_mass, data->mnu, data->w_0[model], data->w_a[model], data->h, data->A_s, data->n_s,-1,NULL,NULL, &status);
   params.Omega_g=0;
   // Make a cosmology object from the parameters with the default configuration
   ccl_cosmology * cosmo = ccl_cosmology_create(params, default_config);
@@ -91,7 +94,6 @@ static void compare_growth(int model, struct growth_data * data)
   
   // Compare to benchmark data
   for (int j=0; j<6; j++){
-    int status=0;
     double a = 1/(1.+data->z[j]);
     double gf_ij=ccl_growth_factor_unnorm(cosmo,a, &status);
     if (status) printf("%s\n",cosmo->status_message);
@@ -118,8 +120,8 @@ static void check_mgrowth(void)
     z_mg[ii]=4*(ii+0.0)/(nz_mg-1.);
     df_mg[ii]=0.1/(1+z_mg[ii]);
   }
-  params1=ccl_parameters_create(0.25,0.05,0,0,-1,0,0.7,2.1E-9,0.96,-1,NULL,NULL);
-  params2=ccl_parameters_create(0.25,0.05,0,0,-1,0,0.7,2.1E-9,0.96,nz_mg,z_mg,df_mg);
+  params1=ccl_parameters_create(0.25,0.05,0,0,0,0,-1,0,0.7,2.1E-9,0.96,-1,NULL,NULL, &status);
+  params2=ccl_parameters_create(0.25,0.05,0,0,0,0,-1,0,0.7,2.1E-9,0.96,nz_mg,z_mg,df_mg, &status);
   cosmo1=ccl_cosmology_create(params1,default_config);
   cosmo2=ccl_cosmology_create(params2,default_config);
 

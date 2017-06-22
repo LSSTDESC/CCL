@@ -14,10 +14,6 @@
 #include "ccl.h"
 #include "fftlog.h"
 
-#ifndef M_PI
-    #define M_PI 3.14159265358979323846
-#endif
-
 typedef struct
 {
   gsl_spline *cl;
