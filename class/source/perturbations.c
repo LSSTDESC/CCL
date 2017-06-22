@@ -182,11 +182,14 @@ int perturb_init(
                ppt->error_message,
                "So far, the fluid is meant to be negligible at early time, and not to be important for defining the initial conditions of other species. You are using parameters for which this assumption may break down, so maybe it's the case to fully implement the fluid in the initial condition routine");
 
-    class_test((pba->w0_fld==-1.) && (pba->wa_fld==0.),
+//  MI: the second part of the if is superfluous. Removing it fixes the problem 
+//  of the code stalling with w0=-1 and wa!=0
+//    class_test((pba->w0_fld==-1.) && (pba->wa_fld==0.),
+      class_test((pba->w0_fld==-1.),
                ppt->error_message,
                "Your choice of a fluid with (w0,wa)=(-1,0) is not valid due to instabilities in the unphysical perturbations of such a fluid. Try instead with a plain cosmological constant");
-// MI: changed < to <= to stop the case w0=-1 and wa <>0.0 and provide error message.  
-    class_test(((pba->w0_fld + pba->wa_fld +1.0)*(pba->w0_fld+1.0)) <= 0.0,
+
+    class_test(((pba->w0_fld + pba->wa_fld +1.0)*(pba->w0_fld+1.0)) < 0.0,
                ppt->error_message,
                "w crosses -1 between the infinite past and today, and this would lead to divergent perturbation equations for the fluid.");
 
