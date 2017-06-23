@@ -2,18 +2,10 @@
 
 #pragma once
 
-/**
- * Auxiliar function that computes 1/l. This is a ccl_angular_cl-like function for test case. Hankel tranform of 1./l is 1./theta (up to factors of 2\pi)
- * @param cosmo Cosmological parameters
- * @param l angular multipole
- * @param ct1 one of the tracers
- * @param ct2 another tracer
- * @param status status for catching errors
- * @return 1/l
- */
-double angular_l_inv2(ccl_cosmology *cosmo,int l,CCL_ClTracer *clt1,
-		      CCL_ClTracer *clt2, int * status);
-  
+#define CCL_CORR_LGNDRE 1001
+#define CCL_CORR_FFTLOG 1002
+#define CCL_CORR_BESSEL 1003
+
 /**
  * Computes the correlation function (wrapper)
  * @param cosmo Cosmological parameters
@@ -29,8 +21,21 @@ double angular_l_inv2(ccl_cosmology *cosmo,int l,CCL_ClTracer *clt1,
  */
 int ccl_tracer_corr(ccl_cosmology *cosmo, int n_theta, double **theta,
 		    CCL_ClTracer *ct1, CCL_ClTracer *ct2, int i_bessel,
-		    bool taper_cl,double *taper_cl_limits, double **corr_func);
+		    bool taper_cl,double *taper_cl_limits, double **corr_func,int flag_method);
 
+#ifdef _DEFNONE
+/**
+ * Auxiliar function that computes 1/l. This is a ccl_angular_cl-like function for test case. Hankel tranform of 1./l is 1./theta (up to factors of 2\pi)
+ * @param cosmo Cosmological parameters
+ * @param l angular multipole
+ * @param ct1 one of the tracers
+ * @param ct2 another tracer
+ * @param status status for catching errors
+ * @return 1/l
+ */
+double angular_l_inv2(ccl_cosmology *cosmo,int l,CCL_ClTracer *clt1,
+		      CCL_ClTracer *clt2, int * status);
+  
 /**
 * Computes the correlation function using FFTlog
  * @param cosmo Cosmological parameters
@@ -81,3 +86,4 @@ int ccl_tracer_corr_legendre(ccl_cosmology *cosmo, int n_theta, double **theta,
  */
 double ccl_single_tracer_corr(double theta_in,ccl_cosmology *cosmo,
 			      CCL_ClTracer *ct1, CCL_ClTracer *ct2, int i_bessel);
+#endif //_DEFNONE

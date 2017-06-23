@@ -6,6 +6,7 @@
 #include "gsl/gsl_sf_legendre.h"
 #include "ccl_error.h"
 #include "ccl_utils.h"
+#include "ccl_correlation.h"
 #include <stdlib.h>
 #include <math.h>
 #include <stdio.h>
@@ -80,7 +81,7 @@ static void ccl_general_corr(gsl_spline *cl, double *theta, double *corr_func, i
 TASK: Obtain 1./l. This is a ccl_angular_cl-like function for test case. Hankel tranform of 1./l is 1./theta (uto factors of 2\pi)
 INPUT: cosmology, l value, tracer 1, tracer 2
 */
-double angular_l_inv2(ccl_cosmology *cosmo,int l,CCL_ClTracer *clt1,CCL_ClTracer *clt2, int * status)
+static double angular_l_inv2(ccl_cosmology *cosmo,int l,CCL_ClTracer *clt1,CCL_ClTracer *clt2, int * status)
 {
   if (l==0)
     return 0;
@@ -190,36 +191,16 @@ static int check_i_bessel(CCL_ClTracer *ct1, CCL_ClTracer *ct2, int i_bessel)
 return 0;
 }
 
-/*--------ROUTINE: ccl_tracer_corr ------
-TASK: For a given tracer, get the correlation function. Do so by running
-      ccl_angular_cls. If you already have Cls calculated, go to the next
-      function to pass them directly.
-INPUT: cosmology, number of theta values to evaluate = NL, theta vector,
-       tracer 1, tracer 2, i_bessel, key for tapering, limits of tapering
-       correlation function.
- */
-int ccl_tracer_corr(ccl_cosmology *cosmo, int n_theta, double **theta,
-                    CCL_ClTracer *ct1, CCL_ClTracer *ct2, int i_bessel,
-		    bool do_taper_cl,double *taper_cl_limits,
-		    double **corr_func)
-{
-
-  //return ccl_tracer_corr_fftlog(cosmo, n_theta,theta,ct1,ct2,i_bessel,do_taper_cl,taper_cl_limits,corr_func,ccl_angular_cl);
-
-  return ccl_tracer_corr_legendre(cosmo, n_theta,theta,ct1,ct2,i_bessel,do_taper_cl,taper_cl_limits,corr_func,ccl_angular_cl);
-}
-
-
 /*--------ROUTINE: ccl_tracer_corr_fftlog ------
 TASK: For a given tracer, get the correlation function
       Following function takes a function to calculate angular cl as well.
       By default above function will call it using ccl_angular_cl
 INPUT: type of tracer, number of theta values to evaluate = NL, theta vector
  */
-int ccl_tracer_corr_fftlog(ccl_cosmology *cosmo, int n_theta, double **theta,
-		    CCL_ClTracer *ct1, CCL_ClTracer *ct2, int i_bessel,
-		     bool do_taper_cl,double *taper_cl_limits,double **corr_func,
-		    double (*angular_cl)(ccl_cosmology *cosmo,int l,CCL_ClTracer *clt1,
+static int ccl_tracer_corr_fftlog(ccl_cosmology *cosmo, int n_theta, double **theta,
+				  CCL_ClTracer *ct1, CCL_ClTracer *ct2, int i_bessel,
+				  bool do_taper_cl,double *taper_cl_limits,double **corr_func,
+				  double (*angular_cl)(ccl_cosmology *cosmo,int l,CCL_ClTracer *clt1,
 					 CCL_ClTracer *clt2, int * status) ){
   int status=check_i_bessel(ct1,ct2,i_bessel);
   if (status!=0)
@@ -236,9 +217,8 @@ int ccl_tracer_corr_fftlog(ccl_cosmology *cosmo, int n_theta, double **theta,
 
   int l2=0;
   for(int i=0;i<n_theta;i+=1) {
-    if (l_arr[i]<1)
-      {
-	       cl_arr[i]=0;
+    if (l_arr[i]<1)    {
+	cl_arr[i]=0;
       	//cl_arr[i]=1./l_arr[i];//works for the 1/ell analytical function.
       	//cl_arr[i]=1./sqrt(l_arr[i]*l_arr[i]+1);
       	//cl_arr[i]=exp(-0.5*l_arr[i]*l_arr[i]*1);
@@ -366,11 +346,11 @@ TASK: Compute correlation function via Legendre polynomials
 INPUT: cosmology, number of theta bins, theta array, tracer 1, tracer 2, i_bessel, boolean
        for tapering, vector of tapering limits, correlation vector, angular_cl function.
  */
-int ccl_tracer_corr_legendre(ccl_cosmology *cosmo, int n_theta, double **theta,
-		                        CCL_ClTracer *ct1, CCL_ClTracer *ct2, int i_bessel,
-                            bool do_taper_cl,double *taper_cl_limits,double **corr_func,
-		                        double (*angular_cl)(ccl_cosmology *cosmo,int l,CCL_ClTracer *clt1,
-					                                       CCL_ClTracer *clt2, int * status) )
+static int ccl_tracer_corr_legendre(ccl_cosmology *cosmo, int n_theta, double **theta,
+				    CCL_ClTracer *ct1, CCL_ClTracer *ct2, int i_bessel,
+				    bool do_taper_cl,double *taper_cl_limits,double **corr_func,
+				    double (*angular_cl)(ccl_cosmology *cosmo,int l,CCL_ClTracer *clt1,
+							 CCL_ClTracer *clt2, int * status) )
 {
   /*In this computation, we need to sum over all integer ell upto some ell_max. Since angular_cl calls are expensive, we only do them for some selected ell values in log space and then interpolate them to get values at every ell.*/
   int status=check_i_bessel(ct1,ct2,i_bessel);
@@ -469,7 +449,8 @@ TASK: Wrap bin_func and tracer_corr to get the correlation function at a single 
       access to.
 INPUT: desired theta value, cosmology struct, tracer 1, tracer 2, i_bessel
  */
-double ccl_single_tracer_corr(double theta_in,ccl_cosmology *cosmo,CCL_ClTracer *ct1, CCL_ClTracer *ct2, int i_bessel)
+static double ccl_single_tracer_corr(double theta_in,ccl_cosmology *cosmo,
+				     CCL_ClTracer *ct1, CCL_ClTracer *ct2, int i_bessel)
 {
 
   double *theta,corr_func_out,*corr_func;
@@ -487,3 +468,29 @@ double ccl_single_tracer_corr(double theta_in,ccl_cosmology *cosmo,CCL_ClTracer 
 
   return corr_func_out;
 }
+
+/*--------ROUTINE: ccl_tracer_corr ------
+TASK: For a given tracer, get the correlation function. Do so by running
+      ccl_angular_cls. If you already have Cls calculated, go to the next
+      function to pass them directly.
+INPUT: cosmology, number of theta values to evaluate = NL, theta vector,
+       tracer 1, tracer 2, i_bessel, key for tapering, limits of tapering
+       correlation function.
+ */
+int ccl_tracer_corr(ccl_cosmology *cosmo, int n_theta, double **theta,
+                    CCL_ClTracer *ct1, CCL_ClTracer *ct2, int i_bessel,
+		    bool do_taper_cl,double *taper_cl_limits,
+		    double **corr_func,int flag_method)
+{
+  if(flag_method==CCL_CORR_FFTLOG)
+    return ccl_tracer_corr_fftlog(cosmo, n_theta,theta,ct1,ct2,i_bessel,do_taper_cl,taper_cl_limits,corr_func,ccl_angular_cl);
+  else if(flag_method==CCL_CORR_LGNDRE)
+    return ccl_tracer_corr_legendre(cosmo, n_theta,theta,ct1,ct2,i_bessel,do_taper_cl,taper_cl_limits,corr_func,ccl_angular_cl);
+  else if(flag_method==CCL_CORR_BESSEL)
+    exit(1);
+  else
+    exit(1); //TODO: proper error handling
+  //TODO: what's this tapering crap?
+  //TODO: pass C_ell, not corr
+}
+

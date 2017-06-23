@@ -150,19 +150,17 @@ static void compare_corr(char *compare_type,struct corrs_data * data)
   sprintf(fname,"tests/benchmark/codecomp_step2_outputs/run_b2b2%s_log_wt_ll_mm.txt",compare_type);
   fi_ll_22_mm=fopen(fname,"r"); ASSERT_NOT_NULL(fi_ll_22_mm);
 
-  double fraction_failed=0,fraction_failed_analytical=0;
+  double fraction_failed=0;
   int nofl=15;
   bool taper_cl=false;
   double taper_cl_limits[4]={1,2,10000,15000};//{0,0,0,0};
   double wt_dd_11[nofl],wt_dd_12[nofl],wt_dd_22[nofl];
-  double wt_dd_11_taper[nofl];
   double wt_ll_11_mm[nofl],wt_ll_12_mm[nofl],wt_ll_22_mm[nofl];
   double wt_ll_11_pp[nofl],wt_ll_12_pp[nofl],wt_ll_22_pp[nofl];
-  double *analytical_l_inv,*analytical_l2_inv,*analytical_l2_exp;
-  double *wt_dd_11_h,*wt_dd_12_h,*wt_dd_22_h,*wt_dd_11_h_taper;
+  double *wt_dd_11_h,*wt_dd_12_h,*wt_dd_22_h;
   double *wt_ll_11_h_mm,*wt_ll_12_h_mm,*wt_ll_22_h_mm;
   double *wt_ll_11_h_pp,*wt_ll_12_h_pp,*wt_ll_22_h_pp;
-  double theta_in[nofl],*theta_arr,*theta_arr_an;
+  double theta_in[nofl],*theta_arr;
 
 
   for(int ii=0;ii<nofl;ii++) {
@@ -180,70 +178,46 @@ static void compare_corr(char *compare_type,struct corrs_data * data)
   double time_sec=0;
 
   time(&start_time);
-  taper_cl=true;
-  //computing on analytical functions
-  ccl_tracer_corr_fftlog(cosmo,NL,&theta_arr_an,tr_nc_1,tr_nc_1,0,taper_cl,taper_cl_limits,
-		   &analytical_l_inv,angular_l_inv);
-  ccl_tracer_corr_fftlog(cosmo,NL,&theta_arr_an,tr_nc_1,tr_nc_1,0,taper_cl,taper_cl_limits,
-		   &analytical_l2_inv,angular_l2_inv);
-  ccl_tracer_corr_fftlog(cosmo,NL,&theta_arr_an,tr_nc_1,tr_nc_1,0,taper_cl,taper_cl_limits,
-		   &analytical_l2_exp,angular_l2_exp);
-
-  time(&end_time);
-  time_sec=difftime(end_time,start_time);
-  printf("CCL correlation Analytical done. More in progress... %.10e \n",time_sec);
-
-  time(&start_time);
-  taper_cl=true;
-  //taper_cl_limits={1,2,30000,50000};
-  ccl_tracer_corr(cosmo,NL,&theta_arr,tr_nc_1,tr_nc_1,0,taper_cl,taper_cl_limits,
-                  &wt_dd_11_h_taper);
   taper_cl=false;
   ccl_tracer_corr(cosmo,NL,&theta_arr,tr_nc_1,tr_nc_1,0,taper_cl,taper_cl_limits,
-		  &wt_dd_11_h);
+		  &wt_dd_11_h,CCL_CORR_FFTLOG);
 
   time(&end_time);
   time_sec=difftime(end_time,start_time);
   printf("CCL correlation first calculation done. More in progress... %.10e \n",time_sec);
   ccl_tracer_corr(cosmo,NL,&theta_arr,tr_nc_1,tr_nc_2,0,taper_cl,taper_cl_limits,
-		  &wt_dd_12_h);
+		  &wt_dd_12_h,CCL_CORR_FFTLOG);
   ccl_tracer_corr(cosmo,NL,&theta_arr,tr_nc_2,tr_nc_2,0,taper_cl,taper_cl_limits,
-		  &wt_dd_22_h);
+		  &wt_dd_22_h,CCL_CORR_FFTLOG);
   ccl_tracer_corr(cosmo,NL,&theta_arr,tr_wl_1,tr_wl_1,0,taper_cl,taper_cl_limits,
-		  &wt_ll_11_h_pp);
+		  &wt_ll_11_h_pp,CCL_CORR_FFTLOG);
   ccl_tracer_corr(cosmo,NL,&theta_arr,tr_wl_1,tr_wl_2,0,taper_cl,taper_cl_limits,
-		  &wt_ll_12_h_pp);
+		  &wt_ll_12_h_pp,CCL_CORR_FFTLOG);
   ccl_tracer_corr(cosmo,NL,&theta_arr,tr_wl_2,tr_wl_2,0,taper_cl,taper_cl_limits,
-		  &wt_ll_22_h_pp);
+		  &wt_ll_22_h_pp,CCL_CORR_FFTLOG);
   ccl_tracer_corr(cosmo,NL,&theta_arr,tr_wl_1,tr_wl_1,4,taper_cl,taper_cl_limits,
-		  &wt_ll_11_h_mm);
+		  &wt_ll_11_h_mm,CCL_CORR_FFTLOG);
   ccl_tracer_corr(cosmo,NL,&theta_arr,tr_wl_1,tr_wl_2,4,taper_cl,taper_cl_limits,
-		  &wt_ll_12_h_mm);
+		  &wt_ll_12_h_mm,CCL_CORR_FFTLOG);
   ccl_tracer_corr(cosmo,NL,&theta_arr,tr_wl_2,tr_wl_2,4,taper_cl,taper_cl_limits,
-		  &wt_ll_22_h_mm);
+		  &wt_ll_22_h_mm,CCL_CORR_FFTLOG);
   time(&end_time);
   time_sec=difftime(end_time,start_time);
   printf("CCL correlation all calculation done. %.10e \n",time_sec);
+
   //Re-scale theta from radians to degrees
   for (int i=0;i<NL;i++){
-    theta_arr_an[i]=theta_arr_an[i]*180/M_PI;
     theta_arr[i]=theta_arr[i]*180/M_PI;
   }
-
   
   FILE *output2 = fopen("cc_test_corr_out_fftlog.dat", "w");
-  FILE *output_analytical = fopen("cc_test_corr_out_analytical_fftlog.dat", "w");
   for (int ii=0;ii<NL;ii++){
-    fprintf(output2,"%.10e %.10e %.10e %.10e %.10e %.10e %.10e %.10e %.10e %.10e %.10e \n",
-	    theta_arr[ii],wt_dd_11_h[ii],wt_dd_11_h_taper[ii],wt_dd_12_h[ii],wt_dd_22_h[ii],
+    fprintf(output2,"%.10e %.10e %.10e %.10e %.10e %.10e %.10e %.10e %.10e %.10e \n",
+	    theta_arr[ii],wt_dd_11_h[ii],wt_dd_12_h[ii],wt_dd_22_h[ii],
 	    wt_ll_11_h_pp[ii],wt_ll_12_h_pp[ii],wt_ll_22_h_pp[ii],wt_ll_11_h_mm[ii],
 	    wt_ll_12_h_mm[ii],wt_ll_22_h_mm[ii]);
-
-    fprintf(output_analytical,"%.10e %.10e %.10e %.10e\n",theta_arr_an[ii],
-	    analytical_l_inv[ii],analytical_l2_inv[ii],analytical_l2_exp[ii]);
   }
   fclose(output2);
-  fclose(output_analytical);
   printf("CCL correlation output done. Comparison in progress...\n");
 
   //Spline
@@ -290,9 +264,6 @@ static void compare_corr(char *compare_type,struct corrs_data * data)
     //by-pass small thetas, we don't have requirements on those.
     //if (theta_in[ii]<0.1)
     //  continue;
-
-    if (fabs(analytical_l_inv[ii]*2.0*M_PI*(theta_arr[ii]*M_PI/180.)-1)>CORR_TOLERANCE*theta_arr[ii]/0.1)
-      fraction_failed_analytical++;
 
     tmp=gsl_spline_eval(spl_wt_dd_11_h, theta_in[ii], NULL);
     if(fabs(tmp/wt_dd_11[ii]-1)>CORR_TOLERANCE*theta_in[ii]/0.1)
@@ -371,7 +342,6 @@ static void compare_corr(char *compare_type,struct corrs_data * data)
 
   fraction_failed/=9*nofl;
   printf("%lf %%\n",fraction_failed*100);
-  printf("Analytical %lf %%\n",fraction_failed_analytical/nofl/1*100);
   ASSERT_TRUE((fraction_failed<CORR_FRACTION));
 
   free(zarr_1);

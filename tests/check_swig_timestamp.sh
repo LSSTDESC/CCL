@@ -20,10 +20,14 @@ t1_swig_cwrap=`git log --pretty=format:%ct -n 1 ../pyccl/ccl_wrap.c`
 for hdr in `ls ../include/*.h ../class/include/*.h ../pyccl/*.i`;
 do
     last_commit=`git log --pretty=format:%ct -n 1 $hdr`
+    echo $hdr
     if [ ! -z "$last_commit" ];
     then
 	if [ "$last_commit" -gt "$t1_swig_pylib" ] || [ "$last_commit" -gt "$t1_swig_cwrap" ];
 	then
+	    echo $last_commit
+	    echo $t1_swig_pylib
+	    echo $t1_swig_cwrap
 	    echo $msg1
 	    echo ""
 	    echo $msg2
