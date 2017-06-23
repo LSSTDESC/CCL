@@ -9,6 +9,7 @@
 #include <string.h>
 #include "gsl/gsl_errno.h"
 #include "gsl/gsl_integration.h"
+#include "ccl_params.h"
 
 //Spline creator
 //n     -> number of points
@@ -726,12 +727,12 @@ static void get_k_interval(ccl_cosmology *cosmo,CCL_ClTracer *clt1,CCL_ClTracer 
     chimax=clt2->chimax;
   }
   else {
-    chimin=0.5*(l+0.5)/K_MAX;
-    chimax=2*(l+0.5)/K_MIN_DEFAULT;
+    chimin=0.5*(l+0.5)/ccl_splines->K_MAX;
+    chimax=2*(l+0.5)/ccl_splines->K_MIN_DEFAULT;
   }
 
   if(chimin<=0)
-    chimin=0.5*(l+0.5)/K_MAX;
+    chimin=0.5*(l+0.5)/ccl_splines->K_MAX;
 
   *lkmax=fmin( 2,log10(2  *(l+0.5)/chimin));
   *lkmin=fmax(-4,log10(0.5*(l+0.5)/chimax));

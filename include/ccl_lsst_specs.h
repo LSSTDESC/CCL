@@ -11,18 +11,22 @@
  * with a void* field to contain the parameters to that function.
  */
 typedef struct {
-  double (* your_pz_func)(double, double, void *, int*); // first double corresponds to photo-z, second to spec-z
-        void *  your_pz_params;
+        double (* your_pz_func)(double, double, void *, int*); /*< Function returns the liklihood of measuring a z_ph
+ * (first double) given a z_spec (second double), with a pointer to additonal arguments and a status flag.*/
+        void *  your_pz_params; /*< Additional parameters to be passed into your_pz_func */
 } user_pz_info;
 
-/** A function to provide the bias of the clustering sample
- *  This is an analytic function that gives the clustering bias
- *  @param cosmo Cosmological parameters
- *  @param a scale factor, normalized to 1 for today
- *  @param status Status flag. 0 if there are no errors, nonzero otherwise.
- *  @return b(z) for the clustering sample
+/**
+ * Compute b(a), the bias of the clustering sample of a cosmology at a given scale factor
+ * This is input from LSS group.
+ * @param cosmo Cosmological parameters
+ * @param a scale factor, normalized to a=1 today.
+ * @param status Status flag. 0 if there are no errors, nonzero otherwise.
+ * For specific cases see documentation for ccl_error.
+ * @return b, the bias at a in cosmo
  */
-double ccl_specs_bias_clustering(ccl_cosmology * cosmo, double a, int * status); 
+double ccl_specs_bias_clustering(ccl_cosmology * cosmo, double a, int * status);
+
 
 /** Return dNdz in a particular tomographic bin, 
     convolved with a photo-z model (defined by the user), and normalized.

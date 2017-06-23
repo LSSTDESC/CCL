@@ -9,13 +9,16 @@
 #define INVSIGMA_TOLERANCE 5e-3
 #define MASSFUNC_TOLERANCE 5e-3
 
+
 CTEST_DATA(massfunc) {
   double Omega_c;
   double Omega_b;
   double h;
   double A_s;
   double n_s;
-  double Omega_n;
+  double N_nu_rel;
+  double N_nu_mass;
+  double mnu;
   double Omega_v[1];
   double Omega_k[1];
   double w_0[1];
@@ -35,7 +38,8 @@ static void read_massfunc_test_file(double mass[13], double massfunc[3][13])
 
    // Ignore header line
    char str[1024];
-   fgets(str, 1024, f);
+   char* rtn;
+   rtn = fgets(str, 1024, f);
 
    // file is in fixed format - logmass, sigma, invsigma, and hmf, w/ 13 rows
    for (int i=0; i<13; i++){
@@ -56,8 +60,10 @@ CTEST_SETUP(massfunc){
   data->h = 0.7;
   data->A_s = 2.1e-9;
   data->n_s = 0.96;
-  data->Omega_n =0.0;
   data->sigma_8 = 0.8;
+  data->N_nu_rel=0;
+  data->N_nu_mass=0;
+  data->mnu=0;
 
   double Omega_v[1] = { 0.7 };
   double w_0[1]     = {-1.0 };
@@ -66,7 +72,7 @@ CTEST_SETUP(massfunc){
     data->Omega_v[i] = Omega_v[i];
     data->w_0[i] = w_0[i];
     data->w_a[i]= w_a[i];
-    data->Omega_k[i] = 1.0 - data->Omega_c - data->Omega_b - data->Omega_n - data->Omega_v[i];
+    data->Omega_k[i] = 1.0 - data->Omega_c - data->Omega_b - data->Omega_v[i];
   }
 
   // read the file of benchmark data
@@ -79,13 +85,8 @@ static void compare_massfunc(int model, struct massfunc_data * data)
   
   int stat = 0;
   int* status = &stat;
-  
-  ccl_parameters params = ccl_parameters_create(data->Omega_c, data->Omega_b,
-                                                data->Omega_k[model], data->Omega_n,
-                                                data->w_0[model], data->w_a[model], data->h,
-                                                data->A_s, data->n_s, -1,
-                                                NULL, NULL);
 
+  ccl_parameters params = ccl_parameters_create(data->Omega_c, data->Omega_b,data->Omega_k[model], data->N_nu_rel, data->N_nu_mass, data->mnu,data->w_0[model], data->w_a[model], data->h,data->A_s, data->n_s, -1, NULL, NULL, status);
 
   params.sigma_8 = data->sigma_8;
   ccl_configuration config = default_config;
@@ -98,6 +99,7 @@ static void compare_massfunc(int model, struct massfunc_data * data)
 
   double a = 1.0;
   double logmass = 10;
+  double odelta = 200;
   double rho_m = RHO_CRITICAL*cosmo->params.Omega_m*cosmo->params.h*cosmo->params.h;
 
   // compare to benchmark data
@@ -105,7 +107,7 @@ static void compare_massfunc(int model, struct massfunc_data * data)
     double mass = pow(10,logmass);
     double sigma_j = ccl_sigmaM(cosmo, mass, a, status);
     double loginvsigma_j = log10(1./sigma_j);
-    double logmassfunc_j = log10(ccl_massfunc(cosmo, mass, a, status)*mass/(rho_m*log(10.)));
+    double logmassfunc_j = log10(ccl_massfunc(cosmo, mass, a, odelta, status)*mass/(rho_m*log(10.)));
 
     double absolute_tolerance = SIGMA_TOLERANCE*data->massfunc[0][j];
     if (fabs(absolute_tolerance)<1e-12) absolute_tolerance = 1e-12;

@@ -10,17 +10,25 @@
  */
 void ccl_cosmology_compute_sigma(ccl_cosmology * cosmo, int * status);
 
+/** Updates Tinker mass function fitting formulas for specific Delta
+ * @param cosmo Cosmological parameters
+ * @param status Status flag. 0 if there are no errors, nonzero otherwise.
+ * For specific cases see documentation for ccl_error.
+ */
+void ccl_cosmology_compute_hmfparams(ccl_cosmology * cosmo, int * status);
+
 //TODO smooth_mass is not really correct in this function, tho it makes sense in compute_sigma
 /**
  * Compute halo mass function at a given mass for a given cosmology as dn/ dlog10(M)
  * @param cosmo Cosmological parameters
  * @param smooth_mass Mass to compute at, in units of Msun
  * @param a Scale factor, normalized to a=1 today
+ * @param odelta choice of Delta
  * @param status Status flag. 0 if there are no errors, nonzero otherwise.
  * For specific cases see documentation for ccl_error.
  * @return massfunc, the value of the mass function at the specified parameters
  */
-double ccl_massfunc(ccl_cosmology * cosmo, double smooth_mass, double a, int * status);
+double ccl_massfunc(ccl_cosmology * cosmo, double smooth_mass, double a, double odelta, int * status);
 
 //TODO status flag unused here
 /**
@@ -32,12 +40,13 @@ double ccl_massfunc(ccl_cosmology * cosmo, double smooth_mass, double a, int * s
  * For specific cases see documentation for ccl_error.
  * @return hb, the halo bias at the specified parameters
  */
-double ccl_halo_bias(ccl_cosmology *cosmo, double smooth_mass, double a, int * status);
+double ccl_halo_bias(ccl_cosmology *cosmo, double smooth_mass, double a, double odelta, int * status);
 /**
  * Convert smoothing halo mass in units of Msun to smoothing halo radius in units of Mpc.
  * @param cosmo Cosmological parameters
  * @param smooth_mass Mass to compute at, in units of Msun
  * @param a Scale factor, normalized to a=1 today
+ * @param odelta choice of Delta
  * @param status Status flag. 0 if there are no errors, nonzero otherwise.
  * For specific cases see documentation for ccl_error.
  * @return smooth_radius, the equivalent tophat smoothing radius corresponding to smooth_mass

@@ -12,6 +12,7 @@ CTEST_DATA(params) {
     double n_s;
     double wa;
     double w0;
+    int status;
 };
 
 // This function is one before each test defined below with CTEST2 in the suite.
@@ -26,6 +27,7 @@ CTEST_SETUP(params){
     data->n_s = 0.96;
     data->wa = 0.01;
     data->w0 = -1.0;
+    data->status=0;
 }
 
 // The 2 on the end of CTEST2 means that for this test we use 
@@ -38,17 +40,16 @@ CTEST_SETUP(params){
 // If you wanted to you could call other functions in here too and use these
 // assertions there also.
 CTEST2(params, create_lcdm){
-    ccl_parameters params = ccl_parameters_create_flat_lcdm(data->Omega_c, data->Omega_b, data->h, data->A_s, data->n_s);
+    ccl_parameters params = ccl_parameters_create_flat_lcdm(data->Omega_c, data->Omega_b, data->h, data->A_s, data->n_s, &(data->status));
     ASSERT_DBL_NEAR_TOL(params.Omega_c, data->Omega_c, 1e-10);
     ASSERT_DBL_NEAR_TOL(params.w0, -1.0, 1e-10);
     ASSERT_DBL_NEAR_TOL(params.wa, 0.0, 1e-10);
-    ASSERT_DBL_NEAR_TOL(params.Omega_n, 0.0, 1e-10);
 }
 
 // This adds a second test in the same suite.  It uses the same setup function as the
 // previous one (though the setup function is run afresh for each test).
 CTEST2(params, create_wacdm){
-    ccl_parameters params = ccl_parameters_create_flat_lcdm(data->Omega_c, data->Omega_b, data->h, data->A_s, data->n_s);
+    ccl_parameters params = ccl_parameters_create_flat_lcdm(data->Omega_c, data->Omega_b, data->h, data->A_s, data->n_s, &(data->status));
     ASSERT_DBL_NEAR_TOL(params.Omega_c, data->Omega_c, 1e-10);
     ASSERT_DBL_NEAR_TOL(params.Omega_k, 0.0, 1e-10);
     ASSERT_DBL_NEAR_TOL(params.w0, -1.0, 1e-10);

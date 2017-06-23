@@ -20,6 +20,12 @@
 #define Z0_SH 0.65
 #define SZ_SH 0.05
 #define NL 512
+#define PS 0.1 
+#define NREL 3.046
+#define NMAS 0
+#define MNU 0.0
+
+
 
 // The user defines a structure of parameters to the user-defined function for the photo-z probability 
 struct user_func_params
@@ -40,8 +46,10 @@ int main(int argc,char **argv){
 	int status =0;
 	// Initialize cosmological parameters
 	ccl_configuration config=default_config;
-	config.transfer_function_method=ccl_bbks;
-	ccl_parameters params=ccl_parameters_create(OC,OB,OK,ON,W0,WA,HH,NORMPS,NS,-1,NULL,NULL);
+	config.transfer_function_method=ccl_boltzmann_class;
+	//ccl_parameters params=ccl_parameters_create(OC,OB,OK,ON,W0,WA,HH,NAN,NS,-1,NULL,NULL);
+	ccl_parameters params = ccl_parameters_create(OC, OB, OK, NREL, NMAS, MNU, W0, WA, HH, NORMPS, NS,0,NULL,NULL, &status);
+        //printf("in sample run w0=%1.12f, wa=%1.12f\n", W0, WA);
 
 	// Initialize cosmology object given cosmo params
 	ccl_cosmology *cosmo=ccl_cosmology_create(params,config);
@@ -50,6 +58,9 @@ int main(int argc,char **argv){
 		ZD,ccl_comoving_radial_distance(cosmo,1./(1+ZD), &status));
 	printf("Luminosity distance to z = %.3lf is chi = %.3lf Mpc\n",
 		ZD,ccl_luminosity_distance(cosmo,1./(1+ZD), &status));
+    printf("Distance modulus to z = %.3lf is mu = %.3lf Mpc\n",
+		ZD,ccl_distance_modulus(cosmo,1./(1+ZD), &status));
+
 	
 	//Consistency check
 	printf("Scale factor is a=%.3lf \n",1./(1+ZD));
@@ -102,7 +113,7 @@ int main(int argc,char **argv){
 		printf("%.1e\t",pow(10,logM));
 		for(double z=0; z<=1; z+=0.5)
 		{
-			printf("%e\t", ccl_massfunc(cosmo, pow(10,logM),1.0/(1.0+z), &status));
+			printf("%e\t", ccl_massfunc(cosmo, pow(10,logM),1.0/(1.0+z), 200., &status));
 		}
 		printf("\n");
 	}
@@ -114,7 +125,7 @@ int main(int argc,char **argv){
 	{
 		for(double z=0; z<=1; z+=0.5)
 		{
-		  printf("%.1e %.1e %.2e\n",1.0/(1.0+z),pow(10,logM),ccl_halo_bias(cosmo,pow(10,logM),1.0/(1.0+z), &status));
+		  printf("%.1e %.1e %.2e\n",1.0/(1.0+z),pow(10,logM),ccl_halo_bias(cosmo,pow(10,logM),1.0/(1.0+z), 200., &status));
 		}
 	}
 	printf("\n");
