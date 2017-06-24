@@ -18,15 +18,6 @@
 \bibitem[{{Bonvin} \& {Durrer}(2011)}]{2011PhRvD..84f3505B}
 {Bonvin}, C., \& {Durrer}, R. 2011, \prd, 84, 063505
 
-\bibitem[{{Campagne} {et~al.}(2017){Campagne}, {Neveu}, \&
-  {Plaszczynski}}]{2017arXiv170103592C}
-{Campagne}, J.-E., {Neveu}, J., \& {Plaszczynski}, S. 2017, ArXiv e-prints,
-  arXiv:1701.03592
-
-\bibitem[{{Carroll} {et~al.}(1992){Carroll}, {Press}, \&
-  {Turner}}]{1992ARA&A..30..499C}
-{Carroll}, S.~M., {Press}, W.~H., \& {Turner}, E.~L. 1992, \araa, 30, 499
-
 \bibitem[{{Challinor} \& {Lewis}(2011)}]{2011PhRvD..84d3516C}
 {Challinor}, A., \& {Lewis}, A. 2011, \prd, 84, 043516
 
@@ -38,13 +29,6 @@
 \bibitem[{{Dodelson} \& {Efstathiou}(2004)}]{DodelsonBook}
 {Dodelson}, S., \& {Efstathiou}, G. 2004, Physics Today, 57, 60
 
-\bibitem[{{Durrer}(2008)}]{2008cmb..book.....D}
-{Durrer}, R. 2008, {The Cosmic Microwave Background} (Cambridge University
-  Press)
-
-\bibitem[{{Eisenstein} \& {Hu}(1998)}]{1998ApJ...496..605E}
-{Eisenstein}, D.~J., \& {Hu}, W. 1998, \apj, 496, 605
-
 \bibitem[{{Hirata} {et~al.}(2007){Hirata}, {Mandelbaum}, {Ishak}, {Seljak},
   {Nichol}, {Pimbblet}, {Ross}, \& {Wake}}]{2007MNRAS.381.1197H}
 {Hirata}, C.~M., {Mandelbaum}, R., {Ishak}, M., {et~al.} 2007, \mnras, 381,
@@ -55,11 +39,6 @@
 
 \bibitem[{{Kamionkowski} \& {Spergel}(1994)}]{1994ApJ...432....7K}
 {Kamionkowski}, M., \& {Spergel}, D.~N. 1994, \apj, 432, 7
-
-\bibitem[{{Lahav} {et~al.}(1991){Lahav}, {Lilje}, {Primack}, \&
-  {Rees}}]{1991MNRAS.251..128L}
-{Lahav}, O., {Lilje}, P.~B., {Primack}, J.~R., \& {Rees}, M.~J. 1991, \mnras,
-  251, 128
 
 \bibitem[{{LSST Science Collaboration}(2009)}]{ScienceBook}
 {LSST Science Collaboration}. 2009, ArXiv e-prints, arXiv:0912.0201
@@ -93,17 +72,5 @@
   {Shapiro}, \& {Yepes}}]{Watson2013}
 {Watson}, W.~A., {Iliev}, I.~T., {D'Aloisio}, A., {et~al.} 2013, \mnras, 433,
   1230
-
-\bibitem[{{Yoo}(2010)}]{2010PhRvD..82h3508Y}
-{Yoo}, J. 2010, \prd, 82, 083508
-
-\bibitem[{{Yoo} {et~al.}(2009){Yoo}, {Fitzpatrick}, \&
-  {Zaldarriaga}}]{2009PhRvD..80h3514Y}
-{Yoo}, J., {Fitzpatrick}, A.~L., \& {Zaldarriaga}, M. 2009, \prd, 80, 083514
-
-\bibitem[{{Zumalacarregui} {et~al.}(2016){Zumalacarregui}, {Bellini},
-  {Sawicki}, {Lesgourgues}, \& {Ferreira}}]{hiclass}
-{Zumalacarregui}, M., {Bellini}, E., {Sawicki}, I., {Lesgourgues}, J., \&
-  {Ferreira}, P.~G. 2016, ArXiv e-prints, arXiv:1605.06102
 
 \end{thebibliography}

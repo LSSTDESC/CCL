@@ -6,45 +6,45 @@ Database file #1: mainNotes.bib
 Database file #2: main.bib
 Reallocated wiz_functions (elt_size=4) to 6000 items from 3000.
 Warning--empty publisher in PeacockBook
-You've used 26 entries,
+You've used 18 entries,
             3085 wiz_defined-function locations,
-            844 strings with 9633 characters,
-and the built_in function-call counts, 12370 in all, are:
-= -- 1071
-> -- 837
-< -- 11
-+ -- 285
-- -- 309
-* -- 1011
-:= -- 2304
-add.period$ -- 26
-call.type$ -- 26
-change.case$ -- 192
-chr.to.int$ -- 26
-cite$ -- 27
-duplicate$ -- 495
-empty$ -- 760
-format.name$ -- 344
-if$ -- 2472
+            786 strings with 8052 characters,
+and the built_in function-call counts, 8833 in all, are:
+= -- 763
+> -- 617
+< -- 8
++ -- 211
+- -- 229
+* -- 730
+:= -- 1648
+add.period$ -- 18
+call.type$ -- 18
+change.case$ -- 138
+chr.to.int$ -- 18
+cite$ -- 19
+duplicate$ -- 345
+empty$ -- 522
+format.name$ -- 256
+if$ -- 1759
 int.to.chr$ -- 1
 int.to.str$ -- 0
-missing$ -- 25
-newline$ -- 82
-num.names$ -- 104
-pop$ -- 210
+missing$ -- 17
+newline$ -- 58
+num.names$ -- 72
+pop$ -- 149
 preamble$ -- 1
-purify$ -- 192
+purify$ -- 138
 quote$ -- 0
-skip$ -- 425
+skip$ -- 298
 stack$ -- 0
-substring$ -- 537
+substring$ -- 381
 swap$ -- 6
 text.length$ -- 0
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 228
+type$ -- 159
 warning$ -- 1
-while$ -- 98
+while$ -- 69
 width$ -- 0
-write$ -- 264
+write$ -- 184
 (There was 1 warning)
