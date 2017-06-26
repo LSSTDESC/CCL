@@ -8,7 +8,8 @@
 #define CL_TRACER_NC 1 //Tracer type 1: number counts
 #define CL_TRACER_WL 2 //Tracer type 2: weak lensing
 
-/**Spline wrapper, used to evaluate a function
+/**
+ * Spline wrapper, used to evaluate a function
  * outside of the supported range past the interpolation limit.
  */
 typedef struct {
@@ -18,7 +19,8 @@ typedef struct {
   double y0,yf; //Constant values to use beyond interpolation limit
 } SplPar;
 
-/**ClTracer structure, used to contain everything
+/**
+ * ClTracer structure, used to contain everything
  * that a Cl tracer could have, such as splines for
  * various quantities and limits on the value of chi
  * that this tracer deals with.

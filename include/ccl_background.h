@@ -1,3 +1,5 @@
+/** @file */
+
 #pragma once
 #include "ccl_core.h"
 
@@ -11,7 +13,6 @@ typedef enum ccl_omega_x_label {
   ccl_omega_nu_label=5
 } ccl_omega_x_label;
 
-/// Normalized expansion rate at scale factor a.
 /**
  * Normalized expansion rate at scale factor a.
  * Returns H(a)/H0 in a given cosmology.
@@ -84,7 +85,7 @@ double ccl_sinn(ccl_cosmology *cosmo,double chi, int *status);
  * @return comoving_angular_distance, the angular distance in Mpc
  */
 double ccl_comoving_angular_distance(ccl_cosmology * cosmo, double a, int* status);
-//
+
 /**
  * Comoving angular distances in Mpc to scale factors as given in array a[0..na-1]
  * NOTE this quantity is otherwise known as the transverse comoving distance, and is NOT angular diameter
@@ -180,7 +181,7 @@ void ccl_growth_factors(ccl_cosmology * cosmo, int na, double a[na], double outp
  * @return growth_factor_unnorm, Unnormalized growth factor, normalized to the scale factor at early times.
  */
 double ccl_growth_factor_unnorm(ccl_cosmology * cosmo, double a, int * status);
-//
+
 /**
  * Growth factors at a list of scale factor given in a[0..na-1], where g(a) is normalized to a in matter domination
  * @param cosmo Cosmological parameters
@@ -203,7 +204,7 @@ void ccl_growth_factors_unnorm(ccl_cosmology * cosmo, int na, double a[na], doub
  * @return f, the growth rate at a
  */
 double ccl_growth_rate(ccl_cosmology * cosmo, double a, int* status);
-//
+
 /**
  * Logarithmic rates of d ln(g)/d ln(a) at an array of scale factors a[0..na-1]
  * @param cosmo Cosmological parameters

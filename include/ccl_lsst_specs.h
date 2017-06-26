@@ -6,7 +6,8 @@
 #include "gsl/gsl_integration.h"
 #include "gsl/gsl_spline.h"
 
-/** A user-defined P(z) function.
+/** 
+ * A user-defined P(z) function.
  * This is a user-defined P(z) function, 
  * with a void* field to contain the parameters to that function.
  */
@@ -27,8 +28,8 @@ typedef struct {
  */
 double ccl_specs_bias_clustering(ccl_cosmology * cosmo, double a, int * status);
 
-
-/** Return dNdz in a particular tomographic bin, 
+/** 
+ * Return dNdz in a particular tomographic bin, 
     convolved with a photo-z model (defined by the user), and normalized.
  * @param z redshift 
  * @param dNdz_type the choice of dN/dz from Chang+
@@ -41,7 +42,8 @@ double ccl_specs_bias_clustering(ccl_cosmology * cosmo, double a, int * status);
  */
 void ccl_specs_dNdz_tomog(double z, int dNdz_type, double bin_zmin, double bin_zmax, user_pz_info * user_info,  double *tomoout, int *status);
 
-/** This function creates a structure amalgamating the user-input information on the photo-z model, P(z) plus some parameters.
+/** 
+ * This function creates a structure amalgamating the user-input information on the photo-z model, P(z) plus some parameters.
  * @param user_params User-defined parameters for the P(z) function
  * @param user_pz_func P(z) function
  * @return a structure with the user-provided P(z) and parameters
@@ -54,15 +56,17 @@ user_pz_info* ccl_specs_create_photoz_info(void * user_params, double(*user_pz_f
  */
 void ccl_specs_free_photoz_info(user_pz_info *my_photoz_info);
 
-/** Return sigma(z), the photo-z dispersion, for the clustering sample
-    This is if you want to assume Gaussian uncertainties.
+/** 
+ * Return sigma(z), the photo-z dispersion, for the clustering sample
+   This is if you want to assume Gaussian uncertainties.
  *  @param z redshift
  *  @return sigma(z) for the clustering sample
  */
 double ccl_specs_sigmaz_clustering(double z);
 
-/** Return sigma(z), the photo-z dispersion, for the lensing sample
-    This is if you want to assume Gaussian uncertainties.
+/** 
+ * Return sigma(z), the photo-z dispersion, for the lensing sample
+   This is if you want to assume Gaussian uncertainties.
  *  @param z redshift
  *  @return sigma(z) for the lensing sample
  */

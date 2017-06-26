@@ -2,7 +2,8 @@
 
 #pragma once
 
-/** Transfer function typedef.
+/** 
+ * Transfer function typedef.
  * Contains all information that describes a specific
  * transfer function. This includes whether there is an
  * emulator being used (Note: not implemented yet),
@@ -27,7 +28,8 @@ typedef enum transfer_function_t
     ccl_boltzmann_camb    = 4
 } transfer_function_t;
 
-/** Matter power spectrum typedef.
+/** 
+ * Matter power spectrum typedef.
  * Contains all information that describes a specific
  * matter power spectrum. This inclues whether we
  * want the linear power spectrum, whether we use
@@ -44,7 +46,8 @@ typedef enum matter_power_spectrum_t
 
 } matter_power_spectrum_t;
 
-/** Mass function typedef
+/** 
+ * Mass function typedef
  * Contains all information that describes a specific
  * mass function. This is basically a switch that chooses
  * between Tinker08, Tinker10, Watson and Angulo mass
@@ -58,7 +61,8 @@ typedef enum mass_function_t
     ccl_angulo      = 4
 } mass_function_t;
 
-/** Configuration typedef.
+/** 
+ * Configuration typedef.
  * This contains the transfer function,
  * matter power spectrum, and mass function
  * that is being used currently.

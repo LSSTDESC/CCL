@@ -1,5 +1,9 @@
+/** @file */
 #pragma once
 
+/** 
+ * Struct that contains all spline params
+ */
 typedef struct ccl_spline_params {
   
    //Scale factor splines

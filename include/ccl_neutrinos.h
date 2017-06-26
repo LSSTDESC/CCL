@@ -1,3 +1,5 @@
+/** @file */
+
 //#pragma once
 #include "ccl_core.h"
 #include "gsl/gsl_spline.h"
@@ -18,6 +20,13 @@
 // precalculate the phase space integral
 gsl_spline* calculate_nu_phasespace_spline(int *status);
 
-// Returns density of one neutrino species at a scale factor a.
+/** Returns density of one neutrino species at a scale factor a.
+ * @param a scale factor
+ * @param Neff N effective
+ * @param mnu neutrino mass
+ * @param TCMB the temperature of the CMB
+ * @param accel -
+ * @param status status flag
+ */
 double Omeganuh2 (double a, double Neff, double mnu, double TCMB, gsl_interp_accel* accel, int * status);
 
