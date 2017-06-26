@@ -575,9 +575,9 @@ about 15s on 16 threads, which is to be compared to about 0.5s with \texttt{Angp
 \subsection{Correlation functions}
 \label{sec:corr}
 
-\todo{This section is new. Sukhdeep and Elisa to update.}
+\subsubsection{Limber approximation}
 
-In the Limber approximation, the angular correlation function between any two tracers $1$ and $2$ is given by\footnote{See Bartelmann and Schneider (1999) weak lensing review, page 44. See also Joachimi \& Bridle (2010)}
+In the Limber approximation, the angular correlation function between any two tracers $1$ and $2$ is given by\footnote{See \citet{Bartelmann01} weak lensing review, page 44. See also \citet{Joachimi10}.}
 
 \begin{equation}
 C_{12}(\theta) = \int d\chi'q_1(\chi')q_2(\chi')\int dk\frac{k}{2\pi}P_{\delta}(k,\chi')J_0[f_K(\chi')\theta k],
@@ -588,6 +588,7 @@ where $J_0$ is the Bessel function of order 0, $\chi$ is the comoving distance a
 {\bf Clustering.} For clustering, the relevant weight is given by $q_1(\chi)=b_1(\chi)dN_1/d\chi(\chi)$, the comoving distance probability distribution times the bias. The angular correlation function can also be re-written as
 \begin{equation}
 C_{12}(\theta) = \int dl \frac{l}{2\pi} C_{gg}(l) J_0(l\theta),
+\label{eq:xiclu}
 \end{equation}
 where $C_{gg}$ is the galaxy clustering angular power spectrum.
 
@@ -596,6 +597,7 @@ where $C_{gg}$ is the galaxy clustering angular power spectrum.
 \begin{eqnarray}
 \xi_{+}(\theta)&=&\int_0^{\infty}dl\frac{l}{2\pi}J_0(l\theta)P_\kappa(l),\\
 \xi_{-}(\theta)&=&\int_0^{\infty}dl\frac{l}{2\pi}J_4(l\theta)P_\kappa(l),
+\label{eq:xipxim}
 \end{eqnarray}
 %
 where the angular lensing convergence power spectrum is given by
@@ -603,9 +605,61 @@ where the angular lensing convergence power spectrum is given by
 P_\kappa(l) &=& \frac{9H_0^4\Omega_m^2}{4c^4}\int_{0}^{\chi_h}\frac{d\chi}{a^2(\chi)}P_\delta\left(\frac{l}{f_K(\chi)},\chi\right)\left[\int_\chi^{\chi_h}d\chi'p_\chi(\chi')\frac{f_K(\chi'-\chi)}{f_K(\chi')}\right]^2\\
 \end{eqnarray}
 
-For numerical integration of the correlation functions, we make use of the public code {\tt FFTlog}\footnote{\url{http://casa.colorado.edu/~ajsh/FFTLog/}}. A version of this code is included in {\tt CCL} with minor modifications.
+For numerical integration of the correlation functions, we make use of the public code {\tt FFTlog}\footnote{\url{http://casa.colorado.edu/~ajsh/FFTLog/}}\citep{Hamilton2000,Talman2009}. In brief, FFTlog works on functions periodic in log space, by writing the Hankel Transform as a convolution between bessel function and the function of interest (in this case $C_\ell$).A version of this code is included in {\tt CCL} with minor modifications.
 
-\todo{Describe Legendre polynomial option}
+\subsubsection{Beyond Limber}
+
+We begin by writing the angular space observable, $X$, in terms of a decomposition in spherical harmonics, 
+\begin{align}\label{eq:X_harmonic}
+  X(\Omega)=&\sum_{lm}\tilde X_{lm}Y_{lm}(\Omega)
+\end{align}
+where $\Omega$ refers to the angular coordinates on the sky.
+The angular cross correlation function of two (scalar) tracers, $X$ and $Z$ of the large scale structure can be written in terms of their harmonic components, $\tilde X_{\ell m}$ and $\tilde Z_{\ell' m'}$ as
+\begin{align}
+  \langle XZ \rangle(\theta)=&\left\langle\sum_{\ell,m}\sum_{\ell', m'}\tilde X_{\ell m}\tilde Z_{\ell' m'}
+  Y_{\ell m}(\Omega)
+  Y_{\ell'm'}(\Omega+\theta)\right\rangle\\
+  =&\sum_{\ell,m}C_{\ell}Y_{\ell m}(\Omega)
+  Y_{\ell m}(\Omega+\theta)\\
+  \langle XZ \rangle(\theta)=&\frac{1}{4\pi}\sum_{\ell}(2\ell+1)C_{\ell}P_{\ell}(\cos\theta)\label{eq:xi_pl0}
+\end{align}
+where we have used the identities
+\begin{align}
+  \langle\tilde X_{\ell m}\tilde Z_{\ell' m'}\rangle=&C_{\ell}\delta_D(m,m')\delta_D(\ell,\ell'),\\
+  \sum_{m=-\ell}^{m=\ell}Y_{\ell m}(\Omega)Y_{\ell m}(\Omega+\theta)=&\frac{2\ell+1}{4\pi}\label{eq:Ylm_Pl}.
+\end{align}
+
+For the case of shear, since it is a spin-2 object, eq.\ref{eq:X_harmonic} is written in terms of spin harmonics 
+\citep[see for ex.][]{Castro2005,Kilbinger2017}. The rest of the analysis proceeds similarly, using the relation for spin 
+harmonics, analogous to eq.~\ref{eq:Ylm_Pl} \citep[see for ex. ][]{Hu1997}. 
+
+The expressions for $\xi_+$ (which is the same as in Eq.~\ref{eq:xi_pl0}) and for $\xi_-$ are given by
+\begin{align}
+  %\langle g\gamma_T\rangle(\theta)&=\frac{1}{4\pi}\sum_{\ell}\frac{(2\ell+1)}{\ell(\ell+1)}C_{\ell}^{g\kappa}
+  %P_{\ell}^2(\cos\theta)\label{eq:xi_g_gamma}\\
+  \xi_+(\theta)&=\frac{1}{4\pi}\sum_{\ell}{(2\ell+1)}C_{\ell}^{\kappa\kappa}
+  P_{\ell}(\cos\theta)\label{eq:xi_p}\\
+  \xi_-(\theta)&=\frac{1}{4\pi}\sum_{\ell}\frac{(\ell-4)!}{(\ell+4)!}\ell^4{(2\ell+1)}C_{\ell}^{\kappa\kappa}
+  P_{\ell}^4(\cos\theta)\label{eq:xi_m}
+\end{align}
+\todo{Sukhdeep: $\xi_-$ is a bit of cheating. I'm not familiar with spin harmonics, so I simply took the relation between $P_\ell^m$ and $J_m(\ell \theta)$ to get this expression from the Hankel transform for $\xi_-$. It may not be very accurate at large scale (low $\ell$) as is evident from $g\gamma_T$ expression. I can sort this out later. If somebody knows correct expression already, please feel free to put it in.}
+
+The {\tt ccl\_tracer\_corr\_legendre} routine computes these transform to convert angular power spectra, $C_\ell$, into correlation functions. We use the associated Legendre function implementation from the {\tt GSL} library. {\tt ccl\_tracer\_corr\_legendre} routine evaluations can be very slow, especially for polynomials $P_\ell^m$ with $m>0$. Note that $P_\ell^m$ evaluations need to be done only once and can then be saved as long as $\ell$ and $\theta$ values do not change. However, {\tt CCL} has not yet implemented this feature.
+
+\paragraph{Hankel Transform}
+Notice that in the flat-sky limit, the expressions in Eqs.~\ref{eq:xi_p}--\ref{eq:xi_m} can be written as Hankel transforms using the relation between $P_{\ell}^m$ and bessel functions $J_m$
+\begin{align}
+  P_{\ell}^m(\cos\theta)=(-1)^m\frac{(\ell+m)!}{(\ell-m)!}\ell^{-m}J_m(\ell\theta)
+\end{align}
+which yields final expressions that coincide with Eq. \ref{eq:xipxim}.
+%In the flat-sky limit, We get the following expressions
+%\begin{align}
+%  \langle g\gamma_T\rangle(\theta)&=\frac{1}{2\pi}\int d\ell\ell C_\ell J_2(\ell\theta),\\
+%  \xi_+(\theta)&=\frac{1}{2\pi}\int d\ell\ell C_\ell J_0(\ell\theta),\\
+%  \xi_-(\theta)&=\frac{1}{2\pi}\int d\ell\ell C_\ell J_4(\ell\theta).
+%\end{align}
+%To evaluate the Hankel transform, we use the fast {\tt FFTlog} routine\citep{Hamilton2000,Talman2009}. In brief, FFTlog works on functions periodic in log space, by writing the Hankel Transform as a convolution between bessel function and the function of interest (in this case $C_\ell$). The convolution can then be evaluated using Fourier transforms, with Fourier transform of bessel function evaluated using analytical functions while Fourier transform of $C_\ell$ and the inverse Fourier transform of the product evaluated using fast fourier transform routines. 
+
 
 \subsection{Halo mass \& halo bias functions}
 \label{sec:hmf}
