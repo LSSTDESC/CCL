@@ -6,8 +6,6 @@
 #include <time.h>
 #include <string.h>
 
-#define CORR_TOLERANCE 1E-3
-//Notice the actual requirement is on theta/0.1*CORR_TOLERANCE
 #define CORR_FRACTION 1E-3
 
 CTEST_DATA(corrs) {
@@ -38,27 +36,6 @@ static int linecount(FILE *f)
   return i0;
 }
 
-static double angular_l_inv(ccl_cosmology *cosmo,int l,CCL_ClTracer *clt1,CCL_ClTracer *clt2, int * status)
-{
-  if (l==0)
-    return 0;
-  return 1./l;//HT of this should give 1./theta
-}
-
-static double angular_l2_inv(ccl_cosmology *cosmo,int l,CCL_ClTracer *clt1,CCL_ClTracer *clt2, int * status)
-{
-  double l2=(double)l*(double)l;
-  double z2=1.0;//z**2
-  return 1./sqrt(l2+z2);//HT of this should give (exp(-k|z|)/k)
-}
-
-static double angular_l2_exp(ccl_cosmology *cosmo,int l,CCL_ClTracer *clt1,CCL_ClTracer *clt2, int * status)
-{
-  double l2=(double)l*(double)l;
-  double a2=1;//a**2
-  return exp(-0.5*l2*a2);//HT of this should give 1./(a**2)exp(-0.5*theta**2/(a**2))
-}
-
 static void compare_corr(char *compare_type,struct corrs_data * data)
 {
   int status=0;
@@ -70,50 +47,25 @@ static void compare_corr(char *compare_type,struct corrs_data * data)
 
   int nz;
   double *zarr_1,*pzarr_1,*zarr_2,*pzarr_2,*bzarr;
-  if(!strcmp(compare_type,"analytic")) {
-    //Create arrays for N(z)
-    double zmean_1=1.0,sigz_1=0.15;
-    double zmean_2=1.5,sigz_2=0.15;
-    nz=512;
-    zarr_1=malloc(nz*sizeof(double));
-    pzarr_1=malloc(nz*sizeof(double));
-    zarr_2=malloc(nz*sizeof(double));
-    pzarr_2=malloc(nz*sizeof(double));
-    bzarr=malloc(nz*sizeof(double));
-    for(int ii=0;ii<nz;ii++) {
-      double z1=zmean_1-5*sigz_1+10*sigz_1*(ii+0.5)/nz;
-      double z2=zmean_2-5*sigz_2+10*sigz_2*(ii+0.5)/nz;
-      double pz1=exp(-0.5*((z1-zmean_1)*(z1-zmean_1)/(sigz_1*sigz_1)));
-      double pz2=exp(-0.5*((z2-zmean_2)*(z2-zmean_2)/(sigz_2*sigz_2)));
-      zarr_1[ii]=z1;
-      zarr_2[ii]=z2;
-      pzarr_1[ii]=pz1;
-      pzarr_2[ii]=pz2;
-      bzarr[ii]=1.;
-    }
-  }
-  else {
-    char str[1024];
-    FILE *fnz1=fopen("./tests/benchmark/codecomp_step2_outputs/bin1_histo.txt","r");
-    ASSERT_NOT_NULL(fnz1);
-    FILE *fnz2=fopen("./tests/benchmark/codecomp_step2_outputs/bin2_histo.txt","r");
-    ASSERT_NOT_NULL(fnz2);
-    nz=linecount(fnz1)-1; rewind(fnz1);
-    zarr_1=malloc(nz*sizeof(double));
-    pzarr_1=malloc(nz*sizeof(double));
-    zarr_2=malloc(nz*sizeof(double));
-    pzarr_2=malloc(nz*sizeof(double));
-    bzarr=malloc(nz*sizeof(double));
-    fgets(str,1024,fnz1);
-    fgets(str,1024,fnz2);
-    for(int ii=0;ii<nz;ii++) {
-      double z1,z2,nz1,nz2;
-      fscanf(fnz1,"%lf %lf",&z1,&nz1);
-      fscanf(fnz2,"%lf %lf",&z2,&nz2);
-      zarr_1[ii]=z1; zarr_2[ii]=z2;
-      pzarr_1[ii]=nz1; pzarr_2[ii]=nz2;
-      bzarr[ii]=1.;
-    }
+  //Create arrays for N(z)
+  double zmean_1=1.0,sigz_1=0.15;
+  double zmean_2=1.5,sigz_2=0.15;
+  nz=512;
+  zarr_1=malloc(nz*sizeof(double));
+  pzarr_1=malloc(nz*sizeof(double));
+  zarr_2=malloc(nz*sizeof(double));
+  pzarr_2=malloc(nz*sizeof(double));
+  bzarr=malloc(nz*sizeof(double));
+  for(int ii=0;ii<nz;ii++) {
+    double z1=zmean_1-5*sigz_1+10*sigz_1*(ii+0.5)/nz;
+    double z2=zmean_2-5*sigz_2+10*sigz_2*(ii+0.5)/nz;
+    double pz1=exp(-0.5*((z1-zmean_1)*(z1-zmean_1)/(sigz_1*sigz_1)));
+    double pz2=exp(-0.5*((z2-zmean_2)*(z2-zmean_2)/(sigz_2*sigz_2)));
+    zarr_1[ii]=z1;
+    zarr_2[ii]=z2;
+    pzarr_1[ii]=pz1;
+    pzarr_2[ii]=pz2;
+    bzarr[ii]=1.;
   }
 
   char fname[256];
@@ -177,14 +129,13 @@ static void compare_corr(char *compare_type,struct corrs_data * data)
   time_t start_time,end_time;
   double time_sec=0;
 
-  time(&start_time);
+  //Now obtain the correlation from CCL
   taper_cl=false;
   ccl_tracer_corr(cosmo,NL,&theta_arr,tr_nc_1,tr_nc_1,0,taper_cl,taper_cl_limits,
 		  &wt_dd_11_h,CCL_CORR_FFTLOG);
 
   time(&end_time);
   time_sec=difftime(end_time,start_time);
-  printf("CCL correlation first calculation done. More in progress... %.10e \n",time_sec);
   ccl_tracer_corr(cosmo,NL,&theta_arr,tr_nc_1,tr_nc_2,0,taper_cl,taper_cl_limits,
 		  &wt_dd_12_h,CCL_CORR_FFTLOG);
   ccl_tracer_corr(cosmo,NL,&theta_arr,tr_nc_2,tr_nc_2,0,taper_cl,taper_cl_limits,
@@ -201,15 +152,13 @@ static void compare_corr(char *compare_type,struct corrs_data * data)
 		  &wt_ll_12_h_mm,CCL_CORR_FFTLOG);
   ccl_tracer_corr(cosmo,NL,&theta_arr,tr_wl_2,tr_wl_2,4,taper_cl,taper_cl_limits,
 		  &wt_ll_22_h_mm,CCL_CORR_FFTLOG);
-  time(&end_time);
-  time_sec=difftime(end_time,start_time);
-  printf("CCL correlation all calculation done. %.10e \n",time_sec);
 
   //Re-scale theta from radians to degrees
   for (int i=0;i<NL;i++){
     theta_arr[i]=theta_arr[i]*180/M_PI;
   }
   
+  /*Print to a file
   FILE *output2 = fopen("cc_test_corr_out_fftlog.dat", "w");
   for (int ii=0;ii<NL;ii++){
     fprintf(output2,"%.10e %.10e %.10e %.10e %.10e %.10e %.10e %.10e %.10e %.10e \n",
@@ -218,7 +167,7 @@ static void compare_corr(char *compare_type,struct corrs_data * data)
 	    wt_ll_12_h_mm[ii],wt_ll_22_h_mm[ii]);
   }
   fclose(output2);
-  printf("CCL correlation output done. Comparison in progress...\n");
+  printf("CCL correlation output done.\n");*/
 
   //Spline
   gsl_spline * spl_wt_dd_11_h = gsl_spline_alloc(L_SPLINE_TYPE,NL);
@@ -239,87 +188,144 @@ static void compare_corr(char *compare_type,struct corrs_data * data)
   status = gsl_spline_init(spl_wt_ll_12_h_mm, theta_arr, wt_ll_12_h_mm, NL);
   gsl_spline * spl_wt_ll_22_h_mm = gsl_spline_alloc(L_SPLINE_TYPE,NL);
   status = gsl_spline_init(spl_wt_ll_22_h_mm, theta_arr, wt_ll_22_h_mm, NL);
-  printf("Splines for correlation done. Spline evaluation in progress...\n");
+  //printf("Splines for correlation done.\n");
 
+  //Adjusting the range of thetas in case theta_in is wider than theta_arr
   int ii,istart=0,iend=nofl;
   if(theta_in[0]<theta_arr[0] || theta_in[nofl-1]>theta_arr[NL-1]){
-    printf("theta_in range: [%e,%e]\n",theta_in[0],theta_in[nofl-1]);
-    printf("theta_arr range: [%e,%e]\n",theta_arr[0],theta_arr[NL-1]);
-    printf("This code would crash because gsl will attempt to extrapolate.\n");
-    printf("Temporary solution: reducing the range for comparison to avoid extralpolation.\n");
+    //printf("theta_in range: [%e,%e]\n",theta_in[0],theta_in[nofl-1]);
+    //printf("theta_arr range: [%e,%e]\n",theta_arr[0],theta_arr[NL-1]);
+    //printf("This code would crash because gsl will attempt to extrapolate.\n");
+    //printf("Temporary solution: reducing the range for comparison to avoid extralpolation.\n");
     ii=0;
     while(theta_in[ii]<theta_arr[NL-1]){ii++;}
     iend=ii-1;
     ii=nofl-1;
     while(theta_in[ii]>theta_arr[0]){ii=ii-1;}
     istart=ii+1;
-    printf("Corrected theta_in range: [%e,%e]\n",theta_in[istart],theta_in[iend]);
-    printf("This correction avoids crash, but does not\n compare correlation in the full range of angles needed.\n");
+    //printf("Corrected theta_in range: [%e,%e]\n",theta_in[istart],theta_in[iend]);
+    //printf("This correction avoids crash, but does not\n compare correlation in the full range of angles needed.\n");
   }
   
-  double tmp;
-  FILE *output = fopen("cc_test_corr_out.dat", "w");
+ 
+  //Now we are going to define the tolerance based on the 
+  //absolute error, provided by EK. We will read and spline the tolerance.
+  int nsig=15;
+  double *sigwt_dd_11,*sigwt_dd_22;
+  double *sigwt_ll_11_mm,*sigwt_ll_22_mm;
+  double *sigwt_ll_11_pp,*sigwt_ll_22_pp;
+  sigwt_dd_11=malloc(nsig*sizeof(double));
+  sigwt_dd_22=malloc(nsig*sizeof(double));
+  sigwt_ll_11_pp=malloc(nsig*sizeof(double));
+  sigwt_ll_22_pp=malloc(nsig*sizeof(double));
+  sigwt_ll_11_mm=malloc(nsig*sizeof(double));
+  sigwt_ll_22_mm=malloc(nsig*sizeof(double));
+  double sig_theta_in[nsig];
+  FILE *fi_dd_sig,*fi_pp_sig,*fi_mm_sig;
+  fi_dd_sig=fopen("tests/benchmark/cov_corr/sigma_clustering_Nbin5","r");
+  fi_mm_sig=fopen("tests/benchmark/cov_corr/sigma_xi-_Nbin5","r");
+  fi_pp_sig=fopen("tests/benchmark/cov_corr/sigma_xi+_Nbin5","r");
+  fscanf(fi_dd_sig,"%*s %*s %*s %*s %*s\n");
+  fscanf(fi_mm_sig,"%*s %*s %*s %*s %*s\n");
+  fscanf(fi_pp_sig,"%*s %*s %*s %*s %*s\n");
+  for(int ii=0;ii<nsig;ii++) {
+    fscanf(fi_dd_sig,"%le %le %le %*le",&sig_theta_in[ii],&sigwt_dd_11[ii],&sigwt_dd_22[ii]);
+    fscanf(fi_pp_sig,"%le %le %le %*le",&sig_theta_in[ii],&sigwt_ll_11_pp[ii],&sigwt_ll_22_pp[ii]);
+    fscanf(fi_mm_sig,"%le %le %le %*le",&sig_theta_in[ii],&sigwt_ll_11_mm[ii],&sigwt_ll_22_mm[ii]);
+    sig_theta_in[ii]=sig_theta_in[ii]/60.; //convert to deg
+  }
+  fclose(fi_dd_sig);
+  fclose(fi_mm_sig);
+  fclose(fi_pp_sig);
+  //printf("Covariance of the correlation read.\n");
+
+  //Spline
+  gsl_spline * spl_sigwt_dd_11 = gsl_spline_alloc(L_SPLINE_TYPE,nsig);
+  status = gsl_spline_init(spl_sigwt_dd_11, sig_theta_in, sigwt_dd_11,nsig);
+  gsl_spline * spl_sigwt_dd_22 = gsl_spline_alloc(L_SPLINE_TYPE,nsig);
+  status = gsl_spline_init(spl_sigwt_dd_22, sig_theta_in, sigwt_dd_22,nsig);
+  gsl_spline * spl_sigwt_pp_11 = gsl_spline_alloc(L_SPLINE_TYPE,nsig);
+  status = gsl_spline_init(spl_sigwt_pp_11, sig_theta_in, sigwt_ll_11_pp,nsig);
+  gsl_spline * spl_sigwt_pp_22 = gsl_spline_alloc(L_SPLINE_TYPE,nsig);
+  status = gsl_spline_init(spl_sigwt_pp_22, sig_theta_in, sigwt_ll_22_pp,nsig);
+  gsl_spline * spl_sigwt_mm_11 = gsl_spline_alloc(L_SPLINE_TYPE,nsig);
+  status = gsl_spline_init(spl_sigwt_mm_11, sig_theta_in, sigwt_ll_11_mm,nsig);
+  gsl_spline * spl_sigwt_mm_22 = gsl_spline_alloc(L_SPLINE_TYPE,nsig);
+  status = gsl_spline_init(spl_sigwt_mm_22, sig_theta_in, sigwt_ll_22_mm,nsig);
+  //printf("Splines of the covariance done.\n");
+
+  //Adjusting theta comparison range if theta_in is wider than sig_theta_in
+  int istart2=0,iend2=nsig;
+  if((theta_in[istart]<sig_theta_in[0]) || (theta_in[iend-1]>sig_theta_in[nsig-1])){
+    //printf("sig_theta_in range: [%e,%e]\n",sig_theta_in[0],sig_theta_in[nsig-1]);
+    ///printf("theta_in range: [%e,%e]\n",theta_in[istart],theta_in[iend-1]);
+    //printf("This code would crash because gsl will attempt to extrapolate.\n");
+    //printf("Temporary solution: reducing the range for comparison to avoid extralpolation.\n");
+    ii=0;
+    while(theta_in[ii]<sig_theta_in[nsig-1]){ii++;}
+    iend2=ii-1;
+    ii=nofl-1;
+    while(theta_in[ii]>sig_theta_in[0]){ii=ii-1;}
+    istart2=ii+1;
+    if(istart2>istart) istart=istart2;
+    if(iend2<iend) iend=iend2;
+    //printf("Corrected theta_in range: [%e,%e]\n",theta_in[istart],theta_in[iend]);
+    //printf("This correction avoids crash, but does not\n compare correlation in the full range of angles needed.\n");
+  }
+
+  double tmp,tmptol;
+  FILE *output = fopen("tests/cc_test_corr_out.dat", "w");
   for(ii=istart;ii<iend;ii++) {
-
-    //by-pass small thetas, we don't have requirements on those.
-    //if (theta_in[ii]<0.1)
-    //  continue;
-
     tmp=gsl_spline_eval(spl_wt_dd_11_h, theta_in[ii], NULL);
-    if(fabs(tmp/wt_dd_11[ii]-1)>CORR_TOLERANCE*theta_in[ii]/0.1)
+    tmptol=gsl_spline_eval(spl_sigwt_dd_11, theta_in[ii], NULL);
+    if(fabs(tmp-wt_dd_11[ii])>tmptol)
       fraction_failed++;
-    //columns 1,2,3
-    fprintf(output,"%.10e %.10e %.10e",theta_in[ii],tmp,wt_dd_11[ii]);
-
-    tmp=gsl_spline_eval(spl_wt_dd_12_h, theta_in[ii], NULL);
-    if(fabs(tmp/wt_dd_12[ii]-1)>CORR_TOLERANCE*theta_in[ii]/0.1)
-      fraction_failed++;
-    //columns 4,5
-    fprintf(output," %.10e %.10e",tmp,wt_dd_12[ii]);
+    fprintf(output,"%.10e %.10e %.10e",theta_in[ii],fabs(tmp-wt_dd_11[ii]),tmptol);
 
     tmp=gsl_spline_eval(spl_wt_dd_22_h, theta_in[ii], NULL);
-    if(fabs(tmp/wt_dd_22[ii]-1)>CORR_TOLERANCE*theta_in[ii]/0.1)
+    tmptol=gsl_spline_eval(spl_sigwt_dd_22, theta_in[ii], NULL);
+    if(fabs(tmp-wt_dd_22[ii])>tmptol)
       fraction_failed++;
-    //columns 6,7
-    fprintf(output," %.10e %.10e",tmp,wt_dd_22[ii]);
+    fprintf(output," %.10e %.10e",fabs(tmp-wt_dd_22[ii]),tmptol);
 
     gsl_spline_eval_e(spl_wt_ll_11_h_pp, theta_in[ii], NULL,&tmp);
-    if(fabs(tmp/wt_ll_11_pp[ii]-1)>CORR_TOLERANCE*theta_in[ii]/0.1)
+    tmptol=gsl_spline_eval(spl_sigwt_pp_11, theta_in[ii], NULL);
+    if(fabs(tmp-wt_ll_11_pp[ii])>tmptol)
       fraction_failed++;
-    //columns 8,9
-    fprintf(output," %.10e %.10e",tmp,wt_ll_11_pp[ii]);
-    
-    gsl_spline_eval_e(spl_wt_ll_12_h_pp, theta_in[ii], NULL,&tmp);
-    if(fabs(tmp/wt_ll_12_pp[ii]-1)>CORR_TOLERANCE*theta_in[ii]/0.1)
-      fraction_failed++;
-    //columns 10,11
-    fprintf(output," %.10e %.10e",tmp,wt_ll_12_pp[ii]);
+    fprintf(output," %.10e %.10e",fabs(tmp-wt_ll_11_pp[ii]),tmptol);
 
     gsl_spline_eval_e(spl_wt_ll_22_h_pp, theta_in[ii], NULL,&tmp);
-    if(fabs(tmp/wt_ll_22_pp[ii]-1)>CORR_TOLERANCE*theta_in[ii]/0.1)
+    tmptol=gsl_spline_eval(spl_sigwt_pp_22, theta_in[ii], NULL);
+    if(fabs(tmp-wt_ll_22_pp[ii])>tmptol)
       fraction_failed++;
-    //columns 12,13
-    fprintf(output," %.10e %.10e",tmp,wt_ll_22_pp[ii]);
+    fprintf(output," %.10e %.10e",fabs(tmp-wt_ll_22_pp[ii]),tmptol);
 
     gsl_spline_eval_e(spl_wt_ll_11_h_mm, theta_in[ii], NULL,&tmp);
-    if(fabs(tmp/wt_ll_11_mm[ii]-1)>CORR_TOLERANCE*theta_in[ii]/0.1)
+    tmptol=gsl_spline_eval(spl_sigwt_mm_11, theta_in[ii], NULL);
+    if(fabs(tmp-wt_ll_11_mm[ii])>tmptol)
       fraction_failed++;
-    //columns 14,15
-    fprintf(output," %.10e %.10e",tmp,wt_ll_11_mm[ii]);
-
-    gsl_spline_eval_e(spl_wt_ll_12_h_mm, theta_in[ii], NULL,&tmp);
-    if(fabs(tmp/wt_ll_12_mm[ii]-1)>CORR_TOLERANCE*theta_in[ii]/0.1)
-      fraction_failed++;
-    //columns 16,17
-    fprintf(output," %.10e %.10e",tmp,wt_ll_12_mm[ii]);
+    fprintf(output," %.10e %.10e",fabs(tmp-wt_ll_11_mm[ii]),tmptol);
 
     gsl_spline_eval_e(spl_wt_ll_22_h_mm, theta_in[ii], NULL,&tmp);
-    if(fabs(tmp/wt_ll_22_mm[ii]-1)>CORR_TOLERANCE*theta_in[ii]/0.1)
+    tmptol=gsl_spline_eval(spl_sigwt_mm_22, theta_in[ii], NULL);
+    if(fabs(tmp-wt_ll_22_mm[ii])>tmptol)
       fraction_failed++;
-    //columns 18,19
-    fprintf(output," %.10e %.10e \n",tmp,wt_ll_22_mm[ii]);
+    fprintf(output," %.10e %.10e \n",fabs(tmp-wt_ll_22_mm[ii]),tmptol);
   }
   fclose(output);
+
+  free(sigwt_dd_11);
+  free(sigwt_dd_22);
+  free(sigwt_ll_11_pp);
+  free(sigwt_ll_22_pp);
+  free(sigwt_ll_11_mm);
+  free(sigwt_ll_22_mm);
+  gsl_spline_free(spl_sigwt_dd_11);
+  gsl_spline_free(spl_sigwt_dd_22);
+  gsl_spline_free(spl_sigwt_mm_11);
+  gsl_spline_free(spl_sigwt_pp_11);
+  gsl_spline_free(spl_sigwt_mm_22);
+  gsl_spline_free(spl_sigwt_pp_22);
   gsl_spline_free(spl_wt_dd_11_h);
   gsl_spline_free(spl_wt_dd_12_h);
   gsl_spline_free(spl_wt_dd_22_h);
@@ -340,7 +346,7 @@ static void compare_corr(char *compare_type,struct corrs_data * data)
   fclose(fi_ll_12_mm);
   fclose(fi_ll_22_mm);
 
-  fraction_failed/=9*nofl;
+  fraction_failed/=6*nofl;
   printf("%lf %%\n",fraction_failed*100);
   ASSERT_TRUE((fraction_failed<CORR_FRACTION));
 
@@ -352,10 +358,6 @@ static void compare_corr(char *compare_type,struct corrs_data * data)
   ccl_cosmology_free(cosmo);
 }
 
-
-CTEST2(corrs,histo) {
-  compare_corr("histo",data);
-}
 
 CTEST2(corrs,analytic) {
   compare_corr("analytic",data);
