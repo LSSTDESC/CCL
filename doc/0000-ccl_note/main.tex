@@ -14,6 +14,7 @@
 \graphicspath{{./}{./figures/}}
 \bibliographystyle{apj}
 \newcommand{\todo}[1]{\textcolor{magenta}{To do: #1}}
+\newcommand{\jab}[1]{\textcolor{blue}{JAB: #1}}
 \newcommand{\mrm}[1]{\mathrm{#1}}
 
 %This is a paper and note template for the LSST DESC \citep{Overview,ScienceBook,WhitePaper}.
@@ -43,7 +44,7 @@
 
 \begin{abstract}
 
-The Core Cosmology Library ({\tt CCL}) provides routines to compute basic cosmological observables with validated numerical accuracy. These routines have been validated to a hereby documented accuracy level against the results of the Code Comparison Project. In the current version, predictions are provided for distances and background quantities, angular auto- and cross-spectra of cosmic shear and clustering and the halo mass function. Fiducial specifications for the expected LSST galaxy distributions and clustering bias are also included, together with a facility to compute redshift distributions for a user-defined photometric redshift model. {\tt CCL} is written in C with a Python interface. In this note, we explain the functionality of the first release ({\tt CCL} v0.1) of the library.
+The Core Cosmology Library ({\tt CCL}) provides routines to compute basic cosmological observables with validated numerical accuracy. These routines have been validated to a hereby documented accuracy level against the results of the Code Comparison Project. In the current version, predictions are provided for distances and background quantities, angular auto- and cross-spectra of cosmic shear and clustering, and the halo mass function. Fiducial specifications for the expected LSST galaxy distributions and clustering bias are also included, together with a facility to compute redshift distributions for a user-defined photometric redshift model. {\tt CCL} is written in C with a Python interface. In this note, we explain the functionality of the first release ({\tt CCL} v0.1) of the library.
 
 \end{abstract}
 
@@ -96,6 +97,8 @@ This will create two directories (if not present already): {\tt /home/desc$\_$fa
 
 After installing the C library you can make sure it is running as it should by typing {\tt make check}, which will run the unit tests described in Section \ref{sec:tests}. You are now ready to install the Python wrapper following the steps described in Section \ref{sec:python}.
 
+\jab{What is required when pulling a new version? make clean; make install? or make clean; make all}
+
 \subsection{Alternative installation and pip}
 
 
@@ -117,7 +120,7 @@ This will run the embedded unit tests. Using this last method to install the Pyt
  
 \subsection{Compiling against an external version of CLASS}
 
-{\tt CCL} has a built-in version of {\tt CLASS} that is used to calculate power spectra and other cosmological functions. This is compiled by default. Optionally, you can also link {\tt CCL} against an external version of {\tt CLASS}. This section is useful if you want to use a modified version of {\tt CLASS}, or a different or more up-to-date version of the standard {\tt CLASS}. For example, we have sucessfully compiled and ran {\tt CCL} with {\tt hiCLASS} \citep{hiclass} for Horndeski models.
+{\tt CCL} has a built-in version of {\tt CLASS} that is used to calculate power spectra and other cosmological functions. This is compiled by default. Optionally, you can also link {\tt CCL} against an external version of {\tt CLASS}. This section is useful if you want to use a modified version of {\tt CLASS}, or a different or more up-to-date version of the standard {\tt CLASS}. For example, we have successfully compiled and run {\tt CCL} with {\tt hiCLASS} \citep{hiclass} for Horndeski models.
 
 To compile {\tt CCL} with an external version of {\tt CLASS}, you must first prepare the external copy so that it can be linked as a shared library. By default, the {\tt CLASS} build tools create a static library. After compiling {\tt CLASS} in the usual way (by running {\tt make}), look for a static library file called {\tt libclass.a} that should have been placed in the root source directory. Then, run the following command from that directory (Linux only):
 \begin{verbatim}
@@ -126,7 +129,8 @@ To compile {\tt CCL} with an external version of {\tt CLASS}, you must first pre
 \end{verbatim}
 This should create a new shared library, {\tt libclass.so}, in the same directory. (N.B. The {\tt -lgomp} flag has to appear at the end of the command; otherwise the linker can fail.) If you are running Mac OS X, use the following command instead:
 \begin{verbatim}
- $ gcc -fpic -shared -o libclass.dylib -Wl,-all_load libclass.a -Wl,-noall_load
+ $ gcc -fpic -shared -o libclass.dylib -Wl,-all_load libclass.a \
+                              -Wl,-noall_load
 \end{verbatim}
 
 Next, change to the root {\tt CCL} directory and run {\tt make clean} if you have previously run the compilation process. Then, set the {\tt CLASSDIR} environment variable to point to the directory containing {\tt libclass.so}:
@@ -140,7 +144,7 @@ Once compilation has finished, run {\tt make check} to make sure everything is w
 \subsection{Creating a Docker Image}
 {\tt CCL} supports the use of the Docker project for the deployment of applications inside software containers. The included Dockerfile allows for quick creation of an image file that will allow for easy realization of virtual machines that require no additional dependencies beyond the Docker software. The Docker website\footnote{\url{https://www.docker.com}} details the installation process for most common operating systems.
 
-With Docker installed, creating an image is relatively straightforward:
+With Docker installed \jab{and running?}, creating an image is relatively straightforward:
 \begin{verbatim}
 docker build -t ccl .
 \end{verbatim}
