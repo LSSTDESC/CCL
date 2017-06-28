@@ -74,7 +74,7 @@ This note describes how to install {\tt CCL} (Section \ref{sec:install}), its fu
 
 \begin{itemize}
 \item GNU Scientific Library {\tt GSL}\footnote{\url{https://www.gnu.org/software/gsl/}}, {\tt GSL-2.1} or higher
-\item Simplified Wrapper and Interface Generator {\tt SWIG}\footnote{\url{http://www.swig.org/}} is not needed to run {\tt CCL}, but if you are developing new features, you will need {\tt SWIG}. \jab{I'm getting a SWIG-related error.}
+\item Simplified Wrapper and Interface Generator {\tt SWIG}\footnote{\url{http://www.swig.org/}} is not needed to run {\tt CCL}, but if you are developing new features, you will need {\tt SWIG}. 
 \item {\tt FFTlog}\footnote{\url{http://casa.colorado.edu/~ajsh/FFTLog/}} is provided within {\tt CCL} with minor modifications 
 %\item A version of {\tt Angpow} \citep{2017arXiv170103592C} is also incorporated within {\tt CCL}.
 \end{itemize}
@@ -97,7 +97,11 @@ This will create two directories (if not present already): {\tt /home/desc$\_$fa
 
 After installing the C library you can make sure it is running as it should by typing {\tt make check}, which will run the unit tests described in Section \ref{sec:tests}. You are now ready to install the Python wrapper following the steps described in Section \ref{sec:python}.
 
-\jab{What is required when pulling a new version? make clean; make install? or make clean; make all}
+When pulling a new version of {\tt CCL}, you can recompile the library by running:
+\begin{verbatim}
+ $ make clean; make uninstall
+ $ make; make install
+\end{verbatim}
 
 \subsection{Alternative installation and pip}
 
@@ -170,7 +174,7 @@ This will allow for full access to the virtual machine for installation of any a
 Ultimately, CCL will aim to incorporate theoretical predictions for all cosmological models of interest to LSST. Currently, the following families of models are supported:
 \begin{itemize}
  \item Flat $\Lambda$CDM 
- \item wCDM and the CPL model ($w_0+w_a$) \jab{cite? footnote?}
+ \item wCDM and the CPL model ($w_0+w_a$, \citealt{Chevallier01} and \citealt{Linder03})
  \item Non-zero curvature ($K$)
  \item All the above plus an arbitrary, user-defined, modified growth function (see description in Section \ref{sec:growth})
   \item A single massive neutrino or multiple equal-mass massive neutrinos \jab{combined with any of the above except user-defined growth, right?}
@@ -348,7 +352,7 @@ For a test flat $\Lambda$CDM cosmology with $\Omega_c=0.25$, $\Omega_b=0.05$, $\
 
 The computation of the power spectrum from {\tt CLASS} can be significantly sped up by extrapolating in the range $k>$~{\tt K$\_$MAX$\_$SPLINE} and $k<$~{\tt K$\_$MIN}. In this section, we describe the implementation of the extrapolation and the accuracy attained. These tests are performed in a flat $\Lambda$CDM cosmology with $\Omega_c=0.25$, $\Omega_b=0.05$, $\sigma_8=0.8$, $h=0.7$ and $n_s=0.96$.
 
-We describe first the extrapolation at high wavenumbers. The introduction of the parameter {\tt K$\_$MAX$\_$SPLINE} allows us to spline the matter power spectrum within the {\tt cosmo} structure up to that value of $k$ (in units of $1/$Mpc). A separate {\tt K$\_$MAX} parameter sets the limit for evaluation of the matter power spectrum. The range between {\tt K$\_$MAX$\_$SPLINE}$<k<${\tt K$\_$MAX} is evaluated by performing a second order Taylor expansion within the static routine {\tt ccl$\_$power$\_$extrapol$\_$highk}. \jab{Expansion in lnk...}
+We describe first the extrapolation at high wavenumbers. The introduction of the parameter {\tt K$\_$MAX$\_$SPLINE} allows us to spline the matter power spectrum within the {\tt cosmo} structure up to that value of $k$ (in units of $1/$Mpc). A separate {\tt K$\_$MAX} parameter sets the limit for evaluation of the matter power spectrum. The range between {\tt K$\_$MAX$\_$SPLINE}$<k<${\tt K$\_$MAX} is evaluated by performing a second order Taylor expansion in $\ln k$ within the static routine {\tt ccl$\_$power$\_$extrapol$\_$highk}. 
 
 First, we compute the first and second derivative of the $\ln P(k,z)$ at $k_0={\rm \tt K\_MAX}-2\Delta\ln k$ by computing the numerical derivatives by finite differences using GSL. The fiducial choice for $\Delta\ln k$ is $10^{-2}$. We then apply a second order Taylor expansion to extrapolate the matter power spectrum to $k>${\tt K$\_$MAX$\_$SPLINE}. The Taylor expansion gives
 %
