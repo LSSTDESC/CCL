@@ -361,7 +361,3 @@ CTEST2(corrs,analytic_fftlog) {
 CTEST2(corrs,analytic_bessel) {
   compare_corr("analytic",CCL_CORR_BESSEL,data);
 }
-
-CTEST2(corrs,analytic_legendre) {
-  compare_corr("analytic",CCL_CORR_LGNDRE,data);
-}
