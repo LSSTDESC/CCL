@@ -1,31 +1,43 @@
+#include "ccl.h"
+#include "ccl_correlation.h"
+#include "ccl_utils.h"
+#include "ctest.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
-#include "ccl.h"
-#include "ccl_correlation.h"
+#include <time.h>
+#include <string.h>
 
 #define OC 0.25
 #define OB 0.05
-#define OL 0.70
 #define OK 0.00
 #define ON 0.00
 #define HH 0.70
 #define W0 -1.0
 #define WA 0.00
 #define NS 0.96
-#define AS 2.1E-9
+#define NORMPS 0.80
 #define ZD 0.5
 #define NZ 128
 #define Z0_GC 0.50
 #define SZ_GC 0.05
 #define Z0_SH 0.65
 #define SZ_SH 0.05
+#define NL 512
+#define PS 0.1 
+#define NREL 3.046
+#define NMAS 0
+#define MNU 0.0
+#define ELL_MAX_CL 20000
 
 
 int main(int argc,char **argv)
 {
-  ccl_parameters params=ccl_parameters_create(OC,OB,OK,ON,W0,WA,HH,AS,NS,-1,NULL,NULL);
-  ccl_cosmology *cosmo=ccl_cosmology_create(params,default_config);
+
+  int status=0;
+  ccl_configuration config = default_config;
+  ccl_parameters params=ccl_parameters_create(OC, OB, OK, NREL, NMAS, MNU, W0, WA, HH, NORMPS, NS,0,NULL,NULL, &status);
+  ccl_cosmology *cosmo=ccl_cosmology_create(params,config);
 
   //Create tracers for angular power spectra
   double z_arr_gc[NZ],z_arr_sh[NZ],nz_arr_gc[NZ],nz_arr_sh[NZ],bz_arr[NZ];
@@ -36,22 +48,32 @@ int main(int argc,char **argv)
     z_arr_sh[i]=Z0_SH-5*SZ_SH+10*SZ_SH*(i+0.5)/NZ;
     nz_arr_sh[i]=exp(-0.5*pow((z_arr_sh[i]-Z0_SH)/SZ_SH,2));
   }
-  static int n_theta=NL; //they have to be the same
 
   //Galaxy clustering tracer
-  CCL_ClTracer *ct_gc=ccl_cl_tracer_new(cosmo,CL_TRACER_NC,NZ,z_arr_gc,nz_arr_gc,NZ,z_arr_gc,bz_arr);
-  //Cosmic shear tracer
-  CCL_ClTracer *ct_wl=ccl_cl_tracer_new(cosmo,CL_TRACER_WL,NZ,z_arr_sh,nz_arr_sh,-1,NULL,NULL);
+  CCL_ClTracer *ct_gc=ccl_cl_tracer_number_counts_simple_new(cosmo,NZ,z_arr_gc,nz_arr_gc,NZ,z_arr_gc,bz_arr,&status);
   
+  int il;
+  double *clarr=malloc(ELL_MAX_CL*sizeof(double));
+  double *larr=malloc(ELL_MAX_CL*sizeof(double));
+  for(il=0;il<ELL_MAX_CL;il++){
+    larr[il]=il;
+    clarr[il]=ccl_angular_cl(cosmo,il,ct_gc,ct_gc,&status);
+  }
+
   double *clustering_corr;
   double *theta;
+  int ntheta=15;
+  double taper_cl_limits[4]={1,2,10000,15000};
+  theta = ccl_log_spacing(0.01*M_PI/180.,5.*M_PI/180.,ntheta);
+  clustering_corr=malloc(ntheta*sizeof(double));
+  ccl_correlation(cosmo,ELL_MAX_CL,larr,clarr,ntheta,theta,clustering_corr,CCL_CORR_GG,0,taper_cl_limits,CCL_CORR_FFTLOG,&status);
 
-  int i_bessel=0;
-  ccl_tracer_corr(cosmo,n_theta,&theta,ct_gc,ct_gc,i_bessel,&clustering_corr); //clustering
+  for(int it=0;it<ntheta;it++){
+    printf("%le %le\n",theta[it]*180./M_PI,clustering_corr[it]);
+  }
 
   //Free up tracers
   ccl_cl_tracer_free(ct_gc);
-  ccl_cl_tracer_free(ct_wl);
   //Free up cosmology
   ccl_cosmology_free(cosmo);
 

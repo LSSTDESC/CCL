@@ -143,7 +143,7 @@ static void compare_corr(char *compare_type,int algorithm,struct corrs_data * da
   double *wt_dd_11_h,*wt_dd_12_h,*wt_dd_22_h;
   double *wt_ll_11_h_mm,*wt_ll_12_h_mm,*wt_ll_22_h_mm;
   double *wt_ll_11_h_pp,*wt_ll_12_h_pp,*wt_ll_22_h_pp;
-  double theta_in[nofl],*theta_arr;
+  double theta_in[nofl];
 
 
   for(ii=0;ii<nofl;ii++) {
