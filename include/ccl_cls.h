@@ -1,19 +1,10 @@
 #pragma once
 
 #include "ccl_core.h"
-#include "gsl/gsl_spline.h"
+#include "ccl_utils.h"
 
 #define CL_TRACER_NC 1 //Tracer type 1: number counts
 #define CL_TRACER_WL 2 //Tracer type 2: weak lensing
-
-//Spline wrapper
-//Used to take care of evaluations outside the supported range
-typedef struct {
-  gsl_interp_accel *intacc; //GSL spline
-  gsl_spline *spline;
-  double x0,xf; //Interpolation limits
-  double y0,yf; //Constant values to use beyond interpolation limit
-} SplPar;
 
 typedef struct {
   int tracer_type; //Type (see above)

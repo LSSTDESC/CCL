@@ -557,19 +557,23 @@ def sigmaR_vec(*args):
 CCL_CORR_LGNDRE = _ccllib.CCL_CORR_LGNDRE
 CCL_CORR_FFTLOG = _ccllib.CCL_CORR_FFTLOG
 CCL_CORR_BESSEL = _ccllib.CCL_CORR_BESSEL
+CCL_CORR_GG = _ccllib.CCL_CORR_GG
+CCL_CORR_GL = _ccllib.CCL_CORR_GL
+CCL_CORR_LP = _ccllib.CCL_CORR_LP
+CCL_CORR_LM = _ccllib.CCL_CORR_LM
 
-def tracer_corr(*args):
+def correlation(*args):
   """
-    tracer_corr(cosmology cosmo, int n_theta, double ** theta, CCL_ClTracer ct1, CCL_ClTracer ct2, 
-        int i_bessel, bool taper_cl, double * taper_cl_limits, double ** corr_func, 
-        int flag_method) -> int
+    correlation(cosmology cosmo, int n_ell, double * ell, double * cls, int n_theta, double * theta, 
+        double * wtheta, int corr_type, int do_taper_cl, double * taper_cl_limits, 
+        int flag_method, int * status)
     """
-  return _ccllib.tracer_corr(*args)
+  return _ccllib.correlation(*args)
 
 def correlation_vec(*args):
   """
-    correlation_vec(cosmology cosmo, CCL_ClTracer ct1, CCL_ClTracer ct2, int i_bessel, double * theta, 
-        double * output)
+    correlation_vec(cosmology cosmo, int nlarr, int nclarr, int nt, int corr_type, int method, double * output, 
+        int * status)
     """
   return _ccllib.correlation_vec(*args)
 
@@ -614,41 +618,6 @@ def halo_bias_vec(*args):
   return _ccllib.halo_bias_vec(*args)
 CL_TRACER_NC = _ccllib.CL_TRACER_NC
 CL_TRACER_WL = _ccllib.CL_TRACER_WL
-class SplPar(_object):
-    """Proxy of C SplPar struct"""
-    __swig_setmethods__ = {}
-    __setattr__ = lambda self, name, value: _swig_setattr(self, SplPar, name, value)
-    __swig_getmethods__ = {}
-    __getattr__ = lambda self, name: _swig_getattr(self, SplPar, name)
-    __repr__ = _swig_repr
-    __swig_setmethods__["intacc"] = _ccllib.SplPar_intacc_set
-    __swig_getmethods__["intacc"] = _ccllib.SplPar_intacc_get
-    if _newclass:intacc = _swig_property(_ccllib.SplPar_intacc_get, _ccllib.SplPar_intacc_set)
-    __swig_setmethods__["spline"] = _ccllib.SplPar_spline_set
-    __swig_getmethods__["spline"] = _ccllib.SplPar_spline_get
-    if _newclass:spline = _swig_property(_ccllib.SplPar_spline_get, _ccllib.SplPar_spline_set)
-    __swig_setmethods__["x0"] = _ccllib.SplPar_x0_set
-    __swig_getmethods__["x0"] = _ccllib.SplPar_x0_get
-    if _newclass:x0 = _swig_property(_ccllib.SplPar_x0_get, _ccllib.SplPar_x0_set)
-    __swig_setmethods__["xf"] = _ccllib.SplPar_xf_set
-    __swig_getmethods__["xf"] = _ccllib.SplPar_xf_get
-    if _newclass:xf = _swig_property(_ccllib.SplPar_xf_get, _ccllib.SplPar_xf_set)
-    __swig_setmethods__["y0"] = _ccllib.SplPar_y0_set
-    __swig_getmethods__["y0"] = _ccllib.SplPar_y0_get
-    if _newclass:y0 = _swig_property(_ccllib.SplPar_y0_get, _ccllib.SplPar_y0_set)
-    __swig_setmethods__["yf"] = _ccllib.SplPar_yf_set
-    __swig_getmethods__["yf"] = _ccllib.SplPar_yf_get
-    if _newclass:yf = _swig_property(_ccllib.SplPar_yf_get, _ccllib.SplPar_yf_set)
-    def __init__(self): 
-        """__init__(SplPar self) -> SplPar"""
-        this = _ccllib.new_SplPar()
-        try: self.this.append(this)
-        except: self.this = this
-    __swig_destroy__ = _ccllib.delete_SplPar
-    __del__ = lambda self : None;
-SplPar_swigregister = _ccllib.SplPar_swigregister
-SplPar_swigregister(SplPar)
-
 class CCL_ClTracer(_object):
     """Proxy of C CCL_ClTracer struct"""
     __swig_setmethods__ = {}
@@ -780,9 +749,6 @@ EPSREL_DNDZ = _ccllib.EPSREL_DNDZ
 EPS_SCALEFAC_GROWTH = _ccllib.EPS_SCALEFAC_GROWTH
 EPSREL_CORR_FUNC = _ccllib.EPSREL_CORR_FUNC
 GSL_INTEGRATION_LIMIT = _ccllib.GSL_INTEGRATION_LIMIT
-L_MIN_INT = _ccllib.L_MIN_INT
-L_MAX_INT = _ccllib.L_MAX_INT
-NL = _ccllib.NL
 Z_MIN_SOURCES = _ccllib.Z_MIN_SOURCES
 Z_MAX_SOURCES = _ccllib.Z_MAX_SOURCES
 class user_pz_info(_object):
@@ -946,8 +912,55 @@ def linear_spacing(*args):
 def log_spacing(*args):
   """log_spacing(double xmin, double xmax, int N) -> double *"""
   return _ccllib.log_spacing(*args)
-# This file is compatible with both classic and new-style classes.
-
+class SplPar(_object):
+    """Proxy of C SplPar struct"""
+    __swig_setmethods__ = {}
+    __setattr__ = lambda self, name, value: _swig_setattr(self, SplPar, name, value)
+    __swig_getmethods__ = {}
+    __getattr__ = lambda self, name: _swig_getattr(self, SplPar, name)
+    __repr__ = _swig_repr
+    __swig_setmethods__["intacc"] = _ccllib.SplPar_intacc_set
+    __swig_getmethods__["intacc"] = _ccllib.SplPar_intacc_get
+    if _newclass:intacc = _swig_property(_ccllib.SplPar_intacc_get, _ccllib.SplPar_intacc_set)
+    __swig_setmethods__["spline"] = _ccllib.SplPar_spline_set
+    __swig_getmethods__["spline"] = _ccllib.SplPar_spline_get
+    if _newclass:spline = _swig_property(_ccllib.SplPar_spline_get, _ccllib.SplPar_spline_set)
+    __swig_setmethods__["x0"] = _ccllib.SplPar_x0_set
+    __swig_getmethods__["x0"] = _ccllib.SplPar_x0_get
+    if _newclass:x0 = _swig_property(_ccllib.SplPar_x0_get, _ccllib.SplPar_x0_set)
+    __swig_setmethods__["xf"] = _ccllib.SplPar_xf_set
+    __swig_getmethods__["xf"] = _ccllib.SplPar_xf_get
+    if _newclass:xf = _swig_property(_ccllib.SplPar_xf_get, _ccllib.SplPar_xf_set)
+    __swig_setmethods__["y0"] = _ccllib.SplPar_y0_set
+    __swig_getmethods__["y0"] = _ccllib.SplPar_y0_get
+    if _newclass:y0 = _swig_property(_ccllib.SplPar_y0_get, _ccllib.SplPar_y0_set)
+    __swig_setmethods__["yf"] = _ccllib.SplPar_yf_set
+    __swig_getmethods__["yf"] = _ccllib.SplPar_yf_get
+    if _newclass:yf = _swig_property(_ccllib.SplPar_yf_get, _ccllib.SplPar_yf_set)
+    def __init__(self): 
+        """__init__(SplPar self) -> SplPar"""
+        this = _ccllib.new_SplPar()
+        try: self.this.append(this)
+        except: self.this = this
+    __swig_destroy__ = _ccllib.delete_SplPar
+    __del__ = lambda self : None;
+SplPar_swigregister = _ccllib.SplPar_swigregister
+SplPar_swigregister(SplPar)
 cvar = _ccllib.cvar
 default_config = cvar.default_config
+
+
+def spline_init(*args):
+  """spline_init(int n, double * x, double * y, double y0, double yf) -> SplPar"""
+  return _ccllib.spline_init(*args)
+
+def spline_eval(*args):
+  """spline_eval(double x, SplPar spl) -> double"""
+  return _ccllib.spline_eval(*args)
+
+def spline_free(*args):
+  """spline_free(SplPar spl)"""
+  return _ccllib.spline_free(*args)
+# This file is compatible with both classic and new-style classes.
+
 

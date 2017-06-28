@@ -11,21 +11,29 @@
 // Strip the ccl_ prefix from function names
 %rename("%(strip:[ccl_])s") "";
 
-// Enable vectorised arguments for arrays
-%apply (double* IN_ARRAY1, int DIM1) {(double* theta, int nt)};
-%apply (double* ARGOUT_ARRAY1, int DIM1) {(double* output, int nout)};
-
 %include "../include/ccl_correlation.h"
 
+// Enable vectorised arguments for arrays
+%apply (int DIM1,double* IN_ARRAY1) {
+                                     (int nlarr,double* larr),
+                                     (int nclarr,double* clarr),
+                                     (int nt,double *theta)}
+%apply (double* ARGOUT_ARRAY1, int DIM1) {(double* output, int nout)};
+
 %inline %{
-void correlation_vec(
-                        ccl_cosmology * cosmo,
-			CCL_ClTracer *ct1, CCL_ClTracer *ct2, int i_bessel,
-			double* theta, int nt,
-                        double* output, int nout)
+
+void correlation_vec(ccl_cosmology *cosmo,
+		     int nlarr,double *larr,
+		     int nclarr,double *clarr,
+		     int nt,double *theta,
+		     int corr_type,int method,
+		     double *output,int nout,
+		     int *status)
 {
-    for(int i=0; i < nout; i++){
-      output[i] = ccl_single_tracer_corr(theta[i],cosmo,ct1,ct2,i_bessel);
-    }
+  assert(nlarr==nclarr);
+  assert(nt==nout);
+
+  ccl_correlation(cosmo,nlarr,larr,clarr,nt,theta,output,corr_type,0,NULL,method,status);
 }
- %}
+
+%}
