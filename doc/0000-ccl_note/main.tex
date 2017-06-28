@@ -271,12 +271,11 @@ in units such that $\mu$ is dimensionless. We then conduct the phase-space integ
 where $h_{\rm P}$ is Planck's constant and $h$ is $H_0/100$ with $H_0$ in units of km / s / Mpc. $x_{\rm max}$ is set to 1000. The final bracketed term which includes the phase-space integral can be simplified in the limit where $\mu$ is very large or very small: for small $\mu$, it is set to $\frac{7}{8}$, and for large $\mu$, it becomes $\frac{5\zeta(3)}{18\pi^4}\mu\sim 0.2776\mu$.
 
 
-
 \subsection{Growth function}
 \label{sec:growth}
 
 The routines described in this subsection are implemented in {\tt ccl$\_$background.c}.
-To compute the growth function, $D(a)$, the growth factor of matter perturbations, {\tt CCL} solves the following differential equation:
+To compute the growth function, $D(a)$, the growth factor of matter perturbations, {\tt CCL} solves the following differential equation:\jab{allow show integral form of the equation? how is it actually computed?}
 \begin{equation}
   \frac{d}{da}\left(a^3H(a)\frac{dD}{da}\right)=\frac{3}{2}\Omega_M(a)aH(a)D.
 \end{equation}
@@ -583,6 +582,8 @@ about 15s on 16 threads, which is to be compared to about 0.5s with \texttt{Angp
 
 \end{comment}
 
+\jab{What if I want to output the $P(k)$ predictions?}
+
 \subsection{Correlation functions}
 \label{sec:corr}
 
@@ -679,13 +680,13 @@ which yields final expressions that coincide with Eq. \ref{eq:xipxim}. \jab{even
 
 The routines described in this subsection are implemented in {\tt ccl$\_$massfunc.c}.
 
-The halo mass function is incorporated using several definitions from the literature: \citet{Tinker2008}, \citet{Tinker2010}, \citet{Angulo2012}, and \citet{Watson2013}. All four models are tuned to simulation data and tested against observational results. In addition, each of these fits has been implemented using the common halo definition of $\Delta = 200{\mathrm{m}}$, where a halo is defined with:
+The halo mass function is incorporated using several definitions from the literature: \citet{Tinker2008}, \citet{Tinker2010}, \citet{Angulo2012}, and \citet{Watson2013}. All four models are tuned to simulation data and tested against observational results. In addition, each of these fits has been implemented using the common halo definition of $\Delta = 200{\mathrm{m}}$\jab{get rid of the 'm' here, it's redundant with below.}, where a halo is defined with:
 \begin{equation}
 \bar{\rho}(r_{\Delta}) = \Delta*\rho_{\mathrm{m}},
 \end{equation}
-where a halo with size $r_{\Delta}$ has an average density $\bar{\rho}$ equal to the overdensity parameter $\Delta$ times the mean background density of the universe, $\rho_{\mathrm{m}}$. Note that another common definition utilizes the critical density of the universe, $\rho_{\mathrm{c}}$; currently {\tt CCL} requires an adjustment to the $\Delta$ value provided if this definition is used. We may look into additional methods of implementation in the future that will remove this additional calculation.
+where a halo with size $r_{\Delta}$ has an average density $\bar{\rho}$ equal to the overdensity parameter $\Delta$ times the mean background density of the universe, $\rho_{\mathrm{m}}$. Note that another common definition utilizes the critical density of the universe, $\rho_{\mathrm{c}}$; currently {\tt CCL} requires an adjustment to the $\Delta$ value provided if this definition is used.\jab{you mean that mean density is always used, and the user must convert between the two? this could be explicitly stated.} We plan to include future features that will remove this additional calculation.
 
-In addition to the usage of the most common definition, we have implemented an extension for two of the models. The Tinker 2010 model allows for a value of $\Delta$ to be given between the values of 200 and 3200 and interpolates the fitting parameters within this range in a space of $\log \Delta$ using splines. We also have implemented interpolation in the same range of Tinker 2008 $\Delta$ values. We choose not to use the interpolation fitting functions included in this work due to the introduced inaccuracies from the specified values at distinct $\Delta$ values and instead utilize a spline fitting method. We look toward extending to more general halo definitions in the future, though this implementation is not yet in practice.
+In addition to the usage of the most common definition, we have implemented an extension for two of the models. The Tinker 2010 model allows for a value of $\Delta$ to be given between the values of 200 and 3200 and interpolates the fitting parameters within this range in a space of $\log \Delta$ using splines. We also have implemented interpolation in the same range of Tinker 2008 $\Delta$ values. We choose not to use the interpolation fitting functions included in this work due to the introduced inaccuracies from the specified values at distinct $\Delta$ values and instead utilize a spline fitting method.\jab{You mean that you use the interpolation provided in Tinker 2010 but your own spline interpolation for Tinker 2008?} We plan to extend to more general halo definitions in the future, though this implementation is not yet in practice. \jab{Essentially the same comment is made below. Only needs to be said once.}
 
 
 With the exception of the Tinker 2010 model, we attempt to keep a common form to the multiplicity function whenever possible for ease of extension:
@@ -727,20 +728,22 @@ The currently implemented model in {\tt CCL} allows for an arbitrary overdensity
 \label{sec:photoz}
 The functionality described in this section is implemented in {\tt ccl\_lsst\_specs.c}.
 
-LSST galaxy redshifts will be obtained using photometry. However, analytic forms of galaxy redshift distributions are usually known in terms of spectroscopic redshifts. A model is therefore required for the probability of measuring a photometric redshift $z_{\rm ph}$ for an object with hypothetical spectroscopic redshift $z_{\rm s}$. {\tt CCL} allows the user to flexibly provide their own photometric redshift model.
+LSST galaxy redshifts will be obtained using photometry. \jab{This sentence seems unnecessary:}[However, analytic forms of galaxy redshift distributions are usually known in terms of spectroscopic redshifts.] A model is therefore required for the probability of measuring a photometric redshift $z_{\rm ph}$ for an object with hypothetical spectroscopic redshift $z_{\rm s}$. {\tt CCL} allows the user to flexibly provide their own photometric redshift model. \jab{More generally, CCL might be of interest to people working with spec-z's. The arguments here need not apply only to photo-z's, but could apply to any redshift measurement.}
 
 To do so, the user writes a function which accepts as input a photometric redshift, a spectroscopic redshift, and a void pointer to a structure containing any further parameters of the photo-z model. This function will return the probability of measuring the input photometric redshift given the input spectroscopic redshift. Explicitly, this function should take the form:
 
 {\tt user$\_$pz$\_$probability(double z$\_$ph, double z$\_$s, void * user$\_$par)\{...\}}
 
-The user must then also provides the structure of further parameters ({\tt user$\_$par}). This model can be incorporated when computing $\frac{dN}{dz}^i$ in photometric redshift bin $i$, as given by equation \ref{photoz}, below.
+The user must then also provides the structure of further parameters ({\tt user$\_$par}). This model can be incorporated when computing $\frac{dN}{dz}^i$ in photometric redshift bin $i$, as given by equation \ref{photoz} below.
+
+\jab{Is there an example of how to do this somewhere? Is there a default function that can be used, e.g. Gaussian photo-z's?}
 
 \subsection{LSST Specifications}
 \label{sec:specs}
 
-{\tt CCL} includes LSST specifications for the expected galaxy distributions of the full galaxy clustering sample and the lensing source galaxy sample. These enable the user to easily make predictions or forecasts for LSST. The functionality described in this section is implemented in {\tt ccl\_lsst\_specs.c}.
+{\tt CCL} includes LSST specifications for the expected galaxy distributions of the full galaxy clustering sample and the lensing source galaxy sample. These enable the user to easily make forecasts for LSST. The functionality described in this section is implemented in {\tt ccl\_lsst\_specs.c}.
 
-The functional forms of the expected $\frac{dN}{dz}$ for clustering galaxies and lensing source galaxies are provided. Here, $\frac{dN}{dz}$ is the number density of galaxies as a function of spectroscopic redshift.
+The functional forms of the expected $\frac{dN}{dz}$ for clustering galaxies and lensing source galaxies are provided. Here, $\frac{dN}{dz}$ is the number density of galaxies as a function of spectroscopic redshift. \jab{A minor point, but I think what is actually meant here is ``true redshift'' or even ``cosmological redshift'' depending on how RSD is treated. Usually, you start with the distribution that is actually there, and then perturb it to account for measurement uncertainties, which can occur even for spec-z's, as well as RSDs.}
 
 In the case of lensing source galaxies, these forms are given in \cite{Chang2013}, wherein three different cases are considered: fiducial, optimistic, and conservative. All three are included in {\tt CCL}, and are indicated via a label of {\tt DNDZ$\_$WL$\_$OPT}, {\tt DNDZ$\_$WL$\_$FID}, and {\tt DNDZ$\_$WL$\_$CONS} as appropriate. The functional form of $\frac{dN}{dz}$ for lensing source galaxies is given as:
 \begin{equation}
@@ -754,9 +757,9 @@ For the case of the clustering galaxy sample, the functional form is given by \c
 \frac{dN}{dz} \propto \frac{1}{2z_0}\left(\frac{z}{z_0}\right)^2 {\rm exp}\left(-\frac{z}{z_0}\right)
 \label{dndz_clust}
 \end{equation}
-with $z_0=0.3$. The above $\frac{dN}{dz}$ for lensing sources in fact represents a subset of the $\frac{dN}{dz}$ for clustering.
+with $z_0=0.3$. The above $\frac{dN}{dz}$ for lensing sources in fact represents a subset of the $\frac{dN}{dz}$ for clustering. \jab{What is meant by this last sentence? Is it true that for any reasonable choice of $\alpha$ and $\beta$, the clustering sample with the specified distribution can always be selected as a subsample?}
 
-In order to be incorporated into forecasts or predictions, the above expressions for $\frac{dN}{dz}$ must be normalized, and the value of $\frac{dN}{dz}$ must be provided in a given photometric redshift bin. Support is provided for the user to input a flexible photometric redshift model, as described in Section \ref{sec:photoz}. This takes the form of a function which returns the probability $p(z,z')$of measuring a particular photometric redshift $z$, given a spectroscopic redshift $z'$ and other relevant parameters. Also provided are functions to return $\sigma_z$ at a given redshift for both lensing sources and clustering galaxies, for the case in which the user wishes the assume a Gaussian photo-z model.
+In order to be incorporated into forecasts or predictions, the above expressions for $\frac{dN}{dz}$ must be normalized, and the value of $\frac{dN}{dz}$ must be provided in a given photometric redshift bin. Support is provided for the user to input a flexible photometric redshift model, as described in Section \ref{sec:photoz}. This takes the form of a function which returns the probability $p(z,z')$ of measuring a particular photometric redshift $z$, given a spectroscopic redshift $z'$ and other relevant parameters. Also provided are functions to return $\sigma_z$ at a given redshift for both lensing sources and clustering galaxies, for the case in which the user wishes the assume a Gaussian photo-z model. \jab{So the user can specify $\sigma_z$ at a given redshift for a built-in Gaussian capability? Or the effective $\sigma_z$ is returned for a user-specified function, which may not be Gaussian?}
 
 With this, $\frac{dN^i}{dz}$ of lensing or clustering galaxies in a particular photometric redshift bin $i$ is given by:
 \begin{equation}
@@ -770,22 +773,22 @@ Finally, the expected (linear, scale-independent) bias of galaxies in the cluste
 b(z) = \frac{0.95}{D(z)}
 \label{clustbias}
 \end{equation}
-where $D(z)$ in the linear growth rate of structure.
+where $D(z)$ in the linear growth rate of structure. \jab{normalized to unity at z=0, right?}
 
 \section{Tests and validation}
 \label{sec:tests}
 
-Our goal is for outputs of {\tt CCL} to be validated against the results of the code comparison project down to a $10^{-4}$ or pre-established accuracy level if possible. In some cases, this level of accuracy is not necessary, as other systematics which have not been considered in this version of {\tt CCL} yet are expected to have a larger fractional impact. In the cases where this applies, we make it clear below.
+Our goal is for outputs of {\tt CCL} to be validated against the results of the code comparison project \jab{Will it be clear to the random reader what the ``code comparison project' is? It is mentioned in the abstract. Is there a link to more info? Which codes were used, etc?} down to a $10^{-4}$ or pre-established accuracy level if possible. In some cases, this level of accuracy is not necessary, as other systematics which have not been considered in this version of {\tt CCL} yet are expected to have a larger fractional impact. In the cases where this applies, we make it clear below.
 
 
 A code comparison project was carried out among members of TJP where the following outputs of cosmological forecast codes were compared and validated:
 \begin{enumerate}
 \item growth factor at $z = 0,1,2,3,4,5$,
-\item comoving radial distance $[$Mpc$/h]$ at the same redshifts, as well as the corresponding distance moduli
+\item comoving radial distance $[$Mpc$/h]$ at the same redshifts, as well as the corresponding distance moduli,
 \item linear matter power spectrum, $P(k)$, from BBKS \citealt{BBKS}) in units of $($Mpc$/h)^3$ at $z=0,2$ in the range $10^{-3} \leq k \leq 10 h/$Mpc with 10 bins per decade, and
 \item the mass variance at $z=0$, $\sigma(M,z=0)$ for $M =\{10^6, 10^8, 10^{10}, 10^{12}, 10^{14}, 10^{16}\} $M$_\odot/h$.
 \end{enumerate}
-These forecasts were produced and compared for different cosmologies, which are listed in the table below. The results agree to better than $0.1\%$ relative accuracy for comoving distance and growth factor among all submissions (with one exception), and for $P(k)$ and $\sigma(M)$ among codes which use the same BBKS conventions.
+\jab{Are the units for these comparisons different than the default CCL units? In particular, the inclusion of $h$ doesn't seem consistent}These forecasts were produced and compared for different cosmologies, which are listed in the table below. The results agree to better than $0.1\%$ relative accuracy for comoving distance and growth factor among all submissions (with one exception \jab{??}), and for $P(k)$ and $\sigma(M)$ among codes which use the same BBKS conventions.
 
 \begin{center}
   \begin{tabular}{ c | c c c c c c c c }
@@ -804,17 +807,17 @@ These forecasts were produced and compared for different cosmologies, which are 
   \end{tabular}
 \end{center}
 
-We noticed that there are 2 typos for the BBKS transfer function in ``Modern Cosmology'' \citep{DodelsonBook} compared to the original BBKS paper. The quadratic term should be $(16.1q)^2$ and the cubic term should be $(5.46q)^3$. On the other hand, the BBKS equation is correct in \citet{PeacockBook}. Using the wrong equation can give differences in the results above the $10^{-4}$ level.
+We noticed that there are 2 typos for the BBKS transfer function in ``Modern Cosmology'' \citep{DodelsonBook} compared to the original BBKS paper \jab{I think this citation is wrong.}. The quadratic term should be $(16.1q)^2$ and the cubic term should be $(5.46q)^3$. The BBKS equation is correct in \citet{PeacockBook}. Using the wrong equation can give differences in the results above the $10^{-4}$ level.
 
 From the comparison, we were also able to identify some typical issues which affect convergence at the desired level:
 \begin{itemize}
-\item For achieving $10^{-4}$ precision in $\sigma(M)$ and the normalisation of the power spectrum, one should check that the integral of $\sigma_8$ and $\sigma(M)$ has converged for the chosen values of $\{k_{\rm min},k_{\rm max}\}$. After checking convergence, we achieved the desired precision.
+\item For achieving $10^{-4}$ precision in $\sigma(M)$ and the normalisation of the power spectrum, one should check that the integral of $\sigma_8$ and $\sigma(M)$ has converged for the chosen values of $\{k_{\rm min},k_{\rm max}\}$. After checking convergence, we achieved the desired precision. \jab{For $sigma_8$, we should be able to specify the necessary values for convergence (to good accuracy, since the cosmology dependence is quite minor). It would be helpful to do that somewhere.}
 \item Also note that for $\sigma(M)$, it is important to set the desired precision level correctly for the numerical integrator. The integral usually yields $\sigma^2(M)$, and not $\sigma(M)$. Hence, one has to set the desired precision taking the exponent into account.
-\item The value of the gravitational constant, $G$, enters into the critical density. We found that failure to define $G$ with sufficient precision would result in lack of convergence at the $10^{-4}$ level between the different submissions. Importantly, note that CAMB barely has $10^{-4}$ precision in $G$ (and similarly, there might be other constants within CAMB/CLASS for which one should check the precision level). For {\tt CCL}, we are using the value from the Particle Physics Handbook. %How does it compare?
+\item The value of the gravitational constant, $G$, enters into the critical density. We found that failure to define $G$ with sufficient precision would result in lack of convergence at the $10^{-4}$ level between the different submissions. Importantly, note that CAMB barely has $10^{-4}$ precision in $G$ (and similarly, there might be other constants within CAMB/CLASS for which one should check the precision level). For {\tt CCL}, we are using the value from the Particle Physics Handbook. \jab{So CAMB can't be trusted at better than $10^{-4}$ precision? Is there an option to increase precision? Does the precision in $G$ propegate linearly to precision in all quantities of interest? }%How does it compare?
 \item Including/excluding radiation in the computation of the comoving distances and the growth function can easily make a difference of $10^{-4}$ at the redshifts required in this submission.
 \end{itemize}
 
-In a second stage, we used the BBKS linear matter power spectrum from the previous step to compare two-point statistics for two redshift bins, resulting in three tomography combinations, ($1-1$),($1-2$),($2-2$). We adopted the following analytic redshift distributions: a Gaussian with $\sigma = 0.15$, centered at $z_1 = 1$; and another Gaussian with the same dispersion but centered at $z_2 = 1.5$. We repeated the exercise for two redshift distribution histograms shown in Figure \ref{fig:zhistos}.
+In a second stage, we used the BBKS linear matter power spectrum from the previous step to compare two-point statistics for two redshift bins, resulting in three tomography combinations, ($1-1$),($1-2$),($2-2$). We adopted the following analytic redshift distributions: a Gaussian with $\sigma = 0.15$, centered at $z_1 = 1$; and another Gaussian with the same dispersion but centered at $z_2 = 1.5$. We repeated the exercise for two redshift distribution histograms shown in Figure \ref{fig:zhistos}. \jab{Where did those distributions come from?}
 
 %------------------------
 \begin{figure}
@@ -825,14 +828,15 @@ In a second stage, we used the BBKS linear matter power spectrum from the previo
 \end{figure}
 %------------------------
 
-In this second step, only 2 codes have been compared so far. More outputs are needed to guarantee convergence. Preliminarily, from these outputs, we have concluded that:
+In this second step, only 2 codes have been compared so far. More outputs are needed to guarantee convergence \jab{at what level?}. Preliminarily, from these outputs, we have concluded that:
 \begin{itemize}
-\item The cross-correlation between bins is particularly sensitive to having enough points to sample the lensing kernel.
-\item The nonlinear behaviour is sensitive to $l_{\rm max}$, we had to go up to 30,000 to get convergence (and we could not achieve $0.01\%$ convergence).
-\item The large scales are sensitive to $l_{\rm min}$ (which also prompts a question about using the Limber approximation or not).
+\item The cross-correlation between bins is particularly sensitive to having enough points \jab{in $k$ space or $z$ space?} to sample the lensing kernel.
+\item The nonlinear behaviour \jab{American or UK spelling? Also, nonlinear behavior of what? Correlation functions?} is sensitive to $l_{\rm max}$, we had to go up to 30,000 to get convergence (and we could not achieve $0.01\%$ convergence).
+\item The large scales \jab{of the correlation function?} are sensitive to $l_{\rm min}$. The use of the Limber approximation is also relevant on these scales.
 %\item Because we are using BBKS, evaluating the $P(k)$ at arbitrary $k_{\rm max}$ is not a problem, but we will need to test convergence in other cases.
-\item The correlation functions are sensitive to how the power spectrum is interpolated. For example, in one case we had fewer $l$'s and we had to use an order $5$ spline. If we sample at all $l$'s then a linear interpolation is enough.
+\item The correlation functions are sensitive to how the power spectrum is interpolated. For example, in one case we had fewer $l$'s \jab{what resolution?} and we had to use an order $5$ spline\jab{in order to achieve what?}. If we sample at all $l$'s then a linear interpolation is enough.
 \end{itemize}
+\jab{do we want to use $l$ or $\ell$?}
 
 Additionally, independent codes were utilized to test the accuracy of halo mass function predictions. For the halo mass function, we compare the value of $\sigma$, $\log(\sigma^{-1})$, and the value of the halo mass function in the form used in \citep{Tinker2008},
 \begin{equation}
@@ -852,7 +856,7 @@ Finally, we note that formal tests for predictions in cosmologies with neutrinos
 \section{Default configuration}
 \label{sec:default}
 
-In its default configuration, {\tt CCL} adopts the nonlinear matter power spectrum from {\tt CLASS} through the Halofit implementation and the Tinker mass function for number counts.
+In its default configuration, {\tt CCL} adopts the nonlinear matter power spectrum from {\tt CLASS} through the Halofit implementation and the Tinker mass function for \jab{cluster?} number counts.
 
 
 \section{Examples for C implementation}
