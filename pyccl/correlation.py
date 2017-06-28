@@ -1,36 +1,44 @@
 import ccllib as lib
-import numpy as np
+import constants as const
 from pyutils import _cosmology_obj, check
-from cls import _cltracer_obj
+import numpy as np
 
-def correlation(t,cosmo,cltracer1,cltracer2,i_bessel):
+correlation_methods = {
+    'FFTLog': const.CCL_CORR_FFTLOG,
+    'Bessel': const.CCL_CORR_BESSEL,
+    'Legendre': const.CCL_CORR_LGNDRE,
+}
 
-    """The correlation function, w/o FFTlog implementation.
+correlation_types = {
+    'GG': const.CCL_CORR_GG,
+    'GL': const.CCL_CORR_GL,
+    'L+': const.CCL_CORR_LP,
+    'L-': const.CCL_CORR_LM,
+}
 
-    Args:
-        t: the angle in radians where to sample the correlation (vector or scalar)
-        cosmo (:obj:`Cosmology`): Either a ccl_cosmology or a Cosmology object
-        cltracer1 (:obj:): A Cl tracer.
-        cltracer2 (:obj:): A Cl tracer.
-        index of bessel function
-    Returns:
-        correlation function (array_like)
-
-    """
-    # Access ccl_cosmology object
+#STATUS
+#Comments
+#strings
+def correlation(cosmo,ell,cell,theta,corr_type='GG',method='FFTLog') :
     cosmo = _cosmology_obj(cosmo)
     status = 0
-    scalar = False
-    
-    clt1 = _cltracer_obj(cltracer1)
-    clt2 = _cltracer_obj(cltracer2)
-    
-    if isinstance(t, float):
-        scalar = True
-        t=np.array([t,])
 
-    if isinstance(t, np.ndarray):
-        return lib.correlation_vec(cosmo, clt1,clt2,i_bessel, t, t.size)
-    else:
-        return lib.single_tracer_corr(t,cosmo,clt1,clt2,i_bessel)
-  
+    if corr_type not in correlation_types.keys():
+        raise KeyError("'%s' is not a valid correlation type."%corr_type)
+
+    if method not in correlation_methods.keys():
+        raise KeyError("'%s' is not a valid correlation method."%method)
+
+    scalar=False
+    if isinstance(theta, float):
+        scalar = True
+        theta=np.array([theta,])
+
+    wth,status=lib.correlation_vec(cosmo,ell,cell,theta,correlation_types[corr_type],
+                                   correlation_methods[method],len(theta),status)
+    check(status)
+
+    if scalar :
+        return wth[0]
+    else :
+        return wth

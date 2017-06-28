@@ -130,7 +130,7 @@ static void compare_cls(char *compare_type,struct cls_data * data)
     double cl_ll_11,cl_ll_12,cl_ll_22;
     double cl_dd_11_h,cl_dd_12_h,cl_dd_22_h;
     double cl_ll_11_h,cl_ll_12_h,cl_ll_22_h;
-    
+
     rtn = fscanf(fi_dd_11,"%d %lf",&l,&cl_dd_11);
     rtn = fscanf(fi_dd_12,"%d %lf",&l,&cl_dd_12);
     rtn = fscanf(fi_dd_22,"%d %lf",&l,&cl_dd_22);
@@ -172,7 +172,7 @@ static void compare_cls(char *compare_type,struct cls_data * data)
   fclose(fi_ll_22);
 
   fraction_failed/=6*3001;
-  printf("%lf %%\n",fraction_failed*100);
+  printf("%lf %% ",fraction_failed*100);
   ASSERT_TRUE((fraction_failed<CLS_FRACTION));
 
   free(zarr_1);
