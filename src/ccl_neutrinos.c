@@ -124,6 +124,6 @@ double Omeganuh2 (double a, double Neff, double mnu, double TCMB, gsl_interp_acc
 
 	OmNuh2 = Neff*intval*prefix_massive/a4;
     
-    return OmNuh2
+    return OmNuh2;
 }
 
