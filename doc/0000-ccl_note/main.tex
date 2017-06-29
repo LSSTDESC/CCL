@@ -393,7 +393,7 @@ With the implementation described in the previous section, the power spectrum sp
 As in the previous section, the power spectrum at small wavenumber is extrapolated using a power-law. This extrapolation is performed below a fiducial value of {\tt K\_MIN\_DEFAULT}$=5\times 10^{-5}$.
 
 \subsubsection{Wishlist for the future}
-\label{Pk_whishlist}
+\label{Pk_wishlist}
 Here are some power spectrum methods that we would like to implement in the future:
 \begin{itemize}
  \item CAMB,
@@ -865,6 +865,8 @@ In its default configuration, {\tt CCL} adopts the nonlinear matter power spectr
 
 Examples of how to run {\tt CCL} are provided in the {\tt tests} sub-directory of the library. The first resource for a new user should be the {\tt ccl$\_$sample$\_$run.c} file. This starts by setting up the {\tt CCL} default configuration. Then, it creates the ``cosmo'' structure, which contains distances and power spectra splines, for example. There are example calls for routines that output comoving radial distances, the scale factor, the growth factor and $\sigma_8$. Toy models are created for the redshift distributions of galaxies in the clustering and lensing samples, and for the bias of the clustering sample ($b(z)=1+z$). These are used for constructing the ``tracer'' structures via {\tt CCL$\_$Cltracer}, which can then be called to obtain the angular power spectra for clustering, cosmic shear and galaxy lensing.
 
+\jab{It should be made more clear in this doc how to compile (or where to find that info). I found it in README.md, although it wasn't clear where "the library" was installed. For me, with standard installation, it was /usr/local/.}
+
 
 \section{Python wrapper}
 \label{sec:python}
@@ -878,12 +880,16 @@ Before you can build the Python wrapper, you must have compiled and installed th
 \begin{itemize}
  \item To build and install the wrapper for the current user only, run \\
  {\tt \$ python setup.py install --user}
- \item To build install the wrapper for all users, run \\
+ \item To build and install the wrapper for all users, run \\
  {\tt \$ sudo python setup.py install}
  \item To build the wrapper in-place in the source directory (for testing), run \\
  {\tt \$ python setup.py build$\_$ext --inplace}
 \end{itemize}
 If you choose either of the first two options, the {\tt pyccl} module will be installed into a sensible location in your {\tt PYTHONPATH}, and so should be automatically picked up by your Python interpreter. You can then simply import the module using {\tt import pyccl}. If you use the last option, however, you must either start your interpreter from the root {\tt CCL} directory, or manually add the root {\tt CCL} directory to your {\tt PYTHONPATH}.
+
+\jab{install vs build$\_$ext?}
+
+\jab{I'm having a similar problem here related to gcc. The commands above don't find gcc, which is in /usr/local/.}
 
 These options assume that the C library ({\tt libccl}) has been installed somewhere in the default library path. If this isn't the case, you will need to tell the Python build tools where to find the library. This can be achieved by running the following command first, before any of the commands above:
 
@@ -900,6 +906,8 @@ This happens when the build tools fail to find the directory containing the GSL 
 \texttt{python setup.py build$\_$ext --library-dirs=/path/to/install/lib/ --rpath=/path/to/install/lib/ --include-dirs=/path/to/include/}
 
 and then run one of the {\tt setup.py install} commands listed above. (Note: As an alternative to the {\tt --include-dirs} option, you can use {\tt -I/path/to/include} instead.)
+
+\jab{This appeared to work for me, but then the below tests fail. 'ImportError: No module named 'ccllib'.'}
 
 You can quickly check whether {\tt pyccl} has been installed correctly by running {\tt python -c "import pyccl"} and checking that no errors are returned. For a more in-depth test to make sure everything is working, change to the {\tt tests/} sub-directory and run {\tt python run$\_$tests.py}. These tests will take a few minutes. Notice that these are not the same tests that are run via {\tt make check}. In the case of the {\tt python} tests, the library will only check for finite outputs of the routines called from {\tt pyccl}. There is no benchmark comparison in this case.
  
@@ -981,16 +989,16 @@ The build process will also create a {\tt pyccl/ccllib.py} file, which is the ra
 In the future, we hope that {\tt CCL} will include other functionalities. Functionalities which are currently under development:
 \begin{itemize}
         \item a link to {\tt angpow} \citep{2017arXiv170103592C} for going beyond the Limber approximation,
-	\item a link to FAST-PT \citep{FASTPT} for implementation of perturbation theory,
-	\item a more realistic photo-z model,
+	\item a link to {\tt FAST-PT} \citep{FASTPT} for efficient implementation of nonlinear perturbation theory,
+	\item a more realistic photo-z model, \jab{more realistic than a user-defined function?}
 	\item support for cosmologies with multiple unequal-mass neutrinos,
-	\item and more power spectrum methods (see \ref{Pk_whishlist}).
+	\item and more power spectrum methods (see \ref{Pk_wishlist}).
 \end{itemize}
 
 \section{Feedback}
 \label{sec:feedback}
 
-If you would like to contribute to {\tt CCL} or contact the developers, please do so through the {\tt CCL} github repository located in \url{https://github.com/LSSTDESC/CCL}.
+If you would like to contribute to {\tt CCL} or contact the developers, please do so through the {\tt CCL} github repository located at \url{https://github.com/LSSTDESC/CCL}.
 
 \section{License}
 \label{sec:license}
