@@ -123,6 +123,7 @@ This will run the embedded unit tests. Using this last method to install the Pyt
 \end{verbatim}
  
 \subsection{Compiling against an external version of CLASS}
+\label{sec:extclass}
 
 {\tt CCL} has a built-in version of {\tt CLASS} that is used to calculate power spectra and other cosmological functions. This is compiled by default. Optionally, you can also link {\tt CCL} against an external version of {\tt CLASS}. This section is useful if you want to use a modified version of {\tt CLASS}, or a different or more up-to-date version of the standard {\tt CLASS}. For example, we have successfully compiled and run {\tt CCL} with {\tt hiCLASS} \citep{hiclass} for Horndeski models.
 
@@ -317,13 +318,11 @@ It is worth reminding the reader that the Eisenstein \& Hu and the BBKS approxim
 \subsubsection{CLASS}
 Finally, there is the option to call the {\tt CLASS} software \citep{class} within {\tt CCL} to obtain either linear or nonlinear matter power spectra at given redshifts. Upon initializing the cosmology object, we construct a bi-dimensional spline in $k$ and the scale-factor which is then called by the relevant routines to obtain the matter power spectrum at the desired wavenumber and redshift. The relevant routines can be found within {\tt ccl$\_$power.c}. Currently CLASS computes the non-linear power spectrum using the HaloFit prescription of \cite{CLASS_halofit}.
 
-\jab{mention possibility for user-defined CLASS?}
+As discussed in section \ref{sec:extclass}, the user can compile {\tt CCL} with an external version of {\tt CLASS} as well.
 
 \subsubsection{Spline parameters \& the INI file}
 
-\jab{Is the spline only relevant for CLASS?}
-
-All spline and grid parameters are defined in the {\tt ccl$\_$params.ini} file included in the {\tt include} folder of the repository. This file allows the user to configure the following constants:
+All spline and grid parameters relevant for computing quantities such as distances, growth function, power spectr and halo mass functions, are defined in the {\tt ccl$\_$params.ini} file included in the {\tt include} folder of the repository. This file allows the user to configure the following constants:
 
 \begin{itemize}
 \item {\tt A$\_$SPLINE$\_$DELTA}: spacing of the scale factor spline. The default is {\tt A$\_$SPLINE$\_$DELTA}$=0.001$.
@@ -338,14 +337,12 @@ All spline and grid parameters are defined in the {\tt ccl$\_$params.ini} file i
 \item {\tt K$\_$MAX$\_$SPLINE}: The maximum value of wavenumber considered in the spline. This is explained in more detail in the coming subsections. The default is {\tt K$\_$MAX$\_$SPLINE}$=50/$Mpc.  
 \item {\tt K$\_$MAX}: The maximum value of wavenumber when integrating over $k$. The default is {\tt K$\_$MAX}$=1000$/Mpc.  
 \item {\tt K$\_$MIN$\_$DEFAULT}:  The minimum value of wavenumber when integrating over $k$. The default is {\tt K$\_$MIN$\_$DEFAULT}$=5 \times 10^{-5}$/Mpc. 
-\item {\tt N$\_$K}: Number of bins for the wavenumber. The default is {\tt N$\_$K}$=1000$.  \jab{better to define per log10 bin? otherwise if you chance the min/max range, the resolution changes.}
+\item {\tt N$\_$K}: Number of bins for the wavenumber. The default is {\tt N$\_$K}$=1000$.  \jab{better to define per log10 bin? otherwise if you chance the min/max range, the resolution changes.}\todo{Made an issue to address this, probably not crucial for initial release.}
 \end{itemize}
 
 For a test flat $\Lambda$CDM cosmology with $\Omega_c=0.25$, $\Omega_b=0.05$, $\sigma_8=0.8$, $h=0.7$ and $n_s=0.96$, we have found that changing {\tt N$\_$A} to $200$, or changing {\tt N$\_$K} to $5000$, does not affect the matter power spectrum obtained from CLASS at the $2\times 10^{-4}$ level for $k<10$/Mpc at $z=1$, for example, which is more than what is needed for our purposes. We emphasise that changing these constants can result in loss of accuracy. For certain applications, it might be possible to relax some of the accuracy requirements and increase the speed of {\tt CCL}. The choice of {\tt K$\_$MAX$\_$SPLINE} will be explained in the next subsection.
 
-\jab{Is the k spacing lin or log? From below, it looks like log, but good to be explicit.}
-
-\jab{It should be mentioned that the spline leads to precision loss, as seen in Fig 1.}
+For the matter power spectrum, the spline is performed in two variables: the logarithmic-spaced wavenumber and the linear-spaced scale factor. Performing a spline on the {\tt CLASS} output leads to some precision loss (compared to direct outputs from {\tt CLASS}), but this is small compared to our accuracy requirements.
 
 \subsubsection{Nonlinear low and high wavenumber extrapolation}
 \label{sec:NLextrapol}
@@ -361,7 +358,7 @@ First, we compute the first and second derivative of the $\ln P(k,z)$ at $k_0={\
   \label{eq:NLPSTaylor}
 \end{equation}
 
-The accuracy of this approximation is shown in Figure \ref{fig:NLextrapol} for redshifts $z=0$ and $z=3$. We compare the nonlinear matter power spectrum at $z=0$ computed with the previously described approximation, to the matter power spectrum obtained by directly evaluating {\tt CLASS} at the desired $k$ value. (The benchmark in reality uses a value of {\tt K$\_$MAX$\_$SPLINE}$=5\times 10^3$/Mpc, well beyond our range of application and exceeding also the value of {\tt K\_MAX}. \jab{I thought the point of the benchmark was to test both the accuracy of the spline and the interpolation. How can you do the former if the benchmark also uses a spline?}) We find that for typical values of  $\Delta \ln k=10^{-2}$ and {\tt K$\_$MAX$\_$SPLINE}$=50$/Mpc, $\ln P$ has converged to an accuracy that surpasses the expected impact of baryonic effects on the matter power spectrum at $k>10/$Mpc. (For an estimate of the impact of baryons on the total matter power spectrum, see \citealt{Schneider15}.) The lower {\tt K$\_$MAX$\_$SPLINE} is, the faster {\tt CCL} will run. The optimum choice of {\tt K$\_$MAX$\_$SPLINE} is left to the user for their particular application. 
+The accuracy of this approximation is shown in Figure \ref{fig:NLextrapol} for redshifts $z=0$ and $z=3$. We compare the nonlinear matter power spectrum at $z=0$ computed with the previously described approximation, to the matter power spectrum obtained by directly evaluating {\tt CLASS} at the desired $k$ value. (The benchmark in reality uses a value of {\tt K$\_$MAX$\_$SPLINE}$=5\times 10^3$/Mpc, well beyond our range of application and exceeding also the value of {\tt K\_MAX}. As discussed above, we have found that splines of the {\tt CLASS} power spectrum outputs are not a significant source of inaccuracy comparing to direct {\tt CLASS} outputs.) In figure \ref{fig:NLextrapol}, we vary $\Delta \ln k$ and {\tt K$\_$MAX$\_$SPLINE} at a time to determine the impact of the choice of parameters. We find that for typical values of $\Delta \ln k=10^{-2}$ and {\tt K$\_$MAX$\_$SPLINE}$=50$/Mpc, $\ln P$ has converged to an accuracy that surpasses the expected impact of baryonic effects on the matter power spectrum at $k>10/$Mpc.  (For an estimate of the impact of baryons on the total matter power spectrum, see \citealt{Schneider15}.) The lower {\tt K$\_$MAX$\_$SPLINE} is, the faster {\tt CCL} will run. The optimum choice of {\tt K$\_$MAX$\_$SPLINE} is left to the user for their particular application. 
 
 We also extrapolate the power spectrum at small wavenumbers within the static routine {\tt ccl\_power\_extrapol\_lowk}. In this case, the power spectrum below {\tt K$\_$MIN} is obtained by a power-law extrapolation with index $n_s$:
 \begin{equation}
@@ -374,7 +371,7 @@ The value adopted for {\tt K\_MIN} depends on the choice of power spectrum metho
 \begin{figure*}
 \centering
 \includegraphics[width=0.9\textwidth]{PS_converge_nonlin.eps}
-\caption{The relative error produced by splining the nonlinear matter power spectrum up to {\tt K$\_$MAX$\_$SPLINE} and extrapolating beyond this value with a second order Taylor expansion the natural logarithm of the matter power spectrum. The left panel shows the results at $z=0$. The right panel shows the results at $z=3$. The fiducial parameters adopted are those corresponding to the black dashed curve. The solid curve shows the improvement on the accuracy when using {\tt K$\_$MAX$\_$SPLINE}$=500$/Mpc, which exceeds our requirements. The magenta curve shows the uncertainty introduced in the fiducial case when comparing to $\Delta\ln k=10^{-4}$. \jab{What is meant here?} For comparison, the impact of baryonic physics on the matter power spectrum is $\sim 10\%$ at $k=1$/Mpc \citep{Schneider15}.}
+\caption{The relative error produced by splining the nonlinear matter power spectrum up to {\tt K$\_$MAX$\_$SPLINE} and extrapolating beyond this value with a second order Taylor expansion the natural logarithm of the matter power spectrum. The left panel shows the results at $z=0$. The right panel shows the results at $z=3$. The fiducial parameters adopted are those corresponding to the black dashed curve. The solid curve shows the improvement on the accuracy when using {\tt K$\_$MAX$\_$SPLINE}$=500$/Mpc, which exceeds our requirements. The magenta curve shows the uncertainty introduced in the fiducial case when comparing to a lower value of $\Delta\ln k=10^{-4}$ in Eq. \ref{eq:NLPSTaylor}. For comparison, the impact of baryonic physics on the matter power spectrum is $\sim 10\%$ at $k=1$/Mpc \citep{Schneider15}.}
 \label{fig:NLextrapol}
 \end{figure*}
 %------------------------
@@ -382,7 +379,7 @@ The value adopted for {\tt K\_MIN} depends on the choice of power spectrum metho
 \subsubsection{Linear extrapolation}
 \label{sec:Lextrapol}
 
-With the implementation described in the previous section, the power spectrum splines are initialized up to {\tt K$\_$MAX$\_$SPLINE}. This is also true for the linear matter power spectrum, which is used within {\tt CCL} in particular to obtain $\sigma_8$. \jab{ref eq 48?} We have tested here how the procedure described in the previous section affects the convergence of the linear matter power spectrum. We compare the fiducial {\tt CCL} output to the case where we set {\tt K$\_$MAX$\_$SPLINE}$=5\times 10^3/$Mpc. The result is shown in Figure \ref{fig:Lextrapol}. Although there is a significant difference ($\gtrsim 10\%$) between the linear power spectra at large $k$, we have confirmed that the difference in $\sigma_8$ is negligible. Nevertheless, for other applications that use the linear power spectrum, the user might need to increase the value of {\tt K$\_$MAX$\_$SPLINE}.
+With the implementation described in the previous section, the power spectrum splines are initialized up to {\tt K$\_$MAX$\_$SPLINE}. This is also true for the linear matter power spectrum, which is used within {\tt CCL} in particular to obtain $\sigma_8$ (see Eq. \ref{eq:sigR}). We have tested here how the procedure described in the previous section affects the convergence of the linear matter power spectrum. We compare the fiducial {\tt CCL} output to the case where we set {\tt K$\_$MAX$\_$SPLINE}$=5\times 10^3/$Mpc. The result is shown in Figure \ref{fig:Lextrapol}. Although there is a significant difference ($\gtrsim 10\%$) between the linear power spectra at large $k$, we have confirmed that the difference in $\sigma_8$ is negligible. Nevertheless, for other applications that use the linear power spectrum, the user might need to increase the value of {\tt K$\_$MAX$\_$SPLINE}.
 
 %------------------------
 \begin{figure*}
@@ -410,7 +407,7 @@ Here are some power spectrum methods that we would like to implement in the futu
 
 There are two alternative schemes for normalization of the matter power spectrum. The first one is to specify the value of $A_s$, the amplitude of the primordial power spectrum, which is passed directly to {\tt CLASS}. This option is available in the case of the linear/nonlinear matter power spectrum implementation. For these, as well as for BBKS \jab{E\&H?}, there is the additional option to set the normalization of the matter power spectrum by specifying $\sigma_8$, the RMS density contrast averaged over spheres of radius $8h^{-1}$Mpc. The computation of $\sigma_8$ is described in Section \ref{sec:hmf}.
 
-In practice, there is only one argument that encodes the normalization. This is the argument ${\tt norm\_pk}$, which can be passed the power spectrum normalization parameterized by $\sigma_8$ or $A_\mathrm{s}$. As noted above, {\tt ccl$\_$parameters$\_$create} switches to $\sigma_8$ normalization if ${\tt norm\_pk} > 1.e-5$, and to $A_{\mathrm s}$ normalization otherwise.
+In practice, there is only one argument that encodes the normalization. This is the argument ${\tt norm\_pk}$, which can be passed the power spectrum normalization parameterized by $\sigma_8$ or $A_\mathrm{s}$. As noted above, {\tt ccl$\_$parameters$\_$create} switches to $\sigma_8$ normalization if ${\tt norm\_pk} > 10^{-5}$, and to $A_{\mathrm s}$ normalization otherwise.
 
 \subsection{Angular power spectra}
 \label{sec:cl}
