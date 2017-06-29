@@ -73,17 +73,13 @@ You can quickly check whether *pyccl* has been installed correctly by running `p
 
 
 ## Docker image installation
-**NOTE THAT AT THIS TIME DOCKER IMAGES ARE NOT SECURE AND SHOULD NOT BE SHARED UNDER ANY CIRCUMSTANCES. EACH INDIVIDUAL SHOULD GENERATE THEIR OWN DOCKER IMAGES AND NEVER SHARE THEM.** This will be changed at Public Release.
 
-The Dockerfile to generate a Docker image is included in the CCL repository as Dockerfile. This can be used to create an image that Docker can spool up as a virtual machine, allowing you to utilize CCL on any infrastructure with minimal hassle. The details of Docker and the installation process can be found at [https://www.docker.com/](https://www.docker.com/). Once Docker is installed, it is a simple process to create an image!
-1. Enter the Dockerfile with the editor of your choice. Replace YOURGITUSERNAME and YOURGITPASSWORD with your Git information. This is a temporary measure that will be removed upon public release of the repository. **DO NOT SHARE THE RESULTING IMAGE WITH ANYONE.**
-2. In a terminal of your choosing (with Docker running), type the command `docker build -t ccl .` in the CCL directory.
+The Dockerfile to generate a Docker image is included in the CCL repository as Dockerfile. This can be used to create an image that Docker can spool up as a virtual machine, allowing you to utilize CCL on any infrastructure with minimal hassle. The details of Docker and the installation process can be found at [https://www.docker.com/](https://www.docker.com/). Once Docker is installed, it is a simple process to create an image! In a terminal of your choosing (with Docker running), type the command `docker build -t ccl .` in the CCL directory.
 
 The resulting Docker image has two primary functionalities. The first is a CMD that will open Jupyter notebook tied to a port on your local machine. This can be used with the following run command: `docker run -p 8888:8888 ccl`. You can then access the notebook in the browser of your choice at `localhost:8888`. The second is to access the bash itself, which can be done using `docker run -it ccl bash`.
 
 This Dockerfile currently contains all installed C libraries and the Python wrapper. It currently uses continuumio/anaconda as the base image and supports ipython and Jupyter notebook. There should be minimal slowdown due to the virtualization.
 
-**AGAIN DO NOT SHARE THIS IMAGE UNDER ANY CIRCUMSTANCES.** Images will be safe upon public release.
 
 # Documentation
 
