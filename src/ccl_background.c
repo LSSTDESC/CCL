@@ -492,10 +492,18 @@ void ccl_cosmology_compute_growth(ccl_cosmology * cosmo, int * status)
 	       else if(z>cosmo->params.z_mgrowth[cosmo->params.nz_mgrowth-1]) 
 	          df_arr[i]=cosmo->params.df_mgrowth[cosmo->params.nz_mgrowth-1];
 	       else
-	          df_arr[i]=gsl_spline_eval(df_z_spline,z,NULL);
+            chistatus |=gsl_spline_eval_e (df_z_spline,z,NULL,&df_arr[i]);
       }
       else
 	       df_arr[i]=0;
+    }
+    if(chistatus) {
+      free(a);
+      free(df_arr);
+      gsl_spline_free(df_z_spline);
+      *status = CCL_ERROR_SPLINE;
+      strcpy(cosmo->status_message,"ccl_background.c: ccl_cosmology_compute_growth(): Error evaluating Delta f(z) spline\n");
+      return;
     }
     gsl_spline_free(df_z_spline);
 
@@ -543,7 +551,7 @@ void ccl_cosmology_compute_growth(ccl_cosmology * cosmo, int * status)
       if(a[i]>0) {
 	double df,integ;
 	//Add modification to f
-	df=gsl_spline_eval(df_a_spline,a[i],NULL);
+	status_mg |=gsl_spline_eval_e(df_a_spline,a[i],NULL,&df);
 	y2[i]+=df;
 	//Multiply D by exp(-int(df))
 	status_mg |= gsl_integration_cquad(&F,a[i],1.0,0.0,EPSREL_DIST,workspace,&integ,NULL,NULL);
@@ -627,6 +635,7 @@ double ccl_h_over_h0(ccl_cosmology * cosmo, double a, int* status)
   }
     
   // Bounds check
+  //EK: I believe these are not required anymore with change below?
   #ifdef CCL_BOUNDS_CHECK_INTERP
   if ((a < ccl_splines->A_SPLINE_MIN) || (a > ccl_splines->A_SPLINE_MAX)){
     *status = CCL_ERROR_SPLINE_EV;
@@ -635,7 +644,9 @@ double ccl_h_over_h0(ccl_cosmology * cosmo, double a, int* status)
   }
   #endif
   
-  return gsl_spline_eval(cosmo->data.E, a, cosmo->data.accelerator);
+  double h_over_h0;
+  *status = gsl_spline_eval_e(cosmo->data.E, a, cosmo->data.accelerator,&h_over_h0);
+  return h_over_h0;
 }
 
 
@@ -656,7 +667,7 @@ void ccl_h_over_h0s(ccl_cosmology * cosmo, int na, double a[na], double output[n
     }
     #endif
     
-    output[i]=gsl_spline_eval(cosmo->data.E,a[i],cosmo->data.accelerator);
+    *status|=gsl_spline_eval_e(cosmo->data.E,a[i],cosmo->data.accelerator, &output[i]);
   }
 }
 
@@ -677,6 +688,7 @@ double ccl_comoving_radial_distance(ccl_cosmology * cosmo, double a, int * statu
     }
     
     // Bounds check
+    //EK: no longer needed?
     #ifdef CCL_BOUNDS_CHECK_INTERP
     if ((a < ccl_splines->A_SPLINE_MIN) || (a > ccl_splines->A_SPLINE_MAX)){
       *status = CCL_ERROR_SPLINE_EV;
@@ -684,8 +696,9 @@ double ccl_comoving_radial_distance(ccl_cosmology * cosmo, double a, int * statu
       return NAN;
     }
     #endif
-    
-    return gsl_spline_eval(cosmo->data.chi, a, cosmo->data.accelerator);
+    double crd;
+    *status |=gsl_spline_eval_e(cosmo->data.chi, a, cosmo->data.accelerator, &crd);
+    return crd;
   }
 }
 
@@ -712,7 +725,7 @@ void ccl_comoving_radial_distances(ccl_cosmology * cosmo, int na, double a[na], 
       }
       #endif
       
-      output[i]=gsl_spline_eval(cosmo->data.chi,a[i],cosmo->data.accelerator);
+      *status|=gsl_spline_eval_e(cosmo->data.chi,a[i],cosmo->data.accelerator, &output[i]);
     }
   }
   
@@ -754,6 +767,7 @@ double ccl_comoving_angular_distance(ccl_cosmology * cosmo, double a, int* statu
     }
     
     // Bounds check
+    //EK: no longer needed?
     #ifdef CCL_BOUNDS_CHECK_INTERP
     if ((a < ccl_splines->A_SPLINE_MIN) || (a > ccl_splines->A_SPLINE_MAX)){
       *status = CCL_ERROR_SPLINE_EV;
@@ -761,12 +775,10 @@ double ccl_comoving_angular_distance(ccl_cosmology * cosmo, double a, int* statu
       return NAN;
     }
     #endif
-    
-    return ccl_sinn(cosmo,
-		    gsl_spline_eval(cosmo->data.chi, a,
-				    cosmo->data.accelerator),
-		    status
-		    );
+    double chi;
+    *status|=gsl_spline_eval_e(cosmo->data.chi, a,
+            cosmo->data.accelerator,&chi);
+    return ccl_sinn(cosmo,chi,status);
   }
 }
 
@@ -777,6 +789,7 @@ void ccl_comoving_angular_distances(ccl_cosmology * cosmo, int na, double a[na],
     ccl_cosmology_compute_distances(cosmo, status);
     ccl_check_status(cosmo, status);
   }
+  double chi;
   for (int i=0; i < na; i++){
     if((a[i] > (1. - 1.e-8)) && (a[i]<=1.)) output[i]=0.;
     else if(a[i]>1.){
@@ -793,12 +806,10 @@ void ccl_comoving_angular_distances(ccl_cosmology * cosmo, int na, double a[na],
         return;
       }
       #endif
-      
-      output[i] = ccl_sinn(cosmo,
-                         gsl_spline_eval(cosmo->data.chi, a[i], 
-                                         cosmo->data.accelerator),
-                         status
-			 );
+
+      *status|=gsl_spline_eval_e(cosmo->data.chi, a[i], 
+                                         cosmo->data.accelerator, &chi);
+      output[i] = ccl_sinn(cosmo,chi,status);
     }
   }
 }
@@ -897,7 +908,9 @@ double ccl_scale_factor_of_chi(ccl_cosmology * cosmo, double chi, int * status)
        ccl_cosmology_compute_distances(cosmo,status);
        ccl_check_status(cosmo,status);
      }
-     return gsl_spline_eval(cosmo->data.achi, chi,cosmo->data.accelerator_achi);
+     double a;
+     *status |=gsl_spline_eval_e(cosmo->data.achi, chi,cosmo->data.accelerator_achi, &a);
+     return a;
    }
 }
 
@@ -914,7 +927,7 @@ void ccl_scale_factor_of_chis(ccl_cosmology * cosmo, int nchi, double chi[nchi],
       *status = CCL_ERROR_COMPUTECHI;
       strcpy(cosmo->status_message,"ccl_background.c: distance cannot be less than 0.\n");
       ccl_check_status(cosmo,status);
-    } else output[i]=gsl_spline_eval(cosmo->data.achi,chi[i],cosmo->data.accelerator_achi);
+    } else *status|=gsl_spline_eval_e(cosmo->data.achi,chi[i],cosmo->data.accelerator_achi,&output[i]);
   }
 }
 
@@ -939,8 +952,9 @@ double ccl_growth_factor(ccl_cosmology * cosmo, double a, int * status)
       return NAN;
     }
     #endif
-    
-    return gsl_spline_eval(cosmo->data.growth, a, cosmo->data.accelerator);
+    double D;
+    *status |=gsl_spline_eval_e(cosmo->data.growth, a, cosmo->data.accelerator,&D);
+    return D;
   }
 }
 
@@ -967,7 +981,7 @@ void ccl_growth_factors(ccl_cosmology * cosmo, int na, double a[na], double outp
       }
       #endif
       
-      output[i]=gsl_spline_eval(cosmo->data.growth,a[i],cosmo->data.accelerator);
+      *status|=gsl_spline_eval_e(cosmo->data.growth,a[i],cosmo->data.accelerator,&output[i]);
     }
   }
 }
@@ -993,8 +1007,9 @@ double ccl_growth_factor_unnorm(ccl_cosmology * cosmo, double a, int * status)
       return NAN;
     }
     #endif
-    
-    return cosmo->data.growth0*gsl_spline_eval(cosmo->data.growth, a, cosmo->data.accelerator);
+    double D;
+    *status|=gsl_spline_eval_e(cosmo->data.growth, a, cosmo->data.accelerator,&D);
+    return cosmo->data.growth0*D;
   }
 }
 
@@ -1019,8 +1034,8 @@ void ccl_growth_factors_unnorm(ccl_cosmology * cosmo, int na, double a[na], doub
         return;
       }
       #endif
-      
-      output[i]=cosmo->data.growth0*gsl_spline_eval(cosmo->data.growth,a[i],cosmo->data.accelerator);
+      *status|=gsl_spline_eval_e(cosmo->data.growth,a[i],cosmo->data.accelerator,&output[i]);
+      output[i]*=cosmo->data.growth0;
     }
   }
 }
@@ -1046,8 +1061,9 @@ double ccl_growth_rate(ccl_cosmology * cosmo, double a, int * status)
       return NAN;
     }
     #endif
-    
-    return gsl_spline_eval(cosmo->data.fgrowth, a, cosmo->data.accelerator);
+    double g;
+    *status|=gsl_spline_eval_e(cosmo->data.fgrowth, a, cosmo->data.accelerator,&g);
+    return g;
   }
 }
 
@@ -1073,7 +1089,7 @@ void ccl_growth_rates(ccl_cosmology * cosmo, int na, double a[na], double output
       }
       #endif
       
-      output[i]=gsl_spline_eval(cosmo->data.fgrowth,a[i],cosmo->data.accelerator);
+      *status|=gsl_spline_eval_e(cosmo->data.fgrowth,a[i],cosmo->data.accelerator,&output[i]);
     }
   }
 }
