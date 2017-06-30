@@ -219,6 +219,7 @@ static double massfunc_f(ccl_cosmology *cosmo, double halomass, double a, double
     fit_c = gsl_spline_eval(cosmo->data.phihmf, log10(odelta), cosmo->data.accelerator_d);
     fit_d = pow(10, -1.0*pow(0.75 / log10(odelta / 75.0), 1.2));
 
+    fit_A = fit_A*pow(a, 0.14);
     fit_a = fit_a*pow(a, 0.06);
     fit_b = fit_b*pow(a, fit_d);
 
@@ -250,8 +251,6 @@ static double massfunc_f(ccl_cosmology *cosmo, double halomass, double a, double
     fit_b = gsl_spline_eval(cosmo->data.betahmf, log10(odelta), cosmo->data.accelerator_d)*pow(a, -0.20); //beta in Eq. 8
     fit_c = gsl_spline_eval(cosmo->data.gammahmf, log10(odelta), cosmo->data.accelerator_d)*pow(a, 0.01); //gamma in Eq. 8
     fit_d = gsl_spline_eval(cosmo->data.phihmf, log10(odelta), cosmo->data.accelerator_d)*pow(a, 0.08); //phi in Eq. 8;
-
-    printf("%le %le %le %le %le\n", fit_A, fit_a, fit_b, fit_c, fit_d);
 
     return nu*fit_A*(1.+pow(fit_b*nu,-2.*fit_d))*pow(nu, 2.*fit_a)*exp(-0.5*fit_c*nu*nu);
     break;

@@ -11,11 +11,12 @@
 #define PNL_SPLINE_TYPE gsl_interp2d_bicubic
 #define PLIN_SPLINE_TYPE gsl_interp2d_bicubic
 
-// These are in units of Mpc (no factor of h)
-#define K_PIVOT 0.05
-
 /** @file */
 
+/**
+ *  k pivot. These are in units of Mpc (no factor of h)
+*/
+#define K_PIVOT 0.05
 
 /** 
  * Rho critical in units of M_sun/h / (Mpc/h)^3
@@ -48,22 +49,34 @@
  */
 #define PC_TO_METER 3.08567758149e16
 
-// Boltzmann constant in units of J/K
+/**
+ * Boltzmann constant in units of J/K
+*/
 #define KBOLTZ  GSL_CONST_MKSA_BOLTZMANN
 
-// Stefan-Boltzmann constant in units of kg/s^3 / K^4
+/**
+ * Stefan-Boltzmann constant in units of kg/s^3 / K^4
+ */
 #define STBOLTZ GSL_CONST_MKSA_STEFAN_BOLTZMANN_CONSTANT
 
-// Planck's constant in units kg m^2 / s
+/**
+ * Planck's constant in units kg m^2 / s
+ */
 #define HPLANCK  GSL_CONST_MKSA_PLANCKS_CONSTANT_H 
 
-// The speed of light in m/s
+/**
+ * The speed of light in m/s
+ */
 #define CLIGHT   GSL_CONST_MKSA_SPEED_OF_LIGHT
 
-// Electron volt to Joules convestion
+/**
+ * Electron volt to Joules convestion
+ */
 #define EV_IN_J  GSL_CONST_MKSA_ELECTRON_VOLT
 
-// T_ncdm, as taken from CLASS, explanatory.ini
+/**
+ * T_ncdm, as taken from CLASS, explanatory.ini
+ */
 #define TNCDM 0.71611
 
 //Precision parameters
@@ -86,7 +99,3 @@
  * Absolute precision in growth calculations
  */
 #define EPS_SCALEFAC_GROWTH 1E-6
-
-//LSST specific numbers
-#define Z_MIN_SOURCES 0.1
-#define Z_MAX_SOURCES 3.0
