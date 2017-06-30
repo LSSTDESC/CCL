@@ -51,3 +51,7 @@ double ccl_specs_sigmaz_sources(double z);
 // Clustering
 #define DNDZ_NC 4
 
+//LSST redshift range for lensing sources
+#define Z_MIN_SOURCES 0.1
+#define Z_MAX_SOURCES 3.0
+

@@ -65,4 +65,3 @@
 //LSST specific numbers
 #define Z_MIN_SOURCES 0.1
 #define Z_MAX_SOURCES 3.0
-

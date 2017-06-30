@@ -298,24 +298,20 @@ def check_cls(cosmo):
     
 def check_corr(cosmo):
     
-    z = np.linspace(0.1, 3., 200)
-    i_lim = 26. # Limiting i-band magnitude
-    z0 = 0.0417*i_lim - 0.744
-    Ngal = 46. * 100.31 * (i_lim - 25.) # Normalisation, galaxies/arcmin^2
-    pz = 1./(2.*z0) * (z / z0)**2. * np.exp(-z/z0) # Redshift distribution, p(z)
-    dNdz = Ngal * pz # Number density distribution
-    lens1 = ccl.ClTracerLensing(cosmo, False, z,dNdz)
-    lens2 = ccl.ClTracerLensing(cosmo, False, z,dNdz)
-    t=np.logspace(-2,np.log10(5.),20) #degrees
-    trad=t*math.pi/180.
-    assert_no_warnings(ccl.correlation,trad,cosmo,lens1,lens2,0)
-    assert_no_warnings(ccl.correlation,trad,cosmo,lens1,lens1,4)
-    corrfunc=ccl.correlation(trad,cosmo,lens1,lens2,0)
-    assert_( all_finite(corrfunc))
-    corrfunc=ccl.correlation(trad,cosmo,lens1,lens2,4)
-    assert_( all_finite(corrfunc))
-    
+    # Number density input
+    z = np.linspace(0., 1., 200)
+    n = np.ones(z.shape)
 
+    # ClTracer test objects
+    lens1 = ccl.ClTracerLensing(cosmo, False, n=n, z=z)
+    lens2 = ccl.ClTracerLensing(cosmo, True, n=(z,n), bias_ia=(z,n), f_red=(z,n))
+
+    ells=np.arange(3000)
+    cls=ccl.angular_cl(cosmo,lens1,lens2,ells)
+
+    t=np.logspace(-2,np.log10(5.),20) #degrees
+    corrfunc=ccl.correlation(cosmo,ells,cls,t,corr_type='L+',method='FFTLog')
+    assert_( all_finite(corrfunc))
     
 def test_background():
     """
