@@ -12,16 +12,24 @@
 
 /**
  * Computes the correlation function (wrapper)
- * @param cosmo Cosmological parameters
- * @param n_theta Number of points where to compute the correlation
- * @param theta Vector of angles in radians
- * @param ct1 one of the tracers
- * @param ct2 another tracer
- * @param i_bessel the bessel function order (0 or 4)
- * @param taper_cl 
+ * @param cosmo :Cosmological parameters
+ * @param n_ell : number of multipoles in the input power spectrum
+ * @param ell : multipoles at which the power spectrum is evaluated
+ * @param cls : input power spectrum
+ * @param n_theta : number of output values of the separation angle (theta)
+ * @param theta : values of the separation angle in degrees.
+ * @param wtheta : the values of the correlation function at the angles above will be returned in this array, which should be pre-allocated
+ * @param do_taper_cl :
  * @param taper_cl_limits
- * @param corr_func the output vector with the correlation function
- * @return int
+ * @param flag_method : method to compute the correlation function. Choose between:
+ *  - CCL_CORR_FFTLOG : fast integration with FFTLog
+ *  - CCL_CORR_BESSEL : direct integration over the Bessel function
+ *  - CCL_CORR_LGNDRE : brute-force sum over legendre polynomials
+ * @param corr_type : type of correlation function. Choose between:
+ *  - CCL_CORR_GG : galaxy-galaxy
+ *  - CCL_CORR_GL : galaxy-shear
+ *  - CCL_CORR_LP : shear-shear (xi+)
+ *  - CCL_CORR_LM : shear-shear (xi-)
  */
 void ccl_correlation(ccl_cosmology *cosmo,
 		     int n_ell,double *ell,double *cls,

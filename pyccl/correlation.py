@@ -16,10 +16,21 @@ correlation_types = {
     'L-': const.CCL_CORR_LM,
 }
 
-#STATUS
-#Comments
-#strings
 def correlation(cosmo,ell,cell,theta,corr_type='GG',method='FFTLog') :
+    """
+    Compute the angular correlation function.
+
+    Args:
+        cosmo (:obj:`Cosmology`): A Cosmology object.
+        ell (array_like): multipoles corresponding input angular power spectrum
+        cell (array_like): input angular power spectrum
+        theta (float or array_like): angular separation(s) at which the angular correlation function is requested (in degrees).
+        corr_type (string): type of correlation function. Choices: 'GG' (galaxy-galaxy), 'GL' (galaxy-shear), 'LP' (shear-shear, xi+), 'LM' (shear-shear, xi-).
+        method (string): method to compute the correlation function. Choices: 'Bessel' (direct integration over Bessel function), 'FFTLog' (fast integration with FFTLog), 'Legendre' (brute-force sum over Legendre polynomials).
+    Returns:
+        Value(s) of the correlation function at the input angular separation(s).
+    """
+
     cosmo = _cosmology_obj(cosmo)
     status = 0
 

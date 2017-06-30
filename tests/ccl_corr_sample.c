@@ -21,8 +21,6 @@
 #define NZ 128
 #define Z0_GC 0.50
 #define SZ_GC 0.05
-#define Z0_SH 0.65
-#define SZ_SH 0.05
 #define NL 512
 #define PS 0.1 
 #define NREL 3.046
@@ -36,21 +34,21 @@ int main(int argc,char **argv)
 
   int status=0;
   ccl_configuration config = default_config;
-  ccl_parameters params=ccl_parameters_create(OC, OB, OK, NREL, NMAS, MNU, W0, WA, HH, NORMPS, NS,0,NULL,NULL, &status);
+  ccl_parameters params=ccl_parameters_create(OC, OB, OK, NREL, NMAS, MNU, W0, WA, HH, NORMPS, NS,
+					      0,NULL,NULL, &status);
   ccl_cosmology *cosmo=ccl_cosmology_create(params,config);
 
   //Create tracers for angular power spectra
-  double z_arr_gc[NZ],z_arr_sh[NZ],nz_arr_gc[NZ],nz_arr_sh[NZ],bz_arr[NZ];
+  double z_arr_gc[NZ],nz_arr_gc[NZ],bz_arr[NZ];
   for(int i=0;i<NZ;i++) {
     z_arr_gc[i]=Z0_GC-5*SZ_GC+10*SZ_GC*(i+0.5)/NZ;
     nz_arr_gc[i]=exp(-0.5*pow((z_arr_gc[i]-Z0_GC)/SZ_GC,2));
     bz_arr[i]=1+z_arr_gc[i];
-    z_arr_sh[i]=Z0_SH-5*SZ_SH+10*SZ_SH*(i+0.5)/NZ;
-    nz_arr_sh[i]=exp(-0.5*pow((z_arr_sh[i]-Z0_SH)/SZ_SH,2));
   }
 
   //Galaxy clustering tracer
-  CCL_ClTracer *ct_gc=ccl_cl_tracer_number_counts_simple_new(cosmo,NZ,z_arr_gc,nz_arr_gc,NZ,z_arr_gc,bz_arr,&status);
+  CCL_ClTracer *ct_gc=ccl_cl_tracer_number_counts_simple_new(cosmo,NZ,z_arr_gc,nz_arr_gc,
+							     NZ,z_arr_gc,bz_arr,&status);
   
   int il;
   double *clarr=malloc(ELL_MAX_CL*sizeof(double));
@@ -64,13 +62,13 @@ int main(int argc,char **argv)
   double *theta;
   int ntheta=15;
   double taper_cl_limits[4]={1,2,10000,15000};
-  theta = ccl_log_spacing(0.01*M_PI/180.,5.*M_PI/180.,ntheta);
+  theta = ccl_log_spacing(0.01,5.,ntheta);
   clustering_corr=malloc(ntheta*sizeof(double));
-  ccl_correlation(cosmo,ELL_MAX_CL,larr,clarr,ntheta,theta,clustering_corr,CCL_CORR_GG,0,taper_cl_limits,CCL_CORR_FFTLOG,&status);
+  ccl_correlation(cosmo,ELL_MAX_CL,larr,clarr,ntheta,theta,clustering_corr,CCL_CORR_GG,
+		  0,taper_cl_limits,CCL_CORR_FFTLOG,&status);
 
-  for(int it=0;it<ntheta;it++){
-    printf("%le %le\n",theta[it]*180./M_PI,clustering_corr[it]);
-  }
+  for(int it=0;it<ntheta;it++)
+    printf("%le %le\n",theta[it],clustering_corr[it]);
 
   //Free up tracers
   ccl_cl_tracer_free(ct_gc);

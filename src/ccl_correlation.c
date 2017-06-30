@@ -217,7 +217,6 @@ INPUT: type of tracer, number of theta values to evaluate = NL, theta vector
  */
 #define ELL_MIN_FFTLOG 0.01
 #define ELL_MAX_FFTLOG 60000
-#define N_ELLS_LOG 500
 #define N_ELL_FFTLOG 5000
 static void ccl_tracer_corr_fftlog(ccl_cosmology *cosmo,
 				   int n_ell,double *ell,double *cls,
