@@ -178,7 +178,7 @@ Ultimately, CCL will aim to incorporate theoretical predictions for all cosmolog
  \item wCDM and the CPL model ($w_0+w_a$, \citealt{Chevallier01} and \citealt{Linder03})
  \item Non-zero curvature ($K$)
  \item All the above plus an arbitrary, user-defined, modified growth function (see description in Section \ref{sec:growth})
-  \item A single massive neutrino or multiple equal-mass massive neutrinos \jab{combined with any of the above except user-defined growth, right?}
+  \item A single massive neutrino or multiple equal-mass massive neutrinos, in combination with any of the above except a user-defined modified growth function.
 \end{itemize}
 
 Not all functionalities are available for all models. For a reference of what predictions are available for each model, see Table \ref{tab:cosmo}.
@@ -263,7 +263,7 @@ For massive neutrinos, $\Omega_{\nu, {\rm m}}(a)$ is calculated by calling a set
 T_{\nu}^{\rm eff} = T_{\rm CMB} T_{\rm NCDM}.
 \label{Tnueff}
 \end{equation}
-$T_{\rm NCDM}$ here is used to explicitly set the value of $m_{\nu} / \Omega_{\nu}^0$. \jab{The units don't make sense here. $T_{\rm NCDM}$ is named like a temperature, but is actually a dimensionless temperature rescaling.}We choose a default value of $T_{\rm NCDM} = 0.71611$, which corresponds to $m_{\nu} / \Omega_{\nu}^0 = 93.14$ eV, to agree with the default value set by {\tt CLASS}. We define 
+$T_{\rm NCDM}$ here is used to explicitly set the value of $m_{\nu} / \Omega_{\nu}^0$. Note that despite its name, $T_{\rm NCDM}$ is a dimensionless temperature rescaling rather than a temperature. This nomenclature is chosen to match that employed by {\tt CLASS}. We choose a default value of $T_{\rm NCDM} = 0.71611$, which corresponds to $m_{\nu} / \Omega_{\nu}^0 = 93.14$ eV, to agree with the default value set by {\tt CLASS}. We define 
 \begin{equation}
 \mu = \frac{m_{\nu}^{\rm tot}a}{N_{\rm m}^\nu T_{\nu}^{\rm eff}}
 \label{mnuOT}
@@ -432,7 +432,7 @@ where $\mathcal{P}_\Phi(k)$ is the dimensionless power spectrum of the primordia
         \begin{equation}
           \Delta^{\rm RSD}_\ell(k)=\int dz\,p_z(z)\frac{(1+z) p_z(z)}{H(z)}T_\theta(k,z) j_\ell''(k\chi(z)),
         \end{equation}
-        where $T_\theta(k,z)$ is the transfer function of $\theta$, the divergence of the comoving velocity field. $T_\theta(k,z)$ depends on the growth, which {\tt CCL} does not compute for massive neutrino cosmologies; this is why $C_\ell$ spectra involving number count tracers are not supported when massive neutrinos are present. \jab{Perhaps a topic for the future, but RSD should be pretty minimal for angular power spectra, at least with wide enough z bins. Why not use linear theory with no neutrinos in any case and just warn about potential loss of accuracy?}
+        where $T_\theta(k,z)$ is the transfer function of $\theta$, the divergence of the comoving velocity field. $T_\theta(k,z)$ depends on the growth, which {\tt CCL} does not compute for massive neutrino cosmologies; this is why $C_\ell$ spectra involving number count tracers are not supported when massive neutrinos are present. \jab{Perhaps a topic for the future, but RSD should be pretty minimal for angular power spectra, at least with wide enough z bins. Why not use linear theory with no neutrinos in any case and just warn about potential loss of accuracy?} \todo{DL:Made an issue to address this, probably not crucial for initial release.}
   \item $\Delta^{\rm M}$ is the contribution from magnification lensing:
         \begin{equation}
           \Delta_\ell^{\rm M}(k)=-\ell(\ell+1)\int \frac{dz}{H(z)} W^{\rm M}(z) T_{\phi+\psi}(k,z) j_\ell(k\chi(z)),
@@ -687,7 +687,7 @@ The halo mass function is incorporated using several definitions from the litera
 \end{equation}
 where a halo with size $r_{\Delta}$ has an average density $\bar{\rho}$ equal to the overdensity parameter $\Delta$ times the mean background density of the universe, $\rho_{\mathrm{m}}$. Note that another common definition utilizes the critical density of the universe, $\rho_{\mathrm{c}}$; currently {\tt CCL} requires that an external conversion by the end user between values of $\Delta$ with respect to the critical density to values of $\Delta$ as defined with respect to the mean density. In the future we plan to allow for self-consistent handling of critical density based definitions, though it is not implemented as of this build.
 
-In addition to the usage of the most common definition, we have implemented an extension for two of the models. The Tinker 2010 model allows for a value of $\Delta$ to be given between the values of 200 and 3200 and interpolates the fitting parameters within this range in a space of $\log \Delta$ using splines. We also have implemented interpolation in the same range of Tinker 2008 $\Delta$ values. For both Tinker 2008 and Tinker 2010 models we have utilized spline interpolation through \tt{GSL} routines in order to guarantee a match to specified fitting parameters at exact values of $\Delta$. This fitting has slight deviation from the fit as expressed in Tinker 2010.
+In addition to the usage of the most common definition, we have implemented an extension for two of the models. The Tinker 2010 model allows for a value of $\Delta$ to be given between the values of 200 and 3200 and interpolates the fitting parameters within this range in a space of $\log \Delta$ using splines. We also have implemented interpolation in the same range of Tinker 2008 $\Delta$ values. For both Tinker 2008 and Tinker 2010 models we have utilized spline interpolation through {\tt GSL} routines in order to guarantee a match to specified fitting parameters at exact values of $\Delta$. This fitting has slight deviation from the fit as expressed in Tinker 2010.
 
 
 With the exception of the Tinker 2010 model, we attempt to keep a common form to the multiplicity function whenever possible for ease of extension:
@@ -729,22 +729,20 @@ The currently implemented model in {\tt CCL} allows for an arbitrary overdensity
 \label{sec:photoz}
 The functionality described in this section is implemented in {\tt ccl\_lsst\_specs.c}.
 
-LSST galaxy redshifts will be obtained using photometry. \jab{This sentence seems unnecessary:}[However, analytic forms of galaxy redshift distributions are usually known in terms of spectroscopic redshifts.] A model is therefore required for the probability of measuring a photometric redshift $z_{\rm ph}$ for an object with hypothetical spectroscopic redshift $z_{\rm s}$. {\tt CCL} allows the user to flexibly provide their own photometric redshift model. \jab{More generally, CCL might be of interest to people working with spec-z's. The arguments here need not apply only to photo-z's, but could apply to any redshift measurement.}
+LSST galaxy redshifts will be obtained using photometry. A model is therefore required for the probability of measuring a photometric redshift $z_{\rm ph}$ for an object with hypothetical spectroscopic redshift $z_{\rm s}$. {\tt CCL} allows the user to flexibly provide their own photometric redshift model. Equally, although this part of {\tt CCL} has been designed with photometric redshift in mind, it could be employed by the user to accommodate other types of redshift measurements.
 
-To do so, the user writes a function which accepts as input a photometric redshift, a spectroscopic redshift, and a void pointer to a structure containing any further parameters of the photo-z model. This function will return the probability of measuring the input photometric redshift given the input spectroscopic redshift. Explicitly, this function should take the form:
+To take advantage of this functionality, the user writes a function which accepts as input a photometric redshift, a spectroscopic redshift, and a void pointer to a structure containing any further parameters of the photo-z model. This function will return the probability of measuring the input photometric redshift given the input spectroscopic redshift. Explicitly, this function should take the form:
 
 {\tt user$\_$pz$\_$probability(double z$\_$ph, double z$\_$s, void * user$\_$par)\{...\}}
 
-The user must then also provides the structure of further parameters ({\tt user$\_$par}). This model can be incorporated when computing $\frac{dN}{dz}^i$ in photometric redshift bin $i$, as given by equation \ref{photoz} below.
-
-\jab{Is there an example of how to do this somewhere? Is there a default function that can be used, e.g. Gaussian photo-z's?}
+The user must then also provides the structure of further parameters ({\tt user$\_$par}). This model can be incorporated when computing $\frac{dN}{dz}^i$ in photometric redshift bin $i$, as given by equation \ref{photoz} below. An example of how the user can construct the required functions and structure can be found in {\tt ccl_sample_run.c}. 
 
 \subsection{LSST Specifications}
 \label{sec:specs}
 
 {\tt CCL} includes LSST specifications for the expected galaxy distributions of the full galaxy clustering sample and the lensing source galaxy sample. These enable the user to easily make forecasts for LSST. The functionality described in this section is implemented in {\tt ccl\_lsst\_specs.c}.
 
-The functional forms of the expected $\frac{dN}{dz}$ for clustering galaxies and lensing source galaxies are provided. Here, $\frac{dN}{dz}$ is the number density of galaxies as a function of spectroscopic redshift. \jab{A minor point, but I think what is actually meant here is ``true redshift'' or even ``cosmological redshift'' depending on how RSD is treated. Usually, you start with the distribution that is actually there, and then perturb it to account for measurement uncertainties, which can occur even for spec-z's, as well as RSDs.}
+The functional forms of the expected $\frac{dN}{dz}$ for clustering galaxies and lensing source galaxies are provided. Here, $\frac{dN}{dz}$ is the number density of galaxies as a function of true redshift. 
 
 In the case of lensing source galaxies, these forms are given in \cite{Chang2013}, wherein three different cases are considered: fiducial, optimistic, and conservative. All three are included in {\tt CCL}, and are indicated via a label of {\tt DNDZ$\_$WL$\_$OPT}, {\tt DNDZ$\_$WL$\_$FID}, and {\tt DNDZ$\_$WL$\_$CONS} as appropriate. The functional form of $\frac{dN}{dz}$ for lensing source galaxies is given as:
 \begin{equation}
@@ -758,9 +756,9 @@ For the case of the clustering galaxy sample, the functional form is given by \c
 \frac{dN}{dz} \propto \frac{1}{2z_0}\left(\frac{z}{z_0}\right)^2 {\rm exp}\left(-\frac{z}{z_0}\right)
 \label{dndz_clust}
 \end{equation}
-with $z_0=0.3$. The above $\frac{dN}{dz}$ for lensing sources in fact represents a subset of the $\frac{dN}{dz}$ for clustering. \jab{What is meant by this last sentence? Is it true that for any reasonable choice of $\alpha$ and $\beta$, the clustering sample with the specified distribution can always be selected as a subsample?}
+with $z_0=0.3$. 
 
-In order to be incorporated into forecasts or predictions, the above expressions for $\frac{dN}{dz}$ must be normalized, and the value of $\frac{dN}{dz}$ must be provided in a given photometric redshift bin. Support is provided for the user to input a flexible photometric redshift model, as described in Section \ref{sec:photoz}. This takes the form of a function which returns the probability $p(z,z')$ of measuring a particular photometric redshift $z$, given a spectroscopic redshift $z'$ and other relevant parameters. Also provided are functions to return $\sigma_z$ at a given redshift for both lensing sources and clustering galaxies, for the case in which the user wishes the assume a Gaussian photo-z model. \jab{So the user can specify $\sigma_z$ at a given redshift for a built-in Gaussian capability? Or the effective $\sigma_z$ is returned for a user-specified function, which may not be Gaussian?}
+In order to be incorporated into forecasts or predictions, the above expressions for $\frac{dN}{dz}$ must be normalized, and the value of $\frac{dN}{dz}$ must be provided in a given photometric redshift bin. Support is provided for the user to input a flexible photometric redshift model, as described in Section \ref{sec:photoz}. This takes the form of a function which returns the probability $p(z,z')$ of measuring a particular photometric redshift $z$, given a spectroscopic redshift $z'$ and other relevant parameters. Also provided are functions to return $\sigma_z$ at a given redshift for both lensing sources and clustering galaxies, for the case in which the user-defined function is a Gaussian photo-z model. 
 
 With this, $\frac{dN^i}{dz}$ of lensing or clustering galaxies in a particular photometric redshift bin $i$ is given by:
 \begin{equation}
@@ -774,7 +772,7 @@ Finally, the expected (linear, scale-independent) bias of galaxies in the cluste
 b(z) = \frac{0.95}{D(z)}
 \label{clustbias}
 \end{equation}
-where $D(z)$ in the linear growth rate of structure. \jab{normalized to unity at z=0, right?}
+where $D(z)$ in the linear growth rate of structure normalized to unity at z=0.
 
 \section{Tests and validation}
 \label{sec:tests}
@@ -990,7 +988,6 @@ In the future, we hope that {\tt CCL} will include other functionalities. Functi
 \begin{itemize}
         \item a link to {\tt angpow} \citep{2017arXiv170103592C} for going beyond the Limber approximation,
 	\item a link to {\tt FAST-PT} \citep{FASTPT} for efficient implementation of nonlinear perturbation theory,
-	\item a more realistic photo-z model, \jab{more realistic than a user-defined function?}
 	\item support for cosmologies with multiple unequal-mass neutrinos,
 	\item and more power spectrum methods (see \ref{Pk_wishlist}).
 \end{itemize}
