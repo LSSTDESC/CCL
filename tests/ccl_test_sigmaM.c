@@ -4,6 +4,8 @@
 #include <math.h>
 
 #define SIGMAM_TOLERANCE 1.0E-4
+// Reference data calculated for BBKS, so slightly relax the tolerance for CLASS
+#define SIGMAM_TOLERANCE_CLASS 1.0E-1
 
 CTEST_DATA(sigmam) {
   double Omega_c;
@@ -25,10 +27,10 @@ CTEST_SETUP(sigmam) {
   data->Omega_c = 0.25;
   data->Omega_b = 0.05;
   data->h = 0.7;
-  data->A_s = 2.1e-9;
+  //data->A_s = 2.1e-9;
   data->sigma_8=0.8;
   data->n_s = 0.96;
-  data->N_nu_rel=0;
+  data->N_nu_rel=3.046;
   data->N_nu_mass=0;
   data->mnu=0;
 
@@ -56,21 +58,31 @@ static int linecount(FILE *f)
   return i0;
 }
 
-static void compare_sigmam(int i_model,struct sigmam_data * data)
+static void compare_sigmam(int i_model, struct sigmam_data * data, transfer_function_t transfer_fn)
 {
   int nm,i;
   char fname[256],str[1024];
   char* rtn;
+  double sigmam_tol = SIGMAM_TOLERANCE;
   FILE *f;
   int status=0;
+  
+  // Set up cosmology
   ccl_configuration config = default_config;
-  config.transfer_function_method = ccl_bbks;
-  ccl_parameters params = ccl_parameters_create(data->Omega_c,data->Omega_b,data->Omega_k[i_model-1],data->N_nu_rel, data->N_nu_mass, data->mnu,data->w_0[i_model-1],data->w_a[i_model-1],data->h,data->A_s,data->n_s,-1,NULL,NULL, &status);
-  params.sigma_8=data->sigma_8;
+  config.transfer_function_method = transfer_fn;
+  if (transfer_fn == ccl_boltzmann_class) sigmam_tol = SIGMAM_TOLERANCE_CLASS;
+  ccl_parameters params = ccl_parameters_create(
+                            data->Omega_c, data->Omega_b,data->Omega_k[i_model-1],
+                            data->N_nu_rel, data->N_nu_mass, data->mnu,
+                            data->w_0[i_model-1], data->w_a[i_model-1],
+                            data->h, data->sigma_8, data->n_s, 
+                            -1,NULL,NULL, &status);
+  //params.sigma_8 = data->sigma_8;
   ccl_cosmology * cosmo = ccl_cosmology_create(params, config);
   ASSERT_NOT_NULL(cosmo);
-
-  sprintf(fname,"./tests/benchmark/model%d_sm.txt",i_model);
+  
+  // Load file with reference results
+  sprintf(fname,"./tests/benchmark/model%d_sm.txt", i_model);
   f=fopen(fname,"r");
   if(f==NULL) {
     fprintf(stderr,"Error opening file %s\n",fname);
@@ -87,29 +99,49 @@ static void compare_sigmam(int i_model,struct sigmam_data * data)
       fprintf(stderr,"Error reading file %s, line %d\n",fname,i+2);
       exit(1);
     }
-    m=m_h/data->h;
-    sm_h=ccl_sigmaM(cosmo,m,1.,&status);
+    m = m_h/data->h;
+    sm_h = ccl_sigmaM(cosmo,m,1.,&status);
+    
     if (status) printf("%s\n",cosmo->status_message);
-    err=sm_h/sm_bench-1;
+    err = sm_h/sm_bench-1;
     //printf("%le\n", err);
-    ASSERT_DBL_NEAR_TOL(err,0.,1E-4);
+    
+    // Check that calculated value is within specified tolerance
+    ASSERT_DBL_NEAR_TOL(0., err, sigmam_tol);
   }
   fclose(f);
 
   free(cosmo);
 }
 
-CTEST2(sigmam,model_1) {
-  int model=1;
-  compare_sigmam(model,data);
-}
-
-CTEST2(sigmam,model_2) {
-  int model=2;
-  compare_sigmam(model,data);
-}
-
-CTEST2(sigmam,model_3) {
+// The CLASS checks are only to make sure it's within the right order of magnitude
+CTEST2(sigmam, model3_class) {
   int model=3;
-  compare_sigmam(model,data);
+  compare_sigmam(model, data, ccl_boltzmann_class);
+}
+
+CTEST2(sigmam, model2_class) {
+  int model=2;
+  compare_sigmam(model, data, ccl_boltzmann_class);
+}
+
+CTEST2(sigmam, model1_class) {
+  int model=1;
+  compare_sigmam(model, data, ccl_boltzmann_class);
+}
+
+// The BBKS tests are the proper benchmarks
+CTEST2(sigmam, model3_bbks) {
+  int model=3;
+  compare_sigmam(model, data, ccl_bbks);
+}
+
+CTEST2(sigmam, model2_bbks) {
+  int model=2;
+  compare_sigmam(model, data, ccl_bbks);
+}
+
+CTEST2(sigmam, model1_bbks) {
+  int model=1;
+  compare_sigmam(model, data, ccl_bbks);
 }
