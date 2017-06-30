@@ -74,5 +74,10 @@ typedef struct ccl_configuration {
     // TODO: Halo definition
 } ccl_configuration;
 
-/// The default configuration object
+/**
+ * The default configuration object
+ * In the default configuration, defined in ccl_core.c
+ * CCL runs with:
+ * default_config = {ccl_boltzmann_class, ccl_halofit, ccl_tinker10}
+ */
 extern const ccl_configuration default_config;
