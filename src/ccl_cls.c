@@ -46,8 +46,12 @@ static double spline_eval(double x,SplPar *spl)
     return spl->y0;
   else if(x>=spl->xf) 
     return spl->yf;
-  else
-    return gsl_spline_eval(spl->spline,x,spl->intacc);
+  else{
+    double y;
+    int stat= gsl_spline_eval_e(spl->spline,x,spl->intacc,&y);
+    if (stat != GSL_SUCCESS) return NAN;
+    return y;
+  }
 }
 
 //Wrapper around spline_eval with GSL function syntax
