@@ -49,7 +49,10 @@ static double spline_eval(double x,SplPar *spl)
   else{
     double y;
     int stat= gsl_spline_eval_e(spl->spline,x,spl->intacc,&y);
-    if (stat != GSL_SUCCESS) return NAN;
+    if (stat != GSL_SUCCESS){
+      ccl_raise_exception(stat,"ccl_cls.c: splin_eval(): gsl error\n");
+      return NAN;
+    }
     return y;
   }
 }
