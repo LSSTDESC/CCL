@@ -5,7 +5,7 @@
 #include "gsl/gsl_spline.h"
 
 typedef struct {
-        double (* your_pz_func)(double, double, void *, int*); /*< Function returns the liklihood of measuring a z_ph
+        double (* your_pz_func)(double, double, void *, int*); /*< Function returns the likelihood of measuring a z_ph
  * (first double) given a z_spec (second double), with a pointer to additonal arguments and a status flag.*/
         void *  your_pz_params; /*< Additional parameters to be passed into your_pz_func */
 } user_pz_info;
@@ -39,7 +39,9 @@ double ccl_specs_bias_clustering(ccl_cosmology * cosmo, double a, int * status);
  */
 void ccl_specs_dNdz_tomog(double z, int dNdz_type, double bin_zmin, double bin_zmax, user_pz_info * user_info,  double *tomoout, int *status);
 user_pz_info* ccl_specs_create_photoz_info(void * user_params, double(*user_pz_func)(double, double,void*,int*));
+user_pz_info* ccl_specs_create_gaussian_photoz_info(double sigma_z0);
 void ccl_specs_free_photoz_info(user_pz_info *my_photoz_info);
+void ccl_specs_free_photoz_info_gaussian(user_pz_info *my_photoz_info);
 double ccl_specs_sigmaz_clustering(double z);
 double ccl_specs_sigmaz_sources(double z);
 

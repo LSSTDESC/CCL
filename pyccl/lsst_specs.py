@@ -38,6 +38,30 @@ class PhotoZFunction(object):
         except:
             pass
 
+class PhotoZGaussian(PhotoZFunction):
+    """
+    Gaussian photo-z function with sigma(z) = sigma_z0 (1 + z).
+    """
+    def __init__(self, sigma_z0):
+        """Create a new Gaussian photo-z function.
+        
+        Args:
+            sigma_z0 (float): Width of photo-z uncertainty at z=0, assuming 
+            that the uncertainty evolves like sigma_z0 * (1 + z).
+        """
+        # Create user_pz_info object
+        self.sigma_z0 = sigma_z0
+        self.pz_func = lib.specs_create_gaussian_photoz_info(sigma_z0)
+    
+    def __del__(self):
+        """Destructor for PhotoZGaussian object.
+
+        """
+        try:
+            lib.specs_free_photoz_info_gaussian(self.pz_func)
+        except:
+            pass
+
 
 def bias_clustering(cosmo, a):
     """Bias clustering, b(z), at a scale
