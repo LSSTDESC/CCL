@@ -82,9 +82,9 @@ double nu_phasespace_intg(gsl_interp_accel* accel, double mnuOT, int* status) {
 	}
 	
 	// Evaluate the spline - this will use the accelerator if it has been defined.
-	integral_value = gsl_spline_eval(nu_spline, log(mnuOT),accel)*7./8.;
+  *status |= gsl_spline_eval_e(nu_spline, log(mnuOT),accel, &integral_value);
 
-  return integral_value;
+  return integral_value*7./8.;
 }
 /* -------- ROUTINE: Omeganuh2 ---------
 INPUTS: a: scale factor, Neff: number of neutrino species, mnu: total mass in eV of neutrinos, TCMB: CMB temperature, accel: pointer to an accelerator which will evaluate the neutrino phasespace spline if defined, status: pointer to status integer.

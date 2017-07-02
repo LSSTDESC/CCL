@@ -505,7 +505,7 @@ double ccl_sigmaM(ccl_cosmology * cosmo, double halomass, double a, int * status
                                      log10(halomass), 
                                      cosmo->data.accelerator_m,&lgsigmaM);
     // Interpolate to get sigma
-    sigmaM = pow(10,lgsigmaM)*sigmaM*ccl_growth_factor(cosmo, a, status);
+    sigmaM = pow(10,lgsigmaM)*ccl_growth_factor(cosmo, a, status);
 
     return sigmaM;
 }
