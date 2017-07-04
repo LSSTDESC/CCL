@@ -40,7 +40,15 @@ static int linecount(FILE *f)
 
 static void compare_corr(char *compare_type,int algorithm,struct corrs_data * data)
 {
+
   int ii,status=0;
+
+  /* Set up the CCL configuration for comparing to benchmarks
+   * The benchmarks are of two types: those which use analytic
+   * redshift distributions, and those which use histograms for
+   * them. We will compare CCL correlations to the benchmarks
+   * using estimated covariances from CosmoLike.
+   */
   ccl_configuration config = default_config;
   config.transfer_function_method = ccl_bbks;
   ccl_parameters params = ccl_parameters_create_flat_lcdm(data->Omega_c,data->Omega_b,data->h,
@@ -48,6 +56,7 @@ static void compare_corr(char *compare_type,int algorithm,struct corrs_data * da
   ccl_cosmology * cosmo = ccl_cosmology_create(params, config);
   ASSERT_NOT_NULL(cosmo);
 
+  /*Create arrays for redshift distributions in the case of analytic benchmarks*/
   int nz;
   double *zarr_1,*pzarr_1,*zarr_2,*pzarr_2,*bzarr;
   if(!strcmp(compare_type,"analytic")) {
@@ -72,7 +81,7 @@ static void compare_corr(char *compare_type,int algorithm,struct corrs_data * da
       bzarr[ii]=1.;
     }
   }
-  else {
+  else { /*Load arrays for redshift distributions in the case of histograms*/
     char *rtn;
     char str[1024];
     FILE *fnz1=fopen("./tests/benchmark/codecomp_step2_outputs/bin1_histo.txt","r");
@@ -98,6 +107,8 @@ static void compare_corr(char *compare_type,int algorithm,struct corrs_data * da
     }
   }
 
+  /*For the same configuration as the benchmarks, we will produce CCL
+   correlation functions starting by computing C_ells here: */
   char fname[256];
   FILE *fi_dd_11,*fi_dd_12,*fi_dd_22;
   FILE *fi_ll_11_pp,*fi_ll_12_pp,*fi_ll_22_pp;
@@ -115,6 +126,7 @@ static void compare_corr(char *compare_type,int algorithm,struct corrs_data * da
   CCL_ClTracer *tr_wl_2=ccl_cl_tracer_lensing_simple_new(cosmo,nz,zarr_2,pzarr_2,&status2);
   ASSERT_NOT_NULL(tr_wl_2);
 
+  /* Read in the benchmark correlations*/
   sprintf(fname,"tests/benchmark/codecomp_step2_outputs/run_b1b1%s_log_wt_dd.txt",compare_type);
   fi_dd_11=fopen(fname,"r"); ASSERT_NOT_NULL(fi_dd_11);
   sprintf(fname,"tests/benchmark/codecomp_step2_outputs/run_b1b2%s_log_wt_dd.txt",compare_type);
@@ -163,6 +175,7 @@ static void compare_corr(char *compare_type,int algorithm,struct corrs_data * da
   fclose(fi_ll_11_pp); fclose(fi_ll_12_pp); fclose(fi_ll_22_pp);
   fclose(fi_ll_11_mm); fclose(fi_ll_12_mm); fclose(fi_ll_22_mm);
 
+  /*Compute the correlation with CCL*/
   int il;
   double *clarr=malloc(ELL_MAX_CL*sizeof(double));
   double *larr=malloc(ELL_MAX_CL*sizeof(double));
@@ -214,6 +227,10 @@ static void compare_corr(char *compare_type,int algorithm,struct corrs_data * da
   free(clarr);
   free(larr);
 
+  /* With the CCL correlation already computed, we proceed to the
+  * comparison. Here, we read in the benchmark covariances from CosmoLike, which
+  * allow us to set our tolerance.
+  */
   int nsig=15;
   double sigwt_dd_11[15], sigwt_dd_22[15];
   double sigwt_ll_11_mm[15], sigwt_ll_22_mm[15];
@@ -248,6 +265,7 @@ static void compare_corr(char *compare_type,int algorithm,struct corrs_data * da
   fclose(fi_mm_sig);
   fclose(fi_pp_sig);
 
+  /* Spline the covariances */
   gsl_spline *spl_sigwt_dd_11   =gsl_spline_alloc(L_SPLINE_TYPE,nsig);
   gsl_spline_init(spl_sigwt_dd_11   ,sig_theta_in,sigwt_dd_11   ,nsig);
   gsl_spline *spl_sigwt_dd_22   =gsl_spline_alloc(L_SPLINE_TYPE,nsig);
@@ -261,6 +279,10 @@ static void compare_corr(char *compare_type,int algorithm,struct corrs_data * da
   gsl_spline *spl_sigwt_ll_22_mm=gsl_spline_alloc(L_SPLINE_TYPE,nsig);
   gsl_spline_init(spl_sigwt_ll_22_mm,sig_theta_in,sigwt_ll_22_mm,nsig);
 
+  /* Proceed to the comparison between benchmarks and CCL.
+   * If DEBUG flag is set, then produce an output file.
+   */
+  
 #ifdef _DEBUG
   FILE *output = fopen("cc_test_corr_out.dat", "w");
 #endif //_DEBUG
@@ -272,6 +294,9 @@ static void compare_corr(char *compare_type,int algorithm,struct corrs_data * da
       continue;
     else
       npoints++;
+
+    /*First time the tolerance is set. The tolerance is equal to the 
+     *expected error bar times CORR_ERR_FRACTION=0.5 (default) */
     tol=gsl_spline_eval(spl_sigwt_dd_11,theta_in[ii],NULL);
     if(fabs(wt_dd_11_h[ii]-wt_dd_11[ii])>tol*CORR_ERROR_FRACTION)
       fraction_failed++;
@@ -333,18 +358,20 @@ static void compare_corr(char *compare_type,int algorithm,struct corrs_data * da
 #ifdef _DEBUG
   fclose(output);
 #endif //_DEBUG
-
+  
+  //Determine the fraction of points that failed the test
+  fraction_failed/=6*npoints;
+  printf("%lf %% ",fraction_failed*100);
+  //Check is this fraction is larger than we allow
+  ASSERT_TRUE((fraction_failed<CORR_FRACTION_PASS));
+  
+  //Free splines, cosmology and arrays
   gsl_spline_free(spl_sigwt_dd_11);
   gsl_spline_free(spl_sigwt_dd_22);
   gsl_spline_free(spl_sigwt_ll_11_pp);
   gsl_spline_free(spl_sigwt_ll_22_pp);
   gsl_spline_free(spl_sigwt_ll_11_mm);
   gsl_spline_free(spl_sigwt_ll_22_mm);
-
-  fraction_failed/=6*npoints;
-  printf("%lf %% ",fraction_failed*100);
-  ASSERT_TRUE((fraction_failed<CORR_FRACTION_PASS));
-
   free(wt_dd_11_h); free(wt_dd_12_h); free(wt_dd_22_h);
   free(wt_ll_11_h_pp); free(wt_ll_12_h_pp); free(wt_ll_22_h_pp);
   free(wt_ll_11_h_mm); free(wt_ll_12_h_mm); free(wt_ll_22_h_mm);
