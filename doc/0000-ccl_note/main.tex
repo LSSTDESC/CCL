@@ -210,7 +210,7 @@ Directions for an example {\tt CCL} script are provided in Section \ref{sec:exam
 
 The routines described in this subsection are implemented in {\tt ccl$\_$background.c}.
 
-The Hubble parameter is calculated via \jab{why factor out the $a^{-3/2}$? Also, are these $\Omega$ values enforced to add up to 1?}
+The Hubble parameter is calculated via
 %
 \begin{align}\label{eq:Ha}
 \frac{H(a)}{H_0} &= a^{-3/2}\Big(\Omega_{M,0}+\Omega_{\Lambda,0} a^{-3(w_0+w_a)}
@@ -280,10 +280,11 @@ where $h_{\rm P}$ is Planck's constant and $h$ is $H_0/100$ with $H_0$ in units 
 \label{sec:growth}
 
 The routines described in this subsection are implemented in {\tt ccl$\_$background.c}.
-To compute the growth function, $D(a)$, the growth factor of matter perturbations, {\tt CCL} solves the following differential equation:\jab{allow show integral form of the equation? how is it actually computed?}
+To compute the growth function, $D(a)$, the growth factor of matter perturbations, {\tt CCL} solves the following differential equation:
 \begin{equation}
-  \frac{d}{da}\left(a^3H(a)\frac{dD}{da}\right)=\frac{3}{2}\Omega_M(a)aH(a)D.
+  \frac{d}{da}\left(a^3H(a)\frac{dD}{da}\right)=\frac{3}{2}\Omega_M(a)aH(a)D,
 \end{equation}
+using a Runge-Kutta Cash-Karp algorithm.
 
 In doing this, {\tt CCL} simultaneously computes the so-called growth rate $f(a)$, defined as:
 \begin{equation}
@@ -291,7 +292,7 @@ In doing this, {\tt CCL} simultaneously computes the so-called growth rate $f(a)
 \end{equation}
 CCL provides different functions that return the growth normalized to $D(a=1)=1$ and to $D(a\ll1)\rightarrow a$.
 
-Note that the above is strictly valid only for a Universe containing just dust-like components \jab{is DE ``dust-like''?}. A scale-independent growth rate is, for example, ill-defined in the presence of massive neutrinos.
+Note that the above is strictly valid only for a Universe containing just dust-like matter components. A scale-independent growth rate is, for example, ill-defined in the presence of massive neutrinos.
 
 Currently CCL allows for an alternative cosmological model defined by a regular background $(w_0+w_a)$CDM (with arbitrary $K$) as well as a user-defined $\Delta f(a)$, such that the true growth rate in this model is given by $f(a)=f_0(a)+\Delta f(a)$, where $f_0(a)$ is the growth rate in the background model. Note that this model is only consistently implemented with regards to the computation of the linear growth factor and growth rates (which will also scale the linear power spectrum). All other CCL functions (including the non-linear power spectrum) will ignore these modifications. This model, and the interpretation of the predictions given by CCL, should therefore be used with care.
 
@@ -307,13 +308,13 @@ CCL implements the analytical BBKS approximation to the transfer function \citep
 T(q\equiv k/\Gamma h {\rm Mpc}^{-1}) = \frac{\ln[1+2.34q]}{2.34q}[1+3.89q+(16.2q)^2+(5.47q)^3+(6.71q)^4]^{-0.25}
 \end{equation}
 where $\Gamma = \Omega_m h$.
-The power spectrum is related to the transfer function by $\Delta(k)\propto T^2(k)k^{3+n}$ and $\Delta^2(k)\propto k^3P(k)$. \jab{This scaling is true for all of the transfer function options, right? Or do we go straight to P(k) for the other options?} The normalization of the power spectrum is achieved at $z=0$ by setting $\sigma_8$ to its value today.
+The power spectrum is related to the transfer function by $\Delta(k)\propto T^2(k)k^{3+n}$ and $\Delta^2(k)\propto k^3P(k)$. The normalization of the power spectrum is achieved at $z=0$ by setting $\sigma_8$ to its value today.
 The BBKS power spectrum option is primarily used as a precisely defined input for testing the numerical accuracy of {\tt CCL} routines (as described in Sect.~\ref{sec:tests}), and it is not recommended for other uses.
 
 \subsubsection{Eisenstein and Hu}
-CCL also provides an approximation to the matter power spectrum as implemented by \citet{1998ApJ...496..605E} (we refer the reader to this paper for a detailed discussion of the fitting formulae)\footnote{Note that the implementation in CCL modifies Eq. 5 of \citet{1998ApJ...496..605E} using $a^{-1}=1+z$ instead of the approximation $a^{-1}\sim z$. The difference in the resulting power spectra is negligible, but larger than 1 part in $10^4$ for $k<10\,h\,{\rm Mpc}^{-1}$.}.
+CCL also provides an approximation to the matter power spectrum as implemented by \citet{1998ApJ...496..605E} (E\&H, we refer the reader to this paper for a detailed discussion of the fitting formulae)\footnote{Note that the implementation in CCL modifies Eq. 5 of \citet{1998ApJ...496..605E} using $a^{-1}=1+z$ instead of the approximation $a^{-1}\sim z$. The difference in the resulting power spectra is negligible, but larger than 1 part in $10^4$ for $k<10\,h\,{\rm Mpc}^{-1}$.}.
 
-It is worth reminding the reader that the Eisenstein \& Hu and the BBKS approximations are not accurate \jab{can we be more specific here?} and should not be used to derive scientific results. \jab{What about ``no-wiggle'' implementations that use E\&H? Those may still be useful in a scientific context.} They are, however, computationally faster, and therefore useful for code testing.
+It is worth reminding the reader that the Eisenstein \& Hu and the BBKS approximations are not as accurate and their use to derive precise cosmological constraints is discouraged. They are, however, computationally faster, and therefore useful for code testing.
 
 \subsubsection{CLASS}
 Finally, there is the option to call the {\tt CLASS} software \citep{class} within {\tt CCL} to obtain either linear or nonlinear matter power spectra at given redshifts. Upon initializing the cosmology object, we construct a bi-dimensional spline in $k$ and the scale-factor which is then called by the relevant routines to obtain the matter power spectrum at the desired wavenumber and redshift. The relevant routines can be found within {\tt ccl$\_$power.c}. Currently CLASS computes the non-linear power spectrum using the HaloFit prescription of \cite{CLASS_halofit}.
@@ -405,14 +406,14 @@ Here are some power spectrum methods that we would like to implement in the futu
 \subsubsection{Normalization of the power spectrum}
 \label{sec:PSnorm}
 
-There are two alternative schemes for normalization of the matter power spectrum. The first one is to specify the value of $A_s$, the amplitude of the primordial power spectrum, which is passed directly to {\tt CLASS}. This option is available in the case of the linear/nonlinear matter power spectrum implementation. For these, as well as for BBKS \jab{E\&H?}, there is the additional option to set the normalization of the matter power spectrum by specifying $\sigma_8$, the RMS density contrast averaged over spheres of radius $8h^{-1}$Mpc. The computation of $\sigma_8$ is described in Section \ref{sec:hmf}.
+There are two alternative schemes for normalization of the matter power spectrum. The first one is to specify the value of $A_s$, the amplitude of the primordial power spectrum, which is passed directly to {\tt CLASS}. This option is available in the case of the linear/nonlinear matter power spectrum implementation. For these, as well as for BBKS and E\&H transfer functions, there is the additional option to set the normalization of the matter power spectrum by specifying $\sigma_8$, the RMS density contrast averaged over spheres of radius $8h^{-1}$Mpc. The computation of $\sigma_8$ is described in Section \ref{sec:hmf}.
 
 In practice, there is only one argument that encodes the normalization. This is the argument ${\tt norm\_pk}$, which can be passed the power spectrum normalization parameterized by $\sigma_8$ or $A_\mathrm{s}$. As noted above, {\tt ccl$\_$parameters$\_$create} switches to $\sigma_8$ normalization if ${\tt norm\_pk} > 10^{-5}$, and to $A_{\mathrm s}$ normalization otherwise.
 
 \subsection{Angular power spectra}
 \label{sec:cl}
 
-In this section we will distinguish between {\sl observables} (quantities observed on the sky, such as number counts in a redshift bin, shear or CMB temperature fluctuations) and {\sl contributions} to the total observed fluctuations \jab{just fluctuations?} of these observables (such as the biased matter density term in number counts, redshift-space distortions, magnification, ISW, etc.).
+In this section we will distinguish between {\sl observables} (quantities observed on the sky, such as number counts in a redshift bin, shear or CMB temperature fluctuations) and {\sl contributions} to the total observed fluctuations of these observables (such as the biased matter density term in number counts, redshift-space distortions, magnification, ISW, etc.).
 The routines described in this subsection are implemented in {\tt ccl$\_$cls.c}.
 
 \subsubsection{Exact expressions}
@@ -432,7 +433,7 @@ where $\mathcal{P}_\Phi(k)$ is the dimensionless power spectrum of the primordia
         \begin{equation}
           \Delta^{\rm RSD}_\ell(k)=\int dz\,p_z(z)\frac{(1+z) p_z(z)}{H(z)}T_\theta(k,z) j_\ell''(k\chi(z)),
         \end{equation}
-        where $T_\theta(k,z)$ is the transfer function of $\theta$, the divergence of the comoving velocity field. $T_\theta(k,z)$ depends on the growth, which {\tt CCL} does not compute for massive neutrino cosmologies; this is why $C_\ell$ spectra involving number count tracers are not supported when massive neutrinos are present. \jab{Perhaps a topic for the future, but RSD should be pretty minimal for angular power spectra, at least with wide enough z bins. Why not use linear theory with no neutrinos in any case and just warn about potential loss of accuracy?} \todo{DL:Made an issue to address this, probably not crucial for initial release.}
+        where $T_\theta(k,z)$ is the transfer function of $\theta$, the divergence of the comoving velocity field. $T_\theta(k,z)$ depends on the growth, which {\tt CCL} does not compute for massive neutrino cosmologies. $C_\ell$ is instead computed assuming a linear-theory relation between the matter overdensity and peculiar velocity fields. While this should not be problematic for wide photometric redshift bins, users should exercise care when interpreting results for narrow window functions.
   \item $\Delta^{\rm M}$ is the contribution from magnification lensing:
         \begin{equation}
           \Delta_\ell^{\rm M}(k)=-\ell(\ell+1)\int \frac{dz}{H(z)} W^{\rm M}(z) T_{\phi+\psi}(k,z) j_\ell(k\chi(z)),
@@ -443,20 +444,20 @@ where $\mathcal{P}_\Phi(k)$ is the dimensionless power spectrum of the primordia
         \end{equation}
         Here $s(z)$ is the magnification bias, given as the logarithmic derivative of the number of sources with magnitude limit, and $r(\chi)$ is the angular comoving distance (see Eq. \ref{eq:angdist}).
 
-        Note that {\tt CCL} currently does not compute relativistic corrections to number counts \cite{2011PhRvD..84d3516C,2011PhRvD..84f3505B}. Although these should be included in the future, their contribution to the total fluctuation is largely subdominant \jab{A bit vague. At what scales, precision, etc?}, and therefore it is safe to work without them for the time being.
+        Note that {\tt CCL} currently does not compute relativistic corrections to number counts \cite{2011PhRvD..84d3516C,2011PhRvD..84f3505B}. Although these should be included in the future, their contribution to the total fluctuation is largely subdominant (see \cite{GReffects} and the two references above), and therefore it is safe to work without them in most cases.
 \end{itemize}
 
 \paragraph{\bf Galaxy shape distortions.} The transfer function for shape distortions is currently decomposed into two terms: $\Delta^{\rm SH}=\Delta^{\rm WL}+\Delta^{\rm IA}$, where
 \begin{itemize}
   \item $\Delta^{\rm L}$ is the standard lensing contribution:
-        \begin{equation}
+        \begin{equation} \label{eq:transfer_lensing}
           \Delta_\ell^{\rm L}(k)=-\frac{1}{2}\sqrt{\frac{(\ell+2)!}{(\ell-2)!}}\int \frac{dz}{H(z)} W^{\rm L}(z) T_{\phi+\psi}(k,z) j_\ell(k\chi(z)),
         \end{equation}
         where $W^{\rm L}$ is the lensing kernel, given by
         \begin{equation}
           W^L(z)\equiv\int_z^\infty dz' p_z(z')\frac{r(\chi(z')-\chi(z))}{r(\chi(z'))}.
         \end{equation}
-  \item $\Delta^{\rm IA}$ is the transfer function for intrinsic galaxy alignments. {\tt CCL} currently supports the so-called ``linear alignment model'', according to which the galaxy inertia tensor is proportional the local tidal tensor \cite{2004PhRvD..70f3526H,2007MNRAS.381.1197H}. \jab{no option for the halofit P(k) to be used yet?}
+  \item $\Delta^{\rm IA}$ is the transfer function for intrinsic galaxy alignments. {\tt CCL} currently supports the so-called ``non-linear alignment model'', according to which the galaxy inertia tensor is proportional the local tidal tensor \cite{2004PhRvD..70f3526H,2007MNRAS.381.1197H}.
         \begin{equation}
           \Delta_\ell^{\rm IA}(k)=\sqrt{\frac{(\ell+2)!}{(\ell-2)!}}\int dz\,p_z(z)\,b_{\rm IA}(z)\,f_{\rm red}(z)\,T_\delta(k,z)\,\frac{j_\ell(k\chi(z))}{(k\chi(z))^2}.
         \end{equation}
@@ -472,11 +473,11 @@ As shown above, computing each transfer function involves a radial projection (i
 Thus for each $k$ and $\ell$ we can define a radial distance $\chi_\ell\equiv(\ell+1/2)/k$, with corresponding redshift $z_\ell$. This approximation works best for wide radial kernels and high multipoles.
 
 Substituting this in the expressions above, the simplified versions become:
-\begin{equation}
+\begin{equation}\label{eq:limber}
  C^{ab}_\ell=\frac{2}{2\ell+1}\int_0^\infty dk\,P_\delta\left(k,z_\ell\right)
  \tilde{\Delta}^a_\ell(k)\tilde{\Delta}^b_\ell(k).
 \end{equation}
-where \jab{H=?}
+where
 \begin{align}
  &\tilde{\Delta}_\ell^{\rm D}(k)=p_z(z_\ell)\,b(z_\ell)\,H(z_\ell)\\
  &\tilde{\Delta}_\ell^{\rm RSD}(k)=
@@ -583,47 +584,38 @@ about 15s on 16 threads, which is to be compared to about 0.5s with \texttt{Angp
 
 \end{comment}
 
-\jab{What if I want to output the $P(k)$ predictions?}
-
 \subsection{Correlation functions}
 \label{sec:corr}
 
-\subsubsection{Limber approximation}
+%\subsubsection{Flat-sky approximation}
 
-In the Limber approximation, the angular correlation function between any two tracers $1$ and $2$ is given by\footnote{See \citet{Bartelmann01} weak lensing review, page 44. See also \citet{Joachimi10}.}
+The following expressions relating the angular power spectra and correlation functions are valid in the flat-sky approximation\footnote{See the weak lensing review by \citet{Bartelmann01}, page 44 and \citet{Joachimi10}.}. In all cases, $f_K(\chi)$ is comoving angular diameter distance, which differs from the radial comoving distance $\chi$ only in the case of cosmologies with non-zero curvature.
 
+{\bf Galaxy-galaxy.} The angular correlation function between two number-count tracers (labeled $a$ and $b$ here) is given by
 \begin{equation}
-C_{12}(\theta) = \int d\chi'q_1(\chi')q_2(\chi')\int dk\frac{k}{2\pi}P_{\delta}(k,\chi')J_0[f_K(\chi')\theta k],
-\end{equation}
-%
-where $J_0$ is the Bessel function of order 0, $\chi$ is the comoving distance and $f_K(\chi)$ is the radial function that multiplies the spatial metric element, which is different from $\chi$ in the case of a cosmology with non-zero curvature.
-
-{\bf Clustering.} For clustering, the relevant weight is given by $q_1(\chi)=b_1(\chi)dN_1/d\chi(\chi)$, the comoving distance probability distribution times the bias. The angular correlation function can also be re-written as
-\begin{equation}
-C_{12}(\theta) = \int dl \frac{l}{2\pi} C_{gg}(l) J_0(l\theta),
+  \xi^{ab}(\theta) = \int dl \frac{l}{2\pi} C^{ab}_l\, J_0(l\theta),
 \label{eq:xiclu}
 \end{equation}
-where $C_{gg}$ is the galaxy clustering angular power spectrum.
+where $C_{ab}$ is the angular power spectrum between both tracers.
 
-{\bf Lensing.} Lensing correlation functions are \footnote{from Schneider 2002 and Bartelmann \& Schneider section 6.4.1}
-%
+{\bf Lensing-lensing.} The lensing correlation functions are \footnote{from Schneider 2002 and Bartelmann \& Schneider section 6.4.1}
 \begin{eqnarray}
-\xi_{+}(\theta)&=&\int_0^{\infty}dl\frac{l}{2\pi}J_0(l\theta)P_\kappa(l),\\
-\xi_{-}(\theta)&=&\int_0^{\infty}dl\frac{l}{2\pi}J_4(l\theta)P_\kappa(l),
+  \xi^{ab}_{+}(\theta)&=&\int_0^{\infty}dl\frac{l}{2\pi}J_0(l\theta)C^{ab}_l,\\
+  \xi^{ab}_{-}(\theta)&=&\int_0^{\infty}dl\frac{l}{2\pi}J_4(l\theta)C^{ab}_l,
 \label{eq:xipxim}
 \end{eqnarray}
-%
-where the angular lensing convergence power spectrum is given by
-\begin{eqnarray}
-P_\kappa(l) &=& \frac{9H_0^4\Omega_m^2}{4c^4}\int_{0}^{\chi_h}\frac{d\chi}{a^2(\chi)}P_\delta\left(\frac{l}{f_K(\chi)},\chi\right)\left[\int_\chi^{\chi_h}d\chi'p_\chi(\chi')\frac{f_K(\chi'-\chi)}{f_K(\chi')}\right]^2\\
-\end{eqnarray}
-\jab{relation to the $C_\ell$ defined above (eq 18)?}
+where the angular lensing convergence power spectrum $C^{ab}_l$ is given above (see Equations \ref{eq:transfer_lensing} and \ref{eq:limber}).
 
-For numerical integration of the correlation functions, we make use of the public code {\tt FFTlog}\footnote{\url{http://casa.colorado.edu/~ajsh/FFTLog/}}\citep{Hamilton2000,Talman2009}. In brief, FFTlog works on functions periodic in log space, by writing the Hankel Transform as a convolution between bessel function and the function of interest (in this case $C_\ell$). A version of this code is included in {\tt CCL} with minor modifications. \jab{which modification? at some point, we had found a minor bug in the FFTlog code. I will let you know.}
+{\bf Galaxy-lensing.} The correlation between a number count tracer $a$ and a shear tracer $b$ is given by
+\begin{equation}
+  \xi^{ab}(\theta) = \int dl \frac{l}{2\pi} C^{ab}_l\, J_2(l\theta),
+\end{equation}
 
-\subsubsection{Beyond Limber}
+For numerical integration of the correlation functions, we make use of the public code {\tt FFTlog}\footnote{\url{http://casa.colorado.edu/~ajsh/FFTLog/}}\citep{Hamilton2000,Talman2009}. In brief, FFTlog works on functions periodic in log space, by writing the Hankel Transform as a convolution between Bessel functions and the function of interest (in this case $C_\ell$). A version of this code is included in {\tt CCL} with minor modifications.
 
-\jab{We go beyond limber for correlation functions?}
+\begin{comment}
+\subsubsection{Beyond flat-sky}
+
 We begin by writing the angular space observable, $X$, in terms of a decomposition in spherical harmonics, 
 \begin{align}\label{eq:X_harmonic}
   X(\Omega)=&\sum_{lm}\tilde X_{lm}Y_{lm}(\Omega)
@@ -674,6 +666,7 @@ which yields final expressions that coincide with Eq. \ref{eq:xipxim}. \jab{even
 %  \xi_-(\theta)&=\frac{1}{2\pi}\int d\ell\ell C_\ell J_4(\ell\theta).
 %\end{align}
 %To evaluate the Hankel transform, we use the fast {\tt FFTlog} routine\citep{Hamilton2000,Talman2009}. In brief, FFTlog works on functions periodic in log space, by writing the Hankel Transform as a convolution between bessel function and the function of interest (in this case $C_\ell$). The convolution can then be evaluated using Fourier transforms, with Fourier transform of bessel function evaluated using analytical functions while Fourier transform of $C_\ell$ and the inverse Fourier transform of the product evaluated using fast fourier transform routines. 
+\end{comment}
 
 
 \subsection{Halo mass \& halo bias functions}
@@ -777,7 +770,7 @@ where $D(z)$ in the linear growth rate of structure normalized to unity at z=0.
 \section{Tests and validation}
 \label{sec:tests}
 
-Our goal is for outputs of {\tt CCL} to be validated against the results of the code comparison project \jab{Will it be clear to the random reader what the ``code comparison project' is? It is mentioned in the abstract. Is there a link to more info? Which codes were used, etc?} down to a $10^{-4}$ or pre-established accuracy level if possible. In some cases, this level of accuracy is not necessary, as other systematics which have not been considered in this version of {\tt CCL} yet are expected to have a larger fractional impact. In the cases where this applies, we make it clear below.
+Our goal is for outputs of {\tt CCL} to be validated against the results of a code-comparison project run within LSST-DESC down to a $10^{-4}$ or pre-established accuracy level if possible. In some cases, this level of accuracy is not necessary, as other systematics which have not been considered in this version of {\tt CCL} yet are expected to have a larger fractional impact. In the cases where this applies, we make it clear below.
 
 
 A code comparison project was carried out among members of TJP where the following outputs of cosmological forecast codes were compared and validated:
@@ -787,7 +780,7 @@ A code comparison project was carried out among members of TJP where the followi
 \item linear matter power spectrum, $P(k)$, from BBKS \citealt{BBKS}) in units of $($Mpc$/h)^3$ at $z=0,2$ in the range $10^{-3} \leq k \leq 10 h/$Mpc with 10 bins per decade, and
 \item the mass variance at $z=0$, $\sigma(M,z=0)$ for $M =\{10^6, 10^8, 10^{10}, 10^{12}, 10^{14}, 10^{16}\} $M$_\odot/h$.
 \end{enumerate}
-\jab{Are the units for these comparisons different than the default CCL units? In particular, the inclusion of $h$ doesn't seem consistent}These forecasts were produced and compared for different cosmologies, which are listed in the table below. The results agree to better than $0.1\%$ relative accuracy for comoving distance and growth factor among all submissions (with one exception \jab{??}), and for $P(k)$ and $\sigma(M)$ among codes which use the same BBKS conventions.
+These predictions were produced and compared for different cosmologies, which are listed in the table below. The results agree to better than $0.1\%$ relative accuracy for comoving distance and growth factor among all submissions, and for $P(k)$ and $\sigma(M)$ among codes which use the same BBKS conventions.
 
 \begin{center}
   \begin{tabular}{ c | c c c c c c c c }
@@ -806,17 +799,17 @@ A code comparison project was carried out among members of TJP where the followi
   \end{tabular}
 \end{center}
 
-We noticed that there are 2 typos for the BBKS transfer function in ``Modern Cosmology'' \citep{DodelsonBook} compared to the original BBKS paper \jab{I think this citation is wrong.}. The quadratic term should be $(16.1q)^2$ and the cubic term should be $(5.46q)^3$. The BBKS equation is correct in \citet{PeacockBook}. Using the wrong equation can give differences in the results above the $10^{-4}$ level.
+We noticed that there are 2 typos for the BBKS transfer function in ``Modern Cosmology'' \citep{DodelsonBook} compared to the original BBKS paper. The quadratic term should be $(16.1q)^2$ and the cubic term should be $(5.46q)^3$. The BBKS equation is correct in \citet{PeacockBook}. Using the wrong equation can give differences in the results above the $10^{-4}$ level.
 
 From the comparison, we were also able to identify some typical issues which affect convergence at the desired level:
 \begin{itemize}
-\item For achieving $10^{-4}$ precision in $\sigma(M)$ and the normalisation of the power spectrum, one should check that the integral of $\sigma_8$ and $\sigma(M)$ has converged for the chosen values of $\{k_{\rm min},k_{\rm max}\}$. After checking convergence, we achieved the desired precision. \jab{For $sigma_8$, we should be able to specify the necessary values for convergence (to good accuracy, since the cosmology dependence is quite minor). It would be helpful to do that somewhere.}
+\item For achieving $10^{-4}$ precision in $\sigma(M)$ and the normalisation of the power spectrum, one should check that the integral of $\sigma_8$ and $\sigma(M)$ has converged for the chosen values of $\{k_{\rm min},k_{\rm max}\}$. After checking convergence, we achieved the desired precision.
 \item Also note that for $\sigma(M)$, it is important to set the desired precision level correctly for the numerical integrator. The integral usually yields $\sigma^2(M)$, and not $\sigma(M)$. Hence, one has to set the desired precision taking the exponent into account.
-\item The value of the gravitational constant, $G$, enters into the critical density. We found that failure to define $G$ with sufficient precision would result in lack of convergence at the $10^{-4}$ level between the different submissions. Importantly, note that CAMB barely has $10^{-4}$ precision in $G$ (and similarly, there might be other constants within CAMB/CLASS for which one should check the precision level). For {\tt CCL}, we are using the value from the Particle Physics Handbook. \jab{So CAMB can't be trusted at better than $10^{-4}$ precision? Is there an option to increase precision? Does the precision in $G$ propegate linearly to precision in all quantities of interest? }%How does it compare?
+\item The value of the gravitational constant, $G$, enters into the critical density. We found that failure to define $G$ with sufficient precision would result in lack of convergence at the $10^{-4}$ level between the different submissions. Importantly, note that CAMB barely has $10^{-4}$ precision in $G$ (and similarly, there might be other constants within CAMB/CLASS for which one should check the precision level). For {\tt CCL}, we are using the value from the Particle Physics Handbook. 
 \item Including/excluding radiation in the computation of the comoving distances and the growth function can easily make a difference of $10^{-4}$ at the redshifts required in this submission.
 \end{itemize}
 
-In a second stage, we used the BBKS linear matter power spectrum from the previous step to compare two-point statistics for two redshift bins, resulting in three tomography combinations, ($1-1$),($1-2$),($2-2$). We adopted the following analytic redshift distributions: a Gaussian with $\sigma = 0.15$, centered at $z_1 = 1$; and another Gaussian with the same dispersion but centered at $z_2 = 1.5$. We repeated the exercise for two redshift distribution histograms shown in Figure \ref{fig:zhistos}. \jab{Where did those distributions come from?}
+In a second stage, we used the BBKS linear matter power spectrum from the previous step to compare two-point statistics for two redshift bins, resulting in three tomography combinations, ($1-1$),($1-2$),($2-2$). We adopted the following analytic redshift distributions: a Gaussian with $\sigma = 0.15$, centered at $z_1 = 1$; and another Gaussian with the same dispersion but centered at $z_2 = 1.5$. We repeated the exercise for two redshift distribution histograms shown in Figure \ref{fig:zhistos}.
 
 %------------------------
 \begin{figure}
@@ -827,15 +820,13 @@ In a second stage, we used the BBKS linear matter power spectrum from the previo
 \end{figure}
 %------------------------
 
-In this second step, only 2 codes have been compared so far. More outputs are needed to guarantee convergence \jab{at what level?}. Preliminarily, from these outputs, we have concluded that:
+In this second step, only 2 codes have been compared so far. More outputs are needed to guarantee convergence. Preliminarily, from these outputs, we have concluded that:
 \begin{itemize}
-\item The cross-correlation between bins is particularly sensitive to having enough points \jab{in $k$ space or $z$ space?} to sample the lensing kernel.
-\item The nonlinear behaviour \jab{American or UK spelling? Also, nonlinear behavior of what? Correlation functions?} is sensitive to $l_{\rm max}$, we had to go up to 30,000 to get convergence (and we could not achieve $0.01\%$ convergence).
-\item The large scales \jab{of the correlation function?} are sensitive to $l_{\rm min}$. The use of the Limber approximation is also relevant on these scales.
-%\item Because we are using BBKS, evaluating the $P(k)$ at arbitrary $k_{\rm max}$ is not a problem, but we will need to test convergence in other cases.
-\item The correlation functions are sensitive to how the power spectrum is interpolated. For example, in one case we had fewer $l$'s \jab{what resolution?} and we had to use an order $5$ spline\jab{in order to achieve what?}. If we sample at all $l$'s then a linear interpolation is enough.
+\item The cross-correlation between bins is particularly sensitive to the number of points where the kernels have been sampled.
+\item The accuracy of the correlation function is sensitive to $l_{\rm max}$. We had to use up to $l_{\rm max}=3\times10^4$ to get convergence (and we could not achieve $0.01\%$ convergence).
+\item The large scales of the correlation function are sensitive to $l_{\rm min}$. The use of the flat-sky approximation is also relevant on these scales.
+\item For sufficiently high precision, the correlation functions are sensitive to how the power spectrum is sampled and interpolated.
 \end{itemize}
-\jab{do we want to use $l$ or $\ell$?}
 
 Additionally, independent codes were utilized to test the accuracy of halo mass function predictions. For the halo mass function, we compare the value of $\sigma$, $\log(\sigma^{-1})$, and the value of the halo mass function in the form used in \citep{Tinker2008},
 \begin{equation}
@@ -855,15 +846,13 @@ Finally, we note that formal tests for predictions in cosmologies with neutrinos
 \section{Default configuration}
 \label{sec:default}
 
-In its default configuration, {\tt CCL} adopts the nonlinear matter power spectrum from {\tt CLASS} through the Halofit implementation and the Tinker mass function for \jab{cluster?} number counts.
+In its default configuration, {\tt CCL} adopts the nonlinear matter power spectrum from {\tt CLASS} through the Halofit implementation and the Tinker mass function for cluster number counts.
 
 
 \section{Examples for C implementation}
 \label{sec:example}
 
 Examples of how to run {\tt CCL} are provided in the {\tt tests} sub-directory of the library. The first resource for a new user should be the {\tt ccl$\_$sample$\_$run.c} file. This starts by setting up the {\tt CCL} default configuration. Then, it creates the ``cosmo'' structure, which contains distances and power spectra splines, for example. There are example calls for routines that output comoving radial distances, the scale factor, the growth factor and $\sigma_8$. Toy models are created for the redshift distributions of galaxies in the clustering and lensing samples, and for the bias of the clustering sample ($b(z)=1+z$). These are used for constructing the ``tracer'' structures via {\tt CCL$\_$Cltracer}, which can then be called to obtain the angular power spectra for clustering, cosmic shear and galaxy lensing.
-
-\jab{It should be made more clear in this doc how to compile (or where to find that info). I found it in README.md, although it wasn't clear where "the library" was installed. For me, with standard installation, it was /usr/local/.}
 
 
 \section{Python wrapper}
@@ -885,10 +874,6 @@ Before you can build the Python wrapper, you must have compiled and installed th
 \end{itemize}
 If you choose either of the first two options, the {\tt pyccl} module will be installed into a sensible location in your {\tt PYTHONPATH}, and so should be automatically picked up by your Python interpreter. You can then simply import the module using {\tt import pyccl}. If you use the last option, however, you must either start your interpreter from the root {\tt CCL} directory, or manually add the root {\tt CCL} directory to your {\tt PYTHONPATH}.
 
-\jab{install vs build$\_$ext?}
-
-\jab{I'm having a similar problem here related to gcc. The commands above don't find gcc, which is in /usr/local/.}
-
 These options assume that the C library ({\tt libccl}) has been installed somewhere in the default library path. If this isn't the case, you will need to tell the Python build tools where to find the library. This can be achieved by running the following command first, before any of the commands above:
 
 \texttt{python setup.py build$\_$ext --library-dirs=/path/to/lib/ --rpath=/path/to/lib/}
@@ -904,8 +889,6 @@ This happens when the build tools fail to find the directory containing the GSL 
 \texttt{python setup.py build$\_$ext --library-dirs=/path/to/install/lib/ --rpath=/path/to/install/lib/ --include-dirs=/path/to/include/}
 
 and then run one of the {\tt setup.py install} commands listed above. (Note: As an alternative to the {\tt --include-dirs} option, you can use {\tt -I/path/to/include} instead.)
-
-\jab{This appeared to work for me, but then the below tests fail. 'ImportError: No module named 'ccllib'.'}
 
 You can quickly check whether {\tt pyccl} has been installed correctly by running {\tt python -c "import pyccl"} and checking that no errors are returned. For a more in-depth test to make sure everything is working, change to the {\tt tests/} sub-directory and run {\tt python run$\_$tests.py}. These tests will take a few minutes. Notice that these are not the same tests that are run via {\tt make check}. In the case of the {\tt python} tests, the library will only check for finite outputs of the routines called from {\tt pyccl}. There is no benchmark comparison in this case.
  
