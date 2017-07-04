@@ -1,5 +1,6 @@
 var searchData=
 [
+  ['d_5fspline_5ftype',['D_SPLINE_TYPE',['../ccl__constants_8h.html#a8336f9ad19db564c77f1af07784b7c2d',1,'ccl_constants.h']]],
   ['data',['data',['../structccl__cosmology.html#a672d3fab40334e3a5da4324604715370',1,'ccl_cosmology::data()'],['../structctest.html#a6a274c4182b5ed85ce47d6922e50ccdf',1,'ctest::data()']]],
   ['default_5fconfig',['default_config',['../ccl__core_8c.html#a71e38b37263fd3d61ba6e6885769e6f1',1,'default_config():&#160;ccl_core.c'],['../ccl__config_8h.html#a71e38b37263fd3d61ba6e6885769e6f1',1,'default_config():&#160;ccl_core.c']]],
   ['df_5fmgrowth',['df_mgrowth',['../structccl__parameters.html#a1de918f0be839a643cc8283933f1ffe5',1,'ccl_parameters']]],

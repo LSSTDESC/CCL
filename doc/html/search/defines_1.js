@@ -1,9 +1,5 @@
 var searchData=
 [
-  ['a_5fspline_5fdelta',['A_SPLINE_DELTA',['../ccl__constants_8h.html#a0046cc70d9b547e0b371c7b33fada70b',1,'ccl_constants.h']]],
-  ['a_5fspline_5fmax',['A_SPLINE_MAX',['../ccl__constants_8h.html#a94babc3d3220029edcd8ccbbf995a7b6',1,'ccl_constants.h']]],
-  ['a_5fspline_5fmin',['A_SPLINE_MIN',['../ccl__constants_8h.html#a4dd5aa1a1527150c72010c12bda6fa11',1,'ccl_constants.h']]],
-  ['a_5fspline_5fna',['A_SPLINE_NA',['../ccl__constants_8h.html#a25902723df9705644ffd5cab144f0be9',1,'ccl_constants.h']]],
   ['a_5fspline_5ftype',['A_SPLINE_TYPE',['../ccl__constants_8h.html#a751ebc907f37cb6afad10d406ae552f1',1,'ccl_constants.h']]],
   ['assert_5fdata',['ASSERT_DATA',['../ctest_8h.html#a78490b8914d1af53dda97d8b9e8a716b',1,'ctest.h']]],
   ['assert_5fdbl_5ffar',['ASSERT_DBL_FAR',['../ctest_8h.html#ac775f4ecc848afa6be74049e8f9f1787',1,'ctest.h']]],

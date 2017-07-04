@@ -1,6 +1,4 @@
 var searchData=
 [
-  ['pc_5fto_5fmeter',['PC_TO_METER',['../ccl__constants_8h.html#a883e84c99172ca9d27c255c59a5ca6e2',1,'ccl_constants.h']]],
-  ['plin_5fspline_5ftype',['PLIN_SPLINE_TYPE',['../ccl__constants_8h.html#a260f16f8d43137c1758a065d0e104d5c',1,'ccl_constants.h']]],
-  ['pnl_5fspline_5ftype',['PNL_SPLINE_TYPE',['../ccl__constants_8h.html#acce559487718e5f9706b85d57b6209c6',1,'ccl_constants.h']]]
+  ['rho_5fcritical',['RHO_CRITICAL',['../ccl__constants_8h.html#ac0b106d2ee2484119f9ff10eb40221ad',1,'ccl_constants.h']]]
 ];

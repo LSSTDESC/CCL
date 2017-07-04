@@ -1,7 +1,7 @@
 var searchData=
 [
-  ['logm_5fspline_5fdelta',['LOGM_SPLINE_DELTA',['../ccl__constants_8h.html#a7f4feec94e77af05e65ac30c5ba8a077',1,'ccl_constants.h']]],
-  ['logm_5fspline_5fmax',['LOGM_SPLINE_MAX',['../ccl__constants_8h.html#a29fc16990a578e6e8b44418556256029',1,'ccl_constants.h']]],
-  ['logm_5fspline_5fmin',['LOGM_SPLINE_MIN',['../ccl__constants_8h.html#ae8f42f7b402f6cbafcfc42002ed7a309',1,'ccl_constants.h']]],
-  ['logm_5fspline_5fnm',['LOGM_SPLINE_NM',['../ccl__constants_8h.html#a5d8db83ffb27291db9e32b6b6de062c3',1,'ccl_constants.h']]]
+  ['m_5fspline_5ftype',['M_SPLINE_TYPE',['../ccl__constants_8h.html#ad0e073c709b4599bbbcde44d44048fdc',1,'ccl_constants.h']]],
+  ['massfunc_5ftolerance',['MASSFUNC_TOLERANCE',['../ccl__test__massfunc_8c.html#aa82555c1954f8a761739838acbfa9145',1,'ccl_test_massfunc.c']]],
+  ['mnu',['MNU',['../ccl__sample__run_8c.html#acc280e6db3e9bb53e961b46ff32c64be',1,'ccl_sample_run.c']]],
+  ['mpc_5fto_5fmeter',['MPC_TO_METER',['../ccl__constants_8h.html#a8bda9125de78a9e4b0afb9fe4ce0032d',1,'ccl_constants.h']]]
 ];

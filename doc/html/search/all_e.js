@@ -9,7 +9,9 @@ var searchData=
   ['omega_5fk',['Omega_k',['../structccl__parameters.html#a902d19139eb90fb6efdf949bc963916c',1,'ccl_parameters']]],
   ['omega_5fl',['Omega_l',['../structccl__parameters.html#a674308443d7bafd7373e08bad4e274b9',1,'ccl_parameters']]],
   ['omega_5fm',['Omega_m',['../structccl__parameters.html#ad3693ce8fafeecf7a97dd9979ab77214',1,'ccl_parameters']]],
-  ['omega_5fn',['Omega_n',['../structccl__parameters.html#a365db7a4e8cc44796d80ae6ae564df85',1,'ccl_parameters::Omega_n()'],['../namespaceccl__test__distances.html#a46c7e3b3f99b7d987f0b5b3260a6ec78',1,'ccl_test_distances.Omega_n()'],['../namespaceccl__test__growth.html#ad393ff96d05b88664072acc1041220d5',1,'ccl_test_growth.Omega_n()']]],
-  ['omega_5fv_5fvals',['Omega_v_vals',['../namespaceccl__test__distances.html#ab1df946ad5e768938253dcbb23938f8f',1,'ccl_test_distances.Omega_v_vals()'],['../namespaceccl__test__growth.html#ac480b115b0ee84461922df024394801b',1,'ccl_test_growth.Omega_v_vals()']]],
+  ['omega_5fn_5fmass',['Omega_n_mass',['../structccl__parameters.html#af0f1d0f60ab271f9837a71d84bd55c1e',1,'ccl_parameters']]],
+  ['omega_5fn_5frel',['Omega_n_rel',['../structccl__parameters.html#ac04eef0f1888df60a0b49dbbc16ee6f3',1,'ccl_parameters']]],
+  ['omega_5fv_5fvals',['Omega_v_vals',['../namespaceccl__test__distances.html#a12765193e04eba1a445ea1429b656ef8',1,'ccl_test_distances.Omega_v_vals()'],['../namespaceccl__test__growth.html#a4abfc4891b595cd9d894d978c4ce89f0',1,'ccl_test_growth.Omega_v_vals()']]],
+  ['omeganuh2',['Omeganuh2',['../ccl__neutrinos_8c.html#a51e1234f78bb01f2d18f04afe7bd61f6',1,'Omeganuh2(double a, double Neff, double mnu, double TCMB, gsl_interp_accel *accel, int *status):&#160;ccl_neutrinos.c'],['../ccl__neutrinos_8h.html#a51e1234f78bb01f2d18f04afe7bd61f6',1,'Omeganuh2(double a, double Neff, double mnu, double TCMB, gsl_interp_accel *accel, int *status):&#160;ccl_neutrinos.c']]],
   ['on',['ON',['../ccl__sample__run_8c.html#ad76d1750a6cdeebd506bfcd6752554d2',1,'ccl_sample_run.c']]]
 ];
