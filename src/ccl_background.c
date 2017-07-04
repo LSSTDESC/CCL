@@ -486,16 +486,16 @@ void ccl_cosmology_compute_growth(ccl_cosmology * cosmo, int * status)
     }
     for (int i=0; i<na; i++){
       if(a[i]>0) {
-	       double z=1./a[i]-1.;
-	       if(z<=cosmo->params.z_mgrowth[0]) 
-	          df_arr[i]=cosmo->params.df_mgrowth[0];
-	       else if(z>cosmo->params.z_mgrowth[cosmo->params.nz_mgrowth-1]) 
-	          df_arr[i]=cosmo->params.df_mgrowth[cosmo->params.nz_mgrowth-1];
-	       else
-            chistatus |=gsl_spline_eval_e (df_z_spline,z,NULL,&df_arr[i]);
+	double z=1./a[i]-1.;
+	if(z<=cosmo->params.z_mgrowth[0]) 
+	  df_arr[i]=cosmo->params.df_mgrowth[0];
+	else if(z>cosmo->params.z_mgrowth[cosmo->params.nz_mgrowth-1]) 
+	  df_arr[i]=cosmo->params.df_mgrowth[cosmo->params.nz_mgrowth-1];
+	else
+	  chistatus|=gsl_spline_eval_e (df_z_spline,z,NULL,&df_arr[i]);
       }
       else
-	       df_arr[i]=0;
+	df_arr[i]=0;
     }
     if(chistatus) {
       free(a);
@@ -531,8 +531,8 @@ void ccl_cosmology_compute_growth(ccl_cosmology * cosmo, int * status)
   double *y = malloc(sizeof(double)*na);
   if(y==NULL) {
     free(a);
-        *status=CCL_ERROR_MEMORY;
-	  strcpy(cosmo->status_message,"ccl_background.c: ccl_cosmology_compute_distances(): ran out of memory\n"); 
+    *status=CCL_ERROR_MEMORY;
+    strcpy(cosmo->status_message,"ccl_background.c: ccl_cosmology_compute_distances(): ran out of memory\n"); 
     return;
   }
   double *y2 = malloc(sizeof(double)*na);
