@@ -69,6 +69,8 @@ def comoving_radial_distance(cosmo, a):
 
 def comoving_angular_distance(cosmo, a):
     """Comoving angular distance.
+    NOTE this quantity is otherwise known as the transverse comoving distance, and is NOT angular diameter
+    distance or angular separation
     
     Args:
         cosmo (:obj:`ccl.cosmology`): Cosmological parameters.

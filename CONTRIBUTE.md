@@ -18,7 +18,8 @@ Things to do if you are adding new features to the CCL C lib
     Makefile.am.
  3. When adding a new header file (.h), put it in include.
     The new file should be listed under include_HEADERS in
-    include/Makefile.am
+    include/Makefile.am. It should also have doxygen
+    compatible documentation.
  4. When adding new unit test files, they should be listed
     under check_ccl_SOURCES in Makefile.am
  5. Any other new files that should be included with the
@@ -45,6 +46,9 @@ More autotools fun:
    can be created automatically by typing:
      $> make dist
 
+To view the doxygen documentation, open any .html file in the html/ 
+directory. To refresh the docs to reflect new changes, run 
+`doxygen` in the main directory (assuming you already have it installed).
 
 Modifying the Python wrapper
 ---------------------------------------------------------

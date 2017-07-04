@@ -172,6 +172,8 @@ void ccl_cosmology_compute_hmfparams(ccl_cosmology * cosmo, int *status)
   }
 }
 
+//TODO some of these are unused, many are included in ccl.h
+
 /*----- ROUTINE: ccl_massfunc_f -----
 INPUT: cosmology+parameters, a halo mass, and scale factor
 TASK: Outputs fitting function for use in halo mass function calculation;

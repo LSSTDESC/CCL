@@ -676,7 +676,7 @@ void ccl_comoving_radial_distances(ccl_cosmology * cosmo, int na, double a[na], 
   
 }
 
-double ccl_sinn(ccl_cosmology *cosmo, double chi, int * status)
+double ccl_sinn(ccl_cosmology *cosmo, double chi, int *status)
 {
   //////
   //         { sin(x)  , if k==1
