@@ -93,7 +93,7 @@ TASK: Compute Omeganu * h^2 as a function of time.
 
 double Omeganuh2 (double a, double Neff, double mnu, double TCMB, gsl_interp_accel* accel, int* status) {
 	
-	double Tnu, a4, prefix_massless, mnuone;
+	double Tnu, a4, prefix_massless, mnuone, OmNuh2;
 	double Tnu_eff, mnuOT, intval, prefix_massive;
 	
 	// First check if Neff if 0
@@ -121,7 +121,9 @@ double Omeganuh2 (double a, double Neff, double mnu, double TCMB, gsl_interp_acc
 		
     // Define the prefix using the effective temperature (to get mnu / Omega = 93.14 eV) for the massive case: 
     prefix_massive = NU_CONST * Tnu_eff * Tnu_eff * Tnu_eff * Tnu_eff;
+
+	OmNuh2 = Neff*intval*prefix_massive/a4;
     
-    return Neff*intval*prefix_massive/a4;
+    return OmNuh2;
 }
 

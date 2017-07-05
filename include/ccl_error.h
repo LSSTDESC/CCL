@@ -1,3 +1,5 @@
+/** @file */
+
 #pragma once
 #include "ccl_core.h"
 
@@ -20,7 +22,28 @@ typedef enum {
     CCL_ERROR_POLICY_CONTINUE = 1,
 } CCLErrorPolicy;
 
+/** Raise an exception
+ * Given a status, give an error message.
+ * @return void
+ */
 void ccl_raise_exception(int err, char* msg);
+
+/** Set the error policy
+ * @oaram error_policy the error policy
+ * @return void
+ */
 void ccl_set_error_policy(CCLErrorPolicy error_policy);
+
+/** Check the error status
+ * Given a status, check if any errors have occurred,
+ * based on the CCL_ERRORs defined so far.
+ * @return void
+ */
 void ccl_check_status(ccl_cosmology *cosmo, int* status);
+
+/** Check the error status - no cosmology
+ * Given a status, check if any errors have occurred,
+ * based on the CCL_ERRORs defined so far.
+ * @return void
+ */
 void ccl_check_status_nocosmo(int* status);
