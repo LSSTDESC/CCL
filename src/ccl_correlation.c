@@ -16,172 +16,6 @@
 #include "ccl.h"
 #include "fftlog.h"
 
-#ifdef _NODEF
-typedef struct
-{
-  gsl_spline *cl;
-  double theta;
-  int i_bessel;
-} corr_int_par;
-
-/*--------ROUTINE: ccl_corr_integrand ------
-TASK: Compute the integrand of the correlation function
-INPUT: ell-value and a params structure defined above.
-TODO (Optional): Implement a function to use GSL implementation of hankel transform.
- */
-static double ccl_corr_integrand(double l, void *params)
-{
-  corr_int_par *p=(corr_int_par *) params;
-  double bessel_j=gsl_sf_bessel_Jn(p->i_bessel,p->theta*l);
-  return l*bessel_j*gsl_spline_eval(p->cl,l,NULL);
-}
-
-/*--------ROUTINE: ccl_general_corr ------
-TASK: Compute the correlation function by passing it a spline of Cl and a bessel function index
-INPUT: Cl spline, theta-vector, correlation function vector, number of theta values, index of the bessel function. NB: length of theta and corr_func must match and be equal to n_theta.
-*/
-static void ccl_general_corr(gsl_spline *cl, double *theta, double *corr_func, int n_theta, int i_bessel)
-{
-  gsl_function F;
-  corr_int_par cp;
-  double result,eresult;
-
-  cp.i_bessel=i_bessel;
-  cp.cl=cl;
-
-  gsl_integration_workspace *w=gsl_integration_workspace_alloc(GSL_INTEGRATION_LIMIT);
-  /*Alternative QAWO integration, but omega should be revised:
-  const double omega = 1;
-  const double L = L_MAX_INT-L_MIN_INT;
-  gsl_integration_qawo_table* wf = gsl_integration_qawo_table_alloc(omega, L, GSL_INTEG_SINE, GSL_INTEGRATION_LIMIT);*/
-  /* Alternative cquag integrator
-     gsl_integration_cquad_workspace * w = gsl_integration_cquad_workspace_alloc (1000);
-  */
-
-  for (int i=0;i<n_theta;i++)
-    {
-      cp.theta=theta[i];
-      F.function=&ccl_corr_integrand;
-      F.params=&cp;
-      //This is another integration option: qawo is supposedly better for oscillatory functions but it isn't working either.
-      //int status = gsl_integration_qawo (&F,L_MIN_INT,0,EPSREL_CORR_FUNC,GSL_INTEGRATION_LIMIT,w,wf,&result,&eresult);
-      //Original integrator
-      gsl_integration_qag(&F,L_MIN_INT,L_MAX_INT,0,EPSREL_CORR_FUNC,GSL_INTEGRATION_LIMIT,GSL_INTEG_GAUSS41,w,&result,&eresult);
-      /*Integrator we are using for photo-z
-	gsl_integration_cquad(&F,L_MIN_INT,L_MAX_INT,0,EPSREL_CORR_FUNC,w, &result, &eresult, NULL);*/
-      corr_func[i]=result/(2*M_PI);
-    }
-
-  //gsl_integration_qawo_table_free(wf);
-  //gsl_integration_cquad_workspace_free(w);
-  gsl_integration_workspace_free(w);
-
-  return;
-}
-
-/*--------ROUTINE: bin_func ------
-TASK: Bin the correlation function
-INPUT: number of theta bins, theta vector (of n_theta length), correlation function vector (n_theta length),
-       number of output bins, output theta, output correlation.
- */
-static int bin_func(int n_theta, double *theta, double *corr_func,int n_theta_bins,
-	     double *theta_bins, double *corr_func_binned)
-{
-  double theta_integrand_lim[2]={0,0};
-  double bin_norm=0;
-  int j_start=0;
-  for (int i=0;i<n_theta_bins-1;i++) {
-    bin_norm=0;
-    theta_integrand_lim[0]=theta_bins[i];
-    for(int j=j_start;j<n_theta;j++) {
-      if (theta[j]<theta_bins[i])
-	continue;
-      if(theta[j]>theta_bins[i+1]) {
-	corr_func_binned[i]/=bin_norm;
-	j_start=j;//this assumes theta is monotonically increasing
-	break;//move onto next bin
-      }
-      if (j!=n_theta-1) {
-	if (theta[j+1]<theta_bins[i+1])//min(theta[j+1],theta_bins[i+1])
-	  theta_integrand_lim[1]=theta[j+1];
-	else
-	  theta_integrand_lim[1]=theta_bins[i+1];
-      }
-      else
-	theta_integrand_lim[1]=theta_bins[i+1];
-      corr_func_binned[i]+=theta[j]*corr_func[j]*(theta_integrand_lim[1]-
-						  theta_integrand_lim[0]);
-      bin_norm+=theta[j]*(theta_integrand_lim[1]-
-			  theta_integrand_lim[0]);
-      theta_integrand_lim[0]=theta_integrand_lim[1];
-      if(j==n_theta-1)
-	corr_func_binned[i]/=bin_norm;
-    }
-  }
-
-  return 0;
-}
-
-/*--------ROUTINE: check_i_bessel ------
-TASK: Function to check correct bessel function index for given tracers
-INPUT: 2 CCL tracers and the bessel function index.
-*/
-static int check_i_bessel(CCL_ClTracer *ct1, CCL_ClTracer *ct2, int i_bessel)
-{
-  /* do we need to input i_bessel? could just be set here based on tracer.*/
-  if((ct1->tracer_type==CL_TRACER_WL) && (ct2->tracer_type==CL_TRACER_WL)){
-    if((i_bessel!=0) && (i_bessel!=4)){
-      printf("wrong i_bessel for WL tracers , need i_bessel=0 or 4\n");
-      return 1;
-    }
-  }
-  if((ct1->tracer_type==CL_TRACER_NC) && (ct2->tracer_type==CL_TRACER_NC)){
-    if(i_bessel!=0){
-      printf("wrong i_bessel for NC tracers , need i_bessel=0\n");
-      return 1;
-    }
-  }
-  if(((ct1->tracer_type==CL_TRACER_WL) && (ct2->tracer_type==CL_TRACER_NC)) || ((ct1->tracer_type==CL_TRACER_NC) && (ct2->tracer_type==CL_TRACER_WL))){
-    if(i_bessel!=2){
-      printf("wrong i_bessel for NC X WL tracers, need i_bessel=2\n");
-      return 1;
-    }
-  }
-return 0;
-}
-
-if(qagstatus!=GSL_SUCCESS || *ipar.status) {
-  *status=CCL_ERROR_INTEG;
-  strcpy(cosmo->status_message,"ccl_cls.c: ccl_angular_cl(): error integrating over k\n");
-  return -1;
- }
-
-/*--------ROUTINE: ccl_single_tracer_corr ------
-TASK: Wrap bin_func and tracer_corr to get the correlation function at a single point
-      This routine takes fewer inputs and is the one that the python interface has
-      access to.
-INPUT: desired theta value, cosmology struct, tracer 1, tracer 2, i_bessel
- */
-static double ccl_single_tracer_corr(double theta_in,ccl_cosmology *cosmo,
-				     CCL_ClTracer *ct1, CCL_ClTracer *ct2, int i_bessel)
-{
-
-  double *theta,corr_func_out,*corr_func;
-  int n_theta=100; //NL
-  double taper_cl_limits[4]={1,2,10000,15000}; //why these values?
-
-  //ccl_tracer_corr_legendre(cosmo, n_theta,&theta,ct1,ct2,i_bessel,true,
-  //			   taper_cl_limits,&corr_func,ccl_angular_cl);
-  ccl_tracer_corr_fftlog(cosmo, n_theta,&theta,ct1,ct2,i_bessel,true,taper_cl_limits,&corr_func,ccl_angular_cl);
-
-  //Spline the correlation
-  gsl_spline * corr_spline = gsl_spline_alloc(CORR_SPLINE_TYPE, n_theta);
-  int status = gsl_spline_init(corr_spline, theta,corr_func,n_theta);
-  status = gsl_spline_eval_e(corr_spline,theta_in, NULL,&corr_func_out);
-
-  return corr_func_out;
-}
-#endif //_NODEF
 
 /*--------ROUTINE: taper_cl ------
 TASK:n Apply cosine tapering to Cls to reduce aliasing
@@ -269,7 +103,7 @@ static void ccl_tracer_corr_fftlog(ccl_cosmology *cosmo,
   }
   ccl_spline_free(cl_spl);
 
-  if (do_taper_cl)//also takes in int l_arr
+  if (do_taper_cl)
     taper_cl(N_ELL_FFTLOG,l_arr,cl_arr,taper_cl_limits);
 
   th_arr=malloc(sizeof(double)*N_ELL_FFTLOG);
@@ -353,7 +187,6 @@ static double corr_bessel_integrand(double l,void *params)
   }
   else
     cl=ccl_spline_eval(l,p->cl_spl);
-  //    cl=ccl_spline_eval((double)((int)l),p->cl_spl);
 
   if(p->i_bessel)
     jbes=gsl_sf_bessel_Jn(p->i_bessel,x);
@@ -418,7 +251,7 @@ static void ccl_tracer_corr_bessel(ccl_cosmology *cosmo,
     cp->th=theta[ith]*M_PI/180;
     F.function=&corr_bessel_integrand;
     F.params=cp;
-    gsl_integration_qag(&F,0,ELL_MAX_FFTLOG,0,1E-4,1000,GSL_INTEG_GAUSS41,w,&result,&eresult);
+    *status=gsl_integration_qag(&F,0,ELL_MAX_FFTLOG,0,1E-4,1000,GSL_INTEG_GAUSS41,w,&result,&eresult);
     wtheta[ith]=result/(2*M_PI);
   }
   gsl_integration_workspace_free(w);
@@ -560,7 +393,7 @@ static void ccl_tracer_corr_legendre(ccl_cosmology *cosmo,
     return;
   }
   for (int i=0;i<n_theta;i++) {
-    Pl_theta[i]=malloc(sizeof(double)*(ELL_MAX_FFTLOG+1)); //TODO: check mallocs
+    Pl_theta[i]=malloc(sizeof(double)*(ELL_MAX_FFTLOG+1));
     if(Pl_theta[i]==NULL) {
       int j;
       free(cl_arr);
@@ -580,7 +413,7 @@ static void ccl_tracer_corr_legendre(ccl_cosmology *cosmo,
     for(int i_L=1;i_L<ELL_MAX_FFTLOG;i_L+=1)
       wtheta[i]+=cl_arr[i_L]*Pl_theta[i][i_L];
     wtheta[i]/=(M_PI*4);
-  } //CHECK THIS STUFF
+  }
 
   for (int i=0;i<n_theta;i++)
     free(Pl_theta[i]);

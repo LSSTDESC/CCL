@@ -103,8 +103,15 @@ double ccl_spline_eval(double x,SplPar *spl)
     return spl->y0;
   else if(x>=spl->xf) 
     return spl->yf;
-  else
-    return gsl_spline_eval(spl->spline,x,spl->intacc);
+  else {
+    double y;
+    int stat=gsl_spline_eval_e(spl->spline,x,spl->intacc,&y);
+    if (stat!=GSL_SUCCESS){
+      ccl_raise_exception(stat,"ccl_utils.c: ccl_splin_eval(): gsl error\n");
+      return NAN;
+    }
+    return y;
+  }
 }
 
 //Spline destructor
@@ -114,5 +121,3 @@ void ccl_spline_free(SplPar *spl)
   gsl_interp_accel_free(spl->intacc);
   free(spl);
 }
-
-
