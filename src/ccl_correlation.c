@@ -514,6 +514,9 @@ static void ccl_tracer_corr_legendre(ccl_cosmology *cosmo,
     return;
   }
 
+  if(corr_type==CCL_CORR_LM)
+    printf("WARNING: legendre sum for xi- is still not correctly implemented.\n");
+
   //Interpolate input Cl into 
   SplPar *cl_spl=ccl_spline_init(n_ell,ell,cls,cls[0],0);
   if(cl_spl==NULL) {
