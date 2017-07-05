@@ -100,7 +100,10 @@ computed_power, computed_sigma: store status of the computations
 
 ccl_cosmology * ccl_cosmology_create(ccl_parameters params, ccl_configuration config)
 {
-  
+  #ifndef USE_GSL_ERROR
+    gsl_set_error_handler_off ();
+  #endif
+
   if(ccl_splines==NULL) ccl_cosmology_read_config();
 
   ccl_cosmology * cosmo = malloc(sizeof(ccl_cosmology));
