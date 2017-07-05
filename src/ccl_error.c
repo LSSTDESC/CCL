@@ -68,7 +68,7 @@ void ccl_check_status_nocosmo(int * status){
 			exit(1);
 			
 		default:		
-			fprintf(stderr,"%s", "OTHER ERROR");
+			fprintf(stderr,"%s", "OTHER ERROR; SEE gsl_errno.h for ERROR CODES 1-32.");
 			exit(1);
 	}
 }
