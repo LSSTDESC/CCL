@@ -618,4 +618,6 @@ void ccl_correlation(ccl_cosmology *cosmo,
     *status=CCL_ERROR_INCONSISTENT;
     strcpy(cosmo->status_message,"ccl_correlation.c: ccl_correlation. Unknown algorithm\n");
   }
+
+  ccl_check_status(cosmo,status);
 }
