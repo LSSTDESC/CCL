@@ -44,7 +44,7 @@
 
 \begin{abstract}
 
-The Core Cosmology Library ({\tt CCL}) provides routines to compute basic cosmological observables with validated numerical accuracy. These routines have been validated to a hereby documented accuracy level against the results of the Code Comparison Project. In the current version, predictions are provided for distances and background quantities, angular auto- and cross-spectra of cosmic shear and clustering, and the halo mass function. Fiducial specifications for the expected LSST galaxy distributions and clustering bias are also included, together with a facility to compute redshift distributions for a user-defined photometric redshift model. {\tt CCL} is written in C with a Python interface. In this note, we explain the functionality of the first release ({\tt CCL} v0.1) of the library.
+The Core Cosmology Library ({\tt CCL}) provides routines to compute basic cosmological observables with validated numerical accuracy. These routines have been validated to a hereby documented accuracy level against the results of the Code Comparison Project. In the current version, predictions are provided for distances and background quantities, angular auto- and cross-spectra of cosmic shear and clustering, and the halo mass function. Fiducial specifications for the expected LSST galaxy distributions and clustering bias are also included, together with a facility to compute redshift distributions for a user-defined photometric redshift model. {\tt CCL} is written in C with a Python interface. In this note, we explain the functionality of the publicly released ({\tt CCL} v0.2) library.
 
 \end{abstract}
 
@@ -73,9 +73,10 @@ This note describes how to install {\tt CCL} (Section \ref{sec:install}), its fu
 \subsection{Dependencies}
 
 \begin{itemize}
-\item GNU Scientific Library {\tt GSL}\footnote{\url{https://www.gnu.org/software/gsl/}}, {\tt GSL-2.1} or higher
-\item Simplified Wrapper and Interface Generator {\tt SWIG}\footnote{\url{http://www.swig.org/}} is not needed to run {\tt CCL}, but if you are developing new features, you will need {\tt SWIG}. 
-\item {\tt FFTlog}\footnote{\url{http://casa.colorado.edu/~ajsh/FFTLog/}} is provided within {\tt CCL} with minor modifications 
+\item GNU Scientific Library {\tt GSL}\footnote{\url{https://www.gnu.org/software/gsl/}}, {\tt GSL-2.1} or higher.
+\item Simplified Wrapper and Interface Generator {\tt SWIG}\footnote{\url{http://www.swig.org/}} is not needed to run {\tt CCL}, but if you are developing new features, you will need {\tt SWIG}.
+\item {\tt FFTW}\footnote{\url{http://www.fftw.org}} is required for computation of correlation functions.
+\item {\tt FFTlog}\footnote{\url{http://casa.colorado.edu/~ajsh/FFTLog/}} is provided within {\tt CCL} with minor modifications.
 %\item A version of {\tt Angpow} \citep{2017arXiv170103592C} is also incorporated within {\tt CCL}.
 \end{itemize}
 
@@ -593,32 +594,32 @@ The following expressions relating the angular power spectra and correlation fun
 
 {\bf Galaxy-galaxy.} The angular correlation function between two number-count tracers (labeled $a$ and $b$ here) is given by
 \begin{equation}
-  \xi^{ab}(\theta) = \int dl \frac{l}{2\pi} C^{ab}_l\, J_0(l\theta),
+  \xi^{ab}(\theta) = \int d\ell \frac{\ell}{2\pi} C^{ab}_\ell\, J_0(\ell\theta),
 \label{eq:xiclu}
 \end{equation}
 where $C_{ab}$ is the angular power spectrum between both tracers.
 
 {\bf Lensing-lensing.} The lensing correlation functions are \footnote{from Schneider 2002 and Bartelmann \& Schneider section 6.4.1}
 \begin{eqnarray}
-  \xi^{ab}_{+}(\theta)&=&\int_0^{\infty}dl\frac{l}{2\pi}J_0(l\theta)C^{ab}_l,\\
-  \xi^{ab}_{-}(\theta)&=&\int_0^{\infty}dl\frac{l}{2\pi}J_4(l\theta)C^{ab}_l,
+  \xi^{ab}_{+}(\theta)&=&\int_0^{\infty}d\ell\frac{\ell}{2\pi}J_0(\ell\theta)C^{ab}_\ell,\\
+  \xi^{ab}_{-}(\theta)&=&\int_0^{\infty}d\ell\frac{\ell}{2\pi}J_4(\ell\theta)C^{ab}_\ell,
 \label{eq:xipxim}
 \end{eqnarray}
-where the angular lensing convergence power spectrum $C^{ab}_l$ is given above (see Equations \ref{eq:transfer_lensing} and \ref{eq:limber}).
+where the angular lensing convergence power spectrum $C^{ab}_\ell$ is given above (see Equations \ref{eq:transfer_lensing} and \ref{eq:limber}).
 
 {\bf Galaxy-lensing.} The correlation between a number count tracer $a$ and a shear tracer $b$ is given by
 \begin{equation}
-  \xi^{ab}(\theta) = \int dl \frac{l}{2\pi} C^{ab}_l\, J_2(l\theta),
+  \xi^{ab}(\theta) = \int d\ell \frac{\ell}{2\pi} C^{ab}_\ell\, J_2(\ell\theta),
 \end{equation}
 
-For numerical integration of the correlation functions, we make use of the public code {\tt FFTlog}\footnote{\url{http://casa.colorado.edu/~ajsh/FFTLog/}}\citep{Hamilton2000,Talman2009}. In brief, FFTlog works on functions periodic in log space, by writing the Hankel Transform as a convolution between Bessel functions and the function of interest (in this case $C_\ell$). A version of this code is included in {\tt CCL} with minor modifications.
+For numerical integration of the correlation functions, we make use of the public code {\tt FFTlog}\footnote{\url{http://casa.colorado.edu/~ajsh/FFTLog/}}\citep{Hamilton2000,Talman2009}. In brief, {\tt FFTlog} works on functions periodic in log space, by writing the Hankel Transform as a convolution between Bessel functions and the function of interest (in this case $C_\ell$). A version of this code is included in {\tt CCL} with minor modifications.
 
 \begin{comment}
 \subsubsection{Beyond flat-sky}
 
 We begin by writing the angular space observable, $X$, in terms of a decomposition in spherical harmonics, 
 \begin{align}\label{eq:X_harmonic}
-  X(\Omega)=&\sum_{lm}\tilde X_{lm}Y_{lm}(\Omega)
+  X(\Omega)=&\sum_{\ell m}\tilde X_{\ell m}Y_{\ell m}(\Omega)
 \end{align}
 where $\Omega$ refers to the angular coordinates on the sky.
 The angular cross correlation function of two (scalar) tracers, $X$ and $Z$ of the large scale structure can be written in terms of their harmonic components, $\tilde X_{\ell m}$ and $\tilde Z_{\ell' m'}$ as
@@ -823,8 +824,8 @@ In a second stage, we used the BBKS linear matter power spectrum from the previo
 In this second step, only 2 codes have been compared so far. More outputs are needed to guarantee convergence. Preliminarily, from these outputs, we have concluded that:
 \begin{itemize}
 \item The cross-correlation between bins is particularly sensitive to the number of points where the kernels have been sampled.
-\item The accuracy of the correlation function is sensitive to $l_{\rm max}$. We had to use up to $l_{\rm max}=3\times10^4$ to get convergence (and we could not achieve $0.01\%$ convergence).
-\item The large scales of the correlation function are sensitive to $l_{\rm min}$. The use of the flat-sky approximation is also relevant on these scales.
+\item The accuracy of the correlation function is sensitive to $\ell_{\rm max}$. We had to use up to $\ell_{\rm max}=3\times10^4$ to get convergence (and we could not achieve $0.01\%$ convergence).
+\item The large scales of the correlation function are sensitive to $\ell_{\rm min}$. The use of the flat-sky approximation is also relevant on these scales.
 \item For sufficiently high precision, the correlation functions are sensitive to how the power spectrum is sampled and interpolated.
 \end{itemize}
 
