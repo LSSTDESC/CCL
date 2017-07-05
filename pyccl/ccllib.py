@@ -586,19 +586,19 @@ def cosmology_compute_hmfparams(*args):
   return _ccllib.cosmology_compute_hmfparams(*args)
 
 def massfunc(*args):
-  """massfunc(cosmology cosmo, double halomass, double a, double odelta, int * status) -> double"""
+  """massfunc(cosmology cosmo, double smooth_mass, double a, double odelta, int * status) -> double"""
   return _ccllib.massfunc(*args)
 
 def halo_bias(*args):
-  """halo_bias(cosmology cosmo, double halomass, double a, double odelta, int * status) -> double"""
+  """halo_bias(cosmology cosmo, double smooth_mass, double a, double odelta, int * status) -> double"""
   return _ccllib.halo_bias(*args)
 
 def massfunc_m2r(*args):
-  """massfunc_m2r(cosmology cosmo, double halomass, int * status) -> double"""
+  """massfunc_m2r(cosmology cosmo, double smooth_mass, int * status) -> double"""
   return _ccllib.massfunc_m2r(*args)
 
 def sigmaM(*args):
-  """sigmaM(cosmology cosmo, double halomass, double a, int * status) -> double"""
+  """sigmaM(cosmology cosmo, double smooth_mass, double a, int * status) -> double"""
   return _ccllib.sigmaM(*args)
 
 def massfunc_vec(*args):
