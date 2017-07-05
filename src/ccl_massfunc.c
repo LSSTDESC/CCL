@@ -490,22 +490,12 @@ double ccl_sigmaM(ccl_cosmology * cosmo, double halomass, double a, int * status
         ccl_check_status(cosmo, status);
     }
     
-    // Check interpolation bounds
-    #ifdef CCL_BOUNDS_CHECK_INTERP
-    if (   (log10(halomass) < ccl_splines->LOGM_SPLINE_MIN) 
-        || (log10(halomass) > ccl_splines->LOGM_SPLINE_MAX)){
-        *status = CCL_ERROR_SPLINE_EV;
-        strcpy(cosmo->status_message, 
-               "ccl_massfunc.c: ccl_sigmaM(): Mass outside interpolated range.");
-        return NAN;
-    }
-    #endif
     double lgsigmaM;
     *status = gsl_spline_eval_e(cosmo->data.logsigma, 
                                      log10(halomass), 
                                      cosmo->data.accelerator_m,&lgsigmaM);
     // Interpolate to get sigma
     sigmaM = pow(10,lgsigmaM)*ccl_growth_factor(cosmo, a, status);
-
+    ccl_check_status(cosmo, status);
     return sigmaM;
 }
