@@ -17270,7 +17270,7 @@ SWIGINTERN PyObject *CCL_ERROR_MEMORY_swigconstant(PyObject *SWIGUNUSEDPARM(self
   if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
   d = PyModule_GetDict(module);
   if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "CCL_ERROR_MEMORY",SWIG_From_int((int)(1)));
+  SWIG_Python_SetConstant(d, "CCL_ERROR_MEMORY",SWIG_From_int((int)(1025)));
   return SWIG_Py_Void();
 }
 
@@ -17281,7 +17281,7 @@ SWIGINTERN PyObject *CCL_ERROR_LINSPACE_swigconstant(PyObject *SWIGUNUSEDPARM(se
   if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
   d = PyModule_GetDict(module);
   if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "CCL_ERROR_LINSPACE",SWIG_From_int((int)(2)));
+  SWIG_Python_SetConstant(d, "CCL_ERROR_LINSPACE",SWIG_From_int((int)(1026)));
   return SWIG_Py_Void();
 }
 
@@ -17292,7 +17292,7 @@ SWIGINTERN PyObject *CCL_ERROR_INCONSISTENT_swigconstant(PyObject *SWIGUNUSEDPAR
   if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
   d = PyModule_GetDict(module);
   if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "CCL_ERROR_INCONSISTENT",SWIG_From_int((int)(3)));
+  SWIG_Python_SetConstant(d, "CCL_ERROR_INCONSISTENT",SWIG_From_int((int)(1027)));
   return SWIG_Py_Void();
 }
 
@@ -17303,7 +17303,7 @@ SWIGINTERN PyObject *CCL_ERROR_SPLINE_swigconstant(PyObject *SWIGUNUSEDPARM(self
   if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
   d = PyModule_GetDict(module);
   if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "CCL_ERROR_SPLINE",SWIG_From_int((int)(4)));
+  SWIG_Python_SetConstant(d, "CCL_ERROR_SPLINE",SWIG_From_int((int)(1028)));
   return SWIG_Py_Void();
 }
 
@@ -17314,7 +17314,7 @@ SWIGINTERN PyObject *CCL_ERROR_SPLINE_EV_swigconstant(PyObject *SWIGUNUSEDPARM(s
   if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
   d = PyModule_GetDict(module);
   if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "CCL_ERROR_SPLINE_EV",SWIG_From_int((int)(5)));
+  SWIG_Python_SetConstant(d, "CCL_ERROR_SPLINE_EV",SWIG_From_int((int)(1029)));
   return SWIG_Py_Void();
 }
 
@@ -17325,7 +17325,7 @@ SWIGINTERN PyObject *CCL_ERROR_INTEG_swigconstant(PyObject *SWIGUNUSEDPARM(self)
   if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
   d = PyModule_GetDict(module);
   if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "CCL_ERROR_INTEG",SWIG_From_int((int)(6)));
+  SWIG_Python_SetConstant(d, "CCL_ERROR_INTEG",SWIG_From_int((int)(1030)));
   return SWIG_Py_Void();
 }
 
@@ -17336,7 +17336,7 @@ SWIGINTERN PyObject *CCL_ERROR_ROOT_swigconstant(PyObject *SWIGUNUSEDPARM(self),
   if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
   d = PyModule_GetDict(module);
   if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "CCL_ERROR_ROOT",SWIG_From_int((int)(7)));
+  SWIG_Python_SetConstant(d, "CCL_ERROR_ROOT",SWIG_From_int((int)(1031)));
   return SWIG_Py_Void();
 }
 
@@ -17347,7 +17347,7 @@ SWIGINTERN PyObject *CCL_ERROR_CLASS_swigconstant(PyObject *SWIGUNUSEDPARM(self)
   if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
   d = PyModule_GetDict(module);
   if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "CCL_ERROR_CLASS",SWIG_From_int((int)(8)));
+  SWIG_Python_SetConstant(d, "CCL_ERROR_CLASS",SWIG_From_int((int)(1032)));
   return SWIG_Py_Void();
 }
 
@@ -17358,7 +17358,7 @@ SWIGINTERN PyObject *CCL_ERROR_COMPUTECHI_swigconstant(PyObject *SWIGUNUSEDPARM(
   if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
   d = PyModule_GetDict(module);
   if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "CCL_ERROR_COMPUTECHI",SWIG_From_int((int)(9)));
+  SWIG_Python_SetConstant(d, "CCL_ERROR_COMPUTECHI",SWIG_From_int((int)(1033)));
   return SWIG_Py_Void();
 }
 
@@ -17369,7 +17369,7 @@ SWIGINTERN PyObject *CCL_ERROR_MF_swigconstant(PyObject *SWIGUNUSEDPARM(self), P
   if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
   d = PyModule_GetDict(module);
   if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "CCL_ERROR_MF",SWIG_From_int((int)(10)));
+  SWIG_Python_SetConstant(d, "CCL_ERROR_MF",SWIG_From_int((int)(1034)));
   return SWIG_Py_Void();
 }
 
@@ -17380,7 +17380,7 @@ SWIGINTERN PyObject *CCL_ERROR_HMF_INTERP_swigconstant(PyObject *SWIGUNUSEDPARM(
   if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
   d = PyModule_GetDict(module);
   if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "CCL_ERROR_HMF_INTERP",SWIG_From_int((int)(11)));
+  SWIG_Python_SetConstant(d, "CCL_ERROR_HMF_INTERP",SWIG_From_int((int)(1035)));
   return SWIG_Py_Void();
 }
 
@@ -17391,7 +17391,7 @@ SWIGINTERN PyObject *CCL_ERROR_PARAMETERS_swigconstant(PyObject *SWIGUNUSEDPARM(
   if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
   d = PyModule_GetDict(module);
   if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "CCL_ERROR_PARAMETERS",SWIG_From_int((int)(12)));
+  SWIG_Python_SetConstant(d, "CCL_ERROR_PARAMETERS",SWIG_From_int((int)(1036)));
   return SWIG_Py_Void();
 }
 
@@ -17402,7 +17402,7 @@ SWIGINTERN PyObject *CCL_ERROR_NU_INT_swigconstant(PyObject *SWIGUNUSEDPARM(self
   if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
   d = PyModule_GetDict(module);
   if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "CCL_ERROR_NU_INT",SWIG_From_int((int)(13)));
+  SWIG_Python_SetConstant(d, "CCL_ERROR_NU_INT",SWIG_From_int((int)(1037)));
   return SWIG_Py_Void();
 }
 
@@ -17848,10 +17848,10 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"sigmaR_vec", _wrap_sigmaR_vec, METH_VARARGS, (char *)"sigmaR_vec(cosmology cosmo, double * R, double * output, int * status)"},
 	 { (char *)"cosmology_compute_sigma", _wrap_cosmology_compute_sigma, METH_VARARGS, (char *)"cosmology_compute_sigma(cosmology cosmo, int * status)"},
 	 { (char *)"cosmology_compute_hmfparams", _wrap_cosmology_compute_hmfparams, METH_VARARGS, (char *)"cosmology_compute_hmfparams(cosmology cosmo, int * status)"},
-	 { (char *)"massfunc", _wrap_massfunc, METH_VARARGS, (char *)"massfunc(cosmology cosmo, double halomass, double a, double odelta, int * status) -> double"},
-	 { (char *)"halo_bias", _wrap_halo_bias, METH_VARARGS, (char *)"halo_bias(cosmology cosmo, double halomass, double a, double odelta, int * status) -> double"},
-	 { (char *)"massfunc_m2r", _wrap_massfunc_m2r, METH_VARARGS, (char *)"massfunc_m2r(cosmology cosmo, double halomass, int * status) -> double"},
-	 { (char *)"sigmaM", _wrap_sigmaM, METH_VARARGS, (char *)"sigmaM(cosmology cosmo, double halomass, double a, int * status) -> double"},
+	 { (char *)"massfunc", _wrap_massfunc, METH_VARARGS, (char *)"massfunc(cosmology cosmo, double smooth_mass, double a, double odelta, int * status) -> double"},
+	 { (char *)"halo_bias", _wrap_halo_bias, METH_VARARGS, (char *)"halo_bias(cosmology cosmo, double smooth_mass, double a, double odelta, int * status) -> double"},
+	 { (char *)"massfunc_m2r", _wrap_massfunc_m2r, METH_VARARGS, (char *)"massfunc_m2r(cosmology cosmo, double smooth_mass, int * status) -> double"},
+	 { (char *)"sigmaM", _wrap_sigmaM, METH_VARARGS, (char *)"sigmaM(cosmology cosmo, double smooth_mass, double a, int * status) -> double"},
 	 { (char *)"massfunc_vec", _wrap_massfunc_vec, METH_VARARGS, (char *)"massfunc_vec(cosmology cosmo, double a, double odelta, double * halo_mass, double * output, int * status)"},
 	 { (char *)"massfunc_m2r_vec", _wrap_massfunc_m2r_vec, METH_VARARGS, (char *)"massfunc_m2r_vec(cosmology cosmo, double * halo_mass, double * output, int * status)"},
 	 { (char *)"sigmaM_vec", _wrap_sigmaM_vec, METH_VARARGS, (char *)"sigmaM_vec(cosmology cosmo, double a, double * halo_mass, double * output, int * status)"},

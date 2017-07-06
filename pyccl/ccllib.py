@@ -628,21 +628,21 @@ def cosmology_compute_hmfparams(cosmo, status):
     """cosmology_compute_hmfparams(cosmology cosmo, int * status)"""
     return _ccllib.cosmology_compute_hmfparams(cosmo, status)
 
-def massfunc(cosmo, halomass, a, odelta, status):
-    """massfunc(cosmology cosmo, double halomass, double a, double odelta, int * status) -> double"""
-    return _ccllib.massfunc(cosmo, halomass, a, odelta, status)
+def massfunc(cosmo, smooth_mass, a, odelta, status):
+    """massfunc(cosmology cosmo, double smooth_mass, double a, double odelta, int * status) -> double"""
+    return _ccllib.massfunc(cosmo, smooth_mass, a, odelta, status)
 
-def halo_bias(cosmo, halomass, a, odelta, status):
-    """halo_bias(cosmology cosmo, double halomass, double a, double odelta, int * status) -> double"""
-    return _ccllib.halo_bias(cosmo, halomass, a, odelta, status)
+def halo_bias(cosmo, smooth_mass, a, odelta, status):
+    """halo_bias(cosmology cosmo, double smooth_mass, double a, double odelta, int * status) -> double"""
+    return _ccllib.halo_bias(cosmo, smooth_mass, a, odelta, status)
 
-def massfunc_m2r(cosmo, halomass, status):
-    """massfunc_m2r(cosmology cosmo, double halomass, int * status) -> double"""
-    return _ccllib.massfunc_m2r(cosmo, halomass, status)
+def massfunc_m2r(cosmo, smooth_mass, status):
+    """massfunc_m2r(cosmology cosmo, double smooth_mass, int * status) -> double"""
+    return _ccllib.massfunc_m2r(cosmo, smooth_mass, status)
 
-def sigmaM(cosmo, halomass, a, status):
-    """sigmaM(cosmology cosmo, double halomass, double a, int * status) -> double"""
-    return _ccllib.sigmaM(cosmo, halomass, a, status)
+def sigmaM(cosmo, smooth_mass, a, status):
+    """sigmaM(cosmology cosmo, double smooth_mass, double a, int * status) -> double"""
+    return _ccllib.sigmaM(cosmo, smooth_mass, a, status)
 
 def massfunc_vec(cosmo, a, odelta, halo_mass, output, status):
     """massfunc_vec(cosmology cosmo, double a, double odelta, double * halo_mass, double * output, int * status)"""

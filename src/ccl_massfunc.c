@@ -172,6 +172,8 @@ void ccl_cosmology_compute_hmfparams(ccl_cosmology * cosmo, int *status)
   }
 }
 
+//TODO some of these are unused, many are included in ccl.h
+
 /*----- ROUTINE: ccl_massfunc_f -----
 INPUT: cosmology+parameters, a halo mass, and scale factor
 TASK: Outputs fitting function for use in halo mass function calculation;
@@ -192,50 +194,47 @@ static double massfunc_f(ccl_cosmology *cosmo, double halomass, double a, double
 
   switch(cosmo->config.mass_function_method){
   case ccl_tinker:
-
-    if (odelta < 200){
+    
+    // Check if odelta is outside the interpolated range
+    if ((odelta < 200) || (odelta > 3200)){
       *status = CCL_ERROR_HMF_INTERP;
-      strcpy(cosmo->status_message, "ccl_massfunc.c: ccl_massfunc_f(): Tinker 2008 only supported in range of Delta = 200 to Delta = 3200.");
-      ccl_raise_exception(CCL_ERROR_HMF_INTERP, cosmo->status_message);
-      return 0;
+      strcpy(cosmo->status_message, "ccl_massfunc.c: massfunc_f(): Tinker 2008 only supported in range of Delta = 200 to Delta = 3200.\n");
+      return NAN;
     }
-    if (odelta > 3200){
-      * status = CCL_ERROR_HMF_INTERP;
-      strcpy(cosmo->status_message, "ccl_massfunc.c: ccl_massfunc_f(): Tinker 2008 only supported in range of Delta = 200 to Delta = 3200.");
-      ccl_raise_exception(CCL_ERROR_HMF_INTERP, cosmo->status_message);
-      return 0;
-    }
-
+    
+    // Compute HMF parameter (alpha, beta, gamma, phi) splines if they haven't 
+    // been computed already
     if (!cosmo->computed_hmfparams){
         ccl_cosmology_compute_hmfparams(cosmo, status);
         ccl_check_status(cosmo, status);
     }
 
-    fit_A = gsl_spline_eval(cosmo->data.alphahmf, log10(odelta), cosmo->data.accelerator_d);
-    fit_a = gsl_spline_eval(cosmo->data.betahmf, log10(odelta), cosmo->data.accelerator_d);
-    fit_b = gsl_spline_eval(cosmo->data.gammahmf, log10(odelta), cosmo->data.accelerator_d);
-    fit_c = gsl_spline_eval(cosmo->data.phihmf, log10(odelta), cosmo->data.accelerator_d);
+    *status |= gsl_spline_eval_e(cosmo->data.alphahmf, log10(odelta), cosmo->data.accelerator_d,&fit_A);
+    *status |= gsl_spline_eval_e(cosmo->data.betahmf, log10(odelta), cosmo->data.accelerator_d,&fit_a);
+    *status |= gsl_spline_eval_e(cosmo->data.gammahmf, log10(odelta), cosmo->data.accelerator_d,&fit_b);
+    *status |= gsl_spline_eval_e(cosmo->data.phihmf, log10(odelta), cosmo->data.accelerator_d,&fit_c);
     fit_d = pow(10, -1.0*pow(0.75 / log10(odelta / 75.0), 1.2));
 
     fit_A = fit_A*pow(a, 0.14);
     fit_a = fit_a*pow(a, 0.06);
     fit_b = fit_b*pow(a, fit_d);
-
+    if (*status){
+      strcpy(cosmo->status_message, "ccl_massfunc.c: ccl_massfunc_f(): interpolation error for Tinker MF\n");
+      return NAN;      
+    }
     return fit_A*(pow(sigma/fit_b,-fit_a)+1.0)*exp(-fit_c/sigma/sigma);
     break;
     //this version uses f(nu) parameterization from Eq. 8 in Tinker et al. 2010
     // use this for consistency with Tinker et al. 2010 fitting function for halo bias
   case ccl_tinker10:
-    if (odelta < 200){
+    
+    // Check if odelta is outside the interpolated range
+    if ((odelta < 200) || (odelta > 3200)){
       *status = CCL_ERROR_HMF_INTERP;
-      strcpy(cosmo->status_message, "ccl_massfunc.c: ccl_massfunc_f(): Tinker 2010 only supported in range of Delta = 200 to Delta = 3200.\n");
+      strcpy(cosmo->status_message, "ccl_massfunc.c: massfunc_f(): Tinker 2010 only supported in range of Delta = 200 to Delta = 3200.\n");
       return 0;
     }
-    if (odelta > 3200){
-      * status = CCL_ERROR_HMF_INTERP;
-      strcpy(cosmo->status_message, "ccl_massfunc.c: ccl_massfunc_f(): Tinker 2010 only supported in range of Delta = 200 to Delta = 3200.\n");
-      return 0;
-    }
+    
     if (!cosmo->computed_hmfparams){
         ccl_cosmology_compute_hmfparams(cosmo, status);
         ccl_check_status(cosmo, status);
@@ -244,12 +243,20 @@ static double massfunc_f(ccl_cosmology *cosmo, double halomass, double a, double
     delta_c_Tinker = 1.686;
     nu = delta_c_Tinker/(sigma);
 
-    fit_A = gsl_spline_eval(cosmo->data.alphahmf, log10(odelta), cosmo->data.accelerator_d); //alpha in Eq. 8
-    fit_a = gsl_spline_eval(cosmo->data.etahmf, log10(odelta), cosmo->data.accelerator_d)*pow(a, -0.27); //eta in Eq. 8
-    fit_b = gsl_spline_eval(cosmo->data.betahmf, log10(odelta), cosmo->data.accelerator_d)*pow(a, -0.20); //beta in Eq. 8
-    fit_c = gsl_spline_eval(cosmo->data.gammahmf, log10(odelta), cosmo->data.accelerator_d)*pow(a, 0.01); //gamma in Eq. 8
-    fit_d = gsl_spline_eval(cosmo->data.phihmf, log10(odelta), cosmo->data.accelerator_d)*pow(a, 0.08); //phi in Eq. 8;
+    *status |= gsl_spline_eval_e(cosmo->data.alphahmf, log10(odelta), cosmo->data.accelerator_d,&fit_A); //alpha in Eq. 8
+    *status |= gsl_spline_eval_e(cosmo->data.etahmf, log10(odelta), cosmo->data.accelerator_d,&fit_a); //eta in Eq. 8
+    *status |= gsl_spline_eval_e(cosmo->data.betahmf, log10(odelta), cosmo->data.accelerator_d,&fit_b); //beta in Eq. 8
+    *status |= gsl_spline_eval_e(cosmo->data.gammahmf, log10(odelta), cosmo->data.accelerator_d,&fit_c); //gamma in Eq. 8
+    *status |= gsl_spline_eval_e(cosmo->data.phihmf, log10(odelta), cosmo->data.accelerator_d,&fit_d); //phi in Eq. 8;
 
+    fit_a *=pow(a, -0.27);
+    fit_b *=pow(a, -0.20);
+    fit_c *=pow(a, 0.01);
+    fit_d *=pow(a, 0.08);
+    if (*status){
+      strcpy(cosmo->status_message, "ccl_massfunc.c: ccl_massfunc_f(): interpolation error for Tinker 2010 MF\n");
+      return NAN;      
+    }
     return nu*fit_A*(1.+pow(fit_b*nu,-2.*fit_d))*pow(nu, 2.*fit_a)*exp(-0.5*fit_c*nu*nu);
     break;
 
@@ -271,7 +278,7 @@ static double massfunc_f(ccl_cosmology *cosmo, double halomass, double a, double
     if(odelta!=200.) {
       *status = CCL_ERROR_HMF_INTERP;
       strcpy(cosmo->status_message, "ccl_massfunc.c: ccl_massfunc_f(): Angulo HMF only supported for Delta = 200.\n");
-      return 0;
+      return NAN;
     }
     fit_A = 0.201;
     fit_a = 2.08;
@@ -285,7 +292,7 @@ static double massfunc_f(ccl_cosmology *cosmo, double halomass, double a, double
     sprintf(cosmo->status_message ,
 	    "ccl_massfunc.c: ccl_massfunc(): Unknown or non-implemented mass function method: %d \n",
 	    cosmo->config.mass_function_method);
-    return 0;
+    return NAN;
   }
 }
 static double ccl_halo_b1(ccl_cosmology *cosmo, double halomass, double a, double odelta, int * status)
@@ -362,19 +369,34 @@ void ccl_cosmology_compute_sigma(ccl_cosmology * cosmo, int *status)
      strcpy(cosmo->status_message, "ccl_massfunc.c: ccl_cosmology_compute_sigma(): Error creating sigma(M) spline\n");
      return;
    }
+   double na, nb;
    for (int i=0; i<nm; i++){
      if(i==0){
-       y[i] = log(pow(10, gsl_spline_eval(logsigma, m[i], NULL)))-log(pow(10,gsl_spline_eval(logsigma, m[i]+ccl_splines->LOGM_SPLINE_DELTA/2., NULL)));
+       *status |= gsl_spline_eval_e(logsigma, m[i], NULL,&na);
+       *status |= gsl_spline_eval_e(logsigma, m[i]+ccl_splines->LOGM_SPLINE_DELTA/2., NULL,&nb);
+       y[i] = log(pow(10, na))-log(pow(10,nb));
        y[i] = 2.*y[i] / ccl_splines->LOGM_SPLINE_DELTA;
      }
      else if (i==nm-1){
-       y[i] = log(pow(10, gsl_spline_eval(logsigma, m[i]-ccl_splines->LOGM_SPLINE_DELTA/2., NULL)))-log(pow(10,gsl_spline_eval(logsigma, m[i], NULL)));
+       *status |= gsl_spline_eval_e(logsigma, m[i]-ccl_splines->LOGM_SPLINE_DELTA/2., NULL,&na);
+       *status |= gsl_spline_eval_e(logsigma, m[i], NULL,&nb);
+       y[i] = log(pow(10, na))-log(pow(10,nb));
        y[i] = 2.*y[i] / ccl_splines->LOGM_SPLINE_DELTA;
      }
      else{
-       y[i] = (log(pow(10,gsl_spline_eval(logsigma, m[i]-ccl_splines->LOGM_SPLINE_DELTA/2., NULL)))-log(pow(10,gsl_spline_eval(logsigma, m[i]+ccl_splines->LOGM_SPLINE_DELTA/2., NULL))));
+       *status |= gsl_spline_eval_e(logsigma, m[i]-ccl_splines->LOGM_SPLINE_DELTA/2., NULL,&na);
+       *status |= gsl_spline_eval_e(logsigma, m[i]+ccl_splines->LOGM_SPLINE_DELTA/2., NULL,&nb);
+       y[i] = (log(pow(10,na))-log(pow(10,nb)));
        y[i] = y[i] / ccl_splines->LOGM_SPLINE_DELTA;
      }
+   }
+   if (*status){
+     free(m);
+     free(y);
+     gsl_spline_free(logsigma);
+     *status = CCL_ERROR_SPLINE ;
+     strcpy(cosmo->status_message, "ccl_massfunc.c: ccl_cosmology_compute_sigma(): Error evaluating grid points for dlnsigma/dlogM spline\n");
+     return;
    }
 
    gsl_spline * dlnsigma_dlogm = gsl_spline_alloc(M_SPLINE_TYPE, nm);
@@ -415,8 +437,8 @@ double ccl_massfunc(ccl_cosmology *cosmo, double halomass, double a, double odel
   logmass = log10(halomass);
   rho_m = RHO_CRITICAL*cosmo->params.Omega_m*cosmo->params.h*cosmo->params.h;
   f=massfunc_f(cosmo,halomass,a,odelta,status);
+  *status |= gsl_spline_eval_e(cosmo->data.dlnsigma_dlogm, logmass, cosmo->data.accelerator_m,&deriv);
   ccl_check_status(cosmo, status);
-  deriv = gsl_spline_eval(cosmo->data.dlnsigma_dlogm, logmass, cosmo->data.accelerator_m);
   return f*rho_m*deriv/halomass;
 }
 
@@ -463,14 +485,19 @@ necessary.
 double ccl_sigmaM(ccl_cosmology * cosmo, double halomass, double a, int * status)
 {
     double sigmaM;
-
+    
+    // Check if sigma has already been calculated
     if (!cosmo->computed_sigma){
         ccl_cosmology_compute_sigma(cosmo, status);
         ccl_check_status(cosmo, status);
     }
-
-    sigmaM = pow(10,gsl_spline_eval(cosmo->data.logsigma, log10(halomass), cosmo->data.accelerator_m));
-    sigmaM = sigmaM*ccl_growth_factor(cosmo, a, status);
-
+    
+    double lgsigmaM;
+    *status = gsl_spline_eval_e(cosmo->data.logsigma, 
+                                     log10(halomass), 
+                                     cosmo->data.accelerator_m,&lgsigmaM);
+    // Interpolate to get sigma
+    sigmaM = pow(10,lgsigmaM)*ccl_growth_factor(cosmo, a, status);
+    ccl_check_status(cosmo, status);
     return sigmaM;
 }

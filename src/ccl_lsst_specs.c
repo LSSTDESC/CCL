@@ -234,7 +234,7 @@ static double ccl_specs_norm_integrand(double z, void* params){
         gsl_function F;
         F.function = ccl_specs_photoz;
         F.params = &valparams;
-        gsl_integration_cquad(&F, z_min, z_max, 0.0,EPSREL_DNDZ,workspace,&pz_int, NULL, NULL);
+        *p->status|= gsl_integration_cquad(&F, z_min, z_max, 0.0,EPSREL_DNDZ,workspace,&pz_int, NULL, NULL);
         gsl_integration_cquad_workspace_free(workspace);
 
 

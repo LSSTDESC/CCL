@@ -82,9 +82,9 @@ double nu_phasespace_intg(gsl_interp_accel* accel, double mnuOT, int* status) {
 	}
 	
 	// Evaluate the spline - this will use the accelerator if it has been defined.
-	integral_value = gsl_spline_eval(nu_spline, log(mnuOT),accel)*7./8.;
+  *status |= gsl_spline_eval_e(nu_spline, log(mnuOT),accel, &integral_value);
 
-  return integral_value;
+  return integral_value*7./8.;
 }
 /* -------- ROUTINE: Omeganuh2 ---------
 INPUTS: a: scale factor, Neff: number of neutrino species, mnu: total mass in eV of neutrinos, TCMB: CMB temperature, accel: pointer to an accelerator which will evaluate the neutrino phasespace spline if defined, status: pointer to status integer.
@@ -93,7 +93,7 @@ TASK: Compute Omeganu * h^2 as a function of time.
 
 double Omeganuh2 (double a, double Neff, double mnu, double TCMB, gsl_interp_accel* accel, int* status) {
 	
-	double Tnu, a4, prefix_massless, mnuone;
+	double Tnu, a4, prefix_massless, mnuone, OmNuh2;
 	double Tnu_eff, mnuOT, intval, prefix_massive;
 	
 	// First check if Neff if 0
@@ -121,7 +121,9 @@ double Omeganuh2 (double a, double Neff, double mnu, double TCMB, gsl_interp_acc
 		
     // Define the prefix using the effective temperature (to get mnu / Omega = 93.14 eV) for the massive case: 
     prefix_massive = NU_CONST * Tnu_eff * Tnu_eff * Tnu_eff * Tnu_eff;
+
+	OmNuh2 = Neff*intval*prefix_massive/a4;
     
-    return Neff*intval*prefix_massive/a4;
+    return OmNuh2;
 }
 
