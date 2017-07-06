@@ -141,6 +141,12 @@ int main(int argc,char **argv){
 	// Create the struct to hold the user information about photo_z's.
 	pz_info_example = ccl_specs_create_photoz_info(&my_params_example, &user_pz_probability); 
 	
+	// Alternatively, we could have used the built-in Gaussian photo-z pdf, 
+	// which assumes sigma_z = sigma_z0 * (1 + z) (not used in what follows).
+	double sigma_z0 = 0.05;
+	user_pz_info *pz_info_gaussian;
+	pz_info_gaussian = ccl_specs_create_gaussian_photoz_info(sigma_z0);
+	
 	double z_test;
 	double dNdz_tomo;
 	int z;
