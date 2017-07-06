@@ -64,7 +64,7 @@ In preparation for constraining cosmology with the Large Synoptic Survey Telesco
 
 The Core Cosmology Library is written in C and incorporates the {\tt CLASS} code \cite{class} to provide predictions for the matter power spectrum\footnote{Future versions of the library will incorporate other power-spectrum libraries and methods.}. A Python wrapper is also provided for improved ease of use.
 
-This note describes how to install {\tt CCL} (Section \ref{sec:install}), its functionality (Section \ref{sec:func}), the relevant unit tests (Section \ref{sec:tests}), the default configuration (Section \ref{sec:default}), directions for finding a {\tt CCL} example (Section \ref{sec:example}), the Python wrapper (Section \ref{sec:python}), future plans (Section \ref{sec:future}), means to contact the developers (Section \ref{sec:feedback}) and the license under which {\tt CCL} is released (Section \ref{sec:license}).
+This note describes how to install {\tt CCL} (Section \ref{sec:install}), how {\tt CCL} is documented (Section \ref{sec:doc}), its functionality (Section \ref{sec:func}), the relevant unit tests (Section \ref{sec:tests}), the default configuration (Section \ref{sec:default}), directions for finding a {\tt CCL} example (Section \ref{sec:example}), the Python wrapper (Section \ref{sec:python}), future plans (Section \ref{sec:future}), means to contact the developers (Section \ref{sec:feedback}) and the license under which {\tt CCL} is released (Section \ref{sec:license}).
 
 
 \section{Installation}
@@ -166,6 +166,11 @@ docker run -it ccl bash
 \end{verbatim}
 This will allow for full access to the virtual machine for installation of any additional desired dependencies.
 
+\section{Documentation}
+\label{sec:doc}
+
+{\tt CCL} has {\tt doxygen}\footnote{\url{http://www.stack.nl/~dimitri/doxygen/}} documentation for its C routines. This can be found in the directory {\tt doc/} within the {\tt CCL} repository by opening the {\tt index.html} file in your browser. The {\tt python} routines are documented in situ.
+
 \section{Functionality}
 \label{sec:func}
 
@@ -173,7 +178,7 @@ This will allow for full access to the virtual machine for installation of any a
 
 
 \label{sec:cosmologies}
-Ultimately, CCL will aim to incorporate theoretical predictions for all cosmological models of interest to LSST. Currently, the following families of models are supported:
+Ultimately, {\tt CCL} will aim to incorporate theoretical predictions for all cosmological models of interest to LSST. Currently, the following families of models are supported:
 \begin{itemize}
  \item Flat $\Lambda$CDM 
  \item wCDM and the CPL model ($w_0+w_a$, \citealt{Chevallier01} and \citealt{Linder03})
