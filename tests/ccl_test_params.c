@@ -44,7 +44,6 @@ CTEST2(params, create_lcdm){
     ASSERT_DBL_NEAR_TOL(params.Omega_c, data->Omega_c, 1e-10);
     ASSERT_DBL_NEAR_TOL(params.w0, -1.0, 1e-10);
     ASSERT_DBL_NEAR_TOL(params.wa, 0.0, 1e-10);
-    ASSERT_DBL_NEAR_TOL(params.Omega_n, 0.0, 1e-10);
 }
 
 // This adds a second test in the same suite.  It uses the same setup function as the

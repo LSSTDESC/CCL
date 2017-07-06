@@ -1,5 +1,10 @@
+/** @file */
 #pragma once
 
+/** 
+ * Struct that contains all the parameters needed to create certain splines.
+ * This includes splines for the scale factor, masses, and power spectra.
+ */
 typedef struct ccl_spline_params {
   
    //Scale factor splines
