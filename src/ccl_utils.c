@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "ccl_params.h"
+#include "ccl_error.h"
+#include <gsl/gsl_errno.h>
 
 /* ------- ROUTINE: ccl_linear spacing ------
 INPUTS: [xmin,xmax] of the interval to be divided in N bins
