@@ -829,6 +829,9 @@ In this second step, only 2 codes have been compared so far. More outputs are ne
 \item For sufficiently high precision, the correlation functions are sensitive to how the power spectrum is sampled and interpolated.
 \end{itemize}
 
+To obtain realistic targets for the convergence of correlation function computations for LSST analyses, we calculate the expected statistical uncertainty of the clustering and lensing correlation functions of the LSST gold sample (c.f. Sect.~\ref{sec:specs}), assuming an effective source galaxy density of $n_\mathrm{eff} = 26\mathrm{gal/sqarcmin}$ for galaxy shape distortions, and galaxy density of $n_\mathrm{gold} = 45\mathrm{gal/sqarcmin}$ for number counts. Specifically, we calculate the Gaussian covariance of angular correlation functions following the formalism of \citet{2008A&A...477...43J}, and note that leaving out the non-Gaussian covariance terms makes this convergence criterion more conservative. We split the source galaxy sample into 10 tomography bins, defined to contain equal numbers of source galaxies, and define the relative correlation function convergence criterion (for cosmic shear correlation functions) to be the minimum over these tomography bins.
+\todo{Verify that this describes the actual benchmark test (Elisa)}
+
 Additionally, independent codes were utilized to test the accuracy of halo mass function predictions. For the halo mass function, we compare the value of $\sigma$, $\log(\sigma^{-1})$, and the value of the halo mass function in the form used in \citep{Tinker2008},
 \begin{equation}
 \log[(M^2/\bar{\rho}_m)dn/dM].
@@ -841,7 +844,6 @@ Finally, we note that formal tests for predictions in cosmologies with neutrinos
 
 \todo{What new checks were added?}
 
-\todo{Add correlation function benchmarks (Elisabeth)}
 
 
 \section{Default configuration}
