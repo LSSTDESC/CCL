@@ -6,6 +6,8 @@
 #include <stdlib.h>
 #include "fftlog.h"
 
+/* This code is FFTLog, which is described in arXiv:astro-ph/9905191 */
+
 /* Computes the Gamma function using the Lanczos approximation */
 static double complex gamma_fftlog(double complex z) {
     /* Lanczos coefficients for g = 7 */
