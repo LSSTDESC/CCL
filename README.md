@@ -94,6 +94,15 @@ Then, run `./configure` and compile and install *CCL* as usual. The *CCL* build 
 Once compilation has finished, run `make check` to make sure everything is working correctly. Remember to add the external *CLASS* library directory to your system library path, using either `export LD_LIBRARY_PATH=/path/to/external/class` (Linux) or `export DYLD_FALLBACK_LIBRARY_PATH=/path/to/external/class` (Mac). The system must be able to find both the *CCL* and *CLASS* libraries; it is not enough to only add *CCL* to the library path.
 
 
+## Docker image installation
+
+The Dockerfile to generate a Docker image is included in the CCL repository as Dockerfile. This can be used to create an image that Docker can spool up as a virtual machine, allowing you to utilize CCL on any infrastructure with minimal hassle. The details of Docker and the installation process can be found at [https://www.docker.com/](https://www.docker.com/). Once Docker is installed, it is a simple process to create an image! In a terminal of your choosing (with Docker running), type the command `docker build -t ccl .` in the CCL directory.
+
+The resulting Docker image has two primary functionalities. The first is a CMD that will open Jupyter notebook tied to a port on your local machine. This can be used with the following run command: `docker run -p 8888:8888 ccl`. You can then access the notebook in the browser of your choice at `localhost:8888`. The second is to access the bash itself, which can be done using `docker run -it ccl bash`.
+
+This Dockerfile currently contains all installed C libraries and the Python wrapper. It currently uses continuumio/anaconda as the base image and supports ipython and Jupyter notebook. There should be minimal slowdown due to the virtualization.
+
+
 # Documentation
 
 This document contains basic information about used structures and functions. At the end of document is provided code which implements these basic functions (also in *tests/ccl_sample_run.c*). More information about CCL functions and implementation can be found in *doc/0000-ccl_note/0000-ccl_note.pdf*.
