@@ -14,7 +14,7 @@
 typedef struct {
   double (* your_pz_func)(double, double, void *, int*); /*< Function returns the liklihood of measuring a z_ph
 							  * (first double) given a z_spec (second double), with a pointer to additonal arguments and a status flag.*/
-        void *  your_pz_params; /*< Additional parameters to be passed into your_pz_func */
+  void *  your_pz_params; /*< Additional parameters to be passed into your_pz_func */
 } user_pz_info;
 
 /**
