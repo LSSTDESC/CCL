@@ -1,50 +1,51 @@
-This is BibTeX, Version 0.99d (TeX Live 2015)
+This is BibTeX, Version 0.99d (TeX Live 2016)
 Capacity: max_strings=35307, hash_size=35307, hash_prime=30011
 The top-level auxiliary file: main.aux
 The style file: apj.bst
 Database file #1: mainNotes.bib
 Database file #2: main.bib
 Reallocated wiz_functions (elt_size=4) to 6000 items from 3000.
+Warning--empty publisher in DodelsonBook
 Warning--empty publisher in PeacockBook
-You've used 18 entries,
+You've used 29 entries,
             3085 wiz_defined-function locations,
-            786 strings with 8052 characters,
-and the built_in function-call counts, 8833 in all, are:
-= -- 763
-> -- 617
-< -- 8
-+ -- 211
-- -- 229
-* -- 730
-:= -- 1648
-add.period$ -- 18
-call.type$ -- 18
-change.case$ -- 138
-chr.to.int$ -- 18
-cite$ -- 19
-duplicate$ -- 345
-empty$ -- 522
-format.name$ -- 256
-if$ -- 1759
+            877 strings with 10123 characters,
+and the built_in function-call counts, 13572 in all, are:
+= -- 1184
+> -- 883
+< -- 16
++ -- 300
+- -- 322
+* -- 1090
+:= -- 2521
+add.period$ -- 29
+call.type$ -- 29
+change.case$ -- 208
+chr.to.int$ -- 29
+cite$ -- 31
+duplicate$ -- 555
+empty$ -- 848
+format.name$ -- 365
+if$ -- 2725
 int.to.chr$ -- 1
 int.to.str$ -- 0
-missing$ -- 17
-newline$ -- 58
-num.names$ -- 72
-pop$ -- 149
+missing$ -- 28
+newline$ -- 91
+num.names$ -- 116
+pop$ -- 222
 preamble$ -- 1
-purify$ -- 138
+purify$ -- 208
 quote$ -- 0
-skip$ -- 298
+skip$ -- 481
 stack$ -- 0
-substring$ -- 381
-swap$ -- 6
-text.length$ -- 0
+substring$ -- 611
+swap$ -- 13
+text.length$ -- 1
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 159
-warning$ -- 1
-while$ -- 69
+type$ -- 255
+warning$ -- 2
+while$ -- 112
 width$ -- 0
-write$ -- 184
-(There was 1 warning)
+write$ -- 295
+(There were 2 warnings)
