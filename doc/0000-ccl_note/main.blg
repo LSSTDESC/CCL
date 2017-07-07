@@ -1,0 +1,50 @@
+This is BibTeX, Version 0.99d (TeX Live 2015)
+Capacity: max_strings=35307, hash_size=35307, hash_prime=30011
+The top-level auxiliary file: main.aux
+The style file: apj.bst
+Database file #1: mainNotes.bib
+Database file #2: main.bib
+Reallocated wiz_functions (elt_size=4) to 6000 items from 3000.
+Warning--empty publisher in PeacockBook
+You've used 18 entries,
+            3085 wiz_defined-function locations,
+            786 strings with 8052 characters,
+and the built_in function-call counts, 8833 in all, are:
+= -- 763
+> -- 617
+< -- 8
++ -- 211
+- -- 229
+* -- 730
+:= -- 1648
+add.period$ -- 18
+call.type$ -- 18
+change.case$ -- 138
+chr.to.int$ -- 18
+cite$ -- 19
+duplicate$ -- 345
+empty$ -- 522
+format.name$ -- 256
+if$ -- 1759
+int.to.chr$ -- 1
+int.to.str$ -- 0
+missing$ -- 17
+newline$ -- 58
+num.names$ -- 72
+pop$ -- 149
+preamble$ -- 1
+purify$ -- 138
+quote$ -- 0
+skip$ -- 298
+stack$ -- 0
+substring$ -- 381
+swap$ -- 6
+text.length$ -- 0
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 159
+warning$ -- 1
+while$ -- 69
+width$ -- 0
+write$ -- 184
+(There was 1 warning)

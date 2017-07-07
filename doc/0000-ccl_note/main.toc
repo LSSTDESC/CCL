@@ -1,0 +1,43 @@
+\contentsline {abstract}{}{1}{section*.1}
+\tocdepth@munge 
+\tocdepth@restore 
+\contentsline {section}{\numberline {1}Introduction}{4}{section.1}
+\contentsline {section}{\numberline {2}Installation}{4}{section.2}
+\contentsline {subsection}{\numberline {2.1}Dependencies}{4}{subsection.2.1}
+\contentsline {subsection}{\numberline {2.2}Installation Procedure}{4}{subsection.2.2}
+\contentsline {subsection}{\numberline {2.3}Compiling against an external version of CLASS}{5}{subsection.2.3}
+\contentsline {section}{\numberline {3}Functionality}{6}{section.3}
+\contentsline {subsection}{\numberline {3.1}Supported cosmological models}{6}{subsection.3.1}
+\contentsline {subsection}{\numberline {3.2}Distances}{8}{subsection.3.2}
+\contentsline {subsection}{\numberline {3.3}Density parameter functions}{9}{subsection.3.3}
+\contentsline {subsection}{\numberline {3.4}Growth function}{9}{subsection.3.4}
+\contentsline {subsection}{\numberline {3.5}Matter power spectrum}{10}{subsection.3.5}
+\contentsline {subsubsection}{\numberline {3.5.1}BBKS}{10}{subsubsection.3.5.1}
+\contentsline {subsubsection}{\numberline {3.5.2}CLASS}{10}{subsubsection.3.5.2}
+\contentsline {subsubsection}{\numberline {3.5.3}Nonlinear extrapolation}{11}{subsubsection.3.5.3}
+\contentsline {subsubsection}{\numberline {3.5.4}Linear extrapolation}{12}{subsubsection.3.5.4}
+\contentsline {subsubsection}{\numberline {3.5.5}Wishlist for the future}{12}{subsubsection.3.5.5}
+\contentsline {subsubsection}{\numberline {3.5.6}Normalization of the power spectrum}{13}{subsubsection.3.5.6}
+\contentsline {subsection}{\numberline {3.6}Angular power spectra}{13}{subsection.3.6}
+\contentsline {subsubsection}{\numberline {3.6.1}Exact expressions}{14}{subsubsection.3.6.1}
+\contentsline {paragraph}{\bf Number counts.}{14}{section*.3}
+\contentsline {paragraph}{\bf Galaxy shape distortions.}{15}{section*.4}
+\contentsline {subsubsection}{\numberline {3.6.2}The Limber approximation}{15}{subsubsection.3.6.2}
+\contentsline {subsection}{\numberline {3.7}Halo mass \& halo bias functions}{16}{subsection.3.7}
+\contentsline {subsection}{\numberline {3.8}Photo-$z$ implementation}{18}{subsection.3.8}
+\contentsline {subsection}{\numberline {3.9}LSST Specifications}{19}{subsection.3.9}
+\contentsline {section}{\numberline {4}Tests and validation}{20}{section.4}
+\contentsline {section}{\numberline {5}Default configuration}{24}{section.5}
+\contentsline {section}{\numberline {6}Examples for C implementation}{24}{section.6}
+\contentsline {section}{\numberline {7}Python wrapper}{24}{section.7}
+\contentsline {subsection}{\numberline {7.1}Python installation}{24}{subsection.7.1}
+\contentsline {subsection}{\numberline {7.2}Python example}{26}{subsection.7.2}
+\contentsline {subsection}{\numberline {7.3}Technical notes on how the Python wrapper is implemented}{27}{subsection.7.3}
+\contentsline {paragraph}{{\tt setup.py}}{27}{section*.5}
+\contentsline {paragraph}{Interface ({\tt .i}) files}{28}{section*.6}
+\contentsline {paragraph}{Python module files}{28}{section*.7}
+\contentsline {paragraph}{Auto-generated wrapper files}{28}{section*.8}
+\contentsline {paragraph}{{\tt pyccl/pyutils.py}}{29}{section*.9}
+\contentsline {section}{\numberline {8}Future functionality to be included}{29}{section.8}
+\contentsline {section}{\numberline {9}Feedback}{29}{section.9}
+\contentsline {section}{\numberline {10}License}{29}{section.10}
