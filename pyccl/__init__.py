@@ -1,7 +1,7 @@
 
 import ccllib as lib
 
-import core, constants, background, power, massfunction, correlation
+import core, constants, background, power, massfunction
 
 # Core data structures
 from core import Parameters, Cosmology
