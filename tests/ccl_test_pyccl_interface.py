@@ -3,7 +3,6 @@ from numpy.testing import assert_raises, assert_warns, assert_no_warnings, \
                           assert_, decorators, run_module_suite
 import pyccl as ccl
 
-
 def reference_models():
     """
     Create a set of reference Cosmology() objects.
@@ -139,6 +138,7 @@ def check_massfunc(cosmo):
     """
     Check that mass function and supporting functions can be run.
     """
+
     z = 0.
     z_arr = np.linspace(0., 2., 10)
     a = 1.
@@ -295,7 +295,23 @@ def check_cls(cosmo):
     assert_( all_finite(ccl.angular_cl(cosmo, nc1, lens1, ell_arr)) )
     assert_( all_finite(ccl.angular_cl(cosmo, nc1, lens2, ell_arr)) )
     
+def check_corr(cosmo):
+    
+    # Number density input
+    z = np.linspace(0., 1., 200)
+    n = np.ones(z.shape)
 
+    # ClTracer test objects
+    lens1 = ccl.ClTracerLensing(cosmo, False, n=n, z=z)
+    lens2 = ccl.ClTracerLensing(cosmo, True, n=(z,n), bias_ia=(z,n), f_red=(z,n))
+
+    ells=np.arange(3000)
+    cls=ccl.angular_cl(cosmo,lens1,lens2,ells)
+
+    t=np.logspace(-2,np.log10(5.),20) #degrees
+    corrfunc=ccl.correlation(cosmo,ells,cls,t,corr_type='L+',method='FFTLog')
+    assert_( all_finite(corrfunc))
+    
 def test_background():
     """
     Test background and growth functions in ccl.background.
@@ -333,5 +349,13 @@ def test_cls():
     for cosmo in reference_models():
         yield check_cls, cosmo
 
+def test_corr():
+    """
+    Test top-level functions in pyccl.correlation module.
+    """
+    for cosmo in reference_models():
+        yield check_corr, cosmo
+
+        
 if __name__ == '__main__':
     run_module_suite()
