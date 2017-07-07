@@ -12,9 +12,9 @@
  * with a void* field to contain the parameters to that function.
  */
 typedef struct {
-        double (* your_pz_func)(double, double, void *, int*); /*< Function returns the liklihood of measuring a z_ph
- * (first double) given a z_spec (second double), with a pointer to additonal arguments and a status flag.*/
-        void *  your_pz_params; /*< Additional parameters to be passed into your_pz_func */
+  double (* your_pz_func)(double, double, void *, int*); /*< Function returns the liklihood of measuring a z_ph
+							  * (first double) given a z_spec (second double), with a pointer to additonal arguments and a status flag.*/
+  void *  your_pz_params; /*< Additional parameters to be passed into your_pz_func */
 } user_pz_info;
 
 /**
@@ -83,4 +83,3 @@ double ccl_specs_sigmaz_sources(double z);
 //LSST redshift range for lensing sources
 #define Z_MIN_SOURCES 0.1
 #define Z_MAX_SOURCES 3.0
-

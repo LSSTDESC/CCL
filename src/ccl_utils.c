@@ -11,22 +11,23 @@ INPUTS: [xmin,xmax] of the interval to be divided in N bins
 OUTPUT: bin edges in range [xmin,xmax]
 */
 
-double * ccl_linear_spacing(double xmin, double xmax, int N){
-    double dx = (xmax-xmin)/(N -1.);
-
-    double * x = malloc(sizeof(double)*N);
-    if (x==NULL){
-        fprintf(stderr, "ERROR: Could not allocate memory for linear-spaced array (N=%d)\n", N);
-        return x;
-    }
-
-    for (int i=0; i<N; i++){
-        x[i] = xmin + dx*i;
-    }
-    x[0]=xmin; //Make sure roundoff errors don't spoil edges
-    x[N-1]=xmax; //Make sure roundoff errors don't spoil edges
-
+double * ccl_linear_spacing(double xmin, double xmax, int N)
+{
+  double dx = (xmax-xmin)/(N -1.);
+  
+  double * x = malloc(sizeof(double)*N);
+  if (x==NULL) {
+    fprintf(stderr, "ERROR: Could not allocate memory for linear-spaced array (N=%d)\n", N);
     return x;
+  }
+  
+  for (int i=0; i<N; i++) {
+    x[i] = xmin + dx*i;
+  }
+  x[0]=xmin; //Make sure roundoff errors don't spoil edges
+  x[N-1]=xmax; //Make sure roundoff errors don't spoil edges
+  
+  return x;
 }
 
 /* ------- ROUTINE: ccl_log spacing ------
@@ -35,38 +36,35 @@ TASK: divide an interval in N logarithmic bins
 OUTPUT: bin edges in range [xmin,xmax]
 */
 
-double * ccl_log_spacing(double xmin, double xmax, int N){
-
-    if (N<2){
-        fprintf(stderr, "ERROR: Cannot make log-spaced array with %d points - need at least 2\n", N);
-        return NULL;
-    }
-
-    if (!(xmin>0 && xmax>0)){
-        fprintf(stderr, "ERROR: Cannot make log-spaced array xmax or xmax non-positive (had %le, %le)\n", xmin, xmax);
-        return NULL;
-    }
-
-
-    double log_xmax = log(xmax);
-    double log_xmin = log(xmin);
-    double dlog_x = (log_xmax - log_xmin) /  (N-1.);
-
-
-    double * x = malloc(sizeof(double)*N);
-    if (x==NULL){
-        fprintf(stderr, "ERROR: Could not allocate memory for log-spaced array (N=%d)\n", N);
-        return x;
-    }
-
-
-    for (int i=0; i<N; i++){
-        x[i] = exp(log_xmin + dlog_x*i);
-    }
-    x[0]=xmin; //Make sure roundoff errors don't spoil edges
-    x[N-1]=xmax; //Make sure roundoff errors don't spoil edges
-
+double * ccl_log_spacing(double xmin, double xmax, int N)
+{
+  if (N<2) {
+    fprintf(stderr, "ERROR: Cannot make log-spaced array with %d points - need at least 2\n", N);
+    return NULL;
+  }
+  
+  if (!(xmin>0 && xmax>0)) {
+    fprintf(stderr, "ERROR: Cannot make log-spaced array xmax or xmax non-positive (had %le, %le)\n", xmin, xmax);
+    return NULL;
+  }
+  
+  double log_xmax = log(xmax);
+  double log_xmin = log(xmin);
+  double dlog_x = (log_xmax - log_xmin) /  (N-1.);
+  
+  double * x = malloc(sizeof(double)*N);
+  if (x==NULL) {
+    fprintf(stderr, "ERROR: Could not allocate memory for log-spaced array (N=%d)\n", N);
     return x;
+  }
+  
+  for (int i=0; i<N; i++) {
+    x[i] = exp(log_xmin + dlog_x*i);
+  }
+  x[0]=xmin; //Make sure roundoff errors don't spoil edges
+  x[N-1]=xmax; //Make sure roundoff errors don't spoil edges
+  
+  return x;
 }
 
 
@@ -108,7 +106,7 @@ double ccl_spline_eval(double x,SplPar *spl)
   else {
     double y;
     int stat=gsl_spline_eval_e(spl->spline,x,spl->intacc,&y);
-    if (stat!=GSL_SUCCESS){
+    if (stat!=GSL_SUCCESS) {
       ccl_raise_exception(stat,"ccl_utils.c: ccl_splin_eval(): gsl error\n");
       return NAN;
     }

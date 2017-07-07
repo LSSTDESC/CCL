@@ -32,14 +32,13 @@
 
 int main(int argc,char **argv)
 {
-  
   // Use the default configuration, plus the cosmological parameters that were 
   // defined above
   int status=0;
   ccl_configuration config = default_config;
   ccl_parameters params = ccl_parameters_create(OC, OB, OK, NREL, NMAS, MNU, 
                                                 W0, WA, HH, NORMPS, NS,
-					                            0, NULL, NULL, &status);
+						0, NULL, NULL, &status);
   ccl_cosmology *cosmo = ccl_cosmology_create(params,config);
 
   // Create example number density and bias for tracer
@@ -51,11 +50,10 @@ int main(int argc,char **argv)
   }
 
   // Define a galaxy clustering tracer and calculate C_ell's
-  CCL_ClTracer *ct_gc = ccl_cl_tracer_number_counts_simple_new(
-                                cosmo, 
-                                NZ, z_arr_gc, nz_arr_gc,
-							    NZ, z_arr_gc, bz_arr,
-							    &status);
+  CCL_ClTracer *ct_gc = ccl_cl_tracer_number_counts_simple_new(cosmo, 
+							       NZ, z_arr_gc, nz_arr_gc,
+							       NZ, z_arr_gc, bz_arr,
+							       &status);
   int il;
   double *clarr = malloc(ELL_MAX_CL*sizeof(double));
   double *larr = malloc(ELL_MAX_CL*sizeof(double));
@@ -84,7 +82,7 @@ int main(int argc,char **argv)
   // Print results
   for(int it=0; it < ntheta; it++)
     printf("%le %le\n", theta[it], clustering_corr[it]);
-
+  
   // Free tracers and other allocated memory
   ccl_cl_tracer_free(ct_gc);
   ccl_cosmology_free(cosmo);

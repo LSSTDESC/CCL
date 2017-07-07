@@ -6,7 +6,6 @@
  * This includes splines for the scale factor, masses, and power spectra.
  */
 typedef struct ccl_spline_params {
-  
    //Scale factor splines
   double A_SPLINE_DELTA;
   int  A_SPLINE_NA;

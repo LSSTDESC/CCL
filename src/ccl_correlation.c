@@ -292,9 +292,9 @@ static void ccl_compute_legendre_polynomial(int corr_type,int n_theta,double *th
     }
   }
   else if(corr_type==CCL_CORR_LP) {
-    for (int i=0;i<n_theta;i++){
+    for (int i=0;i<n_theta;i++) {
       gsl_sf_legendre_Pl_array(ell_max,cos(theta[i]*M_PI/180),Pl_theta[i]);
-      for (int j=0;j<=ell_max;j++){
+      for (int j=0;j<=ell_max;j++) {
 	Pl_theta[i][j]*=(2*j+1);
       }
     }
@@ -370,7 +370,7 @@ static void ccl_tracer_corr_legendre(ccl_cosmology *cosmo,
     cl_tilt=log(cls[n_ell-1]/cls[n_ell-2])/log(ell[n_ell-1]/ell[n_ell-2]);
     cl_edge=cls[n_ell-1];
   }
-  for(i=0;i<=ELL_MAX_FFTLOG;i++){
+  for(i=0;i<=ELL_MAX_FFTLOG;i++) {
     double l=(double)i;
     l_arr[i]=l;
     if(l>=l_edge)
@@ -408,7 +408,7 @@ static void ccl_tracer_corr_legendre(ccl_cosmology *cosmo,
   }
   ccl_compute_legendre_polynomial(corr_type,n_theta,theta,ELL_MAX_FFTLOG,Pl_theta);
 
-  for (int i=0;i<n_theta;i++){
+  for (int i=0;i<n_theta;i++) {
     wtheta[i]=0;
     for(int i_L=1;i_L<ELL_MAX_FFTLOG;i_L+=1)
       wtheta[i]+=cl_arr[i_L]*Pl_theta[i][i_L];
