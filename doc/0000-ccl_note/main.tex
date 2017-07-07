@@ -190,7 +190,7 @@ Ultimately, \ccl plans to incorporate theoretical predictions for all cosmologic
   \item A single massive neutrino species or multiple equal-mass massive neutrinos, in combination with any of the above (except the user-defined modified growth function).
 \end{itemize}
 
-Not all features of \ccl are available for all models. For a guide to which predictions are available for each model, see Table \ref{tab:cosmo}. \jab{For MG, if users install their own class, does CCL gain functionality? Also, why is MG listed here? I don't see any mention of MG growth functions, except for the user-defined one.}
+Not all features of \ccl are available for all models. For a guide to which predictions are available for each model, see Table \ref{tab:cosmo}. \jab{For MG, if users install their own class, does CCL gain functionality? Also, MG growth is listed here but not mentioned until later.}
 
 \subsection{Creating a cosmology}
 
@@ -206,7 +206,7 @@ To use \ccl, the first step is to create a {\tt ccl$\_$cosmology} structure, con
  \item {\tt ccl$\_$parameters$\_$create$\_$flat$\_$wacdm(...)}: $w_0+w_a$.
  \item {\tt ccl$\_$parameters$\_$create$\_$lcdm(...)}: curved $\Lambda$CDM cosmologies.
 \end{itemize}
-The argument ${\tt norm\_pk}$ can be used to specify the power spectrum normalization in terms of either $\sigma_8$ or $A_\mathrm{s}$. The {\tt ccl$\_$parameters$\_$create} functions assume $\sigma_8$ normalization if ${\tt norm\_pk > 1.e-5}$ and $A_{\mathrm s}$ normalization otherwise.
+The argument ${\tt norm\_pk}$ can be used to specify the power spectrum normalization in terms of either $\sigma_8$ or $A_\mathrm{s}$. The {\tt ccl$\_$parameters$\_$create} functions assume $\sigma_8$ normalization if ${\tt norm\_pk > 1.0e-5}$ and $A_{\mathrm s}$ normalization otherwise.
 
 To include massive neutrinos, the suffix `{\tt $\_$nu}' may be appended to the last four {\tt ccl$\_$parameters\_create} functions above. Using these functions without the {\tt $\_$nu} suffix will set the number of massive neutrinos to 0 and the effective number of massless neutrinos to $3.046$. In the case of non-zero massive neutrinos, it may be desirable to set {\tt N\_nu\_rel} such that $N_{\rm eff}=3.046$ in the early universe. In agreement with {\tt CLASS}, when using the default value of $T_{\rm NCDM}$ as described in section \ref{sec:distances} below, {\tt N\_nu\_rel} can be set to 2.0328, 1.0196, and 0.00641 for 1, 2 and 3 massive neutrinos respectively to achieve this.
 
@@ -352,7 +352,7 @@ All spline and grid parameters relevant for computing quantities such as distanc
 
 For the matter power spectrum, the spline is performed in two variables: the logarithmically-spaced wavenumber and the linearly-spaced scale factor. Performing a spline on the {\tt CLASS} output leads to some precision loss (compared to direct outputs from {\tt CLASS}). We quantify this, along with the impact of extrapolation in the following subsection.
 
-\subsubsection{Nonlinear low and high wavenumber extrapolation}
+\subsubsection{Extrapolation for the nonlinear power spectrum}
 \label{sec:NLextrapol}
 
 The computation of the power spectrum from {\tt CLASS} can be significantly sped up by extrapolating in the range $k>$~{\tt K$\_$MAX$\_$SPLINE} and $k<$~{\tt K$\_$MIN}. In this section, we describe the implementation of the extrapolation and the accuracy attained. These tests are performed in a flat $\Lambda$CDM cosmology with $\Omega_c=0.25$, $\Omega_b=0.05$, $A_s=2.1\times10^{-9}$, $h=0.7$ and $n_s=0.96$.
@@ -379,12 +379,12 @@ The value adopted for {\tt K\_MIN} depends on the choice of power spectrum metho
 \begin{figure*}
 \centering
 \includegraphics[width=0.9\textwidth]{PS_converge_nonlin.eps}
-\caption{The relative error produced by splining the nonlinear matter power spectrum up to {\tt K$\_$MAX$\_$SPLINE} and extrapolating beyond this value with a second order Taylor expansion the natural logarithm of the matter power spectrum. The left panel shows the results at $z=0$. The right panel shows the results at $z=3$. The fiducial parameters adopted are those corresponding to the black dashed curve. The solid curve shows the improvement on the accuracy when using {\tt K$\_$MAX$\_$SPLINE}$=500$/Mpc, which exceeds our requirements. The magenta curve shows the uncertainty introduced in the fiducial case when comparing to a lower value of $\Delta\ln k=10^{-4}$ in Eq. \ref{eq:NLPSTaylor}. For comparison, the impact of baryonic physics on the matter power spectrum is $\sim 10\%$ at $k=1$/Mpc \citep{Schneider15}.}
+\caption{The relative error produced by splining the nonlinear matter power spectrum up to {\tt K$\_$MAX$\_$SPLINE} and extrapolating beyond this value with a second order Taylor expansion the natural logarithm of the matter power spectrum. The left panel shows the results at $z=0$. The right panel shows the results at $z=3$. The fiducial parameters adopted are those corresponding to the black dashed curve. The solid curve shows the accuracy (compared to direct CLASS outputs) when using {\tt K$\_$MAX$\_$SPLINE}$=500$/Mpc, which exceeds our requirements. The magenta curve shows the impact of using the higher resolution $\Delta\ln k=10^{-4}$ in Eq. \ref{eq:NLPSTaylor}. For comparison, the impact of baryonic physics on the matter power spectrum is $\sim 10\%$ at $k=1$/Mpc \citep{Schneider15}. \jab{I changed the wording here a bit. Check that you agree.}}
 \label{fig:NLextrapol}
 \end{figure*}
 %------------------------
 
-\subsubsection{Linear extrapolation}
+\subsubsection{Extrapolation for the linear power spectrum}
 \label{sec:Lextrapol}
 
 With the implementation described in the previous section, the power spectrum splines are initialized up to {\tt K$\_$MAX$\_$SPLINE}. This is also true for the linear matter power spectrum, which is used within \ccl in particular to obtain $\sigma_8$ (see Eq. \ref{eq:sigR}). We have tested here how the procedure described in the previous section affects the convergence of the linear matter power spectrum. We compare the fiducial \ccl output to the case where we set {\tt K$\_$MAX$\_$SPLINE}$=5\times 10^3/$Mpc. The result is shown in Figure \ref{fig:Lextrapol}. Although there is a significant difference ($\gtrsim 10\%$) between the linear power spectra at large $k$, we have confirmed that the difference in $\sigma_8$ is negligible. Nevertheless, for other applications that use the linear power spectrum, the user might need to increase the value of {\tt K$\_$MAX$\_$SPLINE}.
@@ -417,7 +417,7 @@ We plan to implement the following power spectrum methods in the future:
 
 There are two alternative schemes for normalization of the matter power spectrum. The first one is to specify the value of $A_s$, the amplitude of the primordial power spectrum, which is passed directly to {\tt CLASS}. This option is available in the case of the linear/nonlinear matter power spectrum implementation. For these, as well as for BBKS and E\&H transfer functions, there is the additional option to set the normalization of the matter power spectrum by specifying $\sigma_8$, the RMS density contrast averaged over spheres of radius $8h^{-1}$Mpc. The computation of $\sigma_8$ is described in Section \ref{sec:hmf}.
 
-In practice, there is only one argument that encodes the normalization. This is the argument ${\tt norm\_pk}$, which can be passed the power spectrum normalization parameterized by $\sigma_8$ or $A_\mathrm{s}$. As noted above, {\tt ccl$\_$parameters$\_$create} switches to $\sigma_8$ normalization if ${\tt norm\_pk} > 10^{-5}$, and to $A_{\mathrm s}$ normalization otherwise.
+In practice, there is only one argument that encodes the normalization. This is the argument ${\tt norm\_pk}$, which can be passed the power spectrum normalization parameterized by $\sigma_8$ or $A_\mathrm{s}$. As noted above, {\tt ccl$\_$parameters$\_$create} switches to $\sigma_8$ normalization if ${\tt norm\_pk} > 10^{-5}$, and to $A_{\mathrm s}$ normalization otherwise. \jab{Not the case for Python, right?}
 
 \subsection{Angular power spectra}
 \label{sec:cl}
@@ -731,7 +731,7 @@ The currently implemented model in \ccl allows for an arbitrary overdensity $\De
 \label{sec:photoz}
 The functionality described in this section is implemented in {\tt ccl\_lsst\_specs.c}.
 
-LSST galaxy redshifts will be obtained using photometry. A model is therefore required for the probability of measuring a photometric redshift $z_{\rm ph}$ for an object with hypothetical spectroscopic redshift $z_{\rm s}$. \ccl allows the user to flexibly provide their own photometric redshift model. Equally, although this part of \ccl has been designed with photometric redshift in mind, it could be employed by the user to accommodate other types of redshift measurements.
+LSST galaxy redshifts will be obtained using photometry. A model is therefore required for the probability of measuring a photometric redshift $z_{\rm ph}$ for an object with hypothetical spectroscopic redshift $z_{\rm s}$. \ccl allows the user to flexibly provide their own photometric redshift model. Equally, although this part of \ccl has been designed with photometric redshift in mind, it could be employed by the user to accommodate other types of redshift measurements. \jab{I know I suggested this last sentence, but now it reads as odd. If we use "spectroscopic redshift" to mean "true redshift" then there is no other type of redshift measurement that really makes sense in this framework. I had just meant that spec-z's also have some (small) scatter which could in principle be handled by CCL. I think either we explicitly mention this point, or just drop the last sentence.}
 
 To take advantage of this functionality, the user writes a function which accepts as input a photometric redshift, a spectroscopic redshift, and a void pointer to a structure containing any further parameters of the photo-z model. This function will return the probability of measuring the input photometric redshift given the input spectroscopic redshift. Explicitly, it should take the form:
 
@@ -739,7 +739,7 @@ To take advantage of this functionality, the user writes a function which accept
 
 This function is responsible for extracting the photo-z model parameters from the void pointer {\tt user$\_$par} itself.
 
-This model can be used when computing $\frac{dN}{dz}^i$ in photometric redshift bin $i$, as given by equation \ref{photoz} below. An example of how the user can construct the required functions and structure can be found in {\tt ccl\_sample\_run.c}. A simpler example that uses a built-in Gaussian photo-z model is also provided.
+This model can be used when computing $\frac{dN}{dz}^i$ in photometric redshift bin $i$, as given by equation \ref{photoz} below. An example of how the user can construct the required functions and structure can be found in {\tt ccl\_sample\_run.c}. An example that uses a built-in Gaussian photo-z model is also provided.
 
 \subsection{LSST Specifications}
 \label{sec:specs}
@@ -818,7 +818,7 @@ From the comparison, we were also able to identify some typical issues which aff
 \item For achieving $10^{-4}$ precision in $\sigma(M)$ and the normalisation of the power spectrum, one should check that the integral of $\sigma_8$ and $\sigma(M)$ has converged for the chosen values of $\{k_{\rm min},k_{\rm max}\}$. After checking convergence, we achieved the desired precision.
 \item Also note that for $\sigma(M)$, it is important to set the desired precision level correctly for the numerical integrator. The integral usually yields $\sigma^2(M)$, and not $\sigma(M)$. Hence, one has to set the desired precision taking the exponent into account.
 \item The value of the gravitational constant, $G$, enters into the critical density. We found that failure to define $G$ with sufficient precision would result in lack of convergence at the $10^{-4}$ level between the different submissions. Importantly, note that CAMB barely has $10^{-4}$ precision in $G$ (and similarly, there might be other constants within CAMB/CLASS for which one should check the precision level). For \ccl, we are using the value from the Particle Physics Handbook. 
-\item Including/excluding radiation in the computation of the comoving distances and the growth function can easily make a difference of $10^{-4}$ at the redshifts required in this submission.
+\item Including/excluding radiation in the computation of the comoving distances and the growth function can easily make a difference of $10^{-4}$ at the redshifts required in this comparison.
 \end{itemize}
 
 In a second stage, we used the BBKS linear matter power spectrum from the previous step to compare two-point statistics for two redshift bins, resulting in three tomography combinations, ($1-1$),($1-2$),($2-2$). We computed the following quantities:
@@ -842,7 +842,7 @@ We adopted the following analytic redshift distributions: a Gaussian with $\sigm
 In this second step, only 2 codes have been compared so far. More outputs are needed to guarantee convergence. Preliminarily, from these outputs, we have concluded that:
 \begin{itemize}
 \item The cross-correlation between bins is particularly sensitive to the number of points where the kernels have been sampled.
-\item The accuracy of the correlation function is sensitive to $\ell_{\rm max}$. We had to use up to $\ell_{\rm max}=3\times10^4$ to get convergence (and we could not achieve $0.01\%$ convergence).
+\item The accuracy of the correlation function is sensitive to $\ell_{\rm max}$. We had to use up to $\ell_{\rm max}=3\times10^4$ for convergence (and we could not achieve $0.01\%$ convergence).
 \item The large scales of the correlation function are sensitive to $\ell_{\rm min}$. The use of the flat-sky approximation is also relevant on these scales.
 \item For sufficiently high precision, the correlation functions are sensitive to how the power spectrum is sampled and interpolated.
 \end{itemize}
@@ -865,7 +865,7 @@ Finally, we note that formal tests for predictions in cosmologies with neutrinos
 \section{Default configuration}
 \label{sec:default}
 
-In its default configuration, \ccl adopts the nonlinear matter power spectrum from {\tt CLASS} through the Halofit implementation and the Tinker mass function for cluster number counts.
+In its default configuration, \ccl adopts the nonlinear matter power spectrum from {\tt CLASS} through the Halofit implementation and the Tinker mass function for cluster number counts. \jab{Why is this a section? This info could be contained as a subsection.}
 
 
 \section{Examples for C implementation}
