@@ -281,7 +281,6 @@ setup(name="pyccl",
             swig_opts=['-threads'], 
             )
     ],
-    data_files=['./tests/benchmark/*'],
     cmdclass={
         'install': PyInstall,
         'build_clib': BuildExternalCLib,
