@@ -7,6 +7,8 @@ RUN pip install numpy ipython[all] scipy matplotlib
 
 ENV GSL_TAR="gsl-2.3.tar.gz"
 ENV GSL_DL="http://ftp.wayne.edu/gnu/gsl/$GSL_TAR"
+ENV FFTW_TAR="fftw-3.3.6-pl2.tar.gz"
+ENV FFTW_DL="http://www.fftw.org/$FFTW_TAR"
 
 ENV LD_LIBRARY_PATH=/usr/local/lib
 
@@ -20,6 +22,16 @@ RUN wget -q $GSL_DL \
     && make -j 4 \
     && make install
 
+WORKDIR /fftw
+
+RUN wget -q $FFTW_DL \
+    && tar zxvf $FFTW_TAR \
+    && rm -f $FFTW_TAR \
+    && cd /fftw/fftw-3.3.6-pl2 \
+    && ./configure --enable-shared \
+    && make \
+    && make install
+
 RUN cd /home \
     && git clone https://github.com/LSSTDESC/CCL.git \
     && cd /home/CCL \
@@ -27,8 +39,7 @@ RUN cd /home \
     && make \
     && make install \
     && autoreconf -i \
-    && python setup.py install \
-    && python setup.py install
+    && python setup.py install 
 
 WORKDIR /home/CCL
 
