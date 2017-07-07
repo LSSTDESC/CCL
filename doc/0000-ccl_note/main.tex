@@ -44,7 +44,7 @@
 
 \begin{abstract}
 
-The Core Cosmology Library ({\tt CCL}) provides routines to compute basic cosmological observables with validated numerical accuracy. These routines have been validated to a hereby documented accuracy level against the results of the Code Comparison Project. In the current version, predictions are provided for distances and background quantities, angular auto- and cross-spectra of cosmic shear and clustering, and the halo mass function. Fiducial specifications for the expected LSST galaxy distributions and clustering bias are also included, together with a facility to compute redshift distributions for a user-defined photometric redshift model. {\tt CCL} is written in C with a Python interface. In this note, we explain the functionality of the publicly released ({\tt CCL} v0.2) library.
+The Core Cosmology Library ({\tt CCL}) provides routines to compute basic cosmological observables with validated numerical accuracy. These routines have been validated to a hereby documented accuracy level against the results of the Code Comparison Project. In the current version, predictions are provided for distances and background quantities, angular auto- and cross-spectra of cosmic shear and clustering, and the halo mass function. Fiducial specifications for the expected LSST galaxy distributions and clustering bias are also included, together with a facility \jab{best word?} to compute redshift distributions for a user-defined photometric redshift model. {\tt CCL} is written in C with a Python interface. In this note, we explain the functionality of the publicly released ({\tt CCL} v0.2) library.
 
 \end{abstract}
 
@@ -75,8 +75,8 @@ This note describes how to install {\tt CCL} (Section \ref{sec:install}), how {\
 \begin{itemize}
 \item GNU Scientific Library {\tt GSL}\footnote{\url{https://www.gnu.org/software/gsl/}}, {\tt GSL-2.1} or higher.
 \item Simplified Wrapper and Interface Generator {\tt SWIG}\footnote{\url{http://www.swig.org/}} is not needed to run {\tt CCL}, but if you are developing new features, you will need {\tt SWIG}.
-\item {\tt FFTW}\footnote{\url{http://www.fftw.org}} is required for computation of correlation functions.
-\item {\tt FFTlog}\footnote{\url{http://casa.colorado.edu/~ajsh/FFTLog/}} is provided within {\tt CCL} with minor modifications.
+\item {\tt FFTW}\footnote{\url{http://www.fftw.org}} is required for computation of correlation functions. \jab{specify fftw3?}
+\item {\tt FFTlog}\footnote{\url{http://casa.colorado.edu/~ajsh/FFTLog/}} is provided within {\tt CCL} with minor modifications. \jab{also link to anze's repo with C code?}
 %\item A version of {\tt Angpow} \citep{2017arXiv170103592C} is also incorporated within {\tt CCL}.
 \end{itemize}
 
@@ -107,7 +107,7 @@ When pulling a new version of {\tt CCL}, you can recompile the library by runnin
 \subsection{Alternative installation and pip}
 
 
-There exists also the possibility of installing both the C library and the Python wrapper together by running
+It is also possible to install the C library and the Python wrapper together by running
 \begin{verbatim}
  $ python setup.py install --prefix=/home/desc_fan
 \end{verbatim}
@@ -154,7 +154,7 @@ With Docker installed and the Docker Daemon running, creating an image is relati
 \begin{verbatim}
 docker build -t ccl .
 \end{verbatim}
-This will begin the process of creating the image file for {\tt CCL} locally. This Dockerfile contains all installed C libraries in {\tt CCL} as well as the Python wrapper. It currently utilizes {\tt python:2.7} as a base image and supports both ipython and Jupyter notebook. The virtualization process should have minimum impact on performance.
+\jab{punctuation in this context is not consistent. Do we want the period or not?}This will begin the process of creating the image file for {\tt CCL} locally. This Dockerfile contains all installed C libraries in {\tt CCL} as well as the Python wrapper. It currently utilizes {\tt python:2.7} as a base image and supports both ipython and Jupyter notebook. The virtualization process should have minimal impact on performance.
 
 The resulting Docker image has two primary functionalities. The first is a command that will open a Jupyter notebook tied to a port connection on your local machine. This can be utilized with the following command on run:
 \begin{verbatim}
@@ -169,7 +169,7 @@ This will allow for full access to the virtual machine for installation of any a
 \section{Documentation}
 \label{sec:doc}
 
-{\tt CCL} has {\tt doxygen}\footnote{\url{http://www.stack.nl/~dimitri/doxygen/}} documentation for its C routines. This can be found in the directory {\tt doc/} within the {\tt CCL} repository by opening the {\tt index.html} file in your browser. The {\tt python} routines are documented in situ.
+{\tt CCL} has {\tt doxygen}\footnote{\url{http://www.stack.nl/~dimitri/doxygen/}} documentation for its C routines. This can be found in the directory {\tt doc/} within the {\tt CCL} repository by opening the {\tt index.html} file in your browser. The {\tt python} routines are documented in situ. \jab{Just make this a subsection of the Installation section? It's pretty short, unless there are future plans to add more here.}
 
 \section{Functionality}
 \label{sec:func}
@@ -187,7 +187,7 @@ Ultimately, {\tt CCL} will aim to incorporate theoretical predictions for all co
   \item A single massive neutrino or multiple equal-mass massive neutrinos, in combination with any of the above except a user-defined modified growth function.
 \end{itemize}
 
-Not all functionalities are available for all models. For a reference of what predictions are available for each model, see Table \ref{tab:cosmo}.
+Not all functionalities are available for all models. For a reference of what predictions are available for each model, see Table \ref{tab:cosmo}. \jab{For MG, if users install their own class, does CCL gain functionality? Also, why is MG listed here? I don't see any mention of MG growth functions, except for the user-defined one.}
 
 The first step to use CCL is to generate a {\tt ccl$\_$cosmology} structure, containing all of the information required to compute cosmological observables. A {\tt ccl$\_$cosmology} structure is generated using the information from a {\tt ccl$\_$parameters} object and a {\tt ccl$\_$configuration} object.
 
