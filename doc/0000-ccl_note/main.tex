@@ -421,7 +421,7 @@ There are two alternative schemes for normalization of the matter power spectrum
 
 In practice, there is only one argument that encodes the normalization. This is the argument ${\tt norm\_pk}$, which can be passed the power spectrum normalization parameterized by $\sigma_8$ or $A_\mathrm{s}$. As noted above, {\tt ccl$\_$parameters$\_$create} switches to $\sigma_8$ normalization if ${\tt norm\_pk} > 10^{-5}$, and to $A_{\mathrm s}$ normalization otherwise. 
 
-In the {\tt python} implementation, {\tt CCL} only allows for $\sigma_8$ to be passed.
+In the {\tt python} implementation, {\tt CCL} allows for either $\sigma 8$ or {\tt A\_s} to be passed as parameters.
 
 \subsection{Angular power spectra}
 \label{sec:cl}
