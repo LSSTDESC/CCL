@@ -109,6 +109,19 @@ def luminosity_distance(cosmo, a):
     return _vectorize_fn(lib.luminosity_distance, 
                          lib.luminosity_distance_vec, cosmo, a)
 
+def distance_modulus(cosmo, a):
+    """Distance Modulus
+    
+    Args:
+        cosmo (:obj:`ccl.cosmology`): Cosmological parameters.
+        a (float or array_like): Scale factor(s), normalized to 1 today.
+
+    Returns:
+        distance_modulus (float or array_like): Distance modulus at a.  
+    """
+    return _vectorize_fn(lib.distance_modulus,
+                         lib.distance_modulus_vec, cosmo, a)
+
 def scale_factor_of_chi(cosmo, chi):
     """Scale factor, a, at a comoving distance chi.
     

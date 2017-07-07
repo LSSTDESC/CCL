@@ -33,10 +33,24 @@ def read_chi_test_file():
     chi = dat[1:]
     return z, chi
 
+def read_dm_test_file():
+    """
+    Read the file containing all the distance modulus benchmarks 
+    """
+    # Load data from file
+    dat = np.genfromtxt("./benchmark/dm_model1-5.txt").T
+    assert(dat.shape == (6,6))
+
+    # Split into redshift column and chi(z) columns
+    z = dat[0]
+    dm = dat[1:]
+    return z, dm
+
 # Set-up test data
 z, chi = read_chi_test_file()
+_, dm = read_dm_test_file()
 
-def compare_distances(z, chi_bench, Omega_v, w0, wa):
+def compare_distances(z, chi_bench,dm_bench, Omega_v, w0, wa):
     """
     Compare distances calculated by pyccl with the distances in the benchmark 
     file.
@@ -55,29 +69,34 @@ def compare_distances(z, chi_bench, Omega_v, w0, wa):
     # Calculate distance using pyccl
     a = 1. / (1. + z)
     chi = ccl.comoving_radial_distance(cosmo, a) * h
-    
     # Compare to benchmark data
     assert_allclose(chi, chi_bench, atol=1e-12, rtol=DISTANCES_TOLERANCE)
 
+    #compare distance moudli where a!=1
+    a_not_one = (a!=1).nonzero()
+    dm = ccl.distance_modulus(cosmo,a[a_not_one])
+
+    assert_allclose(dm, dm_bench[a_not_one], atol=1e-3, rtol = DISTANCES_TOLERANCE*10)
+
 def test_distance_model_0():
     i = 0
-    compare_distances(z, chi[i], Omega_v_vals[i], w0_vals[i], wa_vals[i])
+    compare_distances(z, chi[i],dm[i], Omega_v_vals[i], w0_vals[i], wa_vals[i])
 
 def test_distance_model_1():
     i = 1
-    compare_distances(z, chi[i], Omega_v_vals[i], w0_vals[i], wa_vals[i])
+    compare_distances(z, chi[i],dm[i], Omega_v_vals[i], w0_vals[i], wa_vals[i])
 
 def test_distance_model_2():
     i = 2
-    compare_distances(z, chi[i], Omega_v_vals[i], w0_vals[i], wa_vals[i])
+    compare_distances(z, chi[i],dm[i], Omega_v_vals[i], w0_vals[i], wa_vals[i])
 
 def test_distance_model_3():
     i = 3
-    compare_distances(z, chi[i], Omega_v_vals[i], w0_vals[i], wa_vals[i])
+    compare_distances(z, chi[i],dm[i], Omega_v_vals[i], w0_vals[i], wa_vals[i])
 
 def test_distance_model_4():
     i = 4
-    compare_distances(z, chi[i], Omega_v_vals[i], w0_vals[i], wa_vals[i])
+    compare_distances(z, chi[i],dm[i], Omega_v_vals[i], w0_vals[i], wa_vals[i])
 
 
 if __name__ == "__main__":

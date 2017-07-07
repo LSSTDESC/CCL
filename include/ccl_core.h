@@ -16,7 +16,6 @@ typedef struct ccl_parameters {
   double Omega_c;
   double Omega_b;
   double Omega_m;
-  double Omega_n;
   double Omega_k;
   double sqrtk;
   int k_sign;

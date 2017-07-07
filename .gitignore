@@ -28,3 +28,6 @@ tests/check_ccl
 *.pyc
 build/*
 tests/.ipynb_checkpoints/
+
+# Ignore VCS files
+.idea/*

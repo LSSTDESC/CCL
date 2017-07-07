@@ -85,9 +85,6 @@ class parameters(_object):
     __swig_setmethods__["Omega_m"] = _ccllib.parameters_Omega_m_set
     __swig_getmethods__["Omega_m"] = _ccllib.parameters_Omega_m_get
     if _newclass:Omega_m = _swig_property(_ccllib.parameters_Omega_m_get, _ccllib.parameters_Omega_m_set)
-    __swig_setmethods__["Omega_n"] = _ccllib.parameters_Omega_n_set
-    __swig_getmethods__["Omega_n"] = _ccllib.parameters_Omega_n_get
-    if _newclass:Omega_n = _swig_property(_ccllib.parameters_Omega_n_get, _ccllib.parameters_Omega_n_set)
     __swig_setmethods__["Omega_k"] = _ccllib.parameters_Omega_k_set
     __swig_getmethods__["Omega_k"] = _ccllib.parameters_Omega_k_get
     if _newclass:Omega_k = _swig_property(_ccllib.parameters_Omega_k_get, _ccllib.parameters_Omega_k_set)
@@ -446,6 +443,14 @@ def luminosity_distances(*args):
   """luminosity_distances(cosmology cosmo, int na, double [na] a, double [na] output, int * status)"""
   return _ccllib.luminosity_distances(*args)
 
+def distance_modulus(*args):
+  """distance_modulus(cosmology cosmo, double a, int * status) -> double"""
+  return _ccllib.distance_modulus(*args)
+
+def distance_moduli(*args):
+  """distance_moduli(cosmology cosmo, int na, double [na] a, double [na] output, int * status)"""
+  return _ccllib.distance_moduli(*args)
+
 def growth_factor(*args):
   """growth_factor(cosmology cosmo, double a, int * status) -> double"""
   return _ccllib.growth_factor(*args)
@@ -509,6 +514,10 @@ def h_over_h0_vec(*args):
 def luminosity_distance_vec(*args):
   """luminosity_distance_vec(cosmology cosmo, double * a, double * output, int * status)"""
   return _ccllib.luminosity_distance_vec(*args)
+
+def distance_modulus_vec(*args):
+  """distance_modulus_vec(cosmology cosmo, double * a, double * output, int * status)"""
+  return _ccllib.distance_modulus_vec(*args)
 
 def scale_factor_of_chi_vec(*args):
   """scale_factor_of_chi_vec(cosmology cosmo, double * chi, double * output, int * status)"""
