@@ -38,7 +38,7 @@ def read_dm_test_file():
     Read the file containing all the distance modulus benchmarks 
     """
     # Load data from file
-    dat = np.genfromtxt("./benchmark/dm_model1-5.txt").T
+    dat = np.genfromtxt(join(dirname(__file__),"benchmark/chi_model1-5.txt")).T
     assert(dat.shape == (6,6))
 
     # Split into redshift column and chi(z) columns
