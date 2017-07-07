@@ -40,7 +40,6 @@ static int linecount(FILE *f)
 
 static void compare_corr(char *compare_type,int algorithm,struct corrs_data * data)
 {
-
   int ii,status=0;
 
   /* Set up the CCL configuration for comparing to benchmarks
@@ -156,7 +155,6 @@ static void compare_corr(char *compare_type,int algorithm,struct corrs_data * da
   double *wt_ll_11_h_mm,*wt_ll_12_h_mm,*wt_ll_22_h_mm;
   double *wt_ll_11_h_pp,*wt_ll_12_h_pp,*wt_ll_22_h_pp;
   double theta_in[nofl];
-
 
   for(ii=0;ii<nofl;ii++) {
     int stat;
@@ -289,7 +287,7 @@ static void compare_corr(char *compare_type,int algorithm,struct corrs_data * da
   int npoints=0;
   for(ii=0;ii<nofl;ii++) {
     double tol;
-
+    
     if((theta_in[ii]<sig_theta_in[0]) ||(theta_in[ii]>sig_theta_in[nsig-1]))
       continue;
     else

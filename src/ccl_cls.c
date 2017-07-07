@@ -85,7 +85,6 @@ typedef struct {
 static double integrand_mag(double chip,void *params)
 {
   IntMagPar *p=(IntMagPar *)params;
-//EK: added local status here as the status testing is done in routines called from this function
   int status;
   double chi=p->chi;
   double a=ccl_scale_factor_of_chi(p->cosmo,chip, p->status);
@@ -166,7 +165,7 @@ static CCL_ClTracer *cl_tracer_new(ccl_cosmology *cosmo,int tracer_type,
 
   if((tracer_type==CL_TRACER_NC)||(tracer_type==CL_TRACER_WL)) {
     clt->chimax=ccl_comoving_radial_distance(cosmo,1./(1+z_n[nz_n-1]), status);
-    clt->spl_nz=ccl_spline_init(nz_n,z_n,n,0,0); //ERROR HERE?
+    clt->spl_nz=ccl_spline_init(nz_n,z_n,n,0,0);
     if(clt->spl_nz==NULL) {
       free(clt);
       *status=CCL_ERROR_SPLINE;
@@ -189,7 +188,7 @@ static CCL_ClTracer *cl_tracer_new(ccl_cosmology *cosmo,int tracer_type,
     F.function=&speval_bis;
     F.params=clt->spl_nz;
     clstatus=gsl_integration_qag(&F,z_n[0],z_n[nz_n-1],0,1E-4,1000,GSL_INTEG_GAUSS41,w,&nz_norm,&nz_enorm);
-    gsl_integration_workspace_free(w); //TODO:check for integration errors
+    gsl_integration_workspace_free(w);
     if(clstatus!=GSL_SUCCESS) {
       ccl_spline_free(clt->spl_nz);
       free(clt);
@@ -683,16 +682,7 @@ static void get_k_interval(ccl_cosmology *cosmo,CCL_ClTracer *clt1,CCL_ClTracer 
   if(chimin<=0)
     chimin=0.5*(l+0.5)/ccl_splines->K_MAX;
 
-  //TODO: Should we replace 2 and -4 by log10 of K_MIN_INT and K_MAX_INT
-  //*lkmax = log10(K_MAX_INT); //=3, breaks Cl test
   *lkmax=fmin( 2,log10(2  *(l+0.5)/chimin));
-  //*lkmin=log10(K_MIN_INT); //=-4, breaks Cl test
-  /*if(l<1e4){
-      *lkmin=fmax(-4,log10(0.5*(l+0.5)/chimax)); //fiduc
-   } else {
-      *lkmin=-4;
-   }*/
-  //Try other scalings
   *lkmin=fmax(-4,log10(0.1*(l+0.5)/chimax));
 }
 
@@ -730,4 +720,3 @@ double ccl_angular_cl(ccl_cosmology *cosmo,int l,CCL_ClTracer *clt1,CCL_ClTracer
 
   return M_LN10*result/(l+0.5);
 }
-//TODO: currently using linear power spectrum

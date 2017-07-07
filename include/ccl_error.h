@@ -21,8 +21,8 @@
 #define CCL_ERROR_NU_INT 1037
 
 typedef enum {
-    CCL_ERROR_POLICY_EXIT = 0,
-    CCL_ERROR_POLICY_CONTINUE = 1,
+  CCL_ERROR_POLICY_EXIT = 0,
+  CCL_ERROR_POLICY_CONTINUE = 1,
 } CCLErrorPolicy;
 
 /** Raise an exception

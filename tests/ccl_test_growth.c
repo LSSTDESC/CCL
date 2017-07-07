@@ -38,7 +38,7 @@ static void read_growth_test_file(double z[6], double gf[5][6])
   rtn = fgets(str, 1024, f);
   
     // File is fixed format - five rows and six columns
-  for (int i=0; i<6; i++){
+  for (int i=0; i<6; i++) {
     int count = fscanf(f, "%le %le %le %le %le %le\n", &z[i],
 		       &gf[0][i], &gf[1][i], &gf[2][i], &gf[3][i], &gf[4][i]);
     	// Check that all the stuff in the benchmark is there
@@ -49,8 +49,7 @@ static void read_growth_test_file(double z[6], double gf[5][6])
 
 // Set up the cosmological parameters to be used in each of the
 // models
-CTEST_SETUP(growth){
-
+CTEST_SETUP(growth) {
   // Values that are the same for all 5 models
   data->Omega_c = 0.25;
   data->Omega_b = 0.05;
@@ -68,7 +67,7 @@ CTEST_SETUP(growth){
   double w_a[5]     = {  0.0,  0.0,  0.1,  0.1,  0.1  };
   
   // Fill in the values from these constant arrays.
-  for (int i=0; i<5; i++){
+  for (int i=0; i<5; i++) {
     data->Omega_v[i] = Omega_v[i];
     data->w_0[i]     = w_0[i];
     data->w_a[i]     = w_a[i];
@@ -78,8 +77,6 @@ CTEST_SETUP(growth){
   // The file of benchmark data.
   read_growth_test_file(data->z, data->gf);
 }
-
-
 
 static void compare_growth(int model, struct growth_data * data)
 {
@@ -93,7 +90,7 @@ static void compare_growth(int model, struct growth_data * data)
   ASSERT_NOT_NULL(cosmo);
   
   // Compare to benchmark data
-  for (int j=0; j<6; j++){
+  for (int j=0; j<6; j++) {
     double a = 1/(1.+data->z[j]);
     double gf_ij=ccl_growth_factor_unnorm(cosmo,a, &status);
     if (status) printf("%s\n",cosmo->status_message);
@@ -146,31 +143,31 @@ static void check_mgrowth(void)
   ccl_cosmology_free(cosmo2);
 }
 
-CTEST2(growth, model_1){
+CTEST2(growth, model_1) {
   int model = 0;
   compare_growth(model, data);
 }
 
-CTEST2(growth, model_2){
+CTEST2(growth, model_2) {
   int model = 1;
   compare_growth(model, data);
 }
 
-CTEST2(growth, model_3){
+CTEST2(growth, model_3) {
   int model = 2;
   compare_growth(model, data);
 }
 
-CTEST2(growth, model_4){
+CTEST2(growth, model_4) {
   int model = 3;
   compare_growth(model, data);
 }
 
-CTEST2(growth, model_5){
+CTEST2(growth, model_5) {
   int model = 4;
   compare_growth(model, data);
 }
 
-CTEST2(growth,mgrowth){
+CTEST2(growth,mgrowth) {
   check_mgrowth();
 }

@@ -35,7 +35,8 @@ void xi2pk(int N,  const double r[],  const double xi[], double k[], double pk[]
  * in this notation.  The input k-values must be logarithmically spaced.  The
  * resulting xi_l^m(r) will be evaluated at the dual r-values
  *   r[0] = 1/k[N-1], ..., r[N-1] = 1/k[0]. */
-void fftlog_ComputeXiLM(double l, double m, int N, const double k[],  const double pk[], double r[], double xi[]);
+void fftlog_ComputeXiLM(double l, double m, int N, const double k[],  const double pk[],
+			double r[], double xi[]);
 
 
 #include <complex.h>
