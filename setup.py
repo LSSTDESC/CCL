@@ -261,6 +261,7 @@ setup(name="pyccl",
         Extension("_ccllib",["pyccl/ccl_wrap.c"],
             libraries=['m', 'gsl', 'gslcblas', 'ccl'],
             include_dirs=[numpy_include, "include/", "class/include"],
+            library_dirs=["./.libs/"],
             extra_compile_args=['-O4', '-std=c99'],
             swig_opts=['-threads'],
             )
