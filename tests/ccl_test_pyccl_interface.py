@@ -2,7 +2,6 @@ import numpy as np
 from numpy.testing import assert_raises, assert_warns, assert_no_warnings, \
                           assert_, decorators, run_module_suite
 import pyccl as ccl
-import math
 
 def reference_models():
     """
