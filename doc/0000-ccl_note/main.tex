@@ -503,6 +503,12 @@ where
  &\tilde{\Delta}_\ell^{\rm IA}(k)=\sqrt{\frac{(\ell+2)!}{(\ell-2)!}}\frac{p_z(z_\ell)\,b_{\rm IA}(z_\ell)f_{\rm red}(z_\ell)H(z_\ell)}{(\ell+1/2)^2}
 \end{align}
 
+%----------------------------------------------------------------
+%
+%      This is the Angpow section currently under development
+%
+%----------------------------------------------------------------
+
 \begin{comment}
 
 \subsubsection{Beyond Limber: angpow}
@@ -522,8 +528,6 @@ where
 %   adsurl = {http://adsabs.harvard.edu/abs/2017arXiv170103592C},
 %  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
 %}
-
-
 
 Our aim is to compute the angular over density power spectrum  $C_{\ell}(z_1, z_2)$ as a cross-correlation between two $z$-shells with mean values ($z_1, z_2$) and also the auto-correlation $C_{\ell}(z_1)$ with $z_1 = z_2$,  taking into account, in both cases, possible redshift selection functions and physical processes such as redshift-space distortions without any Limber numerical approximation. For this purpose, \ccl has been linked to the \texttt{Angpow} code \citep{2017arXiv170103592C}, which is briefly described here.
 
@@ -583,8 +587,6 @@ In brief this algorithm proceeds the following way:
 All the Chebyshev expansions and the Clenshaw-Curtis quadrature are
 performed via the DCT-I fast transform of FFTW. 
 
-%Text Added JECampagne 27/05/17 END
-\todo{Can we have a sentence or two with motivation and comparison of angpow vs other methods?}
 We have tested the code both on laptop (Linux, MacOSX) as well as on
 Computer Center (CCIN2P3 in France and NERSC in the USA). 
 We use OpenMP to distribute the computation of a given $C_\ell$ on a single
@@ -594,13 +596,20 @@ reconstruct these accurate spectra. Such performances are much higher than those
 with {\tt CLASSgal} when not using the Limber approximation.
 For instance using{\tt CLASSgal}  to compute the auto-correlation with a Gaussian selection function with ($z_\mrm{mean}=1$, $\sigma_z=0.02$, $5\sigma_z$-cut) and $k_\mrm{max}=1\ \mrm{Mpc}^{-1}$ and a radial quadrature based on $N_\mrm{pts}=139$ sample points, it takes
 about 15s on 16 threads, which is to be compared to about 0.5s with \texttt{Angpow}.
+%Text Added JECampagne 27/05/17 END
 
 \end{comment}
+
+
+%----------------------------------------------------------------
+%
+%      End of the Angpow section currently under development
+%
+%----------------------------------------------------------------
 
 \subsection{Correlation functions}
 \label{sec:corr}
 
-%\subsubsection{Flat-sky approximation}
 
 The following expressions relating the angular power spectra and correlation functions are valid in the flat-sky approximation\footnote{See the weak lensing review by \citet{Bartelmann01}, page 44 and \citet{Joachimi10}.}. In all cases, $f_K(\chi)$ is comoving angular diameter distance, which differs from the radial comoving distance $\chi$ only in the case of cosmologies with non-zero curvature.
 
@@ -625,6 +634,12 @@ where the angular lensing convergence power spectrum $C^{ab}_\ell$ is given abov
 \end{equation}
 
 For numerical integration of the correlation functions, we make use of the public code {\tt FFTlog}\footnote{\url{http://casa.colorado.edu/~ajsh/FFTLog/}}\citep{Hamilton2000,Talman2009}. In brief, {\tt FFTlog} works on functions periodic in log space, by writing the Hankel Transform as a convolution between Bessel functions and the function of interest (in this case $C_\ell$). A version of this code is included in \ccl with minor modifications.
+
+%-----------------------------------------------------------
+%
+%   Correlation: beyond flat-sky (under development)
+%
+%-----------------------------------------------------------
 
 \begin{comment}
 \subsubsection{Beyond flat-sky}
@@ -662,7 +677,7 @@ The expressions for $\xi_+$ (which is the same as in Eq.~\ref{eq:xi_pl0}) and fo
   \xi_-(\theta)&=\frac{1}{4\pi}\sum_{\ell}\frac{(\ell-4)!}{(\ell+4)!}\ell^4{(2\ell+1)}C_{\ell}^{\kappa\kappa}
   P_{\ell}^4(\cos\theta)\label{eq:xi_m}
 \end{align}
-\todo{Sukhdeep: $\xi_-$ is a bit of cheating. I'm not familiar with spin harmonics, so I simply took the relation between $P_\ell^m$ and $J_m(\ell \theta)$ to get this expression from the Hankel transform for $\xi_-$. It may not be very accurate at large scale (low $\ell$) as is evident from $g\gamma_T$ expression. I can sort this out later. If somebody knows correct expression already, please feel free to put it in.}
+\todo{Simply took the relation between $P_\ell^m$ and $J_m(\ell \theta)$ to get this expression from the Hankel transform for $\xi_-$. It may not be very accurate at large scale (low $\ell$) as is evident from $g\gamma_T$ expression. To be revisited.}
 
 The {\tt ccl\_tracer\_corr\_legendre} routine computes these transform to convert angular power spectra, $C_\ell$, into correlation functions. We use the associated Legendre function implementation from the {\tt GSL} library. {\tt ccl\_tracer\_corr\_legendre} routine evaluations can be very slow, especially for polynomials $P_\ell^m$ with $m>0$. Note that $P_\ell^m$ evaluations need to be done only once and can then be saved as long as $\ell$ and $\theta$ values do not change. However, \ccl has not yet implemented this feature.
 
@@ -672,14 +687,15 @@ Notice that in the flat-sky limit, the expressions in Eqs.~\ref{eq:xi_p}--\ref{e
   P_{\ell}^m(\cos\theta)=(-1)^m\frac{(\ell+m)!}{(\ell-m)!}\ell^{-m}J_m(\ell\theta)
 \end{align}
 which yields final expressions that coincide with Eq. \ref{eq:xipxim}.
-%In the flat-sky limit, We get the following expressions
-%\begin{align}
-%  \langle g\gamma_T\rangle(\theta)&=\frac{1}{2\pi}\int d\ell\ell C_\ell J_2(\ell\theta),\\
-%  \xi_+(\theta)&=\frac{1}{2\pi}\int d\ell\ell C_\ell J_0(\ell\theta),\\
-%  \xi_-(\theta)&=\frac{1}{2\pi}\int d\ell\ell C_\ell J_4(\ell\theta).
-%\end{align}
-%To evaluate the Hankel transform, we use the fast {\tt FFTlog} routine\citep{Hamilton2000,Talman2009}. In brief, FFTlog works on functions periodic in log space, by writing the Hankel Transform as a convolution between bessel function and the function of interest (in this case $C_\ell$). The convolution can then be evaluated using Fourier transforms, with Fourier transform of bessel function evaluated using analytical functions while Fourier transform of $C_\ell$ and the inverse Fourier transform of the product evaluated using fast fourier transform routines. 
+
 \end{comment}
+
+
+%-----------------------------------------------------------
+%
+%   End of Correlation: beyond flat-sky (under development)
+%
+%-----------------------------------------------------------
 
 
 \subsection{Halo mass \& halo bias functions}
