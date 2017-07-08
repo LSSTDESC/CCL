@@ -2,7 +2,6 @@
 
 import os
 import sys
-import optparse
 from distutils import log, ccompiler
 from distutils.cmd import Command
 from distutils.core import setup
@@ -253,19 +252,14 @@ def _check_extensions():
     return ret_val
 
 # CCL setup script
-parser = optparse.OptionParser()
-parser.add_option(
-        '--user', dest='user_install', action='store_true', default=False,
-        help='install in user site package (requires Python 2.6 or later)')
-parser.add_option('--prefix', dest='prefix', default=None)
-options, args = parser.parse_args()
-if options.user_install:
+
+if "--user" in sys.argv:
     libdir=os.path.realpath(os.path.join(site.USER_BASE,'lib'))
-elif options.prefix is not None:
-    libdir=os.path.realpath(os.path.join(prefix,'lib'))
+elif "--prefix" in sys.argv:
+    libdir=os.path.realpath(os.path.join(site.USER_SITE,'lib'))
 else:
-    libdir=os.path.realpath(os.path.join(sys.prefix,'lib'))
-print 'Installing at ',libdir
+    libdir=os.path.realpath(os.path.join(site.USER_SITE,'lib'))
+print sys.argv
 setup(name="pyccl",
     description="Library of validated cosmological functions.",
     author="LSST DESC",
