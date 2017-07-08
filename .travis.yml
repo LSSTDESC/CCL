@@ -1,3 +1,6 @@
+os:
+  - linux
+  - osx
 script:
 language: python
 python:
