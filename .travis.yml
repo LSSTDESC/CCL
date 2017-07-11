@@ -7,6 +7,7 @@ python:
 # We have to install it from source (this will make the tests slower)
 before_install:
   - sudo apt-get -qq update
+  - sudo apt-get install fftw3 fftw3-dev pkg-config
   - ./install-gsl.sh 
 addons:
     apt:
