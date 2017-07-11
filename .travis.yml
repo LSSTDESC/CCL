@@ -3,9 +3,13 @@ language: python
 python:
   - "2.6"
   - "2.7"
+# Travis uses Ubuntu 12.04 and 14.04. None of them have GSL2x in apt-get
+# We have to install it from source (this will make the tests slower)
 before_install:
   - sudo apt-get -qq update
-  - sudo apt-get install -y gsl-bin libgsl0-dev
+  - wget ftp://ftp.gnu.org/gnu/gsl/gsl-2.4.tar.gz > gsl-2.4.tar.gz
+  - tar -xzvf gsl-2.4.tar.gz
+  - pushd gsl-2.4 && ./configure && make && make install
 addons:
     apt:
         packages:
