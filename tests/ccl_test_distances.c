@@ -38,7 +38,7 @@ static void read_chi_test_file(double z[6], double chi[5][6])
   fgets(str, 1024, f);
   
   // File is fixed format - five rows and six columns
-  for (int i=0; i<6; i++){
+  for (int i=0; i<6; i++) {
     int count = fscanf(f, "%le %le %le %le %le %le\n", &z[i],
                &chi[0][i], &chi[1][i], &chi[2][i], &chi[3][i], &chi[4][i]);
     // Check that all the stuff in the benchmark is there
@@ -58,7 +58,7 @@ static void read_dm_test_file(double z[6], double dm[5][6])
   fgets(str, 1024, f);
 
   // File is fixed format - five rows and six columns
-  for (int i=0; i<6; i++){
+  for (int i=0; i<6; i++) {
     int count = fscanf(f, "%le %le %le %le %le %le\n", &z[i],
                        &dm[0][i], &dm[1][i], &dm[2][i], &dm[3][i], &dm[4][i]);
     // Check that all the stuff in the benchmark is there
@@ -69,8 +69,7 @@ static void read_dm_test_file(double z[6], double dm[5][6])
 
 // Set up the cosmological parameters to be used in each of the
 // models
-CTEST_SETUP(distances){
-
+CTEST_SETUP(distances) {
   // Values that are the same for all 5 models
   data->Omega_c = 0.25;
   data->Omega_b = 0.05;
@@ -87,7 +86,7 @@ CTEST_SETUP(distances){
   double w_a[5]     = {  0.0,  0.0,  0.1,  0.1,  0.1  };
 
   // Fill in the values from these constant arrays.
-  for (int i=0; i<5; i++){
+  for (int i=0; i<5; i++) {
     data->Omega_v[i] = Omega_v[i];
     data->w_0[i]     = w_0[i];
     data->w_a[i]     = w_a[i];
@@ -99,27 +98,24 @@ CTEST_SETUP(distances){
   read_chi_test_file(data->z, data->chi);
 }
 
-
-
 static void compare_distances(int model, struct distances_data * data)
-
 {
   int status=0;
   // Make the parameter set from the input data
   // Values of some parameters depend on the model index
-  ccl_parameters params = ccl_parameters_create(data->Omega_c, data->Omega_b, 
-						data->Omega_k[model], data->N_nu_rel, data->N_nu_mass, data->mnu,
+  ccl_parameters params = ccl_parameters_create(data->Omega_c, data->Omega_b, data->Omega_k[model],
+						data->N_nu_rel, data->N_nu_mass, data->mnu,
 						data->w_0[model], data->w_a[model],
 						data->h, data->A_s, data->n_s,-1,NULL,NULL, &status);
-
-    params.Omega_g=0;
-
+  
+  params.Omega_g=0;
+  
   // Make a cosmology object from the parameters with the default configuration
   ccl_cosmology * cosmo = ccl_cosmology_create(params, default_config);
   ASSERT_NOT_NULL(cosmo);
   
   // Compare to benchmark data
-  for (int j=0; j<6; j++){
+  for (int j=0; j<6; j++) {
     double a = 1/(1.+data->z[j]);
     double chi_ij=ccl_comoving_radial_distance(cosmo,a, &status)*data->h;
     if (status) printf("%s\n",cosmo->status_message);
@@ -127,7 +123,7 @@ static void compare_distances(int model, struct distances_data * data)
     if (fabs(absolute_tolerance)<1e-12) absolute_tolerance = 1e-12;
     ASSERT_DBL_NEAR_TOL(data->chi[model][j], chi_ij, absolute_tolerance);
 
-    if(a!=1){  //skip this test for a=1 since it will raise an error
+    if(a!=1) {  //skip this test for a=1 since it will raise an error
         double dm_ij=ccl_distance_modulus(cosmo,a, &status);
         if (status) printf("%s\n",cosmo->status_message);
         //NOTE tolerances are different!
@@ -140,27 +136,27 @@ static void compare_distances(int model, struct distances_data * data)
   ccl_cosmology_free(cosmo);
 }
 
-CTEST2(distances, model_1){
+CTEST2(distances, model_1) {
   int model = 0;
   compare_distances(model, data);
 }
 
-CTEST2(distances, model_2){
+CTEST2(distances, model_2) {
   int model = 1;
   compare_distances(model, data);
 }
 
-CTEST2(distances, model_3){
+CTEST2(distances, model_3) {
   int model = 2;
   compare_distances(model, data);
 }
 
-CTEST2(distances, model_4){
+CTEST2(distances, model_4) {
   int model = 3;
   compare_distances(model, data);
 }
 
-CTEST2(distances, model_5){
+CTEST2(distances, model_5) {
   int model = 4;
   compare_distances(model, data);
 }
