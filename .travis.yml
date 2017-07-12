@@ -1,7 +1,6 @@
 script:
 language: python
 python:
-  - "2.6"
   - "2.7"
 # Travis uses Ubuntu 12.04 and 14.04. None of them have GSL2x in apt-get
 # We have to install it from source (this will make the tests slower)
