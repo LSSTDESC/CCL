@@ -19,7 +19,8 @@ addons:
             - texlive-fonts-recommended
             - texlive-fonts-extra
             - dvipng
-install: sudo -H pip install . --egg
+#install: sudo -H pip install . --egg
+install: python setup.py install --user
 script:
     - python setup.py test
     - make -C doc/0000-ccl_note
