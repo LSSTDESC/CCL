@@ -2,14 +2,14 @@ script:
 language: python
 python:
   - "2.7"
+  - "3.5"
 # Travis uses Ubuntu 12.04 and 14.04. None of them have GSL2x in apt-get
 # We have to install it from source (this will make the tests slower)
 before_install:
   - sudo apt-get -qq update
   - sudo apt-get install fftw3 fftw3-dev pkg-config
   - sudo apt-get install latexmk
-  - umask 022
-  - sudo -H pip install numpy
+  - pip install numpy
   - ./install-gsl.sh 
 addons:
     apt:
@@ -19,11 +19,7 @@ addons:
             - texlive-fonts-recommended
             - texlive-fonts-extra
             - dvipng
-#install: sudo -H pip install . --egg
-install:
-    # To circumvent issue with swig you have to install twice
-    - python setup.py install --user
-    - python setup.py install --user
+install: pip install .
 script:
     - python setup.py test
     - make -C doc/0000-ccl_note
