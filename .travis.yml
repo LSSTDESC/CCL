@@ -21,6 +21,7 @@ addons:
 #install: sudo -H pip install . --egg
 install: python setup.py install --user
 script:
+    - python setup.py install --user
     - python setup.py test
     - make -C doc/0000-ccl_note
 after_success: |
