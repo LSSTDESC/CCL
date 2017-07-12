@@ -21,6 +21,7 @@ addons:
 #install: sudo -H pip install . --egg
 install: python setup.py install --user
 script:
+    # To circumvent issue with swig you have to install twice
     - python setup.py install --user
     - python setup.py test
     - make -C doc/0000-ccl_note
