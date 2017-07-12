@@ -7,6 +7,7 @@ python:
 before_install:
   - sudo apt-get -qq update
   - sudo apt-get install fftw3 fftw3-dev pkg-config
+  - sudo apt-get install latexmk
   - umask 022
   - sudo -H pip install numpy
   - ./install-gsl.sh 
@@ -19,10 +20,11 @@ addons:
             - texlive-fonts-extra
             - dvipng
 #install: sudo -H pip install . --egg
-install: python setup.py install --user
-script:
+install:
     # To circumvent issue with swig you have to install twice
     - python setup.py install --user
+    - python setup.py install --user
+script:
     - python setup.py test
     - make -C doc/0000-ccl_note
 after_success: |
