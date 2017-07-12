@@ -256,9 +256,10 @@ def _check_extensions():
 if "--user" in sys.argv:
     libdir=os.path.realpath(os.path.join(site.USER_BASE,'lib'))
 elif "--prefix" in sys.argv:
-    libdir=os.path.realpath(os.path.join(site.USER_SITE,'lib'))
+    ii = np.where(np.array(sys.argv)=="--prefix")
+    libdir=os.path.realpath(os.path.join(sys.argv[ii+1],'lib'))
 else:
-    libdir=os.path.realpath(os.path.join(site.USER_SITE,'lib'))
+    libdir=os.path.realpath(os.path.join(site.USER_BASE,'lib'))
 setup(name="pyccl",
     description="Library of validated cosmological functions.",
     author="LSST DESC",
