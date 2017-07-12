@@ -31,7 +31,7 @@ _ccllib = Extension(
 setup(  name         = "pyccl",
         description  = "Library of validated cosmological functions.",
         author       = "LSST DESC",
-        version      = "0.1",
+        version      = "0.2",
         packages     = ['pyccl'],
         ext_modules  = [_ccllib,],
         )
