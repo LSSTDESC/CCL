@@ -8,6 +8,7 @@ python:
 before_install:
   - sudo apt-get -qq update
   - sudo apt-get install fftw3 fftw3-dev pkg-config
+  - sudo pip install numpy
   - ./install-gsl.sh 
 addons:
     apt:
