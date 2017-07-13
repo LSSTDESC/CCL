@@ -33,6 +33,7 @@
 %include "ccl_core.i"
 %include "ccl_background.i"
 %include "ccl_power.i"
+%include "ccl_correlation.i"
 %include "ccl_massfunc.i"
 %include "ccl_cls.i"
 %include "ccl_constants.i"

@@ -1,0 +1,26 @@
+\begin{thebibliography}{}
+\expandafter\ifx\csname natexlab\endcsname\relax\def\natexlab#1{#1}\fi
+
+\bibitem[{{Castro} {et~al.}(2005){Castro}, {Heavens}, \&
+  {Kitching}}]{Castro2005}
+{Castro}, P.~G., {Heavens}, A.~F., \& {Kitching}, T.~D. 2005, \prd, 72, 023516
+
+\bibitem[{{de Putter} \& {Takada}(2010)}]{Putter2010}
+{de Putter}, R., \& {Takada}, M. 2010, \prd, 82, 103522
+
+\bibitem[{{Hamilton}(2000)}]{Hamilton2000}
+{Hamilton}, A.~J.~S. 2000, \mnras, 312, 257
+
+\bibitem[{{Hu} \& {White}(1997)}]{Hu1997}
+{Hu}, W., \& {White}, M. 1997, \prd, 56, 596
+
+\bibitem[{{Kilbinger} {et~al.}(2017){Kilbinger}, {Heymans}, {Asgari},
+  {Joudaki}, {Schneider}, {Simon}, {Van Waerbeke}, {Harnois-D{\'e}raps},
+  {Hildebrandt}, {K{\"o}hlinger}, {Kuijken}, \& {Viola}}]{Kilbinger2017}
+{Kilbinger}, M., {Heymans}, C., {Asgari}, M., {et~al.} 2017, ArXiv e-prints,
+  arXiv:1702.05301
+
+\bibitem[{Talman(2009)}]{Talman2009}
+Talman, J. 2009, Computer Physics Communications, 180, 332
+
+\end{thebibliography}

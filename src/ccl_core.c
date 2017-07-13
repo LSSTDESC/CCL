@@ -42,9 +42,10 @@ void ccl_cosmology_read_config(void)
   // Get parameter .ini filename from environment variable or default location
   const char* param_file;
   const char* param_file_env = getenv("CCL_PARAM_FILE");
-  if (param_file_env != NULL){
+  if (param_file_env != NULL) {
     param_file = param_file_env;
-  } else {
+  }
+  else {
     // Use default ini file
     param_file = EXPAND_STR(__CCL_DATA_DIR__) "/ccl_params.ini";
   }
@@ -54,29 +55,31 @@ void ccl_cosmology_read_config(void)
   } 
 
   while(! feof(fconfig)) {
-  rtn = fgets(buf, CONFIG_LINE_BUFFER_SIZE, fconfig);
-  if (buf[0]==';' || buf[0]=='[' || buf[0]=='\n') {
-    continue;
-  } else {
-    sscanf(buf, "%99[^=]=%le\n",var_name, &var_dbl);
-    if(strcmp(var_name,"A_SPLINE_DELTA")==0) ccl_splines->A_SPLINE_DELTA=var_dbl;
-    if(strcmp(var_name,"A_SPLINE_NA")==0) ccl_splines->A_SPLINE_NA=(int) var_dbl;
-    if(strcmp(var_name,"A_SPLINE_MIN")==0) ccl_splines->A_SPLINE_MIN=var_dbl;
-    if(strcmp(var_name,"A_SPLINE_MAX")==0) ccl_splines->A_SPLINE_MAX=var_dbl;
-    if(strcmp(var_name,"LOGM_SPLINE_DELTA")==0) ccl_splines->LOGM_SPLINE_DELTA=var_dbl;
-    if(strcmp(var_name,"LOGM_SPLINE_NM")==0) ccl_splines->LOGM_SPLINE_NM=(int) var_dbl;
-    if(strcmp(var_name,"LOGM_SPLINE_MIN")==0) ccl_splines->LOGM_SPLINE_MIN=var_dbl;
-    if(strcmp(var_name,"LOGM_SPLINE_MAX")==0) ccl_splines->LOGM_SPLINE_MAX=var_dbl;
-    if(strcmp(var_name,"N_A")==0) ccl_splines->N_A=(int) var_dbl;
-    if(strcmp(var_name,"K_MAX_SPLINE")==0) ccl_splines->K_MAX_SPLINE=var_dbl;
-    if(strcmp(var_name,"K_MAX")==0) ccl_splines->K_MAX=var_dbl;
-    if(strcmp(var_name,"K_MIN_DEFAULT")==0) ccl_splines->K_MIN_DEFAULT=var_dbl;
-    if(strcmp(var_name,"N_K")==0) ccl_splines->N_K=(int) var_dbl;     
+    rtn = fgets(buf, CONFIG_LINE_BUFFER_SIZE, fconfig);
+    if (buf[0]==';' || buf[0]=='[' || buf[0]=='\n') {
+      continue;
+    }
+    else {
+      sscanf(buf, "%99[^=]=%le\n",var_name, &var_dbl);
+      if(strcmp(var_name,"A_SPLINE_DELTA")==0) ccl_splines->A_SPLINE_DELTA=var_dbl;
+      if(strcmp(var_name,"A_SPLINE_NA")==0) ccl_splines->A_SPLINE_NA=(int) var_dbl;
+      if(strcmp(var_name,"A_SPLINE_MIN")==0) ccl_splines->A_SPLINE_MIN=var_dbl;
+      if(strcmp(var_name,"A_SPLINE_MAX")==0) ccl_splines->A_SPLINE_MAX=var_dbl;
+      if(strcmp(var_name,"LOGM_SPLINE_DELTA")==0) ccl_splines->LOGM_SPLINE_DELTA=var_dbl;
+      if(strcmp(var_name,"LOGM_SPLINE_NM")==0) ccl_splines->LOGM_SPLINE_NM=(int) var_dbl;
+      if(strcmp(var_name,"LOGM_SPLINE_MIN")==0) ccl_splines->LOGM_SPLINE_MIN=var_dbl;
+      if(strcmp(var_name,"LOGM_SPLINE_MAX")==0) ccl_splines->LOGM_SPLINE_MAX=var_dbl;
+      if(strcmp(var_name,"N_A")==0) ccl_splines->N_A=(int) var_dbl;
+      if(strcmp(var_name,"K_MAX_SPLINE")==0) ccl_splines->K_MAX_SPLINE=var_dbl;
+      if(strcmp(var_name,"K_MAX")==0) ccl_splines->K_MAX=var_dbl;
+      if(strcmp(var_name,"K_MIN_DEFAULT")==0) ccl_splines->K_MIN_DEFAULT=var_dbl;
+      if(strcmp(var_name,"N_K")==0) ccl_splines->N_K=(int) var_dbl;     
     }
   }
 
   fclose(fconfig);
 }
+
 
 /* ------- ROUTINE: ccl_cosmology_create ------
 INPUTS: ccl_parameters params
@@ -96,8 +99,6 @@ p_lnl: nonlinear matter power spectrum at z=0?
 computed_distances, computed_growth, 
 computed_power, computed_sigma: store status of the computations
 */
-
-
 ccl_cosmology * ccl_cosmology_create(ccl_parameters params, ccl_configuration config)
 {
   #ifndef USE_GSL_ERROR
@@ -161,25 +162,25 @@ h: Hubble's constant divided by (100 km/s/Mpc).
 norm_pk: amplitude of the primordial PS (either A_s or sigma_8)
 n_s: index of the primordial PS
 */
-
-ccl_cosmology * ccl_cosmology_create_with_params(
-	double Omega_c, double Omega_b, double Omega_k, double N_nu_rel, 
-	double N_nu_mass, double M_nu, double w0, double wa, double h, 
-	double norm_pk, double n_s, int nz_mgrowth, double *zarr_mgrowth, 
-	double *dfarr_mgrowth, ccl_configuration config, int *status)
+ccl_cosmology * ccl_cosmology_create_with_params(double Omega_c, double Omega_b, double Omega_k,
+						 double N_nu_rel, double N_nu_mass, double M_nu,
+						 double w0, double wa, double h, double norm_pk, double n_s,
+						 int nz_mgrowth, double *zarr_mgrowth, 
+						 double *dfarr_mgrowth, ccl_configuration config,
+						 int *status)
 {
-    // Create ccl_parameters struct from input parameters
-    ccl_parameters params;
-    params = ccl_parameters_create(Omega_c, Omega_b, Omega_k, N_nu_rel, N_nu_mass, M_nu, w0, wa, h, norm_pk, n_s, nz_mgrowth, zarr_mgrowth, dfarr_mgrowth, status);
-    // Check status
-	ccl_check_status_nocosmo(status);
-	
-    // Create  ccl_cosmology struct
-    ccl_cosmology *cosmo;
-    cosmo = ccl_cosmology_create(params, config);
-    return cosmo;
+  // Create ccl_parameters struct from input parameters
+  ccl_parameters params;
+  params = ccl_parameters_create(Omega_c, Omega_b, Omega_k, N_nu_rel, N_nu_mass, M_nu, w0, wa,
+				 h, norm_pk, n_s, nz_mgrowth, zarr_mgrowth, dfarr_mgrowth, status);
+  // Check status
+  ccl_check_status_nocosmo(status);
+  
+  // Create  ccl_cosmology struct
+  ccl_cosmology *cosmo;
+  cosmo = ccl_cosmology_create(params, config);
+  return cosmo;
 }
-
 
 /* ------- ROUTINE: ccl_cosmology_create_with_lcdm_params ------
 INPUTS: 
@@ -196,24 +197,21 @@ h: Hubble's constant divided by (100 km/s/Mpc).
 norm_pk: amplitude of the primordial PS (either A_s or sigma_8)
 n_s: index of the primordial PS
 */
-
-ccl_cosmology * ccl_cosmology_create_with_lcdm_params(
-        double Omega_c, double Omega_b, double Omega_k, double h, 
-        double norm_pk, double n_s,
-        ccl_configuration config, int *status)
+ccl_cosmology * ccl_cosmology_create_with_lcdm_params(double Omega_c, double Omega_b, double Omega_k,
+						      double h, double norm_pk, double n_s,
+						      ccl_configuration config, int *status)
 {
-    // Create ccl_parameters struct from input parameters
-    ccl_parameters params;
-    params = ccl_parameters_create_lcdm(Omega_c, Omega_b, Omega_k, h, norm_pk, n_s, status);
-    // Check status
-	ccl_check_status_nocosmo(status);
-    
-    // Create  ccl_cosmology struct
-    ccl_cosmology *cosmo;
-    cosmo = ccl_cosmology_create(params, config);
-    return cosmo;
+  // Create ccl_parameters struct from input parameters
+  ccl_parameters params;
+  params = ccl_parameters_create_lcdm(Omega_c, Omega_b, Omega_k, h, norm_pk, n_s, status);
+  // Check status
+  ccl_check_status_nocosmo(status);
+  
+  // Create  ccl_cosmology struct
+  ccl_cosmology *cosmo;
+  cosmo = ccl_cosmology_create(params, config);
+  return cosmo;
 }
-
 
 /* ------ ROUTINE: ccl_parameters_fill_initial -------
 INPUT: ccl_parameters: params
@@ -226,7 +224,6 @@ A_s: amplitude of the primordial PS, enforced here to initially set to NaN
 sigma_8: variance in 8 Mpc/h spheres for normalization of matter PS, enforced here to initially set to NaN
 z_star: recombination redshift
  */
-
 void ccl_parameters_fill_initial(ccl_parameters * params, int *status)
 {
   // Fixed radiation parameters
@@ -239,12 +236,13 @@ void ccl_parameters_fill_initial(ccl_parameters * params, int *status)
   params-> Omega_n_rel = params->N_nu_rel* 8. * pow(M_PI,5) *pow((KBOLTZ/ HPLANCK),3)* KBOLTZ/(15. *pow( CLIGHT,3))* (8. * M_PI * GNEWT) / (3. * 100.*100.*1000.*1000. /MPC_TO_METER /MPC_TO_METER  * CLIGHT * CLIGHT)  * Tnu * Tnu * Tnu * Tnu *7./8.;
   
   // Neutrinos: if massive neutrinos are present, calculate the phase_space integral.
-  if((params->N_nu_mass)>0.0001){
-	// Pass NULL for the accelerator here because we don't have our cosmology object defined yet.
-	params->Omega_n_mass = Omeganuh2(1.0, params->N_nu_mass, params->mnu, params->T_CMB, NULL, status) / ((params->h)*(params->h));
-	ccl_check_status_nocosmo(status);
-  } else{
-	params->Omega_n_mass = 0.;
+  if((params->N_nu_mass)>0.0001) {
+    // Pass NULL for the accelerator here because we don't have our cosmology object defined yet.
+    params->Omega_n_mass = Omeganuh2(1.0, params->N_nu_mass, params->mnu, params->T_CMB, NULL, status) / ((params->h)*(params->h));
+    ccl_check_status_nocosmo(status);
+  } 
+  else{
+    params->Omega_n_mass = 0.;
   }
 
   // Derived parameters
@@ -252,8 +250,8 @@ void ccl_parameters_fill_initial(ccl_parameters * params, int *status)
   params->Omega_l = 1.0 - params->Omega_m - params->Omega_g - params->Omega_n_rel -params->Omega_n_mass- params->Omega_k;
   // Initially undetermined parameters - set to nan to trigger
   // problems if they are mistakenly used.
-  if (isfinite(params->A_s)){params->sigma_8 = NAN;}
-  if (isfinite(params->sigma_8)){params->A_s = NAN;}
+  if (isfinite(params->A_s)) {params->sigma_8 = NAN;}
+  if (isfinite(params->sigma_8)) {params->A_s = NAN;}
   params->z_star = NAN;
 
   if(fabs(params->Omega_k)<1E-6)
@@ -264,6 +262,7 @@ void ccl_parameters_fill_initial(ccl_parameters * params, int *status)
     params->k_sign=1;
   params->sqrtk=sqrt(fabs(params->Omega_k))*params->h/CLIGHT_HMPC;
 }
+
 
 /* ------ ROUTINE: ccl_parameters_create -------
 INPUT: numbers for the basic cosmological parameters needed by CCL
@@ -281,8 +280,12 @@ h: Hubble's constant divided by (100 km/s/Mpc).
 A_s: amplitude of the primordial PS
 n_s: index of the primordial PS
  */
-
-ccl_parameters ccl_parameters_create(double Omega_c, double Omega_b, double Omega_k, double N_nu_rel, double N_nu_mass, double mnu, double w0, double wa, double h, double norm_pk, double n_s,int nz_mgrowth,double *zarr_mgrowth,double *dfarr_mgrowth, int *status){
+ccl_parameters ccl_parameters_create(double Omega_c, double Omega_b, double Omega_k,
+				     double N_nu_rel, double N_nu_mass, double mnu,
+				     double w0, double wa, double h, double norm_pk,
+				     double n_s,int nz_mgrowth,double *zarr_mgrowth,
+				     double *dfarr_mgrowth, int *status)
+{
   ccl_parameters params;
   params.sigma_8 = NAN;
   params.A_s = NAN;
@@ -332,12 +335,13 @@ ccl_parameters ccl_parameters_create(double Omega_c, double Omega_b, double Omeg
   return params;  
 }
 
+
 /* ------- ROUTINE: ccl_parameters_create_flat_lcdm -------- 
 INPUT: some cosmological parameters needed to create a flat LCDM model 
 TASK: call ccl_parameters_create to produce an LCDM model
 */
-
-ccl_parameters ccl_parameters_create_flat_lcdm(double Omega_c, double Omega_b, double h, double norm_pk, double n_s, int *status)
+ccl_parameters ccl_parameters_create_flat_lcdm(double Omega_c, double Omega_b, double h,
+					       double norm_pk, double n_s, int *status)
 {
   double Omega_k = 0.0;
   double N_nu_mass = 0.0;
@@ -345,69 +349,73 @@ ccl_parameters ccl_parameters_create_flat_lcdm(double Omega_c, double Omega_b, d
   double mnu = 0.0;
   double w0 = -1.0;
   double wa = 0.0;
-  ccl_parameters params = ccl_parameters_create(Omega_c, Omega_b, Omega_k, N_nu_rel, N_nu_mass, mnu, w0, wa, h, norm_pk, n_s, -1, NULL, NULL, status);
+  ccl_parameters params = ccl_parameters_create(Omega_c, Omega_b, Omega_k, N_nu_rel, N_nu_mass,
+						mnu, w0, wa, h, norm_pk, n_s, -1, NULL, NULL, status);
   return params;
 
 }
+
 
 /* ------- ROUTINE: ccl_parameters_create_flat_lcdm_nu -------- 
 INPUT: some cosmological parameters needed to create a flat LCDM model with neutrinos 
 TASK: call ccl_parameters_create to produce an LCDM model
 */
-
-ccl_parameters ccl_parameters_create_flat_lcdm_nu(double Omega_c, double Omega_b, double h, double norm_pk, double n_s, double N_nu_rel, double N_nu_mass, double mnu, int *status)
+ccl_parameters ccl_parameters_create_flat_lcdm_nu(double Omega_c, double Omega_b, double h, double norm_pk,
+						  double n_s, double N_nu_rel, double N_nu_mass, double mnu,
+						  int *status)
 {
   double Omega_k = 0.0;
   double w0 = -1.0;
   double wa = 0.0;
-  ccl_parameters params = ccl_parameters_create(Omega_c, Omega_b, Omega_k, N_nu_rel, N_nu_mass, mnu, w0, wa, h, norm_pk, n_s, -1, NULL, NULL, status);
+  ccl_parameters params = ccl_parameters_create(Omega_c, Omega_b, Omega_k, N_nu_rel, N_nu_mass, mnu, w0, wa,
+						h, norm_pk, n_s, -1, NULL, NULL, status);
   return params;
 
 }
-
 
 
 /* ------- ROUTINE: ccl_parameters_create_lcdm -------- 
 INPUT: some cosmological parameters needed to create an LCDM model with curvature 
 TASK: call ccl_parameters_create for this specific model
 */
-
-ccl_parameters ccl_parameters_create_lcdm(double Omega_c, double Omega_b, double Omega_k, double h, double norm_pk, double n_s, int *status)
+ccl_parameters ccl_parameters_create_lcdm(double Omega_c, double Omega_b, double Omega_k, double h,
+					  double norm_pk, double n_s, int *status)
 {
   double N_nu_mass = 0.0;
   double N_nu_rel = 3.046;
   double mnu = 0.0;
   double w0 = -1.0;
   double wa = 0.0;
-  ccl_parameters params = ccl_parameters_create(Omega_c, Omega_b, Omega_k, N_nu_rel, N_nu_mass, mnu, w0, wa, h, norm_pk, n_s,-1,NULL,NULL, status);
+  ccl_parameters params = ccl_parameters_create(Omega_c, Omega_b, Omega_k, N_nu_rel, N_nu_mass, mnu, w0, wa,
+						h, norm_pk, n_s,-1,NULL,NULL, status);
   return params;
-
 }
+
 
 /* ------- ROUTINE: ccl_parameters_create_lcdm_nu -------- 
 INPUT: some cosmological parameters needed to create an LCDM model with curvature and neutrinos
 TASK: call ccl_parameters_create for this specific model
 */
-
-ccl_parameters ccl_parameters_create_lcdm_nu(double Omega_c, double Omega_b, double Omega_k, double h, double norm_pk, double n_s, double N_nu_rel, double N_nu_mass, double mnu, int *status)
+ccl_parameters ccl_parameters_create_lcdm_nu(double Omega_c, double Omega_b, double Omega_k, double h,
+					     double norm_pk, double n_s, double N_nu_rel, double N_nu_mass,
+					     double mnu, int *status)
 {
   double w0 = -1.0;
   double wa = 0.0; 
 
-  ccl_parameters params = ccl_parameters_create(Omega_c, Omega_b, Omega_k, N_nu_rel, N_nu_mass, mnu, w0, wa, h, norm_pk, n_s,-1,NULL,NULL, status);
+  ccl_parameters params = ccl_parameters_create(Omega_c, Omega_b, Omega_k, N_nu_rel, N_nu_mass, mnu, w0, wa,
+						h, norm_pk, n_s,-1,NULL,NULL, status);
 
   return params;
 
 }
 
-
 /* ------- ROUTINE: ccl_parameters_create_flat_wcdm -------- 
 INPUT: some cosmological parameters needed to create an LCDM model with wa=0 but w0!=-1
 TASK: call ccl_parameters_create for this specific model
 */
-
-
-ccl_parameters ccl_parameters_create_flat_wcdm(double Omega_c, double Omega_b, double w0, double h, double norm_pk, double n_s, int *status)
+ccl_parameters ccl_parameters_create_flat_wcdm(double Omega_c, double Omega_b, double w0, double h,
+					       double norm_pk, double n_s, int *status)
 {
 
   double Omega_k = 0.0;
@@ -415,22 +423,25 @@ ccl_parameters ccl_parameters_create_flat_wcdm(double Omega_c, double Omega_b, d
   double N_nu_rel = 3.046;
   double mnu = 0.0;
   double wa = 0.0;
-  ccl_parameters params = ccl_parameters_create(Omega_c, Omega_b, Omega_k, N_nu_rel, N_nu_mass, mnu, w0, wa, h, norm_pk, n_s,-1,NULL,NULL, status);
+  ccl_parameters params = ccl_parameters_create(Omega_c, Omega_b, Omega_k, N_nu_rel, N_nu_mass, mnu, w0, wa,
+						h, norm_pk, n_s,-1,NULL,NULL, status);
   return params;
 }
+
 
 /* ------- ROUTINE: ccl_parameters_create_wcdm_nu -------- 
 INPUT: some cosmological parameters needed to create an LCDM model with neutrinos, and wa=0 but w0!=-1
 TASK: call ccl_parameters_create for this specific model
 */
-
-
-ccl_parameters ccl_parameters_create_flat_wcdm_nu(double Omega_c, double Omega_b, double w0, double h, double norm_pk, double n_s, double N_nu_rel, double N_nu_mass, double mnu, int *status)
+ccl_parameters ccl_parameters_create_flat_wcdm_nu(double Omega_c, double Omega_b, double w0, double h,
+						  double norm_pk, double n_s, double N_nu_rel, 
+						  double N_nu_mass, double mnu, int *status)
 {
 
   double Omega_k = 0.0;
   double wa = 0.0;
-  ccl_parameters params = ccl_parameters_create(Omega_c, Omega_b, Omega_k, N_nu_rel, N_nu_mass, mnu, w0, wa, h, norm_pk, n_s,-1,NULL,NULL, status);
+  ccl_parameters params = ccl_parameters_create(Omega_c, Omega_b, Omega_k, N_nu_rel, N_nu_mass, mnu, w0, wa, 
+						h, norm_pk, n_s,-1,NULL,NULL, status);
   return params;
 }
 
@@ -439,38 +450,39 @@ ccl_parameters ccl_parameters_create_flat_wcdm_nu(double Omega_c, double Omega_b
 INPUT: some cosmological parameters needed to create an LCDM model with curvature wa!=0 and and w0!=-1
 TASK: call ccl_parameters_create for this specific model
 */
-
-ccl_parameters ccl_parameters_create_flat_wacdm(double Omega_c, double Omega_b, double w0, double wa, double h, double norm_pk, double n_s, int *status)
+ccl_parameters ccl_parameters_create_flat_wacdm(double Omega_c, double Omega_b, double w0, double wa,
+						double h, double norm_pk, double n_s, int *status)
 {
-
   double Omega_k = 0.0;
   double N_nu_mass = 0.0;
   double N_nu_rel = 3.046;
   double mnu = 0.0;
-  ccl_parameters params = ccl_parameters_create(Omega_c, Omega_b, Omega_k,N_nu_rel, N_nu_mass, mnu, w0, wa, h, norm_pk, n_s,-1,NULL,NULL, status);
+  ccl_parameters params = ccl_parameters_create(Omega_c, Omega_b, Omega_k,N_nu_rel, N_nu_mass, mnu, w0, wa,
+						h, norm_pk, n_s,-1,NULL,NULL, status);
   return params;
 }
+
 
 /* ------- ROUTINE: ccl_parameters_create_wacdm_nu -------- 
 INPUT: some cosmological parameters needed to create an LCDM model with neutrinoswith curvature wa!=0 and and w0!=-1
 TASK: call ccl_parameters_create for this specific model
 */
-
-ccl_parameters ccl_parameters_create_flat_wacdm_nu(double Omega_c, double Omega_b, double w0, double wa, double h, double norm_pk, double n_s, double N_nu_rel, double N_nu_mass, double mnu, int *status)
+ccl_parameters ccl_parameters_create_flat_wacdm_nu(double Omega_c, double Omega_b, double w0, double wa,
+						   double h, double norm_pk, double n_s, double N_nu_rel,
+						   double N_nu_mass, double mnu, int *status)
 {
 
   double Omega_k = 0.0;
-  ccl_parameters params = ccl_parameters_create(Omega_c, Omega_b, Omega_k,N_nu_rel, N_nu_mass, mnu, w0, wa, h, norm_pk, n_s,-1,NULL,NULL, status);
+  ccl_parameters params = ccl_parameters_create(Omega_c, Omega_b, Omega_k,N_nu_rel, N_nu_mass, mnu, w0, wa,
+						h, norm_pk, n_s,-1,NULL,NULL, status);
   return params;
 }
-
 
 
 /* ------- ROUTINE: ccl_data_free -------- 
 INPUT: ccl_data
 TASK: free the input data
 */
-
 void ccl_data_free(ccl_data * data)
 {
   //We cannot assume that all of these have been allocated
@@ -516,7 +528,6 @@ void ccl_data_free(ccl_data * data)
 INPUT: ccl_cosmology struct
 TASK: free the input data and the cosmology struct
 */
-
 void ccl_cosmology_free(ccl_cosmology * cosmo)
 {
   ccl_data_free(&cosmo->data);

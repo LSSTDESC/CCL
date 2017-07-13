@@ -6,10 +6,12 @@
 //Spline types
 #define A_SPLINE_TYPE gsl_interp_akima
 #define K_SPLINE_TYPE gsl_interp_akima
+#define L_SPLINE_TYPE gsl_interp_akima
 #define M_SPLINE_TYPE gsl_interp_akima
 #define D_SPLINE_TYPE gsl_interp_akima
 #define PNL_SPLINE_TYPE gsl_interp2d_bicubic
 #define PLIN_SPLINE_TYPE gsl_interp2d_bicubic
+#define CORR_SPLINE_TYPE gsl_interp_akima
 
 /** @file */
 
@@ -99,3 +101,11 @@
  * Absolute precision in growth calculations
  */
 #define EPS_SCALEFAC_GROWTH 1E-6
+
+//Correlation function related parameters
+#define EPSREL_CORR_FUNC 1E-3
+#define GSL_INTEGRATION_LIMIT 1000
+
+//LSST specific numbers
+#define Z_MIN_SOURCES 0.1
+#define Z_MAX_SOURCES 3.0
