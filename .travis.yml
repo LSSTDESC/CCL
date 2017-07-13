@@ -22,7 +22,7 @@ before_install:
 #            - dvipng
 install: pip install . --egg
 script:
-    - python setup.py test --verbose --process-restartworker --detailed-errors
+    - python setup.py test --verbose --detailed-errors
 # Check why the note creation process crashes
 #    - make -C doc/0000-ccl_note
 #after_success: 
