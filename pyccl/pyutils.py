@@ -1,7 +1,7 @@
 
 from pyccl import ccllib as lib
 import numpy as np
-from pyccl import core
+import pyccl.core
 
 def check(status):
     """Check the status returned by a ccllib function.
@@ -14,8 +14,8 @@ def check(status):
     if status == 0: return
 
     # Check for known error status
-    if status in core.error_types.keys():
-        raise RuntimeError("Error %d: %s" % (status, core.error_types[status]))
+    if status in pyccl.core.error_types.keys():
+        raise RuntimeError("Error %d: %s" % (status, pyccl.core.error_types[status]))
 
     # Check for unknown error
     if status != 0:
@@ -33,7 +33,7 @@ def _cosmology_obj(cosmo):
     """
     if isinstance(cosmo, lib.cosmology):
         return cosmo
-    elif isinstance(cosmo, core.Cosmology):
+    elif isinstance(cosmo, pyccl.core.Cosmology):
         return cosmo.cosmo
     else:
         raise TypeError("Invalid Cosmology or ccl_cosmology object.")
