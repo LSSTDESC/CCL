@@ -23,7 +23,7 @@
 /** 
  * Rho critical in units of M_sun/h / (Mpc/h)^3
  */
-#define RHO_CRITICAL 2.7744948E11
+//#define RHO_CRITICAL 2.7744948E11
 
 /**
  * Lightspeed / H0 in units of Mpc/h
@@ -39,7 +39,7 @@
 /**
  * Solar mass in units ofkg (from PDG 2013)
  */
-#define SOLAR_MASS 1.9885e30
+#define SOLAR_MASS GSL_CONST_MKSA_SOLAR_MASS
 
 /**
  * Mpc to meters (from PDG 2013)
