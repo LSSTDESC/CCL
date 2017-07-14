@@ -129,7 +129,7 @@ double gaussian_pz(double z_ph, double z_s, void* params, int *status){
     //printf("gaussian_pz = %3.3e\n", sigma_z0);
     double sigma_z = sigma_z0 * (1. + z_s);
     return exp(- (z_ph - z_s)*(z_ph - z_s) / (2.*sigma_z*sigma_z)) \
-         / (sqrt(2.*M_PI) * sigma_z*sigma_z);
+         / (sqrt(2.*M_PI) *sigma_z);
 }
 
 /*------ ROUTINE: ccl_specs_create_gaussian_photoz_info ------
