@@ -20,11 +20,6 @@
 */
 #define K_PIVOT 0.05
 
-/** 
- * Rho critical in units of M_sun/h / (Mpc/h)^3
- */
-//#define RHO_CRITICAL 2.7744948E11
-
 /**
  * Lightspeed / H0 in units of Mpc/h
  */
@@ -50,6 +45,12 @@
  * pc to meters (from PDG 2013)
  */
 #define PC_TO_METER 3.08567758149e16
+
+/** 
+ * Rho critical in units of M_sun/h / (Mpc/h)^3
+ */
+//#define RHO_CRITICAL 2.7744948E11
+#define RHO_CRITICAL ((3*100*100)/(8*M_PI*GNEWT)) * (1000*1000*MPC_TO_METER/SOLAR_MASS)
 
 /**
  * Boltzmann constant in units of J/K
