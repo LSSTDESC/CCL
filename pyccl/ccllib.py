@@ -783,12 +783,11 @@ def angular_cl_vec(cosmo, clt1, clt2, ell, output, status):
     """angular_cl_vec(cosmology cosmo, CCL_ClTracer clt1, CCL_ClTracer clt2, double * ell, double * output, int * status)"""
     return _ccllib.angular_cl_vec(cosmo, clt1, clt2, ell, output, status)
 K_PIVOT = _ccllib.K_PIVOT
-RHO_CRITICAL = _ccllib.RHO_CRITICAL
 CLIGHT_HMPC = _ccllib.CLIGHT_HMPC
 GNEWT = _ccllib.GNEWT
-SOLAR_MASS = _ccllib.SOLAR_MASS
 MPC_TO_METER = _ccllib.MPC_TO_METER
 PC_TO_METER = _ccllib.PC_TO_METER
+RHO_CRITICAL = _ccllib.RHO_CRITICAL
 TNCDM = _ccllib.TNCDM
 EPSREL_DIST = _ccllib.EPSREL_DIST
 EPSREL_GROWTH = _ccllib.EPSREL_GROWTH

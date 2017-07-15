@@ -18547,12 +18547,11 @@ SWIG_init(void) {
   SWIG_Python_SetConstant(d, "CL_TRACER_NC",SWIG_From_int((int)(1)));
   SWIG_Python_SetConstant(d, "CL_TRACER_WL",SWIG_From_int((int)(2)));
   SWIG_Python_SetConstant(d, "K_PIVOT",SWIG_From_double((double)(0.05)));
-  SWIG_Python_SetConstant(d, "RHO_CRITICAL",SWIG_From_double((double)(2.7744948E11)));
   SWIG_Python_SetConstant(d, "CLIGHT_HMPC",SWIG_From_double((double)(2997.92458)));
   SWIG_Python_SetConstant(d, "GNEWT",SWIG_From_double((double)(6.67428e-11)));
-  SWIG_Python_SetConstant(d, "SOLAR_MASS",SWIG_From_double((double)(1.9885e30)));
   SWIG_Python_SetConstant(d, "MPC_TO_METER",SWIG_From_double((double)(3.08567758149e22)));
   SWIG_Python_SetConstant(d, "PC_TO_METER",SWIG_From_double((double)(3.08567758149e16)));
+  SWIG_Python_SetConstant(d, "RHO_CRITICAL",SWIG_From_double((double)(2.7744948E11)));
   SWIG_Python_SetConstant(d, "TNCDM",SWIG_From_double((double)(0.71611)));
   SWIG_Python_SetConstant(d, "EPSREL_DIST",SWIG_From_double((double)(1E-6)));
   SWIG_Python_SetConstant(d, "EPSREL_GROWTH",SWIG_From_double((double)(1E-6)));
