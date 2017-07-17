@@ -30,9 +30,19 @@ All unit tests can be run after installation by running
 ```sh
 make check
 ```
+For quick introduction to CCL in C look at *tests/ccl_sample_run.c*.
 
 ## Known installation issues
-1. If you move or delete the source directory after installing CCL, some functions may fail. The source directory contains files needed by *CLASS* (which is contained within CCL) at run-time.
+1. If you are having issues with GSL versions linking, please try the following during the configuration step:
+````sh
+./configure CFLAGS="-I/usr/local/include" LDFLAGS="-L/usr/local/lib"
+````
+2. If you are having issues with FFTW linking, please make sure you have the latest version correctly installed. See more on [FFTW webpage](http://www.fftw.org/download.html)
+3. If you move or delete the source directory after installing CCL, some functions may fail. The source directory contains files needed by CLASS (which is contained within CCL) at run-time.
+4. If you are planning to compile your own file that calls CCL, then you should add the following to your .bashrc:
+````sh
+export LD_LIBRARY_PATH=/path/to/where/ccl/is/installed/lib:$LD_LIBRARY_PATH
+````
 
 ## Python wrapper installation
 The Python wrapper is called *pyccl*. Before you can build it, you must have compiled and installed the C version of CCL, as *pyccl* will be dynamically linked to it. The Python wrapper's build tools currently assume that your C compiler is *gcc*, and that you have a working Python 2.x installation with *numpy* and *distutils* with *swig*.
@@ -70,6 +80,8 @@ python setup.py build_ext --library-dirs=/path/to/install/lib/ --rpath=/path/to/
 and then run one of the `setup.py install` commands listed above. (Note: As an alternative to the `--include-dirs` option, you can use `-I/path/to/include` instead.)
 
 You can quickly check whether *pyccl* has been installed correctly by running `python -c "import pyccl"` and checking that no errors are returned. For a more in-depth test to make sure everything is working, change to the `tests/` sub-directory and run `python run_tests.py`. These tests will take a few minutes.
+
+For quick introduction to CCL in Python look at notebooks in *tests/*.
 
 ## Compiling against an external version of CLASS
 
