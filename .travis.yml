@@ -7,10 +7,8 @@ python:
 # Travis uses Ubuntu 12.04 and 14.04. None of them have GSL2x in apt-get
 # We have to install it from source (this will make the tests slower)
 before_install:
-  - sudo add-apt-repository ppa:fkrull/deadsnakes
-  - sudo apt-get update
+  - sudo apt-get -qq update
   - sudo apt-get install fftw3 fftw3-dev pkg-config
-  - sudo apt-get install python2.7 
 #  - sudo apt-get install latexmk
   - pip install numpy
   - ./install-gsl.sh 
@@ -22,12 +20,9 @@ before_install:
 #            - texlive-fonts-recommended
 #            - texlive-fonts-extra
 #            - dvipng
-install: pip install . --egg
+install: python setup.py install
 script:
     - python tests/run_tests.py --debug --detailed-errors --verbose --process-restartworker 
-after_failure:
-- COREFILE=$(find . -maxdepth 1 -name "core*" | head -n 1) # find core file
-- if [[ -f "$COREFILE" ]]; then gdb -c "$COREFILE" example -ex "thread apply all bt" -ex "set pagination 0" -batch; fi
 
 # Check why the note creation process crashes
 #    - make -C doc/0000-ccl_note
