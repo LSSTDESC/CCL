@@ -9,7 +9,7 @@ python:
 before_install:
   - sudo apt-get -qq update
   - sudo apt-get install fftw3 fftw3-dev pkg-config
-  - sudo apt-get install gdb python2.7-dbg
+  - sudo apt-get install libpython2.7 python2.7 python2.7-dev python2.7-minimal 
 #  - sudo apt-get install latexmk
   - pip install numpy
   - ./install-gsl.sh 
