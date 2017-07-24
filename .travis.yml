@@ -7,9 +7,10 @@ python:
 # Travis uses Ubuntu 12.04 and 14.04. None of them have GSL2x in apt-get
 # We have to install it from source (this will make the tests slower)
 before_install:
-  - sudo apt-get -qq update
+  - sudo add-apt-repository ppa:fkrull/deadsnakes
+  - sudo apt-get update
   - sudo apt-get install fftw3 fftw3-dev pkg-config
-  - sudo apt-get install libpython2.7 python2.7 python2.7-dev python2.7-minimal 
+  - sudo apt-get install python2.7 
 #  - sudo apt-get install latexmk
   - pip install numpy
   - ./install-gsl.sh 
