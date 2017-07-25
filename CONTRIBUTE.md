@@ -1,13 +1,13 @@
 Reviewing a pull request (PR) on github
 ---------------------------------------
-1. Checkout the branch
-2. Make sure you can install the C library
-3. Make sure you can install the python module
-4. Make sure the C unit tests pass (i.e. run "make check" successfully)
-5. Make sure the python tests pass (i.e. run "python run_tests.py" from the "tests" directory)
-6. Look at the code (see "Files changed" on the top of this page) and check that the changes make sense to you
+1. Checkout the branch.
+2. Make sure you can install the C library.
+3. Make sure you can install the python module.
+4. Make sure the C unit tests pass (i.e. run "make check" successfully).
+5. Make sure the python tests pass (i.e. run "python run_tests.py" from the "tests" directory).
+6. Look at the code (see "Files changed" on the top of this page) and check that the changes make sense to you.
 7. If new science has been implemented, and if possible, try to compare the output of the code against your own predictions. Possibly, ask the developer to implement a unit test for it.
-
+8. Make sure that the libraries install successfully and the unit tests pass at Travis-CI.
 
 Things to do if you are adding new features to the CCL C lib
 ------------------------------------------------------------
@@ -122,7 +122,7 @@ scratch. The procedure is as follows:
     
 1.1 Execute `make clean`
 
-1.2 Execute `python setup.py clean`
+1.2 Execute `python setup.py uninstall`
 
 2. Delete built/installed python files
 
@@ -168,3 +168,11 @@ If you need to modify the note, the files to modify are:
   -main.tex: to detail the changes to the library
 
   -main.bib: to add new references
+
+Travis-CI
+--------------------------------------------
+
+Travis-CI is a continuous integration tool that reads the file `.travis.yml` and performs
+the steps described there in a virtual environment. More details can be found here: https://docs.travis-ci.com/user/getting-started/
+
+Every time you perform a commit Travis-CI will automatically try to build the libraries with your new changes and run the unit tests. You can check the status of your build here: https://travis-ci.org/LSSTDESC/CCL/builds. If you click in your build you will find more information about its status and a log describing the process. If your build errored or failed you can scroll through the log to find out what went wrong. If your additions require new dependencies make sure that you include them in `.travis.yml`.
