@@ -996,6 +996,11 @@ static void ccl_cosmology_compute_power_emu(ccl_cosmology * cosmo, int * status)
     strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_emu(): h is outside allowed range\n");
     return;
   }
+  if(cosmo->params.N_nu_rel!=3.04){
+    *status=CCL_ERROR_INCONSISTENT;
+    strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_emu(): Neff should be 3.04 for the cosmic emulator predictions\n");
+    return;
+  }
   w0wacomb=-cosmo->params.w0-cosmo->params.wa;
   if(w0wacomb<0.3*0.3*0.3*0.3){
     *status=CCL_ERROR_INCONSISTENT;

@@ -12,7 +12,7 @@ int main(int argc, char * argv[])
   double normp = 0.8; //2.1e-9
   double n_s = 0.96;
   double Omega_k = 0.;
-  double Neff = 3.046;
+  double Neff = 3.04;
   double Nmass = 1;
   double mnu = 0.06;
   
