@@ -1,6 +1,5 @@
 #pragma once
 
-
 #include "gsl/gsl_const_mksa.h"
 
 //Spline types
@@ -14,6 +13,13 @@
 #define CORR_SPLINE_TYPE gsl_interp_akima
 
 /** @file */
+
+#ifndef M_PI
+/**
+ *  PI (in case it's not defined from math.h)
+*/
+#define M_PI 3.14159265358979323846
+#endif
 
 /**
  *  k pivot. These are in units of Mpc (no factor of h)
