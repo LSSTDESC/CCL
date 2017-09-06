@@ -25,7 +25,9 @@ typedef enum transfer_function_t
   ccl_boltzmann         = 3,
   ccl_boltzmann_class   = 3,
   
-  ccl_boltzmann_camb    = 4
+  ccl_boltzmann_camb    = 4,
+  
+  ccl_baryons_bcm       = 5
 } transfer_function_t;
 
 /** 
