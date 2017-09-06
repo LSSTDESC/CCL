@@ -1078,8 +1078,8 @@ revtex4-1.cls^^J^^J}\stop
 
 % How the section number will appear in the section title - AV
 % LSST DESC Notes: no section numbering!
-% \def\ApjSectionMarkInTitle#1{#1.\ }
-\def\ApjSectionMarkInTitle#1{\!\!}
+\def\ApjSectionMarkInTitle#1{#1.\ }
+%\def\ApjSectionMarkInTitle#1{\!\!}
 \def\ApjSectionpenalty{0}
 
 
@@ -6383,7 +6383,7 @@ width 0pt\relax\fi}}}
 
 
 %% get rid of \jobname Notes being sent to .aux file:
-% Commented out to avoid .bib cache creation (we hope): 
+% Commented out to avoid .bib cache creation (we hope):
 % http://journals.aas.org/authors/aastex/linux.html
 % \let\bibdata@app\relax
 % \def\pre@bibdata{}

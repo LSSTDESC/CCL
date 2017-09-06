@@ -7,8 +7,8 @@ def linear_matter_power(cosmo, k, a):
 
     Args:
         cosmo (:obj:`ccl.cosmology`): Cosmological parameters.
-        k (float): Wavenumber; Mpc^-1.
-        a (float or array_like): Scale factor.
+        k (float or array_like): Wavenumber; Mpc^-1.
+        a (float): Scale factor.
 
     Returns:
         linear_matter_power (float or array_like): Linear matter power spectrum; Mpc^-3.
@@ -22,8 +22,8 @@ def nonlin_matter_power(cosmo, k, a):
 
     Args:
         cosmo (:obj:`ccl.cosmology`): Cosmological parameters.
-        k (float): Wavenumber; Mpc^-1.
-        a (float or array_like): Scale factor.
+        k (float or array_like): Wavenumber; Mpc^-1.
+        a (float): Scale factor.
 
     Returns:
         nonlin_matter_power (float or array_like): Nonlinear matter power spectrum; Mpc^-3.

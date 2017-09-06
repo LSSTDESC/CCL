@@ -3,6 +3,12 @@
 from distutils.core import *
 from distutils import sysconfig
 import os.path
+import sys
+
+# Throw error if Python 3.x is being used
+if sys.version_info.major == 3:
+    print("Python 3.x is not currently supported. Please use Python 2.")
+    sys.exit(1)
 
 # Get numpy include directory (works across versions)
 import numpy
