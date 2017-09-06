@@ -990,8 +990,6 @@ static void ccl_cosmology_compute_power_emu(ccl_cosmology * cosmo, int * status)
     return;
   }
 
-  //TMP:
-  double Omega_nu=0.;
   //Check ranges:
   if((cosmo->params.h<0.55) || (cosmo->params.h>0.85)){
     *status=CCL_ERROR_INCONSISTENT;
@@ -1002,6 +1000,11 @@ static void ccl_cosmology_compute_power_emu(ccl_cosmology * cosmo, int * status)
   if(w0wacomb<0.3*0.3*0.3*0.3){
     *status=CCL_ERROR_INCONSISTENT;
     strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_emu(): w0 and wa do not satisfy the emulator bound\n");
+    return;
+  }
+  if(cosmo->params.Omega_n_mass*cosmo->params.h*cosmo->params.h>0.01){
+    *status=CCL_ERROR_INCONSISTENT;
+    strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_emu(): Omega_nu does not satisfy the emulator bound\n");
     return;
   }
   
@@ -1016,7 +1019,7 @@ static void ccl_cosmology_compute_power_emu(ccl_cosmology * cosmo, int * status)
     xstar[4] = cosmo->params.n_s;
     xstar[5] = cosmo->params.w0;
     xstar[6] = cosmo->params.wa;
-    xstar[7] = Omega_nu*cosmo->params.h*cosmo->params.h;
+    xstar[7] = cosmo->params.Omega_n_mass*cosmo->params.h*cosmo->params.h;
     xstar[8] = 1./z[j]-1;
     //Need to have this here because otherwise overwritten by emu in each loop
     
