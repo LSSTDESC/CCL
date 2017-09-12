@@ -106,7 +106,7 @@ ccl_cosmology * ccl_cosmology_create(ccl_parameters params, ccl_configuration co
   #endif
 
   if(ccl_splines==NULL) ccl_cosmology_read_config();
-
+  
   ccl_cosmology * cosmo = malloc(sizeof(ccl_cosmology));
   cosmo->params = params;
   cosmo->config = config;
@@ -165,6 +165,7 @@ n_s: index of the primordial PS
 ccl_cosmology * ccl_cosmology_create_with_params(double Omega_c, double Omega_b, double Omega_k,
 						 double N_nu_rel, double N_nu_mass, double M_nu,
 						 double w0, double wa, double h, double norm_pk, double n_s,
+						 double bcm_log10Mc, double bcm_etab, double bcm_ks,
 						 int nz_mgrowth, double *zarr_mgrowth, 
 						 double *dfarr_mgrowth, ccl_configuration config,
 						 int *status)
@@ -172,7 +173,8 @@ ccl_cosmology * ccl_cosmology_create_with_params(double Omega_c, double Omega_b,
   // Create ccl_parameters struct from input parameters
   ccl_parameters params;
   params = ccl_parameters_create(Omega_c, Omega_b, Omega_k, N_nu_rel, N_nu_mass, M_nu, w0, wa,
-				 h, norm_pk, n_s, nz_mgrowth, zarr_mgrowth, dfarr_mgrowth, status);
+				 h, norm_pk, n_s, bcm_log10Mc, bcm_etab, bcm_ks, nz_mgrowth,
+				 zarr_mgrowth, dfarr_mgrowth, status);
   // Check status
   ccl_check_status_nocosmo(status);
   
@@ -244,7 +246,7 @@ void ccl_parameters_fill_initial(ccl_parameters * params, int *status)
   else{
     params->Omega_n_mass = 0.;
   }
-
+  
   // Derived parameters
   params->Omega_m = params->Omega_b + params-> Omega_c;
   params->Omega_l = 1.0 - params->Omega_m - params->Omega_g - params->Omega_n_rel -params->Omega_n_mass- params->Omega_k;
@@ -283,7 +285,8 @@ n_s: index of the primordial PS
 ccl_parameters ccl_parameters_create(double Omega_c, double Omega_b, double Omega_k,
 				     double N_nu_rel, double N_nu_mass, double mnu,
 				     double w0, double wa, double h, double norm_pk,
-				     double n_s,int nz_mgrowth,double *zarr_mgrowth,
+				     double n_s, double bcm_log10Mc, double bcm_etab, double bcm_ks,
+				     int nz_mgrowth,double *zarr_mgrowth,
 				     double *dfarr_mgrowth, int *status)
 {
   ccl_parameters params;
@@ -313,6 +316,20 @@ ccl_parameters ccl_parameters_create(double Omega_c, double Omega_b, double Omeg
     params.sigma_8=norm_pk;
   params.n_s = n_s;
 
+  //Baryonic params
+  if(bcm_log10Mc<0)
+    params.bcm_log10Mc=log10(1.2e14);
+  else
+    params.bcm_log10Mc=bcm_log10Mc;
+  if(bcm_etab<0)
+    params.bcm_etab=0.5;
+  else
+    params.bcm_etab=bcm_etab;
+  if(bcm_ks<0)
+    params.bcm_ks=55.0;
+  else
+    params.bcm_ks=bcm_ks;
+  
   // Set remaining standard and easily derived parameters
   ccl_parameters_fill_initial(&params, status);
 
@@ -350,11 +367,33 @@ ccl_parameters ccl_parameters_create_flat_lcdm(double Omega_c, double Omega_b, d
   double w0 = -1.0;
   double wa = 0.0;
   ccl_parameters params = ccl_parameters_create(Omega_c, Omega_b, Omega_k, N_nu_rel, N_nu_mass,
-						mnu, w0, wa, h, norm_pk, n_s, -1, NULL, NULL, status);
+						mnu, w0, wa, h, norm_pk, n_s, -1, -1, -1, -1, NULL, NULL, status);
   return params;
 
 }
 
+
+
+/* ------- ROUTINE: ccl_parameters_create_flat_lcdm -------- 
+INPUT: some cosmological parameters needed to create a flat LCDM model 
+TASK: call ccl_parameters_create to produce an LCDM model with baryonic effects
+*/
+ccl_parameters ccl_parameters_create_flat_lcdm_bar(double Omega_c, double Omega_b, double h,
+						   double norm_pk, double n_s, double bcm_log10Mc,
+						   double bcm_etab, double bcm_ks, int *status)
+{
+  double Omega_k = 0.0;
+  double N_nu_mass = 0.0;
+  double N_nu_rel = 3.046;
+  double mnu = 0.0;
+  double w0 = -1.0;
+  double wa = 0.0;
+  ccl_parameters params = ccl_parameters_create(Omega_c, Omega_b, Omega_k, N_nu_rel, N_nu_mass,
+						mnu, w0, wa, h, norm_pk, n_s, bcm_log10Mc, bcm_etab,
+						bcm_ks, -1, NULL, NULL, status);
+  return params;
+
+}
 
 /* ------- ROUTINE: ccl_parameters_create_flat_lcdm_nu -------- 
 INPUT: some cosmological parameters needed to create a flat LCDM model with neutrinos 
@@ -368,7 +407,7 @@ ccl_parameters ccl_parameters_create_flat_lcdm_nu(double Omega_c, double Omega_b
   double w0 = -1.0;
   double wa = 0.0;
   ccl_parameters params = ccl_parameters_create(Omega_c, Omega_b, Omega_k, N_nu_rel, N_nu_mass, mnu, w0, wa,
-						h, norm_pk, n_s, -1, NULL, NULL, status);
+						h, norm_pk, n_s, -1, -1, -1, -1, NULL, NULL, status);
   return params;
 
 }
@@ -387,7 +426,7 @@ ccl_parameters ccl_parameters_create_lcdm(double Omega_c, double Omega_b, double
   double w0 = -1.0;
   double wa = 0.0;
   ccl_parameters params = ccl_parameters_create(Omega_c, Omega_b, Omega_k, N_nu_rel, N_nu_mass, mnu, w0, wa,
-						h, norm_pk, n_s,-1,NULL,NULL, status);
+						h, norm_pk, n_s, -1, -1, -1,-1,NULL,NULL, status);
   return params;
 }
 
@@ -404,7 +443,7 @@ ccl_parameters ccl_parameters_create_lcdm_nu(double Omega_c, double Omega_b, dou
   double wa = 0.0; 
 
   ccl_parameters params = ccl_parameters_create(Omega_c, Omega_b, Omega_k, N_nu_rel, N_nu_mass, mnu, w0, wa,
-						h, norm_pk, n_s,-1,NULL,NULL, status);
+						h, norm_pk, n_s, -1, -1, -1,-1,NULL,NULL, status);
 
   return params;
 
@@ -424,7 +463,7 @@ ccl_parameters ccl_parameters_create_flat_wcdm(double Omega_c, double Omega_b, d
   double mnu = 0.0;
   double wa = 0.0;
   ccl_parameters params = ccl_parameters_create(Omega_c, Omega_b, Omega_k, N_nu_rel, N_nu_mass, mnu, w0, wa,
-						h, norm_pk, n_s,-1,NULL,NULL, status);
+						h, norm_pk, n_s, -1, -1, -1,-1,NULL,NULL, status);
   return params;
 }
 
@@ -441,7 +480,7 @@ ccl_parameters ccl_parameters_create_flat_wcdm_nu(double Omega_c, double Omega_b
   double Omega_k = 0.0;
   double wa = 0.0;
   ccl_parameters params = ccl_parameters_create(Omega_c, Omega_b, Omega_k, N_nu_rel, N_nu_mass, mnu, w0, wa, 
-						h, norm_pk, n_s,-1,NULL,NULL, status);
+						h, norm_pk, n_s, -1, -1, -1,-1,NULL,NULL, status);
   return params;
 }
 
@@ -458,7 +497,7 @@ ccl_parameters ccl_parameters_create_flat_wacdm(double Omega_c, double Omega_b, 
   double N_nu_rel = 3.046;
   double mnu = 0.0;
   ccl_parameters params = ccl_parameters_create(Omega_c, Omega_b, Omega_k,N_nu_rel, N_nu_mass, mnu, w0, wa,
-						h, norm_pk, n_s,-1,NULL,NULL, status);
+						h, norm_pk, n_s, -1, -1, -1,-1,NULL,NULL, status);
   return params;
 }
 
@@ -474,7 +513,7 @@ ccl_parameters ccl_parameters_create_flat_wacdm_nu(double Omega_c, double Omega_
 
   double Omega_k = 0.0;
   ccl_parameters params = ccl_parameters_create(Omega_c, Omega_b, Omega_k,N_nu_rel, N_nu_mass, mnu, w0, wa,
-						h, norm_pk, n_s,-1,NULL,NULL, status);
+						h, norm_pk, n_s, -1, -1, -1,-1,NULL,NULL, status);
   return params;
 }
 

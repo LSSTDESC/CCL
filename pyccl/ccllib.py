@@ -179,6 +179,18 @@ class parameters(_object):
     __swig_getmethods__["T_CMB"] = _ccllib.parameters_T_CMB_get
     if _newclass:
         T_CMB = _swig_property(_ccllib.parameters_T_CMB_get, _ccllib.parameters_T_CMB_set)
+    __swig_setmethods__["bcm_log10Mc"] = _ccllib.parameters_bcm_log10Mc_set
+    __swig_getmethods__["bcm_log10Mc"] = _ccllib.parameters_bcm_log10Mc_get
+    if _newclass:
+        bcm_log10Mc = _swig_property(_ccllib.parameters_bcm_log10Mc_get, _ccllib.parameters_bcm_log10Mc_set)
+    __swig_setmethods__["bcm_etab"] = _ccllib.parameters_bcm_etab_set
+    __swig_getmethods__["bcm_etab"] = _ccllib.parameters_bcm_etab_get
+    if _newclass:
+        bcm_etab = _swig_property(_ccllib.parameters_bcm_etab_get, _ccllib.parameters_bcm_etab_set)
+    __swig_setmethods__["bcm_ks"] = _ccllib.parameters_bcm_ks_set
+    __swig_getmethods__["bcm_ks"] = _ccllib.parameters_bcm_ks_get
+    if _newclass:
+        bcm_ks = _swig_property(_ccllib.parameters_bcm_ks_get, _ccllib.parameters_bcm_ks_set)
     __swig_setmethods__["sigma_8"] = _ccllib.parameters_sigma_8_set
     __swig_getmethods__["sigma_8"] = _ccllib.parameters_sigma_8_get
     if _newclass:
@@ -395,21 +407,25 @@ def cosmology_create(params, config):
     """cosmology_create(parameters params, configuration config) -> cosmology"""
     return _ccllib.cosmology_create(params, config)
 
-def cosmology_create_with_params(Omega_c, Omega_b, Omega_k, N_nu_rel, N_nu_mass, mnu, w0, wa, h, norm_pk, n_s, nz_mgrowth, zarr_mgrowth, dfarr_mgrowth, config, status):
-    """cosmology_create_with_params(double Omega_c, double Omega_b, double Omega_k, double N_nu_rel, double N_nu_mass, double mnu, double w0, double wa, double h, double norm_pk, double n_s, int nz_mgrowth, double * zarr_mgrowth, double * dfarr_mgrowth, configuration config, int * status) -> cosmology"""
-    return _ccllib.cosmology_create_with_params(Omega_c, Omega_b, Omega_k, N_nu_rel, N_nu_mass, mnu, w0, wa, h, norm_pk, n_s, nz_mgrowth, zarr_mgrowth, dfarr_mgrowth, config, status)
+def cosmology_create_with_params(Omega_c, Omega_b, Omega_k, N_nu_rel, N_nu_mass, mnu, w0, wa, h, norm_pk, n_s, bcm_log10Mc, bcm_etab, bcm_ks, nz_mgrowth, zarr_mgrowth, dfarr_mgrowth, config, status):
+    """cosmology_create_with_params(double Omega_c, double Omega_b, double Omega_k, double N_nu_rel, double N_nu_mass, double mnu, double w0, double wa, double h, double norm_pk, double n_s, double bcm_log10Mc, double bcm_etab, double bcm_ks, int nz_mgrowth, double * zarr_mgrowth, double * dfarr_mgrowth, configuration config, int * status) -> cosmology"""
+    return _ccllib.cosmology_create_with_params(Omega_c, Omega_b, Omega_k, N_nu_rel, N_nu_mass, mnu, w0, wa, h, norm_pk, n_s, bcm_log10Mc, bcm_etab, bcm_ks, nz_mgrowth, zarr_mgrowth, dfarr_mgrowth, config, status)
 
 def cosmology_create_with_lcdm_params(Omega_c, Omega_b, Omega_k, h, norm_pk, n_s, config, status):
     """cosmology_create_with_lcdm_params(double Omega_c, double Omega_b, double Omega_k, double h, double norm_pk, double n_s, configuration config, int * status) -> cosmology"""
     return _ccllib.cosmology_create_with_lcdm_params(Omega_c, Omega_b, Omega_k, h, norm_pk, n_s, config, status)
 
-def parameters_create(Omega_c, Omega_b, Omega_k, N_nu_rel, N_nu_mass, mnu, w0, wa, h, norm_pk, n_s, nz_mgrowth, zarr_mgrowth, dfarr_mgrowth, status):
-    """parameters_create(double Omega_c, double Omega_b, double Omega_k, double N_nu_rel, double N_nu_mass, double mnu, double w0, double wa, double h, double norm_pk, double n_s, int nz_mgrowth, double * zarr_mgrowth, double * dfarr_mgrowth, int * status) -> parameters"""
-    return _ccllib.parameters_create(Omega_c, Omega_b, Omega_k, N_nu_rel, N_nu_mass, mnu, w0, wa, h, norm_pk, n_s, nz_mgrowth, zarr_mgrowth, dfarr_mgrowth, status)
+def parameters_create(Omega_c, Omega_b, Omega_k, N_nu_rel, N_nu_mass, mnu, w0, wa, h, norm_pk, n_s, bcm_log10Mc, bcm_etab, bcm_ks, nz_mgrowth, zarr_mgrowth, dfarr_mgrowth, status):
+    """parameters_create(double Omega_c, double Omega_b, double Omega_k, double N_nu_rel, double N_nu_mass, double mnu, double w0, double wa, double h, double norm_pk, double n_s, double bcm_log10Mc, double bcm_etab, double bcm_ks, int nz_mgrowth, double * zarr_mgrowth, double * dfarr_mgrowth, int * status) -> parameters"""
+    return _ccllib.parameters_create(Omega_c, Omega_b, Omega_k, N_nu_rel, N_nu_mass, mnu, w0, wa, h, norm_pk, n_s, bcm_log10Mc, bcm_etab, bcm_ks, nz_mgrowth, zarr_mgrowth, dfarr_mgrowth, status)
 
 def parameters_create_flat_lcdm(Omega_c, Omega_b, h, norm_pk, n_s, status):
     """parameters_create_flat_lcdm(double Omega_c, double Omega_b, double h, double norm_pk, double n_s, int * status) -> parameters"""
     return _ccllib.parameters_create_flat_lcdm(Omega_c, Omega_b, h, norm_pk, n_s, status)
+
+def parameters_create_flat_lcdm_bar(Omega_c, Omega_b, h, norm_pk, n_s, bcm_log10Mc, bcm_etab, bcm_ks, status):
+    """parameters_create_flat_lcdm_bar(double Omega_c, double Omega_b, double h, double norm_pk, double n_s, double bcm_log10Mc, double bcm_etab, double bcm_ks, int * status) -> parameters"""
+    return _ccllib.parameters_create_flat_lcdm_bar(Omega_c, Omega_b, h, norm_pk, n_s, bcm_log10Mc, bcm_etab, bcm_ks, status)
 
 def parameters_create_flat_wcdm(Omega_c, Omega_b, w0, h, norm_pk, n_s, status):
     """parameters_create_flat_wcdm(double Omega_c, double Omega_b, double w0, double h, double norm_pk, double n_s, int * status) -> parameters"""
@@ -584,6 +600,10 @@ def scale_factor_of_chi_vec(cosmo, chi, output, status):
 def omega_x_vec(cosmo, label, a, output, status):
     """omega_x_vec(cosmology cosmo, int label, double * a, double * output, int * status)"""
     return _ccllib.omega_x_vec(cosmo, label, a, output, status)
+
+def bcm_model_fkz(cosmo, k, a, status):
+    """bcm_model_fkz(cosmology cosmo, double k, double a, int * status) -> double"""
+    return _ccllib.bcm_model_fkz(cosmo, k, a, status)
 
 def linear_matter_power(cosmo, k, a, status):
     """linear_matter_power(cosmology cosmo, double k, double a, int * status) -> double"""
@@ -887,6 +907,7 @@ bbks = _ccllib.bbks
 boltzmann = _ccllib.boltzmann
 boltzmann_class = _ccllib.boltzmann_class
 boltzmann_camb = _ccllib.boltzmann_camb
+baryons_bcm = _ccllib.baryons_bcm
 linear = _ccllib.linear
 halofit = _ccllib.halofit
 halo_model = _ccllib.halo_model
