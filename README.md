@@ -1,4 +1,4 @@
-# CCL
+# CCL     [![Build Status](https://travis-ci.org/LSSTDESC/CCL.svg?branch=master)](https://travis-ci.org/LSSTDESC/CCL)
 LSST DESC Core Cosmology Library: cosmology routines with validated numerical accuracy.
 
 The library is written in C99 and all functionality is directly callable from C and C++ code.  We also provide python bindings for higher-level functions.
@@ -6,8 +6,9 @@ The library is written in C99 and all functionality is directly callable from C 
 See also our wiki: https://github.com/LSSTDESC/CCL/wiki
 
 # Installation
-In order to compile CCL you need GSL. You can get GSL here: https://www.gnu.org/software/gsl/. Note that CCL uses version 2+ of GSL (which is not yet standard in all systems).
+In order to compile CCL you need GSL. You can get GSL here: https://www.gnu.org/software/gsl/. Note that CCL uses version 2+ of GSL (which is not yet standard in all systems). It also needs the FFTW libraries that can be found here: http://www.fftw.org/
 
+# C-only installation
 To install CCL, from the base directory (the one where this file is located) run:
 ```sh
 ./configure
@@ -30,8 +31,6 @@ All unit tests can be run after installation by running
 ```sh
 make check
 ```
-For quick introduction to CCL in C look at *tests/ccl_sample_run.c*.
-
 ## Known installation issues
 1. If you are having issues with GSL versions linking, please try the following during the configuration step:
 ````sh
@@ -44,10 +43,10 @@ For quick introduction to CCL in C look at *tests/ccl_sample_run.c*.
 export LD_LIBRARY_PATH=/path/to/where/ccl/is/installed/lib:$LD_LIBRARY_PATH
 ````
 
-## Python wrapper installation
+## Python installation
 The Python wrapper is called *pyccl*. Before you can build it, you must have compiled and installed the C version of CCL, as *pyccl* will be dynamically linked to it. The Python wrapper's build tools currently assume that your C compiler is *gcc*, and that you have a working Python 2.x installation with *numpy* and *distutils* with *swig*.
 
-If you have installed CCL in your default library path, you can build and install the *pyccl* module by going to the root CCL source directory and choosing one of the following options:
+The Python wrapper installs the C libraries automatically and requires that GSL2.x and FFTW are already installed. The C libraries will be installed in `/PATH/TO/PREFIX/lib` and `/PATH/TO/PREFIX/include`.
 
 * To build and install the wrapper for the current user only, run
 ````sh
@@ -62,12 +61,6 @@ sudo python setup.py install
 python setup.py build_ext --inplace
 ````
 If you choose either of the first two options, the *pyccl* module will be installed into a sensible location in your *PYTHONPATH*, and so should be picked up automatically by your Python interpreter. You can then simply import the module using `import pyccl`. If you use the last option, however, you must either start your interpreter from the root CCL directory, or manually add the root CCL directory to your *PYTHONPATH*.
-
-These options assume that the C library (`libccl`) has been installed somewhere in the default library path. If this isn’t the case, you will need to tell the Python build tools where to find the library. This can be achieved by running the following command first, before any of the install commands above:
-````sh
-python setup.py build_ext --library-dirs=/path/to/install/lib/ --rpath=/path/to/install/lib/
-````
-Here, `/path/to/install/lib/` should point to the directory where you installed the C library. For example, if you ran `./configure --prefix=/path/to/install/` before you compiled the C library, the correct path would be `/path/to/install/lib/`. The command above will build the Python wrapper in-place; you can then run one of the install commands, as listed above, to actually install the wrapper. Note that the `rpath` switch makes sure that the CCL C library can be found at runtime, even if it is not in the default library path. If you use this option, there should therefore be no need to modify the system library path yourself.
 
 On some systems, building or installing the Python wrapper fails with a message similar to
 ````sh
