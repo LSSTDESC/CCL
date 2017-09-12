@@ -71,7 +71,21 @@ int main(int argc,char **argv)
   // Compute growth factor and growth rate (see include/ccl_background.h for more routines)
   printf("Growth factor and growth rate at z = %.3lf are D = %.3lf and f = %.3lf\n",
 	 ZD, ccl_growth_factor(cosmo,1./(1+ZD), &status),ccl_growth_rate(cosmo,1./(1+ZD), &status));
-  
+ 
+  // Compute Omega_m, Omega_L and Omega_r at different times
+  printf("z\tOmega_m\tOmega_L\tOmega_r\n");
+  double Om, OL, Or;
+  for (int z=10000;z!=0;z/=3){
+    Om = ccl_omega_x(cosmo, 1./(z+1), 0, &status);
+    OL = ccl_omega_x(cosmo, 1./(z+1), 1, &status);
+    Or = ccl_omega_x(cosmo, 1./(z+1), 2, &status);
+    printf("%i\t%.3f\t%.3f\t%.3f\n", z, Om, OL, Or);
+  }
+  Om = ccl_omega_x(cosmo, 1., 0, &status);
+  OL = ccl_omega_x(cosmo, 1., 1, &status);
+  Or = ccl_omega_x(cosmo, 1., 2, &status);
+  printf("%i\t%.3f\t%.3f\t%.3f\n", 0, Om, OL, Or);
+
   // Compute sigma_8
   printf("Initializing power spectrum...\n");
   printf("sigma_8 = %.3lf\n\n", ccl_sigma8(cosmo, &status));

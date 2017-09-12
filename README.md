@@ -131,10 +131,19 @@ This Dockerfile currently contains all installed C libraries and the Python wrap
 
 # Documentation
 
+`CCL` has basic [doxygen](http://www.stack.nl/~dimitri/doxygen/) documentation for its C routines. This can be found in the directory *doc/html* within the `CCL` repository by opening the *index.html* file in your browser. The python routines are documented in situ; you can view the documentation for a function by calling `help(function name)` from within `python`.
+
 This document contains basic information about used structures and functions. At the end of document is provided code which implements these basic functions (also in *tests/ccl_sample_run.c*). More information about CCL functions and implementation can be found in *doc/0000-ccl_note/0000-ccl_note.pdf*.
 
 ### Cosmological parameters
 Start by defining cosmological parameters defined in structure **`ccl_parameters`**. This structure (exact definition in `include/ccl_core.h`) contains densities of matter, parameters of dark energy (`w0`, `wa`), Hubble parameters, primordial power spectra, radiation parameters, derived parameters (`sigma_8`, `Omega_1`, `z_star`) and modified growth rate.
+
+Currently, the following families of models are supported:
+* Flat ΛCDM
+* wCDM and the CPL model (w0 + wa)
+* Non-zero curvature (K)
+* Arbitrary, user-defined modified growth function
+* A single massive neutrino species or multiple equal-mass massive neutrinos (non-compatible with the user-defined modified growth function)
 
 You can initialize this structure through function **`ccl_parameters_create`** which returns object of type **`ccl_parameters`**.
 ```c
@@ -173,8 +182,8 @@ After you are done working with this cosmology object, you should free its work 
 void ccl_cosmology_free(ccl_cosmology * cosmo);
 ```
 
-### Distances and Growth factor
-With defined cosmology we can now compute distances, growth factor (and rate) or sigma_8. For comoving radial distance you can call function **`ccl_comoving_radial_distance`**
+### Distances, Growth factor and Density parameter functions
+With defined cosmology we can now compute distances, growth factor (and rate), sigma_8 or density parameters. For comoving radial distance you can call function **`ccl_comoving_radial_distance`**
 ```c
 double ccl_comoving_radial_distance(ccl_cosmology * cosmo, double a);
 ```
@@ -186,7 +195,13 @@ which also returns distance in units of Mpc. For growth factor (normalized to 1 
 ```c
 double ccl_growth_factor(ccl_cosmology * cosmo, double a);
 ```
-For more routines to compute distances and growth rates (e.g. at multiple times at once) see file `include/ccl_background.h`
+For evaluating density parameters (e.g. matter, dark energy or radiation) call function **`ccl_omega_x`**
+```c
+double ccl_omega_x(ccl_cosmology * cosmo, double a, ccl_omega_x_label label, int* status);
+```
+where **`ccl_omega_x_label label`** defines species type: 'matter' (0), 'dark_energy'(1), 'radiation'(2), and 'curvature'(3).
+
+For more routines to compute distances, growth rates and density parameters (e.g. at multiple times at once) see file `include/ccl_background.h`
 
 ###  Matter power spectra and sigma_8
 For given cosmology we can compute linear and non-linear matter power spectra using functions **`ccl_linear_matter_power`** and **`ccl_nonlin_matter_power`**
