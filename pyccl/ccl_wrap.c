@@ -16264,6 +16264,32 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_specs_create_gaussian_photoz_info(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  double arg1 ;
+  double val1 ;
+  int ecode1 = 0 ;
+  PyObject * obj0 = 0 ;
+  user_pz_info *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:specs_create_gaussian_photoz_info",&obj0)) SWIG_fail;
+  ecode1 = SWIG_AsVal_double(obj0, &val1);
+  if (!SWIG_IsOK(ecode1)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "specs_create_gaussian_photoz_info" "', argument " "1"" of type '" "double""'");
+  } 
+  arg1 = (double)(val1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (user_pz_info *)ccl_specs_create_gaussian_photoz_info(arg1);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_user_pz_info, 0 |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_specs_free_photoz_info(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   user_pz_info *arg1 = (user_pz_info *) 0 ;
@@ -16280,6 +16306,31 @@ SWIGINTERN PyObject *_wrap_specs_free_photoz_info(PyObject *SWIGUNUSEDPARM(self)
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
     ccl_specs_free_photoz_info(arg1);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_specs_free_photoz_info_gaussian(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  user_pz_info *arg1 = (user_pz_info *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:specs_free_photoz_info_gaussian",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_user_pz_info, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "specs_free_photoz_info_gaussian" "', argument " "1"" of type '" "user_pz_info *""'"); 
+  }
+  arg1 = (user_pz_info *)(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    ccl_specs_free_photoz_info_gaussian(arg1);
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
   resultobj = SWIG_Py_Void();
@@ -18432,7 +18483,9 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"specs_bias_clustering", _wrap_specs_bias_clustering, METH_VARARGS, (char *)"specs_bias_clustering(cosmology cosmo, double a, int * status) -> double"},
 	 { (char *)"specs_dNdz_tomog", _wrap_specs_dNdz_tomog, METH_VARARGS, (char *)"specs_dNdz_tomog(double z, int dNdz_type, double bin_zmin, double bin_zmax, user_pz_info user_info, double * tomoout, int * status)"},
 	 { (char *)"specs_create_photoz_info", _wrap_specs_create_photoz_info, METH_VARARGS, (char *)"specs_create_photoz_info(void * user_params, double (*)(double,double,void *,int *) user_pz_func) -> user_pz_info"},
+	 { (char *)"specs_create_gaussian_photoz_info", _wrap_specs_create_gaussian_photoz_info, METH_VARARGS, (char *)"specs_create_gaussian_photoz_info(double sigma_z0) -> user_pz_info"},
 	 { (char *)"specs_free_photoz_info", _wrap_specs_free_photoz_info, METH_VARARGS, (char *)"specs_free_photoz_info(user_pz_info my_photoz_info)"},
+	 { (char *)"specs_free_photoz_info_gaussian", _wrap_specs_free_photoz_info_gaussian, METH_VARARGS, (char *)"specs_free_photoz_info_gaussian(user_pz_info my_photoz_info)"},
 	 { (char *)"specs_sigmaz_clustering", _wrap_specs_sigmaz_clustering, METH_VARARGS, (char *)"specs_sigmaz_clustering(double z) -> double"},
 	 { (char *)"specs_sigmaz_sources", _wrap_specs_sigmaz_sources, METH_VARARGS, (char *)"specs_sigmaz_sources(double z) -> double"},
 	 { (char *)"DNDZ_WL_CONS_swigconstant", DNDZ_WL_CONS_swigconstant, METH_VARARGS, NULL},

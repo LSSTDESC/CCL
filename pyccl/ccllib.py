@@ -897,9 +897,17 @@ def specs_create_photoz_info(user_params, user_pz_func):
     """specs_create_photoz_info(void * user_params, double (*)(double,double,void *,int *) user_pz_func) -> user_pz_info"""
     return _ccllib.specs_create_photoz_info(user_params, user_pz_func)
 
+def specs_create_gaussian_photoz_info(sigma_z0):
+    """specs_create_gaussian_photoz_info(double sigma_z0) -> user_pz_info"""
+    return _ccllib.specs_create_gaussian_photoz_info(sigma_z0)
+
 def specs_free_photoz_info(my_photoz_info):
     """specs_free_photoz_info(user_pz_info my_photoz_info)"""
     return _ccllib.specs_free_photoz_info(my_photoz_info)
+
+def specs_free_photoz_info_gaussian(my_photoz_info):
+    """specs_free_photoz_info_gaussian(user_pz_info my_photoz_info)"""
+    return _ccllib.specs_free_photoz_info_gaussian(my_photoz_info)
 
 def specs_sigmaz_clustering(z):
     """specs_sigmaz_clustering(double z) -> double"""

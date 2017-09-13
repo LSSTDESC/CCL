@@ -24,7 +24,7 @@ from pyccl.cls import angular_cl, ClTracer, ClTracerNumberCounts, \
     ClTracerLensing
 
 from pyccl.lsst_specs import bias_clustering, sigmaz_clustering, \
-    sigmaz_sources, dNdz_tomog, PhotoZFunction
+    sigmaz_sources, dNdz_tomog, PhotoZFunction, PhotoZGaussian
 
 # Useful constants and unit conversions
 from pyccl.constants import CLIGHT_HMPC, MPC_TO_METER, PC_TO_METER, \
