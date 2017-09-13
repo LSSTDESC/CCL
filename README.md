@@ -7,10 +7,10 @@ See also our [wiki](https://github.com/LSSTDESC/CCL/wiki).
 
 # Installation
 In order to compile `CCL` you need a few libraries:
-* GNU Scientific Library [GSL](https://www.gnu.org/software/gsl/). Note that CCL uses version 2.1 or higher of GSL (which is not yet standard in all systems).
-* The [SWIG](http://www.swig.org/) Python wrapper generator is not needed to run CCL, but must be installed if you intend to modify CCL in any way.
+* GNU Scientific Library [GSL](https://www.gnu.org/software/gsl/). Note that `CCL` uses version 2.1 or higher of GSL (which is not yet standard in all systems).
+* The [SWIG](http://www.swig.org/) Python wrapper generator is not needed to run `CCL`, but must be installed if you intend to modify `CCL` in any way.
 * [FFTW3](http://www.fftw.org/) is required for computation of correlation functions.
-* FFTlog([here](http://casa.colorado.edu/~ajsh/FFTLog/) and [here](https://github.com/slosar/FFTLog))is provided within CCL, with minor modifications.
+* FFTlog([here](http://casa.colorado.edu/~ajsh/FFTLog/) and [here](https://github.com/slosar/FFTLog))is provided within `CCL`, with minor modifications.
 
 # C-only installation
 `CCL` can be easily installed using an *autotools*-generated configuration file. To install `CCL`, from the base directory (the one where this file is located) run:
@@ -50,15 +50,15 @@ make install
 ./configure CFLAGS="-I/usr/local/include" LDFLAGS="-L/usr/local/lib"
 ````
 2. If you are having issues with FFTW linking, please make sure you have the latest version correctly installed. See more on [FFTW webpage](http://www.fftw.org/download.html)
-3. If you move or delete the source directory after installing CCL, some functions may fail. The source directory contains files needed by CLASS (which is contained within CCL) at run-time.
-4. If you are planning to compile your own file that calls CCL, then you should add the following to your .bashrc:
+3. If you move or delete the source directory after installing `CCL`, some functions may fail. The source directory contains files needed by CLASS (which is contained within `CCL`) at run-time.
+4. If you are planning to compile your own file that calls `CCL`, then you should add the following to your .bashrc:
 ````sh
 export LD_LIBRARY_PATH=/path/to/where/ccl/is/installed/lib:$LD_LIBRARY_PATH
 ````
 5. We know of one case with Mac OS where `libtools` had the “lock” function set to “yes” and this caused the installation to stall. However, this is very rare. If this happens, after the `configure` step, edit `libtool` to set the “lock” to “no”.
 
 ## Python installation
-The Python wrapper module is called `pyccl`. Before you can build it, you must have compiled and installed the C version of CCL, as `pyccl` will be dynamically linked to it. The Python wrapper's build tools currently assume that your C compiler is `gcc`, and that you have a working Python 2.x installation with `numpy` and `distutils` with `swig` (the latter is not necessary for using `CCL`, only for development).
+The Python wrapper module is called `pyccl`. Before you can build it, you must have compiled and installed the C version of `CCL`, as `pyccl` will be dynamically linked to it. The Python wrapper's build tools currently assume that your C compiler is `gcc`, and that you have a working Python 2.x installation with `numpy` and `distutils` with `swig` (the latter is not necessary for using `CCL`, only for development).
 
 The Python wrapper installs the C libraries automatically and requires that GSL2.x and FFTW are already installed. The C libraries will be installed in `/PATH/TO/PREFIX/lib` and `/PATH/TO/PREFIX/include`.
 
@@ -74,7 +74,7 @@ sudo python setup.py install
 ````sh
 python setup.py build_ext --inplace
 ````
-If you choose either of the first two options, the `pyccl` module will be installed into a sensible location in your *PYTHONPATH*, and so should be picked up automatically by your Python interpreter. You can then simply import the module using `import pyccl`. If you use the last option, however, you must either start your interpreter from the root CCL directory, or manually add the root CCL directory to your *PYTHONPATH*.
+If you choose either of the first two options, the `pyccl` module will be installed into a sensible location in your `PYTHONPATH`, and so should be picked up automatically by your Python interpreter. You can then simply import the module using `import pyccl`. If you use the last option, however, you must either start your interpreter from the root `CCL` directory, or manually add the root `CCL` directory to your `PYTHONPATH`.
 
 On some systems, building or installing the Python wrapper fails with a message similar to
 ````sh
@@ -95,23 +95,23 @@ This will run the embedded unit tests (may take a few minutes). Using this last 
 python setup.py uninstall
 ````
 
-For quick introduction to CCL in Python look at notebooks in *tests/*.
+For quick introduction to `CCL` in Python look at notebooks in ***tests/***.
 
 ## Compiling against an external version of CLASS
 
 `CCL` has a built-in version of `CLASS` that is used to calculate power spectra and other cosmological functions. This is compiled by default. Optionally, you can also link `CCL` against an external version of `CLASS`. This is useful if you want to use a modified version of `CLASS`, or a different or more up-to-date version of the standard `CLASS`.
 
-To compile `CCL` with an external version of `CLASS`, you must first prepare the external copy so that it can be linked as a shared library. By default, the `CLASS` build tools create a static library. After compiling `CLASS` in the usual way (by running `make`), look for a static library file called `libclass.a` that should have been placed in the root source directory. Then, run the following command from that directory (Linux only):
+To compile `CCL` with an external version of `CLASS`, you must first prepare the external copy so that it can be linked as a shared library. By default, the `CLASS` build tools create a static library. After compiling `CLASS` in the usual way (by running `make`), look for a static library file called ***libclass.a*** that should have been placed in the root source directory. Then, run the following command from that directory (Linux only):
 ````sh
 gcc -shared -o libclass.so -Wl,--whole-archive libclass.a \
                            -Wl,--no-whole-archive -lgomp
 ````
-This should create a new shared library, `libclass.so`, in the same directory. (N.B. The `-lgomp` flag has to appear at the end of the command; otherwise the linker can fail.) If you are running Mac OS X, use the following command instead:
+This should create a new shared library, ***libclass.so***, in the same directory. (N.B. The `-lgomp` flag has to appear at the end of the command; otherwise the linker can fail.) If you are running Mac OS X, use the following command instead:
 ````sh
 gcc -fpic -shared -o libclass.dylib -Wl,-all\_load libclass.a -Wl,-noall\_load
 ````
 
-Next, change to the root `CCL` directory and run `make clean` if you have previously run the compilation process. Then, set the `CLASSDIR` environment variable to point to the directory containing `libclass.so`:
+Next, change to the root `CCL` directory and run `make clean` if you have previously run the compilation process. Then, set the `CLASSDIR` environment variable to point to the directory containing ***libclass.so***:
 ````sh
 export CLASSDIR=/path/to/external/class
 ````
@@ -122,7 +122,7 @@ Once compilation has finished, run `make check` to make sure everything is worki
 
 ## Docker image installation
 
-The Dockerfile to generate a Docker image is included in the CCL repository as Dockerfile. This can be used to create an image that Docker can spool up as a virtual machine, allowing you to utilize CCL on any infrastructure with minimal hassle. The details of Docker and the installation process can be found at [https://www.docker.com/](https://www.docker.com/). Once Docker is installed, it is a simple process to create an image! In a terminal of your choosing (with Docker running), type the command `docker build -t ccl .` in the CCL directory.
+The Dockerfile to generate a Docker image is included in the `CCL` repository as Dockerfile. This can be used to create an image that Docker can spool up as a virtual machine, allowing you to utilize `CCL` on any infrastructure with minimal hassle. The details of Docker and the installation process can be found at [https://www.docker.com/](https://www.docker.com/). Once Docker is installed, it is a simple process to create an image! In a terminal of your choosing (with Docker running), type the command `docker build -t ccl .` in the `CCL` directory.
 
 The resulting Docker image has two primary functionalities. The first is a CMD that will open Jupyter notebook tied to a port on your local machine. This can be used with the following run command: `docker run -p 8888:8888 ccl`. You can then access the notebook in the browser of your choice at `localhost:8888`. The second is to access the bash itself, which can be done using `docker run -it ccl bash`.
 
@@ -131,12 +131,12 @@ This Dockerfile currently contains all installed C libraries and the Python wrap
 
 # Documentation
 
-`CCL` has basic [doxygen](http://www.stack.nl/~dimitri/doxygen/) documentation for its C routines. This can be found in the directory *doc/html* within the `CCL` repository by opening the *index.html* file in your browser. The python routines are documented in situ; you can view the documentation for a function by calling `help(function name)` from within `python`.
+`CCL` has basic [doxygen](http://www.stack.nl/~dimitri/doxygen/) documentation for its C routines. This can be found in the directory ***doc/html*** within the `CCL` repository by opening the ***index.html*** file in your browser. The python routines are documented in situ; you can view the documentation for a function by calling `help(function name)` from within `python`.
 
-This document contains basic information about used structures and functions. At the end of document is provided code which implements these basic functions (also in *tests/ccl_sample_run.c*). More information about CCL functions and implementation can be found in *doc/0000-ccl_note/0000-ccl_note.pdf*.
+This document contains basic information about used structures and functions. At the end of document is provided code which implements these basic functions (also in ***tests/ccl_sample_run.c***). More information about `CCL` functions and implementation can be found in ***doc/0000-ccl_note/0000-ccl_note.pdf***.
 
 ### Cosmological parameters
-Start by defining cosmological parameters defined in structure **`ccl_parameters`**. This structure (exact definition in `include/ccl_core.h`) contains densities of matter, parameters of dark energy (`w0`, `wa`), Hubble parameters, primordial power spectra, radiation parameters, derived parameters (`sigma_8`, `Omega_1`, `z_star`) and modified growth rate.
+Start by defining cosmological parameters defined in structure **`ccl_parameters`**. This structure (exact definition in ***include/ccl_core.h***) contains densities of matter, parameters of dark energy (`w0`, `wa`), Hubble parameters, primordial power spectra, radiation parameters, derived parameters (`sigma_8`, `Omega_1`, `z_star`) and modified growth rate.
 
 Currently, the following families of models are supported:
 * Flat ΛCDM
@@ -166,14 +166,14 @@ where:
 * `A_s`: amplitude of the primordial PS
 * `n_s`: index of the primordial PS
 
-For some specific cosmologies you can also use functions **`ccl_parameters_create_flat_lcdm`**, **`ccl_parameters_create_flat_wcdm`**, **`ccl_parameters_create_flat_wacdm`**, **`ccl_parameters_create_lcdm`**, which automatically set some parameters. For more information, see file `include/ccl_core.c`.
+For some specific cosmologies you can also use functions **`ccl_parameters_create_flat_lcdm`**, **`ccl_parameters_create_flat_wcdm`**, **`ccl_parameters_create_flat_wacdm`**, **`ccl_parameters_create_lcdm`**, which automatically set some parameters. For more information, see file ***include/ccl_core.c***.
 
 ### The `ccl_cosmology` object
-For the majority of CCL's functions you need an object of type **`ccl_cosmology`**, which can be initalize by function **`ccl_cosmology_create`**
+For the majority of `CCL`'s functions you need an object of type **`ccl_cosmology`**, which can be initalize by function **`ccl_cosmology_create`**
 ```c
 ccl_cosmology * ccl_cosmology_create(ccl_parameters params, ccl_configuration config);
 ```
-Note that the function returns a pointer. Variable **`params`** of type **`ccl_parameters`** contains cosmological parameters created in previous step. Structure **`ccl_configuration`** contains information about methods for computing transfer function, matter power spectrum and mass function (for available methods see `include/ccl_config.h`). For now, you should use default configuration **`default_config`**
+Note that the function returns a pointer. Variable `params` of type **`ccl_parameters`** contains cosmological parameters created in previous step. Structure **`ccl_configuration`** contains information about methods for computing transfer function, matter power spectrum and mass function (for available methods see ***include/ccl_config.h***). For now, you should use default configuration **`default_config`**
 ```c
 const ccl_configuration default_config = {ccl_boltzmann_class, ccl_halofit, ccl_tinker};
 ```
@@ -187,11 +187,11 @@ With defined cosmology we can now compute distances, growth factor (and rate), s
 ```c
 double ccl_comoving_radial_distance(ccl_cosmology * cosmo, double a);
 ```
-which returns distance to scale factor **`a`** in units of Mpc. For luminosity distance call function **`ccl_luminosity_distance`**
+which returns distance to scale factor `a` in units of Mpc. For luminosity distance call function **`ccl_luminosity_distance`**
 ```c
 double ccl_luminosity_distance(ccl_cosmology * cosmo, double a);
 ```
-which also returns distance in units of Mpc. For growth factor (normalized to 1 at **`z`** = 0) at sale factor **`a`** call **`ccl_growth_factor`**
+which also returns distance in units of Mpc. For growth factor (normalized to 1 at `z` = 0) at sale factor `a` call **`ccl_growth_factor`**
 ```c
 double ccl_growth_factor(ccl_cosmology * cosmo, double a);
 ```
@@ -199,9 +199,9 @@ For evaluating density parameters (e.g. matter, dark energy or radiation) call f
 ```c
 double ccl_omega_x(ccl_cosmology * cosmo, double a, ccl_omega_x_label label, int* status);
 ```
-where **`ccl_omega_x_label label`** defines species type: 'matter' (0), 'dark_energy'(1), 'radiation'(2), and 'curvature'(3).
+where **`ccl_omega_x_label`** `label` defines species type: `'matter' (0)`, `'dark_energy'(1)`, `'radiation'(2)`, and `'curvature'(3)`.
 
-For more routines to compute distances, growth rates and density parameters (e.g. at multiple times at once) see file `include/ccl_background.h`
+For more routines to compute distances, growth rates and density parameters (e.g. at multiple times at once) see file ***include/ccl_background.h***
 
 ###  Matter power spectra and sigma_8
 For given cosmology we can compute linear and non-linear matter power spectra using functions **`ccl_linear_matter_power`** and **`ccl_nonlin_matter_power`**
@@ -209,16 +209,16 @@ For given cosmology we can compute linear and non-linear matter power spectra us
 double ccl_linear_matter_power(ccl_cosmology * cosmo, double k, double a);
 double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double k, double a);
 ```
-Sigma_8 can be calculated by function **`ccl_sigma8`**, or more generally by function **`ccl_sigmaR`**, which computes the variance of the density field smoothed by spherical top-hat window function on a comoving distance **`R`** (in Mpc).
+Sigma_8 can be calculated by function **`ccl_sigma8`**, or more generally by function **`ccl_sigmaR`**, which computes the variance of the density field smoothed by spherical top-hat window function on a comoving distance `R` (in Mpc).
 ```c
 double ccl_sigmaR(ccl_cosmology *cosmo, double R);
 double ccl_sigma8(ccl_cosmology *cosmo);
 
 ````
-These and other functions for different matter power spectra can be found in file *include/ccl_power.h*.
+These and other functions for different matter power spectra can be found in file ***include/ccl_power.h***.
 
 ### Angular power spectra
-CCL can compute angular power spectra for two tracer types: galaxy number counts and galaxy weak lensing. Tracer parameters are defined in structure **CCL_ClTracer**. In general, you can create this object with function **ccl_cl_tracer_new**
+`CCL` can compute angular power spectra for two tracer types: galaxy number counts and galaxy weak lensing. Tracer parameters are defined in structure **`CCL_ClTracer`**. In general, you can create this object with function **`ccl_cl_tracer_new`**
 ````c
 CCL_ClTracer *ccl_cl_tracer_new(ccl_cosmology *cosmo,int tracer_type,
 				int has_rsd,int has_magnification,int has_intrinsic_alignment,
@@ -228,41 +228,41 @@ CCL_ClTracer *ccl_cl_tracer_new(ccl_cosmology *cosmo,int tracer_type,
 				int nz_ba,double *z_ba,double *ba,
 				int nz_rf,double *z_rf,double *rf);
 ````
-Exact definition of these parameters are described in file *include/ccl_cls.h*. Usually you can use simplified versions of this function, namely **ccl_cl_tracer_number_counts_new, ccl_cl_tracer_number_counts_simple_new, ccl_cl_tracer_lensing_new** or **ccl_cl_tracer_lensing_simple_new**. Two most simplified versions (one for number counts and one for shear) take parameters:
+Exact definition of these parameters are described in file ***include/ccl_cls.h***. Usually you can use simplified versions of this function, namely **`ccl_cl_tracer_number_counts_new`, `ccl_cl_tracer_number_counts_simple_new`, `ccl_cl_tracer_lensing_new`** or **`ccl_cl_tracer_lensing_simple_new`**. Two most simplified versions (one for number counts and one for shear) take parameters:
 ````c
 CCL_ClTracer *ccl_cl_tracer_number_counts_simple_new(ccl_cosmology *cosmo, int nz_n,double *z_n,
                                                      double *n, int nz_b,double *z_b,double *b);
 CCL_ClTracer *ccl_cl_tracer_lensing_simple_new(ccl_cosmology *cosmo, int nz_n,double *z_n,double *n);
 
 ````
-where **nz_n** is dimension of arrays **z_n** and **n**. **z_n** and **n** are arrays for the number count of objects per redshift interval (arbitrary normalization - renormalized inside). **nz_b, z_b** and **b** are the same for the clustering bias.
-With initialized tracers you can compute limber power spectrum with **ccl_angular_cl**
+where `nz_n` is dimension of arrays `z_n` and `n`. `z_n` and `n` are arrays for the number count of objects per redshift interval (arbitrary normalization - renormalized inside). `nz_b`, `z_b` and `b` are the same for the clustering bias.
+With initialized tracers you can compute limber power spectrum with **`ccl_angular_cl`**
 ````c
 double ccl_angular_cl(ccl_cosmology *cosmo,int l,CCL_ClTracer *clt1,CCL_ClTracer *clt2);
 ````
-After you are done working with tracers, you should free its work space by **ccl_cl_tracer_free**
+After you are done working with tracers, you should free its work space by **`ccl_cl_tracer_free`**
 ````c
 void ccl_cl_tracer_free(CCL_ClTracer *clt);
 ````
 
 ### Halo mass function
-The halo mass function *dN/dM* can be obtained by function **ccl_massfunc**
+The halo mass function *dN/dM* can be obtained by function **`ccl_massfunc`**
 ````c
 double ccl_massfunc(ccl_cosmology * cosmo, double halo_mass, double redshift)
 ````
-where **halo_mass** is mass smoothing scale (in units of *M_sun/h*. For more details (or other functions like *sigma_M*) see *include/ccl_massfunc.h* and *src/mass_func.c*.
+where `halo_mass` is mass smoothing scale (in units of *M_sun/h*. For more details (or other functions like **`sigma_M`**) see ***include/ccl_massfunc.h*** and ***src/mass_func.c***.
 
 ### LSST Specifications
-CCL includes LSST specifications for the expected galaxy distributions of the full galaxy clustering sample and the lensing source galaxy sample. Start by defining a flexible photometric redshift model given by function
+`CCL` includes LSST specifications for the expected galaxy distributions of the full galaxy clustering sample and the lensing source galaxy sample. Start by defining a flexible photometric redshift model given by function
 ````c
 double (* your_pz_func)(double photo_z, double spec_z, void *param);
 ````
-which returns the probability of measuring a particular photometric redshift, given a spectroscopic redshift and other relevant parameters. Then you call function **ccl_specs_create_photoz_info**
+which returns the probability of measuring a particular photometric redshift, given a spectroscopic redshift and other relevant parameters. Then you call function **`ccl_specs_create_photoz_info`**
 ````c
 user_pz_info* ccl_specs_create_photoz_info(void * user_params, 
                                            double(*user_pz_func)(double, double,void*));
 ````
-which creates a strcture **user_pz_info** which holds information needed to compute *dN/dz*
+which creates a strcture **`user_pz_info`** which holds information needed to compute *dN/dz*
 ````c
 typedef struct {
 	//first double corresponds to photo-z, second to spec-z
@@ -270,25 +270,25 @@ typedef struct {
         void *  your_pz_params;
 } user_pz_info;
 ````
-The expected *dN/dz* for lensing or clustering galaxies with given binnig can be obtained by function **ccl_specs_dNdz_tomog**
+The expected *dN/dz* for lensing or clustering galaxies with given binnig can be obtained by function **`ccl_specs_dNdz_tomog`**
 ````c
 int ccl_specs_dNdz_tomog(double z, int dNdz_type, double bin_zmin, double bin_zmax, 
                          user_pz_info * user_info,  double *tomoout);
 ````
-Result is returned in **tomoout**. This function returns zero if called with an allowable type of dNdz, non-zero otherwise. Allowed types of dNdz (currently one for clustering and three for lensing - fiducial, optimistic, and conservative - cases are considered) and other information and functions like bias clustering or sigma_z are specified in file *include/ccl_lsst_specs.h* 
+Result is returned in `tomoout`. This function returns zero if called with an allowable type of dNdz, non-zero otherwise. Allowed types of dNdz (currently one for clustering and three for lensing - fiducial, optimistic, and conservative - cases are considered) and other information and functions like bias clustering or sigma_z are specified in file ***include/ccl_lsst_specs.h*** 
 
-After you are done working with photo_z, you should free its work space by **ccl_specs_free_photoz_info**
+After you are done working with photo_z, you should free its work space by **`ccl_specs_free_photoz_info`**
 ````c
 void ccl_specs_free_photoz_info(user_pz_info *my_photoz_info);
 ````
 
 ## Example code
-This code can also be found in *tests/ccl_sample_run.c* You can run the following example code. For this you will need to compile with the following command:
+This code can also be found in ***tests/ccl_sample_run.c*** You can run the following example code. For this you will need to compile with the following command:
 ````sh
 gcc -Wall -Wpedantic -g -I/path/to/install/include -std=gnu99 -fPIC tests/ccl_sample_run.c \
 -o tests/ccl_sample_run -L/path/to/install/lib -L/usr/local/lib -lgsl -lgslcblas -lm -lccl
 ````
-where */path/to/install/* is the path to the location where the library has been installed.
+where `/path/to/install/` is the path to the location where the library has been installed.
 
 ```c
 #include <stdlib.h>
@@ -461,9 +461,9 @@ int main(int argc,char **argv){
 ````
 
 ## Python wrapper
-A Python wrapper for CCL is provided through a module called `pyccl`. The whole CCL interface can be accessed through regular Python functions and classes, with all of the computation happening in the background through the C code. The functions all support *numpy* arrays as inputs and outputs, with any loops being performed in the C code for speed.
+A Python wrapper for `CCL` is provided through a module called `pyccl`. The whole `CCL` interface can be accessed through regular Python functions and classes, with all of the computation happening in the background through the C code. The functions all support `numpy` arrays as inputs and outputs, with any loops being performed in the C code for speed.
 
-The Python module has essentially the same functions as the C library, just presented in a more standard Python-like way. You can inspect the available functions and their arguments by using the built-in Python **help()** function, as with any Python module.
+The Python module has essentially the same functions as the C library, just presented in a more standard Python-like way. You can inspect the available functions and their arguments by using the built-in Python **`help()`** function, as with any Python module.
 
 Below is a simple example Python script that creates a new **Cosmology** object, and then uses it to calculate the angular power spectra for a simple lensing cross-correlation. It should take a few seconds on a typical laptop.
 
@@ -495,6 +495,6 @@ print cls
 
 
 # License, Credits, Feedback etc
-The CCL is still under development and should be considered research in progress. You are welcome to re-use the code, which is open source and available under the modified BSD license. If you make use of any of the ideas or software in this package in your own research, please cite them as "(LSST DESC, in preparation)" and provide a link to this repository: https://github.com/LSSTDESC/CCL If you have comments, questions, or feedback, please [write us an issue](https://github.com/LSSTDESC/CCL/issues).
+The `CCL` is still under development and should be considered research in progress. You are welcome to re-use the code, which is open source and available under the modified BSD license. If you make use of any of the ideas or software in this package in your own research, please cite them as "(LSST DESC, in preparation)" and provide a link to this repository: https://github.com/LSSTDESC/CCL If you have comments, questions, or feedback, please [write us an issue](https://github.com/LSSTDESC/CCL/issues).
 
 
