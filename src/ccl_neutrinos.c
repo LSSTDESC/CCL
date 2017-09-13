@@ -77,10 +77,10 @@ double nu_phasespace_intg(gsl_interp_accel* accel, double mnuOT, int* status)
   
   // First check the cases where we are in the limits.
   if (mnuOT<CCL_NU_MNUT_MIN) {
-    integral_value = 7./8.;
+    return 7./8.;
   }
   else if (mnuOT>CCL_NU_MNUT_MAX) {
-    integral_value = 0.2776566337*mnuOT; 
+    return 0.2776566337*mnuOT; 
   }
 	
   // Evaluate the spline - this will use the accelerator if it has been defined.
