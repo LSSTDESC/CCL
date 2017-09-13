@@ -35,9 +35,9 @@ make check
 1. If you move or delete the source directory after installing CCL, some functions may fail. The source directory contains files needed by *CLASS* (which is contained within CCL) at run-time.
 
 ## Python installation
-The Python wrapper is called *pyccl*. Before you can build it, you must have compiled and installed the C version of CCL, as *pyccl* will be dynamically linked to it. The Python wrapper's build tools currently assume that your C compiler is *gcc*, and that you have a working Python 2.x installation with *numpy* and *distutils* with *swig*.
+The Python wrapper is called *pyccl*. Generally, you can build and install the *pyccl* wrapper directly, without having to first compile the C version of CCL. The Python wrapper's build tools currently assume that your C compiler is *gcc*, and that you have a working Python 2.x or 3.x installation with *numpy* and *distutils*. You will also need *swig* if you wish to change the CCL code itself, rather than just installing it as-is.
 
-The Python wrapper installs the C libraries automatically and requires that GSL2.x and FFTW are already installed. The C libraries will be installed in `/PATH/TO/PREFIX/lib` and `/PATH/TO/PREFIX/include`.
+The Python wrapper installs the C libraries automatically and requires that GSL2.x and FFTW are already installed. Note that the C libraries will be installed in the same prefix as the Python files.
 
 * To build and install the wrapper for the current user only, run
 ````sh
@@ -212,23 +212,23 @@ double (* your_pz_func)(double photo_z, double spec_z, void *param);
 ````
 which returns the probability of measuring a particular photometric redshift, given a spectroscopic redshift and other relevant parameters. Then you call function **ccl_specs_create_photoz_info**
 ````c
-user_pz_info* ccl_specs_create_photoz_info(void * user_params, 
+user_pz_info* ccl_specs_create_photoz_info(void * user_params,
                                            double(*user_pz_func)(double, double,void*));
 ````
 which creates a strcture **user_pz_info** which holds information needed to compute *dN/dz*
 ````c
 typedef struct {
 	//first double corresponds to photo-z, second to spec-z
-        double (* your_pz_func)(double, double, void *); 
+        double (* your_pz_func)(double, double, void *);
         void *  your_pz_params;
 } user_pz_info;
 ````
 The expected *dN/dz* for lensing or clustering galaxies with given binnig can be obtained by function **ccl_specs_dNdz_tomog**
 ````c
-int ccl_specs_dNdz_tomog(double z, int dNdz_type, double bin_zmin, double bin_zmax, 
+int ccl_specs_dNdz_tomog(double z, int dNdz_type, double bin_zmin, double bin_zmax,
                          user_pz_info * user_info,  double *tomoout);
 ````
-Result is returned in **tomoout**. This function returns zero if called with an allowable type of dNdz, non-zero otherwise. Allowed types of dNdz (currently one for clustering and three for lensing - fiducial, optimistic, and conservative - cases are considered) and other information and functions like bias clustering or sigma_z are specified in file *include/ccl_lsst_specs.h* 
+Result is returned in **tomoout**. This function returns zero if called with an allowable type of dNdz, non-zero otherwise. Allowed types of dNdz (currently one for clustering and three for lensing - fiducial, optimistic, and conservative - cases are considered) and other information and functions like bias clustering or sigma_z are specified in file *include/ccl_lsst_specs.h*
 
 After you are done working with photo_z, you should free its work space by **ccl_specs_free_photoz_info**
 ````c
@@ -267,7 +267,7 @@ where */path/to/install/* is the path to the location where the library has been
 #define SZ_SH 0.05
 #define NL 512
 
-// The user defines a structure of parameters to the user-defined function for the photo-z probability 
+// The user defines a structure of parameters to the user-defined function for the photo-z probability
 struct user_func_params
 {
 	double (* sigma_z) (double);
@@ -302,7 +302,7 @@ int main(int argc,char **argv){
         printf("Consistency: Scale factor at chi=%.3lf Mpc is a=%.3lf\n",
                ccl_comoving_radial_distance(cosmo,1./(1+ZD), &status),
                ccl_scale_factor_of_chi(cosmo,ccl_comoving_radial_distance(cosmo,1./(1+ZD), &status), &status));
-	 
+
 	// Compute growth factor and growth rate (see include/ccl_background.h for more routines)
 	printf("Growth factor and growth rate at z = %.3lf are D = %.3lf and f = %.3lf\n",
 		ZD, ccl_growth_factor(cosmo,1./(1+ZD)),ccl_growth_rate(cosmo,1./(1+ZD)));
@@ -340,7 +340,7 @@ int main(int argc,char **argv){
 	//Free up tracers
 	ccl_cl_tracer_free(ct_gc);
 	ccl_cl_tracer_free(ct_wl);
-	
+
 	//Halo mass function
 	printf("M\tdN/dM(z = 0, 0.5, 1))\n");
 	for(int logM=9;logM<=15;logM+=1)
@@ -363,24 +363,24 @@ int main(int argc,char **argv){
 	user_pz_info * pz_info_example;
 
 	// Create the struct to hold the user information about photo_z's.
-	pz_info_example = ccl_specs_create_photoz_info(&my_params_example, &user_pz_probability); 
-	
+	pz_info_example = ccl_specs_create_photoz_info(&my_params_example, &user_pz_probability);
+
 	double z_test;
 	double dNdz_tomo;
 	int z,status;
 	FILE * output;
-	
+
 	//Try splitting dNdz (lensing) into 5 redshift bins
 	double tmp1,tmp2,tmp3,tmp4,tmp5;
 	printf("Trying splitting dNdz (lensing) into 5 redshift bins. Output written into file tests/specs_example_tomo_lens.out\n");
 	output = fopen("./tests/specs_example_tomo_lens.out", "w");     
 	for (z=0; z<100; z=z+1){
 		z_test = 0.035*z;
-		status = ccl_specs_dNdz_tomog(z_test, DNDZ_WL_FID, 0.,6., pz_info_example,&dNdz_tomo); 
-		status = ccl_specs_dNdz_tomog(z_test, DNDZ_WL_FID, 0.,0.6, pz_info_example,&tmp1); 
+		status = ccl_specs_dNdz_tomog(z_test, DNDZ_WL_FID, 0.,6., pz_info_example,&dNdz_tomo);
+		status = ccl_specs_dNdz_tomog(z_test, DNDZ_WL_FID, 0.,0.6, pz_info_example,&tmp1);
 		status = ccl_specs_dNdz_tomog(z_test, DNDZ_WL_FID, 0.6,1.2, pz_info_example,&tmp2);
 		status = ccl_specs_dNdz_tomog(z_test, DNDZ_WL_FID, 1.2,1.8, pz_info_example,&tmp3);
-		status = ccl_specs_dNdz_tomog(z_test, DNDZ_WL_FID, 1.8,2.4, pz_info_example,&tmp4); 
+		status = ccl_specs_dNdz_tomog(z_test, DNDZ_WL_FID, 1.8,2.4, pz_info_example,&tmp4);
 		status = ccl_specs_dNdz_tomog(z_test, DNDZ_WL_FID, 2.4,3.0, pz_info_example,&tmp5);
 		fprintf(output, "%f %f %f %f %f %f %f\n", z_test,tmp1,tmp2,tmp3,tmp4,tmp5,dNdz_tomo);
 	}
@@ -392,7 +392,7 @@ int main(int argc,char **argv){
 	output = fopen("./tests/specs_example_tomo_clu.out", "w");     
 	for (z=0; z<100; z=z+1){
 		z_test = 0.035*z;
-		status = ccl_specs_dNdz_tomog(z_test, DNDZ_NC,0.,6., pz_info_example,&dNdz_tomo); 
+		status = ccl_specs_dNdz_tomog(z_test, DNDZ_NC,0.,6., pz_info_example,&dNdz_tomo);
 		status = ccl_specs_dNdz_tomog(z_test, DNDZ_NC,0.,0.6, pz_info_example,&tmp1);
 		status = ccl_specs_dNdz_tomog(z_test, DNDZ_NC,0.6,1.2, pz_info_example,&tmp2);
 		status = ccl_specs_dNdz_tomog(z_test, DNDZ_NC,1.2,1.8, pz_info_example,&tmp3);
@@ -402,7 +402,7 @@ int main(int argc,char **argv){
 	}
 
 	fclose(output);
-	
+
 	//Free up photo-z info
 	ccl_specs_free_photoz_info(pz_info_example);
 
@@ -449,5 +449,3 @@ print cls
 
 # License, Credits, Feedback etc
 The CCL is still under development and should be considered research in progress. You are welcome to re-use the code, which is open source and available under the modified BSD license. If you make use of any of the ideas or software in this package in your own research, please cite them as "(LSST DESC, in preparation)" and provide a link to this repository: https://github.com/LSSTDESC/CCL If you have comments, questions, or feedback, please [write us an issue](https://github.com/LSSTDESC/CCL/issues).
-
-
