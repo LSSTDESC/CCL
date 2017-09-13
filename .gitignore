@@ -5,6 +5,7 @@ config.log
 config.status
 libtool
 stamp-h1
+install-record.txt
 
 # Ignore compile and link build files.
 *.o
