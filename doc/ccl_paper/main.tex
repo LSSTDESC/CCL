@@ -60,6 +60,70 @@ The Core Cosmology Library (\ccl) provides routines to compute basic cosmologica
 \tableofcontents{}
 \newpage
 
+
+%===============================================================================
+{\it Revised structure for paper}
+
+%-------------------------------------------------------------------------------
+\section{Introduction}
+
+%-------------------------------------------------------------------------------
+\section{Cosmological models and observables}
+
+\subsection{Background cosmology}
+Background cosmology parameter definition. Expansion and distance functions. Growth function and growth rate.
+
+\subsection{Matter power spectrum}
+Matter power spectrum and transfer function definition. Approximations.
+
+\subsection{Weak lensing}
+Lensing kernel. Weak lensing power spectrum. Correlation functions. Nuisance parameters and functions.
+
+\subsection{Halo mass function}
+Mass function definitions. Discussion of precision of Tinker mass function fits.
+
+\subsection{Massive neutrinos}
+Neutrino mass/density definition. Transfer function. Definitions of hierarchies etc.
+
+%-------------------------------------------------------------------------------
+\section{Implementation of high-accuracy cosmological functions}
+
+\subsection{Distance functions}
+Initial conditions. Normalization. Units and sensitivity to physical constants (G, c etc).
+
+\subsection{Matter power spectrum}
+Interpolation strategy. Sensitivity to spline parameters and sampling in $k$. Settings that control speed vs. accuracy. Emulation (Cosmicemu).
+
+\subsection{Correlation functions}
+Which basis to work in. Approach to performing oscillatory integrals.
+
+\subsection{Halo mass function}
+Evaluation of derivatives. Interpolations for different values of $\Delta$. Precision of $\sigma(M)$ calculation.
+
+\subsection{Massive neutrinos}
+Approximations. Approach to performing integrals.
+
+
+%-------------------------------------------------------------------------------
+\section{Validation over the $\Lambda$CDM parameter space}
+
+\subsection{Accuracy criteria}
+Why we chose the $10^{-4}$ level of accuracy. Accuracy summary statistic used in VARRIC.
+
+\subsection{Validation tests on a fiducial parameter set}
+Overview of the code comparison. How the codes used for comparison were selected. Validation plots for several observables.
+
+\subsection{Validation of the power spectrum over parameter space}
+`Fair' sampling of parameter space with Latin Hypercubes. Summary statistics used, and binning of power spectrum in $k$ and $z$. Precision settings used for CLASS. Estimates of run-time. Results. Range of validity.
+
+%-------------------------------------------------------------------------------
+\section{Outlook}
+Extended parameters spaces. Example use case (integration into LSS pipeline).
+
+
+\newpage
+%===============================================================================
+
 \section{Introduction}
 \label{sec:intro}
 
