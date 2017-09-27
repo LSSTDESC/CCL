@@ -625,7 +625,7 @@ static double transfer_cmblens(int l,double k,ccl_cosmology *cosmo,CCL_ClTracer 
     double a=ccl_scale_factor_of_chi(cosmo,chi,status);
     double w=1-chi/clt->chi_source;
     
-    return (l+1.)*l*clt->prefac_lensing*w/(a*chi*k*k);
+    return clt->prefac_lensing*l*(l+1.)*w/(a*chi*k*k);
   }
 }
 
