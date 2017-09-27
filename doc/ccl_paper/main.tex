@@ -49,9 +49,12 @@ The Core Cosmology Library (\ccl) provides routines to compute basic cosmologica
 \label{sec:intro}
 
 In preparation for constraining cosmology with the Large Synoptic Survey Telescope (LSST), it is necessary to be able to produce rigorous theoretical predictions for the cosmological quantities that will be measured. The Core Cosmology Library\footnote{\url{https://github.com/LSSTDESC/CCL}} (\ccl) aims to provide, in one library, a way of making predictions that are validated to a well-documented numerical accuracy, for the purpose of constraining cosmology with LSST. By constructing a cosmology library specifically with LSST in mind, it is possible to ensure that it is flexible, adaptable, and validated for all cases of interest, as well as user-friendly and appropriate for the needs of all working groups.
+\todo{Summarize the probes we cover. Explain future link to likelihood pipeline. Highlight CCL can be used by other surveys.}
 
 %-------------------------------------------------------------------------------
 \section{Cosmological models and observables}
+
+\todo{Range of validity of the predictions.}
 
 Ultimately, \ccl plans to incorporate theoretical predictions for all cosmological models of interest to LSST. Currently, the following families of models are supported:
 \begin{itemize}
@@ -65,6 +68,7 @@ Ultimately, \ccl plans to incorporate theoretical predictions for all cosmologic
 Not all features of \ccl are available for all models. For a guide to which predictions are available for each model, see Table \ref{tab:cosmo}. Note that if users install their own version of {\tt CLASS}, {\tt CCL} can then make predictions for a more extended set of cosmologies. Users should take care to understand the validity of the {\tt CCL} assumptions for their own models. 
 
 \input{table_cosmo}
+\todo{Add discussion of external versions of CLASS and Modified Gravity.}
 
 %-------------------------------------------------------------------------------
 \subsection{Background cosmology}
@@ -130,7 +134,7 @@ Currently \ccl allows for an alternative `modified gravity' cosmological model d
 
 %-------------------------------------------------------------------------------
 \subsection{Matter power spectrum}
-{\color{blue} Matter power spectrum and transfer function definition. Approximations.}
+{\color{blue} Matter power spectrum and transfer function definition. Approximations. Cosmic emulator. Baryonic physics model.}
 
 \ccl implements the analytical BBKS approximation to the transfer function \citep{BBKS}, given by
 \begin{eqnarray}
@@ -298,7 +302,8 @@ in units such that $\mu$ is dimensionless. We then conduct the phase-space integ
 where $h_{\rm P}$ is Planck's constant and $h$ is $H_0/100$ with $H_0$ in units of km / s / Mpc. $x_{\rm max}$ is set to 1000. The final bracketed term which includes the phase-space integral can be simplified in the limit where $\mu$ is very large or very small: for small $\mu$, it is set to $\frac{7}{8}$, and for large $\mu$, it becomes $\frac{5\zeta(3)}{18\pi^4}\mu\sim 0.2776\mu$.
 
 
-
+%-------------------------------------------------------------------------------
+\section{Implementation of photometric redshifts}
 
 %-------------------------------------------------------------------------------
 \section{Implementation of high-accuracy cosmological functions}
@@ -313,7 +318,7 @@ The value of the gravitational constant, $G$, enters into the critical density. 
 
 %-------------------------------------------------------------------------------
 \subsection{Matter power spectrum}
-{\color{blue} Interpolation strategy. Sensitivity to spline parameters and sampling in $k$. Settings that control speed vs. accuracy. Emulation (Cosmicemu).}
+{\color{blue} Interpolation strategy. Sensitivity to spline parameters and sampling in $k$. Settings that control speed vs. accuracy. }
 
 For the matter power spectrum, the spline is performed in two variables: the logarithmically-spaced wavenumber and the linearly-spaced scale factor. Splining the {\tt CLASS} output leads to some precision loss (compared to direct outputs from {\tt CLASS}). We quantify this, along with the impact of extrapolation, in the following subsection.
 
@@ -641,6 +646,9 @@ We note that while we maintain the $10^{-4}$ for our evaluations of $\sigma$, th
 \subsection{Validation of the power spectrum over parameter space}
 {\color{blue} `Fair' sampling of parameter space with Latin Hypercubes. Summary statistics used, and binning of power spectrum in $k$ and $z$. Precision settings used for CLASS. Estimates of run-time. Results. Range of validity.}
 
+
+\section{Usage}
+\todo{Some general guidelines here of where to find the library and availability of examples/docs. One paragraph is sufficient.}
 
 %-------------------------------------------------------------------------------
 \section{Outlook}
