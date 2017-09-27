@@ -196,7 +196,7 @@ class ClTracerCMBLensing(ClTracer):
 
     def __init__(self, cosmo, z_source):
         """
-        ClTracer class for a tracer of galaxy number counts (galaxy clustering).
+        ClTracer class for a tracer of CMB lensing.
 
         Args:
             cosmo (:obj:`Cosmology`): Cosmology object.
