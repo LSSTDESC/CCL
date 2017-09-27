@@ -478,6 +478,12 @@ where $\mathcal{P}_\Phi(k)$ is the dimensionless power spectrum of the primordia
 
 It is worth noting that the equations above should be modified for non-flat cosmologies by replacing the spherical Bessel functions $j_\ell$ with their hyperspherical counterparts \cite{1994ApJ...432....7K}. Since the library currently only uses the Limber approximation (documented below), this is not currently an issue. It will be revisited in future versions of \ccl.
 
+\paragraph{\bf CMB lensing.} The transfer function lensing convergence from a source at redshift $z_{\rm S}$ is given by:
+\begin{equation} \label{eq:transfer_cmb_lensing}
+  \Delta_\ell^{\rm C}(k)=-\frac{\ell(\ell+1)}{2}\int_0^{\chi_{\rm S}} d\chi\,\frac{r(\chi_{\rm S})-r(\chi)}{r(\chi)r(\chi_{\rm S})}T_{\phi+\psi}(k,\chi) j_\ell(k\chi),
+\end{equation}
+where $\chi_{\rm S}\equiv\chi(z_{\rm S})$.
+
 \subsubsection{The Limber approximation}
 As shown above, computing each transfer function involves a radial projection (i.e. an integral over redshift or $\chi$), and thus computing full power spectrum consists of a triple integral for each $\ell$. This can be computationally intensive, but can be significantly simplified in certain regimes by using the Limber approximation, given by:
 \begin{equation}
@@ -497,11 +503,13 @@ where
  \frac{1+8\ell}{(2\ell+1)^2}\,p_z(z_\ell)\,f(z_\ell)\,H(z_\ell)-\\
  &\hspace{48pt}\frac{4}{2\ell+3}\sqrt{\frac{2\ell+1}{2\ell+3}}p_z(z_{\ell+1})\,f(z_{\ell+1})\,H(z_{\ell+1})\\
  &\tilde{\Delta}_\ell^{\rm M}(k)=3\Omega_{M,0}H_0^2\frac{\ell(\ell+1)}{k^2}\,
- \frac{(1+z_\ell)}{\chi_\ell}W^{\rm M}(z_\ell)\\
+ \frac{(1+z_\ell)}{r(\chi_\ell)}W^{\rm M}(z_\ell)\\
  &\tilde{\Delta}_\ell^{\rm L}(k)=\frac{3}{2}\Omega_{M,0}H_0^2\sqrt{\frac{(\ell+2)!}{(\ell-2)}}\frac{1}{k^2}\,
- \frac{1+z_\ell}{\chi_\ell}W^{\rm L}(z_\ell)\\
- &\tilde{\Delta}_\ell^{\rm IA}(k)=\sqrt{\frac{(\ell+2)!}{(\ell-2)!}}\frac{p_z(z_\ell)\,b_{\rm IA}(z_\ell)f_{\rm red}(z_\ell)H(z_\ell)}{(\ell+1/2)^2}
+ \frac{1+z_\ell}{r(\chi_\ell)}W^{\rm L}(z_\ell)\\
+ &\tilde{\Delta}_\ell^{\rm IA}(k)=\sqrt{\frac{(\ell+2)!}{(\ell-2)!}}\frac{p_z(z_\ell)\,b_{\rm IA}(z_\ell)f_{\rm red}(z_\ell)H(z_\ell)}{(\ell+1/2)^2}\\
+ &\tilde{\Delta}_\ell^{\rm C}(k)=\frac{3}{2}\Omega_{M,0}H_0^2\,\ell(\ell+1)\frac{1+z_\ell}{k^2}\,\frac{r(\chi_{\rm S})-r(\chi_\ell)}{r(\chi_\ell)r(\chi_{\rm S}))}\,\Theta(\chi_\ell;0,\chi_{\rm S}).
 \end{align}
+Here ($\Theta(x;x_i,x_f)$) is a top-hat function (1 for $x\in[x_i,x_f]$ and 0 otherwise).
 
 %----------------------------------------------------------------
 %
@@ -632,6 +640,8 @@ where the angular lensing convergence power spectrum $C^{ab}_\ell$ is given abov
 \begin{equation}
   \xi^{ab}(\theta) = \int d\ell \frac{\ell}{2\pi} C^{ab}_\ell\, J_2(\ell\theta),
 \end{equation}
+
+Note that, in the above, ``Galaxy'' and ``Lensing'' can be replaced by any spin-0 and spin-2 fields on the sphere respectively (e.g. the CMB lensing convergence would play the same role as the galaxy overdensity field in all the formulas above).
 
 For numerical integration of the correlation functions, we make use of the public code {\tt FFTlog}\footnote{\url{http://casa.colorado.edu/~ajsh/FFTLog/}}\citep{Hamilton2000,Talman2009}. In brief, {\tt FFTlog} works on functions periodic in log space, by writing the Hankel Transform as a convolution between Bessel functions and the function of interest (in this case $C_\ell$). A version of this code is included in \ccl with minor modifications.
 
