@@ -269,6 +269,7 @@ def check_cls(cosmo):
     nc2 = ccl.ClTracerNumberCounts(cosmo, True, False, n=(z,n), bias=(z,b))
     nc3 = ccl.ClTracerNumberCounts(cosmo, True, True, n=(z,n), bias=(z,b),
                                    mag_bias=(z,b))
+    cmbl=ccl.ClTracerCMBLensing(cosmo,1100.)
     
     # Check valid ell input is accepted
     assert_( all_finite(ccl.angular_cl(cosmo, lens1, lens1, ell_scl)) )
@@ -278,18 +279,25 @@ def check_cls(cosmo):
     assert_( all_finite(ccl.angular_cl(cosmo, nc1, nc1, ell_scl)) )
     assert_( all_finite(ccl.angular_cl(cosmo, nc1, nc1, ell_lst)) )
     assert_( all_finite(ccl.angular_cl(cosmo, nc1, nc1, ell_arr)) )
+
+    assert_( all_finite(ccl.angular_cl(cosmo, cmbl, cmbl, ell_arr)) )
     
     # Check various cross-correlation combinations
     assert_( all_finite(ccl.angular_cl(cosmo, lens1, lens2, ell_arr)) )
     assert_( all_finite(ccl.angular_cl(cosmo, lens1, nc1, ell_arr)) )
     assert_( all_finite(ccl.angular_cl(cosmo, lens1, nc2, ell_arr)) )
     assert_( all_finite(ccl.angular_cl(cosmo, lens1, nc3, ell_arr)) )
+    assert_( all_finite(ccl.angular_cl(cosmo, lens1, cmbl, ell_arr)) )
     assert_( all_finite(ccl.angular_cl(cosmo, lens2, nc1, ell_arr)) )
     assert_( all_finite(ccl.angular_cl(cosmo, lens2, nc2, ell_arr)) )
     assert_( all_finite(ccl.angular_cl(cosmo, lens2, nc3, ell_arr)) )
+    assert_( all_finite(ccl.angular_cl(cosmo, lens2, cmbl, ell_arr)) )
     assert_( all_finite(ccl.angular_cl(cosmo, nc1, nc2, ell_arr)) )
     assert_( all_finite(ccl.angular_cl(cosmo, nc1, nc3, ell_arr)) )
+    assert_( all_finite(ccl.angular_cl(cosmo, nc1, cmbl, ell_arr)) )
     assert_( all_finite(ccl.angular_cl(cosmo, nc2, nc3, ell_arr)) )
+    assert_( all_finite(ccl.angular_cl(cosmo, nc2, cmbl, ell_arr)) )
+    assert_( all_finite(ccl.angular_cl(cosmo, nc3, cmbl, ell_arr)) )
     
     # Check that reversing order of ClTracer inputs works
     assert_( all_finite(ccl.angular_cl(cosmo, nc1, lens1, ell_arr)) )
