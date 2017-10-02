@@ -12234,7 +12234,7 @@ SWIGINTERN PyObject *_wrap_bcm_model_fkz(PyObject *SWIGUNUSEDPARM(self), PyObjec
   }
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    result = (double)bcm_model_fkz(arg1,arg2,arg3,arg4);
+    result = (double)ccl_bcm_model_fkz(arg1,arg2,arg3,arg4);
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
   resultobj = SWIG_From_double((double)(result));

@@ -519,7 +519,7 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int * statu
 
 /* BCM correction */
 // See Schneider & Teyssier (2015) for details of the model.  
-double bcm_model_fkz(ccl_cosmology * cosmo, double k, double a, int *status){
+double ccl_bcm_model_fkz(ccl_cosmology * cosmo, double k, double a, int *status){
 
   double fkz;
   double b0;
@@ -659,7 +659,7 @@ static void ccl_cosmology_compute_power_class_bcm(ccl_cosmology * cosmo, int * s
 	for (int j = 0; j < na; j++) {
 	  s |= spectra_pk_nl_at_k_and_z(&ba, &pm, &sp,exp(x[i]),1./afact[j]-1,&psout_nl);
 	  //Here use BCM correction
-	  bcmcorr=bcm_model_fkz(cosmo,exp(x[i]),afact[j],status);
+	  bcmcorr=ccl_bcm_model_fkz(cosmo,exp(x[i]),afact[j],status);
 	  psout_nl*=bcmcorr;
 	  y2d_nl[j*nk+i] = log(psout_nl);
 	}

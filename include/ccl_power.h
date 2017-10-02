@@ -13,7 +13,7 @@
  * For specific cases see documentation for ccl_error.c
  * @return f(k,a).
  */
-double bcm_model_fkz(ccl_cosmology * cosmo, double k, double a, int *status);
+double ccl_bcm_model_fkz(ccl_cosmology * cosmo, double k, double a, int *status);
 
 /**
  * Linear matter power spectrum.
