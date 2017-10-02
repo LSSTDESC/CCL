@@ -1,6 +1,6 @@
 
-import ccllib as lib
-from pyutils import _vectorize_fn, _vectorize_fn2, _vectorize_fn4
+from pyccl import ccllib as lib
+from pyccl.pyutils import _vectorize_fn, _vectorize_fn2, _vectorize_fn4
 
 def massfunc(cosmo, halo_mass, a, odelta=200):
     """Halo mass function.
