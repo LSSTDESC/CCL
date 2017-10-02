@@ -16,7 +16,8 @@ transfer_function_types = {
     'boltzmann_camb':   lib.boltzmann_camb,
     'camb':             lib.boltzmann_camb,
     'boltzmann_class':  lib.boltzmann_class,
-    'class':            lib.boltzmann_class
+    'class':            lib.boltzmann_class,
+    'baryons_bcm':      lib.baryons_bcm
 }
 
 matter_power_spectrum_types = {

@@ -1,4 +1,4 @@
-import numpy as np
+import numpy as np,math
 from numpy.testing import assert_raises, assert_warns, assert_no_warnings, \
                           assert_, decorators, run_module_suite
 import pyccl as ccl
@@ -29,9 +29,17 @@ def reference_models():
     p5 = ccl.Parameters(Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96)
     cosmo5 = ccl.Cosmology(p5,transfer_function='eisenstein_hu')
 
+    # Baryons Pk
+    p6 = ccl.Parameters(Omega_c=0.27, Omega_b=0.045, h=0.67, A_s=1e-10, n_s=0.96)
+    cosmo6 = ccl.Cosmology(p6,transfer_function='baryons_bcm')
     
-    # Return (only do one cosmology for now, for speed reasons)
-    return [cosmo1,cosmo4,cosmo5] # cosmo2, cosmo3
+    # Baryons Pk with choice of BCM parameters other than default
+    p7 = ccl.Parameters(Omega_c=0.27, Omega_b=0.045, h=0.67, A_s=1e-10, n_s=0.96,
+                        bcm_log10Mc=math.log10(1.7e14), bcm_etab=0.3, bcm_ks=75.)
+    cosmo7 = ccl.Cosmology(p7,transfer_function='baryons_bcm')
+
+    # Return 
+    return [cosmo1,cosmo4,cosmo5,cosmo7] # cosmo2, cosmo3, cosmo6
 
 def all_finite(vals):
     """
