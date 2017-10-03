@@ -966,25 +966,122 @@ TASK: provide spline for the emulated power spectrum from Cosmic EMU
 static void ccl_cosmology_compute_power_emu(ccl_cosmology * cosmo, int * status)
 {
 
-  /*if (isfinite(cosmo->params.sigma_8)){
-      *status = CCL_ERROR_INCONSISTENT;
-      strcpy(cosmo->status_message ,"ccl_power.c: Error initialzing EMU pararmeters: no sigma_8 defined\n");
-    return;
-    }*/
+  struct precision pr;        // for precision parameters 
+  struct background ba;       // for cosmological background 
+  struct thermo th;           // for thermodynamics 
+  struct perturbs pt;         // for source functions 
+  struct transfers tr;        // for transfer functions 
+  struct primordial pm;       // for primordial spectra 
+  struct spectra sp;          // for output spectra 
+  struct nonlinear nl;        // for non-linear spectra 
+  struct lensing le;
+  struct output op;
+  struct file_content fc;
 
-  cosmo->data.k_min=K_MIN_EMU; //limit of the emulator
-  double amin = A_MIN_EMU; //limit of the emulator
-  double amax = ccl_splines->A_SPLINE_MAX; 
+  ErrorMsg errmsg; // for error messages 
+  // generate file_content structure 
+  // CLASS configuration parameters will be passed through this structure,
+  // to avoid writing and reading .ini files for every call
+  int parser_length = 20;
+  int init_arr[7]={0,0,0,0,0,0,0};
+  if (parser_init(&fc,parser_length,"none",errmsg) == _FAILURE_) {
+    *status = CCL_ERROR_CLASS;
+    sprintf(cosmo->status_message ,"ccl_power.c: ccl_cosmology_compute_power_class(): parser init error:%s\n",errmsg);
+    return;
+  }
+
+  ccl_fill_class_parameters(cosmo,&fc,parser_length, status);
+  
+  if (*status != CCL_ERROR_CLASS)
+    ccl_run_class(cosmo, &fc,&pr,&ba,&th,&pt,&tr,&pm,&sp,&nl,&le,&op,init_arr,status);
+
+  if (*status == CCL_ERROR_CLASS) {
+    //printed error message while running CLASS
+    ccl_free_class_structs(cosmo, &ba,&th,&pt,&tr,&pm,&sp,&nl,&le,init_arr,status);
+    return;
+  }
+  if (parser_free(&fc)== _FAILURE_) {
+    *status = CCL_ERROR_CLASS;
+    strcpy(cosmo->status_message ,"ccl_power.c: ccl_cosmology_compute_power_class(): Error freeing CLASS parser\n");
+    ccl_free_class_structs(cosmo, &ba,&th,&pt,&tr,&pm,&sp,&nl,&le,init_arr,status);
+    return;
+  }
+
+  cosmo->data.k_min=2*exp(sp.ln_k[0]);
+  //CLASS calculations done - now allocate CCL splines
+  double kmin = cosmo->data.k_min;
+  double kmax = ccl_splines->K_MAX_SPLINE;
+  int nk = ccl_splines->N_K;
+  double amin = ccl_splines->A_SPLINE_MIN;
+  double amax = ccl_splines->A_SPLINE_MAX;
   int na = ccl_splines->N_A;
+  
+  // The x array is initially k, but will later
+  // be overwritten with log(k)
+  double * x = ccl_log_spacing(kmin, kmax, nk);
+  double * z = ccl_linear_spacing(amin,amax, na);
+  double * y2d_lin = malloc(nk * na * sizeof(double));
+  if (z==NULL|| x==NULL || y2d_lin==NULL) {
+    *status = CCL_ERROR_SPLINE;
+    strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_class(): memory allocation error\n");
+  }
+  else{  
+    // After this loop x will contain log(k), y will contain log(P_nl), z will contain log(P_lin)
+    // all in Mpc, not Mpc/h units!
+    double psout_l,ic;
+    int s=0;
+    for (int i=0; i<nk; i++) {
+      for (int j = 0; j < na; j++) {
+	//The 2D interpolation routines access the function values y_{k_ia_j} with the following ordering:
+	//y_ij = y2d[j*N_k + i]
+	//with i = 0,...,N_k-1 and j = 0,...,N_a-1.
+	s |= spectra_pk_at_k_and_z(&ba, &pm, &sp,x[i],1./z[j]-1., &psout_l,&ic);
+	y2d_lin[j*nk+i] = log(psout_l);
+      }
+      x[i] = log(x[i]);
+    }
+    if(s) {
+      free(x); 
+      free(z);
+      free(y2d_lin);
+      *status = CCL_ERROR_CLASS;
+      strcpy(cosmo->status_message ,"ccl_power.c: ccl_cosmology_compute_power_class(): Error computing CLASS power spectrum\n");
+
+      ccl_free_class_structs(cosmo, &ba,&th,&pt,&tr,&pm,&sp,&nl,&le,init_arr,status);
+
+      return;
+    }
+    gsl_spline2d * log_power = gsl_spline2d_alloc(PLIN_SPLINE_TYPE, nk,na);
+    int pwstatus = gsl_spline2d_init(log_power, x, z, y2d_lin,nk,na);
+    if (pwstatus) {
+      free(x); 
+      free(z);
+      free(y2d_lin);
+      gsl_spline2d_free(log_power);
+      ccl_free_class_structs(cosmo, &ba,&th,&pt,&tr,&pm,&sp,&nl,&le,init_arr,status);
+      strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_class(): Error creating log_power spline\n");
+      return;
+    }
+    else {
+      cosmo->data.p_lin = log_power;
+    }
+  }
+
+  printf("Starting NL computation\n\n");
+  //Now start the NL computation with the emulator
+  cosmo->data.k_min=K_MIN_EMU; //limit of the emulator
+  amin = A_MIN_EMU; //limit of the emulator
+  amax = ccl_splines->A_SPLINE_MAX; 
+  na = ccl_splines->N_A;
   // The x array is initially k, but will later
   // be overwritten with log(k)
   double * logx= malloc(351*sizeof(double));
   double * y;
   double * xstar = malloc(9 * sizeof(double));
-  double * z = ccl_linear_spacing(amin,amax, na);
+  double * zemu = ccl_linear_spacing(amin,amax, na);
   double * y2d = malloc(351 * na * sizeof(double));
   double w0wacomb;
-  if (z==NULL || y2d==NULL || logx==NULL || xstar==NULL){
+  if (zemu==NULL || y2d==NULL || logx==NULL || xstar==NULL){
     *status=CCL_ERROR_MEMORY;
     strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_emu(): memory allocation error\n");
     return;
@@ -1025,7 +1122,7 @@ static void ccl_cosmology_compute_power_emu(ccl_cosmology * cosmo, int * status)
     xstar[5] = cosmo->params.w0;
     xstar[6] = cosmo->params.wa;
     xstar[7] = cosmo->params.Omega_n_mass*cosmo->params.h*cosmo->params.h;
-    xstar[8] = 1./z[j]-1;
+    xstar[8] = 1./zemu[j]-1;
     //Need to have this here because otherwise overwritten by emu in each loop
     
     //Call emulator at this redshift
@@ -1036,23 +1133,22 @@ static void ccl_cosmology_compute_power_emu(ccl_cosmology * cosmo, int * status)
     }
   }
   
-  gsl_spline2d * log_power_lin = gsl_spline2d_alloc(PLIN_SPLINE_TYPE, 351,na);
-  int splinstatus = gsl_spline2d_init(log_power_lin, logx, z, y2d,351,na);
+  gsl_spline2d * log_power_nl = gsl_spline2d_alloc(PLIN_SPLINE_TYPE, 351,na);
+  int splinstatus = gsl_spline2d_init(log_power_nl, logx, zemu, y2d,351,na);
   
   if (splinstatus){
-    free(z);
+    free(zemu);
     free(y2d);
-    gsl_spline2d_free(log_power_lin);
+    gsl_spline2d_free(log_power_nl);
     *status = CCL_ERROR_SPLINE;
     strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_emu(): Error creating log_power spline\n");
     return;
 
   }
-  cosmo->data.p_lin=log_power_lin; //No such thing as linear for this model
-  cosmo->data.p_nl = log_power_lin;
+  cosmo->data.p_nl = log_power_nl;
   cosmo->computed_power=true;
   
-  free(z);
+  free(zemu);
   free(y2d);
 }
 
@@ -1180,7 +1276,7 @@ double ccl_linear_matter_power(ccl_cosmology * cosmo, double k, double a, int * 
     log_p_1=ccl_power_extrapol_lowk(cosmo,k,a,cosmo->data.p_lin,status);
     return exp(log_p_1);
   }
-  else if(((cosmo->config.transfer_function_method != ccl_emulator) && (k<ccl_splines->K_MAX_SPLINE)) || ((cosmo->config.transfer_function_method == ccl_emulator) && (k<K_MAX_EMU))){
+  else if(k<ccl_splines->K_MAX_SPLINE){
     pkstatus = gsl_spline2d_eval_e(cosmo->data.p_lin, log(k), a,NULL,NULL,&log_p_1);
     if (pkstatus) {
       *status = CCL_ERROR_SPLINE_EV;
@@ -1209,7 +1305,8 @@ double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double k, double a, int *s
     *status = CCL_ERROR_INCONSISTENT;
     sprintf(cosmo->status_message ,"ccl_power.c: the cosmic emulator cannot be used above z=2\n");
     return NAN;
-  }
+  }    
+  double log_p_1;
   
   switch(cosmo->config.matter_power_spectrum_method) {
 
@@ -1220,14 +1317,35 @@ double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double k, double a, int *s
   case ccl_halofit:
     if (!cosmo->computed_power)
       ccl_cosmology_compute_power(cosmo,status);
-    
-    double log_p_1;
+
+    if(k<=cosmo->data.k_min) {
+      log_p_1=ccl_power_extrapol_lowk(cosmo,k,a,cosmo->data.p_nl,status);
+      return exp(log_p_1);
+    }
+    if(k<ccl_splines->K_MAX_SPLINE){
+      int pwstatus =  gsl_spline2d_eval_e(cosmo->data.p_nl, log(k),a,NULL ,NULL ,&log_p_1);
+      if (pwstatus) {
+	*status = CCL_ERROR_SPLINE_EV;
+	sprintf(cosmo->status_message ,"ccl_power.c: ccl_nonlin_matter_power(): Spline evaluation error\n");
+	return NAN;
+      }
+      else
+	return exp(log_p_1);
+    }
+    else { //Extrapolate NL regime using log derivative
+      log_p_1 = ccl_power_extrapol_highk(cosmo,k,a,cosmo->data.p_nl,status);
+      return exp(log_p_1);
+    }
+
+  case ccl_emu:
+    if (!cosmo->computed_power)
+      ccl_cosmology_compute_power(cosmo,status);
     
     if(k<=cosmo->data.k_min) {
       log_p_1=ccl_power_extrapol_lowk(cosmo,k,a,cosmo->data.p_nl,status);
       return exp(log_p_1);
     }
-    if(((cosmo->config.transfer_function_method != ccl_emulator) && (k<ccl_splines->K_MAX_SPLINE)) || ((cosmo->config.transfer_function_method == ccl_emulator) && (k<K_MAX_EMU))){
+    if(k<K_MAX_EMU){
       int pwstatus =  gsl_spline2d_eval_e(cosmo->data.p_nl, log(k),a,NULL ,NULL ,&log_p_1);
       if (pwstatus) {
 	*status = CCL_ERROR_SPLINE_EV;
@@ -1249,8 +1367,6 @@ double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double k, double a, int *s
   }
 
 }
-
-
 
 //Params for sigma(R) integrand
 typedef struct {
