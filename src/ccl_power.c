@@ -1107,12 +1107,13 @@ static void ccl_cosmology_compute_power_emu(ccl_cosmology * cosmo, int * status)
     strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_emu(): Omega_nu does not satisfy the emulator bound\n");
     return;
   }
+
   
   //For each redshift:
   for (int j = 0; j < na; j++){
     
     //Turn cosmology into xstar:
-    xstar[0] = cosmo->params.Omega_c*cosmo->params.h*cosmo->params.h;
+    xstar[0] = (cosmo->params.Omega_c+cosmo->params.Omega_b)*cosmo->params.h*cosmo->params.h;
     xstar[1] = cosmo->params.Omega_b*cosmo->params.h*cosmo->params.h;
     xstar[2] = cosmo->params.sigma_8;
     xstar[3] = cosmo->params.h;
