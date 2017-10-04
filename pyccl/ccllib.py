@@ -890,6 +890,7 @@ boltzmann_camb = _ccllib.boltzmann_camb
 linear = _ccllib.linear
 halofit = _ccllib.halofit
 halo_model = _ccllib.halo_model
+emu = _ccllib.emu
 tinker = _ccllib.tinker
 tinker10 = _ccllib.tinker10
 watson = _ccllib.watson

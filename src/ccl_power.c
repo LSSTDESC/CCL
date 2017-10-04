@@ -1067,7 +1067,6 @@ static void ccl_cosmology_compute_power_emu(ccl_cosmology * cosmo, int * status)
     }
   }
 
-  printf("Starting NL computation\n\n");
   //Now start the NL computation with the emulator
   cosmo->data.k_min=K_MIN_EMU; //limit of the emulator
   amin = A_MIN_EMU; //limit of the emulator
@@ -1086,7 +1085,6 @@ static void ccl_cosmology_compute_power_emu(ccl_cosmology * cosmo, int * status)
     strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_emu(): memory allocation error\n");
     return;
   }
-
   //Check ranges:
   if((cosmo->params.h<0.55) || (cosmo->params.h>0.85)){
     *status=CCL_ERROR_INCONSISTENT;
@@ -1095,7 +1093,7 @@ static void ccl_cosmology_compute_power_emu(ccl_cosmology * cosmo, int * status)
   }
   if(cosmo->params.N_nu_rel!=3.04){
     *status=CCL_ERROR_INCONSISTENT;
-    strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_emu(): Neff should be 3.04 for the cosmic emulator predictions\n");
+    strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_emu(): Neff should be 3.04 for the cosmic emulator predictions\n");//This error is not successfully passed to python
     return;
   }
   w0wacomb=-cosmo->params.w0-cosmo->params.wa;
@@ -1173,7 +1171,6 @@ void ccl_cosmology_compute_power(ccl_cosmology * cosmo, int * status)
 	  ccl_cosmology_compute_power_class(cosmo,status);
 	  break;
         case ccl_emulator:
-	  printf("Entering EMU PS computation\n\n");
 	  ccl_cosmology_compute_power_emu(cosmo,status);
 	  break;
         default:

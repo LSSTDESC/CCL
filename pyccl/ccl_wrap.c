@@ -18577,6 +18577,7 @@ SWIG_init(void) {
   SWIG_Python_SetConstant(d, "linear",SWIG_From_int((int)(ccl_linear)));
   SWIG_Python_SetConstant(d, "halofit",SWIG_From_int((int)(ccl_halofit)));
   SWIG_Python_SetConstant(d, "halo_model",SWIG_From_int((int)(ccl_halo_model)));
+  SWIG_Python_SetConstant(d, "emu",SWIG_From_int((int)(ccl_emu)));
   SWIG_Python_SetConstant(d, "tinker",SWIG_From_int((int)(ccl_tinker)));
   SWIG_Python_SetConstant(d, "tinker10",SWIG_From_int((int)(ccl_tinker10)));
   SWIG_Python_SetConstant(d, "watson",SWIG_From_int((int)(ccl_watson)));

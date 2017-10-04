@@ -29,9 +29,13 @@ def reference_models():
     p5 = ccl.Parameters(Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96)
     cosmo5 = ccl.Cosmology(p5,transfer_function='eisenstein_hu')
 
+    # Emulator Pk
+    p6=ccl.Parameters(Omega_c=0.27, Omega_b=0.022/0.67**2, h=0.67, sigma8=0.8, n_s=0.96,N_nu_rel=3.04,N_nu_mass=1,m_nu=0.06)
+    cosmo6 = ccl.Cosmology(p6,transfer_function='emulator',matter_power_spectrum='emu')
+
     
     # Return (only do one cosmology for now, for speed reasons)
-    return [cosmo1,cosmo4,cosmo5] # cosmo2, cosmo3
+    return [cosmo1,cosmo4,cosmo5,cosmo6] # cosmo2, cosmo3
 
 def all_finite(vals):
     """
