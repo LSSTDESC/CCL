@@ -1,6 +1,6 @@
 
-import ccllib as lib
-from pyutils import _vectorize_fn, _vectorize_fn2, _vectorize_fn3
+from pyccl import ccllib as lib
+from pyccl.pyutils import _vectorize_fn, _vectorize_fn2, _vectorize_fn3
 
 species_types = {
     'matter':      lib.omega_m_label,
