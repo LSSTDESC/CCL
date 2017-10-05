@@ -32,13 +32,13 @@
 #define CLIGHT_HMPC 2997.92458 //H0^-1 in Mpc/h
 
 /**
- * Newton's gravitational constant in units of m^3/Kg/s^2 (from PDG 2013)
+ * Newton's gravitational constant in units of m^3/Kg/s^2 
  */
 //#define GNEWT 6.6738e-11    //(from PDG 2013) in m^3/Kg/s^2
 #define GNEWT 6.67428e-11 // CLASS VALUE
 
 /**
- * Solar mass in units ofkg (from PDG 2013)
+ * Solar mass in units of kg (from GSL)
  */
 #define SOLAR_MASS GSL_CONST_MKSA_SOLAR_MASS
 
@@ -55,7 +55,6 @@
 /** 
  * Rho critical in units of M_sun/h / (Mpc/h)^3
  */
-//#define RHO_CRITICAL 2.7744948E11
 #define RHO_CRITICAL ((3*100*100)/(8*M_PI*GNEWT)) * (1000*1000*MPC_TO_METER/SOLAR_MASS)
 
 /**
