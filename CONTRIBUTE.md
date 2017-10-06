@@ -101,6 +101,9 @@ pyccl/ccllib.py by running swig:
 
 ~$ swig -python -threads -o pyccl/ccl_wrap.c pyccl/ccl.i
 
+This command may fail if swig can't find the GSL headers, in which case
+add "-I/path/to/gsl/headers" right after "swig".
+
 
 Once you have finished making changes to the wrapper, check to make sure 
 everything is operational by running the Python unit tests in the tests/ 
