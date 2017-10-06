@@ -148,8 +148,8 @@ Currently, the following families of models are supported:
 You can initialize this structure through function **`ccl_parameters_create`** which returns object of type **`ccl_parameters`**.
 ```c
 ccl_parameters ccl_parameters_create(
-	double Omega_c, double Omega_b, double Omega_k, double Omega_n, double w0, double wa, double h,
-	double A_s, double n_s, int nz_mgrowth, double *zarr_mgrowth, double *dfarr_mgrowth
+    double Omega_c, double Omega_b, double Omega_k, double N_nu_rel, double N_nu_mass, double mnu, double w0, double wa,
+    double h, double norm_pk, double n_s,int nz_mgrowth,double *zarr_mgrowth,double *dfarr_mgrowth, int *status);   
 );
 ```
 where:
