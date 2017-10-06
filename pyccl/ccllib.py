@@ -808,11 +808,314 @@ def angular_cl_vec(cosmo, clt1, clt2, ell, output, status):
     """angular_cl_vec(cosmology cosmo, CCL_ClTracer clt1, CCL_ClTracer clt2, double * ell, double * output, int * status)"""
     return _ccllib.angular_cl_vec(cosmo, clt1, clt2, ell, output, status)
 
+_ccllib.GSL_CONST_MKSA_SPEED_OF_LIGHT_swigconstant(_ccllib)
+GSL_CONST_MKSA_SPEED_OF_LIGHT = _ccllib.GSL_CONST_MKSA_SPEED_OF_LIGHT
+
+_ccllib.GSL_CONST_MKSA_GRAVITATIONAL_CONSTANT_swigconstant(_ccllib)
+GSL_CONST_MKSA_GRAVITATIONAL_CONSTANT = _ccllib.GSL_CONST_MKSA_GRAVITATIONAL_CONSTANT
+
+_ccllib.GSL_CONST_MKSA_PLANCKS_CONSTANT_H_swigconstant(_ccllib)
+GSL_CONST_MKSA_PLANCKS_CONSTANT_H = _ccllib.GSL_CONST_MKSA_PLANCKS_CONSTANT_H
+
+_ccllib.GSL_CONST_MKSA_PLANCKS_CONSTANT_HBAR_swigconstant(_ccllib)
+GSL_CONST_MKSA_PLANCKS_CONSTANT_HBAR = _ccllib.GSL_CONST_MKSA_PLANCKS_CONSTANT_HBAR
+
+_ccllib.GSL_CONST_MKSA_ASTRONOMICAL_UNIT_swigconstant(_ccllib)
+GSL_CONST_MKSA_ASTRONOMICAL_UNIT = _ccllib.GSL_CONST_MKSA_ASTRONOMICAL_UNIT
+
+_ccllib.GSL_CONST_MKSA_LIGHT_YEAR_swigconstant(_ccllib)
+GSL_CONST_MKSA_LIGHT_YEAR = _ccllib.GSL_CONST_MKSA_LIGHT_YEAR
+
+_ccllib.GSL_CONST_MKSA_PARSEC_swigconstant(_ccllib)
+GSL_CONST_MKSA_PARSEC = _ccllib.GSL_CONST_MKSA_PARSEC
+
+_ccllib.GSL_CONST_MKSA_GRAV_ACCEL_swigconstant(_ccllib)
+GSL_CONST_MKSA_GRAV_ACCEL = _ccllib.GSL_CONST_MKSA_GRAV_ACCEL
+
+_ccllib.GSL_CONST_MKSA_ELECTRON_VOLT_swigconstant(_ccllib)
+GSL_CONST_MKSA_ELECTRON_VOLT = _ccllib.GSL_CONST_MKSA_ELECTRON_VOLT
+
+_ccllib.GSL_CONST_MKSA_MASS_ELECTRON_swigconstant(_ccllib)
+GSL_CONST_MKSA_MASS_ELECTRON = _ccllib.GSL_CONST_MKSA_MASS_ELECTRON
+
+_ccllib.GSL_CONST_MKSA_MASS_MUON_swigconstant(_ccllib)
+GSL_CONST_MKSA_MASS_MUON = _ccllib.GSL_CONST_MKSA_MASS_MUON
+
+_ccllib.GSL_CONST_MKSA_MASS_PROTON_swigconstant(_ccllib)
+GSL_CONST_MKSA_MASS_PROTON = _ccllib.GSL_CONST_MKSA_MASS_PROTON
+
+_ccllib.GSL_CONST_MKSA_MASS_NEUTRON_swigconstant(_ccllib)
+GSL_CONST_MKSA_MASS_NEUTRON = _ccllib.GSL_CONST_MKSA_MASS_NEUTRON
+
+_ccllib.GSL_CONST_MKSA_RYDBERG_swigconstant(_ccllib)
+GSL_CONST_MKSA_RYDBERG = _ccllib.GSL_CONST_MKSA_RYDBERG
+
+_ccllib.GSL_CONST_MKSA_BOLTZMANN_swigconstant(_ccllib)
+GSL_CONST_MKSA_BOLTZMANN = _ccllib.GSL_CONST_MKSA_BOLTZMANN
+
+_ccllib.GSL_CONST_MKSA_MOLAR_GAS_swigconstant(_ccllib)
+GSL_CONST_MKSA_MOLAR_GAS = _ccllib.GSL_CONST_MKSA_MOLAR_GAS
+
+_ccllib.GSL_CONST_MKSA_STANDARD_GAS_VOLUME_swigconstant(_ccllib)
+GSL_CONST_MKSA_STANDARD_GAS_VOLUME = _ccllib.GSL_CONST_MKSA_STANDARD_GAS_VOLUME
+
+_ccllib.GSL_CONST_MKSA_MINUTE_swigconstant(_ccllib)
+GSL_CONST_MKSA_MINUTE = _ccllib.GSL_CONST_MKSA_MINUTE
+
+_ccllib.GSL_CONST_MKSA_HOUR_swigconstant(_ccllib)
+GSL_CONST_MKSA_HOUR = _ccllib.GSL_CONST_MKSA_HOUR
+
+_ccllib.GSL_CONST_MKSA_DAY_swigconstant(_ccllib)
+GSL_CONST_MKSA_DAY = _ccllib.GSL_CONST_MKSA_DAY
+
+_ccllib.GSL_CONST_MKSA_WEEK_swigconstant(_ccllib)
+GSL_CONST_MKSA_WEEK = _ccllib.GSL_CONST_MKSA_WEEK
+
+_ccllib.GSL_CONST_MKSA_INCH_swigconstant(_ccllib)
+GSL_CONST_MKSA_INCH = _ccllib.GSL_CONST_MKSA_INCH
+
+_ccllib.GSL_CONST_MKSA_FOOT_swigconstant(_ccllib)
+GSL_CONST_MKSA_FOOT = _ccllib.GSL_CONST_MKSA_FOOT
+
+_ccllib.GSL_CONST_MKSA_YARD_swigconstant(_ccllib)
+GSL_CONST_MKSA_YARD = _ccllib.GSL_CONST_MKSA_YARD
+
+_ccllib.GSL_CONST_MKSA_MILE_swigconstant(_ccllib)
+GSL_CONST_MKSA_MILE = _ccllib.GSL_CONST_MKSA_MILE
+
+_ccllib.GSL_CONST_MKSA_NAUTICAL_MILE_swigconstant(_ccllib)
+GSL_CONST_MKSA_NAUTICAL_MILE = _ccllib.GSL_CONST_MKSA_NAUTICAL_MILE
+
+_ccllib.GSL_CONST_MKSA_FATHOM_swigconstant(_ccllib)
+GSL_CONST_MKSA_FATHOM = _ccllib.GSL_CONST_MKSA_FATHOM
+
+_ccllib.GSL_CONST_MKSA_MIL_swigconstant(_ccllib)
+GSL_CONST_MKSA_MIL = _ccllib.GSL_CONST_MKSA_MIL
+
+_ccllib.GSL_CONST_MKSA_POINT_swigconstant(_ccllib)
+GSL_CONST_MKSA_POINT = _ccllib.GSL_CONST_MKSA_POINT
+
+_ccllib.GSL_CONST_MKSA_TEXPOINT_swigconstant(_ccllib)
+GSL_CONST_MKSA_TEXPOINT = _ccllib.GSL_CONST_MKSA_TEXPOINT
+
+_ccllib.GSL_CONST_MKSA_MICRON_swigconstant(_ccllib)
+GSL_CONST_MKSA_MICRON = _ccllib.GSL_CONST_MKSA_MICRON
+
+_ccllib.GSL_CONST_MKSA_ANGSTROM_swigconstant(_ccllib)
+GSL_CONST_MKSA_ANGSTROM = _ccllib.GSL_CONST_MKSA_ANGSTROM
+
+_ccllib.GSL_CONST_MKSA_HECTARE_swigconstant(_ccllib)
+GSL_CONST_MKSA_HECTARE = _ccllib.GSL_CONST_MKSA_HECTARE
+
+_ccllib.GSL_CONST_MKSA_ACRE_swigconstant(_ccllib)
+GSL_CONST_MKSA_ACRE = _ccllib.GSL_CONST_MKSA_ACRE
+
+_ccllib.GSL_CONST_MKSA_BARN_swigconstant(_ccllib)
+GSL_CONST_MKSA_BARN = _ccllib.GSL_CONST_MKSA_BARN
+
+_ccllib.GSL_CONST_MKSA_LITER_swigconstant(_ccllib)
+GSL_CONST_MKSA_LITER = _ccllib.GSL_CONST_MKSA_LITER
+
+_ccllib.GSL_CONST_MKSA_US_GALLON_swigconstant(_ccllib)
+GSL_CONST_MKSA_US_GALLON = _ccllib.GSL_CONST_MKSA_US_GALLON
+
+_ccllib.GSL_CONST_MKSA_QUART_swigconstant(_ccllib)
+GSL_CONST_MKSA_QUART = _ccllib.GSL_CONST_MKSA_QUART
+
+_ccllib.GSL_CONST_MKSA_PINT_swigconstant(_ccllib)
+GSL_CONST_MKSA_PINT = _ccllib.GSL_CONST_MKSA_PINT
+
+_ccllib.GSL_CONST_MKSA_CUP_swigconstant(_ccllib)
+GSL_CONST_MKSA_CUP = _ccllib.GSL_CONST_MKSA_CUP
+
+_ccllib.GSL_CONST_MKSA_FLUID_OUNCE_swigconstant(_ccllib)
+GSL_CONST_MKSA_FLUID_OUNCE = _ccllib.GSL_CONST_MKSA_FLUID_OUNCE
+
+_ccllib.GSL_CONST_MKSA_TABLESPOON_swigconstant(_ccllib)
+GSL_CONST_MKSA_TABLESPOON = _ccllib.GSL_CONST_MKSA_TABLESPOON
+
+_ccllib.GSL_CONST_MKSA_TEASPOON_swigconstant(_ccllib)
+GSL_CONST_MKSA_TEASPOON = _ccllib.GSL_CONST_MKSA_TEASPOON
+
+_ccllib.GSL_CONST_MKSA_CANADIAN_GALLON_swigconstant(_ccllib)
+GSL_CONST_MKSA_CANADIAN_GALLON = _ccllib.GSL_CONST_MKSA_CANADIAN_GALLON
+
+_ccllib.GSL_CONST_MKSA_UK_GALLON_swigconstant(_ccllib)
+GSL_CONST_MKSA_UK_GALLON = _ccllib.GSL_CONST_MKSA_UK_GALLON
+
+_ccllib.GSL_CONST_MKSA_MILES_PER_HOUR_swigconstant(_ccllib)
+GSL_CONST_MKSA_MILES_PER_HOUR = _ccllib.GSL_CONST_MKSA_MILES_PER_HOUR
+
+_ccllib.GSL_CONST_MKSA_KILOMETERS_PER_HOUR_swigconstant(_ccllib)
+GSL_CONST_MKSA_KILOMETERS_PER_HOUR = _ccllib.GSL_CONST_MKSA_KILOMETERS_PER_HOUR
+
+_ccllib.GSL_CONST_MKSA_KNOT_swigconstant(_ccllib)
+GSL_CONST_MKSA_KNOT = _ccllib.GSL_CONST_MKSA_KNOT
+
+_ccllib.GSL_CONST_MKSA_POUND_MASS_swigconstant(_ccllib)
+GSL_CONST_MKSA_POUND_MASS = _ccllib.GSL_CONST_MKSA_POUND_MASS
+
+_ccllib.GSL_CONST_MKSA_OUNCE_MASS_swigconstant(_ccllib)
+GSL_CONST_MKSA_OUNCE_MASS = _ccllib.GSL_CONST_MKSA_OUNCE_MASS
+
+_ccllib.GSL_CONST_MKSA_TON_swigconstant(_ccllib)
+GSL_CONST_MKSA_TON = _ccllib.GSL_CONST_MKSA_TON
+
+_ccllib.GSL_CONST_MKSA_METRIC_TON_swigconstant(_ccllib)
+GSL_CONST_MKSA_METRIC_TON = _ccllib.GSL_CONST_MKSA_METRIC_TON
+
+_ccllib.GSL_CONST_MKSA_UK_TON_swigconstant(_ccllib)
+GSL_CONST_MKSA_UK_TON = _ccllib.GSL_CONST_MKSA_UK_TON
+
+_ccllib.GSL_CONST_MKSA_TROY_OUNCE_swigconstant(_ccllib)
+GSL_CONST_MKSA_TROY_OUNCE = _ccllib.GSL_CONST_MKSA_TROY_OUNCE
+
+_ccllib.GSL_CONST_MKSA_CARAT_swigconstant(_ccllib)
+GSL_CONST_MKSA_CARAT = _ccllib.GSL_CONST_MKSA_CARAT
+
+_ccllib.GSL_CONST_MKSA_UNIFIED_ATOMIC_MASS_swigconstant(_ccllib)
+GSL_CONST_MKSA_UNIFIED_ATOMIC_MASS = _ccllib.GSL_CONST_MKSA_UNIFIED_ATOMIC_MASS
+
+_ccllib.GSL_CONST_MKSA_GRAM_FORCE_swigconstant(_ccllib)
+GSL_CONST_MKSA_GRAM_FORCE = _ccllib.GSL_CONST_MKSA_GRAM_FORCE
+
+_ccllib.GSL_CONST_MKSA_POUND_FORCE_swigconstant(_ccllib)
+GSL_CONST_MKSA_POUND_FORCE = _ccllib.GSL_CONST_MKSA_POUND_FORCE
+
+_ccllib.GSL_CONST_MKSA_KILOPOUND_FORCE_swigconstant(_ccllib)
+GSL_CONST_MKSA_KILOPOUND_FORCE = _ccllib.GSL_CONST_MKSA_KILOPOUND_FORCE
+
+_ccllib.GSL_CONST_MKSA_POUNDAL_swigconstant(_ccllib)
+GSL_CONST_MKSA_POUNDAL = _ccllib.GSL_CONST_MKSA_POUNDAL
+
+_ccllib.GSL_CONST_MKSA_CALORIE_swigconstant(_ccllib)
+GSL_CONST_MKSA_CALORIE = _ccllib.GSL_CONST_MKSA_CALORIE
+
+_ccllib.GSL_CONST_MKSA_BTU_swigconstant(_ccllib)
+GSL_CONST_MKSA_BTU = _ccllib.GSL_CONST_MKSA_BTU
+
+_ccllib.GSL_CONST_MKSA_THERM_swigconstant(_ccllib)
+GSL_CONST_MKSA_THERM = _ccllib.GSL_CONST_MKSA_THERM
+
+_ccllib.GSL_CONST_MKSA_HORSEPOWER_swigconstant(_ccllib)
+GSL_CONST_MKSA_HORSEPOWER = _ccllib.GSL_CONST_MKSA_HORSEPOWER
+
+_ccllib.GSL_CONST_MKSA_BAR_swigconstant(_ccllib)
+GSL_CONST_MKSA_BAR = _ccllib.GSL_CONST_MKSA_BAR
+
+_ccllib.GSL_CONST_MKSA_STD_ATMOSPHERE_swigconstant(_ccllib)
+GSL_CONST_MKSA_STD_ATMOSPHERE = _ccllib.GSL_CONST_MKSA_STD_ATMOSPHERE
+
+_ccllib.GSL_CONST_MKSA_TORR_swigconstant(_ccllib)
+GSL_CONST_MKSA_TORR = _ccllib.GSL_CONST_MKSA_TORR
+
+_ccllib.GSL_CONST_MKSA_METER_OF_MERCURY_swigconstant(_ccllib)
+GSL_CONST_MKSA_METER_OF_MERCURY = _ccllib.GSL_CONST_MKSA_METER_OF_MERCURY
+
+_ccllib.GSL_CONST_MKSA_INCH_OF_MERCURY_swigconstant(_ccllib)
+GSL_CONST_MKSA_INCH_OF_MERCURY = _ccllib.GSL_CONST_MKSA_INCH_OF_MERCURY
+
+_ccllib.GSL_CONST_MKSA_INCH_OF_WATER_swigconstant(_ccllib)
+GSL_CONST_MKSA_INCH_OF_WATER = _ccllib.GSL_CONST_MKSA_INCH_OF_WATER
+
+_ccllib.GSL_CONST_MKSA_PSI_swigconstant(_ccllib)
+GSL_CONST_MKSA_PSI = _ccllib.GSL_CONST_MKSA_PSI
+
+_ccllib.GSL_CONST_MKSA_POISE_swigconstant(_ccllib)
+GSL_CONST_MKSA_POISE = _ccllib.GSL_CONST_MKSA_POISE
+
+_ccllib.GSL_CONST_MKSA_STOKES_swigconstant(_ccllib)
+GSL_CONST_MKSA_STOKES = _ccllib.GSL_CONST_MKSA_STOKES
+
+_ccllib.GSL_CONST_MKSA_STILB_swigconstant(_ccllib)
+GSL_CONST_MKSA_STILB = _ccllib.GSL_CONST_MKSA_STILB
+
+_ccllib.GSL_CONST_MKSA_LUMEN_swigconstant(_ccllib)
+GSL_CONST_MKSA_LUMEN = _ccllib.GSL_CONST_MKSA_LUMEN
+
+_ccllib.GSL_CONST_MKSA_LUX_swigconstant(_ccllib)
+GSL_CONST_MKSA_LUX = _ccllib.GSL_CONST_MKSA_LUX
+
+_ccllib.GSL_CONST_MKSA_PHOT_swigconstant(_ccllib)
+GSL_CONST_MKSA_PHOT = _ccllib.GSL_CONST_MKSA_PHOT
+
+_ccllib.GSL_CONST_MKSA_FOOTCANDLE_swigconstant(_ccllib)
+GSL_CONST_MKSA_FOOTCANDLE = _ccllib.GSL_CONST_MKSA_FOOTCANDLE
+
+_ccllib.GSL_CONST_MKSA_LAMBERT_swigconstant(_ccllib)
+GSL_CONST_MKSA_LAMBERT = _ccllib.GSL_CONST_MKSA_LAMBERT
+
+_ccllib.GSL_CONST_MKSA_FOOTLAMBERT_swigconstant(_ccllib)
+GSL_CONST_MKSA_FOOTLAMBERT = _ccllib.GSL_CONST_MKSA_FOOTLAMBERT
+
+_ccllib.GSL_CONST_MKSA_CURIE_swigconstant(_ccllib)
+GSL_CONST_MKSA_CURIE = _ccllib.GSL_CONST_MKSA_CURIE
+
+_ccllib.GSL_CONST_MKSA_ROENTGEN_swigconstant(_ccllib)
+GSL_CONST_MKSA_ROENTGEN = _ccllib.GSL_CONST_MKSA_ROENTGEN
+
+_ccllib.GSL_CONST_MKSA_RAD_swigconstant(_ccllib)
+GSL_CONST_MKSA_RAD = _ccllib.GSL_CONST_MKSA_RAD
+
+_ccllib.GSL_CONST_MKSA_SOLAR_MASS_swigconstant(_ccllib)
+GSL_CONST_MKSA_SOLAR_MASS = _ccllib.GSL_CONST_MKSA_SOLAR_MASS
+
+_ccllib.GSL_CONST_MKSA_BOHR_RADIUS_swigconstant(_ccllib)
+GSL_CONST_MKSA_BOHR_RADIUS = _ccllib.GSL_CONST_MKSA_BOHR_RADIUS
+
+_ccllib.GSL_CONST_MKSA_NEWTON_swigconstant(_ccllib)
+GSL_CONST_MKSA_NEWTON = _ccllib.GSL_CONST_MKSA_NEWTON
+
+_ccllib.GSL_CONST_MKSA_DYNE_swigconstant(_ccllib)
+GSL_CONST_MKSA_DYNE = _ccllib.GSL_CONST_MKSA_DYNE
+
+_ccllib.GSL_CONST_MKSA_JOULE_swigconstant(_ccllib)
+GSL_CONST_MKSA_JOULE = _ccllib.GSL_CONST_MKSA_JOULE
+
+_ccllib.GSL_CONST_MKSA_ERG_swigconstant(_ccllib)
+GSL_CONST_MKSA_ERG = _ccllib.GSL_CONST_MKSA_ERG
+
+_ccllib.GSL_CONST_MKSA_STEFAN_BOLTZMANN_CONSTANT_swigconstant(_ccllib)
+GSL_CONST_MKSA_STEFAN_BOLTZMANN_CONSTANT = _ccllib.GSL_CONST_MKSA_STEFAN_BOLTZMANN_CONSTANT
+
+_ccllib.GSL_CONST_MKSA_THOMSON_CROSS_SECTION_swigconstant(_ccllib)
+GSL_CONST_MKSA_THOMSON_CROSS_SECTION = _ccllib.GSL_CONST_MKSA_THOMSON_CROSS_SECTION
+
+_ccllib.GSL_CONST_MKSA_BOHR_MAGNETON_swigconstant(_ccllib)
+GSL_CONST_MKSA_BOHR_MAGNETON = _ccllib.GSL_CONST_MKSA_BOHR_MAGNETON
+
+_ccllib.GSL_CONST_MKSA_NUCLEAR_MAGNETON_swigconstant(_ccllib)
+GSL_CONST_MKSA_NUCLEAR_MAGNETON = _ccllib.GSL_CONST_MKSA_NUCLEAR_MAGNETON
+
+_ccllib.GSL_CONST_MKSA_ELECTRON_MAGNETIC_MOMENT_swigconstant(_ccllib)
+GSL_CONST_MKSA_ELECTRON_MAGNETIC_MOMENT = _ccllib.GSL_CONST_MKSA_ELECTRON_MAGNETIC_MOMENT
+
+_ccllib.GSL_CONST_MKSA_PROTON_MAGNETIC_MOMENT_swigconstant(_ccllib)
+GSL_CONST_MKSA_PROTON_MAGNETIC_MOMENT = _ccllib.GSL_CONST_MKSA_PROTON_MAGNETIC_MOMENT
+
+_ccllib.GSL_CONST_MKSA_FARADAY_swigconstant(_ccllib)
+GSL_CONST_MKSA_FARADAY = _ccllib.GSL_CONST_MKSA_FARADAY
+
+_ccllib.GSL_CONST_MKSA_ELECTRON_CHARGE_swigconstant(_ccllib)
+GSL_CONST_MKSA_ELECTRON_CHARGE = _ccllib.GSL_CONST_MKSA_ELECTRON_CHARGE
+
+_ccllib.GSL_CONST_MKSA_VACUUM_PERMITTIVITY_swigconstant(_ccllib)
+GSL_CONST_MKSA_VACUUM_PERMITTIVITY = _ccllib.GSL_CONST_MKSA_VACUUM_PERMITTIVITY
+
+_ccllib.GSL_CONST_MKSA_VACUUM_PERMEABILITY_swigconstant(_ccllib)
+GSL_CONST_MKSA_VACUUM_PERMEABILITY = _ccllib.GSL_CONST_MKSA_VACUUM_PERMEABILITY
+
+_ccllib.GSL_CONST_MKSA_DEBYE_swigconstant(_ccllib)
+GSL_CONST_MKSA_DEBYE = _ccllib.GSL_CONST_MKSA_DEBYE
+
+_ccllib.GSL_CONST_MKSA_GAUSS_swigconstant(_ccllib)
+GSL_CONST_MKSA_GAUSS = _ccllib.GSL_CONST_MKSA_GAUSS
+
+_ccllib.M_PI_swigconstant(_ccllib)
+M_PI = _ccllib.M_PI
+
 _ccllib.K_PIVOT_swigconstant(_ccllib)
 K_PIVOT = _ccllib.K_PIVOT
-
-_ccllib.RHO_CRITICAL_swigconstant(_ccllib)
-RHO_CRITICAL = _ccllib.RHO_CRITICAL
 
 _ccllib.CLIGHT_HMPC_swigconstant(_ccllib)
 CLIGHT_HMPC = _ccllib.CLIGHT_HMPC
@@ -828,6 +1131,24 @@ MPC_TO_METER = _ccllib.MPC_TO_METER
 
 _ccllib.PC_TO_METER_swigconstant(_ccllib)
 PC_TO_METER = _ccllib.PC_TO_METER
+
+_ccllib.RHO_CRITICAL_swigconstant(_ccllib)
+RHO_CRITICAL = _ccllib.RHO_CRITICAL
+
+_ccllib.KBOLTZ_swigconstant(_ccllib)
+KBOLTZ = _ccllib.KBOLTZ
+
+_ccllib.STBOLTZ_swigconstant(_ccllib)
+STBOLTZ = _ccllib.STBOLTZ
+
+_ccllib.HPLANCK_swigconstant(_ccllib)
+HPLANCK = _ccllib.HPLANCK
+
+_ccllib.CLIGHT_swigconstant(_ccllib)
+CLIGHT = _ccllib.CLIGHT
+
+_ccllib.EV_IN_J_swigconstant(_ccllib)
+EV_IN_J = _ccllib.EV_IN_J
 
 _ccllib.TNCDM_swigconstant(_ccllib)
 TNCDM = _ccllib.TNCDM
