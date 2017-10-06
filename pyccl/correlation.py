@@ -1,6 +1,6 @@
-import ccllib as lib
-import constants as const
-from pyutils import _cosmology_obj, check
+from pyccl import ccllib as lib
+import pyccl.constants as const
+from pyccl.pyutils import _cosmology_obj, check
 import numpy as np
 
 correlation_methods = {
@@ -33,29 +33,28 @@ def correlation(cosmo, ell, C_ell, theta, corr_type='gg', method='fftlog'):
 
     cosmo = _cosmology_obj(cosmo)
     status = 0
-    
+
     # Convert to lower case
     corr_type = corr_type.lower()
     method = method.lower()
-    
+
     if corr_type not in correlation_types.keys():
         raise KeyError("'%s' is not a valid correlation type." % corr_type)
 
     if method.lower() not in correlation_methods.keys():
         raise KeyError("'%s' is not a valid correlation method." % method)
-    
+
     # Convert scalar input into an array
     scalar = False
     if isinstance(theta, float):
         scalar = True
         theta = np.array([theta,])
-    
-    # Call correlation function 
-    wth, status = lib.correlation_vec(cosmo, ell, C_ell, theta, 
+
+    # Call correlation function
+    wth, status = lib.correlation_vec(cosmo, ell, C_ell, theta,
                                       correlation_types[corr_type],
-                                      correlation_methods[method], 
+                                      correlation_methods[method],
                                       len(theta), status)
     check(status)
     if scalar: return wth[0]
     return wth
-    

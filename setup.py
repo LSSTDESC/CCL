@@ -19,6 +19,7 @@ import subprocess
 from subprocess import check_call
 import tempfile
 from textwrap import dedent
+
 # Implicit requirement - numpy must already be installed
 import numpy
 try:
@@ -37,7 +38,6 @@ except AttributeError:
 
 if get_config_var('MACOSX_DEPLOYMENT_TARGET') and 'MACOSX_DEPLOYMENT_TARGET' not in os.environ:
     os.environ['MACOSX_DEPLOYMENT_TARGET'] = get_config_var('MACOSX_DEPLOYMENT_TARGET')
-
 
 #######################
 class BuildExternalCLib(BuildCLib):
