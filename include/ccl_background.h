@@ -35,7 +35,7 @@ double ccl_h_over_h0(ccl_cosmology * cosmo, double a, int * status);
  * For specific cases see documentation for ccl_error.
  * @return void
  */
-void ccl_h_over_h0s(ccl_cosmology * cosmo, int na, double a[na], double output[na], int * status);
+void ccl_h_over_h0s(ccl_cosmology * cosmo, int na, double a[], double output[], int * status);
 
 /**
  * Comoving radial distance in Mpc from today to scale factor a
@@ -58,7 +58,7 @@ double ccl_comoving_radial_distance(ccl_cosmology * cosmo, double a, int* status
  * For specific cases see documentation for ccl_error.
  * @return void
  */
-void ccl_comoving_radial_distances(ccl_cosmology * cosmo, int na, double a[na], double output[na], int* status);
+void ccl_comoving_radial_distances(ccl_cosmology * cosmo, int na, double a[], double output[], int* status);
 
 /**
  * Transforms between radial and transverse comoving distances
@@ -99,7 +99,7 @@ double ccl_comoving_angular_distance(ccl_cosmology * cosmo, double a, int* statu
  * For specific cases see documentation for ccl_error.
  * @return void
  */
-void ccl_comoving_angular_distances(ccl_cosmology * cosmo, int na, double a[na], double output[na], int* status);
+void ccl_comoving_angular_distances(ccl_cosmology * cosmo, int na, double a[], double output[], int* status);
 
 /**
  * Comoving luminosity distance in Mpc from today to scale factor a
@@ -122,7 +122,7 @@ double ccl_luminosity_distance(ccl_cosmology * cosmo, double a, int * status);
  * For specific cases see documentation for ccl_error.
  * @return void
  */
-void ccl_luminosity_distances(ccl_cosmology * cosmo, int na, double a[na], double output[na], int * status);
+void ccl_luminosity_distances(ccl_cosmology * cosmo, int na, double a[], double output[], int * status);
 
 /** 
  * Distance modulus for object at scale factor a. Note the factor of 6 arises from the conversion from Mpc to pc.
@@ -145,7 +145,7 @@ double ccl_distance_modulus(ccl_cosmology * cosmo, double a, int * status);
  * For specific cases see documentation for ccl_error.
  * @return void
 */
-void ccl_distance_moduli(ccl_cosmology * cosmo, int na, double a[na], double output[na], int * status);
+void ccl_distance_moduli(ccl_cosmology * cosmo, int na, double a[], double output[], int * status);
 
 
 /**
@@ -169,7 +169,7 @@ double ccl_growth_factor(ccl_cosmology * cosmo, double a, int * status);
  * For specific cases see documentation for ccl_error.
  * @return void
  */
-void ccl_growth_factors(ccl_cosmology * cosmo, int na, double a[na], double output[na], int * status);
+void ccl_growth_factors(ccl_cosmology * cosmo, int na, double a[], double output[], int * status);
 
 //
 /**
@@ -193,7 +193,7 @@ double ccl_growth_factor_unnorm(ccl_cosmology * cosmo, double a, int * status);
  * For specific cases see documentation for ccl_error.
  * @return void
  */
-void ccl_growth_factors_unnorm(ccl_cosmology * cosmo, int na, double a[na], double output[na], int * status);
+void ccl_growth_factors_unnorm(ccl_cosmology * cosmo, int na, double a[], double output[], int * status);
 
 /**
  * Logarithmic rate of d ln(g)/d ln(a)  at scale factor a
@@ -216,7 +216,7 @@ double ccl_growth_rate(ccl_cosmology * cosmo, double a, int* status);
  * For specific cases see documentation for ccl_error.
  * @return void
  */
-void ccl_growth_rates(ccl_cosmology * cosmo, int na, double a[na], double output[na], int * status);
+void ccl_growth_rates(ccl_cosmology * cosmo, int na, double a[], double output[], int * status);
 
 /**
  * Scale factor for a given comoving distance (in Mpc)
@@ -239,7 +239,7 @@ double ccl_scale_factor_of_chi(ccl_cosmology * cosmo, double chi, int * status);
  * For specific cases see documentation for ccl_error.
  * @return void
  */
-void ccl_scale_factor_of_chis(ccl_cosmology * cosmo, int nchi, double chi[nchi], double output[nchi], int* status);
+void ccl_scale_factor_of_chis(ccl_cosmology * cosmo, int nchi, double chi[], double output[], int* status);
 
 /**
  * Density fraction of a given species at a redshift different than z=0.
