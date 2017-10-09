@@ -7110,7 +7110,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_data_k_min_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_data_k_min_lin_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   struct ccl_data *arg1 = (struct ccl_data *) 0 ;
   double arg2 ;
@@ -7121,20 +7121,20 @@ SWIGINTERN PyObject *_wrap_data_k_min_set(PyObject *SWIGUNUSEDPARM(self), PyObje
   PyObject * obj0 = 0 ;
   PyObject * obj1 = 0 ;
   
-  if (!PyArg_ParseTuple(args,(char *)"OO:data_k_min_set",&obj0,&obj1)) SWIG_fail;
+  if (!PyArg_ParseTuple(args,(char *)"OO:data_k_min_lin_set",&obj0,&obj1)) SWIG_fail;
   res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_data, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "data_k_min_set" "', argument " "1"" of type '" "struct ccl_data *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "data_k_min_lin_set" "', argument " "1"" of type '" "struct ccl_data *""'"); 
   }
   arg1 = (struct ccl_data *)(argp1);
   ecode2 = SWIG_AsVal_double(obj1, &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "data_k_min_set" "', argument " "2"" of type '" "double""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "data_k_min_lin_set" "', argument " "2"" of type '" "double""'");
   } 
   arg2 = (double)(val2);
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    if (arg1) (arg1)->k_min = arg2;
+    if (arg1) (arg1)->k_min_lin = arg2;
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
   resultobj = SWIG_Py_Void();
@@ -7144,7 +7144,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_data_k_min_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_data_k_min_lin_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   struct ccl_data *arg1 = (struct ccl_data *) 0 ;
   void *argp1 = 0 ;
@@ -7152,15 +7152,195 @@ SWIGINTERN PyObject *_wrap_data_k_min_get(PyObject *SWIGUNUSEDPARM(self), PyObje
   PyObject * obj0 = 0 ;
   double result;
   
-  if (!PyArg_ParseTuple(args,(char *)"O:data_k_min_get",&obj0)) SWIG_fail;
+  if (!PyArg_ParseTuple(args,(char *)"O:data_k_min_lin_get",&obj0)) SWIG_fail;
   res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_data, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "data_k_min_get" "', argument " "1"" of type '" "struct ccl_data *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "data_k_min_lin_get" "', argument " "1"" of type '" "struct ccl_data *""'"); 
   }
   arg1 = (struct ccl_data *)(argp1);
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    result = (double) ((arg1)->k_min);
+    result = (double) ((arg1)->k_min_lin);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double((double)(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_data_k_min_nl_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  struct ccl_data *arg1 = (struct ccl_data *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:data_k_min_nl_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_data, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "data_k_min_nl_set" "', argument " "1"" of type '" "struct ccl_data *""'"); 
+  }
+  arg1 = (struct ccl_data *)(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "data_k_min_nl_set" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = (double)(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->k_min_nl = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_data_k_min_nl_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  struct ccl_data *arg1 = (struct ccl_data *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  double result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:data_k_min_nl_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_data, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "data_k_min_nl_get" "', argument " "1"" of type '" "struct ccl_data *""'"); 
+  }
+  arg1 = (struct ccl_data *)(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double) ((arg1)->k_min_nl);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double((double)(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_data_k_max_lin_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  struct ccl_data *arg1 = (struct ccl_data *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:data_k_max_lin_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_data, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "data_k_max_lin_set" "', argument " "1"" of type '" "struct ccl_data *""'"); 
+  }
+  arg1 = (struct ccl_data *)(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "data_k_max_lin_set" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = (double)(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->k_max_lin = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_data_k_max_lin_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  struct ccl_data *arg1 = (struct ccl_data *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  double result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:data_k_max_lin_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_data, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "data_k_max_lin_get" "', argument " "1"" of type '" "struct ccl_data *""'"); 
+  }
+  arg1 = (struct ccl_data *)(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double) ((arg1)->k_max_lin);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double((double)(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_data_k_max_nl_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  struct ccl_data *arg1 = (struct ccl_data *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:data_k_max_nl_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_data, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "data_k_max_nl_set" "', argument " "1"" of type '" "struct ccl_data *""'"); 
+  }
+  arg1 = (struct ccl_data *)(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "data_k_max_nl_set" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = (double)(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->k_max_nl = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_data_k_max_nl_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  struct ccl_data *arg1 = (struct ccl_data *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  double result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:data_k_max_nl_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_data, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "data_k_max_nl_get" "', argument " "1"" of type '" "struct ccl_data *""'"); 
+  }
+  arg1 = (struct ccl_data *)(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double) ((arg1)->k_max_nl);
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
   resultobj = SWIG_From_double((double)(result));
@@ -17556,8 +17736,14 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"data_p_lin_get", _wrap_data_p_lin_get, METH_VARARGS, (char *)"data_p_lin_get(data self) -> gsl_spline2d *"},
 	 { (char *)"data_p_nl_set", _wrap_data_p_nl_set, METH_VARARGS, (char *)"data_p_nl_set(data self, gsl_spline2d * p_nl)"},
 	 { (char *)"data_p_nl_get", _wrap_data_p_nl_get, METH_VARARGS, (char *)"data_p_nl_get(data self) -> gsl_spline2d *"},
-	 { (char *)"data_k_min_set", _wrap_data_k_min_set, METH_VARARGS, (char *)"data_k_min_set(data self, double k_min)"},
-	 { (char *)"data_k_min_get", _wrap_data_k_min_get, METH_VARARGS, (char *)"data_k_min_get(data self) -> double"},
+	 { (char *)"data_k_min_lin_set", _wrap_data_k_min_lin_set, METH_VARARGS, (char *)"data_k_min_lin_set(data self, double k_min_lin)"},
+	 { (char *)"data_k_min_lin_get", _wrap_data_k_min_lin_get, METH_VARARGS, (char *)"data_k_min_lin_get(data self) -> double"},
+	 { (char *)"data_k_min_nl_set", _wrap_data_k_min_nl_set, METH_VARARGS, (char *)"data_k_min_nl_set(data self, double k_min_nl)"},
+	 { (char *)"data_k_min_nl_get", _wrap_data_k_min_nl_get, METH_VARARGS, (char *)"data_k_min_nl_get(data self) -> double"},
+	 { (char *)"data_k_max_lin_set", _wrap_data_k_max_lin_set, METH_VARARGS, (char *)"data_k_max_lin_set(data self, double k_max_lin)"},
+	 { (char *)"data_k_max_lin_get", _wrap_data_k_max_lin_get, METH_VARARGS, (char *)"data_k_max_lin_get(data self) -> double"},
+	 { (char *)"data_k_max_nl_set", _wrap_data_k_max_nl_set, METH_VARARGS, (char *)"data_k_max_nl_set(data self, double k_max_nl)"},
+	 { (char *)"data_k_max_nl_get", _wrap_data_k_max_nl_get, METH_VARARGS, (char *)"data_k_max_nl_get(data self) -> double"},
 	 { (char *)"new_data", _wrap_new_data, METH_VARARGS, (char *)"new_data() -> data"},
 	 { (char *)"delete_data", _wrap_delete_data, METH_VARARGS, (char *)"delete_data(data self)"},
 	 { (char *)"data_swigregister", data_swigregister, METH_VARARGS, NULL},

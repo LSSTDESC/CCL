@@ -308,10 +308,22 @@ class data(_object):
     __swig_getmethods__["p_nl"] = _ccllib.data_p_nl_get
     if _newclass:
         p_nl = _swig_property(_ccllib.data_p_nl_get, _ccllib.data_p_nl_set)
-    __swig_setmethods__["k_min"] = _ccllib.data_k_min_set
-    __swig_getmethods__["k_min"] = _ccllib.data_k_min_get
+    __swig_setmethods__["k_min_lin"] = _ccllib.data_k_min_lin_set
+    __swig_getmethods__["k_min_lin"] = _ccllib.data_k_min_lin_get
     if _newclass:
-        k_min = _swig_property(_ccllib.data_k_min_get, _ccllib.data_k_min_set)
+        k_min_lin = _swig_property(_ccllib.data_k_min_lin_get, _ccllib.data_k_min_lin_set)
+    __swig_setmethods__["k_min_nl"] = _ccllib.data_k_min_nl_set
+    __swig_getmethods__["k_min_nl"] = _ccllib.data_k_min_nl_get
+    if _newclass:
+        k_min_nl = _swig_property(_ccllib.data_k_min_nl_get, _ccllib.data_k_min_nl_set)
+    __swig_setmethods__["k_max_lin"] = _ccllib.data_k_max_lin_set
+    __swig_getmethods__["k_max_lin"] = _ccllib.data_k_max_lin_get
+    if _newclass:
+        k_max_lin = _swig_property(_ccllib.data_k_max_lin_get, _ccllib.data_k_max_lin_set)
+    __swig_setmethods__["k_max_nl"] = _ccllib.data_k_max_nl_set
+    __swig_getmethods__["k_max_nl"] = _ccllib.data_k_max_nl_get
+    if _newclass:
+        k_max_nl = _swig_property(_ccllib.data_k_max_nl_get, _ccllib.data_k_max_nl_set)
 
     def __init__(self):
         """__init__(ccl_data self) -> data"""
