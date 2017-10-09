@@ -401,9 +401,10 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int * statu
     return;
   }
 
-  cosmo->data.k_min=2*exp(sp.ln_k[0]);
+  cosmo->data.k_min_lin=2*exp(sp.ln_k[0]);
+  cosmo->data.k_max_lin=ccl_splines->K_MAX_SPLINE;
   //CLASS calculations done - now allocate CCL splines
-  double kmin = cosmo->data.k_min;
+  double kmin = cosmo->data.k_min_lin;
   double kmax = ccl_splines->K_MAX_SPLINE;
   int nk = ccl_splines->N_K;
   double amin = ccl_splines->A_SPLINE_MIN;
@@ -468,8 +469,12 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int * statu
       *status = CCL_ERROR_CLASS;
       strcpy(cosmo->status_message ,"ccl_power.c: ccl_cosmology_compute_power_class(): K_MIN is less than CLASS's kmin. Not yet supported for nonlinear P(k).\n");
     }
-    
+
+    cosmo->data.k_min_nl=2*exp(sp.ln_k[0]);
+    cosmo->data.k_max_nl=ccl_splines->K_MAX_SPLINE;
+
     if(cosmo->config.matter_power_spectrum_method==ccl_halofit) {
+      
       double psout_nl;
       
       for (int i=0; i<nk; i++) {
@@ -683,8 +688,11 @@ static double eh_power(ccl_parameters *params,eh_struct *eh,double k,int wiggled
 
 static void ccl_cosmology_compute_power_eh(ccl_cosmology * cosmo, int * status)
 {
-  cosmo->data.k_min=ccl_splines->K_MIN_DEFAULT;
-  double kmin = cosmo->data.k_min;
+  cosmo->data.k_min_lin=ccl_splines->K_MIN_DEFAULT;
+  cosmo->data.k_min_nl=ccl_splines->K_MIN_DEFAULT;
+  cosmo->data.k_max_lin=ccl_splines->K_MAX;
+  cosmo->data.k_max_nl=ccl_splines->K_MAX;
+  double kmin = cosmo->data.k_min_lin;
   double kmax = ccl_splines->K_MAX;
   int nk = ccl_splines->N_K;
   double amin = ccl_splines->A_SPLINE_MIN;
@@ -838,8 +846,11 @@ TASK: provide spline for the BBKS power spectrum with baryonic correction
 
 static void ccl_cosmology_compute_power_bbks(ccl_cosmology * cosmo, int * status)
 {
-  cosmo->data.k_min=ccl_splines->K_MIN_DEFAULT;
-  double kmin = cosmo->data.k_min;
+  cosmo->data.k_min_lin=ccl_splines->K_MIN_DEFAULT;
+  cosmo->data.k_min_nl=ccl_splines->K_MIN_DEFAULT;
+  cosmo->data.k_max_lin=ccl_splines->K_MAX;
+  cosmo->data.k_max_nl=ccl_splines->K_MAX;
+  double kmin = cosmo->data.k_min_lin;
   double kmax = ccl_splines->K_MAX;
   int nk = ccl_splines->N_K;
   double amin = ccl_splines->A_SPLINE_MIN;
@@ -1007,9 +1018,10 @@ static void ccl_cosmology_compute_power_emu(ccl_cosmology * cosmo, int * status)
     return;
   }
 
-  cosmo->data.k_min=2*exp(sp.ln_k[0]);
-  //CLASS calculations done - now allocate CCL splines
-  double kmin = cosmo->data.k_min;
+  cosmo->data.k_min_lin=2*exp(sp.ln_k[0]); 
+  cosmo->data.k_max_lin=ccl_splines->K_MAX_SPLINE;
+//CLASS calculations done - now allocate CCL splines
+  double kmin = cosmo->data.k_min_lin;
   double kmax = ccl_splines->K_MAX_SPLINE;
   int nk = ccl_splines->N_K;
   double amin = ccl_splines->A_SPLINE_MIN;
@@ -1068,7 +1080,8 @@ static void ccl_cosmology_compute_power_emu(ccl_cosmology * cosmo, int * status)
   }
 
   //Now start the NL computation with the emulator
-  cosmo->data.k_min=K_MIN_EMU; //limit of the emulator
+  cosmo->data.k_min_nl=K_MIN_EMU;
+  cosmo->data.k_max_nl=K_MAX_EMU;
   amin = A_MIN_EMU; //limit of the emulator
   amax = ccl_splines->A_SPLINE_MAX; 
   na = ccl_splines->N_A;
@@ -1134,7 +1147,8 @@ static void ccl_cosmology_compute_power_emu(ccl_cosmology * cosmo, int * status)
   
   gsl_spline2d * log_power_nl = gsl_spline2d_alloc(PLIN_SPLINE_TYPE, 351,na);
   int splinstatus = gsl_spline2d_init(log_power_nl, logx, zemu, y2d,351,na);
-  
+  //Note the minimum k of the spline is different from the linear one.
+
   if (splinstatus){
     free(zemu);
     free(y2d);
@@ -1189,19 +1203,15 @@ INPUT: ccl_cosmology * cosmo, a, k [1/Mpc]
 TASK: extrapolate power spectrum at high k
 */
 static double ccl_power_extrapol_highk(ccl_cosmology * cosmo, double k, double a, 
-				       gsl_spline2d * powerspl, int * status)
+				       gsl_spline2d * powerspl, double kmax, int * status)
 {
   double log_p_1;
   double deltak=1e-2; //step for numerical derivative;
   double deriv_pk_kmid,deriv2_pk_kmid;
   double lkmid;
   double lpk_kmid;
-
-  if(cosmo->config.transfer_function_method!=ccl_emulator){
-    lkmid=log(ccl_splines->K_MAX_SPLINE)-2*deltak;
-  } else {
-    lkmid=log(K_MAX_EMU)-2*deltak;
-  }
+  
+  lkmid = log(kmax)-2*deltak;
   
   int pwstatus =  gsl_spline2d_eval_e(powerspl, lkmid,a,NULL ,NULL ,&lpk_kmid);
   if (pwstatus) {
@@ -1234,11 +1244,11 @@ INPUT: ccl_cosmology * cosmo, a, k [1/Mpc]
 TASK: extrapolate power spectrum at low k
 */
 static double ccl_power_extrapol_lowk(ccl_cosmology * cosmo, double k, double a,
-				      gsl_spline2d * powerspl, int * status)
+				      gsl_spline2d * powerspl, double kmin, int * status)
 {
   double log_p_1;
   double deltak=1e-2; //safety step
-  double lkmin=log(cosmo->data.k_min)+deltak;
+  double lkmin=log(kmin)+deltak;
   double lpk_kmin;
   int pwstatus=gsl_spline2d_eval_e(powerspl,lkmin,a,NULL,NULL,&lpk_kmin);
 
@@ -1270,11 +1280,11 @@ double ccl_linear_matter_power(ccl_cosmology * cosmo, double k, double a, int * 
   double log_p_1;
   int pkstatus;
  
-  if(k<=cosmo->data.k_min) {
-    log_p_1=ccl_power_extrapol_lowk(cosmo,k,a,cosmo->data.p_lin,status);
+  if(k<=cosmo->data.k_min_lin) { 
+    log_p_1=ccl_power_extrapol_lowk(cosmo,k,a,cosmo->data.p_lin,cosmo->data.k_min_lin,status);
     return exp(log_p_1);
   }
-  else if(k<ccl_splines->K_MAX_SPLINE){
+  else if(k<cosmo->data.k_max_lin){
     pkstatus = gsl_spline2d_eval_e(cosmo->data.p_lin, log(k), a,NULL,NULL,&log_p_1);
     if (pkstatus) {
       *status = CCL_ERROR_SPLINE_EV;
@@ -1284,8 +1294,8 @@ double ccl_linear_matter_power(ccl_cosmology * cosmo, double k, double a, int * 
     else
       return exp(log_p_1);
   }
-  else { //Extrapolate NL regime using log derivative
-    log_p_1 = ccl_power_extrapol_highk(cosmo,k,a,cosmo->data.p_lin,status);
+  else { //Extrapolate using log derivative
+    log_p_1 = ccl_power_extrapol_highk(cosmo,k,a,cosmo->data.p_lin,cosmo->data.k_max_lin,status);
     return exp(log_p_1);
   }
 }
@@ -1298,17 +1308,12 @@ TASK: compute the nonlinear power spectrum at a given redshift
 
 double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double k, double a, int *status)
 {
-  
-  if ((cosmo->config.transfer_function_method == ccl_emulator) && (a<A_MIN_EMU)){
-    *status = CCL_ERROR_INCONSISTENT;
-    sprintf(cosmo->status_message ,"ccl_power.c: the cosmic emulator cannot be used above z=2\n");
-    return NAN;
-  }    
+
   double log_p_1;
   
   switch(cosmo->config.matter_power_spectrum_method) {
-
-    //If the matter PS specified was linear, then do the linear compuation
+    
+  //If the matter PS specified was linear, then do the linear compuation
   case ccl_linear:
     return ccl_linear_matter_power(cosmo,k,a,status);
     
@@ -1316,11 +1321,11 @@ double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double k, double a, int *s
     if (!cosmo->computed_power)
       ccl_cosmology_compute_power(cosmo,status);
 
-    if(k<=cosmo->data.k_min) {
-      log_p_1=ccl_power_extrapol_lowk(cosmo,k,a,cosmo->data.p_nl,status);
+    if(k<=cosmo->data.k_min_nl) {
+      log_p_1=ccl_power_extrapol_lowk(cosmo,k,a,cosmo->data.p_nl,cosmo->data.k_min_nl,status);
       return exp(log_p_1);
     }
-    if(k<ccl_splines->K_MAX_SPLINE){
+    if(k<cosmo->data.k_max_nl){
       int pwstatus =  gsl_spline2d_eval_e(cosmo->data.p_nl, log(k),a,NULL ,NULL ,&log_p_1);
       if (pwstatus) {
 	*status = CCL_ERROR_SPLINE_EV;
@@ -1331,19 +1336,27 @@ double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double k, double a, int *s
 	return exp(log_p_1);
     }
     else { //Extrapolate NL regime using log derivative
-      log_p_1 = ccl_power_extrapol_highk(cosmo,k,a,cosmo->data.p_nl,status);
+      log_p_1 = ccl_power_extrapol_highk(cosmo,k,a,cosmo->data.p_nl,cosmo->data.k_max_nl,status);
       return exp(log_p_1);
     }
 
   case ccl_emu:
+
+    if ((cosmo->config.transfer_function_method == ccl_emulator) && (a<A_MIN_EMU)){
+      *status = CCL_ERROR_INCONSISTENT;
+      sprintf(cosmo->status_message ,"ccl_power.c: the cosmic emulator cannot be used above z=2\
+\n");
+      return NAN;
+    }
+
     if (!cosmo->computed_power)
       ccl_cosmology_compute_power(cosmo,status);
     
-    if(k<=cosmo->data.k_min) {
-      log_p_1=ccl_power_extrapol_lowk(cosmo,k,a,cosmo->data.p_nl,status);
+    if(k<=cosmo->data.k_min_nl) {
+      log_p_1=ccl_power_extrapol_lowk(cosmo,k,a,cosmo->data.p_nl,cosmo->data.k_min_nl,status);
       return exp(log_p_1);
     }
-    if(k<K_MAX_EMU){
+    if(k<cosmo->data.k_max_nl){
       int pwstatus =  gsl_spline2d_eval_e(cosmo->data.p_nl, log(k),a,NULL ,NULL ,&log_p_1);
       if (pwstatus) {
 	*status = CCL_ERROR_SPLINE_EV;
@@ -1354,7 +1367,7 @@ double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double k, double a, int *s
 	return exp(log_p_1);
     }
     else { //Extrapolate NL regime using log derivative
-      log_p_1 = ccl_power_extrapol_highk(cosmo,k,a,cosmo->data.p_nl,status);
+      log_p_1 = ccl_power_extrapol_highk(cosmo,k,a,cosmo->data.p_nl,cosmo->data.k_max_nl,status);
       return exp(log_p_1);
     }
 

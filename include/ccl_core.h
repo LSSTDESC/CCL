@@ -105,8 +105,10 @@ typedef struct ccl_data{
   // These are all functions of the wavenumber k and the scale factor a.
   gsl_spline2d * p_lin;
   gsl_spline2d * p_nl;
-  double k_min; //k_min  [1/Mpc] <- minimum wavenumber that the power spectrum has been computed to 
-
+  double k_min_lin; //k_min  [1/Mpc] <- minimum wavenumber that the power spectrum has been computed to 
+  double k_min_nl; 
+  double k_max_lin;
+  double k_max_nl;
 } ccl_data;
 
 /**
