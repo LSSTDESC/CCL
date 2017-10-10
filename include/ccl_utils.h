@@ -1,4 +1,7 @@
 /** @file */
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #pragma once
 #include "gsl/gsl_spline.h"
@@ -38,3 +41,7 @@ SplPar *ccl_spline_init(int n,double *x,double *y,double y0,double yf);
 double ccl_spline_eval(double x,SplPar *spl);
 
 void ccl_spline_free(SplPar *spl);
+
+#ifdef __cplusplus
+}
+#endif

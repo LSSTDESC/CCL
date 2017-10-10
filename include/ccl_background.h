@@ -1,4 +1,7 @@
 /** @file */
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #pragma once
 #include "ccl_core.h"
@@ -251,3 +254,7 @@ void ccl_scale_factor_of_chis(ccl_cosmology * cosmo, int nchi, double chi[], dou
  * @return omega_x, Density fraction of a given species at scale factor a.
  */
 double ccl_omega_x(ccl_cosmology * cosmo, double a, ccl_omega_x_label label, int* status);
+
+#ifdef __cplusplus
+}
+#endif

@@ -1,4 +1,7 @@
 /** @file */
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #pragma once
 
@@ -81,3 +84,7 @@ typedef struct ccl_configuration {
  * default_config = {ccl_boltzmann_class, ccl_halofit, ccl_tinker10}
  */
 extern const ccl_configuration default_config;
+
+#ifdef __cplusplus
+}
+#endif

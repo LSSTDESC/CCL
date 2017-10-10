@@ -1,3 +1,7 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #pragma once
 
 #include "ccl_core.h"
@@ -46,3 +50,7 @@ double ccl_sigmaR(ccl_cosmology *cosmo, double R, int * status);
  * @return sigma_8.
  */
 double ccl_sigma8(ccl_cosmology *cosmo, int * status);
+
+#ifdef __cplusplus
+}
+#endif
