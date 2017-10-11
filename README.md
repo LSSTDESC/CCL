@@ -1,3 +1,15 @@
+<!---
+STYLE CONVENTION USED   
+    bolt italic:
+        ***file***"
+    code:
+       `program` or `library``
+       `commands` or `paths`
+       `variable`
+    bold code:
+        **`function`**
+        **`type`** or **`structure`**
+-->
 # CCL     [![Build Status](https://travis-ci.org/LSSTDESC/CCL.svg?branch=master)](https://travis-ci.org/LSSTDESC/CCL)
 LSST DESC Core Cosmology Library (`CCL`) provides routines to compute basic cosmological observables with validated numerical accuracy.
 
