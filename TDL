@@ -1,0 +1,25 @@
+
+** Branch 'master' **
+
+
+** Branch 'Documentation' **
+
+MERGE::
+ - min_code.c merged with ccl_sample_run.c
+ - new examples in ccl_sample_run.c and in README.md : angular power spectra, halo mass func, LSST spec
+ - python wrapper instalation
+ - python wrapper example (to be extended)
+
+** Branch 'research_note_pdf' **
+
+extend 'Permissible cosmological models'
+
+'Distances' add and ask about formulae
+
+Future functionality
+
+Examples
+
+** Branch 'ccl_halofit'
+
+? Omega development

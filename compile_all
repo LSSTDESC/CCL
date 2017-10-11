@@ -1,0 +1,10 @@
+#!/bin/bash
+
+echo 'Compile library'
+make
+echo 'Compile test case "tests/ccl_example_halofit.c"'
+gcc -Wall -Wpedantic -g -O0 -I./include -std=c99 -fPIC tests/ccl_example_halofit.c -o tests/ccl_example_halofit -L./lib -L/usr/local/lib -lgsl -lgslcblas -lm -Lclass -lclass -lccl
+echo 'Compile test case "tests/ccl_sample_run.c"'
+gcc -Wall -Wpedantic -g -O0 -I./include -std=c99 -fPIC tests/ccl_sample_run.c -o tests/ccl_sample_run -L./lib -L/usr/local/lib -lgsl -lgslcblas -lm -Lclass -lclass -lccl
+echo 'Copying library'
+sudo make install

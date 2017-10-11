@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CodeLite_Project Name="CCL" InternalType="">
+  <VirtualDirectory Name="class">
+    <VirtualDirectory Name="source">
+      <File Name="class/source/background.c"/>
+      <File Name="class/source/thermodynamics.c"/>
+      <File Name="class/source/spectra.c"/>
+      <File Name="class/source/primordial.c"/>
+      <File Name="class/source/transfer.c"/>
+      <File Name="class/source/output.c"/>
+      <File Name="class/source/lensing.c"/>
+      <File Name="class/source/nonlinear.c"/>
+      <File Name="class/source/input.c"/>
+      <File Name="class/source/perturbations.c"/>
+    </VirtualDirectory>
+    <VirtualDirectory Name="tools">
+      <File Name="class/tools/sparse.c"/>
+      <File Name="class/tools/evolver_ndf15.c"/>
+      <File Name="class/tools/dei_rkck.c"/>
+      <File Name="class/tools/parser.c"/>
+      <File Name="class/tools/hyperspherical.c"/>
+      <File Name="class/tools/hermite6_interpolation_csource.h"/>
+      <File Name="class/tools/quadrature.c"/>
+      <File Name="class/tools/growTable.c"/>
+      <File Name="class/tools/hermite4_interpolation_csource.h"/>
+      <File Name="class/tools/common.c"/>
+      <File Name="class/tools/hermite3_interpolation_csource.h"/>
+      <File Name="class/tools/arrays.c"/>
+      <File Name="class/tools/evolver_rkck.c"/>
+    </VirtualDirectory>
+    <VirtualDirectory Name="include">
+      <File Name="class/include/lensing.h"/>
+      <File Name="class/include/evolver_ndf15.h"/>
+      <File Name="class/include/hyperspherical.h"/>
+      <File Name="class/include/transfer.h"/>
+      <File Name="class/include/growTable.h"/>
+      <File Name="class/include/svnversion.h"/>
+      <File Name="class/include/evolver_rkck.h"/>
+      <File Name="class/include/output.h"/>
+      <File Name="class/include/sparse.h"/>
+      <File Name="class/include/background.h"/>
+      <File Name="class/include/common.h"/>
+      <File Name="class/include/thermodynamics.h"/>
+      <File Name="class/include/primordial.h"/>
+      <File Name="class/include/nonlinear.h"/>
+      <File Name="class/include/hermite6_interpolation_csource.h"/>
+      <File Name="class/include/perturbations.h"/>
+      <File Name="class/include/spectra.h"/>
+      <File Name="class/include/hermite4_interpolation_csource.h"/>
+      <File Name="class/include/class.h"/>
+      <File Name="class/include/quadrature.h"/>
+      <File Name="class/include/parser.h"/>
+      <File Name="class/include/hermite3_interpolation_csource.h"/>
+      <File Name="class/include/dei_rkck.h"/>
+      <File Name="class/include/arrays.h"/>
+      <File Name="class/include/input.h"/>
+    </VirtualDirectory>
+    <VirtualDirectory Name="main">
+      <File Name="class/main/class.c"/>
+    </VirtualDirectory>
+  </VirtualDirectory>
+  <Description/>
+  <Dependencies/>
+  <Settings Type="Executable">
+    <GlobalSettings>
+      <Compiler Options="" C_Options="" Assembler="">
+        <IncludePath Value="."/>
+      </Compiler>
+      <Linker Options="">
+        <LibraryPath Value="."/>
+      </Linker>
+      <ResourceCompiler Options=""/>
+    </GlobalSettings>
+    <Configuration Name="Debug" CompilerType="Cross GCC ( x86_64-linux-gnu )" DebuggerType="GNU gdb debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
+      <Compiler Options="-g -Wall" C_Options="" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="0">
+        <IncludePath Value="."/>
+      </Compiler>
+      <Linker Options="-O0" Required="yes">
+        <LibraryPath Value="."/>
+        <LibraryPath Value="Debug"/>
+      </Linker>
+      <ResourceCompiler Options="" Required="no"/>
+      <General OutputFile="$(IntermediateDirectory)/$(ProjectName)" IntermediateDirectory="./Debug" Command="./$(ProjectName)" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="./Debug" PauseExecWhenProcTerminates="no" IsGUIProgram="no" IsEnabled="yes"/>
+      <Environment EnvVarSetName="&lt;Use Workspace Settings&gt;" DbgSetName="&lt;Use Global Settings&gt;">
+        <![CDATA[]]>
+      </Environment>
+      <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="" IsExtended="no">
+        <DebuggerSearchPaths/>
+        <PostConnectCommands/>
+        <StartupCommands/>
+      </Debugger>
+      <PreBuild/>
+      <PostBuild/>
+      <CustomBuild Enabled="no">
+        <RebuildCommand/>
+        <CleanCommand/>
+        <BuildCommand/>
+        <PreprocessFileCommand/>
+        <SingleFileCommand/>
+        <MakefileGenerationCommand/>
+        <ThirdPartyToolName/>
+        <WorkingDirectory/>
+      </CustomBuild>
+      <AdditionalRules>
+        <CustomPostBuild/>
+        <CustomPreBuild/>
+      </AdditionalRules>
+      <Completion EnableCpp11="no" EnableCpp14="no">
+        <ClangCmpFlagsC/>
+        <ClangCmpFlags/>
+        <ClangPP/>
+        <SearchPaths/>
+      </Completion>
+    </Configuration>
+  </Settings>
+  <VirtualDirectory Name="tests">
+    <File Name="tests/ccl_test_growth.c"/>
+    <File Name="tests/ccl_sample_power.c"/>
+    <File Name="tests/ccl_example_photoz.c"/>
+    <File Name="tests/ccl_test_params.c"/>
+    <File Name="tests/ccl_test_massfunc.c"/>
+    <File Name="tests/ccl_test_distances.c"/>
+    <File Name="tests/ccl_test_utils.c"/>
+    <File Name="tests/min_code.c"/>
+    <File Name="tests/ccl_example_specs.c"/>
+    <File Name="tests/ccl_sample_run.c"/>
+    <File Name="tests/ctest.h"/>
+    <File Name="tests/ccl_test_bbks.c"/>
+    <File Name="tests/ccl_test_sigmaM.c"/>
+    <File Name="tests/ccl_test_cls.c"/>
+    <File Name="tests/ccl_test.c"/>
+    <File Name="tests/ccl_example_halofit.c"/>
+  </VirtualDirectory>
+  <VirtualDirectory Name="sandbox">
+    <File Name="sandbox/WL.c"/>
+    <File Name="sandbox/PZ.c"/>
+  </VirtualDirectory>
+  <VirtualDirectory Name="src">
+    <File Name="src/ccl_placeholder.c"/>
+    <File Name="src/ccl_massfunc.c"/>
+    <File Name="src/ccl_cls.c"/>
+    <File Name="src/ccl_background.c"/>
+    <File Name="src/ccl_core.c"/>
+    <File Name="src/ccl_error.c"/>
+    <File Name="src/ccl_utils.c"/>
+    <File Name="src/ccl_lsst_specs.c"/>
+    <File Name="src/ccl_power.c"/>
+    <File Name="src/ccl_halofit.c"/>
+  </VirtualDirectory>
+  <VirtualDirectory Name="include">
+    <File Name="include/ccl_background.h"/>
+    <File Name="include/ccl_config.h"/>
+    <File Name="include/ccl_placeholder.h"/>
+    <File Name="include/ccl_cls.h"/>
+    <File Name="include/ccl_core.h"/>
+    <File Name="include/ccl_error.h"/>
+    <File Name="include/ccl.h"/>
+    <File Name="include/ccl_constants.h"/>
+    <File Name="include/ccl_power.h"/>
+    <File Name="include/ccl_utils.h"/>
+    <File Name="include/ccl_lsst_specs.h"/>
+    <File Name="include/ccl_massfunc.h"/>
+    <File Name="include/ccl_halofit.h"/>
+  </VirtualDirectory>
+</CodeLite_Project>

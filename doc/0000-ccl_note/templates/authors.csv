@@ -1,0 +1,32 @@
+# ======================================================================
+# authors.csv
+#
+# While we wait for the LSST DESC publications system to generate files
+# like this from its database, we'll need to edit authors.csv by hand.
+# Below are some example entries.
+#
+# Notes:
+#   - If someone has two affiliations, they get two rows, and the last
+#     row is is used for their contribution.
+#   - Try to make your one-sentence contribution statement as
+#     informative as possible, so that it's clear who did what.
+#   - The contribution statement is a _summary of your impact on the
+#     project_, not a _timecard_. So, if you spent 90% of your time
+#     debugging, but 10% of your time designing and implementing the
+#     framework that then needed debugging, your statement should
+#     emphasize the design and implementation rather than the debugging.
+#   - BUG: mkauthlist cannot deal with empty rows, so please avoid them!
+#   - BUG: contributions are re-formatted by mkauthlist into Title case,
+#     removing all other capitalizations. Sorry about this!
+#
+# Example rows for you to adapt:
+#
+# Drlica-Wagner,Alex,A.~Drlica-Wagner,Contact,"Fermi National Accelerator Laboratory, P. O. Box 500, Batavia, IL 60510, USA","Developed algorithms for switching between document styles and generating author lists, implemented and tested software.",kadrlica@fnal.gov
+# Marshall,Phil,P.~Marshall,Contributor,"SLAC National Accelerator Laboratory, Menlo Park, CA 94025, USA","Initiated and led project.",dr.phil.marshall@gmail.com
+# Marshall,Phil,P.~Marshall,Contributor,"Kavli Institute for Particle Astrophysics \& Cosmology, P. O. Box 2450, Stanford University, Stanford, CA 94305, USA","Initiated and led project, designed templates, tested system.",dr.phil.marshall@gmail.com
+# Digel,Seth,S.~Digel,Builder,"SLAC National Accelerator Laboratory, Menlo Park, CA 94025, USA","Advised on LSST DESC publication system requirements.",digel@stanford.edu
+# Digel,Seth,S.~Digel,Builder,"Kavli Institute for Particle Astrophysics \& Cosmology, P. O. Box 2450, Stanford University, Stanford, CA 94305, USA","Advised on LSST DESC publication system requirements.",digel@stanford.edu
+#
+# ======================================================================
+Lastname,Firstname,Authorname,AuthorType,Affiliation,Contribution,Email
+"Lastname", "Firstname","{{ cookiecutter.author }}",Contact,"{{ cookiecutter.affiliation }}","Initiated project, led development work.","{{ cookiecutter.email }}"

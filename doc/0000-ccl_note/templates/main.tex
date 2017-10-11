@@ -1,0 +1,152 @@
+% {% raw %}
+% ======================================================================
+\RequirePackage{docswitch}
+% \flag is set by the user, through the makefile:
+%    make note
+%    make apj
+% etc.
+\setjournal{\flag}
+
+\documentclass[\docopts]{\docclass}
+
+% You could also define the document class directly
+%\documentclass[]{emulateapj}
+
+% Custom commands from LSST DESC, see texmf/styles/lsstdesc_macros.sty
+\usepackage{lsstdesc_macros}
+
+\usepackage{graphicx}
+\graphicspath{{./}{./figures/}}
+\bibliographystyle{apj}
+
+% Add your own macros here:
+
+
+
+% {% endraw %}
+% ======================================================================
+
+\begin{document}
+
+\title{ {{ cookiecutter.title }} }
+
+\maketitlepre
+
+\begin{abstract}
+
+{{ cookiecutter.description }}
+
+\end{abstract}
+
+% Keywords are ignored in the LSST DESC Note style:
+\dockeys{latex: templates, papers: awesome}
+
+\maketitlepost
+
+% ----------------------------------------------------------------------
+% {% raw %}
+
+\section{Introduction}
+\label{sec:intro}
+
+This is a paper and note template for the LSST DESC \citep{Overview,ScienceBook,WhitePaper}.
+You can delete all this tutorial text whenever you like.
+
+You can easily switch between various \LaTeX\xspace styles for internal notes and peer reviewed journals.
+Documents can be compiled using the provided \code{Makefile}.
+The command \code{make} with no arguments compiles \code{main.tex} using the  \code{lsstdescnote.cls} style.
+If you want to upgrade your Note into a journal article, just choose a journal name, between \code{make apj} (ApJ preprint format), \code{make apjl} (which uses the \code{emulateapj} style), \code{make prd}, \code{make prl}, and \code{make mnras}.
+
+
+% ----------------------------------------------------------------------
+
+\section{Commands}
+\label{sec:commands}
+
+There are a number of useful \LaTeX\xspace commands predefined in \code{macros.tex}.
+Notice that the section labels are prefixed with \code{sec:} to allow the use of the \verb=\secref= command to reference a section (\ie, \secref{intro}).
+Figures can be referenced with the \verb=\figref= command, which assumes that the figure label is prefixed with \code{fig:}.
+In \figref{example} we show an example figure.
+You'll notice that the actual figure file is found in the \code{figures} directory.
+However, because we have specified this directory in our \verb=\graphicspath= we do not need to explicitly specify the path to the image.
+
+The \code{macros.tex} package also contains some conventional scientific units like \angstrom, \GeV, \Msun, etc. and some editorial tools for highlighting \FIXME{issues}, \CHECK{text to be checked}, \COMMENT{comments}, and \NEW{new additions}.
+
+
+% ----------------------------------------------------------------------
+
+\section{Methods}
+\label{sec:methods}
+
+Similar to the figure before, here we have included a table of data from \code{tables/table.tex}.
+Notice that again we are able to reference \tabref{example} with the \verb=\tabref= command using the \code{tab:} prefix.
+Also notice that we haven't needed to specify the full path to the table because in the \code{Makefile} we include \code{./tables} directory in the \code{\$TEXINPUTS} environment variable.
+
+\input{table}
+
+Equations appear as follows, and can be referred to as, for example, \eqnref{example} -- just as for tables, we use the \verb=\eqnref= command using the \code{eqn:} prefix.
+\begin{equation}
+  \label{eqn:example}
+  \langle f(k) \rangle = \frac{ \sum_{t=0}^{N}f(t,k) }{N}
+\end{equation}
+
+
+% ----------------------------------------------------------------------
+
+\section{Results}
+\label{sec:results}
+
+\figref{example} shows an example figure, referred to with the \verb=\figref= command and the \code{fig:} prefix.
+
+\begin{figure}
+\includegraphics[width=0.9\columnwidth]{example.png}
+\caption{An example figure: the LSST DESC logo, copied from \code{texmf/logos/desc-logo.png} into \code{figures/example.png}. \label{fig:example}}
+\end{figure}
+
+
+% ----------------------------------------------------------------------
+
+\section{Discussion}
+\label{sec:discussion}
+
+If you are planning on committing your paper to GitHub, it's a good idea to write your tex as one sentence per line.
+This allows for an easier \code{diff} of changes.
+It also makes sense to think of latex as \emph{code}, and sentences as logical statements, occupying one line each.
+Each line must ``compile'' in the mind of the reader.
+
+
+% ----------------------------------------------------------------------
+
+\section{Conclusions}
+\label{sec:conclusions}
+
+Here's a summary of what we just reported.
+
+We can draw the following well-organized and neatly-formatted conclusions:
+\begin{itemize}
+  \item This is important.
+  \item We can measure some number with some precision.
+  \item This has some implications.
+\end{itemize}
+
+Here are some parting thoughts.
+
+
+% ----------------------------------------------------------------------
+
+\subsection*{Acknowledgments}
+
+Here is where you should add your specific acknowledgments, remembering that some standard thanks will be added via the \code{acknowledgments.tex} and \code{contributions.tex} files.
+
+\input{acknowledgments}
+
+\input{contributions}
+
+%{\it Facilities:} \facility{LSST}
+
+% Include both collaboration papers and external citations:
+\bibliography{lsstdesc,main}
+
+\end{document}
+% ======================================================================
+% {% endraw %}
