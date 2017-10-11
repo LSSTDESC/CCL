@@ -350,17 +350,16 @@ double user_pz_probability(double z_ph, double z_spec, void * user_par, int * st
 int main(int argc,char **argv)
 {
   //status flag
-  int status = 0;
-
+  int status =0;
   // Initialize cosmological parameters
-  ccl_configuration config = default_config;
-  config.transfer_function_method = ccl_boltzmann_class;
-  ccl_parameters params = ccl_parameters_create(OC, OB, OK, NREL, NMAS, MNU, W0, WA, HH,
-                                                NORMPS, NS,0,NULL,NULL, &status);
+  ccl_configuration config=default_config;
+  config.transfer_function_method=ccl_boltzmann_class;
+  //ccl_parameters params=ccl_parameters_create(OC,OB,OK,ON,W0,WA,HH,NAN,NS,-1,NULL,NULL);
+  ccl_parameters params = ccl_parameters_create(OC, OB, OK, NREL, NMAS, MNU, W0, WA, HH, NORMPS, NS,0,NULL,NULL, &status);
+  //printf("in sample run w0=%1.12f, wa=%1.12f\n", W0, WA);
   
   // Initialize cosmology object given cosmo params
   ccl_cosmology *cosmo=ccl_cosmology_create(params,config);
-
   // Compute radial distances (see include/ccl_background.h for more routines)
   printf("Comoving distance to z = %.3lf is chi = %.3lf Mpc\n",
 	 ZD,ccl_comoving_radial_distance(cosmo,1./(1+ZD), &status));
@@ -368,6 +367,7 @@ int main(int argc,char **argv)
 	 ZD,ccl_luminosity_distance(cosmo,1./(1+ZD), &status));
   printf("Distance modulus to z = %.3lf is mu = %.3lf Mpc\n",
 	 ZD,ccl_distance_modulus(cosmo,1./(1+ZD), &status));
+  
   
   //Consistency check
   printf("Scale factor is a=%.3lf \n",1./(1+ZD));
