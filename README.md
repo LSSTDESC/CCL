@@ -182,16 +182,16 @@ where:
 
 For some specific cosmologies you can also use functions **`ccl_parameters_create_flat_lcdm`**, **`ccl_parameters_create_flat_wcdm`**, **`ccl_parameters_create_flat_wacdm`**, **`ccl_parameters_create_lcdm`**, which automatically set some parameters. For more information, see file ***include/ccl_core.c***.
 
-The status flag `**int** status = 0` is getting pass around in almost every `CCL` function. Normally zero is returned while nonzero if there were some errors during a function call. For specific cases see documentation for **`ccl_error.c`**.
+The status flag `int status = 0` is passed around in almost every `CCL` function. Normally zero is returned while nonzero if there were some errors during a function call. For specific cases see documentation for **`ccl_error.c`**.
 
 ### The `ccl_cosmology` object
 For the majority of `CCL`'s functions you need an object of type **`ccl_cosmology`**, which can be initalize by function **`ccl_cosmology_create`**
 ```c
 ccl_cosmology * ccl_cosmology_create(ccl_parameters params, ccl_configuration config);
 ```
-Note that the function returns a pointer. Variable `params` of type **`ccl_parameters`** contains cosmological parameters created in previous step. Structure **`ccl_configuration`** contains information about methods for computing transfer function, matter power spectrum and mass function (for available methods see ***include/ccl_config.h***). For now, you should use default configuration **`default_config`**
+Note that the function returns a pointer. Variable `params` of type **`ccl_parameters`** contains cosmological parameters created in previous step. Structure **`ccl_configuration`** contains information about methods for computing transfer function, matter power spectrum and mass function (for available methods see ***include/ccl_config.h***). For now, you should use default configuration `default_config`
 ```c
-const ccl_configuration default_config = {ccl_boltzmann_class, ccl_halofit, ccl_tinker};
+const ccl_configuration default_config = {ccl_boltzmann_class, ccl_halofit, ccl_tinker10};
 ```
 After you are done working with this cosmology object, you should free its work space by **`ccl_cosmology_free`**
 ```c
@@ -201,15 +201,15 @@ void ccl_cosmology_free(ccl_cosmology * cosmo);
 ### Distances, Growth factor and Density parameter functions
 With defined cosmology we can now compute distances, growth factor (and rate), sigma_8 or density parameters. For comoving radial distance you can call function **`ccl_comoving_radial_distance`**
 ```c
-double ccl_comoving_radial_distance(ccl_cosmology * cosmo, double a);
+double ccl_comoving_radial_distance(ccl_cosmology * cosmo, double a, int* status);
 ```
 which returns distance to scale factor `a` in units of Mpc. For luminosity distance call function **`ccl_luminosity_distance`**
 ```c
-double ccl_luminosity_distance(ccl_cosmology * cosmo, double a);
+double ccl_luminosity_distance(ccl_cosmology * cosmo, double a, int * status);
 ```
 which also returns distance in units of Mpc. For growth factor (normalized to 1 at `z` = 0) at sale factor `a` call **`ccl_growth_factor`**
 ```c
-double ccl_growth_factor(ccl_cosmology * cosmo, double a);
+double ccl_growth_factor(ccl_cosmology * cosmo, double a, int * status);
 ```
 For evaluating density parameters (e.g. matter, dark energy or radiation) call function **`ccl_omega_x`**
 ```c
@@ -222,15 +222,14 @@ For more routines to compute distances, growth rates and density parameters (e.g
 ###  Matter power spectra and sigma_8
 For given cosmology we can compute linear and non-linear matter power spectra using functions **`ccl_linear_matter_power`** and **`ccl_nonlin_matter_power`**
 ```c
-double ccl_linear_matter_power(ccl_cosmology * cosmo, double k, double a);
-double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double k, double a);
+double ccl_linear_matter_power(ccl_cosmology * cosmo, double k, double a,int * status);
+double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double k, double a,int * status);
 ```
 Sigma_8 can be calculated by function **`ccl_sigma8`**, or more generally by function **`ccl_sigmaR`**, which computes the variance of the density field smoothed by spherical top-hat window function on a comoving distance `R` (in Mpc).
 ```c
-double ccl_sigmaR(ccl_cosmology *cosmo, double R);
-double ccl_sigma8(ccl_cosmology *cosmo);
-
-````
+double ccl_sigmaR(ccl_cosmology *cosmo, double R, int * status);
+double ccl_sigma8(ccl_cosmology *cosmo, int * status);
+```
 These and other functions for different matter power spectra can be found in file ***include/ccl_power.h***.
 
 ### Angular power spectra
@@ -242,19 +241,21 @@ CCL_ClTracer *ccl_cl_tracer_new(ccl_cosmology *cosmo,int tracer_type,
 				int nz_b,double *z_b,double *b,
 				int nz_s,double *z_s,double *s,
 				int nz_ba,double *z_ba,double *ba,
-				int nz_rf,double *z_rf,double *rf);
+				int nz_rf,double *z_rf,double *rf, int * status);
 ````
 Exact definition of these parameters are described in file ***include/ccl_cls.h***. Usually you can use simplified versions of this function, namely **`ccl_cl_tracer_number_counts_new`, `ccl_cl_tracer_number_counts_simple_new`, `ccl_cl_tracer_lensing_new`** or **`ccl_cl_tracer_lensing_simple_new`**. Two most simplified versions (one for number counts and one for shear) take parameters:
 ````c
-CCL_ClTracer *ccl_cl_tracer_number_counts_simple_new(ccl_cosmology *cosmo, int nz_n,double *z_n,
-                                                     double *n, int nz_b,double *z_b,double *b);
-CCL_ClTracer *ccl_cl_tracer_lensing_simple_new(ccl_cosmology *cosmo, int nz_n,double *z_n,double *n);
-
+CCL_ClTracer *ccl_cl_tracer_number_counts_simple_new(ccl_cosmology *cosmo,
+						     int nz_n,double *z_n,double *n,
+                             int nz_b,double *z_b,double *b, int * status);
+CCL_ClTracer *ccl_cl_tracer_lensing_simple_new(ccl_cosmology *cosmo,
+					       int nz_n,double *z_n,double *n, int * status);
 ````
-where `nz_n` is dimension of arrays `z_n` and `n`. `z_n` and `n` are arrays for the number count of objects per redshift interval (arbitrary normalization - renormalized inside). `nz_b`, `z_b` and `b` are the same for the clustering bias.
+where `nz_n` is dimension (number of bins) of arrays `z_n` and `n`. `z_n` and `n` are arrays for the number count of objects per redshift interval (arbitrary normalization - renormalized inside). `nz_b`, `z_b` and `b` are the same for the clustering bias.
+
 With initialized tracers you can compute limber power spectrum with **`ccl_angular_cl`**
 ````c
-double ccl_angular_cl(ccl_cosmology *cosmo,int l,CCL_ClTracer *clt1,CCL_ClTracer *clt2);
+double ccl_angular_cl(ccl_cosmology *cosmo,int l,CCL_ClTracer *clt1,CCL_ClTracer *clt2, int * status);
 ````
 After you are done working with tracers, you should free its work space by **`ccl_cl_tracer_free`**
 ````c
@@ -264,34 +265,33 @@ void ccl_cl_tracer_free(CCL_ClTracer *clt);
 ### Halo mass function
 The halo mass function *dN/dM* can be obtained by function **`ccl_massfunc`**
 ````c
-double ccl_massfunc(ccl_cosmology * cosmo, double halo_mass, double redshift)
+double ccl_massfunc(ccl_cosmology * cosmo, double smooth_mass, double a, double odelta, int * status);
 ````
-where `halo_mass` is mass smoothing scale (in units of *M_sun/h*. For more details (or other functions like **`sigma_M`**) see ***include/ccl_massfunc.h*** and ***src/mass_func.c***.
+where `smooth_mass` is mass smoothing scale (in units of *M_sun*) and `odelta` is choice of Delta. For more details (or other functions like **`sigma_M`**) see ***include/ccl_massfunc.h*** and ***src/mass_func.c***.
 
 ### LSST Specifications
 `CCL` includes LSST specifications for the expected galaxy distributions of the full galaxy clustering sample and the lensing source galaxy sample. Start by defining a flexible photometric redshift model given by function
 ````c
-double (* your_pz_func)(double photo_z, double spec_z, void *param);
+double (* your_pz_func)(double z_ph, double z_spec, void *param, int * status);
 ````
-which returns the probability of measuring a particular photometric redshift, given a spectroscopic redshift and other relevant parameters. Then you call function **`ccl_specs_create_photoz_info`**
+which returns the liklihood of measuring a particular photometric redshift `z_ph` given a spectroscopic redshift `z_spec`, with a pointer to additional arguments `param` and a status flag. Then you call function **`ccl_specs_create_photoz_info`**
 ````c
 user_pz_info* ccl_specs_create_photoz_info(void * user_params, 
-                                           double(*user_pz_func)(double, double,void*));
+                                           double(*user_pz_func)(double, double, void*, int*));
 ````
 which creates a strcture **`user_pz_info`** which holds information needed to compute *dN/dz*
 ````c
 typedef struct {
-	//first double corresponds to photo-z, second to spec-z
-        double (* your_pz_func)(double, double, void *); 
-        void *  your_pz_params;
+  double (* your_pz_func)(double, double, void *, int*);
+  void *  your_pz_params;
 } user_pz_info;
 ````
 The expected *dN/dz* for lensing or clustering galaxies with given binnig can be obtained by function **`ccl_specs_dNdz_tomog`**
 ````c
-int ccl_specs_dNdz_tomog(double z, int dNdz_type, double bin_zmin, double bin_zmax, 
-                         user_pz_info * user_info,  double *tomoout);
+void ccl_specs_dNdz_tomog(double z, int dNdz_type, double bin_zmin, double bin_zmax,
+                          user_pz_info * user_info,  double *tomoout, int *status);
 ````
-Result is returned in `tomoout`. This function returns zero if called with an allowable type of dNdz, non-zero otherwise. Allowed types of dNdz (currently one for clustering and three for lensing - fiducial, optimistic, and conservative - cases are considered) and other information and functions like bias clustering or sigma_z are specified in file ***include/ccl_lsst_specs.h*** 
+Result is returned in `tomoout`. Allowed types of `dNdz_type` (currently one for clustering and three for lensing - fiducial, optimistic, and conservative - cases are considered) and other information and functions like bias clustering or sigma_z are specified in file ***include/ccl_lsst_specs.h*** 
 
 After you are done working with photo_z, you should free its work space by **`ccl_specs_free_photoz_info`**
 ````c
