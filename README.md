@@ -161,24 +161,28 @@ You can initialize this structure through function **`ccl_parameters_create`** w
 ```c
 ccl_parameters ccl_parameters_create(
     double Omega_c, double Omega_b, double Omega_k, double N_nu_rel, double N_nu_mass, double mnu, double w0, double wa,
-    double h, double norm_pk, double n_s,int nz_mgrowth,double *zarr_mgrowth,double *dfarr_mgrowth, int *status);   
-);
+    double h, double norm_pk, double n_s,int nz_mgrowth,double *zarr_mgrowth,double *dfarr_mgrowth, int *status);
 ```
 where:
 * `Omega_c`: cold dark matter
 * `Omega_b`: baryons
-* `Omega_m`: matter
-* `Omega_n`: neutrinos
 * `Omega_k`: curvature
-* little `omega_x` means "Omega_x h^2"
+* `N_nu_rel`: Number of relativisitic species
+* `N_nu_mass`: N_nu_mass
+* `mnu`: deneutrino masssc
 * `w0`: Dark energy eqn of state parameter
 * `wa`: Dark energy eqn of state parameter, time variation
-* `H0`: Hubble's constant in km/s/Mpc.
-* `h`: Hubble's constant divided by (100 km/s/Mpc).
-* `A_s`: amplitude of the primordial PS
-* `n_s`: index of the primordial PS
+* `h`: Hubble constant in units of 100 km/s/Mpc
+* `norm_pk`: the normalization of the power spectrum, either A_s or sigma_8
+* `n_s`: the power-law index of the primordial power spectrum
+* `nz_mgrowth`: the number of redshifts where the modified growth is provided
+* `zarr_mgrowth`: the array of redshifts where the modified growth is provided
+* `dfarr_mgrowth`: the modified growth function vector provided
+* `status`: Status flag. 0 if there are no errors, nonzero otherwise.
 
 For some specific cosmologies you can also use functions **`ccl_parameters_create_flat_lcdm`**, **`ccl_parameters_create_flat_wcdm`**, **`ccl_parameters_create_flat_wacdm`**, **`ccl_parameters_create_lcdm`**, which automatically set some parameters. For more information, see file ***include/ccl_core.c***.
+
+The status flag `**int** status = 0` is getting pass around in almost every `CCL` function. Normally zero is returned while nonzero if there were some errors during a function call. For specific cases see documentation for **`ccl_error.c`**.
 
 ### The `ccl_cosmology` object
 For the majority of `CCL`'s functions you need an object of type **`ccl_cosmology`**, which can be initalize by function **`ccl_cosmology_create`**
