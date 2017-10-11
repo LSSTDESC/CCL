@@ -94,7 +94,8 @@ fatal error: 'gsl/gsl_interp2d.h' file not found.
 ````
 This happens when the build tools fail to find the directory containing the GSL header files, e.g. when they have been installed in a non-standard directory. To work around this problem, use the `--include-dirs` option when running the `setup.py build_ext` step above, i.e. if the GSL header files are in the directory `/path/to/include/`, you would run
 ````sh
-python setup.py build_ext --library-dirs=/path/to/install/lib/ --rpath=/path/to/install/lib/ --include-dirs=/path/to/include/
+python setup.py build_ext --library-dirs=/path/to/install/lib/ \
+--rpath=/path/to/install/lib/ --include-dirs=/path/to/include/
 ````
 and then run one of the `setup.py install` commands listed above. (Note: As an alternative to the `--include-dirs` option, you can use `-I/path/to/include` instead.)
 
@@ -107,7 +108,7 @@ This will run the embedded unit tests (may take a few minutes). Using this last 
 python setup.py uninstall
 ````
 
-For quick introduction to `CCL` in Python look at notebooks in ***tests/***.
+For quick introduction to `CCL` in Python look at notebooks in **_tests/_**.
 
 ## Compiling against an external version of CLASS
 
@@ -160,8 +161,9 @@ Currently, the following families of models are supported:
 You can initialize this structure through function **`ccl_parameters_create`** which returns object of type **`ccl_parameters`**.
 ```c
 ccl_parameters ccl_parameters_create(
-    double Omega_c, double Omega_b, double Omega_k, double N_nu_rel, double N_nu_mass, double mnu, double w0, double wa,
-    double h, double norm_pk, double n_s,int nz_mgrowth,double *zarr_mgrowth,double *dfarr_mgrowth, int *status);
+    double Omega_c, double Omega_b, double Omega_k, double N_nu_rel, double N_nu_mass, double mnu,
+    double w0, double wa, double h, double norm_pk, double n_s, int nz_mgrowth, double *zarr_mgrowth,
+    double *dfarr_mgrowth, int *status);
 ```
 where:
 * `Omega_c`: cold dark matter
@@ -334,13 +336,16 @@ where `/path/to/install/` is the path to the location where the library has been
 #define NMAS 0
 #define MNU 0.0
 
-// The user defines a structure of parameters to the user-defined function for the photo-z probability 
+// The user defines a structure of parameters
+// to the user-defined function for the photo-z probability 
 struct user_func_params
 {
   double (* sigma_z) (double);
 };
 
-// The user defines a function of the form double function ( z_ph, z_spec, void * user_pz_params) where user_pz_params is a pointer to the parameters of the user-defined function. This returns the probability of obtaining a given photo-z given a particular spec_z.
+// The user defines a function of the form double function ( z_ph, z_spec, void * user_pz_params)
+// where user_pz_params is a pointer to the parameters of the user-defined function.
+// This returns the probability of obtaining a given photo-z given a particular spec_z.
 double user_pz_probability(double z_ph, double z_spec, void * user_par, int * status)
 {
   double sigma_z = ((struct user_func_params *) user_par)->sigma_z(z_spec);
@@ -408,7 +413,8 @@ int main(int argc,char **argv)
   }
   
   //Galaxy clustering tracer
-  CCL_ClTracer *ct_gc=ccl_cl_tracer_number_counts_simple_new(cosmo,NZ,z_arr_gc,nz_arr_gc,NZ,z_arr_gc,bz_arr, &status);
+  CCL_ClTracer *ct_gc=ccl_cl_tracer_number_counts_simple_new(cosmo,NZ,z_arr_gc,nz_arr_gc,NZ,
+                                                             z_arr_gc,bz_arr, &status);
   
   //Cosmic shear tracer
   CCL_ClTracer *ct_wl=ccl_cl_tracer_lensing_simple_new(cosmo,NZ,z_arr_sh,nz_arr_sh, &status);
@@ -440,7 +446,8 @@ int main(int argc,char **argv)
   printf("Halo bias: z, M, b1(M,z)\n");
   for(int logM=9;logM<=15;logM+=1) {
     for(double z=0; z<=1; z+=0.5) {
-      printf("%.1e %.1e %.2e\n",1.0/(1.0+z),pow(10,logM),ccl_halo_bias(cosmo,pow(10,logM),1.0/(1.0+z), 200., &status));
+      printf("%.1e %.1e %.2e\n",1.0/(1.0+z),pow(10,logM),
+             ccl_halo_bias(cosmo,pow(10,logM),1.0/(1.0+z), 200., &status));
     }
   }
   printf("\n");
@@ -463,11 +470,13 @@ int main(int argc,char **argv)
   
   //Try splitting dNdz (lensing) into 5 redshift bins
   double tmp1,tmp2,tmp3,tmp4,tmp5;
-  printf("Trying splitting dNdz (lensing) into 5 redshift bins. Output written into file tests/specs_example_tomo_lens.out\n");
+  printf("Trying splitting dNdz (lensing) into 5 redshift bins. "
+         "Output written into file tests/specs_example_tomo_lens.out\n");
   output = fopen("./tests/specs_example_tomo_lens.out", "w"); 
   
   if(!output) {
-    fprintf(stderr, "Could not write to 'tests' subdirectory - please run this program from the main CCL directory\n");
+    fprintf(stderr, "Could not write to 'tests' subdirectory"
+                    " - please run this program from the main CCL directory\n");
     exit(1);
   }
   status = 0;
@@ -485,7 +494,8 @@ int main(int argc,char **argv)
   fclose(output);
   
   //Try splitting dNdz (clustering) into 5 redshift bins
-  printf("Trying splitting dNdz (clustering) into 5 redshift bins. Output written into file tests/specs_example_tomo_clu.out\n");
+  printf("Trying splitting dNdz (clustering) into 5 redshift bins. "
+         "Output written into file tests/specs_example_tomo_clu.out\n");
   output = fopen("./tests/specs_example_tomo_clu.out", "w");     
   for (z=0; z<100; z=z+1) {
     z_test = 0.035*z;

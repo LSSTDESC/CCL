@@ -44,15 +44,16 @@ int main(int argc,char **argv)
 {
   //status flag
   int status =0;
+
   // Initialize cosmological parameters
   ccl_configuration config=default_config;
   config.transfer_function_method=ccl_boltzmann_class;
-  //ccl_parameters params=ccl_parameters_create(OC,OB,OK,ON,W0,WA,HH,NAN,NS,-1,NULL,NULL);
   ccl_parameters params = ccl_parameters_create(OC, OB, OK, NREL, NMAS, MNU, W0, WA, HH, NORMPS, NS,0,NULL,NULL, &status);
   //printf("in sample run w0=%1.12f, wa=%1.12f\n", W0, WA);
   
   // Initialize cosmology object given cosmo params
   ccl_cosmology *cosmo=ccl_cosmology_create(params,config);
+
   // Compute radial distances (see include/ccl_background.h for more routines)
   printf("Comoving distance to z = %.3lf is chi = %.3lf Mpc\n",
 	 ZD,ccl_comoving_radial_distance(cosmo,1./(1+ZD), &status));
@@ -156,11 +157,13 @@ int main(int argc,char **argv)
   
   //Try splitting dNdz (lensing) into 5 redshift bins
   double tmp1,tmp2,tmp3,tmp4,tmp5;
-  printf("Trying splitting dNdz (lensing) into 5 redshift bins. Output written into file tests/specs_example_tomo_lens.out\n");
+  printf("Trying splitting dNdz (lensing) into 5 redshift bins. "
+         "Output written into file tests/specs_example_tomo_lens.out\n");
   output = fopen("./tests/specs_example_tomo_lens.out", "w"); 
   
   if(!output) {
-    fprintf(stderr, "Could not write to 'tests' subdirectory - please run this program from the main CCL directory\n");
+    fprintf(stderr, "Could not write to 'tests' subdirectory"
+                    " - please run this program from the main CCL directory\n");
     exit(1);
   }
   status = 0;
@@ -178,7 +181,8 @@ int main(int argc,char **argv)
   fclose(output);
   
   //Try splitting dNdz (clustering) into 5 redshift bins
-  printf("Trying splitting dNdz (clustering) into 5 redshift bins. Output written into file tests/specs_example_tomo_clu.out\n");
+  printf("Trying splitting dNdz (clustering) into 5 redshift bins. "
+         "Output written into file tests/specs_example_tomo_clu.out\n");
   output = fopen("./tests/specs_example_tomo_clu.out", "w");     
   for (z=0; z<100; z=z+1) {
     z_test = 0.035*z;
