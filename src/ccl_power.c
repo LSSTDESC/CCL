@@ -1057,7 +1057,7 @@ static void ccl_cosmology_compute_power_emu(ccl_cosmology * cosmo, int * status)
       free(z);
       free(y2d_lin);
       *status = CCL_ERROR_CLASS;
-      strcpy(cosmo->status_message ,"ccl_power.c: ccl_cosmology_compute_power_class(): Error computing CLASS power spectrum\n");
+      strcpy(cosmo->status_message ,"ccl_power.c: ccl_cosmology_compute_power_emu(): Error computing CLASS power spectrum\n");
 
       ccl_free_class_structs(cosmo, &ba,&th,&pt,&tr,&pm,&sp,&nl,&le,init_arr,status);
 
@@ -1071,7 +1071,7 @@ static void ccl_cosmology_compute_power_emu(ccl_cosmology * cosmo, int * status)
       free(y2d_lin);
       gsl_spline2d_free(log_power);
       ccl_free_class_structs(cosmo, &ba,&th,&pt,&tr,&pm,&sp,&nl,&le,init_arr,status);
-      strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_class(): Error creating log_power spline\n");
+      strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_emu(): Error creating log_power spline\n");
       return;
     }
     else {
@@ -1115,12 +1115,18 @@ static void ccl_cosmology_compute_power_emu(ccl_cosmology * cosmo, int * status)
     strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_emu(): w0 and wa do not satisfy the emulator bound\n");
     return;
   }
+  /*Ideallly, we would set the following error
   if(cosmo->params.Omega_n_mass*cosmo->params.h*cosmo->params.h>0.01){
     *status=CCL_ERROR_INCONSISTENT;
     strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_emu(): Omega_nu does not satisfy the emulator bound\n");
     return;
-  }
-
+    }*/
+  //But for now, the cosmic emulator implementation with neutrinos hasn't been validated
+  if(cosmo->params.Omega_n_mass*cosmo->params.h*cosmo->params.h>1e-10){
+    *status=CCL_ERROR_INCONSISTENT;
+    strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_emu(): the emulator implementation has not yet been validated for Omega_nu!=0\n");
+    return;
+    }
   
   //For each redshift:
   for (int j = 0; j < na; j++){
