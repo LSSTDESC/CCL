@@ -70,9 +70,9 @@ export LD_LIBRARY_PATH=/path/to/where/ccl/is/installed/lib:$LD_LIBRARY_PATH
 5. We know of one case with Mac OS where `libtools` had the “lock” function set to “yes” and this caused the installation to stall. However, this is very rare. If this happens, after the `configure` step, edit `libtool` to set the “lock” to “no”.
 
 ## Python installation
-The Python wrapper module is called `pyccl`. Before you can build it, you must have compiled and installed the C version of `CCL`, as `pyccl` will be dynamically linked to it. The Python wrapper's build tools currently assume that your C compiler is `gcc`, and that you have a working Python 2.x installation with `numpy` and `distutils` with `swig` (the latter is not necessary for using `CCL`, only for development).
+The Python wrapper is called `pyccl`. Generally, you can build and install the `pyccl` wrapper directly, without having to first compile the C version of `CCL`. The Python wrapper's build tools currently assume that your C compiler is `gcc`, and that you have a working Python 2.x or 3.x installation with `numpy` and `distutils`. You will also need `swig` if you wish to change the `CCL` code itself, rather than just installing it as-is.
 
-The Python wrapper installs the C libraries automatically and requires that GSL2.x and FFTW are already installed. The C libraries will be installed in `/PATH/TO/PREFIX/lib` and `/PATH/TO/PREFIX/include`.
+The Python wrapper installs the C libraries automatically and requires that GSL2.x and FFTW are already installed. Note that the C libraries will be installed in the same prefix as the Python files.
 
 * To build and install the wrapper for the current user only, run
 ````sh
@@ -293,7 +293,7 @@ The expected *dN/dz* for lensing or clustering galaxies with given binnig can be
 void ccl_specs_dNdz_tomog(double z, int dNdz_type, double bin_zmin, double bin_zmax,
                           user_pz_info * user_info,  double *tomoout, int *status);
 ````
-Result is returned in `tomoout`. Allowed types of `dNdz_type` (currently one for clustering and three for lensing - fiducial, optimistic, and conservative - cases are considered) and other information and functions like bias clustering or sigma_z are specified in file ***include/ccl_lsst_specs.h*** 
+Result is returned in `tomoout`. Allowed types of `dNdz_type` (currently one for clustering and three for lensing - fiducial, optimistic, and conservative - cases are considered) and other information and functions like bias clustering or sigma_z are specified in file ***include/ccl_lsst_specs.h***
 
 After you are done working with photo_z, you should free its work space by **`ccl_specs_free_photoz_info`**
 ````c
@@ -335,6 +335,7 @@ where `/path/to/install/` is the path to the location where the library has been
 #define NREL 3.046
 #define NMAS 0
 #define MNU 0.0
+
 
 // The user defines a structure of parameters
 // to the user-defined function for the photo-z probability 
@@ -531,12 +532,9 @@ Below is a simple example Python script that creates a new **Cosmology** object,
 import pyccl as ccl
 import numpy as np
 
-# Create new Parameters object, containing cosmo parameter values
-p = ccl.Parameters(Omega_c=0.27, Omega_b=0.045, h=0.67, A_s=1e-10, n_s=0.96)
-
-# Create new Cosmology object with these parameters. This keeps track of
-# previously-computed cosmological functions
-cosmo = ccl.Cosmology(p)
+# Create new Cosmology object with a given set of parameters. This keeps track 
+# of previously-computed cosmological functions
+cosmo = ccl.Cosmology(Omega_c=0.27, Omega_b=0.045, h=0.67, A_s=1e-10, n_s=0.96)
 
 # Define a simple binned galaxy number density curve as a function of redshift
 z_n = np.linspace(0., 1., 200)
@@ -544,8 +542,8 @@ n = np.ones(z_n.shape)
 
 # Create objects to represent tracers of the weak lensing signal with this
 # number density (with has_intrinsic_alignment=False)
-lens1 = ccl.ClTracerLensing(cosmo, False, z_n, n)
-lens2 = ccl.ClTracerLensing(cosmo, False, z_n, n)
+lens1 = ccl.ClTracerLensing(cosmo, False, n=(z_n, n))
+lens2 = ccl.ClTracerLensing(cosmo, False, n=(z_n, n))
 
 # Calculate the angular cross-spectrum of the two tracers as a function of ell
 ell = np.arange(2, 10)
@@ -556,5 +554,3 @@ print cls
 
 # License, Credits, Feedback etc
 The `CCL` is still under development and should be considered research in progress. You are welcome to re-use the code, which is open source and available under the modified BSD license. If you make use of any of the ideas or software in this package in your own research, please cite them as "(LSST DESC, in preparation)" and provide a link to this repository: https://github.com/LSSTDESC/CCL If you have comments, questions, or feedback, please [write us an issue](https://github.com/LSSTDESC/CCL/issues).
-
-

@@ -12,9 +12,9 @@
  * with a void* field to contain the parameters to that function.
  */
 typedef struct {
-  double (* your_pz_func)(double, double, void *, int*); /*< Function returns the liklihood of measuring a z_ph
-							  * (first double) given a z_spec (second double), with a pointer to additonal arguments and a status flag.*/
-  void *  your_pz_params; /*< Additional parameters to be passed into your_pz_func */
+        double (* your_pz_func)(double, double, void *, int*); /*< Function returns the likelihood of measuring a z_ph
+ * (first double) given a z_spec (second double), with a pointer to additonal arguments and a status flag.*/
+        void *  your_pz_params; /*< Additional parameters to be passed into your_pz_func */
 } user_pz_info;
 
 /**
@@ -50,11 +50,24 @@ void ccl_specs_dNdz_tomog(double z, int dNdz_type, double bin_zmin, double bin_z
  */
 user_pz_info* ccl_specs_create_photoz_info(void * user_params, double(*user_pz_func)(double, double,void*,int*));
 
+/** 
+ * This function creates a structure containing the photo-z model for the built-in Gaussian photo-z pdf.
+ * @param sigma_z0 The photo-z uncertainty at z=0. The photo-z uncertainty is assumed to scale like (1 + z).
+ * @return a structure with the built-in Gaussian P(z) and parameters
+ */
+user_pz_info* ccl_specs_create_gaussian_photoz_info(double sigma_z0);
+
 /** Free memory holding the structure containing user-input photoz information.
  * @param my_photoz_info that holds user-defined P(z) and parameters
  * @return void
  */
 void ccl_specs_free_photoz_info(user_pz_info *my_photoz_info);
+
+/** Free memory holding the structure containing user-input photoz information for the built-in Gaussian photo-z pdf.
+ * @param my_photoz_info that holds user-defined P(z) and parameters
+ * @return void
+ */
+void ccl_specs_free_photoz_info_gaussian(user_pz_info *my_photoz_info);
 
 /** 
  * Return sigma(z), the photo-z dispersion, for the clustering sample
