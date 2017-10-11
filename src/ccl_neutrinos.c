@@ -93,38 +93,45 @@ double nu_phasespace_intg(gsl_interp_accel* accel, double mnuOT, int* status)
 INPUTS: a: scale factor, Neff: number of neutrino species, mnu: total mass in eV of neutrinos, TCMB: CMB temperature, accel: pointer to an accelerator which will evaluate the neutrino phasespace spline if defined, status: pointer to status integer.
 TASK: Compute Omeganu * h^2 as a function of time.
 */
-double Omeganuh2 (double a, double Neff, double mnu, double TCMB, gsl_interp_accel* accel, int* status)
+//double Omeganuh2 (double a, double Neff, double* mnu, double TCMB, gsl_interp_accel* accel, int* status)
+double Omeganuh2 (double a, double Neff, double* mnu, double TCMB, gsl_interp_accel* accel, int* status)
 {
   double Tnu, a4, prefix_massless, mnuone, OmNuh2;
   double Tnu_eff, mnuOT, intval, prefix_massive;
+  double total_mass; // To check if this is the massless or massive case.
+  
   
   // First check if Neff if 0
-  if (Neff==0) return 0.0;
+  if (Neff==0) return 0.0;  
   
   // Now handle the massless case
   Tnu=TCMB*pow(4./11.,1./3.);
   a4=a*a*a*a;  
-  if ( mnu < 1e-12) {
+  // Check if this is the massless case. We assume that in the massless case mnu is a pointer to a single element and that element is 0.
+  if (mnu[0] < 1e-12) {
     prefix_massless = NU_CONST  * Tnu * Tnu * Tnu * Tnu; 
     return Neff*prefix_massless*7./8./a4;
   }
   
-  // And the remaining massive case
-  mnuone=mnu/Neff;  // Get the mass of one species (assuming equal-mass neutrinos).
+  // And the remaining massive case. If we've got this far, then Neff = Nnumass and this will be the number of elements in the array to which mnu points.
+  
+  //mnuone=mnu/Neff;  // Get the mass of one species (assuming equal-mass neutrinos).
   // Tnu_eff is used in the massive case because CLASS uses an effective temperature of nonLCDM components to match to mnu / Omeganu =93.14eV. Tnu_eff = T_ncdm * TCMB = 0.71611 * TCMB
   Tnu_eff = Tnu * TNCDM / (pow(4./11.,1./3.));
-    
-  // Get mass over T (mass (eV) / ((kb eV/s/K) Tnu_eff (K)) 
-  // This returns the density normalized so that we get nuh2 at a=0
-  mnuOT = mnuone / (Tnu_eff/a) * (EV_IN_J / (KBOLTZ)); 
-  
-  // Get the value of the phase-space integral 
-  intval=nu_phasespace_intg(accel,mnuOT, status);
   
   // Define the prefix using the effective temperature (to get mnu / Omega = 93.14 eV) for the massive case: 
   prefix_massive = NU_CONST * Tnu_eff * Tnu_eff * Tnu_eff * Tnu_eff;
   
-  OmNuh2 = Neff*intval*prefix_massive/a4;
+  OmNuh2 = 0.; // Initialize to 0 - we add to this for each massive neutrino species.
+  for(int i=0; i<Neff; i++){
+	// Get mass over T (mass (eV) / ((kb eV/s/K) Tnu_eff (K)) 
+	// This returns the density normalized so that we get nuh2 at a=0
+	mnuOT = mnu[i] / (Tnu_eff/a) * (EV_IN_J / (KBOLTZ)); 
+  
+	// Get the value of the phase-space integral 
+	intval=nu_phasespace_intg(accel,mnuOT, status);
+	OmNuh2 = intval*prefix_massive/a4 + OmNuh2;
+  }
   
   return OmNuh2;
 }

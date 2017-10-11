@@ -15,7 +15,7 @@ CTEST_DATA(cosmology) {
   double w0;
   double N_nu_rel;
   double N_nu_mass;
-  double m_nu;
+  double* m_nu;
   int status;
 };
 
@@ -34,7 +34,8 @@ CTEST_SETUP(cosmology) {
   data->w0 = -1.0;
   data->N_nu_rel = 0.;
   data->N_nu_mass=0.;
-  data->m_nu=0.;
+  double mnuval = 0.;
+  data->m_nu =&mnuval;
   data->status=0;
 }
 

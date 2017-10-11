@@ -14,7 +14,7 @@ CTEST_DATA(sigmam) {
   double sigma_8;
   double N_nu_rel;
   double N_nu_mass;
-  double mnu;
+  double* mnu;
   double Omega_v[5];
   double Omega_k[5];
   double w_0[5];
@@ -30,7 +30,8 @@ CTEST_SETUP(sigmam) {
   data->n_s = 0.96;
   data->N_nu_rel=0;
   data->N_nu_mass=0;
-  data->mnu=0;
+  double mnuval = 0.;
+  data->mnu=&mnuval;
 
   double Omega_v[5]={0.7, 0.7, 0.7, 0.65, 0.75};
   double w_0[5] = {-1.0, -0.9, -0.9, -0.9, -0.9};

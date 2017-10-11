@@ -17,7 +17,7 @@ CTEST_DATA(massfunc) {
   double n_s;
   double N_nu_rel;
   double N_nu_mass;
-  double mnu;
+  double* mnu;
   double Omega_v[1];
   double Omega_k[1];
   double w_0[1];
@@ -60,7 +60,8 @@ CTEST_SETUP(massfunc) {
   data->sigma_8 = 0.8;
   data->N_nu_rel=0;
   data->N_nu_mass=0;
-  data->mnu=0;
+  double mnuval = 0.;
+  data->mnu=&mnuval;
 
   double Omega_v[1] = { 0.7 };
   double w_0[1]     = {-1.0 };

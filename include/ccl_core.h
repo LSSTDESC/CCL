@@ -38,7 +38,7 @@ typedef struct ccl_parameters {
   // At the moment, only support equal-mass massive neutrinos (cannot have two different masses)
   double N_nu_mass; // Number of different species of massive neutrinos
   double N_nu_rel;  // Neff massless
-  double mnu;  // total mass of massive neutrinos
+  double *mnu;  // total mass of massive neutrinos (This is a pointer so that it can hold multiple unequal masses.)
   double Omega_n_mass; // Omega_nu for MASSIVE neutrinos 
   double Omega_n_rel; // Omega_nu for MASSLESS neutrinos
  
@@ -139,7 +139,7 @@ ccl_cosmology * ccl_cosmology_create(ccl_parameters params, ccl_configuration co
 
 // Helper functions to create ccl_cosmology structs directly given a set of params
 ccl_cosmology * ccl_cosmology_create_with_params(
-        double Omega_c, double Omega_b, double Omega_k, double N_nu_rel, double N_nu_mass, double mnu, 
+        double Omega_c, double Omega_b, double Omega_k, double N_nu_rel, double N_nu_mass, double* mnu, 
         double w0, double wa, double h, double norm_pk, double n_s,
         int nz_mgrowth, double *zarr_mgrowth, double *dfarr_mgrowth, 
         ccl_configuration config, int *status);
@@ -170,7 +170,7 @@ ccl_cosmology * ccl_cosmology_create_with_lcdm_params(
  * For specific cases see documentation for ccl_error.c
  * @return void
  */
-ccl_parameters ccl_parameters_create(double Omega_c, double Omega_b, double Omega_k, double N_nu_rel, double N_nu_mass, double mnu, double w0, double wa, double h, double norm_pk, double n_s,int nz_mgrowth,double *zarr_mgrowth,double *dfarr_mgrowth, int *status);
+ccl_parameters ccl_parameters_create(double Omega_c, double Omega_b, double Omega_k, double N_nu_rel, double N_nu_mass, double* mnu, double w0, double wa, double h, double norm_pk, double n_s,int nz_mgrowth,double *zarr_mgrowth,double *dfarr_mgrowth, int *status);
 
 // Specific sub-models
 /**
@@ -231,10 +231,10 @@ ccl_parameters ccl_parameters_create_flat_wacdm(double Omega_c, double Omega_b, 
  */
 ccl_parameters ccl_parameters_create_lcdm(double Omega_c, double Omega_b, double Omega_k, double h, double norm_pk, double n_s, int *status);
 
-ccl_parameters ccl_parameters_create_flat_lcdm_nu(double Omega_c, double Omega_b, double h, double norm_pk, double n_s, double N_nu_rel, double N_nu_mass, double mnu, int *status);
-ccl_parameters ccl_parameters_create_flat_wcdm_nu(double Omega_c, double Omega_b, double w0, double h, double norm_pk, double n_s, double N_nu_rel, double N_nu_mass, double mnu, int *status);
-ccl_parameters ccl_parameters_create_flat_wacdm_nu(double Omega_c, double Omega_b, double w0,double wa, double h, double norm_pk, double n_s, double N_nu_rel, double N_nu_mass, double mnu, int *status);
-ccl_parameters ccl_parameters_create_lcdm_nu(double Omega_c, double Omega_b, double Omega_k, double h, double norm_pk, double n_s, double N_nu_rel, double N_nu_mass, double mnu, int *status);
+ccl_parameters ccl_parameters_create_flat_lcdm_nu(double Omega_c, double Omega_b, double h, double norm_pk, double n_s, double N_nu_rel, double N_nu_mass, double* mnu, int *status);
+ccl_parameters ccl_parameters_create_flat_wcdm_nu(double Omega_c, double Omega_b, double w0, double h, double norm_pk, double n_s, double N_nu_rel, double N_nu_mass, double* mnu, int *status);
+ccl_parameters ccl_parameters_create_flat_wacdm_nu(double Omega_c, double Omega_b, double w0,double wa, double h, double norm_pk, double n_s, double N_nu_rel, double N_nu_mass, double* mnu, int *status);
+ccl_parameters ccl_parameters_create_lcdm_nu(double Omega_c, double Omega_b, double Omega_k, double h, double norm_pk, double n_s, double N_nu_rel, double N_nu_mass, double* mnu, int *status);
 
 /**
  * Free a cosmology struct

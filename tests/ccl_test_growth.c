@@ -14,7 +14,7 @@ CTEST_DATA(growth) {
   double n_s;
   double N_nu_rel;
   double N_nu_mass;
-  double mnu;
+  double* mnu;
   double Omega_v[5];
   double Omega_k[5];
   double w_0[5];
@@ -58,7 +58,8 @@ CTEST_SETUP(growth) {
   data->n_s = 0.96;
   data->N_nu_rel=0;
   data->N_nu_mass=0;
-  data->mnu=0;
+  double mnuval = 0.;
+  data->mnu= &mnuval;
   
   
   // Values that are different for the different models

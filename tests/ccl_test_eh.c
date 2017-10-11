@@ -18,7 +18,7 @@ CTEST_DATA(eh) {
   double w_a[1];
   double N_nu_rel;
   double N_nu_mass;
-  double m_nu;
+  double* m_nu;
 };
 
 CTEST_SETUP(eh) {
@@ -30,7 +30,8 @@ CTEST_SETUP(eh) {
   data->n_s = 0.96;
   data->N_nu_rel = 0.;
   data->N_nu_mass=0.;
-  data->m_nu=0.;
+  double mnuval = 0.;
+  data->m_nu= &mnuval;
 
   double Omega_v[1]={0.7};
   double w_0[1] = {-1.0};

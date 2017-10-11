@@ -327,11 +327,17 @@ static void ccl_fill_class_parameters(ccl_cosmology * cosmo, struct file_content
     strcpy(fc->name[15],"N_ncdm");
     sprintf(fc->value[15],"%e",cosmo->params.N_nu_mass);
     strcpy(fc->name[16],"m_ncdm");
-    sprintf(fc->value[16],"%e",cosmo->params.mnu/cosmo->params.N_nu_mass);
+    //sprintf(fc->value[16],"%e",cosmo->params.mnu/cosmo->params.N_nu_mass);
     //assume equal mass neutrino species for now!
-    for (int i = 1; i < cosmo->params.N_nu_mass; i++) {
+    //for (int i = 1; i < cosmo->params.N_nu_mass; i++) {
+    //  char tmp[20];
+    //  sprintf(tmp,", %e",cosmo->params.mnu/cosmo->params.N_nu_mass);
+    //  strcat(fc->value[16],tmp);
+    //}
+    //sprintf(fc->value[16],"%e",cosmo->params.mnu/cosmo->params.N_nu_mass);
+    for (int i = 0; i < cosmo->params.N_nu_mass; i++) {
       char tmp[20];
-      sprintf(tmp,", %e",cosmo->params.mnu/cosmo->params.N_nu_mass);
+      sprintf(tmp,", %e",(cosmo->params.mnu)[i]);
       strcat(fc->value[16],tmp);
     }
   }
