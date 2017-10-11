@@ -60,20 +60,23 @@ In preparation for constraining cosmology with the Large Synoptic Survey Telesco
 \section{Cosmological models and observables}
 \vol{Renee}
 
-\todo{Range of validity of the predictions.}
+The overarching goal of \ccl is to allow seamless integration of different cosmological models of interest to LSST, given some priors on the range of validity of the specific models. 
 
-Ultimately, \ccl plans to incorporate theoretical predictions for all cosmological models of interest to LSST. Currently, the following families of models are supported:
+Currently, the following families of models are supported:
 \begin{itemize}
- \item Flat $\Lambda$CDM 
- \item wCDM and the CPL model ($w_0+w_a$, \citealt{Chevallier01} and \citealt{Linder03})
- \item Non-zero curvature ($K$)
+ \item Flat $\Lambda$CDM cosmology with parameters $\Omega_b, n_s, A_s, \Omega_m, \Omega_\Lambda, \tau$ and a cosmological constant dark energy model with equation-of-state $w=-1.$ 
+ \item wCDM and the Chevallier-Polarski-Linder (CPL) model for dark energy and it's redshift dependence ($w(a) = w_0+w_a(1-a)$, \citealt{Chevallier01} and \citealt{Linder03})
+ \item A universe with non-zero curvature ($K$) so that the curvature energy density is the difference of sum of the energy densities of the other components with respect to unity (flatness), i.e. $\Omega_k = 1- \sum_i \Omega_i$
  \item All of the above, plus an arbitrary, user-defined modified growth function (see description in Section \ref{sec:growth})
-  \item A single massive neutrino species or multiple equal-mass massive neutrinos, in combination with any of the above (except the user-defined modified growth function).
+  \item A single massive neutrino species or multiple equal-mass massive neutrinos, in combination with any of the above (except the user-defined modified growth function), specified by the neutrino mass $\Sigma m_\nu$.
 \end{itemize}
+
+\todo{Range of validity of the predictions.}
 
 Not all features of \ccl are available for all models. For a guide to which predictions are available for each model, see Table \ref{tab:cosmo}. Note that if users install their own version of {\tt CLASS}, {\tt CCL} can then make predictions for a more extended set of cosmologies. Users should take care to understand the validity of the {\tt CCL} assumptions for their own models. 
 
 \input{table_cosmo}
+
 \todo{Add discussion of external versions of CLASS and Modified Gravity.}
 
 %-------------------------------------------------------------------------------
@@ -81,18 +84,18 @@ Not all features of \ccl are available for all models. For a guide to which pred
 \vol{Renee}
 
 \cont{Background cosmology parameter definition. Expansion and distance functions. Growth function and growth rate.}
-
-The Hubble parameter is calculated as
+The models that are specified above map directly onto cosmological observables like the expansion rate of the universe, which is paramterised through the Hubble parameter as:
 \begin{align}\label{eq:Ha}
 \frac{H(a)}{H_0} &= a^{-3/2}\Big(\Omega_{M,0}+\Omega_{\Lambda,0} a^{-3(w_0+w_a)}
     \exp[3 w_a (a-1)]+\Omega_{K,0} a \nonumber \\ &+(\Omega_{g,0} + \Omega_{\nu, {\rm rel}}) a^{-1} + \Omega_{\nu, {\rm m}}(a)a^3\Big)^{\frac{1}{2}}.
 \end{align}
 
-The radial comoving distance is calculated via a numerical integral,
+In order to compute distances, we use the radial comoving distance, which is calculated via a numerical integral as
 \begin{equation}
  \chi(a)= c \int_a^1 \frac{da'}{a'^2 H(a')}.
 \end{equation}
-The transverse comoving distance is computed in terms of the radial comoving distance as:
+
+The transverse comoving distance is then computed in terms of the radial comoving distance as:
 \begin{equation}\label{eq:angdist}
  r(\chi)=\left\{\begin{array}{cc}
                  k^{-1/2}\sin(k^{1/2}\chi) & k>0\\
@@ -100,6 +103,13 @@ The transverse comoving distance is computed in terms of the radial comoving dis
                  |k|^{-1/2}\sinh(|k|^{1/2}\chi) & k<0\\
                 \end{array}\right.
 \end{equation}
+
+This function can be written directly in terms of the energy density in cosmic curvature, $\Omega_k$, as:
+\begin{equation}\label{eq:angdist_omegak}
+ r(\chi)=                 \Omega_k^{-1/2}\sinh(\sqrt{\Omega_k}\chi)         
+\end{equation}
+
+
 The usual angular diameter distance is $d_A=a\,r(a)$, and the luminosity distance is
 $d_L=r(a)/a$.
 
