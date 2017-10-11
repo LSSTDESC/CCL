@@ -106,14 +106,16 @@ The transverse comoving distance is then computed in terms of the radial comovin
 
 This function can be written directly in terms of the energy density in cosmic curvature, $\Omega_k$, as:
 \begin{equation}\label{eq:angdist_omegak}
- r(\chi)=                 \Omega_k^{-1/2}\sinh(\sqrt{\Omega_k}\chi)         
+ r(\chi)=                 \frac{c}{H_0}\sqrt{\Omega_k}\sinh(\sqrt{\Omega_k}\chi),
 \end{equation}
+
+which is valid for all forms of the curvature energy density.
 
 
 The usual angular diameter distance is $d_A=a\,r(a)$, and the luminosity distance is
-$d_L=r(a)/a$.
+$d_L=r(a)/a,$ leading to the familiar relation $d_A = a^2d_L$ which is valid in general for all metric theories of gravity.
 
-\ccl can also compute the distance modulus, defined as,
+The \ccl suite also have the functionality to compute the distance modulus, defined as,
 \begin{equation}\label{eq:distmod}
     \mu = 5 \log_{10}(d_L / {\rm pc})-5
 \end{equation}
@@ -747,9 +749,13 @@ We note that while we maintain the $10^{-4}$ for our evaluations of $\sigma$, th
 
 \section{Usage}
 \vol{Renee}
+The \ccl is released as part of the code from the Dark Energy Science Collaboration of LSST, and as such can be downloaded from \hyperref{https://github.com/LSSTDESC/CCL}.
 
-\cont{Some general guidelines here of where to find the library and availability of examples/docs. One paragraph is sufficient.}
+The documentation of the code is provided \hyperref{https://github.com/LSSTDESC/CCL/blob/master/doc/html/index.html}{through Doxygen} \textbf{RH: how do we get this to display not in github format but to render?}.
+\ccl needs the Gnu Scientific Library to install, more detailed instructions are given \hyperref{https://github.com/LSSTDESC/CCL/blob/master/README.md}{in the README file}. It is also included as a Docker image for ease of use and installation. 
 
+There are a suite of test files located in the \verbatim{tests} directory within the main \ccl code, these tests run, for example, a user-defined form for the photometric redshift of a source and how it integrates and tests with the various codes and libraries within \ccl.
+  
 %-------------------------------------------------------------------------------
 \section{Outlook}
 \vol{David Alonso, ?}
