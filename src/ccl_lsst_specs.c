@@ -123,6 +123,39 @@ user_pz_info* ccl_specs_create_photoz_info(void * user_params,
 }
 
 
+// Gaussian photo-z function
+double gaussian_pz(double z_ph, double z_s, void* params, int *status){
+    double sigma_z0 = *((double*) params);
+    //printf("gaussian_pz = %3.3e\n", sigma_z0);
+    double sigma_z = sigma_z0 * (1. + z_s);
+    return exp(- (z_ph - z_s)*(z_ph - z_s) / (2.*sigma_z*sigma_z)) \
+         / (sqrt(2.*M_PI) *sigma_z);
+}
+
+/*------ ROUTINE: ccl_specs_create_gaussian_photoz_info ------
+INPUT: void * user_pz_params, (double *) user_pz_func (double, double, void *)
+TASK: Convenience function for creating a Gaussian photo-z model with error
+sigma(z) = sigma_z0 (1 + z). */
+
+user_pz_info* ccl_specs_create_gaussian_photoz_info(double sigma_z0){
+    
+    // Allocate memory so that this value persists
+    double* sigma_z0_copy = malloc(sizeof(double));
+    *sigma_z0_copy = sigma_z0;
+    
+    // Construct user_pz_info struct
+    user_pz_info * this_user_info = malloc(sizeof(user_pz_info));
+    this_user_info->your_pz_params = sigma_z0_copy;
+    this_user_info->your_pz_func = &gaussian_pz;
+    return this_user_info;
+}
+
+void ccl_specs_free_photoz_info_gaussian(user_pz_info *my_photoz_info){
+    double* ptr = (double*)(my_photoz_info->your_pz_params);
+    free(ptr);
+    free(my_photoz_info);
+}
+
 /* ------ ROUTINE: ccl_specs_free_photoz_info -------
 INPUT: user_pz_info my_photoz_info
 TASK: free memory holding the structure containing user-input photoz information */
