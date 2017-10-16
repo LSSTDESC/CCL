@@ -19,6 +19,7 @@
 \newcommand{\vol}[1]{\textcolor{red}{Volunteer(s) in charge: #1}}
 \newcommand{\cont}[1]{\textcolor{blue}{Suggested content: #1}}
 \newcommand{\mrm}[1]{\mathrm{#1}}
+\newcommand{\sukhdeep}[1]{\textcolor{magenta}{SS:#1}}
 
 \newcommand{\ccl}{{\tt CCL}\xspace}
 
@@ -60,11 +61,11 @@ In preparation for constraining cosmology with the Large Synoptic Survey Telesco
 \section{Cosmological models and observables}
 \vol{Renee}
 
-The overarching goal of \ccl is to allow seamless integration of different cosmological models of interest to LSST, given some priors on the range of validity of the specific models. 
+The overarching goal of \ccl is to allow seamless integration of different cosmological models of interest to LSST, given some priors on the range of validity of the specific models.
 
 Currently, the following families of models are supported:
 \begin{itemize}
- \item Flat $\Lambda$CDM cosmology with parameters $\Omega_b, n_s, A_s, \Omega_m, \Omega_\Lambda, \tau$ and a cosmological constant dark energy model with equation-of-state $w=-1.$ 
+ \item Flat $\Lambda$CDM cosmology with parameters $\Omega_b, n_s, A_s, \Omega_m, \Omega_\Lambda, \tau$ and a cosmological constant dark energy model with equation-of-state $w=-1.$
  \item wCDM and the Chevallier-Polarski-Linder (CPL) model for dark energy and it's redshift dependence ($w(a) = w_0+w_a(1-a)$, \citealt{Chevallier01} and \citealt{Linder03})
  \item A universe with non-zero curvature ($K$) so that the curvature energy density is the difference of sum of the energy densities of the other components with respect to unity (flatness), i.e. $\Omega_k = 1- \sum_i \Omega_i$
  \item All of the above, plus an arbitrary, user-defined modified growth function (see description in Section \ref{sec:growth})
@@ -73,7 +74,7 @@ Currently, the following families of models are supported:
 
 \todo{Range of validity of the predictions.}
 
-Not all features of \ccl are available for all models. For a guide to which predictions are available for each model, see Table \ref{tab:cosmo}. Note that if users install their own version of {\tt CLASS}, {\tt CCL} can then make predictions for a more extended set of cosmologies. Users should take care to understand the validity of the {\tt CCL} assumptions for their own models. 
+Not all features of \ccl are available for all models. For a guide to which predictions are available for each model, see Table \ref{tab:cosmo}. Note that if users install their own version of {\tt CLASS}, {\tt CCL} can then make predictions for a more extended set of cosmologies. Users should take care to understand the validity of the {\tt CCL} assumptions for their own models.
 
 \input{table_cosmo}
 
@@ -171,7 +172,7 @@ where $\tilde\delta({\bf k})$ is the Fourier component of the overdensity field 
 
 \ccl implements several different methods for making predictions for the matter power spectrum. Two of those methods, the BBKS \citep{BBKS} and \citet{1998ApJ...496..605E} approximations are only accurate to within a few percent and are implemented for validation purposes only. These approximations provide analytical expressions for the trasnfer function, $T(k)$, which is related to the matter power spectrum by $\Delta(k)\propto T^2(k)k^{3+n}$ and $\Delta^2(k)\propto k^3P(k)$. The normalization of the power spectrum is defined at $z=0$ by setting $\sigma_8$ to its value today.
 
-The default \ccl implementation uses the {\tt CLASS} algorithm \citet{class} to obtain predictions for $P(k,z)$. In addition, \ccl can also generate $P(k,z)$ predictions by emulation of cosmological numerical simuations, in particular, using the ``Cosmic Emulator'' developed by \citet{Lawrence17}. {\bf Note this branch hasn't been merged yet and it doesn't have validated implementation for cosmologies with neutrinos}. 
+The default \ccl implementation uses the {\tt CLASS} algorithm \citet{class} to obtain predictions for $P(k,z)$. In addition, \ccl can also generate $P(k,z)$ predictions by emulation of cosmological numerical simuations, in particular, using the ``Cosmic Emulator'' developed by \citet{Lawrence17}. {\bf Note this branch hasn't been merged yet and it doesn't have validated implementation for cosmologies with neutrinos}.
 
 None of the previous methods account for the impact of baryonic physics on the distribution of matter, which is known to exceed percent level at scales $k \gtrsim 1/$Mpc \citep{vanDaalen11,Illustris,Hellwing16,Springel17} and can affect the extraction of cosmological parameters \citep{Semboloni11,Semboloni13,Mohammed14,Eifler15,Mohammed17}. To account for this effect, we incorporate in \ccl an effective parametrisation \citep{Schneider15} of the redistribution of matter as a consequence of feedback from Active Galactic Nuclei and adiabatic cooling. This parametrisation reproduces results from the OWLS simulations at $z=0$.{\bf Note this branch hasn't been merged yet.} We give an overview of each method in what follows.
 
@@ -209,7 +210,7 @@ Three effective parameters govern the contribution of baryonic processes to modi
    \item and $k_s$ [$h/$Mpc]: the wavenumber that determines the scale of the stellar profile.
  \end{itemize}
  If these parameters are not specified by the user, \ccl assumes the default parameters of \citet{Schneider15}, which are in agreement with results from OWLS \citep{vanDaalen11}.
- 
+
 %-------------------------------------------------------------------------------
 \subsection{Clustering and lensing power spectra}
 \vol{David Alonso, Tom McClintock}
@@ -268,7 +269,7 @@ where $\mathcal{P}_\Phi(k)$ is the dimensionless power spectrum of the primordia
 
 \subsubsection{Correlation functions}
 \vol{Elisa Chisari, Sukhdeep Singh?}
-
+\sukhdeep{Is this section necessary?}
 The following expressions relating the angular power spectra and correlation functions are valid in the flat-sky approximation\footnote{See the weak lensing review by \citet{Bartelmann01}, page 44 and \citet{Joachimi10}.}. In all cases, $f_K(\chi)$ is comoving angular diameter distance, which differs from the radial comoving distance $\chi$ only in the case of cosmologies with non-zero curvature.
 
 {\bf Galaxy-galaxy.} The angular correlation function between two number-count tracers (labeled $a$ and $b$ here) is given by
@@ -356,7 +357,7 @@ For massive neutrinos, $\Omega_{\nu, {\rm m}}(a)$ is calculated by calling a set
 T_{\nu}^{\rm eff} = T_{\rm CMB} T_{\rm NCDM}.
 \label{Tnueff}
 \end{equation}
-Here, $T_{\rm NCDM}$ is used to explicitly set the value of $m_{\nu} / \Omega_{\nu}^0$. Note that despite its name, $T_{\rm NCDM}$ is a dimensionless temperature rescaling rather than an actual temperature, following the nomenclature used by {\tt CLASS}. We choose a default value of $T_{\rm NCDM} = 0.71611$, which corresponds to $m_{\nu} / \Omega_{\nu}^0 = 93.14$ eV, to agree with the default value set by {\tt CLASS}. We define 
+Here, $T_{\rm NCDM}$ is used to explicitly set the value of $m_{\nu} / \Omega_{\nu}^0$. Note that despite its name, $T_{\rm NCDM}$ is a dimensionless temperature rescaling rather than an actual temperature, following the nomenclature used by {\tt CLASS}. We choose a default value of $T_{\rm NCDM} = 0.71611$, which corresponds to $m_{\nu} / \Omega_{\nu}^0 = 93.14$ eV, to agree with the default value set by {\tt CLASS}. We define
 \begin{equation}
 \mu = \frac{m_{\nu}^{\rm tot}a}{N_{\rm m}^\nu T_{\nu}^{\rm eff}}
 \label{mnuOT}
@@ -392,7 +393,7 @@ For the matter power spectrum, the spline is performed in two variables: the log
 
 The computation of the power spectrum from {\tt CLASS} can be significantly sped up by extrapolating in the range $k>$~{\tt K$\_$MAX$\_$SPLINE} and $k<$~{\tt K$\_$MIN}. In this section, we describe the implementation of the extrapolation and the accuracy attained. These tests are performed in a flat $\Lambda$CDM cosmology with $\Omega_c=0.25$, $\Omega_b=0.05$, $A_s=2.1\times10^{-9}$, $h=0.7$ and $n_s=0.96$.
 
-We first describe the extrapolation at high wavenumbers. The introduction of the parameter {\tt K$\_$MAX$\_$SPLINE} allows us to spline the matter power spectrum within the {\tt cosmo} structure up to that value of $k$ (in units of $1/$Mpc). A separate {\tt K$\_$MAX} parameter sets the limit for evaluation of the matter power spectrum. The range between {\tt K$\_$MAX$\_$SPLINE}$<k<${\tt K$\_$MAX} is evaluated by performing a second order Taylor expansion in $\ln k$ within the static routine {\tt ccl$\_$power$\_$extrapol$\_$highk}. 
+We first describe the extrapolation at high wavenumbers. The introduction of the parameter {\tt K$\_$MAX$\_$SPLINE} allows us to spline the matter power spectrum within the {\tt cosmo} structure up to that value of $k$ (in units of $1/$Mpc). A separate {\tt K$\_$MAX} parameter sets the limit for evaluation of the matter power spectrum. The range between {\tt K$\_$MAX$\_$SPLINE}$<k<${\tt K$\_$MAX} is evaluated by performing a second order Taylor expansion in $\ln k$ within the static routine {\tt ccl$\_$power$\_$extrapol$\_$highk}.
 
 First, we compute the first and second derivative of the $\ln P(k,z)$ at $k_0={\rm \tt K\_MAX}-2\Delta\ln k$ by computing the numerical derivatives by finite differences using GSL. The fiducial choice for $\Delta\ln k$ is $10^{-2}$. We then apply a second order Taylor expansion to extrapolate the matter power spectrum to $k>${\tt K$\_$MAX$\_$SPLINE}. The Taylor expansion gives
 %
@@ -402,7 +403,7 @@ First, we compute the first and second derivative of the $\ln P(k,z)$ at $k_0={\
   \label{eq:NLPSTaylor}
 \end{eqnarray}
 
-The accuracy of this approximation is shown in Figure \ref{fig:NLextrapol} for redshifts $z=0$ and $z=3$. We compare the nonlinear matter power spectrum at $z=0$ computed with the previously described approximation, to the matter power spectrum obtained by directly evaluating {\tt CLASS} at the desired $k$ value. In figure \ref{fig:NLextrapol}, we vary $\Delta \ln k$ and {\tt K$\_$MAX$\_$SPLINE} at a time to determine the impact of the choice of parameters. We find that for typical values of $\Delta \ln k=10^{-2}$ and {\tt K$\_$MAX$\_$SPLINE}$=50$/Mpc, $\ln P$ has converged to an accuracy that surpasses the expected impact of baryonic effects on the matter power spectrum at $k>10/$Mpc.  (For an estimate of the impact of baryons on the total matter power spectrum, see \citealt{Schneider15}.) The lower {\tt K$\_$MAX$\_$SPLINE} is, the faster \ccl will run. The optimum choice of {\tt K$\_$MAX$\_$SPLINE} is left to the user for their particular application. 
+The accuracy of this approximation is shown in Figure \ref{fig:NLextrapol} for redshifts $z=0$ and $z=3$. We compare the nonlinear matter power spectrum at $z=0$ computed with the previously described approximation, to the matter power spectrum obtained by directly evaluating {\tt CLASS} at the desired $k$ value. In figure \ref{fig:NLextrapol}, we vary $\Delta \ln k$ and {\tt K$\_$MAX$\_$SPLINE} at a time to determine the impact of the choice of parameters. We find that for typical values of $\Delta \ln k=10^{-2}$ and {\tt K$\_$MAX$\_$SPLINE}$=50$/Mpc, $\ln P$ has converged to an accuracy that surpasses the expected impact of baryonic effects on the matter power spectrum at $k>10/$Mpc.  (For an estimate of the impact of baryons on the total matter power spectrum, see \citealt{Schneider15}.) The lower {\tt K$\_$MAX$\_$SPLINE} is, the faster \ccl will run. The optimum choice of {\tt K$\_$MAX$\_$SPLINE} is left to the user for their particular application.
 
 We also extrapolate the power spectrum at small wavenumbers within the static routine {\tt ccl\_power\_extrapol\_lowk}. In this case, the power spectrum below {\tt K$\_$MIN} is obtained by a power-law extrapolation with index $n_s$:
 \begin{equation}
@@ -446,11 +447,11 @@ We have found that changing {\tt N$\_$A} to $200$, or changing {\tt N$\_$K} to $
 %\item {\tt LOGM$\_$SPLINE$\_$NM}: number of points in the mass function spline (logarithm). The default is {\tt LOGM$\_$SPLINE$\_$NA}$=440$.
 %\item {\tt LOGM$\_$SPLINE$\_$MIN}: minimum value for the mass function spline (logarithm). The default is {\tt LOGM$\_$SPLINE$\_$MIN}$=6$.
 %\item {\tt LOGM$\_$SPLINE$\_$MAX}: maximum value for the mass function spline (logarithm). The default is {\tt LOGM$\_$SPLINE$\_$MAX}$=17$.
-%\item {\tt N$\_$A}: number of bins for the scale factor in the case of two-dimensional splines (where the second variable is the wavenumber). The default is {\tt N$\_$A}$=50$. 
-%\item {\tt K$\_$MAX$\_$SPLINE}: The maximum value of wavenumber considered in the spline. This is explained in more detail in the coming subsections. The default is {\tt K$\_$MAX$\_$SPLINE}$=50/$Mpc.  
-%\item {\tt K$\_$MAX}: The maximum value of wavenumber when integrating over $k$. The default is {\tt K$\_$MAX}$=1000$/Mpc.  
-%\item {\tt K$\_$MIN$\_$DEFAULT}:  The minimum value of wavenumber when integrating over $k$. The default is {\tt K$\_$MIN$\_$DEFAULT}$=5 \times 10^{-5}$/Mpc. 
-%\item {\tt N$\_$K}: Number of bins for the wavenumber. The default is {\tt N$\_$K}$=1000$.  
+%\item {\tt N$\_$A}: number of bins for the scale factor in the case of two-dimensional splines (where the second variable is the wavenumber). The default is {\tt N$\_$A}$=50$.
+%\item {\tt K$\_$MAX$\_$SPLINE}: The maximum value of wavenumber considered in the spline. This is explained in more detail in the coming subsections. The default is {\tt K$\_$MAX$\_$SPLINE}$=50/$Mpc.
+%\item {\tt K$\_$MAX}: The maximum value of wavenumber when integrating over $k$. The default is {\tt K$\_$MAX}$=1000$/Mpc.
+%\item {\tt K$\_$MIN$\_$DEFAULT}:  The minimum value of wavenumber when integrating over $k$. The default is {\tt K$\_$MIN$\_$DEFAULT}$=5 \times 10^{-5}$/Mpc.
+%\item {\tt N$\_$K}: Number of bins for the wavenumber. The default is {\tt N$\_$K}$=1000$.
 %\end{itemize}
 %Note that a copy of {\tt ccl$\_$params.ini} is installed along with the library, so changing the version of this file inside the source directory will not have any effect unless you reinstall.
 
@@ -499,28 +500,28 @@ The angular power spectrum for two shells, $C_{\ell}(z_1, z_2)$, is computed acc
 \begin{equation}
 \begin{split}
 C_{\ell}&(z_1, z_2;\sigma_1, \sigma_2)\\& = \iint_0^\infty \mathrm{d} z \mathrm{d} z^\prime \ W_1(z; z_1, \sigma_1) W_2(z^\prime; z_2, \sigma_2)\\
-&\phantom{\iint_0^\infty \mathrm{d} z \mathrm{d} z^\prime} \times \int_0^\infty \mathrm{d} k\ f_{\ell}(z, k) f_{\ell}(z^\prime, k). 
+&\phantom{\iint_0^\infty \mathrm{d} z \mathrm{d} z^\prime} \times \int_0^\infty \mathrm{d} k\ f_{\ell}(z, k) f_{\ell}(z^\prime, k).
 \end{split}
 \label{eq-clz1z2-obs}
 \end{equation}
 %
 where we have introduced two normalized redshift selection functions $W_1(z;z_1,\sigma_1)$ and $W_2(z^\prime;z_2,\sigma_2)$  around $z_1$ and $z_2$ with typical width $\sigma_1$ and $\sigma_2$, respectively.
 
-The auxiliary function $f_\ell(z,k)$ can be defined without loss of generality as 
+The auxiliary function $f_\ell(z,k)$ can be defined without loss of generality as
 \begin{equation}
 f_\ell(z,k) \equiv  \sqrt{\frac{2}{\pi}}\  k \sqrt{P(k,z)}\ \widetilde{\Delta}_\ell(z,k)\label{eq-fell-func}
 \end{equation}
-with 
+with
 \begin{itemize}
 \item  $P(k,z)$ : the power spectrum at redshift $z$ which is defined either using the primordial power spectrum $P_{in}(k)$ and the transfer function $T(k,z)$ as
 \begin{equation}
 P(k,z) = P_{in}(k) T(k,z),
-\end{equation} 
+\end{equation}
 or using an approximation valid at low redshift  with the power spectrum at $z=0$ ($P(k)|_{z=0}$) and the growth factor $G(z)$ as
 \begin{equation}
 P(k,z) = P(k)|_{z=0} G^2(z);
-\end{equation} 
-There are abstract classes that one may tune according to the use-case (see \texttt{angpow\_integrand\_base.h} and \texttt{angpow\_powspec\_base.h}). For instance we have specialized in \texttt{angpow\_powspec.h} the computation of a $P(k)$ from an external 
+\end{equation}
+There are abstract classes that one may tune according to the use-case (see \texttt{angpow\_integrand\_base.h} and \texttt{angpow\_powspec\_base.h}). For instance we have specialized in \texttt{angpow\_powspec.h} the computation of a $P(k)$ from an external
 file and a growth rate from \citet{1991MNRAS.251..128L, 1992ARA&A..30..499C}, and in \texttt{angpow\_integrand.h} we have included the RSD term and a constant bias.
 \item $\widetilde{\Delta}_\ell(z,k)$: a function describing the physical processes such as matter density fluctuations, redshift-space distortions as described for instance in references \citet{2008cmb..book.....D,2009PhRvD..80h3514Y,2010PhRvD..82h3508Y, 2011PhRvD..84d3516C,2011PhRvD..84f3505B}. As example \todo{example for galaxy clustering?} with a constant bias $b$ and using the growth factor rate $f_a(z) = d\log G(a(z))/d\log(a(z))$, we can approximate
 \begin{equation}
@@ -529,7 +530,7 @@ file and a growth rate from \citet{1991MNRAS.251..128L, 1992ARA&A..30..499C}, an
 with $j_\ell(x)$ and $j_\ell^{\prime\prime}(x)$ the spherical Bessel function of order $\ell$ and its second derivative, and $\chi(z)$ is the comoving distance at redshift $z$.
 \end{itemize}
 
-To proceed to a numerical evaluation of equation \ref{eq-clz1z2-obs}, we first conduct  inside the rectangle $ [z_{1\mrm{min}},z_{1\mrm{max}}] \times [z_{2\mrm{min}},z_{2\mrm{max}}]$ given by the $W$ selection functions a Cartesian product of one-dimensional (1D) quadrature 
+To proceed to a numerical evaluation of equation \ref{eq-clz1z2-obs}, we first conduct  inside the rectangle $ [z_{1\mrm{min}},z_{1\mrm{max}}] \times [z_{2\mrm{min}},z_{2\mrm{max}}]$ given by the $W$ selection functions a Cartesian product of one-dimensional (1D) quadrature
  defined by the set of sample nodes $z_i$ and weights $w_i$. In practice, we use the Clenshaw-Curtis quadrature.   The corresponding sampling points $(z_{1i},z_{2j})$ are weighted by the product  $w_i w_j$ using the 1D quadrature sample points and weights on both redshift regions with $i=0,\dots, N_{\mrm{z}_1}-1$ and $j=0,\dots,N_{\mrm{z}_2}-1$. Then, one gets the following approximation:
 \begin{equation}
 C^{\mrm{thick}}_{\ell}(z_1, z_2) \approx  \sum_{i=0}^{N_{\mrm{z}_1}-1}\sum_{j=0}^{N_{\mrm{z}_2}-1} w_i w_j W_1(z_i,z_1)W_2(z_j,z_2) \widehat{P}_\ell(\chi_i,\chi_j)
@@ -540,21 +541,21 @@ with the notations $z_i = z_{1i}$, $z_j = z_{2j}$ and  $\chi_i = \chi(z_{1i})$, 
 \widehat{P}_\ell(z_i,z_j) =   \int_0^\infty dk\ f_\ell(z_i,k) f_\ell(z_j,k)
 \label{eq-Pellzizj}
 ,\end{equation}
-defined with the $f_\ell(z,k)$ function of equation \ref{eq-fell-func}. 
+defined with the $f_\ell(z,k)$ function of equation \ref{eq-fell-func}.
 To conduct the computation of such integral of highly oscillating functions we use the 3C-algorithm described in details in reference \citep{2017arXiv170103592C}.
 
 In brief this algorithm proceeds the following way:
 \begin{enumerate}
 \item the total integration $k$ interval (eg. $[k_\mathrm{min}, k_\mathrm{max}]$) in equation (\ref{eq-Pellzizj}) is cut on several $k$-sub-intervals;
 \item  on each sub-interval the functions $f_{i\, \ell}(k) = f_\ell(z_i,k) $ and $f_{j\, \ell}(k) = f_\ell(z_j,k)$ are projected onto Chebyshev series of order $2^N$;
-\item the product of the two Chebyshev series is performed with a $2^{2N}$ Chebyshev series; 
-\item then, the integral on the sub-interval is computed thanks to the Clenshaw-Curtis quadrature.   
+\item the product of the two Chebyshev series is performed with a $2^{2N}$ Chebyshev series;
+\item then, the integral on the sub-interval is computed thanks to the Clenshaw-Curtis quadrature.
 \end{enumerate}
 All the Chebyshev expansions and the Clenshaw-Curtis quadrature are
-performed via the DCT-I fast transform of FFTW. 
+performed via the DCT-I fast transform of FFTW.
 
 We have tested the code both on laptop (Linux, MacOSX) as well as on
-Computer Center (CCIN2P3 in France and NERSC in the USA). 
+Computer Center (CCIN2P3 in France and NERSC in the USA).
 We use OpenMP to distribute the computation of a given $C_\ell$ on a single
 thread. The code wall time  decreases reasonably well with the number of threads
 and a wall time at the $\mathcal{O}$(1s) level can be reached to
@@ -571,44 +572,59 @@ about 15s on 16 threads, which is to be compared to about 0.5s with \texttt{Angp
 
 \cont{Which basis to work in. Approach to performing oscillatory integrals.}
 
-For numerical integration of the correlation functions, we make use of the public code {\tt FFTlog}\footnote{\url{http://casa.colorado.edu/~ajsh/FFTLog/}}\citep{Hamilton2000,Talman2009}. In brief, {\tt FFTlog} works on functions periodic in log space, by writing the Hankel Transform as a convolution between Bessel functions and the function of interest (in this case $C_\ell$). A version of this code is included in \ccl with minor modifications.
+In this section we describe the computation of correlation functions given the angular power
+spectrum.
 
-We begin by writing the angular space observable, $X$, in terms of a decomposition in spherical harmonics, 
+We begin by briefly deriving the relation between correlation functions and power spectra.
+A (scalar) angular space observable, $X$, can be decompsed into spherical harmonics
 \begin{align}\label{eq:X_harmonic}
-  X(\Omega)=&\sum_{\ell m}\tilde X_{\ell m}Y_{\ell m}(\Omega)
+  X(\vec \Omega)=&\sum_{\ell m}\tilde X_{\ell m}Y_{\ell m}(\vec \Omega)
 \end{align}
-where $\Omega$ refers to the angular coordinates on the sky.
-The angular cross correlation function of two (scalar) tracers, $X$ and $Z$ of the large scale structure can be written in terms of their harmonic components, $\tilde X_{\ell m}$ and $\tilde Z_{\ell' m'}$ as
+where $\vec \Omega$ refers to the angular coordinates on the sky.
+The angular cross correlation function of two (scalar) tracers, $X$ and $Z$ of the large scale
+structure can be written in terms of their harmonic components, $\tilde X_{\ell m}$ and $\tilde Z_{\ell' m'}$ as
 \begin{align}
-  \langle XZ \rangle(\theta)=&\left\langle\sum_{\ell,m}\sum_{\ell', m'}\tilde X_{\ell m}\tilde Z_{\ell' m'}
-  Y_{\ell m}(\Omega)
-  Y_{\ell'm'}(\Omega+\theta)\right\rangle\\
-  =&\sum_{\ell,m}C_{\ell}Y_{\ell m}(\Omega)
-  Y_{\ell m}(\Omega+\theta)\\
-  \langle XZ \rangle(\theta)=&\frac{1}{4\pi}\sum_{\ell}(2\ell+1)C_{\ell}P_{\ell}(\cos\theta)\label{eq:xi_pl0}
+  \langle XZ \rangle(\theta)=&\left\langle\sum_{\ell,m}\sum_{\ell', m'}\tilde X_{\ell m}\tilde
+  Z_{\ell' m'}Y_{\ell m}(\vec \Omega)Y_{\ell'm'}(\vec \Omega+\theta)\right\rangle\\
+  =&\sum_{\ell,m}C_{\ell}Y_{\ell m}(\vec \Omega)Y_{\ell m}(\vec \Omega+\theta)\\
+  \langle XZ
+  \rangle(\theta)=&\frac{1}{4\pi}\sum_{\ell}(2\ell+1)C_{\ell}P_{\ell}(\cos\theta)\label{eq:xi_pl0}
 \end{align}
 where we have used the identities
 \begin{align}
   \langle\tilde X_{\ell m}\tilde Z_{\ell' m'}\rangle=&C_{\ell}\delta_D(m,m')\delta_D(\ell,\ell'),\\
-  \sum_{m=-\ell}^{m=\ell}Y_{\ell m}(\Omega)Y_{\ell m}(\Omega+\theta)=&\frac{2\ell+1}{4\pi}\label{eq:Ylm_Pl}.
+  \sum_{m=-\ell}^{m=\ell}Y_{\ell m}(\vec\Omega)Y_{\ell m}(\vec\Omega+\theta)=&\frac{2\ell+1}{4\pi}
+  P_{\ell}(\cos\theta)
+  \label{eq:Ylm_Pl}.
 \end{align}
 
-For the case of shear, since it is a spin-2 object, eq.\ref{eq:X_harmonic} is written in terms of spin harmonics 
-\citep[see for ex.][]{Castro2005,Kilbinger2017}. The rest of the analysis proceeds similarly, using the relation for spin 
-harmonics, analogous to eq.~\ref{eq:Ylm_Pl} \citep[see for ex. ][]{Hu1997}. 
+For the case of shear, since it is a spin-2 object, eq.\ref{eq:X_harmonic} is written in terms of
+spin harmonics \citep[see for ex.][]{Castro2005,Kilbinger2017}. The rest of the analysis proceeds
+similarly, using the relation for spin harmonics, analogous to eq.~\ref{eq:Ylm_Pl} \citep[see for
+ex. ][]{Hu1997}.
 
-The expressions for $\xi_+$ (which is the same as in Eq.~\ref{eq:xi_pl0}) and for $\xi_-$ are given by
+The expressions for $\xi_+$ (which is the same as in Eq.~\ref{eq:xi_pl0}) and for $\xi_-$ are given
+by
 \begin{align}
-  %\langle g\gamma_T\rangle(\theta)&=\frac{1}{4\pi}\sum_{\ell}\frac{(2\ell+1)}{\ell(\ell+1)}C_{\ell}^{g\kappa}
-  %P_{\ell}^2(\cos\theta)\label{eq:xi_g_gamma}\\
+  \langle g\gamma_T\rangle(\theta)&=
+  \frac{1}{4\pi}\sum_{\ell}\frac{(2\ell+1)}{\ell(\ell+1)}C_{\ell}^{g\kappa}
+  P_{\ell}^2(\cos\theta)\label{eq:xi_g_gamma}\\
   \xi_+(\theta)&=\frac{1}{4\pi}\sum_{\ell}{(2\ell+1)}C_{\ell}^{\kappa\kappa}
   P_{\ell}(\cos\theta)\label{eq:xi_p}\\
-  \xi_-(\theta)&=\frac{1}{4\pi}\sum_{\ell}\frac{(\ell-4)!}{(\ell+4)!}\ell^4{(2\ell+1)}C_{\ell}^{\kappa\kappa}
+  \xi_-(\theta)&=\frac{1}{4\pi}\sum_{\ell}\frac{(\ell-4)!}{(\ell+4)!}\ell^4{(2\ell+1)}C_{\ell}^{\kap
+  pa\kappa}
   P_{\ell}^4(\cos\theta)\label{eq:xi_m}
 \end{align}
-\todo{Simply took the relation between $P_\ell^m$ and $J_m(\ell \theta)$ to get this expression from the Hankel transform for $\xi_-$. It may not be very accurate at large scale (low $\ell$) as is evident from $g\gamma_T$ expression. To be revisited.}
+\todo{Simply took the relation between $P_\ell^m$ and $J_m(\ell \theta)$ to get this expression
+from the Hankel transform for $\xi_-$. It may not be very accurate at large scale (low $\ell$) as
+is evident from $g\gamma_T$ expression. To be revisited.}
 
-The {\tt ccl\_tracer\_corr\_legendre} routine computes these transform to convert angular power spectra, $C_\ell$, into correlation functions. We use the associated Legendre function implementation from the {\tt GSL} library. {\tt ccl\_tracer\_corr\_legendre} routine evaluations can be very slow, especially for polynomials $P_\ell^m$ with $m>0$. Note that $P_\ell^m$ evaluations need to be done only once and can then be saved as long as $\ell$ and $\theta$ values do not change. However, \ccl has not yet implemented this feature.
+The {\tt ccl\_tracer\_corr\_legendre} routine computes these transform to convert angular power
+spectra, $C_\ell$, into correlation functions. We use the associated Legendre function
+implementation from the {\tt GSL} library. {\tt ccl\_tracer\_corr\_legendre} routine evaluations
+can be very slow, especially for polynomials $P_\ell^m$ with $m>0$. Note that $P_\ell^m$
+evaluations need to be done only once and can then be saved as long as $\ell$ and $\theta$ values
+do not change. However, \ccl has not yet implemented this feature.
 
 \paragraph{Hankel Transform}
 Notice that in the flat-sky limit, the expressions in Eqs.~\ref{eq:xi_p}--\ref{eq:xi_m} can be written as Hankel transforms using the relation between $P_{\ell}^m$ and bessel functions $J_m$
@@ -617,6 +633,7 @@ Notice that in the flat-sky limit, the expressions in Eqs.~\ref{eq:xi_p}--\ref{e
 \end{align}
 which yields final expressions that coincide with Eq. \ref{eq:xipxim}.
 
+For numerical integration of the correlation functions, we make use of the public code {\tt FFTlog}\footnote{\url{http://casa.colorado.edu/~ajsh/FFTLog/}}\citep{Hamilton2000,Talman2009}. In brief, {\tt FFTlog} works on functions periodic in log space, by writing the Hankel Transform as a convolution between Bessel functions and the function of interest (in this case $C_\ell$). A version of this code is included in \ccl with minor modifications.
 
 %-------------------------------------------------------------------------------
 \subsection{Halo mass function}
@@ -707,8 +724,8 @@ We noticed that there are 2 typos for the BBKS transfer function in ``Modern Cos
 In a second stage, we used the BBKS linear matter power spectrum from the previous step to compare two-point statistics for two redshift bins, resulting in three tomography combinations, ($1-1$),($1-2$),($2-2$). We computed the following quantities:
 \begin{itemize}
 \item projected galaxy clustering tomography power spectra: density term only (no magnification, RSD, etc.) with non-evolving linear bias $b(z) = 1$, in the range $10 < \ell < 10000$, using $5$ bins per decade,
-\item angular convergence tomography power spectra: leading order convergence term only (no magnification), in the same range and with the same resolution as the case above, 
-\item angular galaxy clustering tomography correlation function, in the range $0.01 \deg < \theta < 5 \deg$, using 5 bins per decade, and 
+\item angular convergence tomography power spectra: leading order convergence term only (no magnification), in the same range and with the same resolution as the case above,
+\item angular galaxy clustering tomography correlation function, in the range $0.01 \deg < \theta < 5 \deg$, using 5 bins per decade, and
 \item angular shear tomography correlation functions ($\xi_+$,$\xi_-$), similarly to above.
 \end{itemize}
 We adopted the following analytic redshift distributions: a Gaussian with $\sigma = 0.15$, centered at $z_1 = 1$; and another Gaussian with the same dispersion but centered at $z_2 = 1.5$. We repeated the exercise for two redshift distribution histograms shown in Figure \ref{fig:zhistos}.
@@ -752,10 +769,10 @@ We note that while we maintain the $10^{-4}$ for our evaluations of $\sigma$, th
 The \ccl is released as part of the code from the Dark Energy Science Collaboration of LSST, and as such can be downloaded from \hyperref{https://github.com/LSSTDESC/CCL}.
 
 The documentation of the code is provided \hyperref{https://github.com/LSSTDESC/CCL/blob/master/doc/html/index.html}{through Doxygen} \textbf{RH: how do we get this to display not in github format but to render?}.
-\ccl needs the Gnu Scientific Library to install, more detailed instructions are given \hyperref{https://github.com/LSSTDESC/CCL/blob/master/README.md}{in the README file}. It is also included as a Docker image for ease of use and installation. 
+\ccl needs the Gnu Scientific Library to install, more detailed instructions are given \hyperref{https://github.com/LSSTDESC/CCL/blob/master/README.md}{in the README file}. It is also included as a Docker image for ease of use and installation.
 
 There are a suite of test files located in the {\tt tests} directory within the main \ccl code, these tests run, for example, a user-defined form for the photometric redshift of a source and how it integrates and tests with the various codes and libraries within \ccl.
-  
+
 %-------------------------------------------------------------------------------
 \section{Outlook}
 \vol{David Alonso, ?}
