@@ -214,7 +214,7 @@ class Cosmology(object):
                  z_mg=None, df_mg=None, 
                  transfer_function='boltzmann_class',
                  matter_power_spectrum='halofit',
-                 mass_function='tinker'):
+                 mass_function='tinker10'):
         """Creates a wrapper for ccl_cosmology.
 
         TODO: enumerate transfer_function and 
