@@ -3,7 +3,7 @@ from pyccl import ccllib as lib
 import numpy as np
 import pyccl.core
 
-def check(status):
+def check(status, cosmo=None):
     """Check the status returned by a ccllib function.
 
     Args:
@@ -12,15 +12,20 @@ def check(status):
     """
     # Check for normal status (no action required)
     if status == 0: return
+    
+    # Get status message from Cosmology object, if there is one
+    if cosmo is not None:
+        msg = _cosmology_obj(cosmo).status_message
+    else:
+        msg = ""
 
     # Check for known error status
     if status in pyccl.core.error_types.keys():
-        raise RuntimeError("Error %d: %s" % (status, pyccl.core.error_types[status]))
+        raise RuntimeError("Error %s: %s" % (pyccl.core.error_types[status], msg))
 
     # Check for unknown error
     if status != 0:
-        raise RuntimeError("Error %d: Unnamed error returned by CCL C library." \
-                           % status)
+        raise RuntimeError("Error %d: %s" % (status, msg))
 
 
 def _cosmology_obj(cosmo):
@@ -87,6 +92,7 @@ def _vectorize_fn(fn, fn_vec, cosmo, x, returns_status=True):
 
     """
     # Access ccl_cosmology object
+    cosmo_in = cosmo
     cosmo = _cosmology_obj(cosmo)
     status = 0
 
@@ -110,7 +116,7 @@ def _vectorize_fn(fn, fn_vec, cosmo, x, returns_status=True):
             f = fn_vec(cosmo, x, len(x))
 
     # Check result and return
-    check(status)
+    check(status, cosmo_in)
     return f
 
 
@@ -129,6 +135,7 @@ def _vectorize_fn2(fn, fn_vec, cosmo, x, z, returns_status=True):
 
     """
     # Access ccl_cosmology object
+    cosmo_in = cosmo
     cosmo = _cosmology_obj(cosmo)
     status = 0
     scalar = False
@@ -152,7 +159,7 @@ def _vectorize_fn2(fn, fn_vec, cosmo, x, z, returns_status=True):
             f = fn_vec(cosmo, z, x, len(x))
 
     # Check result and return
-    check(status)
+    check(status, cosmo_in)
     if scalar:
         return f[0]
     else:
@@ -171,7 +178,8 @@ def _vectorize_fn3(fn, fn_vec, cosmo, x, n, returns_status=True):
         returns_stats (bool): Indicates whether fn returns a status.
 
     """
-   # Access ccl_cosmology object
+    # Access ccl_cosmology object
+    cosmo_in = cosmo
     cosmo = _cosmology_obj(cosmo)
     status = 0
     scalar = False
@@ -194,7 +202,7 @@ def _vectorize_fn3(fn, fn_vec, cosmo, x, n, returns_status=True):
             f = fn_vec(cosmo, n, x, len(x))
 
     # Check result and return
-    check(status)
+    check(status, cosmo_in)
     if scalar:
         return f[0]
     else:
@@ -214,7 +222,8 @@ def _vectorize_fn4(fn, fn_vec, cosmo, x, a, d, returns_status=True):
         returns_stats (bool): Indicates whether fn returns a status.
 
     """
-   # Access ccl_cosmology object
+    # Access ccl_cosmology object
+    cosmo_in = cosmo
     cosmo = _cosmology_obj(cosmo)
     status = 0
     scalar = False
@@ -237,7 +246,7 @@ def _vectorize_fn4(fn, fn_vec, cosmo, x, a, d, returns_status=True):
             f = fn_vec(cosmo, a, d, x, len(x))
 
     # Check result and return
-    check(status)
+    check(status, cosmo_in)
     if scalar:
         return f[0]
     else:
