@@ -119,10 +119,12 @@ ccl_cosmology * ccl_cosmology_create(ccl_parameters params, ccl_configuration co
   cosmo->data.accelerator_achi=NULL;
   cosmo->data.accelerator_m=NULL;
   cosmo->data.accelerator_d=NULL;
+  cosmo->data.accelerator_k=NULL;
   cosmo->data.growth0 = 1.;
   cosmo->data.achi=NULL;
 
   cosmo->data.logsigma = NULL;
+  cosmo->data.dlnsigma_dlogm = NULL;
 
   // hmf parameter for interpolation
   cosmo->data.alphahmf = NULL;
