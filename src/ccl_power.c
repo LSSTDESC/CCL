@@ -263,6 +263,12 @@ static double ccl_get_class_As(ccl_cosmology *cosmo, struct file_content *fc, in
 static void ccl_fill_class_parameters(ccl_cosmology * cosmo, struct file_content * fc,
 				      int parser_length, int * status)
 {
+  // initialize fc fields
+  //silences Valgrind's "Conditional jump or move depends on uninitialised value" warning
+  for (int i = 0; i< parser_length; i++){
+    strcpy(fc->name[i]," ");
+    strcpy(fc->value[i]," "); 
+  }
   strcpy(fc->name[0],"output");
   strcpy(fc->value[0],"mPk"); 
 
