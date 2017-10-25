@@ -505,6 +505,8 @@ void ccl_data_free(ccl_data * data)
     gsl_spline_free(data->achi);
   if(data->logsigma!=NULL)
     gsl_spline_free(data->logsigma);
+  if(data->dlnsigma_dlogm!=NULL)
+    gsl_spline_free(data->dlnsigma_dlogm);
   if(data->p_lin!=NULL)
     gsl_spline2d_free(data->p_lin);
   if(data->p_nl!=NULL)
@@ -521,6 +523,10 @@ void ccl_data_free(ccl_data * data)
     gsl_spline_free(data->etahmf);
   if(data->accelerator_d!=NULL)
     gsl_interp_accel_free(data->accelerator_d);
+  if(data->accelerator_m!=NULL)
+    gsl_interp_accel_free(data->accelerator_m);
+  if(data->accelerator_k!=NULL)
+    gsl_interp_accel_free(data->accelerator_k);
 }
 
 
