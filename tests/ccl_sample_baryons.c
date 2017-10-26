@@ -16,7 +16,7 @@ int main(int argc, char * argv[])
   double other_bcm_ks = 75.;
 
   ccl_configuration config = default_config;
-  config.transfer_function_method = ccl_baryons_bcm;
+  config.matter_power_spectrum_method=ccl_baryons;
   //The following two options are identical if the parameters being passed are the fiducial ones
   //In this case, we are passing user-specified parameters
   //ccl_parameters params = ccl_parameters_create_flat_lcdm(Omega_c, Omega_b, h, normp, n_s, &status);
@@ -47,7 +47,7 @@ int main(int argc, char * argv[])
     p2 = ccl_nonlin_matter_power(cosmo,k, a_at_z2,&status);
     p3 = ccl_nonlin_matter_power(cosmo,k, a_at_z3,&status);
     printf("%le %le %le %le %le\n", k, p,p1,p2,p3);
-    }
+  }
 
   printf("Completed. Status = %d\n",status);
   

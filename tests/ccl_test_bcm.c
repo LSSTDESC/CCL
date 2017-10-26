@@ -27,7 +27,7 @@ CTEST_SETUP(bcm) {
   data->h = 0.7;
   data->A_s = 2.2e-9;
   data->n_s = 0.96;
-  data->N_nu_rel = 0.;
+  data->N_nu_rel = 3.046;
   data->N_nu_mass=0.;
   data->m_nu=0.;
 
@@ -64,15 +64,22 @@ static void compare_bcm(int i_model,struct bcm_data * data)
   char* rtn;
   FILE *f,*f2;
   ccl_configuration config = default_config;
-  config.transfer_function_method = ccl_baryons_bcm;
+  config.matter_power_spectrum_method=ccl_baryons;
   ccl_parameters params = ccl_parameters_create(data->Omega_c,data->Omega_b,data->Omega_k[i_model-1],
 						data->N_nu_rel, data->N_nu_mass, data->m_nu,
 						data->w_0[i_model-1],data->w_a[i_model-1],
 						data->h,data->A_s,data->n_s,14,-1,-1,-1,NULL,NULL, &status);
-  params.sigma_8=data->sigma_8;
-  params.Omega_g=0;
   ccl_cosmology * cosmo = ccl_cosmology_create(params, config);
   ASSERT_NOT_NULL(cosmo);
+  ccl_configuration config_nobar = default_config;
+  ccl_parameters params_nobar = ccl_parameters_create(data->Omega_c,data->Omega_b,data->Omega_k[i_model-1],
+						data->N_nu_rel, data->N_nu_mass, data->m_nu,
+						data->w_0[i_model-1],data->w_a[i_model-1],
+						data->h,data->A_s,data->n_s,-1,-1,-1,-1,NULL,NULL, &status);
+  params.sigma_8=data->sigma_8;
+  params.Omega_g=0;
+  ccl_cosmology * cosmo_nobar = ccl_cosmology_create(params_nobar, config_nobar);
+  ASSERT_NOT_NULL(cosmo_nobar);
   
   sprintf(fname,"./tests/benchmark/bcm/w_baryonspk_nl.dat");
   f=fopen(fname,"r");
@@ -103,6 +110,7 @@ static void compare_bcm(int i_model,struct bcm_data * data)
     double k_h,k;
     int stat;
     double psbar,psnobar,fbcm_bench,err;
+    double psbar_bench,psnobar_bench;
     stat=fscanf(f,"%le %le",&k_h,&psbar);
     if(stat!=2) {
       fprintf(stderr,"Error reading file %s, line %d\n",fname,i+5);
@@ -114,11 +122,19 @@ static void compare_bcm(int i_model,struct bcm_data * data)
       exit(1);
     }
     k=k_h*data->h;
+    //Check baryonic correction directly
     fbcm_bench=ccl_bcm_model_fkz(cosmo,k,1.,&status);
     if (status) printf("%s\n",cosmo->status_message);
     err=fabs(psbar/psnobar/fbcm_bench-1);
-    
     ASSERT_DBL_NEAR_TOL(err,0.,BCM_TOLERANCE);
+    //And check the ratio between power spectra
+    psbar_bench=ccl_nonlin_matter_power(cosmo,k,1.,&status);
+    if (status) printf("%s\n",cosmo->status_message);
+    psnobar_bench=ccl_nonlin_matter_power(cosmo_nobar,k,1.,&status);
+    if (status) printf("%s\n",cosmo_nobar->status_message);
+    err=fabs(psbar/psnobar/(psbar_bench/psnobar_bench)-1);
+    ASSERT_DBL_NEAR_TOL(err,0.,BCM_TOLERANCE);
+    
   }
   fclose(f);
   fclose(f2);

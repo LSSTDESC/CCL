@@ -27,7 +27,6 @@ typedef enum transfer_function_t
   
   ccl_boltzmann_camb    = 4,
   
-  ccl_baryons_bcm       = 5
 } transfer_function_t;
 
 /** 
@@ -42,10 +41,11 @@ typedef enum matter_power_spectrum_t
   ccl_linear           = 0,
   
   ccl_halofit          = 1,
-  // more?
-  ccl_halo_model       = 3
-  // even more kinds ...
+
+  ccl_halo_model       = 3,
   
+  ccl_baryons          = 4
+  // even more kinds ... 
 } matter_power_spectrum_t;
 
 /** 

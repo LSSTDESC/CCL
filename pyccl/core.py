@@ -17,14 +17,14 @@ transfer_function_types = {
     'camb':             lib.boltzmann_camb,
     'boltzmann_class':  lib.boltzmann_class,
     'class':            lib.boltzmann_class,
-    'baryons_bcm':      lib.baryons_bcm
 }
 
 matter_power_spectrum_types = {
     'halo_model':   lib.halo_model,
     'halomodel':    lib.halo_model,
     'halofit':      lib.halofit,
-    'linear':       lib.linear
+    'linear':       lib.linear,
+    'baryons':      lib.baryons
 }
 
 mass_function_types = {

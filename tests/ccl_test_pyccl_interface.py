@@ -31,12 +31,12 @@ def reference_models():
 
     # Baryons Pk
     p6 = ccl.Parameters(Omega_c=0.27, Omega_b=0.045, h=0.67, A_s=1e-10, n_s=0.96)
-    cosmo6 = ccl.Cosmology(p6,transfer_function='baryons_bcm')
+    cosmo6 = ccl.Cosmology(p6,matter_power_spectrum='baryons')
     
     # Baryons Pk with choice of BCM parameters other than default
     p7 = ccl.Parameters(Omega_c=0.27, Omega_b=0.045, h=0.67, A_s=1e-10, n_s=0.96,
                         bcm_log10Mc=math.log10(1.7e14), bcm_etab=0.3, bcm_ks=75.)
-    cosmo7 = ccl.Cosmology(p7,transfer_function='baryons_bcm')
+    cosmo7 = ccl.Cosmology(p7,matter_power_spectrum='baryons')
 
     # Return 
     return [cosmo1,cosmo4,cosmo5,cosmo7] # cosmo2, cosmo3, cosmo6
