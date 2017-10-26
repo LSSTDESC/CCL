@@ -333,7 +333,7 @@ As discussed in Section \ref{sec:extclass}, the user can compile \ccl with an ex
 
 \subsubsection{Impact of baryons}
 
-\ccl incorporates the impact of baryons on the total matter power spectrum via the ``baryonic correction model'' of \citet{Schneider15}. The main consequences of baryonic processes are: to suppress the power spectrum at intermediate scales ($k\sim$ a few $h/$Mpc) due to the ejection of gas by Active Galactic Nuclei feedaback, and to enhance it at smaller scales due to enhanced cooling. Three effective parameters govern the contribution of baryonic processes to modifying the total matter power spectrum:
+\ccl incorporates the impact of baryons on the total matter power spectrum via the ``baryonic correction model'' (BCM) of \citet{Schneider15}. The main consequences of baryonic processes are: to suppress the power spectrum at intermediate scales ($k\sim$ a few $h/$Mpc) due to the ejection of gas by Active Galactic Nuclei feedaback, and to enhance it at smaller scales due to enhanced cooling. Three effective parameters govern the contribution of baryonic processes to modifying the total matter power spectrum:
 
 \begin{itemize}
   \item $\log_{10} [M_c/($M$_\odot/h)]$: the mass of the clusters responsible for feedback, which regulates the amount of suppression of the matter power spectrum at intermediate scales;
@@ -341,7 +341,7 @@ As discussed in Section \ref{sec:extclass}, the user can compile \ccl with an ex
   \item and $k_s$ [$h/$Mpc]: the wavenumber that determines the scale of the stellar profile.
 \end{itemize}
 
-If these parameters are not specified, \ccl assumes the default paramters of \citet{Schneider15}. The user may pass these explicitly if desired. 
+If the BCM parameters are not specified and the user sets \ccl to compute the power spectrym with baryonic feedback included, \ccl will assume the default parameters of \citet{Schneider15}. The user may pass these explicitly if desired. 
 
 \subsubsection{Spline parameters \& the INI file}
 
