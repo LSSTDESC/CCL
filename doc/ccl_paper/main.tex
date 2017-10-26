@@ -576,48 +576,76 @@ In this section we describe the computation of correlation functions given the a
 spectrum.
 
 We begin by briefly deriving the relation between correlation functions and power spectra.
-A (scalar) angular space observable, $X$, can be decompsed into spherical harmonics
+A (scalar) angular space observable, $X$, with spin $s$ can be decompsed into spin spherical
+harmonics
 \begin{align}\label{eq:X_harmonic}
-  X(\vec \Omega)=&\sum_{\ell m}\tilde X_{\ell m}Y_{\ell m}(\vec \Omega)
+  X(\vec \Omega)=&\sum_{\ell m}\tilde X_{\ell m} {\hspace{5pt}}_sY_{\ell m}(\vec \Omega)
 \end{align}
 where $\vec \Omega$ refers to the angular coordinates on the sky.
 The angular cross correlation function of two (scalar) tracers, $X$ and $Z$ of the large scale
 structure can be written in terms of their harmonic components, $\tilde X_{\ell m}$ and $\tilde Z_{\ell' m'}$ as
 \begin{align}
   \langle XZ \rangle(\theta)=&\left\langle\sum_{\ell,m}\sum_{\ell', m'}\tilde X_{\ell m}\tilde
-  Z_{\ell' m'}Y_{\ell m}(\vec \Omega)Y_{\ell'm'}(\vec \Omega+\theta)\right\rangle\\
-  =&\sum_{\ell,m}C_{\ell}Y_{\ell m}(\vec \Omega)Y_{\ell m}(\vec \Omega+\theta)\\
+  Z_{\ell' m'}{\hspace{5pt}}_{s_X}Y_{\ell m}(\vec \Omega){\hspace{5pt}}_{s_Z}Y_{\ell'm'}(\vec \Omega+\theta)\right\rangle\\
+  =&\sum_{\ell,m}C_{\ell}{\hspace{5pt}}_{s_X}Y_{\ell m}(\vec \Omega){\hspace{5pt}}_{s_Z}Y_{\ell m}(\vec \Omega+\theta)%\\
+  %\langle XZ
+  %\rangle(\theta)=&\frac{1}{4\pi}\sum_{\ell}(2\ell+1)C_{\ell}P_{\ell}(\cos\theta)\label{eq:xi_pl0}
+\end{align}
+where we have used the identity
+\begin{align}
+  \langle\tilde X_{\ell m}\tilde Z_{\ell' m'}\rangle=&C_{\ell}\delta_D(m,m')\delta_D(\ell,\ell'),
+  % \\
+  % \sum_{m=-\ell}^{m=\ell}Y_{\ell m}(\vec\Omega)Y_{\ell m}(\vec\Omega+\theta)=&\frac{2\ell+1}{4\pi}
+  % P_{\ell}(\cos\theta)
+  % \label{eq:Ylm_Pl}.
+\end{align}
+Using the addition theorem for spherical harmonics and the relation between spherical harmonics and
+wigner D-matrices\footnote{https://en.wikipedia.org/wiki/Wigner_D-matrix} \citep{Ng1999}, we can
+write
+\begin{align}
   \langle XZ
-  \rangle(\theta)=&\frac{1}{4\pi}\sum_{\ell}(2\ell+1)C_{\ell}P_{\ell}(\cos\theta)\label{eq:xi_pl0}
-\end{align}
-where we have used the identities
-\begin{align}
-  \langle\tilde X_{\ell m}\tilde Z_{\ell' m'}\rangle=&C_{\ell}\delta_D(m,m')\delta_D(\ell,\ell'),\\
-  \sum_{m=-\ell}^{m=\ell}Y_{\ell m}(\vec\Omega)Y_{\ell m}(\vec\Omega+\theta)=&\frac{2\ell+1}{4\pi}
-  P_{\ell}(\cos\theta)
-  \label{eq:Ylm_Pl}.
+  \rangle(\theta)=&\frac{1}{4\pi}\sum_{\ell}(2\ell+1)C_{\ell}D^{\ell}_{s_X,-s_Z}(0,\theta,0)
 \end{align}
 
-For the case of shear, since it is a spin-2 object, eq.\ref{eq:X_harmonic} is written in terms of
-spin harmonics \citep[see for ex.][]{Castro2005,Kilbinger2017}. The rest of the analysis proceeds
-similarly, using the relation for spin harmonics, analogous to eq.~\ref{eq:Ylm_Pl} \citep[see for
-ex. ][]{Hu1997}.
-
-The expressions for $\xi_+$ (which is the same as in Eq.~\ref{eq:xi_pl0}) and for $\xi_-$ are given
-by
+The galaxy number count is spin zero and shear is a spin-2 object. Thus the expressions for various correlations and cross correlations are
 \begin{align}
+  \xi_{gg}(\theta)&=\frac{1}{4\pi}\sum_{\ell}{(2\ell+1)}C_{\ell}^{gg}D^{\ell}_{0,0}(0,\theta,0)=
+  \frac{1}{4\pi}\sum_{\ell}{(2\ell+1)}C_{\ell}^{gg}P_{\ell}(\cos\theta)\label{eq:xi_gg_D}\\
   \langle g\gamma_T\rangle(\theta)&=
-  \frac{1}{4\pi}\sum_{\ell}\frac{(2\ell+1)}{\ell(\ell+1)}C_{\ell}^{g\kappa}
-  P_{\ell}^2(\cos\theta)\label{eq:xi_g_gamma}\\
-  \xi_+(\theta)&=\frac{1}{4\pi}\sum_{\ell}{(2\ell+1)}C_{\ell}^{\kappa\kappa}
+  \frac{1}{4\pi}\sum_{\ell}{(2\ell+1)}C_{\ell}^{g\gamma}D^{\ell}_{2,0}(0,\theta,0)=
+  \frac{1}{4\pi}\sum_{\ell}(2\ell+1)\sqrt{\frac{(\ell-2)!}{(\ell+2)!}}C_{\ell}^{g\gamma}
+  P_{\ell}^2(\cos\theta)\label{eq:xi_g_gamma_D}\\
+  \langle g\kappa\rangle(\theta)&=
+  \frac{1}{4\pi}\sum_{\ell}{(2\ell+1)}C_{\ell}^{g\kappa}D^{\ell}_{0,0}(0,\theta,0)=
+  \frac{1}{4\pi}\sum_{\ell}(2\ell+1)C_{\ell}^{g\kappa}
+  P_{\ell}(\cos\theta)\label{eq:xi_g_kappa_D}\\
+  \xi_+(\theta)&=\frac{1}{4\pi}\sum_{\ell}{(2\ell+1)}C_{\ell}^{\gamma\gamma*}
+  D^{\ell}_{2,2}(0,\theta,0)\label{eq:xi_p_D}\\
+  \xi_-(\theta)&=\frac{1}{4\pi}\sum_{\ell}{(2\ell+1)}C_{\ell}^{\gamma\gamma*}
+  D^{\ell}_{2,-2}(0,\theta,0)
+  %\approx \frac{1}{4\pi}\sum_{\ell}{(2\ell+1)}C_{\ell}^{\gamma\gamma*}P_{\ell}(\cos\theta)
+  \label{eq:xi_m_D}
+\end{align}
+
+Using relations from \cite{Kilbinger2017}, we can write
+\begin{align}
+  C_{\ell}^{g\kappa}&={\frac{(\ell+1)!}{(\ell-1)!}}C_{\ell}^{gm}\\
+  C_{\ell}^{g\gamma}&=\sqrt{\frac{(\ell+2)!}{(\ell-2)!}}C_{\ell}^{gm}
+  \\ \langle g\gamma_T\rangle(\theta)&
+  =\frac{1}{4\pi}\sum_{\ell}\frac{(2\ell+1)}{\ell(\ell+1)}C_{\ell}^{g\kappa}P_{\ell}^2(\cos\theta)
+  \label{eq:xi_g_gamma}\\
+  \xi_+(\theta)&=\frac{1}{4\pi}\sum_{\ell}{(2\ell+1)}C_{\ell}^{\gamma\gamma*}
   P_{\ell}(\cos\theta)\label{eq:xi_p}\\
   \xi_-(\theta)&=\frac{1}{4\pi}\sum_{\ell}\frac{(\ell-4)!}{(\ell+4)!}\ell^4{(2\ell+1)}
   C_{\ell}^{\kappa\kappa}
   P_{\ell}^4(\cos\theta)\label{eq:xi_m}
 \end{align}
-\todo{Simply took the relation between $P_\ell^m$ and $J_m(\ell \theta)$ to get this expression
+\todo{Can't relate eq.~\ref{eq:xi_p_D} and \ref{eq:xi_p}.
+Simply took the relation between $P_\ell^m$ and $J_m(\ell \theta)$ to get this expression
 from the Hankel transform for $\xi_-$. It may not be very accurate at large scale (low $\ell$) as
-is evident from $g\gamma_T$ expression. To be revisited.}
+is evident from $g\gamma_T$ expression. To be revisited.
+On positive note, eq.~\ref{eq:xi_g_gamma} matches expression in \cite{Putter2010}.}
+
 
 The {\tt ccl\_tracer\_corr\_legendre} routine computes these transform to convert angular power
 spectra, $C_\ell$, into correlation functions. We use the associated Legendre function
@@ -627,12 +655,19 @@ evaluations need to be done only once and can then be saved as long as $\ell$ an
 do not change. However, \ccl has not yet implemented this feature.
 
 \paragraph{Hankel Transform}
-Notice that in the flat-sky limit, the expressions in Eqs.~\ref{eq:xi_p}--\ref{eq:xi_m} can be written as Hankel transforms using the relation between $P_{\ell}^m$ and bessel functions $J_m$
+Notice that in the flat-sky limit, the expressions in Eqs.~\ref{eq:xi_gg_D}--\ref{eq:xi_m_D} can be
+written as Hankel transforms using the relation between $D_{m,m'}^\ell$ and bessel functions $J$
+(for $\ell\gg m,m'$)
+\begin{align}
+  D^{l}_{m,m'}(0,\theta,0)\approx J_{m-m'}(\ell\theta)
+\end{align}
+Same expressions can also be derived from Eqs.~\ref{eq:xi_p}--\ref{eq:xi_m} using relation between $P_{\ell}^m$ and bessel functions $J_m$
 \citep{Putter2010}
 \begin{align}
   P_{\ell}^m(\cos\theta)=(-1)^m\frac{(\ell+m)!}{(\ell-m)!}\ell^{-m}J_m(\ell\theta)
 \end{align}
 which yields final expressions that coincide with Eq. \ref{eq:xipxim}.
+
 
 For numerical integration of the correlation functions, we make use of the public code {\tt FFTlog}\footnote{\url{http://casa.colorado.edu/~ajsh/FFTLog/}}\citep{Hamilton2000,Talman2009}. In brief, {\tt FFTlog} works on functions periodic in log space, by writing the Hankel Transform as a convolution between Bessel functions and the function of interest (in this case $C_\ell$). A version of this code is included in \ccl with minor modifications.
 
