@@ -100,14 +100,14 @@ double Omeganuh2 (double a, double Neff, double* mnu, double TCMB, gsl_interp_ac
   double Tnu_eff, mnuOT, intval, prefix_massive;
   double total_mass; // To check if this is the massless or massive case.
   
-  
   // First check if Neff if 0
   if (Neff==0) return 0.0;  
   
   // Now handle the massless case
   Tnu=TCMB*pow(4./11.,1./3.);
   a4=a*a*a*a;  
-  // Check if this is the massless case. We assume that in the massless case mnu is a pointer to a single element and that element is 0.
+  // Check if this is the massless case. We assume that in the massless case mnu is a pointer to a single element and that element is 0. This should in principle never be called.
+  
   if (mnu[0] < 1e-12) {
     prefix_massless = NU_CONST  * Tnu * Tnu * Tnu * Tnu; 
     return Neff*prefix_massless*7./8./a4;

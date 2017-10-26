@@ -623,6 +623,7 @@ void ccl_cosmology_compute_growth(ccl_cosmology * cosmo, int * status)
 
 double ccl_h_over_h0(ccl_cosmology * cosmo, double a, int* status)
 {
+	
   if(!cosmo->computed_distances) {
     ccl_cosmology_compute_distances(cosmo,status);
     ccl_check_status(cosmo, status);   
@@ -634,6 +635,7 @@ double ccl_h_over_h0(ccl_cosmology * cosmo, double a, int* status)
     strcpy(cosmo->status_message, "ccl_background.c: ccl_h_over_h0(): Scale factor outside interpolation range.\n");
     return NAN;    
   }
+  
   return h_over_h0;
 }
 

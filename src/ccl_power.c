@@ -327,19 +327,14 @@ static void ccl_fill_class_parameters(ccl_cosmology * cosmo, struct file_content
     strcpy(fc->name[15],"N_ncdm");
     sprintf(fc->value[15],"%e",cosmo->params.N_nu_mass);
     strcpy(fc->name[16],"m_ncdm");
-    //sprintf(fc->value[16],"%e",cosmo->params.mnu/cosmo->params.N_nu_mass);
-    //assume equal mass neutrino species for now!
-    //for (int i = 1; i < cosmo->params.N_nu_mass; i++) {
-    //  char tmp[20];
-    //  sprintf(tmp,", %e",cosmo->params.mnu/cosmo->params.N_nu_mass);
-    //  strcat(fc->value[16],tmp);
-    //}
-    //sprintf(fc->value[16],"%e",cosmo->params.mnu/cosmo->params.N_nu_mass);
-    for (int i = 0; i < cosmo->params.N_nu_mass; i++) {
+    sprintf(fc->value[16],"%e", (cosmo->params.mnu)[0]);
+    for (int i = 1; i < cosmo->params.N_nu_mass; i++) {
       char tmp[20];
+      printf("mnu = %f\n", (cosmo->params.mnu)[i]);
       sprintf(tmp,", %e",(cosmo->params.mnu)[i]);
       strcat(fc->value[16],tmp);
     }
+      printf("%s\n", fc->value[16]);
   }
   //normalization comes last, so that all other parameters are filled in for determining A_s if sigma_8 is specified
   if (isfinite(cosmo->params.sigma_8) && isfinite(cosmo->params.A_s)) {
