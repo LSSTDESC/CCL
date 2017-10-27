@@ -67,7 +67,7 @@ CTEST_SETUP(emu) {
     data->Omega_b[i] = Omega_b[i];
     data->n_s[i] = n_s[i];
   }
-  close(f);
+  fclose(f);
 }
 
 static int linecount(FILE *f)
