@@ -362,7 +362,7 @@ The \citet{Tinker2010} model parameterizes both the halo mass function and the h
   f(\nu) &=& \alpha[1+(\beta\nu)^{-2\phi}]\nu^{2\eta}e(-\gamma\nu^2/2).
 \end{eqnarray}
 
-We note that these halo mass functions, while implemented to high \em{numerical} accuracy, carry their own uncertainties. It has not been significantly stufied on whether the halo mass function (or halo bias function) is universal with respect to changes in dark energy parameterisation. Further, \citet{Tinker2010} found an \sim6\% scatter when determining the halo bias due to differences in simulations. This is in addition to a 5\% error in the mass function alone. This result is consistent with the work of \citet{Watson2013}, which also finds a 5\% level difference in comparison to the Tinker fitting function. Further study will be required in the future in order to gain percent level accuracy in determining the halo mass function. 
+We note that these halo mass functions, while implemented to high \em{numerical} accuracy, carry their own uncertainties. It has not been significantly stufied on whether the halo mass function (or halo bias function) is universal with respect to changes in dark energy parameterisation. Further, \citet{Tinker2010} found an \sim6\% scatter when determining the halo bias due to differences in simulations. This is in addition to a 5\% error in the mass function alone. This result is consistent with the work of \citet{Watson2013}, which also finds a 5\% level difference in comparison to the Tinker fitting function. Further study will be required in the future in order to gain percent level accuracy in determining the halo mass function.
 
 %-------------------------------------------------------------------------------
 \subsection{Massive neutrinos}
@@ -602,7 +602,7 @@ harmonics
   X(\vec \Omega)=&\sum_{\ell m}\tilde X_{\ell m} {\hspace{5pt}}_sY_{\ell m}(\vec \Omega)
 \end{align}
 where $\vec \Omega$ refers to the angular coordinates on the sky.
-The angular cross correlation function of two (scalar) tracers, $X$ and $Z$ of the large scale
+The angular cross correlation function of two tracers, $X$ and $Z$ of the large scale
 structure can be written in terms of their harmonic components, $\tilde X_{\ell m}$ and $\tilde Z_{\ell' m'}$ as
 \begin{align}
   \langle XZ \rangle(\theta)=&\left\langle\sum_{\ell,m}\sum_{\ell', m'}\tilde X_{\ell m}\tilde
@@ -611,7 +611,8 @@ structure can be written in terms of their harmonic components, $\tilde X_{\ell 
   %\langle XZ
   %\rangle(\theta)=&\frac{1}{4\pi}\sum_{\ell}(2\ell+1)C_{\ell}P_{\ell}(\cos\theta)\label{eq:xi_pl0}
 \end{align}
-where we have used the identity
+where $s_X$ and $s_Z$ are the spins of tracers, $_{s}Y_{\ell m}$ are spin spherical harmonics and
+we also used the identity
 \begin{align}
   \langle\tilde X_{\ell m}\tilde Z_{\ell' m'}\rangle=&C_{\ell}\delta_D(m,m')\delta_D(\ell,\ell'),
   % \\
@@ -619,15 +620,15 @@ where we have used the identity
   % P_{\ell}(\cos\theta)
   % \label{eq:Ylm_Pl}.
 \end{align}
-Using the addition theorem for spherical harmonics and the relation between spherical harmonics and
-wigner D-matrices\footnote{\url{https://en.wikipedia.org/wiki/Wigner_D-matrix}} \citep{Ng1999}, we can
-write
+Using the addition theorem for sping spherical harmonics and the relation between spherical
+harmonics and wigner D-matrices\footnote{\url{https://en.wikipedia.org/wiki/Wigner_D-matrix}}
+\citep{Ng1999}, we can write
 \begin{align}
   \langle XZ
   \rangle(\theta)=&\frac{1}{4\pi}\sum_{\ell}(2\ell+1)C_{\ell}D^{\ell}_{s_X,-s_Z}(0,\theta,0)
 \end{align}
 
-The galaxy number count is spin zero and shear is a spin-2 object. Thus the expressions for various correlations and cross correlations are
+The galaxy number count is spin zero and shear is a spin-2 object. Thus the expressions for various auto and cross correlations are
 \begin{align}
   \xi_{gg}(\theta)&=\frac{1}{4\pi}\sum_{\ell}{(2\ell+1)}C_{\ell}^{gg}D^{\ell}_{0,0}(0,\theta,0)=
   \frac{1}{4\pi}\sum_{\ell}{(2\ell+1)}C_{\ell}^{gg}P_{\ell}(\cos\theta)\label{eq:xi_gg_D}\\
@@ -656,16 +657,15 @@ Using relations from \cite{Kilbinger2017}, we can write
   \label{eq:xi_g_gamma}\\
   \xi_+(\theta)&=\frac{1}{4\pi}\sum_{\ell}{(2\ell+1)}C_{\ell}^{\gamma\gamma*}
   P_{\ell}(\cos\theta)\label{eq:xi_p}\\
-  \xi_-(\theta)&=\frac{1}{4\pi}\sum_{\ell}\frac{(\ell-4)!}{(\ell+4)!}\ell^4{(2\ell+1)}
-  C_{\ell}^{\kappa\kappa}
+  \xi_-(\theta)&\approx\frac{1}{4\pi}\sum_{\ell}{(2\ell+1)}
+  C_{\ell}^{\gamma\gamma*}\sqrt{\frac{(\ell-4)!}{(\ell+4)!}}
   P_{\ell}^4(\cos\theta)\label{eq:xi_m}
 \end{align}
 \todo{Can't relate eq.~\ref{eq:xi_p_D} and \ref{eq:xi_p}.
 Simply took the relation between $P_\ell^m$ and $J_m(\ell \theta)$ to get this expression
-from the Hankel transform for $\xi_-$. It may not be very accurate at large scale (low $\ell$) as
-is evident from $g\gamma_T$ expression. To be revisited.
+from the Hankel transform for $\xi_-$. Should work at small scales (high $\ell$) as it converges to
+hankel transform but cannot gurantee at large scales (low $\ell$). To be revisited.
 On positive note, eq.~\ref{eq:xi_g_gamma} matches expression in \cite{Putter2010}.}
-
 
 The {\tt ccl\_tracer\_corr\_legendre} routine computes these transform to convert angular power
 spectra, $C_\ell$, into correlation functions. We use the associated Legendre function
@@ -688,8 +688,13 @@ Same expressions can also be derived from Eqs.~\ref{eq:xi_p}--\ref{eq:xi_m} usin
 \end{align}
 which yields final expressions that coincide with Eq. \ref{eq:xipxim}.
 
-
-For numerical integration of the correlation functions, we make use of the public code {\tt FFTlog}\footnote{\url{http://casa.colorado.edu/~ajsh/FFTLog/}}\citep{Hamilton2000,Talman2009}. In brief, {\tt FFTlog} works on functions periodic in log space, by writing the Hankel Transform as a convolution between Bessel functions and the function of interest (in this case $C_\ell$). A version of this code is included in \ccl with minor modifications.
+For numerical integration to get (projected) correlation functions using hankel transform,
+we make use of the
+public code {\tt FFTlog}\footnote{\url{http://casa.colorado.edu/~ajsh/FFTLog/}}
+\citep{Hamilton2000,Talman2009}. In brief, {\tt FFTlog} works on functions periodic in log space,
+by writing the Hankel Transform as a convolution between Bessel functions and the function of
+interest (in this case $C_\ell$). A version of this code is included in \ccl with minor
+modifications.
 
 %-------------------------------------------------------------------------------
 \subsection{Halo mass function}
