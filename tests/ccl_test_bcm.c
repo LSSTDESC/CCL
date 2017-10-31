@@ -64,7 +64,7 @@ static void compare_bcm(int i_model,struct bcm_data * data)
   char* rtn;
   FILE *f,*f2;
   ccl_configuration config = default_config;
-  config.matter_power_spectrum_method=ccl_baryons;
+  config.baryons_power_spectrum_method=ccl_bcm;
   ccl_parameters params = ccl_parameters_create(data->Omega_c,data->Omega_b,data->Omega_k[i_model-1],
 						data->N_nu_rel, data->N_nu_mass, data->m_nu,
 						data->w_0[i_model-1],data->w_a[i_model-1],

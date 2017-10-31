@@ -2983,25 +2983,26 @@ SWIG_Python_NonDynamicSetAttr(PyObject *obj, PyObject *name, PyObject *value) {
 #define SWIGTYPE_p_CCLErrorPolicy swig_types[0]
 #define SWIGTYPE_p_CCL_ClTracer swig_types[1]
 #define SWIGTYPE_p_SplPar swig_types[2]
-#define SWIGTYPE_p_ccl_configuration swig_types[3]
-#define SWIGTYPE_p_ccl_cosmology swig_types[4]
-#define SWIGTYPE_p_ccl_data swig_types[5]
-#define SWIGTYPE_p_ccl_omega_x_label swig_types[6]
-#define SWIGTYPE_p_ccl_parameters swig_types[7]
-#define SWIGTYPE_p_char swig_types[8]
-#define SWIGTYPE_p_double swig_types[9]
-#define SWIGTYPE_p_f_double_double_p_void_p_int__double swig_types[10]
-#define SWIGTYPE_p_gsl_interp_accel swig_types[11]
-#define SWIGTYPE_p_gsl_spline swig_types[12]
-#define SWIGTYPE_p_gsl_spline2d swig_types[13]
-#define SWIGTYPE_p_int swig_types[14]
-#define SWIGTYPE_p_mass_function_t swig_types[15]
-#define SWIGTYPE_p_matter_power_spectrum_t swig_types[16]
-#define SWIGTYPE_p_transfer_function_t swig_types[17]
-#define SWIGTYPE_p_user_pz_info swig_types[18]
-#define SWIGTYPE_p_void swig_types[19]
-static swig_type_info *swig_types[21];
-static swig_module_info swig_module = {swig_types, 20, 0, 0, 0, 0};
+#define SWIGTYPE_p_baryons_power_spectrum_t swig_types[3]
+#define SWIGTYPE_p_ccl_configuration swig_types[4]
+#define SWIGTYPE_p_ccl_cosmology swig_types[5]
+#define SWIGTYPE_p_ccl_data swig_types[6]
+#define SWIGTYPE_p_ccl_omega_x_label swig_types[7]
+#define SWIGTYPE_p_ccl_parameters swig_types[8]
+#define SWIGTYPE_p_char swig_types[9]
+#define SWIGTYPE_p_double swig_types[10]
+#define SWIGTYPE_p_f_double_double_p_void_p_int__double swig_types[11]
+#define SWIGTYPE_p_gsl_interp_accel swig_types[12]
+#define SWIGTYPE_p_gsl_spline swig_types[13]
+#define SWIGTYPE_p_gsl_spline2d swig_types[14]
+#define SWIGTYPE_p_int swig_types[15]
+#define SWIGTYPE_p_mass_function_t swig_types[16]
+#define SWIGTYPE_p_matter_power_spectrum_t swig_types[17]
+#define SWIGTYPE_p_transfer_function_t swig_types[18]
+#define SWIGTYPE_p_user_pz_info swig_types[19]
+#define SWIGTYPE_p_void swig_types[20]
+static swig_type_info *swig_types[22];
+static swig_module_info swig_module = {swig_types, 21, 0, 0, 0, 0};
 #define SWIG_TypeQuery(name) SWIG_TypeQueryModule(&swig_module, &swig_module, name)
 #define SWIG_MangledTypeQuery(name) SWIG_MangledTypeQueryModule(&swig_module, &swig_module, name)
 
@@ -17059,6 +17060,66 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_configuration_baryons_power_spectrum_method_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  struct ccl_configuration *arg1 = (struct ccl_configuration *) 0 ;
+  baryons_power_spectrum_t arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:configuration_baryons_power_spectrum_method_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_configuration, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "configuration_baryons_power_spectrum_method_set" "', argument " "1"" of type '" "struct ccl_configuration *""'"); 
+  }
+  arg1 = (struct ccl_configuration *)(argp1);
+  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "configuration_baryons_power_spectrum_method_set" "', argument " "2"" of type '" "baryons_power_spectrum_t""'");
+  } 
+  arg2 = (baryons_power_spectrum_t)(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->baryons_power_spectrum_method = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_configuration_baryons_power_spectrum_method_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  struct ccl_configuration *arg1 = (struct ccl_configuration *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  baryons_power_spectrum_t result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:configuration_baryons_power_spectrum_method_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_configuration, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "configuration_baryons_power_spectrum_method_get" "', argument " "1"" of type '" "struct ccl_configuration *""'"); 
+  }
+  arg1 = (struct ccl_configuration *)(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (baryons_power_spectrum_t) ((arg1)->baryons_power_spectrum_method);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_int((int)(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_configuration_mass_function_method_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   struct ccl_configuration *arg1 = (struct ccl_configuration *) 0 ;
@@ -18209,6 +18270,8 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"configuration_transfer_function_method_get", _wrap_configuration_transfer_function_method_get, METH_VARARGS, (char *)"configuration_transfer_function_method_get(configuration self) -> transfer_function_t"},
 	 { (char *)"configuration_matter_power_spectrum_method_set", _wrap_configuration_matter_power_spectrum_method_set, METH_VARARGS, (char *)"configuration_matter_power_spectrum_method_set(configuration self, matter_power_spectrum_t matter_power_spectrum_method)"},
 	 { (char *)"configuration_matter_power_spectrum_method_get", _wrap_configuration_matter_power_spectrum_method_get, METH_VARARGS, (char *)"configuration_matter_power_spectrum_method_get(configuration self) -> matter_power_spectrum_t"},
+	 { (char *)"configuration_baryons_power_spectrum_method_set", _wrap_configuration_baryons_power_spectrum_method_set, METH_VARARGS, (char *)"configuration_baryons_power_spectrum_method_set(configuration self, baryons_power_spectrum_t baryons_power_spectrum_method)"},
+	 { (char *)"configuration_baryons_power_spectrum_method_get", _wrap_configuration_baryons_power_spectrum_method_get, METH_VARARGS, (char *)"configuration_baryons_power_spectrum_method_get(configuration self) -> baryons_power_spectrum_t"},
 	 { (char *)"configuration_mass_function_method_set", _wrap_configuration_mass_function_method_set, METH_VARARGS, (char *)"configuration_mass_function_method_set(configuration self, mass_function_t mass_function_method)"},
 	 { (char *)"configuration_mass_function_method_get", _wrap_configuration_mass_function_method_get, METH_VARARGS, (char *)"configuration_mass_function_method_get(configuration self) -> mass_function_t"},
 	 { (char *)"new_configuration", _wrap_new_configuration, METH_VARARGS, (char *)"new_configuration() -> configuration"},
@@ -18247,6 +18310,7 @@ static PyMethodDef SwigMethods[] = {
 static swig_type_info _swigt__p_CCLErrorPolicy = {"_p_CCLErrorPolicy", "enum CCLErrorPolicy *|CCLErrorPolicy *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_CCL_ClTracer = {"_p_CCL_ClTracer", "CCL_ClTracer *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_SplPar = {"_p_SplPar", "SplPar *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_baryons_power_spectrum_t = {"_p_baryons_power_spectrum_t", "enum baryons_power_spectrum_t *|baryons_power_spectrum_t *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_ccl_configuration = {"_p_ccl_configuration", "struct ccl_configuration *|ccl_configuration *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_ccl_cosmology = {"_p_ccl_cosmology", "struct ccl_cosmology *|ccl_cosmology *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_ccl_data = {"_p_ccl_data", "struct ccl_data *|ccl_data *", 0, 0, (void*)0, 0};
@@ -18269,6 +18333,7 @@ static swig_type_info *swig_type_initial[] = {
   &_swigt__p_CCLErrorPolicy,
   &_swigt__p_CCL_ClTracer,
   &_swigt__p_SplPar,
+  &_swigt__p_baryons_power_spectrum_t,
   &_swigt__p_ccl_configuration,
   &_swigt__p_ccl_cosmology,
   &_swigt__p_ccl_data,
@@ -18291,6 +18356,7 @@ static swig_type_info *swig_type_initial[] = {
 static swig_cast_info _swigc__p_CCLErrorPolicy[] = {  {&_swigt__p_CCLErrorPolicy, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_CCL_ClTracer[] = {  {&_swigt__p_CCL_ClTracer, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_SplPar[] = {  {&_swigt__p_SplPar, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_baryons_power_spectrum_t[] = {  {&_swigt__p_baryons_power_spectrum_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_ccl_configuration[] = {  {&_swigt__p_ccl_configuration, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_ccl_cosmology[] = {  {&_swigt__p_ccl_cosmology, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_ccl_data[] = {  {&_swigt__p_ccl_data, 0, 0, 0},{0, 0, 0, 0}};
@@ -18313,6 +18379,7 @@ static swig_cast_info *swig_cast_initial[] = {
   _swigc__p_CCLErrorPolicy,
   _swigc__p_CCL_ClTracer,
   _swigc__p_SplPar,
+  _swigc__p_baryons_power_spectrum_t,
   _swigc__p_ccl_configuration,
   _swigc__p_ccl_cosmology,
   _swigc__p_ccl_data,
@@ -19072,7 +19139,8 @@ SWIG_init(void) {
   SWIG_Python_SetConstant(d, "linear",SWIG_From_int((int)(ccl_linear)));
   SWIG_Python_SetConstant(d, "halofit",SWIG_From_int((int)(ccl_halofit)));
   SWIG_Python_SetConstant(d, "halo_model",SWIG_From_int((int)(ccl_halo_model)));
-  SWIG_Python_SetConstant(d, "baryons",SWIG_From_int((int)(ccl_baryons)));
+  SWIG_Python_SetConstant(d, "nobaryons",SWIG_From_int((int)(ccl_nobaryons)));
+  SWIG_Python_SetConstant(d, "bcm",SWIG_From_int((int)(ccl_bcm)));
   SWIG_Python_SetConstant(d, "tinker",SWIG_From_int((int)(ccl_tinker)));
   SWIG_Python_SetConstant(d, "tinker10",SWIG_From_int((int)(ccl_tinker10)));
   SWIG_Python_SetConstant(d, "watson",SWIG_From_int((int)(ccl_watson)));

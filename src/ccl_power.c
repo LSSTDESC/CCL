@@ -267,7 +267,7 @@ static void ccl_fill_class_parameters(ccl_cosmology * cosmo, struct file_content
   strcpy(fc->value[0],"mPk"); 
 
   strcpy(fc->name[1],"non linear");
-  if (cosmo->config.matter_power_spectrum_method == ccl_halofit || cosmo->config.matter_power_spectrum_method == ccl_baryons)
+  if (cosmo->config.matter_power_spectrum_method == ccl_halofit)
     strcpy(fc->value[1],"Halofit");
   else 
     strcpy(fc->value[1],"none");
@@ -467,7 +467,7 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int * statu
       strcpy(cosmo->status_message ,"ccl_power.c: ccl_cosmology_compute_power_class(): K_MIN is less than CLASS's kmin. Not yet supported for nonlinear P(k).\n");
     }
     
-    if(cosmo->config.matter_power_spectrum_method==ccl_halofit || cosmo->config.matter_power_spectrum_method==ccl_baryons) {
+    if(cosmo->config.matter_power_spectrum_method==ccl_halofit) {
       double psout_nl;
       
       for (int i=0; i<nk; i++) {
@@ -1122,7 +1122,7 @@ double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double k, double a, int *s
     return ccl_linear_matter_power(cosmo,k,a,status);
 
   }
-  else if (cosmo->config.matter_power_spectrum_method==ccl_halofit || cosmo->config.matter_power_spectrum_method==ccl_baryons){
+  else if (cosmo->config.matter_power_spectrum_method==ccl_halofit){
 
     if (!cosmo->computed_power)
       ccl_cosmology_compute_power(cosmo,status);
@@ -1147,7 +1147,7 @@ double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double k, double a, int *s
       log_p_1 = ccl_power_extrapol_highk(cosmo,k,a,cosmo->data.p_nl,status);
       pk=exp(log_p_1);
     }
-    if(cosmo->config.matter_power_spectrum_method==ccl_baryons){
+    if(cosmo->config.baryons_power_spectrum_method==ccl_bcm){
       int pwstatus=0;
       double fbcm=ccl_bcm_model_fkz(cosmo,k,a,&pwstatus);
       pk=pk*fbcm;

@@ -14,7 +14,7 @@
 #include "ccl_error.h"
 #include <stdlib.h>
 
-const ccl_configuration default_config = {ccl_boltzmann_class, ccl_halofit, ccl_tinker10};
+const ccl_configuration default_config = {ccl_boltzmann_class, ccl_halofit, ccl_nobaryons, ccl_tinker10};
 
 /* ------- ROUTINE: ccl_cosmology_read_config ------
    INPUTS: none, but will look for ini file in include/ dir

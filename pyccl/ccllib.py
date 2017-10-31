@@ -918,7 +918,8 @@ boltzmann_camb = _ccllib.boltzmann_camb
 linear = _ccllib.linear
 halofit = _ccllib.halofit
 halo_model = _ccllib.halo_model
-baryons = _ccllib.baryons
+nobaryons = _ccllib.nobaryons
+bcm = _ccllib.bcm
 tinker = _ccllib.tinker
 tinker10 = _ccllib.tinker10
 watson = _ccllib.watson
@@ -939,6 +940,10 @@ class configuration(_object):
     __swig_getmethods__["matter_power_spectrum_method"] = _ccllib.configuration_matter_power_spectrum_method_get
     if _newclass:
         matter_power_spectrum_method = _swig_property(_ccllib.configuration_matter_power_spectrum_method_get, _ccllib.configuration_matter_power_spectrum_method_set)
+    __swig_setmethods__["baryons_power_spectrum_method"] = _ccllib.configuration_baryons_power_spectrum_method_set
+    __swig_getmethods__["baryons_power_spectrum_method"] = _ccllib.configuration_baryons_power_spectrum_method_get
+    if _newclass:
+        baryons_power_spectrum_method = _swig_property(_ccllib.configuration_baryons_power_spectrum_method_get, _ccllib.configuration_baryons_power_spectrum_method_set)
     __swig_setmethods__["mass_function_method"] = _ccllib.configuration_mass_function_method_set
     __swig_getmethods__["mass_function_method"] = _ccllib.configuration_mass_function_method_get
     if _newclass:

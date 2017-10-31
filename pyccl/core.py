@@ -23,8 +23,12 @@ matter_power_spectrum_types = {
     'halo_model':   lib.halo_model,
     'halomodel':    lib.halo_model,
     'halofit':      lib.halofit,
-    'linear':       lib.linear,
-    'baryons':      lib.baryons
+    'linear':       lib.linear
+}
+
+baryons_power_spectrum_types = {
+    'nobaryons':   lib.nobaryons,
+    'bcm':      lib.bcm
 }
 
 mass_function_types = {
@@ -223,6 +227,7 @@ class Cosmology(object):
                  z_mg=None, df_mg=None, 
                  transfer_function='boltzmann_class',
                  matter_power_spectrum='halofit',
+                 baryons_power_spectrum='nobaryons',
                  mass_function='tinker'):
         """Creates a wrapper for ccl_cosmology.
 
@@ -238,6 +243,8 @@ class Cosmology(object):
             use. Defaults to `boltzmann_class`.
             matter_power_spectrum (:obj:`str`, optional): The matter power 
             spectrum to use. Defaults to `halofit`.
+            baryons_power_spectrum (:obj:`str`, optional): The correction from baryonic
+            effects to be implemented. Defaults to `nobaryons`.
             mass_function (:obj:`str`, optional): The mass function to use. 
             Defaults to `tinker` (2010).
 
@@ -299,6 +306,11 @@ class Cosmology(object):
                                   "type. Available options are: %s" \
                                  % (matter_power_spectrum, 
                                     matter_power_spectrum_types.keys()) )
+            if baryons_power_spectrum not in baryons_power_spectrum_types.keys():
+                raise ValueError( "'%s' is not a valid baryons_power_spectrum "
+                                  "type. Available options are: %s" \
+                                 % (baryons_power_spectrum, 
+                                    baryons_power_spectrum_types.keys()) )
             if mass_function not in mass_function_types.keys():
                 raise ValueError( "'%s' is not a valid mass_function type. "
                                   "Available options are: %s" \
@@ -312,6 +324,8 @@ class Cosmology(object):
                             transfer_function_types[transfer_function]
             config.matter_power_spectrum_method = \
                             matter_power_spectrum_types[matter_power_spectrum]
+            config.baryons_power_spectrum_method = \
+                            baryons_power_spectrum_types[baryons_power_spectrum]
             config.mass_function_method = \
                             mass_function_types[mass_function]
             
