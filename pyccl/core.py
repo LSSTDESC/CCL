@@ -228,7 +228,7 @@ class Cosmology(object):
                  transfer_function='boltzmann_class',
                  matter_power_spectrum='halofit',
                  baryons_power_spectrum='nobaryons',
-                 mass_function='tinker'):
+                 mass_function='tinker10'):
         """Creates a wrapper for ccl_cosmology.
 
         TODO: enumerate transfer_function and 
@@ -389,7 +389,7 @@ class Cosmology(object):
         """
         status = 0
         status = lib.cosmology_compute_distances(self.cosmo, status)
-        check(status)
+        check(status, self.cosmo)
     
     def compute_growth(self):
         """Interfaces with src/ccl_background.c: ccl_cosmology_compute_growth().
@@ -398,7 +398,7 @@ class Cosmology(object):
         """
         status = 0
         status = lib.cosmology_compute_growth(self.cosmo, status)
-        check(status)
+        check(status, self.cosmo)
     
     def compute_power(self):
         """Interfaces with src/ccl_power.c: ccl_cosmology_compute_power().
@@ -407,7 +407,7 @@ class Cosmology(object):
         """
         status = 0
         status = lib.cosmology_compute_power(self.cosmo, status)
-        check(status)
+        check(status, self.cosmo)
     
     def has_distances(self):
         """Checks if the distances have been precomputed.

@@ -67,7 +67,7 @@ In preparation for constraining cosmology with the Large Synoptic Survey Telesco
 
 The Core Cosmology Library is written in C and incorporates the {\tt CLASS} code \citep{class} to provide predictions for the matter power spectrum.\footnote{Future versions of the library will incorporate other power-spectrum libraries and methods.} A Python wrapper is also provided for ease of use.
 
-This note describes how to install \ccl (Section \ref{sec:install}), how \ccl is documented (Section \ref{sec:doc}), its functionality (Section \ref{sec:func}), the relevant unit tests (Section \ref{sec:tests}), directions for finding a \ccl example (Section \ref{sec:example}), the Python wrapper (Section \ref{sec:python}), future plans (Section \ref{sec:future}), means to contact the developers (Section \ref{sec:feedback}), and the license under which \ccl is released (Section \ref{sec:license}).
+This note describes how to install \ccl (Section \ref{sec:install}), how \ccl is documented (Section \ref{sec:doc}), its functionality (Section \ref{sec:func}), the relevant unit tests (Section \ref{sec:tests}), directions for finding a \ccl example (Section \ref{sec:example}), the Python wrapper (Section \ref{sec:python}), future plans (Section \ref{sec:future}), means to contact the developers (Section \ref{sec:feedback}), instructions on how to cite \ccl (and {\tt CLASS}, Section \ref{sec:cite}), and the license under which \ccl is released (Section \ref{sec:license}).
 
 
 \section{Installation}
@@ -176,6 +176,24 @@ This will allow for full access to the virtual machine via a terminal, so you ca
 
 \section{Functionality}
 \label{sec:func}
+
+\subsection{Physical constants}
+
+\label{sec:constants}
+We have performed a comparison of the physical constants used in \ccl and included dependencies and external sources. See Table \ref{tab:constants} for percent differences of the constants between these sources.
+
+\input{table_constants}
+
+
+
+
+
+
+
+
+
+
+
 
 \subsection{Supported cosmological models}
 
@@ -360,7 +378,7 @@ All spline and grid parameters relevant for computing quantities such as distanc
 \item {\tt K$\_$MAX$\_$SPLINE}: The maximum value of wavenumber considered in the spline. This is explained in more detail in the coming subsections. The default is {\tt K$\_$MAX$\_$SPLINE}$=50/$Mpc.
 \item {\tt K$\_$MAX}: The maximum value of wavenumber when integrating over $k$. The default is {\tt K$\_$MAX}$=1000$/Mpc.
 \item {\tt K$\_$MIN$\_$DEFAULT}:  The minimum value of wavenumber when integrating over $k$. The default is {\tt K$\_$MIN$\_$DEFAULT}$=5 \times 10^{-5}$/Mpc.
-\item {\tt N$\_$K}: Number of bins for the wavenumber. The default is {\tt N$\_$K}$=1000$.
+\item {\tt N$\_$K}: Number of bins per decade for the wavenumber. The default is {\tt N$\_$K}$=167$.
 \end{itemize}
 Note that a copy of {\tt ccl$\_$params.ini} is installed along with the library, so changing the version of this file inside the source directory will not have any effect unless you reinstall.
 
@@ -414,7 +432,7 @@ With the implementation described in the previous section, the power spectrum sp
 
 As in the previous section, the power spectrum at small wavenumber is extrapolated using a power-law. This extrapolation is performed below a fiducial value of {\tt K\_MIN\_DEFAULT}$=5\times 10^{-5}$.
 
-We have found that changing {\tt N$\_$A} to $200$, or changing {\tt N$\_$K} to $5000$, does not change the results presented in Figures \ref{fig:NLextrapol} and \ref{fig:Lextrapol} in this section.
+We have found that changing {\tt N$\_$A} to $200$, or changing the sampling of the wavenumber to $5000$ points, does not change the results presented in Figures \ref{fig:NLextrapol} and \ref{fig:Lextrapol} in this section.
 
 \subsubsection{Wishlist for the future}
 \label{Pk_wishlist}
@@ -976,7 +994,11 @@ Distance Calculations Example.ipynb,
 Lensing angular power spectrum.ipynb,
 
 Correlation.ipynb.
+
+MCMC Likelihood Analysis.ipynb
 \end{verbatim}
+
+Note that the likelihood analysis in the last notebook is not intended to be realistic, but it gives an operational example of how {\tt CCL} can be integrated into such an analysis. In particular, the notebook only considers cosmic shear over one wide redshift bin and the covariance matrix adopted solely includes a contribution from cosmic variance. The ``data vector'' is simply a simulated using {\tt CCL} theoretical predictions. For speed, theoretical predictions use the BBKS power spectrum plementation.
 
 
 \subsection{Technical notes on how the Python wrapper is implemented}
@@ -1022,6 +1044,11 @@ In the future, we hope that \ccl will include other functionalities. Functionali
 
 If you would like to contribute to \ccl or contact the developers, please do so through the \ccl github repository located at \url{https://github.com/LSSTDESC/CCL}.
 
+\section{Citing \ccl}
+\label{sec:cite}
+
+If you use \ccl in your work, please provide a link to the repository and cite it as LSST DESC (in preparation). For free use of the {\tt CLASS} library, the {\tt CLASS} developers require that the {\tt CLASS} paper be cited: {\it  CLASS II: Approximation schemes}, D. Blas, J. Lesgourgues, T. Tram, arXiv:1104.2933, JCAP 1107 (2011) 034. The {\tt CLASS} repository can be found in \url{http://class-code.net}.
+
 \section{License}
 \label{sec:license}
 
@@ -1056,7 +1083,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 \input{acknowledgments}
 
 \input{contributions}
-
 
 %{\it Facilities:} \facility{LSST}
 

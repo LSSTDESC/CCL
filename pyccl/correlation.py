@@ -30,7 +30,7 @@ def correlation(cosmo, ell, C_ell, theta, corr_type='gg', method='fftlog'):
     Returns:
         Value(s) of the correlation function at the input angular separation(s).
     """
-
+    cosmo_in = cosmo
     cosmo = _cosmology_obj(cosmo)
     status = 0
 
@@ -55,6 +55,6 @@ def correlation(cosmo, ell, C_ell, theta, corr_type='gg', method='fftlog'):
                                       correlation_types[corr_type],
                                       correlation_methods[method],
                                       len(theta), status)
-    check(status)
+    check(status, cosmo_in)
     if scalar: return wth[0]
     return wth
