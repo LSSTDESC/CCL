@@ -356,7 +356,8 @@ All spline and grid parameters relevant for computing quantities such as distanc
 \begin{itemize}
 \item {\tt A$\_$SPLINE$\_$DELTA}: spacing of the scale factor spline. The default is {\tt A$\_$SPLINE$\_$DELTA}$=0.001$.
 \item {\tt A$\_$SPLINE$\_$NA}: number of points in the scale factor spline. The default is {\tt A$\_$SPLINE$\_$NA}$=1000$.
-\item {\tt A$\_$SPLINE$\_$MIN}: minimum value for the scale factor spline. The default is {\tt A$\_$SPLINE$\_$MIN}$=0.1$.
+\item {\tt A$\_$SPLINE$\_$MIN}: minimum value for the scale factor spline. The default is {\tt A$\_$SPLINE$\_$MIN}$=0.01$. This only applies to background quantities.
+\item {\tt A$\_$SPLINE$\_$MIN$\_$PK}: minimum value for the scale factor spline. The default is {\tt A$\_$SPLINE$\_$MIN}$=0.1$. This only applies for the 2D power spectrum splines.
 \item {\tt A$\_$SPLINE$\_$MAX}: maximum value for the scale factor spline. The default is {\tt A$\_$SPLINE$\_$MAX}$=1$.
 \item {\tt LOGM$\_$SPLINE$\_$DELTA}: spacing of the mass function spline (logarithm). The default is {\tt LOGM$\_$SPLINE$\_$DELTA}$=0.025$.
 \item {\tt LOGM$\_$SPLINE$\_$NM}: number of points in the mass function spline (logarithm). The default is {\tt LOGM$\_$SPLINE$\_$NA}$=440$.
@@ -525,7 +526,7 @@ where
  &\tilde{\Delta}_\ell^{\rm L}(k)=\frac{3}{2}\Omega_{M,0}H_0^2\sqrt{\frac{(\ell+2)!}{(\ell-2)}}\frac{1}{k^2}\,
  \frac{1+z_\ell}{r(\chi_\ell)}W^{\rm L}(z_\ell)\\
  &\tilde{\Delta}_\ell^{\rm IA}(k)=\sqrt{\frac{(\ell+2)!}{(\ell-2)!}}\frac{p_z(z_\ell)\,b_{\rm IA}(z_\ell)f_{\rm red}(z_\ell)H(z_\ell)}{(\ell+1/2)^2}\\
- &\tilde{\Delta}_\ell^{\rm C}(k)=\frac{3}{2}\Omega_{M,0}H_0^2\,\ell(\ell+1)\frac{1+z_\ell}{k^2}\,\frac{r(\chi_{\rm S})-r(\chi_\ell)}{r(\chi_\ell)r(\chi_{\rm S}))}\,\Theta(\chi_\ell;0,\chi_{\rm S}).
+ &\tilde{\Delta}_\ell^{\rm C}(k)=\frac{3}{2}\Omega_{M,0}H_0^2\,\ell(\ell+1)\frac{1+z_\ell}{k^2}\,\frac{r(\chi_{\rm S})-r(\chi_\ell)}{r(\chi_\ell)r(\chi_{\rm S})}\,\Theta(\chi_\ell;0,\chi_{\rm S}).
 \end{align}
 Here ($\Theta(x;x_i,x_f)$) is a top-hat function (1 for $x\in[x_i,x_f]$ and 0 otherwise).
 
@@ -991,7 +992,7 @@ Distance Calculations Example.ipynb,
 
 Lensing angular power spectrum.ipynb,
 
-Correlation.ipynb.
+Correlation.ipynb,
 
 MCMC Likelihood Analysis.ipynb
 \end{verbatim}
