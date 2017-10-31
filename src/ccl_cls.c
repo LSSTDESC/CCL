@@ -371,7 +371,7 @@ static CCL_ClTracer *cl_tracer_new(ccl_cosmology *cosmo,int tracer_type,
       }
     }
   }
-  else if(tracer_type=CL_TRACER_CL) {
+  else if(tracer_type==CL_TRACER_CL) {
     clt->chi_source=ccl_comoving_radial_distance(cosmo,1./(1+z_source),status);
     clt->chimax=clt->chi_source;
     clt->chimin=0;
