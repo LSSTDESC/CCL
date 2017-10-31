@@ -1148,7 +1148,7 @@ double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double k, double a, int *s
       pk=exp(log_p_1);
     }
     if(cosmo->config.matter_power_spectrum_method==ccl_baryons){
-      int pwstatus;
+      int pwstatus=0;
       double fbcm=ccl_bcm_model_fkz(cosmo,k,a,&pwstatus);
       pk=pk*fbcm;
       if(pwstatus){
