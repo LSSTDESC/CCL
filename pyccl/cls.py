@@ -284,6 +284,7 @@ def angular_cl(cosmo, cltracer1, cltracer2, ell):
 
     """
     # Access ccl_cosmology object
+    cosmo_in = cosmo
     cosmo = _cosmology_obj(cosmo)
 
     # Access CCL_ClTracer objects
@@ -301,5 +302,5 @@ def angular_cl(cosmo, cltracer1, cltracer2, ell):
     else:
         # Use vectorised function
         cl, status = lib.angular_cl_vec(cosmo, clt1, clt2, ell, len(ell), status)
-    check(status)
+    check(status, cosmo_in)
     return cl
