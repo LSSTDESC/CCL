@@ -187,11 +187,11 @@ For some specific cosmologies you can also use functions **`ccl_parameters_creat
 The status flag `int status = 0` is passed around in almost every `CCL` function. Normally zero is returned while nonzero if there were some errors during a function call. For specific cases see documentation for **`ccl_error.c`**.
 
 ### The `ccl_cosmology` object
-For the majority of `CCL`'s functions you need an object of type **`ccl_cosmology`**, which can be initalize by function **`ccl_cosmology_create`**
+For the majority of `CCL`'s functions you need an object of type **`ccl_cosmology`**, which can be initialized by function **`ccl_cosmology_create`**
 ```c
 ccl_cosmology * ccl_cosmology_create(ccl_parameters params, ccl_configuration config);
 ```
-Note that the function returns a pointer. Variable `params` of type **`ccl_parameters`** contains cosmological parameters created in previous step. Structure **`ccl_configuration`** contains information about methods for computing transfer function, matter power spectrum and mass function (for available methods see ***include/ccl_config.h***). For now, you should use default configuration `default_config`
+Note that the function returns a pointer. Variable `params` of type **`ccl_parameters`** contains cosmological parameters created in previous step. Structure **`ccl_configuration`** contains information about methods for computing transfer function, matter power spectrum and mass function (for available methods see ***include/ccl_config.h***). In the default configuration `default_config`, `CCL` will use the following set-up:
 ```c
 const ccl_configuration default_config = {ccl_boltzmann_class, ccl_halofit, ccl_tinker10};
 ```
@@ -276,7 +276,7 @@ where `smooth_mass` is mass smoothing scale (in units of *M_sun*) and `odelta` i
 ````c
 double (* your_pz_func)(double z_ph, double z_spec, void *param, int * status);
 ````
-which returns the liklihood of measuring a particular photometric redshift `z_ph` given a spectroscopic redshift `z_spec`, with a pointer to additional arguments `param` and a status flag. Then you call function **`ccl_specs_create_photoz_info`**
+which returns the likelihood of measuring a particular photometric redshift `z_ph` given a spectroscopic redshift `z_spec`, with a pointer to additional arguments `param` and a status flag. Then you call function **`ccl_specs_create_photoz_info`**
 ````c
 user_pz_info* ccl_specs_create_photoz_info(void * user_params, 
                                            double(*user_pz_func)(double, double, void*, int*));
@@ -288,7 +288,7 @@ typedef struct {
   void *  your_pz_params;
 } user_pz_info;
 ````
-The expected *dN/dz* for lensing or clustering galaxies with given binnig can be obtained by function **`ccl_specs_dNdz_tomog`**
+The expected *dN/dz* for lensing or clustering galaxies with given binning can be obtained by function **`ccl_specs_dNdz_tomog`**
 ````c
 void ccl_specs_dNdz_tomog(double z, int dNdz_type, double bin_zmin, double bin_zmax,
                           user_pz_info * user_info,  double *tomoout, int *status);
