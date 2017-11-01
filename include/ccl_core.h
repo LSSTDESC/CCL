@@ -169,6 +169,9 @@ ccl_cosmology * ccl_cosmology_create_with_lcdm_params(
  * @param h Hubble constant in units of 100 km/s/Mpc
  * @param norm_pk the normalization of the power spectrum, either A_s or sigma_8
  * @param n_s the power-law index of the power spectrum
+ * @param bcm_log10Mc one of the parameters of the BCM model
+ * @param bcm_etab one of the parameters of the BCM model
+ * @param bcm_ks one of the parameters of the BCM model
  * @param nz_mgrowth the number of redshifts where the modified growth is provided
  * @param zarr_mgrowth the array of redshifts where the modified growth is provided
  * @param dfarr_mgrowth the modified growth function vector provided
