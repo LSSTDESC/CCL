@@ -2,7 +2,7 @@
 from pyccl import ccllib as lib
 import numpy as np
 from warnings import warn
-from pyutils import check
+from pyccl.pyutils import check
 import math
 
 # Configuration types
