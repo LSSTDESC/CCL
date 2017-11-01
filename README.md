@@ -162,7 +162,7 @@ For given cosmology we can compute linear and non-linear matter power spectra us
 double ccl_linear_matter_power(ccl_cosmology * cosmo, double k, double a);
 double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double k, double a);
 ```
-It is possible to incorporate the impact of baryonic processes on the total matter power spectrum via the **`baryons_matter_power_spectrum`** flag is set to **`ccl_bcm`**. Please see the CCL note for details on the implementation.
+It is possible to incorporate the impact of baryonic processes on the total matter power spectrum via the **`baryons_power_spectrum`** flag is set to **`ccl_bcm`**. Please see the CCL note for details on the implementation.
 Sigma_8 can be calculated by function **`ccl_sigma8`**, or more generally by function **`ccl_sigmaR`**, which computes the variance of the density field smoothed by spherical top-hat window function on a comoving distance **`R`** (in Mpc).
 ```c
 double ccl_sigmaR(ccl_cosmology *cosmo, double R);
