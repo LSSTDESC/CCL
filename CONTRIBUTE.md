@@ -1,3 +1,12 @@
+Working on an issue on github
+-----------------------------
+1. If you work on an issue (e.g. number 273), create a new local branch with ```git checkout -b issue273```.
+2. Comment on the issue page linking the branch to the issue, and fice versa.
+3. Fix the issue.
+4. Make a pull request following the instructions below.
+5. Comment on the issue page linking the PR to the issue, and vice versa.
+
+
 Reviewing a pull request (PR) on github
 ---------------------------------------
 1. Checkout the branch
