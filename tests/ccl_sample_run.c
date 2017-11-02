@@ -44,15 +44,16 @@ int main(int argc,char **argv)
 {
   //status flag
   int status =0;
+
   // Initialize cosmological parameters
   ccl_configuration config=default_config;
   config.transfer_function_method=ccl_boltzmann_class;
-  //ccl_parameters params=ccl_parameters_create(OC,OB,OK,ON,W0,WA,HH,NAN,NS,-1,NULL,NULL);
   ccl_parameters params = ccl_parameters_create(OC, OB, OK, NREL, NMAS, MNU, W0, WA, HH, NORMPS, NS,0,NULL,NULL, &status);
   //printf("in sample run w0=%1.12f, wa=%1.12f\n", W0, WA);
   
   // Initialize cosmology object given cosmo params
   ccl_cosmology *cosmo=ccl_cosmology_create(params,config);
+
   // Compute radial distances (see include/ccl_background.h for more routines)
   printf("Comoving distance to z = %.3lf is chi = %.3lf Mpc\n",
 	 ZD,ccl_comoving_radial_distance(cosmo,1./(1+ZD), &status));
@@ -71,7 +72,21 @@ int main(int argc,char **argv)
   // Compute growth factor and growth rate (see include/ccl_background.h for more routines)
   printf("Growth factor and growth rate at z = %.3lf are D = %.3lf and f = %.3lf\n",
 	 ZD, ccl_growth_factor(cosmo,1./(1+ZD), &status),ccl_growth_rate(cosmo,1./(1+ZD), &status));
-  
+ 
+  // Compute Omega_m, Omega_L and Omega_r at different times
+  printf("z\tOmega_m\tOmega_L\tOmega_r\n");
+  double Om, OL, Or;
+  for (int z=10000;z!=0;z/=3){
+    Om = ccl_omega_x(cosmo, 1./(z+1), 0, &status);
+    OL = ccl_omega_x(cosmo, 1./(z+1), 1, &status);
+    Or = ccl_omega_x(cosmo, 1./(z+1), 2, &status);
+    printf("%i\t%.3f\t%.3f\t%.3f\n", z, Om, OL, Or);
+  }
+  Om = ccl_omega_x(cosmo, 1., 0, &status);
+  OL = ccl_omega_x(cosmo, 1., 1, &status);
+  Or = ccl_omega_x(cosmo, 1., 2, &status);
+  printf("%i\t%.3f\t%.3f\t%.3f\n", 0, Om, OL, Or);
+
   // Compute sigma_8
   printf("Initializing power spectrum...\n");
   printf("sigma_8 = %.3lf\n\n", ccl_sigma8(cosmo, &status));
@@ -133,7 +148,13 @@ int main(int argc,char **argv)
   user_pz_info * pz_info_example;
   
   // Create the struct to hold the user information about photo_z's.
-  pz_info_example = ccl_specs_create_photoz_info(&my_params_example, &user_pz_probability); 
+  pz_info_example = ccl_specs_create_photoz_info(&my_params_example, &user_pz_probability);
+  
+  // Alternatively, we could have used the built-in Gaussian photo-z pdf, 
+  // which assumes sigma_z = sigma_z0 * (1 + z) (not used in what follows).
+  double sigma_z0 = 0.05;
+  user_pz_info *pz_info_gaussian;
+  pz_info_gaussian = ccl_specs_create_gaussian_photoz_info(sigma_z0);
   
   double z_test;
   double dNdz_tomo;
@@ -142,11 +163,13 @@ int main(int argc,char **argv)
   
   //Try splitting dNdz (lensing) into 5 redshift bins
   double tmp1,tmp2,tmp3,tmp4,tmp5;
-  printf("Trying splitting dNdz (lensing) into 5 redshift bins. Output written into file tests/specs_example_tomo_lens.out\n");
+  printf("Trying splitting dNdz (lensing) into 5 redshift bins. "
+         "Output written into file tests/specs_example_tomo_lens.out\n");
   output = fopen("./tests/specs_example_tomo_lens.out", "w"); 
   
   if(!output) {
-    fprintf(stderr, "Could not write to 'tests' subdirectory - please run this program from the main CCL directory\n");
+    fprintf(stderr, "Could not write to 'tests' subdirectory"
+                    " - please run this program from the main CCL directory\n");
     exit(1);
   }
   status = 0;
@@ -164,7 +187,8 @@ int main(int argc,char **argv)
   fclose(output);
   
   //Try splitting dNdz (clustering) into 5 redshift bins
-  printf("Trying splitting dNdz (clustering) into 5 redshift bins. Output written into file tests/specs_example_tomo_clu.out\n");
+  printf("Trying splitting dNdz (clustering) into 5 redshift bins. "
+         "Output written into file tests/specs_example_tomo_clu.out\n");
   output = fopen("./tests/specs_example_tomo_clu.out", "w");     
   for (z=0; z<100; z=z+1) {
     z_test = 0.035*z;

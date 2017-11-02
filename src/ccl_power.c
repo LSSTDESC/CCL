@@ -406,7 +406,9 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int * statu
   //CLASS calculations done - now allocate CCL splines
   double kmin = cosmo->data.k_min_lin;
   double kmax = ccl_splines->K_MAX_SPLINE;
-  int nk = ccl_splines->N_K;
+  //Compute nk from number of decades and N_K = # k per decade
+  double ndecades = log10(kmax) - log10(kmin);
+  int nk = (int)ceil(ndecades*ccl_splines->N_K);
   double amin = ccl_splines->A_SPLINE_MIN;
   double amax = ccl_splines->A_SPLINE_MAX;
   int na = ccl_splines->N_A;
@@ -694,7 +696,9 @@ static void ccl_cosmology_compute_power_eh(ccl_cosmology * cosmo, int * status)
   cosmo->data.k_max_nl=ccl_splines->K_MAX;
   double kmin = cosmo->data.k_min_lin;
   double kmax = ccl_splines->K_MAX;
-  int nk = ccl_splines->N_K;
+  //Compute nk from number of decades and N_K = # k per decade
+  double ndecades = log10(kmax) - log10(kmin);
+  int nk = (int)ceil(ndecades*ccl_splines->N_K);
   double amin = ccl_splines->A_SPLINE_MIN;
   double amax = ccl_splines->A_SPLINE_MAX;
   int na = ccl_splines->N_A;
@@ -852,7 +856,9 @@ static void ccl_cosmology_compute_power_bbks(ccl_cosmology * cosmo, int * status
   cosmo->data.k_max_nl=ccl_splines->K_MAX;
   double kmin = cosmo->data.k_min_lin;
   double kmax = ccl_splines->K_MAX;
-  int nk = ccl_splines->N_K;
+  //Compute nk from number of decades and N_K = # k per decade
+  double ndecades = log10(kmax) - log10(kmin);
+  int nk = (int)ceil(ndecades*ccl_splines->N_K);
   double amin = ccl_splines->A_SPLINE_MIN;
   double amax = ccl_splines->A_SPLINE_MAX;
   int na = ccl_splines->N_A;

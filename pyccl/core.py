@@ -1,8 +1,8 @@
 
-import ccllib as lib
+from pyccl import ccllib as lib
 import numpy as np
 from warnings import warn
-from pyutils import check 
+from pyccl.pyutils import check 
 
 # Configuration types
 transfer_function_types = {
@@ -148,7 +148,7 @@ class Parameters(object):
                 = lib.parameters_create_vec( Omega_c, Omega_b, Omega_k, N_nu_rel, 
                                              N_nu_mass, m_nu, w0, wa, h, norm_pk, 
                                              n_s, z_mg, df_mg, status )
-        check(status)    
+        check(status)   
     
     def __getitem__(self, key):
         """Access parameter values by name.
@@ -215,7 +215,7 @@ class Cosmology(object):
                  z_mg=None, df_mg=None, 
                  transfer_function='boltzmann_class',
                  matter_power_spectrum='halofit',
-                 mass_function='tinker'):
+                 mass_function='tinker10'):
         """Creates a wrapper for ccl_cosmology.
 
         TODO: enumerate transfer_function and 
@@ -366,7 +366,7 @@ class Cosmology(object):
         """
         status = 0
         status = lib.cosmology_compute_distances(self.cosmo, status)
-        check(status)
+        check(status, self.cosmo)
     
     def compute_growth(self):
         """Interfaces with src/ccl_background.c: ccl_cosmology_compute_growth().
@@ -375,7 +375,7 @@ class Cosmology(object):
         """
         status = 0
         status = lib.cosmology_compute_growth(self.cosmo, status)
-        check(status)
+        check(status, self.cosmo)
     
     def compute_power(self):
         """Interfaces with src/ccl_power.c: ccl_cosmology_compute_power().
@@ -384,7 +384,7 @@ class Cosmology(object):
         """
         status = 0
         status = lib.cosmology_compute_power(self.cosmo, status)
-        check(status)
+        check(status, self.cosmo)
     
     def has_distances(self):
         """Checks if the distances have been precomputed.

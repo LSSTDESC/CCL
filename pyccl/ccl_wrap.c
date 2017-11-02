@@ -4168,6 +4168,7 @@ void angular_cl_vec(ccl_cosmology * cosmo,
 
 
 #define SWIG_FILE_WITH_INIT
+#include "gsl/gsl_const_mksa.h"
 #include "../include/ccl_constants.h"
 
 
@@ -16118,6 +16119,32 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_specs_create_gaussian_photoz_info(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  double arg1 ;
+  double val1 ;
+  int ecode1 = 0 ;
+  PyObject * obj0 = 0 ;
+  user_pz_info *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:specs_create_gaussian_photoz_info",&obj0)) SWIG_fail;
+  ecode1 = SWIG_AsVal_double(obj0, &val1);
+  if (!SWIG_IsOK(ecode1)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "specs_create_gaussian_photoz_info" "', argument " "1"" of type '" "double""'");
+  } 
+  arg1 = (double)(val1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (user_pz_info *)ccl_specs_create_gaussian_photoz_info(arg1);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_user_pz_info, 0 |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_specs_free_photoz_info(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   user_pz_info *arg1 = (user_pz_info *) 0 ;
@@ -16134,6 +16161,31 @@ SWIGINTERN PyObject *_wrap_specs_free_photoz_info(PyObject *SWIGUNUSEDPARM(self)
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
     ccl_specs_free_photoz_info(arg1);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_specs_free_photoz_info_gaussian(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  user_pz_info *arg1 = (user_pz_info *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:specs_free_photoz_info_gaussian",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_user_pz_info, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "specs_free_photoz_info_gaussian" "', argument " "1"" of type '" "user_pz_info *""'"); 
+  }
+  arg1 = (user_pz_info *)(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    ccl_specs_free_photoz_info_gaussian(arg1);
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
   resultobj = SWIG_Py_Void();
@@ -17887,7 +17939,9 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"specs_bias_clustering", _wrap_specs_bias_clustering, METH_VARARGS, (char *)"specs_bias_clustering(cosmology cosmo, double a, int * status) -> double"},
 	 { (char *)"specs_dNdz_tomog", _wrap_specs_dNdz_tomog, METH_VARARGS, (char *)"specs_dNdz_tomog(double z, int dNdz_type, double bin_zmin, double bin_zmax, user_pz_info user_info, double * tomoout, int * status)"},
 	 { (char *)"specs_create_photoz_info", _wrap_specs_create_photoz_info, METH_VARARGS, (char *)"specs_create_photoz_info(void * user_params, double (*)(double,double,void *,int *) user_pz_func) -> user_pz_info"},
+	 { (char *)"specs_create_gaussian_photoz_info", _wrap_specs_create_gaussian_photoz_info, METH_VARARGS, (char *)"specs_create_gaussian_photoz_info(double sigma_z0) -> user_pz_info"},
 	 { (char *)"specs_free_photoz_info", _wrap_specs_free_photoz_info, METH_VARARGS, (char *)"specs_free_photoz_info(user_pz_info my_photoz_info)"},
+	 { (char *)"specs_free_photoz_info_gaussian", _wrap_specs_free_photoz_info_gaussian, METH_VARARGS, (char *)"specs_free_photoz_info_gaussian(user_pz_info my_photoz_info)"},
 	 { (char *)"specs_sigmaz_clustering", _wrap_specs_sigmaz_clustering, METH_VARARGS, (char *)"specs_sigmaz_clustering(double z) -> double"},
 	 { (char *)"specs_sigmaz_sources", _wrap_specs_sigmaz_sources, METH_VARARGS, (char *)"specs_sigmaz_sources(double z) -> double"},
 	 { (char *)"specs_bias_clustering_vec", _wrap_specs_bias_clustering_vec, METH_VARARGS, (char *)"specs_bias_clustering_vec(cosmology cosmo, double * a, double * output, int * status)"},
@@ -18732,13 +18786,120 @@ SWIG_init(void) {
   SWIG_Python_SetConstant(d, "CCL_CORR_LM",SWIG_From_int((int)(2004)));
   SWIG_Python_SetConstant(d, "CL_TRACER_NC",SWIG_From_int((int)(1)));
   SWIG_Python_SetConstant(d, "CL_TRACER_WL",SWIG_From_int((int)(2)));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_SPEED_OF_LIGHT",SWIG_From_double((double)((2.99792458e8))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_GRAVITATIONAL_CONSTANT",SWIG_From_double((double)((6.673e-11))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_PLANCKS_CONSTANT_H",SWIG_From_double((double)((6.62606896e-34))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_PLANCKS_CONSTANT_HBAR",SWIG_From_double((double)((1.05457162825e-34))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_ASTRONOMICAL_UNIT",SWIG_From_double((double)((1.49597870691e11))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_LIGHT_YEAR",SWIG_From_double((double)((9.46053620707e15))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_PARSEC",SWIG_From_double((double)((3.08567758135e16))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_GRAV_ACCEL",SWIG_From_double((double)((9.80665e0))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_ELECTRON_VOLT",SWIG_From_double((double)((1.602176487e-19))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_MASS_ELECTRON",SWIG_From_double((double)((9.10938188e-31))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_MASS_MUON",SWIG_From_double((double)((1.88353109e-28))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_MASS_PROTON",SWIG_From_double((double)((1.67262158e-27))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_MASS_NEUTRON",SWIG_From_double((double)((1.67492716e-27))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_RYDBERG",SWIG_From_double((double)((2.17987196968e-18))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_BOLTZMANN",SWIG_From_double((double)((1.3806504e-23))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_MOLAR_GAS",SWIG_From_double((double)((8.314472e0))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_STANDARD_GAS_VOLUME",SWIG_From_double((double)((2.2710981e-2))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_MINUTE",SWIG_From_double((double)((6e1))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_HOUR",SWIG_From_double((double)((3.6e3))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_DAY",SWIG_From_double((double)((8.64e4))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_WEEK",SWIG_From_double((double)((6.048e5))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_INCH",SWIG_From_double((double)((2.54e-2))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_FOOT",SWIG_From_double((double)((3.048e-1))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_YARD",SWIG_From_double((double)((9.144e-1))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_MILE",SWIG_From_double((double)((1.609344e3))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_NAUTICAL_MILE",SWIG_From_double((double)((1.852e3))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_FATHOM",SWIG_From_double((double)((1.8288e0))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_MIL",SWIG_From_double((double)((2.54e-5))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_POINT",SWIG_From_double((double)((3.52777777778e-4))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_TEXPOINT",SWIG_From_double((double)((3.51459803515e-4))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_MICRON",SWIG_From_double((double)((1e-6))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_ANGSTROM",SWIG_From_double((double)((1e-10))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_HECTARE",SWIG_From_double((double)((1e4))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_ACRE",SWIG_From_double((double)((4.04685642241e3))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_BARN",SWIG_From_double((double)((1e-28))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_LITER",SWIG_From_double((double)((1e-3))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_US_GALLON",SWIG_From_double((double)((3.78541178402e-3))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_QUART",SWIG_From_double((double)((9.46352946004e-4))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_PINT",SWIG_From_double((double)((4.73176473002e-4))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_CUP",SWIG_From_double((double)((2.36588236501e-4))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_FLUID_OUNCE",SWIG_From_double((double)((2.95735295626e-5))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_TABLESPOON",SWIG_From_double((double)((1.47867647813e-5))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_TEASPOON",SWIG_From_double((double)((4.92892159375e-6))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_CANADIAN_GALLON",SWIG_From_double((double)((4.54609e-3))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_UK_GALLON",SWIG_From_double((double)((4.546092e-3))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_MILES_PER_HOUR",SWIG_From_double((double)((4.4704e-1))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_KILOMETERS_PER_HOUR",SWIG_From_double((double)((2.77777777778e-1))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_KNOT",SWIG_From_double((double)((5.14444444444e-1))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_POUND_MASS",SWIG_From_double((double)((4.5359237e-1))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_OUNCE_MASS",SWIG_From_double((double)((2.8349523125e-2))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_TON",SWIG_From_double((double)((9.0718474e2))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_METRIC_TON",SWIG_From_double((double)((1e3))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_UK_TON",SWIG_From_double((double)((1.0160469088e3))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_TROY_OUNCE",SWIG_From_double((double)((3.1103475e-2))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_CARAT",SWIG_From_double((double)((2e-4))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_UNIFIED_ATOMIC_MASS",SWIG_From_double((double)((1.660538782e-27))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_GRAM_FORCE",SWIG_From_double((double)((9.80665e-3))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_POUND_FORCE",SWIG_From_double((double)((4.44822161526e0))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_KILOPOUND_FORCE",SWIG_From_double((double)((4.44822161526e3))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_POUNDAL",SWIG_From_double((double)((1.38255e-1))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_CALORIE",SWIG_From_double((double)((4.1868e0))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_BTU",SWIG_From_double((double)((1.05505585262e3))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_THERM",SWIG_From_double((double)((1.05506e8))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_HORSEPOWER",SWIG_From_double((double)((7.457e2))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_BAR",SWIG_From_double((double)((1e5))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_STD_ATMOSPHERE",SWIG_From_double((double)((1.01325e5))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_TORR",SWIG_From_double((double)((1.33322368421e2))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_METER_OF_MERCURY",SWIG_From_double((double)((1.33322368421e5))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_INCH_OF_MERCURY",SWIG_From_double((double)((3.38638815789e3))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_INCH_OF_WATER",SWIG_From_double((double)((2.490889e2))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_PSI",SWIG_From_double((double)((6.89475729317e3))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_POISE",SWIG_From_double((double)((1e-1))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_STOKES",SWIG_From_double((double)((1e-4))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_STILB",SWIG_From_double((double)((1e4))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_LUMEN",SWIG_From_double((double)((1e0))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_LUX",SWIG_From_double((double)((1e0))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_PHOT",SWIG_From_double((double)((1e4))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_FOOTCANDLE",SWIG_From_double((double)((1.076e1))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_LAMBERT",SWIG_From_double((double)((1e4))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_FOOTLAMBERT",SWIG_From_double((double)((1.07639104e1))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_CURIE",SWIG_From_double((double)((3.7e10))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_ROENTGEN",SWIG_From_double((double)((2.58e-4))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_RAD",SWIG_From_double((double)((1e-2))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_SOLAR_MASS",SWIG_From_double((double)((1.98892e30))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_BOHR_RADIUS",SWIG_From_double((double)((5.291772083e-11))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_NEWTON",SWIG_From_double((double)((1e0))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_DYNE",SWIG_From_double((double)((1e-5))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_JOULE",SWIG_From_double((double)((1e0))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_ERG",SWIG_From_double((double)((1e-7))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_STEFAN_BOLTZMANN_CONSTANT",SWIG_From_double((double)((5.67040047374e-8))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_THOMSON_CROSS_SECTION",SWIG_From_double((double)((6.65245893699e-29))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_BOHR_MAGNETON",SWIG_From_double((double)((9.27400899e-24))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_NUCLEAR_MAGNETON",SWIG_From_double((double)((5.05078317e-27))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_ELECTRON_MAGNETIC_MOMENT",SWIG_From_double((double)((9.28476362e-24))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_PROTON_MAGNETIC_MOMENT",SWIG_From_double((double)((1.410606633e-26))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_FARADAY",SWIG_From_double((double)((9.64853429775e4))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_ELECTRON_CHARGE",SWIG_From_double((double)((1.602176487e-19))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_VACUUM_PERMITTIVITY",SWIG_From_double((double)((8.854187817e-12))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_VACUUM_PERMEABILITY",SWIG_From_double((double)((1.25663706144e-6))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_DEBYE",SWIG_From_double((double)((3.33564095198e-30))));
+  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_GAUSS",SWIG_From_double((double)((1e-4))));
+  SWIG_Python_SetConstant(d, "M_PI",SWIG_From_double((double)(3.14159265358979323846)));
   SWIG_Python_SetConstant(d, "K_PIVOT",SWIG_From_double((double)(0.05)));
-  SWIG_Python_SetConstant(d, "RHO_CRITICAL",SWIG_From_double((double)(2.7744948E11)));
   SWIG_Python_SetConstant(d, "CLIGHT_HMPC",SWIG_From_double((double)(2997.92458)));
   SWIG_Python_SetConstant(d, "GNEWT",SWIG_From_double((double)(6.67428e-11)));
-  SWIG_Python_SetConstant(d, "SOLAR_MASS",SWIG_From_double((double)(1.9885e30)));
+  SWIG_Python_SetConstant(d, "SOLAR_MASS",SWIG_From_double((double)((1.98892e30))));
   SWIG_Python_SetConstant(d, "MPC_TO_METER",SWIG_From_double((double)(3.08567758149e22)));
   SWIG_Python_SetConstant(d, "PC_TO_METER",SWIG_From_double((double)(3.08567758149e16)));
+  SWIG_Python_SetConstant(d, "RHO_CRITICAL",SWIG_From_double((double)(((3*100*100)/(8*3.14159265358979323846*6.67428e-11))*(1000*1000*3.08567758149e22/(1.98892e30)))));
+  SWIG_Python_SetConstant(d, "KBOLTZ",SWIG_From_double((double)((1.3806504e-23))));
+  SWIG_Python_SetConstant(d, "STBOLTZ",SWIG_From_double((double)((5.67040047374e-8))));
+  SWIG_Python_SetConstant(d, "HPLANCK",SWIG_From_double((double)((6.62606896e-34))));
+  SWIG_Python_SetConstant(d, "CLIGHT",SWIG_From_double((double)((2.99792458e8))));
+  SWIG_Python_SetConstant(d, "EV_IN_J",SWIG_From_double((double)((1.602176487e-19))));
   SWIG_Python_SetConstant(d, "TNCDM",SWIG_From_double((double)(0.71611)));
   SWIG_Python_SetConstant(d, "EPSREL_DIST",SWIG_From_double((double)(1E-6)));
   SWIG_Python_SetConstant(d, "EPSREL_GROWTH",SWIG_From_double((double)(1E-6)));
