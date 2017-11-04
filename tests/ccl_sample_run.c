@@ -77,14 +77,14 @@ int main(int argc,char **argv)
   printf("z\tOmega_m\tOmega_L\tOmega_r\n");
   double Om, OL, Or;
   for (int z=10000;z!=0;z/=3){
-    Om = ccl_omega_x(cosmo, 1./(z+1), 0, &status);
-    OL = ccl_omega_x(cosmo, 1./(z+1), 1, &status);
-    Or = ccl_omega_x(cosmo, 1./(z+1), 2, &status);
+    Om = ccl_omega_x(cosmo, 1./(z+1), ccl_omega_m_label, &status);
+    OL = ccl_omega_x(cosmo, 1./(z+1), ccl_omega_l_label, &status);
+    Or = ccl_omega_x(cosmo, 1./(z+1), ccl_omega_g_label, &status);
     printf("%i\t%.3f\t%.3f\t%.3f\n", z, Om, OL, Or);
   }
-  Om = ccl_omega_x(cosmo, 1., 0, &status);
-  OL = ccl_omega_x(cosmo, 1., 1, &status);
-  Or = ccl_omega_x(cosmo, 1., 2, &status);
+  Om = ccl_omega_x(cosmo, 1., ccl_omega_m_label, &status);
+  OL = ccl_omega_x(cosmo, 1., ccl_omega_l_label, &status);
+  Or = ccl_omega_x(cosmo, 1., ccl_omega_g_label, &status);
   printf("%i\t%.3f\t%.3f\t%.3f\n", 0, Om, OL, Or);
 
   // Compute sigma_8

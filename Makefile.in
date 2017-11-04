@@ -424,6 +424,7 @@ pdfdir = @pdfdir@
 prefix = @prefix@
 program_transform_name = @program_transform_name@
 psdir = @psdir@
+runstatedir = @runstatedir@
 sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 srcdir = @srcdir@
@@ -1485,6 +1486,10 @@ uninstall-am: uninstall-cclDATA uninstall-libLTLIBRARIES
 
 dist-hook:
 	rm -f $(distdir)/clean_code.sh
+
+check-cpp:
+	$(AC_PROG_CXX)
+	$(CXX) -Og -g -Wall -std=c++11 -fPIC -I$(includedir) tests/ccl_sample_run.c -o tests/ccl_sample_run -L$(libdir) $(LIBS) -lccl
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
