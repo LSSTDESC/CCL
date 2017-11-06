@@ -29,4 +29,4 @@ dist-hook:
 
 check-cpp:
 	$(AC_PROG_CXX)
-	$(CXX) -Og -g -Wall -std=c++11 -fPIC -I$(includedir) tests/ccl_sample_run.c -o tests/ccl_sample_run -L$(libdir) $(LIBS) -lccl
+	$(CXX) -Og -g -Wall -std=c++11 -fPIC -I$(includedir) tests/ccl_sample_run.cpp -o tests/ccl_sample_run -L$(libdir) $(LIBS) -lccl
