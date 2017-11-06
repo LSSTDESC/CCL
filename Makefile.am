@@ -29,4 +29,5 @@ dist-hook:
 
 check-cpp:
 	$(AC_PROG_CXX)
+	echo '#include "ccl_sample_run.c"' > tests/ccl_sample_run.cpp
 	$(CXX) -Og -g -Wall -std=c++11 -fPIC -I$(includedir) tests/ccl_sample_run.cpp -o tests/ccl_sample_run -L$(libdir) $(LIBS) -lccl
