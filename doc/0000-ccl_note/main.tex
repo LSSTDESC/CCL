@@ -19,6 +19,7 @@
 \newcommand{\mrm}[1]{\mathrm{#1}}
 
 \newcommand{\ccl}{{\tt CCL}\xspace}
+\newcommand{\CC}{C\nolinebreak\hspace{-.05em}\raisebox{.3ex}{\footnotesize +}\nolinebreak\hspace{-.10em}\raisebox{.3ex}{\footnotesize +}}
 
 %This is a paper and note template for the LSST DESC \citep{Overview,ScienceBook,WhitePaper}.
 %Eventually it will be possible to switch between various \LaTeX\xspace styles for internal notes and peer reviewed journals templates.
@@ -106,6 +107,11 @@ After pulling a new version of \ccl from the {\tt git} repository, you can recom
  $ make clean; make uninstall
  $ make; make install
 \end{verbatim}
+\ccl library can be called from \CC\ code without any  additional requirements or modifications. To make sure that there are no problems you can run
+\begin{verbatim}
+    $ make check-cpp
+    $ ./tests/ccl_sample_run
+   \end{verbatim}
 
 \subsection{Alternative installation and pip}
 \label{sec:install:alternative}
