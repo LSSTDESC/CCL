@@ -1006,7 +1006,38 @@ static void ccl_cosmology_compute_power_emu(ccl_cosmology * cosmo, int * status)
     sprintf(cosmo->status_message ,"ccl_power.c: ccl_cosmology_compute_power_class(): parser init error:%s\n",errmsg);
     return;
   }
-
+  
+  // Check ranges to see if the cosmology is valid
+  if((cosmo->params.h<0.55) || (cosmo->params.h>0.85)){
+    *status=CCL_ERROR_INCONSISTENT;
+    strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_emu(): h is outside allowed range\n");
+    return;
+  }
+  if(cosmo->params.N_nu_rel!=3.04){
+    *status=CCL_ERROR_INCONSISTENT;
+    strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_emu(): Neff should be 3.04 for the cosmic emulator predictions\n");//This error is not successfully passed to python
+    return;
+  }
+  double w0wacomb = -cosmo->params.w0 - cosmo->params.wa;
+  if(w0wacomb<0.3*0.3*0.3*0.3){
+    *status=CCL_ERROR_INCONSISTENT;
+    strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_emu(): w0 and wa do not satisfy the emulator bound\n");
+    return;
+  }
+  /*Ideallly, we would set the following error
+  if(cosmo->params.Omega_n_mass*cosmo->params.h*cosmo->params.h>0.01){
+    *status=CCL_ERROR_INCONSISTENT;
+    strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_emu(): Omega_nu does not satisfy the emulator bound\n");
+    return;
+    }*/
+  //But for now, the cosmic emulator implementation with neutrinos hasn't been validated
+  if(cosmo->params.Omega_n_mass*cosmo->params.h*cosmo->params.h>1e-10){
+    *status=CCL_ERROR_INCONSISTENT;
+    strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_emu(): the emulator implementation has not yet been validated for Omega_nu!=0\n");
+    return;
+    }  
+  
+    // Prepare to run CLASS for linear scales
   ccl_fill_class_parameters(cosmo,&fc,parser_length, status);
   
   if (*status != CCL_ERROR_CLASS)
@@ -1098,41 +1129,11 @@ static void ccl_cosmology_compute_power_emu(ccl_cosmology * cosmo, int * status)
   double * xstar = malloc(9 * sizeof(double));
   double * zemu = ccl_linear_spacing(amin,amax, na);
   double * y2d = malloc(351 * na * sizeof(double));
-  double w0wacomb;
   if (zemu==NULL || y2d==NULL || logx==NULL || xstar==NULL){
     *status=CCL_ERROR_MEMORY;
     strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_emu(): memory allocation error\n");
     return;
   }
-  //Check ranges:
-  if((cosmo->params.h<0.55) || (cosmo->params.h>0.85)){
-    *status=CCL_ERROR_INCONSISTENT;
-    strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_emu(): h is outside allowed range\n");
-    return;
-  }
-  if(cosmo->params.N_nu_rel!=3.04){
-    *status=CCL_ERROR_INCONSISTENT;
-    strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_emu(): Neff should be 3.04 for the cosmic emulator predictions\n");//This error is not successfully passed to python
-    return;
-  }
-  w0wacomb=-cosmo->params.w0-cosmo->params.wa;
-  if(w0wacomb<0.3*0.3*0.3*0.3){
-    *status=CCL_ERROR_INCONSISTENT;
-    strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_emu(): w0 and wa do not satisfy the emulator bound\n");
-    return;
-  }
-  /*Ideallly, we would set the following error
-  if(cosmo->params.Omega_n_mass*cosmo->params.h*cosmo->params.h>0.01){
-    *status=CCL_ERROR_INCONSISTENT;
-    strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_emu(): Omega_nu does not satisfy the emulator bound\n");
-    return;
-    }*/
-  //But for now, the cosmic emulator implementation with neutrinos hasn't been validated
-  if(cosmo->params.Omega_n_mass*cosmo->params.h*cosmo->params.h>1e-10){
-    *status=CCL_ERROR_INCONSISTENT;
-    strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_emu(): the emulator implementation has not yet been validated for Omega_nu!=0\n");
-    return;
-    }
   
   //For each redshift:
   for (int j = 0; j < na; j++){
