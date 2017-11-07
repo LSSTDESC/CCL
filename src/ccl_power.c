@@ -1360,14 +1360,18 @@ double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double k, double a, int *s
 \n");
       return NAN;
     }
-
-    if (!cosmo->computed_power)
+    
+    // Compute power spectrum if needed; return if computation failed
+    if (!cosmo->computed_power){
       ccl_cosmology_compute_power(cosmo,status);
+    }
+    if (cosmo->data.p_nl == NULL) return NAN;
     
     if(k<=cosmo->data.k_min_nl) {
       log_p_1=ccl_power_extrapol_lowk(cosmo,k,a,cosmo->data.p_nl,cosmo->data.k_min_nl,status);
       return exp(log_p_1);
     }
+    
     if(k<cosmo->data.k_max_nl){
       int pwstatus =  gsl_spline2d_eval_e(cosmo->data.p_nl, log(k),a,NULL ,NULL ,&log_p_1);
       if (pwstatus) {
