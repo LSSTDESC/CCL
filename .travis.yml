@@ -24,7 +24,7 @@ before_install:
 install: python setup.py install
 script:
     - python tests/run_tests.py --debug --detailed-errors --verbose --process-restartworker
-    - make check-cpp && ./tests/ccl_sample_run
+    - make check-cpp
 
 # Check why the note creation process crashes
 #    - make -C doc/0000-ccl_note
