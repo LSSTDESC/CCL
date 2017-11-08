@@ -67,7 +67,7 @@ In preparation for constraining cosmology with the Large Synoptic Survey Telesco
 
 The Core Cosmology Library is written in C and incorporates the {\tt CLASS} code \citep{class} to provide predictions for the matter power spectrum.\footnote{Future versions of the library will incorporate other power-spectrum libraries and methods.} A Python wrapper is also provided for ease of use.
 
-This note describes how to install \ccl (Section \ref{sec:install}), how \ccl is documented (Section \ref{sec:doc}), its functionality (Section \ref{sec:func}), the relevant unit tests (Section \ref{sec:tests}), directions for finding a \ccl example (Section \ref{sec:example}), the Python wrapper (Section \ref{sec:python}), future plans (Section \ref{sec:future}), means to contact the developers (Section \ref{sec:feedback}), and the license under which \ccl is released (Section \ref{sec:license}).
+This note describes how to install \ccl (Section \ref{sec:install}), how \ccl is documented (Section \ref{sec:doc}), its functionality (Section \ref{sec:func}), the relevant unit tests (Section \ref{sec:tests}), directions for finding a \ccl example (Section \ref{sec:example}), the Python wrapper (Section \ref{sec:python}), future plans (Section \ref{sec:future}), means to contact the developers (Section \ref{sec:feedback}), instructions on how to cite \ccl (and {\tt CLASS}, Section \ref{sec:cite}), and the license under which \ccl is released (Section \ref{sec:license}).
 
 
 \section{Installation}
@@ -229,7 +229,7 @@ The argument ${\tt norm\_pk}$ can be used to specify the power spectrum normaliz
 
 To include massive neutrinos, the suffix `{\tt $\_$nu}' may be appended to the last four {\tt ccl$\_$parameters\_create} functions above. Using these functions without the {\tt $\_$nu} suffix will set the number of massive neutrinos to 0 and the effective number of massless neutrinos to $3.046$. In the case of non-zero massive neutrinos, it may be desirable to set {\tt N\_nu\_rel} such that $N_{\rm eff}=3.046$ in the early universe. In agreement with {\tt CLASS}, when using the default value of $T_{\rm NCDM}$ as described in section \ref{sec:distances} below, {\tt N\_nu\_rel} can be set to 2.0328, 1.0196, and 0.00641 for 1, 2 and 3 massive neutrinos respectively to achieve this.
 
-{\tt ccl$\_$configuration} objects contain information about the prescriptions to be used to compute transfer functions, power spectra, mass functions, etc. A default {\tt ccl$\_$configuration} object is made available as {\tt default$\_$config}, which specifies that CLASS will be used to compute transfer functions, HaloFit will be used to calculate the matter power spectrum, and the Tinker 2010 prescription will be used to compute the halo mass function.
+{\tt ccl$\_$configuration} objects contain information about the prescriptions to be used to compute transfer functions, power spectra, mass functions, etc. A default {\tt ccl$\_$configuration} object is made available as {\tt default$\_$config}, which specifies that CLASS will be used to compute transfer functions, HaloFit will be used to calculate the matter power spectrum, there will be no impact of baryons included and the Tinker 2010 prescription will be used to compute the halo mass function.
 
 After initializing instances of {\tt ccl$\_$parameters} and {\tt ccl$\_$configuration}, use the function {\tt ccl$\_$cosmology$\_$create(ccl$\_$parameters, ccl$\_$configuration)} to return a pointer to a {\tt ccl$\_$cosmology} structure. You will need to pass this pointer around to every CCL function.
 
@@ -345,9 +345,25 @@ The BBKS power spectrum option is primarily used as a precisely-defined input fo
 The Eisenstein \& Hu and BBKS approximations are not very accurate (generally only to within a few percent), and so should not be used to derive precise cosmological constraints. They are, however, computationally faster, and therefore useful for code testing and comparison.
 
 \subsubsection{CLASS}
-Finally, there is the option to call the {\tt CLASS} software \citep{class} within \ccl to obtain either linear or nonlinear matter power spectra at given redshifts. On initializing the cosmology object, we construct a bi-dimensional spline in $k$ and the scale-factor which is then evaluated by the relevant routines to obtain the matter power spectrum at the desired wavenumber and redshift. The relevant routines can be found within {\tt ccl$\_$power.c}. CLASS currently computes the non-linear power spectrum using the HaloFit prescription of \cite{CLASS_halofit}.
+The fiducial configuration calls the {\tt CLASS} software \citep{class} within \ccl to obtain either linear or nonlinear matter power spectra at given redshifts. On initializing the cosmology object, we construct a bi-dimensional spline in $k$ and the scale-factor which is then evaluated by the relevant routines to obtain the matter power spectrum at the desired wavenumber and redshift. The relevant routines can be found within {\tt ccl$\_$power.c}. CLASS currently computes the non-linear power spectrum using the HaloFit prescription of \cite{CLASS_halofit}.
 
 As discussed in Section \ref{sec:extclass}, the user can compile \ccl with an external version of {\tt CLASS} as well.
+
+\subsubsection{Impact of baryons}
+
+\ccl incorporates the impact of baryons on the total matter power spectrum via the ``baryonic correction model'' (BCM) of \citet{Schneider15}. This is implemented through a flag in the configuration object, which currently accepts the following options: {\tt ccl\_nobaryons} or {\tt ccl\_bcm}. When {\tt ccl\_bcm} is set, the nonlinear matter power spectrum (whichever the method that provides it) is multiplied by a correction factor $F(k,z)$ which models the impact of baryons.
+
+The main consequences of baryonic processes are: to suppress the power spectrum at intermediate scales ($k\sim$ a few $h/$Mpc) due to the ejection of gas by Active Galactic Nuclei feedaback, and to enhance it at smaller scales due to enhanced cooling. Three effective parameters govern the contribution of baryonic processes to modifying the total matter power spectrum:
+
+\begin{itemize}
+  \item $\log_{10} [M_c/($M$_\odot/h)]$: the mass of the clusters responsible for feedback, which regulates the amount of suppression of the matter power spectrum at intermediate scales;
+  \item $\eta_b$: a dimensionless parameter which determines the scale at which suppression peaks;
+  \item and $k_s$ [$h/$Mpc]: the wavenumber that determines the scale of the stellar profile.
+\end{itemize}
+
+If the BCM parameters are not specified and the user sets \ccl to compute the power spectrym with baryonic feedback included, \ccl will assume the default parameters of \citet{Schneider15}. The user may pass these explicitly if desired. 
+
+Other baryonic impact models might be incorporated in the future as they become available.
 
 \subsubsection{Spline parameters \& the INI file}
 
@@ -1032,6 +1048,11 @@ In the future, we hope that \ccl will include other functionalities. Functionali
 
 If you would like to contribute to \ccl or contact the developers, please do so through the \ccl github repository located at \url{https://github.com/LSSTDESC/CCL}.
 
+\section{Citing \ccl}
+\label{sec:cite}
+
+If you use \ccl in your work, please provide a link to the repository and cite it as LSST DESC (in preparation). For free use of the {\tt CLASS} library, the {\tt CLASS} developers require that the {\tt CLASS} paper be cited: {\it  CLASS II: Approximation schemes}, D. Blas, J. Lesgourgues, T. Tram, arXiv:1104.2933, JCAP 1107 (2011) 034. The {\tt CLASS} repository can be found in \url{http://class-code.net}.
+
 \section{License}
 \label{sec:license}
 
@@ -1066,7 +1087,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 \input{acknowledgments}
 
 \input{contributions}
-
 
 %{\it Facilities:} \facility{LSST}
 
