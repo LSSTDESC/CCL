@@ -1,5 +1,13 @@
 var searchData=
 [
+  ['ccl_5fbounds_5fcheck_5finterp',['CCL_BOUNDS_CHECK_INTERP',['../ccl__error_8h.html#afddf3418c4a31a234337a90c19cc4420',1,'ccl_error.h']]],
+  ['ccl_5fcorr_5fbessel',['CCL_CORR_BESSEL',['../ccl__correlation_8h.html#a5c187985c9ea5291d2cc25bf2024aae7',1,'ccl_correlation.h']]],
+  ['ccl_5fcorr_5ffftlog',['CCL_CORR_FFTLOG',['../ccl__correlation_8h.html#acc2b6040e184405feec802eb08257d35',1,'ccl_correlation.h']]],
+  ['ccl_5fcorr_5fgg',['CCL_CORR_GG',['../ccl__correlation_8h.html#a94f240c7aa05fed9abbda99486eb0356',1,'ccl_correlation.h']]],
+  ['ccl_5fcorr_5fgl',['CCL_CORR_GL',['../ccl__correlation_8h.html#aee9dee16ecb10974ee529d33518e9a1b',1,'ccl_correlation.h']]],
+  ['ccl_5fcorr_5flgndre',['CCL_CORR_LGNDRE',['../ccl__correlation_8h.html#ab9203e4514b3567aa2220d247b2447c3',1,'ccl_correlation.h']]],
+  ['ccl_5fcorr_5flm',['CCL_CORR_LM',['../ccl__correlation_8h.html#aad6421ab16c845de060037f492eea5b7',1,'ccl_correlation.h']]],
+  ['ccl_5fcorr_5flp',['CCL_CORR_LP',['../ccl__correlation_8h.html#a8edb89ae22db56c5238abe1ae84d102f',1,'ccl_correlation.h']]],
   ['ccl_5ferror_5fclass',['CCL_ERROR_CLASS',['../ccl__error_8h.html#ab5a9c0ba2592990786ecfb90515cf139',1,'ccl_error.h']]],
   ['ccl_5ferror_5fcomputechi',['CCL_ERROR_COMPUTECHI',['../ccl__error_8h.html#a08a0899cb8bf041ba4340b46c3758160',1,'ccl_error.h']]],
   ['ccl_5ferror_5fhmf_5finterp',['CCL_ERROR_HMF_INTERP',['../ccl__error_8h.html#a1fd3e805594d6858457d50059db110f8',1,'ccl_error.h']]],
@@ -23,6 +31,9 @@ var searchData=
   ['clight_5fhmpc',['CLIGHT_HMPC',['../ccl__constants_8h.html#a00b179bddf81494eaf15fc1bea6788d2',1,'ccl_constants.h']]],
   ['cls_5ffraction',['CLS_FRACTION',['../ccl__test__cls_8c.html#ada417a739f856d9304346203e6d56ac0',1,'ccl_test_cls.c']]],
   ['cls_5ftolerance',['CLS_TOLERANCE',['../ccl__test__cls_8c.html#a356c80697ff20b0a20cff9cc8fd83535',1,'ccl_test_cls.c']]],
+  ['corr_5ferror_5ffraction',['CORR_ERROR_FRACTION',['../ccl__test__correlation_8c.html#a349479ce48fca3104ffd6a78b94cc9ee',1,'ccl_test_correlation.c']]],
+  ['corr_5ffraction_5fpass',['CORR_FRACTION_PASS',['../ccl__test__correlation_8c.html#a42532bcccd60bfc5a97721b27268ecd8',1,'ccl_test_correlation.c']]],
+  ['corr_5fspline_5ftype',['CORR_SPLINE_TYPE',['../ccl__constants_8h.html#ac769da88943b671a096e7e7bb526dbe7',1,'ccl_constants.h']]],
   ['ctest',['CTEST',['../ctest_8h.html#a52a1ee634beaee554d1035a83baa99c8',1,'ctest.h']]],
   ['ctest2',['CTEST2',['../ctest_8h.html#aaa46a2a9e9fca53933c2439c51dfb2be',1,'ctest.h']]],
   ['ctest2_5fskip',['CTEST2_SKIP',['../ctest_8h.html#a7443bedbd368d837d00c9223c56bf454',1,'ctest.h']]],
