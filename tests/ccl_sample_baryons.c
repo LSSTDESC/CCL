@@ -16,7 +16,7 @@ int main(int argc, char * argv[])
   double other_bcm_ks = 75.;
 
   ccl_configuration config = default_config;
-  config.matter_power_spectrum_method=ccl_baryons;
+  config.baryons_power_spectrum_method=ccl_bcm;
   //The following two options are identical if the parameters being passed are the fiducial ones
   //In this case, we are passing user-specified parameters
   //ccl_parameters params = ccl_parameters_create_flat_lcdm(Omega_c, Omega_b, h, normp, n_s, &status);
