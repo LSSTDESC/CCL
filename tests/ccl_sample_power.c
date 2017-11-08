@@ -13,8 +13,7 @@ int main(int argc, char * argv[])
   double n_s = 0.96;
 
   ccl_configuration config = default_config;
-  //config.transfer_function_method = ccl_bbks;
-  config.matter_power_spectrum_method=ccl_linear;
+  config.matter_power_spectrum_method=ccl_halofit;
 
   ccl_parameters params = ccl_parameters_create_flat_lcdm(Omega_c, Omega_b, h, normp, n_s, &status);
   ccl_cosmology * cosmo = ccl_cosmology_create(params, config);
