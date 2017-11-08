@@ -28,6 +28,5 @@ dist-hook:
 	rm -f $(distdir)/clean_code.sh
 
 check-cpp:
-	$(AC_PROG_CXX)
 	echo '#include "ccl_sample_run.c"' > tests/ccl_sample_run.cpp
-	$(CXX) -O0 -g3 -Wall -std=c++11 -fPIC -I$(includedir) tests/ccl_sample_run.cpp -o tests/ccl_sample_run -L$(libdir) $(LIBS) -lccl
+	$(CXX) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) -std=c++11 $(AM_CFLAGS) $(CFLAGS) -I$(includedir) $(LDFLAGS) tests/ccl_sample_run.cpp -o tests/ccl_sample_run -L$(libdir) -lccl $(LIBS)
