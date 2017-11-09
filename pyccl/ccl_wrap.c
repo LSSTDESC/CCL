@@ -10038,12 +10038,12 @@ SWIGINTERN PyObject *_wrap_h_over_h0s(PyObject *SWIGUNUSEDPARM(self), PyObject *
   arg2 = (int)(val2);
   res3 = SWIG_ConvertPtr(obj2, &argp3,SWIGTYPE_p_double, 0 |  0 );
   if (!SWIG_IsOK(res3)) {
-    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "h_over_h0s" "', argument " "3"" of type '" "double [na]""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "h_over_h0s" "', argument " "3"" of type '" "double []""'"); 
   } 
   arg3 = (double *)(argp3);
   res4 = SWIG_ConvertPtr(obj3, &argp4,SWIGTYPE_p_double, 0 |  0 );
   if (!SWIG_IsOK(res4)) {
-    SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "h_over_h0s" "', argument " "4"" of type '" "double [na]""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "h_over_h0s" "', argument " "4"" of type '" "double []""'"); 
   } 
   arg4 = (double *)(argp4);
   if (!(SWIG_IsOK((res5 = SWIG_ConvertPtr(obj4,SWIG_as_voidptrptr(&arg5),SWIGTYPE_p_int,0))))) {
@@ -10165,12 +10165,12 @@ SWIGINTERN PyObject *_wrap_comoving_radial_distances(PyObject *SWIGUNUSEDPARM(se
   arg2 = (int)(val2);
   res3 = SWIG_ConvertPtr(obj2, &argp3,SWIGTYPE_p_double, 0 |  0 );
   if (!SWIG_IsOK(res3)) {
-    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "comoving_radial_distances" "', argument " "3"" of type '" "double [na]""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "comoving_radial_distances" "', argument " "3"" of type '" "double []""'"); 
   } 
   arg3 = (double *)(argp3);
   res4 = SWIG_ConvertPtr(obj3, &argp4,SWIGTYPE_p_double, 0 |  0 );
   if (!SWIG_IsOK(res4)) {
-    SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "comoving_radial_distances" "', argument " "4"" of type '" "double [na]""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "comoving_radial_distances" "', argument " "4"" of type '" "double []""'"); 
   } 
   arg4 = (double *)(argp4);
   if (!(SWIG_IsOK((res5 = SWIG_ConvertPtr(obj4,SWIG_as_voidptrptr(&arg5),SWIGTYPE_p_int,0))))) {
@@ -10347,12 +10347,12 @@ SWIGINTERN PyObject *_wrap_comoving_angular_distances(PyObject *SWIGUNUSEDPARM(s
   arg2 = (int)(val2);
   res3 = SWIG_ConvertPtr(obj2, &argp3,SWIGTYPE_p_double, 0 |  0 );
   if (!SWIG_IsOK(res3)) {
-    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "comoving_angular_distances" "', argument " "3"" of type '" "double [na]""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "comoving_angular_distances" "', argument " "3"" of type '" "double []""'"); 
   } 
   arg3 = (double *)(argp3);
   res4 = SWIG_ConvertPtr(obj3, &argp4,SWIGTYPE_p_double, 0 |  0 );
   if (!SWIG_IsOK(res4)) {
-    SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "comoving_angular_distances" "', argument " "4"" of type '" "double [na]""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "comoving_angular_distances" "', argument " "4"" of type '" "double []""'"); 
   } 
   arg4 = (double *)(argp4);
   if (!(SWIG_IsOK((res5 = SWIG_ConvertPtr(obj4,SWIG_as_voidptrptr(&arg5),SWIGTYPE_p_int,0))))) {
@@ -10474,12 +10474,12 @@ SWIGINTERN PyObject *_wrap_luminosity_distances(PyObject *SWIGUNUSEDPARM(self), 
   arg2 = (int)(val2);
   res3 = SWIG_ConvertPtr(obj2, &argp3,SWIGTYPE_p_double, 0 |  0 );
   if (!SWIG_IsOK(res3)) {
-    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "luminosity_distances" "', argument " "3"" of type '" "double [na]""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "luminosity_distances" "', argument " "3"" of type '" "double []""'"); 
   } 
   arg3 = (double *)(argp3);
   res4 = SWIG_ConvertPtr(obj3, &argp4,SWIGTYPE_p_double, 0 |  0 );
   if (!SWIG_IsOK(res4)) {
-    SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "luminosity_distances" "', argument " "4"" of type '" "double [na]""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "luminosity_distances" "', argument " "4"" of type '" "double []""'"); 
   } 
   arg4 = (double *)(argp4);
   if (!(SWIG_IsOK((res5 = SWIG_ConvertPtr(obj4,SWIG_as_voidptrptr(&arg5),SWIGTYPE_p_int,0))))) {
@@ -10601,12 +10601,12 @@ SWIGINTERN PyObject *_wrap_distance_moduli(PyObject *SWIGUNUSEDPARM(self), PyObj
   arg2 = (int)(val2);
   res3 = SWIG_ConvertPtr(obj2, &argp3,SWIGTYPE_p_double, 0 |  0 );
   if (!SWIG_IsOK(res3)) {
-    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "distance_moduli" "', argument " "3"" of type '" "double [na]""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "distance_moduli" "', argument " "3"" of type '" "double []""'"); 
   } 
   arg3 = (double *)(argp3);
   res4 = SWIG_ConvertPtr(obj3, &argp4,SWIGTYPE_p_double, 0 |  0 );
   if (!SWIG_IsOK(res4)) {
-    SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "distance_moduli" "', argument " "4"" of type '" "double [na]""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "distance_moduli" "', argument " "4"" of type '" "double []""'"); 
   } 
   arg4 = (double *)(argp4);
   if (!(SWIG_IsOK((res5 = SWIG_ConvertPtr(obj4,SWIG_as_voidptrptr(&arg5),SWIGTYPE_p_int,0))))) {
@@ -10728,12 +10728,12 @@ SWIGINTERN PyObject *_wrap_growth_factors(PyObject *SWIGUNUSEDPARM(self), PyObje
   arg2 = (int)(val2);
   res3 = SWIG_ConvertPtr(obj2, &argp3,SWIGTYPE_p_double, 0 |  0 );
   if (!SWIG_IsOK(res3)) {
-    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "growth_factors" "', argument " "3"" of type '" "double [na]""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "growth_factors" "', argument " "3"" of type '" "double []""'"); 
   } 
   arg3 = (double *)(argp3);
   res4 = SWIG_ConvertPtr(obj3, &argp4,SWIGTYPE_p_double, 0 |  0 );
   if (!SWIG_IsOK(res4)) {
-    SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "growth_factors" "', argument " "4"" of type '" "double [na]""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "growth_factors" "', argument " "4"" of type '" "double []""'"); 
   } 
   arg4 = (double *)(argp4);
   if (!(SWIG_IsOK((res5 = SWIG_ConvertPtr(obj4,SWIG_as_voidptrptr(&arg5),SWIGTYPE_p_int,0))))) {
@@ -10855,12 +10855,12 @@ SWIGINTERN PyObject *_wrap_growth_factors_unnorm(PyObject *SWIGUNUSEDPARM(self),
   arg2 = (int)(val2);
   res3 = SWIG_ConvertPtr(obj2, &argp3,SWIGTYPE_p_double, 0 |  0 );
   if (!SWIG_IsOK(res3)) {
-    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "growth_factors_unnorm" "', argument " "3"" of type '" "double [na]""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "growth_factors_unnorm" "', argument " "3"" of type '" "double []""'"); 
   } 
   arg3 = (double *)(argp3);
   res4 = SWIG_ConvertPtr(obj3, &argp4,SWIGTYPE_p_double, 0 |  0 );
   if (!SWIG_IsOK(res4)) {
-    SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "growth_factors_unnorm" "', argument " "4"" of type '" "double [na]""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "growth_factors_unnorm" "', argument " "4"" of type '" "double []""'"); 
   } 
   arg4 = (double *)(argp4);
   if (!(SWIG_IsOK((res5 = SWIG_ConvertPtr(obj4,SWIG_as_voidptrptr(&arg5),SWIGTYPE_p_int,0))))) {
@@ -10982,12 +10982,12 @@ SWIGINTERN PyObject *_wrap_growth_rates(PyObject *SWIGUNUSEDPARM(self), PyObject
   arg2 = (int)(val2);
   res3 = SWIG_ConvertPtr(obj2, &argp3,SWIGTYPE_p_double, 0 |  0 );
   if (!SWIG_IsOK(res3)) {
-    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "growth_rates" "', argument " "3"" of type '" "double [na]""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "growth_rates" "', argument " "3"" of type '" "double []""'"); 
   } 
   arg3 = (double *)(argp3);
   res4 = SWIG_ConvertPtr(obj3, &argp4,SWIGTYPE_p_double, 0 |  0 );
   if (!SWIG_IsOK(res4)) {
-    SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "growth_rates" "', argument " "4"" of type '" "double [na]""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "growth_rates" "', argument " "4"" of type '" "double []""'"); 
   } 
   arg4 = (double *)(argp4);
   if (!(SWIG_IsOK((res5 = SWIG_ConvertPtr(obj4,SWIG_as_voidptrptr(&arg5),SWIGTYPE_p_int,0))))) {
@@ -11109,12 +11109,12 @@ SWIGINTERN PyObject *_wrap_scale_factor_of_chis(PyObject *SWIGUNUSEDPARM(self), 
   arg2 = (int)(val2);
   res3 = SWIG_ConvertPtr(obj2, &argp3,SWIGTYPE_p_double, 0 |  0 );
   if (!SWIG_IsOK(res3)) {
-    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "scale_factor_of_chis" "', argument " "3"" of type '" "double [nchi]""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "scale_factor_of_chis" "', argument " "3"" of type '" "double []""'"); 
   } 
   arg3 = (double *)(argp3);
   res4 = SWIG_ConvertPtr(obj3, &argp4,SWIGTYPE_p_double, 0 |  0 );
   if (!SWIG_IsOK(res4)) {
-    SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "scale_factor_of_chis" "', argument " "4"" of type '" "double [nchi]""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "scale_factor_of_chis" "', argument " "4"" of type '" "double []""'"); 
   } 
   arg4 = (double *)(argp4);
   if (!(SWIG_IsOK((res5 = SWIG_ConvertPtr(obj4,SWIG_as_voidptrptr(&arg5),SWIGTYPE_p_int,0))))) {
@@ -18157,24 +18157,24 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"cosmology_compute_power", _wrap_cosmology_compute_power, METH_VARARGS, (char *)"cosmology_compute_power(cosmology cosmo, int * status)"},
 	 { (char *)"parameters_create_vec", _wrap_parameters_create_vec, METH_VARARGS, (char *)"parameters_create_vec(double Omega_c, double Omega_b, double Omega_k, double N_nu_rel, double N_nu_mass, double M_nu, double w0, double wa, double h, double norm_pk, double n_s, double bcm_log10Mc, double bcm_etab, double bcm_ks, double * zarr, double * dfarr, int * status) -> parameters"},
 	 { (char *)"h_over_h0", _wrap_h_over_h0, METH_VARARGS, (char *)"h_over_h0(cosmology cosmo, double a, int * status) -> double"},
-	 { (char *)"h_over_h0s", _wrap_h_over_h0s, METH_VARARGS, (char *)"h_over_h0s(cosmology cosmo, int na, double [na] a, double [na] output, int * status)"},
+	 { (char *)"h_over_h0s", _wrap_h_over_h0s, METH_VARARGS, (char *)"h_over_h0s(cosmology cosmo, int na, double [] a, double [] output, int * status)"},
 	 { (char *)"comoving_radial_distance", _wrap_comoving_radial_distance, METH_VARARGS, (char *)"comoving_radial_distance(cosmology cosmo, double a, int * status) -> double"},
-	 { (char *)"comoving_radial_distances", _wrap_comoving_radial_distances, METH_VARARGS, (char *)"comoving_radial_distances(cosmology cosmo, int na, double [na] a, double [na] output, int * status)"},
+	 { (char *)"comoving_radial_distances", _wrap_comoving_radial_distances, METH_VARARGS, (char *)"comoving_radial_distances(cosmology cosmo, int na, double [] a, double [] output, int * status)"},
 	 { (char *)"sinn", _wrap_sinn, METH_VARARGS, (char *)"sinn(cosmology cosmo, double chi, int * status) -> double"},
 	 { (char *)"comoving_angular_distance", _wrap_comoving_angular_distance, METH_VARARGS, (char *)"comoving_angular_distance(cosmology cosmo, double a, int * status) -> double"},
-	 { (char *)"comoving_angular_distances", _wrap_comoving_angular_distances, METH_VARARGS, (char *)"comoving_angular_distances(cosmology cosmo, int na, double [na] a, double [na] output, int * status)"},
+	 { (char *)"comoving_angular_distances", _wrap_comoving_angular_distances, METH_VARARGS, (char *)"comoving_angular_distances(cosmology cosmo, int na, double [] a, double [] output, int * status)"},
 	 { (char *)"luminosity_distance", _wrap_luminosity_distance, METH_VARARGS, (char *)"luminosity_distance(cosmology cosmo, double a, int * status) -> double"},
-	 { (char *)"luminosity_distances", _wrap_luminosity_distances, METH_VARARGS, (char *)"luminosity_distances(cosmology cosmo, int na, double [na] a, double [na] output, int * status)"},
+	 { (char *)"luminosity_distances", _wrap_luminosity_distances, METH_VARARGS, (char *)"luminosity_distances(cosmology cosmo, int na, double [] a, double [] output, int * status)"},
 	 { (char *)"distance_modulus", _wrap_distance_modulus, METH_VARARGS, (char *)"distance_modulus(cosmology cosmo, double a, int * status) -> double"},
-	 { (char *)"distance_moduli", _wrap_distance_moduli, METH_VARARGS, (char *)"distance_moduli(cosmology cosmo, int na, double [na] a, double [na] output, int * status)"},
+	 { (char *)"distance_moduli", _wrap_distance_moduli, METH_VARARGS, (char *)"distance_moduli(cosmology cosmo, int na, double [] a, double [] output, int * status)"},
 	 { (char *)"growth_factor", _wrap_growth_factor, METH_VARARGS, (char *)"growth_factor(cosmology cosmo, double a, int * status) -> double"},
-	 { (char *)"growth_factors", _wrap_growth_factors, METH_VARARGS, (char *)"growth_factors(cosmology cosmo, int na, double [na] a, double [na] output, int * status)"},
+	 { (char *)"growth_factors", _wrap_growth_factors, METH_VARARGS, (char *)"growth_factors(cosmology cosmo, int na, double [] a, double [] output, int * status)"},
 	 { (char *)"growth_factor_unnorm", _wrap_growth_factor_unnorm, METH_VARARGS, (char *)"growth_factor_unnorm(cosmology cosmo, double a, int * status) -> double"},
-	 { (char *)"growth_factors_unnorm", _wrap_growth_factors_unnorm, METH_VARARGS, (char *)"growth_factors_unnorm(cosmology cosmo, int na, double [na] a, double [na] output, int * status)"},
+	 { (char *)"growth_factors_unnorm", _wrap_growth_factors_unnorm, METH_VARARGS, (char *)"growth_factors_unnorm(cosmology cosmo, int na, double [] a, double [] output, int * status)"},
 	 { (char *)"growth_rate", _wrap_growth_rate, METH_VARARGS, (char *)"growth_rate(cosmology cosmo, double a, int * status) -> double"},
-	 { (char *)"growth_rates", _wrap_growth_rates, METH_VARARGS, (char *)"growth_rates(cosmology cosmo, int na, double [na] a, double [na] output, int * status)"},
+	 { (char *)"growth_rates", _wrap_growth_rates, METH_VARARGS, (char *)"growth_rates(cosmology cosmo, int na, double [] a, double [] output, int * status)"},
 	 { (char *)"scale_factor_of_chi", _wrap_scale_factor_of_chi, METH_VARARGS, (char *)"scale_factor_of_chi(cosmology cosmo, double chi, int * status) -> double"},
-	 { (char *)"scale_factor_of_chis", _wrap_scale_factor_of_chis, METH_VARARGS, (char *)"scale_factor_of_chis(cosmology cosmo, int nchi, double [nchi] chi, double [nchi] output, int * status)"},
+	 { (char *)"scale_factor_of_chis", _wrap_scale_factor_of_chis, METH_VARARGS, (char *)"scale_factor_of_chis(cosmology cosmo, int nchi, double [] chi, double [] output, int * status)"},
 	 { (char *)"omega_x", _wrap_omega_x, METH_VARARGS, (char *)"omega_x(cosmology cosmo, double a, ccl_omega_x_label label, int * status) -> double"},
 	 { (char *)"growth_factor_vec", _wrap_growth_factor_vec, METH_VARARGS, (char *)"growth_factor_vec(cosmology cosmo, double * a, double * output, int * status)"},
 	 { (char *)"growth_factor_unnorm_vec", _wrap_growth_factor_unnorm_vec, METH_VARARGS, (char *)"growth_factor_unnorm_vec(cosmology cosmo, double * a, double * output, int * status)"},

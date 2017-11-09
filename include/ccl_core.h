@@ -1,4 +1,7 @@
 /** @file */
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #pragma once
 #include "gsl/gsl_spline.h"
@@ -299,3 +302,7 @@ void ccl_cosmology_compute_growth(ccl_cosmology * cosmo, int * status);
  * @return void
  */
 void ccl_cosmology_compute_power(ccl_cosmology * cosmo, int* status);
+
+#ifdef __cplusplus
+}
+#endif

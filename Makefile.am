@@ -26,3 +26,7 @@ tests_check_ccl_LDFLAGS =  -L./ -lccl -lgsl -lgslcblas -lfftw3 $(CLASS_LIB)
 
 dist-hook:
 	rm -f $(distdir)/clean_code.sh
+
+check-cpp:
+	echo '#include "ccl_sample_run.c"' > tests/ccl_sample_run.cpp
+	$(CXX) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) -std=c++11 $(AM_CFLAGS) $(CFLAGS) -I$(includedir) $(LDFLAGS) tests/ccl_sample_run.cpp -o tests/ccl_sample_run -L$(libdir) -lccl $(LIBS)

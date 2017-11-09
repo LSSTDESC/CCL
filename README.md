@@ -24,7 +24,7 @@ In order to compile `CCL` you need a few libraries:
 * [FFTW3](http://www.fftw.org/) is required for computation of correlation functions.
 * FFTlog([here](http://casa.colorado.edu/~ajsh/FFTLog/) and [here](https://github.com/slosar/FFTLog))is provided within `CCL`, with minor modifications.
 
-# C-only installation
+## C-only installation
 `CCL` can be easily installed using an *autotools*-generated configuration file. To install `CCL`, from the base directory (the one where this file is located) run:
 ```sh
 ./configure
@@ -68,6 +68,13 @@ make install
 export LD_LIBRARY_PATH=/path/to/where/ccl/is/installed/lib:$LD_LIBRARY_PATH
 ````
 5. We know of one case with Mac OS where `libtools` had the “lock” function set to “yes” and this caused the installation to stall. However, this is very rare. If this happens, after the `configure` step, edit `libtool` to set the “lock” to “no”.
+
+## C++ compatibility
+`CCL` library can be called from C++ code without any  additional requirements or modifications. To make sure that there are no problems you can run
+````sh
+make check-cpp
+./tests/ccl_sample_run
+````
 
 ## Python installation
 The Python wrapper is called `pyccl`. Generally, you can build and install the `pyccl` wrapper directly, without having to first compile the C version of `CCL`. The Python wrapper's build tools currently assume that your C compiler is `gcc`, and that you have a working Python 2.x or 3.x installation with `numpy` and `distutils`. You will also need `swig` if you wish to change the `CCL` code itself, rather than just installing it as-is.

@@ -1,3 +1,7 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #pragma once
 
 #include "gsl/gsl_const_mksa.h"
@@ -115,3 +119,7 @@
 //LSST specific numbers
 #define Z_MIN_SOURCES 0.1
 #define Z_MAX_SOURCES 3.0
+
+#ifdef __cplusplus
+}
+#endif

@@ -1,4 +1,7 @@
 /* @file */
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /*! \mainpage Core Cosmology Library
  * The Core Cosmology Library (CCL) provides routines to compute basic cosmological observables with validated numerical accuracy. In the current version, predictions are provided for distances and background quantities, an
@@ -31,3 +34,7 @@
 #include "ccl_neutrinos.h"
 
 #include "ccl_placeholder.h"
+
+#ifdef __cplusplus
+}
+#endif

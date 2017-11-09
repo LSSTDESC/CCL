@@ -486,7 +486,7 @@ def h_over_h0(cosmo, a, status):
     return _ccllib.h_over_h0(cosmo, a, status)
 
 def h_over_h0s(cosmo, na, a, output, status):
-    """h_over_h0s(cosmology cosmo, int na, double [na] a, double [na] output, int * status)"""
+    """h_over_h0s(cosmology cosmo, int na, double [] a, double [] output, int * status)"""
     return _ccllib.h_over_h0s(cosmo, na, a, output, status)
 
 def comoving_radial_distance(cosmo, a, status):
@@ -494,7 +494,7 @@ def comoving_radial_distance(cosmo, a, status):
     return _ccllib.comoving_radial_distance(cosmo, a, status)
 
 def comoving_radial_distances(cosmo, na, a, output, status):
-    """comoving_radial_distances(cosmology cosmo, int na, double [na] a, double [na] output, int * status)"""
+    """comoving_radial_distances(cosmology cosmo, int na, double [] a, double [] output, int * status)"""
     return _ccllib.comoving_radial_distances(cosmo, na, a, output, status)
 
 def sinn(cosmo, chi, status):
@@ -506,7 +506,7 @@ def comoving_angular_distance(cosmo, a, status):
     return _ccllib.comoving_angular_distance(cosmo, a, status)
 
 def comoving_angular_distances(cosmo, na, a, output, status):
-    """comoving_angular_distances(cosmology cosmo, int na, double [na] a, double [na] output, int * status)"""
+    """comoving_angular_distances(cosmology cosmo, int na, double [] a, double [] output, int * status)"""
     return _ccllib.comoving_angular_distances(cosmo, na, a, output, status)
 
 def luminosity_distance(cosmo, a, status):
@@ -514,7 +514,7 @@ def luminosity_distance(cosmo, a, status):
     return _ccllib.luminosity_distance(cosmo, a, status)
 
 def luminosity_distances(cosmo, na, a, output, status):
-    """luminosity_distances(cosmology cosmo, int na, double [na] a, double [na] output, int * status)"""
+    """luminosity_distances(cosmology cosmo, int na, double [] a, double [] output, int * status)"""
     return _ccllib.luminosity_distances(cosmo, na, a, output, status)
 
 def distance_modulus(cosmo, a, status):
@@ -522,7 +522,7 @@ def distance_modulus(cosmo, a, status):
     return _ccllib.distance_modulus(cosmo, a, status)
 
 def distance_moduli(cosmo, na, a, output, status):
-    """distance_moduli(cosmology cosmo, int na, double [na] a, double [na] output, int * status)"""
+    """distance_moduli(cosmology cosmo, int na, double [] a, double [] output, int * status)"""
     return _ccllib.distance_moduli(cosmo, na, a, output, status)
 
 def growth_factor(cosmo, a, status):
@@ -530,7 +530,7 @@ def growth_factor(cosmo, a, status):
     return _ccllib.growth_factor(cosmo, a, status)
 
 def growth_factors(cosmo, na, a, output, status):
-    """growth_factors(cosmology cosmo, int na, double [na] a, double [na] output, int * status)"""
+    """growth_factors(cosmology cosmo, int na, double [] a, double [] output, int * status)"""
     return _ccllib.growth_factors(cosmo, na, a, output, status)
 
 def growth_factor_unnorm(cosmo, a, status):
@@ -538,7 +538,7 @@ def growth_factor_unnorm(cosmo, a, status):
     return _ccllib.growth_factor_unnorm(cosmo, a, status)
 
 def growth_factors_unnorm(cosmo, na, a, output, status):
-    """growth_factors_unnorm(cosmology cosmo, int na, double [na] a, double [na] output, int * status)"""
+    """growth_factors_unnorm(cosmology cosmo, int na, double [] a, double [] output, int * status)"""
     return _ccllib.growth_factors_unnorm(cosmo, na, a, output, status)
 
 def growth_rate(cosmo, a, status):
@@ -546,7 +546,7 @@ def growth_rate(cosmo, a, status):
     return _ccllib.growth_rate(cosmo, a, status)
 
 def growth_rates(cosmo, na, a, output, status):
-    """growth_rates(cosmology cosmo, int na, double [na] a, double [na] output, int * status)"""
+    """growth_rates(cosmology cosmo, int na, double [] a, double [] output, int * status)"""
     return _ccllib.growth_rates(cosmo, na, a, output, status)
 
 def scale_factor_of_chi(cosmo, chi, status):
@@ -554,7 +554,7 @@ def scale_factor_of_chi(cosmo, chi, status):
     return _ccllib.scale_factor_of_chi(cosmo, chi, status)
 
 def scale_factor_of_chis(cosmo, nchi, chi, output, status):
-    """scale_factor_of_chis(cosmology cosmo, int nchi, double [nchi] chi, double [nchi] output, int * status)"""
+    """scale_factor_of_chis(cosmology cosmo, int nchi, double [] chi, double [] output, int * status)"""
     return _ccllib.scale_factor_of_chis(cosmo, nchi, chi, output, status)
 
 def omega_x(cosmo, a, label, status):
