@@ -1,3 +1,4 @@
+
 %
 \RequirePackage{docswitch}
 \setjournal{\flag}
@@ -135,7 +136,7 @@ and $a(\chi)$, the inverse of $\chi(a)$.
 
 %-------------------------------------------------------------------------------
 \subsection{Growth of perturbations}
-\vol{?}
+\vol{Mustapha Ishak}
 
 To compute the growth function, $D(a)$, the growth factor of matter perturbations, \ccl solves the following differential equation:
 \begin{equation}
@@ -362,7 +363,7 @@ The \citet{Tinker2010} model parameterizes both the halo mass function and the h
   f(\nu) &=& \alpha[1+(\beta\nu)^{-2\phi}]\nu^{2\eta}e(-\gamma\nu^2/2).
 \end{eqnarray}
 
-We note that these halo mass functions, while implemented to high \em{numerical} accuracy, carry their own uncertainties. It has not been significantly stufied on whether the halo mass function (or halo bias function) is universal with respect to changes in dark energy parameterisation. Further, \citet{Tinker2010} found an \sim6\% scatter when determining the halo bias due to differences in simulations. This is in addition to a 5\% error in the mass function alone. This result is consistent with the work of \citet{Watson2013}, which also finds a 5\% level difference in comparison to the Tinker fitting function. Further study will be required in the future in order to gain percent level accuracy in determining the halo mass function.
+We note that these halo mass functions, while implemented to high {\em numerical} accuracy, carry their own uncertainties. It has not been significantly studied whether the halo mass function (or halo bias function) is universal with respect to changes in dark energy parameterisation. Further, \citet{Tinker2010} found a $\sim6\%$ scatter when determining the halo bias due to differences in simulations. This is in addition to a $5\%$ error in the mass function alone. This result is consistent with the work of \citet{Watson2013}, which also finds a $5\%$ level difference in comparison to the Tinker fitting function. Further study will be required in the future in order to gain percent level accuracy in determining the halo mass function.
 
 %-------------------------------------------------------------------------------
 \subsection{Massive neutrinos}
@@ -394,14 +395,15 @@ where $h_{\rm P}$ is Planck's constant and $h$ is $H_0/100$ with $H_0$ in units 
 \section{Implementation of high-accuracy cosmological functions}
 
 %-------------------------------------------------------------------------------
-\subsection{Background functions}
-\vol{?}
+\subsection{Background functions \& growth of perturbations}
+\vol{Mustapha Ishak}
 
 \cont{Initial conditions. Normalization. Units and sensitivity to physical constants (G, c etc).}
 
 Including/excluding radiation in the computation of the comoving distances and the growth function can easily make a difference of $10^{-4}$ at the redshifts required in this comparison.
 
 The value of the gravitational constant, $G$, enters into the critical density. We found that failure to define $G$ with sufficient precision would result in lack of convergence at the $10^{-4}$ level between the different submissions. Importantly, note that CAMB barely has $10^{-4}$ precision in $G$ (and similarly, there might be other constants within CAMB/CLASS for which one should check the precision level). For \ccl, we are using the value from the Particle Physics Handbook.
+
 
 %-------------------------------------------------------------------------------
 \subsection{Matter power spectrum}
