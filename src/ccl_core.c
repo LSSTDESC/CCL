@@ -119,10 +119,12 @@ ccl_cosmology * ccl_cosmology_create(ccl_parameters params, ccl_configuration co
   cosmo->data.accelerator_achi=NULL;
   cosmo->data.accelerator_m=NULL;
   cosmo->data.accelerator_d=NULL;
+  cosmo->data.accelerator_k=NULL;
   cosmo->data.growth0 = 1.;
   cosmo->data.achi=NULL;
 
   cosmo->data.logsigma = NULL;
+  cosmo->data.dlnsigma_dlogm = NULL;
 
   // hmf parameter for interpolation
   cosmo->data.alphahmf = NULL;
@@ -544,6 +546,8 @@ void ccl_data_free(ccl_data * data)
     gsl_spline_free(data->achi);
   if(data->logsigma!=NULL)
     gsl_spline_free(data->logsigma);
+  if(data->dlnsigma_dlogm!=NULL)
+    gsl_spline_free(data->dlnsigma_dlogm);
   if(data->p_lin!=NULL)
     gsl_spline2d_free(data->p_lin);
   if(data->p_nl!=NULL)
@@ -560,6 +564,10 @@ void ccl_data_free(ccl_data * data)
     gsl_spline_free(data->etahmf);
   if(data->accelerator_d!=NULL)
     gsl_interp_accel_free(data->accelerator_d);
+  if(data->accelerator_m!=NULL)
+    gsl_interp_accel_free(data->accelerator_m);
+  if(data->accelerator_k!=NULL)
+    gsl_interp_accel_free(data->accelerator_k);
 }
 
 
