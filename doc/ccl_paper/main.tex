@@ -56,6 +56,19 @@ The Core Cosmology Library (\ccl) provides routines to compute basic cosmologica
 \todo{Use CCL plot from SRM}
 
 In preparation for constraining cosmology with the Large Synoptic Survey Telescope (LSST), it is necessary to be able to produce rigorous theoretical predictions for the cosmological quantities that will be measured. The Core Cosmology Library\footnote{\url{https://github.com/LSSTDESC/CCL}} (\ccl) aims to provide, in one library, a way of making predictions that are validated to a well-documented numerical accuracy, for the purpose of constraining cosmology with LSST. By constructing a cosmology library specifically with LSST in mind, it is possible to ensure that it is flexible, adaptable, and validated for all cases of interest, as well as user-friendly and appropriate for the needs of all working groups.
+
+\ccl structure is illustrated in figure \ref{fig:CCC_structure}.
+
+%------------------------
+\begin{figure*}
+\centering
+\includegraphics[width=0.9\textwidth]{CCL_Flowchart3}
+\caption{\ccl structure flowchart. \ccl is written in C with a Python interface. \ccl routines calculate basic cosmological functions such as Hubble function, density parameters, distances and growth function. It uses various methods to compute the matter-power spectrum including {\tt CLASS}, ``Cosmic Emulator'' developed by \citet{Lawrence17}, or common approximations. It computes 2-point angular power spectra and correlation functions from various probes. \ccl is designed to accommodate multiple methods to calculate cosmological observables.}
+\label{fig:CCL_structure}
+\end{figure*}
+%------------------------
+
+
 \todo{Summarize the probes we cover. Explain future link to likelihood pipeline. Highlight CCL can be used by other surveys.}
 
 %-------------------------------------------------------------------------------
