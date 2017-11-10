@@ -1151,7 +1151,9 @@ static void ccl_cosmology_compute_power_emu(ccl_cosmology * cosmo, int * status)
     //Need to have this here because otherwise overwritten by emu in each loop
     
     //Call emulator at this redshift
-    ccl_pkemu(xstar,&y,status);
+    ccl_pkemu(xstar,&y, status, cosmo);
+    ccl_check_status(cosmo, status);
+    if (y == NULL) return;
     for (int i=0; i<351; i++){
       logx[i] = log(mode[i]);
       y2d[j*351+i] = log(y[i]);
@@ -1286,6 +1288,7 @@ double ccl_linear_matter_power(ccl_cosmology * cosmo, double k, double a, int * 
   if ((cosmo->config.transfer_function_method == ccl_emulator) && (a<A_MIN_EMU)){
     *status = CCL_ERROR_INCONSISTENT;
     sprintf(cosmo->status_message ,"ccl_power.c: the cosmic emulator cannot be used above z=2\n");
+    fprintf(stderr, "Return NAN (-1)\n");
     return NAN;
   }
   
@@ -1302,6 +1305,7 @@ double ccl_linear_matter_power(ccl_cosmology * cosmo, double k, double a, int * 
     if (pkstatus) {
       *status = CCL_ERROR_SPLINE_EV;
       sprintf(cosmo->status_message ,"ccl_power.c: ccl_linear_matter_power(): Spline evaluation error\n");
+      fprintf(stderr, "Return NAN (-2)\n");
       return NAN;
     }
     else
@@ -1343,6 +1347,7 @@ double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double k, double a, int *s
       if (pwstatus) {
 	*status = CCL_ERROR_SPLINE_EV;
 	sprintf(cosmo->status_message ,"ccl_power.c: ccl_nonlin_matter_power(): Spline evaluation error\n");
+	fprintf(stderr, "Return NAN (0)\n");
 	return NAN;
       }
       else
@@ -1354,11 +1359,14 @@ double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double k, double a, int *s
     }
 
   case ccl_emu:
-
+    
+    fprintf(stderr, "ccl_emu branch\n"); // FIXME
+    
     if ((cosmo->config.transfer_function_method == ccl_emulator) && (a<A_MIN_EMU)){
       *status = CCL_ERROR_INCONSISTENT;
       sprintf(cosmo->status_message ,"ccl_power.c: the cosmic emulator cannot be used above z=2\
 \n");
+      fprintf(stderr, "Return NAN (1)\n");
       return NAN;
     }
     
@@ -1366,7 +1374,10 @@ double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double k, double a, int *s
     if (!cosmo->computed_power){
       ccl_cosmology_compute_power(cosmo,status);
     }
-    if (cosmo->data.p_nl == NULL) return NAN;
+    if (cosmo->data.p_nl == NULL){
+        fprintf(stderr, "Return NAN (2)\n");
+        return NAN;
+    }
     
     if(k<=cosmo->data.k_min_nl) {
       log_p_1=ccl_power_extrapol_lowk(cosmo,k,a,cosmo->data.p_nl,cosmo->data.k_min_nl,status);
@@ -1378,10 +1389,13 @@ double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double k, double a, int *s
       if (pwstatus) {
 	*status = CCL_ERROR_SPLINE_EV;
 	sprintf(cosmo->status_message ,"ccl_power.c: ccl_nonlin_matter_power(): Spline evaluation error\n");
+	fprintf(stderr, "Return NAN (3)\n");
 	return NAN;
       }
-      else
-	return exp(log_p_1);
+      else{
+        fprintf(stderr, "ccl_emu spline was evaluated, cosmo->data.k_max_nl = %e, log_p_1=%e, k=%e, a=%e\n", cosmo->data.k_max_nl, log_p_1, k, a);
+	    return exp(log_p_1);
+	  }
     }
     else { //Extrapolate NL regime using log derivative
       log_p_1 = ccl_power_extrapol_highk(cosmo,k,a,cosmo->data.p_nl,cosmo->data.k_max_nl,status);
