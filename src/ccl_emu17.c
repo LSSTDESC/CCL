@@ -14,6 +14,8 @@
 #include <gsl/gsl_errno.h>
 
 #include "ccl_emu17_params.h"
+#include "ccl_core.h"
+#include "ccl_error.h"
 
 // Sizes of stuff
 static int m[2] = {111, 36}, neta=2808, peta[2]={7, 28}, rs=8, p=8, nmode=351;
@@ -132,7 +134,7 @@ static void emuInit() {
 } // emuInit()
 
 // Actual emulation
-static void emu(double *xstar, double **ystar) {
+static void emu(double *xstar, double **ystar, int* status, ccl_cosmology* cosmo) {
     
     static double inited=0;
     int ee, i, j, k;
@@ -174,37 +176,58 @@ static void emu(double *xstar, double **ystar) {
         if((xstar[i] < xmin[i]) || (xstar[i] > xmax[i])) {
             switch(i) {
                 case 0:
-                    printf("omega_m must be between %f and %f.\n", xmin[i], xmax[i]);
+                    sprintf(cosmo->status_message, 
+                            "ccl_pkemu(): omega_m must be between %f and %f.\n", 
+                            xmin[i], xmax[i]);
                     break;
                 case 1:
-                    printf("omega_b must be between %f and %f.\n", xmin[i], xmax[i]);
+                    sprintf(cosmo->status_message, 
+                            "ccl_pkemu(): omega_b must be between %f and %f.\n", 
+                            xmin[i], xmax[i]);
                     break;
                 case 2:
-                    printf("sigma_8 must be between %f and %f.\n", xmin[i], xmax[i]);
+                    sprintf(cosmo->status_message, 
+                            "ccl_pkemu(): sigma_8 must be between %f and %f.\n", 
+                            xmin[i], xmax[i]);
                     break;
                 case 3:
-                    printf("h must be between %f and %f.\n", xmin[i], xmax[i]);
+                    sprintf(cosmo->status_message, 
+                            "ccl_pkemu(): h must be between %f and %f.\n", 
+                            xmin[i], xmax[i]);
                     break;
                 case 4:
-                    printf("n_s must be between %f and %f.\n", xmin[i], xmax[i]);
+                    sprintf(cosmo->status_message, 
+                            "ccl_pkemu(): n_s must be between %f and %f.\n", 
+                            xmin[i], xmax[i]);
                     break;
                 case 5:
-                    printf("w_0 must be between %f and %f.\n", xmin[i], xmax[i]);
+                    sprintf(cosmo->status_message, 
+                            "ccl_pkemu(): w_0 must be between %f and %f.\n", 
+                            xmin[i], xmax[i]);
                     break;
                 case 6:
-                    printf("(-w_0-w_a)^(1/4) must be between %f and %f.\n", xmin[i], xmax[i]);
+                    sprintf(cosmo->status_message, 
+                            "ccl_pkemu(): (-w_0-w_a)^(1/4) must be between %f and %f.\n", 
+                            xmin[i], xmax[i]);
                     break;
                 case 7:
-                    printf("omega_nu must be between %f and %f.\n", xmin[i], xmax[i]);
+                    sprintf(cosmo->status_message, 
+                            "ccl_pkemu(): omega_nu must be between %f and %f.\n", 
+                            xmin[i], xmax[i]);
                     break;
             }
-            exit(1);
+            *status = CCL_ERROR_EMULATOR_BOUND;
+            ccl_raise_exception(*status, cosmo->status_message);
+            return;
         }
     } // for(i=0; i<p; i++)
     if((xstar[p] < z[0]) || (xstar[p] > z[rs-1])) {
-        printf("z must be between %f and %f.\n", z[0], z[rs-1]);
-        printf("%f\n", xstar[p]-z[rs-1]);
-        exit(1);
+        sprintf(cosmo->status_message, 
+                "ccl_pkemu(): z must be between %f and %f.\n", 
+                z[0], z[rs-1]);
+        *status = CCL_ERROR_EMULATOR_BOUND;
+        ccl_raise_exception(*status, cosmo->status_message);
+        return;
     }
     
     // Standardize the inputs
@@ -309,11 +332,8 @@ static void emu(double *xstar, double **ystar) {
     }
 }
 
-void ccl_pkemu(double xstarin[], double **Pkemu, int status) {
 
+void ccl_pkemu(double xstarin[], double **Pkemu, int* status, ccl_cosmology* cosmo) {
   int i;
-  status = 1;
-  
-  emu(xstarin, Pkemu);
-
+  emu(xstarin, Pkemu, status, cosmo);
 }
