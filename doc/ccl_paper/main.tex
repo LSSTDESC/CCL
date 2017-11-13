@@ -77,13 +77,15 @@ In preparation for constraining cosmology with the Large Synoptic Survey Telesco
 
 The overarching goal of \ccl is to allow seamless integration of different cosmological models of interest to LSST, given some priors on the range of validity of the specific models.
 
+The cosmological components include the matter density parameter $\Omega_m$, the dark energy density $\Omega_\Lambda$, the radiation density $\Omega_r$, the energy in curvature $\Omega_K$, the neutrino density of both massless and massive neutrinos, given by $\Omega_{\nu, {\rm rel}$ and $\Omega_{\nu, {\rm m}}$ respectively, the optical depth $\tau$, and parameters for the equation of state of dark energy.
+
 Currently, the following families of models are supported:
 \begin{itemize}
  \item Flat $\Lambda$CDM cosmology with parameters $\Omega_b, n_s, A_s, \Omega_m, \Omega_\Lambda, \tau$ and a cosmological constant dark energy model with equation-of-state $w=-1.$
  \item wCDM and the Chevallier-Polarski-Linder (CPL) model for dark energy and it's redshift dependence ($w(a) = w_0+w_a(1-a)$, \citealt{Chevallier01} and \citealt{Linder03})
  \item A universe with non-zero curvature ($K$) so that the curvature energy density is the difference of sum of the energy densities of the other components with respect to unity (flatness), i.e. $\Omega_k = 1- \sum_i \Omega_i$
  \item All of the above, plus an arbitrary, user-defined modified growth function (see description in Section \ref{sec:growth})
-  \item A single massive neutrino species or multiple equal-mass massive neutrinos, in combination with any of the above (except the user-defined modified growth function), specified by the neutrino mass $\Sigma m_\nu$.
+  \item A single massive neutrino species or multiple equal-mass massive neutrinos, in combination with any of the above (except the user-defined modified growth function), specified by the neutrino mass $\Sigma m_\nu$ (which maps on to the density $\Omega_{\nu, {\rm m}}$ above).
 \end{itemize}
 
 \todo{Range of validity of the predictions.}
@@ -99,7 +101,8 @@ Not all features of \ccl are available for all models. For a guide to which pred
 \vol{Renee}
 
 \cont{Background cosmology parameter definition. Expansion and distance functions. Growth function and growth rate.}
-The models that are specified above map directly onto cosmological observables like the expansion rate of the universe, which is paramterised through the Hubble parameter as:
+The models that are specified above map directly onto cosmological observables like the expansion rate of the universe, which is paramterised through the Hubble parameter (and assuming the CPL parameterization described above) as:
+
 \begin{align}\label{eq:Ha}
 \frac{H(a)}{H_0} &= a^{-3/2}\Big(\Omega_{M,0}+\Omega_{\Lambda,0} a^{-3(w_0+w_a)}
     \exp[3 w_a (a-1)]+\Omega_{K,0} a \nonumber \\ &+(\Omega_{g,0} + \Omega_{\nu, {\rm rel}}) a^{-1} + \Omega_{\nu, {\rm m}}(a)a^3\Big)^{\frac{1}{2}}.
@@ -126,7 +129,6 @@ This function can be written directly in terms of the energy density in cosmic c
 
 which is valid for all forms of the curvature energy density.
 
-
 The usual angular diameter distance is $d_A=a\,r(a)$, and the luminosity distance is
 $d_L=r(a)/a,$ leading to the familiar relation $d_A = a^2d_L$ which is valid in general for all metric theories of gravity.
 
@@ -136,16 +138,7 @@ The \ccl suite also have the functionality to compute the distance modulus, defi
 \end{equation}
 and $a(\chi)$, the inverse of $\chi(a)$.
 
-%The density parameter functions $\Omega_X(a)$ can be calculated for six components:
-%\begin{itemize}
-%\item matter density parameter $\Omega_M(a) = \Omega_{M,0} H_0^2 / (a^3 H^2(a) )$,
-%\item dark energy density parameter $\Omega_\Lambda(a) = \Omega_{\Lambda,0} H_0^2 / H^2(a)$,
-%\item radiation density parameter $\Omega_g(a) = \Omega_{g,0} H_0^2 / (a^4 H^2(a) )$,
-%\item curvature density parameter $\Omega_K(a) = \Omega_{K,0} H_0^2 / (a^2 H^2(a) )$,
-%\item massless neutrino density parameter $\Omega_{\nu, {\rm rel}}(a) = \Omega_{\nu, {\rm rel},0} H_0^2 / (a^4 H^2(a) )$,
-%\item massive neutrino density parameter $\Omega_{\nu, {\rm m}}(a)$,
-%\end{itemize}
-%all using the Hubble parameter defined in equation~\ref{eq:Ha}.
+
 
 %-------------------------------------------------------------------------------
 \subsection{Growth of perturbations}
