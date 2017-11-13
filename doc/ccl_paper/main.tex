@@ -88,13 +88,14 @@ Currently, the following families of models are supported:
   \item A single massive neutrino species or multiple equal-mass massive neutrinos, in combination with any of the above (except the user-defined modified growth function), specified by the neutrino mass $\Sigma m_\nu$ (which maps on to the density $\Omega_{\nu, {\rm m}}$ above).
 \end{itemize}
 
-\todo{Range of validity of the predictions.}
-
+%\todo{Range of validity of the predictions.}
 Not all features of \ccl are available for all models. For a guide to which predictions are available for each model, see Table \ref{tab:cosmo}. Note that if users install their own version of {\tt CLASS}, {\tt CCL} can then make predictions for a more extended set of cosmologies. Users should take care to understand the validity of the {\tt CCL} assumptions for their own models.
+
+The power spectrum computed with {\tt CLASS} is consistent with the power spectrum in Astropy to a precision of $10^{-4}$, while the luminosity distance splines are accurate to $10^{-4}$ out to a redshift of $z=2.$ Similarly the co-moving distance comparisons yield similar results. 
 
 \input{table_cosmo}
 
-\todo{Add discussion of external versions of CLASS and Modified Gravity.}
+%\todo{Add discussion of external versions of CLASS and Modified Gravity.}
 
 %-------------------------------------------------------------------------------
 \subsection{Background cosmology}
