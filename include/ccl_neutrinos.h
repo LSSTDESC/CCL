@@ -1,4 +1,7 @@
 /** @file */
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 //#pragma once
 #include "ccl_core.h"
@@ -39,3 +42,7 @@ gsl_spline* calculate_nu_phasespace_spline(int *status);
  * @return OmNuh2 Fractional energy density of neutrions with mass mnu, multiplied by h squared. 
  */
 double Omeganuh2 (double a, double Neff, double mnu, double TCMB, gsl_interp_accel* accel, int * status);
+
+#ifdef __cplusplus
+}
+#endif

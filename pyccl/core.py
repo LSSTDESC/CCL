@@ -1,8 +1,9 @@
 
-import ccllib as lib
+from pyccl import ccllib as lib
 import numpy as np
 from warnings import warn
-from pyutils import check 
+from pyccl.pyutils import check
+import math
 
 # Configuration types
 transfer_function_types = {
@@ -15,7 +16,7 @@ transfer_function_types = {
     'boltzmann_camb':   lib.boltzmann_camb,
     'camb':             lib.boltzmann_camb,
     'boltzmann_class':  lib.boltzmann_class,
-    'class':            lib.boltzmann_class
+    'class':            lib.boltzmann_class,
 }
 
 matter_power_spectrum_types = {
@@ -23,6 +24,11 @@ matter_power_spectrum_types = {
     'halomodel':    lib.halo_model,
     'halofit':      lib.halofit,
     'linear':       lib.linear
+}
+
+baryons_power_spectrum_types = {
+    'nobaryons':   lib.nobaryons,
+    'bcm':      lib.bcm
 }
 
 mass_function_types = {
@@ -55,7 +61,8 @@ class Parameters(object):
     """
     
     def __init__(self, Omega_c=None, Omega_b=None, h=None, A_s=None, n_s=None, 
-                 Omega_k=0., N_nu_rel=3.046, N_nu_mass=0., m_nu=0.,w0=-1., wa=0., sigma8=None,
+                 Omega_k=0., N_nu_rel=3.046, N_nu_mass=0., m_nu=0.,w0=-1., wa=0.,
+                 bcm_log10Mc=math.log10(1.2e14), bcm_etab=0.5, bcm_ks=55., sigma8=None,
                  z_mg=None, df_mg=None):
         """
         Creates a set of cosmological parameters.
@@ -80,6 +87,9 @@ class Parameters(object):
                                   state. Defaults to -1.
             wa (float, optional): Second order term of dark energy equation of 
                                   state. Defaults to 0.
+            log10Mc (float, optional): One of the parameters of the BCM model.
+            etab (float, optional): One of the parameters of the BCM model.
+            ks (float, optional): One of the parameters of the BCM model.
             sigma8 (float): Variance of matter density perturbations at 8 Mpc/h
                             scale. Optional if A_s is specified.
             df_mg (:obj: array_like): Perturbations to the GR growth rate as a 
@@ -140,13 +150,15 @@ class Parameters(object):
             self.parameters, status \
                 = lib.parameters_create( Omega_c, Omega_b, Omega_k, N_nu_rel, 
                                          N_nu_mass, m_nu, w0, wa, h, norm_pk, 
-                                         n_s, -1, None, None, status )
+                                         n_s, bcm_log10Mc, bcm_etab, bcm_ks, -1,
+                                         None, None, status )
         else:
             # Create ccl_parameters with modified growth arrays
             self.parameters, status \
                 = lib.parameters_create_vec( Omega_c, Omega_b, Omega_k, N_nu_rel, 
                                              N_nu_mass, m_nu, w0, wa, h, norm_pk, 
-                                             n_s, z_mg, df_mg, status )
+                                             n_s, bcm_log10Mc, bcm_etab, bcm_ks,
+                                             z_mg, df_mg, status )
         check(status)    
     
     def __getitem__(self, key):
@@ -182,7 +194,7 @@ class Parameters(object):
         Output the parameters that were set, and their values.
         """
         params = ['Omega_c', 'Omega_b', 'Omega_m', 'Omega_k', 'Omega_l',
-                  'w0', 'wa', 'H0', 'h', 'A_s', 'n_s',
+                  'w0', 'wa', 'H0', 'h', 'A_s', 'n_s', 'bcm_log10Mc', 'bcm_etab', 'bcm_ks',
                   'N_nu_rel', 'N_nu_mass', 'mnu', 'Omega_n_mass', 'Omega_n_rel',
                   'T_CMB', 'Omega_g', 'z_star', 'has_mgrowth']
         
@@ -210,11 +222,13 @@ class Cosmology(object):
     def __init__(self, 
                  params=None, config=None,
                  Omega_c=None, Omega_b=None, h=None, A_s=None, n_s=None, 
-                 Omega_k=0., N_nu_rel=3.046, N_nu_mass=0., m_nu=0., w0=-1., wa=0., sigma8=None,
+                 Omega_k=0., N_nu_rel=3.046, N_nu_mass=0., m_nu=0., w0=-1., wa=0.,
+                 bcm_log10Mc=math.log10(1.2e14), bcm_etab=0.5, bcm_ks=55., sigma8=None,
                  z_mg=None, df_mg=None, 
                  transfer_function='boltzmann_class',
                  matter_power_spectrum='halofit',
-                 mass_function='tinker'):
+                 baryons_power_spectrum='nobaryons',
+                 mass_function='tinker10'):
         """Creates a wrapper for ccl_cosmology.
 
         TODO: enumerate transfer_function and 
@@ -229,6 +243,8 @@ class Cosmology(object):
             use. Defaults to `boltzmann_class`.
             matter_power_spectrum (:obj:`str`, optional): The matter power 
             spectrum to use. Defaults to `halofit`.
+            baryons_power_spectrum (:obj:`str`, optional): The correction from baryonic
+            effects to be implemented. Defaults to `nobaryons`.
             mass_function (:obj:`str`, optional): The mass function to use. 
             Defaults to `tinker` (2010).
 
@@ -239,8 +255,8 @@ class Cosmology(object):
             # Create new Parameters object
             params = Parameters(Omega_c=Omega_c, Omega_b=Omega_b, h=h, A_s=A_s, 
                                 n_s=n_s, Omega_k=Omega_k, N_nu_rel = N_nu_rel, N_nu_mass=N_nu_mass, m_nu=m_nu, 
-                                w0=w0, wa=wa, sigma8=sigma8, z_mg=z_mg, 
-                                df_mg=df_mg)
+                                w0=w0, wa=wa, sigma8=sigma8, bcm_log10Mc=bcm_log10Mc, bcm_etab=bcm_etab,
+                                bcm_ks=bcm_ks, z_mg=z_mg, df_mg=df_mg)
             self.params = params
             params = params.parameters # We only need the ccl_parameters object
         elif isinstance(params, lib.parameters):
@@ -253,7 +269,8 @@ class Cosmology(object):
             # Warn if any cosmological parameters were specified at the same 
             # time as a Parameters() object; they will be ignored
             argtest = [Omega_c==None, Omega_b==None, h==None, A_s==None, 
-                       n_s==None, Omega_k==0., N_nu_rel==3.046, N_nu_mass==0., m_nu==0., w0==-1., wa==0., 
+                       n_s==None, Omega_k==0., N_nu_rel==3.046, N_nu_mass==0., m_nu==0.,
+                       w0==-1., wa==0., bcm_log10Mc==math.log10(1.2e14), bcm_etab==0.5, bcm_ks==55.,
                        sigma8==None, z_mg==None, df_mg==None]
             
             if not all(arg == True for arg in argtest):
@@ -289,6 +306,11 @@ class Cosmology(object):
                                   "type. Available options are: %s" \
                                  % (matter_power_spectrum, 
                                     matter_power_spectrum_types.keys()) )
+            if baryons_power_spectrum not in baryons_power_spectrum_types.keys():
+                raise ValueError( "'%s' is not a valid baryons_power_spectrum "
+                                  "type. Available options are: %s" \
+                                 % (baryons_power_spectrum, 
+                                    baryons_power_spectrum_types.keys()) )
             if mass_function not in mass_function_types.keys():
                 raise ValueError( "'%s' is not a valid mass_function type. "
                                   "Available options are: %s" \
@@ -302,6 +324,8 @@ class Cosmology(object):
                             transfer_function_types[transfer_function]
             config.matter_power_spectrum_method = \
                             matter_power_spectrum_types[matter_power_spectrum]
+            config.baryons_power_spectrum_method = \
+                            baryons_power_spectrum_types[baryons_power_spectrum]
             config.mass_function_method = \
                             mass_function_types[mass_function]
             
@@ -365,7 +389,7 @@ class Cosmology(object):
         """
         status = 0
         status = lib.cosmology_compute_distances(self.cosmo, status)
-        check(status)
+        check(status, self.cosmo)
     
     def compute_growth(self):
         """Interfaces with src/ccl_background.c: ccl_cosmology_compute_growth().
@@ -374,7 +398,7 @@ class Cosmology(object):
         """
         status = 0
         status = lib.cosmology_compute_growth(self.cosmo, status)
-        check(status)
+        check(status, self.cosmo)
     
     def compute_power(self):
         """Interfaces with src/ccl_power.c: ccl_cosmology_compute_power().
@@ -383,7 +407,7 @@ class Cosmology(object):
         """
         status = 0
         status = lib.cosmology_compute_power(self.cosmo, status)
-        check(status)
+        check(status, self.cosmo)
     
     def has_distances(self):
         """Checks if the distances have been precomputed.

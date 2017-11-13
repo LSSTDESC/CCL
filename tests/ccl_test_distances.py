@@ -1,7 +1,7 @@
 import numpy as np
 from numpy.testing import assert_allclose, run_module_suite
 import pyccl as ccl
-
+from os.path import dirname,join,abspath
 # Set tolerances
 DISTANCES_TOLERANCE = 1e-4
 
@@ -18,14 +18,14 @@ n_s = 0.96
 Omega_v_vals = np.array([0.7, 0.7, 0.7, 0.65, 0.75])
 w0_vals = np.array([-1.0, -0.9, -0.9, -0.9, -0.9])
 wa_vals = np.array([0.0, 0.0, 0.1, 0.1, 0.1])
-
+path = dirname(abspath(__file__))
 def read_chi_test_file():
     """
     Read the file containing all the radial comoving distance benchmarks 
     (distances are in Mpc/h)
     """
     # Load data from file
-    dat = np.genfromtxt("./benchmark/chi_model1-5.txt").T
+    dat = np.genfromtxt(join(path,"benchmark/chi_model1-5.txt")).T
     assert(dat.shape == (6,6))
     
     # Split into redshift column and chi(z) columns
@@ -38,7 +38,7 @@ def read_dm_test_file():
     Read the file containing all the distance modulus benchmarks 
     """
     # Load data from file
-    dat = np.genfromtxt("./benchmark/dm_model1-5.txt").T
+    dat = np.genfromtxt(join(path,"benchmark/dm_model1-5.txt")).T
     assert(dat.shape == (6,6))
 
     # Split into redshift column and chi(z) columns

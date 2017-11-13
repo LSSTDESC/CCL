@@ -1,5 +1,8 @@
-#pragma once
+#ifdef __cplusplus
+extern "C" {
+#endif
 
+#pragma once
 
 #include "gsl/gsl_const_mksa.h"
 
@@ -15,15 +18,17 @@
 
 /** @file */
 
+#ifndef M_PI
+/**
+ *  PI (in case it's not defined from math.h)
+*/
+#define M_PI 3.14159265358979323846
+#endif
+
 /**
  *  k pivot. These are in units of Mpc (no factor of h)
 */
 #define K_PIVOT 0.05
-
-/** 
- * Rho critical in units of M_sun/h / (Mpc/h)^3
- */
-#define RHO_CRITICAL 2.7744948E11
 
 /**
  * Lightspeed / H0 in units of Mpc/h
@@ -31,15 +36,15 @@
 #define CLIGHT_HMPC 2997.92458 //H0^-1 in Mpc/h
 
 /**
- * Newton's gravitational constant in units of m^3/Kg/s^2 (from PDG 2013)
+ * Newton's gravitational constant in units of m^3/Kg/s^2 
  */
 //#define GNEWT 6.6738e-11    //(from PDG 2013) in m^3/Kg/s^2
 #define GNEWT 6.67428e-11 // CLASS VALUE
 
 /**
- * Solar mass in units ofkg (from PDG 2013)
+ * Solar mass in units of kg (from GSL)
  */
-#define SOLAR_MASS 1.9885e30
+#define SOLAR_MASS GSL_CONST_MKSA_SOLAR_MASS
 
 /**
  * Mpc to meters (from PDG 2013)
@@ -50,6 +55,11 @@
  * pc to meters (from PDG 2013)
  */
 #define PC_TO_METER 3.08567758149e16
+
+/** 
+ * Rho critical in units of M_sun/h / (Mpc/h)^3
+ */
+#define RHO_CRITICAL ((3*100*100)/(8*M_PI*GNEWT)) * (1000*1000*MPC_TO_METER/SOLAR_MASS)
 
 /**
  * Boltzmann constant in units of J/K
@@ -109,3 +119,7 @@
 //LSST specific numbers
 #define Z_MIN_SOURCES 0.1
 #define Z_MAX_SOURCES 3.0
+
+#ifdef __cplusplus
+}
+#endif
