@@ -4006,6 +4006,9 @@ void omega_x_vec(ccl_cosmology * cosmo, int label,
 #include "../include/ccl_power.h"
 
 
+
+
+
 void linear_matter_power_vec(
                         ccl_cosmology * cosmo,
                         double a,
@@ -4294,9 +4297,6 @@ user_pz_info* specs_create_photoz_info_from_py(PyObject *pyfunc)
     Py_XINCREF(pyfunc);
     return pzinfo;
 }
-
-
-
 
 
 #ifdef __cplusplus
@@ -11997,6 +11997,72 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_cosmology_write_power_class_z(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  char *arg1 = (char *) 0 ;
+  ccl_cosmology *arg2 = (ccl_cosmology *) 0 ;
+  double arg3 ;
+  int *arg4 = (int *) 0 ;
+  int res1 ;
+  char *buf1 = 0 ;
+  int alloc1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  double val3 ;
+  int ecode3 = 0 ;
+  int temp4 ;
+  int res4 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  PyObject * obj3 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOOO:cosmology_write_power_class_z",&obj0,&obj1,&obj2,&obj3)) SWIG_fail;
+  res1 = SWIG_AsCharPtrAndSize(obj0, &buf1, NULL, &alloc1);
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "cosmology_write_power_class_z" "', argument " "1"" of type '" "char *""'");
+  }
+  arg1 = (char *)(buf1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_ccl_cosmology, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "cosmology_write_power_class_z" "', argument " "2"" of type '" "ccl_cosmology *""'"); 
+  }
+  arg2 = (ccl_cosmology *)(argp2);
+  ecode3 = SWIG_AsVal_double(obj2, &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "cosmology_write_power_class_z" "', argument " "3"" of type '" "double""'");
+  } 
+  arg3 = (double)(val3);
+  if (!(SWIG_IsOK((res4 = SWIG_ConvertPtr(obj3,SWIG_as_voidptrptr(&arg4),SWIGTYPE_p_int,0))))) {
+    int val; 
+    int ecode = SWIG_AsVal_int(obj3, &val);
+    if (!SWIG_IsOK(ecode)) {
+      SWIG_exception_fail(SWIG_ArgError(ecode), "in method '" "cosmology_write_power_class_z" "', argument " "4"" of type '" "int""'");
+    }
+    temp4 = (int)(val);
+    arg4 = &temp4;
+    res4 = SWIG_AddTmpMask(ecode);
+  }
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    ccl_cosmology_write_power_class_z(arg1,arg2,arg3,arg4);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  if (SWIG_IsTmpObj(res4)) {
+    resultobj = SWIG_Python_AppendOutput(resultobj, SWIG_From_int((*arg4)));
+  } else {
+    int new_flags = SWIG_IsNewObj(res4) ? (SWIG_POINTER_OWN |  0 ) :  0 ;
+    resultobj = SWIG_Python_AppendOutput(resultobj, SWIG_NewPointerObj((void*)(arg4), SWIGTYPE_p_int, new_flags));
+  }
+  if (alloc1 == SWIG_NEWOBJ) free((char*)buf1);
+  return resultobj;
+fail:
+  if (alloc1 == SWIG_NEWOBJ) free((char*)buf1);
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_linear_matter_power(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   ccl_cosmology *arg1 = (ccl_cosmology *) 0 ;
@@ -17870,6 +17936,7 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"distance_modulus_vec", _wrap_distance_modulus_vec, METH_VARARGS, (char *)"distance_modulus_vec(cosmology cosmo, double * a, double * output, int * status)"},
 	 { (char *)"scale_factor_of_chi_vec", _wrap_scale_factor_of_chi_vec, METH_VARARGS, (char *)"scale_factor_of_chi_vec(cosmology cosmo, double * chi, double * output, int * status)"},
 	 { (char *)"omega_x_vec", _wrap_omega_x_vec, METH_VARARGS, (char *)"omega_x_vec(cosmology cosmo, int label, double * a, double * output, int * status)"},
+	 { (char *)"cosmology_write_power_class_z", _wrap_cosmology_write_power_class_z, METH_VARARGS, (char *)"cosmology_write_power_class_z(char * filename, cosmology cosmo, double z, int * status)"},
 	 { (char *)"linear_matter_power", _wrap_linear_matter_power, METH_VARARGS, (char *)"linear_matter_power(cosmology cosmo, double k, double a, int * status) -> double"},
 	 { (char *)"nonlin_matter_power", _wrap_nonlin_matter_power, METH_VARARGS, (char *)"nonlin_matter_power(cosmology cosmo, double k, double a, int * status) -> double"},
 	 { (char *)"sigmaR", _wrap_sigmaR, METH_VARARGS, (char *)"sigmaR(cosmology cosmo, double R, int * status) -> double"},
@@ -18944,6 +19011,7 @@ SWIG_init(void) {
   SWIG_Python_SetConstant(d, "CCL_ERROR_HMF_INTERP",SWIG_From_int((int)(1035)));
   SWIG_Python_SetConstant(d, "CCL_ERROR_PARAMETERS",SWIG_From_int((int)(1036)));
   SWIG_Python_SetConstant(d, "CCL_ERROR_NU_INT",SWIG_From_int((int)(1037)));
+  SWIG_Python_SetConstant(d, "CCL_ERROR_NU_SOLVE",SWIG_From_int((int)(1038)));
   SWIG_Python_SetConstant(d, "CCL_ERROR_POLICY_EXIT",SWIG_From_int((int)(CCL_ERROR_POLICY_EXIT)));
   SWIG_Python_SetConstant(d, "CCL_ERROR_POLICY_CONTINUE",SWIG_From_int((int)(CCL_ERROR_POLICY_CONTINUE)));
   
