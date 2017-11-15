@@ -8,7 +8,7 @@
 #define SZ_GC 0.02
 #define Z0_SH 0.65
 #define SZ_SH 0.05
-#define LMAX 999
+#define LMAX 499
 
 #define CLS_PRECISION 1E-2 // with respect to cosmic variance
 
