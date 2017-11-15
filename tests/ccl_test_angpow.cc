@@ -1,32 +1,55 @@
-#include "ccl_angpow_interface.h"
+#include "ccl.h"
+#include "ctest.h"
+#include <stdio.h>
+#include <math.h>
 
-#define OC 0.2582
-#define OB 0.0483
-#define OK 0.00
-#define ON 0.00
-#define HH 0.679
-#define W0 -1.0
-#define WA 0.00
-#define NS 1.0
-#define NORMPS 2.215e-9
-#define ZD 0.5
-#define NZ 128
+#define NZ 1024
 #define Z0_GC 1.0 
 #define SZ_GC 0.02
 #define Z0_SH 0.65
 #define SZ_SH 0.05
-#define LMAX 500
+#define LMAX 999
+
+#define CLS_PRECISION 1E-2 // with respect to cosmic variance
+
+CTEST_DATA(angpow) {
+  double Omega_c;
+  double Omega_b;
+  double h;
+  double A_s;
+  double n_s;
+  double Omega_n;
+  double Omega_v[5];
+  double Omega_k[5];
+  double w_0[5];
+  double w_a[5];
+  
+  double z[6];
+  double gf[5][6];
+};
+
+
+// Set up the cosmological parameters to be used 
+CTEST_SETUP(growth){
+
+  // Values that are the same for all 5 models
+  data->Omega_c = 0.25;
+  data->Omega_b = 0.05;
+  data->h = 0.7;
+  data->A_s = 2.1e-9;
+  data->n_s = 0.96;
+  data->Omega_n = 0.0;
+  data->Omega_v[i] = 0;
+  data->w_0[i]     = -1;
+  data->w_a[i]     = 0;
+  data->Omega_k[i] = 0;
+}
 
 
 
 
-//------------------------------
-// Exemple of processing from P(k) to Cl
-//------------------------------
-int main(int argc,char **argv){
-
-  int rc=0;
-  try {
+static void test_angpow_precision(data)
+{
   // Status flag
   int status =0;
   
@@ -34,7 +57,10 @@ int main(int argc,char **argv){
 
   ccl_configuration ccl_config=default_config;
   ccl_config.transfer_function_method=ccl_boltzmann_class;
-  ccl_parameters ccl_params=ccl_parameters_create(OC,OB,OK,ON,W0,WA,HH,NORMPS,NS,-1,NULL,NULL);
+  ccl_parameters ccl_params=ccl_parameters_create(data->Omega_c, data->Omega_b, 
+						data->Omega_k, data->Omega_n, 
+						data->w_0, data->w_a,
+						data->h, data->A_s, data->n_s,-1,NULL,NULL);
 
   // Initialize cosmology object given cosmo params
   ccl_cosmology *ccl_cosmo=ccl_cosmology_create(ccl_params,ccl_config);
@@ -55,9 +81,32 @@ int main(int argc,char **argv){
   CCL_ClTracer *clt_gc1=ccl_cl_tracer_number_counts_new(ccl_cosmo,has_rsd,has_magnification,NZ,z_arr_gc,nz_arr_gc,NZ,z_arr_gc,bz_arr,NZ,z_arr_gc,sz_arr, &status);
   CCL_ClTracer *clt_gc2=ccl_cl_tracer_number_counts_new(ccl_cosmo,has_rsd,has_magnification,NZ,z_arr_gc,nz_arr_gc,NZ,z_arr_gc,bz_arr,NZ,z_arr_gc,sz_arr, &status);
 
-  // Compute C_ell
-  SplPar * spl_cl = ccl_angular_cls_angpow(ccl_cosmo, LMAX, clt_gc1, clt_gc2, &status);
+  // Workspaces
+  double linstep = 40;
+  double logstep = 1.15;
+  double dchi = (ct_gc_A->chimax-ct_gc_A->chimin)/1000.; // must be below 3 to converge toward limber computation at high ell
+  double dlk = 0.003;
+  double zmin = 0.05;
+  CCL_ClWorkspace *wnl=ccl_cl_workspace_new(NL+1,2*ells[NL-1],CCL_NONLIMBER_METHOD_NATIVE,logstep,linstep,dchi,dlk,zmin,&status);
+  CCL_ClWorkspace *wap=ccl_cl_workspace_new(NL+1,2*ells[NL-1],CCL_NONLIMBER_METHOD_ANGPOW,logstep,linstep,dchi,dlk,zmin,&status);
+
   
+  // Compute C_ell
+  ccl_angular_cls(cosmo,wnl,ct_gc_B,ct_gc_B,NL,ells,cells_gg_native,&status);
+  ccl_angular_cls(cosmo,wap,ct_gc_A,ct_gc_A,NL,ells,cells_gg_angpow,&status);
+  double rel_precision = 0.;
+  for(int ii=0;ii<NL;ii++) {
+    int l = ells[ii]
+    double cl_gg_nl=cells_gg_native[ii];
+    double cl_gg_ap=cells_gg_angpow[ii];
+    double ratio = abs(cl_gg_nl-cl_gg_ap)/cl_gg_nl;
+    rel_precision += ratio / sqrt(2./(2*l+1));
+  }
+  rel_precision /= NL;
+
+  ASSERT_TRUE((rel_precision < CLS_PRECISION));
+
+  /*
   {// Save the Cls in text file for tests
     Angpow::Parameters para = Angpow::Param::Instance().GetParam();
     std::fstream ofs;
@@ -68,6 +117,7 @@ int main(int argc,char **argv){
     }
     ofs.close();
   }
+  */
   
   /* {//save ctheta */
 
@@ -95,23 +145,15 @@ int main(int argc,char **argv){
   //Free up tracers
   ccl_cl_tracer_free(clt_gc1);
   ccl_cl_tracer_free(clt_gc2);
+  free(ells);
+  free(zarr_1);
+  free(zarr_2);
+  free(pzarr_1);
+  free(pzarr_2);
+  free(bzarr);
+  ccl_cosmology_free(cosmo);  
+}
 
-
-  }//try
-    catch (std::exception& sex) {
-      std::cerr << "\n job std::exception :"  << (std::string)typeid(sex).name() 
-         << "\n msg= " << sex.what() << std::endl;
-    rc = 78;
-  }
-    catch ( std::string str ) {
-    std::cerr << "job Exception raised: " << str << std::endl;
-  }
-  catch (...) {
-    std::cerr << " job catched unknown (...) exception  " << std::endl; 
-    rc = 79; 
-  } 
-
-  std::cout << ">>>> job ------- END ----------- RC=" << rc << std::endl;
-  return rc;
-  
+CTEST1(angpow,precision) {
+  angpow_precision(data)
 }

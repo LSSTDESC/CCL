@@ -1300,12 +1300,21 @@ static void ccl_angular_cls_angpow(ccl_cosmology *ccl_cosmo,CCL_ClWorkspace *w,
 				   double *cl_out,int * status)
 {
   // Initialize the Angpow parameters
-  int chebyshev_order_1=9; //TODO ANGPOW: we should figure out if this is good enough
+  int chebyshev_order_1=9; 
   int chebyshev_order_2=9;
-  double cl_kmax=1.; //TODO ANGPOW: this shouldn't be hard-coded 
-  int nsamp_z_1=(int)((clt1->chimax-clt1->chimin)/w->dchi)+1; //TODO ANGPOW: we need to figure out if this is good enough
-  int nsamp_z_2=(int)((clt2->chimax-clt2->chimin)/w->dchi)+1;
+  int nroots=200; 
   int l_max_use=CCL_MIN(w->l_limber,w->lmax);
+  double cl_kmax= 3.14*l_max_use/CCL_MIN(clt1->chimin,clt2->chimin); 
+  int nsamp_z_1=(int)(CCL_MAX(15,0.124*cl_kmax*(clt1->chimin+clt1->chimax)-0.76*l_max_use));
+  int nsamp_z_2=(int)(CCL_MAX(15,0.124*cl_kmax*(clt2->chimin+clt2->chimax)-0.76*l_max_use));
+  //benchmark prints
+  printf("lmax= %d l_limber= %d\n", l_max_use,w->l_limber);
+  printf("chebyshevorder1: %d chebyshevorder2: %d\n",chebyshev_order_1,chebyshev_order_2);
+  printf("radialorder1: %d radialorder2: %d\n", nsamp_z_1,nsamp_z_2);
+  printf("kmax= %.3g\n", cl_kmax);
+  printf("nroots= %d\n",nroots);
+  printf(" %.3g %.3g %.3g\n", clt1->chimax,clt1->chimin,w->dchi);
+  printf(" %.3g %.3g %.3g\n", clt2->chimax,clt2->chimin,w->dchi);
 
   // Initialize the radial selection windows W(z)
   Angpow::RadSplineSelect Z1win(clt1->spl_nz,clt1->zmin,clt1->zmax);
@@ -1333,8 +1342,9 @@ static void ccl_angular_cls_angpow(ccl_cosmology *ccl_cosmo,CCL_ClWorkspace *w,
   // Main class to compute Cl with Angpow
   Angpow::Pk2Cl pk2cl; //Default: the user parameters are used in the Constructor 
   pk2cl.SetOrdFunc(chebyshev_order_1,chebyshev_order_2);
-  pk2cl.SetRadOrder(nsamp_z_1/2,nsamp_z_2/2);
+  pk2cl.SetRadOrder(nsamp_z_1,nsamp_z_2);
   pk2cl.SetKmax(cl_kmax);
+  pk2cl.SetNRootPerInt(nroots); 
   pk2cl.Compute(int1,int2,cosmo,&Z1win,&Z2win,clout[clout.Size()-1].first+1,clout);
 
   // Pass the Clbase class values (ell and C_ell) to the output spline

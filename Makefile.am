@@ -11,7 +11,7 @@ libccl_la_CPPFLAGS = $(OPENMP_CFLAGS) $(OPENMP_CXXFLAGS) -std=c++11 -I./include/
 
 noinst_PROGRAMS = tests/check_ccl
 TESTS = tests/check_ccl
-tests_check_ccl_SOURCES = tests/ccl_test.c tests/ccl_test_utils.c tests/ccl_test_params.c tests/ccl_test_cosmology.c tests/ccl_test_distances.c tests/ccl_test_growth.c tests/ccl_test_bbks.c tests/ccl_test_eh.c tests/ccl_test_cls.c tests/ccl_test_sigmaM.c tests/ccl_test_massfunc.c
+tests_check_ccl_SOURCES = tests/ccl_test.c tests/ccl_test_utils.c tests/ccl_test_params.c tests/ccl_test_cosmology.c tests/ccl_test_distances.c tests/ccl_test_growth.c tests/ccl_test_bbks.c tests/ccl_test_eh.c tests/ccl_test_cls.c tests/ccl_test_angpow.c tests/ccl_test_sigmaM.c tests/ccl_test_massfunc.c
 tests_check_ccl_CPPFLAGS = $(OPENMP_CFLAGS) $(OPENMP_CXXFLAGS) -I./tests/ -I./include/ -fopenmp
 tests_check_ccl_LDFLAGS =  $(OPENMP_CFLAGS) $(OPENMP_CXXFLAGS) -L./ -lccl -lgsl -lgslcblas -lfftw3 -lfftw3_threads -lm
 
