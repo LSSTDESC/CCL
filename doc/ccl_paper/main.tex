@@ -182,7 +182,7 @@ where $\tilde\delta({\bf k})$ is the Fourier component of the overdensity field 
 
 The default \ccl implementation uses the {\tt CLASS} algorithm \citet{class} to obtain predictions for $P(k,z)$. In addition, \ccl can also generate $P(k,z)$ predictions by emulation of cosmological numerical simuations, in particular, using the ``Cosmic Emulator'' developed by \citet{Lawrence17}. {\bf Note this branch hasn't been merged yet and it doesn't have validated implementation for cosmologies with neutrinos}.
 
-None of the previous methods account for the impact of baryonic physics on the distribution of matter, which is known to exceed percent level at scales $k \gtrsim 1/$Mpc \citep{vanDaalen11,Illustris,Hellwing16,Springel17} and can affect the extraction of cosmological parameters \citep{Semboloni11,Semboloni13,Mohammed14,Eifler15,Mohammed17}. To account for this effect, we incorporate in \ccl an effective parametrisation \citep{Schneider15} of the redistribution of matter as a consequence of feedback from Active Galactic Nuclei and adiabatic cooling. This parametrisation reproduces results from the OWLS simulations at $z=0$.{\bf Note this branch hasn't been merged yet.} We give an overview of each method in what follows.
+None of the previous methods account for the impact of baryonic physics on the distribution of matter, which is known to exceed percent level at scales $k \gtrsim 1/$Mpc \citep{vanDaalen11,Illustris,Hellwing16,Springel17} and can affect the extraction of cosmological parameters \citep{Semboloni11,Semboloni13,Mohammed14,Eifler15,Mohammed17}. To account for this effect, we incorporate in \ccl an effective parametrisation \citep{Schneider15} of the redistribution of matter as a consequence of feedback from Active Galactic Nuclei and adiabatic cooling. This parametrisation reproduces results from the OWLS simulations at $z=0$. We give an overview of each method in what follows.
 
 {\bf BBKS approximation}. \ccl implements the analytical BBKS approximation to the transfer function \citep{BBKS}, given by
 \begin{eqnarray}
@@ -838,20 +838,26 @@ We note that while we maintain the $10^{-4}$ for our evaluations of $\sigma$, th
 
 \cont{ `Fair' sampling of parameter space with Latin Hypercubes. Summary statistics used, and binning of power spectrum in $k$ and $z$. Precision settings used for CLASS. Estimates of run-time. Results. Range of validity.}
 
+\subsection{Validation of the Cosmic Emulator}
+\vol{Elisa Chisari}
+\cont{Explain automated tests for cosmic emulator}
+
+{\bf This branch has not been merged yet.} \citet{Lawrence17} quantified the accuracy of the matter power spectrum from their emulation scheme by comparing their predictions to the resulting power spectra from the numerical simulations used for the calibration of their scheme. We repeated this procedure making the emulator predictions via \ccl for a subset of emulator cosmologies. For cosmologies without neutrinos, we required the matter power spectrum at $z=0$ to be within $1\%$ of the smoothed simulated power spectrum from \citet{Lawrence17} (see their Figure 6). Similarly, we required $3\%$ accuracy for cosmologies with neutrinos (their Figure 5). 
 
 \section{Usage}
 \vol{Renee}
 
-The \ccl is released as part of the code from the Dark Energy Science Collaboration of LSST, and as such can be downloaded from \url{https://github.com/LSSTDESC/CCL}.
+The \ccl is released as part of the code from the Dark Energy Science Collaboration of LSST, and as such can be downloaded from the collaboration's github repository\footnote{\url{https://github.com/LSSTDESC/CCL}}.
 
-The documentation of the code is provided \url{https://github.com/LSSTDESC/CCL/blob/master/doc/html/index.html}{through Doxygen} {\bf RH: how do we get this to display not in github format but to render?}.
-\ccl needs the Gnu Scientific Library to install, more detailed instructions are given \url{https://github.com/LSSTDESC/CCL/blob/master/README.md}{in the README file}. It is also included as a Docker image for ease of use and installation.
+The documentation of the code is provided through Doxygen\footnote{\url{https://github.com/LSSTDESC/CCL/blob/master/doc/html/index.html}}. \ccl needs the GNU Scientific Library to install {\bf reference needed}, more detailed instructions are given in the README file of the repository. Instructions on how to generate a Docker {\bf reference needed} image are provided for portability to different architectures.
 
-There are a suite of test files located in the {\tt tests} directory within the main \ccl code, these tests run, for example, a user-defined form for the photometric redshift of a source and how it integrates and tests with the various codes and libraries within \ccl.
+There are a suite of test files located in the {\tt tests} directory within the main \ccl code, these tests run, for example, a user-defined form for the photometric redshift of a source and how it integrates and tests with the various codes and libraries within \ccl. {\bf Connect to validation section above. Explain automated tests. Mention Jupyter notebooks.}
+
+{\bf Something about our license.}
 
 %-------------------------------------------------------------------------------
 \section{Outlook}
-\vol{David Alonso, ?}
+\vol{David Alonso, Elisabeth Krause}
 
 \cont{Extended parameter spaces. Example use case (integration into LSS pipeline).}
 
