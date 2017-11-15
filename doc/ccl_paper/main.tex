@@ -351,7 +351,7 @@ where $P(k)$ is the linear matter power spectrum and $\tilde{W}(kR)$ is the Four
 \tilde{W}_R(k) = \frac{3}{(kR)^3}[\sin(kR)-kR\cos(kR)].
 \end{equation}
 
-One commonly used halo mass function definition within the literature is the \citet{Tinker2010} fitting function. This fitting function has been developed using collisionless N-body simulation data, using haloes determined by spherical overdensities. This is an extension of the \citet{Tinker2008} halo mass function, which is also included within \ccl as a comparative option. This fitting function assumes little change with respect to cosmological parameters. Further, it includes a redshift scaling with is assumed to sharply end at a redshift of $z = 3$. This halo mass function is calibrated within the range of $10^{10.5} h\mathrm{M}_\odot \leq M \leq 10^{15.5} h\mathrm{M}_\odot$ at a redshift of $z = 0$.
+One commonly used halo mass function definition within the literature is the \citet{Tinker2010} fitting function. This fitting function has been developed using collisionless $N$-body simulation data, using haloes determined by spherical overdensities. This is an extension of the \citet{Tinker2008} halo mass function, which is also included within \ccl as a comparative option. This fitting function assumes little change with respect to cosmological parameters. Further, it includes a redshift scaling with is assumed to sharply end at a redshift of $z = 3$. This halo mass function is calibrated within the range of $10^{10.5} h\mathrm{M}_\odot \leq M \leq 10^{15.5} h\mathrm{M}_\odot$ at a redshift of $z = 0$.
 
 For purposes of comparison, we also have included the results of \citet{Angulo2012}, which uses the Millenium XXL simulation in order to study galaxy cluster scaling relations. As part of this study, they have calculated their own fit to the \citet{Tinker2010} fitting function. While this additional halo mass function is available, it has not been extended to a broad range of overdensity parameter $\Delta$, nor has it been extended beyond a redshift of $z = 0$.
 
@@ -365,13 +365,21 @@ f(\sigma)=A\Big[\Big(\frac{b}{\sigma}+1\Big)^{-a}\Big]e^{-c/{\sigma}^2},
 \end{equation}
 where the only change is in the formulation of the second term. Note that the fitting parameters in the \citet{Angulo2012} formulation do not contain any redshift dependence and the use of it is primarily for testing and benchmark purposes.
 
-The \citet{Tinker2010} model parameterizes both the halo mass function and the halo bias in terms of the peak height, $\nu = \delta_c / \sigma(M)$, where $\delta_c$ is the critical density for collapse and is chosen to be $1.686$ for this particular parameterization. We can then parameterize the halo function and halo bias as
-\begin{eqnarray}
-  b(\nu) &=& 1 - A\frac{\nu^a}{\nu^a + {\delta_c}^a} + B\nu^b+C\nu^c,\\
-  f(\nu) &=& \alpha[1+(\beta\nu)^{-2\phi}]\nu^{2\eta}e(-\gamma\nu^2/2).
-\end{eqnarray}
+%The \citet{Tinker2010} model parameterizes both the halo mass function and the halo bias in terms of the peak height, $\nu = \delta_c / \sigma(M)$, where $\delta_c$ is the critical density for collapse and is chosen to be $1.686$ for this particular parameterization. We can then parameterize the halo function and halo bias as
+%\begin{eqnarray}
+%  b(\nu) &=& 1 - A\frac{\nu^a}{\nu^a + {\delta_c}^a} + B\nu^b+C\nu^c,\\
+%  f(\nu) &=& \alpha[1+(\beta\nu)^{-2\phi}]\nu^{2\eta}e(-\gamma\nu^2/2).
+%\end{eqnarray}
+The \citet{Tinker2010} model parameterizes the halo mass function in terms of th peak height, $\nu = \delta_c/\sigma(M)$, where $\delta_c=1.686$ is the critical density for collapse. The multiplicity function is then written as
+\begin{equation}
+  f(\nu) = \alpha[1+(\beta\nu)^{-2\phi}]\nu^{2\eta}e(-\gamma\nu^2/2).
+\end{equation}
 
-We note that these halo mass functions, while implemented to high {\em numerical} accuracy, carry their own uncertainties. It has not been significantly studied whether the halo mass function (or halo bias function) is universal with respect to changes in dark energy parameterisation. Further, \citet{Tinker2010} found a $\sim6\%$ scatter when determining the halo bias due to differences in simulations. This is in addition to a $5\%$ error in the mass function alone. This result is consistent with the work of \citet{Watson2013}, which also finds a $5\%$ level difference in comparison to the Tinker fitting function. Further study will be required in the future in order to gain percent level accuracy in determining the halo mass function.
+We note that these halo mass functions, while implemented to high {\em numerical} accuracy, carry their own uncertainties. It has not been significantly studied whether the halo mass function (or halo bias function) is universal with respect to changes in dark energy parameterisation.
+%Further, \citet{Tinker2010} found a $\sim6\%$ scatter when determining the halo bias due to differences in simulations.
+%This is in addition to a $5\%$ error in the mass function alone.
+\citet{Tinker2008,Tinker2010} quote 5\% accuracy of their mass funcitons.
+This result is consistent with the work of \citet{Watson2013}, which also finds a $5\%$ level difference in comparison to the Tinker fitting function. Further study will be required in the future in order to gain percent level accuracy in determining the halo mass function.
 
 %-------------------------------------------------------------------------------
 \subsection{Massive neutrinos}
