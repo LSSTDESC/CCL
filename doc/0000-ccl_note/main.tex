@@ -367,13 +367,9 @@ The allowed range of cosmological parameters is as follows:
 0.0&\leq& \Omega_\nu h^2 \leq 0.01.
 \end{eqnarray}
  %
-Actually, $w_a$ and $w_0$ are constrained jointly to be $0.3\leq (-w_0-w_a)^{1/4}$.
+Actually, $w_a$ and $w_0$ are constrained jointly to be $0.3\leq (-w_0-w_a)^{1/4}$. Note that \ccl only allows a subregion within this parameter space. For models in which w(z) crosses $-1$ at some given redshift, {\tt CLASS} will crash because this value corresponds to a true cosmological constant, which by definition should have no perturbations.\footnote{We thank Emilio Bellini and Miguel Zumlac\'arregui for clarifying this for us.} The linear matter power spectrum is still obtained from {\tt CLASS} as described in the section above. 
 
-An automated check is in place which compares the \ccl emulator outputs for certain cosmologies to smoothed power spectra from the simulations presented in \citet{Lawrence17} - courtesy of E. Lawrence and K. Heitmann. The check ensures that the \ccl outputs when calling the emulator are within $1\%$ of the simulation benchmarks at $z=0$ and for the $k$ range of validity of the emulator.
-
-While massive neutrinos can be passed to the cosmic emulator through \ccl, this particular feature has not yet been validated. This is due to the emulator requiring $\Omega_\nu$ to be passed, while \ccl usually takes the number of massive neutrino species and their mass as input. 
-
-Notice that in this implementation of \ccl, the linear matter power spectrum is still obtained from {\tt CLASS} as described in the section above. 
+An automated check is in place which compares the \ccl emulator outputs for certain cosmologies to smoothed power spectra from the simulations presented in \citet{Lawrence17}.\footnote{Courtesy of Earl Lawrence and Katrin Heitmann.} The check ensures that the \ccl outputs when calling the emulator are within $3\%$ of the simulation benchmarks at $z=0$ and for the $k$ range of validity of the emulator. This essentially corresponds to a verification of the results presented in Figure 5 and Figure 6 of \citet{Lawrence17}.
 
 \subsubsection{Spline parameters \& the INI file}
 
