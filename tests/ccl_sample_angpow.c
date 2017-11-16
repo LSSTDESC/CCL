@@ -18,8 +18,8 @@
 #define NZ 1024
 #define Z1_GC 1.0
 #define SZ1_GC 0.02
-#define Z0_GC 3.0
-#define SZ_GC 0.2
+#define Z0_GC 0.2
+#define SZ_GC 0.012
 #define Z0_SH 0.65
 #define SZ_SH 0.05
 #define NL 999
@@ -174,43 +174,6 @@ int main(int argc,char **argv)
   
   return 0;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

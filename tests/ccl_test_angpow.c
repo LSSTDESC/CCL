@@ -3,14 +3,26 @@
 #include <stdio.h>
 #include <math.h>
 
+#define OC 0.25
+#define OB 0.05
+#define OK 0.00
+#define ON 0.00
+#define HH 0.70
+#define W0 -1.0
+#define WA 0.00
+#define NS 0.96
+//#define NORMPS 0.80
+#define NORMPS 2.215e-9
+#define ZD 0.5
 #define NZ 1024
 #define Z0_GC 1.0 
 #define SZ_GC 0.02
 #define Z0_SH 0.65
 #define SZ_SH 0.05
-#define LMAX 499
+#define NL 499
 
 #define CLS_PRECISION 1E-2 // with respect to cosmic variance
+
 
 CTEST_DATA(angpow) {
   double Omega_c;
@@ -19,36 +31,34 @@ CTEST_DATA(angpow) {
   double A_s;
   double n_s;
   double Omega_n;
-  double Omega_v[5];
-  double Omega_k[5];
-  double w_0[5];
-  double w_a[5];
-  
-  double z[6];
-  double gf[5][6];
+  double Omega_v;
+  double Omega_k;
+  double w_0;
+  double w_a;
 };
 
 
-// Set up the cosmological parameters to be used 
-CTEST_SETUP(growth){
 
-  // Values that are the same for all 5 models
+
+// Set up the cosmological parameters to be used 
+CTEST_SETUP(angpow){
   data->Omega_c = 0.25;
   data->Omega_b = 0.05;
   data->h = 0.7;
   data->A_s = 2.1e-9;
   data->n_s = 0.96;
   data->Omega_n = 0.0;
-  data->Omega_v[i] = 0;
-  data->w_0[i]     = -1;
-  data->w_a[i]     = 0;
-  data->Omega_k[i] = 0;
+  data->Omega_v = 0;
+  data->w_0     = -1;
+  data->w_a    = 0;
+  data->Omega_k = 0;
 }
 
 
 
 
-static void test_angpow_precision(data)
+
+static void test_angpow_precision(struct angpow_data * data)
 {
   // Status flag
   int status =0;
@@ -57,10 +67,9 @@ static void test_angpow_precision(data)
 
   ccl_configuration ccl_config=default_config;
   ccl_config.transfer_function_method=ccl_boltzmann_class;
-  ccl_parameters ccl_params=ccl_parameters_create(data->Omega_c, data->Omega_b, 
-						data->Omega_k, data->Omega_n, 
-						data->w_0, data->w_a,
-						data->h, data->A_s, data->n_s,-1,NULL,NULL);
+  ccl_config.matter_power_spectrum_method=ccl_linear;
+  //ccl_parameters ccl_params=ccl_parameters_create(OC,OB,OK,ON,W0,WA,HH,NORMPS,NS,-1,NULL,NULL);
+  ccl_parameters ccl_params=ccl_parameters_create(data->Omega_c, data->Omega_b, 						data->Omega_k, data->Omega_n, 						data->w_0, data->w_a,						data->h, data->A_s, data->n_s,-1,NULL,NULL);
 
   // Initialize cosmology object given cosmo params
   ccl_cosmology *ccl_cosmo=ccl_cosmology_create(ccl_params,ccl_config);
@@ -78,13 +87,20 @@ static void test_angpow_precision(data)
   // Galaxy clustering tracer
   bool has_rsd = true;
   bool has_magnification = false;
-  CCL_ClTracer *clt_gc1=ccl_cl_tracer_number_counts_new(ccl_cosmo,has_rsd,has_magnification,NZ,z_arr_gc,nz_arr_gc,NZ,z_arr_gc,bz_arr,NZ,z_arr_gc,sz_arr, &status);
-  CCL_ClTracer *clt_gc2=ccl_cl_tracer_number_counts_new(ccl_cosmo,has_rsd,has_magnification,NZ,z_arr_gc,nz_arr_gc,NZ,z_arr_gc,bz_arr,NZ,z_arr_gc,sz_arr, &status);
+  CCL_ClTracer *ct_gc_A=ccl_cl_tracer_number_counts_new(ccl_cosmo,has_rsd,has_magnification,NZ,z_arr_gc,nz_arr_gc,NZ,z_arr_gc,bz_arr,-1,NULL,NULL, &status);
+  CCL_ClTracer *ct_gc_B=ccl_cl_tracer_number_counts_new(ccl_cosmo,has_rsd,has_magnification,NZ,z_arr_gc,nz_arr_gc,NZ,z_arr_gc,bz_arr,-1,NULL,NULL, &status);
+  
+  int *ells=malloc(NL*sizeof(int));
+  double *cells_gg_angpow=malloc(NL*sizeof(double));
+  double *cells_gg_native=malloc(NL*sizeof(double));
+  for(int ii=0;ii<NL;ii++)
+    ells[ii]=ii;
+
 
   // Workspaces
   double linstep = 40;
   double logstep = 1.15;
-  double dchi = (ct_gc_A->chimax-ct_gc_A->chimin)/1000.; // must be below 3 to converge toward limber computation at high ell
+  double dchi = (ct_gc_A->chimax-ct_gc_A->chimin)/200.; 
   double dlk = 0.003;
   double zmin = 0.05;
   CCL_ClWorkspace *wnl=ccl_cl_workspace_new(NL+1,2*ells[NL-1],CCL_NONLIMBER_METHOD_NATIVE,logstep,linstep,dchi,dlk,zmin,&status);
@@ -92,17 +108,19 @@ static void test_angpow_precision(data)
 
   
   // Compute C_ell
-  ccl_angular_cls(cosmo,wnl,ct_gc_B,ct_gc_B,NL,ells,cells_gg_native,&status);
-  ccl_angular_cls(cosmo,wap,ct_gc_A,ct_gc_A,NL,ells,cells_gg_angpow,&status);
+  ccl_angular_cls(ccl_cosmo,wnl,ct_gc_B,ct_gc_B,NL,ells,cells_gg_native,&status);
+  ccl_angular_cls(ccl_cosmo,wap,ct_gc_A,ct_gc_A,NL,ells,cells_gg_angpow,&status);
   double rel_precision = 0.;
-  for(int ii=0;ii<NL;ii++) {
-    int l = ells[ii]
+  for(int ii=2;ii<NL;ii++) {
+    int l = ells[ii];
     double cl_gg_nl=cells_gg_native[ii];
     double cl_gg_ap=cells_gg_angpow[ii];
-    double ratio = abs(cl_gg_nl-cl_gg_ap)/cl_gg_nl;
+    double ratio = fabs(cl_gg_nl-cl_gg_ap)/cl_gg_nl;
     rel_precision += ratio / sqrt(2./(2*l+1));
+    //printf("%d %.3g %.3g %.3g %.3g\n",l,cl_gg_nl,cl_gg_ap,ratio,ratio / sqrt(2./(2*l+1)));
   }
   rel_precision /= NL;
+  //printf("precision %.3g\n",rel_precision);
 
   ASSERT_TRUE((rel_precision < CLS_PRECISION));
 
@@ -143,17 +161,23 @@ static void test_angpow_precision(data)
   
   
   //Free up tracers
-  ccl_cl_tracer_free(clt_gc1);
-  ccl_cl_tracer_free(clt_gc2);
+  ccl_cl_tracer_free(ct_gc_A);
+  ccl_cl_tracer_free(ct_gc_B);
   free(ells);
+  ccl_cl_workspace_free(wap);
+  ccl_cl_workspace_free(wnl);
+  free(cells_gg_angpow);
+  free(cells_gg_native);
+ /*
   free(zarr_1);
   free(zarr_2);
   free(pzarr_1);
   free(pzarr_2);
   free(bzarr);
-  ccl_cosmology_free(cosmo);  
+  */
+  ccl_cosmology_free(ccl_cosmo);  
 }
 
-CTEST1(angpow,precision) {
-  angpow_precision(data)
+CTEST2(angpow,precision) {
+  test_angpow_precision(data);
 }

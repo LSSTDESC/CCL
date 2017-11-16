@@ -1308,6 +1308,7 @@ static void ccl_angular_cls_angpow(ccl_cosmology *ccl_cosmo,CCL_ClWorkspace *w,
   int nsamp_z_1=(int)(CCL_MAX(15,0.124*cl_kmax*(clt1->chimin+clt1->chimax)-0.76*l_max_use));
   int nsamp_z_2=(int)(CCL_MAX(15,0.124*cl_kmax*(clt2->chimin+clt2->chimax)-0.76*l_max_use));
   //benchmark prints
+  /*
   printf("lmax= %d l_limber= %d\n", l_max_use,w->l_limber);
   printf("chebyshevorder1: %d chebyshevorder2: %d\n",chebyshev_order_1,chebyshev_order_2);
   printf("radialorder1: %d radialorder2: %d\n", nsamp_z_1,nsamp_z_2);
@@ -1315,6 +1316,7 @@ static void ccl_angular_cls_angpow(ccl_cosmology *ccl_cosmo,CCL_ClWorkspace *w,
   printf("nroots= %d\n",nroots);
   printf(" %.3g %.3g %.3g\n", clt1->chimax,clt1->chimin,w->dchi);
   printf(" %.3g %.3g %.3g\n", clt2->chimax,clt2->chimin,w->dchi);
+  */
 
   // Initialize the radial selection windows W(z)
   Angpow::RadSplineSelect Z1win(clt1->spl_nz,clt1->zmin,clt1->zmax);
