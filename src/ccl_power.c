@@ -1091,20 +1091,13 @@ static void ccl_cosmology_compute_power_emu(ccl_cosmology * cosmo, int * status)
     strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_emu(): w0 and wa do not satisfy the emulator bound\n");
     return;
   }
-  /*Ideallly, we would set the following error
   if(cosmo->params.Omega_n_mass*cosmo->params.h*cosmo->params.h>0.01){
     *status=CCL_ERROR_INCONSISTENT;
     strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_emu(): Omega_nu does not satisfy the emulator bound\n");
     return;
-    }*/
-  //But for now, the cosmic emulator implementation with neutrinos hasn't been validated
-  if(cosmo->params.Omega_n_mass*cosmo->params.h*cosmo->params.h>1e-10){
-    *status=CCL_ERROR_INCONSISTENT;
-    strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_emu(): the emulator implementation has not yet been validated for Omega_nu!=0\n");
-    return;
-    }  
+    }
   
-    // Prepare to run CLASS for linear scales
+  // Prepare to run CLASS for linear scales
   ccl_fill_class_parameters(cosmo,&fc,parser_length, status);
   
   if (*status != CCL_ERROR_CLASS)
