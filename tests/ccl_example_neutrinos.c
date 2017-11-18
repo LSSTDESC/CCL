@@ -2,6 +2,7 @@
 #include "ccl_neutrinos.h"
 #include <stdio.h>
 #include <math.h>
+#include "ccl_params.h"
 
 int main(int argc, char * argv[])
 {
@@ -15,6 +16,7 @@ int main(int argc, char * argv[])
   double N_ncdm = 1.;
   double mnu = 0.04;
   int status=0;
+  int status2=0;
   double a, omnuh2, h_of_a;
   FILE * output;
   FILE * input;
@@ -45,12 +47,11 @@ int main(int argc, char * argv[])
   
   // Open file to output results
   output = fopen("./neutrinos_example_1massivem2massless_h.out", "w");
-  
   while((fscanf(input, "%le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le\n", &z, &no_a, &no_b, &no_c, &no_d, &no_e, &no_f, &no_g, &no_h, &no_i, &no_j, &no_k, &no_l, &no_m, &no_n, &no_o, &no_p, &no_q)!=EOF)) {	
     a = 1. / (1. + z);		
-    if ((z>(1./A_SPLINE_MIN -1.))) continue;  // Only continue if the z is within what can be handled by the splines in CCL.
+    if ((z>(1./ccl_splines->A_SPLINE_MIN -1.))) continue;  // Only continue if the z is within what can be handled by the splines in CCL.
     h_of_a  = ccl_h_over_h0(cosmo, a, &status);
-    omnuh2 = Omeganuh2(a, params.N_nu_mass, params.mnu, params.T_CMB, cosmo->data.nu_pspace_int)+ Omeganuh2(a, params.N_nu_rel, 0., params.T_CMB, cosmo->data.nu_pspace_int);
+    omnuh2 = Omeganuh2(a, params.N_nu_mass, params.mnu, params.T_CMB,NULL,&status)+ Omeganuh2(a, params.N_nu_rel, 0., params.T_CMB,NULL,&status2);
     fprintf(output, "%.16le %.16le %.16le \n",a, omnuh2, h_of_a); 
     
   }

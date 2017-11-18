@@ -22,11 +22,7 @@ int main(int argc, char * argv[])
   //ccl_cosmology * cosmo = ccl_cosmology_create(params, default_config);	
   double a, omnuh2_3massless, omnuh2_3massive;
   FILE * output;
-  gsl_spline *temp_spline;
-
-  // Get the spline of the phase-space integral
-  temp_spline = ccl_calculate_nu_phasespace_spline(&status);
-  
+    
   // Print parameters 
   printf("OmegaL=%1.12f\n",params.Omega_l);
   printf("OmegaNuRel=%1.12f\n", params.Omega_n_rel);
@@ -43,10 +39,10 @@ int main(int argc, char * argv[])
     a= ai*0.021;
     // Examples of calling Omeganuh2 for different neutrino configurations:
     // All neutrinos massless:	 
-    omnuh2_3massless = Omeganuh2(a, 3.046, 0., params.T_CMB, temp_spline);
+    omnuh2_3massless = Omeganuh2(a, 3.046, 0., params.T_CMB, NULL,&status);
     // Three massive neutrinos of 0.04 eV each. Adding a small contribution from massless neutrinos as described in CLASS explanatory.ini to ensure N = 3.046 at early times.
-    omnuh2_3massive = Omeganuh2(a, params.N_nu_mass, params.mnu, params.T_CMB, temp_spline)+
-      Omeganuh2(a, params.N_nu_rel, 0., params.T_CMB, temp_spline);
+    omnuh2_3massive = Omeganuh2(a, params.N_nu_mass, params.mnu, params.T_CMB, NULL, &status)+
+      Omeganuh2(a, params.N_nu_rel, 0., params.T_CMB, NULL, &status);
     fprintf(output, "%.16f %.16f %.16f \n",a, omnuh2_3massless, omnuh2_3massive); 
     
   }
