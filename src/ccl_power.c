@@ -526,6 +526,73 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int * statu
 
 }
 
+void ccl_cosmology_write_power_class_z(char *filename, ccl_cosmology * cosmo, double z, int * status)
+{
+  struct precision pr;        // for precision parameters 
+  struct background ba;       // for cosmological background 
+  struct thermo th;           // for thermodynamics 
+  struct perturbs pt;         // for source functions 
+  struct transfers tr;        // for transfer functions 
+  struct primordial pm;       // for primordial spectra 
+  struct spectra sp;          // for output spectra 
+  struct nonlinear nl;        // for non-linear spectra 
+  struct lensing le;
+  struct output op;
+  struct file_content fc;
+
+  ErrorMsg errmsg; // for error messages 
+  // generate file_content structure 
+  // CLASS configuration parameters will be passed through this structure,
+  // to avoid writing and reading .ini files for every call
+  int parser_length = 20;
+  int init_arr[7]={0,0,0,0,0,0,0};
+  if (parser_init(&fc,parser_length,"none",errmsg) == _FAILURE_) {
+    *status = CCL_ERROR_CLASS;
+    sprintf(cosmo->status_message ,"ccl_power.c: write_power_class_z(): parser init error:%s\n",errmsg);
+    return;
+  }
+
+  ccl_fill_class_parameters(cosmo,&fc,parser_length, status);
+  
+  if (*status != CCL_ERROR_CLASS)
+    ccl_run_class(cosmo, &fc,&pr,&ba,&th,&pt,&tr,&pm,&sp,&nl,&le,&op,init_arr,status);
+
+  if (*status == CCL_ERROR_CLASS) {
+    //printed error message while running CLASS
+    ccl_free_class_structs(cosmo, &ba,&th,&pt,&tr,&pm,&sp,&nl,&le,init_arr,status);
+    return;
+  }
+  if (parser_free(&fc)== _FAILURE_) {
+    *status = CCL_ERROR_CLASS;
+    strcpy(cosmo->status_message ,"ccl_power.c: write_power_class_z(): Error freeing CLASS parser\n");
+    ccl_free_class_structs(cosmo, &ba,&th,&pt,&tr,&pm,&sp,&nl,&le,init_arr,status);
+    return;
+  }
+  FILE *f;
+  f = fopen(filename,"w");
+  if (!f){
+    *status = CCL_ERROR_CLASS;
+    strcpy(cosmo->status_message ,"ccl_power.c: write_power_class_z(): Error opening output file\n");
+    ccl_free_class_structs(cosmo, &ba,&th,&pt,&tr,&pm,&sp,&nl,&le,init_arr,status);
+    fclose(f);
+    return;
+  }
+  double psout_l,ic;
+  int s=0;
+  for (int i=0; i<sp.ln_k_size; i++) {
+    s |= spectra_pk_at_k_and_z(&ba, &pm, &sp,exp(sp.ln_k[i]),z, &psout_l,&ic);
+    fprintf(f,"%e %e\n",exp(sp.ln_k[i]),psout_l);
+  }
+  fclose(f);
+  if(s) {
+    *status = CCL_ERROR_CLASS;
+    strcpy(cosmo->status_message ,"ccl_power.c: write_power_class_z(): Error writing CLASS power spectrum\n");
+  }
+
+  ccl_free_class_structs(cosmo, &ba,&th,&pt,&tr,&pm,&sp,&nl,&le,init_arr,status);
+}
+
+
 typedef struct {
   double rsound;
   double zeq;
@@ -1024,20 +1091,13 @@ static void ccl_cosmology_compute_power_emu(ccl_cosmology * cosmo, int * status)
     strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_emu(): w0 and wa do not satisfy the emulator bound\n");
     return;
   }
-  /*Ideallly, we would set the following error
   if(cosmo->params.Omega_n_mass*cosmo->params.h*cosmo->params.h>0.01){
     *status=CCL_ERROR_INCONSISTENT;
     strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_emu(): Omega_nu does not satisfy the emulator bound\n");
     return;
-    }*/
-  //But for now, the cosmic emulator implementation with neutrinos hasn't been validated
-  if(cosmo->params.Omega_n_mass*cosmo->params.h*cosmo->params.h>1e-10){
-    *status=CCL_ERROR_INCONSISTENT;
-    strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_emu(): the emulator implementation has not yet been validated for Omega_nu!=0\n");
-    return;
-    }  
+    }
   
-    // Prepare to run CLASS for linear scales
+  // Prepare to run CLASS for linear scales
   ccl_fill_class_parameters(cosmo,&fc,parser_length, status);
   
   if (*status != CCL_ERROR_CLASS)

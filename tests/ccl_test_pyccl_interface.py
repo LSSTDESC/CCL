@@ -32,10 +32,13 @@ def reference_models():
     # Emulator Pk
     p6=ccl.Parameters(Omega_c=0.27, Omega_b=0.022/0.67**2, h=0.67, sigma8=0.8, n_s=0.96,N_nu_rel=3.04,N_nu_mass=0.,m_nu=0.)
     cosmo6 = ccl.Cosmology(p6,transfer_function='emulator',matter_power_spectrum='emu')
-
     
-    # Return (only do one cosmology for now, for speed reasons)
-    return [cosmo1,cosmo4,cosmo5,cosmo6] # cosmo2, cosmo3
+    # Emulator Pk w/neutrinos
+    p7=ccl.Parameters(Omega_c=0.27, Omega_b=0.022/0.67**2, h=0.67, sigma8=0.8, n_s=0.96,N_nu_rel=3.04,N_nu_mass=1,m_nu=0.06)
+    cosmo7 = ccl.Cosmology(p7,transfer_function='emulator',matter_power_spectrum='emu')
+
+    # Return (do a few cosmologies, for speed reasons)
+    return [cosmo1,cosmo4,cosmo5,cosmo7] # cosmo2, cosmo3, cosmo6
 
 def all_finite(vals):
     """

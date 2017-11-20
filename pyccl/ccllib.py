@@ -597,6 +597,10 @@ def omega_x_vec(cosmo, label, a, output, status):
     """omega_x_vec(cosmology cosmo, int label, double * a, double * output, int * status)"""
     return _ccllib.omega_x_vec(cosmo, label, a, output, status)
 
+def cosmology_write_power_class_z(filename, cosmo, z, status):
+    """cosmology_write_power_class_z(char * filename, cosmology cosmo, double z, int * status)"""
+    return _ccllib.cosmology_write_power_class_z(filename, cosmo, z, status)
+
 def linear_matter_power(cosmo, k, a, status):
     """linear_matter_power(cosmology cosmo, double k, double a, int * status) -> double"""
     return _ccllib.linear_matter_power(cosmo, k, a, status)
@@ -1068,6 +1072,7 @@ CCL_ERROR_MF = _ccllib.CCL_ERROR_MF
 CCL_ERROR_HMF_INTERP = _ccllib.CCL_ERROR_HMF_INTERP
 CCL_ERROR_PARAMETERS = _ccllib.CCL_ERROR_PARAMETERS
 CCL_ERROR_NU_INT = _ccllib.CCL_ERROR_NU_INT
+CCL_ERROR_NU_SOLVE = _ccllib.CCL_ERROR_NU_SOLVE
 CCL_ERROR_POLICY_EXIT = _ccllib.CCL_ERROR_POLICY_EXIT
 CCL_ERROR_POLICY_CONTINUE = _ccllib.CCL_ERROR_POLICY_CONTINUE
 
