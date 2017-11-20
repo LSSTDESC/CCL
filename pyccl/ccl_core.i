@@ -22,7 +22,7 @@
 %inline %{
 ccl_parameters parameters_create_vec(
                         double Omega_c, double Omega_b, double Omega_k, 
-                        double N_nu_rel, double N_nu_mass, double M_nu, double w0, double wa, double h, 
+                        double N_nu_rel, double N_nu_mass, double* M_nu, double w0, double wa, double h, 
                         double norm_pk, double n_s, 
                         double* zarr, int nz,
                         double* dfarr, int nf,int* status)

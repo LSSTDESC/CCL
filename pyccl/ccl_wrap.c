@@ -3413,7 +3413,7 @@ SWIG_strnlen(const char* s, size_t maxlen)
 
 ccl_parameters parameters_create_vec(
                         double Omega_c, double Omega_b, double Omega_k, 
-                        double N_nu_rel, double N_nu_mass, double M_nu, double w0, double wa, double h, 
+                        double N_nu_rel, double N_nu_mass, double* M_nu, double w0, double wa, double h, 
                         double norm_pk, double n_s, 
                         double* zarr, int nz,
                         double* dfarr, int nf,int* status)
@@ -5010,11 +5010,11 @@ fail:
 SWIGINTERN PyObject *_wrap_parameters_mnu_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   struct ccl_parameters *arg1 = (struct ccl_parameters *) 0 ;
-  double arg2 ;
+  double *arg2 = (double *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  double val2 ;
-  int ecode2 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
   PyObject * obj0 = 0 ;
   PyObject * obj1 = 0 ;
   
@@ -5024,11 +5024,11 @@ SWIGINTERN PyObject *_wrap_parameters_mnu_set(PyObject *SWIGUNUSEDPARM(self), Py
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "parameters_mnu_set" "', argument " "1"" of type '" "struct ccl_parameters *""'"); 
   }
   arg1 = (struct ccl_parameters *)(argp1);
-  ecode2 = SWIG_AsVal_double(obj1, &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "parameters_mnu_set" "', argument " "2"" of type '" "double""'");
-  } 
-  arg2 = (double)(val2);
+  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_double, SWIG_POINTER_DISOWN |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "parameters_mnu_set" "', argument " "2"" of type '" "double *""'"); 
+  }
+  arg2 = (double *)(argp2);
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
     if (arg1) (arg1)->mnu = arg2;
@@ -5047,7 +5047,7 @@ SWIGINTERN PyObject *_wrap_parameters_mnu_get(PyObject *SWIGUNUSEDPARM(self), Py
   void *argp1 = 0 ;
   int res1 = 0 ;
   PyObject * obj0 = 0 ;
-  double result;
+  double *result = 0 ;
   
   if (!PyArg_ParseTuple(args,(char *)"O:parameters_mnu_get",&obj0)) SWIG_fail;
   res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_parameters, 0 |  0 );
@@ -5057,10 +5057,10 @@ SWIGINTERN PyObject *_wrap_parameters_mnu_get(PyObject *SWIGUNUSEDPARM(self), Py
   arg1 = (struct ccl_parameters *)(argp1);
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    result = (double) ((arg1)->mnu);
+    result = (double *) ((arg1)->mnu);
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
-  resultobj = SWIG_From_double((double)(result));
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_double, 0 |  0 );
   return resultobj;
 fail:
   return NULL;
@@ -7931,7 +7931,7 @@ SWIGINTERN PyObject *_wrap_cosmology_create_with_params(PyObject *SWIGUNUSEDPARM
   double arg3 ;
   double arg4 ;
   double arg5 ;
-  double arg6 ;
+  double *arg6 = (double *) 0 ;
   double arg7 ;
   double arg8 ;
   double arg9 ;
@@ -7952,8 +7952,8 @@ SWIGINTERN PyObject *_wrap_cosmology_create_with_params(PyObject *SWIGUNUSEDPARM
   int ecode4 = 0 ;
   double val5 ;
   int ecode5 = 0 ;
-  double val6 ;
-  int ecode6 = 0 ;
+  void *argp6 = 0 ;
+  int res6 = 0 ;
   double val7 ;
   int ecode7 = 0 ;
   double val8 ;
@@ -8018,11 +8018,11 @@ SWIGINTERN PyObject *_wrap_cosmology_create_with_params(PyObject *SWIGUNUSEDPARM
     SWIG_exception_fail(SWIG_ArgError(ecode5), "in method '" "cosmology_create_with_params" "', argument " "5"" of type '" "double""'");
   } 
   arg5 = (double)(val5);
-  ecode6 = SWIG_AsVal_double(obj5, &val6);
-  if (!SWIG_IsOK(ecode6)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode6), "in method '" "cosmology_create_with_params" "', argument " "6"" of type '" "double""'");
-  } 
-  arg6 = (double)(val6);
+  res6 = SWIG_ConvertPtr(obj5, &argp6,SWIGTYPE_p_double, 0 |  0 );
+  if (!SWIG_IsOK(res6)) {
+    SWIG_exception_fail(SWIG_ArgError(res6), "in method '" "cosmology_create_with_params" "', argument " "6"" of type '" "double *""'"); 
+  }
+  arg6 = (double *)(argp6);
   ecode7 = SWIG_AsVal_double(obj6, &val7);
   if (!SWIG_IsOK(ecode7)) {
     SWIG_exception_fail(SWIG_ArgError(ecode7), "in method '" "cosmology_create_with_params" "', argument " "7"" of type '" "double""'");
@@ -8215,7 +8215,7 @@ SWIGINTERN PyObject *_wrap_parameters_create(PyObject *SWIGUNUSEDPARM(self), PyO
   double arg3 ;
   double arg4 ;
   double arg5 ;
-  double arg6 ;
+  double *arg6 = (double *) 0 ;
   double arg7 ;
   double arg8 ;
   double arg9 ;
@@ -8235,8 +8235,8 @@ SWIGINTERN PyObject *_wrap_parameters_create(PyObject *SWIGUNUSEDPARM(self), PyO
   int ecode4 = 0 ;
   double val5 ;
   int ecode5 = 0 ;
-  double val6 ;
-  int ecode6 = 0 ;
+  void *argp6 = 0 ;
+  int res6 = 0 ;
   double val7 ;
   int ecode7 = 0 ;
   double val8 ;
@@ -8298,11 +8298,11 @@ SWIGINTERN PyObject *_wrap_parameters_create(PyObject *SWIGUNUSEDPARM(self), PyO
     SWIG_exception_fail(SWIG_ArgError(ecode5), "in method '" "parameters_create" "', argument " "5"" of type '" "double""'");
   } 
   arg5 = (double)(val5);
-  ecode6 = SWIG_AsVal_double(obj5, &val6);
-  if (!SWIG_IsOK(ecode6)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode6), "in method '" "parameters_create" "', argument " "6"" of type '" "double""'");
-  } 
-  arg6 = (double)(val6);
+  res6 = SWIG_ConvertPtr(obj5, &argp6,SWIGTYPE_p_double, 0 |  0 );
+  if (!SWIG_IsOK(res6)) {
+    SWIG_exception_fail(SWIG_ArgError(res6), "in method '" "parameters_create" "', argument " "6"" of type '" "double *""'"); 
+  }
+  arg6 = (double *)(argp6);
   ecode7 = SWIG_AsVal_double(obj6, &val7);
   if (!SWIG_IsOK(ecode7)) {
     SWIG_exception_fail(SWIG_ArgError(ecode7), "in method '" "parameters_create" "', argument " "7"" of type '" "double""'");
@@ -8744,7 +8744,7 @@ SWIGINTERN PyObject *_wrap_parameters_create_flat_lcdm_nu(PyObject *SWIGUNUSEDPA
   double arg5 ;
   double arg6 ;
   double arg7 ;
-  double arg8 ;
+  double *arg8 = (double *) 0 ;
   int *arg9 = (int *) 0 ;
   double val1 ;
   int ecode1 = 0 ;
@@ -8760,8 +8760,8 @@ SWIGINTERN PyObject *_wrap_parameters_create_flat_lcdm_nu(PyObject *SWIGUNUSEDPA
   int ecode6 = 0 ;
   double val7 ;
   int ecode7 = 0 ;
-  double val8 ;
-  int ecode8 = 0 ;
+  void *argp8 = 0 ;
+  int res8 = 0 ;
   int temp9 ;
   int res9 = 0 ;
   PyObject * obj0 = 0 ;
@@ -8811,11 +8811,11 @@ SWIGINTERN PyObject *_wrap_parameters_create_flat_lcdm_nu(PyObject *SWIGUNUSEDPA
     SWIG_exception_fail(SWIG_ArgError(ecode7), "in method '" "parameters_create_flat_lcdm_nu" "', argument " "7"" of type '" "double""'");
   } 
   arg7 = (double)(val7);
-  ecode8 = SWIG_AsVal_double(obj7, &val8);
-  if (!SWIG_IsOK(ecode8)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode8), "in method '" "parameters_create_flat_lcdm_nu" "', argument " "8"" of type '" "double""'");
-  } 
-  arg8 = (double)(val8);
+  res8 = SWIG_ConvertPtr(obj7, &argp8,SWIGTYPE_p_double, 0 |  0 );
+  if (!SWIG_IsOK(res8)) {
+    SWIG_exception_fail(SWIG_ArgError(res8), "in method '" "parameters_create_flat_lcdm_nu" "', argument " "8"" of type '" "double *""'"); 
+  }
+  arg8 = (double *)(argp8);
   if (!(SWIG_IsOK((res9 = SWIG_ConvertPtr(obj8,SWIG_as_voidptrptr(&arg9),SWIGTYPE_p_int,0))))) {
     int val; 
     int ecode = SWIG_AsVal_int(obj8, &val);
@@ -8854,7 +8854,7 @@ SWIGINTERN PyObject *_wrap_parameters_create_flat_wcdm_nu(PyObject *SWIGUNUSEDPA
   double arg6 ;
   double arg7 ;
   double arg8 ;
-  double arg9 ;
+  double *arg9 = (double *) 0 ;
   int *arg10 = (int *) 0 ;
   double val1 ;
   int ecode1 = 0 ;
@@ -8872,8 +8872,8 @@ SWIGINTERN PyObject *_wrap_parameters_create_flat_wcdm_nu(PyObject *SWIGUNUSEDPA
   int ecode7 = 0 ;
   double val8 ;
   int ecode8 = 0 ;
-  double val9 ;
-  int ecode9 = 0 ;
+  void *argp9 = 0 ;
+  int res9 = 0 ;
   int temp10 ;
   int res10 = 0 ;
   PyObject * obj0 = 0 ;
@@ -8929,11 +8929,11 @@ SWIGINTERN PyObject *_wrap_parameters_create_flat_wcdm_nu(PyObject *SWIGUNUSEDPA
     SWIG_exception_fail(SWIG_ArgError(ecode8), "in method '" "parameters_create_flat_wcdm_nu" "', argument " "8"" of type '" "double""'");
   } 
   arg8 = (double)(val8);
-  ecode9 = SWIG_AsVal_double(obj8, &val9);
-  if (!SWIG_IsOK(ecode9)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode9), "in method '" "parameters_create_flat_wcdm_nu" "', argument " "9"" of type '" "double""'");
-  } 
-  arg9 = (double)(val9);
+  res9 = SWIG_ConvertPtr(obj8, &argp9,SWIGTYPE_p_double, 0 |  0 );
+  if (!SWIG_IsOK(res9)) {
+    SWIG_exception_fail(SWIG_ArgError(res9), "in method '" "parameters_create_flat_wcdm_nu" "', argument " "9"" of type '" "double *""'"); 
+  }
+  arg9 = (double *)(argp9);
   if (!(SWIG_IsOK((res10 = SWIG_ConvertPtr(obj9,SWIG_as_voidptrptr(&arg10),SWIGTYPE_p_int,0))))) {
     int val; 
     int ecode = SWIG_AsVal_int(obj9, &val);
@@ -8973,7 +8973,7 @@ SWIGINTERN PyObject *_wrap_parameters_create_flat_wacdm_nu(PyObject *SWIGUNUSEDP
   double arg7 ;
   double arg8 ;
   double arg9 ;
-  double arg10 ;
+  double *arg10 = (double *) 0 ;
   int *arg11 = (int *) 0 ;
   double val1 ;
   int ecode1 = 0 ;
@@ -8993,8 +8993,8 @@ SWIGINTERN PyObject *_wrap_parameters_create_flat_wacdm_nu(PyObject *SWIGUNUSEDP
   int ecode8 = 0 ;
   double val9 ;
   int ecode9 = 0 ;
-  double val10 ;
-  int ecode10 = 0 ;
+  void *argp10 = 0 ;
+  int res10 = 0 ;
   int temp11 ;
   int res11 = 0 ;
   PyObject * obj0 = 0 ;
@@ -9056,11 +9056,11 @@ SWIGINTERN PyObject *_wrap_parameters_create_flat_wacdm_nu(PyObject *SWIGUNUSEDP
     SWIG_exception_fail(SWIG_ArgError(ecode9), "in method '" "parameters_create_flat_wacdm_nu" "', argument " "9"" of type '" "double""'");
   } 
   arg9 = (double)(val9);
-  ecode10 = SWIG_AsVal_double(obj9, &val10);
-  if (!SWIG_IsOK(ecode10)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode10), "in method '" "parameters_create_flat_wacdm_nu" "', argument " "10"" of type '" "double""'");
-  } 
-  arg10 = (double)(val10);
+  res10 = SWIG_ConvertPtr(obj9, &argp10,SWIGTYPE_p_double, 0 |  0 );
+  if (!SWIG_IsOK(res10)) {
+    SWIG_exception_fail(SWIG_ArgError(res10), "in method '" "parameters_create_flat_wacdm_nu" "', argument " "10"" of type '" "double *""'"); 
+  }
+  arg10 = (double *)(argp10);
   if (!(SWIG_IsOK((res11 = SWIG_ConvertPtr(obj10,SWIG_as_voidptrptr(&arg11),SWIGTYPE_p_int,0))))) {
     int val; 
     int ecode = SWIG_AsVal_int(obj10, &val);
@@ -9099,7 +9099,7 @@ SWIGINTERN PyObject *_wrap_parameters_create_lcdm_nu(PyObject *SWIGUNUSEDPARM(se
   double arg6 ;
   double arg7 ;
   double arg8 ;
-  double arg9 ;
+  double *arg9 = (double *) 0 ;
   int *arg10 = (int *) 0 ;
   double val1 ;
   int ecode1 = 0 ;
@@ -9117,8 +9117,8 @@ SWIGINTERN PyObject *_wrap_parameters_create_lcdm_nu(PyObject *SWIGUNUSEDPARM(se
   int ecode7 = 0 ;
   double val8 ;
   int ecode8 = 0 ;
-  double val9 ;
-  int ecode9 = 0 ;
+  void *argp9 = 0 ;
+  int res9 = 0 ;
   int temp10 ;
   int res10 = 0 ;
   PyObject * obj0 = 0 ;
@@ -9174,11 +9174,11 @@ SWIGINTERN PyObject *_wrap_parameters_create_lcdm_nu(PyObject *SWIGUNUSEDPARM(se
     SWIG_exception_fail(SWIG_ArgError(ecode8), "in method '" "parameters_create_lcdm_nu" "', argument " "8"" of type '" "double""'");
   } 
   arg8 = (double)(val8);
-  ecode9 = SWIG_AsVal_double(obj8, &val9);
-  if (!SWIG_IsOK(ecode9)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode9), "in method '" "parameters_create_lcdm_nu" "', argument " "9"" of type '" "double""'");
-  } 
-  arg9 = (double)(val9);
+  res9 = SWIG_ConvertPtr(obj8, &argp9,SWIGTYPE_p_double, 0 |  0 );
+  if (!SWIG_IsOK(res9)) {
+    SWIG_exception_fail(SWIG_ArgError(res9), "in method '" "parameters_create_lcdm_nu" "', argument " "9"" of type '" "double *""'"); 
+  }
+  arg9 = (double *)(argp9);
   if (!(SWIG_IsOK((res10 = SWIG_ConvertPtr(obj9,SWIG_as_voidptrptr(&arg10),SWIGTYPE_p_int,0))))) {
     int val; 
     int ecode = SWIG_AsVal_int(obj9, &val);
@@ -9374,7 +9374,7 @@ SWIGINTERN PyObject *_wrap_parameters_create_vec(PyObject *SWIGUNUSEDPARM(self),
   double arg3 ;
   double arg4 ;
   double arg5 ;
-  double arg6 ;
+  double *arg6 = (double *) 0 ;
   double arg7 ;
   double arg8 ;
   double arg9 ;
@@ -9395,8 +9395,8 @@ SWIGINTERN PyObject *_wrap_parameters_create_vec(PyObject *SWIGUNUSEDPARM(self),
   int ecode4 = 0 ;
   double val5 ;
   int ecode5 = 0 ;
-  double val6 ;
-  int ecode6 = 0 ;
+  void *argp6 = 0 ;
+  int res6 = 0 ;
   double val7 ;
   int ecode7 = 0 ;
   double val8 ;
@@ -9455,11 +9455,11 @@ SWIGINTERN PyObject *_wrap_parameters_create_vec(PyObject *SWIGUNUSEDPARM(self),
     SWIG_exception_fail(SWIG_ArgError(ecode5), "in method '" "parameters_create_vec" "', argument " "5"" of type '" "double""'");
   } 
   arg5 = (double)(val5);
-  ecode6 = SWIG_AsVal_double(obj5, &val6);
-  if (!SWIG_IsOK(ecode6)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode6), "in method '" "parameters_create_vec" "', argument " "6"" of type '" "double""'");
-  } 
-  arg6 = (double)(val6);
+  res6 = SWIG_ConvertPtr(obj5, &argp6,SWIGTYPE_p_double, 0 |  0 );
+  if (!SWIG_IsOK(res6)) {
+    SWIG_exception_fail(SWIG_ArgError(res6), "in method '" "parameters_create_vec" "', argument " "6"" of type '" "double *""'"); 
+  }
+  arg6 = (double *)(argp6);
   ecode7 = SWIG_AsVal_double(obj6, &val7);
   if (!SWIG_IsOK(ecode7)) {
     SWIG_exception_fail(SWIG_ArgError(ecode7), "in method '" "parameters_create_vec" "', argument " "7"" of type '" "double""'");
@@ -19414,8 +19414,8 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"parameters_N_nu_mass_get", _wrap_parameters_N_nu_mass_get, METH_VARARGS, (char *)"parameters_N_nu_mass_get(parameters self) -> double"},
 	 { (char *)"parameters_N_nu_rel_set", _wrap_parameters_N_nu_rel_set, METH_VARARGS, (char *)"parameters_N_nu_rel_set(parameters self, double N_nu_rel)"},
 	 { (char *)"parameters_N_nu_rel_get", _wrap_parameters_N_nu_rel_get, METH_VARARGS, (char *)"parameters_N_nu_rel_get(parameters self) -> double"},
-	 { (char *)"parameters_mnu_set", _wrap_parameters_mnu_set, METH_VARARGS, (char *)"parameters_mnu_set(parameters self, double mnu)"},
-	 { (char *)"parameters_mnu_get", _wrap_parameters_mnu_get, METH_VARARGS, (char *)"parameters_mnu_get(parameters self) -> double"},
+	 { (char *)"parameters_mnu_set", _wrap_parameters_mnu_set, METH_VARARGS, (char *)"parameters_mnu_set(parameters self, double * mnu)"},
+	 { (char *)"parameters_mnu_get", _wrap_parameters_mnu_get, METH_VARARGS, (char *)"parameters_mnu_get(parameters self) -> double *"},
 	 { (char *)"parameters_Omega_n_mass_set", _wrap_parameters_Omega_n_mass_set, METH_VARARGS, (char *)"parameters_Omega_n_mass_set(parameters self, double Omega_n_mass)"},
 	 { (char *)"parameters_Omega_n_mass_get", _wrap_parameters_Omega_n_mass_get, METH_VARARGS, (char *)"parameters_Omega_n_mass_get(parameters self) -> double"},
 	 { (char *)"parameters_Omega_n_rel_set", _wrap_parameters_Omega_n_rel_set, METH_VARARGS, (char *)"parameters_Omega_n_rel_set(parameters self, double Omega_n_rel)"},
@@ -19515,22 +19515,22 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"cosmology_swigregister", cosmology_swigregister, METH_VARARGS, NULL},
 	 { (char *)"cosmology_read_config", _wrap_cosmology_read_config, METH_VARARGS, (char *)"cosmology_read_config()"},
 	 { (char *)"cosmology_create", _wrap_cosmology_create, METH_VARARGS, (char *)"cosmology_create(parameters params, configuration config) -> cosmology"},
-	 { (char *)"cosmology_create_with_params", _wrap_cosmology_create_with_params, METH_VARARGS, (char *)"cosmology_create_with_params(double Omega_c, double Omega_b, double Omega_k, double N_nu_rel, double N_nu_mass, double mnu, double w0, double wa, double h, double norm_pk, double n_s, int nz_mgrowth, double * zarr_mgrowth, double * dfarr_mgrowth, configuration config, int * status) -> cosmology"},
+	 { (char *)"cosmology_create_with_params", _wrap_cosmology_create_with_params, METH_VARARGS, (char *)"cosmology_create_with_params(double Omega_c, double Omega_b, double Omega_k, double N_nu_rel, double N_nu_mass, double * mnu, double w0, double wa, double h, double norm_pk, double n_s, int nz_mgrowth, double * zarr_mgrowth, double * dfarr_mgrowth, configuration config, int * status) -> cosmology"},
 	 { (char *)"cosmology_create_with_lcdm_params", _wrap_cosmology_create_with_lcdm_params, METH_VARARGS, (char *)"cosmology_create_with_lcdm_params(double Omega_c, double Omega_b, double Omega_k, double h, double norm_pk, double n_s, configuration config, int * status) -> cosmology"},
-	 { (char *)"parameters_create", _wrap_parameters_create, METH_VARARGS, (char *)"parameters_create(double Omega_c, double Omega_b, double Omega_k, double N_nu_rel, double N_nu_mass, double mnu, double w0, double wa, double h, double norm_pk, double n_s, int nz_mgrowth, double * zarr_mgrowth, double * dfarr_mgrowth, int * status) -> parameters"},
+	 { (char *)"parameters_create", _wrap_parameters_create, METH_VARARGS, (char *)"parameters_create(double Omega_c, double Omega_b, double Omega_k, double N_nu_rel, double N_nu_mass, double * mnu, double w0, double wa, double h, double norm_pk, double n_s, int nz_mgrowth, double * zarr_mgrowth, double * dfarr_mgrowth, int * status) -> parameters"},
 	 { (char *)"parameters_create_flat_lcdm", _wrap_parameters_create_flat_lcdm, METH_VARARGS, (char *)"parameters_create_flat_lcdm(double Omega_c, double Omega_b, double h, double norm_pk, double n_s, int * status) -> parameters"},
 	 { (char *)"parameters_create_flat_wcdm", _wrap_parameters_create_flat_wcdm, METH_VARARGS, (char *)"parameters_create_flat_wcdm(double Omega_c, double Omega_b, double w0, double h, double norm_pk, double n_s, int * status) -> parameters"},
 	 { (char *)"parameters_create_flat_wacdm", _wrap_parameters_create_flat_wacdm, METH_VARARGS, (char *)"parameters_create_flat_wacdm(double Omega_c, double Omega_b, double w0, double wa, double h, double norm_pk, double n_s, int * status) -> parameters"},
 	 { (char *)"parameters_create_lcdm", _wrap_parameters_create_lcdm, METH_VARARGS, (char *)"parameters_create_lcdm(double Omega_c, double Omega_b, double Omega_k, double h, double norm_pk, double n_s, int * status) -> parameters"},
-	 { (char *)"parameters_create_flat_lcdm_nu", _wrap_parameters_create_flat_lcdm_nu, METH_VARARGS, (char *)"parameters_create_flat_lcdm_nu(double Omega_c, double Omega_b, double h, double norm_pk, double n_s, double N_nu_rel, double N_nu_mass, double mnu, int * status) -> parameters"},
-	 { (char *)"parameters_create_flat_wcdm_nu", _wrap_parameters_create_flat_wcdm_nu, METH_VARARGS, (char *)"parameters_create_flat_wcdm_nu(double Omega_c, double Omega_b, double w0, double h, double norm_pk, double n_s, double N_nu_rel, double N_nu_mass, double mnu, int * status) -> parameters"},
-	 { (char *)"parameters_create_flat_wacdm_nu", _wrap_parameters_create_flat_wacdm_nu, METH_VARARGS, (char *)"parameters_create_flat_wacdm_nu(double Omega_c, double Omega_b, double w0, double wa, double h, double norm_pk, double n_s, double N_nu_rel, double N_nu_mass, double mnu, int * status) -> parameters"},
-	 { (char *)"parameters_create_lcdm_nu", _wrap_parameters_create_lcdm_nu, METH_VARARGS, (char *)"parameters_create_lcdm_nu(double Omega_c, double Omega_b, double Omega_k, double h, double norm_pk, double n_s, double N_nu_rel, double N_nu_mass, double mnu, int * status) -> parameters"},
+	 { (char *)"parameters_create_flat_lcdm_nu", _wrap_parameters_create_flat_lcdm_nu, METH_VARARGS, (char *)"parameters_create_flat_lcdm_nu(double Omega_c, double Omega_b, double h, double norm_pk, double n_s, double N_nu_rel, double N_nu_mass, double * mnu, int * status) -> parameters"},
+	 { (char *)"parameters_create_flat_wcdm_nu", _wrap_parameters_create_flat_wcdm_nu, METH_VARARGS, (char *)"parameters_create_flat_wcdm_nu(double Omega_c, double Omega_b, double w0, double h, double norm_pk, double n_s, double N_nu_rel, double N_nu_mass, double * mnu, int * status) -> parameters"},
+	 { (char *)"parameters_create_flat_wacdm_nu", _wrap_parameters_create_flat_wacdm_nu, METH_VARARGS, (char *)"parameters_create_flat_wacdm_nu(double Omega_c, double Omega_b, double w0, double wa, double h, double norm_pk, double n_s, double N_nu_rel, double N_nu_mass, double * mnu, int * status) -> parameters"},
+	 { (char *)"parameters_create_lcdm_nu", _wrap_parameters_create_lcdm_nu, METH_VARARGS, (char *)"parameters_create_lcdm_nu(double Omega_c, double Omega_b, double Omega_k, double h, double norm_pk, double n_s, double N_nu_rel, double N_nu_mass, double * mnu, int * status) -> parameters"},
 	 { (char *)"cosmology_free", _wrap_cosmology_free, METH_VARARGS, (char *)"cosmology_free(cosmology cosmo)"},
 	 { (char *)"cosmology_compute_distances", _wrap_cosmology_compute_distances, METH_VARARGS, (char *)"cosmology_compute_distances(cosmology cosmo, int * status)"},
 	 { (char *)"cosmology_compute_growth", _wrap_cosmology_compute_growth, METH_VARARGS, (char *)"cosmology_compute_growth(cosmology cosmo, int * status)"},
 	 { (char *)"cosmology_compute_power", _wrap_cosmology_compute_power, METH_VARARGS, (char *)"cosmology_compute_power(cosmology cosmo, int * status)"},
-	 { (char *)"parameters_create_vec", _wrap_parameters_create_vec, METH_VARARGS, (char *)"parameters_create_vec(double Omega_c, double Omega_b, double Omega_k, double N_nu_rel, double N_nu_mass, double M_nu, double w0, double wa, double h, double norm_pk, double n_s, double * zarr, double * dfarr, int * status) -> parameters"},
+	 { (char *)"parameters_create_vec", _wrap_parameters_create_vec, METH_VARARGS, (char *)"parameters_create_vec(double Omega_c, double Omega_b, double Omega_k, double N_nu_rel, double N_nu_mass, double * M_nu, double w0, double wa, double h, double norm_pk, double n_s, double * zarr, double * dfarr, int * status) -> parameters"},
 	 { (char *)"omega_m_label_swigconstant", omega_m_label_swigconstant, METH_VARARGS, NULL},
 	 { (char *)"omega_l_label_swigconstant", omega_l_label_swigconstant, METH_VARARGS, NULL},
 	 { (char *)"omega_g_label_swigconstant", omega_g_label_swigconstant, METH_VARARGS, NULL},

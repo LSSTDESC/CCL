@@ -55,7 +55,7 @@ class Parameters(object):
     """
     
     def __init__(self, Omega_c=None, Omega_b=None, h=None, A_s=None, n_s=None, 
-                 Omega_k=0., N_nu_rel=3.046, N_nu_mass=0., m_nu=0.,w0=-1., wa=0., sigma8=None,
+                 Omega_k=0., N_nu_rel=3.046, N_nu_mass=0., m_nu=[0],w0=-1., wa=0., sigma8=None,
                  z_mg=None, df_mg=None):
         """
         Creates a set of cosmological parameters.
@@ -75,7 +75,7 @@ class Parameters(object):
             Omega_k (float, optional): Curvature density fraction. Defaults to 0.
             N_nu_rel (float, optional): Number of massless neutrinos present. Defaults to 3.046
             N_nu_mass (float, optional): Number of massive neutrinos present. Defaults to 0.
-            m_nu (float, optional): total mass in eV of the massive neutrinos present (current must be equal mass). Defaults to 0.
+            m_nu (:obj: array_like, optional): total mass in eV of the massive neutrinos present (current must be equal mass). Defaults to [0].
             w0 (float, optional): First order term of dark energy equation of 
                                   state. Defaults to -1.
             wa (float, optional): Second order term of dark energy equation of 
