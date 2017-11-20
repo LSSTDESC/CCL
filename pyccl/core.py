@@ -55,7 +55,7 @@ class Parameters(object):
     """
     
     def __init__(self, Omega_c=None, Omega_b=None, h=None, A_s=None, n_s=None, 
-                 Omega_k=0., N_nu_rel=3.046, N_nu_mass=0., m_nu=[0],w0=-1., wa=0., sigma8=None,
+                 Omega_k=0., N_nu_rel=3.046, N_nu_mass=0., m_nu=None ,w0=-1., wa=0., sigma8=None,
                  z_mg=None, df_mg=None):
         """
         Creates a set of cosmological parameters.
@@ -123,16 +123,37 @@ class Parameters(object):
             
         if norm_pk < 1e-5 and sigma8 is not None:
             raise ValueError("sigma8 must be greater than 1e-5.")
+            
+        # Deal with potential problem cases with non-degerate massive neutrinos:
+        if ((type(N_nu_mass)==float) or (type (N_nu_mass)==int)):
+            if (np.abs(N_nu_mass)<1e-14):
+                if (hasattr(m_nu, "__len__")==True):
+                    raise ValueError("Length of m_nu must match N_nu_mass.")
+                if (m_nu != None):
+                    if (np.abs(m_nu)>1e-14):
+                        raise ValueError("If N_nu_mass is zero, m_nu must be 0 or None.")
+                    else:
+                        m_nu=np.asarray([m_nu])
+                    
+            elif (np.abs(N_nu_mass-1.)<1e-14):
+                if (hasattr(m_nu, "__len__")!=True):
+                    m_nu = np.asarray([m_nu])
+                elif (len(m_nu)!=1):
+                    raise ValueError("Length of m_nu must match N_nu_mass.")
+        elif (hasattr(m_nu, "__len__")!=True and N_nu_mass!=None):
+            raise ValueError("Length of m_nu must match N_nu_mass.")
+        elif (N_nu_mass != None):
+            if(int(N_nu_mass) != len(m_nu)):
+                raise ValueError("Length of m_nu must match N_nu_mass.")
         
         # Check if any compulsory parameters are not set
-        compul = [Omega_c, Omega_b, Omega_k, N_nu_rel, N_nu_mass, m_nu, w0, wa, h, norm_pk, n_s]
-        names = ['Omega_c', 'Omega_b', 'Omega_k', 'N_nu_rel', 'N_nu_mass', 'mnu', 'w0', 'wa', 
+        compul = [Omega_c, Omega_b, Omega_k, N_nu_rel, N_nu_mass, w0, wa, h, norm_pk, n_s]
+        names = ['Omega_c', 'Omega_b', 'Omega_k', 'N_nu_rel', 'N_nu_mass', 'w0', 'wa', 
                  'h', 'norm_pk', 'n_s']
         for nm, item in zip(names, compul):
             if item is None:
                 raise ValueError("Necessary parameter '%s' was not set "
                                  "(or set to None)." % nm)
-        
         # Create new instance of ccl_parameters object
         status = 0 # Create an internal status variable; needed to check massive neutrino integral.
         if nz_mg == -1:
@@ -141,6 +162,7 @@ class Parameters(object):
                 = lib.parameters_create( Omega_c, Omega_b, Omega_k, N_nu_rel, 
                                          N_nu_mass, m_nu, w0, wa, h, norm_pk, 
                                          n_s, -1, None, None, status )
+            
         else:
             # Create ccl_parameters with modified growth arrays
             self.parameters, status \
