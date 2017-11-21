@@ -39,19 +39,34 @@ static int linecount(FILE *f)
   return i0;
 }
 
-static void compare_cls(struct cls_data * data)
+static void compare_cls(int which_test,struct cls_data * data)
 {
   int status=0;
+  char fname[256];
+  double factor_tol;
+  double zlss;
+  if(which_test==0) {
+    sprintf(fname,"tests/benchmark/codecomp_step2_outputs/run_log_cl_cc.txt");
+    factor_tol=1.;
+    zlss=1090.;
+  }
+  else {
+    sprintf(fname,"tests/benchmark/codecomp_step2_outputs/run_log_cl_cc_b.txt");
+    factor_tol=3.;
+    zlss=1100.;
+  }  
 
   ccl_configuration config = default_config;
   config.transfer_function_method = ccl_bbks;
   config.matter_power_spectrum_method = ccl_linear;
   ccl_parameters params = ccl_parameters_create_flat_lcdm(data->Omega_c,data->Omega_b,data->h,
 							  data->A_s,data->n_s, &status);
-  params.Omega_k=0;
-  params.Omega_g=0;
-  params.Omega_n_rel=0;
-  params.Omega_l = 1.0 - params.Omega_m;
+  if(which_test==0) {
+    params.Omega_k=0;
+    params.Omega_g=0;
+    params.Omega_n_rel=0;
+    params.Omega_l = 1.0 - params.Omega_m;
+  }
   params.sigma_8=data->sigma_8;
   ccl_cosmology * cosmo = ccl_cosmology_create(params, config);
   ASSERT_NOT_NULL(cosmo);
@@ -60,11 +75,9 @@ static void compare_cls(struct cls_data * data)
   ccl_splines->A_SPLINE_NA=10000;
   ccl_splines->N_A=500;
 
-  char fname[256];
   FILE *fi_cc;
-  CCL_ClTracer *tr_cl=ccl_cl_tracer_cmblens_new(cosmo,1090.,&status);
+  CCL_ClTracer *tr_cl=ccl_cl_tracer_cmblens_new(cosmo,zlss,&status);
   ASSERT_NOT_NULL(tr_cl);
-  sprintf(fname,"tests/benchmark/codecomp_step2_outputs/run_log_cl_cc.txt");
   fi_cc=fopen(fname,"r"); ASSERT_NOT_NULL(fi_cc);
   double fraction_failed=0;
   for(int ii=0;ii<3001;ii++) {
@@ -73,8 +86,9 @@ static void compare_cls(struct cls_data * data)
     rtn = fscanf(fi_cc,"%d %lf",&l,&cl_cc);
     cl_cc_h=ccl_angular_cl(cosmo,l,tr_cl,tr_cl,&status);
     if (status) printf("%s\n",cosmo->status_message);
-    if(fabs(cl_cc_h/cl_cc-1)>CLS_TOLERANCE)
+    if(fabs(cl_cc_h/cl_cc-1)>factor_tol*CLS_TOLERANCE) {
       fraction_failed++;
+    }
   }
   fclose(fi_cc);
 
@@ -87,5 +101,6 @@ static void compare_cls(struct cls_data * data)
 }
 
 CTEST2(cls,cmblens) {
-  compare_cls(data);
+  compare_cls(0,data);
+  compare_cls(1,data);
 }
