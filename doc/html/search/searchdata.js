@@ -6,10 +6,10 @@ var indexSectionsWithContent =
   3: "cfr",
   4: "acfgmnoprtux",
   5: "abcdefghiklmnoprstuwxyz",
-  6: "cmst",
-  7: "cmt",
+  6: "bcmst",
+  7: "bcmt",
   8: "c",
-  9: "_abcdeghiklmnoprstwz",
+  9: "_abcdefghiklmnoprstwz",
   10: "cw"
 };
 

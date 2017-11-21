@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.11"/>
-<title>CCL: /home/alonso/Science/LSST/CCL/CCL/include/ccl_config.h File Reference</title>
+<title>CCL: /home/alonso/Downloads/Clean/CCL/include/ccl_config.h File Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -109,6 +109,8 @@ Typedefs</h2></td></tr>
 <tr class="separator:af402b60bffdd554ef06e2b73df3985a7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0afb851df176a731e4a6198ed09d871b"><td class="memItemLeft" align="right" valign="top">typedef enum <a class="el" href="ccl__config_8h.html#a33c02fcf871bde5a88799d19418fb615">matter_power_spectrum_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__config_8h.html#a0afb851df176a731e4a6198ed09d871b">matter_power_spectrum_t</a></td></tr>
 <tr class="separator:a0afb851df176a731e4a6198ed09d871b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5d162459719a580f8c24e9d20b8565eb"><td class="memItemLeft" align="right" valign="top">typedef enum <a class="el" href="ccl__config_8h.html#a834a8dab508cb785c7fdcc3b6353a013">baryons_power_spectrum_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__config_8h.html#a5d162459719a580f8c24e9d20b8565eb">baryons_power_spectrum_t</a></td></tr>
+<tr class="separator:a5d162459719a580f8c24e9d20b8565eb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8254626f06896ae23ce945320108b732"><td class="memItemLeft" align="right" valign="top">typedef enum <a class="el" href="ccl__config_8h.html#ad544e91cedc9b0865dba11bf4c652091">mass_function_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__config_8h.html#a8254626f06896ae23ce945320108b732">mass_function_t</a></td></tr>
 <tr class="separator:a8254626f06896ae23ce945320108b732"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab55c2da6b25228a0cee69fd96d6a9261"><td class="memItemLeft" align="right" valign="top">typedef struct <a class="el" href="structccl__configuration.html">ccl_configuration</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__config_8h.html#ab55c2da6b25228a0cee69fd96d6a9261">ccl_configuration</a></td></tr>
@@ -134,6 +136,10 @@ Enumerations</h2></td></tr>
 <a class="el" href="ccl__config_8h.html#a33c02fcf871bde5a88799d19418fb615affdcc54b7e1e1ec015abef7554dae615">ccl_halo_model</a> = 3
  }</td></tr>
 <tr class="separator:a33c02fcf871bde5a88799d19418fb615"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a834a8dab508cb785c7fdcc3b6353a013"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__config_8h.html#a834a8dab508cb785c7fdcc3b6353a013">baryons_power_spectrum_t</a> { <a class="el" href="ccl__config_8h.html#a834a8dab508cb785c7fdcc3b6353a013afceb68dd5a80a8523d88026d2f67cfbf">ccl_nobaryons</a> = 0, 
+<a class="el" href="ccl__config_8h.html#a834a8dab508cb785c7fdcc3b6353a013abb3dcbc64879f682cce4a57ce070f427">ccl_bcm</a> = 1
+ }</td></tr>
+<tr class="separator:a834a8dab508cb785c7fdcc3b6353a013"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad544e91cedc9b0865dba11bf4c652091"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__config_8h.html#ad544e91cedc9b0865dba11bf4c652091">mass_function_t</a> { <a class="el" href="ccl__config_8h.html#ad544e91cedc9b0865dba11bf4c652091a636e93eb194de00b00383a4372400505">ccl_tinker</a> = 1, 
 <a class="el" href="ccl__config_8h.html#ad544e91cedc9b0865dba11bf4c652091aa92ddafbaf0d6d9b13a46ff8a1fafda3">ccl_tinker10</a> = 2, 
 <a class="el" href="ccl__config_8h.html#ad544e91cedc9b0865dba11bf4c652091a296d3638b1183030ff41553cd2446776">ccl_watson</a> = 3, 
@@ -147,6 +153,19 @@ Variables</h2></td></tr>
 <tr class="separator:a71e38b37263fd3d61ba6e6885769e6f1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Typedef Documentation</h2>
+<a class="anchor" id="a5d162459719a580f8c24e9d20b8565eb"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef enum <a class="el" href="ccl__config_8h.html#a834a8dab508cb785c7fdcc3b6353a013">baryons_power_spectrum_t</a>  <a class="el" href="ccl__config_8h.html#a834a8dab508cb785c7fdcc3b6353a013">baryons_power_spectrum_t</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Bayrons power spectrum typedef. Specified what model is being used for accounting for the impact of baryonic processes on the total matter power spectrum </p>
+
+</div>
+</div>
 <a class="anchor" id="ab55c2da6b25228a0cee69fd96d6a9261"></a>
 <div class="memitem">
 <div class="memproto">
@@ -200,6 +219,25 @@ Variables</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Enumeration Type Documentation</h2>
+<a class="anchor" id="a834a8dab508cb785c7fdcc3b6353a013"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum <a class="el" href="ccl__config_8h.html#a834a8dab508cb785c7fdcc3b6353a013">baryons_power_spectrum_t</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Bayrons power spectrum typedef. Specified what model is being used for accounting for the impact of baryonic processes on the total matter power spectrum </p>
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a class="anchor" id="a834a8dab508cb785c7fdcc3b6353a013afceb68dd5a80a8523d88026d2f67cfbf"></a>ccl_nobaryons&#160;</td><td class="fielddoc">
+</td></tr>
+<tr><td class="fieldname"><a class="anchor" id="a834a8dab508cb785c7fdcc3b6353a013abb3dcbc64879f682cce4a57ce070f427"></a>ccl_bcm&#160;</td><td class="fielddoc">
+</td></tr>
+</table>
+
+</div>
+</div>
 <a class="anchor" id="ad544e91cedc9b0865dba11bf4c652091"></a>
 <div class="memitem">
 <div class="memproto">
@@ -285,7 +323,7 @@ Variables</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>The default configuration object In the default configuration, defined in <a class="el" href="ccl__core_8c.html">ccl_core.c</a> CCL runs with: default_config = {ccl_boltzmann_class, ccl_halofit, ccl_tinker10} </p>
+<p>The default configuration object In the default configuration, defined in <a class="el" href="ccl__core_8c.html">ccl_core.c</a> CCL runs with: default_config = {ccl_boltzmann_class, ccl_halofit, ccl_nobaryons, ccl_tinker10} </p>
 
 </div>
 </div>

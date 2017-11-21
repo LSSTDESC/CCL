@@ -1,4 +1,7 @@
 /** @file */
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #pragma once
 
@@ -171,3 +174,7 @@ void ccl_cl_tracer_free(CCL_ClTracer *clt);
  * @return void
  */
 double ccl_angular_cl(ccl_cosmology *cosmo,int l,CCL_ClTracer *clt1,CCL_ClTracer *clt2, int * status);
+
+#ifdef __cplusplus
+}
+#endif

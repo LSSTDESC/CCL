@@ -1,6 +1,5 @@
 var searchData=
 [
-  ['w0',['W0',['../ccl__corr__sample_8c.html#a5d94134ae98ebb688dc6b0f6d6131b42',1,'W0():&#160;ccl_corr_sample.c'],['../ccl__sample__run_8c.html#a5d94134ae98ebb688dc6b0f6d6131b42',1,'W0():&#160;ccl_sample_run.c']]],
-  ['wa',['WA',['../ccl__corr__sample_8c.html#aa85719abd4650c5dba5e18ba2e861fda',1,'WA():&#160;ccl_corr_sample.c'],['../ccl__sample__run_8c.html#aa85719abd4650c5dba5e18ba2e861fda',1,'WA():&#160;ccl_sample_run.c']]],
-  ['weak',['WEAK',['../ctest_8h.html#ad1480e9557edcc543498ca259cee6c7d',1,'ctest.h']]]
+  ['teardown_5ffname',['TEARDOWN_FNAME',['../ctest_8h.html#a5c06c47bbeb5de1f37999f7b0eaad5ae',1,'ctest.h']]],
+  ['tncdm',['TNCDM',['../ccl__constants_8h.html#ae8f28193dc11b27b79a90bf83f982d43',1,'ccl_constants.h']]]
 ];

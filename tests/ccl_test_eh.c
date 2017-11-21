@@ -68,7 +68,7 @@ static void compare_eh(int i_model,struct eh_data * data)
   ccl_parameters params = ccl_parameters_create(data->Omega_c,data->Omega_b,data->Omega_k[i_model-1],
 						data->N_nu_rel, data->N_nu_mass, data->m_nu,
 						data->w_0[i_model-1],data->w_a[i_model-1],
-						data->h,data->A_s,data->n_s,-1,NULL,NULL, &status);
+						data->h,data->A_s,data->n_s,-1,-1,-1,-1,NULL,NULL, &status);
   params.sigma_8=data->sigma_8;
   params.Omega_g=0;
   ccl_cosmology * cosmo = ccl_cosmology_create(params, config);
