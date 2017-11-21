@@ -69,7 +69,8 @@ extern "C" {
 /**
  * Stefan-Boltzmann constant in units of kg/s^3 / K^4
  */
-#define STBOLTZ GSL_CONST_MKSA_STEFAN_BOLTZMANN_CONSTANT
+//#define STBOLTZ GSL_CONST_MKSA_STEFAN_BOLTZMANN_CONSTANT
+#define STBOLTZ (2*M_PI*M_PI*M_PI*M_PI*M_PI*KBOLTZ*KBOLTZ*KBOLTZ*KBOLTZ)/(15*HPLANCK*HPLANCK*HPLANCK*CLIGHT*CLIGHT)
 
 /**
  * Planck's constant in units kg m^2 / s
