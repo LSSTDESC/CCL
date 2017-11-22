@@ -53,9 +53,15 @@ The Core Cosmology Library (\ccl) provides routines to compute basic cosmologica
 \label{sec:intro}
 \vol{Mustapha Ishak}
 
-In preparation for constraining cosmology with the Large Synoptic Survey Telescope (LSST), it is necessary to be able to produce rigorous theoretical predictions for the cosmological quantities that will be measured. The Core Cosmology Library\footnote{\url{https://github.com/LSSTDESC/CCL}} (\ccl) aims to provide, in one library, a way of making predictions that are validated to a well-documented numerical accuracy, for the purpose of constraining cosmology with LSST. By constructing a cosmology library specifically with LSST in mind, it is possible to ensure that it is flexible, adaptable, and validated for all cases of interest, as well as user-friendly and appropriate for the needs of all working groups.
+Tentative: An era of precision cosmology is at the door with the advent of a number of high precision surveys. One of them is the Large Synoptic Survey Telescope (LSST) that is designed to address the question of cosmic acceleration and the Dark Energy associated with it.  
 
-\ccl structure is illustrated in figure \ref{fig:CCC_structure}. 
+In preparation for constraining cosmology with LSST, it is necessary to be able to produce rigorous (and accurate?) theoretical predictions for the cosmological quantities that will be measured. The Core Cosmology Library\footnote{\url{https://github.com/LSSTDESC/CCL}} (\ccl) aims to provide, in one library, a way of making predictions that are validated to a well-documented numerical accuracy, for the purpose of constraining cosmology with LSST. By constructing a cosmology library specifically with LSST and its Dark Energy Science Collaboration (DESC) in mind, it is possible to ensure that it is flexible, adaptable, and validated for all cases of interest, as well as user-friendly and appropriate for the needs of all DESC working groups.
+
+\ccl computes basic cosmological functions including Hubble parameter, distances, density parameters, and linear growth functions. It calculates the matter power spectrum using various method including common approximations, calls to external software such as {\tt CLASS} \citep{class}, or emulators such as ``Cosmic Emulator'' of \citet{Lawrence17}. It computes 2-point angular power spectra and correlation functions from various probes, going beyond the Limber approximation. \ccl 's overall structure is illustrated in figure \ref{fig:CCC_structure}. 
+
+\ccl 's implementation includes spatially flat and curved $\Lambda$-Cold Dark Matter ($\Lambda$CDM) cosmologies, $w$CDM cosmologies with the option of using a time-dependent equation of state. It also allows the use of massive neutrinos. (is Table 1 up to date?). 
+
+Finally, it is worth noting that while \ccl is built in light of LSST, its flexible and modular structure is designed to work with any other pipelines and surveys.  
 
 %------------------------
 \begin{figure*}
@@ -75,13 +81,13 @@ In preparation for constraining cosmology with the Large Synoptic Survey Telesco
 
 The overarching goal of \ccl is to allow seamless integration of different cosmological models of interest to LSST, given some priors on the range of validity of the specific models.
 
-The cosmological components include the matter density parameter $\Omega_m$, the dark energy density $\Omega_\Lambda$, the radiation density $\Omega_r$, the energy in curvature $\Omega_K$, the neutrino density of both massless and massive neutrinos, given by $\Omega_{\nu, {\rm rel}}$ and $\Omega_{\nu, {\rm m}}$ respectively, the optical depth $\tau$, and parameters for the equation of state of dark energy.
+The cosmological components include the matter density parameter $\Omega_m$, the dark energy density $\Omega_\Lambda$, the radiation density $\Omega_r$, the energy in curvature (the curvature density parameter (MI)) $\Omega_K$, the neutrino density of both massless and massive neutrinos, given by $\Omega_{\nu, {\rm rel}}$ and $\Omega_{\nu, {\rm m}}$ respectively, the optical depth $\tau$, and parameters for the equation of state of dark energy.
 
 Currently, the following families of models are supported:
 \begin{itemize}
  \item Flat $\Lambda$CDM cosmology with parameters $\Omega_b, n_s, A_s, \Omega_m, \Omega_\Lambda, \tau$ and a cosmological constant dark energy model with equation-of-state $w=-1.$
  \item wCDM and the Chevallier-Polarski-Linder (CPL) model for dark energy and it's redshift dependence ($w(a) = w_0+w_a(1-a)$, \citealt{Chevallier01} and \citealt{Linder03})
- \item A universe with non-zero curvature ($K$) so that the curvature energy density is the difference of sum of the energy densities of the other components with respect to unity (flatness), i.e. $\Omega_k = 1- \sum_i \Omega_i$
+ \item A universe with non-zero curvature ($K$) so that the curvature energy density (density parameter (MI)) is the difference of sum of the energy densities of the other components with respect to unity (flatness), i.e. $\Omega_k = 1- \sum_i \Omega_i$
  \item All of the above, plus an arbitrary, user-defined modified growth function (see description in Section \ref{sec:growth})
   \item A single massive neutrino species or multiple equal-mass massive neutrinos, in combination with any of the above (except the user-defined modified growth function), specified by the neutrino mass $\Sigma m_\nu$ (which maps on to the density $\Omega_{\nu, {\rm m}}$ above).
 \end{itemize}
