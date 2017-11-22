@@ -1463,21 +1463,7 @@ double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double k, double a, int *s
                                          cosmo->data.k_max_nl, status);
       pk = exp(log_p_1);
     }
-    
-    // Add baryonic correction if requested
-    if(cosmo->config.baryons_power_spectrum_method == ccl_bcm){
-      int pwstatus=0;
-      double fbcm=ccl_bcm_model_fkz(cosmo,k,a,&pwstatus);
-      pk = pk*fbcm;
-      if(pwstatus){
-	    *status = CCL_ERROR_SPLINE_EV;
-	    sprintf(cosmo->status_message, 
-	       "ccl_power.c: ccl_nonlin_matter_power(): Error in BCM correction\n");
-	    return NAN;
-      }
-    }
-    return pk;
-  
+    break; // Return pk at end of function
   
   // CosmicEmu emulator
   case ccl_emu:
@@ -1517,8 +1503,7 @@ double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double k, double a, int *s
                                          cosmo->data.k_max_nl, status);
       pk = exp(log_p_1);
     }
-    
-    return pk;
+    break; // Return pk at end of function
     
   default:
     fprintf(stderr, "WARNING: config.matter_power_spectrum_method = %d not yet supported\n continuing with linear power spectrum\n", 
@@ -1526,6 +1511,20 @@ double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double k, double a, int *s
     cosmo->config.matter_power_spectrum_method = ccl_linear;
     return ccl_linear_matter_power(cosmo, k, a, status);
   } // end switch
+  
+  // Add baryonic correction if requested
+  if(cosmo->config.baryons_power_spectrum_method == ccl_bcm){
+    int pwstatus = 0;
+    double fbcm = ccl_bcm_model_fkz(cosmo, k, a, &pwstatus);
+    pk = pk * fbcm;
+    if(pwstatus){
+      *status = CCL_ERROR_SPLINE_EV;
+      sprintf(cosmo->status_message, 
+         "ccl_power.c: ccl_nonlin_matter_power(): Error in BCM correction\n");
+      return NAN;
+    }
+  }
+  return pk;
 
 }
 
