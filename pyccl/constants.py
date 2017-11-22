@@ -1,4 +1,6 @@
 
+import pyccl.ccllib
+
 from pyccl.ccllib import \
   CCL_ClTracer, CCL_ClTracer_swigregister, \
   CCL_ERROR_CLASS, CCL_ERROR_INCONSISTENT, CCL_ERROR_INTEG, CCL_ERROR_LINSPACE,\

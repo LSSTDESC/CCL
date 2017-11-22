@@ -1,4 +1,7 @@
 /** @file */
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #pragma once
 
@@ -36,3 +39,7 @@ void ccl_correlation(ccl_cosmology *cosmo,
 		     int n_theta,double *theta,double *wtheta,
 		     int corr_type,int do_taper_cl,double *taper_cl_limits,int flag_method,
 		     int *status);
+
+#ifdef __cplusplus
+}
+#endif

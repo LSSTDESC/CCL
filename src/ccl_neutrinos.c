@@ -4,7 +4,6 @@
 #include "gsl/gsl_errno.h"
 #include "gsl/gsl_spline.h"
 #include "gsl/gsl_integration.h"
-#include "gsl/gsl_const_mksa.h"
 #include <gsl/gsl_roots.h>
 #include "ccl_error.h"
 #include "ccl_core.h"

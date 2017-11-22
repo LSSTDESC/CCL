@@ -14,5 +14,5 @@
 // Strip the ccl_ prefix from function names
 %rename("%(strip:[ccl_])s") "";
 
-%include "gsl/gsl_const_mksa.h"
+%import "gsl/gsl_const_mksa.h"
 %include "../include/ccl_constants.h"

@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['nu_5fphasespace_5fintg',['nu_phasespace_intg',['../ccl__neutrinos_8c.html#a5adb5270bfe6998ffea34d76ea5d96ca',1,'ccl_neutrinos.c']]]
+  ['gaussian_5fpz',['gaussian_pz',['../ccl__lsst__specs_8c.html#ae2c8ccc63807abd82914c90eef26b76b',1,'ccl_lsst_specs.c']]]
 ];

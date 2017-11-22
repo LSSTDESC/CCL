@@ -48,7 +48,7 @@ int main(int argc,char **argv)
   // Initialize cosmological parameters
   ccl_configuration config=default_config;
   config.transfer_function_method=ccl_boltzmann_class;
-  ccl_parameters params = ccl_parameters_create(OC, OB, OK, NREL, NMAS, MNU, W0, WA, HH, NORMPS, NS,0,NULL,NULL, &status);
+  ccl_parameters params = ccl_parameters_create(OC, OB, OK, NREL, NMAS, MNU, W0, WA, HH, NORMPS, NS,-1,-1,-1,-1,NULL,NULL, &status);
   //printf("in sample run w0=%1.12f, wa=%1.12f\n", W0, WA);
   
   // Initialize cosmology object given cosmo params
@@ -77,14 +77,14 @@ int main(int argc,char **argv)
   printf("z\tOmega_m\tOmega_L\tOmega_r\n");
   double Om, OL, Or;
   for (int z=10000;z!=0;z/=3){
-    Om = ccl_omega_x(cosmo, 1./(z+1), 0, &status);
-    OL = ccl_omega_x(cosmo, 1./(z+1), 1, &status);
-    Or = ccl_omega_x(cosmo, 1./(z+1), 2, &status);
+    Om = ccl_omega_x(cosmo, 1./(z+1), ccl_omega_m_label, &status);
+    OL = ccl_omega_x(cosmo, 1./(z+1), ccl_omega_l_label, &status);
+    Or = ccl_omega_x(cosmo, 1./(z+1), ccl_omega_g_label, &status);
     printf("%i\t%.3f\t%.3f\t%.3f\n", z, Om, OL, Or);
   }
-  Om = ccl_omega_x(cosmo, 1., 0, &status);
-  OL = ccl_omega_x(cosmo, 1., 1, &status);
-  Or = ccl_omega_x(cosmo, 1., 2, &status);
+  Om = ccl_omega_x(cosmo, 1., ccl_omega_m_label, &status);
+  OL = ccl_omega_x(cosmo, 1., ccl_omega_l_label, &status);
+  Or = ccl_omega_x(cosmo, 1., ccl_omega_g_label, &status);
   printf("%i\t%.3f\t%.3f\t%.3f\n", 0, Om, OL, Or);
 
   // Compute sigma_8

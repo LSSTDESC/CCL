@@ -68,7 +68,7 @@ static void compare_sigmam(int i_model,struct sigmam_data * data)
   ccl_parameters params = ccl_parameters_create(data->Omega_c,data->Omega_b,data->Omega_k[i_model-1],
 						data->N_nu_rel, data->N_nu_mass, data->mnu,
 						data->w_0[i_model-1],data->w_a[i_model-1],data->h,
-						data->A_s,data->n_s,-1,NULL,NULL, &status);
+						data->A_s,data->n_s,-1,-1,-1,-1,NULL,NULL, &status);
   params.sigma_8=data->sigma_8;
   ccl_cosmology * cosmo = ccl_cosmology_create(params, config);
   ASSERT_NOT_NULL(cosmo);
