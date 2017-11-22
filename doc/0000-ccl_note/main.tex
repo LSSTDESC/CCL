@@ -379,7 +379,7 @@ Actually, $w_a$ and $w_0$ are constrained jointly to be $0.3\leq (-w_0-w_a)^{1/4
 
 \subsubsection{Impact of baryons}
 
-\ccl incorporates the impact of baryons on the total matter power spectrum via the ``baryonic correction model'' (BCM) of \citet{Schneider15}. This is implemented through a flag in the configuration object, which currently accepts the following options: {\tt ccl\_nobaryons} or {\tt ccl\_bcm}. When {\tt ccl\_bcm} is set, the nonlinear matter power spectrum (whichever the method that provides it) is multiplied by a correction factor $F(k,z)$ which models the impact of baryons.
+\ccl incorporates the impact of baryons on the total matter power spectrum via the ``baryonic correction model'' (BCM) of \citet{Schneider15}. This is implemented through a flag in the configuration object, which currently accepts the following options: {\tt ccl\_nobaryons} or {\tt ccl\_bcm}. When {\tt ccl\_bcm} is set, the nonlinear matter power spectrum is multiplied by a correction factor $F(k,z)$ which models the impact of baryons.
 
 The main consequences of baryonic processes are: to suppress the power spectrum at intermediate scales ($k\sim$ a few $h/$Mpc) due to the ejection of gas by Active Galactic Nuclei feedback, and to enhance it at smaller scales due to enhanced cooling. Three effective parameters govern the contribution of baryonic processes to modifying the total matter power spectrum:
 \begin{itemize}
