@@ -9,14 +9,15 @@
 #define INVSIGMA_TOLERANCE 5e-3
 #define MASSFUNC_TOLERANCE 5e-3
 
-
 CTEST_DATA(massfunc) {
   double Omega_c;
   double Omega_b;
   double h;
   double A_s;
   double n_s;
-  double Omega_n;
+  double N_nu_rel;
+  double N_nu_mass;
+  double mnu;
   double Omega_v[1];
   double Omega_k[1];
   double w_0[1];
@@ -33,13 +34,13 @@ static void read_massfunc_test_file(double mass[13], double massfunc[3][13])
    FILE * f = fopen("./tests/benchmark/model1_hmf.txt", "r");
    ASSERT_NOT_NULL(f);
 
-
    // Ignore header line
    char str[1024];
-   fgets(str, 1024, f);
+   char* rtn;
+   rtn = fgets(str, 1024, f);
 
    // file is in fixed format - logmass, sigma, invsigma, and hmf, w/ 13 rows
-   for (int i=0; i<13; i++){
+   for (int i=0; i<13; i++) {
      int count = fscanf(f, "%le %le %le %le\n", &mass[i],
                         &massfunc[0][i], &massfunc[1][i], &massfunc[2][i]);
      // Check that all the stuff in the benchmark is there
@@ -49,25 +50,26 @@ static void read_massfunc_test_file(double mass[13], double massfunc[3][13])
 }
 
 // set up the cosmological parameters to be used in the test case
-CTEST_SETUP(massfunc){
-
+CTEST_SETUP(massfunc) {
   // only single model at tihs point
   data->Omega_c = 0.25;
   data->Omega_b = 0.05;
   data->h = 0.7;
   data->A_s = 2.1e-9;
   data->n_s = 0.96;
-  data->Omega_n =0.0;
   data->sigma_8 = 0.8;
+  data->N_nu_rel=0;
+  data->N_nu_mass=0;
+  data->mnu=0;
 
   double Omega_v[1] = { 0.7 };
   double w_0[1]     = {-1.0 };
   double w_a[1]     = { 0.0 };
-  for (int i=0; i<1; i++){
+  for (int i=0; i<1; i++) {
     data->Omega_v[i] = Omega_v[i];
     data->w_0[i] = w_0[i];
     data->w_a[i]= w_a[i];
-    data->Omega_k[i] = 1.0 - data->Omega_c - data->Omega_b - data->Omega_n - data->Omega_v[i];
+    data->Omega_k[i] = 1.0 - data->Omega_c - data->Omega_b - data->Omega_v[i];
   }
 
   // read the file of benchmark data
@@ -76,17 +78,13 @@ CTEST_SETUP(massfunc){
 
 static void compare_massfunc(int model, struct massfunc_data * data)
 {
-  // make the parameter set from input data
-  
   int stat = 0;
   int* status = &stat;
-  
-  ccl_parameters params = ccl_parameters_create(data->Omega_c, data->Omega_b,
-                                                data->Omega_k[model], data->Omega_n,
-                                                data->w_0[model], data->w_a[model], data->h,
-                                                data->A_s, data->n_s, -1,
-                                                NULL, NULL);
 
+  ccl_parameters params = ccl_parameters_create(data->Omega_c, data->Omega_b,data->Omega_k[model],
+						data->N_nu_rel, data->N_nu_mass, data->mnu,data->w_0[model],
+						data->w_a[model], data->h,data->A_s, data->n_s,
+						-1, -1, -1, -1, NULL, NULL, status);
 
   params.sigma_8 = data->sigma_8;
   ccl_configuration config = default_config;
@@ -103,7 +101,7 @@ static void compare_massfunc(int model, struct massfunc_data * data)
   double rho_m = RHO_CRITICAL*cosmo->params.Omega_m*cosmo->params.h*cosmo->params.h;
 
   // compare to benchmark data
-  for (int j=0; j<13; j++){
+  for (int j=0; j<13; j++) {
     double mass = pow(10,logmass);
     double sigma_j = ccl_sigmaM(cosmo, mass, a, status);
     double loginvsigma_j = log10(1./sigma_j);
@@ -126,7 +124,7 @@ static void compare_massfunc(int model, struct massfunc_data * data)
   free(cosmo);
 }
 
-CTEST2(massfunc, model_1){
+CTEST2(massfunc, model_1) {
    int model = 0;
    compare_massfunc(model, data);
 }

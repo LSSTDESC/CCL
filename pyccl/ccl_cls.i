@@ -62,7 +62,9 @@ CCL_ClTracer* cl_tracer_new_wrapper(ccl_cosmology *cosmo,int tracer_type,
 
 void angular_cl_vec(ccl_cosmology * cosmo,
                     CCL_ClTracer *clt1, CCL_ClTracer *clt2,
-		    double l_limber,double l_logstep,double l_linstep,int method,
+		    double l_limber,double l_logstep,double l_linstep,
+		    double dchi, double dlk, double zmin,
+		    int method,
                     double* ell, int nell,
                     double* output, int nout,
                     int* status)
@@ -71,9 +73,7 @@ void angular_cl_vec(ccl_cosmology * cosmo,
 
   //Cast ells as integers
   int *ell_int=malloc(nell*sizeof(int));
-  CCL_ClWorkspace *w=ccl_cl_workspace_new((int)(ell[nell-1])+1,(int)l_limber,method,
-					  l_logstep,(int)l_linstep,3.,status);
-  //TODO: 3. shouldn't be hard-coded
+  CCL_ClWorkspace *w=ccl_cl_workspace_new((int)(ell[nell-1])+1,(int)l_limber,method,l_logstep,(int)l_linstep,dchi,dlk,zmin,status);
 
   for(int i=0;i<nell;i++)
     ell_int[i]=(int)(ell[i]);

@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <math.h>
 
+/*
 #define OC 0.25
 #define OB 0.05
 #define OK 0.00
@@ -13,6 +14,11 @@
 #define NS 0.96
 //#define NORMPS 0.80
 #define NORMPS 2.215e-9
+#define PS 0.1 
+#define NREL 3.046
+#define NMAS 0
+#define MNU 0.0
+*/
 #define ZD 0.5
 #define NZ 1024
 #define Z0_GC 1.0 
@@ -30,6 +36,9 @@ CTEST_DATA(angpow) {
   double h;
   double A_s;
   double n_s;
+  double N_nu_rel;
+  double N_nu_mass;
+  double mnu;
   double Omega_n;
   double Omega_v;
   double Omega_k;
@@ -49,6 +58,9 @@ CTEST_SETUP(angpow){
   data->n_s = 0.96;
   data->Omega_n = 0.0;
   data->Omega_v = 0;
+  data->N_nu_rel=3.046;
+  data->N_nu_mass=0;
+  data->mnu=0;
   data->w_0     = -1;
   data->w_a    = 0;
   data->Omega_k = 0;
@@ -69,7 +81,8 @@ static void test_angpow_precision(struct angpow_data * data)
   ccl_config.transfer_function_method=ccl_boltzmann_class;
   ccl_config.matter_power_spectrum_method=ccl_linear;
   //ccl_parameters ccl_params=ccl_parameters_create(OC,OB,OK,ON,W0,WA,HH,NORMPS,NS,-1,NULL,NULL);
-  ccl_parameters ccl_params=ccl_parameters_create(data->Omega_c, data->Omega_b, 						data->Omega_k, data->Omega_n, 						data->w_0, data->w_a,						data->h, data->A_s, data->n_s,-1,NULL,NULL);
+  ccl_parameters ccl_params = ccl_parameters_create(data->Omega_c, data->Omega_b, data->Omega_k, data->N_nu_rel, data->N_nu_mass, data->mnu, data->w_0, data->w_a, data->h, data->A_s, data->n_s,-1,-1,-1,-1,NULL,NULL, &status);
+  //  ccl_parameters ccl_params=ccl_parameters_create(data->Omega_c, data->Omega_b, 						data->Omega_k, data->Omega_n, 						data->w_0, data->w_a,						data->h, data->A_s, data->n_s,-1,NULL,NULL);
 
   // Initialize cosmology object given cosmo params
   ccl_cosmology *ccl_cosmo=ccl_cosmology_create(ccl_params,ccl_config);

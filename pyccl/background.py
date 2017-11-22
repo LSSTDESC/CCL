@@ -1,12 +1,14 @@
 
-import ccllib as lib
-from pyutils import _vectorize_fn, _vectorize_fn2, _vectorize_fn3
+from pyccl import ccllib as lib
+from pyccl.pyutils import _vectorize_fn, _vectorize_fn2, _vectorize_fn3
 
 species_types = {
     'matter':      lib.omega_m_label,
     'dark_energy': lib.omega_l_label,
     'radiation':   lib.omega_g_label,
-    'curvature':   lib.omega_k_label
+    'curvature':   lib.omega_k_label,
+    'neutrinos_rel': lib.omega_ur_label,
+    'neutrinos_massive': lib.omega_nu_label,
 }
 
 def growth_factor(cosmo, a):
@@ -67,6 +69,8 @@ def comoving_radial_distance(cosmo, a):
 
 def comoving_angular_distance(cosmo, a):
     """Comoving angular distance.
+    NOTE this quantity is otherwise known as the transverse comoving distance, and is NOT angular diameter
+    distance or angular separation
     
     Args:
         cosmo (:obj:`ccl.cosmology`): Cosmological parameters.
@@ -107,6 +111,19 @@ def luminosity_distance(cosmo, a):
     return _vectorize_fn(lib.luminosity_distance, 
                          lib.luminosity_distance_vec, cosmo, a)
 
+def distance_modulus(cosmo, a):
+    """Distance Modulus
+    
+    Args:
+        cosmo (:obj:`ccl.cosmology`): Cosmological parameters.
+        a (float or array_like): Scale factor(s), normalized to 1 today.
+
+    Returns:
+        distance_modulus (float or array_like): Distance modulus at a.  
+    """
+    return _vectorize_fn(lib.distance_modulus,
+                         lib.distance_modulus_vec, cosmo, a)
+
 def scale_factor_of_chi(cosmo, chi):
     """Scale factor, a, at a comoving distance chi.
     
@@ -128,7 +145,7 @@ def omega_x(cosmo, a, label):
         cosmo (:obj:`ccl.cosmology`): Cosmological parameters.
         a (float or array_like): Scale factor(s), normalized to 1 today.
         label (string): species type. Available: 'matter', 'dark_energy',
-                        'radiation' and 'curvature'
+                        'radiation', 'curvature', 'neutrinos_rel', and 'neutrinos_massive'
 
     Returns:
         omega_x (float or array_like): Density fraction of a given species

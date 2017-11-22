@@ -12,11 +12,13 @@ CTEST_DATA(eh) {
   double A_s;
   double n_s;
   double sigma_8;
-  double Omega_n;
   double Omega_v[1];
   double Omega_k[1];
   double w_0[1];
   double w_a[1];
+  double N_nu_rel;
+  double N_nu_mass;
+  double m_nu;
 };
 
 CTEST_SETUP(eh) {
@@ -26,6 +28,9 @@ CTEST_SETUP(eh) {
   data->A_s = 2.1e-9;
   data->sigma_8=0.8;
   data->n_s = 0.96;
+  data->N_nu_rel = 0.;
+  data->N_nu_mass=0.;
+  data->m_nu=0.;
 
   double Omega_v[1]={0.7};
   double w_0[1] = {-1.0};
@@ -35,8 +40,7 @@ CTEST_SETUP(eh) {
     data->Omega_v[i] = Omega_v[i];
     data->w_0[i] = w_0[i];
     data->w_a[i] = w_a[i];
-    data->Omega_n = 0.0;
-    data->Omega_k[i] = 1.0 - data->Omega_c - data->Omega_b - data->Omega_n - data->Omega_v[i];
+    data->Omega_k[i] = 1.0 - data->Omega_c - data->Omega_b - data->Omega_v[i];
   }
 }
 
@@ -55,14 +59,16 @@ static int linecount(FILE *f)
 static void compare_eh(int i_model,struct eh_data * data)
 {
   int nk,i,j;
+  int status =0;
   char fname[256],str[1024];
+  char* rtn;
   FILE *f;
   ccl_configuration config = default_config;
   config.transfer_function_method = ccl_eisenstein_hu;
-  ccl_parameters params = ccl_parameters_create(data->Omega_c,data->Omega_b,
-						data->Omega_k[i_model-1],data->Omega_n,
+  ccl_parameters params = ccl_parameters_create(data->Omega_c,data->Omega_b,data->Omega_k[i_model-1],
+						data->N_nu_rel, data->N_nu_mass, data->m_nu,
 						data->w_0[i_model-1],data->w_a[i_model-1],
-						data->h,data->A_s,data->n_s,-1,NULL,NULL);
+						data->h,data->A_s,data->n_s,-1,-1,-1,-1,NULL,NULL, &status);
   params.sigma_8=data->sigma_8;
   params.Omega_g=0;
   ccl_cosmology * cosmo = ccl_cosmology_create(params, config);
@@ -77,7 +83,7 @@ static void compare_eh(int i_model,struct eh_data * data)
   }
   nk=linecount(f)-1; rewind(f);
   
-  fgets(str, 1024, f);
+  rtn = fgets(str, 1024, f);
   for(i=0;i<nk;i++) {
     double k_h,k;
     int stat;

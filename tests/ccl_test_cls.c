@@ -41,15 +41,15 @@ static int linecount(FILE *f)
 
 static void compare_cls(char *compare_type,struct cls_data * data)
 {
+  int status=0;
   ccl_configuration config = default_config;
   config.transfer_function_method = ccl_bbks;
   config.matter_power_spectrum_method = ccl_linear;
   ccl_parameters params = ccl_parameters_create_flat_lcdm(data->Omega_c,data->Omega_b,data->h,
-							  data->A_s,data->n_s);
+							  data->A_s,data->n_s, &status);
   params.Omega_g=0;
   params.sigma_8=data->sigma_8;
   ccl_cosmology * cosmo = ccl_cosmology_create(params, config);
-  int status=0;
   ASSERT_NOT_NULL(cosmo);
 
   int nz;
@@ -78,6 +78,8 @@ static void compare_cls(char *compare_type,struct cls_data * data)
   }
   else {
     char str[1024];
+    char* rtn;
+    int stat;
     FILE *fnz1=fopen("./tests/benchmark/codecomp_step2_outputs/bin1_histo.txt","r");
     ASSERT_NOT_NULL(fnz1);
     FILE *fnz2=fopen("./tests/benchmark/codecomp_step2_outputs/bin2_histo.txt","r");
@@ -88,12 +90,12 @@ static void compare_cls(char *compare_type,struct cls_data * data)
     zarr_2=malloc(nz*sizeof(double));
     pzarr_2=malloc(nz*sizeof(double));
     bzarr=malloc(nz*sizeof(double));
-    fgets(str,1024,fnz1);
-    fgets(str,1024,fnz2);
+    rtn = fgets(str,1024,fnz1);
+    rtn = fgets(str,1024,fnz2);
     for(int ii=0;ii<nz;ii++) {
       double z1,z2,nz1,nz2;
-      fscanf(fnz1,"%lf %lf",&z1,&nz1);
-      fscanf(fnz2,"%lf %lf",&z2,&nz2);
+      stat = fscanf(fnz1,"%lf %lf",&z1,&nz1);
+      stat = fscanf(fnz2,"%lf %lf",&z2,&nz2);
       zarr_1[ii]=z1; zarr_2[ii]=z2;
       pzarr_1[ii]=nz1; pzarr_2[ii]=nz2;
       bzarr[ii]=1.;
@@ -137,7 +139,7 @@ static void compare_cls(char *compare_type,struct cls_data * data)
   double *cls_ll_22_h=malloc(3001*sizeof(double));
 
   for(int ii=0;ii<3001;ii++) {
-    int l;
+    int l, rtn;
     double cl_dd_11,cl_dd_12,cl_dd_22;
     double cl_ll_11,cl_ll_12,cl_ll_22;
     double cl_dd_11_h,cl_dd_12_h,cl_dd_22_h;
@@ -158,7 +160,7 @@ static void compare_cls(char *compare_type,struct cls_data * data)
   fclose(fi_ll_12);
   fclose(fi_ll_22);
 
-  CCL_ClWorkspace *w=ccl_cl_workspace_new(3001,-1,CCL_NONLIMBER_METHOD_NATIVE,1.05,20,3.,0.003,0.05,&status);
+  CCL_ClWorkspace *w=ccl_cl_workspace_new(3001,-1,CCL_NONLIMBER_METHOD_NATIVE,1.05,20,5.,0.003,0.05,&status);
 
   ccl_angular_cls(cosmo,w,tr_nc_1,tr_nc_1,3001,ells,cls_dd_11_h,&status);
   if (status) printf("%s\n",cosmo->status_message);
@@ -191,18 +193,30 @@ static void compare_cls(char *compare_type,struct cls_data * data)
     double cl_ll_12_h=cls_ll_12_h[ii];
     double cl_ll_22_h=cls_ll_22_h[ii];
 
-    if(fabs(cl_dd_11_h/cl_dd_11-1)>CLS_TOLERANCE)
+    if(fabs(cl_dd_11_h/cl_dd_11-1)>CLS_TOLERANCE) {
       fraction_failed++;
-    if(fabs(cl_dd_12_h/cl_dd_12-1)>CLS_TOLERANCE)
+      printf("cl_dd_11,l,tol %d %.3g %.3g\n",ii,fabs(cl_dd_11_h/cl_dd_11-1),CLS_TOLERANCE);
+    }
+    if(fabs(cl_dd_12_h/cl_dd_12-1)>CLS_TOLERANCE) {
       fraction_failed++;
-    if(fabs(cl_dd_22_h/cl_dd_22-1)>CLS_TOLERANCE)
+      printf("cl_dd_12,l,tol %d %.3g %.3g\n",ii,fabs(cl_dd_12_h/cl_dd_12-1),CLS_TOLERANCE);
+    }
+      if(fabs(cl_dd_22_h/cl_dd_22-1)>CLS_TOLERANCE){
       fraction_failed++;
-    if(fabs(cl_ll_11_h/cl_ll_11-1)>CLS_TOLERANCE)
+      printf("cl_dd_22,l,tol %d %.3g %.3g\n",ii,fabs(cl_dd_22_h/cl_dd_22-1),CLS_TOLERANCE);
+    }
+      if(fabs(cl_ll_11_h/cl_ll_11-1)>CLS_TOLERANCE){
       fraction_failed++;
-    if(fabs(cl_ll_12_h/cl_ll_12-1)>CLS_TOLERANCE)
+      printf("cl_ll_11,l,tol %d %.3g %.3g\n",ii,fabs(cl_ll_11_h/cl_ll_11-1),CLS_TOLERANCE);
+    }
+      if(fabs(cl_ll_12_h/cl_ll_12-1)>CLS_TOLERANCE){
       fraction_failed++;
-    if(fabs(cl_ll_22_h/cl_ll_22-1)>CLS_TOLERANCE)
+      printf("cl_ll_12,l,tol %d %.3g %.3g\n",ii,fabs(cl_ll_12_h/cl_ll_12-1),CLS_TOLERANCE);
+    }
+      if(fabs(cl_ll_22_h/cl_ll_22-1)>CLS_TOLERANCE){
       fraction_failed++;
+      printf("cl_ll_22,l,tol %d %.3g %.3g\n",ii,fabs(cl_ll_22_h/cl_ll_22-1),CLS_TOLERANCE);
+    }
   }
 
   free(ells);
@@ -213,7 +227,7 @@ static void compare_cls(char *compare_type,struct cls_data * data)
 
   printf("%d, ",(int)fraction_failed);
   fraction_failed/=6*3001;
-  printf("%lf %%\n",fraction_failed*100);
+  printf("%lf %% ",fraction_failed*100);
   ASSERT_TRUE((fraction_failed<CLS_FRACTION));
 
   free(zarr_1);

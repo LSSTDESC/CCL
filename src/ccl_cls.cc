@@ -860,7 +860,7 @@ static double transfer_wl(int l,double k,
     ret*=w->dchi;
   }
 
-  //  return sqrt((l+2.)*(l+1.)*l*(l-1.))*ret/(k*k);
+  //return sqrt((l+2.)*(l+1.)*l*(l-1.))*ret/(k*k);
   return (l+1.)*l*ret/(k*k);
 }
 
