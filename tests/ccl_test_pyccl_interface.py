@@ -344,8 +344,7 @@ def test_power():
     """
     Test power spectrum and sigma functions in ccl.power.
     """
-    for i, cosmo in enumerate(reference_models()):
-        print "COSMO", i
+    for cosmo in reference_models():
         yield check_power, cosmo
 
 @decorators.slow
