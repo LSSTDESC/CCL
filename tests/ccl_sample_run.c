@@ -19,7 +19,7 @@
 #define SZ_GC 0.05
 #define Z0_SH 0.65
 #define SZ_SH 0.05
-#define NL 512
+#define NL 513
 #define PS 0.1 
 #define NREL 3.046
 #define NMAS 0
@@ -107,12 +107,35 @@ int main(int argc,char **argv)
   //Cosmic shear tracer
   CCL_ClTracer *ct_wl=ccl_cl_tracer_lensing_simple_new(cosmo,NZ,z_arr_sh,nz_arr_sh, &status);
   printf("ell C_ell(g,g) C_ell(g,s) C_ell(s,s) | r(g,s)\n");
+  /*
   for(int l=2;l<=NL;l*=2) {
     double cl_gg=ccl_angular_cl(cosmo,l,ct_gc,ct_gc, &status); //Galaxy-galaxy
     double cl_gs=ccl_angular_cl(cosmo,l,ct_gc,ct_wl, &status); //Galaxy-lensing
     double cl_ss=ccl_angular_cl(cosmo,l,ct_wl,ct_wl, &status); //Lensing-lensing
     printf("%d %.3lE %.3lE %.3lE | %.3lE\n",l,cl_gg,cl_gs,cl_ss,cl_gs/sqrt(cl_gg*cl_ss));
   }
+  */
+
+  int *ells=malloc(NL*sizeof(int));
+  double *cells_ll_limber=malloc(NL*sizeof(double));
+  double *cells_gl_limber=malloc(NL*sizeof(double));
+  double *cells_gg_limber=malloc(NL*sizeof(double));
+  for(int ii=0;ii<NL;ii++)
+    ells[ii]=ii;
+
+  double linstep = 40;
+  double logstep = 1.15;
+  double dchi = (ct_gc->chimax-ct_gc->chimin)/1000.; // must be below 3 to converge toward limber computation at high ell
+  double dlk = 0.003;
+  double zmin = 0.05;
+  CCL_ClWorkspace *w=ccl_cl_workspace_new(NL+1,-1          ,CCL_NONLIMBER_METHOD_ANGPOW,logstep,linstep,dchi,dlk,zmin,&status);
+  ccl_angular_cls(cosmo,w,ct_gc,ct_gc,NL,ells,cells_gg_limber,&status);
+  ccl_angular_cls(cosmo,w,ct_gc,ct_wl,NL,ells,cells_gl_limber,&status);
+  ccl_angular_cls(cosmo,w,ct_wl,ct_wl,NL,ells,cells_ll_limber,&status);
+
+  
+  for(int l=2;l<=NL;l*=2)
+    printf("%d %.3lE %.3lE %.3lE | %.3lE\n",l,cells_gg_limber[l],cells_gl_limber[l],cells_ll_limber[l],cells_gl_limber[l]/sqrt(cells_gg_limber[l]*cells_ll_limber[l]));
   printf("\n");
   
   //Free up tracers

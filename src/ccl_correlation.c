@@ -202,7 +202,6 @@ static void ccl_tracer_corr_bessel(ccl_cosmology *cosmo,
 				   int corr_type,int *status)
 {
   corr_int_par *cp=malloc(sizeof(corr_int_par));
-  printf("gogogo");
   if(cp==NULL) {
     *status=CCL_ERROR_MEMORY;
     strcpy(cosmo->status_message,"ccl_correlation.c: ccl_tracer_corr_bessel ran out of memory\n");
@@ -215,7 +214,6 @@ static void ccl_tracer_corr_bessel(ccl_cosmology *cosmo,
   cp->cl0=cls[0];
   cp->clf=cls[n_ell-1];
   cp->cl_spl=ccl_spline_init(n_ell,ell,cls,cls[0],0);
-  printf("goooooooooooooooooo n_ell %d\n",n_ell);
   if(cp->cl_spl==NULL) {
     free(cp);
     *status=CCL_ERROR_MEMORY;

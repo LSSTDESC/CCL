@@ -223,7 +223,6 @@ static void compare_corr(char *compare_type,int algorithm,struct corrs_data * da
   wt_ll_22_h_mm=malloc(nofl*sizeof(double));
   wt_ll_22_h_pp=malloc(nofl*sizeof(double));
   ccl_angular_cls(cosmo,wyl,tr_wl_2,tr_wl_2,ELL_MAX_CL,ells,clarr,&status);
-  printf("heeeerrre I start corr\n");
   ccl_correlation(cosmo,ELL_MAX_CL,larr,clarr,nofl,theta_in,wt_ll_22_h_pp,CCL_CORR_LP,
 		  0,taper_cl_limits,algorithm,&status);
   ccl_correlation(cosmo,ELL_MAX_CL,larr,clarr,nofl,theta_in,wt_ll_22_h_mm,CCL_CORR_LM,

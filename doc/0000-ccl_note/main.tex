@@ -644,7 +644,7 @@ about 15s on 16 threads, which is to be compared to about 0.5s with \texttt{Angp
 The Limber approximation can fail at low-$\ell$ and for the cross-correlations. It is therefore necessary to conduct the intensive computations of the triple integrals. As they involved very oscillatory functions ($j_\ell(k\chi(z))$), their correct sampling is not a trivial task. Two methods are proposed in CCL to handle such heavy computations:
 \begin{itemize}
 \item A brute-force computation using the GSL library and fine sampling of the integrals adapted to the cosmological case under study. This ensures that the computed spectrum converges to the Limber solution at high $\ell$.
-\item The Angpow software tool \citep{Campagne2017} based on Chebyshev polynomial basis, FFT and on Clenshaw-Curtis integral quadrature method. This software is an order of magnitude faster than the brute-force computation, and its precision was optimised so that the relative numerical error compared with the first method is two orders of magnitude below the relative cosmic variance $\sqrt{2/(2\ell+1)}$, from $\ell=2$ to $\ell=1000$. 
+\item The Angpow software tool based on Chebyshev polynomial basis, FFT and on Clenshaw-Curtis integral quadrature method. This software is an order of magnitude faster than the brute-force computation, and its precision was optimised so that the relative numerical error compared with the first method is two orders of magnitude below the relative cosmic variance $\sqrt{2/(2\ell+1)}$, from $\ell=2$ to $\ell=1000$. 
 \end{itemize}
 
 
