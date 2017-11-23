@@ -39,34 +39,19 @@ static int linecount(FILE *f)
   return i0;
 }
 
-static void compare_cls(int which_test,struct cls_data * data)
+static void compare_cls(struct cls_data * data)
 {
   int status=0;
   char fname[256];
-  double factor_tol;
-  double zlss;
-  if(which_test==0) {
-    sprintf(fname,"tests/benchmark/codecomp_step2_outputs/run_log_cl_cc.txt");
-    factor_tol=1.;
-    zlss=1090.;
-  }
-  else {
-    sprintf(fname,"tests/benchmark/codecomp_step2_outputs/run_log_cl_cc_b.txt");
-    factor_tol=3.;
-    zlss=1100.;
-  }  
+  double factor_tol=3.;
+  double zlss=1100.;
+  sprintf(fname,"tests/benchmark/codecomp_step2_outputs/run_log_cl_cc.txt");
 
   ccl_configuration config = default_config;
   config.transfer_function_method = ccl_bbks;
   config.matter_power_spectrum_method = ccl_linear;
   ccl_parameters params = ccl_parameters_create_flat_lcdm(data->Omega_c,data->Omega_b,data->h,
 							  data->A_s,data->n_s, &status);
-  if(which_test==0) {
-    params.Omega_k=0;
-    params.Omega_g=0;
-    params.Omega_n_rel=0;
-    params.Omega_l = 1.0 - params.Omega_m;
-  }
   params.sigma_8=data->sigma_8;
   ccl_cosmology * cosmo = ccl_cosmology_create(params, config);
   ASSERT_NOT_NULL(cosmo);
@@ -101,6 +86,5 @@ static void compare_cls(int which_test,struct cls_data * data)
 }
 
 CTEST2(cls,cmblens) {
-  compare_cls(0,data);
-  compare_cls(1,data);
+  compare_cls(data);
 }
