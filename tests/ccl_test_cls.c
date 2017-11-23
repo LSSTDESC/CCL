@@ -160,7 +160,8 @@ static void compare_cls(char *compare_type,struct cls_data * data)
   fclose(fi_ll_12);
   fclose(fi_ll_22);
 
-  CCL_ClWorkspace *w=ccl_cl_workspace_new(3001,-1,CCL_NONLIMBER_METHOD_NATIVE,1.05,20,5.,0.003,0.05,&status);
+  double zmin = CCL_MIN(zarr_1[0],zarr_2[0]);
+  CCL_ClWorkspace *w=ccl_cl_workspace_new(3001,-1,CCL_NONLIMBER_METHOD_NATIVE,1.05,20,5.,0.003,zmin,&status);
 
   ccl_angular_cls(cosmo,w,tr_nc_1,tr_nc_1,3001,ells,cls_dd_11_h,&status);
   if (status) printf("%s\n",cosmo->status_message);
@@ -193,30 +194,19 @@ static void compare_cls(char *compare_type,struct cls_data * data)
     double cl_ll_12_h=cls_ll_12_h[ii];
     double cl_ll_22_h=cls_ll_22_h[ii];
 
-    if(fabs(cl_dd_11_h/cl_dd_11-1)>CLS_TOLERANCE) {
+    if(fabs(cl_dd_11_h/cl_dd_11-1)>CLS_TOLERANCE)
       fraction_failed++;
-      printf("cl_dd_11,l,tol %d %.3g %.3g\n",ii,fabs(cl_dd_11_h/cl_dd_11-1),CLS_TOLERANCE);
-    }
-    if(fabs(cl_dd_12_h/cl_dd_12-1)>CLS_TOLERANCE) {
+    if(fabs(cl_dd_12_h/cl_dd_12-1)>CLS_TOLERANCE)
       fraction_failed++;
-      printf("cl_dd_12,l,tol %d %.3g %.3g\n",ii,fabs(cl_dd_12_h/cl_dd_12-1),CLS_TOLERANCE);
-    }
-      if(fabs(cl_dd_22_h/cl_dd_22-1)>CLS_TOLERANCE){
+    if(fabs(cl_dd_22_h/cl_dd_22-1)>CLS_TOLERANCE)
       fraction_failed++;
-      printf("cl_dd_22,l,tol %d %.3g %.3g\n",ii,fabs(cl_dd_22_h/cl_dd_22-1),CLS_TOLERANCE);
-    }
-      if(fabs(cl_ll_11_h/cl_ll_11-1)>CLS_TOLERANCE){
+    if(fabs(cl_ll_11_h/cl_ll_11-1)>CLS_TOLERANCE)
       fraction_failed++;
-      printf("cl_ll_11,l,tol %d %.3g %.3g\n",ii,fabs(cl_ll_11_h/cl_ll_11-1),CLS_TOLERANCE);
-    }
-      if(fabs(cl_ll_12_h/cl_ll_12-1)>CLS_TOLERANCE){
+    if(fabs(cl_ll_12_h/cl_ll_12-1)>CLS_TOLERANCE)
       fraction_failed++;
-      printf("cl_ll_12,l,tol %d %.3g %.3g\n",ii,fabs(cl_ll_12_h/cl_ll_12-1),CLS_TOLERANCE);
-    }
-      if(fabs(cl_ll_22_h/cl_ll_22-1)>CLS_TOLERANCE){
+    if(fabs(cl_ll_22_h/cl_ll_22-1)>CLS_TOLERANCE)
       fraction_failed++;
-      printf("cl_ll_22,l,tol %d %.3g %.3g\n",ii,fabs(cl_ll_22_h/cl_ll_22-1),CLS_TOLERANCE);
-    }
+
   }
 
   free(ells);

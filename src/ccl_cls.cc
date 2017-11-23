@@ -362,7 +362,6 @@ static CCL_ClTracer *cl_tracer_new(ccl_cosmology *cosmo,int tracer_type,
 
   if((tracer_type==CL_TRACER_NC)||(tracer_type==CL_TRACER_WL)) {
     get_support_interval(nz_n,z_n,n,CCL_FRAC_RELEVANT,&(clt->zmin),&(clt->zmax));
-    printf("zmin, zmax: %.3g %.3g\n",clt->zmin,clt->zmax);
     clt->chimax=ccl_comoving_radial_distance(cosmo,1./(1+clt->zmax),status);
     clt->chimin=ccl_comoving_radial_distance(cosmo,1./(1+clt->zmin),status);
     clt->spl_nz=spline_init(nz_n,z_n,n,0,0);
@@ -513,7 +512,6 @@ static CCL_ClTracer *cl_tracer_new(ccl_cosmology *cosmo,int tracer_type,
       nchi=(int)(chimax/dchi)+1;
       x=ccl_linear_spacing(0.,chimax,nchi);
       dchi=chimax/nchi;
-      printf("chimin %.3g chimax %.3g nchi %d zmax %.3g dchi %.3g\n",clt->chimin,clt->chimax,nchi,zmax,dchi);
       if(x==NULL || (fabs(x[0]-0)>1E-5) || (fabs(x[nchi-1]-chimax)>1e-5)) {
 	spline_free(clt->spl_nz);
 	free(clt);
@@ -912,7 +910,6 @@ static double *get_lkarr(ccl_cosmology *cosmo,CCL_ClWorkspace *w,
   }
   lkmin=log10(kmin);
   lkmax=log10(kmax);
-  printf("lkmin %.3f lkmax %.3f\n",lkmin,lkmax);
   
   //Allocate memory for transfer function
   double *lkarr;
@@ -1056,10 +1053,14 @@ static void compute_transfer(CCL_ClTracer *clt,ccl_cosmology *cosmo,CCL_ClWorksp
 static double transfer(int il,double lk,ccl_cosmology *cosmo,
 		       CCL_ClWorkspace *w,CCL_ClTracer *clt,int *status)
 {
-  if(!(clt->computed_transfer))
-    compute_transfer(clt,cosmo,w,status);
-  
-  return spline_eval(lk,clt->spl_transfer[il]);
+  if(il<w->l_limber) {
+    if(!(clt->computed_transfer))
+      compute_transfer(clt,cosmo,w,status);
+    
+    return spline_eval(lk,clt->spl_transfer[il]);
+  } else {
+    return transfer_wrap(il,lk,cosmo,w,clt,status);
+  }
 }
 
 //Params for power spectrum integrand
