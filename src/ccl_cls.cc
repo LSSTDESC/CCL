@@ -580,7 +580,6 @@ static CCL_ClTracer *cl_tracer_new(ccl_cosmology *cosmo,int tracer_type,
     strcpy(cosmo->status_message,"ccl_cls.c: ccl_cl_tracer_new(): unknown tracer type\n");
     return NULL;
   }
-  printf("transfer_wm chimax: %.3g  %.3g\n",clt->chimin,clt->chimax);
 
   return clt;
 }
@@ -1369,7 +1368,7 @@ void ccl_angular_cls(ccl_cosmology *cosmo,CCL_ClWorkspace *w,
   for(ii=0;ii<nl_out;ii++) {
     if(l_out[ii]>w->lmax) {
       *status=CCL_ERROR_SPLINE_EV;
-      strcpy(cosmo->status_message,"ccl_cls.c: ccl_cl_angular_cls(); "
+      strcpy(cosmo->status_message,"ccl_cls.cc: ccl_angular_cls(); "
 	     "requested l beyond range allowed by workspace\n");
       return;
     }
@@ -1379,7 +1378,7 @@ void ccl_angular_cls(ccl_cosmology *cosmo,CCL_ClWorkspace *w,
   double *l_nodes=(double *)malloc(w->n_ls*sizeof(double));
   if(l_nodes==NULL) {
     *status=CCL_ERROR_MEMORY;
-    strcpy(cosmo->status_message,"ccl_cls.c: ccl_cl_angular_cls(); memory allocation\n");
+    strcpy(cosmo->status_message,"ccl_cls.cc: ccl_angular_cls(); memory allocation\n");
     return;
   }
   double *cl_nodes=(double *)malloc(w->n_ls*sizeof(double));

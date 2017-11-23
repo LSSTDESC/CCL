@@ -176,9 +176,12 @@ static void compare_corr(char *compare_type,int algorithm,struct corrs_data * da
   /*Compute the correlation with CCL*/
   int il;
   double *clarr=malloc(ELL_MAX_CL*sizeof(double));
-  int *larr=malloc(ELL_MAX_CL*sizeof(double));
-  for(il=0;il<ELL_MAX_CL;il++)
+  double *larr=malloc(ELL_MAX_CL*sizeof(double));
+  int *ells=malloc(ELL_MAX_CL*sizeof(int)); // ccl_angular_cls needs int
+  for(il=0;il<ELL_MAX_CL;il++){
     larr[il]=il;
+    ells[il]=il;
+  }
 
   /*Use Limber computation*/
   double linstep = 40;
@@ -189,38 +192,21 @@ static void compare_corr(char *compare_type,int algorithm,struct corrs_data * da
   CCL_ClWorkspace *wyl=ccl_cl_workspace_new(ELL_MAX_CL+1,-1,CCL_NONLIMBER_METHOD_ANGPOW,logstep,linstep,dchi,dlk,zmin,&status);
 
   wt_dd_11_h=malloc(nofl*sizeof(double));
-  /*
-  for(il=0;il<ELL_MAX_CL;il++)
-    clarr[il]=ccl_angular_cl(cosmo,il,tr_nc_1,tr_nc_1,&status);
-  */
-  ccl_angular_cls(cosmo,wyl,tr_nc_1,tr_nc_1,ELL_MAX_CL,larr,clarr,&status);
-  
+  ccl_angular_cls(cosmo,wyl,tr_nc_1,tr_nc_1,ELL_MAX_CL,ells,clarr,&status);
   ccl_correlation(cosmo,ELL_MAX_CL,larr,clarr,nofl,theta_in,wt_dd_11_h,CCL_CORR_GG,
 		  0,taper_cl_limits,algorithm,&status);
   wt_dd_12_h=malloc(nofl*sizeof(double));
-  /*
-  for(il=0;il<ELL_MAX_CL;il++)
-    clarr[il]=ccl_angular_cl(cosmo,il,tr_nc_1,tr_nc_2,&status);
-  */
-  ccl_angular_cls(cosmo,wyl,tr_nc_1,tr_nc_2,ELL_MAX_CL,larr,clarr,&status);
+  ccl_angular_cls(cosmo,wyl,tr_nc_1,tr_nc_2,ELL_MAX_CL,ells,clarr,&status);
   ccl_correlation(cosmo,ELL_MAX_CL,larr,clarr,nofl,theta_in,wt_dd_12_h,CCL_CORR_GG,
 		  0,taper_cl_limits,algorithm,&status);
   wt_dd_22_h=malloc(nofl*sizeof(double));
-  /*
-  for(il=0;il<ELL_MAX_CL;il++)
-    clarr[il]=ccl_angular_cl(cosmo,il,tr_nc_2,tr_nc_2,&status);
-  */
-  ccl_angular_cls(cosmo,wyl,tr_nc_2,tr_nc_2,ELL_MAX_CL,larr,clarr,&status);
+  ccl_angular_cls(cosmo,wyl,tr_nc_2,tr_nc_2,ELL_MAX_CL,ells,clarr,&status);
   ccl_correlation(cosmo,ELL_MAX_CL,larr,clarr,nofl,theta_in,wt_dd_22_h,CCL_CORR_GG,
 		  0,taper_cl_limits,algorithm,&status);
 
   wt_ll_11_h_mm=malloc(nofl*sizeof(double));
   wt_ll_11_h_pp=malloc(nofl*sizeof(double));
-  /*
-  for(il=0;il<ELL_MAX_CL;il++)
-    clarr[il]=ccl_angular_cl(cosmo,il,tr_wl_1,tr_wl_1,&status);
-  */
-  ccl_angular_cls(cosmo,wyl,tr_wl_1,tr_wl_1,ELL_MAX_CL,larr,clarr,&status);
+  ccl_angular_cls(cosmo,wyl,tr_wl_1,tr_wl_1,ELL_MAX_CL,ells,clarr,&status);
   ccl_correlation(cosmo,ELL_MAX_CL,larr,clarr,nofl,theta_in,wt_ll_11_h_pp,CCL_CORR_LP,
 		  0,taper_cl_limits,algorithm,&status);
   ccl_correlation(cosmo,ELL_MAX_CL,larr,clarr,nofl,theta_in,wt_ll_11_h_mm,CCL_CORR_LM,
@@ -228,11 +214,7 @@ static void compare_corr(char *compare_type,int algorithm,struct corrs_data * da
 
   wt_ll_12_h_mm=malloc(nofl*sizeof(double));
   wt_ll_12_h_pp=malloc(nofl*sizeof(double));
-  /*
-  for(il=0;il<ELL_MAX_CL;il++)
-    clarr[il]=ccl_angular_cl(cosmo,il,tr_wl_1,tr_wl_2,&status);
-  */
-  ccl_angular_cls(cosmo,wyl,tr_wl_1,tr_wl_2,ELL_MAX_CL,larr,clarr,&status);
+  ccl_angular_cls(cosmo,wyl,tr_wl_1,tr_wl_2,ELL_MAX_CL,ells,clarr,&status);
   ccl_correlation(cosmo,ELL_MAX_CL,larr,clarr,nofl,theta_in,wt_ll_12_h_pp,CCL_CORR_LP,
 		  0,taper_cl_limits,algorithm,&status);
   ccl_correlation(cosmo,ELL_MAX_CL,larr,clarr,nofl,theta_in,wt_ll_12_h_mm,CCL_CORR_LM,
@@ -240,11 +222,8 @@ static void compare_corr(char *compare_type,int algorithm,struct corrs_data * da
 
   wt_ll_22_h_mm=malloc(nofl*sizeof(double));
   wt_ll_22_h_pp=malloc(nofl*sizeof(double));
-  /*
-  for(il=0;il<ELL_MAX_CL;il++)
-    clarr[il]=ccl_angular_cl(cosmo,il,tr_wl_2,tr_wl_2,&status);
-  */
-  ccl_angular_cls(cosmo,wyl,tr_wl_2,tr_wl_2,ELL_MAX_CL,larr,clarr,&status);
+  ccl_angular_cls(cosmo,wyl,tr_wl_2,tr_wl_2,ELL_MAX_CL,ells,clarr,&status);
+  printf("heeeerrre I start corr\n");
   ccl_correlation(cosmo,ELL_MAX_CL,larr,clarr,nofl,theta_in,wt_ll_22_h_pp,CCL_CORR_LP,
 		  0,taper_cl_limits,algorithm,&status);
   ccl_correlation(cosmo,ELL_MAX_CL,larr,clarr,nofl,theta_in,wt_ll_22_h_mm,CCL_CORR_LM,
@@ -404,6 +383,7 @@ static void compare_corr(char *compare_type,int algorithm,struct corrs_data * da
   free(pzarr_1); free(pzarr_2);
   free(bzarr);
   ccl_cosmology_free(cosmo);
+  ccl_cl_workspace_free(wyl);
 }
 
 CTEST2(corrs,analytic_fftlog) {
