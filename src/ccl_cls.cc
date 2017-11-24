@@ -676,7 +676,7 @@ CCL_ClTracer *ccl_cl_tracer_lensing_simple_new(ccl_cosmology *cosmo,
 			   -1,NULL,NULL,-1,NULL,NULL, status);
 }
 
-static double limits_bessel(double l,double thr,double *xmin,double *xmax)
+static void limits_bessel(double l,double thr,double *xmin,double *xmax)
 {
   double thrb=thr*0.5635/pow(l+0.53,0.834);
   *xmax=1./thrb;
@@ -988,7 +988,7 @@ static void compute_transfer(CCL_ClTracer *clt,ccl_cosmology *cosmo,CCL_ClWorksp
     double l=(double)(w->l_arr[il]);
     double *lkarr=get_lkarr(cosmo,w,l,chimin,chimax,&nk,status);
     if(lkarr==NULL) {
-      *status==CCL_ERROR_MEMORY;
+      *status=CCL_ERROR_MEMORY;
       strcpy(cosmo->status_message,"ccl_cls.c: compute_transfer(): memory allocation\n");
       break;
     }
@@ -996,7 +996,7 @@ static void compute_transfer(CCL_ClTracer *clt,ccl_cosmology *cosmo,CCL_ClWorksp
     double *tkarr=(double *)malloc(nk*sizeof(double));
     if(tkarr==NULL) {
       free(lkarr);
-      *status==CCL_ERROR_MEMORY;
+      *status=CCL_ERROR_MEMORY;
       strcpy(cosmo->status_message,"ccl_cls.c: compute_transfer(): memory allocation\n");
       break;
     }
@@ -1031,7 +1031,7 @@ static void compute_transfer(CCL_ClTracer *clt,ccl_cosmology *cosmo,CCL_ClWorksp
     if(clt->spl_transfer[il]==NULL) {
       free(lkarr);
       free(tkarr);
-      *status==CCL_ERROR_MEMORY;
+      *status=CCL_ERROR_MEMORY;
       strcpy(cosmo->status_message,"ccl_cls.c: compute_transfer(): memory allocation\n");
       break;
     }
