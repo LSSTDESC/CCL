@@ -135,6 +135,7 @@ ccl_cosmology * ccl_cosmology_create(ccl_parameters params, ccl_configuration co
 
   cosmo->data.p_lin = NULL;
   cosmo->data.p_nl = NULL;
+  cosmo->data.k_min= 5E-5;
   //cosmo->data.nu_pspace_int = NULL;
   cosmo->computed_distances = false;
   cosmo->computed_growth = false;

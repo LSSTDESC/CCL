@@ -27,6 +27,15 @@ try:
 except AttributeError:
     numpy_include = numpy.get_numpy_include()
 
+# CCL extension module
+#_ccllib = Extension(
+#            "_ccllib",
+#               ["pyccl/ccl.i",],
+#               libraries = ['m', 'gsl', 'gslcblas', 'ccl','fftw3','fftw3_threads','gomp'],
+#               include_dirs = [numpy_include, "include/", "class/include"],
+#               extra_compile_args=['-O4', '-std=c99','-fopenmp'],
+#               swig_opts=['-threads'],
+#           )
 # This part is taken from healpy's setup.py
 
 # Apple switched default C++ standard libraries (from gcc's libstdc++ to
@@ -267,11 +276,12 @@ setup(name="pyccl",
     packages=['pyccl'],
     ext_modules=[
         Extension("_ccllib",["pyccl/ccl_wrap.c"],
-            libraries=['m', 'gsl', 'gslcblas', 'ccl'],
+            libraries = ['m', 'gsl', 'gslcblas', 'ccl','fftw3','fftw3_threads','gomp'],
+            #libraries=['m', 'gsl', 'gslcblas', 'ccl'],      
             include_dirs=[numpy_include, "include/", "class/include"],
             library_dirs=[libdir],
             runtime_library_dirs=[libdir],
-            extra_compile_args=['-O4', '-std=c99'],
+            extra_compile_args=['-O4', '-std=c99', '-fopenmp'],
             swig_opts=['-threads'], 
             )
     ],

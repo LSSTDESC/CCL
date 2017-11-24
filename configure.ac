@@ -16,10 +16,13 @@ AM_MAINTAINER_MODE
 
 # Checks for programs.
 AC_PROG_CC
+AC_PROG_CXX
 AC_PROG_CC_STDC
 AC_PROG_INSTALL
 AM_PROG_CC_C_O
+AC_PROG_CXX_C_O
 AM_MAINTAINER_MODE
+AC_OPENMP
 
 # Checks for libraries.
 AC_SEARCH_LIBS([pow],[m],[],AC_MSG_ERROR(Couldn't find libm. Required.))
@@ -59,7 +62,8 @@ AC_CHECK_FUNCS([pow sqrt])
 # Includes Makefiles
 AC_CONFIG_FILES([Makefile
 		 include/Makefile
-		 $CLASS_MAKEFILE])
+		 $CLASS_MAKEFILE
+		 angpow/Makefile])
 
 AC_OUTPUT
 

@@ -6,6 +6,9 @@ extern "C" {
 #pragma once
 #include "gsl/gsl_spline.h"
 
+#define CCL_MIN(a, b)  (((a) < (b)) ? (a) : (b))
+#define CCL_MAX(a, b)  (((a) > (b)) ? (a) : (b))
+
 /**
  * Compute bin edges of N-1 linearly spaced bins on the interval [xmin,xmax]
  * @param xmin minimum value of spacing
@@ -24,6 +27,10 @@ double * ccl_linear_spacing(double xmin, double xmax, int N);
  * @return x, bin edges in range [xmin, xmax]
  */
 double * ccl_log_spacing(double xmin, double xmax, int N);
+//Returns array of N logarithmically-spaced values between xmin and xmax
+
+double ccl_j_bessel(int l,double x);
+//Spherical Bessel function of order l (adapted from CAMB)
 
 /**
  * Spline wrapper
