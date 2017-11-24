@@ -1304,7 +1304,7 @@ static void ccl_angular_cls_angpow(ccl_cosmology *ccl_cosmo,CCL_ClWorkspace *w,
 				   double *cl_out,int * status)
 {
   // Initialize the Angpow parameters
-  int chebyshev_order_1=9; 
+  int chebyshev_order_1=9; // polynoms of order 2^{N}
   int chebyshev_order_2=9;
   int nroots=200; 
   int l_max_use=CCL_MIN(w->l_limber,w->lmax);
