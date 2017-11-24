@@ -852,6 +852,35 @@ We note that while we maintain the $10^{-4}$ for our evaluations of $\sigma$, th
 
 \cont{ `Fair' sampling of parameter space with Latin Hypercubes. Summary statistics used, and binning of power spectrum in $k$ and $z$. Precision settings used for CLASS. Estimates of run-time. Results. Range of validity.}
 
+While concentrating on individual points in cosmological parameter space allows us to perform detailed validation tests, as above, it is important for \ccl to also be validated across a wide range of cosmological parameter values, e.g. to ensure validity for MCMC analyses. In this section, we present a set of validation tests for the \ccl linear and non-linear matter power spectrum functions that spans a broad rnage of $\Lambda$CDM parameters.
+
+Covering a full range of all 5 $\Lambda$CDM parameters on a regular grid would be prohibitively expensive, so an alternative method for fairly (but more sparsely) sampling the parameter space is needed. We use Latin Hypercube Sampling to determine a tractably-sized set of sample points. This splits the parameter space into a regular grid with a given number of cells per dimension. The sample points are then chosen by going through each dimension in turn and choosing a cell at random {\it without replacement}, so that a given cell of a given dimension is only ever chosen once. This is repeated until all cells in all dimensions contain a single sample. This has the effect of covering the space uniformly but sparsely. The exact location of the sample within each cell can be chosen from a uniform distribution within that cell, but for simplicity we put each sample at the cell centre. The ranges used for each parameter are shown in Table~\ref{tab:paramranges}.
+
+For each set of parameters, we then calculate the linear and non-linear power spectra using \ccl for a range of redshifts ($z \in \{ 0.0,\, 0.5,\, 1.0,\, 1.5,\, 2.0,\, 2.5\}$) and wavenumbers ($k \in [10^{-4}, 10^0]$ Mpc$^{-1}$). A corresponding set of reference power spectra is then produced using CLASS, which we run with settings chosen to produce high-precision results, taken from the {\tt pk\_ref.pre} precision file that is bundled with CLASS.
+
+\begin{table}[t]
+  \centering
+  \begin{tabular}{l | r}
+    \hline
+    Parameter & Range \\
+    \hline
+    $h$ & $[0.5, 0.9]$ \\
+    $\Omega_c$ & $[0.1, 0.4]$ \\
+    $\Omega_b$ & $[0.018, 0.052]$ \\
+    $A_s$ & $[1.5 \times 10^{-9}, 2.5 \times 10^{-9}]$ \\
+    $n_s$ & $[0.93, 0.99]$ \\
+    \hline
+  \end{tabular}
+  \caption{Ranges of $\Lambda$CDM parameters.}
+  \label{tab:paramranges}
+\end{table}
+
+To quantify the level of agreement between the \ccl and reference power spectra, we use the following summary statistic that can be summed over a chosen set of bins in redshift and wavenumber:
+\begin{equation}
+\Delta = \sum_{ij} \Theta \left ( \log_{10} \left | \frac{P_{\rm CCL}(k_i, z_j) - P_{\rm ref}(k_i, z_j)}{P_{\rm ref}(k_i, z_j) \Delta_{\rm thres}} \right | \right ).
+\end{equation}
+Here, $\Delta_{\rm thres}$ is a target threshold for the fractional deviation between the power spectra, and we have defined $\Theta(x) \equiv x ~~(x \ge 0)$ and $0$ otherwise. Bins where the \ccl power spectrum deviates from the reference power spectrum by a fraction less than $\Delta_{\rm thres}$ do not contribute to the statistic, so the aim is to have $\Delta = 0$ (i.e. no deviation beyond the threshold in any bin). If deviations are found, however, they are weighted logarithmically -- one large deviation of several orders of magnitude affects the statistic as much as a few smaller deviations of order $\sim \Delta_{\rm thres}$.
+
 \subsection{Validation of the Cosmic Emulator}
 \vol{Elisa Chisari}
 \cont{Explain automated tests for cosmic emulator}
