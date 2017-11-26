@@ -149,21 +149,23 @@ and $a(\chi)$, the inverse of $\chi(a)$.
 \subsection{Growth of perturbations}
 \vol{Mustapha Ishak}
 \label{sec:growth}
-To compute the growth function, $D(a)$, the growth factor of matter perturbations, \ccl solves the following differential equation:
+
+To compute the linear growth factor of matter perturbations, $D(a)$, \ccl solves the following usual differential equation:
 \begin{equation}
   \frac{d}{da}\left(a^3H(a)\frac{dD}{da}\right)=\frac{3}{2}\Omega_M(a)aH(a)D,
 \end{equation}
-using a Runge-Kutta Cash-Karp algorithm.
+using a Runge-Kutta Cash-Karp algorithm. 
 
-In doing this, \ccl simultaneously computes the growth rate $f(a)$, defined as:
+In doing this, \ccl simultaneously computes the logarithmic growth rate $f(a)$, defined as:
 \begin{equation}
   f(a)=\frac{d\ln D}{d\ln a}.
 \end{equation}
-\ccl provides different functions that return the growth normalized to $D(a=1)=1$ and to $D(a\ll1)\rightarrow a$.
 
-Note that the above is strictly valid for a Universe containing only dust-like matter components. A scale-independent growth rate is, for example, ill-defined in the presence of massive neutrinos.
+\ccl provides different functions that return the growth normalized to $D(a=1)=1$ and to $D(a\ll1)\rightarrow a$. It employs an accelerated spline that is linearly spaced in the scale factor to interpolate the growth functions. 
 
-Currently \ccl allows for an alternative `modified gravity' cosmological model defined by a regular background $(w_0+w_a)$CDM (with arbitrary $K$) as well as a user-defined $\Delta f(a)$, such that the true growth rate in this model is given by $f(a)=f_0(a)+\Delta f(a)$, where $f_0(a)$ is the growth rate in the background model. Note that this model is only consistently implemented with regards to the computation of the linear growth factor and growth rates (which will also scale the linear power spectrum). All other \ccl functions (including the non-linear power spectrum) will ignore these modifications. This model, and the interpretation of the predictions given by \ccl, should therefore be used with care.
+The growth calculations cover flat and curved $\Lambda$CDM, $w$CDM, and $(w0+w_a)$CDM cosmologies. It should be noted though that the above is strictly valid for a Universe containing only dust-like matter components. A scale-independent growth rate is, for example, ill-defined in the presence of massive neutrinos which are not included in \ccl 's growth calculation. 
+
+Finally, \ccl allows for an alternative `modified gravity' cosmological model defined by a regular background $(w_0+w_a)$CDM (with arbitrary $K$???) as well as a user-defined $\Delta f(a)$, such that the true growth rate in this model is given by $f(a)=f_0(a)+\Delta f(a)$, where $f_0(a)$ is the growth rate in the background model. Note that this model is only consistently implemented with regards to the computation of the linear growth factor and growth rates (which will also scale the linear power spectrum). All other \ccl functions (including the non-linear power spectrum) will ignore these modifications. This model, and the interpretation of the predictions given by \ccl, should therefore be used with care.
 
 
 %-------------------------------------------------------------------------------
