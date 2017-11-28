@@ -101,22 +101,29 @@ int main(int argc,char **argv)
     nz_arr_sh[i]=exp(-0.5*pow((z_arr_sh[i]-Z0_SH)/SZ_SH,2));
   }
   
+  //CMB lensing tracer
+  CCL_ClTracer *ct_cl=ccl_cl_tracer_cmblens_new(cosmo,1100.,&status);
+
   //Galaxy clustering tracer
   CCL_ClTracer *ct_gc=ccl_cl_tracer_number_counts_simple_new(cosmo,NZ,z_arr_gc,nz_arr_gc,NZ,z_arr_gc,bz_arr, &status);
   
   //Cosmic shear tracer
   CCL_ClTracer *ct_wl=ccl_cl_tracer_lensing_simple_new(cosmo,NZ,z_arr_sh,nz_arr_sh, &status);
-  printf("ell C_ell(g,g) C_ell(g,s) C_ell(s,s) | r(g,s)\n");
+  printf("ell C_ell(c,c) C_ell(c,g) C_ell(c,s) C_ell(g,g) C_ell(g,s) C_ell(s,s) | r(g,s)\n");
   for(int l=2;l<=NL;l*=2) {
+    double cl_cc=ccl_angular_cl(cosmo,l,ct_wl,ct_wl, &status); //CMBLensing-CMBLensing
+    double cl_cg=ccl_angular_cl(cosmo,l,ct_wl,ct_wl, &status); //CMBLensing-CMBLensing
+    double cl_cs=ccl_angular_cl(cosmo,l,ct_wl,ct_wl, &status); //CMBLensing-CMBLensing
     double cl_gg=ccl_angular_cl(cosmo,l,ct_gc,ct_gc, &status); //Galaxy-galaxy
     double cl_gs=ccl_angular_cl(cosmo,l,ct_gc,ct_wl, &status); //Galaxy-lensing
     double cl_ss=ccl_angular_cl(cosmo,l,ct_wl,ct_wl, &status); //Lensing-lensing
-    printf("%d %.3lE %.3lE %.3lE | %.3lE\n",l,cl_gg,cl_gs,cl_ss,cl_gs/sqrt(cl_gg*cl_ss));
+    printf("%d %.3lE %.3lE %.3lE %.3lE %.3lE %.3lE\n",l,cl_cc,cl_cg,cl_cs,cl_gg,cl_gs,cl_ss);
   }
   printf("\n");
   
   //Free up tracers
   ccl_cl_tracer_free(ct_gc);
+  ccl_cl_tracer_free(ct_cl);
   ccl_cl_tracer_free(ct_wl);
   
   //Halo mass function
