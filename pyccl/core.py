@@ -126,7 +126,9 @@ class Parameters(object):
             
         # Deal with potential problem cases with non-degerate massive neutrinos:
         if ((type(N_nu_mass)==float) or (type (N_nu_mass)==int)):
+            print "here, N_nu_mass type is float or int"
             if (np.abs(N_nu_mass)<1e-14):
+                print "here, N_nu_mass is zero"
                 if (hasattr(m_nu, "__len__")==True):
                     raise ValueError("Length of m_nu must match N_nu_mass.")
                 if (m_nu != None):
@@ -136,6 +138,7 @@ class Parameters(object):
                         m_nu=np.asarray([m_nu])
                     
             elif (np.abs(N_nu_mass-1.)<1e-14):
+                print "here, N_nu_mass = 1"
                 if (hasattr(m_nu, "__len__")!=True):
                     m_nu = np.asarray([m_nu])
                 elif (len(m_nu)!=1):
@@ -145,6 +148,7 @@ class Parameters(object):
         elif (N_nu_mass != None):
             if(int(N_nu_mass) != len(m_nu)):
                 raise ValueError("Length of m_nu must match N_nu_mass.")
+        print "mnu after if statement=", m_nu
         
         # Check if any compulsory parameters are not set
         compul = [Omega_c, Omega_b, Omega_k, N_nu_rel, N_nu_mass, w0, wa, h, norm_pk, n_s]
@@ -154,21 +158,29 @@ class Parameters(object):
             if item is None:
                 raise ValueError("Necessary parameter '%s' was not set "
                                  "(or set to None)." % nm)
+                                 
+        print "z_mg=", z_mg                        
+                                 
         # Create new instance of ccl_parameters object
         status = 0 # Create an internal status variable; needed to check massive neutrino integral.
-        if nz_mg == -1:
+        if ((nz_mg == -1) and (np.abs(N_nu_mass)<1e-14)):
             # Create ccl_parameters without modified growth
             self.parameters, status \
                 = lib.parameters_create( Omega_c, Omega_b, Omega_k, N_nu_rel, 
                                          N_nu_mass, m_nu, w0, wa, h, norm_pk, 
                                          n_s, -1, None, None, status )
-            
+        elif (nz_mg== -1):
+            # Create ccl_parameters with massive neutrinos
+            self.parameters, status \
+            = lib.parameters_create_vec( Omega_c, Omega_b, Omega_k, N_nu_rel, 
+                                             w0, wa, h, norm_pk, 
+                                             n_s, z_mg, df_mg, m_nu, status ) 
         else:
             # Create ccl_parameters with modified growth arrays
             self.parameters, status \
                 = lib.parameters_create_vec( Omega_c, Omega_b, Omega_k, N_nu_rel, 
-                                             N_nu_mass, m_nu, w0, wa, h, norm_pk, 
-                                             n_s, z_mg, df_mg, status )
+                                             w0, wa, h, norm_pk, 
+                                             n_s, z_mg, df_mg, m_nu, status )
         check(status)    
     
     def __getitem__(self, key):

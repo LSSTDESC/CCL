@@ -450,9 +450,9 @@ def cosmology_compute_power(cosmo, status):
     """cosmology_compute_power(cosmology cosmo, int * status)"""
     return _ccllib.cosmology_compute_power(cosmo, status)
 
-def parameters_create_vec(Omega_c, Omega_b, Omega_k, N_nu_rel, N_nu_mass, M_nu, w0, wa, h, norm_pk, n_s, zarr, dfarr, status):
-    """parameters_create_vec(double Omega_c, double Omega_b, double Omega_k, double N_nu_rel, double N_nu_mass, double * M_nu, double w0, double wa, double h, double norm_pk, double n_s, double * zarr, double * dfarr, int * status) -> parameters"""
-    return _ccllib.parameters_create_vec(Omega_c, Omega_b, Omega_k, N_nu_rel, N_nu_mass, M_nu, w0, wa, h, norm_pk, n_s, zarr, dfarr, status)
+def parameters_create_vec(Omega_c, Omega_b, Omega_k, N_nu_rel, w0, wa, h, norm_pk, n_s, zarr, dfarr, M_nu, n_mnu, status):
+    """parameters_create_vec(double Omega_c, double Omega_b, double Omega_k, double N_nu_rel, double w0, double wa, double h, double norm_pk, double n_s, double * zarr, double * dfarr, double * M_nu, int n_mnu, int * status) -> parameters"""
+    return _ccllib.parameters_create_vec(Omega_c, Omega_b, Omega_k, N_nu_rel, w0, wa, h, norm_pk, n_s, zarr, dfarr, M_nu, n_mnu, status)
 
 _ccllib.omega_m_label_swigconstant(_ccllib)
 omega_m_label = _ccllib.omega_m_label
