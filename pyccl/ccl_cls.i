@@ -37,6 +37,7 @@ CCL_ClTracer* cl_tracer_new_wrapper(ccl_cosmology *cosmo,int tracer_type,
 				int nz_s, double *z_s, int ns, double *s,
 				int nz_ba, double *z_ba, int nba, double *ba,
 				int nz_rf, double *z_rf, int nrf, double *rf,
+				double z_source,
 				int* status){
     
     assert(nz_n == nn);
@@ -56,7 +57,8 @@ CCL_ClTracer* cl_tracer_new_wrapper(ccl_cosmology *cosmo,int tracer_type,
 				             nz_s, z_s, s,
 				             nz_ba, z_ba, ba,
 				             nz_rf, z_rf, rf, 
-				             status);
+                   			     z_source,
+ 				             status);
 }
 
 

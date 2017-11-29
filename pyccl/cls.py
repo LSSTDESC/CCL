@@ -10,6 +10,8 @@ tracer_types = {
     'wl':               const.CL_TRACER_WL,
     'lensing':          const.CL_TRACER_WL,
     'weak_lensing':     const.CL_TRACER_WL,
+    'cmbl':             const.CL_TRACER_CL,
+    'cmb_lensing':      const.CL_TRACER_CL,
 }
 
 #Same mapping for non-Limber integration methods
@@ -34,7 +36,7 @@ class ClTracer(object):
     def __init__(self, cosmo, tracer_type=None, has_rsd=False,
                  has_magnification=False, has_intrinsic_alignment=False,
                  z=None, n=None, bias=None, mag_bias=None, bias_ia=None,
-                 f_red=None):
+                 f_red=None,z_source=1100.):
         """
         ClTracer is a class for handling tracers that have an angular power
         spectrum.
@@ -69,6 +71,7 @@ class ClTracer(object):
                 alignment amplitudes b_IA(z), or a tuple of arrays (z, b_IA(z)).
             f_red (array_like or tuple, optional): Array of red galaxy
                 fractions f_red(z), or a tuple of arrays (z, f_red(z)).
+            z_source (float, optional): Redshift of source plane for CMB lensing.
         """
         # Verify cosmo object
         cosmo = _cosmology_obj(cosmo)
@@ -93,7 +96,7 @@ class ClTracer(object):
                             int(has_rsd),
                             int(has_magnification),
                             int(has_intrinsic_alignment),
-                            z_n, n, z_b, b, z_s, s, z_ba, ba, z_rf, rf,
+                            z_n, n, z_b, b, z_s, s, z_ba, ba, z_rf, rf, z_source,
                             status )
 
     def __del__(self):
@@ -190,6 +193,29 @@ class ClTracerLensing(ClTracer):
                  has_intrinsic_alignment=has_intrinsic_alignment,
                  z=z, n=n, bias=None, mag_bias=None,
                  bias_ia=bias_ia, f_red=f_red)
+
+
+class ClTracerCMBLensing(ClTracer):
+    """
+    ClTracer for CMB lensing.
+    """
+
+    def __init__(self, cosmo, z_source):
+        """
+        ClTracer class for a tracer of CMB lensing.
+
+        Args:
+            cosmo (:obj:`Cosmology`): Cosmology object.
+            z_source (float): Redshift of source plane for CMB lensing.
+        """
+
+        # Call ClTracer constructor with appropriate arguments
+        super(ClTracerCMBLensing, self).__init__(
+                 cosmo=cosmo, tracer_type='cmbl',
+                 has_rsd=False, has_magnification=False,
+                 has_intrinsic_alignment=False,
+                 z=None, n=None, bias=None, mag_bias=None,
+                 bias_ia=None, f_red=None, z_source=z_source)
 
 
 def _cltracer_obj(cltracer):
