@@ -285,7 +285,7 @@ static void ccl_fill_class_parameters(ccl_cosmology * cosmo, struct file_content
   sprintf(fc->value[2],"%e",ccl_splines->K_MAX_SPLINE); //in units of 1/Mpc, corroborated with ccl_constants.h
 
   strcpy(fc->name[3],"z_max_pk");
-  sprintf(fc->value[3],"%e",1./ccl_splines->A_SPLINE_MIN-1.);
+  sprintf(fc->value[3],"%e",1./ccl_splines->A_SPLINE_MIN_PK-1.);
 
   strcpy(fc->name[4],"modes");
   strcpy(fc->value[4],"s");
@@ -416,7 +416,7 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int * statu
   //Compute nk from number of decades and N_K = # k per decade
   double ndecades = log10(kmax) - log10(kmin);
   int nk = (int)ceil(ndecades*ccl_splines->N_K);
-  double amin = ccl_splines->A_SPLINE_MIN;
+  double amin = ccl_splines->A_SPLINE_MIN_PK;
   double amax = ccl_splines->A_SPLINE_MAX;
   int na = ccl_splines->N_A;
   
@@ -801,7 +801,7 @@ static void ccl_cosmology_compute_power_eh(ccl_cosmology * cosmo, int * status)
   //Compute nk from number of decades and N_K = # k per decade
   double ndecades = log10(kmax) - log10(kmin);
   int nk = (int)ceil(ndecades*ccl_splines->N_K);
-  double amin = ccl_splines->A_SPLINE_MIN;
+  double amin = ccl_splines->A_SPLINE_MIN_PK;
   double amax = ccl_splines->A_SPLINE_MAX;
   int na = ccl_splines->N_A;
   eh_struct *eh=eh_struct_new(&(cosmo->params));
@@ -961,7 +961,7 @@ static void ccl_cosmology_compute_power_bbks(ccl_cosmology * cosmo, int * status
   //Compute nk from number of decades and N_K = # k per decade
   double ndecades = log10(kmax) - log10(kmin);
   int nk = (int)ceil(ndecades*ccl_splines->N_K);
-  double amin = ccl_splines->A_SPLINE_MIN;
+  double amin = ccl_splines->A_SPLINE_MIN_PK;
   double amax = ccl_splines->A_SPLINE_MAX;
   int na = ccl_splines->N_A;
   
@@ -1358,7 +1358,7 @@ static double ccl_power_extrapol_highk(ccl_cosmology * cosmo, double k, double a
     
 }
 
-/*------ ROUTINE: ccl_power_extrapol_hxighk ----- 
+/*------ ROUTINE: ccl_power_extrapol_lowk ----- 
 INPUT: ccl_cosmology * cosmo, a, k [1/Mpc]
 TASK: extrapolate power spectrum at low k
 */
@@ -1399,12 +1399,22 @@ double ccl_linear_matter_power(ccl_cosmology * cosmo, double k, double a, int * 
   double log_p_1;
   int pkstatus;
  
-  if(k<=cosmo->data.k_min_lin) { 
-    log_p_1=ccl_power_extrapol_lowk(cosmo,k,a,cosmo->data.p_lin,cosmo->data.k_min_lin,status);
+  // Extrapolate linearly at high redshift
+  if(a < ccl_splines->A_SPLINE_MIN_PK) {
+    double pk0 = ccl_linear_matter_power(cosmo, k, ccl_splines->A_SPLINE_MIN_PK, status);
+    double gf = ccl_growth_factor(cosmo, a, status) 
+              / ccl_growth_factor(cosmo, ccl_splines->A_SPLINE_MIN_PK, status);
+    return pk0*gf*gf;
+  }
+  
+  // Check which k regime was requested
+  if(k <= cosmo->data.k_min_lin) {
+    log_p_1 = ccl_power_extrapol_lowk(cosmo, k, a, cosmo->data.p_lin, 
+                                      cosmo->data.k_min_lin, status);
     return exp(log_p_1);
   }
   else if(k<cosmo->data.k_max_lin){
-    pkstatus = gsl_spline2d_eval_e(cosmo->data.p_lin, log(k), a,NULL,NULL,&log_p_1);
+    pkstatus = gsl_spline2d_eval_e(cosmo->data.p_lin, log(k), a, NULL, NULL, &log_p_1);
     if (pkstatus) {
       *status = CCL_ERROR_SPLINE_EV;
       sprintf(cosmo->status_message ,"ccl_power.c: ccl_linear_matter_power(): Spline evaluation error\n");
@@ -1441,14 +1451,27 @@ double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double k, double a, int *s
 
     if (!cosmo->computed_power)
       ccl_cosmology_compute_power(cosmo, status);
-
+    
+    double log_p_1, pk;
+    
+    // Extrapolate linearly at high redshift
+    if(a < ccl_splines->A_SPLINE_MIN_PK) {
+      double pk0 = ccl_nonlin_matter_power(cosmo, k, 
+                                           ccl_splines->A_SPLINE_MIN_PK, status);
+      double gf = ccl_growth_factor(cosmo, a, status)
+                / ccl_growth_factor(cosmo, ccl_splines->A_SPLINE_MIN_PK, status);
+      pk = pk0*gf*gf;
+    }
+    
+    // Check which k regime was requested
     if(k <= cosmo->data.k_min_nl) {
-      log_p_1=ccl_power_extrapol_lowk(cosmo, k, a, cosmo->data.p_nl, 
-                                      cosmo->data.k_min_nl,status);
+      log_p_1 = ccl_power_extrapol_lowk(cosmo, k, a, cosmo->data.p_nl, 
+                                        cosmo->data.k_min_nl, status);
       pk = exp(log_p_1);
-    }else if(k < cosmo->data.k_max_nl){
-      int pwstatus =  gsl_spline2d_eval_e(cosmo->data.p_nl, log(k), a, 
-                                          NULL, NULL, &log_p_1);
+    }
+    else if(k < ccl_splines->K_MAX_SPLINE) {
+      int pwstatus = gsl_spline2d_eval_e(cosmo->data.p_nl, log(k), a, 
+                                         NULL, NULL, &log_p_1);
       if (pwstatus) {
 	    *status = CCL_ERROR_SPLINE_EV;
 	    sprintf(cosmo->status_message, 

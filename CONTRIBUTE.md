@@ -48,7 +48,8 @@ More autotools fun:
 
 To view the doxygen documentation, open any .html file in the html/ 
 directory. To refresh the docs to reflect new changes, run 
-`doxygen` in the main directory (assuming you already have it installed).
+`doxygen doxygen/Doxyfile` in the directory `doc` (assuming you
+already have it installed).
 
 Modifying the Python wrapper
 ---------------------------------------------------------
