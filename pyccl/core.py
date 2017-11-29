@@ -124,25 +124,29 @@ class Parameters(object):
         if norm_pk < 1e-5 and sigma8 is not None:
             raise ValueError("sigma8 must be greater than 1e-5.")
             
-        # Deal with potential problem cases with non-degerate massive neutrinos:
+        # Check that m_nu and N_nu_mass are compatible.
+        # First check if N_nu_mass is a float or integer as expected. 
         if ((type(N_nu_mass)==float) or (type (N_nu_mass)==int)):
-            print "here, N_nu_mass type is float or int"
+			# Is N_nu_mass = 0?
             if (np.abs(N_nu_mass)<1e-14):
-                print "here, N_nu_mass is zero"
                 if (hasattr(m_nu, "__len__")==True):
                     raise ValueError("Length of m_nu must match N_nu_mass.")
                 if (m_nu != None):
+                    # If N_nu_mass is 0, make sure m_nu is None or zero.
                     if (np.abs(m_nu)>1e-14):
                         raise ValueError("If N_nu_mass is zero, m_nu must be 0 or None.")
                     else:
+						# If N_nu_mass = 0 and m_nu=0, put m_nu in an array/
                         m_nu=np.asarray([m_nu])
-                    
+            # Is N_nu_mass ==1?        
             elif (np.abs(N_nu_mass-1.)<1e-14):
-                print "here, N_nu_mass = 1"
+				# Make sure we only have one m_nu value if N_nu_mass =1
                 if (hasattr(m_nu, "__len__")!=True):
+					# Put m_nu value in array.
                     m_nu = np.asarray([m_nu])
                 elif (len(m_nu)!=1):
                     raise ValueError("Length of m_nu must match N_nu_mass.")
+				
         elif (hasattr(m_nu, "__len__")!=True and N_nu_mass!=None):
             raise ValueError("Length of m_nu must match N_nu_mass.")
         elif (N_nu_mass != None):
@@ -157,9 +161,7 @@ class Parameters(object):
         for nm, item in zip(names, compul):
             if item is None:
                 raise ValueError("Necessary parameter '%s' was not set "
-                                 "(or set to None)." % nm)
-                                 
-        print "z_mg=", z_mg                        
+                                 "(or set to None)." % nm)                       
                                  
         # Create new instance of ccl_parameters object
         status = 0 # Create an internal status variable; needed to check massive neutrino integral.
@@ -170,13 +172,14 @@ class Parameters(object):
                                          N_nu_mass, m_nu, w0, wa, h, norm_pk, 
                                          n_s, -1, None, None, status )
         elif (nz_mg== -1):
-            # Create ccl_parameters with massive neutrinos
+            # Create ccl_parameters with massive neutrinos but without modified growth
             self.parameters, status \
-            = lib.parameters_create_vec( Omega_c, Omega_b, Omega_k, N_nu_rel, 
+            = lib.parameters_create_nuvec( Omega_c, Omega_b, Omega_k, N_nu_rel, 
                                              w0, wa, h, norm_pk, 
-                                             n_s, z_mg, df_mg, m_nu, status ) 
+                                             n_s, -1, None, None, m_nu, status ) 
+                                             
         else:
-            # Create ccl_parameters with modified growth arrays
+            # Create ccl_parameters with modified growth arrays and without massive neutrinos
             self.parameters, status \
                 = lib.parameters_create_vec( Omega_c, Omega_b, Omega_k, N_nu_rel, 
                                              w0, wa, h, norm_pk, 
