@@ -55,7 +55,7 @@ class Parameters(object):
     """
     
     def __init__(self, Omega_c=None, Omega_b=None, h=None, A_s=None, n_s=None, 
-                 Omega_k=0., N_nu_rel=3.046, N_nu_mass=0., m_nu=None ,w0=-1., wa=0., sigma8=None,
+                 Omega_k=0., N_nu_rel=3.046, N_nu_mass=0, m_nu=0.,w0=-1., wa=0., sigma8=None,
                  z_mg=None, df_mg=None):
         """
         Creates a set of cosmological parameters.
@@ -124,20 +124,25 @@ class Parameters(object):
         if norm_pk < 1e-5 and sigma8 is not None:
             raise ValueError("sigma8 must be greater than 1e-5.")
             
+        # Check if N_nu_mass is a float and if so does it represent an integer?
+        # If it is a float that could be an integer, make it an integer.
+        if (type(N_nu_mass)==float):
+            if ( N_nu_mass.is_integer() != True):
+                raise ValueError("N_nu_mass must be an integer value.")
+            else:
+                N_nu_mass = int(N_nu_mass)
+            
         # Check that m_nu and N_nu_mass are compatible.
-        # First check if N_nu_mass is a float or integer as expected. 
-        if ((type(N_nu_mass)==float) or (type (N_nu_mass)==int)):
+        if (type(N_nu_mass)==int): 
 			# Is N_nu_mass = 0?
-            if (np.abs(N_nu_mass)<1e-14):
+            if (N_nu_mass==0):
                 if (hasattr(m_nu, "__len__")==True):
                     raise ValueError("Length of m_nu must match N_nu_mass.")
-                if (m_nu != None):
-                    # If N_nu_mass is 0, make sure m_nu is None or zero.
-                    if (np.abs(m_nu)>1e-14):
-                        raise ValueError("If N_nu_mass is zero, m_nu must be 0 or None.")
-                    else:
-						# If N_nu_mass = 0 and m_nu=0, put m_nu in an array/
-                        m_nu=np.asarray([m_nu])
+                if (np.abs(m_nu)>1e-14):
+                    raise ValueError("If N_nu_mass is 0, m_nu must be 0 or unset.")
+                else:
+                    # If N_nu_mass = 0 and m_nu=0, put m_nu in an array/
+                    m_nu=np.asarray([m_nu])
             # Is N_nu_mass ==1?        
             elif (np.abs(N_nu_mass-1.)<1e-14):
 				# Make sure we only have one m_nu value if N_nu_mass =1
@@ -154,6 +159,7 @@ class Parameters(object):
                 raise ValueError("Length of m_nu must match N_nu_mass.")
         print "mnu after if statement=", m_nu
         
+        
         # Check if any compulsory parameters are not set
         compul = [Omega_c, Omega_b, Omega_k, N_nu_rel, N_nu_mass, w0, wa, h, norm_pk, n_s]
         names = ['Omega_c', 'Omega_b', 'Omega_k', 'N_nu_rel', 'N_nu_mass', 'w0', 'wa', 
@@ -165,7 +171,7 @@ class Parameters(object):
                                  
         # Create new instance of ccl_parameters object
         status = 0 # Create an internal status variable; needed to check massive neutrino integral.
-        if ((nz_mg == -1) and (np.abs(N_nu_mass)<1e-14)):
+        if ((nz_mg == -1) and (N_nu_mass == None)):
             # Create ccl_parameters without modified growth
             self.parameters, status \
                 = lib.parameters_create( Omega_c, Omega_b, Omega_k, N_nu_rel, 

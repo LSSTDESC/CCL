@@ -163,7 +163,7 @@ norm_pk: amplitude of the primordial PS (either A_s or sigma_8)
 n_s: index of the primordial PS
 */
 ccl_cosmology * ccl_cosmology_create_with_params(double Omega_c, double Omega_b, double Omega_k,
-						 double N_nu_rel, double N_nu_mass, double* mnu,
+						 double N_nu_rel, int N_nu_mass, double* mnu,
 						 double w0, double wa, double h, double norm_pk, double n_s,
 						 int nz_mgrowth, double *zarr_mgrowth, 
 						 double *dfarr_mgrowth, ccl_configuration config,
@@ -281,7 +281,7 @@ A_s: amplitude of the primordial PS
 n_s: index of the primordial PS
  */
 ccl_parameters ccl_parameters_create(double Omega_c, double Omega_b, double Omega_k,
-				     double N_nu_rel, double N_nu_mass, double* mnu,
+				     double N_nu_rel, int N_nu_mass, double* mnu,
 				     double w0, double wa, double h, double norm_pk,
 				     double n_s,int nz_mgrowth,double *zarr_mgrowth,
 				     double *dfarr_mgrowth, int *status)
@@ -344,7 +344,7 @@ ccl_parameters ccl_parameters_create_flat_lcdm(double Omega_c, double Omega_b, d
 					       double norm_pk, double n_s, int *status)
 {
   double Omega_k = 0.0;
-  double N_nu_mass = 0.0;
+  int N_nu_mass = 0;
   double N_nu_rel = 3.046;
   double w0 = -1.0;
   double wa = 0.0;
@@ -364,7 +364,7 @@ INPUT: some cosmological parameters needed to create a flat LCDM model with neut
 TASK: call ccl_parameters_create to produce an LCDM model
 */
 ccl_parameters ccl_parameters_create_flat_lcdm_nu(double Omega_c, double Omega_b, double h, double norm_pk,
-						  double n_s, double N_nu_rel, double N_nu_mass, double *mnu,
+						  double n_s, double N_nu_rel, int N_nu_mass, double *mnu,
 						  int *status)
 {
   double Omega_k = 0.0;
@@ -384,7 +384,7 @@ TASK: call ccl_parameters_create for this specific model
 ccl_parameters ccl_parameters_create_lcdm(double Omega_c, double Omega_b, double Omega_k, double h,
 					  double norm_pk, double n_s, int *status)
 {
-  double N_nu_mass = 0.0;
+  int N_nu_mass = 0;
   double N_nu_rel = 3.046;
   double w0 = -1.0;
   double wa = 0.0;
@@ -403,7 +403,7 @@ INPUT: some cosmological parameters needed to create an LCDM model with curvatur
 TASK: call ccl_parameters_create for this specific model
 */
 ccl_parameters ccl_parameters_create_lcdm_nu(double Omega_c, double Omega_b, double Omega_k, double h,
-					     double norm_pk, double n_s, double N_nu_rel, double N_nu_mass,
+					     double norm_pk, double n_s, double N_nu_rel, int N_nu_mass,
 					     double* mnu, int *status)
 {
   double w0 = -1.0;
@@ -425,7 +425,7 @@ ccl_parameters ccl_parameters_create_flat_wcdm(double Omega_c, double Omega_b, d
 {
 
   double Omega_k = 0.0;
-  double N_nu_mass = 0.0;
+  int N_nu_mass = 0;
   double N_nu_rel = 3.046;
   double wa = 0.0;
   double *mnu;
@@ -444,7 +444,7 @@ TASK: call ccl_parameters_create for this specific model
 */
 ccl_parameters ccl_parameters_create_flat_wcdm_nu(double Omega_c, double Omega_b, double w0, double h,
 						  double norm_pk, double n_s, double N_nu_rel, 
-						  double N_nu_mass, double *mnu, int *status)
+						  int N_nu_mass, double *mnu, int *status)
 {
 
   double Omega_k = 0.0;
@@ -463,7 +463,7 @@ ccl_parameters ccl_parameters_create_flat_wacdm(double Omega_c, double Omega_b, 
 						double h, double norm_pk, double n_s, int *status)
 {
   double Omega_k = 0.0;
-  double N_nu_mass = 0.0;
+  int N_nu_mass = 0;
   double N_nu_rel = 3.046;
   double *mnu;
   double mnuval = 0.;
@@ -481,7 +481,7 @@ TASK: call ccl_parameters_create for this specific model
 */
 ccl_parameters ccl_parameters_create_flat_wacdm_nu(double Omega_c, double Omega_b, double w0, double wa,
 						   double h, double norm_pk, double n_s, double N_nu_rel,
-						   double N_nu_mass, double* mnu, int *status)
+						   int N_nu_mass, double* mnu, int *status)
 {
 
   double Omega_k = 0.0;
