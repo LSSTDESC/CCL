@@ -1,6 +1,6 @@
 
 if LOCALCLASS
- SUBDIRS = include class
+ SUBDIRS = include
 else
  SUBDIRS = include
 endif
@@ -13,9 +13,11 @@ ccl_DATA = include/ccl_params.ini
 lib_LTLIBRARIES = libccl.la
 libccl_la_SOURCES = src/ccl_background.c src/ccl_core.c src/ccl_error.c src/ccl_lsst_specs.c src/ccl_placeholder.c src/ccl_power.c src/ccl_utils.c src/ccl_cls.c src/ccl_massfunc.c src/ccl_neutrinos.c src/ccl_correlation.c src/fftlog.c
 if LOCALCLASS
-  libccl_la_LIBADD = class/libclass.la
+# libccl_la_LIBADD = class/libclass.la
+ libccl_la_CPPFLAGS = -I./include/ -I./class/include -D__CCL_DATA_DIR__=$(datadir)/ccl
+else
+ libccl_la_CPPFLAGS = -I./include/ -I$(CLASSDIR)/include -D__CCL_DATA_DIR__=$(datadir)/ccl
 endif
-libccl_la_CPPFLAGS = -I./include/ -I$(CLASSDIR)/include -D__CCL_DATA_DIR__=$(datadir)/ccl
 
 noinst_PROGRAMS = tests/check_ccl
 TESTS = tests/check_ccl tests/check_swig_timestamp.sh

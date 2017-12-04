@@ -35,11 +35,19 @@ if test "$CLASSDIR" != ""; then
     AC_SUBST(CLASS_LIB, ["-L${CLASSDIR} -lclass -Wl,-rpath,${CLASSDIR}"])
     AC_SEARCH_LIBS([background_free],[class],[],AC_MSG_ERROR(Couldn't find libclass.))
 else
-    AC_MSG_NOTICE([Using the built-in version of CLASS.])
-    CLASSDIR="./class"
-    CLASS_LIB=""
-    CLASS_MAKEFILE="class/Makefile"
+    AC_MSG_NOTICE([Using the default version of CLASS])
+    CLASS_LIB="-L./class -lclass"
+    CLASS_MAKEFILE=""
+    LDFLAGS="$LDFLAGS $CLASS_LIB"
     localclass=true
+    
+    AC_SUBST(CLASS_LIB, ["-L./class -lclass -Wl,-rpath,./class"])
+    AC_SEARCH_LIBS([background_free],[class],[],AC_MSG_ERROR(Couldn't find libclass.))
+#    AC_MSG_NOTICE([Using the built-in version of CLASS.])
+#    CLASSDIR="./class"
+#    CLASS_LIB=""
+#    CLASS_MAKEFILE="class/Makefile"
+#    localclass=true
 fi
 AM_CONDITIONAL([LOCALCLASS], [test x$localclass = xtrue])
 AC_SEARCH_LIBS([cblas_dgemm],[gslcblas],[],AC_MSG_ERROR(Couldn't find libgslcblas.))
