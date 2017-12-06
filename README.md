@@ -24,7 +24,7 @@ In order to compile `CCL` you need a few libraries:
 * [FFTW3](http://www.fftw.org/) is required for computation of correlation functions.
 * FFTlog([here](http://casa.colorado.edu/~ajsh/FFTLog/) and [here](https://github.com/slosar/FFTLog))is provided within `CCL`, with minor modifications.
 
-# C-only installation
+## C-only installation
 `CCL` can be easily installed using an *autotools*-generated configuration file. To install `CCL`, from the base directory (the one where this file is located) run:
 ```sh
 ./configure
@@ -68,6 +68,13 @@ make install
 export LD_LIBRARY_PATH=/path/to/where/ccl/is/installed/lib:$LD_LIBRARY_PATH
 ````
 5. We know of one case with Mac OS where `libtools` had the “lock” function set to “yes” and this caused the installation to stall. However, this is very rare. If this happens, after the `configure` step, edit `libtool` to set the “lock” to “no”.
+
+## C++ compatibility
+`CCL` library can be called from C++ code without any  additional requirements or modifications. To make sure that there are no problems you can run
+````sh
+make check-cpp
+./tests/ccl_sample_run
+````
 
 ## Python installation
 The Python wrapper is called `pyccl`. Generally, you can build and install the `pyccl` wrapper directly, without having to first compile the C version of `CCL`. The Python wrapper's build tools currently assume that your C compiler is `gcc`, and that you have a working Python 2.x or 3.x installation with `numpy` and `distutils`. You will also need `swig` if you wish to change the `CCL` code itself, rather than just installing it as-is.
@@ -191,9 +198,11 @@ For the majority of `CCL`'s functions you need an object of type **`ccl_cosmolog
 ```c
 ccl_cosmology * ccl_cosmology_create(ccl_parameters params, ccl_configuration config);
 ```
-Note that the function returns a pointer. Variable `params` of type **`ccl_parameters`** contains cosmological parameters created in previous step. Structure **`ccl_configuration`** contains information about methods for computing transfer function, matter power spectrum and mass function (for available methods see ***include/ccl_config.h***). In the default configuration `default_config`, `CCL` will use the following set-up:
+
+Note that the function returns a pointer. Variable `params` of type **`ccl_parameters`** contains cosmological parameters created in previous step. Structure **`ccl_configuration`** contains information about methods for computing transfer function, matter power spectrum, the impact of baryons on the matter power spectrum and mass function (for available methods see `include/ccl_config.h`). In the default configuration `default_config`, `CCL` will use the following set-up:
 ```c
-const ccl_configuration default_config = {ccl_boltzmann_class, ccl_halofit, ccl_tinker10};
+const ccl_configuration default_config = {ccl_boltzmann_class, ccl_halofit, ccl_nobaryons, ccl_tinker};
+
 ```
 After you are done working with this cosmology object, you should free its work space by **`ccl_cosmology_free`**
 ```c
@@ -227,7 +236,10 @@ For given cosmology we can compute linear and non-linear matter power spectra us
 double ccl_linear_matter_power(ccl_cosmology * cosmo, double k, double a,int * status);
 double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double k, double a,int * status);
 ```
+
+It is possible to incorporate the impact of baryonic processes on the total matter power spectrum via the **`baryons_power_spectrum`** flag is set to **`ccl_bcm`**. Please see the CCL note for details on the implementation.
 Sigma_8 can be calculated by function **`ccl_sigma8`**, or more generally by function **`ccl_sigmaR`**, which computes the variance of the density field smoothed by spherical top-hat window function on a comoving distance `R` (in Mpc).
+
 ```c
 double ccl_sigmaR(ccl_cosmology *cosmo, double R, int * status);
 double ccl_sigma8(ccl_cosmology *cosmo, int * status);

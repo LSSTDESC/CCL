@@ -272,7 +272,7 @@ static void ccl_fill_class_parameters(ccl_cosmology * cosmo, struct file_content
     strcpy(fc->name[i]," ");
     strcpy(fc->value[i]," "); 
   }
-  
+
   strcpy(fc->name[0],"output");
   strcpy(fc->value[0],"mPk"); 
 
@@ -534,10 +534,8 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int * statu
 
 }
 
-
 /* BCM correction */
 // See Schneider & Teyssier (2015) for details of the model.  
-/*
 double ccl_bcm_model_fkz(ccl_cosmology * cosmo, double k, double a, int *status){
 
   double fkz;
@@ -559,7 +557,6 @@ double ccl_bcm_model_fkz(ccl_cosmology * cosmo, double k, double a, int *status)
   fkz = gf*scomp;
   return fkz;
 }
-*/
 
 void ccl_cosmology_write_power_class_z(char *filename, ccl_cosmology * cosmo, double z, int * status)
 {
@@ -1432,7 +1429,7 @@ TASK: compute the nonlinear power spectrum at a given redshift
 double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double k, double a, int *status)
 {
 
-  double log_p_1;
+  double log_p_1, pk;
   
   switch(cosmo->config.matter_power_spectrum_method) {
     
@@ -1441,6 +1438,7 @@ double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double k, double a, int *s
     return ccl_linear_matter_power(cosmo,k,a,status);
     
   case ccl_halofit:
+
     if (!cosmo->computed_power)
       ccl_cosmology_compute_power(cosmo,status);
     
@@ -1457,30 +1455,30 @@ double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double k, double a, int *s
     if(k<cosmo->data.k_max_nl){
       int pwstatus =  gsl_spline2d_eval_e(cosmo->data.p_nl, log(k),a,NULL ,NULL ,&log_p_1);
       if (pwstatus) {
-	*status = CCL_ERROR_SPLINE_EV;
-	sprintf(cosmo->status_message ,"ccl_power.c: ccl_nonlin_matter_power(): Spline evaluation error\n");
-	return NAN;
+	    *status = CCL_ERROR_SPLINE_EV;
+	    sprintf(cosmo->status_message ,"ccl_power.c: ccl_nonlin_matter_power(): Spline evaluation error\n");
+	    return NAN;
+      }else{
+        pk = exp(log_p_1);
       }
-      else
-	return exp(log_p_1);
     }
     else { //Extrapolate NL regime using log derivative
       log_p_1 = ccl_power_extrapol_highk(cosmo,k,a,cosmo->data.p_nl,cosmo->data.k_max_nl,status);
-      double pk = exp(log_p_1);
-      /*
-      if(cosmo->config.baryons_power_spectrum_method==ccl_bcm){
-        int pwstatus=0;
-        double fbcm=ccl_bcm_model_fkz(cosmo,k,a,&pwstatus);
-        pk=pk*fbcm;
-        if(pwstatus){
-            *status = CCL_ERROR_SPLINE_EV;
-            sprintf(cosmo->status_message ,"ccl_power.c: ccl_nonlin_matter_power(): Error in BCM correction\n");
-            return NAN;
-        }
-      }
-      */
-      return pk;
+      pk = exp(log_p_1);
     }
+    
+    // Add baryonic correction
+    if(cosmo->config.baryons_power_spectrum_method==ccl_bcm){
+      int pwstatus=0;
+      double fbcm=ccl_bcm_model_fkz(cosmo,k,a,&pwstatus);
+      pk=pk*fbcm;
+      if(pwstatus){
+        *status = CCL_ERROR_SPLINE_EV;
+        sprintf(cosmo->status_message ,"ccl_power.c: ccl_nonlin_matter_power(): Error in BCM correction\n");
+        return NAN;
+      }
+    }
+    return pk;
 
   case ccl_emu:
     if ((cosmo->config.transfer_function_method == ccl_emulator) && (a<A_MIN_EMU)){
@@ -1509,19 +1507,31 @@ double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double k, double a, int *s
 	return NAN;
       }
       else{
-	    return exp(log_p_1);
+	    pk = exp(log_p_1);
 	  }
     }
     else { // Extrapolate NL regime using log derivative
       log_p_1 = ccl_power_extrapol_highk(cosmo,k,a,cosmo->data.p_nl,cosmo->data.k_max_nl,status);
-      return exp(log_p_1);
+      pk = exp(log_p_1);
     }
-
+    // Add baryonic correction
+    if(cosmo->config.baryons_power_spectrum_method==ccl_bcm){
+      int pwstatus=0;
+      double fbcm=ccl_bcm_model_fkz(cosmo,k,a,&pwstatus);
+      pk = pk*fbcm;
+      if(pwstatus){
+	    *status = CCL_ERROR_SPLINE_EV;
+	    sprintf(cosmo->status_message ,"ccl_power.c: ccl_nonlin_matter_power(): Error in BCM correction\n");
+	    return NAN;
+      }
+    }
+    return pk;
+    
   default:
     printf("WARNING:  config.matter_power_spectrum_method = %d not yet supported\n continuing with linear power spectrum\n",cosmo->config.matter_power_spectrum_method);
     cosmo->config.matter_power_spectrum_method=ccl_linear;
     return ccl_linear_matter_power(cosmo,k,a,status);
-  }
+  } // end switch
 
 }
 

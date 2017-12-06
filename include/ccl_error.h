@@ -1,4 +1,7 @@
 /** @file */
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #pragma once
 #include "ccl_core.h"
@@ -52,3 +55,7 @@ void ccl_check_status(ccl_cosmology *cosmo, int* status);
  * @return void
  */
 void ccl_check_status_nocosmo(int* status);
+
+#ifdef __cplusplus
+}
+#endif

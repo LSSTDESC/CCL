@@ -1,4 +1,4 @@
-import numpy as np
+import numpy as np,math
 from numpy.testing import assert_raises, assert_warns, assert_no_warnings, \
                           assert_, decorators, run_module_suite
 import pyccl as ccl
@@ -37,8 +37,17 @@ def reference_models():
     p7=ccl.Parameters(Omega_c=0.27, Omega_b=0.022/0.67**2, h=0.67, sigma8=0.8, n_s=0.96,N_nu_rel=3.04,N_nu_mass=1,m_nu=0.06)
     cosmo7 = ccl.Cosmology(p7,transfer_function='emulator',matter_power_spectrum='emu')
 
+    # Baryons Pk
+    p8 = ccl.Parameters(Omega_c=0.27, Omega_b=0.045, h=0.67, A_s=1e-10, n_s=0.96)
+    cosmo8 = ccl.Cosmology(p8,baryons_power_spectrum='bcm')
+    
+    # Baryons Pk with choice of BCM parameters other than default
+    p9 = ccl.Parameters(Omega_c=0.27, Omega_b=0.045, h=0.67, A_s=1e-10, n_s=0.96,
+                        bcm_log10Mc=math.log10(1.7e14), bcm_etab=0.3, bcm_ks=75.)
+    cosmo9 = ccl.Cosmology(p9,baryons_power_spectrum='bcm')
+
     # Return (do a few cosmologies, for speed reasons)
-    return [cosmo1,cosmo4,cosmo5,cosmo7] # cosmo2, cosmo3, cosmo6
+    return [cosmo1,cosmo4,cosmo5,cosmo7, cosmo9] # cosmo2, cosmo3, cosmo6
 
 def all_finite(vals):
     """
@@ -276,6 +285,7 @@ def check_cls(cosmo):
     nc2 = ccl.ClTracerNumberCounts(cosmo, True, False, n=(z,n), bias=(z,b))
     nc3 = ccl.ClTracerNumberCounts(cosmo, True, True, n=(z,n), bias=(z,b),
                                    mag_bias=(z,b))
+    cmbl=ccl.ClTracerCMBLensing(cosmo,1100.)
     
     # Check valid ell input is accepted
     assert_( all_finite(ccl.angular_cl(cosmo, lens1, lens1, ell_scl)) )
@@ -285,18 +295,25 @@ def check_cls(cosmo):
     assert_( all_finite(ccl.angular_cl(cosmo, nc1, nc1, ell_scl)) )
     assert_( all_finite(ccl.angular_cl(cosmo, nc1, nc1, ell_lst)) )
     assert_( all_finite(ccl.angular_cl(cosmo, nc1, nc1, ell_arr)) )
+
+    assert_( all_finite(ccl.angular_cl(cosmo, cmbl, cmbl, ell_arr)) )
     
     # Check various cross-correlation combinations
     assert_( all_finite(ccl.angular_cl(cosmo, lens1, lens2, ell_arr)) )
     assert_( all_finite(ccl.angular_cl(cosmo, lens1, nc1, ell_arr)) )
     assert_( all_finite(ccl.angular_cl(cosmo, lens1, nc2, ell_arr)) )
     assert_( all_finite(ccl.angular_cl(cosmo, lens1, nc3, ell_arr)) )
+    assert_( all_finite(ccl.angular_cl(cosmo, lens1, cmbl, ell_arr)) )
     assert_( all_finite(ccl.angular_cl(cosmo, lens2, nc1, ell_arr)) )
     assert_( all_finite(ccl.angular_cl(cosmo, lens2, nc2, ell_arr)) )
     assert_( all_finite(ccl.angular_cl(cosmo, lens2, nc3, ell_arr)) )
+    assert_( all_finite(ccl.angular_cl(cosmo, lens2, cmbl, ell_arr)) )
     assert_( all_finite(ccl.angular_cl(cosmo, nc1, nc2, ell_arr)) )
     assert_( all_finite(ccl.angular_cl(cosmo, nc1, nc3, ell_arr)) )
+    assert_( all_finite(ccl.angular_cl(cosmo, nc1, cmbl, ell_arr)) )
     assert_( all_finite(ccl.angular_cl(cosmo, nc2, nc3, ell_arr)) )
+    assert_( all_finite(ccl.angular_cl(cosmo, nc2, cmbl, ell_arr)) )
+    assert_( all_finite(ccl.angular_cl(cosmo, nc3, cmbl, ell_arr)) )
     
     # Check that reversing order of ClTracer inputs works
     assert_( all_finite(ccl.angular_cl(cosmo, nc1, lens1, ell_arr)) )

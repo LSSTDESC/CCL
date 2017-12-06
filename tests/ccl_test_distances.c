@@ -106,7 +106,7 @@ static void compare_distances(int model, struct distances_data * data)
   ccl_parameters params = ccl_parameters_create(data->Omega_c, data->Omega_b, data->Omega_k[model],
 						data->N_nu_rel, data->N_nu_mass, data->mnu,
 						data->w_0[model], data->w_a[model],
-						data->h, data->A_s, data->n_s,-1,NULL,NULL, &status);
+						data->h, data->A_s, data->n_s,-1,-1,-1,-1,NULL,NULL, &status);
   
   params.Omega_g=0;
   
