@@ -11,6 +11,8 @@ typedef struct ccl_spline_params {
   int  A_SPLINE_NA;
   double A_SPLINE_MIN;
   double  A_SPLINE_MAX;
+  double A_SPLINE_MINLOG;
+  int A_SPLINE_NLOG;
   
   //Mass splines
   double LOGM_SPLINE_DELTA;

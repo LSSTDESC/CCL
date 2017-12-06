@@ -12,6 +12,10 @@
  */
 double * ccl_linear_spacing(double xmin, double xmax, int N);
 
+/**
+ * Compute bin edges of N-1 logarithmically and then linearly spaced bins on the interval [xmin,xmax]
+ */
+double * ccl_linlog_spacing(double xminlog, double xmin, double xmax, int Nlin, int Nlog);
 
 /**
  * Compute bin edges of N-1 logarithmically spaced bins on the interval [xmin,xmax]
