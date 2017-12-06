@@ -323,18 +323,20 @@ static void ccl_fill_class_parameters(ccl_cosmology * cosmo, struct file_content
     strcpy(fc->name[14],"N_ur");
     sprintf(fc->value[14],"%e", 0.);
   }
+  
   if (cosmo->params.N_nu_mass > 0) {
     strcpy(fc->name[15],"N_ncdm");
-    sprintf(fc->value[15],"%e",cosmo->params.N_nu_mass);
+    sprintf(fc->value[15],"%d",cosmo->params.N_nu_mass);
     strcpy(fc->name[16],"m_ncdm");
-    sprintf(fc->value[16],"%e", (cosmo->params.mnu)[0]);
-    for (int i = 1; i < cosmo->params.N_nu_mass; i++) {
-      char tmp[20];
-      printf("mnu = %f\n", (cosmo->params.mnu)[i]);
-      sprintf(tmp,", %e",(cosmo->params.mnu)[i]);
-      strcat(fc->value[16],tmp);
-    }
-      printf("%s\n", fc->value[16]);
+    sprintf(fc->value[16],"%f", (cosmo->params.mnu)[0]);
+    if (cosmo->params.N_nu_mass >=1){
+		for (int i = 1; i < cosmo->params.N_nu_mass; i++) {
+			char tmp[20];
+			sprintf(tmp,", %f",(cosmo->params.mnu)[i]);
+			strcat(fc->value[16],tmp);
+		}
+	}
+
   }
   //normalization comes last, so that all other parameters are filled in for determining A_s if sigma_8 is specified
   if (isfinite(cosmo->params.sigma_8) && isfinite(cosmo->params.A_s)) {
@@ -382,14 +384,11 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int * statu
     sprintf(cosmo->status_message ,"ccl_power.c: ccl_cosmology_compute_power_class(): parser init error:%s\n",errmsg);
     return;
   }
-  printf("before fill parameters \n");
+
   ccl_fill_class_parameters(cosmo,&fc,parser_length, status);
-  printf("after fill parameters \n");
-  
-  printf("before run class\n");
+
   if (*status != CCL_ERROR_CLASS)
     ccl_run_class(cosmo, &fc,&pr,&ba,&th,&pt,&tr,&pm,&sp,&nl,&le,&op,init_arr,status);
-  printf("after run class\n");
 
   if (*status == CCL_ERROR_CLASS) {
     //printed error message while running CLASS
@@ -984,7 +983,6 @@ void ccl_cosmology_compute_power(ccl_cosmology * cosmo, int * status)
     ccl_cosmology_compute_power_eh(cosmo,status);
     break;
   case ccl_boltzmann_class:
-    printf("class\n");
     ccl_cosmology_compute_power_class(cosmo,status);
     break;
   default:
@@ -1077,10 +1075,7 @@ double ccl_linear_matter_power(ccl_cosmology * cosmo, double k, double a, int * 
     return exp(log_p_1);
   }
   else if(k<ccl_splines->K_MAX_SPLINE) {
-	printf("medium k\n");
-	printf("log(k)=%e\n", log(k));
     pkstatus = gsl_spline2d_eval_e(cosmo->data.p_lin, log(k), a,NULL,NULL,&log_p_1);
-    printf("evaluated spline\n");
     if (pkstatus) {
       *status = CCL_ERROR_SPLINE_EV;
       sprintf(cosmo->status_message ,"ccl_power.c: ccl_linear_matter_power(): Spline evaluation error\n");
@@ -1090,7 +1085,6 @@ double ccl_linear_matter_power(ccl_cosmology * cosmo, double k, double a, int * 
       return exp(log_p_1);
   }
   else { //Extrapolate NL regime using log derivative
-	 printf("very large k\n");
     log_p_1 = ccl_power_extrapol_highk(cosmo,k,a,cosmo->data.p_lin,status);
     return exp(log_p_1);
   }

@@ -50,8 +50,8 @@ def test_parameters_missing():
                                               N_nu_rel=None)
     assert_raises(ValueError, ccl.Parameters, 0.25, 0.05, 0.7, 2.1e-9, 0.96, 
                                               N_nu_mass=None)
-    assert_raises(ValueError, ccl.Parameters, 0.25, 0.05, 0.7, 2.1e-9, 0.96, 
-                                              m_nu=None)                                                                                  
+    #assert_raises(ValueError, ccl.Parameters, 0.25, 0.05, 0.7, 2.1e-9, 0.96, 
+    #                                          m_nu=None)                                                                                  
     
     # Check that a single missing compulsory parameter is noticed
     assert_raises(ValueError, ccl.Parameters, Omega_c=0.25, Omega_b=0.05, 

@@ -131,9 +131,11 @@ class Parameters(object):
                 raise ValueError("N_nu_mass must be an integer value.")
             else:
                 N_nu_mass = int(N_nu_mass)
-            
-        # Check that m_nu and N_nu_mass are compatible.
-        if (type(N_nu_mass)==int): 
+                
+        # Check if N_nu_mass is now anything other than an integer:
+		if (type(N_nu_mass)!= int):
+				raise ValueError("N_nu_mass must be an integer (or a float with integer value).")
+        else:
 			# Is N_nu_mass = 0?
             if (N_nu_mass==0):
                 if (hasattr(m_nu, "__len__")==True):
@@ -144,20 +146,18 @@ class Parameters(object):
                     # If N_nu_mass = 0 and m_nu=0, put m_nu in an array/
                     m_nu=np.asarray([m_nu])
             # Is N_nu_mass ==1?        
-            elif (np.abs(N_nu_mass-1.)<1e-14):
+            elif (N_nu_mass==1):
 				# Make sure we only have one m_nu value if N_nu_mass =1
                 if (hasattr(m_nu, "__len__")!=True):
 					# Put m_nu value in array.
                     m_nu = np.asarray([m_nu])
                 elif (len(m_nu)!=1):
                     raise ValueError("Length of m_nu must match N_nu_mass.")
-				
-        elif (hasattr(m_nu, "__len__")!=True and N_nu_mass!=None):
-            raise ValueError("Length of m_nu must match N_nu_mass.")
-        elif (N_nu_mass != None):
-            if(int(N_nu_mass) != len(m_nu)):
-                raise ValueError("Length of m_nu must match N_nu_mass.")
-        print "mnu after if statement=", m_nu
+            else:
+                if (hasattr(m_nu, "__len__")!=True):
+                    raise ValueError("Length of m_nu must match N_nu_mass.")
+                elif (len(m_nu)!= N_nu_mass):
+                    raise ValueError("Length of m_nu must match N_nu_mass.")
         
         
         # Check if any compulsory parameters are not set
@@ -179,6 +179,7 @@ class Parameters(object):
                                          n_s, -1, None, None, status )
         elif (nz_mg== -1):
             # Create ccl_parameters with massive neutrinos but without modified growth
+            print "mnu in final if core.py=", m_nu
             self.parameters, status \
             = lib.parameters_create_nuvec( Omega_c, Omega_b, Omega_k, N_nu_rel, 
                                              w0, wa, h, norm_pk, 
@@ -280,6 +281,7 @@ class Cosmology(object):
         # Use either input cosmology parameters or Parameters() object
         if params is None:
             # Create new Parameters object
+            print "Creating new parameters object"
             params = Parameters(Omega_c=Omega_c, Omega_b=Omega_b, h=h, A_s=A_s, 
                                 n_s=n_s, Omega_k=Omega_k, N_nu_rel = N_nu_rel, N_nu_mass=N_nu_mass, m_nu=m_nu, 
                                 w0=w0, wa=wa, sigma8=sigma8, z_mg=z_mg, 

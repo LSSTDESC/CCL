@@ -286,6 +286,7 @@ ccl_parameters ccl_parameters_create(double Omega_c, double Omega_b, double Omeg
 				     double n_s,int nz_mgrowth,double *zarr_mgrowth,
 				     double *dfarr_mgrowth, int *status)
 {
+	
   ccl_parameters params;
   params.sigma_8 = NAN;
   params.A_s = NAN;
@@ -296,7 +297,11 @@ ccl_parameters ccl_parameters_create(double Omega_c, double Omega_b, double Omeg
   // Neutrinos
   params.N_nu_mass = N_nu_mass;
   params.N_nu_rel = N_nu_rel;
-  params.mnu = mnu; 
+  //params.mnu = mnu; 
+  if (N_nu_mass>0){
+	params.mnu=malloc(params.N_nu_mass*sizeof(double));
+	memcpy(params.mnu,mnu,params.N_nu_mass*sizeof(double));
+  }
   
   // Dark Energy
   params.w0 = w0;
