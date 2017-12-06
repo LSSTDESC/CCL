@@ -43,6 +43,7 @@ def check_background(cosmo):
     """
     Check that background and growth functions can be run.
     """
+    
     # Types of scale factor input (scalar, list, array)
     a_scl = 0.5
     a_lst = [0.2, 0.4, 0.6, 0.8, 1.]
@@ -300,6 +301,8 @@ def check_corr(cosmo):
     # Number density input
     z = np.linspace(0., 1., 200)
     n = np.ones(z.shape)
+    
+    print "corr"
 
     # ClTracer test objects
     lens1 = ccl.ClTracerLensing(cosmo, False, n=n, z=z)
