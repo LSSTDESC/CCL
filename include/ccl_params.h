@@ -7,7 +7,6 @@
  */
 typedef struct ccl_spline_params {
    //Scale factor splines
-  double A_SPLINE_DELTA;
   int  A_SPLINE_NA;
   double A_SPLINE_MIN;
   double  A_SPLINE_MAX;
