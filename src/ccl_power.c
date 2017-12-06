@@ -222,6 +222,7 @@ static void ccl_run_class(ccl_cosmology *cosmo,
     sprintf(cosmo->status_message ,"ccl_power.c: ccl_cosmology_compute_power_class(): Error running CLASS spectra:%s\n",sp->error_message);
     return;
   }
+  init_arr[i_init++]=1;
 }
 
 static double ccl_get_class_As(ccl_cosmology *cosmo, struct file_content *fc, int position_As,
@@ -265,6 +266,13 @@ static double ccl_get_class_As(ccl_cosmology *cosmo, struct file_content *fc, in
 static void ccl_fill_class_parameters(ccl_cosmology * cosmo, struct file_content * fc,
 				      int parser_length, int * status)
 {
+  // initialize fc fields
+  //silences Valgrind's "Conditional jump or move depends on uninitialised value" warning
+  for (int i = 0; i< parser_length; i++){
+    strcpy(fc->name[i]," ");
+    strcpy(fc->value[i]," "); 
+  }
+  
   strcpy(fc->name[0],"output");
   strcpy(fc->value[0],"mPk"); 
 
@@ -278,7 +286,7 @@ static void ccl_fill_class_parameters(ccl_cosmology * cosmo, struct file_content
   sprintf(fc->value[2],"%e",ccl_splines->K_MAX_SPLINE); //in units of 1/Mpc, corroborated with ccl_constants.h
 
   strcpy(fc->name[3],"z_max_pk");
-  sprintf(fc->value[3],"%e",1./ccl_splines->A_SPLINE_MIN-1.);
+  sprintf(fc->value[3],"%e",1./ccl_splines->A_SPLINE_MIN_PK-1.);
 
   strcpy(fc->name[4],"modes");
   strcpy(fc->value[4],"s");
@@ -340,7 +348,7 @@ static void ccl_fill_class_parameters(ccl_cosmology * cosmo, struct file_content
   //normalization comes last, so that all other parameters are filled in for determining A_s if sigma_8 is specified
   if (isfinite(cosmo->params.sigma_8) && isfinite(cosmo->params.A_s)){
       *status = CCL_ERROR_INCONSISTENT;
-      strcpy(cosmo->status_message ,"ccl_power.c: class_parameters(): Error initialzing CLASS parameters: both sigma_8 and A_s defined\n");
+      strcpy(cosmo->status_message ,"ccl_power.c: class_parameters(): Error initializing CLASS parameters: both sigma_8 and A_s defined\n");
     return;
   }
   if (isfinite(cosmo->params.sigma_8)) {
@@ -353,7 +361,7 @@ static void ccl_fill_class_parameters(ccl_cosmology * cosmo, struct file_content
   }
   else {
     *status = CCL_ERROR_INCONSISTENT;
-    strcpy(cosmo->status_message ,"ccl_power.c: class_parameters(): Error initialzing CLASS pararmeters: neither sigma_8 nor A_s defined\n");
+    strcpy(cosmo->status_message ,"ccl_power.c: class_parameters(): Error initializing CLASS pararmeters: neither sigma_8 nor A_s defined\n");
     return;
   }
 }
@@ -409,7 +417,7 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int * statu
   //Compute nk from number of decades and N_K = # k per decade
   double ndecades = log10(kmax) - log10(kmin);
   int nk = (int)ceil(ndecades*ccl_splines->N_K);
-  double amin = ccl_splines->A_SPLINE_MIN;
+  double amin = ccl_splines->A_SPLINE_MIN_PK;
   double amax = ccl_splines->A_SPLINE_MAX;
   int na = ccl_splines->N_A;
   
@@ -525,6 +533,33 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int * statu
   }
 
 }
+
+
+/* BCM correction */
+// See Schneider & Teyssier (2015) for details of the model.  
+/*
+double ccl_bcm_model_fkz(ccl_cosmology * cosmo, double k, double a, int *status){
+
+  double fkz;
+  double b0;
+  double bfunc, bfunc4;
+  double kg;
+  double gf,scomp;
+  double kh;
+  double z;
+
+  z=1./a-1.;
+  kh = k/cosmo->params.h;
+  b0 = 0.105*cosmo->params.bcm_log10Mc-1.27;
+  bfunc = b0/(1.+pow(z/2.3,2.5));
+  bfunc4 = (1-bfunc)*(1-bfunc)*(1-bfunc)*(1-bfunc);
+  kg = 0.7*bfunc4*pow(cosmo->params.bcm_etab,-1.6);
+  gf = bfunc/(1+pow(kh/kg,3.))+1.-bfunc; //k in h/Mpc                                 
+  scomp = 1+(kh/cosmo->params.bcm_ks)*(kh/cosmo->params.bcm_ks); //k in h/Mpc   
+  fkz = gf*scomp;
+  return fkz;
+}
+*/
 
 void ccl_cosmology_write_power_class_z(char *filename, ccl_cosmology * cosmo, double z, int * status)
 {
@@ -766,7 +801,7 @@ static void ccl_cosmology_compute_power_eh(ccl_cosmology * cosmo, int * status)
   //Compute nk from number of decades and N_K = # k per decade
   double ndecades = log10(kmax) - log10(kmin);
   int nk = (int)ceil(ndecades*ccl_splines->N_K);
-  double amin = ccl_splines->A_SPLINE_MIN;
+  double amin = ccl_splines->A_SPLINE_MIN_PK;
   double amax = ccl_splines->A_SPLINE_MAX;
   int na = ccl_splines->N_A;
   eh_struct *eh=eh_struct_new(&(cosmo->params));
@@ -926,7 +961,7 @@ static void ccl_cosmology_compute_power_bbks(ccl_cosmology * cosmo, int * status
   //Compute nk from number of decades and N_K = # k per decade
   double ndecades = log10(kmax) - log10(kmin);
   int nk = (int)ceil(ndecades*ccl_splines->N_K);
-  double amin = ccl_splines->A_SPLINE_MIN;
+  double amin = ccl_splines->A_SPLINE_MIN_PK;
   double amax = ccl_splines->A_SPLINE_MAX;
   int na = ccl_splines->N_A;
   
@@ -1128,7 +1163,7 @@ static void ccl_cosmology_compute_power_emu(ccl_cosmology * cosmo, int * status)
   double kmin = cosmo->data.k_min_lin;
   double kmax = ccl_splines->K_MAX_SPLINE;
   int nk = ccl_splines->N_K;
-  double amin = ccl_splines->A_SPLINE_MIN;
+  double amin = ccl_splines->A_SPLINE_MIN_PK;
   double amax = ccl_splines->A_SPLINE_MAX;
   int na = ccl_splines->N_A;
   
@@ -1361,6 +1396,12 @@ double ccl_linear_matter_power(ccl_cosmology * cosmo, double k, double a, int * 
   if (!cosmo->computed_power) ccl_cosmology_compute_power(cosmo, status);
   double log_p_1;
   int pkstatus;
+  
+  if(a<ccl_splines->A_SPLINE_MIN_PK) {  //Extrapolate linearly at high redshift
+    double pk0=ccl_linear_matter_power(cosmo,k,ccl_splines->A_SPLINE_MIN_PK,status);
+    double gf=ccl_growth_factor(cosmo,a,status)/ccl_growth_factor(cosmo,ccl_splines->A_SPLINE_MIN_PK,status);
+    return pk0*gf*gf;
+  }
  
   if(k<=cosmo->data.k_min_lin) { 
     log_p_1=ccl_power_extrapol_lowk(cosmo,k,a,cosmo->data.p_lin,cosmo->data.k_min_lin,status);
@@ -1402,7 +1443,13 @@ double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double k, double a, int *s
   case ccl_halofit:
     if (!cosmo->computed_power)
       ccl_cosmology_compute_power(cosmo,status);
-
+    
+    if(a<ccl_splines->A_SPLINE_MIN_PK) { //Extrapolate linearly at high redshift
+      double pk0=ccl_nonlin_matter_power(cosmo,k,ccl_splines->A_SPLINE_MIN_PK,status);
+      double gf=ccl_growth_factor(cosmo,a,status)/ccl_growth_factor(cosmo,ccl_splines->A_SPLINE_MIN_PK,status);
+      return pk0*gf*gf;
+    }
+    
     if(k<=cosmo->data.k_min_nl) {
       log_p_1=ccl_power_extrapol_lowk(cosmo,k,a,cosmo->data.p_nl,cosmo->data.k_min_nl,status);
       return exp(log_p_1);
@@ -1419,7 +1466,20 @@ double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double k, double a, int *s
     }
     else { //Extrapolate NL regime using log derivative
       log_p_1 = ccl_power_extrapol_highk(cosmo,k,a,cosmo->data.p_nl,cosmo->data.k_max_nl,status);
-      return exp(log_p_1);
+      double pk = exp(log_p_1);
+      /*
+      if(cosmo->config.baryons_power_spectrum_method==ccl_bcm){
+        int pwstatus=0;
+        double fbcm=ccl_bcm_model_fkz(cosmo,k,a,&pwstatus);
+        pk=pk*fbcm;
+        if(pwstatus){
+            *status = CCL_ERROR_SPLINE_EV;
+            sprintf(cosmo->status_message ,"ccl_power.c: ccl_nonlin_matter_power(): Error in BCM correction\n");
+            return NAN;
+        }
+      }
+      */
+      return pk;
     }
 
   case ccl_emu:
