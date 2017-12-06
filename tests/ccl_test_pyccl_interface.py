@@ -278,6 +278,11 @@ def check_cls(cosmo):
     ell_lst = [2, 3, 4, 5, 6, 7, 8, 9]
     ell_arr = np.arange(2, 10)
     
+    # Check if power spectrum type is valid for CMB
+    cmb_ok = True
+    if cosmo.configuration.matter_power_spectrum_method \
+        == ccl.core.matter_power_spectrum_types['emu']: cmb_ok = False
+    
     # ClTracer test objects
     lens1 = ccl.ClTracerLensing(cosmo, False, n=n, z=z)
     lens2 = ccl.ClTracerLensing(cosmo, True, n=(z,n), bias_ia=(z,n), f_red=(z,n))
@@ -296,24 +301,24 @@ def check_cls(cosmo):
     assert_( all_finite(ccl.angular_cl(cosmo, nc1, nc1, ell_lst)) )
     assert_( all_finite(ccl.angular_cl(cosmo, nc1, nc1, ell_arr)) )
 
-    assert_( all_finite(ccl.angular_cl(cosmo, cmbl, cmbl, ell_arr)) )
+    if cmb_ok: assert_( all_finite(ccl.angular_cl(cosmo, cmbl, cmbl, ell_arr)) )
     
     # Check various cross-correlation combinations
     assert_( all_finite(ccl.angular_cl(cosmo, lens1, lens2, ell_arr)) )
     assert_( all_finite(ccl.angular_cl(cosmo, lens1, nc1, ell_arr)) )
     assert_( all_finite(ccl.angular_cl(cosmo, lens1, nc2, ell_arr)) )
     assert_( all_finite(ccl.angular_cl(cosmo, lens1, nc3, ell_arr)) )
-    assert_( all_finite(ccl.angular_cl(cosmo, lens1, cmbl, ell_arr)) )
+    if cmb_ok: assert_( all_finite(ccl.angular_cl(cosmo, lens1, cmbl, ell_arr)) )
     assert_( all_finite(ccl.angular_cl(cosmo, lens2, nc1, ell_arr)) )
     assert_( all_finite(ccl.angular_cl(cosmo, lens2, nc2, ell_arr)) )
     assert_( all_finite(ccl.angular_cl(cosmo, lens2, nc3, ell_arr)) )
-    assert_( all_finite(ccl.angular_cl(cosmo, lens2, cmbl, ell_arr)) )
+    if cmb_ok: assert_( all_finite(ccl.angular_cl(cosmo, lens2, cmbl, ell_arr)) )
     assert_( all_finite(ccl.angular_cl(cosmo, nc1, nc2, ell_arr)) )
     assert_( all_finite(ccl.angular_cl(cosmo, nc1, nc3, ell_arr)) )
-    assert_( all_finite(ccl.angular_cl(cosmo, nc1, cmbl, ell_arr)) )
+    if cmb_ok: assert_( all_finite(ccl.angular_cl(cosmo, nc1, cmbl, ell_arr)) )
     assert_( all_finite(ccl.angular_cl(cosmo, nc2, nc3, ell_arr)) )
-    assert_( all_finite(ccl.angular_cl(cosmo, nc2, cmbl, ell_arr)) )
-    assert_( all_finite(ccl.angular_cl(cosmo, nc3, cmbl, ell_arr)) )
+    if cmb_ok: assert_( all_finite(ccl.angular_cl(cosmo, nc2, cmbl, ell_arr)) )
+    if cmb_ok: assert_( all_finite(ccl.angular_cl(cosmo, nc3, cmbl, ell_arr)) )
     
     # Check that reversing order of ClTracer inputs works
     assert_( all_finite(ccl.angular_cl(cosmo, nc1, lens1, ell_arr)) )

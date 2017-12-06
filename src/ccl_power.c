@@ -1482,8 +1482,8 @@ double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double k, double a, int *s
 
   case ccl_emu:
     if ((cosmo->config.transfer_function_method == ccl_emulator) && (a<A_MIN_EMU)){
-      *status = CCL_ERROR_INCONSISTENT;
-      sprintf(cosmo->status_message ,"ccl_power.c: the cosmic emulator cannot be used above z=2\
+      *status = CCL_ERROR_EMULATOR_BOUND;
+      sprintf(cosmo->status_message, "ccl_power.c: the cosmic emulator cannot be used above z=2\
 \n");
       return NAN;
     }
