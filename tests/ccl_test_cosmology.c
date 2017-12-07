@@ -46,7 +46,7 @@ CTEST2(cosmology, create_general_cosmo) {
   ccl_cosmology * cosmo = ccl_cosmology_create_with_params(data->Omega_c, data->Omega_b, data->Omega_k, 
 							   data->N_nu_rel, data->N_nu_mass, data->m_nu, 
 							   data->w0, data->wa, data->h, data->A_s, data->n_s,
-							   -1, NULL, NULL, config, &(data->status));
+							   -1,-1,-1,-1, NULL, NULL, config, &(data->status));
   
   // Pull ccl_parameters object out of ccl_cosmology
   ccl_parameters params = (*cosmo).params;
@@ -54,6 +54,7 @@ CTEST2(cosmology, create_general_cosmo) {
   ASSERT_DBL_NEAR_TOL(params.Omega_c, data->Omega_c, 1e-10);
   ASSERT_DBL_NEAR_TOL(params.w0, -1.0, 1e-10);
   ASSERT_DBL_NEAR_TOL(params.wa, data->wa, 1e-10);
+  ASSERT_DBL_NEAR_TOL(params.bcm_etab, 0.5, 1e-10);
 }
 
 // Check to see if LCDM ccl_cosmology struct is initialized correctly

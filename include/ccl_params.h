@@ -1,4 +1,8 @@
 /** @file */
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #pragma once
 
 /** 
@@ -9,6 +13,7 @@ typedef struct ccl_spline_params {
    //Scale factor splines
   int  A_SPLINE_NA;
   double A_SPLINE_MIN;
+  double A_SPLINE_MIN_PK;
   double  A_SPLINE_MAX;
   double A_SPLINE_MINLOG;
   int A_SPLINE_NLOG;
@@ -31,3 +36,7 @@ typedef struct ccl_spline_params {
 } ccl_spline_params;
 
 extern ccl_spline_params * ccl_splines;
+
+#ifdef __cplusplus
+}
+#endif

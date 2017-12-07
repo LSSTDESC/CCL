@@ -1,7 +1,11 @@
 var searchData=
 [
-  ['pc_5fto_5fmeter',['PC_TO_METER',['../ccl__constants_8h.html#a883e84c99172ca9d27c255c59a5ca6e2',1,'ccl_constants.h']]],
-  ['plin_5fspline_5ftype',['PLIN_SPLINE_TYPE',['../ccl__constants_8h.html#a260f16f8d43137c1758a065d0e104d5c',1,'ccl_constants.h']]],
-  ['pnl_5fspline_5ftype',['PNL_SPLINE_TYPE',['../ccl__constants_8h.html#acce559487718e5f9706b85d57b6209c6',1,'ccl_constants.h']]],
-  ['ps',['PS',['../ccl__sample__run_8c.html#ad7f630556c2cd30d8d8976e0f6e7f749',1,'ccl_sample_run.c']]]
+  ['n_5fell_5ffftlog',['N_ELL_FFTLOG',['../ccl__correlation_8c.html#a8afcc884d53c47fbaa349a05180d1a62',1,'ccl_correlation.c']]],
+  ['nl',['NL',['../ccl__corr__sample_8c.html#a4fc34b120ed3bd1120c1eb36abbcd6af',1,'NL():&#160;ccl_corr_sample.c'],['../ccl__sample__run_8c.html#a4fc34b120ed3bd1120c1eb36abbcd6af',1,'NL():&#160;ccl_sample_run.c']]],
+  ['nmas',['NMAS',['../ccl__corr__sample_8c.html#a53e2cb4e65d53632323a5e30bb1886e2',1,'NMAS():&#160;ccl_corr_sample.c'],['../ccl__sample__run_8c.html#a53e2cb4e65d53632323a5e30bb1886e2',1,'NMAS():&#160;ccl_sample_run.c']]],
+  ['normps',['NORMPS',['../ccl__corr__sample_8c.html#a8227d0bc109d5ae83bb618b472a83ec8',1,'NORMPS():&#160;ccl_corr_sample.c'],['../ccl__sample__run_8c.html#a8227d0bc109d5ae83bb618b472a83ec8',1,'NORMPS():&#160;ccl_sample_run.c']]],
+  ['nrel',['NREL',['../ccl__corr__sample_8c.html#a0d36976fed6c13c78254c5a61855288b',1,'NREL():&#160;ccl_corr_sample.c'],['../ccl__sample__run_8c.html#a0d36976fed6c13c78254c5a61855288b',1,'NREL():&#160;ccl_sample_run.c']]],
+  ['ns',['NS',['../ccl__corr__sample_8c.html#a06c201f90533d5b49cd039c960327968',1,'NS():&#160;ccl_corr_sample.c'],['../ccl__sample__run_8c.html#a06c201f90533d5b49cd039c960327968',1,'NS():&#160;ccl_sample_run.c']]],
+  ['nu_5fconst',['NU_CONST',['../ccl__neutrinos_8h.html#a671563ad8bf05e3484ad13907b1362d8',1,'ccl_neutrinos.h']]],
+  ['nz',['NZ',['../ccl__corr__sample_8c.html#a693aee47b2103d0a7fcd3a0a0dd4fb57',1,'NZ():&#160;ccl_corr_sample.c'],['../ccl__sample__run_8c.html#a693aee47b2103d0a7fcd3a0a0dd4fb57',1,'NZ():&#160;ccl_sample_run.c']]]
 ];

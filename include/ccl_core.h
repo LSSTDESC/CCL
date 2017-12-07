@@ -1,4 +1,7 @@
 /** @file */
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #pragma once
 #include "gsl/gsl_spline.h"
@@ -52,6 +55,11 @@ typedef struct ccl_parameters {
   // Radiation parameters
   double Omega_g;
   double T_CMB;
+
+  // BCM baryonic model parameters
+  double bcm_log10Mc;
+  double bcm_etab;
+  double bcm_ks;
   
   // Derived parameters
   double sigma_8;
@@ -141,7 +149,8 @@ ccl_cosmology * ccl_cosmology_create(ccl_parameters params, ccl_configuration co
 ccl_cosmology * ccl_cosmology_create_with_params(
         double Omega_c, double Omega_b, double Omega_k, double N_nu_rel, double N_nu_mass, double mnu, 
         double w0, double wa, double h, double norm_pk, double n_s,
-        int nz_mgrowth, double *zarr_mgrowth, double *dfarr_mgrowth, 
+        double bcm_log10Mc, double bcm_etab, double bcm_ks,
+	int nz_mgrowth, double *zarr_mgrowth, double *dfarr_mgrowth, 
         ccl_configuration config, int *status);
 
 ccl_cosmology * ccl_cosmology_create_with_lcdm_params(
@@ -163,6 +172,9 @@ ccl_cosmology * ccl_cosmology_create_with_lcdm_params(
  * @param h Hubble constant in units of 100 km/s/Mpc
  * @param norm_pk the normalization of the power spectrum, either A_s or sigma_8
  * @param n_s the power-law index of the power spectrum
+ * @param bcm_log10Mc log10 cluster mass, one of the parameters of the BCM model
+ * @param bcm_etab ejection radius parameter, one of the parameters of the BCM model
+ * @param bcm_ks wavenumber for the stellar profile, one of the parameters of the BCM model
  * @param nz_mgrowth the number of redshifts where the modified growth is provided
  * @param zarr_mgrowth the array of redshifts where the modified growth is provided
  * @param dfarr_mgrowth the modified growth function vector provided
@@ -170,7 +182,7 @@ ccl_cosmology * ccl_cosmology_create_with_lcdm_params(
  * For specific cases see documentation for ccl_error.c
  * @return void
  */
-ccl_parameters ccl_parameters_create(double Omega_c, double Omega_b, double Omega_k, double N_nu_rel, double N_nu_mass, double mnu, double w0, double wa, double h, double norm_pk, double n_s,int nz_mgrowth,double *zarr_mgrowth,double *dfarr_mgrowth, int *status);
+ccl_parameters ccl_parameters_create(double Omega_c, double Omega_b, double Omega_k, double N_nu_rel, double N_nu_mass, double mnu, double w0, double wa, double h, double norm_pk, double n_s, double bcm_log10Mc, double bcm_etab, double bcm_ks, int nz_mgrowth,double *zarr_mgrowth,double *dfarr_mgrowth, int *status);
 
 // Specific sub-models
 /**
@@ -185,6 +197,24 @@ ccl_parameters ccl_parameters_create(double Omega_c, double Omega_b, double Omeg
  * @return void
  */
 ccl_parameters ccl_parameters_create_flat_lcdm(double Omega_c, double Omega_b, double h, double norm_pk, double n_s, int *status);
+
+/**
+ * Create a flat LCDM cosmology with the impact of baryons
+ * @param Omega_c Omega_c 
+ * @param Omega_b Omega_b 
+ * @param h Hubble constant in units of 100 km/s/Mpc
+ * @param norm_pk the normalization of the power spectrum, either A_s or sigma_8
+ * @param n_s the power-law index of the power spectrum
+ * @param bcm_log10Mc log10 cluster mass, one of the parameters of the BCM model
+ * @param bcm_etab ejection radius parameter, one of the parameters of the BCM model
+ * @param bcm_ks wavenumber for the stellar profile, one of the parameters of the BCM model
+ * @param status Status flag. 0 if there are no errors, nonzero otherwise.
+ * For specific cases see documentation for ccl_error.c
+ * @return void
+ */
+ccl_parameters ccl_parameters_create_flat_lcdm_bar(double Omega_c, double Omega_b, double h,
+						   double norm_pk, double n_s, double bcm_log10Mc,
+						   double bcm_etab, double bcm_ks, int *status);
 
 /**
  * Create a flat wCDM cosmology
@@ -272,3 +302,7 @@ void ccl_cosmology_compute_growth(ccl_cosmology * cosmo, int * status);
  * @return void
  */
 void ccl_cosmology_compute_power(ccl_cosmology * cosmo, int* status);
+
+#ifdef __cplusplus
+}
+#endif

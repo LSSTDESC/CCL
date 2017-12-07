@@ -1,4 +1,7 @@
 /** @file */
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #pragma once
 
@@ -25,7 +28,8 @@ typedef enum transfer_function_t
   ccl_boltzmann         = 3,
   ccl_boltzmann_class   = 3,
   
-  ccl_boltzmann_camb    = 4
+  ccl_boltzmann_camb    = 4,
+  
 } transfer_function_t;
 
 /** 
@@ -40,11 +44,24 @@ typedef enum matter_power_spectrum_t
   ccl_linear           = 0,
   
   ccl_halofit          = 1,
-  // more?
+
   ccl_halo_model       = 3
-  // even more kinds ...
-  
+  // even more kinds ... 
 } matter_power_spectrum_t;
+
+/** 
+ * Bayrons power spectrum typedef.
+ * Specified what model is being used for accounting
+ * for the impact of baryonic processes on the total
+ * matter power spectrum
+ */
+typedef enum baryons_power_spectrum_t
+{
+  ccl_nobaryons           = 0,
+  
+  ccl_bcm                 = 1
+  // even more kinds ... 
+} baryons_power_spectrum_t;
 
 /** 
  * Mass function typedef
@@ -70,6 +87,7 @@ typedef enum mass_function_t
 typedef struct ccl_configuration {
   transfer_function_t      transfer_function_method;
   matter_power_spectrum_t  matter_power_spectrum_method;
+  baryons_power_spectrum_t  baryons_power_spectrum_method;
   mass_function_t          mass_function_method;
   // TODO: Halo definition
 } ccl_configuration;
@@ -78,6 +96,10 @@ typedef struct ccl_configuration {
  * The default configuration object
  * In the default configuration, defined in ccl_core.c
  * CCL runs with:
- * default_config = {ccl_boltzmann_class, ccl_halofit, ccl_tinker10}
+ * default_config = {ccl_boltzmann_class, ccl_halofit, ccl_nobaryons, ccl_tinker10}
  */
 extern const ccl_configuration default_config;
+
+#ifdef __cplusplus
+}
+#endif

@@ -1,3 +1,7 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #ifndef FFTLOG_H
 #define FFTLOG_H
 
@@ -60,3 +64,7 @@ void compute_u_coefficients(int N, double mu, double q, double L, double kcrc, d
 
 
 #endif // FFTLOG_H
+
+#ifdef __cplusplus
+}
+#endif

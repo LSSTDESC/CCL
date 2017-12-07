@@ -639,7 +639,7 @@ double ccl_h_over_h0(ccl_cosmology * cosmo, double a, int* status)
 }
 
 
-void ccl_h_over_h0s(ccl_cosmology * cosmo, int na, double a[na], double output[na], int * status)
+void ccl_h_over_h0s(ccl_cosmology * cosmo, int na, double a[], double output[], int * status)
 {
   if(!cosmo->computed_distances) {
     ccl_cosmology_compute_distances(cosmo,status);
@@ -682,7 +682,7 @@ double ccl_comoving_radial_distance(ccl_cosmology * cosmo, double a, int * statu
   }
 }
 
-void ccl_comoving_radial_distances(ccl_cosmology * cosmo, int na, double a[na], double output[na], int* status)
+void ccl_comoving_radial_distances(ccl_cosmology * cosmo, int na, double a[], double output[], int* status)
 {
   if(!cosmo->computed_distances) {
     ccl_cosmology_compute_distances(cosmo,status);
@@ -755,8 +755,8 @@ double ccl_comoving_angular_distance(ccl_cosmology * cosmo, double a, int* statu
   }
 }
 
-void ccl_comoving_angular_distances(ccl_cosmology * cosmo, int na, double a[na], 
-                                    double output[na], int* status)
+void ccl_comoving_angular_distances(ccl_cosmology * cosmo, int na, double a[], 
+                                    double output[], int* status)
 {
   if (!cosmo->computed_distances) {
     ccl_cosmology_compute_distances(cosmo, status);
@@ -802,7 +802,7 @@ double ccl_luminosity_distance(ccl_cosmology * cosmo, double a, int* status)
   }
 }
 
-void ccl_luminosity_distances(ccl_cosmology * cosmo, int na, double a[na], double output[na], int * status)
+void ccl_luminosity_distances(ccl_cosmology * cosmo, int na, double a[], double output[], int * status)
 {
   if (!cosmo->computed_distances) {
     ccl_cosmology_compute_distances(cosmo, status);
@@ -843,7 +843,7 @@ double ccl_distance_modulus(ccl_cosmology * cosmo, double a, int* status)
 }
 
 
-void ccl_distance_moduli(ccl_cosmology * cosmo, int na, double a[na], double output[na], int * status)
+void ccl_distance_moduli(ccl_cosmology * cosmo, int na, double a[], double output[], int * status)
 {
   if (!cosmo->computed_distances) {
     ccl_cosmology_compute_distances(cosmo, status);
@@ -888,7 +888,7 @@ double ccl_scale_factor_of_chi(ccl_cosmology * cosmo, double chi, int * status)
 }
 
 //
-void ccl_scale_factor_of_chis(ccl_cosmology * cosmo, int nchi, double chi[nchi], double output[nchi], int * status)
+void ccl_scale_factor_of_chis(ccl_cosmology * cosmo, int nchi, double chi[], double output[], int * status)
 {
   if (!cosmo->computed_distances) {
     ccl_cosmology_compute_distances(cosmo,status);
@@ -931,7 +931,7 @@ double ccl_growth_factor(ccl_cosmology * cosmo, double a, int * status)
   }
 }
 
-void ccl_growth_factors(ccl_cosmology * cosmo, int na, double a[na], double output[na], int * status)
+void ccl_growth_factors(ccl_cosmology * cosmo, int na, double a[], double output[], int * status)
 {
   if (!cosmo->computed_growth) {
     ccl_cosmology_compute_growth(cosmo, status);
@@ -977,7 +977,7 @@ double ccl_growth_factor_unnorm(ccl_cosmology * cosmo, double a, int * status)
   }
 }
 
-void ccl_growth_factors_unnorm(ccl_cosmology * cosmo, int na, double a[na], double output[na], int * status)
+void ccl_growth_factors_unnorm(ccl_cosmology * cosmo, int na, double a[], double output[], int * status)
 {
   if (!cosmo->computed_growth) {
     ccl_cosmology_compute_growth(cosmo, status);
@@ -1024,7 +1024,7 @@ double ccl_growth_rate(ccl_cosmology * cosmo, double a, int * status)
   }
 }
 
-void ccl_growth_rates(ccl_cosmology * cosmo, int na, double a[na], double output[na], int * status)
+void ccl_growth_rates(ccl_cosmology * cosmo, int na, double a[], double output[], int * status)
 {
   if (!cosmo->computed_growth) {
     ccl_cosmology_compute_growth(cosmo, status);

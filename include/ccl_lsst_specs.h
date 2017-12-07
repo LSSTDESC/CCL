@@ -1,4 +1,7 @@
 /** @file */
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #pragma once
 #include "ccl_core.h"
@@ -96,3 +99,7 @@ double ccl_specs_sigmaz_sources(double z);
 //LSST redshift range for lensing sources
 #define Z_MIN_SOURCES 0.1
 #define Z_MAX_SOURCES 3.0
+
+#ifdef __cplusplus
+}
+#endif
