@@ -27,6 +27,7 @@ ccl_parameters parameters_create_vec(
                         double* zarr, int nz,
                         double* dfarr, int nf,int* status)
 {
+  printf(" ");
     assert(nz == nf);
     if (nz == 0){ nz = -1; }
     return ccl_parameters_create(Omega_c, Omega_b, Omega_k, N_nu_rel, N_nu_mass, M_nu, 
