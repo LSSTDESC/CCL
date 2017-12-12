@@ -21,6 +21,25 @@ AC_PROG_INSTALL
 AM_PROG_CC_C_O
 AM_MAINTAINER_MODE
 
+AC_CANONICAL_HOST
+build_linux=no
+build_mac=no
+
+case "${host_os}" in
+     linux*)
+	build_linux=yes
+	;;
+     darwin*)
+	build_mac=yes
+	;;
+     *)
+	AC_MSG_ERROR(["OS $host_os is not supported"])
+	;;
+esac
+AM_CONDITIONAL([LINUX], [test "$build_linux" = "yes"])
+AM_CONDITIONAL([OSX], [test "$build_mac" = "yes"])
+
+
 # Checks for libraries.
 AC_SEARCH_LIBS([pow],[m],[],AC_MSG_ERROR(Couldn't find libm. Required.))
 # Allows building against an external copy of CLASS
