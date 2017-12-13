@@ -127,11 +127,14 @@ static void compare_bcm(int i_model,struct bcm_data * data)
     if (status) printf("%s\n",cosmo->status_message);
     err=fabs(psbar/psnobar/fbcm_bench-1);
     ASSERT_DBL_NEAR_TOL(err,0.,BCM_TOLERANCE);
+    
     //And check the ratio between power spectra
     psbar_bench=ccl_nonlin_matter_power(cosmo,k,1.,&status);
     if (status) printf("%s\n",cosmo->status_message);
+    
     psnobar_bench=ccl_nonlin_matter_power(cosmo_nobar,k,1.,&status);
     if (status) printf("%s\n",cosmo_nobar->status_message);
+    
     err=fabs(psbar/psnobar/(psbar_bench/psnobar_bench)-1);
     ASSERT_DBL_NEAR_TOL(err,0.,BCM_TOLERANCE);
     

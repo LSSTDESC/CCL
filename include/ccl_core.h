@@ -113,8 +113,10 @@ typedef struct ccl_data{
   // These are all functions of the wavenumber k and the scale factor a.
   gsl_spline2d * p_lin;
   gsl_spline2d * p_nl;
-  double k_min; //k_min  [1/Mpc] <- minimum wavenumber that the power spectrum has been computed to 
-
+  double k_min_lin; //k_min  [1/Mpc] <- minimum wavenumber that the power spectrum has been computed to 
+  double k_min_nl; 
+  double k_max_lin;
+  double k_max_nl;
 } ccl_data;
 
 /**
@@ -182,7 +184,7 @@ ccl_cosmology * ccl_cosmology_create_with_lcdm_params(
  * For specific cases see documentation for ccl_error.c
  * @return void
  */
-ccl_parameters ccl_parameters_create(double Omega_c, double Omega_b, double Omega_k, double N_nu_rel, double N_nu_mass, double mnu, double w0, double wa, double h, double norm_pk, double n_s, double bcm_log10Mc, double bcm_etab, double bcm_ks, int nz_mgrowth,double *zarr_mgrowth,double *dfarr_mgrowth, int *status);
+ccl_parameters ccl_parameters_create(double Omega_c, double Omega_b, double Omega_k, double N_nu_rel, double N_nu_mass, double mnu, double w0, double wa, double h, double norm_pk, double n_s, double bcm_log10Mc, double bcm_etab, double bcm_ks, int nz_mgrowth, double *zarr_mgrowth, double *dfarr_mgrowth, int *status);
 
 // Specific sub-models
 /**

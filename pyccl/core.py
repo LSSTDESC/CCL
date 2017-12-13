@@ -23,7 +23,8 @@ matter_power_spectrum_types = {
     'halo_model':   lib.halo_model,
     'halomodel':    lib.halo_model,
     'halofit':      lib.halofit,
-    'linear':       lib.linear
+    'linear':       lib.linear,
+    'emu':       lib.emu
 }
 
 baryons_power_spectrum_types = {

@@ -285,12 +285,13 @@ h: Hubble's constant divided by (100 km/s/Mpc).
 A_s: amplitude of the primordial PS
 n_s: index of the primordial PS
  */
-ccl_parameters ccl_parameters_create(double Omega_c, double Omega_b, double Omega_k,
-				     double N_nu_rel, double N_nu_mass, double mnu,
-				     double w0, double wa, double h, double norm_pk,
-				     double n_s, double bcm_log10Mc, double bcm_etab, double bcm_ks,
-				     int nz_mgrowth,double *zarr_mgrowth,
-				     double *dfarr_mgrowth, int *status)
+ccl_parameters ccl_parameters_create(
+        double Omega_c, double Omega_b, double Omega_k,
+        double N_nu_rel, double N_nu_mass, double mnu,
+		double w0, double wa, double h, double norm_pk, double n_s, 
+		double bcm_log10Mc, double bcm_etab, double bcm_ks,
+		int nz_mgrowth,double *zarr_mgrowth, double *dfarr_mgrowth, 
+		int *status)
 {
   ccl_parameters params;
   params.sigma_8 = NAN;

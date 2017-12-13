@@ -3992,6 +3992,9 @@ void omega_x_vec(ccl_cosmology * cosmo, int label,
 #include "../include/ccl_power.h"
 
 
+
+
+
 void linear_matter_power_vec(
                         ccl_cosmology * cosmo,
                         double a,
@@ -4282,9 +4285,6 @@ user_pz_info* specs_create_photoz_info_from_py(PyObject *pyfunc)
     Py_XINCREF(pyfunc);
     return pzinfo;
 }
-
-
-
 
 
 #ifdef __cplusplus
@@ -7279,7 +7279,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_data_k_min_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_data_k_min_lin_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   struct ccl_data *arg1 = (struct ccl_data *) 0 ;
   double arg2 ;
@@ -7290,20 +7290,20 @@ SWIGINTERN PyObject *_wrap_data_k_min_set(PyObject *SWIGUNUSEDPARM(self), PyObje
   PyObject * obj0 = 0 ;
   PyObject * obj1 = 0 ;
   
-  if (!PyArg_ParseTuple(args,(char *)"OO:data_k_min_set",&obj0,&obj1)) SWIG_fail;
+  if (!PyArg_ParseTuple(args,(char *)"OO:data_k_min_lin_set",&obj0,&obj1)) SWIG_fail;
   res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_data, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "data_k_min_set" "', argument " "1"" of type '" "struct ccl_data *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "data_k_min_lin_set" "', argument " "1"" of type '" "struct ccl_data *""'"); 
   }
   arg1 = (struct ccl_data *)(argp1);
   ecode2 = SWIG_AsVal_double(obj1, &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "data_k_min_set" "', argument " "2"" of type '" "double""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "data_k_min_lin_set" "', argument " "2"" of type '" "double""'");
   } 
   arg2 = (double)(val2);
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    if (arg1) (arg1)->k_min = arg2;
+    if (arg1) (arg1)->k_min_lin = arg2;
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
   resultobj = SWIG_Py_Void();
@@ -7313,7 +7313,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_data_k_min_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_data_k_min_lin_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   struct ccl_data *arg1 = (struct ccl_data *) 0 ;
   void *argp1 = 0 ;
@@ -7321,15 +7321,195 @@ SWIGINTERN PyObject *_wrap_data_k_min_get(PyObject *SWIGUNUSEDPARM(self), PyObje
   PyObject * obj0 = 0 ;
   double result;
   
-  if (!PyArg_ParseTuple(args,(char *)"O:data_k_min_get",&obj0)) SWIG_fail;
+  if (!PyArg_ParseTuple(args,(char *)"O:data_k_min_lin_get",&obj0)) SWIG_fail;
   res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_data, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "data_k_min_get" "', argument " "1"" of type '" "struct ccl_data *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "data_k_min_lin_get" "', argument " "1"" of type '" "struct ccl_data *""'"); 
   }
   arg1 = (struct ccl_data *)(argp1);
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    result = (double) ((arg1)->k_min);
+    result = (double) ((arg1)->k_min_lin);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double((double)(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_data_k_min_nl_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  struct ccl_data *arg1 = (struct ccl_data *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:data_k_min_nl_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_data, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "data_k_min_nl_set" "', argument " "1"" of type '" "struct ccl_data *""'"); 
+  }
+  arg1 = (struct ccl_data *)(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "data_k_min_nl_set" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = (double)(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->k_min_nl = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_data_k_min_nl_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  struct ccl_data *arg1 = (struct ccl_data *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  double result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:data_k_min_nl_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_data, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "data_k_min_nl_get" "', argument " "1"" of type '" "struct ccl_data *""'"); 
+  }
+  arg1 = (struct ccl_data *)(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double) ((arg1)->k_min_nl);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double((double)(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_data_k_max_lin_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  struct ccl_data *arg1 = (struct ccl_data *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:data_k_max_lin_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_data, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "data_k_max_lin_set" "', argument " "1"" of type '" "struct ccl_data *""'"); 
+  }
+  arg1 = (struct ccl_data *)(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "data_k_max_lin_set" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = (double)(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->k_max_lin = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_data_k_max_lin_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  struct ccl_data *arg1 = (struct ccl_data *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  double result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:data_k_max_lin_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_data, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "data_k_max_lin_get" "', argument " "1"" of type '" "struct ccl_data *""'"); 
+  }
+  arg1 = (struct ccl_data *)(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double) ((arg1)->k_max_lin);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double((double)(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_data_k_max_nl_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  struct ccl_data *arg1 = (struct ccl_data *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:data_k_max_nl_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_data, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "data_k_max_nl_set" "', argument " "1"" of type '" "struct ccl_data *""'"); 
+  }
+  arg1 = (struct ccl_data *)(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "data_k_max_nl_set" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = (double)(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->k_max_nl = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_data_k_max_nl_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  struct ccl_data *arg1 = (struct ccl_data *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  double result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:data_k_max_nl_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_data, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "data_k_max_nl_get" "', argument " "1"" of type '" "struct ccl_data *""'"); 
+  }
+  arg1 = (struct ccl_data *)(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double) ((arg1)->k_max_nl);
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
   resultobj = SWIG_From_double((double)(result));
@@ -12241,6 +12421,72 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_cosmology_write_power_class_z(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  char *arg1 = (char *) 0 ;
+  ccl_cosmology *arg2 = (ccl_cosmology *) 0 ;
+  double arg3 ;
+  int *arg4 = (int *) 0 ;
+  int res1 ;
+  char *buf1 = 0 ;
+  int alloc1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  double val3 ;
+  int ecode3 = 0 ;
+  int temp4 ;
+  int res4 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  PyObject * obj3 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOOO:cosmology_write_power_class_z",&obj0,&obj1,&obj2,&obj3)) SWIG_fail;
+  res1 = SWIG_AsCharPtrAndSize(obj0, &buf1, NULL, &alloc1);
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "cosmology_write_power_class_z" "', argument " "1"" of type '" "char *""'");
+  }
+  arg1 = (char *)(buf1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_ccl_cosmology, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "cosmology_write_power_class_z" "', argument " "2"" of type '" "ccl_cosmology *""'"); 
+  }
+  arg2 = (ccl_cosmology *)(argp2);
+  ecode3 = SWIG_AsVal_double(obj2, &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "cosmology_write_power_class_z" "', argument " "3"" of type '" "double""'");
+  } 
+  arg3 = (double)(val3);
+  if (!(SWIG_IsOK((res4 = SWIG_ConvertPtr(obj3,SWIG_as_voidptrptr(&arg4),SWIGTYPE_p_int,0))))) {
+    int val; 
+    int ecode = SWIG_AsVal_int(obj3, &val);
+    if (!SWIG_IsOK(ecode)) {
+      SWIG_exception_fail(SWIG_ArgError(ecode), "in method '" "cosmology_write_power_class_z" "', argument " "4"" of type '" "int""'");
+    }
+    temp4 = (int)(val);
+    arg4 = &temp4;
+    res4 = SWIG_AddTmpMask(ecode);
+  }
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    ccl_cosmology_write_power_class_z(arg1,arg2,arg3,arg4);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  if (SWIG_IsTmpObj(res4)) {
+    resultobj = SWIG_Python_AppendOutput(resultobj, SWIG_From_int((*arg4)));
+  } else {
+    int new_flags = SWIG_IsNewObj(res4) ? (SWIG_POINTER_OWN |  0 ) :  0 ;
+    resultobj = SWIG_Python_AppendOutput(resultobj, SWIG_NewPointerObj((void*)(arg4), SWIGTYPE_p_int, new_flags));
+  }
+  if (alloc1 == SWIG_NEWOBJ) free((char*)buf1);
+  return resultobj;
+fail:
+  if (alloc1 == SWIG_NEWOBJ) free((char*)buf1);
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_bcm_model_fkz(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   ccl_cosmology *arg1 = (ccl_cosmology *) 0 ;
@@ -16327,1117 +16573,6 @@ fail:
 }
 
 
-SWIGINTERN PyObject *GSL_CONST_MKSA_SPEED_OF_LIGHT_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_SPEED_OF_LIGHT",SWIG_From_double((double)((2.99792458e8))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_GRAVITATIONAL_CONSTANT_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_GRAVITATIONAL_CONSTANT",SWIG_From_double((double)((6.673e-11))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_PLANCKS_CONSTANT_H_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_PLANCKS_CONSTANT_H",SWIG_From_double((double)((6.62606896e-34))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_PLANCKS_CONSTANT_HBAR_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_PLANCKS_CONSTANT_HBAR",SWIG_From_double((double)((1.05457162825e-34))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_ASTRONOMICAL_UNIT_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_ASTRONOMICAL_UNIT",SWIG_From_double((double)((1.49597870691e11))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_LIGHT_YEAR_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_LIGHT_YEAR",SWIG_From_double((double)((9.46053620707e15))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_PARSEC_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_PARSEC",SWIG_From_double((double)((3.08567758135e16))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_GRAV_ACCEL_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_GRAV_ACCEL",SWIG_From_double((double)((9.80665e0))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_ELECTRON_VOLT_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_ELECTRON_VOLT",SWIG_From_double((double)((1.602176487e-19))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_MASS_ELECTRON_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_MASS_ELECTRON",SWIG_From_double((double)((9.10938188e-31))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_MASS_MUON_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_MASS_MUON",SWIG_From_double((double)((1.88353109e-28))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_MASS_PROTON_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_MASS_PROTON",SWIG_From_double((double)((1.67262158e-27))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_MASS_NEUTRON_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_MASS_NEUTRON",SWIG_From_double((double)((1.67492716e-27))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_RYDBERG_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_RYDBERG",SWIG_From_double((double)((2.17987196968e-18))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_BOLTZMANN_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_BOLTZMANN",SWIG_From_double((double)((1.3806504e-23))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_MOLAR_GAS_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_MOLAR_GAS",SWIG_From_double((double)((8.314472e0))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_STANDARD_GAS_VOLUME_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_STANDARD_GAS_VOLUME",SWIG_From_double((double)((2.2710981e-2))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_MINUTE_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_MINUTE",SWIG_From_double((double)((6e1))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_HOUR_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_HOUR",SWIG_From_double((double)((3.6e3))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_DAY_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_DAY",SWIG_From_double((double)((8.64e4))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_WEEK_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_WEEK",SWIG_From_double((double)((6.048e5))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_INCH_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_INCH",SWIG_From_double((double)((2.54e-2))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_FOOT_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_FOOT",SWIG_From_double((double)((3.048e-1))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_YARD_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_YARD",SWIG_From_double((double)((9.144e-1))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_MILE_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_MILE",SWIG_From_double((double)((1.609344e3))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_NAUTICAL_MILE_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_NAUTICAL_MILE",SWIG_From_double((double)((1.852e3))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_FATHOM_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_FATHOM",SWIG_From_double((double)((1.8288e0))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_MIL_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_MIL",SWIG_From_double((double)((2.54e-5))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_POINT_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_POINT",SWIG_From_double((double)((3.52777777778e-4))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_TEXPOINT_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_TEXPOINT",SWIG_From_double((double)((3.51459803515e-4))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_MICRON_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_MICRON",SWIG_From_double((double)((1e-6))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_ANGSTROM_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_ANGSTROM",SWIG_From_double((double)((1e-10))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_HECTARE_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_HECTARE",SWIG_From_double((double)((1e4))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_ACRE_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_ACRE",SWIG_From_double((double)((4.04685642241e3))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_BARN_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_BARN",SWIG_From_double((double)((1e-28))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_LITER_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_LITER",SWIG_From_double((double)((1e-3))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_US_GALLON_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_US_GALLON",SWIG_From_double((double)((3.78541178402e-3))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_QUART_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_QUART",SWIG_From_double((double)((9.46352946004e-4))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_PINT_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_PINT",SWIG_From_double((double)((4.73176473002e-4))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_CUP_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_CUP",SWIG_From_double((double)((2.36588236501e-4))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_FLUID_OUNCE_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_FLUID_OUNCE",SWIG_From_double((double)((2.95735295626e-5))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_TABLESPOON_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_TABLESPOON",SWIG_From_double((double)((1.47867647813e-5))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_TEASPOON_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_TEASPOON",SWIG_From_double((double)((4.92892159375e-6))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_CANADIAN_GALLON_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_CANADIAN_GALLON",SWIG_From_double((double)((4.54609e-3))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_UK_GALLON_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_UK_GALLON",SWIG_From_double((double)((4.546092e-3))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_MILES_PER_HOUR_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_MILES_PER_HOUR",SWIG_From_double((double)((4.4704e-1))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_KILOMETERS_PER_HOUR_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_KILOMETERS_PER_HOUR",SWIG_From_double((double)((2.77777777778e-1))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_KNOT_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_KNOT",SWIG_From_double((double)((5.14444444444e-1))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_POUND_MASS_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_POUND_MASS",SWIG_From_double((double)((4.5359237e-1))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_OUNCE_MASS_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_OUNCE_MASS",SWIG_From_double((double)((2.8349523125e-2))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_TON_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_TON",SWIG_From_double((double)((9.0718474e2))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_METRIC_TON_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_METRIC_TON",SWIG_From_double((double)((1e3))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_UK_TON_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_UK_TON",SWIG_From_double((double)((1.0160469088e3))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_TROY_OUNCE_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_TROY_OUNCE",SWIG_From_double((double)((3.1103475e-2))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_CARAT_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_CARAT",SWIG_From_double((double)((2e-4))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_UNIFIED_ATOMIC_MASS_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_UNIFIED_ATOMIC_MASS",SWIG_From_double((double)((1.660538782e-27))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_GRAM_FORCE_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_GRAM_FORCE",SWIG_From_double((double)((9.80665e-3))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_POUND_FORCE_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_POUND_FORCE",SWIG_From_double((double)((4.44822161526e0))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_KILOPOUND_FORCE_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_KILOPOUND_FORCE",SWIG_From_double((double)((4.44822161526e3))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_POUNDAL_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_POUNDAL",SWIG_From_double((double)((1.38255e-1))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_CALORIE_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_CALORIE",SWIG_From_double((double)((4.1868e0))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_BTU_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_BTU",SWIG_From_double((double)((1.05505585262e3))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_THERM_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_THERM",SWIG_From_double((double)((1.05506e8))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_HORSEPOWER_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_HORSEPOWER",SWIG_From_double((double)((7.457e2))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_BAR_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_BAR",SWIG_From_double((double)((1e5))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_STD_ATMOSPHERE_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_STD_ATMOSPHERE",SWIG_From_double((double)((1.01325e5))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_TORR_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_TORR",SWIG_From_double((double)((1.33322368421e2))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_METER_OF_MERCURY_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_METER_OF_MERCURY",SWIG_From_double((double)((1.33322368421e5))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_INCH_OF_MERCURY_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_INCH_OF_MERCURY",SWIG_From_double((double)((3.38638815789e3))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_INCH_OF_WATER_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_INCH_OF_WATER",SWIG_From_double((double)((2.490889e2))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_PSI_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_PSI",SWIG_From_double((double)((6.89475729317e3))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_POISE_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_POISE",SWIG_From_double((double)((1e-1))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_STOKES_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_STOKES",SWIG_From_double((double)((1e-4))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_STILB_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_STILB",SWIG_From_double((double)((1e4))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_LUMEN_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_LUMEN",SWIG_From_double((double)((1e0))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_LUX_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_LUX",SWIG_From_double((double)((1e0))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_PHOT_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_PHOT",SWIG_From_double((double)((1e4))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_FOOTCANDLE_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_FOOTCANDLE",SWIG_From_double((double)((1.076e1))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_LAMBERT_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_LAMBERT",SWIG_From_double((double)((1e4))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_FOOTLAMBERT_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_FOOTLAMBERT",SWIG_From_double((double)((1.07639104e1))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_CURIE_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_CURIE",SWIG_From_double((double)((3.7e10))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_ROENTGEN_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_ROENTGEN",SWIG_From_double((double)((2.58e-4))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_RAD_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_RAD",SWIG_From_double((double)((1e-2))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_SOLAR_MASS_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_SOLAR_MASS",SWIG_From_double((double)((1.98892e30))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_BOHR_RADIUS_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_BOHR_RADIUS",SWIG_From_double((double)((5.291772083e-11))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_NEWTON_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_NEWTON",SWIG_From_double((double)((1e0))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_DYNE_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_DYNE",SWIG_From_double((double)((1e-5))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_JOULE_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_JOULE",SWIG_From_double((double)((1e0))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_ERG_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_ERG",SWIG_From_double((double)((1e-7))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_STEFAN_BOLTZMANN_CONSTANT_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_STEFAN_BOLTZMANN_CONSTANT",SWIG_From_double((double)((5.67040047374e-8))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_THOMSON_CROSS_SECTION_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_THOMSON_CROSS_SECTION",SWIG_From_double((double)((6.65245893699e-29))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_BOHR_MAGNETON_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_BOHR_MAGNETON",SWIG_From_double((double)((9.27400899e-24))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_NUCLEAR_MAGNETON_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_NUCLEAR_MAGNETON",SWIG_From_double((double)((5.05078317e-27))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_ELECTRON_MAGNETIC_MOMENT_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_ELECTRON_MAGNETIC_MOMENT",SWIG_From_double((double)((9.28476362e-24))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_PROTON_MAGNETIC_MOMENT_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_PROTON_MAGNETIC_MOMENT",SWIG_From_double((double)((1.410606633e-26))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_FARADAY_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_FARADAY",SWIG_From_double((double)((9.64853429775e4))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_ELECTRON_CHARGE_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_ELECTRON_CHARGE",SWIG_From_double((double)((1.602176487e-19))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_VACUUM_PERMITTIVITY_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_VACUUM_PERMITTIVITY",SWIG_From_double((double)((8.854187817e-12))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_VACUUM_PERMEABILITY_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_VACUUM_PERMEABILITY",SWIG_From_double((double)((1.25663706144e-6))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_DEBYE_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_DEBYE",SWIG_From_double((double)((3.33564095198e-30))));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *GSL_CONST_MKSA_GAUSS_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "GSL_CONST_MKSA_GAUSS",SWIG_From_double((double)((1e-4))));
-  return SWIG_Py_Void();
-}
-
-
 SWIGINTERN PyObject *M_PI_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *module;
   PyObject *d;
@@ -18755,6 +17890,17 @@ SWIGINTERN PyObject *halo_model_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyO
 }
 
 
+SWIGINTERN PyObject *emu_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *module;
+  PyObject *d;
+  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
+  d = PyModule_GetDict(module);
+  if (!d) return NULL;
+  SWIG_Python_SetConstant(d, "emu",SWIG_From_int((int)(ccl_emu)));
+  return SWIG_Py_Void();
+}
+
+
 SWIGINTERN PyObject *nobaryons_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *module;
   PyObject *d;
@@ -19263,6 +18409,28 @@ SWIGINTERN PyObject *CCL_ERROR_NU_INT_swigconstant(PyObject *SWIGUNUSEDPARM(self
   d = PyModule_GetDict(module);
   if (!d) return NULL;
   SWIG_Python_SetConstant(d, "CCL_ERROR_NU_INT",SWIG_From_int((int)(1037)));
+  return SWIG_Py_Void();
+}
+
+
+SWIGINTERN PyObject *CCL_ERROR_EMULATOR_BOUND_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *module;
+  PyObject *d;
+  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
+  d = PyModule_GetDict(module);
+  if (!d) return NULL;
+  SWIG_Python_SetConstant(d, "CCL_ERROR_EMULATOR_BOUND",SWIG_From_int((int)(1038)));
+  return SWIG_Py_Void();
+}
+
+
+SWIGINTERN PyObject *CCL_ERROR_NU_SOLVE_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *module;
+  PyObject *d;
+  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
+  d = PyModule_GetDict(module);
+  if (!d) return NULL;
+  SWIG_Python_SetConstant(d, "CCL_ERROR_NU_SOLVE",SWIG_From_int((int)(1039)));
   return SWIG_Py_Void();
 }
 
@@ -20154,8 +19322,14 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"data_p_lin_get", _wrap_data_p_lin_get, METH_VARARGS, (char *)"data_p_lin_get(data self) -> gsl_spline2d *"},
 	 { (char *)"data_p_nl_set", _wrap_data_p_nl_set, METH_VARARGS, (char *)"data_p_nl_set(data self, gsl_spline2d * p_nl)"},
 	 { (char *)"data_p_nl_get", _wrap_data_p_nl_get, METH_VARARGS, (char *)"data_p_nl_get(data self) -> gsl_spline2d *"},
-	 { (char *)"data_k_min_set", _wrap_data_k_min_set, METH_VARARGS, (char *)"data_k_min_set(data self, double k_min)"},
-	 { (char *)"data_k_min_get", _wrap_data_k_min_get, METH_VARARGS, (char *)"data_k_min_get(data self) -> double"},
+	 { (char *)"data_k_min_lin_set", _wrap_data_k_min_lin_set, METH_VARARGS, (char *)"data_k_min_lin_set(data self, double k_min_lin)"},
+	 { (char *)"data_k_min_lin_get", _wrap_data_k_min_lin_get, METH_VARARGS, (char *)"data_k_min_lin_get(data self) -> double"},
+	 { (char *)"data_k_min_nl_set", _wrap_data_k_min_nl_set, METH_VARARGS, (char *)"data_k_min_nl_set(data self, double k_min_nl)"},
+	 { (char *)"data_k_min_nl_get", _wrap_data_k_min_nl_get, METH_VARARGS, (char *)"data_k_min_nl_get(data self) -> double"},
+	 { (char *)"data_k_max_lin_set", _wrap_data_k_max_lin_set, METH_VARARGS, (char *)"data_k_max_lin_set(data self, double k_max_lin)"},
+	 { (char *)"data_k_max_lin_get", _wrap_data_k_max_lin_get, METH_VARARGS, (char *)"data_k_max_lin_get(data self) -> double"},
+	 { (char *)"data_k_max_nl_set", _wrap_data_k_max_nl_set, METH_VARARGS, (char *)"data_k_max_nl_set(data self, double k_max_nl)"},
+	 { (char *)"data_k_max_nl_get", _wrap_data_k_max_nl_get, METH_VARARGS, (char *)"data_k_max_nl_get(data self) -> double"},
 	 { (char *)"new_data", _wrap_new_data, METH_VARARGS, (char *)"new_data() -> data"},
 	 { (char *)"delete_data", _wrap_delete_data, METH_VARARGS, (char *)"delete_data(data self)"},
 	 { (char *)"data_swigregister", data_swigregister, METH_VARARGS, NULL},
@@ -20237,6 +19411,7 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"distance_modulus_vec", _wrap_distance_modulus_vec, METH_VARARGS, (char *)"distance_modulus_vec(cosmology cosmo, double * a, double * output, int * status)"},
 	 { (char *)"scale_factor_of_chi_vec", _wrap_scale_factor_of_chi_vec, METH_VARARGS, (char *)"scale_factor_of_chi_vec(cosmology cosmo, double * chi, double * output, int * status)"},
 	 { (char *)"omega_x_vec", _wrap_omega_x_vec, METH_VARARGS, (char *)"omega_x_vec(cosmology cosmo, int label, double * a, double * output, int * status)"},
+	 { (char *)"cosmology_write_power_class_z", _wrap_cosmology_write_power_class_z, METH_VARARGS, (char *)"cosmology_write_power_class_z(char * filename, cosmology cosmo, double z, int * status)"},
 	 { (char *)"bcm_model_fkz", _wrap_bcm_model_fkz, METH_VARARGS, (char *)"bcm_model_fkz(cosmology cosmo, double k, double a, int * status) -> double"},
 	 { (char *)"linear_matter_power", _wrap_linear_matter_power, METH_VARARGS, (char *)"linear_matter_power(cosmology cosmo, double k, double a, int * status) -> double"},
 	 { (char *)"nonlin_matter_power", _wrap_nonlin_matter_power, METH_VARARGS, (char *)"nonlin_matter_power(cosmology cosmo, double k, double a, int * status) -> double"},
@@ -20310,107 +19485,6 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"angular_cl", _wrap_angular_cl, METH_VARARGS, (char *)"angular_cl(cosmology cosmo, int l, CCL_ClTracer clt1, CCL_ClTracer clt2, int * status) -> double"},
 	 { (char *)"cl_tracer_new_wrapper", _wrap_cl_tracer_new_wrapper, METH_VARARGS, (char *)"cl_tracer_new_wrapper(cosmology cosmo, int tracer_type, int has_rsd, int has_magnification, int has_intrinsic_alignment, int nz_n, int nn, int nz_b, int nb, int nz_s, int ns, int nz_ba, int nba, int nz_rf, int nrf, double z_source, int * status) -> CCL_ClTracer"},
 	 { (char *)"angular_cl_vec", _wrap_angular_cl_vec, METH_VARARGS, (char *)"angular_cl_vec(cosmology cosmo, CCL_ClTracer clt1, CCL_ClTracer clt2, double * ell, double * output, int * status)"},
-	 { (char *)"GSL_CONST_MKSA_SPEED_OF_LIGHT_swigconstant", GSL_CONST_MKSA_SPEED_OF_LIGHT_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_GRAVITATIONAL_CONSTANT_swigconstant", GSL_CONST_MKSA_GRAVITATIONAL_CONSTANT_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_PLANCKS_CONSTANT_H_swigconstant", GSL_CONST_MKSA_PLANCKS_CONSTANT_H_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_PLANCKS_CONSTANT_HBAR_swigconstant", GSL_CONST_MKSA_PLANCKS_CONSTANT_HBAR_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_ASTRONOMICAL_UNIT_swigconstant", GSL_CONST_MKSA_ASTRONOMICAL_UNIT_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_LIGHT_YEAR_swigconstant", GSL_CONST_MKSA_LIGHT_YEAR_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_PARSEC_swigconstant", GSL_CONST_MKSA_PARSEC_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_GRAV_ACCEL_swigconstant", GSL_CONST_MKSA_GRAV_ACCEL_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_ELECTRON_VOLT_swigconstant", GSL_CONST_MKSA_ELECTRON_VOLT_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_MASS_ELECTRON_swigconstant", GSL_CONST_MKSA_MASS_ELECTRON_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_MASS_MUON_swigconstant", GSL_CONST_MKSA_MASS_MUON_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_MASS_PROTON_swigconstant", GSL_CONST_MKSA_MASS_PROTON_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_MASS_NEUTRON_swigconstant", GSL_CONST_MKSA_MASS_NEUTRON_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_RYDBERG_swigconstant", GSL_CONST_MKSA_RYDBERG_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_BOLTZMANN_swigconstant", GSL_CONST_MKSA_BOLTZMANN_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_MOLAR_GAS_swigconstant", GSL_CONST_MKSA_MOLAR_GAS_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_STANDARD_GAS_VOLUME_swigconstant", GSL_CONST_MKSA_STANDARD_GAS_VOLUME_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_MINUTE_swigconstant", GSL_CONST_MKSA_MINUTE_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_HOUR_swigconstant", GSL_CONST_MKSA_HOUR_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_DAY_swigconstant", GSL_CONST_MKSA_DAY_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_WEEK_swigconstant", GSL_CONST_MKSA_WEEK_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_INCH_swigconstant", GSL_CONST_MKSA_INCH_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_FOOT_swigconstant", GSL_CONST_MKSA_FOOT_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_YARD_swigconstant", GSL_CONST_MKSA_YARD_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_MILE_swigconstant", GSL_CONST_MKSA_MILE_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_NAUTICAL_MILE_swigconstant", GSL_CONST_MKSA_NAUTICAL_MILE_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_FATHOM_swigconstant", GSL_CONST_MKSA_FATHOM_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_MIL_swigconstant", GSL_CONST_MKSA_MIL_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_POINT_swigconstant", GSL_CONST_MKSA_POINT_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_TEXPOINT_swigconstant", GSL_CONST_MKSA_TEXPOINT_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_MICRON_swigconstant", GSL_CONST_MKSA_MICRON_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_ANGSTROM_swigconstant", GSL_CONST_MKSA_ANGSTROM_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_HECTARE_swigconstant", GSL_CONST_MKSA_HECTARE_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_ACRE_swigconstant", GSL_CONST_MKSA_ACRE_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_BARN_swigconstant", GSL_CONST_MKSA_BARN_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_LITER_swigconstant", GSL_CONST_MKSA_LITER_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_US_GALLON_swigconstant", GSL_CONST_MKSA_US_GALLON_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_QUART_swigconstant", GSL_CONST_MKSA_QUART_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_PINT_swigconstant", GSL_CONST_MKSA_PINT_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_CUP_swigconstant", GSL_CONST_MKSA_CUP_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_FLUID_OUNCE_swigconstant", GSL_CONST_MKSA_FLUID_OUNCE_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_TABLESPOON_swigconstant", GSL_CONST_MKSA_TABLESPOON_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_TEASPOON_swigconstant", GSL_CONST_MKSA_TEASPOON_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_CANADIAN_GALLON_swigconstant", GSL_CONST_MKSA_CANADIAN_GALLON_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_UK_GALLON_swigconstant", GSL_CONST_MKSA_UK_GALLON_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_MILES_PER_HOUR_swigconstant", GSL_CONST_MKSA_MILES_PER_HOUR_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_KILOMETERS_PER_HOUR_swigconstant", GSL_CONST_MKSA_KILOMETERS_PER_HOUR_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_KNOT_swigconstant", GSL_CONST_MKSA_KNOT_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_POUND_MASS_swigconstant", GSL_CONST_MKSA_POUND_MASS_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_OUNCE_MASS_swigconstant", GSL_CONST_MKSA_OUNCE_MASS_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_TON_swigconstant", GSL_CONST_MKSA_TON_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_METRIC_TON_swigconstant", GSL_CONST_MKSA_METRIC_TON_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_UK_TON_swigconstant", GSL_CONST_MKSA_UK_TON_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_TROY_OUNCE_swigconstant", GSL_CONST_MKSA_TROY_OUNCE_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_CARAT_swigconstant", GSL_CONST_MKSA_CARAT_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_UNIFIED_ATOMIC_MASS_swigconstant", GSL_CONST_MKSA_UNIFIED_ATOMIC_MASS_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_GRAM_FORCE_swigconstant", GSL_CONST_MKSA_GRAM_FORCE_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_POUND_FORCE_swigconstant", GSL_CONST_MKSA_POUND_FORCE_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_KILOPOUND_FORCE_swigconstant", GSL_CONST_MKSA_KILOPOUND_FORCE_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_POUNDAL_swigconstant", GSL_CONST_MKSA_POUNDAL_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_CALORIE_swigconstant", GSL_CONST_MKSA_CALORIE_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_BTU_swigconstant", GSL_CONST_MKSA_BTU_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_THERM_swigconstant", GSL_CONST_MKSA_THERM_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_HORSEPOWER_swigconstant", GSL_CONST_MKSA_HORSEPOWER_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_BAR_swigconstant", GSL_CONST_MKSA_BAR_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_STD_ATMOSPHERE_swigconstant", GSL_CONST_MKSA_STD_ATMOSPHERE_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_TORR_swigconstant", GSL_CONST_MKSA_TORR_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_METER_OF_MERCURY_swigconstant", GSL_CONST_MKSA_METER_OF_MERCURY_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_INCH_OF_MERCURY_swigconstant", GSL_CONST_MKSA_INCH_OF_MERCURY_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_INCH_OF_WATER_swigconstant", GSL_CONST_MKSA_INCH_OF_WATER_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_PSI_swigconstant", GSL_CONST_MKSA_PSI_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_POISE_swigconstant", GSL_CONST_MKSA_POISE_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_STOKES_swigconstant", GSL_CONST_MKSA_STOKES_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_STILB_swigconstant", GSL_CONST_MKSA_STILB_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_LUMEN_swigconstant", GSL_CONST_MKSA_LUMEN_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_LUX_swigconstant", GSL_CONST_MKSA_LUX_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_PHOT_swigconstant", GSL_CONST_MKSA_PHOT_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_FOOTCANDLE_swigconstant", GSL_CONST_MKSA_FOOTCANDLE_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_LAMBERT_swigconstant", GSL_CONST_MKSA_LAMBERT_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_FOOTLAMBERT_swigconstant", GSL_CONST_MKSA_FOOTLAMBERT_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_CURIE_swigconstant", GSL_CONST_MKSA_CURIE_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_ROENTGEN_swigconstant", GSL_CONST_MKSA_ROENTGEN_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_RAD_swigconstant", GSL_CONST_MKSA_RAD_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_SOLAR_MASS_swigconstant", GSL_CONST_MKSA_SOLAR_MASS_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_BOHR_RADIUS_swigconstant", GSL_CONST_MKSA_BOHR_RADIUS_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_NEWTON_swigconstant", GSL_CONST_MKSA_NEWTON_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_DYNE_swigconstant", GSL_CONST_MKSA_DYNE_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_JOULE_swigconstant", GSL_CONST_MKSA_JOULE_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_ERG_swigconstant", GSL_CONST_MKSA_ERG_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_STEFAN_BOLTZMANN_CONSTANT_swigconstant", GSL_CONST_MKSA_STEFAN_BOLTZMANN_CONSTANT_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_THOMSON_CROSS_SECTION_swigconstant", GSL_CONST_MKSA_THOMSON_CROSS_SECTION_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_BOHR_MAGNETON_swigconstant", GSL_CONST_MKSA_BOHR_MAGNETON_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_NUCLEAR_MAGNETON_swigconstant", GSL_CONST_MKSA_NUCLEAR_MAGNETON_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_ELECTRON_MAGNETIC_MOMENT_swigconstant", GSL_CONST_MKSA_ELECTRON_MAGNETIC_MOMENT_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_PROTON_MAGNETIC_MOMENT_swigconstant", GSL_CONST_MKSA_PROTON_MAGNETIC_MOMENT_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_FARADAY_swigconstant", GSL_CONST_MKSA_FARADAY_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_ELECTRON_CHARGE_swigconstant", GSL_CONST_MKSA_ELECTRON_CHARGE_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_VACUUM_PERMITTIVITY_swigconstant", GSL_CONST_MKSA_VACUUM_PERMITTIVITY_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_VACUUM_PERMEABILITY_swigconstant", GSL_CONST_MKSA_VACUUM_PERMEABILITY_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_DEBYE_swigconstant", GSL_CONST_MKSA_DEBYE_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"GSL_CONST_MKSA_GAUSS_swigconstant", GSL_CONST_MKSA_GAUSS_swigconstant, METH_VARARGS, NULL},
 	 { (char *)"M_PI_swigconstant", M_PI_swigconstant, METH_VARARGS, NULL},
 	 { (char *)"K_PIVOT_swigconstant", K_PIVOT_swigconstant, METH_VARARGS, NULL},
 	 { (char *)"CLIGHT_HMPC_swigconstant", CLIGHT_HMPC_swigconstant, METH_VARARGS, NULL},
@@ -20469,6 +19543,7 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"linear_swigconstant", linear_swigconstant, METH_VARARGS, NULL},
 	 { (char *)"halofit_swigconstant", halofit_swigconstant, METH_VARARGS, NULL},
 	 { (char *)"halo_model_swigconstant", halo_model_swigconstant, METH_VARARGS, NULL},
+	 { (char *)"emu_swigconstant", emu_swigconstant, METH_VARARGS, NULL},
 	 { (char *)"nobaryons_swigconstant", nobaryons_swigconstant, METH_VARARGS, NULL},
 	 { (char *)"bcm_swigconstant", bcm_swigconstant, METH_VARARGS, NULL},
 	 { (char *)"tinker_swigconstant", tinker_swigconstant, METH_VARARGS, NULL},
@@ -20499,6 +19574,8 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"CCL_ERROR_HMF_INTERP_swigconstant", CCL_ERROR_HMF_INTERP_swigconstant, METH_VARARGS, NULL},
 	 { (char *)"CCL_ERROR_PARAMETERS_swigconstant", CCL_ERROR_PARAMETERS_swigconstant, METH_VARARGS, NULL},
 	 { (char *)"CCL_ERROR_NU_INT_swigconstant", CCL_ERROR_NU_INT_swigconstant, METH_VARARGS, NULL},
+	 { (char *)"CCL_ERROR_EMULATOR_BOUND_swigconstant", CCL_ERROR_EMULATOR_BOUND_swigconstant, METH_VARARGS, NULL},
+	 { (char *)"CCL_ERROR_NU_SOLVE_swigconstant", CCL_ERROR_NU_SOLVE_swigconstant, METH_VARARGS, NULL},
 	 { (char *)"CCL_ERROR_POLICY_EXIT_swigconstant", CCL_ERROR_POLICY_EXIT_swigconstant, METH_VARARGS, NULL},
 	 { (char *)"CCL_ERROR_POLICY_CONTINUE_swigconstant", CCL_ERROR_POLICY_CONTINUE_swigconstant, METH_VARARGS, NULL},
 	 { (char *)"raise_exception", _wrap_raise_exception, METH_VARARGS, (char *)"raise_exception(int err, char * msg)"},
