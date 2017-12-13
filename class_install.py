@@ -1,3 +1,4 @@
+from __future__ import print_function
 import os
 import sys
 import getopt
@@ -29,8 +30,8 @@ def cleanup(full_cleanup=False) :
 def check_command(command) :
     st=os.system(command+" >>log_class_install 2>&1")
     if st :
-        print " Command "+command[:10]+"... failed."
-        print " See log file contents"
+        print(" Command "+command[:10]+"... failed.")
+        print(" See log file contents")
         os.system("cat log_class_install")
         cleanup(full_cleanup=True)
         sys.exit(1)
@@ -39,33 +40,33 @@ def check_command(command) :
 def mod_makefile(cname) :
     for line in fileinput.FileInput("Makefile",inplace=1) :
         if line.startswith('CC ') :
-            print "CC       = %s\n"%cname,
+            print("CC       = %s\n"%cname,end="")
         else :
-            print "%s"%line,
+            print("%s"%line,end="")
         
 #Check input arguments
 try :
     opts, args = getopt.getopt(sys.argv[1:],"hc:",["help","c_comp="])
 except getopt.GetoptError:
-    print help_msg
+    print(help_msg)
     sys.exit(1)
     
 c_comp='gcc'
 for opt,arg in opts :
     if opt in ("-h","--help") :
-        print help_msg
+        print(help_msg)
         sys.exit(1)
     elif opt in ("-c","--c_comp") :
         c_comp=arg
 
 #Actual installation        
-print "Downloading class..."
+print("Downloading class...")
 check_command('wget -q https://github.com/lesgourg/class_public/archive/v2.6.3.tar.gz')
-print "Unpacking..."
+print("Unpacking...")
 check_command('tar -xvf v2.6.3.tar.gz ')
 check_command('mv class_public-2.6.3 class')
 
-print "Compiling..."
+print("Compiling...")
 os.chdir('class')
 mod_makefile(c_comp)
 check_command('make libclass.a')
@@ -77,5 +78,5 @@ else :
     raise OSError("Can't figure out your system : "+sys.platform)
 check_command(comp_string)
 
-print "Cleanup"
+print("Cleanup")
 cleanup()
