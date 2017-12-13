@@ -61,9 +61,12 @@ for opt,arg in opts :
 
 #Actual installation        
 print("Downloading class...")
-check_command('wget -q https://github.com/lesgourg/class_public/archive/v2.6.3.tar.gz')
-print("Unpacking...")
-check_command('tar -xvf v2.6.3.tar.gz ')
+if sys.platform.startswith('linux') :
+    check_command('wget -q https://github.com/lesgourg/class_public/archive/v2.6.3.tar.gz')
+    print("Unpacking...")
+    check_command('tar -xvf v2.6.3.tar.gz ')
+if sys.platform.startswith('darwin') :
+    check_command('curl -L https://github.com/lesgourg/class_public/archive/v2.6.3.tar.gz | tar xz')
 check_command('mv class_public-2.6.3 class')
 
 print("Compiling...")
