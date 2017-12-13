@@ -679,18 +679,8 @@ Using relations from \cite{Kilbinger2017}, we can write
   C_{\ell}^{g\gamma}&=\frac{1}{2}\sqrt{\frac{(\ell+2)!}{(\ell-2)!}}C_{\ell}^{g\psi}
   \\ \langle g\gamma_T\rangle(\theta)&
   =\frac{1}{4\pi}\sum_{\ell}\frac{(2\ell+1)}{\ell(\ell+1)}C_{\ell}^{g\kappa}P_{\ell}^2(\cos\theta)
-  \label{eq:xi_g_gamma}\\
-  \xi_+(\theta)&=\frac{1}{4\pi}\sum_{\ell}{(2\ell+1)}C_{\ell}^{\gamma\gamma*}
-  P_{\ell}(\cos\theta)\label{eq:xi_p}\\
-  \xi_-(\theta)&\approx\frac{1}{4\pi}\sum_{\ell}{(2\ell+1)}
-  C_{\ell}^{\gamma\gamma*}\sqrt{\frac{(\ell-4)!}{(\ell+4)!}}
-  P_{\ell}^4(\cos\theta)\label{eq:xi_m}
+  \label{eq:xi_g_gamma}\,.
 \end{align}
-\todo{Can't relate eq.~\ref{eq:xi_p_D} and \ref{eq:xi_p}.
-Simply took the relation between $P_\ell^m$ and $J_m(\ell \theta)$ to get this expression
-from the Hankel transform for $\xi_-$. Should work at small scales (high $\ell$) as it converges to
-hankel transform but cannot gurantee at large scales (low $\ell$). To be revisited.
-On positive note, eq.~\ref{eq:xi_g_gamma} matches expression in \cite{Putter2010}.}
 
 The {\tt ccl\_tracer\_corr\_legendre} routine computes these transform to convert angular power
 spectra, $C_\ell$, into correlation functions. We use the associated Legendre function
@@ -698,6 +688,8 @@ implementation from the {\tt GSL} library. {\tt ccl\_tracer\_corr\_legendre} rou
 can be very slow, especially for polynomials $P_\ell^m$ with $m>0$. Note that $P_\ell^m$
 evaluations need to be done only once and can then be saved as long as $\ell$ and $\theta$ values
 do not change. However, \ccl has not yet implemented this feature.
+
+The {\tt ccl\_tracer\_corr\_legendre} methods currently does not support the computation of the shear correlation functions $\xi_{\pm}$, and the approximate $\tt ccl\_tracer\_corr\_fftlog} (described below) should be used instead. As demonstrated in \cite{Kilbinger2017} and \cite{Kitching17}, this approximation should be sufficient even for futuristic surveys.
 
 \paragraph{Hankel Transform}
 Notice that in the flat-sky limit, the expressions in Eqs.~\ref{eq:xi_gg_D}--\ref{eq:xi_m_D} can be
