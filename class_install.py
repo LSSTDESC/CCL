@@ -9,7 +9,7 @@ help_msg= "Usage : class_install.py [options]\n"
 help_msg+="Options :\n"
 help_msg+=" -h, --help : This help\n"
 help_msg+=" -c, --c-comp= : which C compiler to use (default: gcc)\n"
-
+help_msg+=" -omp, --enable-openmp: enable OpenMP (default: yes if Linux)\n"
 #Current directory
 dir_path=os.path.dirname(os.path.realpath(__file__))
 
@@ -37,11 +37,13 @@ def check_command(command) :
         sys.exit(1)
 
 #Makes necessary modifications to CLASS's makefile
-def mod_makefile(cname) :
+def mod_makefile(cname,ompflag) :
     for line in fileinput.FileInput("Makefile",inplace=1) :
         if line.startswith('CC ') :
             print("CC       = %s\n"%cname,end="")
-        else :
+        elif line.startswith('OMPFLAG ') :
+            print("OMPFLAG  =%s\n"%ompflag,end="")
+        else:
             print("%s"%line,end="")
         
 #Check input arguments
@@ -52,12 +54,15 @@ except getopt.GetoptError:
     sys.exit(1)
     
 c_comp='gcc'
+ompflag=''
 for opt,arg in opts :
     if opt in ("-h","--help") :
         print(help_msg)
         sys.exit(1)
     elif opt in ("-c","--c_comp") :
         c_comp=arg
+    elif opt in ("-omp","--enable-openmp"):
+        ompflag='-fopenmp'
 
 #Actual installation        
 print("Downloading class...")
@@ -71,12 +76,12 @@ check_command('mv class_public-2.6.3 class')
 
 print("Compiling...")
 os.chdir('class')
-mod_makefile(c_comp)
+mod_makefile(c_comp,ompflag)
 check_command('make libclass.a')
 if sys.platform.startswith('linux') :
     comp_string=c_comp+' -shared -o libclass.so -Wl,--whole-archive libclass.a -Wl,--no-whole-archive -lgomp >> ./log_class_install ; '
 elif sys.platform.startswith('darwin') :
-    comp_string=c_comp+"gcc -fpic -shared -o libclass.dylib -Wl,-all_load libclass.a -Wl,-noall_load"
+    comp_string=c_comp+" -fpic -shared -o libclass.dylib -Wl,-all_load libclass.a -Wl,-noall_load"
 else :
     raise OSError("Can't figure out your system : "+sys.platform)
 check_command(comp_string)
