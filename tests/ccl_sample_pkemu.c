@@ -20,7 +20,6 @@ int main(int argc, char * argv[])
   config.transfer_function_method = ccl_emulator;
   config.matter_power_spectrum_method = ccl_emu;
 
-  //ccl_parameters params = ccl_parameters_create_flat_lcdm(Omega_c, Omega_b, h, normp, n_s, &status);
   ccl_parameters params = ccl_parameters_create_lcdm_nu(Omega_c, Omega_b, Omega_k,h, normp, n_s, Neff, Nmass, mnu, &status);
   ccl_cosmology * cosmo = ccl_cosmology_create(params, config);
 
@@ -40,10 +39,6 @@ int main(int argc, char * argv[])
     p2 = ccl_linear_matter_power(cosmo,k, a_at_z2,&status);
     printf("%le %le %le %le %le %le %le\n", k, p,p1,p2,pnl,p1nl,p2nl);
   }
-
-  /*printf("sigma_8 = %.6lE\n", ccl_sigmaR(cosmo,8./h,&status));
-  printf("Consistency check: sigma_8 = %.6lE\n", ccl_sigma8(cosmo,&status));
-  printf("Completed. Status = %d\n",status);*/
 
   return 0;
 }

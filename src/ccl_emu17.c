@@ -156,19 +156,6 @@ static void emu(double *xstar, double **ystar, int* status, ccl_cosmology* cosmo
         inited = 1;
     }
     
-    /* Something is in there.
-    // Can I see KrigBasis with stuff in it?
-    for(k=0; k<2; k++) {
-        for(i=0; i<peta[k]; i++) {
-            for(j=0; j<m[k]; j++) {
-                printf("%f ", KrigBasis[k][i][j]);
-            }
-            printf("\n");
-        }
-        printf("\n");
-    }
-     */
-    
     // Transform w_a into (-w_0-w_a)^(1/4)
     xstar[6] = pow(-xstar[5]-xstar[6], 0.25);
     // Check the inputs to make sure we're interpolating.
@@ -236,14 +223,6 @@ static void emu(double *xstar, double **ystar, int* status, ccl_cosmology* cosmo
         //printf("%f %f\n", xstar[i], xstarstd[i]);
     }
     
-    /* Yes.
-    // Are we getting through
-    for(i=0; i<p; i++) {
-        printf("%f ", xstarstd[i]);
-    }
-    printf("\n");
-     */
-    
     // compute the covariances between the new input and sims for all the PCs.
     for(ee=0; ee<2; ee++) {
         for(i=0; i<peta[ee]; i++) {
@@ -285,9 +264,7 @@ static void emu(double *xstar, double **ystar, int* status, ccl_cosmology* cosmo
             ystaremu[i] += K[i][j]*wstar[j];
         }
         ystaremu[i] = ystaremu[i]*sd + mean[i];
-        
-        //printf("%f\n", ystaremu[i]);
-        
+                
         // Convert to P(k)
         //ystaremu[i] = ystaremu[i] - 1.5*log10(mode[i % nmode]);
         //ystaremu[i] = 2*M_PI*M_PI*pow(10, ystaremu[i]);
