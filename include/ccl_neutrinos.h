@@ -41,7 +41,7 @@ gsl_spline* calculate_nu_phasespace_spline(int *status);
  * For specific cases see documentation for ccl_error.c
  * @return OmNuh2 Fractional energy density of neutrions with mass mnu, multiplied by h squared. 
  */
-double Omeganuh2 (double a, double Neff, double mnu, double TCMB, gsl_interp_accel* accel, int * status);
+double ccl_Omeganuh2 (double a, double Neff, double mnu, double TCMB, gsl_interp_accel* accel, int * status);
 
 /** 
  * Returns mass of one neutrino species at a scale factor a. 
@@ -54,7 +54,7 @@ double Omeganuh2 (double a, double Neff, double mnu, double TCMB, gsl_interp_acc
  * For specific cases see documentation for ccl_error.c
  * @return Mnu Neutrino mass [eV]. 
  */
-double Omeganuh2_to_Mnu (double a, double Neff, double OmNuh2, double TCMB, gsl_interp_accel* accel, int * status);
+double ccl_Omeganuh2_to_Mnu (double a, double Neff, double OmNuh2, double TCMB, gsl_interp_accel* accel, int * status);
 
 #ifdef __cplusplus
 }

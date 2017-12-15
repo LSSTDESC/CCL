@@ -243,7 +243,7 @@ void ccl_parameters_fill_initial(ccl_parameters * params, int *status)
   // Neutrinos: if massive neutrinos are present, calculate the phase_space integral.
   if((params->N_nu_mass)>0.0001) {
     // Pass NULL for the accelerator here because we don't have our cosmology object defined yet.
-    params->Omega_n_mass = Omeganuh2(1.0, params->N_nu_mass, params->mnu, params->T_CMB, NULL, status) / ((params->h)*(params->h));
+    params->Omega_n_mass = ccl_Omeganuh2(1.0, params->N_nu_mass, params->mnu, params->T_CMB, NULL, status) / ((params->h)*(params->h));
     ccl_check_status_nocosmo(status);
   } 
   else{

@@ -94,7 +94,7 @@ double nu_phasespace_intg(gsl_interp_accel* accel, double mnuOT, int* status)
 INPUTS: a: scale factor, Neff: number of neutrino species, mnu: total mass in eV of neutrinos, TCMB: CMB temperature, accel: pointer to an accelerator which will evaluate the neutrino phasespace spline if defined, status: pointer to status integer.
 TASK: Compute Omeganu * h^2 as a function of time.
 */
-double Omeganuh2 (double a, double Neff, double mnu, double TCMB, gsl_interp_accel* accel, int* status)
+double ccl_Omeganuh2 (double a, double Neff, double mnu, double TCMB, gsl_interp_accel* accel, int* status)
 {
   double Tnu, a4, prefix_massless, mnuone, OmNuh2;
   double Tnu_eff, mnuOT, intval, prefix_massive;
@@ -139,13 +139,13 @@ typedef struct {
 // wrapper for calling Omeganuh2 from root finding routine
 double Omeganuh2_root(double m_iter, void *params){
   OmNuh2_params *p = (OmNuh2_params *) params;
-  return Omeganuh2(p->a, p->Neff, m_iter, p->TCMB, p->accel, p->status) - p->OmNuh2_target;
+  return ccl_Omeganuh2(p->a, p->Neff, m_iter, p->TCMB, p->accel, p->status) - p->OmNuh2_target;
 }
 /* -------- ROUTINE: Omeganuh2_to_Mnu ---------
 INPUTS: a: scale factor, Neff: number of neutrino species, OmNuh2: neutrino mass density Omeganu * h^2, TCMB: CMB temperature, accel: pointer to an accelerator which will evaluate the neutrino phasespace spline if defined, status: pointer to status integer.
 TASK: Compute Omeganu * h^2 as a function of time.
 */
-double Omeganuh2_to_Mnu(double a, double Neff, double OmNuh2, double TCMB, gsl_interp_accel* accel, int* status){
+double ccl_Omeganuh2_to_Mnu(double a, double Neff, double OmNuh2, double TCMB, gsl_interp_accel* accel, int* status){
   // First check if Neff if 0
   if (Neff==0) return 0.0;
   
