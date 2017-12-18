@@ -1,3 +1,7 @@
+# Ignore RTD documentation special files
+docs/_build
+docs/*~
+
 # Ignore autoconf build files.
 Makefile
 config.h

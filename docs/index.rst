@@ -13,6 +13,7 @@ The core functions of this package include:
 The source code is available on github at https://github.com/LSSTDESC/CCL.
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+   :maxdepth: 1
+   :caption: Reference
 
+   CCL Reference/API<api/modules>
