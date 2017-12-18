@@ -20,7 +20,7 @@ import os
 from os.path import abspath, dirname, join as pjoin
 import sys
 this_dir = dirname(abspath(__file__))
-root_path = abspath(pjoin(this_dir, '../pyccl/'))
+root_path = abspath(pjoin(this_dir, '../'))
 if os.path.isdir(root_path):
     sys.path.insert(0, root_path)
 
@@ -36,7 +36,7 @@ if on_rtd:
         def __getattr__(cls, name):
             return MagicMock()
 
-    MOCK_MODULES = ['numpy']
+    MOCK_MODULES = ['numpy','pyccl','cclib','_vectorize_fn','_vectorize_fn2','_vectorize_fn3']
     sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
 
 # -- General configuration ------------------------------------------------
