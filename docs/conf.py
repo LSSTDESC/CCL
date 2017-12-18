@@ -20,7 +20,7 @@ import os
 from os.path import abspath, dirname, join as pjoin
 import sys
 this_dir = dirname(abspath(__file__))
-root_path = abspath(pjoin(this_dir, '../'))
+root_path = abspath(pjoin(this_dir, '../pyccl/'))
 if os.path.isdir(root_path):
     sys.path.insert(0, root_path)
 
