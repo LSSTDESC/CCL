@@ -73,8 +73,6 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'pyccl'
-__import__(project)
-package = sys.modules[project]
 copyright = u'2017, LSST DESC'
 author = u'LSST DESC'
 
