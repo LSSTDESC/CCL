@@ -13366,7 +13366,6 @@ if test "$CLASSDIR" != ""; then
     { $as_echo "$as_me:${as_lineno-$LINENO}: Using the version of CLASS from $CLASSDIR" >&5
 $as_echo "$as_me: Using the version of CLASS from $CLASSDIR" >&6;}
     CLASS_LIB="-L${CLASSDIR} -lclass"
-    CLASS_MAKEFILE=""
     LDFLAGS="$LDFLAGS $CLASS_LIB"
     localclass=false
 
@@ -13434,7 +13433,6 @@ else
     { $as_echo "$as_me:${as_lineno-$LINENO}: Using the default version of CLASS" >&5
 $as_echo "$as_me: Using the default version of CLASS" >&6;}
     CLASS_LIB="-L./class -lclass"
-    CLASS_MAKEFILE=""
     LDFLAGS="$LDFLAGS $CLASS_LIB"
     localclass=true
 
@@ -13498,11 +13496,6 @@ else
   as_fn_error $? "Couldn't find libclass." "$LINENO" 5
 fi
 
-#    AC_MSG_NOTICE([Using the built-in version of CLASS.])
-#    CLASSDIR="./class"
-#    CLASS_LIB=""
-#    CLASS_MAKEFILE="class/Makefile"
-#    localclass=true
 fi
  if test x$localclass = xtrue; then
   LOCALCLASS_TRUE=
@@ -13797,7 +13790,7 @@ done
 
 
 # Includes Makefiles
-ac_config_files="$ac_config_files Makefile include/Makefile $CLASS_MAKEFILE"
+ac_config_files="$ac_config_files Makefile include/Makefile"
 
 
 cat >confcache <<\_ACEOF
@@ -14837,7 +14830,6 @@ do
     "config.h") CONFIG_HEADERS="$CONFIG_HEADERS config.h" ;;
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
     "include/Makefile") CONFIG_FILES="$CONFIG_FILES include/Makefile" ;;
-    "$CLASS_MAKEFILE") CONFIG_FILES="$CONFIG_FILES $CLASS_MAKEFILE" ;;
 
   *) as_fn_error $? "invalid argument: \`$ac_config_target'" "$LINENO" 5;;
   esac

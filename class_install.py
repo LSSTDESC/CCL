@@ -78,13 +78,13 @@ print("Compiling...")
 os.chdir('class')
 mod_makefile(c_comp,ompflag)
 check_command('make libclass.a')
-if sys.platform.startswith('linux') :
-    comp_string=c_comp+' -shared -o libclass.so -Wl,--whole-archive libclass.a -Wl,--no-whole-archive -lgomp >> ./log_class_install ; '
-elif sys.platform.startswith('darwin') :
-    comp_string=c_comp+" -fpic -shared -o libclass.dylib -Wl,-all_load libclass.a -Wl,-noall_load"
-else :
-    raise OSError("Can't figure out your system : "+sys.platform)
-check_command(comp_string)
+#if sys.platform.startswith('linux') :
+#    comp_string=c_comp+' -shared -o libclass.so -Wl,--whole-archive libclass.a -Wl,--no-whole-archive -lgomp >> ./log_class_install ; '
+#elif sys.platform.startswith('darwin') :
+#    comp_string=c_comp+" -fpic -shared -o libclass.dylib -Wl,-all_load libclass.a -Wl,-noall_load"
+#else :
+#    raise OSError("Can't figure out your system : "+sys.platform)
+#check_command(comp_string)
 
 print("Cleanup")
 cleanup()

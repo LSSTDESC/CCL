@@ -14,13 +14,8 @@ lib_LTLIBRARIES = libccl.la
 libccl_la_SOURCES = src/ccl_background.c src/ccl_core.c src/ccl_error.c src/ccl_lsst_specs.c src/ccl_placeholder.c src/ccl_power.c src/ccl_utils.c src/ccl_cls.c src/ccl_massfunc.c src/ccl_neutrinos.c src/ccl_correlation.c src/fftlog.c
 if LOCALCLASS
 
+ libccl_la_LIBADD = class/libclass.a
  libccl_la_CPPFLAGS = -I./include/ -I./class/include -D__CCL_DATA_DIR__=$(datadir)/ccl
- libccldir=$(libdir)
-if LINUX
-  dist_libccl_SCRIPTS = class/libclass.so
-else
-  dist_libccl_SCRIPTS = class/libclass.dylib
-endif
 
 else
 
