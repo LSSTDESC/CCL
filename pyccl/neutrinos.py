@@ -1,5 +1,4 @@
 from pyccl import ccllib as lib
-from pyccl.pyutils import _vectorize_fn_simple
 
 def Omeganuh2(a,Neff,mnu,TCMB):
     """Omeganuh2
@@ -7,14 +6,14 @@ def Omeganuh2(a,Neff,mnu,TCMB):
     Args:
         a (float): Scale factor, normalized to 1 today.
         Neff (float): Number of relativistic neutrino species
-        mnu (float): Neutrino mass ()
+        mnu (float): Neutrino mass (in eV)
         TCMB (float): Temperature of the CMB (K)
     Returns:
         Omeganuh2 (float or array_like)
 
     """
     status=0
-    return lib.Omeganuh2(a,Neff,mnu,TCMB,None,status)
+    return lib.Omeganuh2(a,Neff,mnu,TCMB,None,status)[0]
 
 
 def Omeganuh2_to_Mnu(a,Neff,OmNuh2,TCMB):
@@ -31,4 +30,4 @@ def Omeganuh2_to_Mnu(a,Neff,OmNuh2,TCMB):
     
     """
     status=0
-    return lib.Omeganuh2_to_Mnu(a,Neff,OmNuh2,TCMB,None,status)
+    return lib.Omeganuh2_to_Mnu(a,Neff,OmNuh2,TCMB,None,status)[0]
