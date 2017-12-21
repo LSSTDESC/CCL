@@ -1458,6 +1458,10 @@ def linear_spacing(xmin, xmax, N):
     """linear_spacing(double xmin, double xmax, int N) -> double *"""
     return _ccllib.linear_spacing(xmin, xmax, N)
 
+def linlog_spacing(xminlog, xmin, xmax, Nlin, Nlog):
+    """linlog_spacing(double xminlog, double xmin, double xmax, int Nlin, int Nlog) -> double *"""
+    return _ccllib.linlog_spacing(xminlog, xmin, xmax, Nlin, Nlog)
+
 def log_spacing(xmin, xmax, N):
     """log_spacing(double xmin, double xmax, int N) -> double *"""
     return _ccllib.log_spacing(xmin, xmax, N)
