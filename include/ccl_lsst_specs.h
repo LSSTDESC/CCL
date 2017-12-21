@@ -22,7 +22,7 @@ typedef struct {
 
 /**
  * Compute b(a), the bias of the clustering sample of a cosmology at a given scale factor
- * This is input from LSS group.
+ * This is input from the LSS group.
  * @param cosmo Cosmological parameters
  * @param a scale factor, normalized to a=1 today.
  * @param status Status flag. 0 if there are no errors, nonzero otherwise.

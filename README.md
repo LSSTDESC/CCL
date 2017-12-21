@@ -18,7 +18,7 @@ The library is written in C99 and all functionality is directly callable from C 
 See also our [wiki](https://github.com/LSSTDESC/CCL/wiki).
 
 # Installation
-In order to compile `CCL` you need a few libraries:
+In order to compile `CCL` you need a few libraries: 
 * GNU Scientific Library [GSL](https://www.gnu.org/software/gsl/). Note that `CCL` uses version 2.1 or higher of GSL (which is not yet standard in all systems).
 * The [SWIG](http://www.swig.org/) Python wrapper generator is not needed to run `CCL`, but must be installed if you intend to modify `CCL` in any way.
 * [FFTW3](http://www.fftw.org/) is required for computation of correlation functions.
