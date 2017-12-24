@@ -21,6 +21,25 @@ AC_PROG_INSTALL
 AM_PROG_CC_C_O
 AM_MAINTAINER_MODE
 
+AC_CANONICAL_HOST
+build_linux=no
+build_mac=no
+
+case "${host_os}" in
+     linux*)
+	build_linux=yes
+	;;
+     darwin*)
+	build_mac=yes
+	;;
+     *)
+	AC_MSG_ERROR(["OS $host_os is not supported"])
+	;;
+esac
+AM_CONDITIONAL([LINUX], [test "$build_linux" = "yes"])
+AM_CONDITIONAL([OSX], [test "$build_mac" = "yes"])
+
+
 # Checks for libraries.
 AC_SEARCH_LIBS([pow],[m],[],AC_MSG_ERROR(Couldn't find libm. Required.))
 # Allows building against an external copy of CLASS
@@ -28,18 +47,19 @@ AC_ARG_VAR([CLASSDIR], [Location of external CLASS directory, to be used instead
 if test "$CLASSDIR" != ""; then
     AC_MSG_NOTICE([Using the version of CLASS from $CLASSDIR])
     CLASS_LIB="-L${CLASSDIR} -lclass"
-    CLASS_MAKEFILE=""
     LDFLAGS="$LDFLAGS $CLASS_LIB"
     localclass=false
     
     AC_SUBST(CLASS_LIB, ["-L${CLASSDIR} -lclass -Wl,-rpath,${CLASSDIR}"])
     AC_SEARCH_LIBS([background_free],[class],[],AC_MSG_ERROR(Couldn't find libclass.))
 else
-    AC_MSG_NOTICE([Using the built-in version of CLASS.])
-    CLASSDIR="./class"
-    CLASS_LIB=""
-    CLASS_MAKEFILE="class/Makefile"
+    AC_MSG_NOTICE([Using the default version of CLASS])
+    CLASS_LIB="-L./class -lclass"
+    LDFLAGS="$LDFLAGS $CLASS_LIB"
     localclass=true
+    
+    AC_SUBST(CLASS_LIB, ["-L./class -lclass -Wl,-rpath,./class"])
+    AC_SEARCH_LIBS([background_free],[class],[],AC_MSG_ERROR(Couldn't find libclass.))
 fi
 AM_CONDITIONAL([LOCALCLASS], [test x$localclass = xtrue])
 AC_SEARCH_LIBS([cblas_dgemm],[gslcblas],[],AC_MSG_ERROR(Couldn't find libgslcblas.))
@@ -58,8 +78,7 @@ AC_CHECK_FUNCS([pow sqrt])
 
 # Includes Makefiles
 AC_CONFIG_FILES([Makefile
-		 include/Makefile
-		 $CLASS_MAKEFILE])
+		 include/Makefile])
 
 AC_OUTPUT
 
