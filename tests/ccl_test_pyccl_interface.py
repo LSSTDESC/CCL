@@ -190,7 +190,33 @@ def check_massfunc(cosmo):
     assert_raises(TypeError, ccl.sigmaM, cosmo, mhalo_scl, a_arr)
     assert_raises(TypeError, ccl.sigmaM, cosmo, mhalo_lst, a_arr)
     assert_raises(TypeError, ccl.sigmaM, cosmo, mhalo_arr, a_arr)
+
+
+def check_neutrinos():
+    """
+    Check that neutrino-related functions can be run.
+    """
+    z = 0.
+    z_arr = np.linspace(0., 2., 10)
+    a = 1.
+    a_arr = 1. / (1.+z_arr)
+    a_lst = [_a for _a in a_arr]
     
+    TCMB = 2.725
+    Neff = 3.046
+    mnu = 0.06
+    OmNuh2 = 0.0006441
+    
+    # Omeganuh2
+    assert_( all_finite(ccl.Omeganuh2(a, Neff, mnu, TCMB)) )
+    assert_( all_finite(ccl.Omeganuh2(a_lst, Neff, mnu, TCMB)) )
+    assert_( all_finite(ccl.Omeganuh2(a_arr, Neff, mnu, TCMB)) )
+    
+    # Omeganuh2_to_Mnu
+    assert_( all_finite(ccl.Omeganuh2_to_Mnu(a, Neff, OmNuh2, TCMB)) )
+    assert_( all_finite(ccl.Omeganuh2_to_Mnu(a_lst, Neff, OmNuh2, TCMB)) )
+    assert_( all_finite(ccl.Omeganuh2_to_Mnu(a_arr, Neff, OmNuh2, TCMB)) )
+
 
 def check_lsst_specs(cosmo):
     """
@@ -363,6 +389,12 @@ def test_massfunc():
     """
     for cosmo in reference_models():
         yield check_massfunc, cosmo
+
+def test_neutrinos():
+    """
+    Test neutrino-related functions.
+    """
+    yield check_neutrinos
 
 def test_lsst_specs():
     """
