@@ -35,7 +35,7 @@ CTEST_DATA(emu_nu) {
 
 CTEST_SETUP(emu_nu) {
   
-  data->N_nu_rel=3.04;
+  data->N_nu_rel=2.04;
   data->N_nu_mass=1;
 
   double *sigma_8;
@@ -89,7 +89,8 @@ CTEST_SETUP(emu_nu) {
     data->Omega_c[i] = Omega_c[i];
     data->Omega_b[i] = Omega_b[i];
     data->n_s[i] = n_s[i];
-    Mnu_out = ccl_Omeganuh2_to_Mnu(1.,3.04, Omega_nu[i]*h[i]*h[i], 2.725, NULL, &omnustatus);
+    // Neff is fixed to 3.04 here
+    Mnu_out = ccl_Omeganuh2_to_Mnu(1., 3.04, Omega_nu[i]*h[i]*h[i], 2.725, NULL, &omnustatus);
     /*if (omnustatus){
       printf("%s\n",cosmo->status_message);
       exit(1);

@@ -1112,9 +1112,9 @@ static void ccl_cosmology_compute_power_emu(ccl_cosmology * cosmo, int * status)
     strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_emu(): h is outside allowed range\n");
     return;
   }
-  if(cosmo->params.N_nu_rel!=3.04){
+  if((cosmo->params.N_nu_rel + cosmo->params.N_nu_mass) != 3.04){
     *status=CCL_ERROR_INCONSISTENT;
-    strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_emu(): Neff should be 3.04 for the cosmic emulator predictions\n");//This error is not successfully passed to python
+    strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_emu(): Neff = N_nu_rel + N_nu_mass must be fixed to 3.04 for cosmic emulator predictions.\n");
     return;
   }
   double w0wacomb = -cosmo->params.w0 - cosmo->params.wa;

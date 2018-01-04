@@ -23,31 +23,35 @@ def reference_models():
 
     # BBKS Pk
     p4 = ccl.Parameters(Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96)
-    cosmo4 = ccl.Cosmology(p4,transfer_function='bbks')
+    cosmo4 = ccl.Cosmology(p4, transfer_function='bbks')
 
     # E&H Pk
     p5 = ccl.Parameters(Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96)
-    cosmo5 = ccl.Cosmology(p5,transfer_function='eisenstein_hu')
+    cosmo5 = ccl.Cosmology(p5, transfer_function='eisenstein_hu')
 
     # Emulator Pk
-    p6=ccl.Parameters(Omega_c=0.27, Omega_b=0.022/0.67**2, h=0.67, sigma8=0.8, n_s=0.96,N_nu_rel=3.04,N_nu_mass=0.,m_nu=0.)
-    cosmo6 = ccl.Cosmology(p6,transfer_function='emulator',matter_power_spectrum='emu')
+    p6 = ccl.Parameters(Omega_c=0.27, Omega_b=0.022/0.67**2, h=0.67, sigma8=0.8, 
+                        n_s=0.96, N_nu_rel=3.04, N_nu_mass=0., m_nu=0.)
+    cosmo6 = ccl.Cosmology(p6, transfer_function='emulator', 
+                           matter_power_spectrum='emu')
     
     # Emulator Pk w/neutrinos
-    p7=ccl.Parameters(Omega_c=0.27, Omega_b=0.022/0.67**2, h=0.67, sigma8=0.8, n_s=0.96,N_nu_rel=3.04,N_nu_mass=1,m_nu=0.06)
-    cosmo7 = ccl.Cosmology(p7,transfer_function='emulator',matter_power_spectrum='emu')
+    p7 = ccl.Parameters(Omega_c=0.27, Omega_b=0.022/0.67**2, h=0.67, sigma8=0.8, 
+                        n_s=0.96, N_nu_rel=2.04, N_nu_mass=1, m_nu=0.06)
+    cosmo7 = ccl.Cosmology(p7, transfer_function='emulator', 
+                           matter_power_spectrum='emu')
 
     # Baryons Pk
     p8 = ccl.Parameters(Omega_c=0.27, Omega_b=0.045, h=0.67, A_s=1e-10, n_s=0.96)
-    cosmo8 = ccl.Cosmology(p8,baryons_power_spectrum='bcm')
+    cosmo8 = ccl.Cosmology(p8, baryons_power_spectrum='bcm')
     
     # Baryons Pk with choice of BCM parameters other than default
     p9 = ccl.Parameters(Omega_c=0.27, Omega_b=0.045, h=0.67, A_s=1e-10, n_s=0.96,
                         bcm_log10Mc=math.log10(1.7e14), bcm_etab=0.3, bcm_ks=75.)
-    cosmo9 = ccl.Cosmology(p9,baryons_power_spectrum='bcm')
+    cosmo9 = ccl.Cosmology(p9, baryons_power_spectrum='bcm')
 
     # Return (do a few cosmologies, for speed reasons)
-    return [cosmo1,cosmo4,cosmo5,cosmo7, cosmo9] # cosmo2, cosmo3, cosmo6
+    return [cosmo1, cosmo4, cosmo5, cosmo7, cosmo9] # cosmo2, cosmo3, cosmo6
 
 def all_finite(vals):
     """
