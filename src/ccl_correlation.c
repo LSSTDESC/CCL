@@ -518,7 +518,7 @@ void ccl_3dcorrelation(ccl_cosmology *cosmo,
   ccl_spline_free(pk_spl);
 
   if (do_taper_pk)
-    taper_cl(N_K_FFTLOG,k_arr,pk_arr,taper_pk_limits);init
+    taper_cl(N_K_FFTLOG,k_arr,pk_arr,taper_pk_limits);
 
   r_arr=malloc(sizeof(double)*N_K_FFTLOG);
   if(r_arr==NULL) {
