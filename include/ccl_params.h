@@ -25,7 +25,7 @@ typedef struct ccl_spline_params {
   double LOGM_SPLINE_MAX;
   
   //PS a and k spline
-  int N_A;
+  int A_SPLINE_NA_PK;
 
   //k-splines and integrals
   double K_MAX_SPLINE;
