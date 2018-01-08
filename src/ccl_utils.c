@@ -50,8 +50,13 @@ double * ccl_linlog_spacing(double xminlog, double xmin, double xmax, int Nlog, 
     return NULL;
   }
 
-  if (xminlog>xmin && xmax<xmin){
-    fprintf(stderr, "ERROR: xminlog must be smaller as xmin and xmin must be smaller as xmax");
+  if (xminlog>xmin){
+    fprintf(stderr, "ERROR: xminlog must be smaller as xmin");
+    return NULL;
+  }
+
+  if (xmin>xmax){
+    fprintf(stderr, "ERROR: xmin must be smaller as xmax");
     return NULL;
   }
 
