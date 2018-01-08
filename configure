@@ -640,6 +640,10 @@ LOCALCLASS_FALSE
 LOCALCLASS_TRUE
 CLASS_LIB
 CLASSDIR
+OSX_FALSE
+OSX_TRUE
+LINUX_FALSE
+LINUX_TRUE
 MAINT
 MAINTAINER_MODE_FALSE
 MAINTAINER_MODE_TRUE
@@ -737,6 +741,7 @@ infodir
 docdir
 oldincludedir
 includedir
+runstatedir
 localstatedir
 sharedstatedir
 sysconfdir
@@ -820,6 +825,7 @@ datadir='${datarootdir}'
 sysconfdir='${prefix}/etc'
 sharedstatedir='${prefix}/com'
 localstatedir='${prefix}/var'
+runstatedir='${localstatedir}/run'
 includedir='${prefix}/include'
 oldincludedir='/usr/include'
 docdir='${datarootdir}/doc/${PACKAGE_TARNAME}'
@@ -1072,6 +1078,15 @@ do
   | -silent | --silent | --silen | --sile | --sil)
     silent=yes ;;
 
+  -runstatedir | --runstatedir | --runstatedi | --runstated \
+  | --runstate | --runstat | --runsta | --runst | --runs \
+  | --run | --ru | --r)
+    ac_prev=runstatedir ;;
+  -runstatedir=* | --runstatedir=* | --runstatedi=* | --runstated=* \
+  | --runstate=* | --runstat=* | --runsta=* | --runst=* | --runs=* \
+  | --run=* | --ru=* | --r=*)
+    runstatedir=$ac_optarg ;;
+
   -sbindir | --sbindir | --sbindi | --sbind | --sbin | --sbi | --sb)
     ac_prev=sbindir ;;
   -sbindir=* | --sbindir=* | --sbindi=* | --sbind=* | --sbin=* \
@@ -1209,7 +1224,7 @@ fi
 for ac_var in	exec_prefix prefix bindir sbindir libexecdir datarootdir \
 		datadir sysconfdir sharedstatedir localstatedir includedir \
 		oldincludedir docdir infodir htmldir dvidir pdfdir psdir \
-		libdir localedir mandir
+		libdir localedir mandir runstatedir
 do
   eval ac_val=\$$ac_var
   # Remove trailing slashes.
@@ -1362,6 +1377,7 @@ Fine tuning of the installation directories:
   --sysconfdir=DIR        read-only single-machine data [PREFIX/etc]
   --sharedstatedir=DIR    modifiable architecture-independent data [PREFIX/com]
   --localstatedir=DIR     modifiable single-machine data [PREFIX/var]
+  --runstatedir=DIR       modifiable per-process data [LOCALSTATEDIR/run]
   --libdir=DIR            object code libraries [EPREFIX/lib]
   --includedir=DIR        C header files [PREFIX/include]
   --oldincludedir=DIR     C header files for non-gcc [/usr/include]
@@ -5407,7 +5423,7 @@ linux* | k*bsd*-gnu | kopensolaris*-gnu | gnu*)
   lt_cv_deplibs_check_method=pass_all
   ;;
 
-netbsd*)
+netbsd* | netbsdelf*-gnu)
   if echo __ELF__ | $CC -E - | $GREP __ELF__ > /dev/null; then
     lt_cv_deplibs_check_method='match_pattern /lib[^/]+(\.so\.[0-9]+\.[0-9]+|_pic\.a)$'
   else
@@ -9094,6 +9110,9 @@ $as_echo_n "checking whether the $compiler linker ($LD) supports shared librarie
   openbsd* | bitrig*)
     with_gnu_ld=no
     ;;
+  linux* | k*bsd*-gnu | gnu*)
+    link_all_deplibs=no
+    ;;
   esac
 
   ld_shlibs=yes
@@ -9348,7 +9367,7 @@ _LT_EOF
       fi
       ;;
 
-    netbsd*)
+    netbsd* | netbsdelf*-gnu)
       if echo __ELF__ | $CC -E - | $GREP __ELF__ >/dev/null; then
 	archive_cmds='$LD -Bshareable $libobjs $deplibs $linker_flags -o $lib'
 	wlarc=
@@ -10018,6 +10037,7 @@ $as_echo "$lt_cv_irix_exported_symbol" >&6; }
 	if test yes = "$lt_cv_irix_exported_symbol"; then
           archive_expsym_cmds='$CC -shared $pic_flag $libobjs $deplibs $compiler_flags $wl-soname $wl$soname `test -n "$verstring" && func_echo_all "$wl-set_version $wl$verstring"` $wl-update_registry $wl$output_objdir/so_locations $wl-exports_file $wl$export_symbols -o $lib'
 	fi
+	link_all_deplibs=no
       else
 	archive_cmds='$CC -shared $libobjs $deplibs $compiler_flags -soname $soname `test -n "$verstring" && func_echo_all "-set_version $verstring"` -update_registry $output_objdir/so_locations -o $lib'
 	archive_expsym_cmds='$CC -shared $libobjs $deplibs $compiler_flags -soname $soname `test -n "$verstring" && func_echo_all "-set_version $verstring"` -update_registry $output_objdir/so_locations -exports_file $export_symbols -o $lib'
@@ -10039,7 +10059,7 @@ $as_echo "$lt_cv_irix_exported_symbol" >&6; }
       esac
       ;;
 
-    netbsd*)
+    netbsd* | netbsdelf*-gnu)
       if echo __ELF__ | $CC -E - | $GREP __ELF__ >/dev/null; then
 	archive_cmds='$LD -Bshareable -o $lib $libobjs $deplibs $linker_flags'  # a.out
       else
@@ -11152,6 +11172,18 @@ fi
   # people can always --disable-shared, the test was removed, and we
   # assume the GNU/Linux dynamic linker is in use.
   dynamic_linker='GNU/Linux ld.so'
+  ;;
+
+netbsdelf*-gnu)
+  version_type=linux
+  need_lib_prefix=no
+  need_version=no
+  library_names_spec='${libname}${release}${shared_ext}$versuffix ${libname}${release}${shared_ext}$major ${libname}${shared_ext}'
+  soname_spec='${libname}${release}${shared_ext}$major'
+  shlibpath_var=LD_LIBRARY_PATH
+  shlibpath_overrides_runpath=no
+  hardcode_into_libs=yes
+  dynamic_linker='NetBSD ld.elf_so'
   ;;
 
 netbsd*)
@@ -13236,6 +13268,39 @@ fi
 
 
 
+
+build_linux=no
+build_mac=no
+
+case "${host_os}" in
+     linux*)
+	build_linux=yes
+	;;
+     darwin*)
+	build_mac=yes
+	;;
+     *)
+	as_fn_error $? "\"OS $host_os is not supported\"" "$LINENO" 5
+	;;
+esac
+ if test "$build_linux" = "yes"; then
+  LINUX_TRUE=
+  LINUX_FALSE='#'
+else
+  LINUX_TRUE='#'
+  LINUX_FALSE=
+fi
+
+ if test "$build_mac" = "yes"; then
+  OSX_TRUE=
+  OSX_FALSE='#'
+else
+  OSX_TRUE='#'
+  OSX_FALSE=
+fi
+
+
+
 # Checks for libraries.
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing pow" >&5
 $as_echo_n "checking for library containing pow... " >&6; }
@@ -13301,7 +13366,6 @@ if test "$CLASSDIR" != ""; then
     { $as_echo "$as_me:${as_lineno-$LINENO}: Using the version of CLASS from $CLASSDIR" >&5
 $as_echo "$as_me: Using the version of CLASS from $CLASSDIR" >&6;}
     CLASS_LIB="-L${CLASSDIR} -lclass"
-    CLASS_MAKEFILE=""
     LDFLAGS="$LDFLAGS $CLASS_LIB"
     localclass=false
 
@@ -13366,12 +13430,72 @@ else
 fi
 
 else
-    { $as_echo "$as_me:${as_lineno-$LINENO}: Using the built-in version of CLASS." >&5
-$as_echo "$as_me: Using the built-in version of CLASS." >&6;}
-    CLASSDIR="./class"
-    CLASS_LIB=""
-    CLASS_MAKEFILE="class/Makefile"
+    { $as_echo "$as_me:${as_lineno-$LINENO}: Using the default version of CLASS" >&5
+$as_echo "$as_me: Using the default version of CLASS" >&6;}
+    CLASS_LIB="-L./class -lclass"
+    LDFLAGS="$LDFLAGS $CLASS_LIB"
     localclass=true
+
+    CLASS_LIB="-L./class -lclass -Wl,-rpath,./class"
+
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing background_free" >&5
+$as_echo_n "checking for library containing background_free... " >&6; }
+if ${ac_cv_search_background_free+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_func_search_save_LIBS=$LIBS
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char background_free ();
+int
+main ()
+{
+return background_free ();
+  ;
+  return 0;
+}
+_ACEOF
+for ac_lib in '' class; do
+  if test -z "$ac_lib"; then
+    ac_res="none required"
+  else
+    ac_res=-l$ac_lib
+    LIBS="-l$ac_lib  $ac_func_search_save_LIBS"
+  fi
+  if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_search_background_free=$ac_res
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext
+  if ${ac_cv_search_background_free+:} false; then :
+  break
+fi
+done
+if ${ac_cv_search_background_free+:} false; then :
+
+else
+  ac_cv_search_background_free=no
+fi
+rm conftest.$ac_ext
+LIBS=$ac_func_search_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_search_background_free" >&5
+$as_echo "$ac_cv_search_background_free" >&6; }
+ac_res=$ac_cv_search_background_free
+if test "$ac_res" != no; then :
+  test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
+
+else
+  as_fn_error $? "Couldn't find libclass." "$LINENO" 5
+fi
+
 fi
  if test x$localclass = xtrue; then
   LOCALCLASS_TRUE=
@@ -13666,7 +13790,7 @@ done
 
 
 # Includes Makefiles
-ac_config_files="$ac_config_files Makefile include/Makefile $CLASS_MAKEFILE"
+ac_config_files="$ac_config_files Makefile include/Makefile"
 
 
 cat >confcache <<\_ACEOF
@@ -13812,6 +13936,14 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${MAINTAINER_MODE_TRUE}" && test -z "${MAINTAINER_MODE_FALSE}"; then
   as_fn_error $? "conditional \"MAINTAINER_MODE\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${LINUX_TRUE}" && test -z "${LINUX_FALSE}"; then
+  as_fn_error $? "conditional \"LINUX\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${OSX_TRUE}" && test -z "${OSX_FALSE}"; then
+  as_fn_error $? "conditional \"OSX\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${LOCALCLASS_TRUE}" && test -z "${LOCALCLASS_FALSE}"; then
@@ -14698,7 +14830,6 @@ do
     "config.h") CONFIG_HEADERS="$CONFIG_HEADERS config.h" ;;
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
     "include/Makefile") CONFIG_FILES="$CONFIG_FILES include/Makefile" ;;
-    "$CLASS_MAKEFILE") CONFIG_FILES="$CONFIG_FILES $CLASS_MAKEFILE" ;;
 
   *) as_fn_error $? "invalid argument: \`$ac_config_target'" "$LINENO" 5;;
   esac

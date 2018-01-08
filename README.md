@@ -18,14 +18,22 @@ The library is written in C99 and all functionality is directly callable from C 
 See also our [wiki](https://github.com/LSSTDESC/CCL/wiki).
 
 # Installation
-In order to compile `CCL` you need a few libraries:
+In order to compile `CCL` you need a few libraries: 
 * GNU Scientific Library [GSL](https://www.gnu.org/software/gsl/). Note that `CCL` uses version 2.1 or higher of GSL (which is not yet standard in all systems).
 * The [SWIG](http://www.swig.org/) Python wrapper generator is not needed to run `CCL`, but must be installed if you intend to modify `CCL` in any way.
 * [FFTW3](http://www.fftw.org/) is required for computation of correlation functions.
 * FFTlog([here](http://casa.colorado.edu/~ajsh/FFTLog/) and [here](https://github.com/slosar/FFTLog))is provided within `CCL`, with minor modifications.
+* The C library associated to the CLASS code. The installation of this library is described below.
 
-# C-only installation
-`CCL` can be easily installed using an *autotools*-generated configuration file. To install `CCL`, from the base directory (the one where this file is located) run:
+## Installing CLASS
+CCL uses CLASS as one of the possible ways of computing the matter power spectrum. In order to communicate with CLASS, CCL must be linked to its library. Before installing CCL proper you must therefore install this library first. Since this process is not necessarily straightforward, we provide a python script `class_install.py` that automatically downloads and install the latest tagged stable version of CLASS. You should run this script (`python class_install.py`) before carrying out the next steps. By default, the script assumes that your main C compiler is `gcc`. If that's not the case, pass the name of your C compiler to the script via the command-line argument `--c_comp` (i.e. `python class_install.py --c_comp=[name of compiler]`). Type `python class_install.py -h` for further details.
+
+This procedure has one final caveat: if you already have a working installation of CCL, `class_install.py` may fail the first time you run it. This can be fixed by either simply running `class_install.py` a second time, or by starting from scratch (i.e. downloading or cloning CCL).
+
+Note that, if you want to use your own version of CLASS, you should follow the steps described in the section "Compiling against an external version of CLASS" below.
+
+## C-only installation
+Once the CLASS library is installed, `CCL` can be easily installed using an *autotools*-generated configuration file. To install `CCL`, from the base directory (the one where this file is located) run:
 ```sh
 ./configure
 make
@@ -68,6 +76,13 @@ make install
 export LD_LIBRARY_PATH=/path/to/where/ccl/is/installed/lib:$LD_LIBRARY_PATH
 ````
 5. We know of one case with Mac OS where `libtools` had the “lock” function set to “yes” and this caused the installation to stall. However, this is very rare. If this happens, after the `configure` step, edit `libtool` to set the “lock” to “no”.
+
+## C++ compatibility
+`CCL` library can be called from C++ code without any  additional requirements or modifications. To make sure that there are no problems you can run
+````sh
+make check-cpp
+./tests/ccl_sample_run
+````
 
 ## Python installation
 The Python wrapper is called `pyccl`. Generally, you can build and install the `pyccl` wrapper directly, without having to first compile the C version of `CCL`. The Python wrapper's build tools currently assume that your C compiler is `gcc`, and that you have a working Python 2.x or 3.x installation with `numpy` and `distutils`. You will also need `swig` if you wish to change the `CCL` code itself, rather than just installing it as-is.
@@ -112,7 +127,7 @@ For quick introduction to `CCL` in Python look at notebooks in **_tests/_**.
 
 ## Compiling against an external version of CLASS
 
-`CCL` has a built-in version of `CLASS` that is used to calculate power spectra and other cosmological functions. This is compiled by default. Optionally, you can also link `CCL` against an external version of `CLASS`. This is useful if you want to use a modified version of `CLASS`, or a different or more up-to-date version of the standard `CLASS`.
+The default installation procedure for `CCL` implies automatically downloading and installing a tagged version of `CLASS`. Optionally, you can also link `CCL` against an external version of `CLASS`. This is useful if you want to use a modified version of `CLASS`, or a different or more up-to-date version of the standard `CLASS`.
 
 To compile `CCL` with an external version of `CLASS`, you must first prepare the external copy so that it can be linked as a shared library. By default, the `CLASS` build tools create a static library. After compiling `CLASS` in the usual way (by running `make`), look for a static library file called ***libclass.a*** that should have been placed in the root source directory. Then, run the following command from that directory (Linux only):
 ````sh
@@ -120,7 +135,7 @@ gcc -shared -o libclass.so -Wl,--whole-archive libclass.a \
                            -Wl,--no-whole-archive -lgomp
 ````
 This should create a new shared library, ***libclass.so***, in the same directory. (N.B. The `-lgomp` flag has to appear at the end of the command; otherwise the linker can fail.) If you are running Mac OS X, use the following command instead:
-````sh
+````sh	    
 gcc -fpic -shared -o libclass.dylib -Wl,-all\_load libclass.a -Wl,-noall\_load
 ````
 
@@ -191,9 +206,11 @@ For the majority of `CCL`'s functions you need an object of type **`ccl_cosmolog
 ```c
 ccl_cosmology * ccl_cosmology_create(ccl_parameters params, ccl_configuration config);
 ```
-Note that the function returns a pointer. Variable `params` of type **`ccl_parameters`** contains cosmological parameters created in previous step. Structure **`ccl_configuration`** contains information about methods for computing transfer function, matter power spectrum and mass function (for available methods see ***include/ccl_config.h***). In the default configuration `default_config`, `CCL` will use the following set-up:
+
+Note that the function returns a pointer. Variable `params` of type **`ccl_parameters`** contains cosmological parameters created in previous step. Structure **`ccl_configuration`** contains information about methods for computing transfer function, matter power spectrum, the impact of baryons on the matter power spectrum and mass function (for available methods see `include/ccl_config.h`). In the default configuration `default_config`, `CCL` will use the following set-up:
 ```c
-const ccl_configuration default_config = {ccl_boltzmann_class, ccl_halofit, ccl_tinker10};
+const ccl_configuration default_config = {ccl_boltzmann_class, ccl_halofit, ccl_nobaryons, ccl_tinker};
+
 ```
 After you are done working with this cosmology object, you should free its work space by **`ccl_cosmology_free`**
 ```c
@@ -227,7 +244,10 @@ For given cosmology we can compute linear and non-linear matter power spectra us
 double ccl_linear_matter_power(ccl_cosmology * cosmo, double k, double a,int * status);
 double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double k, double a,int * status);
 ```
+
+It is possible to incorporate the impact of baryonic processes on the total matter power spectrum via the **`baryons_power_spectrum`** flag is set to **`ccl_bcm`**. Please see the CCL note for details on the implementation.
 Sigma_8 can be calculated by function **`ccl_sigma8`**, or more generally by function **`ccl_sigmaR`**, which computes the variance of the density field smoothed by spherical top-hat window function on a comoving distance `R` (in Mpc).
+
 ```c
 double ccl_sigmaR(ccl_cosmology *cosmo, double R, int * status);
 double ccl_sigma8(ccl_cosmology *cosmo, int * status);

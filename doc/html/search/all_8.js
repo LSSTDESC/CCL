@@ -6,6 +6,6 @@ var searchData=
   ['has_5fmagnification',['has_magnification',['../struct_c_c_l___cl_tracer.html#a2144bb85ca1a13bf4d3bfa50c81b76aa',1,'CCL_ClTracer']]],
   ['has_5fmgrowth',['has_mgrowth',['../structccl__parameters.html#a95772e3679983bd0ad6874b2fcd03eb1',1,'ccl_parameters']]],
   ['has_5frsd',['has_rsd',['../struct_c_c_l___cl_tracer.html#a2fd0fa101614e87cc8b78fa6fff78b8e',1,'CCL_ClTracer']]],
-  ['hh',['HH',['../ccl__sample__run_8c.html#a98e0283d49017dc771669a2a07dbdcf8',1,'ccl_sample_run.c']]],
+  ['hh',['HH',['../ccl__corr__sample_8c.html#a98e0283d49017dc771669a2a07dbdcf8',1,'HH():&#160;ccl_corr_sample.c'],['../ccl__sample__run_8c.html#a98e0283d49017dc771669a2a07dbdcf8',1,'HH():&#160;ccl_sample_run.c']]],
   ['hplanck',['HPLANCK',['../ccl__constants_8h.html#a32c64516e5ad4b3ec65b54deb3f27457',1,'ccl_constants.h']]]
 ];
