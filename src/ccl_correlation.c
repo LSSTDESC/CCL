@@ -454,7 +454,7 @@ void ccl_correlation(ccl_cosmology *cosmo,
   ccl_check_status(cosmo,status);
 }
 
-/*--------ROUTINE: ccl_3dcorrelation ------
+/*--------ROUTINE: ccl_correlation_3d ------
 TASK: For a given power spectrum, get the 3d-correlation function. Do so by using FFTLog. 
 
 INPUT: cosmology, number of k values to evaluate, k vector, power spectrum at k values,
@@ -466,7 +466,7 @@ INPUT: cosmology, number of k values to evaluate, k vector, power spectrum at k 
 #define K_MIN_FFTLOG 0.0001
 #define K_MAX_FFTLOG 500
 #define N_K_FFTLOG 5000
-void ccl_3dcorrelation(ccl_cosmology *cosmo,
+void ccl_correlation_3d(ccl_cosmology *cosmo,
 		     int n_k,double *k,double *pk,
 		     int n_r,double *r,double *xi,
 		     int do_taper_pk,double *taper_pk_limits,
@@ -478,14 +478,14 @@ void ccl_3dcorrelation(ccl_cosmology *cosmo,
   k_arr=ccl_log_spacing(K_MIN_FFTLOG,K_MAX_FFTLOG,N_K_FFTLOG);
   if(k_arr==NULL) {
     *status=CCL_ERROR_LINSPACE;
-    strcpy(cosmo->status_message,"ccl_correlation.c: ccl_3dcorrelation ran out of memory\n");
+    strcpy(cosmo->status_message,"ccl_correlation.c: ccl_correlation_3d ran out of memory\n");
     return;
   }
   pk_arr=malloc(N_K_FFTLOG*sizeof(double));
   if(pk_arr==NULL) {
     free(k_arr);
     *status=CCL_ERROR_MEMORY;
-    strcpy(cosmo->status_message,"ccl_correlation.c: ccl_3dcorrelation ran out of memory\n");
+    strcpy(cosmo->status_message,"ccl_correlation.c: ccl_correlation_3d ran out of memory\n");
     return;
   }
 
@@ -495,7 +495,7 @@ void ccl_3dcorrelation(ccl_cosmology *cosmo,
     free(k_arr);
     free(pk_arr);
     *status=CCL_ERROR_MEMORY;
-    strcpy(cosmo->status_message,"ccl_correlation.c: ccl_3dcorrelation ran out of memory\n");
+    strcpy(cosmo->status_message,"ccl_correlation.c: ccl_correlation_3d ran out of memory\n");
     return;
   }
 
@@ -525,14 +525,14 @@ void ccl_3dcorrelation(ccl_cosmology *cosmo,
     free(k_arr);
     free(pk_arr);
     *status=CCL_ERROR_MEMORY;
-    strcpy(cosmo->status_message,"ccl_correlation.c: ccl_3dcorrelation ran out of memory\n");
+    strcpy(cosmo->status_message,"ccl_correlation.c: ccl_correlation_3d ran out of memory\n");
     return;
   }
   xi_arr=malloc(sizeof(double)*N_K_FFTLOG);
   if(xi_arr==NULL) {
     free(k_arr); free(pk_arr); free(r_arr);
     *status=CCL_ERROR_MEMORY;
-    strcpy(cosmo->status_message,"ccl_correlation.c: ccl_3dcorrelation ran out of memory\n");
+    strcpy(cosmo->status_message,"ccl_correlation.c: ccl_correlation_3d ran out of memory\n");
     return;
   }
 

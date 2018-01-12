@@ -53,7 +53,7 @@ void ccl_correlation(ccl_cosmology *cosmo,
  * @param do_taper_pk : key for tapering (using cosine tapering by default)
  * @param taper_pk_limits: limits of tapering
  */
-void ccl_3dcorrelation(ccl_cosmology *cosmo,
+void ccl_correlation_3d(ccl_cosmology *cosmo,
 		     int n_k,double *k,double *pk,
 		     int n_r,double *r,double *xi,
 		     int do_taper_pk,double *taper_pk_limits,

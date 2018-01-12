@@ -47,7 +47,7 @@ int main(int argc,char **argv)
   double *pkarr = malloc(N_MAX_PK*sizeof(double));
   double *karr;
 
-  karr=ccl_log_spacing(K_MIN,K_MAX,N_MAX_PK);
+  karr = ccl_log_spacing(K_MIN,K_MAX,N_MAX_PK);
   for(i=0; i < N_MAX_PK; i++){
     // Calculate power spectrum
     pkarr[i] = ccl_nonlin_matter_power(cosmo, karr[i], 1.0, &status); 
@@ -64,7 +64,7 @@ int main(int argc,char **argv)
   xi = malloc(n_r*sizeof(double));
 
   // Calculate 3dcorrelation function from power spectrum
-  ccl_3dcorrelation(cosmo, N_MAX_PK, karr, pkarr, 
+  ccl_correlation_3d(cosmo, N_MAX_PK, karr, pkarr, 
                   n_r, r, xi,
                   0, taper_pk_limits, 
                   &status);
