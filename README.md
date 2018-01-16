@@ -23,9 +23,17 @@ In order to compile `CCL` you need a few libraries:
 * The [SWIG](http://www.swig.org/) Python wrapper generator is not needed to run `CCL`, but must be installed if you intend to modify `CCL` in any way.
 * [FFTW3](http://www.fftw.org/) is required for computation of correlation functions.
 * FFTlog([here](http://casa.colorado.edu/~ajsh/FFTLog/) and [here](https://github.com/slosar/FFTLog))is provided within `CCL`, with minor modifications.
+* The C library associated to the CLASS code. The installation of this library is described below.
+
+## Installing CLASS
+CCL uses CLASS as one of the possible ways of computing the matter power spectrum. In order to communicate with CLASS, CCL must be linked to its library. Before installing CCL proper you must therefore install this library first. Since this process is not necessarily straightforward, we provide a python script `class_install.py` that automatically downloads and install the latest tagged stable version of CLASS. You should run this script (`python class_install.py`) before carrying out the next steps. By default, the script assumes that your main C compiler is `gcc`. If that's not the case, pass the name of your C compiler to the script via the command-line argument `--c_comp` (i.e. `python class_install.py --c_comp=[name of compiler]`). Type `python class_install.py -h` for further details.
+
+This procedure has one final caveat: if you already have a working installation of CCL, `class_install.py` may fail the first time you run it. This can be fixed by either simply running `class_install.py` a second time, or by starting from scratch (i.e. downloading or cloning CCL).
+
+Note that, if you want to use your own version of CLASS, you should follow the steps described in the section "Compiling against an external version of CLASS" below.
 
 ## C-only installation
-`CCL` can be easily installed using an *autotools*-generated configuration file. To install `CCL`, from the base directory (the one where this file is located) run:
+Once the CLASS library is installed, `CCL` can be easily installed using an *autotools*-generated configuration file. To install `CCL`, from the base directory (the one where this file is located) run:
 ```sh
 ./configure
 make
@@ -119,7 +127,7 @@ For quick introduction to `CCL` in Python look at notebooks in **_tests/_**.
 
 ## Compiling against an external version of CLASS
 
-`CCL` has a built-in version of `CLASS` that is used to calculate power spectra and other cosmological functions. This is compiled by default. Optionally, you can also link `CCL` against an external version of `CLASS`. This is useful if you want to use a modified version of `CLASS`, or a different or more up-to-date version of the standard `CLASS`.
+The default installation procedure for `CCL` implies automatically downloading and installing a tagged version of `CLASS`. Optionally, you can also link `CCL` against an external version of `CLASS`. This is useful if you want to use a modified version of `CLASS`, or a different or more up-to-date version of the standard `CLASS`.
 
 To compile `CCL` with an external version of `CLASS`, you must first prepare the external copy so that it can be linked as a shared library. By default, the `CLASS` build tools create a static library. After compiling `CLASS` in the usual way (by running `make`), look for a static library file called ***libclass.a*** that should have been placed in the root source directory. Then, run the following command from that directory (Linux only):
 ````sh
@@ -127,7 +135,7 @@ gcc -shared -o libclass.so -Wl,--whole-archive libclass.a \
                            -Wl,--no-whole-archive -lgomp
 ````
 This should create a new shared library, ***libclass.so***, in the same directory. (N.B. The `-lgomp` flag has to appear at the end of the command; otherwise the linker can fail.) If you are running Mac OS X, use the following command instead:
-````sh
+````sh	    
 gcc -fpic -shared -o libclass.dylib -Wl,-all\_load libclass.a -Wl,-noall\_load
 ````
 
