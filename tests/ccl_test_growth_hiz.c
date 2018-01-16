@@ -95,7 +95,6 @@ static void compare_growth_hiz(int model, struct growth_hiz_data * data)
     double gf_ij=ccl_growth_factor_unnorm(cosmo,a, &status);
     if (status) printf("%s\n",cosmo->status_message);
     double absolute_tolerance = GROWTH_HIZ_TOLERANCE*data->gf[model][j];
-    printf("%lE %lE %lE\n",data->z[j],fabs(data->gf[model][j]-gf_ij), absolute_tolerance);
     if (fabs(absolute_tolerance)<1e-12) absolute_tolerance = 1e-12;
     ASSERT_DBL_NEAR_TOL(data->gf[model][j], gf_ij, absolute_tolerance);
   }
