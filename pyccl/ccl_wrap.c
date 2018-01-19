@@ -8,7 +8,7 @@
  * interface file instead.
  * ----------------------------------------------------------------------------- */
 
-
+    
 #ifndef SWIGPYTHON
 #define SWIGPYTHON
 #endif
