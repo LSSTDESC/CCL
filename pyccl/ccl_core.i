@@ -21,7 +21,30 @@
 };
 
 %inline %{
-ccl_parameters parameters_create_vec(
+
+ccl_parameters parameters_create_nu(
+                        double Omega_c, double Omega_b, double Omega_k, 
+                        double N_nu_rel, double w0, double wa, double h, 
+                        double norm_pk, double n_s, 
+                        double* M_nu, int n_m, int* status)
+{
+
+    if (( M_nu[0] * M_nu[0])<1e-7){
+    return ccl_parameters_create(Omega_c, Omega_b, Omega_k, N_nu_rel, 0, M_nu, 
+                                 w0, wa, h, norm_pk, n_s, 
+                                 -1, NULL, NULL, status);
+    }else{
+    return ccl_parameters_create(Omega_c, Omega_b, Omega_k, N_nu_rel, n_m, M_nu, 
+                                 w0, wa, h, norm_pk, n_s, 
+                                 -1, NULL, NULL, status);
+    }                             
+    
+    
+    
+}
+
+
+ccl_parameters parameters_create_nu_vec(
                         double Omega_c, double Omega_b, double Omega_k, 
                         double N_nu_rel, double w0, double wa, double h, 
                         double norm_pk, double n_s, 
@@ -31,24 +54,17 @@ ccl_parameters parameters_create_vec(
 
     assert(nz == nf);
     if (nz == 0){ nz = -1; }
+    
+    if (( M_nu[0] * M_nu[0])<1e-7){
+    return ccl_parameters_create(Omega_c, Omega_b, Omega_k, N_nu_rel, 0, M_nu, 
+                                 w0, wa, h, norm_pk, n_s, 
+                                 nz, zarr, dfarr, status);
+    }else{
     return ccl_parameters_create(Omega_c, Omega_b, Omega_k, N_nu_rel, n_m, M_nu, 
                                  w0, wa, h, norm_pk, n_s, 
                                  nz, zarr, dfarr, status);
-    
-    
+    }   
+      
 }
 
-ccl_parameters parameters_create_nuvec(
-                        double Omega_c, double Omega_b, double Omega_k, 
-                        double N_nu_rel, double w0, double wa, double h, 
-                        double norm_pk, double n_s, int n_mg, double *z_mg, double* df_mg, double* M_nu, int n_m, int* status)
-{
-
-
-    return ccl_parameters_create(Omega_c, Omega_b, Omega_k, N_nu_rel, n_m, M_nu, 
-                                 w0, wa, h, norm_pk, n_s, 
-                                 n_mg, z_mg, df_mg, status);
-    
-    
-}
 %}

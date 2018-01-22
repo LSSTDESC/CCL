@@ -87,10 +87,9 @@ def _vectorize_fn(fn, fn_vec, cosmo, x, returns_status=True):
 
     """
     
-    print "in vectorize fn"
-    
     # Access ccl_cosmology object
     cosmo = _cosmology_obj(cosmo)
+    
     status = 0
 
     if isinstance(x, float):

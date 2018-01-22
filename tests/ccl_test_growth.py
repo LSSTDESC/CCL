@@ -44,8 +44,6 @@ def compare_growth(z, gfac_bench, Omega_v, w0, wa):
     file. This test only works if radiation is explicitly set to 0.
     """
     
-    print "compare growth"
-    
     # Set Omega_K in a consistent way
     Omega_k = 1.0 - Omega_c - Omega_b - Omega_v    
     
@@ -63,8 +61,6 @@ def compare_growth(z, gfac_bench, Omega_v, w0, wa):
     # Calculate distance using pyccl
     a = 1. / (1. + z)
     gfac = ccl.growth_factor_unnorm(cosmo, a)
-    
-    print "gfac_bench=", gfac_bench
     
     # Compare to benchmark data
     assert_allclose(gfac, gfac_bench, atol=1e-12, rtol=GROWTH_TOLERANCE)

@@ -450,13 +450,13 @@ def cosmology_compute_power(cosmo, status):
     """cosmology_compute_power(cosmology cosmo, int * status)"""
     return _ccllib.cosmology_compute_power(cosmo, status)
 
-def parameters_create_vec(Omega_c, Omega_b, Omega_k, N_nu_rel, w0, wa, h, norm_pk, n_s, zarr, dfarr, M_nu, status):
-    """parameters_create_vec(double Omega_c, double Omega_b, double Omega_k, double N_nu_rel, double w0, double wa, double h, double norm_pk, double n_s, double * zarr, double * dfarr, double * M_nu, int * status) -> parameters"""
-    return _ccllib.parameters_create_vec(Omega_c, Omega_b, Omega_k, N_nu_rel, w0, wa, h, norm_pk, n_s, zarr, dfarr, M_nu, status)
+def parameters_create_nu(Omega_c, Omega_b, Omega_k, N_nu_rel, w0, wa, h, norm_pk, n_s, M_nu, status):
+    """parameters_create_nu(double Omega_c, double Omega_b, double Omega_k, double N_nu_rel, double w0, double wa, double h, double norm_pk, double n_s, double * M_nu, int * status) -> parameters"""
+    return _ccllib.parameters_create_nu(Omega_c, Omega_b, Omega_k, N_nu_rel, w0, wa, h, norm_pk, n_s, M_nu, status)
 
-def parameters_create_nuvec(Omega_c, Omega_b, Omega_k, N_nu_rel, w0, wa, h, norm_pk, n_s, n_mg, z_mg, df_mg, M_nu, status):
-    """parameters_create_nuvec(double Omega_c, double Omega_b, double Omega_k, double N_nu_rel, double w0, double wa, double h, double norm_pk, double n_s, int n_mg, double * z_mg, double * df_mg, double * M_nu, int * status) -> parameters"""
-    return _ccllib.parameters_create_nuvec(Omega_c, Omega_b, Omega_k, N_nu_rel, w0, wa, h, norm_pk, n_s, n_mg, z_mg, df_mg, M_nu, status)
+def parameters_create_nu_vec(Omega_c, Omega_b, Omega_k, N_nu_rel, w0, wa, h, norm_pk, n_s, zarr, dfarr, M_nu, status):
+    """parameters_create_nu_vec(double Omega_c, double Omega_b, double Omega_k, double N_nu_rel, double w0, double wa, double h, double norm_pk, double n_s, double * zarr, double * dfarr, double * M_nu, int * status) -> parameters"""
+    return _ccllib.parameters_create_nu_vec(Omega_c, Omega_b, Omega_k, N_nu_rel, w0, wa, h, norm_pk, n_s, zarr, dfarr, M_nu, status)
 
 _ccllib.omega_m_label_swigconstant(_ccllib)
 omega_m_label = _ccllib.omega_m_label

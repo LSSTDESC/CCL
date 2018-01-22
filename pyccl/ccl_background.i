@@ -35,7 +35,6 @@ void growth_factor_unnorm_vec(ccl_cosmology * cosmo,
                         double* output, int nout,
                         int* status){
     assert(nout == na);
-    printf("here in growth factor unnorm vec\n");
     ccl_growth_factors_unnorm(cosmo, na, a, output, status);
 }
 

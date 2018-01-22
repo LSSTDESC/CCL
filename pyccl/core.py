@@ -126,36 +126,30 @@ class Parameters(object):
             
         # Check if N_nu_mass is a float and if so does it represent an integer?
         # If it is a float that could be an integer, make it an integer.
-        print "N_nu_mass first=", N_nu_mass
         if (type(N_nu_mass)==float):
             if ( N_nu_mass.is_integer() != True):
                 raise ValueError("N_nu_mass must be an integer value.")
             else:
-                N_nu_mass = int(N_nu_mass)
-        print "N_nu_mass=", N_nu_mass        
+                N_nu_mass = int(N_nu_mass)     
 
         # Check if N_nu_mass is now anything other than an integer:
         if (type(N_nu_mass)!= int):
             raise ValueError("N_nu_mass must be an integer (or a float with integer value).")
         else:
-			# Is N_nu_mass = 0?
             if (N_nu_mass==0):
                 if (hasattr(m_nu, "__len__")==True):
-                    raise ValueError("Length of m_nu must match N_nu_mass.")
-                if (np.abs(m_nu)>1e-14):
+					if (len(m_nu)!=1):
+						raise ValueError("Length of m_nu must match N_nu_mass.")
+					else:
+						if (np.abs(m_nu[0]>1e-14)):
+							raise ValueError("If N_nu_mass is 0, m_nu must be 0 or unset.")
+                elif (np.abs(m_nu)>1e-14):
                     raise ValueError("If N_nu_mass is 0, m_nu must be 0 or unset.")
                 else:
-                    # If N_nu_mass = 0 and m_nu=0, put m_nu in an array/
-                    m_nu=np.asarray([m_nu])
-            # Is N_nu_mass ==1?        
+                    m_nu=np.asarray([m_nu]) # If N_nu_mass = 0 and m_nu=0, put m_nu in an array/       
             elif (N_nu_mass==1):
-                print "Here, N_nu_mass=1"
-				# Make sure we only have one m_nu value if N_nu_mass =1
                 if (hasattr(m_nu, "__len__")!=True):
-                    print "m_nu has no length=", m_nu
-					# Put m_nu value in array.
-                    m_nu = np.asarray([m_nu])
-                    print "m_nu has no length after fix=", m_nu
+                    m_nu = np.asarray([m_nu]) # Put m_nu value in array.
                 elif (len(m_nu)!=1):
                     raise ValueError("Length of m_nu must match N_nu_mass.")
             else:
@@ -176,26 +170,21 @@ class Parameters(object):
                                  
         # Create new instance of ccl_parameters object
         status = 0 # Create an internal status variable; needed to check massive neutrino integral.
-        if ((nz_mg == -1) and (N_nu_mass == None)):
+        if (nz_mg== -1):
             # Create ccl_parameters without modified growth
             self.parameters, status \
-                = lib.parameters_create( Omega_c, Omega_b, Omega_k, N_nu_rel, 
-                                         N_nu_mass, m_nu, w0, wa, h, norm_pk, 
-                                         n_s, -1, None, None, status )
-        elif (nz_mg== -1):
-            # Create ccl_parameters with massive neutrinos but without modified growth
-            print "mnu in final if core.py=", m_nu
-            self.parameters, status \
-            = lib.parameters_create_nuvec( Omega_c, Omega_b, Omega_k, N_nu_rel, 
+            = lib.parameters_create_nu( Omega_c, Omega_b, Omega_k, N_nu_rel, 
                                              w0, wa, h, norm_pk, 
-                                             n_s, -1, None, None, m_nu, status ) 
+                                             n_s, m_nu, status ) 
                                              
         else:
-            # Create ccl_parameters with modified growth arrays and without massive neutrinos
+            # Create ccl_parameters with modified growth arrays
             self.parameters, status \
-                = lib.parameters_create_vec( Omega_c, Omega_b, Omega_k, N_nu_rel, 
+            = lib.parameters_create_nu_vec( Omega_c, Omega_b, Omega_k, N_nu_rel, 
                                              w0, wa, h, norm_pk, 
                                              n_s, z_mg, df_mg, m_nu, status )
+            
+            
         check(status)    
     
     def __getitem__(self, key):
