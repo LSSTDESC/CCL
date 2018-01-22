@@ -126,15 +126,17 @@ class Parameters(object):
             
         # Check if N_nu_mass is a float and if so does it represent an integer?
         # If it is a float that could be an integer, make it an integer.
+        print "N_nu_mass first=", N_nu_mass
         if (type(N_nu_mass)==float):
             if ( N_nu_mass.is_integer() != True):
                 raise ValueError("N_nu_mass must be an integer value.")
             else:
                 N_nu_mass = int(N_nu_mass)
-                
+        print "N_nu_mass=", N_nu_mass        
+
         # Check if N_nu_mass is now anything other than an integer:
-		if (type(N_nu_mass)!= int):
-				raise ValueError("N_nu_mass must be an integer (or a float with integer value).")
+        if (type(N_nu_mass)!= int):
+            raise ValueError("N_nu_mass must be an integer (or a float with integer value).")
         else:
 			# Is N_nu_mass = 0?
             if (N_nu_mass==0):
@@ -147,10 +149,13 @@ class Parameters(object):
                     m_nu=np.asarray([m_nu])
             # Is N_nu_mass ==1?        
             elif (N_nu_mass==1):
+                print "Here, N_nu_mass=1"
 				# Make sure we only have one m_nu value if N_nu_mass =1
                 if (hasattr(m_nu, "__len__")!=True):
+                    print "m_nu has no length=", m_nu
 					# Put m_nu value in array.
                     m_nu = np.asarray([m_nu])
+                    print "m_nu has no length after fix=", m_nu
                 elif (len(m_nu)!=1):
                     raise ValueError("Length of m_nu must match N_nu_mass.")
             else:

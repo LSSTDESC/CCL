@@ -43,19 +43,28 @@ def compare_growth(z, gfac_bench, Omega_v, w0, wa):
     Compare growth factor calculated by pyccl with the values in the benchmark 
     file. This test only works if radiation is explicitly set to 0.
     """
+    
+    print "compare growth"
+    
     # Set Omega_K in a consistent way
     Omega_k = 1.0 - Omega_c - Omega_b - Omega_v    
     
     # Create new Parameters and Cosmology objects
+    
+    #print "Omega_c=", Omega_c, "Omega_b=", Omega_b, "N_nu_rel=", N_nu_rel, "N_nu_mass=", N_nu_mass, "m_nu=", m_nu, "h=", h, "A_s=", A_s, "n_s=", n_s, "Omega_k=", Omega_k, "w0=", w0, "wa=", wa
+    
     p = ccl.Parameters(Omega_c=Omega_c, Omega_b=Omega_b, N_nu_rel=N_nu_rel, N_nu_mass=N_nu_mass, m_nu=m_nu,
                        h=h, A_s=A_s, n_s=n_s, Omega_k=Omega_k,
-                       w0=w0, wa=wa)
+                       w0=w0, wa=wa)                 
+                       
     p.parameters.Omega_g = 0. # Hack to set to same value used for benchmarks
     cosmo = ccl.Cosmology(p)
     
     # Calculate distance using pyccl
     a = 1. / (1. + z)
     gfac = ccl.growth_factor_unnorm(cosmo, a)
+    
+    print "gfac_bench=", gfac_bench
     
     # Compare to benchmark data
     assert_allclose(gfac, gfac_bench, atol=1e-12, rtol=GROWTH_TOLERANCE)

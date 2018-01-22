@@ -36,6 +36,7 @@ def growth_factor_unnorm(cosmo, a):
         growth_factor_unnorm (float or array_like): Unnormalized growth factor, normalized to the scale factor at early times.
 
     """
+    print "here in growth factor unnorm"
     return _vectorize_fn(lib.growth_factor_unnorm, 
                          lib.growth_factor_unnorm_vec, cosmo, a)
 

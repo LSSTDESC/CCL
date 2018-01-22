@@ -86,6 +86,9 @@ def _vectorize_fn(fn, fn_vec, cosmo, x, returns_status=True):
         returns_stats (bool): Indicates whether fn returns a status.
 
     """
+    
+    print "in vectorize fn"
+    
     # Access ccl_cosmology object
     cosmo = _cosmology_obj(cosmo)
     status = 0
