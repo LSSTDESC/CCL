@@ -978,8 +978,6 @@ double ccl_growth_factor_unnorm(ccl_cosmology * cosmo, double a, int * status)
       ccl_cosmology_compute_growth(cosmo, status);
       ccl_check_status(cosmo, status);
       
-      printf("mnu=%f\n", *(cosmo->params.mnu));
-      
     }
     double D;
     *status|=gsl_spline_eval_e(cosmo->data.growth, a, cosmo->data.accelerator,&D);
@@ -993,27 +991,24 @@ double ccl_growth_factor_unnorm(ccl_cosmology * cosmo, double a, int * status)
 
 void ccl_growth_factors_unnorm(ccl_cosmology * cosmo, int na, double a[na], double output[na], int * status)
 {
-  printf("in ccl growth factor\n");	
-	
   if (!cosmo->computed_growth) {
-	  
-	printf("computing growth\n");
-	  
+	   
     ccl_cosmology_compute_growth(cosmo, status);
     ccl_check_status(cosmo, status);    
   }
+  
+  printf("growth0=%f\n", cosmo->data.growth0);
+  
   for (int i=0; i<na; i++) {
     if(a[i]>1.) {
-		printf("a=%f\n", a[i]);
       *status = CCL_ERROR_COMPUTECHI;
       strcpy(cosmo->status_message,"ccl_background.c: scale factor cannot be larger than 1.\n");
       ccl_check_status(cosmo,status);
     }
     else {
       *status|=gsl_spline_eval_e(cosmo->data.growth,a[i],cosmo->data.accelerator,&output[i]);
-      printf("a=%f, output=%f\n", a[i], output[i]);
       output[i]*=cosmo->data.growth0;
-      printf("output=%f\n", output[i]);
+      printf("a=%f, output=%f\n", a[i], output[i]);
       if (*status != GSL_SUCCESS) {
         strcpy(cosmo->status_message, "ccl_background.c: ccl_growth_factors_unnorm(): Scale factor outside interpolation range.\n");
         output[i] = NAN;        
