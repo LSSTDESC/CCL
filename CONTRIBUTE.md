@@ -33,6 +33,10 @@ Things to do if you are adding new features to the CCL C lib
       $> autoreconf -i
     and commit any modified files (some files will be
     automatically modified by this command).
+ 8. Any updates to CCL should be documented in the CCL note
+    that you can find in the directory doc/0000-ccl_note.
+    You will need to edit main.tex, compile with: $> make
+    and commit your changes, including the updated pdf.
 
 More autotools fun:
  - To install the library, users will run:
@@ -48,7 +52,8 @@ More autotools fun:
 
 To view the doxygen documentation, open any .html file in the html/ 
 directory. To refresh the docs to reflect new changes, run 
-`doxygen` in the main directory (assuming you already have it installed).
+`doxygen doxygen/Doxyfile` in the directory `doc` (assuming you
+already have it installed).
 
 Modifying the Python wrapper
 ---------------------------------------------------------

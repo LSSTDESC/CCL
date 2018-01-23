@@ -134,7 +134,7 @@ am__uninstall_files_from_dir = { \
   }
 am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(ccldir)"
 LTLIBRARIES = $(lib_LTLIBRARIES)
-@LOCALCLASS_TRUE@libccl_la_DEPENDENCIES = class/libclass.la
+@LOCALCLASS_TRUE@libccl_la_DEPENDENCIES = class/libclass.a
 am__dirstamp = $(am__leading_dot)dirstamp
 am_libccl_la_OBJECTS = src/libccl_la-ccl_background.lo \
 	src/libccl_la-ccl_core.lo src/libccl_la-ccl_error.lo \
@@ -154,13 +154,17 @@ am_tests_check_ccl_OBJECTS = tests/tests_check_ccl-ccl_test.$(OBJEXT) \
 	tests/tests_check_ccl-ccl_test_params.$(OBJEXT) \
 	tests/tests_check_ccl-ccl_test_cosmology.$(OBJEXT) \
 	tests/tests_check_ccl-ccl_test_distances.$(OBJEXT) \
+	tests/tests_check_ccl-ccl_test_distances_hiz.$(OBJEXT) \
 	tests/tests_check_ccl-ccl_test_growth.$(OBJEXT) \
+	tests/tests_check_ccl-ccl_test_growth_hiz.$(OBJEXT) \
 	tests/tests_check_ccl-ccl_test_bbks.$(OBJEXT) \
 	tests/tests_check_ccl-ccl_test_eh.$(OBJEXT) \
 	tests/tests_check_ccl-ccl_test_cls.$(OBJEXT) \
+	tests/tests_check_ccl-ccl_test_cmblens.$(OBJEXT) \
 	tests/tests_check_ccl-ccl_test_sigmaM.$(OBJEXT) \
 	tests/tests_check_ccl-ccl_test_massfunc.$(OBJEXT) \
-	tests/tests_check_ccl-ccl_test_correlation.$(OBJEXT)
+	tests/tests_check_ccl-ccl_test_correlation.$(OBJEXT) \
+	tests/tests_check_ccl-ccl_test_bcm.$(OBJEXT)
 tests_check_ccl_OBJECTS = $(am_tests_check_ccl_OBJECTS)
 tests_check_ccl_LDADD = $(LDADD)
 tests_check_ccl_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
@@ -268,7 +272,7 @@ am__tty_colors = { \
     std='[m'; \
   fi; \
 }
-DIST_SUBDIRS = include class
+DIST_SUBDIRS = include
 am__DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/config.h.in ar-lib \
 	compile config.guess config.sub depcomp install-sh ltmain.sh \
 	missing
@@ -434,15 +438,16 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 @LOCALCLASS_FALSE@SUBDIRS = include
-@LOCALCLASS_TRUE@SUBDIRS = include class
+@LOCALCLASS_TRUE@SUBDIRS = include
 EXTRA_DIST = doc sandbox README.md tests/benchmark tests/ccl_example_photoz.c tests/ccl_example_specs.c tests/ccl_sample_power.c tests/ctest.h tests/min_code.c tests/readme.md include/ccl_params.ini tests/ccl_test_neutrinos.c
 ccldir = $(datadir)/ccl
 ccl_DATA = include/ccl_params.ini
 lib_LTLIBRARIES = libccl.la
 libccl_la_SOURCES = src/ccl_background.c src/ccl_core.c src/ccl_error.c src/ccl_lsst_specs.c src/ccl_placeholder.c src/ccl_power.c src/ccl_utils.c src/ccl_cls.c src/ccl_massfunc.c src/ccl_neutrinos.c src/ccl_correlation.c src/fftlog.c
-@LOCALCLASS_TRUE@libccl_la_LIBADD = class/libclass.la
-libccl_la_CPPFLAGS = -I./include/ -I$(CLASSDIR)/include -D__CCL_DATA_DIR__=$(datadir)/ccl
-tests_check_ccl_SOURCES = tests/ccl_test.c tests/ccl_test_utils.c tests/ccl_test_params.c tests/ccl_test_cosmology.c tests/ccl_test_distances.c tests/ccl_test_growth.c tests/ccl_test_bbks.c tests/ccl_test_eh.c tests/ccl_test_cls.c tests/ccl_test_sigmaM.c tests/ccl_test_massfunc.c tests/ccl_test_correlation.c
+@LOCALCLASS_TRUE@libccl_la_LIBADD = class/libclass.a
+@LOCALCLASS_FALSE@libccl_la_CPPFLAGS = -I./include/ -I$(CLASSDIR)/include -D__CCL_DATA_DIR__=$(datadir)/ccl
+@LOCALCLASS_TRUE@libccl_la_CPPFLAGS = -I./include/ -I./class/include -D__CCL_DATA_DIR__=$(datadir)/ccl
+tests_check_ccl_SOURCES = tests/ccl_test.c tests/ccl_test_utils.c tests/ccl_test_params.c tests/ccl_test_cosmology.c tests/ccl_test_distances.c tests/ccl_test_distances_hiz.c tests/ccl_test_growth.c tests/ccl_test_growth_hiz.c tests/ccl_test_bbks.c tests/ccl_test_eh.c tests/ccl_test_cls.c tests/ccl_test_cmblens.c tests/ccl_test_sigmaM.c tests/ccl_test_massfunc.c tests/ccl_test_correlation.c tests/ccl_test_bcm.c
 tests_check_ccl_CPPFLAGS = -I./tests/ -I./include/
 tests_check_ccl_LDFLAGS = -L./ -lccl -lgsl -lgslcblas -lfftw3 $(CLASS_LIB)
 all: config.h
@@ -591,7 +596,11 @@ tests/tests_check_ccl-ccl_test_cosmology.$(OBJEXT):  \
 	tests/$(am__dirstamp) tests/$(DEPDIR)/$(am__dirstamp)
 tests/tests_check_ccl-ccl_test_distances.$(OBJEXT):  \
 	tests/$(am__dirstamp) tests/$(DEPDIR)/$(am__dirstamp)
+tests/tests_check_ccl-ccl_test_distances_hiz.$(OBJEXT):  \
+	tests/$(am__dirstamp) tests/$(DEPDIR)/$(am__dirstamp)
 tests/tests_check_ccl-ccl_test_growth.$(OBJEXT):  \
+	tests/$(am__dirstamp) tests/$(DEPDIR)/$(am__dirstamp)
+tests/tests_check_ccl-ccl_test_growth_hiz.$(OBJEXT):  \
 	tests/$(am__dirstamp) tests/$(DEPDIR)/$(am__dirstamp)
 tests/tests_check_ccl-ccl_test_bbks.$(OBJEXT): tests/$(am__dirstamp) \
 	tests/$(DEPDIR)/$(am__dirstamp)
@@ -599,12 +608,16 @@ tests/tests_check_ccl-ccl_test_eh.$(OBJEXT): tests/$(am__dirstamp) \
 	tests/$(DEPDIR)/$(am__dirstamp)
 tests/tests_check_ccl-ccl_test_cls.$(OBJEXT): tests/$(am__dirstamp) \
 	tests/$(DEPDIR)/$(am__dirstamp)
+tests/tests_check_ccl-ccl_test_cmblens.$(OBJEXT):  \
+	tests/$(am__dirstamp) tests/$(DEPDIR)/$(am__dirstamp)
 tests/tests_check_ccl-ccl_test_sigmaM.$(OBJEXT):  \
 	tests/$(am__dirstamp) tests/$(DEPDIR)/$(am__dirstamp)
 tests/tests_check_ccl-ccl_test_massfunc.$(OBJEXT):  \
 	tests/$(am__dirstamp) tests/$(DEPDIR)/$(am__dirstamp)
 tests/tests_check_ccl-ccl_test_correlation.$(OBJEXT):  \
 	tests/$(am__dirstamp) tests/$(DEPDIR)/$(am__dirstamp)
+tests/tests_check_ccl-ccl_test_bcm.$(OBJEXT): tests/$(am__dirstamp) \
+	tests/$(DEPDIR)/$(am__dirstamp)
 
 tests/check_ccl$(EXEEXT): $(tests_check_ccl_OBJECTS) $(tests_check_ccl_DEPENDENCIES) $(EXTRA_tests_check_ccl_DEPENDENCIES) tests/$(am__dirstamp)
 	@rm -f tests/check_ccl$(EXEEXT)
@@ -633,12 +646,16 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/libccl_la-fftlog.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/tests_check_ccl-ccl_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/tests_check_ccl-ccl_test_bbks.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/tests_check_ccl-ccl_test_bcm.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/tests_check_ccl-ccl_test_cls.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/tests_check_ccl-ccl_test_cmblens.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/tests_check_ccl-ccl_test_correlation.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/tests_check_ccl-ccl_test_cosmology.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/tests_check_ccl-ccl_test_distances.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/tests_check_ccl-ccl_test_distances_hiz.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/tests_check_ccl-ccl_test_eh.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/tests_check_ccl-ccl_test_growth.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/tests_check_ccl-ccl_test_growth_hiz.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/tests_check_ccl-ccl_test_massfunc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/tests_check_ccl-ccl_test_params.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/tests_check_ccl-ccl_test_sigmaM.Po@am__quote@
@@ -822,6 +839,20 @@ tests/tests_check_ccl-ccl_test_distances.obj: tests/ccl_test_distances.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(tests_check_ccl_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o tests/tests_check_ccl-ccl_test_distances.obj `if test -f 'tests/ccl_test_distances.c'; then $(CYGPATH_W) 'tests/ccl_test_distances.c'; else $(CYGPATH_W) '$(srcdir)/tests/ccl_test_distances.c'; fi`
 
+tests/tests_check_ccl-ccl_test_distances_hiz.o: tests/ccl_test_distances_hiz.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(tests_check_ccl_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT tests/tests_check_ccl-ccl_test_distances_hiz.o -MD -MP -MF tests/$(DEPDIR)/tests_check_ccl-ccl_test_distances_hiz.Tpo -c -o tests/tests_check_ccl-ccl_test_distances_hiz.o `test -f 'tests/ccl_test_distances_hiz.c' || echo '$(srcdir)/'`tests/ccl_test_distances_hiz.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) tests/$(DEPDIR)/tests_check_ccl-ccl_test_distances_hiz.Tpo tests/$(DEPDIR)/tests_check_ccl-ccl_test_distances_hiz.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='tests/ccl_test_distances_hiz.c' object='tests/tests_check_ccl-ccl_test_distances_hiz.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(tests_check_ccl_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o tests/tests_check_ccl-ccl_test_distances_hiz.o `test -f 'tests/ccl_test_distances_hiz.c' || echo '$(srcdir)/'`tests/ccl_test_distances_hiz.c
+
+tests/tests_check_ccl-ccl_test_distances_hiz.obj: tests/ccl_test_distances_hiz.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(tests_check_ccl_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT tests/tests_check_ccl-ccl_test_distances_hiz.obj -MD -MP -MF tests/$(DEPDIR)/tests_check_ccl-ccl_test_distances_hiz.Tpo -c -o tests/tests_check_ccl-ccl_test_distances_hiz.obj `if test -f 'tests/ccl_test_distances_hiz.c'; then $(CYGPATH_W) 'tests/ccl_test_distances_hiz.c'; else $(CYGPATH_W) '$(srcdir)/tests/ccl_test_distances_hiz.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) tests/$(DEPDIR)/tests_check_ccl-ccl_test_distances_hiz.Tpo tests/$(DEPDIR)/tests_check_ccl-ccl_test_distances_hiz.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='tests/ccl_test_distances_hiz.c' object='tests/tests_check_ccl-ccl_test_distances_hiz.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(tests_check_ccl_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o tests/tests_check_ccl-ccl_test_distances_hiz.obj `if test -f 'tests/ccl_test_distances_hiz.c'; then $(CYGPATH_W) 'tests/ccl_test_distances_hiz.c'; else $(CYGPATH_W) '$(srcdir)/tests/ccl_test_distances_hiz.c'; fi`
+
 tests/tests_check_ccl-ccl_test_growth.o: tests/ccl_test_growth.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(tests_check_ccl_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT tests/tests_check_ccl-ccl_test_growth.o -MD -MP -MF tests/$(DEPDIR)/tests_check_ccl-ccl_test_growth.Tpo -c -o tests/tests_check_ccl-ccl_test_growth.o `test -f 'tests/ccl_test_growth.c' || echo '$(srcdir)/'`tests/ccl_test_growth.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) tests/$(DEPDIR)/tests_check_ccl-ccl_test_growth.Tpo tests/$(DEPDIR)/tests_check_ccl-ccl_test_growth.Po
@@ -835,6 +866,20 @@ tests/tests_check_ccl-ccl_test_growth.obj: tests/ccl_test_growth.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='tests/ccl_test_growth.c' object='tests/tests_check_ccl-ccl_test_growth.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(tests_check_ccl_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o tests/tests_check_ccl-ccl_test_growth.obj `if test -f 'tests/ccl_test_growth.c'; then $(CYGPATH_W) 'tests/ccl_test_growth.c'; else $(CYGPATH_W) '$(srcdir)/tests/ccl_test_growth.c'; fi`
+
+tests/tests_check_ccl-ccl_test_growth_hiz.o: tests/ccl_test_growth_hiz.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(tests_check_ccl_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT tests/tests_check_ccl-ccl_test_growth_hiz.o -MD -MP -MF tests/$(DEPDIR)/tests_check_ccl-ccl_test_growth_hiz.Tpo -c -o tests/tests_check_ccl-ccl_test_growth_hiz.o `test -f 'tests/ccl_test_growth_hiz.c' || echo '$(srcdir)/'`tests/ccl_test_growth_hiz.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) tests/$(DEPDIR)/tests_check_ccl-ccl_test_growth_hiz.Tpo tests/$(DEPDIR)/tests_check_ccl-ccl_test_growth_hiz.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='tests/ccl_test_growth_hiz.c' object='tests/tests_check_ccl-ccl_test_growth_hiz.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(tests_check_ccl_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o tests/tests_check_ccl-ccl_test_growth_hiz.o `test -f 'tests/ccl_test_growth_hiz.c' || echo '$(srcdir)/'`tests/ccl_test_growth_hiz.c
+
+tests/tests_check_ccl-ccl_test_growth_hiz.obj: tests/ccl_test_growth_hiz.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(tests_check_ccl_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT tests/tests_check_ccl-ccl_test_growth_hiz.obj -MD -MP -MF tests/$(DEPDIR)/tests_check_ccl-ccl_test_growth_hiz.Tpo -c -o tests/tests_check_ccl-ccl_test_growth_hiz.obj `if test -f 'tests/ccl_test_growth_hiz.c'; then $(CYGPATH_W) 'tests/ccl_test_growth_hiz.c'; else $(CYGPATH_W) '$(srcdir)/tests/ccl_test_growth_hiz.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) tests/$(DEPDIR)/tests_check_ccl-ccl_test_growth_hiz.Tpo tests/$(DEPDIR)/tests_check_ccl-ccl_test_growth_hiz.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='tests/ccl_test_growth_hiz.c' object='tests/tests_check_ccl-ccl_test_growth_hiz.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(tests_check_ccl_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o tests/tests_check_ccl-ccl_test_growth_hiz.obj `if test -f 'tests/ccl_test_growth_hiz.c'; then $(CYGPATH_W) 'tests/ccl_test_growth_hiz.c'; else $(CYGPATH_W) '$(srcdir)/tests/ccl_test_growth_hiz.c'; fi`
 
 tests/tests_check_ccl-ccl_test_bbks.o: tests/ccl_test_bbks.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(tests_check_ccl_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT tests/tests_check_ccl-ccl_test_bbks.o -MD -MP -MF tests/$(DEPDIR)/tests_check_ccl-ccl_test_bbks.Tpo -c -o tests/tests_check_ccl-ccl_test_bbks.o `test -f 'tests/ccl_test_bbks.c' || echo '$(srcdir)/'`tests/ccl_test_bbks.c
@@ -878,6 +923,20 @@ tests/tests_check_ccl-ccl_test_cls.obj: tests/ccl_test_cls.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(tests_check_ccl_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o tests/tests_check_ccl-ccl_test_cls.obj `if test -f 'tests/ccl_test_cls.c'; then $(CYGPATH_W) 'tests/ccl_test_cls.c'; else $(CYGPATH_W) '$(srcdir)/tests/ccl_test_cls.c'; fi`
 
+tests/tests_check_ccl-ccl_test_cmblens.o: tests/ccl_test_cmblens.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(tests_check_ccl_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT tests/tests_check_ccl-ccl_test_cmblens.o -MD -MP -MF tests/$(DEPDIR)/tests_check_ccl-ccl_test_cmblens.Tpo -c -o tests/tests_check_ccl-ccl_test_cmblens.o `test -f 'tests/ccl_test_cmblens.c' || echo '$(srcdir)/'`tests/ccl_test_cmblens.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) tests/$(DEPDIR)/tests_check_ccl-ccl_test_cmblens.Tpo tests/$(DEPDIR)/tests_check_ccl-ccl_test_cmblens.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='tests/ccl_test_cmblens.c' object='tests/tests_check_ccl-ccl_test_cmblens.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(tests_check_ccl_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o tests/tests_check_ccl-ccl_test_cmblens.o `test -f 'tests/ccl_test_cmblens.c' || echo '$(srcdir)/'`tests/ccl_test_cmblens.c
+
+tests/tests_check_ccl-ccl_test_cmblens.obj: tests/ccl_test_cmblens.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(tests_check_ccl_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT tests/tests_check_ccl-ccl_test_cmblens.obj -MD -MP -MF tests/$(DEPDIR)/tests_check_ccl-ccl_test_cmblens.Tpo -c -o tests/tests_check_ccl-ccl_test_cmblens.obj `if test -f 'tests/ccl_test_cmblens.c'; then $(CYGPATH_W) 'tests/ccl_test_cmblens.c'; else $(CYGPATH_W) '$(srcdir)/tests/ccl_test_cmblens.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) tests/$(DEPDIR)/tests_check_ccl-ccl_test_cmblens.Tpo tests/$(DEPDIR)/tests_check_ccl-ccl_test_cmblens.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='tests/ccl_test_cmblens.c' object='tests/tests_check_ccl-ccl_test_cmblens.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(tests_check_ccl_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o tests/tests_check_ccl-ccl_test_cmblens.obj `if test -f 'tests/ccl_test_cmblens.c'; then $(CYGPATH_W) 'tests/ccl_test_cmblens.c'; else $(CYGPATH_W) '$(srcdir)/tests/ccl_test_cmblens.c'; fi`
+
 tests/tests_check_ccl-ccl_test_sigmaM.o: tests/ccl_test_sigmaM.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(tests_check_ccl_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT tests/tests_check_ccl-ccl_test_sigmaM.o -MD -MP -MF tests/$(DEPDIR)/tests_check_ccl-ccl_test_sigmaM.Tpo -c -o tests/tests_check_ccl-ccl_test_sigmaM.o `test -f 'tests/ccl_test_sigmaM.c' || echo '$(srcdir)/'`tests/ccl_test_sigmaM.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) tests/$(DEPDIR)/tests_check_ccl-ccl_test_sigmaM.Tpo tests/$(DEPDIR)/tests_check_ccl-ccl_test_sigmaM.Po
@@ -919,6 +978,20 @@ tests/tests_check_ccl-ccl_test_correlation.obj: tests/ccl_test_correlation.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='tests/ccl_test_correlation.c' object='tests/tests_check_ccl-ccl_test_correlation.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(tests_check_ccl_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o tests/tests_check_ccl-ccl_test_correlation.obj `if test -f 'tests/ccl_test_correlation.c'; then $(CYGPATH_W) 'tests/ccl_test_correlation.c'; else $(CYGPATH_W) '$(srcdir)/tests/ccl_test_correlation.c'; fi`
+
+tests/tests_check_ccl-ccl_test_bcm.o: tests/ccl_test_bcm.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(tests_check_ccl_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT tests/tests_check_ccl-ccl_test_bcm.o -MD -MP -MF tests/$(DEPDIR)/tests_check_ccl-ccl_test_bcm.Tpo -c -o tests/tests_check_ccl-ccl_test_bcm.o `test -f 'tests/ccl_test_bcm.c' || echo '$(srcdir)/'`tests/ccl_test_bcm.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) tests/$(DEPDIR)/tests_check_ccl-ccl_test_bcm.Tpo tests/$(DEPDIR)/tests_check_ccl-ccl_test_bcm.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='tests/ccl_test_bcm.c' object='tests/tests_check_ccl-ccl_test_bcm.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(tests_check_ccl_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o tests/tests_check_ccl-ccl_test_bcm.o `test -f 'tests/ccl_test_bcm.c' || echo '$(srcdir)/'`tests/ccl_test_bcm.c
+
+tests/tests_check_ccl-ccl_test_bcm.obj: tests/ccl_test_bcm.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(tests_check_ccl_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT tests/tests_check_ccl-ccl_test_bcm.obj -MD -MP -MF tests/$(DEPDIR)/tests_check_ccl-ccl_test_bcm.Tpo -c -o tests/tests_check_ccl-ccl_test_bcm.obj `if test -f 'tests/ccl_test_bcm.c'; then $(CYGPATH_W) 'tests/ccl_test_bcm.c'; else $(CYGPATH_W) '$(srcdir)/tests/ccl_test_bcm.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) tests/$(DEPDIR)/tests_check_ccl-ccl_test_bcm.Tpo tests/$(DEPDIR)/tests_check_ccl-ccl_test_bcm.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='tests/ccl_test_bcm.c' object='tests/tests_check_ccl-ccl_test_bcm.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(tests_check_ccl_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o tests/tests_check_ccl-ccl_test_bcm.obj `if test -f 'tests/ccl_test_bcm.c'; then $(CYGPATH_W) 'tests/ccl_test_bcm.c'; else $(CYGPATH_W) '$(srcdir)/tests/ccl_test_bcm.c'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo
@@ -1486,6 +1559,10 @@ uninstall-am: uninstall-cclDATA uninstall-libLTLIBRARIES
 
 dist-hook:
 	rm -f $(distdir)/clean_code.sh
+
+check-cpp:
+	echo '#include "ccl_sample_run.c"' > tests/ccl_sample_run.cpp
+	$(CXX) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) -std=c++11 $(AM_CFLAGS) $(CFLAGS) -I$(includedir) $(LDFLAGS) tests/ccl_sample_run.cpp -o tests/ccl_sample_run -L$(libdir) -lccl $(LIBS)
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

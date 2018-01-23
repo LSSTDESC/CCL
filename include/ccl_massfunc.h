@@ -1,4 +1,7 @@
 /** @file */
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #pragma once
 
@@ -66,3 +69,7 @@ double ccl_massfunc_m2r(ccl_cosmology * cosmo, double smooth_mass, int * status)
  * @return sigmaM, the standard deviation of density at mass scale M
  */
 double ccl_sigmaM(ccl_cosmology * cosmo, double smooth_mass, double a, int * status);
+
+#ifdef __cplusplus
+}
+#endif

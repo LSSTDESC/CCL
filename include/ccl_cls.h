@@ -1,4 +1,7 @@
 /** @file */
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #pragma once
 
@@ -7,7 +10,7 @@
 
 #define CL_TRACER_NC 1 //Tracer type 1: number counts
 #define CL_TRACER_WL 2 //Tracer type 2: weak lensing
-
+#define CL_TRACER_CL 3 //Tracer type 2: CMB lensing
 
 /**
  * ClTracer structure, used to contain everything
@@ -20,6 +23,7 @@ typedef struct {
   double prefac_lensing; //3*O_M*H_0^2/2
   double chimax; //Limits in chi where we care about this tracer
   double chimin;
+  double chi_source; //Comoving distance to the source (for CMB lensing)
   int has_rsd;
   int has_magnification;
   int has_intrinsic_alignment;
@@ -34,7 +38,7 @@ typedef struct {
 
 /**
  * Constructor for a ClTracer.
- * @param Tracer_type pass CL_TRACER_NC (number counts) or CL_TRACER_WL (weak lensing)
+ * @param Tracer_type pass CL_TRACER_NC (number counts), CL_TRACER_WL (weak lensing) or CL_TRACER_CL (CMB lensing)
  * @param has_rsd Set to 1 if you want to compute the RSD contribution to number counts (0 otherwise)
  * @param has_magnification Set to 1 if you want to compute the magnification contribution to number counts (0 otherwise)
  * @param has_intrinsic_alignment Set to 1 if you want to compute the IA contribution to shear
@@ -53,6 +57,9 @@ typedef struct {
  * @param nz_rf Number of bins in z_f and f
  * @param z_rf Redshifts for each redshift interval of rf
  * @param rf Aligned red fraction in each redshift bin
+ * @param z_source Redshift of source plane for CMB lensing (z~1100 for CMB lensing).
+ * @param status Status flag. 0 if there are no errors, nonzero otherwise.
+ * For specific cases see documentation for ccl_error.c
  * @return CCL_ClTracer object
  */
 CCL_ClTracer *ccl_cl_tracer_new(ccl_cosmology *cosmo,int tracer_type,
@@ -61,7 +68,8 @@ CCL_ClTracer *ccl_cl_tracer_new(ccl_cosmology *cosmo,int tracer_type,
 				int nz_b,double *z_b,double *b,
 				int nz_s,double *z_s,double *s,
 				int nz_ba,double *z_ba,double *ba,
-				int nz_rf,double *z_rf,double *rf, int * status);
+				int nz_rf,double *z_rf,double *rf,
+				double z_source,int * status);
 
 /**
  * Simplified constructor for a clustering ClTracer.
@@ -140,6 +148,15 @@ CCL_ClTracer *ccl_cl_tracer_lensing_simple_new(ccl_cosmology *cosmo,
 
 
 /**
+ * Simplified constructor for a CMB lensing ClTracer.
+ * @param z_source Redshift of source plane (z~1100 for CMB lensing).
+ * @param status Status flag. 0 if there are no errors, nonzero otherwise.
+ * For specific cases see documentation for ccl_error.c
+ * @return CCL_ClTracer object
+ */
+CCL_ClTracer *ccl_cl_tracer_cmblens_new(ccl_cosmology *cosmo,double z_source,int *status);
+
+/**
  * Destructor for a Cltracer
  * @param clt a Cltracer
  * @return void
@@ -157,3 +174,7 @@ void ccl_cl_tracer_free(CCL_ClTracer *clt);
  * @return void
  */
 double ccl_angular_cl(ccl_cosmology *cosmo,int l,CCL_ClTracer *clt1,CCL_ClTracer *clt2, int * status);
+
+#ifdef __cplusplus
+}
+#endif

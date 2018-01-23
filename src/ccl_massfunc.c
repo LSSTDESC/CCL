@@ -323,7 +323,6 @@ static double ccl_halo_b1(ccl_cosmology *cosmo, double halomass, double a, doubl
     
   default:
     *status = CCL_ERROR_MF;
-    cosmo->status = 11;
     sprintf(cosmo->status_message ,
 	    "ccl_massfunc.c: ccl_halo_b1(): No b(M) fitting function implemented for mass_function_method: %d \n",
       cosmo->config.mass_function_method);

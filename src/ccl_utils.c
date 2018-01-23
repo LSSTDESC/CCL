@@ -30,6 +30,61 @@ double * ccl_linear_spacing(double xmin, double xmax, int N)
   return x;
 }
 
+/* ------- ROUTINE: ccl_linlog spacing ------
+ * INPUTS: [xminlog,xmax] of the interval to be divided in bins
+ *         xmin when linear spacing starts
+ *         Nlog number of logarithmically spaced bins 
+ *         Nlin number of linearly spaced bins 
+ * OUTPUT: bin edges in range [xminlog,xmax]
+ * */
+
+double * ccl_linlog_spacing(double xminlog, double xmin, double xmax, int Nlog, int Nlin)
+{
+  if (Nlog<2) {
+    fprintf(stderr, "ERROR: Cannot make log-spaced array with %d points - need at least 2\n", Nlog);
+    return NULL;
+  }
+
+  if (!(xminlog>0 && xmin>0)) {
+    fprintf(stderr, "ERROR: Cannot make log-spaced array xminlog or xmin  non-positive (had %le, %le)\n", xminlog, xmin);
+    return NULL;
+  }
+
+  if (xminlog>xmin){
+    fprintf(stderr, "ERROR: xminlog must be smaller as xmin");
+    return NULL;
+  }
+
+  if (xmin>xmax){
+    fprintf(stderr, "ERROR: xmin must be smaller as xmax");
+    return NULL;
+  }
+
+  double * x = malloc(sizeof(double)*(Nlin+Nlog-1));
+  if (x==NULL) {
+    fprintf(stderr, "ERROR: Could not allocate memory for array of size (Nlin+Nlog-1)=%d)\n", (Nlin+Nlog-1));
+    return x;
+  }
+
+  double dx = (xmax-xmin)/(Nlin -1.);
+  double log_xchange = log(xmin);
+  double log_xmin = log(xminlog);
+  double dlog_x = (log_xchange - log_xmin) /  (Nlog-1.);
+
+  for (int i=0; i<Nlin+Nlog-1; i++) {
+    if (i<Nlog)
+        x[i] = exp(log_xmin + dlog_x*i);
+    if (i>=Nlog)
+        x[i] = xmin + dx*(i-Nlog+1);
+  }
+
+  x[0]=xminlog; //Make sure roundoff errors don't spoil edges
+  x[Nlog-1]=xmin; //Make sure roundoff errors don't spoil edges
+  x[Nlin+Nlog-2]=xmax; //Make sure roundoff errors don't spoil edges
+  
+  return x;
+}
+
 /* ------- ROUTINE: ccl_log spacing ------
 INPUTS: [xmin,xmax] of the interval to be divided logarithmically in N bins
 TASK: divide an interval in N logarithmic bins

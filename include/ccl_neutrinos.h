@@ -1,4 +1,7 @@
 /** @file */
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 //#pragma once
 #include "ccl_core.h"
@@ -31,7 +34,7 @@ gsl_spline* calculate_nu_phasespace_spline(int *status);
  * Users are encouraged to access this quantity via the function ccl_omega_x.
  * @param a Scale factor
  * @param Neff The effective number of species with neutrino mass mnu.
- * @param mnu Neutrino mass (can be 0).
+ * @param mnu Pointer to array containing neutrino mass (can be 0).
  * @param TCMB Temperature of the CMB
  * @param accel - Interpolation accelerator to be used with phasespace spline. If not set yet, pass NULL.
  * @param status Status flag. 0 if there are no errors, nonzero otherwise.
@@ -39,3 +42,7 @@ gsl_spline* calculate_nu_phasespace_spline(int *status);
  * @return OmNuh2 Fractional energy density of neutrions with mass mnu, multiplied by h squared. 
  */
 double Omeganuh2 (double a, double Neff, double* mnu, double TCMB, gsl_interp_accel* accel, int * status);
+
+#ifdef __cplusplus
+}
+#endif

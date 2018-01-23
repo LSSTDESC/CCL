@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['user_5fpz_5fprobability',['user_pz_probability',['../ccl__example__photoz_8c.html#acbfb995df7cb5b0797ab5859c85abc78',1,'user_pz_probability(double z_ph, double z_s, void *user_par, int *status):&#160;ccl_example_photoz.c'],['../ccl__sample__run_8c.html#acbfb995df7cb5b0797ab5859c85abc78',1,'user_pz_probability(double z_ph, double z_s, void *user_par, int *status):&#160;ccl_sample_run.c']]]
+  ['pk2xi',['pk2xi',['../fftlog_8c.html#a7ed666792a587e29a9387f50f841d6f6',1,'pk2xi(int N, const double k[], const double pk[], double r[], double xi[]):&#160;fftlog.c'],['../fftlog_8h.html#a7ed666792a587e29a9387f50f841d6f6',1,'pk2xi(int N, const double k[], const double pk[], double r[], double xi[]):&#160;fftlog.c']]]
 ];

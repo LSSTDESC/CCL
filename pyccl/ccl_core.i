@@ -25,17 +25,17 @@
 ccl_parameters parameters_create_nu(
                         double Omega_c, double Omega_b, double Omega_k, 
                         double N_nu_rel, double w0, double wa, double h, 
-                        double norm_pk, double n_s, 
-                        double* M_nu, int n_m, int* status)
+                        double norm_pk, double n_s, double bcm_log10Mc, double bcm_etab,
+                        double bcm_ks, double* M_nu, int n_m, int* status)
 {
 
     if (( M_nu[0] * M_nu[0])<1e-7){
     return ccl_parameters_create(Omega_c, Omega_b, Omega_k, N_nu_rel, 0, M_nu, 
-                                 w0, wa, h, norm_pk, n_s, 
+                                 w0, wa, h, norm_pk, n_s, bcm_log10Mc, bcm_etab, bcm_ks,
                                  -1, NULL, NULL, status);
     }else{
     return ccl_parameters_create(Omega_c, Omega_b, Omega_k, N_nu_rel, n_m, M_nu, 
-                                 w0, wa, h, norm_pk, n_s, 
+                                 w0, wa, h, norm_pk, n_s, bcm_log10Mc, bcm_etab, bcm_ks,
                                  -1, NULL, NULL, status);
     }                             
     
@@ -47,7 +47,7 @@ ccl_parameters parameters_create_nu(
 ccl_parameters parameters_create_nu_vec(
                         double Omega_c, double Omega_b, double Omega_k, 
                         double N_nu_rel, double w0, double wa, double h, 
-                        double norm_pk, double n_s, 
+                        double norm_pk, double n_s, double bcm_log10Mc, double bcm_etab, double bcm_ks, 
                         double* zarr, int nz,
                         double* dfarr, int nf, double* M_nu, int n_m, int* status)
 {
@@ -57,11 +57,11 @@ ccl_parameters parameters_create_nu_vec(
     
     if (( M_nu[0] * M_nu[0])<1e-7){
     return ccl_parameters_create(Omega_c, Omega_b, Omega_k, N_nu_rel, 0, M_nu, 
-                                 w0, wa, h, norm_pk, n_s, 
+                                 w0, wa, h, norm_pk, n_s, bcm_log10Mc, bcm_etab, bcm_ks,
                                  nz, zarr, dfarr, status);
     }else{
     return ccl_parameters_create(Omega_c, Omega_b, Omega_k, N_nu_rel, n_m, M_nu, 
-                                 w0, wa, h, norm_pk, n_s, 
+                                 w0, wa, h, norm_pk, n_s, bcm_log10Mc, bcm_etab, bcm_ks,
                                  nz, zarr, dfarr, status);
     }   
       
