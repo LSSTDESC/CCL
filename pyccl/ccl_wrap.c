@@ -19267,6 +19267,17 @@ SWIGINTERN PyObject *CCL_ERROR_NU_INT_swigconstant(PyObject *SWIGUNUSEDPARM(self
 }
 
 
+SWIGINTERN PyObject *CCL_ERROR_NOT_IMPLEMENTED_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *module;
+  PyObject *d;
+  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
+  d = PyModule_GetDict(module);
+  if (!d) return NULL;
+  SWIG_Python_SetConstant(d, "CCL_ERROR_NOT_IMPLEMENTED",SWIG_From_int((int)(1038)));
+  return SWIG_Py_Void();
+}
+
+
 SWIGINTERN PyObject *CCL_ERROR_POLICY_EXIT_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *module;
   PyObject *d;
@@ -20561,6 +20572,7 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"CCL_ERROR_HMF_INTERP_swigconstant", CCL_ERROR_HMF_INTERP_swigconstant, METH_VARARGS, NULL},
 	 { (char *)"CCL_ERROR_PARAMETERS_swigconstant", CCL_ERROR_PARAMETERS_swigconstant, METH_VARARGS, NULL},
 	 { (char *)"CCL_ERROR_NU_INT_swigconstant", CCL_ERROR_NU_INT_swigconstant, METH_VARARGS, NULL},
+	 { (char *)"CCL_ERROR_NOT_IMPLEMENTED_swigconstant", CCL_ERROR_NOT_IMPLEMENTED_swigconstant, METH_VARARGS, NULL},
 	 { (char *)"CCL_ERROR_POLICY_EXIT_swigconstant", CCL_ERROR_POLICY_EXIT_swigconstant, METH_VARARGS, NULL},
 	 { (char *)"CCL_ERROR_POLICY_CONTINUE_swigconstant", CCL_ERROR_POLICY_CONTINUE_swigconstant, METH_VARARGS, NULL},
 	 { (char *)"raise_exception", _wrap_raise_exception, METH_VARARGS, (char *)"raise_exception(int err, char * msg)"},
