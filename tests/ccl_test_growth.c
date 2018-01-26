@@ -118,8 +118,11 @@ static void check_mgrowth(void)
     z_mg[ii]=4*(ii+0.0)/(nz_mg-1.);
     df_mg[ii]=0.1/(1+z_mg[ii]);
   }
-  params1=ccl_parameters_create(0.25,0.05,0,0,0,0,-1,0,0.7,2.1E-9,0.96,-1,-1,-1,-1,NULL,NULL, &status);
-  params2=ccl_parameters_create(0.25,0.05,0,0,0,0,-1,0,0.7,2.1E-9,0.96,-1,-1,-1,nz_mg,z_mg,df_mg, &status);
+  double mnuval = 0;
+  
+  
+  params1=ccl_parameters_create(0.25,0.05,0,0,0,&mnuval,-1,0,0.7,2.1E-9,0.96,-1,-1,-1,-1,NULL,NULL, &status);
+  params2=ccl_parameters_create(0.25,0.05,0,0,0,&mnuval,-1,0,0.7,2.1E-9,0.96,-1,-1,-1,nz_mg,z_mg,df_mg, &status);
   cosmo1=ccl_cosmology_create(params1,default_config);
   cosmo2=ccl_cosmology_create(params2,default_config);
 

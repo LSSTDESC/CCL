@@ -174,6 +174,7 @@ ccl_cosmology * ccl_cosmology_create_with_params(double Omega_c, double Omega_b,
 						 double *dfarr_mgrowth, ccl_configuration config,
 						 int *status)
 {
+
   // Create ccl_parameters struct from input parameters
   ccl_parameters params;
   params = ccl_parameters_create(Omega_c, Omega_b, Omega_k, N_nu_rel, N_nu_mass, mnu, w0, wa,
@@ -185,6 +186,7 @@ ccl_cosmology * ccl_cosmology_create_with_params(double Omega_c, double Omega_b,
   // Create  ccl_cosmology struct
   ccl_cosmology *cosmo;
   cosmo = ccl_cosmology_create(params, config);
+
   return cosmo;
 }
 
@@ -308,7 +310,13 @@ ccl_parameters ccl_parameters_create(double Omega_c, double Omega_b, double Omeg
   if (N_nu_mass>0){
 	params.mnu=malloc(params.N_nu_mass*sizeof(double));
 	memcpy(params.mnu,mnu,params.N_nu_mass*sizeof(double));
+  }else if(N_nu_mass==0){
+	// We still need an array of size 1 holding a single mnu=0 here
+	params.mnu=malloc(sizeof(double));
+	memcpy(params.mnu,mnu,sizeof(double));
   }
+
+  
   
   // Dark Energy
   params.w0 = w0;
