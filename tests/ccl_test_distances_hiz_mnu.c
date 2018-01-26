@@ -3,8 +3,12 @@
 #include <stdio.h>
 #include <math.h>
 
-// The tolerance in chi for all the
-#define DISTANCES_TOLERANCE 1.0e-4
+// The tolerance in chi 
+// We use 1.0e-3 here because we compare with benchmarks produced by 
+// astropy, which uses a fitting formula for the neutrino
+// phasespace integral, which itself differs from the exact expression
+// at greater than a 1.0e-4 level.
+#define DISTANCES_TOLERANCE 1.0e-3
 
 CTEST_DATA(distances_hiz_mnu) {
   double Omega_c;
@@ -82,7 +86,10 @@ CTEST_SETUP(distances_hiz_mnu) {
   double w_0[5]     = { -1.0, -0.9, -0.9, -0.9, -0.9  };
   double w_a[5]     = {  0.0,  0.0,  0.1,  0.1,  0.1  };
   
-  double N_nu_rel[5] 	= {2.0328, 1.0196, 0.00641, 2.0328, 1.0196};
+  // We use a total of 3 neutrinos instead of 3.046 
+  // This is to compare with benchmarks from astropy
+  // which splits equally total N between all species
+  double N_nu_rel[5] 	= {2, 1, 0, 2, 1};
   double N_nu_mass[5]	= {1, 2, 3, 1, 2};
   
   double mnu0[1]	= 	{0.04};

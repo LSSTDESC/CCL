@@ -4,7 +4,7 @@
 #include <math.h>
 
 // The tolerance in chi for all the
-#define DISTANCES_HIZ_TOLERANCE 1.0e-4
+#define DISTANCES_HIZ_TOLERANCE 1.0e-3
 
 CTEST_DATA(distances_hiz) {
   double Omega_c;
