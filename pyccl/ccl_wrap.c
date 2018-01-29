@@ -16909,6 +16909,79 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_angular_cl(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  ccl_cosmology *arg1 = (ccl_cosmology *) 0 ;
+  int arg2 ;
+  CCL_ClTracer *arg3 = (CCL_ClTracer *) 0 ;
+  CCL_ClTracer *arg4 = (CCL_ClTracer *) 0 ;
+  int *arg5 = (int *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  void *argp3 = 0 ;
+  int res3 = 0 ;
+  void *argp4 = 0 ;
+  int res4 = 0 ;
+  int temp5 ;
+  int res5 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  PyObject * obj3 = 0 ;
+  PyObject * obj4 = 0 ;
+  double result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOOOO:angular_cl",&obj0,&obj1,&obj2,&obj3,&obj4)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_cosmology, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "angular_cl" "', argument " "1"" of type '" "ccl_cosmology *""'"); 
+  }
+  arg1 = (ccl_cosmology *)(argp1);
+  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "angular_cl" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = (int)(val2);
+  res3 = SWIG_ConvertPtr(obj2, &argp3,SWIGTYPE_p_CCL_ClTracer, 0 |  0 );
+  if (!SWIG_IsOK(res3)) {
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "angular_cl" "', argument " "3"" of type '" "CCL_ClTracer *""'"); 
+  }
+  arg3 = (CCL_ClTracer *)(argp3);
+  res4 = SWIG_ConvertPtr(obj3, &argp4,SWIGTYPE_p_CCL_ClTracer, 0 |  0 );
+  if (!SWIG_IsOK(res4)) {
+    SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "angular_cl" "', argument " "4"" of type '" "CCL_ClTracer *""'"); 
+  }
+  arg4 = (CCL_ClTracer *)(argp4);
+  if (!(SWIG_IsOK((res5 = SWIG_ConvertPtr(obj4,SWIG_as_voidptrptr(&arg5),SWIGTYPE_p_int,0))))) {
+    int val; 
+    int ecode = SWIG_AsVal_int(obj4, &val);
+    if (!SWIG_IsOK(ecode)) {
+      SWIG_exception_fail(SWIG_ArgError(ecode), "in method '" "angular_cl" "', argument " "5"" of type '" "int""'");
+    }
+    temp5 = (int)(val);
+    arg5 = &temp5;
+    res5 = SWIG_AddTmpMask(ecode);
+  }
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double)ccl_angular_cl(arg1,arg2,arg3,arg4,arg5);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double((double)(result));
+  if (SWIG_IsTmpObj(res5)) {
+    resultobj = SWIG_Python_AppendOutput(resultobj, SWIG_From_int((*arg5)));
+  } else {
+    int new_flags = SWIG_IsNewObj(res5) ? (SWIG_POINTER_OWN |  0 ) :  0 ;
+    resultobj = SWIG_Python_AppendOutput(resultobj, SWIG_NewPointerObj((void*)(arg5), SWIGTYPE_p_int, new_flags));
+  }
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_cl_tracer_new_wrapper(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   ccl_cosmology *arg1 = (ccl_cosmology *) 0 ;
@@ -18868,6 +18941,68 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_linlog_spacing(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  double arg1 ;
+  double arg2 ;
+  double arg3 ;
+  int arg4 ;
+  int arg5 ;
+  double val1 ;
+  int ecode1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  double val3 ;
+  int ecode3 = 0 ;
+  int val4 ;
+  int ecode4 = 0 ;
+  int val5 ;
+  int ecode5 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  PyObject * obj3 = 0 ;
+  PyObject * obj4 = 0 ;
+  double *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOOOO:linlog_spacing",&obj0,&obj1,&obj2,&obj3,&obj4)) SWIG_fail;
+  ecode1 = SWIG_AsVal_double(obj0, &val1);
+  if (!SWIG_IsOK(ecode1)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "linlog_spacing" "', argument " "1"" of type '" "double""'");
+  } 
+  arg1 = (double)(val1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "linlog_spacing" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = (double)(val2);
+  ecode3 = SWIG_AsVal_double(obj2, &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "linlog_spacing" "', argument " "3"" of type '" "double""'");
+  } 
+  arg3 = (double)(val3);
+  ecode4 = SWIG_AsVal_int(obj3, &val4);
+  if (!SWIG_IsOK(ecode4)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "linlog_spacing" "', argument " "4"" of type '" "int""'");
+  } 
+  arg4 = (int)(val4);
+  ecode5 = SWIG_AsVal_int(obj4, &val5);
+  if (!SWIG_IsOK(ecode5)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode5), "in method '" "linlog_spacing" "', argument " "5"" of type '" "int""'");
+  } 
+  arg5 = (int)(val5);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double *)ccl_linlog_spacing(arg1,arg2,arg3,arg4,arg5);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_double, 0 |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_log_spacing(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   double arg1 ;
@@ -19757,6 +19892,7 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"cl_workspace_new_default", _wrap_cl_workspace_new_default, METH_VARARGS, (char *)"cl_workspace_new_default(int lmax, int l_limber, int * status) -> CCL_ClWorkspace"},
 	 { (char *)"cl_workspace_free", _wrap_cl_workspace_free, METH_VARARGS, (char *)"cl_workspace_free(CCL_ClWorkspace w)"},
 	 { (char *)"angular_cls", _wrap_angular_cls, METH_VARARGS, (char *)"angular_cls(cosmology cosmo, CCL_ClWorkspace w, CCL_ClTracer clt1, CCL_ClTracer clt2, int nl_out, int * l, double * cl, int * status)"},
+	 { (char *)"angular_cl", _wrap_angular_cl, METH_VARARGS, (char *)"angular_cl(cosmology cosmo, int l, CCL_ClTracer clt1, CCL_ClTracer clt2, int * status) -> double"},
 	 { (char *)"cl_tracer_new_wrapper", _wrap_cl_tracer_new_wrapper, METH_VARARGS, (char *)"cl_tracer_new_wrapper(cosmology cosmo, int tracer_type, int has_rsd, int has_magnification, int has_intrinsic_alignment, int nz_n, int nn, int nz_b, int nb, int nz_s, int ns, int nz_ba, int nba, int nz_rf, int nrf, double z_source, int * status) -> CCL_ClTracer"},
 	 { (char *)"angular_cl_vec", _wrap_angular_cl_vec, METH_VARARGS, (char *)"angular_cl_vec(cosmology cosmo, CCL_ClTracer clt1, CCL_ClTracer clt2, double l_limber, double l_logstep, double l_linstep, double dchi, double dlk, double zmin, int method, double * ell, double * output, int * status)"},
 	 { (char *)"user_pz_info_your_pz_func_set", _wrap_user_pz_info_your_pz_func_set, METH_VARARGS, (char *)"user_pz_info_your_pz_func_set(user_pz_info self, double (*)(double,double,void *,int *) your_pz_func)"},
@@ -19796,6 +19932,7 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"check_status", _wrap_check_status, METH_VARARGS, (char *)"check_status(cosmology cosmo, int * status)"},
 	 { (char *)"check_status_nocosmo", _wrap_check_status_nocosmo, METH_VARARGS, (char *)"check_status_nocosmo(int * status)"},
 	 { (char *)"linear_spacing", _wrap_linear_spacing, METH_VARARGS, (char *)"linear_spacing(double xmin, double xmax, int N) -> double *"},
+	 { (char *)"linlog_spacing", _wrap_linlog_spacing, METH_VARARGS, (char *)"linlog_spacing(double xminlog, double xmin, double xmax, int Nlin, int Nlog) -> double *"},
 	 { (char *)"log_spacing", _wrap_log_spacing, METH_VARARGS, (char *)"log_spacing(double xmin, double xmax, int N) -> double *"},
 	 { (char *)"j_bessel", _wrap_j_bessel, METH_VARARGS, (char *)"j_bessel(int l, double x) -> double"},
 	 { (char *)"SplPar_intacc_set", _wrap_SplPar_intacc_set, METH_VARARGS, (char *)"SplPar_intacc_set(SplPar self, gsl_interp_accel * intacc)"},
@@ -20793,7 +20930,8 @@ SWIG_init(void) {
   SWIG_Python_SetConstant(d, "CCL_ERROR_HMF_INTERP",SWIG_From_int((int)(1035)));
   SWIG_Python_SetConstant(d, "CCL_ERROR_PARAMETERS",SWIG_From_int((int)(1036)));
   SWIG_Python_SetConstant(d, "CCL_ERROR_NU_INT",SWIG_From_int((int)(1037)));
-  SWIG_Python_SetConstant(d, "CCL_ERROR_ANGPOW",SWIG_From_int((int)(1038)));
+  SWIG_Python_SetConstant(d, "CCL_ERROR_NOT_IMPLEMENTED",SWIG_From_int((int)(1038)));
+  SWIG_Python_SetConstant(d, "CCL_ERROR_ANGPOW",SWIG_From_int((int)(1039)));
   SWIG_Python_SetConstant(d, "CCL_ERROR_POLICY_EXIT",SWIG_From_int((int)(CCL_ERROR_POLICY_EXIT)));
   SWIG_Python_SetConstant(d, "CCL_ERROR_POLICY_CONTINUE",SWIG_From_int((int)(CCL_ERROR_POLICY_CONTINUE)));
   

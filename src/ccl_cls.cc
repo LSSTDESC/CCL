@@ -1467,3 +1467,40 @@ void ccl_angular_cls(ccl_cosmology *cosmo,CCL_ClWorkspace *w,
   free(cl_nodes);
   free(l_nodes);
 }
+
+
+// //Compute angular power spectrum between two bins
+// //cosmo -> ccl_cosmology object
+// //l -> angular multipole
+// //clt1 -> tracer #1
+// //clt2 -> tracer #2
+// double ccl_angular_cl(ccl_cosmology *cosmo,int l,CCL_ClTracer *clt1,CCL_ClTracer *clt2, int * status)
+// {
+//   int clastatus=0, qagstatus;
+//   IntClPar ipar;
+//   double result=0,eresult;
+//   double lkmin,lkmax;
+//   gsl_function F;
+//   gsl_integration_workspace *w=gsl_integration_workspace_alloc(1000);
+
+//   get_k_interval(cosmo,clt1,clt2,l,&lkmin,&lkmax);
+
+//   ipar.il=l;
+//   ipar.cosmo=cosmo;
+//   ipar.clt1=clt1;
+//   ipar.clt2=clt2;
+//   ipar.status = &clastatus;
+//   F.function=&cl_integrand;
+//   F.params=&ipar;
+//   qagstatus=gsl_integration_qag(&F,lkmin,lkmax,0,1E-4,1000,GSL_INTEG_GAUSS41,w,&result,&eresult);
+//   gsl_integration_workspace_free(w);
+//   if(qagstatus!=GSL_SUCCESS || *ipar.status) {
+//     *status=CCL_ERROR_INTEG;
+//     strcpy(cosmo->status_message,"ccl_cls.c: ccl_angular_cl(): error integrating over k\n");
+//     return -1;
+//   }
+//   ccl_check_status(cosmo,status);
+
+//   return M_LN10*result/(l+0.5);
+// }
+// //TODO: currently using linear power spectrum

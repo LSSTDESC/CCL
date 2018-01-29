@@ -8,6 +8,7 @@
 
 #define CLS_TOLERANCE 1E-3
 #define CLS_FRACTION 1E-3
+#define ELL_MAX_CL 3001
 
 CTEST_DATA(cls) {
   double Omega_c;
@@ -58,26 +59,47 @@ static void compare_cls(struct cls_data * data)
 
   //Fix spline parameters for the high-redshift needs of the CMB lensing power spectrum
   ccl_splines->A_SPLINE_NA=10000;
-  ccl_splines->N_A=500;
+  ccl_splines->A_SPLINE_NA_PK=500;
 
   FILE *fi_cc;
   CCL_ClTracer *tr_cl=ccl_cl_tracer_cmblens_new(cosmo,zlss,&status);
   ASSERT_NOT_NULL(tr_cl);
   fi_cc=fopen(fname,"r"); ASSERT_NOT_NULL(fi_cc);
+
+  /*Compute the correlation with CCL*/
+  double *clarr=malloc(ELL_MAX_CL*sizeof(double));
+  double *larr=malloc(ELL_MAX_CL*sizeof(double));
+  int *ells=malloc(ELL_MAX_CL*sizeof(int)); // ccl_angular_cls needs int
+  for(int il=0;il<ELL_MAX_CL;il++){
+    larr[il]=il;
+    ells[il]=il;
+  }
+
+  /*Use Limber computation*/
+  double linstep = 40;
+  double logstep = 1.15;
+  double dchi = 3.; //(tr_nc_1->chimax-tr_nc_1->chimin)/200.; // must be below 3 to converge toward limber computation at high ell
+  double dlk = 0.003;
+  double zmin = 0.05;
+  CCL_ClWorkspace *w=ccl_cl_workspace_new(ELL_MAX_CL+1,-1,CCL_NONLIMBER_METHOD_NATIVE,logstep,linstep,dchi,dlk,zmin,&status);
+  ccl_angular_cls(cosmo,w,tr_cl,tr_cl,ELL_MAX_CL,ells,clarr,&status);
+  
   double fraction_failed=0;
-  for(int ii=0;ii<3001;ii++) {
+  for(int ii=0;ii<ELL_MAX_CL;ii++) {
     int l, rtn;
     double cl_cc,cl_cc_h;
     rtn = fscanf(fi_cc,"%d %lf",&l,&cl_cc);
-    cl_cc_h=ccl_angular_cl(cosmo,l,tr_cl,tr_cl,&status);
-    if (status) printf("%s\n",cosmo->status_message);
+    //cl_cc_h=ccl_angular_cl(cosmo,l,tr_cl,tr_cl,&status);
+    cl_cc_h=clarr[l];
+    printf("%d %.3g %.3g %.3g\n",l,cl_cc_h,cl_cc);
+    //if (status) printf("%s\n",cosmo->status_message);
     if(fabs(cl_cc_h/cl_cc-1)>factor_tol*CLS_TOLERANCE) {
       fraction_failed++;
     }
   }
   fclose(fi_cc);
 
-  fraction_failed/=3001;
+  fraction_failed/=ELL_MAX_CL;
   printf("%lf %% ",fraction_failed*100);
   ASSERT_TRUE((fraction_failed<CLS_FRACTION));
 

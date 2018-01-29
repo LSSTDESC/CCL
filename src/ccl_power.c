@@ -415,7 +415,7 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int * statu
   int nk = (int)ceil(ndecades*ccl_splines->N_K);
   double amin = ccl_splines->A_SPLINE_MIN_PK;
   double amax = ccl_splines->A_SPLINE_MAX;
-  int na = ccl_splines->N_A;
+  int na = ccl_splines->A_SPLINE_NA_PK;
   
   // The x array is initially k, but will later
   // be overwritten with log(k)
@@ -724,7 +724,7 @@ static void ccl_cosmology_compute_power_eh(ccl_cosmology * cosmo, int * status)
   int nk = (int)ceil(ndecades*ccl_splines->N_K);
   double amin = ccl_splines->A_SPLINE_MIN_PK;
   double amax = ccl_splines->A_SPLINE_MAX;
-  int na = ccl_splines->N_A;
+  int na = ccl_splines->A_SPLINE_NA_PK;
   eh_struct *eh=eh_struct_new(&(cosmo->params));
   if (eh==NULL) {
     *status=CCL_ERROR_MEMORY;
@@ -881,7 +881,8 @@ static void ccl_cosmology_compute_power_bbks(ccl_cosmology * cosmo, int * status
   int nk = (int)ceil(ndecades*ccl_splines->N_K);
   double amin = ccl_splines->A_SPLINE_MIN_PK;
   double amax = ccl_splines->A_SPLINE_MAX;
-  int na = ccl_splines->N_A;
+  int na = ccl_splines->A_SPLINE_NA_PK;
+  
   // The x array is initially k, but will later
   // be overwritten with log(k)
   double * x = ccl_log_spacing(kmin, kmax, nk);

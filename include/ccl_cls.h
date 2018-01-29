@@ -212,7 +212,7 @@ void ccl_angular_cls(ccl_cosmology *cosmo,CCL_ClWorkspace *w,
 		     CCL_ClTracer *clt1,CCL_ClTracer *clt2,
 		     int nl_out,int *l,double *cl,int *status);
 
-/*
+/**
  * Computes limber power spectrum for two different tracers
  * @param cosmo Cosmological parameters
  * @param clt1 a Cltracer
@@ -221,10 +221,8 @@ void ccl_angular_cls(ccl_cosmology *cosmo,CCL_ClWorkspace *w,
  * For specific cases see documentation for ccl_error.c
  * @return void
  */
-  /*
 double ccl_angular_cl(ccl_cosmology *cosmo,int l,CCL_ClTracer *clt1,CCL_ClTracer *clt2, int * status);
   
-*/
 
 
 #ifdef __cplusplus

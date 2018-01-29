@@ -174,11 +174,10 @@ static void compare_corr(char *compare_type,int algorithm,struct corrs_data * da
   fclose(fi_ll_11_mm); fclose(fi_ll_12_mm); fclose(fi_ll_22_mm);
 
   /*Compute the correlation with CCL*/
-  int il;
   double *clarr=malloc(ELL_MAX_CL*sizeof(double));
   double *larr=malloc(ELL_MAX_CL*sizeof(double));
   int *ells=malloc(ELL_MAX_CL*sizeof(int)); // ccl_angular_cls needs int
-  for(il=0;il<ELL_MAX_CL;il++){
+  for(int il=0;il<ELL_MAX_CL;il++){
     larr[il]=il;
     ells[il]=il;
   }

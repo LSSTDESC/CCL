@@ -81,8 +81,16 @@ This note describes how to install \ccl (Section \ref{sec:install}), how \ccl is
 \item The {\tt SWIG}\footnote{\url{http://www.swig.org/}} Python wrapper generator is not needed to run \ccl, but must be installed if you intend to modify \ccl in any way.
 \item {\tt FFTW3}\footnote{\url{http://www.fftw.org}} is required for computation of correlation functions.
 \item {\tt FFTlog}\footnote{\url{http://casa.colorado.edu/~ajsh/FFTLog/} and \url{https://github.com/slosar/FFTLog}} is provided within \ccl, with minor modifications.
+\item The C library associated to the {\tt CLASS} code. The installation of this library is described below. 
 %\item A version of {\tt Angpow} \citep{2017arXiv170103592C} is also incorporated within \ccl.
 \end{itemize}
+
+\subsection{Installing CLASS}
+  {\tt CCL} uses {\tt CLASS} as one of the possible ways of computing the matter power spectrum. In order to communicate with {\tt CLASS}, {\tt CCL} must be linked to its library. Before installing CCL proper you must therefore install this library first. Since this process is not necessarily straightforward, we provide a python script {\tt class\_install.py} that automatically downloads and install the latest tagged stable version of CLASS. You should run this script (i.e. {\tt \$ python class\_install.py}) before carrying out the next steps. By default, the script assumes that your main C compiler is {\tt gcc}. If that's not the case, pass the name of your C compiler to the script via the command-line argument {\tt --c\_comp} (e.g. {\tt \$ python class\_install.py --c\_comp=icc}). Type {\tt python class\_install.py -h} for further details.
+
+  This procedure has one final caveat: if you already have a working installation of {\tt CCL}, {\tt class\_install.py} may fail the first time you run it. This can be fixed by either simply running {\tt class\_install.py} a second time, or by starting from scratch (i.e. downloading or cloning {\tt CCL}).
+
+  Note that, if you want to use your own version of {\tt CLASS}, you should follow the steps described in Section \ref{sec:extclass} below.
 
 \subsection{Installation Procedure}
 
@@ -135,7 +143,7 @@ This will run the embedded unit tests. Using this last method to install the Pyt
 \subsection{Compiling against an external version of CLASS}
 \label{sec:extclass}
 
-\ccl has a built-in version of {\tt CLASS} that is used to calculate power spectra and other cosmological functions. This is compiled by default. Optionally, you can also link \ccl against an external version of {\tt CLASS}. This section is useful if you want to use a modified version of {\tt CLASS}, or a different or more up-to-date version of the standard {\tt CLASS}. For example, we have successfully compiled and run \ccl with {\tt hiCLASS} \citep{hiclass}.
+The default installation procedure for \ccl implies automatically downloading and installing a tagged version of {\tt CLASS}. Optionally, you can also link \ccl against an external version of {\tt CLASS}. This section is useful if you want to use a modified version of {\tt CLASS}, or a different or more up-to-date version of the standard {\tt CLASS}. For example, we have successfully compiled and run \ccl with {\tt hiCLASS} \citep{hiclass}.
 
 To compile \ccl with an external version of {\tt CLASS}, you must first prepare the external copy so that it can be linked as a shared library. By default, the {\tt CLASS} build tools create a static library. After compiling {\tt CLASS} in the usual way (by running {\tt make}), look for a static library file called {\tt libclass.a} that should have been placed in the root source directory. Then, run the following command from that directory (Linux only):
 \begin{verbatim}
@@ -376,16 +384,17 @@ Other baryonic impact models might be incorporated in the future as they become 
 All spline and grid parameters relevant for computing quantities such as distances, growth functions, power spectra, and halo mass functions are defined in the {\tt ccl$\_$params.ini} file in the {\tt include} folder of the repository. This file allows the user to configure the following constants:
 
 \begin{itemize}
-\item {\tt A$\_$SPLINE$\_$DELTA}: spacing of the scale factor spline. The default is {\tt A$\_$SPLINE$\_$DELTA}$=0.001$.
-\item {\tt A$\_$SPLINE$\_$NA}: number of points in the scale factor spline. The default is {\tt A$\_$SPLINE$\_$NA}$=1000$.
-\item {\tt A$\_$SPLINE$\_$MIN}: minimum value for the scale factor spline. The default is {\tt A$\_$SPLINE$\_$MIN}$=0.01$. This only applies to background quantities.
-\item {\tt A$\_$SPLINE$\_$MIN$\_$PK}: minimum value for the scale factor spline. The default is {\tt A$\_$SPLINE$\_$MIN}$=0.1$. This only applies for the 2D power spectrum splines.
+\item {\tt A$\_$SPLINE$\_$NLOG}: number of points in the logarithmic part of the scale factor spline. The default is {\tt A$\_$SPLINE$\_$NLOG}$=250$.
+\item {\tt A$\_$SPLINE$\_$NA}: number of points in the linear part of the scale factor spline. The default is {\tt A$\_$SPLINE$\_$NA}$=250$.
+\item {\tt A$\_$SPLINE$\_$MINLOG}: minimum value for the scale factor spline. The default is {\tt A$\_$SPLINE$\_$MINLOG}$=0.0001$. This only applies to background quantities.
+\item {\tt A$\_$SPLINE$\_$MIN}: maximum value for the logarithmic part and minimum value for the linear part of the scale factor spline. The default is {\tt A$\_$SPLINE$\_$MIN}$=0.01$. This only applies to background quantities.
 \item {\tt A$\_$SPLINE$\_$MAX}: maximum value for the scale factor spline. The default is {\tt A$\_$SPLINE$\_$MAX}$=1$.
 \item {\tt LOGM$\_$SPLINE$\_$DELTA}: spacing of the mass function spline (logarithm). The default is {\tt LOGM$\_$SPLINE$\_$DELTA}$=0.025$.
 \item {\tt LOGM$\_$SPLINE$\_$NM}: number of points in the mass function spline (logarithm). The default is {\tt LOGM$\_$SPLINE$\_$NA}$=440$.
 \item {\tt LOGM$\_$SPLINE$\_$MIN}: minimum value for the mass function spline (logarithm). The default is {\tt LOGM$\_$SPLINE$\_$MIN}$=6$.
 \item {\tt LOGM$\_$SPLINE$\_$MAX}: maximum value for the mass function spline (logarithm). The default is {\tt LOGM$\_$SPLINE$\_$MAX}$=17$.
-\item {\tt N$\_$A}: number of bins for the scale factor in the case of two-dimensional splines (where the second variable is the wavenumber). The default is {\tt N$\_$A}$=50$.
+\item {\tt A$\_$SPLINE$\_$NA$\_$PK}: number of bins for the scale factor in the case of two-dimensional splines (where the second variable is the wavenumber). The default is {\tt A$\_$SPLINE$\_$NA$\_$PK}$=50$.
+\item {\tt A$\_$SPLINE$\_$MIN$\_$PK}: minimum value for the scale factor spline. The default is {\tt A$\_$SPLINE$\_$MIN$\_$PK}$=0.1$. This only applies for the 2D power spectrum splines.
 \item {\tt K$\_$MAX$\_$SPLINE}: The maximum value of wavenumber considered in the spline. This is explained in more detail in the coming subsections. The default is {\tt K$\_$MAX$\_$SPLINE}$=50/$Mpc.
 \item {\tt K$\_$MAX}: The maximum value of wavenumber when integrating over $k$. The default is {\tt K$\_$MAX}$=1000$/Mpc.
 \item {\tt K$\_$MIN$\_$DEFAULT}:  The minimum value of wavenumber when integrating over $k$. The default is {\tt K$\_$MIN$\_$DEFAULT}$=5 \times 10^{-5}$/Mpc.
@@ -987,6 +996,8 @@ Photo-z example.ipynb,
 Power spectrum example.ipynb,
 
 Distance Calculations Example.ipynb,
+
+HMFexample.ipynb,
 
 Lensing angular power spectrum.ipynb,
 

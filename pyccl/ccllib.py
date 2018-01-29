@@ -903,6 +903,10 @@ def angular_cls(cosmo, w, clt1, clt2, nl_out, l, cl, status):
     """angular_cls(cosmology cosmo, CCL_ClWorkspace w, CCL_ClTracer clt1, CCL_ClTracer clt2, int nl_out, int * l, double * cl, int * status)"""
     return _ccllib.angular_cls(cosmo, w, clt1, clt2, nl_out, l, cl, status)
 
+def angular_cl(cosmo, l, clt1, clt2, status):
+    """angular_cl(cosmology cosmo, int l, CCL_ClTracer clt1, CCL_ClTracer clt2, int * status) -> double"""
+    return _ccllib.angular_cl(cosmo, l, clt1, clt2, status)
+
 def cl_tracer_new_wrapper(cosmo, tracer_type, has_rsd, has_magnification, has_intrinsic_alignment, nz_n, nn, nz_b, nb, nz_s, ns, nz_ba, nba, nz_rf, nrf, z_source, status):
     """cl_tracer_new_wrapper(cosmology cosmo, int tracer_type, int has_rsd, int has_magnification, int has_intrinsic_alignment, int nz_n, int nn, int nz_b, int nb, int nz_s, int ns, int nz_ba, int nba, int nz_rf, int nrf, double z_source, int * status) -> CCL_ClTracer"""
     return _ccllib.cl_tracer_new_wrapper(cosmo, tracer_type, has_rsd, has_magnification, has_intrinsic_alignment, nz_n, nn, nz_b, nb, nz_s, ns, nz_ba, nba, nz_rf, nrf, z_source, status)
@@ -1189,6 +1193,7 @@ CCL_ERROR_MF = _ccllib.CCL_ERROR_MF
 CCL_ERROR_HMF_INTERP = _ccllib.CCL_ERROR_HMF_INTERP
 CCL_ERROR_PARAMETERS = _ccllib.CCL_ERROR_PARAMETERS
 CCL_ERROR_NU_INT = _ccllib.CCL_ERROR_NU_INT
+CCL_ERROR_NOT_IMPLEMENTED = _ccllib.CCL_ERROR_NOT_IMPLEMENTED
 CCL_ERROR_ANGPOW = _ccllib.CCL_ERROR_ANGPOW
 CCL_ERROR_POLICY_EXIT = _ccllib.CCL_ERROR_POLICY_EXIT
 CCL_ERROR_POLICY_CONTINUE = _ccllib.CCL_ERROR_POLICY_CONTINUE
@@ -1212,6 +1217,10 @@ def check_status_nocosmo(status):
 def linear_spacing(xmin, xmax, N):
     """linear_spacing(double xmin, double xmax, int N) -> double *"""
     return _ccllib.linear_spacing(xmin, xmax, N)
+
+def linlog_spacing(xminlog, xmin, xmax, Nlin, Nlog):
+    """linlog_spacing(double xminlog, double xmin, double xmax, int Nlin, int Nlog) -> double *"""
+    return _ccllib.linlog_spacing(xminlog, xmin, xmax, Nlin, Nlog)
 
 def log_spacing(xmin, xmax, N):
     """log_spacing(double xmin, double xmax, int N) -> double *"""
