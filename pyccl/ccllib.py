@@ -796,29 +796,29 @@ CCL_ClTracer_swigregister = _ccllib.CCL_ClTracer_swigregister
 CCL_ClTracer_swigregister(CCL_ClTracer)
 
 
-def cl_tracer_new(cosmo, tracer_type, has_rsd, has_magnification, has_intrinsic_alignment, nz_n, z_n, n, nz_b, z_b, b, nz_s, z_s, s, nz_ba, z_ba, ba, nz_rf, z_rf, rf, z_source, status):
-    """cl_tracer_new(cosmology cosmo, int tracer_type, int has_rsd, int has_magnification, int has_intrinsic_alignment, int nz_n, double * z_n, double * n, int nz_b, double * z_b, double * b, int nz_s, double * z_s, double * s, int nz_ba, double * z_ba, double * ba, int nz_rf, double * z_rf, double * rf, double z_source, int * status) -> CCL_ClTracer"""
-    return _ccllib.cl_tracer_new(cosmo, tracer_type, has_rsd, has_magnification, has_intrinsic_alignment, nz_n, z_n, n, nz_b, z_b, b, nz_s, z_s, s, nz_ba, z_ba, ba, nz_rf, z_rf, rf, z_source, status)
+def cl_tracer(cosmo, tracer_type, has_rsd, has_magnification, has_intrinsic_alignment, nz_n, z_n, n, nz_b, z_b, b, nz_s, z_s, s, nz_ba, z_ba, ba, nz_rf, z_rf, rf, z_source, status):
+    """cl_tracer(cosmology cosmo, int tracer_type, int has_rsd, int has_magnification, int has_intrinsic_alignment, int nz_n, double * z_n, double * n, int nz_b, double * z_b, double * b, int nz_s, double * z_s, double * s, int nz_ba, double * z_ba, double * ba, int nz_rf, double * z_rf, double * rf, double z_source, int * status) -> CCL_ClTracer"""
+    return _ccllib.cl_tracer(cosmo, tracer_type, has_rsd, has_magnification, has_intrinsic_alignment, nz_n, z_n, n, nz_b, z_b, b, nz_s, z_s, s, nz_ba, z_ba, ba, nz_rf, z_rf, rf, z_source, status)
 
-def cl_tracer_number_counts_new(cosmo, has_rsd, has_magnification, nz_n, z_n, n, nz_b, z_b, b, nz_s, z_s, s, status):
-    """cl_tracer_number_counts_new(cosmology cosmo, int has_rsd, int has_magnification, int nz_n, double * z_n, double * n, int nz_b, double * z_b, double * b, int nz_s, double * z_s, double * s, int * status) -> CCL_ClTracer"""
-    return _ccllib.cl_tracer_number_counts_new(cosmo, has_rsd, has_magnification, nz_n, z_n, n, nz_b, z_b, b, nz_s, z_s, s, status)
+def cl_tracer_number_counts(cosmo, has_rsd, has_magnification, nz_n, z_n, n, nz_b, z_b, b, nz_s, z_s, s, status):
+    """cl_tracer_number_counts(cosmology cosmo, int has_rsd, int has_magnification, int nz_n, double * z_n, double * n, int nz_b, double * z_b, double * b, int nz_s, double * z_s, double * s, int * status) -> CCL_ClTracer"""
+    return _ccllib.cl_tracer_number_counts(cosmo, has_rsd, has_magnification, nz_n, z_n, n, nz_b, z_b, b, nz_s, z_s, s, status)
 
-def cl_tracer_number_counts_simple_new(cosmo, nz_n, z_n, n, nz_b, z_b, b, status):
-    """cl_tracer_number_counts_simple_new(cosmology cosmo, int nz_n, double * z_n, double * n, int nz_b, double * z_b, double * b, int * status) -> CCL_ClTracer"""
-    return _ccllib.cl_tracer_number_counts_simple_new(cosmo, nz_n, z_n, n, nz_b, z_b, b, status)
+def cl_tracer_number_counts_simple(cosmo, nz_n, z_n, n, nz_b, z_b, b, status):
+    """cl_tracer_number_counts_simple(cosmology cosmo, int nz_n, double * z_n, double * n, int nz_b, double * z_b, double * b, int * status) -> CCL_ClTracer"""
+    return _ccllib.cl_tracer_number_counts_simple(cosmo, nz_n, z_n, n, nz_b, z_b, b, status)
 
-def cl_tracer_lensing_new(cosmo, has_alignment, nz_n, z_n, n, nz_ba, z_ba, ba, nz_rf, z_rf, rf, status):
-    """cl_tracer_lensing_new(cosmology cosmo, int has_alignment, int nz_n, double * z_n, double * n, int nz_ba, double * z_ba, double * ba, int nz_rf, double * z_rf, double * rf, int * status) -> CCL_ClTracer"""
-    return _ccllib.cl_tracer_lensing_new(cosmo, has_alignment, nz_n, z_n, n, nz_ba, z_ba, ba, nz_rf, z_rf, rf, status)
+def cl_tracer_lensing(cosmo, has_alignment, nz_n, z_n, n, nz_ba, z_ba, ba, nz_rf, z_rf, rf, status):
+    """cl_tracer_lensing(cosmology cosmo, int has_alignment, int nz_n, double * z_n, double * n, int nz_ba, double * z_ba, double * ba, int nz_rf, double * z_rf, double * rf, int * status) -> CCL_ClTracer"""
+    return _ccllib.cl_tracer_lensing(cosmo, has_alignment, nz_n, z_n, n, nz_ba, z_ba, ba, nz_rf, z_rf, rf, status)
 
-def cl_tracer_lensing_simple_new(cosmo, nz_n, z_n, n, status):
-    """cl_tracer_lensing_simple_new(cosmology cosmo, int nz_n, double * z_n, double * n, int * status) -> CCL_ClTracer"""
-    return _ccllib.cl_tracer_lensing_simple_new(cosmo, nz_n, z_n, n, status)
+def cl_tracer_lensing_simple(cosmo, nz_n, z_n, n, status):
+    """cl_tracer_lensing_simple(cosmology cosmo, int nz_n, double * z_n, double * n, int * status) -> CCL_ClTracer"""
+    return _ccllib.cl_tracer_lensing_simple(cosmo, nz_n, z_n, n, status)
 
-def cl_tracer_cmblens_new(cosmo, z_source, status):
-    """cl_tracer_cmblens_new(cosmology cosmo, double z_source, int * status) -> CCL_ClTracer"""
-    return _ccllib.cl_tracer_cmblens_new(cosmo, z_source, status)
+def cl_tracer_cmblens(cosmo, z_source, status):
+    """cl_tracer_cmblens(cosmology cosmo, double z_source, int * status) -> CCL_ClTracer"""
+    return _ccllib.cl_tracer_cmblens(cosmo, z_source, status)
 
 def cl_tracer_free(clt):
     """cl_tracer_free(CCL_ClTracer clt)"""
@@ -887,13 +887,13 @@ CCL_ClWorkspace_swigregister = _ccllib.CCL_ClWorkspace_swigregister
 CCL_ClWorkspace_swigregister(CCL_ClWorkspace)
 
 
-def cl_workspace_new(lmax, l_limber, non_limber_method, l_logstep, l_linstep, dchi, dlk, zmin, status):
-    """cl_workspace_new(int lmax, int l_limber, int non_limber_method, double l_logstep, int l_linstep, double dchi, double dlk, double zmin, int * status) -> CCL_ClWorkspace"""
-    return _ccllib.cl_workspace_new(lmax, l_limber, non_limber_method, l_logstep, l_linstep, dchi, dlk, zmin, status)
+def cl_workspace_default(lmax, l_limber, non_limber_method, l_logstep, l_linstep, dchi, dlk, zmin, status):
+    """cl_workspace_default(int lmax, int l_limber, int non_limber_method, double l_logstep, int l_linstep, double dchi, double dlk, double zmin, int * status) -> CCL_ClWorkspace"""
+    return _ccllib.cl_workspace_default(lmax, l_limber, non_limber_method, l_logstep, l_linstep, dchi, dlk, zmin, status)
 
-def cl_workspace_new_default(lmax, l_limber, status):
-    """cl_workspace_new_default(int lmax, int l_limber, int * status) -> CCL_ClWorkspace"""
-    return _ccllib.cl_workspace_new_default(lmax, l_limber, status)
+def cl_workspace_default_limber(lmax, l_limber, status):
+    """cl_workspace_default_limber(int lmax, int l_limber, int * status) -> CCL_ClWorkspace"""
+    return _ccllib.cl_workspace_default_limber(lmax, l_limber, status)
 
 def cl_workspace_free(w):
     """cl_workspace_free(CCL_ClWorkspace w)"""
@@ -902,10 +902,6 @@ def cl_workspace_free(w):
 def angular_cls(cosmo, w, clt1, clt2, nl_out, l, cl, status):
     """angular_cls(cosmology cosmo, CCL_ClWorkspace w, CCL_ClTracer clt1, CCL_ClTracer clt2, int nl_out, int * l, double * cl, int * status)"""
     return _ccllib.angular_cls(cosmo, w, clt1, clt2, nl_out, l, cl, status)
-
-def angular_cl(cosmo, l, clt1, clt2, status):
-    """angular_cl(cosmology cosmo, int l, CCL_ClTracer clt1, CCL_ClTracer clt2, int * status) -> double"""
-    return _ccllib.angular_cl(cosmo, l, clt1, clt2, status)
 
 def cl_tracer_new_wrapper(cosmo, tracer_type, has_rsd, has_magnification, has_intrinsic_alignment, nz_n, nn, nz_b, nb, nz_s, ns, nz_ba, nba, nz_rf, nrf, z_source, status):
     """cl_tracer_new_wrapper(cosmology cosmo, int tracer_type, int has_rsd, int has_magnification, int has_intrinsic_alignment, int nz_n, int nn, int nz_b, int nb, int nz_s, int ns, int nz_ba, int nba, int nz_rf, int nrf, double z_source, int * status) -> CCL_ClTracer"""

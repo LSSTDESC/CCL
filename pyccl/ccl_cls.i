@@ -75,7 +75,7 @@ void angular_cl_vec(ccl_cosmology * cosmo,
 
   //Cast ells as integers
   int *ell_int=malloc(nell*sizeof(int));
-  CCL_ClWorkspace *w=ccl_cl_workspace_new((int)(ell[nell-1])+1,(int)l_limber,method,l_logstep,(int)l_linstep,dchi,dlk,zmin,status);
+  CCL_ClWorkspace *w=ccl_cl_workspace_default((int)(ell[nell-1])+1,(int)l_limber,method,l_logstep,(int)l_linstep,dchi,dlk,zmin,status);
 
   for(int i=0;i<nell;i++)
     ell_int[i]=(int)(ell[i]);

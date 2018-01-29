@@ -62,7 +62,7 @@ static void compare_cls(struct cls_data * data)
   ccl_splines->A_SPLINE_NA_PK=500;
 
   FILE *fi_cc;
-  CCL_ClTracer *tr_cl=ccl_cl_tracer_cmblens_new(cosmo,zlss,&status);
+  CCL_ClTracer *tr_cl=ccl_cl_tracer_cmblens(cosmo,zlss,&status);
   ASSERT_NOT_NULL(tr_cl);
   fi_cc=fopen(fname,"r"); ASSERT_NOT_NULL(fi_cc);
 
@@ -76,12 +76,7 @@ static void compare_cls(struct cls_data * data)
   }
 
   /*Use Limber computation*/
-  double linstep = 40;
-  double logstep = 1.15;
-  double dchi = 3.; //(tr_nc_1->chimax-tr_nc_1->chimin)/200.; // must be below 3 to converge toward limber computation at high ell
-  double dlk = 0.003;
-  double zmin = 0.05;
-  CCL_ClWorkspace *w=ccl_cl_workspace_new(ELL_MAX_CL+1,-1,CCL_NONLIMBER_METHOD_NATIVE,logstep,linstep,dchi,dlk,zmin,&status);
+  CCL_ClWorkspace *w=ccl_cl_workspace_default_limber(ELL_MAX_CL+1,-1,&status);
   ccl_angular_cls(cosmo,w,tr_cl,tr_cl,ELL_MAX_CL,ells,clarr,&status);
   
   double fraction_failed=0;
@@ -91,7 +86,7 @@ static void compare_cls(struct cls_data * data)
     rtn = fscanf(fi_cc,"%d %lf",&l,&cl_cc);
     //cl_cc_h=ccl_angular_cl(cosmo,l,tr_cl,tr_cl,&status);
     cl_cc_h=clarr[l];
-    printf("%d %.3g %.3g %.3g\n",l,cl_cc_h,cl_cc);
+    //printf("%d %.3g %.3g \n",l,cl_cc_h,cl_cc);
     //if (status) printf("%s\n",cosmo->status_message);
     if(fabs(cl_cc_h/cl_cc-1)>factor_tol*CLS_TOLERANCE) {
       fraction_failed++;

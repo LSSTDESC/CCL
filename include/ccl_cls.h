@@ -68,7 +68,7 @@ typedef struct {
  * For specific cases see documentation for ccl_error.c
  * @return CCL_ClTracer object
  */
-CCL_ClTracer *ccl_cl_tracer_new(ccl_cosmology *cosmo,int tracer_type,
+CCL_ClTracer *ccl_cl_tracer(ccl_cosmology *cosmo,int tracer_type,
 				int has_rsd,int has_magnification,int has_intrinsic_alignment,
 				int nz_n,double *z_n,double *n,
 				int nz_b,double *z_b,double *b,
@@ -95,7 +95,7 @@ CCL_ClTracer *ccl_cl_tracer_new(ccl_cosmology *cosmo,int tracer_type,
  * For specific cases see documentation for ccl_error.c
  * @return CCL_ClTracer object
  */
-CCL_ClTracer *ccl_cl_tracer_number_counts_new(ccl_cosmology *cosmo,
+CCL_ClTracer *ccl_cl_tracer_number_counts(ccl_cosmology *cosmo,
 					      int has_rsd,int has_magnification,
 					      int nz_n,double *z_n,double *n,
 					      int nz_b,double *z_b,double *b,
@@ -114,7 +114,7 @@ CCL_ClTracer *ccl_cl_tracer_number_counts_new(ccl_cosmology *cosmo,
  * For specific cases see documentation for ccl_error.c
  * @return CCL_ClTracer object
  */
-CCL_ClTracer *ccl_cl_tracer_number_counts_simple_new(ccl_cosmology *cosmo,
+CCL_ClTracer *ccl_cl_tracer_number_counts_simple(ccl_cosmology *cosmo,
 						     int nz_n,double *z_n,double *n,
 						     int nz_b,double *z_b,double *b, int * status);
 
@@ -134,7 +134,7 @@ CCL_ClTracer *ccl_cl_tracer_number_counts_simple_new(ccl_cosmology *cosmo,
  * For specific cases see documentation for ccl_error.c
  * @return CCL_ClTracer object
  */
-CCL_ClTracer *ccl_cl_tracer_lensing_new(ccl_cosmology *cosmo,
+CCL_ClTracer *ccl_cl_tracer_lensing(ccl_cosmology *cosmo,
 					int has_alignment,
 					int nz_n,double *z_n,double *n,
 					int nz_ba,double *z_ba,double *ba,
@@ -149,7 +149,7 @@ CCL_ClTracer *ccl_cl_tracer_lensing_new(ccl_cosmology *cosmo,
  * For specific cases see documentation for ccl_error.c
  * @return CCL_ClTracer object
  */
-CCL_ClTracer *ccl_cl_tracer_lensing_simple_new(ccl_cosmology *cosmo,
+CCL_ClTracer *ccl_cl_tracer_lensing_simple(ccl_cosmology *cosmo,
 					       int nz_n,double *z_n,double *n, int * status);
 
 
@@ -160,7 +160,7 @@ CCL_ClTracer *ccl_cl_tracer_lensing_simple_new(ccl_cosmology *cosmo,
  * For specific cases see documentation for ccl_error.c
  * @return CCL_ClTracer object
  */
-CCL_ClTracer *ccl_cl_tracer_cmblens_new(ccl_cosmology *cosmo,double z_source,int *status);
+CCL_ClTracer *ccl_cl_tracer_cmblens(ccl_cosmology *cosmo,double z_source,int *status);
 
 /**
  * Destructor for a Cltracer
@@ -187,11 +187,11 @@ typedef struct {
 } CCL_ClWorkspace;
 
 //CCL_ClWorkspace constructor
-CCL_ClWorkspace *ccl_cl_workspace_new(int lmax,int l_limber,int non_limber_method,
+CCL_ClWorkspace *ccl_cl_workspace_default(int lmax,int l_limber,int non_limber_method,
 				      double l_logstep,int l_linstep,
 				      double dchi,double dlk,double zmin,int *status);
 //CCL_ClWorkspace simplified constructor
-CCL_ClWorkspace *ccl_cl_workspace_new_default(int lmax,int l_limber,int *status);
+CCL_ClWorkspace *ccl_cl_workspace_default_limber(int lmax,int l_limber,int *status);
 //CCL_ClWorkspace destructor
 void ccl_cl_workspace_free(CCL_ClWorkspace *w);
 
@@ -221,7 +221,9 @@ void ccl_angular_cls(ccl_cosmology *cosmo,CCL_ClWorkspace *w,
  * For specific cases see documentation for ccl_error.c
  * @return void
  */
+  /*
 double ccl_angular_cl(ccl_cosmology *cosmo,int l,CCL_ClTracer *clt1,CCL_ClTracer *clt2, int * status);
+  */
   
 
 

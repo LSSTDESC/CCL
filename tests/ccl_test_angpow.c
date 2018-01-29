@@ -100,8 +100,8 @@ static void test_angpow_precision(struct angpow_data * data)
   // Galaxy clustering tracer
   bool has_rsd = true;
   bool has_magnification = false;
-  CCL_ClTracer *ct_gc_A=ccl_cl_tracer_number_counts_new(ccl_cosmo,has_rsd,has_magnification,NZ,z_arr_gc,nz_arr_gc,NZ,z_arr_gc,bz_arr,-1,NULL,NULL, &status);
-  CCL_ClTracer *ct_gc_B=ccl_cl_tracer_number_counts_new(ccl_cosmo,has_rsd,has_magnification,NZ,z_arr_gc,nz_arr_gc,NZ,z_arr_gc,bz_arr,-1,NULL,NULL, &status);
+  CCL_ClTracer *ct_gc_A=ccl_cl_tracer_number_counts(ccl_cosmo,has_rsd,has_magnification,NZ,z_arr_gc,nz_arr_gc,NZ,z_arr_gc,bz_arr,-1,NULL,NULL, &status);
+  CCL_ClTracer *ct_gc_B=ccl_cl_tracer_number_counts(ccl_cosmo,has_rsd,has_magnification,NZ,z_arr_gc,nz_arr_gc,NZ,z_arr_gc,bz_arr,-1,NULL,NULL, &status);
   
   int *ells=malloc(NL*sizeof(int));
   double *cells_gg_angpow=malloc(NL*sizeof(double));
@@ -116,8 +116,8 @@ static void test_angpow_precision(struct angpow_data * data)
   double dchi = (ct_gc_A->chimax-ct_gc_A->chimin)/200.; 
   double dlk = 0.003;
   double zmin = 0.05;
-  CCL_ClWorkspace *wnl=ccl_cl_workspace_new(NL+1,2*ells[NL-1],CCL_NONLIMBER_METHOD_NATIVE,logstep,linstep,dchi,dlk,zmin,&status);
-  CCL_ClWorkspace *wap=ccl_cl_workspace_new(NL+1,2*ells[NL-1],CCL_NONLIMBER_METHOD_ANGPOW,logstep,linstep,dchi,dlk,zmin,&status);
+  CCL_ClWorkspace *wnl=ccl_cl_workspace_default(NL+1,2*ells[NL-1],CCL_NONLIMBER_METHOD_NATIVE,logstep,linstep,dchi,dlk,zmin,&status);
+  CCL_ClWorkspace *wap=ccl_cl_workspace_default(NL+1,2*ells[NL-1],CCL_NONLIMBER_METHOD_ANGPOW,logstep,linstep,dchi,dlk,zmin,&status);
 
   
   // Compute C_ell

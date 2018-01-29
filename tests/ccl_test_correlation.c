@@ -114,15 +114,15 @@ static void compare_corr(char *compare_type,int algorithm,struct corrs_data * da
   FILE *fi_ll_11_mm,*fi_ll_12_mm,*fi_ll_22_mm;
   int has_rsd=0,has_magnification=0, has_intrinsic_alignment=0;
   int status2=0;
-  CCL_ClTracer *tr_nc_1=ccl_cl_tracer_number_counts_simple_new(cosmo,nz,zarr_1,pzarr_1,
+  CCL_ClTracer *tr_nc_1=ccl_cl_tracer_number_counts_simple(cosmo,nz,zarr_1,pzarr_1,
 							       nz,zarr_1,bzarr,&status2);
   ASSERT_NOT_NULL(tr_nc_1);
-  CCL_ClTracer *tr_nc_2=ccl_cl_tracer_number_counts_simple_new(cosmo,nz,zarr_2,pzarr_2,
+  CCL_ClTracer *tr_nc_2=ccl_cl_tracer_number_counts_simple(cosmo,nz,zarr_2,pzarr_2,
 							       nz,zarr_2,bzarr,&status2);
   ASSERT_NOT_NULL(tr_nc_2);
-  CCL_ClTracer *tr_wl_1=ccl_cl_tracer_lensing_simple_new(cosmo,nz,zarr_1,pzarr_1,&status2);
+  CCL_ClTracer *tr_wl_1=ccl_cl_tracer_lensing_simple(cosmo,nz,zarr_1,pzarr_1,&status2);
   ASSERT_NOT_NULL(tr_wl_1);
-  CCL_ClTracer *tr_wl_2=ccl_cl_tracer_lensing_simple_new(cosmo,nz,zarr_2,pzarr_2,&status2);
+  CCL_ClTracer *tr_wl_2=ccl_cl_tracer_lensing_simple(cosmo,nz,zarr_2,pzarr_2,&status2);
   ASSERT_NOT_NULL(tr_wl_2);
 
   /* Read in the benchmark correlations*/
@@ -183,12 +183,7 @@ static void compare_corr(char *compare_type,int algorithm,struct corrs_data * da
   }
 
   /*Use Limber computation*/
-  double linstep = 40;
-  double logstep = 1.15;
-  double dchi = (tr_nc_1->chimax-tr_nc_1->chimin)/200.; // must be below 3 to converge toward limber computation at high ell
-  double dlk = 0.003;
-  double zmin = 0.05;
-  CCL_ClWorkspace *wyl=ccl_cl_workspace_new(ELL_MAX_CL+1,-1,CCL_NONLIMBER_METHOD_ANGPOW,logstep,linstep,dchi,dlk,zmin,&status);
+  CCL_ClWorkspace *wyl=ccl_cl_workspace_default_limber(ELL_MAX_CL+1,-1,&status);
 
   wt_dd_11_h=malloc(nofl*sizeof(double));
   ccl_angular_cls(cosmo,wyl,tr_nc_1,tr_nc_1,ELL_MAX_CL,ells,clarr,&status);

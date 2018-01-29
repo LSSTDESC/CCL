@@ -108,13 +108,13 @@ static void compare_cls(char *compare_type,struct cls_data * data)
 
   char fname[256];
   FILE *fi_dd_11,*fi_dd_12,*fi_dd_22,*fi_ll_11,*fi_ll_12,*fi_ll_22;
-  CCL_ClTracer *tr_nc_1=ccl_cl_tracer_number_counts_simple_new(cosmo,nz,zarr_1,pzarr_1,nz,zarr_1,bzarr,&status);
+  CCL_ClTracer *tr_nc_1=ccl_cl_tracer_number_counts_simple(cosmo,nz,zarr_1,pzarr_1,nz,zarr_1,bzarr,&status);
   ASSERT_NOT_NULL(tr_nc_1);
-  CCL_ClTracer *tr_nc_2=ccl_cl_tracer_number_counts_simple_new(cosmo,nz,zarr_2,pzarr_2,nz,zarr_2,bzarr,&status);
+  CCL_ClTracer *tr_nc_2=ccl_cl_tracer_number_counts_simple(cosmo,nz,zarr_2,pzarr_2,nz,zarr_2,bzarr,&status);
   ASSERT_NOT_NULL(tr_nc_2);
-  CCL_ClTracer *tr_wl_1=ccl_cl_tracer_lensing_simple_new(cosmo,nz,zarr_1,pzarr_1,&status);
+  CCL_ClTracer *tr_wl_1=ccl_cl_tracer_lensing_simple(cosmo,nz,zarr_1,pzarr_1,&status);
   ASSERT_NOT_NULL(tr_wl_1);
-  CCL_ClTracer *tr_wl_2=ccl_cl_tracer_lensing_simple_new(cosmo,nz,zarr_2,pzarr_2,&status);
+  CCL_ClTracer *tr_wl_2=ccl_cl_tracer_lensing_simple(cosmo,nz,zarr_2,pzarr_2,&status);
   ASSERT_NOT_NULL(tr_wl_2);
   sprintf(fname,"tests/benchmark/codecomp_step2_outputs/run_b1b1%s_log_cl_dd.txt",compare_type);
   fi_dd_11=fopen(fname,"r"); ASSERT_NOT_NULL(fi_dd_11);
@@ -166,7 +166,7 @@ static void compare_cls(char *compare_type,struct cls_data * data)
   fclose(fi_ll_22);
 
   double zmin = CCL_MIN(zarr_1[0],zarr_2[0]);
-  CCL_ClWorkspace *w=ccl_cl_workspace_new(3001,-1,CCL_NONLIMBER_METHOD_NATIVE,1.05,20,5.,0.003,zmin,&status);
+  CCL_ClWorkspace *w=ccl_cl_workspace_default_limber(3001,-1,&status);
 
   ccl_angular_cls(cosmo,w,tr_nc_1,tr_nc_1,3001,ells,cls_dd_11_h,&status);
   if (status) printf("%s\n",cosmo->status_message);
