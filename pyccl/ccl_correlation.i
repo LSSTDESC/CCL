@@ -18,8 +18,6 @@
                                      (int nlarr,double* larr),
                                      (int nclarr,double* clarr),
                                      (int nt,double *theta),
-                                     (int nkarr,double* karr),
-                                     (int npkarr,double* pkarr),
                                      (int nr,double *r)}
 %apply (double* ARGOUT_ARRAY1, int DIM1) {(double* output, int nout),(double* xi, int nxi)};
 
@@ -39,16 +37,13 @@ void correlation_vec(ccl_cosmology *cosmo,
   ccl_correlation(cosmo,nlarr,larr,clarr,nt,theta,output,corr_type,0,NULL,method,status);
 }
 
-void correlation_3d_vec(ccl_cosmology *cosmo,
-		     int nkarr,double *karr,
-                     int npkarr,double *pkarr,
+void correlation_3d_vec(ccl_cosmology *cosmo,double a,
 		     int nr,double *r,
                      double *xi,int nxi,
 		     int *status)
 { 
-  assert(nkarr==n_pkarr);
-  assert(nr==nout);
+  assert(nr==nxi);
 
-  ccl_correlation_3d(cosmo,nkarr,karr,pkarr,nr,r,xi,0,NULL,status);
+  ccl_correlation_3d(cosmo,a,nr,r,xi,0,NULL,status);
 }
 %}

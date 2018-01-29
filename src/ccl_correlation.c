@@ -12,6 +12,7 @@
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
+#include "ccl_params.h"
 #include "ccl_power.h"
 #include "ccl.h"
 #include "fftlog.h"
@@ -455,72 +456,60 @@ void ccl_correlation(ccl_cosmology *cosmo,
 }
 
 /*--------ROUTINE: ccl_correlation_3d ------
-TASK: For a given power spectrum, get the 3d-correlation function. Do so by using FFTLog. 
+TASK: Calculate the 3d-correlation function. Do so by using FFTLog. 
 
-INPUT: cosmology, number of k values to evaluate, k vector, power spectrum at k values,
+INPUT: cosmology, scale factor a,
        number of r values, r values, correlation function xi,
        key for tapering, limits of tapering
  */
 
-//k values used for logspacing
-#define K_MIN_FFTLOG 0.0001
-#define K_MAX_FFTLOG 500
-#define N_K_FFTLOG 5000
-void ccl_correlation_3d(ccl_cosmology *cosmo,
-		     int n_k,double *k,double *pk,
+void ccl_correlation_3d(ccl_cosmology *cosmo, double a,
 		     int n_r,double *r,double *xi,
 		     int do_taper_pk,double *taper_pk_limits,
 		     int *status)
 {
-  int i;
+  int i,N_ARR;
   double *k_arr,*pk_arr,*r_arr,*xi_arr;
 
-  k_arr=ccl_log_spacing(K_MIN_FFTLOG,K_MAX_FFTLOG,N_K_FFTLOG);
+  //number of data points for k and pk array
+  N_ARR=(int)(ccl_splines->N_K*log(ccl_splines->K_MAX/ccl_splines->K_MIN_DEFAULT));  
+
+  k_arr=ccl_log_spacing(ccl_splines->K_MIN_DEFAULT,ccl_splines->K_MAX,N_ARR);
   if(k_arr==NULL) {
-    *status=CCL_ERROR_LINSPACE;
+    *status=CCL_ERROR_MEMORY;
     strcpy(cosmo->status_message,"ccl_correlation.c: ccl_correlation_3d ran out of memory\n");
     return;
   }
-  pk_arr=malloc(N_K_FFTLOG*sizeof(double));
+
+  pk_arr=malloc(N_ARR*sizeof(double));
   if(pk_arr==NULL) {
     free(k_arr);
     *status=CCL_ERROR_MEMORY;
     strcpy(cosmo->status_message,"ccl_correlation.c: ccl_correlation_3d ran out of memory\n");
     return;
-  }
+  }  
 
-  //Interpolate input pk into array needed for FFTLog
-  SplPar *pk_spl=ccl_spline_init(n_k,k,pk,pk[0],0);
-  if(pk_spl==NULL) {
-    free(k_arr);
-    free(pk_arr);
-    *status=CCL_ERROR_MEMORY;
-    strcpy(cosmo->status_message,"ccl_correlation.c: ccl_correlation_3d ran out of memory\n");
-    return;
-  }
-
-  double pk_tilt,k_edge,pk_edge;
-  k_edge=k[n_k-1];
-  if((pk[n_k-1]*pk[n_k-2]<0) || (pk[n_k-2]==0)) {
-    pk_tilt=0;
-    pk_edge=0;
+  if(cosmo->config.matter_power_spectrum_method==ccl_linear) {
+    for (i=0; i<N_ARR; i++) {
+      pk_arr[i] = ccl_linear_matter_power(cosmo, k_arr[i], a, status);
+    }
   }
   else {
-    pk_tilt=log(pk[n_k-1]/pk[n_k-2])/log(k[n_k-1]/k[n_k-2]);
-    pk_edge=pk[n_k-1];
+    if(cosmo->config.matter_power_spectrum_method==ccl_halofit) {
+      for (i=0; i<N_ARR; i++) {
+	pk_arr[i] = ccl_nonlin_matter_power(cosmo, k_arr[i], a, status);
+      }
+    }
+    else {
+      printf("ccl_sample_power.c: Unknown power spectrum method.\n");
+      return;
+    }
   }
-  for(i=0;i<N_K_FFTLOG;i++) {
-    if(k_arr[i]>=k_edge)
-      pk_arr[i]=pk_edge*pow(k_arr[i]/k_edge,pk_tilt);
-    else
-      pk_arr[i]=ccl_spline_eval(k_arr[i],pk_spl);
-  }
-  ccl_spline_free(pk_spl);
 
   if (do_taper_pk)
-    taper_cl(N_K_FFTLOG,k_arr,pk_arr,taper_pk_limits);
+    taper_cl(N_ARR,k_arr,pk_arr,taper_pk_limits);
 
-  r_arr=malloc(sizeof(double)*N_K_FFTLOG);
+  r_arr=malloc(sizeof(double)*N_ARR);
   if(r_arr==NULL) {
     free(k_arr);
     free(pk_arr);
@@ -528,7 +517,7 @@ void ccl_correlation_3d(ccl_cosmology *cosmo,
     strcpy(cosmo->status_message,"ccl_correlation.c: ccl_correlation_3d ran out of memory\n");
     return;
   }
-  xi_arr=malloc(sizeof(double)*N_K_FFTLOG);
+  xi_arr=malloc(sizeof(double)*N_ARR);
   if(xi_arr==NULL) {
     free(k_arr); free(pk_arr); free(r_arr);
     *status=CCL_ERROR_MEMORY;
@@ -536,13 +525,13 @@ void ccl_correlation_3d(ccl_cosmology *cosmo,
     return;
   }
 
-  for(i=0;i<N_K_FFTLOG;i++)
+  for(i=0;i<N_ARR;i++)
     r_arr[i]=0;
  
-  pk2xi(N_K_FFTLOG,k_arr,pk_arr,r_arr,xi_arr);
+  pk2xi(N_ARR,k_arr,pk_arr,r_arr,xi_arr);
 
   // Interpolate to output values of r
-  SplPar *xi_spl=ccl_spline_init(N_K_FFTLOG,r_arr,xi_arr,xi_arr[0],0);
+  SplPar *xi_spl=ccl_spline_init(N_ARR,r_arr,xi_arr,xi_arr[0],0);
   for(i=0;i<n_r;i++)
     xi[i]=ccl_spline_eval(r[i],xi_spl);
   ccl_spline_free(xi_spl);

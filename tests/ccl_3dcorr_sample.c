@@ -38,20 +38,12 @@ int main(int argc,char **argv)
   // defined above
   int status=0;
   ccl_configuration config = default_config;
+  config.matter_power_spectrum_method=ccl_halofit;
+
   ccl_parameters params = ccl_parameters_create(OC, OB, OK, NREL, NMAS, MNU, 
                                                 W0, WA, HH, NORMPS, NS,
 						14.079181246047625, 0.5, 55, 0, NULL, NULL, &status);
   ccl_cosmology *cosmo = ccl_cosmology_create(params,config);
-
-  int i;
-  double *pkarr = malloc(N_MAX_PK*sizeof(double));
-  double *karr;
-
-  karr = ccl_log_spacing(K_MIN,K_MAX,N_MAX_PK);
-  for(i=0; i < N_MAX_PK; i++){
-    // Calculate power spectrum
-    pkarr[i] = ccl_nonlin_matter_power(cosmo, karr[i], 1.0, &status); 
-  }
   
   // Define cosine tapering, to reduce ringing. The first two numbers are 
   // [kmin, kmax] for the low-k taper, and the last two are [kmin, kmax] for 
@@ -64,7 +56,7 @@ int main(int argc,char **argv)
   xi = malloc(n_r*sizeof(double));
 
   // Calculate 3dcorrelation function from power spectrum
-  ccl_correlation_3d(cosmo, N_MAX_PK, karr, pkarr, 
+  ccl_correlation_3d(cosmo, 1.0, 
                   n_r, r, xi,
                   0, taper_pk_limits, 
                   &status);
@@ -76,8 +68,6 @@ int main(int argc,char **argv)
   // Free allocated memory
   ccl_cosmology_free(cosmo);
   free(xi);
-  free(karr);
-  free(pkarr);
 
   return 0;
 }

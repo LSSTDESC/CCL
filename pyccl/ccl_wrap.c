@@ -4049,17 +4049,14 @@ void correlation_vec(ccl_cosmology *cosmo,
   ccl_correlation(cosmo,nlarr,larr,clarr,nt,theta,output,corr_type,0,NULL,method,status);
 }
 
-void correlation_3d_vec(ccl_cosmology *cosmo,
-		     int nkarr,double *karr,
-                     int npkarr,double *pkarr,
+void correlation_3d_vec(ccl_cosmology *cosmo,double a,
 		     int nr,double *r,
                      double *xi,int nxi,
 		     int *status)
 { 
-  assert(nkarr==n_pkarr);
-  assert(nr==nout);
+  assert(nr==nxi);
 
-  ccl_correlation_3d(cosmo,nkarr,karr,pkarr,nr,r,xi,0,NULL,status);
+  ccl_correlation_3d(cosmo,a,nr,r,xi,0,NULL,status);
 }
 
 
@@ -13070,35 +13067,29 @@ fail:
 SWIGINTERN PyObject *_wrap_correlation_3d(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   ccl_cosmology *arg1 = (ccl_cosmology *) 0 ;
-  int arg2 ;
-  double *arg3 = (double *) 0 ;
+  double arg2 ;
+  int arg3 ;
   double *arg4 = (double *) 0 ;
-  int arg5 ;
-  double *arg6 = (double *) 0 ;
+  double *arg5 = (double *) 0 ;
+  int arg6 ;
   double *arg7 = (double *) 0 ;
-  int arg8 ;
-  double *arg9 = (double *) 0 ;
-  int *arg10 = (int *) 0 ;
+  int *arg8 = (int *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  int val2 ;
+  double val2 ;
   int ecode2 = 0 ;
-  void *argp3 = 0 ;
-  int res3 = 0 ;
+  int val3 ;
+  int ecode3 = 0 ;
   void *argp4 = 0 ;
   int res4 = 0 ;
-  int val5 ;
-  int ecode5 = 0 ;
-  void *argp6 = 0 ;
-  int res6 = 0 ;
+  void *argp5 = 0 ;
+  int res5 = 0 ;
+  int val6 ;
+  int ecode6 = 0 ;
   void *argp7 = 0 ;
   int res7 = 0 ;
-  int val8 ;
-  int ecode8 = 0 ;
-  void *argp9 = 0 ;
-  int res9 = 0 ;
-  int temp10 ;
-  int res10 = 0 ;
+  int temp8 ;
+  int res8 = 0 ;
   PyObject * obj0 = 0 ;
   PyObject * obj1 = 0 ;
   PyObject * obj2 = 0 ;
@@ -13107,76 +13098,64 @@ SWIGINTERN PyObject *_wrap_correlation_3d(PyObject *SWIGUNUSEDPARM(self), PyObje
   PyObject * obj5 = 0 ;
   PyObject * obj6 = 0 ;
   PyObject * obj7 = 0 ;
-  PyObject * obj8 = 0 ;
-  PyObject * obj9 = 0 ;
   
-  if (!PyArg_ParseTuple(args,(char *)"OOOOOOOOOO:correlation_3d",&obj0,&obj1,&obj2,&obj3,&obj4,&obj5,&obj6,&obj7,&obj8,&obj9)) SWIG_fail;
+  if (!PyArg_ParseTuple(args,(char *)"OOOOOOOO:correlation_3d",&obj0,&obj1,&obj2,&obj3,&obj4,&obj5,&obj6,&obj7)) SWIG_fail;
   res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_cosmology, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "correlation_3d" "', argument " "1"" of type '" "ccl_cosmology *""'"); 
   }
   arg1 = (ccl_cosmology *)(argp1);
-  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "correlation_3d" "', argument " "2"" of type '" "int""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "correlation_3d" "', argument " "2"" of type '" "double""'");
   } 
-  arg2 = (int)(val2);
-  res3 = SWIG_ConvertPtr(obj2, &argp3,SWIGTYPE_p_double, 0 |  0 );
-  if (!SWIG_IsOK(res3)) {
-    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "correlation_3d" "', argument " "3"" of type '" "double *""'"); 
-  }
-  arg3 = (double *)(argp3);
+  arg2 = (double)(val2);
+  ecode3 = SWIG_AsVal_int(obj2, &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "correlation_3d" "', argument " "3"" of type '" "int""'");
+  } 
+  arg3 = (int)(val3);
   res4 = SWIG_ConvertPtr(obj3, &argp4,SWIGTYPE_p_double, 0 |  0 );
   if (!SWIG_IsOK(res4)) {
     SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "correlation_3d" "', argument " "4"" of type '" "double *""'"); 
   }
   arg4 = (double *)(argp4);
-  ecode5 = SWIG_AsVal_int(obj4, &val5);
-  if (!SWIG_IsOK(ecode5)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode5), "in method '" "correlation_3d" "', argument " "5"" of type '" "int""'");
-  } 
-  arg5 = (int)(val5);
-  res6 = SWIG_ConvertPtr(obj5, &argp6,SWIGTYPE_p_double, 0 |  0 );
-  if (!SWIG_IsOK(res6)) {
-    SWIG_exception_fail(SWIG_ArgError(res6), "in method '" "correlation_3d" "', argument " "6"" of type '" "double *""'"); 
+  res5 = SWIG_ConvertPtr(obj4, &argp5,SWIGTYPE_p_double, 0 |  0 );
+  if (!SWIG_IsOK(res5)) {
+    SWIG_exception_fail(SWIG_ArgError(res5), "in method '" "correlation_3d" "', argument " "5"" of type '" "double *""'"); 
   }
-  arg6 = (double *)(argp6);
+  arg5 = (double *)(argp5);
+  ecode6 = SWIG_AsVal_int(obj5, &val6);
+  if (!SWIG_IsOK(ecode6)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode6), "in method '" "correlation_3d" "', argument " "6"" of type '" "int""'");
+  } 
+  arg6 = (int)(val6);
   res7 = SWIG_ConvertPtr(obj6, &argp7,SWIGTYPE_p_double, 0 |  0 );
   if (!SWIG_IsOK(res7)) {
     SWIG_exception_fail(SWIG_ArgError(res7), "in method '" "correlation_3d" "', argument " "7"" of type '" "double *""'"); 
   }
   arg7 = (double *)(argp7);
-  ecode8 = SWIG_AsVal_int(obj7, &val8);
-  if (!SWIG_IsOK(ecode8)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode8), "in method '" "correlation_3d" "', argument " "8"" of type '" "int""'");
-  } 
-  arg8 = (int)(val8);
-  res9 = SWIG_ConvertPtr(obj8, &argp9,SWIGTYPE_p_double, 0 |  0 );
-  if (!SWIG_IsOK(res9)) {
-    SWIG_exception_fail(SWIG_ArgError(res9), "in method '" "correlation_3d" "', argument " "9"" of type '" "double *""'"); 
-  }
-  arg9 = (double *)(argp9);
-  if (!(SWIG_IsOK((res10 = SWIG_ConvertPtr(obj9,SWIG_as_voidptrptr(&arg10),SWIGTYPE_p_int,0))))) {
+  if (!(SWIG_IsOK((res8 = SWIG_ConvertPtr(obj7,SWIG_as_voidptrptr(&arg8),SWIGTYPE_p_int,0))))) {
     int val; 
-    int ecode = SWIG_AsVal_int(obj9, &val);
+    int ecode = SWIG_AsVal_int(obj7, &val);
     if (!SWIG_IsOK(ecode)) {
-      SWIG_exception_fail(SWIG_ArgError(ecode), "in method '" "correlation_3d" "', argument " "10"" of type '" "int""'");
+      SWIG_exception_fail(SWIG_ArgError(ecode), "in method '" "correlation_3d" "', argument " "8"" of type '" "int""'");
     }
-    temp10 = (int)(val);
-    arg10 = &temp10;
-    res10 = SWIG_AddTmpMask(ecode);
+    temp8 = (int)(val);
+    arg8 = &temp8;
+    res8 = SWIG_AddTmpMask(ecode);
   }
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    ccl_correlation_3d(arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9,arg10);
+    ccl_correlation_3d(arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8);
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
   resultobj = SWIG_Py_Void();
-  if (SWIG_IsTmpObj(res10)) {
-    resultobj = SWIG_Python_AppendOutput(resultobj, SWIG_From_int((*arg10)));
+  if (SWIG_IsTmpObj(res8)) {
+    resultobj = SWIG_Python_AppendOutput(resultobj, SWIG_From_int((*arg8)));
   } else {
-    int new_flags = SWIG_IsNewObj(res10) ? (SWIG_POINTER_OWN |  0 ) :  0 ;
-    resultobj = SWIG_Python_AppendOutput(resultobj, SWIG_NewPointerObj((void*)(arg10), SWIGTYPE_p_int, new_flags));
+    int new_flags = SWIG_IsNewObj(res8) ? (SWIG_POINTER_OWN |  0 ) :  0 ;
+    resultobj = SWIG_Python_AppendOutput(resultobj, SWIG_NewPointerObj((void*)(arg8), SWIGTYPE_p_int, new_flags));
   }
   return resultobj;
 fail:
@@ -13360,152 +13339,103 @@ fail:
 SWIGINTERN PyObject *_wrap_correlation_3d_vec(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   ccl_cosmology *arg1 = (ccl_cosmology *) 0 ;
-  int arg2 ;
-  double *arg3 = (double *) 0 ;
-  int arg4 ;
+  double arg2 ;
+  int arg3 ;
+  double *arg4 = (double *) 0 ;
   double *arg5 = (double *) 0 ;
   int arg6 ;
-  double *arg7 = (double *) 0 ;
-  double *arg8 = (double *) 0 ;
-  int arg9 ;
-  int *arg10 = (int *) 0 ;
+  int *arg7 = (int *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  PyArrayObject *array2 = NULL ;
-  int is_new_object2 = 0 ;
-  PyArrayObject *array4 = NULL ;
-  int is_new_object4 = 0 ;
-  PyArrayObject *array6 = NULL ;
-  int is_new_object6 = 0 ;
-  PyObject *array8 = NULL ;
-  int temp10 ;
-  int res10 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyArrayObject *array3 = NULL ;
+  int is_new_object3 = 0 ;
+  PyObject *array5 = NULL ;
+  int temp7 ;
+  int res7 = 0 ;
   PyObject * obj0 = 0 ;
   PyObject * obj1 = 0 ;
   PyObject * obj2 = 0 ;
   PyObject * obj3 = 0 ;
   PyObject * obj4 = 0 ;
-  PyObject * obj5 = 0 ;
   
-  if (!PyArg_ParseTuple(args,(char *)"OOOOOO:correlation_3d_vec",&obj0,&obj1,&obj2,&obj3,&obj4,&obj5)) SWIG_fail;
+  if (!PyArg_ParseTuple(args,(char *)"OOOOO:correlation_3d_vec",&obj0,&obj1,&obj2,&obj3,&obj4)) SWIG_fail;
   res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_cosmology, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "correlation_3d_vec" "', argument " "1"" of type '" "ccl_cosmology *""'"); 
   }
   arg1 = (ccl_cosmology *)(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "correlation_3d_vec" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = (double)(val2);
   {
     npy_intp size[1] = {
       -1
     };
-    array2 = obj_to_array_contiguous_allow_conversion(obj1,
+    array3 = obj_to_array_contiguous_allow_conversion(obj2,
       NPY_DOUBLE,
-      &is_new_object2);
-    if (!array2 || !require_dimensions(array2, 1) ||
-      !require_size(array2, size, 1)) SWIG_fail;
-    arg2 = (int) array_size(array2,0);
-    arg3 = (double*) array_data(array2);
-  }
-  {
-    npy_intp size[1] = {
-      -1
-    };
-    array4 = obj_to_array_contiguous_allow_conversion(obj2,
-      NPY_DOUBLE,
-      &is_new_object4);
-    if (!array4 || !require_dimensions(array4, 1) ||
-      !require_size(array4, size, 1)) SWIG_fail;
-    arg4 = (int) array_size(array4,0);
-    arg5 = (double*) array_data(array4);
-  }
-  {
-    npy_intp size[1] = {
-      -1
-    };
-    array6 = obj_to_array_contiguous_allow_conversion(obj3,
-      NPY_DOUBLE,
-      &is_new_object6);
-    if (!array6 || !require_dimensions(array6, 1) ||
-      !require_size(array6, size, 1)) SWIG_fail;
-    arg6 = (int) array_size(array6,0);
-    arg7 = (double*) array_data(array6);
+      &is_new_object3);
+    if (!array3 || !require_dimensions(array3, 1) ||
+      !require_size(array3, size, 1)) SWIG_fail;
+    arg3 = (int) array_size(array3,0);
+    arg4 = (double*) array_data(array3);
   }
   {
     npy_intp dims[1];
-    if (!PyInt_Check(obj4))
+    if (!PyInt_Check(obj3))
     {
-      const char* typestring = pytype_string(obj4);
+      const char* typestring = pytype_string(obj3);
       PyErr_Format(PyExc_TypeError,
         "Int dimension expected.  '%s' given.",
         typestring);
       SWIG_fail;
     }
-    arg9 = (int) PyInt_AsLong(obj4);
-    dims[0] = (npy_intp) arg9;
-    array8 = PyArray_SimpleNew(1, dims, NPY_DOUBLE);
-    if (!array8) SWIG_fail;
-    arg8 = (double*) array_data(array8);
+    arg6 = (int) PyInt_AsLong(obj3);
+    dims[0] = (npy_intp) arg6;
+    array5 = PyArray_SimpleNew(1, dims, NPY_DOUBLE);
+    if (!array5) SWIG_fail;
+    arg5 = (double*) array_data(array5);
   }
-  if (!(SWIG_IsOK((res10 = SWIG_ConvertPtr(obj5,SWIG_as_voidptrptr(&arg10),SWIGTYPE_p_int,0))))) {
+  if (!(SWIG_IsOK((res7 = SWIG_ConvertPtr(obj4,SWIG_as_voidptrptr(&arg7),SWIGTYPE_p_int,0))))) {
     int val; 
-    int ecode = SWIG_AsVal_int(obj5, &val);
+    int ecode = SWIG_AsVal_int(obj4, &val);
     if (!SWIG_IsOK(ecode)) {
-      SWIG_exception_fail(SWIG_ArgError(ecode), "in method '" "correlation_3d_vec" "', argument " "10"" of type '" "int""'");
+      SWIG_exception_fail(SWIG_ArgError(ecode), "in method '" "correlation_3d_vec" "', argument " "7"" of type '" "int""'");
     }
-    temp10 = (int)(val);
-    arg10 = &temp10;
-    res10 = SWIG_AddTmpMask(ecode);
+    temp7 = (int)(val);
+    arg7 = &temp7;
+    res7 = SWIG_AddTmpMask(ecode);
   }
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    correlation_3d_vec(arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9,arg10);
+    correlation_3d_vec(arg1,arg2,arg3,arg4,arg5,arg6,arg7);
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
   resultobj = SWIG_Py_Void();
   {
-    resultobj = SWIG_Python_AppendOutput(resultobj,(PyObject*)array8);
+    resultobj = SWIG_Python_AppendOutput(resultobj,(PyObject*)array5);
   }
-  if (SWIG_IsTmpObj(res10)) {
-    resultobj = SWIG_Python_AppendOutput(resultobj, SWIG_From_int((*arg10)));
+  if (SWIG_IsTmpObj(res7)) {
+    resultobj = SWIG_Python_AppendOutput(resultobj, SWIG_From_int((*arg7)));
   } else {
-    int new_flags = SWIG_IsNewObj(res10) ? (SWIG_POINTER_OWN |  0 ) :  0 ;
-    resultobj = SWIG_Python_AppendOutput(resultobj, SWIG_NewPointerObj((void*)(arg10), SWIGTYPE_p_int, new_flags));
+    int new_flags = SWIG_IsNewObj(res7) ? (SWIG_POINTER_OWN |  0 ) :  0 ;
+    resultobj = SWIG_Python_AppendOutput(resultobj, SWIG_NewPointerObj((void*)(arg7), SWIGTYPE_p_int, new_flags));
   }
   {
-    if (is_new_object2 && array2)
+    if (is_new_object3 && array3)
     {
-      Py_DECREF(array2); 
-    }
-  }
-  {
-    if (is_new_object4 && array4)
-    {
-      Py_DECREF(array4); 
-    }
-  }
-  {
-    if (is_new_object6 && array6)
-    {
-      Py_DECREF(array6); 
+      Py_DECREF(array3); 
     }
   }
   return resultobj;
 fail:
   {
-    if (is_new_object2 && array2)
+    if (is_new_object3 && array3)
     {
-      Py_DECREF(array2); 
-    }
-  }
-  {
-    if (is_new_object4 && array4)
-    {
-      Py_DECREF(array4); 
-    }
-  }
-  {
-    if (is_new_object6 && array6)
-    {
-      Py_DECREF(array6); 
+      Py_DECREF(array3); 
     }
   }
   return NULL;
@@ -20537,9 +20467,9 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"CCL_CORR_LP_swigconstant", CCL_CORR_LP_swigconstant, METH_VARARGS, NULL},
 	 { (char *)"CCL_CORR_LM_swigconstant", CCL_CORR_LM_swigconstant, METH_VARARGS, NULL},
 	 { (char *)"correlation", _wrap_correlation, METH_VARARGS, (char *)"correlation(cosmology cosmo, int n_ell, double * ell, double * cls, int n_theta, double * theta, double * wtheta, int corr_type, int do_taper_cl, double * taper_cl_limits, int flag_method, int * status)"},
-	 { (char *)"correlation_3d", _wrap_correlation_3d, METH_VARARGS, (char *)"correlation_3d(cosmology cosmo, int n_k, double * k, double * pk, int n_r, double * r, double * xi, int do_taper_pk, double * taper_pk_limits, int * status)"},
+	 { (char *)"correlation_3d", _wrap_correlation_3d, METH_VARARGS, (char *)"correlation_3d(cosmology cosmo, double a, int n_r, double * r, double * xi, int do_taper_pk, double * taper_pk_limits, int * status)"},
 	 { (char *)"correlation_vec", _wrap_correlation_vec, METH_VARARGS, (char *)"correlation_vec(cosmology cosmo, int nlarr, int nclarr, int nt, int corr_type, int method, double * output, int * status)"},
-	 { (char *)"correlation_3d_vec", _wrap_correlation_3d_vec, METH_VARARGS, (char *)"correlation_3d_vec(cosmology cosmo, int nkarr, int npkarr, int nr, double * xi, int * status)"},
+	 { (char *)"correlation_3d_vec", _wrap_correlation_3d_vec, METH_VARARGS, (char *)"correlation_3d_vec(cosmology cosmo, double a, int nr, double * xi, int * status)"},
 	 { (char *)"cosmology_compute_sigma", _wrap_cosmology_compute_sigma, METH_VARARGS, (char *)"cosmology_compute_sigma(cosmology cosmo, int * status)"},
 	 { (char *)"cosmology_compute_hmfparams", _wrap_cosmology_compute_hmfparams, METH_VARARGS, (char *)"cosmology_compute_hmfparams(cosmology cosmo, int * status)"},
 	 { (char *)"massfunc", _wrap_massfunc, METH_VARARGS, (char *)"massfunc(cosmology cosmo, double smooth_mass, double a, double odelta, int * status) -> double"},

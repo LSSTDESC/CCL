@@ -59,14 +59,13 @@ def correlation(cosmo, ell, C_ell, theta, corr_type='gg', method='fftlog'):
     if scalar: return wth[0]
     return wth
 
-def correlation_3d(cosmo, k, pk, r):
+def correlation_3d(cosmo, a, r):
     """
     Compute the 3D correlation function.
 
     Args:
         cosmo (:obj:`Cosmology`): A Cosmology object.
-        k (array_like): Wavenumber corresponding to the input power spectrum; Mpc^-1.
-        pk (array_like): Input power spectrum.
+        a (float): scale factor.
         r (float or array_like): distance(s) at which to calculate the 3D correlation function (in Mpc).        
     Returns:
         Value(s) of the correlation function at the input distance(s).
@@ -82,7 +81,7 @@ def correlation_3d(cosmo, k, pk, r):
         r = np.array([r,])
 
     # Call 3D correlation function
-    xi, status = lib.correlation_3d_vec(cosmo, k, pk, r,
+    xi, status = lib.correlation_3d_vec(cosmo, a, r,
                                       len(r), status)
     check(status, cosmo_in)
     if scalar: return xi[0]
