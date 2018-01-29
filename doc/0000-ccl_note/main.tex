@@ -350,7 +350,10 @@ The routines described in this subsection are implemented in {\tt ccl$\_$power.c
 T(q\equiv k/\Gamma h {\rm Mpc}^{-1}) = \frac{\ln[1+2.34q]}{2.34q}[1+3.89q+(16.2q)^2+(5.47q)^3+(6.71q)^4]^{-0.25}
 \end{equation}
 where $\Gamma = \Omega_m h$.
-The power spectrum is related to the transfer function by $\Delta(k)\propto T^2(k)k^{3+n}$ and $\Delta^2(k)\propto k^3P(k)$. The normalization of the power spectrum is defined at $z=0$ by setting $\sigma_8$ to its value today.
+The power spectrum is related to the transfer function by 
+$P(k) = 2 \pi^2 \Delta^2(k) /k^3  \propto T^2(k) k^{n_s}$, where $\Delta(k)$ is the dimensionless power 
+spectrum and $n_s$ is the spectral index. The normalization of the power spectrum is defined at $z=0$ by 
+setting $\sigma_8$ to its value today.
 The BBKS power spectrum option is primarily used as a precisely-defined input for testing the numerical accuracy of \ccl routines (as described in Sect.~\ref{sec:tests}), and it is not recommended for other uses.
 
 \subsubsection{Eisenstein and Hu}
@@ -668,7 +671,7 @@ about 15s on 16 threads, which is to be compared to about 0.5s with \texttt{Angp
 \label{sec:corr}
 
 
-The following expressions relating the angular power spectra and correlation functions are valid in the flat-sky approximation\footnote{See the weak lensing review by \citet{Bartelmann01}, page 44 and \citet{Joachimi10}.}. In all cases, $f_K(\chi)$ is comoving angular diameter distance, which differs from the radial comoving distance $\chi$ only in the case of cosmologies with non-zero curvature.
+The following expressions relating the angular power spectra and correlation functions are valid in the flat-sky approximation\footnote{See the weak lensing review by \citet{Bartelmann01}, page 44 and \citet{Joachimi10}.}. In all cases, $f_K(\chi)$ is comoving angular diameter distance, which differs from the radial comoving distance $\chi$ only in the case of cosmologies with non-zero curvature. The routines described in this subsection are implemented in {\tt ccl$\_$correlation.c}.
 
 {\bf Galaxy-galaxy.} The angular correlation function between two number-count tracers (labeled $a$ and $b$ here) is given by
 \begin{equation}
@@ -692,7 +695,13 @@ where the angular lensing convergence power spectrum $C^{ab}_\ell$ is given abov
 
 Note that, in the above, ``Galaxy'' and ``Lensing'' can be replaced by any spin-0 and spin-2 fields on the sphere respectively (e.g. the CMB lensing convergence would play the same role as the galaxy overdensity field in all the formulas above).
 
-For numerical integration of the correlation functions, we make use of the public code {\tt FFTlog}\footnote{\url{http://casa.colorado.edu/~ajsh/FFTLog/}}\citep{Hamilton2000,Talman2009}. In brief, {\tt FFTlog} works on functions periodic in log space, by writing the Hankel Transform as a convolution between Bessel functions and the function of interest (in this case $C_\ell$). A version of this code is included in \ccl with minor modifications.
+{In addition to the angular correlation functions, the 3-dimensional spatial correlation function $\xi(r)$ is also calculated from the power spectrum $P(k)$ using a Fourier transform:
+\begin{equation}
+\xi(r) = \frac{1}{2 \pi^2} \int dk \; k^2 P(k) \frac{\sin(kr)}{kr}
+\end{equation}
+
+
+To evaluate the numerical integral in the correlation functions, we make use of the public code {\tt FFTlog}\footnote{\url{http://casa.colorado.edu/~ajsh/FFTLog/}}\citep{Hamilton2000,Talman2009}. In brief, {\tt FFTlog} works on functions periodic in log space, by writing the Hankel Transform as a convolution between Bessel functions and the function of interest (in this case either $C_\ell$ or $P(k)$). A version of this code is included in \ccl with minor modifications.
 
 %-----------------------------------------------------------
 %
