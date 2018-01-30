@@ -84,10 +84,7 @@ static void compare_cls(struct cls_data * data)
     int l, rtn;
     double cl_cc,cl_cc_h;
     rtn = fscanf(fi_cc,"%d %lf",&l,&cl_cc);
-    //cl_cc_h=ccl_angular_cl(cosmo,l,tr_cl,tr_cl,&status);
     cl_cc_h=clarr[l];
-    //printf("%d %.3g %.3g \n",l,cl_cc_h,cl_cc);
-    //if (status) printf("%s\n",cosmo->status_message);
     if(fabs(cl_cc_h/cl_cc-1)>factor_tol*CLS_TOLERANCE) {
       fraction_failed++;
     }
