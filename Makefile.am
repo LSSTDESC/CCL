@@ -1,5 +1,5 @@
 if LOCALCLASS
- SUBDIRS = include
+ SUBDIRS = include angpow
 else
  SUBDIRS = include angpow
 endif
@@ -15,7 +15,7 @@ libccl_la_SOURCES = src/ccl_background.c src/ccl_core.c src/ccl_error.c src/ccl_
 if LOCALCLASS
 
  libccl_la_LIBADD = class/libclass.a angpow/libangpow.la
- libccl_la_CPPFLAGS = -I./include/ -I./class/include -D__CCL_DATA_DIR__=$(datadir)/ccl -I./angpow/inc  -std=c++11
+ libccl_la_CPPFLAGS = $(OPENMP_CFLAGS) $(OPENMP_CXXFLAGS) -I./include/ -I./class/include -D__CCL_DATA_DIR__=$(datadir)/ccl -I./angpow/inc  -std=c++11
 
 else
 
