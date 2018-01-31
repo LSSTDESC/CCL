@@ -381,7 +381,16 @@ The allowed range of cosmological parameters is as follows:
 0.0&\leq& \Omega_\nu h^2 \leq 0.01.
 \end{eqnarray}
  %
-Actually, $w_a$ and $w_0$ are constrained jointly to be $0.3\leq (-w_0-w_a)^{1/4}$. Note that \ccl only allows a subregion within this parameter space. For models in which w(z) crosses $-1$ at some given redshift, {\tt CLASS} will crash because this value corresponds to a true cosmological constant, which by definition should have no perturbations.\footnote{We thank Emilio Bellini and Miguel Zumalac\'arregui for clarifying this for us.} The linear matter power spectrum is still obtained from {\tt CLASS} as described in the section above. 
+Actually, $w_a$ and $w_0$ are constrained jointly to be $0.3\leq (-w_0-w_a)^{1/4}$. Note that \ccl only allows a subregion within this parameter space. For models in which w(z) crosses $-1$ at some given redshift, {\tt CLASS} will crash because this value corresponds to a true cosmological constant, which by definition should have no perturbations.\footnote{We thank Emilio Bellini and Miguel Zumalac\'arregui for clarifying this for us.} The linear matter power spectrum is still obtained from {\tt CLASS} as described in the section above.
+
+\paragraph{Neutrino species} The emulator is set up to consider an effective number of relativistic species of $3.04$ and the user can provide $\Omega_\nu h^2$ to set the neutrino mass. This is different from the standard {\tt CCL} configuration, which takes as input the parameters the number of relativistic species, $N_{\nu,{\rm rel}}$, the number of massive neutrinos, $N_{\nu,{\rm mass}}$ and their mass in eV, $m_{\nu}$. For best compatibility with the emulator, the user can decide to pass the following set of parameters to {\tt CCL}:
+\begin{itemize}
+\item $\{N_{\nu,{\rm rel}},N_{\nu,{\rm mass}},m_{\nu}\}=\{0.00641,3,m_{\nu}\}$ for massive neutrinos or
+\item $\{N_{\nu,{\rm rel}},N_{\nu,{\rm mass}},m_{\nu}\}=\{3.04,0,0\}$ otherwise.
+\end{itemize}
+If other combinations of parameters are passed in emulator mode, {\tt CCL} will quit and issue an error.
+
+Notice that ideally we would like pass a non-integer number of massive neutrino species for best compatibility with the emulator set-up. However, since this is not possible within {\tt CCL}, we have opted to verify that neither the growth function nor the comoving radial distance computation are affected by this approximation to more than $10^{-4}$ in the range $0.01<a<1$, where $a$ is the scale factor. We have verified this by comparing this prediction for a fiducial cosmology $\{\Omega_c=0.27,\Omega_b=0.049,h=0.67,\sigma_8=0.8,n_s=0.96\}$ with the following neutrino parameters: $\{N_{\nu,{\rm rel}},N_{\nu,{\rm mass}},m_{\nu}\}=\{0.00641,3,0.06{\rm eV}\}$, $\{N_{\nu,{\rm rel}},N_{\nu,{\rm mass}},m_{\nu}\}=\{0,3.04,0.06{\rm eV}\}$ and $\{N_{\nu,{\rm rel}},N_{\nu,{\rm mass}},m_{\nu}\}=\{0,3.046,0.06{\rm eV}\}$. The discrepancy between distances and growth results between these choices of neutrino parameters can raise above $10^{-4}$ at $a<0.01$ and the user should be mindful of this for their particular application.
 
 \subsubsection{Impact of baryons}
 
