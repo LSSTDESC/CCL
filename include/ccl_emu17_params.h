@@ -1,3 +1,14 @@
+//
+//  emu.c
+//  Created by Earl Lawrence on 11/10/16.
+//  Modified E Chisari 05/10/17 for CCL
+//  For details on the license, see ../LICENSE_COSMICEMU
+//  in this repository.
+//
+#ifdef __cplusplus
+extern "C" {
+#endif
+  
 static double x[111][8] = {0.777143,
 0.555000,
 0.889000,
@@ -104509,4 +104520,6 @@ static double z[8] = {0.000000,
 1.006000,
 1.610000,
 2.020000};
-
+#ifdef __cplusplus
+}
+#endif

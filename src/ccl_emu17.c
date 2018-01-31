@@ -2,6 +2,8 @@
 //  emu.c
 //  Created by Earl Lawrence on 11/10/16.
 //  Modified E Chisari 05/10/17 for CCL
+//  For details on the license, see ../LICENSE_COSMICEMU
+//  in this repository.
 //
 
 #include <stdio.h>
