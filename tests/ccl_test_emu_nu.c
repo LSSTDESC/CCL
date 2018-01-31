@@ -35,8 +35,8 @@ CTEST_DATA(emu_nu) {
 
 CTEST_SETUP(emu_nu) {
   
-  data->N_nu_rel=2.04;
-  data->N_nu_mass=1;
+  data->N_nu_rel=0.00641;
+  data->N_nu_mass=3;
 
   double *sigma_8;
   double *Omega_c;
@@ -89,8 +89,8 @@ CTEST_SETUP(emu_nu) {
     data->Omega_c[i] = Omega_c[i];
     data->Omega_b[i] = Omega_b[i];
     data->n_s[i] = n_s[i];
-    // Neff is fixed to 3.04 here
-    Mnu_out = ccl_Omeganuh2_to_Mnu(1., 3.04, Omega_nu[i]*h[i]*h[i], 2.725, NULL, &omnustatus);
+    // Number of neutrino species is fixed to 3
+    Mnu_out = ccl_Omeganuh2_to_Mnu(1.,data->N_nu_mass, Omega_nu[i]*h[i]*h[i], 2.725, NULL, &omnustatus);
     /*if (omnustatus){
       printf("%s\n",cosmo->status_message);
       exit(1);
@@ -125,7 +125,7 @@ static void compare_emu_nu(int i_model,struct emu_nu_data * data)
   ccl_configuration config = default_config;
   config.transfer_function_method = ccl_emulator;
   config.matter_power_spectrum_method = ccl_emu;
-  
+ 
   //None of the current cosmologies being checked include neutrinos
   ccl_parameters params = ccl_parameters_create(data->Omega_c[i_model-1],data->Omega_b[i_model-1],0.0,data->N_nu_rel, data->N_nu_mass, data->mnu[i_model-1],data->w_0[i_model-1],data->w_a[i_model-1],data->h[i_model-1],data->sigma_8[i_model-1],data->n_s[i_model-1],-1,-1,-1,-1,NULL,NULL, &status);
   params.Omega_g=0;

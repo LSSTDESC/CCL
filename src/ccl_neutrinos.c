@@ -93,6 +93,7 @@ double nu_phasespace_intg(gsl_interp_accel* accel, double mnuOT, int* status)
 /* -------- ROUTINE: Omeganuh2 ---------
 INPUTS: a: scale factor, Neff: number of neutrino species, mnu: total mass in eV of neutrinos, TCMB: CMB temperature, accel: pointer to an accelerator which will evaluate the neutrino phasespace spline if defined, status: pointer to status integer.
 TASK: Compute Omeganu * h^2 as a function of time.
+!! To all practical purposes, Neff is simply N_nu_mass !!
 */
 double ccl_Omeganuh2 (double a, double Neff, double mnu, double TCMB, gsl_interp_accel* accel, int* status)
 {

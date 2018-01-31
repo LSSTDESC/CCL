@@ -37,7 +37,7 @@ def reference_models():
     
     # Emulator Pk w/neutrinos
     p7 = ccl.Parameters(Omega_c=0.27, Omega_b=0.022/0.67**2, h=0.67, sigma8=0.8, 
-                        n_s=0.96, N_nu_rel=2.04, N_nu_mass=1, m_nu=0.06)
+                        n_s=0.96, N_nu_rel=0.00641, N_nu_mass=3, m_nu=0.06)
     cosmo7 = ccl.Cosmology(p7, transfer_function='emulator', 
                            matter_power_spectrum='emu')
 
