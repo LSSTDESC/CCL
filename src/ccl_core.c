@@ -296,6 +296,8 @@ ccl_parameters ccl_parameters_create(double Omega_c, double Omega_b, double Omeg
 				     double *dfarr_mgrowth, int *status)
 {
 	
+  //printf("Nncdm=%d, mnu=%f\n", N_nu_mass, mnu[0]);	
+	
   ccl_parameters params;
   params.sigma_8 = NAN;
   params.A_s = NAN;
@@ -365,6 +367,8 @@ ccl_parameters ccl_parameters_create(double Omega_c, double Omega_b, double Omeg
     params.z_mgrowth=NULL;
     params.df_mgrowth=NULL;
   } 
+  
+  //printf("In parameters, h=%f, OmC=%f, OmB=%f, OmK=%f, n_s=%f, w0=%f, wa=%f, Nur=%f, Nncdm=%d, mncdm=%f\n", params.h,params.Omega_c, params.Omega_b, params.Omega_k, params.n_s, params.w0, params.wa, params.N_nu_rel, params.N_nu_mass, params.mnu[0]);
   
   return params;  
 }

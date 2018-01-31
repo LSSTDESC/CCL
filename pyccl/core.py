@@ -176,7 +176,7 @@ class Parameters(object):
         for nm, item in zip(names, compul):
             if item is None:
                 raise ValueError("Necessary parameter '%s' was not set "
-                                 "(or set to None)." % nm)                       
+                                 "(or set to None)." % nm)                     
                                  
         # Create new instance of ccl_parameters object
         status = 0 # Create an internal status variable; needed to check massive neutrino integral.
