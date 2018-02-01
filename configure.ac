@@ -65,6 +65,13 @@ else
     AC_SEARCH_LIBS([background_free],[class],[],AC_MSG_ERROR(Couldn't find libclass.))
 fi
 AM_CONDITIONAL([LOCALCLASS], [test x$localclass = xtrue])
+
+AC_CHECK_FILE("angpow",[AC_MSG_NOTICE([Using the CCL version of Angpow])
+localangpow=true],
+[AC_MSG_NOTICE([Angpow not used])
+localangpow=false])
+AM_CONDITIONAL([LOCALANGPOW],[test x$localangpow = xtrue])
+
 AC_SEARCH_LIBS([cblas_dgemm],[gslcblas],[],AC_MSG_ERROR(Couldn't find libgslcblas.))
 AC_SEARCH_LIBS([gsl_spline2d_eval_e],[gsl],[],AC_MSG_ERROR(Couldn't find libgsl. GSL V2+ required.))
 AC_SEARCH_LIBS([fftw_plan_dft_1d],[fftw3],[],AC_MSG_ERROR(Couldn't find fftw3. Required.))
@@ -81,8 +88,7 @@ AC_CHECK_FUNCS([pow sqrt])
 
 # Includes Makefiles
 AC_CONFIG_FILES([Makefile
-		 include/Makefile
-		 angpow/Makefile])
+		 include/Makefile])
 
 AC_OUTPUT
 

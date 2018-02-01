@@ -196,7 +196,7 @@ CCL_ClWorkspace *ccl_cl_workspace_default_limber(int lmax,int l_limber,int *stat
 void ccl_cl_workspace_free(CCL_ClWorkspace *w);
 
 /**
- * Computes limber power spectrum for two different tracers
+ * Computes limber or non-limber power spectrum for two different tracers
  * @param cosmo Cosmological parameters
  * @param w a ClWorkspace
  * @param clt1 a Cltracer
@@ -212,19 +212,6 @@ void ccl_angular_cls(ccl_cosmology *cosmo,CCL_ClWorkspace *w,
 		     CCL_ClTracer *clt1,CCL_ClTracer *clt2,
 		     int nl_out,int *l,double *cl,int *status);
 
-/**
- * Computes limber power spectrum for two different tracers
- * @param cosmo Cosmological parameters
- * @param clt1 a Cltracer
- * @param clt2 a Cltracer
- * @param status Status flag. 0 if there are no errors, nonzero otherwise.
- * For specific cases see documentation for ccl_error.c
- * @return void
- */
-  /*
-double ccl_angular_cl(ccl_cosmology *cosmo,int l,CCL_ClTracer *clt1,CCL_ClTracer *clt2, int * status);
-  */
-  
 
 
 #ifdef __cplusplus

@@ -269,26 +269,51 @@ elif "--prefix" in sys.argv:
     libdir=os.path.realpath(os.path.join(sys.argv[ii+1],'lib'))
 else:
     libdir=os.path.realpath(os.path.join(sys.prefix,'lib'))
-setup(name="pyccl",
-    description="Library of validated cosmological functions.",
-    author="LSST DESC",
-    version="0.1",
-    packages=['pyccl'],
-    ext_modules=[
-        Extension("_ccllib",["pyccl/ccl_wrap.c"],
-            libraries = ['m', 'gsl', 'gslcblas', 'ccl','fftw3','fftw3_threads','gomp'],
-            #libraries=['m', 'gsl', 'gslcblas', 'ccl'],      
-            include_dirs=[numpy_include, "include/", "class/include"],
-            library_dirs=[libdir],
-            runtime_library_dirs=[libdir],
-            extra_compile_args=['-O4', '-std=c99', '-fopenmp'],
-            swig_opts=['-threads'], 
-            )
-    ],
-    cmdclass={
-        'install': PyInstall,
-        'build_clib': BuildExternalCLib,
-        'test': PyTest,
-        'uninstall': PyUninstall
-    }
-    )
+
+if os.path.isfile(os.path.join(sys.prefix,'angpow/lib/libangpow.a')):
+    setup(name="pyccl",
+        description="Library of validated cosmological functions.",
+        author="LSST DESC",
+        version="0.1",
+        packages=['pyccl'],
+        ext_modules=[
+            Extension("_ccllib",["pyccl/ccl_wrap.c"],
+                libraries = ['m', 'gsl', 'gslcblas', 'ccl','fftw3','fftw3_threads','gomp'],
+                #libraries=['m', 'gsl', 'gslcblas', 'ccl'],      
+                include_dirs=[numpy_include, "include/", "class/include"],
+                library_dirs=[libdir],
+                runtime_library_dirs=[libdir],
+                extra_compile_args=['-O4', '-std=c99', '-fopenmp'],
+                swig_opts=['-threads'], 
+                )
+        ],
+        cmdclass={
+            'install': PyInstall,
+            'build_clib': BuildExternalCLib,
+            'test': PyTest,
+            'uninstall': PyUninstall
+        }
+        )
+else:
+    setup(name="pyccl",
+        description="Library of validated cosmological functions.",
+        author="LSST DESC",
+        version="0.1",
+        packages=['pyccl'],
+        ext_modules=[
+            Extension("_ccllib",["pyccl/ccl_wrap.c"],
+                libraries=['m', 'gsl', 'gslcblas', 'ccl'],      
+                include_dirs=[numpy_include, "include/", "class/include"],
+                library_dirs=[libdir],
+                runtime_library_dirs=[libdir],
+                extra_compile_args=['-O4', '-std=c99'],
+                swig_opts=['-threads'], 
+                )
+        ],
+        cmdclass={
+            'install': PyInstall,
+            'build_clib': BuildExternalCLib,
+            'test': PyTest,
+            'uninstall': PyUninstall
+        }
+        )
