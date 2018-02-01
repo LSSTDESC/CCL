@@ -102,13 +102,13 @@ int main(int argc,char **argv)
   }
   
   //CMB lensing tracer
-  CCL_ClTracer *ct_cl=ccl_cl_tracer_cmblens_new(cosmo,1100.,&status);
+  CCL_ClTracer *ct_cl=ccl_cl_tracer_cmblens(cosmo,1100.,&status);
 
   //Galaxy clustering tracer
-  CCL_ClTracer *ct_gc=ccl_cl_tracer_number_counts_simple_new(cosmo,NZ,z_arr_gc,nz_arr_gc,NZ,z_arr_gc,bz_arr, &status);
+  CCL_ClTracer *ct_gc=ccl_cl_tracer_number_counts_simple(cosmo,NZ,z_arr_gc,nz_arr_gc,NZ,z_arr_gc,bz_arr, &status);
   
   //Cosmic shear tracer
-  CCL_ClTracer *ct_wl=ccl_cl_tracer_lensing_simple_new(cosmo,NZ,z_arr_sh,nz_arr_sh, &status);
+  CCL_ClTracer *ct_wl=ccl_cl_tracer_lensing_simple(cosmo,NZ,z_arr_sh,nz_arr_sh, &status);
   printf("ell C_ell(c,c) C_ell(c,g) C_ell(c,s) C_ell(g,g) C_ell(g,s) C_ell(s,s) | r(g,s)\n");
   /*
   for(int l=2;l<=NL;l*=2) {
@@ -137,7 +137,7 @@ int main(int argc,char **argv)
   double dchi = (ct_gc->chimax-ct_gc->chimin)/1000.; // must be below 3 to converge toward limber computation at high ell
   double dlk = 0.003;
   double zmin = 0.05;
-  CCL_ClWorkspace *w=ccl_cl_workspace_new(NL+1,-1,CCL_NONLIMBER_METHOD_ANGPOW,logstep,linstep,dchi,dlk,zmin,&status);
+  CCL_ClWorkspace *w=ccl_cl_workspace_default(NL+1,-1,CCL_NONLIMBER_METHOD_ANGPOW,logstep,linstep,dchi,dlk,zmin,&status);
   ccl_angular_cls(cosmo,w,ct_cl,ct_cl,NL,ells,cells_cc_limber,&status);
   ccl_angular_cls(cosmo,w,ct_cl,ct_gc,NL,ells,cells_cg_limber,&status);
   ccl_angular_cls(cosmo,w,ct_cl,ct_wl,NL,ells,cells_cl_limber,&status);
