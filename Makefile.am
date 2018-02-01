@@ -1,5 +1,5 @@
 if LOCALCLASS
- SUBDIRS = include
+ SUBDIRS = include 
 else
  SUBDIRS = include
 endif
