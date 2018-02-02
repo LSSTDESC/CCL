@@ -5,14 +5,18 @@ from pyccl.pyutils import check
 
 def Omeganuh2(a, Neff, mnu, TCMB=2.725):
     """Omeganuh2
-    
+
+    Returns the Omehanuh2 value for a given
+    number of massive neutrino species with mass
+    mnu. 
+
     Args:
         a (float): Scale factor, normalized to 1 today.
-        Neff (float): Number of relativistic neutrino species
+        Neff (float): Number of relativistic neutrino species (NB: to all practical purposes, Neff is simply N_nu_mass)
         mnu (float): Neutrino mass (in eV)
         TCMB (float, optional): Temperature of the CMB (K). Default: 2.725.
     Returns:
-        Omeganuh2 (float or array_like)
+        Omeganuh2 (float or array_like) corresponding to a given neutrino mass
 
     """
     status = 0
@@ -36,7 +40,7 @@ def Omeganuh2_to_Mnu(a, Neff, OmNuh2, TCMB=2.725):
 
     Args:
         a (float or array_like): Scale factor(s), normalized to 1 today.
-        Neff (float): Number of relativistic neutrino species
+        Neff (float): Number of relativistic neutrino species (NB: to all practical purposes, Neff is simply N_nu_mass)
         OmNuh2 (float): Neutrino energy density times h^2
         TCMB (float, optional): Temperature of the CMB (K). Default: 2.725.
 
