@@ -265,10 +265,7 @@ static void ccl_fill_class_parameters(ccl_cosmology * cosmo, struct file_content
 				      int parser_length, int * status)
 				   
 {
-	
-  // Debugging: just print all the parameter values
-  printf("Parameters from cosmo, in ccl_fill_class_parameters, h=%f, OmC=%f, OmB=%f, OmK=%f, n_s=%f, w0=%f, wa=%f, Nur=%f, Nncdm=%d, mncdm=%f\n", cosmo->params.h,cosmo->params.Omega_c, cosmo->params.Omega_b, cosmo->params.Omega_k, cosmo->params.n_s, cosmo->params.w0, cosmo->params.wa, cosmo->params.N_nu_rel, cosmo->params.N_nu_mass, (cosmo->params.mnu)[0]);	
-	
+
   // initialize fc fields
   //silences Valgrind's "Conditional jump or move depends on uninitialised value" warning
   for (int i = 0; i< parser_length; i++){
@@ -350,10 +347,7 @@ static void ccl_fill_class_parameters(ccl_cosmology * cosmo, struct file_content
 	}
 
   }
-  
-  printf("Values for CLASS: %s=%s, %s=%s, %s=%s, %s=%s,%s=%s, %s=%s, %s=%s, %s=%s, %s=%s, %s=%s\n", fc->name[0], fc->value[0],fc->name[1], fc->value[1], fc->name[2], fc->value[2], fc->name[3], fc->value[3],   fc->name[6], fc->value[6], fc->name[7], fc->value[7], fc->name[8], fc->value[8], fc->name[9], fc->value[9], fc->name[10], fc->value[10], fc->name[14], fc->value[14]);
-  
-  
+   
   //normalization comes last, so that all other parameters are filled in for determining A_s if sigma_8 is specified
   if (isfinite(cosmo->params.sigma_8) && isfinite(cosmo->params.A_s)) {
     *status = CCL_ERROR_INCONSISTENT;
@@ -361,12 +355,10 @@ static void ccl_fill_class_parameters(ccl_cosmology * cosmo, struct file_content
     return;
   }
   if (isfinite(cosmo->params.sigma_8)) {
-	printf("sigma8 defined\n");  
     strcpy(fc->name[parser_length-1],"A_s");
     sprintf(fc->value[parser_length-1],"%e",ccl_get_class_As(cosmo,fc,parser_length-1,cosmo->params.sigma_8, status));
   }
   else if (isfinite(cosmo->params.A_s)) {
-	printf("A_s defined\n");
     strcpy(fc->name[parser_length-1],"A_s");
     sprintf(fc->value[parser_length-1],"%e",cosmo->params.A_s);
   }
@@ -375,9 +367,7 @@ static void ccl_fill_class_parameters(ccl_cosmology * cosmo, struct file_content
     strcpy(cosmo->status_message ,"ccl_power.c: class_parameters(): Error initialzing CLASS pararmeters: neither sigma_8 nor A_s defined\n");
     return;
   }
-  
-  printf("%s=%s\n", fc->name[parser_length-1], fc->value[parser_length-1]);
-  
+
 }
 
 static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int * status)

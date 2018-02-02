@@ -35,8 +35,6 @@ ccl_parameters parameters_create_nu(
                                  -1, NULL, NULL, status);
     }else{
 
-    printf("Right here\n");
-
     return ccl_parameters_create(Omega_c, Omega_b, Omega_k, N_nu_rel, n_m, M_nu, w0, wa, h, norm_pk, n_s, bcm_log10Mc, bcm_etab, bcm_ks, -1, NULL, NULL, status);
     }                             
     

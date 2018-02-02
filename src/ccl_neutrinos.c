@@ -103,19 +103,15 @@ double Omeganuh2 (double a, double Neff, double* mnu, double TCMB, gsl_interp_ac
   // First check if Neff if 0
   if (Neff==0) return 0.0;  
   
-  // Now handle the massless case
   Tnu=TCMB*pow(4./11.,1./3.);
   a4=a*a*a*a;  
-  // Check if this is the massless case. We assume that in the massless case mnu is a pointer to a single element and that element is 0. This should in principle never be called.
-  
+  // Check if mnu=0. We assume that in the massless case mnu is a pointer to a single element and that element is 0. This should in principle never be called.
   if (mnu[0] < 1e-12) {
     prefix_massless = NU_CONST  * Tnu * Tnu * Tnu * Tnu; 
     return Neff*prefix_massless*7./8./a4;
   }
   
   // And the remaining massive case. If we've got this far, then Neff = Nnumass and this will be the number of elements in the array to which mnu points.
-  
-  //mnuone=mnu/Neff;  // Get the mass of one species (assuming equal-mass neutrinos).
   // Tnu_eff is used in the massive case because CLASS uses an effective temperature of nonLCDM components to match to mnu / Omeganu =93.14eV. Tnu_eff = T_ncdm * TCMB = 0.71611 * TCMB
   Tnu_eff = Tnu * TNCDM / (pow(4./11.,1./3.));
   
