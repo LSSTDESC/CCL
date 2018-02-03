@@ -11,6 +11,10 @@
 #include "ccl_utils.h"
 #include "ccl_params.h"
 
+#ifdef HAVE_ANGPOW
+  # include "ccl_angpow.h"
+#endif
+
 //#define _DEBUG
 #define CCL_FRAC_RELEVANT 5E-4
 //#define CCL_FRAC_RELEVANT 1E-3
@@ -88,18 +92,19 @@ static double spline_eval(double x,SplPar *spl)
     return gsl_spline_eval(spl->spline,x,spl->intacc);
 }
 
-//Wrapper around spline_eval with GSL function syntax
-static double speval_bis(double x,void *params)
-{
-  return spline_eval(x,(SplPar *)params);
-}
-
 //Spline destructor
 static void spline_free(SplPar *spl)
 {
   gsl_spline_free(spl->spline);
   gsl_interp_accel_free(spl->intacc);
   free(spl);
+}
+
+
+//Wrapper around spline_eval with GSL function syntax
+static double speval_bis(double x,void *params)
+{
+  return spline_eval(x,(SplPar *)params);
 }
 
 
@@ -209,7 +214,7 @@ static double integrand_wl(double chip,void *params)
   double chi=p->chi;
   double a=ccl_scale_factor_of_chi(p->cosmo,chip, p->status);
   double z=1./a-1;
-  double pz=spline_eval(z,p->spl_pz);
+  double pz=ccl_spline_eval(z,p->spl_pz);
   double h=p->cosmo->params.h*ccl_h_over_h0(p->cosmo,a, p->status)/CLIGHT_HMPC;
 
   if(chi==0)
@@ -266,8 +271,8 @@ static double integrand_mag(double chip,void *params)
   double chi=p->chi;
   double a=ccl_scale_factor_of_chi(p->cosmo,chip, p->status);
   double z=1./a-1;
-  double pz=spline_eval(z,p->spl_pz);
-  double sz=spline_eval(z,p->spl_sz);
+  double pz=ccl_spline_eval(z,p->spl_pz);
+  double sz=ccl_spline_eval(z,p->spl_sz);
   double h=p->cosmo->params.h*ccl_h_over_h0(p->cosmo,a, p->status)/CLIGHT_HMPC;
 
   if(chi==0)
@@ -347,7 +352,7 @@ static CCL_ClTracer *cl_tracer(ccl_cosmology *cosmo,int tracer_type,
     get_support_interval(nz_n,z_n,n,CCL_FRAC_RELEVANT,&(clt->zmin),&(clt->zmax));
     clt->chimax=ccl_comoving_radial_distance(cosmo,1./(1+clt->zmax),status);
     clt->chimin=ccl_comoving_radial_distance(cosmo,1./(1+clt->zmin),status);
-    clt->spl_nz=spline_init(nz_n,z_n,n,0,0);
+    clt->spl_nz=ccl_spline_init(nz_n,z_n,n,0,0);
     if(clt->spl_nz==NULL) {
       free(clt);
       *status=CCL_ERROR_SPLINE;
@@ -360,7 +365,7 @@ static CCL_ClTracer *cl_tracer(ccl_cosmology *cosmo,int tracer_type,
     double nz_norm,nz_enorm;
     double *nz_normalized=(double *)malloc(nz_n*sizeof(double));
     if(nz_normalized==NULL) {
-      spline_free(clt->spl_nz);
+      ccl_spline_free(clt->spl_nz);
       free(clt);
       *status=CCL_ERROR_MEMORY;
       strcpy(cosmo->status_message,"ccl_cls.c: ccl_cl_tracer(): memory allocation\n");
@@ -373,7 +378,7 @@ static CCL_ClTracer *cl_tracer(ccl_cosmology *cosmo,int tracer_type,
     clstatus=gsl_integration_qag(&F,z_n[0],z_n[nz_n-1],0,1E-4,1000,GSL_INTEG_GAUSS41,w,&nz_norm,&nz_enorm);
     gsl_integration_workspace_free(w); //TODO:check for integration errors
     if(clstatus!=GSL_SUCCESS) {
-      spline_free(clt->spl_nz);
+      ccl_spline_free(clt->spl_nz);
       free(clt);
       *status=CCL_ERROR_INTEG;
       strcpy(cosmo->status_message,"ccl_cls.c: ccl_cl_tracer(): integration error when normalizing N(z)\n");
@@ -381,8 +386,8 @@ static CCL_ClTracer *cl_tracer(ccl_cosmology *cosmo,int tracer_type,
     }
     for(int ii=0;ii<nz_n;ii++)
       nz_normalized[ii]=n[ii]/nz_norm;
-    spline_free(clt->spl_nz);
-    clt->spl_nz=spline_init(nz_n,z_n,nz_normalized,0,0);
+    ccl_spline_free(clt->spl_nz);
+    clt->spl_nz=ccl_spline_init(nz_n,z_n,nz_normalized,0,0);
     free(nz_normalized);
     if(clt->spl_nz==NULL) {
       free(clt);
@@ -393,9 +398,9 @@ static CCL_ClTracer *cl_tracer(ccl_cosmology *cosmo,int tracer_type,
 
     if(tracer_type==CL_TRACER_NC) {
       //Initialize bias spline
-      clt->spl_bz=spline_init(nz_b,z_b,b,b[0],b[nz_b-1]);
+      clt->spl_bz=ccl_spline_init(nz_b,z_b,b,b[0],b[nz_b-1]);
       if(clt->spl_bz==NULL) {
-	spline_free(clt->spl_nz);
+	ccl_spline_free(clt->spl_nz);
 	free(clt);
 	*status=CCL_ERROR_SPLINE;
 	strcpy(cosmo->status_message,"ccl_cls.c: ccl_cl_tracer(): error initializing spline for b(z)\n");
@@ -415,10 +420,10 @@ static CCL_ClTracer *cl_tracer(ccl_cosmology *cosmo,int tracer_type,
 	//In this case we need to integrate all the way to z=0. Reset zmin and chimin
 	clt->zmin=0;
 	clt->chimin=0;
-	clt->spl_sz=spline_init(nz_s,z_s,s,s[0],s[nz_s-1]);
+	clt->spl_sz=ccl_spline_init(nz_s,z_s,s,s[0],s[nz_s-1]);
 	if(clt->spl_sz==NULL) {
-	  spline_free(clt->spl_nz);
-	  spline_free(clt->spl_bz);
+	  ccl_spline_free(clt->spl_nz);
+	  ccl_spline_free(clt->spl_bz);
 	  free(clt);
 	  *status=CCL_ERROR_SPLINE;
 	  strcpy(cosmo->status_message,"ccl_cls.c: ccl_cl_tracer(): error initializing spline for s(z)\n");
@@ -429,9 +434,9 @@ static CCL_ClTracer *cl_tracer(ccl_cosmology *cosmo,int tracer_type,
 	x=ccl_linear_spacing(0.,chimax,nchi);
 	dchi=chimax/nchi;
 	if(x==NULL || (fabs(x[0]-0)>1E-5) || (fabs(x[nchi-1]-chimax)>1e-5)) {
-	  spline_free(clt->spl_nz);
-	  spline_free(clt->spl_bz);
-	  spline_free(clt->spl_sz);
+	  ccl_spline_free(clt->spl_nz);
+	  ccl_spline_free(clt->spl_bz);
+	  ccl_spline_free(clt->spl_sz);
 	  free(clt);
 	  *status=CCL_ERROR_LINSPACE;
 	  strcpy(cosmo->status_message,
@@ -441,9 +446,9 @@ static CCL_ClTracer *cl_tracer(ccl_cosmology *cosmo,int tracer_type,
 	y=(double *)malloc(nchi*sizeof(double));
 	if(y==NULL) {
 	  free(x);
-	  spline_free(clt->spl_nz);
-	  spline_free(clt->spl_bz);
-	  spline_free(clt->spl_sz);
+	  ccl_spline_free(clt->spl_nz);
+	  ccl_spline_free(clt->spl_bz);
+	  ccl_spline_free(clt->spl_sz);
 	  free(clt);
 	  *status=CCL_ERROR_MEMORY;
 	  strcpy(cosmo->status_message,"ccl_cls.c: ccl_cl_tracer(): memory allocation\n");
@@ -455,22 +460,22 @@ static CCL_ClTracer *cl_tracer(ccl_cosmology *cosmo,int tracer_type,
 	if(clstatus) {
 	  free(y);
 	  free(x);
-	  spline_free(clt->spl_nz);
-	  spline_free(clt->spl_bz);
-	  spline_free(clt->spl_sz);
+	  ccl_spline_free(clt->spl_nz);
+	  ccl_spline_free(clt->spl_bz);
+	  ccl_spline_free(clt->spl_sz);
 	  free(clt);
 	  *status=CCL_ERROR_INTEG;
 	  strcpy(cosmo->status_message,"ccl_cls.c: ccl_cl_tracer(): error computing lensing window\n");
 	  return NULL;
 	}
 
-	clt->spl_wM=spline_init(nchi,x,y,y[0],0);
+	clt->spl_wM=ccl_spline_init(nchi,x,y,y[0],0);
 	if(clt->spl_wM==NULL) {
 	  free(y);
 	  free(x);
-	  spline_free(clt->spl_nz);
-	  spline_free(clt->spl_bz);
-	  spline_free(clt->spl_sz);
+	  ccl_spline_free(clt->spl_nz);
+	  ccl_spline_free(clt->spl_bz);
+	  ccl_spline_free(clt->spl_sz);
 	  free(clt);
 	  *status=CCL_ERROR_SPLINE;
 	  strcpy(cosmo->status_message,
@@ -496,7 +501,7 @@ static CCL_ClTracer *cl_tracer(ccl_cosmology *cosmo,int tracer_type,
       x=ccl_linear_spacing(0.,chimax,nchi);
       dchi=chimax/nchi;
       if(x==NULL || (fabs(x[0]-0)>1E-5) || (fabs(x[nchi-1]-chimax)>1e-5)) {
-	spline_free(clt->spl_nz);
+	ccl_spline_free(clt->spl_nz);
 	free(clt);
 	*status=CCL_ERROR_LINSPACE;
 	strcpy(cosmo->status_message,"ccl_cls.c: ccl_cl_tracer(): Error creating linear spacing in chi\n");
@@ -505,7 +510,7 @@ static CCL_ClTracer *cl_tracer(ccl_cosmology *cosmo,int tracer_type,
       y=(double *)malloc(nchi*sizeof(double));
       if(y==NULL) {
 	free(x);
-	spline_free(clt->spl_nz);
+	ccl_spline_free(clt->spl_nz);
 	free(clt);
 	*status=CCL_ERROR_MEMORY;
 	strcpy(cosmo->status_message,"ccl_cls.c: ccl_cl_tracer(): memory allocation\n");
@@ -517,18 +522,18 @@ static CCL_ClTracer *cl_tracer(ccl_cosmology *cosmo,int tracer_type,
       if(clstatus) {
 	free(y);
 	free(x);
-	spline_free(clt->spl_nz);
+	ccl_spline_free(clt->spl_nz);
 	free(clt);
 	*status=CCL_ERROR_INTEG;
 	strcpy(cosmo->status_message,"ccl_cls.c: ccl_cl_tracer(): error computing lensing window\n");
 	return NULL;
       }
 
-      clt->spl_wL=spline_init(nchi,x,y,y[0],0);
+      clt->spl_wL=ccl_spline_init(nchi,x,y,y[0],0);
       if(clt->spl_wL==NULL) {
 	free(y);
 	free(x);
-	spline_free(clt->spl_nz);
+	ccl_spline_free(clt->spl_nz);
 	free(clt);
 	*status=CCL_ERROR_SPLINE;
 	strcpy(cosmo->status_message,"ccl_cls.c: ccl_cl_tracer(): error initializing spline for lensing window\n");
@@ -538,18 +543,18 @@ static CCL_ClTracer *cl_tracer(ccl_cosmology *cosmo,int tracer_type,
       
       clt->has_intrinsic_alignment=has_intrinsic_alignment;
       if(clt->has_intrinsic_alignment) {
-	clt->spl_rf=spline_init(nz_rf,z_rf,rf,rf[0],rf[nz_rf-1]);
+	clt->spl_rf=ccl_spline_init(nz_rf,z_rf,rf,rf[0],rf[nz_rf-1]);
 	if(clt->spl_rf==NULL) {
-	  spline_free(clt->spl_nz);
+	  ccl_spline_free(clt->spl_nz);
 	  free(clt);
 	  *status=CCL_ERROR_SPLINE;
 	  strcpy(cosmo->status_message,"ccl_cls.c: ccl_cl_tracer(): error initializing spline for rf(z)\n");
 	  return NULL;
 	}
-	clt->spl_ba=spline_init(nz_ba,z_ba,ba,ba[0],ba[nz_ba-1]);
+	clt->spl_ba=ccl_spline_init(nz_ba,z_ba,ba,ba[0],ba[nz_ba-1]);
 	if(clt->spl_ba==NULL) {
-	  spline_free(clt->spl_rf);
-	  spline_free(clt->spl_nz);
+	  ccl_spline_free(clt->spl_rf);
+	  ccl_spline_free(clt->spl_nz);
 	  free(clt);
 	  *status=CCL_ERROR_SPLINE;
 	  strcpy(cosmo->status_message,"ccl_cls.c: ccl_cl_tracer(): error initializing spline for ba(z)\n");
@@ -602,27 +607,27 @@ CCL_ClTracer *ccl_cl_tracer(ccl_cosmology *cosmo,int tracer_type,
 void ccl_cl_tracer_free(CCL_ClTracer *clt)
 {
   if((clt->tracer_type==CL_TRACER_NC) || (clt->tracer_type==CL_TRACER_WL))
-    spline_free(clt->spl_nz);
+    ccl_spline_free(clt->spl_nz);
     
   if(clt->tracer_type==CL_TRACER_NC) {
-    spline_free(clt->spl_bz);
+    ccl_spline_free(clt->spl_bz);
     if(clt->has_magnification) {
-      spline_free(clt->spl_sz);
-      spline_free(clt->spl_wM);
+      ccl_spline_free(clt->spl_sz);
+      ccl_spline_free(clt->spl_wM);
     }
   }
   else if(clt->tracer_type==CL_TRACER_WL) {
-    spline_free(clt->spl_wL);
+    ccl_spline_free(clt->spl_wL);
     if(clt->has_intrinsic_alignment) {
-      spline_free(clt->spl_ba);
-      spline_free(clt->spl_rf);
+      ccl_spline_free(clt->spl_ba);
+      ccl_spline_free(clt->spl_rf);
     }
   }
   if(clt->computed_transfer) {
     int il;
     free(clt->n_k);
     for(il=0;il<clt->n_ls;il++)
-      spline_free(clt->spl_transfer[il]);
+      ccl_spline_free(clt->spl_transfer[il]);
     free(clt->spl_transfer);
   }
   free(clt);
@@ -695,8 +700,8 @@ static double j_bessel_limber(int l,double k)
 static double f_dens(double a,ccl_cosmology *cosmo,CCL_ClTracer *clt, int * status)
 {
   double z=1./a-1;
-  double pz=spline_eval(z,clt->spl_nz);
-  double bz=spline_eval(z,clt->spl_bz);
+  double pz=ccl_spline_eval(z,clt->spl_nz);
+  double bz=ccl_spline_eval(z,clt->spl_bz);
   double h=cosmo->params.h*ccl_h_over_h0(cosmo,a,status)/CLIGHT_HMPC;
 
   return pz*bz*h;
@@ -705,7 +710,7 @@ static double f_dens(double a,ccl_cosmology *cosmo,CCL_ClTracer *clt, int * stat
 static double f_rsd(double a,ccl_cosmology *cosmo,CCL_ClTracer *clt, int * status)
 {
   double z=1./a-1;
-  double pz=spline_eval(z,clt->spl_nz);
+  double pz=ccl_spline_eval(z,clt->spl_nz);
   double fg=ccl_growth_rate(cosmo,a,status);
   double h=cosmo->params.h*ccl_h_over_h0(cosmo,a,status)/CLIGHT_HMPC;
 
@@ -714,7 +719,7 @@ static double f_rsd(double a,ccl_cosmology *cosmo,CCL_ClTracer *clt, int * statu
 
 static double f_mag(double a,double chi,ccl_cosmology *cosmo,CCL_ClTracer *clt, int * status)
 {
-  double wM=spline_eval(chi,clt->spl_wM);
+  double wM=ccl_spline_eval(chi,clt->spl_wM);
   
   if(wM<=0)
     return 0;
@@ -793,7 +798,7 @@ static double transfer_nc(int l,double k,
 
 static double f_lensing(double a,double chi,ccl_cosmology *cosmo,CCL_ClTracer *clt, int * status)
 {
-  double wL=spline_eval(chi,clt->spl_wL);
+  double wL=ccl_spline_eval(chi,clt->spl_wL);
   
   if(wL<=0)
     return 0;
@@ -808,9 +813,9 @@ static double f_IA_NLA(double a,double chi,ccl_cosmology *cosmo,CCL_ClTracer *cl
   else {
     double a=ccl_scale_factor_of_chi(cosmo,chi, status);
     double z=1./a-1;
-    double pz=spline_eval(z,clt->spl_nz);
-    double ba=spline_eval(z,clt->spl_ba);
-    double rf=spline_eval(z,clt->spl_rf);
+    double pz=ccl_spline_eval(z,clt->spl_nz);
+    double ba=ccl_spline_eval(z,clt->spl_ba);
+    double rf=ccl_spline_eval(z,clt->spl_rf);
     double h=cosmo->params.h*ccl_h_over_h0(cosmo,a,status)/CLIGHT_HMPC;
     
     return pz*ba*rf*h/(chi*chi);
@@ -1044,7 +1049,7 @@ static void compute_transfer(CCL_ClTracer *clt,ccl_cosmology *cosmo,CCL_ClWorksp
 #endif //_DEBUG
 
     //Initialize spline for this ell
-    clt->spl_transfer[il]=spline_init(nk,lkarr,tkarr,0,0);
+    clt->spl_transfer[il]=ccl_spline_init(nk,lkarr,tkarr,0,0);
     if(clt->spl_transfer[il]==NULL) {
       free(lkarr);
       free(tkarr);
@@ -1059,7 +1064,7 @@ static void compute_transfer(CCL_ClTracer *clt,ccl_cosmology *cosmo,CCL_ClWorksp
     free(clt->n_k);
     int ill;
     for(ill=0;ill<il;ill++)
-      spline_free(clt->spl_transfer[il]);
+      ccl_spline_free(clt->spl_transfer[il]);
     free(clt->spl_transfer);
   }
 
@@ -1073,7 +1078,7 @@ static double transfer(int il,double lk,ccl_cosmology *cosmo,
     if(!(clt->computed_transfer))
       compute_transfer(clt,cosmo,w,status);
     
-    return spline_eval(lk,clt->spl_transfer[il]);
+    return ccl_spline_eval(lk,clt->spl_transfer[il]);
   } else {
     return transfer_wrap(il,lk,cosmo,w,clt,status);
   }
@@ -1251,7 +1256,7 @@ void ccl_angular_cls(ccl_cosmology *cosmo,CCL_ClWorkspace *w,
   }
   
   //Interpolate into ells requested by user
-  SplPar *spcl_nodes=spline_init(w->n_ls,l_nodes,cl_nodes,0,0);
+  SplPar *spcl_nodes=ccl_spline_init(w->n_ls,l_nodes,cl_nodes,0,0);
   if(spcl_nodes==NULL) {
     free(cl_nodes);
     *status=CCL_ERROR_MEMORY;
@@ -1259,10 +1264,10 @@ void ccl_angular_cls(ccl_cosmology *cosmo,CCL_ClWorkspace *w,
     return;
   }
   for(ii=0;ii<nl_out;ii++)
-    cl_out[ii]=spline_eval((double)(l_out[ii]),spcl_nodes);
+    cl_out[ii]=ccl_spline_eval((double)(l_out[ii]),spcl_nodes);
 
   //Cleanup
-  spline_free(spcl_nodes);
+  ccl_spline_free(spcl_nodes);
   free(cl_nodes);
   free(l_nodes);
 }

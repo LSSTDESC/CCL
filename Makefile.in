@@ -92,11 +92,11 @@ build_triplet = @build@
 host_triplet = @host@
 @LOCALANGPOW_TRUE@am__append_1 = src/ccl_angpow.cc
 @LOCALANGPOW_TRUE@am__append_2 = angpow/lib/libangpow.a
-@LOCALANGPOW_TRUE@am__append_3 = $(OPENMP_CFLAGS) $(OPENMP_CXXFLAGS)  -std=c++11   -I./angpow/inc
+@LOCALANGPOW_TRUE@am__append_3 = $(OPENMP_CFLAGS) $(OPENMP_CXXFLAGS)  -std=c++11   -I./angpow/inc -DHAVE_ANGPOW
 noinst_PROGRAMS = tests/check_ccl$(EXEEXT)
 TESTS = tests/check_ccl$(EXEEXT) tests/check_swig_timestamp.sh
 @LOCALANGPOW_TRUE@am__append_4 = tests/ccl_test_angpow.c
-@LOCALANGPOW_TRUE@am__append_5 = $(OPENMP_CFLAGS) $(OPENMP_CXXFLAGS)  -fopenmp
+@LOCALANGPOW_TRUE@am__append_5 = $(OPENMP_CFLAGS) $(OPENMP_CXXFLAGS)  -fopenmp -DHAVE_ANGPOW
 @LOCALANGPOW_TRUE@am__append_6 = $(OPENMP_CFLAGS) $(OPENMP_CXXFLAGS) -lfftw3_threads
 subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4

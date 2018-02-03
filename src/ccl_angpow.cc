@@ -2,6 +2,8 @@
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
+#include "gsl/gsl_errno.h"
+#include "gsl/gsl_integration.h"
 #ifdef __cplusplus
 extern "C"{
 #endif //__cplusplus
@@ -40,7 +42,7 @@ namespace Angpow {
     
     
     virtual r_8 operator()(r_8 z) const {
-      return spline_eval(z,spl_);
+      return ccl_spline_eval(z,spl_);
     }
     
   private:
@@ -100,7 +102,7 @@ namespace Angpow {
 	// WARNING: here we want to store dlnD/dln(+1z) = - dlnD/dlna
 	fz_= - ccl_growth_rate(cosmo_,1.0/(1+z), &status);
       }
-      bz_ = spline_eval(z,clt_->spl_bz);
+      bz_ = ccl_spline_eval(z,clt_->spl_bz);
     }
     virtual ~IntegrandCCL() {}
     //! Return f(ell,k,z) for a given k
@@ -161,7 +163,7 @@ namespace Angpow {
 //clt1 -> tracer #1
 //clt2 -> tracer #2
 //status -> status
-static void ccl_angular_cls_angpow(ccl_cosmology *ccl_cosmo,CCL_ClWorkspace *w,
+void ccl_angular_cls_angpow(ccl_cosmology *ccl_cosmo,CCL_ClWorkspace *w,
 				   CCL_ClTracer *clt1,CCL_ClTracer *clt2,
 				   double *cl_out,int * status)
 {

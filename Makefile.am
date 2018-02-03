@@ -33,7 +33,7 @@ endif
 if LOCALANGPOW
 
  libccl_la_LIBADD += angpow/lib/libangpow.a
- libccl_la_CPPFLAGS += $(OPENMP_CFLAGS) $(OPENMP_CXXFLAGS)  -std=c++11   -I./angpow/inc
+ libccl_la_CPPFLAGS += $(OPENMP_CFLAGS) $(OPENMP_CXXFLAGS)  -std=c++11   -I./angpow/inc -DHAVE_ANGPOW
 
 endif
 
@@ -48,7 +48,7 @@ tests_check_ccl_LDFLAGS = -L./ -lccl -lgsl -lgslcblas -lfftw3 -lm $(CLASS_LIB)
 if LOCALANGPOW
 
  tests_check_ccl_SOURCES += tests/ccl_test_angpow.c
- tests_check_ccl_CPPFLAGS +=  $(OPENMP_CFLAGS) $(OPENMP_CXXFLAGS)  -fopenmp
+ tests_check_ccl_CPPFLAGS +=  $(OPENMP_CFLAGS) $(OPENMP_CXXFLAGS)  -fopenmp -DHAVE_ANGPOW
  tests_check_ccl_LDFLAGS += $(OPENMP_CFLAGS) $(OPENMP_CXXFLAGS) -lfftw3_threads
 
 endif
