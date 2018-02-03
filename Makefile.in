@@ -90,7 +90,7 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-@LOCALANGPOW_TRUE@am__append_1 = src/ccl_angpow.cc
+@LOCALANGPOW_TRUE@am__append_1 = angpow/src/angpow_ccl.cc
 @LOCALANGPOW_TRUE@am__append_2 = angpow/lib/libangpow.a
 @LOCALANGPOW_TRUE@am__append_3 = $(OPENMP_CFLAGS) $(OPENMP_CXXFLAGS)  -std=c++11   -I./angpow/inc -DHAVE_ANGPOW
 noinst_PROGRAMS = tests/check_ccl$(EXEEXT)
@@ -147,9 +147,9 @@ am__libccl_la_SOURCES_DIST = src/ccl_background.c src/ccl_core.c \
 	src/ccl_error.c src/ccl_lsst_specs.c src/ccl_placeholder.c \
 	src/ccl_power.c src/ccl_utils.c src/ccl_cls.c \
 	src/ccl_massfunc.c src/ccl_neutrinos.c src/ccl_correlation.c \
-	src/fftlog.c src/ccl_angpow.cc
+	src/fftlog.c angpow/src/angpow_ccl.cc
 am__dirstamp = $(am__leading_dot)dirstamp
-@LOCALANGPOW_TRUE@am__objects_1 = src/libccl_la-ccl_angpow.lo
+@LOCALANGPOW_TRUE@am__objects_1 = angpow/src/libccl_la-angpow_ccl.lo
 am_libccl_la_OBJECTS = src/libccl_la-ccl_background.lo \
 	src/libccl_la-ccl_core.lo src/libccl_la-ccl_error.lo \
 	src/libccl_la-ccl_lsst_specs.lo \
@@ -635,8 +635,14 @@ src/libccl_la-ccl_correlation.lo: src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
 src/libccl_la-fftlog.lo: src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
-src/libccl_la-ccl_angpow.lo: src/$(am__dirstamp) \
-	src/$(DEPDIR)/$(am__dirstamp)
+angpow/src/$(am__dirstamp):
+	@$(MKDIR_P) angpow/src
+	@: > angpow/src/$(am__dirstamp)
+angpow/src/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) angpow/src/$(DEPDIR)
+	@: > angpow/src/$(DEPDIR)/$(am__dirstamp)
+angpow/src/libccl_la-angpow_ccl.lo: angpow/src/$(am__dirstamp) \
+	angpow/src/$(DEPDIR)/$(am__dirstamp)
 
 libccl.la: $(libccl_la_OBJECTS) $(libccl_la_DEPENDENCIES) $(EXTRA_libccl_la_DEPENDENCIES) 
 	$(AM_V_CXXLD)$(CXXLINK) -rpath $(libdir) $(libccl_la_OBJECTS) $(libccl_la_LIBADD) $(LIBS)
@@ -696,6 +702,8 @@ tests/check_ccl$(EXEEXT): $(tests_check_ccl_OBJECTS) $(tests_check_ccl_DEPENDENC
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
+	-rm -f angpow/src/*.$(OBJEXT)
+	-rm -f angpow/src/*.lo
 	-rm -f src/*.$(OBJEXT)
 	-rm -f src/*.lo
 	-rm -f tests/*.$(OBJEXT)
@@ -703,7 +711,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/libccl_la-ccl_angpow.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@angpow/src/$(DEPDIR)/libccl_la-angpow_ccl.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/libccl_la-ccl_background.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/libccl_la-ccl_cls.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/libccl_la-ccl_core.Plo@am__quote@
@@ -1104,18 +1112,19 @@ tests/tests_check_ccl-ccl_test_angpow.obj: tests/ccl_test_angpow.c
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LTCXXCOMPILE) -c -o $@ $<
 
-src/libccl_la-ccl_angpow.lo: src/ccl_angpow.cc
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libccl_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/libccl_la-ccl_angpow.lo -MD -MP -MF src/$(DEPDIR)/libccl_la-ccl_angpow.Tpo -c -o src/libccl_la-ccl_angpow.lo `test -f 'src/ccl_angpow.cc' || echo '$(srcdir)/'`src/ccl_angpow.cc
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/$(DEPDIR)/libccl_la-ccl_angpow.Tpo src/$(DEPDIR)/libccl_la-ccl_angpow.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/ccl_angpow.cc' object='src/libccl_la-ccl_angpow.lo' libtool=yes @AMDEPBACKSLASH@
+angpow/src/libccl_la-angpow_ccl.lo: angpow/src/angpow_ccl.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libccl_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT angpow/src/libccl_la-angpow_ccl.lo -MD -MP -MF angpow/src/$(DEPDIR)/libccl_la-angpow_ccl.Tpo -c -o angpow/src/libccl_la-angpow_ccl.lo `test -f 'angpow/src/angpow_ccl.cc' || echo '$(srcdir)/'`angpow/src/angpow_ccl.cc
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) angpow/src/$(DEPDIR)/libccl_la-angpow_ccl.Tpo angpow/src/$(DEPDIR)/libccl_la-angpow_ccl.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='angpow/src/angpow_ccl.cc' object='angpow/src/libccl_la-angpow_ccl.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libccl_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/libccl_la-ccl_angpow.lo `test -f 'src/ccl_angpow.cc' || echo '$(srcdir)/'`src/ccl_angpow.cc
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libccl_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o angpow/src/libccl_la-angpow_ccl.lo `test -f 'angpow/src/angpow_ccl.cc' || echo '$(srcdir)/'`angpow/src/angpow_ccl.cc
 
 mostlyclean-libtool:
 	-rm -f *.lo
 
 clean-libtool:
 	-rm -rf .libs _libs
+	-rm -rf angpow/src/.libs angpow/src/_libs
 	-rm -rf src/.libs src/_libs
 	-rm -rf tests/.libs tests/_libs
 
@@ -1568,6 +1577,8 @@ clean-generic:
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
 	-test . = "$(srcdir)" || test -z "$(CONFIG_CLEAN_VPATH_FILES)" || rm -f $(CONFIG_CLEAN_VPATH_FILES)
+	-rm -f angpow/src/$(DEPDIR)/$(am__dirstamp)
+	-rm -f angpow/src/$(am__dirstamp)
 	-rm -f src/$(DEPDIR)/$(am__dirstamp)
 	-rm -f src/$(am__dirstamp)
 	-rm -f tests/$(DEPDIR)/$(am__dirstamp)
@@ -1583,7 +1594,7 @@ clean-am: clean-generic clean-libLTLIBRARIES clean-libtool \
 
 distclean: distclean-recursive
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
-	-rm -rf src/$(DEPDIR) tests/$(DEPDIR)
+	-rm -rf angpow/src/$(DEPDIR) src/$(DEPDIR) tests/$(DEPDIR)
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-hdr distclean-libtool distclean-tags
@@ -1631,7 +1642,7 @@ installcheck-am:
 maintainer-clean: maintainer-clean-recursive
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
 	-rm -rf $(top_srcdir)/autom4te.cache
-	-rm -rf src/$(DEPDIR) tests/$(DEPDIR)
+	-rm -rf angpow/src/$(DEPDIR) src/$(DEPDIR) tests/$(DEPDIR)
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 

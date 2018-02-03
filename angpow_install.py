@@ -22,7 +22,7 @@ flog.close()
 #Final cleanup
 def cleanup(full_cleanup=False) :
     os.chdir(dir_path)
-    os.system('rm -f v0.1.tar.gz')
+    os.system('rm -f v0.2.tar.gz')
     os.system('rm -f log_angpow_install')
     if full_cleanup :
         os.system('rm -r angpow')
@@ -72,12 +72,12 @@ else:
     #Actual installation
     print("Downloading Angpow...")
     if sys.platform.startswith('linux') :
-        check_command('wget -q https://github.com/LSSTDESC/Angpow4CCL/archive/v0.1.tar.gz')
+        check_command('wget -q https://github.com/LSSTDESC/Angpow4CCL/archive/v0.2.tar.gz')
         print("Unpacking...")
-        check_command('tar -xvf v0.1.tar.gz ')
+        check_command('tar -xvf v0.2.tar.gz ')
     if sys.platform.startswith('darwin') :
-        check_command('curl -L https://github.com/LSSTDESC/Angpow4CCL/archive/v0.1.tar.gz | tar xz')
-    check_command('mv Angpow4CCL-0.1 angpow')
+        check_command('curl -L https://github.com/LSSTDESC/Angpow4CCL/archive/v0.2.tar.gz | tar xz')
+    check_command('mv Angpow4CCL-0.2 angpow')
 
     print("Compiling...")
     os.chdir('angpow')

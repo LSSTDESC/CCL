@@ -12,7 +12,7 @@
 #include "ccl_params.h"
 
 #ifdef HAVE_ANGPOW
-  # include "ccl_angpow.h"
+  # include "Angpow/angpow_ccl.h"
 #endif
 
 //#define _DEBUG

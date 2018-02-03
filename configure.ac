@@ -66,7 +66,7 @@ else
 fi
 AM_CONDITIONAL([LOCALCLASS], [test x$localclass = xtrue])
 
-AC_CHECK_FILE("angpow",[AC_MSG_NOTICE([Using the CCL version of Angpow])
+AC_CHECK_FILE("angpow/lib/libangpow.a",[AC_MSG_NOTICE([Using the CCL version of Angpow])
 localangpow=true],
 [AC_MSG_NOTICE([Angpow not used])
 localangpow=false])

@@ -14,7 +14,7 @@ libccl_la_SOURCES = src/ccl_background.c src/ccl_core.c src/ccl_error.c src/ccl_
 
 if LOCALANGPOW
 
- libccl_la_SOURCES += src/ccl_angpow.cc
+ libccl_la_SOURCES += angpow/src/angpow_ccl.cc
 
 endif
 
