@@ -15212,99 +15212,6 @@ SWIGINTERN PyObject *CCL_ClTracer_swigregister(PyObject *SWIGUNUSEDPARM(self), P
   return SWIG_Py_Void();
 }
 
-SWIGINTERN PyObject *_wrap_spline_eval(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  double arg1 ;
-  SplPar *arg2 = (SplPar *) 0 ;
-  double val1 ;
-  int ecode1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  double result;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OO:spline_eval",&obj0,&obj1)) SWIG_fail;
-  ecode1 = SWIG_AsVal_double(obj0, &val1);
-  if (!SWIG_IsOK(ecode1)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "spline_eval" "', argument " "1"" of type '" "double""'");
-  } 
-  arg1 = (double)(val1);
-  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_SplPar, 0 |  0 );
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "spline_eval" "', argument " "2"" of type '" "SplPar *""'"); 
-  }
-  arg2 = (SplPar *)(argp2);
-  {
-    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    result = (double)spline_eval(arg1,arg2);
-    SWIG_PYTHON_THREAD_END_ALLOW;
-  }
-  resultobj = SWIG_From_double((double)(result));
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_speval_bis(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  double arg1 ;
-  void *arg2 = (void *) 0 ;
-  double val1 ;
-  int ecode1 = 0 ;
-  int res2 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  double result;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OO:speval_bis",&obj0,&obj1)) SWIG_fail;
-  ecode1 = SWIG_AsVal_double(obj0, &val1);
-  if (!SWIG_IsOK(ecode1)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "speval_bis" "', argument " "1"" of type '" "double""'");
-  } 
-  arg1 = (double)(val1);
-  res2 = SWIG_ConvertPtr(obj1,SWIG_as_voidptrptr(&arg2), 0, 0);
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "speval_bis" "', argument " "2"" of type '" "void *""'"); 
-  }
-  {
-    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    result = (double)speval_bis(arg1,arg2);
-    SWIG_PYTHON_THREAD_END_ALLOW;
-  }
-  resultobj = SWIG_From_double((double)(result));
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_spline_free(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  SplPar *arg1 = (SplPar *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject * obj0 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:spline_free",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_SplPar, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "spline_free" "', argument " "1"" of type '" "SplPar *""'"); 
-  }
-  arg1 = (SplPar *)(argp1);
-  {
-    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    spline_free(arg1);
-    SWIG_PYTHON_THREAD_END_ALLOW;
-  }
-  resultobj = SWIG_Py_Void();
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
 SWIGINTERN PyObject *_wrap_cl_tracer(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   ccl_cosmology *arg1 = (ccl_cosmology *) 0 ;
@@ -19573,6 +19480,66 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_spline_eval(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  double arg1 ;
+  SplPar *arg2 = (SplPar *) 0 ;
+  double val1 ;
+  int ecode1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  double result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:spline_eval",&obj0,&obj1)) SWIG_fail;
+  ecode1 = SWIG_AsVal_double(obj0, &val1);
+  if (!SWIG_IsOK(ecode1)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "spline_eval" "', argument " "1"" of type '" "double""'");
+  } 
+  arg1 = (double)(val1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_SplPar, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "spline_eval" "', argument " "2"" of type '" "SplPar *""'"); 
+  }
+  arg2 = (SplPar *)(argp2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double)ccl_spline_eval(arg1,arg2);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double((double)(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_spline_free(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  SplPar *arg1 = (SplPar *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:spline_free",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_SplPar, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "spline_free" "', argument " "1"" of type '" "SplPar *""'"); 
+  }
+  arg1 = (SplPar *)(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    ccl_spline_free(arg1);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 static PyMethodDef SwigMethods[] = {
 	 { (char *)"SWIG_PyInstanceMethod_New", (PyCFunction)SWIG_PyInstanceMethod_New, METH_O, NULL},
 	 { (char *)"parameters_Omega_c_set", _wrap_parameters_Omega_c_set, METH_VARARGS, (char *)"parameters_Omega_c_set(parameters self, double Omega_c)"},
@@ -19818,9 +19785,6 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"new_CCL_ClTracer", _wrap_new_CCL_ClTracer, METH_VARARGS, (char *)"new_CCL_ClTracer() -> CCL_ClTracer"},
 	 { (char *)"delete_CCL_ClTracer", _wrap_delete_CCL_ClTracer, METH_VARARGS, (char *)"delete_CCL_ClTracer(CCL_ClTracer self)"},
 	 { (char *)"CCL_ClTracer_swigregister", CCL_ClTracer_swigregister, METH_VARARGS, NULL},
-	 { (char *)"spline_eval", _wrap_spline_eval, METH_VARARGS, (char *)"spline_eval(double x, SplPar spl) -> double"},
-	 { (char *)"speval_bis", _wrap_speval_bis, METH_VARARGS, (char *)"speval_bis(double x, void * params) -> double"},
-	 { (char *)"spline_free", _wrap_spline_free, METH_VARARGS, (char *)"spline_free(SplPar spl)"},
 	 { (char *)"cl_tracer", _wrap_cl_tracer, METH_VARARGS, (char *)"cl_tracer(cosmology cosmo, int tracer_type, int has_rsd, int has_magnification, int has_intrinsic_alignment, int nz_n, double * z_n, double * n, int nz_b, double * z_b, double * b, int nz_s, double * z_s, double * s, int nz_ba, double * z_ba, double * ba, int nz_rf, double * z_rf, double * rf, double z_source, int * status) -> CCL_ClTracer"},
 	 { (char *)"cl_tracer_number_counts", _wrap_cl_tracer_number_counts, METH_VARARGS, (char *)"cl_tracer_number_counts(cosmology cosmo, int has_rsd, int has_magnification, int nz_n, double * z_n, double * n, int nz_b, double * z_b, double * b, int nz_s, double * z_s, double * s, int * status) -> CCL_ClTracer"},
 	 { (char *)"cl_tracer_number_counts_simple", _wrap_cl_tracer_number_counts_simple, METH_VARARGS, (char *)"cl_tracer_number_counts_simple(cosmology cosmo, int nz_n, double * z_n, double * n, int nz_b, double * z_b, double * b, int * status) -> CCL_ClTracer"},
@@ -19913,6 +19877,8 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"delete_SplPar", _wrap_delete_SplPar, METH_VARARGS, (char *)"delete_SplPar(SplPar self)"},
 	 { (char *)"SplPar_swigregister", SplPar_swigregister, METH_VARARGS, NULL},
 	 { (char *)"spline_init", _wrap_spline_init, METH_VARARGS, (char *)"spline_init(int n, double * x, double * y, double y0, double yf) -> SplPar"},
+	 { (char *)"spline_eval", _wrap_spline_eval, METH_VARARGS, (char *)"spline_eval(double x, SplPar spl) -> double"},
+	 { (char *)"spline_free", _wrap_spline_free, METH_VARARGS, (char *)"spline_free(SplPar spl)"},
 	 { NULL, NULL, 0, NULL }
 };
 

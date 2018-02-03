@@ -796,18 +796,6 @@ CCL_ClTracer_swigregister = _ccllib.CCL_ClTracer_swigregister
 CCL_ClTracer_swigregister(CCL_ClTracer)
 
 
-def spline_eval(x, spl):
-    """spline_eval(double x, SplPar spl) -> double"""
-    return _ccllib.spline_eval(x, spl)
-
-def speval_bis(x, params):
-    """speval_bis(double x, void * params) -> double"""
-    return _ccllib.speval_bis(x, params)
-
-def spline_free(spl):
-    """spline_free(SplPar spl)"""
-    return _ccllib.spline_free(spl)
-
 def cl_tracer(cosmo, tracer_type, has_rsd, has_magnification, has_intrinsic_alignment, nz_n, z_n, n, nz_b, z_b, b, nz_s, z_s, s, nz_ba, z_ba, ba, nz_rf, z_rf, rf, z_source, status):
     """cl_tracer(cosmology cosmo, int tracer_type, int has_rsd, int has_magnification, int has_intrinsic_alignment, int nz_n, double * z_n, double * n, int nz_b, double * z_b, double * b, int nz_s, double * z_s, double * s, int nz_ba, double * z_ba, double * ba, int nz_rf, double * z_rf, double * rf, double z_source, int * status) -> CCL_ClTracer"""
     return _ccllib.cl_tracer(cosmo, tracer_type, has_rsd, has_magnification, has_intrinsic_alignment, nz_n, z_n, n, nz_b, z_b, b, nz_s, z_s, s, nz_ba, z_ba, ba, nz_rf, z_rf, rf, z_source, status)
@@ -1288,6 +1276,14 @@ default_config = cvar.default_config
 def spline_init(n, x, y, y0, yf):
     """spline_init(int n, double * x, double * y, double y0, double yf) -> SplPar"""
     return _ccllib.spline_init(n, x, y, y0, yf)
+
+def spline_eval(x, spl):
+    """spline_eval(double x, SplPar spl) -> double"""
+    return _ccllib.spline_eval(x, spl)
+
+def spline_free(spl):
+    """spline_free(SplPar spl)"""
+    return _ccllib.spline_free(spl)
 # This file is compatible with both classic and new-style classes.
 
 
