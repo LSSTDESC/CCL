@@ -56,7 +56,7 @@ static void get_support_interval(int n,double *x,double *y,double frac,
 //Wrapper around spline_eval with GSL function syntax
 static double speval_bis(double x,void *params)
 {
-  return spline_eval(x,(SplPar *)params);
+  return ccl_spline_eval(x,(SplPar *)params);
 }
 
 
