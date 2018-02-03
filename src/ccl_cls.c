@@ -53,54 +53,6 @@ static void get_support_interval(int n,double *x,double *y,double frac,
   }
 }
 
-//Spline creator
-//n     -> number of points
-//x     -> x-axis
-//y     -> f(x)-axis
-//y0,yf -> values of f(x) to use beyond the interpolation range
-static SplPar *spline_init(int n,double *x,double *y,double y0,double yf)
-{
-  SplPar *spl=(SplPar *)malloc(sizeof(SplPar));
-  if(spl==NULL)
-    return NULL;
-  
-  spl->intacc=gsl_interp_accel_alloc();
-  spl->spline=gsl_spline_alloc(gsl_interp_cspline,n);
-  int parstatus=gsl_spline_init(spl->spline,x,y,n);
-  if(parstatus) {
-    gsl_interp_accel_free(spl->intacc);
-    gsl_spline_free(spl->spline);
-    return NULL;
-  }
-
-  spl->x0=x[0];
-  spl->xf=x[n-1];
-  spl->y0=y0;
-  spl->yf=yf;
-
-  return spl;
-}
-
-//Evaluates spline at x checking for bound errors
-static double spline_eval(double x,SplPar *spl)
-{
-  if(x<=spl->x0)
-    return spl->y0;
-  else if(x>=spl->xf) 
-    return spl->yf;
-  else
-    return gsl_spline_eval(spl->spline,x,spl->intacc);
-}
-
-//Spline destructor
-static void spline_free(SplPar *spl)
-{
-  gsl_spline_free(spl->spline);
-  gsl_interp_accel_free(spl->intacc);
-  free(spl);
-}
-
-
 //Wrapper around spline_eval with GSL function syntax
 static double speval_bis(double x,void *params)
 {
