@@ -270,7 +270,7 @@ elif "--prefix" in sys.argv:
 else:
     libdir=os.path.realpath(os.path.join(sys.prefix,'lib'))
 
-if os.path.isfile(os.path.join(sys.prefix,'angpow/lib/libangpow.a')):
+if os.path.isfile('./angpow/lib/libangpow.a'):
     setup(name="pyccl",
         description="Library of validated cosmological functions.",
         author="LSST DESC",
