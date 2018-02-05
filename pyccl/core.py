@@ -289,7 +289,6 @@ class Cosmology(object):
         # Use either input cosmology parameters or Parameters() object
         if params is None:
             # Create new Parameters object
-            print "Creating new parameters object"
             params = Parameters(Omega_c=Omega_c, Omega_b=Omega_b, h=h, A_s=A_s, 
                                 n_s=n_s, Omega_k=Omega_k, N_nu_rel = N_nu_rel, N_nu_mass=N_nu_mass, m_nu=m_nu, 
                                 w0=w0, wa=wa, sigma8=sigma8, bcm_log10Mc=bcm_log10Mc, bcm_etab=bcm_etab,
