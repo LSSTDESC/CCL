@@ -342,6 +342,8 @@ static void ccl_fill_class_parameters(ccl_cosmology * cosmo, struct file_content
       strcat(fc->value[16],tmp);
     }
   }
+  strcpy(fc->name[17],"T_cmb");
+  sprintf(fc->value[17],"%e",cosmo->params.T_CMB);
   //normalization comes last, so that all other parameters are filled in for determining A_s if sigma_8 is specified
   if (isfinite(cosmo->params.sigma_8) && isfinite(cosmo->params.A_s)) {
     *status = CCL_ERROR_INCONSISTENT;
