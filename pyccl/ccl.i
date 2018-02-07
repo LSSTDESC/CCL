@@ -38,6 +38,7 @@
 %include "ccl_cls.i"
 %include "ccl_constants.i"
 %include "ccl_lsst_specs.i"
+%include "ccl_neutrinos.i"
 
 %include "../include/ccl_config.h"
 %include "../include/ccl_error.h"

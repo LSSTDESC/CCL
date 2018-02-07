@@ -41,12 +41,13 @@ typedef enum transfer_function_t
  */
 typedef enum matter_power_spectrum_t
 {
-  ccl_linear           = 0,
-  
-  ccl_halofit          = 1,
+    ccl_linear           = 0,
 
-  ccl_halo_model       = 3
-  // even more kinds ... 
+    ccl_halofit          = 1,
+    // more?
+    ccl_halo_model       = 3,
+    // even more kinds ...
+    ccl_emu              = 4
 } matter_power_spectrum_t;
 
 /** 
