@@ -1132,8 +1132,11 @@ static double ccl_angular_cl_native(ccl_cosmology *cosmo,CCL_ClWorkspace *cw,int
   qagstatus=gsl_integration_qag(&F,lkmin,lkmax,0,1E-4,1000,GSL_INTEG_GAUSS41,w,&result,&eresult);
   gsl_integration_workspace_free(w);
   if(qagstatus!=GSL_SUCCESS || *ipar.status) {
-    *status=CCL_ERROR_INTEG;
-    strcpy(cosmo->status_message,"ccl_cls.c: ccl_angular_cls(): error integrating over k\n");
+    // If an error status was already set, don't overwrite it.
+    if(*status == 0){
+        *status=CCL_ERROR_INTEG;
+        strcpy(cosmo->status_message,"ccl_cls.c: ccl_angular_cl(): error integrating over k\n");
+    }
     return -1;
   }
   ccl_check_status(cosmo,status);

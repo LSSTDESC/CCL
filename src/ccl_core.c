@@ -137,7 +137,6 @@ ccl_cosmology * ccl_cosmology_create(ccl_parameters params, ccl_configuration co
 
   cosmo->data.p_lin = NULL;
   cosmo->data.p_nl = NULL;
-  cosmo->data.k_min= 5E-5;
   //cosmo->data.nu_pspace_int = NULL;
   cosmo->computed_distances = false;
   cosmo->computed_growth = false;
@@ -245,7 +244,7 @@ void ccl_parameters_fill_initial(ccl_parameters * params, int *status)
   // Neutrinos: if massive neutrinos are present, calculate the phase_space integral.
   if((params->N_nu_mass)>0.0001) {
     // Pass NULL for the accelerator here because we don't have our cosmology object defined yet.
-    params->Omega_n_mass = Omeganuh2(1.0, params->N_nu_mass, params->mnu, params->T_CMB, NULL, status) / ((params->h)*(params->h));
+    params->Omega_n_mass = ccl_Omeganuh2(1.0, params->N_nu_mass, params->mnu, params->T_CMB, NULL, status) / ((params->h)*(params->h));
     ccl_check_status_nocosmo(status);
   } 
   else{
