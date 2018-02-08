@@ -36,7 +36,7 @@ if on_rtd:
         def __getattr__(cls, name):
             return MagicMock()
 
-    MOCK_MODULES = ['numpy','pyccl']
+    MOCK_MODULES = ['numpy','pyccl','pyccl.background','pyccl.cclib']
     sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
 
 # -- General configuration ------------------------------------------------
