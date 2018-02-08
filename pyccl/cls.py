@@ -76,11 +76,12 @@ class ClTracer(object):
 
         # Convert array arguments that are 'None' into 'NoneArr' type, and
         # check whether arrays were specified as tuples or with a common z array
-        z_n, n = _check_array_params(z, n, 'n')
-        z_b, b = _check_array_params(z, bias, 'bias')
-        z_s, s = _check_array_params(z, mag_bias, 'mag_bias')
-        z_ba, ba = _check_array_params(z, bias_ia, 'bias_ia')
-        z_rf, rf = _check_array_params(z, f_red, 'f_red')
+        self.z_n, self.n = _check_array_params(z, n, 'n')
+        self.z_b, self.b = _check_array_params(z, bias, 'bias')
+        self.z_s, self.s = _check_array_params(z, mag_bias, 'mag_bias')
+        self.z_ba, self.ba = _check_array_params(z, bias_ia, 'bias_ia')
+        self.z_rf, self.rf = _check_array_params(z, f_red, 'f_red')
+        self.z_source = z_source
 
         # Construct new ccl_cl_tracer
         status = 0
@@ -90,7 +91,12 @@ class ClTracer(object):
                             int(has_rsd),
                             int(has_magnification),
                             int(has_intrinsic_alignment),
-                            z_n, n, z_b, b, z_s, s, z_ba, ba, z_rf, rf, z_source,
+                            self.z_n, self.n, 
+                            self.z_b, self.b, 
+                            self.z_s, self.s, 
+                            self.z_ba, self.ba, 
+                            self.z_rf, self.rf,
+                            self.z_source,
                             status )
 
     def __del__(self):

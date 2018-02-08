@@ -291,32 +291,6 @@ static void ccl_compute_legendre_polynomial(int corr_type,int n_theta,double *th
       }
     }
   }
-  else if(corr_type==CCL_CORR_LP) {
-    for (int i=0;i<n_theta;i++) {
-      gsl_sf_legendre_Pl_array(ell_max,cos(theta[i]*M_PI/180),Pl_theta[i]);
-      for (int j=0;j<=ell_max;j++) {
-	Pl_theta[i][j]*=(2*j+1);
-      }
-    }
-  }
-  else if(corr_type==CCL_CORR_LM) {
-    for (int i=0;i<n_theta;i++) {
-      for (int j=0;j<=ell_max;j++) {
-	if(j>1e4) {///////////Some theta points thrown away for speed
-	  Pl_theta[i][j]=0;
-	  continue;
-	}
-	if (j<4) { 
-	  Pl_theta[i][j]=0;
-	  continue;
-	}
-	Pl_theta[i][j]=gsl_sf_legendre_Plm(j,4,cos(theta[i]*M_PI/180));
-	Pl_theta[i][j]*=(2*j+1)*pow(j,4);//approximate.. Using relation between bessel and legendre functions from Steibbens96.
-	for (k=-3;k<=4;k++)
-	  Pl_theta[i][j]/=(j+k);
-      }
-    }
-  }
 }
 
 /*--------ROUTINE: ccl_tracer_corr_legendre ------
@@ -333,6 +307,11 @@ static void ccl_tracer_corr_legendre(ccl_cosmology *cosmo,
   int i;
   double *l_arr,*cl_arr;
 
+  if(corr_type==CCL_CORR_LM || corr_type==CCL_CORR_LP){
+    *status=CCL_ERROR_NOT_IMPLEMENTED;
+    strcpy(cosmo->status_message,"ccl_correlation.c: CCL does not support full-sky xi+- calcuations.\nhttps://arxiv.org/abs/1702.05301 indicates flat-sky to be sufficient.\n");
+    return;
+  }
   l_arr=malloc((ELL_MAX_FFTLOG+1)*sizeof(double));
   if(l_arr==NULL) {
     *status=CCL_ERROR_MEMORY;
@@ -347,8 +326,6 @@ static void ccl_tracer_corr_legendre(ccl_cosmology *cosmo,
     return;
   }
 
-  if(corr_type==CCL_CORR_LM)
-    printf("WARNING: legendre sum for xi- is still not correctly implemented.\n");
 
   //Interpolate input Cl into 
   SplPar *cl_spl=ccl_spline_init(n_ell,ell,cls,cls[0],0);

@@ -58,7 +58,7 @@ static void compare_cls(struct cls_data * data)
 
   //Fix spline parameters for the high-redshift needs of the CMB lensing power spectrum
   ccl_splines->A_SPLINE_NA=10000;
-  ccl_splines->N_A=500;
+  ccl_splines->A_SPLINE_NA_PK=500;
 
   FILE *fi_cc;
   CCL_ClTracer *tr_cl=ccl_cl_tracer_cmblens_new(cosmo,zlss,&status);

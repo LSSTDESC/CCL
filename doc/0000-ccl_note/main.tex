@@ -66,7 +66,7 @@ The Core Cosmology Library (\ccl) provides routines to compute basic cosmologica
 
 In preparation for constraining cosmology with the Large Synoptic Survey Telescope (LSST), it is necessary to be able to produce rigorous theoretical predictions for the cosmological quantities that will be measured. The Core Cosmology Library\footnote{\url{https://github.com/LSSTDESC/CCL}} (\ccl) aims to provide, in one library, a way of making predictions that are validated to a well-documented numerical accuracy, for the purpose of constraining cosmology with LSST. By constructing a cosmology library specifically with LSST in mind, it is possible to ensure that it is flexible, adaptable, and validated for all cases of interest, as well as user-friendly and appropriate for the needs of all working groups.
 
-The Core Cosmology Library is written in C and incorporates the {\tt CLASS} code \citep{class} to provide predictions for the matter power spectrum.\footnote{Future versions of the library will incorporate other power-spectrum libraries and methods.} A Python wrapper is also provided for ease of use.
+The Core Cosmology Library is written in C and incorporates the {\tt CLASS} code \citep{class} to provide predictions for the matter power spectrum. It also incorporates emulated power spectra from the cosmic emulator of \citet{Lawrence17}.\footnote{Future versions of the library will incorporate other power-spectrum libraries and methods.} A Python wrapper is also provided for ease of use.
 
 This note describes how to install \ccl (Section \ref{sec:install}), how \ccl is documented (Section \ref{sec:doc}), its functionality (Section \ref{sec:func}), the relevant unit tests (Section \ref{sec:tests}), directions for finding a \ccl example (Section \ref{sec:example}), the Python wrapper (Section \ref{sec:python}), future plans (Section \ref{sec:future}), means to contact the developers (Section \ref{sec:feedback}), instructions on how to cite \ccl (and {\tt CLASS}, Section \ref{sec:cite}), and the license under which \ccl is released (Section \ref{sec:license}).
 
@@ -81,8 +81,16 @@ This note describes how to install \ccl (Section \ref{sec:install}), how \ccl is
 \item The {\tt SWIG}\footnote{\url{http://www.swig.org/}} Python wrapper generator is not needed to run \ccl, but must be installed if you intend to modify \ccl in any way.
 \item {\tt FFTW3}\footnote{\url{http://www.fftw.org}} is required for computation of correlation functions.
 \item {\tt FFTlog}\footnote{\url{http://casa.colorado.edu/~ajsh/FFTLog/} and \url{https://github.com/slosar/FFTLog}} is provided within \ccl, with minor modifications.
+\item The C library associated to the {\tt CLASS} code. The installation of this library is described below. 
 %\item A version of {\tt Angpow} \citep{2017arXiv170103592C} is also incorporated within \ccl.
 \end{itemize}
+
+\subsection{Installing CLASS}
+  {\tt CCL} uses {\tt CLASS} as one of the possible ways of computing the matter power spectrum. In order to communicate with {\tt CLASS}, {\tt CCL} must be linked to its library. Before installing CCL proper you must therefore install this library first. Since this process is not necessarily straightforward, we provide a python script {\tt class\_install.py} that automatically downloads and install the latest tagged stable version of CLASS. You should run this script (i.e. {\tt \$ python class\_install.py}) before carrying out the next steps. By default, the script assumes that your main C compiler is {\tt gcc}. If that's not the case, pass the name of your C compiler to the script via the command-line argument {\tt --c\_comp} (e.g. {\tt \$ python class\_install.py --c\_comp=icc}). Type {\tt python class\_install.py -h} for further details.
+
+  This procedure has one final caveat: if you already have a working installation of {\tt CCL}, {\tt class\_install.py} may fail the first time you run it. This can be fixed by either simply running {\tt class\_install.py} a second time, or by starting from scratch (i.e. downloading or cloning {\tt CCL}).
+
+  Note that, if you want to use your own version of {\tt CLASS}, you should follow the steps described in Section \ref{sec:extclass} below.
 
 \subsection{Installation Procedure}
 
@@ -135,7 +143,7 @@ This will run the embedded unit tests. Using this last method to install the Pyt
 \subsection{Compiling against an external version of CLASS}
 \label{sec:extclass}
 
-\ccl has a built-in version of {\tt CLASS} that is used to calculate power spectra and other cosmological functions. This is compiled by default. Optionally, you can also link \ccl against an external version of {\tt CLASS}. This section is useful if you want to use a modified version of {\tt CLASS}, or a different or more up-to-date version of the standard {\tt CLASS}. For example, we have successfully compiled and run \ccl with {\tt hiCLASS} \citep{hiclass}.
+The default installation procedure for \ccl implies automatically downloading and installing a tagged version of {\tt CLASS}. Optionally, you can also link \ccl against an external version of {\tt CLASS}. This section is useful if you want to use a modified version of {\tt CLASS}, or a different or more up-to-date version of the standard {\tt CLASS}. For example, we have successfully compiled and run \ccl with {\tt hiCLASS} \citep{hiclass}.
 
 To compile \ccl with an external version of {\tt CLASS}, you must first prepare the external copy so that it can be linked as a shared library. By default, the {\tt CLASS} build tools create a static library. After compiling {\tt CLASS} in the usual way (by running {\tt make}), look for a static library file called {\tt libclass.a} that should have been placed in the root source directory. Then, run the following command from that directory (Linux only):
 \begin{verbatim}
@@ -233,7 +241,7 @@ To use \ccl, the first step is to create a {\tt ccl$\_$cosmology} structure, con
 \end{itemize}
 The argument ${\tt norm\_pk}$ can be used to specify the power spectrum normalization in terms of either $\sigma_8$ or $A_\mathrm{s}$. The {\tt ccl$\_$parameters$\_$create} functions assume $\sigma_8$ normalization if ${\tt norm\_pk > 1.0e-5}$ and $A_{\mathrm s}$ normalization otherwise.
 
-To include massive neutrinos, the suffix `{\tt $\_$nu}' may be appended to the last four {\tt ccl$\_$parameters\_create} functions above. Using these functions without the {\tt $\_$nu} suffix will set the number of massive neutrinos to 0 and the effective number of massless neutrinos to $3.046$. In the case of non-zero massive neutrinos, it may be desirable to set {\tt N\_nu\_rel} such that $N_{\rm eff}=3.046$ in the early universe. In agreement with {\tt CLASS}, when using the default value of $T_{\rm NCDM}$ as described in section \ref{sec:distances} below, {\tt N\_nu\_rel} can be set to 2.0328, 1.0196, and 0.00641 for 1, 2 and 3 massive neutrinos respectively to achieve this.
+To include massive neutrinos, the suffix `{\tt $\_$nu}' may be appended to the last four {\tt ccl$\_$parameters\_create} functions above. Using these functions without the {\tt $\_$nu} suffix will set the number of massive neutrinos to 0 and the effective number of massless neutrinos to $3.046$. In the case of non-zero massive neutrinos, it may be desirable to set {\tt N\_nu\_rel} such that $N_{\rm eff}=3.046$ in the early universe. In agreement with {\tt CLASS}, when using the default value of $T_{\rm NCDM}$ as described in section \ref{subsec:densityparam} below, {\tt N\_nu\_rel} can be set to 2.0328, 1.0196, and 0.00641 for 1, 2 and 3 massive neutrinos respectively to achieve this.
 
 {\tt ccl$\_$configuration} objects contain information about the prescriptions to be used to compute transfer functions, power spectra, mass functions, etc. A default {\tt ccl$\_$configuration} object is made available as {\tt default$\_$config}, which specifies that CLASS will be used to compute transfer functions, HaloFit will be used to calculate the matter power spectrum, there will be no impact of baryons included and the Tinker 2010 prescription will be used to compute the halo mass function.
 
@@ -355,6 +363,35 @@ The fiducial configuration calls the {\tt CLASS} software \citep{class} within \
 
 As discussed in Section \ref{sec:extclass}, the user can compile \ccl with an external version of {\tt CLASS} as well.
 
+\subsubsection{Cosmic emulator}
+
+The cosmic emulator of \citet{Lawrence17} is integrated into \ccl and it is available as one of the matter power spectrum and transfer function methods (both have to be specified). The cosmic emulator provides predictions for the matter power spectrum based on an interpolation over simulation outputs spanning a defined set of cosmological parameter values.
+
+The emulator provides accurate predictions for the nonlinear matter power spectrum, at the $1\%$ level, for $z\leq 2$ and in the wavenumber range $k=[10^{-3},5]$ Mpc$^{-1}$. If a redshift above $z=2$ is passed, the emulator will quit and return an error message. For $k$ values below and above the previously specified range, we extrapolate in the manner specified in the following section.
+
+The allowed range of cosmological parameters is as follows:
+\begin{eqnarray}
+0.12&\leq& \Omega_m h^2 \leq 0.155,\nonumber\\
+0.0215&\leq& \Omega_b h^2 \leq 0.0235,\nonumber\\
+0.7&\leq& \sigma_8 \leq 0.9,\nonumber\\
+0.55&\leq& h \leq 0.85,\nonumber\\
+0.85&\leq& n_s\leq 1.05,\nonumber\\
+-1.3&\leq& w_0\leq-0.7,\nonumber\\
+-1.73&\leq& w_a\leq -0.7,\nonumber\\
+0.0&\leq& \Omega_\nu h^2 \leq 0.01.
+\end{eqnarray}
+ %
+Actually, $w_a$ and $w_0$ are constrained jointly to be $0.3\leq (-w_0-w_a)^{1/4}$. Note that \ccl only allows a subregion within this parameter space. For models in which w(z) crosses $-1$ at some given redshift, {\tt CLASS} will crash because this value corresponds to a true cosmological constant, which by definition should have no perturbations.\footnote{We thank Emilio Bellini and Miguel Zumalac\'arregui for clarifying this for us.} The linear matter power spectrum is still obtained from {\tt CLASS} as described in the section above.
+
+\paragraph{Neutrino species} The emulator is set up to consider an effective number of relativistic species of $3.04$ and the user can provide $\Omega_\nu h^2$ to set the neutrino mass. This is different from the standard {\tt CCL} configuration, which takes as input the parameters the number of relativistic species, $N_{\nu,{\rm rel}}$, the number of massive neutrinos, $N_{\nu,{\rm mass}}$ and their mass in eV, $m_{\nu}$. For best compatibility with the emulator, the user can decide to pass the following set of parameters to {\tt CCL}:
+\begin{itemize}
+\item $\{N_{\nu,{\rm rel}},N_{\nu,{\rm mass}},m_{\nu}\}=\{0.00641,3,m_{\nu}\}$ for massive neutrinos or
+\item $\{N_{\nu,{\rm rel}},N_{\nu,{\rm mass}},m_{\nu}\}=\{3.04,0,0\}$ otherwise.
+\end{itemize}
+If other combinations of parameters are passed in emulator mode, {\tt CCL} will quit and issue an error.
+
+Notice that ideally we would like pass a non-integer number of massive neutrino species for best compatibility with the emulator set-up. However, since this is not possible within {\tt CCL}, we have opted to verify that neither the growth function nor the comoving radial distance computation are affected by this approximation to more than $10^{-4}$ in the range $0.01<a<1$, where $a$ is the scale factor. We have verified this by comparing this prediction for a fiducial cosmology $\{\Omega_c=0.27,\Omega_b=0.049,h=0.67,\sigma_8=0.8,n_s=0.96\}$ with the following neutrino parameters: $\{N_{\nu,{\rm rel}},N_{\nu,{\rm mass}},m_{\nu}\}=\{0.00641,3,0.06{\rm eV}\}$, $\{N_{\nu,{\rm rel}},N_{\nu,{\rm mass}},m_{\nu}\}=\{0,3.04,0.06{\rm eV}\}$ and $\{N_{\nu,{\rm rel}},N_{\nu,{\rm mass}},m_{\nu}\}=\{0,3.046,0.06{\rm eV}\}$. The discrepancy between distances and growth results between these choices of neutrino parameters can raise above $10^{-4}$ at $a<0.01$ and the user should be mindful of this for their particular application.
+
 \subsubsection{Impact of baryons}
 
 \ccl incorporates the impact of baryons on the total matter power spectrum via the ``baryonic correction model'' (BCM) of \citet{Schneider15}. This is implemented through a flag in the configuration object, which currently accepts the following options: {\tt ccl\_nobaryons} or {\tt ccl\_bcm}. When {\tt ccl\_bcm} is set, the nonlinear matter power spectrum (whichever the method that provides it) is multiplied by a correction factor $F(k,z)$ which models the impact of baryons.
@@ -376,16 +413,17 @@ Other baryonic impact models might be incorporated in the future as they become 
 All spline and grid parameters relevant for computing quantities such as distances, growth functions, power spectra, and halo mass functions are defined in the {\tt ccl$\_$params.ini} file in the {\tt include} folder of the repository. This file allows the user to configure the following constants:
 
 \begin{itemize}
-\item {\tt A$\_$SPLINE$\_$DELTA}: spacing of the scale factor spline. The default is {\tt A$\_$SPLINE$\_$DELTA}$=0.001$.
-\item {\tt A$\_$SPLINE$\_$NA}: number of points in the scale factor spline. The default is {\tt A$\_$SPLINE$\_$NA}$=1000$.
-\item {\tt A$\_$SPLINE$\_$MIN}: minimum value for the scale factor spline. The default is {\tt A$\_$SPLINE$\_$MIN}$=0.01$. This only applies to background quantities.
-\item {\tt A$\_$SPLINE$\_$MIN$\_$PK}: minimum value for the scale factor spline. The default is {\tt A$\_$SPLINE$\_$MIN}$=0.1$. This only applies for the 2D power spectrum splines.
+\item {\tt A$\_$SPLINE$\_$NLOG}: number of points in the logarithmic part of the scale factor spline. The default is {\tt A$\_$SPLINE$\_$NLOG}$=250$.
+\item {\tt A$\_$SPLINE$\_$NA}: number of points in the linear part of the scale factor spline. The default is {\tt A$\_$SPLINE$\_$NA}$=250$.
+\item {\tt A$\_$SPLINE$\_$MINLOG}: minimum value for the scale factor spline. The default is {\tt A$\_$SPLINE$\_$MINLOG}$=0.0001$. This only applies to background quantities.
+\item {\tt A$\_$SPLINE$\_$MIN}: maximum value for the logarithmic part and minimum value for the linear part of the scale factor spline. The default is {\tt A$\_$SPLINE$\_$MIN}$=0.01$. This only applies to background quantities.
 \item {\tt A$\_$SPLINE$\_$MAX}: maximum value for the scale factor spline. The default is {\tt A$\_$SPLINE$\_$MAX}$=1$.
 \item {\tt LOGM$\_$SPLINE$\_$DELTA}: spacing of the mass function spline (logarithm). The default is {\tt LOGM$\_$SPLINE$\_$DELTA}$=0.025$.
 \item {\tt LOGM$\_$SPLINE$\_$NM}: number of points in the mass function spline (logarithm). The default is {\tt LOGM$\_$SPLINE$\_$NA}$=440$.
 \item {\tt LOGM$\_$SPLINE$\_$MIN}: minimum value for the mass function spline (logarithm). The default is {\tt LOGM$\_$SPLINE$\_$MIN}$=6$.
 \item {\tt LOGM$\_$SPLINE$\_$MAX}: maximum value for the mass function spline (logarithm). The default is {\tt LOGM$\_$SPLINE$\_$MAX}$=17$.
-\item {\tt N$\_$A}: number of bins for the scale factor in the case of two-dimensional splines (where the second variable is the wavenumber). The default is {\tt N$\_$A}$=50$.
+\item {\tt A$\_$SPLINE$\_$NA$\_$PK}: number of bins for the scale factor in the case of two-dimensional splines (where the second variable is the wavenumber). The default is {\tt A$\_$SPLINE$\_$NA$\_$PK}$=50$. For the emulator, this is overwritten by adopting {\tt K$\_$MAX$\_$SPLINE}$=5/$Mpc for the nonlinear matter power spectrum.  
+\item {\tt A$\_$SPLINE$\_$MIN$\_$PK}: minimum value for the scale factor spline. The default is {\tt A$\_$SPLINE$\_$MIN$\_$PK}$=0.1$. This only applies to the 2D power spectrum splines. For the cosmic emulator and in the case of the nonlinear matter power spectrum, this is overwritten by adopting {\tt A$\_$SPLINE$\_$MIN\_PK}$=1/3$.
 \item {\tt K$\_$MAX$\_$SPLINE}: The maximum value of wavenumber considered in the spline. This is explained in more detail in the coming subsections. The default is {\tt K$\_$MAX$\_$SPLINE}$=50/$Mpc.
 \item {\tt K$\_$MAX}: The maximum value of wavenumber when integrating over $k$. The default is {\tt K$\_$MAX}$=1000$/Mpc.
 \item {\tt K$\_$MIN$\_$DEFAULT}:  The minimum value of wavenumber when integrating over $k$. The default is {\tt K$\_$MIN$\_$DEFAULT}$=5 \times 10^{-5}$/Mpc.
@@ -450,7 +488,7 @@ We have found that changing {\tt N$\_$A} to $200$, or changing the sampling of t
 We plan to implement the following power spectrum methods in the future:
 \begin{itemize}
  \item CAMB,
- \item Cosmic emulators,
+ \item other emulators,
  \item Halo model/HOD.
 \end{itemize}
 
@@ -927,6 +965,8 @@ Additionally, independent codes were utilized to test the accuracy of halo mass 
 \log[(M^2/\bar{\rho}_m)dn/dM].
 \end{equation}
 We note that while we maintain the $10^{-4}$ for our evaluations of $\sigma$, the accuracy degrades to a value of $5\times10^{-3}$ for the halo mass function evaluation, primarily at the high halo mass and high redshift domains. We find that this increased error is acceptable, as the level of precision is significantly better than the accuracy of current halo mass function models.
+
+The implementation of the matter power spectrum emulation code from \citet{Lawrence17} in \ccl has been validated at first instance by comparing the direct output of the original code to \ccl for the best fit cosmology (M000) in the range of wavenumbers spanned by the emulator predictions and confirming that the agreement is within the expectation from numerical errors (fractional difference of $<10^{-5}$). We have also compared the \ccl emulator outputs for certain cosmologies to smoothed power spectra from the simulations presented in \citet{Lawrence17}.\footnote{Courtesy of Earl Lawrence and Katrin Heitmann.} The check ensures that the \ccl outputs when calling the emulator are within $3\%$ of the simulation benchmarks at $z=0$ and for the $k$ range of validity of the emulator. This essentially corresponds to a verification of the results presented in Figure 5 and Figure 6 of \citet{Lawrence17}.
 
 Finally, we note that formal tests for predictions in cosmologies with neutrinos are not yet included. The support for neutrino cosmologies in the current release is therefore not yet formally validated, although outputs have been informally compared against other codes where available. Formal validation of this functionality is ongoing.
 

@@ -267,13 +267,13 @@ setup(name="pyccl",
     packages=['pyccl'],
     ext_modules=[
         Extension("_ccllib",["pyccl/ccl_wrap.c"],
-            libraries=['m', 'gsl', 'gslcblas', 'ccl'],
-            include_dirs=[numpy_include, "include/", "class/include"],
-            library_dirs=[libdir],
-            runtime_library_dirs=[libdir],
-            extra_compile_args=['-O4', '-std=c99'],
-            swig_opts=['-threads'], 
-            )
+                  libraries=['m','gsl','gslcblas','ccl'],
+                  include_dirs=[numpy_include, "include/", "class/include"],
+                  library_dirs=[libdir],
+                  runtime_library_dirs=[libdir],
+                  extra_compile_args=['-O4', '-std=c99'],
+                  swig_opts=['-threads'], 
+        )
     ],
     cmdclass={
         'install': PyInstall,

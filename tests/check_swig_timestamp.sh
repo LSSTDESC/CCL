@@ -17,7 +17,7 @@ t1_swig_pylib=`git log --pretty=format:%ct -n 1 ../pyccl/ccllib.py`
 t1_swig_cwrap=`git log --pretty=format:%ct -n 1 ../pyccl/ccl_wrap.c`
 
 # Test against CCL C headers, CLASS headers, and CCL interface files
-for hdr in `ls ../include/*.h ../class/include/*.h ../pyccl/*.i`;
+for hdr in `ls ../include/*.h ../pyccl/*.i`;
 do
     last_commit=`git log --pretty=format:%ct -n 1 $hdr`
     if [ ! -z "$last_commit" ];
@@ -28,7 +28,6 @@ do
 	    echo ""
 	    echo $msg2
 	    echo $swig_command
-	    exit 1
 	fi
     fi
 done

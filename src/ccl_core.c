@@ -61,8 +61,9 @@ void ccl_cosmology_read_config(void)
     }
     else {
       sscanf(buf, "%99[^=]=%le\n",var_name, &var_dbl);
-      if(strcmp(var_name,"A_SPLINE_DELTA")==0) ccl_splines->A_SPLINE_DELTA=var_dbl;
-      if(strcmp(var_name,"A_SPLINE_NA")==0) ccl_splines->A_SPLINE_NA=(int) var_dbl;
+      if(strcmp(var_name,"A_SPLINE_NA")==0) ccl_splines->A_SPLINE_NA=(int) var_dbl; 
+      if(strcmp(var_name,"A_SPLINE_NLOG")==0) ccl_splines->A_SPLINE_NLOG=(int) var_dbl;
+      if(strcmp(var_name,"A_SPLINE_MINLOG")==0) ccl_splines->A_SPLINE_MINLOG=var_dbl;
       if(strcmp(var_name,"A_SPLINE_MIN")==0) ccl_splines->A_SPLINE_MIN=var_dbl;
       if(strcmp(var_name,"A_SPLINE_MIN_PK")==0) ccl_splines->A_SPLINE_MIN_PK=var_dbl;
       if(strcmp(var_name,"A_SPLINE_MAX")==0) ccl_splines->A_SPLINE_MAX=var_dbl;
@@ -70,7 +71,7 @@ void ccl_cosmology_read_config(void)
       if(strcmp(var_name,"LOGM_SPLINE_NM")==0) ccl_splines->LOGM_SPLINE_NM=(int) var_dbl;
       if(strcmp(var_name,"LOGM_SPLINE_MIN")==0) ccl_splines->LOGM_SPLINE_MIN=var_dbl;
       if(strcmp(var_name,"LOGM_SPLINE_MAX")==0) ccl_splines->LOGM_SPLINE_MAX=var_dbl;
-      if(strcmp(var_name,"N_A")==0) ccl_splines->N_A=(int) var_dbl;
+      if(strcmp(var_name,"A_SPLINE_NA_PK")==0) ccl_splines->A_SPLINE_NA_PK=(int) var_dbl;
       if(strcmp(var_name,"K_MAX_SPLINE")==0) ccl_splines->K_MAX_SPLINE=var_dbl;
       if(strcmp(var_name,"K_MAX")==0) ccl_splines->K_MAX=var_dbl;
       if(strcmp(var_name,"K_MIN_DEFAULT")==0) ccl_splines->K_MIN_DEFAULT=var_dbl;
@@ -243,7 +244,7 @@ void ccl_parameters_fill_initial(ccl_parameters * params, int *status)
   // Neutrinos: if massive neutrinos are present, calculate the phase_space integral.
   if((params->N_nu_mass)>0.0001) {
     // Pass NULL for the accelerator here because we don't have our cosmology object defined yet.
-    params->Omega_n_mass = Omeganuh2(1.0, params->N_nu_mass, params->mnu, params->T_CMB, NULL, status) / ((params->h)*(params->h));
+    params->Omega_n_mass = ccl_Omeganuh2(1.0, params->N_nu_mass, params->mnu, params->T_CMB, NULL, status) / ((params->h)*(params->h));
     ccl_check_status_nocosmo(status);
   } 
   else{
