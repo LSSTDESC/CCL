@@ -68,6 +68,14 @@ pyccl\.massfunction module
     :undoc-members:
     :show-inheritance:
 
+pyccl\.neutrinos module
+-----------------------
+
+.. automodule:: pyccl.neutrinos
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 pyccl\.power module
 -------------------
 
