@@ -36,7 +36,7 @@ if on_rtd:
         def __getattr__(cls, name):
             return MagicMock()
 
-    MOCK_MODULES = ['numpy','pyccl','ccllib','pyccl.ccllib']
+    MOCK_MODULES = []#'numpy','pyccl','ccllib','pyccl.ccllib']
     #['pyccl','pyccl.background','pyccl.ccllib','pyccl.cls','pyccl.core','pyccl.constants','pyccl.correlation','pyccl.lsst_specs','pyccl.massfunction','pyccl.power','pyccl.pyutils']
     sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
 
@@ -74,8 +74,8 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'pyccl'
-__import__(project)
-package = sys.modules[project]
+#__import__(project)
+#package = sys.modules[project]
 copyright = u'2018, LSST DESC'
 author = u'LSST DESC'
 
