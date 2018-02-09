@@ -393,8 +393,10 @@ All spline and grid parameters relevant for computing quantities such as distanc
 \item {\tt LOGM$\_$SPLINE$\_$NM}: number of points in the mass function spline (logarithm). The default is {\tt LOGM$\_$SPLINE$\_$NA}$=440$.
 \item {\tt LOGM$\_$SPLINE$\_$MIN}: minimum value for the mass function spline (logarithm). The default is {\tt LOGM$\_$SPLINE$\_$MIN}$=6$.
 \item {\tt LOGM$\_$SPLINE$\_$MAX}: maximum value for the mass function spline (logarithm). The default is {\tt LOGM$\_$SPLINE$\_$MAX}$=17$.
-\item {\tt A$\_$SPLINE$\_$NA$\_$PK}: number of bins for the scale factor in the case of two-dimensional splines (where the second variable is the wavenumber). The default is {\tt A$\_$SPLINE$\_$NA$\_$PK}$=50$.
-\item {\tt A$\_$SPLINE$\_$MIN$\_$PK}: minimum value for the scale factor spline. The default is {\tt A$\_$SPLINE$\_$MIN$\_$PK}$=0.1$. This only applies for the 2D power spectrum splines.
+\item {\tt A$\_$SPLINE$\_$NLOG$\_$PK}: number of bins for the logarithmic part of the scale factor in the case of two-dimensional splines (where the second variable is the wavenumber). The default is {\tt A$\_$SPLINE$\_$NLOG$\_$PK}$=11$.
+\item {\tt A$\_$SPLINE$\_$NA$\_$PK}: number of bins for the linear part of the scale factor in the case of two-dimensional splines (where the second variable is the wavenumber). The default is {\tt A$\_$SPLINE$\_$NA$\_$PK}$=40$.
+\item {\tt A$\_$SPLINE$\_$MINLOG$\_$PK}: minimum value for the scale factor spline. The default is {\tt A$\_$SPLINE$\_$MINLOG$\_$PK}$=0.01$. This only applies for the 2D power spectrum splines.
+\item {\tt A$\_$SPLINE$\_$MIN$\_$PK}: maximum value for the logarithmic part and minimum value for the linear part of the scale factor spline. The default is {\tt A$\_$SPLINE$\_$MIN$\_$PK}$=0.1$. This only applies for the 2D power spectrum splines.
 \item {\tt K$\_$MAX$\_$SPLINE}: The maximum value of wavenumber considered in the spline. This is explained in more detail in the coming subsections. The default is {\tt K$\_$MAX$\_$SPLINE}$=50/$Mpc.
 \item {\tt K$\_$MAX}: The maximum value of wavenumber when integrating over $k$. The default is {\tt K$\_$MAX}$=1000$/Mpc.
 \item {\tt K$\_$MIN$\_$DEFAULT}:  The minimum value of wavenumber when integrating over $k$. The default is {\tt K$\_$MIN$\_$DEFAULT}$=5 \times 10^{-5}$/Mpc.
