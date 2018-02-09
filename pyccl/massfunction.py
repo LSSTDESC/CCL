@@ -52,18 +52,18 @@ def sigmaM(cosmo, halo_mass, a):
                           lib.sigmaM_vec, cosmo, halo_mass, a)
 
 def halo_bias(cosmo, halo_mass, a, odelta=200):
-    """Halo bias.
+    """Tinker et al. (201) halo bias.
 
-    Note: only Tinker (2010) halo bias is implemented right now.
+    TODO: implement other halo bias models.
 
     Args:
         cosmo (:obj:`ccl.cosmology`): Cosmological parameters.
         halo_mass (float or array_like): Halo masses; Msun.
         a (float): Scale factor.
-        odelta (float): overdensity parameter (default: 200)
+        odelta (float): overdensity parameter (default: 200).
 
     Returns:
-        halo_bias (float or array_like): Halo bias.
+        float or array_like: Halo bias.
 
     """
     return _vectorize_fn4(lib.halo_bias, 
