@@ -1020,6 +1020,17 @@ def Omeganuh2_vec(*args):
 def Omeganuh2_to_Mnu_vec(*args):
   """Omeganuh2_to_Mnu_vec(double Neff, double OmNuh2, double TCMB, double * a, double * output, int * status)"""
   return _ccllib.Omeganuh2_to_Mnu_vec(*args)
+
+def u_nfw_c(*args):
+  """u_nfw_c(cosmology cosmo, double c, double halomass, double k, double a, int * status) -> double"""
+  return _ccllib.u_nfw_c(*args)
+
+def u_nfw_c_vec(*args):
+  """
+    u_nfw_c_vec(cosmology cosmo, double c, double * halo_mass, double k, double a, double * output, 
+        int * status)
+    """
+  return _ccllib.u_nfw_c_vec(*args)
 emulator = _ccllib.emulator
 none = _ccllib.none
 fitting_function = _ccllib.fitting_function

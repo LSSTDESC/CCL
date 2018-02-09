@@ -1,7 +1,7 @@
 
 from pyccl import ccllib as lib
 
-from pyccl import core, constants, background, power, massfunction
+from pyccl import core, constants, background, power, massfunction, halomodel
 
 # Core data structures
 from pyccl.core import Parameters, Cosmology
@@ -31,5 +31,7 @@ from pyccl.constants import CLIGHT_HMPC, MPC_TO_METER, PC_TO_METER, \
                       GNEWT, RHO_CRITICAL, SOLAR_MASS
 
 from pyccl.correlation import correlation
+
+from pyccl.halomodel import u_nfw_c
 
 from pyccl.neutrinos import Omeganuh2,Omeganuh2_to_Mnu

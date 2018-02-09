@@ -26,7 +26,7 @@ void u_nfw_c_vec(ccl_cosmology * cosmo,
 {
     assert(nout == nm);
     for(int i=0; i < nm; i++){
-        output[i] = ccl_u_nfw_c(cosmo, c, halo_mass[i], k, a, status);
+        output[i] = u_nfw_c(cosmo, c, halo_mass[i], k, a, status);
     }
 }
 %}
