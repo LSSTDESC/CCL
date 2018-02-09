@@ -283,7 +283,7 @@ static void ccl_fill_class_parameters(ccl_cosmology * cosmo, struct file_content
   sprintf(fc->value[2],"%e",ccl_splines->K_MAX_SPLINE); //in units of 1/Mpc, corroborated with ccl_constants.h
 
   strcpy(fc->name[3],"z_max_pk");
-  sprintf(fc->value[3],"%e",1./ccl_splines->A_SPLINE_MIN_PK-1.);
+  sprintf(fc->value[3],"%e",1./ccl_splines->A_SPLINE_MINLOG_PK-1.);
 
   strcpy(fc->name[4],"modes");
   strcpy(fc->value[4],"s");
@@ -413,14 +413,14 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int * statu
   //Compute nk from number of decades and N_K = # k per decade
   double ndecades = log10(kmax) - log10(kmin);
   int nk = (int)ceil(ndecades*ccl_splines->N_K);
-  double amin = ccl_splines->A_SPLINE_MIN_PK;
+  double amin = ccl_splines->A_SPLINE_MINLOG_PK;
   double amax = ccl_splines->A_SPLINE_MAX;
-  int na = ccl_splines->A_SPLINE_NA_PK;
+  int na = ccl_splines->A_SPLINE_NA_PK+ccl_splines->A_SPLINE_NLOG_PK-1;
   
   // The x array is initially k, but will later
   // be overwritten with log(k)
   double * x = ccl_log_spacing(kmin, kmax, nk);
-  double * z = ccl_linear_spacing(amin,amax, na);
+  double * z = ccl_linlog_spacing(amin, ccl_splines->A_SPLINE_MIN_PK, amax, ccl_splines->A_SPLINE_NLOG_PK, ccl_splines->A_SPLINE_NA_PK);
   double * y2d_lin = malloc(nk * na * sizeof(double));
   double * y2d_nl = malloc(nk * na * sizeof(double));
   if (z==NULL|| x==NULL || y2d_lin==NULL || y2d_nl==NULL) {
@@ -722,9 +722,9 @@ static void ccl_cosmology_compute_power_eh(ccl_cosmology * cosmo, int * status)
   //Compute nk from number of decades and N_K = # k per decade
   double ndecades = log10(kmax) - log10(kmin);
   int nk = (int)ceil(ndecades*ccl_splines->N_K);
-  double amin = ccl_splines->A_SPLINE_MIN_PK;
+  double amin = ccl_splines->A_SPLINE_MINLOG_PK;
   double amax = ccl_splines->A_SPLINE_MAX;
-  int na = ccl_splines->A_SPLINE_NA_PK;
+  int na = ccl_splines->A_SPLINE_NA_PK+ccl_splines->A_SPLINE_NLOG_PK-1;
   eh_struct *eh=eh_struct_new(&(cosmo->params));
   if (eh==NULL) {
     *status=CCL_ERROR_MEMORY;
@@ -736,7 +736,7 @@ static void ccl_cosmology_compute_power_eh(ccl_cosmology * cosmo, int * status)
   // be overwritten with log(k)
   double * x = ccl_log_spacing(kmin, kmax, nk);
   double * y = malloc(sizeof(double)*nk);
-  double * z = ccl_linear_spacing(amin,amax, na);
+  double * z = ccl_linlog_spacing(amin, ccl_splines->A_SPLINE_MIN_PK, amax, ccl_splines->A_SPLINE_NLOG_PK, ccl_splines->A_SPLINE_NA_PK);
   double * y2d = malloc(nk * na * sizeof(double));
   if (z==NULL||y==NULL|| x==NULL || y2d==NULL) {
     free(eh);
@@ -879,15 +879,15 @@ static void ccl_cosmology_compute_power_bbks(ccl_cosmology * cosmo, int * status
   //Compute nk from number of decades and N_K = # k per decade
   double ndecades = log10(kmax) - log10(kmin);
   int nk = (int)ceil(ndecades*ccl_splines->N_K);
-  double amin = ccl_splines->A_SPLINE_MIN_PK;
+  double amin = ccl_splines->A_SPLINE_MINLOG_PK;
   double amax = ccl_splines->A_SPLINE_MAX;
-  int na = ccl_splines->A_SPLINE_NA_PK;
+  int na = ccl_splines->A_SPLINE_NA_PK+ccl_splines->A_SPLINE_NLOG_PK-1;
   
   // The x array is initially k, but will later
   // be overwritten with log(k)
   double * x = ccl_log_spacing(kmin, kmax, nk);
   double * y = malloc(sizeof(double)*nk);
-  double * z = ccl_linear_spacing(amin,amax, na);
+  double * z = ccl_linlog_spacing(amin, ccl_splines->A_SPLINE_MIN_PK, amax, ccl_splines->A_SPLINE_NLOG_PK, ccl_splines->A_SPLINE_NA_PK);
   double * y2d = malloc(nk * na * sizeof(double));
   if (z==NULL||y==NULL|| x==NULL || y2d==0) {
     *status=CCL_ERROR_MEMORY;
@@ -1100,9 +1100,9 @@ double ccl_linear_matter_power(ccl_cosmology * cosmo, double k, double a, int * 
   double log_p_1;
   int pkstatus;
  
-  if(a<ccl_splines->A_SPLINE_MIN_PK) {  //Extrapolate linearly at high redshift
-    double pk0=ccl_linear_matter_power(cosmo,k,ccl_splines->A_SPLINE_MIN_PK,status);
-    double gf=ccl_growth_factor(cosmo,a,status)/ccl_growth_factor(cosmo,ccl_splines->A_SPLINE_MIN_PK,status);
+  if(a<ccl_splines->A_SPLINE_MINLOG_PK) {  //Extrapolate linearly at high redshift
+    double pk0=ccl_linear_matter_power(cosmo,k,ccl_splines->A_SPLINE_MINLOG_PK,status);
+    double gf=ccl_growth_factor(cosmo,a,status)/ccl_growth_factor(cosmo,ccl_splines->A_SPLINE_MINLOG_PK,status);
     return pk0*gf*gf;
   }
 
@@ -1148,9 +1148,9 @@ double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double k, double a, int *s
     
     double log_p_1,pk;
     
-    if(a<ccl_splines->A_SPLINE_MIN_PK) { //Extrapolate linearly at high redshift
-      double pk0=ccl_nonlin_matter_power(cosmo,k,ccl_splines->A_SPLINE_MIN_PK,status);
-      double gf=ccl_growth_factor(cosmo,a,status)/ccl_growth_factor(cosmo,ccl_splines->A_SPLINE_MIN_PK,status);
+    if(a<ccl_splines->A_SPLINE_MINLOG_PK) { //Extrapolate linearly at high redshift
+      double pk0=ccl_nonlin_matter_power(cosmo,k,ccl_splines->A_SPLINE_MINLOG_PK,status);
+      double gf=ccl_growth_factor(cosmo,a,status)/ccl_growth_factor(cosmo,ccl_splines->A_SPLINE_MINLOG_PK,status);
       return pk0*gf*gf;
     } 
 

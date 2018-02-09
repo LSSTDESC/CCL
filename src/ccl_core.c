@@ -65,6 +65,7 @@ void ccl_cosmology_read_config(void)
       if(strcmp(var_name,"A_SPLINE_NLOG")==0) ccl_splines->A_SPLINE_NLOG=(int) var_dbl;
       if(strcmp(var_name,"A_SPLINE_MINLOG")==0) ccl_splines->A_SPLINE_MINLOG=var_dbl;
       if(strcmp(var_name,"A_SPLINE_MIN")==0) ccl_splines->A_SPLINE_MIN=var_dbl;
+      if(strcmp(var_name,"A_SPLINE_MINLOG_PK")==0) ccl_splines->A_SPLINE_MINLOG_PK=var_dbl;
       if(strcmp(var_name,"A_SPLINE_MIN_PK")==0) ccl_splines->A_SPLINE_MIN_PK=var_dbl;
       if(strcmp(var_name,"A_SPLINE_MAX")==0) ccl_splines->A_SPLINE_MAX=var_dbl;
       if(strcmp(var_name,"LOGM_SPLINE_DELTA")==0) ccl_splines->LOGM_SPLINE_DELTA=var_dbl;
@@ -72,6 +73,7 @@ void ccl_cosmology_read_config(void)
       if(strcmp(var_name,"LOGM_SPLINE_MIN")==0) ccl_splines->LOGM_SPLINE_MIN=var_dbl;
       if(strcmp(var_name,"LOGM_SPLINE_MAX")==0) ccl_splines->LOGM_SPLINE_MAX=var_dbl;
       if(strcmp(var_name,"A_SPLINE_NA_PK")==0) ccl_splines->A_SPLINE_NA_PK=(int) var_dbl;
+      if(strcmp(var_name,"A_SPLINE_NLOG_PK")==0) ccl_splines->A_SPLINE_NLOG_PK=(int) var_dbl;
       if(strcmp(var_name,"K_MAX_SPLINE")==0) ccl_splines->K_MAX_SPLINE=var_dbl;
       if(strcmp(var_name,"K_MAX")==0) ccl_splines->K_MAX=var_dbl;
       if(strcmp(var_name,"K_MIN_DEFAULT")==0) ccl_splines->K_MIN_DEFAULT=var_dbl;
