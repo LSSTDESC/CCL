@@ -1,4 +1,4 @@
-#include "ccl_core.h"
+
 #include "ccl_utils.h"
 #include "math.h"
 #include "stdio.h"
@@ -19,11 +19,11 @@
 
 // TODO: rename parameters for consistency.
 // TODO: check if r_Delta is something equivalent in CCL.
-double u_nfw_c(double c,double halomass, double k, double a){
+double u_nfw_c(ccl_cosmology *cosmo, double c,double halomass, double k, double a){
   // analytic FT of NFW profile, from Cooray & Sheth 2001
   double x, xu;
   double f1, f2, f3;
-  x = k * r_Delta(halomass,a)/c; // x = k*rv/c = k*rs = ks
+  x = k * r_delta(cosmo, halomass, a, status)/c; // x = k*rv/c = k*rs = ks
   xu = (1.+c)*x; // xu = ks*(1+c)
   f1 = sin(x)*(gsl_sf_Si(xu)-gsl_sf_Si(x));
   f2 = cos(x)*(gsl_sf_Ci(xu)-gsl_sf_Ci(x));
@@ -32,7 +32,13 @@ double u_nfw_c(double c,double halomass, double k, double a){
   return (f1+f2-f3)/fc;
 }
 
-double inner_I0j (ccl_cosmology *cosmo, double halomass, void *para, int status){
+void double r_delta(ccl_cosmology *cosmo, double halomass, double a, int * status){
+  rho_m = RHO_CRITICAL*cosmo->params.Omega_m*cosmo->params.h*cosmo->params.h;
+  delta = 200.0;
+  return pow(halomass*3.0/(4.0*M_PI*rho_m*delta);
+}
+
+double inner_I0j (ccl_cosmology *cosmo, double halomass, void *para, int * status){
   double *array = (double *) para;
   long double u = 1.0; //the number one?
   double a= array[6]; //Array of ...
