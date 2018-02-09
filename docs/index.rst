@@ -35,3 +35,4 @@ The source code is available on github at https://github.com/LSSTDESC/CCL.
    :caption: Reference
 
    CCL Reference/API<api/modules>
+   Citing CCL<source/citation.rst>
