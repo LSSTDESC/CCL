@@ -1,6 +1,7 @@
 # Ignore RTD documentation special files
 docs/_build
 docs/*~
+docs/source/*~
 
 # Ignore autoconf build files.
 Makefile
