@@ -1559,14 +1559,8 @@ typedef struct {
   int* status;
 } SigmaR_pars;
 
-static double sigmaR_integrand(double lk,void *params)
+static double tophat(double kR)
 {
-  SigmaR_pars *par=(SigmaR_pars *)params;
-  
-  double k=pow(10.,lk);
-  double pk=ccl_linear_matter_power(par->cosmo,k, 1.,par->status);
-  double kR=k*par->R;
-  double w;
   if(kR<0.1) {
     w =1.-0.1*kR*kR+0.003571429*kR*kR*kR*kR
       -6.61376E-5*kR*kR*kR*kR*kR*kR
@@ -1574,9 +1568,32 @@ static double sigmaR_integrand(double lk,void *params)
   }
   else
     w = 3.*(sin(kR) - kR*cos(kR))/(kR*kR*kR);
+  return w;
+}
+
+static double sigmaR_integrand(double lk,void *params)
+{
+  SigmaR_pars *par=(SigmaR_pars *)params;
+  
+  double k=pow(10.,lk);
+  double pk=ccl_linear_matter_power(par->cosmo,k, 1.,par->status);
+  double kR=k*par->R;
+  double w = tophat(kR);
 
   return pk*k*k*k*w*w;
 }
+
+static double sigmaV_integrand(double lk,void *params)
+{
+  SigmaV_pars *par=(SigmaV_pars *)params;
+
+  double k=pow(10.,lk);
+  double pk=ccl_linear_matter_power(par->cosmo,k, 1.,par->status);
+  double kR=k*par->R;
+  double w = tophat(kR);
+
+  return pk*k*w*w/3.0;
+}  
 
 double ccl_sigmaR(ccl_cosmology *cosmo,double R, int *status)
 {
@@ -1598,6 +1615,29 @@ double ccl_sigmaR(ccl_cosmology *cosmo,double R, int *status)
   gsl_integration_cquad_workspace_free(workspace);
 
   return sqrt(sigma_R*M_LN10/(2*M_PI*M_PI));
+}
+
+double ccl_sigmaV(ccl_cosmology *cosmo,double V, int *status)
+{
+  SigmaV_pars par;
+  par.status = status;
+  
+  par.cosmo=cosmo;
+  par.V=V;
+  gsl_integration_cquad_workspace *workspace=gsl_integration_cquad_workspace_alloc(1000);
+  gsl_function F;
+  F.function=&sigmaV_integrand;
+  F.params=&par;
+  double sigma_V;
+  *status |=gsl_integration_cquad(&F,log10(ccl_splines->K_MIN_DEFAULT),log10(ccl_splines->K_MAX),
+				  0.0,1E-5,workspace,&sigma_V,NULL,NULL);
+  //TODO: this carries over from the sigmaR TODO list.
+  //TODO: log10 could be taken already in the macros.
+  //TODO: 1E-5 should be a macro
+  //TODO: we should check for integration success
+  gsl_integration_cquad_workspace_free(workspace);
+
+  return sqrt(sigma_V*M_LN10/(2*M_PI*M_PI));
 }
 
 double ccl_sigma8(ccl_cosmology *cosmo, int *status)
