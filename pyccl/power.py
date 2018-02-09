@@ -46,15 +46,15 @@ def sigmaR(cosmo, R):
                          lib.sigmaR_vec, cosmo, R)
 
 def sigma8(cosmo):
-    """RMS variance in a top-hat sphere of radius 8 Mpc.
+    """RMS variance in a top-hat sphere of radius 8 Mpc/h.
 
-    TODO: Fix the units on this.
+    .. note:: 8 Mpc/h is rescaled based on the Hubble constant.
 
     Args:
         cosmo (:obj:`ccl.cosmology`): Cosmological parameters.
 
     Returns:
-        float: RMS variance in top-hat sphere of radius 8 Mpc.
+        float: RMS variance in top-hat sphere of radius 8 Mpc/h.
 
     """
     return sigmaR(cosmo,8./cosmo['h'])
