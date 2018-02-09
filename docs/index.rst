@@ -6,6 +6,9 @@ The Core Cosmology Library (CCL) is a standardized library of routines to calcul
 
 The core functions of this package include:
 
+ * Hubble constant :math:`H(z)`
+ * Comoving distances :math:`\chi(z)` and distance moduli :math:`\mu(z)`
+ * Growth of structure :math:`D(z)`, :math:`f`
  * Matter power spectra :math:`P(k)` (in development)
  * Projected correlation functions :math:`w(\theta)` (in development)
  * Other things

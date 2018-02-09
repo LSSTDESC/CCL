@@ -1,3 +1,5 @@
+"""The pyccl package contains all of the submodules that are implemented in individual files in CCL.
+"""
 
 from pyccl import ccllib as lib
 

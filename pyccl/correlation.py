@@ -27,8 +27,10 @@ def correlation(cosmo, ell, C_ell, theta, corr_type='gg', method='fftlog'):
         theta (float or array_like): Angular separation(s) at which to calculate the angular correlation function (in degrees).
         corr_type (string): Type of correlation function. Choices: 'GG' (galaxy-galaxy), 'GL' (galaxy-shear), 'L+' (shear-shear, xi+), 'L-' (shear-shear, xi-).
         method (string, optional): Method to compute the correlation function. Choices: 'Bessel' (direct integration over Bessel function), 'FFTLog' (fast integration with FFTLog), 'Legendre' (brute-force sum over Legendre polynomials).
+    
     Returns:
-        Value(s) of the correlation function at the input angular separation(s).
+        float or array_like: Value(s) of the correlation function at the input angular separations
+
     """
     cosmo_in = cosmo
     cosmo = _cosmology_obj(cosmo)
