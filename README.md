@@ -64,19 +64,6 @@ make
 make install
 ```
 
-## Known installation issues
-1. If you are having issues with GSL versions linking, please try the following during the configuration step:
-````sh
-./configure CFLAGS="-I/usr/local/include" LDFLAGS="-L/usr/local/lib"
-````
-2. If you are having issues with FFTW linking, please make sure you have the latest version correctly installed. See more on [FFTW webpage](http://www.fftw.org/download.html)
-3. If you move or delete the source directory after installing `CCL`, some functions may fail. The source directory contains files needed by CLASS (which is contained within `CCL`) at run-time.
-4. If you are planning to compile your own file that calls `CCL`, then you should add the following to your .bashrc:
-````sh
-export LD_LIBRARY_PATH=/path/to/where/ccl/is/installed/lib:$LD_LIBRARY_PATH
-````
-5. We know of one case with Mac OS where `libtools` had the “lock” function set to “yes” and this caused the installation to stall. However, this is very rare. If this happens, after the `configure` step, edit `libtool` to set the “lock” to “no”.
-
 ## C++ compatibility
 `CCL` library can be called from C++ code without any  additional requirements or modifications. To make sure that there are no problems you can run
 ````sh
@@ -124,6 +111,34 @@ python setup.py uninstall
 ````
 
 For quick introduction to `CCL` in Python look at notebooks in **_tests/_**.
+
+## Known installation issues
+1. If you are having issues with GSL versions linking, please try the following during the configuration step:
+````sh
+./configure CFLAGS="-I/usr/local/include" LDFLAGS="-L/usr/local/lib"
+````
+2. If you are having issues with FFTW linking, please make sure you have the latest version correctly installed. See more on [FFTW webpage](http://www.fftw.org/download.html)
+3. If you move or delete the source directory after installing `CCL`, some functions may fail. The source directory contains files needed by CLASS (which is contained within `CCL`) at run-time.
+4. If you are planning to compile your own file that calls `CCL`, then you should add the following to your .bashrc:
+````sh
+export LD_LIBRARY_PATH=/path/to/where/ccl/is/installed/lib:$LD_LIBRARY_PATH
+````
+5. We know of one case with Mac OS where `libtools` had the “lock” function set to “yes” and this caused the installation to stall. However, this is very rare. If this happens, after the `configure` step, edit `libtool` to set the “lock” to “no”.
+6. We know of one case on a Mac OS where running 
+````sh
+python setup.py install --user
+````
+produced the error 
+
+````sh
+error: can't combine user with prefix, exec_prefix/home, or install_(plat)base
+````
+This issue can be solved by instead running
+
+````sh
+python setup.py install --user --prefix=
+````
+The issue is discussed in detail [here](https://stackoverflow.com/questions/4495120/combine-user-with-prefix-error-with-setup-py-install).
 
 ## Compiling against an external version of CLASS
 
