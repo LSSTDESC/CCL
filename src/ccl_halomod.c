@@ -17,6 +17,12 @@
 #include "ccl_emu17.h"
 #include "ccl_emu17_params.h"
 
+void double r_delta(ccl_cosmology *cosmo, double halomass, double a, int * status){
+  rho_m = RHO_CRITICAL*cosmo->params.Omega_m*cosmo->params.h*cosmo->params.h;
+  delta = 200.0;
+  return pow(halomass*3.0/(4.0*M_PI*rho_m*delta);
+}
+
 // TODO: rename parameters for consistency.
 // TODO: check if r_Delta is something equivalent in CCL.
 double u_nfw_c(ccl_cosmology *cosmo, double c,double halomass, double k, double a){
@@ -30,12 +36,6 @@ double u_nfw_c(ccl_cosmology *cosmo, double c,double halomass, double k, double 
   f3 = sinl(c*x)/xu;
   fc = log(1.+c)-c/(1.+c);
   return (f1+f2-f3)/fc;
-}
-
-void double r_delta(ccl_cosmology *cosmo, double halomass, double a, int * status){
-  rho_m = RHO_CRITICAL*cosmo->params.Omega_m*cosmo->params.h*cosmo->params.h;
-  delta = 200.0;
-  return pow(halomass*3.0/(4.0*M_PI*rho_m*delta);
 }
 
 double inner_I0j (ccl_cosmology *cosmo, double halomass, void *para, int * status){
@@ -65,6 +65,8 @@ double p_1h(double k, double a)
   return I0j(2,k,k,0.,0.,a);
 }
 
+// TODO: make consistency check so that ccl_halo_concentration only runs if called with appropriate definition
+// e.g. if Delta != 200 rho_{mean}, should not function.
 double ccl_halo_concentration(ccl_cosmology *cosmo, double halomass, double a)
 {
   // Bhattacharya et al. 2011, Delta = 200 rho_{mean} (Table 2)
