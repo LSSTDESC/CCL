@@ -19,11 +19,11 @@
 
 // TODO: rename parameters for consistency.
 // TODO: check if r_Delta is something equivalent in CCL.
-double u_nfw_c(double c,double k, double m, double aa){
+double u_nfw_c(double c,double halomass, double k, double a){
   // analytic FT of NFW profile, from Cooray & Sheth 2001
   double x, xu;
   double f1, f2, f3;
-  x = k * r_Delta(m,aa)/c; // x = k*rv/c = k*rs = ks
+  x = k * r_Delta(halomass,a)/c; // x = k*rv/c = k*rs = ks
   xu = (1.+c)*x; // xu = ks*(1+c)
   f1 = sin(x)*(gsl_sf_Si(xu)-gsl_sf_Si(x));
   f2 = cos(x)*(gsl_sf_Ci(xu)-gsl_sf_Ci(x));
@@ -31,7 +31,6 @@ double u_nfw_c(double c,double k, double m, double aa){
   fc = log(1.+c)-c/(1.+c);
   return (f1+f2-f3)/fc;
 }
-
 
 double inner_I0j (ccl_cosmology *cosmo, double halomass, void *para, int status){
   double *array = (double *) para;
@@ -60,12 +59,14 @@ double p_1h(double k, double a)
   return I0j(2,k,k,0.,0.,a);
 }
 
-double halo_concentration(double m, double a)
+double ccl_halo_concentration(ccl_cosmology *cosmo, double halomass, double a)
 {
-  return 9.*pow(nu(m,a),-.29)*pow(growfac(a)/growfac(1.),1.15);// Bhattacharya et al. 2011, Delta = 200 rho_{mean} (Table 2)
+  // Bhattacharya et al. 2011, Delta = 200 rho_{mean} (Table 2)
+  return 9.*pow(nu(halomass,a),-.29)*pow(ccl_growth_factor(cosmo, a, status)/ccl_growth_factor(cosmo, 1.0, status),1.15);
   //return 10.14*pow(m/2.e+12,-0.081)*pow(a,1.01); //Duffy et al. 2008 (Delta = 200 mean)
 }
 
+// TODO: move this into ccl_massfunc - be careful about the units!
 double massfunc(double nu) {
   //Sheth Tormen mass function!
   //Note that nu=dc/sigma(M) and this Sheth & Tormen (1999) use nu=(dc/sigma)^2
@@ -76,16 +77,19 @@ double massfunc(double nu) {
   return A*(1.+((q*nu*nu)**(-p)))*exp(-q*nu*nu/2.);
 }
 
+// TODO: we should probably set this up as a macro..
 double delta_c() {
   //Linear collapse threshold
   return 1.686;
 }
 
+// TODO: referred to as odelta in ccl_massfunc, as a free parameter.
 double Delta_v() {
   //Halo mean density
   return 200.;
 }
 
+// TODO: move this into ccl_massfunc as standard function conversion.
 double nu(ccl_cosmology *cosmo, double halomass, double a, int * status) {
   //nu = delta_c/sigma(M)
   return delta_c()/ccl_sigmaM(cosmo,halomass,a);
