@@ -14,7 +14,7 @@ from pyccl.background import growth_factor, growth_factor_unnorm, \
 
 # Power spectrum calculations and sigma8
 from pyccl.power import linear_matter_power, nonlin_matter_power, sigmaR, \
-    sigma8
+    sigmaV, sigma8
 
 # Halo mass function
 from pyccl.massfunction import massfunc, massfunc_m2r, sigmaM, halo_bias

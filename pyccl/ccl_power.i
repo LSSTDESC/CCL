@@ -55,4 +55,14 @@ void sigmaR_vec(ccl_cosmology * cosmo,
     }
 }
 
+void sigmaV_vec(ccl_cosmology * cosmo,
+                        double* R, int nR,
+                        double* output, int nout, int *status)
+{
+    assert(nout == nR);
+    for(int i=0; i < nR; i++){
+        output[i] = ccl_sigmaV(cosmo, R[i], status);
+    }
+}
+
 %}

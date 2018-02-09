@@ -46,6 +46,19 @@ def sigmaR(cosmo, R):
     return _vectorize_fn(lib.sigmaR, 
                          lib.sigmaR_vec, cosmo, R)
 
+def sigmaV(cosmo, R):
+    """RMS variance in the displacement field in a top-hat sphere of radius R.
+
+    Args:
+        cosmo (:obj:`ccl.cosmology`): Cosmological parameters.
+        R (float or array_like): Radius; Mpc.
+
+    Returns:
+        sigmaV (float or array_like): RMS variance in the displacement sphere in top-hat sphere.
+
+    """
+    return _vectorize_fn(lib.sigmaV, 
+                         lib.sigmaV_vec, cosmo, R)
 def sigma8(cosmo):
     """RMS variance in a top-hat sphere of radius 8 Mpc.
 

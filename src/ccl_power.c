@@ -1559,8 +1559,16 @@ typedef struct {
   int* status;
 } SigmaR_pars;
 
-static double tophat(double kR)
+typedef struct {
+  ccl_cosmology *cosmo;
+  double R;
+  int* status;
+} SigmaV_pars;
+
+static double w_tophat(double kR)
 {
+  double w;
+
   if(kR<0.1) {
     w =1.-0.1*kR*kR+0.003571429*kR*kR*kR*kR
       -6.61376E-5*kR*kR*kR*kR*kR*kR
@@ -1578,7 +1586,7 @@ static double sigmaR_integrand(double lk,void *params)
   double k=pow(10.,lk);
   double pk=ccl_linear_matter_power(par->cosmo,k, 1.,par->status);
   double kR=k*par->R;
-  double w = tophat(kR);
+  double w = w_tophat(kR);
 
   return pk*k*k*k*w*w;
 }
@@ -1590,7 +1598,7 @@ static double sigmaV_integrand(double lk,void *params)
   double k=pow(10.,lk);
   double pk=ccl_linear_matter_power(par->cosmo,k, 1.,par->status);
   double kR=k*par->R;
-  double w = tophat(kR);
+  double w = w_tophat(kR);
 
   return pk*k*w*w/3.0;
 }  
@@ -1617,13 +1625,13 @@ double ccl_sigmaR(ccl_cosmology *cosmo,double R, int *status)
   return sqrt(sigma_R*M_LN10/(2*M_PI*M_PI));
 }
 
-double ccl_sigmaV(ccl_cosmology *cosmo,double V, int *status)
+double ccl_sigmaV(ccl_cosmology *cosmo,double R, int *status)
 {
   SigmaV_pars par;
   par.status = status;
   
   par.cosmo=cosmo;
-  par.V=V;
+  par.R=R;
   gsl_integration_cquad_workspace *workspace=gsl_integration_cquad_workspace_alloc(1000);
   gsl_function F;
   F.function=&sigmaV_integrand;
