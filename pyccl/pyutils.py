@@ -1,4 +1,6 @@
+"""Utility functions to analyze status and error messages passed from CCL, as well as wrappers to automatically vectorize functions.
 
+"""
 from pyccl import ccllib as lib
 import numpy as np
 import pyccl.core
@@ -7,7 +9,7 @@ def check(status, cosmo=None):
     """Check the status returned by a ccllib function.
 
     Args:
-        status (int or core.error_types): Flag or error describing the success of a function.
+        status (int or :obj:`core.error_types`): Flag or error describing the success of a function.
 
     """
     # Check for normal status (no action required)
