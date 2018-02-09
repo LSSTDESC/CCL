@@ -138,7 +138,7 @@ This issue can be solved by instead running
 ````sh
 python setup.py install --user --prefix=
 ````
-The issue is discussed in detail [here](https://stackoverflow.com/questions/4495120/combine-user-with-prefix-error-with-setup-py-install)
+The issue is discussed in detail [here](https://stackoverflow.com/questions/4495120/combine-user-with-prefix-error-with-setup-py-install).
 
 ## Compiling against an external version of CLASS
 
