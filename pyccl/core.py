@@ -1,4 +1,6 @@
+"""The core functionality of ccl, including the core data types. This includes the cosmology and parameters objects used to instantiate a model from which one can compute a set of theoretical predictions.
 
+"""
 from pyccl import ccllib as lib
 import numpy as np
 from warnings import warn
@@ -18,6 +20,9 @@ transfer_function_types = {
     'boltzmann_class':  lib.boltzmann_class,
     'class':            lib.boltzmann_class,
 }
+"""dict: Types of transfer functions. The strings represent possible choices the user can specify for different transfer function models.
+
+"""
 
 matter_power_spectrum_types = {
     'halo_model':   lib.halo_model,
@@ -26,11 +31,17 @@ matter_power_spectrum_types = {
     'linear':       lib.linear,
     'emu':          lib.emu
 }
+"""dict: Types of power spectrum models. The strings represent possible choices the user can specify for different power spectrum models.
+
+"""
 
 baryons_power_spectrum_types = {
     'nobaryons':   lib.nobaryons,
-    'bcm':      lib.bcm
+    'bcm':         lib.bcm
 }
+"""dict: Types of baryon modifications to power spectra. The strings represent possible choices the user can specify for different baryon modifications to power spectra.
+
+"""
 
 mass_function_types = {
     'angulo':   lib.angulo,
@@ -38,27 +49,62 @@ mass_function_types = {
     'tinker10': lib.tinker10,
     'watson':   lib.watson
 }
+"""dict: Types of halo mass function models. The strings represent possible choices the user can specify for different halo mass function models.
 
-# Error types
+"""
+
 error_types = {
-    lib.CCL_ERROR_MEMORY:       'CCL_ERROR_MEMORY',
-    lib.CCL_ERROR_LINSPACE:     'CCL_ERROR_LINSPACE',
-    lib.CCL_ERROR_INCONSISTENT: 'CCL_ERROR_INCONSISTENT',
-    lib.CCL_ERROR_SPLINE:       'CCL_ERROR_SPLINE',
-    lib.CCL_ERROR_SPLINE_EV:    'CCL_ERROR_SPLINE_EV',
-    lib.CCL_ERROR_INTEG:        'CCL_ERROR_INTEG',
-    lib.CCL_ERROR_ROOT:         'CCL_ERROR_ROOT',
-    lib.CCL_ERROR_CLASS:        'CCL_ERROR_CLASS',
-    lib.CCL_ERROR_COMPUTECHI:   'CCL_ERROR_COMPUTECHI',
-    lib.CCL_ERROR_MF:           'CCL_ERROR_MF',
-    lib.CCL_ERROR_HMF_INTERP:   'CCL_ERROR_HMF_INTERP',
-    lib.CCL_ERROR_PARAMETERS:   'CCL_ERROR_PARAMETERS',
-    lib.CCL_ERROR_NU_INT:		'CCL_ERROR_NU_INT',
+    lib.CCL_ERROR_MEMORY:         'CCL_ERROR_MEMORY',
+    lib.CCL_ERROR_LINSPACE:       'CCL_ERROR_LINSPACE',
+    lib.CCL_ERROR_INCONSISTENT:   'CCL_ERROR_INCONSISTENT',
+    lib.CCL_ERROR_SPLINE:         'CCL_ERROR_SPLINE',
+    lib.CCL_ERROR_SPLINE_EV:      'CCL_ERROR_SPLINE_EV',
+    lib.CCL_ERROR_INTEG:          'CCL_ERROR_INTEG',
+    lib.CCL_ERROR_ROOT:           'CCL_ERROR_ROOT',
+    lib.CCL_ERROR_CLASS:          'CCL_ERROR_CLASS',
+    lib.CCL_ERROR_COMPUTECHI:     'CCL_ERROR_COMPUTECHI',
+    lib.CCL_ERROR_MF:             'CCL_ERROR_MF',
+    lib.CCL_ERROR_HMF_INTERP:     'CCL_ERROR_HMF_INTERP',
+    lib.CCL_ERROR_PARAMETERS:     'CCL_ERROR_PARAMETERS',
+    lib.CCL_ERROR_NU_INT:         'CCL_ERROR_NU_INT',
     lib.CCL_ERROR_EMULATOR_BOUND: 'CCL_ERROR_EMULATOR_BOUND'
 }
 
 class Parameters(object):
-    """The Parameters class contains cosmological parameters.
+    """A set of cosmological parameters.
+
+    Note:
+        Although some arguments default to `None`, they will raise a 
+        ValueError inside this function if not specified, so they are not 
+        optional.
+
+    Args:
+        Omega_c (float): Cold dark matter density fraction.
+        Omega_b (float): Baryonic matter density fraction.
+        h (float): Hubble constant divided by 100 km/s/Mpc; unitless.
+        A_s (float): Power spectrum normalization. Optional if sigma8 
+            is specified.
+        n_s (float): Primordial scalar perturbation spectral index.
+        Omega_k (float, optional): Curvature density fraction. Defaults to 0.
+        N_nu_rel (float, optional): Number of massless neutrinos present. 
+            Defaults to 3.046.
+        N_nu_mass (float, optional): Number of massive neutrinos present. 
+            Defaults to 0.
+        m_nu (float, optional): total mass in eV of the massive neutrinos 
+            present (current must be equal mass). Defaults to 0.
+        w0 (float, optional): First order term of dark energy equation of 
+            state. Defaults to -1.
+        wa (float, optional): Second order term of dark energy equation of 
+            state. Defaults to 0.
+        log10Mc (float, optional): One of the parameters of the BCM model.
+            etab (float, optional): One of the parameters of the BCM model.
+        ks (float, optional): One of the parameters of the BCM model.
+        sigma8 (float): Variance of matter density perturbations at 8 Mpc/h 
+            scale. Optional if A_s is specified.
+        df_mg (array_like): Perturbations to the GR growth rate as 
+            a function of redshift :math:`\Delta f`. 
+            Used to implement simple modified growth scenarios.
+        z_mg (array_like): Array of redshifts corresponding to df_mg.
 
     """
     
@@ -66,41 +112,6 @@ class Parameters(object):
                  Omega_k=0., N_nu_rel=3.046, N_nu_mass=0., m_nu=0.,w0=-1., wa=0.,
                  bcm_log10Mc=math.log10(1.2e14), bcm_etab=0.5, bcm_ks=55., sigma8=None,
                  z_mg=None, df_mg=None):
-        """
-        Creates a set of cosmological parameters.
-
-        Note:
-            Although some arguments default to `None`, they will raise a 
-            ValueError inside this function if not specified, so they are not 
-            optional.
-        
-        Args:
-            Omega_c (float): Cold dark matter density fraction.
-            Omega_b (float): Baryonic matter density fraction.
-            h (float): Hubble constant divided by 100 km/s/Mpc; unitless.
-            A_s (float): Power spectrum normalization. Optional if sigma8 is 
-                         specified.
-            n_s (float): Primordial scalar perturbation spectral index.
-            Omega_k (float, optional): Curvature density fraction. Defaults to 0.
-            N_nu_rel (float, optional): Number of massless neutrinos present. Defaults to 3.046
-            N_nu_mass (float, optional): Number of massive neutrinos present. Defaults to 0.
-            m_nu (float, optional): total mass in eV of the massive neutrinos present (current must be equal mass). Defaults to 0.
-            w0 (float, optional): First order term of dark energy equation of 
-                                  state. Defaults to -1.
-            wa (float, optional): Second order term of dark energy equation of 
-                                  state. Defaults to 0.
-            log10Mc (float, optional): One of the parameters of the BCM model.
-            etab (float, optional): One of the parameters of the BCM model.
-            ks (float, optional): One of the parameters of the BCM model.
-            sigma8 (float): Variance of matter density perturbations at 8 Mpc/h
-                            scale. Optional if A_s is specified.
-            df_mg (:obj: array_like): Perturbations to the GR growth rate as a 
-                                      function of redshift, Delta f. Used to 
-                                      implement simple modified growth 
-                                      scenarios.
-            z_mg (:obj: array_like): Array of redshifts corresponding to df_mg.
-
-        """
         # Set current ccl_parameters object to None
         self.parameters = None
         
@@ -192,8 +203,7 @@ class Parameters(object):
         # TODO: Should update/replace CCL objects appropriately
     
     def __str__(self):
-        """
-        Output the parameters that were set, and their values.
+        """Output the parameters that were set, and their values.
         """
         params = ['Omega_c', 'Omega_b', 'Omega_m', 'Omega_k', 'Omega_l',
                   'w0', 'wa', 'H0', 'h', 'A_s', 'n_s', 'bcm_log10Mc', 'bcm_etab', 'bcm_ks',
@@ -215,9 +225,21 @@ class Parameters(object):
 
 
 class Cosmology(object):
-    """Wrapper for the ccl_cosmology object.
+    """Wrapper for the ccl_cosmology object, including cosmological parameters and cached data.
 
-    Includes cosmological parameters and cached data.
+    Args:
+        params (:obj:`Parameters`): Cosmological parameters object.
+            config (:obj:`ccl_configuration`, optional): Configuration for how 
+            to use CCL. Takes precident over any other passed in configuration. 
+            Defaults to None.
+        transfer_function (:obj:`str`, optional): The transfer function to 
+            use. Defaults to `boltzmann_class`.
+        matter_power_spectrum (:obj:`str`, optional): The matter power 
+            spectrum to use. Defaults to `halofit`.
+        baryons_power_spectrum (:obj:`str`, optional): The correction from 
+            baryonic effects to be implemented. Defaults to `nobaryons`.
+        mass_function (:obj:`str`, optional): The mass function to use. 
+            Defaults to `tinker` (2010).
 
     """
     
@@ -231,27 +253,6 @@ class Cosmology(object):
                  matter_power_spectrum='halofit',
                  baryons_power_spectrum='nobaryons',
                  mass_function='tinker10'):
-        """Creates a wrapper for ccl_cosmology.
-
-        TODO: enumerate transfer_function and 
-        matter_power_spectrum options.
-
-        Args:
-            params (:obj:`Parameters`): Cosmological parameters object.
-            config (:obj:`ccl_configuration`, optional): Configuration for how 
-            to use CCL. Takes precident over any other passed in configuration. 
-            Defaults to None.
-            transfer_function (:obj:`str`, optional): The transfer function to 
-            use. Defaults to `boltzmann_class`.
-            matter_power_spectrum (:obj:`str`, optional): The matter power 
-            spectrum to use. Defaults to `halofit`.
-            baryons_power_spectrum (:obj:`str`, optional): The correction from baryonic
-            effects to be implemented. Defaults to `nobaryons`.
-            mass_function (:obj:`str`, optional): The mass function to use. 
-            Defaults to `tinker` (2010).
-
-        """
-        
         # Use either input cosmology parameters or Parameters() object
         if params is None:
             # Create new Parameters object
@@ -343,7 +344,8 @@ class Cosmology(object):
                                % (self.cosmo.status, self.cosmo.status_message))
     
     def __del__(self):
-        """Free the ccl_cosmology instance that this Cosmology object is managing.
+        """Free the ccl_cosmology instance that this Cosmology object is 
+           managing.
 
         """
         lib.cosmology_free(self.cosmo)
@@ -385,7 +387,7 @@ class Cosmology(object):
         return self.params.__getitem__(key)
     
     def compute_distances(self):
-        """Interfaces with src/compute_background.c: ccl_cosmology_compute_distances().
+        """Interfaces with src/compute_background.c: ccl_cosmology_compute_distances(). 
         Sets up the splines for the distances.
 
         """
@@ -415,7 +417,7 @@ class Cosmology(object):
         """Checks if the distances have been precomputed.
 
         Returns:
-            True if precomputed, False otherwise.
+            bool: True if precomputed, False otherwise.
 
         """
         return bool(self.cosmo.computed_distances)
@@ -424,7 +426,7 @@ class Cosmology(object):
         """Checks if the growth function has been precomputed.
 
         Returns:
-            True if precomputed, False otherwise.
+            bool: True if precomputed, False otherwise.
 
         """
         return bool(self.cosmo.computed_growth)
@@ -433,7 +435,7 @@ class Cosmology(object):
         """Checks if the power spectra have been precomputed.
 
         Returns:
-            True if precomputed, False otherwise.
+            bool: True if precomputed, False otherwise.
 
         """
         return bool(self.cosmo.computed_power)
@@ -442,7 +444,7 @@ class Cosmology(object):
         """Checks if sigma8 has been computed.
 
         Returns:
-            True if precomputed, False otherwise.
+            bool: True if precomputed, False otherwise.
 
         """
         return bool(self.cosmo.computed_sigma)

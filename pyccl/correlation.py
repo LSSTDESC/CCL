@@ -8,6 +8,9 @@ correlation_methods = {
     'bessel':   const.CCL_CORR_BESSEL,
     'legendre': const.CCL_CORR_LGNDRE,
 }
+"""Choices of algorithms used to compute correlation functions. 'Bessel' is a direct integration using Bessel functions. 'FFTLog' is fast using a fast Fourier transform. 'Legendre' uses a sum over Legendre polynomials.
+
+"""
 
 correlation_types = {
     'gg': const.CCL_CORR_GG,
@@ -17,19 +20,18 @@ correlation_types = {
 }
 
 def correlation(cosmo, ell, C_ell, theta, corr_type='gg', method='fftlog'):
-    """
-    Compute the angular correlation function.
+    """Compute the angular correlation function.
 
     Args:
         cosmo (:obj:`Cosmology`): A Cosmology object.
-        ell (array_like): Multipoles corresponding to the input angular power spectrum
+        ell (array_like): Multipoles corresponding to the input angular power spectrum.
         C_ell (array_like): Input angular power spectrum.
         theta (float or array_like): Angular separation(s) at which to calculate the angular correlation function (in degrees).
         corr_type (string): Type of correlation function. Choices: 'GG' (galaxy-galaxy), 'GL' (galaxy-shear), 'L+' (shear-shear, xi+), 'L-' (shear-shear, xi-).
-        method (string, optional): Method to compute the correlation function. Choices: 'Bessel' (direct integration over Bessel function), 'FFTLog' (fast integration with FFTLog), 'Legendre' (brute-force sum over Legendre polynomials).
+        method (string, optional): Method to compute the correlation function.
     
     Returns:
-        float or array_like: Value(s) of the correlation function at the input angular separations
+        float or array_like: Value(s) of the correlation function at the input angular separations.
 
     """
     cosmo_in = cosmo
