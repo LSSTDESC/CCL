@@ -1,3 +1,3 @@
 # bash
 
-sphinx-apidoc -f -o api/ ../pyccl/
+sphinx-apidoc -f -o api/ ../pyccl/ -e
