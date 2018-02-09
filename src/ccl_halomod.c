@@ -54,8 +54,33 @@ double p_1h(double k, double a)
   return I0j(2,k,k,0.,0.,a);
 }
 
-double conc(double m, double a)
+double halo_concentration(double m, double a)
 {
   return 9.*pow(nu(m,a),-.29)*pow(growfac(a)/growfac(1.),1.15);// Bhattacharya et al. 2011, Delta = 200 rho_{mean} (Table 2)
   //return 10.14*pow(m/2.e+12,-0.081)*pow(a,1.01); //Duffy et al. 2008 (Delta = 200 mean)
+}
+
+double massfunc(double nu) {
+  //Sheth Tormen mass function!
+  //Note that nu=dc/sigma(M) and this Sheth & Tormen (1999) use nu=(dc/sigma)^2
+  //This accounts for some small differences
+  double p=0.3;
+  double q=0.707;
+  double A=0.21616;
+  return A*(1.+((q*nu*nu)**(-p)))*exp(-q*nu*nu/2.);
+}
+
+double delta_c() {
+  //Linear collapse threshold
+  return 1.686;
+}
+
+double Delta_v() {
+  //Halo mean density
+  return 200.;
+}
+
+double nu(ccl_cosmology *cosmo, double halomass, double a, int * status) {
+  //nu = delta_c/sigma(M)
+  return delta_c()/ccl_sigmaM(cosmo,halomass,a);
 }
