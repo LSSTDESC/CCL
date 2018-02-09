@@ -124,7 +124,7 @@ For quick introduction to `CCL` in Python look at notebooks in **_tests/_**.
 export LD_LIBRARY_PATH=/path/to/where/ccl/is/installed/lib:$LD_LIBRARY_PATH
 ````
 5. We know of one case with Mac OS where `libtools` had the “lock” function set to “yes” and this caused the installation to stall. However, this is very rare. If this happens, after the `configure` step, edit `libtool` to set the “lock” to “no”.
-6.We know of one case on a Mac OS where running 
+6. We know of one case on a Mac OS where running 
 ````sh
 python setup.py install --user
 ````
@@ -138,7 +138,7 @@ This issue can be solved by instead running
 ````sh
 python setup.py install --user --prefix=
 ````
-The issue is discussed in detail here (https://stackoverflow.com/questions/4495120/combine-user-with-prefix-error-with-setup-py-install)
+The issue is discussed in detail [here](https://stackoverflow.com/questions/4495120/combine-user-with-prefix-error-with-setup-py-install)
 
 ## Compiling against an external version of CLASS
 
