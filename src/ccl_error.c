@@ -39,6 +39,8 @@ void ccl_check_status(ccl_cosmology *cosmo, int * status)
     ccl_raise_exception(*status, cosmo->status_message);
   case CCL_ERROR_NU_INT: // error in getting the neutrino integral spline: exit. No status_message in cosmo because can't pass cosmology to the function.
     ccl_raise_exception(*status, "Error, in ccl_neutrinos.c. ccl_calculate_nu_phasespace_spline(): Error in setting neutrino phasespace spline.");
+  case CCL_ERROR_NU_SOLVE: // error in converting Omeganuh2-> Mnu: exit. No status_message in cosmo because can't pass cosmology to the function.
+    ccl_raise_exception(*status, "Error, in ccl_neutrinos.c. Omeganuh2_to_Mnu(): Root finding did not converge.");
     // TODO: Implement softer error handling, e.g. for integral convergence here	
   default:
     ccl_raise_exception(*status, cosmo->status_message);
@@ -69,6 +71,9 @@ void ccl_check_status_nocosmo(int * status)
   case CCL_ERROR_NU_INT: // error in getting the neutrino integral spline: exit. No status_message in cosmo because can't pass cosmology to the function. //DL
     fprintf(stderr, "%s", "Error, in ccl_neutrinos.c. ccl_calculate_nu_phasespace_spline(): Error in setting neutrino phasespace spline.");
     exit(1);
+  case CCL_ERROR_NU_SOLVE: // error in converting Omeganuh2-> Mnu: exit. No status_message in cosmo because can't pass cosmology to the function.
+    fprintf(stderr, "%s", "Error, in ccl_neutrinos.c. Omeganuh2_to_Mnu(): Root finding did not converge.");
+     exit(1);
   default:		
     fprintf(stderr,"%s", "OTHER ERROR; SEE gsl_errno.h for ERROR CODES 1-32.");
     exit(1);

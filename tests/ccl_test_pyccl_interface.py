@@ -23,23 +23,35 @@ def reference_models():
 
     # BBKS Pk
     p4 = ccl.Parameters(Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96)
-    cosmo4 = ccl.Cosmology(p4,transfer_function='bbks')
+    cosmo4 = ccl.Cosmology(p4, transfer_function='bbks')
 
     # E&H Pk
     p5 = ccl.Parameters(Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96)
-    cosmo5 = ccl.Cosmology(p5,transfer_function='eisenstein_hu')
+    cosmo5 = ccl.Cosmology(p5, transfer_function='eisenstein_hu')
+
+    # Emulator Pk
+    p6 = ccl.Parameters(Omega_c=0.27, Omega_b=0.022/0.67**2, h=0.67, sigma8=0.8, 
+                        n_s=0.96, N_nu_rel=3.04, N_nu_mass=0., m_nu=0.)
+    cosmo6 = ccl.Cosmology(p6, transfer_function='emulator', 
+                           matter_power_spectrum='emu')
+    
+    # Emulator Pk w/neutrinos
+    p7 = ccl.Parameters(Omega_c=0.27, Omega_b=0.022/0.67**2, h=0.67, sigma8=0.8, 
+                        n_s=0.96, N_nu_rel=0.00641, N_nu_mass=3, m_nu=0.06)
+    cosmo7 = ccl.Cosmology(p7, transfer_function='emulator', 
+                           matter_power_spectrum='emu')
 
     # Baryons Pk
-    p6 = ccl.Parameters(Omega_c=0.27, Omega_b=0.045, h=0.67, A_s=1e-10, n_s=0.96)
-    cosmo6 = ccl.Cosmology(p6,baryons_power_spectrum='bcm')
+    p8 = ccl.Parameters(Omega_c=0.27, Omega_b=0.045, h=0.67, A_s=1e-10, n_s=0.96)
+    cosmo8 = ccl.Cosmology(p8, baryons_power_spectrum='bcm')
     
     # Baryons Pk with choice of BCM parameters other than default
-    p7 = ccl.Parameters(Omega_c=0.27, Omega_b=0.045, h=0.67, A_s=1e-10, n_s=0.96,
+    p9 = ccl.Parameters(Omega_c=0.27, Omega_b=0.045, h=0.67, A_s=1e-10, n_s=0.96,
                         bcm_log10Mc=math.log10(1.7e14), bcm_etab=0.3, bcm_ks=75.)
-    cosmo7 = ccl.Cosmology(p7,baryons_power_spectrum='bcm')
+    cosmo9 = ccl.Cosmology(p9, baryons_power_spectrum='bcm')
 
-    # Return 
-    return [cosmo1,cosmo4,cosmo5,cosmo7] # cosmo2, cosmo3, cosmo6
+    # Return (do a few cosmologies, for speed reasons)
+    return [cosmo1, cosmo4, cosmo5, cosmo7, cosmo9] # cosmo2, cosmo3, cosmo6
 
 def all_finite(vals):
     """
@@ -182,7 +194,33 @@ def check_massfunc(cosmo):
     assert_raises(TypeError, ccl.sigmaM, cosmo, mhalo_scl, a_arr)
     assert_raises(TypeError, ccl.sigmaM, cosmo, mhalo_lst, a_arr)
     assert_raises(TypeError, ccl.sigmaM, cosmo, mhalo_arr, a_arr)
+
+
+def check_neutrinos():
+    """
+    Check that neutrino-related functions can be run.
+    """
+    z = 0.
+    z_arr = np.linspace(0., 2., 10)
+    a = 1.
+    a_arr = 1. / (1.+z_arr)
+    a_lst = [_a for _a in a_arr]
     
+    TCMB = 2.725
+    Neff = 3.046
+    mnu = 0.06
+    OmNuh2 = 0.0006441
+    
+    # Omeganuh2
+    assert_( all_finite(ccl.Omeganuh2(a, Neff, mnu, TCMB)) )
+    assert_( all_finite(ccl.Omeganuh2(a_lst, Neff, mnu, TCMB)) )
+    assert_( all_finite(ccl.Omeganuh2(a_arr, Neff, mnu, TCMB)) )
+    
+    # Omeganuh2_to_Mnu
+    assert_( all_finite(ccl.Omeganuh2_to_Mnu(a, Neff, OmNuh2, TCMB)) )
+    assert_( all_finite(ccl.Omeganuh2_to_Mnu(a_lst, Neff, OmNuh2, TCMB)) )
+    assert_( all_finite(ccl.Omeganuh2_to_Mnu(a_arr, Neff, OmNuh2, TCMB)) )
+
 
 def check_lsst_specs(cosmo):
     """
@@ -270,6 +308,11 @@ def check_cls(cosmo):
     ell_lst = [2, 3, 4, 5, 6, 7, 8, 9]
     ell_arr = np.arange(2, 10)
     
+    # Check if power spectrum type is valid for CMB
+    cmb_ok = True
+    if cosmo.configuration.matter_power_spectrum_method \
+        == ccl.core.matter_power_spectrum_types['emu']: cmb_ok = False
+    
     # ClTracer test objects
     lens1 = ccl.ClTracerLensing(cosmo, False, n=n, z=z)
     lens2 = ccl.ClTracerLensing(cosmo, True, n=(z,n), bias_ia=(z,n), f_red=(z,n))
@@ -288,24 +331,24 @@ def check_cls(cosmo):
     assert_( all_finite(ccl.angular_cl(cosmo, nc1, nc1, ell_lst)) )
     assert_( all_finite(ccl.angular_cl(cosmo, nc1, nc1, ell_arr)) )
 
-    assert_( all_finite(ccl.angular_cl(cosmo, cmbl, cmbl, ell_arr)) )
+    if cmb_ok: assert_( all_finite(ccl.angular_cl(cosmo, cmbl, cmbl, ell_arr)) )
     
     # Check various cross-correlation combinations
     assert_( all_finite(ccl.angular_cl(cosmo, lens1, lens2, ell_arr)) )
     assert_( all_finite(ccl.angular_cl(cosmo, lens1, nc1, ell_arr)) )
     assert_( all_finite(ccl.angular_cl(cosmo, lens1, nc2, ell_arr)) )
     assert_( all_finite(ccl.angular_cl(cosmo, lens1, nc3, ell_arr)) )
-    assert_( all_finite(ccl.angular_cl(cosmo, lens1, cmbl, ell_arr)) )
+    if cmb_ok: assert_( all_finite(ccl.angular_cl(cosmo, lens1, cmbl, ell_arr)) )
     assert_( all_finite(ccl.angular_cl(cosmo, lens2, nc1, ell_arr)) )
     assert_( all_finite(ccl.angular_cl(cosmo, lens2, nc2, ell_arr)) )
     assert_( all_finite(ccl.angular_cl(cosmo, lens2, nc3, ell_arr)) )
-    assert_( all_finite(ccl.angular_cl(cosmo, lens2, cmbl, ell_arr)) )
+    if cmb_ok: assert_( all_finite(ccl.angular_cl(cosmo, lens2, cmbl, ell_arr)) )
     assert_( all_finite(ccl.angular_cl(cosmo, nc1, nc2, ell_arr)) )
     assert_( all_finite(ccl.angular_cl(cosmo, nc1, nc3, ell_arr)) )
-    assert_( all_finite(ccl.angular_cl(cosmo, nc1, cmbl, ell_arr)) )
+    if cmb_ok: assert_( all_finite(ccl.angular_cl(cosmo, nc1, cmbl, ell_arr)) )
     assert_( all_finite(ccl.angular_cl(cosmo, nc2, nc3, ell_arr)) )
-    assert_( all_finite(ccl.angular_cl(cosmo, nc2, cmbl, ell_arr)) )
-    assert_( all_finite(ccl.angular_cl(cosmo, nc3, cmbl, ell_arr)) )
+    if cmb_ok: assert_( all_finite(ccl.angular_cl(cosmo, nc2, cmbl, ell_arr)) )
+    if cmb_ok: assert_( all_finite(ccl.angular_cl(cosmo, nc3, cmbl, ell_arr)) )
     
     # Check that reversing order of ClTracer inputs works
     assert_( all_finite(ccl.angular_cl(cosmo, nc1, lens1, ell_arr)) )
@@ -350,6 +393,12 @@ def test_massfunc():
     """
     for cosmo in reference_models():
         yield check_massfunc, cosmo
+
+def test_neutrinos():
+    """
+    Test neutrino-related functions.
+    """
+    yield check_neutrinos
 
 def test_lsst_specs():
     """
