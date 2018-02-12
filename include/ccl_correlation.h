@@ -29,10 +29,11 @@ extern "C" {
  *  - CCL_CORR_BESSEL : direct integration over the Bessel function
  *  - CCL_CORR_LGNDRE : brute-force sum over legendre polynomials
  * @param corr_type : type of correlation function. Choose between:
- *  - CCL_CORR_GG : galaxy-galaxy
- *  - CCL_CORR_GL : galaxy-shear
- *  - CCL_CORR_LP : shear-shear (xi+)
- *  - CCL_CORR_LM : shear-shear (xi-)
+ *  - CCL_CORR_GG : spin0-spin0
+ *  - CCL_CORR_GL : spin0-spin2
+ *  - CCL_CORR_LP : spin2-spin2 (xi+)
+ *  - CCL_CORR_LM : spin2-spin2 (xi-)
+ * Currently supported spin-0 fields are number counts and CMB lensing. The only spin-2 is currently shear.
  */
 void ccl_correlation(ccl_cosmology *cosmo,
 		     int n_ell,double *ell,double *cls,

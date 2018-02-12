@@ -10,12 +10,8 @@ tracer_types = {
     'wl':               const.CL_TRACER_WL,
     'lensing':          const.CL_TRACER_WL,
     'weak_lensing':     const.CL_TRACER_WL,
-}
-
-#Same mapping for non-Limber integration methods
-nonlimber_methods = {
-    'native': const.CCL_NONLIMBER_METHOD_NATIVE,
-    'angpow': const.CCL_NONLIMBER_METHOD_ANGPOW,
+    'cmbl':             const.CL_TRACER_CL,
+    'cmb_lensing':      const.CL_TRACER_CL,
 }
 
 # Define symbolic 'None' type for arrays, to allow proper handling by swig wrapper
@@ -34,7 +30,7 @@ class ClTracer(object):
     def __init__(self, cosmo, tracer_type=None, has_rsd=False,
                  has_magnification=False, has_intrinsic_alignment=False,
                  z=None, n=None, bias=None, mag_bias=None, bias_ia=None,
-                 f_red=None):
+                 f_red=None,z_source=1100.):
         """
         ClTracer is a class for handling tracers that have an angular power
         spectrum.
@@ -69,6 +65,7 @@ class ClTracer(object):
                 alignment amplitudes b_IA(z), or a tuple of arrays (z, b_IA(z)).
             f_red (array_like or tuple, optional): Array of red galaxy
                 fractions f_red(z), or a tuple of arrays (z, f_red(z)).
+            z_source (float, optional): Redshift of source plane for CMB lensing.
         """
         # Verify cosmo object
         cosmo = _cosmology_obj(cosmo)
@@ -79,11 +76,12 @@ class ClTracer(object):
 
         # Convert array arguments that are 'None' into 'NoneArr' type, and
         # check whether arrays were specified as tuples or with a common z array
-        z_n, n = _check_array_params(z, n, 'n')
-        z_b, b = _check_array_params(z, bias, 'bias')
-        z_s, s = _check_array_params(z, mag_bias, 'mag_bias')
-        z_ba, ba = _check_array_params(z, bias_ia, 'bias_ia')
-        z_rf, rf = _check_array_params(z, f_red, 'f_red')
+        self.z_n, self.n = _check_array_params(z, n, 'n')
+        self.z_b, self.b = _check_array_params(z, bias, 'bias')
+        self.z_s, self.s = _check_array_params(z, mag_bias, 'mag_bias')
+        self.z_ba, self.ba = _check_array_params(z, bias_ia, 'bias_ia')
+        self.z_rf, self.rf = _check_array_params(z, f_red, 'f_red')
+        self.z_source = z_source
 
         # Construct new ccl_cl_tracer
         status = 0
@@ -93,7 +91,12 @@ class ClTracer(object):
                             int(has_rsd),
                             int(has_magnification),
                             int(has_intrinsic_alignment),
-                            z_n, n, z_b, b, z_s, s, z_ba, ba, z_rf, rf,
+                            self.z_n, self.n, 
+                            self.z_b, self.b, 
+                            self.z_s, self.s, 
+                            self.z_ba, self.ba, 
+                            self.z_rf, self.rf,
+                            self.z_source,
                             status )
 
     def __del__(self):
@@ -192,6 +195,29 @@ class ClTracerLensing(ClTracer):
                  bias_ia=bias_ia, f_red=f_red)
 
 
+class ClTracerCMBLensing(ClTracer):
+    """
+    ClTracer for CMB lensing.
+    """
+
+    def __init__(self, cosmo, z_source):
+        """
+        ClTracer class for a tracer of CMB lensing.
+
+        Args:
+            cosmo (:obj:`Cosmology`): Cosmology object.
+            z_source (float): Redshift of source plane for CMB lensing.
+        """
+
+        # Call ClTracer constructor with appropriate arguments
+        super(ClTracerCMBLensing, self).__init__(
+                 cosmo=cosmo, tracer_type='cmbl',
+                 has_rsd=False, has_magnification=False,
+                 has_intrinsic_alignment=False,
+                 z=None, n=None, bias=None, mag_bias=None,
+                 bias_ia=None, f_red=None, z_source=z_source)
+
+
 def _cltracer_obj(cltracer):
     """
     Returns a CCL_ClTracer object, given an input object which may be
@@ -248,8 +274,7 @@ def _check_array_params(z, f_arg, f_name):
     return z_f, f
 
 
-def angular_cl(cosmo, cltracer1, cltracer2, ell,l_limber=-1.,l_logstep=1.05,l_linstep=20.,dchi=3., dlk=0.003, zmin=0.05,
-               non_limber_method="native"):
+def angular_cl(cosmo, cltracer1, cltracer2, ell):
     """
     Calculate the angular (cross-)power spectrum for a pair of tracers.
 
@@ -258,15 +283,6 @@ def angular_cl(cosmo, cltracer1, cltracer2, ell,l_limber=-1.,l_logstep=1.05,l_li
         cltracer1, cltracer2 (:obj:): ClTracer objects, of any kind.
         ell (float or array_like): Angular wavenumber(s) to evaluate the
             angular power spectrum at.
-        l_limber (float) : Angular wavenumber beyond which Limber's
-            approximation will be used
-        l_logstep (float) : logarithmic step in ell at low multipoles
-        l_linstep (float) : linear step in ell at high multipoles
-        dchi (float) : comoving distance step size in non-limber native integrals
-        dlk (float) : logarithmic step for the k non-limber native integral
-        zmin (float) : minimal redshift for the integrals
-        non_limber_method (str) : non-Limber integration method. Supported:
-            "native" and "angpow"
 
     Returns:
         cl (float or array_like): Angular (cross-)power spectrum values, C_ell,
@@ -276,9 +292,6 @@ def angular_cl(cosmo, cltracer1, cltracer2, ell,l_limber=-1.,l_logstep=1.05,l_li
     # Access ccl_cosmology object
     cosmo_in = cosmo
     cosmo = _cosmology_obj(cosmo)
-    
-    if non_limber_method not in nonlimber_methods.keys() :
-        raise KeyError("'%s' is not a valide non-Limber integration method."%non_limber_method)
 
     # Access CCL_ClTracer objects
     clt1 = _cltracer_obj(cltracer1)
@@ -288,16 +301,12 @@ def angular_cl(cosmo, cltracer1, cltracer2, ell,l_limber=-1.,l_logstep=1.05,l_li
     # Return Cl values, according to whether ell is an array or not
     if isinstance(ell, float) or isinstance(ell, int) :
         # Use single-value function
-        cl_one,status=lib.angular_cl_vec(cosmo,clt1,clt2,l_limber,l_logstep,l_linstep,dchi,dlk,zmin,
-                                         nonlimber_methods[non_limber_method],[ell],1,status)
-        cl=cl_one[0]
+        cl, status = lib.angular_cl(cosmo, ell, clt1, clt2, status)
     elif isinstance(ell, np.ndarray):
         # Use vectorised function
-        cl,status=lib.angular_cl_vec(cosmo,clt1,clt2,l_limber,l_logstep,l_linstep,dchi,dlk,zmin,
-                                     nonlimber_methods[non_limber_method],ell,ell.size,status)
+        cl, status = lib.angular_cl_vec(cosmo, clt1, clt2, ell, ell.size, status)
     else:
         # Use vectorised function
-        cl,status=lib.angular_cl_vec(cosmo,clt1,clt2,l_limber,l_logstep,l_linstep,dchi,dlk,zmin,
-                                     nonlimber_methods[non_limber_method],ell,len(ell),status)
-    check(status)
+        cl, status = lib.angular_cl_vec(cosmo, clt1, clt2, ell, len(ell), status)
+    check(status, cosmo_in)
     return cl

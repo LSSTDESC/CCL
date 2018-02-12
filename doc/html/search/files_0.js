@@ -35,6 +35,7 @@ var searchData=
   ['ccl_5ftest_5fbbks_2ec',['ccl_test_bbks.c',['../ccl__test__bbks_8c.html',1,'']]],
   ['ccl_5ftest_5fbcm_2ec',['ccl_test_bcm.c',['../ccl__test__bcm_8c.html',1,'']]],
   ['ccl_5ftest_5fcls_2ec',['ccl_test_cls.c',['../ccl__test__cls_8c.html',1,'']]],
+  ['ccl_5ftest_5fcmblens_2ec',['ccl_test_cmblens.c',['../ccl__test__cmblens_8c.html',1,'']]],
   ['ccl_5ftest_5fcore_2epy',['ccl_test_core.py',['../ccl__test__core_8py.html',1,'']]],
   ['ccl_5ftest_5fcorrelation_2ec',['ccl_test_correlation.c',['../ccl__test__correlation_8c.html',1,'']]],
   ['ccl_5ftest_5fcosmology_2ec',['ccl_test_cosmology.c',['../ccl__test__cosmology_8c.html',1,'']]],

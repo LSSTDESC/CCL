@@ -21,7 +21,7 @@ from pyccl.massfunction import massfunc, massfunc_m2r, sigmaM, halo_bias
 
 # Cl's and tracers
 from pyccl.cls import angular_cl, ClTracer, ClTracerNumberCounts, \
-    ClTracerLensing
+    ClTracerLensing, ClTracerCMBLensing
 
 from pyccl.lsst_specs import bias_clustering, sigmaz_clustering, \
     sigmaz_sources, dNdz_tomog, PhotoZFunction, PhotoZGaussian
@@ -31,3 +31,5 @@ from pyccl.constants import CLIGHT_HMPC, MPC_TO_METER, PC_TO_METER, \
                       GNEWT, RHO_CRITICAL, SOLAR_MASS
 
 from pyccl.correlation import correlation
+
+from pyccl.neutrinos import Omeganuh2,Omeganuh2_to_Mnu

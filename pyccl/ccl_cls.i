@@ -37,6 +37,7 @@ CCL_ClTracer* cl_tracer_new_wrapper(ccl_cosmology *cosmo,int tracer_type,
 				int nz_s, double *z_s, int ns, double *s,
 				int nz_ba, double *z_ba, int nba, double *ba,
 				int nz_rf, double *z_rf, int nrf, double *rf,
+				double z_source,
 				int* status){
     
     assert(nz_n == nn);
@@ -56,33 +57,21 @@ CCL_ClTracer* cl_tracer_new_wrapper(ccl_cosmology *cosmo,int tracer_type,
 				             nz_s, z_s, s,
 				             nz_ba, z_ba, ba,
 				             nz_rf, z_rf, rf, 
-				             status);
+                   			     z_source,
+ 				             status);
 }
 
 
 void angular_cl_vec(ccl_cosmology * cosmo,
                     CCL_ClTracer *clt1, CCL_ClTracer *clt2,
-		    double l_limber,double l_logstep,double l_linstep,
-		    double dchi, double dlk, double zmin,
-		    int method,
                     double* ell, int nell,
                     double* output, int nout,
                     int* status)
 {
-  assert(nout == nell);
-
-  //Cast ells as integers
-  int *ell_int=malloc(nell*sizeof(int));
-  CCL_ClWorkspace *w=ccl_cl_workspace_new((int)(ell[nell-1])+1,(int)l_limber,method,l_logstep,(int)l_linstep,dchi,dlk,zmin,status);
-
-  for(int i=0;i<nell;i++)
-    ell_int[i]=(int)(ell[i]);
-
-  //Compute C_ells
-  ccl_angular_cls(cosmo,w,clt1,clt2,nell,ell_int,output,status);
-
-  free(ell_int);
-  ccl_cl_workspace_free(w);
+    assert(nout == nell);
+    for(int i=0; i < nell; i++){
+        output[i] = ccl_angular_cl(cosmo, ell[i], clt1, clt2, status);
+    }
 }
 
 %}
