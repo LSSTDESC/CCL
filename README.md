@@ -309,9 +309,9 @@ where `smooth_mass` is mass smoothing scale (in units of *M_sun*) and `odelta` i
 ### LSST Specifications
 `CCL` includes LSST specifications for the expected galaxy distributions of the full galaxy clustering sample and the lensing source galaxy sample. Start by defining a flexible photometric redshift model given by function
 ````c
-double (* your_pz_func)(double z_ph, double z_spec, void *param, int * status);
+double (* your_pz_func)(double z_ph, double z_s, void *param, int * status);
 ````
-which returns the likelihood of measuring a particular photometric redshift `z_ph` given a spectroscopic redshift `z_spec`, with a pointer to additional arguments `param` and a status flag. Then you call function **`ccl_specs_create_photoz_info`**
+which returns the likelihood of measuring a particular photometric redshift `z_ph` given a spectroscopic redshift `z_s`, with a pointer to additional arguments `param` and a status flag. Then you call function **`ccl_specs_create_photoz_info`**
 ````c
 user_pz_info* ccl_specs_create_photoz_info(void * user_params, 
                                            double(*user_pz_func)(double, double, void*, int*));
@@ -380,13 +380,13 @@ struct user_func_params
   double (* sigma_z) (double);
 };
 
-// The user defines a function of the form double function ( z_ph, z_spec, void * user_pz_params) 
+// The user defines a function of the form double function ( z_ph, z_s, void * user_pz_params) 
 // where user_pz_params is a pointer to the parameters of the user-defined function. 
 // This returns the probabilty of obtaining a given photo-z given a particular spec_z.
-double user_pz_probability(double z_ph, double z_spec, void * user_par, int * status)
+double user_pz_probability(double z_ph, double z_s, void * user_par, int * status)
 {
-  double sigma_z = ((struct user_func_params *) user_par)->sigma_z(z_spec);
-  return exp(- (z_ph-z_spec)*(z_ph-z_spec) / (2.*sigma_z*sigma_z)) / (pow(2.*M_PI,0.5)*sigma_z);
+  double sigma_z = ((struct user_func_params *) user_par)->sigma_z(z_s);
+  return exp(- (z_ph-z_s)*(z_ph-z_s) / (2.*sigma_z*sigma_z)) / (pow(2.*M_PI,0.5)*sigma_z);
 }
 
 int main(int argc,char **argv)
