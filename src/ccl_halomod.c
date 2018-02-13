@@ -86,22 +86,41 @@ double inner_I0j (ccl_cosmology *cosmo, double halomass, double k, double a, voi
   return massfunc(nu(cosmo,halomass,a,status))*halomass*pow(halomass/(RHO_CRITICAL*cosmo->params.Omega_m),(double)j)*u;
 }
 
-double inner_I02(ccl_cosmology *cosmo, double halomass, double k, double a, int * status){
+//Params for I02 integrand
+typedef struct{
+  ccl_cosmology *cosmo;
+  double k, a;
+  int * status;
+} IntI02Par;
+
+static double inner_I02(double logmass, void *params){
+  IntI02Par *p=(IntI02Par *)params;
   double u;
-  double c = ccl_halo_concentration(cosmo, halomass,a, status); //The halo concentration for this mass and scale factor
-  u = u_nfw_c(cosmo, c, halomass, k, a, status)*u_nfw_c(cosmo, c, halomass, k, a, status);
-  
+  double halomass = exp(logmass);
+  double c = ccl_halo_concentration(p->cosmo,halomass,p->a,p->status); //The halo concentration for this mass and scale factor
+  u = u_nfw_c(p->cosmo, c, halomass, p->k, p->a, p->status)*u_nfw_c(p->cosmo, c, halomass, p->k, p->a, p->status);
   // TODO: mass function should be the CCL call - check units due to changes (Msun vs Msun/h, etc)
-  return massfunc(nu(cosmo,halomass,a,status))*halomass*pow(halomass/(RHO_CRITICAL*cosmo->params.Omega_m),2.0)*u;
+  return massfunc(nu(p->cosmo,halomass,p->a,p->status))*halomass*pow(halomass/(RHO_CRITICAL*p->cosmo->params.Omega_m),2.0)*u;
 }
 
 double I02(ccl_cosmology *cosmo, double k, double a, int * status){
-  // TODO: here we will need to set up a structure that passes into the
-  // integration routines
-  double k1, k2, k3, k4;
-  double array[7] = {k1,k2,k3,k4,0.,2.0,a};
-//  return int_gsl_integrate_medium_precision(inner_I02,(void*)array,log(limits.M_min),log(limits.M_max),NULL, 2000);
-  return 1.0; //temp while refactoring.
+  int I02status=0, qagstatus;
+  double result=0,eresult;
+  double logmassmin=3; // should be set to something more reasonable
+  double logmassmax=9; // also should be set to reasonable
+  IntI02Par ipar;
+  gsl_function F;
+  gsl_integration_workspace *w=gsl_integration_workspace_alloc(1000);
+
+  ipar.cosmo=cosmo;
+  ipar.k=k;
+  ipar.a=a;
+  ipar.status=&I02status;
+  F.function=&inner_I02;
+  F.params=&ipar;
+  qagstatus=gsl_integration_qag(&F,logmassmin,logmassmax,0,1E-4,1000,GSL_INTEG_GAUSS41,w,&result,&eresult);
+  gsl_integration_workspace_free(w);
+  return result; //temp while refactoring.
 }
 
 // TODO: pass the cosmology construct around.
