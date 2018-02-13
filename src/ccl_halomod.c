@@ -87,9 +87,10 @@ double inner_I0j (ccl_cosmology *cosmo, double halomass, double k, double a, voi
 }
 
 double inner_I02(ccl_cosmology *cosmo, double halomass, double k, double a, int * status){
+  double u;
   double c = ccl_halo_concentration(cosmo, halomass,a, status); //The halo concentration for this mass and scale factor
   u = u_nfw_c(cosmo, c, halomass, k, a, status)*u_nfw_c(cosmo, c, halomass, k, a, status);
-  }
+  
   // TODO: mass function should be the CCL call - check units due to changes (Msun vs Msun/h, etc)
   return massfunc(nu(cosmo,halomass,a,status))*halomass*pow(halomass/(RHO_CRITICAL*cosmo->params.Omega_m),2.0)*u;
 }
@@ -97,6 +98,7 @@ double inner_I02(ccl_cosmology *cosmo, double halomass, double k, double a, int 
 double I02(ccl_cosmology *cosmo, double k, double a, int * status){
   // TODO: here we will need to set up a structure that passes into the
   // integration routines
+  double k1, k2, k3, k4;
   double array[7] = {k1,k2,k3,k4,0.,2.0,a};
 //  return int_gsl_integrate_medium_precision(inner_I02,(void*)array,log(limits.M_min),log(limits.M_max),NULL, 2000);
   return 1.0; //temp while refactoring.
