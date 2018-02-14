@@ -47,15 +47,18 @@ static double r_Lagrangian(ccl_cosmology *cosmo, double halomass, double a, int 
   return pow(halomass*3.0/(4.0*M_PI*rho_m),1.0/3.0);
 }
 
+// QUESTION: Mead - Why is 'sinl' used in the below routine as well as 'sin'
 double u_nfw_c(ccl_cosmology *cosmo, double c, double halomass, double k, double a, int * status){
   // analytic FT of NFW profile, from Cooray & Sheth (2002; Section 3 of https://arxiv.org/abs/astro-ph/0206508)
-  double x, xu;
+  double rs, ks;
   double f1, f2, f3, fc;
-  x = k * r_delta(cosmo, halomass, a, status)/c; // x = k*rv/c = k*rs = ks
-  xu = (1.+c)*x; // xu = ks*(1+c)
-  f1 = sin(x)*(gsl_sf_Si(xu)-gsl_sf_Si(x));
-  f2 = cos(x)*(gsl_sf_Ci(xu)-gsl_sf_Ci(x));
-  f3 = sinl(c*x)/xu;
+  //x = k * r_delta(cosmo, halomass, a, status)/c; // x = k*rv/c = k*rs = ks
+  //xu = (1.+c)*x; // xu = ks*(1+c)
+  rs = r_delta(cosmo, halomass, a, status)/c; //Scale radius for NFW
+  ks = k*rs; //Dimensionless wave-number variable
+  f1 = sin(ks)*(gsl_sf_Si(ks*(1.+c))-gsl_sf_Si(ks));
+  f2 = cos(ks)*(gsl_sf_Ci(ks*(1.+c))-gsl_sf_Ci(ks));
+  f3 = sinl(c*ks)/(ks*(1.+c));
   fc = log(1.+c)-c/(1.+c);
   return (f1+f2-f3)/fc;
 }
@@ -109,6 +112,8 @@ typedef struct{
   int * status;
 } IntI02Par;
 
+
+// QUESTION: Mead - Why is u = u_nfw*u_nfw rather than pow(u_nfw,2). This would save an evalation?
 static double inner_I02(double logmass, void *params){
   // Integrand for the one-halo integral
   IntI02Par *p=(IntI02Par *)params;
