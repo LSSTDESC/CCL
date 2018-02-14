@@ -4229,15 +4229,14 @@ void Omeganuh2_to_Mnu_vec(double Neff, double OmNuh2, double TCMB,
 #include "../include/ccl_halomod.h"
 
 
-void u_nfw_c_vec(ccl_cosmology * cosmo,
-                    double c, double* halo_mass,
-                    int nm, double k, double a,
+void p_1h_vec(ccl_cosmology * cosmo,
+                    double* k, int nm, double a,
                     double* output, int nout,
                     int* status)
 {
     assert(nout == nm);
     for(int i=0; i < nm; i++){
-        output[i] = u_nfw_c(cosmo, c, halo_mass[i], k, a, status);
+        output[i] = p_1h(cosmo, k[i], a, status);
     }
 }
 
@@ -17844,81 +17843,63 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_u_nfw_c(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_p_1h(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   ccl_cosmology *arg1 = (ccl_cosmology *) 0 ;
   double arg2 ;
   double arg3 ;
-  double arg4 ;
-  double arg5 ;
-  int *arg6 = (int *) 0 ;
+  int *arg4 = (int *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   double val2 ;
   int ecode2 = 0 ;
   double val3 ;
   int ecode3 = 0 ;
-  double val4 ;
-  int ecode4 = 0 ;
-  double val5 ;
-  int ecode5 = 0 ;
-  int temp6 ;
-  int res6 = 0 ;
+  int temp4 ;
+  int res4 = 0 ;
   PyObject * obj0 = 0 ;
   PyObject * obj1 = 0 ;
   PyObject * obj2 = 0 ;
   PyObject * obj3 = 0 ;
-  PyObject * obj4 = 0 ;
-  PyObject * obj5 = 0 ;
   double result;
   
-  if (!PyArg_ParseTuple(args,(char *)"OOOOOO:u_nfw_c",&obj0,&obj1,&obj2,&obj3,&obj4,&obj5)) SWIG_fail;
+  if (!PyArg_ParseTuple(args,(char *)"OOOO:p_1h",&obj0,&obj1,&obj2,&obj3)) SWIG_fail;
   res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_cosmology, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "u_nfw_c" "', argument " "1"" of type '" "ccl_cosmology *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "p_1h" "', argument " "1"" of type '" "ccl_cosmology *""'"); 
   }
   arg1 = (ccl_cosmology *)(argp1);
   ecode2 = SWIG_AsVal_double(obj1, &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "u_nfw_c" "', argument " "2"" of type '" "double""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "p_1h" "', argument " "2"" of type '" "double""'");
   } 
   arg2 = (double)(val2);
   ecode3 = SWIG_AsVal_double(obj2, &val3);
   if (!SWIG_IsOK(ecode3)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "u_nfw_c" "', argument " "3"" of type '" "double""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "p_1h" "', argument " "3"" of type '" "double""'");
   } 
   arg3 = (double)(val3);
-  ecode4 = SWIG_AsVal_double(obj3, &val4);
-  if (!SWIG_IsOK(ecode4)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "u_nfw_c" "', argument " "4"" of type '" "double""'");
-  } 
-  arg4 = (double)(val4);
-  ecode5 = SWIG_AsVal_double(obj4, &val5);
-  if (!SWIG_IsOK(ecode5)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode5), "in method '" "u_nfw_c" "', argument " "5"" of type '" "double""'");
-  } 
-  arg5 = (double)(val5);
-  if (!(SWIG_IsOK((res6 = SWIG_ConvertPtr(obj5,SWIG_as_voidptrptr(&arg6),SWIGTYPE_p_int,0))))) {
+  if (!(SWIG_IsOK((res4 = SWIG_ConvertPtr(obj3,SWIG_as_voidptrptr(&arg4),SWIGTYPE_p_int,0))))) {
     int val; 
-    int ecode = SWIG_AsVal_int(obj5, &val);
+    int ecode = SWIG_AsVal_int(obj3, &val);
     if (!SWIG_IsOK(ecode)) {
-      SWIG_exception_fail(SWIG_ArgError(ecode), "in method '" "u_nfw_c" "', argument " "6"" of type '" "int""'");
+      SWIG_exception_fail(SWIG_ArgError(ecode), "in method '" "p_1h" "', argument " "4"" of type '" "int""'");
     }
-    temp6 = (int)(val);
-    arg6 = &temp6;
-    res6 = SWIG_AddTmpMask(ecode);
+    temp4 = (int)(val);
+    arg4 = &temp4;
+    res4 = SWIG_AddTmpMask(ecode);
   }
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    result = (double)u_nfw_c(arg1,arg2,arg3,arg4,arg5,arg6);
+    result = (double)p_1h(arg1,arg2,arg3,arg4);
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
   resultobj = SWIG_From_double((double)(result));
-  if (SWIG_IsTmpObj(res6)) {
-    resultobj = SWIG_Python_AppendOutput(resultobj, SWIG_From_int((*arg6)));
+  if (SWIG_IsTmpObj(res4)) {
+    resultobj = SWIG_Python_AppendOutput(resultobj, SWIG_From_int((*arg4)));
   } else {
-    int new_flags = SWIG_IsNewObj(res6) ? (SWIG_POINTER_OWN |  0 ) :  0 ;
-    resultobj = SWIG_Python_AppendOutput(resultobj, SWIG_NewPointerObj((void*)(arg6), SWIGTYPE_p_int, new_flags));
+    int new_flags = SWIG_IsNewObj(res4) ? (SWIG_POINTER_OWN |  0 ) :  0 ;
+    resultobj = SWIG_Python_AppendOutput(resultobj, SWIG_NewPointerObj((void*)(arg4), SWIGTYPE_p_int, new_flags));
   }
   return resultobj;
 fail:
@@ -17926,124 +17907,106 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_u_nfw_c_vec(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_p_1h_vec(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   ccl_cosmology *arg1 = (ccl_cosmology *) 0 ;
-  double arg2 ;
-  double *arg3 = (double *) 0 ;
-  int arg4 ;
-  double arg5 ;
-  double arg6 ;
-  double *arg7 = (double *) 0 ;
-  int arg8 ;
-  int *arg9 = (int *) 0 ;
+  double *arg2 = (double *) 0 ;
+  int arg3 ;
+  double arg4 ;
+  double *arg5 = (double *) 0 ;
+  int arg6 ;
+  int *arg7 = (int *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  double val2 ;
-  int ecode2 = 0 ;
-  PyArrayObject *array3 = NULL ;
-  int is_new_object3 = 0 ;
-  double val5 ;
-  int ecode5 = 0 ;
-  double val6 ;
-  int ecode6 = 0 ;
-  PyObject *array7 = NULL ;
-  int temp9 ;
-  int res9 = 0 ;
+  PyArrayObject *array2 = NULL ;
+  int is_new_object2 = 0 ;
+  double val4 ;
+  int ecode4 = 0 ;
+  PyObject *array5 = NULL ;
+  int temp7 ;
+  int res7 = 0 ;
   PyObject * obj0 = 0 ;
   PyObject * obj1 = 0 ;
   PyObject * obj2 = 0 ;
   PyObject * obj3 = 0 ;
   PyObject * obj4 = 0 ;
-  PyObject * obj5 = 0 ;
-  PyObject * obj6 = 0 ;
   
-  if (!PyArg_ParseTuple(args,(char *)"OOOOOOO:u_nfw_c_vec",&obj0,&obj1,&obj2,&obj3,&obj4,&obj5,&obj6)) SWIG_fail;
+  if (!PyArg_ParseTuple(args,(char *)"OOOOO:p_1h_vec",&obj0,&obj1,&obj2,&obj3,&obj4)) SWIG_fail;
   res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_cosmology, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "u_nfw_c_vec" "', argument " "1"" of type '" "ccl_cosmology *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "p_1h_vec" "', argument " "1"" of type '" "ccl_cosmology *""'"); 
   }
   arg1 = (ccl_cosmology *)(argp1);
-  ecode2 = SWIG_AsVal_double(obj1, &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "u_nfw_c_vec" "', argument " "2"" of type '" "double""'");
-  } 
-  arg2 = (double)(val2);
   {
     npy_intp size[1] = {
       -1 
     };
-    array3 = obj_to_array_contiguous_allow_conversion(obj2,
+    array2 = obj_to_array_contiguous_allow_conversion(obj1,
       NPY_DOUBLE,
-      &is_new_object3);
-    if (!array3 || !require_dimensions(array3, 1) ||
-      !require_size(array3, size, 1)) SWIG_fail;
-    arg3 = (double*) array_data(array3);
-    arg4 = (int) array_size(array3,0);
+      &is_new_object2);
+    if (!array2 || !require_dimensions(array2, 1) ||
+      !require_size(array2, size, 1)) SWIG_fail;
+    arg2 = (double*) array_data(array2);
+    arg3 = (int) array_size(array2,0);
   }
-  ecode5 = SWIG_AsVal_double(obj3, &val5);
-  if (!SWIG_IsOK(ecode5)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode5), "in method '" "u_nfw_c_vec" "', argument " "5"" of type '" "double""'");
+  ecode4 = SWIG_AsVal_double(obj2, &val4);
+  if (!SWIG_IsOK(ecode4)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "p_1h_vec" "', argument " "4"" of type '" "double""'");
   } 
-  arg5 = (double)(val5);
-  ecode6 = SWIG_AsVal_double(obj4, &val6);
-  if (!SWIG_IsOK(ecode6)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode6), "in method '" "u_nfw_c_vec" "', argument " "6"" of type '" "double""'");
-  } 
-  arg6 = (double)(val6);
+  arg4 = (double)(val4);
   {
     npy_intp dims[1];
-    if (!PyInt_Check(obj5))
+    if (!PyInt_Check(obj3))
     {
-      const char* typestring = pytype_string(obj5);
+      const char* typestring = pytype_string(obj3);
       PyErr_Format(PyExc_TypeError,
         "Int dimension expected.  '%s' given.",
         typestring);
       SWIG_fail;
     }
-    arg8 = (int) PyInt_AsLong(obj5);
-    dims[0] = (npy_intp) arg8;
-    array7 = PyArray_SimpleNew(1, dims, NPY_DOUBLE);
-    if (!array7) SWIG_fail;
-    arg7 = (double*) array_data(array7);
+    arg6 = (int) PyInt_AsLong(obj3);
+    dims[0] = (npy_intp) arg6;
+    array5 = PyArray_SimpleNew(1, dims, NPY_DOUBLE);
+    if (!array5) SWIG_fail;
+    arg5 = (double*) array_data(array5);
   }
-  if (!(SWIG_IsOK((res9 = SWIG_ConvertPtr(obj6,SWIG_as_voidptrptr(&arg9),SWIGTYPE_p_int,0))))) {
+  if (!(SWIG_IsOK((res7 = SWIG_ConvertPtr(obj4,SWIG_as_voidptrptr(&arg7),SWIGTYPE_p_int,0))))) {
     int val; 
-    int ecode = SWIG_AsVal_int(obj6, &val);
+    int ecode = SWIG_AsVal_int(obj4, &val);
     if (!SWIG_IsOK(ecode)) {
-      SWIG_exception_fail(SWIG_ArgError(ecode), "in method '" "u_nfw_c_vec" "', argument " "9"" of type '" "int""'");
+      SWIG_exception_fail(SWIG_ArgError(ecode), "in method '" "p_1h_vec" "', argument " "7"" of type '" "int""'");
     }
-    temp9 = (int)(val);
-    arg9 = &temp9;
-    res9 = SWIG_AddTmpMask(ecode);
+    temp7 = (int)(val);
+    arg7 = &temp7;
+    res7 = SWIG_AddTmpMask(ecode);
   }
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    u_nfw_c_vec(arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9);
+    p_1h_vec(arg1,arg2,arg3,arg4,arg5,arg6,arg7);
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
   resultobj = SWIG_Py_Void();
   {
-    resultobj = SWIG_Python_AppendOutput(resultobj,(PyObject*)array7);
+    resultobj = SWIG_Python_AppendOutput(resultobj,(PyObject*)array5);
   }
-  if (SWIG_IsTmpObj(res9)) {
-    resultobj = SWIG_Python_AppendOutput(resultobj, SWIG_From_int((*arg9)));
+  if (SWIG_IsTmpObj(res7)) {
+    resultobj = SWIG_Python_AppendOutput(resultobj, SWIG_From_int((*arg7)));
   } else {
-    int new_flags = SWIG_IsNewObj(res9) ? (SWIG_POINTER_OWN |  0 ) :  0 ;
-    resultobj = SWIG_Python_AppendOutput(resultobj, SWIG_NewPointerObj((void*)(arg9), SWIGTYPE_p_int, new_flags));
+    int new_flags = SWIG_IsNewObj(res7) ? (SWIG_POINTER_OWN |  0 ) :  0 ;
+    resultobj = SWIG_Python_AppendOutput(resultobj, SWIG_NewPointerObj((void*)(arg7), SWIGTYPE_p_int, new_flags));
   }
   {
-    if (is_new_object3 && array3)
+    if (is_new_object2 && array2)
     {
-      Py_DECREF(array3); 
+      Py_DECREF(array2); 
     }
   }
   return resultobj;
 fail:
   {
-    if (is_new_object3 && array3)
+    if (is_new_object2 && array2)
     {
-      Py_DECREF(array3); 
+      Py_DECREF(array2); 
     }
   }
   return NULL;
@@ -19532,11 +19495,8 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"Omeganuh2_to_Mnu", _wrap_Omeganuh2_to_Mnu, METH_VARARGS, (char *)"Omeganuh2_to_Mnu(double a, double Neff, double OmNuh2, double TCMB, gsl_interp_accel * accel, int * status) -> double"},
 	 { (char *)"Omeganuh2_vec", _wrap_Omeganuh2_vec, METH_VARARGS, (char *)"Omeganuh2_vec(double Neff, double mnu, double TCMB, double * a, double * output, int * status)"},
 	 { (char *)"Omeganuh2_to_Mnu_vec", _wrap_Omeganuh2_to_Mnu_vec, METH_VARARGS, (char *)"Omeganuh2_to_Mnu_vec(double Neff, double OmNuh2, double TCMB, double * a, double * output, int * status)"},
-	 { (char *)"u_nfw_c", _wrap_u_nfw_c, METH_VARARGS, (char *)"u_nfw_c(cosmology cosmo, double c, double halomass, double k, double a, int * status) -> double"},
-	 { (char *)"u_nfw_c_vec", _wrap_u_nfw_c_vec, METH_VARARGS, (char *)"\n"
-		"u_nfw_c_vec(cosmology cosmo, double c, double * halo_mass, double k, double a, double * output, \n"
-		"    int * status)\n"
-		""},
+	 { (char *)"p_1h", _wrap_p_1h, METH_VARARGS, (char *)"p_1h(cosmology cosmo, double k, double a, int * status) -> double"},
+	 { (char *)"p_1h_vec", _wrap_p_1h_vec, METH_VARARGS, (char *)"p_1h_vec(cosmology cosmo, double * k, double a, double * output, int * status)"},
 	 { (char *)"configuration_transfer_function_method_set", _wrap_configuration_transfer_function_method_set, METH_VARARGS, (char *)"configuration_transfer_function_method_set(configuration self, transfer_function_t transfer_function_method)"},
 	 { (char *)"configuration_transfer_function_method_get", _wrap_configuration_transfer_function_method_get, METH_VARARGS, (char *)"configuration_transfer_function_method_get(configuration self) -> transfer_function_t"},
 	 { (char *)"configuration_matter_power_spectrum_method_set", _wrap_configuration_matter_power_spectrum_method_set, METH_VARARGS, (char *)"configuration_matter_power_spectrum_method_set(configuration self, matter_power_spectrum_t matter_power_spectrum_method)"},

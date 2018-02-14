@@ -14,19 +14,18 @@
 %include "../include/ccl_halomod.h"
 
 // Enable vectorised arguments for arrays
-%apply (double* IN_ARRAY1, int DIM1) {(double* halo_mass, int nm)};
+%apply (double* IN_ARRAY1, int DIM1) {(double* k, int nm)};
 %apply (double* ARGOUT_ARRAY1, int DIM1) {(double* output, int nout)};
 
 %inline %{
-void u_nfw_c_vec(ccl_cosmology * cosmo,
-                    double c, double* halo_mass,
-                    int nm, double k, double a,
+void p_1h_vec(ccl_cosmology * cosmo,
+                    double* k, int nm, double a,
                     double* output, int nout,
                     int* status)
 {
     assert(nout == nm);
     for(int i=0; i < nm; i++){
-        output[i] = u_nfw_c(cosmo, c, halo_mass[i], k, a, status);
+        output[i] = p_1h(cosmo, k[i], a, status);
     }
 }
 %}
