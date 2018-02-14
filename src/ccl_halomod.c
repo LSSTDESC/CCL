@@ -118,9 +118,12 @@ double I02(ccl_cosmology *cosmo, double k, double a, int * status){
   ipar.status=&I02status;
   F.function=&inner_I02;
   F.params=&ipar;
+
   qagstatus=gsl_integration_qag(&F,logmassmin,logmassmax,0,1E-4,1000,GSL_INTEG_GAUSS41,w,&result,&eresult);
+
   gsl_integration_workspace_free(w);
-  return result; //temp while refactoring.
+
+  return result;
 }
 
 // TODO: pass the cosmology construct around.
@@ -128,12 +131,3 @@ double p_1h(ccl_cosmology *cosmo, double k, double a, int * status)
 {
   return I02(cosmo, k, a, status);
 }
-
-
-
-// TODO: referred to as odelta in ccl_massfunc, as a free parameter.
-double Delta_v() {
-  //Halo mean density
-  return 200.;
-}
-
