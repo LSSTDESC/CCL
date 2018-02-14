@@ -80,7 +80,7 @@ double ccl_halo_concentration(ccl_cosmology *cosmo, double halomass, double a, i
 
 // TODO: move this into ccl_massfunc - be careful about the units!
 // Keep for now for immediate testing.
-double massfunc(double nu) {
+double massfunc_st(double nu) {
   // Sheth Tormen mass function!
   // Note that nu=dc/sigma(M) and this Sheth & Tormen (1999) use nu=(dc/sigma)^2
   // This accounts for some small differences
@@ -122,7 +122,7 @@ static double inner_I02(double logmass, void *params){
   double c = ccl_halo_concentration(p->cosmo,halomass,p->a,p->status); //The halo concentration for this mass and scale factor
   u = u_nfw_c(p->cosmo, c, halomass, p->k, p->a, p->status)*u_nfw_c(p->cosmo, c, halomass, p->k, p->a, p->status);
   // TODO: mass function should be the CCL call - check units due to changes (Msun vs Msun/h, etc)
-  return massfunc(nu(p->cosmo,halomass,p->a,p->status))*halomass*pow(halomass/(RHO_CRITICAL*p->cosmo->params.Omega_m),2.0)*u;
+  return massfunc_st(nu(p->cosmo,halomass,p->a,p->status))*halomass*pow(halomass/(RHO_CRITICAL*p->cosmo->params.Omega_m),2.0)*u;
 }
 
 double I02(ccl_cosmology *cosmo, double k, double a, int * status){
