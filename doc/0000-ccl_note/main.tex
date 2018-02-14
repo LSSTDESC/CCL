@@ -118,7 +118,7 @@ After pulling a new version of \ccl from the {\tt git} repository, you can recom
 \ccl library can be called from \CC\ code without any  additional requirements or modifications. To make sure that there are no problems you can run
 \begin{verbatim}
     $ make check-cpp
-    $ ./tests/ccl_sample_run
+    $ ./examples/ccl_sample_run
    \end{verbatim}
 
 \subsection{Alternative installation and pip}
@@ -1044,11 +1044,9 @@ cls = ccl.angular_cl(cosmo, lens1, lens2, ell)
 print cls
 \end{verbatim}
 
-Further examples are collected in several Jupyter notebooks available in the {\tt tests/} directory. These are:
+Further examples are collected in several Jupyter notebooks available in the {\tt examples/} directory. These are:
 \begin{verbatim}
-Photo-z example.ipynb,
-
-Power spectrum example.ipynb,
+Correlation.ipynb,
 
 Distance Calculations Example.ipynb,
 
@@ -1056,12 +1054,14 @@ HMFexample.ipynb,
 
 Lensing angular power spectrum.ipynb,
 
-Correlation.ipynb,
+MCMC Likelihood Analysis.ipynb,
 
-MCMC Likelihood Analysis.ipynb
+Photo-z example.ipynb,
+
+Power spectrum example.ipynb
 \end{verbatim}
 
-Note that the likelihood analysis in the last notebook is not intended to be realistic, but it gives an operational example of how {\tt CCL} can be integrated into such an analysis. In particular, the notebook only considers cosmic shear over one wide redshift bin and the covariance matrix adopted solely includes a contribution from cosmic variance. The ``data vector'' is simply a simulated using {\tt CCL} theoretical predictions. For speed, theoretical predictions use the BBKS power spectrum plementation.
+Note that the likelihood analysis in the last notebook is not intended to be realistic, but it gives an operational example of how {\tt CCL} can be integrated into such an analysis. In particular, the notebook only considers cosmic shear over one wide redshift bin and the covariance matrix adopted solely includes a contribution from cosmic variance. The ``data vector'' is simply a simulated using {\tt CCL} theoretical predictions. For speed, theoretical predictions use the BBKS power spectrum implementation.
 
 
 \subsection{Technical notes on how the Python wrapper is implemented}
