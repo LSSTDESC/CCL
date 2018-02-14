@@ -1,4 +1,3 @@
-
 #include "ccl_utils.h"
 #include "math.h"
 #include "stdio.h"
@@ -19,18 +18,37 @@
 #include "ccl_emu17.h"
 #include "ccl_emu17_params.h"
 
-// converts halo mass to rdelta.
+double delta_c(){
+  // Linear collapse threshold for haloes
+  return 1.686;
+}
+
+// TODO: referred to as odelta in ccl_massfunc, as a free parameter.
+double Delta_v() {
+  // Halo mean density
+  return 200.;
+}
+
 // TODO: possibly need to correct unit errors.
 // TODO: possible that delta should be passed around for consistency checks
 static double r_delta(ccl_cosmology *cosmo, double halomass, double a, int * status){
+  // Converts halo mass to rdelta.
   double rho_m, delta;
   rho_m = RHO_CRITICAL*cosmo->params.Omega_m*cosmo->params.h*cosmo->params.h;
-  delta = 200.0;
-  return pow(halomass*3.0/(4.0*M_PI*rho_m*delta),1.0/3.0);
+  // delta = 200.0;
+  return pow(halomass*3.0/(4.0*M_PI*rho_m*Delta_v()),1.0/3.0);
 }
 
-double u_nfw_c(ccl_cosmology *cosmo, double c,double halomass, double k, double a, int * status){
-  // analytic FT of NFW profile, from Cooray & Sheth 2001
+static double r_Lagrangian(ccl_cosmology *cosmo, double halomass, double a, int * status){
+  // Calculates the halo Lagrangian radius as a function of halo mass
+  double rho_m, delta;
+  rho_m = RHO_CRITICAL*cosmo->params.Omega_m*cosmo->params.h*cosmo->params.h;
+  // delta = 200.0;
+  return pow(halomass*3.0/(4.0*M_PI*rho_m),1.0/3.0);
+}
+
+double u_nfw_c(ccl_cosmology *cosmo, double c, double halomass, double k, double a, int * status){
+  // analytic FT of NFW profile, from Cooray & Sheth (2002; Section 3 of https://arxiv.org/abs/astro-ph/0206508)
   double x, xu;
   double f1, f2, f3, fc;
   x = k * r_delta(cosmo, halomass, a, status)/c; // x = k*rv/c = k*rs = ks
@@ -42,12 +60,10 @@ double u_nfw_c(ccl_cosmology *cosmo, double c,double halomass, double k, double 
   return (f1+f2-f3)/fc;
 }
 
-
 // TODO: move this into ccl_massfunc as standard function conversion.
 // Alternatively - just use this in ccl_massfunc as necessary
 double nu(ccl_cosmology *cosmo, double halomass, double a, int * status) {
-  double delta_c = 1.686;
-  return delta_c/ccl_sigmaM(cosmo,halomass,a,status);
+  return delta_c()/ccl_sigmaM(cosmo,halomass,a,status);
 }
 
 // TODO: make consistency check so that ccl_halo_concentration only runs if called with appropriate definition
@@ -62,9 +78,9 @@ double ccl_halo_concentration(ccl_cosmology *cosmo, double halomass, double a, i
 // TODO: move this into ccl_massfunc - be careful about the units!
 // Keep for now for immediate testing.
 double massfunc(double nu) {
-  //Sheth Tormen mass function!
-  //Note that nu=dc/sigma(M) and this Sheth & Tormen (1999) use nu=(dc/sigma)^2
-  //This accounts for some small differences
+  // Sheth Tormen mass function!
+  // Note that nu=dc/sigma(M) and this Sheth & Tormen (1999) use nu=(dc/sigma)^2
+  // This accounts for some small differences
   double p=0.3;
   double q=0.707;
   double A=0.21616;
@@ -72,28 +88,29 @@ double massfunc(double nu) {
 }
 
 // TODO: serious simplification of this function.
-double inner_I0j (ccl_cosmology *cosmo, double halomass, double k, double a, void *para, int * status){
-  double *array = (double *) para;
-  long double u = 1.0; //the number one?
-  double arr= array[6]; //Array of ...
-  double c = ccl_halo_concentration(cosmo, halomass,a, status); //The halo concentration for this mass and scale factor
-  int l;
-  int j = (int)(array[5]);
-  for (l = 0; l< j; l++){
-    u = u*u_nfw_c(cosmo, c, halomass, k, a, status);
-  }
-  // TODO: mass function should be the CCL call - check units due to changes (Msun vs Msun/h, etc)
-  return massfunc(nu(cosmo,halomass,a,status))*halomass*pow(halomass/(RHO_CRITICAL*cosmo->params.Omega_m),(double)j)*u;
-}
+//double inner_I0j (ccl_cosmology *cosmo, double halomass, double k, double a, void *para, int * status){
+//  double *array = (double *) para;
+//  long double u = 1.0; //the number one?
+//  double arr= array[6]; //Array of ...
+//  double c = ccl_halo_concentration(cosmo, halomass,a, status); //The halo concentration for this mass and scale factor
+//  int l;
+//  int j = (int)(array[5]);
+//  for (l = 0; l< j; l++){
+//    u = u*u_nfw_c(cosmo, c, halomass, k, a, status);
+//  }
+// TODO: mass function should be the CCL call - check units due to changes (Msun vs Msun/h, etc)
+//  return massfunc(nu(cosmo,halomass,a,status))*halomass*pow(halomass/(RHO_CRITICAL*cosmo->params.Omega_m),(double)j)*u;
+//}
 
-//Params for I02 integrand
 typedef struct{
+  // Parameters for the I02 integrand
   ccl_cosmology *cosmo;
   double k, a;
   int * status;
 } IntI02Par;
 
 static double inner_I02(double logmass, void *params){
+  // Integrand for the one-halo integral
   IntI02Par *p=(IntI02Par *)params;
   double u;
   double halomass = exp(logmass);
@@ -104,6 +121,7 @@ static double inner_I02(double logmass, void *params){
 }
 
 double I02(ccl_cosmology *cosmo, double k, double a, int * status){
+  // The actual one-halo integral
   int I02status=0, qagstatus;
   double result=0,eresult;
   double logmassmin=3; // should be set to something more reasonable
@@ -124,16 +142,8 @@ double I02(ccl_cosmology *cosmo, double k, double a, int * status){
 }
 
 // TODO: pass the cosmology construct around.
-double p_1h(ccl_cosmology *cosmo, double k, double a, int * status)
-{
+double p_1h(ccl_cosmology *cosmo, double k, double a, int * status){
+  // Computes the one-halo integral
   return I02(cosmo, k, a, status);
-}
-
-
-
-// TODO: referred to as odelta in ccl_massfunc, as a free parameter.
-double Delta_v() {
-  //Halo mean density
-  return 200.;
 }
 
