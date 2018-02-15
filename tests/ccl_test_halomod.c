@@ -15,7 +15,7 @@
 #define WA 0.00
 #define NS 0.96
 #define NORMPS 0.80
-#define ZD 0.01
+#define ZD 0.0
 #define NZ 128
 #define Z0_GC 0.50
 #define SZ_GC 0.05
@@ -35,12 +35,12 @@ int main(void){
 
   //FILE *fp; // File pointer
 
-  int test_distance = 0;
-  int test_basics = 0;
-  int test_mass_function = 0;
+  int test_distance = 1;
+  int test_basics = 1;
+  int test_mass_function = 1;
   int test_halo_properties = 1;
-  int test_nfw_wk = 0;
-  int test_power = 0;
+  int test_nfw_wk = 1;
+  int test_power = 1;
 
   // Initial white space
   printf("\n"); 
@@ -119,7 +119,7 @@ int main(void){
     printf("\n");
 
     printf("M / Msun\t nu\t\t r_vir / Mpc\t r_Lag / Mpc\t conc\t\n");
-    printf("============================================================================\n");
+    printf("==========================================================================\n");
     for (int i = 1; i <= nm; i++){
       double m = exp(log(m_min)+log(m_max/m_min)*((i-1.)/(nm-1.)));
       double n = nu(cosmo, m, a, &status); 
@@ -128,7 +128,7 @@ int main(void){
       double conc = ccl_halo_concentration(cosmo, m, a, &status);
       printf("%e\t %f\t %f\t %f\t %f\n", m, n, r_vir, r_lag, conc);
     }
-    printf("============================================================================\n");
+    printf("==========================================================================\n");
     printf("\n");
     
   }
@@ -141,23 +141,30 @@ int main(void){
     double kmax = 1e2;
     int nk = 101;
 
-    double c = 4.; //Halo concentration
+    //double c = 4.; //Halo concentration
     double m = 1e15; //Halo mass in Msun
 
     printf("Testing halo Fourier Transform\n");
     printf("\n");
+    printf("Halo mass [Msun]: %e\n", m);
+    double c=ccl_halo_concentration(cosmo, m, a, &status);
+    printf("Halo concentration: %f\n", c);
+    printf("\n");
 
     //fp = fopen("Mead/CCL_Wk.dat", "w");
-    
+
+    printf("k / Mpc^-1\t Wk\t\n");
+    printf("=============================\n");
     for (int i = 1; i <= nk; i++){
 
       double k = exp(log(kmin)+log(kmax/kmin)*(i-1.)/(nk-1.));
       double wk = u_nfw_c(cosmo, c, m, k, a, &status);
 
-      printf("%d\t %e\t %e\n", i, k, wk);
+      printf("%e\t %e\n", k, wk);
       //fprintf(fp, "%e\t %e\n", k, wk);
       
     }
+    printf("=============================\n");
 
     //fclose(fp);
     printf("\n");
