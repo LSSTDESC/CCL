@@ -101,7 +101,7 @@ int main(void){
     for (int i = 1; i <= nm; i++){
       double m = exp(log(m_min)+log(m_max/m_min)*((i-1.)/(nm-1.)));
       double n = nu(cosmo, m, a, &status); 
-      //double gnu = massfunc_st(n);
+      double gnu = massfunc_st(n);
       printf("%e\t %f\t %f\n", m, n, n);
     }
     printf("=========================================\n");
