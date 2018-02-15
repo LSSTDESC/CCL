@@ -111,12 +111,13 @@ int main(void){
   //Test the halo Fourier Transform
   if(test_nfw_wk==1){
 
+    //k range and number of points in k
     double kmin = 1e-3;
     double kmax = 1e2;
     int nk = 101;
 
     double c = 4.; //Halo concentration
-    double m = 1e15; //Halo mass
+    double m = 1e15; //Halo mass in Msun
 
     printf("Testing halo Fourier Transform\n");
     printf("\n");
