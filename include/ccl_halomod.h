@@ -21,6 +21,14 @@ double delta_c();
 
 double Delta_v();
 
+double r_delta(ccl_cosmology *cosmo, double halomass, double a, int * status);
+
+double r_Lagrangian(ccl_cosmology *cosmo, double halomass, double a, int * status);
+
+double ccl_halo_concentration(ccl_cosmology *cosmo, double halomass, double a, int * status);
+
+double inner_I02(double logmass, void *params);
+  
 #ifdef __cplusplus
 }
 #endif

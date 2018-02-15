@@ -35,11 +35,12 @@ int main(void){
 
   //FILE *fp; // File pointer
 
-  int test_distance = 1;
-  int test_basics = 1;
-  int test_massfunc = 1;
-  int test_nfw_wk = 1;
-  int test_power = 1;
+  int test_distance = 0;
+  int test_basics = 0;
+  int test_mass_function = 0;
+  int test_halo_properties = 1;
+  int test_nfw_wk = 0;
+  int test_power = 0;
 
   // Initial white space
   printf("\n"); 
@@ -73,38 +74,62 @@ int main(void){
   //Test the basic halo-model function
   if(test_basics==1){
 
-    double dc, Dv;
-
     printf("Testing basics\n");
     printf("\n");
 
-    dc=delta_c();
-    Dv=Delta_v();
+    double dc=delta_c();
+    double Dv=Delta_v();
     printf("delta_c: %f\n", dc);
     printf("Delta_v: %f\n", Dv);
     printf("\n");
     
   }
 
-  //Test the mass function
-  if(test_massfunc==1){
+  //Test mass function
+  if(test_mass_function==1){
+
+  double m_min=1e10;
+  double m_max=1e16;
+  int nm=101;
+
+  printf("Testing mass function\n");
+  printf("\n");
+  
+  printf("M / Msun\t nu\t\t g(nu)\t\n");
+  printf("=========================================\n");
+  for (int i = 1; i <= nm; i++){
+    double m = exp(log(m_min)+log(m_max/m_min)*((i-1.)/(nm-1.)));
+    double n = nu(cosmo, m, a, &status);
+    double gnu = massfunc_st(n);
+    printf("%e\t %f\t %f\n", m, n, gnu);
+  }
+  printf("=========================================\n");
+  printf("\n");
+  
+  }
+
+  //Test halo properties
+  if(test_halo_properties==1){
 
     double m_min=1e10;
     double m_max=1e16;
     int nm=101;
 
-    printf("Testing mass function\n");
+    printf("Testing halo properties\n");
     printf("\n");
 
-    printf("M / Msun\t nu\t\t f(nu)\t\n");
-    printf("=========================================\n");
+    printf("M / Msun\t nu\t\t r_vir / Mpc\t r_Lag / Mpc\t conc\t\n");
+    printf("============================================================================\n");
     for (int i = 1; i <= nm; i++){
       double m = exp(log(m_min)+log(m_max/m_min)*((i-1.)/(nm-1.)));
       double n = nu(cosmo, m, a, &status); 
-      double gnu = massfunc_st(n);
-      printf("%e\t %f\t %f\n", m, n, gnu);
+      double r_vir = r_delta(cosmo, m, a, &status);
+      double r_lag = r_Lagrangian(cosmo, m, a, &status);
+      double conc = ccl_halo_concentration(cosmo, m, a, &status);
+      printf("%e\t %f\t %f\t %f\t %f\n", m, n, r_vir, r_lag, conc);
     }
-    printf("=========================================\n");
+    printf("============================================================================\n");
+    printf("\n");
     
   }
 
@@ -135,6 +160,8 @@ int main(void){
     }
 
     //fclose(fp);
+    printf("\n");
+    
     
   }  
 

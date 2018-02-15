@@ -31,7 +31,7 @@ double Delta_v() {
 
 // TODO: possibly need to correct unit errors.
 // TODO: possible that delta should be passed around for consistency checks
-static double r_delta(ccl_cosmology *cosmo, double halomass, double a, int * status){
+double r_delta(ccl_cosmology *cosmo, double halomass, double a, int * status){
   // Converts halo mass to rdelta.
   double rho_m, delta;
   rho_m = RHO_CRITICAL*cosmo->params.Omega_m*cosmo->params.h*cosmo->params.h;
@@ -39,7 +39,7 @@ static double r_delta(ccl_cosmology *cosmo, double halomass, double a, int * sta
   return pow(halomass*3.0/(4.0*M_PI*rho_m*Delta_v()),1.0/3.0);
 }
 
-static double r_Lagrangian(ccl_cosmology *cosmo, double halomass, double a, int * status){
+double r_Lagrangian(ccl_cosmology *cosmo, double halomass, double a, int * status){
   // Calculates the halo Lagrangian radius as a function of halo mass
   double rho_m, delta;
   rho_m = RHO_CRITICAL*cosmo->params.Omega_m*cosmo->params.h*cosmo->params.h;
@@ -114,7 +114,7 @@ typedef struct{
 
 
 // QUESTION: Mead - Why is u = u_nfw*u_nfw rather than pow(u_nfw,2). This would save an evalation?
-static double inner_I02(double logmass, void *params){
+double inner_I02(double logmass, void *params){
   // Integrand for the one-halo integral
   IntI02Par *p=(IntI02Par *)params;
   double u;
