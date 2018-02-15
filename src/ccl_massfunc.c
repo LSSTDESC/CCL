@@ -483,7 +483,6 @@ necessary.
 double ccl_sigmaM(ccl_cosmology * cosmo, double halomass, double a, int * status)
 {
   double sigmaM;
-  
   // Check if sigma has already been calculated
   if (!cosmo->computed_sigma) {
     ccl_cosmology_compute_sigma(cosmo, status);
