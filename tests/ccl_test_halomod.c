@@ -33,13 +33,13 @@ int main(void){
 
   double a = 1./(1.+ZD); // scale factor
 
-  //FILE *fp; // File pointer
+  FILE *fp; // File pointer
 
-  int test_distance = 1;
-  int test_basics = 1;
-  int test_mass_function = 1;
-  int test_halo_properties = 1;
-  int test_nfw_wk = 1;
+  int test_distance = 0;
+  int test_basics = 0;
+  int test_mass_function = 0;
+  int test_halo_properties = 0;
+  int test_nfw_wk = 0;
   int test_power = 1;
 
   // Initial white space
@@ -151,7 +151,7 @@ int main(void){
     printf("Halo concentration: %f\n", c);
     printf("\n");
 
-    //fp = fopen("Mead/CCL_Wk.dat", "w");
+    fp = fopen("Mead/CCL_Wk.dat", "w");
 
     printf("k / Mpc^-1\t Wk\t\n");
     printf("=============================\n");
@@ -161,12 +161,12 @@ int main(void){
       double wk = u_nfw_c(cosmo, c, m, k, a, &status);
 
       printf("%e\t %e\n", k, wk);
-      //fprintf(fp, "%e\t %e\n", k, wk);
+      fprintf(fp, "%e\t %e\n", k, wk);
       
     }
     printf("=============================\n");
 
-    //fclose(fp);
+    fclose(fp);
     printf("\n");
     
     
@@ -182,25 +182,27 @@ int main(void){
     printf("Testing power spectrum calculation");
     printf("\n");
 
-    //fp = fopen("Mead/CCL_power.dat", "w");
+    fp = fopen("Mead/CCL_power.dat", "w");
   
-    printf("k\t\t P_lin\t\t P_NL\t\t P_halo\t\n");
-    printf("=============================================================\n");    
+    printf("k\t\t P_lin\t\t P_NL\t\t P_2h\t\t P_1h\t\t P_halo\t\n");
+    printf("=============================================================================================\n");    
     for (int i = 1; i <= nk; i++){
 
       double k = exp(log(kmin)+log(kmax/kmin)*(i-1.)/(nk-1.));
     
       double p_lin = ccl_linear_matter_power(cosmo, k, a, &status); // Linear spectrum
       double p_nl = ccl_nonlin_matter_power(cosmo, k, a, &status); // Non-linear spectrum (HALOFIT I think...)
-      double p_halo = p_1h(cosmo, k, a, &status); // Halo-model spectrum
+      double p_twohalo = p_2h(cosmo, k, a, &status); // Two-halo power
+      double p_onehalo = p_1h(cosmo, k, a, &status); // One-halo power      
+      double p_full = p_halomod(cosmo, k, a, &status); // Full halo-model power
 
-      printf("%e\t %e\t %e\t %e\n", k, p_lin, p_nl, p_halo);
-      //fprintf(fp, "%e\t %e\t %e\t %e\n", k, p_lin, p_nl, p_lin);
+      printf("%e\t %e\t %e\t %e\t %e\t %e\n", k, p_lin, p_nl, p_twohalo, p_onehalo, p_full);
+      fprintf(fp, "%e\t %e\t %e\t %e\t %e\t %e\n", k, p_lin, p_nl, p_twohalo, p_onehalo, p_full);
 
     }
-    printf("=============================================================\n");
+    printf("=============================================================================================\n");
     printf("\n");
-    //fclose(fp);
+    fclose(fp);
   
   }  
   
