@@ -17,6 +17,9 @@ double I02(ccl_cosmology *cosmo, double k, double a, int * status);
 
 double p_1h(ccl_cosmology *cosmo, double k, double a, int * status);
 
+double delta_c();
+
+double Delta_v();
 
 #ifdef __cplusplus
 }
