@@ -35,8 +35,8 @@ int main(void){
 
   FILE *fp; // File pointer
 
-  int test_distance = 0;
-  int test_basics = 0;
+  int test_distance = 1;
+  int test_basics = 1;
   int test_massfunc = 1;
   int test_nfw_wk = 0;
   int test_power = 0;
@@ -73,16 +73,16 @@ int main(void){
   //Test the basic halo-model function
   if(test_basics==1){
 
-    //double dc, Dv;
+    double dc, Dv;
 
     printf("Testing basics\n");
     printf("\n");
 
-    //dc=delta_c();
-    //Dv=delta_v();
-    //print("delta_c: %f\n", dc);
-    //print("delta_c: %f\n", Dv);
-    //print("\n");
+    dc=delta_c();
+    Dv=Delta_v();
+    printf("delta_c: %f\n", dc);
+    printf("Delta_v: %f\n", Dv);
+    printf("\n");
     
   }
 
@@ -101,8 +101,8 @@ int main(void){
     for (int i = 1; i <= nm; i++){
       double m = exp(log(m_min)+log(m_max/m_min)*((i-1.)/(nm-1.)));
       double n = nu(cosmo, m, a, &status); 
-      //double gnu = massfunc_st(n);
-      printf("%e\t %f\t %f\n", m, n, n);
+      double gnu = massfunc_st(n);
+      printf("%e\t %f\t %f\n", m, n, gnu);
     }
     printf("=========================================\n");
     
