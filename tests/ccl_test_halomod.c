@@ -15,7 +15,7 @@
 #define WA 0.00
 #define NS 0.96
 #define NORMPS 0.80
-#define ZD 0.
+#define ZD 0.01
 #define NZ 128
 #define Z0_GC 0.50
 #define SZ_GC 0.05
@@ -33,13 +33,13 @@ int main(void){
 
   double a = 1./(1.+ZD); // scale factor
 
-  FILE *fp; // File pointer
+  //FILE *fp; // File pointer
 
   int test_distance = 1;
   int test_basics = 1;
   int test_massfunc = 1;
-  int test_nfw_wk = 0;
-  int test_power = 0;
+  int test_nfw_wk = 1;
+  int test_power = 1;
 
   // Initial white space
   printf("\n"); 
@@ -122,7 +122,7 @@ int main(void){
     printf("Testing halo Fourier Transform\n");
     printf("\n");
 
-    fp = fopen("Mead/CCL_Wk.dat", "w");
+    //fp = fopen("Mead/CCL_Wk.dat", "w");
     
     for (int i = 1; i <= nk; i++){
 
@@ -130,11 +130,11 @@ int main(void){
       double wk = u_nfw_c(cosmo, c, m, k, a, &status);
 
       printf("%d\t %e\t %e\n", i, k, wk);
-      fprintf(fp, "%e\t %e\n", k, wk);
+      //fprintf(fp, "%e\t %e\n", k, wk);
       
     }
 
-    fclose(fp);
+    //fclose(fp);
     
   }  
 
@@ -148,8 +148,8 @@ int main(void){
     printf("Testing power spectrum calculation");
     printf("\n");
 
-    fp = fopen("Mead/CCL_power.dat", "w");
-    
+    //fp = fopen("Mead/CCL_power.dat", "w");
+  
     printf("k\t\t P_lin\t\t P_NL\t\t P_halo\t\n");
     printf("=============================================================\n");    
     for (int i = 1; i <= nk; i++){
@@ -158,15 +158,15 @@ int main(void){
     
       double p_lin = ccl_linear_matter_power(cosmo, k, a, &status); // Linear spectrum
       double p_nl = ccl_nonlin_matter_power(cosmo, k, a, &status); // Non-linear spectrum (HALOFIT I think...)
-      //double p_halo = p_1h(cosmo, k, a, &status); // Halo-model spectrum
+      double p_halo = p_1h(cosmo, k, a, &status); // Halo-model spectrum
 
-      printf("%e\t %e\t %e\t %e\n", k, p_lin, p_nl, p_lin);
-      fprintf(fp, "%e\t %e\t %e\t %e\n", k, p_lin, p_nl, p_lin);
+      printf("%e\t %e\t %e\t %e\n", k, p_lin, p_nl, p_halo);
+      //fprintf(fp, "%e\t %e\t %e\t %e\n", k, p_lin, p_nl, p_lin);
 
     }
     printf("=============================================================\n");
     printf("\n");
-    fclose(fp);
+    //fclose(fp);
   
   }  
   
