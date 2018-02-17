@@ -6,9 +6,6 @@
 #include "gsl/gsl_interp.h"
 #include "gsl/gsl_spline.h"
 #include "gsl/gsl_sf_expint.h"
-#include "gsl/gsl_roots.h"
-//#include "gsl/gsl_interp2d.h"
-//#include "gsl/gsl_spline2d.h"
 #include "ccl_placeholder.h"
 #include "ccl_background.h"
 #include "ccl_power.h"
@@ -30,37 +27,45 @@ double Delta_v() {
   return 200.;
 }
 
-// TODO: possibly need to correct unit errors.
+double comoving_matter_density(ccl_cosmology *cosmo){
+  return RHO_CRITICAL*cosmo->params.Omega_m*cosmo->params.h*cosmo->params.h;
+}
+
 // TODO: possible that delta should be passed around for consistency checks
 double r_delta(ccl_cosmology *cosmo, double halomass, double a, int * status){
   // Converts halo mass to rdelta.
-  double rho_m, delta;
-  rho_m = RHO_CRITICAL*cosmo->params.Omega_m*cosmo->params.h*cosmo->params.h;
-  // delta = 200.0;
-  return pow(halomass*3.0/(4.0*M_PI*rho_m*Delta_v()),1.0/3.0);
+  double rho_matter = comoving_matter_density(cosmo);
+  
+  //rho_m = RHO_CRITICAL*cosmo->params.Omega_m*cosmo->params.h*cosmo->params.h;  
+  
+  return pow(halomass*3.0/(4.0*M_PI*rho_matter*Delta_v()),1.0/3.0);
 }
 
 double r_Lagrangian(ccl_cosmology *cosmo, double halomass, double a, int * status){
   // Calculates the halo Lagrangian radius as a function of halo mass
-  double rho_m, delta;
-  rho_m = RHO_CRITICAL*cosmo->params.Omega_m*cosmo->params.h*cosmo->params.h;
-  // delta = 200.0;
-  return pow(halomass*3.0/(4.0*M_PI*rho_m),1.0/3.0);
-}
+  double rho_matter = comoving_matter_density(cosmo);
+  
+  return pow(halomass*3.0/(4.0*M_PI*rho_matter),1.0/3.0);
+  }
 
-// QUESTION: Mead - Why is 'sinl' used in the below routine as well as 'sin'
+// QUESTION: Mead - Why is 'sinl' used in the below routine as well as 'sin'?
 double u_nfw_c(ccl_cosmology *cosmo, double c, double halomass, double k, double a, int * status){
   // analytic FT of NFW profile, from Cooray & Sheth (2002; Section 3 of https://arxiv.org/abs/astro-ph/0206508)
   double rs, ks;
   double f1, f2, f3, fc;
-  //x = k * r_delta(cosmo, halomass, a, status)/c; // x = k*rv/c = k*rs = ks
-  //xu = (1.+c)*x; // xu = ks*(1+c)
-  rs = r_delta(cosmo, halomass, a, status)/c; //Scale radius for NFW
-  ks = k*rs; //Dimensionless wave-number variable
+
+  //Scale radius for NFW
+  rs = r_delta(cosmo, halomass, a, status)/c;
+
+  //Dimensionless wave-number variable
+  ks = k*rs;
+
+  // Various bits for summing together to get final result
   f1 = sin(ks)*(gsl_sf_Si(ks*(1.+c))-gsl_sf_Si(ks));
   f2 = cos(ks)*(gsl_sf_Ci(ks*(1.+c))-gsl_sf_Ci(ks));
   f3 = sinl(c*ks)/(ks*(1.+c));
   fc = log(1.+c)-c/(1.+c);
+  
   return (f1+f2-f3)/fc;
 }
 
@@ -69,85 +74,6 @@ double u_nfw_c(ccl_cosmology *cosmo, double c, double halomass, double k, double
 double nu(ccl_cosmology *cosmo, double halomass, double a, int * status) {
   return delta_c()/ccl_sigmaM(cosmo,halomass,a,status);
 }
-
-/*
-//Root finding for a(chi)
-typedef struct {
-  double chi;
-  ccl_cosmology *cosmo;
-  int * status;
-} Fpar;
-
-static double fzero(double a,void *params)
-{
-  double chi, chia,a _use=a;
-  
-  chi=((Fpar *)params)->chi;
-  compute_chi(a_use,((Fpar *)params)->cosmo,&chia, ((Fpar *)params)->status);
-
-  return chi-chia;
-}
-
-static double dfzero(double a,void *params)
-{
-  ccl_cosmology *cosmo=((Fpar *)params)->cosmo;
-  int *stat = ((Fpar *)params)->status;
-  
-  chipar p;
-  p.cosmo=cosmo;
-  p.status=stat;
-  
-  return chi_integrand(a,&p)/cosmo->params.h;
-}
-
-static void fdfzero(double a,void *params,double *f,double *df)
-{
-  *f=fzero(a,params);
-  *df=dfzero(a,params);
-}
-
-static double m_nu(double nu, ccl_cosmology *cosmo, int* stat, double *m_old, gsl_root_fdfsolver *s)
-{
-  if(nu==0) {
-    *m_old=1;
-    return 0;
-  }
-  else {
-    
-    Fpar p;
-    gsl_function_fdf FDF;
-    double m_previous, m_current=*m_old;
-
-    p.cosmo = cosmo;
-    p.nu = nu;
-    p.status = stat;
-    FDF.f = &fzero;
-    FDF.df = &dfzero;
-    FDF.fdf = &fdfzero;
-    FDF.params = &p;
-    gsl_root_fdfsolver_set(s,&FDF,m_current);
-
-    int iter=0, status;
-    do {
-      iter++;
-      status = gsl_root_fdfsolver_iterate(s);
-      m_previous = m_current;
-      m_current = gsl_root_fdfsolver_root(s);
-      status = gsl_root_test_delta(m_current,m_previous,1E-6,0);
-    } while(status==GSL_CONTINUE);
-
-    *m_old=m_current;
-
-    // Allows us to pass a status to h_over_h0 for the neutrino integral calculation.
-    if (status==GSL_SUCCESS) status= *(p.status);
-    
-    if(status!=GSL_SUCCESS)
-      return 1;
-    
-    return 0;
-  }
-}
-*/
 
 // TODO: make consistency check so that ccl_halo_concentration only runs if called with appropriate definition
 // e.g. if Delta != 200 rho_{mean}, should not function.
@@ -158,17 +84,89 @@ double ccl_halo_concentration(ccl_cosmology *cosmo, double halomass, double a, i
   //return 10.14*pow(m/2.e+12,-0.081)*pow(a,1.01); //Duffy et al. 2008 (Delta = 200 mean)
 }
 
+typedef struct{
+  // Parameters for the I02 integrand
+  ccl_cosmology *cosmo;
+  double k, a;
+  int * status;
+} IntI02Par;
+
+double one_halo_integrand(double log10mass, void *params){  
+  // Integrand for the one-halo integral
+  IntI02Par *p=(IntI02Par *)params;
+  double halomass = pow(10,log10mass);
+
+  // The halo concentration for this mass and scale factor  
+  double c = ccl_halo_concentration(p->cosmo,halomass,p->a,p->status); 
+
+  // The squared normalised Fourier Transform of a halo profile (W(k->0 = 1)
+  double wk_squared = pow(u_nfw_c(p->cosmo, c, halomass, p->k, p->a, p->status),2); 
+
+  // The mean background matter density in Msun/Mpc^3
+  //double rho_matter = RHO_CRITICAL*p->cosmo->params.Omega_m*pow(p->cosmo->params.h,2);
+  double rho_matter = comoving_matter_density(p->cosmo);
+
+  // Fairly sure that there should be no ln(10) factor should be here since the integration is being specified in log10 range
+  double dn_dlogM = ccl_massfunc(p->cosmo, halomass, p->a, Delta_v(), p->status);
+    
+  return pow(halomass,2)*dn_dlogM*wk_squared/pow(rho_matter,2); 
+}
+
+double one_halo_integral(ccl_cosmology *cosmo, double k, double a, int * status){
+  // The one-halo term integral using gsl
+  int one_halo_integral_status = 0, qagstatus;
+  double result = 0, eresult;
+  double log10massmin = 7;
+  double log10massmax = 17;
+  IntI02Par ipar;
+  gsl_function F;
+  gsl_integration_workspace *w = gsl_integration_workspace_alloc(1000);
+
+  // Structure required for the gsl integration
+  ipar.cosmo = cosmo;
+  ipar.k = k;
+  ipar.a = a;
+  ipar.status = &one_halo_integral_status;
+  F.function = &one_halo_integrand;
+  F.params = &ipar;
+
+  // Actually does the integration
+  qagstatus = gsl_integration_qag(&F, log10massmin, log10massmax, 0, 1E-4, 1000, GSL_INTEG_GAUSS41, w, &result, &eresult);
+
+  // Clean up
+  gsl_integration_workspace_free(w);
+
+  return result;
+}
+
+double p_1h(ccl_cosmology *cosmo, double k, double a, int * status){
+  // Computes the one-halo term
+  return one_halo_integral(cosmo, k, a, status);
+}
+
+double p_2h(ccl_cosmology *cosmo, double k, double a, int * status){
+  // Computes the two-halo term (just the linear power at the moment)
+  return ccl_linear_matter_power(cosmo, k, a, status);
+}
+
+double p_halomod(ccl_cosmology *cosmo, double k, double a, int * status){
+  // Computes the full halo-model power
+  return p_2h(cosmo, k, a, status)+p_1h(cosmo, k, a, status);
+}
+
+/*
 // TODO: move this into ccl_massfunc - be careful about the units!
 // Keep for now for immediate testing.
 double massfunc_st(double nu) {
-  // Sheth Tormen mass function!
-  // Note that nu=dc/sigma(M) and this Sheth & Tormen (1999) use nu=(dc/sigma)^2
-  // This accounts for some small differences
-  double p=0.3;
-  double q=0.707;
-  double A=0.21616;
-  return A*(1.+pow(q*nu*nu,-p))*exp(-q*nu*nu/2.);
+// Sheth Tormen mass function!
+// Note that nu=dc/sigma(M) and this Sheth & Tormen (1999) use nu=(dc/sigma)^2
+// This accounts for some small differences
+double p=0.3;
+double q=0.707;
+double A=0.21616;
+return A*(1.+pow(q*nu*nu,-p))*exp(-q*nu*nu/2.);
 }
+*/
 
 /*
   TODO: serious simplification of this function.
@@ -180,37 +178,33 @@ double massfunc_st(double nu) {
   int l;
   int j = (int)(array[5]);
   for (l = 0; l< j; l++){
-    u = u*u_nfw_c(cosmo, c, halomass, k, a, status);
+  u = u*u_nfw_c(cosmo, c, halomass, k, a, status);
   }
- TODO: mass function should be the CCL call - check units due to changes (Msun vs Msun/h, etc)
+  TODO: mass function should be the CCL call - check units due to changes (Msun vs Msun/h, etc)
   return massfunc(nu(cosmo,halomass,a,status))*halomass*pow(halomass/(RHO_CRITICAL*cosmo->params.Omega_m),(double)j)*u;
-}
+  }
 */
 
-typedef struct{
-  // Parameters for the I02 integrand
-  ccl_cosmology *cosmo;
-  double k, a;
-  int * status;
-} IntI02Par;
-
+/*
 // QUESTION: Mead - Why is u = u_nfw*u_nfw rather than pow(u_nfw,2). This would save an evalation?
 double inner_I02(double log10mass, void *params){
   
-  // Integrand for the one-halo integral
-  IntI02Par *p=(IntI02Par *)params;
-  double halomass = pow(log10mass,10);
-  double c = ccl_halo_concentration(p->cosmo,halomass,p->a,p->status); //The halo concentration for this mass and scale factor  
-  double Wk_squared = pow(u_nfw_c(p->cosmo, c, halomass, p->k, p->a, p->status),2);
-  double rho_matter = RHO_CRITICAL*p->cosmo->params.Omega_m*pow(p->cosmo->params.h,2); // QUESTION: What units does CCL use for this?
-  //double rho_matter = 2.775e11*p->cosmo->params.Omega_m*pow(p->cosmo->params.h,2); // Comoving matter density in Msun/Mpc^3
+// Integrand for the one-halo integral
+IntI02Par *p=(IntI02Par *)params;
+double halomass = pow(log10mass,10);
+double c = ccl_halo_concentration(p->cosmo,halomass,p->a,p->status); //The halo concentration for this mass and scale factor  
+double Wk_squared = pow(u_nfw_c(p->cosmo, c, halomass, p->k, p->a, p->status),2);
+double rho_matter = RHO_CRITICAL*p->cosmo->params.Omega_m*pow(p->cosmo->params.h,2); // QUESTION: What units does CCL use for this?
+//double rho_matter = 2.775e11*p->cosmo->params.Omega_m*pow(p->cosmo->params.h,2); // Comoving matter density in Msun/Mpc^3
   
-  // TODO: mass function should be the CCL call - check units due to changes (Msun vs Msun/h, etc)
-  //return massfunc_st(nu(p->cosmo, halomass, p->a, p->status))*halomass*pow(halomass/(RHO_CRITICAL*p->cosmo->params.Omega_m),2.0)*Wk_squared;
-    return massfunc_st(nu(p->cosmo, halomass, p->a, p->status))*halomass/rho_matter;
+// TODO: mass function should be the CCL call - check units due to changes (Msun vs Msun/h, etc)
+//return massfunc_st(nu(p->cosmo, halomass, p->a, p->status))*halomass*pow(halomass/(RHO_CRITICAL*p->cosmo->params.Omega_m),2.0)*Wk_squared;
+return massfunc_st(nu(p->cosmo, halomass, p->a, p->status))*halomass/rho_matter;
 }
+*/
 
-double I02(ccl_cosmology *cosmo, double k, double a, int * status){
+/*
+  double I02(ccl_cosmology *cosmo, double k, double a, int * status){
   // The actual one-halo integral
   int I02status=0, qagstatus;
   double result=0, eresult;
@@ -232,66 +226,5 @@ double I02(ccl_cosmology *cosmo, double k, double a, int * status){
   gsl_integration_workspace_free(w);
 
   return result;
-}
-
-double one_halo_integrand(double log10mass, void *params){
-  
-  // Integrand for the one-halo integral
-  IntI02Par *p=(IntI02Par *)params;
-  double halomass = pow(log10mass,10);
-  double c = ccl_halo_concentration(p->cosmo,halomass,p->a,p->status); //The halo concentration for this mass and scale factor  
-  double wk_squared = pow(u_nfw_c(p->cosmo, c, halomass, p->k, p->a, p->status),2);
-  double rho_matter = RHO_CRITICAL*p->cosmo->params.Omega_m*pow(p->cosmo->params.h,2); // QUESTION: What units does CCL use for this?
-  //double rho_matter = 2.775e11*p->cosmo->params.Omega_m*pow(p->cosmo->params.h,2); // Comoving matter density in Msun/Mpc^3
-    
-  //return massfunc_st(nu(p->cosmo, halomass, p->a, p->status))*halomass*pow(halomass/(RHO_CRITICAL*p->cosmo->params.Omega_m),2.0)*Wk_squared;
-  
-  // TODO: mass function should be the CCL call - check units due to changes (Msun vs Msun/h, etc)
-  double n=nu(p->cosmo, halomass, p->a, p->status);
-  double fnudnu=(halomass/rho_matter)*massfunc_st(n); //This is definitely wrong, need dnu/dM
-  
-  return fnudnu*halomass*wk_squared/rho_matter; 
-}
-
-double one_halo_integral(ccl_cosmology *cosmo, double k, double a, int * status){
-  // The actual one-halo integral
-  int one_halo_integral_status = 0, qagstatus;
-  double result = 0, eresult;
-  double log10massmin = 10;
-  double log10massmax = 15;
-  //double numin = nu(cosmo, massmin, a, status);
-  //double numax = nu(cosmo, massmax, a, status);
-  IntI02Par ipar;
-  gsl_function F;
-  gsl_integration_workspace *w = gsl_integration_workspace_alloc(1000);
-
-  ipar.cosmo = cosmo;
-  ipar.k = k;
-  ipar.a = a;
-  ipar.status = &one_halo_integral_status;
-  F.function = &one_halo_integrand;
-  F.params = &ipar;
-     
-  qagstatus = gsl_integration_qag(&F, log10massmin, log10massmax, 0, 1E-4, 1000, GSL_INTEG_GAUSS41, w, &result, &eresult);
-
-  gsl_integration_workspace_free(w);
-
-  return result;
-}
-
-// TODO: pass the cosmology construct around.
-double p_1h(ccl_cosmology *cosmo, double k, double a, int * status){
-  // Computes the one-halo term
-  //return I02(cosmo, k, a, status);
-  return one_halo_integral(cosmo, k, a, status);
-}
-
-double p_2h(ccl_cosmology *cosmo, double k, double a, int * status){
-  // Computes the two-halo term (just the linear power at the moment)
-  return ccl_linear_matter_power(cosmo, k, a, status);
-}
-
-double p_halomod(ccl_cosmology *cosmo, double k, double a, int * status){
-  // Computes the full halo-model power
-  return p_2h(cosmo, k, a, status)+p_1h(cosmo, k, a, status);
-}
+  }
+*/
