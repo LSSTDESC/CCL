@@ -182,6 +182,7 @@ TASK: Outputs fitting function for use in halo mass function calculation;
     ccl_tinker10 (arxiv 1001.3162 )
     ccl_angulo (arxiv 1203.3216 ) 
     ccl_watson (arxiv 1212.0095 )
+    ccl_shethtormen (arxiv 9901122)
 */
 
 static double massfunc_f(ccl_cosmology *cosmo, double halomass, double a, double odelta, int *status)
@@ -193,6 +194,21 @@ static double massfunc_f(ccl_cosmology *cosmo, double halomass, double a, double
   double sigma=ccl_sigmaM(cosmo, halomass, a, status);
   
   switch(cosmo->config.mass_function_method) {
+  case ccl_shethtormen:
+    if (odelta!=200){
+      *status = CCL_ERROR_HMF_INTERP;
+      strcpy(cosmo->status_message, "ccl_massfunc.c: massfunc_f(): Sheth-Tormen 1999 only supported for Delta = 200\n");
+      return NAN;
+    }
+    fit_A = 0.21616;
+    fit_a = 0.3;
+    fit_b = 0.707;
+
+    delta_c_Tinker = 1.686;
+    nu = delta_c_Tinker / sigma;
+ 
+    return nu*fit_A*(1.+pow(fit_b*nu*nu,-fit_a))*exp(-fit_b*nu*nu/2.);
+
   case ccl_tinker:
     
     // Check if odelta is outside the interpolated range
@@ -264,7 +280,7 @@ static double massfunc_f(ccl_cosmology *cosmo, double halomass, double a, double
     if(odelta!=200.) {
       *status = CCL_ERROR_HMF_INTERP;
       strcpy(cosmo->status_message, "ccl_massfunc.c: ccl_massfunc_f(): Watson HMF only supported for Delta = 200.\n");
-      return 0;
+      return NAN;
     }
     Omega_m_a = ccl_omega_x(cosmo, a, ccl_omega_m_label,status);
     fit_A = Omega_m_a*(0.990*pow(a,3.216)+0.074);

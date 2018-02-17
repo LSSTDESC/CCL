@@ -76,7 +76,8 @@ typedef enum mass_function_t
   ccl_tinker      = 1,
   ccl_tinker10    = 2,
   ccl_watson      = 3,
-  ccl_angulo      = 4
+  ccl_angulo      = 4,
+  ccl_shethtormen = 5
 } mass_function_t;
 
 /** 
