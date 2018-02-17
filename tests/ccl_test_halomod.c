@@ -35,11 +35,11 @@ int main(void){
 
   FILE *fp; // File pointer
 
-  int test_distance = 0;
-  int test_basics = 0;
-  int test_mass_function = 0;
-  int test_halo_properties = 0;
-  int test_nfw_wk = 0;
+  int test_distance = 1;
+  int test_basics = 1;
+  //int test_mass_function = 0;
+  int test_halo_properties = 1;
+  int test_nfw_wk = 1;
   int test_power = 1;
 
   // Initial white space
@@ -85,6 +85,7 @@ int main(void){
     
   }
 
+  /*
   //Test mass function
   if(test_mass_function==1){
 
@@ -107,6 +108,7 @@ int main(void){
   printf("\n");
   
   }
+  */
 
   //Test halo properties
   if(test_halo_properties==1){
@@ -179,7 +181,7 @@ int main(void){
     double kmax=100;
     int nk=101;
 
-    printf("Testing power spectrum calculation");
+    printf("Testing power spectrum calculation\n");
     printf("\n");
 
     fp = fopen("Mead/CCL_power.dat", "w");

@@ -11,9 +11,9 @@ double u_nfw_c(ccl_cosmology *cosmo, double c, double halomass, double k, double
 
 double nu(ccl_cosmology *cosmo, double halomass, double a, int * status);
 
-double massfunc_st(double nu);
+  //double massfunc_st(double nu);
 
-double I02(ccl_cosmology *cosmo, double k, double a, int * status);
+  //double I02(ccl_cosmology *cosmo, double k, double a, int * status);
 
 double p_1h(ccl_cosmology *cosmo, double k, double a, int * status);
 
@@ -31,7 +31,7 @@ double r_Lagrangian(ccl_cosmology *cosmo, double halomass, double a, int * statu
 
 double ccl_halo_concentration(ccl_cosmology *cosmo, double halomass, double a, int * status);
 
-double inner_I02(double logmass, void *params);
+  //double inner_I02(double logmass, void *params);
   
 #ifdef __cplusplus
 }
