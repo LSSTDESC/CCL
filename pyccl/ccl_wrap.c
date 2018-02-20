@@ -4324,25 +4324,25 @@ user_pz_info* specs_create_photoz_info_from_py(PyObject *pyfunc)
 
 
 void Omeganuh2_vec(double Neff, double TCMB,
-                   double* a, int na, double* mnu, int nm, 
+                   double* a, int na, 
+                   double* mnu, int nm, 
                    double* output, int nout,
                    int* status)
 {
     assert(nout == na);
-    
+    assert(nm == 3);
     for(int i=0; i < na; i++){
-      output[i] = ccl_Omeganuh2(a[i], Neff, mnu, TCMB, NULL, status);
+        output[i] = ccl_Omeganuh2(a[i], Neff, mnu, TCMB, NULL, status);
     }   
 }
 
 void Omeganuh2_to_Mnu_vec(double Neff, double OmNuh2, double TCMB,
                           double a_scalar,
-                          double* output2, int nout2,
+                          double* output, int nout,
                           int* status)
 {
-    assert(nout2 == nm);
-    
-    output2 = ccl_Omeganuh2_to_Mnu(a_scalar, Neff, OmNuh2, TCMB, NULL, status);   
+    assert(nout == nm);
+    output = ccl_Omeganuh2_to_Mnu(a_scalar, Neff, OmNuh2, TCMB, NULL, status);   
 }
 
 
@@ -19521,10 +19521,7 @@ SWIGINTERN PyObject *_wrap_Omeganuh2_to_Mnu_vec(PyObject *SWIGUNUSEDPARM(self), 
   int ecode3 = 0 ;
   double val4 ;
   int ecode4 = 0 ;
-  void *argp5 = 0 ;
-  int res5 = 0 ;
-  int val6 ;
-  int ecode6 = 0 ;
+  PyObject *array5 = NULL ;
   int temp7 ;
   int res7 = 0 ;
   PyObject * obj0 = 0 ;
@@ -19533,9 +19530,8 @@ SWIGINTERN PyObject *_wrap_Omeganuh2_to_Mnu_vec(PyObject *SWIGUNUSEDPARM(self), 
   PyObject * obj3 = 0 ;
   PyObject * obj4 = 0 ;
   PyObject * obj5 = 0 ;
-  PyObject * obj6 = 0 ;
   
-  if (!PyArg_ParseTuple(args,(char *)"OOOOOOO:Omeganuh2_to_Mnu_vec",&obj0,&obj1,&obj2,&obj3,&obj4,&obj5,&obj6)) SWIG_fail;
+  if (!PyArg_ParseTuple(args,(char *)"OOOOOO:Omeganuh2_to_Mnu_vec",&obj0,&obj1,&obj2,&obj3,&obj4,&obj5)) SWIG_fail;
   ecode1 = SWIG_AsVal_double(obj0, &val1);
   if (!SWIG_IsOK(ecode1)) {
     SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "Omeganuh2_to_Mnu_vec" "', argument " "1"" of type '" "double""'");
@@ -19556,19 +19552,25 @@ SWIGINTERN PyObject *_wrap_Omeganuh2_to_Mnu_vec(PyObject *SWIGUNUSEDPARM(self), 
     SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "Omeganuh2_to_Mnu_vec" "', argument " "4"" of type '" "double""'");
   } 
   arg4 = (double)(val4);
-  res5 = SWIG_ConvertPtr(obj4, &argp5,SWIGTYPE_p_double, 0 |  0 );
-  if (!SWIG_IsOK(res5)) {
-    SWIG_exception_fail(SWIG_ArgError(res5), "in method '" "Omeganuh2_to_Mnu_vec" "', argument " "5"" of type '" "double *""'"); 
+  {
+    npy_intp dims[1];
+    if (!PyInt_Check(obj4))
+    {
+      const char* typestring = pytype_string(obj4);
+      PyErr_Format(PyExc_TypeError,
+        "Int dimension expected.  '%s' given.",
+        typestring);
+      SWIG_fail;
+    }
+    arg6 = (int) PyInt_AsLong(obj4);
+    dims[0] = (npy_intp) arg6;
+    array5 = PyArray_SimpleNew(1, dims, NPY_DOUBLE);
+    if (!array5) SWIG_fail;
+    arg5 = (double*) array_data(array5);
   }
-  arg5 = (double *)(argp5);
-  ecode6 = SWIG_AsVal_int(obj5, &val6);
-  if (!SWIG_IsOK(ecode6)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode6), "in method '" "Omeganuh2_to_Mnu_vec" "', argument " "6"" of type '" "int""'");
-  } 
-  arg6 = (int)(val6);
-  if (!(SWIG_IsOK((res7 = SWIG_ConvertPtr(obj6,SWIG_as_voidptrptr(&arg7),SWIGTYPE_p_int,0))))) {
+  if (!(SWIG_IsOK((res7 = SWIG_ConvertPtr(obj5,SWIG_as_voidptrptr(&arg7),SWIGTYPE_p_int,0))))) {
     int val; 
-    int ecode = SWIG_AsVal_int(obj6, &val);
+    int ecode = SWIG_AsVal_int(obj5, &val);
     if (!SWIG_IsOK(ecode)) {
       SWIG_exception_fail(SWIG_ArgError(ecode), "in method '" "Omeganuh2_to_Mnu_vec" "', argument " "7"" of type '" "int""'");
     }
@@ -19582,6 +19584,9 @@ SWIGINTERN PyObject *_wrap_Omeganuh2_to_Mnu_vec(PyObject *SWIGUNUSEDPARM(self), 
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
   resultobj = SWIG_Py_Void();
+  {
+    resultobj = SWIG_Python_AppendOutput(resultobj,(PyObject*)array5);
+  }
   if (SWIG_IsTmpObj(res7)) {
     resultobj = SWIG_Python_AppendOutput(resultobj, SWIG_From_int((*arg7)));
   } else {
@@ -21540,7 +21545,7 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"Omeganuh2", _wrap_Omeganuh2, METH_VARARGS, (char *)"Omeganuh2(double a, double Neff, double * mnu, double TCMB, gsl_interp_accel * accel, int * status) -> double"},
 	 { (char *)"Omeganuh2_to_Mnu", _wrap_Omeganuh2_to_Mnu, METH_VARARGS, (char *)"Omeganuh2_to_Mnu(double a, double Neff, double OmNuh2, double TCMB, gsl_interp_accel * accel, int * status) -> double *"},
 	 { (char *)"Omeganuh2_vec", _wrap_Omeganuh2_vec, METH_VARARGS, (char *)"Omeganuh2_vec(double Neff, double TCMB, double * a, double * mnu, double * output, int * status)"},
-	 { (char *)"Omeganuh2_to_Mnu_vec", _wrap_Omeganuh2_to_Mnu_vec, METH_VARARGS, (char *)"Omeganuh2_to_Mnu_vec(double Neff, double OmNuh2, double TCMB, double a_scalar, double * output2, int nout2, int * status)"},
+	 { (char *)"Omeganuh2_to_Mnu_vec", _wrap_Omeganuh2_to_Mnu_vec, METH_VARARGS, (char *)"Omeganuh2_to_Mnu_vec(double Neff, double OmNuh2, double TCMB, double a_scalar, double * output, int * status)"},
 	 { (char *)"emulator_swigconstant", emulator_swigconstant, METH_VARARGS, NULL},
 	 { (char *)"none_swigconstant", none_swigconstant, METH_VARARGS, NULL},
 	 { (char *)"fitting_function_swigconstant", fitting_function_swigconstant, METH_VARARGS, NULL},

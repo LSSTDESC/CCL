@@ -14,38 +14,31 @@
 %include "../include/ccl_neutrinos.h"
 
 // Enable vectorised arguments for arrays
-%apply (double* IN_ARRAY1, int DIM1) {
-					(double* a, int na), 
-					(double* mnu, int nm)
-					};
-					
-%apply (double* ARGOUT_ARRAY1[DIM1], int DIM1){
-					(double* output, int nout), 
-					(double* output2, int nout2)
-					};
+%apply (double* IN_ARRAY1, int DIM1) {(double* a, int na), (double* mnu, int nm)};
+%apply (double* ARGOUT_ARRAY1, int DIM1){(double* output, int nout)};
 
 %inline %{
 
 void Omeganuh2_vec(double Neff, double TCMB,
-                   double* a, int na, double* mnu, int nm, 
+                   double* a, int na, 
+                   double* mnu, int nm, 
                    double* output, int nout,
                    int* status)
 {
     assert(nout == na);
-    
+    assert(nm == 3);
     for(int i=0; i < na; i++){
-      output[i] = ccl_Omeganuh2(a[i], Neff, mnu, TCMB, NULL, status);
+        output[i] = ccl_Omeganuh2(a[i], Neff, mnu, TCMB, NULL, status);
     }   
 }
 
 void Omeganuh2_to_Mnu_vec(double Neff, double OmNuh2, double TCMB,
                           double a_scalar,
-                          double* output2, int nout2,
+                          double* output, int nout,
                           int* status)
 {
-    assert(nout2 == nm);
-    
-    output2 = ccl_Omeganuh2_to_Mnu(a_scalar, Neff, OmNuh2, TCMB, NULL, status);   
+    assert(nout == nm);
+    output = ccl_Omeganuh2_to_Mnu(a_scalar, Neff, OmNuh2, TCMB, NULL, status);   
 }
 
 %}

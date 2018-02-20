@@ -1353,9 +1353,9 @@ def Omeganuh2_vec(Neff, TCMB, a, mnu, output, status):
     """Omeganuh2_vec(double Neff, double TCMB, double * a, double * mnu, double * output, int * status)"""
     return _ccllib.Omeganuh2_vec(Neff, TCMB, a, mnu, output, status)
 
-def Omeganuh2_to_Mnu_vec(Neff, OmNuh2, TCMB, a_scalar, output2, nout2, status):
-    """Omeganuh2_to_Mnu_vec(double Neff, double OmNuh2, double TCMB, double a_scalar, double * output2, int nout2, int * status)"""
-    return _ccllib.Omeganuh2_to_Mnu_vec(Neff, OmNuh2, TCMB, a_scalar, output2, nout2, status)
+def Omeganuh2_to_Mnu_vec(Neff, OmNuh2, TCMB, a_scalar, output, status):
+    """Omeganuh2_to_Mnu_vec(double Neff, double OmNuh2, double TCMB, double a_scalar, double * output, int * status)"""
+    return _ccllib.Omeganuh2_to_Mnu_vec(Neff, OmNuh2, TCMB, a_scalar, output, status)
 
 _ccllib.emulator_swigconstant(_ccllib)
 emulator = _ccllib.emulator
