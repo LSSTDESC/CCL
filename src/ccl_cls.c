@@ -145,10 +145,9 @@ CCL_ClWorkspace *ccl_cl_workspace_default(int lmax,int l_limber,int non_limber_m
   return w;
 }
 
-CCL_ClWorkspace *ccl_cl_workspace_default_limber(int lmax,int l_limber,int *status)
+CCL_ClWorkspace *ccl_cl_workspace_default_limber(int lmax, double l_logstep,int l_linstep,  double dlk, int *status)
 {
-  //Default parameters: 1.05 logarithmic sampling, 20 linear sampling, native non-limber method
-  return ccl_cl_workspace_default(lmax,l_limber,CCL_NONLIMBER_METHOD_NATIVE,1.05,20.,3.,0.01,0.05,status);
+  return ccl_cl_workspace_default(lmax,-1,CCL_NONLIMBER_METHOD_NATIVE,l_logstep,l_linstep,3.,dlk,0.05,status);
 }
 
 //Params for lensing kernel integrand
@@ -1150,7 +1149,6 @@ void ccl_angular_cls(ccl_cosmology *cosmo,CCL_ClWorkspace *w,
 		     int nl_out,int *l_out,double *cl_out,int *status)
 {
   int ii;
-
   //First check if ell range is within workspace
   for(ii=0;ii<nl_out;ii++) {
     if(l_out[ii]>w->lmax) {
@@ -1192,7 +1190,6 @@ void ccl_angular_cls(ccl_cosmology *cosmo,CCL_ClWorkspace *w,
       do_angpow=0;
       method_use=CCL_NONLIMBER_METHOD_NATIVE;
     }
-
     //Use angpow if non-limber is needed
 #ifdef HAVE_ANGPOW
     if(do_angpow)

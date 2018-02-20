@@ -165,8 +165,10 @@ static void compare_cls(char *compare_type,struct cls_data * data)
   fclose(fi_ll_12);
   fclose(fi_ll_22);
 
-  double zmin = CCL_MIN(zarr_1[0],zarr_2[0]);
-  CCL_ClWorkspace *w=ccl_cl_workspace_default_limber(3001,-1,&status);
+  double l_logstep = 1.05;
+  double l_linstep = 20.;
+  double dlk = 0.01;
+  CCL_ClWorkspace *w=ccl_cl_workspace_default_limber(3001,l_logstep,l_linstep,dlk,&status);
 
   ccl_angular_cls(cosmo,w,tr_nc_1,tr_nc_1,3001,ells,cls_dd_11_h,&status);
   if (status) printf("%s\n",cosmo->status_message);
