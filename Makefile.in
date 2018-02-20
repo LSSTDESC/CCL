@@ -173,7 +173,8 @@ am__tests_check_ccl_SOURCES_DIST = tests/ccl_test.c \
 	tests/ccl_test_cmblens.c tests/ccl_test_sigmaM.c \
 	tests/ccl_test_massfunc.c tests/ccl_test_correlation.c \
 	tests/ccl_test_bcm.c tests/ccl_test_emu.c \
-	tests/ccl_test_emu_nu.c tests/ccl_test_angpow.c
+	tests/ccl_test_emu_nu.c tests/ccl_test_nonlimber.c \
+	tests/ccl_test_angpow.c
 @LOCALANGPOW_TRUE@am__objects_2 = tests/tests_check_ccl-ccl_test_angpow.$(OBJEXT)
 am_tests_check_ccl_OBJECTS = tests/tests_check_ccl-ccl_test.$(OBJEXT) \
 	tests/tests_check_ccl-ccl_test_utils.$(OBJEXT) \
@@ -193,6 +194,7 @@ am_tests_check_ccl_OBJECTS = tests/tests_check_ccl-ccl_test.$(OBJEXT) \
 	tests/tests_check_ccl-ccl_test_bcm.$(OBJEXT) \
 	tests/tests_check_ccl-ccl_test_emu.$(OBJEXT) \
 	tests/tests_check_ccl-ccl_test_emu_nu.$(OBJEXT) \
+	tests/tests_check_ccl-ccl_test_nonlimber.$(OBJEXT) \
 	$(am__objects_2)
 tests_check_ccl_OBJECTS = $(am_tests_check_ccl_OBJECTS)
 tests_check_ccl_LDADD = $(LDADD)
@@ -518,7 +520,8 @@ tests_check_ccl_SOURCES = tests/ccl_test.c tests/ccl_test_utils.c \
 	tests/ccl_test_cmblens.c tests/ccl_test_sigmaM.c \
 	tests/ccl_test_massfunc.c tests/ccl_test_correlation.c \
 	tests/ccl_test_bcm.c tests/ccl_test_emu.c \
-	tests/ccl_test_emu_nu.c $(am__append_4)
+	tests/ccl_test_emu_nu.c tests/ccl_test_nonlimber.c \
+	$(am__append_4)
 tests_check_ccl_CPPFLAGS = -I./tests/ -I./include/ $(am__append_5)
 tests_check_ccl_LDFLAGS = -L./ -lccl -lgsl -lgslcblas -lfftw3 \
 	$(CLASS_LIB) $(am__append_6)
@@ -704,6 +707,8 @@ tests/tests_check_ccl-ccl_test_emu.$(OBJEXT): tests/$(am__dirstamp) \
 	tests/$(DEPDIR)/$(am__dirstamp)
 tests/tests_check_ccl-ccl_test_emu_nu.$(OBJEXT):  \
 	tests/$(am__dirstamp) tests/$(DEPDIR)/$(am__dirstamp)
+tests/tests_check_ccl-ccl_test_nonlimber.$(OBJEXT):  \
+	tests/$(am__dirstamp) tests/$(DEPDIR)/$(am__dirstamp)
 tests/tests_check_ccl-ccl_test_angpow.$(OBJEXT):  \
 	tests/$(am__dirstamp) tests/$(DEPDIR)/$(am__dirstamp)
 
@@ -752,6 +757,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/tests_check_ccl-ccl_test_growth.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/tests_check_ccl-ccl_test_growth_hiz.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/tests_check_ccl-ccl_test_massfunc.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/tests_check_ccl-ccl_test_nonlimber.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/tests_check_ccl-ccl_test_params.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/tests_check_ccl-ccl_test_sigmaM.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/tests_check_ccl-ccl_test_utils.Po@am__quote@
@@ -1122,6 +1128,20 @@ tests/tests_check_ccl-ccl_test_emu_nu.obj: tests/ccl_test_emu_nu.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='tests/ccl_test_emu_nu.c' object='tests/tests_check_ccl-ccl_test_emu_nu.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(tests_check_ccl_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o tests/tests_check_ccl-ccl_test_emu_nu.obj `if test -f 'tests/ccl_test_emu_nu.c'; then $(CYGPATH_W) 'tests/ccl_test_emu_nu.c'; else $(CYGPATH_W) '$(srcdir)/tests/ccl_test_emu_nu.c'; fi`
+
+tests/tests_check_ccl-ccl_test_nonlimber.o: tests/ccl_test_nonlimber.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(tests_check_ccl_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT tests/tests_check_ccl-ccl_test_nonlimber.o -MD -MP -MF tests/$(DEPDIR)/tests_check_ccl-ccl_test_nonlimber.Tpo -c -o tests/tests_check_ccl-ccl_test_nonlimber.o `test -f 'tests/ccl_test_nonlimber.c' || echo '$(srcdir)/'`tests/ccl_test_nonlimber.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) tests/$(DEPDIR)/tests_check_ccl-ccl_test_nonlimber.Tpo tests/$(DEPDIR)/tests_check_ccl-ccl_test_nonlimber.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='tests/ccl_test_nonlimber.c' object='tests/tests_check_ccl-ccl_test_nonlimber.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(tests_check_ccl_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o tests/tests_check_ccl-ccl_test_nonlimber.o `test -f 'tests/ccl_test_nonlimber.c' || echo '$(srcdir)/'`tests/ccl_test_nonlimber.c
+
+tests/tests_check_ccl-ccl_test_nonlimber.obj: tests/ccl_test_nonlimber.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(tests_check_ccl_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT tests/tests_check_ccl-ccl_test_nonlimber.obj -MD -MP -MF tests/$(DEPDIR)/tests_check_ccl-ccl_test_nonlimber.Tpo -c -o tests/tests_check_ccl-ccl_test_nonlimber.obj `if test -f 'tests/ccl_test_nonlimber.c'; then $(CYGPATH_W) 'tests/ccl_test_nonlimber.c'; else $(CYGPATH_W) '$(srcdir)/tests/ccl_test_nonlimber.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) tests/$(DEPDIR)/tests_check_ccl-ccl_test_nonlimber.Tpo tests/$(DEPDIR)/tests_check_ccl-ccl_test_nonlimber.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='tests/ccl_test_nonlimber.c' object='tests/tests_check_ccl-ccl_test_nonlimber.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(tests_check_ccl_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o tests/tests_check_ccl-ccl_test_nonlimber.obj `if test -f 'tests/ccl_test_nonlimber.c'; then $(CYGPATH_W) 'tests/ccl_test_nonlimber.c'; else $(CYGPATH_W) '$(srcdir)/tests/ccl_test_nonlimber.c'; fi`
 
 tests/tests_check_ccl-ccl_test_angpow.o: tests/ccl_test_angpow.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(tests_check_ccl_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT tests/tests_check_ccl-ccl_test_angpow.o -MD -MP -MF tests/$(DEPDIR)/tests_check_ccl-ccl_test_angpow.Tpo -c -o tests/tests_check_ccl-ccl_test_angpow.o `test -f 'tests/ccl_test_angpow.c' || echo '$(srcdir)/'`tests/ccl_test_angpow.c
