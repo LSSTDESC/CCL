@@ -315,10 +315,22 @@ class data(_object):
     __swig_getmethods__["p_nl"] = _ccllib.data_p_nl_get
     if _newclass:
         p_nl = _swig_property(_ccllib.data_p_nl_get, _ccllib.data_p_nl_set)
-    __swig_setmethods__["k_min"] = _ccllib.data_k_min_set
-    __swig_getmethods__["k_min"] = _ccllib.data_k_min_get
+    __swig_setmethods__["k_min_lin"] = _ccllib.data_k_min_lin_set
+    __swig_getmethods__["k_min_lin"] = _ccllib.data_k_min_lin_get
     if _newclass:
-        k_min = _swig_property(_ccllib.data_k_min_get, _ccllib.data_k_min_set)
+        k_min_lin = _swig_property(_ccllib.data_k_min_lin_get, _ccllib.data_k_min_lin_set)
+    __swig_setmethods__["k_min_nl"] = _ccllib.data_k_min_nl_set
+    __swig_getmethods__["k_min_nl"] = _ccllib.data_k_min_nl_get
+    if _newclass:
+        k_min_nl = _swig_property(_ccllib.data_k_min_nl_get, _ccllib.data_k_min_nl_set)
+    __swig_setmethods__["k_max_lin"] = _ccllib.data_k_max_lin_set
+    __swig_getmethods__["k_max_lin"] = _ccllib.data_k_max_lin_get
+    if _newclass:
+        k_max_lin = _swig_property(_ccllib.data_k_max_lin_get, _ccllib.data_k_max_lin_set)
+    __swig_setmethods__["k_max_nl"] = _ccllib.data_k_max_nl_set
+    __swig_getmethods__["k_max_nl"] = _ccllib.data_k_max_nl_get
+    if _newclass:
+        k_max_nl = _swig_property(_ccllib.data_k_max_nl_get, _ccllib.data_k_max_nl_set)
 
     def __init__(self):
         """__init__(ccl_data self) -> data"""
@@ -611,6 +623,10 @@ def scale_factor_of_chi_vec(cosmo, chi, output, status):
 def omega_x_vec(cosmo, label, a, output, status):
     """omega_x_vec(cosmology cosmo, int label, double * a, double * output, int * status)"""
     return _ccllib.omega_x_vec(cosmo, label, a, output, status)
+
+def cosmology_write_power_class_z(filename, cosmo, z, status):
+    """cosmology_write_power_class_z(char * filename, cosmology cosmo, double z, int * status)"""
+    return _ccllib.cosmology_write_power_class_z(filename, cosmo, z, status)
 
 def bcm_model_fkz(cosmo, k, a, status):
     """bcm_model_fkz(cosmology cosmo, double k, double a, int * status) -> double"""
@@ -1309,6 +1325,38 @@ def specs_create_photoz_info_from_py(pyfunc):
     """specs_create_photoz_info_from_py(PyObject * pyfunc) -> user_pz_info"""
     return _ccllib.specs_create_photoz_info_from_py(pyfunc)
 
+_ccllib.CCL_MAX_NU_SPECIES_swigconstant(_ccllib)
+CCL_MAX_NU_SPECIES = _ccllib.CCL_MAX_NU_SPECIES
+
+_ccllib.CCL_NU_MNUT_MIN_swigconstant(_ccllib)
+CCL_NU_MNUT_MIN = _ccllib.CCL_NU_MNUT_MIN
+
+_ccllib.CCL_NU_MNUT_MAX_swigconstant(_ccllib)
+CCL_NU_MNUT_MAX = _ccllib.CCL_NU_MNUT_MAX
+
+_ccllib.CCL_NU_MNUT_N_swigconstant(_ccllib)
+CCL_NU_MNUT_N = _ccllib.CCL_NU_MNUT_N
+
+def calculate_nu_phasespace_spline(status):
+    """calculate_nu_phasespace_spline(int * status) -> gsl_spline *"""
+    return _ccllib.calculate_nu_phasespace_spline(status)
+
+def Omeganuh2(a, Neff, mnu, TCMB, accel, status):
+    """Omeganuh2(double a, double Neff, double * mnu, double TCMB, gsl_interp_accel * accel, int * status) -> double"""
+    return _ccllib.Omeganuh2(a, Neff, mnu, TCMB, accel, status)
+
+def Omeganuh2_to_Mnu(a, Neff, OmNuh2, TCMB, accel, status):
+    """Omeganuh2_to_Mnu(double a, double Neff, double OmNuh2, double TCMB, gsl_interp_accel * accel, int * status) -> double *"""
+    return _ccllib.Omeganuh2_to_Mnu(a, Neff, OmNuh2, TCMB, accel, status)
+
+def Omeganuh2_vec(Neff, TCMB, a, mnu, output, status):
+    """Omeganuh2_vec(double Neff, double TCMB, double * a, double * mnu, double * output, int * status)"""
+    return _ccllib.Omeganuh2_vec(Neff, TCMB, a, mnu, output, status)
+
+def Omeganuh2_to_Mnu_vec(Neff, OmNuh2, TCMB, a_scalar, output2, nout2, status):
+    """Omeganuh2_to_Mnu_vec(double Neff, double OmNuh2, double TCMB, double a_scalar, double * output2, int nout2, int * status)"""
+    return _ccllib.Omeganuh2_to_Mnu_vec(Neff, OmNuh2, TCMB, a_scalar, output2, nout2, status)
+
 _ccllib.emulator_swigconstant(_ccllib)
 emulator = _ccllib.emulator
 
@@ -1341,6 +1389,9 @@ halofit = _ccllib.halofit
 
 _ccllib.halo_model_swigconstant(_ccllib)
 halo_model = _ccllib.halo_model
+
+_ccllib.emu_swigconstant(_ccllib)
+emu = _ccllib.emu
 
 _ccllib.nobaryons_swigconstant(_ccllib)
 nobaryons = _ccllib.nobaryons
@@ -1435,6 +1486,12 @@ CCL_ERROR_PARAMETERS = _ccllib.CCL_ERROR_PARAMETERS
 
 _ccllib.CCL_ERROR_NU_INT_swigconstant(_ccllib)
 CCL_ERROR_NU_INT = _ccllib.CCL_ERROR_NU_INT
+
+_ccllib.CCL_ERROR_EMULATOR_BOUND_swigconstant(_ccllib)
+CCL_ERROR_EMULATOR_BOUND = _ccllib.CCL_ERROR_EMULATOR_BOUND
+
+_ccllib.CCL_ERROR_NU_SOLVE_swigconstant(_ccllib)
+CCL_ERROR_NU_SOLVE = _ccllib.CCL_ERROR_NU_SOLVE
 
 _ccllib.CCL_ERROR_NOT_IMPLEMENTED_swigconstant(_ccllib)
 CCL_ERROR_NOT_IMPLEMENTED = _ccllib.CCL_ERROR_NOT_IMPLEMENTED

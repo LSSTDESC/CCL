@@ -23,7 +23,8 @@ matter_power_spectrum_types = {
     'halo_model':   lib.halo_model,
     'halomodel':    lib.halo_model,
     'halofit':      lib.halofit,
-    'linear':       lib.linear
+    'linear':       lib.linear,
+    'emu':          lib.emu
 }
 
 baryons_power_spectrum_types = {
@@ -53,6 +54,7 @@ error_types = {
     lib.CCL_ERROR_HMF_INTERP:   'CCL_ERROR_HMF_INTERP',
     lib.CCL_ERROR_PARAMETERS:   'CCL_ERROR_PARAMETERS',
     lib.CCL_ERROR_NU_INT:		'CCL_ERROR_NU_INT',
+    lib.CCL_ERROR_EMULATOR_BOUND: 'CCL_ERROR_EMULATOR_BOUND'
 }
 
 class Parameters(object):

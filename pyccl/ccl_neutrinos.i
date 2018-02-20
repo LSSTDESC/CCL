@@ -1,0 +1,51 @@
+%module ccl_neutrinos
+
+%{
+#define SWIG_FILE_WITH_INIT
+#include "../include/ccl_neutrinos.h"
+%}
+
+// Strip the ccl_ prefix from function names
+%rename("%(strip:[ccl_])s") "";
+
+// Automatically document arguments and output types of all functions
+%feature("autodoc", "1");
+
+%include "../include/ccl_neutrinos.h"
+
+// Enable vectorised arguments for arrays
+%apply (double* IN_ARRAY1, int DIM1) {
+					(double* a, int na), 
+					(double* mnu, int nm)
+					};
+					
+%apply (double* ARGOUT_ARRAY1[DIM1], int DIM1){
+					(double* output, int nout), 
+					(double* output2, int nout2)
+					};
+
+%inline %{
+
+void Omeganuh2_vec(double Neff, double TCMB,
+                   double* a, int na, double* mnu, int nm, 
+                   double* output, int nout,
+                   int* status)
+{
+    assert(nout == na);
+    
+    for(int i=0; i < na; i++){
+      output[i] = ccl_Omeganuh2(a[i], Neff, mnu, TCMB, NULL, status);
+    }   
+}
+
+void Omeganuh2_to_Mnu_vec(double Neff, double OmNuh2, double TCMB,
+                          double a_scalar,
+                          double* output2, int nout2,
+                          int* status)
+{
+    assert(nout2 == nm);
+    
+    output2 = ccl_Omeganuh2_to_Mnu(a_scalar, Neff, OmNuh2, TCMB, NULL, status);   
+}
+
+%}

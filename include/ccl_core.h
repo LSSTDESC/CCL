@@ -113,8 +113,10 @@ typedef struct ccl_data{
   // These are all functions of the wavenumber k and the scale factor a.
   gsl_spline2d * p_lin;
   gsl_spline2d * p_nl;
-  double k_min; //k_min  [1/Mpc] <- minimum wavenumber that the power spectrum has been computed to 
-
+  double k_min_lin; //k_min  [1/Mpc] <- minimum wavenumber that the power spectrum has been computed to 
+  double k_min_nl; 
+  double k_max_lin;
+  double k_max_nl;
 } ccl_data;
 
 /**
@@ -165,7 +167,7 @@ ccl_cosmology * ccl_cosmology_create_with_lcdm_params(
  * @param Omega_b Omega_b 
  * @param Omega_k Omega_k 
  * @param N_nu_rel Number of relativisitic species
- * @param N_nu_mass N_nu_mass
+ * @param N_nu_mass Number of massive neutrinos
  * @param mnu neutrino mass
  * @param w0 Dark energy EoS parameter
  * @param wa Dark energy EoS parameter

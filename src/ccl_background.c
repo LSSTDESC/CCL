@@ -24,7 +24,7 @@ static double h_over_h0(double a, ccl_cosmology * cosmo, int *status)
   // Check if massive neutrinos are present - if not, we don't need to compute their contribution
   double Om_mass_nu;
   if ((cosmo->params.N_nu_mass)>1e-12) {
-    Om_mass_nu = Omeganuh2(a, cosmo->params.N_nu_mass, cosmo->params.mnu, cosmo->params.T_CMB, cosmo->data.accelerator, status) / (cosmo->params.h) / (cosmo->params.h);
+    Om_mass_nu = ccl_Omeganuh2(a, cosmo->params.N_nu_mass, cosmo->params.mnu, cosmo->params.T_CMB, cosmo->data.accelerator, status) / (cosmo->params.h) / (cosmo->params.h);
     ccl_check_status(cosmo, status);
   }
   else {
@@ -51,7 +51,7 @@ double ccl_omega_x(ccl_cosmology * cosmo, double a, ccl_omega_x_label label, int
   double OmNuh2;
   if ((cosmo->params.N_nu_mass) > 0.0001) {
     // Call the massive neutrino density function just once at this redshift.
-    OmNuh2 = Omeganuh2(a, cosmo->params.N_nu_mass, cosmo->params.mnu, 
+    OmNuh2 = ccl_Omeganuh2(a, cosmo->params.N_nu_mass, cosmo->params.mnu, 
 		       cosmo->params.T_CMB, cosmo->data.accelerator, status);
     ccl_check_status(cosmo, status);
   }
