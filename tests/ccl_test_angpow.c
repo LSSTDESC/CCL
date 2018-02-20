@@ -4,8 +4,8 @@
 #include <math.h>
 
 #define NZ 1024
-#define Z0_GC 0.5 
-#define SZ_GC 0.005
+#define Z0_GC 1.0 
+#define SZ_GC 0.02
 #define NL 499
 
 #define CLS_PRECISION 1E-2 // with respect to cosmic variance
@@ -105,25 +105,26 @@ static void test_angpow_precision(struct angpow_data * data)
   ccl_angular_cls(ccl_cosmo,wnl,ct_gc_B,ct_gc_B,NL,ells,cells_gg_native,&status);
   ccl_angular_cls(ccl_cosmo,wap,ct_gc_A,ct_gc_A,NL,ells,cells_gg_angpow,&status);
   double rel_precision = 0.;
-  double rel_precision_lim = 0.;
+  //double rel_precision_lim = 0.;
   for(int ii=2;ii<NL;ii++) {
     int l = ells[ii];
     double cl_gg_nl=cells_gg_native[ii];
     double cl_gg_ap=cells_gg_angpow[ii];
     double cl_gg_lim=cells_gg_limber[ii];
     double ratio = fabs(cl_gg_nl-cl_gg_ap)/cl_gg_nl;
-    double ratio_lim = fabs(cl_gg_nl-cl_gg_lim)/cl_gg_lim;
+    //double ratio_lim = fabs(cl_gg_nl-cl_gg_lim)/cl_gg_lim;
     rel_precision += ratio / sqrt(2./(2*l+1));
-    if(l>NL/2)
-      rel_precision_lim += ratio_lim / sqrt(2./(2*l+1));
-    printf("%d %.3g %.3g %.3g %.3g\n",l,cl_gg_nl,cl_gg_lim,ratio_lim,ratio_lim / sqrt(2./(2*l+1)));
+    //if(l>NL/2)
+    //  rel_precision_lim += ratio_lim / sqrt(2./(2*l+1));
+    //printf("%d %.3g %.3g %.3g %.3g\n",l,cl_gg_nl,cl_gg_lim,ratio_lim,ratio_lim / sqrt(2./(2*l+1)));
   }
   rel_precision /= NL;
-  rel_precision_lim /= NL/2;
-  printf("precision %.3g\n",rel_precision);
-  printf("precision %.3g\n",rel_precision_lim);
+  //rel_precision_lim /= NL/2;
+  //printf("precision %.3g\n",rel_precision);
+  //printf("precision %.3g\n",rel_precision_lim);
 
-  ASSERT_TRUE((rel_precision < CLS_PRECISION)&&(rel_precision_lim < CLS_PRECISION));
+  //ASSERT_TRUE((rel_precision < CLS_PRECISION)&&(rel_precision_lim < CLS_PRECISION));
+  ASSERT_TRUE(rel_precision < CLS_PRECISION);
 
   
   //Free up tracers

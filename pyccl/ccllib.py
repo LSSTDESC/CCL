@@ -907,9 +907,9 @@ def cl_workspace_default(lmax, l_limber, non_limber_method, l_logstep, l_linstep
     """cl_workspace_default(int lmax, int l_limber, int non_limber_method, double l_logstep, int l_linstep, double dchi, double dlk, double zmin, int * status) -> CCL_ClWorkspace"""
     return _ccllib.cl_workspace_default(lmax, l_limber, non_limber_method, l_logstep, l_linstep, dchi, dlk, zmin, status)
 
-def cl_workspace_default_limber(lmax, l_limber, status):
-    """cl_workspace_default_limber(int lmax, int l_limber, int * status) -> CCL_ClWorkspace"""
-    return _ccllib.cl_workspace_default_limber(lmax, l_limber, status)
+def cl_workspace_default_limber(lmax, l_logstep, l_linstep, dlk, status):
+    """cl_workspace_default_limber(int lmax, double l_logstep, int l_linstep, double dlk, int * status) -> CCL_ClWorkspace"""
+    return _ccllib.cl_workspace_default_limber(lmax, l_logstep, l_linstep, dlk, status)
 
 def cl_workspace_free(w):
     """cl_workspace_free(CCL_ClWorkspace w)"""

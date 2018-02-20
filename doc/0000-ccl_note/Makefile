@@ -78,10 +78,15 @@ tar : main
 	cd ${tardir} && tar -czf ../${outname}.tar.gz . && cd ..
 	rm -rf ${tardir}
 
-authlist :
-	pip install --upgrade mkauthlist
+authlist : mkauthlist-exists
+	#pip install --upgrade mkauthlist
+ifdef MKAUTHLIST
+	$(MKAUTHLIST) -j ${style} -f -c "LSST Dark Energy Science Collaboration" \
+		--cntrb contributions.tex authors.csv authors.tex
+else
 	mkauthlist -j ${style} -f -c "LSST Dark Energy Science Collaboration" \
 		--cntrb contributions.tex authors.csv authors.tex
+endif
 
 # http://stackoverflow.com/q/8028314/
 TARGETS=apj apjl prd prl mnras tex aastex61 emulateapj
@@ -95,6 +100,12 @@ $(TARGETS):
 # with no target compiles PDF out of main.tex using lsstdescnote.cls
 # (which is to say, by default we assume you are writing an LSST
 # DESC Note in latex format).
+
+# Check if mkauthlist exists. Can be overridden with environment variable.
+mkauthlist-exists : 
+ifndef MKAUTHLIST
+	$(if $(shell which mkauthlist),,$(error "mkauthlist not found. Install using 'pip install mkauthlist'"))
+endif
 
 tidy:
 	rm -f *.log *.aux *.out *.dvi *.synctex.gz *.fdb_latexmk *.fls

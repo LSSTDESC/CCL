@@ -17010,51 +17010,69 @@ fail:
 SWIGINTERN PyObject *_wrap_cl_workspace_default_limber(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   int arg1 ;
-  int arg2 ;
-  int *arg3 = (int *) 0 ;
+  double arg2 ;
+  int arg3 ;
+  double arg4 ;
+  int *arg5 = (int *) 0 ;
   int val1 ;
   int ecode1 = 0 ;
-  int val2 ;
+  double val2 ;
   int ecode2 = 0 ;
-  int temp3 ;
-  int res3 = 0 ;
+  int val3 ;
+  int ecode3 = 0 ;
+  double val4 ;
+  int ecode4 = 0 ;
+  int temp5 ;
+  int res5 = 0 ;
   PyObject * obj0 = 0 ;
   PyObject * obj1 = 0 ;
   PyObject * obj2 = 0 ;
+  PyObject * obj3 = 0 ;
+  PyObject * obj4 = 0 ;
   CCL_ClWorkspace *result = 0 ;
   
-  if (!PyArg_ParseTuple(args,(char *)"OOO:cl_workspace_default_limber",&obj0,&obj1,&obj2)) SWIG_fail;
+  if (!PyArg_ParseTuple(args,(char *)"OOOOO:cl_workspace_default_limber",&obj0,&obj1,&obj2,&obj3,&obj4)) SWIG_fail;
   ecode1 = SWIG_AsVal_int(obj0, &val1);
   if (!SWIG_IsOK(ecode1)) {
     SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "cl_workspace_default_limber" "', argument " "1"" of type '" "int""'");
   } 
   arg1 = (int)(val1);
-  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "cl_workspace_default_limber" "', argument " "2"" of type '" "int""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "cl_workspace_default_limber" "', argument " "2"" of type '" "double""'");
   } 
-  arg2 = (int)(val2);
-  if (!(SWIG_IsOK((res3 = SWIG_ConvertPtr(obj2,SWIG_as_voidptrptr(&arg3),SWIGTYPE_p_int,0))))) {
+  arg2 = (double)(val2);
+  ecode3 = SWIG_AsVal_int(obj2, &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "cl_workspace_default_limber" "', argument " "3"" of type '" "int""'");
+  } 
+  arg3 = (int)(val3);
+  ecode4 = SWIG_AsVal_double(obj3, &val4);
+  if (!SWIG_IsOK(ecode4)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "cl_workspace_default_limber" "', argument " "4"" of type '" "double""'");
+  } 
+  arg4 = (double)(val4);
+  if (!(SWIG_IsOK((res5 = SWIG_ConvertPtr(obj4,SWIG_as_voidptrptr(&arg5),SWIGTYPE_p_int,0))))) {
     int val; 
-    int ecode = SWIG_AsVal_int(obj2, &val);
+    int ecode = SWIG_AsVal_int(obj4, &val);
     if (!SWIG_IsOK(ecode)) {
-      SWIG_exception_fail(SWIG_ArgError(ecode), "in method '" "cl_workspace_default_limber" "', argument " "3"" of type '" "int""'");
+      SWIG_exception_fail(SWIG_ArgError(ecode), "in method '" "cl_workspace_default_limber" "', argument " "5"" of type '" "int""'");
     }
-    temp3 = (int)(val);
-    arg3 = &temp3;
-    res3 = SWIG_AddTmpMask(ecode);
+    temp5 = (int)(val);
+    arg5 = &temp5;
+    res5 = SWIG_AddTmpMask(ecode);
   }
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    result = (CCL_ClWorkspace *)ccl_cl_workspace_default_limber(arg1,arg2,arg3);
+    result = (CCL_ClWorkspace *)ccl_cl_workspace_default_limber(arg1,arg2,arg3,arg4,arg5);
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
   resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_CCL_ClWorkspace, 0 |  0 );
-  if (SWIG_IsTmpObj(res3)) {
-    resultobj = SWIG_Python_AppendOutput(resultobj, SWIG_From_int((*arg3)));
+  if (SWIG_IsTmpObj(res5)) {
+    resultobj = SWIG_Python_AppendOutput(resultobj, SWIG_From_int((*arg5)));
   } else {
-    int new_flags = SWIG_IsNewObj(res3) ? (SWIG_POINTER_OWN |  0 ) :  0 ;
-    resultobj = SWIG_Python_AppendOutput(resultobj, SWIG_NewPointerObj((void*)(arg3), SWIGTYPE_p_int, new_flags));
+    int new_flags = SWIG_IsNewObj(res5) ? (SWIG_POINTER_OWN |  0 ) :  0 ;
+    resultobj = SWIG_Python_AppendOutput(resultobj, SWIG_NewPointerObj((void*)(arg5), SWIGTYPE_p_int, new_flags));
   }
   return resultobj;
 fail:
@@ -20531,7 +20549,7 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"delete_CCL_ClWorkspace", _wrap_delete_CCL_ClWorkspace, METH_VARARGS, (char *)"delete_CCL_ClWorkspace(CCL_ClWorkspace self)"},
 	 { (char *)"CCL_ClWorkspace_swigregister", CCL_ClWorkspace_swigregister, METH_VARARGS, NULL},
 	 { (char *)"cl_workspace_default", _wrap_cl_workspace_default, METH_VARARGS, (char *)"cl_workspace_default(int lmax, int l_limber, int non_limber_method, double l_logstep, int l_linstep, double dchi, double dlk, double zmin, int * status) -> CCL_ClWorkspace"},
-	 { (char *)"cl_workspace_default_limber", _wrap_cl_workspace_default_limber, METH_VARARGS, (char *)"cl_workspace_default_limber(int lmax, int l_limber, int * status) -> CCL_ClWorkspace"},
+	 { (char *)"cl_workspace_default_limber", _wrap_cl_workspace_default_limber, METH_VARARGS, (char *)"cl_workspace_default_limber(int lmax, double l_logstep, int l_linstep, double dlk, int * status) -> CCL_ClWorkspace"},
 	 { (char *)"cl_workspace_free", _wrap_cl_workspace_free, METH_VARARGS, (char *)"cl_workspace_free(CCL_ClWorkspace w)"},
 	 { (char *)"angular_cls", _wrap_angular_cls, METH_VARARGS, (char *)"angular_cls(cosmology cosmo, CCL_ClWorkspace w, CCL_ClTracer clt1, CCL_ClTracer clt2, int nl_out, int * l, double * cl, int * status)"},
 	 { (char *)"cl_tracer_new_wrapper", _wrap_cl_tracer_new_wrapper, METH_VARARGS, (char *)"cl_tracer_new_wrapper(cosmology cosmo, int tracer_type, int has_rsd, int has_magnification, int has_intrinsic_alignment, int nz_n, int nn, int nz_b, int nb, int nz_s, int ns, int nz_ba, int nba, int nz_rf, int nrf, double z_source, int * status) -> CCL_ClTracer"},
