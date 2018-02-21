@@ -56,6 +56,7 @@ def _vectorize_fn_simple(fn, fn_vec, x, returns_status=True):
 
     """
     status = 0
+    if isinstance(x, int): x = float(x)
     if isinstance(x, float):
         # Use single-value function
         if returns_status:
@@ -97,7 +98,8 @@ def _vectorize_fn(fn, fn_vec, cosmo, x, returns_status=True):
     cosmo = _cosmology_obj(cosmo)
     
     status = 0
-
+    
+    if isinstance(x, int): x = float(x)
     if isinstance(x, float):
         # Use single-value function
         if returns_status:
@@ -143,6 +145,7 @@ def _vectorize_fn2(fn, fn_vec, cosmo, x, z, returns_status=True):
     scalar = False
 
     # If a scalar was passed, convert to an array
+    if isinstance(x, int): x = float(x)
     if isinstance(x, float):
         scalar = True
         x = np.array([x,])
@@ -185,7 +188,8 @@ def _vectorize_fn3(fn, fn_vec, cosmo, x, n, returns_status=True):
     cosmo = _cosmology_obj(cosmo)
     status = 0
     scalar = False
-
+    
+    if isinstance(x, int): x = float(x)
     if isinstance(x, float):
         scalar = True
         x=np.array([x,])
@@ -229,7 +233,8 @@ def _vectorize_fn4(fn, fn_vec, cosmo, x, a, d, returns_status=True):
     cosmo = _cosmology_obj(cosmo)
     status = 0
     scalar = False
-
+    
+    if isinstance(x, int): x = float(x)
     if isinstance(x, float):
         scalar = True
         x=np.array([x,])
