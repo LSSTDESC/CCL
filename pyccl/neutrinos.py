@@ -25,10 +25,13 @@ def Omeganuh2(a, Neff, mnu, TCMB=2.725):
     # Convert to array if it's not already an array
     if not isinstance(a, np.ndarray):
         a = np.array([a,]).flatten()
+    if not isinstance(mnu, np.ndarray):
         mnu = np.array([mnu,]).flatten()
     
+    # FIXME: Implement length checking of mnu (should it be a certain length?)
+    
     # Call function
-    OmNuh2, status = lib.Omeganuh2_vec(Neff, TCMB, a, mnu, status)
+    OmNuh2, status = lib.Omeganuh2_vec(Neff, TCMB, a, mnu, a.size, status)
     
     # Check status and return
     check(status)
@@ -53,11 +56,14 @@ def Omeganuh2_to_Mnu(a, Neff, OmNuh2, TCMB=2.725):
     #scalar = True if isinstance(a, float) else False
     
     # Convert to array if it's not already an array
-    if not isinstance(a, np.ndarray):
-        a = np.array([a,]).flatten()
+    #if not isinstance(a, np.ndarray):
+    #    a = np.array([a,]).flatten()
+    if not isinstance(a, float):
+        raise TypeError("Omeganuh2_to_Mnu(): 'a' argument must be a single float.")
     
     # Call function
-    mnu, status = lib.Omeganuh2_to_Mnu_vec(Neff, OmNuh2, TCMB, a, status)
+    N_mnu = 3
+    mnu, status = lib.Omeganuh2_to_Mnu_vec(Neff, OmNuh2, TCMB, a, N_mnu, status)
     
     # Check status and return
     check(status)

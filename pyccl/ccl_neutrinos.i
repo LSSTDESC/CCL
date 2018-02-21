@@ -37,8 +37,11 @@ void Omeganuh2_to_Mnu_vec(double Neff, double OmNuh2, double TCMB,
                           double* output, int nout,
                           int* status)
 {
-    assert(nout == nm);
-    output = ccl_Omeganuh2_to_Mnu(a_scalar, Neff, OmNuh2, TCMB, NULL, status);   
+    double* mnu;
+    mnu = ccl_Omeganuh2_to_Mnu(a_scalar, Neff, OmNuh2, TCMB, NULL, status);
+    for(int i=0; i < nout; i++){
+        output[i] = *(mnu+i);
+    }
 }
 
 %}
