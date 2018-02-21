@@ -20,7 +20,7 @@ int main(int argc, char * argv[])
   */
   double Nnurel = 0.00641;
   double Nmass = 3;
-  double mnu = 0.06;
+  double mnu[3] = {0.02, 0.02, 0.02};
   /*In the case of the emulator without massive
    neutrinos, we simply set: 
   */

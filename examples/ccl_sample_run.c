@@ -23,7 +23,6 @@
 #define PS 0.1 
 #define NREL 3.046
 #define NMAS 0
-#define MNU 0.0
 
 
 
@@ -44,7 +43,10 @@ int main(int argc,char **argv)
 {
   //status flag
   int status =0;
-
+    
+  // Set neutrino masses
+  double MNU[3] = {0., 0., 0.};
+  
   // Initialize cosmological parameters
   ccl_configuration config=default_config;
   config.transfer_function_method=ccl_boltzmann_class;
