@@ -16,16 +16,19 @@ Reviewing a pull request (PR) on github
  4. Make sure the C unit tests pass (i.e. run `make check` successfully).
  5. Make sure the python tests pass (i.e. run `python run_tests.py` from the 
     `tests/` directory).
- 6. Look at the code (see "Files changed" on the top of the GitHub pull request 
+ 6. Make sure that the autotools files and SWIG wrapper have been regenerated 
+    if necessary.
+ 7. Look at the code (see "Files changed" on the top of the GitHub pull request 
     page) and check that the changes make sense to you.
- 7. If new science has been implemented, and if possible, try to compare the 
-    output of the code against your own predictions. Possibly, ask the developer 
-    to implement a unit test for it.
- 8. Make sure that the libraries install successfully and the unit tests pass 
-    on Travis-CI.
- 9. Make sure that the changes come with documentation, e.g. internally in the 
-    C code and through Python docstrings. Make sure that example code in the 
-    `examples/` directory has been updated appropriately.
+ 8. If new science has been implemented, and if possible, try to compare the 
+    output of the code against your own predictions. Ask the developer to 
+    implement appropriate unit tests for it.
+ 9. Make sure that the unit tests pass on Travis-CI.
+10. Make sure that the changes come with documentation, e.g. internally in the 
+    C code and through Python docstrings, and that the doxygen documentation 
+    has been regenerated. Make sure that example code in the `examples/` 
+    directory has been updated appropriately, and that the CCL note has been 
+    updated if necessary.
 
 Things to do if you are adding new features to the CCL C lib
 ------------------------------------------------------------
