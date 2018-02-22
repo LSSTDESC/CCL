@@ -31,13 +31,13 @@ def reference_models():
 
     # Emulator Pk
     p6 = ccl.Parameters(Omega_c=0.27, Omega_b=0.022/0.67**2, h=0.67, sigma8=0.8, 
-                        n_s=0.96, N_nu_rel=3.04, N_nu_mass=0., m_nu=0.)
+                        n_s=0.96, Neff=3.04, m_nu=0.)
     cosmo6 = ccl.Cosmology(p6, transfer_function='emulator', 
                            matter_power_spectrum='emu')
     
     # Emulator Pk w/neutrinos
     p7 = ccl.Parameters(Omega_c=0.27, Omega_b=0.022/0.67**2, h=0.67, sigma8=0.8, 
-                        n_s=0.96, N_nu_rel=0.00641, N_nu_mass=3, m_nu=[0.02, 0.02, 0.02])
+                        n_s=0.96, Neff=3.04, m_nu=[0.02, 0.02, 0.02])
     cosmo7 = ccl.Cosmology(p7, transfer_function='emulator', 
                            matter_power_spectrum='emu')
 
@@ -208,17 +208,17 @@ def check_neutrinos():
     a_lst = [_a for _a in a_arr]
     
     TCMB = 2.725
-    Neff = 3.046
-    mnu = 0.06
+    N_nu_mass = 3
+    mnu = [0.02, 0.02, 0.02]
     OmNuh2 = 0.0006441
     
     # Omeganuh2
-    assert_( all_finite(ccl.Omeganuh2(a, Neff, mnu, TCMB)) )
-    assert_( all_finite(ccl.Omeganuh2(a_lst, Neff, mnu, TCMB)) )
-    assert_( all_finite(ccl.Omeganuh2(a_arr, Neff, mnu, TCMB)) )
+    assert_( all_finite(ccl.Omeganuh2(a, N_nu_mass, mnu, TCMB)) )
+    assert_( all_finite(ccl.Omeganuh2(a_lst, N_nu_mass, mnu, TCMB)) )
+    assert_( all_finite(ccl.Omeganuh2(a_arr, N_nu_mass, mnu, TCMB)) )
     
     # Omeganuh2_to_Mnu
-    assert_( all_finite(ccl.Omeganuh2_to_Mnu(a, Neff, OmNuh2, TCMB)) )
+    assert_( all_finite(ccl.Omeganuh2_to_Mnu(a, N_nu_mass, OmNuh2, TCMB)) )
     #assert_( all_finite(ccl.Omeganuh2_to_Mnu(a_lst, Neff, OmNuh2, TCMB)) )
     #assert_( all_finite(ccl.Omeganuh2_to_Mnu(a_arr, Neff, OmNuh2, TCMB)) )
 

@@ -29,13 +29,13 @@ ccl_parameters parameters_create_nu(
                         double bcm_ks, int mnu_is_sum, double* m_nu, int n_m, int* status)
 {
 
-    if (( M_nu[0] * M_nu[0])<1e-7){
-    return ccl_parameters_create(Omega_c, Omega_b, Omega_k, Neff M_nu, 
+    if (( m_nu[0] * m_nu[0])<1e-7){
+    return ccl_parameters_create(Omega_c, Omega_b, Omega_k, Neff, m_nu, mnu_is_sum,
                                  w0, wa, h, norm_pk, n_s, bcm_log10Mc, bcm_etab, bcm_ks,
                                  -1, NULL, NULL, status);
     }else{
 
-    return ccl_parameters_create(Omega_c, Omega_b, Omega_k, N_nu_rel, n_m, M_nu, w0, wa, h, norm_pk, n_s, bcm_log10Mc, bcm_etab, bcm_ks, -1, NULL, NULL, status);
+    return ccl_parameters_create(Omega_c, Omega_b, Omega_k, Neff, m_nu, mnu_is_sum, w0, wa, h, norm_pk, n_s, bcm_log10Mc, bcm_etab, bcm_ks, -1, NULL, NULL, status);
     }                             
     
     
@@ -54,12 +54,12 @@ ccl_parameters parameters_create_nu_vec(
     assert(nz == nf);
     if (nz == 0){ nz = -1; }
     
-    if (( M_nu[0] * M_nu[0])<1e-7){
-    return ccl_parameters_create(Omega_c, Omega_b, Omega_k, N_nu_rel, 0, M_nu, 
+    if (( m_nu[0] * m_nu[0])<1e-7){
+    return ccl_parameters_create(Omega_c, Omega_b, Omega_k, Neff, m_nu, mnu_is_sum, 
                                  w0, wa, h, norm_pk, n_s, bcm_log10Mc, bcm_etab, bcm_ks,
                                  nz, zarr, dfarr, status);
     }else{
-    return ccl_parameters_create(Omega_c, Omega_b, Omega_k, N_nu_rel, n_m, M_nu, 
+    return ccl_parameters_create(Omega_c, Omega_b, Omega_k, Neff, m_nu, mnu_is_sum, 
                                  w0, wa, h, norm_pk, n_s, bcm_log10Mc, bcm_etab, bcm_ks,
                                  nz, zarr, dfarr, status);
     }   

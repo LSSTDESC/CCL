@@ -172,15 +172,15 @@ class Parameters(object):
         #            raise ValueError("Length of m_nu must match N_nu_mass.")
         
         if isinstance(m_nu, float):
-			mnu_is_sum = 1  # True
-			m_nu = [m_nu]
-		elif hasattr(m_nu, "__len__"):
-			if (len(m_nu)!=3):
-				raise ValueError("m_nu must be a float or array-like object with length 3.")
-			else:
-				mnu_is_sum = 0  # False
-		else:
-			raise ValueError("m_nu must be a float or array-like object with length 3.")
+            mnu_is_sum = 1  # True
+            m_nu = [m_nu]
+        elif hasattr(m_nu, "__len__"):
+            if (len(m_nu)!=3):
+                raise ValueError("m_nu must be a float or array-like object with length 3.")
+            else:
+                mnu_is_sum = 0  # False
+        else:
+            raise ValueError("m_nu must be a float or array-like object with length 3.")
         
         
         # Check if any compulsory parameters are not set
@@ -245,7 +245,7 @@ class Parameters(object):
         """
         params = ['Omega_c', 'Omega_b', 'Omega_m', 'Omega_k', 'Omega_l',
                   'w0', 'wa', 'H0', 'h', 'A_s', 'n_s', 'bcm_log10Mc', 'bcm_etab', 'bcm_ks',
-                  'N_nu_rel', 'N_nu_mass', 'mnu', 'Omega_n_mass', 'Omega_n_rel',
+                  'Neff', 'mnu', 'Omega_n_mass', 'Omega_n_rel',
                   'T_CMB', 'Omega_g', 'z_star', 'has_mgrowth']
         
         # Get values of parameters
@@ -272,7 +272,7 @@ class Cosmology(object):
     def __init__(self, 
                  params=None, config=None,
                  Omega_c=None, Omega_b=None, h=None, A_s=None, n_s=None, 
-                 Omega_k=0., N_nu_rel=3.046, N_nu_mass=0., m_nu=0., w0=-1., wa=0.,
+                 Omega_k=0., Neff=3.046, m_nu=0., w0=-1., wa=0.,
                  bcm_log10Mc=math.log10(1.2e14), bcm_etab=0.5, bcm_ks=55., sigma8=None,
                  z_mg=None, df_mg=None, 
                  transfer_function='boltzmann_class',
@@ -304,7 +304,7 @@ class Cosmology(object):
         if params is None:
             # Create new Parameters object
             params = Parameters(Omega_c=Omega_c, Omega_b=Omega_b, h=h, A_s=A_s, 
-                                n_s=n_s, Omega_k=Omega_k, N_nu_rel = N_nu_rel, N_nu_mass=N_nu_mass, m_nu=m_nu, 
+                                n_s=n_s, Omega_k=Omega_k, Neff = Neff, m_nu=m_nu, 
                                 w0=w0, wa=wa, sigma8=sigma8, bcm_log10Mc=bcm_log10Mc, bcm_etab=bcm_etab,
                                 bcm_ks=bcm_ks, z_mg=z_mg, df_mg=df_mg)
             self.params = params
@@ -319,7 +319,7 @@ class Cosmology(object):
             # Warn if any cosmological parameters were specified at the same 
             # time as a Parameters() object; they will be ignored
             argtest = [Omega_c==None, Omega_b==None, h==None, A_s==None, 
-                       n_s==None, Omega_k==0., N_nu_rel==3.046, N_nu_mass==0., m_nu==0.,
+                       n_s==None, Omega_k==0., Neff==3.046, m_nu==0.,
                        w0==-1., wa==0., bcm_log10Mc==math.log10(1.2e14), bcm_etab==0.5, bcm_ks==55.,
                        sigma8==None, z_mg==None, df_mg==None]
             
