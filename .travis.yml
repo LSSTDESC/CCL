@@ -13,6 +13,7 @@ before_install:
   - sudo apt-get install fftw3 fftw3-dev pkg-config
 #  - sudo apt-get install latexmk
   - pip install numpy
+  - pip install coveralls
   - ./install-gsl.sh
   - python class_install.py
 #addons:
