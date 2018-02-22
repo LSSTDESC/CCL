@@ -50,9 +50,6 @@ CTEST2(cosmology, create_general_cosmo) {
   
   // Pull ccl_parameters object out of ccl_cosmology
   ccl_parameters params = (*cosmo).params;
-  //double mnutest = (params.mnu)[0];
-  
-  printf("params mnu=%f, data mnu=%f\n", (params.mnu[0]), (data->mnuval));
   
   ASSERT_DBL_NEAR_TOL(params.Omega_c, data->Omega_c, 1e-10);
   ASSERT_DBL_NEAR_TOL(params.w0, -1.0, 1e-10);

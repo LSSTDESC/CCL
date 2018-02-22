@@ -313,8 +313,6 @@ ccl_parameters ccl_parameters_create(double Omega_c, double Omega_b, double Omeg
   // Neutrinos
   params.Neff = Neff;
   
-  printf("Neff=%f, mnu_is_sum=%d\n", params.Neff, mnu_is_sum);
-  
   // If mnu is a sum of neutrino masses, set these by default to 
   // obey the normal hierarchy.
   if (mnu_is_sum){
@@ -328,7 +326,6 @@ ccl_parameters ccl_parameters_create(double Omega_c, double Omega_b, double Omeg
 	  else{
 	    // The user has provided a sum that is below the physical limit.
 	    // Status?
-	    printf("Sum is below physical limit; assuming no nonrelativistic neutrinos.\n");
 	    mnu[0] = 0.;
 	    mnu[1] = 0.;
 	    mnu[2] = 0.;
@@ -344,22 +341,19 @@ ccl_parameters ccl_parameters_create(double Omega_c, double Omega_b, double Omeg
   		N_nu_mass = N_nu_mass + 1;
   	}  	  
   }
-  printf("N_nu_mass=%d\n", N_nu_mass);
   params.N_nu_mass = N_nu_mass;
   
   // Fill the array of massive neutrinos
 //  params.N_nu_mass = N_nu_mass;
   if (N_nu_mass>0){
   	params.mnu=malloc(params.N_nu_mass*sizeof(double));
-  	printf("Allocated params.mnu\n");
   	int relativistic[3] = {0, 0, 0};
 	for (int i = 0; i<N_nu_mass; i = i + 1){
-		printf("i=%d\n", i);
 		for (int j = 0; j<3; j = j +1){
-			printf("j=%d\n", j);
 			if ((mnu[j]>0.00017) && (relativistic[j]==0)){
 				relativistic[j]=1;
 				params.mnu[i] = mnu[j];
+				break;
 			}
 		}
 	}
@@ -367,10 +361,6 @@ ccl_parameters ccl_parameters_create(double Omega_c, double Omega_b, double Omeg
 	  params.mnu = malloc(sizeof(double));
 	  params.mnu[0] = 0.;
 	}
-  
-  for (int i = 0; i<N_nu_mass; i = i + 1){
-	  printf("mnu=%f\n", params.mnu[i]);
-  }
   
   // Dark Energy
   params.w0 = w0;

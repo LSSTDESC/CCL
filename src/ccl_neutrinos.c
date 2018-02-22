@@ -191,7 +191,7 @@ double* ccl_Omeganuh2_to_Mnu(double a, double Neff, double OmNuh2, double TCMB, 
   gsl_function F;
   OmNuh2_params p;
   p.a = a;
-  p.Neff =3;
+  p.Neff =Neff;
   p.OmNuh2_target = OmNuh2;
   p.TCMB = TCMB;
   p.accel = accel;

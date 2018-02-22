@@ -1122,19 +1122,12 @@ static void ccl_cosmology_compute_power_emu(ccl_cosmology * cosmo, int * status)
     strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_emu(): h is outside allowed range\n");
     return;
   }
-  if(cosmo->params.N_nu_mass>0){
-    //From CLASS explanatory.ini: N_nu_rel=0.00641 to obtain Neff=3.046 in the early Universe.
-    if(cosmo->params.N_nu_mass==3){
-      if(fabs(cosmo->params.N_nu_rel-0.00641)>1.e-5){
-	*status=CCL_ERROR_INCONSISTENT;
-	strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_emu(): N_nu_rel must be fixed to 0.00641 for cosmic emulator predictions with 3 massive neutrinos.\n");
-	return;
-      }
-    } else {
+  if(cosmo->params.N_nu_mass>0) {
+      if (cosmo->params.N_nu_mass!=3){
       *status=CCL_ERROR_INCONSISTENT;
       strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_emu(): N_nu_mass cannot be other than 3 for cosmic emulator predictions.\n");
       return;
-    }
+  }
   } else {
     if(fabs(cosmo->params.N_nu_rel - 3.04)>1.e-6){
       *status=CCL_ERROR_INCONSISTENT;
