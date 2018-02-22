@@ -63,7 +63,7 @@ class Parameters(object):
     """
     
     def __init__(self, Omega_c=None, Omega_b=None, h=None, A_s=None, n_s=None, 
-                 Omega_k=0., N_nu_rel=3.046, N_nu_mass=0, m_nu=0.,w0=-1., wa=0., 
+                 Omega_k=0., Neff = 3.046, m_nu=0.,w0=-1., wa=0., 
                  bcm_log10Mc=math.log10(1.2e14), bcm_etab=0.5, bcm_ks=55., sigma8=None,
                  z_mg=None, df_mg=None):
         """
@@ -82,9 +82,10 @@ class Parameters(object):
                          specified.
             n_s (float): Primordial scalar perturbation spectral index.
             Omega_k (float, optional): Curvature density fraction. Defaults to 0.
-            N_nu_rel (float, optional): Number of massless neutrinos present. Defaults to 3.046
-            N_nu_mass (float, optional): Number of massive neutrinos present. Defaults to 0.
-            m_nu (:obj: array_like, optional): total mass in eV of the massive neutrinos present (current must be equal mass). Defaults to [0].
+            Neff (float, optional): Effective number of neutrino species. Defaults to 3.046
+            m_nu (:obj: float or array-like, optional): If float: total mass in eV of 
+							the massive neutrinos present. If array-like, masses of 3 neutrino
+							species (must have length 3).
             w0 (float, optional): First order term of dark energy equation of 
                                   state. Defaults to -1.
             wa (float, optional): Second order term of dark energy equation of 
@@ -138,42 +139,53 @@ class Parameters(object):
             
         # Check if N_nu_mass is a float and if so does it represent an integer?
         # If it is a float that could be an integer, make it an integer.
-        if (type(N_nu_mass)==float):
-            if ( N_nu_mass.is_integer() != True):
-                raise ValueError("N_nu_mass must be an integer value.")
-            else:
-                N_nu_mass = int(N_nu_mass)     
+        #if (type(N_nu_mass)==float):
+        #    if ( N_nu_mass.is_integer() != True):
+        #        raise ValueError("N_nu_mass must be an integer value.")
+        #    else:
+        #        N_nu_mass = int(N_nu_mass)     
 
         # Check if N_nu_mass is now anything other than an integer:
-        if (type(N_nu_mass)!= int):
-            raise ValueError("N_nu_mass must be an integer (or a float with integer value).")
-        else:
-            if (N_nu_mass==0):
-                if (hasattr(m_nu, "__len__")==True):
-					if (len(m_nu)!=1):
-						raise ValueError("Length of m_nu must match N_nu_mass.")
-					else:
-						if (np.abs(m_nu[0]>1e-14)):
-							raise ValueError("If N_nu_mass is 0, m_nu must be 0 or unset.")
-                elif (np.abs(m_nu)>1e-14):
-                    raise ValueError("If N_nu_mass is 0, m_nu must be 0 or unset.")
-                else:
-                    m_nu=np.asarray([m_nu]) # If N_nu_mass = 0 and m_nu=0, put m_nu in an array/       
-            elif (N_nu_mass==1):
-                if (hasattr(m_nu, "__len__")!=True):
-                    m_nu = np.asarray([m_nu]) # Put m_nu value in array.
-                elif (len(m_nu)!=1):
-                    raise ValueError("Length of m_nu must match N_nu_mass.")
-            else:
-                if (hasattr(m_nu, "__len__")!=True):
-                    raise ValueError("Length of m_nu must match N_nu_mass.")
-                elif (len(m_nu)!= N_nu_mass):
-                    raise ValueError("Length of m_nu must match N_nu_mass.")
+        #if (type(N_nu_mass)!= int):
+        #    raise ValueError("N_nu_mass must be an integer (or a float with integer value).")
+        #else:
+        #    if (N_nu_mass==0):
+        #        if (hasattr(m_nu, "__len__")==True):
+		#			if (len(m_nu)!=1):
+		#				raise ValueError("Length of m_nu must match N_nu_mass.")
+		#				else:
+		#				if (np.abs(m_nu[0]>1e-14)):
+		#					raise ValueError("If N_nu_mass is 0, m_nu must be 0 or unset.")
+        #        elif (np.abs(m_nu)>1e-14):
+        #            raise ValueError("If N_nu_mass is 0, m_nu must be 0 or unset.")
+        #        else:
+        #            m_nu=np.asarray([m_nu]) # If N_nu_mass = 0 and m_nu=0, put m_nu in an array/       
+        #    elif (N_nu_mass==1):
+        #        if (hasattr(m_nu, "__len__")!=True):
+        #            m_nu = np.asarray([m_nu]) # Put m_nu value in array.
+        #        elif (len(m_nu)!=1):
+        #            raise ValueError("Length of m_nu must match N_nu_mass.")
+        #    else:
+        #        if (hasattr(m_nu, "__len__")!=True):
+        #            raise ValueError("Length of m_nu must match N_nu_mass.")
+        #        elif (len(m_nu)!= N_nu_mass):
+        #            raise ValueError("Length of m_nu must match N_nu_mass.")
+        
+        if isinstance(m_nu, float):
+			mnu_is_sum = 1  # True
+			m_nu = [m_nu]
+		elif hasattr(m_nu, "__len__"):
+			if (len(m_nu)!=3):
+				raise ValueError("m_nu must be a float or array-like object with length 3.")
+			else:
+				mnu_is_sum = 0  # False
+		else:
+			raise ValueError("m_nu must be a float or array-like object with length 3.")
         
         
         # Check if any compulsory parameters are not set
-        compul = [Omega_c, Omega_b, Omega_k, N_nu_rel, N_nu_mass, w0, wa, h, norm_pk, n_s]
-        names = ['Omega_c', 'Omega_b', 'Omega_k', 'N_nu_rel', 'N_nu_mass', 'w0', 'wa', 
+        compul = [Omega_c, Omega_b, Omega_k, w0, wa, h, norm_pk, n_s]
+        names = ['Omega_c', 'Omega_b', 'Omega_k', 'w0', 'wa', 
                  'h', 'norm_pk', 'n_s']
         for nm, item in zip(names, compul):
             if item is None:
@@ -185,18 +197,18 @@ class Parameters(object):
         if (nz_mg== -1):
             # Create ccl_parameters without modified growth
             self.parameters, status \
-            = lib.parameters_create_nu( Omega_c, Omega_b, Omega_k, N_nu_rel, 
+            = lib.parameters_create_nu( Omega_c, Omega_b, Omega_k, Neff, 
                                              w0, wa, h, norm_pk, 
                                              n_s, bcm_log10Mc, bcm_etab, bcm_ks, 
-                                             m_nu, status ) 
+                                             mnu_is_sum, m_nu, status ) 
                                              
         else:
             # Create ccl_parameters with modified growth arrays
             self.parameters, status \
-            = lib.parameters_create_nu_vec( Omega_c, Omega_b, Omega_k, N_nu_rel, 
+            = lib.parameters_create_nu_vec( Omega_c, Omega_b, Omega_k, Neff, 
                                              w0, wa, h, norm_pk, 
                                              n_s, bcm_log10Mc, bcm_etab, bcm_ks, 
-                                             z_mg, df_mg, m_nu, status )
+                                             z_mg, df_mg, mnu_is_sum, m_nu, status )
         check(status)    
     
     def __getitem__(self, key):

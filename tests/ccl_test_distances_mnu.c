@@ -16,9 +16,9 @@ CTEST_DATA(distances_mnu) {
   double h;
   double A_s;
   double n_s;
-  double N_nu_rel[5];
-  double N_nu_mass[5];
-  double mnu0[1], mnu1[2], mnu2[3], mnu3[1], mnu4[2];
+  double Neff[5];
+  double mnu0[3], mnu1[3], mnu2[3], mnu3[3], mnu4[3];
+  int mnu_is_sum;
   double Omega_v[5];
   double Omega_k[5];
   double w_0[5];
@@ -80,6 +80,7 @@ CTEST_SETUP(distances_mnu) {
   data->h = 0.7;
   data->A_s = 2.1e-9;
   data->n_s = 0.96;
+  data->mnu_is_sum = 0;
 
   // Values that are different for the different models
   double Omega_v[5] = {  0.7,  0.7,  0.7,  0.65, 0.75 };
@@ -89,14 +90,13 @@ CTEST_SETUP(distances_mnu) {
   // We use a total of 3 neutrinos instead of 3.046 
   // This is to compare with benchmarks from astropy
   // which splits equally total N between all species
-  double N_nu_rel[5] 	= {2, 1, 0, 2, 1};
-  double N_nu_mass[5]	= {1, 2, 3, 1, 2};
+  double Neff[5] 	= {3, 3, 3, 3, 3};
   
-  double mnu0[1]	= 	{0.04};
-  double mnu1[2]	= 	{0.05, 0.01};
+  double mnu0[3]	= 	{0.04, 0., 0.};
+  double mnu1[3]	= 	{0.05, 0.01, 0.};
   double mnu2[3]	= 	{0.03, 0.02, 0.04};
-  double mnu3[1]	= 	{0.05};
-  double mnu4[2]	=	{0.03, 0.02};
+  double mnu3[3]	= 	{0.05, 0., 0.};
+  double mnu4[3]	=	{0.03, 0.02, 0.};
   
   data->mnu0[0] = mnu0[0];
   data->mnu1[0] = mnu1[0];
@@ -104,11 +104,17 @@ CTEST_SETUP(distances_mnu) {
   data->mnu3[0] = mnu3[0];
   data->mnu4[0] = mnu4[0];
   
+  data->mnu0[1] = mnu0[1];
   data->mnu1[1] = mnu1[1];
   data->mnu2[1] = mnu2[1];
+  data->mnu3[1] = mnu3[1];
   data->mnu4[1] = mnu4[1];
   
+  data->mnu0[2] = mnu0[2];
+  data->mnu1[2] = mnu1[1];
   data->mnu2[2] = mnu2[1];
+  data->mnu3[2] = mnu3[1];
+  data->mnu4[2] = mnu4[1];
 
   // Fill in the values from these constant arrays.
   for (int i=0; i<5; i++) {
@@ -116,8 +122,7 @@ CTEST_SETUP(distances_mnu) {
     data->w_0[i]     = w_0[i];
     data->w_a[i]     = w_a[i];
     data->Omega_k[i] = 1.0 - data->Omega_c - data->Omega_b - data->Omega_v[i];
-    data->N_nu_rel[i] = N_nu_rel[i];
-    data->N_nu_mass[i] = N_nu_mass[i];
+    data->Neff[i] = Neff[i];
   }
 
   // The file of benchmark data.
@@ -139,27 +144,27 @@ static void compare_distances_mnu(int model, struct distances_mnu_data * data)
   if (model==0){
   
   params = ccl_parameters_create(data->Omega_c, data->Omega_b, data->Omega_k[model],
-						data->N_nu_rel[model], data->N_nu_mass[model], data->mnu0,
+						data->Neff[model], data->mnu0, data-> mnu_is_sum, 
 						data->w_0[model], data->w_a[model],
 						data->h, data->A_s, data->n_s,-1,-1,-1,-1,NULL,NULL, &status);
   } else if (model==1){
 	  params = ccl_parameters_create(data->Omega_c, data->Omega_b, data->Omega_k[model],
-						data->N_nu_rel[model], data->N_nu_mass[model], data->mnu1,
+						data->Neff[model], data->mnu1, data->mnu_is_sum,
 						data->w_0[model], data->w_a[model],
 						data->h, data->A_s, data->n_s,-1,-1,-1,-1,NULL,NULL, &status);
   } else if (model==2){
 	 params = ccl_parameters_create(data->Omega_c, data->Omega_b, data->Omega_k[model],
-						data->N_nu_rel[model], data->N_nu_mass[model], data->mnu2,
+						data->Neff[model], data->mnu2, data->mnu_is_sum,
 						data->w_0[model], data->w_a[model],
 						data->h, data->A_s, data->n_s,-1,-1,-1,-1,NULL,NULL, &status);
   } else if (model ==3){
 	params = ccl_parameters_create(data->Omega_c, data->Omega_b, data->Omega_k[model],
-						data->N_nu_rel[model], data->N_nu_mass[model], data->mnu3,
+						data->Neff[model], data->mnu3, data->mnu_is_sum,
 						data->w_0[model], data->w_a[model],
 						data->h, data->A_s, data->n_s,-1,-1,-1,-1,NULL,NULL, &status);
   }else if (model ==4){
 	  params = ccl_parameters_create(data->Omega_c, data->Omega_b, data->Omega_k[model],
-						data->N_nu_rel[model], data->N_nu_mass[model], data->mnu4,
+						data->Neff[model], data->mnu4, data->mnu_is_sum,
 						data->w_0[model], data->w_a[model],
 						data->h, data->A_s, data->n_s,-1,-1,-1,-1,NULL,NULL, &status);
   }

@@ -16,9 +16,9 @@ CTEST_DATA(eh) {
   double Omega_k[1];
   double w_0[1];
   double w_a[1];
-  double N_nu_rel;
-  double N_nu_mass;
+  double Neff;
   double* m_nu;
+  int mnu_is_sum;
 };
 
 CTEST_SETUP(eh) {
@@ -28,10 +28,10 @@ CTEST_SETUP(eh) {
   data->A_s = 2.1e-9;
   data->sigma_8=0.8;
   data->n_s = 0.96;
-  data->N_nu_rel = 0.;
-  data->N_nu_mass=0.;
+  data->Neff = 0.;
   double mnuval = 0.;
   data->m_nu= &mnuval;
+  data-> mnu_is_sum = 1;
 
   double Omega_v[1]={0.7};
   double w_0[1] = {-1.0};
@@ -67,7 +67,7 @@ static void compare_eh(int i_model,struct eh_data * data)
   ccl_configuration config = default_config;
   config.transfer_function_method = ccl_eisenstein_hu;
   ccl_parameters params = ccl_parameters_create(data->Omega_c,data->Omega_b,data->Omega_k[i_model-1],
-						data->N_nu_rel, data->N_nu_mass, data->m_nu,
+						data->Neff, data->m_nu, data->mnu_is_sum,
 						data->w_0[i_model-1],data->w_a[i_model-1],
 						data->h,data->A_s,data->n_s,-1,-1,-1,-1,NULL,NULL, &status);
   params.sigma_8=data->sigma_8;

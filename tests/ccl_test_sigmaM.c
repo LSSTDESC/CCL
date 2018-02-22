@@ -12,9 +12,9 @@ CTEST_DATA(sigmam) {
   double A_s;
   double n_s;
   double sigma_8;
-  double N_nu_rel;
-  double N_nu_mass;
+  double Neff;
   double* mnu;
+  int mnu_is_sum;
   double Omega_v[5];
   double Omega_k[5];
   double w_0[5];
@@ -28,10 +28,10 @@ CTEST_SETUP(sigmam) {
   data->A_s = 2.1e-9;
   data->sigma_8=0.8;
   data->n_s = 0.96;
-  data->N_nu_rel=0;
-  data->N_nu_mass=0;
+  data->Neff=0;
   double mnuval = 0.;
   data->mnu=&mnuval;
+  data-> mnu_is_sum = 1;
 
   double Omega_v[5]={0.7, 0.7, 0.7, 0.65, 0.75};
   double w_0[5] = {-1.0, -0.9, -0.9, -0.9, -0.9};
@@ -67,7 +67,7 @@ static void compare_sigmam(int i_model,struct sigmam_data * data)
   ccl_configuration config = default_config;
   config.transfer_function_method = ccl_bbks;
   ccl_parameters params = ccl_parameters_create(data->Omega_c,data->Omega_b,data->Omega_k[i_model-1],
-						data->N_nu_rel, data->N_nu_mass, data->mnu,
+						data->Neff, data->mnu, data->mnu_is_sum,
 						data->w_0[i_model-1],data->w_a[i_model-1],data->h,
 						data->A_s,data->n_s,-1,-1,-1,-1,NULL,NULL, &status);
   params.sigma_8=data->sigma_8;
