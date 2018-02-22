@@ -346,7 +346,10 @@ class Cosmology(object):
         """Free the ccl_cosmology instance that this Cosmology object is managing.
 
         """
-        lib.cosmology_free(self.cosmo)
+        try:
+            lib.cosmology_free(self.cosmo)
+        except:
+            pass
     
     def __str__(self):
         """Output the cosmological parameters that were set, and their values,
