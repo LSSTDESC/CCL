@@ -401,6 +401,8 @@ All spline and grid parameters relevant for computing quantities such as distanc
 \item {\tt K$\_$MAX}: The maximum value of wavenumber when integrating over $k$. The default is {\tt K$\_$MAX}$=1000$/Mpc.
 \item {\tt K$\_$MIN$\_$DEFAULT}:  The minimum value of wavenumber when integrating over $k$. The default is {\tt K$\_$MIN$\_$DEFAULT}$=5 \times 10^{-5}$/Mpc.
 \item {\tt N$\_$K}: Number of bins per decade for the wavenumber. The default is {\tt N$\_$K}$=167$.
+\item {\tt N$\_$K$\_$3DCOR}: Number of bins per decade for the wavenumber in the 3d correlation function calculation. 
+The default is {\tt N$\_$K$\_$3DCOR}~=~1000.
 \end{itemize}
 Note that a copy of {\tt ccl$\_$params.ini} is installed along with the library, so changing the version of this file inside the source directory will not have any effect unless you reinstall.
 
@@ -695,7 +697,7 @@ where the angular lensing convergence power spectrum $C^{ab}_\ell$ is given abov
 
 Note that, in the above, ``Galaxy'' and ``Lensing'' can be replaced by any spin-0 and spin-2 fields on the sphere respectively (e.g. the CMB lensing convergence would play the same role as the galaxy overdensity field in all the formulas above).
 
-{In addition to the angular correlation functions, the 3-dimensional spatial correlation function $\xi(r)$ is also calculated from the power spectrum $P(k)$ using a Fourier transform:
+{In addition to the angular correlation functions, the 3-dimensional spatial correlation function $\xi(r)$ is also calculated from the power spectrum $P(k)$ using
 \begin{equation}
 \xi(r) = \frac{1}{2 \pi^2} \int dk \; k^2 P(k) \frac{\sin(kr)}{kr}
 \end{equation}
@@ -939,6 +941,14 @@ For $C_\ell$ computations, we required the relative difference between \ccl and 
 
 To obtain realistic targets for the convergence of correlation function computations for LSST analyses, we calculate the expected statistical uncertainty of the clustering and lensing correlation functions of the LSST gold sample (c.f. Sect.~\ref{sec:specs}), assuming an effective source galaxy density of $n_\mathrm{eff} = 26\mathrm{gal/sq\,arcmin}$ for galaxy shape distortions, and galaxy density of $n_\mathrm{gold} = 45\mathrm{gal/sq\,arcmin}$ for number counts. Specifically, we calculate the Gaussian covariance of angular correlation functions following the formalism of \citet{2008A&A...477...43J}, and note that leaving out the non-Gaussian covariance terms makes this convergence criterion more conservative. We split the galaxy samples into 10 tomography bins, defined to contain equal numbers of galaxies. The accuracy test then proceeds as follows. We compared the difference between \ccl calculated lensing and clustering correlations and the benchmarks for the analytic redshift distributions and for auto-correlations of redshift bins only. To pass the benchmark test, we required that this difference be smaller than half of the value of the errorbar derived from the covariance for each correlation function computed. Specifically, we take the value of the covariance in the bins centered at $z=1$ and $z=1.5$ to compare to the benchmarks.
 
+The 3-dimensional correlation function $\xi(r)$ was validated by comparing with an independent transform code based 
+on the method of \cite{Ogata2005} implemented in the hankel.py python package. We calculate $\xi(r)$ by transforming the CCL 
+BBKS linear power spectrum using this independent code and using a fine sampling of $P(k)$. This is done for the five cosmologies 
+listed in the table above and redshifts $z = 0,1,2,3,4,5$.  We then compare with the $\xi(r)$ from CCL with a sampling of $P(k)$ 
+equal to {\tt N$\_$K$\_$3DCOR} bins per decade. The default value of {\tt N$\_$K$\_$3DCOR}~=~1000 results in fractional agreement 
+at the level of $<4 \times 10^{-3}$ for $0.1 < r < 50$~Mpc increasing to  $< 0.01 $ at $r = 100$~Mpc. Above this scale $\xi(r)$ 
+approaches zero. If higher accuracy is desired, the user can increase the value of {\tt N$\_$K$\_$3DCOR}.
+
 Additionally, independent codes were utilized to test the accuracy of halo mass function predictions. For the halo mass function, we compare the value of $\sigma$, $\log(\sigma^{-1})$, and the value of the halo mass function in the form used in \cite{Tinker2008},
 \begin{equation}
 \log[(M^2/\bar{\rho}_m)dn/dM].
@@ -1034,6 +1044,8 @@ HMFexample.ipynb,
 Lensing angular power spectrum.ipynb,
 
 Correlation.ipynb,
+
+Correlation_3d.ipynb,
 
 MCMC Likelihood Analysis.ipynb
 \end{verbatim}
