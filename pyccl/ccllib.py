@@ -1345,6 +1345,18 @@ CCL_NU_MNUT_MAX = _ccllib.CCL_NU_MNUT_MAX
 _ccllib.CCL_NU_MNUT_N_swigconstant(_ccllib)
 CCL_NU_MNUT_N = _ccllib.CCL_NU_MNUT_N
 
+_ccllib.nu_masses_normal_label_swigconstant(_ccllib)
+nu_masses_normal_label = _ccllib.nu_masses_normal_label
+
+_ccllib.nu_masses_inverted_label_swigconstant(_ccllib)
+nu_masses_inverted_label = _ccllib.nu_masses_inverted_label
+
+_ccllib.nu_masses_equal_label_swigconstant(_ccllib)
+nu_masses_equal_label = _ccllib.nu_masses_equal_label
+
+_ccllib.nu_masses_sum_label_swigconstant(_ccllib)
+nu_masses_sum_label = _ccllib.nu_masses_sum_label
+
 def calculate_nu_phasespace_spline(status):
     """calculate_nu_phasespace_spline(int * status) -> gsl_spline *"""
     return _ccllib.calculate_nu_phasespace_spline(status)
@@ -1353,17 +1365,17 @@ def Omeganuh2(a, Neff, mnu, TCMB, accel, status):
     """Omeganuh2(double a, double Neff, double * mnu, double TCMB, gsl_interp_accel * accel, int * status) -> double"""
     return _ccllib.Omeganuh2(a, Neff, mnu, TCMB, accel, status)
 
-def Omeganuh2_to_Mnu(a, Neff, OmNuh2, TCMB, accel, status):
-    """Omeganuh2_to_Mnu(double a, double Neff, double OmNuh2, double TCMB, gsl_interp_accel * accel, int * status) -> double *"""
-    return _ccllib.Omeganuh2_to_Mnu(a, Neff, OmNuh2, TCMB, accel, status)
+def nu_masses(OmNuh2, label, TCMB, accel, status):
+    """nu_masses(double OmNuh2, ccl_nu_masses_label label, double TCMB, gsl_interp_accel * accel, int * status) -> double *"""
+    return _ccllib.nu_masses(OmNuh2, label, TCMB, accel, status)
 
 def Omeganuh2_vec(Neff, TCMB, a, mnu, output, status):
     """Omeganuh2_vec(double Neff, double TCMB, double * a, double * mnu, double * output, int * status)"""
     return _ccllib.Omeganuh2_vec(Neff, TCMB, a, mnu, output, status)
 
-def Omeganuh2_to_Mnu_vec(Neff, OmNuh2, TCMB, a_scalar, output, status):
-    """Omeganuh2_to_Mnu_vec(double Neff, double OmNuh2, double TCMB, double a_scalar, double * output, int * status)"""
-    return _ccllib.Omeganuh2_to_Mnu_vec(Neff, OmNuh2, TCMB, a_scalar, output, status)
+def nu_masses_vec(OmNuh2, label, TCMB, output, status):
+    """nu_masses_vec(double OmNuh2, int label, double TCMB, double * output, int * status)"""
+    return _ccllib.nu_masses_vec(OmNuh2, label, TCMB, output, status)
 
 _ccllib.emulator_swigconstant(_ccllib)
 emulator = _ccllib.emulator
@@ -1513,6 +1525,9 @@ CCL_ERROR_NU_SOLVE = _ccllib.CCL_ERROR_NU_SOLVE
 
 _ccllib.CCL_ERROR_NOT_IMPLEMENTED_swigconstant(_ccllib)
 CCL_ERROR_NOT_IMPLEMENTED = _ccllib.CCL_ERROR_NOT_IMPLEMENTED
+
+_ccllib.CCL_ERROR_MNU_UNPHYSICAL_swigconstant(_ccllib)
+CCL_ERROR_MNU_UNPHYSICAL = _ccllib.CCL_ERROR_MNU_UNPHYSICAL
 
 _ccllib.CCL_ERROR_POLICY_EXIT_swigconstant(_ccllib)
 CCL_ERROR_POLICY_EXIT = _ccllib.CCL_ERROR_POLICY_EXIT

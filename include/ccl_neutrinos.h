@@ -2,6 +2,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+#pragma once
 
 //#pragma once
 #include "ccl_core.h"
@@ -19,6 +20,13 @@ extern "C" {
 
 // The combination of constants required in Omeganuh2
 #define NU_CONST (8. * pow(M_PI,5) *pow((KBOLTZ/ HPLANCK),3)* KBOLTZ/(15. *pow( CLIGHT,3))* (8. * M_PI * GNEWT) / (3. * 100.*100.*1000.*1000. /MPC_TO_METER /MPC_TO_METER  * CLIGHT * CLIGHT))
+
+typedef enum ccl_nu_masses_label {
+  ccl_nu_masses_normal_label=0,
+  ccl_nu_masses_inverted_label=1,
+  ccl_nu_masses_equal_label=2,
+  ccl_nu_masses_sum_label=3
+} ccl_nu_masses_label;
 
 /**
  * Spline for the phasespace integral required for getting the fractional energy density of massive neutrinos.
@@ -55,7 +63,7 @@ double ccl_Omeganuh2 (double a, double Neff, double* mnu, double TCMB, gsl_inter
  * For specific cases see documentation for ccl_error.c
  * @return Mnu Neutrino mass [eV]. 
  */
-double* ccl_Omeganuh2_to_Mnu (double a, double Neff, double OmNuh2, double TCMB, gsl_interp_accel* accel, int * status);
+double* ccl_nu_masses (double OmNuh2, ccl_nu_masses_label label, double TCMB, gsl_interp_accel* accel, int * status);
 
 #ifdef __cplusplus
 }

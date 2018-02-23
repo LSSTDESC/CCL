@@ -93,7 +93,7 @@ CTEST_SETUP(emu_nu) {
     data->Omega_b[i] = Omega_b[i];
     data->n_s[i] = n_s[i];
     // Number of neutrino species is fixed to 3
-    Mnu_out = ccl_Omeganuh2_to_Mnu(1.,3, Omega_nu[i]*h[i]*h[i], 2.725, NULL, &omnustatus);
+    Mnu_out = ccl_nu_masses(Omega_nu[i]*h[i]*h[i], ccl_nu_masses_equal_label, 2.725, NULL, &omnustatus);
     /*if (omnustatus){
       printf("%s\n",cosmo->status_message);
       exit(1);

@@ -32,4 +32,4 @@ from pyccl.constants import CLIGHT_HMPC, MPC_TO_METER, PC_TO_METER, \
 
 from pyccl.correlation import correlation
 
-from pyccl.neutrinos import Omeganuh2,Omeganuh2_to_Mnu
+from pyccl.neutrinos import Omeganuh2,nu_masses

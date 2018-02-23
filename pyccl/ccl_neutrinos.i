@@ -32,13 +32,12 @@ void Omeganuh2_vec(double Neff, double TCMB,
     }   
 }
 
-void Omeganuh2_to_Mnu_vec(double Neff, double OmNuh2, double TCMB,
-                          double a_scalar,
+void nu_masses_vec(double OmNuh2, int label, double TCMB,
                           double* output, int nout,
                           int* status)
 {
     double* mnu;
-    mnu = ccl_Omeganuh2_to_Mnu(a_scalar, Neff, OmNuh2, TCMB, NULL, status);
+    mnu = ccl_nu_masses(OmNuh2, TCMB, label, NULL, status);
     for(int i=0; i < nout; i++){
         output[i] = *(mnu+i);
     }

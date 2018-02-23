@@ -74,6 +74,9 @@ void ccl_check_status_nocosmo(int * status)
   case CCL_ERROR_NU_SOLVE: // error in converting Omeganuh2-> Mnu: exit. No status_message in cosmo because can't pass cosmology to the function.
     fprintf(stderr, "%s", "Error, in ccl_neutrinos.c. Omeganuh2_to_Mnu(): Root finding did not converge.");
      exit(1);
+  case CCL_ERROR_MNU_UNPHYSICAL: // error in the sum of mnu or Omeganu passed for the hierarchy requested.
+	fprintf(stderr, "%s", "Error: the sum of neutrinos masses of Omeganu value you have passed is incompatible with the requested mass hierarchy.");
+	exit(1);
   default:		
     fprintf(stderr,"%s", "OTHER ERROR; SEE gsl_errno.h for ERROR CODES 1-32.");
     exit(1);

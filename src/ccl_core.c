@@ -326,13 +326,19 @@ ccl_parameters ccl_parameters_create(double Omega_c, double Omega_b, double Omeg
 	  else{
 	    // The user has provided a sum that is below the physical limit.
 	    // Status?
-	    mnu[0] = 0.;
-	    mnu[1] = 0.;
-	    mnu[2] = 0.;
-	   }
+	    if (abs(*mnu)<1e-14){
+			mnu[0] = 0.;
+			mnu[1] = 0.;
+			mnu[2] = 0.;
+		}else{
+			*status = CCL_ERROR_MNU_UNPHYSICAL;
+	    }
+	  }
   }else{
 	  params.sum_nu_masses = mnu[0] + mnu[1] + mnu[2];
   }
+  
+  ccl_check_status_nocosmo(status);
   
   // Check which of the neutrino species are non-relativistic today
   int N_nu_mass = 0;

@@ -218,7 +218,7 @@ def check_neutrinos():
     assert_( all_finite(ccl.Omeganuh2(a_arr, N_nu_mass, mnu, TCMB)) )
     
     # Omeganuh2_to_Mnu
-    assert_( all_finite(ccl.Omeganuh2_to_Mnu(a, N_nu_mass, OmNuh2, TCMB)) )
+    assert_( all_finite(ccl.nu_masses(OmNuh2, 'equal', TCMB)) )
     #assert_( all_finite(ccl.Omeganuh2_to_Mnu(a_lst, Neff, OmNuh2, TCMB)) )
     #assert_( all_finite(ccl.Omeganuh2_to_Mnu(a_arr, Neff, OmNuh2, TCMB)) )
 

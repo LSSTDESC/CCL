@@ -147,24 +147,90 @@ double Omeganuh2_root(double m_iter, void *params){
   return ccl_Omeganuh2(p->a, p->Neff, m_iter_three, p->TCMB, p->accel, p->status) - p->OmNuh2_target;
 }
 /* -------- ROUTINE: Omeganuh2_to_Mnu ---------
-INPUTS: a: scale factor, OmNuh2: neutrino mass density Omeganu * h^2, TCMB: CMB temperature, accel: pointer to an accelerator which will evaluate the neutrino phasespace spline if defined, status: pointer to status integer.
-TASK: Given Omeganuh2, and ASSUMING THREE EQUAL MASS NEUTRINOS, output a pointer to the array of neutrino masses. 
+INPUTS: OmNuh2: neutrino mass density today Omeganu * h^2, label: how you want to split up the masses, see ccl_neutrinos.h for options, TCMB: CMB temperature, accel: pointer to an accelerator which will evaluate the neutrino phasespace spline if defined, status: pointer to status integer.
+TASK: Given Omeganuh2 today, the method of splitting into masses, and the temperature of the CMB, output a pointer to the array of neutrino masses (may be length 1 if label asks for sum) 
 */
 
-double* ccl_Omeganuh2_to_Mnu(double a, double Neff, double OmNuh2, double TCMB, gsl_interp_accel* accel, int* status){
+double* ccl_nu_masses(double OmNuh2, ccl_nu_masses_label label, double TCMB, gsl_interp_accel* accel, int* status){
+  
+  double sumnu;
+  
+  sumnu = 93.14 * OmNuh2;
+  
+  // Now split the sum up into three masses depending on the label given:
+  
+  if(label==ccl_nu_masses_normal_label){
+	  
+     double *mnu;
+	 mnu = malloc(3*sizeof(double));
+			
+	 if (sumnu>0.59){
+		 mnu[0] = (sumnu - 0.59) / 3.;
+		 mnu[1] = mnu[0] + 0.009;
+		 mnu[2] = mnu[0] + 0.05;
+	 }else{
+		 *status = CCL_ERROR_MNU_UNPHYSICAL;
+	 }
+	 
+	 ccl_check_status_nocosmo(status);
+	 return mnu; 
+	 
+  } else if (label==ccl_nu_masses_inverted_label){
+
+	double *mnu;
+	mnu = malloc(3*sizeof(double));
+	if (sumnu > 0.109){
+	    mnu[0] = (sumnu+0.041) / 3.;
+		mnu[1] = mnu[0] + 0.009;
+		mnu[2] = mnu[0] - 0.05;
+	}else{
+		*status = CCL_ERROR_MNU_UNPHYSICAL;
+	}
 	
-  double mnu[3] = {-1., -1., -1.}; // Intialize pointer to hold answer.	
+	ccl_check_status_nocosmo(status);
+	return mnu; 
 	
-  // First check if Neff if 0
-  if (Neff==0){
-	  for(int i = 0; i < 3; i = i +1){
-		mnu[i] = 0.;
-	  }
-	  return mnu;
-  }
+  } else if (label==ccl_nu_masses_equal_label){
+	  
+	  double *mnu;
+	  mnu = malloc(3*sizeof(double));
+	  mnu[0] = sumnu/3.;
+	  mnu[1] = sumnu/3.;
+	  mnu[2] = sumnu/3.;
+      
+      return mnu;
+      
+  } else if (label == ccl_nu_masses_sum_label){
+	  
+	  double *mnu;
+	  mnu = malloc(sizeof(double));
+	  
+      mnu[1] = sumnu;
+      
+      return mnu;
+      
+  } else{
+	  
+	  printf("WARNING:  mass option = %d not yet supported\n continuing with normal hierarchy\n",label);
+	  double *mnu;
+	  mnu = malloc(3*sizeof(double));
+			
+	 if (sumnu>0.59){
+		 mnu[0] = (sumnu - 0.59) / 3.;
+		 mnu[1] = mnu[0] + 0.009;
+		 mnu[2] = mnu[0] + 0.05;
+	 }else{
+		 *status = CCL_ERROR_MNU_UNPHYSICAL;
+	 }
+	 
+	 ccl_check_status_nocosmo(status);
+	 return mnu; 
+  }	
+}	  
+	  
 		
   // Now handle the massless case
-  double Tnu, a4, prefix_massless,Omeganuh2_massless;
+  /*double Tnu, a4, prefix_massless,Omeganuh2_massless;
 
   Tnu=TCMB*pow(4./11.,1./3.);
   a4=a*a*a*a;  
@@ -172,10 +238,15 @@ double* ccl_Omeganuh2_to_Mnu(double a, double Neff, double OmNuh2, double TCMB, 
   Omeganuh2_massless = Neff*prefix_massless*7./8./a4;
   if ( OmNuh2 < Omeganuh2_massless) {
     for(int i=0; i < 3; i = i + 1){
-		mnu[i] = 0.;
-	  }
-	  return mnu;
+  		mnu[i] = 0.;
+  	  }
+  	  return mnu;
   }
+
+  // How do we do this for the different labelled options? Equal is easy. Is Omeganuh2 sensitive to the split or is it just linear?
+  
+  // Omeganu0 = sum (m_nu) / 93.14 eV is something we trust, I think. So why not just use this? This is super easy to solve for - then just split.
+
 
   int root_status, iter = 0, max_iter = 100;
   const gsl_root_fsolver_type *T;
@@ -226,4 +297,4 @@ double* ccl_Omeganuh2_to_Mnu(double a, double Neff, double OmNuh2, double TCMB, 
 	gsl_root_fsolver_free (s);
 
   return m_root;
-}
+}*/
