@@ -1418,6 +1418,12 @@ watson = _ccllib.watson
 
 _ccllib.angulo_swigconstant(_ccllib)
 angulo = _ccllib.angulo
+
+_ccllib.strict_swigconstant(_ccllib)
+strict = _ccllib.strict
+
+_ccllib.equalize_swigconstant(_ccllib)
+equalize = _ccllib.equalize
 class configuration(_object):
     """Proxy of C ccl_configuration struct."""
 
@@ -1442,6 +1448,10 @@ class configuration(_object):
     __swig_getmethods__["mass_function_method"] = _ccllib.configuration_mass_function_method_get
     if _newclass:
         mass_function_method = _swig_property(_ccllib.configuration_mass_function_method_get, _ccllib.configuration_mass_function_method_set)
+    __swig_setmethods__["emulator_neutrinos_method"] = _ccllib.configuration_emulator_neutrinos_method_set
+    __swig_getmethods__["emulator_neutrinos_method"] = _ccllib.configuration_emulator_neutrinos_method_get
+    if _newclass:
+        emulator_neutrinos_method = _swig_property(_ccllib.configuration_emulator_neutrinos_method_get, _ccllib.configuration_emulator_neutrinos_method_set)
 
     def __init__(self):
         """__init__(ccl_configuration self) -> configuration"""

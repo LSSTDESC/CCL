@@ -2994,18 +2994,19 @@ SWIG_Python_NonDynamicSetAttr(PyObject *obj, PyObject *name, PyObject *value) {
 #define SWIGTYPE_p_ccl_parameters swig_types[8]
 #define SWIGTYPE_p_char swig_types[9]
 #define SWIGTYPE_p_double swig_types[10]
-#define SWIGTYPE_p_f_double_double_p_void_p_int__double swig_types[11]
-#define SWIGTYPE_p_gsl_interp_accel swig_types[12]
-#define SWIGTYPE_p_gsl_spline swig_types[13]
-#define SWIGTYPE_p_gsl_spline2d swig_types[14]
-#define SWIGTYPE_p_int swig_types[15]
-#define SWIGTYPE_p_mass_function_t swig_types[16]
-#define SWIGTYPE_p_matter_power_spectrum_t swig_types[17]
-#define SWIGTYPE_p_transfer_function_t swig_types[18]
-#define SWIGTYPE_p_user_pz_info swig_types[19]
-#define SWIGTYPE_p_void swig_types[20]
-static swig_type_info *swig_types[22];
-static swig_module_info swig_module = {swig_types, 21, 0, 0, 0, 0};
+#define SWIGTYPE_p_emulator_neutrinos_t swig_types[11]
+#define SWIGTYPE_p_f_double_double_p_void_p_int__double swig_types[12]
+#define SWIGTYPE_p_gsl_interp_accel swig_types[13]
+#define SWIGTYPE_p_gsl_spline swig_types[14]
+#define SWIGTYPE_p_gsl_spline2d swig_types[15]
+#define SWIGTYPE_p_int swig_types[16]
+#define SWIGTYPE_p_mass_function_t swig_types[17]
+#define SWIGTYPE_p_matter_power_spectrum_t swig_types[18]
+#define SWIGTYPE_p_transfer_function_t swig_types[19]
+#define SWIGTYPE_p_user_pz_info swig_types[20]
+#define SWIGTYPE_p_void swig_types[21]
+static swig_type_info *swig_types[23];
+static swig_module_info swig_module = {swig_types, 22, 0, 0, 0, 0};
 #define SWIG_TypeQuery(name) SWIG_TypeQueryModule(&swig_module, &swig_module, name)
 #define SWIG_MangledTypeQuery(name) SWIG_MangledTypeQueryModule(&swig_module, &swig_module, name)
 
@@ -19938,6 +19939,28 @@ SWIGINTERN PyObject *angulo_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObjec
 }
 
 
+SWIGINTERN PyObject *strict_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *module;
+  PyObject *d;
+  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
+  d = PyModule_GetDict(module);
+  if (!d) return NULL;
+  SWIG_Python_SetConstant(d, "strict",SWIG_From_int((int)(ccl_strict)));
+  return SWIG_Py_Void();
+}
+
+
+SWIGINTERN PyObject *equalize_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *module;
+  PyObject *d;
+  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
+  d = PyModule_GetDict(module);
+  if (!d) return NULL;
+  SWIG_Python_SetConstant(d, "equalize",SWIG_From_int((int)(ccl_equalize)));
+  return SWIG_Py_Void();
+}
+
+
 SWIGINTERN PyObject *_wrap_configuration_transfer_function_method_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   struct ccl_configuration *arg1 = (struct ccl_configuration *) 0 ;
@@ -20169,6 +20192,66 @@ SWIGINTERN PyObject *_wrap_configuration_mass_function_method_get(PyObject *SWIG
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
     result = (mass_function_t) ((arg1)->mass_function_method);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_int((int)(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_configuration_emulator_neutrinos_method_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  struct ccl_configuration *arg1 = (struct ccl_configuration *) 0 ;
+  emulator_neutrinos_t arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:configuration_emulator_neutrinos_method_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_configuration, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "configuration_emulator_neutrinos_method_set" "', argument " "1"" of type '" "struct ccl_configuration *""'"); 
+  }
+  arg1 = (struct ccl_configuration *)(argp1);
+  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "configuration_emulator_neutrinos_method_set" "', argument " "2"" of type '" "emulator_neutrinos_t""'");
+  } 
+  arg2 = (emulator_neutrinos_t)(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->emulator_neutrinos_method = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_configuration_emulator_neutrinos_method_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  struct ccl_configuration *arg1 = (struct ccl_configuration *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  emulator_neutrinos_t result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:configuration_emulator_neutrinos_method_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_configuration, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "configuration_emulator_neutrinos_method_get" "', argument " "1"" of type '" "struct ccl_configuration *""'"); 
+  }
+  arg1 = (struct ccl_configuration *)(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (emulator_neutrinos_t) ((arg1)->emulator_neutrinos_method);
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
   resultobj = SWIG_From_int((int)(result));
@@ -21709,6 +21792,8 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"tinker10_swigconstant", tinker10_swigconstant, METH_VARARGS, NULL},
 	 { (char *)"watson_swigconstant", watson_swigconstant, METH_VARARGS, NULL},
 	 { (char *)"angulo_swigconstant", angulo_swigconstant, METH_VARARGS, NULL},
+	 { (char *)"strict_swigconstant", strict_swigconstant, METH_VARARGS, NULL},
+	 { (char *)"equalize_swigconstant", equalize_swigconstant, METH_VARARGS, NULL},
 	 { (char *)"configuration_transfer_function_method_set", _wrap_configuration_transfer_function_method_set, METH_VARARGS, (char *)"configuration_transfer_function_method_set(configuration self, transfer_function_t transfer_function_method)"},
 	 { (char *)"configuration_transfer_function_method_get", _wrap_configuration_transfer_function_method_get, METH_VARARGS, (char *)"configuration_transfer_function_method_get(configuration self) -> transfer_function_t"},
 	 { (char *)"configuration_matter_power_spectrum_method_set", _wrap_configuration_matter_power_spectrum_method_set, METH_VARARGS, (char *)"configuration_matter_power_spectrum_method_set(configuration self, matter_power_spectrum_t matter_power_spectrum_method)"},
@@ -21717,6 +21802,8 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"configuration_baryons_power_spectrum_method_get", _wrap_configuration_baryons_power_spectrum_method_get, METH_VARARGS, (char *)"configuration_baryons_power_spectrum_method_get(configuration self) -> baryons_power_spectrum_t"},
 	 { (char *)"configuration_mass_function_method_set", _wrap_configuration_mass_function_method_set, METH_VARARGS, (char *)"configuration_mass_function_method_set(configuration self, mass_function_t mass_function_method)"},
 	 { (char *)"configuration_mass_function_method_get", _wrap_configuration_mass_function_method_get, METH_VARARGS, (char *)"configuration_mass_function_method_get(configuration self) -> mass_function_t"},
+	 { (char *)"configuration_emulator_neutrinos_method_set", _wrap_configuration_emulator_neutrinos_method_set, METH_VARARGS, (char *)"configuration_emulator_neutrinos_method_set(configuration self, emulator_neutrinos_t emulator_neutrinos_method)"},
+	 { (char *)"configuration_emulator_neutrinos_method_get", _wrap_configuration_emulator_neutrinos_method_get, METH_VARARGS, (char *)"configuration_emulator_neutrinos_method_get(configuration self) -> emulator_neutrinos_t"},
 	 { (char *)"new_configuration", _wrap_new_configuration, METH_VARARGS, (char *)"new_configuration() -> configuration"},
 	 { (char *)"delete_configuration", _wrap_delete_configuration, METH_VARARGS, (char *)"delete_configuration(configuration self)"},
 	 { (char *)"configuration_swigregister", configuration_swigregister, METH_VARARGS, NULL},
@@ -21780,6 +21867,7 @@ static swig_type_info _swigt__p_ccl_omega_x_label = {"_p_ccl_omega_x_label", "en
 static swig_type_info _swigt__p_ccl_parameters = {"_p_ccl_parameters", "struct ccl_parameters *|ccl_parameters *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_char = {"_p_char", "char *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_double = {"_p_double", "double *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_emulator_neutrinos_t = {"_p_emulator_neutrinos_t", "enum emulator_neutrinos_t *|emulator_neutrinos_t *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_f_double_double_p_void_p_int__double = {"_p_f_double_double_p_void_p_int__double", "double (*)(double,double,void *,int *)", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_gsl_interp_accel = {"_p_gsl_interp_accel", "gsl_interp_accel *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_gsl_spline = {"_p_gsl_spline", "gsl_spline *", 0, 0, (void*)0, 0};
@@ -21803,6 +21891,7 @@ static swig_type_info *swig_type_initial[] = {
   &_swigt__p_ccl_parameters,
   &_swigt__p_char,
   &_swigt__p_double,
+  &_swigt__p_emulator_neutrinos_t,
   &_swigt__p_f_double_double_p_void_p_int__double,
   &_swigt__p_gsl_interp_accel,
   &_swigt__p_gsl_spline,
@@ -21826,6 +21915,7 @@ static swig_cast_info _swigc__p_ccl_omega_x_label[] = {  {&_swigt__p_ccl_omega_x
 static swig_cast_info _swigc__p_ccl_parameters[] = {  {&_swigt__p_ccl_parameters, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_char[] = {  {&_swigt__p_char, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_double[] = {  {&_swigt__p_double, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_emulator_neutrinos_t[] = {  {&_swigt__p_emulator_neutrinos_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_f_double_double_p_void_p_int__double[] = {  {&_swigt__p_f_double_double_p_void_p_int__double, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_gsl_interp_accel[] = {  {&_swigt__p_gsl_interp_accel, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_gsl_spline[] = {  {&_swigt__p_gsl_spline, 0, 0, 0},{0, 0, 0, 0}};
@@ -21849,6 +21939,7 @@ static swig_cast_info *swig_cast_initial[] = {
   _swigc__p_ccl_parameters,
   _swigc__p_char,
   _swigc__p_double,
+  _swigc__p_emulator_neutrinos_t,
   _swigc__p_f_double_double_p_void_p_int__double,
   _swigc__p_gsl_interp_accel,
   _swigc__p_gsl_spline,

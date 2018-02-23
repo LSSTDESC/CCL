@@ -39,6 +39,11 @@ mass_function_types = {
     'watson':   lib.watson
 }
 
+emulator_neutrinos_types = {
+	'strict': 	lib.strict,
+	'equalize': lib.equalize
+}
+
 # Error types
 error_types = {
     lib.CCL_ERROR_MEMORY:       'CCL_ERROR_MEMORY',
@@ -278,7 +283,7 @@ class Cosmology(object):
                  transfer_function='boltzmann_class',
                  matter_power_spectrum='halofit',
                  baryons_power_spectrum='nobaryons',
-                 mass_function='tinker10'):
+                 mass_function='tinker10', emulator_neutrinos='strict'):
         """Creates a wrapper for ccl_cosmology.
 
         TODO: enumerate transfer_function and 
@@ -297,6 +302,9 @@ class Cosmology(object):
             effects to be implemented. Defaults to `nobaryons`.
             mass_function (:obj:`str`, optional): The mass function to use. 
             Defaults to `tinker` (2010).
+            emulator_neutrinos: `str`, optional): If using the emulator for 
+            the power spectrum, specified treatment of unequal neutrinos.
+            Defaults to `strict`.
 
         """
         
@@ -366,6 +374,11 @@ class Cosmology(object):
                                   "Available options are: %s" \
                                  % (mass_function, 
                                     mass_function_types.keys()) )
+            if emulator_neutrinos not in emulator_neutrinos_types.keys():
+                raise ValueError( "'%s' is not a valid emulator neutrinos method. "
+                                  "Available options are: %s" \
+                                 % (emulator_neutrinos, 
+                                    emulator_neutrinos_types.keys()) )
             
             # Assign values to new ccl_configuration object
             config = lib.configuration()
@@ -378,6 +391,8 @@ class Cosmology(object):
                             baryons_power_spectrum_types[baryons_power_spectrum]
             config.mass_function_method = \
                             mass_function_types[mass_function]
+            config.emulator_neutrinos_method = \
+                            emulator_neutrinos_types[emulator_neutrinos]
             
             # Store ccl_configuration for later access
             self.configuration = config
