@@ -167,7 +167,7 @@ norm_pk: amplitude of the primordial PS (either A_s or sigma_8)
 n_s: index of the primordial PS
 */
 ccl_cosmology * ccl_cosmology_create_with_params(double Omega_c, double Omega_b, double Omega_k,
-						 double Neff, double* mnu, int mnu_is_sum,
+						 double Neff, double* mnu, ccl_mnu_is_sum_label mnu_is_sum,
 						 double w0, double wa, double h, double norm_pk, double n_s,
 						 double bcm_log10Mc, double bcm_etab, double bcm_ks,
 						 int nz_mgrowth, double *zarr_mgrowth, 
@@ -296,7 +296,7 @@ n_s: index of the primordial PS
 
  */
 ccl_parameters ccl_parameters_create(double Omega_c, double Omega_b, double Omega_k,
-				     double Neff, double* mnu, int mnu_is_sum,
+				     double Neff, double* mnu, ccl_mnu_is_sum_label mnu_sum_label,
 				     double w0, double wa, double h, double norm_pk,
 				     double n_s, double bcm_log10Mc, double bcm_etab, double bcm_ks,
 				     int nz_mgrowth,double *zarr_mgrowth,
@@ -315,7 +315,7 @@ ccl_parameters ccl_parameters_create(double Omega_c, double Omega_b, double Omeg
   
   // If mnu is a sum of neutrino masses, set these by default to 
   // obey the normal hierarchy.
-  if (mnu_is_sum){
+  if (mnu_sum_label==ccl_mnu_is_sum){
 	  params.sum_nu_masses = *mnu;
 	  mnu=malloc(3*sizeof(double));
 	  if (params.sum_nu_masses>0.59){
@@ -435,10 +435,10 @@ ccl_parameters ccl_parameters_create_flat_lcdm(double Omega_c, double Omega_b, d
   double *mnu;
   double mnuval = 0.;
   mnu = &mnuval;
-  int mnu_is_sum = 1;
+  ccl_mnu_is_sum_label mnu_sum_label = ccl_mnu_is_sum;
   
   ccl_parameters params = ccl_parameters_create(Omega_c, Omega_b, Omega_k, Neff,
-						mnu, mnu_is_sum, w0, wa, h, norm_pk, n_s, -1, -1, -1, -1, NULL, NULL, status);
+						mnu, mnu_sum_label, w0, wa, h, norm_pk, n_s, -1, -1, -1, -1, NULL, NULL, status);
 			
   return params;
 
@@ -459,11 +459,11 @@ ccl_parameters ccl_parameters_create_flat_lcdm_bar(double Omega_c, double Omega_
   double *mnu;
   double mnuval = 0.;
   mnu = &mnuval;
-  int mnu_is_sum = 1;
+  ccl_mnu_is_sum_label mnu_sum_label = ccl_mnu_is_sum;
   double w0 = -1.0;
   double wa = 0.0;
   ccl_parameters params = ccl_parameters_create(Omega_c, Omega_b, Omega_k, Neff,
-						mnu, mnu_is_sum, w0, wa, h, norm_pk, n_s, bcm_log10Mc, bcm_etab,
+						mnu, mnu_sum_label, w0, wa, h, norm_pk, n_s, bcm_log10Mc, bcm_etab,
 						bcm_ks, -1, NULL, NULL, status);
   return params;
 
@@ -474,13 +474,13 @@ INPUT: some cosmological parameters needed to create a flat LCDM model with neut
 TASK: call ccl_parameters_create to produce an LCDM model
 */
 ccl_parameters ccl_parameters_create_flat_lcdm_nu(double Omega_c, double Omega_b, double h, double norm_pk,
-						  double n_s, double Neff, double *mnu, int mnu_is_sum,
+						  double n_s, double Neff, double *mnu, ccl_mnu_is_sum_label mnu_sum_label,
 						  int *status)
 {
   double Omega_k = 0.0;
   double w0 = -1.0;
   double wa = 0.0;
-  ccl_parameters params = ccl_parameters_create(Omega_c, Omega_b, Omega_k, Neff, mnu, mnu_is_sum, w0, wa,
+  ccl_parameters params = ccl_parameters_create(Omega_c, Omega_b, Omega_k, Neff, mnu, mnu_sum_label, w0, wa,
 						h, norm_pk, n_s, -1, -1, -1, -1, NULL, NULL, status);
   return params;
 
@@ -500,9 +500,9 @@ ccl_parameters ccl_parameters_create_lcdm(double Omega_c, double Omega_b, double
   double *mnu;
   double mnuval = 0.;
   mnu = &mnuval;
-  int mnu_is_sum = 1;
+  ccl_mnu_is_sum_label mnu_sum_label = ccl_mnu_is_sum;
   
-  ccl_parameters params = ccl_parameters_create(Omega_c, Omega_b, Omega_k, Neff, mnu, mnu_is_sum, w0, wa,
+  ccl_parameters params = ccl_parameters_create(Omega_c, Omega_b, Omega_k, Neff, mnu, mnu_sum_label, w0, wa,
 						h, norm_pk, n_s, -1, -1, -1,-1,NULL,NULL, status);
   return params;
 }
@@ -514,12 +514,12 @@ TASK: call ccl_parameters_create for this specific model
 */
 ccl_parameters ccl_parameters_create_lcdm_nu(double Omega_c, double Omega_b, double Omega_k, double h,
 					     double norm_pk, double n_s, double Neff,
-					     double* mnu, int mnu_is_sum, int *status)
+					     double* mnu, ccl_mnu_is_sum_label mnu_sum_label, int *status)
 {
   double w0 = -1.0;
   double wa = 0.0; 
 
-  ccl_parameters params = ccl_parameters_create(Omega_c, Omega_b, Omega_k, Neff, mnu, mnu_is_sum, w0, wa,
+  ccl_parameters params = ccl_parameters_create(Omega_c, Omega_b, Omega_k, Neff, mnu, mnu_sum_label, w0, wa,
 						h, norm_pk, n_s, -1, -1, -1,-1,NULL,NULL, status);
 
   return params;
@@ -540,9 +540,9 @@ ccl_parameters ccl_parameters_create_flat_wcdm(double Omega_c, double Omega_b, d
   double *mnu;
   double mnuval = 0.;
   mnu = &mnuval;
-  int mnu_is_sum = 1;
+  ccl_mnu_is_sum_label mnu_sum_label = ccl_mnu_is_sum;
 
-  ccl_parameters params = ccl_parameters_create(Omega_c, Omega_b, Omega_k, Neff, mnu, mnu_is_sum, w0, wa,
+  ccl_parameters params = ccl_parameters_create(Omega_c, Omega_b, Omega_k, Neff, mnu, mnu_sum_label, w0, wa,
 						h, norm_pk, n_s, -1, -1, -1,-1,NULL,NULL, status);
   return params;
 }
@@ -553,12 +553,12 @@ INPUT: some cosmological parameters needed to create an LCDM model with neutrino
 TASK: call ccl_parameters_create for this specific model
 */
 ccl_parameters ccl_parameters_create_flat_wcdm_nu(double Omega_c, double Omega_b, double w0, double h,
-						  double norm_pk, double n_s, double Neff, double *mnu, int mnu_is_sum, int *status)
+						  double norm_pk, double n_s, double Neff, double *mnu, ccl_mnu_is_sum_label mnu_sum_label, int *status)
 {
 
   double Omega_k = 0.0;
   double wa = 0.0;
-  ccl_parameters params = ccl_parameters_create(Omega_c, Omega_b, Omega_k, Neff, mnu, mnu_is_sum, w0, wa, 
+  ccl_parameters params = ccl_parameters_create(Omega_c, Omega_b, Omega_k, Neff, mnu, mnu_sum_label, w0, wa, 
 						h, norm_pk, n_s, -1, -1, -1,-1,NULL,NULL, status);
   return params;
 }
@@ -576,9 +576,9 @@ ccl_parameters ccl_parameters_create_flat_wacdm(double Omega_c, double Omega_b, 
   double *mnu;
   double mnuval = 0.;
   mnu = &mnuval;
-  int mnu_is_sum = 1;
+  ccl_mnu_is_sum_label mnu_sum_label = ccl_mnu_is_sum;
   
-  ccl_parameters params = ccl_parameters_create(Omega_c, Omega_b, Omega_k,Neff, mnu, mnu_is_sum, w0, wa,
+  ccl_parameters params = ccl_parameters_create(Omega_c, Omega_b, Omega_k,Neff, mnu, mnu_sum_label, w0, wa,
 						h, norm_pk, n_s, -1, -1, -1,-1,NULL,NULL, status);
   return params;
 }
@@ -590,11 +590,11 @@ TASK: call ccl_parameters_create for this specific model
 */
 ccl_parameters ccl_parameters_create_flat_wacdm_nu(double Omega_c, double Omega_b, double w0, double wa,
 						   double h, double norm_pk, double n_s,
-						   double Neff, double* mnu, int mnu_is_sum, int *status)
+						   double Neff, double* mnu, ccl_mnu_is_sum_label mnu_sum_label, int *status)
 {
 
   double Omega_k = 0.0;
-  ccl_parameters params = ccl_parameters_create(Omega_c, Omega_b, Omega_k,Neff, mnu, mnu_is_sum, w0, wa,
+  ccl_parameters params = ccl_parameters_create(Omega_c, Omega_b, Omega_k,Neff, mnu, mnu_sum_label, w0, wa,
 						h, norm_pk, n_s, -1, -1, -1,-1,NULL,NULL, status);
   return params;
 }

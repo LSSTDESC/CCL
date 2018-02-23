@@ -14,7 +14,7 @@ CTEST_DATA(distances) {
   double n_s;
   double Neff;
   double* mnu;
-  int mnu_is_sum;
+  ccl_mnu_is_sum_label mnu_is_sum;
   double Omega_v[5];
   double Omega_k[5];
   double w_0[5];
@@ -79,7 +79,7 @@ CTEST_SETUP(distances) {
   data->Neff=0;
   double mnuval = 0.;
   data->mnu= &mnuval;
-  data->mnu_is_sum = 1;
+  data->mnu_is_sum = ccl_mnu_is_sum;
   
 
   // Values that are different for the different models

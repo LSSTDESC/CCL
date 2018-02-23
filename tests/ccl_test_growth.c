@@ -18,7 +18,7 @@ CTEST_DATA(growth) {
   double Omega_k[5];
   double w_0[5];
   double w_a[5];
-  int mnu_is_sum;
+  ccl_mnu_is_sum_label mnu_is_sum;
   
   double z[6];
   double gf[5][6];
@@ -59,7 +59,7 @@ CTEST_SETUP(growth) {
   data->Neff=0;
   double mnuval = 0.;
   data->mnu= &mnuval;
-  data-> mnu_is_sum = 1;
+  data-> mnu_is_sum = ccl_mnu_is_sum;
   
   
   // Values that are different for the different models

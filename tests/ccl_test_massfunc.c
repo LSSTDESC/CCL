@@ -17,7 +17,7 @@ CTEST_DATA(massfunc) {
   double n_s;
   double Neff;
   double* mnu;
-  int mnu_is_sum;
+  ccl_mnu_is_sum_label mnu_is_sum;
   double Omega_v[1];
   double Omega_k[1];
   double w_0[1];
@@ -61,7 +61,7 @@ CTEST_SETUP(massfunc) {
   data->Neff=0;
   double mnuval = 0.;
   data->mnu=&mnuval;
-  int mnu_is_sum = 1;
+  data->mnu_is_sum = ccl_mnu_is_sum;
 
   double Omega_v[1] = { 0.7 };
   double w_0[1]     = {-1.0 };

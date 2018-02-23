@@ -18,7 +18,7 @@ CTEST_DATA(eh) {
   double w_a[1];
   double Neff;
   double* m_nu;
-  int mnu_is_sum;
+  ccl_mnu_is_sum_label mnu_is_sum;
 };
 
 CTEST_SETUP(eh) {
@@ -31,7 +31,7 @@ CTEST_SETUP(eh) {
   data->Neff = 0.;
   double mnuval = 0.;
   data->m_nu= &mnuval;
-  data-> mnu_is_sum = 1;
+  data-> mnu_is_sum = ccl_mnu_is_sum;
 
   double Omega_v[1]={0.7};
   double w_0[1] = {-1.0};

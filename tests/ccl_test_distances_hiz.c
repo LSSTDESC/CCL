@@ -14,7 +14,7 @@ CTEST_DATA(distances_hiz) {
   double n_s;
   double Neff;
   double* mnu;
-  int mnu_is_sum;
+  ccl_mnu_is_sum_label mnu_is_sum;
   double Omega_v[3];
   double Omega_k[3];
   double w_0[3];
@@ -58,7 +58,7 @@ CTEST_SETUP(distances_hiz) {
   data->Neff=0;
   double mnuval = 0.;
   data->mnu= &mnuval;
-  data->mnu_is_sum = 1;
+  data->mnu_is_sum = ccl_mnu_is_sum;
 
   // Values that are different for the different models
   double Omega_v[3] = {  0.7,  0.7,  0.7};

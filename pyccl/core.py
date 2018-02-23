@@ -44,6 +44,11 @@ emulator_neutrinos_types = {
 	'equalize': lib.equalize
 }
 
+mnu_types = {
+	'sum': lib.mnu_is_sum,
+	'list': lib.mnu_is_list,
+}
+
 # Error types
 error_types = {
     lib.CCL_ERROR_MEMORY:       'CCL_ERROR_MEMORY',
@@ -177,13 +182,13 @@ class Parameters(object):
         #            raise ValueError("Length of m_nu must match N_nu_mass.")
         
         if isinstance(m_nu, float):
-            mnu_is_sum = 1  # True
+            mnu_length = mnu_types['sum']
             m_nu = [m_nu]
         elif hasattr(m_nu, "__len__"):
             if (len(m_nu)!=3):
                 raise ValueError("m_nu must be a float or array-like object with length 3.")
             else:
-                mnu_is_sum = 0  # False
+                mnu_length = mnu_types['list']  # False
         else:
             raise ValueError("m_nu must be a float or array-like object with length 3.")
         
@@ -205,7 +210,7 @@ class Parameters(object):
             = lib.parameters_create_nu( Omega_c, Omega_b, Omega_k, Neff, 
                                              w0, wa, h, norm_pk, 
                                              n_s, bcm_log10Mc, bcm_etab, bcm_ks, 
-                                             mnu_is_sum, m_nu, status ) 
+                                             mnu_length, m_nu, status ) 
                                              
         else:
             # Create ccl_parameters with modified growth arrays
@@ -213,7 +218,7 @@ class Parameters(object):
             = lib.parameters_create_nu_vec( Omega_c, Omega_b, Omega_k, Neff, 
                                              w0, wa, h, norm_pk, 
                                              n_s, bcm_log10Mc, bcm_etab, bcm_ks, 
-                                             z_mg, df_mg, mnu_is_sum, m_nu, status )
+                                             z_mg, df_mg, mnu_length, m_nu, status )
         check(status)    
     
     def __getitem__(self, key):

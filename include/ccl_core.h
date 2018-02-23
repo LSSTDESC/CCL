@@ -143,6 +143,20 @@ typedef struct ccl_cosmology
   // other flags?
 } ccl_cosmology;
 
+// Label for whether you are passing a pointer to a sum of neutrino masses or a pointer to a list of 3 masses.
+typedef enum ccl_mnu_is_sum_label {
+  ccl_mnu_is_list=0,
+  ccl_mnu_is_sum =1
+} ccl_mnu_is_sum_label;
+
+
+// Label for which method you want to use to distribute the neutrino masses if you pass a sum.
+typedef enum ccl_mnu_split_method {
+  ccl_mnu_normal_split =0,
+  ccl_mnu_inverted_split =1,
+  ccl_mnu_equal_split = 2,
+} ccl_mnu_split_method;
+
 
 // Initialization and life cycle of objects
 void ccl_cosmology_read_config(void);
@@ -151,7 +165,7 @@ ccl_cosmology * ccl_cosmology_create(ccl_parameters params, ccl_configuration co
 
 // Helper functions to create ccl_cosmology structs directly given a set of params
 ccl_cosmology * ccl_cosmology_create_with_params(double Omega_c, double Omega_b, double Omega_k,
-						 double Neff, double* mnu, int mnu_is_sum,
+						 double Neff, double* mnu, ccl_mnu_is_sum_label mnu_sum_label,
 						 double w0, double wa, double h, double norm_pk, double n_s,
 						 double bcm_log10Mc, double bcm_etab, double bcm_ks,
 						 int nz_mgrowth, double *zarr_mgrowth, 
@@ -189,7 +203,7 @@ ccl_cosmology * ccl_cosmology_create_with_lcdm_params(
  */
 
 ccl_parameters ccl_parameters_create(double Omega_c, double Omega_b, double Omega_k,
-				     double Neff, double* mnu, int mnu_is_sum,
+				     double Neff, double* mnu, ccl_mnu_is_sum_label mnu_sum_label,
 				     double w0, double wa, double h, double norm_pk,
 				     double n_s, double bcm_log10Mc, double bcm_etab, double bcm_ks,
 				     int nz_mgrowth,double *zarr_mgrowth,
@@ -273,10 +287,10 @@ ccl_parameters ccl_parameters_create_flat_wacdm(double Omega_c, double Omega_b, 
  */
 ccl_parameters ccl_parameters_create_lcdm(double Omega_c, double Omega_b, double Omega_k, double h, double norm_pk, double n_s, int *status);
 
-ccl_parameters ccl_parameters_create_flat_lcdm_nu(double Omega_c, double Omega_b, double h, double norm_pk,double n_s, double Neff, double *mnu, int mnu_is_sum, int *status);
-ccl_parameters ccl_parameters_create_flat_wcdm_nu(double Omega_c, double Omega_b, double w0, double h, double norm_pk, double n_s, double Neff, double *mnu, int mnu_is_sum, int *status);
-ccl_parameters ccl_parameters_create_flat_wacdm_nu(double Omega_c, double Omega_b, double w0, double wa,double h, double norm_pk, double n_s, double Neff, double* mnu, int mnu_is_sum, int *status);
-ccl_parameters ccl_parameters_create_lcdm_nu(double Omega_c, double Omega_b, double Omega_k, double h, double norm_pk, double n_s, double Neff, double* mnu, int mnu_is_sum, int *status);
+ccl_parameters ccl_parameters_create_flat_lcdm_nu(double Omega_c, double Omega_b, double h, double norm_pk,double n_s, double Neff, double *mnu, ccl_mnu_is_sum_label mnu_sum_label, int *status);
+ccl_parameters ccl_parameters_create_flat_wcdm_nu(double Omega_c, double Omega_b, double w0, double h, double norm_pk, double n_s, double Neff, double *mnu, ccl_mnu_is_sum_label mnu_sum_label, int *status);
+ccl_parameters ccl_parameters_create_flat_wacdm_nu(double Omega_c, double Omega_b, double w0, double wa,double h, double norm_pk, double n_s, double Neff, double* mnu, ccl_mnu_is_sum_label mnu_sum_label, int *status);
+ccl_parameters ccl_parameters_create_lcdm_nu(double Omega_c, double Omega_b, double Omega_k, double h, double norm_pk, double n_s, double Neff, double* mnu, ccl_mnu_is_sum_label mnu_sum_label, int *status);
 
 /**
  * Free a cosmology struct

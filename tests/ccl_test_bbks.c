@@ -14,7 +14,7 @@ CTEST_DATA(bbks) {
   double sigma_8;
   double Neff;
   double* mnu;
-  int mnu_is_sum;
+  ccl_mnu_is_sum_label mnu_is_sum;
   double Omega_v[5];
   double Omega_k[5];
   double w_0[5];
@@ -32,7 +32,7 @@ CTEST_SETUP(bbks) {
   data->Neff=0;
   double mnuval = 0.;
   data->mnu=&mnuval;
-  data->mnu_is_sum =1;
+  data->mnu_is_sum =ccl_mnu_is_sum;
 
   double Omega_v[5]={0.7, 0.7, 0.7, 0.65, 0.75};
   double w_0[5] = {-1.0, -0.9, -0.9, -0.9, -0.9};

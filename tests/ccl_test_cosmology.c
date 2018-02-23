@@ -15,7 +15,7 @@ CTEST_DATA(cosmology) {
   double w0;
   double Neff;
   double mnuval;
-  int mnu_is_sum;
+  ccl_mnu_is_sum_label mnu_is_sum;
   int status;
 };
 
@@ -35,7 +35,7 @@ CTEST_SETUP(cosmology) {
   data->Neff = 0.;
   data->mnuval =0.;
   data->status=0;
-  data->mnu_is_sum =1;
+  data->mnu_is_sum =ccl_mnu_is_sum;
 }
 
 // Check to see if general ccl_cosmology struct is initialized correctly

@@ -23,7 +23,7 @@
 CTEST_DATA(emu) {
   double Neff;
   double* mnu;
-  int mnu_is_sum;
+  ccl_mnu_is_sum_label mnu_is_sum;
   double sigma_8[6];
   double Omega_c[6];
   double Omega_b[6];
@@ -41,7 +41,7 @@ CTEST_SETUP(emu) {
   data->Neff=3.04;
   double mnuval = 0.;
   data->mnu=&mnuval;
-  data->mnu_is_sum=1;
+  data->mnu_is_sum=ccl_mnu_is_sum;
 
   double *sigma_8;
   double *Omega_c;

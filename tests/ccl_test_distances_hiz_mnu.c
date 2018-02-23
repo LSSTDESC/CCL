@@ -18,7 +18,7 @@ CTEST_DATA(distances_hiz_mnu) {
   double n_s;
   double Neff[5];
   double mnu0[3], mnu1[3], mnu2[3], mnu3[3], mnu4[3];
-  int mnu_is_sum;
+  ccl_mnu_is_sum_label mnu_is_sum;
   double Omega_v[5];
   double Omega_k[5];
   double w_0[5];
@@ -90,7 +90,7 @@ CTEST_SETUP(distances_hiz_mnu) {
   // This is to compare with benchmarks from astropy
   // which splits equally total N between all species
   double Neff[5] 	= {3, 3, 3, 3, 3};
-  int mnu_is_sum = 0;
+  data->mnu_is_sum = ccl_mnu_is_list;
   
   double mnu0[3]	= 	{0.04, 0., 0.};
   double mnu1[3]	= 	{0.05, 0.01, 0.};
