@@ -18,7 +18,7 @@ CTEST_DATA(growth) {
   double Omega_k[5];
   double w_0[5];
   double w_a[5];
-  ccl_mnu_is_sum_label mnu_is_sum;
+  ccl_mnu_type_label mnu_type;
   
   double z[6];
   double gf[5][6];
@@ -59,7 +59,7 @@ CTEST_SETUP(growth) {
   data->Neff=0;
   double mnuval = 0.;
   data->mnu= &mnuval;
-  data-> mnu_is_sum = ccl_mnu_is_sum;
+  data-> mnu_type = ccl_mnu_sum;
   
   
   // Values that are different for the different models
@@ -84,7 +84,7 @@ static void compare_growth(int model, struct growth_data * data)
   int status=0; 	
   // Make the parameter set from the input data
   // Values of some parameters depend on the model index
-  ccl_parameters params = ccl_parameters_create(data->Omega_c, data->Omega_b, data->Omega_k[model], data->Neff, data->mnu, data->mnu_is_sum, data->w_0[model], data->w_a[model], data->h, data->A_s, data->n_s,-1,-1,-1,-1,NULL,NULL, &status);
+  ccl_parameters params = ccl_parameters_create(data->Omega_c, data->Omega_b, data->Omega_k[model], data->Neff, data->mnu, data->mnu_type, data->w_0[model], data->w_a[model], data->h, data->A_s, data->n_s,-1,-1,-1,-1,NULL,NULL, &status);
   params.Omega_g=0;
   // Make a cosmology object from the parameters with the default configuration
   ccl_cosmology * cosmo = ccl_cosmology_create(params, default_config);

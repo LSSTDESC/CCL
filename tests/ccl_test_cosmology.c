@@ -15,7 +15,7 @@ CTEST_DATA(cosmology) {
   double w0;
   double Neff;
   double mnuval;
-  ccl_mnu_is_sum_label mnu_is_sum;
+  ccl_mnu_type_label mnu_type;
   int status;
 };
 
@@ -35,7 +35,7 @@ CTEST_SETUP(cosmology) {
   data->Neff = 0.;
   data->mnuval =0.;
   data->status=0;
-  data->mnu_is_sum =ccl_mnu_is_sum;
+  data->mnu_type =ccl_mnu_sum;
 }
 
 // Check to see if general ccl_cosmology struct is initialized correctly
@@ -44,7 +44,7 @@ CTEST2(cosmology, create_general_cosmo) {
   
   // Initialize ccl_cosmology struct
   ccl_cosmology * cosmo = ccl_cosmology_create_with_params(data->Omega_c, data->Omega_b, data->Omega_k, 
-							   data->Neff, &(data->mnuval), data->mnu_is_sum,
+							   data->Neff, &(data->mnuval), data->mnu_type,
 							   data->w0, data->wa, data->h, data->A_s, data->n_s,
 							   -1,-1,-1,-1, NULL, NULL, config, &(data->status));
   

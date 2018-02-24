@@ -18,7 +18,7 @@ CTEST_DATA(distances_hiz_mnu) {
   double n_s;
   double Neff[5];
   double mnu0[3], mnu1[3], mnu2[3], mnu3[3], mnu4[3];
-  ccl_mnu_is_sum_label mnu_is_sum;
+  ccl_mnu_type_label mnu_type;
   double Omega_v[5];
   double Omega_k[5];
   double w_0[5];
@@ -90,7 +90,7 @@ CTEST_SETUP(distances_hiz_mnu) {
   // This is to compare with benchmarks from astropy
   // which splits equally total N between all species
   double Neff[5] 	= {3, 3, 3, 3, 3};
-  data->mnu_is_sum = ccl_mnu_is_list;
+  data->mnu_type = ccl_mnu_list;
   
   double mnu0[3]	= 	{0.04, 0., 0.};
   double mnu1[3]	= 	{0.05, 0.01, 0.};
@@ -145,27 +145,27 @@ static void compare_distances_hiz_mnu(int model, struct distances_hiz_mnu_data *
   if (model==0){
   
   params = ccl_parameters_create(data->Omega_c, data->Omega_b, data->Omega_k[model],
-						data->Neff[model], data->mnu0, data->mnu_is_sum,
+						data->Neff[model], data->mnu0, data->mnu_type,
 						data->w_0[model], data->w_a[model],
 						data->h, data->A_s, data->n_s,-1,-1,-1,-1,NULL,NULL, &status);
   } else if (model==1){
 	  params = ccl_parameters_create(data->Omega_c, data->Omega_b, data->Omega_k[model],
-						data->Neff[model], data->mnu1, data->mnu_is_sum,
+						data->Neff[model], data->mnu1, data->mnu_type,
 						data->w_0[model], data->w_a[model],
 						data->h, data->A_s, data->n_s,-1,-1,-1,-1,NULL,NULL, &status);
   } else if (model==2){
 	 params = ccl_parameters_create(data->Omega_c, data->Omega_b, data->Omega_k[model],
-						data->Neff[model], data->mnu2, data->mnu_is_sum,
+						data->Neff[model], data->mnu2, data->mnu_type,
 						data->w_0[model], data->w_a[model],
 						data->h, data->A_s, data->n_s,-1,-1,-1,-1,NULL,NULL, &status);
   } else if (model ==3){
 	params = ccl_parameters_create(data->Omega_c, data->Omega_b, data->Omega_k[model],
-						data->Neff[model], data->mnu3, data->mnu_is_sum,
+						data->Neff[model], data->mnu3, data->mnu_type,
 						data->w_0[model], data->w_a[model],
 						data->h, data->A_s, data->n_s,-1,-1,-1,-1,NULL,NULL, &status);
   }else if (model ==4){
 	  params = ccl_parameters_create(data->Omega_c, data->Omega_b, data->Omega_k[model],
-						data->Neff[model], data->mnu4, data->mnu_is_sum,
+						data->Neff[model], data->mnu4, data->mnu_type,
 						data->w_0[model], data->w_a[model],
 						data->h, data->A_s, data->n_s,-1,-1,-1,-1,NULL,NULL, &status);
   }

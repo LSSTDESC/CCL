@@ -23,7 +23,7 @@
 CTEST_DATA(emu) {
   double Neff;
   double* mnu;
-  ccl_mnu_is_sum_label mnu_is_sum;
+  ccl_mnu_type_label mnu_type;
   double sigma_8[6];
   double Omega_c[6];
   double Omega_b[6];
@@ -41,7 +41,7 @@ CTEST_SETUP(emu) {
   data->Neff=3.04;
   double mnuval = 0.;
   data->mnu=&mnuval;
-  data->mnu_is_sum=ccl_mnu_is_sum;
+  data->mnu_type=ccl_mnu_sum;
 
   double *sigma_8;
   double *Omega_c;
@@ -120,7 +120,7 @@ static void compare_emu(int i_model,struct emu_data * data)
   config.matter_power_spectrum_method = ccl_emu;
   
   //None of the current cosmologies being checked include neutrinos
-  ccl_parameters params = ccl_parameters_create(data->Omega_c[i_model-1],data->Omega_b[i_model-1],0.0,data->Neff, data->mnu, data->mnu_is_sum, data->w_0[i_model-1],data->w_a[i_model-1],data->h[i_model-1],data->sigma_8[i_model-1],data->n_s[i_model-1],-1,-1,-1,-1,NULL,NULL, &status);
+  ccl_parameters params = ccl_parameters_create(data->Omega_c[i_model-1],data->Omega_b[i_model-1],0.0,data->Neff, data->mnu, data->mnu_type, data->w_0[i_model-1],data->w_a[i_model-1],data->h[i_model-1],data->sigma_8[i_model-1],data->n_s[i_model-1],-1,-1,-1,-1,NULL,NULL, &status);
   params.Omega_g=0;
   params.sigma_8=data->sigma_8[i_model-1];
   ccl_cosmology * cosmo = ccl_cosmology_create(params, config);

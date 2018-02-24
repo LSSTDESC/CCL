@@ -14,7 +14,7 @@ CTEST_DATA(distances_hiz) {
   double n_s;
   double Neff;
   double* mnu;
-  ccl_mnu_is_sum_label mnu_is_sum;
+  ccl_mnu_type_label mnu_type;
   double Omega_v[3];
   double Omega_k[3];
   double w_0[3];
@@ -58,7 +58,7 @@ CTEST_SETUP(distances_hiz) {
   data->Neff=0;
   double mnuval = 0.;
   data->mnu= &mnuval;
-  data->mnu_is_sum = ccl_mnu_is_sum;
+  data->mnu_type = ccl_mnu_sum;
 
   // Values that are different for the different models
   double Omega_v[3] = {  0.7,  0.7,  0.7};
@@ -83,7 +83,7 @@ static void compare_distances_hiz(int model, struct distances_hiz_data * data)
   // Make the parameter set from the input data
   // Values of some parameters depend on the model index
   ccl_parameters params = ccl_parameters_create(data->Omega_c, data->Omega_b, data->Omega_k[model],
-						data->Neff, data->mnu, data->mnu_is_sum,
+						data->Neff, data->mnu, data->mnu_type,
 						data->w_0[model], data->w_a[model],
 						data->h, data->A_s, data->n_s,-1,-1,-1,-1,NULL,NULL, &status);
   

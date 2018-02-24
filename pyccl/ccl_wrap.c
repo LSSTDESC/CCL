@@ -2990,26 +2990,25 @@ SWIG_Python_NonDynamicSetAttr(PyObject *obj, PyObject *name, PyObject *value) {
 #define SWIGTYPE_p_ccl_configuration swig_types[4]
 #define SWIGTYPE_p_ccl_cosmology swig_types[5]
 #define SWIGTYPE_p_ccl_data swig_types[6]
-#define SWIGTYPE_p_ccl_mnu_is_sum_label swig_types[7]
-#define SWIGTYPE_p_ccl_mnu_split_method swig_types[8]
-#define SWIGTYPE_p_ccl_nu_masses_label swig_types[9]
-#define SWIGTYPE_p_ccl_omega_x_label swig_types[10]
-#define SWIGTYPE_p_ccl_parameters swig_types[11]
-#define SWIGTYPE_p_char swig_types[12]
-#define SWIGTYPE_p_double swig_types[13]
-#define SWIGTYPE_p_emulator_neutrinos_t swig_types[14]
-#define SWIGTYPE_p_f_double_double_p_void_p_int__double swig_types[15]
-#define SWIGTYPE_p_gsl_interp_accel swig_types[16]
-#define SWIGTYPE_p_gsl_spline swig_types[17]
-#define SWIGTYPE_p_gsl_spline2d swig_types[18]
-#define SWIGTYPE_p_int swig_types[19]
-#define SWIGTYPE_p_mass_function_t swig_types[20]
-#define SWIGTYPE_p_matter_power_spectrum_t swig_types[21]
-#define SWIGTYPE_p_transfer_function_t swig_types[22]
-#define SWIGTYPE_p_user_pz_info swig_types[23]
-#define SWIGTYPE_p_void swig_types[24]
-static swig_type_info *swig_types[26];
-static swig_module_info swig_module = {swig_types, 25, 0, 0, 0, 0};
+#define SWIGTYPE_p_ccl_mnu_type_label swig_types[7]
+#define SWIGTYPE_p_ccl_nu_masses_label swig_types[8]
+#define SWIGTYPE_p_ccl_omega_x_label swig_types[9]
+#define SWIGTYPE_p_ccl_parameters swig_types[10]
+#define SWIGTYPE_p_char swig_types[11]
+#define SWIGTYPE_p_double swig_types[12]
+#define SWIGTYPE_p_emulator_neutrinos_t swig_types[13]
+#define SWIGTYPE_p_f_double_double_p_void_p_int__double swig_types[14]
+#define SWIGTYPE_p_gsl_interp_accel swig_types[15]
+#define SWIGTYPE_p_gsl_spline swig_types[16]
+#define SWIGTYPE_p_gsl_spline2d swig_types[17]
+#define SWIGTYPE_p_int swig_types[18]
+#define SWIGTYPE_p_mass_function_t swig_types[19]
+#define SWIGTYPE_p_matter_power_spectrum_t swig_types[20]
+#define SWIGTYPE_p_transfer_function_t swig_types[21]
+#define SWIGTYPE_p_user_pz_info swig_types[22]
+#define SWIGTYPE_p_void swig_types[23]
+static swig_type_info *swig_types[25];
+static swig_module_info swig_module = {swig_types, 24, 0, 0, 0, 0};
 #define SWIG_TypeQuery(name) SWIG_TypeQueryModule(&swig_module, &swig_module, name)
 #define SWIG_MangledTypeQuery(name) SWIG_MangledTypeQueryModule(&swig_module, &swig_module, name)
 
@@ -8409,57 +8408,46 @@ SWIGINTERN PyObject *cosmology_swigregister(PyObject *SWIGUNUSEDPARM(self), PyOb
   return SWIG_Py_Void();
 }
 
-SWIGINTERN PyObject *mnu_is_list_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *mnu_list_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *module;
   PyObject *d;
   if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
   d = PyModule_GetDict(module);
   if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "mnu_is_list",SWIG_From_int((int)(ccl_mnu_is_list)));
+  SWIG_Python_SetConstant(d, "mnu_list",SWIG_From_int((int)(ccl_mnu_list)));
   return SWIG_Py_Void();
 }
 
 
-SWIGINTERN PyObject *mnu_is_sum_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *mnu_sum_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *module;
   PyObject *d;
   if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
   d = PyModule_GetDict(module);
   if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "mnu_is_sum",SWIG_From_int((int)(ccl_mnu_is_sum)));
+  SWIG_Python_SetConstant(d, "mnu_sum",SWIG_From_int((int)(ccl_mnu_sum)));
   return SWIG_Py_Void();
 }
 
 
-SWIGINTERN PyObject *mnu_normal_split_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *mnu_sum_inverted_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *module;
   PyObject *d;
   if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
   d = PyModule_GetDict(module);
   if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "mnu_normal_split",SWIG_From_int((int)(ccl_mnu_normal_split)));
+  SWIG_Python_SetConstant(d, "mnu_sum_inverted",SWIG_From_int((int)(ccl_mnu_sum_inverted)));
   return SWIG_Py_Void();
 }
 
 
-SWIGINTERN PyObject *mnu_inverted_split_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *mnu_sum_equal_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *module;
   PyObject *d;
   if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
   d = PyModule_GetDict(module);
   if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "mnu_inverted_split",SWIG_From_int((int)(ccl_mnu_inverted_split)));
-  return SWIG_Py_Void();
-}
-
-
-SWIGINTERN PyObject *mnu_equal_split_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *module;
-  PyObject *d;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
-  d = PyModule_GetDict(module);
-  if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "mnu_equal_split",SWIG_From_int((int)(ccl_mnu_equal_split)));
+  SWIG_Python_SetConstant(d, "mnu_sum_equal",SWIG_From_int((int)(ccl_mnu_sum_equal)));
   return SWIG_Py_Void();
 }
 
@@ -8534,7 +8522,7 @@ SWIGINTERN PyObject *_wrap_cosmology_create_with_params(PyObject *SWIGUNUSEDPARM
   double arg3 ;
   double arg4 ;
   double *arg5 = (double *) 0 ;
-  ccl_mnu_is_sum_label arg6 ;
+  ccl_mnu_type_label arg6 ;
   double arg7 ;
   double arg8 ;
   double arg9 ;
@@ -8635,9 +8623,9 @@ SWIGINTERN PyObject *_wrap_cosmology_create_with_params(PyObject *SWIGUNUSEDPARM
   arg5 = (double *)(argp5);
   ecode6 = SWIG_AsVal_int(obj5, &val6);
   if (!SWIG_IsOK(ecode6)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode6), "in method '" "cosmology_create_with_params" "', argument " "6"" of type '" "ccl_mnu_is_sum_label""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode6), "in method '" "cosmology_create_with_params" "', argument " "6"" of type '" "ccl_mnu_type_label""'");
   } 
-  arg6 = (ccl_mnu_is_sum_label)(val6);
+  arg6 = (ccl_mnu_type_label)(val6);
   ecode7 = SWIG_AsVal_double(obj6, &val7);
   if (!SWIG_IsOK(ecode7)) {
     SWIG_exception_fail(SWIG_ArgError(ecode7), "in method '" "cosmology_create_with_params" "', argument " "7"" of type '" "double""'");
@@ -8845,7 +8833,7 @@ SWIGINTERN PyObject *_wrap_parameters_create(PyObject *SWIGUNUSEDPARM(self), PyO
   double arg3 ;
   double arg4 ;
   double *arg5 = (double *) 0 ;
-  ccl_mnu_is_sum_label arg6 ;
+  ccl_mnu_type_label arg6 ;
   double arg7 ;
   double arg8 ;
   double arg9 ;
@@ -8942,9 +8930,9 @@ SWIGINTERN PyObject *_wrap_parameters_create(PyObject *SWIGUNUSEDPARM(self), PyO
   arg5 = (double *)(argp5);
   ecode6 = SWIG_AsVal_int(obj5, &val6);
   if (!SWIG_IsOK(ecode6)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode6), "in method '" "parameters_create" "', argument " "6"" of type '" "ccl_mnu_is_sum_label""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode6), "in method '" "parameters_create" "', argument " "6"" of type '" "ccl_mnu_type_label""'");
   } 
-  arg6 = (ccl_mnu_is_sum_label)(val6);
+  arg6 = (ccl_mnu_type_label)(val6);
   ecode7 = SWIG_AsVal_double(obj6, &val7);
   if (!SWIG_IsOK(ecode7)) {
     SWIG_exception_fail(SWIG_ArgError(ecode7), "in method '" "parameters_create" "', argument " "7"" of type '" "double""'");
@@ -9510,7 +9498,7 @@ SWIGINTERN PyObject *_wrap_parameters_create_flat_lcdm_nu(PyObject *SWIGUNUSEDPA
   double arg5 ;
   double arg6 ;
   double *arg7 = (double *) 0 ;
-  ccl_mnu_is_sum_label arg8 ;
+  ccl_mnu_type_label arg8 ;
   int *arg9 = (int *) 0 ;
   double val1 ;
   int ecode1 = 0 ;
@@ -9579,9 +9567,9 @@ SWIGINTERN PyObject *_wrap_parameters_create_flat_lcdm_nu(PyObject *SWIGUNUSEDPA
   arg7 = (double *)(argp7);
   ecode8 = SWIG_AsVal_int(obj7, &val8);
   if (!SWIG_IsOK(ecode8)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode8), "in method '" "parameters_create_flat_lcdm_nu" "', argument " "8"" of type '" "ccl_mnu_is_sum_label""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode8), "in method '" "parameters_create_flat_lcdm_nu" "', argument " "8"" of type '" "ccl_mnu_type_label""'");
   } 
-  arg8 = (ccl_mnu_is_sum_label)(val8);
+  arg8 = (ccl_mnu_type_label)(val8);
   if (!(SWIG_IsOK((res9 = SWIG_ConvertPtr(obj8,SWIG_as_voidptrptr(&arg9),SWIGTYPE_p_int,0))))) {
     int val; 
     int ecode = SWIG_AsVal_int(obj8, &val);
@@ -9620,7 +9608,7 @@ SWIGINTERN PyObject *_wrap_parameters_create_flat_wcdm_nu(PyObject *SWIGUNUSEDPA
   double arg6 ;
   double arg7 ;
   double *arg8 = (double *) 0 ;
-  ccl_mnu_is_sum_label arg9 ;
+  ccl_mnu_type_label arg9 ;
   int *arg10 = (int *) 0 ;
   double val1 ;
   int ecode1 = 0 ;
@@ -9697,9 +9685,9 @@ SWIGINTERN PyObject *_wrap_parameters_create_flat_wcdm_nu(PyObject *SWIGUNUSEDPA
   arg8 = (double *)(argp8);
   ecode9 = SWIG_AsVal_int(obj8, &val9);
   if (!SWIG_IsOK(ecode9)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode9), "in method '" "parameters_create_flat_wcdm_nu" "', argument " "9"" of type '" "ccl_mnu_is_sum_label""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode9), "in method '" "parameters_create_flat_wcdm_nu" "', argument " "9"" of type '" "ccl_mnu_type_label""'");
   } 
-  arg9 = (ccl_mnu_is_sum_label)(val9);
+  arg9 = (ccl_mnu_type_label)(val9);
   if (!(SWIG_IsOK((res10 = SWIG_ConvertPtr(obj9,SWIG_as_voidptrptr(&arg10),SWIGTYPE_p_int,0))))) {
     int val; 
     int ecode = SWIG_AsVal_int(obj9, &val);
@@ -9739,7 +9727,7 @@ SWIGINTERN PyObject *_wrap_parameters_create_flat_wacdm_nu(PyObject *SWIGUNUSEDP
   double arg7 ;
   double arg8 ;
   double *arg9 = (double *) 0 ;
-  ccl_mnu_is_sum_label arg10 ;
+  ccl_mnu_type_label arg10 ;
   int *arg11 = (int *) 0 ;
   double val1 ;
   int ecode1 = 0 ;
@@ -9824,9 +9812,9 @@ SWIGINTERN PyObject *_wrap_parameters_create_flat_wacdm_nu(PyObject *SWIGUNUSEDP
   arg9 = (double *)(argp9);
   ecode10 = SWIG_AsVal_int(obj9, &val10);
   if (!SWIG_IsOK(ecode10)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode10), "in method '" "parameters_create_flat_wacdm_nu" "', argument " "10"" of type '" "ccl_mnu_is_sum_label""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode10), "in method '" "parameters_create_flat_wacdm_nu" "', argument " "10"" of type '" "ccl_mnu_type_label""'");
   } 
-  arg10 = (ccl_mnu_is_sum_label)(val10);
+  arg10 = (ccl_mnu_type_label)(val10);
   if (!(SWIG_IsOK((res11 = SWIG_ConvertPtr(obj10,SWIG_as_voidptrptr(&arg11),SWIGTYPE_p_int,0))))) {
     int val; 
     int ecode = SWIG_AsVal_int(obj10, &val);
@@ -9865,7 +9853,7 @@ SWIGINTERN PyObject *_wrap_parameters_create_lcdm_nu(PyObject *SWIGUNUSEDPARM(se
   double arg6 ;
   double arg7 ;
   double *arg8 = (double *) 0 ;
-  ccl_mnu_is_sum_label arg9 ;
+  ccl_mnu_type_label arg9 ;
   int *arg10 = (int *) 0 ;
   double val1 ;
   int ecode1 = 0 ;
@@ -9942,9 +9930,9 @@ SWIGINTERN PyObject *_wrap_parameters_create_lcdm_nu(PyObject *SWIGUNUSEDPARM(se
   arg8 = (double *)(argp8);
   ecode9 = SWIG_AsVal_int(obj8, &val9);
   if (!SWIG_IsOK(ecode9)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode9), "in method '" "parameters_create_lcdm_nu" "', argument " "9"" of type '" "ccl_mnu_is_sum_label""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode9), "in method '" "parameters_create_lcdm_nu" "', argument " "9"" of type '" "ccl_mnu_type_label""'");
   } 
-  arg9 = (ccl_mnu_is_sum_label)(val9);
+  arg9 = (ccl_mnu_type_label)(val9);
   if (!(SWIG_IsOK((res10 = SWIG_ConvertPtr(obj9,SWIG_as_voidptrptr(&arg10),SWIGTYPE_p_int,0))))) {
     int val; 
     int ecode = SWIG_AsVal_int(obj9, &val);
@@ -21581,25 +21569,24 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"new_cosmology", _wrap_new_cosmology, METH_VARARGS, (char *)"new_cosmology() -> cosmology"},
 	 { (char *)"delete_cosmology", _wrap_delete_cosmology, METH_VARARGS, (char *)"delete_cosmology(cosmology self)"},
 	 { (char *)"cosmology_swigregister", cosmology_swigregister, METH_VARARGS, NULL},
-	 { (char *)"mnu_is_list_swigconstant", mnu_is_list_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"mnu_is_sum_swigconstant", mnu_is_sum_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"mnu_normal_split_swigconstant", mnu_normal_split_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"mnu_inverted_split_swigconstant", mnu_inverted_split_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"mnu_equal_split_swigconstant", mnu_equal_split_swigconstant, METH_VARARGS, NULL},
+	 { (char *)"mnu_list_swigconstant", mnu_list_swigconstant, METH_VARARGS, NULL},
+	 { (char *)"mnu_sum_swigconstant", mnu_sum_swigconstant, METH_VARARGS, NULL},
+	 { (char *)"mnu_sum_inverted_swigconstant", mnu_sum_inverted_swigconstant, METH_VARARGS, NULL},
+	 { (char *)"mnu_sum_equal_swigconstant", mnu_sum_equal_swigconstant, METH_VARARGS, NULL},
 	 { (char *)"cosmology_read_config", _wrap_cosmology_read_config, METH_VARARGS, (char *)"cosmology_read_config()"},
 	 { (char *)"cosmology_create", _wrap_cosmology_create, METH_VARARGS, (char *)"cosmology_create(parameters params, configuration config) -> cosmology"},
-	 { (char *)"cosmology_create_with_params", _wrap_cosmology_create_with_params, METH_VARARGS, (char *)"cosmology_create_with_params(double Omega_c, double Omega_b, double Omega_k, double Neff, double * mnu, ccl_mnu_is_sum_label mnu_sum_label, double w0, double wa, double h, double norm_pk, double n_s, double bcm_log10Mc, double bcm_etab, double bcm_ks, int nz_mgrowth, double * zarr_mgrowth, double * dfarr_mgrowth, configuration config, int * status) -> cosmology"},
+	 { (char *)"cosmology_create_with_params", _wrap_cosmology_create_with_params, METH_VARARGS, (char *)"cosmology_create_with_params(double Omega_c, double Omega_b, double Omega_k, double Neff, double * mnu, ccl_mnu_type_label mnu_type, double w0, double wa, double h, double norm_pk, double n_s, double bcm_log10Mc, double bcm_etab, double bcm_ks, int nz_mgrowth, double * zarr_mgrowth, double * dfarr_mgrowth, configuration config, int * status) -> cosmology"},
 	 { (char *)"cosmology_create_with_lcdm_params", _wrap_cosmology_create_with_lcdm_params, METH_VARARGS, (char *)"cosmology_create_with_lcdm_params(double Omega_c, double Omega_b, double Omega_k, double h, double norm_pk, double n_s, configuration config, int * status) -> cosmology"},
-	 { (char *)"parameters_create", _wrap_parameters_create, METH_VARARGS, (char *)"parameters_create(double Omega_c, double Omega_b, double Omega_k, double Neff, double * mnu, ccl_mnu_is_sum_label mnu_sum_label, double w0, double wa, double h, double norm_pk, double n_s, double bcm_log10Mc, double bcm_etab, double bcm_ks, int nz_mgrowth, double * zarr_mgrowth, double * dfarr_mgrowth, int * status) -> parameters"},
+	 { (char *)"parameters_create", _wrap_parameters_create, METH_VARARGS, (char *)"parameters_create(double Omega_c, double Omega_b, double Omega_k, double Neff, double * mnu, ccl_mnu_type_label mnu_type, double w0, double wa, double h, double norm_pk, double n_s, double bcm_log10Mc, double bcm_etab, double bcm_ks, int nz_mgrowth, double * zarr_mgrowth, double * dfarr_mgrowth, int * status) -> parameters"},
 	 { (char *)"parameters_create_flat_lcdm", _wrap_parameters_create_flat_lcdm, METH_VARARGS, (char *)"parameters_create_flat_lcdm(double Omega_c, double Omega_b, double h, double norm_pk, double n_s, int * status) -> parameters"},
 	 { (char *)"parameters_create_flat_lcdm_bar", _wrap_parameters_create_flat_lcdm_bar, METH_VARARGS, (char *)"parameters_create_flat_lcdm_bar(double Omega_c, double Omega_b, double h, double norm_pk, double n_s, double bcm_log10Mc, double bcm_etab, double bcm_ks, int * status) -> parameters"},
 	 { (char *)"parameters_create_flat_wcdm", _wrap_parameters_create_flat_wcdm, METH_VARARGS, (char *)"parameters_create_flat_wcdm(double Omega_c, double Omega_b, double w0, double h, double norm_pk, double n_s, int * status) -> parameters"},
 	 { (char *)"parameters_create_flat_wacdm", _wrap_parameters_create_flat_wacdm, METH_VARARGS, (char *)"parameters_create_flat_wacdm(double Omega_c, double Omega_b, double w0, double wa, double h, double norm_pk, double n_s, int * status) -> parameters"},
 	 { (char *)"parameters_create_lcdm", _wrap_parameters_create_lcdm, METH_VARARGS, (char *)"parameters_create_lcdm(double Omega_c, double Omega_b, double Omega_k, double h, double norm_pk, double n_s, int * status) -> parameters"},
-	 { (char *)"parameters_create_flat_lcdm_nu", _wrap_parameters_create_flat_lcdm_nu, METH_VARARGS, (char *)"parameters_create_flat_lcdm_nu(double Omega_c, double Omega_b, double h, double norm_pk, double n_s, double Neff, double * mnu, ccl_mnu_is_sum_label mnu_sum_label, int * status) -> parameters"},
-	 { (char *)"parameters_create_flat_wcdm_nu", _wrap_parameters_create_flat_wcdm_nu, METH_VARARGS, (char *)"parameters_create_flat_wcdm_nu(double Omega_c, double Omega_b, double w0, double h, double norm_pk, double n_s, double Neff, double * mnu, ccl_mnu_is_sum_label mnu_sum_label, int * status) -> parameters"},
-	 { (char *)"parameters_create_flat_wacdm_nu", _wrap_parameters_create_flat_wacdm_nu, METH_VARARGS, (char *)"parameters_create_flat_wacdm_nu(double Omega_c, double Omega_b, double w0, double wa, double h, double norm_pk, double n_s, double Neff, double * mnu, ccl_mnu_is_sum_label mnu_sum_label, int * status) -> parameters"},
-	 { (char *)"parameters_create_lcdm_nu", _wrap_parameters_create_lcdm_nu, METH_VARARGS, (char *)"parameters_create_lcdm_nu(double Omega_c, double Omega_b, double Omega_k, double h, double norm_pk, double n_s, double Neff, double * mnu, ccl_mnu_is_sum_label mnu_sum_label, int * status) -> parameters"},
+	 { (char *)"parameters_create_flat_lcdm_nu", _wrap_parameters_create_flat_lcdm_nu, METH_VARARGS, (char *)"parameters_create_flat_lcdm_nu(double Omega_c, double Omega_b, double h, double norm_pk, double n_s, double Neff, double * mnu, ccl_mnu_type_label mnu_type, int * status) -> parameters"},
+	 { (char *)"parameters_create_flat_wcdm_nu", _wrap_parameters_create_flat_wcdm_nu, METH_VARARGS, (char *)"parameters_create_flat_wcdm_nu(double Omega_c, double Omega_b, double w0, double h, double norm_pk, double n_s, double Neff, double * mnu, ccl_mnu_type_label mnu_type, int * status) -> parameters"},
+	 { (char *)"parameters_create_flat_wacdm_nu", _wrap_parameters_create_flat_wacdm_nu, METH_VARARGS, (char *)"parameters_create_flat_wacdm_nu(double Omega_c, double Omega_b, double w0, double wa, double h, double norm_pk, double n_s, double Neff, double * mnu, ccl_mnu_type_label mnu_type, int * status) -> parameters"},
+	 { (char *)"parameters_create_lcdm_nu", _wrap_parameters_create_lcdm_nu, METH_VARARGS, (char *)"parameters_create_lcdm_nu(double Omega_c, double Omega_b, double Omega_k, double h, double norm_pk, double n_s, double Neff, double * mnu, ccl_mnu_type_label mnu_type, int * status) -> parameters"},
 	 { (char *)"cosmology_free", _wrap_cosmology_free, METH_VARARGS, (char *)"cosmology_free(cosmology cosmo)"},
 	 { (char *)"cosmology_compute_distances", _wrap_cosmology_compute_distances, METH_VARARGS, (char *)"cosmology_compute_distances(cosmology cosmo, int * status)"},
 	 { (char *)"cosmology_compute_growth", _wrap_cosmology_compute_growth, METH_VARARGS, (char *)"cosmology_compute_growth(cosmology cosmo, int * status)"},
@@ -21967,8 +21954,7 @@ static swig_type_info _swigt__p_baryons_power_spectrum_t = {"_p_baryons_power_sp
 static swig_type_info _swigt__p_ccl_configuration = {"_p_ccl_configuration", "struct ccl_configuration *|ccl_configuration *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_ccl_cosmology = {"_p_ccl_cosmology", "struct ccl_cosmology *|ccl_cosmology *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_ccl_data = {"_p_ccl_data", "struct ccl_data *|ccl_data *", 0, 0, (void*)0, 0};
-static swig_type_info _swigt__p_ccl_mnu_is_sum_label = {"_p_ccl_mnu_is_sum_label", "enum ccl_mnu_is_sum_label *|ccl_mnu_is_sum_label *", 0, 0, (void*)0, 0};
-static swig_type_info _swigt__p_ccl_mnu_split_method = {"_p_ccl_mnu_split_method", "enum ccl_mnu_split_method *|ccl_mnu_split_method *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_ccl_mnu_type_label = {"_p_ccl_mnu_type_label", "enum ccl_mnu_type_label *|ccl_mnu_type_label *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_ccl_nu_masses_label = {"_p_ccl_nu_masses_label", "enum ccl_nu_masses_label *|ccl_nu_masses_label *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_ccl_omega_x_label = {"_p_ccl_omega_x_label", "enum ccl_omega_x_label *|ccl_omega_x_label *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_ccl_parameters = {"_p_ccl_parameters", "struct ccl_parameters *|ccl_parameters *", 0, 0, (void*)0, 0};
@@ -21994,8 +21980,7 @@ static swig_type_info *swig_type_initial[] = {
   &_swigt__p_ccl_configuration,
   &_swigt__p_ccl_cosmology,
   &_swigt__p_ccl_data,
-  &_swigt__p_ccl_mnu_is_sum_label,
-  &_swigt__p_ccl_mnu_split_method,
+  &_swigt__p_ccl_mnu_type_label,
   &_swigt__p_ccl_nu_masses_label,
   &_swigt__p_ccl_omega_x_label,
   &_swigt__p_ccl_parameters,
@@ -22021,8 +22006,7 @@ static swig_cast_info _swigc__p_baryons_power_spectrum_t[] = {  {&_swigt__p_bary
 static swig_cast_info _swigc__p_ccl_configuration[] = {  {&_swigt__p_ccl_configuration, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_ccl_cosmology[] = {  {&_swigt__p_ccl_cosmology, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_ccl_data[] = {  {&_swigt__p_ccl_data, 0, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_ccl_mnu_is_sum_label[] = {  {&_swigt__p_ccl_mnu_is_sum_label, 0, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_ccl_mnu_split_method[] = {  {&_swigt__p_ccl_mnu_split_method, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_ccl_mnu_type_label[] = {  {&_swigt__p_ccl_mnu_type_label, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_ccl_nu_masses_label[] = {  {&_swigt__p_ccl_nu_masses_label, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_ccl_omega_x_label[] = {  {&_swigt__p_ccl_omega_x_label, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_ccl_parameters[] = {  {&_swigt__p_ccl_parameters, 0, 0, 0},{0, 0, 0, 0}};
@@ -22048,8 +22032,7 @@ static swig_cast_info *swig_cast_initial[] = {
   _swigc__p_ccl_configuration,
   _swigc__p_ccl_cosmology,
   _swigc__p_ccl_data,
-  _swigc__p_ccl_mnu_is_sum_label,
-  _swigc__p_ccl_mnu_split_method,
+  _swigc__p_ccl_mnu_type_label,
   _swigc__p_ccl_nu_masses_label,
   _swigc__p_ccl_omega_x_label,
   _swigc__p_ccl_parameters,

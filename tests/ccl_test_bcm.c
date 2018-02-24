@@ -18,7 +18,7 @@ CTEST_DATA(bcm) {
   double w_a[1];
   double Neff;
   double* m_nu;
-  ccl_mnu_is_sum_label mnu_is_sum;
+  ccl_mnu_type_label mnu_type;
 };
 
 CTEST_SETUP(bcm) {
@@ -30,7 +30,7 @@ CTEST_SETUP(bcm) {
   data->Neff = 3.046;
   double mnuval = 0.;
   data->m_nu= &mnuval;
-  data-> mnu_is_sum = ccl_mnu_is_sum;
+  data-> mnu_type = ccl_mnu_sum;
 
   double Omega_v[1]={0.7};
   double w_0[1] = {-1.0};
@@ -67,14 +67,14 @@ static void compare_bcm(int i_model,struct bcm_data * data)
   ccl_configuration config = default_config;
   config.baryons_power_spectrum_method=ccl_bcm;
   ccl_parameters params = ccl_parameters_create(data->Omega_c,data->Omega_b,data->Omega_k[i_model-1],
-						data->Neff, data->m_nu, data-> mnu_is_sum,
+						data->Neff, data->m_nu, data-> mnu_type,
 						data->w_0[i_model-1],data->w_a[i_model-1],
 						data->h,data->A_s,data->n_s,14,-1,-1,-1,NULL,NULL, &status);
   ccl_cosmology * cosmo = ccl_cosmology_create(params, config);
   ASSERT_NOT_NULL(cosmo);
   ccl_configuration config_nobar = default_config;
   ccl_parameters params_nobar = ccl_parameters_create(data->Omega_c,data->Omega_b,data->Omega_k[i_model-1],
-						data->Neff, data->m_nu, data->mnu_is_sum,
+						data->Neff, data->m_nu, data->mnu_type,
 						data->w_0[i_model-1],data->w_a[i_model-1],
 						data->h,data->A_s,data->n_s,-1,-1,-1,-1,NULL,NULL, &status);
   params.sigma_8=data->sigma_8;

@@ -1125,6 +1125,9 @@ static void ccl_cosmology_compute_power_emu(ccl_cosmology * cosmo, int * status)
     strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_emu(): h is outside allowed range\n");
     return;
   }
+  
+  // Check if the cosmology has been set up with equal neutrino masses for the emulator
+  // If not, check if the user has forced redistribution of masses and if so do this.
   if(cosmo->params.N_nu_mass>0) {
 	  if (cosmo->config.emulator_neutrinos_method == ccl_strict){
 		  if (cosmo->params.N_nu_mass==3){
@@ -1133,12 +1136,12 @@ static void ccl_cosmology_compute_power_emu(ccl_cosmology * cosmo, int * status)
 			  double diff3 = abs(cosmo->params.mnu[2] - cosmo->params.mnu[0]);
 			  if (diff1>1e-12 || diff2>1e-12 || diff3>1e-12){
 				*status = CCL_ERROR_INCONSISTENT;
-				strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_emu(): In the default configuration, you must pass three equal neutrino masses to use the emulator. If you wish to over-ride this, set config->emulator_ neutrinos_method = 'ccl_equalize'. This will force the neutrinos to be of equal mass but will result in internal inconsistencies.\n");
+				strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_emu(): In the default configuration, you must pass a list of 3 equal neutrino masses or pass a sum of  and set mnu_type = ccl_mnu_sum_equal. If you wish to over-ride this, set config->emulator_ neutrinos_method = 'ccl_equalize'. This will force the neutrinos to be of equal mass but will result in internal inconsistencies.\n");
 				return;
 			    }
-          }else if (cosmo->params.N_nu_mass==3){
+          }else if (cosmo->params.N_nu_mass!=3){
 			    *status = CCL_ERROR_INCONSISTENT;
-				strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_emu(): In the default configuration, you must pass three equal neutrino masses to use the emulator. If you wish to over-ride this, set config->emulator_ neutrinos_method = 'ccl_equalize'. This will force the neutrinos to be of equal mass but will result in internal inconsistencies.\n");
+				strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_emu(): In the default configuration, you must pass a list of 3 equal neutrino masses or pass a sum of  and set mnu_type = ccl_mnu_sum_equal. If you wish to over-ride this, set config->emulator_ neutrinos_method = 'ccl_equalize'. This will force the neutrinos to be of equal mass but will result in internal inconsistencies.\n");
 				return;
 			}
       }else if (cosmo->config.emulator_neutrinos_method == ccl_equalize){ 		  
@@ -1149,7 +1152,7 @@ static void ccl_cosmology_compute_power_emu(ccl_cosmology * cosmo, int * status)
   } else {
     if(fabs(cosmo->params.N_nu_rel - 3.04)>1.e-6){
       *status=CCL_ERROR_INCONSISTENT;
-      strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_emu(): N_nu_rel = 3.04 for cosmic emulator predictions in absence of massive neutrinos.\n");
+      strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_emu(): Set N_nu_rel = 3.04 for cosmic emulator predictions in absence of massive neutrinos.\n");
       return;
     }
     }

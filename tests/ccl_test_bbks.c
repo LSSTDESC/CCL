@@ -14,7 +14,7 @@ CTEST_DATA(bbks) {
   double sigma_8;
   double Neff;
   double* mnu;
-  ccl_mnu_is_sum_label mnu_is_sum;
+  ccl_mnu_type_label mnu_type;
   double Omega_v[5];
   double Omega_k[5];
   double w_0[5];
@@ -32,7 +32,7 @@ CTEST_SETUP(bbks) {
   data->Neff=0;
   double mnuval = 0.;
   data->mnu=&mnuval;
-  data->mnu_is_sum =ccl_mnu_is_sum;
+  data->mnu_type =ccl_mnu_sum;
 
   double Omega_v[5]={0.7, 0.7, 0.7, 0.65, 0.75};
   double w_0[5] = {-1.0, -0.9, -0.9, -0.9, -0.9};
@@ -67,7 +67,7 @@ static void compare_bbks(int i_model,struct bbks_data * data)
   FILE *f;
   ccl_configuration config = default_config;
   config.transfer_function_method = ccl_bbks;
-  ccl_parameters params = ccl_parameters_create(data->Omega_c,data->Omega_b,data->Omega_k[i_model-1],data->Neff, data->mnu,data->mnu_is_sum, data->w_0[i_model-1],data->w_a[i_model-1],data->h,data->A_s,data->n_s,-1,-1,-1,-1,NULL,NULL, &status);
+  ccl_parameters params = ccl_parameters_create(data->Omega_c,data->Omega_b,data->Omega_k[i_model-1],data->Neff, data->mnu,data->mnu_type, data->w_0[i_model-1],data->w_a[i_model-1],data->h,data->A_s,data->n_s,-1,-1,-1,-1,NULL,NULL, &status);
   params.Omega_g=0;
   params.sigma_8=data->sigma_8;
   ccl_cosmology * cosmo = ccl_cosmology_create(params, config);

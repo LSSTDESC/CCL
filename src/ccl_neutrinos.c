@@ -134,18 +134,6 @@ double ccl_Omeganuh2 (double a, double Neff, double* mnu, double TCMB, gsl_inter
   return OmNuh2;
 }
 
-//structure with Omeganuh2 arguments for call from root finding routine
-typedef struct {
-  double a, Neff, OmNuh2_target,TCMB;
-  gsl_interp_accel* accel;
-  int *status;
-} OmNuh2_params;
-// wrapper for calling Omeganuh2 from root finding routine
-double Omeganuh2_root(double m_iter, void *params){
-  OmNuh2_params *p = (OmNuh2_params *) params;
-  double m_iter_three[3] = {m_iter, m_iter, m_iter};
-  return ccl_Omeganuh2(p->a, p->Neff, m_iter_three, p->TCMB, p->accel, p->status) - p->OmNuh2_target;
-}
 /* -------- ROUTINE: Omeganuh2_to_Mnu ---------
 INPUTS: OmNuh2: neutrino mass density today Omeganu * h^2, label: how you want to split up the masses, see ccl_neutrinos.h for options, TCMB: CMB temperature, accel: pointer to an accelerator which will evaluate the neutrino phasespace spline if defined, status: pointer to status integer.
 TASK: Given Omeganuh2 today, the method of splitting into masses, and the temperature of the CMB, output a pointer to the array of neutrino masses (may be length 1 if label asks for sum) 
@@ -227,74 +215,3 @@ double* ccl_nu_masses(double OmNuh2, ccl_nu_masses_label label, double TCMB, gsl
 	 return mnu; 
   }	
 }	  
-	  
-		
-  // Now handle the massless case
-  /*double Tnu, a4, prefix_massless,Omeganuh2_massless;
-
-  Tnu=TCMB*pow(4./11.,1./3.);
-  a4=a*a*a*a;  
-  prefix_massless = NU_CONST  * Tnu * Tnu * Tnu * Tnu; 
-  Omeganuh2_massless = Neff*prefix_massless*7./8./a4;
-  if ( OmNuh2 < Omeganuh2_massless) {
-    for(int i=0; i < 3; i = i + 1){
-  		mnu[i] = 0.;
-  	  }
-  	  return mnu;
-  }
-
-  // How do we do this for the different labelled options? Equal is easy. Is Omeganuh2 sensitive to the split or is it just linear?
-  
-  // Omeganu0 = sum (m_nu) / 93.14 eV is something we trust, I think. So why not just use this? This is super easy to solve for - then just split.
-
-
-  int root_status, iter = 0, max_iter = 100;
-  const gsl_root_fsolver_type *T;
-  gsl_root_fsolver *s;
-
-  double* m_root; 
-  double m_iter = 0.;
-  double m_min = 1.e-12; //required for consistency with massless case in Omeganuh2
-  double m_max = 100.0; //root finding requires some upper bound
-  
-  m_root =malloc(3*sizeof(double));
-  
-  gsl_function F;
-  OmNuh2_params p;
-  p.a = a;
-  p.Neff =Neff;
-  p.OmNuh2_target = OmNuh2;
-  p.TCMB = TCMB;
-  p.accel = accel;
-  p.status = status;
-
-  F.function = &Omeganuh2_root;
-  F.params = &p;
-
-  T = gsl_root_fsolver_brent;
-  s = gsl_root_fsolver_alloc (T);
-  gsl_root_fsolver_set (s, &F, m_min, m_max);
-
-  do
-	{
-	iter++;
-	root_status = gsl_root_fsolver_iterate (s);
-	if (root_status){break;} //could not evaluate Omeganuh2
-	m_iter = gsl_root_fsolver_root (s);
-	m_min = gsl_root_fsolver_x_lower (s);
-	m_max = gsl_root_fsolver_x_upper (s);
-	root_status = gsl_root_test_interval (m_min, m_max,
-										0, 0.001); // double epsabs, double epsrel
-	}
-  while (root_status == GSL_CONTINUE && iter < max_iter && *status ==0);
-
-  if (root_status == GSL_SUCCESS){
-	for(int j=0; j<3; j = j +1){
-	m_root[j] = m_iter;
-    }
-	}else{*status = CCL_ERROR_NU_SOLVE;}
-		
-	gsl_root_fsolver_free (s);
-
-  return m_root;
-}*/

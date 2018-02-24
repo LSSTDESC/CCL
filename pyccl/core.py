@@ -45,8 +45,10 @@ emulator_neutrinos_types = {
 }
 
 mnu_types = {
-	'sum': lib.mnu_is_sum,
-	'list': lib.mnu_is_list,
+	'list': lib.mnu_list,
+	'sum': lib.mnu_sum,
+	'sum_inverted': lib.mnu_sum_inverted,
+	'sum_equal': lib.mnu_sum_equal, 
 }
 
 # Error types
@@ -73,7 +75,7 @@ class Parameters(object):
     """
     
     def __init__(self, Omega_c=None, Omega_b=None, h=None, A_s=None, n_s=None, 
-                 Omega_k=0., Neff = 3.046, m_nu=0.,w0=-1., wa=0., 
+                 Omega_k=0., Neff = 3.046, m_nu=0., mnu_type = None, w0=-1., wa=0., 
                  bcm_log10Mc=math.log10(1.2e14), bcm_etab=0.5, bcm_ks=55., sigma8=None,
                  z_mg=None, df_mg=None):
         """
@@ -93,9 +95,11 @@ class Parameters(object):
             n_s (float): Primordial scalar perturbation spectral index.
             Omega_k (float, optional): Curvature density fraction. Defaults to 0.
             Neff (float, optional): Effective number of neutrino species. Defaults to 3.046
-            m_nu (:obj: float or array-like, optional): If float: total mass in eV of 
+            m_nu (float or array-like, optional): If float: total mass in eV of 
 							the massive neutrinos present. If array-like, masses of 3 neutrino
 							species (must have length 3).
+			mnu_type (string): treatment for neutrinos. Available: 'sum', 'sum_inverted',
+							'sum_equal', 'list'
             w0 (float, optional): First order term of dark energy equation of 
                                   state. Defaults to -1.
             wa (float, optional): Second order term of dark energy equation of 
@@ -146,49 +150,18 @@ class Parameters(object):
             
         if norm_pk < 1e-5 and sigma8 is not None:
             raise ValueError("sigma8 must be greater than 1e-5.")
-            
-        # Check if N_nu_mass is a float and if so does it represent an integer?
-        # If it is a float that could be an integer, make it an integer.
-        #if (type(N_nu_mass)==float):
-        #    if ( N_nu_mass.is_integer() != True):
-        #        raise ValueError("N_nu_mass must be an integer value.")
-        #    else:
-        #        N_nu_mass = int(N_nu_mass)     
-
-        # Check if N_nu_mass is now anything other than an integer:
-        #if (type(N_nu_mass)!= int):
-        #    raise ValueError("N_nu_mass must be an integer (or a float with integer value).")
-        #else:
-        #    if (N_nu_mass==0):
-        #        if (hasattr(m_nu, "__len__")==True):
-		#			if (len(m_nu)!=1):
-		#				raise ValueError("Length of m_nu must match N_nu_mass.")
-		#				else:
-		#				if (np.abs(m_nu[0]>1e-14)):
-		#					raise ValueError("If N_nu_mass is 0, m_nu must be 0 or unset.")
-        #        elif (np.abs(m_nu)>1e-14):
-        #            raise ValueError("If N_nu_mass is 0, m_nu must be 0 or unset.")
-        #        else:
-        #            m_nu=np.asarray([m_nu]) # If N_nu_mass = 0 and m_nu=0, put m_nu in an array/       
-        #    elif (N_nu_mass==1):
-        #        if (hasattr(m_nu, "__len__")!=True):
-        #            m_nu = np.asarray([m_nu]) # Put m_nu value in array.
-        #        elif (len(m_nu)!=1):
-        #            raise ValueError("Length of m_nu must match N_nu_mass.")
-        #    else:
-        #        if (hasattr(m_nu, "__len__")!=True):
-        #            raise ValueError("Length of m_nu must match N_nu_mass.")
-        #        elif (len(m_nu)!= N_nu_mass):
-        #            raise ValueError("Length of m_nu must match N_nu_mass.")
         
         if isinstance(m_nu, float):
-            mnu_length = mnu_types['sum']
+            if mnu_type == None :
+                mnu_type = 'sum';
             m_nu = [m_nu]
         elif hasattr(m_nu, "__len__"):
             if (len(m_nu)!=3):
                 raise ValueError("m_nu must be a float or array-like object with length 3.")
-            else:
-                mnu_length = mnu_types['list']  # False
+            elif ((mnu_type=='sum') or (mnu_type=='sum_inverted') or (mnu_type=='sum_equal')):
+                raise ValueError("That mnu type cannot be passed with a list of neutrino masses, only with a sum.");
+            elif (mnu_type==None):
+                mnu_type = 'list'  # False
         else:
             raise ValueError("m_nu must be a float or array-like object with length 3.")
         
@@ -210,7 +183,7 @@ class Parameters(object):
             = lib.parameters_create_nu( Omega_c, Omega_b, Omega_k, Neff, 
                                              w0, wa, h, norm_pk, 
                                              n_s, bcm_log10Mc, bcm_etab, bcm_ks, 
-                                             mnu_length, m_nu, status ) 
+                                             mnu_types[mnu_type], m_nu, status ) 
                                              
         else:
             # Create ccl_parameters with modified growth arrays
@@ -218,7 +191,7 @@ class Parameters(object):
             = lib.parameters_create_nu_vec( Omega_c, Omega_b, Omega_k, Neff, 
                                              w0, wa, h, norm_pk, 
                                              n_s, bcm_log10Mc, bcm_etab, bcm_ks, 
-                                             z_mg, df_mg, mnu_length, m_nu, status )
+                                             z_mg, df_mg, mnu_types[mnu_type], m_nu, status )
         check(status)    
     
     def __getitem__(self, key):
@@ -282,7 +255,7 @@ class Cosmology(object):
     def __init__(self, 
                  params=None, config=None,
                  Omega_c=None, Omega_b=None, h=None, A_s=None, n_s=None, 
-                 Omega_k=0., Neff=3.046, m_nu=0., w0=-1., wa=0.,
+                 Omega_k=0., Neff=3.046, m_nu=0., mnu_type = None, w0=-1., wa=0.,
                  bcm_log10Mc=math.log10(1.2e14), bcm_etab=0.5, bcm_ks=55., sigma8=None,
                  z_mg=None, df_mg=None, 
                  transfer_function='boltzmann_class',
@@ -317,7 +290,7 @@ class Cosmology(object):
         if params is None:
             # Create new Parameters object
             params = Parameters(Omega_c=Omega_c, Omega_b=Omega_b, h=h, A_s=A_s, 
-                                n_s=n_s, Omega_k=Omega_k, Neff = Neff, m_nu=m_nu, 
+                                n_s=n_s, Omega_k=Omega_k, Neff = Neff, m_nu=m_nu, mnu_type=mnu_type,
                                 w0=w0, wa=wa, sigma8=sigma8, bcm_log10Mc=bcm_log10Mc, bcm_etab=bcm_etab,
                                 bcm_ks=bcm_ks, z_mg=z_mg, df_mg=df_mg)
             self.params = params
@@ -332,7 +305,7 @@ class Cosmology(object):
             # Warn if any cosmological parameters were specified at the same 
             # time as a Parameters() object; they will be ignored
             argtest = [Omega_c==None, Omega_b==None, h==None, A_s==None, 
-                       n_s==None, Omega_k==0., Neff==3.046, m_nu==0.,
+                       n_s==None, Omega_k==0., Neff==3.046, m_nu==0., mnu_type==None,
                        w0==-1., wa==0., bcm_log10Mc==math.log10(1.2e14), bcm_etab==0.5, bcm_ks==55.,
                        sigma8==None, z_mg==None, df_mg==None]
             

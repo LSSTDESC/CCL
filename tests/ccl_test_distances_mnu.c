@@ -18,7 +18,7 @@ CTEST_DATA(distances_mnu) {
   double n_s;
   double Neff[5];
   double mnu0[3], mnu1[3], mnu2[3], mnu3[3], mnu4[3];
-  ccl_mnu_is_sum_label mnu_is_sum;
+  ccl_mnu_type_label mnu_type;
   double Omega_v[5];
   double Omega_k[5];
   double w_0[5];
@@ -80,7 +80,7 @@ CTEST_SETUP(distances_mnu) {
   data->h = 0.7;
   data->A_s = 2.1e-9;
   data->n_s = 0.96;
-  data->mnu_is_sum = ccl_mnu_is_list;
+  data->mnu_type = ccl_mnu_list;
 
   // Values that are different for the different models
   double Omega_v[5] = {  0.7,  0.7,  0.7,  0.65, 0.75 };
@@ -144,27 +144,27 @@ static void compare_distances_mnu(int model, struct distances_mnu_data * data)
   if (model==0){
   
   params = ccl_parameters_create(data->Omega_c, data->Omega_b, data->Omega_k[model],
-						data->Neff[model], data->mnu0, data-> mnu_is_sum, 
+						data->Neff[model], data->mnu0, data-> mnu_type, 
 						data->w_0[model], data->w_a[model],
 						data->h, data->A_s, data->n_s,-1,-1,-1,-1,NULL,NULL, &status);
   } else if (model==1){
 	  params = ccl_parameters_create(data->Omega_c, data->Omega_b, data->Omega_k[model],
-						data->Neff[model], data->mnu1, data->mnu_is_sum,
+						data->Neff[model], data->mnu1, data->mnu_type,
 						data->w_0[model], data->w_a[model],
 						data->h, data->A_s, data->n_s,-1,-1,-1,-1,NULL,NULL, &status);
   } else if (model==2){
 	 params = ccl_parameters_create(data->Omega_c, data->Omega_b, data->Omega_k[model],
-						data->Neff[model], data->mnu2, data->mnu_is_sum,
+						data->Neff[model], data->mnu2, data->mnu_type,
 						data->w_0[model], data->w_a[model],
 						data->h, data->A_s, data->n_s,-1,-1,-1,-1,NULL,NULL, &status);
   } else if (model ==3){
 	params = ccl_parameters_create(data->Omega_c, data->Omega_b, data->Omega_k[model],
-						data->Neff[model], data->mnu3, data->mnu_is_sum,
+						data->Neff[model], data->mnu3, data->mnu_type,
 						data->w_0[model], data->w_a[model],
 						data->h, data->A_s, data->n_s,-1,-1,-1,-1,NULL,NULL, &status);
   }else if (model ==4){
 	  params = ccl_parameters_create(data->Omega_c, data->Omega_b, data->Omega_k[model],
-						data->Neff[model], data->mnu4, data->mnu_is_sum,
+						data->Neff[model], data->mnu4, data->mnu_type,
 						data->w_0[model], data->w_a[model],
 						data->h, data->A_s, data->n_s,-1,-1,-1,-1,NULL,NULL, &status);
   }
