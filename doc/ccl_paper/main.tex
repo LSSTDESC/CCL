@@ -321,7 +321,13 @@ where the angular lensing convergence power spectrum $C^{ab}_\ell$ is given abov
   \xi^{ab}(\theta) = \int d\ell \frac{\ell}{2\pi} C^{ab}_\ell\, J_2(\ell\theta),
 \end{equation}
 
+{\bf 3-dimensional spatial correlation function.}
 
+In addition to the angular correlation functions, the 3-dimensional spatial correlation function $\xi(r)$ is 
+calculated from the power spectrum $P(k)$ using
+\begin{equation}
+\xi(r) = \frac{1}{2 \pi^2} \int dk \; k^2 P(k) \frac{\sin(kr)}{kr}
+\end{equation}
 
 %-------------------------------------------------------------------------------
 \subsection{Halo mass function}
@@ -802,6 +808,16 @@ In this second step, only 2 codes have been compared so far. More outputs are ne
 For $C_\ell$ computations, we required the relative difference between \ccl and the benchmarks to be $<10^{-3}$. We performed the test both for analytic redshift distributions and histograms.
 
 To obtain realistic targets for the convergence of correlation function computations for LSST analyses, we calculate the expected statistical uncertainty of the clustering and lensing correlation functions of the LSST gold sample (c.f. Sect.~\ref{sec:specs}), assuming an effective source galaxy density of $n_\mathrm{eff} = 26\mathrm{gal/sq\,arcmin}$ for galaxy shape distortions, and galaxy density of $n_\mathrm{gold} = 45\mathrm{gal/sq\,arcmin}$ for number counts. Specifically, we calculate the Gaussian covariance of angular correlation functions following the formalism of \citet{2008A&A...477...43J}, and note that leaving out the non-Gaussian covariance terms makes this convergence criterion more conservative. We split the galaxy samples into 10 tomography bins, defined to contain equal numbers of galaxies. The accuracy test then proceeds as follows. We compared the difference between \ccl calculated lensing and clustering correlations and the benchmarks for the analytic redshift distributions and for auto-correlations of redshift bins only. To pass the benchmark test, we required that this difference be smaller than half of the value of the errorbar derived from the covariance for each correlation function computed. Specifically, we take the value of the covariance in the bins centered at $z=1$ and $z=1.5$ to compare to the benchmarks.
+
+
+The 3-dimensional correlation function $\xi(r)$ was validated by comparing with an independent transform code based
+on the method of \cite{Ogata2005} implemented in the hankel.py python package. We calculate $\xi(r)$ by transforming the CCL
+BBKS linear power spectrum using this independent code and using a fine sampling of $P(k)$. This is done for the five cosmologies
+listed in Table~\ref{tab:cosmologies} and redshifts $z = 0,1,2,3,4,5$.  We then compare with the $\xi(r)$ from CCL with a sampling of $P(k)$
+equal to {\tt N$\_$K$\_$3DCOR} bins per decade. The default value of {\tt N$\_$K$\_$3DCOR}~=~1000 results in fractional agreement
+at the level of $<4 \times 10^{-3}$ for $0.1 < r < 50$~Mpc increasing to  $< 0.01 $ at $r = 100$~Mpc. Above this scale $\xi(r)$
+approaches zero. If higher accuracy is desired, the user can increase the value of {\tt N$\_$K$\_$3DCOR}.
+
 
 Additionally, independent codes were utilized to test the accuracy of halo mass function predictions. For the halo mass function, we compare the value of $\sigma$, $\log(\sigma^{-1})$, and the value of the halo mass function in the form used in \cite{Tinker2008},
 \begin{equation}
