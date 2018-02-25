@@ -336,7 +336,6 @@ static void ccl_fill_class_parameters(ccl_cosmology * cosmo, struct file_content
     strcpy(fc->name[14],"N_ur");
     sprintf(fc->value[14],"%e", 0.);
   }
-  
   if (cosmo->params.N_nu_mass > 0) {
     strcpy(fc->name[15],"N_ncdm");
     sprintf(fc->value[15],"%d",cosmo->params.N_nu_mass);
@@ -374,6 +373,8 @@ static void ccl_fill_class_parameters(ccl_cosmology * cosmo, struct file_content
     strcpy(cosmo->status_message ,"ccl_power.c: class_parameters(): Error initializing CLASS pararmeters: neither sigma_8 nor A_s defined\n");
     return;
   }
+  
+  //printf("%s=%s, %s=%s,%s=%s,%s=%s,%s=%s,%s=%s,%s=%s,%s=%s,%s=%s,%s=%s,%s=%s,%s=%s,%s=%s,%s=%s,%s=%s,%s=%s,%s=%s,%s=%s,%s=%s\n", fc->name[0], fc->value[0], fc->name[1], fc->value[1],fc->name[2], fc->value[2],fc->name[3], fc->value[3],fc->name[4], fc->value[4], fc->name[5], fc->value[5], fc->name[6], fc->value[6], fc->name[7], fc->value[7], fc->name[8], fc->value[8], fc->name[9], fc->value[9], fc->name[10], fc->value[10], fc->name[11], fc->value[11], fc->name[12], fc->value[12], fc->name[13], fc->value[13], fc->name[14], fc->value[14], fc->name[15], fc->value[15], fc->name[16], fc->value[16], fc->name[17], fc->value[17], fc->name[18], fc->value[18]);
 
 }
 

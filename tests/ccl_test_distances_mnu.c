@@ -111,10 +111,10 @@ CTEST_SETUP(distances_mnu) {
   data->mnu4[1] = mnu4[1];
   
   data->mnu0[2] = mnu0[2];
-  data->mnu1[2] = mnu1[1];
-  data->mnu2[2] = mnu2[1];
-  data->mnu3[2] = mnu3[1];
-  data->mnu4[2] = mnu4[1];
+  data->mnu1[2] = mnu1[2];
+  data->mnu2[2] = mnu2[2];
+  data->mnu3[2] = mnu3[2];
+  data->mnu4[2] = mnu4[2];
 
   // Fill in the values from these constant arrays.
   for (int i=0; i<5; i++) {
