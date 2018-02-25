@@ -474,7 +474,7 @@ void ccl_correlation_3d(ccl_cosmology *cosmo, double a,
   double *k_arr,*pk_arr,*r_arr,*xi_arr;
 
   //number of data points for k and pk array
-  N_ARR=(int)(1000*log10(ccl_splines->K_MAX/ccl_splines->K_MIN_DEFAULT));  
+  N_ARR=(int)(ccl_splines->N_K_3DCOR*log10(ccl_splines->K_MAX/ccl_splines->K_MIN_DEFAULT));  
 
   k_arr=ccl_log_spacing(ccl_splines->K_MIN_DEFAULT,ccl_splines->K_MAX,N_ARR);
   if(k_arr==NULL) {

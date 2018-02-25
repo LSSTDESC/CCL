@@ -4,7 +4,8 @@
 #include <stdio.h>
 #include <math.h>
 
-#define corr_tolerance 1.0E-2
+#define CORR_TOLERANCE1 4.0E-3
+#define CORR_TOLERANCE2 1.0E-2
 
 CTEST_DATA(corrs_3d) {
   double Omega_c;
@@ -30,9 +31,9 @@ CTEST_SETUP(corrs_3d) {
   data->A_s = 2.1e-9;
   data->n_s = 0.96;
   data->sigma_8=0.8;
-  data->N_nu_rel=0;
-  data->N_nu_mass=0;
-  data->mnu=0;
+  data->N_nu_rel=3.046;
+  data->N_nu_mass=0.0;
+  data->mnu=0.0;
 
   double Omega_v[5]={0.7, 0.7, 0.7, 0.65, 0.75};
   double w_0[5] = {-1.0, -0.9, -0.9, -0.9, -0.9};
@@ -68,7 +69,7 @@ static void compare_correlation_3d(int i_model,struct corrs_3d_data * data)
   ccl_configuration config = default_config;
   config.matter_power_spectrum_method=ccl_linear;
   config.transfer_function_method = ccl_bbks;
-  ccl_parameters params = ccl_parameters_create(data->Omega_c,data->Omega_b,data->Omega_k[i_model-1],data->N_nu_rel, data->N_nu_mass, data->mnu,data->w_0[i_model-1],data->w_a[i_model-1],data->h,data->A_s,data->n_s,-1,-1,-1,-1,NULL,NULL, &status);
+  ccl_parameters params = ccl_parameters_create(data->Omega_c,data->Omega_b,data->Omega_k[i_model-1],data->N_nu_rel, data->N_nu_mass, data->mnu,data->w_0[i_model-1],data->w_a[i_model-1],data->h,data->A_s,data->n_s,14.079181246047625, 0.5, 55, 0,NULL,NULL, &status);
   params.Omega_g=0;
   params.sigma_8=data->sigma_8;
   ccl_cosmology * cosmo = ccl_cosmology_create(params, config);
@@ -95,11 +96,10 @@ static void compare_correlation_3d(int i_model,struct corrs_3d_data * data)
       exit(1);
     }
 
-    r_arr[i]=r_h/data->h;
+    r_arr[i]=r_h;
 
     for(j=0;j<6;j++) {
-      double ximm_bench;
-      
+      double ximm_bench;      
       stat=fscanf(f,"%lf",&ximm_bench);
       if(stat!=1) {
 	fprintf(stderr,"Error reading file %s, line %d\n",fname,i+2);
@@ -116,14 +116,17 @@ static void compare_correlation_3d(int i_model,struct corrs_3d_data * data)
       ccl_correlation_3d(cosmo,1.0/(j+1),nr,r_arr,ximm_ccl_out,0,NULL,&status);
 
       if (status) printf("%s\n",cosmo->status_message);
-      for(i=0;i<nr;i++){
-      if(r_arr[i]>100) break;
+      for(i=0;i<nr;i++){     
       double err;
       err=fabs(ximm_ccl_out[i]/ximm_bench_arr[i][j]-1);
-      ASSERT_DBL_NEAR_TOL(err,0.,corr_tolerance);
-      //fprintf(stderr,"i= %d j= %d r= %f ximm_bench= %f\n",i,j,r_arr[i],ximm_bench_arr[i][j]);
-      }
-    
+      if(r_arr[i]<50.) 
+      ASSERT_DBL_NEAR_TOL(err,0.,CORR_TOLERANCE1);
+      else
+      ASSERT_DBL_NEAR_TOL(err,0.,CORR_TOLERANCE2);
+      
+      //if(j==1)
+      //fprintf(stderr,"\ni= %d j= %d r= %f ximm_bench= %f ximm_ccl= %f err= %f",i,j,r_arr[i],ximm_bench_arr[i][j],ximm_ccl_out[i],err);
+      }   
   }
   fclose(f);
   
