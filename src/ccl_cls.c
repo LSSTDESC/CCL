@@ -312,7 +312,6 @@ static CCL_ClTracer *cl_tracer(ccl_cosmology *cosmo,int tracer_type,
     }
 
     //Normalize n(z)
-    //printf("DB: Normalizing\n");
     gsl_function F;
     double nz_norm,nz_enorm;
     double *nz_normalized=(double *)malloc(nz_n*sizeof(double));
@@ -447,7 +446,6 @@ static CCL_ClTracer *cl_tracer(ccl_cosmology *cosmo,int tracer_type,
       double chimax=ccl_comoving_radial_distance(cosmo,1./(1+zmax),status);
       //TODO: The interval in chi (5. Mpc) should be made a macro
 
-      //printf("DB: Lensing kernel\n");
       //In this case we need to integrate all the way to z=0. Reset zmin and chimin
       clt->zmin=0;
       clt->chimin=0;
@@ -519,7 +517,6 @@ static CCL_ClTracer *cl_tracer(ccl_cosmology *cosmo,int tracer_type,
 	  return NULL;
 	}
       }
-      //printf("DB: Done\n");
     }
   }
   else if(tracer_type==CL_TRACER_CL) {
