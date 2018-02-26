@@ -1132,17 +1132,18 @@ static void ccl_cosmology_compute_power_emu(ccl_cosmology * cosmo, int * status)
   if(cosmo->params.N_nu_mass>0) {
 	  if (cosmo->config.emulator_neutrinos_method == ccl_strict){
 		  if (cosmo->params.N_nu_mass==3){
-			  double diff1 = abs(cosmo->params.mnu[0] - cosmo->params.mnu[1]);
-			  double diff2 = abs(cosmo->params.mnu[1] - cosmo->params.mnu[2]);
-			  double diff3 = abs(cosmo->params.mnu[2] - cosmo->params.mnu[0]);
+			  double diff1 = pow((cosmo->params.mnu[0] - cosmo->params.mnu[1]) * (cosmo->params.mnu[0] - cosmo->params.mnu[1]), 0.5);
+			  double diff2 = pow((cosmo->params.mnu[1] - cosmo->params.mnu[2]) * (cosmo->params.mnu[1] - cosmo->params.mnu[2]), 0.5);
+			  double diff3 = pow((cosmo->params.mnu[2] - cosmo->params.mnu[0]) * (cosmo->params.mnu[2] - cosmo->params.mnu[0]), 0.5);
+			  //printf("no abs, diff1=%f, diff2=%f, diff3=%f\n", cosmo->params.mnu[0] - cosmo->params.mnu[1], cosmo->params.mnu[1] - cosmo->params.mnu[2], cosmo->params.mnu[2] - cosmo->params.mnu[0]);
 			  if (diff1>1e-12 || diff2>1e-12 || diff3>1e-12){
 				*status = CCL_ERROR_INCONSISTENT;
-				strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_emu(): In the default configuration, you must pass a list of 3 equal neutrino masses or pass a sum of  and set mnu_type = ccl_mnu_sum_equal. If you wish to over-ride this, set config->emulator_ neutrinos_method = 'ccl_equalize'. This will force the neutrinos to be of equal mass but will result in internal inconsistencies.\n");
+				strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_emu(): In the default configuration, you must pass a list of 3 equal neutrino masses or pass a sum and set mnu_type = ccl_mnu_sum_equal. If you wish to over-ride this, set config->emulator_neutrinos_method = 'ccl_equalize'. This will force the neutrinos to be of equal mass but will result in internal inconsistencies.\n");
 				return;
 			    }
           }else if (cosmo->params.N_nu_mass!=3){
 			    *status = CCL_ERROR_INCONSISTENT;
-				strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_emu(): In the default configuration, you must pass a list of 3 equal neutrino masses or pass a sum of  and set mnu_type = ccl_mnu_sum_equal. If you wish to over-ride this, set config->emulator_ neutrinos_method = 'ccl_equalize'. This will force the neutrinos to be of equal mass but will result in internal inconsistencies.\n");
+				strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_emu(): In the default configuration, you must pass a list of 3 equal neutrino masses or pass a sum and set mnu_type = ccl_mnu_sum_equal. If you wish to over-ride this, set config->emulator_neutrinos_method = 'ccl_equalize'. This will force the neutrinos to be of equal mass but will result in internal inconsistencies.\n");
 				return;
 			}
       }else if (cosmo->config.emulator_neutrinos_method == ccl_equalize){ 		  
@@ -1431,6 +1432,7 @@ TASK: compute the linear power spectrum at a given redshift
 double ccl_linear_matter_power(ccl_cosmology * cosmo, double k, double a, int * status)
 
 {
+
   if ((cosmo->config.transfer_function_method == ccl_emulator) && (a<A_MIN_EMU)){
     *status = CCL_ERROR_INCONSISTENT;
     sprintf(cosmo->status_message ,"ccl_power.c: the cosmic emulator cannot be used above z=2\n");
@@ -1440,32 +1442,35 @@ double ccl_linear_matter_power(ccl_cosmology * cosmo, double k, double a, int * 
   if (!cosmo->computed_power) ccl_cosmology_compute_power(cosmo, status);
   double log_p_1;
   int pkstatus;
- 
+
   if(a<ccl_splines->A_SPLINE_MINLOG_PK) {  //Extrapolate linearly at high redshift
     double pk0=ccl_linear_matter_power(cosmo,k,ccl_splines->A_SPLINE_MINLOG_PK,status);
     double gf=ccl_growth_factor(cosmo,a,status)/ccl_growth_factor(cosmo,ccl_splines->A_SPLINE_MINLOG_PK,status);
 
     return pk0*gf*gf;
   }
- 
-  if(k<=cosmo->data.k_min_lin) { 
-    log_p_1=ccl_power_extrapol_lowk(cosmo,k,a,cosmo->data.p_lin,cosmo->data.k_min_lin,status);
 
-    return exp(log_p_1);
-  }
-  else if(k<cosmo->data.k_max_lin){
-    pkstatus = gsl_spline2d_eval_e(cosmo->data.p_lin, log(k), a,NULL,NULL,&log_p_1);
-    if (pkstatus) {
-      *status = CCL_ERROR_SPLINE_EV;
-      sprintf(cosmo->status_message ,"ccl_power.c: ccl_linear_matter_power(): Spline evaluation error\n");
-      return NAN;
-    }
-    else
+  if (*status!=CCL_ERROR_INCONSISTENT){
+    if(k<=cosmo->data.k_min_lin) { 
+      log_p_1=ccl_power_extrapol_lowk(cosmo,k,a,cosmo->data.p_lin,cosmo->data.k_min_lin,status);
+
       return exp(log_p_1);
-  }
-  else { //Extrapolate using log derivative
-    log_p_1 = ccl_power_extrapol_highk(cosmo,k,a,cosmo->data.p_lin,cosmo->data.k_max_lin,status);
-    return exp(log_p_1);
+    }
+    else if(k<cosmo->data.k_max_lin){
+      pkstatus = gsl_spline2d_eval_e(cosmo->data.p_lin, log(k), a,NULL,NULL,&log_p_1);
+      if (pkstatus) {
+        *status = CCL_ERROR_SPLINE_EV;
+        sprintf(cosmo->status_message ,"ccl_power.c: ccl_linear_matter_power(): Spline evaluation error\n");
+        return NAN;
+      }
+      else{
+        return exp(log_p_1);
+      }
+    }
+    else { //Extrapolate using log derivative
+      log_p_1 = ccl_power_extrapol_highk(cosmo,k,a,cosmo->data.p_lin,cosmo->data.k_max_lin,status);
+      return exp(log_p_1);
+    }
   }
 }
 

@@ -4344,7 +4344,7 @@ void nu_masses_vec(double OmNuh2, int label, double TCMB,
                           int* status)
 {
     double* mnu;
-    mnu = ccl_nu_masses(OmNuh2, TCMB, label, NULL, status);
+    mnu = ccl_nu_masses(OmNuh2, label, TCMB, NULL, status);
     for(int i=0; i < nout; i++){
         output[i] = *(mnu+i);
     }

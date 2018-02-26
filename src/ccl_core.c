@@ -320,14 +320,14 @@ ccl_parameters ccl_parameters_create(double Omega_c, double Omega_b, double Omeg
   if (mnu_type==ccl_mnu_sum){
 	  params.sum_nu_masses = *mnu;
 	  mnu=malloc(3*sizeof(double));
-	  if (params.sum_nu_masses>0.59){
-		mnu[0] = (params.sum_nu_masses - 0.59) / 3.;
+	  if (params.sum_nu_masses>0.059){
+		mnu[0] = (params.sum_nu_masses - 0.059) / 3.;
 		mnu[1] = mnu[0] + 0.009;
 		mnu[2] = mnu[0] + 0.05;
 	  }
 	  else{
 	    // The user has provided a sum that is below the physical limit.
-	    if (abs(*mnu)<1e-14){
+	    if (params.sum_nu_masses<1e-14){
 			mnu[0] = 0.;
 			mnu[1] = 0.;
 			mnu[2] = 0.;
@@ -343,26 +343,24 @@ ccl_parameters ccl_parameters_create(double Omega_c, double Omega_b, double Omeg
 			mnu[0] = (params.sum_nu_masses+0.041) / 3.;
 			mnu[1] = mnu[0] + 0.009;
 			mnu[2] = mnu[0] - 0.05;
-	  }
-	  else{
+	    }
+	    else{
 	    // The user has provided a sum that is below the physical limit.
-	    if (abs(*mnu)<1e-14){
+	    if (params.sum_nu_masses<1e-14){
 			mnu[0] = 0.;
 			mnu[1] = 0.;
 			mnu[2] = 0.;
 		}else{
 			*status = CCL_ERROR_MNU_UNPHYSICAL;
 	    }
-	  }
-  
-  
+	    }
   } else if (mnu_type==ccl_mnu_sum_equal){
-	  // Split the sum of masses equally
-	  params.sum_nu_masses = *mnu;
-	  mnu=malloc(3*sizeof(double));
-	  mnu[0] = params.sum_nu_masses / 3.;
-	  mnu[1] = params.sum_nu_masses / 3.;
-	  mnu[2] = params.sum_nu_masses / 3.;
+	    // Split the sum of masses equally
+	    params.sum_nu_masses = *mnu;
+	    mnu=malloc(3*sizeof(double));
+	    mnu[0] = params.sum_nu_masses / 3.;
+	    mnu[1] = params.sum_nu_masses / 3.;
+	    mnu[2] = params.sum_nu_masses / 3.;
   } else if (mnu_type == ccl_mnu_list){
 	  params.sum_nu_masses = mnu[0] + mnu[1] + mnu[2];
   } else {

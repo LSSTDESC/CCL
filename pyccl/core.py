@@ -153,7 +153,7 @@ class Parameters(object):
         
         if isinstance(m_nu, float):
             if mnu_type == None :
-                mnu_type = 'sum';
+                mnu_type = 'sum'
             m_nu = [m_nu]
         elif hasattr(m_nu, "__len__"):
             if (len(m_nu)!=3):

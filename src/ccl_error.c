@@ -69,16 +69,16 @@ void ccl_check_status_nocosmo(int * status)
     fprintf(stderr,"%s", "CCL_ERROR_HMF_INTERP");
     exit(1);
   case CCL_ERROR_NU_INT: // error in getting the neutrino integral spline: exit. No status_message in cosmo because can't pass cosmology to the function. //DL
-    fprintf(stderr, "%s", "Error, in ccl_neutrinos.c. ccl_calculate_nu_phasespace_spline(): Error in setting neutrino phasespace spline.");
+    fprintf(stderr, "%s", "Error, in ccl_neutrinos.c. ccl_calculate_nu_phasespace_spline(): Error in setting neutrino phasespace spline.\n");
     exit(1);
   case CCL_ERROR_NU_SOLVE: // error in converting Omeganuh2-> Mnu: exit. No status_message in cosmo because can't pass cosmology to the function.
-    fprintf(stderr, "%s", "Error, in ccl_neutrinos.c. Omeganuh2_to_Mnu(): Root finding did not converge.");
+    fprintf(stderr, "%s", "Error, in ccl_neutrinos.c. Omeganuh2_to_Mnu(): Root finding did not converge.\n");
      exit(1);
   case CCL_ERROR_MNU_UNPHYSICAL: // error in the sum of mnu or Omeganu passed for the hierarchy requested.
-	fprintf(stderr, "%s", "Error: the sum of neutrinos masses of Omeganu value you have passed is incompatible with the requested mass hierarchy.");
+	fprintf(stderr, "%s", "Error: the sum of neutrinos masses of Omeganu value you have passed is incompatible with the requested mass hierarchy.\n");
 	exit(1);
   case CCL_ERROR_NOT_IMPLEMENTED: 
-    fprintf(stderr, "%s", "Error: the type of m_nu specified is not supported.");
+    fprintf(stderr, "%s", "Error: the type of m_nu specified is not supported.\n");
   default:		
     fprintf(stderr,"%s", "OTHER ERROR; SEE gsl_errno.h for ERROR CODES 1-32.");
     exit(1);

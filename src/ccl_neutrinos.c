@@ -152,8 +152,8 @@ double* ccl_nu_masses(double OmNuh2, ccl_nu_masses_label label, double TCMB, gsl
      double *mnu;
 	 mnu = malloc(3*sizeof(double));
 			
-	 if (sumnu>0.59){
-		 mnu[0] = (sumnu - 0.59) / 3.;
+	 if (sumnu>0.059){
+		 mnu[0] = (sumnu - 0.059) / 3.;
 		 mnu[1] = mnu[0] + 0.009;
 		 mnu[2] = mnu[0] + 0.05;
 	 }else{
@@ -163,7 +163,7 @@ double* ccl_nu_masses(double OmNuh2, ccl_nu_masses_label label, double TCMB, gsl
 	 ccl_check_status_nocosmo(status);
 	 return mnu; 
 	 
-  } else if (label==ccl_nu_masses_inverted_label){
+  } else if (label==ccl_nu_masses_inverted_label){ 
 
 	double *mnu;
 	mnu = malloc(3*sizeof(double));
@@ -193,7 +193,7 @@ double* ccl_nu_masses(double OmNuh2, ccl_nu_masses_label label, double TCMB, gsl
 	  double *mnu;
 	  mnu = malloc(sizeof(double));
 	  
-      mnu[1] = sumnu;
+      mnu[0] = sumnu;
       
       return mnu;
       

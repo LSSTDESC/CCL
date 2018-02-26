@@ -439,6 +439,14 @@ TASK: if not already there, make a table of growth function and growth rate
 
 void ccl_cosmology_compute_growth(ccl_cosmology * cosmo, int * status)
 {
+	
+  // This is not valid for massive neutrinos; if we have massive neutrinos, exit.
+  if (cosmo->params.N_nu_mass>0){
+	  *status = CCL_ERROR_NOT_IMPLEMENTED;
+	  strcpy(cosmo->status_message,"ccl_background.c: ccl_cosmology_compute_growth(): Support for the growth rate in cosmologies with massive neutrinos is not yet implemented.\n");
+	  return; 
+  }
+	
   if(cosmo->computed_growth)
     return;
 
@@ -922,19 +930,23 @@ double ccl_growth_factor(ccl_cosmology * cosmo, double a, int * status)
       ccl_cosmology_compute_growth(cosmo, status);
       ccl_check_status(cosmo, status);
     }
-    
-    double D;
-    *status |=gsl_spline_eval_e(cosmo->data.growth, a, cosmo->data.accelerator,&D);
-    if (*status != GSL_SUCCESS) {
-      strcpy(cosmo->status_message, "ccl_background.c: ccl_growth_factor(): Scale factor outside interpolation range.\n");
-      return NAN;      
-    }
+    if (*status!= CCL_ERROR_NOT_IMPLEMENTED){
+      double D;
+      *status |=gsl_spline_eval_e(cosmo->data.growth, a, cosmo->data.accelerator,&D);
+      if (*status != GSL_SUCCESS) {
+        strcpy(cosmo->status_message, "ccl_background.c: ccl_growth_factor(): Scale factor outside interpolation range.\n");
+        return NAN;      
+      }
     return D;
+   } else {
+	  return NAN;
+  } 
   }
 }
 
 void ccl_growth_factors(ccl_cosmology * cosmo, int na, double a[], double output[], int * status)
 {
+
   if (!cosmo->computed_growth) {
     ccl_cosmology_compute_growth(cosmo, status);
     ccl_check_status(cosmo, status);    
@@ -947,11 +959,16 @@ void ccl_growth_factors(ccl_cosmology * cosmo, int na, double a[], double output
       ccl_check_status(cosmo,status);
     }
     else {
-      *status|=gsl_spline_eval_e(cosmo->data.growth,a[i],cosmo->data.accelerator,&output[i]);
-      if (*status != GSL_SUCCESS) {
-        strcpy(cosmo->status_message, "ccl_background.c: ccl_growth_factors(): Scale factor outside interpolation range.\n");
-        output[i] = NAN;        
-      }
+		
+	  if (*status!= CCL_ERROR_NOT_IMPLEMENTED){	
+        *status|=gsl_spline_eval_e(cosmo->data.growth,a[i],cosmo->data.accelerator,&output[i]);
+        if (*status != GSL_SUCCESS) {
+          strcpy(cosmo->status_message, "ccl_background.c: ccl_growth_factors(): Scale factor outside interpolation range.\n");
+          output[i] = NAN;          
+        }
+      } else {
+		  output[i] = NAN;
+	  }
     }
   }
 }
@@ -972,13 +989,17 @@ double ccl_growth_factor_unnorm(ccl_cosmology * cosmo, double a, int * status)
       ccl_check_status(cosmo, status);
       
     }
-    double D;
-    *status|=gsl_spline_eval_e(cosmo->data.growth, a, cosmo->data.accelerator,&D);
-    if (*status != GSL_SUCCESS) {
-      strcpy(cosmo->status_message, "ccl_background.c: ccl_growth_factor_unnorm(): Scale factor outside interpolation range.\n");
-      return NAN;      
-    }
-    return cosmo->data.growth0*D;
+    if (*status != CCL_ERROR_NOT_IMPLEMENTED){
+      double D;
+      *status|=gsl_spline_eval_e(cosmo->data.growth, a, cosmo->data.accelerator,&D);
+      if (*status != GSL_SUCCESS) {
+        strcpy(cosmo->status_message, "ccl_background.c: ccl_growth_factor_unnorm(): Scale factor outside interpolation range.\n");
+        return NAN;      
+      }
+      return cosmo->data.growth0*D;
+    } else {
+		return NAN;
+	}
   }
 }
 
@@ -997,12 +1018,17 @@ void ccl_growth_factors_unnorm(ccl_cosmology * cosmo, int na, double a[], double
       ccl_check_status(cosmo,status);
     }
     else {
-      *status|=gsl_spline_eval_e(cosmo->data.growth,a[i],cosmo->data.accelerator,&output[i]);
-      output[i]*=cosmo->data.growth0;
-      if (*status != GSL_SUCCESS) {
-        strcpy(cosmo->status_message, "ccl_background.c: ccl_growth_factors_unnorm(): Scale factor outside interpolation range.\n");
-        output[i] = NAN;        
-      }
+		if (*status != CCL_ERROR_NOT_IMPLEMENTED){
+          *status|=gsl_spline_eval_e(cosmo->data.growth,a[i],cosmo->data.accelerator,&output[i]);
+          output[i]*=cosmo->data.growth0;
+          if (*status != GSL_SUCCESS) {
+            strcpy(cosmo->status_message, "ccl_background.c: ccl_growth_factors_unnorm(): Scale factor outside interpolation range.\n");
+            output[i] = NAN;        
+          }
+        } else {
+			output[i] = NAN;
+		}
+        
     }
   }
 }
@@ -1016,18 +1042,22 @@ double ccl_growth_rate(ccl_cosmology * cosmo, double a, int * status)
     return 0.;
   }
   else {
+	  
     if (!cosmo->computed_growth) {
       ccl_cosmology_compute_growth(cosmo, status);
       ccl_check_status(cosmo, status);
     }
-    
-    double g;
-    *status|=gsl_spline_eval_e(cosmo->data.fgrowth, a, cosmo->data.accelerator,&g);
-    if (*status != GSL_SUCCESS) {
-      strcpy(cosmo->status_message, "ccl_background.c: ccl_growth_rate(): Scale factor outside interpolation range.\n");
-      return NAN;      
-    }
-    return g;
+    if(*status != CCL_ERROR_NOT_IMPLEMENTED) {
+      double g;
+      *status|=gsl_spline_eval_e(cosmo->data.fgrowth, a, cosmo->data.accelerator,&g);
+      if (*status != GSL_SUCCESS) {
+        strcpy(cosmo->status_message, "ccl_background.c: ccl_growth_rate(): Scale factor outside interpolation range.\n");
+        return NAN;      
+      }
+      return g;
+    } else {
+	  return NAN;
+	}
   }
 }
 
@@ -1044,11 +1074,15 @@ void ccl_growth_rates(ccl_cosmology * cosmo, int na, double a[], double output[]
       ccl_check_status(cosmo,status);
     }
     else {
-      *status|=gsl_spline_eval_e(cosmo->data.fgrowth,a[i],cosmo->data.accelerator,&output[i]);
-      if (*status != GSL_SUCCESS) {
-        *status = CCL_ERROR_SPLINE_EV;
-        output[i] = NAN;       
-      }
+	  if (*status != CCL_ERROR_NOT_IMPLEMENTED) {
+        *status|=gsl_spline_eval_e(cosmo->data.fgrowth,a[i],cosmo->data.accelerator,&output[i]);
+        if (*status != GSL_SUCCESS) {
+          *status = CCL_ERROR_SPLINE_EV;
+          output[i] = NAN;       
+        }
+      }else {
+		  output[i] = NAN;
+	  }
     }
   }
 }
