@@ -280,7 +280,8 @@ def _check_array_params(z, f_arg, f_name):
     return z_f, f
 
 
-def angular_cl(cosmo, cltracer1, cltracer2, ell,l_limber=-1.,l_logstep=1.05,l_linstep=20.,dchi=3., dlk=0.003, zmin=0.05,
+def angular_cl(cosmo, cltracer1, cltracer2, ell,
+               l_limber=-1.,l_logstep=1.05,l_linstep=20.,dchi=3., dlk=0.003, zmin=0.05,
                non_limber_method="native"):
     """
     Calculate the angular (cross-)power spectrum for a pair of tracers.
@@ -310,7 +311,7 @@ def angular_cl(cosmo, cltracer1, cltracer2, ell,l_limber=-1.,l_logstep=1.05,l_li
     cosmo = _cosmology_obj(cosmo)
     
     if non_limber_method not in nonlimber_methods.keys() :
-        raise KeyError("'%s' is not a valide non-Limber integration method."%non_limber_method)
+        raise KeyError("'%s' is not a valid non-Limber integration method."%non_limber_method)
 
     # Access CCL_ClTracer objects
     clt1 = _cltracer_obj(cltracer1)
