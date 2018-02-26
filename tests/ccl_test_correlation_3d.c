@@ -120,12 +120,9 @@ static void compare_correlation_3d(int i_model,struct corrs_3d_data * data)
       double err;
       err=fabs(ximm_ccl_out[i]/ximm_bench_arr[i][j]-1);
       if(r_arr[i]<50.) 
-      ASSERT_DBL_NEAR_TOL(err,0.,CORR_TOLERANCE1);
+      ASSERT_DBL_NEAR_TOL(0.,err,CORR_TOLERANCE1);
       else
-      ASSERT_DBL_NEAR_TOL(err,0.,CORR_TOLERANCE2);
-      
-      //if(j==1)
-      //fprintf(stderr,"\ni= %d j= %d r= %f ximm_bench= %f ximm_ccl= %f err= %f",i,j,r_arr[i],ximm_bench_arr[i][j],ximm_ccl_out[i],err);
+      ASSERT_DBL_NEAR_TOL(0.,err,CORR_TOLERANCE2);
       }   
   }
   fclose(f);
