@@ -153,13 +153,25 @@ static CCL_ClTracer *cl_tracer_new(ccl_cosmology *cosmo,int tracer_type,
 				   int nz_rf,double *z_rf,double *rf,
 				   double z_source,int * status)
 {
+	
+  printf("in cl_tracer_new\n");	
   int clstatus=0;
   CCL_ClTracer *clt=malloc(sizeof(CCL_ClTracer));
   if(clt==NULL) {
+	  
     *status=CCL_ERROR_MEMORY;
     strcpy(cosmo->status_message,"ccl_cls.c: ccl_cl_tracer_new(): memory allocation\n");
     return NULL;
   }
+  
+  if ( ((cosmo->params.N_nu_mass)>0) && tracer_type==CL_TRACER_NC && has_rsd){
+	  free(clt);
+	  *status=CCL_ERROR_NOT_IMPLEMENTED;
+	  strcpy(cosmo->status_message, "ccl_cls.c: ccl_cl_tracer_new(): Number counts tracers with rsd not yet implemented in cosmologies with massive neutrinos.");
+	  return NULL;
+  }
+  printf("after rsd check");
+  
   clt->tracer_type=tracer_type;
   double hub=cosmo->params.h*ccl_h_over_h0(cosmo,1.,status)/CLIGHT_HMPC;
   clt->prefac_lensing=1.5*hub*hub*cosmo->params.Omega_m;
@@ -407,7 +419,9 @@ CCL_ClTracer *ccl_cl_tracer_new(ccl_cosmology *cosmo,int tracer_type,
 {
   CCL_ClTracer *clt=cl_tracer_new(cosmo,tracer_type,has_rsd,has_magnification,has_intrinsic_alignment,
 				  nz_n,z_n,n,nz_b,z_b,b,nz_s,z_s,s,nz_ba,z_ba,ba,nz_rf,z_rf,rf,z_source,status);
+  printf("back in ccl_cl_tracer_new\n");			  
   ccl_check_status(cosmo,status);
+  printf("status checked\n");
   return clt;
 }
 

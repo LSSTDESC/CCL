@@ -631,7 +631,7 @@ void ccl_cosmology_compute_growth(ccl_cosmology * cosmo, int * status)
 //Expansion rate normalized to 1 today
 
 double ccl_h_over_h0(ccl_cosmology * cosmo, double a, int* status)
-{
+{	
 	
   if(!cosmo->computed_distances) {
     ccl_cosmology_compute_distances(cosmo,status);
@@ -640,7 +640,7 @@ double ccl_h_over_h0(ccl_cosmology * cosmo, double a, int* status)
   
   double h_over_h0;
   *status |= gsl_spline_eval_e(cosmo->data.E, a, cosmo->data.accelerator,&h_over_h0);
-  if(*status != GSL_SUCCESS) {
+  if(*status != GSL_SUCCESS) { 
     strcpy(cosmo->status_message, "ccl_background.c: ccl_h_over_h0(): Scale factor outside interpolation range.\n");
     return NAN;    
   }
