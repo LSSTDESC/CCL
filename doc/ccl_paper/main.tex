@@ -393,7 +393,12 @@ This result is consistent with the work of \citet{Watson2013}, which also finds 
 
 \cont{Halo bias definition.}
 
-An important step in many interpretations of the halo model is to have a measure of the bias of dark matter halos in contrast to the underlying density field. As with measures of the halo mass function, high accuracy cosmological constraints requires the use of numerical simulations to develop fitting functions and emulators. We note that we will define haloes as in the above subsection focusing on the halo mass function. {\tt CCL} currently implements the halo bias fitting function results in \citet{Tinker2010}, though future improvements will likely require the use of emulator methods.
+An important step in many interpretations of the halo model is to have a measure of the bias of dark matter halos, defined as the ratio of the halo power spectrum to the linear dark matter power spectrum,
+\begin{equation}
+  b^2(k) = \frac{P_h(k)}{P_{\mathrm{lin}}(k)}.
+\end{equation}
+
+As with measures of the halo mass function, high accuracy cosmological constraints requires the use of numerical simulations to develop fitting functions and emulators. We note that we will define haloes as in the above subsection focusing on the halo mass function. {\tt CCL} currently implements the halo bias fitting function results in \citet{Tinker2010}, though future improvements will likely require the use of emulator methods.
 
 The \citet{Tinker2010} model parameterizes the halo bias in terms of the peak height, $\nu = \delta_c / \sigma(M)$, where $\delta_c$ is the critical density for collapse and is chosen to be $1.686$ for this particular parameterization. We can then parameterize the halo function and halo bias as
 \begin{eqnarray}
