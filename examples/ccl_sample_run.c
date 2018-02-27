@@ -44,7 +44,9 @@ int main(int argc,char **argv)
   int status =0;
     
   // Set neutrino masses
-  double MNU[3] = {0., 0., 0.};
+  double* MNU;
+  mnuval = 0.;
+  MNU = &mnuval;
   ccl_mnu_type_label MNUTYPE = ccl_mnu_list;
   
   // Initialize cosmological parameters
