@@ -94,8 +94,6 @@ def h_over_h0(cosmo, a):
         h_over_h0 (float or array_like): H(a)/H0.
 
     """
-    
-    print "a=", a
     return _vectorize_fn(lib.h_over_h0, 
                          lib.h_over_h0_vec, cosmo, a)
 
