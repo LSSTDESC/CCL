@@ -68,7 +68,7 @@ make install
 `CCL` library can be called from C++ code without any  additional requirements or modifications. To make sure that there are no problems you can run
 ````sh
 make check-cpp
-./tests/ccl_sample_run
+./examples/ccl_sample_run
 ````
 
 ## Python installation
@@ -176,7 +176,7 @@ This Dockerfile currently contains all installed C libraries and the Python wrap
 
 `CCL` has basic [doxygen](http://www.stack.nl/~dimitri/doxygen/) documentation for its C routines. This can be found in the directory ***doc/html*** within the `CCL` repository by opening the ***index.html*** file in your browser. The python routines are documented in situ; you can view the documentation for a function by calling `help(function name)` from within `python`.
 
-This document contains basic information about used structures and functions. At the end of document is provided code which implements these basic functions (also in ***tests/ccl_sample_run.c***). More information about `CCL` functions and implementation can be found in ***doc/0000-ccl_note/0000-ccl_note.pdf***.
+This document contains basic information about used structures and functions. At the end of document is provided code which implements these basic functions (also in ***examples/ccl_sample_run.c***). More information about `CCL` functions and implementation can be found in ***doc/0000-ccl_note/0000-ccl_note.pdf***.
 
 ### Cosmological parameters
 Start by defining cosmological parameters defined in structure **`ccl_parameters`**. This structure (exact definition in ***include/ccl_core.h***) contains densities of matter, parameters of dark energy (`w0`, `wa`), Hubble parameters, primordial power spectra, radiation parameters, derived parameters (`sigma_8`, `Omega_1`, `z_star`) and modified growth rate.
@@ -336,10 +336,10 @@ void ccl_specs_free_photoz_info(user_pz_info *my_photoz_info);
 ````
 
 ## Example code
-This code can also be found in ***tests/ccl_sample_run.c*** You can run the following example code. For this you will need to compile with the following command:
+This code can also be found in ***examples/ccl_sample_run.c*** You can run the following example code. For this you will need to compile with the following command:
 ````sh
-gcc -Wall -Wpedantic -g -I/path/to/install/include -std=gnu99 -fPIC tests/ccl_sample_run.c \
--o tests/ccl_sample_run -L/path/to/install/lib -L/usr/local/lib -lgsl -lgslcblas -lm -lccl
+gcc -Wall -Wpedantic -g -I/path/to/install/include -std=gnu99 -fPIC examples/ccl_sample_run.c \
+-o examples/ccl_sample_run -L/path/to/install/lib -L/usr/local/lib -lgsl -lgslcblas -lm -lccl
 ````
 where `/path/to/install/` is the path to the location where the library has been installed.
 

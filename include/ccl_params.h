@@ -13,6 +13,7 @@ typedef struct ccl_spline_params {
    //Scale factor splines
   int  A_SPLINE_NA;
   double A_SPLINE_MIN;
+  double A_SPLINE_MINLOG_PK;
   double A_SPLINE_MIN_PK;
   double  A_SPLINE_MAX;
   double A_SPLINE_MINLOG;
@@ -26,6 +27,7 @@ typedef struct ccl_spline_params {
   
   //PS a and k spline
   int A_SPLINE_NA_PK;
+  int A_SPLINE_NLOG_PK;
 
   //k-splines and integrals
   double K_MAX_SPLINE;
