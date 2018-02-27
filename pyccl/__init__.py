@@ -31,3 +31,5 @@ from pyccl.constants import CLIGHT_HMPC, MPC_TO_METER, PC_TO_METER, \
                       GNEWT, RHO_CRITICAL, SOLAR_MASS
 
 from pyccl.correlation import correlation, correlation_3d
+
+from pyccl.neutrinos import Omeganuh2,Omeganuh2_to_Mnu

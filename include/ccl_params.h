@@ -11,11 +11,12 @@ extern "C" {
  */
 typedef struct ccl_spline_params {
    //Scale factor splines
-  double A_SPLINE_DELTA;
   int  A_SPLINE_NA;
   double A_SPLINE_MIN;
   double A_SPLINE_MIN_PK;
   double  A_SPLINE_MAX;
+  double A_SPLINE_MINLOG;
+  int A_SPLINE_NLOG;
   
   //Mass splines
   double LOGM_SPLINE_DELTA;
@@ -24,7 +25,7 @@ typedef struct ccl_spline_params {
   double LOGM_SPLINE_MAX;
   
   //PS a and k spline
-  int N_A;
+  int A_SPLINE_NA_PK;
 
   //k-splines and integrals
   double K_MAX_SPLINE;

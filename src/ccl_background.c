@@ -14,6 +14,7 @@
 #include "gsl/gsl_roots.h"
 #include "ccl_params.h"
 
+
 /* --------- ROUTINE: h_over_h0 ---------
 INPUT: scale factor, cosmology
 TASK: Compute E(a)=H(a)/H0
@@ -23,7 +24,7 @@ static double h_over_h0(double a, ccl_cosmology * cosmo, int *status)
   // Check if massive neutrinos are present - if not, we don't need to compute their contribution
   double Om_mass_nu;
   if ((cosmo->params.N_nu_mass)>1e-12) {
-    Om_mass_nu = Omeganuh2(a, cosmo->params.N_nu_mass, cosmo->params.mnu, cosmo->params.T_CMB, cosmo->data.accelerator, status) / (cosmo->params.h) / (cosmo->params.h);
+    Om_mass_nu = ccl_Omeganuh2(a, cosmo->params.N_nu_mass, cosmo->params.mnu, cosmo->params.T_CMB, cosmo->data.accelerator, status) / (cosmo->params.h) / (cosmo->params.h);
     ccl_check_status(cosmo, status);
   }
   else {
@@ -50,7 +51,7 @@ double ccl_omega_x(ccl_cosmology * cosmo, double a, ccl_omega_x_label label, int
   double OmNuh2;
   if ((cosmo->params.N_nu_mass) > 0.0001) {
     // Call the massive neutrino density function just once at this redshift.
-    OmNuh2 = Omeganuh2(a, cosmo->params.N_nu_mass, cosmo->params.mnu, 
+    OmNuh2 = ccl_Omeganuh2(a, cosmo->params.N_nu_mass, cosmo->params.mnu, 
 		       cosmo->params.T_CMB, cosmo->data.accelerator, status);
     ccl_check_status(cosmo, status);
   }
@@ -289,18 +290,18 @@ void ccl_cosmology_compute_distances(ccl_cosmology * cosmo, int *status)
     return;
   }
 
-  // Create linearly-spaced values of the scale factor
-  int na = ccl_splines->A_SPLINE_NA;
-  double * a = ccl_linear_spacing(ccl_splines->A_SPLINE_MIN, ccl_splines->A_SPLINE_MAX, na);
-
-  if (a==NULL || 
-      (fabs(a[0]-ccl_splines->A_SPLINE_MIN)>1e-5) || 
+  // Create logarithmically and then linearly-spaced values of the scale factor 
+  int na = ccl_splines->A_SPLINE_NA+ccl_splines->A_SPLINE_NLOG-1;  
+  double * a = ccl_linlog_spacing(ccl_splines->A_SPLINE_MINLOG, ccl_splines->A_SPLINE_MIN, ccl_splines->A_SPLINE_MAX, ccl_splines->A_SPLINE_NLOG, ccl_splines->A_SPLINE_NA);
+                              
+  if (a==NULL ||   
+      (fabs(a[0]-ccl_splines->A_SPLINE_MINLOG)>1e-5) || 
       (fabs(a[na-1]-ccl_splines->A_SPLINE_MAX)>1e-5) || 
       (a[na-1]>1.0)) {
-    // old:    cosmo->status = CCL_ERROR_LINSPACE;
-    *status = CCL_ERROR_LINSPACE; 
-    strcpy(cosmo->status_message,"ccl_background.c: ccl_cosmology_compute_distances(): Error creating linear spacing in a\n");
-    return;
+      // old:    cosmo->status = CCL_ERROR_LINSPACE;
+      *status = CCL_ERROR_LINSPACE; 
+      strcpy(cosmo->status_message,"ccl_background.c: ccl_cosmology_compute_distances(): Error creating first logarithmic and then linear spacing in a\n");
+      return;
   }
 
   // allocate space for y, which will be all three
@@ -333,7 +334,6 @@ void ccl_cosmology_compute_distances(ccl_cosmology * cosmo, int *status)
     return;
   }
 
-  //Fill in chi(a)
   for (int i=0; i<na; i++) {
     chistatus |= compute_chi(a[i],cosmo,&(y[i]), status);
    }
@@ -427,6 +427,7 @@ void ccl_cosmology_compute_distances(ccl_cosmology * cosmo, int *status)
     
   free(a);
   free(y);
+
 }
 
 
@@ -441,16 +442,16 @@ void ccl_cosmology_compute_growth(ccl_cosmology * cosmo, int * status)
   if(cosmo->computed_growth)
     return;
 
-  // Create linearly-spaced values of the scale factor
-  int  chistatus = 0, na = ccl_splines->A_SPLINE_NA;
-  double * a = ccl_linear_spacing(ccl_splines->A_SPLINE_MIN, ccl_splines->A_SPLINE_MAX, na);
+  // Create logarithmically and then linearly-spaced values of the scale factor
+  int  chistatus = 0, na = ccl_splines->A_SPLINE_NA+ccl_splines->A_SPLINE_NLOG-1;
+  double * a = ccl_linlog_spacing(ccl_splines->A_SPLINE_MINLOG, ccl_splines->A_SPLINE_MIN, ccl_splines->A_SPLINE_MAX, ccl_splines->A_SPLINE_NLOG, ccl_splines->A_SPLINE_NA);
   if (a==NULL || 
-      (fabs(a[0]-ccl_splines->A_SPLINE_MIN)>1e-5) || 
+      (fabs(a[0]-ccl_splines->A_SPLINE_MINLOG)>1e-5) || 
       (fabs(a[na-1]-ccl_splines->A_SPLINE_MAX)>1e-5) || 
       (a[na-1]>1.0)
       ) {
     *status = CCL_ERROR_LINSPACE;
-    strcpy(cosmo->status_message,"ccl_background.c: ccl_cosmology_compute_growth(): Error creating linear spacing in a\n");
+    strcpy(cosmo->status_message,"ccl_background.c: ccl_cosmology_compute_growth(): Error creating logarithmically and then linear spacing in a\n");
     return;
   }
 
