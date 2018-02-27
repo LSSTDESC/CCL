@@ -4129,15 +4129,15 @@ void halo_bias_vec(ccl_cosmology * cosmo,
 
 
 CCL_ClTracer* cl_tracer_new_wrapper(ccl_cosmology *cosmo,int tracer_type,
-				int has_rsd, int has_magnification, int has_intrinsic_alignment,
-				int nz_n, double *z_n, int nn, double *n,
-				int nz_b, double *z_b, int nb, double *b,
-				int nz_s, double *z_s, int ns, double *s,
-				int nz_ba, double *z_ba, int nba, double *ba,
-				int nz_rf, double *z_rf, int nrf, double *rf,
-				double z_source,
-				int* status){
-    
+				    int has_rsd, int has_magnification, int has_intrinsic_alignment,
+				    int nz_n, double *z_n, int nn, double *n,
+				    int nz_b, double *z_b, int nb, double *b,
+				    int nz_s, double *z_s, int ns, double *s,
+				    int nz_ba, double *z_ba, int nba, double *ba,
+				    int nz_rf, double *z_rf, int nrf, double *rf,
+				    double z_source,
+				    int* status){
+  
     assert(nz_n == nn);
     assert(nz_b == nb);
     assert(nz_s == ns);
@@ -4148,15 +4148,15 @@ CCL_ClTracer* cl_tracer_new_wrapper(ccl_cosmology *cosmo,int tracer_type,
     
     
     return ccl_cl_tracer(cosmo, tracer_type,
-				             has_rsd, has_magnification, 
-				             has_intrinsic_alignment,
-				             nz_n, z_n, n,  
-				             nz_b, z_b, b,
-				             nz_s, z_s, s,
-				             nz_ba, z_ba, ba,
-				             nz_rf, z_rf, rf, 
-                   			     z_source,
- 				             status);
+			 has_rsd, has_magnification, 
+			 has_intrinsic_alignment,
+			 nz_n, z_n, n,  
+			 nz_b, z_b, b,
+			 nz_s, z_s, s,
+			 nz_ba, z_ba, ba,
+			 nz_rf, z_rf, rf, 
+			 z_source,
+			 status);
 }
 
 

@@ -9,7 +9,7 @@ help_msg= "Usage : angpow_install.py [options]\n"
 help_msg+="Options :\n"
 help_msg+=" -h, --help : This help\n"
 #help_msg+=" -c, --c-comp= : which C compiler to use (default: gcc)\n"
-help_msg+=" -c, --clean= : Clean angpo installation (default: False)\n"
+help_msg+=" -c, --clean= : Clean angpow installation (default: False)\n"
 #help_msg+=" -omp, --enable-openmp: enable OpenMP (default: yes if Linux)\n"
 #Current directory
 dir_path=os.path.dirname(os.path.realpath(__file__))

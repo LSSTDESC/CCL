@@ -71,7 +71,7 @@ static void test_nonlimber_precision(struct nonlimber_data * data)
     {
       z_arr_gc[i]=Z0_GC-5*SZ_GC+10*SZ_GC*(i+0.5)/NZ;
       nz_arr_gc[i]=exp(-0.5*pow((z_arr_gc[i]-Z0_GC)/SZ_GC,2));
-      bz_arr[i]=1;//+z_arr_gc[i];
+      bz_arr[i]=1;
       sz_arr[i]=exp(-0.5*pow((z_arr_gc[i]-Z0_GC)/SZ_GC,2));
     }
   
@@ -110,10 +110,8 @@ static void test_nonlimber_precision(struct nonlimber_data * data)
     double ratio = fabs(cl_gg_nl-cl_gg_lim)/cl_gg_nl;
     if(l>NL/2)
       rel_precision += ratio / sqrt(2./(2*l+1));
-    //printf("%d %.3g %.3g %.3g %.3g\n",l,cl_gg_nl,cl_gg_lim,ratio,ratio / sqrt(2./(2*l+1)));
   }
   rel_precision /= NL/2;
-  //printf("precision %.3g\n",rel_precision);
   ASSERT_TRUE(rel_precision < CLS_PRECISION);
 
   
