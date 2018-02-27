@@ -4162,7 +4162,6 @@ CCL_ClTracer* cl_tracer_new_wrapper(ccl_cosmology *cosmo,int tracer_type,
     
     // Check for null arrays
     
-    printf("in cls.i\n"); 
     CCL_ClTracer *clt;  
      
     clt = ccl_cl_tracer_new(cosmo, tracer_type,
@@ -4175,11 +4174,6 @@ CCL_ClTracer* cl_tracer_new_wrapper(ccl_cosmology *cosmo,int tracer_type,
 				             nz_rf, z_rf, rf, 
                    			 z_source,
  				             status);
-
-    //if (!test){
-    //    printf("output is null\n");
-    //}
-
     return clt;
 }
 

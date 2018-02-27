@@ -248,7 +248,23 @@ After initializing instances of {\tt ccl$\_$parameters} and {\tt ccl$\_$configur
 An example of using \ccl is provided in Section \ref{sec:example}. The {\tt README} file has additional extensive documentation for the example run, as well as installation.
 
 \subsubsection{Creating a cosmology with massive neutrinos}
-In the parameter construction routines above, {\tt *mnu} is a pointer to either a single value, to be interpreted as the sum of neutrino masses, or to an array containing the three neutrino masses, both in eV. {\tt mnu$\_$type} is a label which indicates whether {\tt *mnu} points to a single sum or to an array of three masses, and in the case of the sum, which convention should be used to split the sum into three masses for calculations (options are normal hierarchy, inverted hierarchy, or an equal split). For easier initiation of cosmologies with massive neutrinos, the suffix `{\tt $\_$nu}' may be appended to the last four {\tt ccl$\_$parameters\_create} functions above. Using these functions without the {\tt $\_$nu} suffix will set the neutrino masses to 0 and the effective number of neutrino species to $3.046$. 
+In the parameter construction routines above, {\tt mnu} is a pointer to either a single value, to be interpreted as the sum of neutrino masses, or to an array containing the three neutrino masses, both in eV. {\tt mnu$\_$type} is a label which indicates whether {\tt mnu} points to sum of the masses or to an array of three mass values. In the former case, {\tt mnu$\_$type} also defines which convention should be used to split the sum into three neutrino masses for calculations (options are normal hierarchy, inverted hierarchy, or an equal split).
+
+To set up a cosmology with massive neutrinos, the user should pass {\tt mnu}, {\tt mnu$\_$type}, and {\tt N$\_$eff} to the parameter construction routine. When working from the python wrapper, it suffices to pass {\tt mnu} and {\tt N$\_$eff}; \ccl will infer whether {\tt mnu} is a set of masses or a sum. In the latter case, the default behaviour is to split the sum into masses consistent with the normal hierarchy, but an inverted hierarchy or equal splitting can be requested by passing {\tt mnu$\_$type}. 
+
+In the case where {\tt mnu} corresponds to a sum, we first allocate the three neutrino masses according to the requested convention (by default the normal hierarchy). Having then a set of three masses regardless of {\tt mnu$\_$type}, we check for which of the three masses the coresponding neutrino species is non-reativistic today ($m_\nu>0.00017$, \citealt{Lesgourgues2012}), and obtain a number of massive neutrinos {\tt N$\_$nu$\_$mass}. We use this along with the {\tt N$\_$eff} value to set the number of relativistc neutrinos species {\tt N$\_$nu$\_$rel}. We must be slightly careful in doing so, as for massive neutrinos only we follow {\tt CLASS} in modifying the relationship between the temperature of the CMB and the neutrino temperature:
+\begin{equation}
+T_{\nu}^{\rm eff} = T_{\rm CMB} T_{\rm NCDM}.
+\label{Tnueff}
+\end{equation}
+Setting $T_{\rm NCDM}=0.71611$ ensures that $m_{\nu} / \Omega_{\nu}^0 = 93.14 {\rm eV}$, in agreement with experiment. Therefore to get {\tt N$\_$nu$\_$rel} consistent with the {\tt N$\_$eff} passed by the user, we do:
+\begin{equation}
+{\tt N\_nu\_rel} = {\tt N\_eff} - \left(T_{\rm NCDM}\right)^{4} \left(\frac{4}{11}\right)^{-\frac{4}{3}} {\tt N\_nu\_mass}.
+\label{Nnurel}
+\end{equation}
+
+For easier initiation of cosmologies with massive neutrinos, the suffix `{\tt $\_$nu}' may be appended to the last four {\tt ccl$\_$parameters$\_$create} functions in the previous section. Using these functions without the {\tt $\_$nu} suffix will set the neutrino masses to 0 and the effective number of neutrino species to $3.046$. 
+
 
 \subsection{Distances}
 \label{sec:distances}
@@ -301,14 +317,7 @@ The density parameter functions $\Omega_X(a)$ can be calculated for six componen
 \end{itemize}
 all using the Hubble parameter defined in equation~\ref{eq:Ha}.
 
-For massive neutrinos, $\Omega_{\nu, {\rm m}}(a)$ is calculated by calling a set of functions contained in {\tt ccl\_neutrinos.c}.  We first compute a quantity called the effective temperature:
-\begin{equation}
-T_{\nu}^{\rm eff} = T_{\rm CMB} T_{\rm NCDM}.
-\label{Tnueff}
-\end{equation}
-$T_{\rm NCDM}$ is used to explicitly set the value of $m_{\nu} / \Omega_{\nu}^0$. Note that despite its name, $T_{\rm NCDM}$ is a dimensionless temperature rescaling rather than an actual temperature, following the nomenclature used by {\tt CLASS}. We choose a default value of $T_{\rm NCDM} = 0.71611$, which corresponds to $m_{\nu} / \Omega_{\nu}^0 = 93.14$ eV, to agree with the default value set by {\tt CLASS}. 
-
-For each species of massive neutrino with mass $m_\nu^i$, we define
+For massive neutrinos, $\Omega_{\nu, {\rm m}}(a)$ is calculated by calling a set of functions contained in {\tt ccl\_neutrinos.c}. For each species of massive neutrino with mass $m_\nu^i$, we define
 \begin{equation}
 \mu^i = \frac{m_{\nu}^{i}a}{T_{\nu}^{\rm eff}}
 \label{mnuOT}
@@ -337,7 +346,7 @@ In doing this, \ccl simultaneously computes the growth rate $f(a)$, defined as:
 \end{equation}
 \ccl provides different functions that return the growth normalized to $D(a=1)=1$ and to $D(a\ll1)\rightarrow a$.
 
-Note that the above is strictly valid for a Universe containing only dust-like matter components. A scale-independent growth rate is, for example, ill-defined in the presence of massive neutrinos.
+Note that the above is strictly valid for a Universe containing only dust-like matter components. A scale-independent growth rate is, for example, ill-defined in the presence of massive neutrinos; therefore \ccl will raise an error if the user attempts to calculate the growth rate or growth factor in a cosmology with massive neutrinos.
 
 Currently \ccl allows for an alternative `modified gravity' cosmological model defined by a regular background $(w_0+w_a)$CDM (with arbitrary $K$) as well as a user-defined $\Delta f(a)$, such that the true growth rate in this model is given by $f(a)=f_0(a)+\Delta f(a)$, where $f_0(a)$ is the growth rate in the background model. Note that this model is only consistently implemented with regards to the computation of the linear growth factor and growth rates (which will also scale the linear power spectrum). All other \ccl functions (including the non-linear power spectrum) will ignore these modifications. This model, and the interpretation of the predictions given by \ccl, should therefore be used with care.
 
@@ -386,14 +395,15 @@ The allowed range of cosmological parameters is as follows:
  %
 Actually, $w_a$ and $w_0$ are constrained jointly to be $0.3\leq (-w_0-w_a)^{1/4}$. Note that \ccl only allows a subregion within this parameter space. For models in which w(z) crosses $-1$ at some given redshift, {\tt CLASS} will crash because this value corresponds to a true cosmological constant, which by definition should have no perturbations.\footnote{We thank Emilio Bellini and Miguel Zumalac\'arregui for clarifying this for us.} The linear matter power spectrum is still obtained from {\tt CLASS} as described in the section above.
 
-\paragraph{Neutrino species} The emulator is set up to consider an effective number of relativistic species of $3.04$ and the user can provide $\Omega_\nu h^2$ to set the neutrino mass. This is different from the standard {\tt CCL} configuration, which takes as input the parameters the number of relativistic species, $N_{\nu,{\rm rel}}$, the number of massive neutrinos, $N_{\nu,{\rm mass}}$ and their mass in eV, $m_{\nu}$. For best compatibility with the emulator, the user can decide to pass the following set of parameters to {\tt CCL}:
+\paragraph{Neutrino species} The emulator is set up to consider $N_{\rm eff}=3.04$ and to allow the user to provide $\Omega_\nu h^2$ in order to set the neutrino mass, where it is assumed that the corresponding mass is split equally amongst three neutrinos. This is different from the standard {\tt CCL} configuration, which takes as input the mass(es) of neutrinos in eV, $m_{\nu}$. The assumption of an equal split of masses amongst three neutrino species is also different from the default \ccl choice to split the mass amongst species according to the normal hierarchy. For best compatibility with the emulator, we therefore include a {\tt ccl$\_$configuration} element {\tt emulator$\_$neutrinos$\_$method}, which defaults to {\tt ccl$\_$strict} but can be set to {\tt ccl$\_$equalize} if desired:
 \begin{itemize}
-\item $\{N_{\nu,{\rm rel}},N_{\nu,{\rm mass}},m_{\nu}\}=\{0.00641,3,m_{\nu}\}$ for massive neutrinos or
-\item $\{N_{\nu,{\rm rel}},N_{\nu,{\rm mass}},m_{\nu}\}=\{3.04,0,0\}$ otherwise.
+\item{{\tt ccl$\_$strict} requires the user to pass either a set of three equal neutrino masses, or to pass a sum of masses and to set {\tt ccl$\_$mnu$\_$type} such that the sum is split equally amongst species. If other options are selected when the emulator is in use, \ccl will raise an error and exit. This default option ensures full self-consistency within quantities calculated with a single \ccl cosmology.}
+\item{{\tt ccl$\_$equalize} allows the user to pass an unequal set of neutrino masses, or to pass a sum with {\tt ccl$\_$mnu$\_$type} set such that the sum is not split equally amongst speices. In this case, \ccl will pass redistributed equal neutrino masses to the emulator. This choice may result in internal inconsistency amongst different quantities calculated with the same \ccl cosmology, or indeed even internal inconsistency between the linear and nonlinear parts of the same power spectrum. This option should only be selected for convenience if you are sure you don't care about the mass splitting between neutrino speices.}
 \end{itemize}
-If other combinations of parameters are passed in emulator mode, {\tt CCL} will quit and issue an error.
 
-Notice that ideally we would like pass a non-integer number of massive neutrino species for best compatibility with the emulator set-up. However, since this is not possible within {\tt CCL}, we have opted to verify that neither the growth function nor the comoving radial distance computation are affected by this approximation to more than $10^{-4}$ in the range $0.01<a<1$, where $a$ is the scale factor. We have verified this by comparing this prediction for a fiducial cosmology $\{\Omega_c=0.27,\Omega_b=0.049,h=0.67,\sigma_8=0.8,n_s=0.96\}$ with the following neutrino parameters: $\{N_{\nu,{\rm rel}},N_{\nu,{\rm mass}},m_{\nu}\}=\{0.00641,3,0.06{\rm eV}\}$, $\{N_{\nu,{\rm rel}},N_{\nu,{\rm mass}},m_{\nu}\}=\{0,3.04,0.06{\rm eV}\}$ and $\{N_{\nu,{\rm rel}},N_{\nu,{\rm mass}},m_{\nu}\}=\{0,3.046,0.06{\rm eV}\}$. The discrepancy between distances and growth results between these choices of neutrino parameters can raise above $10^{-4}$ at $a<0.01$ and the user should be mindful of this for their particular application.
+Note also that because the emulator is constructed with $N_{\rm eff}=3.04$, the user is required to pass this when the emulator is in use.  If this is not the case, {\tt CCL} will quit and issue an error.
+
+Notice that ideally we would like to pass a non-integer number of massive neutrino species for best compatibility with the emulator set-up. However, since this is not possible within {\tt CCL}, we have opted to verify that neither the growth function nor the comoving radial distance computation are affected by this approximation to more than $10^{-4}$ in the range $0.01<a<1$, where $a$ is the scale factor. We have verified this by comparing this prediction for a fiducial cosmology $\{\Omega_c=0.27,\Omega_b=0.049,h=0.67,\sigma_8=0.8,n_s=0.96\}$ with the following neutrino parameters: $\{N_{\nu,{\rm rel}},N_{\nu,{\rm mass}},m_{\nu}\}=\{0.00641,3,0.06{\rm eV}\}$, $\{N_{\nu,{\rm rel}},N_{\nu,{\rm mass}},m_{\nu}\}=\{0,3.04,0.06{\rm eV}\}$ and $\{N_{\nu,{\rm rel}},N_{\nu,{\rm mass}},m_{\nu}\}=\{0,3.046,0.06{\rm eV}\}$. The discrepancy between distances and growth results between these choices of neutrino parameters can raise above $10^{-4}$ at $a<0.01$ and the user should be mindful of this for their particular application.
 
 \subsubsection{Impact of baryons}
 
@@ -521,7 +531,7 @@ where $\mathcal{P}_\Phi(k)$ is the dimensionless power spectrum of the primordia
         \begin{equation}
           \Delta^{\rm RSD}_\ell(k)=\int dz\,p_z(z)\frac{(1+z) p_z(z)}{H(z)}T_\theta(k,z) j_\ell''(k\chi(z)),
         \end{equation}
-        where $T_\theta(k,z)$ is the transfer function of $\theta$, the divergence of the comoving velocity field. $T_\theta(k,z)$ depends on the growth, which \ccl does not compute for massive neutrino cosmologies. $C_\ell$ is instead computed assuming a linear-theory relation between the matter overdensity and peculiar velocity fields. While this should not be problematic for wide photometric redshift bins, users should exercise care when interpreting results for narrow window functions.
+        where $T_\theta(k,z)$ is the transfer function of $\theta$, the divergence of the comoving velocity field. $T_\theta(k,z)$ depends on the growth, which \ccl does not compute for massive neutrino cosmologies; therefore at this time an attempt to create a number count tracer in a cosmology with massive neutrinos will cause \ccl to raise an error. $C_\ell$ is instead computed assuming a linear-theory relation between the matter overdensity and peculiar velocity fields. While this should not be problematic for wide photometric redshift bins, users should exercise care when interpreting results for narrow window functions. 
   \item $\Delta^{\rm M}$ is the contribution from magnification lensing:
         \begin{equation}
           \Delta_\ell^{\rm M}(k)=-\ell(\ell+1)\int \frac{dz}{H(z)} W^{\rm M}(z) T_{\phi+\psi}(k,z) j_\ell(k\chi(z)),
@@ -796,6 +806,8 @@ where a halo with size $r_{\Delta}$ has an average density $\bar{\rho}$ equal to
 
 In addition to the usage of the most common definition, we have implemented an extension for two of the models. The Tinker 2010 model allows for a value of $\Delta$ to be given between the values of 200 and 3200 and interpolates the fitting parameters within this range in a space of $\log \Delta$ using splines. We also have implemented interpolation in the same range of Tinker 2008 $\Delta$ values. For both Tinker 2008 and Tinker 2010 models we have utilized spline interpolation through {\tt GSL} routines in order to guarantee a match to specified fitting parameters at exact values of $\Delta$. This fitting has slight deviation from the fit as expressed in Tinker 2010.
 
+The halo mass function models implemented in CCL are tuned to simulations without massive neutrinos, therefore are not valid in cosmologies with massive neutrinos. Attempts to calculate the halo mass function, halo bias, or other related quantities within cosmologies with massive neutrinos will cause \ccl to raise an error and quit.
+
 
 With the exception of the Tinker 2010 model, we attempt to keep a common form to the multiplicity function whenever possible for ease of extension:
 \begin{equation}
@@ -831,6 +843,8 @@ The \citet{Tinker2010} model parameterizes both the halo mass function and the h
   f(\nu) = \alpha[1+(\beta\nu)^{-2\phi}]\nu^{2\eta}e(-\gamma\nu^2/2).
 \end{equation}
 The currently implemented model in \ccl allows for an arbitrary overdensity $\Delta$ to be chosen, using the fitting functions provided in \citet{Tinker2010}. Other halo model definitions are not included in the halo bias calculation, though this remains an area of active work to improve upon.
+
+The halo mass function and related quantities
 
 \subsection{Photo-$z$ implementation}
 \label{sec:photoz}
@@ -881,7 +895,7 @@ Finally, the expected (linear, scale-independent) bias of galaxies in the cluste
 b(z) = \frac{0.95}{D(z)}
 \label{clustbias}
 \end{equation}
-where $D(z)$ in the linear growth rate of structure normalized to unity at z=0.
+where $D(z)$ in the linear growth rate of structure normalized to unity at z=0. Note that this bias definition requires the calculation of the linear growth rate and therefore is not yet supported for cosmologies with massive neutrinos.
 
 \section{Tests and validation}
 \label{sec:tests}

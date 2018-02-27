@@ -154,7 +154,6 @@ static CCL_ClTracer *cl_tracer_new(ccl_cosmology *cosmo,int tracer_type,
 				   double z_source,int * status)
 {
 	
-  printf("in cl_tracer_new\n");	
   int clstatus=0;
   CCL_ClTracer *clt=malloc(sizeof(CCL_ClTracer));
   if(clt==NULL) {
@@ -170,7 +169,6 @@ static CCL_ClTracer *cl_tracer_new(ccl_cosmology *cosmo,int tracer_type,
 	  strcpy(cosmo->status_message, "ccl_cls.c: ccl_cl_tracer_new(): Number counts tracers with rsd not yet implemented in cosmologies with massive neutrinos.");
 	  return NULL;
   }
-  printf("after rsd check");
   
   clt->tracer_type=tracer_type;
   double hub=cosmo->params.h*ccl_h_over_h0(cosmo,1.,status)/CLIGHT_HMPC;
@@ -418,10 +416,8 @@ CCL_ClTracer *ccl_cl_tracer_new(ccl_cosmology *cosmo,int tracer_type,
 				double z_source,int * status)
 {
   CCL_ClTracer *clt=cl_tracer_new(cosmo,tracer_type,has_rsd,has_magnification,has_intrinsic_alignment,
-				  nz_n,z_n,n,nz_b,z_b,b,nz_s,z_s,s,nz_ba,z_ba,ba,nz_rf,z_rf,rf,z_source,status);
-  printf("back in ccl_cl_tracer_new\n");			  
+				  nz_n,z_n,n,nz_b,z_b,b,nz_s,z_s,s,nz_ba,z_ba,ba,nz_rf,z_rf,rf,z_source,status);			  
   ccl_check_status(cosmo,status);
-  printf("status checked\n");
   return clt;
 }
 

@@ -83,24 +83,9 @@ class ClTracer(object):
         self.z_rf, self.rf = _check_array_params(z, f_red, 'f_red')
         self.z_source = z_source
 
-
-        print "constructing new tracer"
         # Construct new ccl_cl_tracer
         status = 0
-        """self.cltracer, status = lib.cl_tracer_new_wrapper(
-                            cosmo,
-                            tracer_types[tracer_type],
-                            int(has_rsd),
-                            int(has_magnification),
-                            int(has_intrinsic_alignment),
-                            self.z_n, self.n, 
-                            self.z_b, self.b, 
-                            self.z_s, self.s, 
-                            self.z_ba, self.ba, 
-                            self.z_rf, self.rf,
-                            self.z_source,
-                            status )"""
-        thing = lib.cl_tracer_new_wrapper(
+        output = lib.cl_tracer_new_wrapper(
                             cosmo,
                             tracer_types[tracer_type],
                             int(has_rsd),
@@ -113,14 +98,20 @@ class ClTracer(object):
                             self.z_rf, self.rf,
                             self.z_source,
                             status )
-        print "thing=", thing
-        print "new tracer constructed successfully"
+                  
+        if (isinstance(output,int)):
+			self.has_cltracer = False 
+			check(output)                
+        else:
+			self.has_cltracer = True
+			self.cltracer, status = output
 
     def __del__(self):
         """Free memory associated with CCL_ClTracer object.
 
         """
-        lib.cl_tracer_free(self.cltracer)
+        if self.has_cltracer==True:
+			lib.cl_tracer_free(self.cltracer)
 
 
 class ClTracerNumberCounts(ClTracer):
@@ -311,11 +302,8 @@ def angular_cl(cosmo, cltracer1, cltracer2, ell):
     cosmo = _cosmology_obj(cosmo)
 
     # Access CCL_ClTracer objects
-    print "getting tracer 1"
     clt1 = _cltracer_obj(cltracer1)
-    print "getting tracer 2"
     clt2 = _cltracer_obj(cltracer2)
-    print "got tracer 2"
 
     status = 0
     # Return Cl values, according to whether ell is an array or not
