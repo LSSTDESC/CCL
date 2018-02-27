@@ -47,7 +47,7 @@ int main(int argc,char **argv)
   double* MNU;
   double mnuval = 0.;
   MNU = &mnuval;
-  ccl_mnu_type_label MNUTYPE = ccl_mnu_list;
+  ccl_mnu_type_label MNUTYPE = ccl_mnu_sum;
   
   // Initialize cosmological parameters
   ccl_configuration config=default_config;
