@@ -50,7 +50,7 @@ int main(int argc,char **argv)
   // Initialize cosmological parameters
   ccl_configuration config=default_config;
   config.transfer_function_method=ccl_boltzmann_class;
-  ccl_parameters params = ccl_parameters_create(OC, OB, OK, NREL, MNU, MNUTYPE, W0, WA, HH, NORMPS, NS,-1,-1,-1,-1,NULL,NULL, &status);
+  ccl_parameters params = ccl_parameters_create(OC, OB, OK, NEFF, MNU, MNUTYPE, W0, WA, HH, NORMPS, NS,-1,-1,-1,-1,NULL,NULL, &status);
   //printf("in sample run w0=%1.12f, wa=%1.12f\n", W0, WA);
   
   // Initialize cosmology object given cosmo params

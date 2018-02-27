@@ -100,18 +100,18 @@ class ClTracer(object):
                             status )
                   
         if (isinstance(output,int)):
-			self.has_cltracer = False 
-			check(output)                
+            self.has_cltracer = False 
+            check(output)                
         else:
-			self.has_cltracer = True
-			self.cltracer, status = output
+            self.has_cltracer = True
+            self.cltracer, status = output
 
     def __del__(self):
         """Free memory associated with CCL_ClTracer object.
 
         """
         if self.has_cltracer==True:
-			lib.cl_tracer_free(self.cltracer)
+            lib.cl_tracer_free(self.cltracer)
 
 
 class ClTracerNumberCounts(ClTracer):
