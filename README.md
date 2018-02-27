@@ -32,11 +32,10 @@ This procedure has one final caveat: if you already have a working installation 
 
 Note that, if you want to use your own version of CLASS, you should follow the steps described in the section "Compiling against an external version of CLASS" below.
 
-## Installing AngPow
+## Installing Angpow
+CCL provides an optional link to the Angpow library that enables fast and accurate computations of the angular power spectra without using the Limber approximation (written in C++). We provide a python script to automatically install Angpow and make the link with CCL. You should first run this script (`python angpow_install.py`) before carrying out the next steps. The installation downloads the last release of Angpow from this [DESC repository](https://github.com/LSSTDESC/Angpow4CCL) and looks for a C++ compiler compatible with OpenMP. It provides a dedicated file `./angpow/src/angpow_ccl.cc` that makes the interface between the CCL structures and the Angpow classes.
 
-CCL provides an optional link to the AngPow library that enables fast and accurate computations of the angular power spectra without using the Limber approximation (written in C++). We provide a python script to automatically install AngPow and make the link with CCL. You should first run this script (`python angpow_install.py`) before carrying out the next steps. The installation downloads the last release of AngPow from this [DESC repository](https://github.com/LSSTDESC/Angpow4CCL) and looks for a C++ compiler compatible with OpenMP. It provides a dedicated file `./angpow/src/angpow_ccl.cc` that makes the interface between the CCL structures and the AngPow classes.
-
-To remove AngPow, run `python angpow_install.py --clean` and install CCL again.
+To remove Angpow, run `python angpow_install.py --clean` and install CCL again.
 
 ## C-only installation
 Once the CLASS library is installed, `CCL` can be easily installed using an *autotools*-generated configuration file. To install `CCL`, from the base directory (the one where this file is located) run:
@@ -303,7 +302,7 @@ CCL_ClWorkspace *ccl_cl_workspace_default(int lmax,int l_limber,int non_limber_m
 					  double l_logstep,int l_linstep,
 					  double dchi,double dlk,double zmin,int *status)
 ````
-where `lmax` sets the maximum multipole, `l_limber` the limit multipole from which the Limber approximation is used (`l_limber=-1` means that the Liber approximation is never used). The `non_limber_method` variable can be set to `CCL_NONLIMBER_METHOD_NATIVE` or `CCL_NONLIMBER_METHOD_ANGPOW` to choose the method to compute the non-Limber part of the angular power spectrum (either the native `CCL` code or the [AngPow library](https://github.com/LSSTDESC/CCL/blob/non_limber_speedup/README.md#installing-angpow)). Then `l_linstep` sets the maximum multipole until which the angular power spectrum is computed at each multipole, and `l_logstep` the logarithmic stepping to use above `l_linstep` (then the power spectrum is interpolated at each multipole). `dchi` sets the interval in comoving distance to use for the native non-Limber computation and `dlk`the logarithmic stepping for the Fourier k-integration (AngPow is not concerned by these two parameters). A simplified workspace is provided for computations that use only the Limber approximation at each multipole:
+where `lmax` sets the maximum multipole, `l_limber` the limit multipole from which the Limber approximation is used (`l_limber=-1` means that the Liber approximation is never used). The `non_limber_method` variable can be set to `CCL_NONLIMBER_METHOD_NATIVE` or `CCL_NONLIMBER_METHOD_ANGPOW` to choose the method to compute the non-Limber part of the angular power spectrum (either the native `CCL` code or the [`Angpow` library](https://github.com/LSSTDESC/CCL/blob/non_limber_speedup/README.md#installing-angpow)). Then `l_linstep` sets the maximum multipole until which the angular power spectrum is computed at each multipole, and `l_logstep` the logarithmic stepping to use above `l_linstep` (then the power spectrum is interpolated at each multipole). `dchi` sets the interval in comoving distance to use for the native non-Limber computation and `dlk`the logarithmic stepping for the Fourier k-integration (`Angpow` is not concerned by these two parameters). A simplified workspace is provided for computations that use only the Limber approximation at each multipole:
 ````c
 CCL_ClWorkspace *ccl_cl_workspace_default_limber(int lmax,double l_logstep,int l_linstep,
 						 double dlk,int *status)
@@ -322,7 +321,7 @@ void ccl_cl_tracer_free(CCL_ClTracer *clt);
 void ccl_cl_workspace_free(CCL_ClWorkspace *w);
 ````
 
-Note that for the moment AngPow can not handle the magnification lensing term for the galaxy number count tracers, and has not been tested for the weak lensing tracer. This limitations will be removed in the near future.
+Note that for the moment `Angpow` can not handle the magnification lensing term for the galaxy number count tracers, and has not been tested for the weak lensing tracer. This limitations will be removed in the near future.
 
 ### Halo mass function
 The halo mass function *dN/dM* can be obtained by function **`ccl_massfunc`**
