@@ -595,8 +595,6 @@ def check_corr(cosmo):
     # Number density input
     z = np.linspace(0., 1., 200)
     n = np.ones(z.shape)
-    
-    print "corr"
 
     # ClTracer test objects
     lens1 = ccl.ClTracerLensing(cosmo, False, n=n, z=z)

@@ -45,7 +45,7 @@ int main(int argc,char **argv)
     
   // Set neutrino masses
   double* MNU;
-  mnuval = 0.;
+  double mnuval = 0.;
   MNU = &mnuval;
   ccl_mnu_type_label MNUTYPE = ccl_mnu_list;
   
