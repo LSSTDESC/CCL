@@ -21,12 +21,12 @@ extern "C" {
 // The combination of constants required in Omeganuh2
 #define NU_CONST (8. * pow(M_PI,5) *pow((KBOLTZ/ HPLANCK),3)* KBOLTZ/(15. *pow( CLIGHT,3))* (8. * M_PI * GNEWT) / (3. * 100.*100.*1000.*1000. /MPC_TO_METER /MPC_TO_METER  * CLIGHT * CLIGHT))
 
-typedef enum ccl_nu_masses_label {
-  ccl_nu_masses_normal_label=0,
-  ccl_nu_masses_inverted_label=1,
-  ccl_nu_masses_equal_label=2,
-  ccl_nu_masses_sum_label=3
-} ccl_nu_masses_label;
+typedef enum ccl_neutrino_mass_splits{
+  ccl_nu_normal=0,
+  ccl_nu_inverted=1,
+  ccl_nu_equal=2,
+  ccl_nu_sum=3
+} ccl_neutrino_mass_splits;
 
 /**
  * Spline for the phasespace integral required for getting the fractional energy density of massive neutrinos.
@@ -50,7 +50,7 @@ gsl_spline* calculate_nu_phasespace_spline(int *status);
  * @return OmNuh2 Fractional energy density of neutrions with mass mnu, multiplied by h squared. 
  */
 
-double ccl_Omeganuh2 (double a, double Neff, double* mnu, double TCMB, gsl_interp_accel* accel, int * status);
+double ccl_Omeganuh2 (double a, int N_nu_mass, double* mnu, double TCMB, gsl_interp_accel* accel, int * status);
 
 /** 
  * Returns mass of one neutrino species at a scale factor a. 
@@ -63,7 +63,7 @@ double ccl_Omeganuh2 (double a, double Neff, double* mnu, double TCMB, gsl_inter
  * For specific cases see documentation for ccl_error.c
  * @return Mnu Neutrino mass [eV]. 
  */
-double* ccl_nu_masses (double OmNuh2, ccl_nu_masses_label label, double TCMB, gsl_interp_accel* accel, int * status);
+double* ccl_nu_masses (double OmNuh2, ccl_neutrino_mass_splits mass_split, double TCMB, int * status);
 
 #ifdef __cplusplus
 }

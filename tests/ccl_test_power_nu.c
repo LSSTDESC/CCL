@@ -14,7 +14,7 @@ CTEST_DATA(power_nu) {
   double sigma_8;
   double Neff;
   double mnu0[3], mnu1[3], mnu2[3];
-  ccl_mnu_type_label mnu_type;
+  ccl_mnu_convention mnu_type;
   double Omega_v[3];
   double Omega_k;
   double w_0[3];
@@ -68,7 +68,7 @@ CTEST_DATA(power_nu_nl) {
   double sigma_8;
   double Neff;
   double mnu0[3], mnu1[3], mnu2[3];
-  ccl_mnu_type_label mnu_type;
+  ccl_mnu_convention mnu_type;
   double Omega_v[3];
   double Omega_k;
   double w_0[3];
@@ -191,7 +191,7 @@ static void compare_power_nu(int i_model,struct power_nu_data * data)
 
 }
 
-static void compare_power_nu_nl(int i_model,struct power_nu_data * data)
+static void compare_power_nu_nl(int i_model,struct power_nu_nl_data * data)
 {
   int i,j, nk_nl;
   int status=0;

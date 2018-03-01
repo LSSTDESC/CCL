@@ -85,7 +85,7 @@ class ClTracer(object):
 
         # Construct new ccl_cl_tracer
         status = 0
-        output = lib.cl_tracer_new_wrapper(
+        return_val = lib.cl_tracer_new_wrapper(
                             cosmo,
                             tracer_types[tracer_type],
                             int(has_rsd),
@@ -99,12 +99,12 @@ class ClTracer(object):
                             self.z_source,
                             status )
                   
-        if (isinstance(output,int)):
+        if (isinstance(return_val,int)):
             self.has_cltracer = False 
-            check(output)                
+            check(return_val)                
         else:
             self.has_cltracer = True
-            self.cltracer, status = output
+            self.cltracer, status = return_val
 
     def __del__(self):
         """Free memory associated with CCL_ClTracer object.

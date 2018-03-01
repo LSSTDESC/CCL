@@ -91,6 +91,12 @@ extern "C" {
  */
 #define TNCDM 0.71611
 
+/**
+ * neutrino mass splitting differences
+*/
+#define DELTAM12 0.009
+#define DELTAM13 0.05
+
 //Precision parameters
 /**
  * Relative precision in distance calculations

@@ -91,29 +91,29 @@ double nu_phasespace_intg(gsl_interp_accel* accel, double mnuOT, int* status)
 }
 
 /* -------- ROUTINE: Omeganuh2 ---------
-INPUTS: a: scale factor, Neff: number of neutrino species, mnu: total mass in eV of neutrinos, TCMB: CMB temperature, accel: pointer to an accelerator which will evaluate the neutrino phasespace spline if defined, status: pointer to status integer.
+INPUTS: a: scale factor, Nnumass: number of massive neutrino species, mnu: total mass in eV of neutrinos, TCMB: CMB temperature, accel: pointer to an accelerator which will evaluate the neutrino phasespace spline if defined, status: pointer to status integer.
 TASK: Compute Omeganu * h^2 as a function of time.
 !! To all practical purposes, Neff is simply N_nu_mass !!
 */
 
-double ccl_Omeganuh2 (double a, double Neff, double* mnu, double TCMB, gsl_interp_accel* accel, int* status)
+double ccl_Omeganuh2 (double a, int N_nu_mass, double* mnu, double TCMB, gsl_interp_accel* accel, int* status)
 {
   double Tnu, a4, prefix_massless, mnuone, OmNuh2;
   double Tnu_eff, mnuOT, intval, prefix_massive;
   double total_mass; // To check if this is the massless or massive case.
   
-  // First check if Neff if 0
-  if (Neff==0) return 0.0;  
+  // First check if N_nu_mass is 0
+  if (N_nu_mass==0) return 0.0;  
   
   Tnu=TCMB*pow(4./11.,1./3.);
   a4=a*a*a*a;  
   // Check if mnu=0. We assume that in the massless case mnu is a pointer to a single element and that element is 0. This should in principle never be called.
-  if (mnu[0] < 1e-12) {
+  if (mnu[0] < 0.00017) {  // Limit taken from Lesgourges et al. 2012
     prefix_massless = NU_CONST  * Tnu * Tnu * Tnu * Tnu; 
-    return Neff*prefix_massless*7./8./a4;
+    return N_nu_mass*prefix_massless*7./8./a4;
   }
   
-  // And the remaining massive case. If we've got this far, then Neff = Nnumass and this will be the number of elements in the array to which mnu points.
+  // And the remaining massive case.
   // Tnu_eff is used in the massive case because CLASS uses an effective temperature of nonLCDM components to match to mnu / Omeganu =93.14eV. Tnu_eff = T_ncdm * TCMB = 0.71611 * TCMB
   Tnu_eff = Tnu * TNCDM / (pow(4./11.,1./3.));
   
@@ -121,7 +121,7 @@ double ccl_Omeganuh2 (double a, double Neff, double* mnu, double TCMB, gsl_inter
   prefix_massive = NU_CONST * Tnu_eff * Tnu_eff * Tnu_eff * Tnu_eff;
   
   OmNuh2 = 0.; // Initialize to 0 - we add to this for each massive neutrino species.
-  for(int i=0; i<Neff; i++){
+  for(int i=0; i<N_nu_mass; i++){
 	// Get mass over T (mass (eV) / ((kb eV/s/K) Tnu_eff (K)) 
 	// This returns the density normalized so that we get nuh2 at a=0
 	mnuOT = mnu[i] / (Tnu_eff/a) * (EV_IN_J / (KBOLTZ)); 
@@ -139,7 +139,7 @@ INPUTS: OmNuh2: neutrino mass density today Omeganu * h^2, label: how you want t
 TASK: Given Omeganuh2 today, the method of splitting into masses, and the temperature of the CMB, output a pointer to the array of neutrino masses (may be length 1 if label asks for sum) 
 */
 
-double* ccl_nu_masses(double OmNuh2, ccl_nu_masses_label label, double TCMB, gsl_interp_accel* accel, int* status){
+double* ccl_nu_masses(double OmNuh2, ccl_neutrino_mass_splits mass_split, double TCMB,  int* status){
   
   double sumnu;
   
@@ -147,11 +147,16 @@ double* ccl_nu_masses(double OmNuh2, ccl_nu_masses_label label, double TCMB, gsl
   
   // Now split the sum up into three masses depending on the label given:
   
-  if(label==ccl_nu_masses_normal_label){
+  if(mass_split==ccl_nu_normal){
 	  
      double *mnu;
 	 mnu = malloc(3*sizeof(double));
 			
+	 // Neutrino mass splittings are measured at +/- 0.05 and + 0.009
+	 // See e.g. review of Gerbino et al. 2017, Lesgourgues et al. 2012
+	 // The below expressions for the normal hierarchy then the inverted
+	 // hierarchy come from (sumnu - 0.05 - 0.009) (normal) and 
+	 // (sumnu + 0.05 - 0.009) (inverted).		
 	 if (sumnu>0.059){
 		 mnu[0] = (sumnu - 0.059) / 3.;
 		 mnu[1] = mnu[0] + 0.009;
@@ -163,7 +168,7 @@ double* ccl_nu_masses(double OmNuh2, ccl_nu_masses_label label, double TCMB, gsl
 	 ccl_check_status_nocosmo(status);
 	 return mnu; 
 	 
-  } else if (label==ccl_nu_masses_inverted_label){ 
+  } else if (mass_split==ccl_nu_inverted){ 
 
 	double *mnu;
 	mnu = malloc(3*sizeof(double));
@@ -178,7 +183,7 @@ double* ccl_nu_masses(double OmNuh2, ccl_nu_masses_label label, double TCMB, gsl
 	ccl_check_status_nocosmo(status);
 	return mnu; 
 	
-  } else if (label==ccl_nu_masses_equal_label){
+  } else if (mass_split==ccl_nu_equal){
 	  
 	  double *mnu;
 	  mnu = malloc(3*sizeof(double));
@@ -188,7 +193,7 @@ double* ccl_nu_masses(double OmNuh2, ccl_nu_masses_label label, double TCMB, gsl
       
       return mnu;
       
-  } else if (label == ccl_nu_masses_sum_label){
+  } else if (mass_split == ccl_nu_sum){
 	  
 	  double *mnu;
 	  mnu = malloc(sizeof(double));
@@ -199,7 +204,7 @@ double* ccl_nu_masses(double OmNuh2, ccl_nu_masses_label label, double TCMB, gsl
       
   } else{
 	  
-	  printf("WARNING:  mass option = %d not yet supported\n continuing with normal hierarchy\n",label);
+	  printf("WARNING:  mass option = %d not yet supported\n continuing with normal hierarchy\n", mass_split);
 	  double *mnu;
 	  mnu = malloc(3*sizeof(double));
 			

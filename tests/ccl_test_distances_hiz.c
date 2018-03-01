@@ -14,7 +14,7 @@ CTEST_DATA(distances_hiz) {
   double n_s;
   double Neff;
   double* mnu;
-  ccl_mnu_type_label mnu_type;
+  ccl_mnu_convention mnu_type;
   double Omega_v[3];
   double Omega_k[3];
   double w_0[3];

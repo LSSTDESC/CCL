@@ -18,7 +18,7 @@ CTEST_DATA(growth_hiz) {
   double Omega_k[3];
   double w_0[3];
   double w_a[3];
-  ccl_mnu_type_label mnu_type;
+  ccl_mnu_convention mnu_type;
   
   double z[7];
   double gf[3][7];

@@ -17,7 +17,7 @@ CTEST_DATA(massfunc) {
   double n_s;
   double Neff;
   double* mnu;
-  ccl_mnu_type_label mnu_type;
+  ccl_mnu_convention mnu_type;
   double Omega_v[1];
   double Omega_k[1];
   double w_0[1];

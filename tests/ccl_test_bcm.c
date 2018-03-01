@@ -18,7 +18,7 @@ CTEST_DATA(bcm) {
   double w_a[1];
   double Neff;
   double* m_nu;
-  ccl_mnu_type_label mnu_type;
+  ccl_mnu_convention mnu_type;
 };
 
 CTEST_SETUP(bcm) {

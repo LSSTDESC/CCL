@@ -15,7 +15,7 @@ CTEST_DATA(cosmology) {
   double w0;
   double Neff;
   double mnuval;
-  ccl_mnu_type_label mnu_type;
+  ccl_mnu_convention mnu_type;
   int status;
 };
 

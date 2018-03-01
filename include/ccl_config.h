@@ -87,8 +87,8 @@ typedef enum mass_function_t
 */
 typedef enum emulator_neutrinos_t
 {
-  ccl_strict   = 1,
-  ccl_equalize = 2
+  ccl_emu_strict   = 1,
+  ccl_emu_equalize = 2
 } emulator_neutrinos_t;
 
 /** 
@@ -110,7 +110,7 @@ typedef struct ccl_configuration {
  * The default configuration object
  * In the default configuration, defined in ccl_core.c
  * CCL runs with:
- * default_config = {ccl_boltzmann_class, ccl_halofit, ccl_nobaryons, ccl_tinker10, ccl_strict}
+ * default_config = {ccl_boltzmann_class, ccl_halofit, ccl_nobaryons, ccl_tinker10, ccl_emu_strict}
  */
 extern const ccl_configuration default_config;
 

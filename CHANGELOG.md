@@ -1,79 +1,19 @@
 v 0.3 API changes:
 
+Summary: the user interface for setting up cosmologies with neutrinos has been altered. Users should from now on pass Neff, the effective number of relativistic neutrino species in the early universe, and mnu, either a sum or neutrino masses or a set of 3 neutrinos masses.
+
 C library:
-
-Changes in ccl_core.c:
-
-Old call signature:
-ccl_parameters ccl_parameters_create(double Omega_c, double Omega_b, double Omega_k,
-				     double N_nu_rel, double N_nu_mass, double mnu,
-				     double w0, double wa, double h, double norm_pk,
-				     double n_s, double bcm_log10Mc, double bcm_etab, double bcm_ks,
-				     int nz_mgrowth,double *zarr_mgrowth,
-					 double *dfarr_mgrowth, int *status)
-					 
-New call signature:
-ccl_parameters_create(double Omega_c, double Omega_b, double Omega_k,
-				     double Neff, double* mnu, ccl_mnu_type_label mnu_type,
-				     double w0, double wa, double h, double norm_pk,
-				     double n_s, double bcm_log10Mc, double bcm_etab, double bcm_ks,
-				     int nz_mgrowth,double *zarr_mgrowth,
-				     double *dfarr_mgrowth, int *status)
-				 
-Old call signature:
-ccl_parameters ccl_parameters_create(double Omega_c, double Omega_b, double Omega_k,
-				     double N_nu_rel, double N_nu_mass, double mnu,
-				     double w0, double wa, double h, double norm_pk,
-				     double n_s, double bcm_log10Mc, double bcm_etab, double bcm_ks,
-				     int nz_mgrowth,double *zarr_mgrowth,
-                     double *dfarr_mgrowth, int *status)
-                     
-New call signature:
-ccl_cosmology * ccl_cosmology_create_with_params(double Omega_c, double Omega_b, double Omega_k,
-						 double Neff, double* mnu, ccl_mnu_type_label mnu_type,
-						 double w0, double wa, double h, double norm_pk, double n_s,
-						 double bcm_log10Mc, double bcm_etab, double bcm_ks,
-						 int nz_mgrowth, double *zarr_mgrowth, 
-						 double *dfarr_mgrowth, ccl_configuration config,
-						 int *status)
-						 
-(Similar changes apply for any ccl_parameters_create_..._nu convenience functions.)
+In ccl_core.c:
+In the function, ccl\_parameters\_create, the arguements 'double N\_nu\_rel', and 'double N\_nu\_mass' have been removed. The arguments 'double Neff' and 'ccl\_mnu\_convention mnu\_type' have been added. The argument 'mnu' has changed in type from 'double mnu' to 'double* mnu'.
+Similar changes apply in 'ccl\_cosmology\_create\_with\_params' and all 'ccl\_parameters\_create...nu' convenience functions.
+In ccl_neutrinos.c:
+The function ccl\_Omeganuh2\_to\_Mnu has been renamed ccl\_nu\_masses. The arguments 'double a' and 'gsl\_interp\_accel* accel' have been removed. The argument 'ccl\_neutrino\_mass\_splits mass\_split' has been added.
 
 Python wrapper:
+In core.py:
+In the Parameters class, the arguments 'N\_nu\_rel', and 'N\_nu\_mass' have been removed. The optional argument 'mnu\_type' has been added. A similar change occurs in the Cosmology class. 
+In neutrinos.py
+In the function Omeganuh2, the argument 'Neff' has been removed. It is now fixed to the length of the argument 'mnu'.
+The function 'Omeganuh2\_to\_Mnu' has been renamed 'nu\_masses'. The arguments 'a' and 'Neff' have been removed. The argument 'mass\_split' has been added.
 
-Changes in core.py:
-
-Old call signature:
-ccl.Parameters(Omega_c=None, Omega_b=None, h=None, A_s=None, n_s=None, 
-                 Omega_k=0., N_nu_rel=3.046, N_nu_mass=0., m_nu=0.,w0=-1., wa=0.,
-                 bcm_log10Mc=math.log10(1.2e14), bcm_etab=0.5, bcm_ks=55., sigma8=None,
-                 z_mg=None, df_mg=None)
-
-New call signature:
-ccl.Parameter(Omega_c=None, Omega_b=None, h=None, A_s=None, n_s=None, 
-              Omega_k=0., Neff = 3.046, m_nu=0., mnu_type = None, w0=-1., wa=0., 
-              bcm_log10Mc=math.log10(1.2e14), bcm_etab=0.5, bcm_ks=55., sigma8=None,
-              z_mg=None, df_mg=None)
-              
-Old call signature:
-cc.Cosmology(params=None, config=None,
-             Omega_c=None, Omega_b=None, h=None, A_s=None, n_s=None, 
-             Omega_k=0., N_nu_rel=3.046, N_nu_mass=0., m_nu=0., w0=-1., wa=0.,
-             bcm_log10Mc=math.log10(1.2e14), bcm_etab=0.5, bcm_ks=55., sigma8=None,
-             z_mg=None, df_mg=None, 
-             transfer_function='boltzmann_class',
-             matter_power_spectrum='halofit',
-             baryons_power_spectrum='nobaryons',
-             mass_function='tinker10')
-
-New call signature:
-ccl.Cosmology(params=None, config=None,
-              Omega_c=None, Omega_b=None, h=None, A_s=None, n_s=None, 
-              Omega_k=0., Neff=3.046, m_nu=0., mnu_type = None, w0=-1., wa=0.,
-              bcm_log10Mc=math.log10(1.2e14), bcm_etab=0.5, bcm_ks=55., sigma8=None,
-              z_mg=None, df_mg=None, 
-              transfer_function='boltzmann_class',
-              matter_power_spectrum='halofit',
-              baryons_power_spectrum='nobaryons',
-              mass_function='tinker10', emulator_neutrinos='strict')
 

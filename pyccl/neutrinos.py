@@ -3,14 +3,14 @@ from pyccl import ccllib as lib
 from pyccl.pyutils import check
 
 neutrino_mass_splits = {
-    'normal':      lib.nu_masses_normal_label,
-    'inverted': lib.nu_masses_inverted_label,
-    'equal':   lib.nu_masses_equal_label,
-    'sum':   lib.nu_masses_sum_label,
+    'normal':      lib.nu_normal,
+    'inverted': lib.nu_inverted,
+    'equal':   lib.nu_equal,
+    'sum':   lib.nu_sum,
 }
 
 
-def Omeganuh2(a, Neff, mnu, TCMB=2.725):
+def Omeganuh2(a, mnu, TCMB=2.725):
     """Omeganuh2
 
     Returns the Omehanuh2 value for a given
@@ -19,7 +19,6 @@ def Omeganuh2(a, Neff, mnu, TCMB=2.725):
 
     Args:
         a (float): Scale factor, normalized to 1 today.
-        Neff (float): Number of massive neutrino species (NB: to all practical purposes, Neff is simply N_nu_mass)
         mnu (float or array_like): Neutrino mass (in eV)
         TCMB (float, optional): Temperature of the CMB (K). Default: 2.725.
     Returns:
@@ -34,11 +33,11 @@ def Omeganuh2(a, Neff, mnu, TCMB=2.725):
         a = np.array([a,]).flatten()
     if not isinstance(mnu, np.ndarray):
         mnu = np.array([mnu,]).flatten()
-    
-    # FIXME: Implement length checking of mnu (should it be a certain length?)
+        
+    N_nu_mass = len(mnu)
     
     # Call function
-    OmNuh2, status = lib.Omeganuh2_vec(Neff, TCMB, a, mnu, a.size, status)
+    OmNuh2, status = lib.Omeganuh2_vec(N_nu_mass, TCMB, a, mnu, a.size, status)
     
     # Check status and return
     check(status)
@@ -46,12 +45,14 @@ def Omeganuh2(a, Neff, mnu, TCMB=2.725):
     return OmNuh2
 
 
-def nu_masses(OmNuh2, label, ccl_TCMB=2.725):
-    """Omeganu2h_to_Mnu
+def nu_masses(OmNuh2, mass_split, ccl_TCMB=2.725):
+    """nu_masses
+		Returns the neutrinos mass(es) for a given OmNuh2, according to the 
+		splitting convention specified by the user.
 
     Args:
         OmNuh2 (float): Neutrino energy density at z=0 times h^2
-        label: indicates how the masses should be split up
+        mass_split: indicates how the masses should be split up
         TCMB (float, optional): Temperature of the CMB (K). Default: 2.725.
 
     Returns:
@@ -60,21 +61,20 @@ def nu_masses(OmNuh2, label, ccl_TCMB=2.725):
     """
     status = 0
     
-    if label not in neutrino_mass_splits.keys() :
+    if mass_split not in neutrino_mass_splits.keys() :
         raise ValueError( "'%s' is not a valid species type. "
                           "Available options are: %s" \
-                         % (label,neutrino_mass_splits.keys()) )
+                         % (mass_split,neutrino_mass_splits.keys()) )
     
     # Call function
-    if ((label=='normal') or (label=='inverted') or (label=='equal')):
-        mnu, status = lib.nu_masses_vec(OmNuh2, neutrino_mass_splits[label], ccl_TCMB, 3, status)
-    elif label=='sum':
-        mnu, status = lib.nu_masses_vec(OmNuh2, neutrino_mass_splits[label], ccl_TCMB, 1, status)
+    if ((mass_split=='normal') or (mass_split=='inverted') or (mass_split=='equal')):
+        mnu, status = lib.nu_masses_vec(OmNuh2, neutrino_mass_splits[mass_split], ccl_TCMB, 3, status)
+    elif mass_split=='sum':
+        mnu, status = lib.nu_masses_vec(OmNuh2, neutrino_mass_splits[mass_split], ccl_TCMB, 1, status)
         mnu = mnu[0]
         
 	
     # Check status and return
     check(status)
-    #if scalar: return mnu[0]
     return mnu
 

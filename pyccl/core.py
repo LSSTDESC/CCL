@@ -40,8 +40,8 @@ mass_function_types = {
 }
 
 emulator_neutrinos_types = {
-	'strict': 	lib.strict,
-	'equalize': lib.equalize
+	'strict': 	lib.emu_strict,
+	'equalize': lib.emu_equalize
 }
 
 mnu_types = {
@@ -96,10 +96,11 @@ class Parameters(object):
             Omega_k (float, optional): Curvature density fraction. Defaults to 0.
             Neff (float, optional): Effective number of neutrino species. Defaults to 3.046
             m_nu (float or array-like, optional): If float: total mass in eV of 
-							the massive neutrinos present. If array-like, masses of 3 neutrino
-							species (must have length 3).
+            the massive neutrinos present. If array-like, masses of 3 neutrino
+            species (must have length 3).
 			mnu_type (string): treatment for neutrinos. Available: 'sum', 'sum_inverted',
-							'sum_equal', 'list'
+            'sum_equal', 'list'. Default if m_nu is a float is 'sum', default if m_nu is array-like
+            with length 3 is 'list'.
             w0 (float, optional): First order term of dark energy equation of 
                                   state. Defaults to -1.
             wa (float, optional): Second order term of dark energy equation of 
@@ -159,7 +160,7 @@ class Parameters(object):
             if (len(m_nu)!=3):
                 raise ValueError("m_nu must be a float or array-like object with length 3.")
             elif ((mnu_type=='sum') or (mnu_type=='sum_inverted') or (mnu_type=='sum_equal')):
-                raise ValueError("That mnu type cannot be passed with a list of neutrino masses, only with a sum.");
+                raise ValueError("mnu type '%s' cannot be passed with a list of neutrino masses, only with a sum." % mnu_type);
             elif (mnu_type==None):
                 mnu_type = 'list'  # False
         else:
@@ -282,7 +283,11 @@ class Cosmology(object):
             Defaults to `tinker` (2010).
             emulator_neutrinos: `str`, optional): If using the emulator for 
             the power spectrum, specified treatment of unequal neutrinos.
-            Defaults to `strict`.
+            Options are 'strict', which will raise an error and quit if the 
+            user fails to pass either a set of three equal masses or a sum with 
+            mnu_type = 'equal', and 'equalize', which will redistribute masses
+            to be equal right before calling the emualtor but results in
+            internal inconsistencies. Defaults to `strict`.
 
         """
         

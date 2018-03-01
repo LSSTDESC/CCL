@@ -23,7 +23,7 @@
 CTEST_DATA(emu) {
   double Neff;
   double* mnu;
-  ccl_mnu_type_label mnu_type;
+  ccl_mnu_convention mnu_type;
   double sigma_8[6];
   double Omega_c[6];
   double Omega_b[6];

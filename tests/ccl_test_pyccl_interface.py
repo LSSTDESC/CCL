@@ -323,9 +323,9 @@ def check_neutrinos():
     mnu = [0.02, 0.02, 0.02]
     
     # Omeganuh2
-    assert_( all_finite(ccl.Omeganuh2(a, N_nu_mass, mnu, TCMB)) )
-    assert_( all_finite(ccl.Omeganuh2(a_lst, N_nu_mass, mnu, TCMB)) )
-    assert_( all_finite(ccl.Omeganuh2(a_arr, N_nu_mass, mnu, TCMB)) )
+    assert_( all_finite(ccl.Omeganuh2(a, mnu, TCMB)) )
+    assert_( all_finite(ccl.Omeganuh2(a_lst, mnu, TCMB)) )
+    assert_( all_finite(ccl.Omeganuh2(a_arr, mnu, TCMB)) )
     
     OmNuh2 = 0.01
     

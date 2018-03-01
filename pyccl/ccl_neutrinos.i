@@ -19,7 +19,7 @@
 
 %inline %{
 
-void Omeganuh2_vec(double Neff, double TCMB,
+void Omeganuh2_vec(int N_nu_mass, double TCMB,
                    double* a, int na, 
                    double* mnu, int nm, 
                    double* output, int nout,
@@ -28,7 +28,7 @@ void Omeganuh2_vec(double Neff, double TCMB,
     assert(nout == na);
     assert(nm == 3);
     for(int i=0; i < na; i++){
-        output[i] = ccl_Omeganuh2(a[i], Neff, mnu, TCMB, NULL, status);
+        output[i] = ccl_Omeganuh2(a[i], N_nu_mass, mnu, TCMB, NULL, status);
     }   
 }
 
@@ -37,7 +37,7 @@ void nu_masses_vec(double OmNuh2, int label, double TCMB,
                           int* status)
 {
     double* mnu;
-    mnu = ccl_nu_masses(OmNuh2, label, TCMB, NULL, status);
+    mnu = ccl_nu_masses(OmNuh2, label, TCMB, status);
     for(int i=0; i < nout; i++){
         output[i] = *(mnu+i);
     }
