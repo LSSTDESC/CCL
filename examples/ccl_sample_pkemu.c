@@ -20,7 +20,7 @@ int main(int argc, char * argv[])
   */
   double Neff = 3.04;
   double mnu[3] = {0.02, 0.02, 0.02};
-  ccl_mnu_type_label mnutype = ccl_mnu_list;
+  ccl_mnu_convention mnutype = ccl_mnu_list;
   /*In the case of the emulator without massive
    neutrinos, we simply set: 
   */
