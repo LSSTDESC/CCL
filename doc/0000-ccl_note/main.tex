@@ -252,12 +252,12 @@ In the parameter construction routines above, {\tt mnu} is a pointer to either a
 
 To set up a cosmology with massive neutrinos, the user should pass {\tt mnu}, {\tt mnu$\_$type}, and {\tt N$\_$eff} to the parameter construction routine. When working from the python wrapper, it suffices to pass {\tt mnu} and {\tt N$\_$eff}; \ccl will infer whether {\tt mnu} is a set of masses or a sum. In the latter case, the default behaviour is to split the sum into masses consistent with the normal hierarchy, but an inverted hierarchy or equal splitting can be requested by passing {\tt mnu$\_$type}. 
 
-In the case where {\tt mnu} corresponds to a sum, we first allocate the three neutrino masses according to the requested convention (by default the normal hierarchy). Having then a set of three masses regardless of {\tt mnu$\_$type}, we check for which of the three masses the coresponding neutrino species is non-reativistic today ($m_\nu>0.00017$, \citealt{Lesgourgues2012}), and obtain a number of massive neutrinos {\tt N$\_$nu$\_$mass}. We use this along with the {\tt N$\_$eff} value to set the number of relativistc neutrinos species {\tt N$\_$nu$\_$rel}. We must be slightly careful in doing so, as for massive neutrinos only we follow {\tt CLASS} in modifying the relationship between the temperature of the CMB and the neutrino temperature:
+In the case where {\tt mnu} corresponds to a sum, we first allocate the three neutrino masses according to the requested convention (by default the normal hierarchy). Having then a set of three masses regardless of {\tt mnu$\_$type}, we check for which of the three masses the corresponding neutrino species is non-relativistic today ($m_\nu>0.00017$, \citealt{Lesgourgues2012}), and obtain a number of massive neutrinos {\tt N$\_$nu$\_$mass}. We use this along with the {\tt N$\_$eff} value to set the number of relativistic neutrinos species {\tt N$\_$nu$\_$rel}. We must be slightly careful in doing so, as for massive neutrinos only we follow {\tt CLASS} in modifying the relationship between the temperature of the CMB and the neutrino temperature:
 \begin{equation}
-T_{\nu}^{\rm eff} = T_{\rm CMB} T_{\rm NCDM}.
+T_{\nu}^{\rm eff} = T_{\rm CMB} T_{\rm NCDM}
 \label{Tnueff}
 \end{equation}
-Setting $T_{\rm NCDM}=0.71611$ ensures that $m_{\nu} / \Omega_{\nu}^0 = 93.14 {\rm eV}$, in agreement with experiment. Therefore to get {\tt N$\_$nu$\_$rel} consistent with the {\tt N$\_$eff} passed by the user, we do:
+where the above defines $T_{\rm NCDM}$, an adhoc modification to the equality between $T_{\rm CMB}$ and $T_{\nu}^{\rm eff}$. We follow the nomenclature of {\tt CLASS} here, but we emphasize that $T_{\rm NCDM}$ is a dimensionless scaling factor, not a temperature. Setting $T_{\rm NCDM}=0.71611$ ensures that $m_{\nu} / \Omega_{\nu}^0 = 93.14 {\rm eV}$, in agreement with experiment. Therefore to get {\tt N$\_$nu$\_$rel} consistent with the {\tt N$\_$eff} passed by the user, we do:
 \begin{equation}
 {\tt N\_nu\_rel} = {\tt N\_eff} - \left(T_{\rm NCDM}\right)^{4} \left(\frac{4}{11}\right)^{-\frac{4}{3}} {\tt N\_nu\_mass}.
 \label{Nnurel}
@@ -324,7 +324,7 @@ For massive neutrinos, $\Omega_{\nu, {\rm m}}(a)$ is calculated by calling a set
 \mu^i = \frac{m_{\nu}^{i}a}{T_{\nu}^{\rm eff}}
 \label{mnuOT}
 \end{equation}
-in units such that $\mu$ is dimensionless. We conduct the phase-space integral required to get the neutrino density once, and store the result as a {\tt gsl} spline for subsequent access. Given then the value of this integral, we multiply by appropriate factors to obtain $\Omega_{\nu, {\rm m}}(a)$:
+in units such that $\mu$ is dimensionless. We conduct once the phase-space integral required to get the neutrino density (the integral over $x$ in equation \ref{Omnu} below), and store the result as a {\tt gsl} spline for subsequent access. Given then the value of this integral, we multiply by appropriate factors to obtain $\Omega_{\nu, {\rm m}}(a)$:
 \begin{equation}
 \Omega_{\nu, {\rm m}}(a) = \sum_{i=1}^{N_\nu} \frac{8 \pi^2(\pi k_b )^3 k_b}{15(c h_{\rm P})^3} \frac{8 \pi G}{3h^2c^2} \left(\frac{T_{\nu}^{\rm eff}}{a}\right)^4 \left(\frac{7}{8}\int_0^{x_{\rm max}} dx \, x^2 \frac{\sqrt{x^2 + \left(\mu^i\right)^2}}{\exp(x) + 1}\right)
 \label{Omnu}
