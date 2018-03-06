@@ -16,13 +16,13 @@ AM_MAINTAINER_MODE
 
 # Checks for programs.
 AC_PROG_CC
-AC_PROG_CXX
 AC_PROG_CC_STDC
 AC_PROG_INSTALL
 AM_PROG_CC_C_O
-AC_PROG_CXX_C_O
 AM_MAINTAINER_MODE
-AC_OPENMP
+# Necessary to link Angpow to CCL
+AC_PROG_CXX
+AC_PROG_CXX_C_O
 
 AC_CANONICAL_HOST
 build_linux=no
@@ -66,11 +66,17 @@ else
 fi
 AM_CONDITIONAL([LOCALCLASS], [test x$localclass = xtrue])
 
+# Check for Angpow
 AC_CHECK_FILE("angpow/lib/libangpow.a",[AC_MSG_NOTICE([Using the CCL version of Angpow])
-localangpow=true],
+localangpow=true
+ANGPOW_LIB="-L./angpow/lib/ -langpow"
+AC_OPENMP
+LDFLAGS="$LDFLAGS $ANGPOW_LIB $OPENMP_CFLAGS $OPENMP_CXXFLAGS"
+CPPFLAGS="$CPPFLAGS -I./angpow/inc -DHAVE_ANGPOW $OPENMP_CFLAGS $OPENMP_CXXFLAGS"],
 [AC_MSG_NOTICE([Angpow not used])
 localangpow=false])
 AM_CONDITIONAL([LOCALANGPOW],[test x$localangpow = xtrue])
+
 
 AC_SEARCH_LIBS([cblas_dgemm],[gslcblas],[],AC_MSG_ERROR(Couldn't find libgslcblas.))
 AC_SEARCH_LIBS([gsl_spline2d_eval_e],[gsl],[],AC_MSG_ERROR(Couldn't find libgsl. GSL V2+ required.))

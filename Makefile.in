@@ -90,14 +90,15 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-@LOCALANGPOW_TRUE@am__append_1 = angpow/src/angpow_ccl.cc
-@LOCALANGPOW_TRUE@am__append_2 = angpow/lib/libangpow.a
-@LOCALANGPOW_TRUE@am__append_3 = $(OPENMP_CFLAGS) $(OPENMP_CXXFLAGS)  -std=c++11   -I./angpow/inc -DHAVE_ANGPOW
+
+# To force libtool to use C++ compilers, a .cc files must be seen in the source files
+# To make the link between Angpow (C++) and CCL (C), this dummy file forces the use of g++
+@LOCALANGPOW_TRUE@am__append_1 = ./angpow/src/angpow_cpp_placeholder.cc 
 noinst_PROGRAMS = tests/check_ccl$(EXEEXT)
 TESTS = tests/check_ccl$(EXEEXT) tests/check_swig_timestamp.sh
-@LOCALANGPOW_TRUE@am__append_4 = tests/ccl_test_angpow.c
-@LOCALANGPOW_TRUE@am__append_5 = $(OPENMP_CFLAGS) $(OPENMP_CXXFLAGS)  -fopenmp -DHAVE_ANGPOW
-@LOCALANGPOW_TRUE@am__append_6 = $(OPENMP_CFLAGS) $(OPENMP_CXXFLAGS) -lfftw3_threads
+
+# Add a specific unit test for Angpow
+@LOCALANGPOW_TRUE@am__append_2 = tests/ccl_test_angpow.c
 subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
@@ -140,16 +141,15 @@ am__uninstall_files_from_dir = { \
   }
 am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(ccldir)"
 LTLIBRARIES = $(lib_LTLIBRARIES)
-@LOCALCLASS_FALSE@libccl_la_DEPENDENCIES = $(am__append_2)
-@LOCALCLASS_TRUE@libccl_la_DEPENDENCIES = class/libclass.a \
-@LOCALCLASS_TRUE@	$(am__append_2)
+@LOCALCLASS_TRUE@libccl_la_DEPENDENCIES = class/libclass.a
 am__libccl_la_SOURCES_DIST = src/ccl_background.c src/ccl_core.c \
 	src/ccl_error.c src/ccl_lsst_specs.c src/ccl_placeholder.c \
 	src/ccl_power.c src/ccl_utils.c src/ccl_cls.c \
 	src/ccl_massfunc.c src/ccl_neutrinos.c src/ccl_emu17.c \
-	src/ccl_correlation.c src/fftlog.c angpow/src/angpow_ccl.cc
+	src/ccl_correlation.c src/fftlog.c \
+	./angpow/src/angpow_cpp_placeholder.cc
 am__dirstamp = $(am__leading_dot)dirstamp
-@LOCALANGPOW_TRUE@am__objects_1 = angpow/src/libccl_la-angpow_ccl.lo
+@LOCALANGPOW_TRUE@am__objects_1 = ./angpow/src/libccl_la-angpow_cpp_placeholder.lo
 am_libccl_la_OBJECTS = src/libccl_la-ccl_background.lo \
 	src/libccl_la-ccl_core.lo src/libccl_la-ccl_error.lo \
 	src/libccl_la-ccl_lsst_specs.lo \
@@ -493,7 +493,7 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 @LOCALCLASS_FALSE@SUBDIRS = include
-@LOCALCLASS_TRUE@SUBDIRS = include 
+@LOCALCLASS_TRUE@SUBDIRS = include
 EXTRA_DIST = doc sandbox README.md tests/benchmark tests/ctest.h tests/readme.md include/ccl_params.ini tests/ccl_test_neutrinos.c examples/ccl_sample_baryons.c examples/ccl_sample_neutrinos.c examples/ccl_sample_photoz.c examples/ccl_sample_pkemu.c examples/ccl_sample_power.c examples/ccl_sample_run.c
 ccldir = $(datadir)/ccl
 ccl_DATA = include/ccl_params.ini
@@ -503,15 +503,10 @@ libccl_la_SOURCES = src/ccl_background.c src/ccl_core.c \
 	src/ccl_power.c src/ccl_utils.c src/ccl_cls.c \
 	src/ccl_massfunc.c src/ccl_neutrinos.c src/ccl_emu17.c \
 	src/ccl_correlation.c src/fftlog.c $(am__append_1)
-@LOCALCLASS_FALSE@libccl_la_LIBADD = $(am__append_2)
-@LOCALCLASS_TRUE@libccl_la_LIBADD = class/libclass.a $(am__append_2)
-@LOCALCLASS_FALSE@libccl_la_CPPFLAGS = -I./include/ \
-@LOCALCLASS_FALSE@	-I$(CLASSDIR)/include \
-@LOCALCLASS_FALSE@	-D__CCL_DATA_DIR__=$(datadir)/ccl \
-@LOCALCLASS_FALSE@	$(am__append_3)
-@LOCALCLASS_TRUE@libccl_la_CPPFLAGS = -I./include/ -I./class/include \
-@LOCALCLASS_TRUE@	-D__CCL_DATA_DIR__=$(datadir)/ccl \
-@LOCALCLASS_TRUE@	$(am__append_3)
+@LOCALCLASS_FALSE@libccl_la_LIBADD = 
+@LOCALCLASS_TRUE@libccl_la_LIBADD = class/libclass.a
+@LOCALCLASS_FALSE@libccl_la_CPPFLAGS = -I./include/ -I$(CLASSDIR)/include -D__CCL_DATA_DIR__=$(datadir)/ccl
+@LOCALCLASS_TRUE@libccl_la_CPPFLAGS = -I./include/ -I./class/include -D__CCL_DATA_DIR__=$(datadir)/ccl
 tests_check_ccl_SOURCES = tests/ccl_test.c tests/ccl_test_utils.c \
 	tests/ccl_test_params.c tests/ccl_test_cosmology.c \
 	tests/ccl_test_distances.c tests/ccl_test_distances_hiz.c \
@@ -521,10 +516,9 @@ tests_check_ccl_SOURCES = tests/ccl_test.c tests/ccl_test_utils.c \
 	tests/ccl_test_massfunc.c tests/ccl_test_correlation.c \
 	tests/ccl_test_bcm.c tests/ccl_test_emu.c \
 	tests/ccl_test_emu_nu.c tests/ccl_test_nonlimber.c \
-	$(am__append_4)
-tests_check_ccl_CPPFLAGS = -I./tests/ -I./include/ $(am__append_5)
-tests_check_ccl_LDFLAGS = -L./ -lccl -lgsl -lgslcblas -lfftw3 \
-	$(CLASS_LIB) $(am__append_6)
+	$(am__append_2)
+tests_check_ccl_CPPFLAGS = -I./tests/ -I./include/
+tests_check_ccl_LDFLAGS = -L./ -lccl -lgsl -lgslcblas -lfftw3 $(CLASS_LIB)
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 
@@ -646,12 +640,13 @@ src/libccl_la-ccl_correlation.lo: src/$(am__dirstamp) \
 src/libccl_la-fftlog.lo: src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
 angpow/src/$(am__dirstamp):
-	@$(MKDIR_P) angpow/src
+	@$(MKDIR_P) ./angpow/src
 	@: > angpow/src/$(am__dirstamp)
 angpow/src/$(DEPDIR)/$(am__dirstamp):
-	@$(MKDIR_P) angpow/src/$(DEPDIR)
+	@$(MKDIR_P) ./angpow/src/$(DEPDIR)
 	@: > angpow/src/$(DEPDIR)/$(am__dirstamp)
-angpow/src/libccl_la-angpow_ccl.lo: angpow/src/$(am__dirstamp) \
+./angpow/src/libccl_la-angpow_cpp_placeholder.lo:  \
+	angpow/src/$(am__dirstamp) \
 	angpow/src/$(DEPDIR)/$(am__dirstamp)
 
 libccl.la: $(libccl_la_OBJECTS) $(libccl_la_DEPENDENCIES) $(EXTRA_libccl_la_DEPENDENCIES) 
@@ -718,8 +713,8 @@ tests/check_ccl$(EXEEXT): $(tests_check_ccl_OBJECTS) $(tests_check_ccl_DEPENDENC
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
-	-rm -f angpow/src/*.$(OBJEXT)
-	-rm -f angpow/src/*.lo
+	-rm -f ./angpow/src/*.$(OBJEXT)
+	-rm -f ./angpow/src/*.lo
 	-rm -f src/*.$(OBJEXT)
 	-rm -f src/*.lo
 	-rm -f tests/*.$(OBJEXT)
@@ -727,7 +722,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@angpow/src/$(DEPDIR)/libccl_la-angpow_ccl.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./angpow/src/$(DEPDIR)/libccl_la-angpow_cpp_placeholder.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/libccl_la-ccl_background.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/libccl_la-ccl_cls.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/libccl_la-ccl_core.Plo@am__quote@
@@ -1181,19 +1176,19 @@ tests/tests_check_ccl-ccl_test_angpow.obj: tests/ccl_test_angpow.c
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LTCXXCOMPILE) -c -o $@ $<
 
-angpow/src/libccl_la-angpow_ccl.lo: angpow/src/angpow_ccl.cc
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libccl_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT angpow/src/libccl_la-angpow_ccl.lo -MD -MP -MF angpow/src/$(DEPDIR)/libccl_la-angpow_ccl.Tpo -c -o angpow/src/libccl_la-angpow_ccl.lo `test -f 'angpow/src/angpow_ccl.cc' || echo '$(srcdir)/'`angpow/src/angpow_ccl.cc
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) angpow/src/$(DEPDIR)/libccl_la-angpow_ccl.Tpo angpow/src/$(DEPDIR)/libccl_la-angpow_ccl.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='angpow/src/angpow_ccl.cc' object='angpow/src/libccl_la-angpow_ccl.lo' libtool=yes @AMDEPBACKSLASH@
+./angpow/src/libccl_la-angpow_cpp_placeholder.lo: ./angpow/src/angpow_cpp_placeholder.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libccl_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ./angpow/src/libccl_la-angpow_cpp_placeholder.lo -MD -MP -MF ./angpow/src/$(DEPDIR)/libccl_la-angpow_cpp_placeholder.Tpo -c -o ./angpow/src/libccl_la-angpow_cpp_placeholder.lo `test -f './angpow/src/angpow_cpp_placeholder.cc' || echo '$(srcdir)/'`./angpow/src/angpow_cpp_placeholder.cc
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) ./angpow/src/$(DEPDIR)/libccl_la-angpow_cpp_placeholder.Tpo ./angpow/src/$(DEPDIR)/libccl_la-angpow_cpp_placeholder.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='./angpow/src/angpow_cpp_placeholder.cc' object='./angpow/src/libccl_la-angpow_cpp_placeholder.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libccl_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o angpow/src/libccl_la-angpow_ccl.lo `test -f 'angpow/src/angpow_ccl.cc' || echo '$(srcdir)/'`angpow/src/angpow_ccl.cc
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libccl_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ./angpow/src/libccl_la-angpow_cpp_placeholder.lo `test -f './angpow/src/angpow_cpp_placeholder.cc' || echo '$(srcdir)/'`./angpow/src/angpow_cpp_placeholder.cc
 
 mostlyclean-libtool:
 	-rm -f *.lo
 
 clean-libtool:
 	-rm -rf .libs _libs
-	-rm -rf angpow/src/.libs angpow/src/_libs
+	-rm -rf ./angpow/src/.libs ./angpow/src/_libs
 	-rm -rf src/.libs src/_libs
 	-rm -rf tests/.libs tests/_libs
 
@@ -1663,7 +1658,7 @@ clean-am: clean-generic clean-libLTLIBRARIES clean-libtool \
 
 distclean: distclean-recursive
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
-	-rm -rf angpow/src/$(DEPDIR) src/$(DEPDIR) tests/$(DEPDIR)
+	-rm -rf ./angpow/src/$(DEPDIR) src/$(DEPDIR) tests/$(DEPDIR)
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-hdr distclean-libtool distclean-tags
@@ -1711,7 +1706,7 @@ installcheck-am:
 maintainer-clean: maintainer-clean-recursive
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
 	-rm -rf $(top_srcdir)/autom4te.cache
-	-rm -rf angpow/src/$(DEPDIR) src/$(DEPDIR) tests/$(DEPDIR)
+	-rm -rf ./angpow/src/$(DEPDIR) src/$(DEPDIR) tests/$(DEPDIR)
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 
@@ -1760,9 +1755,11 @@ dist-hook:
 
 check-cpp:
 	echo '#include "ccl_sample_run.c"' > examples/ccl_sample_run.cpp
-	$(CXX) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(tests_check_ccl_CPPFLAGS) -std=c++11 $(AM_CFLAGS) $(CFLAGS) -I$(includedir) $(LDFLAGS) examples/ccl_sample_run.cpp -o examples/ccl_sample_run -L$(libdir) -lccl  $(LIBS)
+	$(CXX) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) -std=c++11 $(AM_CFLAGS) $(CFLAGS) -I$(includedir) $(LDFLAGS) examples/ccl_sample_run.cpp -o examples/ccl_sample_run -L$(libdir) -lccl $(LIBS)
 	echo '#include "ccl_sample_pkemu.c"' > examples/ccl_sample_pkemu.cpp
-	$(CXX) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(tests_check_ccl_CPPFLAGS) -std=c++11 $(AM_CFLAGS) $(CFLAGS) -I$(includedir) $(LDFLAGS) examples/ccl_sample_pkemu.cpp -o examples/ccl_sample_pkemu -L$(libdir) -lccl $(LIBS)
+	$(CXX) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) -std=c++11 $(AM_CFLAGS) $(CFLAGS) -I$(includedir) $(LDFLAGS) examples/ccl_sample_pkemu.cpp -o examples/ccl_sample_pkemu -L$(libdir) -lccl $(LIBS)
+	echo '#include "ccl_sample_angpow.c"' > tests/ccl_sample_angpow.c
+	$(CXX) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) -std=c++11 $(AM_CFLAGS) $(CFLAGS) -I$(includedir) $(LDFLAGS) examples/ccl_sample_angpow.cpp -o examples/ccl_sample_angpow -L$(libdir) -lccl $(LIBS)
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
