@@ -54,33 +54,41 @@ void ccl_check_status(ccl_cosmology *cosmo, int * status)
 void ccl_check_status_nocosmo(int * status)
 {
   switch (*status) {
-  case 0: //all good, nothing to do
+  case 0: // Nothing to do
     return;
-  case CCL_ERROR_LINSPACE:	// spacing allocation error, always terminate		
-    fprintf(stderr,"%s", "CCL_ERROR_LINSPACE");
-    exit(1);	
-  case CCL_ERROR_SPLINE:	// spline allocation error, always terminate	
-    fprintf(stderr,"%s", "CCL_ERROR_SPLINE");
-    exit(1);
-  case CCL_ERROR_COMPUTECHI:	// compute_chi error //RH
-    fprintf(stderr,"%s", "CCL_ERROR_COMPUTECHI");
-    exit(1);
-  case CCL_ERROR_HMF_INTERP: // terminate if hmf definition not supported
-    fprintf(stderr,"%s", "CCL_ERROR_HMF_INTERP");
-    exit(1);
-  case CCL_ERROR_NU_INT: // error in getting the neutrino integral spline: exit. No status_message in cosmo because can't pass cosmology to the function. //DL
-    fprintf(stderr, "%s", "Error, in ccl_neutrinos.c. ccl_calculate_nu_phasespace_spline(): Error in setting neutrino phasespace spline.\n");
-    exit(1);
-  case CCL_ERROR_NU_SOLVE: // error in converting Omeganuh2-> Mnu: exit. No status_message in cosmo because can't pass cosmology to the function.
-    fprintf(stderr, "%s", "Error, in ccl_neutrinos.c. Omeganuh2_to_Mnu(): Root finding did not converge.\n");
-     exit(1);
-  case CCL_ERROR_MNU_UNPHYSICAL: // error in the sum of mnu or Omeganu passed for the hierarchy requested.
-	fprintf(stderr, "%s", "Error: the sum of neutrinos masses of Omeganu value you have passed is incompatible with the requested mass hierarchy.\n");
-	exit(1);
+  case CCL_ERROR_LINSPACE:
+    // Spacing allocation error, always terminate
+    ccl_raise_exception(*status, "CCL_ERROR_LINSPACE: Spacing allocation error.");
+  case CCL_ERROR_SPLINE:
+    // Spline allocation error, always terminate
+    ccl_raise_exception(*status, "CCL_ERROR_SPLINE: Spline allocation error.");
+  case CCL_ERROR_COMPUTECHI:
+    // Compute_chi error
+    ccl_raise_exception(*status, 
+             "CCL_ERROR_COMPUTECHI: Comoving distance chi computation failed.");
+  case CCL_ERROR_HMF_INTERP:
+    // Terminate if hmf definition not supported
+    ccl_raise_exception(*status, 
+          "CCL_ERROR_HMF_INTERP: Halo mass function definition not supported.");
+  case CCL_ERROR_NU_INT:
+    // Error in getting the neutrino integral spline: exit. No status_message 
+    // in cosmo because can't pass cosmology to the function.
+    ccl_raise_exception(*status, 
+      "CCL_ERROR_NU_INT: Error getting the neutrino phase-space integral spline.");
+  case CCL_ERROR_NU_SOLVE:
+    // Error in converting Omeganuh2-> Mnu: exit. No status_message in cosmo 
+    // because can't pass cosmology to the function.
+    ccl_raise_exception(*status, 
+                      "CCL_ERROR_NU_SOLVE: Error converting Omeganuh2 -> Mnu.");
+  case CCL_ERROR_MNU_UNPHYSICAL:
+    // Error in the sum of mnu or Omeganu passed for the hierarchy requested.
+	  ccl_raise_exception(*status, 
+      "CCL_ERROR_MNU_UNPHYSICAL: Sum of neutrinos masses for this Omeganu value is incompatible with the requested mass hierarchy.");
   case CCL_ERROR_NOT_IMPLEMENTED: 
-    fprintf(stderr, "%s", "Error: the type of m_nu specified is not supported.\n");
-  default:		
-    fprintf(stderr,"%s", "OTHER ERROR; SEE gsl_errno.h for ERROR CODES 1-32.");
-    exit(1);
+    ccl_raise_exception(*status, 
+      "CCL_ERROR_NOT_IMPLEMENTED: the type of m_nu specified is not supported.");
+  default:
+    ccl_raise_exception(*status, 
+             "Unrecognized error code (see gsl_errno.h for error codes 1-32).");
   }
 }
