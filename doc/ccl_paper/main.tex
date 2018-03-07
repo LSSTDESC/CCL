@@ -875,29 +875,32 @@ Here, $\Delta_{\rm thres}$ is a target threshold for the fractional deviation be
 
 \subsection{Validation of the Cosmic Emulator}
 \vol{Elisa Chisari}
-\cont{Explain automated tests for cosmic emulator}
 
-{\bf This branch has not been merged yet.} \citet{Lawrence17} quantified the accuracy of the matter power spectrum from their emulation scheme by comparing their predictions to the resulting power spectra from the numerical simulations used for the calibration of their scheme. We repeated this procedure making the emulator predictions via \ccl for a subset of emulator cosmologies. For cosmologies without neutrinos, we required the matter power spectrum at $z=0$ to be within $1\%$ of the smoothed simulated power spectrum from \citet{Lawrence17} (see their Figure 6). Similarly, we required $3\%$ accuracy for cosmologies with neutrinos (their Figure 5). 
+\citet{Lawrence17} quantified the accuracy of the matter power spectrum from their emulation scheme by comparing their predictions to the resulting power spectra from the numerical simulations used for the calibration of their scheme. We repeated this procedure making the emulator predictions via \ccl for a subset of emulator cosmologies. For cosmologies without neutrinos, we required the matter power spectrum at $z=0$ to be within $1\%$ of the smoothed simulated power spectrum from \citet{Lawrence17} (see their Figure 6). Similarly, we required $3\%$ accuracy for cosmologies with neutrinos (their Figure 5). 
 
 \section{Usage}
-\vol{Renee}
+\vol{Renee, Elisa}
 
-The \ccl is released as part of the code from the Dark Energy Science Collaboration of LSST, and as such can be downloaded from the collaboration's github repository\footnote{\url{https://github.com/LSSTDESC/CCL}}.
+%Installation and dependencies
+\ccl is a public tool developed by the members of the Dark Energy Science Collaboration of LSST, and as such can be downloaded from the collaboration's github repository at the URL provided in the abstract. Installation instructions are provided in a README file available in that same repository. Instructions on how to generate a Docker\footnote{\url{https://www.docker.com/}} image are provided for portability to different architectures. \ccl dependencies include the GNU Scientific Library\footnote{\url{https://www.gnu.org/software/gsl/}} and FFTW3\footnote{\url{http://www.fftw.org/}}. A suite of tests can be run to ensure installation was successful and all features perform nomrmally. Accuracy checks are performed in C, while a suite of unit tests is available in python.
 
-The documentation of the code is provided through Doxygen\footnote{\url{https://github.com/LSSTDESC/CCL/blob/master/doc/html/index.html}}. \ccl needs the GNU Scientific Library to install {\bf reference needed}, more detailed instructions are given in the README file of the repository. Instructions on how to generate a Docker {\bf reference needed} image are provided for portability to different architectures.
+%Examples
+\ccl is documented using Doxygen\footnote{\url{www.doxygen.org/}}. For convenience, the repository includes multiple example files in C and several {\tt Jupyter} notebooks. 
 
-There are a suite of test files located in the {\tt tests} directory within the main \ccl code, these tests run, for example, a user-defined form for the photometric redshift of a source and how it integrates and tests with the various codes and libraries within \ccl. {\bf Connect to validation section above. Explain automated tests. Mention Jupyter notebooks.}
-
-{\bf Something about our license.}
-
+%Licensing.
+\ccl is released under terms consistent with BSD 3-Clause licensing. 
 %-------------------------------------------------------------------------------
+
 \section{Outlook}
 \vol{David Alonso, Elisabeth Krause}
 
 \cont{Extended parameter spaces. Example use case (integration into LSS pipeline).}
 
+\vskip 5pt
 
 \input{acknowledgments}
+
+\vskip 5pt
 
 \input{contributions}
 
