@@ -482,26 +482,16 @@ We also extrapolate the power spectrum at small wavenumbers within the static ro
 \end{equation}
 The value adopted for {\tt K\_MIN} depends on the choice of power spectrum method. For CLASS and the nonlinear power spectrum, we adopt {\tt K\_MIN} that coincides with the smallest wavenumber output by CLASS, {\tt K\_MIN}$=7\times 10^{-6}$/Mpc.\footnote{For BBKS, the power spectrum is computed analytically at all $k$, there is no extrapolation. For the Eisenstein \& Hu implementation, the splines of the power spectrum span {\tt K\_MIN\_DEFAULT}$<k<${\tt K$\_$MAX$\_$SPLINE}, so there is only extrapolation at high $k$.} Note that this parameter is different from {\tt K\_MIN\_DEFAULT}, which sets the minimum $k$ for integrations and which is set by default to {\tt K\_MIN\_DEFAULT}$=5\times 10^{-5}$/Mpc. Hence, in practice, no extrapolation is occurring in this case, unless the user specifically asks for an output power spectra below {\tt K\_MIN\_DEFAULT} for their own purposes.
 
-
 %------------------------
 \begin{figure*}
 \centering
-\includegraphics[width=0.9\textwidth]{PS_converge_nonlin.eps}
-\caption{The relative error compared to direct CLASS outputs, $P_{fid}$, produced by splining the nonlinear matter power spectrum up to {\tt K$\_$MAX$\_$SPLINE} and extrapolating beyond this value with a second order Taylor expansion the natural logarithm of the matter power spectrum. The left panel shows the results at $z=0$. The right panel shows the results at $z=3$. The standard \ccl parameters adopted are those corresponding to the black dashed curve. The solid curve shows the accuracy when using {\tt K$\_$MAX$\_$SPLINE}$=500$/Mpc. The magenta curve shows the impact of using the higher resolution $\Delta\ln k=10^{-4}$ in Eq. \ref{eq:NLPSTaylor}. For comparison, the impact of baryonic physics on the matter power spectrum is $\sim 10\%$ at $k=1$/Mpc \citep{Schneider15}.}
+\includegraphics[width=1.0\textwidth]{plot_power.eps}
+\caption{The relative error compared to power spectra produced with high values of the power spectrum splines, $P_{fid}$, produced by splining the matter power spectrum up to {\tt K$\_$MAX$\_$SPLINE} and extrapolating beyond this value with a second order Taylor expansion the natural logarithm of the matter power spectrum. The left panel shows the relative errors for the linear matter power spectrum at $z=0$, $z=3$ and $z=20$. The right panel shows the results for the non-linear matter power spectrum at the same redshifts. The standard \ccl parameters adopted are those corresponding to the black dashed curve. For comparison, the impact of baryonic physics on the matter power spectrum is $\sim 10\%$ at $k=1$/Mpc \citep{Schneider15}.}
 \label{fig:NLextrapol}
 \end{figure*}
 %------------------------
 
 With the implementation described above, the power spectrum splines are initialized up to {\tt K$\_$MAX$\_$SPLINE}. This is also true for the linear matter power spectrum, which is used within \ccl in particular to obtain $\sigma_8$ (see Eq. \ref{eq:sigR}). We have tested how the procedure described in the previous section affects the convergence of the linear matter power spectrum. We compare the fiducial \ccl output to the case where we set {\tt K$\_$MAX$\_$SPLINE}~$=5\times 10^3/$Mpc. The result is shown in Figure \ref{fig:Lextrapol}. Although there is a significant difference ($\gtrsim 10\%$) between the linear power spectra at large $k$, we have confirmed that the difference in $\sigma_8$ is negligible. Nevertheless, for other applications that use the linear power spectrum, the user might need to increase the value of {\tt K$\_$MAX$\_$SPLINE}.
-
-%------------------------
-\begin{figure*}
-\centering
-\includegraphics[width=0.9\textwidth]{PS_converge_lin.eps}
-\caption{Same as Fig. \ref{fig:NLextrapol} but for the linear matter power spectrum at $z=0$ (left) and $z=3$ (right).}
-\label{fig:Lextrapol}
-\end{figure*}
-%------------------------
 
 As in the previous section, the power spectrum at small wavenumber is extrapolated using a power-law. This extrapolation is performed below a fiducial value of {\tt K\_MIN\_DEFAULT}$=5\times 10^{-5}$.
 
