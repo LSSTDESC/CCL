@@ -81,21 +81,21 @@ Finally, it is worth noting that while \ccl is built in light of LSST, its flexi
 
 The overarching goal of \ccl is to allow seamless integration of different cosmological models of interest to LSST, given some priors on the range of validity of the specific models.
 
-The cosmological components include the matter density parameter $\Omega_m$, the dark energy density $\Omega_\Lambda$, the radiation density $\Omega_r$, the energy in curvature (the curvature density parameter (MI)) $\Omega_K$, the neutrino density of both massless and massive neutrinos, given by $\Omega_{\nu, {\rm rel}}$ and $\Omega_{\nu, {\rm m}}$ respectively, the optical depth $\tau$, and parameters for the equation of state of dark energy.
+The cosmological components include the matter density parameter $\Omega_m$, the dark energy density $\Omega_\Lambda$, the radiation density $\Omega_r$, the curvature density parameter $\Omega_K$, the neutrino density of both massless and massive neutrinos, given by $\Omega_{\nu, {\rm rel}}$ and $\Omega_{\nu, {\rm m}}$ respectively, the optical depth $\tau$, and parameters for the equation of state of dark energy.
 
 Currently, the following families of models are supported:
 \begin{itemize}
- \item Flat $\Lambda$CDM cosmology with parameters $\Omega_b, n_s, A_s, \Omega_m, \Omega_\Lambda, \tau$ and a cosmological constant dark energy model with equation-of-state $w=-1.$
- \item wCDM and the Chevallier-Polarski-Linder (CPL) model for dark energy and it's redshift dependence ($w(a) = w_0+w_a(1-a)$, \citealt{Chevallier01} and \citealt{Linder03})
- \item A universe with non-zero curvature ($K$) so that the curvature energy density (density parameter (MI)) is the difference of sum of the energy densities of the other components with respect to unity (flatness), i.e. $\Omega_k = 1- \sum_i \Omega_i$
+ \item Flat $\Lambda$CDM cosmology with parameters $\Omega_b$, $n_s$, $A_s$ or $\sigma_8$, $\Omega_m$, $\Omega_\Lambda$, $\tau$ and a cosmological constant dark energy model with equation-of-state $w=-1.$
+ \item wCDM and the Chevallier-Polarski-Linder (CPL) model for dark energy and its redshift dependence ($w(a) = w_0+w_a(1-a)$, \citealt{Chevallier01} and \citealt{Linder03})
+ \item A universe with non-zero curvature ($K$) so that the curvature density parameter is the difference of sum of the energy densities of the other components with respect to unity (flatness), i.e. $\Omega_k = 1- \sum_i \Omega_i$
  \item All of the above, plus an arbitrary, user-defined modified growth function (see description in Section \ref{sec:growth})
-  \item A single massive neutrino species or multiple equal-mass massive neutrinos, in combination with any of the above (except the user-defined modified growth function), specified by the neutrino mass $\Sigma m_\nu$ (which maps on to the density $\Omega_{\nu, {\rm m}}$ above).
+  \item Massive neutrino species in combination with any of the above except the user-defined modified growth function, specified by either $\Sigma m_\nu$ (which maps on to the density $\Omega_{\nu, {\rm m}}$ above), or by the individual masses of each of three neutrino species.
 \end{itemize}
+
+In the particular case of cosmologies with massive neutrinos, \ccl allows the user to specify either a sum of masses, $\Sigma m_\nu$, or the individual mass of each of three neutrino species. In the former case, \ccl will by default split $\Sigma m_\nu$ into three neutrino masses which are consistent with the normal hierarchy (see, e.g. \cite{Gerbino2017} for a review). However, the user can alternatively ask for $\Sigma m_\nu$ to be split either into masses consistent with the inverted hierarchy, or into equal masses. Each mass is then checked for whether it is non-relativistic (massive) at $z=0$, and this information is used in combination with the user-provided value of $N_{\rm eff}$ (the effective number of relativistic neutrino species in the early universe) to set the number of relativistic neutrino species.
 
 %\todo{Range of validity of the predictions.}
 Not all features of \ccl are available for all models. For a guide to which predictions are available for each model, see Table \ref{tab:cosmo}. Note that if users install their own version of {\tt CLASS}, {\tt CCL} can then make predictions for a more extended set of cosmologies. Users should take care to understand the validity of the {\tt CCL} assumptions for their own models.
-
-The power spectrum computed with {\tt CLASS} is consistent with the power spectrum in Astropy to a precision of $10^{-4}$, while the luminosity distance splines are accurate to $10^{-4}$ out to a redshift of $z=2.$ Similarly the co-moving distance comparisons yield similar results. 
 
 \input{table_cosmo}
 
@@ -110,8 +110,14 @@ The models that are specified above map directly onto cosmological observables l
 
 \begin{align}\label{eq:Ha}
 \frac{H(a)}{H_0} &= a^{-3/2}\Big(\Omega_{M,0}+\Omega_{\Lambda,0} a^{-3(w_0+w_a)}
-    \exp[3 w_a (a-1)]+\Omega_{K,0} a \nonumber \\ &+(\Omega_{g,0} + \Omega_{\nu, {\rm rel}}) a^{-1} + \Omega_{\nu, {\rm m}}(a)a^3\Big)^{\frac{1}{2}}.
+    \exp[3 w_a (a-1)]\nonumber \\ &+\Omega_{K,0} a +(\Omega_{g,0} + \Omega_{\nu, {\rm rel}}) a^{-1} + \Omega_{\nu, {\rm m}}(a)a^3\Big)^{\frac{1}{2}},
 \end{align}
+where $\Omega_{\nu, {\rm m}}(a)$, the fractional energy density of massive neutrinos, is calculated via
+\begin{align}
+\Omega_{\nu, {\rm m}}(a) &= \sum_{i=1}^{N_\nu} \frac{8 \pi^2(\pi k_b )^3 k_b}{15(c h_{\rm P})^3} \frac{8 \pi G}{3h^2c^2} \left(\frac{T_{\nu}^{\rm eff}}{a}\right)^4 \nonumber \\ & \times \left(\frac{7}{8}\int_0^{x_{\rm max}} dx \, x^2 \frac{\sqrt{x^2 + \left(\mu^i\right)^2}}{\exp(x) + 1}\right).
+\label{Omnu}
+\end{align}
+Here, $h_{\rm P}$ is Planck's constant, $h$ is $H_0/100$ with $H_0$ in units of km / s / Mpc, and $T_{\nu}^{\rm eff}$ is the effective temperature of massive neutrinos. $T_{\nu}^{\rm eff}$ is related to the temperature of the CMB via $T_{\nu}^{\rm eff} = T_{\rm CMB} T_{\rm NCDM}$, where $T_{\rm NCDM}$ is a dimensionless factor used by e.g. {\tt CLASS} to set the ratio of $\frac{\Sum m_\nu}{\Omega_{\nu}^0}$ to its experimentally measured value. Note that $T_{\rm NCDM}$ is used to modulate the effective temperatuer of massive neutrinos only; the temperature of relativistic neutrinos follows the usual relation. Finally, $\mu^i$ is a per-species, mass-like dimensionless value, given by $\mu^i = m_{\nu}^{i}a / T_{\nu}^{\rm eff}$. 
 
 In order to compute distances, we use the radial comoving distance, which is calculated via a numerical integral as
 \begin{equation}
@@ -407,32 +413,6 @@ The \citet{Tinker2010} model parameterizes the halo bias in terms of the peak he
 \end{eqnarray}
 
 Again, while high {\em numerical} accuracy has been verified, there is a remaining uncertainty. \citet{Tinker2010} found a $\sim6\%$ scatter when determining the halo bias due to differences in simulations alone. In addition, this parameterization does not include a careful exploration of any impact due to changes in the dark energy equation of state. As with the halo mass function, studies will be required to reach accuracy at the percent level for any cosmological predictions. 
-
-%-------------------------------------------------------------------------------
-\subsection{Massive neutrinos}
-\vol{Danielle Leonard}
-
-\cont{Neutrino mass/density definition. Transfer function. Definitions of hierarchies etc.}
-
-To include massive neutrinos, the suffix `{\tt $\_$nu}' may be appended to the last four {\tt ccl$\_$parameters\_create} functions above. Using these functions without the {\tt $\_$nu} suffix will set the number of massive neutrinos to 0 and the effective number of massless neutrinos to $3.046$. In the case of non-zero massive neutrinos, it may be desirable to set {\tt N\_nu\_rel} such that $N_{\rm eff}=3.046$ in the early universe. In agreement with {\tt CLASS}, when using the default value of $T_{\rm NCDM}$ as described in section \ref{sec:distances} below, {\tt N\_nu\_rel} can be set to 2.0328, 1.0196, and 0.00641 for 1, 2 and 3 massive neutrinos respectively to achieve this.
-
-For massive neutrinos, $\Omega_{\nu, {\rm m}}(a)$ is calculated by calling a set of functions contained in {\tt ccl\_neutrinos.c}. First, we assume that the mass of one neutrino is equal to $m_{\nu}^{\rm tot} / N_{\rm m}^{\nu}$ (recalling that we assume a single massive neutrino or equal-mass neutrinos). We then compute a quantity called the effective temperature:
-\begin{equation}
-T_{\nu}^{\rm eff} = T_{\rm CMB} T_{\rm NCDM}.
-\label{Tnueff}
-\end{equation}
-Here, $T_{\rm NCDM}$ is used to explicitly set the value of $m_{\nu} / \Omega_{\nu}^0$. Note that despite its name, $T_{\rm NCDM}$ is a dimensionless temperature rescaling rather than an actual temperature, following the nomenclature used by {\tt CLASS}. We choose a default value of $T_{\rm NCDM} = 0.71611$, which corresponds to $m_{\nu} / \Omega_{\nu}^0 = 93.14$ eV, to agree with the default value set by {\tt CLASS}. We define
-\begin{equation}
-\mu = \frac{m_{\nu}^{\rm tot}a}{N_{\rm m}^\nu T_{\nu}^{\rm eff}}
-\label{mnuOT}
-\end{equation}
-in units such that $\mu$ is dimensionless. We then conduct the phase-space integral required to get the neutrino density, and multiply by appropriate factors to obtain $\Omega_{\nu, {\rm m}}(a)$:
-\begin{eqnarray}
-  \Omega_{\nu, {\rm m}}(a) &=& N_{\rm m}^\nu \frac{8 \pi^2(\pi k_b )^3 k_b}{15(c h_{\rm P})^3} \frac{8 \pi G}{3h^2c^2} \left(\frac{T_{\nu}^{\rm eff}}{a}\right)^4 \times\nonumber\\
-  && \left(\frac{7}{8}\int_0^{x_{\rm max}} dx \, x^2 \frac{\sqrt{x^2 + \mu^2}}{\exp(x) + 1}\right)
-\label{Omnu}
-\end{eqnarray}
-where $h_{\rm P}$ is Planck's constant and $h$ is $H_0/100$ with $H_0$ in units of km / s / Mpc. $x_{\rm max}$ is set to 1000. The final bracketed term which includes the phase-space integral can be simplified in the limit where $\mu$ is very large or very small: for small $\mu$, it is set to $\frac{7}{8}$, and for large $\mu$, it becomes $\frac{5\zeta(3)}{18\pi^4}\mu\sim 0.2776\mu$.
 
 %-------------------------------------------------------------------------------
 \section{Implementation of high-accuracy cosmological functions}
@@ -756,31 +736,6 @@ In order to accomodate a wide range of values of the overdensity parameter $\Del
 Details of the halo bias implementation are similar to those of \autoref{sec:halo_mass_function_implementation}. The same spline for $\sigma(M)$ is used to calculate the peak height $\nu$ used in the fitting functions available in CCL.
 
 Similar to the treatment of the halo mass function, the fitting function parameters in the mass functions depend on halo definition. We consider only changes in overdensity $\Delta$, as was done in \citet{Tinker2010}. We implement the explicit dependence of the fit parameters on $\Delta$, following Table 2 in \citet{Tinker2010}. These do not require the use of interpolators.
-
-%-------------------------------------------------------------------------------
-\subsection{Massive neutrinos}
-\vol{Danielle Leonard}
-
-\cont{Approximations. Approach to performing integrals.}
-
-\subsection{Implementation of photometric redshifts}
-\vol{Danielle Leonard}
-
-\cont{Explain approach to photometric redshifts and flexibility to pass user-defined function.}
-
-Redshifts of LSST galaxies will be obtained via photometry. Performing any cosmological analysis which incorporates redshift information therefore requires a model for the probability of measuring a photometric redshift $z_{\rm ph}$ for an object with hypothetical spectroscopic redshift $z_{\rm s}$.  In order to maintain agnosticism towards the optimal model, and hence to allow for the future inclusion of advancements from ongoing research, \ccl allows the user to flexibly input a photometric redshift model. In addition, for ease of use, \ccl provides the option of using a built-in function for a simple Gaussian photometric redshift probability distribution.
-
-In order to use \ccl with a custom-input photometric redshift model, the user writes a function which accepts as input a photometric redshift, a spectroscopic redshift, and a pointer to a structure containing any further parameters of the model. This function will return the probability of measuring the input photometric redshift given the input spectroscopic redshift. The photometric redshift model can then be used, for example, when computing $\frac{dN}{dz}^i$ in photometric redshift bin $i$, as given by:
-\begin{equation}
-\frac{dN}{dz}^i = \frac{\frac{dN}{dz}\int_{z_i}^{z_{i+1}} dz' p(z,z')}{\int_{z_{\rm min}}^{z_{\rm max}}dz \frac{dN}{dz} \int_{z_i}^{z_{i+1}}dz' p(z, z')}
-\label{photoz}
-\end{equation}
-where $p(z,z')$ is the photometric redshift probability distribution, and $z_{i}$ and $z_{i+1}$ are the photo-z edges of the bin in question. In the case of the simple Gaussian photometric redshift model for which support is included in \ccl out of the box, $p(z, z')$ is given as
-\begin{equation}
-p(z,z') = \frac{1}{\sqrt{2 \pi}\sigma_z} \exp\left(-\frac{(z-z')^2}{2\sigma_z^2}\right).
-\label{pz_gauss}
-\end{equation}
-
 
 
 %-------------------------------------------------------------------------------
