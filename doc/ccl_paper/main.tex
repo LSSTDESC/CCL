@@ -737,6 +737,7 @@ modifications.
 %-------------------------------------------------------------------------------
 
 \subsection{Halo mass function}
+\label{sec:halo_mass_function_implementation}
 \vol{Antonio Villarreal, Tom M}
 
 For achieving $10^{-4}$ precision in $\sigma(M)$ and the normalisation of the power spectrum, we checked that the integral of $\sigma_8$ and $\sigma(M)$ converged for the chosen values of $\{k_{\rm min},k_{\rm max}\}$. The desired precision is set taking into account the fact that the numerical integral calculated $\sigma^2(M)$ while we require $\sigma(M)$.
@@ -747,11 +748,14 @@ In order to accomodate a wide range of values of the overdensity parameter $\Del
 
 %-------------------------------------------------------------------------------
 \subsection{Halo Bias}
+\label{sec:halo_bias_implementation}
 \vol{Tom M}
 
-\cont{All the implementation details (currently none at the time of writing this).}
+\cont{Need someone that has looked at the code to check the statement about how the fit function parameters change.}
 
+Details of the halo bias implementation are similar to those of \autoref{sec:halo_mass_function_implementation}. The same spline for $\sigma(M)$ is used to calculate the peak height $\nu$ used in the fitting functions available in CCL.
 
+Similar to the treatment of the halo mass function, the fitting function parameters in the mass functions depend on halo definition. We consider only changes in overdensity $\Delta$, as was done in \citet{Tinker2010}. We implement the explicit dependence of the fit parameters on $\Delta$, following Table 2 in \citet{Tinker2010}. These do not require the use of interpolators.
 
 %-------------------------------------------------------------------------------
 \subsection{Massive neutrinos}
