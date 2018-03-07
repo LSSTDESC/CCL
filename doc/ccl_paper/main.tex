@@ -456,11 +456,11 @@ The value of the gravitational constant, $G$, enters into the critical density. 
 
 %-------------------------------------------------------------------------------
 \subsection{Matter power spectrum}
-\vol{Elisa Chisari, who else?}
+\vol{Elisa Chisari}
 
 \cont{Interpolation strategy. Sensitivity to spline parameters and sampling in $k$. Settings that control speed vs. accuracy. }
 
-For the matter power spectrum, the spline is performed in two variables: the logarithmically-spaced wavenumber and the linearly-spaced scale factor. Splining the {\tt CLASS} output leads to some precision loss (compared to direct outputs from {\tt CLASS}). We quantify this, along with the impact of extrapolation, in the following subsection.
+For the matter power spectrum, the spline is performed in two variables: the logarithmically-spaced wavenumber and the logarithmically and linearly-spaced scale factor. Splining the {\tt CLASS} output leads to some precision loss (compared to direct outputs from {\tt CLASS}). We quantify this, along with the impact of extrapolation, in the following subsection.
 
 The computation of the power spectrum from {\tt CLASS} can be significantly sped up by extrapolating in the range $k>$~{\tt K$\_$MAX$\_$SPLINE} and $k<$~{\tt K$\_$MIN}. In this section, we describe the implementation of the extrapolation and the accuracy attained. These tests are performed in a flat $\Lambda$CDM cosmology with $\Omega_c=0.25$, $\Omega_b=0.05$, $A_s=2.1\times10^{-9}$, $h=0.7$ and $n_s=0.96$.
 
@@ -474,7 +474,7 @@ First, we compute the first and second derivative of $\ln P(k,z)$ at $k_0={\rm \
   \label{eq:NLPSTaylor}
 \end{eqnarray}
 
-The accuracy of this approximation is shown in Figure \ref{fig:NLextrapol} for redshifts $z=0$ and $z=3$. We compare the nonlinear matter power spectrum at $z=0$ computed with the previously described approximation, to the matter power spectrum obtained by directly evaluating {\tt CLASS} at the desired $k$ value. In figure \ref{fig:NLextrapol}, we vary $\Delta \ln k$ and {\tt K$\_$MAX$\_$SPLINE} at a time to determine the impact of the choice of parameters. We find that for typical values of $\Delta \ln k=10^{-2}$ and {\tt K$\_$MAX$\_$SPLINE}$=50$/Mpc, $\ln P$ has converged to an accuracy that surpasses the expected impact of baryonic effects on the matter power spectrum at $k>10/$Mpc.  (For an estimate of the impact of baryons on the total matter power spectrum, see \citealt{Schneider15}.) The lower {\tt K$\_$MAX$\_$SPLINE} is, the faster \ccl will run. The optimum choice of {\tt K$\_$MAX$\_$SPLINE} is left to the user for their particular application.
+The accuracy of this approximation is shown in Figure \ref{fig:NLextrapol} for redshifts $z=0$, $z=3$ and $z=20$. We compare the nonlinear matter power spectrum at these redshifts, computed with the previously described approximation, to the matter power spectrum obtained by setting the power spectrum splines to high values. We find that for typical values of $\Delta \ln k=10^{-2}$ and {\tt K$\_$MAX$\_$SPLINE}$=50$/Mpc, $\ln P$ has converged to an accuracy that surpasses the expected impact of baryonic effects on the matter power spectrum at $k>10/$Mpc.  (For an estimate of the impact of baryons on the total matter power spectrum, see \citealt{Schneider15}.) The lower {\tt K$\_$MAX$\_$SPLINE} is, the faster \ccl will run. The optimum choice of {\tt K$\_$MAX$\_$SPLINE} is left to the user for their particular application.
 
 We also extrapolate the power spectrum at small wavenumbers within the static routine {\tt ccl\_power\_extrapol\_lowk}. In this case, the power spectrum below {\tt K$\_$MIN} is obtained by a power-law extrapolation with index $n_s$:
 \begin{equation}
@@ -491,11 +491,11 @@ The value adopted for {\tt K\_MIN} depends on the choice of power spectrum metho
 \end{figure*}
 %------------------------
 
-With the implementation described above, the power spectrum splines are initialized up to {\tt K$\_$MAX$\_$SPLINE}. This is also true for the linear matter power spectrum, which is used within \ccl in particular to obtain $\sigma_8$ (see Eq. \ref{eq:sigR}). We have tested how the procedure described in the previous section affects the convergence of the linear matter power spectrum. We compare the fiducial \ccl output to the case where we set {\tt K$\_$MAX$\_$SPLINE}~$=5\times 10^3/$Mpc. The result is shown in Figure \ref{fig:Lextrapol}. Although there is a significant difference ($\gtrsim 10\%$) between the linear power spectra at large $k$, we have confirmed that the difference in $\sigma_8$ is negligible. Nevertheless, for other applications that use the linear power spectrum, the user might need to increase the value of {\tt K$\_$MAX$\_$SPLINE}.
+With the implementation described above, the power spectrum splines are initialized up to {\tt K$\_$MAX$\_$SPLINE}. This is also true for the linear matter power spectrum, which is used within \ccl in particular to obtain $\sigma_8$ (see Eq. \ref{eq:sigR}). We have tested how the procedure described in the previous section affects the convergence of the linear matter power spectrum. We compare the fiducial \ccl output to the case where we set {\tt K$\_$MAX$\_$SPLINE}~$=5\times 10^3/$Mpc. The result is shown in Figure \ref{fig:NLextrapol}. For some applications that use the linear power spectrum, the user might need to increase the value of {\tt K$\_$MAX$\_$SPLINE}.
 
 As in the previous section, the power spectrum at small wavenumber is extrapolated using a power-law. This extrapolation is performed below a fiducial value of {\tt K\_MIN\_DEFAULT}$=5\times 10^{-5}$.
 
-We have found that changing {\tt A$\_$SPLINE$\_$NA$\_$PK} to $200$, or changing {\tt N$\_$K} to $5000$, does not change the results presented in Figures \ref{fig:NLextrapol} and \ref{fig:Lextrapol} in this section.
+We have found that changing {\tt A$\_$SPLINE$\_$NA$\_$PK} to $200$, or changing {\tt N$\_$K} to $5000$, does not change the results presented in Figures \ref{fig:NLextrapol} in this section.
 
 %All spline and grid parameters relevant for computing quantities such as distances, growth functions, power spectra, and halo mass functions are defined in the {\tt ccl$\_$params.ini} file in the {\tt include} folder of the repository. This file allows the user to configure the following constants:
 
