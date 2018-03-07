@@ -322,25 +322,24 @@ where the angular lensing convergence power spectrum $C^{ab}_\ell$ is given abov
 
 {\bf 3-dimensional spatial correlation function.}
 
-In addition to the angular correlation functions, the 3-dimensional spatial correlation function $\xi(r)$ is 
-calculated from the power spectrum $P(k)$ using
+In addition to the angular correlation functions, the 3-dimensional spatial matter correlation function $\xi(r)$ is calculated from the matter power spectrum $P(k)$ using
 \begin{equation}
-\xi(r) = \frac{1}{2 \pi^2} \int dk \; k^2 P(k) \frac{\sin(kr)}{kr}
+\xi(r) = \frac{1}{2 \pi^2} \int dk \; k^2 P(k) \frac{\sin(kr)}{kr}\,.
 \end{equation}
 
 %-------------------------------------------------------------------------------
+
 \subsection{Halo mass function}
-\vol{Antonio Villarreal - Could Use Review}
+\label{sec:halo_mass_function}
+\vol{Antonio Villarreal, Tom M}
 
-\vol{Tom - made edits. Text written by Antonio that I changed is left as comments. Remove when ready. Removed discussion of bias from this section.}
-
-Being able to calculate the halo abundance as a function of mass is a necessary step to being able to constrain cosmology with probes such as galaxy clustering. While analytic functions are the traditional means of predicting evolution, calibration is frequently required against cosmological simulations. In order to reach the high precision for cosmological constraints in a self-consistent fashion, it is ultimately necessary to use cosmological simulations; we implement this with halo mass functions with parameters fit to these simulations. The calculation of the halo mass function focuses around the spherical overdensity method of halo finding, in which the size of a halo can be defined with:
-
+Being able to calculate the halo abundance as a function of mass is a necessary step to being able to constrain cosmology with probes such as galaxy clustering, cluster abundance, and cluster clustering. While analytic functions are the traditional means of predicting evolution, calibration is frequently required against cosmological simulations. In order to reach the high precision for cosmological constraints in a self-consistent fashion, it is ultimately necessary to use cosmological simulations; we implement this with halo mass functions with parameters fit to these simulations. The halo mass functions implemented here are based on the spherical overdensity method of halo finding, in which the size of a halo can be defined with:
+%
 \begin{equation}
-\bar{\rho}(r_{\Delta}) = \Delta \times \bar{\rho}_{\mathrm{m}},
+  \bar{\rho}(r_{\Delta}) = \Delta \times \bar{\rho}_{\mathrm{m}}\, ,
 \end{equation}
-
-where a spherical halo with radius $r_{\Delta}$ has an average density $\bar{\rho}$ equal to the overdensity parameter $\Delta$ times the mean background density of the universe, $\rho_{\mathrm{m}}$. Within the literature, the choice of $\Delta$ can vary considerably, as observations focusing on the compact cores of haloes often will often take much larger values of $\Delta$, while the fiducial definition in most halo clustering studies is a definition of $\Delta = 200$. We note that another common definition exists which utilizes the critical density of the universe, $\rho_{\mathrm{crit}}$; this introduces a simple conversion factor between the two definitions that must be accounted for. Currently, \ccl only accepts overdensity parameters with respect to the mean matter density, but we plan to allow for self-consistent handling of critical density based definitions in the future.
+%
+where a spherical halo with radius $r_{\Delta}$ has an average density $\bar{\rho}$ equal to the overdensity parameter $\Delta$ times the mean background density of the universe, $\rho_{\mathrm{m}}$. Within the literature, the choice of $\Delta$ can vary considerably, as observations focusing on the compact cores of haloes often will often take much larger values of $\Delta$, while the fiducial definition in most halo clustering studies is a definition of $\Delta = 200$. We note that another common definition exists which utilizes the critical density of the universe, $\rho_{\mathrm{crit}}$; this introduces a conversion factor between the two definitions that must be accounted for. Currently, \ccl only accepts overdensity parameters with respect to the mean matter density, but we plan to allow for self-consistent handling of critical density based definitions in the future.
 
 The halo mass function is defined as
 \begin{equation}
@@ -388,14 +387,15 @@ We note that these halo mass functions, while implemented to high {\em numerical
 \citet{Tinker2008,Tinker2010} quote 5\% accuracy of their mass funcitons.
 This result is consistent with the work of \citet{Watson2013}, which also finds a $5\%$ level difference in comparison to the Tinker fitting function. Further study will be required in the future in order to gain percent level accuracy in determining the halo mass function.
 
+%-------------------------------------------------------------------------------
+
 \subsection{Halo bias}
-\vol{Antonio Villarreal}
+\label{sec:halo_bias}
+\vol{Antonio Villarreal, Tom M}
 
-\cont{Halo bias definition.}
-
-An important step in many interpretations of the halo model is to have a measure of the bias of dark matter halos, defined as the ratio of the halo power spectrum to the linear dark matter power spectrum,
+An important step in many interpretations of the halo model is to have a measure of the bias of dark matter halos, defined as the ratio of the halo-matter power spectrum to the linear dark matter power spectrum,
 \begin{equation}
-  b^2(k) = \frac{P_h(k)}{P_{\mathrm{lin}}(k)}.
+  b^2(k) = \frac{P_{hm}(k)}{P_{\mathrm{lin}}(k)}.
 \end{equation}
 
 As with measures of the halo mass function, high accuracy cosmological constraints requires the use of numerical simulations to develop fitting functions and emulators. We note that we will define haloes as in the above subsection focusing on the halo mass function. {\tt CCL} currently implements the halo bias fitting function results in \citet{Tinker2010}, though future improvements will likely require the use of emulator methods.
@@ -735,18 +735,22 @@ interest (in this case $C_\ell$). A version of this code is included in \ccl wit
 modifications.
 
 %-------------------------------------------------------------------------------
+
 \subsection{Halo mass function}
-\vol{Antonio Villarreal - Could Use Review}
+\vol{Antonio Villarreal, Tom M}
 
-\cont{Evaluation of derivatives. Interpolations for different values of $\Delta$. Precision of $\sigma(M)$ calculation.}
+For achieving $10^{-4}$ precision in $\sigma(M)$ and the normalisation of the power spectrum, we checked that the integral of $\sigma_8$ and $\sigma(M)$ converged for the chosen values of $\{k_{\rm min},k_{\rm max}\}$. The desired precision is set taking into account the fact that the numerical integral calculated $\sigma^2(M)$ while we require $\sigma(M)$.
 
-For achieving $10^{-4}$ precision in $\sigma(M)$ and the normalisation of the power spectrum, one should check that the integral of $\sigma_8$ and $\sigma(M)$ has converged for the chosen values of $\{k_{\rm min},k_{\rm max}\}$. After checking convergence, we achieved the desired precision.
-
-Also note that for $\sigma(M)$, it is important to set the desired precision level correctly for the numerical integrator. The integral usually yields $\sigma^2(M)$, and not $\sigma(M)$. Hence, one has to set the desired precision taking the exponent into account.
-
-Derivatives are calculated utilizing a spline that is built off of the previously described $\sigma(M)$ spline. As such, these splines cover the range from $10^6$ to $10^{17} M_\odot$. For each value of $\log(M)$ in our spline evaluation, we calculate the value of $\sigma(M)$ half a step in either direction. We use the difference compared to the mass spacing to calculate an approximate derivative, which is then used in the spline interpolation. This has been tested to meet our necessary precision for the halo mass function within the mass range explored by \citet{Tinker2010}. We note that there the accuracy is reduced at the edges of these splines and exploring extreme mass ranges may require changes in the parameters to initialize these splines.
+Derivatives are calculated utilizing a spline that is built off of the previously described $\sigma(M)$ spline. As such, these splines cover the range from $10^6$ to $10^{17} M_\odot$. For each value of $\log(M)$ in our spline evaluation, we calculate the value of $\sigma(M)$ half a step in either direction. We use the difference compared to the mass spacing to calculate an approximate derivative, which is then used in the spline interpolation. This has been tested to meet our necessary precision for the halo mass function within the mass range explored by \citet{Tinker2010}. We note that the accuracy is reduced at the edges of these splines. Exploring extreme mass ranges require manually changing the initialization of these splines.
 
 In order to accomodate a wide range of values of the overdensity parameter $\Delta$, we have generated a spline interpolation between best fit values as defined by \citet{Tinker2008} and \citet{Tinker2010}. This covers a dynamic range from $\Delta=200$ to $3200$. Within this range, we interpolate in the space of the fit parameter and $\log\Delta$ using the Akima interpolation built from piecewise third order polynomials. We have chosen this rather than the fitting formulas utilized in \citet{Tinker2010} in order to assure high precision match to the Tinker halo mass function when choosing a value of $Delta$ directly from the paper. 
+
+%-------------------------------------------------------------------------------
+\subsection{Halo Bias}
+\vol{Tom M}
+
+\cont{All the implementation details (currently none at the time of writing this).}
+
 
 
 %-------------------------------------------------------------------------------
