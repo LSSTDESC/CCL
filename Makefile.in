@@ -93,12 +93,13 @@ host_triplet = @host@
 
 # To force libtool to use C++ compilers, a .cc files must be seen in the source files
 # To make the link between Angpow (C++) and CCL (C), this dummy file forces the use of g++
-@LOCALANGPOW_TRUE@am__append_1 = ./angpow/src/angpow_cpp_placeholder.cc 
+@LOCALANGPOW_TRUE@am__append_1 = ./examples/ccl_sample_angpow.c
+@LOCALANGPOW_TRUE@am__append_2 = ./angpow/src/angpow_cpp_placeholder.cc 
 noinst_PROGRAMS = tests/check_ccl$(EXEEXT)
 TESTS = tests/check_ccl$(EXEEXT) tests/check_swig_timestamp.sh
 
 # Add a specific unit test for Angpow
-@LOCALANGPOW_TRUE@am__append_2 = tests/ccl_test_angpow.c
+@LOCALANGPOW_TRUE@am__append_3 = tests/ccl_test_angpow.c
 subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
@@ -494,7 +495,12 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 @LOCALCLASS_FALSE@SUBDIRS = include
 @LOCALCLASS_TRUE@SUBDIRS = include
-EXTRA_DIST = doc sandbox README.md tests/benchmark tests/ctest.h tests/readme.md include/ccl_params.ini tests/ccl_test_neutrinos.c examples/ccl_sample_baryons.c examples/ccl_sample_neutrinos.c examples/ccl_sample_photoz.c examples/ccl_sample_pkemu.c examples/ccl_sample_power.c examples/ccl_sample_run.c
+EXTRA_DIST = doc sandbox README.md tests/benchmark tests/ctest.h \
+	tests/readme.md include/ccl_params.ini \
+	tests/ccl_test_neutrinos.c examples/ccl_sample_baryons.c \
+	examples/ccl_sample_neutrinos.c examples/ccl_sample_photoz.c \
+	examples/ccl_sample_pkemu.c examples/ccl_sample_power.c \
+	examples/ccl_sample_run.c $(am__append_1)
 ccldir = $(datadir)/ccl
 ccl_DATA = include/ccl_params.ini
 lib_LTLIBRARIES = libccl.la
@@ -502,7 +508,7 @@ libccl_la_SOURCES = src/ccl_background.c src/ccl_core.c \
 	src/ccl_error.c src/ccl_lsst_specs.c src/ccl_placeholder.c \
 	src/ccl_power.c src/ccl_utils.c src/ccl_cls.c \
 	src/ccl_massfunc.c src/ccl_neutrinos.c src/ccl_emu17.c \
-	src/ccl_correlation.c src/fftlog.c $(am__append_1)
+	src/ccl_correlation.c src/fftlog.c $(am__append_2)
 @LOCALCLASS_FALSE@libccl_la_LIBADD = 
 @LOCALCLASS_TRUE@libccl_la_LIBADD = class/libclass.a
 @LOCALCLASS_FALSE@libccl_la_CPPFLAGS = -I./include/ -I$(CLASSDIR)/include -D__CCL_DATA_DIR__=$(datadir)/ccl
@@ -516,7 +522,7 @@ tests_check_ccl_SOURCES = tests/ccl_test.c tests/ccl_test_utils.c \
 	tests/ccl_test_massfunc.c tests/ccl_test_correlation.c \
 	tests/ccl_test_bcm.c tests/ccl_test_emu.c \
 	tests/ccl_test_emu_nu.c tests/ccl_test_nonlimber.c \
-	$(am__append_2)
+	$(am__append_3)
 tests_check_ccl_CPPFLAGS = -I./tests/ -I./include/
 tests_check_ccl_LDFLAGS = -L./ -lccl -lgsl -lgslcblas -lfftw3 $(CLASS_LIB)
 all: config.h
@@ -1758,8 +1764,6 @@ check-cpp:
 	$(CXX) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) -std=c++11 $(AM_CFLAGS) $(CFLAGS) -I$(includedir) $(LDFLAGS) examples/ccl_sample_run.cpp -o examples/ccl_sample_run -L$(libdir) -lccl $(LIBS)
 	echo '#include "ccl_sample_pkemu.c"' > examples/ccl_sample_pkemu.cpp
 	$(CXX) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) -std=c++11 $(AM_CFLAGS) $(CFLAGS) -I$(includedir) $(LDFLAGS) examples/ccl_sample_pkemu.cpp -o examples/ccl_sample_pkemu -L$(libdir) -lccl $(LIBS)
-	echo '#include "ccl_sample_angpow.c"' > tests/ccl_sample_angpow.c
-	$(CXX) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) -std=c++11 $(AM_CFLAGS) $(CFLAGS) -I$(includedir) $(LDFLAGS) examples/ccl_sample_angpow.cpp -o examples/ccl_sample_angpow -L$(libdir) -lccl $(LIBS)
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

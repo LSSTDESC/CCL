@@ -1,9 +1,5 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include <iostream>
-#include <string>
-#include <vector>
-
 #include <math.h>
 #include "ccl.h"
 #include "time.h"
@@ -75,7 +71,6 @@ void print_params(int l_limber,const char *fname_params,const char *prefix_out)
 using namespace std;
 int main(int argc,char **argv)
 {
-  cout << "------------------------ ccl_sample_angpow.cc ----------- " << endl;
   //status flag
   int status =0;
   // Initialize cosmological parameters

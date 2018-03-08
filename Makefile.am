@@ -28,6 +28,7 @@ endif
 # To make the link between Angpow (C++) and CCL (C), this dummy file forces the use of g++
 if LOCALANGPOW
 
+ EXTRA_DIST += ./examples/ccl_sample_angpow.c
  libccl_la_SOURCES += ./angpow/src/angpow_cpp_placeholder.cc 
 
 endif
@@ -56,5 +57,3 @@ check-cpp:
 	$(CXX) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) -std=c++11 $(AM_CFLAGS) $(CFLAGS) -I$(includedir) $(LDFLAGS) examples/ccl_sample_run.cpp -o examples/ccl_sample_run -L$(libdir) -lccl $(LIBS)
 	echo '#include "ccl_sample_pkemu.c"' > examples/ccl_sample_pkemu.cpp
 	$(CXX) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) -std=c++11 $(AM_CFLAGS) $(CFLAGS) -I$(includedir) $(LDFLAGS) examples/ccl_sample_pkemu.cpp -o examples/ccl_sample_pkemu -L$(libdir) -lccl $(LIBS)
-	echo '#include "ccl_sample_angpow.c"' > tests/ccl_sample_angpow.c
-	$(CXX) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) -std=c++11 $(AM_CFLAGS) $(CFLAGS) -I$(includedir) $(LDFLAGS) examples/ccl_sample_angpow.cpp -o examples/ccl_sample_angpow -L$(libdir) -lccl $(LIBS)
