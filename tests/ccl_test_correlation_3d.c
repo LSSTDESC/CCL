@@ -2,10 +2,7 @@
 #include "ctest.h"
 #include <stdlib.h>
 #include <stdio.h>
-#include <math.h>
-
-#define CORR_TOLERANCE1 4.0E-3
-#define CORR_TOLERANCE2 1.0E-2
+#include <math.h> 
 
 CTEST_DATA(corrs_3d) {
   double Omega_c;
@@ -28,7 +25,7 @@ CTEST_SETUP(corrs_3d) {
   data->Omega_b = 0.05;
   data->h = 0.7;
   //TODO: Don't we have to change this to normpk?
-  data->A_s = 2.1e-9;
+  data->A_s = 0.8;
   data->n_s = 0.96;
   data->sigma_8=0.8;
   data->N_nu_rel=3.046;
@@ -67,8 +64,8 @@ static void compare_correlation_3d(int i_model,struct corrs_3d_data * data)
   char* rtn;
   FILE *f;
   ccl_configuration config = default_config;
-  config.matter_power_spectrum_method=ccl_linear;
-  config.transfer_function_method = ccl_bbks;
+  config.matter_power_spectrum_method= ccl_halofit;
+  config.transfer_function_method = ccl_boltzmann_class;
   ccl_parameters params = ccl_parameters_create(data->Omega_c,data->Omega_b,data->Omega_k[i_model-1],data->N_nu_rel, data->N_nu_mass, data->mnu,data->w_0[i_model-1],data->w_a[i_model-1],data->h,data->A_s,data->n_s,14.079181246047625, 0.5, 55, 0,NULL,NULL, &status);
   params.Omega_g=0;
   params.sigma_8=data->sigma_8;
@@ -83,7 +80,14 @@ static void compare_correlation_3d(int i_model,struct corrs_3d_data * data)
   }
   nr=linecount(f)-1; rewind(f);
 
-  double *r_arr=malloc(nr*sizeof(double));
+  // tolerence on abs difference in r^2 xi(r) for the range r = 0.1 - 100 Mpc (40 points in r) for z=0,1,2,3,4,5
+  double CORR_TOLERANCE1[6] = {0.18,0.07,0.035,0.02,0.015,0.01};
+  // tolerence on abs difference in r^2 xi(r) for the range r = 50 - 250 Mpc (100 points in r) for z=0,1,2,3,4,5
+  double CORR_TOLERANCE2[6] = {0.7,0.3,0.15,0.1,0.06,0.04};
+
+  int N1=40;
+  double *r_arr1=malloc(N1*sizeof(double));
+  double *r_arr2=malloc((nr-N1)*sizeof(double));
   double (*ximm_bench_arr)[6]=malloc(6*nr*sizeof(double));
   
   rtn = fgets(str, 1024, f);
@@ -96,7 +100,10 @@ static void compare_correlation_3d(int i_model,struct corrs_3d_data * data)
       exit(1);
     }
 
-    r_arr[i]=r_h;
+    if(i<N1)
+    r_arr1[i]=r_h;
+    else
+    r_arr2[i-N1]=r_h;
 
     for(j=0;j<6;j++) {
       double ximm_bench;      
@@ -110,26 +117,34 @@ static void compare_correlation_3d(int i_model,struct corrs_3d_data * data)
     }
   }
 
-  double *ximm_ccl_out=malloc(nr*sizeof(double));
+  double *ximm_ccl_out1=malloc(N1*sizeof(double));
+  double *ximm_ccl_out2=malloc((nr-N1)*sizeof(double));
 
    for(j=0;j<6;j++) {
-      ccl_correlation_3d(cosmo,1.0/(j+1),nr,r_arr,ximm_ccl_out,0,NULL,&status);
+      
+      ccl_correlation_3d(cosmo,1.0/(j+1),N1,r_arr1,ximm_ccl_out1,0,NULL,&status);
+      ccl_correlation_3d(cosmo,1.0/(j+1),nr-N1,r_arr2,ximm_ccl_out2,0,NULL,&status);
 
       if (status) printf("%s\n",cosmo->status_message);
       for(i=0;i<nr;i++){     
       double err;
-      err=fabs(ximm_ccl_out[i]/ximm_bench_arr[i][j]-1);
-      if(r_arr[i]<50.) 
-      ASSERT_DBL_NEAR_TOL(0.,err,CORR_TOLERANCE1);
-      else
-      ASSERT_DBL_NEAR_TOL(0.,err,CORR_TOLERANCE2);
+      if(i<N1){
+      err=fabs(r_arr1[i]*r_arr1[i]*(ximm_ccl_out1[i]-ximm_bench_arr[i][j])); 
+      ASSERT_DBL_NEAR_TOL(0.,err,CORR_TOLERANCE1[j]);
+      }
+      else{
+      err=fabs(r_arr2[i-N1]*r_arr2[i-N1]*(ximm_ccl_out2[i-N1]-ximm_bench_arr[i][j])); 
+      ASSERT_DBL_NEAR_TOL(0.,err,CORR_TOLERANCE2[j]);
+      }
       }   
   }
   fclose(f);
   
-  free(r_arr);
+  free(r_arr1);
+  free(r_arr2);
   free(ximm_bench_arr);
-  free(ximm_ccl_out);
+  free(ximm_ccl_out1);
+  free(ximm_ccl_out2); 
 
   ccl_cosmology_free(cosmo);
 }
