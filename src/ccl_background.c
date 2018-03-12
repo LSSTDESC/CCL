@@ -116,21 +116,19 @@ static int growth_ode_system(double a,const double y[],double dydt[],void *param
   return status;
 }
 
-typedef struct {
-  double a0;
-  gsl_spline *spl;
-} df_int_par;
 /* --------- ROUTINE: df_integrand ---------
 INPUT: scale factor, spline object
 TASK: Compute integrand from modified growth function
 */
 static double df_integrand(double a,void * spline_void)
 {
-  df_int_par *dfp=(df_int_par *)spline_void;
-  if(a<dfp->a0)
+  if(a<=0)
     return 0;
-  else
-    return gsl_spline_eval(dfp->spl,a,NULL)/a;
+  else {
+    gsl_spline *df_a_spline=(gsl_spline *)spline_void;
+    
+    return gsl_spline_eval(df_a_spline,a,NULL)/a;
+  }
 }
 
 /* --------- ROUTINE: growth_factor_and_growth_rate ---------
@@ -515,12 +513,10 @@ void ccl_cosmology_compute_growth(ccl_cosmology * cosmo, int * status)
       strcpy(cosmo->status_message,"ccl_background.c: ccl_cosmology_compute_growth(): Error creating Delta f(a) spline\n");
       return;
     }
-    df_int_par dfp;
-    dfp.spl=df_a_spline;
-    dfp.a0=a[0];
+    
     workspace=gsl_integration_cquad_workspace_alloc(1000);
     F.function=&df_integrand;
-    F.params=&dfp;
+    F.params=df_a_spline;
   }
   
   // allocate space for y, which will be all three
