@@ -837,7 +837,7 @@ While concentrating on individual points in cosmological parameter space allows 
 
 Covering a full range of all 5 $\Lambda$CDM parameters on a regular grid would be prohibitively expensive, so an alternative method for fairly (but more sparsely) sampling the parameter space is needed. We use Latin Hypercube Sampling to determine a tractably-sized set of sample points. This splits the parameter space into a regular grid with a given number of cells per dimension. The sample points are then chosen by going through each dimension in turn and choosing a cell at random {\it without replacement}, so that a given cell of a given dimension is only ever chosen once. This is repeated until all cells in all dimensions contain a single sample. This has the effect of covering the space uniformly but sparsely. The exact location of the sample within each cell can be chosen from a uniform distribution within that cell, but for simplicity we put each sample at the cell centre. The ranges used for each parameter are shown in Table~\ref{tab:paramranges}.
 %
-\begin{table}[htp*]
+\begin{table}[ht]
   \centering
   \begin{tabular}{l | r}
     \hline
