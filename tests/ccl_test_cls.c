@@ -131,6 +131,7 @@ static void compare_cls(char *compare_type,struct cls_data * data)
   double fraction_failed=0;
   for(int ii=0;ii<3001;ii++) {
     int l, rtn;
+    double ell_correct;
     double cl_dd_11,cl_dd_12,cl_dd_22;
     double cl_ll_11,cl_ll_12,cl_ll_22;
     double cl_dd_11_h,cl_dd_12_h,cl_dd_22_h;
@@ -142,17 +143,21 @@ static void compare_cls(char *compare_type,struct cls_data * data)
     rtn = fscanf(fi_ll_11,"%d %lf",&l,&cl_ll_11);
     rtn = fscanf(fi_ll_12,"%d %lf",&l,&cl_ll_12);
     rtn = fscanf(fi_ll_22,"%d %lf",&l,&cl_ll_22);
+    if(l<=0)
+      ell_correct=1;
+    else
+      ell_correct=l*(l+1.)/sqrt((l+2.)*(l+1.)*l*(l-1.));
     cl_dd_11_h=ccl_angular_cl(cosmo,l,tr_nc_1,tr_nc_1,&status);
     if (status) printf("%s\n",cosmo->status_message);
     cl_dd_12_h=ccl_angular_cl(cosmo,l,tr_nc_1,tr_nc_2,&status);
     if (status) printf("%s\n",cosmo->status_message);
     cl_dd_22_h=ccl_angular_cl(cosmo,l,tr_nc_2,tr_nc_2,&status);
     if (status) printf("%s\n",cosmo->status_message);
-    cl_ll_11_h=ccl_angular_cl(cosmo,l,tr_wl_1,tr_wl_1,&status);
+    cl_ll_11_h=ccl_angular_cl(cosmo,l,tr_wl_1,tr_wl_1,&status)*ell_correct*ell_correct;
     if (status) printf("%s\n",cosmo->status_message);
-    cl_ll_12_h=ccl_angular_cl(cosmo,l,tr_wl_1,tr_wl_2,&status);
+    cl_ll_12_h=ccl_angular_cl(cosmo,l,tr_wl_1,tr_wl_2,&status)*ell_correct*ell_correct;
     if (status) printf("%s\n",cosmo->status_message);
-    cl_ll_22_h=ccl_angular_cl(cosmo,l,tr_wl_2,tr_wl_2,&status);
+    cl_ll_22_h=ccl_angular_cl(cosmo,l,tr_wl_2,tr_wl_2,&status)*ell_correct*ell_correct;;
     if (status) printf("%s\n",cosmo->status_message);
 
     if(fabs(cl_dd_11_h/cl_dd_11-1)>CLS_TOLERANCE)
