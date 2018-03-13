@@ -79,7 +79,7 @@ double u_nfw_c(ccl_cosmology *cosmo, double c, double halomass, double k, double
   double rs, ks;
   double f1, f2, f3, fc;
 
-  //Scale radius for NFW
+  //Scale radius for NFW (rs=rv/c)
   rs = r_delta(cosmo, halomass, a, status)/c;
 
   //Dimensionless wave-number variable
@@ -88,7 +88,7 @@ double u_nfw_c(ccl_cosmology *cosmo, double c, double halomass, double k, double
   // Various bits for summing together to get final result
   f1 = sin(ks)*(gsl_sf_Si(ks*(1.+c))-gsl_sf_Si(ks));
   f2 = cos(ks)*(gsl_sf_Ci(ks*(1.+c))-gsl_sf_Ci(ks));
-  f3 = sinl(c*ks)/(ks*(1.+c));
+  f3 = sin(c*ks)/(ks*(1.+c));
   fc = log(1.+c)-c/(1.+c);
   
   return (f1+f2-f3)/fc;
