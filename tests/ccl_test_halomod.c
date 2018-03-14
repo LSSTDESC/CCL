@@ -35,13 +35,14 @@ int main(void){
 
   FILE *fp; // File pointer
 
+  int test_densities = 1;
   int test_distance = 1;
   int test_basics = 1;
   //int test_mass_function = 0;
   int test_halo_properties = 1;
   int test_nfw_wk = 1;
   int test_power = 1;
-
+  
   // Initial white space
   printf("\n"); 
 
@@ -57,6 +58,18 @@ int main(void){
   //
   //Now to the tests
   //
+
+  //Test the cosmological densities
+  if(test_densities==1){
+
+    printf("Testing distance calculation\n");
+    printf("\n");
+
+    // Compute radial distances (see include/ccl_background.h for more routines)
+    printf("Critical density [Msun/h / (Mpc/h)^3]: %14.7e\n", RHO_CRITICAL);
+    printf("\n");
+    
+  }
   
   //Test the distance calculation
   if(test_distance==1){
@@ -174,17 +187,23 @@ int main(void){
     
   }  
 
-  //Test the power spectrum calculation
+  // Test the power spectrum calculation
   if(test_power==1){
 
-    double kmin=1e-3;
-    double kmax=100;
-    int nk=101;
+    //Set range (note that the round numbers are in k/h)
+    double kmin=1e-3*cosmo->params.h;
+    double kmax=1e4*cosmo->params.h;
+    int nk=200;
+
+    //Convert range so that it is k/h
+    //kmin=kmin/cosmo->params.h;
+    //kmax=kmax/cosmo->params.h;
 
     printf("Testing power spectrum calculation\n");
     printf("\n");
 
     fp = fopen("Mead/CCL_power.dat", "w");
+    fprintf(fp, "### - Necessary comment to compare with HMcode\n");
   
     printf("k\t\t P_lin\t\t P_NL\t\t P_2h\t\t P_1h\t\t P_halo\t\n");
     printf("=============================================================================================\n");    
@@ -197,6 +216,9 @@ int main(void){
       double p_twohalo = p_2h(cosmo, k, a, &status); // Two-halo power
       double p_onehalo = p_1h(cosmo, k, a, &status); // One-halo power      
       double p_full = p_halomod(cosmo, k, a, &status); // Full halo-model power
+
+      //Convert k/h back to k
+      //k=k*cosmo->params.h;
 
       printf("%e\t %e\t %e\t %e\t %e\t %e\n", k, p_lin, p_nl, p_twohalo, p_onehalo, p_full);
       fprintf(fp, "%e\t %e\t %e\t %e\t %e\t %e\n", k, p_lin, p_nl, p_twohalo, p_onehalo, p_full);
