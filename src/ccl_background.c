@@ -34,6 +34,76 @@ static double h_over_h0(double a, ccl_cosmology * cosmo, int *status)
   return sqrt((cosmo->params.Omega_m+cosmo->params.Omega_l*pow(a,-3*(cosmo->params.w0+cosmo->params.wa))*exp(3*cosmo->params.wa*(a-1))+cosmo->params.Omega_k*a+(cosmo->params.Omega_g + cosmo->params.Omega_n_rel)/a + Om_mass_nu*a*a*a)/(a*a*a));
 }
 
+/* --------- ROUTINE: ccl_rho_x ---------
+INPUT: cosmology object, scale factor, species label
+TASK: Compute rho_x(a), with x defined by species label.
+Possible values for "label":
+ccl_rho_crit_label <- critical (physical)
+ccl_rho_crit_comoving_label <- critical (comoving)
+ccl_rho_m_label <- matter (physical)
+ccl_rho_m_comoving_label <- matter (comoving)
+ccl_rho_l_label <- DE (physical)
+ccl_rho_l_comoving_label <- DE (comoving)
+ccl_rho_g_label <- radiation (physical)
+ccl_rho_g_comoving_label <- radiation (comoving)
+ccl_rho_k_label <- curvature (physical)
+ccl_rho_k_comoving_label <- curvature (comoving)
+ccl_rho_ur_label <- massless neutrinos (physical)
+ccl_rho_ur_comoving_label <- massless neutrinos (comoving)
+ccl_rho_nu_label <- massive neutrinos (physical)
+ccl_rho_nu_comoving_label <- massive neutrinos (comoving)
+*/
+double ccl_rho_x(ccl_cosmology * cosmo, double a, ccl_rho_x_label label, int *status)
+{
+  // If massive neutrinos are present, compute the phase-space integral and get OmegaNuh2. If not, set OmegaNuh2 to zero.
+  double OmNuh2;
+  if ((cosmo->params.N_nu_mass) > 0.0001) {
+    // Call the massive neutrino density function just once at this redshift.
+    OmNuh2 = ccl_Omeganuh2(a, cosmo->params.N_nu_mass, cosmo->params.mnu, cosmo->params.T_CMB, cosmo->data.accelerator, status);
+    ccl_check_status(cosmo, status);
+  }
+  else {
+    OmNuh2 = 0.;
+  }
+
+  switch(label) {
+  case ccl_rho_crit_label :
+      return RHO_CRITICAL * (cosmo->params.h) * (cosmo->params.h) * (cosmo->params.Omega_m+cosmo->params.Omega_l*pow(a,-3*(cosmo->params.w0+cosmo->params.wa))*exp(3*cosmo->params.wa*(a-1))+cosmo->params.Omega_k*a+(cosmo->params.Omega_g + cosmo->params.Omega_n_rel)/a + OmNuh2*a*a*a / (cosmo->params.h) / (cosmo->params.h))/(a*a*a);
+  case ccl_rho_crit_comoving_label :
+      return RHO_CRITICAL * (cosmo->params.h) * (cosmo->params.h) * (cosmo->params.Omega_m+cosmo->params.Omega_l*pow(a,-3*(cosmo->params.w0+cosmo->params.wa))*exp(3*cosmo->params.wa*(a-1))+cosmo->params.Omega_k*a+(cosmo->params.Omega_g + cosmo->params.Omega_n_rel)/a + OmNuh2*a*a*a / (cosmo->params.h) / (cosmo->params.h));
+  case ccl_rho_m_label :
+      return RHO_CRITICAL * (cosmo->params.h) * (cosmo->params.h) * (cosmo->params.Omega_m / (a*a*a));
+  case ccl_rho_m_comoving_label :
+      return RHO_CRITICAL * (cosmo->params.h) * (cosmo->params.h) * (cosmo->params.Omega_m);
+  case ccl_rho_l_label :
+      return RHO_CRITICAL * (cosmo->params.h) * (cosmo->params.h) * (cosmo->params.Omega_l*pow(a,-3*(cosmo->params.w0+cosmo->params.wa))*exp(3*cosmo->params.wa*(a-1)) / (a*a*a));
+  case ccl_rho_l_comoving_label :
+      return RHO_CRITICAL * (cosmo->params.h) * (cosmo->params.h) * (cosmo->params.Omega_l*pow(a,-3*(cosmo->params.w0+cosmo->params.wa))*exp(3*cosmo->params.wa*(a-1)));
+  case ccl_rho_g_label :
+      return RHO_CRITICAL * (cosmo->params.h) * (cosmo->params.h) * (cosmo->params.Omega_g)/(a*a*a*a);
+  case ccl_rho_g_comoving_label :
+      return RHO_CRITICAL * (cosmo->params.h) * (cosmo->params.h) * (cosmo->params.Omega_g)/a;
+  case ccl_rho_k_label :
+      return RHO_CRITICAL * (cosmo->params.h) * (cosmo->params.h) * (cosmo->params.Omega_k)/(a*a);
+  case ccl_rho_k_comoving_label :
+      return RHO_CRITICAL * (cosmo->params.h) * (cosmo->params.h) * (cosmo->params.Omega_k)*a;
+  case ccl_rho_ur_label :
+      return RHO_CRITICAL * (cosmo->params.h) * (cosmo->params.h) * (cosmo->params.Omega_n_rel)/(a*a*a*a);
+  case ccl_rho_ur_comoving_label :
+      return RHO_CRITICAL * (cosmo->params.h) * (cosmo->params.h) * (cosmo->params.Omega_n_rel)/a;
+  case ccl_rho_nu_label :
+      return RHO_CRITICAL * OmNuh2;
+  case ccl_rho_nu_comoving_label :
+      return RHO_CRITICAL * OmNuh2 * (a*a*a);
+
+  default:
+    *status = CCL_ERROR_PARAMETERS;
+    sprintf(cosmo->status_message,"ccl_background.c: ccl_rho_x(): Species %d not supported\n",label);
+    return 0.;
+  }
+}
+
+
 /* --------- ROUTINE: ccl_omega_x ---------
 INPUT: cosmology object, scale factor, species label
 TASK: Compute Omega_x(a), with x defined by species label.
