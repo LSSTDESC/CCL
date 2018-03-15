@@ -66,31 +66,33 @@ double ccl_rho_x(ccl_cosmology * cosmo, double a, ccl_rho_x_label label, int *st
     OmNuh2 = 0.;
   }
 
+  double rhocrit_present = RHO_CRITICAL * (cosmo->params.h) * (cosmo->params.h); //units of M_sun/(Mpc)^3
+  
   switch(label) {
   case ccl_rho_crit_label :
-      return RHO_CRITICAL * (cosmo->params.h) * (cosmo->params.h) * (cosmo->params.Omega_m+cosmo->params.Omega_l*pow(a,-3*(cosmo->params.w0+cosmo->params.wa))*exp(3*cosmo->params.wa*(a-1))+cosmo->params.Omega_k*a+(cosmo->params.Omega_g + cosmo->params.Omega_n_rel)/a + OmNuh2*a*a*a / (cosmo->params.h) / (cosmo->params.h))/(a*a*a);
+      return rhocrit_present * (cosmo->params.Omega_m+cosmo->params.Omega_l*pow(a,-3*(cosmo->params.w0+cosmo->params.wa))*exp(3*cosmo->params.wa*(a-1))+cosmo->params.Omega_k*a+(cosmo->params.Omega_g + cosmo->params.Omega_n_rel)/a + OmNuh2*a*a*a / (cosmo->params.h) / (cosmo->params.h))/(a*a*a);
   case ccl_rho_crit_comoving_label :
-      return RHO_CRITICAL * (cosmo->params.h) * (cosmo->params.h) * (cosmo->params.Omega_m+cosmo->params.Omega_l*pow(a,-3*(cosmo->params.w0+cosmo->params.wa))*exp(3*cosmo->params.wa*(a-1))+cosmo->params.Omega_k*a+(cosmo->params.Omega_g + cosmo->params.Omega_n_rel)/a + OmNuh2*a*a*a / (cosmo->params.h) / (cosmo->params.h));
+      return rhocrit_present * (cosmo->params.Omega_m+cosmo->params.Omega_l*pow(a,-3*(cosmo->params.w0+cosmo->params.wa))*exp(3*cosmo->params.wa*(a-1))+cosmo->params.Omega_k*a+(cosmo->params.Omega_g + cosmo->params.Omega_n_rel)/a + OmNuh2*a*a*a / (cosmo->params.h) / (cosmo->params.h));
   case ccl_rho_m_label :
-      return RHO_CRITICAL * (cosmo->params.h) * (cosmo->params.h) * (cosmo->params.Omega_m / (a*a*a));
+      return rhocrit_present * (cosmo->params.Omega_m / (a*a*a));
   case ccl_rho_m_comoving_label :
-      return RHO_CRITICAL * (cosmo->params.h) * (cosmo->params.h) * (cosmo->params.Omega_m);
+      return rhocrit_present * (cosmo->params.Omega_m);
   case ccl_rho_l_label :
-      return RHO_CRITICAL * (cosmo->params.h) * (cosmo->params.h) * (cosmo->params.Omega_l*pow(a,-3*(cosmo->params.w0+cosmo->params.wa))*exp(3*cosmo->params.wa*(a-1)) / (a*a*a));
+      return rhocrit_present * (cosmo->params.Omega_l*pow(a,-3*(cosmo->params.w0+cosmo->params.wa))*exp(3*cosmo->params.wa*(a-1)) / (a*a*a));
   case ccl_rho_l_comoving_label :
-      return RHO_CRITICAL * (cosmo->params.h) * (cosmo->params.h) * (cosmo->params.Omega_l*pow(a,-3*(cosmo->params.w0+cosmo->params.wa))*exp(3*cosmo->params.wa*(a-1)));
+      return rhocrit_present * (cosmo->params.Omega_l*pow(a,-3*(cosmo->params.w0+cosmo->params.wa))*exp(3*cosmo->params.wa*(a-1)));
   case ccl_rho_g_label :
-      return RHO_CRITICAL * (cosmo->params.h) * (cosmo->params.h) * (cosmo->params.Omega_g)/(a*a*a*a);
+      return rhocrit_present * (cosmo->params.Omega_g)/(a*a*a*a);
   case ccl_rho_g_comoving_label :
-      return RHO_CRITICAL * (cosmo->params.h) * (cosmo->params.h) * (cosmo->params.Omega_g)/a;
+      return rhocrit_present * (cosmo->params.Omega_g)/a;
   case ccl_rho_k_label :
-      return RHO_CRITICAL * (cosmo->params.h) * (cosmo->params.h) * (cosmo->params.Omega_k)/(a*a);
+      return rhocrit_present * (cosmo->params.Omega_k)/(a*a);
   case ccl_rho_k_comoving_label :
-      return RHO_CRITICAL * (cosmo->params.h) * (cosmo->params.h) * (cosmo->params.Omega_k)*a;
+      return rhocrit_present * (cosmo->params.Omega_k)*a;
   case ccl_rho_ur_label :
-      return RHO_CRITICAL * (cosmo->params.h) * (cosmo->params.h) * (cosmo->params.Omega_n_rel)/(a*a*a*a);
+      return rhocrit_present * (cosmo->params.Omega_n_rel)/(a*a*a*a);
   case ccl_rho_ur_comoving_label :
-      return RHO_CRITICAL * (cosmo->params.h) * (cosmo->params.h) * (cosmo->params.Omega_n_rel)/a;
+      return rhocrit_present * (cosmo->params.Omega_n_rel)/a;
   case ccl_rho_nu_label :
       return RHO_CRITICAL * OmNuh2;
   case ccl_rho_nu_comoving_label :
