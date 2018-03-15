@@ -569,8 +569,6 @@ static double transfer_mag(int l,double k,ccl_cosmology *cosmo,CCL_ClTracer *clt
       return 0;
     else
       return -2*clt->prefac_lensing*l*(l+1)*wM/(a*chi*k*k);
-    //The actual prefactor on large scales should be sqrt((l+2.)*(l+1.)*l*(l-1.)) instead of l*(l+1)
-    //      return clt->prefac_lensing*sqrt((l+2.)*(l+1.)*l*(l-1.))*gf*wL/(a*chi*k*k);
   }
   else
     return 0;
@@ -591,9 +589,7 @@ static double transfer_wl(int l,double k,ccl_cosmology *cosmo,CCL_ClTracer *clt,
     if(wL<=0)
       return 0;
     else
-      return clt->prefac_lensing*l*(l+1)*wL/(a*chi*k*k);
-    //The actual prefactor on large scales should be sqrt((l+2.)*(l+1.)*l*(l-1.)) instead of l*(l+1)
-    //      return clt->prefac_lensing*sqrt((l+2.)*(l+1.)*l*(l-1.))*gf*wL/(a*chi*k*k);
+      return clt->prefac_lensing*sqrt((l+2.)*(l+1.)*l*(l-1.))*wL/(a*chi*k*k);
   }
   else
     return 0;
