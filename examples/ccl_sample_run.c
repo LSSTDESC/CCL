@@ -100,8 +100,8 @@ int main(int argc,char **argv)
     z_arr_sh[i]=Z0_SH-5*SZ_SH+10*SZ_SH*(i+0.5)/NZ;
     nz_arr_sh[i]=exp(-0.5*pow((z_arr_sh[i]-Z0_SH)/SZ_SH,2));
   }
-  double *a_arr_resample=malloc(2*NZ*sizeof(double));
-  double *nz_resampled=malloc(2*NZ*sizeof(double));
+  double *a_arr_resample=(double *)malloc(2*NZ*sizeof(double));
+  double *nz_resampled=(double *)malloc(2*NZ*sizeof(double));
   for(int i=0;i<2*NZ;i++) {
     double z=(i+0.5)/NZ;
     a_arr_resample[i]=1./(1+z);
