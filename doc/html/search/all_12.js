@@ -35,6 +35,8 @@ var searchData=
   ['tilt0',['tilt0',['../structcorr__int__par.html#afd5c7f46c3055457c5c01288aa686d74',1,'corr_int_par']]],
   ['tiltf',['tiltf',['../structcorr__int__par.html#a713ce7a30183713e4ed13509253c0299',1,'corr_int_par']]],
   ['tncdm',['TNCDM',['../ccl__constants_8h.html#ae8f28193dc11b27b79a90bf83f982d43',1,'ccl_constants.h']]],
+  ['tr1',['tr1',['../namespacef4crash.html#a97d9763b0efce791773f8e5fb73636ae',1,'f4crash']]],
+  ['tr2',['tr2',['../namespacef4crash.html#a0e44684a10409257005e81b5ff267df4',1,'f4crash']]],
   ['tracer_5ftype',['tracer_type',['../struct_c_c_l___cl_tracer.html#a782f0812a2c0ebf86f9dda4d2d893507',1,'CCL_ClTracer']]],
   ['transfer_5ffunction_5fmethod',['transfer_function_method',['../structccl__configuration.html#aad3d79052deba5c55552e6fd70a5a1ec',1,'ccl_configuration']]],
   ['transfer_5ffunction_5ft',['transfer_function_t',['../ccl__config_8h.html#a8746e6d3648e86a8233d4c2813415e15',1,'transfer_function_t():&#160;ccl_config.h'],['../ccl__config_8h.html#af402b60bffdd554ef06e2b73df3985a7',1,'transfer_function_t():&#160;ccl_config.h']]],

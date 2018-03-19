@@ -7,5 +7,6 @@ var searchData=
   ['neff',['Neff',['../struct_om_nuh2__params.html#ad1fb29ed62d3cc01f8904b2ad115ae59',1,'OmNuh2_params']]],
   ['nell',['nell',['../structcorr__int__par.html#ae22460e00a79b289bd60564b9643af73',1,'corr_int_par']]],
   ['nu_5fspline',['nu_spline',['../ccl__neutrinos_8c.html#aea78ee990dac0263c18d69c07d84ecc9',1,'ccl_neutrinos.c']]],
-  ['nz_5fmgrowth',['nz_mgrowth',['../structccl__parameters.html#a6e52ddfdb58c6823df3cbd1c7b2208e9',1,'ccl_parameters']]]
+  ['nz_5fmgrowth',['nz_mgrowth',['../structccl__parameters.html#a6e52ddfdb58c6823df3cbd1c7b2208e9',1,'ccl_parameters']]],
+  ['nzarr',['nzarr',['../namespacef4crash.html#a6e1cfff5318e2c0ffb5f278f235260ba',1,'f4crash']]]
 ];

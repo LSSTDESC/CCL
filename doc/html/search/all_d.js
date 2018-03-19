@@ -17,5 +17,6 @@ var searchData=
   ['nu_5fphasespace_5fintg',['nu_phasespace_intg',['../ccl__neutrinos_8c.html#a5adb5270bfe6998ffea34d76ea5d96ca',1,'ccl_neutrinos.c']]],
   ['nu_5fspline',['nu_spline',['../ccl__neutrinos_8c.html#aea78ee990dac0263c18d69c07d84ecc9',1,'ccl_neutrinos.c']]],
   ['nz',['NZ',['../ccl__corr__sample_8c.html#a693aee47b2103d0a7fcd3a0a0dd4fb57',1,'ccl_corr_sample.c']]],
-  ['nz_5fmgrowth',['nz_mgrowth',['../structccl__parameters.html#a6e52ddfdb58c6823df3cbd1c7b2208e9',1,'ccl_parameters']]]
+  ['nz_5fmgrowth',['nz_mgrowth',['../structccl__parameters.html#a6e52ddfdb58c6823df3cbd1c7b2208e9',1,'ccl_parameters']]],
+  ['nzarr',['nzarr',['../namespacef4crash.html#a6e1cfff5318e2c0ffb5f278f235260ba',1,'f4crash']]]
 ];

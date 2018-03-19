@@ -7,6 +7,8 @@ var searchData=
   ['th2p7',['th2p7',['../structeh__struct.html#afd9583995f4670685035d05749c385f0',1,'eh_struct']]],
   ['tilt0',['tilt0',['../structcorr__int__par.html#afd5c7f46c3055457c5c01288aa686d74',1,'corr_int_par']]],
   ['tiltf',['tiltf',['../structcorr__int__par.html#a713ce7a30183713e4ed13509253c0299',1,'corr_int_par']]],
+  ['tr1',['tr1',['../namespacef4crash.html#a97d9763b0efce791773f8e5fb73636ae',1,'f4crash']]],
+  ['tr2',['tr2',['../namespacef4crash.html#a0e44684a10409257005e81b5ff267df4',1,'f4crash']]],
   ['tracer_5ftype',['tracer_type',['../struct_c_c_l___cl_tracer.html#a782f0812a2c0ebf86f9dda4d2d893507',1,'CCL_ClTracer']]],
   ['transfer_5ffunction_5fmethod',['transfer_function_method',['../structccl__configuration.html#aad3d79052deba5c55552e6fd70a5a1ec',1,'ccl_configuration']]],
   ['ttname',['ttname',['../structctest.html#a18c814d874c53cd386192525a2045954',1,'ctest']]],
