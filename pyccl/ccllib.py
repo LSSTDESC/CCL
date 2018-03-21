@@ -757,6 +757,27 @@ CL_TRACER_WL = _ccllib.CL_TRACER_WL
 
 _ccllib.CL_TRACER_CL_swigconstant(_ccllib)
 CL_TRACER_CL = _ccllib.CL_TRACER_CL
+
+_ccllib.CCL_CLT_NZ_swigconstant(_ccllib)
+CCL_CLT_NZ = _ccllib.CCL_CLT_NZ
+
+_ccllib.CCL_CLT_BZ_swigconstant(_ccllib)
+CCL_CLT_BZ = _ccllib.CCL_CLT_BZ
+
+_ccllib.CCL_CLT_SZ_swigconstant(_ccllib)
+CCL_CLT_SZ = _ccllib.CCL_CLT_SZ
+
+_ccllib.CCL_CLT_RF_swigconstant(_ccllib)
+CCL_CLT_RF = _ccllib.CCL_CLT_RF
+
+_ccllib.CCL_CLT_BA_swigconstant(_ccllib)
+CCL_CLT_BA = _ccllib.CCL_CLT_BA
+
+_ccllib.CCL_CLT_WL_swigconstant(_ccllib)
+CCL_CLT_WL = _ccllib.CCL_CLT_WL
+
+_ccllib.CCL_CLT_WM_swigconstant(_ccllib)
+CCL_CLT_WM = _ccllib.CCL_CLT_WM
 class CCL_ClTracer(_object):
     """Proxy of C CCL_ClTracer struct."""
 
@@ -867,6 +888,14 @@ def cl_tracer_free(clt):
     """cl_tracer_free(CCL_ClTracer clt)"""
     return _ccllib.cl_tracer_free(clt)
 
+def get_tracer_fa(cosmo, clt, a, func_code, status):
+    """get_tracer_fa(cosmology cosmo, CCL_ClTracer clt, double a, int func_code, int * status) -> double"""
+    return _ccllib.get_tracer_fa(cosmo, clt, a, func_code, status)
+
+def get_tracer_fas(cosmo, clt, na, a, fa, func_code, status):
+    """get_tracer_fas(cosmology cosmo, CCL_ClTracer clt, int na, double * a, double * fa, int func_code, int * status) -> int"""
+    return _ccllib.get_tracer_fas(cosmo, clt, na, a, fa, func_code, status)
+
 def angular_cl(cosmo, l, clt1, clt2, status):
     """angular_cl(cosmology cosmo, int l, CCL_ClTracer clt1, CCL_ClTracer clt2, int * status) -> double"""
     return _ccllib.angular_cl(cosmo, l, clt1, clt2, status)
@@ -878,6 +907,10 @@ def cl_tracer_new_wrapper(cosmo, tracer_type, has_rsd, has_magnification, has_in
 def angular_cl_vec(cosmo, clt1, clt2, ell, output, status):
     """angular_cl_vec(cosmology cosmo, CCL_ClTracer clt1, CCL_ClTracer clt2, double * ell, double * output, int * status)"""
     return _ccllib.angular_cl_vec(cosmo, clt1, clt2, ell, output, status)
+
+def clt_fa_vec(cosmo, clt, func_code, aarr, output, status):
+    """clt_fa_vec(cosmology cosmo, CCL_ClTracer clt, int func_code, double * aarr, double * output, int * status)"""
+    return _ccllib.clt_fa_vec(cosmo, clt, func_code, aarr, output, status)
 
 _ccllib.GSL_CONST_MKSA_SPEED_OF_LIGHT_swigconstant(_ccllib)
 GSL_CONST_MKSA_SPEED_OF_LIGHT = _ccllib.GSL_CONST_MKSA_SPEED_OF_LIGHT
