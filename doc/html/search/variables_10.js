@@ -2,7 +2,6 @@ var searchData=
 [
   ['setup',['setup',['../structctest.html#a5d7683856aab7a122f28bf4c56244bc1',1,'ctest']]],
   ['sigma_5f8',['sigma_8',['../structccl__parameters.html#a9b594373cc14c7b8c76ddda112df6516',1,'ccl_parameters']]],
-  ['sigma_5fz',['sigma_z',['../structuser__func__params.html#a1bd5589f9bb4d8b34d28398c0622deb7',1,'user_func_params']]],
   ['skip',['skip',['../structctest.html#aa370fc3a1ca838de6bf4e3fa3a12d605',1,'ctest']]],
   ['spl_5fba',['spl_ba',['../struct_c_c_l___cl_tracer.html#a6465ff884a3b359995b014a9165738cf',1,'CCL_ClTracer']]],
   ['spl_5fbz',['spl_bz',['../struct_c_c_l___cl_tracer.html#a8efd94b42acc38fdbde6006537232cd5',1,'CCL_ClTracer']]],
@@ -15,6 +14,6 @@ var searchData=
   ['spline',['spline',['../struct_spl_par.html#ae8f88172b1b5531e97049f3996734d61',1,'SplPar']]],
   ['sqrtk',['sqrtk',['../structccl__parameters.html#a9fecdefe2eef4ffa7ac866d9e64497cf',1,'ccl_parameters']]],
   ['ssname',['ssname',['../structctest.html#a22c00ac32556a836ad36a1c6e884031d',1,'ctest']]],
-  ['status',['status',['../structchipar.html#a035d74baeb5c41b4835481658cf1fd12',1,'chipar::status()'],['../struct_fpar.html#adce795808a394aa0004e3d6c9e03d041',1,'Fpar::status()'],['../struct_int_lens_par.html#a618ab6203724fe7e8a5dc83bd8955b37',1,'IntLensPar::status()'],['../struct_int_mag_par.html#a95e214626b6a1bc822ede29ce1b8743d',1,'IntMagPar::status()'],['../struct_int_cl_par.html#abc2ccba43ee24664930d4471badeba83',1,'IntClPar::status()'],['../structpz__params.html#aca361dcabadd103eb8d5cb9bac0745c5',1,'pz_params::status()'],['../structnorm__params.html#af115f32a22df005a5723e2d7c905de51',1,'norm_params::status()'],['../struct_sigma_r__pars.html#ac844a04f7d5a92c27afdb351d7055dd3',1,'SigmaR_pars::status()'],['../structccl__cosmology.html#a6de30ecc78151cd63260547adc344e78',1,'ccl_cosmology::status()']]],
+  ['status',['status',['../structchipar.html#a035d74baeb5c41b4835481658cf1fd12',1,'chipar::status()'],['../struct_fpar.html#adce795808a394aa0004e3d6c9e03d041',1,'Fpar::status()'],['../struct_int_lens_par.html#a618ab6203724fe7e8a5dc83bd8955b37',1,'IntLensPar::status()'],['../struct_int_mag_par.html#a95e214626b6a1bc822ede29ce1b8743d',1,'IntMagPar::status()'],['../struct_int_cl_par.html#abc2ccba43ee24664930d4471badeba83',1,'IntClPar::status()'],['../structpz__params.html#aca361dcabadd103eb8d5cb9bac0745c5',1,'pz_params::status()'],['../structnorm__params.html#af115f32a22df005a5723e2d7c905de51',1,'norm_params::status()'],['../struct_om_nuh2__params.html#a8854997915f148ca04a9c9ed9646979a',1,'OmNuh2_params::status()'],['../struct_sigma_r__pars.html#ac844a04f7d5a92c27afdb351d7055dd3',1,'SigmaR_pars::status()'],['../structccl__cosmology.html#a6de30ecc78151cd63260547adc344e78',1,'ccl_cosmology::status()']]],
   ['status_5fmessage',['status_message',['../structccl__cosmology.html#ade6f0b525e23bd7c719a46fe0e083a5e',1,'ccl_cosmology']]]
 ];

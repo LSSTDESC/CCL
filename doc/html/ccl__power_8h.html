@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.11"/>
-<title>CCL: /home/alonso/Downloads/Clean/CCL/include/ccl_power.h File Reference</title>
+<title>CCL: ccl_power.h File Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -98,6 +98,8 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
+<tr class="memitem:a250e3f7272c9756f14a7ca3c3ad05cab"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__power_8h.html#a250e3f7272c9756f14a7ca3c3ad05cab">ccl_cosmology_write_power_class_z</a> (char *filename, <a class="el" href="structccl__cosmology.html">ccl_cosmology</a> *cosmo, double z, int *status)</td></tr>
+<tr class="separator:a250e3f7272c9756f14a7ca3c3ad05cab"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a969ae77b55820713b49bc55eab9eca23"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__power_8h.html#a969ae77b55820713b49bc55eab9eca23">ccl_bcm_model_fkz</a> (<a class="el" href="structccl__cosmology.html">ccl_cosmology</a> *cosmo, double k, double a, int *status)</td></tr>
 <tr class="separator:a969ae77b55820713b49bc55eab9eca23"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4a4453e1433b557d74fd1936366fb6da"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__power_8h.html#a4a4453e1433b557d74fd1936366fb6da">ccl_linear_matter_power</a> (<a class="el" href="structccl__cosmology.html">ccl_cosmology</a> *cosmo, double k, double a, int *status)</td></tr>
@@ -155,6 +157,53 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>f(k,a). </dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="a250e3f7272c9756f14a7ca3c3ad05cab"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ccl_cosmology_write_power_class_z </td>
+          <td>(</td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>filename</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structccl__cosmology.html">ccl_cosmology</a> *&#160;</td>
+          <td class="paramname"><em>cosmo</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>z</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>status</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>CLASS power spectrum without splines. Write k, P(k,z) [1/Mpc, Mpc^3] for given cosmology at the k values used within CLASS (spectra.ln_k[]), using the method specified in config.matter_power_spectrum_method. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">filename</td><td>File into which k, P(k,a) will be written </td></tr>
+    <tr><td class="paramname">cosmo</td><td>Cosmology parameters and configurations </td></tr>
+    <tr><td class="paramname">z</td><td>Redshift at which the power spectrum is evaluated </td></tr>
+    <tr><td class="paramname">status</td><td>Status flag. 0 if there are no errors, nonzero otherwise. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
