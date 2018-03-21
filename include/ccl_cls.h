@@ -11,6 +11,13 @@ extern "C" {
 #define CL_TRACER_NC 1 //Tracer type 1: number counts
 #define CL_TRACER_WL 2 //Tracer type 2: weak lensing
 #define CL_TRACER_CL 3 //Tracer type 2: CMB lensing
+#define CCL_CLT_NZ 201 //Redshift distribution
+#define CCL_CLT_BZ 202 //Clustering bias
+#define CCL_CLT_SZ 203 //Magnification bias
+#define CCL_CLT_RF 204 //Aligned fraction
+#define CCL_CLT_BA 205 //Alignment bias
+#define CCL_CLT_WL 206 //Weak lensing window function
+#define CCL_CLT_WM 207 //Magnification window function
 
 /**
  * ClTracer structure, used to contain everything
@@ -163,6 +170,38 @@ CCL_ClTracer *ccl_cl_tracer_cmblens_new(ccl_cosmology *cosmo,double z_source,int
  */
 void ccl_cl_tracer_free(CCL_ClTracer *clt);
 
+/**
+ * Method to return certain redshift or distance-dependent internal quantities for a given tracer.
+ * @param cosmo Cosmological parameters
+ * @param clt ClTracer object
+ * @param a scale factor at which the function is to be evaluated
+ * @param func_code integer defining which internal function to evaluate. Choose between:
+ * CCL_CLT_NZ (redshift distribution), CCL_CLT_BZ (clustering bias), CCL_CLT_SZ (magnification bias),
+ * CCL_CLT_RF (aligned fraction), CCL_CLT_BA (alignment bias),
+ * CCL_CLT_WL (weak lensing window function), CCL_CLT_WM (magnification window function)
+ * @param status Status flag. 0 if there are no errors, nonzero otherwise.
+ * For specific cases see documentation for ccl_error.c
+ * @return interpolated value of the requested function
+ */
+double ccl_get_tracer_fa(ccl_cosmology *cosmo,CCL_ClTracer *clt,double a,int func_code,int *status);
+
+/**
+ * Method to return certain redshift or distance-dependent internal quantities for a given tracer.
+ * @param cosmo Cosmological parameters
+ * @param clt ClTracer object
+ * @param na number of points at which the function will be evaluated
+ * @param a na values of the scale factor at which the function is to be evaluated
+ * @param fa output array with na values that will store the interpolated function values
+ * @param func_code integer defining which internal function to evaluate. Choose between:
+ * CCL_CLT_NZ (redshift distribution), CCL_CLT_BZ (clustering bias), CCL_CLT_SZ (magnification bias),
+ * CCL_CLT_RF (aligned fraction), CCL_CLT_BA (alignment bias),
+ * CCL_CLT_WL (weak lensing window function), CCL_CLT_WM (magnification window function)
+ * @param status Status flag. 0 if there are no errors, nonzero otherwise.
+ * For specific cases see documentation for ccl_error.c
+ * @return void
+ */
+int ccl_get_tracer_fas(ccl_cosmology *cosmo,CCL_ClTracer *clt,int na,double *a,double *fa,
+		       int func_code,int *status);
 
 /**
  * Computes limber power spectrum for two different tracers

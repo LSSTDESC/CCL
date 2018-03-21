@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['user_5fpz_5fprobability',['user_pz_probability',['../ccl__example__photoz_8c.html#acbfb995df7cb5b0797ab5859c85abc78',1,'user_pz_probability(double z_ph, double z_s, void *user_par, int *status):&#160;ccl_example_photoz.c'],['../ccl__sample__run_8c.html#acbfb995df7cb5b0797ab5859c85abc78',1,'user_pz_probability(double z_ph, double z_s, void *user_par, int *status):&#160;ccl_sample_run.c']]]
+  ['write_5fpk_5fclass',['write_Pk_CLASS',['../write___c_l_a_s_s__benchmark_8c.html#a8fc0e38dc286056a32d108eff0432222',1,'write_CLASS_benchmark.c']]]
 ];

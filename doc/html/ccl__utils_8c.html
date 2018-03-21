@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.11"/>
-<title>CCL: /home/alonso/Downloads/Clean/CCL/src/ccl_utils.c File Reference</title>
+<title>CCL: ccl_utils.c File Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -104,6 +104,8 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 Functions</h2></td></tr>
 <tr class="memitem:aa10bf558879f2e45f03c8487701db157"><td class="memItemLeft" align="right" valign="top">double *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__utils_8c.html#aa10bf558879f2e45f03c8487701db157">ccl_linear_spacing</a> (double xmin, double xmax, int N)</td></tr>
 <tr class="separator:aa10bf558879f2e45f03c8487701db157"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abd59f811635900d074d7ea34d24bcbdd"><td class="memItemLeft" align="right" valign="top">double *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__utils_8c.html#abd59f811635900d074d7ea34d24bcbdd">ccl_linlog_spacing</a> (double xminlog, double xmin, double xmax, int Nlog, int Nlin)</td></tr>
+<tr class="separator:abd59f811635900d074d7ea34d24bcbdd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a02fea5a1bfc664b0f5f38c0331579e05"><td class="memItemLeft" align="right" valign="top">double *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__utils_8c.html#a02fea5a1bfc664b0f5f38c0331579e05">ccl_log_spacing</a> (double xmin, double xmax, int N)</td></tr>
 <tr class="separator:a02fea5a1bfc664b0f5f38c0331579e05"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae1ad6daadfafe5d994c3ffa6a84caca5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_spl_par.html">SplPar</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__utils_8c.html#ae1ad6daadfafe5d994c3ffa6a84caca5">ccl_spline_init</a> (int n, double *x, double *y, double y0, double yf)</td></tr>
@@ -152,6 +154,61 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>x, bin edges in range [xmin, xmax] </dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="abd59f811635900d074d7ea34d24bcbdd"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double* ccl_linlog_spacing </td>
+          <td>(</td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>xminlog</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>xmin</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>xmax</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>Nlin</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>Nlog</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Compute bin edges of N-1 logarithmically and then linearly spaced bins on the interval [xmin,xmax] </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">xminlog</td><td>minimum value of spacing </td></tr>
+    <tr><td class="paramname">xmin</td><td>value when logarithmical ends and linear spacing begins </td></tr>
+    <tr><td class="paramname">xmax</td><td>maximum value of spacing </td></tr>
+    <tr><td class="paramname">Nlin</td><td>number of linear bins plus one (number of bin edges) </td></tr>
+    <tr><td class="paramname">Nlog</td><td>number of logarithmic bins plus one (number of bin edges) </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>x, bin edges in range [xminlog, xmax] </dd></dl>
 
 </div>
 </div>

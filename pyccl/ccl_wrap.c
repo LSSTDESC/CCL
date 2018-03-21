@@ -4155,6 +4155,13 @@ void angular_cl_vec(ccl_cosmology * cosmo,
     }
 }
 
+void clt_fa_vec(ccl_cosmology *cosmo,CCL_ClTracer *clt,int func_code,
+		double *aarr,int na,double *output,int nout,int *status)
+{
+  assert(nout==na);
+  ccl_get_tracer_fas(cosmo,clt,na,aarr,output,func_code,status);
+}
+ 
 
 
 
@@ -14326,6 +14333,83 @@ SWIGINTERN PyObject *CL_TRACER_CL_swigconstant(PyObject *SWIGUNUSEDPARM(self), P
 }
 
 
+SWIGINTERN PyObject *CCL_CLT_NZ_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *module;
+  PyObject *d;
+  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
+  d = PyModule_GetDict(module);
+  if (!d) return NULL;
+  SWIG_Python_SetConstant(d, "CCL_CLT_NZ",SWIG_From_int((int)(201)));
+  return SWIG_Py_Void();
+}
+
+
+SWIGINTERN PyObject *CCL_CLT_BZ_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *module;
+  PyObject *d;
+  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
+  d = PyModule_GetDict(module);
+  if (!d) return NULL;
+  SWIG_Python_SetConstant(d, "CCL_CLT_BZ",SWIG_From_int((int)(202)));
+  return SWIG_Py_Void();
+}
+
+
+SWIGINTERN PyObject *CCL_CLT_SZ_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *module;
+  PyObject *d;
+  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
+  d = PyModule_GetDict(module);
+  if (!d) return NULL;
+  SWIG_Python_SetConstant(d, "CCL_CLT_SZ",SWIG_From_int((int)(203)));
+  return SWIG_Py_Void();
+}
+
+
+SWIGINTERN PyObject *CCL_CLT_RF_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *module;
+  PyObject *d;
+  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
+  d = PyModule_GetDict(module);
+  if (!d) return NULL;
+  SWIG_Python_SetConstant(d, "CCL_CLT_RF",SWIG_From_int((int)(204)));
+  return SWIG_Py_Void();
+}
+
+
+SWIGINTERN PyObject *CCL_CLT_BA_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *module;
+  PyObject *d;
+  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
+  d = PyModule_GetDict(module);
+  if (!d) return NULL;
+  SWIG_Python_SetConstant(d, "CCL_CLT_BA",SWIG_From_int((int)(205)));
+  return SWIG_Py_Void();
+}
+
+
+SWIGINTERN PyObject *CCL_CLT_WL_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *module;
+  PyObject *d;
+  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
+  d = PyModule_GetDict(module);
+  if (!d) return NULL;
+  SWIG_Python_SetConstant(d, "CCL_CLT_WL",SWIG_From_int((int)(206)));
+  return SWIG_Py_Void();
+}
+
+
+SWIGINTERN PyObject *CCL_CLT_WM_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *module;
+  PyObject *d;
+  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
+  d = PyModule_GetDict(module);
+  if (!d) return NULL;
+  SWIG_Python_SetConstant(d, "CCL_CLT_WM",SWIG_From_int((int)(207)));
+  return SWIG_Py_Void();
+}
+
+
 SWIGINTERN PyObject *_wrap_CCL_ClTracer_tracer_type_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   CCL_ClTracer *arg1 = (CCL_ClTracer *) 0 ;
@@ -16035,6 +16119,170 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_get_tracer_fa(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  ccl_cosmology *arg1 = (ccl_cosmology *) 0 ;
+  CCL_ClTracer *arg2 = (CCL_ClTracer *) 0 ;
+  double arg3 ;
+  int arg4 ;
+  int *arg5 = (int *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  double val3 ;
+  int ecode3 = 0 ;
+  int val4 ;
+  int ecode4 = 0 ;
+  int temp5 ;
+  int res5 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  PyObject * obj3 = 0 ;
+  PyObject * obj4 = 0 ;
+  double result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOOOO:get_tracer_fa",&obj0,&obj1,&obj2,&obj3,&obj4)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_cosmology, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "get_tracer_fa" "', argument " "1"" of type '" "ccl_cosmology *""'"); 
+  }
+  arg1 = (ccl_cosmology *)(argp1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_CCL_ClTracer, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "get_tracer_fa" "', argument " "2"" of type '" "CCL_ClTracer *""'"); 
+  }
+  arg2 = (CCL_ClTracer *)(argp2);
+  ecode3 = SWIG_AsVal_double(obj2, &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "get_tracer_fa" "', argument " "3"" of type '" "double""'");
+  } 
+  arg3 = (double)(val3);
+  ecode4 = SWIG_AsVal_int(obj3, &val4);
+  if (!SWIG_IsOK(ecode4)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "get_tracer_fa" "', argument " "4"" of type '" "int""'");
+  } 
+  arg4 = (int)(val4);
+  if (!(SWIG_IsOK((res5 = SWIG_ConvertPtr(obj4,SWIG_as_voidptrptr(&arg5),SWIGTYPE_p_int,0))))) {
+    int val; 
+    int ecode = SWIG_AsVal_int(obj4, &val);
+    if (!SWIG_IsOK(ecode)) {
+      SWIG_exception_fail(SWIG_ArgError(ecode), "in method '" "get_tracer_fa" "', argument " "5"" of type '" "int""'");
+    }
+    temp5 = (int)(val);
+    arg5 = &temp5;
+    res5 = SWIG_AddTmpMask(ecode);
+  }
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double)ccl_get_tracer_fa(arg1,arg2,arg3,arg4,arg5);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double((double)(result));
+  if (SWIG_IsTmpObj(res5)) {
+    resultobj = SWIG_Python_AppendOutput(resultobj, SWIG_From_int((*arg5)));
+  } else {
+    int new_flags = SWIG_IsNewObj(res5) ? (SWIG_POINTER_OWN |  0 ) :  0 ;
+    resultobj = SWIG_Python_AppendOutput(resultobj, SWIG_NewPointerObj((void*)(arg5), SWIGTYPE_p_int, new_flags));
+  }
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_get_tracer_fas(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  ccl_cosmology *arg1 = (ccl_cosmology *) 0 ;
+  CCL_ClTracer *arg2 = (CCL_ClTracer *) 0 ;
+  int arg3 ;
+  double *arg4 = (double *) 0 ;
+  double *arg5 = (double *) 0 ;
+  int arg6 ;
+  int *arg7 = (int *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  int val3 ;
+  int ecode3 = 0 ;
+  void *argp4 = 0 ;
+  int res4 = 0 ;
+  void *argp5 = 0 ;
+  int res5 = 0 ;
+  int val6 ;
+  int ecode6 = 0 ;
+  int temp7 ;
+  int res7 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  PyObject * obj3 = 0 ;
+  PyObject * obj4 = 0 ;
+  PyObject * obj5 = 0 ;
+  PyObject * obj6 = 0 ;
+  int result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOOOOOO:get_tracer_fas",&obj0,&obj1,&obj2,&obj3,&obj4,&obj5,&obj6)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_cosmology, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "get_tracer_fas" "', argument " "1"" of type '" "ccl_cosmology *""'"); 
+  }
+  arg1 = (ccl_cosmology *)(argp1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_CCL_ClTracer, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "get_tracer_fas" "', argument " "2"" of type '" "CCL_ClTracer *""'"); 
+  }
+  arg2 = (CCL_ClTracer *)(argp2);
+  ecode3 = SWIG_AsVal_int(obj2, &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "get_tracer_fas" "', argument " "3"" of type '" "int""'");
+  } 
+  arg3 = (int)(val3);
+  res4 = SWIG_ConvertPtr(obj3, &argp4,SWIGTYPE_p_double, 0 |  0 );
+  if (!SWIG_IsOK(res4)) {
+    SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "get_tracer_fas" "', argument " "4"" of type '" "double *""'"); 
+  }
+  arg4 = (double *)(argp4);
+  res5 = SWIG_ConvertPtr(obj4, &argp5,SWIGTYPE_p_double, 0 |  0 );
+  if (!SWIG_IsOK(res5)) {
+    SWIG_exception_fail(SWIG_ArgError(res5), "in method '" "get_tracer_fas" "', argument " "5"" of type '" "double *""'"); 
+  }
+  arg5 = (double *)(argp5);
+  ecode6 = SWIG_AsVal_int(obj5, &val6);
+  if (!SWIG_IsOK(ecode6)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode6), "in method '" "get_tracer_fas" "', argument " "6"" of type '" "int""'");
+  } 
+  arg6 = (int)(val6);
+  if (!(SWIG_IsOK((res7 = SWIG_ConvertPtr(obj6,SWIG_as_voidptrptr(&arg7),SWIGTYPE_p_int,0))))) {
+    int val; 
+    int ecode = SWIG_AsVal_int(obj6, &val);
+    if (!SWIG_IsOK(ecode)) {
+      SWIG_exception_fail(SWIG_ArgError(ecode), "in method '" "get_tracer_fas" "', argument " "7"" of type '" "int""'");
+    }
+    temp7 = (int)(val);
+    arg7 = &temp7;
+    res7 = SWIG_AddTmpMask(ecode);
+  }
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (int)ccl_get_tracer_fas(arg1,arg2,arg3,arg4,arg5,arg6,arg7);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_int((int)(result));
+  if (SWIG_IsTmpObj(res7)) {
+    resultobj = SWIG_Python_AppendOutput(resultobj, SWIG_From_int((*arg7)));
+  } else {
+    int new_flags = SWIG_IsNewObj(res7) ? (SWIG_POINTER_OWN |  0 ) :  0 ;
+    resultobj = SWIG_Python_AppendOutput(resultobj, SWIG_NewPointerObj((void*)(arg7), SWIGTYPE_p_int, new_flags));
+  }
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_angular_cl(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   ccl_cosmology *arg1 = (ccl_cosmology *) 0 ;
@@ -16574,6 +16822,121 @@ SWIGINTERN PyObject *_wrap_angular_cl_vec(PyObject *SWIGUNUSEDPARM(self), PyObje
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
     angular_cl_vec(arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    resultobj = SWIG_Python_AppendOutput(resultobj,(PyObject*)array6);
+  }
+  if (SWIG_IsTmpObj(res8)) {
+    resultobj = SWIG_Python_AppendOutput(resultobj, SWIG_From_int((*arg8)));
+  } else {
+    int new_flags = SWIG_IsNewObj(res8) ? (SWIG_POINTER_OWN |  0 ) :  0 ;
+    resultobj = SWIG_Python_AppendOutput(resultobj, SWIG_NewPointerObj((void*)(arg8), SWIGTYPE_p_int, new_flags));
+  }
+  {
+    if (is_new_object4 && array4)
+    {
+      Py_DECREF(array4); 
+    }
+  }
+  return resultobj;
+fail:
+  {
+    if (is_new_object4 && array4)
+    {
+      Py_DECREF(array4); 
+    }
+  }
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_clt_fa_vec(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  ccl_cosmology *arg1 = (ccl_cosmology *) 0 ;
+  CCL_ClTracer *arg2 = (CCL_ClTracer *) 0 ;
+  int arg3 ;
+  double *arg4 = (double *) 0 ;
+  int arg5 ;
+  double *arg6 = (double *) 0 ;
+  int arg7 ;
+  int *arg8 = (int *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  int val3 ;
+  int ecode3 = 0 ;
+  PyArrayObject *array4 = NULL ;
+  int is_new_object4 = 0 ;
+  PyObject *array6 = NULL ;
+  int temp8 ;
+  int res8 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  PyObject * obj3 = 0 ;
+  PyObject * obj4 = 0 ;
+  PyObject * obj5 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOOOOO:clt_fa_vec",&obj0,&obj1,&obj2,&obj3,&obj4,&obj5)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_cosmology, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "clt_fa_vec" "', argument " "1"" of type '" "ccl_cosmology *""'"); 
+  }
+  arg1 = (ccl_cosmology *)(argp1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_CCL_ClTracer, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "clt_fa_vec" "', argument " "2"" of type '" "CCL_ClTracer *""'"); 
+  }
+  arg2 = (CCL_ClTracer *)(argp2);
+  ecode3 = SWIG_AsVal_int(obj2, &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "clt_fa_vec" "', argument " "3"" of type '" "int""'");
+  } 
+  arg3 = (int)(val3);
+  {
+    npy_intp size[1] = {
+      -1 
+    };
+    array4 = obj_to_array_contiguous_allow_conversion(obj3,
+      NPY_DOUBLE,
+      &is_new_object4);
+    if (!array4 || !require_dimensions(array4, 1) ||
+      !require_size(array4, size, 1)) SWIG_fail;
+    arg4 = (double*) array_data(array4);
+    arg5 = (int) array_size(array4,0);
+  }
+  {
+    npy_intp dims[1];
+    if (!PyInt_Check(obj4))
+    {
+      const char* typestring = pytype_string(obj4);
+      PyErr_Format(PyExc_TypeError,
+        "Int dimension expected.  '%s' given.",
+        typestring);
+      SWIG_fail;
+    }
+    arg7 = (int) PyInt_AsLong(obj4);
+    dims[0] = (npy_intp) arg7;
+    array6 = PyArray_SimpleNew(1, dims, NPY_DOUBLE);
+    if (!array6) SWIG_fail;
+    arg6 = (double*) array_data(array6);
+  }
+  if (!(SWIG_IsOK((res8 = SWIG_ConvertPtr(obj5,SWIG_as_voidptrptr(&arg8),SWIGTYPE_p_int,0))))) {
+    int val; 
+    int ecode = SWIG_AsVal_int(obj5, &val);
+    if (!SWIG_IsOK(ecode)) {
+      SWIG_exception_fail(SWIG_ArgError(ecode), "in method '" "clt_fa_vec" "', argument " "8"" of type '" "int""'");
+    }
+    temp8 = (int)(val);
+    arg8 = &temp8;
+    res8 = SWIG_AddTmpMask(ecode);
+  }
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    clt_fa_vec(arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8);
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
   resultobj = SWIG_Py_Void();
@@ -21132,6 +21495,13 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"CL_TRACER_NC_swigconstant", CL_TRACER_NC_swigconstant, METH_VARARGS, NULL},
 	 { (char *)"CL_TRACER_WL_swigconstant", CL_TRACER_WL_swigconstant, METH_VARARGS, NULL},
 	 { (char *)"CL_TRACER_CL_swigconstant", CL_TRACER_CL_swigconstant, METH_VARARGS, NULL},
+	 { (char *)"CCL_CLT_NZ_swigconstant", CCL_CLT_NZ_swigconstant, METH_VARARGS, NULL},
+	 { (char *)"CCL_CLT_BZ_swigconstant", CCL_CLT_BZ_swigconstant, METH_VARARGS, NULL},
+	 { (char *)"CCL_CLT_SZ_swigconstant", CCL_CLT_SZ_swigconstant, METH_VARARGS, NULL},
+	 { (char *)"CCL_CLT_RF_swigconstant", CCL_CLT_RF_swigconstant, METH_VARARGS, NULL},
+	 { (char *)"CCL_CLT_BA_swigconstant", CCL_CLT_BA_swigconstant, METH_VARARGS, NULL},
+	 { (char *)"CCL_CLT_WL_swigconstant", CCL_CLT_WL_swigconstant, METH_VARARGS, NULL},
+	 { (char *)"CCL_CLT_WM_swigconstant", CCL_CLT_WM_swigconstant, METH_VARARGS, NULL},
 	 { (char *)"CCL_ClTracer_tracer_type_set", _wrap_CCL_ClTracer_tracer_type_set, METH_VARARGS, (char *)"CCL_ClTracer_tracer_type_set(CCL_ClTracer self, int tracer_type)"},
 	 { (char *)"CCL_ClTracer_tracer_type_get", _wrap_CCL_ClTracer_tracer_type_get, METH_VARARGS, (char *)"CCL_ClTracer_tracer_type_get(CCL_ClTracer self) -> int"},
 	 { (char *)"CCL_ClTracer_prefac_lensing_set", _wrap_CCL_ClTracer_prefac_lensing_set, METH_VARARGS, (char *)"CCL_ClTracer_prefac_lensing_set(CCL_ClTracer self, double prefac_lensing)"},
@@ -21172,9 +21542,12 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"cl_tracer_lensing_simple_new", _wrap_cl_tracer_lensing_simple_new, METH_VARARGS, (char *)"cl_tracer_lensing_simple_new(cosmology cosmo, int nz_n, double * z_n, double * n, int * status) -> CCL_ClTracer"},
 	 { (char *)"cl_tracer_cmblens_new", _wrap_cl_tracer_cmblens_new, METH_VARARGS, (char *)"cl_tracer_cmblens_new(cosmology cosmo, double z_source, int * status) -> CCL_ClTracer"},
 	 { (char *)"cl_tracer_free", _wrap_cl_tracer_free, METH_VARARGS, (char *)"cl_tracer_free(CCL_ClTracer clt)"},
+	 { (char *)"get_tracer_fa", _wrap_get_tracer_fa, METH_VARARGS, (char *)"get_tracer_fa(cosmology cosmo, CCL_ClTracer clt, double a, int func_code, int * status) -> double"},
+	 { (char *)"get_tracer_fas", _wrap_get_tracer_fas, METH_VARARGS, (char *)"get_tracer_fas(cosmology cosmo, CCL_ClTracer clt, int na, double * a, double * fa, int func_code, int * status) -> int"},
 	 { (char *)"angular_cl", _wrap_angular_cl, METH_VARARGS, (char *)"angular_cl(cosmology cosmo, int l, CCL_ClTracer clt1, CCL_ClTracer clt2, int * status) -> double"},
 	 { (char *)"cl_tracer_new_wrapper", _wrap_cl_tracer_new_wrapper, METH_VARARGS, (char *)"cl_tracer_new_wrapper(cosmology cosmo, int tracer_type, int has_rsd, int has_magnification, int has_intrinsic_alignment, int nz_n, int nn, int nz_b, int nb, int nz_s, int ns, int nz_ba, int nba, int nz_rf, int nrf, double z_source, int * status) -> CCL_ClTracer"},
 	 { (char *)"angular_cl_vec", _wrap_angular_cl_vec, METH_VARARGS, (char *)"angular_cl_vec(cosmology cosmo, CCL_ClTracer clt1, CCL_ClTracer clt2, double * ell, double * output, int * status)"},
+	 { (char *)"clt_fa_vec", _wrap_clt_fa_vec, METH_VARARGS, (char *)"clt_fa_vec(cosmology cosmo, CCL_ClTracer clt, int func_code, double * aarr, double * output, int * status)"},
 	 { (char *)"GSL_CONST_MKSA_SPEED_OF_LIGHT_swigconstant", GSL_CONST_MKSA_SPEED_OF_LIGHT_swigconstant, METH_VARARGS, NULL},
 	 { (char *)"GSL_CONST_MKSA_GRAVITATIONAL_CONSTANT_swigconstant", GSL_CONST_MKSA_GRAVITATIONAL_CONSTANT_swigconstant, METH_VARARGS, NULL},
 	 { (char *)"GSL_CONST_MKSA_PLANCKS_CONSTANT_H_swigconstant", GSL_CONST_MKSA_PLANCKS_CONSTANT_H_swigconstant, METH_VARARGS, NULL},

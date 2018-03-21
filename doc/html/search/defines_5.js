@@ -4,6 +4,7 @@ var searchData=
   ['ell_5fmax_5fcl',['ELL_MAX_CL',['../ccl__corr__sample_8c.html#a66f60491e1fee44eff72f091b29838ad',1,'ELL_MAX_CL():&#160;ccl_corr_sample.c'],['../ccl__test__correlation_8c.html#a66f60491e1fee44eff72f091b29838ad',1,'ELL_MAX_CL():&#160;ccl_test_correlation.c']]],
   ['ell_5fmax_5ffftlog',['ELL_MAX_FFTLOG',['../ccl__correlation_8c.html#a09a9cdf08131dd0efb8dcff8a4116369',1,'ccl_correlation.c']]],
   ['ell_5fmin_5ffftlog',['ELL_MIN_FFTLOG',['../ccl__correlation_8c.html#a13f719656c246d9d8b16dd0831fd16c6',1,'ccl_correlation.c']]],
+  ['emu_5ftolerance',['EMU_TOLERANCE',['../ccl__test__emu_8c.html#a191e8bd5f83183e0869d865635e1ab24',1,'EMU_TOLERANCE():&#160;ccl_test_emu.c'],['../ccl__test__emu__nu_8c.html#a191e8bd5f83183e0869d865635e1ab24',1,'EMU_TOLERANCE():&#160;ccl_test_emu_nu.c']]],
   ['eps_5fscalefac_5fgrowth',['EPS_SCALEFAC_GROWTH',['../ccl__constants_8h.html#a1e3ea0f33c446bf5cf97ca4392f0f51d',1,'ccl_constants.h']]],
   ['epsrel_5fcorr_5ffunc',['EPSREL_CORR_FUNC',['../ccl__constants_8h.html#a88e5457116f1bce836557c4452d5bdc4',1,'ccl_constants.h']]],
   ['epsrel_5fdist',['EPSREL_DIST',['../ccl__constants_8h.html#a7337ec7b9554f2b5f033b0686a948cfd',1,'ccl_constants.h']]],

@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.11"/>
-<title>CCL: /home/alonso/Downloads/Clean/CCL/src/ccl_cls.c File Reference</title>
+<title>CCL: ccl_cls.c File Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -131,6 +131,10 @@ Functions</h2></td></tr>
 <tr class="separator:ac843896d596b83f28615e8d4b402845f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab24d8b8c8bbd92fdfef3751f22b6a8c6"><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_c_c_l___cl_tracer.html">CCL_ClTracer</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__cls_8c.html#ab24d8b8c8bbd92fdfef3751f22b6a8c6">ccl_cl_tracer_lensing_simple_new</a> (<a class="el" href="structccl__cosmology.html">ccl_cosmology</a> *cosmo, int nz_n, double *z_n, double *n, int *status)</td></tr>
 <tr class="separator:ab24d8b8c8bbd92fdfef3751f22b6a8c6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a22a046fe3b7689a530d02e4706f228c8"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__cls_8c.html#a22a046fe3b7689a530d02e4706f228c8">ccl_get_tracer_fa</a> (<a class="el" href="structccl__cosmology.html">ccl_cosmology</a> *cosmo, <a class="el" href="struct_c_c_l___cl_tracer.html">CCL_ClTracer</a> *clt, double a, int func_code, int *status)</td></tr>
+<tr class="separator:a22a046fe3b7689a530d02e4706f228c8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a80ec8795adef4d6fa35fd0ecae77f6ab"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__cls_8c.html#a80ec8795adef4d6fa35fd0ecae77f6ab">ccl_get_tracer_fas</a> (<a class="el" href="structccl__cosmology.html">ccl_cosmology</a> *cosmo, <a class="el" href="struct_c_c_l___cl_tracer.html">CCL_ClTracer</a> *clt, int na, double *a, double *fa, int func_code, int *status)</td></tr>
+<tr class="separator:a80ec8795adef4d6fa35fd0ecae77f6ab"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a96708d7ec42949f44ac66d15c2b0e9e1"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__cls_8c.html#a96708d7ec42949f44ac66d15c2b0e9e1">ccl_angular_cl</a> (<a class="el" href="structccl__cosmology.html">ccl_cosmology</a> *cosmo, int l, <a class="el" href="struct_c_c_l___cl_tracer.html">CCL_ClTracer</a> *clt1, <a class="el" href="struct_c_c_l___cl_tracer.html">CCL_ClTracer</a> *clt2, int *status)</td></tr>
 <tr class="separator:a96708d7ec42949f44ac66d15c2b0e9e1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
@@ -765,6 +769,130 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd><a class="el" href="struct_c_c_l___cl_tracer.html">CCL_ClTracer</a> object </dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="a22a046fe3b7689a530d02e4706f228c8"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double ccl_get_tracer_fa </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structccl__cosmology.html">ccl_cosmology</a> *&#160;</td>
+          <td class="paramname"><em>cosmo</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="struct_c_c_l___cl_tracer.html">CCL_ClTracer</a> *&#160;</td>
+          <td class="paramname"><em>clt</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>a</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>func_code</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>status</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Method to return certain redshift or distance-dependent internal quantities for a given tracer. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">cosmo</td><td>Cosmological parameters </td></tr>
+    <tr><td class="paramname">clt</td><td>ClTracer object </td></tr>
+    <tr><td class="paramname">a</td><td>scale factor at which the function is to be evaluated </td></tr>
+    <tr><td class="paramname">func_code</td><td>integer defining which internal function to evaluate. Choose between: CCL_CLT_NZ (redshift distribution), CCL_CLT_BZ (clustering bias), CCL_CLT_SZ (magnification bias), CCL_CLT_RF (aligned fraction), CCL_CLT_BA (alignment bias), CCL_CLT_WL (weak lensing window function), CCL_CLT_WM (magnification window function) </td></tr>
+    <tr><td class="paramname">status</td><td>Status flag. 0 if there are no errors, nonzero otherwise. For specific cases see documentation for <a class="el" href="ccl__error_8c.html">ccl_error.c</a> </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>interpolated value of the requested function </dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="a80ec8795adef4d6fa35fd0ecae77f6ab"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int ccl_get_tracer_fas </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structccl__cosmology.html">ccl_cosmology</a> *&#160;</td>
+          <td class="paramname"><em>cosmo</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="struct_c_c_l___cl_tracer.html">CCL_ClTracer</a> *&#160;</td>
+          <td class="paramname"><em>clt</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>na</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *&#160;</td>
+          <td class="paramname"><em>a</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *&#160;</td>
+          <td class="paramname"><em>fa</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>func_code</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>status</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Method to return certain redshift or distance-dependent internal quantities for a given tracer. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">cosmo</td><td>Cosmological parameters </td></tr>
+    <tr><td class="paramname">clt</td><td>ClTracer object </td></tr>
+    <tr><td class="paramname">na</td><td>number of points at which the function will be evaluated </td></tr>
+    <tr><td class="paramname">a</td><td>na values of the scale factor at which the function is to be evaluated </td></tr>
+    <tr><td class="paramname">fa</td><td>output array with na values that will store the interpolated function values </td></tr>
+    <tr><td class="paramname">func_code</td><td>integer defining which internal function to evaluate. Choose between: CCL_CLT_NZ (redshift distribution), CCL_CLT_BZ (clustering bias), CCL_CLT_SZ (magnification bias), CCL_CLT_RF (aligned fraction), CCL_CLT_BA (alignment bias), CCL_CLT_WL (weak lensing window function), CCL_CLT_WM (magnification window function) </td></tr>
+    <tr><td class="paramname">status</td><td>Status flag. 0 if there are no errors, nonzero otherwise. For specific cases see documentation for <a class="el" href="ccl__error_8c.html">ccl_error.c</a> </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>void </dd></dl>
 
 </div>
 </div>
