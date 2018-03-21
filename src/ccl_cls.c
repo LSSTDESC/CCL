@@ -348,7 +348,7 @@ static CCL_ClTracer *cl_tracer_new(ccl_cosmology *cosmo,int tracer_type,
 	return NULL;
       }
       free(x); free(y);
-      
+
       clt->has_intrinsic_alignment=has_intrinsic_alignment;
       if(clt->has_intrinsic_alignment) {
 	clt->spl_rf=ccl_spline_init(nz_rf,z_rf,rf,rf[0],rf[nz_rf-1]);
@@ -554,7 +554,7 @@ static double transfer_mag(int l,double k,ccl_cosmology *cosmo,CCL_ClTracer *clt
   if(chi<=clt->chimax) {
     double a=ccl_scale_factor_of_chi(cosmo,chi,status);
     double wM=ccl_spline_eval(chi,clt->spl_wM);
-    
+
     if(wM<=0)
       return 0;
     else
@@ -575,7 +575,7 @@ static double transfer_wl(int l,double k,ccl_cosmology *cosmo,CCL_ClTracer *clt,
   if(chi<=clt->chimax) {
     double a=ccl_scale_factor_of_chi(cosmo,chi, status);
     double wL=ccl_spline_eval(chi,clt->spl_wL);
-    
+
     if(wL<=0)
       return 0;
     else
@@ -620,7 +620,7 @@ static double transfer_cmblens(int l,double k,ccl_cosmology *cosmo,CCL_ClTracer 
   if(chi<=clt->chimax) {
     double a=ccl_scale_factor_of_chi(cosmo,chi,status);
     double w=1-chi/clt->chi_source;
-    
+
     return clt->prefac_lensing*l*(l+1.)*w/(a*chi*k*k);
   }
 }
@@ -741,6 +741,16 @@ double ccl_angular_cl(ccl_cosmology *cosmo,int l,CCL_ClTracer *clt1,CCL_ClTracer
   F.params=&ipar;
   qagstatus=gsl_integration_qag(&F,lkmin,lkmax,0,1E-4,1000,GSL_INTEG_GAUSS41,w,&result,&eresult);
   gsl_integration_workspace_free(w);
+
+  // Test if a round-off error occured in the evaluation of the integral
+  // If so, try another integration function, more robust but potentially slower
+  if(qagstatus == GSL_EROUND){
+    gsl_integration_cquad_workspace *w_cquad= gsl_integration_cquad_workspace_alloc (1000);
+    size_t nevals=0;
+    qagstatus=gsl_integration_cquad(&F, lkmin,lkmax,0,1E-4, w_cquad, &result,&eresult, &nevals);
+    gsl_integration_cquad_workspace_free (w_cquad);
+  }
+
   if(qagstatus!=GSL_SUCCESS || *ipar.status) {
     // If an error status was already set, don't overwrite it.
     if(*status == 0){
@@ -750,6 +760,6 @@ double ccl_angular_cl(ccl_cosmology *cosmo,int l,CCL_ClTracer *clt1,CCL_ClTracer
     return -1;
   }
   ccl_check_status(cosmo,status);
-
+  qagstatus = GSL_EROUND;
   return M_LN10*result/(l+0.5);
 }
