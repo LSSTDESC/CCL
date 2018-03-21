@@ -368,6 +368,7 @@ where a spherical halo with radius $r_{\Delta}$ has an average density $\bar{\rh
 The halo mass function is defined as
 \begin{equation}
 \frac{dn}{dM}=f(\sigma)\frac{\bar{\rho}_\mathrm{m}}{M}\frac{d\ln{\sigma^{-1}}}{dM},
+\label{eq:halo_mass_function}
 \end{equation}
 where $n$ is the number density of halos of a given mass $M$ associated with the RMS variance of the matter density field $\sigma^2$.
 In CCL calling this function returns the mass function in logarithmic mass bins, $dn/d\log_{10}{M}$, where the input is the halo mass $M$ and scale factor $a$.
@@ -419,17 +420,88 @@ This result is consistent with the work of \citet{Watson2013}, which also finds 
 An important step in many interpretations of the halo model is to have a measure of the bias of dark matter halos, defined as the ratio of the halo power spectrum to the linear dark matter power spectrum,
 \begin{equation}
   b^2(k) = \frac{P_h(k)}{P_{\mathrm{lin}}(k)}.
+  \label{eq:halo_bias}
 \end{equation}
 
 As with measures of the halo mass function, high accuracy cosmological constraints requires the use of numerical simulations to develop fitting functions and emulators. We note that we will define haloes as in the above subsection focusing on the halo mass function. {\tt CCL} currently implements the halo bias fitting function results in \citet{Tinker2010}, though future improvements will likely require the use of emulator methods.
 
-The \citet{Tinker2010} model parameterizes the halo bias in terms of the peak height, $\nu = \delta_c / \sigma(M)$, where $\delta_c$ is the critical density for collapse and is chosen to be $1.686$ for this particular parameterization. We can then parameterize the halo function and halo bias as
+The \citet{Tinker2010} model parameterizes the halo bias in terms of the peak height, $\nu = \delta_c / \sigma(M)$, where $\delta_c$ is the critical density for collapse and is chosen to be $1.686$ for this particular parameterization. We can then parameterize the halo mass function and halo bias as
 \begin{eqnarray}
   b(\nu) &=& 1 - A\frac{\nu^a}{\nu^a + {\delta_c}^a} + B\nu^b+C\nu^c,\\
   f(\nu) &=& \alpha[1+(\beta\nu)^{-2\phi}]\nu^{2\eta}e(-\gamma\nu^2/2).
 \end{eqnarray}
 
 Again, while high {\em numerical} accuracy has been verified, there is a remaining uncertainty. \citet{Tinker2010} found a $\sim6\%$ scatter when determining the halo bias due to differences in simulations alone. In addition, this parameterization does not include a careful exploration of any impact due to changes in the dark energy equation of state. As with the halo mass function, studies will be required to reach accuracy at the percent level for any cosmological predictions. 
+
+\subsection{Halo model}
+\label{sec:halo_model}
+\vol{Alexander Mead}
+
+In this section we review a basic halo-model computation \citep{Seljak2000,Peacock2000,Cooray2002} of the cross-correlation between any two cosmological fields and only requires knowledge of the halo profiles of the field in question. For example, in the case of the matter-density auto spectrum we need only know the halo density profiles. For the galaxy spectrum we require knowledge of the number of, and distribution of, galaxies as a function of halo mass. In this simple form the halo model is approximate and makes the assumption that haloes are \emph{linearly} biased with respect to the \emph{linear} matter field and also assumes that haloes are spherical with properties that are determined solely by the halo mass. It is possible to go beyond these simplified assumptions, and we direct the interested reader to \cite{Cooray2002,Smith2007,Giocoli2010,Smith2011}.
+
+The eventual aim for CCL is to have a halo model that can calculate the auto- and cross-spectra for any cosmological field combinations with parameters that can be taken either from numerical simulations or observational data. Currently we have only implemented the case of the matter-density auto spectrum, but we keep the notation as general as possible in the following:
+
+Consider two 3D cosmological fields $\rho_i$ and $\rho_j$, the cross power spectrum at a given redshift can be written as a sum of a two- and a one-halo term given by
+\begin{equation}
+P_{2\mathrm{H},ij}(k)=P_{\mathrm{lin}}(k)
+\prod_{n=i,j}\left[\int_0^\infty b(M)\frac{\mathrm{d}n}{\mathrm{d}M}W_n(M,k)\;\mathrm{d}M\right]\ ,
+\label{eq:two_halo}
+\end{equation}
+\begin{equation}
+P_{1\mathrm{H},ij}(k)=\int_0^\infty \frac{\mathrm{d}n}{\mathrm{d}M}W_i(M,k)W_j(M,k)\;\mathrm{d}M\ ,
+\label{eq:one_halo}
+\end{equation}
+where $M$ is the halo mass, $\mathrm{d}n/\mathrm{d}M$ is the halo mass function defined in equation~(\ref{eq:halo_mass_function}) and $b(M)$ is the linear halo bias with respect to the linear matter density field, defined as the large-scale limit of equation~(\ref{eq:halo_bias}).
+
+Equations~(\ref{eq:two_halo}) and (\ref{eq:one_halo}) contain the (spherical) Fourier transform of the halo profile, or halo `window function':
+\begin{equation}
+W_i(M,k)=\int_0^\infty4\pi r^2\frac{\sin(kr)}{kr}\rho_{\mathrm{H},i}(M,r)\;\mathrm{d}r\ ,
+\label{eq:window_function}
+\end{equation}
+where $\rho_{\mathrm{H},i}(M,r)$ is the radial profile for the field $i$ in a host halo of mass $M$. For example, if one is interested in matter fields then this would be the halo density profile, if one were interested in galaxies then this would be the number density and distribution of galaxies around a halo of mass $M$.
+
+%The dimensionless mass function, $f(\nu)$, is related to $n(M)$ via
+%\begin{equation}
+%f(\nu)\,\mathrm{d}\nu=\frac{M}{\bar\rho}n(M)\;\mathrm{d}M\ .
+%\label{eq:mass_function}
+%\end{equation}
+%and is written in terms of the mass variable $\nu=\delta_\mathrm{c}/\sigma(M)$: $\delta_\mathrm{c}$ is the critical linear density for halo collapse: $\delta_\mathrm{c}\simeq 1.686$, but with a weak cosmology dependence.  $\sigma(M)$ is the variance in the linear matter field when filtered on a Lagrangian scale $R$ corresponding to mass $M=4\pi R^3/3$:
+%\begin{equation}
+%\sigma^2(R)=\int_0^{\infty}\Delta_{\mathrm{lin}}^2(k)\, T^2(kR)\;\mathrm{d}\ln{k}\ ,
+%\label{eq:variance}
+%\end{equation}
+%with $T$ being the Fourier Transform of a real-space top-hat filter
+%\begin{equation}
+%T(x)=\frac{3}{x^3}(\sin{x}-x\cos{x})\ .
+%\label{eq:top_hat}
+%\end{equation}
+Note that the halo mass function and bias \emph{must} satisfy the following properties for the total power spectrum to have the correct large-scale limit\footnote{Note that achieving these correct limits for some fields is difficult numerically because of the large amount of mass contained in low mass haloes according to most popular mass functions. Special care must be taken with the two-halo integral in the case of matter power spectra.}:
+\begin{equation}
+\frac{1}{\bar\rho_\mathrm{m}}\int_0^\infty M\frac{\mathrm{d}n}{\mathrm{d}M}\;\mathrm{d}M=1\ ,
+\label{eq:mf_normalisation}
+\end{equation}
+\begin{equation}
+\frac{1}{\bar\rho_\mathrm{m}}\int_0^\infty Mb(M)\frac{\mathrm{d}n}{\mathrm{d}M}\;\mathrm{d}M=1\ .
+\label{eq:bias_normalisation}
+\end{equation}
+If one uses a mass function and bias pair that are related via the peak-background split formalism \citep{Mo1996,Sheth2001} the these conditions are automatically satisfied. In words these equations enforce that all matter is associated to a halo and that matter is on average unbiased with respect to itself. In the convention used in CCL the units of $P(k)$ will be exactly the units of $\rho_i\rho_j / \mathrm{Mpc}^3$. The units of the $W_i$ are those of $\rho_i$ multiplied by volume.
+
+For the matter power spectrum we use the halo profiles of \citeauthor*{Navarro1997} (NFW; \citeyear{Navarro1997}):
+\begin{equation}
+\rho_\mathrm{H}(M,r)\propto\frac{1}{r/r_\mathrm{s}(1+r/r_\mathrm{s})^2}\ ,
+\label{eq:NFW_profile}
+\end{equation}
+which is written in terms of a scale radius $r_\mathrm{s}$. The constant of proportionality fixed by the condition that the halo has total mass $M$ when the boundary is set at the virial radius $r_\mathrm{v}$, which is set such that the halo has a fixed density $\Delta_\mathrm{v}$ with respect to the mean
+\begin{equation}
+M=4\pi r_\mathrm{v}^3\Delta_\mathrm{v}\bar\rho\ .
+\label{eq:virial_radius}
+\end{equation}
+Finally, the scale radius is usually expressed in terms of the mass-dependent halo concentration parameter $c(M)=r_\mathrm{v}/r_\mathrm{s}$. We use the simple mass-concentration relation from \cite{Bullock2001}
+\begin{equation}
+c(M)=9\left(\frac{M}{M_*}\right)^{-0.13}\ ,
+\end{equation}
+where $\delta_\mathrm{c}/\sigma(M_*)=1$.
+Note that, in order to be consistent, one should use a value of $\Delta_\mathrm{v}$ and $c(M)$ that is consistent with the halo definition used for the halo mass function and bias.
 
 %-------------------------------------------------------------------------------
 \section{Implementation of high-accuracy cosmological functions}
@@ -921,7 +993,7 @@ It is the primary goal of the \ccl to become the backbone of all cosmological an
 
 The implementation of \ccl in realistic analysis pipelines has already begun: all likelihood module prototypes under development use it as its backbone, and the first of this, corresponding to the cosmological analysis of angular galaxy clustering cross-correlations, will serve as a model for the design of the joint-probes likelihood of the DESC \damonge{TJPCosmo-ers should feel free to strike this whole sentence out and rephrase as necessary!}. This work has allowed us to validate the performance of \ccl in a realistic analysis scenario, verifying its accuracy and efficiency in the context of computationally demanding MCMC runs. In addition to simulated analysis tests, \ccl has also been validated through its use in the analysis of current datasets \damonge{I could include a couple of my papers here, but I don't know if we want to incur in self-citations. Do we know external papers that have used CCL?}
 
-Beyond its usefulness in the DESC, the generality of the design envisioned for \ccl also aims to make it a useful tool for the analysis of other cosmological datasets, as well as for the cross-correlation of different experiments. To this end, and to allow a generic and flexible analysis of the LSST data, further functionality will be added to \ccl. Plans are in place to extend the range of standard and non-standard cosmological models covered by the code. Work is already underway to add a comprehensive implementation of the halo-model calculation of two-point functions \citep{2000MNRAS.318.1144P} with sufficient flexibility to include generic parametrizations of observable halo profiles and mass-observable relations. The current simplified treatment of the galaxy-matter connection for galaxy clustering and intrinsic alignments will be improved by implementing generic perturbation-theory approaches to structure formation \citep{2009JCAP...08..020M,2016JCAP...09..015M}. A more complete implementation of all relevant cross-correlations between large-scale structure observables and other cosmological probes (e.g. CMB integrated Sachs-Wolfe effect \citep{1967ApJ...147...73S} and other secondary anisotropies) will also soon be included.
+Beyond its usefulness in the DESC, the generality of the design envisioned for \ccl also aims to make it a useful tool for the analysis of other cosmological datasets, as well as for the cross-correlation of different experiments. To this end, and to allow a generic and flexible analysis of the LSST data, further functionality will be added to \ccl. Plans are in place to extend the range of standard and non-standard cosmological models covered by the code. Work is already underway to add a comprehensive implementation of the halo-model calculation of two-point functions \citep{Peacock2000} with sufficient flexibility to include generic parametrizations of observable halo profiles and mass-observable relations. The current simplified treatment of the galaxy-matter connection for galaxy clustering and intrinsic alignments will be improved by implementing generic perturbation-theory approaches to structure formation \citep{2009JCAP...08..020M,2016JCAP...09..015M}. A more complete implementation of all relevant cross-correlations between large-scale structure observables and other cosmological probes (e.g. CMB integrated Sachs-Wolfe effect \citep{1967ApJ...147...73S} and other secondary anisotropies) will also soon be included.
 
 In general, although this document presents the functionality and performance of \ccl shortly after its release, we expect the library to be a continuously evolving piece of software. This will allow \ccl to satisfy the analysis needs of future large datasets, as well as more accurate and sophisticated models for a broad range of cosmological and astrophysical observables.
 
