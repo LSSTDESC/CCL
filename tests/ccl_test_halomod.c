@@ -38,7 +38,7 @@ int main(void){
   int test_densities = 1;
   int test_distance = 1;
   int test_basics = 1;
-  //int test_mass_function = 0;
+  int test_mass_function = 1;
   int test_halo_properties = 1;
   int test_nfw_wk = 1;
   int test_power = 1;
@@ -48,9 +48,9 @@ int main(void){
 
   // Initialize cosmological parameters
   ccl_configuration config=default_config;
-  config.transfer_function_method=ccl_boltzmann_class;
+  config.transfer_function_method=ccl_boltzmann_class; //Set the linear spectrum to come from CLASS
+  config.mass_function_method=ccl_shethtormen; //Set the mass function to be Sheth & Tormen (1999)
   ccl_parameters params = ccl_parameters_create(OC, OB, OK, NREL, NMAS, MNU, W0, WA, HH, NORMPS, NS,-1,-1,-1,-1,NULL,NULL, &status);
-  //printf("in sample run w0=%1.12f, wa=%1.12f\n", W0, WA);
   
   // Initialize the cosmology object given the cosmological parameters
   ccl_cosmology *cosmo=ccl_cosmology_create(params,config);
@@ -62,7 +62,7 @@ int main(void){
   //Test the cosmological densities
   if(test_densities==1){
 
-    printf("Testing distance calculation\n");
+    printf("Testing density\n");
     printf("\n");
 
     // Compute radial distances (see include/ccl_background.h for more routines)
@@ -84,10 +84,10 @@ int main(void){
   
   }
 
-  //Test the basic halo-model function
+  //Test the basic halo-model numbers
   if(test_basics==1){
 
-    printf("Testing basics\n");
+    printf("Testing halo-model basics\n");
     printf("\n");
 
     double dc=delta_c();
@@ -98,7 +98,6 @@ int main(void){
     
   }
 
-  /*
   //Test mass function
   if(test_mass_function==1){
 
@@ -109,19 +108,18 @@ int main(void){
   printf("Testing mass function\n");
   printf("\n");
   
-  printf("M / Msun\t nu\t\t g(nu)\t\n");
+  printf("M / Msun\t nu\t\t n(M)\t\n");
   printf("=========================================\n");
   for (int i = 1; i <= nm; i++){
     double m = exp(log(m_min)+log(m_max/m_min)*((i-1.)/(nm-1.)));
     double n = nu(cosmo, m, a, &status);
-    double gnu = massfunc_st(n);
-    printf("%e\t %f\t %f\n", m, n, gnu);
+    double f = ccl_massfunc(cosmo, m, a, Delta_v(), &status);
+    printf("%e\t %f\t %f\n", m, n, f);
   }
   printf("=========================================\n");
   printf("\n");
   
   }
-  */
 
   //Test halo properties
   if(test_halo_properties==1){

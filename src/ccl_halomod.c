@@ -127,7 +127,7 @@ double ccl_halo_concentration(ccl_cosmology *cosmo, double halomass, double a, i
   // 3 - Duffy et al. (2008)
   // 4 - Constant concentration (for testing)
   // 5 - Simple Bullock et al. (2001)
-  int iconc=1;
+  int iconc=5;
 
   // Bhattacharya et al. 2011, Delta = 200 rho_{mean} (Table 2)
   if(iconc==1){    
@@ -157,7 +157,8 @@ double ccl_halo_concentration(ccl_cosmology *cosmo, double halomass, double a, i
 
   // Simple Bullock et al. (2001) relation
   else if(iconc==5){
-    return 4.;
+    double Mstar = 1e13;
+    return 9.*pow(halomass/Mstar,-0.13);
   }
 
   // Something went wrong
@@ -257,8 +258,7 @@ double p_halomod(ccl_cosmology *cosmo, double k, double a, int * status){
   else{
     exit(0);
   }
-  
-  
+    
 }
 
 /*
