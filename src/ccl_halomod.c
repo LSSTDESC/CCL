@@ -16,6 +16,32 @@
 #include "ccl_emu17.h"
 #include "ccl_emu17_params.h"
 
+// Set two-halo term
+// 1 - Standard two-halo term
+// 2 - Linear theory
+int i2h=1;
+
+// Set full halo model pwoer spectrum method
+// 1 - Standard sum of two- and one-halo terms
+// 2 - Smooth transition using alpha parameter from Mead et al. (2015)
+int ipow=1;
+
+// Set concentration-mass relation
+// 1 - Bhattaharya et al. (2011)
+// 2 - Full Bullock et al. (2001)
+// 3 - Duffy et al. (2008)
+// 4 - Constant concentration (for testing)
+// 5 - Simple Bullock et al. (2001)
+int iconc=1;
+
+// Select window function
+// 1 - NFW profile, appropriate for matter power spectrum
+int iwin=1;
+
+// Set the mass range for the halo-model integration
+double mmin=1e7;
+double mmax=1e17;
+
 // Linear collapse threshold for haloes
 double delta_c(){  
   return 1.686;
@@ -27,42 +53,49 @@ double Delta_v() {
   return 200.;
 }
 
-// sigma(R,z) - scale z=0 result by growth function
+// sigma(R,z) - scale z=0 result by growth function (this is approximate!)
+// TODO: This should be moved to ccl_power.c
 double ccl_sigmaRz(ccl_cosmology *cosmo, double R, double a, int * status){ 
   return ccl_sigmaR(cosmo, R, status)*ccl_growth_factor(cosmo, a, status);
 }
 
-// sigma_V(R,z) - scale z=0 result by growth function
+// sigma_V(R,z) - scale z=0 result by growth function (this is approximate!)
+// TODO: This should be moved to ccl_power.c
 double ccl_sigmaVz(ccl_cosmology *cosmo, double R, double a, int * status){  
   return ccl_sigmaV(cosmo, R, status)*ccl_growth_factor(cosmo, a, status);
 }
 
-// HMcode parameter: k*  
+// HMcode parameter: one-halo damping wavenumber: k*  
 double k_star(ccl_cosmology *cosmo, double a, int * status){  
-  //double sigmaVz = ccl_sigmaV(cosmo, 0., status)*ccl_growth_factor(cosmo, a, status);
   return 0.584/ccl_sigmaVz(cosmo, 0., a, status);
 }
 
-// HMcode parameter: f  
+// HMcode parameter: two-halo damping: f  
 double f_damp(ccl_cosmology *cosmo, double a, int * status){ 
-  //double sigma8z = ccl_sigma8(cosmo, status)*ccl_growth_factor(cosmo, a, status);
-  double sigma8z = ccl_sigmaRz(cosmo, 8., a, status);
-  return 0.188*pow(sigma8z, 4.29);
+  // Damping f from Mead et al. (2015)
+  //double sigma8z = ccl_sigmaRz(cosmo, 8., a, status);
+  //return 0.188*pow(sigma8z, 4.29);
+
+  //Damping f from Mead et al. (2016)
+  double sigmav100 = ccl_sigmaVz(cosmo, 100., a, status);
+  return 0.0095*pow(sigmav100, 1.37); 
 }
 
-// HMcode parameter: spectral index at the collapse scale, neff
-//TODO: Actually code this up
+// HMcode parameter: spectral index at the collapse scale: neff
+// TODO: Actually code this up
 double collapse_index(ccl_cosmology *cosmo, double a, int * status){
   return -2.;
 }
 
-// HMcode parameter: alpha to transition between one- and two-halo regimes
+// HMcode parameter: smoothing for transition between one- and two-halo regimes: alpha
 double alpha(ccl_cosmology *cosmo, double a, int * status){  
   double neff = collapse_index(cosmo, a, status);
-  return 2.93*pow(1.77,neff);
+  //return 2.93*pow(1.77,neff); //This is the relation from Mead et al. (2015)
+  return 3.24*pow(1.85,neff); //This is the relation from Mead et al. (2016)
 }
 
 // The comoving density of matter. This is a constant in time. Units are Msun/Mpc^3 (no factors of h)
+// TODO: This should be moved elsewhere. Maybe to ccl_background.c
 double comoving_matter_density(ccl_cosmology *cosmo){  
   return RHO_CRITICAL*cosmo->params.Omega_m*pow(cosmo->params.h,2);
 }
@@ -70,36 +103,46 @@ double comoving_matter_density(ccl_cosmology *cosmo){
 // Converts halo mass to rdelta.
 // TODO: possible that delta should be passed around for consistency checks
 double r_delta(ccl_cosmology *cosmo, double halomass, double a, int * status){    
-  double rho_matter = comoving_matter_density(cosmo);  
-  //rho_m = RHO_CRITICAL*cosmo->params.Omega_m*cosmo->params.h*cosmo->params.h;  
+  double rho_matter = comoving_matter_density(cosmo);   
   return pow(halomass*3.0/(4.0*M_PI*rho_matter*Delta_v()),1.0/3.0);
 }
 
 // Calculates the halo Lagrangian radius as a function of halo mass
+// TODO: This should probably be moved to ccl_massfunc.c
 double r_Lagrangian(ccl_cosmology *cosmo, double halomass, double a, int * status){  
   double rho_matter = comoving_matter_density(cosmo);  
   return pow(halomass*3.0/(4.0*M_PI*rho_matter),1.0/3.0);
 }
 
 // analytic FT of NFW profile, from Cooray & Sheth (2002; Section 3 of https://arxiv.org/abs/astro-ph/0206508)
+// Normalised such that U(k=0)=1
 double u_nfw_c(ccl_cosmology *cosmo, double c, double halomass, double k, double a, int * status){
    
   double rs, ks;
   double f1, f2, f3, fc;
 
-  //Scale radius for NFW (rs=rv/c)
-  rs = r_delta(cosmo, halomass, a, status)/c;
+  // Special case to prevent numerical problems if k=0,
+  // the result should be unity here because of the normalisation
+  if(k==0.){    
+    return 1.;    
+  }
 
-  //Dimensionless wave-number variable
-  ks = k*rs;
+  // The general k case
+  else{
+    //Scale radius for NFW (rs=rv/c)
+    rs = r_delta(cosmo, halomass, a, status)/c;
 
-  // Various bits for summing together to get final result
-  f1 = sin(ks)*(gsl_sf_Si(ks*(1.+c))-gsl_sf_Si(ks));
-  f2 = cos(ks)*(gsl_sf_Ci(ks*(1.+c))-gsl_sf_Ci(ks));
-  f3 = sin(c*ks)/(ks*(1.+c));
-  fc = log(1.+c)-c/(1.+c);
+    //Dimensionless wave-number variable
+    ks = k*rs;
+
+    // Various bits for summing together to get final result
+    f1 = sin(ks)*(gsl_sf_Si(ks*(1.+c))-gsl_sf_Si(ks));
+    f2 = cos(ks)*(gsl_sf_Ci(ks*(1.+c))-gsl_sf_Ci(ks));
+    f3 = sin(c*ks)/(ks*(1.+c));
+    fc = log(1.+c)-c/(1.+c);
   
-  return (f1+f2-f3)/fc;
+    return (f1+f2-f3)/fc;
+  }
 }
 
 // The variable nu that is the peak threshold (nu = delta_c / sigma(R))
@@ -110,24 +153,23 @@ double nu(ccl_cosmology *cosmo, double halomass, double a, int * status) {
 }
 
 // Halo "formation redshift" calculated according to the Bullock et al. (2001) prescription
-// TODO: Actually write this
+// TODO: Actually code this up
 double z_formation_Bullock(ccl_cosmology *cosmo, double halomass, double a, int * status){ 
   return 0.;
 }
 
+// The non-linear mass (sigma(M*)=delta_c))
+// TO DO: Actually code this up
+double Mstar(){
+  return 1e13;
+}
+
 // The concentration-mass relation for haloes
 // TODO: make consistency check so that ccl_halo_concentration only runs if called with appropriate definition
-// TODO: should this be moved to the ccl_massfunc.c ?
 // TODO: e.g. if Delta != 200 rho_{mean}, should not function (or should it?)
+// TODO: should this be moved to the ccl_massfunc.c ?
 double ccl_halo_concentration(ccl_cosmology *cosmo, double halomass, double a, int * status)
 {
-  // Set concentration-mass relation
-  // 1 - Bhattaharya et al. (2011)
-  // 2 - Full Bullock et al. (2001)
-  // 3 - Duffy et al. (2008)
-  // 4 - Constant concentration (for testing)
-  // 5 - Simple Bullock et al. (2001)
-  int iconc=5;
 
   // Bhattacharya et al. 2011, Delta = 200 rho_{mean} (Table 2)
   if(iconc==1){    
@@ -157,8 +199,8 @@ double ccl_halo_concentration(ccl_cosmology *cosmo, double halomass, double a, i
 
   // Simple Bullock et al. (2001) relation
   else if(iconc==5){
-    double Mstar = 1e13;
-    return 9.*pow(halomass/Mstar,-0.13);
+    //double Mstar = 1e13; 
+    return 9.*pow(halomass/Mstar(),-0.13);
   }
 
   // Something went wrong
@@ -168,33 +210,48 @@ double ccl_halo_concentration(ccl_cosmology *cosmo, double halomass, double a, i
 	  
 }
 
+// Fourier transforms of halo profiles
+double window_function(ccl_cosmology *cosmo, double m, double k, double a, int * status){
+
+  //Window function for matter power spectrum with NFW haloes
+  if(iwin==1){
+    // The mean background matter density in Msun/Mpc^3
+    double rho_matter = comoving_matter_density(cosmo);
+
+    // The halo concentration for this mass and scale factor  
+    double c = ccl_halo_concentration(cosmo,m,a,status);
+
+    // The function U is normalised so multiplying by M/rho turns units to overdensity
+    return m*u_nfw_c(cosmo,c,m,k,a,status)/rho_matter;
+  }
+
+  // Something went wrong
+  else{
+    exit(0);
+  }
+  
+}
+
 // Parameters structure for the one-halo integrand
 typedef struct{  
   ccl_cosmology *cosmo;
   double k, a;
   int * status;
-} IntI02Par;
+} Int_one_halo_Par;
 
 // Integrand for the one-halo integral
 double one_halo_integrand(double log10mass, void *params){  
   
-  IntI02Par *p=(IntI02Par *)params;
+  Int_one_halo_Par *p=(Int_one_halo_Par *)params;;
   double halomass = pow(10,log10mass);
 
-  // The halo concentration for this mass and scale factor  
-  double c = ccl_halo_concentration(p->cosmo,halomass,p->a,p->status); 
-
   // The squared normalised Fourier Transform of a halo profile (W(k->0 = 1)
-  double wk_squared = pow(u_nfw_c(p->cosmo,c,halomass,p->k,p->a,p->status),2); 
-
-  // The mean background matter density in Msun/Mpc^3
-  //double rho_matter = RHO_CRITICAL*p->cosmo->params.Omega_m*pow(p->cosmo->params.h,2);
-  double rho_matter = comoving_matter_density(p->cosmo);
+  double wk = window_function(p->cosmo,halomass,p->k,p->a,p->status);
 
   // Fairly sure that there should be no ln(10) factor should be here since the integration is being specified in log10 range
   double dn_dlogM = ccl_massfunc(p->cosmo,halomass,p->a,Delta_v(),p->status);
     
-  return pow(halomass,2)*dn_dlogM*wk_squared/pow(rho_matter,2); 
+  return dn_dlogM*pow(wk,2);
 }
 
 // The one-halo term integral using gsl
@@ -202,9 +259,9 @@ double one_halo_integral(ccl_cosmology *cosmo, double k, double a, int * status)
     
   int one_halo_integral_status = 0, qagstatus;
   double result = 0, eresult;
-  double log10massmin = 7;
-  double log10massmax = 17;
-  IntI02Par ipar;
+  double log10massmin = log10(mmin);
+  double log10massmax = log10(mmax);
+  Int_one_halo_Par ipar;
   gsl_function F;
   gsl_integration_workspace *w = gsl_integration_workspace_alloc(1000);
 
@@ -225,31 +282,108 @@ double one_halo_integral(ccl_cosmology *cosmo, double k, double a, int * status)
   return result;
 }
 
-// Computes the one-halo term
-double p_1h(ccl_cosmology *cosmo, double k, double a, int * status){  
-  return one_halo_integral(cosmo, k, a, status);
+// Parameters structure for the two-halo integrand
+typedef struct{  
+  ccl_cosmology *cosmo;
+  double k, a;
+  int * status;
+} Int_two_halo_Par;
+
+// Integrand for the two-halo integral
+double two_halo_integrand(double log10mass, void *params){  
+  
+  Int_two_halo_Par *p=(Int_two_halo_Par *)params;
+  double halomass = pow(10,log10mass);
+
+  // The window function appropriate for the matter power spectrum
+  //double wk = halomass*u_nfw_c(p->cosmo,c,halomass,p->k,p->a,p->status)/rho_matter
+  double wk = window_function(p->cosmo,halomass,p->k,p->a,p->status);
+
+  // Fairly sure that there should be no ln(10) factor should be here since the integration is being specified in log10 range
+  double dn_dlogM = ccl_massfunc(p->cosmo,halomass,p->a,Delta_v(),p->status);
+
+  // Halo bias
+  double b = ccl_halo_bias(p->cosmo,halomass,p->a,Delta_v(),p->status);
+    
+  return b*dn_dlogM*wk;
 }
 
-// Computes the two-halo term (just the linear power at the moment)
-double p_2h(ccl_cosmology *cosmo, double k, double a, int * status){  
-  return ccl_linear_matter_power(cosmo, k, a, status);
+// The two-halo term integral using gsl
+double two_halo_integral(ccl_cosmology *cosmo, double k, double a, int * status){
+    
+  int two_halo_integral_status = 0, qagstatus;
+  double result = 0, eresult;
+  double log10massmin = log10(mmin);
+  double log10massmax = log10(mmax);
+  Int_two_halo_Par ipar;
+  gsl_function F;
+  gsl_integration_workspace *w = gsl_integration_workspace_alloc(1000);
+
+  // Structure required for the gsl integration
+  ipar.cosmo = cosmo;
+  ipar.k = k;
+  ipar.a = a;
+  ipar.status = &two_halo_integral_status;
+  F.function = &two_halo_integrand;
+  F.params = &ipar;
+
+  // Actually does the integration
+  qagstatus = gsl_integration_qag(&F, log10massmin, log10massmax, 0, 1E-4, 1000, GSL_INTEG_GAUSS41, w, &result, &eresult);
+
+  // Clean up
+  gsl_integration_workspace_free(w);
+
+  return result;
+}
+
+// Computes the two-halo term
+double p_2h(ccl_cosmology *cosmo, double k, double a, int * status){
+
+  // The standard formation of the two-halo term
+  if(i2h==1){
+    // Get the integral
+    double I2h = two_halo_integral(cosmo, k, a, status);
+    
+    // The addative correction is the missing part of the integral below the lower-mass limit
+    double A = 1.-two_halo_integral(cosmo, 0., a, status);
+
+    // ...multiplied by the ratio of window functions
+    A=A*window_function(cosmo, mmin, k, a, status)/window_function(cosmo, mmin, 0., a, status);    
+
+    // Add the additive correction to the calculated integral
+    I2h=I2h+A;
+      
+    return ccl_linear_matter_power(cosmo, k, a, status)*pow(I2h,2);
+  }
+
+  // Two-halo term is just linear theory in this case
+  // This is okay for the matter spectrum, but not some other things
+  else if(i2h==2){
+    return ccl_linear_matter_power(cosmo, k, a, status);
+  }
+
+  //Something went wrong
+  else{
+    exit(0);
+  }
+  
+}
+
+// Computes the one-halo term
+double p_1h(ccl_cosmology *cosmo, double k, double a, int * status){  
+    return one_halo_integral(cosmo, k, a, status);
 }
 
 // Computes the full halo-model power
 double p_halomod(ccl_cosmology *cosmo, double k, double a, int * status){  
-  
-  // Set power-spectrum method
-  // 1 - Standard sum of two- and one-halo terms
-  // 2 - Smooth transition using alpha parameter from Mead et al. (2015)
-  int ipow=1;
 
+  // Standard sum of two- and one-halo terms
   if(ipow==1){
-    // Standard sum of two- and one-halo terms
     return p_2h(cosmo, k, a, status)+p_1h(cosmo, k, a, status);
   }
 
-  else if(ipow==2){
-    // Smooth transition using alpha parameter from Mead et al. (2015)
+  // Smooth transition using alpha parameter from Mead et al. (2015)
+  else if(ipow==2){    
     double alp = alpha(cosmo, a, status);
     return pow(pow(p_2h(cosmo, k, a, status),alp)+pow(p_1h(cosmo, k, a, status),alp),1./alp);
   }

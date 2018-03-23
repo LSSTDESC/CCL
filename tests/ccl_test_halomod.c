@@ -48,8 +48,9 @@ int main(void){
 
   // Initialize cosmological parameters
   ccl_configuration config=default_config;
-  config.transfer_function_method=ccl_boltzmann_class; //Set the linear spectrum to come from CLASS
-  config.mass_function_method=ccl_shethtormen; //Set the mass function to be Sheth & Tormen (1999)
+  //config.transfer_function_method=ccl_boltzmann_class; //Set the linear spectrum to come from CLASS
+  config.transfer_function_method=ccl_eisenstein_hu; //Set the linear spectrum to come from Eisenstein & Hu (1998) approximation
+  //config.mass_function_method=ccl_shethtormen; //Set the mass function to be Sheth & Tormen (1999)
   ccl_parameters params = ccl_parameters_create(OC, OB, OK, NREL, NMAS, MNU, W0, WA, HH, NORMPS, NS,-1,-1,-1,-1,NULL,NULL, &status);
   
   // Initialize the cosmology object given the cosmological parameters
@@ -98,32 +99,34 @@ int main(void){
     
   }
 
-  //Test mass function
+  // Test mass function
   if(test_mass_function==1){
 
-  double m_min=1e10;
-  double m_max=1e16;
-  int nm=101;
+    // Set the mass range and number of masses to do
+    double m_min=1e10;
+    double m_max=1e16;
+    int nm=101;
 
-  printf("Testing mass function\n");
-  printf("\n");
+    printf("Testing mass function\n");
+    printf("\n");
   
-  printf("M / Msun\t nu\t\t n(M)\t\n");
-  printf("=========================================\n");
-  for (int i = 1; i <= nm; i++){
-    double m = exp(log(m_min)+log(m_max/m_min)*((i-1.)/(nm-1.)));
-    double n = nu(cosmo, m, a, &status);
-    double f = ccl_massfunc(cosmo, m, a, Delta_v(), &status);
-    printf("%e\t %f\t %f\n", m, n, f);
-  }
-  printf("=========================================\n");
-  printf("\n");
+    printf("M / Msun\t nu\t\t n(M)\t\n");
+    printf("=========================================\n");
+    for (int i = 1; i <= nm; i++){
+      double m = exp(log(m_min)+log(m_max/m_min)*((i-1.)/(nm-1.)));
+      double n = nu(cosmo, m, a, &status);
+      double f = ccl_massfunc(cosmo, m, a, Delta_v(), &status);
+      printf("%e\t %f\t %f\n", m, n, f);
+    }
+    printf("=========================================\n");
+    printf("\n");
   
   }
 
   //Test halo properties
   if(test_halo_properties==1){
 
+    // Set the mass range and number of masses to do
     double m_min=1e10;
     double m_max=1e16;
     int nm=101;
@@ -149,13 +152,13 @@ int main(void){
   //Test the halo Fourier Transform
   if(test_nfw_wk==1){
 
-    //k range and number of points in k
+    // k range and number of points in k
     double kmin = 1e-3;
     double kmax = 1e2;
     int nk = 101;
 
-    //double c = 4.; //Halo concentration
-    double m = 1e15; //Halo mass in Msun
+    // Halo mass in Msun
+    double m = 1e15; 
 
     printf("Testing halo Fourier Transform\n");
     printf("\n");
@@ -188,14 +191,10 @@ int main(void){
   // Test the power spectrum calculation
   if(test_power==1){
 
-    //Set range (note that the round numbers are in k/h)
+    // Set range (note that the round numbers are in k/h)
     double kmin=1e-3*cosmo->params.h;
     double kmax=1e4*cosmo->params.h;
     int nk=200;
-
-    //Convert range so that it is k/h
-    //kmin=kmin/cosmo->params.h;
-    //kmax=kmax/cosmo->params.h;
 
     printf("Testing power spectrum calculation\n");
     printf("\n");
@@ -214,9 +213,6 @@ int main(void){
       double p_twohalo = p_2h(cosmo, k, a, &status); // Two-halo power
       double p_onehalo = p_1h(cosmo, k, a, &status); // One-halo power      
       double p_full = p_halomod(cosmo, k, a, &status); // Full halo-model power
-
-      //Convert k/h back to k
-      //k=k*cosmo->params.h;
 
       printf("%e\t %e\t %e\t %e\t %e\t %e\n", k, p_lin, p_nl, p_twohalo, p_onehalo, p_full);
       fprintf(fp, "%e\t %e\t %e\t %e\t %e\t %e\n", k, p_lin, p_nl, p_twohalo, p_onehalo, p_full);
