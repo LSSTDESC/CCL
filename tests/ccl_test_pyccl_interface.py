@@ -113,6 +113,11 @@ def check_background(cosmo):
     assert_( all_finite(ccl.rho_x(cosmo, a_lst, 'critical')) )
     assert_( all_finite(ccl.rho_x(cosmo, a_arr, 'critical')) )
 
+    # rho_m_a
+    assert_( all_finite(ccl.rho_x(cosmo, a_scl, 'matter')) )
+    assert_( all_finite(ccl.rho_x(cosmo, a_lst, 'matter')) )
+    assert_( all_finite(ccl.rho_x(cosmo, a_arr, 'matter')) )
+
 
 def check_power(cosmo):
     """
