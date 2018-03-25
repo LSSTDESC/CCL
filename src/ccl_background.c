@@ -70,9 +70,9 @@ double ccl_rho_x(ccl_cosmology * cosmo, double a, ccl_rho_x_label label, int *st
   
   switch(label) {
   case ccl_rho_crit_label :
-      return rhocrit_present * (cosmo->params.Omega_m+cosmo->params.Omega_l*pow(a,-3*(cosmo->params.w0+cosmo->params.wa))*exp(3*cosmo->params.wa*(a-1))+cosmo->params.Omega_k*a+(cosmo->params.Omega_g + cosmo->params.Omega_n_rel)/a + OmNuh2*a*a*a / (cosmo->params.h) / (cosmo->params.h))/(a*a*a);
+      return rhocrit_present * h_over_h0(a, cosmo, status) * h_over_h0(a, cosmo, status);
   case ccl_rho_crit_comoving_label :
-      return rhocrit_present * (cosmo->params.Omega_m+cosmo->params.Omega_l*pow(a,-3*(cosmo->params.w0+cosmo->params.wa))*exp(3*cosmo->params.wa*(a-1))+cosmo->params.Omega_k*a+(cosmo->params.Omega_g + cosmo->params.Omega_n_rel)/a + OmNuh2*a*a*a / (cosmo->params.h) / (cosmo->params.h));
+      return rhocrit_present * h_over_h0(a, cosmo, status) * h_over_h0(a, cosmo, status) * a*a*a;
   case ccl_rho_m_label :
       return rhocrit_present * (cosmo->params.Omega_m / (a*a*a));
   case ccl_rho_m_comoving_label :
