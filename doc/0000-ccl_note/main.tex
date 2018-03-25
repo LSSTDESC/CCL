@@ -64,7 +64,7 @@ The Core Cosmology Library (\ccl) provides routines to compute basic cosmologica
 \section{Introduction}
 \label{sec:intro}
 
-In preparation for constraining cosmology with the Large Synoptic Survey Telescope (LSST), it is necessary to be able to produce rigorous theoretical predictions for the cosmological quantities that will be measured. The Core Cosmology Library\footnote{l{https://github.com/LSSTDESC/CCL}} (\ccl) aims to provide, in one library, a way of making predictions that are validated to a well-documented numerical accuracy, for the purpose of constraining cosmology with LSST. By constructing a cosmology library specifically with LSST in mind, it is possible to ensure that it is flexible, adaptable, and validated for all cases of interest, as well as user-friendly and appropriate for the needs of all working groups.
+In preparation for constraining cosmology with the Large Synoptic Survey Telescope (LSST), it is necessary to be able to produce rigorous theoretical predictions for the cosmological quantities that will be measured. The Core Cosmology Library\footnote{\url{https://github.com/LSSTDESC/CCL}} (\ccl) aims to provide, in one library, a way of making predictions that are validated to a well-documented numerical accuracy, for the purpose of constraining cosmology with LSST. By constructing a cosmology library specifically with LSST in mind, it is possible to ensure that it is flexible, adaptable, and validated for all cases of interest, as well as user-friendly and appropriate for the needs of all working groups.
 
 The Core Cosmology Library is written in C and incorporates the {\tt CLASS} code \citep{class} to provide predictions for the matter power spectrum. It also incorporates emulated power spectra from the cosmic emulator of \citet{Lawrence17}.\footnote{Future versions of the library will incorporate other power-spectrum libraries and methods.} A Python wrapper is also provided for ease of use.
 
@@ -77,10 +77,10 @@ This note describes how to install \ccl (Section \ref{sec:install}), how \ccl is
 \subsection{Dependencies}
 
 \begin{itemize}
-\item GNU Scientific Library {\tt GSL},\footnote{{https://www.gnu.org/software/gsl/}} {\tt GSL-2.1} or higher.
-\item The {\tt SWIG}\footnote{{http://www.swig.org/}} Python wrapper generator is not needed to run \ccl, but must be installed if you intend to modify \ccl in any way.
-\item {\tt FFTW3}\footnote{{http://www.fftw.org}} is required for computation of correlation functions.
-\item {\tt FFTlog}\footnote{{http://casa.colorado.edu/~ajsh/FFTLog/} and {https://github.com/slosar/FFTLog}} is provided within \ccl, with minor modifications.
+\item GNU Scientific Library {\tt GSL},\footnote{\url{https://www.gnu.org/software/gsl/}} {\tt GSL-2.1} or higher.
+\item The {\tt SWIG}\footnote{\url{http://www.swig.org/}} Python wrapper generator is not needed to run \ccl, but must be installed if you intend to modify \ccl in any way.
+\item {\tt FFTW3}\footnote{\url{http://www.fftw.org}} is required for computation of correlation functions.
+\item {\tt FFTlog}\footnote{\url{http://casa.colorado.edu/~ajsh/FFTLog/} and \url{https://github.com/slosar/FFTLog}} is provided within \ccl, with minor modifications.
 \item The C library associated to the {\tt CLASS} code. The installation of this library is described below. 
 %\item A version of {\tt Angpow} \citep{2017arXiv170103592C} is also incorporated within \ccl.
 \end{itemize}
@@ -165,7 +165,7 @@ Then, run {\tt ./configure} and compile and install \ccl as usual. The \ccl buil
 Once compilation has finished, run {\tt make check} to make sure everything is working correctly. Remember to add the external {\tt CLASS} library directory to your system library path, using either {\tt export LD\_LIBRARY\_PATH=/path/to/external/class} (Linux) or {\tt export DYLD\_FALLBACK\_LIBRARY\_PATH=/path/to/external/class} (Mac). The system must be able to find both the \ccl and {\tt CLASS} libraries; it is not enough to only add \ccl to the library path.
 
 \subsection{Creating a Docker Image}
-\ccl supports the use of Docker, for the deployment of applications inside software containers. The Dockerfile included with \ccl makes it possible to quickly create an image file that can be used to run virtual machines that require no additional dependencies beyond the Docker software. The Docker website\footnote{{https://www.docker.com}} details the installation and start-up process for most common operating systems.
+\ccl supports the use of Docker, for the deployment of applications inside software containers. The Dockerfile included with \ccl makes it possible to quickly create an image file that can be used to run virtual machines that require no additional dependencies beyond the Docker software. The Docker website\footnote{\url{https://www.docker.com}} details the installation and start-up process for most common operating systems.
 
 With Docker installed and the Docker Daemon running, creating an image is relatively straightforward:
 \begin{verbatim}
@@ -186,7 +186,7 @@ This will allow for full access to the virtual machine via a terminal, so you ca
 \subsection{Documentation}
 \label{sec:doc}
 
-\ccl has basic {\tt doxygen}\footnote{{http://www.stack.nl/~dimitri/doxygen/}} documentation for its C routines. This can be found in the directory {\tt doc/html} within the \ccl repository by opening the {\tt index.html} file in your browser. The {\tt python} routines are documented in situ; you can view the documentation for a function by calling {\tt help(function\_name)} from within {\tt python}.
+\ccl has basic {\tt doxygen}\footnote{\url{http://www.stack.nl/~dimitri/doxygen/}} documentation for its C routines. This can be found in the directory {\tt doc/html} within the \ccl repository by opening the {\tt index.html} file in your browser. The {\tt python} routines are documented in situ; you can view the documentation for a function by calling {\tt help(function\_name)} from within {\tt python}.
 
 \section{Functionality}
 \label{sec:func}
@@ -196,7 +196,7 @@ This will allow for full access to the virtual machine via a terminal, so you ca
 \label{sec:constants}
 We have performed a comparison of the physical constants used in \ccl and included dependencies and external sources. See Table \ref{tab:constants} for percent differences of the constants between these sources.
 
-\input{tables/table_constants}
+\input{table_constants}
 
 
 
@@ -229,7 +229,7 @@ In its default configuration, \ccl adopts the nonlinear matter power spectrum fr
 
 To use \ccl, the first step is to create a {\tt ccl$\_$cosmology} structure, containing all of the information required to compute cosmological observables. A {\tt ccl$\_$cosmology} structure can be generated using the information from a {\tt ccl$\_$parameters} object and a {\tt ccl$\_$configuration} object.
 
-\input{tables/table_cosmo}
+\input{table_cosmo}
 
 {\tt ccl$\_$parameters} objects contain information about the cosmological parameters of a given model, and are initialized using one of the following routines (the full syntax for each function can be found in the header file {\tt ccl$\_$core.h}):
 \begin{itemize}
@@ -316,6 +316,7 @@ in units such that $\mu$ is dimensionless. We then conduct the phase-space integ
 \label{Omnu}
 \end{equation}
 where $h_{\rm P}$ is Planck's constant and $h$ is $H_0/100$ with $H_0$ in units of km / s / Mpc. $x_{\rm max}$ is set to 1000. The final bracketed term which includes the phase-space integral can be simplified in the limit where $\mu$ is very large or very small: for small $\mu$, it is set to $\frac{7}{8}$, and for large $\mu$, it becomes $\frac{5\zeta(3)}{18\pi^4}\mu\sim 0.2776\mu$.
+
 
 \subsection{Functions of the physical density}
 \label{subsec:physicaldensity}
@@ -732,7 +733,7 @@ where the angular lensing convergence power spectrum $C^{ab}_\ell$ is given abov
 
 Note that, in the above, ``Galaxy'' and ``Lensing'' can be replaced by any spin-0 and spin-2 fields on the sphere respectively (e.g. the CMB lensing convergence would play the same role as the galaxy overdensity field in all the formulas above).
 
-For numerical integration of the correlation functions, we make use of the public code {\tt FFTlog}\footnote{{http://casa.colorado.edu/~ajsh/FFTLog/}}\citep{Hamilton2000,Talman2009}. In brief, {\tt FFTlog} works on functions periodic in log space, by writing the Hankel Transform as a convolution between Bessel functions and the function of interest (in this case $C_\ell$). A version of this code is included in \ccl with minor modifications.
+For numerical integration of the correlation functions, we make use of the public code {\tt FFTlog}\footnote{\url{http://casa.colorado.edu/~ajsh/FFTLog/}}\citep{Hamilton2000,Talman2009}. In brief, {\tt FFTlog} works on functions periodic in log space, by writing the Hankel Transform as a convolution between Bessel functions and the function of interest (in this case $C_\ell$). A version of this code is included in \ccl with minor modifications.
 
 %-----------------------------------------------------------
 %
@@ -1115,18 +1116,18 @@ In the future, we hope that \ccl will include other functionalities. Functionali
 \section{Feedback}
 \label{sec:feedback}
 
-If you would like to contribute to \ccl or contact the developers, please do so through the \ccl github repository located at {https://github.com/LSSTDESC/CCL}.
+If you would like to contribute to \ccl or contact the developers, please do so through the \ccl github repository located at \url{https://github.com/LSSTDESC/CCL}.
 
 \section{Citing \ccl}
 \label{sec:cite}
 
-If you use \ccl in your work, please provide a link to the repository and cite it as LSST DESC (in preparation). For free use of the {\tt CLASS} library, the {\tt CLASS} developers require that the {\tt CLASS} paper be cited: {\it  CLASS II: Approximation schemes}, D. Blas, J. Lesgourgues, T. Tram, arXiv:1104.2933, JCAP 1107 (2011) 034. The {\tt CLASS} repository can be found in {http://class-code.net}.
+If you use \ccl in your work, please provide a link to the repository and cite it as LSST DESC (in preparation). For free use of the {\tt CLASS} library, the {\tt CLASS} developers require that the {\tt CLASS} paper be cited: {\it  CLASS II: Approximation schemes}, D. Blas, J. Lesgourgues, T. Tram, arXiv:1104.2933, JCAP 1107 (2011) 034. The {\tt CLASS} repository can be found in \url{http://class-code.net}.
 
 \section{License}
 \label{sec:license}
 
 Copyright \textcopyright 2017, the LSSTDESC \ccl contributors are listed in the
-documentation (``research note'') provided with this software. The repository can be found at {https://github.com/LSSTDESC/CCL}. All rights reserved.
+documentation (``research note'') provided with this software. The repository can be found at \url{https://github.com/LSSTDESC/CCL}. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -1137,7 +1138,7 @@ modification, are permitted provided that the following conditions are met:
 \item Redistributions in binary form must reproduce the above copyright notice,
   this list of conditions and the following disclaimer in the documentation
   and/or other materials provided with the distribution.
-\item Neither the name of \ccl ({https://github.com/LSSTDESC/CCL}) nor the names of its
+\item Neither the name of \ccl (\url{https://github.com/LSSTDESC/CCL}) nor the names of its
   contributors may be used to endorse or promote products derived from
   this software without specific prior written permission.
 \end{itemize}
