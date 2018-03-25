@@ -78,7 +78,7 @@ double ccl_rho_x(ccl_cosmology * cosmo, double a, ccl_rho_x_label label, int *st
   case ccl_rho_m_comoving_label :
       return rhocrit_present * (cosmo->params.Omega_m);
   case ccl_rho_l_label :
-      return rhocrit_present * (cosmo->params.Omega_l*pow(a,-3*(cosmo->params.w0+cosmo->params.wa))*exp(3*cosmo->params.wa*(a-1)) / (a*a*a));
+      return rhocrit_present * (cosmo->params.Omega_l*pow(a,-3*(1+cosmo->params.w0+cosmo->params.wa))*exp(3*cosmo->params.wa*(a-1)));
   case ccl_rho_l_comoving_label :
       return rhocrit_present * (cosmo->params.Omega_l*pow(a,-3*(cosmo->params.w0+cosmo->params.wa))*exp(3*cosmo->params.wa*(a-1)));
   case ccl_rho_g_label :
@@ -133,17 +133,17 @@ double ccl_omega_x(ccl_cosmology * cosmo, double a, ccl_omega_x_label label, int
 	
   switch(label) {
   case ccl_omega_m_label :
-    return cosmo->params.Omega_m/(cosmo->params.Omega_m+cosmo->params.Omega_l*pow(a,-3*(cosmo->params.w0+cosmo->params.wa))*exp(3*cosmo->params.wa*(a-1))+cosmo->params.Omega_k*a+ (cosmo->params.Omega_g + cosmo->params.Omega_n_rel)/a + OmNuh2*a*a*a / (cosmo->params.h) / (cosmo->params.h));
+    return cosmo->params.Omega_m/(a*a*a) / h_over_h0(a, cosmo, status) / h_over_h0(a, cosmo, status);
   case ccl_omega_l_label :
-    return cosmo->params.Omega_l*pow(a,-3*(cosmo->params.w0+cosmo->params.wa))* exp(3*cosmo->params.wa*(a-1))/(cosmo->params.Omega_m+cosmo->params.Omega_l*pow(a,-3*(cosmo->params.w0+cosmo->params.wa))*exp(3*cosmo->params.wa*(a-1))+cosmo->params.Omega_k*a+(cosmo->params.Omega_g + cosmo->params.Omega_n_rel)/a + OmNuh2*a*a*a / (cosmo->params.h) / (cosmo->params.h));
+    return cosmo->params.Omega_l*pow(a,-3*(1+cosmo->params.w0+cosmo->params.wa))*exp(3*cosmo->params.wa*(a-1)) / h_over_h0(a, cosmo, status) / h_over_h0(a, cosmo, status);
   case ccl_omega_g_label :
-    return cosmo->params.Omega_g/(cosmo->params.Omega_m*a+cosmo->params.Omega_l*pow(a,-3*(cosmo->params.w0+cosmo->params.wa))*exp(3*cosmo->params.wa*(a-1))*a+cosmo->params.Omega_k*a*a+cosmo->params.Omega_g + cosmo->params.Omega_n_rel + OmNuh2*a*a*a*a / (cosmo->params.h) / (cosmo->params.h) );
+    return cosmo->params.Omega_g/(a*a*a*a) / h_over_h0(a, cosmo, status) / h_over_h0(a, cosmo, status);
   case ccl_omega_k_label :
-    return cosmo->params.Omega_k*a/(cosmo->params.Omega_m+cosmo->params.Omega_l*pow(a,-3*(cosmo->params.w0+cosmo->params.wa))*exp(3*cosmo->params.wa*(a-1))+cosmo->params.Omega_k*a+(cosmo->params.Omega_g + cosmo->params.Omega_n_rel)/a + OmNuh2*a*a*a / (cosmo->params.h) / (cosmo->params.h));
+    return cosmo->params.Omega_k/(a*a) / h_over_h0(a, cosmo, status) / h_over_h0(a, cosmo, status);
   case ccl_omega_ur_label :
-    return cosmo->params.Omega_n_rel/(cosmo->params.Omega_m*a+cosmo->params.Omega_l*pow(a,-3*(cosmo->params.w0+cosmo->params.wa))*exp(3*cosmo->params.wa*(a-1))*a+cosmo->params.Omega_k*a*a+cosmo->params.Omega_g + cosmo->params.Omega_n_rel + OmNuh2*a*a*a*a / (cosmo->params.h) / (cosmo->params.h) );
+    return cosmo->params.Omega_n_rel/(a*a*a*a) / h_over_h0(a, cosmo, status) / h_over_h0(a, cosmo, status);
   case ccl_omega_nu_label :
-    return OmNuh2 / (cosmo->params.h) / (cosmo->params.h) /(cosmo->params.Omega_m/a/a/a +cosmo->params.Omega_l*pow(a,-3*(cosmo->params.w0+cosmo->params.wa))*exp(3*cosmo->params.wa*(a-1))/a/a/a+cosmo->params.Omega_k/a/a+ (cosmo->params.Omega_g + cosmo->params.Omega_n_rel)/a/a/a/a + OmNuh2 / (cosmo->params.h) / (cosmo->params.h));
+    return OmNuh2 / (cosmo->params.h) / (cosmo->params.h) / h_over_h0(a, cosmo, status) / h_over_h0(a, cosmo, status);
     
   default:
     *status = CCL_ERROR_PARAMETERS;
