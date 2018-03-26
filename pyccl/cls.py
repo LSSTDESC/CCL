@@ -14,6 +14,22 @@ tracer_types = {
     'cmb_lensing':      const.CL_TRACER_CL,
 }
 
+function_types = {
+    'dndz':             const.CCL_CLT_NZ,
+    'bz':               const.CCL_CLT_BZ,
+    'bias':             const.CCL_CLT_BZ,
+    'sz':               const.CCL_CLT_SZ,
+    'm_bias':           const.CCL_CLT_SZ,
+    'rfz':              const.CCL_CLT_RF,
+    'red_fraction':     const.CCL_CLT_RF,
+    'baz':              const.CCL_CLT_BA,
+    'a_bias':           const.CCL_CLT_BA,
+    'wL':               const.CCL_CLT_WL,
+    'window_lensing':   const.CCL_CLT_WL,
+    'wM':               const.CCL_CLT_WM,
+    'window_magnif':    const.CCL_CLT_WM,
+}
+
 # Define symbolic 'None' type for arrays, to allow proper handling by swig wrapper
 NoneArr = np.array([])
 
@@ -99,6 +115,52 @@ class ClTracer(object):
                             self.z_source,
                             status )
 
+    def get_internal_function(self,cosmo,function,a) :
+        """
+        Method to evaluate any internal function of redshift for this tracer.
+
+        Args:
+            cosmo (:obj:`Cosmology`): Cosmology object.
+            function (:obj:`str`): Specifies which function to evaluate. Must be one of the types specified in the `function_types` dict in `cls.py`.
+            a (:obj: float or array-like): list of scale factors at which to evaluate the function.
+                specified. Must be one of the types specified in the
+                `tracer_types` dict in `cls.py`.
+            has_rsd (bool, optional): Flag for whether the tracer has a
+                redshift-space distortion term. Defaults to False.
+            has_magnification (bool, optional): Flag for whether the tracer has
+                a magnification term. Defaults to False.
+            has_intrinsic_alignment (bool, optional): Flag for whether the
+                tracer has an intrinsic alignment term. Defaults to False.
+        Returns:
+            Array of function values at the input scale factors.
+        """
+        # Access ccl_cosmology object
+        cosmo_in=cosmo
+        cosmo=_cosmology_obj(cosmo)
+        
+        # Access CCL_ClTracer objects
+        clt=self.cltracer
+        
+        status=0
+        is_scalar=False
+        if isinstance(a,float) :
+            is_scalar=True
+            aarr=np.array([a])
+            na=1
+        elif isinstance(a,np.ndarray) :
+            aarr=a
+            na=a.size
+        else :
+            aarr=a
+            na=len(a)
+
+        farr,status=lib.clt_fa_vec(cosmo,self.cltracer,function_types[function],aarr,na,status)
+        check(status,cosmo_in)
+        if is_scalar :
+            return farr[0]
+        else :
+            return farr
+        
     def __del__(self):
         """Free memory associated with CCL_ClTracer object.
 
@@ -272,7 +334,6 @@ def _check_array_params(z, f_arg, f_name):
             z_f = np.atleast_1d(z)
             f = np.atleast_1d(f_arg)
     return z_f, f
-
 
 def angular_cl(cosmo, cltracer1, cltracer2, ell):
     """
