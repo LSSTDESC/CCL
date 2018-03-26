@@ -38,5 +38,5 @@ tests/.ipynb_checkpoints/
 # Ignore VCS files
 .idea/*
 
-# Ignore class components
-class/
+# Ignore rope project
+.ropeproject
