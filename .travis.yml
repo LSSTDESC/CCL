@@ -10,11 +10,9 @@ python:
 # CLASS also needs to be downloaded and compiled, which there is no easy fix for.
 before_install:
   - sudo apt-get -qq update
-  - sudo apt-get install fftw3 fftw3-dev pkg-config
+  - sudo apt-get install fftw3 fftw3-dev pkg-config cmake
 #  - sudo apt-get install latexmk
-  - pip install numpy
-  - ./install-gsl.sh
-  - python class_install.py
+
 #addons:
 #    apt:
 #        packages:
@@ -23,7 +21,12 @@ before_install:
 #            - texlive-fonts-recommended
 #            - texlive-fonts-extra
 #            - dvipng
-install: python setup.py install
+install:
+    - mkdir build
+    - cd build
+    - cmake ..
+    - make && make install
+
 script:
     - python tests/run_tests.py --debug --detailed-errors --verbose --process-restartworker
     - make check-cpp
