@@ -55,6 +55,7 @@ project(ccl)
                  tests/ccl_test_emu_nu.c)
 
     # Define include and library directories for external dependencies
+    message(${CLASS_INCLUDE_DIRS} ${GSL_INCLUDE_DIRS} ${FFTW_INCLUDE_DIRS})
     include_directories( ${CLASS_INCLUDE_DIRS} ${GSL_INCLUDE_DIRS} ${FFTW_INCLUDE_DIRS})
     link_directories(${CLASS_LIBRARY_DIRS} ${GSL_LIBRARY_DIRS} ${FFTW_INCLUDE_DIRS})
     # Adds path to CCL include folder
