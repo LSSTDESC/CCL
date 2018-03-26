@@ -5,10 +5,10 @@ compiler:
   - clang
   - gcc
 
-# Installs system level dependencies 
+# Installs system level dependencies
 before_install:
-  - sudo apt-get -qq update
-  - sudo apt-get install fftw3 fftw3-dev pkg-config cmake
+  - sudo apt-get update -qq
+  - sudo apt-get install -qq fftw3 fftw3-dev pkg-config cmake
 
 install: true
 

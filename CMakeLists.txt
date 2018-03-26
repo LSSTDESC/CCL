@@ -14,9 +14,9 @@ project(ccl)
     # Compilation flags
     if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
       # using Clang, disabling OpenMP support
-      set(CMAKE_C_FLAGS "-O3 -fomit-frame-pointer -fno-common -fPIC -D__CCL_DATA_DIR__=${CMAKE_INSTALL_PREFIX}/share/ccl")
+      set(CMAKE_C_FLAGS "-O3 -fomit-frame-pointer -fno-common -std=c99 -fPIC -D__CCL_DATA_DIR__=${CMAKE_INSTALL_PREFIX}/share/ccl")
     else()
-      set(CMAKE_C_FLAGS "-O3 -fomit-frame-pointer -fno-common -fPIC -fopenmp -D__CCL_DATA_DIR__=${CMAKE_INSTALL_PREFIX}/share/ccl")
+      set(CMAKE_C_FLAGS "-O3 -fomit-frame-pointer -fno-common -std=c99 -fPIC -fopenmp -D__CCL_DATA_DIR__=${CMAKE_INSTALL_PREFIX}/share/ccl")
     endif()
 
     # Defines list of CCL src files
