@@ -1,35 +1,22 @@
-script:
-language: python
-python:
-  - "2.7"
-  - "3.5"
-  - "3.6"
+language: c
 
-# Travis uses Ubuntu 12.04 and 14.04. None of them have GSL2x in apt-get
-# We have to install it from source (this will make the tests slower)
-# CLASS also needs to be downloaded and compiled, which there is no easy fix for.
+# Compiler selection
+compiler:
+  - clang
+  - gcc
+
+# Installs system level dependencies 
 before_install:
   - sudo apt-get -qq update
   - sudo apt-get install fftw3 fftw3-dev pkg-config cmake
-#  - sudo apt-get install latexmk
 
-#addons:
-#    apt:
-#        packages:
-#            - texlive-latex-recommended
-#            - texlive-latex-extra
-#            - texlive-fonts-recommended
-#            - texlive-fonts-extra
-#            - dvipng
-install:
+install: true
+
+script:
     - mkdir build
     - cd build
     - cmake ..
     - make && make install
-
-script:
-    - python tests/run_tests.py --debug --detailed-errors --verbose --process-restartworker
-    - make check-cpp
 
 # Check why the note creation process crashes
 #    - make -C doc/0000-ccl_note
