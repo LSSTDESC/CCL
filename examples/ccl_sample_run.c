@@ -4,11 +4,11 @@
 #include "ccl.h"
 #include "ccl_lsst_specs.h"
 
-#define OC 0.27
-#define OB 0.045
+#define OC 0.25
+#define OB 0.05
 #define OK 0.00
 #define ON 0.00
-#define HH 0.67
+#define HH 0.70
 #define W0 -1.0
 #define WA 0.00
 #define NS 0.96
