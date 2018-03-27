@@ -14,18 +14,6 @@ install: true
 
 script:
     - mkdir build
+    - cmake -DCMAKE_INSTALL_PREFIX:PATH=`pwd`/root -H. -Bbuild
     - cd build
-    - cmake ..
     - make && make install
-
-# Check why the note creation process crashes
-#    - make -C doc/0000-ccl_note
-#after_success:
-#    if [[ -n "$GITHUB_API_KEY" ]; then
-#        git checkout --orphan pdf
-#        git rm -rf .
-#        cp doc/0000-ccl_note/main.pdf 0000-ccl_note.pdf
-#        git add -f 0000-ccl_note.pdf
-#        git -c user.name='travis' -c user.email='travis' commit -m init
-#        git push -q -f https://drphilmarshall:$GITHUB_API_KEY@github.com/DarkEnergyScienceCollaboration/CCL pdf
-#    fi
