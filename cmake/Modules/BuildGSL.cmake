@@ -10,7 +10,7 @@ if(NOT GSL_FOUND )
     message(STATUS "GSL not found, downloading and compiling from source")
     ExternalProject_Add(GSL
         PREFIX GSL
-        URL ftp://ftp.gnu.org/gnu/gsl/gsl-${GSLVersion}.tar.gz
+        URL http://ftpmirror.gnu.org/gsl-${GSLVersion}.tar.gz
         URL_MD5 ${GSLMD5}
         DOWNLOAD_NO_PROGRESS 1
         CONFIGURE_COMMAND ./configure
