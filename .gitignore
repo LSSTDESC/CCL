@@ -35,6 +35,7 @@ tests/.ipynb_checkpoints/
 *bak
 *dylib
 pyccl/ccllib.py
+pyccl/ccl_params.ini
 pyccl.egg*
 .eggs*
 

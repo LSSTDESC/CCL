@@ -13,6 +13,7 @@ class build(_build):
         errno = call(["make", "-Cbuild", "_ccllib"])
         errno = call(["cp", "build/_ccllib.so", "pyccl/"])
         errno = call(["cp", "build/ccllib.py", "pyccl/"])
+        errno = call(["cp", "include/ccl_params.ini", "pyccl/"])
         _build.run(self)
 
 setup(name="pyccl",
@@ -21,7 +22,7 @@ setup(name="pyccl",
     version="0.2.1",
     packages=['pyccl'],
     provides=['pyccl'],
-    package_data={'pyccl': ['_ccllib.so']},
+    package_data={'pyccl': ['_ccllib.so', 'ccl_params.ini']},
     install_requires=['numpy'],
     test_suite='nose.collector',
     tests_require=['nose'],
