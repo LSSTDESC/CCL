@@ -6,9 +6,6 @@ python:
 
 addons:
   apt:
-    sources:
-      - sourceline: 'ppa:george-edison55/cmake-3.x'
-      
     packages:
       - fftw3
       - fftw3-dev
