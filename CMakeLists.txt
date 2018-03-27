@@ -14,9 +14,9 @@ project(ccl)
     # Compilation flags
     if ("${CMAKE_C_COMPILER_ID}" STREQUAL "Clang")
       # using Clang, disabling OpenMP support
-      set(CMAKE_C_FLAGS "-O3 -fomit-frame-pointer -fno-common -std=c99 -fPIC -D__CCL_DATA_DIR__=${CMAKE_INSTALL_PREFIX}/share/ccl")
+      set(CMAKE_C_FLAGS "-O3 -g -fomit-frame-pointer -fno-common -std=c99 -fPIC -D__CCL_DATA_DIR__=${CMAKE_INSTALL_PREFIX}/share/ccl")
     else()
-      set(CMAKE_C_FLAGS "-O3 -fomit-frame-pointer -fno-common -std=c99 -fPIC -fopenmp -D__CCL_DATA_DIR__=${CMAKE_INSTALL_PREFIX}/share/ccl")
+      set(CMAKE_C_FLAGS "-O3 -g -fomit-frame-pointer -fno-common -std=c99 -fPIC -fopenmp -D__CCL_DATA_DIR__=${CMAKE_INSTALL_PREFIX}/share/ccl")
     endif()
 
     # Defines list of CCL src files
@@ -86,7 +86,7 @@ project(ccl)
     #find_package(PythonInterp)
     find_package(PythonLibsNew)
     find_package(NumPy REQUIRED)
-    include_directories(${PYTHON_INCLUDE_DIRS} ${NUMPY_INCLUDE_DIRS})
+    include_directories(BEFORE ${PYTHON_INCLUDE_DIRS} ${NUMPY_INCLUDE_DIRS})
 
     # Builds swig python module in place
     if(${CMAKE_VERSION} VERSION_LESS "3.8.0")
@@ -95,6 +95,7 @@ project(ccl)
       swig_add_library(ccllib TYPE SHARED LANGUAGE python SOURCES pyccl/ccl.i)
     endif()
     swig_link_libraries(ccllib ${PYTHON_LIBRARIES} ccl)
+
     # Forces build of swig executable if not found
     if(NOT SWIG_FOUND)
       add_dependencies(${SWIG_MODULE_ccllib_REAL_NAME} SWIG)
