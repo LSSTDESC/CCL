@@ -14,6 +14,6 @@ install: true
 
 script:
     - mkdir build
-    - cmake -DCMAKE_INSTALL_PREFIX:PATH=`pwd`/root -H. -Bbuild
-    - cd build
-    - make && make install
+    - cmake -H. -Bbuild
+    - sudo make -Cbuild install
+    - cd tests && check_ccl
