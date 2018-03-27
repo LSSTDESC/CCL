@@ -3,8 +3,8 @@ language: python
 # Caching GSL and CLASS
 cache:
   directories:
-    - $HOME/build/EiffL/CCL/build/GSL
-    - $HOME/build/EiffL/CCL/build/CLASS
+    - $HOME/build/EiffL/CCL/build/GSL/src
+    - $HOME/build/EiffL/CCL/build/CLASS/src
 
 python:
   - "2.7"
