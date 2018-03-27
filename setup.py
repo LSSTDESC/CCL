@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-from distutils.command.build import build as _build
-from distutils.core import setup, Command
+from setuptools.command.build_py import build_py as _build
+from setuptools import setup
 from subprocess import call
 import os
 import sys
@@ -8,35 +8,24 @@ import sys
 class build(_build):
     """Specialized Python source builder."""
     def run(self):
-        call(["mkdir", "-p", "build"])
-        call(["cmake", "-H.", "-Bbuild"])
-        call(["make", "-Cbuild", "_ccllib"])
-        call(["cp", "build/_ccllib.so", "pyccl/"])
-        call(["cp", "build/ccllib.py", "pyccl/"])
+        errno = call(["mkdir", "-p", "build"])
+        errno = call(["cmake", "-H.", "-Bbuild"])
+        errno = call(["make", "-Cbuild", "_ccllib"])
+        errno = call(["cp", "build/_ccllib.so", "pyccl/"])
+        errno = call(["cp", "build/ccllib.py", "pyccl/"])
         _build.run(self)
-
-# Creating the PyTest command
-class PyTest(Command):
-    user_options = []
-    def initialize_options(self):
-        pass
-
-    def finalize_options(self):
-        pass
-
-    def run(self):
-        errno = call([sys.executable, 'tests/run_tests.py'])
-        raise SystemExit(errno)
 
 setup(name="pyccl",
     description="Library of validated cosmological functions.",
     author="LSST DESC",
-    version="0.1",
+    version="0.2.1",
     packages=['pyccl'],
     provides=['pyccl'],
     package_data={'pyccl': ['_ccllib.so']},
     install_requires=['numpy'],
-    cmdclass={'build': build, 'test':PyTest},
+    test_suite='nose.collector',
+    tests_require=['nose'],
+    cmdclass={'build_py': build},
     classifiers=[
 	  'Development Status :: 4 - Beta',
           'Intended Audience :: Science/Research',

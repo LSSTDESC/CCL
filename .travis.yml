@@ -1,14 +1,12 @@
-language: c
-
-# Compiler selection
-os:
-  - linux
-  - osx
-
+language: python
 
 python:
   - "2.7"
   - "3.6"
+
+os:
+  - linux
+  - osx
 
 addons:
   apt:
