@@ -1,14 +1,30 @@
 language: c
 
 # Compiler selection
+os:
+  - linux
+  - osx
+
 compiler:
-  - clang
   - gcc
+  - clang
+
+addons:
+  apt:
+    packages:
+      - fftw3
+      - fftw3-dev
+      - pkg-config
+      - cmake
+      - libgsl0-dev
+      - swig
+      - python3-numpy
+
 
 # Installs system level dependencies
 before_install:
-  - sudo apt-get update -qq
-  - sudo apt-get install -qq fftw3 fftw3-dev pkg-config cmake libgsl0-dev swig python3-numpy
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update          ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install cmake fftw gsl swig numpy; fi
 
 install: true
 
