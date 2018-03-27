@@ -17,3 +17,5 @@ script:
     - cmake -H. -Bbuild
     - sudo make -Cbuild install
     - check_ccl
+    - python setup.py build
+    - python setup.py test
