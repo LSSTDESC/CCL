@@ -7,7 +7,7 @@ python:
 addons:
   apt:
     sources:
-      - george-edison55-precise-backports
+      - george-edison55/cmake-3.x
     packages:
       - fftw3
       - fftw3-dev
@@ -16,12 +16,12 @@ addons:
       - swig
       - python-numpy
       - python3-numpy
-      - cmake-data
       - cmake
 
 install: true
 
 script:
+    - cmake --version
     - python setup.py build
     - python setup.py test
     - sudo make -Cbuild install
