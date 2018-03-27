@@ -6,6 +6,12 @@ project(ccl)
 
     # Finds dependencies
     find_package(FFTW REQUIRED)
+    find_package(SWIG REQUIRED)
+    include(UseSWIG)
+
+    find_package(PythonLibs REQUIRED)
+    find_package(NumPy REQUIRED)
+    include_directories(${PYTHON_INCLUDE_DIRS} ${NUMPY_INCLUDE_DIRS})
 
     # Builds GSL and CLASS if necessary
     include(BuildGSL)
@@ -55,7 +61,6 @@ project(ccl)
                  tests/ccl_test_emu_nu.c)
 
     # Define include and library directories for external dependencies
-    message(${CLASS_INCLUDE_DIRS} ${GSL_INCLUDE_DIRS} ${FFTW_INCLUDE_DIRS})
     include_directories( ${CLASS_INCLUDE_DIRS} ${GSL_INCLUDE_DIRS} ${FFTW_INCLUDE_DIRS})
     link_directories(${CLASS_LIBRARY_DIRS} ${GSL_LIBRARY_DIRS} ${FFTW_INCLUDE_DIRS})
     # Adds path to CCL include folder
@@ -69,11 +74,15 @@ project(ccl)
     endif()
     target_link_libraries(ccl ${GSL_LIBRARIES} ${FFTW_LIBRARIES} ${CLASS_LIBRARIES} m)
 
+    # Builds swig python module in place
+    swig_add_library(pyccl TYPE SHARED LANGUAGE python SOURCES pyccl/ccl.i)
+    swig_link_libraries(pyccl ${PYTHON_LIBRARIES} ccl)
+
     # Builds the test suite
     add_executable(check_ccl ${TEST_SRC})
     target_link_libraries(check_ccl ccl)
 
-    # Installs CCL
+    # Installs the CCL library
     install(TARGETS ccl DESTINATION lib)
     install(DIRECTORY include/ DESTINATION include/
             FILES_MATCHING PATTERN "*.h")
