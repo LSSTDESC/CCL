@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 from distutils.command.build import build as _build
-from distutils.core import setup
+from distutils.core import setup, Command
 from subprocess import call
 import os
+import sys
 
 class build(_build):
     """Specialized Python source builder."""
@@ -14,6 +15,19 @@ class build(_build):
         call(["cp", "build/ccllib.py", "pyccl/"])
         _build.run(self)
 
+# Creating the PyTest command
+class PyTest(Command):
+    user_options = []
+    def initialize_options(self):
+        pass
+
+    def finalize_options(self):
+        pass
+
+    def run(self):
+        errno = call([sys.executable, 'tests/run_tests.py'])
+        raise SystemExit(errno)
+
 setup(name="pyccl",
     description="Library of validated cosmological functions.",
     author="LSST DESC",
@@ -22,7 +36,7 @@ setup(name="pyccl",
     provides=['pyccl'],
     package_data={'pyccl': ['_pyccl.so']},
     install_requires=['numpy'],
-    cmdclass={'build': build},
+    cmdclass={'build': build, 'test':PyTest},
     classifiers=[
 	  'Development Status :: 4 - Beta',
           'Intended Audience :: Science/Research',
