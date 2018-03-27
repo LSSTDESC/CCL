@@ -5,6 +5,11 @@ os:
   - linux
   - osx
 
+
+python:
+  - "2.7"
+  - "3.6"
+
 addons:
   apt:
     packages:
@@ -15,11 +20,12 @@ addons:
       - libgsl0-dev
       - swig
       - python3-numpy
+      - python-numpy
 
 # Installs system level dependencies
 before_install:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update          ; fi
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install cmake fftw gsl swig numpy; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install fftw swig; fi
 
 install: true
 
