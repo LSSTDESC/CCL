@@ -8,6 +8,10 @@ cache:
     - $HOME/build/EiffL/CCL/build/SWIG/src
     - $HOME/build/EiffL/CCL/build/CLASS/src
 
+os:
+  - linux
+  - osx
+
 python:
   - "2.7"
   - "3.5"
