@@ -1,5 +1,3 @@
-cmake_minimum_required(VERSION 3.5)
-
 include(ExternalProject)
 
 set(SWIGVersion 3.0.12)
