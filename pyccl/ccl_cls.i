@@ -25,7 +25,8 @@
                                       (int ns, double* s),
                                       (int nba, double* ba),
                                       (int nrf, double* rf) }
-%apply (double* IN_ARRAY1, int DIM1) {(double* ell, int nell)}
+%apply (double* IN_ARRAY1, int DIM1) {(double* ell, int nell),
+                                      (double *aarr,int na)};
 %apply (double* ARGOUT_ARRAY1, int DIM1) {(double* output, int nout)};
 
 %inline %{
@@ -74,4 +75,11 @@ void angular_cl_vec(ccl_cosmology * cosmo,
     }
 }
 
+void clt_fa_vec(ccl_cosmology *cosmo,CCL_ClTracer *clt,int func_code,
+		double *aarr,int na,double *output,int nout,int *status)
+{
+  assert(nout==na);
+  ccl_get_tracer_fas(cosmo,clt,na,aarr,output,func_code,status);
+}
+ 
 %}

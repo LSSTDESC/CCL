@@ -53,7 +53,7 @@ double ccl_h_over_h0(ccl_cosmology * cosmo, double a, int * status);
  * @param a array of scale factors
  * @param output array of length na to store the results of the calculation. The entry at index i stores H(a[i])/H0
  * @param status Status flag. 0 if there are no errors, nonzero otherwise.
- * For specific cases see documentation for ccl_error.
+ * For specific cases see documentation for ccl_error.c
  * @return void
  */
 void ccl_h_over_h0s(ccl_cosmology * cosmo, int na, double a[], double output[], int * status);
@@ -76,7 +76,7 @@ double ccl_comoving_radial_distance(ccl_cosmology * cosmo, double a, int* status
  * @param output array of length na to store the results of the calculation. The entry at index i stores the
  * distance for a[i].
  * @param status Status flag. 0 if there are no errors, nonzero otherwise.
- * For specific cases see documentation for ccl_error.
+ * For specific cases see documentation for ccl_error.c
  * @return void
  */
 void ccl_comoving_radial_distances(ccl_cosmology * cosmo, int na, double a[], double output[], int* status);
@@ -90,7 +90,7 @@ void ccl_comoving_radial_distances(ccl_cosmology * cosmo, int na, double a[], do
  * @param cosmo Cosmological parameters
  * @param chi Comoving radial distance of two objects
  * @param status Status flag. 0 if there are no errors, nonzero otherwise.
- * For specific cases see documentation for ccl_error.
+ * For specific cases see documentation for ccl_error.c
  * @return chi_t, the transverse comoving distance
  */
 double ccl_sinn(ccl_cosmology *cosmo,double chi, int *status);
@@ -117,7 +117,7 @@ double ccl_comoving_angular_distance(ccl_cosmology * cosmo, double a, int* statu
  * @param output array of length na to store the results of the calculation. The entry at index i stores the
  * distance for a[i].
  * @param status Status flag. 0 if there are no errors, nonzero otherwise.
- * For specific cases see documentation for ccl_error.
+ * For specific cases see documentation for ccl_error.c
  * @return void
  */
 void ccl_comoving_angular_distances(ccl_cosmology * cosmo, int na, double a[], double output[], int* status);
@@ -140,17 +140,17 @@ double ccl_luminosity_distance(ccl_cosmology * cosmo, double a, int * status);
  * @param output array of length na to store the results of the calculation. The entry at index i stores the
  * distance for a[i].
  * @param status Status flag. 0 if there are no errors, nonzero otherwise.
- * For specific cases see documentation for ccl_error.
+ * For specific cases see documentation for ccl_error.c
  * @return void
  */
 void ccl_luminosity_distances(ccl_cosmology * cosmo, int na, double a[], double output[], int * status);
 
-/** 
+/**
  * Distance modulus for object at scale factor a. Note the factor of 6 arises from the conversion from Mpc to pc.
  * @param cosmo Cosmological parameters
  * @param a scale factor, normalized to 1 today
  * @param status Status flag. 0 if there are no errors, nonzero otherwise.
- * For specific cases see documentation for ccl_error.
+ * For specific cases see documentation for ccl_error.c
  * @return distance modulus
  */
 double ccl_distance_modulus(ccl_cosmology * cosmo, double a, int * status);
@@ -163,7 +163,7 @@ double ccl_distance_modulus(ccl_cosmology * cosmo, double a, int * status);
  * @param output array of length na to store the results of the calculation. The entry at index i stores the
  * distance for a[i].
  * @param status Status flag. 0 if there are no errors, nonzero otherwise.
- * For specific cases see documentation for ccl_error.
+ * For specific cases see documentation for ccl_error.c
  * @return void
 */
 void ccl_distance_moduli(ccl_cosmology * cosmo, int na, double a[], double output[], int * status);
@@ -187,12 +187,11 @@ double ccl_growth_factor(ccl_cosmology * cosmo, double a, int * status);
  * @param output array of length na to store the results of the calculation. The entry at index i stores the
  * distance for a[i].
  * @param status Status flag. 0 if there are no errors, nonzero otherwise.
- * For specific cases see documentation for ccl_error.
+ * For specific cases see documentation for ccl_error.c
  * @return void
  */
 void ccl_growth_factors(ccl_cosmology * cosmo, int na, double a[], double output[], int * status);
 
-//
 /**
  * Growth factor at scale factor a, where g(a) is normalized to a in matter domination
  * @param cosmo Cosmological parameters
@@ -211,7 +210,7 @@ double ccl_growth_factor_unnorm(ccl_cosmology * cosmo, double a, int * status);
  * @param output array of length na to store the results of the calculation. The entry at index i stores the
  * distance for a[i].
  * @param status Status flag. 0 if there are no errors, nonzero otherwise.
- * For specific cases see documentation for ccl_error.
+ * For specific cases see documentation for ccl_error.c
  * @return void
  */
 void ccl_growth_factors_unnorm(ccl_cosmology * cosmo, int na, double a[], double output[], int * status);
@@ -234,7 +233,7 @@ double ccl_growth_rate(ccl_cosmology * cosmo, double a, int* status);
  * @param output array of length na to store the results of the calculation. The entry at index i stores the
  * distance for a[i].
  * @param status Status flag. 0 if there are no errors, nonzero otherwise.
- * For specific cases see documentation for ccl_error.
+ * For specific cases see documentation for ccl_error.c
  * @return void
  */
 void ccl_growth_rates(ccl_cosmology * cosmo, int na, double a[], double output[], int * status);
@@ -244,7 +243,7 @@ void ccl_growth_rates(ccl_cosmology * cosmo, int na, double a[], double output[]
  * @param cosmo Cosmological parameters
  * @param chi Comoving distance in Mpc
  * @param status Status flag. 0 if there are no errors, nonzero otherwise.
- * For specific cases see documentation for ccl_error.
+ * For specific cases see documentation for ccl_error.c
  * @return a, scale factor of distance xi
  */
 double ccl_scale_factor_of_chi(ccl_cosmology * cosmo, double chi, int * status);
@@ -257,22 +256,17 @@ double ccl_scale_factor_of_chi(ccl_cosmology * cosmo, double chi, int * status);
  * @param output array of length na to store the results of the calculation. The entry at index i stores the
  * scale factor for chi[i].
  * @param status Status flag. 0 if there are no errors, nonzero otherwise.
- * For specific cases see documentation for ccl_error.
+ * For specific cases see documentation for ccl_error.c
  * @return void
  */
 void ccl_scale_factor_of_chis(ccl_cosmology * cosmo, int nchi, double chi[], double output[], int* status);
 
 /**
- * Physical density (\rho) as a function of scale factor. 
- * Critical density is defined as \rho_critical = 3 H^2(a)/ (8\pi*G). 
- * Density of a given species is then \rho_x = \Omega_x(a) \rho_critical(a). 
- * For example, \rho_matter(a) = \Omega_m * a^{-3} / (H^2/H0^2) * 3H^2 / (8\pi*G) = \Omega_m * a^{-3} * 3H0^2 / (8\pi*G) = \Omega_m * a^{-3} * \rho_critical_present
- * Units of M_sun/(Mpc)^3.
+ * Physical density (rho) as a function of scale factor.  Critical density is defined as rho_critical = 3 H^2(a)/ (8 pi G). Density of a given species is then rho_x = Omega_x(a) rho_critical(a). For example, rho_matter(a) = Omega_m  a^{-3} / (H^2/H0^2)  3H^2 / (8 pi G) =  Omega_m  a^{-3}  3H0^2 / (8 pi G) =  Omega_m a^{-3}  rho_critical_present. Units of M_sun/(Mpc)^3.
  * @param cosmo Cosmological parameters
  * @param a scale factor, normalized to 1 for today
- * @param label species type. Available: 'critical'(0,1), 'matter'(2,3), 'dark_energy'(4,5), 'radiation'(6,7), 'curvature'(8,9), 'massless neutrinos'(10,11), 'massive neutrinos'(12,13)
- * Even label numbers above refer to the physical densities. Odd label numbers refer to 'comoving' densities, which multiply the physical densities by a^3.
- * @param status Status flag. 0 if there are no errors, nonzero otherwise.
+ * @param label species type. Available: 'critical'(0,1), 'matter'(2,3), 'dark_energy'(4,5), 'radiation'(6,7), 'curvature'(8,9), 'massless neutrinos'(10,11), 'massive neutrinos'(12,13). Even label numbers refer to the physical densities. Odd label numbers refer to 'comoving' densities, which multiply the physical densities by a^3.
+ * @param status Status flag. 0 if there are no errors, nonzero otherwise. 
  * For specific cases see documentation for ccl_error.
  * @return rho_x, physical density at scale factor a. 
  */
@@ -284,7 +278,7 @@ double ccl_rho_x(ccl_cosmology * cosmo, double a, ccl_rho_x_label label, int* st
  * @param a scale factor, normalized to 1 for today
  * @param label species type. Available: 'matter' (0), 'dark_energy'(1), 'radiation'(2), and 'curvature'(3)
  * @param status Status flag. 0 if there are no errors, nonzero otherwise.
- * For specific cases see documentation for ccl_error.
+ * For specific cases see documentation for ccl_error.c
  * @return omega_x, Density fraction of a given species at scale factor a.
  */
 double ccl_omega_x(ccl_cosmology * cosmo, double a, ccl_omega_x_label label, int* status);

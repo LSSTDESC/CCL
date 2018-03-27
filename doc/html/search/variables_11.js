@@ -1,6 +1,7 @@
 var searchData=
 [
   ['t_5fcmb',['T_CMB',['../structccl__parameters.html#a3015eb317a0a8fe96512b2c58b7a5965',1,'ccl_parameters']]],
+  ['tcmb',['TCMB',['../struct_om_nuh2__params.html#ac9ab826eb083774d5d097388d44cf012',1,'OmNuh2_params']]],
   ['teardown',['teardown',['../structctest.html#ab9e135ee92db9511b1cf3592dffec011',1,'ctest']]],
   ['th',['th',['../structcorr__int__par.html#a5bed0d568a478cf9c72dd6933f055e2b',1,'corr_int_par']]],
   ['th2p7',['th2p7',['../structeh__struct.html#afd9583995f4670685035d05749c385f0',1,'eh_struct']]],
