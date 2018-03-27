@@ -6,12 +6,6 @@ project(ccl)
 
     # Finds dependencies
     find_package(FFTW REQUIRED)
-    find_package(SWIG REQUIRED)
-    include(UseSWIG)
-
-    find_package(PythonLibs REQUIRED)
-    find_package(NumPy REQUIRED)
-    include_directories(${PYTHON_INCLUDE_DIRS} ${NUMPY_INCLUDE_DIRS})
 
     # Builds GSL and CLASS if necessary
     include(BuildGSL)
@@ -74,10 +68,6 @@ project(ccl)
     endif()
     target_link_libraries(ccl ${GSL_LIBRARIES} ${FFTW_LIBRARIES} ${CLASS_LIBRARIES} m)
 
-    # Builds swig python module in place
-    swig_add_library(ccllib TYPE SHARED LANGUAGE python SOURCES pyccl/ccl.i)
-    swig_link_libraries(ccllib ${PYTHON_LIBRARIES} ccl)
-
     # Builds the test suite
     add_executable(check_ccl ${TEST_SRC})
     target_link_libraries(check_ccl ccl)
@@ -87,3 +77,18 @@ project(ccl)
     install(DIRECTORY include/ DESTINATION include/
             FILES_MATCHING PATTERN "*.h")
     install(FILES include/ccl_params.ini DESTINATION share/ccl)
+
+    # Builds the python module
+    include(BuildSWIG)
+    include(UseSWIG)
+
+    find_package(PythonLibs REQUIRED)
+    find_package(NumPy REQUIRED)
+    include_directories(${PYTHON_INCLUDE_DIRS} ${NUMPY_INCLUDE_DIRS})
+
+    # Builds swig python module in place
+    swig_add_library(ccllib TYPE SHARED LANGUAGE python SOURCES pyccl/ccl.i)
+    if(NOT SWIG_FOUND)
+      add_dependencies(ccl SWIG)
+    endif()
+    swig_link_libraries(ccllib ${PYTHON_LIBRARIES} ccl)
