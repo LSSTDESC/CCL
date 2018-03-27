@@ -75,8 +75,8 @@ project(ccl)
     target_link_libraries(ccl ${GSL_LIBRARIES} ${FFTW_LIBRARIES} ${CLASS_LIBRARIES} m)
 
     # Builds swig python module in place
-    swig_add_library(pyccl TYPE SHARED LANGUAGE python SOURCES pyccl/ccl.i)
-    swig_link_libraries(pyccl ${PYTHON_LIBRARIES} ccl)
+    swig_add_library(ccllib TYPE SHARED LANGUAGE python SOURCES pyccl/ccl.i)
+    swig_link_libraries(ccllib ${PYTHON_LIBRARIES} ccl)
 
     # Builds the test suite
     add_executable(check_ccl ${TEST_SRC})
