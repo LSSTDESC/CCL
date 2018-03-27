@@ -6,6 +6,8 @@ python:
 
 addons:
   apt:
+    sources:
+      - george-edison55-precise-backports
     packages:
       - fftw3
       - fftw3-dev
@@ -14,10 +16,10 @@ addons:
       - swig
       - python-numpy
       - python3-numpy
+      - cmake-data
+      - cmake
 
-install:
-   - wget https://cmake.org/files/v3.9/cmake-3.9.1-Linux-x86_64.sh
-   - sudo sh cmake-3.9.1-Linux-x86_64.sh
+install: true
 
 script:
     - python setup.py build
