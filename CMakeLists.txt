@@ -84,43 +84,6 @@ project(ccl)
     include(UseSWIG)
 
     find_package(PythonInterp)
-    set(Python_ADDITIONAL_VERSIONS ${PYTHON_VERSION_STRING})
-    # Introspect the python to get the correct environment
-    execute_process(COMMAND "${PYTHON_EXECUTABLE}" "-c"
-"from distutils import sysconfig as s;import sys;import struct;
-print('.'.join(str(v) for v in sys.version_info));
-print(s.PREFIX);
-print(s.get_python_inc(plat_specific=True));
-print(s.get_python_lib(plat_specific=True));
-print(s.get_config_var('SO'));
-print(hasattr(sys, 'gettotalrefcount')+0);
-print(struct.calcsize('@P'));
-"
-        RESULT_VARIABLE _PYTHON_SUCCESS
-        OUTPUT_VARIABLE _PYTHON_VALUES
-        ERROR_VARIABLE _PYTHON_ERROR_VALUE
-        OUTPUT_STRIP_TRAILING_WHITESPACE)
-
-    if(NOT _PYTHON_SUCCESS MATCHES 0)
-        set(PYTHONLIBS_FOUND FALSE)
-        return()
-    endif()
-
-# Convert the process output into a list
-string(REGEX REPLACE ";" "\\\\;" _PYTHON_VALUES ${_PYTHON_VALUES})
-string(REGEX REPLACE "\n" ";" _PYTHON_VALUES ${_PYTHON_VALUES})
-list(GET _PYTHON_VALUES 0 _PYTHON_VERSION_LIST)
-list(GET _PYTHON_VALUES 1 PYTHON_PREFIX)
-list(GET _PYTHON_VALUES 2 PYTHON_INCLUDE_DIR)
-list(GET _PYTHON_VALUES 3 PYTHON_SITE_PACKAGES)
-list(GET _PYTHON_VALUES 4 PYTHON_MODULE_EXTENSION)
-list(GET _PYTHON_VALUES 5 PYTHON_IS_DEBUG)
-list(GET _PYTHON_VALUES 6 PYTHON_SIZEOF_VOID_P)
-
-    message(${PYTHON_INCLUDE_DIR})
-    message(${PYTHON_PREFIX})
-    message(${PYTHON_SITE_PACKAGES})
-
     find_package(PythonLibs)
     find_package(NumPy REQUIRED)
     include_directories(${PYTHON_INCLUDE_DIRS} ${NUMPY_INCLUDE_DIRS})
