@@ -84,6 +84,7 @@ project(ccl)
     include(UseSWIG)
 
     find_package(PythonInterp)
+    set(Python_ADDITIONAL_VERSIONS ${PYTHON_VERSION_STRING})
     # Introspect the python to get the correct environment
     execute_process(COMMAND "${PYTHON_EXECUTABLE}" "-c"
 "from distutils import sysconfig as s;import sys;import struct;
