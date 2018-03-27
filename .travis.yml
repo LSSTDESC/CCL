@@ -16,4 +16,4 @@ script:
     - mkdir build
     - cmake -H. -Bbuild
     - sudo make -Cbuild install
-    - cd tests && check_ccl
+    - check_ccl
