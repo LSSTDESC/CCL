@@ -83,7 +83,8 @@ project(ccl)
     include(BuildSWIG)
     include(UseSWIG)
 
-    find_package(PythonLibs REQUIRED)
+    find_package(PythonInterp)
+    find_package(PythonLibs)
     find_package(NumPy REQUIRED)
     include_directories(${PYTHON_INCLUDE_DIRS} ${NUMPY_INCLUDE_DIRS})
 
