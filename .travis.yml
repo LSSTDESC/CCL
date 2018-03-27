@@ -4,22 +4,14 @@ language: python
 cache:
   directories:
     - $HOME/build/EiffL/CCL/build/GSL/src
+    - $HOME/build/EiffL/CCL/build/FFTW/src
+    - $HOME/build/EiffL/CCL/build/SWIG/src
     - $HOME/build/EiffL/CCL/build/CLASS/src
 
 python:
   - "2.7"
   - "3.5"
   - "3.6"
-
-addons:
-  apt:
-    packages:
-      - fftw3
-      - fftw3-dev
-      - pkg-config
-      - libgsl0-dev
-      - swig
-      - cmake
 
 install: true
 

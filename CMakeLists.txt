@@ -4,19 +4,17 @@ list(APPEND CMAKE_MODULE_PATH  "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
 project(ccl)
 
-    # Finds dependencies
-    find_package(FFTW REQUIRED)
-
-    # Builds GSL and CLASS if necessary
+    # Uses system libraries or downloads and build if necessary
+    include(BuildFFTW)
     include(BuildGSL)
     include(BuildCLASS)
 
     # Compilation flags
     if ("${CMAKE_C_COMPILER_ID}" STREQUAL "Clang")
       # using Clang, disabling OpenMP support
-      set(CMAKE_C_FLAGS "-O3 -g -fomit-frame-pointer -fno-common -std=c99 -fPIC -D__CCL_DATA_DIR__=${CMAKE_INSTALL_PREFIX}/share/ccl")
+      set(CMAKE_C_FLAGS "-O3 -fomit-frame-pointer -fno-common -std=c99 -fPIC -D__CCL_DATA_DIR__=${CMAKE_INSTALL_PREFIX}/share/ccl")
     else()
-      set(CMAKE_C_FLAGS "-O3 -g -fomit-frame-pointer -fno-common -std=c99 -fPIC -fopenmp -D__CCL_DATA_DIR__=${CMAKE_INSTALL_PREFIX}/share/ccl")
+      set(CMAKE_C_FLAGS "-O3 -fomit-frame-pointer -fno-common -std=c99 -fPIC -fopenmp -D__CCL_DATA_DIR__=${CMAKE_INSTALL_PREFIX}/share/ccl")
     endif()
 
     # Defines list of CCL src files
@@ -65,6 +63,9 @@ project(ccl)
     add_dependencies(ccl CLASS)
     if(NOT GSL_FOUND)
       add_dependencies(ccl GSL)
+    endif()
+    if(NOT FFTW_FOUND)
+      add_dependencies(ccl FFTW)
     endif()
     target_link_libraries(ccl ${GSL_LIBRARIES} ${FFTW_LIBRARIES} ${CLASS_LIBRARIES} m)
 
