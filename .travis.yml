@@ -10,13 +10,14 @@ addons:
       - fftw3
       - fftw3-dev
       - pkg-config
-      - cmake
       - libgsl0-dev
       - swig
       - python-numpy
       - python3-numpy
 
-install: true
+install:
+   - wget https://cmake.org/files/v3.9/cmake-3.9.1-Linux-x86_64.sh
+   - sudo sh cmake-3.9.1-Linux-x86_64.sh
 
 script:
     - python setup.py build
