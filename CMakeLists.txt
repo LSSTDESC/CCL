@@ -88,7 +88,11 @@ project(ccl)
     include_directories(${PYTHON_INCLUDE_DIRS} ${NUMPY_INCLUDE_DIRS})
 
     # Builds swig python module in place
-    swig_add_library(ccllib TYPE SHARED LANGUAGE python SOURCES pyccl/ccl.i)
+    if(${CMAKE_VERSION} VERSION_LESS "3.8.0")
+      swig_add_module(ccllib  python pyccl/ccl.i)
+    else()
+      swig_add_library(ccllib TYPE SHARED LANGUAGE python SOURCES pyccl/ccl.i)
+    endif()
     swig_link_libraries(ccllib ${PYTHON_LIBRARIES} ccl)
     # Forces build of swig executable if not found
     if(NOT SWIG_FOUND)
