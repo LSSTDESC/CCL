@@ -1,5 +1,9 @@
 language: python
 
+cache:
+  directories:
+    - $HOME/EiffL/CCL/build/GSL
+
 python:
   - "2.7"
   - "3.6"
