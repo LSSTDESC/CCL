@@ -5,10 +5,6 @@ os:
   - linux
   - osx
 
-compiler:
-  - gcc
-  - clang
-
 addons:
   apt:
     packages:
@@ -19,7 +15,6 @@ addons:
       - libgsl0-dev
       - swig
       - python3-numpy
-
 
 # Installs system level dependencies
 before_install:
