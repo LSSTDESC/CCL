@@ -16,8 +16,6 @@ addons:
       - pkg-config
       - libgsl0-dev
       - swig
-      - python-numpy
-      - python3-numpy
       - cmake
 
 install: true
