@@ -109,29 +109,33 @@ Not all features of \ccl are available for all models. For a guide to which pred
 %-------------------------------------------------------------------------------
 \subsection{Background cosmology}
 \vol{Renee}
+\vol{Shahab -- added some extra text on physical densities, along with various minor corrections. Moreover, what we expressed as $\Omega_{\nu, {\rm m}}(a)$ in Eqns 1 and 2 should be re-expressed as either $\rho^{-1}_{\rm crit,0} \rho_{\nu, {\rm m}}(a)$ or $H_0^{-2} H^{2}(a)\Omega_{\nu, {\rm m}}(a)$ given the definition of $\Omega_X(a)$.}
 
 \cont{Background cosmology parameter definition. Expansion and distance functions. Growth function and growth rate.}
 The models that are specified above map directly onto cosmological observables like the expansion rate of the universe, which is paramterised through the Hubble parameter (and assuming the CPL parameterization described above) as:
 
 \begin{align}\label{eq:Ha}
 \frac{H(a)}{H_0} &= a^{-3/2}\Big(\Omega_{M,0}+\Omega_{\Lambda,0} a^{-3(w_0+w_a)}
-    \exp[3 w_a (a-1)]+\nonumber \\ &\Omega_{K,0} a +(\Omega_{g,0} + \Omega_{\nu, {\rm rel}}) a^{-1} + \Omega_{\nu, {\rm m}}(a)a^3\Big)^{\frac{1}{2}}.
+    \exp[3 w_a (a-1)]+\nonumber \\ &\Omega_{K,0} a +(\Omega_{g,0} + \Omega_{\nu, {\rm rel},0}) a^{-1} + \rho^{-1}_{\rm crit,0} \rho_{\nu, {\rm m}}(a)a^3\Big)^{\frac{1}{2}} ,
 \end{align}
-where $\Omega_{\nu, {\rm m}}(a)$, the fractional energy density of massive neutrinos, is calculated via
+where $\rho^{-1}_{\rm crit,0} \rho_{\nu, {\rm m}}(a)$ is the fractional energy density of massive neutrinos, calculated via
 \begin{align}
-\Omega_{\nu, {\rm m}}(a) &= \sum_{i=1}^{N_\nu} \frac{8 \pi^2(\pi k_b )^3 k_b}{15(c h_{\rm P})^3} \frac{8 \pi G}{3h^2c^2} \left(\frac{T_{\nu}^{\rm eff}}{a}\right)^4 \nonumber \\ & \times \left(\frac{7}{8}\int_0^{x_{\rm max}} dx \, x^2 \frac{\sqrt{x^2 + \left(\mu^i\right)^2}}{\exp(x) + 1}\right).
+\rho^{-1}_{\rm crit,0} \rho_{\nu, {\rm m}}(a) &= \sum_{i=1}^{N_\nu} \frac{8 \pi^2(\pi k_b )^3 k_b}{15(c h_{\rm P})^3} \frac{8 \pi G}{3c^2H_0^2} \left(\frac{T_{\nu}^{\rm eff}}{a}\right)^4 \nonumber \\ & \times \left(\frac{7}{8}\int_0^{x_{\rm max}} dx \, x^2 \frac{\sqrt{x^2 + \left(\mu^i\right)^2}}{\exp(x) + 1}\right).
 \label{Omnu}
 \end{align}
-Here, $h_{\rm P}$ is Planck's constant, $h$ is $H_0/100$ with $H_0$ in units of km / s / Mpc, and $T_{\nu}^{\rm eff}$ is the effective temperature of massive neutrinos. $T_{\nu}^{\rm eff}$ is related to the temperature of the CMB via $T_{\nu}^{\rm eff} = T_{\rm CMB} T_{\rm NCDM}$, where $T_{\rm NCDM}$ is a dimensionless factor used by e.g. {\tt CLASS} to set the ratio of $\frac{\sum m_\nu}{\Omega_{\nu}^0}$ to its experimentally measured value. Note that $T_{\rm NCDM}$ is used to modulate the effective temperatuer of massive neutrinos only; the temperature of relativistic neutrinos follows the usual relation. Finally, $\mu^i$ is a per-species, mass-like dimensionless value, given by $\mu^i = m_{\nu}^{i}a / T_{\nu}^{\rm eff}$. 
+Here, $h_{\rm P}$ is Planck's constant, $H_0 = 100~h~{\rm km}~{\rm s}^{-1}~{\rm Mpc}^{-1}$, where $h$ is a dimensionless constant, and $T_{\nu}^{\rm eff}$ is the effective temperature of massive neutrinos. $T_{\nu}^{\rm eff}$ is related to the temperature of the CMB via $T_{\nu}^{\rm eff} = T_{\rm CMB} T_{\rm NCDM}$, where $T_{\rm NCDM}$ is a dimensionless factor used by e.g. {\tt CLASS} to set the ratio of $\frac{\sum m_\nu}{\Omega_{\nu}^0}$ to its experimentally measured value. Note that $T_{\rm NCDM}$ is used to modulate the effective temperature of massive neutrinos only; the temperature of relativistic neutrinos follows the usual relation. Finally, $\mu^i$ is a per-species, mass-like dimensionless value, given by $\mu^i = m_{\nu}^{i}a / T_{\nu}^{\rm eff}$.
 
-\noindent
-In order to compute distances, we use the radial comoving distance, which is calculated via a numerical integral as
+The density parameters $\Omega_X(a)$ of a given species $X$ are defined in terms of the physical densities $\rho_X(a)$ via $\Omega_X(a) \equiv \rho^{-1}_{\rm crit}(a) \rho_X(a)$, where the critical density $\rho_{\rm crit}(a) = {( 8 \pi G)}^{-1} 3H^2(a) = \rho_{\rm crit,0} H_0^{-2} H^2(a)$. As an example, the physical density of matter is given by $\rho_M(a) = \rho_{M,0} a^{-3} = \rho_{\rm crit,0} \Omega_{M,0} a^{-3}$, and its density parameter is $\Omega_M(a) = \Omega_{M,0} H_0^{2} a^{-3} H^{-2}(a)$. \ccl moreover allows for comoving physical densities $\rho_{X, {\rm com}}(a) = \rho_X(a) a^3$ to be extracted, which in the case of matter reduces to $\rho_{M, {\rm com}} = \rho_{\rm crit,0} \Omega_{M,0}$.
+
+%\noindent
+In order to compute distances, we consider the comoving radial distance, which is calculated via a numerical integral as
 \begin{equation}
  \chi(a)= c \int_a^1 \frac{da'}{a'^2 H(a')}.
 \end{equation}
-
-\noindent
-The transverse comoving distance is then computed in terms of the radial comoving distance as:
+%\noindent
+%The comoving transverse distance
+The comoving angular diameter distance
+is then computed in terms of the comoving radial distance,
 \begin{equation}\label{eq:angdist}
  r(\chi)=\left\{\begin{array}{cc}
                  k^{-1/2}\sin(k^{1/2}\chi) & k>0\\
@@ -139,22 +143,20 @@ The transverse comoving distance is then computed in terms of the radial comovin
                  |k|^{-1/2}\sinh(|k|^{1/2}\chi) & k<0\\
                 \end{array}\right.
 \end{equation}
-
-\noindent
-This function can be written directly in terms of the energy density in cosmic curvature, $\Omega_k$, as:
+where $k = \left({\sum_X \Omega_X -1}\right) c^{-2} H_0^2$ is the curvature.
+%\noindent
+This function can be written directly in terms of the present density in cosmic curvature, $\Omega_{K,0}$, as
 \begin{equation}\label{eq:angdist_omegak}
- r(\chi)=                 \frac{c}{H_0}\sqrt{\Omega_k}\sinh(\sqrt{\Omega_k}\chi),
+ r(\chi) = \sqrt{\Omega_{K,0}}\sinh(\sqrt{\Omega_{K,0}}\chi),
 \end{equation}
-which is valid for all forms of the curvature energy density.
-
-The angular diameter distance is $d_A=a\,r(a)$, and the luminosity distance is
+which is valid for all forms of the curvature density.
+The angular diameter distance is given by $d_A=a\,r(a)$, and the luminosity distance is
 $d_L=r(a)/a,$ leading to the familiar relation $d_A = a^2d_L$ which is valid in general for all metric theories of gravity.
-
 The \ccl suite also has the functionality to compute the distance modulus, defined as,
 \begin{equation}\label{eq:distmod}
-    \mu = 5 \log_{10}(d_L / {\rm pc})-5
+    \mu = 5 \log_{10}(d_L / {\rm pc})-5,
 \end{equation}
-and $a(\chi)$, the inverse of $\chi(a)$.
+along with $a(\chi)$, the inverse function of $\chi(a)$.
 
 
 
