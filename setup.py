@@ -10,7 +10,7 @@ class build(_build):
     def run(self):
         call(["mkdir", "-p", "build"])
         call(["cmake", "-H.", "-Bbuild"])
-        call(["make", "-Cbuild"])
+        call(["make", "-Cbuild", "_ccllib"])
         call(["cp", "build/_ccllib.so", "pyccl/"])
         call(["cp", "build/ccllib.py", "pyccl/"])
         _build.run(self)
