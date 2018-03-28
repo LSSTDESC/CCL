@@ -10,7 +10,11 @@ class build(_build):
     def run(self):
         errno = call(["mkdir", "-p", "build"])
         errno = call(["cmake", "-H.", "-Bbuild"])
+        if errno != 0:
+            raise SystemExit(errno)
         errno = call(["make", "-Cbuild", "_ccllib"])
+        if errno != 0:
+            raise SystemExit(errno)
         errno = call(["cp", "build/_ccllib.so", "pyccl/"])
         errno = call(["cp", "build/ccllib.py", "pyccl/"])
         errno = call(["cp", "include/ccl_params.ini", "pyccl/"])
@@ -35,6 +39,7 @@ setup(name="pyccl",
           'Operating System :: POSIX :: Linux',
           'Programming Language :: C',
           'Programming Language :: Python :: 2.7',
+          'Programming Language :: Python :: 3.5',
           'Programming Language :: Python :: 3.6',
           'Topic :: Scientific/Engineering :: Physics'
       ]
