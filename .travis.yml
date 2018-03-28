@@ -1,12 +1,22 @@
 language: python
 
-# Caching GSL and CLASS
+# Caching all the depencencies so that they don't have to be redownloaded and
+# compiled everytime
 cache:
   directories:
     - $HOME/build/EiffL/CCL/build/GSL/src
     - $HOME/build/EiffL/CCL/build/FFTW/src
     - $HOME/build/EiffL/CCL/build/SWIG/src
     - $HOME/build/EiffL/CCL/build/CLASS/src
+
+#addons:
+#    apt:
+#        packages:
+#            - texlive-latex-recommended
+#            - texlive-latex-extra
+#            - texlive-fonts-recommended
+#            - texlive-fonts-extra
+#            - dvipng
 
 os:
   - linux
@@ -25,3 +35,15 @@ script:
     - python setup.py test
     - sudo make -Cbuild install
     - check_ccl
+
+# Check why the note creation process crashes
+#    - make -C doc/0000-ccl_note
+#after_success:
+#    if [[ -n "$GITHUB_API_KEY" ]; then
+#        git checkout --orphan pdf
+#        git rm -rf .
+#        cp doc/0000-ccl_note/main.pdf 0000-ccl_note.pdf
+#        git add -f 0000-ccl_note.pdf
+#        git -c user.name='travis' -c user.email='travis' commit -m init
+#        git push -q -f https://drphilmarshall:$GITHUB_API_KEY@github.com/DarkEnergyScienceCollaboration/CCL pdf
+#    fi
