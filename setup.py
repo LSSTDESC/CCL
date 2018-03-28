@@ -15,7 +15,7 @@ class build(_build):
         errno = call(["make", "-Cbuild", "_ccllib"])
         if errno != 0:
             raise SystemExit(errno)
-        errno = call(["cp", "build/_ccllib.so", "pyccl/"])
+        errno = call(["cp", "build/_ccllib.*", "pyccl/"])
         if errno != 0:
             raise SystemExit(errno)
         errno = call(["cp", "build/ccllib.py", "pyccl/"])
@@ -30,7 +30,7 @@ setup(name="pyccl",
     version="0.2.1",
     packages=['pyccl'],
     provides=['pyccl'],
-    package_data={'pyccl': ['_ccllib.so', 'ccl_params.ini']},
+    package_data={'pyccl': ['_ccllib.so', '_ccllib.dylib', 'ccl_params.ini']},
     install_requires=['numpy'],
     test_suite='nose.collector',
     tests_require=['nose'],
