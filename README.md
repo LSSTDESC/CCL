@@ -25,9 +25,7 @@ See also our [wiki](https://github.com/LSSTDESC/CCL/wiki).
 ```
 $ pip install pyccl
 ```
-This should work as long as `CMake` is installed on your system (see instructions below).
-
-Once `CCL` is installed, tryout some example notebooks [here](examples).
+This should work as long as `CMake` is installed on your system (see instructions below). Once `CCL` is installed, take it for a spin by following some example notebooks [here](examples).
 
 ## Dependencies and requirements
 
