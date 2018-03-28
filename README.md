@@ -126,11 +126,20 @@ make check-cpp
 TODO: add this to cmake
 --->
 ## Python installation
-The Python wrapper is called `pyccl`. Generally, you can build and install the `pyccl` wrapper directly, without having to first compile the C version of `CCL`. The Python wrapper's build tools currently assume that your C compiler is `gcc`, and that you have a working Python 2.x or 3.x installation with `numpy` and `distutils`. You will also need `swig` if you wish to change the `CCL` code itself, rather than just installing it as-is.
 
-The Python wrapper installs the C libraries automatically and requires that GSL2.x and FFTW are already installed. Note that the C libraries will be installed in the same prefix as the Python files.
+The Python wrapper is called `pyccl` and is available on PyPi, simply run:
+```sh
+$ pip install pyccl # append --user for single user install
+```
+This only assumes that `CMake` is available on your system.
 
-* To build and install the wrapper for the current user only, run
+You can also build and install `pyccl` from the `CCL` source, **without necessarily
+installing the C library**. The Python wrapper's build tools currently assume
+that your C compiler is `gcc`, and that you have a working Python 2.x or 3.x
+installation with `numpy` and `distutils`.
+
+* To build and install the wrapper for the current user only, run from the root
+`CCL` directory:
 ````sh
 $ python setup.py install --user
 ````
@@ -148,9 +157,11 @@ You can quickly check whether `pyccl` has been installed correctly by running `p
 ````sh
 python setup.py test
 ````
-This will run the embedded unit tests (may take a few minutes). Using this last method to install the Python library allows you to uninstall it simply by running
+This will run the embedded unit tests (may take a few minutes).
+
+Whatever the install method, you can always uninstall the pyton wrapper by running:
 ````sh
-python setup.py uninstall
+pip uninstall pyccl
 ````
 
 For quick introduction to `CCL` in Python look at notebooks in **_tests/_**.
