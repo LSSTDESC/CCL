@@ -117,7 +117,7 @@ If you ever need to uninstall `CCL`, run the following from the `build` director
 $ xargs rm < install_manifest.txt
 ```
 You may need to prepend a `sudo` if you installed `CCL` in a protected folder.
-
+<!---
 ### C++ compatibility
 `CCL` library can be called from C++ code without any additional requirements or modifications.
 To make sure that there are no problems you can run:
@@ -126,7 +126,7 @@ make check-cpp
 ./examples/ccl_sample_run
 ````
 TODO: add this to cmake
-
+--->
 ## Python installation
 The Python wrapper is called `pyccl`. Generally, you can build and install the `pyccl` wrapper directly, without having to first compile the C version of `CCL`. The Python wrapper's build tools currently assume that your C compiler is `gcc`, and that you have a working Python 2.x or 3.x installation with `numpy` and `distutils`. You will also need `swig` if you wish to change the `CCL` code itself, rather than just installing it as-is.
 
