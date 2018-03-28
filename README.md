@@ -52,7 +52,7 @@ In addition, the build system for `CCL` relies on the following software:
     ```
 
 It is preferable to install the other dependencies on your system
-before building `CCL` but not necessary, but `CMake` will automatically download and build the missing requirements in order to compile `CCL`.
+before building `CCL` but not necessary, `CMake` will automatically download and build the missing requirements in order to compile `CCL`.
 
 To install all the dependencies at once, and avoid having `CMake` recompiling them, for instance on Ubuntu:
   ```sh
