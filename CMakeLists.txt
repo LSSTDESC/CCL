@@ -77,7 +77,6 @@ project(ccl)
     include(BuildSWIG)
     include(UseSWIG)
 
-    #find_package(PythonInterp)
     find_package(PythonLibsNew)
     find_package(NumPy)
     include_directories(BEFORE ${PYTHON_INCLUDE_DIRS} ${NUMPY_INCLUDE_DIRS})
