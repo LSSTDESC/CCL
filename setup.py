@@ -2,26 +2,28 @@
 from setuptools.command.build_py import build_py as _build
 from setuptools import setup
 from subprocess import call
+import glob
 import os
 import sys
 
 class build(_build):
     """Specialized Python source builder."""
     def run(self):
-        errno = call(["mkdir", "-p", "build"])
-        errno = call(["cmake", "-H.", "-Bbuild"])
-        if errno != 0:
-            raise SystemExit(errno)
-        errno = call(["make", "-Cbuild", "_ccllib"])
-        if errno != 0:
-            raise SystemExit(errno)
-        errno = call(["cp", "build/_ccllib.so", "pyccl/"])
-        if errno != 0:
-            raise SystemExit(errno)
-        errno = call(["cp", "build/ccllib.py", "pyccl/"])
-        if errno != 0:
-            raise SystemExit(errno)
-        errno = call(["cp", "include/ccl_params.ini", "pyccl/"])
+        call(["mkdir", "-p", "build"])
+        if call(["cmake", "-H.", "-Bbuild"]) != 0:
+            raise Exception("Could not run CMake configuration. Make sure CMake is installed !")
+        if call(["make", "-Cbuild", "_ccllib"]) != 0:
+            raise Exception("Could not build CCL")
+        # Finds the library under its different possible names
+        if os.path.exists("build/_ccllib.so"):
+            call(["cp", "build/_ccllib.so", "pyccl/"])
+        elif os.path.exists("build/_ccllib.dylib"):
+            call(["cp", "build/_ccllib.dylib", "pyccl/"])
+        else:
+            raise Exception("Could not find wrapper shared library, compilation must have failed.")
+        if call(["cp", "build/ccllib.py", "pyccl/"]) != 0:
+            raise Exception("Could not find python module, SWIG must have failed.")
+        call(["cp", "include/ccl_params.ini", "pyccl/"])
         _build.run(self)
 
 setup(name="pyccl",
