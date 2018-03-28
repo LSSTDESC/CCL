@@ -83,7 +83,7 @@ project(ccl)
 
     # Builds swig python module in place
     if(${CMAKE_VERSION} VERSION_LESS "3.8.0")
-      swig_add_module(ccllib  python pyccl/ccl.i)
+      swig_add_module(ccllib python pyccl/ccl.i)
     else()
       swig_add_library(ccllib TYPE SHARED LANGUAGE python SOURCES pyccl/ccl.i)
     endif()

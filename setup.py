@@ -15,8 +15,12 @@ class build(_build):
         errno = call(["make", "-Cbuild", "_ccllib"])
         if errno != 0:
             raise SystemExit(errno)
-        errno = call(["cp", "build/_ccllib.so", "pyccl/"])
+        errno = call(["cp", "build/_ccllib.*", "pyccl/"])
+        if errno != 0:
+            raise SystemExit(errno)
         errno = call(["cp", "build/ccllib.py", "pyccl/"])
+        if errno != 0:
+            raise SystemExit(errno)
         errno = call(["cp", "include/ccl_params.ini", "pyccl/"])
         _build.run(self)
 

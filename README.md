@@ -25,7 +25,8 @@ See also our [wiki](https://github.com/LSSTDESC/CCL/wiki).
 ```
 $ pip install pyccl
 ```
-This should work as long as `CMake` is installed on your system (see instructions below). Once `CCL` is installed, take it for a spin by following some example notebooks [here](examples).
+This should work as long as `CMake` is installed on your system (if it doesn't follow the detailed instructions below).
+Once `CCL` is installed, take it for a spin by following some example notebooks [here](examples).
 
 ## Dependencies and requirements
 
@@ -66,13 +67,20 @@ To download the latest version of `CCL`:
 $ git clone https://github.com/LSSTDESC/CCL.git
 $ cd CCL
 ```
-or download and extract the latest stable release from [here](https://github.com/LSSTDESC/CCL/releases). Then, from the base `CCL` directory run:
+or download and extract the latest stable release from [here](https://github.com/LSSTDESC/CCL/releases).
+
+**Note:** in case you have several C compilers on your machine, you will probably
+need to specify which one to use to `CMake` by setting the environment `CC` like so:
+```sh
+$ export CC=gcc
+```
+Then, from the base `CCL` directory run:
 ```sh
 $ mkdir build && cd build
 $ cmake ..
 ```
 This will run the configuration script, try to detect the required dependencies
-on your machine and generate a Makefile.Once CMake has been configured, to build
+on your machine and generate a Makefile. Once CMake has been configured, to build
 and install the library simply run for the `build` directory:
 ```sh
 $ make
@@ -163,7 +171,13 @@ pip uninstall pyccl
 For quick introduction to `CCL` in Python look at notebooks in **_tests/_**.
 
 ## Known installation issues
-1. If you are planning to compile your own file that calls `CCL`, then you should add the following to your .bashrc:
+1. In case you have several C compilers on your system, `CMake` may not default
+to the one you want to use. You can specify which C compiler will be used to compile
+`CCL` by setting the `CC` environment variable **before** calling any `cmake` or `python setup.py` commands:
+```sh
+export CC=gcc
+```
+2. If you are planning to compile your own file that calls `CCL`, then you should add the following to your .bashrc:
 ````sh
 export LD_LIBRARY_PATH=/path/to/where/ccl/is/installed/lib:$LD_LIBRARY_PATH
 ````
