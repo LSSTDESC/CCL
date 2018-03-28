@@ -18,58 +18,114 @@ The library is written in C99 and all functionality is directly callable from C 
 See also our [wiki](https://github.com/LSSTDESC/CCL/wiki).
 
 # Installation
-In order to compile `CCL` you need a few libraries: 
-* GNU Scientific Library [GSL](https://www.gnu.org/software/gsl/). Note that `CCL` uses version 2.1 or higher of GSL (which is not yet standard in all systems).
-* The [SWIG](http://www.swig.org/) Python wrapper generator is not needed to run `CCL`, but must be installed if you intend to modify `CCL` in any way.
-* [FFTW3](http://www.fftw.org/) is required for computation of correlation functions.
-* FFTlog([here](http://casa.colorado.edu/~ajsh/FFTLog/) and [here](https://github.com/slosar/FFTLog))is provided within `CCL`, with minor modifications.
-* The C library associated to the CLASS code. The installation of this library is described below.
 
-## Installing CLASS
-CCL uses CLASS as one of the possible ways of computing the matter power spectrum. In order to communicate with CLASS, CCL must be linked to its library. Before installing CCL proper you must therefore install this library first. Since this process is not necessarily straightforward, we provide a python script `class_install.py` that automatically downloads and install the latest tagged stable version of CLASS. You should run this script (`python class_install.py`) before carrying out the next steps. By default, the script assumes that your main C compiler is `gcc`. If that's not the case, pass the name of your C compiler to the script via the command-line argument `--c_comp` (i.e. `python class_install.py --c_comp=[name of compiler]`). Type `python class_install.py -h` for further details.
+## TLDR
 
-This procedure has one final caveat: if you already have a working installation of CCL, `class_install.py` may fail the first time you run it. This can be fixed by either simply running `class_install.py` a second time, or by starting from scratch (i.e. downloading or cloning CCL).
+`CCL` is available as a Python package through PyPi, to install:
+```
+$ pip install pyccl
+```
+This should work as long as `CMake` is installed on your system (see instructions below).
 
-Note that, if you want to use your own version of CLASS, you should follow the steps described in the section "Compiling against an external version of CLASS" below.
+Once `CCL` is installed, tryout some example notebooks [here](examples).
 
-## C-only installation
-Once the CLASS library is installed, `CCL` can be easily installed using an *autotools*-generated configuration file. To install `CCL`, from the base directory (the one where this file is located) run:
+## Dependencies and requirements
+
+`CCL` requires the following software and libraries:
+  * [GSL](https://www.gnu.org/software/gsl/) version 2.1 or above
+  * [FFTW3](http://www.fftw.org/) version 3.1 or above
+  * [CLASS](http://class-code.net/) version 2.6.3 or above
+  * FFTlog([here](http://casa.colorado.edu/~ajsh/FFTLog/) and [here](https://github.com/slosar/FFTLog))is provided within `CCL`, with minor modifications.
+
+In addition, the build system for `CCL` relies on the following software:
+  * [CMake](https://cmake.org/) version 3.2 or above
+  * [SWIG](http://www.swig.org/)
+
+`CMake` is the **only requirement that needs to be manually installed**:
+  * On Ubuntu:
+  ```sh
+  $ sudo apt-get install cmake
+  ```
+  * On MacOs X:
+    * Install using a `DMG` package from this [download page](https://cmake.org/download/)
+    * Install using a package manager ([brew](https://brew.sh/), [MacPorts](https://www.macports.org/), [Fink](http://www.finkproject.org/)). For instance with brew:
+    ```sh
+    $ brew install cmake
+    ```
+
+It is preferable to install the other dependencies on your system
+before building `CCL` but not necessary. `CMake` will automatically download and build the missing requirements in order to compile `CCL`.
+
+To install all the dependencies at once, and avoid having `CMake` recompiling them, for instance on Ubuntu:
+  ```sh
+  $ sudo apt-get install cmake swig libgsl-dev libfftw3-dev
+  ```
+
+## Install
+
+## Compile and install the CCL C library
+
+To download the latest version of `CCL`:
 ```sh
-./configure
-make
-make install
+$ git clone https://github.com/LSSTDESC/CCL.git
+$ cd CCL
+```
+or download and extract the latest stable release from [here](https://github.com/LSSTDESC/CCL/releases).
+
+From the base `CCL` directory run:
+```sh
+$ mkdir build && cd build
+$ cmake ..
+```
+This will run the configuration script, try to detect the required dependencies
+on your machine and generate a Makefile. By default, `CMake` will try to install
+`CCL` in `/usr/local`, if you would like to instead install CCL in a user-defined
+ directory (for instance if you don't have admin privileges), you can specify it
+ to `CMake` by running instead the following command:
+```sh
+$ cmake -DCMAKE_INSTALL_PREFIX=/path/to/install ..
+```
+This will instruct CMake to install `CCL` in the following folders: `/path/to/install/include`,`/path/to/install/share` ,`/path/to/install/lib`.
+Note that, in order to use `CCL` with your own scripts you'll have to add `/path/to/install/lib` to your LD_LIBRARY_PATH.
+
+
+Once CMake has been configured, to build and install the library simply run for the `build` directory:
+```sh
+$ make
+$ make install
 ```
 Often admin privileges will be needed to install the library. If you have those just type:
 ```sh
-sudo make install
-```
-If you don't have admin privileges, you can still install the library in a user-defined directory by running
-```sh
-./configure --prefix=/path/to/install
-make
-make install
-```
-where `/path/to/install` is the absolute path to the directory where you want the library to be installed. If non-existing, this will create two directories, `/path/to/install/include` and `/path/to/install/lib`, and the library and header files will be installed there. Note that, in order to use `CCL` with your own scripts you'll have to add `/path/to/install/lib` to your LD_LIBRARY_PATH. `CCL` has been successfully installed on several different Linux and Mac OS X systems.
-
-To make sure that everything is working properly, you can run all unit tests after installation by running
-```sh
-make check
-```
-Assuming that the tests pass, you can then move on to installing the Python wrapper (optional).
-
-After pulling a new version of `CCL` from the [git](https://github.com/LSSTDESC/CCL) repository, you can recompile the library by running:
-```sh
-make clean; make uninstall
-make
-make install
+$ sudo make install
 ```
 
-## C++ compatibility
-`CCL` library can be called from C++ code without any  additional requirements or modifications. To make sure that there are no problems you can run
+To make sure that everything is working properly, you can run all unit tests after installation by running from the root `CCL` directory:
+```sh
+$ check_ccl
+```
+Assuming that the tests pass, you have successfully installed `CCL`!
+
+After pulling a new version of `CCL` from the [git](https://github.com/LSSTDESC/CCL)
+repository, you can recompile the library by running from the `build` directory:
+```sh
+$ make
+$ make install
+```
+
+If you ever need to uninstall `CCL`, run the following from the `build` directory:
+```sh
+$ xargs rm < install_manifest.txt
+```
+You may need to prepend a `sudo` if you installed `CCL` in a protected folder.
+
+### C++ compatibility
+`CCL` library can be called from C++ code without any additional requirements or modifications.
+To make sure that there are no problems you can run:
 ````sh
 make check-cpp
 ./examples/ccl_sample_run
 ````
+TODO: add this to cmake
 
 ## Python installation
 The Python wrapper is called `pyccl`. Generally, you can build and install the `pyccl` wrapper directly, without having to first compile the C version of `CCL`. The Python wrapper's build tools currently assume that your C compiler is `gcc`, and that you have a working Python 2.x or 3.x installation with `numpy` and `distutils`. You will also need `swig` if you wish to change the `CCL` code itself, rather than just installing it as-is.
@@ -78,28 +134,17 @@ The Python wrapper installs the C libraries automatically and requires that GSL2
 
 * To build and install the wrapper for the current user only, run
 ````sh
-python setup.py install --user
+$ python setup.py install --user
 ````
 * To build install the wrapper for all users, run
 ````sh
-sudo python setup.py install
+$ sudo python setup.py install
 ````
 * To build the wrapper in-place in the source directory (for testing), run
 ````sh
-python setup.py build_ext --inplace
+$ python setup.py build
 ````
 If you choose either of the first two options, the `pyccl` module will be installed into a sensible location in your `PYTHONPATH`, and so should be picked up automatically by your Python interpreter. You can then simply import the module using `import pyccl`. If you use the last option, however, you must either start your interpreter from the root `CCL` directory, or manually add the root `CCL` directory to your `PYTHONPATH`.
-
-On some systems, building or installing the Python wrapper fails with a message similar to
-````sh
-fatal error: 'gsl/gsl_interp2d.h' file not found.
-````
-This happens when the build tools fail to find the directory containing the GSL header files, e.g. when they have been installed in a non-standard directory. To work around this problem, use the `--include-dirs` option when running the `setup.py build_ext` step above, i.e. if the GSL header files are in the directory `/path/to/include/`, you would run
-````sh
-python setup.py build_ext --library-dirs=/path/to/install/lib/ \
---rpath=/path/to/install/lib/ --include-dirs=/path/to/include/
-````
-and then run one of the `setup.py install` commands listed above. (Note: As an alternative to the `--include-dirs` option, you can use `-I/path/to/include` instead.)
 
 You can quickly check whether `pyccl` has been installed correctly by running `python -c "import pyccl"` and checking that no errors are returned. For a more in-depth test to make sure everything is working, run
 ````sh
@@ -113,55 +158,22 @@ python setup.py uninstall
 For quick introduction to `CCL` in Python look at notebooks in **_tests/_**.
 
 ## Known installation issues
-1. If you are having issues with GSL versions linking, please try the following during the configuration step:
-````sh
-./configure CFLAGS="-I/usr/local/include" LDFLAGS="-L/usr/local/lib"
-````
-2. If you are having issues with FFTW linking, please make sure you have the latest version correctly installed. See more on [FFTW webpage](http://www.fftw.org/download.html)
-3. If you move or delete the source directory after installing `CCL`, some functions may fail. The source directory contains files needed by CLASS (which is contained within `CCL`) at run-time.
-4. If you are planning to compile your own file that calls `CCL`, then you should add the following to your .bashrc:
+1. If you are planning to compile your own file that calls `CCL`, then you should add the following to your .bashrc:
 ````sh
 export LD_LIBRARY_PATH=/path/to/where/ccl/is/installed/lib:$LD_LIBRARY_PATH
 ````
-5. We know of one case with Mac OS where `libtools` had the “lock” function set to “yes” and this caused the installation to stall. However, this is very rare. If this happens, after the `configure` step, edit `libtool` to set the “lock” to “no”.
-6. We know of one case on a Mac OS where running 
-````sh
-python setup.py install --user
-````
-produced the error 
-
-````sh
-error: can't combine user with prefix, exec_prefix/home, or install_(plat)base
-````
-This issue can be solved by instead running
-
-````sh
-python setup.py install --user --prefix=
-````
-The issue is discussed in detail [here](https://stackoverflow.com/questions/4495120/combine-user-with-prefix-error-with-setup-py-install).
+2. We know of one case with Mac OS where `libtools` had the “lock” function set to “yes” and this caused the installation to stall. However, this is very rare. If this happens, after the `configure` step, edit `libtool` to set the “lock” to “no”.
 
 ## Compiling against an external version of CLASS
 
-The default installation procedure for `CCL` implies automatically downloading and installing a tagged version of `CLASS`. Optionally, you can also link `CCL` against an external version of `CLASS`. This is useful if you want to use a modified version of `CLASS`, or a different or more up-to-date version of the standard `CLASS`.
+The default installation procedure for `CCL` implies automatically downloading and installing a tagged version of `CLASS`. Optionally, you can also link `CCL` against a different version of `CLASS`. This is useful if you want to use a modified version of `CLASS`, or a different or more up-to-date version of the standard `CLASS`.
 
-To compile `CCL` with an external version of `CLASS`, you must first prepare the external copy so that it can be linked as a shared library. By default, the `CLASS` build tools create a static library. After compiling `CLASS` in the usual way (by running `make`), look for a static library file called ***libclass.a*** that should have been placed in the root source directory. Then, run the following command from that directory (Linux only):
-````sh
-gcc -shared -o libclass.so -Wl,--whole-archive libclass.a \
-                           -Wl,--no-whole-archive -lgomp
-````
-This should create a new shared library, ***libclass.so***, in the same directory. (N.B. The `-lgomp` flag has to appear at the end of the command; otherwise the linker can fail.) If you are running Mac OS X, use the following command instead:
-````sh	    
-gcc -fpic -shared -o libclass.dylib -Wl,-all\_load libclass.a -Wl,-noall\_load
-````
-
-Next, change to the root `CCL` directory and run `make clean` if you have previously run the compilation process. Then, set the `CLASSDIR` environment variable to point to the directory containing ***libclass.so***:
-````sh
-export CLASSDIR=/path/to/external/class
-````
-Then, run `./configure` and compile and install `CCL` as usual. The `CCL` build tools should take care of linking to the external version of `CLASS`.
-
-Once compilation has finished, run `make check` to make sure everything is working correctly. Remember to add the external `CLASS` library directory to your system library path, using either `export LD_LIBRARY_PATH=/path/to/external/class` (Linux) or `export DYLD_FALLBACK_LIBRARY_PATH=/path/to/external/class` (Mac). The system must be able to find both the `CCL` and `CLASS` libraries; it is not enough to only add `CCL` to the library path.
-
+To compile `CCL` with an external version of `CLASS`, just run the following `CMake`
+command at the first configuration step of the install (from the `build` directory, make sure it is empty to get a clean configuration):
+```sh
+$ cmake -DEXTERNAL_CLASS_PATH=/path/to/class ..
+```
+the rest of the build process should be the same.
 
 ## Docker image installation
 
@@ -170,7 +182,6 @@ The Dockerfile to generate a Docker image is included in the `CCL` repository as
 The resulting Docker image has two primary functionalities. The first is a CMD that will open Jupyter notebook tied to a port on your local machine. This can be used with the following run command: `docker run -p 8888:8888 ccl`. You can then access the notebook in the browser of your choice at `localhost:8888`. The second is to access the bash itself, which can be done using `docker run -it ccl bash`.
 
 This Dockerfile currently contains all installed C libraries and the Python wrapper. It currently uses continuumio/anaconda as the base image and supports ipython and Jupyter notebook. There should be minimal slowdown due to the virtualization.
-
 
 # Documentation
 
@@ -313,7 +324,7 @@ double (* your_pz_func)(double z_ph, double z_s, void *param, int * status);
 ````
 which returns the likelihood of measuring a particular photometric redshift `z_ph` given a spectroscopic redshift `z_s`, with a pointer to additional arguments `param` and a status flag. Then you call function **`ccl_specs_create_photoz_info`**
 ````c
-user_pz_info* ccl_specs_create_photoz_info(void * user_params, 
+user_pz_info* ccl_specs_create_photoz_info(void * user_params,
                                            double(*user_pz_func)(double, double, void*, int*));
 ````
 which creates a strcture **`user_pz_info`** which holds information needed to compute *dN/dz*
@@ -366,22 +377,22 @@ where `/path/to/install/` is the path to the location where the library has been
 #define Z0_SH 0.65
 #define SZ_SH 0.05
 #define NL 512
-#define PS 0.1 
+#define PS 0.1
 #define NREL 3.046
 #define NMAS 0
 #define MNU 0.0
 
 
 
-// The user defines a structure of parameters 
-// to the user-defined function for the photo-z probability 
+// The user defines a structure of parameters
+// to the user-defined function for the photo-z probability
 struct user_func_params
 {
   double (* sigma_z) (double);
 };
 
-// The user defines a function of the form double function ( z_ph, z_s, void * user_pz_params) 
-// where user_pz_params is a pointer to the parameters of the user-defined function. 
+// The user defines a function of the form double function ( z_ph, z_s, void * user_pz_params)
+// where user_pz_params is a pointer to the parameters of the user-defined function.
 // This returns the probabilty of obtaining a given photo-z given a particular spec_z.
 double user_pz_probability(double z_ph, double z_s, void * user_par, int * status)
 {
@@ -400,7 +411,7 @@ int main(int argc,char **argv)
   ccl_parameters params = ccl_parameters_create(OC, OB, OK, NREL, NMAS, MNU, W0, WA, HH,
   		 	  			NORMPS, NS,-1,-1,-1,-1,NULL,NULL, &status);
   //printf("in sample run w0=%1.12f, wa=%1.12f\n", W0, WA);
-  
+
   // Initialize cosmology object given cosmo params
   ccl_cosmology *cosmo=ccl_cosmology_create(params,config);
 
@@ -411,18 +422,18 @@ int main(int argc,char **argv)
 	 ZD,ccl_luminosity_distance(cosmo,1./(1+ZD), &status));
   printf("Distance modulus to z = %.3lf is mu = %.3lf Mpc\n",
 	 ZD,ccl_distance_modulus(cosmo,1./(1+ZD), &status));
-  
-  
+
+
   //Consistency check
   printf("Scale factor is a=%.3lf \n",1./(1+ZD));
   printf("Consistency: Scale factor at chi=%.3lf Mpc is a=%.3lf\n",
 	 ccl_comoving_radial_distance(cosmo,1./(1+ZD), &status),
 	 ccl_scale_factor_of_chi(cosmo,ccl_comoving_radial_distance(cosmo,1./(1+ZD), &status), &status));
-  
+
   // Compute growth factor and growth rate (see include/ccl_background.h for more routines)
   printf("Growth factor and growth rate at z = %.3lf are D = %.3lf and f = %.3lf\n",
 	 ZD, ccl_growth_factor(cosmo,1./(1+ZD), &status),ccl_growth_rate(cosmo,1./(1+ZD), &status));
- 
+
   // Compute Omega_m, Omega_L and Omega_r at different times
   printf("z\tOmega_m\tOmega_L\tOmega_r\n");
   double Om, OL, Or;
@@ -440,7 +451,7 @@ int main(int argc,char **argv)
   // Compute sigma_8
   printf("Initializing power spectrum...\n");
   printf("sigma_8 = %.3lf\n\n", ccl_sigma8(cosmo, &status));
-  
+
   //Create tracers for angular power spectra
   double z_arr_gc[NZ],z_arr_sh[NZ],nz_arr_gc[NZ],nz_arr_sh[NZ],bz_arr[NZ];
   for(int i=0;i<NZ;i++) {
@@ -450,14 +461,14 @@ int main(int argc,char **argv)
     z_arr_sh[i]=Z0_SH-5*SZ_SH+10*SZ_SH*(i+0.5)/NZ;
     nz_arr_sh[i]=exp(-0.5*pow((z_arr_sh[i]-Z0_SH)/SZ_SH,2));
   }
-  
+
   //CMB lensing tracer
   CCL_ClTracer *ct_cl=ccl_cl_tracer_cmblens_new(cosmo,1100.,&status);
 
   //Galaxy clustering tracer
   CCL_ClTracer *ct_gc=ccl_cl_tracer_number_counts_simple_new(cosmo,NZ,
                                 z_arr_gc,nz_arr_gc,NZ,z_arr_gc,bz_arr, &status);
-  
+
   //Cosmic shear tracer
   CCL_ClTracer *ct_wl=ccl_cl_tracer_lensing_simple_new(cosmo,NZ,z_arr_sh,nz_arr_sh, &status);
   printf("ell C_ell(c,c) C_ell(c,g) C_ell(c,s) C_ell(g,g) C_ell(g,s) C_ell(s,s) \n");
@@ -471,12 +482,12 @@ int main(int argc,char **argv)
     printf("%d %.3lE %.3lE %.3lE %.3lE %.3lE %.3lE\n",l,cl_cc,cl_cg,cl_cs,cl_gg,cl_gs,cl_ss);
   }
   printf("\n");
-  
+
   //Free up tracers
   ccl_cl_tracer_free(ct_gc);
   ccl_cl_tracer_free(ct_cl);
   ccl_cl_tracer_free(ct_wl);
-  
+
   //Halo mass function
   printf("M\tdN/dlog10M(z = 0, 0.5, 1))\n");
   for(int logM=9;logM<=15;logM+=1) {
@@ -487,7 +498,7 @@ int main(int argc,char **argv)
     printf("\n");
   }
   printf("\n");
-  
+
   //Halo bias
   printf("Halo bias: z, M, b1(M,z)\n");
   for(int logM=9;logM<=15;logM+=1) {
@@ -496,35 +507,35 @@ int main(int argc,char **argv)
     }
   }
   printf("\n");
-  
+
   // LSST Specification
   // The user declares and sets an instance of parameters to their photo_z function:
   struct user_func_params my_params_example;
   my_params_example.sigma_z = ccl_specs_sigmaz_sources;
-  
+
   // Declare a variable of the type of user_pz_info to hold the struct to be created.
   user_pz_info * pz_info_example;
-  
+
   // Create the struct to hold the user information about photo_z's.
   pz_info_example = ccl_specs_create_photoz_info(&my_params_example, &user_pz_probability);
-  
-  // Alternatively, we could have used the built-in Gaussian photo-z pdf, 
+
+  // Alternatively, we could have used the built-in Gaussian photo-z pdf,
   // which assumes sigma_z = sigma_z0 * (1 + z) (not used in what follows).
   double sigma_z0 = 0.05;
   user_pz_info *pz_info_gaussian;
   pz_info_gaussian = ccl_specs_create_gaussian_photoz_info(sigma_z0);
-  
+
   double z_test;
   double dNdz_tomo;
   int z;
   FILE * output;
-  
+
   //Try splitting dNdz (lensing) into 5 redshift bins
   double tmp1,tmp2,tmp3,tmp4,tmp5;
   printf("Trying splitting dNdz (lensing) into 5 redshift bins. "
          "Output written into file tests/specs_example_tomo_lens.out\n");
-  output = fopen("./tests/specs_example_tomo_lens.out", "w"); 
-  
+  output = fopen("./tests/specs_example_tomo_lens.out", "w");
+
   if(!output) {
     fprintf(stderr, "Could not write to 'tests' subdirectory"
                     " - please run this program from the main CCL directory\n");
@@ -533,24 +544,24 @@ int main(int argc,char **argv)
   status = 0;
   for (z=0; z<100; z=z+1) {
     z_test = 0.035*z;
-    ccl_specs_dNdz_tomog(z_test, DNDZ_WL_FID, 0.,6., pz_info_example,&dNdz_tomo,&status); 
-    ccl_specs_dNdz_tomog(z_test, DNDZ_WL_FID, 0.,0.6, pz_info_example,&tmp1,&status); 
+    ccl_specs_dNdz_tomog(z_test, DNDZ_WL_FID, 0.,6., pz_info_example,&dNdz_tomo,&status);
+    ccl_specs_dNdz_tomog(z_test, DNDZ_WL_FID, 0.,0.6, pz_info_example,&tmp1,&status);
     ccl_specs_dNdz_tomog(z_test, DNDZ_WL_FID, 0.6,1.2, pz_info_example,&tmp2,&status);
     ccl_specs_dNdz_tomog(z_test, DNDZ_WL_FID, 1.2,1.8, pz_info_example,&tmp3,&status);
-    ccl_specs_dNdz_tomog(z_test, DNDZ_WL_FID, 1.8,2.4, pz_info_example,&tmp4,&status); 
+    ccl_specs_dNdz_tomog(z_test, DNDZ_WL_FID, 1.8,2.4, pz_info_example,&tmp4,&status);
     ccl_specs_dNdz_tomog(z_test, DNDZ_WL_FID, 2.4,3.0, pz_info_example,&tmp5,&status);
     fprintf(output, "%f %f %f %f %f %f %f\n", z_test,tmp1,tmp2,tmp3,tmp4,tmp5,dNdz_tomo);
   }
-  
+
   fclose(output);
-  
+
   //Try splitting dNdz (clustering) into 5 redshift bins
   printf("Trying splitting dNdz (clustering) into 5 redshift bins. "
          "Output written into file tests/specs_example_tomo_clu.out\n");
   output = fopen("./tests/specs_example_tomo_clu.out", "w");     
   for (z=0; z<100; z=z+1) {
     z_test = 0.035*z;
-    ccl_specs_dNdz_tomog(z_test, DNDZ_NC,0.,6., pz_info_example,&dNdz_tomo,&status); 
+    ccl_specs_dNdz_tomog(z_test, DNDZ_NC,0.,6., pz_info_example,&dNdz_tomo,&status);
     ccl_specs_dNdz_tomog(z_test, DNDZ_NC,0.,0.6, pz_info_example,&tmp1,&status);
     ccl_specs_dNdz_tomog(z_test, DNDZ_NC,0.6,1.2, pz_info_example,&tmp2,&status);
     ccl_specs_dNdz_tomog(z_test, DNDZ_NC,1.2,1.8, pz_info_example,&tmp3,&status);
@@ -560,13 +571,13 @@ int main(int argc,char **argv)
   }
   printf("ccl_sample_run completed, status = %d\n",status);
   fclose(output);
-  
+
   //Free up photo-z info
   ccl_specs_free_photoz_info(pz_info_example);
-  
+
   //Always clean up!!
   ccl_cosmology_free(cosmo);
-  
+
   return 0;
 }
 ````
@@ -582,7 +593,7 @@ Below is a simple example Python script that creates a new **Cosmology** object,
 import pyccl as ccl
 import numpy as np
 
-# Create new Cosmology object with a given set of parameters. This keeps track 
+# Create new Cosmology object with a given set of parameters. This keeps track
 # of previously-computed cosmological functions
 cosmo = ccl.Cosmology(Omega_c=0.27, Omega_b=0.045, h=0.67, A_s=1e-10, n_s=0.96)
 

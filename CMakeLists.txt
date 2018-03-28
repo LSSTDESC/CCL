@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.2)
 
 # Adding customized cmake module
 list(APPEND CMAKE_MODULE_PATH  "${CMAKE_SOURCE_DIR}/cmake/Modules/")
@@ -8,7 +8,18 @@ project(ccl)
     # Uses system libraries or downloads and build if necessary
     include(BuildFFTW)
     include(BuildGSL)
-    include(BuildCLASS)
+
+    # If a CLASS installation folder is provided, use it,
+    # otherwise download and compile CLASS
+    if(EXTERNAL_CLASS_PATH)
+      message("Using external install of CLASS")
+      set(CLASS_LIBRARY_DIRS ${EXTERNAL_CLASS_PATH})
+      set(CLASS_INCLUDE_DIRS ${EXTERNAL_CLASS_PATH}/include)
+      set(CLASS_LIBRARIES -lclass)
+      set(CLASS_EXTERNAL True)
+    else(EXTERNAL_CLASS_PATH)
+      include(BuildCLASS)
+    endif(EXTERNAL_CLASS_PATH)
 
     # Compilation flags
     if ("${CMAKE_C_COMPILER_ID}" STREQUAL "Clang")
@@ -38,8 +49,10 @@ project(ccl)
 
     # Builds the main CCL library
     add_library(ccl ${CCL_SRC})
-    add_dependencies(ccl CLASS)
     target_link_libraries(ccl ${GSL_LIBRARIES} ${FFTW_LIBRARIES} ${CLASS_LIBRARIES} m)
+    if(NOT CLASS_EXTERNAL)
+      add_dependencies(ccl CLASS)
+    endif()
     if(NOT GSL_FOUND)
       add_dependencies(ccl GSL)
     endif()
@@ -66,7 +79,7 @@ project(ccl)
 
     #find_package(PythonInterp)
     find_package(PythonLibsNew)
-    find_package(NumPy REQUIRED)
+    find_package(NumPy)
     include_directories(BEFORE ${PYTHON_INCLUDE_DIRS} ${NUMPY_INCLUDE_DIRS})
 
     # Builds swig python module in place
