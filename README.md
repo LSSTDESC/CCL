@@ -70,26 +70,14 @@ To download the latest version of `CCL`:
 $ git clone https://github.com/LSSTDESC/CCL.git
 $ cd CCL
 ```
-or download and extract the latest stable release from [here](https://github.com/LSSTDESC/CCL/releases).
-
-From the base `CCL` directory run:
+or download and extract the latest stable release from [here](https://github.com/LSSTDESC/CCL/releases). Then, from the base `CCL` directory run:
 ```sh
 $ mkdir build && cd build
 $ cmake ..
 ```
 This will run the configuration script, try to detect the required dependencies
-on your machine and generate a Makefile. By default, `CMake` will try to install
-`CCL` in `/usr/local`, if you would like to instead install CCL in a user-defined
- directory (for instance if you don't have admin privileges), you can specify it
- to `CMake` by running instead the following command:
-```sh
-$ cmake -DCMAKE_INSTALL_PREFIX=/path/to/install ..
-```
-This will instruct CMake to install `CCL` in the following folders: `/path/to/install/include`,`/path/to/install/share` ,`/path/to/install/lib`.
-Note that, in order to use `CCL` with your own scripts you'll have to add `/path/to/install/lib` to your LD_LIBRARY_PATH.
-
-
-Once CMake has been configured, to build and install the library simply run for the `build` directory:
+on your machine and generate a Makefile.Once CMake has been configured, to build
+and install the library simply run for the `build` directory:
 ```sh
 $ make
 $ make install
@@ -98,6 +86,16 @@ Often admin privileges will be needed to install the library. If you have those 
 ```sh
 $ sudo make install
 ```
+
+By default, `CMake` will try to install `CCL` in `/usr/local`, if you would like
+to instead install CCL in a user-defined directory (for instance if you don't have
+ admin privileges), you can specify it to `CMake` by running instead the following command:
+```sh
+$ cmake -DCMAKE_INSTALL_PREFIX=/path/to/install ..
+```
+This will instruct CMake to install `CCL` in the following folders: `/path/to/install/include`,`/path/to/install/share` ,`/path/to/install/lib`.
+Note that, in order to use `CCL` with your own scripts you'll have to add `/path/to/install/lib` to your LD_LIBRARY_PATH.
+
 
 To make sure that everything is working properly, you can run all unit tests after installation by running from the root `CCL` directory:
 ```sh
