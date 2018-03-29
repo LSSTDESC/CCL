@@ -18,10 +18,11 @@ ExternalProject_Add(CLASS
         URL https://github.com/lesgourg/class_public/archive/v${CLASSVersion}.tar.gz
         URL_MD5 ${CLASSMD5}
         DOWNLOAD_NO_PROGRESS 1
-        # In the configuration step, we set the CLASS compiler to the desired one
-        CONFIGURE_COMMAND     sed "/^CC /c CC = ${CMAKE_C_COMPILER}" Makefile > Makefile_tmp &&
-                              sed "/^OMPFLAG /c ${CLASS_OMPFLAG}" Makefile_tmp > Makefile
-        BUILD_COMMAND         make libclass.a
+        # In the configuration step, we comment out the default compiler and
+        # provide an appropriate omp flag
+        CONFIGURE_COMMAND     perl -pi -e "s/^CC /# CC /" Makefile &&
+                              perl -pi -e "s/^OMPFLAG .*/${CLASS_OMPFLAG}/" Makefile
+        BUILD_COMMAND         make CC=${CMAKE_C_COMPILER} libclass.a
         INSTALL_COMMAND       mkdir -p ${CMAKE_BINARY_DIR}/extern/lib &&
                               cp libclass.a ${CMAKE_BINARY_DIR}/extern/lib &&
                               cp -r include ${CMAKE_BINARY_DIR}/extern

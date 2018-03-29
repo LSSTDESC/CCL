@@ -48,7 +48,7 @@ project(ccl)
     include_directories(include)
 
     # Builds the main CCL library
-    add_library(ccl ${CCL_SRC})
+    add_library(ccl SHARED ${CCL_SRC})
     target_link_libraries(ccl ${GSL_LIBRARIES} ${FFTW_LIBRARIES} ${CLASS_LIBRARIES} m)
     if(NOT CLASS_EXTERNAL)
       add_dependencies(ccl CLASS)
