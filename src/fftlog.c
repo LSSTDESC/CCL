@@ -148,8 +148,7 @@ void fftlog_ComputeXiLM(double l, double m, int N, const double k[], const doubl
     a[i] = pow(k[i], m - 0.5) * pk[i];
   fht(N, k, a, r, b, l + 0.5, 0, 1, 1, NULL);
   for(int i = 0; i < N; i++)
-    //      xi[i] = creal(pow(2*M_PI*r[i], -(m-0.5)) * b[i]);
-    xi[i] = creal(pow(2*M_PI*r[i], -1.5) * b[i]);
+    xi[i] = creal(pow(2*M_PI*r[i], -(m-0.5)) * b[i]);
   
   free(a);
   free(b);

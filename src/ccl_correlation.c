@@ -137,8 +137,6 @@ static void ccl_tracer_corr_fftlog(ccl_cosmology *cosmo,
   if(corr_type==CCL_CORR_LP) i_bessel=0;
   if(corr_type==CCL_CORR_LM) i_bessel=4;
   fftlog_ComputeXiLM(i_bessel-0.5,1.5,N_ELL_FFTLOG,l_arr,cl_arr,th_arr,wth_arr);
-  for(i=0;i<N_ELL_FFTLOG;i++)
-    wth_arr[i]*=sqrt(th_arr[i]*2.0*M_PI);
 
   // Interpolate to output values of theta
   SplPar *wth_spl=ccl_spline_init(N_ELL_FFTLOG,th_arr,wth_arr,wth_arr[0],0);
