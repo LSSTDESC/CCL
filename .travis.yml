@@ -9,6 +9,25 @@ cache:
     - $HOME/build/EiffL/CCL/build/SWIG/src
     - $HOME/build/EiffL/CCL/build/CLASS/src
 
+# Definition of python build matrix for osx comes from:
+# https://docs.travis-ci.com/user/multi-os/#Python-example-(unsupported-languages)
+matrix:
+    include:
+        - os: linux
+          python: 2.7
+          sudo: required
+          env: TOXENV=py27
+        - os: linux
+          sudo: required
+          python: 3.6
+          env: TOXENV=py36
+        - os: osx
+          language: generic
+          env: TOXENV=py27
+        - os: osx
+          language: generic
+          env: TOXENV=py36
+
 #addons:
 #    apt:
 #        packages:
@@ -18,16 +37,8 @@ cache:
 #            - texlive-fonts-extra
 #            - dvipng
 
-os:
-  - linux
-  - osx
-
-python:
-  - "2.7"
-  - "3.5"
-  - "3.6"
-
-install: true
+install:
+    - ./.travis/install.sh # Installs dependencies for osx
 
 script:
     - cmake --version

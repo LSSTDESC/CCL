@@ -29,5 +29,3 @@ ExternalProject_Add(CLASS
 set(CLASS_LIBRARY_DIRS ${CMAKE_BINARY_DIR}/extern/lib/ )
 set(CLASS_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/extern/include/)
 set(CLASS_LIBRARIES -lclass)
- # &&
- #                              sed "/^OMPFLAG /c ${CLASS_OMPFLAG}" Makefile > Makefile
