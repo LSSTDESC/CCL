@@ -9,12 +9,17 @@ if [[ $TRAVIS_OS_NAME == 'osx' ]]; then
         py27)
             # Install some custom Python 2.7 requirements on OS X
             echo "No specific requirements on osx for now"
+            easy_install pip
             pip install --user nose
             ;;
         py36)
             # Install some custom Python 3.6 requirements on OS X
             echo "No specific requirements on osx for now"
-            pip install --user nose
+            brew update
+            brew install python3
+            virtualenv venv -p python3
+            source venv/bin/activate
+            pip install --user nose numpy
             ;;
     esac
 else
