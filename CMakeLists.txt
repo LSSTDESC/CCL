@@ -22,7 +22,7 @@ project(ccl)
     endif(EXTERNAL_CLASS_PATH)
 
     # Compilation flags
-    if ("${CMAKE_C_COMPILER_ID}" STREQUAL "Clang")
+    if ("${CMAKE_C_COMPILER_ID}" MATCHES "^(Apple)?Clang$")
       # using Clang, disabling OpenMP support
       set(CMAKE_C_FLAGS "-O3 -fomit-frame-pointer -fno-common -std=c99 -fPIC -D__CCL_DATA_DIR__=${CMAKE_INSTALL_PREFIX}/share/ccl")
     else()
