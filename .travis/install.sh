@@ -9,10 +9,12 @@ if [[ $TRAVIS_OS_NAME == 'osx' ]]; then
         py27)
             # Install some custom Python 2.7 requirements on OS X
             echo "No specific requirements on osx for now"
+            pip install --user nose
             ;;
         py36)
             # Install some custom Python 3.6 requirements on OS X
             echo "No specific requirements on osx for now"
+            pip install --user nose
             ;;
     esac
 else

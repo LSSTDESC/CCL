@@ -67,14 +67,7 @@ To download the latest version of `CCL`:
 $ git clone https://github.com/LSSTDESC/CCL.git
 $ cd CCL
 ```
-or download and extract the latest stable release from [here](https://github.com/LSSTDESC/CCL/releases).
-
-**Note:** in case you have several C compilers on your machine, you will probably
-need to specify which one to use to `CMake` by setting the environment `CC` like so:
-```sh
-$ export CC=gcc
-```
-Then, from the base `CCL` directory run:
+or download and extract the latest stable release from [here](https://github.com/LSSTDESC/CCL/releases). Then, from the base `CCL` directory run:
 ```sh
 $ mkdir build && cd build
 $ cmake ..
@@ -91,15 +84,24 @@ Often admin privileges will be needed to install the library. If you have those 
 $ sudo make install
 ```
 
-By default, `CMake` will try to install `CCL` in `/usr/local`, if you would like
+**Note:** This is the default install procedure, but depending on your system
+you might want to customize the intall process. Here are a few common configuration
+options:
+  - *C compiler*: In case you have several C compilers on your machine, you will probably
+need to specify which one to use to `CMake` by setting the environment `CC` like
+so, **before** running `CMake`:
+```sh
+$ export CC=gcc
+```
+  - *Install directory*: By default, `CMake` will try to install `CCL` in `/usr/local`, if you would like
 to instead install CCL in a user-defined directory (for instance if you don't have
  admin privileges), you can specify it to `CMake` by running instead the following command:
 ```sh
 $ cmake -DCMAKE_INSTALL_PREFIX=/path/to/install ..
 ```
 This will instruct CMake to install `CCL` in the following folders: `/path/to/install/include`,`/path/to/install/share` ,`/path/to/install/lib`.
-Note that, in order to use `CCL` with your own scripts you'll have to add `/path/to/install/lib` to your LD_LIBRARY_PATH.
 
+Depending on where you install `CCL` your might need to add the `/path/to/install/lib` to your `LD_LIBRARY_PATH`.
 
 To make sure that everything is working properly, you can run all unit tests after installation by running from the root `CCL` directory:
 ```sh

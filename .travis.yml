@@ -48,9 +48,6 @@ script:
     - python setup.py test
     - sudo make -Cbuild install
     - check_ccl
-    # Tests that we can compile against library
-    - gcc examples/ccl_sample_run.c `pkg-config --libs --cflags ccl` -o ccl_sample_run
-    - ./ccl_sample_run
 
 # Check why the note creation process crashes
 #    - make -C doc/0000-ccl_note
