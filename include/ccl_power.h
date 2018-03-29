@@ -6,6 +6,8 @@ extern "C" {
 
 #include "ccl_core.h"
 
+double ccl_comoving_matter_density(ccl_cosmology *cosmo);
+
 /**
  * CLASS power spectrum without splines.
  * Write k, P(k,z) [1/Mpc, Mpc^3] for given cosmology at the k values used within CLASS (spectra.ln_k[]), using the method specified in config.matter_power_spectrum_method.
@@ -64,6 +66,7 @@ double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double k, double a,int * s
  * @return sigma(R).
  */
 double ccl_sigmaR(ccl_cosmology *cosmo, double R, int * status);
+double ccl_sigmaRz(ccl_cosmology *cosmo, double R, double a, int * status);
 
 /**
  * Variance of the displacement field with (top-hat) smoothing scale R [Mpc]
@@ -75,6 +78,7 @@ double ccl_sigmaR(ccl_cosmology *cosmo, double R, int * status);
  * @return sigma(R).
  */
 double ccl_sigmaV(ccl_cosmology *cosmo, double R, int * status);
+double ccl_sigmaVz(ccl_cosmology *cosmo, double R, double a, int * status);
 
 /**
  * Computes sigma_8, variance of the matter density field with (top-hat) smoothing scale R = 8 Mpc/h, from linear power spectrum.

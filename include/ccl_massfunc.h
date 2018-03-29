@@ -70,6 +70,12 @@ double ccl_massfunc_m2r(ccl_cosmology * cosmo, double smooth_mass, int * status)
  */
 double ccl_sigmaM(ccl_cosmology * cosmo, double smooth_mass, double a, int * status);
 
+double ccl_r_delta(ccl_cosmology *cosmo, double halomass, double a, double odelta, int * status);
+
+double ccl_r_Lagrangian(ccl_cosmology *cosmo, double halomass, double a, int * status);
+
+double ccl_nu(ccl_cosmology *cosmo, double halomass, double a, int * status);
+
 #ifdef __cplusplus
 }
 #endif
