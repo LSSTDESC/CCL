@@ -106,6 +106,8 @@ project(ccl VERSION 0.2.1)
       swig_add_library(ccllib TYPE SHARED LANGUAGE python SOURCES pyccl/ccl.i)
     endif()
     swig_link_libraries(ccllib ${PYTHON_LIBRARIES} ccl)
+    set_target_properties(ccllib PROPERTIES SUFFIX .so)
+    
     # Forces build of swig executable if not found
     if(NOT SWIG_FOUND)
       add_dependencies(${SWIG_MODULE_ccllib_REAL_NAME} SWIG)

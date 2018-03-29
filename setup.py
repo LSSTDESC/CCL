@@ -17,8 +17,6 @@ class build(_build):
         # Finds the library under its different possible names
         if os.path.exists("build/_ccllib.so"):
             call(["cp", "build/_ccllib.so", "pyccl/"])
-        elif os.path.exists("build/_ccllib.dylib"):
-            call(["cp", "build/_ccllib.dylib", "pyccl/"])
         else:
             raise Exception("Could not find wrapper shared library, compilation must have failed.")
         if call(["cp", "build/ccllib.py", "pyccl/"]) != 0:
@@ -32,7 +30,7 @@ setup(name="pyccl",
     version="0.2.1",
     packages=['pyccl'],
     provides=['pyccl'],
-    package_data={'pyccl': ['_ccllib.so', '_ccllib.dylib', 'ccl_params.ini']},
+    package_data={'pyccl': ['_ccllib.so', 'ccl_params.ini']},
     install_requires=['numpy'],
     test_suite='nose.collector',
     tests_require=['nose'],
