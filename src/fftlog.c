@@ -138,6 +138,22 @@ void fht(int N, const double r[], const double complex a[], double k[], double c
   free(ulocal);
 }
 
+void fftlog_ComputeXi2D(double bessel_order,int N,const double l[],const double cl[],
+			double th[], double xi[])
+{
+  double complex* a = malloc(sizeof(complex double)*N);
+  double complex* b = malloc(sizeof(complex double)*N);
+  
+  for(int i=0;i<N;i++)
+    a[i]=l[i]*cl[i];
+  fht(N,l,a,th,b,bessel_order,0,1,1,NULL);
+  for(int i=0;i<N;i++)
+    xi[i]=creal(b[i]/(2*M_PI*th[i]));
+  
+  free(a);
+  free(b);
+}
+
 void fftlog_ComputeXiLM(double l, double m, int N, const double k[], const double pk[], 
 			double r[], double xi[])
 {
