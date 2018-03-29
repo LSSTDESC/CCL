@@ -16,6 +16,7 @@
 \usepackage{xspace}
 
 \graphicspath{{./}{./figures/}}
+\newcommand{\nv}{\hat{\bf n}}
 \newcommand{\todo}[1]{\textcolor{magenta}{To do: #1}}
 \newcommand{\vol}[1]{\textcolor{red}{Volunteer(s) in charge: #1}}
 \newcommand{\cont}[1]{\textcolor{blue}{Suggested content: #1}}
@@ -23,7 +24,6 @@
 \newcommand{\sukhdeep}[1]{\textcolor{magenta}{SS:#1}}
 \newcommand{\damonge}[1]{\textcolor{green!55!blue}{DA:#1}}
 \newcommand{\revise}{\textcolor{red!55!blue}{\bf Section ready for revision}}
-
 
 \newcommand{\ccl}{{\tt CCL}\xspace}
 
@@ -248,14 +248,31 @@ Three effective parameters govern the contribution of baryonic processes to modi
 
 \cont{Kernels. Correlation functions. Nuisance parameters and functions.}
 
-In this section we will distinguish between {\sl tracers} (quantities observed on the sky, such as number counts in a redshift bin, shear, or CMB temperature fluctuations) and {\sl contributions} to the total observed fluctuations of these tracers (such as the biased matter density term in number counts, redshift-space distortions, magnification, etc.).
+This section describes the theoretical expectations for the two-point correlators of pairs of quantities (fields) defined on the sky. These fields can be classified in terms of their spin $s$ under rotations on the plane tangent to the sphere. In general a spin-$s$ field is defined by two real-valued functions of the spherical coordinates $a_1(\nv)$ and $a_2(\nv)$ (e.g. $\gamma_1$ and $\gamma_2$ for weak lensing or the Stokes parameters $Q$ and $U$ in the case of polarized intensity), from which one can form the complex field $a=a_1+ia_2$.
+
+Spin-$s$ quantities can be decomposed into their harmonic coefficients $\,_sa_{\ell m}$ through a spherical harmonic transfom:
+\begin{equation}\nonumber
+  \,_sa_{\ell m}=\int d\nv\,a(\nv)\,_sY^*_{\ell m}(\nv),\hspace{12pt}
+  a(\nv)=\sum_{\ell m}\,_sa_{\ell m}\,Y_{\ell m}(\nv)
+\end{equation}
+where $_sY_{\ell m}$ are the spin-weighed spherical harmonics. The harmonic coefficients can then be associated with parity-even and parity-odd components ($E$-modes and $B$-modes respectively) as\footnote{We note that for spin-$0$ quantities the minus sign preceding these equations is usually omitted.}
+\begin{align}\nonumber
+   E_{\ell m}&=-\frac{1}{2}\left[\,_{s}a_{\ell m}+(-1)^s\,_{-s}a_{\ell m}\right]\\\nonumber
+  iB_{\ell m}&=-\frac{1}{2}\left[\,_{s}a_{\ell m}-(-1)^s\,_{-s}a_{\ell m}\right]
+\end{align}
+
+In what follows we will focus on scalar ($s=0$) quantities such as the overdensity of source number counts or the lensing convergence, and on spin-2 fields such as the lensing shear. We will also distinguish between {\sl tracers} (fields observed on the sky, such as number counts in a redshift bin, shear, or CMB temperature fluctuations) and {\sl contributions} to the total observed fluctuations of these tracers (such as the biased matter density term in number counts, redshift-space distortions, magnification, etc.).
 
 \subsubsection{Angular power spectra}\label{sssec:2pt.pspec}
 \vol{David Alonso}
 
 \revise
 
-The angular power spectrum between two tracers $a$ and $b$ can be written as:
+The angular power spectrum $C^{ab}_\ell$ between two tracers $a$ and $b$ is defined as
+\begin{equation}
+  \langle a_{\ell m}b^*_{\ell m}\rangle\equiv C^{ab}\delta_{\ell\ell'}\delta_{mm'},
+\end{equation}
+where $a_{\ell m}$/$b_{\ell m}$ can be either the $E$-mode or $B$-mode component of the corresponding field. In what follows we will only deal with fields for which the $B$-modes are identically $0$, and therefore all equations refer to the $E$-$E$ power spectrum. In general this power spectrum can be written as:
 \begin{equation}
   C^{ab}_\ell=4\pi\int_0^\infty \frac{dk}{k}\,\mathcal{P}_\Phi(k)\Delta^a_\ell(k)\Delta^b_\ell(k),
 \end{equation}
@@ -324,35 +341,69 @@ These approximations will be revisited in future versions of the library.
 
 \subsubsection{Correlation functions}
 \vol{Elisa Chisari, Sukhdeep Singh?}
-The following expressions relating the angular power spectra and correlation functions are valid in the flat-sky approximation\footnote{See the weak lensing review by \citet{Bartelmann01}, page 44 and \citet{Joachimi10}.}. In all cases, $f_K(\chi)$ is comoving angular diameter distance, which differs from the radial comoving distance $\chi$ only in the case of cosmologies with non-zero curvature.
 
-{\bf Galaxy-galaxy.} The angular correlation function between two number-count tracers (labeled $a$ and $b$ here) is given by
-\begin{equation}
-  \xi^{ab}(\theta) = \int d\ell \frac{\ell}{2\pi} C^{ab}_\ell\, J_0(\ell\theta),
-\label{eq:xiclu}
+\revise
+
+Fields can also be correlated in configuration space, and the corresponding correlators are called correlation functions. Let $a$ and $b$ be two fields with spins $s_a$ and $s_b$. We start by defining $\tilde{a}(\nv_1)$ and $\tilde{b}(\nv_2)$ as the fields $a$ and $b$ rotated on the by angles such that the $x$-axis of the tangential coordinate systems at $\nv_1$ and $\nv_2$ become aligned with the vector connecting both points. We can then define two correlation functions:
+\begin{equation}\nonumber
+  \xi^{ab}_+(\theta)\equiv\left\langle\tilde{a}(\nv_1)\tilde{b}^*(\nv_2)\right\rangle,\hspace{12pt}
+  \xi^{ab}_-(\theta)\equiv\left\langle\tilde{a}(\nv_1)\tilde{b}(\nv_2)\right\rangle,
 \end{equation}
-where $C_{ab}$ is the angular power spectrum between both tracers.
+where $\nv_1\cdot\nv_2\equiv\cos\theta$. 
 
-{\bf Lensing-lensing.} The lensing correlation functions are \footnote{from Schneider 2002 and Bartelmann \& Schneider section 6.4.1}
-\begin{eqnarray}
-  \xi^{ab}_{+}(\theta)&=&\int_0^{\infty}d\ell\frac{\ell}{2\pi}J_0(\ell\theta)C^{ab}_\ell,\\
-  \xi^{ab}_{-}(\theta)&=&\int_0^{\infty}d\ell\frac{\ell}{2\pi}J_4(\ell\theta)C^{ab}_\ell,
-\label{eq:xipxim}
-\end{eqnarray}
-where the angular lensing convergence power spectrum $C^{ab}_\ell$ is given above (see Equations \ref{eq:transfer_lensing} and \ref{eq:limber}).
-
-{\bf Galaxy-lensing.} The correlation between a number count tracer $a$ and a shear tracer $b$ is given by
+$\xi_{\pm}$ can be related to the power spectra as
+\begin{equation}\label{eq:cl_xi}
+ \xi^{ab}_\pm\sum_\ell\frac{2\ell+1}{4\pi}\,(\pm1)^{s_b}\,C^{ab\pm}_\ell\,d^\ell_{s_a,\pm s_b}(\theta),
+\end{equation}
+where $d^\ell_{mm'}$ are the Wigner-$d$ matrices\footnote{\url{https://en.wikipedia.org/wiki/Wigner_D-matrix}}
+\citep{Ng1999,2004MNRAS.350..914C} and we have defined the power spectra
 \begin{equation}
-  \xi^{ab}(\theta) = \int d\ell \frac{\ell}{2\pi} C^{ab}_\ell\, J_2(\ell\theta),
+  C^{ab\pm}_\ell\equiv\left(C^{a_Eb_E}_\ell\pm C^{a_Bb_B}_\ell\right)+i\left(C^{a_Bb_E}_\ell\pm C^{a_Eb_B}_\ell\right),
+\end{equation}
+which reduces to the $E$-$E$ power spectrum when all $B$-modes are 0.
+
+Note that, scalar quantities are real, any correlation involving at least one spin-$0$ field only has one non-unique correlation function. In these cases, the Wigner-$d$ matrices can also be expressed in terms of associated Legendre polynomials $P^m_\ell$, and therefore Eq. \ref{eq:cl_xi} becomes
+\begin{align}
+  \xi^{ab}(\theta)&=\sum_\ell\frac{2\ell+1}{4\pi}\,C^{ab}_\ell\sqrt{\frac{(\ell-s_a)!}{(\ell+s_a)!}}P^{s_a}_\ell(\cos\theta)\\
+                  &=\sum_\ell\frac{2\ell+1}{4\pi}\,C^{ab}_\ell P_\ell(\cos\theta),
+\end{align}
+where the last equality holds for $s_a=0$, and both expressions assume $s_b=0$.
+
+In the flat-sky approximation we can take the small-scale limit $\ell\gg s_1,s_2$ and approximate 
+\begin{equation}
+  d_{s_1s_2}^\ell(\theta)\longrightarrow J_{s_1-s_2}(\ell\theta),
+\end{equation}
+where $J_\alpha(x)$ is the Bessel function of order $\alpha$. Eq. \ref{eq:cl_xi} then becomes\footnote{See the weak lensing review by \citet{Bartelmann01}, page 44 and \citet{Joachimi10}.}
+\begin{equation}
+  \xi^{ab}_{\pm}(\theta)=\left(\pm1\right)^{s_b}\int\frac{d\ell\,\ell}{2\pi}\,C^{ab\pm}_\ell J_{s_a\mp s_b}(\ell\theta).
 \end{equation}
 
-{\bf 3-dimensional spatial correlation function.}
+In summary, for spins 0 and 2, the three relevant cases for the cosmological observables supported by \ccl are:
+\begin{itemize}
+  \item $s_a=s_b=0$ (e.g. galaxy-galaxy, galaxy-$\kappa$ and $\kappa$-$\kappa$):
+    \begin{align}
+      \xi^{ab}(\theta)&=\sum_\ell\frac{2\ell+1}{4\pi}\,C^{ab}_\ell P_\ell(\cos\theta)\hspace{5pt}\text{(full-sky)}\\
+                      &=\int_0^\infty\frac{d\ell\,\ell}{2\pi}\,C^{ab}_\ell J_0(\ell\theta)\hspace{25pt}\text{(flat-sky)}
+    \end{align}
+  \item $s_a=2$, $s_b=0$ (e.g. galaxy-shear, $\kappa$-shear):
+    \begin{align}
+      \xi^{ab}(\theta)&=\sum_\ell\frac{2\ell+1}{4\pi}\,C^{ab}_\ell d^\ell_{2,0}(\theta)\hspace{15pt}\text{(full-sky)}\\
+                      &=\int_0^\infty\frac{d\ell\,\ell}{2\pi}\,C^{ab}_\ell J_2(\ell\theta)\hspace{25pt}\text{(flat-sky)}
+    \end{align}
+  \item $s_a=s_b=2$ (e.g. shear-shear):
+    \begin{align}
+      \xi^{ab}_\pm(\theta)&=\sum_\ell\frac{2\ell+1}{4\pi}\,C^{ab}_\ell d^\ell_{2,\pm2}(\theta)\hspace{12pt}\text{(full-sky)}\\
+                      &=\int_0^\infty\frac{d\ell\,\ell}{2\pi}\,C^{ab}_\ell J_{2\mp2}(\ell\theta)\hspace{16pt}\text{(flat-sky)}
+    \end{align}
+\end{itemize}
 
-In addition to the angular correlation functions, the 3-dimensional spatial correlation function $\xi(r)$ is 
-calculated from the power spectrum $P(k)$ using
+\subsubsection{3-dimensional spatial correlation function.}
+In addition to the angular correlation functions, \ccl can also be used to compute the 3-dimensional spatial correlation function $\xi(r)$, given as a Fourier transform of the matter power spectrum:
 \begin{equation}
 \xi(r) = \frac{1}{2 \pi^2} \int dk \; k^2 P(k) \frac{\sin(kr)}{kr}
 \end{equation}
+In the future \ccl will be expanded to incorporate the calculation of the higher-order multipoles needed to characterize the redshift-space 3D correlation function in the presence of RSDs.
+
 
 %-------------------------------------------------------------------------------
 \subsection{Halo mass function}
