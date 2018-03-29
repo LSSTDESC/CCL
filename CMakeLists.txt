@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.2)
 # Adding customized cmake module
 list(APPEND CMAKE_MODULE_PATH  "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
-project(ccl)
+project(ccl VERSION 0.0.2)
 
     # Uses system libraries or downloads and build if necessary
     include(BuildFFTW)
@@ -47,8 +47,10 @@ project(ccl)
     # Adds path to CCL include folder
     include_directories(include)
 
+    #
     # Builds the main CCL library
-    add_library(ccl SHARED ${CCL_SRC})
+    #
+    add_library(ccl ${CCL_SRC})
     target_link_libraries(ccl ${GSL_LIBRARIES} ${FFTW_LIBRARIES} ${CLASS_LIBRARIES} m)
     if(NOT CLASS_EXTERNAL)
       add_dependencies(ccl CLASS)
