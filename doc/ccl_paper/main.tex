@@ -381,18 +381,18 @@ where $J_\alpha(x)$ is the Bessel function of order $\alpha$. Eq. \ref{eq:cl_xi}
 In summary, for spins 0 and 2, the three relevant cases for the cosmological observables supported by \ccl are:
 \begin{itemize}
   \item $s_a=s_b=0$ (e.g. galaxy-galaxy, galaxy-$\kappa$ and $\kappa$-$\kappa$):
-    \begin{align}
-      \xi^{ab}(\theta)&=\sum_\ell\frac{2\ell+1}{4\pi}\,C^{ab}_\ell P_\ell(\cos\theta)\hspace{5pt}\text{(full-sky)}\\
+    \begin{align}\label{eq:xi00full}
+      \xi^{ab}(\theta)&=\sum_\ell\frac{2\ell+1}{4\pi}\,C^{ab}_\ell P_\ell(\cos\theta)\hspace{5pt}\text{(full-sky)}\\\label{eq:xi00flat}
                       &=\int_0^\infty\frac{d\ell\,\ell}{2\pi}\,C^{ab}_\ell J_0(\ell\theta)\hspace{25pt}\text{(flat-sky)}
     \end{align}
   \item $s_a=2$, $s_b=0$ (e.g. galaxy-shear, $\kappa$-shear):
-    \begin{align}
-      \xi^{ab}(\theta)&=\sum_\ell\frac{2\ell+1}{4\pi}\,C^{ab}_\ell d^\ell_{2,0}(\theta)\hspace{15pt}\text{(full-sky)}\\
+    \begin{align}\label{eq:xi02full}
+      \xi^{ab}(\theta)&=\sum_\ell\frac{2\ell+1}{4\pi}\,C^{ab}_\ell d^\ell_{2,0}(\theta)\hspace{15pt}\text{(full-sky)}\\\label{eq:xi02flat}
                       &=\int_0^\infty\frac{d\ell\,\ell}{2\pi}\,C^{ab}_\ell J_2(\ell\theta)\hspace{25pt}\text{(flat-sky)}
     \end{align}
   \item $s_a=s_b=2$ (e.g. shear-shear):
-    \begin{align}
-      \xi^{ab}_\pm(\theta)&=\sum_\ell\frac{2\ell+1}{4\pi}\,C^{ab}_\ell d^\ell_{2,\pm2}(\theta)\hspace{12pt}\text{(full-sky)}\\
+    \begin{align}\label{eq:xi22full}
+      \xi^{ab}_\pm(\theta)&=\sum_\ell\frac{2\ell+1}{4\pi}\,C^{ab}_\ell d^\ell_{2,\pm2}(\theta)\hspace{12pt}\text{(full-sky)}\\\label{eq:xi22flat}
                       &=\int_0^\infty\frac{d\ell\,\ell}{2\pi}\,C^{ab}_\ell J_{2\mp2}(\ell\theta)\hspace{16pt}\text{(flat-sky)}
     \end{align}
 \end{itemize}
@@ -651,9 +651,9 @@ As shown in Section \ref{sssec:2pt.pspec}, computing each transfer function cont
 \begin{equation}
  j_\ell(x)\simeq\sqrt{\frac{\pi}{2\ell+1}}\,\delta\left(\ell+\frac{1}{2}-x\right).
 \end{equation}
-Thus for each $k$ and $\ell$ we can define a radial distance $\chi_\ell\equiv(\ell+1/2)/k$, with corresponding redshift $z_\ell$. This approximation works best for wide radial kernels and high multipoles.
+This eliminates the integrals associated with each of the two transfer functions, massively accelerating the calculation.
 
-Substituting this in the expressions above, the simplified versions become:
+Thus for each $k$ and $\ell$ we can define a radial distance $\chi_\ell\equiv(\ell+1/2)/k$, with corresponding redshift $z_\ell$. Substituting this in the expressions presented in Section \ref{sssec:2pt.pspec}, the power spectrum can be computed as a single integral:
 \begin{equation}\label{eq:limber}
  C^{ab}_\ell=\frac{2}{2\ell+1}\int_0^\infty dk\,P_\delta\left(k,z_\ell\right)
  \tilde{\Delta}^a_\ell(k)\tilde{\Delta}^b_\ell(k).
@@ -662,15 +662,16 @@ where
 \begin{align}
  &\tilde{\Delta}_\ell^{\rm D}(k)=p_z(z_\ell)\,b(z_\ell)\,H(z_\ell)\\
  &\tilde{\Delta}_\ell^{\rm RSD}(k)=
- \frac{1+8\ell}{(2\ell+1)^2}\,p_z(z_\ell)\,f(z_\ell)\,H(z_\ell)-\\
+ \frac{1+8\ell}{(2\ell+1)^2}\,p_z(z_\ell)\,f(z_\ell)\,H(z_\ell)-\\\nonumber
  &\hspace{48pt}\frac{4}{2\ell+3}\sqrt{\frac{2\ell+1}{2\ell+3}}p_z(z_{\ell+1})\,f(z_{\ell+1})\,H(z_{\ell+1})\\
  &\tilde{\Delta}_\ell^{\rm M}(k)=3\Omega_{M,0}H_0^2\frac{\ell(\ell+1)}{k^2}\,
  \frac{(1+z_\ell)}{\chi_\ell}W^{\rm M}(z_\ell)\\
  &\tilde{\Delta}_\ell^{\rm L}(k)=\frac{3}{2}\Omega_{M,0}H_0^2\sqrt{\frac{(\ell+2)!}{(\ell-2)}}\frac{1}{k^2}\,
  \frac{1+z_\ell}{\chi_\ell}W^{\rm L}(z_\ell)\\
- &\tilde{\Delta}_\ell^{\rm IA}(k)=\sqrt{\frac{(\ell+2)!}{(\ell-2)!}}\frac{p_z(z_\ell)\,b_{\rm IA}(z_\ell)f_{\rm red}(z_\ell)H(z_\ell)}{(\ell+1/2)^2}
+ &\tilde{\Delta}_\ell^{\rm IA}(k)=\sqrt{\frac{(\ell+2)!}{(\ell-2)!}}\frac{p_z(z_\ell)\,b_{\rm IA}(z_\ell)f_{\rm red}(z_\ell)H(z_\ell)}{(\ell+1/2)^2}.
 \end{align}
 
+The Limber approximation works best for wide radial kernels and high $\ell$.
 
 \subsubsection{Beyond Limber: \texttt{Angpow}}
 \vol{J\'er\'emy Neveu}
@@ -711,79 +712,9 @@ As in the general case the Limber approximation is valid at high $\ell$ values, 
 
 \cont{Which basis to work in. Approach to performing oscillatory integrals.}
 
-In this section we describe the computation of correlation functions given the angular power
-spectrum.
+The exact Equations (\ref{eq:xi00full}, \ref{eq:xi02full}, \ref{eq:xi22full}) relating the angular correlation functions and power spectra involve carrying out $N_\theta\times\ell_{\rm max}$ operations, where $\ell_{\rm max}\sim O(10^{4-5})$ is the maximum multipole needed to achieve convergence and $N_\theta$ is the number of angular scales $\theta$ at which the angular correlation function needs to be computed. Thus, evaluating these expressions directly becomes prohibitively slow and should be avoided except in regimes where other approximations are not valid. In particular \ccl only supports the brute-force evaluation of these equations for correlations involving at least one spin-0 field. The currently preferred method in \ccl is to use the flat-sky approximation and evaluate the Hankel transforms (Eqs. \ref{eq:xi00flat}, \ref{eq:xi02flat}, \ref{eq:xi22flat}).
 
-We begin by briefly deriving the relation between correlation functions and power spectra.
-A (scalar) angular space observable, $X$, with spin $s$ can be decompsed into spin spherical
-harmonics
-\begin{align}\label{eq:X_harmonic}
-  X(\vec \Omega)=&\sum_{\ell m}\tilde X_{\ell m} {\hspace{5pt}}_sY_{\ell m}(\vec \Omega)
-\end{align}
-where $\vec \Omega$ refers to the angular coordinates on the sky.
-The angular cross correlation function of two tracers, $X$ and $Z$ of the large scale
-structure can be written in terms of their harmonic components, $\tilde X_{\ell m}$ and $\tilde Z_{\ell' m'}$ as
-\begin{align}
-  \langle XZ \rangle(\theta)=&\left\langle\sum_{\ell,m}\sum_{\ell', m'}\tilde X_{\ell m}\tilde
-  Z_{\ell' m'}{\hspace{5pt}}_{s_X}Y_{\ell m}(\vec \Omega){\hspace{5pt}}_{s_Z}Y_{\ell'm'}(\vec \Omega+\theta)\right\rangle\\
-  =&\sum_{\ell,m}C_{\ell}{\hspace{5pt}}_{s_X}Y_{\ell m}(\vec \Omega){\hspace{5pt}}_{s_Z}Y_{\ell m}(\vec \Omega+\theta)%\\
-  %\langle XZ
-  %\rangle(\theta)=&\frac{1}{4\pi}\sum_{\ell}(2\ell+1)C_{\ell}P_{\ell}(\cos\theta)\label{eq:xi_pl0}
-\end{align}
-where $s_X$ and $s_Z$ are the spins of tracers, $_{s}Y_{\ell m}$ are spin spherical harmonics and
-we also used the identity
-\begin{align}
-  \langle\tilde X_{\ell m}\tilde Z_{\ell' m'}\rangle=&C_{\ell}\delta_D(m,m')\delta_D(\ell,\ell'),
-  % \\
-  % \sum_{m=-\ell}^{m=\ell}Y_{\ell m}(\vec\Omega)Y_{\ell m}(\vec\Omega+\theta)=&\frac{2\ell+1}{4\pi}
-  % P_{\ell}(\cos\theta)
-  % \label{eq:Ylm_Pl}.
-\end{align}
-Using the addition theorem for spin spherical harmonics and the relation between spherical
-harmonics and wigner D-matrices\footnote{\url{https://en.wikipedia.org/wiki/Wigner_D-matrix}}
-\citep{Ng1999}, we can write
-\begin{align}
-  \langle XZ
-  \rangle(\theta)=&\frac{1}{4\pi}\sum_{\ell}(2\ell+1)C_{\ell}D^{\ell}_{s_X,-s_Z}(0,\theta,0)
-\end{align}
-
-The galaxy number count is spin zero and shear is a spin-2 object. Thus the expressions for various auto and cross correlations are \todo{expand to full width of page}
-\begin{align}
-  \xi_{gg}(\theta)&=\frac{1}{4\pi}\sum_{\ell}{(2\ell+1)}C_{\ell}^{gg}D^{\ell}_{0,0}(0,\theta,0)=
-  \frac{1}{4\pi}\sum_{\ell}{(2\ell+1)}C_{\ell}^{gg}P_{\ell}(\cos\theta)\label{eq:xi_gg_D}\\
-  \langle g\gamma_T\rangle(\theta)&=
-  \frac{1}{4\pi}\sum_{\ell}{(2\ell+1)}C_{\ell}^{g\gamma}D^{\ell}_{2,0}(0,\theta,0)=
-  \frac{1}{4\pi}\sum_{\ell}(2\ell+1)\sqrt{\frac{(\ell-2)!}{(\ell+2)!}}C_{\ell}^{g\gamma}
-  P_{\ell}^2(\cos\theta)\label{eq:xi_g_gamma_D}\\
-  \langle g\kappa\rangle(\theta)&=
-  \frac{1}{4\pi}\sum_{\ell}{(2\ell+1)}C_{\ell}^{g\kappa}D^{\ell}_{0,0}(0,\theta,0)=
-  \frac{1}{4\pi}\sum_{\ell}(2\ell+1)C_{\ell}^{g\kappa}
-  P_{\ell}(\cos\theta)\label{eq:xi_g_kappa_D}\\
-  \xi_+(\theta)&=\frac{1}{4\pi}\sum_{\ell}{(2\ell+1)}C_{\ell}^{\gamma\gamma*}
-  D^{\ell}_{2,2}(0,\theta,0)\label{eq:xi_p_D}\\
-  \xi_-(\theta)&=\frac{1}{4\pi}\sum_{\ell}{(2\ell+1)}C_{\ell}^{\gamma\gamma*}
-  D^{\ell}_{2,-2}(0,\theta,0)
-  %\approx \frac{1}{4\pi}\sum_{\ell}{(2\ell+1)}C_{\ell}^{\gamma\gamma*}P_{\ell}(\cos\theta)
-  \label{eq:xi_m_D}
-\end{align}
-
-Using relations from \cite{Kilbinger2017}, we can write
-\begin{align}
-  C_{\ell}^{g\kappa}&={\frac{1}{2}\frac{(\ell+1)!}{(\ell-1)!}}C_{\ell}^{g\psi}\\
-  C_{\ell}^{g\gamma}&=\frac{1}{2}\sqrt{\frac{(\ell+2)!}{(\ell-2)!}}C_{\ell}^{g\psi}
-  \\ \langle g\gamma_T\rangle(\theta)&
-  =\frac{1}{4\pi}\sum_{\ell}\frac{(2\ell+1)}{\ell(\ell+1)}C_{\ell}^{g\kappa}P_{\ell}^2(\cos\theta)
-  \label{eq:xi_g_gamma}\,.
-\end{align}
-
-The {\tt ccl\_tracer\_corr\_legendre} routine computes these transform to convert angular power
-spectra, $C_\ell$, into correlation functions. We use the associated Legendre function
-implementation from the {\tt GSL} library. {\tt ccl\_tracer\_corr\_legendre} routine evaluations
-can be very slow, especially for polynomials $P_\ell^m$ with $m>0$. Note that the $P_\ell^m$
-evaluations need to be done only once and can then be saved as long as $\ell$ and $\theta$ values
-do not change. However, \ccl has not yet implemented this feature.
-
-The {\tt ccl\_tracer\_corr\_legendre} methods currently does not support the computation of the shear correlation functions $\xi_{\pm}$, and the approximate {\tt ccl\_tracer\_corr\_fftlog} (described below) should be used instead. As demonstrated in \cite{Kilbinger2017} and \cite{Kitching17}, this approximation should be sufficient even for futuristic surveys.
+We should also note that other approaches relating the correlation functions directly with the 3D matter power spectrum (E.g. \cite{2017ApJ...845...28C}) could be useful in accelerating this computation, and we will explore these avenues in the future.
 
 \paragraph{Hankel Transform}
 Notice that in the flat-sky limit, the expressions in Eqs.~\ref{eq:xi_gg_D}--\ref{eq:xi_m_D} can be
@@ -1021,3 +952,80 @@ In general, although this document presents the functionality and performance of
 
 \end{document}
 %
+
+
+
+%Previous discussion on correlation functions
+In this section we describe the computation of correlation functions given the angular power
+spectrum.
+
+We begin by briefly deriving the relation between correlation functions and power spectra.
+A (scalar) angular space observable, $X$, with spin $s$ can be decompsed into spin spherical
+harmonics
+\begin{align}\label{eq:X_harmonic}
+  X(\vec \Omega)=&\sum_{\ell m}\tilde X_{\ell m} {\hspace{5pt}}_sY_{\ell m}(\vec \Omega)
+\end{align}
+where $\vec \Omega$ refers to the angular coordinates on the sky.
+The angular cross correlation function of two tracers, $X$ and $Z$ of the large scale
+structure can be written in terms of their harmonic components, $\tilde X_{\ell m}$ and $\tilde Z_{\ell' m'}$ as
+\begin{align}
+  \langle XZ \rangle(\theta)=&\left\langle\sum_{\ell,m}\sum_{\ell', m'}\tilde X_{\ell m}\tilde
+  Z_{\ell' m'}{\hspace{5pt}}_{s_X}Y_{\ell m}(\vec \Omega){\hspace{5pt}}_{s_Z}Y_{\ell'm'}(\vec \Omega+\theta)\right\rangle\\
+  =&\sum_{\ell,m}C_{\ell}{\hspace{5pt}}_{s_X}Y_{\ell m}(\vec \Omega){\hspace{5pt}}_{s_Z}Y_{\ell m}(\vec \Omega+\theta)%\\
+  %\langle XZ
+  %\rangle(\theta)=&\frac{1}{4\pi}\sum_{\ell}(2\ell+1)C_{\ell}P_{\ell}(\cos\theta)\label{eq:xi_pl0}
+\end{align}
+where $s_X$ and $s_Z$ are the spins of tracers, $_{s}Y_{\ell m}$ are spin spherical harmonics and
+we also used the identity
+\begin{align}
+  \langle\tilde X_{\ell m}\tilde Z_{\ell' m'}\rangle=&C_{\ell}\delta_D(m,m')\delta_D(\ell,\ell'),
+  % \\
+  % \sum_{m=-\ell}^{m=\ell}Y_{\ell m}(\vec\Omega)Y_{\ell m}(\vec\Omega+\theta)=&\frac{2\ell+1}{4\pi}
+  % P_{\ell}(\cos\theta)
+  % \label{eq:Ylm_Pl}.
+\end{align}
+Using the addition theorem for spin spherical harmonics and the relation between spherical
+harmonics and wigner D-matrices\footnote{\url{https://en.wikipedia.org/wiki/Wigner_D-matrix}}
+\citep{Ng1999}, we can write
+\begin{align}
+  \langle XZ
+  \rangle(\theta)=&\frac{1}{4\pi}\sum_{\ell}(2\ell+1)C_{\ell}D^{\ell}_{s_X,-s_Z}(0,\theta,0)
+\end{align}
+
+The galaxy number count is spin zero and shear is a spin-2 object. Thus the expressions for various auto and cross correlations are \todo{expand to full width of page}
+\begin{align}
+  \xi_{gg}(\theta)&=\frac{1}{4\pi}\sum_{\ell}{(2\ell+1)}C_{\ell}^{gg}D^{\ell}_{0,0}(0,\theta,0)=
+  \frac{1}{4\pi}\sum_{\ell}{(2\ell+1)}C_{\ell}^{gg}P_{\ell}(\cos\theta)\label{eq:xi_gg_D}\\
+  \langle g\gamma_T\rangle(\theta)&=
+  \frac{1}{4\pi}\sum_{\ell}{(2\ell+1)}C_{\ell}^{g\gamma}D^{\ell}_{2,0}(0,\theta,0)=
+  \frac{1}{4\pi}\sum_{\ell}(2\ell+1)\sqrt{\frac{(\ell-2)!}{(\ell+2)!}}C_{\ell}^{g\gamma}
+  P_{\ell}^2(\cos\theta)\label{eq:xi_g_gamma_D}\\
+  \langle g\kappa\rangle(\theta)&=
+  \frac{1}{4\pi}\sum_{\ell}{(2\ell+1)}C_{\ell}^{g\kappa}D^{\ell}_{0,0}(0,\theta,0)=
+  \frac{1}{4\pi}\sum_{\ell}(2\ell+1)C_{\ell}^{g\kappa}
+  P_{\ell}(\cos\theta)\label{eq:xi_g_kappa_D}\\
+  \xi_+(\theta)&=\frac{1}{4\pi}\sum_{\ell}{(2\ell+1)}C_{\ell}^{\gamma\gamma*}
+  D^{\ell}_{2,2}(0,\theta,0)\label{eq:xi_p_D}\\
+  \xi_-(\theta)&=\frac{1}{4\pi}\sum_{\ell}{(2\ell+1)}C_{\ell}^{\gamma\gamma*}
+  D^{\ell}_{2,-2}(0,\theta,0)
+  %\approx \frac{1}{4\pi}\sum_{\ell}{(2\ell+1)}C_{\ell}^{\gamma\gamma*}P_{\ell}(\cos\theta)
+  \label{eq:xi_m_D}
+\end{align}
+
+Using relations from \cite{Kilbinger2017}, we can write
+\begin{align}
+  C_{\ell}^{g\kappa}&={\frac{1}{2}\frac{(\ell+1)!}{(\ell-1)!}}C_{\ell}^{g\psi}\\
+  C_{\ell}^{g\gamma}&=\frac{1}{2}\sqrt{\frac{(\ell+2)!}{(\ell-2)!}}C_{\ell}^{g\psi}
+  \\ \langle g\gamma_T\rangle(\theta)&
+  =\frac{1}{4\pi}\sum_{\ell}\frac{(2\ell+1)}{\ell(\ell+1)}C_{\ell}^{g\kappa}P_{\ell}^2(\cos\theta)
+  \label{eq:xi_g_gamma}\,.
+\end{align}
+
+The {\tt ccl\_tracer\_corr\_legendre} routine computes these transform to convert angular power
+spectra, $C_\ell$, into correlation functions. We use the associated Legendre function
+implementation from the {\tt GSL} library. {\tt ccl\_tracer\_corr\_legendre} routine evaluations
+can be very slow, especially for polynomials $P_\ell^m$ with $m>0$. Note that the $P_\ell^m$
+evaluations need to be done only once and can then be saved as long as $\ell$ and $\theta$ values
+do not change. However, \ccl has not yet implemented this feature.
+
+The {\tt ccl\_tracer\_corr\_legendre} methods currently does not support the computation of the shear correlation functions $\xi_{\pm}$, and the approximate {\tt ccl\_tracer\_corr\_fftlog} (described below) should be used instead. As demonstrated in \cite{Kilbinger2017} and \cite{Kitching17}, this approximation should be sufficient even for futuristic surveys.
