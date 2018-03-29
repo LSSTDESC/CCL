@@ -19,8 +19,8 @@ ExternalProject_Add(CLASS
         URL_MD5 ${CLASSMD5}
         DOWNLOAD_NO_PROGRESS 1
         # In the configuration step, we set the CLASS compiler to the desired one
-        CONFIGURE_COMMAND     sed -i "/^CC /c CC = ${CMAKE_C_COMPILER}" Makefile &&
-			      sed -i "/^OMPFLAG /c ${CLASS_OMPFLAG}" Makefile
+        CONFIGURE_COMMAND     sed "/^CC /c CC = ${CMAKE_C_COMPILER}" Makefile > Makefile_tmp &&
+                              sed "/^OMPFLAG /c ${CLASS_OMPFLAG}" Makefile_tmp > Makefile
         BUILD_COMMAND         make libclass.a
         INSTALL_COMMAND       mkdir -p ${CMAKE_BINARY_DIR}/extern/lib &&
                               cp libclass.a ${CMAKE_BINARY_DIR}/extern/lib &&
