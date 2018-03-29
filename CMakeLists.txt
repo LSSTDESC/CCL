@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.2)
 # Adding customized cmake module
 list(APPEND CMAKE_MODULE_PATH  "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
-project(ccl VERSION 0.0.2)
+project(ccl VERSION 0.2.1)
 
     # Uses system libraries or downloads and build if necessary
     include(BuildFFTW)
@@ -50,21 +50,36 @@ project(ccl VERSION 0.0.2)
     #
     # Builds the main CCL library
     #
-    add_library(ccl ${CCL_SRC})
+    # The reason for building ccl as a shared library is that we can link it to
+    # class directly, and it's not a dependency anymore
+    add_library(ccl SHARED ${CCL_SRC})
     target_link_libraries(ccl ${GSL_LIBRARIES} ${FFTW_LIBRARIES} ${CLASS_LIBRARIES} m)
     if(NOT CLASS_EXTERNAL)
       add_dependencies(ccl CLASS)
     endif()
-    if(NOT GSL_FOUND)
+    if(GSL_FOUND)
+      set(PCGSL_LIB "-lgsl -lgslcblas")
+    else(GSL_FOUND)
       add_dependencies(ccl GSL)
-    endif()
-    if(NOT FFTW_FOUND)
+    endif(GSL_FOUND)
+    if(FFTW_FOUND)
+      set(PCFFTW_LIB "-lfftw3")
+    else(FFTW_FOUND)
       add_dependencies(ccl FFTW)
-    endif()
+    endif(FFTW_FOUND)
 
     # Builds the test suite
     add_executable(check_ccl ${TEST_SRC})
     target_link_libraries(check_ccl ccl)
+
+    # Builds pkgconfig file for CCL
+    SET(PROJECT_DESCRIPTION "DESC Core Cosmology Library: cosmology routines with validated numerical accuracy")
+    SET(PKG_CONFIG_LIBDIR "${CMAKE_INSTALL_PREFIX}/lib")
+    SET(PKG_CONFIG_INCLUDEDIR "${CMAKE_INSTALL_PREFIX}/include/")
+    SET(PKG_CONFIG_LIBS "-L${PKG_CONFIG_LIBDIR} -lccl ${PCGSL_LIB} ${PCFFTW_LIB} -lm")
+    SET(PKG_CONFIG_CFLAGS "-I${PKG_CONFIG_INCLUDEDIR}")
+    CONFIGURE_FILE( "${CMAKE_CURRENT_SOURCE_DIR}/cmake/pkg-config.cmakein"
+                    "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.pc" )
 
     # Installs the CCL library
     install(TARGETS ccl DESTINATION lib)
@@ -72,6 +87,7 @@ project(ccl VERSION 0.0.2)
     install(DIRECTORY include/ DESTINATION include/
             FILES_MATCHING PATTERN "*.h")
     install(FILES include/ccl_params.ini DESTINATION share/ccl)
+    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/ccl.pc DESTINATION lib/pkgconfig)
 
     #
     # Builds the python module
