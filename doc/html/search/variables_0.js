@@ -1,11 +1,17 @@
 var searchData=
 [
+  ['a',['a',['../struct_om_nuh2__params.html#a99501948ae400494a980f4dea7ed80db',1,'OmNuh2_params']]],
   ['a_5fs',['A_s',['../structccl__parameters.html#a315b41a853e710ee2cb280f35e65c191',1,'ccl_parameters::A_s()'],['../namespaceccl__test__distances.html#a4fee99b90c7ad9e42ac56246005f2f99',1,'ccl_test_distances.A_s()'],['../namespaceccl__test__growth.html#ae7c040656adf879c79a4f0266f35e7e7',1,'ccl_test_growth.A_s()']]],
-  ['a_5fspline_5fdelta',['A_SPLINE_DELTA',['../structccl__spline__params.html#aaf8b01f5e51093e0d4fc614cca03464e',1,'ccl_spline_params']]],
   ['a_5fspline_5fmax',['A_SPLINE_MAX',['../structccl__spline__params.html#aa227bbd087fee06f845b9de60ff09556',1,'ccl_spline_params']]],
   ['a_5fspline_5fmin',['A_SPLINE_MIN',['../structccl__spline__params.html#a43f7b575552fac8d54fd75bd60e42cc7',1,'ccl_spline_params']]],
   ['a_5fspline_5fmin_5fpk',['A_SPLINE_MIN_PK',['../structccl__spline__params.html#a800c10517429ab9b35ffccf3bff5f1f0',1,'ccl_spline_params']]],
+  ['a_5fspline_5fminlog',['A_SPLINE_MINLOG',['../structccl__spline__params.html#ad8e5259b94af0abb124baa51bde42d68',1,'ccl_spline_params']]],
+  ['a_5fspline_5fminlog_5fpk',['A_SPLINE_MINLOG_PK',['../structccl__spline__params.html#a58ef2cbecc4a7d3100182fd07c90fcf7',1,'ccl_spline_params']]],
   ['a_5fspline_5fna',['A_SPLINE_NA',['../structccl__spline__params.html#a5206373ecbc1c9cc7fbce0840dc83e38',1,'ccl_spline_params']]],
+  ['a_5fspline_5fna_5fpk',['A_SPLINE_NA_PK',['../structccl__spline__params.html#a1e8edb8505e8a05d62df4d92999dacfc',1,'ccl_spline_params']]],
+  ['a_5fspline_5fnlog',['A_SPLINE_NLOG',['../structccl__spline__params.html#a53ec49c7af23118fae9868df9569ff72',1,'ccl_spline_params']]],
+  ['a_5fspline_5fnlog_5fpk',['A_SPLINE_NLOG_PK',['../structccl__spline__params.html#afebd711662e73360a7b18968ac5e8f40',1,'ccl_spline_params']]],
+  ['accel',['accel',['../struct_om_nuh2__params.html#a0dea67e6081bd4ae3ea01c7a5a801182',1,'OmNuh2_params']]],
   ['accelerator',['accelerator',['../structccl__data.html#ad8d2aef21dc9cf1fdee8e4afe3778b33',1,'ccl_data']]],
   ['accelerator_5fachi',['accelerator_achi',['../structccl__data.html#a813c89f4e504a5954b47d7b7797c49a3',1,'ccl_data']]],
   ['accelerator_5fd',['accelerator_d',['../structccl__data.html#aef120c743423fc4967e56fe0f60b52c8',1,'ccl_data']]],

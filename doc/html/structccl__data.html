@@ -134,8 +134,14 @@ Data Fields</h2></td></tr>
 <tr class="separator:aa965346f6aa1fe399a7a0d759fb85312"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad55e7ec9ee6a6d8ad95b3c9eb1eef92b"><td class="memItemLeft" align="right" valign="top">gsl_spline2d *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structccl__data.html#ad55e7ec9ee6a6d8ad95b3c9eb1eef92b">p_nl</a></td></tr>
 <tr class="separator:ad55e7ec9ee6a6d8ad95b3c9eb1eef92b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a692d7cc4baebed5a6b33bf21b6b558bb"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structccl__data.html#a692d7cc4baebed5a6b33bf21b6b558bb">k_min</a></td></tr>
-<tr class="separator:a692d7cc4baebed5a6b33bf21b6b558bb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac33675ca1fd015c79fcf3e18623ed405"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structccl__data.html#ac33675ca1fd015c79fcf3e18623ed405">k_min_lin</a></td></tr>
+<tr class="separator:ac33675ca1fd015c79fcf3e18623ed405"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2ab9d362ddf213f30d73c4cac4c60141"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structccl__data.html#a2ab9d362ddf213f30d73c4cac4c60141">k_min_nl</a></td></tr>
+<tr class="separator:a2ab9d362ddf213f30d73c4cac4c60141"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a36afcf1cc6daf98b42b8e9c55338dad7"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structccl__data.html#a36afcf1cc6daf98b42b8e9c55338dad7">k_max_lin</a></td></tr>
+<tr class="separator:a36afcf1cc6daf98b42b8e9c55338dad7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a26b24c2ae6bb9b41b2f3a64a14fc65af"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structccl__data.html#a26b24c2ae6bb9b41b2f3a64a14fc65af">k_max_nl</a></td></tr>
+<tr class="separator:a26b24c2ae6bb9b41b2f3a64a14fc65af"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Struct containing references to gsl splines for distance and acceleration calculations </p>
@@ -332,12 +338,48 @@ Data Fields</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a692d7cc4baebed5a6b33bf21b6b558bb"></a>
+<a class="anchor" id="a36afcf1cc6daf98b42b8e9c55338dad7"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">double ccl_data::k_min</td>
+          <td class="memname">double ccl_data::k_max_lin</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a26b24c2ae6bb9b41b2f3a64a14fc65af"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double ccl_data::k_max_nl</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="ac33675ca1fd015c79fcf3e18623ed405"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double ccl_data::k_min_lin</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a2ab9d362ddf213f30d73c4cac4c60141"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double ccl_data::k_min_nl</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -393,7 +435,7 @@ Data Fields</h2></td></tr>
 </div>
 </div>
 <hr/>The documentation for this struct was generated from the following file:<ul>
-<li>/home/alonso/Downloads/Clean/CCL/include/<a class="el" href="ccl__core_8h_source.html">ccl_core.h</a></li>
+<li><a class="el" href="ccl__core_8h_source.html">ccl_core.h</a></li>
 </ul>
 </div><!-- contents -->
 <!-- start footer part -->

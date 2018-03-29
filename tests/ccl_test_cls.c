@@ -145,10 +145,6 @@ static void compare_cls(char *compare_type,struct cls_data * data)
 
   for(int ii=0;ii<3001;ii++) {
     int l, rtn;
-    double cl_dd_11,cl_dd_12,cl_dd_22;
-    double cl_ll_11,cl_ll_12,cl_ll_22;
-    double cl_dd_11_h,cl_dd_12_h,cl_dd_22_h;
-    double cl_ll_11_h,cl_ll_12_h,cl_ll_22_h;
     fscanf(fi_dd_11,"%d %lf",&l,&(cls_dd_11_b[ii]));
     fscanf(fi_dd_12,"%d %lf",&l,&(cls_dd_12_b[ii]));
     fscanf(fi_dd_22,"%d %lf",&l,&(cls_dd_22_b[ii]));
@@ -188,18 +184,28 @@ static void compare_cls(char *compare_type,struct cls_data * data)
   double fraction_failed=0;
   for(int ii=0;ii<3001;ii++) {
     int l=ells[ii];
-    double cl_dd_11  =cls_dd_11_b[ii];
-    double cl_dd_12  =cls_dd_12_b[ii];
-    double cl_dd_22  =cls_dd_22_b[ii];
-    double cl_ll_11  =cls_ll_11_b[ii];
-    double cl_ll_12  =cls_ll_12_b[ii];
-    double cl_ll_22  =cls_ll_22_b[ii];
-    double cl_dd_11_h=cls_dd_11_h[ii];
-    double cl_dd_12_h=cls_dd_12_h[ii];
-    double cl_dd_22_h=cls_dd_22_h[ii];
-    double cl_ll_11_h=cls_ll_11_h[ii];
-    double cl_ll_12_h=cls_ll_12_h[ii];
-    double cl_ll_22_h=cls_ll_22_h[ii];
+    double ell_correct;
+    double cl_dd_11,cl_dd_12,cl_dd_22;
+    double cl_ll_11,cl_ll_12,cl_ll_22;
+    double cl_dd_11_h,cl_dd_12_h,cl_dd_22_h;
+    double cl_ll_11_h,cl_ll_12_h,cl_ll_22_h;
+    
+    if(l<=0)
+      ell_correct=1;
+    else
+      ell_correct=l*(l+1.)/sqrt((l+2.)*(l+1.)*l*(l-1.));
+    cl_dd_11  =cls_dd_11_b[ii];
+    cl_dd_12  =cls_dd_12_b[ii];
+    cl_dd_22  =cls_dd_22_b[ii];
+    cl_ll_11  =cls_ll_11_b[ii];
+    cl_ll_12  =cls_ll_12_b[ii];
+    cl_ll_22  =cls_ll_22_b[ii];
+    cl_dd_11_h=cls_dd_11_h[ii];
+    cl_dd_12_h=cls_dd_12_h[ii];
+    cl_dd_22_h=cls_dd_22_h[ii];
+    cl_ll_11_h=cls_ll_11_h[ii]*ell_correct*ell_correct;
+    cl_ll_12_h=cls_ll_12_h[ii]*ell_correct*ell_correct;
+    cl_ll_22_h=cls_ll_22_h[ii]*ell_correct*ell_correct;
 
     if(fabs(cl_dd_11_h/cl_dd_11-1)>CLS_TOLERANCE)
       fraction_failed++;
@@ -213,7 +219,6 @@ static void compare_cls(char *compare_type,struct cls_data * data)
       fraction_failed++;
     if(fabs(cl_ll_22_h/cl_ll_22-1)>CLS_TOLERANCE)
       fraction_failed++;
-
   }
 
   free(ells);
