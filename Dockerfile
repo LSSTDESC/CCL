@@ -1,9 +1,10 @@
-FROM jupyter/scipy-notebook
+FROM ubuntu:artful
 LABEL maintainer "francois.lanusse@gmail.com"
 
 RUN apt-get update && apt-get upgrade -y
 RUN apt-get install -y git cmake make g++ gcc wget swig python-pip
 RUN apt-get install -y libgsl-dev libfftw3-dev
+RUN pip install numpy scipy matplotlib jupyter
 
 # Installing CCL C library
 RUN git clone https://github.com/EiffL/CCL && cd CCL && \
