@@ -32,6 +32,9 @@ if [[ $TRAVIS_OS_NAME == 'osx' ]]; then
     esac;
 
     source activate test-environment
+    # Install gsl manually because clang compilation outputs to many warnings
+    # which makes the compile log too long and eventually kills the build on travis
+    conda install --yes -c conda-forge gsl
     pip install numpy nose
 
 else
