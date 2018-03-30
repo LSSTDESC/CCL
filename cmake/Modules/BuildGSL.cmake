@@ -3,7 +3,7 @@ include(ExternalProject)
 set(GSLVersion 2.4)
 set(GSLMD5 dba736f15404807834dc1c7b93e83b92)
 
-find_package(GSL 2.4)
+find_package(GSL 2.3)
 
 # If GSL is not installed, lets go ahead and compile it
 if(NOT GSL_FOUND )

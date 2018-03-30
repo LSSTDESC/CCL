@@ -103,7 +103,14 @@ project(ccl VERSION 0.2.1)
     else()
       swig_add_library(ccllib TYPE SHARED LANGUAGE python SOURCES pyccl/ccl.i)
     endif()
-    swig_link_libraries(ccllib ${PYTHON_LIBRARIES} ccl)
+    # Unpleasant subtelty for linking on osx
+    if(APPLE)
+      message(${PYTHON_LIBRARIES})
+      set_target_properties(${SWIG_MODULE_ccllib_REAL_NAME} PROPERTIES LINK_FLAGS "-undefined dynamic_lookup")
+    else()
+      swig_link_libraries(ccllib ${PYTHON_LIBRARIES} ccl)
+    endif()
+
     set_target_properties(${SWIG_MODULE_ccllib_REAL_NAME} PROPERTIES SUFFIX .so)
 
     # Forces build of swig executable if not found
