@@ -8,6 +8,7 @@ cache:
     - $HOME/build/EiffL/CCL/build/FFTW/src
     - $HOME/build/EiffL/CCL/build/SWIG/src
     - $HOME/build/EiffL/CCL/build/CLASS/src
+    - $HOME/miniconda
 
 # Definition of python build matrix for osx comes from:
 # https://docs.travis-ci.com/user/multi-os/#Python-example-(unsupported-languages)
@@ -38,12 +39,13 @@ matrix:
 #            - dvipng
 
 install:
-    - ./.travis/install.sh # Installs dependencies for osx
+    - ./.travis/install.sh
     - export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
     - export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/usr/local/lib/pkgconfig
 
 script:
     - cmake --version
+    - python --version
     - python setup.py build
     - python setup.py test
     - sudo make -Cbuild install

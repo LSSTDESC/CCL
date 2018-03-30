@@ -59,10 +59,10 @@ project(ccl VERSION 0.2.1)
     endif()
     if(NOT GSL_FOUND)
       add_dependencies(ccl GSL)
-    endif(GSL_FOUND)
+    endif()
     if(NOT FFTW_FOUND)
       add_dependencies(ccl FFTW)
-    endif(FFTW_FOUND)
+    endif()
 
     # Builds the test suite
     add_executable(check_ccl ${TEST_SRC})
