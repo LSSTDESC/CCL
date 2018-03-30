@@ -23,7 +23,7 @@ See also our [wiki](https://github.com/LSSTDESC/CCL/wiki).
 
 `CCL` is available as a Python package through PyPi, to install:
 ```
-$ pip install pyccl
+$ pip install git+git://github.com/EiffL/CCL.git
 ```
 This should work as long as `CMake` is installed on your system (if it doesn't follow the detailed instructions below).
 Once `CCL` is installed, take it for a spin by following some example notebooks [here](examples).
