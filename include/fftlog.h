@@ -42,7 +42,13 @@ void xi2pk(int N,  const double r[],  const double xi[], double k[], double pk[]
 void fftlog_ComputeXiLM(double l, double m, int N, const double k[],  const double pk[],
 			double r[], double xi[]);
 
-
+/* Compute the function
+ *   \xi_\alpha(\theta) = \int_0^\infty \frac{d\ell}{2\pi} \ell J_\alpha(\ell\theta) C_\ell
+ * The input l-values must be logarithmically spaced.  The
+ * resulting xi_alpha(th) will be evaluated at the dual th-values
+ *   th[0] = 1/l[N-1], ..., th[N-1] = 1/l[0]. */
+void fftlog_ComputeXi2D(double bessel_order,int N,const double l[],const double cl[],
+			double th[], double xi[]);
 #include <complex.h>
 
 /* Compute the discrete Hankel transform of the function a(r).  See the FFTLog
