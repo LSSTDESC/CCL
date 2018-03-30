@@ -93,9 +93,12 @@ extern "C" {
 
 /**
  * neutrino mass splitting differences
+ * See Lesgourgues et al. 2012 for these values.
 */
-#define DELTAM12 0.009
-#define DELTAM13 0.05
+#define DELTAM12_sq 7.62E-5
+#define DELTAM13_sq_pos 2.55E-3
+#define DELTAM13_sq_neg -2.43E-3
+
 
 //Precision parameters
 /**

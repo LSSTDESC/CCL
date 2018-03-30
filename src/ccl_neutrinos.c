@@ -152,19 +152,22 @@ double* ccl_nu_masses(double OmNuh2, ccl_neutrino_mass_splits mass_split, double
      double *mnu;
 	 mnu = malloc(3*sizeof(double));
 			
-	 // Neutrino mass splittings are measured at +/- 0.05 and + 0.009
-	 // See e.g. review of Gerbino et al. 2017, Lesgourgues et al. 2012
-	 // The below expressions for the normal hierarchy then the inverted
-	 // hierarchy come from (sumnu - 0.05 - 0.009) (normal) and 
-	 // (sumnu + 0.05 - 0.009) (inverted).		
-	 if (sumnu>0.059){
-		 mnu[0] = (sumnu - 0.059) / 3.;
-		 mnu[1] = mnu[0] + 0.009;
-		 mnu[2] = mnu[0] + 0.05;
-	 }else{
+     // See CCL note for how we get these expressions for the neutrino masses in normal and inverted hierarchy.	
+	 mnu[0] = 2./3.* sumnu - 1./6. * pow(-6. * DELTAM12_sq + 12. * DELTAM13_sq_pos + 4. * sumnu*sumnu, 0.5) 
+	         - 0.25 * DELTAM12_sq / (2./3.* sumnu - 1./6. * pow(-6. * DELTAM12_sq + 12. * DELTAM13_sq_pos + 4. * sumnu*sumnu, 0.5));
+	 mnu[1] = 2./3.* sumnu - 1./6. * pow(-6. * DELTAM12_sq + 12. * DELTAM13_sq_pos + 4. * sumnu*sumnu, 0.5) 
+	         + 0.25 * DELTAM12_sq / (2./3.* sumnu - 1./6. * pow(-6. * DELTAM12_sq + 12. * DELTAM13_sq_pos + 4. * sumnu*sumnu, 0.5));
+	 mnu[2] = -1./3. * sumnu + 1./3 * pow(-6. * DELTAM12_sq + 12. * DELTAM13_sq_pos + 4. * sumnu*sumnu, 0.5); 
+	 if (mnu[0]<0 || mnu[1]<0 || mnu[2]<0){
+	    // The user has provided a sum that is below the physical limit.
+	    if (sumnu<1e-14){
+			mnu[0] = 0.;
+			mnu[1] = 0.;
+			mnu[2] = 0.;
+	    }else{
 		 *status = CCL_ERROR_MNU_UNPHYSICAL;
 	 }
-	 
+     }	 
 	 ccl_check_status_nocosmo(status);
 	 return mnu; 
 	 
@@ -172,13 +175,21 @@ double* ccl_nu_masses(double OmNuh2, ccl_neutrino_mass_splits mass_split, double
 
 	double *mnu;
 	mnu = malloc(3*sizeof(double));
-	if (sumnu > 0.109){
-	    mnu[0] = (sumnu+0.041) / 3.;
-		mnu[1] = mnu[0] + 0.009;
-		mnu[2] = mnu[0] - 0.05;
-	}else{
+	mnu[0] = 2./3.* sumnu - 1./6. * pow(-6. * DELTAM12_sq + 12. * DELTAM13_sq_neg + 4. * sumnu * sumnu, 0.5) 
+	         - 0.25 * DELTAM12_sq / (2./3.* sumnu - 1./6. * pow(-6. * DELTAM12_sq + 12. * DELTAM13_sq_neg + 4. * sumnu * sumnu, 0.5));
+	mnu[1] = 2./3.* sumnu - 1./6. * pow(-6. * DELTAM12_sq + 12. * DELTAM13_sq_neg + 4. * sumnu*sumnu, 0.5) 
+	         + 0.25 * DELTAM12_sq / (2./3.* sumnu - 1./6. * pow(-6. * DELTAM12_sq + 12. * DELTAM13_sq_neg + 4. * sumnu*sumnu, 0.5));
+	mnu[2] = -1./3. * sumnu + 1./3 * pow(-6. * DELTAM12_sq + 12. * DELTAM13_sq_neg + 4. * sumnu*sumnu, 0.5); 
+	if(mnu[0]<0 || mnu[1]<0 || mnu[2]<0){
+	// The user has provided a sum that is below the physical limit.
+	    if (sumnu<1e-14){
+			mnu[0] = 0.;
+			mnu[1] = 0.;
+			mnu[2] = 0.;;
+        }else{
 		*status = CCL_ERROR_MNU_UNPHYSICAL;
-	}
+	    }
+	}    
 	
 	ccl_check_status_nocosmo(status);
 	return mnu; 

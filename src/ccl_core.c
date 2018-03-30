@@ -315,13 +315,15 @@ ccl_parameters ccl_parameters_create(double Omega_c, double Omega_b, double Omeg
   params.Omega_k = Omega_k;
   params.Neff = Neff;
   
-  
+  // See CCL note for how we get these expressions for the neutrino masses in normal and inverted hierarchy.
   if (mnu_type==ccl_mnu_sum){
 	  params.sum_nu_masses = *mnu;
 	  mnu=malloc(3*sizeof(double));
-	  mnu[0] = (params.sum_nu_masses - DELTAM12 - DELTAM13) / 3.;
-	  mnu[1] = mnu[0] + DELTAM12;
-	  mnu[2] = mnu[0] + DELTAM13;
+	  mnu[0] = 2./3.* params.sum_nu_masses - 1./6. * pow(-6. * DELTAM12_sq + 12. * DELTAM13_sq_pos + 4. * params.sum_nu_masses*params.sum_nu_masses, 0.5) 
+	         - 0.25 * DELTAM12_sq / (2./3.* params.sum_nu_masses - 1./6. * pow(-6. * DELTAM12_sq + 12. * DELTAM13_sq_pos + 4. * params.sum_nu_masses*params.sum_nu_masses, 0.5));
+	  mnu[1] = 2./3.* params.sum_nu_masses - 1./6. * pow(-6. * DELTAM12_sq + 12. * DELTAM13_sq_pos + 4. * params.sum_nu_masses*params.sum_nu_masses, 0.5) 
+	         + 0.25 * DELTAM12_sq / (2./3.* params.sum_nu_masses - 1./6. * pow(-6. * DELTAM12_sq + 12. * DELTAM13_sq_pos + 4. * params.sum_nu_masses*params.sum_nu_masses, 0.5));
+	  mnu[2] = -1./3. * params.sum_nu_masses + 1./3 * pow(-6. * DELTAM12_sq + 12. * DELTAM13_sq_pos + 4. * params.sum_nu_masses*params.sum_nu_masses, 0.5); 
 	  if (mnu[0]<0 || mnu[1]<0 || mnu[2]<0){
 	    // The user has provided a sum that is below the physical limit.
 	    if (params.sum_nu_masses<1e-14){
@@ -336,9 +338,11 @@ ccl_parameters ccl_parameters_create(double Omega_c, double Omega_b, double Omeg
 		// Do the inverted hierarchy
 		params.sum_nu_masses = *mnu;
 		mnu=malloc(3*sizeof(double));
-		mnu[0] = (params.sum_nu_masses - DELTAM12 + DELTAM13) / 3.;
-		mnu[1] = mnu[0] + DELTAM12;
-		mnu[2] = mnu[0] - DELTAM13;
+		mnu[0] = 2./3.* params.sum_nu_masses - 1./6. * pow(-6. * DELTAM12_sq + 12. * DELTAM13_sq_neg + 4. * params.sum_nu_masses*params.sum_nu_masses, 0.5) 
+	         - 0.25 * DELTAM12_sq / (2./3.* params.sum_nu_masses - 1./6. * pow(-6. * DELTAM12_sq + 12. * DELTAM13_sq_neg + 4. * params.sum_nu_masses*params.sum_nu_masses, 0.5));
+	    mnu[1] = 2./3.* params.sum_nu_masses - 1./6. * pow(-6. * DELTAM12_sq + 12. * DELTAM13_sq_neg + 4. * params.sum_nu_masses*params.sum_nu_masses, 0.5) 
+	         + 0.25 * DELTAM12_sq / (2./3.* params.sum_nu_masses - 1./6. * pow(-6. * DELTAM12_sq + 12. * DELTAM13_sq_neg + 4. * params.sum_nu_masses*params.sum_nu_masses, 0.5));
+	    mnu[2] = -1./3. * params.sum_nu_masses + 1./3 * pow(-6. * DELTAM12_sq + 12. * DELTAM13_sq_neg + 4. * params.sum_nu_masses*params.sum_nu_masses, 0.5); 
 	    if(mnu[0]<0 || mnu[1]<0 || mnu[2]<0){
 	    // The user has provided a sum that is below the physical limit.
 	    if (params.sum_nu_masses<1e-14){
