@@ -10,7 +10,7 @@ if [[ $TRAVIS_OS_NAME == 'osx' ]]; then
       rm -rf $HOME/miniconda;
       mkdir -p $HOME/download;
       if [ "${TOXENV}" = py27 ]; then
-        wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O $HOME/download/miniconda.sh;
+        wget https://repo.continuum.io/miniconda/Miniconda2-latest-MacOSX-x86_64.sh -O $HOME/download/miniconda.sh;
       else
         wget https://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh -O $HOME/download/miniconda.sh;
       fi;
@@ -33,7 +33,7 @@ if [[ $TRAVIS_OS_NAME == 'osx' ]]; then
 
     source activate test-environment
     pip install numpy nose
-    
+
 else
     # Install some custom requirements on Linux
     echo "No specific requirements on linux"
