@@ -50,10 +50,12 @@ project(ccl VERSION 0.2.1)
     #
     # Builds the main CCL library
     #
+    add_library(objlib OBJECT ${CCL_SRC})
     # The reason for building ccl as a shared library is that we can link it to
     # class directly, and it's not a dependency anymore
-    add_library(ccl SHARED ${CCL_SRC})
+    add_library(ccl SHARED $<TARGET_OBJECTS:objlib>)
     target_link_libraries(ccl ${GSL_LIBRARIES} ${FFTW_LIBRARIES} ${CLASS_LIBRARIES} m)
+    # Make sure the external projects are correclty built
     if(NOT CLASS_EXTERNAL)
       add_dependencies(ccl CLASS)
     endif()
@@ -97,19 +99,24 @@ project(ccl VERSION 0.2.1)
     find_package(NumPy)
     include_directories(BEFORE ${PYTHON_INCLUDE_DIRS} ${NUMPY_INCLUDE_DIRS})
 
+    # We also build a static library only for linking the python module
+    add_library(ccl_static STATIC $<TARGET_OBJECTS:objlib>)
+    target_link_libraries(ccl_static ${GSL_LIBRARIES} ${FFTW_LIBRARIES} ${CLASS_LIBRARIES} m)
+    add_dependencies(ccl_static ccl)
+
     # Builds swig python module in place
     if(${CMAKE_VERSION} VERSION_LESS "3.8.0")
       swig_add_module(ccllib python pyccl/ccl.i)
     else()
       swig_add_library(ccllib TYPE SHARED LANGUAGE python SOURCES pyccl/ccl.i)
     endif()
-    swig_link_libraries(ccllib ${PYTHON_LIBRARIES} ccl)
-    # # Unpleasant subtelty for linking on osx
-    # if(APPLE)
-    #   message(${PYTHON_LIBRARIES})
-    #   set_target_properties(${SWIG_MODULE_ccllib_REAL_NAME} PROPERTIES LINK_FLAGS "-undefined dynamic_lookup")
-    # endif()
-
+    swig_link_libraries(ccllib ccl_static)
+    if(APPLE)
+        # Unpleasant subtelty for linking on osx
+        set_target_properties(${SWIG_MODULE_ccllib_REAL_NAME} PROPERTIES LINK_FLAGS "-undefined dynamic_lookup")
+    else(APPLE)
+        swig_link_libraries(ccllib ${PYTHON_LIBRARIES})
+    endif()
     set_target_properties(${SWIG_MODULE_ccllib_REAL_NAME} PROPERTIES SUFFIX .so)
 
     # Forces build of swig executable if not found
