@@ -17,7 +17,7 @@ if(NOT GSL_FOUND )
                                                             --prefix=${CMAKE_BINARY_DIR}/extern
                                                             --enable-shared=no
                                                             --with-pic=yes
-        BUILD_COMMAND           make -j8 > log
+        BUILD_COMMAND           make -j8 &> out.log
         INSTALL_COMMAND         make install
         BUILD_IN_SOURCE 1)
         set(GSL_LIBRARY_DIRS ${CMAKE_BINARY_DIR}/extern/lib/ )
