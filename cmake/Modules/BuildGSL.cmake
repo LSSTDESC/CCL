@@ -6,7 +6,7 @@ set(GSLMD5 dba736f15404807834dc1c7b93e83b92)
 find_package(GSL 2.4)
 
 # If GSL is not installed, lets go ahead and compile it
-if( GSL_FOUND )
+if(NOT GSL_FOUND )
     message(STATUS "GSL not found, downloading and compiling from source")
     ExternalProject_Add(GSL
         PREFIX GSL
