@@ -1,7 +1,6 @@
 include(ExternalProject)
 
-set(CLASSVersion 2.6.3)
-set(CLASSMD5 e6eb0fd721bb1098e642f5d1970501ce)
+set(CLASSTag v2.6.3)
 
 # In case the compiler being used  is clang, remove the omp flag
 if ("${CMAKE_C_COMPILER_ID}" MATCHES "^(Apple)?Clang$")
@@ -15,8 +14,8 @@ endif()
 # Downloads and compiles CLASS
 ExternalProject_Add(CLASS
         PREFIX CLASS
-        URL https://github.com/lesgourg/class_public/archive/v${CLASSVersion}.tar.gz
-        URL_MD5 ${CLASSMD5}
+        GIT_REPOSITORY https://github.com/lesgourg/class_public.git
+        GIT_TAG ${CLASSTag}
         DOWNLOAD_NO_PROGRESS 1
         # In the configuration step, we comment out the default compiler and
         # provide an appropriate omp flag
