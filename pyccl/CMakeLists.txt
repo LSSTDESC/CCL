@@ -5,8 +5,8 @@
 include(BuildSWIG)
 include(UseSWIG)
 
-find_package(PythonLibsNew REQUIRED)
-find_package(NumPy REQUIRED)
+find_package(PythonLibsNew)
+find_package(NumPy)
 include_directories(BEFORE ${PYTHON_INCLUDE_DIRS} ${NUMPY_INCLUDE_DIRS})
 
 # We also build a static library only for linking the python module
