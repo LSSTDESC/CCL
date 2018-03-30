@@ -50,21 +50,25 @@ project(ccl VERSION 0.2.1)
     #
     # Builds the main CCL library
     #
+
+    # Compiles all the source files
     add_library(objlib OBJECT ${CCL_SRC})
+    # Make sure the external projects are correclty built
+    if(NOT CLASS_EXTERNAL)
+      add_dependencies(objlib CLASS)
+    endif()
+    if(NOT GSL_FOUND)
+      add_dependencies(objlib GSL)
+    endif()
+    if(NOT FFTW_FOUND)
+      add_dependencies(objlib FFTW)
+    endif()
+
+
     # The reason for building ccl as a shared library is that we can link it to
     # class directly, and it's not a dependency anymore
     add_library(ccl SHARED $<TARGET_OBJECTS:objlib>)
     target_link_libraries(ccl ${GSL_LIBRARIES} ${FFTW_LIBRARIES} ${CLASS_LIBRARIES} m)
-    # Make sure the external projects are correclty built
-    if(NOT CLASS_EXTERNAL)
-      add_dependencies(ccl CLASS)
-    endif()
-    if(NOT GSL_FOUND)
-      add_dependencies(ccl GSL)
-    endif()
-    if(NOT FFTW_FOUND)
-      add_dependencies(ccl FFTW)
-    endif()
 
     # Builds the test suite
     add_executable(check_ccl ${TEST_SRC})
