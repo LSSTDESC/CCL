@@ -40,7 +40,7 @@ In addition, the build system for `CCL` relies on the following software:
   * [CMake](https://cmake.org/) version 3.2 or above
   * [SWIG](http://www.swig.org/)
 
-`CMake` is the **only requirement that needs to be manually installed**:
+**`CMake` is the only requirement that needs to be manually installed**:
   * On Ubuntu:
   ```sh
   $ sudo apt-get install cmake
@@ -53,7 +53,7 @@ In addition, the build system for `CCL` relies on the following software:
     ```
 
 It is preferable to install `GSL` and `FFTW` on your system before building `CCL`
-but only necessary if you intend to link your own code against `CCL`, otherwise
+but only necessary if you want to properly install the C library, otherwise
 `CMake` will automatically download and build the missing requirements in order
 to compile `CCL`.
 
@@ -103,7 +103,13 @@ $ cmake -DCMAKE_INSTALL_PREFIX=/path/to/install ..
 ```
 This will instruct CMake to install `CCL` in the following folders: `/path/to/install/include`,`/path/to/install/share` ,`/path/to/install/lib`.
 
-Depending on where you install `CCL` your might need to add the `/path/to/install/lib` to your `LD_LIBRARY_PATH`.
+Depending on where you install `CCL` your might need to add the installation path
+to your to your `PATH` and `LD_LIBRARY_PATH` environment variables. In the default
+case, it will look like:
+```sh
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/bin
+```
 
 To make sure that everything is working properly, you can run all unit tests after installation by running from the root `CCL` directory:
 ```sh
@@ -111,18 +117,13 @@ $ check_ccl
 ```
 Assuming that the tests pass, you have successfully installed `CCL`!
 
-After pulling a new version of `CCL` from the [git](https://github.com/LSSTDESC/CCL)
-repository, you can recompile the library by running from the `build` directory:
-```sh
-$ make
-$ make install
-```
 
 If you ever need to uninstall `CCL`, run the following from the `build` directory:
 ```sh
 $ xargs rm < install_manifest.txt
 ```
 You may need to prepend a `sudo` if you installed `CCL` in a protected folder.
+
 <!---
 ### C++ compatibility
 `CCL` library can be called from C++ code without any additional requirements or modifications.
@@ -142,34 +143,28 @@ $ pip install pyccl # append --user for single user install
 This only assumes that `CMake` is available on your system.
 
 You can also build and install `pyccl` from the `CCL` source, **without necessarily
-installing the C library**. The Python wrapper's build tools currently assume
-that your C compiler is `gcc`, and that you have a working Python 2.x or 3.x
-installation with `numpy` and `distutils`.
+installing the C library**. From the root `CCL` folder, run:
+````sh
+$ python setup.py install # append --user for single user install
+````
 
-* To build and install the wrapper for the current user only, run from the root
+The `pyccl` module will be installed into a sensible location in your `PYTHONPATH`,
+and so should be picked up automatically by your Python interpreter. You can then simply
+import the module using `import pyccl`.
+
+You can quickly check whether `pyccl` has been installed correctly by running
+`python -c "import pyccl"` and checking that no errors are returned.
+
+For a more in-depth test to make sure everything is working, run from the root
 `CCL` directory:
 ````sh
-$ python setup.py install --user
-````
-* To build install the wrapper for all users, run
-````sh
-$ sudo python setup.py install
-````
-* To build the wrapper in-place in the source directory (for testing), run
-````sh
-$ python setup.py build
-````
-If you choose either of the first two options, the `pyccl` module will be installed into a sensible location in your `PYTHONPATH`, and so should be picked up automatically by your Python interpreter. You can then simply import the module using `import pyccl`. If you use the last option, however, you must either start your interpreter from the root `CCL` directory, or manually add the root `CCL` directory to your `PYTHONPATH`.
-
-You can quickly check whether `pyccl` has been installed correctly by running `python -c "import pyccl"` and checking that no errors are returned. For a more in-depth test to make sure everything is working, run
-````sh
-python setup.py test
+$ python setup.py test
 ````
 This will run the embedded unit tests (may take a few minutes).
 
 Whatever the install method, you can always uninstall the pyton wrapper by running:
 ````sh
-pip uninstall pyccl
+$ pip uninstall pyccl
 ````
 
 For quick introduction to `CCL` in Python look at notebooks in **_tests/_**.
@@ -181,10 +176,68 @@ to the one you want to use. You can specify which C compiler will be used to com
 ```sh
 export CC=gcc
 ```
-2. If you are planning to compile your own file that calls `CCL`, then you should add the following to your .bashrc:
-````sh
-export LD_LIBRARY_PATH=/path/to/where/ccl/is/installed/lib:$LD_LIBRARY_PATH
-````
+
+## Development workflow
+
+**Installing `CCL` on the system is not a good idea when doing development**, you
+can compile and run all the libraries and examples directly from your local copy.
+The only subtlety when not actually installing the library is that one needs to
+define the environment variable `CCL_PARAM_FILE` pointing to `include/ccl_params.ini` :
+```sh
+export CCL_PARAM_FILE=/path/to/your/ccl/folder/include/ccl_params.ini
+```
+Failure to define this environment variable will result in violent segfaults !
+
+### Working on the C library
+Here are a few common steps when working on the C library:
+
+  - Cloning a local copy and CCL and compiling it:
+  ```sh
+  $ git clone https://github.com/EiffL/CCL
+  $ mkdir -p CCL/build && cd CCL/build
+  $ cmake ..
+  $ make
+  ```
+
+  - Updating local copy from master, recompiling what needs recompiling, and
+  running the test suite:
+  ```sh
+  $ git pull      # From root folder
+  $ make -Cbuild  # The -C option allows you to run make from a different directory
+  $ build/check_ccl
+  ```
+
+  - Compiling (or recompiling) an example in the `CCL/examples` folder:
+  ```sh
+  $ cd examples  # From root folder
+  $ make -C../build ccl_sample_pkemu
+  $ ./ccl_sample_pkemu
+  ```
+
+  - Reconfiguring from scratch (in case something goes terribly wrong):
+  ```sh
+  $ cd build
+  $ rm -rf *
+  $ cmake ..
+  $ make
+  ```
+
+### Working on the Python library
+Here are a few common steps when working on the Python module:
+
+  - Building the python module:
+  ```sh
+  $ python setup.py build
+  ```
+  After that, you can start your interpreter from the root `CCL` folder and import
+  pyccl
+
+  - Running the tests after a modification of the C library:
+  ```sh
+  $ python setup.py build
+  $ python setup.py test
+  ```
+
 
 ## Compiling against an external version of CLASS
 

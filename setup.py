@@ -15,11 +15,11 @@ class build(_build):
         if call(["make", "-Cbuild", "_ccllib"]) != 0:
             raise Exception("Could not build CCL")
         # Finds the library under its different possible names
-        if os.path.exists("build/_ccllib.so"):
-            call(["cp", "build/_ccllib.so", "pyccl/"])
+        if os.path.exists("build/pyccl/_ccllib.so"):
+            call(["cp", "build/pyccl/_ccllib.so", "pyccl/"])
         else:
             raise Exception("Could not find wrapper shared library, compilation must have failed.")
-        if call(["cp", "build/ccllib.py", "pyccl/"]) != 0:
+        if call(["cp", "build/pyccl/ccllib.py", "pyccl/"]) != 0:
             raise Exception("Could not find python module, SWIG must have failed.")
         call(["cp", "include/ccl_params.ini", "pyccl/"])
         _build.run(self)
