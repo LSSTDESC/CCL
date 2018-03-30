@@ -40,12 +40,15 @@ matrix:
 
 install:
     - ./.travis/install.sh
+    - if ! [[ $TRAVIS_OS_NAME == "osx" ]]; then source $HOME/miniconda/bin/activate; fi
+    - if ! [[ $TRAVIS_OS_NAME == "osx" ]]; then hash -r ; fi
+    - if ! [[ $TRAVIS_OS_NAME == "osx" ]]; then source activate test-environment ; fi
     - export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
     - export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/usr/local/lib/pkgconfig
-
-script:
     - cmake --version
     - python --version
+
+script:
     - python setup.py build
     - python setup.py test
     - sudo make -Cbuild install
