@@ -43,8 +43,9 @@ install:
     - if ! [[ $TRAVIS_OS_NAME == "linux" ]]; then source $HOME/miniconda/bin/activate; fi
     - if ! [[ $TRAVIS_OS_NAME == "linux" ]]; then hash -r ; fi
     - if ! [[ $TRAVIS_OS_NAME == "linux" ]]; then source activate test-environment ; fi
+    - if ! [[ $TRAVIS_OS_NAME == "linux" ]]; then export PKG_CONFIG_PATH=$CONDA_PREFIX/lib/pkgconfig:$PKG_CONFIG_PATH ; fi
     - export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
-    - export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/usr/local/lib/pkgconfig:$CONDA_PREFIX/lib/pkgconfig
+    - export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/usr/local/lib/pkgconfig
     - cmake --version
     - python --version
 
