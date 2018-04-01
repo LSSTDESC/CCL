@@ -14,6 +14,9 @@
 \usepackage[outdir=./]{epstopdf}
 \usepackage{graphicx,verbatim}
 \usepackage{xspace}
+\usepackage{rotating,tabularx}
+\setlength{\rotFPtop}{0pt plus 3fil}
+\setlength{\rotFPbot}{0pt plus 1fil}
 
 \graphicspath{{./}{./figures/}}
 \newcommand{\nv}{\hat{\bf n}}
@@ -133,6 +136,7 @@ The density parameters $\Omega_X(a)$ of a given species $X$ are defined in terms
 In order to compute distances, we consider the comoving radial distance, which is calculated via a numerical integral as
 \begin{equation}
  \chi(a)= c \int_a^1 \frac{da'}{a'^2 H(a')}.
+ \label{eq:comrdist}
 \end{equation}
 %\noindent
 %The comoving transverse distance
@@ -169,6 +173,7 @@ along with $a(\chi)$, the inverse function of $\chi(a)$.
 To compute the linear growth factor of matter perturbations, $D(a)$, \ccl solves the following usual differential equation:
 \begin{equation}
   \frac{d}{da}\left(a^3H(a)\frac{dD}{da}\right)=\frac{3}{2}\Omega_M(a)aH(a)D,
+  \label{eq:growth}
 \end{equation}
 using a Runge-Kutta Cash-Karp algorithm. 
 
@@ -208,6 +213,7 @@ None of the previous methods account for the impact of baryonic physics on the d
 
 {\bf BBKS approximation}. \ccl implements the analytical BBKS approximation to the transfer function \citep{BBKS}, given by
 \begin{eqnarray}
+  \label{eq:bbks}
   T&&(q\equiv k/\Gamma h {\rm Mpc}^{-1}) = \frac{\ln[1+2.34q]}{2.34q}\times\\
   &&[1+3.89q+(16.2q)^2+(5.47q)^3+(6.71q)^4]^{-0.25}\nonumber
 \end{eqnarray}
@@ -275,13 +281,14 @@ The angular power spectrum $C^{ab}_\ell$ between two tracers $a$ and $b$ is defi
 where $a_{\ell m}$/$b_{\ell m}$ can be either the $E$-mode or $B$-mode component of the corresponding field. In what follows we will only deal with fields for which the $B$-modes are identically $0$, and therefore all equations refer to the $E$-$E$ power spectrum. In general this power spectrum can be written as:
 \begin{equation}
   C^{ab}_\ell=4\pi\int_0^\infty \frac{dk}{k}\,\mathcal{P}_\Phi(k)\Delta^a_\ell(k)\Delta^b_\ell(k),
+  \label{eq:cls}
 \end{equation}
 where $\mathcal{P}_\Phi(k)$ is the dimensionless power spectrum of the primordial curvature perturbations, and $\Delta^a$ and $\Delta^b$ are the transfer functions corresponding to these tracers. Each transfer function will receive contributions from different terms. Currently \ccl supports three types of tracers: number counts, galaxy shape distortions and lensing convergence, with the following contributions:
 
 \paragraph{\bf Number counts.} The transfer function for number counts can be decomposed into three contributions: $\Delta^{\rm NC}=\Delta^{\rm D}+\Delta^{\rm RSD}+\Delta^{\rm M}$, where
 \begin{itemize}
   \item $\Delta^{\rm D}$ is the standard density term proportional to the matter density:
-        \begin{equation}
+        \begin{equation}\label{eq:transfer_nc}
           \Delta^{\rm D}_\ell(k)=\int dz\,p_z(z)\,b(z)\,T_\delta(k,z)\,j_\ell(k\chi(z)),
         \end{equation}
         where $j_\ell(x)$ is $\ell$-th order spherical Bessel function, $T_\delta$ is the matter transfer function, $b(z)$ is the linear clustering bias for this tracer and $p_z(z)$ is the normalized distribution of sources in redshift (i.e. the selection function). The fluctuations in the number density of sources in different redshift bins are therefore treated by \ccl as different tracers. Note that \ccl currently does not support non-linear or scale-dependent bias, but future releases of it will do so under a number of schemes, including perturbative approaches as implemented in e.g. \cite{FASTPT}.
@@ -321,12 +328,13 @@ Note that \ccl currently does not compute relativistic corrections to number cou
       \Delta_\ell^{\rm IA}(k)=\sqrt{\frac{(\ell+2)!}{(\ell-2)!}}\int &dz\,p_z(z)\,b_{\rm IA}(z)\,f_{\rm red}(z)\\
       &T_\delta(k,z)\,\frac{j_\ell(k\chi(z))}{(k\chi(z))^2}.
     \end{align}
-    Here $b_{\rm IA}$ is the so-called alignment bias, and $f_{\rm red}$ is the fraction of red galaxies in the sample. It is understood that only red galaxies are subject to this type of alignment mechanism, therefore $f_{\rm red}$ should be interpreted as ``the fraction of galaxies that suffer intrinsic alignment''. \todo{Elisa, check if phrasing is correct?}
+    Here $b_{\rm IA}$ is the so-called alignment bias, and $f_{\rm red}$ is the fraction of red galaxies in the sample. It is understood that only red galaxies are subject to this type of alignment mechanism, therefore $f_{\rm red}$ should be interpreted as ``the fraction of galaxies that suffer intrinsic alignment''. 
 \end{itemize}
 
 \paragraph{\bf Lensing convergence.} The transfer function for the lensing convergence of a given source plane at redshift $z_*$ receives only one contribution, given by
 \begin{equation}
   \Delta_\ell^\kappa(k)=-\frac{\ell(\ell+1)}{2}\int_0^{\chi_*}\frac{dz}{H(z)}\,\frac{r(\chi_*-\chi)}{r(\chi)r(\chi_*)}T_{\phi+\psi}(k,z),
+  \label{eq:cmblens}
 \end{equation}
 where $\chi_*\equiv\chi(z_*)$.
 
@@ -348,6 +356,7 @@ Fields can also be correlated in configuration space, and the corresponding corr
 \begin{equation}\nonumber
   \xi^{ab}_+(\theta)\equiv\left\langle\tilde{a}(\nv_1)\tilde{b}^*(\nv_2)\right\rangle,\hspace{12pt}
   \xi^{ab}_-(\theta)\equiv\left\langle\tilde{a}(\nv_1)\tilde{b}(\nv_2)\right\rangle,
+  \label{eq:xipm}
 \end{equation}
 where $\nv_1\cdot\nv_2\equiv\cos\theta$. 
 
@@ -366,6 +375,7 @@ Note that, scalar quantities are real, any correlation involving at least one sp
 \begin{align}
   \xi^{ab}(\theta)&=\sum_\ell\frac{2\ell+1}{4\pi}\,C^{ab}_\ell\sqrt{\frac{(\ell-s_a)!}{(\ell+s_a)!}}P^{s_a}_\ell(\cos\theta)\\
                   &=\sum_\ell\frac{2\ell+1}{4\pi}\,C^{ab}_\ell P_\ell(\cos\theta),
+\label{eq:xigg}
 \end{align}
 where the last equality holds for $s_a=0$, and both expressions assume $s_b=0$.
 
@@ -401,6 +411,7 @@ In summary, for spins 0 and 2, the three relevant cases for the cosmological obs
 In addition to the angular correlation functions, \ccl can also be used to compute the 3-dimensional spatial correlation function $\xi(r)$, given as a Fourier transform of the matter power spectrum:
 \begin{equation}
 \xi(r) = \frac{1}{2 \pi^2} \int dk \; k^2 P(k) \frac{\sin(kr)}{kr}
+\label{eq:xi3d}
 \end{equation}
 In the future \ccl will be expanded to incorporate the calculation of the higher-order multipoles needed to characterize the redshift-space 3D correlation function in the presence of RSDs.
 
@@ -440,6 +451,7 @@ where $P(k)$ is the linear matter power spectrum and $\tilde{W}(kR)$ is the Four
 \begin{equation}
 \tilde{W}_R(k) = \frac{3}{(kR)^3}[\sin(kR)-kR\cos(kR)].
 \end{equation}
+\todo{We need to define $\sigma(M)$ here to link to table \ref{tab:tests}. For now, I have linked to Eq. \ref{eq:sigR}.}
 
 One commonly used halo mass function definition within the literature is the \citet{Tinker2010} fitting function. This fitting function has been developed using collisionless $N$-body simulation data, using haloes determined by spherical overdensities. This is an extension of the \citet{Tinker2008} halo mass function, which is also included within \ccl as a comparative option. This fitting function assumes little change with respect to cosmological parameters. Further, it includes a redshift scaling with is assumed to sharply end at a redshift of $z = 3$. This halo mass function is calibrated within the range of $10^{10.5} h\mathrm{M}_\odot \leq M \leq 10^{15.5} h\mathrm{M}_\odot$ at a redshift of $z = 0$.
 
@@ -807,25 +819,26 @@ A code comparison project was carried out among members of TJP where the followi
 \end{enumerate}
 These predictions were produced and compared for different cosmologies, which are listed in the table below. The results agree to better than $0.1\%$ relative accuracy for comoving distance and growth factor among all submissions, and for $P(k)$ and $\sigma(M)$ among codes which use the same BBKS conventions.
 
-\begin{table}[t]
+\begin{table*}[t]
   \centering
-  \begin{tabular}{ c | c c c c c c c c }
+  \begin{tabular}{ l c | c c c c c c c c }
     \hline
-    \multicolumn{9}{|c|}{Cosmological models for code comparison project} \\
+    \multicolumn{10}{|c|}{Cosmological models for code comparison project} \\
     \hline
     \hline
-    Model & $\Omega_m$ & $\Omega_b$ & $\Omega_\Lambda$ & $h_0$ & $\sigma_8$ & $n_s$ & $w_0$ & $w_a$ \\
+    Acronym & Model & $\Omega_m$ & $\Omega_b$ & $\Omega_\Lambda$ & $h_0$ & $\sigma_8$ & $n_s$ & $w_0$ & $w_a$ \\
     \hline
-    flat LCDM & 0.3 & 0.05 & 0.7 & 0.7 & 0.8 & 0.96 & -1 & 0 \\
-    $w_0$ LCDM & 0.3 & 0.05 & 0.7 & 0.7 & 0.8 & 0.96 & -0.9 & 0  \\
-    $w_a$ LCDM & 0.3 & 0.05 & 0.7 & 0.7 & 0.8 & 0.96 & -0.9 & 0.1  \\
-    open $w_a$ LCDM & 0.3 & 0.05 & 0.65 & 0.7 & 0.8 & 0.96 & -0.9 & 0.1  \\
-    closed $w_a$ LCDM & 0.3 & 0.05 & 0.75 & 0.7 & 0.8 & 0.96 & -0.9 & 0.1  \\
+    CCL1 & flat $\Lambda$CDM & 0.3 & 0.05 & 0.7 & 0.7 & 0.8 & 0.96 & -1 & 0 \\
+    CCL2 & $w_0$ $\Lambda$CDM & 0.3 & 0.05 & 0.7 & 0.7 & 0.8 & 0.96 & -0.9 & 0  \\
+    CCL3 & $w_a$ $\Lambda$CDM & 0.3 & 0.05 & 0.7 & 0.7 & 0.8 & 0.96 & -0.9 & 0.1  \\
+    CCL4 & open $w_a$ $\Lambda$CDM & 0.3 & 0.05 & 0.65 & 0.7 & 0.8 & 0.96 & -0.9 & 0.1  \\
+    CCL5 & closed $w_a$ $\Lambda$CDM & 0.3 & 0.05 & 0.75 & 0.7 & 0.8 & 0.96 & -0.9 & 0.1  \\
+    CCL6 & flat $\Lambda$CDM & 0.3 & 0 & 0.7 & 0.7 & 0.8 & 0.96 & -1 & 0 \\
     \hline
   \end{tabular}
-  \caption{Cosmological models for code comparison project.}
+  \caption{Cosmological models for code comparison project.\todo{Model 6 was introduced because we use it in some of the checks, it needs more explanation in the main text}}
   \label{tab:cosmologies}
-\end{table}
+\end{table*}
 
 We noticed that there are 2 typographical errors for the BBKS transfer function in ``Modern Cosmology'' \citep{DodelsonBook} compared to the original BBKS paper. The quadratic term should be $(16.1q)^2$ and the cubic term should be $(5.46q)^3$. The BBKS equation is correct in \citet{PeacockBook}. Using the wrong equation can give differences in the results above the $10^{-4}$ level.
 
@@ -858,7 +871,7 @@ In this second step, only 2 codes have been compared so far. More outputs are ne
 For $C_\ell$ computations, we required the relative difference between \ccl and the benchmarks to be $<10^{-3}$. We performed the test both for analytic redshift distributions and histograms.
 
 To obtain realistic targets for the convergence of correlation function computations for LSST analyses, we calculate the expected statistical uncertainty of the clustering and lensing correlation functions of the LSST gold sample (c.f. Sect.~\damonge{missing section}),%\ref{sec:specs}
-assuming an effective source galaxy density of $n_\mathrm{eff} = 26\mathrm{gal/sq\,arcmin}$ for galaxy shape distortions, and galaxy density of $n_\mathrm{gold} = 45\mathrm{gal/sq\,arcmin}$ for number counts. Specifically, we calculate the Gaussian covariance of angular correlation functions following the formalism of \citet{2008A&A...477...43J}, and note that leaving out the non-Gaussian covariance terms makes this convergence criterion more conservative. We split the galaxy samples into 10 tomography bins, defined to contain equal numbers of galaxies. The accuracy test then proceeds as follows. We compared the difference between \ccl calculated lensing and clustering correlations and the benchmarks for the analytic redshift distributions and for auto-correlations of redshift bins only. To pass the benchmark test, we required that this difference be smaller than half of the value of the errorbar derived from the covariance for each correlation function computed. Specifically, we take the value of the covariance in the bins centered at $z=1$ and $z=1.5$ to compare to the benchmarks.
+assuming an effective source galaxy density of $n_\mathrm{eff} = 26\,\mathrm{gal/sq\,arcmin}$ for galaxy shape distortions, and galaxy density of $n_\mathrm{gold} = 45\,\mathrm{gal/sq\,arcmin}$ for number counts. Specifically, we calculate the Gaussian covariance of angular correlation functions following the formalism of \citet{2008A&A...477...43J}, and note that leaving out the non-Gaussian covariance terms makes this convergence criterion more conservative. We split the galaxy samples into 10 tomography bins, defined to contain equal numbers of galaxies. The accuracy test then proceeds as follows. We compared the difference between \ccl calculated lensing and clustering correlations and the benchmarks for the analytic redshift distributions and for auto-correlations of redshift bins only. To pass the benchmark test, we required that this difference be smaller than half of the value of the errorbar derived from the covariance for each correlation function computed. Specifically, we take the value of the covariance in the bins centered at $z=1$ and $z=1.5$ to compare to the benchmarks.
 
 
 The 3-dimensional correlation function $\xi(r)$ was validated by comparing with an independent transform code based
@@ -875,6 +888,41 @@ Additionally, independent codes were utilized to test the accuracy of halo mass 
 \log[(M^2/\bar{\rho}_m)dn/dM].
 \end{equation}
 We note that while we maintain the $10^{-4}$ for our evaluations of $\sigma$, the accuracy degrades to a value of $5\times10^{-3}$ for the halo mass function evaluation, primarily at the high halo mass and high redshift domains. We find that this increased error is acceptable, as the level of precision is significantly better than the accuracy of current halo mass function models.
+
+Table \ref{tab:tests} summarises all the \ccl validation tests discussed in this section.
+%
+%\begin{table*}[ht]
+\begin{sidewaystable*}[!htp]
+  \centering
+  \begin{tabular}{ l|c c c c}
+    \hline
+    Quantity & Equation/Reference & Cosmologies & Range & Accuracy \\
+    \hline
+    Comoving radial distance (low $z$) & (\ref{eq:comrdist}) & CCL1-5 & $0\leq z\leq 5$ &  $10^{-4}$\\
+    Comoving radial distance (high $z$) & (\ref{eq:comrdist}) & CCL1-3 & $10\leq z\leq 10^3$ &  $10^{-4}$\\
+    Growth (low $z$) & (\ref{eq:growth}) & CCL1-5 &  $0\leq z\leq 5 $ &  $10^{-4}$\\
+    Growth (high $z$) & (\ref{eq:growth}) & CCL1-3 & $10\leq z\leq 10^3$ &  $10^{-4}$\\
+    $\sigma(M)$ (BBKS) & (\ref{eq:sigR}) & CCL1-3 &  $10^6\leq M/({\rm M}_\odot/h)\leq 10^{16}$ &  $10^{-4}$\\
+    $dn/dM$ & (\ref{eq:halo_mass_function}) & CCL1 & $10^{10}\leq M/({\rm M}_\odot)\leq 10^{16}$ \& $z=0$ & $5\times 10^{-3}$\\
+    $P(k)$ (BBKS) & (\ref{eq:bbks}) & CCL1-3 & $10^{-3}\leq k/(h/{\rm Mpc})\leq 10$ \& $0\leq z\leq 5$ &  $10^{-4}$\\
+    $P(k)$ (Eisenstein \& Hu) & \citet{1998ApJ...496..605E}  & CCL1 & $10^{-3}\leq k/(h/{\rm Mpc})\leq 10$ \& $z=0$ & $10^{-4}$ \\
+    $P(k)$ (CosmicEmu $w$CDM) & \citet{Lawrence17} & M1,M3,M5,M6,M8,M10 & $10^{-3}\leq k/{\rm Mpc}^{-1}\leq 5$ \& $z=0$  & $3\times 10^{-2}$ \\
+    $P(k)$ (CosmicEmu $\nu$CDM) & \citet{Lawrence17} & M38,M39,M40,M42 & $10^{-3}\leq k/{\rm Mpc}^{-1}\leq 5$ \& $z=0$ & $3\times 10^{-2}$ \\
+    %$P(k)$ splines & & & &  \\
+    $C_l$ clustering & (\ref{eq:cls}),(\ref{eq:transfer_nc})& CCL6 &$1 \leq l\leq 30000$ &  $10^{-3}$\\
+    $C_l$ weak lensing & (\ref{eq:cls}),(\ref{eq:transfer_lensing})& CCL6 &$1 \leq l\leq 30000$ &  $10^{-3}$\\
+    $C_l$ CMB lensing &(\ref{eq:cls}),(\ref{eq:cmblens}) & CCL6 & $1 \leq l\leq 3000$& $3\times 10^{-3}$ \\
+    $\xi_+,\xi_-,\xi$ & (\ref{eq:xi22flat}),(\ref{eq:xi00flat}) & CCL6 & $0.01< \theta/{\rm deg}< 5$&  $0.5\sigma$\\
+    3D correlation & (\ref{eq:xi3d}) & CCL1-5 & $1<r/{\rm Mpc}<50$ \& $0 \leq z \leq 5$& $4\times 10^{-3}$  \\
+    \todo{{\tt angpow}?} &  & & &  \\
+    \todo{{\tt CLASS}?} &  & & &  \\
+    \hline
+  \end{tabular}
+  \caption{Summary of \ccl validation tests and accuracy achieved. These tests can be reproduced by the user and are integrated into the \ccl repository via TravisCl.\todo{Some questions about the HMF test. We are checking the HMF but also $\sigma$ and $\sigma^{-1}$ with different tolerances. In what way are those checks different from the $\sigma(M)$ check? Also, the units of mass in the $\sigma(M)$ check and HMF check are inconsistent - do we want to change that? For BBKS, do we test Eq. \ref{eq:bbks}? For CMB lensing, we actually have an allowed fraction of $l$s where we don't pass the cut, this is $10^{-3}$. Some cross-checks against text are necesary.}}
+  \label{tab:tests}
+%\end{table*}
+\end{sidewaystable*}
+
 
 %-------------------------------------------------------------------------------
 \subsection{Validation of the power spectrum over parameter space}
