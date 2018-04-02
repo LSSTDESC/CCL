@@ -722,33 +722,20 @@ As in the general case the Limber approximation is valid at high $\ell$ values, 
 \subsection{Correlation functions}
 \vol{Elisa Chisari, Sukhdeep Singh?}
 
-\cont{Which basis to work in. Approach to performing oscillatory integrals.}
+\revise
 
 The exact Equations (\ref{eq:xi00full}, \ref{eq:xi02full}, \ref{eq:xi22full}) relating the angular correlation functions and power spectra involve carrying out $N_\theta\times\ell_{\rm max}$ operations, where $\ell_{\rm max}\sim O(10^{4-5})$ is the maximum multipole needed to achieve convergence and $N_\theta$ is the number of angular scales $\theta$ at which the angular correlation function needs to be computed. Thus, evaluating these expressions directly becomes prohibitively slow and should be avoided except in regimes where other approximations are not valid. In particular \ccl only supports the brute-force evaluation of these equations for correlations involving at least one spin-0 field. The currently preferred method in \ccl is to use the flat-sky approximation and evaluate the Hankel transforms (Eqs. \ref{eq:xi00flat}, \ref{eq:xi02flat}, \ref{eq:xi22flat}).
 
+\ccl currently provides two methods to compute Hankel transforms:
+\begin{itemize}
+ \item {\bf Brute-force integration.} \ccl allows users to compute Hankel transforms by brute-force integration over the Bessel functions. The oscillating nature of these functions makes this method slow and not appropriate for likelihood-sampling. The preferred method to compute correlation functions is through the use of {\tt FFTlog} (see below), and we support the brute-force method only for testing and validation.
+ \item {\bf FFTlog.} The public code {\tt FFTlog}\footnote{\url{http://casa.colorado.edu/~ajsh/FFTLog/}} is able to compute fast Hankel transforms through the assumption that the kernels of these transforms are periodic functions in logarithmic space. The Hankel transform can then be solved using Fast Fourier Transforms at a much lower computational expense than brute-force integration \citep{Hamilton2000,Talman2009}. \ccl incorporates a version of the {\tt FFTlog} method with only minor modifications from the original. The only potential drawbacks of this methods is the need to sample the kernels (i.e. the $C_\ell$) on very small scales to ensure the convergence of the method. To do this, \ccl extrapolates the power spectrum as a power law ($C_\ell\propto\ell^\beta$). We have verified that this method agrees with the brute-force integration  well within cosmic-variance uncertainties.
+\end{itemize}
+
 We should also note that other approaches relating the correlation functions directly with the 3D matter power spectrum (E.g. \cite{2017ApJ...845...28C}) could be useful in accelerating this computation, and we will explore these avenues in the future.
 
-\paragraph{Hankel Transform}
-Notice that in the flat-sky limit, the expressions in Eqs.~\ref{eq:xi_gg_D}--\ref{eq:xi_m_D} can be
-written as Hankel transforms using the relation between $D_{m,m'}^\ell$ and the Bessel functions $J$
-(for $\ell\gg m,m'$)
-\begin{align}
-  D^{l}_{m,m'}(0,\theta,0)\approx J_{m-m'}(\ell\theta)
-\end{align}
-The same expressions can also be derived from Eqs.~\ref{eq:xi_p_D}--\ref{eq:xi_m_D} using the relation between $P_{\ell}^m$ and the Bessel functions $J_m$
-\citep{Putter2010}
-\begin{align}
-  P_{\ell}^m(\cos\theta)=(-1)^m\frac{(\ell+m)!}{(\ell-m)!}\ell^{-m}J_m(\ell\theta)
-\end{align}
-which yields final expressions that coincide with Eq. \ref{eq:xipxim}.
 
-For numerical integration to get (projected) correlation functions using Hankel transform,
-we make use of the
-public code {\tt FFTlog}\footnote{\url{http://casa.colorado.edu/~ajsh/FFTLog/}}
-\citep{Hamilton2000,Talman2009}. In brief, {\tt FFTlog} works on functions periodic in log space,
-by writing the Hankel Transform as a convolution between Bessel functions and the function of
-interest (in this case $C_\ell$). A version of this code is included in \ccl with minor
-modifications.
+
 
 %-------------------------------------------------------------------------------
 \subsection{Halo mass function}
@@ -982,7 +969,7 @@ Science software development to facilitate the cosmological inference from LSST 
 
 It is the primary goal of the \ccl to become the backbone of all cosmological analyses carried out by the Dark Energy Science Collaboration of the LSST. This unified approach of a validated \ccl will ensure that DESC results that are both consistent (in that they will all be based on the same theory framework) and accurate (in that this framework has undergone a rigorous numerical validation).
 
-The implementation of \ccl in realistic analysis pipelines has already begun: all likelihood module prototypes under development use it as its backbone, and the first of this, corresponding to the cosmological analysis of angular galaxy clustering cross-correlations, will serve as a model for the design of the joint-probes likelihood of the DESC \damonge{TJPCosmo-ers should feel free to strike this whole sentence out and rephrase as necessary!}. This work has allowed us to validate the performance of \ccl in a realistic analysis scenario, verifying its accuracy and efficiency in the context of computationally demanding MCMC runs. In addition to simulated analysis tests, \ccl has also been validated through its use in the analysis of current datasets \damonge{I could include a couple of my papers here, but I don't know if we want to incur in self-citations. Do we know external papers that have used CCL?}
+The implementation of \ccl in realistic analysis pipelines has already begun: all likelihood module prototypes under development use it as its backbone, and the first of this, corresponding to the cosmological analysis of angular galaxy clustering cross-correlations, will serve as a model for the design of the joint-probes likelihood of the DESC \damonge{TJPCosmo-ers should feel free to strike this whole sentence out and rephrase as necessary!}. This work has allowed us to validate the performance of \ccl in a realistic analysis scenario, verifying its accuracy and efficiency in the context of computationally demanding MCMC runs. In addition to simulated analysis tests, \ccl has also been validated through its use in the analysis of current datasets \damonge{Do we know external papers that have used CCL?}
 
 Beyond its usefulness in the DESC, the generality of the design envisioned for \ccl also aims to make it a useful tool for the analysis of other cosmological datasets, as well as for the cross-correlation of different experiments. To this end, and to allow a generic and flexible analysis of the LSST data, further functionality will be added to \ccl. Plans are in place to extend the range of standard and non-standard cosmological models covered by the code. Work is already underway to add a comprehensive implementation of the halo-model calculation of two-point functions \citep{Peacock2000} with sufficient flexibility to include generic parametrizations of observable halo profiles and mass-observable relations. The current simplified treatment of the galaxy-matter connection for galaxy clustering and intrinsic alignments will be improved by implementing generic perturbation-theory approaches to structure formation \citep{2009JCAP...08..020M,2016JCAP...09..015M}. A more complete implementation of all relevant cross-correlations between large-scale structure observables and other cosmological probes (e.g. CMB integrated Sachs-Wolfe effect \citep{1967ApJ...147...73S} and other secondary anisotropies) will also soon be included.
 
@@ -1077,3 +1064,25 @@ evaluations need to be done only once and can then be saved as long as $\ell$ an
 do not change. However, \ccl has not yet implemented this feature.
 
 The {\tt ccl\_tracer\_corr\_legendre} methods currently does not support the computation of the shear correlation functions $\xi_{\pm}$, and the approximate {\tt ccl\_tracer\_corr\_fftlog} (described below) should be used instead. As demonstrated in \cite{Kilbinger2017} and \cite{Kitching17}, this approximation should be sufficient even for futuristic surveys.
+
+\paragraph{Hankel Transform}
+Notice that in the flat-sky limit, the expressions in Eqs.~\ref{eq:xi_gg_D}--\ref{eq:xi_m_D} can be
+written as Hankel transforms using the relation between $D_{m,m'}^\ell$ and the Bessel functions $J$
+(for $\ell\gg m,m'$)
+\begin{align}
+  D^{l}_{m,m'}(0,\theta,0)\approx J_{m-m'}(\ell\theta)
+\end{align}
+The same expressions can also be derived from Eqs.~\ref{eq:xi_p_D}--\ref{eq:xi_m_D} using the relation between $P_{\ell}^m$ and the Bessel functions $J_m$
+\citep{Putter2010}
+\begin{align}
+  P_{\ell}^m(\cos\theta)=(-1)^m\frac{(\ell+m)!}{(\ell-m)!}\ell^{-m}J_m(\ell\theta)
+\end{align}
+which yields final expressions that coincide with Eq. \ref{eq:xipxim}.
+
+For numerical integration to get (projected) correlation functions using Hankel transform,
+we make use of the
+public code {\tt FFTlog}\footnote{\url{http://casa.colorado.edu/~ajsh/FFTLog/}}
+\citep{Hamilton2000,Talman2009}. In brief, {\tt FFTlog} works on functions periodic in log space,
+by writing the Hankel Transform as a convolution between Bessel functions and the function of
+interest (in this case $C_\ell$). A version of this code is included in \ccl with minor
+modifications.
