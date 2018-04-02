@@ -195,7 +195,6 @@ double* ccl_nu_masses(double OmNuh2, ccl_neutrino_mass_splits mass_split, double
 	return mnu; 
 	
   } else if (mass_split==ccl_nu_equal){
-	  
 	  double *mnu;
 	  mnu = malloc(3*sizeof(double));
 	  mnu[0] = sumnu/3.;
