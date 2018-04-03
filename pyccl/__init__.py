@@ -17,7 +17,8 @@ from pyccl.power import linear_matter_power, nonlin_matter_power, sigmaR, \
     sigmaV, sigma8
 
 # Halo mass function
-from pyccl.massfunction import massfunc, massfunc_m2r, sigmaM, halo_bias
+from pyccl.massfunction import massfunc, massfunc_m2r, sigmaM, halo_bias, \
+    r_delta, r_Lagrangian, nu
 
 # Cl's and tracers
 from pyccl.cls import angular_cl, ClTracer, ClTracerNumberCounts, \
@@ -32,6 +33,6 @@ from pyccl.constants import CLIGHT_HMPC, MPC_TO_METER, PC_TO_METER, \
 
 from pyccl.correlation import correlation
 
-from pyccl.halomodel import p_1h
+from pyccl.halomodel import p_1h, p_2h, p_halomod, halo_concentration
 
 from pyccl.neutrinos import Omeganuh2,Omeganuh2_to_Mnu

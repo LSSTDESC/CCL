@@ -1,6 +1,6 @@
 
 from pyccl import ccllib as lib
-from pyccl.pyutils import _vectorize_fn, _vectorize_fn2, _vectorize_fn4
+from pyccl.pyutils import _vectorize_fn, _vectorize_fn2, _vectorize_fn3, _vectorize_fn4
 
 def massfunc(cosmo, halo_mass, a, odelta=200):
     """Halo mass function.
@@ -68,3 +68,52 @@ def halo_bias(cosmo, halo_mass, a, odelta=200):
     """
     return _vectorize_fn4(lib.halo_bias, 
                           lib.halo_bias_vec, cosmo, halo_mass, a, odelta)
+
+def r_delta(cosmo, halo_mass, a, odelta):
+    """ something something rdelta
+
+    Args:
+        cosmo (:obj:`ccl.cosmology`): Cosmological parameters.
+        halo_mass (float or array_like): Halo masses; Msun.
+        a (float): Scale factor.
+        odelta (float): overdensity parameter
+
+    Returns:
+        r_delta (float or array_like): something something
+
+    """
+    return _vectorize_fn4(lib.r_delta,
+			  lib.r_delta_vec, cosmo, halo_mass, a, odelta)
+
+def r_Lagrangian(cosmo, halo_mass, a, odelta):
+    """ something something r Lagrangian
+
+    Args:
+        cosmo (:obj:`ccl.cosmology`): Cosmological parameters.
+        halo_mass (float or array_like): Halo masses; Msun.
+        a (float): Scale factor.
+
+    Returns:
+        r_Lagrangian (float or array_like): something something
+
+    """
+    return _vectorize_fn3(lib.r_Lagrangian,
+			  lib.r_Lagrangian_vec, cosmo, halo_mass, a)
+
+def nu(cosmo, halo_mass, a):
+    """ something something nu
+
+    Args:
+        cosmo (:obj:`ccl.cosmology`): Cosmological parameters.
+        halo_mass (float or array_like): Halo masses; Msun.
+        a (float): Scale factor.
+
+    Returns:
+        nu (float or array_like): something something
+
+    """
+    return _vectorize_fn3(lib.r_delta,
+			  lib.r_delta_vec, cosmo, halo_mass, a)
+
+
+

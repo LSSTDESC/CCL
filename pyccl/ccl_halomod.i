@@ -14,7 +14,8 @@
 %include "../include/ccl_halomod.h"
 
 // Enable vectorised arguments for arrays
-%apply (double* IN_ARRAY1, int DIM1) {(double* k, int nm)};
+%apply (double* IN_ARRAY1, int DIM1) {(double* k, int nm),
+                                      (double* halo_mass, int nm)};
 %apply (double* ARGOUT_ARRAY1, int DIM1) {(double* output, int nout)};
 
 %inline %{
@@ -28,4 +29,38 @@ void p_1h_vec(ccl_cosmology * cosmo,
         output[i] = p_1h(cosmo, k[i], a, status);
     }
 }
+
+void p_2h_vec(ccl_cosmology * cosmo,
+                    double* k, int nm, double a,
+                    double* output, int nout,
+                    int* status)
+{
+    assert(nout == nm);
+    for(int i=0; i < nm; i++){
+        output[i] = p_2h(cosmo, k[i], a, status);
+    }
+}
+
+void p_halomod_vec(ccl_cosmology * cosmo,
+                     double* k, int nm, double a,
+                     double* output, int nout,
+                     int* status)
+{
+    assert(nout == nm);
+    for(int i=0; i < nm; i++){
+        output[i] = p_halomod(cosmo, k[i], a, status);
+    }
+}
+
+void halo_concentration_vec(ccl_cosmology * cosmo,
+                                 double* halo_mass, int nm,
+                                 double a, double* output,
+                                 int nout, int* status)
+{
+    assert(nout == nm);
+    for(int i=0; i < nm; i++){
+        output[i] = halo_concentration(cosmo, halo_mass[i], a, status);
+    }
+}
+
 %}
