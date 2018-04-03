@@ -7,6 +7,7 @@ var searchData=
   ['ccl_5fboltzmann_5fcamb',['ccl_boltzmann_camb',['../ccl__config_8h.html#a8746e6d3648e86a8233d4c2813415e15a7630657ff747621b606c67e6736f6810',1,'ccl_config.h']]],
   ['ccl_5fboltzmann_5fclass',['ccl_boltzmann_class',['../ccl__config_8h.html#a8746e6d3648e86a8233d4c2813415e15a2b9083c5271eb911d72cc8dc0553fec0',1,'ccl_config.h']]],
   ['ccl_5feisenstein_5fhu',['ccl_eisenstein_hu',['../ccl__config_8h.html#a8746e6d3648e86a8233d4c2813415e15a0aba562d960017a68b411095ef8e1344',1,'ccl_config.h']]],
+  ['ccl_5femu',['ccl_emu',['../ccl__config_8h.html#a33c02fcf871bde5a88799d19418fb615a3f16e6f086e7ba100c170b7587075ffa',1,'ccl_config.h']]],
   ['ccl_5femulator',['ccl_emulator',['../ccl__config_8h.html#a8746e6d3648e86a8233d4c2813415e15a5a7bbc705ff820dc4d88ee48a5c45fae',1,'ccl_config.h']]],
   ['ccl_5ferror_5fpolicy_5fcontinue',['CCL_ERROR_POLICY_CONTINUE',['../ccl__error_8h.html#aa89d50a80b7ff363358dda82a8b42848a192b01bd5a035975b5438460911441d0',1,'ccl_error.h']]],
   ['ccl_5ferror_5fpolicy_5fexit',['CCL_ERROR_POLICY_EXIT',['../ccl__error_8h.html#aa89d50a80b7ff363358dda82a8b42848aa09d0966d16d4a1657e82a813d326dfe',1,'ccl_error.h']]],

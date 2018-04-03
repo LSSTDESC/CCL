@@ -126,19 +126,12 @@ static void ccl_tracer_corr_fftlog(ccl_cosmology *cosmo,
     th_arr[i]=0;
   //Although set here to 0, theta is modified by FFTlog to obtain the correlation at ~1/l
 
-  // FFTlog uses spherical bessel functions, j_n, but for projected
-  // correlations we need bessel functions of first order, J_n.
-  // To compensate for the difference, we use the relation
-  // j_n(x) = sqrt(Pi/2x)J_{n+1/2}(x)
-  // J_{m}(x) = sqrt(2x/Pi) j_{m-1/2}(x)
   int i_bessel=0;
   if(corr_type==CCL_CORR_GG) i_bessel=0;
   if(corr_type==CCL_CORR_GL) i_bessel=2;
   if(corr_type==CCL_CORR_LP) i_bessel=0;
   if(corr_type==CCL_CORR_LM) i_bessel=4;
-  fftlog_ComputeXiLM(i_bessel-0.5,1.5,N_ELL_FFTLOG,l_arr,cl_arr,th_arr,wth_arr);
-  for(i=0;i<N_ELL_FFTLOG;i++)
-    wth_arr[i]*=sqrt(th_arr[i]*2.0*M_PI);
+  fftlog_ComputeXi2D(i_bessel,N_ELL_FFTLOG,l_arr,cl_arr,th_arr,wth_arr);
 
   // Interpolate to output values of theta
   SplPar *wth_spl=ccl_spline_init(N_ELL_FFTLOG,th_arr,wth_arr,wth_arr[0],0);

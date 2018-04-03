@@ -100,6 +100,12 @@ int main(int argc,char **argv)
     z_arr_sh[i]=Z0_SH-5*SZ_SH+10*SZ_SH*(i+0.5)/NZ;
     nz_arr_sh[i]=exp(-0.5*pow((z_arr_sh[i]-Z0_SH)/SZ_SH,2));
   }
+  double *a_arr_resample=(double *)malloc(2*NZ*sizeof(double));
+  double *nz_resampled=(double *)malloc(2*NZ*sizeof(double));
+  for(int i=0;i<2*NZ;i++) {
+    double z=(i+0.5)/NZ;
+    a_arr_resample[i]=1./(1+z);
+  }
   
   //CMB lensing tracer
   CCL_ClTracer *ct_cl=ccl_cl_tracer_cmblens_new(cosmo,1100.,&status);
@@ -109,6 +115,10 @@ int main(int argc,char **argv)
   
   //Cosmic shear tracer
   CCL_ClTracer *ct_wl=ccl_cl_tracer_lensing_simple_new(cosmo,NZ,z_arr_sh,nz_arr_sh, &status);
+
+  //This function allows you to retrieve some of the tracer's internal functions of redshift
+  ccl_get_tracer_fas(cosmo,ct_gc,2*NZ,a_arr_resample,nz_resampled,CCL_CLT_NZ,&status);
+  
   printf("ell C_ell(c,c) C_ell(c,g) C_ell(c,s) C_ell(g,g) C_ell(g,s) C_ell(s,s)\n");
   for(int l=2;l<=NL;l*=2) {
     double cl_cc=ccl_angular_cl(cosmo,l,ct_cl,ct_cl, &status); //CMBLensing-CMBLensing
