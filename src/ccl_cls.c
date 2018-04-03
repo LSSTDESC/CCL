@@ -53,7 +53,7 @@ static int window_lensing(double chi,ccl_cosmology *cosmo,SplPar *spl_pz,double 
   double result,eresult;
   IntLensPar ip;
   gsl_function F;
-  gsl_integration_workspace *w=gsl_integration_workspace_alloc(1000);
+  gsl_integration_workspace *w=gsl_integration_workspace_alloc(ccl_gsl->N_ITERATION);
 
   ip.chi=chi;
   ip.cosmo=cosmo;
@@ -61,7 +61,10 @@ static int window_lensing(double chi,ccl_cosmology *cosmo,SplPar *spl_pz,double 
   ip.status = &status;
   F.function=&integrand_wl;
   F.params=&ip;
-  gslstatus=gsl_integration_qag(&F,chi,chi_max,0,1E-4,1000,GSL_INTEG_GAUSS41,w,&result,&eresult);
+  gslstatus=gsl_integration_qag(&F, chi, chi_max, 0,
+                                ccl_gsl->INTEGRATION_EPSREL, ccl_gsl->N_ITERATION,
+                                ccl_gsl->INTEGRATION_GAUSS_KRONROD_POINTS,
+                                w, &result, &eresult);
   *win=result;
   gsl_integration_workspace_free(w);
   if(gslstatus!=GSL_SUCCESS || *ip.status)
@@ -113,7 +116,7 @@ static int window_magnification(double chi,ccl_cosmology *cosmo,SplPar *spl_pz,S
   double result,eresult;
   IntMagPar ip;
   gsl_function F;
-  gsl_integration_workspace *w=gsl_integration_workspace_alloc(1000);
+  gsl_integration_workspace *w=gsl_integration_workspace_alloc(ccl_gsl->N_ITERATION);
 
   ip.chi=chi;
   ip.cosmo=cosmo;
@@ -122,7 +125,10 @@ static int window_magnification(double chi,ccl_cosmology *cosmo,SplPar *spl_pz,S
   ip.status = &status;
   F.function=&integrand_mag;
   F.params=&ip;
-  gslstatus=gsl_integration_qag(&F,chi,chi_max,0,1E-4,1000,GSL_INTEG_GAUSS41,w,&result,&eresult);
+  gslstatus=gsl_integration_qag(&F, chi, chi_max, 0,
+                                ccl_gsl->INTEGRATION_EPSREL, ccl_gsl->N_ITERATION,
+                                ccl_gsl->INTEGRATION_GAUSS_KRONROD_POINTS,
+                                w, &result, &eresult);
   *win=result;
   gsl_integration_workspace_free(w);
   if(gslstatus!=GSL_SUCCESS || *ip.status)
@@ -186,10 +192,13 @@ static CCL_ClTracer *cl_tracer_new(ccl_cosmology *cosmo,int tracer_type,
       return NULL;
     }
 
-    gsl_integration_workspace *w=gsl_integration_workspace_alloc(1000);
+    gsl_integration_workspace *w=gsl_integration_workspace_alloc(ccl_gsl->N_ITERATION);
     F.function=&speval_bis;
     F.params=clt->spl_nz;
-    clstatus=gsl_integration_qag(&F,z_n[0],z_n[nz_n-1],0,1E-4,1000,GSL_INTEG_GAUSS41,w,&nz_norm,&nz_enorm);
+    clstatus=gsl_integration_qag(&F, z_n[0], z_n[nz_n-1], 0,
+                                 ccl_gsl->INTEGRATION_EPSREL, ccl_gsl->N_ITERATION,
+                                 ccl_gsl->INTEGRATION_GAUSS_KRONROD_POINTS,
+                                 w, &nz_norm, &nz_enorm);
     gsl_integration_workspace_free(w);
     if(clstatus!=GSL_SUCCESS) {
       ccl_spline_free(clt->spl_nz);
@@ -819,7 +828,7 @@ double ccl_angular_cl(ccl_cosmology *cosmo,int l,CCL_ClTracer *clt1,CCL_ClTracer
   double result=0,eresult;
   double lkmin,lkmax;
   gsl_function F;
-  gsl_integration_workspace *w=gsl_integration_workspace_alloc(1000);
+  gsl_integration_workspace *w=gsl_integration_workspace_alloc(ccl_gsl->N_ITERATION);
 
   get_k_interval(cosmo,clt1,clt2,l,&lkmin,&lkmax);
 
@@ -830,7 +839,10 @@ double ccl_angular_cl(ccl_cosmology *cosmo,int l,CCL_ClTracer *clt1,CCL_ClTracer
   ipar.status = &clastatus;
   F.function=&cl_integrand;
   F.params=&ipar;
-  qagstatus=gsl_integration_qag(&F,lkmin,lkmax,0,1E-4,1000,GSL_INTEG_GAUSS41,w,&result,&eresult);
+  qagstatus=gsl_integration_qag(&F, lkmin, lkmax, 0,
+                                ccl_gsl->INTEGRATION_LIMBER_EPSREL, ccl_gsl->N_ITERATION,
+                                ccl_gsl->INTEGRATION_LIMBER_GAUSS_KRONROD_POINTS,
+                                w, &result, &eresult);
   gsl_integration_workspace_free(w);
   if(qagstatus!=GSL_SUCCESS || *ipar.status) {
     // If an error status was already set, don't overwrite it.

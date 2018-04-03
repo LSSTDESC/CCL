@@ -8,6 +8,7 @@
 #include <gsl/gsl_roots.h>
 #include "ccl_error.h"
 #include "ccl_core.h"
+#include "ccl_params.h"
 
 // Global variable to hold the neutrino phase-space spline
 gsl_spline* nu_spline=NULL;
@@ -35,7 +36,7 @@ gsl_spline* calculate_nu_phasespace_spline(int *status) {
     *status = CCL_ERROR_NU_INT;
   }
   int stat=0;
-  gsl_integration_cquad_workspace * workspace = gsl_integration_cquad_workspace_alloc (1000);
+  gsl_integration_cquad_workspace * workspace = gsl_integration_cquad_workspace_alloc(ccl_gsl->N_ITERATION);
   gsl_function F;
   F.function = &nu_integrand;
   for (int i=0; i<CCL_NU_MNUT_N; i++) {
@@ -162,7 +163,7 @@ double ccl_Omeganuh2_to_Mnu(double a, double Neff, double OmNuh2, double TCMB, g
   }
 
 
-  int root_status, iter = 0, max_iter = 100;
+  int root_status, iter = 0, max_iter = ccl_gsl->ROOT_NU_N_ITERATION;
   const gsl_root_fsolver_type *T;
   gsl_root_fsolver *s;
 
@@ -194,7 +195,7 @@ double ccl_Omeganuh2_to_Mnu(double a, double Neff, double OmNuh2, double TCMB, g
       m_min = gsl_root_fsolver_x_lower (s);
       m_max = gsl_root_fsolver_x_upper (s);
       root_status = gsl_root_test_interval (m_min, m_max,
-                                       0, 0.001); // double epsabs, double epsrel
+                                       0, ccl_gsl->ROOT_NU_EPSREL); // double epsabs, double epsrel
     }
   while (root_status == GSL_CONTINUE && iter < max_iter && *status ==0);
 

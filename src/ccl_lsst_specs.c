@@ -231,11 +231,11 @@ static double ccl_specs_norm_integrand(double z, void* params)
   valparams.user_information = p-> user_information;
   
   // Do the intermediary integral over the model relating  photo-z to true-z	
-  gsl_integration_cquad_workspace * workspace = gsl_integration_cquad_workspace_alloc (1000);
+  gsl_integration_cquad_workspace * workspace = gsl_integration_cquad_workspace_alloc(ccl_gsl->N_ITERATION);
   gsl_function F;
   F.function = ccl_specs_photoz;
   F.params = &valparams;
-  *p->status|= gsl_integration_cquad(&F, z_min, z_max, 0.0,EPSREL_DNDZ,workspace,&pz_int, NULL, NULL);
+  *p->status|= gsl_integration_cquad(&F, z_min, z_max, 0.0,ccl_gsl->INTEGRATION_DNDZ_EPSREL,workspace,&pz_int, NULL, NULL);
   gsl_integration_cquad_workspace_free(workspace);
   
   // Now return this value with the value of dNdz at z, to be integrated itself elsewhere
@@ -300,18 +300,18 @@ void ccl_specs_dNdz_tomog(double z, int dNdz_type, double bin_zmin, double bin_z
   
   
   // Integrate over the assumed pdf of photo-z wrt true-z in this bin (this goes in the numerator of the result):
-  gsl_integration_cquad_workspace * workspace = gsl_integration_cquad_workspace_alloc (1000);
+  gsl_integration_cquad_workspace * workspace = gsl_integration_cquad_workspace_alloc(ccl_gsl->N_ITERATION);
   gsl_function F;
   F.function = ccl_specs_photoz;
   F.params = &valparams;
-  *status |=gsl_integration_cquad(&F, bin_zmin, bin_zmax, 0.0,EPSREL_DNDZ,workspace,&numerator_integrand, NULL, NULL);
+  *status |=gsl_integration_cquad(&F, bin_zmin, bin_zmax, 0.0,ccl_gsl->INTEGRATION_DNDZ_EPSREL,workspace,&numerator_integrand, NULL, NULL);
   gsl_integration_cquad_workspace_free(workspace);	
   
   // Now get the denominator, which normalizes dNdz over the photometric bin
-  workspace = gsl_integration_cquad_workspace_alloc (1000);
+  workspace = gsl_integration_cquad_workspace_alloc(ccl_gsl->N_ITERATION);
   F.function = ccl_specs_norm_integrand;
   F.params = &norm_p_val;
-  *status |=gsl_integration_cquad(&F, Z_MIN_SOURCES, Z_MAX_SOURCES, 0.0,EPSREL_DNDZ,workspace,&denom_integrand, NULL, NULL);
+  *status |=gsl_integration_cquad(&F, Z_MIN_SOURCES, Z_MAX_SOURCES, 0.0,ccl_gsl->INTEGRATION_DNDZ_EPSREL,workspace,&denom_integrand, NULL, NULL);
   gsl_integration_cquad_workspace_free(workspace);
   if (*status) {
     *status = CCL_ERROR_INTEG;

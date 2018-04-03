@@ -1590,13 +1590,13 @@ double ccl_sigmaR(ccl_cosmology *cosmo,double R, int *status)
   
   par.cosmo=cosmo;
   par.R=R;
-  gsl_integration_cquad_workspace *workspace=gsl_integration_cquad_workspace_alloc(1000);
+  gsl_integration_cquad_workspace *workspace=gsl_integration_cquad_workspace_alloc(ccl_gsl->N_ITERATION);
   gsl_function F;
   F.function=&sigmaR_integrand;
   F.params=&par;
   double sigma_R;
   *status |=gsl_integration_cquad(&F,log10(ccl_splines->K_MIN_DEFAULT),log10(ccl_splines->K_MAX),
-				  0.0,1E-5,workspace,&sigma_R,NULL,NULL);
+				  0.0,ccl_gsl->INTEGRATION_SIGMAR_EPSREL,workspace,&sigma_R,NULL,NULL);
   //TODO: log10 could be taken already in the macros.
   //TODO: 1E-5 should be a macro
   //TODO: we should check for integration success

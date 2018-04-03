@@ -148,7 +148,7 @@ static int  growth_factor_and_growth_rate(double a,double *gf,double *fg,ccl_cos
     double ainit=EPS_SCALEFAC_GROWTH;
     gsl_odeiv2_system sys={growth_ode_system,NULL,2,cosmo}; 
     gsl_odeiv2_driver *d=
-      gsl_odeiv2_driver_alloc_y_new(&sys,gsl_odeiv2_step_rkck,0.1*EPS_SCALEFAC_GROWTH,0,EPSREL_GROWTH);
+      gsl_odeiv2_driver_alloc_y_new(&sys,gsl_odeiv2_step_rkck,0.1*EPS_SCALEFAC_GROWTH,0,ccl_gsl->ODE_GROWTH_EPSREL);
 
     y[0]=EPS_SCALEFAC_GROWTH;
     y[1]=EPS_SCALEFAC_GROWTH*EPS_SCALEFAC_GROWTH*EPS_SCALEFAC_GROWTH*
@@ -181,13 +181,13 @@ static int compute_chi(double a,ccl_cosmology *cosmo,double * chi, int * stat)
   p.cosmo=cosmo;
   p.status=stat;
   
-  gsl_integration_cquad_workspace * workspace = gsl_integration_cquad_workspace_alloc (1000);
+  gsl_integration_cquad_workspace * workspace = gsl_integration_cquad_workspace_alloc (ccl_gsl->N_ITERATION);
   gsl_function F;
   F.function = &chi_integrand;
   //F.params = cosmo;
   F.params = &p;
   //TODO: CQUAD is great, but slower than other methods. This could be sped up if it becomes an issue.
-  status=gsl_integration_cquad(&F, a, 1.0, 0.0,EPSREL_DIST,workspace,&result, NULL, NULL); 
+  status=gsl_integration_cquad(&F, a, 1.0, 0.0,ccl_gsl->INTEGRATION_DISTANCE_EPSREL,workspace,&result, NULL, NULL); 
   *chi=result/cosmo->params.h;
   gsl_integration_cquad_workspace_free(workspace);
 
@@ -258,7 +258,7 @@ static int  a_of_chi(double chi,ccl_cosmology *cosmo, int* stat, double *a_old,g
       status=gsl_root_fdfsolver_iterate(s);
       a_previous=a_current;
       a_current=gsl_root_fdfsolver_root(s);
-      status=gsl_root_test_delta(a_current,a_previous,1E-6,0);
+      status=gsl_root_test_delta(a_current,a_previous,ccl_gsl->ROOT_EPSABS,0);
     } while(status==GSL_CONTINUE);
 
     *a_old=a_current;
@@ -514,7 +514,7 @@ void ccl_cosmology_compute_growth(ccl_cosmology * cosmo, int * status)
       return;
     }
     
-    workspace=gsl_integration_cquad_workspace_alloc(1000);
+    workspace=gsl_integration_cquad_workspace_alloc(ccl_gsl->N_ITERATION);
     F.function=&df_integrand;
     F.params=df_a_spline;
   }
@@ -549,7 +549,7 @@ void ccl_cosmology_compute_growth(ccl_cosmology * cosmo, int * status)
 	status_mg |=gsl_spline_eval_e(df_a_spline,a[i],NULL,&df);
 	y2[i]+=df;
 	//Multiply D by exp(-int(df))
-	status_mg |= gsl_integration_cquad(&F,a[i],1.0,0.0,EPSREL_DIST,workspace,&integ,NULL,NULL);
+	status_mg |= gsl_integration_cquad(&F,a[i],1.0,0.0,ccl_gsl->INTEGRATION_DISTANCE_EPSREL,workspace,&integ,NULL,NULL);
 	y[i]*=exp(-integ);
       }
     }

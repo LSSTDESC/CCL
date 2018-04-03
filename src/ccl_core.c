@@ -25,6 +25,7 @@ const ccl_configuration default_config = {ccl_boltzmann_class, ccl_halofit, ccl_
 */
 
 ccl_spline_params * ccl_splines; // Global variable
+ccl_gsl_params * ccl_gsl; // Global variable
 
 void ccl_cosmology_read_config(void)
 {
@@ -38,6 +39,31 @@ void ccl_cosmology_read_config(void)
   double var_dbl;
   
   ccl_splines = malloc(sizeof(ccl_spline_params));
+  ccl_gsl = malloc(sizeof(ccl_gsl_params));
+  
+  // Initialise ccl_gsl struct with default values.
+  ccl_gsl->EPSREL = 1.0e-4;
+  ccl_gsl->N_ITERATION = 1000;
+  // Interpolation parameters
+  ccl_gsl->INTEGRATION_GAUSS_KRONROD_POINTS = GSL_INTEG_GAUSS41;
+  ccl_gsl->INTEGRATION_DISTANCE_EPSREL = EPSREL_DIST;
+  ccl_gsl->INTEGRATION_DNDZ_EPSREL = EPSREL_DNDZ;
+  ccl_gsl->INTEGRATION_SIGMAR_EPSREL = 1.0e-5;
+  // Will be set from config file or else from ccl_gsl->EPSREL
+  ccl_gsl->INTEGRATION_EPSREL = -1.0;
+  ccl_gsl->INTEGRATION_LIMBER_GAUSS_KRONROD_POINTS = -1;
+  ccl_gsl->INTEGRATION_LIMBER_EPSREL = -1.0;
+  // Interpolation parameters. Interpolation type can currently not be changed 
+  // in the config file.
+  ccl_gsl->INTERPOLATION_TYPE = gsl_interp_cspline;
+  // Root finding
+  ccl_gsl->ROOT_NU_EPSREL = 1.0e-3;
+  ccl_gsl->ROOT_NU_N_ITERATION = 100;
+  ccl_gsl->ROOT_EPSABS = 1.0e-6;
+  ccl_gsl->ROOT_EPSREL = -1.0;
+  // ODE
+  ccl_gsl->ODE_GROWTH_EPSREL = EPSREL_GROWTH;
+
   
   // Get parameter .ini filename from environment variable or default location
   const char* param_file;
@@ -61,6 +87,7 @@ void ccl_cosmology_read_config(void)
     }
     else {
       sscanf(buf, "%99[^=]=%le\n",var_name, &var_dbl);
+      // Spline parameters
       if(strcmp(var_name,"A_SPLINE_NA")==0) ccl_splines->A_SPLINE_NA=(int) var_dbl; 
       if(strcmp(var_name,"A_SPLINE_NLOG")==0) ccl_splines->A_SPLINE_NLOG=(int) var_dbl;
       if(strcmp(var_name,"A_SPLINE_MINLOG")==0) ccl_splines->A_SPLINE_MINLOG=var_dbl;
@@ -77,11 +104,41 @@ void ccl_cosmology_read_config(void)
       if(strcmp(var_name,"K_MAX_SPLINE")==0) ccl_splines->K_MAX_SPLINE=var_dbl;
       if(strcmp(var_name,"K_MAX")==0) ccl_splines->K_MAX=var_dbl;
       if(strcmp(var_name,"K_MIN_DEFAULT")==0) ccl_splines->K_MIN_DEFAULT=var_dbl;
-      if(strcmp(var_name,"N_K")==0) ccl_splines->N_K=(int) var_dbl;     
+      if(strcmp(var_name,"N_K")==0) ccl_splines->N_K=(int) var_dbl;
+      // GSL parameters
+      if(strcmp(var_name,"GSL_EPSREL")==0) ccl_gsl->EPSREL=var_dbl;
+      if(strcmp(var_name,"GSL_N_ITERATION")==0) ccl_gsl->N_ITERATION=(size_t) var_dbl;
+      if(strcmp(var_name,"GSL_INTEGRATION_GAUSS_KRONROD_POINTS")==0) ccl_gsl->INTEGRATION_GAUSS_KRONROD_POINTS=(int) var_dbl;
+      if(strcmp(var_name,"GSL_INTEGRATION_EPSREL")==0) ccl_gsl->INTEGRATION_EPSREL=var_dbl;
+      if(strcmp(var_name,"GSL_INTEGRATION_DISTANCE_EPSREL")==0) ccl_gsl->INTEGRATION_DISTANCE_EPSREL=var_dbl;
+      if(strcmp(var_name,"GSL_INTEGRATION_DNDZ_EPSREL")==0) ccl_gsl->INTEGRATION_DNDZ_EPSREL=var_dbl;
+      if(strcmp(var_name,"GSL_INTEGRATION_SIGMAR_EPSREL")==0) ccl_gsl->INTEGRATION_SIGMAR_EPSREL=var_dbl;
+      if(strcmp(var_name,"GSL_INTEGRATION_LIMBER_GAUSS_KRONROD_POINTS")==0) ccl_gsl->INTEGRATION_LIMBER_GAUSS_KRONROD_POINTS=(int) var_dbl;
+      if(strcmp(var_name,"GSL_INTEGRATION_LIMBER_EPSREL")==0) ccl_gsl->INTEGRATION_LIMBER_EPSREL=var_dbl;
+      if(strcmp(var_name,"GSL_ROOT_EPSREL")==0) ccl_gsl->ROOT_EPSREL=var_dbl;
+      if(strcmp(var_name,"GSL_ROOT_NU_EPSREL")==0) ccl_gsl->ROOT_NU_EPSREL=var_dbl;
+      if(strcmp(var_name,"GSL_ROOT_NU_N_ITERATION")==0) ccl_gsl->ROOT_NU_N_ITERATION=var_dbl;
+      if(strcmp(var_name,"GSL_ROOT_EPSABS")==0) ccl_gsl->ROOT_EPSABS=var_dbl;
+      if(strcmp(var_name,"GSL_ODE_GROWTH_EPSREL")==0) ccl_gsl->ODE_GROWTH_EPSREL=var_dbl;
     }
   }
 
   fclose(fconfig);
+
+  // If GSL values are not specified in config file, set them to the general
+  // values.
+  if(ccl_gsl->INTEGRATION_EPSREL <= 0.0) {
+    ccl_gsl->INTEGRATION_EPSREL = ccl_gsl->EPSREL;
+  }
+  if(ccl_gsl->INTEGRATION_LIMBER_GAUSS_KRONROD_POINTS <= 0.0) {
+    ccl_gsl->INTEGRATION_LIMBER_GAUSS_KRONROD_POINTS = ccl_gsl->INTEGRATION_GAUSS_KRONROD_POINTS;
+  }
+  if(ccl_gsl->INTEGRATION_LIMBER_EPSREL <= 0.0) {
+    ccl_gsl->INTEGRATION_LIMBER_EPSREL = ccl_gsl->INTEGRATION_EPSREL;
+  }
+  if(ccl_gsl->ROOT_EPSREL <= 0.0) {
+    ccl_gsl->ROOT_EPSREL = ccl_gsl->EPSREL;
+  }
 }
 
 
