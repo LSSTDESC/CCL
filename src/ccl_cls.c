@@ -139,7 +139,8 @@ CCL_ClWorkspace *ccl_cl_workspace_default(int lmax,int l_limber,int non_limber_m
     i_l++;
     l0+=increment;
   }
-  w->l_arr[i_l]=l0;
+  //Don't go further than lmaw
+  w->l_arr[w->n_ls-1]=w->lmax;
 
   return w;
 }
