@@ -22,7 +22,7 @@ flog.close()
 #Final cleanup
 def cleanup(full_cleanup=False) :
     os.chdir(dir_path)
-    os.system('rm -f v0.3.tar.gz')
+    os.system('rm -f v0.4.tar.gz')
     os.system('rm -f log_angpow_install')
     if full_cleanup :
         os.system('rm -r angpow')
@@ -72,19 +72,24 @@ else:
     #Actual installation
     print("Downloading Angpow...")
     if sys.platform.startswith('linux') :
-        check_command('wget -q https://github.com/LSSTDESC/Angpow4CCL/archive/v0.3.tar.gz')
+        check_command('wget -q https://github.com/LSSTDESC/Angpow4CCL/archive/v0.4.tar.gz')
         print("Unpacking...")
-        check_command('tar -xvf v0.3.tar.gz ')
+        check_command('tar -xvf v0.4.tar.gz ')
     if sys.platform.startswith('darwin') :
-        check_command('curl -L https://github.com/LSSTDESC/Angpow4CCL/archive/v0.3.tar.gz | tar xz')
-    check_command('mv Angpow4CCL-0.3 angpow')
+        check_command('curl -L https://github.com/LSSTDESC/Angpow4CCL/archive/v0.4.tar.gz | tar xz')
+    check_command('mv Angpow4CCL-0.4 angpow')
 
     print("Compiling...")
     os.chdir('angpow')
     if not os.path.exists('Objs'): os.mkdir('Objs')
     if not os.path.exists('lib'): os.mkdir('lib')
     #mod_makefile(c_comp,ompflag)
-    check_command('make lib')
+    #check_command('make lib')
+    check_command('mkdir build')
+    os.chdir('build')
+    check_command('cmake ..')
+    check_command('make')
+    check_command('make install')
 
     print("Cleanup")
     cleanup()

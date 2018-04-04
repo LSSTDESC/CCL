@@ -67,9 +67,9 @@ fi
 AM_CONDITIONAL([LOCALCLASS], [test x$localclass = xtrue])
 
 # Check for Angpow
-AC_CHECK_FILE("angpow/lib/libangpow.a",[AC_MSG_NOTICE([Using the CCL version of Angpow])
+AC_CHECK_FILE("angpow/build/libangpow.a",[AC_MSG_NOTICE([Using the CCL version of Angpow])
 localangpow=true
-ANGPOW_LIB="-L./angpow/lib/ -langpow"
+ANGPOW_LIB="-L./angpow/build/ -langpow"
 AC_OPENMP
 LDFLAGS="$LDFLAGS $ANGPOW_LIB $OPENMP_CFLAGS $OPENMP_CXXFLAGS"
 CPPFLAGS="$CPPFLAGS -I./angpow/inc -DHAVE_ANGPOW $OPENMP_CFLAGS $OPENMP_CXXFLAGS"],
