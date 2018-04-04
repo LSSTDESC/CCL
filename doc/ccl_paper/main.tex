@@ -57,17 +57,21 @@ The Core Cosmology Library (\ccl) provides routines to compute basic cosmologica
 %-------------------------------------------------------------------------------
 \section{Introduction}
 \label{sec:intro}
-\vol{Mustapha Ishak}
+\vol{Mustapha Ishak, Elisa Chisari}
 
-Tentative: An era of precision cosmology is at the door with the advent of a number of high precision surveys. One of them is the Large Synoptic Survey Telescope (LSST) that is designed to address the question of cosmic acceleration and the Dark Energy associated with it.  
+Starting in the next decade, large-scale galaxy surveys will drive a new era of high precision cosmology \citep{DESCWhite,green11,Laureijs11}. Their overarching goal is to answer the question of the origin of cosmic acceleration. In other words, to elucidate the nature of ``dark energy'', broadly understood as a family of potential models: from a cosmological constant to a dynamical field and modifications of gravity \citep{Weinberg13}. 
 
-In preparation for constraining cosmology with LSST, it is necessary to be able to produce rigorous (and accurate?) theoretical predictions for the cosmological quantities that will be measured. The Core Cosmology Library\footnote{\url{https://github.com/LSSTDESC/CCL}} (\ccl) aims to provide, in one library, a way of making predictions that are validated to a well-documented numerical accuracy, for the purpose of constraining cosmology with LSST. By constructing a cosmology library specifically with LSST and its Dark Energy Science Collaboration (DESC) in mind, it is possible to ensure that it is flexible, adaptable, and validated for all cases of interest, as well as user-friendly and appropriate for the needs of all DESC working groups.
+High precision constraints on dark energy models will be achieved by combining measurements of multiple cosmological probes: weak and strong gravitational lensing, the clustering of galaxies, baryon acoustic oscillations, supernovae and the abundance, clustering and gravitational lensing of galaxy clusters. Current weak lensing surveys have started to take this approach already \citep{Joudaki18,vanUitert18,DEScombined,krause17}. From a theoretical perspective, there are two challenges faced by the next generation of galaxy surveys. 
 
-\ccl computes basic cosmological functions including the Hubble parameter, distances, density parameters, and linear growth functions. It calculates the matter power spectrum using various methods including common approximations, calls to external software such as {\tt CLASS} \citep{class}, or emulators such as the ``Cosmic Emulator'' of \citet{Lawrence17}. It computes 2-point angular power spectra and correlation functions from various probes, going beyond the Limber approximation. \ccl 's overall structure is illustrated in figure \damonge{missing figure}.%\ref{fig:CCC_structure}. 
+First, to ensure that all probes are modeled accurately, avoiding potential biases in the final cosmological results. In the context of weak gravitational lensing, for example, phenomena that can lead to biases are: the impact of baryons on the distribution of matter or the intrinsic alignments of galaxyes \citep[][e.g.]{Krause15,Blazek17,vanDaalen11,Semboloni11}. In the context of galaxy clustering, effects such as magnification of number counts and redshift space distortions need to be included in the models \citep{Alonso15}. 
 
-\ccl 's implementation includes spatially flat and curved $\Lambda$-Cold Dark Matter ($\Lambda$CDM) cosmologies, and $w$CDM cosmologies with the option of using a time-dependent equation of state. It also allows the use of massive neutrinos. (is Table 1 up to date?). 
+Second, even standard cosmological quantities in the simplest models, such as distances in a $\Lambda$CDM cosmology, have to be predicted to a validated degree of accuracy. To guarantee that this is the case, comparisons must be performed between different numerical tools to ensure no deviations are present. 
 
-Finally, it is worth noting that while \ccl is built in light of LSST, its flexible and modular structure is designed to work with any other pipelines and surveys.  
+Faced with these chanllenges, the Dark Energy Science Collaboration (DESC) of the Large Synoptic Survey Telescope (LSST) has built a comprehensive software tool that satisfies the needs of the next generation of cosmological analysis. This manuscript presents the Core Cosmology Library\footnote{publicly available at \url{https://github.com/LSSTDESC/CCL}} (\ccl), which provides, in one library, a way of making predictions that are validated to a well-documented numerical accuracy for the purpose of constraining cosmology with LSST. While \ccl was built with LSST in mind, our goal was to produce user-friendly, well-documented, adaptable software that can be used in any theoretical modeling work in cosmology. 
+
+\ccl computes standard cosmological functions including the Hubble parameter, distances, density parameters, and linear growth functions. It calculates the matter power spectrum using various methods including common approximations, by calling external software such as {\tt CLASS} \citep{class}, or emulators such as the ``Cosmic Emulator'' of \citet{Lawrence17}. It computes 2-point angular power spectra and correlation functions from various probes, going beyond the Limber approximation. 
+
+\ccl 's overall structure is illustrated in Figure \ref{fig:CCL_structure}. Our implementation has support for spatially flat and curved $\Lambda$-Cold Dark Matter ($\Lambda$CDM) cosmologies, and $w$CDM cosmologies with the option of using a time-dependent equation of state. It also allows for cosmologies with multiple massive neutrino species. \todo{MG via {\tt hiCLASS} should be mentioned here} \todo{Table 1 outdated}.
 
 %------------------------
 \begin{figure*}
@@ -78,11 +82,12 @@ Finally, it is worth noting that while \ccl is built in light of LSST, its flexi
 \end{figure*}
 %------------------------
 
+This manuscript is organized as follows. Section \ref{sec:models} describes the cosmological models and observables supported by \ccl. In Section \ref{sec:implement}, we describe the details of the implementation of the quantities introduced in Section \ref{sec:models}. Section \ref{sec:validation} goes through the details of the validation tests performed and the accuracy achieved. Section \ref{sec:usage} gives brief guidelines for usage of \ccl, but we point the reader to the software online repository, documentation and user manual for further information. We conclude in Section \ref{sec:conclusion} with an outlook towards the integration of \ccl in LSST pipelines and we outline future additions to the software. 
 
-\todo{Summarize the probes we cover. Explain future link to likelihood pipeline. Highlight CCL can be used by other surveys.}
 
 %-------------------------------------------------------------------------------
 \section{Cosmological models and observables}
+\label{sec:models}
 \vol{Renee}
 
 The overarching goal of \ccl is to allow seamless integration of different cosmological models of interest to LSST, given some priors on the range of validity of the specific models.
@@ -571,6 +576,7 @@ Note that, in order to be consistent, one should use a value of $\Delta_\mathrm{
 
 %-------------------------------------------------------------------------------
 \section{Implementation of high-accuracy cosmological functions}
+\label{sec:implement}
 
 %-------------------------------------------------------------------------------
 \subsection{Background functions \& growth of perturbations}
@@ -822,6 +828,7 @@ p(z,z') = \frac{1}{\sqrt{2 \pi}\sigma_z} \exp\left(-\frac{(z-z')^2}{2\sigma_z^2}
 
 %-------------------------------------------------------------------------------
 \section{Validation over the $\Lambda$CDM parameter space}
+\label{sec:validation}
 
 %-------------------------------------------------------------------------------
 \subsection{Accuracy criteria}
@@ -996,6 +1003,7 @@ Here, $\Delta_{\rm thres}$ is a target threshold for the fractional deviation be
 
 
 \section{Usage}
+\label{sec:usage}
 \vol{Renee,Elisa}
 
 \ccl is a public tool developed by the members of the Dark Energy Science Collaboration of LSST, and as such can be downloaded from the collaboration's github repository at the URL provided in the abstract. Installation instructions are provided in a README file available in that same repository. Instructions on how to generate a Docker\footnote{\url{https://www.docker.com/}} image are provided for portability to different architectures. \ccl dependencies include the GNU Scientific Library\footnote{\url{https://www.gnu.org/software/gsl/}} and FFTW3\footnote{\url{http://www.fftw.org/}}. A suite of tests can be run to ensure installation was successful and all features perform nomrmally. Accuracy checks are performed in C, while a suite of unit tests is available in python.
@@ -1006,7 +1014,9 @@ Here, $\Delta_{\rm thres}$ is a target threshold for the fractional deviation be
 
 %-------------------------------------------------------------------------------
 \section{Outlook}
+\label{sec:conclusion}
 \vol{David Alonso, Elisabeth Krause}
+
 Science software development to facilitate the cosmological inference from LSST data is one of the critical task of the Dark Energy Science Collaboration (DESC). Recent cosmological analyses of the Dark Energy Survey (DES) relied on CosmoSIS \citep{Zuntz14} and CosmoLike \citep{krause17}, the Kilo-Degree Survey (KiDS) uses CosmoMC \citep{Lewis10}; all three frameworks employ CLASS, Camb, or the cosmic emulator to compute the density power spectra. Compared to the analyses of DES, KiDS and the Hyper-Suprime Cam Survey (HSC), future data sets (LSST, Euclid, WFIRST, etc) have substantially higher demands on analysis frameworks: The analyses are becoming more complex in terms of cosmological physics that is included in the analyses (neutrinos, modified gravity, and dark matter models) and in terms of modeling astrophysical and observational systematics at the required precision. 
 
 It is the primary goal of the \ccl to become the backbone of all cosmological analyses carried out by the Dark Energy Science Collaboration of the LSST. This unified approach of a validated \ccl will ensure that DESC results that are both consistent (in that they will all be based on the same theory framework) and accurate (in that this framework has undergone a rigorous numerical validation).
