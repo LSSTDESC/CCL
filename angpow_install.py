@@ -84,12 +84,10 @@ else:
     if not os.path.exists('Objs'): os.mkdir('Objs')
     if not os.path.exists('lib'): os.mkdir('lib')
     #mod_makefile(c_comp,ompflag)
-    #check_command('make lib')
     check_command('mkdir build')
     os.chdir('build')
     check_command('cmake ..')
     check_command('make')
-    check_command('make install')
 
     print("Cleanup")
     cleanup()
