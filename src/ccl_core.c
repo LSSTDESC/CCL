@@ -16,6 +16,11 @@
 
 const ccl_configuration default_config = {ccl_boltzmann_class, ccl_halofit, ccl_nobaryons, ccl_tinker10};
 
+const ccl_gsl_params default_gsl_params = {1.0e-4, 1000, 
+                                           GSL_INTEG_GAUSS41, 1.0e-4, GSL_INTEG_GAUSS41, 1.0e-4, EPSREL_DIST, EPSREL_DNDZ, 1.0e-5,
+                                           1.0e-4, 1.0e-6, 1.0e-3, 1000, 100,
+                                           EPSREL_GROWTH};
+
 /* ------- ROUTINE: ccl_cosmology_read_config ------
    INPUTS: none, but will look for ini file in include/ dir
    TASK: fill out global variables of splines with user defined input.
@@ -25,7 +30,7 @@ const ccl_configuration default_config = {ccl_boltzmann_class, ccl_halofit, ccl_
 */
 
 ccl_spline_params * ccl_splines; // Global variable
-ccl_gsl_params * ccl_gsl; // Global variable
+ccl_gsl_params * ccl_gsl = &default_gsl_params; // Global variable
 
 void ccl_cosmology_read_config(void)
 {
@@ -40,32 +45,8 @@ void ccl_cosmology_read_config(void)
   
   ccl_splines = malloc(sizeof(ccl_spline_params));
   ccl_gsl = malloc(sizeof(ccl_gsl_params));
-  
-  // Initialise ccl_gsl struct with default values.
-  ccl_gsl->EPSREL = 1.0e-4;
-  ccl_gsl->N_ITERATION = 1000;
-  // Interpolation parameters
-  ccl_gsl->INTEGRATION_GAUSS_KRONROD_POINTS = GSL_INTEG_GAUSS41;
-  ccl_gsl->INTEGRATION_DISTANCE_EPSREL = EPSREL_DIST;
-  ccl_gsl->INTEGRATION_DNDZ_EPSREL = EPSREL_DNDZ;
-  ccl_gsl->INTEGRATION_SIGMAR_EPSREL = 1.0e-5;
-  // Will be set from config file or else from ccl_gsl->EPSREL
-  ccl_gsl->INTEGRATION_EPSREL = -1.0;
-  ccl_gsl->INTEGRATION_LIMBER_GAUSS_KRONROD_POINTS = -1;
-  ccl_gsl->INTEGRATION_LIMBER_EPSREL = -1.0;
-  // Interpolation parameters. Interpolation type can currently not be changed 
-  // in the config file.
-  ccl_gsl->INTERPOLATION_TYPE = gsl_interp_cspline;
-  // Root finding
-  ccl_gsl->ROOT_NU_EPSREL = 1.0e-3;
-  ccl_gsl->ROOT_NU_N_ITERATION = 100;
-  ccl_gsl->ROOT_EPSABS = 1.0e-6;
-  ccl_gsl->ROOT_EPSREL = -1.0;
-  ccl_gsl->ROOT_N_ITERATION = -1;
-  // ODE
-  ccl_gsl->ODE_GROWTH_EPSREL = EPSREL_GROWTH;
+  memcpy(ccl_gsl, &default_gsl_params, sizeof(ccl_gsl_params));
 
-  
   // Get parameter .ini filename from environment variable or default location
   const char* param_file;
   const char* param_file_env = getenv("CCL_PARAM_FILE");
@@ -126,24 +107,6 @@ void ccl_cosmology_read_config(void)
   }
 
   fclose(fconfig);
-
-  // If GSL values are not specified in config file, set them to the general
-  // values.
-  if(ccl_gsl->INTEGRATION_EPSREL <= 0.0) {
-    ccl_gsl->INTEGRATION_EPSREL = ccl_gsl->EPSREL;
-  }
-  if(ccl_gsl->INTEGRATION_LIMBER_GAUSS_KRONROD_POINTS <= 0.0) {
-    ccl_gsl->INTEGRATION_LIMBER_GAUSS_KRONROD_POINTS = ccl_gsl->INTEGRATION_GAUSS_KRONROD_POINTS;
-  }
-  if(ccl_gsl->INTEGRATION_LIMBER_EPSREL <= 0.0) {
-    ccl_gsl->INTEGRATION_LIMBER_EPSREL = ccl_gsl->INTEGRATION_EPSREL;
-  }
-  if(ccl_gsl->ROOT_EPSREL <= 0.0) {
-    ccl_gsl->ROOT_EPSREL = ccl_gsl->EPSREL;
-  }
-  if(ccl_gsl->ROOT_N_ITERATION <= 0) {
-    ccl_gsl->ROOT_N_ITERATION = ccl_gsl->N_ITERATION;
-  }
 }
 
 
@@ -167,12 +130,6 @@ computed_power, computed_sigma: store status of the computations
 */
 ccl_cosmology * ccl_cosmology_create(ccl_parameters params, ccl_configuration config)
 {
-  #ifndef USE_GSL_ERROR
-    gsl_set_error_handler_off ();
-  #endif
-
-  if(ccl_splines==NULL) ccl_cosmology_read_config();
-  
   ccl_cosmology * cosmo = malloc(sizeof(ccl_cosmology));
   cosmo->params = params;
   cosmo->config = config;
@@ -357,6 +314,11 @@ ccl_parameters ccl_parameters_create(double Omega_c, double Omega_b, double Omeg
 				     int nz_mgrowth,double *zarr_mgrowth,
 				     double *dfarr_mgrowth, int *status)
 {
+  #ifndef USE_GSL_ERROR
+    gsl_set_error_handler_off ();
+  #endif
+  if(ccl_splines==NULL || ccl_gsl==NULL) ccl_cosmology_read_config();
+
   ccl_parameters params;
   params.sigma_8 = NAN;
   params.A_s = NAN;

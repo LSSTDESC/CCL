@@ -62,9 +62,6 @@ typedef struct ccl_gsl_params {
   // sigma_R integral
   double INTEGRATION_SIGMAR_EPSREL;
 
-  // Interpolation
-  const gsl_interp_type * INTERPOLATION_TYPE;
-
   // Root finding
   double ROOT_EPSREL;
   double ROOT_EPSABS;
