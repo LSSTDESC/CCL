@@ -56,7 +56,6 @@ static int linecount(FILE *f)
 
 static void compare_correlation_3d(int i_model,struct corrs_3d_data * data)
 {
-  printf("Model # = %d\n", i_model);
   int nk,nr,i,j;
   int status=0;
   char fname[256],str[1024];
