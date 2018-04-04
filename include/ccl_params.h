@@ -69,6 +69,7 @@ typedef struct ccl_gsl_params {
   double ROOT_EPSREL;
   double ROOT_EPSABS;
   double ROOT_NU_EPSREL;
+  int ROOT_N_ITERATION;
   int ROOT_NU_N_ITERATION;
 
   // ODE

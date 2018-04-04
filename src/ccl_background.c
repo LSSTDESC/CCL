@@ -232,7 +232,7 @@ static void fdfzero(double a,void *params,double *f,double *df)
   *df=dfzero(a,params);
 }
 
-static int  a_of_chi(double chi,ccl_cosmology *cosmo, int* stat, double *a_old,gsl_root_fdfsolver *s)
+static int a_of_chi(double chi, ccl_cosmology *cosmo, int* stat, double *a_old, gsl_root_fdfsolver *s)
 {
   if(chi==0) {
     *a_old=1;
@@ -259,7 +259,7 @@ static int  a_of_chi(double chi,ccl_cosmology *cosmo, int* stat, double *a_old,g
       a_previous=a_current;
       a_current=gsl_root_fdfsolver_root(s);
       status=gsl_root_test_delta(a_current,a_previous,ccl_gsl->ROOT_EPSABS,0);
-    } while(status==GSL_CONTINUE);
+    } while(status==GSL_CONTINUE && iter <= ccl_gsl->ROOT_N_ITERATION);
 
     *a_old=a_current;
 

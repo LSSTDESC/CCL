@@ -61,6 +61,7 @@ void ccl_cosmology_read_config(void)
   ccl_gsl->ROOT_NU_N_ITERATION = 100;
   ccl_gsl->ROOT_EPSABS = 1.0e-6;
   ccl_gsl->ROOT_EPSREL = -1.0;
+  ccl_gsl->ROOT_N_ITERATION = -1;
   // ODE
   ccl_gsl->ODE_GROWTH_EPSREL = EPSREL_GROWTH;
 
@@ -116,8 +117,9 @@ void ccl_cosmology_read_config(void)
       if(strcmp(var_name,"GSL_INTEGRATION_LIMBER_GAUSS_KRONROD_POINTS")==0) ccl_gsl->INTEGRATION_LIMBER_GAUSS_KRONROD_POINTS=(int) var_dbl;
       if(strcmp(var_name,"GSL_INTEGRATION_LIMBER_EPSREL")==0) ccl_gsl->INTEGRATION_LIMBER_EPSREL=var_dbl;
       if(strcmp(var_name,"GSL_ROOT_EPSREL")==0) ccl_gsl->ROOT_EPSREL=var_dbl;
+      if(strcmp(var_name,"GSL_ROOT_N_ITERATION")==0) ccl_gsl->ROOT_N_ITERATION=(int) var_dbl;
       if(strcmp(var_name,"GSL_ROOT_NU_EPSREL")==0) ccl_gsl->ROOT_NU_EPSREL=var_dbl;
-      if(strcmp(var_name,"GSL_ROOT_NU_N_ITERATION")==0) ccl_gsl->ROOT_NU_N_ITERATION=var_dbl;
+      if(strcmp(var_name,"GSL_ROOT_NU_N_ITERATION")==0) ccl_gsl->ROOT_NU_N_ITERATION=(int) var_dbl;
       if(strcmp(var_name,"GSL_ROOT_EPSABS")==0) ccl_gsl->ROOT_EPSABS=var_dbl;
       if(strcmp(var_name,"GSL_ODE_GROWTH_EPSREL")==0) ccl_gsl->ODE_GROWTH_EPSREL=var_dbl;
     }
@@ -138,6 +140,9 @@ void ccl_cosmology_read_config(void)
   }
   if(ccl_gsl->ROOT_EPSREL <= 0.0) {
     ccl_gsl->ROOT_EPSREL = ccl_gsl->EPSREL;
+  }
+  if(ccl_gsl->ROOT_N_ITERATION <= 0) {
+    ccl_gsl->ROOT_N_ITERATION = ccl_gsl->N_ITERATION;
   }
 }
 
