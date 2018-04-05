@@ -10,7 +10,8 @@ necessary files, wrappers etc. are properly updated.
 Reviewing a pull request (PR) on github
 ---------------------------------------
  1. Checkout the branch.
- 2. Export the path to the parameter file of your checked out branch (i.e.
+ 2. Make sure you have exported the environment variable `CCL_PARAM_FILE` pointing
+    to the parameter file of your checked out branch (i.e.
     `export CCL_PARAM_FILE=[path to CCL branch]/include/ccl_params.ini`). This
     is to let you test CCL without actually installing it on your system.
  2. Make sure you can build the C library (i.e. `cmake .. && make` from the `build` directory).
