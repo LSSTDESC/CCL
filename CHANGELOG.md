@@ -4,9 +4,12 @@ Summary: the user interface for setting up cosmologies with neutrinos has been a
 
 ## C library
 In ccl_core.c:
+
 In the function, ccl\_parameters\_create, the arguements 'double N\_nu\_rel', and 'double N\_nu\_mass' have been removed. The arguments 'double Neff' and 'ccl\_mnu\_convention mnu\_type' have been added. The argument 'mnu' has changed in type from 'double mnu' to 'double* mnu'.
 Similar changes apply in 'ccl\_cosmology\_create\_with\_params' and all 'ccl\_parameters\_create...nu' convenience functions.
+
 In ccl_neutrinos.c:
+
 The function ccl\_Omeganuh2\_to\_Mnu has been renamed ccl\_nu\_masses. The arguments 'double a' and 'gsl\_interp\_accel* accel' have been removed. The argument 'ccl\_neutrino\_mass\_splits mass\_split' has been added.
 
 ## Python wrapper
