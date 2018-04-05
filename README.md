@@ -123,7 +123,7 @@ Assuming that the tests pass, you have successfully installed `CCL`!
 
 If you ever need to uninstall `CCL`, run the following from the `build` directory:
 ```sh
-$ xargs rm < install_manifest.txt
+$ make uninstall
 ```
 You may need to prepend a `sudo` if you installed `CCL` in a protected folder.
 
