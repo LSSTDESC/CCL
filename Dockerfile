@@ -1,4 +1,4 @@
-FROM ubuntu:artful
+FROM ubuntu
 LABEL maintainer "francois.lanusse@gmail.com"
 
 RUN apt-get update && apt-get upgrade -y

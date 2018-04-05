@@ -21,12 +21,15 @@ See also our [wiki](https://github.com/LSSTDESC/CCL/wiki).
 
 ## TLDR
 
-`CCL` is available as a Python package through PyPi, to install:
+`CCL` is available as a Python package through PyPi. To install, simply run:
 ```
 $ pip install git+git://github.com/EiffL/CCL.git
 ```
 This should work as long as `CMake` is installed on your system (if it doesn't follow the detailed instructions below).
 Once `CCL` is installed, take it for a spin by following some example notebooks [here](examples).
+
+`CCL` comes in two forms, a C library and a Python module. These components can
+be installed independently of each other, instructions are provided below.
 
 ## Dependencies and requirements
 
@@ -134,16 +137,25 @@ make check-cpp
 ````
 TODO: add this to cmake
 --->
-## Python installation
+## Install the pyccl Python module
 
-The Python wrapper is called `pyccl` and is available on PyPi, simply run:
+`CCL` also comes with a Python wrapper, called `pyccl`, which can be built and
+installed regardless of whether you install the C library. For convenience, we
+provide a PyPi hosted package which can be installed simply by running:
 ```sh
 $ pip install pyccl # append --user for single user install
 ```
-This only assumes that `CMake` is available on your system.
+This only assumes that `CMake` is available on your system, you don't need to
+download the source yourself.
 
-You can also build and install `pyccl` from the `CCL` source, **without necessarily
-installing the C library**. From the root `CCL` folder, run:
+You can also build and install `pyccl` from the `CCL` source, again **without necessarily
+installing the C library**. Download the latest version of `CCL`:
+```sh
+$ git clone https://github.com/LSSTDESC/CCL.git
+$ cd CCL
+```
+
+And from the root `CCL` folder, simply run:
 ````sh
 $ python setup.py install # append --user for single user install
 ````

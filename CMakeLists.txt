@@ -5,6 +5,21 @@ list(APPEND CMAKE_MODULE_PATH  "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
 project(ccl VERSION 0.2.1)
 
+    # Defines list of CCL src files
+    set(CCL_SRC src/ccl_background.c src/ccl_core.c src/ccl_error.c src/ccl_lsst_specs.c src/ccl_placeholder.c
+                src/ccl_power.c src/ccl_utils.c src/ccl_cls.c src/ccl_massfunc.c src/ccl_neutrinos.c
+                src/ccl_emu17.c src/ccl_correlation.c src/fftlog.c)
+
+    # Defines list of CCL tests src files
+    set(TEST_SRC tests/ccl_test.c tests/ccl_test_utils.c tests/ccl_test_params.c tests/ccl_test_cosmology.c
+                 tests/ccl_test_distances.c tests/ccl_test_distances_hiz.c tests/ccl_test_growth.c
+                 tests/ccl_test_growth_hiz.c tests/ccl_test_bbks.c tests/ccl_test_eh.c tests/ccl_test_cls.c
+                 tests/ccl_test_cmblens.c tests/ccl_test_sigmaM.c tests/ccl_test_massfunc.c tests/ccl_test_correlation.c
+                 tests/ccl_test_bcm.c tests/ccl_test_emu.c tests/ccl_test_emu_nu.c)
+
+    # Defines list of extra distribution files to be installed on the system
+    set(EXTRA_DIST include/ccl_params.ini README.md LICENSE LICENSE_COSMICEMU)
+
     # Uses system libraries or downloads and build if necessary
     include(BuildFFTW)
     include(BuildGSL)
@@ -28,18 +43,6 @@ project(ccl VERSION 0.2.1)
     else()
       set(CMAKE_C_FLAGS "-O3 -fomit-frame-pointer -fno-common -std=c99 -fPIC -fopenmp -D__CCL_DATA_DIR__=${CMAKE_INSTALL_PREFIX}/share/ccl")
     endif()
-
-    # Defines list of CCL src files
-    set(CCL_SRC src/ccl_background.c src/ccl_core.c src/ccl_error.c src/ccl_lsst_specs.c src/ccl_placeholder.c
-                src/ccl_power.c src/ccl_utils.c src/ccl_cls.c src/ccl_massfunc.c src/ccl_neutrinos.c
-                src/ccl_emu17.c src/ccl_correlation.c src/fftlog.c)
-
-    # Defines list of CCL tests src files
-    set(TEST_SRC tests/ccl_test.c tests/ccl_test_utils.c tests/ccl_test_params.c tests/ccl_test_cosmology.c
-                 tests/ccl_test_distances.c tests/ccl_test_distances_hiz.c tests/ccl_test_growth.c
-                 tests/ccl_test_growth_hiz.c tests/ccl_test_bbks.c tests/ccl_test_eh.c tests/ccl_test_cls.c
-                 tests/ccl_test_cmblens.c tests/ccl_test_sigmaM.c tests/ccl_test_massfunc.c tests/ccl_test_correlation.c
-                 tests/ccl_test_bcm.c tests/ccl_test_emu.c tests/ccl_test_emu_nu.c)
 
     # Define include and library directories for external dependencies
     include_directories(${CLASS_INCLUDE_DIRS} ${GSL_INCLUDE_DIRS} ${FFTW_INCLUDES})
@@ -80,7 +83,7 @@ project(ccl VERSION 0.2.1)
     SET(PROJECT_DESCRIPTION "DESC Core Cosmology Library: cosmology routines with validated numerical accuracy")
     SET(PKG_CONFIG_LIBDIR "${CMAKE_INSTALL_PREFIX}/lib")
     SET(PKG_CONFIG_INCLUDEDIR "${CMAKE_INSTALL_PREFIX}/include/")
-    SET(PKG_CONFIG_REQUIRES "gsl >= 2.4")
+    SET(PKG_CONFIG_REQUIRES "gsl >= 2.1")
     SET(PKG_CONFIG_REQUIRES_PRIVATE "fftw3")
     SET(PKG_CONFIG_LIBS "-L${PKG_CONFIG_LIBDIR} -lccl -lm")
     SET(PKG_CONFIG_CFLAGS "-I${PKG_CONFIG_INCLUDEDIR}")
@@ -90,9 +93,9 @@ project(ccl VERSION 0.2.1)
     # Installs the CCL library
     install(TARGETS ccl DESTINATION lib)
     install(TARGETS check_ccl DESTINATION bin)
-    install(DIRECTORY include/ DESTINATION include/
+    install(DIRECTORY include DESTINATION include
             FILES_MATCHING PATTERN "*.h")
-    install(FILES include/ccl_params.ini DESTINATION share/ccl)
+    install(FILES ${EXTRA_DIST} DESTINATION share/ccl)
     install(FILES ${CMAKE_CURRENT_BINARY_DIR}/ccl.pc DESTINATION lib/pkgconfig)
 
     # Optionally builds the python wrapper
