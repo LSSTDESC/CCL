@@ -98,5 +98,15 @@ project(ccl VERSION 0.2.1)
     install(FILES ${EXTRA_DIST} DESTINATION share/ccl)
     install(FILES ${CMAKE_CURRENT_BINARY_DIR}/ccl.pc DESTINATION lib/pkgconfig)
 
+    # Adds uninstall target
+    if(NOT TARGET uninstall)
+      configure_file(
+          "${CMAKE_CURRENT_SOURCE_DIR}/cmake/cmake_uninstall.cmake.in"
+          "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
+          IMMEDIATE @ONLY)
+      add_custom_target(uninstall
+          COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
+    endif()
+
     # Optionally builds the python wrapper
     add_subdirectory(pyccl EXCLUDE_FROM_ALL)
