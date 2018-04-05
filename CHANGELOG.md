@@ -17,3 +17,11 @@ In the function Omeganuh2, the argument 'Neff' has been removed. It is now fixed
 The function 'Omeganuh2\_to\_Mnu' has been renamed 'nu\_masses'. The arguments 'a' and 'Neff' have been removed. The argument 'mass\_split' has been added.
 
 
+Other changes since release 0.2.1 (September 2017):
+
+Tutorial added for usage with MCMC
+Added support for BCM baryon model
+cpp compatibility improved
+Added support for computing the nonlinear matter power spectrum with CosmicEmu
+Added support for CMB lensing observables
+Clarified license
