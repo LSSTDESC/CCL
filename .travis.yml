@@ -5,25 +5,37 @@ python:
   - "3.5"
   - "3.6"
 
-# Travis uses Ubuntu 12.04 and 14.04. None of them have GSL2x in apt-get
-# We have to install it from source (this will make the tests slower)
-# CLASS also needs to be downloaded and compiled, which there is no easy fix for.
-before_install:
-  - sudo apt-get -qq update
-  - sudo apt-get install fftw3 fftw3-dev pkg-config
-#  - sudo apt-get install latexmk
-  - pip install numpy
-  - pip install coveralls
-  - ./install-gsl.sh
-  - python class_install.py
-#addons:
-#    apt:
-#        packages:
+# Cache pip- and apt-installed dependencies
+cache:
+    apt: true
+    pip: true
+
+sudo: false
+
+addons:
+    apt:
+        packages:
+            - fftw3
+            - fftw3-dev
+            - pkg-config
 #            - texlive-latex-recommended
 #            - texlive-latex-extra
 #            - texlive-fonts-recommended
 #            - texlive-fonts-extra
 #            - dvipng
+
+# Travis uses Ubuntu 12.04 and 14.04. None of them have GSL2x in apt-get
+# We have to install it from source (this will make the tests slower)
+# CLASS also needs to be downloaded and compiled, which there is no easy fix for.
+before_install:
+#  - sudo apt-get -qq update
+#  - sudo apt-get install fftw3 fftw3-dev pkg-config
+#  - sudo apt-get install latexmk
+  - pip install numpy
+  - pip install coveralls
+  - ./install-gsl.sh
+  - python class_install.py
+
 install: python setup.py install
 script:
     - nosetests tests/run_tests.py --all --debug --detailed-errors --verbose --process-restartworker --with-coverage --cover-package=pyccl
