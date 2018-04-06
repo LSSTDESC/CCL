@@ -26,6 +26,20 @@ matter_power_spectrum_types = {
     'emu':          lib.emu
 }
 
+# List which matter_power_spectrum types are allowed for each transfer_function
+valid_transfer_matter_power_combos = {
+    'none':             [],
+    'emulator':         [lib.emu,],
+    'fitting_function': [lib.linear, lib.halofit, lib.halo_model],
+    'eisenstein_hu':    [lib.linear, lib.halofit, lib.halo_model],
+    'bbks':             [lib.linear, lib.halofit, lib.halo_model],
+    'boltzmann':        [lib.linear, lib.halofit],
+    'boltzmann_class':  [lib.linear, lib.halofit],
+    'class':            [lib.linear, lib.halofit],
+    'boltzmann_camb':   [],
+    'camb':             [],
+}
+
 baryons_power_spectrum_types = {
     'nobaryons':   lib.nobaryons,
     'bcm':      lib.bcm
@@ -62,9 +76,9 @@ class Parameters(object):
     """
     
     def __init__(self, Omega_c=None, Omega_b=None, h=None, A_s=None, n_s=None, 
-                 Omega_k=0., N_nu_rel=3.046, N_nu_mass=0., m_nu=0.,w0=-1., wa=0.,
-                 bcm_log10Mc=np.log10(1.2e14), bcm_etab=0.5, bcm_ks=55., sigma8=None,
-                 z_mg=None, df_mg=None):
+                 Omega_k=0., N_nu_rel=3.046, N_nu_mass=0., m_nu=0., 
+                 w0=-1., wa=0., bcm_log10Mc=np.log10(1.2e14), bcm_etab=0.5, 
+                 bcm_ks=55., sigma8=None, z_mg=None, df_mg=None):
         """
         Creates a set of cosmological parameters.
 
@@ -85,14 +99,16 @@ class Parameters(object):
                          Defaults to 3.046
             N_nu_mass (float, optional): Number of massive neutrinos present. 
                          Defaults to 0.
-            m_nu (float, optional): total mass in eV of the massive neutrinos present (current must be equal mass). Defaults to 0.
+            m_nu (float, optional): total mass in eV of the massive neutrinos 
+                                    present (current must be equal mass). 
+                                    Defaults to 0.
             w0 (float, optional): First order term of dark energy equation of 
                                   state. Defaults to -1.
             wa (float, optional): Second order term of dark energy equation of 
                                   state. Defaults to 0.
-            log10Mc (float, optional): One of the parameters of the BCM model.
-            etab (float, optional): One of the parameters of the BCM model.
-            ks (float, optional): One of the parameters of the BCM model.
+            bcm_log10Mc (float, optional): One of the parameters of the BCM model.
+            bcm_etab (float, optional): One of the parameters of the BCM model.
+            bcm_ks (float, optional): One of the parameters of the BCM model.
             sigma8 (float): Variance of matter density perturbations at 8 Mpc/h
                             scale. Optional if A_s is specified.
             df_mg (:obj: array_like): Perturbations to the GR growth rate as a 
@@ -148,7 +164,7 @@ class Parameters(object):
                                  "(or set to None)." % nm)
         
         # Create new instance of ccl_parameters object
-        status = 0 # Create an internal status variable; needed to check massive neutrino integral.
+        status = 0 # Needed to check massive neutrino integral
         if nz_mg == -1:
             # Create ccl_parameters without modified growth
             self.parameters, status \
@@ -324,6 +340,13 @@ class Cosmology(object):
                                   "Available options are: %s" \
                                  % (mass_function, 
                                     mass_function_types.keys()) )
+            
+            # Check for valid transfer fn/matter power spectrum combination
+            if matter_power_spectrum_types[matter_power_spectrum] \
+              not in valid_transfer_matter_power_combos[transfer_function]:
+                raise ValueError("matter_power_spectrum '%s' can't be used "
+                                 "with transfer_function '%s'." \
+                                 % (matter_power_spectrum, transfer_function))
             
             # Assign values to new ccl_configuration object
             config = lib.configuration()

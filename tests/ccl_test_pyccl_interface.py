@@ -370,7 +370,23 @@ def check_corr(cosmo):
     t=np.logspace(-2,np.log10(5.),20) #degrees
     corrfunc=ccl.correlation(cosmo,ells,cls,t,corr_type='L+',method='FFTLog')
     assert_( all_finite(corrfunc))
+
+
+def test_valid_transfer_combos():
+    """
+    Check that invalid transfer_function <-> matter_power_spectrum pairs raise 
+    an error.
+    """
+    params = { 'Omega_c': 0.27, 'Omega_b': 0.045, 'h': 0.67, 
+               'A_s': 1e-10, 'n_s': 0.96, 'w0': -1., 'wa': 0. }
     
+    assert_raises(ValueError, ccl.Cosmology, transfer_function='emulator', 
+                              matter_power_spectrum='linear', **params)
+    assert_raises(ValueError, ccl.Cosmology, transfer_function='boltzmann', 
+                              matter_power_spectrum='halomodel', **params)
+    assert_raises(ValueError, ccl.Cosmology, transfer_function='bbks', 
+                              matter_power_spectrum='emu', **params)
+
 def test_background():
     """
     Test background and growth functions in ccl.background.
