@@ -11,5 +11,12 @@ from ccl_test_power import *
 from ccl_test_pyccl_interface import *
 
 if __name__ == "__main__":
-    # Run all tests
-    run_module_suite(argv=sys.argv)
+    # Run tests
+    args = sys.argv
+    
+    # If no args were specified, add arg to only do non-slow tests
+    if len(args) == 1: 
+        print("Running tests that are not tagged as 'slow'. "
+              "Use '--all' to run all tests.")
+        args.append("-a!slow")
+    run_module_suite(argv=args)

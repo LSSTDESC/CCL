@@ -26,7 +26,7 @@ before_install:
 #            - dvipng
 install: python setup.py install
 script:
-    - nosetests tests/run_tests.py --debug --detailed-errors --verbose --process-restartworker --with-coverage --cover-package=pyccl
+    - nosetests tests/run_tests.py --all --debug --detailed-errors --verbose --process-restartworker --with-coverage --cover-package=pyccl
     - make check-cpp
 
 after_success:
