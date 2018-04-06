@@ -559,8 +559,6 @@ static double transfer_mag(int l,double k,ccl_cosmology *cosmo,CCL_ClTracer *clt
       return 0;
     else
       return -2*clt->prefac_lensing*l*(l+1)*wM/(a*chi*k*k);
-    //The actual prefactor on large scales should be sqrt((l+2.)*(l+1.)*l*(l-1.)) instead of l*(l+1)
-    //      return clt->prefac_lensing*sqrt((l+2.)*(l+1.)*l*(l-1.))*gf*wL/(a*chi*k*k);
   }
   else
     return 0;
@@ -581,9 +579,7 @@ static double transfer_wl(int l,double k,ccl_cosmology *cosmo,CCL_ClTracer *clt,
     if(wL<=0)
       return 0;
     else
-      return clt->prefac_lensing*l*(l+1)*wL/(a*chi*k*k);
-    //The actual prefactor on large scales should be sqrt((l+2.)*(l+1.)*l*(l-1.)) instead of l*(l+1)
-    //      return clt->prefac_lensing*sqrt((l+2.)*(l+1.)*l*(l-1.))*gf*wL/(a*chi*k*k);
+      return clt->prefac_lensing*sqrt((l+2.)*(l+1.)*l*(l-1.))*wL/(a*chi*k*k);
   }
   else
     return 0;
@@ -655,6 +651,97 @@ static double transfer_wrap(int l,double k,ccl_cosmology *cosmo,CCL_ClTracer *cl
   else
     transfer_out=-1;
   return transfer_out;
+}
+
+static int check_clt_fa_inconsistency(CCL_ClTracer *clt,int func_code)
+{
+  if(((func_code==CCL_CLT_NZ) && (clt->tracer_type==CL_TRACER_CL)) || //Lensing has no N(z)
+     (((func_code==CCL_CLT_BZ) || (func_code==CCL_CLT_SZ) || (func_code==CCL_CLT_WM)) &&
+      (clt->tracer_type!=CL_TRACER_NC)) || //bias and magnification only for clustering
+     (((func_code==CCL_CLT_RF) || (func_code==CCL_CLT_BA) || (func_code==CCL_CLT_WL)) &&
+      (clt->tracer_type!=CL_TRACER_WL))) //IAs only for weak lensing
+    return 1;
+  if((((func_code==CCL_CLT_SZ) || (func_code==CCL_CLT_WM)) &&
+      (clt->has_magnification==0)) || //Correct combination, but no magnification
+     (((func_code==CCL_CLT_RF) || (func_code==CCL_CLT_BA)) &&
+      (clt->has_intrinsic_alignment==0))) //Correct combination, but no IAs
+    return 1;
+  return 0;
+}
+    
+double ccl_get_tracer_fa(ccl_cosmology *cosmo,CCL_ClTracer *clt,double a,int func_code,int *status)
+{
+  SplPar *spl;
+  double x=1./a-1; //x-variable is redshift by default
+  
+  if(check_clt_fa_inconsistency(clt,func_code)) {
+    *status=CCL_ERROR_INCONSISTENT;
+    sprintf(cosmo->status_message ,"ccl_cls.c: inconsistent combination of tracer and internal function to be evaluated");
+    return -1;
+  }
+
+  if(func_code==CCL_CLT_NZ) 
+    spl=clt->spl_nz;
+  if(func_code==CCL_CLT_BZ) 
+    spl=clt->spl_bz;
+  if(func_code==CCL_CLT_SZ) 
+    spl=clt->spl_sz;
+  if(func_code==CCL_CLT_RF) 
+    spl=clt->spl_rf;
+  if(func_code==CCL_CLT_BA) 
+    spl=clt->spl_ba;
+  if((func_code==CCL_CLT_WL) || (func_code==CCL_CLT_WM)) {
+    x=ccl_comoving_radial_distance(cosmo,a,status);
+    if(func_code==CCL_CLT_WL)
+      spl=clt->spl_wL;
+    if(func_code==CCL_CLT_WM)
+      spl=clt->spl_wM;
+  }
+  
+  return ccl_spline_eval(x,spl);
+}
+
+int ccl_get_tracer_fas(ccl_cosmology *cosmo,CCL_ClTracer *clt,int na,double *a,double *fa,
+		       int func_code,int *status)
+{
+  SplPar *spl;
+  
+  if(check_clt_fa_inconsistency(clt,func_code)) {
+    *status=CCL_ERROR_INCONSISTENT;
+    sprintf(cosmo->status_message ,"ccl_cls.c: inconsistent combination of tracer and internal function to be evaluated");
+    return -1;
+  }
+
+  if(func_code==CCL_CLT_NZ) 
+    spl=clt->spl_nz;
+  if(func_code==CCL_CLT_BZ) 
+    spl=clt->spl_bz;
+  if(func_code==CCL_CLT_SZ) 
+    spl=clt->spl_sz;
+  if(func_code==CCL_CLT_RF) 
+    spl=clt->spl_rf;
+  if(func_code==CCL_CLT_BA) 
+    spl=clt->spl_ba;
+  if(func_code==CCL_CLT_WL)
+    spl=clt->spl_wL;
+  if(func_code==CCL_CLT_WM)
+    spl=clt->spl_wM;
+
+  int compchi=0;
+  if((func_code==CCL_CLT_WL) || (func_code==CCL_CLT_WM))
+    compchi=1;
+
+  int ia;
+  for(ia=0;ia<na;ia++) {
+    double x;
+    if(compchi)
+      x=ccl_comoving_radial_distance(cosmo,a[ia],status);
+    else
+      x=1./a[ia]-1;
+    fa[ia]=ccl_spline_eval(x,spl);
+  }
+
+  return 0;
 }
 
 //Params for power spectrum integrand

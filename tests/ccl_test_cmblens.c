@@ -57,6 +57,9 @@ static void compare_cls(struct cls_data * data)
   ASSERT_NOT_NULL(cosmo);
 
   //Fix spline parameters for the high-redshift needs of the CMB lensing power spectrum
+  //We save them first to restore them to their usual values at the end.
+  int na_sv=ccl_splines->A_SPLINE_NA;
+  int na_pk_sv=ccl_splines->A_SPLINE_NA_PK;
   ccl_splines->A_SPLINE_NA=10000;
   ccl_splines->A_SPLINE_NA_PK=500;
 
@@ -81,6 +84,8 @@ static void compare_cls(struct cls_data * data)
   printf("%lf %% ",fraction_failed*100);
   ASSERT_TRUE((fraction_failed<CLS_FRACTION));
 
+  ccl_splines->A_SPLINE_NA=na_sv;
+  ccl_splines->A_SPLINE_NA_PK=na_pk_sv;
   ccl_cl_tracer_free(tr_cl);
   ccl_cosmology_free(cosmo);
 }
