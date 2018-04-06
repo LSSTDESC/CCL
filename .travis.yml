@@ -10,7 +10,7 @@ cache:
     apt: true
     pip: true
 
-sudo: false
+#sudo: false
 
 addons:
     apt:
