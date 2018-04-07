@@ -160,13 +160,19 @@ class ClTracer(object):
         farr, status = lib.clt_fa_vec(cosmo, self.cltracer, 
                                       function_types[function], aarr, na, status)
         check(status, cosmo_in)
-        return farr[0] if is_scalar else return farr
+        if is_scalar:
+            return farr[0]
+        else:
+            return farr
         
     def __del__(self):
         """Free memory associated with CCL_ClTracer object.
 
         """
-        lib.cl_tracer_free(self.cltracer)
+        try:
+            lib.cl_tracer_free(self.cltracer)
+        except:
+            pass
 
 
 class ClTracerNumberCounts(ClTracer):
