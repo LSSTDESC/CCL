@@ -354,6 +354,26 @@ def check_cls(cosmo):
     assert_( all_finite(ccl.angular_cl(cosmo, nc1, lens1, ell_arr)) )
     assert_( all_finite(ccl.angular_cl(cosmo, nc1, lens2, ell_arr)) )
     
+    # Check get_internal_function()
+    a_scl = 0.5
+    a_lst = [0.2, 0.4, 0.6, 0.8, 1.]
+    a_arr = np.linspace(0.2, 1., 5)
+    assert_( all_finite(nc1.get_internal_function(cosmo, 'dndz', a_scl)) )
+    assert_( all_finite(nc1.get_internal_function(cosmo, 'dndz', a_lst)) )
+    assert_( all_finite(nc1.get_internal_function(cosmo, 'dndz', a_arr)) )
+    
+    # Check that invalid options raise errors
+    assert_raises(KeyError, nc1.get_internal_function, cosmo, 'x', a_arr)
+    assert_raises(ValueError, ccl.ClTracerNumberCounts, cosmo, True, True, 
+                  n=(z,n), bias=(z,b))
+    assert_raises(KeyError, ccl.ClTracer, cosmo, 'x', True, True, 
+                  n=(z,n), bias=(z,b))
+    assert_raises(ValueError, ccl.ClTracerLensing, cosmo, 
+                  has_intrinsic_alignment=True, n=(z,n), bias_ia=(z,n))
+    assert_no_warnings(ccl.cls._cltracer_obj, nc1)
+    assert_raises(TypeError, ccl.cls._cltracer_obj, None)
+
+
 def check_corr(cosmo):
     
     # Number density input
