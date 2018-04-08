@@ -1,6 +1,6 @@
 #!/bin/sh
 set -ex
-if [ -e gsl-2.4.tar.gz ]
+if [ -d "gsl-2.4" ]
 then
     cd gsl-2.4 && sudo make install
 else
