@@ -197,7 +197,7 @@ class Parameters(object):
         """
         raise NotImplementedError("Parameters objects are immutable; create a "
                                   "new Parameters() instance instead.")
-        
+        """
         try:
             # First check if the key already exists (otherwise the parameter 
             # would be silently added to the ccl_parameters class instance)
@@ -208,6 +208,7 @@ class Parameters(object):
         # Set value of parameter
         setattr(self.parameters, key, val)
         # TODO: Should update/replace CCL objects appropriately
+        """
     
     def __str__(self):
         """
@@ -251,9 +252,6 @@ class Cosmology(object):
                  baryons_power_spectrum='nobaryons',
                  mass_function='tinker10'):
         """Creates a wrapper for ccl_cosmology.
-
-        TODO: enumerate transfer_function and 
-        matter_power_spectrum options.
 
         Args:
             params (:obj:`Parameters`): Cosmological parameters object.
@@ -321,22 +319,22 @@ class Cosmology(object):
             
             # Check validity of configuration-related arguments
             if transfer_function not in transfer_function_types.keys():
-                raise ValueError( "'%s' is not a valid transfer_function type. "
+                raise KeyError( "'%s' is not a valid transfer_function type. "
                                   "Available options are: %s" \
                                  % (transfer_function, 
                                     transfer_function_types.keys()) )
             if matter_power_spectrum not in matter_power_spectrum_types.keys():
-                raise ValueError( "'%s' is not a valid matter_power_spectrum "
+                raise KeyError( "'%s' is not a valid matter_power_spectrum "
                                   "type. Available options are: %s" \
                                  % (matter_power_spectrum, 
                                     matter_power_spectrum_types.keys()) )
             if baryons_power_spectrum not in baryons_power_spectrum_types.keys():
-                raise ValueError( "'%s' is not a valid baryons_power_spectrum "
+                raise KeyError( "'%s' is not a valid baryons_power_spectrum "
                                   "type. Available options are: %s" \
                                  % (baryons_power_spectrum, 
                                     baryons_power_spectrum_types.keys()) )
             if mass_function not in mass_function_types.keys():
-                raise ValueError( "'%s' is not a valid mass_function type. "
+                raise KeyError( "'%s' is not a valid mass_function type. "
                                   "Available options are: %s" \
                                  % (mass_function, 
                                     mass_function_types.keys()) )

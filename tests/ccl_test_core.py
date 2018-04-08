@@ -183,9 +183,20 @@ def test_cosmology_init():
     
     # Make sure error raised if incorrect type of Parameters object passed
     assert_raises(TypeError, ccl.Cosmology, params=params.parameters)
+    assert_raises(TypeError, ccl.Cosmology, params="xx")
     
     # Make sure error raised if wrong config type passed
     assert_raises(TypeError, ccl.Cosmology, params=params, config="string")
+    
+    # Make sure error raised if invalid transfer/power spectrum etc. type passed
+    assert_raises(KeyError, ccl.Cosmology, params=params, 
+                  matter_power_spectrum='x')
+    assert_raises(KeyError, ccl.Cosmology, params=params, 
+                  transfer_function='x')
+    assert_raises(KeyError, ccl.Cosmology, params=params, 
+                  baryons_power_spectrum='x')
+    assert_raises(KeyError, ccl.Cosmology, params=params, 
+                  mass_function='x')
 
 
 def test_cosmology_output():
