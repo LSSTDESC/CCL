@@ -246,7 +246,7 @@ def check_lsst_specs(cosmo):
     # PhotoZFunction classes
     PZ1 = ccl.PhotoZFunction(pz1)
     PZ2 = ccl.PhotoZFunction(pz2)
-    PZ3 = ccl.PhotoZGaussian(pz3, sigma_z0=0.1)
+    PZ3 = ccl.PhotoZGaussian(sigma_z0=0.1)
     
     # bias_clustering
     assert_( all_finite(ccl.bias_clustering(cosmo, a_scl)) )
