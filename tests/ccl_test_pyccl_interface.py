@@ -246,6 +246,7 @@ def check_lsst_specs(cosmo):
     # PhotoZFunction classes
     PZ1 = ccl.PhotoZFunction(pz1)
     PZ2 = ccl.PhotoZFunction(pz2)
+    PZ3 = ccl.PhotoZGaussian(pz3, sigma_z0=0.1)
     
     # bias_clustering
     assert_( all_finite(ccl.bias_clustering(cosmo, a_scl)) )
@@ -371,6 +372,7 @@ def check_cls(cosmo):
     assert_raises(ValueError, ccl.ClTracerLensing, cosmo, 
                   has_intrinsic_alignment=True, n=(z,n), bias_ia=(z,n))
     assert_no_warnings(ccl.cls._cltracer_obj, nc1)
+    assert_no_warnings(ccl.cls._cltracer_obj, nc1.cltracer)
     assert_raises(TypeError, ccl.cls._cltracer_obj, None)
 
 
