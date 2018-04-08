@@ -93,7 +93,9 @@ extern "C" {
 
 /**
  * neutrino mass splitting differences
- * See Lesgourgues et al. 2012 for these values.
+ * See Lesgourgues and Pastor, 2012 for these values.
+ * Adv. High Energy Phys. 2012 (2012) 608515, 
+ * arXiv:1212.6154, page 13
 */
 #define DELTAM12_sq 7.62E-5
 #define DELTAM13_sq_pos 2.55E-3
