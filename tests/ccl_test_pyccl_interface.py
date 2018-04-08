@@ -405,9 +405,9 @@ def check_corr(cosmo):
     assert_( all_finite(corr3))
     
     # Check that exceptions are raised for invalid input
-    assert_raises(KeyError, ccl.correlation, cosmo, ells, cls, t, 
+    assert_raises(KeyError, ccl.correlation, cosmo, ells, cls, t_arr, 
                   corr_type='xx', method='FFTLog')
-    assert_raises(KeyError, ccl.correlation, cosmo, ells, cls, t, 
+    assert_raises(KeyError, ccl.correlation, cosmo, ells, cls, t_arr, 
                   corr_type='L+', method='xx')
     
 
