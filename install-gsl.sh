@@ -1,6 +1,6 @@
 #!/bin/sh
 set -ex
-if [ -d "gsl-2.4" ]
+if [ -d "gsl-2.4/gsl" ]
 then
     cd gsl-2.4 && sudo make install
 else
