@@ -10,5 +10,6 @@ else
 fi
 pwd
 ls
+echo $TRAVIS_BUILD_DIR
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib
 export LD_RUN_PATH=$LD_RUN_PATH:/usr/lib

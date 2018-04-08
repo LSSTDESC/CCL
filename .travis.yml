@@ -15,6 +15,7 @@ sudo: required
 addons:
     directories:
         - $TRAVIS_BUILD_DIR/gsl-2.4
+        - /home/travis/build/LSSTDESC/CCL/gsl-2.4
     apt:
         packages:
             - fftw3
