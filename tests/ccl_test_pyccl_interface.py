@@ -386,13 +386,30 @@ def check_corr(cosmo):
     lens1 = ccl.ClTracerLensing(cosmo, False, n=n, z=z)
     lens2 = ccl.ClTracerLensing(cosmo, True, n=(z,n), bias_ia=(z,n), f_red=(z,n))
 
-    ells=np.arange(3000)
-    cls=ccl.angular_cl(cosmo,lens1,lens2,ells)
+    ells = np.arange(3000)
+    cls = ccl.angular_cl(cosmo, lens1, lens2, ells)
 
-    t=np.logspace(-2,np.log10(5.),20) #degrees
-    corrfunc=ccl.correlation(cosmo,ells,cls,t,corr_type='L+',method='FFTLog')
-    assert_( all_finite(corrfunc))
-
+    t_arr = np.logspace(-2., np.log10(5.), 20) # degrees
+    t_lst = [t for t in t_arr]
+    t_scl = 2.
+    
+    # Make sure correlation functions work for valid inputs
+    corr1 = ccl.correlation(cosmo, ells, cls, t_arr, corr_type='L+', 
+                            method='FFTLog')
+    corr2 = ccl.correlation(cosmo, ells, cls, t_lst, corr_type='L+', 
+                            method='FFTLog')
+    corr3 = ccl.correlation(cosmo, ells, cls, t_scl, corr_type='L+', 
+                            method='FFTLog')
+    assert_( all_finite(corr1))
+    assert_( all_finite(corr2))
+    assert_( all_finite(corr3))
+    
+    # Check that exceptions are raised for invalid input
+    assert_raises(KeyError, ccl.correlation, cosmo, ells, cls, t, 
+                  corr_type='xx', method='FFTLog')
+    assert_raises(KeyError, ccl.correlation, cosmo, ells, cls, t, 
+                  corr_type='L+', method='xx')
+    
 
 def test_valid_transfer_combos():
     """
