@@ -183,7 +183,7 @@ def test_cosmology_init():
     
     # Make sure error raised if incorrect type of Parameters object passed
     assert_raises(TypeError, ccl.Cosmology, params=params.parameters)
-    assert_raises(TypeError, ccl.Cosmology, params="xx")
+    assert_raises(TypeError, ccl.Cosmology, params="x")
     
     # Make sure error raised if wrong config type passed
     assert_raises(TypeError, ccl.Cosmology, params=params, config="string")
