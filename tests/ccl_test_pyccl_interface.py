@@ -65,6 +65,7 @@ def check_background(cosmo):
     """
     # Types of scale factor input (scalar, list, array)
     a_scl = 0.5
+    is_comoving = 0
     a_lst = [0.2, 0.4, 0.6, 0.8, 1.]
     a_arr = np.linspace(0.2, 1., 5)
     
@@ -109,14 +110,14 @@ def check_background(cosmo):
     assert_( all_finite(ccl.omega_x(cosmo, a_arr, 'matter')) )
 
     # rho_crit_a
-    assert_( all_finite(ccl.rho_x(cosmo, a_scl, 'critical')) )
-    assert_( all_finite(ccl.rho_x(cosmo, a_lst, 'critical')) )
-    assert_( all_finite(ccl.rho_x(cosmo, a_arr, 'critical')) )
+    assert_( all_finite(ccl.rho_x(cosmo, a_scl, 'critical', is_comoving)) )
+    assert_( all_finite(ccl.rho_x(cosmo, a_lst, 'critical', is_comoving)) )
+    assert_( all_finite(ccl.rho_x(cosmo, a_arr, 'critical', is_comoving)) )
 
     # rho_m_a
-    assert_( all_finite(ccl.rho_x(cosmo, a_scl, 'matter')) )
-    assert_( all_finite(ccl.rho_x(cosmo, a_lst, 'matter')) )
-    assert_( all_finite(ccl.rho_x(cosmo, a_arr, 'matter')) )
+    assert_( all_finite(ccl.rho_x(cosmo, a_scl, 'matter', is_comoving)) )
+    assert_( all_finite(ccl.rho_x(cosmo, a_lst, 'matter', is_comoving)) )
+    assert_( all_finite(ccl.rho_x(cosmo, a_arr, 'matter', is_comoving)) )
 
 
 def check_power(cosmo):

@@ -3,29 +3,13 @@ from pyccl import ccllib as lib
 from pyccl.pyutils import _vectorize_fn, _vectorize_fn2, _vectorize_fn3
 
 species_types = {
-    'matter':      lib.omega_m_label,
-    'dark_energy': lib.omega_l_label,
-    'radiation':   lib.omega_g_label,
-    'curvature':   lib.omega_k_label,
-    'neutrinos_rel': lib.omega_ur_label,
-    'neutrinos_massive': lib.omega_nu_label,
-}
-
-species_types_rho = {
-    'critical':                   lib.rho_crit_label,
-    'critical_comoving':          lib.rho_crit_comoving_label,
-    'matter':                     lib.rho_m_label,
-    'matter_comoving':            lib.rho_m_comoving_label,
-    'dark_energy':                lib.rho_l_label,
-    'dark_energy_comoving':       lib.rho_l_comoving_label,
-    'radiation':                  lib.rho_g_label,
-    'radiation_comoving':         lib.rho_g_comoving_label,
-    'curvature':                  lib.rho_k_label,
-    'curvature_comoving':         lib.rho_k_comoving_label,
-    'neutrinos_rel':              lib.rho_ur_label,
-    'neutrinos_rel_comoving':     lib.rho_ur_comoving_label,
-    'neutrinos_massive':          lib.rho_nu_label,
-    'neutrinos_massive_comoving': lib.rho_nu_comoving_label,
+    'critical':                   lib.species_crit_label,
+    'matter':                     lib.species_m_label,
+    'dark_energy':                lib.species_l_label,
+    'radiation':                  lib.species_g_label,
+    'curvature':                  lib.species_k_label,
+    'neutrinos_rel':              lib.species_ur_label,
+    'neutrinos_massive':          lib.species_nu_label,
 }
 
 def growth_factor(cosmo, a):
@@ -177,26 +161,25 @@ def omega_x(cosmo, a, label):
     return _vectorize_fn3(lib.omega_x, 
                           lib.omega_x_vec, cosmo, a, species_types[label])
 
-def rho_x(cosmo, a, label):
+def rho_x(cosmo, a, label, is_comoving):
     """Physical density as a function of scale factor.
 
     Args:
         cosmo (:obj:`ccl.cosmology`): Cosmological parameters.
         a (float or array_like): Scale factor(s), normalized to 1 today.
-        label (string): species type. Available: 'critical', 'critical_comoving', 'matter', 'matter_comoving', 
-                        'dark_energy', 'dark_energy_comoving', 'radiation', 'radiation_comoving',
-                        'curvature', 'curvature_comoving', 'neutrinos_rel', 'neutrinos_rel_comoving', 
-                        and 'neutrinos_massive', 'neutrinos_massive_comoving'
+        label (string): species type. Available: 'critical', 'matter', 'dark_energy', 'radiation',
+                        'curvature', 'neutrinos_rel', and 'neutrinos_massive'
+        is_comoving (int): either physical or cosmoving 
 
     Returns:
         rho_x (float or array_like): Physical density of a given species
         at a scale factor.
 
     """
-    if label not in species_types_rho.keys() :
+    if label not in species_types.keys() :
         raise ValueError( "'%s' is not a valid species type. "
                           "Available options are: %s" \
-                         % (label,species_types_rho.keys()) )
+                         % (label,species_types.keys()) )
 
     return _vectorize_fn3(lib.rho_x, 
-                          lib.rho_x_vec, cosmo, a, species_types_rho[label])
+                          lib.rho_x_vec, cosmo, a, species_types[label], is_comoving)
