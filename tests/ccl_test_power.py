@@ -9,6 +9,7 @@ import sys
 Omega_c = 0.25
 Omega_b = 0.045
 Neff = 3.04
+mnu = 0. # Eisenstein-Hu P(k) not implemented with massive neutrinos.
 h = 0.7
 sigma8 = 0.83
 n_s = 0.96
@@ -44,7 +45,7 @@ def calc_power_spectrum(Omega_v, w0, wa, transfer_fn, matter_power, linear):
                        h=h, sigma8=sigma8, n_s=n_s, Omega_k=Omega_k,
                        w0=w0, wa=wa, transfer_function=transfer_fn,
                        matter_power_spectrum=matter_power,
-                       Neff = Neff)
+                       Neff = Neff, m_nu = mnu)
     
     # Calculate linear and nonlinear power spectra for each scale factor, a
     for _a in a:
