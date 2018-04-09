@@ -183,9 +183,9 @@ ccl_cosmology * ccl_cosmology_create_with_params(double Omega_c, double Omega_b,
 
   // Create ccl_parameters struct from input parameters
   ccl_parameters params;
+  
   params = ccl_parameters_create(Omega_c, Omega_b, Omega_k, Neff, mnu, mnu_type, w0, wa,
 				 h, norm_pk, n_s, bcm_log10Mc, bcm_etab, bcm_ks, nz_mgrowth, zarr_mgrowth, dfarr_mgrowth, status);
-
   // Check status
   ccl_check_status_nocosmo(status);
   
@@ -444,8 +444,7 @@ ccl_parameters ccl_parameters_create(double Omega_c, double Omega_b, double Omeg
     params.z_mgrowth=NULL;
     params.df_mgrowth=NULL;
   } 
- 
-  
+
   return params;  
 }
 

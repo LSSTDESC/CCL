@@ -373,8 +373,6 @@ static void ccl_fill_class_parameters(ccl_cosmology * cosmo, struct file_content
     strcpy(cosmo->status_message ,"ccl_power.c: class_parameters(): Error initializing CLASS pararmeters: neither sigma_8 nor A_s defined\n");
     return;
   }
-  
-  //printf("%s=%s, %s=%s,%s=%s,%s=%s,%s=%s,%s=%s,%s=%s,%s=%s,%s=%s,%s=%s,%s=%s,%s=%s,%s=%s,%s=%s,%s=%s,%s=%s,%s=%s,%s=%s,%s=%s\n", fc->name[0], fc->value[0], fc->name[1], fc->value[1],fc->name[2], fc->value[2],fc->name[3], fc->value[3],fc->name[4], fc->value[4], fc->name[5], fc->value[5], fc->name[6], fc->value[6], fc->name[7], fc->value[7], fc->name[8], fc->value[8], fc->name[9], fc->value[9], fc->name[10], fc->value[10], fc->name[11], fc->value[11], fc->name[12], fc->value[12], fc->name[13], fc->value[13], fc->name[14], fc->value[14], fc->name[15], fc->value[15], fc->name[16], fc->value[16], fc->name[17], fc->value[17], fc->name[18], fc->value[18]);
 
 }
 
@@ -414,6 +412,7 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int * statu
     ccl_free_class_structs(cosmo, &ba,&th,&pt,&tr,&pm,&sp,&nl,&le,init_arr,status);
     return;
   }
+  
   if (parser_free(&fc)== _FAILURE_) {
     *status = CCL_ERROR_CLASS;
     strcpy(cosmo->status_message ,"ccl_power.c: ccl_cosmology_compute_power_class(): Error freeing CLASS parser\n");
@@ -423,6 +422,7 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int * statu
 
   cosmo->data.k_min_lin=2*exp(sp.ln_k[0]);
   cosmo->data.k_max_lin=ccl_splines->K_MAX_SPLINE;
+
   //CLASS calculations done - now allocate CCL splines
   double kmin = cosmo->data.k_min_lin;
   double kmax = ccl_splines->K_MAX_SPLINE;
@@ -1154,7 +1154,7 @@ static void ccl_cosmology_compute_power_emu(ccl_cosmology * cosmo, int * status)
   } else {
     if(fabs(cosmo->params.N_nu_rel - 3.04)>1.e-6){
       *status=CCL_ERROR_INCONSISTENT;
-      strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_emu(): Set N_nu_rel = 3.04 for cosmic emulator predictions in absence of massive neutrinos.\n");
+      strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_emu(): Set Neff = 3.04 for cosmic emulator predictions in absence of massive neutrinos.\n");
       return;
     }
     }
@@ -1373,7 +1373,6 @@ static double ccl_power_extrapol_highk(ccl_cosmology * cosmo, double k, double a
   double lpk_kmid;
   
   lkmid = log(kmax)-2*deltak;
-  
   int pwstatus =  gsl_spline2d_eval_e(powerspl, lkmid,a,NULL ,NULL ,&lpk_kmid);
   if (pwstatus) {
     *status = CCL_ERROR_SPLINE_EV;
@@ -1393,7 +1392,6 @@ static double ccl_power_extrapol_highk(ccl_cosmology * cosmo, double k, double a
     sprintf(cosmo->status_message ,"ccl_power.c: ccl_power_extrapol_highk(): Spline evaluation error\n");
     return NAN;
   }
-  
   log_p_1=lpk_kmid+deriv_pk_kmid*(log(k)-lkmid)+deriv2_pk_kmid/2.*(log(k)-lkmid)*(log(k)-lkmid);
 
   return log_p_1;
@@ -1432,24 +1430,21 @@ TASK: compute the linear power spectrum at a given redshift
 double ccl_linear_matter_power(ccl_cosmology * cosmo, double k, double a, int * status)
 
 {
-
   if ((cosmo->config.transfer_function_method == ccl_emulator) && (a<A_MIN_EMU)){
     *status = CCL_ERROR_INCONSISTENT;
     sprintf(cosmo->status_message ,"ccl_power.c: the cosmic emulator cannot be used above z=2\n");
     return NAN;
   }
-  
   if (!cosmo->computed_power) ccl_cosmology_compute_power(cosmo, status);
   double log_p_1;
   int pkstatus;
-
+ 
   if(a<ccl_splines->A_SPLINE_MINLOG_PK) {  //Extrapolate linearly at high redshift
     double pk0=ccl_linear_matter_power(cosmo,k,ccl_splines->A_SPLINE_MINLOG_PK,status);
     double gf=ccl_growth_factor(cosmo,a,status)/ccl_growth_factor(cosmo,ccl_splines->A_SPLINE_MINLOG_PK,status);
 
     return pk0*gf*gf;
   }
-
   if (*status!=CCL_ERROR_INCONSISTENT){
     if(k<=cosmo->data.k_min_lin) { 
       log_p_1=ccl_power_extrapol_lowk(cosmo,k,a,cosmo->data.p_lin,cosmo->data.k_min_lin,status);
@@ -1482,7 +1477,6 @@ TASK: compute the nonlinear power spectrum at a given redshift
 
 double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double k, double a, int *status)
 {
-
   double log_p_1, pk;
   
   switch(cosmo->config.matter_power_spectrum_method) {
@@ -1492,7 +1486,6 @@ double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double k, double a, int *s
     return ccl_linear_matter_power(cosmo,k,a,status);
     
   case ccl_halofit:
-
     if (!cosmo->computed_power)
       ccl_cosmology_compute_power(cosmo,status);
     

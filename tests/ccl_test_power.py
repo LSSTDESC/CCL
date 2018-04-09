@@ -8,7 +8,7 @@ import sys
 # Values that are the same for all 5 models
 Omega_c = 0.25
 Omega_b = 0.045
-N_nu_rel = 0.
+Neff = 3.04
 h = 0.7
 sigma8 = 0.83
 n_s = 0.96
@@ -44,7 +44,7 @@ def calc_power_spectrum(Omega_v, w0, wa, transfer_fn, matter_power, linear):
                        h=h, sigma8=sigma8, n_s=n_s, Omega_k=Omega_k,
                        w0=w0, wa=wa, transfer_function=transfer_fn,
                        matter_power_spectrum=matter_power,
-                       N_nu_rel=0.00641, N_nu_mass=3, m_nu=0.06)
+                       Neff = Neff)
     
     # Calculate linear and nonlinear power spectra for each scale factor, a
     for _a in a:
