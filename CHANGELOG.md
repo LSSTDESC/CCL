@@ -5,8 +5,11 @@ Summary: the user interface for setting up cosmologies with neutrinos has been a
 ## C library
 In ccl_core.c:
 
-In the function, ccl\_parameters\_create, the arguements 'double N\_nu\_rel', and 'double N\_nu\_mass' have been removed. The arguments 'double Neff' and 'ccl\_mnu\_convention mnu\_type' have been added. The argument 'mnu' has changed in type from 'double mnu' to 'double* mnu'.
+In the function, 'ccl\_parameters\_create', the arguements 'double N\_nu\_rel', and 'double N\_nu\_mass' have been removed. The arguments 'double Neff' and 'ccl\_mnu\_convention mnu\_type' have been added. The argument 'mnu' has changed in type from 'double mnu' to 'double* mnu'.
+
 Similar changes apply in 'ccl\_cosmology\_create\_with\_params' and all 'ccl\_parameters\_create...nu' convenience functions.
+
+Additionally, in the function 'ccl\_parameters\_create' and 'ccl\_cosmology\_create\_with\_params', arguments have been added for the parameters of the BCM baryon model; these are 'double bcm\_log10Mc', 'double bcm\_etab', and 'double bcm\_ks'.
 
 In ccl_neutrinos.c:
 
@@ -25,14 +28,20 @@ The function 'Omeganuh2\_to\_Mnu' has been renamed 'nu\_masses'. The arguments '
 
 ## Other changes since release 0.2.1 (September 2017):
 
+CLASS is no longer included as part of CCL; it can instead of easily downloaded via the class_install.py script and this procedure is documented.
+
 Tutorial added for usage with MCMC
 
 Added support for BCM baryon model
 
 cpp compatibility improved
 
+Python 3 support added
+
 Added support for computing the nonlinear matter power spectrum with CosmicEmu
 
-Added support for CMB lensing observables
+Added support for CMB lensing observables, including splines for cosmological quantities to higher redshift
+
+Added the ability to return useful functions such as dNdz for a tracer Cl object.
 
 Clarified license
