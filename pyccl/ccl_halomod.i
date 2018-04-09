@@ -26,7 +26,7 @@ void p_1h_vec(ccl_cosmology * cosmo,
 {
     assert(nout == nm);
     for(int i=0; i < nm; i++){
-        output[i] = p_1h(cosmo, k[i], a, status);
+        output[i] = ccl_p_1h(cosmo, k[i], a, status);
     }
 }
 
@@ -37,7 +37,7 @@ void p_2h_vec(ccl_cosmology * cosmo,
 {
     assert(nout == nm);
     for(int i=0; i < nm; i++){
-        output[i] = p_2h(cosmo, k[i], a, status);
+        output[i] = ccl_p_2h(cosmo, k[i], a, status);
     }
 }
 
@@ -48,7 +48,7 @@ void p_halomod_vec(ccl_cosmology * cosmo,
 {
     assert(nout == nm);
     for(int i=0; i < nm; i++){
-        output[i] = p_halomod(cosmo, k[i], a, status);
+        output[i] = ccl_p_halomod(cosmo, k[i], a, status);
     }
 }
 
@@ -59,7 +59,7 @@ void halo_concentration_vec(ccl_cosmology * cosmo,
 {
     assert(nout == nm);
     for(int i=0; i < nm; i++){
-        output[i] = halo_concentration(cosmo, halo_mass[i], a, status);
+        output[i] = ccl_halo_concentration(cosmo, halo_mass[i], a, status);
     }
 }
 
