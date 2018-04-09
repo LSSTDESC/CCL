@@ -1,5 +1,5 @@
 import numpy as np
-from numpy.testing import assert_allclose, run_module_suite
+from numpy.testing import assert_allclose, run_module_suite, decorators
 import pyccl as ccl
 from os.path import dirname,join,abspath
 # Set tolerances
@@ -203,7 +203,8 @@ def compare_distances_hiz(z, chi_bench, Omega_v, w0, wa):
     chi = ccl.comoving_radial_distance(cosmo, a) * h
     # Compare to benchmark data
     assert_allclose(chi, chi_bench, atol=1e-12, rtol=DISTANCES_TOLERANCE)
-    
+
+@decorators.slow    
 def compare_distances_mnu(z, chi_bench,dm_bench, Omega_v, w0, wa, Neff, mnu):
     """
     Compare distances calculated by pyccl with the distances in the benchmark 
@@ -230,6 +231,7 @@ def compare_distances_mnu(z, chi_bench,dm_bench, Omega_v, w0, wa, Neff, mnu):
 
     assert_allclose(dm, dm_bench[a_not_one], atol=1e-3, rtol = DISTANCES_TOLERANCE_MNU)
     
+@decorators.slow    
 def compare_distances_mnu_hiz(z, chi_bench,dm_bench, Omega_v, w0, wa, Neff_mnu, mnu):
     """
     Compare distances calculated by pyccl with the distances in the benchmark 

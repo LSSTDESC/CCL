@@ -146,6 +146,7 @@ ccl_cosmology * ccl_cosmology_create(ccl_parameters params, ccl_configuration co
   cosmo->computed_sigma = false;
   cosmo->computed_hmfparams = false;
   cosmo->status = 0;
+  strcpy(cosmo->status_message, "");
   
   return cosmo;
 }

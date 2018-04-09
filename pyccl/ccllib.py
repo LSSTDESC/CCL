@@ -1257,11 +1257,14 @@ EV_IN_J = _ccllib.EV_IN_J
 _ccllib.TNCDM_swigconstant(_ccllib)
 TNCDM = _ccllib.TNCDM
 
-_ccllib.DELTAM12_swigconstant(_ccllib)
-DELTAM12 = _ccllib.DELTAM12
+_ccllib.DELTAM12_sq_swigconstant(_ccllib)
+DELTAM12_sq = _ccllib.DELTAM12_sq
 
-_ccllib.DELTAM13_swigconstant(_ccllib)
-DELTAM13 = _ccllib.DELTAM13
+_ccllib.DELTAM13_sq_pos_swigconstant(_ccllib)
+DELTAM13_sq_pos = _ccllib.DELTAM13_sq_pos
+
+_ccllib.DELTAM13_sq_neg_swigconstant(_ccllib)
+DELTAM13_sq_neg = _ccllib.DELTAM13_sq_neg
 
 _ccllib.EPSREL_DIST_swigconstant(_ccllib)
 EPSREL_DIST = _ccllib.EPSREL_DIST

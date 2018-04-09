@@ -1,6 +1,7 @@
+from __future__ import print_function
 import numpy as np
 from numpy.testing import assert_raises, assert_warns, assert_no_warnings, \
-                          run_module_suite
+                          assert_, run_module_suite
 import pyccl as ccl
 
 
@@ -18,6 +19,7 @@ def test_parameters_valid_input():
                                        A_s=2.1e-9, n_s=0.96, Neff=2.046)
     assert_no_warnings(ccl.Parameters, Omega_c=0.25, Omega_b=0.05, h=0.7, 
                                        A_s=2.1e-9, n_s=0.96, Neff=3.046, m_nu=0.06)                                   
+
     assert_no_warnings(ccl.Parameters, Omega_c=0.25, Omega_b=0.05, h=0.7, 
                                        A_s=2.1e-9, n_s=0.96, w0=-0.9)
     assert_no_warnings(ccl.Parameters, 0.25, 0.05, 0.7, 2.1e-9, 0.96, 
@@ -46,7 +48,7 @@ def test_parameters_missing():
                                               w0=None)
     assert_raises(ValueError, ccl.Parameters, 0.25, 0.05, 0.7, 2.1e-9, 0.96, 
                                               wa=None)                                                                                 
-    
+
     # Check that a single missing compulsory parameter is noticed
     assert_raises(ValueError, ccl.Parameters, Omega_c=0.25, Omega_b=0.05, 
                                               h=0.7, A_s=2.1e-9)
@@ -105,6 +107,23 @@ def test_parameters_spelling():
     assert_raises(TypeError, ccl.Parameters, 0.25, 0.05, 0.7, 2.1e-9, 0.96, 
                                              dfarrmgrowth=None)
 
+def test_parameters_set():
+    """
+    Check that Parameters object allows parameters to be set in a sensible way.
+    """
+    params = ccl.Parameters(Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, 
+                            n_s=0.96)
+    
+    # Check that values of sigma8 and A_s won't be misinterpreted by the C code
+    assert_raises(ValueError, ccl.Parameters, Omega_c=0.25, Omega_b=0.05, 
+                                              h=0.7, A_s=2e-5, n_s=0.96)
+    assert_raises(ValueError, ccl.Parameters, Omega_c=0.25, Omega_b=0.05, 
+                                              h=0.7, sigma8=9e-6, n_s=0.96)
+    
+    # Check that error is raised when unrecognized parameter requested
+    assert_raises(KeyError, lambda: params['wibble'])
+    
+
 def test_parameters_mgrowth():
     """
     Check that valid modified growth inputs are allowed, and invalid ones are
@@ -147,6 +166,48 @@ def test_parameters_mgrowth():
     assert_raises(AssertionError, ccl.Parameters, 0.25, 0.05, 0.7, 2.1e-9, 0.96, 
                                                   z_mg=zarr,
                                  df_mg=np.column_stack((dfarr, dfarr)) )
+
+def test_cosmology_init():
+    """
+    Check that Cosmology objects can only be constructed in a valid way.
+    """
+    # Create test cosmology object
+    params = ccl.Parameters(Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, 
+                            n_s=0.96)
+    
+    # Make sure error raised if incorrect type of Parameters object passed
+    assert_raises(TypeError, ccl.Cosmology, params=params.parameters)
+    
+    # Make sure error raised if wrong config type passed
+    assert_raises(TypeError, ccl.Cosmology, params=params, config="string")
+
+
+def test_cosmology_output():
+    """
+    Check that status messages and other output from Cosmology() object works 
+    correctly.
+    """
+    # Create test cosmology object
+    cosmo = ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, 
+                          n_s=0.96)
+    
+    # Return and print status messages
+    assert_no_warnings(cosmo.status)
+    assert_no_warnings(print, cosmo)
+    
+    # Test status methods for different precomputable quantities
+    assert_(cosmo.has_distances() is False)
+    assert_(cosmo.has_growth() is False)
+    assert_(cosmo.has_power() is False)
+    assert_(cosmo.has_sigma() is False)
+    
+    # Check that quantities can be precomputed
+    assert_no_warnings(cosmo.compute_distances)
+    assert_no_warnings(cosmo.compute_growth)
+    assert_no_warnings(cosmo.compute_power)
+    assert_(cosmo.has_distances() is True)
+    assert_(cosmo.has_growth() is True)
+    assert_(cosmo.has_power() is True)
 
 
 if __name__ == '__main__':

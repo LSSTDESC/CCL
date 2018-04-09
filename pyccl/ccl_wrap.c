@@ -18634,24 +18634,35 @@ SWIGINTERN PyObject *TNCDM_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject
 }
 
 
-SWIGINTERN PyObject *DELTAM12_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *DELTAM12_sq_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *module;
   PyObject *d;
   if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
   d = PyModule_GetDict(module);
   if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "DELTAM12",SWIG_From_double((double)(0.009)));
+  SWIG_Python_SetConstant(d, "DELTAM12_sq",SWIG_From_double((double)(7.62E-5)));
   return SWIG_Py_Void();
 }
 
 
-SWIGINTERN PyObject *DELTAM13_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *DELTAM13_sq_pos_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *module;
   PyObject *d;
   if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
   d = PyModule_GetDict(module);
   if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "DELTAM13",SWIG_From_double((double)(0.05)));
+  SWIG_Python_SetConstant(d, "DELTAM13_sq_pos",SWIG_From_double((double)(2.55E-3)));
+  return SWIG_Py_Void();
+}
+
+
+SWIGINTERN PyObject *DELTAM13_sq_neg_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *module;
+  PyObject *d;
+  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
+  d = PyModule_GetDict(module);
+  if (!d) return NULL;
+  SWIG_Python_SetConstant(d, "DELTAM13_sq_neg",SWIG_From_double((double)(-2.43E-3)));
   return SWIG_Py_Void();
 }
 
@@ -22206,8 +22217,9 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"CLIGHT_swigconstant", CLIGHT_swigconstant, METH_VARARGS, NULL},
 	 { (char *)"EV_IN_J_swigconstant", EV_IN_J_swigconstant, METH_VARARGS, NULL},
 	 { (char *)"TNCDM_swigconstant", TNCDM_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"DELTAM12_swigconstant", DELTAM12_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"DELTAM13_swigconstant", DELTAM13_swigconstant, METH_VARARGS, NULL},
+	 { (char *)"DELTAM12_sq_swigconstant", DELTAM12_sq_swigconstant, METH_VARARGS, NULL},
+	 { (char *)"DELTAM13_sq_pos_swigconstant", DELTAM13_sq_pos_swigconstant, METH_VARARGS, NULL},
+	 { (char *)"DELTAM13_sq_neg_swigconstant", DELTAM13_sq_neg_swigconstant, METH_VARARGS, NULL},
 	 { (char *)"EPSREL_DIST_swigconstant", EPSREL_DIST_swigconstant, METH_VARARGS, NULL},
 	 { (char *)"EPSREL_GROWTH_swigconstant", EPSREL_GROWTH_swigconstant, METH_VARARGS, NULL},
 	 { (char *)"EPSREL_DNDZ_swigconstant", EPSREL_DNDZ_swigconstant, METH_VARARGS, NULL},

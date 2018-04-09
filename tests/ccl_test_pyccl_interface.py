@@ -307,7 +307,6 @@ def check_massfunc_nu(cosmo):
     assert_raises(TypeError, ccl.sigmaM, cosmo, mhalo_lst, a_arr)
     assert_raises(TypeError, ccl.sigmaM, cosmo, mhalo_arr, a_arr)
 
-
 def check_neutrinos():
     """
     Check that neutrino-related functions can be run.
@@ -535,7 +534,7 @@ def check_cls(cosmo):
     # Check that reversing order of ClTracer inputs works
     assert_( all_finite(ccl.angular_cl(cosmo, nc1, lens1, ell_arr)) )
     assert_( all_finite(ccl.angular_cl(cosmo, nc1, lens2, ell_arr)) )
-    
+   
 def check_cls_nu(cosmo):
     """
     Check that cls functions can be run.
@@ -606,7 +605,23 @@ def check_corr(cosmo):
     t=np.logspace(-2,np.log10(5.),20) #degrees
     corrfunc=ccl.correlation(cosmo,ells,cls,t,corr_type='L+',method='FFTLog')
     assert_( all_finite(corrfunc))
+
+
+def test_valid_transfer_combos():
+    """
+    Check that invalid transfer_function <-> matter_power_spectrum pairs raise 
+    an error.
+    """
+    params = { 'Omega_c': 0.27, 'Omega_b': 0.045, 'h': 0.67, 
+               'A_s': 1e-10, 'n_s': 0.96, 'w0': -1., 'wa': 0. }
     
+    assert_raises(ValueError, ccl.Cosmology, transfer_function='emulator', 
+                              matter_power_spectrum='linear', **params)
+    assert_raises(ValueError, ccl.Cosmology, transfer_function='boltzmann', 
+                              matter_power_spectrum='halomodel', **params)
+    assert_raises(ValueError, ccl.Cosmology, transfer_function='bbks', 
+                              matter_power_spectrum='emu', **params)
+
 def test_background():
     """
     Test background and growth functions in ccl.background.
@@ -638,7 +653,8 @@ def test_massfunc():
         
     for cosmo_nu in reference_models_nu():
         yield check_massfunc_nu, cosmo_nu
-
+        
+@decorators.slow
 def test_neutrinos():
     """
     Test neutrino-related functions.
@@ -655,6 +671,7 @@ def test_lsst_specs():
     for cosmo_nu in reference_models_nu():
        yield check_lsst_specs_nu, cosmo_nu
 
+@decorators.slow
 def test_cls():
     """
     Test top-level functions in pyccl.cls module.
