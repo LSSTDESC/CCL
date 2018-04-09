@@ -18,7 +18,7 @@ The function ccl\_Omeganuh2\_to\_Mnu has been renamed ccl\_nu\_masses. The argum
 ## Python wrapper
 In core.py:
 
-In the Parameters class, the arguments 'N\_nu\_rel', and 'N\_nu\_mass' have been removed. The optional arguments 'Neff', 'mnu\_type', 'bcm\_log10Mc', 'bcm\_etab', and 'bcm\_ks' have been added. Similar changes occurs in the Cosmology class. 
+In the Parameters class, the arguments 'N\_nu\_rel', and 'N\_nu\_mass' have been removed. The optional arguments 'Neff', 'mnu\_type', 'bcm\_log10Mc', 'bcm\_etab', and 'bcm\_ks' have been added. Similar changes occur in the Cosmology class. 
 
 In neutrinos.py:
 
