@@ -88,6 +88,11 @@ def check_background(cosmo):
     assert_( all_finite(ccl.comoving_radial_distance(cosmo, a_lst)) )
     assert_( all_finite(ccl.comoving_radial_distance(cosmo, a_arr)) )
     
+    # comoving_angular_distance
+    assert_( all_finite(ccl.comoving_angular_distance(cosmo, a_scl)) )
+    assert_( all_finite(ccl.comoving_angular_distance(cosmo, a_lst)) )
+    assert_( all_finite(ccl.comoving_angular_distance(cosmo, a_arr)) )
+    
     # h_over_h0
     assert_( all_finite(ccl.h_over_h0(cosmo, a_scl)) )
     assert_( all_finite(ccl.h_over_h0(cosmo, a_lst)) )
@@ -107,6 +112,17 @@ def check_background(cosmo):
     assert_( all_finite(ccl.omega_x(cosmo, a_scl, 'matter')) )
     assert_( all_finite(ccl.omega_x(cosmo, a_lst, 'matter')) )
     assert_( all_finite(ccl.omega_x(cosmo, a_arr, 'matter')) )
+    
+    # Fractional density of different types of fluid
+    assert_( all_finite(ccl.omega_x(cosmo, a_arr, 'matter')) )
+    assert_( all_finite(ccl.omega_x(cosmo, a_arr, 'dark_energy')) )
+    assert_( all_finite(ccl.omega_x(cosmo, a_arr, 'radiation')) )
+    assert_( all_finite(ccl.omega_x(cosmo, a_arr, 'curvature')) )
+    assert_( all_finite(ccl.omega_x(cosmo, a_arr, 'neutrinos_rel')) )
+    assert_( all_finite(ccl.omega_x(cosmo, a_arr, 'neutrinos_massive')) )
+    
+    # Check that omega_x fails if invalid component type is passed
+    assert_raises(ValueError, ccl.omega_x, cosmo, a_scl, 'xyz')
 
 
 def check_power(cosmo):
