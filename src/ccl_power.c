@@ -410,6 +410,7 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int * statu
   if (*status == CCL_ERROR_CLASS) {
     //printed error message while running CLASS
     ccl_free_class_structs(cosmo, &ba,&th,&pt,&tr,&pm,&sp,&nl,&le,init_arr,status);
+    printf("%s\n", cosmo->status_message);
     return;
   }
   
@@ -1135,7 +1136,6 @@ static void ccl_cosmology_compute_power_emu(ccl_cosmology * cosmo, int * status)
 			  double diff1 = pow((cosmo->params.mnu[0] - cosmo->params.mnu[1]) * (cosmo->params.mnu[0] - cosmo->params.mnu[1]), 0.5);
 			  double diff2 = pow((cosmo->params.mnu[1] - cosmo->params.mnu[2]) * (cosmo->params.mnu[1] - cosmo->params.mnu[2]), 0.5);
 			  double diff3 = pow((cosmo->params.mnu[2] - cosmo->params.mnu[0]) * (cosmo->params.mnu[2] - cosmo->params.mnu[0]), 0.5);
-			  //printf("no abs, diff1=%f, diff2=%f, diff3=%f\n", cosmo->params.mnu[0] - cosmo->params.mnu[1], cosmo->params.mnu[1] - cosmo->params.mnu[2], cosmo->params.mnu[2] - cosmo->params.mnu[0]);
 			  if (diff1>1e-12 || diff2>1e-12 || diff3>1e-12){
 				*status = CCL_ERROR_INCONSISTENT;
 				strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_emu(): In the default configuration, you must pass a list of 3 equal neutrino masses or pass a sum and set mnu_type = ccl_mnu_sum_equal. If you wish to over-ride this, set config->emulator_neutrinos_method = 'ccl_emu_equalize'. This will force the neutrinos to be of equal mass but will result in internal inconsistencies.\n");
@@ -1435,17 +1435,22 @@ double ccl_linear_matter_power(ccl_cosmology * cosmo, double k, double a, int * 
     sprintf(cosmo->status_message ,"ccl_power.c: the cosmic emulator cannot be used above z=2\n");
     return NAN;
   }
+  
   if (!cosmo->computed_power) ccl_cosmology_compute_power(cosmo, status);
+  // Return if compilation failed
+  if (cosmo->data.p_lin == NULL) return NAN; 
+  
   double log_p_1;
   int pkstatus;
- 
-  if(a<ccl_splines->A_SPLINE_MINLOG_PK) {  //Extrapolate linearly at high redshift
+  
+  
+  if(a<ccl_splines->A_SPLINE_MINLOG_PK) {  //Extrapolate linearly at high redshift  
     double pk0=ccl_linear_matter_power(cosmo,k,ccl_splines->A_SPLINE_MINLOG_PK,status);
     double gf=ccl_growth_factor(cosmo,a,status)/ccl_growth_factor(cosmo,ccl_splines->A_SPLINE_MINLOG_PK,status);
 
     return pk0*gf*gf;
   }
-  if (*status!=CCL_ERROR_INCONSISTENT){
+  if (*status!=CCL_ERROR_INCONSISTENT){ 
     if(k<=cosmo->data.k_min_lin) { 
       log_p_1=ccl_power_extrapol_lowk(cosmo,k,a,cosmo->data.p_lin,cosmo->data.k_min_lin,status);
 

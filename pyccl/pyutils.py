@@ -21,7 +21,7 @@ def check(status, cosmo=None):
 
     # Check for known error status
     if status in pyccl.core.error_types.keys():
-        raise RuntimeError("Error %s: %s" % (pyccl.core.error_types[status], msg))
+        raise RuntimeError , "Error %s: %s" % (pyccl.core.error_types[status], msg)
 
     # Check for unknown error
     if status != 0:

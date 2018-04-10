@@ -8,8 +8,9 @@ import sys
 # Values that are the same for all 5 models
 Omega_c = 0.25
 Omega_b = 0.045
-Neff = 3.04
-mnu = 0. # Eisenstein-Hu P(k) not implemented with massive neutrinos.
+Neff = 3.046
+mnu_sum = 0.06 
+mnu_list = [0.02, 0.02, 0.02] # For use with P(k) from emulator
 h = 0.7
 sigma8 = 0.83
 n_s = 0.96
@@ -29,7 +30,7 @@ def all_finite(vals):
     return np.alltrue( np.isfinite(vals) )
 
 
-def calc_power_spectrum(Omega_v, w0, wa, transfer_fn, matter_power, linear):
+def calc_power_spectrum(Omega_v, w0, wa, transfer_fn, matter_power, linear, raise_errors):
     """
     Calculate linear and nonlinear power spectrum for a given set of parameters 
     and choices of transfer function and matter power spectrum.
@@ -38,8 +39,23 @@ def calc_power_spectrum(Omega_v, w0, wa, transfer_fn, matter_power, linear):
     a = np.logspace(np.log10(0.51), 0., 5) # Emulator only works at z<2
     
     # Set Omega_K in a consistent way
-    Omega_k = 1.0 - Omega_c - Omega_b - Omega_v    
+    Omega_k = 1.0 - Omega_c - Omega_b - Omega_v 
     
+    if (raise_errors == False):
+        if (transfer_fn == 'eisenstein_hu' or transfer_fn == 'bbks'):
+            mnu = 0. # The bbks and E-H P(k) are not defined for massive neutrinos.
+        elif (transfer_fn == 'emulator' and matter_power=='emu'):
+            mnu = mnu_list # For the emulator, we must have 3 equal masses
+        else:
+            mnu = mnu_sum
+    elif (raise_errors==True):
+		if (transfer_fn =='eisenstein_hu' or transfer_fn =='bbks'):
+			mnu = mnu_sum
+		elif (transfer_fn == 'emulator' and matter_power == 'emu'):
+			mnu = mnu_sum
+		else:
+			raise(ValueError, "Transfer function %s with matter power spectrum method %s has no case for which to test errors are raised.", transfer_fn, matter_power)
+	
     # Create new Parameters and Cosmology objects
     cosmo = ccl.Cosmology(Omega_c=Omega_c, Omega_b=Omega_b, 
                        h=h, sigma8=sigma8, n_s=n_s, Omega_k=Omega_k,
@@ -50,14 +66,19 @@ def calc_power_spectrum(Omega_v, w0, wa, transfer_fn, matter_power, linear):
     # Calculate linear and nonlinear power spectra for each scale factor, a
     for _a in a:
         if linear:
-            pk_lin = ccl.linear_matter_power(cosmo, k, _a)
-            assert_(all_finite(pk_lin))
+            if raise_errors==False:
+                pk_lin = ccl.linear_matter_power(cosmo, k, _a)
+                assert_(all_finite(pk_lin))
+            else:
+				assert_raises(RuntimeError, ccl.linear_matter_power, cosmo, k, _a)
         else:
-            pk_nl = ccl.nonlin_matter_power(cosmo, k, _a)
-            assert_(all_finite(pk_nl))
+            if raise_errors==False:
+                pk_nl = ccl.nonlin_matter_power(cosmo, k, _a)
+                assert_(all_finite(pk_nl))
+            else:
+				assert_raises(RuntimeError,ccl.nonlin_matter_power, cosmo, k, _a)
 
-
-def loop_over_params(transfer_fn, matter_power, lin):
+def loop_over_params(transfer_fn, matter_power, lin, raise_errs):
     """
     Call the power spectrum testing function for each of a set of parameters.
     """
@@ -67,36 +88,61 @@ def loop_over_params(transfer_fn, matter_power, lin):
     for i in [0,2]: #w0_vals.size):
         calc_power_spectrum(Omega_v_vals[i], w0_vals[i], wa_vals[i], 
                             transfer_fn=transfer_fn, matter_power=matter_power,
-                            linear=lin)    
+                            linear=lin, raise_errors = raise_errs)    
 
 @decorators.slow
 def test_power_spectrum_linear():
     for tfn in ['eisenstein_hu', 'bbks', 'boltzmann']:
-        loop_over_params(tfn, 'linear', lin=True)
+        loop_over_params(tfn, 'linear', lin=True, raise_errs = False)
 
 @decorators.slow
 def test_power_spectrum_halofit():
     for tfn in ['eisenstein_hu', 'bbks', 'boltzmann']:
-        loop_over_params(tfn, 'halofit', lin=True)
+        loop_over_params(tfn, 'halofit', lin=True, raise_errs = False)
 
 @decorators.slow
 def test_power_spectrum_emu():
-    for tfn in ['emulator',]: loop_over_params(tfn, 'emu', lin=True)
+    for tfn in ['emulator',]: loop_over_params(tfn, 'emu', lin=True, raise_errs = False)
 
 @decorators.slow
 def test_nonlin_power_spectrum_linear():
     for tfn in ['eisenstein_hu', 'bbks', 'boltzmann']:
-        loop_over_params(tfn, 'linear', lin=False)
+        loop_over_params(tfn, 'linear', lin=False, raise_errs = False)
 
 @decorators.slow
 def test_nonlin_power_spectrum_halofit():
     for tfn in ['eisenstein_hu', 'bbks', 'boltzmann']:
-        loop_over_params(tfn, 'halofit', lin=False)
+        loop_over_params(tfn, 'halofit', lin=False, raise_errs = False)
 
 @decorators.slow
 def test_nonlin_power_spectrum_emu():
     transfer_fns = ['emulator',]
-    for tfn in transfer_fns: loop_over_params(tfn, 'emu', lin=False)
+    for tfn in transfer_fns: loop_over_params(tfn, 'emu', lin=False, raise_errs = False)
+    
+@decorators.slow
+def test_raise_error_EH_bbks_lin():
+	for tfn in ['eisenstein_hu', 'bbks']:
+		loop_over_params(tfn, 'linear', lin=True, raise_errs=True)
+		
+@decorators.slow
+def test_raise_error_EH_bbks_halofit():
+	for tfn in ['eisenstein_hu', 'bbks']:
+		loop_over_params(tfn, 'halofit', lin=False, raise_errs=True)
+
+@decorators.slow
+def test_raise_error_EH_bbks_nonlin_linear():
+	for tfn in ['eisenstein_hu', 'bbks']:
+		loop_over_params(tfn, 'linear', lin=False, raise_errs=True)	
+		
+@decorators.slow
+def test_raise_error_emu():
+    transfer_fns = ['emulator',]
+    for tfn in transfer_fns: loop_over_params(tfn, 'emu', lin=True, raise_errs = True)	
+		
+@decorators.slow
+def test_raise_error_emu_nonlin():
+    transfer_fns = ['emulator',]
+    for tfn in transfer_fns: loop_over_params(tfn, 'emu', lin=False, raise_errs = True)	
 
 if __name__ == "__main__":
     run_module_suite(argv=sys.argv)
