@@ -1,6 +1,6 @@
 
 from pyccl import ccllib as lib
-from pyccl.pyutils import _vectorize_fn, _vectorize_fn2, _vectorize_fn3
+from pyccl.pyutils import _vectorize_fn, _vectorize_fn2, _vectorize_fn3, _vectorize_fn4
 
 species_types = {
     'critical':                   lib.species_crit_label,
@@ -161,7 +161,7 @@ def omega_x(cosmo, a, label):
     return _vectorize_fn3(lib.omega_x, 
                           lib.omega_x_vec, cosmo, a, species_types[label])
 
-def rho_x(cosmo, a, label, is_comoving):
+def rho_x(cosmo, a, label, is_comoving=False):
     """Physical density as a function of scale factor.
 
     Args:
@@ -169,7 +169,7 @@ def rho_x(cosmo, a, label, is_comoving):
         a (float or array_like): Scale factor(s), normalized to 1 today.
         label (string): species type. Available: 'critical', 'matter', 'dark_energy', 'radiation',
                         'curvature', 'neutrinos_rel', and 'neutrinos_massive'
-        is_comoving (int): either physical or cosmoving 
+        is_comoving (bool): either physical or cosmoving 
 
     Returns:
         rho_x (float or array_like): Physical density of a given species
@@ -181,5 +181,5 @@ def rho_x(cosmo, a, label, is_comoving):
                           "Available options are: %s" \
                          % (label,species_types.keys()) )
 
-    return _vectorize_fn3(lib.rho_x, 
-                          lib.rho_x_vec, cosmo, a, species_types[label], is_comoving)
+    return _vectorize_fn4(lib.rho_x, 
+                          lib.rho_x_vec, cosmo, a, species_types[label], int(is_comoving))
