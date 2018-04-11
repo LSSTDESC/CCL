@@ -683,9 +683,17 @@ def correlation(cosmo, n_ell, ell, cls, n_theta, theta, wtheta, corr_type, do_ta
     """correlation(cosmology cosmo, int n_ell, double * ell, double * cls, int n_theta, double * theta, double * wtheta, int corr_type, int do_taper_cl, double * taper_cl_limits, int flag_method, int * status)"""
     return _ccllib.correlation(cosmo, n_ell, ell, cls, n_theta, theta, wtheta, corr_type, do_taper_cl, taper_cl_limits, flag_method, status)
 
+def correlation_3d(cosmo, a, n_r, r, xi, do_taper_pk, taper_pk_limits, status):
+    """correlation_3d(cosmology cosmo, double a, int n_r, double * r, double * xi, int do_taper_pk, double * taper_pk_limits, int * status)"""
+    return _ccllib.correlation_3d(cosmo, a, n_r, r, xi, do_taper_pk, taper_pk_limits, status)
+
 def correlation_vec(cosmo, nlarr, nclarr, nt, corr_type, method, output, status):
     """correlation_vec(cosmology cosmo, int nlarr, int nclarr, int nt, int corr_type, int method, double * output, int * status)"""
     return _ccllib.correlation_vec(cosmo, nlarr, nclarr, nt, corr_type, method, output, status)
+
+def correlation_3d_vec(cosmo, a, nr, xi, status):
+    """correlation_3d_vec(cosmology cosmo, double a, int nr, double * xi, int * status)"""
+    return _ccllib.correlation_3d_vec(cosmo, a, nr, xi, status)
 
 def cosmology_compute_sigma(cosmo, status):
     """cosmology_compute_sigma(cosmology cosmo, int * status)"""
