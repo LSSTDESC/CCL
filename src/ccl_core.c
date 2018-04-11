@@ -77,7 +77,8 @@ void ccl_cosmology_read_config(void)
       if(strcmp(var_name,"K_MAX_SPLINE")==0) ccl_splines->K_MAX_SPLINE=var_dbl;
       if(strcmp(var_name,"K_MAX")==0) ccl_splines->K_MAX=var_dbl;
       if(strcmp(var_name,"K_MIN_DEFAULT")==0) ccl_splines->K_MIN_DEFAULT=var_dbl;
-      if(strcmp(var_name,"N_K")==0) ccl_splines->N_K=(int) var_dbl;     
+      if(strcmp(var_name,"N_K")==0) ccl_splines->N_K=(int) var_dbl;
+      if(strcmp(var_name,"N_K_3DCOR")==0) ccl_splines->N_K_3DCOR=(int) var_dbl;     
     }
   }
 
@@ -146,6 +147,7 @@ ccl_cosmology * ccl_cosmology_create(ccl_parameters params, ccl_configuration co
   cosmo->computed_sigma = false;
   cosmo->computed_hmfparams = false;
   cosmo->status = 0;
+  strcpy(cosmo->status_message, "");
   
   return cosmo;
 }

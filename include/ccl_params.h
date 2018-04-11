@@ -34,6 +34,7 @@ typedef struct ccl_spline_params {
   double K_MAX;
   double K_MIN_DEFAULT;
   int N_K;
+  int N_K_3DCOR;
   
 } ccl_spline_params;
 
