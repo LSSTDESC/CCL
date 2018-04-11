@@ -4267,34 +4267,34 @@ void Omeganuh2_to_Mnu_vec(double Neff, double OmNuh2, double TCMB,
 
 
 void p_1h_vec(ccl_cosmology * cosmo,
-                    double* k, int nm, double a,
+                    double* k, int nk, double a,
                     double* output, int nout,
                     int* status)
 {
-    assert(nout == nm);
-    for(int i=0; i < nm; i++){
+    assert(nout == nk);
+    for(int i=0; i < nk; i++){
         output[i] = ccl_p_1h(cosmo, k[i], a, status);
     }
 }
 
 void p_2h_vec(ccl_cosmology * cosmo,
-                    double* k, int nm, double a,
+                    double* k, int nk, double a,
                     double* output, int nout,
                     int* status)
 {
-    assert(nout == nm);
-    for(int i=0; i < nm; i++){
+    assert(nout == nk);
+    for(int i=0; i < nk; i++){
         output[i] = ccl_p_2h(cosmo, k[i], a, status);
     }
 }
 
 void p_halomod_vec(ccl_cosmology * cosmo,
-                     double* k, int nm, double a,
+                     double* k, int nk, double a,
                      double* output, int nout,
                      int* status)
 {
-    assert(nout == nm);
-    for(int i=0; i < nm; i++){
+    assert(nout == nk);
+    for(int i=0; i < nk; i++){
         output[i] = ccl_p_halomod(cosmo, k[i], a, status);
     }
 }

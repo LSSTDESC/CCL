@@ -97,7 +97,7 @@ def r_Lagrangian(cosmo, halo_mass, a, odelta):
         r_Lagrangian (float or array_like): something something
 
     """
-    return _vectorize_fn3(lib.r_Lagrangian,
+    return _vectorize_fn2(lib.r_Lagrangian,
 			  lib.r_Lagrangian_vec, cosmo, halo_mass, a)
 
 def nu(cosmo, halo_mass, a):
@@ -112,7 +112,7 @@ def nu(cosmo, halo_mass, a):
         nu (float or array_like): something something
 
     """
-    return _vectorize_fn3(lib.r_delta,
+    return _vectorize_fn2(lib.r_delta,
 			  lib.r_delta_vec, cosmo, halo_mass, a)
 
 

@@ -11,7 +11,7 @@ def p_1h(cosmo, k, a):
     Returns:
         p_1h (float or array_like): 1 halo term for matter power spectrum
     """
-    return _vectorize_fn3(lib.p_1h, 
+    return _vectorize_fn2(lib.p_1h, 
                           lib.p_1h_vec, cosmo, k, a)
 
 def p_2h(cosmo, k, a):
@@ -24,7 +24,7 @@ def p_2h(cosmo, k, a):
     Returns:
         p_2h (float or array_Like): 2 halo term for matter power spectrum
     """
-    return _vectorize_fn3(lib.p_2h,
+    return _vectorize_fn2(lib.p_2h,
 			  lib.p_2h_vec, cosmo, k, a)
 
 def p_halomod(cosmo, k, a):
@@ -37,7 +37,7 @@ def p_halomod(cosmo, k, a):
     Returns:
         p_halomod (float or array_like): matter power spectrum from halo model
     """
-    return _vectorize_fn3(lib.p_halomod,
+    return _vectorize_fn2(lib.p_halomod,
 			  lib.p_halomod_vec, cosmo, k, a)
 
 def halo_concentration(cosmo, halo_mass, a):
@@ -50,6 +50,6 @@ def halo_concentration(cosmo, halo_mass, a):
     Returns:
         halo_concentration: measure of halo concentration
     """
-    return _vectorize_fn3(lib.halo_concentration,
+    return _vectorize_fn2(lib.halo_concentration,
 			  lib.halo_concentration_vec, cosmo, halo_mass, a)
 
