@@ -1,5 +1,5 @@
 
- HOW TO CONTRIBUTE
+HOW TO CONTRIBUTE
 ---------------------------------------
 
 This file contains guidelines on how to contribute to the development of CCL. 
