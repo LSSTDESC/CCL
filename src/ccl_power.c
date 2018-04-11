@@ -833,6 +833,10 @@ static void ccl_cosmology_compute_power_eh(ccl_cosmology * cosmo, int * status)
     strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_eh(): memory allocation error\n");
     return;
   }
+  printf ("1, x[0]=%f\n", x[0]);
+  printf ("1, y[0]=%f\n", y[0]);
+  printf ("1, z[0]=%f\n", z[0]);
+  printf ("1, y2d[0]=%f\n", y2d[0]);
 
   // After this loop x will contain log(k)
   for (int i=0; i<nk; i++) {
@@ -851,16 +855,26 @@ static void ccl_cosmology_compute_power_eh(ccl_cosmology * cosmo, int * status)
     strcpy(cosmo->status_message ,"ccl_power.c: ccl_cosmology_compute_power_eh(): sigma_8 not set, required for E&H\n");
     return;
   }
-
+  printf ("2, x[0]=%f\n", x[0]);
+  printf ("2, y[0]=%f\n", y[0]);
+  printf ("2, z[0]=%f\n", z[0]);
+  printf ("2, y2d[0]=%f\n", y2d[0]);
   gsl_spline2d * log_power_lin = gsl_spline2d_alloc(PLIN_SPLINE_TYPE, nk,na);
   for (int j = 0; j < na; j++) {
+	//printf("status before=%d\n", *status);  
     double g2 = 2.*log(ccl_growth_factor(cosmo,z[j], status));
+    //printf("g2=%f\n", g2);
+    //printf("status after=%d\n", *status);
+
     for (int i=0; i<nk; i++) {
       y2d[j*nk+i] = y[i]+g2;
     }
-
+    
   }
-
+  printf ("3, x[0]=%f\n", x[0]);
+  printf ("3, y[0]=%f\n", y[0]);
+  printf ("3, z[0]=%f\n", z[0]);
+  printf ("3, y2d[0]=%f\n", y2d[0]);
   int splinstatus = gsl_spline2d_init(log_power_lin, x, z, y2d,nk,na);
   if (splinstatus) {
     free(eh);
@@ -874,7 +888,10 @@ static void ccl_cosmology_compute_power_eh(ccl_cosmology * cosmo, int * status)
     return;
   }
   cosmo->data.p_lin=log_power_lin;
-
+  printf ("4, x[0]=%f\n", x[0]);
+  printf ("4, y[0]=%f\n", y[0]);
+  printf ("4, z[0]=%f\n", z[0]);
+  printf ("4, y2d[0]=%f\n", y2d[0]);
   cosmo->computed_power=true;
   double sigma_8 = ccl_sigma8(cosmo,status);
   cosmo->computed_power=false;
@@ -883,14 +900,20 @@ static void ccl_cosmology_compute_power_eh(ccl_cosmology * cosmo, int * status)
   for (int i=0; i<nk; i++) {
     y[i] += log_sigma_8;
   }
-
+  printf ("5, x[0]=%f\n", x[0]);
+  printf ("5, y[0]=%f\n", y[0]);
+  printf ("5, z[0]=%f\n", z[0]);
+  printf ("5, y2d[0]=%f\n", y2d[0]);
   for (int j = 0; j < na; j++) {
     double g2 = 2.*log(ccl_growth_factor(cosmo,z[j], status));
     for (int i=0; i<nk; i++) {
       y2d[j*nk+i] = y[i]+g2;
     }
   }
-
+  printf ("6, x[0]=%f\n", x[0]);
+  printf ("6, y[0]=%f\n", y[0]);
+  printf ("6, z[0]=%f\n", z[0]);
+  printf ("6, y2d[0]=%f\n", y2d[0]);
   gsl_spline2d_free(log_power_lin);
   log_power_lin = gsl_spline2d_alloc(PLIN_SPLINE_TYPE, nk,na);
   splinstatus = gsl_spline2d_init(log_power_lin, x, z, y2d,nk,na);
@@ -907,7 +930,10 @@ static void ccl_cosmology_compute_power_eh(ccl_cosmology * cosmo, int * status)
   }
   else
     cosmo->data.p_lin = log_power_lin;
-
+  printf ("7, x[0]=%f\n", x[0]);
+  printf ("7, y[0]=%f\n", y[0]);
+  printf ("7, z[0]=%f\n", z[0]);
+  printf ("7, y2d[0]=%f\n", y2d[0]);
   gsl_spline2d * log_power_nl = gsl_spline2d_alloc(PNL_SPLINE_TYPE, nk,na);
   splinstatus = gsl_spline2d_init(log_power_nl, x, z, y2d,nk,na);
 
@@ -925,12 +951,20 @@ static void ccl_cosmology_compute_power_eh(ccl_cosmology * cosmo, int * status)
   }
   else
     cosmo->data.p_nl = log_power_nl;
-
+  printf ("8, x[0]=%f\n", x[0]);
+  printf ("8, y[0]=%f\n", y[0]);
+  printf ("8, z[0]=%f\n", z[0]);
+  printf ("8, y2d[0]=%f\n", y2d[0]);
+  printf("freeing stuff\n");
   free(eh);
   free(x);
   free(y);
   free(z);
   free(y2d);
+  printf ("9, x[0]=%f\n", x[0]);
+  printf ("9, y[0]=%f\n", y[0]);
+  printf ("9, z[0]=%f\n", z[0]);
+  printf ("9, y2d[0]=%f\n", y2d[0]);
 }
 
 /*------ ROUTINE: tsqr_BBKS ----- 
@@ -1353,8 +1387,11 @@ void ccl_cosmology_compute_power(ccl_cosmology * cosmo, int * status)
 	  *status = CCL_ERROR_INCONSISTENT;
 	  sprintf(cosmo->status_message ,"ccl_power.c: ccl_cosmology_compute_power(): Unknown or non-implemented transfer function method: %d \n",cosmo->config.transfer_function_method);
     }
-    cosmo->computed_power = true;
+    
     ccl_check_status(cosmo,status);
+    if (*status==0){
+		cosmo->computed_power = true;
+    }
   return;
 }
 
@@ -1435,10 +1472,11 @@ double ccl_linear_matter_power(ccl_cosmology * cosmo, double k, double a, int * 
     sprintf(cosmo->status_message ,"ccl_power.c: the cosmic emulator cannot be used above z=2\n");
     return NAN;
   }
-  
+
   if (!cosmo->computed_power) ccl_cosmology_compute_power(cosmo, status);
   // Return if compilation failed
-  if (cosmo->data.p_lin == NULL) return NAN; 
+  //if (cosmo->data.p_lin == NULL) return NAN; 
+  if (!cosmo->computed_power) return NAN;
   
   double log_p_1;
   int pkstatus;

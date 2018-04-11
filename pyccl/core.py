@@ -425,6 +425,7 @@ class Cosmology(object):
         """Free the ccl_cosmology instance that this Cosmology object is managing.
 
         """
+        print "freeing cosmology"
         try:
             lib.cosmology_free(self.cosmo)
         except:
