@@ -4,10 +4,10 @@ language: python
 # compiled everytime
 cache:
   directories:
-    - $HOME/build/EiffL/CCL/build/GSL/src
-    - $HOME/build/EiffL/CCL/build/FFTW/src
-    - $HOME/build/EiffL/CCL/build/SWIG/src
-    - $HOME/build/EiffL/CCL/build/CLASS/src
+    - $TRAVIS_BUILD_DIR/build/GSL/src
+    - $TRAVIS_BUILD_DIR/build/FFTW/src
+    - $TRAVIS_BUILD_DIR/build/SWIG/src
+    - $TRAVIS_BUILD_DIR/build/CLASS/src
     - $HOME/miniconda
 
 # Definition of python build matrix for osx comes from:

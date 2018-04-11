@@ -1,5 +1,5 @@
 FROM ubuntu
-LABEL maintainer "francois.lanusse@gmail.com"
+LABEL maintainer "asv13@pitt.edu"
 
 RUN apt-get update && apt-get upgrade -y
 RUN apt-get install -y git cmake make g++ gcc wget swig python-pip pkg-config
@@ -7,11 +7,11 @@ RUN apt-get install -y libgsl-dev libfftw3-dev
 RUN pip install numpy scipy matplotlib jupyter
 
 # Installing CCL C library
-RUN git clone https://github.com/EiffL/CCL && cd CCL && \
+RUN git clone https://github.com/LSSTDESC/CCL && cd CCL && \
     mkdir -p build && (cd build; cmake .. ; make install)
 
 # Installing CCL Python module
-RUN pip install git+git://github.com/EiffL/CCL.git
+RUN pip install git+git://github.com/LSSTDESC/CCL.git
 
 ENV LD_LIBRARY_PATH /usr/local/lib
 ENV PKG_CONFIG_PATH /usr/local/lib/pkgconfig
