@@ -140,6 +140,10 @@ int main(int argc,char **argv)
   ccl_cl_tracer_free(ct_cl);
   ccl_cl_tracer_free(ct_wl);
   
+  // Free arrays
+  free(a_arr_resample);
+  free(nz_resampled);
+  
   //Halo mass function
   printf("M\tdN/dlog10M(z = 0, 0.5, 1))\n");
   for(int logM=9;logM<=15;logM+=1) {
@@ -226,6 +230,7 @@ int main(int argc,char **argv)
   
   //Free up photo-z info
   ccl_specs_free_photoz_info(pz_info_example);
+  ccl_specs_free_photoz_info_gaussian(pz_info_gaussian);
   
   //Always clean up!!
   ccl_cosmology_free(cosmo);
