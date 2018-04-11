@@ -34,18 +34,78 @@ static double h_over_h0(double a, ccl_cosmology * cosmo, int *status)
   return sqrt((cosmo->params.Omega_m+cosmo->params.Omega_l*pow(a,-3*(cosmo->params.w0+cosmo->params.wa))*exp(3*cosmo->params.wa*(a-1))+cosmo->params.Omega_k*a+(cosmo->params.Omega_g + cosmo->params.Omega_n_rel)/a + Om_mass_nu*a*a*a)/(a*a*a));
 }
 
+/* --------- ROUTINE: ccl_rho_x ---------
+INPUT: cosmology object, scale factor, species label
+TASK: Compute rho_x(a), with x defined by species label.
+Possible values for "label":
+ccl_species_crit_label <- critical (physical)
+ccl_species_m_label <- matter (physical)
+ccl_species_l_label <- DE (physical)
+ccl_species_g_label <- radiation (physical)
+ccl_species_k_label <- curvature (physical)
+ccl_species_ur_label <- massless neutrinos (physical)
+ccl_species_nu_label <- massive neutrinos (physical)
+*/
+double ccl_rho_x(ccl_cosmology * cosmo, double a, ccl_species_x_label label, int is_comoving, int *status)
+{
+  // If massive neutrinos are present, compute the phase-space integral and get OmegaNuh2. If not, set OmegaNuh2 to zero.
+  double OmNuh2;
+  if ((cosmo->params.N_nu_mass) > 0.0001) {
+    // Call the massive neutrino density function just once at this redshift.
+    OmNuh2 = ccl_Omeganuh2(a, cosmo->params.N_nu_mass, cosmo->params.mnu, cosmo->params.T_CMB, cosmo->data.accelerator, status);
+    ccl_check_status(cosmo, status);
+  }
+  else {
+    OmNuh2 = 0.;
+  }
+
+  double comfac;
+  if(is_comoving) {
+     comfac=a*a*a;
+  } else {
+      comfac=1.0;
+  }
+
+  double rhocrit_present = RHO_CRITICAL * (cosmo->params.h) * (cosmo->params.h); //units of M_sun/(Mpc)^3
+  double hnorm;
+  hnorm = h_over_h0(a, cosmo, status);
+  
+  switch(label) {
+  case ccl_species_crit_label :
+      return rhocrit_present * hnorm * hnorm * comfac;
+  case ccl_species_m_label :
+      return rhocrit_present * (cosmo->params.Omega_m / (a*a*a)) * comfac;
+  case ccl_species_l_label :
+      return rhocrit_present * (cosmo->params.Omega_l*pow(a,-3*(1+cosmo->params.w0+cosmo->params.wa))*exp(3*cosmo->params.wa*(a-1))) * comfac;
+  case ccl_species_g_label :
+      return rhocrit_present * (cosmo->params.Omega_g)/(a*a*a*a) * comfac;
+  case ccl_species_k_label :
+      return rhocrit_present * (cosmo->params.Omega_k)/(a*a) * comfac;
+  case ccl_species_ur_label :
+      return rhocrit_present * (cosmo->params.Omega_n_rel)/(a*a*a*a) * comfac;
+  case ccl_species_nu_label :
+      return RHO_CRITICAL * OmNuh2 * comfac;
+
+  default:
+    *status = CCL_ERROR_PARAMETERS;
+    sprintf(cosmo->status_message,"ccl_background.c: ccl_rho_x(): Species %d not supported\n",label);
+    return 0.;
+  }
+}
+
+
 /* --------- ROUTINE: ccl_omega_x ---------
 INPUT: cosmology object, scale factor, species label
 TASK: Compute Omega_x(a), with x defined by species label.
 Possible values for "label":
-ccl_omega_m_label <- matter
-ccl_omega_l_label <- DE
-ccl_omega_g_label <- radiation
-ccl_omega_k_label <- curvature
-ccl_omega_ur_label <- massless neutrinos
-ccl_omega_nu_label <- massive neutrinos
+ccl_species_m_label <- matter
+ccl_species_l_label <- DE
+ccl_species_g_label <- radiation
+ccl_species_k_label <- curvature
+ccl_species_ur_label <- massless neutrinos
+ccl_species_nu_label <- massive neutrinos
 */
-double ccl_omega_x(ccl_cosmology * cosmo, double a, ccl_omega_x_label label, int *status)
+double ccl_omega_x(ccl_cosmology * cosmo, double a, ccl_species_x_label label, int *status)
 {
   // If massive neutrinos are present, compute the phase-space integral and get OmegaNuh2. If not, set OmegaNuh2 to zero.
   double OmNuh2;
@@ -59,19 +119,22 @@ double ccl_omega_x(ccl_cosmology * cosmo, double a, ccl_omega_x_label label, int
     OmNuh2 = 0.;
   }
 	
+  double hnorm;
+  hnorm = h_over_h0(a, cosmo, status);
+
   switch(label) {
-  case ccl_omega_m_label :
-    return cosmo->params.Omega_m/(cosmo->params.Omega_m+cosmo->params.Omega_l*pow(a,-3*(cosmo->params.w0+cosmo->params.wa))*exp(3*cosmo->params.wa*(a-1))+cosmo->params.Omega_k*a+ (cosmo->params.Omega_g + cosmo->params.Omega_n_rel)/a + OmNuh2*a*a*a / (cosmo->params.h) / (cosmo->params.h));
-  case ccl_omega_l_label :
-    return cosmo->params.Omega_l*pow(a,-3*(cosmo->params.w0+cosmo->params.wa))* exp(3*cosmo->params.wa*(a-1))/(cosmo->params.Omega_m+cosmo->params.Omega_l*pow(a,-3*(cosmo->params.w0+cosmo->params.wa))*exp(3*cosmo->params.wa*(a-1))+cosmo->params.Omega_k*a+(cosmo->params.Omega_g + cosmo->params.Omega_n_rel)/a + OmNuh2*a*a*a / (cosmo->params.h) / (cosmo->params.h));
-  case ccl_omega_g_label :
-    return cosmo->params.Omega_g/(cosmo->params.Omega_m*a+cosmo->params.Omega_l*pow(a,-3*(cosmo->params.w0+cosmo->params.wa))*exp(3*cosmo->params.wa*(a-1))*a+cosmo->params.Omega_k*a*a+cosmo->params.Omega_g + cosmo->params.Omega_n_rel + OmNuh2*a*a*a*a / (cosmo->params.h) / (cosmo->params.h) );
-  case ccl_omega_k_label :
-    return cosmo->params.Omega_k*a/(cosmo->params.Omega_m+cosmo->params.Omega_l*pow(a,-3*(cosmo->params.w0+cosmo->params.wa))*exp(3*cosmo->params.wa*(a-1))+cosmo->params.Omega_k*a+(cosmo->params.Omega_g + cosmo->params.Omega_n_rel)/a + OmNuh2*a*a*a / (cosmo->params.h) / (cosmo->params.h));
-  case ccl_omega_ur_label :
-    return cosmo->params.Omega_n_rel/(cosmo->params.Omega_m*a+cosmo->params.Omega_l*pow(a,-3*(cosmo->params.w0+cosmo->params.wa))*exp(3*cosmo->params.wa*(a-1))*a+cosmo->params.Omega_k*a*a+cosmo->params.Omega_g + cosmo->params.Omega_n_rel + OmNuh2*a*a*a*a / (cosmo->params.h) / (cosmo->params.h) );
-  case ccl_omega_nu_label :
-    return OmNuh2 / (cosmo->params.h) / (cosmo->params.h) /(cosmo->params.Omega_m/a/a/a +cosmo->params.Omega_l*pow(a,-3*(cosmo->params.w0+cosmo->params.wa))*exp(3*cosmo->params.wa*(a-1))/a/a/a+cosmo->params.Omega_k/a/a+ (cosmo->params.Omega_g + cosmo->params.Omega_n_rel)/a/a/a/a + OmNuh2 / (cosmo->params.h) / (cosmo->params.h));
+  case ccl_species_m_label :
+    return cosmo->params.Omega_m/(a*a*a) / hnorm / hnorm;
+  case ccl_species_l_label :
+    return cosmo->params.Omega_l*pow(a,-3*(1+cosmo->params.w0+cosmo->params.wa))*exp(3*cosmo->params.wa*(a-1)) / hnorm / hnorm;
+  case ccl_species_g_label :
+    return cosmo->params.Omega_g/(a*a*a*a) / hnorm / hnorm;
+  case ccl_species_k_label :
+    return cosmo->params.Omega_k/(a*a) / hnorm / hnorm;
+  case ccl_species_ur_label :
+    return cosmo->params.Omega_n_rel/(a*a*a*a) / hnorm / hnorm;
+  case ccl_species_nu_label :
+    return OmNuh2 / (cosmo->params.h) / (cosmo->params.h) / hnorm / hnorm;
     
   default:
     *status = CCL_ERROR_PARAMETERS;
@@ -108,7 +171,7 @@ static int growth_ode_system(double a,const double y[],double dydt[],void *param
   ccl_cosmology * cosmo = params;
   
   double hnorm=h_over_h0(a,cosmo, &status);
-  double om=ccl_omega_x(cosmo, a, ccl_omega_m_label, &status);
+  double om=ccl_omega_x(cosmo, a, ccl_species_m_label, &status);
 
   dydt[0]=y[1]/(a*a*a*hnorm);
   dydt[1]=1.5*hnorm*a*om*y[0];

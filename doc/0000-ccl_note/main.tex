@@ -292,7 +292,7 @@ The routines described in this subsection are implemented in {\tt ccl$\_$backgro
 The density parameter functions $\Omega_X(a)$ can be calculated for six components:
 \begin{itemize}
 \item matter density parameter $\Omega_M(a) = \Omega_{M,0} H_0^2 / (a^3 H^2(a) )$,
-\item dark energy density parameter $\Omega_\Lambda(a) = \Omega_{\Lambda,0} H_0^2 / H^2(a)$,
+\item dark energy density parameter $\Omega_\Lambda(a) = \Omega_{\Lambda,0} a^{-3(1+w_0+w_a)} \exp[3 w_a (a-1)] H_0^2 / H^2(a)$,
 \item radiation density parameter $\Omega_g(a) = \Omega_{g,0} H_0^2 / (a^4 H^2(a) )$,
 \item curvature density parameter $\Omega_K(a) = \Omega_{K,0} H_0^2 / (a^2 H^2(a) )$,
 \item massless neutrino density parameter $\Omega_{\nu, {\rm rel}}(a) = \Omega_{\nu, {\rm rel},0} H_0^2 / (a^4 H^2(a) )$,
@@ -316,6 +316,24 @@ in units such that $\mu$ is dimensionless. We then conduct the phase-space integ
 \label{Omnu}
 \end{equation}
 where $h_{\rm P}$ is Planck's constant and $h$ is $H_0/100$ with $H_0$ in units of km / s / Mpc. $x_{\rm max}$ is set to 1000. The final bracketed term which includes the phase-space integral can be simplified in the limit where $\mu$ is very large or very small: for small $\mu$, it is set to $\frac{7}{8}$, and for large $\mu$, it becomes $\frac{5\zeta(3)}{18\pi^4}\mu\sim 0.2776\mu$.
+
+
+\subsection{Functions of the physical density}
+\label{subsec:physicaldensity}
+
+The routines described in this subsection are implemented in {\tt ccl$\_$background.c}.
+
+The physical density $\rho_X(a)$ can be calculated for seven components:
+\begin{itemize}
+\item critical density $\rho_{\rm crit}(a) = {{3 H^2(a)} \over { 8 \pi G}} = \rho_{\rm crit,0} H^2(a) / H_0^2$,
+\item matter density $\rho_M(a) = \rho_{\rm crit}(a) \Omega_M(a) = \rho_{\rm crit,0} \Omega_{M,0} / a^{3}$,
+\item dark energy density parameter $\rho_\Lambda(a) = \rho_{\rm crit,0} \Omega_{\Lambda,0} a^{-3(1+w_0+w_a)} \exp[3 w_a (a-1)]$,
+\item radiation density parameter $\rho_g(a) = \rho_{\rm crit,0} \Omega_{g,0} / a^{4}$,
+\item curvature density parameter $\rho_K(a) = \rho_{\rm crit,0} \Omega_{K,0} / a^{2}$,
+\item massless neutrino density parameter $\rho_{\nu, {\rm rel}}(a) = \rho_{\rm crit,0} \Omega_{\nu, {\rm rel},0} / a^{4}$,
+\item massive neutrino density parameter $\Omega_{\nu, {\rm m}}(a) = \rho_{\rm crit,0} \Omega_{\nu, {\rm m}}(a) H^2(a) / H_0^2$,
+\end{itemize}
+where $\Omega_{\nu, {\rm m}}(a)$ is given by equation~\ref{Omnu} and the Hubble parameter by equation~\ref{eq:Ha}. \ccl moreover allows for comoving physical densities $\rho_{X, {\rm comoving}}(a) = \rho_X(a) a^3$.
 
 
 \subsection{Growth function}
@@ -973,7 +991,7 @@ by transforming the CCL non-linear Halofit power spectrum using this independent
 redshifts $z = 0,1,2,3,4,5$.  We then compared with the $\xi(r)$ from CCL with a sampling of $P(k)$ 
 equal to {\tt N$\_$K$\_$3DCOR} bins per decade. The default value of {\tt N$\_$K$\_$3DCOR}~=~100,000 results in a relative agreement 
 at the level of $\Delta \xi(r) / \xi(r) < 2.5 \times 10^{-3}$ for $0.1 < r < 250$~Mpc and redshift zero. The agreement is better for higher redshifts.
-We also compared the absolute value of $r^2 \xi(r)$ and find a maximum difference of \Delta (r^2 \xi(r)) < 3.0 \times 10^{-2}$ for the range 
+We also compared the absolute value of $r^2 \xi(r)$ and find a maximum difference of $\Delta (r^2 \xi(r)) < 3.0 \times 10^{-2}$ for the range 
 $r = 0.1 - 250$~Mpc. This corresponds to approximately 0.08\% of the BAO peak value of $r^2 \xi(r)$. At the BAO peak, the difference is 
 only $9.0 \times 10^{-3}$, or 0.024\% of the peak height. The results are shown in Fig.~\ref{fig:benchmark_xi}
 %
@@ -993,7 +1011,7 @@ less than 0.3\% in the range $2 < r < 250$~Mpc rising to about 5\% at $r = 1000$
 \begin{figure*}[htbp]
 \centering
 \includegraphics[width=0.47\textwidth]{analytic_xi}
-\caption{The relative error in the 3d spatial correlation function computed using the CCL algorithm compared to an analytic function $\xi(r) = (r/r_0)^a$ whose inverse transform $P(k)$ is known analytically. In this validation test, the known $P(k)$ was transformed with the CCL algorithm and compared to the known analytic result for $\xi(r).}
+\caption{The relative error in the 3d spatial correlation function computed using the CCL algorithm compared to an analytic function $\xi(r) = (r/r_0)^a$ whose inverse transform $P(k)$ is known analytically. In this validation test, the known $P(k)$ was transformed with the CCL algorithm and compared to the known analytic result for $\xi(r)$.}
 \label{fig:analytic_xi}
 \end{figure*}
 
