@@ -131,6 +131,16 @@ def check_background(cosmo):
     assert_( all_finite(ccl.omega_x(cosmo, a_lst, 'matter')) )
     assert_( all_finite(ccl.omega_x(cosmo, a_arr, 'matter')) )
     
+    # rho_crit_a
+    assert_( all_finite(ccl.rho_x(cosmo, a_scl, 'critical', is_comoving)) )
+    assert_( all_finite(ccl.rho_x(cosmo, a_lst, 'critical', is_comoving)) )
+    assert_( all_finite(ccl.rho_x(cosmo, a_arr, 'critical', is_comoving)) )
+
+    # rho_m_a
+    assert_( all_finite(ccl.rho_x(cosmo, a_scl, 'matter', is_comoving)) )
+    assert_( all_finite(ccl.rho_x(cosmo, a_lst, 'matter', is_comoving)) )
+    assert_( all_finite(ccl.rho_x(cosmo, a_arr, 'matter', is_comoving)) )
+    
 def check_background_nu(cosmo):
     """
     Check that background functions can be run and that the growth functions
@@ -181,17 +191,6 @@ def check_background_nu(cosmo):
     assert_( all_finite(ccl.omega_x(cosmo, a_scl, 'matter')) )
     assert_( all_finite(ccl.omega_x(cosmo, a_lst, 'matter')) )
     assert_( all_finite(ccl.omega_x(cosmo, a_arr, 'matter')) )
-
-
-    # rho_crit_a
-    assert_( all_finite(ccl.rho_x(cosmo, a_scl, 'critical', is_comoving)) )
-    assert_( all_finite(ccl.rho_x(cosmo, a_lst, 'critical', is_comoving)) )
-    assert_( all_finite(ccl.rho_x(cosmo, a_arr, 'critical', is_comoving)) )
-
-    # rho_m_a
-    assert_( all_finite(ccl.rho_x(cosmo, a_scl, 'matter', is_comoving)) )
-    assert_( all_finite(ccl.rho_x(cosmo, a_lst, 'matter', is_comoving)) )
-    assert_( all_finite(ccl.rho_x(cosmo, a_arr, 'matter', is_comoving)) )
 
 
 def check_power(cosmo):
