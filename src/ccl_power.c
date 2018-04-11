@@ -802,169 +802,152 @@ static double eh_power(ccl_parameters *params,eh_struct *eh,double k,int wiggled
 
 static void ccl_cosmology_compute_power_eh(ccl_cosmology * cosmo, int * status)
 {
-  cosmo->data.k_min_lin=ccl_splines->K_MIN_DEFAULT;
-  cosmo->data.k_min_nl=ccl_splines->K_MIN_DEFAULT;
-  cosmo->data.k_max_lin=ccl_splines->K_MAX;
-  cosmo->data.k_max_nl=ccl_splines->K_MAX;
+  cosmo->data.k_min_lin = ccl_splines->K_MIN_DEFAULT;
+  cosmo->data.k_min_nl = ccl_splines->K_MIN_DEFAULT;
+  cosmo->data.k_max_lin = ccl_splines->K_MAX;
+  cosmo->data.k_max_nl = ccl_splines->K_MAX;
   double kmin = cosmo->data.k_min_lin;
   double kmax = ccl_splines->K_MAX;
-  //Compute nk from number of decades and N_K = # k per decade
+  
+  // Compute nk from number of decades and N_K = # k per decade
   double ndecades = log10(kmax) - log10(kmin);
   int nk = (int)ceil(ndecades*ccl_splines->N_K);
+  
+  // Compute na using predefined spline spacing
   double amin = ccl_splines->A_SPLINE_MINLOG_PK;
   double amax = ccl_splines->A_SPLINE_MAX;
-  int na = ccl_splines->A_SPLINE_NA_PK+ccl_splines->A_SPLINE_NLOG_PK-1;
-  eh_struct *eh=eh_struct_new(&(cosmo->params));
-  if (eh==NULL) {
-    *status=CCL_ERROR_MEMORY;
-    strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_eh(): memory allocation error\n");
+  int na = ccl_splines->A_SPLINE_NA_PK + ccl_splines->A_SPLINE_NLOG_PK - 1;
+  
+  // Exit if sigma_8 wasn't specified
+  if (isnan(cosmo->params.sigma_8)) {
+    *status = CCL_ERROR_INCONSISTENT;
+    strcpy(cosmo->status_message ,"ccl_power.c: ccl_cosmology_compute_power_eh(): sigma_8 was not set, but is required for E&H method\n");
+    return;
+  }
+  
+  // New struct for EH parameters
+  eh_struct *eh = eh_struct_new(&(cosmo->params));
+  if (eh == NULL) {
+    *status = CCL_ERROR_MEMORY;
+    strcpy(cosmo->status_message, "ccl_power.c: ccl_cosmology_compute_power_eh(): memory allocation error\n");
     return;
   }
 
-  // The x array is initially k, but will later
-  // be overwritten with log(k)
+  // Build grids in k and a that P(k, a) will be evaluated on
+  // NB: The x array is initially k, but will later be overwritten with log(k)
   double * x = ccl_log_spacing(kmin, kmax, nk);
   double * y = malloc(sizeof(double)*nk);
-  double * z = ccl_linlog_spacing(amin, ccl_splines->A_SPLINE_MIN_PK, amax, ccl_splines->A_SPLINE_NLOG_PK, ccl_splines->A_SPLINE_NA_PK);
+  double * z = ccl_linlog_spacing(amin, ccl_splines->A_SPLINE_MIN_PK, 
+                                  amax, ccl_splines->A_SPLINE_NLOG_PK, 
+                                  ccl_splines->A_SPLINE_NA_PK);
   double * y2d = malloc(nk * na * sizeof(double));
-  if (z==NULL||y==NULL|| x==NULL || y2d==NULL) {
+  if (z==NULL || y==NULL || x==NULL || y2d==NULL) {
     free(eh);
-    *status=CCL_ERROR_MEMORY;
-    strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_eh(): memory allocation error\n");
+    if (x != NULL) free(x);
+    if (y != NULL) free(y);
+    if (z != NULL) free(z);
+    if (y2d != NULL) free(y2d);
+    *status = CCL_ERROR_MEMORY;
+    strcpy(cosmo->status_message, "ccl_power.c: ccl_cosmology_compute_power_eh(): memory allocation error\n");
     return;
   }
-  printf ("1, x[0]=%f\n", x[0]);
-  printf ("1, y[0]=%f\n", y[0]);
-  printf ("1, z[0]=%f\n", z[0]);
-  printf ("1, y2d[0]=%f\n", y2d[0]);
 
-  // After this loop x will contain log(k)
+  // Calculate P(k) on k grid. After this loop, x will contain log(k) and y 
+  // will contain log(pk) [which has not yet been normalized]
   for (int i=0; i<nk; i++) {
-    y[i] = log(eh_power(&cosmo->params,eh,x[i],1));
+    y[i] = log(eh_power(&cosmo->params, eh, x[i], 1));
     x[i] = log(x[i]);
   }
-
-  // now normalize to cosmo->params.sigma_8
-  if (isnan(cosmo->params.sigma_8)) {
-    free(eh);
-    free(x);
-    free(y);
-    free(z);
-    free(y2d);
-    *status = CCL_ERROR_INCONSISTENT;
-    strcpy(cosmo->status_message ,"ccl_power.c: ccl_cosmology_compute_power_eh(): sigma_8 not set, required for E&H\n");
-    return;
-  }
-  printf ("2, x[0]=%f\n", x[0]);
-  printf ("2, y[0]=%f\n", y[0]);
-  printf ("2, z[0]=%f\n", z[0]);
-  printf ("2, y2d[0]=%f\n", y2d[0]);
-  gsl_spline2d * log_power_lin = gsl_spline2d_alloc(PLIN_SPLINE_TYPE, nk,na);
+  
+  // Apply growth factor, D(a), to P(k) and store in 2D (k, a) array
+  double gfac, g2;
+  gsl_spline2d *log_power_lin = gsl_spline2d_alloc(PLIN_SPLINE_TYPE, nk,na);
   for (int j = 0; j < na; j++) {
-	//printf("status before=%d\n", *status);  
-    double g2 = 2.*log(ccl_growth_factor(cosmo,z[j], status));
-    //printf("g2=%f\n", g2);
-    //printf("status after=%d\n", *status);
-
+    gfac = ccl_growth_factor(cosmo, z[j], status); // z is actually scale factor
+    g2 = 2.*log(gfac);
     for (int i=0; i<nk; i++) {
       y2d[j*nk+i] = y[i]+g2;
-    }
-    
+    } // end loop over k
+  } // end loop over a
+  
+  // Check that ccl_growth_factor didn't fail
+  if (*status) {
+    free(eh); free(x); free(y); free(z); free(y2d);
+    gsl_spline2d_free(log_power_lin);
+    return;
   }
-  printf ("3, x[0]=%f\n", x[0]);
-  printf ("3, y[0]=%f\n", y[0]);
-  printf ("3, z[0]=%f\n", z[0]);
-  printf ("3, y2d[0]=%f\n", y2d[0]);
+  
+  // Initialize a 2D spline over P(k, a) [which is still unnormalized by sigma8]
   int splinstatus = gsl_spline2d_init(log_power_lin, x, z, y2d,nk,na);
   if (splinstatus) {
-    free(eh);
-    free(x);
-    free(y);
-    free(z);
-    free(y2d);
+    free(eh); free(x); free(y); free(z); free(y2d);
     gsl_spline2d_free(log_power_lin);
     *status = CCL_ERROR_SPLINE;
-    strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_eh(): Error creating log_power_lin spline\n");
+    strcpy(cosmo->status_message, "ccl_power.c: ccl_cosmology_compute_power_eh(): Error creating log_power_lin spline\n");
     return;
   }
-  cosmo->data.p_lin=log_power_lin;
-  printf ("4, x[0]=%f\n", x[0]);
-  printf ("4, y[0]=%f\n", y[0]);
-  printf ("4, z[0]=%f\n", z[0]);
-  printf ("4, y2d[0]=%f\n", y2d[0]);
-  cosmo->computed_power=true;
-  double sigma_8 = ccl_sigma8(cosmo,status);
-  cosmo->computed_power=false;
-
+  
+  // Calculate sigma_8 for the unnormalized P(k), using the standard 
+  // ccl_sigma8() function
+  cosmo->data.p_lin = log_power_lin;
+  cosmo->computed_power = true; // Temporarily set this to true
+  double sigma_8 = ccl_sigma8(cosmo, status);
+  cosmo->computed_power = false;
+  
+  // Check that ccl_sigma8 didn't fail
+  if (*status) {
+    free(eh); free(x); free(y); free(z); free(y2d);
+    gsl_spline2d_free(log_power_lin);
+    return;
+  }
+  
+  // Calculate normalization factor using computed value of sigma8, then 
+  // recompute P(k, a) using this normalization
   double log_sigma_8 = 2*(log(cosmo->params.sigma_8) - log(sigma_8));
-  for (int i=0; i<nk; i++) {
+  for (int i=0; i < nk; i++) {
     y[i] += log_sigma_8;
   }
-  printf ("5, x[0]=%f\n", x[0]);
-  printf ("5, y[0]=%f\n", y[0]);
-  printf ("5, z[0]=%f\n", z[0]);
-  printf ("5, y2d[0]=%f\n", y2d[0]);
   for (int j = 0; j < na; j++) {
-    double g2 = 2.*log(ccl_growth_factor(cosmo,z[j], status));
+    gfac = ccl_growth_factor(cosmo, z[j], status);
+    g2 = 2.*log(gfac);
     for (int i=0; i<nk; i++) {
-      y2d[j*nk+i] = y[i]+g2;
-    }
-  }
-  printf ("6, x[0]=%f\n", x[0]);
-  printf ("6, y[0]=%f\n", y[0]);
-  printf ("6, z[0]=%f\n", z[0]);
-  printf ("6, y2d[0]=%f\n", y2d[0]);
+      y2d[j*nk+i] = y[i]+g2; // Replace previous values
+    } // end k loop
+  } // end a loop
+  
+  // Free the previous P(k,a) spline, and allocate a new one to store the 
+  // properly-normalized P(k,a)
   gsl_spline2d_free(log_power_lin);
   log_power_lin = gsl_spline2d_alloc(PLIN_SPLINE_TYPE, nk,na);
-  splinstatus = gsl_spline2d_init(log_power_lin, x, z, y2d,nk,na);
+  splinstatus = gsl_spline2d_init(log_power_lin, x, z, y2d, nk, na);
   if (splinstatus) {
-    free(eh);
-    free(x);
-    free(y);
-    free(z);
-    free(y2d);
+    free(eh); free(x); free(y); free(z); free(y2d);
     gsl_spline2d_free(log_power_lin);
     *status = CCL_ERROR_SPLINE;
-    strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_eh(): Error creating log_power_lin spline\n");
+    strcpy(cosmo->status_message, "ccl_power.c: ccl_cosmology_compute_power_eh(): Error creating log_power_lin spline\n");
     return;
   }
   else
     cosmo->data.p_lin = log_power_lin;
-  printf ("7, x[0]=%f\n", x[0]);
-  printf ("7, y[0]=%f\n", y[0]);
-  printf ("7, z[0]=%f\n", z[0]);
-  printf ("7, y2d[0]=%f\n", y2d[0]);
-  gsl_spline2d * log_power_nl = gsl_spline2d_alloc(PNL_SPLINE_TYPE, nk,na);
-  splinstatus = gsl_spline2d_init(log_power_nl, x, z, y2d,nk,na);
+  
+  // Allocate a 2D spline for the nonlinear P(k) [which is just a copy of the 
+  // linear one for E&H]
+  gsl_spline2d * log_power_nl = gsl_spline2d_alloc(PNL_SPLINE_TYPE, nk, na);
+  splinstatus = gsl_spline2d_init(log_power_nl, x, z, y2d, nk, na);
 
   if (splinstatus) {
-    free(eh);
-    free(x);
-    free(y);
-    free(z);
-    free(y2d);
+    free(eh); free(x); free(y); free(z); free(y2d);
     gsl_spline2d_free(log_power_lin);
     gsl_spline2d_free(log_power_nl);
     *status = CCL_ERROR_SPLINE;
-    strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_eh(): Error creating log_power_nl spline\n");
+    strcpy(cosmo->status_message, "ccl_power.c: ccl_cosmology_compute_power_eh(): Error creating log_power_nl spline\n");
     return;
   }
   else
     cosmo->data.p_nl = log_power_nl;
-  printf ("8, x[0]=%f\n", x[0]);
-  printf ("8, y[0]=%f\n", y[0]);
-  printf ("8, z[0]=%f\n", z[0]);
-  printf ("8, y2d[0]=%f\n", y2d[0]);
-  printf("freeing stuff\n");
-  free(eh);
-  free(x);
-  free(y);
-  free(z);
-  free(y2d);
-  printf ("9, x[0]=%f\n", x[0]);
-  printf ("9, y[0]=%f\n", y[0]);
-  printf ("9, z[0]=%f\n", z[0]);
-  printf ("9, y2d[0]=%f\n", y2d[0]);
+  
+  // Free temporary arrays
+  free(eh); free(x); free(y); free(z); free(y2d);
 }
 
 /*------ ROUTINE: tsqr_BBKS ----- 
