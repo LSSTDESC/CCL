@@ -778,6 +778,14 @@ class CCL_ClTracer(_object):
     __swig_getmethods__["chimin"] = _ccllib.CCL_ClTracer_chimin_get
     if _newclass:
         chimin = _swig_property(_ccllib.CCL_ClTracer_chimin_get, _ccllib.CCL_ClTracer_chimin_set)
+    __swig_setmethods__["zmin"] = _ccllib.CCL_ClTracer_zmin_set
+    __swig_getmethods__["zmin"] = _ccllib.CCL_ClTracer_zmin_get
+    if _newclass:
+        zmin = _swig_property(_ccllib.CCL_ClTracer_zmin_get, _ccllib.CCL_ClTracer_zmin_set)
+    __swig_setmethods__["zmax"] = _ccllib.CCL_ClTracer_zmax_set
+    __swig_getmethods__["zmax"] = _ccllib.CCL_ClTracer_zmax_get
+    if _newclass:
+        zmax = _swig_property(_ccllib.CCL_ClTracer_zmax_get, _ccllib.CCL_ClTracer_zmax_set)
     __swig_setmethods__["chi_source"] = _ccllib.CCL_ClTracer_chi_source_set
     __swig_getmethods__["chi_source"] = _ccllib.CCL_ClTracer_chi_source_get
     if _newclass:
@@ -822,6 +830,22 @@ class CCL_ClTracer(_object):
     __swig_getmethods__["spl_wM"] = _ccllib.CCL_ClTracer_spl_wM_get
     if _newclass:
         spl_wM = _swig_property(_ccllib.CCL_ClTracer_spl_wM_get, _ccllib.CCL_ClTracer_spl_wM_set)
+    __swig_setmethods__["computed_transfer"] = _ccllib.CCL_ClTracer_computed_transfer_set
+    __swig_getmethods__["computed_transfer"] = _ccllib.CCL_ClTracer_computed_transfer_get
+    if _newclass:
+        computed_transfer = _swig_property(_ccllib.CCL_ClTracer_computed_transfer_get, _ccllib.CCL_ClTracer_computed_transfer_set)
+    __swig_setmethods__["n_ls"] = _ccllib.CCL_ClTracer_n_ls_set
+    __swig_getmethods__["n_ls"] = _ccllib.CCL_ClTracer_n_ls_get
+    if _newclass:
+        n_ls = _swig_property(_ccllib.CCL_ClTracer_n_ls_get, _ccllib.CCL_ClTracer_n_ls_set)
+    __swig_setmethods__["n_k"] = _ccllib.CCL_ClTracer_n_k_set
+    __swig_getmethods__["n_k"] = _ccllib.CCL_ClTracer_n_k_get
+    if _newclass:
+        n_k = _swig_property(_ccllib.CCL_ClTracer_n_k_get, _ccllib.CCL_ClTracer_n_k_set)
+    __swig_setmethods__["spl_transfer"] = _ccllib.CCL_ClTracer_spl_transfer_set
+    __swig_getmethods__["spl_transfer"] = _ccllib.CCL_ClTracer_spl_transfer_get
+    if _newclass:
+        spl_transfer = _swig_property(_ccllib.CCL_ClTracer_spl_transfer_get, _ccllib.CCL_ClTracer_spl_transfer_set)
 
     def __init__(self):
         """__init__(CCL_ClTracer self) -> CCL_ClTracer"""
@@ -836,29 +860,29 @@ CCL_ClTracer_swigregister = _ccllib.CCL_ClTracer_swigregister
 CCL_ClTracer_swigregister(CCL_ClTracer)
 
 
-def cl_tracer_new(cosmo, tracer_type, has_rsd, has_magnification, has_intrinsic_alignment, nz_n, z_n, n, nz_b, z_b, b, nz_s, z_s, s, nz_ba, z_ba, ba, nz_rf, z_rf, rf, z_source, status):
-    """cl_tracer_new(cosmology cosmo, int tracer_type, int has_rsd, int has_magnification, int has_intrinsic_alignment, int nz_n, double * z_n, double * n, int nz_b, double * z_b, double * b, int nz_s, double * z_s, double * s, int nz_ba, double * z_ba, double * ba, int nz_rf, double * z_rf, double * rf, double z_source, int * status) -> CCL_ClTracer"""
-    return _ccllib.cl_tracer_new(cosmo, tracer_type, has_rsd, has_magnification, has_intrinsic_alignment, nz_n, z_n, n, nz_b, z_b, b, nz_s, z_s, s, nz_ba, z_ba, ba, nz_rf, z_rf, rf, z_source, status)
+def cl_tracer(cosmo, tracer_type, has_rsd, has_magnification, has_intrinsic_alignment, nz_n, z_n, n, nz_b, z_b, b, nz_s, z_s, s, nz_ba, z_ba, ba, nz_rf, z_rf, rf, z_source, status):
+    """cl_tracer(cosmology cosmo, int tracer_type, int has_rsd, int has_magnification, int has_intrinsic_alignment, int nz_n, double * z_n, double * n, int nz_b, double * z_b, double * b, int nz_s, double * z_s, double * s, int nz_ba, double * z_ba, double * ba, int nz_rf, double * z_rf, double * rf, double z_source, int * status) -> CCL_ClTracer"""
+    return _ccllib.cl_tracer(cosmo, tracer_type, has_rsd, has_magnification, has_intrinsic_alignment, nz_n, z_n, n, nz_b, z_b, b, nz_s, z_s, s, nz_ba, z_ba, ba, nz_rf, z_rf, rf, z_source, status)
 
-def cl_tracer_number_counts_new(cosmo, has_rsd, has_magnification, nz_n, z_n, n, nz_b, z_b, b, nz_s, z_s, s, status):
-    """cl_tracer_number_counts_new(cosmology cosmo, int has_rsd, int has_magnification, int nz_n, double * z_n, double * n, int nz_b, double * z_b, double * b, int nz_s, double * z_s, double * s, int * status) -> CCL_ClTracer"""
-    return _ccllib.cl_tracer_number_counts_new(cosmo, has_rsd, has_magnification, nz_n, z_n, n, nz_b, z_b, b, nz_s, z_s, s, status)
+def cl_tracer_number_counts(cosmo, has_rsd, has_magnification, nz_n, z_n, n, nz_b, z_b, b, nz_s, z_s, s, status):
+    """cl_tracer_number_counts(cosmology cosmo, int has_rsd, int has_magnification, int nz_n, double * z_n, double * n, int nz_b, double * z_b, double * b, int nz_s, double * z_s, double * s, int * status) -> CCL_ClTracer"""
+    return _ccllib.cl_tracer_number_counts(cosmo, has_rsd, has_magnification, nz_n, z_n, n, nz_b, z_b, b, nz_s, z_s, s, status)
 
-def cl_tracer_number_counts_simple_new(cosmo, nz_n, z_n, n, nz_b, z_b, b, status):
-    """cl_tracer_number_counts_simple_new(cosmology cosmo, int nz_n, double * z_n, double * n, int nz_b, double * z_b, double * b, int * status) -> CCL_ClTracer"""
-    return _ccllib.cl_tracer_number_counts_simple_new(cosmo, nz_n, z_n, n, nz_b, z_b, b, status)
+def cl_tracer_number_counts_simple(cosmo, nz_n, z_n, n, nz_b, z_b, b, status):
+    """cl_tracer_number_counts_simple(cosmology cosmo, int nz_n, double * z_n, double * n, int nz_b, double * z_b, double * b, int * status) -> CCL_ClTracer"""
+    return _ccllib.cl_tracer_number_counts_simple(cosmo, nz_n, z_n, n, nz_b, z_b, b, status)
 
-def cl_tracer_lensing_new(cosmo, has_alignment, nz_n, z_n, n, nz_ba, z_ba, ba, nz_rf, z_rf, rf, status):
-    """cl_tracer_lensing_new(cosmology cosmo, int has_alignment, int nz_n, double * z_n, double * n, int nz_ba, double * z_ba, double * ba, int nz_rf, double * z_rf, double * rf, int * status) -> CCL_ClTracer"""
-    return _ccllib.cl_tracer_lensing_new(cosmo, has_alignment, nz_n, z_n, n, nz_ba, z_ba, ba, nz_rf, z_rf, rf, status)
+def cl_tracer_lensing(cosmo, has_alignment, nz_n, z_n, n, nz_ba, z_ba, ba, nz_rf, z_rf, rf, status):
+    """cl_tracer_lensing(cosmology cosmo, int has_alignment, int nz_n, double * z_n, double * n, int nz_ba, double * z_ba, double * ba, int nz_rf, double * z_rf, double * rf, int * status) -> CCL_ClTracer"""
+    return _ccllib.cl_tracer_lensing(cosmo, has_alignment, nz_n, z_n, n, nz_ba, z_ba, ba, nz_rf, z_rf, rf, status)
 
-def cl_tracer_lensing_simple_new(cosmo, nz_n, z_n, n, status):
-    """cl_tracer_lensing_simple_new(cosmology cosmo, int nz_n, double * z_n, double * n, int * status) -> CCL_ClTracer"""
-    return _ccllib.cl_tracer_lensing_simple_new(cosmo, nz_n, z_n, n, status)
+def cl_tracer_lensing_simple(cosmo, nz_n, z_n, n, status):
+    """cl_tracer_lensing_simple(cosmology cosmo, int nz_n, double * z_n, double * n, int * status) -> CCL_ClTracer"""
+    return _ccllib.cl_tracer_lensing_simple(cosmo, nz_n, z_n, n, status)
 
-def cl_tracer_cmblens_new(cosmo, z_source, status):
-    """cl_tracer_cmblens_new(cosmology cosmo, double z_source, int * status) -> CCL_ClTracer"""
-    return _ccllib.cl_tracer_cmblens_new(cosmo, z_source, status)
+def cl_tracer_cmblens(cosmo, z_source, status):
+    """cl_tracer_cmblens(cosmology cosmo, double z_source, int * status) -> CCL_ClTracer"""
+    return _ccllib.cl_tracer_cmblens(cosmo, z_source, status)
 
 def cl_tracer_free(clt):
     """cl_tracer_free(CCL_ClTracer clt)"""
@@ -872,17 +896,96 @@ def get_tracer_fas(cosmo, clt, na, a, fa, func_code, status):
     """get_tracer_fas(cosmology cosmo, CCL_ClTracer clt, int na, double * a, double * fa, int func_code, int * status) -> int"""
     return _ccllib.get_tracer_fas(cosmo, clt, na, a, fa, func_code, status)
 
-def angular_cl(cosmo, l, clt1, clt2, status):
-    """angular_cl(cosmology cosmo, int l, CCL_ClTracer clt1, CCL_ClTracer clt2, int * status) -> double"""
-    return _ccllib.angular_cl(cosmo, l, clt1, clt2, status)
+_ccllib.CCL_NONLIMBER_METHOD_NATIVE_swigconstant(_ccllib)
+CCL_NONLIMBER_METHOD_NATIVE = _ccllib.CCL_NONLIMBER_METHOD_NATIVE
+
+_ccllib.CCL_NONLIMBER_METHOD_ANGPOW_swigconstant(_ccllib)
+CCL_NONLIMBER_METHOD_ANGPOW = _ccllib.CCL_NONLIMBER_METHOD_ANGPOW
+class CCL_ClWorkspace(_object):
+    """Proxy of C CCL_ClWorkspace struct."""
+
+    __swig_setmethods__ = {}
+    __setattr__ = lambda self, name, value: _swig_setattr(self, CCL_ClWorkspace, name, value)
+    __swig_getmethods__ = {}
+    __getattr__ = lambda self, name: _swig_getattr(self, CCL_ClWorkspace, name)
+    __repr__ = _swig_repr
+    __swig_setmethods__["nlimb_method"] = _ccllib.CCL_ClWorkspace_nlimb_method_set
+    __swig_getmethods__["nlimb_method"] = _ccllib.CCL_ClWorkspace_nlimb_method_get
+    if _newclass:
+        nlimb_method = _swig_property(_ccllib.CCL_ClWorkspace_nlimb_method_get, _ccllib.CCL_ClWorkspace_nlimb_method_set)
+    __swig_setmethods__["zmin"] = _ccllib.CCL_ClWorkspace_zmin_set
+    __swig_getmethods__["zmin"] = _ccllib.CCL_ClWorkspace_zmin_get
+    if _newclass:
+        zmin = _swig_property(_ccllib.CCL_ClWorkspace_zmin_get, _ccllib.CCL_ClWorkspace_zmin_set)
+    __swig_setmethods__["dchi"] = _ccllib.CCL_ClWorkspace_dchi_set
+    __swig_getmethods__["dchi"] = _ccllib.CCL_ClWorkspace_dchi_get
+    if _newclass:
+        dchi = _swig_property(_ccllib.CCL_ClWorkspace_dchi_get, _ccllib.CCL_ClWorkspace_dchi_set)
+    __swig_setmethods__["dlk"] = _ccllib.CCL_ClWorkspace_dlk_set
+    __swig_getmethods__["dlk"] = _ccllib.CCL_ClWorkspace_dlk_get
+    if _newclass:
+        dlk = _swig_property(_ccllib.CCL_ClWorkspace_dlk_get, _ccllib.CCL_ClWorkspace_dlk_set)
+    __swig_setmethods__["lmax"] = _ccllib.CCL_ClWorkspace_lmax_set
+    __swig_getmethods__["lmax"] = _ccllib.CCL_ClWorkspace_lmax_get
+    if _newclass:
+        lmax = _swig_property(_ccllib.CCL_ClWorkspace_lmax_get, _ccllib.CCL_ClWorkspace_lmax_set)
+    __swig_setmethods__["l_limber"] = _ccllib.CCL_ClWorkspace_l_limber_set
+    __swig_getmethods__["l_limber"] = _ccllib.CCL_ClWorkspace_l_limber_get
+    if _newclass:
+        l_limber = _swig_property(_ccllib.CCL_ClWorkspace_l_limber_get, _ccllib.CCL_ClWorkspace_l_limber_set)
+    __swig_setmethods__["l_logstep"] = _ccllib.CCL_ClWorkspace_l_logstep_set
+    __swig_getmethods__["l_logstep"] = _ccllib.CCL_ClWorkspace_l_logstep_get
+    if _newclass:
+        l_logstep = _swig_property(_ccllib.CCL_ClWorkspace_l_logstep_get, _ccllib.CCL_ClWorkspace_l_logstep_set)
+    __swig_setmethods__["l_linstep"] = _ccllib.CCL_ClWorkspace_l_linstep_set
+    __swig_getmethods__["l_linstep"] = _ccllib.CCL_ClWorkspace_l_linstep_get
+    if _newclass:
+        l_linstep = _swig_property(_ccllib.CCL_ClWorkspace_l_linstep_get, _ccllib.CCL_ClWorkspace_l_linstep_set)
+    __swig_setmethods__["n_ls"] = _ccllib.CCL_ClWorkspace_n_ls_set
+    __swig_getmethods__["n_ls"] = _ccllib.CCL_ClWorkspace_n_ls_get
+    if _newclass:
+        n_ls = _swig_property(_ccllib.CCL_ClWorkspace_n_ls_get, _ccllib.CCL_ClWorkspace_n_ls_set)
+    __swig_setmethods__["l_arr"] = _ccllib.CCL_ClWorkspace_l_arr_set
+    __swig_getmethods__["l_arr"] = _ccllib.CCL_ClWorkspace_l_arr_get
+    if _newclass:
+        l_arr = _swig_property(_ccllib.CCL_ClWorkspace_l_arr_get, _ccllib.CCL_ClWorkspace_l_arr_set)
+
+    def __init__(self):
+        """__init__(CCL_ClWorkspace self) -> CCL_ClWorkspace"""
+        this = _ccllib.new_CCL_ClWorkspace()
+        try:
+            self.this.append(this)
+        except Exception:
+            self.this = this
+    __swig_destroy__ = _ccllib.delete_CCL_ClWorkspace
+    __del__ = lambda self: None
+CCL_ClWorkspace_swigregister = _ccllib.CCL_ClWorkspace_swigregister
+CCL_ClWorkspace_swigregister(CCL_ClWorkspace)
+
+
+def cl_workspace_default(lmax, l_limber, non_limber_method, l_logstep, l_linstep, dchi, dlk, zmin, status):
+    """cl_workspace_default(int lmax, int l_limber, int non_limber_method, double l_logstep, int l_linstep, double dchi, double dlk, double zmin, int * status) -> CCL_ClWorkspace"""
+    return _ccllib.cl_workspace_default(lmax, l_limber, non_limber_method, l_logstep, l_linstep, dchi, dlk, zmin, status)
+
+def cl_workspace_default_limber(lmax, l_logstep, l_linstep, dlk, status):
+    """cl_workspace_default_limber(int lmax, double l_logstep, int l_linstep, double dlk, int * status) -> CCL_ClWorkspace"""
+    return _ccllib.cl_workspace_default_limber(lmax, l_logstep, l_linstep, dlk, status)
+
+def cl_workspace_free(w):
+    """cl_workspace_free(CCL_ClWorkspace w)"""
+    return _ccllib.cl_workspace_free(w)
+
+def angular_cls(cosmo, w, clt1, clt2, nl_out, l, cl, status):
+    """angular_cls(cosmology cosmo, CCL_ClWorkspace w, CCL_ClTracer clt1, CCL_ClTracer clt2, int nl_out, int * l, double * cl, int * status)"""
+    return _ccllib.angular_cls(cosmo, w, clt1, clt2, nl_out, l, cl, status)
 
 def cl_tracer_new_wrapper(cosmo, tracer_type, has_rsd, has_magnification, has_intrinsic_alignment, nz_n, nn, nz_b, nb, nz_s, ns, nz_ba, nba, nz_rf, nrf, z_source, status):
     """cl_tracer_new_wrapper(cosmology cosmo, int tracer_type, int has_rsd, int has_magnification, int has_intrinsic_alignment, int nz_n, int nn, int nz_b, int nb, int nz_s, int ns, int nz_ba, int nba, int nz_rf, int nrf, double z_source, int * status) -> CCL_ClTracer"""
     return _ccllib.cl_tracer_new_wrapper(cosmo, tracer_type, has_rsd, has_magnification, has_intrinsic_alignment, nz_n, nn, nz_b, nb, nz_s, ns, nz_ba, nba, nz_rf, nrf, z_source, status)
 
-def angular_cl_vec(cosmo, clt1, clt2, ell, output, status):
-    """angular_cl_vec(cosmology cosmo, CCL_ClTracer clt1, CCL_ClTracer clt2, double * ell, double * output, int * status)"""
-    return _ccllib.angular_cl_vec(cosmo, clt1, clt2, ell, output, status)
+def angular_cl_vec(cosmo, clt1, clt2, l_limber, l_logstep, l_linstep, dchi, dlk, zmin, method, ell, output, status):
+    """angular_cl_vec(cosmology cosmo, CCL_ClTracer clt1, CCL_ClTracer clt2, double l_limber, double l_logstep, double l_linstep, double dchi, double dlk, double zmin, int method, double * ell, double * output, int * status)"""
+    return _ccllib.angular_cl_vec(cosmo, clt1, clt2, l_limber, l_logstep, l_linstep, dchi, dlk, zmin, method, ell, output, status)
 
 def clt_fa_vec(cosmo, clt, func_code, aarr, output, status):
     """clt_fa_vec(cosmology cosmo, CCL_ClTracer clt, int func_code, double * aarr, double * output, int * status)"""
@@ -1525,6 +1628,9 @@ CCL_ERROR_NU_SOLVE = _ccllib.CCL_ERROR_NU_SOLVE
 _ccllib.CCL_ERROR_NOT_IMPLEMENTED_swigconstant(_ccllib)
 CCL_ERROR_NOT_IMPLEMENTED = _ccllib.CCL_ERROR_NOT_IMPLEMENTED
 
+_ccllib.CCL_ERROR_ANGPOW_swigconstant(_ccllib)
+CCL_ERROR_ANGPOW = _ccllib.CCL_ERROR_ANGPOW
+
 _ccllib.CCL_ERROR_POLICY_EXIT_swigconstant(_ccllib)
 CCL_ERROR_POLICY_EXIT = _ccllib.CCL_ERROR_POLICY_EXIT
 
@@ -1558,6 +1664,10 @@ def linlog_spacing(xminlog, xmin, xmax, Nlin, Nlog):
 def log_spacing(xmin, xmax, N):
     """log_spacing(double xmin, double xmax, int N) -> double *"""
     return _ccllib.log_spacing(xmin, xmax, N)
+
+def j_bessel(l, x):
+    """j_bessel(int l, double x) -> double"""
+    return _ccllib.j_bessel(l, x)
 class SplPar(_object):
     """Proxy of C SplPar struct."""
 

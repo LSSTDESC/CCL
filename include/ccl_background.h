@@ -27,6 +27,9 @@ typedef enum ccl_omega_x_label {
  */
 double ccl_h_over_h0(ccl_cosmology * cosmo, double a, int * status);
 
+// Normalized expansion rate at scale factors as given in list a[0..na-1]
+void ccl_h_over_h0s(ccl_cosmology * cosmo, int na, double a[], double output[], int * status);
+
 /**
  * Normalized expansion rate at scale factors as given in list a[0..na-1]
  * Returns H(a)/H0 for an array of scale factors a of length na.
@@ -49,6 +52,9 @@ void ccl_h_over_h0s(ccl_cosmology * cosmo, int na, double a[], double output[], 
  * @return comoving_radial_distance, Comoving radial distance in Mpc
  */
 double ccl_comoving_radial_distance(ccl_cosmology * cosmo, double a, int* status);
+
+// Comoving radial distances in Mpc to scale factors as given in list a[0..na-1]
+void ccl_comoving_radial_distances(ccl_cosmology * cosmo, int na, double a[], double output[], int* status);
 
 /**
  * Comoving radial distances in Mpc to scale factors as given in list a[0..na-1]
@@ -89,6 +95,9 @@ double ccl_sinn(ccl_cosmology *cosmo,double chi, int *status);
  */
 double ccl_comoving_angular_distance(ccl_cosmology * cosmo, double a, int* status);
 
+// Comoving angular distances in Mpc to scale factors as given in list a[0..na-1]
+void ccl_comoving_angular_distances(ccl_cosmology * cosmo, int na, double a[], double output[], int* status);
+
 /**
  * Comoving angular distances in Mpc to scale factors as given in array a[0..na-1]
  * NOTE this quantity is otherwise known as the transverse comoving distance, and is NOT angular diameter
@@ -113,6 +122,9 @@ void ccl_comoving_angular_distances(ccl_cosmology * cosmo, int na, double a[], d
  * @return luminosity_distance, the angular distance in Mpc
  */
 double ccl_luminosity_distance(ccl_cosmology * cosmo, double a, int * status);
+
+// Comoving luminosity distances in Mpc to scale factors as given in list a[0..na-1]
+void ccl_luminosity_distances(ccl_cosmology * cosmo, int na, double a[], double output[], int * status);
 
 /**
  * Comoving luminosity distances in Mpc to scale factors as given in array a[0..na-1]
@@ -161,6 +173,9 @@ void ccl_distance_moduli(ccl_cosmology * cosmo, int na, double a[], double outpu
  */
 double ccl_growth_factor(ccl_cosmology * cosmo, double a, int * status);
 
+// Growth factors at a list of scale factor given in a[0..na-1] normalized to 1 at z=0
+void ccl_growth_factors(ccl_cosmology * cosmo, int na, double a[], double output[], int * status);
+
 /**
  * Growth factors at an array of scale factor given in a[0..na-1], where g(z=0) is normalized to 1
  * @param cosmo Cosmological parameters
@@ -183,6 +198,9 @@ void ccl_growth_factors(ccl_cosmology * cosmo, int na, double a[], double output
  * @return growth_factor_unnorm, Unnormalized growth factor, normalized to the scale factor at early times.
  */
 double ccl_growth_factor_unnorm(ccl_cosmology * cosmo, double a, int * status);
+
+// Growth factors at a list of scale factor given in a[0..na-1] normalized to a in matter domination
+void ccl_growth_factors_unnorm(ccl_cosmology * cosmo, int na, double a[], double output[], int * status);
 
 /**
  * Growth factors at a list of scale factor given in a[0..na-1], where g(a) is normalized to a in matter domination
@@ -207,6 +225,9 @@ void ccl_growth_factors_unnorm(ccl_cosmology * cosmo, int na, double a[], double
  */
 double ccl_growth_rate(ccl_cosmology * cosmo, double a, int* status);
 
+// Logarithmic rates of d ln g/d lna a at alist of  scale factor a [0..na-1]
+void ccl_growth_rates(ccl_cosmology * cosmo, int na, double a[], double output[], int * status);
+
 /**
  * Logarithmic rates of d ln(g)/d ln(a) at an array of scale factors a[0..na-1]
  * @param cosmo Cosmological parameters
@@ -229,6 +250,9 @@ void ccl_growth_rates(ccl_cosmology * cosmo, int na, double a[], double output[]
  * @return a, scale factor of distance xi
  */
 double ccl_scale_factor_of_chi(ccl_cosmology * cosmo, double chi, int * status);
+
+// Scale factors for a given list of comoving distances
+void ccl_scale_factor_of_chis(ccl_cosmology * cosmo, int nchi, double chi[], double output[], int* status);
 
 /**
  * Scale factors for a given array of comoving distances chi[0..nchi-1]

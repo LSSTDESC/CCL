@@ -14,6 +14,12 @@ tracer_types = {
     'cmb_lensing':      const.CL_TRACER_CL,
 }
 
+#Same mapping for non-Limber integration methods
+nonlimber_methods = {
+    'native': const.CCL_NONLIMBER_METHOD_NATIVE,
+    'angpow': const.CCL_NONLIMBER_METHOD_ANGPOW,
+}
+
 function_types = {
     'dndz':             const.CCL_CLT_NZ,
     'bz':               const.CCL_CLT_BZ,
@@ -335,7 +341,9 @@ def _check_array_params(z, f_arg, f_name):
             f = np.atleast_1d(f_arg)
     return z_f, f
 
-def angular_cl(cosmo, cltracer1, cltracer2, ell):
+def angular_cl(cosmo, cltracer1, cltracer2, ell,
+               l_limber=-1.,l_logstep=1.05,l_linstep=20.,dchi=3., dlk=0.003, zmin=0.05,
+               non_limber_method="native"):
     """
     Calculate the angular (cross-)power spectrum for a pair of tracers.
 
@@ -344,6 +352,15 @@ def angular_cl(cosmo, cltracer1, cltracer2, ell):
         cltracer1, cltracer2 (:obj:): ClTracer objects, of any kind.
         ell (float or array_like): Angular wavenumber(s) to evaluate the
             angular power spectrum at.
+        l_limber (float) : Angular wavenumber beyond which Limber's
+            approximation will be used
+        l_logstep (float) : logarithmic step in ell at low multipoles
+        l_linstep (float) : linear step in ell at high multipoles
+        dchi (float) : comoving distance step size in non-limber native integrals
+        dlk (float) : logarithmic step for the k non-limber native integral
+        zmin (float) : minimal redshift for the integrals
+        non_limber_method (str) : non-Limber integration method. Supported:
+            "native" and "angpow"
 
     Returns:
         cl (float or array_like): Angular (cross-)power spectrum values, C_ell,
@@ -353,6 +370,9 @@ def angular_cl(cosmo, cltracer1, cltracer2, ell):
     # Access ccl_cosmology object
     cosmo_in = cosmo
     cosmo = _cosmology_obj(cosmo)
+    
+    if non_limber_method not in nonlimber_methods.keys() :
+        raise KeyError("'%s' is not a valid non-Limber integration method."%non_limber_method)
 
     # Access CCL_ClTracer objects
     clt1 = _cltracer_obj(cltracer1)
@@ -362,12 +382,16 @@ def angular_cl(cosmo, cltracer1, cltracer2, ell):
     # Return Cl values, according to whether ell is an array or not
     if isinstance(ell, float) or isinstance(ell, int) :
         # Use single-value function
-        cl, status = lib.angular_cl(cosmo, ell, clt1, clt2, status)
+        cl_one,status=lib.angular_cl_vec(cosmo,clt1,clt2,l_limber,l_logstep,l_linstep,dchi,dlk,zmin,
+                                         nonlimber_methods[non_limber_method],[ell],1,status)
+        cl=cl_one[0]
     elif isinstance(ell, np.ndarray):
         # Use vectorised function
-        cl, status = lib.angular_cl_vec(cosmo, clt1, clt2, ell, ell.size, status)
+        cl,status=lib.angular_cl_vec(cosmo,clt1,clt2,l_limber,l_logstep,l_linstep,dchi,dlk,zmin,
+                                     nonlimber_methods[non_limber_method],ell,ell.size,status)
     else:
         # Use vectorised function
-        cl, status = lib.angular_cl_vec(cosmo, clt1, clt2, ell, len(ell), status)
-    check(status, cosmo_in)
+        cl,status=lib.angular_cl_vec(cosmo,clt1,clt2,l_limber,l_logstep,l_linstep,dchi,dlk,zmin,
+                                     nonlimber_methods[non_limber_method],ell,len(ell),status)
+    check(status)
     return cl

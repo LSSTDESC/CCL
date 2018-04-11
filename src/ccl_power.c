@@ -1431,13 +1431,13 @@ double ccl_linear_matter_power(ccl_cosmology * cosmo, double k, double a, int * 
       sprintf(cosmo->status_message ,"ccl_power.c: ccl_linear_matter_power(): Spline evaluation error\n");
       return NAN;
     }
-    else
-      return exp(log_p_1);
   }
   else { //Extrapolate using log derivative
     log_p_1 = ccl_power_extrapol_highk(cosmo,k,a,cosmo->data.p_lin,cosmo->data.k_max_lin,status);
     return exp(log_p_1);
   }
+
+  return exp(log_p_1);
 }
 
 
