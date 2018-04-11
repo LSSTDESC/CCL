@@ -111,6 +111,11 @@ def check_background(cosmo):
     assert_( all_finite(ccl.comoving_radial_distance(cosmo, a_lst)) )
     assert_( all_finite(ccl.comoving_radial_distance(cosmo, a_arr)) )
     
+    # comoving_angular_distance
+    assert_( all_finite(ccl.comoving_angular_distance(cosmo, a_scl)) )
+    assert_( all_finite(ccl.comoving_angular_distance(cosmo, a_lst)) )
+    assert_( all_finite(ccl.comoving_angular_distance(cosmo, a_arr)) )
+    
     # h_over_h0
     assert_( all_finite(ccl.h_over_h0(cosmo, a_scl)) )
     assert_( all_finite(ccl.h_over_h0(cosmo, a_lst)) )
@@ -131,6 +136,16 @@ def check_background(cosmo):
     assert_( all_finite(ccl.omega_x(cosmo, a_lst, 'matter')) )
     assert_( all_finite(ccl.omega_x(cosmo, a_arr, 'matter')) )
     
+    # Fractional density of different types of fluid
+    assert_( all_finite(ccl.omega_x(cosmo, a_arr, 'dark_energy')) )
+    assert_( all_finite(ccl.omega_x(cosmo, a_arr, 'radiation')) )
+    assert_( all_finite(ccl.omega_x(cosmo, a_arr, 'curvature')) )
+    assert_( all_finite(ccl.omega_x(cosmo, a_arr, 'neutrinos_rel')) )
+    assert_( all_finite(ccl.omega_x(cosmo, a_arr, 'neutrinos_massive')) )
+    
+    # Check that omega_x fails if invalid component type is passed
+    assert_raises(ValueError, ccl.omega_x, cosmo, a_scl, 'xyz')
+    
     # rho_crit_a
     assert_( all_finite(ccl.rho_x(cosmo, a_scl, 'critical', is_comoving)) )
     assert_( all_finite(ccl.rho_x(cosmo, a_lst, 'critical', is_comoving)) )
@@ -140,13 +155,13 @@ def check_background(cosmo):
     assert_( all_finite(ccl.rho_x(cosmo, a_scl, 'matter', is_comoving)) )
     assert_( all_finite(ccl.rho_x(cosmo, a_lst, 'matter', is_comoving)) )
     assert_( all_finite(ccl.rho_x(cosmo, a_arr, 'matter', is_comoving)) )
-    
+
+
 def check_background_nu(cosmo):
     """
     Check that background functions can be run and that the growth functions
     exit gracefully in functions with massive neutrinos (not implemented yet).
     """
-    
     # Types of scale factor input (scalar, list, array)
     a_scl = 0.5
     a_lst = [0.2, 0.4, 0.6, 0.8, 1.]
@@ -279,11 +294,16 @@ def check_massfunc(cosmo):
     assert_raises(TypeError, ccl.sigmaM, cosmo, mhalo_lst, a_arr)
     assert_raises(TypeError, ccl.sigmaM, cosmo, mhalo_arr, a_arr)
     
+    # halo_bias
+    assert_( all_finite(ccl.halo_bias(cosmo, mhalo_scl, a)) )
+    assert_( all_finite(ccl.halo_bias(cosmo, mhalo_lst, a)) )
+    assert_( all_finite(ccl.halo_bias(cosmo, mhalo_arr, a)) )
+
+
 def check_massfunc_nu(cosmo):
     """
     Check that mass function and supporting functions can be run.
     """
-
     z = 0.
     z_arr = np.linspace(0., 2., 10)
     a = 1.
@@ -316,6 +336,7 @@ def check_massfunc_nu(cosmo):
     assert_raises(TypeError, ccl.sigmaM, cosmo, mhalo_scl, a_arr)
     assert_raises(TypeError, ccl.sigmaM, cosmo, mhalo_lst, a_arr)
     assert_raises(TypeError, ccl.sigmaM, cosmo, mhalo_arr, a_arr)
+
 
 def check_neutrinos():
     """
@@ -368,6 +389,7 @@ def check_lsst_specs(cosmo):
     # PhotoZFunction classes
     PZ1 = ccl.PhotoZFunction(pz1)
     PZ2 = ccl.PhotoZFunction(pz2)
+    PZ3 = ccl.PhotoZGaussian(sigma_z0=0.1)
     
     # bias_clustering
     assert_( all_finite(ccl.bias_clustering(cosmo, a_scl)) )
@@ -599,6 +621,27 @@ def check_cls_nu(cosmo):
     assert_( all_finite(ccl.angular_cl(cosmo, nc1, lens1, ell_arr)) )
     assert_( all_finite(ccl.angular_cl(cosmo, nc1, lens2, ell_arr)) )
     
+    # Check get_internal_function()
+    a_scl = 0.5
+    a_lst = [0.2, 0.4, 0.6, 0.8, 1.]
+    a_arr = np.linspace(0.2, 1., 5)
+    assert_( all_finite(nc1.get_internal_function(cosmo, 'dndz', a_scl)) )
+    assert_( all_finite(nc1.get_internal_function(cosmo, 'dndz', a_lst)) )
+    assert_( all_finite(nc1.get_internal_function(cosmo, 'dndz', a_arr)) )
+    
+    # Check that invalid options raise errors
+    assert_raises(KeyError, nc1.get_internal_function, cosmo, 'x', a_arr)
+    assert_raises(ValueError, ccl.ClTracerNumberCounts, cosmo, True, True, 
+                  n=(z,n), bias=(z,b))
+    assert_raises(KeyError, ccl.ClTracer, cosmo, 'x', True, True, 
+                  n=(z,n), bias=(z,b))
+    assert_raises(ValueError, ccl.ClTracerLensing, cosmo, 
+                  has_intrinsic_alignment=True, n=(z,n), bias_ia=(z,n))
+    assert_no_warnings(ccl.cls._cltracer_obj, nc1)
+    assert_no_warnings(ccl.cls._cltracer_obj, nc1.cltracer)
+    assert_raises(TypeError, ccl.cls._cltracer_obj, None)
+
+
 def check_corr(cosmo):
     
     # Number density input
@@ -609,13 +652,30 @@ def check_corr(cosmo):
     lens1 = ccl.ClTracerLensing(cosmo, False, n=n, z=z)
     lens2 = ccl.ClTracerLensing(cosmo, True, n=(z,n), bias_ia=(z,n), f_red=(z,n))
 
-    ells=np.arange(3000)
-    cls=ccl.angular_cl(cosmo,lens1,lens2,ells)
+    ells = np.arange(3000)
+    cls = ccl.angular_cl(cosmo, lens1, lens2, ells)
 
-    t=np.logspace(-2,np.log10(5.),20) #degrees
-    corrfunc=ccl.correlation(cosmo,ells,cls,t,corr_type='L+',method='FFTLog')
-    assert_( all_finite(corrfunc))
-
+    t_arr = np.logspace(-2., np.log10(5.), 20) # degrees
+    t_lst = [t for t in t_arr]
+    t_scl = 2.
+    
+    # Make sure correlation functions work for valid inputs
+    corr1 = ccl.correlation(cosmo, ells, cls, t_arr, corr_type='L+', 
+                            method='FFTLog')
+    corr2 = ccl.correlation(cosmo, ells, cls, t_lst, corr_type='L+', 
+                            method='FFTLog')
+    corr3 = ccl.correlation(cosmo, ells, cls, t_scl, corr_type='L+', 
+                            method='FFTLog')
+    assert_( all_finite(corr1))
+    assert_( all_finite(corr2))
+    assert_( all_finite(corr3))
+    
+    # Check that exceptions are raised for invalid input
+    assert_raises(KeyError, ccl.correlation, cosmo, ells, cls, t_arr, 
+                  corr_type='xx', method='FFTLog')
+    assert_raises(KeyError, ccl.correlation, cosmo, ells, cls, t_arr, 
+                  corr_type='L+', method='xx')
+    
 
 def test_valid_transfer_combos():
     """
