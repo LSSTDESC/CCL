@@ -287,6 +287,13 @@ ccl_parameters ccl_parameters_create_flat_wacdm_nu(double Omega_c, double Omega_
 ccl_parameters ccl_parameters_create_lcdm_nu(double Omega_c, double Omega_b, double Omega_k, double h, double norm_pk, double n_s, double Neff, double* mnu, ccl_mnu_convention mnu_type, int *status);
 
 /**
+ * Free a parameters struct
+ * @param params ccl_parameters struct
+ * @return void
+ */
+void ccl_parameters_free(ccl_parameters * params);
+
+/**
  * Free a cosmology struct
  * @param cosmo Cosmological parameters 
  * @return void

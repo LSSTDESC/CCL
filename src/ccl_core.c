@@ -300,14 +300,18 @@ A_s: amplitude of the primordial PS
 n_s: index of the primordial PS
 
  */
-ccl_parameters ccl_parameters_create(double Omega_c, double Omega_b, double Omega_k,
+ccl_parameters ccl_parameters_create(
+                     double Omega_c, double Omega_b, double Omega_k,
 				     double Neff, double* mnu, ccl_mnu_convention mnu_type,
 				     double w0, double wa, double h, double norm_pk,
-				     double n_s, double bcm_log10Mc, double bcm_etab, double bcm_ks,
-				     int nz_mgrowth,double *zarr_mgrowth,
+				     double n_s, double bcm_log10Mc, double bcm_etab, 
+				     double bcm_ks, int nz_mgrowth, double *zarr_mgrowth,
 				     double *dfarr_mgrowth, int *status)
 {
   ccl_parameters params;
+  params.mnu = NULL;
+  params.z_mgrowth=NULL;
+  params.df_mgrowth=NULL;
   params.sigma_8 = NAN;
   params.A_s = NAN;
   params.Omega_c = Omega_c;
@@ -315,55 +319,63 @@ ccl_parameters ccl_parameters_create(double Omega_c, double Omega_b, double Omeg
   params.Omega_k = Omega_k;
   params.Neff = Neff;
   
-  // See CCL note for how we get these expressions for the neutrino masses in normal and inverted hierarchy.
+  // Set the sum of neutrino masses
+  params.sum_nu_masses = *mnu;
+  double mnusum = *mnu;
+  double *mnu_in = NULL;
+  
+  // Decide how to split sum of neutrino masses between 3 neutrinos. See the 
+  // CCL note for how we get these expressions for the neutrino masses in 
+  // normal and inverted hierarchy.
   if (mnu_type==ccl_mnu_sum){
-	  params.sum_nu_masses = *mnu;
-	  mnu=malloc(3*sizeof(double));
-	  mnu[0] = 2./3.* params.sum_nu_masses - 1./6. * pow(-6. * DELTAM12_sq + 12. * DELTAM13_sq_pos + 4. * params.sum_nu_masses*params.sum_nu_masses, 0.5) 
-	         - 0.25 * DELTAM12_sq / (2./3.* params.sum_nu_masses - 1./6. * pow(-6. * DELTAM12_sq + 12. * DELTAM13_sq_pos + 4. * params.sum_nu_masses*params.sum_nu_masses, 0.5));
-	  mnu[1] = 2./3.* params.sum_nu_masses - 1./6. * pow(-6. * DELTAM12_sq + 12. * DELTAM13_sq_pos + 4. * params.sum_nu_masses*params.sum_nu_masses, 0.5) 
-	         + 0.25 * DELTAM12_sq / (2./3.* params.sum_nu_masses - 1./6. * pow(-6. * DELTAM12_sq + 12. * DELTAM13_sq_pos + 4. * params.sum_nu_masses*params.sum_nu_masses, 0.5));
-	  mnu[2] = -1./3. * params.sum_nu_masses + 1./3 * pow(-6. * DELTAM12_sq + 12. * DELTAM13_sq_pos + 4. * params.sum_nu_masses*params.sum_nu_masses, 0.5); 
+	  // Normal hierarchy
+	  mnu_in = malloc(3*sizeof(double));
+	  double nfac = -6.*DELTAM12_sq + 12.*DELTAM13_sq_pos + 4.*mnusum*mnusum;
 	  
-	  if (mnu[0]<0 || mnu[1]<0 || mnu[2]<0){
+	  mnu_in[0] = 2./3. * mnusum - 1./6. * pow(nfac, 0.5) 
+	            - 0.25 * DELTAM12_sq / (2./3.* mnusum - 1./6.*pow(nfac, 0.5));
+	  mnu_in[1] = 2./3.* mnusum - 1./6. * pow(nfac, 0.5) 
+	            + 0.25 * DELTAM12_sq / (2./3.* mnusum - 1./6. * pow(nfac, 0.5));
+	  mnu_in[2] = -1./3. * mnusum + 1./3 * pow(nfac, 0.5); 
+	  
+	  if (mnu_in[0]<0 || mnu_in[1]<0 || mnu_in[2]<0){
 	    // The user has provided a sum that is below the physical limit.
-	    if (params.sum_nu_masses<1e-14){
-			mnu[0] = 0.;
-			mnu[1] = 0.;
-			mnu[2] = 0.;
+	    if (params.sum_nu_masses < 1e-14){
+			mnu_in[0] = 0.; mnu_in[1] = 0.; mnu_in[2] = 0.;
 		}else{
 			*status = CCL_ERROR_MNU_UNPHYSICAL;
 	    }
 	  }
   } else if (mnu_type==ccl_mnu_sum_inverted){
-		// Do the inverted hierarchy
-		params.sum_nu_masses = *mnu;
-		mnu=malloc(3*sizeof(double));
-		mnu[0] = 2./3.* params.sum_nu_masses - 1./6. * pow(-6. * DELTAM12_sq + 12. * DELTAM13_sq_neg + 4. * params.sum_nu_masses*params.sum_nu_masses, 0.5) 
-	         - 0.25 * DELTAM12_sq / (2./3.* params.sum_nu_masses - 1./6. * pow(-6. * DELTAM12_sq + 12. * DELTAM13_sq_neg + 4. * params.sum_nu_masses*params.sum_nu_masses, 0.5));
-	    mnu[1] = 2./3.* params.sum_nu_masses - 1./6. * pow(-6. * DELTAM12_sq + 12. * DELTAM13_sq_neg + 4. * params.sum_nu_masses*params.sum_nu_masses, 0.5) 
-	         + 0.25 * DELTAM12_sq / (2./3.* params.sum_nu_masses - 1./6. * pow(-6. * DELTAM12_sq + 12. * DELTAM13_sq_neg + 4. * params.sum_nu_masses*params.sum_nu_masses, 0.5));
-	    mnu[2] = -1./3. * params.sum_nu_masses + 1./3 * pow(-6. * DELTAM12_sq + 12. * DELTAM13_sq_neg + 4. * params.sum_nu_masses*params.sum_nu_masses, 0.5); 
+		// Inverted hierarchy
+		mnu_in = malloc(3*sizeof(double));
+		double nfac = -6.*DELTAM12_sq + 12.*DELTAM13_sq_neg + 4.*mnusum*mnusum;
+		
+		mnu_in[0] = 2./3.* mnusum - 1./6.*pow(nfac, 0.5) 
+	              - 0.25 * DELTAM12_sq / (2./3.* mnusum - 1./6.*pow(nfac, 0.5));
+	    mnu_in[1] = 2./3.* mnusum - 1./6. * pow(nfac, 0.5) 
+	              + 0.25 * DELTAM12_sq / (2./3.* mnusum - 1./6. * pow(nfac, 0.5));
+	    mnu_in[2] = -1./3. * mnusum + 1./3 * pow(nfac, 0.5);
 	    
-	    if(mnu[0]<0 || mnu[1]<0 || mnu[2]<0){
+	    if(mnu_in[0]<0 || mnu_in[1]<0 || mnu_in[2]<0){
 	    // The user has provided a sum that is below the physical limit.
-	    if (params.sum_nu_masses<1e-14){
-			mnu[0] = 0.;
-			mnu[1] = 0.;
-			mnu[2] = 0.;
+	    if (params.sum_nu_masses < 1e-14){
+			mnu_in[0] = 0.; mnu_in[1] = 0.; mnu_in[2] = 0.;
 		}else{
 			*status = CCL_ERROR_MNU_UNPHYSICAL;
 	    }
 	    }
   } else if (mnu_type==ccl_mnu_sum_equal){
 	    // Split the sum of masses equally
-	    params.sum_nu_masses = *mnu;
-	    mnu=malloc(3*sizeof(double));
-	    mnu[0] = params.sum_nu_masses / 3.;
-	    mnu[1] = params.sum_nu_masses / 3.;
-	    mnu[2] = params.sum_nu_masses / 3.;
+	    mnu_in = malloc(3*sizeof(double));
+	    mnu_in[0] = params.sum_nu_masses / 3.;
+	    mnu_in[1] = params.sum_nu_masses / 3.;
+	    mnu_in[2] = params.sum_nu_masses / 3.;
   } else if (mnu_type == ccl_mnu_list){
+      // A list of neutrino masses was already passed in
 	  params.sum_nu_masses = mnu[0] + mnu[1] + mnu[2];
+	  mnu_in = malloc(3*sizeof(double));
+	  for(int i=0; i<3; i++) mnu_in[i] = mnu[i];
   } else {
 	  *status = CCL_ERROR_NOT_IMPLEMENTED;
   }
@@ -373,7 +385,7 @@ ccl_parameters ccl_parameters_create(double Omega_c, double Omega_b, double Omeg
   // Check which of the neutrino species are non-relativistic today
   int N_nu_mass = 0;
   for(int i = 0; i<3; i=i+1){
-  	if (mnu[i] > 0.00017){ // Limit taken from Lesgourges et al. 2012
+  	if (mnu_in[i] > 0.00017){ // Limit taken from Lesgourges et al. 2012
   		N_nu_mass = N_nu_mass + 1;
   	}  	  
   }
@@ -381,21 +393,23 @@ ccl_parameters ccl_parameters_create(double Omega_c, double Omega_b, double Omeg
   
   // Fill the array of massive neutrinos
   if (N_nu_mass>0){
-  	params.mnu=malloc(params.N_nu_mass*sizeof(double));
+  	params.mnu = malloc(params.N_nu_mass*sizeof(double));
   	int relativistic[3] = {0, 0, 0};
-	for (int i = 0; i<N_nu_mass; i = i + 1){
+	for (int i = 0; i < N_nu_mass; i = i + 1){
 		for (int j = 0; j<3; j = j +1){
-			if ((mnu[j]>0.00017) && (relativistic[j]==0)){
+			if ((mnu_in[j]>0.00017) && (relativistic[j]==0)){
 				relativistic[j]=1;
-				params.mnu[i] = mnu[j];
+				params.mnu[i] = mnu_in[j];
 				break;
 			}
-		}
-	}
+		} // end loop over neutrinos
+	} // end loop over massive neutrinos
   } else{
 	  params.mnu = malloc(sizeof(double));
 	  params.mnu[0] = 0.;
   }
+  // Free mnu_in
+  if (mnu_in != NULL) free(mnu_in);
   
   // Dark Energy
   params.w0 = w0;
@@ -676,6 +690,26 @@ void ccl_data_free(ccl_data * data)
     gsl_interp_accel_free(data->accelerator_m);
   if(data->accelerator_k!=NULL)
     gsl_interp_accel_free(data->accelerator_k);
+}
+
+/* ------- ROUTINE: ccl_parameters_free -------- 
+INPUT: ccl_parameters struct
+TASK: free allocated quantities in the parameters struct
+*/
+void ccl_parameters_free(ccl_parameters * params)
+{
+  if (params->mnu != NULL){
+    free(params->mnu);
+    params->mnu = NULL;
+  }
+  if (params->z_mgrowth != NULL){
+    free(params->z_mgrowth);
+    params->z_mgrowth = NULL;
+  }
+  if (params->df_mgrowth != NULL){
+    free(params->df_mgrowth);
+    params->df_mgrowth = NULL;
+  }
 }
 
 
