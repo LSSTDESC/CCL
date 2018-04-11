@@ -4267,7 +4267,8 @@ void Omeganuh2_to_Mnu_vec(double Neff, double OmNuh2, double TCMB,
 
 
 void p_1h_vec(ccl_cosmology * cosmo,
-                    double* k, int nk, double a,
+                    double a,
+                    double* k, int nk,
                     double* output, int nout,
                     int* status)
 {
@@ -4278,7 +4279,8 @@ void p_1h_vec(ccl_cosmology * cosmo,
 }
 
 void p_2h_vec(ccl_cosmology * cosmo,
-                    double* k, int nk, double a,
+                    double a,
+                    double* k, int nk,
                     double* output, int nout,
                     int* status)
 {
@@ -4289,7 +4291,8 @@ void p_2h_vec(ccl_cosmology * cosmo,
 }
 
 void p_halomod_vec(ccl_cosmology * cosmo,
-                     double* k, int nk, double a,
+                     double a,
+                     double* k, int nk,
                      double* output, int nout,
                      int* status)
 {
@@ -4300,9 +4303,10 @@ void p_halomod_vec(ccl_cosmology * cosmo,
 }
 
 void halo_concentration_vec(ccl_cosmology * cosmo,
+                                 double a,
                                  double* halo_mass, int nm,
-                                 double a, double* output,
-                                 int nout, int* status)
+                                 double* output, int nout,
+                                 int* status)
 {
     assert(nout == nm);
     for(int i=0; i < nm; i++){
@@ -19019,18 +19023,18 @@ fail:
 SWIGINTERN PyObject *_wrap_p_1h_vec(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   ccl_cosmology *arg1 = (ccl_cosmology *) 0 ;
-  double *arg2 = (double *) 0 ;
-  int arg3 ;
-  double arg4 ;
+  double arg2 ;
+  double *arg3 = (double *) 0 ;
+  int arg4 ;
   double *arg5 = (double *) 0 ;
   int arg6 ;
   int *arg7 = (int *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  PyArrayObject *array2 = NULL ;
-  int is_new_object2 = 0 ;
-  double val4 ;
-  int ecode4 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyArrayObject *array3 = NULL ;
+  int is_new_object3 = 0 ;
   PyObject *array5 = NULL ;
   int temp7 ;
   int res7 = 0 ;
@@ -19046,23 +19050,23 @@ SWIGINTERN PyObject *_wrap_p_1h_vec(PyObject *SWIGUNUSEDPARM(self), PyObject *ar
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "p_1h_vec" "', argument " "1"" of type '" "ccl_cosmology *""'"); 
   }
   arg1 = (ccl_cosmology *)(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "p_1h_vec" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = (double)(val2);
   {
     npy_intp size[1] = {
       -1 
     };
-    array2 = obj_to_array_contiguous_allow_conversion(obj1,
+    array3 = obj_to_array_contiguous_allow_conversion(obj2,
       NPY_DOUBLE,
-      &is_new_object2);
-    if (!array2 || !require_dimensions(array2, 1) ||
-      !require_size(array2, size, 1)) SWIG_fail;
-    arg2 = (double*) array_data(array2);
-    arg3 = (int) array_size(array2,0);
+      &is_new_object3);
+    if (!array3 || !require_dimensions(array3, 1) ||
+      !require_size(array3, size, 1)) SWIG_fail;
+    arg3 = (double*) array_data(array3);
+    arg4 = (int) array_size(array3,0);
   }
-  ecode4 = SWIG_AsVal_double(obj2, &val4);
-  if (!SWIG_IsOK(ecode4)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "p_1h_vec" "', argument " "4"" of type '" "double""'");
-  } 
-  arg4 = (double)(val4);
   {
     npy_intp dims[1];
     if (!PyInt_Check(obj3))
@@ -19105,17 +19109,17 @@ SWIGINTERN PyObject *_wrap_p_1h_vec(PyObject *SWIGUNUSEDPARM(self), PyObject *ar
     resultobj = SWIG_Python_AppendOutput(resultobj, SWIG_NewPointerObj((void*)(arg7), SWIGTYPE_p_int, new_flags));
   }
   {
-    if (is_new_object2 && array2)
+    if (is_new_object3 && array3)
     {
-      Py_DECREF(array2); 
+      Py_DECREF(array3); 
     }
   }
   return resultobj;
 fail:
   {
-    if (is_new_object2 && array2)
+    if (is_new_object3 && array3)
     {
-      Py_DECREF(array2); 
+      Py_DECREF(array3); 
     }
   }
   return NULL;
@@ -19125,18 +19129,18 @@ fail:
 SWIGINTERN PyObject *_wrap_p_2h_vec(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   ccl_cosmology *arg1 = (ccl_cosmology *) 0 ;
-  double *arg2 = (double *) 0 ;
-  int arg3 ;
-  double arg4 ;
+  double arg2 ;
+  double *arg3 = (double *) 0 ;
+  int arg4 ;
   double *arg5 = (double *) 0 ;
   int arg6 ;
   int *arg7 = (int *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  PyArrayObject *array2 = NULL ;
-  int is_new_object2 = 0 ;
-  double val4 ;
-  int ecode4 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyArrayObject *array3 = NULL ;
+  int is_new_object3 = 0 ;
   PyObject *array5 = NULL ;
   int temp7 ;
   int res7 = 0 ;
@@ -19152,23 +19156,23 @@ SWIGINTERN PyObject *_wrap_p_2h_vec(PyObject *SWIGUNUSEDPARM(self), PyObject *ar
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "p_2h_vec" "', argument " "1"" of type '" "ccl_cosmology *""'"); 
   }
   arg1 = (ccl_cosmology *)(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "p_2h_vec" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = (double)(val2);
   {
     npy_intp size[1] = {
       -1 
     };
-    array2 = obj_to_array_contiguous_allow_conversion(obj1,
+    array3 = obj_to_array_contiguous_allow_conversion(obj2,
       NPY_DOUBLE,
-      &is_new_object2);
-    if (!array2 || !require_dimensions(array2, 1) ||
-      !require_size(array2, size, 1)) SWIG_fail;
-    arg2 = (double*) array_data(array2);
-    arg3 = (int) array_size(array2,0);
+      &is_new_object3);
+    if (!array3 || !require_dimensions(array3, 1) ||
+      !require_size(array3, size, 1)) SWIG_fail;
+    arg3 = (double*) array_data(array3);
+    arg4 = (int) array_size(array3,0);
   }
-  ecode4 = SWIG_AsVal_double(obj2, &val4);
-  if (!SWIG_IsOK(ecode4)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "p_2h_vec" "', argument " "4"" of type '" "double""'");
-  } 
-  arg4 = (double)(val4);
   {
     npy_intp dims[1];
     if (!PyInt_Check(obj3))
@@ -19211,17 +19215,17 @@ SWIGINTERN PyObject *_wrap_p_2h_vec(PyObject *SWIGUNUSEDPARM(self), PyObject *ar
     resultobj = SWIG_Python_AppendOutput(resultobj, SWIG_NewPointerObj((void*)(arg7), SWIGTYPE_p_int, new_flags));
   }
   {
-    if (is_new_object2 && array2)
+    if (is_new_object3 && array3)
     {
-      Py_DECREF(array2); 
+      Py_DECREF(array3); 
     }
   }
   return resultobj;
 fail:
   {
-    if (is_new_object2 && array2)
+    if (is_new_object3 && array3)
     {
-      Py_DECREF(array2); 
+      Py_DECREF(array3); 
     }
   }
   return NULL;
@@ -19231,18 +19235,18 @@ fail:
 SWIGINTERN PyObject *_wrap_p_halomod_vec(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   ccl_cosmology *arg1 = (ccl_cosmology *) 0 ;
-  double *arg2 = (double *) 0 ;
-  int arg3 ;
-  double arg4 ;
+  double arg2 ;
+  double *arg3 = (double *) 0 ;
+  int arg4 ;
   double *arg5 = (double *) 0 ;
   int arg6 ;
   int *arg7 = (int *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  PyArrayObject *array2 = NULL ;
-  int is_new_object2 = 0 ;
-  double val4 ;
-  int ecode4 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyArrayObject *array3 = NULL ;
+  int is_new_object3 = 0 ;
   PyObject *array5 = NULL ;
   int temp7 ;
   int res7 = 0 ;
@@ -19258,23 +19262,23 @@ SWIGINTERN PyObject *_wrap_p_halomod_vec(PyObject *SWIGUNUSEDPARM(self), PyObjec
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "p_halomod_vec" "', argument " "1"" of type '" "ccl_cosmology *""'"); 
   }
   arg1 = (ccl_cosmology *)(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "p_halomod_vec" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = (double)(val2);
   {
     npy_intp size[1] = {
       -1 
     };
-    array2 = obj_to_array_contiguous_allow_conversion(obj1,
+    array3 = obj_to_array_contiguous_allow_conversion(obj2,
       NPY_DOUBLE,
-      &is_new_object2);
-    if (!array2 || !require_dimensions(array2, 1) ||
-      !require_size(array2, size, 1)) SWIG_fail;
-    arg2 = (double*) array_data(array2);
-    arg3 = (int) array_size(array2,0);
+      &is_new_object3);
+    if (!array3 || !require_dimensions(array3, 1) ||
+      !require_size(array3, size, 1)) SWIG_fail;
+    arg3 = (double*) array_data(array3);
+    arg4 = (int) array_size(array3,0);
   }
-  ecode4 = SWIG_AsVal_double(obj2, &val4);
-  if (!SWIG_IsOK(ecode4)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "p_halomod_vec" "', argument " "4"" of type '" "double""'");
-  } 
-  arg4 = (double)(val4);
   {
     npy_intp dims[1];
     if (!PyInt_Check(obj3))
@@ -19317,17 +19321,17 @@ SWIGINTERN PyObject *_wrap_p_halomod_vec(PyObject *SWIGUNUSEDPARM(self), PyObjec
     resultobj = SWIG_Python_AppendOutput(resultobj, SWIG_NewPointerObj((void*)(arg7), SWIGTYPE_p_int, new_flags));
   }
   {
-    if (is_new_object2 && array2)
+    if (is_new_object3 && array3)
     {
-      Py_DECREF(array2); 
+      Py_DECREF(array3); 
     }
   }
   return resultobj;
 fail:
   {
-    if (is_new_object2 && array2)
+    if (is_new_object3 && array3)
     {
-      Py_DECREF(array2); 
+      Py_DECREF(array3); 
     }
   }
   return NULL;
@@ -19337,18 +19341,18 @@ fail:
 SWIGINTERN PyObject *_wrap_halo_concentration_vec(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   ccl_cosmology *arg1 = (ccl_cosmology *) 0 ;
-  double *arg2 = (double *) 0 ;
-  int arg3 ;
-  double arg4 ;
+  double arg2 ;
+  double *arg3 = (double *) 0 ;
+  int arg4 ;
   double *arg5 = (double *) 0 ;
   int arg6 ;
   int *arg7 = (int *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  PyArrayObject *array2 = NULL ;
-  int is_new_object2 = 0 ;
-  double val4 ;
-  int ecode4 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyArrayObject *array3 = NULL ;
+  int is_new_object3 = 0 ;
   PyObject *array5 = NULL ;
   int temp7 ;
   int res7 = 0 ;
@@ -19364,23 +19368,23 @@ SWIGINTERN PyObject *_wrap_halo_concentration_vec(PyObject *SWIGUNUSEDPARM(self)
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "halo_concentration_vec" "', argument " "1"" of type '" "ccl_cosmology *""'"); 
   }
   arg1 = (ccl_cosmology *)(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "halo_concentration_vec" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = (double)(val2);
   {
     npy_intp size[1] = {
       -1 
     };
-    array2 = obj_to_array_contiguous_allow_conversion(obj1,
+    array3 = obj_to_array_contiguous_allow_conversion(obj2,
       NPY_DOUBLE,
-      &is_new_object2);
-    if (!array2 || !require_dimensions(array2, 1) ||
-      !require_size(array2, size, 1)) SWIG_fail;
-    arg2 = (double*) array_data(array2);
-    arg3 = (int) array_size(array2,0);
+      &is_new_object3);
+    if (!array3 || !require_dimensions(array3, 1) ||
+      !require_size(array3, size, 1)) SWIG_fail;
+    arg3 = (double*) array_data(array3);
+    arg4 = (int) array_size(array3,0);
   }
-  ecode4 = SWIG_AsVal_double(obj2, &val4);
-  if (!SWIG_IsOK(ecode4)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "halo_concentration_vec" "', argument " "4"" of type '" "double""'");
-  } 
-  arg4 = (double)(val4);
   {
     npy_intp dims[1];
     if (!PyInt_Check(obj3))
@@ -19423,17 +19427,17 @@ SWIGINTERN PyObject *_wrap_halo_concentration_vec(PyObject *SWIGUNUSEDPARM(self)
     resultobj = SWIG_Python_AppendOutput(resultobj, SWIG_NewPointerObj((void*)(arg7), SWIGTYPE_p_int, new_flags));
   }
   {
-    if (is_new_object2 && array2)
+    if (is_new_object3 && array3)
     {
-      Py_DECREF(array2); 
+      Py_DECREF(array3); 
     }
   }
   return resultobj;
 fail:
   {
-    if (is_new_object2 && array2)
+    if (is_new_object3 && array3)
     {
-      Py_DECREF(array2); 
+      Py_DECREF(array3); 
     }
   }
   return NULL;
@@ -20939,10 +20943,10 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"p_2h", _wrap_p_2h, METH_VARARGS, (char *)"p_2h(cosmology cosmo, double k, double a, int * status) -> double"},
 	 { (char *)"p_halomod", _wrap_p_halomod, METH_VARARGS, (char *)"p_halomod(cosmology cosmo, double k, double a, int * status) -> double"},
 	 { (char *)"halo_concentration", _wrap_halo_concentration, METH_VARARGS, (char *)"halo_concentration(cosmology cosmo, double halomass, double a, int * status) -> double"},
-	 { (char *)"p_1h_vec", _wrap_p_1h_vec, METH_VARARGS, (char *)"p_1h_vec(cosmology cosmo, double * k, double a, double * output, int * status)"},
-	 { (char *)"p_2h_vec", _wrap_p_2h_vec, METH_VARARGS, (char *)"p_2h_vec(cosmology cosmo, double * k, double a, double * output, int * status)"},
-	 { (char *)"p_halomod_vec", _wrap_p_halomod_vec, METH_VARARGS, (char *)"p_halomod_vec(cosmology cosmo, double * k, double a, double * output, int * status)"},
-	 { (char *)"halo_concentration_vec", _wrap_halo_concentration_vec, METH_VARARGS, (char *)"halo_concentration_vec(cosmology cosmo, double * halo_mass, double a, double * output, int * status)"},
+	 { (char *)"p_1h_vec", _wrap_p_1h_vec, METH_VARARGS, (char *)"p_1h_vec(cosmology cosmo, double a, double * k, double * output, int * status)"},
+	 { (char *)"p_2h_vec", _wrap_p_2h_vec, METH_VARARGS, (char *)"p_2h_vec(cosmology cosmo, double a, double * k, double * output, int * status)"},
+	 { (char *)"p_halomod_vec", _wrap_p_halomod_vec, METH_VARARGS, (char *)"p_halomod_vec(cosmology cosmo, double a, double * k, double * output, int * status)"},
+	 { (char *)"halo_concentration_vec", _wrap_halo_concentration_vec, METH_VARARGS, (char *)"halo_concentration_vec(cosmology cosmo, double a, double * halo_mass, double * output, int * status)"},
 	 { (char *)"configuration_transfer_function_method_set", _wrap_configuration_transfer_function_method_set, METH_VARARGS, (char *)"configuration_transfer_function_method_set(configuration self, transfer_function_t transfer_function_method)"},
 	 { (char *)"configuration_transfer_function_method_get", _wrap_configuration_transfer_function_method_get, METH_VARARGS, (char *)"configuration_transfer_function_method_get(configuration self) -> transfer_function_t"},
 	 { (char *)"configuration_matter_power_spectrum_method_set", _wrap_configuration_matter_power_spectrum_method_set, METH_VARARGS, (char *)"configuration_matter_power_spectrum_method_set(configuration self, matter_power_spectrum_t matter_power_spectrum_method)"},

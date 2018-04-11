@@ -1072,19 +1072,19 @@ def halo_concentration(*args):
   return _ccllib.halo_concentration(*args)
 
 def p_1h_vec(*args):
-  """p_1h_vec(cosmology cosmo, double * k, double a, double * output, int * status)"""
+  """p_1h_vec(cosmology cosmo, double a, double * k, double * output, int * status)"""
   return _ccllib.p_1h_vec(*args)
 
 def p_2h_vec(*args):
-  """p_2h_vec(cosmology cosmo, double * k, double a, double * output, int * status)"""
+  """p_2h_vec(cosmology cosmo, double a, double * k, double * output, int * status)"""
   return _ccllib.p_2h_vec(*args)
 
 def p_halomod_vec(*args):
-  """p_halomod_vec(cosmology cosmo, double * k, double a, double * output, int * status)"""
+  """p_halomod_vec(cosmology cosmo, double a, double * k, double * output, int * status)"""
   return _ccllib.p_halomod_vec(*args)
 
 def halo_concentration_vec(*args):
-  """halo_concentration_vec(cosmology cosmo, double * halo_mass, double a, double * output, int * status)"""
+  """halo_concentration_vec(cosmology cosmo, double a, double * halo_mass, double * output, int * status)"""
   return _ccllib.halo_concentration_vec(*args)
 emulator = _ccllib.emulator
 none = _ccllib.none
