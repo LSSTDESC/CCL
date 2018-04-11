@@ -336,11 +336,6 @@ def check_massfunc_nu(cosmo):
     assert_raises(TypeError, ccl.sigmaM, cosmo, mhalo_scl, a_arr)
     assert_raises(TypeError, ccl.sigmaM, cosmo, mhalo_lst, a_arr)
     assert_raises(TypeError, ccl.sigmaM, cosmo, mhalo_arr, a_arr)
-    
-    # halo_bias
-    assert_( all_finite(ccl.halo_bias(cosmo, mhalo_scl, a)) )
-    assert_( all_finite(ccl.halo_bias(cosmo, mhalo_lst, a)) )
-    assert_( all_finite(ccl.halo_bias(cosmo, mhalo_arr, a)) )
 
 
 def check_neutrinos():

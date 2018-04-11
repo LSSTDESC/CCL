@@ -176,8 +176,9 @@ class ClTracer(object):
         """Free memory associated with CCL_ClTracer object.
 
         """
-        if self.has_cltracer==True:
-            lib.cl_tracer_free(self.cltracer)
+        if hasattr(self, 'has_cltracer'):
+            if self.has_cltracer:
+                lib.cl_tracer_free(self.cltracer)
 
 
 class ClTracerNumberCounts(ClTracer):
