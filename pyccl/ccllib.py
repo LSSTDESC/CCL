@@ -138,6 +138,10 @@ class parameters(_object):
     __swig_getmethods__["h"] = _ccllib.parameters_h_get
     if _newclass:
         h = _swig_property(_ccllib.parameters_h_get, _ccllib.parameters_h_set)
+    __swig_setmethods__["Neff"] = _ccllib.parameters_Neff_set
+    __swig_getmethods__["Neff"] = _ccllib.parameters_Neff_get
+    if _newclass:
+        Neff = _swig_property(_ccllib.parameters_Neff_get, _ccllib.parameters_Neff_set)
     __swig_setmethods__["N_nu_mass"] = _ccllib.parameters_N_nu_mass_set
     __swig_getmethods__["N_nu_mass"] = _ccllib.parameters_N_nu_mass_get
     if _newclass:
@@ -150,6 +154,10 @@ class parameters(_object):
     __swig_getmethods__["mnu"] = _ccllib.parameters_mnu_get
     if _newclass:
         mnu = _swig_property(_ccllib.parameters_mnu_get, _ccllib.parameters_mnu_set)
+    __swig_setmethods__["sum_nu_masses"] = _ccllib.parameters_sum_nu_masses_set
+    __swig_getmethods__["sum_nu_masses"] = _ccllib.parameters_sum_nu_masses_get
+    if _newclass:
+        sum_nu_masses = _swig_property(_ccllib.parameters_sum_nu_masses_get, _ccllib.parameters_sum_nu_masses_set)
     __swig_setmethods__["Omega_n_mass"] = _ccllib.parameters_Omega_n_mass_set
     __swig_getmethods__["Omega_n_mass"] = _ccllib.parameters_Omega_n_mass_get
     if _newclass:
@@ -406,6 +414,18 @@ cosmology_swigregister = _ccllib.cosmology_swigregister
 cosmology_swigregister(cosmology)
 
 
+_ccllib.mnu_list_swigconstant(_ccllib)
+mnu_list = _ccllib.mnu_list
+
+_ccllib.mnu_sum_swigconstant(_ccllib)
+mnu_sum = _ccllib.mnu_sum
+
+_ccllib.mnu_sum_inverted_swigconstant(_ccllib)
+mnu_sum_inverted = _ccllib.mnu_sum_inverted
+
+_ccllib.mnu_sum_equal_swigconstant(_ccllib)
+mnu_sum_equal = _ccllib.mnu_sum_equal
+
 def cosmology_read_config():
     """cosmology_read_config()"""
     return _ccllib.cosmology_read_config()
@@ -414,17 +434,17 @@ def cosmology_create(params, config):
     """cosmology_create(parameters params, configuration config) -> cosmology"""
     return _ccllib.cosmology_create(params, config)
 
-def cosmology_create_with_params(Omega_c, Omega_b, Omega_k, N_nu_rel, N_nu_mass, mnu, w0, wa, h, norm_pk, n_s, bcm_log10Mc, bcm_etab, bcm_ks, nz_mgrowth, zarr_mgrowth, dfarr_mgrowth, config, status):
-    """cosmology_create_with_params(double Omega_c, double Omega_b, double Omega_k, double N_nu_rel, double N_nu_mass, double mnu, double w0, double wa, double h, double norm_pk, double n_s, double bcm_log10Mc, double bcm_etab, double bcm_ks, int nz_mgrowth, double * zarr_mgrowth, double * dfarr_mgrowth, configuration config, int * status) -> cosmology"""
-    return _ccllib.cosmology_create_with_params(Omega_c, Omega_b, Omega_k, N_nu_rel, N_nu_mass, mnu, w0, wa, h, norm_pk, n_s, bcm_log10Mc, bcm_etab, bcm_ks, nz_mgrowth, zarr_mgrowth, dfarr_mgrowth, config, status)
+def cosmology_create_with_params(Omega_c, Omega_b, Omega_k, Neff, mnu, mnu_type, w0, wa, h, norm_pk, n_s, bcm_log10Mc, bcm_etab, bcm_ks, nz_mgrowth, zarr_mgrowth, dfarr_mgrowth, config, status):
+    """cosmology_create_with_params(double Omega_c, double Omega_b, double Omega_k, double Neff, double * mnu, ccl_mnu_convention mnu_type, double w0, double wa, double h, double norm_pk, double n_s, double bcm_log10Mc, double bcm_etab, double bcm_ks, int nz_mgrowth, double * zarr_mgrowth, double * dfarr_mgrowth, configuration config, int * status) -> cosmology"""
+    return _ccllib.cosmology_create_with_params(Omega_c, Omega_b, Omega_k, Neff, mnu, mnu_type, w0, wa, h, norm_pk, n_s, bcm_log10Mc, bcm_etab, bcm_ks, nz_mgrowth, zarr_mgrowth, dfarr_mgrowth, config, status)
 
 def cosmology_create_with_lcdm_params(Omega_c, Omega_b, Omega_k, h, norm_pk, n_s, config, status):
     """cosmology_create_with_lcdm_params(double Omega_c, double Omega_b, double Omega_k, double h, double norm_pk, double n_s, configuration config, int * status) -> cosmology"""
     return _ccllib.cosmology_create_with_lcdm_params(Omega_c, Omega_b, Omega_k, h, norm_pk, n_s, config, status)
 
-def parameters_create(Omega_c, Omega_b, Omega_k, N_nu_rel, N_nu_mass, mnu, w0, wa, h, norm_pk, n_s, bcm_log10Mc, bcm_etab, bcm_ks, nz_mgrowth, zarr_mgrowth, dfarr_mgrowth, status):
-    """parameters_create(double Omega_c, double Omega_b, double Omega_k, double N_nu_rel, double N_nu_mass, double mnu, double w0, double wa, double h, double norm_pk, double n_s, double bcm_log10Mc, double bcm_etab, double bcm_ks, int nz_mgrowth, double * zarr_mgrowth, double * dfarr_mgrowth, int * status) -> parameters"""
-    return _ccllib.parameters_create(Omega_c, Omega_b, Omega_k, N_nu_rel, N_nu_mass, mnu, w0, wa, h, norm_pk, n_s, bcm_log10Mc, bcm_etab, bcm_ks, nz_mgrowth, zarr_mgrowth, dfarr_mgrowth, status)
+def parameters_create(Omega_c, Omega_b, Omega_k, Neff, mnu, mnu_type, w0, wa, h, norm_pk, n_s, bcm_log10Mc, bcm_etab, bcm_ks, nz_mgrowth, zarr_mgrowth, dfarr_mgrowth, status):
+    """parameters_create(double Omega_c, double Omega_b, double Omega_k, double Neff, double * mnu, ccl_mnu_convention mnu_type, double w0, double wa, double h, double norm_pk, double n_s, double bcm_log10Mc, double bcm_etab, double bcm_ks, int nz_mgrowth, double * zarr_mgrowth, double * dfarr_mgrowth, int * status) -> parameters"""
+    return _ccllib.parameters_create(Omega_c, Omega_b, Omega_k, Neff, mnu, mnu_type, w0, wa, h, norm_pk, n_s, bcm_log10Mc, bcm_etab, bcm_ks, nz_mgrowth, zarr_mgrowth, dfarr_mgrowth, status)
 
 def parameters_create_flat_lcdm(Omega_c, Omega_b, h, norm_pk, n_s, status):
     """parameters_create_flat_lcdm(double Omega_c, double Omega_b, double h, double norm_pk, double n_s, int * status) -> parameters"""
@@ -446,21 +466,25 @@ def parameters_create_lcdm(Omega_c, Omega_b, Omega_k, h, norm_pk, n_s, status):
     """parameters_create_lcdm(double Omega_c, double Omega_b, double Omega_k, double h, double norm_pk, double n_s, int * status) -> parameters"""
     return _ccllib.parameters_create_lcdm(Omega_c, Omega_b, Omega_k, h, norm_pk, n_s, status)
 
-def parameters_create_flat_lcdm_nu(Omega_c, Omega_b, h, norm_pk, n_s, N_nu_rel, N_nu_mass, mnu, status):
-    """parameters_create_flat_lcdm_nu(double Omega_c, double Omega_b, double h, double norm_pk, double n_s, double N_nu_rel, double N_nu_mass, double mnu, int * status) -> parameters"""
-    return _ccllib.parameters_create_flat_lcdm_nu(Omega_c, Omega_b, h, norm_pk, n_s, N_nu_rel, N_nu_mass, mnu, status)
+def parameters_create_flat_lcdm_nu(Omega_c, Omega_b, h, norm_pk, n_s, Neff, mnu, mnu_type, status):
+    """parameters_create_flat_lcdm_nu(double Omega_c, double Omega_b, double h, double norm_pk, double n_s, double Neff, double * mnu, ccl_mnu_convention mnu_type, int * status) -> parameters"""
+    return _ccllib.parameters_create_flat_lcdm_nu(Omega_c, Omega_b, h, norm_pk, n_s, Neff, mnu, mnu_type, status)
 
-def parameters_create_flat_wcdm_nu(Omega_c, Omega_b, w0, h, norm_pk, n_s, N_nu_rel, N_nu_mass, mnu, status):
-    """parameters_create_flat_wcdm_nu(double Omega_c, double Omega_b, double w0, double h, double norm_pk, double n_s, double N_nu_rel, double N_nu_mass, double mnu, int * status) -> parameters"""
-    return _ccllib.parameters_create_flat_wcdm_nu(Omega_c, Omega_b, w0, h, norm_pk, n_s, N_nu_rel, N_nu_mass, mnu, status)
+def parameters_create_flat_wcdm_nu(Omega_c, Omega_b, w0, h, norm_pk, n_s, Neff, mnu, mnu_type, status):
+    """parameters_create_flat_wcdm_nu(double Omega_c, double Omega_b, double w0, double h, double norm_pk, double n_s, double Neff, double * mnu, ccl_mnu_convention mnu_type, int * status) -> parameters"""
+    return _ccllib.parameters_create_flat_wcdm_nu(Omega_c, Omega_b, w0, h, norm_pk, n_s, Neff, mnu, mnu_type, status)
 
-def parameters_create_flat_wacdm_nu(Omega_c, Omega_b, w0, wa, h, norm_pk, n_s, N_nu_rel, N_nu_mass, mnu, status):
-    """parameters_create_flat_wacdm_nu(double Omega_c, double Omega_b, double w0, double wa, double h, double norm_pk, double n_s, double N_nu_rel, double N_nu_mass, double mnu, int * status) -> parameters"""
-    return _ccllib.parameters_create_flat_wacdm_nu(Omega_c, Omega_b, w0, wa, h, norm_pk, n_s, N_nu_rel, N_nu_mass, mnu, status)
+def parameters_create_flat_wacdm_nu(Omega_c, Omega_b, w0, wa, h, norm_pk, n_s, Neff, mnu, mnu_type, status):
+    """parameters_create_flat_wacdm_nu(double Omega_c, double Omega_b, double w0, double wa, double h, double norm_pk, double n_s, double Neff, double * mnu, ccl_mnu_convention mnu_type, int * status) -> parameters"""
+    return _ccllib.parameters_create_flat_wacdm_nu(Omega_c, Omega_b, w0, wa, h, norm_pk, n_s, Neff, mnu, mnu_type, status)
 
-def parameters_create_lcdm_nu(Omega_c, Omega_b, Omega_k, h, norm_pk, n_s, N_nu_rel, N_nu_mass, mnu, status):
-    """parameters_create_lcdm_nu(double Omega_c, double Omega_b, double Omega_k, double h, double norm_pk, double n_s, double N_nu_rel, double N_nu_mass, double mnu, int * status) -> parameters"""
-    return _ccllib.parameters_create_lcdm_nu(Omega_c, Omega_b, Omega_k, h, norm_pk, n_s, N_nu_rel, N_nu_mass, mnu, status)
+def parameters_create_lcdm_nu(Omega_c, Omega_b, Omega_k, h, norm_pk, n_s, Neff, mnu, mnu_type, status):
+    """parameters_create_lcdm_nu(double Omega_c, double Omega_b, double Omega_k, double h, double norm_pk, double n_s, double Neff, double * mnu, ccl_mnu_convention mnu_type, int * status) -> parameters"""
+    return _ccllib.parameters_create_lcdm_nu(Omega_c, Omega_b, Omega_k, h, norm_pk, n_s, Neff, mnu, mnu_type, status)
+
+def parameters_free(params):
+    """parameters_free(parameters params)"""
+    return _ccllib.parameters_free(params)
 
 def cosmology_free(cosmo):
     """cosmology_free(cosmology cosmo)"""
@@ -478,9 +502,13 @@ def cosmology_compute_power(cosmo, status):
     """cosmology_compute_power(cosmology cosmo, int * status)"""
     return _ccllib.cosmology_compute_power(cosmo, status)
 
-def parameters_create_vec(Omega_c, Omega_b, Omega_k, N_nu_rel, N_nu_mass, M_nu, w0, wa, h, norm_pk, n_s, bcm_log10Mc, bcm_etab, bcm_ks, zarr, dfarr, status):
-    """parameters_create_vec(double Omega_c, double Omega_b, double Omega_k, double N_nu_rel, double N_nu_mass, double M_nu, double w0, double wa, double h, double norm_pk, double n_s, double bcm_log10Mc, double bcm_etab, double bcm_ks, double * zarr, double * dfarr, int * status) -> parameters"""
-    return _ccllib.parameters_create_vec(Omega_c, Omega_b, Omega_k, N_nu_rel, N_nu_mass, M_nu, w0, wa, h, norm_pk, n_s, bcm_log10Mc, bcm_etab, bcm_ks, zarr, dfarr, status)
+def parameters_create_nu(Omega_c, Omega_b, Omega_k, Neff, w0, wa, h, norm_pk, n_s, bcm_log10Mc, bcm_etab, bcm_ks, mnu_is_sum, m_nu, status):
+    """parameters_create_nu(double Omega_c, double Omega_b, double Omega_k, double Neff, double w0, double wa, double h, double norm_pk, double n_s, double bcm_log10Mc, double bcm_etab, double bcm_ks, int mnu_is_sum, double * m_nu, int * status) -> parameters"""
+    return _ccllib.parameters_create_nu(Omega_c, Omega_b, Omega_k, Neff, w0, wa, h, norm_pk, n_s, bcm_log10Mc, bcm_etab, bcm_ks, mnu_is_sum, m_nu, status)
+
+def parameters_create_nu_vec(Omega_c, Omega_b, Omega_k, Neff, w0, wa, h, norm_pk, n_s, bcm_log10Mc, bcm_etab, bcm_ks, zarr, dfarr, mnu_is_sum, m_nu, status):
+    """parameters_create_nu_vec(double Omega_c, double Omega_b, double Omega_k, double Neff, double w0, double wa, double h, double norm_pk, double n_s, double bcm_log10Mc, double bcm_etab, double bcm_ks, double * zarr, double * dfarr, int mnu_is_sum, double * m_nu, int * status) -> parameters"""
+    return _ccllib.parameters_create_nu_vec(Omega_c, Omega_b, Omega_k, Neff, w0, wa, h, norm_pk, n_s, bcm_log10Mc, bcm_etab, bcm_ks, zarr, dfarr, mnu_is_sum, m_nu, status)
 
 _ccllib.species_crit_label_swigconstant(_ccllib)
 species_crit_label = _ccllib.species_crit_label
@@ -1252,6 +1280,15 @@ EV_IN_J = _ccllib.EV_IN_J
 _ccllib.TNCDM_swigconstant(_ccllib)
 TNCDM = _ccllib.TNCDM
 
+_ccllib.DELTAM12_sq_swigconstant(_ccllib)
+DELTAM12_sq = _ccllib.DELTAM12_sq
+
+_ccllib.DELTAM13_sq_pos_swigconstant(_ccllib)
+DELTAM13_sq_pos = _ccllib.DELTAM13_sq_pos
+
+_ccllib.DELTAM13_sq_neg_swigconstant(_ccllib)
+DELTAM13_sq_neg = _ccllib.DELTAM13_sq_neg
+
 _ccllib.EPSREL_DIST_swigconstant(_ccllib)
 EPSREL_DIST = _ccllib.EPSREL_DIST
 
@@ -1385,25 +1422,37 @@ CCL_NU_MNUT_MAX = _ccllib.CCL_NU_MNUT_MAX
 _ccllib.CCL_NU_MNUT_N_swigconstant(_ccllib)
 CCL_NU_MNUT_N = _ccllib.CCL_NU_MNUT_N
 
+_ccllib.nu_normal_swigconstant(_ccllib)
+nu_normal = _ccllib.nu_normal
+
+_ccllib.nu_inverted_swigconstant(_ccllib)
+nu_inverted = _ccllib.nu_inverted
+
+_ccllib.nu_equal_swigconstant(_ccllib)
+nu_equal = _ccllib.nu_equal
+
+_ccllib.nu_sum_swigconstant(_ccllib)
+nu_sum = _ccllib.nu_sum
+
 def calculate_nu_phasespace_spline(status):
     """calculate_nu_phasespace_spline(int * status) -> gsl_spline *"""
     return _ccllib.calculate_nu_phasespace_spline(status)
 
-def Omeganuh2(a, Neff, mnu, TCMB, accel, status):
-    """Omeganuh2(double a, double Neff, double mnu, double TCMB, gsl_interp_accel * accel, int * status) -> double"""
-    return _ccllib.Omeganuh2(a, Neff, mnu, TCMB, accel, status)
+def Omeganuh2(a, N_nu_mass, mnu, TCMB, accel, status):
+    """Omeganuh2(double a, int N_nu_mass, double * mnu, double TCMB, gsl_interp_accel * accel, int * status) -> double"""
+    return _ccllib.Omeganuh2(a, N_nu_mass, mnu, TCMB, accel, status)
 
-def Omeganuh2_to_Mnu(a, Neff, OmNuh2, TCMB, accel, status):
-    """Omeganuh2_to_Mnu(double a, double Neff, double OmNuh2, double TCMB, gsl_interp_accel * accel, int * status) -> double"""
-    return _ccllib.Omeganuh2_to_Mnu(a, Neff, OmNuh2, TCMB, accel, status)
+def nu_masses(OmNuh2, mass_split, TCMB, status):
+    """nu_masses(double OmNuh2, ccl_neutrino_mass_splits mass_split, double TCMB, int * status) -> double *"""
+    return _ccllib.nu_masses(OmNuh2, mass_split, TCMB, status)
 
-def Omeganuh2_vec(Neff, mnu, TCMB, a, output, status):
-    """Omeganuh2_vec(double Neff, double mnu, double TCMB, double * a, double * output, int * status)"""
-    return _ccllib.Omeganuh2_vec(Neff, mnu, TCMB, a, output, status)
+def Omeganuh2_vec(N_nu_mass, TCMB, a, mnu, output, status):
+    """Omeganuh2_vec(int N_nu_mass, double TCMB, double * a, double * mnu, double * output, int * status)"""
+    return _ccllib.Omeganuh2_vec(N_nu_mass, TCMB, a, mnu, output, status)
 
-def Omeganuh2_to_Mnu_vec(Neff, OmNuh2, TCMB, a, output, status):
-    """Omeganuh2_to_Mnu_vec(double Neff, double OmNuh2, double TCMB, double * a, double * output, int * status)"""
-    return _ccllib.Omeganuh2_to_Mnu_vec(Neff, OmNuh2, TCMB, a, output, status)
+def nu_masses_vec(OmNuh2, label, TCMB, output, status):
+    """nu_masses_vec(double OmNuh2, int label, double TCMB, double * output, int * status)"""
+    return _ccllib.nu_masses_vec(OmNuh2, label, TCMB, output, status)
 
 _ccllib.emulator_swigconstant(_ccllib)
 emulator = _ccllib.emulator
@@ -1458,6 +1507,12 @@ watson = _ccllib.watson
 
 _ccllib.angulo_swigconstant(_ccllib)
 angulo = _ccllib.angulo
+
+_ccllib.emu_strict_swigconstant(_ccllib)
+emu_strict = _ccllib.emu_strict
+
+_ccllib.emu_equalize_swigconstant(_ccllib)
+emu_equalize = _ccllib.emu_equalize
 class configuration(_object):
     """Proxy of C ccl_configuration struct."""
 
@@ -1482,6 +1537,10 @@ class configuration(_object):
     __swig_getmethods__["mass_function_method"] = _ccllib.configuration_mass_function_method_get
     if _newclass:
         mass_function_method = _swig_property(_ccllib.configuration_mass_function_method_get, _ccllib.configuration_mass_function_method_set)
+    __swig_setmethods__["emulator_neutrinos_method"] = _ccllib.configuration_emulator_neutrinos_method_set
+    __swig_getmethods__["emulator_neutrinos_method"] = _ccllib.configuration_emulator_neutrinos_method_get
+    if _newclass:
+        emulator_neutrinos_method = _swig_property(_ccllib.configuration_emulator_neutrinos_method_get, _ccllib.configuration_emulator_neutrinos_method_set)
 
     def __init__(self):
         """__init__(ccl_configuration self) -> configuration"""
@@ -1543,6 +1602,9 @@ CCL_ERROR_NU_SOLVE = _ccllib.CCL_ERROR_NU_SOLVE
 
 _ccllib.CCL_ERROR_NOT_IMPLEMENTED_swigconstant(_ccllib)
 CCL_ERROR_NOT_IMPLEMENTED = _ccllib.CCL_ERROR_NOT_IMPLEMENTED
+
+_ccllib.CCL_ERROR_MNU_UNPHYSICAL_swigconstant(_ccllib)
+CCL_ERROR_MNU_UNPHYSICAL = _ccllib.CCL_ERROR_MNU_UNPHYSICAL
 
 _ccllib.CCL_ERROR_POLICY_EXIT_swigconstant(_ccllib)
 CCL_ERROR_POLICY_EXIT = _ccllib.CCL_ERROR_POLICY_EXIT

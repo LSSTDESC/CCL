@@ -92,6 +92,17 @@ extern "C" {
  */
 #define TNCDM 0.71611
 
+/**
+ * neutrino mass splitting differences
+ * See Lesgourgues and Pastor, 2012 for these values.
+ * Adv. High Energy Phys. 2012 (2012) 608515, 
+ * arXiv:1212.6154, page 13
+*/
+#define DELTAM12_sq 7.62E-5
+#define DELTAM13_sq_pos 2.55E-3
+#define DELTAM13_sq_neg -2.43E-3
+
+
 //Precision parameters
 /**
  * Relative precision in distance calculations

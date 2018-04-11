@@ -425,6 +425,12 @@ TASK: returns halo mass function as dn / dlog10 m
 
 double ccl_massfunc(ccl_cosmology *cosmo, double halomass, double a, double odelta, int * status)
 {
+  if (cosmo->params.N_nu_mass>0){
+	  *status = CCL_ERROR_NOT_IMPLEMENTED;
+	  strcpy(cosmo->status_message,"ccl_background.c: ccl_cosmology_compute_growth(): Support for the halo mass function in cosmologies with massive neutrinos is not yet implemented.\n");
+	  return NAN; 
+  }
+	
   if (!cosmo->computed_sigma) {
     ccl_cosmology_compute_sigma(cosmo, status);
     ccl_check_status(cosmo, status);
@@ -447,6 +453,13 @@ TASK: returns linear halo bias
 
 double ccl_halo_bias(ccl_cosmology *cosmo, double halomass, double a, double odelta, int * status)
 {
+  if (cosmo->params.N_nu_mass>0){
+	  *status = CCL_ERROR_NOT_IMPLEMENTED;
+	  strcpy(cosmo->status_message,"ccl_background.c: ccl_cosmology_compute_growth(): Support for the halo bias in cosmologies with massive neutrinos is not yet implemented.\n");
+	  return NAN; 
+  }
+		
+	
   if (!cosmo->computed_sigma) {
     ccl_cosmology_compute_sigma(cosmo, status);
     ccl_check_status(cosmo, status);

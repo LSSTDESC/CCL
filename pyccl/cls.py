@@ -101,7 +101,7 @@ class ClTracer(object):
 
         # Construct new ccl_cl_tracer
         status = 0
-        self.cltracer, status = lib.cl_tracer_new_wrapper(
+        return_val = lib.cl_tracer_new_wrapper(
                             cosmo,
                             tracer_types[tracer_type],
                             int(has_rsd),
@@ -114,6 +114,13 @@ class ClTracer(object):
                             self.z_rf, self.rf,
                             self.z_source,
                             status )
+                  
+        if (isinstance(return_val,int)):
+            self.has_cltracer = False 
+            check(return_val)                
+        else:
+            self.has_cltracer = True
+            self.cltracer, status = return_val
 
     def get_internal_function(self,cosmo,function,a) :
         """
@@ -165,7 +172,8 @@ class ClTracer(object):
         """Free memory associated with CCL_ClTracer object.
 
         """
-        lib.cl_tracer_free(self.cltracer)
+        if self.has_cltracer==True:
+            lib.cl_tracer_free(self.cltracer)
 
 
 class ClTracerNumberCounts(ClTracer):
