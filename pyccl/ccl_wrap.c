@@ -2992,8 +2992,8 @@ SWIG_Python_NonDynamicSetAttr(PyObject *obj, PyObject *name, PyObject *value) {
 #define SWIGTYPE_p_ccl_data swig_types[6]
 #define SWIGTYPE_p_ccl_mnu_convention swig_types[7]
 #define SWIGTYPE_p_ccl_neutrino_mass_splits swig_types[8]
-#define SWIGTYPE_p_ccl_omega_x_label swig_types[9]
-#define SWIGTYPE_p_ccl_parameters swig_types[10]
+#define SWIGTYPE_p_ccl_parameters swig_types[9]
+#define SWIGTYPE_p_ccl_species_x_label swig_types[10]
 #define SWIGTYPE_p_char swig_types[11]
 #define SWIGTYPE_p_double swig_types[12]
 #define SWIGTYPE_p_emulator_neutrinos_t swig_types[13]
@@ -4002,6 +4002,15 @@ void omega_x_vec(ccl_cosmology * cosmo, int label,
     assert(nout == na);
     for(int i=0; i < na; i++){
       output[i] = ccl_omega_x(cosmo, a[i], label, status);
+    }
+}
+
+void rho_x_vec(ccl_cosmology * cosmo, int label, int is_comoving,
+		double* a, int na,
+		double* output, int nout, int *status) {
+    assert(nout == na);
+    for(int i=0; i < na; i++){
+      output[i] = ccl_rho_x(cosmo, a[i], label, is_comoving, status);
     }
 }
 
@@ -10575,68 +10584,79 @@ fail:
 }
 
 
-SWIGINTERN PyObject *omega_m_label_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *species_crit_label_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *module;
   PyObject *d;
   if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
   d = PyModule_GetDict(module);
   if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "omega_m_label",SWIG_From_int((int)(ccl_omega_m_label)));
+  SWIG_Python_SetConstant(d, "species_crit_label",SWIG_From_int((int)(ccl_species_crit_label)));
   return SWIG_Py_Void();
 }
 
 
-SWIGINTERN PyObject *omega_l_label_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *species_m_label_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *module;
   PyObject *d;
   if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
   d = PyModule_GetDict(module);
   if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "omega_l_label",SWIG_From_int((int)(ccl_omega_l_label)));
+  SWIG_Python_SetConstant(d, "species_m_label",SWIG_From_int((int)(ccl_species_m_label)));
   return SWIG_Py_Void();
 }
 
 
-SWIGINTERN PyObject *omega_g_label_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *species_l_label_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *module;
   PyObject *d;
   if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
   d = PyModule_GetDict(module);
   if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "omega_g_label",SWIG_From_int((int)(ccl_omega_g_label)));
+  SWIG_Python_SetConstant(d, "species_l_label",SWIG_From_int((int)(ccl_species_l_label)));
   return SWIG_Py_Void();
 }
 
 
-SWIGINTERN PyObject *omega_k_label_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *species_g_label_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *module;
   PyObject *d;
   if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
   d = PyModule_GetDict(module);
   if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "omega_k_label",SWIG_From_int((int)(ccl_omega_k_label)));
+  SWIG_Python_SetConstant(d, "species_g_label",SWIG_From_int((int)(ccl_species_g_label)));
   return SWIG_Py_Void();
 }
 
 
-SWIGINTERN PyObject *omega_ur_label_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *species_k_label_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *module;
   PyObject *d;
   if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
   d = PyModule_GetDict(module);
   if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "omega_ur_label",SWIG_From_int((int)(ccl_omega_ur_label)));
+  SWIG_Python_SetConstant(d, "species_k_label",SWIG_From_int((int)(ccl_species_k_label)));
   return SWIG_Py_Void();
 }
 
 
-SWIGINTERN PyObject *omega_nu_label_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *species_ur_label_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *module;
   PyObject *d;
   if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
   d = PyModule_GetDict(module);
   if (!d) return NULL;
-  SWIG_Python_SetConstant(d, "omega_nu_label",SWIG_From_int((int)(ccl_omega_nu_label)));
+  SWIG_Python_SetConstant(d, "species_ur_label",SWIG_From_int((int)(ccl_species_ur_label)));
+  return SWIG_Py_Void();
+}
+
+
+SWIGINTERN PyObject *species_nu_label_swigconstant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *module;
+  PyObject *d;
+  if (!PyArg_ParseTuple(args,(char*)"O:swigconstant", &module)) return NULL;
+  d = PyModule_GetDict(module);
+  if (!d) return NULL;
+  SWIG_Python_SetConstant(d, "species_nu_label",SWIG_From_int((int)(ccl_species_nu_label)));
   return SWIG_Py_Void();
 }
 
@@ -11839,11 +11859,84 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_rho_x(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  ccl_cosmology *arg1 = (ccl_cosmology *) 0 ;
+  double arg2 ;
+  ccl_species_x_label arg3 ;
+  int arg4 ;
+  int *arg5 = (int *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  int val3 ;
+  int ecode3 = 0 ;
+  int val4 ;
+  int ecode4 = 0 ;
+  int temp5 ;
+  int res5 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  PyObject * obj3 = 0 ;
+  PyObject * obj4 = 0 ;
+  double result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOOOO:rho_x",&obj0,&obj1,&obj2,&obj3,&obj4)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_cosmology, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "rho_x" "', argument " "1"" of type '" "ccl_cosmology *""'"); 
+  }
+  arg1 = (ccl_cosmology *)(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "rho_x" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = (double)(val2);
+  ecode3 = SWIG_AsVal_int(obj2, &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "rho_x" "', argument " "3"" of type '" "ccl_species_x_label""'");
+  } 
+  arg3 = (ccl_species_x_label)(val3);
+  ecode4 = SWIG_AsVal_int(obj3, &val4);
+  if (!SWIG_IsOK(ecode4)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "rho_x" "', argument " "4"" of type '" "int""'");
+  } 
+  arg4 = (int)(val4);
+  if (!(SWIG_IsOK((res5 = SWIG_ConvertPtr(obj4,SWIG_as_voidptrptr(&arg5),SWIGTYPE_p_int,0))))) {
+    int val; 
+    int ecode = SWIG_AsVal_int(obj4, &val);
+    if (!SWIG_IsOK(ecode)) {
+      SWIG_exception_fail(SWIG_ArgError(ecode), "in method '" "rho_x" "', argument " "5"" of type '" "int""'");
+    }
+    temp5 = (int)(val);
+    arg5 = &temp5;
+    res5 = SWIG_AddTmpMask(ecode);
+  }
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double)ccl_rho_x(arg1,arg2,arg3,arg4,arg5);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double((double)(result));
+  if (SWIG_IsTmpObj(res5)) {
+    resultobj = SWIG_Python_AppendOutput(resultobj, SWIG_From_int((*arg5)));
+  } else {
+    int new_flags = SWIG_IsNewObj(res5) ? (SWIG_POINTER_OWN |  0 ) :  0 ;
+    resultobj = SWIG_Python_AppendOutput(resultobj, SWIG_NewPointerObj((void*)(arg5), SWIGTYPE_p_int, new_flags));
+  }
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_omega_x(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   ccl_cosmology *arg1 = (ccl_cosmology *) 0 ;
   double arg2 ;
-  ccl_omega_x_label arg3 ;
+  ccl_species_x_label arg3 ;
   int *arg4 = (int *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
@@ -11872,9 +11965,9 @@ SWIGINTERN PyObject *_wrap_omega_x(PyObject *SWIGUNUSEDPARM(self), PyObject *arg
   arg2 = (double)(val2);
   ecode3 = SWIG_AsVal_int(obj2, &val3);
   if (!SWIG_IsOK(ecode3)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "omega_x" "', argument " "3"" of type '" "ccl_omega_x_label""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "omega_x" "', argument " "3"" of type '" "ccl_species_x_label""'");
   } 
-  arg3 = (ccl_omega_x_label)(val3);
+  arg3 = (ccl_species_x_label)(val3);
   if (!(SWIG_IsOK((res4 = SWIG_ConvertPtr(obj3,SWIG_as_voidptrptr(&arg4),SWIGTYPE_p_int,0))))) {
     int val; 
     int ecode = SWIG_AsVal_int(obj3, &val);
@@ -12876,6 +12969,121 @@ fail:
     if (is_new_object3 && array3)
     {
       Py_DECREF(array3); 
+    }
+  }
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_rho_x_vec(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  ccl_cosmology *arg1 = (ccl_cosmology *) 0 ;
+  int arg2 ;
+  int arg3 ;
+  double *arg4 = (double *) 0 ;
+  int arg5 ;
+  double *arg6 = (double *) 0 ;
+  int arg7 ;
+  int *arg8 = (int *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  int val3 ;
+  int ecode3 = 0 ;
+  PyArrayObject *array4 = NULL ;
+  int is_new_object4 = 0 ;
+  PyObject *array6 = NULL ;
+  int temp8 ;
+  int res8 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  PyObject * obj3 = 0 ;
+  PyObject * obj4 = 0 ;
+  PyObject * obj5 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOOOOO:rho_x_vec",&obj0,&obj1,&obj2,&obj3,&obj4,&obj5)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_cosmology, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "rho_x_vec" "', argument " "1"" of type '" "ccl_cosmology *""'"); 
+  }
+  arg1 = (ccl_cosmology *)(argp1);
+  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "rho_x_vec" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = (int)(val2);
+  ecode3 = SWIG_AsVal_int(obj2, &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "rho_x_vec" "', argument " "3"" of type '" "int""'");
+  } 
+  arg3 = (int)(val3);
+  {
+    npy_intp size[1] = {
+      -1 
+    };
+    array4 = obj_to_array_contiguous_allow_conversion(obj3,
+      NPY_DOUBLE,
+      &is_new_object4);
+    if (!array4 || !require_dimensions(array4, 1) ||
+      !require_size(array4, size, 1)) SWIG_fail;
+    arg4 = (double*) array_data(array4);
+    arg5 = (int) array_size(array4,0);
+  }
+  {
+    npy_intp dims[1];
+    if (!PyInt_Check(obj4))
+    {
+      const char* typestring = pytype_string(obj4);
+      PyErr_Format(PyExc_TypeError,
+        "Int dimension expected.  '%s' given.",
+        typestring);
+      SWIG_fail;
+    }
+    arg7 = (int) PyInt_AsLong(obj4);
+    dims[0] = (npy_intp) arg7;
+    array6 = PyArray_SimpleNew(1, dims, NPY_DOUBLE);
+    if (!array6) SWIG_fail;
+    arg6 = (double*) array_data(array6);
+  }
+  if (!(SWIG_IsOK((res8 = SWIG_ConvertPtr(obj5,SWIG_as_voidptrptr(&arg8),SWIGTYPE_p_int,0))))) {
+    int val; 
+    int ecode = SWIG_AsVal_int(obj5, &val);
+    if (!SWIG_IsOK(ecode)) {
+      SWIG_exception_fail(SWIG_ArgError(ecode), "in method '" "rho_x_vec" "', argument " "8"" of type '" "int""'");
+    }
+    temp8 = (int)(val);
+    arg8 = &temp8;
+    res8 = SWIG_AddTmpMask(ecode);
+  }
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    rho_x_vec(arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    resultobj = SWIG_Python_AppendOutput(resultobj,(PyObject*)array6);
+  }
+  if (SWIG_IsTmpObj(res8)) {
+    resultobj = SWIG_Python_AppendOutput(resultobj, SWIG_From_int((*arg8)));
+  } else {
+    int new_flags = SWIG_IsNewObj(res8) ? (SWIG_POINTER_OWN |  0 ) :  0 ;
+    resultobj = SWIG_Python_AppendOutput(resultobj, SWIG_NewPointerObj((void*)(arg8), SWIGTYPE_p_int, new_flags));
+  }
+  {
+    if (is_new_object4 && array4)
+    {
+      Py_DECREF(array4); 
+    }
+  }
+  return resultobj;
+fail:
+  {
+    if (is_new_object4 && array4)
+    {
+      Py_DECREF(array4); 
     }
   }
   return NULL;
@@ -22209,12 +22417,13 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"cosmology_compute_power", _wrap_cosmology_compute_power, METH_VARARGS, (char *)"cosmology_compute_power(cosmology cosmo, int * status)"},
 	 { (char *)"parameters_create_nu", _wrap_parameters_create_nu, METH_VARARGS, (char *)"parameters_create_nu(double Omega_c, double Omega_b, double Omega_k, double Neff, double w0, double wa, double h, double norm_pk, double n_s, double bcm_log10Mc, double bcm_etab, double bcm_ks, int mnu_is_sum, double * m_nu, int * status) -> parameters"},
 	 { (char *)"parameters_create_nu_vec", _wrap_parameters_create_nu_vec, METH_VARARGS, (char *)"parameters_create_nu_vec(double Omega_c, double Omega_b, double Omega_k, double Neff, double w0, double wa, double h, double norm_pk, double n_s, double bcm_log10Mc, double bcm_etab, double bcm_ks, double * zarr, double * dfarr, int mnu_is_sum, double * m_nu, int * status) -> parameters"},
-	 { (char *)"omega_m_label_swigconstant", omega_m_label_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"omega_l_label_swigconstant", omega_l_label_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"omega_g_label_swigconstant", omega_g_label_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"omega_k_label_swigconstant", omega_k_label_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"omega_ur_label_swigconstant", omega_ur_label_swigconstant, METH_VARARGS, NULL},
-	 { (char *)"omega_nu_label_swigconstant", omega_nu_label_swigconstant, METH_VARARGS, NULL},
+	 { (char *)"species_crit_label_swigconstant", species_crit_label_swigconstant, METH_VARARGS, NULL},
+	 { (char *)"species_m_label_swigconstant", species_m_label_swigconstant, METH_VARARGS, NULL},
+	 { (char *)"species_l_label_swigconstant", species_l_label_swigconstant, METH_VARARGS, NULL},
+	 { (char *)"species_g_label_swigconstant", species_g_label_swigconstant, METH_VARARGS, NULL},
+	 { (char *)"species_k_label_swigconstant", species_k_label_swigconstant, METH_VARARGS, NULL},
+	 { (char *)"species_ur_label_swigconstant", species_ur_label_swigconstant, METH_VARARGS, NULL},
+	 { (char *)"species_nu_label_swigconstant", species_nu_label_swigconstant, METH_VARARGS, NULL},
 	 { (char *)"h_over_h0", _wrap_h_over_h0, METH_VARARGS, (char *)"h_over_h0(cosmology cosmo, double a, int * status) -> double"},
 	 { (char *)"h_over_h0s", _wrap_h_over_h0s, METH_VARARGS, (char *)"h_over_h0s(cosmology cosmo, int na, double [] a, double [] output, int * status)"},
 	 { (char *)"comoving_radial_distance", _wrap_comoving_radial_distance, METH_VARARGS, (char *)"comoving_radial_distance(cosmology cosmo, double a, int * status) -> double"},
@@ -22234,7 +22443,8 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"growth_rates", _wrap_growth_rates, METH_VARARGS, (char *)"growth_rates(cosmology cosmo, int na, double [] a, double [] output, int * status)"},
 	 { (char *)"scale_factor_of_chi", _wrap_scale_factor_of_chi, METH_VARARGS, (char *)"scale_factor_of_chi(cosmology cosmo, double chi, int * status) -> double"},
 	 { (char *)"scale_factor_of_chis", _wrap_scale_factor_of_chis, METH_VARARGS, (char *)"scale_factor_of_chis(cosmology cosmo, int nchi, double [] chi, double [] output, int * status)"},
-	 { (char *)"omega_x", _wrap_omega_x, METH_VARARGS, (char *)"omega_x(cosmology cosmo, double a, ccl_omega_x_label label, int * status) -> double"},
+	 { (char *)"rho_x", _wrap_rho_x, METH_VARARGS, (char *)"rho_x(cosmology cosmo, double a, ccl_species_x_label label, int is_comoving, int * status) -> double"},
+	 { (char *)"omega_x", _wrap_omega_x, METH_VARARGS, (char *)"omega_x(cosmology cosmo, double a, ccl_species_x_label label, int * status) -> double"},
 	 { (char *)"growth_factor_vec", _wrap_growth_factor_vec, METH_VARARGS, (char *)"growth_factor_vec(cosmology cosmo, double * a, double * output, int * status)"},
 	 { (char *)"growth_factor_unnorm_vec", _wrap_growth_factor_unnorm_vec, METH_VARARGS, (char *)"growth_factor_unnorm_vec(cosmology cosmo, double * a, double * output, int * status)"},
 	 { (char *)"growth_rate_vec", _wrap_growth_rate_vec, METH_VARARGS, (char *)"growth_rate_vec(cosmology cosmo, double * a, double * output, int * status)"},
@@ -22245,6 +22455,7 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"distance_modulus_vec", _wrap_distance_modulus_vec, METH_VARARGS, (char *)"distance_modulus_vec(cosmology cosmo, double * a, double * output, int * status)"},
 	 { (char *)"scale_factor_of_chi_vec", _wrap_scale_factor_of_chi_vec, METH_VARARGS, (char *)"scale_factor_of_chi_vec(cosmology cosmo, double * chi, double * output, int * status)"},
 	 { (char *)"omega_x_vec", _wrap_omega_x_vec, METH_VARARGS, (char *)"omega_x_vec(cosmology cosmo, int label, double * a, double * output, int * status)"},
+	 { (char *)"rho_x_vec", _wrap_rho_x_vec, METH_VARARGS, (char *)"rho_x_vec(cosmology cosmo, int label, int is_comoving, double * a, double * output, int * status)"},
 	 { (char *)"cosmology_write_power_class_z", _wrap_cosmology_write_power_class_z, METH_VARARGS, (char *)"cosmology_write_power_class_z(char * filename, cosmology cosmo, double z, int * status)"},
 	 { (char *)"bcm_model_fkz", _wrap_bcm_model_fkz, METH_VARARGS, (char *)"bcm_model_fkz(cosmology cosmo, double k, double a, int * status) -> double"},
 	 { (char *)"linear_matter_power", _wrap_linear_matter_power, METH_VARARGS, (char *)"linear_matter_power(cosmology cosmo, double k, double a, int * status) -> double"},
@@ -22587,8 +22798,8 @@ static swig_type_info _swigt__p_ccl_cosmology = {"_p_ccl_cosmology", "struct ccl
 static swig_type_info _swigt__p_ccl_data = {"_p_ccl_data", "struct ccl_data *|ccl_data *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_ccl_mnu_convention = {"_p_ccl_mnu_convention", "enum ccl_mnu_convention *|ccl_mnu_convention *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_ccl_neutrino_mass_splits = {"_p_ccl_neutrino_mass_splits", "enum ccl_neutrino_mass_splits *|ccl_neutrino_mass_splits *", 0, 0, (void*)0, 0};
-static swig_type_info _swigt__p_ccl_omega_x_label = {"_p_ccl_omega_x_label", "enum ccl_omega_x_label *|ccl_omega_x_label *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_ccl_parameters = {"_p_ccl_parameters", "struct ccl_parameters *|ccl_parameters *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_ccl_species_x_label = {"_p_ccl_species_x_label", "enum ccl_species_x_label *|ccl_species_x_label *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_char = {"_p_char", "char *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_double = {"_p_double", "double *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_emulator_neutrinos_t = {"_p_emulator_neutrinos_t", "enum emulator_neutrinos_t *|emulator_neutrinos_t *", 0, 0, (void*)0, 0};
@@ -22613,8 +22824,8 @@ static swig_type_info *swig_type_initial[] = {
   &_swigt__p_ccl_data,
   &_swigt__p_ccl_mnu_convention,
   &_swigt__p_ccl_neutrino_mass_splits,
-  &_swigt__p_ccl_omega_x_label,
   &_swigt__p_ccl_parameters,
+  &_swigt__p_ccl_species_x_label,
   &_swigt__p_char,
   &_swigt__p_double,
   &_swigt__p_emulator_neutrinos_t,
@@ -22639,8 +22850,8 @@ static swig_cast_info _swigc__p_ccl_cosmology[] = {  {&_swigt__p_ccl_cosmology, 
 static swig_cast_info _swigc__p_ccl_data[] = {  {&_swigt__p_ccl_data, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_ccl_mnu_convention[] = {  {&_swigt__p_ccl_mnu_convention, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_ccl_neutrino_mass_splits[] = {  {&_swigt__p_ccl_neutrino_mass_splits, 0, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_ccl_omega_x_label[] = {  {&_swigt__p_ccl_omega_x_label, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_ccl_parameters[] = {  {&_swigt__p_ccl_parameters, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_ccl_species_x_label[] = {  {&_swigt__p_ccl_species_x_label, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_char[] = {  {&_swigt__p_char, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_double[] = {  {&_swigt__p_double, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_emulator_neutrinos_t[] = {  {&_swigt__p_emulator_neutrinos_t, 0, 0, 0},{0, 0, 0, 0}};
@@ -22665,8 +22876,8 @@ static swig_cast_info *swig_cast_initial[] = {
   _swigc__p_ccl_data,
   _swigc__p_ccl_mnu_convention,
   _swigc__p_ccl_neutrino_mass_splits,
-  _swigc__p_ccl_omega_x_label,
   _swigc__p_ccl_parameters,
+  _swigc__p_ccl_species_x_label,
   _swigc__p_char,
   _swigc__p_double,
   _swigc__p_emulator_neutrinos_t,

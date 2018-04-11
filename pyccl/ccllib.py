@@ -510,23 +510,26 @@ def parameters_create_nu_vec(Omega_c, Omega_b, Omega_k, Neff, w0, wa, h, norm_pk
     """parameters_create_nu_vec(double Omega_c, double Omega_b, double Omega_k, double Neff, double w0, double wa, double h, double norm_pk, double n_s, double bcm_log10Mc, double bcm_etab, double bcm_ks, double * zarr, double * dfarr, int mnu_is_sum, double * m_nu, int * status) -> parameters"""
     return _ccllib.parameters_create_nu_vec(Omega_c, Omega_b, Omega_k, Neff, w0, wa, h, norm_pk, n_s, bcm_log10Mc, bcm_etab, bcm_ks, zarr, dfarr, mnu_is_sum, m_nu, status)
 
-_ccllib.omega_m_label_swigconstant(_ccllib)
-omega_m_label = _ccllib.omega_m_label
+_ccllib.species_crit_label_swigconstant(_ccllib)
+species_crit_label = _ccllib.species_crit_label
 
-_ccllib.omega_l_label_swigconstant(_ccllib)
-omega_l_label = _ccllib.omega_l_label
+_ccllib.species_m_label_swigconstant(_ccllib)
+species_m_label = _ccllib.species_m_label
 
-_ccllib.omega_g_label_swigconstant(_ccllib)
-omega_g_label = _ccllib.omega_g_label
+_ccllib.species_l_label_swigconstant(_ccllib)
+species_l_label = _ccllib.species_l_label
 
-_ccllib.omega_k_label_swigconstant(_ccllib)
-omega_k_label = _ccllib.omega_k_label
+_ccllib.species_g_label_swigconstant(_ccllib)
+species_g_label = _ccllib.species_g_label
 
-_ccllib.omega_ur_label_swigconstant(_ccllib)
-omega_ur_label = _ccllib.omega_ur_label
+_ccllib.species_k_label_swigconstant(_ccllib)
+species_k_label = _ccllib.species_k_label
 
-_ccllib.omega_nu_label_swigconstant(_ccllib)
-omega_nu_label = _ccllib.omega_nu_label
+_ccllib.species_ur_label_swigconstant(_ccllib)
+species_ur_label = _ccllib.species_ur_label
+
+_ccllib.species_nu_label_swigconstant(_ccllib)
+species_nu_label = _ccllib.species_nu_label
 
 def h_over_h0(cosmo, a, status):
     """h_over_h0(cosmology cosmo, double a, int * status) -> double"""
@@ -604,8 +607,12 @@ def scale_factor_of_chis(cosmo, nchi, chi, output, status):
     """scale_factor_of_chis(cosmology cosmo, int nchi, double [] chi, double [] output, int * status)"""
     return _ccllib.scale_factor_of_chis(cosmo, nchi, chi, output, status)
 
+def rho_x(cosmo, a, label, is_comoving, status):
+    """rho_x(cosmology cosmo, double a, ccl_species_x_label label, int is_comoving, int * status) -> double"""
+    return _ccllib.rho_x(cosmo, a, label, is_comoving, status)
+
 def omega_x(cosmo, a, label, status):
-    """omega_x(cosmology cosmo, double a, ccl_omega_x_label label, int * status) -> double"""
+    """omega_x(cosmology cosmo, double a, ccl_species_x_label label, int * status) -> double"""
     return _ccllib.omega_x(cosmo, a, label, status)
 
 def growth_factor_vec(cosmo, a, output, status):
@@ -647,6 +654,10 @@ def scale_factor_of_chi_vec(cosmo, chi, output, status):
 def omega_x_vec(cosmo, label, a, output, status):
     """omega_x_vec(cosmology cosmo, int label, double * a, double * output, int * status)"""
     return _ccllib.omega_x_vec(cosmo, label, a, output, status)
+
+def rho_x_vec(cosmo, label, is_comoving, a, output, status):
+    """rho_x_vec(cosmology cosmo, int label, int is_comoving, double * a, double * output, int * status)"""
+    return _ccllib.rho_x_vec(cosmo, label, is_comoving, a, output, status)
 
 def cosmology_write_power_class_z(filename, cosmo, z, status):
     """cosmology_write_power_class_z(char * filename, cosmology cosmo, double z, int * status)"""

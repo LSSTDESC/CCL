@@ -45,6 +45,7 @@ extern "C" {
  * Solar mass in units of kg (from GSL)
  */
 #define SOLAR_MASS GSL_CONST_MKSA_SOLAR_MASS
+//#define SOLAR_MASS 1.9885e30 //(from PDG 2015) in Kg
 
 /**
  * Mpc to meters (from PDG 2013)
