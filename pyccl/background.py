@@ -169,7 +169,7 @@ def rho_x(cosmo, a, label, is_comoving=False):
         a (float or array_like): Scale factor(s), normalized to 1 today.
         label (string): species type. Available: 'critical', 'matter', 'dark_energy', 'radiation',
                         'curvature', 'neutrinos_rel', and 'neutrinos_massive'
-        is_comoving (bool): either physical or cosmoving 
+        is_comoving (bool): either physical (False, default) or comoving (True)
 
     Returns:
         rho_x (float or array_like): Physical density of a given species
