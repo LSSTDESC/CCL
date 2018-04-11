@@ -90,46 +90,57 @@ def loop_over_params(transfer_fn, matter_power, lin, raise_errs):
                             transfer_fn=transfer_fn, matter_power=matter_power, 
                             linear=lin, raise_errors = raise_errs)    
 
-"""@decorators.slow
 def test_power_spectrum_linear():
-    for tfn in ['bbks']:
-        loop_over_params(tfn, 'linear', lin=True, raise_errs = False)"""
-
-"""@decorators.slow
-def test_power_spectrum_linear():
-    for tfn in ['eisenstein_hu', 'bbks', 'boltzmann']:
+    for tfn in ['bbks', 'eisenstein_hu']:
         loop_over_params(tfn, 'linear', lin=True, raise_errs = False)
 
 @decorators.slow
+def test_power_spectrum_linear_slow():
+    for tfn in ['boltzmann',]:
+        loop_over_params(tfn, 'linear', lin=True, raise_errs = False)
+
 def test_power_spectrum_halofit():
-    for tfn in ['eisenstein_hu', 'bbks', 'boltzmann']:
+    for tfn in ['eisenstein_hu', 'bbks',]:
+        loop_over_params(tfn, 'halofit', lin=True, raise_errs = False)
+
+@decorators.slow
+def test_power_spectrum_halofit_slow():
+    for tfn in ['boltzmann',]:
         loop_over_params(tfn, 'halofit', lin=True, raise_errs = False)
 
 @decorators.slow
 def test_power_spectrum_emu():
     for tfn in ['emulator',]: loop_over_params(tfn, 'emu', lin=True, raise_errs = False)
 
-@decorators.slow
 def test_nonlin_power_spectrum_linear():
-    for tfn in ['eisenstein_hu', 'bbks', 'boltzmann']:
+    for tfn in ['eisenstein_hu', 'bbks']:
         loop_over_params(tfn, 'linear', lin=False, raise_errs = False)
 
 @decorators.slow
+def test_nonlin_power_spectrum_linear_slow():
+    for tfn in ['boltzmann',]:
+        loop_over_params(tfn, 'linear', lin=False, raise_errs = False)
+
 def test_nonlin_power_spectrum_halofit():
-    for tfn in ['eisenstein_hu', 'bbks', 'boltzmann']:
+    for tfn in ['eisenstein_hu', 'bbks']:
+        loop_over_params(tfn, 'halofit', lin=False, raise_errs = False)
+
+@decorators.slow
+def test_nonlin_power_spectrum_halofit_slow():
+    for tfn in ['boltzmann',]:
         loop_over_params(tfn, 'halofit', lin=False, raise_errs = False)
 
 @decorators.slow
 def test_nonlin_power_spectrum_emu():
     transfer_fns = ['emulator',]
-    for tfn in transfer_fns: loop_over_params(tfn, 'emu', lin=False, raise_errs = False)"""
+    for tfn in transfer_fns: loop_over_params(tfn, 'emu', lin=False, raise_errs = False)
     
 @decorators.slow
 def test_raise_error_EH_bbks_lin():
     for tfn in ['eisenstein_hu']:
         loop_over_params(tfn, 'linear', lin=True, raise_errs=True)
 		
-"""@decorators.slow
+@decorators.slow
 def test_raise_error_EH_bbks_halofit():
     for tfn in ['bbks']:
         loop_over_params(tfn, 'halofit', lin=False, raise_errs=True)
@@ -137,9 +148,9 @@ def test_raise_error_EH_bbks_halofit():
 @decorators.slow
 def test_raise_error_EH_bbks_nonlin_linear():
     for tfn in ['bbks']:
-        loop_over_params(tfn, 'linear', lin=False, raise_errs=True)"""
+        loop_over_params(tfn, 'linear', lin=False, raise_errs=True)
 		
-"""@decorators.slow
+@decorators.slow
 def test_raise_error_emu():
     transfer_fns = ['emulator',]
     for tfn in transfer_fns: loop_over_params(tfn, 'emu', lin=True, raise_errs = True)	
@@ -147,7 +158,7 @@ def test_raise_error_emu():
 @decorators.slow
 def test_raise_error_emu_nonlin():
     transfer_fns = ['emulator',]
-    for tfn in transfer_fns: loop_over_params(tfn, 'emu', lin=False, raise_errs = True)"""
+    for tfn in transfer_fns: loop_over_params(tfn, 'emu', lin=False, raise_errs = True)
 
 if __name__ == "__main__":
     run_module_suite(argv=sys.argv)
