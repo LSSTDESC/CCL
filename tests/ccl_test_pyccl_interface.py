@@ -31,14 +31,8 @@ def reference_models():
 
     # Emulator Pk
     p6 = ccl.Parameters(Omega_c=0.27, Omega_b=0.022/0.67**2, h=0.67, sigma8=0.8, 
-                        n_s=0.96, N_nu_rel=3.04, N_nu_mass=0., m_nu=0.)
+                        n_s=0.96, Neff=3.04, m_nu=0.)
     cosmo6 = ccl.Cosmology(p6, transfer_function='emulator', 
-                           matter_power_spectrum='emu')
-    
-    # Emulator Pk w/neutrinos
-    p7 = ccl.Parameters(Omega_c=0.27, Omega_b=0.022/0.67**2, h=0.67, sigma8=0.8, 
-                        n_s=0.96, N_nu_rel=0.00641, N_nu_mass=3, m_nu=0.06)
-    cosmo7 = ccl.Cosmology(p7, transfer_function='emulator', 
                            matter_power_spectrum='emu')
 
     # Baryons Pk
@@ -49,9 +43,36 @@ def reference_models():
     p9 = ccl.Parameters(Omega_c=0.27, Omega_b=0.045, h=0.67, A_s=1e-10, n_s=0.96,
                         bcm_log10Mc=math.log10(1.7e14), bcm_etab=0.3, bcm_ks=75.)
     cosmo9 = ccl.Cosmology(p9, baryons_power_spectrum='bcm')
+    
+    # Emulator Pk w/neutrinos force equalize
+    #p10 = ccl.Parameters(Omega_c=0.27, Omega_b=0.022/0.67**2, h=0.67, sigma8=0.8, 
+    #                    n_s=0.96, Neff=3.04, m_nu=[0.02, 0.02, 0.02])
+    #cosmo10 = ccl.Cosmology(p7, transfer_function='emulator', 
+    #                       matter_power_spectrum='emu', emulator_neutrinos='equalize')
 
     # Return (do a few cosmologies, for speed reasons)
-    return [cosmo1, cosmo4, cosmo5, cosmo7, cosmo9] # cosmo2, cosmo3, cosmo6
+    return [cosmo1, cosmo4, cosmo5, cosmo9] # cosmo2, cosmo3, cosmo6
+    
+def reference_models_nu():
+    """
+    Create a set of reference cosmological models with massive neutrinos.
+    This is separate because certain functionality is not yes implemented
+    for massive neutrino cosmologies so will throw errors. 
+    """
+	
+    # Emulator Pk w/neutrinos list
+    p1 = ccl.Parameters(Omega_c=0.27, Omega_b=0.022/0.67**2, h=0.67, sigma8=0.8, 
+                        n_s=0.96, Neff=3.04, m_nu=[0.02, 0.02, 0.02])
+    cosmo1 = ccl.Cosmology(p1, transfer_function='emulator', 
+                           matter_power_spectrum='emu')
+    
+    # Emulator Pk with neutrinos, force equalize                       
+    #p2 = ccl.Parameters(Omega_c=0.27, Omega_b=0.022/0.67**2, h=0.67, sigma8=0.8, 
+    #                    n_s=0.96, Neff=3.04, m_nu=0.11)
+    #cosmo2 = ccl.Cosmology(p1, transfer_function='emulator', 
+    #                       matter_power_spectrum='emu', emulator_neutrinos='equalize') 
+    
+    return [cosmo1]                      
 
 def all_finite(vals):
     """
@@ -63,8 +84,10 @@ def check_background(cosmo):
     """
     Check that background and growth functions can be run.
     """
+    
     # Types of scale factor input (scalar, list, array)
     a_scl = 0.5
+    is_comoving = 0
     a_lst = [0.2, 0.4, 0.6, 0.8, 1.]
     a_arr = np.linspace(0.2, 1., 5)
     
@@ -114,7 +137,6 @@ def check_background(cosmo):
     assert_( all_finite(ccl.omega_x(cosmo, a_arr, 'matter')) )
     
     # Fractional density of different types of fluid
-    assert_( all_finite(ccl.omega_x(cosmo, a_arr, 'matter')) )
     assert_( all_finite(ccl.omega_x(cosmo, a_arr, 'dark_energy')) )
     assert_( all_finite(ccl.omega_x(cosmo, a_arr, 'radiation')) )
     assert_( all_finite(ccl.omega_x(cosmo, a_arr, 'curvature')) )
@@ -123,6 +145,67 @@ def check_background(cosmo):
     
     # Check that omega_x fails if invalid component type is passed
     assert_raises(ValueError, ccl.omega_x, cosmo, a_scl, 'xyz')
+    
+    # rho_crit_a
+    assert_( all_finite(ccl.rho_x(cosmo, a_scl, 'critical', is_comoving)) )
+    assert_( all_finite(ccl.rho_x(cosmo, a_lst, 'critical', is_comoving)) )
+    assert_( all_finite(ccl.rho_x(cosmo, a_arr, 'critical', is_comoving)) )
+
+    # rho_m_a
+    assert_( all_finite(ccl.rho_x(cosmo, a_scl, 'matter', is_comoving)) )
+    assert_( all_finite(ccl.rho_x(cosmo, a_lst, 'matter', is_comoving)) )
+    assert_( all_finite(ccl.rho_x(cosmo, a_arr, 'matter', is_comoving)) )
+
+
+def check_background_nu(cosmo):
+    """
+    Check that background functions can be run and that the growth functions
+    exit gracefully in functions with massive neutrinos (not implemented yet).
+    """
+    # Types of scale factor input (scalar, list, array)
+    a_scl = 0.5
+    a_lst = [0.2, 0.4, 0.6, 0.8, 1.]
+    a_arr = np.linspace(0.2, 1., 5)
+    
+    # growth_factor
+    assert_raises(RuntimeError, ccl.growth_factor, cosmo, a_scl) 
+    assert_raises(RuntimeError, ccl.growth_factor, cosmo, a_lst) 
+    assert_raises(RuntimeError, ccl.growth_factor, cosmo, a_arr) 
+    
+    # growth_factor_unnorm
+    assert_raises(RuntimeError, ccl.growth_factor_unnorm, cosmo, a_scl) 
+    assert_raises(RuntimeError, ccl.growth_factor_unnorm, cosmo, a_lst) 
+    assert_raises(RuntimeError, ccl.growth_factor_unnorm, cosmo, a_arr)
+    
+    # growth_rate
+    assert_raises(RuntimeError,ccl.growth_rate, cosmo, a_scl) 
+    assert_raises(RuntimeError,ccl.growth_rate, cosmo, a_lst)
+    assert_raises(RuntimeError,ccl.growth_rate, cosmo, a_arr)
+    
+    # comoving_radial_distance
+    assert_( all_finite(ccl.comoving_radial_distance(cosmo, a_scl)) )
+    assert_( all_finite(ccl.comoving_radial_distance(cosmo, a_lst)) )
+    assert_( all_finite(ccl.comoving_radial_distance(cosmo, a_arr)) )
+    
+    # h_over_h0
+    assert_( all_finite(ccl.h_over_h0(cosmo, a_scl)) )
+    assert_( all_finite(ccl.h_over_h0(cosmo, a_lst)) )
+    assert_( all_finite(ccl.h_over_h0(cosmo, a_arr)) )
+    
+    # luminosity_distance
+    assert_( all_finite(ccl.luminosity_distance(cosmo, a_scl)) )
+    assert_( all_finite(ccl.luminosity_distance(cosmo, a_lst)) )
+    assert_( all_finite(ccl.luminosity_distance(cosmo, a_arr)) )
+    
+    # scale_factor_of_chi
+    assert_( all_finite(ccl.scale_factor_of_chi(cosmo, a_scl)) )
+    assert_( all_finite(ccl.scale_factor_of_chi(cosmo, a_lst)) )
+    assert_( all_finite(ccl.scale_factor_of_chi(cosmo, a_arr)) )
+    
+    # omega_m_a
+    assert_( all_finite(ccl.omega_x(cosmo, a_scl, 'matter')) )
+    assert_( all_finite(ccl.omega_x(cosmo, a_lst, 'matter')) )
+    assert_( all_finite(ccl.omega_x(cosmo, a_arr, 'matter')) )
 
 
 def check_power(cosmo):
@@ -216,6 +299,50 @@ def check_massfunc(cosmo):
     assert_( all_finite(ccl.halo_bias(cosmo, mhalo_lst, a)) )
     assert_( all_finite(ccl.halo_bias(cosmo, mhalo_arr, a)) )
 
+
+def check_massfunc_nu(cosmo):
+    """
+    Check that mass function and supporting functions can be run.
+    """
+    z = 0.
+    z_arr = np.linspace(0., 2., 10)
+    a = 1.
+    a_arr = 1. / (1.+z_arr)
+    mhalo_scl = 1e13
+    mhalo_lst = [1e11, 1e12, 1e13, 1e14, 1e15, 1e16]
+    mhalo_arr = np.array([1e11, 1e12, 1e13, 1e14, 1e15, 1e16])
+    odelta = 200.
+    
+    # massfunc
+    assert_raises(RuntimeError, ccl.massfunc,cosmo, mhalo_scl, a, odelta) 
+    assert_raises(RuntimeError, ccl.massfunc,cosmo, mhalo_lst, a, odelta)
+    assert_raises(RuntimeError, ccl.massfunc,cosmo, mhalo_arr, a, odelta)
+    
+    # halo bias
+    assert_raises(RuntimeError, ccl.halo_bias, cosmo, mhalo_scl, a, odelta)
+    assert_raises(RuntimeError, ccl.halo_bias, cosmo, mhalo_lst, a, odelta)
+    assert_raises(RuntimeError, ccl.halo_bias, cosmo, mhalo_arr, a, odelta)
+    
+    # massfunc_m2r
+    assert_( all_finite(ccl.massfunc_m2r(cosmo, mhalo_scl)) )
+    assert_( all_finite(ccl.massfunc_m2r(cosmo, mhalo_lst)) )
+    assert_( all_finite(ccl.massfunc_m2r(cosmo, mhalo_arr)) )
+    
+    # sigmaM
+    assert_raises(RuntimeError, ccl.sigmaM, cosmo, mhalo_scl, a) 
+    assert_raises(RuntimeError, ccl.sigmaM, cosmo, mhalo_lst, a) 
+    assert_raises(RuntimeError, ccl.sigmaM, cosmo, mhalo_arr, a) 
+    
+    assert_raises(TypeError, ccl.sigmaM, cosmo, mhalo_scl, a_arr)
+    assert_raises(TypeError, ccl.sigmaM, cosmo, mhalo_lst, a_arr)
+    assert_raises(TypeError, ccl.sigmaM, cosmo, mhalo_arr, a_arr)
+    
+    # halo_bias
+    assert_( all_finite(ccl.halo_bias(cosmo, mhalo_scl, a)) )
+    assert_( all_finite(ccl.halo_bias(cosmo, mhalo_lst, a)) )
+    assert_( all_finite(ccl.halo_bias(cosmo, mhalo_arr, a)) )
+
+
 def check_neutrinos():
     """
     Check that neutrino-related functions can be run.
@@ -227,20 +354,21 @@ def check_neutrinos():
     a_lst = [_a for _a in a_arr]
     
     TCMB = 2.725
-    Neff = 3.046
-    mnu = 0.06
-    OmNuh2 = 0.0006441
+    N_nu_mass = 3
+    mnu = [0.02, 0.02, 0.02]
     
     # Omeganuh2
-    assert_( all_finite(ccl.Omeganuh2(a, Neff, mnu, TCMB)) )
-    assert_( all_finite(ccl.Omeganuh2(a_lst, Neff, mnu, TCMB)) )
-    assert_( all_finite(ccl.Omeganuh2(a_arr, Neff, mnu, TCMB)) )
+    assert_( all_finite(ccl.Omeganuh2(a, mnu, TCMB)) )
+    assert_( all_finite(ccl.Omeganuh2(a_lst, mnu, TCMB)) )
+    assert_( all_finite(ccl.Omeganuh2(a_arr, mnu, TCMB)) )
+    
+    OmNuh2 = 0.01
     
     # Omeganuh2_to_Mnu
-    assert_( all_finite(ccl.Omeganuh2_to_Mnu(a, Neff, OmNuh2, TCMB)) )
-    assert_( all_finite(ccl.Omeganuh2_to_Mnu(a_lst, Neff, OmNuh2, TCMB)) )
-    assert_( all_finite(ccl.Omeganuh2_to_Mnu(a_arr, Neff, OmNuh2, TCMB)) )
-
+    assert_( all_finite(ccl.nu_masses(OmNuh2, 'normal', TCMB)) )
+    assert_( all_finite(ccl.nu_masses(OmNuh2, 'inverted', TCMB)) )
+    assert_( all_finite(ccl.nu_masses(OmNuh2, 'equal', TCMB)) )
+    assert_( all_finite(ccl.nu_masses(OmNuh2, 'sum', TCMB)) )
 
 def check_lsst_specs(cosmo):
     """
@@ -272,6 +400,75 @@ def check_lsst_specs(cosmo):
     assert_( all_finite(ccl.bias_clustering(cosmo, a_scl)) )
     assert_( all_finite(ccl.bias_clustering(cosmo, a_lst)) )
     assert_( all_finite(ccl.bias_clustering(cosmo, a_arr)) )
+    
+    # dNdz_tomog, PhotoZFunction
+    # sigmaz_clustering
+    assert_( all_finite(ccl.sigmaz_clustering(z_scl)) )
+    assert_( all_finite(ccl.sigmaz_clustering(z_lst)) )
+    assert_( all_finite(ccl.sigmaz_clustering(z_arr)) )
+    
+    # sigmaz_sources
+    assert_( all_finite(ccl.sigmaz_sources(z_scl)) )
+    assert_( all_finite(ccl.sigmaz_sources(z_lst)) )
+    assert_( all_finite(ccl.sigmaz_sources(z_arr)) )
+    
+    # dNdz_tomog
+    zmin = 0.
+    zmax = 1.
+    assert_( all_finite(ccl.dNdz_tomog(z_scl, 'nc', zmin, zmax, PZ1)) )
+    assert_( all_finite(ccl.dNdz_tomog(z_lst, 'nc', zmin, zmax, PZ1)) )
+    assert_( all_finite(ccl.dNdz_tomog(z_arr, 'nc', zmin, zmax, PZ1)) )
+    
+    assert_( all_finite(ccl.dNdz_tomog(z_scl, 'nc', zmin, zmax, PZ2)) )
+    assert_( all_finite(ccl.dNdz_tomog(z_lst, 'nc', zmin, zmax, PZ2)) )
+    assert_( all_finite(ccl.dNdz_tomog(z_arr, 'nc', zmin, zmax, PZ2)) )
+    
+    assert_( all_finite(ccl.dNdz_tomog(z_scl, 'wl_fid', zmin, zmax, PZ1)) )
+    assert_( all_finite(ccl.dNdz_tomog(z_lst, 'wl_fid', zmin, zmax, PZ1)) )
+    assert_( all_finite(ccl.dNdz_tomog(z_arr, 'wl_fid', zmin, zmax, PZ1)) )
+    
+    assert_( all_finite(ccl.dNdz_tomog(z_scl, 'wl_fid', zmin, zmax, PZ2)) )
+    assert_( all_finite(ccl.dNdz_tomog(z_lst, 'wl_fid', zmin, zmax, PZ2)) )
+    assert_( all_finite(ccl.dNdz_tomog(z_arr, 'wl_fid', zmin, zmax, PZ2)) )
+    
+    # Argument checking of dNdz_tomog
+    # Wrong dNdz_type
+    assert_raises(ValueError, ccl.dNdz_tomog, z_scl, 'nonsense', zmin, zmax, PZ1)
+    
+    # Wrong function type
+    assert_raises(TypeError, ccl.dNdz_tomog, z_scl, 'nc', zmin, zmax, pz1)
+    assert_raises(TypeError, ccl.dNdz_tomog, z_scl, 'nc', zmin, zmax, z_arr)
+    assert_raises(TypeError, ccl.dNdz_tomog, z_scl, 'nc', zmin, zmax, None)
+    
+def check_lsst_specs_nu(cosmo):
+    """
+    Check that lsst_specs functions can be run.
+    """
+    # Types of scale factor input (scalar, list, array)
+    a_scl = 0.5
+    a_lst = [0.2, 0.4, 0.6, 0.8, 1.]
+    a_arr = np.linspace(0.2, 1., 5)
+    
+    # Types of redshift input
+    z_scl = 0.5
+    z_lst = [0., 0.5, 1., 1.5, 2.]
+    z_arr = np.array(z_lst)
+    
+    # p(z) function for dNdz_tomog
+    def pz1(z_ph, z_s, args):
+        return np.exp(- (z_ph - z_s)**2. / 2.)
+    
+    # Lambda function p(z) function for dNdz_tomog
+    pz2 = lambda z_ph, z_s, args: np.exp(-(z_ph - z_s)**2. / 2.)
+    
+    # PhotoZFunction classes
+    PZ1 = ccl.PhotoZFunction(pz1)
+    PZ2 = ccl.PhotoZFunction(pz2)
+    
+    # bias_clustering
+    assert_raises(RuntimeError,ccl.bias_clustering, cosmo, a_scl) 
+    assert_raises(RuntimeError,ccl.bias_clustering, cosmo, a_lst)
+    assert_raises(RuntimeError,ccl.bias_clustering, cosmo, a_arr)
     
     # dNdz_tomog, PhotoZFunction
     # sigmaz_clustering
@@ -374,6 +571,60 @@ def check_cls(cosmo):
     # Check that reversing order of ClTracer inputs works
     assert_( all_finite(ccl.angular_cl(cosmo, nc1, lens1, ell_arr)) )
     assert_( all_finite(ccl.angular_cl(cosmo, nc1, lens2, ell_arr)) )
+   
+def check_cls_nu(cosmo):
+    """
+    Check that cls functions can be run.
+    """
+    # Number density input
+    z = np.linspace(0., 1., 200)
+    n = np.ones(z.shape)
+    
+    # Bias input
+    b = np.sqrt(1. + z)
+    
+    # ell range input
+    ell_scl = 4
+    ell_lst = [2, 3, 4, 5, 6, 7, 8, 9]
+    ell_arr = np.arange(2, 10)
+    
+    # Check if power spectrum type is valid for CMB
+    cmb_ok = True
+    if cosmo.configuration.matter_power_spectrum_method \
+        == ccl.core.matter_power_spectrum_types['emu']: cmb_ok = False
+    
+    # ClTracer test objects
+    lens1 = ccl.ClTracerLensing(cosmo, False, n=n, z=z)
+    lens2 = ccl.ClTracerLensing(cosmo, True, n=(z,n), bias_ia=(z,n), f_red=(z,n))
+    nc1 = ccl.ClTracerNumberCounts(cosmo, False, False, n=(z,n), bias=(z,b))
+    
+    # Check that for massive neutrinos including rsd raises an error (not yet implemented)
+    assert_raises(RuntimeError, ccl.ClTracerNumberCounts, cosmo, True, False, n=(z,n), bias=(z,b))
+
+    cmbl=ccl.ClTracerCMBLensing(cosmo,1100.)
+    
+    # Check valid ell input is accepted
+    assert_( all_finite(ccl.angular_cl(cosmo, lens1, lens1, ell_scl)) )
+    assert_( all_finite(ccl.angular_cl(cosmo, lens1, lens1, ell_lst)) )
+    assert_( all_finite(ccl.angular_cl(cosmo, lens1, lens1, ell_arr)) )
+    
+    assert_( all_finite(ccl.angular_cl(cosmo, nc1, nc1, ell_scl)) )
+    assert_( all_finite(ccl.angular_cl(cosmo, nc1, nc1, ell_lst)) )
+    assert_( all_finite(ccl.angular_cl(cosmo, nc1, nc1, ell_arr)) )
+
+    if cmb_ok: assert_( all_finite(ccl.angular_cl(cosmo, cmbl, cmbl, ell_arr)) )
+    
+    # Check various cross-correlation combinations
+    assert_( all_finite(ccl.angular_cl(cosmo, lens1, lens2, ell_arr)) )
+    assert_( all_finite(ccl.angular_cl(cosmo, lens1, nc1, ell_arr)) )
+    if cmb_ok: assert_( all_finite(ccl.angular_cl(cosmo, lens1, cmbl, ell_arr)) )
+    assert_( all_finite(ccl.angular_cl(cosmo, lens2, nc1, ell_arr)) )
+    if cmb_ok: assert_( all_finite(ccl.angular_cl(cosmo, lens2, cmbl, ell_arr)) )
+    if cmb_ok: assert_( all_finite(ccl.angular_cl(cosmo, nc1, cmbl, ell_arr)) )
+    
+    # Check that reversing order of ClTracer inputs works
+    assert_( all_finite(ccl.angular_cl(cosmo, nc1, lens1, ell_arr)) )
+    assert_( all_finite(ccl.angular_cl(cosmo, nc1, lens2, ell_arr)) )
     
     # Check get_internal_function()
     a_scl = 0.5
@@ -452,6 +703,9 @@ def test_background():
     """
     for cosmo in reference_models():
         yield check_background, cosmo
+        
+    for cosmo_nu in reference_models_nu():
+        yield check_background_nu, cosmo_nu
 
 @decorators.slow
 def test_power():
@@ -460,6 +714,9 @@ def test_power():
     """
     for cosmo in reference_models():
         yield check_power, cosmo
+        
+    for cosmo_nu in reference_models_nu():
+        yield check_power, cosmo_nu
 
 @decorators.slow
 def test_massfunc():
@@ -468,7 +725,11 @@ def test_massfunc():
     """
     for cosmo in reference_models():
         yield check_massfunc, cosmo
-
+        
+    for cosmo_nu in reference_models_nu():
+        yield check_massfunc_nu, cosmo_nu
+        
+@decorators.slow
 def test_neutrinos():
     """
     Test neutrino-related functions.
@@ -481,13 +742,20 @@ def test_lsst_specs():
     """
     for cosmo in reference_models():
         yield check_lsst_specs, cosmo
+        
+    for cosmo_nu in reference_models_nu():
+       yield check_lsst_specs_nu, cosmo_nu
 
+@decorators.slow
 def test_cls():
     """
     Test top-level functions in pyccl.cls module.
     """
     for cosmo in reference_models():
         yield check_cls, cosmo
+        
+    for cosmo_nu in reference_models_nu():
+        yield check_cls_nu, cosmo_nu
 
 def test_corr():
     """
@@ -495,6 +763,9 @@ def test_corr():
     """
     for cosmo in reference_models():
         yield check_corr, cosmo
+    
+    for cosmo_nu in reference_models_nu():
+        yield check_corr, cosmo_nu
 
         
 if __name__ == '__main__':

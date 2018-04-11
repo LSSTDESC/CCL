@@ -10,11 +10,17 @@ var searchData=
   ['clf',['clf',['../structcorr__int__par.html#a601b0d90ae00d3175e965be836e73b0f',1,'corr_int_par']]],
   ['clt1',['clt1',['../struct_int_cl_par.html#a6a1d336b42313fbd80f79b3e465f3d7f',1,'IntClPar']]],
   ['clt2',['clt2',['../struct_int_cl_par.html#a730347547f437f2de5e1dac6791f0b02',1,'IntClPar']]],
+  ['color',['color',['../namespacetest__neutrino3p04__emu.html#afc09e97cc90a2ef7db4440b7cc6c1ddd',1,'test_neutrino3p04_emu']]],
   ['computed_5fdistances',['computed_distances',['../structccl__cosmology.html#adb5cd3d53f2031a0716da22f45b4942f',1,'ccl_cosmology']]],
   ['computed_5fgrowth',['computed_growth',['../structccl__cosmology.html#a4428497be74cf69ef0b4e8798d957e0b',1,'ccl_cosmology']]],
   ['computed_5fhmfparams',['computed_hmfparams',['../structccl__cosmology.html#aad9340b8e85ae0f89ad3ac1136c590a7',1,'ccl_cosmology']]],
   ['computed_5fpower',['computed_power',['../structccl__cosmology.html#a6e67313352cef8c3ebd92dedd9913a2e',1,'ccl_cosmology']]],
   ['computed_5fsigma',['computed_sigma',['../structccl__cosmology.html#af2a13ba151996b6c144b7910c753597c',1,'ccl_cosmology']]],
   ['config',['config',['../structccl__cosmology.html#a81c5ada17d334840105d2a29b76323fd',1,'ccl_cosmology']]],
-  ['cosmo',['cosmo',['../structchipar.html#a63646337a89b9164c36c5d76757c5cb5',1,'chipar::cosmo()'],['../struct_fpar.html#a996275af2d7ca615a0c4aa8fbc382218',1,'Fpar::cosmo()'],['../struct_int_lens_par.html#aa2b1c7eb757f6fbf1554a4fc2d45e497',1,'IntLensPar::cosmo()'],['../struct_int_mag_par.html#ade886ce54b0ccdfaaa48c7a9033b8769',1,'IntMagPar::cosmo()'],['../struct_int_cl_par.html#a23ea5c0ad9cf5813be51906bfe326c7d',1,'IntClPar::cosmo()'],['../struct_sigma_r__pars.html#a5b7d34c426edb1b852e988a3000c3428',1,'SigmaR_pars::cosmo()'],['../namespacef4crash.html#a69c6fbc4a9534b3d6fbe40a506b37f6b',1,'f4crash.cosmo()']]]
+  ['cosmo',['cosmo',['../structchipar.html#a63646337a89b9164c36c5d76757c5cb5',1,'chipar::cosmo()'],['../struct_fpar.html#a996275af2d7ca615a0c4aa8fbc382218',1,'Fpar::cosmo()'],['../struct_int_lens_par.html#aa2b1c7eb757f6fbf1554a4fc2d45e497',1,'IntLensPar::cosmo()'],['../struct_int_mag_par.html#ade886ce54b0ccdfaaa48c7a9033b8769',1,'IntMagPar::cosmo()'],['../struct_int_cl_par.html#a23ea5c0ad9cf5813be51906bfe326c7d',1,'IntClPar::cosmo()'],['../struct_sigma_r__pars.html#a5b7d34c426edb1b852e988a3000c3428',1,'SigmaR_pars::cosmo()']]],
+  ['cosmo1',['cosmo1',['../namespacetest__neutrino3p04__emu.html#a5be49df86a2c0f6ea8e5fecc3adf1e98',1,'test_neutrino3p04_emu']]],
+  ['cosmo2',['cosmo2',['../namespacetest__neutrino3p04__emu.html#a1489536936f2bc640fdfca87e04e8389',1,'test_neutrino3p04_emu']]],
+  ['cosmo3',['cosmo3',['../namespacetest__neutrino3p04__emu.html#a9c78bb8c47337eab12e5399fce39d2cf',1,'test_neutrino3p04_emu']]],
+  ['cosmo3p04',['cosmo3p04',['../namespacetest__neutrino3p04__emu.html#a8a2de0140e1697f02681f08f1a8c98bf',1,'test_neutrino3p04_emu']]],
+  ['cosmo3p046',['cosmo3p046',['../namespacetest__neutrino3p04__emu.html#a686f44e1b9b774bdda7fe66e82a0c4f7',1,'test_neutrino3p04_emu']]]
 ];

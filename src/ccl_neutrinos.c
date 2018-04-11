@@ -91,118 +91,142 @@ double nu_phasespace_intg(gsl_interp_accel* accel, double mnuOT, int* status)
 }
 
 /* -------- ROUTINE: Omeganuh2 ---------
-INPUTS: a: scale factor, Neff: number of neutrino species, mnu: total mass in eV of neutrinos, TCMB: CMB temperature, accel: pointer to an accelerator which will evaluate the neutrino phasespace spline if defined, status: pointer to status integer.
+INPUTS: a: scale factor, Nnumass: number of massive neutrino species, mnu: total mass in eV of neutrinos, TCMB: CMB temperature, accel: pointer to an accelerator which will evaluate the neutrino phasespace spline if defined, status: pointer to status integer.
 TASK: Compute Omeganu * h^2 as a function of time.
 !! To all practical purposes, Neff is simply N_nu_mass !!
 */
-double ccl_Omeganuh2 (double a, double Neff, double mnu, double TCMB, gsl_interp_accel* accel, int* status)
+
+double ccl_Omeganuh2 (double a, int N_nu_mass, double* mnu, double TCMB, gsl_interp_accel* accel, int* status)
 {
   double Tnu, a4, prefix_massless, mnuone, OmNuh2;
   double Tnu_eff, mnuOT, intval, prefix_massive;
+  double total_mass; // To check if this is the massless or massive case.
   
-  // First check if Neff if 0
-  if (Neff==0) return 0.0;
+  // First check if N_nu_mass is 0
+  if (N_nu_mass==0) return 0.0;  
   
-  // Now handle the massless case
   Tnu=TCMB*pow(4./11.,1./3.);
   a4=a*a*a*a;  
-  if ( mnu < 1e-12) {
+  // Check if mnu=0. We assume that in the massless case mnu is a pointer to a single element and that element is 0. This should in principle never be called.
+  if (mnu[0] < 0.00017) {  // Limit taken from Lesgourges et al. 2012
     prefix_massless = NU_CONST  * Tnu * Tnu * Tnu * Tnu; 
-    return Neff*prefix_massless*7./8./a4;
+    return N_nu_mass*prefix_massless*7./8./a4;
   }
   
-  // And the remaining massive case
-  mnuone=mnu/Neff;  // Get the mass of one species (assuming equal-mass neutrinos).
+  // And the remaining massive case.
   // Tnu_eff is used in the massive case because CLASS uses an effective temperature of nonLCDM components to match to mnu / Omeganu =93.14eV. Tnu_eff = T_ncdm * TCMB = 0.71611 * TCMB
   Tnu_eff = Tnu * TNCDM / (pow(4./11.,1./3.));
-    
-  // Get mass over T (mass (eV) / ((kb eV/s/K) Tnu_eff (K)) 
-  // This returns the density normalized so that we get nuh2 at a=0
-  mnuOT = mnuone / (Tnu_eff/a) * (EV_IN_J / (KBOLTZ)); 
-  
-  // Get the value of the phase-space integral 
-  intval=nu_phasespace_intg(accel,mnuOT, status);
   
   // Define the prefix using the effective temperature (to get mnu / Omega = 93.14 eV) for the massive case: 
   prefix_massive = NU_CONST * Tnu_eff * Tnu_eff * Tnu_eff * Tnu_eff;
   
-  OmNuh2 = Neff*intval*prefix_massive/a4;
+  OmNuh2 = 0.; // Initialize to 0 - we add to this for each massive neutrino species.
+  for(int i=0; i<N_nu_mass; i++){
+	// Get mass over T (mass (eV) / ((kb eV/s/K) Tnu_eff (K)) 
+	// This returns the density normalized so that we get nuh2 at a=0
+	mnuOT = mnu[i] / (Tnu_eff/a) * (EV_IN_J / (KBOLTZ)); 
+  
+	// Get the value of the phase-space integral 
+	intval=nu_phasespace_intg(accel,mnuOT, status);
+	OmNuh2 = intval*prefix_massive/a4 + OmNuh2;
+  }
   
   return OmNuh2;
 }
 
-//structure with Omeganuh2 arguments for call from root finding routine
-typedef struct {
-  double a, Neff, OmNuh2_target,TCMB;
-  gsl_interp_accel* accel;
-  int *status;
-} OmNuh2_params;
-// wrapper for calling Omeganuh2 from root finding routine
-double Omeganuh2_root(double m_iter, void *params){
-  OmNuh2_params *p = (OmNuh2_params *) params;
-  return ccl_Omeganuh2(p->a, p->Neff, m_iter, p->TCMB, p->accel, p->status) - p->OmNuh2_target;
-}
 /* -------- ROUTINE: Omeganuh2_to_Mnu ---------
-INPUTS: a: scale factor, Neff: number of neutrino species, OmNuh2: neutrino mass density Omeganu * h^2, TCMB: CMB temperature, accel: pointer to an accelerator which will evaluate the neutrino phasespace spline if defined, status: pointer to status integer.
-TASK: Compute Omeganu * h^2 as a function of time.
+INPUTS: OmNuh2: neutrino mass density today Omeganu * h^2, label: how you want to split up the masses, see ccl_neutrinos.h for options, TCMB: CMB temperature, accel: pointer to an accelerator which will evaluate the neutrino phasespace spline if defined, status: pointer to status integer.
+TASK: Given Omeganuh2 today, the method of splitting into masses, and the temperature of the CMB, output a pointer to the array of neutrino masses (may be length 1 if label asks for sum) 
 */
-double ccl_Omeganuh2_to_Mnu(double a, double Neff, double OmNuh2, double TCMB, gsl_interp_accel* accel, int* status){
-  // First check if Neff if 0
-  if (Neff==0) return 0.0;
+
+double* ccl_nu_masses(double OmNuh2, ccl_neutrino_mass_splits mass_split, double TCMB,  int* status){
   
-  // Now handle the massless case
-  double Tnu, a4, prefix_massless,Omeganuh2_massless;
+  double sumnu;
+  
+  sumnu = 93.14 * OmNuh2;
+  
+  // Now split the sum up into three masses depending on the label given:
+  
+  if(mass_split==ccl_nu_normal){
+	  
+     double *mnu;
+	 mnu = malloc(3*sizeof(double));
+			
+     // See CCL note for how we get these expressions for the neutrino masses in normal and inverted hierarchy.	
+	 mnu[0] = 2./3.* sumnu - 1./6. * pow(-6. * DELTAM12_sq + 12. * DELTAM13_sq_pos + 4. * sumnu*sumnu, 0.5) 
+	         - 0.25 * DELTAM12_sq / (2./3.* sumnu - 1./6. * pow(-6. * DELTAM12_sq + 12. * DELTAM13_sq_pos + 4. * sumnu*sumnu, 0.5));
+	 mnu[1] = 2./3.* sumnu - 1./6. * pow(-6. * DELTAM12_sq + 12. * DELTAM13_sq_pos + 4. * sumnu*sumnu, 0.5) 
+	         + 0.25 * DELTAM12_sq / (2./3.* sumnu - 1./6. * pow(-6. * DELTAM12_sq + 12. * DELTAM13_sq_pos + 4. * sumnu*sumnu, 0.5));
+	 mnu[2] = -1./3. * sumnu + 1./3 * pow(-6. * DELTAM12_sq + 12. * DELTAM13_sq_pos + 4. * sumnu*sumnu, 0.5); 
+	 if (mnu[0]<0 || mnu[1]<0 || mnu[2]<0){
+	    // The user has provided a sum that is below the physical limit.
+	    if (sumnu<1e-14){
+			mnu[0] = 0.;
+			mnu[1] = 0.;
+			mnu[2] = 0.;
+	    }else{
+		 *status = CCL_ERROR_MNU_UNPHYSICAL;
+	 }
+     }	 
+	 ccl_check_status_nocosmo(status);
+	 return mnu; 
+	 
+  } else if (mass_split==ccl_nu_inverted){ 
 
-  Tnu=TCMB*pow(4./11.,1./3.);
-  a4=a*a*a*a;  
-  prefix_massless = NU_CONST  * Tnu * Tnu * Tnu * Tnu; 
-  Omeganuh2_massless = Neff*prefix_massless*7./8./a4;
-  if ( OmNuh2 < Omeganuh2_massless) {
-    return 0.0;
-  }
-
-
-  int root_status, iter = 0, max_iter = 100;
-  const gsl_root_fsolver_type *T;
-  gsl_root_fsolver *s;
-
-  double m_root =-1., m_iter =0.;
-  double m_min = 1.e-12; //required for consistency with massless case in Omeganuh2
-  double m_max = 100.0; //root finding requires some upper bound
-  gsl_function F;
-  OmNuh2_params p;
-  p.a = a;
-  p.Neff =Neff;
-  p.OmNuh2_target = OmNuh2;
-  p.TCMB = TCMB;
-  p.accel = accel;
-  p.status = status;
-
-  F.function = &Omeganuh2_root;
-  F.params = &p;
-
-  T = gsl_root_fsolver_brent;
-  s = gsl_root_fsolver_alloc (T);
-  gsl_root_fsolver_set (s, &F, m_min, m_max);
-
-  do
-    {
-      iter++;
-      root_status = gsl_root_fsolver_iterate (s);
-      if (root_status){break;} //could not evaluate Omeganuh2
-      m_iter = gsl_root_fsolver_root (s);
-      m_min = gsl_root_fsolver_x_lower (s);
-      m_max = gsl_root_fsolver_x_upper (s);
-      root_status = gsl_root_test_interval (m_min, m_max,
-                                       0, 0.001); // double epsabs, double epsrel
-    }
-  while (root_status == GSL_CONTINUE && iter < max_iter && *status ==0);
-
-  if (root_status == GSL_SUCCESS){
-    m_root = m_iter;
-  }
-  else{*status = CCL_ERROR_NU_SOLVE;}
-  gsl_root_fsolver_free (s);
-
-  return m_root;
-}
+	double *mnu;
+	mnu = malloc(3*sizeof(double));
+	mnu[0] = 2./3.* sumnu - 1./6. * pow(-6. * DELTAM12_sq + 12. * DELTAM13_sq_neg + 4. * sumnu * sumnu, 0.5) 
+	         - 0.25 * DELTAM12_sq / (2./3.* sumnu - 1./6. * pow(-6. * DELTAM12_sq + 12. * DELTAM13_sq_neg + 4. * sumnu * sumnu, 0.5));
+	mnu[1] = 2./3.* sumnu - 1./6. * pow(-6. * DELTAM12_sq + 12. * DELTAM13_sq_neg + 4. * sumnu*sumnu, 0.5) 
+	         + 0.25 * DELTAM12_sq / (2./3.* sumnu - 1./6. * pow(-6. * DELTAM12_sq + 12. * DELTAM13_sq_neg + 4. * sumnu*sumnu, 0.5));
+	mnu[2] = -1./3. * sumnu + 1./3 * pow(-6. * DELTAM12_sq + 12. * DELTAM13_sq_neg + 4. * sumnu*sumnu, 0.5); 
+	if(mnu[0]<0 || mnu[1]<0 || mnu[2]<0){
+	// The user has provided a sum that is below the physical limit.
+	    if (sumnu<1e-14){
+			mnu[0] = 0.;
+			mnu[1] = 0.;
+			mnu[2] = 0.;;
+        }else{
+		*status = CCL_ERROR_MNU_UNPHYSICAL;
+	    }
+	}    
+	
+	ccl_check_status_nocosmo(status);
+	return mnu; 
+	
+  } else if (mass_split==ccl_nu_equal){
+	  double *mnu;
+	  mnu = malloc(3*sizeof(double));
+	  mnu[0] = sumnu/3.;
+	  mnu[1] = sumnu/3.;
+	  mnu[2] = sumnu/3.;
+      
+      return mnu;
+      
+  } else if (mass_split == ccl_nu_sum){
+	  
+	  double *mnu;
+	  mnu = malloc(sizeof(double));
+	  
+      mnu[0] = sumnu;
+      
+      return mnu;
+      
+  } else{
+	  
+	  printf("WARNING:  mass option = %d not yet supported\n continuing with normal hierarchy\n", mass_split);
+	  double *mnu;
+	  mnu = malloc(3*sizeof(double));
+			
+	 if (sumnu>0.59){
+		 mnu[0] = (sumnu - 0.59) / 3.;
+		 mnu[1] = mnu[0] + 0.009;
+		 mnu[2] = mnu[0] + 0.05;
+	 }else{
+		 *status = CCL_ERROR_MNU_UNPHYSICAL;
+	 }
+	 
+	 ccl_check_status_nocosmo(status);
+	 return mnu; 
+  }	
+}	  

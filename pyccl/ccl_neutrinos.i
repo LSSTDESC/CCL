@@ -11,39 +11,36 @@
 // Automatically document arguments and output types of all functions
 %feature("autodoc", "1");
 
-// Enable vectorised arguments for arrays
-%apply (double* IN_ARRAY1, int DIM1) {(double* a, int na)};
-%apply (double* ARGOUT_ARRAY1, int DIM1) {(double* output, int nout)};
-
-// Flag status variable as input/output variable
-/*%apply (int* INOUT) {(int * status)};*/
-
 %include "../include/ccl_neutrinos.h"
+
+// Enable vectorised arguments for arrays
+%apply (double* IN_ARRAY1, int DIM1) {(double* a, int na), (double* mnu, int nm)};
+%apply (double* ARGOUT_ARRAY1, int DIM1){(double* output, int nout)};
 
 %inline %{
 
-void Omeganuh2_vec(double Neff, double mnu, double TCMB,
-                   double* a, int na,
+void Omeganuh2_vec(int N_nu_mass, double TCMB,
+                   double* a, int na, 
+                   double* mnu, int nm, 
                    double* output, int nout,
                    int* status)
 {
     assert(nout == na);
-    
+    assert(nm == 3);
     for(int i=0; i < na; i++){
-      output[i] = ccl_Omeganuh2(a[i], Neff, mnu, TCMB, NULL, status);
+        output[i] = ccl_Omeganuh2(a[i], N_nu_mass, mnu, TCMB, NULL, status);
     }   
 }
 
-void Omeganuh2_to_Mnu_vec(double Neff, double OmNuh2, double TCMB,
-                          double* a, int na,
+void nu_masses_vec(double OmNuh2, int label, double TCMB,
                           double* output, int nout,
                           int* status)
 {
-    assert(nout == na);
-    
-    for(int i=0; i < na; i++){
-      output[i] = ccl_Omeganuh2_to_Mnu(a[i], Neff, OmNuh2, TCMB, NULL, status);
-    }   
+    double* mnu;
+    mnu = ccl_nu_masses(OmNuh2, label, TCMB, status);
+    for(int i=0; i < nout; i++){
+        output[i] = *(mnu+i);
+    }
 }
 
 %}
