@@ -410,7 +410,6 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int * statu
   if (*status == CCL_ERROR_CLASS) {
     //printed error message while running CLASS
     ccl_free_class_structs(cosmo, &ba,&th,&pt,&tr,&pm,&sp,&nl,&le,init_arr,status);
-    printf("%s\n", cosmo->status_message);
     return;
   }
   

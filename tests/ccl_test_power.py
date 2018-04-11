@@ -50,11 +50,11 @@ def calc_power_spectrum(Omega_v, w0, wa, transfer_fn, matter_power, linear, rais
             mnu = mnu_sum
     elif (raise_errors==True):
         if (transfer_fn =='eisenstein_hu' or transfer_fn =='bbks'):
-            mnu = mnu_sum
+            mnu = mnu_sum #Use massive neutrinos to deliberately raise an error
         elif (transfer_fn == 'emulator' and matter_power == 'emu'):
-            mnu = mnu_sum
+            mnu = mnu_sum #Use a sum instead of an equal list to deliberately raise an error.
         else:
-            raise(ValueError, "Transfer function %s with matter power spectrum method %s has no case for which to test errors are raised.", transfer_fn, matter_power)
+            raise(ValueError, "Transfer function %s with matter power spectrum method %s has no case for which to test errors are raised." % (transfer_fn, matter_power))
     
     # Create new Parameters and Cosmology objects
     cosmo = ccl.Cosmology(Omega_c=Omega_c, Omega_b=Omega_b, 
