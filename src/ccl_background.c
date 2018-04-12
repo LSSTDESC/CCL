@@ -258,7 +258,7 @@ static int a_of_chi(double chi, ccl_cosmology *cosmo, int* stat, double *a_old, 
       status=gsl_root_fdfsolver_iterate(s);
       a_previous=a_current;
       a_current=gsl_root_fdfsolver_root(s);
-      status=gsl_root_test_delta(a_current,a_previous,ccl_gsl->ROOT_EPSABS,0);
+      status=gsl_root_test_delta(a_current, a_previous, 0, ccl_gsl->ROOT_EPSREL);
     } while(status==GSL_CONTINUE && iter <= ccl_gsl->ROOT_N_ITERATION);
 
     *a_old=a_current;

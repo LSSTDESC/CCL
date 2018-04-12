@@ -16,10 +16,21 @@
 
 const ccl_configuration default_config = {ccl_boltzmann_class, ccl_halofit, ccl_nobaryons, ccl_tinker10};
 
-const ccl_gsl_params default_gsl_params = {1.0e-4, 1000, 
-                                           GSL_INTEG_GAUSS41, 1.0e-4, GSL_INTEG_GAUSS41, 1.0e-4, EPSREL_DIST, EPSREL_DNDZ, 1.0e-5,
-                                           1.0e-4, 1.0e-6, 1.0e-3, 1000, 100,
-                                           EPSREL_GROWTH};
+const ccl_gsl_params default_gsl_params = {GSL_EPSREL,                          // EPSREL
+                                           GSL_N_ITERATION,                     // N_ITERATION
+                                           GSL_INTEGRATION_GAUSS_KRONROD_POINTS,// INTEGRATION_GAUSS_KRONROD_POINTS
+                                           GSL_EPSREL,                          // INTEGRATION_EPSREL
+                                           GSL_INTEGRATION_GAUSS_KRONROD_POINTS,// INTEGRATION_LIMBER_GAUSS_KRONROD_POINTS
+                                           GSL_EPSREL,                          // INTEGRATION_LIMBER_EPSREL
+                                           GSL_EPSREL_DIST,                     // INTEGRATION_DISTANCE_EPSREL
+                                           GSL_EPSREL_DNDZ,                     // INTEGRATION_DNDZ_EPSREL
+                                           GSL_EPSREL_SIGMAR,                   // INTEGRATION_SIGMAR_EPSREL
+                                           GSL_EPSREL,                          // ROOT_EPSREL
+                                           GSL_EPSREL_NU,                       // ROOT_NU_EPSREL
+                                           GSL_N_ITERATION,                     // ROOT_N_ITERATION
+                                           GSL_N_ITERATION_NU,                  // ROOT_NU_N_ITERATION
+                                           GSL_EPSREL_GROWTH                    // ODE_GROWTH_EPSREL
+                                          };
 
 /* ------- ROUTINE: ccl_cosmology_read_config ------
    INPUTS: none, but will look for ini file in include/ dir
@@ -101,7 +112,6 @@ void ccl_cosmology_read_config(void)
       if(strcmp(var_name,"GSL_ROOT_N_ITERATION")==0) ccl_gsl->ROOT_N_ITERATION=(int) var_dbl;
       if(strcmp(var_name,"GSL_ROOT_NU_EPSREL")==0) ccl_gsl->ROOT_NU_EPSREL=var_dbl;
       if(strcmp(var_name,"GSL_ROOT_NU_N_ITERATION")==0) ccl_gsl->ROOT_NU_N_ITERATION=(int) var_dbl;
-      if(strcmp(var_name,"GSL_ROOT_EPSABS")==0) ccl_gsl->ROOT_EPSABS=var_dbl;
       if(strcmp(var_name,"GSL_ODE_GROWTH_EPSREL")==0) ccl_gsl->ODE_GROWTH_EPSREL=var_dbl;
     }
   }
