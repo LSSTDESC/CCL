@@ -567,6 +567,9 @@ def check_cls(cosmo):
     assert_( all_finite(ccl.angular_cl(cosmo, nc1, lens1, ell_arr)) )
     assert_( all_finite(ccl.angular_cl(cosmo, nc1, lens2, ell_arr)) )
 
+    # Wrong non limber method
+    assert_raises(KeyError, ccl.angular_cl, cosmo, lens1, lens1, ell_scl, non_limber_method='xx')
+
 
     
 def check_cls_nu(cosmo):
@@ -678,6 +681,19 @@ def check_corr(cosmo):
     assert_raises(KeyError, ccl.correlation, cosmo, ells, cls, t_arr, 
                   corr_type='L+', method='xx')
     
+def check_corr_3d(cosmo):
+    
+    # Scale factor
+    a = 0.8
+
+    # Distances (in Mpc)
+    r_lst = np.linspace(50,100,10)
+    
+    # Make sure correlation functions work for valid inputs
+    corr = ccl.correlation_3d(cosmo, a, r_lst)
+    assert_( all_finite(corr))
+    
+    
 
 def test_valid_transfer_combos():
     """
@@ -743,7 +759,7 @@ def test_lsst_specs():
     for cosmo_nu in reference_models_nu():
        yield check_lsst_specs_nu, cosmo_nu
 
-@decorators.slow
+#@decorators.slow
 def test_cls():
     """
     Test top-level functions in pyccl.cls module.
@@ -763,6 +779,12 @@ def test_corr():
     
     for cosmo_nu in reference_models_nu():
         yield check_corr, cosmo_nu
+
+    for cosmo in reference_models():
+        yield check_corr_3d, cosmo
+    
+    for cosmo_nu in reference_models_nu():
+        yield check_corr_3d, cosmo_nu
 
         
 if __name__ == '__main__':
