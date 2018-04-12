@@ -566,6 +566,11 @@ def check_cls(cosmo):
     # Check that reversing order of ClTracer inputs works
     assert_( all_finite(ccl.angular_cl(cosmo, nc1, lens1, ell_arr)) )
     assert_( all_finite(ccl.angular_cl(cosmo, nc1, lens2, ell_arr)) )
+
+    # Wrong non limber method
+    assert_raises(KeyError, ccl.angular_cl(cosmo, lens1, lens1, ell_scl, non_limber_method='xx'))
+
+
     
 def check_cls_nu(cosmo):
     """
