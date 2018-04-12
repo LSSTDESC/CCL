@@ -10,16 +10,15 @@
 
 #define CLS_PRECISION 1E-2 // with respect to cosmic variance
 
-
 CTEST_DATA(angpow) {
   double Omega_c;
   double Omega_b;
   double h;
   double A_s;
   double n_s;
-  double N_nu_rel;
-  double N_nu_mass;
-  double mnu;
+  double Neff;
+  double* mnu;
+  ccl_mnu_convention mnu_type;
   double Omega_n;
   double Omega_v;
   double Omega_k;
@@ -39,15 +38,14 @@ CTEST_SETUP(angpow){
   data->n_s = 0.96;
   data->Omega_n = 0.0;
   data->Omega_v = 0;
-  data->N_nu_rel=3.046;
-  data->N_nu_mass=0;
-  data->mnu=0;
+  data->Neff=3.046;
+  double mnuval = 0.;
+  data->mnu = &mnuval;
+  data->mnu_type = ccl_mnu_sum;
   data->w_0     = -1;
   data->w_a    = 0;
   data->Omega_k = 0;
 }
-
-
 
 
 
@@ -60,7 +58,7 @@ static void test_angpow_precision(struct angpow_data * data)
   ccl_configuration ccl_config=default_config;
   ccl_config.transfer_function_method=ccl_boltzmann_class;
   ccl_config.matter_power_spectrum_method=ccl_linear;
-  ccl_parameters ccl_params = ccl_parameters_create(data->Omega_c, data->Omega_b, data->Omega_k, data->N_nu_rel, data->N_nu_mass, data->mnu, data->w_0, data->w_a, data->h, data->A_s, data->n_s,-1,-1,-1,-1,NULL,NULL, &status);
+  ccl_parameters ccl_params = ccl_parameters_create(data->Omega_c, data->Omega_b, data->Omega_k, data->Neff, data->mnu, data->mnu_type,data->w_0, data->w_a, data->h, data->A_s, data->n_s,-1,-1,-1,-1,NULL,NULL, &status);
 
   // Initialize cosmology object given cosmo params
   ccl_cosmology *ccl_cosmo=ccl_cosmology_create(ccl_params,ccl_config);
