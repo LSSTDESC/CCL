@@ -566,6 +566,34 @@ def check_cls(cosmo):
     # Check that reversing order of ClTracer inputs works
     assert_( all_finite(ccl.angular_cl(cosmo, nc1, lens1, ell_arr)) )
     assert_( all_finite(ccl.angular_cl(cosmo, nc1, lens2, ell_arr)) )
+    
+def check_cls_nonlimber(cosmo):
+    """
+    Check that cls functions can be run with non_limber functionalities.
+    """
+    # Number density input
+    z = np.linspace(0., 1., 200)
+    n = np.ones(z.shape)
+    
+    # Bias input
+    b = np.sqrt(1. + z)
+    
+    # ell range input
+    ell_arr = np.arange(2, 10)
+
+    # non limber method
+    non_limber_method="angpow"
+    
+    # ClTracer test objects
+    nc1 = ccl.ClTracerNumberCounts(cosmo, False, False, n=(z,n), bias=(z,b))
+    
+    # Check valid ell input is accepted
+    assert_( all_finite(ccl.angular_cl(cosmo, nc1, nc1, ell_arr, non_limber_method="angpow")) )
+    assert_( all_finite(ccl.angular_cl(cosmo, nc1, nc1, ell_arr, non_limber_method="native")) )
+
+    # Check various cross-correlation combinations
+    
+    # Check that reversing order of ClTracer inputs works
    
 def check_cls_nu(cosmo):
     """
@@ -751,6 +779,13 @@ def test_cls():
         
     for cosmo_nu in reference_models_nu():
         yield check_cls_nu, cosmo_nu
+
+    for cosmo in reference_models():
+        yield check_cls_nonlimber, cosmo
+
+    for cosmo_nu in reference_models_nu():
+        yield check_cls_nonlimber, cosmo_nu
+
 
 def test_corr():
     """
