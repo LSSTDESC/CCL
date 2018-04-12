@@ -26,6 +26,7 @@
 \newcommand{\mrm}[1]{\mathrm{#1}}
 \newcommand{\sukhdeep}[1]{\textcolor{magenta}{SS:#1}}
 \newcommand{\damonge}[1]{\textcolor{green!55!blue}{DA:#1}}
+\newcommand{\asv}[1]{\textcolor{purple}{ASV:#1}}
 \newcommand{\revise}{\textcolor{red!55!blue}{\bf Section ready for revision}}
 
 \newcommand{\ccl}{{\tt CCL}\xspace}
@@ -421,20 +422,20 @@ In the future \ccl will be expanded to incorporate the calculation of the higher
 
 \vol{Tom - made edits. Text written by Antonio that I changed is left as comments. Remove when ready. Removed discussion of bias from this section.}
 
-Being able to calculate the halo abundance as a function of mass is a necessary step to being able to constrain cosmology with probes such as galaxy clusters. While analytic functions are the traditional means of predicting evolution \todo{of halo abundance?}, calibration is frequently required against cosmological simulations. In order to reach the high precision for cosmological constraints in a self-consistent fashion, it is ultimately necessary to use cosmological simulations; we implement this with halo mass functions with parameters fit to these simulations. The calculation of the halo mass function focuses around the spherical overdensity method of halo finding, in which the size of a halo can be defined with:
+Being able to calculate the halo abundance as a function of mass is a necessary step to being able to constrain cosmology with probes such as galaxy clusters. While analytic functions are the traditional means of predicting evolution of halo abundances, calibration is frequently required against cosmological simulations. In order to reach the high precision for cosmological constraints in a self-consistent fashion, it is ultimately necessary to use cosmological simulations; we implement this with halo mass functions with parameters fit to these simulations. The calculation of the halo mass function focuses around the spherical overdensity method of halo finding, in which the size of a halo can be defined with:
 
 \begin{equation}
 \bar{\rho}(r_{\Delta}) = \Delta \times \bar{\rho}_{\mathrm{m}},
 \end{equation}
 %
-where a spherical halo with radius $r_{\Delta}$ has an average density $\bar{\rho}$ equal to the overdensity parameter $\Delta$ times the mean background density of the universe, $\bar\rho_{\mathrm{m}}$\todo{is that background density at a given redshift?}. Within the literature, the choice of $\Delta$ can vary considerably, as observations focusing on the compact cores of halos often take much larger values of $\Delta$ than the fiducial definition in most halo clustering studies, $\Delta = 200$. We note that another common definition exists which utilizes the critical density of the universe, $\rho_{\mathrm{crit}}$; this introduces a simple conversion factor between the two definitions that must be accounted for. Currently, \ccl only accepts overdensity parameters with respect to the mean matter density\todo{at what redshift?}, but we plan to allow for self-consistent handling of critical density based definitions in the future.
+where a spherical halo with radius $r_{\Delta}$ has an average density $\bar{\rho}$ equal to the overdensity parameter $\Delta$ times the mean background density of the universe at a given redshift, $\bar\rho_{\mathrm{m}}(z)$. Within the literature, the choice of $\Delta$ can vary considerably, as observations focusing on the compact cores of halos often take much larger values of $\Delta$ than the fiducial definition in most halo clustering studies, $\Delta = 200$. We note that another common definition exists which utilizes the critical density of the universe, $\rho_{\mathrm{crit}}$; this introduces a simple conversion factor between the two definitions that must be accounted for. Currently, \ccl only accepts overdensity parameters with respect to the mean matter density, but we plan to allow for self-consistent handling of critical density based definitions in the future.
 
 The halo mass function is defined as
 \begin{equation}
 \frac{dn}{dM}=f(\sigma)\frac{\bar{\rho}_\mathrm{m}}{M}\frac{d\ln{\sigma^{-1}}}{dM},
 \label{eq:halo_mass_function}
 \end{equation}
-where $n$ is the number density of halos of a given mass $M$ associated with the RMS variance of the matter density field $\sigma^2$\todo{at a given redshift?}.
+where $n$ is the number density of halos of a given mass $M$ associated with the RMS variance of the matter density field $\sigma^2$ at a given redshift and $f$ is the derived fitting function.
 In CCL calling this function returns the mass function in logarithmic mass bins, $dn/d\log_{10}{M}$, where the input is the halo mass $M$ and scale factor $a$.
 
 The halo mass $M$ is related to $\sigma$ by first computing the radius $R$ that would enclose a mass $M$ in a homogeneous Universe at $z=0$:
@@ -450,28 +451,36 @@ where $P(k)$ is the linear matter power spectrum and $\tilde{W}(kR)$ is the Four
 \begin{equation}
 \tilde{W}_R(k) = \frac{3}{(kR)^3}[\sin(kR)-kR\cos(kR)].
 \end{equation}
+
+This is commonly related in terms of the mass inside of the Lagrangian scale of the halo, using the following transformation:
+\begin{equation}
+R = (3M/4\pi\bar{\rho_{\mathrm{m}}})^{1/3}.
+\end{equation}
+
 \todo{We need to define $\sigma(M)$ here to link to table \ref{tab:tests}. For now, I have linked to Eq. \ref{eq:sigR}.}
+\asv{I think this is sufficient given sigma(M) is merely sigma(R->M) with the
+following translation above.}
 
 One commonly used halo mass function definition within the literature is the \citet{Tinker2010} fitting function. This fitting function has been developed using collisionless $N$-body simulation data, using halos identified by spherical overdensities. This is an extension of the \citet{Tinker2008} halo mass function, which is also included within \ccl as a comparative option. This fitting function assumes little change with respect to cosmological parameters. Further, it includes a redshift scaling which is assumed to sharply end at a redshift of $z = 3$. This halo mass function is calibrated within the range of $10^{10.5} h\mathrm{M}_\odot \leq M \leq 10^{15.5} h\mathrm{M}_\odot$ at a redshift of $z = 0$.
 
 For comparison purposes, we also have included the results of \citet{Angulo2012}, which uses the Millenium XXL simulation in order to study galaxy cluster scaling relations. As part of this study, they have calculated their own fit to the \citet{Tinker2010} fitting function. While this additional halo mass function is available, it has not been extended to a broad range of overdensity parameter $\Delta$, nor has it been extended beyond a redshift of $z = 0$.
 
-The \citet{Tinker2008} fitting function uses the following parameterisation for the multiplicity function\todo{define multiplicity function}:
+The \citet{Tinker2008} fitting function uses the following parameterisation of:
 \begin{equation}
 f(\sigma)=A\Big[\Big(\frac{\sigma}{b}\Big)^{-a}+1\Big]e^{-c/{\sigma}^2},
 \end{equation}
-where $A$, $a$, $b$, and $c$ are fitting parameters that have additional redshift scaling and $\sigma$ is the RMS variance of the density field smoothed on some scale $M$ at some scale factor $a$ \todo{there are two different $a$'s in the above equation, can we rename one?}. This basic form is modified for the \citet{Angulo2012} formulation. The resulting form is
+where $A$, $a$, $b$, and $c$ are fitting parameters that have additional redshift scaling and $\sigma$ is the RMS variance of the density field smoothed on some scale $M$ at some scale factor $a$ \todo{there are two different $a$'s in the above equation, can we rename one?}\asv{I am personally against the choice to change variable names here, as this matches the form presented in Tinker 2008.}. This basic form is modified for the \citet{Angulo2012} formulation. The resulting form is
 \begin{equation}
 f(\sigma)=A\Big[\Big(\frac{b}{\sigma}+1\Big)^{-a}\Big]e^{-c/{\sigma}^2},
 \end{equation}
 where the only change is in the formulation of the second term. Note that the fitting parameters in the \citet{Angulo2012} formulation do not contain any redshift dependence and the use of it is primarily for testing and benchmark purposes.
 
-The \citet{Tinker2010} model parameterizes the halo mass function in terms of the peak height, $\nu = \delta_c/\sigma(M)$, where $\delta_c=1.686$ is the critical density for collapse. The multiplicity function is then written as\todo{Give it a different name?$\tilde{f}$?}
+The \citet{Tinker2010} model parameterizes the halo mass function in terms of the peak height, $\nu = \delta_c/\sigma(M)$, where $\delta_c=1.686$ is the critical density for collapse. The function is then written as\todo{Give it a different name?$\tilde{f}$?}\asv{Also against giving this function a different name, as it refers to the same fundamental thing, except as a function of nu instead of a function of sigma(M).}
 \begin{equation}
   f(\nu) = \alpha[1+(\beta\nu)^{-2\phi}]\nu^{2\eta}e(-\gamma\nu^2/2).
 \end{equation}
 
-We note that these halo mass functions, while implemented to high {\em numerical} accuracy, carry their own uncertainties. It has not been significantly studied whether the halo mass function (or halo bias function) is universal with respect to changes in dark energy parameterisation.
+We note that these halo mass functions, while implemented to high {\em numerical} accuracy through comparison against a flat $\Lambda$CDM cosmology (see CCL1 in \ref{tab:cosmologies}, carry their own uncertainties. It has not been significantly studied whether the halo mass function (or halo bias function) is universal with respect to changes in dark energy parameterisation.
 %Further, \citet{Tinker2010} found a $\sim6\%$ scatter when determining the halo bias due to differences in simulations.
 %This is in addition to a $5\%$ error in the mass function alone.
 \citet{Tinker2008,Tinker2010} quote 5\% accuracy of their mass funcitons.
