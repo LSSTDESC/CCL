@@ -38,6 +38,18 @@ typedef enum {
  */
 void ccl_raise_exception(int err, char* msg);
 
+/** Raise a warning
+ * Given a status, give a warning message.
+ * @return void
+ */
+void ccl_raise_warning(int err, char* msg);
+
+/** Raise a warning based on a GSL error message
+ * Given a GSL status, give a warning message.
+ * @return void
+ */
+void ccl_raise_gsl_warning(int gslstatus, char* msg);
+
 /** Set the error policy
  * @oaram error_policy the error policy
  * @return void

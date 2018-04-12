@@ -3,6 +3,7 @@
 #include "math.h"
 #include "stdio.h"
 #include "stdlib.h"
+#include "gsl/gsl_errno.h"
 
 // Error handling policy: whether to exit on error (C default) or continue 
 // (Python or other binding default)
@@ -22,6 +23,27 @@ void ccl_raise_exception(int err, char* msg)
     fprintf(stderr, "%s\n", msg);
     exit(1);
   }
+}
+
+// Convenience function to handle warnings
+void ccl_raise_warning(int err, char* msg)
+{
+  // For now just print warning to stderr.
+  // TODO: Implement some kind of error stack that can be passed on to, e.g.,
+  // the python binding.
+  char warning[256];
+  snprintf(warning, 256, "WARNING: %s", msg);
+  fprintf(stderr, "%s\n", warning);
+  return;
+}
+
+// Convenience function to handle warnings
+void ccl_raise_gsl_warning(int gslstatus, char* msg)
+{
+  char warning[256];
+  snprintf(warning, 256, "%s GSL error: %s", msg, gsl_strerror(gslstatus));
+  ccl_raise_warning(gslstatus, warning);
+  return;
 }
 
 void ccl_check_status(ccl_cosmology *cosmo, int * status)

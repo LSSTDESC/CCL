@@ -144,6 +144,7 @@ static int  growth_factor_and_growth_rate(double a,double *gf,double *fg,ccl_cos
     return 0;
   }
   else {
+    int gslstatus;
     double y[2];
     double ainit=EPS_SCALEFAC_GROWTH;
     gsl_odeiv2_system sys={growth_ode_system,NULL,2,cosmo}; 
@@ -154,11 +155,13 @@ static int  growth_factor_and_growth_rate(double a,double *gf,double *fg,ccl_cos
     y[1]=EPS_SCALEFAC_GROWTH*EPS_SCALEFAC_GROWTH*EPS_SCALEFAC_GROWTH*
       h_over_h0(EPS_SCALEFAC_GROWTH,cosmo, stat);
 
-    int status=gsl_odeiv2_driver_apply(d,&ainit,a,y);
+    gslstatus=gsl_odeiv2_driver_apply(d,&ainit,a,y);
     gsl_odeiv2_driver_free(d);
 
-    if(status!=GSL_SUCCESS)
+    if(gslstatus != GSL_SUCCESS) {
+      ccl_raise_gsl_warning(gslstatus, "ccl_background.c: growth_factor_and_growth_rate():");
       return 1;
+    }
     
     *gf=y[0];
     *fg=y[1]/(a*a*h_over_h0(a,cosmo, stat)*y[0]);
@@ -172,27 +175,29 @@ INPUT: scale factor, cosmology
 OUTPUT: chi -> radial comoving distance
 TASK: compute radial comoving distance at a
 */
-static int compute_chi(double a,ccl_cosmology *cosmo,double * chi, int * stat) 
+static int compute_chi(double a, ccl_cosmology *cosmo, double * chi, int * stat) 
 {
-  int  status;
+  int gslstatus;
   double result;
   chipar p;
   
   p.cosmo=cosmo;
   p.status=stat;
   
-  gsl_integration_cquad_workspace * workspace = gsl_integration_cquad_workspace_alloc (ccl_gsl->N_ITERATION);
+  gsl_integration_cquad_workspace * workspace = gsl_integration_cquad_workspace_alloc(ccl_gsl->N_ITERATION);
   gsl_function F;
   F.function = &chi_integrand;
   //F.params = cosmo;
   F.params = &p;
   //TODO: CQUAD is great, but slower than other methods. This could be sped up if it becomes an issue.
-  status=gsl_integration_cquad(&F, a, 1.0, 0.0,ccl_gsl->INTEGRATION_DISTANCE_EPSREL,workspace,&result, NULL, NULL); 
+  gslstatus=gsl_integration_cquad(&F, a, 1.0, 0.0,ccl_gsl->INTEGRATION_DISTANCE_EPSREL,workspace,&result, NULL, NULL); 
   *chi=result/cosmo->params.h;
   gsl_integration_cquad_workspace_free(workspace);
 
-  if(status!=GSL_SUCCESS)
+  if(gslstatus != GSL_SUCCESS) {
+    ccl_raise_gsl_warning(gslstatus, "ccl_background.c: compute_chi():");
     return 1;
+  }
   return 0;
 }
 
@@ -252,22 +257,26 @@ static int a_of_chi(double chi, ccl_cosmology *cosmo, int* stat, double *a_old, 
     FDF.params=&p;
     gsl_root_fdfsolver_set(s,&FDF,a_current);
 
-    int iter=0,status;
+    int iter=0, gslstatus;
     do {
       iter++;
-      status=gsl_root_fdfsolver_iterate(s);
+      gslstatus=gsl_root_fdfsolver_iterate(s);
+      if(gslstatus!=GSL_SUCCESS) ccl_raise_gsl_warning(gslstatus, "ccl_background.c: a_of_chi():");
       a_previous=a_current;
       a_current=gsl_root_fdfsolver_root(s);
-      status=gsl_root_test_delta(a_current, a_previous, 0, ccl_gsl->ROOT_EPSREL);
-    } while(status==GSL_CONTINUE && iter <= ccl_gsl->ROOT_N_ITERATION);
+      gslstatus=gsl_root_test_delta(a_current, a_previous, 0, ccl_gsl->ROOT_EPSREL);
+    } while(gslstatus==GSL_CONTINUE && iter <= ccl_gsl->ROOT_N_ITERATION);
 
     *a_old=a_current;
 
     // Allows us to pass a status to h_over_h0 for the neutrino integral calculation.
-    if (status==GSL_SUCCESS) status= *(p.status);
-    
-    if(status!=GSL_SUCCESS)
+    if(gslstatus==GSL_SUCCESS) {
+      *stat = *(p.status);
+    }
+    else {
+      ccl_raise_gsl_warning(gslstatus, "ccl_background.c: a_of_chi():");
       return 1;
+    }
     
     return 0;
   }
@@ -521,7 +530,7 @@ void ccl_cosmology_compute_growth(ccl_cosmology * cosmo, int * status)
   
   // allocate space for y, which will be all three
   // of E(a), chi(a), D(a) and f(a) in turn.
-  int  status_mg=0;
+  int  status_mg=0, gslstatus;
   double growth0,fgrowth0;
   double *y = malloc(sizeof(double)*na);
   if(y==NULL) {
@@ -546,11 +555,19 @@ void ccl_cosmology_compute_growth(ccl_cosmology * cosmo, int * status)
       if(a[i]>0) {
 	double df,integ;
 	//Add modification to f
-	status_mg |=gsl_spline_eval_e(df_a_spline,a[i],NULL,&df);
+	gslstatus = gsl_spline_eval_e(df_a_spline,a[i],NULL,&df);
+  if(gslstatus != GSL_SUCCESS) {
+    ccl_raise_gsl_warning(gslstatus, "ccl_background.c: ccl_cosmology_compute_growth():");
+    status_mg |= gslstatus;
+  }
 	y2[i]+=df;
 	//Multiply D by exp(-int(df))
-	status_mg |= gsl_integration_cquad(&F,a[i],1.0,0.0,ccl_gsl->INTEGRATION_DISTANCE_EPSREL,workspace,&integ,NULL,NULL);
-	y[i]*=exp(-integ);
+	gslstatus = gsl_integration_cquad(&F,a[i],1.0,0.0,ccl_gsl->INTEGRATION_DISTANCE_EPSREL,workspace,&integ,NULL,NULL);
+	if(gslstatus != GSL_SUCCESS) {
+    ccl_raise_gsl_warning(gslstatus, "ccl_background.c: ccl_cosmology_compute_growth():");
+    status_mg |= gslstatus;
+  }
+  y[i]*=exp(-integ);
       }
     }
     y[i]/=growth0;
@@ -630,8 +647,10 @@ double ccl_h_over_h0(ccl_cosmology * cosmo, double a, int* status)
   }
   
   double h_over_h0;
-  *status |= gsl_spline_eval_e(cosmo->data.E, a, cosmo->data.accelerator,&h_over_h0);
-  if(*status != GSL_SUCCESS) {
+  int gslstatus = gsl_spline_eval_e(cosmo->data.E, a, cosmo->data.accelerator,&h_over_h0);
+  if(gslstatus != GSL_SUCCESS) {
+    ccl_raise_gsl_warning(gslstatus, "ccl_background.c: ccl_h_over_h0():");
+    *status = gslstatus;
     strcpy(cosmo->status_message, "ccl_background.c: ccl_h_over_h0(): Scale factor outside interpolation range.\n");
     return NAN;    
   }
@@ -645,9 +664,12 @@ void ccl_h_over_h0s(ccl_cosmology * cosmo, int na, double a[], double output[], 
     ccl_cosmology_compute_distances(cosmo,status);
     ccl_check_status(cosmo, status);    
   }
+  int gslstatus;
   for (int i=0; i<na; i++) {
-    *status|=gsl_spline_eval_e(cosmo->data.E,a[i],cosmo->data.accelerator, &output[i]);
-    if(*status != GSL_SUCCESS) {
+    gslstatus = gsl_spline_eval_e(cosmo->data.E,a[i],cosmo->data.accelerator, &output[i]);
+    if(gslstatus != GSL_SUCCESS) {
+      ccl_raise_gsl_warning(gslstatus, "ccl_background.c: ccl_h_over_h0s():");
+      *status |= gslstatus;
       strcpy(cosmo->status_message, "ccl_background.c: ccl_h_over_h0s(): Scale factor outside interpolation range.\n");
       output[i]= NAN;    
     }
@@ -673,8 +695,10 @@ double ccl_comoving_radial_distance(ccl_cosmology * cosmo, double a, int * statu
     }
     
     double crd;
-    *status |=gsl_spline_eval_e(cosmo->data.chi, a, cosmo->data.accelerator, &crd);
-    if(*status != GSL_SUCCESS) {
+    int gslstatus = gsl_spline_eval_e(cosmo->data.chi, a, cosmo->data.accelerator, &crd);
+    if(gslstatus != GSL_SUCCESS) {
+      ccl_raise_gsl_warning(gslstatus, "ccl_background.c: ccl_comoving_radial_distance():");
+      *status = gslstatus;
       strcpy(cosmo->status_message, "ccl_background.c: ccl_comoving_radial_distance(): Scale factor outside interpolation range.\n");
       return NAN;
     }
@@ -688,6 +712,7 @@ void ccl_comoving_radial_distances(ccl_cosmology * cosmo, int na, double a[], do
     ccl_cosmology_compute_distances(cosmo,status);
     ccl_check_status(cosmo,status);    
   }
+  int gslstatus;
   for (int i=0; i<na; i++) {
     if((a[i] > (1. - 1.e-8)) && (a[i]<=1.))
       output[i]=0.;
@@ -697,9 +722,11 @@ void ccl_comoving_radial_distances(ccl_cosmology * cosmo, int na, double a[], do
       ccl_check_status(cosmo,status);
     }
     else {
-      *status|=gsl_spline_eval_e(cosmo->data.chi,a[i],cosmo->data.accelerator, &output[i]);
-      if(*status != GSL_SUCCESS) {
-        strcpy(cosmo->status_message, "ccl_background.c: ccl_comoving_radial_distance(): Scale factor outside interpolation range.\n");
+      gslstatus = gsl_spline_eval_e(cosmo->data.chi,a[i],cosmo->data.accelerator, &output[i]);
+      if(gslstatus != GSL_SUCCESS) {
+        ccl_raise_gsl_warning(gslstatus, "ccl_background.c: ccl_comoving_radial_distances():");
+        *status |= gslstatus;
+        strcpy(cosmo->status_message, "ccl_background.c: ccl_comoving_radial_distances(): Scale factor outside interpolation range.\n");
         output[i] = NAN;
       }
     }
@@ -745,9 +772,11 @@ double ccl_comoving_angular_distance(ccl_cosmology * cosmo, double a, int* statu
     }
     
     double chi;
-    *status|=gsl_spline_eval_e(cosmo->data.chi, a,
-            cosmo->data.accelerator,&chi);
-    if (*status != GSL_SUCCESS) {
+    int gslstatus = gsl_spline_eval_e(cosmo->data.chi, a,
+                                      cosmo->data.accelerator,&chi);
+    if(gslstatus != GSL_SUCCESS) {
+      ccl_raise_gsl_warning(gslstatus, "ccl_background.c: ccl_comoving_angular_distance():");
+      *status |= gslstatus;
       strcpy(cosmo->status_message, "ccl_background.c: ccl_comoving_angular_distance(): Scale factor outside interpolation range.\n");
       return NAN;      
     }
@@ -763,6 +792,7 @@ void ccl_comoving_angular_distances(ccl_cosmology * cosmo, int na, double a[],
     ccl_check_status(cosmo, status);
   }
   double chi;
+  int gslstatus;
   for (int i=0; i < na; i++) {
     if((a[i] > (1. - 1.e-8)) && (a[i]<=1.))
       output[i]=0.;
@@ -772,9 +802,11 @@ void ccl_comoving_angular_distances(ccl_cosmology * cosmo, int na, double a[],
       ccl_check_status(cosmo,status);
     }
     else {
-      *status|=gsl_spline_eval_e(cosmo->data.chi,a[i],cosmo->data.accelerator,&chi);
+      gslstatus = gsl_spline_eval_e(cosmo->data.chi,a[i],cosmo->data.accelerator,&chi);
       output[i] = ccl_sinn(cosmo,chi,status);
-      if (*status != GSL_SUCCESS) {
+      if(gslstatus != GSL_SUCCESS) {
+        ccl_raise_gsl_warning(gslstatus, "ccl_background.c: ccl_comoving_angular_distances():");
+        *status |= gslstatus;
         strcpy(cosmo->status_message, "ccl_background.c: ccl_comoving_angular_distances(): Scale factor outside interpolation range.\n");
         output[i] =  NAN;      
       }
@@ -882,7 +914,11 @@ double ccl_scale_factor_of_chi(ccl_cosmology * cosmo, double chi, int * status)
       ccl_check_status(cosmo,status);
     }
     double a;
-    *status |=gsl_spline_eval_e(cosmo->data.achi, chi,cosmo->data.accelerator_achi, &a);
+    int gslstatus = gsl_spline_eval_e(cosmo->data.achi, chi,cosmo->data.accelerator_achi, &a);
+    if(gslstatus != GSL_SUCCESS) {
+      ccl_raise_gsl_warning(gslstatus, "ccl_background.c: ccl_scale_factor_of_chi():");
+      *status |= gslstatus;
+    }
     return a;
   }
 }
@@ -894,6 +930,7 @@ void ccl_scale_factor_of_chis(ccl_cosmology * cosmo, int nchi, double chi[], dou
     ccl_cosmology_compute_distances(cosmo,status);
     ccl_check_status(cosmo, status);    
   }
+  int gslstatus;
   for (int i=0; i<nchi; i++) {
     if((chi[i] < 1.e-8) && (chi[i]>=0.))
       output[i]=1.;
@@ -903,7 +940,11 @@ void ccl_scale_factor_of_chis(ccl_cosmology * cosmo, int nchi, double chi[], dou
       ccl_check_status(cosmo,status);
     }
     else
-      *status|=gsl_spline_eval_e(cosmo->data.achi,chi[i],cosmo->data.accelerator_achi,&output[i]);
+      gslstatus = gsl_spline_eval_e(cosmo->data.achi,chi[i],cosmo->data.accelerator_achi,&output[i]);
+      if(gslstatus != GSL_SUCCESS) {
+        ccl_raise_gsl_warning(gslstatus, "ccl_background.c: ccl_scale_factor_of_chis():");
+        *status |= gslstatus;
+      }
   }
 }
 
@@ -922,8 +963,10 @@ double ccl_growth_factor(ccl_cosmology * cosmo, double a, int * status)
     }
     
     double D;
-    *status |=gsl_spline_eval_e(cosmo->data.growth, a, cosmo->data.accelerator,&D);
-    if (*status != GSL_SUCCESS) {
+    int gslstatus = gsl_spline_eval_e(cosmo->data.growth, a, cosmo->data.accelerator,&D);
+    if(gslstatus != GSL_SUCCESS) {
+      ccl_raise_gsl_warning(gslstatus, "ccl_background.c: ccl_growth_factor():");
+      *status |= gslstatus;
       strcpy(cosmo->status_message, "ccl_background.c: ccl_growth_factor(): Scale factor outside interpolation range.\n");
       return NAN;      
     }
@@ -937,7 +980,7 @@ void ccl_growth_factors(ccl_cosmology * cosmo, int na, double a[], double output
     ccl_cosmology_compute_growth(cosmo, status);
     ccl_check_status(cosmo, status);    
   }
-
+  int gslstatus;
   for (int i=0; i<na; i++) {
     if(a[i]>1.) {
       *status = CCL_ERROR_COMPUTECHI;
@@ -945,8 +988,10 @@ void ccl_growth_factors(ccl_cosmology * cosmo, int na, double a[], double output
       ccl_check_status(cosmo,status);
     }
     else {
-      *status|=gsl_spline_eval_e(cosmo->data.growth,a[i],cosmo->data.accelerator,&output[i]);
-      if (*status != GSL_SUCCESS) {
+      gslstatus = gsl_spline_eval_e(cosmo->data.growth,a[i],cosmo->data.accelerator,&output[i]);
+      if(gslstatus != GSL_SUCCESS) {
+        ccl_raise_gsl_warning(gslstatus, "ccl_background.c: ccl_growth_factors():");
+        *status |= gslstatus;
         strcpy(cosmo->status_message, "ccl_background.c: ccl_growth_factors(): Scale factor outside interpolation range.\n");
         output[i] = NAN;        
       }
@@ -968,8 +1013,10 @@ double ccl_growth_factor_unnorm(ccl_cosmology * cosmo, double a, int * status)
       ccl_check_status(cosmo, status);
     }
     double D;
-    *status|=gsl_spline_eval_e(cosmo->data.growth, a, cosmo->data.accelerator,&D);
-    if (*status != GSL_SUCCESS) {
+    int gslstatus = gsl_spline_eval_e(cosmo->data.growth, a, cosmo->data.accelerator,&D);
+    if(gslstatus != GSL_SUCCESS) {
+      ccl_raise_gsl_warning(gslstatus, "ccl_background.c: ccl_growth_factor_unnorm():");
+      *status |= gslstatus;
       strcpy(cosmo->status_message, "ccl_background.c: ccl_growth_factor_unnorm(): Scale factor outside interpolation range.\n");
       return NAN;      
     }
@@ -983,6 +1030,7 @@ void ccl_growth_factors_unnorm(ccl_cosmology * cosmo, int na, double a[], double
     ccl_cosmology_compute_growth(cosmo, status);
     ccl_check_status(cosmo, status);    
   }
+  int gslstatus;
   for (int i=0; i<na; i++) {
     if(a[i]>1.) {
       *status = CCL_ERROR_COMPUTECHI;
@@ -990,9 +1038,11 @@ void ccl_growth_factors_unnorm(ccl_cosmology * cosmo, int na, double a[], double
       ccl_check_status(cosmo,status);
     }
     else {
-      *status|=gsl_spline_eval_e(cosmo->data.growth,a[i],cosmo->data.accelerator,&output[i]);
+      gslstatus = gsl_spline_eval_e(cosmo->data.growth,a[i],cosmo->data.accelerator,&output[i]);
       output[i]*=cosmo->data.growth0;
-      if (*status != GSL_SUCCESS) {
+      if(gslstatus != GSL_SUCCESS) {
+        ccl_raise_gsl_warning(gslstatus, "ccl_background.c: ccl_growth_factors_unnorm():");
+        *status |= gslstatus;
         strcpy(cosmo->status_message, "ccl_background.c: ccl_growth_factors_unnorm(): Scale factor outside interpolation range.\n");
         output[i] = NAN;        
       }
@@ -1015,8 +1065,10 @@ double ccl_growth_rate(ccl_cosmology * cosmo, double a, int * status)
     }
     
     double g;
-    *status|=gsl_spline_eval_e(cosmo->data.fgrowth, a, cosmo->data.accelerator,&g);
-    if (*status != GSL_SUCCESS) {
+    int gslstatus = gsl_spline_eval_e(cosmo->data.fgrowth, a, cosmo->data.accelerator,&g);
+    if(gslstatus != GSL_SUCCESS) {
+      ccl_raise_gsl_warning(gslstatus, "ccl_background.c: ccl_growth_rate():");
+      *status |= gslstatus;
       strcpy(cosmo->status_message, "ccl_background.c: ccl_growth_rate(): Scale factor outside interpolation range.\n");
       return NAN;      
     }
@@ -1030,6 +1082,7 @@ void ccl_growth_rates(ccl_cosmology * cosmo, int na, double a[], double output[]
     ccl_cosmology_compute_growth(cosmo, status);
     ccl_check_status(cosmo, status);    
   }
+  int gslstatus;
   for (int i=0; i<na; i++) {
     if(a[i]>1.) {
       *status = CCL_ERROR_COMPUTECHI;
@@ -1037,8 +1090,9 @@ void ccl_growth_rates(ccl_cosmology * cosmo, int na, double a[], double output[]
       ccl_check_status(cosmo,status);
     }
     else {
-      *status|=gsl_spline_eval_e(cosmo->data.fgrowth,a[i],cosmo->data.accelerator,&output[i]);
-      if (*status != GSL_SUCCESS) {
+      gslstatus = gsl_spline_eval_e(cosmo->data.fgrowth,a[i],cosmo->data.accelerator,&output[i]);
+      if(gslstatus != GSL_SUCCESS) {
+        ccl_raise_gsl_warning(gslstatus, "ccl_background.c: ccl_growth_rates():");
         *status = CCL_ERROR_SPLINE_EV;
         output[i] = NAN;       
       }

@@ -201,8 +201,10 @@ static int window_lensing(double chi,ccl_cosmology *cosmo,SplPar *spl_pz,double 
                                 w, &result, &eresult);
   *win=result;
   gsl_integration_workspace_free(w);
-  if(gslstatus!=GSL_SUCCESS || *ip.status)
+  if(gslstatus!=GSL_SUCCESS || *ip.status) {
+    ccl_raise_gsl_warning(gslstatus, "ccl_cls.c: window_lensing():");
     return 1;
+  }
   //TODO: chi_max should be changed to chi_horizon
   //we should precompute this quantity and store it in cosmo by default
 
@@ -265,8 +267,10 @@ static int window_magnification(double chi,ccl_cosmology *cosmo,SplPar *spl_pz,S
                                 w, &result, &eresult);
   *win=result;
   gsl_integration_workspace_free(w);
-  if(gslstatus!=GSL_SUCCESS || *ip.status)
+  if(gslstatus!=GSL_SUCCESS || *ip.status) {
+    ccl_raise_gsl_warning(gslstatus, "ccl_cls.c: window_magnification():");
     return 1;
+  }
   //TODO: chi_max should be changed to chi_horizon
   //we should precompute this quantity and store it in cosmo by default
 
@@ -293,7 +297,7 @@ static CCL_ClTracer *cl_tracer(ccl_cosmology *cosmo,int tracer_type,
 				   int nz_rf,double *z_rf,double *rf,
 				   double z_source, int * status)
 {
-  int clstatus=0;
+  int clstatus=0, gslstatus;
   CCL_ClTracer *clt=(CCL_ClTracer *)malloc(sizeof(CCL_ClTracer));
   if(clt==NULL) {
     *status=CCL_ERROR_MEMORY;
@@ -333,12 +337,13 @@ static CCL_ClTracer *cl_tracer(ccl_cosmology *cosmo,int tracer_type,
     gsl_integration_workspace *w=gsl_integration_workspace_alloc(ccl_gsl->N_ITERATION);
     F.function=&speval_bis;
     F.params=clt->spl_nz;
-    clstatus=gsl_integration_qag(&F, z_n[0], z_n[nz_n-1], 0,
-                                 ccl_gsl->INTEGRATION_EPSREL, ccl_gsl->N_ITERATION,
-                                 ccl_gsl->INTEGRATION_GAUSS_KRONROD_POINTS,
-                                 w, &nz_norm, &nz_enorm);
+    gslstatus=gsl_integration_qag(&F, z_n[0], z_n[nz_n-1], 0,
+                                  ccl_gsl->INTEGRATION_EPSREL, ccl_gsl->N_ITERATION,
+                                  ccl_gsl->INTEGRATION_GAUSS_KRONROD_POINTS,
+                                  w, &nz_norm, &nz_enorm);
     gsl_integration_workspace_free(w);
-    if(clstatus!=GSL_SUCCESS) {
+    if(gslstatus!=GSL_SUCCESS) {
+      ccl_raise_gsl_warning(gslstatus, "ccl_cls.c: cl_tracer():");
       ccl_spline_free(clt->spl_nz);
       free(clt);
       *status=CCL_ERROR_INTEG;
@@ -1103,7 +1108,7 @@ static void get_k_interval(ccl_cosmology *cosmo,CCL_ClWorkspace *w,
 static double ccl_angular_cl_native(ccl_cosmology *cosmo,CCL_ClWorkspace *cw,int il,
 				    CCL_ClTracer *clt1,CCL_ClTracer *clt2,int * status)
 {
-  int clastatus=0, qagstatus;
+  int clastatus=0, gslstatus;
   IntClPar ipar;
   double result=0,eresult;
   double lkmin,lkmax;
@@ -1119,12 +1124,13 @@ static double ccl_angular_cl_native(ccl_cosmology *cosmo,CCL_ClWorkspace *cw,int
   F.function=&cl_integrand;
   F.params=&ipar;
   get_k_interval(cosmo,cw,clt1,clt2,cw->l_arr[il],&lkmin,&lkmax);
-  qagstatus=gsl_integration_qag(&F, lkmin, lkmax, 0,
+  gslstatus=gsl_integration_qag(&F, lkmin, lkmax, 0,
                                 ccl_gsl->INTEGRATION_LIMBER_EPSREL, ccl_gsl->N_ITERATION,
                                 ccl_gsl->INTEGRATION_LIMBER_GAUSS_KRONROD_POINTS,
                                 w, &result, &eresult);
   gsl_integration_workspace_free(w);
-  if(qagstatus!=GSL_SUCCESS || *ipar.status) {
+  if(gslstatus!=GSL_SUCCESS || *ipar.status) {
+    ccl_raise_gsl_warning(gslstatus, "ccl_cls.c: ccl_angular_cl_native():");
     // If an error status was already set, don't overwrite it.
     if(*status == 0){
         *status=CCL_ERROR_INTEG;
