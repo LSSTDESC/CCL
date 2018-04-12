@@ -287,13 +287,23 @@ static CCL_ClTracer *cl_tracer(ccl_cosmology *cosmo,int tracer_type,
 				   int nz_rf,double *z_rf,double *rf,
 				   double z_source, int * status)
 {
+	
   int clstatus=0;
   CCL_ClTracer *clt=(CCL_ClTracer *)malloc(sizeof(CCL_ClTracer));
   if(clt==NULL) {
+	  
     *status=CCL_ERROR_MEMORY;
     strcpy(cosmo->status_message,"ccl_cls.c: ccl_cl_tracer(): memory allocation\n");
     return NULL;
   }
+  
+  if ( ((cosmo->params.N_nu_mass)>0) && tracer_type==CL_TRACER_NC && has_rsd){
+	  free(clt);
+	  *status=CCL_ERROR_NOT_IMPLEMENTED;
+	  strcpy(cosmo->status_message, "ccl_cls.c: ccl_cl_tracer_new(): Number counts tracers with rsd not yet implemented in cosmologies with massive neutrinos.");
+	  return NULL;
+  }
+  
   clt->tracer_type=tracer_type;
   clt->computed_transfer=0;
 

@@ -18,21 +18,20 @@ int main(int argc, char * argv[])
   to be 3.04, compatible with the emulator
   set-up, we need:
   */
-  double Nnurel = 0.00641;
-  double Nmass = 3;
-  double mnu = 0.06;
+  double Neff = 3.04;
+  double mnu[3] = {0.02, 0.02, 0.02};
+  ccl_mnu_convention mnutype = ccl_mnu_list;
   /*In the case of the emulator without massive
    neutrinos, we simply set: 
   */
-  //double Nnurel = 3.04;
-  //double Nmass = 0;
-  //double mnu = 0;
+  //double Neff = 3.04;
+  //double mnu[1] = {0};
   
   ccl_configuration config = default_config;
   config.transfer_function_method = ccl_emulator;
   config.matter_power_spectrum_method = ccl_emu;
 
-  ccl_parameters params = ccl_parameters_create_lcdm_nu(Omega_c, Omega_b, Omega_k,h, normp, n_s, Nnurel, Nmass, mnu, &status);
+  ccl_parameters params = ccl_parameters_create_lcdm_nu(Omega_c, Omega_b, Omega_k,h, normp, n_s, Neff, mnu, mnutype, &status);
   ccl_cosmology * cosmo = ccl_cosmology_create(params, config);
 
   //The linear power spectrum will be from CLASS

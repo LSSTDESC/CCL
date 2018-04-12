@@ -24,9 +24,7 @@
 #define SZ_GC 0.05
 #define NL 512
 #define PS 0.1 
-#define NREL 3.046
-#define NMAS 0
-#define MNU 0.0
+#define NEFF 3.046
 #define ELL_MAX_CL 20000
 
 
@@ -35,10 +33,16 @@ int main(int argc,char **argv)
   // Use the default configuration, plus the cosmological parameters that were 
   // defined above
   int status=0;
+  
+  double mnuval=0.;
+  double* mnu;
+  mnu = &mnuval;
+  ccl_mnu_convention mnu_type = ccl_mnu_sum;
+  
   ccl_configuration config = default_config;
-  ccl_parameters params = ccl_parameters_create(OC, OB, OK, NREL, NMAS, MNU, 
-                                                W0, WA, HH, NORMPS, NS,
-						0, NULL, NULL, &status);
+  ccl_parameters params = ccl_parameters_create(OC, OB, OK, NEFF, mnu, mnu_type,
+                                                W0, WA, HH, NORMPS, NS, -1, -1, -1, -1,
+						NULL, NULL, &status);
   ccl_cosmology *cosmo = ccl_cosmology_create(params,config);
 
   // Create example number density and bias for tracer

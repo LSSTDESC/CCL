@@ -103,5 +103,14 @@ void omega_x_vec(ccl_cosmology * cosmo, int label,
     }
 }
 
+void rho_x_vec(ccl_cosmology * cosmo, int label, int is_comoving,
+		double* a, int na,
+		double* output, int nout, int *status) {
+    assert(nout == na);
+    for(int i=0; i < na; i++){
+      output[i] = ccl_rho_x(cosmo, a[i], label, is_comoving, status);
+    }
+}
+
 
 %}

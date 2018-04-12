@@ -49,7 +49,6 @@ CCL_ClTracer* cl_tracer_new_wrapper(ccl_cosmology *cosmo,int tracer_type,
     
     // Check for null arrays
     
-    
     return ccl_cl_tracer(cosmo, tracer_type,
 			 has_rsd, has_magnification, 
 			 has_intrinsic_alignment,

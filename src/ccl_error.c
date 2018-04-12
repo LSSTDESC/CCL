@@ -16,16 +16,16 @@ void ccl_set_error_policy(CCLErrorPolicy error_policy)
 
 // Convenience function to raise exceptions in an appropriate way
 void ccl_raise_exception(int err, char* msg)
-{
+{  
   // Print error message and exit if fatal errors are enabled
   if ((_ccl_error_policy == CCL_ERROR_POLICY_EXIT) && (err)) {
-    fprintf(stderr, "%s\n", msg);
     exit(1);
   }
 }
 
 void ccl_check_status(ccl_cosmology *cosmo, int * status)
 {
+	
   switch (*status) {
   case 0: // all good, nothing to do
     return;
@@ -42,7 +42,7 @@ void ccl_check_status(ccl_cosmology *cosmo, int * status)
   case CCL_ERROR_NU_SOLVE: // error in converting Omeganuh2-> Mnu: exit. No status_message in cosmo because can't pass cosmology to the function.
     ccl_raise_exception(*status, "Error, in ccl_neutrinos.c. Omeganuh2_to_Mnu(): Root finding did not converge.");
     // TODO: Implement softer error handling, e.g. for integral convergence here	
-  default:
+  default: 
     ccl_raise_exception(*status, cosmo->status_message);
   }
 }
@@ -80,6 +80,13 @@ void ccl_check_status_nocosmo(int * status)
     // because can't pass cosmology to the function.
     ccl_raise_exception(*status, 
                       "CCL_ERROR_NU_SOLVE: Error converting Omeganuh2 -> Mnu.");
+  case CCL_ERROR_MNU_UNPHYSICAL:
+    // Error in the sum of mnu or Omeganu passed for the hierarchy requested.
+	  ccl_raise_exception(*status, 
+      "CCL_ERROR_MNU_UNPHYSICAL: Sum of neutrinos masses for this Omeganu value is incompatible with the requested mass hierarchy.");
+  case CCL_ERROR_NOT_IMPLEMENTED: 
+    ccl_raise_exception(*status, 
+      "CCL_ERROR_NOT_IMPLEMENTED: the type of m_nu specified is not supported.");
   default:
     ccl_raise_exception(*status, 
              "Unrecognized error code (see gsl_errno.h for error codes 1-32).");
