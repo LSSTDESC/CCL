@@ -663,6 +663,7 @@ def check_corr(cosmo):
     t_arr = np.logspace(-2., np.log10(5.), 20) # degrees
     t_lst = [t for t in t_arr]
     t_scl = 2.
+    t_int = 2
     
     # Make sure correlation functions work for valid inputs
     corr1 = ccl.correlation(cosmo, ells, cls, t_arr, corr_type='L+', 
@@ -671,9 +672,12 @@ def check_corr(cosmo):
                             method='FFTLog')
     corr3 = ccl.correlation(cosmo, ells, cls, t_scl, corr_type='L+', 
                             method='FFTLog')
+    corr4 = ccl.correlation(cosmo, ells, cls, t_int, corr_type='L+', 
+                            method='FFTLog')
     assert_( all_finite(corr1))
     assert_( all_finite(corr2))
     assert_( all_finite(corr3))
+    assert_( all_finite(corr4))
     
     # Check that exceptions are raised for invalid input
     assert_raises(KeyError, ccl.correlation, cosmo, ells, cls, t_arr, 
@@ -687,11 +691,17 @@ def check_corr_3d(cosmo):
     a = 0.8
 
     # Distances (in Mpc)
+    r_int = 50
+    r = 50.
     r_lst = np.linspace(50,100,10)
     
     # Make sure correlation functions work for valid inputs
-    corr = ccl.correlation_3d(cosmo, a, r_lst)
-    assert_( all_finite(corr))
+    corr1 = ccl.correlation_3d(cosmo, a, r_int)
+    corr2 = ccl.correlation_3d(cosmo, a, r)
+    corr3 = ccl.correlation_3d(cosmo, a, r_lst)
+    assert_( all_finite(corr1))
+    assert_( all_finite(corr2))
+    assert_( all_finite(corr3))
     
     
 
@@ -759,7 +769,7 @@ def test_lsst_specs():
     for cosmo_nu in reference_models_nu():
        yield check_lsst_specs_nu, cosmo_nu
 
-#@decorators.slow
+@decorators.slow
 def test_cls():
     """
     Test top-level functions in pyccl.cls module.
