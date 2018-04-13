@@ -62,12 +62,13 @@ typedef struct ccl_gsl_params {
   double INTEGRATION_DNDZ_EPSREL;
   // sigma_R integral
   double INTEGRATION_SIGMAR_EPSREL;
+  // Neutrino integral
+  double INTEGRATION_NU_EPSREL;
+  double INTEGRATION_NU_EPSABS;
 
   // Root finding
   double ROOT_EPSREL;
-  double ROOT_NU_EPSREL;
   int ROOT_N_ITERATION;
-  int ROOT_NU_N_ITERATION;
 
   // ODE
   double ODE_GROWTH_EPSREL;

@@ -20,6 +20,7 @@ void ccl_raise_exception(int err, char* msg)
 {  
   // Print error message and exit if fatal errors are enabled
   if ((_ccl_error_policy == CCL_ERROR_POLICY_EXIT) && (err)) {
+    fprintf(stderr, "%s\n", msg);
     exit(1);
   }
 }

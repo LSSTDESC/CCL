@@ -35,14 +35,21 @@ gsl_spline* calculate_nu_phasespace_spline(int *status) {
     // Not setting a status_message here because we can't easily pass a cosmology to this function - message printed in ccl_error.c.
     *status = CCL_ERROR_NU_INT;
   }
-  int stat=0;
+  int stat=0, gslstatus;
   gsl_integration_cquad_workspace * workspace = gsl_integration_cquad_workspace_alloc(ccl_gsl->N_ITERATION);
   gsl_function F;
   F.function = &nu_integrand;
   for (int i=0; i<CCL_NU_MNUT_N; i++) {
     double mnut_=exp(mnut[i]);
     F.params = &(mnut_);
-    stat |= gsl_integration_cquad(&F, 0, 1000.0, 1e-7, 1e-7, workspace,&y[i], NULL, NULL); 
+    gslstatus = gsl_integration_cquad(&F, 0, 1000.0, 
+                                      ccl_gsl->INTEGRATION_NU_EPSABS, 
+                                      ccl_gsl->INTEGRATION_NU_EPSREL, 
+                                      workspace,&y[i], NULL, NULL);
+    if(gslstatus != GSL_SUCCESS) {
+      ccl_raise_gsl_warning(gslstatus, "ccl_neutrinos.c: calculate_nu_phasespace_spline():");
+      stat |= gslstatus;
+    }
   }
   gsl_integration_cquad_workspace_free(workspace);
   double renorm=1./y[0];
@@ -86,8 +93,11 @@ double nu_phasespace_intg(gsl_interp_accel* accel, double mnuOT, int* status)
   }
 	
   // Evaluate the spline - this will use the accelerator if it has been defined.
-  *status |= gsl_spline_eval_e(nu_spline, log(mnuOT),accel, &integral_value);
-
+  int gslstatus = gsl_spline_eval_e(nu_spline, log(mnuOT),accel, &integral_value);
+  if(gslstatus != GSL_SUCCESS) {
+    ccl_raise_gsl_warning(gslstatus, "ccl_neutrinos.c: nu_phasespace_intg():");
+    *status |= gslstatus;
+  }
   return integral_value*7./8.;
 }
 

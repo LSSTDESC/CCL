@@ -122,14 +122,19 @@ extern "C" {
 #define GSL_INTEGRATION_GAUSS_KRONROD_POINTS GSL_INTEG_GAUSS41
 
 /**
+ * Absolute precision in neutrino root finding
+ */
+#define GSL_EPSABS_NU 1E-7
+
+/**
  * Relative precision in neutrino root finding
  */
-#define GSL_EPSREL_NU 1E-3
+#define GSL_EPSREL_NU 1E-7
 
 /**
  * Number of iterations for neutrino root finding
  */
-#define GSL_N_ITERATION_NU 100
+#define GSL_N_ITERATION_NU 1000
 
 /**
  * Relative precision in sigma_R calculations

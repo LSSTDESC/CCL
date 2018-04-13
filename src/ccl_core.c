@@ -25,10 +25,10 @@ const ccl_gsl_params default_gsl_params = {GSL_EPSREL,                          
                                            GSL_EPSREL_DIST,                     // INTEGRATION_DISTANCE_EPSREL
                                            GSL_EPSREL_DNDZ,                     // INTEGRATION_DNDZ_EPSREL
                                            GSL_EPSREL_SIGMAR,                   // INTEGRATION_SIGMAR_EPSREL
+                                           GSL_EPSREL_NU,                       // INTEGRATION_NU_EPSREL
+                                           GSL_EPSABS_NU,                       // INTEGRATION_NU_EPSABS
                                            GSL_EPSREL,                          // ROOT_EPSREL
-                                           GSL_EPSREL_NU,                       // ROOT_NU_EPSREL
                                            GSL_N_ITERATION,                     // ROOT_N_ITERATION
-                                           GSL_N_ITERATION_NU,                  // ROOT_NU_N_ITERATION
                                            GSL_EPSREL_GROWTH                    // ODE_GROWTH_EPSREL
                                           };
 
@@ -106,12 +106,12 @@ void ccl_cosmology_read_config(void)
       if(strcmp(var_name,"GSL_INTEGRATION_DISTANCE_EPSREL")==0) ccl_gsl->INTEGRATION_DISTANCE_EPSREL=var_dbl;
       if(strcmp(var_name,"GSL_INTEGRATION_DNDZ_EPSREL")==0) ccl_gsl->INTEGRATION_DNDZ_EPSREL=var_dbl;
       if(strcmp(var_name,"GSL_INTEGRATION_SIGMAR_EPSREL")==0) ccl_gsl->INTEGRATION_SIGMAR_EPSREL=var_dbl;
+      if(strcmp(var_name,"GSL_INTEGRATION_NU_EPSREL")==0) ccl_gsl->INTEGRATION_NU_EPSREL=var_dbl;
+      if(strcmp(var_name,"GSL_INTEGRATION_NU_EPSABS")==0) ccl_gsl->INTEGRATION_NU_EPSABS=var_dbl;
       if(strcmp(var_name,"GSL_INTEGRATION_LIMBER_GAUSS_KRONROD_POINTS")==0) ccl_gsl->INTEGRATION_LIMBER_GAUSS_KRONROD_POINTS=(int) var_dbl;
       if(strcmp(var_name,"GSL_INTEGRATION_LIMBER_EPSREL")==0) ccl_gsl->INTEGRATION_LIMBER_EPSREL=var_dbl;
       if(strcmp(var_name,"GSL_ROOT_EPSREL")==0) ccl_gsl->ROOT_EPSREL=var_dbl;
       if(strcmp(var_name,"GSL_ROOT_N_ITERATION")==0) ccl_gsl->ROOT_N_ITERATION=(int) var_dbl;
-      if(strcmp(var_name,"GSL_ROOT_NU_EPSREL")==0) ccl_gsl->ROOT_NU_EPSREL=var_dbl;
-      if(strcmp(var_name,"GSL_ROOT_NU_N_ITERATION")==0) ccl_gsl->ROOT_NU_N_ITERATION=(int) var_dbl;
       if(strcmp(var_name,"GSL_ODE_GROWTH_EPSREL")==0) ccl_gsl->ODE_GROWTH_EPSREL=var_dbl;
       // 3dcorr parameters
       if(strcmp(var_name,"N_K_3DCOR")==0) ccl_splines->N_K_3DCOR=(int) var_dbl;     
