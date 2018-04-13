@@ -41,7 +41,7 @@ const ccl_gsl_params default_gsl_params = {GSL_EPSREL,                          
 */
 
 ccl_spline_params * ccl_splines; // Global variable
-ccl_gsl_params * ccl_gsl = &default_gsl_params; // Global variable
+ccl_gsl_params * ccl_gsl; // Global variable
 
 void ccl_cosmology_read_config(void)
 {
@@ -54,10 +54,14 @@ void ccl_cosmology_read_config(void)
   char* rtn;
   double var_dbl;
   
-  ccl_splines = malloc(sizeof(ccl_spline_params));
-  ccl_gsl = malloc(sizeof(ccl_gsl_params));
-  memcpy(ccl_gsl, &default_gsl_params, sizeof(ccl_gsl_params));
-
+  if(ccl_splines == NULL) {
+    ccl_splines = malloc(sizeof(ccl_spline_params));
+  }
+  if(ccl_gsl == NULL) {
+    ccl_gsl = malloc(sizeof(ccl_gsl_params));
+    memcpy(ccl_gsl, &default_gsl_params, sizeof(ccl_gsl_params));
+  }
+  
   // Get parameter .ini filename from environment variable or default location
   const char* param_file;
   const char* param_file_env = getenv("CCL_PARAM_FILE");
@@ -98,6 +102,9 @@ void ccl_cosmology_read_config(void)
       if(strcmp(var_name,"K_MAX")==0) ccl_splines->K_MAX=var_dbl;
       if(strcmp(var_name,"K_MIN_DEFAULT")==0) ccl_splines->K_MIN_DEFAULT=var_dbl;
       if(strcmp(var_name,"N_K")==0) ccl_splines->N_K=(int) var_dbl;
+      // 3dcorr parameters
+      if(strcmp(var_name,"N_K_3DCOR")==0) ccl_splines->N_K_3DCOR=(int) var_dbl;     
+
       // GSL parameters
       if(strcmp(var_name,"GSL_EPSREL")==0) ccl_gsl->EPSREL=var_dbl;
       if(strcmp(var_name,"GSL_N_ITERATION")==0) ccl_gsl->N_ITERATION=(size_t) var_dbl;
@@ -113,8 +120,6 @@ void ccl_cosmology_read_config(void)
       if(strcmp(var_name,"GSL_ROOT_EPSREL")==0) ccl_gsl->ROOT_EPSREL=var_dbl;
       if(strcmp(var_name,"GSL_ROOT_N_ITERATION")==0) ccl_gsl->ROOT_N_ITERATION=(int) var_dbl;
       if(strcmp(var_name,"GSL_ODE_GROWTH_EPSREL")==0) ccl_gsl->ODE_GROWTH_EPSREL=var_dbl;
-      // 3dcorr parameters
-      if(strcmp(var_name,"N_K_3DCOR")==0) ccl_splines->N_K_3DCOR=(int) var_dbl;     
     }
   }
 

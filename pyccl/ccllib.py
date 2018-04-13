@@ -1229,6 +1229,177 @@ def Omeganuh2_vec(N_nu_mass, TCMB, a, mnu, output, status):
 def nu_masses_vec(OmNuh2, label, TCMB, output, status):
     """nu_masses_vec(double OmNuh2, int label, double TCMB, double * output, int * status)"""
     return _ccllib.nu_masses_vec(OmNuh2, label, TCMB, output, status)
+class spline_params(_object):
+    """Proxy of C ccl_spline_params struct."""
+
+    __swig_setmethods__ = {}
+    __setattr__ = lambda self, name, value: _swig_setattr(self, spline_params, name, value)
+    __swig_getmethods__ = {}
+    __getattr__ = lambda self, name: _swig_getattr(self, spline_params, name)
+    __repr__ = _swig_repr
+    __swig_setmethods__["A_SPLINE_NA"] = _ccllib.spline_params_A_SPLINE_NA_set
+    __swig_getmethods__["A_SPLINE_NA"] = _ccllib.spline_params_A_SPLINE_NA_get
+    if _newclass:
+        A_SPLINE_NA = _swig_property(_ccllib.spline_params_A_SPLINE_NA_get, _ccllib.spline_params_A_SPLINE_NA_set)
+    __swig_setmethods__["A_SPLINE_MIN"] = _ccllib.spline_params_A_SPLINE_MIN_set
+    __swig_getmethods__["A_SPLINE_MIN"] = _ccllib.spline_params_A_SPLINE_MIN_get
+    if _newclass:
+        A_SPLINE_MIN = _swig_property(_ccllib.spline_params_A_SPLINE_MIN_get, _ccllib.spline_params_A_SPLINE_MIN_set)
+    __swig_setmethods__["A_SPLINE_MINLOG_PK"] = _ccllib.spline_params_A_SPLINE_MINLOG_PK_set
+    __swig_getmethods__["A_SPLINE_MINLOG_PK"] = _ccllib.spline_params_A_SPLINE_MINLOG_PK_get
+    if _newclass:
+        A_SPLINE_MINLOG_PK = _swig_property(_ccllib.spline_params_A_SPLINE_MINLOG_PK_get, _ccllib.spline_params_A_SPLINE_MINLOG_PK_set)
+    __swig_setmethods__["A_SPLINE_MIN_PK"] = _ccllib.spline_params_A_SPLINE_MIN_PK_set
+    __swig_getmethods__["A_SPLINE_MIN_PK"] = _ccllib.spline_params_A_SPLINE_MIN_PK_get
+    if _newclass:
+        A_SPLINE_MIN_PK = _swig_property(_ccllib.spline_params_A_SPLINE_MIN_PK_get, _ccllib.spline_params_A_SPLINE_MIN_PK_set)
+    __swig_setmethods__["A_SPLINE_MAX"] = _ccllib.spline_params_A_SPLINE_MAX_set
+    __swig_getmethods__["A_SPLINE_MAX"] = _ccllib.spline_params_A_SPLINE_MAX_get
+    if _newclass:
+        A_SPLINE_MAX = _swig_property(_ccllib.spline_params_A_SPLINE_MAX_get, _ccllib.spline_params_A_SPLINE_MAX_set)
+    __swig_setmethods__["A_SPLINE_MINLOG"] = _ccllib.spline_params_A_SPLINE_MINLOG_set
+    __swig_getmethods__["A_SPLINE_MINLOG"] = _ccllib.spline_params_A_SPLINE_MINLOG_get
+    if _newclass:
+        A_SPLINE_MINLOG = _swig_property(_ccllib.spline_params_A_SPLINE_MINLOG_get, _ccllib.spline_params_A_SPLINE_MINLOG_set)
+    __swig_setmethods__["A_SPLINE_NLOG"] = _ccllib.spline_params_A_SPLINE_NLOG_set
+    __swig_getmethods__["A_SPLINE_NLOG"] = _ccllib.spline_params_A_SPLINE_NLOG_get
+    if _newclass:
+        A_SPLINE_NLOG = _swig_property(_ccllib.spline_params_A_SPLINE_NLOG_get, _ccllib.spline_params_A_SPLINE_NLOG_set)
+    __swig_setmethods__["LOGM_SPLINE_DELTA"] = _ccllib.spline_params_LOGM_SPLINE_DELTA_set
+    __swig_getmethods__["LOGM_SPLINE_DELTA"] = _ccllib.spline_params_LOGM_SPLINE_DELTA_get
+    if _newclass:
+        LOGM_SPLINE_DELTA = _swig_property(_ccllib.spline_params_LOGM_SPLINE_DELTA_get, _ccllib.spline_params_LOGM_SPLINE_DELTA_set)
+    __swig_setmethods__["LOGM_SPLINE_NM"] = _ccllib.spline_params_LOGM_SPLINE_NM_set
+    __swig_getmethods__["LOGM_SPLINE_NM"] = _ccllib.spline_params_LOGM_SPLINE_NM_get
+    if _newclass:
+        LOGM_SPLINE_NM = _swig_property(_ccllib.spline_params_LOGM_SPLINE_NM_get, _ccllib.spline_params_LOGM_SPLINE_NM_set)
+    __swig_setmethods__["LOGM_SPLINE_MIN"] = _ccllib.spline_params_LOGM_SPLINE_MIN_set
+    __swig_getmethods__["LOGM_SPLINE_MIN"] = _ccllib.spline_params_LOGM_SPLINE_MIN_get
+    if _newclass:
+        LOGM_SPLINE_MIN = _swig_property(_ccllib.spline_params_LOGM_SPLINE_MIN_get, _ccllib.spline_params_LOGM_SPLINE_MIN_set)
+    __swig_setmethods__["LOGM_SPLINE_MAX"] = _ccllib.spline_params_LOGM_SPLINE_MAX_set
+    __swig_getmethods__["LOGM_SPLINE_MAX"] = _ccllib.spline_params_LOGM_SPLINE_MAX_get
+    if _newclass:
+        LOGM_SPLINE_MAX = _swig_property(_ccllib.spline_params_LOGM_SPLINE_MAX_get, _ccllib.spline_params_LOGM_SPLINE_MAX_set)
+    __swig_setmethods__["A_SPLINE_NA_PK"] = _ccllib.spline_params_A_SPLINE_NA_PK_set
+    __swig_getmethods__["A_SPLINE_NA_PK"] = _ccllib.spline_params_A_SPLINE_NA_PK_get
+    if _newclass:
+        A_SPLINE_NA_PK = _swig_property(_ccllib.spline_params_A_SPLINE_NA_PK_get, _ccllib.spline_params_A_SPLINE_NA_PK_set)
+    __swig_setmethods__["A_SPLINE_NLOG_PK"] = _ccllib.spline_params_A_SPLINE_NLOG_PK_set
+    __swig_getmethods__["A_SPLINE_NLOG_PK"] = _ccllib.spline_params_A_SPLINE_NLOG_PK_get
+    if _newclass:
+        A_SPLINE_NLOG_PK = _swig_property(_ccllib.spline_params_A_SPLINE_NLOG_PK_get, _ccllib.spline_params_A_SPLINE_NLOG_PK_set)
+    __swig_setmethods__["K_MAX_SPLINE"] = _ccllib.spline_params_K_MAX_SPLINE_set
+    __swig_getmethods__["K_MAX_SPLINE"] = _ccllib.spline_params_K_MAX_SPLINE_get
+    if _newclass:
+        K_MAX_SPLINE = _swig_property(_ccllib.spline_params_K_MAX_SPLINE_get, _ccllib.spline_params_K_MAX_SPLINE_set)
+    __swig_setmethods__["K_MAX"] = _ccllib.spline_params_K_MAX_set
+    __swig_getmethods__["K_MAX"] = _ccllib.spline_params_K_MAX_get
+    if _newclass:
+        K_MAX = _swig_property(_ccllib.spline_params_K_MAX_get, _ccllib.spline_params_K_MAX_set)
+    __swig_setmethods__["K_MIN_DEFAULT"] = _ccllib.spline_params_K_MIN_DEFAULT_set
+    __swig_getmethods__["K_MIN_DEFAULT"] = _ccllib.spline_params_K_MIN_DEFAULT_get
+    if _newclass:
+        K_MIN_DEFAULT = _swig_property(_ccllib.spline_params_K_MIN_DEFAULT_get, _ccllib.spline_params_K_MIN_DEFAULT_set)
+    __swig_setmethods__["N_K"] = _ccllib.spline_params_N_K_set
+    __swig_getmethods__["N_K"] = _ccllib.spline_params_N_K_get
+    if _newclass:
+        N_K = _swig_property(_ccllib.spline_params_N_K_get, _ccllib.spline_params_N_K_set)
+    __swig_setmethods__["N_K_3DCOR"] = _ccllib.spline_params_N_K_3DCOR_set
+    __swig_getmethods__["N_K_3DCOR"] = _ccllib.spline_params_N_K_3DCOR_get
+    if _newclass:
+        N_K_3DCOR = _swig_property(_ccllib.spline_params_N_K_3DCOR_get, _ccllib.spline_params_N_K_3DCOR_set)
+
+    def __init__(self):
+        """__init__(ccl_spline_params self) -> spline_params"""
+        this = _ccllib.new_spline_params()
+        try:
+            self.this.append(this)
+        except __builtin__.Exception:
+            self.this = this
+    __swig_destroy__ = _ccllib.delete_spline_params
+    __del__ = lambda self: None
+spline_params_swigregister = _ccllib.spline_params_swigregister
+spline_params_swigregister(spline_params)
+
+class gsl_params(_object):
+    """Proxy of C ccl_gsl_params struct."""
+
+    __swig_setmethods__ = {}
+    __setattr__ = lambda self, name, value: _swig_setattr(self, gsl_params, name, value)
+    __swig_getmethods__ = {}
+    __getattr__ = lambda self, name: _swig_getattr(self, gsl_params, name)
+    __repr__ = _swig_repr
+    __swig_setmethods__["EPSREL"] = _ccllib.gsl_params_EPSREL_set
+    __swig_getmethods__["EPSREL"] = _ccllib.gsl_params_EPSREL_get
+    if _newclass:
+        EPSREL = _swig_property(_ccllib.gsl_params_EPSREL_get, _ccllib.gsl_params_EPSREL_set)
+    __swig_setmethods__["N_ITERATION"] = _ccllib.gsl_params_N_ITERATION_set
+    __swig_getmethods__["N_ITERATION"] = _ccllib.gsl_params_N_ITERATION_get
+    if _newclass:
+        N_ITERATION = _swig_property(_ccllib.gsl_params_N_ITERATION_get, _ccllib.gsl_params_N_ITERATION_set)
+    __swig_setmethods__["INTEGRATION_GAUSS_KRONROD_POINTS"] = _ccllib.gsl_params_INTEGRATION_GAUSS_KRONROD_POINTS_set
+    __swig_getmethods__["INTEGRATION_GAUSS_KRONROD_POINTS"] = _ccllib.gsl_params_INTEGRATION_GAUSS_KRONROD_POINTS_get
+    if _newclass:
+        INTEGRATION_GAUSS_KRONROD_POINTS = _swig_property(_ccllib.gsl_params_INTEGRATION_GAUSS_KRONROD_POINTS_get, _ccllib.gsl_params_INTEGRATION_GAUSS_KRONROD_POINTS_set)
+    __swig_setmethods__["INTEGRATION_EPSREL"] = _ccllib.gsl_params_INTEGRATION_EPSREL_set
+    __swig_getmethods__["INTEGRATION_EPSREL"] = _ccllib.gsl_params_INTEGRATION_EPSREL_get
+    if _newclass:
+        INTEGRATION_EPSREL = _swig_property(_ccllib.gsl_params_INTEGRATION_EPSREL_get, _ccllib.gsl_params_INTEGRATION_EPSREL_set)
+    __swig_setmethods__["INTEGRATION_LIMBER_GAUSS_KRONROD_POINTS"] = _ccllib.gsl_params_INTEGRATION_LIMBER_GAUSS_KRONROD_POINTS_set
+    __swig_getmethods__["INTEGRATION_LIMBER_GAUSS_KRONROD_POINTS"] = _ccllib.gsl_params_INTEGRATION_LIMBER_GAUSS_KRONROD_POINTS_get
+    if _newclass:
+        INTEGRATION_LIMBER_GAUSS_KRONROD_POINTS = _swig_property(_ccllib.gsl_params_INTEGRATION_LIMBER_GAUSS_KRONROD_POINTS_get, _ccllib.gsl_params_INTEGRATION_LIMBER_GAUSS_KRONROD_POINTS_set)
+    __swig_setmethods__["INTEGRATION_LIMBER_EPSREL"] = _ccllib.gsl_params_INTEGRATION_LIMBER_EPSREL_set
+    __swig_getmethods__["INTEGRATION_LIMBER_EPSREL"] = _ccllib.gsl_params_INTEGRATION_LIMBER_EPSREL_get
+    if _newclass:
+        INTEGRATION_LIMBER_EPSREL = _swig_property(_ccllib.gsl_params_INTEGRATION_LIMBER_EPSREL_get, _ccllib.gsl_params_INTEGRATION_LIMBER_EPSREL_set)
+    __swig_setmethods__["INTEGRATION_DISTANCE_EPSREL"] = _ccllib.gsl_params_INTEGRATION_DISTANCE_EPSREL_set
+    __swig_getmethods__["INTEGRATION_DISTANCE_EPSREL"] = _ccllib.gsl_params_INTEGRATION_DISTANCE_EPSREL_get
+    if _newclass:
+        INTEGRATION_DISTANCE_EPSREL = _swig_property(_ccllib.gsl_params_INTEGRATION_DISTANCE_EPSREL_get, _ccllib.gsl_params_INTEGRATION_DISTANCE_EPSREL_set)
+    __swig_setmethods__["INTEGRATION_DNDZ_EPSREL"] = _ccllib.gsl_params_INTEGRATION_DNDZ_EPSREL_set
+    __swig_getmethods__["INTEGRATION_DNDZ_EPSREL"] = _ccllib.gsl_params_INTEGRATION_DNDZ_EPSREL_get
+    if _newclass:
+        INTEGRATION_DNDZ_EPSREL = _swig_property(_ccllib.gsl_params_INTEGRATION_DNDZ_EPSREL_get, _ccllib.gsl_params_INTEGRATION_DNDZ_EPSREL_set)
+    __swig_setmethods__["INTEGRATION_SIGMAR_EPSREL"] = _ccllib.gsl_params_INTEGRATION_SIGMAR_EPSREL_set
+    __swig_getmethods__["INTEGRATION_SIGMAR_EPSREL"] = _ccllib.gsl_params_INTEGRATION_SIGMAR_EPSREL_get
+    if _newclass:
+        INTEGRATION_SIGMAR_EPSREL = _swig_property(_ccllib.gsl_params_INTEGRATION_SIGMAR_EPSREL_get, _ccllib.gsl_params_INTEGRATION_SIGMAR_EPSREL_set)
+    __swig_setmethods__["INTEGRATION_NU_EPSREL"] = _ccllib.gsl_params_INTEGRATION_NU_EPSREL_set
+    __swig_getmethods__["INTEGRATION_NU_EPSREL"] = _ccllib.gsl_params_INTEGRATION_NU_EPSREL_get
+    if _newclass:
+        INTEGRATION_NU_EPSREL = _swig_property(_ccllib.gsl_params_INTEGRATION_NU_EPSREL_get, _ccllib.gsl_params_INTEGRATION_NU_EPSREL_set)
+    __swig_setmethods__["INTEGRATION_NU_EPSABS"] = _ccllib.gsl_params_INTEGRATION_NU_EPSABS_set
+    __swig_getmethods__["INTEGRATION_NU_EPSABS"] = _ccllib.gsl_params_INTEGRATION_NU_EPSABS_get
+    if _newclass:
+        INTEGRATION_NU_EPSABS = _swig_property(_ccllib.gsl_params_INTEGRATION_NU_EPSABS_get, _ccllib.gsl_params_INTEGRATION_NU_EPSABS_set)
+    __swig_setmethods__["ROOT_EPSREL"] = _ccllib.gsl_params_ROOT_EPSREL_set
+    __swig_getmethods__["ROOT_EPSREL"] = _ccllib.gsl_params_ROOT_EPSREL_get
+    if _newclass:
+        ROOT_EPSREL = _swig_property(_ccllib.gsl_params_ROOT_EPSREL_get, _ccllib.gsl_params_ROOT_EPSREL_set)
+    __swig_setmethods__["ROOT_N_ITERATION"] = _ccllib.gsl_params_ROOT_N_ITERATION_set
+    __swig_getmethods__["ROOT_N_ITERATION"] = _ccllib.gsl_params_ROOT_N_ITERATION_get
+    if _newclass:
+        ROOT_N_ITERATION = _swig_property(_ccllib.gsl_params_ROOT_N_ITERATION_get, _ccllib.gsl_params_ROOT_N_ITERATION_set)
+    __swig_setmethods__["ODE_GROWTH_EPSREL"] = _ccllib.gsl_params_ODE_GROWTH_EPSREL_set
+    __swig_getmethods__["ODE_GROWTH_EPSREL"] = _ccllib.gsl_params_ODE_GROWTH_EPSREL_get
+    if _newclass:
+        ODE_GROWTH_EPSREL = _swig_property(_ccllib.gsl_params_ODE_GROWTH_EPSREL_get, _ccllib.gsl_params_ODE_GROWTH_EPSREL_set)
+
+    def __init__(self):
+        """__init__(ccl_gsl_params self) -> gsl_params"""
+        this = _ccllib.new_gsl_params()
+        try:
+            self.this.append(this)
+        except __builtin__.Exception:
+            self.this = this
+    __swig_destroy__ = _ccllib.delete_gsl_params
+    __del__ = lambda self: None
+gsl_params_swigregister = _ccllib.gsl_params_swigregister
+gsl_params_swigregister(gsl_params)
+cvar = _ccllib.cvar
+
 emulator = _ccllib.emulator
 none = _ccllib.none
 fitting_function = _ccllib.fitting_function
@@ -1394,7 +1565,6 @@ class SplPar(_object):
     __del__ = lambda self: None
 SplPar_swigregister = _ccllib.SplPar_swigregister
 SplPar_swigregister(SplPar)
-cvar = _ccllib.cvar
 default_config = cvar.default_config
 
 
