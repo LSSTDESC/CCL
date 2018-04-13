@@ -18,9 +18,12 @@ void ccl_set_error_policy(CCLErrorPolicy error_policy)
 // Convenience function to raise exceptions in an appropriate way
 void ccl_raise_exception(int err, char* msg)
 {  
-  // Print error message and exit if fatal errors are enabled
-  if ((_ccl_error_policy == CCL_ERROR_POLICY_EXIT) && (err)) {
+  // Print error message
+  if(err) {
     fprintf(stderr, "%s\n", msg);
+  }
+  // and exit if fatal errors are enabled
+  if ((_ccl_error_policy == CCL_ERROR_POLICY_EXIT) && (err)) {
     exit(1);
   }
 }

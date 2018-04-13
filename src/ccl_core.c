@@ -54,14 +54,6 @@ void ccl_cosmology_read_config(void)
   char* rtn;
   double var_dbl;
   
-  if(ccl_splines == NULL) {
-    ccl_splines = malloc(sizeof(ccl_spline_params));
-  }
-  if(ccl_gsl == NULL) {
-    ccl_gsl = malloc(sizeof(ccl_gsl_params));
-    memcpy(ccl_gsl, &default_gsl_params, sizeof(ccl_gsl_params));
-  }
-  
   // Get parameter .ini filename from environment variable or default location
   const char* param_file;
   const char* param_file_env = getenv("CCL_PARAM_FILE");
@@ -75,7 +67,16 @@ void ccl_cosmology_read_config(void)
   
   if ((fconfig=fopen(param_file, "r")) == NULL) {
     ccl_raise_exception(EXIT_FAILURE, "ccl_core.c: Failed to open config file");
-  } 
+    return;
+  }
+
+  if(ccl_splines == NULL) {
+    ccl_splines = malloc(sizeof(ccl_spline_params));
+  }
+  if(ccl_gsl == NULL) {
+    ccl_gsl = malloc(sizeof(ccl_gsl_params));
+    memcpy(ccl_gsl, &default_gsl_params, sizeof(ccl_gsl_params));
+  }
 
   while(! feof(fconfig)) {
     rtn = fgets(buf, CONFIG_LINE_BUFFER_SIZE, fconfig);
@@ -347,9 +348,18 @@ ccl_parameters ccl_parameters_create(
   #ifndef USE_GSL_ERROR
     gsl_set_error_handler_off ();
   #endif
-  if(ccl_splines==NULL || ccl_gsl==NULL) ccl_cosmology_read_config();
 
   ccl_parameters params;
+  
+  if(ccl_splines==NULL || ccl_gsl==NULL) {
+    ccl_cosmology_read_config();
+  }
+  if(ccl_splines==NULL || ccl_gsl==NULL) {
+    ccl_raise_exception(EXIT_FAILURE, "ccl_core.c: Failed to read config file.");
+    *status = EXIT_FAILURE;
+    return params;
+  }
+
   params.mnu = NULL;
   params.z_mgrowth=NULL;
   params.df_mgrowth=NULL;
