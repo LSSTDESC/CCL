@@ -1100,12 +1100,16 @@ TNCDM = _ccllib.TNCDM
 DELTAM12_sq = _ccllib.DELTAM12_sq
 DELTAM13_sq_pos = _ccllib.DELTAM13_sq_pos
 DELTAM13_sq_neg = _ccllib.DELTAM13_sq_neg
-EPSREL_DIST = _ccllib.EPSREL_DIST
-EPSREL_GROWTH = _ccllib.EPSREL_GROWTH
-EPSREL_DNDZ = _ccllib.EPSREL_DNDZ
+GSL_EPSREL = _ccllib.GSL_EPSREL
+GSL_N_ITERATION = _ccllib.GSL_N_ITERATION
+GSL_EPSABS_NU = _ccllib.GSL_EPSABS_NU
+GSL_EPSREL_NU = _ccllib.GSL_EPSREL_NU
+GSL_N_ITERATION_NU = _ccllib.GSL_N_ITERATION_NU
+GSL_EPSREL_SIGMAR = _ccllib.GSL_EPSREL_SIGMAR
+GSL_EPSREL_DIST = _ccllib.GSL_EPSREL_DIST
+GSL_EPSREL_GROWTH = _ccllib.GSL_EPSREL_GROWTH
+GSL_EPSREL_DNDZ = _ccllib.GSL_EPSREL_DNDZ
 EPS_SCALEFAC_GROWTH = _ccllib.EPS_SCALEFAC_GROWTH
-EPSREL_CORR_FUNC = _ccllib.EPSREL_CORR_FUNC
-GSL_INTEGRATION_LIMIT = _ccllib.GSL_INTEGRATION_LIMIT
 Z_MIN_SOURCES = _ccllib.Z_MIN_SOURCES
 Z_MAX_SOURCES = _ccllib.Z_MAX_SOURCES
 class user_pz_info(_object):
@@ -1310,6 +1314,14 @@ CCL_ERROR_POLICY_CONTINUE = _ccllib.CCL_ERROR_POLICY_CONTINUE
 def raise_exception(err, msg):
     """raise_exception(int err, char * msg)"""
     return _ccllib.raise_exception(err, msg)
+
+def raise_warning(err, msg):
+    """raise_warning(int err, char * msg)"""
+    return _ccllib.raise_warning(err, msg)
+
+def raise_gsl_warning(gslstatus, msg):
+    """raise_gsl_warning(int gslstatus, char * msg)"""
+    return _ccllib.raise_gsl_warning(gslstatus, msg)
 
 def set_error_policy(error_policy):
     """set_error_policy(CCLErrorPolicy error_policy)"""

@@ -20541,6 +20541,80 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_raise_warning(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  int arg1 ;
+  char *arg2 = (char *) 0 ;
+  int val1 ;
+  int ecode1 = 0 ;
+  int res2 ;
+  char *buf2 = 0 ;
+  int alloc2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:raise_warning",&obj0,&obj1)) SWIG_fail;
+  ecode1 = SWIG_AsVal_int(obj0, &val1);
+  if (!SWIG_IsOK(ecode1)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "raise_warning" "', argument " "1"" of type '" "int""'");
+  } 
+  arg1 = (int)(val1);
+  res2 = SWIG_AsCharPtrAndSize(obj1, &buf2, NULL, &alloc2);
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "raise_warning" "', argument " "2"" of type '" "char *""'");
+  }
+  arg2 = (char *)(buf2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    ccl_raise_warning(arg1,arg2);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  if (alloc2 == SWIG_NEWOBJ) free((char*)buf2);
+  return resultobj;
+fail:
+  if (alloc2 == SWIG_NEWOBJ) free((char*)buf2);
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_raise_gsl_warning(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  int arg1 ;
+  char *arg2 = (char *) 0 ;
+  int val1 ;
+  int ecode1 = 0 ;
+  int res2 ;
+  char *buf2 = 0 ;
+  int alloc2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:raise_gsl_warning",&obj0,&obj1)) SWIG_fail;
+  ecode1 = SWIG_AsVal_int(obj0, &val1);
+  if (!SWIG_IsOK(ecode1)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "raise_gsl_warning" "', argument " "1"" of type '" "int""'");
+  } 
+  arg1 = (int)(val1);
+  res2 = SWIG_AsCharPtrAndSize(obj1, &buf2, NULL, &alloc2);
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "raise_gsl_warning" "', argument " "2"" of type '" "char *""'");
+  }
+  arg2 = (char *)(buf2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    ccl_raise_gsl_warning(arg1,arg2);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  if (alloc2 == SWIG_NEWOBJ) free((char*)buf2);
+  return resultobj;
+fail:
+  if (alloc2 == SWIG_NEWOBJ) free((char*)buf2);
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_set_error_policy(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   CCLErrorPolicy arg1 ;
@@ -21704,6 +21778,8 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"delete_configuration", _wrap_delete_configuration, METH_VARARGS, (char *)"delete_configuration(configuration self)"},
 	 { (char *)"configuration_swigregister", configuration_swigregister, METH_VARARGS, NULL},
 	 { (char *)"raise_exception", _wrap_raise_exception, METH_VARARGS, (char *)"raise_exception(int err, char * msg)"},
+	 { (char *)"raise_warning", _wrap_raise_warning, METH_VARARGS, (char *)"raise_warning(int err, char * msg)"},
+	 { (char *)"raise_gsl_warning", _wrap_raise_gsl_warning, METH_VARARGS, (char *)"raise_gsl_warning(int gslstatus, char * msg)"},
 	 { (char *)"set_error_policy", _wrap_set_error_policy, METH_VARARGS, (char *)"set_error_policy(CCLErrorPolicy error_policy)"},
 	 { (char *)"check_status", _wrap_check_status, METH_VARARGS, (char *)"check_status(cosmology cosmo, int * status)"},
 	 { (char *)"check_status_nocosmo", _wrap_check_status_nocosmo, METH_VARARGS, (char *)"check_status_nocosmo(int * status)"},
@@ -22689,12 +22765,16 @@ SWIG_init(void) {
   SWIG_Python_SetConstant(d, "DELTAM12_sq",SWIG_From_double((double)(7.62E-5)));
   SWIG_Python_SetConstant(d, "DELTAM13_sq_pos",SWIG_From_double((double)(2.55E-3)));
   SWIG_Python_SetConstant(d, "DELTAM13_sq_neg",SWIG_From_double((double)(-2.43E-3)));
-  SWIG_Python_SetConstant(d, "EPSREL_DIST",SWIG_From_double((double)(1E-6)));
-  SWIG_Python_SetConstant(d, "EPSREL_GROWTH",SWIG_From_double((double)(1E-6)));
-  SWIG_Python_SetConstant(d, "EPSREL_DNDZ",SWIG_From_double((double)(1E-6)));
+  SWIG_Python_SetConstant(d, "GSL_EPSREL",SWIG_From_double((double)(1E-4)));
+  SWIG_Python_SetConstant(d, "GSL_N_ITERATION",SWIG_From_int((int)(1000)));
+  SWIG_Python_SetConstant(d, "GSL_EPSABS_NU",SWIG_From_double((double)(1E-7)));
+  SWIG_Python_SetConstant(d, "GSL_EPSREL_NU",SWIG_From_double((double)(1E-7)));
+  SWIG_Python_SetConstant(d, "GSL_N_ITERATION_NU",SWIG_From_int((int)(1000)));
+  SWIG_Python_SetConstant(d, "GSL_EPSREL_SIGMAR",SWIG_From_double((double)(1E-5)));
+  SWIG_Python_SetConstant(d, "GSL_EPSREL_DIST",SWIG_From_double((double)(1E-6)));
+  SWIG_Python_SetConstant(d, "GSL_EPSREL_GROWTH",SWIG_From_double((double)(1E-6)));
+  SWIG_Python_SetConstant(d, "GSL_EPSREL_DNDZ",SWIG_From_double((double)(1E-6)));
   SWIG_Python_SetConstant(d, "EPS_SCALEFAC_GROWTH",SWIG_From_double((double)(1E-6)));
-  SWIG_Python_SetConstant(d, "EPSREL_CORR_FUNC",SWIG_From_double((double)(1E-3)));
-  SWIG_Python_SetConstant(d, "GSL_INTEGRATION_LIMIT",SWIG_From_int((int)(1000)));
   SWIG_Python_SetConstant(d, "Z_MIN_SOURCES",SWIG_From_double((double)(0.1)));
   SWIG_Python_SetConstant(d, "Z_MAX_SOURCES",SWIG_From_double((double)(3.0)));
   SWIG_Python_SetConstant(d, "DNDZ_WL_CONS",SWIG_From_int((int)(1)));
