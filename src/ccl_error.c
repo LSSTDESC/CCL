@@ -8,10 +8,22 @@
 // (Python or other binding default)
 static CCLErrorPolicy _ccl_error_policy = CCL_ERROR_POLICY_EXIT;
 
+// Debug mode policy: whether to print error messages as they are raised. This 
+// is useful for the Python wrapper, which normally allows errors to be 
+// overwritten by the C code until control returns to Python. If debug mode is 
+// switched on, the errors are always printed by the C code when they occur.
+static CCLDebugModePolicy _ccl_debug_mode_policy = CCL_DEBUG_MODE_OFF;
+
 // Set error policy
 void ccl_set_error_policy(CCLErrorPolicy error_policy)
 {
   _ccl_error_policy = error_policy;
+}
+
+// Set debug mode policy
+void ccl_set_debug_policy(CCLDebugModePolicy debug_policy)
+{
+    _ccl_debug_mode_policy = debug_policy;
 }
 
 // Convenience function to raise exceptions in an appropriate way
@@ -19,7 +31,10 @@ void ccl_raise_exception(int err, char* msg)
 {  
   // Print error message and exit if fatal errors are enabled
   if ((_ccl_error_policy == CCL_ERROR_POLICY_EXIT) && (err)) {
+    fprintf(stderr, "ERROR %d: %s\n", err, msg);
     exit(1);
+  }else if ((_ccl_debug_mode_policy == CCL_DEBUG_MODE_ON) && (err)){
+    fprintf(stderr, "ERROR %d: %s\n", err, msg);
   }
 }
 

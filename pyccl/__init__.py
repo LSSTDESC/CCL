@@ -32,4 +32,7 @@ from pyccl.constants import CLIGHT_HMPC, MPC_TO_METER, PC_TO_METER, \
 
 from pyccl.correlation import correlation, correlation_3d
 
-from pyccl.neutrinos import Omeganuh2,nu_masses
+from pyccl.neutrinos import Omeganuh2, nu_masses
+
+# Expose function to toggle debug mode
+from pyccl.pyutils import debug_mode

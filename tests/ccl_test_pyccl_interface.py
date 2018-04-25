@@ -762,6 +762,13 @@ def test_corr():
     for cosmo_nu in reference_models_nu():
         yield check_corr, cosmo_nu
 
+def test_debug_mode():
+    """
+    Test that debug mode can be toggled.
+    """
+    ccl.debug_mode(True)
+    ccl.debug_mode(False)
+
         
 if __name__ == '__main__':
     run_module_suite()
