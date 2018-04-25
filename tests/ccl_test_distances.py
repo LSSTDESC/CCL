@@ -1,23 +1,36 @@
 import numpy as np
-from numpy.testing import assert_allclose, run_module_suite
+from numpy.testing import assert_allclose, run_module_suite, decorators
 import pyccl as ccl
 from os.path import dirname,join,abspath
 # Set tolerances
 DISTANCES_TOLERANCE = 1e-4
+# The distance tolerance is 1e-3 for distances with massive neutrinos
+# This is because we compare to astropy which uses a fitting function
+# instead of the full phasespace integral.
+# The fitting function itself is not accurate to 1e-4.
+DISTANCES_TOLERANCE_MNU = 1e-3
 
 # Set up the cosmological parameters to be used in each of the models
 # Values that are the same for all 5 models
 Omega_c = 0.25
 Omega_b = 0.05
-N_nu_rel = 0.
 h = 0.7
 A_s = 2.1e-9
 n_s = 0.96
+Neff = 0.
 
 # Values that are different for the different models
 Omega_v_vals = np.array([0.7, 0.7, 0.7, 0.65, 0.75])
 w0_vals = np.array([-1.0, -0.9, -0.9, -0.9, -0.9])
 wa_vals = np.array([0.0, 0.0, 0.1, 0.1, 0.1])
+
+mnu = [[0.04, 0., 0.], [0.05, 0.01, 0.], [0.03, 0.02, 0.04], [0.05, 0., 0.], [0.03, 0.02, 0.]]
+# For tests with massive neutrinos, we require N_nu_rel + N_nu_mass = 3
+# Because we compare with astropy for benchmarks
+# Which assumes N total is split equally among all neutrinos.
+Neff_mnu = 3
+
+
 path = dirname(abspath(__file__))
 def read_chi_test_file():
     """
@@ -46,6 +59,50 @@ def read_chi_hiz_test_file():
     z = dat[0]
     chi = dat[1:]
     return z, chi
+    
+def read_chi_mnu_test_file():
+    """
+    Read the file containing all the radial comoving distance benchmarks
+    with non-zero massive neutrinos 
+    (distances are in Mpc)
+    """
+    # Load data from file
+    dat = np.genfromtxt(join(path,"benchmark/chi_mnu_model1-5.txt")).T
+    assert(dat.shape == (6,5))
+    
+    # Split into redshift column and chi(z) columns
+    z = dat[0]
+    chi = dat[1:]
+    return z, chi
+
+def read_chi_hiz_test_file():
+    """
+    Read the file containing all the radial comoving distance benchmarks 
+    (distances are in Mpc/h)
+    """
+    # Load data from file
+    dat = np.genfromtxt(join(path,"benchmark/chi_hiz_model1-3.txt")).T
+    assert(dat.shape == (4,7))
+    
+    # Split into redshift column and chi(z) columns
+    z = dat[0]
+    chi = dat[1:]
+    return z, chi
+    
+def read_chi_mnu_hiz_test_file():
+    """
+    Read the file containing all the radial comoving distance benchmarks
+    with non-zero massive neutrinos 
+    (distances are in Mpc)
+    """
+    # Load data from file
+    dat = np.genfromtxt(join(path,"benchmark/chi_hiz_mnu_model1-5.txt")).T
+    assert(dat.shape == (6,7))
+    
+    # Split into redshift column and chi(z) columns
+    z = dat[0]
+    chi = dat[1:]
+    return z, chi
 
 def read_dm_test_file():
     """
@@ -59,11 +116,43 @@ def read_dm_test_file():
     z = dat[0]
     dm = dat[1:]
     return z, dm
+    
+def read_dm_mnu_test_file():
+    """
+    Read the file containing all the distance modulus benchmarks 
+    for non-zero massive neutrinos.
+    """
+    # Load data from file
+    dat = np.genfromtxt(join(path,"benchmark/dm_mnu_model1-5.txt")).T
+    assert(dat.shape == (6,5))
+
+    # Split into redshift column and chi(z) columns
+    z = dat[0]
+    dm = dat[1:]
+    return z, dm
+    
+def read_dm_mnu_hiz_test_file():
+    """
+    Read the file containing all the distance modulus benchmarks 
+    for non-zero massive neutrinos at high z.
+    """
+    # Load data from file
+    dat = np.genfromtxt(join(path,"benchmark/dm_hiz_mnu_model1-5.txt")).T
+    assert(dat.shape == (6,7))
+
+    # Split into redshift column and chi(z) columns
+    z = dat[0]
+    dm = dat[1:]
+    return z, dm
 
 # Set-up test data
 z, chi = read_chi_test_file()
 zhi, chi_hiz = read_chi_hiz_test_file()
 _, dm = read_dm_test_file()
+znu, chi_nu = read_chi_mnu_test_file()
+znuhi, chi_nu_hiz = read_chi_mnu_hiz_test_file()
+_znu, dm_nu = read_dm_mnu_test_file()
+_znuhi, dm_nu_hiz = read_dm_mnu_hiz_test_file()
 
 def compare_distances(z, chi_bench,dm_bench, Omega_v, w0, wa):
     """
@@ -75,7 +164,7 @@ def compare_distances(z, chi_bench,dm_bench, Omega_v, w0, wa):
     Omega_k = 1.0 - Omega_c - Omega_b - Omega_v    
     
     # Create new Parameters and Cosmology objects
-    p = ccl.Parameters(Omega_c=Omega_c, Omega_b=Omega_b, N_nu_rel=N_nu_rel, 
+    p = ccl.Parameters(Omega_c=Omega_c, Omega_b=Omega_b, Neff = Neff, 
                        h=h, A_s=A_s, n_s=n_s, Omega_k=Omega_k,
                        w0=w0, wa=wa)
     p.parameters.Omega_g = 0. # Hack to set to same value used for benchmarks
@@ -103,7 +192,7 @@ def compare_distances_hiz(z, chi_bench, Omega_v, w0, wa):
     Omega_k = 1.0 - Omega_c - Omega_b - Omega_v    
     
     # Create new Parameters and Cosmology objects
-    p = ccl.Parameters(Omega_c=Omega_c, Omega_b=Omega_b, N_nu_rel=N_nu_rel, 
+    p = ccl.Parameters(Omega_c=Omega_c, Omega_b=Omega_b, Neff=Neff, 
                        h=h, A_s=A_s, n_s=n_s, Omega_k=Omega_k,
                        w0=w0, wa=wa)
     p.parameters.Omega_g = 0. # Hack to set to same value used for benchmarks
@@ -114,6 +203,60 @@ def compare_distances_hiz(z, chi_bench, Omega_v, w0, wa):
     chi = ccl.comoving_radial_distance(cosmo, a) * h
     # Compare to benchmark data
     assert_allclose(chi, chi_bench, atol=1e-12, rtol=DISTANCES_TOLERANCE)
+
+@decorators.slow    
+def compare_distances_mnu(z, chi_bench,dm_bench, Omega_v, w0, wa, Neff, mnu):
+    """
+    Compare distances calculated by pyccl with the distances in the benchmark 
+    file.
+    """
+    # Set Omega_K in a consistent way
+    Omega_k = 1.0 - Omega_c - Omega_b - Omega_v    
+    
+    # Create new Parameters and Cosmology objects
+    p = ccl.Parameters(Omega_c=Omega_c, Omega_b=Omega_b, Neff=Neff_mnu, 
+                       h=h, A_s=A_s, n_s=n_s, Omega_k=Omega_k,
+                       w0=w0, wa=wa, m_nu=mnu)
+    cosmo = ccl.Cosmology(p)
+    
+    # Calculate distance using pyccl
+    a = 1. / (1. + z)
+    chi = ccl.comoving_radial_distance(cosmo, a)
+    # Compare to benchmark data
+    assert_allclose(chi, chi_bench, atol=1e-12, rtol=DISTANCES_TOLERANCE_MNU)
+
+    #compare distance moudli where a!=1
+    a_not_one = (a!=1).nonzero()
+    dm = ccl.distance_modulus(cosmo,a[a_not_one])
+
+    assert_allclose(dm, dm_bench[a_not_one], atol=1e-3, rtol = DISTANCES_TOLERANCE_MNU)
+    
+@decorators.slow    
+def compare_distances_mnu_hiz(z, chi_bench,dm_bench, Omega_v, w0, wa, Neff_mnu, mnu):
+    """
+    Compare distances calculated by pyccl with the distances in the benchmark 
+    file.
+    """
+    # Set Omega_K in a consistent way
+    Omega_k = 1.0 - Omega_c - Omega_b - Omega_v    
+    
+    # Create new Parameters and Cosmology objects
+    p = ccl.Parameters(Omega_c=Omega_c, Omega_b=Omega_b, Neff=Neff, 
+                       h=h, A_s=A_s, n_s=n_s, Omega_k=Omega_k,
+                       w0=w0, wa=wa, m_nu=mnu)
+    cosmo = ccl.Cosmology(p)
+    
+    # Calculate distance using pyccl
+    a = 1. / (1. + z)
+    chi = ccl.comoving_radial_distance(cosmo, a)
+    # Compare to benchmark data
+    assert_allclose(chi, chi_bench, atol=1e-12, rtol=DISTANCES_TOLERANCE_MNU)
+
+    #compare distance moudli where a!=1
+    a_not_one = (a!=1).nonzero()
+    dm = ccl.distance_modulus(cosmo,a[a_not_one])
+
+    assert_allclose(dm, dm_bench[a_not_one], atol=1e-3, rtol = DISTANCES_TOLERANCE_MNU)
     
 def test_distance_model_0():
     i = 0
@@ -146,6 +289,46 @@ def test_distance_hiz_model_1():
 def test_distance_hiz_model_2():
     i = 2
     compare_distances_hiz(zhi, chi_hiz[i], Omega_v_vals[i], w0_vals[i], wa_vals[i])
+    
+def test_distance_mnu_model_0():
+	i=0
+	compare_distances_mnu(znu, chi_nu[i],dm_nu[i], Omega_v_vals[i], w0_vals[i], wa_vals[i], Neff, mnu[i])
+	
+def test_distance_mnu_model_1():
+	i=1
+	compare_distances_mnu(znu, chi_nu[i],dm_nu[i], Omega_v_vals[i], w0_vals[i], wa_vals[i], Neff, mnu[i])
+	
+def test_distance_mnu_model_2():
+	i=2
+	compare_distances_mnu(znu, chi_nu[i],dm_nu[i], Omega_v_vals[i], w0_vals[i], wa_vals[i], Neff, mnu[i])
+	
+def test_distance_mnu_model_3():
+	i=3
+	compare_distances_mnu(znu, chi_nu[i],dm_nu[i], Omega_v_vals[i], w0_vals[i], wa_vals[i], Neff, mnu[i])
+	
+def test_distance_mnu_model_4():
+	i=4
+	compare_distances_mnu(znu, chi_nu[i],dm_nu[i], Omega_v_vals[i], w0_vals[i], wa_vals[i], Neff, mnu[i])
+	
+def test_distance_mnu_hiz_model_0():
+	i=0
+	compare_distances_mnu(znuhi, chi_nu_hiz[i],dm_nu_hiz[i], Omega_v_vals[i], w0_vals[i], wa_vals[i], Neff, mnu[i])
+	
+def test_distance_mnu_hiz_model_1():
+	i=1
+	compare_distances_mnu(znuhi, chi_nu_hiz[i],dm_nu_hiz[i], Omega_v_vals[i], w0_vals[i], wa_vals[i], Neff, mnu[i])
+	
+def test_distance_mnu_hiz_model_2():
+	i=2
+	compare_distances_mnu(znuhi, chi_nu_hiz[i],dm_nu_hiz[i], Omega_v_vals[i], w0_vals[i], wa_vals[i], Neff, mnu[i])
+	
+def test_distance_mnu_hiz_model_3():
+	i=3
+	compare_distances_mnu(znuhi, chi_nu_hiz[i],dm_nu_hiz[i], Omega_v_vals[i], w0_vals[i], wa_vals[i], Neff, mnu[i])
+	
+def test_distance_mnu_hiz_model_4():
+	i=4
+	compare_distances_mnu(znuhi, chi_nu_hiz[i],dm_nu_hiz[i], Omega_v_vals[i], w0_vals[i], wa_vals[i], Neff, mnu[i])
     
 
 if __name__ == "__main__":

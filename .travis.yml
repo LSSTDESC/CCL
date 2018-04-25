@@ -9,6 +9,8 @@ python:
 cache:
     apt: true
     pip: true
+    directories:
+        - $TRAVIS_BUILD_DIR/gsl-2.4
 
 sudo: required
 

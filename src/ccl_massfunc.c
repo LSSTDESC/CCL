@@ -266,7 +266,7 @@ static double massfunc_f(ccl_cosmology *cosmo, double halomass, double a, double
       strcpy(cosmo->status_message, "ccl_massfunc.c: ccl_massfunc_f(): Watson HMF only supported for Delta = 200.\n");
       return 0;
     }
-    Omega_m_a = ccl_omega_x(cosmo, a, ccl_omega_m_label,status);
+    Omega_m_a = ccl_omega_x(cosmo, a, ccl_species_m_label,status);
     fit_A = Omega_m_a*(0.990*pow(a,3.216)+0.074);
     fit_a = Omega_m_a*(5.907*pow(a,3.599)+2.344);
     fit_b = Omega_m_a*(3.136*pow(a,3.058)+2.349);
@@ -425,6 +425,12 @@ TASK: returns halo mass function as dn / dlog10 m
 
 double ccl_massfunc(ccl_cosmology *cosmo, double halomass, double a, double odelta, int * status)
 {
+  if (cosmo->params.N_nu_mass>0){
+	  *status = CCL_ERROR_NOT_IMPLEMENTED;
+	  strcpy(cosmo->status_message,"ccl_background.c: ccl_cosmology_compute_growth(): Support for the halo mass function in cosmologies with massive neutrinos is not yet implemented.\n");
+	  return NAN; 
+  }
+	
   if (!cosmo->computed_sigma) {
     ccl_cosmology_compute_sigma(cosmo, status);
     ccl_check_status(cosmo, status);
@@ -447,6 +453,13 @@ TASK: returns linear halo bias
 
 double ccl_halo_bias(ccl_cosmology *cosmo, double halomass, double a, double odelta, int * status)
 {
+  if (cosmo->params.N_nu_mass>0){
+	  *status = CCL_ERROR_NOT_IMPLEMENTED;
+	  strcpy(cosmo->status_message,"ccl_background.c: ccl_cosmology_compute_growth(): Support for the halo bias in cosmologies with massive neutrinos is not yet implemented.\n");
+	  return NAN; 
+  }
+		
+	
   if (!cosmo->computed_sigma) {
     ccl_cosmology_compute_sigma(cosmo, status);
     ccl_check_status(cosmo, status);

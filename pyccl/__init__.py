@@ -10,7 +10,7 @@ from pyccl.core import Parameters, Cosmology
 from pyccl.background import growth_factor, growth_factor_unnorm, \
     growth_rate, comoving_radial_distance, comoving_angular_distance, \
     h_over_h0, luminosity_distance, distance_modulus, scale_factor_of_chi, \
-    omega_x
+    omega_x, rho_x
 
 # Power spectrum calculations and sigma8
 from pyccl.power import linear_matter_power, nonlin_matter_power, sigmaR, \
@@ -32,4 +32,4 @@ from pyccl.constants import CLIGHT_HMPC, MPC_TO_METER, PC_TO_METER, \
 
 from pyccl.correlation import correlation, correlation_3d
 
-from pyccl.neutrinos import Omeganuh2,Omeganuh2_to_Mnu
+from pyccl.neutrinos import Omeganuh2,nu_masses

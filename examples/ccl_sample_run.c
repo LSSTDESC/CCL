@@ -21,9 +21,7 @@
 #define SZ_SH 0.05
 #define NL 512
 #define PS 0.1 
-#define NREL 3.046
-#define NMAS 0
-#define MNU 0.0
+#define NEFF 3.046
 
 
 
@@ -45,10 +43,19 @@ int main(int argc,char **argv)
   //status flag
   int status =0;
 
+  // Set neutrino masses
+  double* MNU;
+  double mnuval = 0.;
+  MNU = &mnuval;
+  ccl_mnu_convention MNUTYPE = ccl_mnu_sum;
+  
+  //whether comoving or physical
+  int isco=0;
+
   // Initialize cosmological parameters
   ccl_configuration config=default_config;
   config.transfer_function_method=ccl_boltzmann_class;
-  ccl_parameters params = ccl_parameters_create(OC, OB, OK, NREL, NMAS, MNU, W0, WA, HH, NORMPS, NS,-1,-1,-1,-1,NULL,NULL, &status);
+  ccl_parameters params = ccl_parameters_create(OC, OB, OK, NEFF, MNU, MNUTYPE, W0, WA, HH, NORMPS, NS,-1,-1,-1,-1,NULL,NULL, &status);
   //printf("in sample run w0=%1.12f, wa=%1.12f\n", W0, WA);
   
   // Initialize cosmology object given cosmo params
@@ -73,19 +80,23 @@ int main(int argc,char **argv)
   printf("Growth factor and growth rate at z = %.3lf are D = %.3lf and f = %.3lf\n",
 	 ZD, ccl_growth_factor(cosmo,1./(1+ZD), &status),ccl_growth_rate(cosmo,1./(1+ZD), &status));
  
-  // Compute Omega_m, Omega_L and Omega_r at different times
-  printf("z\tOmega_m\tOmega_L\tOmega_r\n");
-  double Om, OL, Or;
+  // Compute Omega_m, Omega_L, Omega_r, rho_crit, rho_m at different times
+  printf("z\tOmega_m\tOmega_L\tOmega_r\trho_crit\trho_m\tRHO_CRITICAL\n");
+  double Om, OL, Or, rhoc, rhom;
   for (int z=10000;z!=0;z/=3){
-    Om = ccl_omega_x(cosmo, 1./(z+1), ccl_omega_m_label, &status);
-    OL = ccl_omega_x(cosmo, 1./(z+1), ccl_omega_l_label, &status);
-    Or = ccl_omega_x(cosmo, 1./(z+1), ccl_omega_g_label, &status);
-    printf("%i\t%.3f\t%.3f\t%.3f\n", z, Om, OL, Or);
+    Om = ccl_omega_x(cosmo, 1./(z+1), ccl_species_m_label, &status);
+    OL = ccl_omega_x(cosmo, 1./(z+1), ccl_species_l_label, &status);
+    Or = ccl_omega_x(cosmo, 1./(z+1), ccl_species_g_label, &status);
+    rhoc = ccl_rho_x(cosmo, 1./(z+1), ccl_species_crit_label, isco, &status);
+    rhom = ccl_rho_x(cosmo, 1./(z+1), ccl_species_m_label, isco, &status);
+    printf("%i\t%.3f\t%.3f\t%.3f\t%.3e\t%.3e\t%.3e\n", z, Om, OL, Or, rhoc, rhom, RHO_CRITICAL);
   }
-  Om = ccl_omega_x(cosmo, 1., ccl_omega_m_label, &status);
-  OL = ccl_omega_x(cosmo, 1., ccl_omega_l_label, &status);
-  Or = ccl_omega_x(cosmo, 1., ccl_omega_g_label, &status);
-  printf("%i\t%.3f\t%.3f\t%.3f\n", 0, Om, OL, Or);
+  Om = ccl_omega_x(cosmo, 1., ccl_species_m_label, &status);
+  OL = ccl_omega_x(cosmo, 1., ccl_species_l_label, &status);
+  Or = ccl_omega_x(cosmo, 1., ccl_species_g_label, &status);
+  rhoc = ccl_rho_x(cosmo, 1., ccl_species_crit_label, isco, &status);
+  rhom = ccl_rho_x(cosmo, 1., ccl_species_m_label, isco, &status);
+  printf("%i\t%.3f\t%.3f\t%.3f\t%.3e\t%.3e\t%.3e\n", 0, Om, OL, Or, rhoc, rhom, RHO_CRITICAL);
 
   // Compute sigma_8
   printf("Initializing power spectrum...\n");
@@ -135,6 +146,10 @@ int main(int argc,char **argv)
   ccl_cl_tracer_free(ct_gc);
   ccl_cl_tracer_free(ct_cl);
   ccl_cl_tracer_free(ct_wl);
+  
+  // Free arrays
+  free(a_arr_resample);
+  free(nz_resampled);
   
   //Halo mass function
   printf("M\tdN/dlog10M(z = 0, 0.5, 1))\n");
@@ -222,6 +237,7 @@ int main(int argc,char **argv)
   
   //Free up photo-z info
   ccl_specs_free_photoz_info(pz_info_example);
+  ccl_specs_free_photoz_info_gaussian(pz_info_gaussian);
   
   //Always clean up!!
   ccl_cosmology_free(cosmo);

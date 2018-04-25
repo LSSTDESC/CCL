@@ -52,6 +52,18 @@ mass_function_types = {
     'watson':   lib.watson
 }
 
+emulator_neutrinos_types = {
+	'strict': 	lib.emu_strict,
+	'equalize': lib.emu_equalize
+}
+
+mnu_types = {
+	'list': lib.mnu_list,
+	'sum': lib.mnu_sum,
+	'sum_inverted': lib.mnu_sum_inverted,
+	'sum_equal': lib.mnu_sum_equal, 
+}
+
 # Error types
 error_types = {
     lib.CCL_ERROR_MEMORY:       'CCL_ERROR_MEMORY',
@@ -76,9 +88,9 @@ class Parameters(object):
     """
     
     def __init__(self, Omega_c=None, Omega_b=None, h=None, A_s=None, n_s=None, 
-                 Omega_k=0., N_nu_rel=3.046, N_nu_mass=0., m_nu=0., 
-                 w0=-1., wa=0., bcm_log10Mc=np.log10(1.2e14), bcm_etab=0.5, 
-                 bcm_ks=55., sigma8=None, z_mg=None, df_mg=None):
+                 Omega_k=0., Neff = 3.046, m_nu=0., mnu_type = None, w0=-1., 
+                 wa=0., bcm_log10Mc=np.log10(1.2e14), bcm_etab=0.5, bcm_ks=55., 
+                 sigma8=None, z_mg=None, df_mg=None):
         """
         Creates a set of cosmological parameters.
 
@@ -95,13 +107,15 @@ class Parameters(object):
                          specified.
             n_s (float): Primordial scalar perturbation spectral index.
             Omega_k (float, optional): Curvature density fraction. Defaults to 0.
-            N_nu_rel (float, optional): Number of massless neutrinos present. 
-                         Defaults to 3.046
-            N_nu_mass (float, optional): Number of massive neutrinos present. 
-                         Defaults to 0.
-            m_nu (float, optional): total mass in eV of the massive neutrinos 
-                                    present (current must be equal mass). 
-                                    Defaults to 0.
+            Neff (float, optional): Effective number of neutrino species. 
+                                    Defaults to 3.046
+            m_nu (float or array-like, optional): If float: total mass in eV of 
+            the massive neutrinos present. If array-like, masses of 3 neutrino
+            species (must have length 3).
+			mnu_type (string): treatment for neutrinos. 
+			        Available: 'sum', 'sum_inverted', 'sum_equal', 'list'. 
+			        Default if m_nu is a float is 'sum', default if m_nu is 
+			        array-like with length 3 is 'list'.
             w0 (float, optional): First order term of dark energy equation of 
                                   state. Defaults to -1.
             wa (float, optional): Second order term of dark energy equation of 
@@ -153,32 +167,53 @@ class Parameters(object):
         if norm_pk < 1e-5 and sigma8 is not None:
             raise ValueError("sigma8 must be greater than 1e-5.")
         
+        if isinstance(m_nu, float):
+            if mnu_type == None: mnu_type = 'sum'
+            m_nu = [m_nu]
+        elif hasattr(m_nu, "__len__"):
+            if (len(m_nu) != 3):
+                raise ValueError("m_nu must be a float or array-like object "
+                                 "with length 3.")
+            elif ((mnu_type=='sum') \
+               or (mnu_type=='sum_inverted') \
+               or (mnu_type=='sum_equal')):
+                raise ValueError("mnu type '%s' cannot be passed with a list "
+                                 "of neutrino masses, only with a sum." \
+                                 % mnu_type)
+            elif (mnu_type==None):
+                mnu_type = 'list'  # False
+        else:
+            raise ValueError("m_nu must be a float or array-like object with "
+                             "length 3.")
+        
+        
         # Check if any compulsory parameters are not set
-        compul = [Omega_c, Omega_b, Omega_k, N_nu_rel, N_nu_mass, m_nu, 
-                  w0, wa, h, norm_pk, n_s]
-        names = ['Omega_c', 'Omega_b', 'Omega_k', 'N_nu_rel', 'N_nu_mass', 
-                 'mnu', 'w0', 'wa', 'h', 'norm_pk', 'n_s']
+        compul = [Omega_c, Omega_b, Omega_k, w0, wa, h, norm_pk, n_s]
+        names = ['Omega_c', 'Omega_b', 'Omega_k', 'w0', 'wa', 
+                 'h', 'norm_pk', 'n_s']
+
         for nm, item in zip(names, compul):
             if item is None:
                 raise ValueError("Necessary parameter '%s' was not set "
-                                 "(or set to None)." % nm)
-        
+                                 "(or set to None)." % nm)                     
+                                 
         # Create new instance of ccl_parameters object
-        status = 0 # Needed to check massive neutrino integral
-        if nz_mg == -1:
+        status = 0 # Create an internal status variable; needed to check massive neutrino integral.
+        if (nz_mg== -1):
             # Create ccl_parameters without modified growth
             self.parameters, status \
-                = lib.parameters_create( Omega_c, Omega_b, Omega_k, N_nu_rel, 
-                                         N_nu_mass, m_nu, w0, wa, h, norm_pk, 
-                                         n_s, bcm_log10Mc, bcm_etab, bcm_ks, -1,
-                                         None, None, status )
+            = lib.parameters_create_nu( Omega_c, Omega_b, Omega_k, Neff, 
+                                             w0, wa, h, norm_pk, 
+                                             n_s, bcm_log10Mc, bcm_etab, bcm_ks, 
+                                             mnu_types[mnu_type], m_nu, status ) 
+                                             
         else:
             # Create ccl_parameters with modified growth arrays
             self.parameters, status \
-                = lib.parameters_create_vec( Omega_c, Omega_b, Omega_k, N_nu_rel, 
-                                             N_nu_mass, m_nu, w0, wa, h, norm_pk, 
-                                             n_s, bcm_log10Mc, bcm_etab, bcm_ks,
-                                             z_mg, df_mg, status )
+            = lib.parameters_create_nu_vec( Omega_c, Omega_b, Omega_k, Neff, 
+                                             w0, wa, h, norm_pk, 
+                                             n_s, bcm_log10Mc, bcm_etab, bcm_ks, 
+                                             z_mg, df_mg, mnu_types[mnu_type], m_nu, status )
         check(status)    
     
     def __getitem__(self, key):
@@ -197,7 +232,7 @@ class Parameters(object):
         """
         raise NotImplementedError("Parameters objects are immutable; create a "
                                   "new Parameters() instance instead.")
-        
+        """
         try:
             # First check if the key already exists (otherwise the parameter 
             # would be silently added to the ccl_parameters class instance)
@@ -208,6 +243,17 @@ class Parameters(object):
         # Set value of parameter
         setattr(self.parameters, key, val)
         # TODO: Should update/replace CCL objects appropriately
+        """
+    
+    def __del__(self):
+        """
+        Free the ccl_parameters instance that this Parameters object is 
+        managing.
+        """
+        if hasattr(self, 'parameters'):
+            if self.parameters is not None: 
+                lib.parameters_free(self.parameters)
+    
     
     def __str__(self):
         """
@@ -215,9 +261,9 @@ class Parameters(object):
         """
         params = ['Omega_c', 'Omega_b', 'Omega_m', 'Omega_k', 'Omega_l',
                   'w0', 'wa', 'H0', 'h', 'A_s', 'n_s', 'bcm_log10Mc', 
-                  'bcm_etab', 'bcm_ks', 'N_nu_rel', 'N_nu_mass', 'mnu', 
-                  'Omega_n_mass', 'Omega_n_rel', 'T_CMB', 'Omega_g', 
-                  'z_star', 'has_mgrowth']
+                  'bcm_etab', 'bcm_ks',
+                  'Neff', 'mnu', 'Omega_n_mass', 'Omega_n_rel',
+                  'T_CMB', 'Omega_g', 'z_star', 'has_mgrowth']
         
         # Get values of parameters
         vals = []
@@ -243,17 +289,14 @@ class Cosmology(object):
     def __init__(self, 
                  params=None, config=None,
                  Omega_c=None, Omega_b=None, h=None, A_s=None, n_s=None, 
-                 Omega_k=0., N_nu_rel=3.046, N_nu_mass=0., m_nu=0., 
-                 w0=-1., wa=0., bcm_log10Mc=np.log10(1.2e14), bcm_etab=0.5, 
-                 bcm_ks=55., sigma8=None, z_mg=None, df_mg=None, 
+                 Omega_k=0., Neff=3.046, m_nu=0., mnu_type = None, w0=-1., wa=0.,
+                 bcm_log10Mc=np.log10(1.2e14), bcm_etab=0.5, bcm_ks=55., 
+                 sigma8=None, z_mg=None, df_mg=None, 
                  transfer_function='boltzmann_class',
                  matter_power_spectrum='halofit',
                  baryons_power_spectrum='nobaryons',
-                 mass_function='tinker10'):
+                 mass_function='tinker10', emulator_neutrinos='strict'):
         """Creates a wrapper for ccl_cosmology.
-
-        TODO: enumerate transfer_function and 
-        matter_power_spectrum options.
 
         Args:
             params (:obj:`Parameters`): Cosmological parameters object.
@@ -264,10 +307,17 @@ class Cosmology(object):
             use. Defaults to `boltzmann_class`.
             matter_power_spectrum (:obj:`str`, optional): The matter power 
             spectrum to use. Defaults to `halofit`.
-            baryons_power_spectrum (:obj:`str`, optional): The correction from baryonic
-            effects to be implemented. Defaults to `nobaryons`.
+            baryons_power_spectrum (:obj:`str`, optional): The correction from 
+            baryonic effects to be implemented. Defaults to `nobaryons`.
             mass_function (:obj:`str`, optional): The mass function to use. 
             Defaults to `tinker` (2010).
+            emulator_neutrinos: `str`, optional): If using the emulator for 
+            the power spectrum, specified treatment of unequal neutrinos.
+            Options are 'strict', which will raise an error and quit if the 
+            user fails to pass either a set of three equal masses or a sum with 
+            mnu_type = 'equal', and 'equalize', which will redistribute masses
+            to be equal right before calling the emualtor but results in
+            internal inconsistencies. Defaults to `strict`.
 
         """
         
@@ -275,11 +325,12 @@ class Cosmology(object):
         if params is None:
             # Create new Parameters object
             params = Parameters(Omega_c=Omega_c, Omega_b=Omega_b, h=h, A_s=A_s, 
-                                n_s=n_s, Omega_k=Omega_k, N_nu_rel = N_nu_rel, 
-                                N_nu_mass=N_nu_mass, m_nu=m_nu, w0=w0, wa=wa, 
+                                n_s=n_s, Omega_k=Omega_k, Neff = Neff, 
+                                m_nu=m_nu, mnu_type=mnu_type, w0=w0, wa=wa, 
                                 sigma8=sigma8, bcm_log10Mc=bcm_log10Mc, 
                                 bcm_etab=bcm_etab, bcm_ks=bcm_ks, 
                                 z_mg=z_mg, df_mg=df_mg)
+
             self.params = params
             params = params.parameters # We only need the ccl_parameters object
         elif isinstance(params, lib.parameters):
@@ -292,10 +343,10 @@ class Cosmology(object):
             # Warn if any cosmological parameters were specified at the same 
             # time as a Parameters() object; they will be ignored
             argtest = [Omega_c==None, Omega_b==None, h==None, A_s==None, 
-                       n_s==None, Omega_k==0., N_nu_rel==3.046, N_nu_mass==0., 
-                       m_nu==0., w0==-1., wa==0., bcm_log10Mc==np.log10(1.2e14), 
-                       bcm_etab==0.5, bcm_ks==55., sigma8==None, 
-                       z_mg==None, df_mg==None]
+                       n_s==None, Omega_k==0., Neff==3.046, m_nu==0., 
+                       mnu_type==None, w0==-1., wa==0., 
+                       bcm_log10Mc==np.log10(1.2e14), bcm_etab==0.5, 
+                       bcm_ks==55., sigma8==None, z_mg==None, df_mg==None]
             
             if not all(arg == True for arg in argtest):
                 warn("Cosmological parameter kwargs are ignored if 'params' is "
@@ -321,25 +372,30 @@ class Cosmology(object):
             
             # Check validity of configuration-related arguments
             if transfer_function not in transfer_function_types.keys():
-                raise ValueError( "'%s' is not a valid transfer_function type. "
+                raise KeyError( "'%s' is not a valid transfer_function type. "
                                   "Available options are: %s" \
                                  % (transfer_function, 
                                     transfer_function_types.keys()) )
             if matter_power_spectrum not in matter_power_spectrum_types.keys():
-                raise ValueError( "'%s' is not a valid matter_power_spectrum "
+                raise KeyError( "'%s' is not a valid matter_power_spectrum "
                                   "type. Available options are: %s" \
                                  % (matter_power_spectrum, 
                                     matter_power_spectrum_types.keys()) )
             if baryons_power_spectrum not in baryons_power_spectrum_types.keys():
-                raise ValueError( "'%s' is not a valid baryons_power_spectrum "
+                raise KeyError( "'%s' is not a valid baryons_power_spectrum "
                                   "type. Available options are: %s" \
                                  % (baryons_power_spectrum, 
                                     baryons_power_spectrum_types.keys()) )
             if mass_function not in mass_function_types.keys():
-                raise ValueError( "'%s' is not a valid mass_function type. "
+                raise KeyError( "'%s' is not a valid mass_function type. "
                                   "Available options are: %s" \
                                  % (mass_function, 
                                     mass_function_types.keys()) )
+            if emulator_neutrinos not in emulator_neutrinos_types.keys():
+                raise ValueError( "'%s' is not a valid emulator neutrinos method. "
+                                  "Available options are: %s" \
+                                 % (emulator_neutrinos, 
+                                    emulator_neutrinos_types.keys()) )
             
             # Check for valid transfer fn/matter power spectrum combination
             if matter_power_spectrum_types[matter_power_spectrum] \
@@ -359,6 +415,8 @@ class Cosmology(object):
                             baryons_power_spectrum_types[baryons_power_spectrum]
             config.mass_function_method = \
                             mass_function_types[mass_function]
+            config.emulator_neutrinos_method = \
+                            emulator_neutrinos_types[emulator_neutrinos]
             
             # Store ccl_configuration for later access
             self.configuration = config

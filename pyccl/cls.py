@@ -101,7 +101,7 @@ class ClTracer(object):
 
         # Construct new ccl_cl_tracer
         status = 0
-        self.cltracer, status = lib.cl_tracer_new_wrapper(
+        return_val = lib.cl_tracer_new_wrapper(
                             cosmo,
                             tracer_types[tracer_type],
                             int(has_rsd),
@@ -114,58 +114,71 @@ class ClTracer(object):
                             self.z_rf, self.rf,
                             self.z_source,
                             status )
+                  
+        if (isinstance(return_val,int)):
+            self.has_cltracer = False 
+            check(return_val)                
+        else:
+            self.has_cltracer = True
+            self.cltracer, status = return_val
 
-    def get_internal_function(self,cosmo,function,a) :
+    def get_internal_function(self, cosmo, function, a):
         """
         Method to evaluate any internal function of redshift for this tracer.
 
         Args:
             cosmo (:obj:`Cosmology`): Cosmology object.
-            function (:obj:`str`): Specifies which function to evaluate. Must be one of the types specified in the `function_types` dict in `cls.py`.
-            a (:obj: float or array-like): list of scale factors at which to evaluate the function.
-                specified. Must be one of the types specified in the
-                `tracer_types` dict in `cls.py`.
-            has_rsd (bool, optional): Flag for whether the tracer has a
-                redshift-space distortion term. Defaults to False.
-            has_magnification (bool, optional): Flag for whether the tracer has
-                a magnification term. Defaults to False.
-            has_intrinsic_alignment (bool, optional): Flag for whether the
-                tracer has an intrinsic alignment term. Defaults to False.
+            function (:obj:`str`): Specifies which function to evaluate. Must 
+                be one of the types specified in the `pyccl.cls.function_types` 
+                dictionary.
+            a (:obj: float or array-like): list of scale factors at which to 
+                evaluate the function.
+            
         Returns:
             Array of function values at the input scale factors.
         """
         # Access ccl_cosmology object
-        cosmo_in=cosmo
-        cosmo=_cosmology_obj(cosmo)
+        cosmo_in = cosmo
+        cosmo = _cosmology_obj(cosmo)
         
         # Access CCL_ClTracer objects
-        clt=self.cltracer
+        clt = self.cltracer
         
-        status=0
-        is_scalar=False
-        if isinstance(a,float) :
-            is_scalar=True
-            aarr=np.array([a])
-            na=1
-        elif isinstance(a,np.ndarray) :
-            aarr=a
-            na=a.size
-        else :
-            aarr=a
-            na=len(a)
-
-        farr,status=lib.clt_fa_vec(cosmo,self.cltracer,function_types[function],aarr,na,status)
-        check(status,cosmo_in)
-        if is_scalar :
+        # Check that specified function type exists
+        if function not in function_types.keys():
+            raise KeyError("Internal function type '%s' not recognized." 
+                           % function)
+        
+        # Check input types
+        status = 0
+        is_scalar = False
+        if isinstance(a, float):
+            is_scalar = True
+            aarr = np.array([a])
+            na = 1
+        elif isinstance(a, np.ndarray):
+            aarr = a
+            na = a.size
+        else:
+            aarr = a
+            na = len(a)
+        
+        # Evaluate function
+        farr, status = lib.clt_fa_vec(cosmo, self.cltracer, 
+                                      function_types[function], aarr, na, status)
+        check(status, cosmo_in)
+        if is_scalar:
             return farr[0]
-        else :
+        else:
             return farr
         
     def __del__(self):
         """Free memory associated with CCL_ClTracer object.
 
         """
-        lib.cl_tracer_free(self.cltracer)
+        if hasattr(self, 'has_cltracer'):
+            if self.has_cltracer:
+                lib.cl_tracer_free(self.cltracer)
 
 
 class ClTracerNumberCounts(ClTracer):

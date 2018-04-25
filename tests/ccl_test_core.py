@@ -16,10 +16,10 @@ def test_parameters_valid_input():
     assert_no_warnings(ccl.Parameters, Omega_c=0.25, Omega_b=0.05, h=0.7, 
                                        A_s=2.1e-9, n_s=0.96, Omega_k=0.05)
     assert_no_warnings(ccl.Parameters, Omega_c=0.25, Omega_b=0.05, h=0.7, 
-                                       A_s=2.1e-9, n_s=0.96, N_nu_rel=2.046)
+                                       A_s=2.1e-9, n_s=0.96, Neff=2.046)
     assert_no_warnings(ccl.Parameters, Omega_c=0.25, Omega_b=0.05, h=0.7, 
-                                       A_s=2.1e-9, n_s=0.96, N_nu_rel = 2.046, 
-                                       N_nu_mass=1., m_nu=0.05)
+                                       A_s=2.1e-9, n_s=0.96, Neff=3.046, m_nu=0.06)                                   
+
     assert_no_warnings(ccl.Parameters, Omega_c=0.25, Omega_b=0.05, h=0.7, 
                                        A_s=2.1e-9, n_s=0.96, w0=-0.9)
     assert_no_warnings(ccl.Parameters, 0.25, 0.05, 0.7, 2.1e-9, 0.96, 
@@ -47,14 +47,8 @@ def test_parameters_missing():
     assert_raises(ValueError, ccl.Parameters, 0.25, 0.05, 0.7, 2.1e-9, 0.96, 
                                               w0=None)
     assert_raises(ValueError, ccl.Parameters, 0.25, 0.05, 0.7, 2.1e-9, 0.96, 
-                                              wa=None)
-    assert_raises(ValueError, ccl.Parameters, 0.25, 0.05, 0.7, 2.1e-9, 0.96, 
-                                              N_nu_rel=None)
-    assert_raises(ValueError, ccl.Parameters, 0.25, 0.05, 0.7, 2.1e-9, 0.96, 
-                                              N_nu_mass=None)
-    assert_raises(ValueError, ccl.Parameters, 0.25, 0.05, 0.7, 2.1e-9, 0.96, 
-                                              m_nu=None)
-    
+                                              wa=None)                                                                                 
+
     # Check that a single missing compulsory parameter is noticed
     assert_raises(ValueError, ccl.Parameters, Omega_c=0.25, Omega_b=0.05, 
                                               h=0.7, A_s=2.1e-9)
@@ -183,9 +177,20 @@ def test_cosmology_init():
     
     # Make sure error raised if incorrect type of Parameters object passed
     assert_raises(TypeError, ccl.Cosmology, params=params.parameters)
+    assert_raises(TypeError, ccl.Cosmology, params="x")
     
     # Make sure error raised if wrong config type passed
     assert_raises(TypeError, ccl.Cosmology, params=params, config="string")
+    
+    # Make sure error raised if invalid transfer/power spectrum etc. type passed
+    assert_raises(KeyError, ccl.Cosmology, params=params, 
+                  matter_power_spectrum='x')
+    assert_raises(KeyError, ccl.Cosmology, params=params, 
+                  transfer_function='x')
+    assert_raises(KeyError, ccl.Cosmology, params=params, 
+                  baryons_power_spectrum='x')
+    assert_raises(KeyError, ccl.Cosmology, params=params, 
+                  mass_function='x')
 
 
 def test_cosmology_output():

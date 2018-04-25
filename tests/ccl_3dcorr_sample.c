@@ -24,9 +24,7 @@
 #define SZ_GC 0.05
 #define NL 512
 #define PS 0.1 
-#define NREL 3.046
-#define NMAS 0
-#define MNU 0.0
+#define NEFF 3.046
 #define K_MIN 0.001
 #define K_MAX 100
 #define N_MAX_PK 20000
@@ -39,8 +37,13 @@ int main(int argc,char **argv)
   int status=0;
   ccl_configuration config = default_config;
   config.matter_power_spectrum_method=ccl_halofit;
+  
+  double mnuval = 0.;
+  double* mnu;
+  mnu = &mnuval;
+  ccl_mnu_convention mnu_type = ccl_mnu_sum;
 
-  ccl_parameters params = ccl_parameters_create(OC, OB, OK, NREL, NMAS, MNU, 
+  ccl_parameters params = ccl_parameters_create(OC, OB, OK, NEFF, mnu, mnu_type,
                                                 W0, WA, HH, NORMPS, NS,
 						14.079181246047625, 0.5, 55, 0, NULL, NULL, &status);
   ccl_cosmology *cosmo = ccl_cosmology_create(params,config);

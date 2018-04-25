@@ -1,14 +1,15 @@
 
 from pyccl import ccllib as lib
-from pyccl.pyutils import _vectorize_fn, _vectorize_fn2, _vectorize_fn3
+from pyccl.pyutils import _vectorize_fn, _vectorize_fn2, _vectorize_fn3, _vectorize_fn4
 
 species_types = {
-    'matter':      lib.omega_m_label,
-    'dark_energy': lib.omega_l_label,
-    'radiation':   lib.omega_g_label,
-    'curvature':   lib.omega_k_label,
-    'neutrinos_rel': lib.omega_ur_label,
-    'neutrinos_massive': lib.omega_nu_label,
+    'critical':                   lib.species_crit_label,
+    'matter':                     lib.species_m_label,
+    'dark_energy':                lib.species_l_label,
+    'radiation':                  lib.species_g_label,
+    'curvature':                  lib.species_k_label,
+    'neutrinos_rel':              lib.species_ur_label,
+    'neutrinos_massive':          lib.species_nu_label,
 }
 
 def growth_factor(cosmo, a):
@@ -159,3 +160,26 @@ def omega_x(cosmo, a, label):
 
     return _vectorize_fn3(lib.omega_x, 
                           lib.omega_x_vec, cosmo, a, species_types[label])
+
+def rho_x(cosmo, a, label, is_comoving=False):
+    """Physical density as a function of scale factor.
+
+    Args:
+        cosmo (:obj:`ccl.cosmology`): Cosmological parameters.
+        a (float or array_like): Scale factor(s), normalized to 1 today.
+        label (string): species type. Available: 'critical', 'matter', 'dark_energy', 'radiation',
+                        'curvature', 'neutrinos_rel', and 'neutrinos_massive'
+        is_comoving (bool): either physical (False, default) or comoving (True)
+
+    Returns:
+        rho_x (float or array_like): Physical density of a given species
+        at a scale factor.
+
+    """
+    if label not in species_types.keys() :
+        raise ValueError( "'%s' is not a valid species type. "
+                          "Available options are: %s" \
+                         % (label,species_types.keys()) )
+
+    return _vectorize_fn4(lib.rho_x, 
+                          lib.rho_x_vec, cosmo, a, species_types[label], int(is_comoving))

@@ -21,9 +21,9 @@
 //paper results (Fig 5).
 
 CTEST_DATA(emu_nu) {
-  double N_nu_rel;
-  double N_nu_mass;
-  double mnu[4];
+  double Neff;
+  double *mnu[4];
+  ccl_mnu_convention mnu_type;
   double sigma_8[4];
   double Omega_c[4];
   double Omega_b[4];
@@ -35,8 +35,8 @@ CTEST_DATA(emu_nu) {
 
 CTEST_SETUP(emu_nu) {
   
-  data->N_nu_rel=0.00641;
-  data->N_nu_mass=3;
+  data->Neff = 3.04;
+  data->mnu_type = ccl_mnu_list;
 
   double *sigma_8;
   double *Omega_c;
@@ -46,7 +46,7 @@ CTEST_SETUP(emu_nu) {
   double *h;
   double *w_0;
   double *w_a;
-  double Mnu_out;
+  double *Mnu_out;
   int status=0;
   char fname[256],str[1024];
   char* rtn;
@@ -62,6 +62,9 @@ CTEST_SETUP(emu_nu) {
   w_0=malloc(4*sizeof(double));
   w_a=malloc(4*sizeof(double));
   Omega_nu=malloc(4*sizeof(double));
+  
+  // Omeganuh2_to_mnu will output a pointer to an array of 3 neutrino masses.
+  Mnu_out=malloc(3*sizeof(double));
 
   //Each line of this file corresponds to the cosmological parameters for
   //cosmologies {38,39,40,42} of the emulator set. Notice that Omega_i
@@ -90,14 +93,13 @@ CTEST_SETUP(emu_nu) {
     data->Omega_b[i] = Omega_b[i];
     data->n_s[i] = n_s[i];
     // Number of neutrino species is fixed to 3
-    Mnu_out = ccl_Omeganuh2_to_Mnu(1.,data->N_nu_mass, Omega_nu[i]*h[i]*h[i], 2.725, NULL, &omnustatus);
+    Mnu_out = ccl_nu_masses(Omega_nu[i]*h[i]*h[i], ccl_nu_equal, 2.725, &omnustatus);
     /*if (omnustatus){
       printf("%s\n",cosmo->status_message);
       exit(1);
       }*/
     data->mnu[i]=Mnu_out;
   }
-
   fclose(f);
 }
 
@@ -127,7 +129,7 @@ static void compare_emu_nu(int i_model,struct emu_nu_data * data)
   config.matter_power_spectrum_method = ccl_emu;
  
   //None of the current cosmologies being checked include neutrinos
-  ccl_parameters params = ccl_parameters_create(data->Omega_c[i_model-1],data->Omega_b[i_model-1],0.0,data->N_nu_rel, data->N_nu_mass, data->mnu[i_model-1],data->w_0[i_model-1],data->w_a[i_model-1],data->h[i_model-1],data->sigma_8[i_model-1],data->n_s[i_model-1],-1,-1,-1,-1,NULL,NULL, &status);
+  ccl_parameters params = ccl_parameters_create(data->Omega_c[i_model-1],data->Omega_b[i_model-1],0.0,data->Neff, data->mnu[i_model-1], data->mnu_type, data->w_0[i_model-1],data->w_a[i_model-1],data->h[i_model-1],data->sigma_8[i_model-1],data->n_s[i_model-1],-1,-1,-1,-1,NULL,NULL, &status);
   params.Omega_g=0;
   params.sigma_8=data->sigma_8[i_model-1];
   ccl_cosmology * cosmo = ccl_cosmology_create(params, config);

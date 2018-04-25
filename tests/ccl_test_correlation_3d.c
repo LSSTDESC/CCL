@@ -11,9 +11,9 @@ CTEST_DATA(corrs_3d) {
   double A_s;
   double n_s;
   double sigma_8;
-  double N_nu_rel;
-  double N_nu_mass;
-  double mnu;
+  double Neff;
+  double* mnu;
+  ccl_mnu_convention mnu_type;
   double Omega_v[5];
   double Omega_k[5];
   double w_0[5];
@@ -27,9 +27,10 @@ CTEST_SETUP(corrs_3d) {
   data->A_s = 0.8;
   data->n_s = 0.96;
   data->sigma_8=0.8;
-  data->N_nu_rel=3.046;
-  data->N_nu_mass=0.0;
-  data->mnu=0.0;
+  data->Neff=3.046;
+  double mnuval = 0.;
+  data->mnu= &mnuval;
+  data->mnu_type = ccl_mnu_sum;
 
   double Omega_v[5]={0.7, 0.7, 0.7, 0.65, 0.75};
   double w_0[5] = {-1.0, -0.9, -0.9, -0.9, -0.9};
@@ -65,7 +66,7 @@ static void compare_correlation_3d(int i_model,struct corrs_3d_data * data)
   config.matter_power_spectrum_method= ccl_halofit;
   config.transfer_function_method = ccl_boltzmann;
   ccl_parameters params = ccl_parameters_create(data->Omega_c,data->Omega_b,data->Omega_k[i_model-1],
-		data->N_nu_rel, data->N_nu_mass, data->mnu,data->w_0[i_model-1],data->w_a[i_model-1],
+		data->Neff, data->mnu, data->mnu_type, data->w_0[i_model-1],data->w_a[i_model-1],
 		data->h,data->A_s,data->n_s,-1, -1, -1, -1,NULL,NULL, &status);
   params.Omega_g=0.0;
   params.sigma_8=data->sigma_8;
