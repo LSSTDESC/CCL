@@ -110,7 +110,8 @@ static void compare_distances(int model, struct distances_data * data)
 						data->w_0[model], data->w_a[model],
 						data->h, data->A_s, data->n_s,-1,-1,-1,-1,NULL,NULL, &status);
   
-  params.Omega_g=0;
+  params.Omega_g=0; //enforce no radiation
+  params.Omega_l = 1.-params.Omega_m-params.Omega_k; //reomcpute Omega_l without radiation
   
   // Make a cosmology object from the parameters with the default configuration
   ccl_cosmology * cosmo = ccl_cosmology_create(params, default_config);
