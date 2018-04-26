@@ -511,7 +511,7 @@ def check_cls(cosmo):
     """
     # Number density input
     z = np.linspace(0., 1., 200)
-    n = np.ones(z.shape)
+    n = np.exp(-((z-0.5)/0.1)**2)
     
     # Bias input
     b = np.sqrt(1. + z)
@@ -545,6 +545,10 @@ def check_cls(cosmo):
     assert_( all_finite(ccl.angular_cl(cosmo, nc1, nc1, ell_arr)) )
 
     if cmb_ok: assert_( all_finite(ccl.angular_cl(cosmo, cmbl, cmbl, ell_arr)) )
+
+    # Check non-limber calculations
+    assert_( all_finite(ccl.angular_cl(cosmo, nc1, nc1, ell_arr, l_limber=20, non_limber_method="native")))
+    assert_( all_finite(ccl.angular_cl(cosmo, nc1, nc1, ell_arr, l_limber=20, non_limber_method="angpow")))
     
     # Check various cross-correlation combinations
     assert_( all_finite(ccl.angular_cl(cosmo, lens1, lens2, ell_arr)) )
@@ -567,6 +571,9 @@ def check_cls(cosmo):
     assert_( all_finite(ccl.angular_cl(cosmo, nc1, lens1, ell_arr)) )
     assert_( all_finite(ccl.angular_cl(cosmo, nc1, lens2, ell_arr)) )
 
+    # Wrong non limber method
+    assert_raises(KeyError, ccl.angular_cl, cosmo, lens1, lens1, ell_scl, non_limber_method='xx')
+
 
     
 def check_cls_nu(cosmo):
@@ -575,7 +582,7 @@ def check_cls_nu(cosmo):
     """
     # Number density input
     z = np.linspace(0., 1., 200)
-    n = np.ones(z.shape)
+    n = np.exp(-((z-0.5)/0.1)**2)
     
     # Bias input
     b = np.sqrt(1. + z)
@@ -660,6 +667,7 @@ def check_corr(cosmo):
     t_arr = np.logspace(-2., np.log10(5.), 20) # degrees
     t_lst = [t for t in t_arr]
     t_scl = 2.
+    t_int = 2
     
     # Make sure correlation functions work for valid inputs
     corr1 = ccl.correlation(cosmo, ells, cls, t_arr, corr_type='L+', 
@@ -668,15 +676,37 @@ def check_corr(cosmo):
                             method='FFTLog')
     corr3 = ccl.correlation(cosmo, ells, cls, t_scl, corr_type='L+', 
                             method='FFTLog')
+    corr4 = ccl.correlation(cosmo, ells, cls, t_int, corr_type='L+', 
+                            method='FFTLog')
     assert_( all_finite(corr1))
     assert_( all_finite(corr2))
     assert_( all_finite(corr3))
+    assert_( all_finite(corr4))
     
     # Check that exceptions are raised for invalid input
     assert_raises(KeyError, ccl.correlation, cosmo, ells, cls, t_arr, 
                   corr_type='xx', method='FFTLog')
     assert_raises(KeyError, ccl.correlation, cosmo, ells, cls, t_arr, 
                   corr_type='L+', method='xx')
+    
+def check_corr_3d(cosmo):
+    
+    # Scale factor
+    a = 0.8
+
+    # Distances (in Mpc)
+    r_int = 50
+    r = 50.
+    r_lst = np.linspace(50,100,10)
+    
+    # Make sure correlation functions work for valid inputs
+    corr1 = ccl.correlation_3d(cosmo, a, r_int)
+    corr2 = ccl.correlation_3d(cosmo, a, r)
+    corr3 = ccl.correlation_3d(cosmo, a, r_lst)
+    assert_( all_finite(corr1))
+    assert_( all_finite(corr2))
+    assert_( all_finite(corr3))
+    
     
 
 def test_valid_transfer_combos():
@@ -704,7 +734,6 @@ def test_background():
     for cosmo_nu in reference_models_nu():
         yield check_background_nu, cosmo_nu
 
-@decorators.slow
 def test_power():
     """
     Test power spectrum and sigma functions in ccl.power.
@@ -763,6 +792,12 @@ def test_corr():
     
     for cosmo_nu in reference_models_nu():
         yield check_corr, cosmo_nu
+
+    for cosmo in reference_models():
+        yield check_corr_3d, cosmo
+    
+    for cosmo_nu in reference_models_nu():
+        yield check_corr_3d, cosmo_nu
 
 def test_debug_mode():
     """
