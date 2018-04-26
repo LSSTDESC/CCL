@@ -36,6 +36,7 @@ typedef enum {
 typedef enum {
   CCL_DEBUG_MODE_OFF = 0,
   CCL_DEBUG_MODE_ON = 1,
+  CCL_DEBUG_MODE_WARNING = 2,
 } CCLDebugModePolicy;
 
 /** Raise an exception

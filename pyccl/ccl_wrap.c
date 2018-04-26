@@ -25166,6 +25166,7 @@ SWIG_init(void) {
   SWIG_Python_SetConstant(d, "CCL_ERROR_POLICY_CONTINUE",SWIG_From_int((int)(CCL_ERROR_POLICY_CONTINUE)));
   SWIG_Python_SetConstant(d, "CCL_DEBUG_MODE_OFF",SWIG_From_int((int)(CCL_DEBUG_MODE_OFF)));
   SWIG_Python_SetConstant(d, "CCL_DEBUG_MODE_ON",SWIG_From_int((int)(CCL_DEBUG_MODE_ON)));
+  SWIG_Python_SetConstant(d, "CCL_DEBUG_MODE_WARNING",SWIG_From_int((int)(CCL_DEBUG_MODE_WARNING)));
   
   /* Initialize threading */
   SWIG_PYTHON_INITIALIZE_THREADS;

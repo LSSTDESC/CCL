@@ -1483,6 +1483,7 @@ CCL_ERROR_POLICY_EXIT = _ccllib.CCL_ERROR_POLICY_EXIT
 CCL_ERROR_POLICY_CONTINUE = _ccllib.CCL_ERROR_POLICY_CONTINUE
 CCL_DEBUG_MODE_OFF = _ccllib.CCL_DEBUG_MODE_OFF
 CCL_DEBUG_MODE_ON = _ccllib.CCL_DEBUG_MODE_ON
+CCL_DEBUG_MODE_WARNING = _ccllib.CCL_DEBUG_MODE_WARNING
 
 def raise_exception(err, msg):
     """raise_exception(int err, char * msg)"""
