@@ -18,17 +18,36 @@ libccl_la_CPPFLAGS = -I./include/ -I./class/include -D__CCL_DATA_DIR__=$(datadir
 
 else
 
+libccl_la_LIBADD =
 libccl_la_CPPFLAGS = -I./include/ -I$(CLASSDIR)/include -D__CCL_DATA_DIR__=$(datadir)/ccl
 
 endif
 
+# To force libtool to use C++ compilers, a .cc files must be seen in the source files
+# To make the link between Angpow (C++) and CCL (C), this dummy file forces the use of g++
+if LOCALANGPOW
+
+ EXTRA_DIST += ./examples/ccl_sample_angpow.c
+ libccl_la_SOURCES += ./angpow/src/angpow_cpp_placeholder.cc 
+
+endif
+
+
 noinst_PROGRAMS = tests/check_ccl
 TESTS = tests/check_ccl tests/check_swig_timestamp.sh
 
-tests_check_ccl_SOURCES = tests/ccl_test.c tests/ccl_test_utils.c tests/ccl_test_params.c tests/ccl_test_params_mnu.c tests/ccl_test_cosmology.c tests/ccl_test_distances.c tests/ccl_test_distances_hiz.c tests/ccl_test_growth.c tests/ccl_test_growth_hiz.c tests/ccl_test_bbks.c tests/ccl_test_eh.c tests/ccl_test_cls.c tests/ccl_test_cmblens.c tests/ccl_test_sigmaM.c tests/ccl_test_massfunc.c tests/ccl_test_correlation.c tests/ccl_test_correlation_3d.c tests/ccl_test_bcm.c tests/ccl_test_emu.c tests/ccl_test_emu_nu.c tests/ccl_test_distances_mnu.c tests/ccl_test_distances_hiz_mnu.c tests/ccl_test_power_nu.c 
+tests_check_ccl_SOURCES = tests/ccl_test.c tests/ccl_test_utils.c tests/ccl_test_params.c tests/ccl_test_params_mnu.c tests/ccl_test_cosmology.c tests/ccl_test_distances.c tests/ccl_test_distances_hiz.c tests/ccl_test_growth.c tests/ccl_test_growth_hiz.c tests/ccl_test_bbks.c tests/ccl_test_eh.c tests/ccl_test_cls.c tests/ccl_test_cmblens.c tests/ccl_test_sigmaM.c tests/ccl_test_massfunc.c tests/ccl_test_correlation.c tests/ccl_test_correlation_3d.c tests/ccl_test_bcm.c tests/ccl_test_emu.c tests/ccl_test_emu_nu.c tests/ccl_test_distances_mnu.c tests/ccl_test_distances_hiz_mnu.c tests/ccl_test_power_nu.c tests/ccl_test_nonlimber.c
 
 tests_check_ccl_CPPFLAGS = -I./tests/ -I./include/
 tests_check_ccl_LDFLAGS =  -L./ -lccl -lgsl -lgslcblas -lfftw3 $(CLASS_LIB)
+
+# Add a specific unit test for Angpow
+if LOCALANGPOW
+
+ tests_check_ccl_SOURCES += tests/ccl_test_angpow.c
+
+endif
+
 
 dist-hook:
 	rm -f $(distdir)/clean_code.sh

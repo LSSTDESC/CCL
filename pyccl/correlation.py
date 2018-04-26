@@ -46,7 +46,7 @@ def correlation(cosmo, ell, C_ell, theta, corr_type='gg', method='fftlog'):
 
     # Convert scalar input into an array
     scalar = False
-    if isinstance(theta, float):
+    if isinstance(theta, float) or isinstance(theta, int):
         scalar = True
         theta = np.array([theta,])
 
@@ -76,7 +76,7 @@ def correlation_3d(cosmo, a, r):
 
     # Convert scalar input into an array
     scalar = False
-    if isinstance(r, float):
+    if isinstance(r, float) or isinstance(r, int):
         scalar = True
         r = np.array([r,])
 
