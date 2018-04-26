@@ -511,7 +511,7 @@ def check_cls(cosmo):
     """
     # Number density input
     z = np.linspace(0., 1., 200)
-    n = np.ones(z.shape)
+    n = np.exp(-((z-0.5)/0.1)**2)
     
     # Bias input
     b = np.sqrt(1. + z)
@@ -582,7 +582,7 @@ def check_cls_nu(cosmo):
     """
     # Number density input
     z = np.linspace(0., 1., 200)
-    n = np.ones(z.shape)
+    n = np.exp(-((z-0.5)/0.1)**2)
     
     # Bias input
     b = np.sqrt(1. + z)
@@ -709,7 +709,6 @@ def check_corr_3d(cosmo):
     
     
 
-@decorators.slow
 def test_valid_transfer_combos():
     """
     Check that invalid transfer_function <-> matter_power_spectrum pairs raise 
@@ -725,7 +724,6 @@ def test_valid_transfer_combos():
     assert_raises(ValueError, ccl.Cosmology, transfer_function='bbks', 
                               matter_power_spectrum='emu', **params)
 
-@decorators.slow
 def test_background():
     """
     Test background and growth functions in ccl.background.
@@ -736,7 +734,6 @@ def test_background():
     for cosmo_nu in reference_models_nu():
         yield check_background_nu, cosmo_nu
 
-@decorators.slow
 def test_power():
     """
     Test power spectrum and sigma functions in ccl.power.
@@ -802,7 +799,6 @@ def test_corr():
     for cosmo_nu in reference_models_nu():
         yield check_corr_3d, cosmo_nu
 
-@decorators.slow
 def test_debug_mode():
     """
     Test that debug mode can be toggled.
