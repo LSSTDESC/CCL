@@ -436,9 +436,9 @@ Correlation function result will be in array xi
  */
 
 void ccl_correlation_3d(ccl_cosmology *cosmo, double a,
-		     int n_r,double *r,double *xi,
-		     int do_taper_pk,double *taper_pk_limits,
-		     int *status)
+			int n_r,double *r,double *xi,
+			int do_taper_pk,double *taper_pk_limits,
+			int *status)
 {
   int i,N_ARR;
   double *k_arr,*pk_arr,*r_arr,*xi_arr;
@@ -461,22 +461,8 @@ void ccl_correlation_3d(ccl_cosmology *cosmo, double a,
     return;
   }  
 
-  if(cosmo->config.matter_power_spectrum_method==ccl_linear) {
-    for (i=0; i<N_ARR; i++) {
-      pk_arr[i] = ccl_linear_matter_power(cosmo, k_arr[i], a, status);
-    }
-  }
-  else {
-    if(cosmo->config.matter_power_spectrum_method==ccl_halofit) {
-      for (i=0; i<N_ARR; i++) {
-	pk_arr[i] = ccl_nonlin_matter_power(cosmo, k_arr[i], a, status);
-      }
-    }
-    else {
-      printf("ccl_sample_power.c: Unknown power spectrum method.\n");
-      return;
-    }
-  }
+  for (i=0; i<N_ARR; i++)
+    pk_arr[i] = ccl_nonlin_matter_power(cosmo, k_arr[i], a, status);
 
   if (do_taper_pk)
     taper_cl(N_ARR,k_arr,pk_arr,taper_pk_limits);
@@ -499,7 +485,7 @@ void ccl_correlation_3d(ccl_cosmology *cosmo, double a,
 
   for(i=0;i<N_ARR;i++)
     r_arr[i]=0;
- 
+
   pk2xi(N_ARR,k_arr,pk_arr,r_arr,xi_arr);
 
   // Interpolate to output values of r

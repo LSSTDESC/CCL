@@ -33,6 +33,11 @@ typedef enum {
   CCL_ERROR_POLICY_CONTINUE = 1,
 } CCLErrorPolicy;
 
+typedef enum {
+  CCL_DEBUG_MODE_OFF = 0,
+  CCL_DEBUG_MODE_ON = 1,
+} CCLDebugModePolicy;
+
 /** Raise an exception
  * Given a status, give an error message.
  * @return void
@@ -44,6 +49,12 @@ void ccl_raise_exception(int err, char* msg);
  * @return void
  */
 void ccl_set_error_policy(CCLErrorPolicy error_policy);
+
+/** Set the error policy
+ * @oaram debug_policy the debug mode policy
+ * @return void
+ */
+void ccl_set_debug_policy(CCLDebugModePolicy debug_policy);
 
 /** Check the error status
  * Given a status, check if any errors have occurred,

@@ -165,6 +165,21 @@ procedure is as follows:
  3. You can now reinstall the package in the normal way, starting with the 
     C code and then the python code. 
 
+Debug mode in Python
+--------------------------------------------
+Because of the way the Python wrapper handles exceptions that occur inside the C code, by default 
+users will only see error messages for the most recent error to occur. If multiple errors occured 
+during a CCL function call, all but the most recent error message will be overwritten. This can 
+make it difficult to debug the root cause of a problem.
+
+To help with debugging this kind of issue, you can enable debug mode in the Python wrapper. To do 
+this, simply call `pyccl.debug_mode(True)`. This will cause the Python wrapper to print all C 
+error messages to `stderr` whenever they occur. Python exceptions will only be raised for the most 
+recent error, as before, but you can at least see if other exceptions were thrown by inspecting 
+the `stderr` output.
+
+(Note that Jupyter notebooks do not print `stderr` messages by default.)
+
 API Changes and Stability
 --------------------------------------------
 An API breakage is anything that modifies the name or call signature of an 
