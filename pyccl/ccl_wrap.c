@@ -2980,36 +2980,37 @@ SWIG_Python_NonDynamicSetAttr(PyObject *obj, PyObject *name, PyObject *value) {
 
 /* -------- TYPES TABLE (BEGIN) -------- */
 
-#define SWIGTYPE_p_CCLErrorPolicy swig_types[0]
-#define SWIGTYPE_p_CCL_ClTracer swig_types[1]
-#define SWIGTYPE_p_CCL_ClWorkspace swig_types[2]
-#define SWIGTYPE_p_SplPar swig_types[3]
-#define SWIGTYPE_p_baryons_power_spectrum_t swig_types[4]
-#define SWIGTYPE_p_ccl_configuration swig_types[5]
-#define SWIGTYPE_p_ccl_cosmology swig_types[6]
-#define SWIGTYPE_p_ccl_data swig_types[7]
-#define SWIGTYPE_p_ccl_gsl_params swig_types[8]
-#define SWIGTYPE_p_ccl_mnu_convention swig_types[9]
-#define SWIGTYPE_p_ccl_neutrino_mass_splits swig_types[10]
-#define SWIGTYPE_p_ccl_parameters swig_types[11]
-#define SWIGTYPE_p_ccl_species_x_label swig_types[12]
-#define SWIGTYPE_p_ccl_spline_params swig_types[13]
-#define SWIGTYPE_p_char swig_types[14]
-#define SWIGTYPE_p_double swig_types[15]
-#define SWIGTYPE_p_emulator_neutrinos_t swig_types[16]
-#define SWIGTYPE_p_f_double_double_p_void_p_int__double swig_types[17]
-#define SWIGTYPE_p_gsl_interp_accel swig_types[18]
-#define SWIGTYPE_p_gsl_spline swig_types[19]
-#define SWIGTYPE_p_gsl_spline2d swig_types[20]
-#define SWIGTYPE_p_int swig_types[21]
-#define SWIGTYPE_p_mass_function_t swig_types[22]
-#define SWIGTYPE_p_matter_power_spectrum_t swig_types[23]
-#define SWIGTYPE_p_p_SplPar swig_types[24]
-#define SWIGTYPE_p_transfer_function_t swig_types[25]
-#define SWIGTYPE_p_user_pz_info swig_types[26]
-#define SWIGTYPE_p_void swig_types[27]
-static swig_type_info *swig_types[29];
-static swig_module_info swig_module = {swig_types, 28, 0, 0, 0, 0};
+#define SWIGTYPE_p_CCLDebugModePolicy swig_types[0]
+#define SWIGTYPE_p_CCLErrorPolicy swig_types[1]
+#define SWIGTYPE_p_CCL_ClTracer swig_types[2]
+#define SWIGTYPE_p_CCL_ClWorkspace swig_types[3]
+#define SWIGTYPE_p_SplPar swig_types[4]
+#define SWIGTYPE_p_baryons_power_spectrum_t swig_types[5]
+#define SWIGTYPE_p_ccl_configuration swig_types[6]
+#define SWIGTYPE_p_ccl_cosmology swig_types[7]
+#define SWIGTYPE_p_ccl_data swig_types[8]
+#define SWIGTYPE_p_ccl_gsl_params swig_types[9]
+#define SWIGTYPE_p_ccl_mnu_convention swig_types[10]
+#define SWIGTYPE_p_ccl_neutrino_mass_splits swig_types[11]
+#define SWIGTYPE_p_ccl_parameters swig_types[12]
+#define SWIGTYPE_p_ccl_species_x_label swig_types[13]
+#define SWIGTYPE_p_ccl_spline_params swig_types[14]
+#define SWIGTYPE_p_char swig_types[15]
+#define SWIGTYPE_p_double swig_types[16]
+#define SWIGTYPE_p_emulator_neutrinos_t swig_types[17]
+#define SWIGTYPE_p_f_double_double_p_void_p_int__double swig_types[18]
+#define SWIGTYPE_p_gsl_interp_accel swig_types[19]
+#define SWIGTYPE_p_gsl_spline swig_types[20]
+#define SWIGTYPE_p_gsl_spline2d swig_types[21]
+#define SWIGTYPE_p_int swig_types[22]
+#define SWIGTYPE_p_mass_function_t swig_types[23]
+#define SWIGTYPE_p_matter_power_spectrum_t swig_types[24]
+#define SWIGTYPE_p_p_SplPar swig_types[25]
+#define SWIGTYPE_p_transfer_function_t swig_types[26]
+#define SWIGTYPE_p_user_pz_info swig_types[27]
+#define SWIGTYPE_p_void swig_types[28]
+static swig_type_info *swig_types[30];
+static swig_module_info swig_module = {swig_types, 29, 0, 0, 0, 0};
 #define SWIG_TypeQuery(name) SWIG_TypeQueryModule(&swig_module, &swig_module, name)
 #define SWIG_MangledTypeQuery(name) SWIG_MangledTypeQueryModule(&swig_module, &swig_module, name)
 
@@ -22862,6 +22863,31 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_set_debug_policy(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  CCLDebugModePolicy arg1 ;
+  int val1 ;
+  int ecode1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:set_debug_policy",&obj0)) SWIG_fail;
+  ecode1 = SWIG_AsVal_int(obj0, &val1);
+  if (!SWIG_IsOK(ecode1)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "set_debug_policy" "', argument " "1"" of type '" "CCLDebugModePolicy""'");
+  } 
+  arg1 = (CCLDebugModePolicy)(val1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    ccl_set_debug_policy(arg1);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_check_status(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   ccl_cosmology *arg1 = (ccl_cosmology *) 0 ;
@@ -24073,6 +24099,7 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"raise_warning", _wrap_raise_warning, METH_VARARGS, (char *)"raise_warning(int err, char * msg)"},
 	 { (char *)"raise_gsl_warning", _wrap_raise_gsl_warning, METH_VARARGS, (char *)"raise_gsl_warning(int gslstatus, char * msg)"},
 	 { (char *)"set_error_policy", _wrap_set_error_policy, METH_VARARGS, (char *)"set_error_policy(CCLErrorPolicy error_policy)"},
+	 { (char *)"set_debug_policy", _wrap_set_debug_policy, METH_VARARGS, (char *)"set_debug_policy(CCLDebugModePolicy debug_policy)"},
 	 { (char *)"check_status", _wrap_check_status, METH_VARARGS, (char *)"check_status(cosmology cosmo, int * status)"},
 	 { (char *)"check_status_nocosmo", _wrap_check_status_nocosmo, METH_VARARGS, (char *)"check_status_nocosmo(int * status)"},
 	 { (char *)"linear_spacing", _wrap_linear_spacing, METH_VARARGS, (char *)"linear_spacing(double xmin, double xmax, int N) -> double *"},
@@ -24103,6 +24130,7 @@ static PyMethodDef SwigMethods[] = {
 
 /* -------- TYPE CONVERSION AND EQUIVALENCE RULES (BEGIN) -------- */
 
+static swig_type_info _swigt__p_CCLDebugModePolicy = {"_p_CCLDebugModePolicy", "enum CCLDebugModePolicy *|CCLDebugModePolicy *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_CCLErrorPolicy = {"_p_CCLErrorPolicy", "enum CCLErrorPolicy *|CCLErrorPolicy *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_CCL_ClTracer = {"_p_CCL_ClTracer", "CCL_ClTracer *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_CCL_ClWorkspace = {"_p_CCL_ClWorkspace", "CCL_ClWorkspace *", 0, 0, (void*)0, 0};
@@ -24133,6 +24161,7 @@ static swig_type_info _swigt__p_user_pz_info = {"_p_user_pz_info", "user_pz_info
 static swig_type_info _swigt__p_void = {"_p_void", "void *", 0, 0, (void*)0, 0};
 
 static swig_type_info *swig_type_initial[] = {
+  &_swigt__p_CCLDebugModePolicy,
   &_swigt__p_CCLErrorPolicy,
   &_swigt__p_CCL_ClTracer,
   &_swigt__p_CCL_ClWorkspace,
@@ -24163,6 +24192,7 @@ static swig_type_info *swig_type_initial[] = {
   &_swigt__p_void,
 };
 
+static swig_cast_info _swigc__p_CCLDebugModePolicy[] = {  {&_swigt__p_CCLDebugModePolicy, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_CCLErrorPolicy[] = {  {&_swigt__p_CCLErrorPolicy, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_CCL_ClTracer[] = {  {&_swigt__p_CCL_ClTracer, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_CCL_ClWorkspace[] = {  {&_swigt__p_CCL_ClWorkspace, 0, 0, 0},{0, 0, 0, 0}};
@@ -24193,6 +24223,7 @@ static swig_cast_info _swigc__p_user_pz_info[] = {  {&_swigt__p_user_pz_info, 0,
 static swig_cast_info _swigc__p_void[] = {  {&_swigt__p_void, 0, 0, 0},{0, 0, 0, 0}};
 
 static swig_cast_info *swig_cast_initial[] = {
+  _swigc__p_CCLDebugModePolicy,
   _swigc__p_CCLErrorPolicy,
   _swigc__p_CCL_ClTracer,
   _swigc__p_CCL_ClWorkspace,
@@ -25133,6 +25164,8 @@ SWIG_init(void) {
   SWIG_Python_SetConstant(d, "CCL_ERROR_ANGPOW",SWIG_From_int((int)(1042)));
   SWIG_Python_SetConstant(d, "CCL_ERROR_POLICY_EXIT",SWIG_From_int((int)(CCL_ERROR_POLICY_EXIT)));
   SWIG_Python_SetConstant(d, "CCL_ERROR_POLICY_CONTINUE",SWIG_From_int((int)(CCL_ERROR_POLICY_CONTINUE)));
+  SWIG_Python_SetConstant(d, "CCL_DEBUG_MODE_OFF",SWIG_From_int((int)(CCL_DEBUG_MODE_OFF)));
+  SWIG_Python_SetConstant(d, "CCL_DEBUG_MODE_ON",SWIG_From_int((int)(CCL_DEBUG_MODE_ON)));
   
   /* Initialize threading */
   SWIG_PYTHON_INITIALIZE_THREADS;

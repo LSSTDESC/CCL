@@ -1481,6 +1481,8 @@ CCL_ERROR_MNU_UNPHYSICAL = _ccllib.CCL_ERROR_MNU_UNPHYSICAL
 CCL_ERROR_ANGPOW = _ccllib.CCL_ERROR_ANGPOW
 CCL_ERROR_POLICY_EXIT = _ccllib.CCL_ERROR_POLICY_EXIT
 CCL_ERROR_POLICY_CONTINUE = _ccllib.CCL_ERROR_POLICY_CONTINUE
+CCL_DEBUG_MODE_OFF = _ccllib.CCL_DEBUG_MODE_OFF
+CCL_DEBUG_MODE_ON = _ccllib.CCL_DEBUG_MODE_ON
 
 def raise_exception(err, msg):
     """raise_exception(int err, char * msg)"""
@@ -1497,6 +1499,10 @@ def raise_gsl_warning(gslstatus, msg):
 def set_error_policy(error_policy):
     """set_error_policy(CCLErrorPolicy error_policy)"""
     return _ccllib.set_error_policy(error_policy)
+
+def set_debug_policy(debug_policy):
+    """set_debug_policy(CCLDebugModePolicy debug_policy)"""
+    return _ccllib.set_debug_policy(debug_policy)
 
 def check_status(cosmo, status):
     """check_status(cosmology cosmo, int * status)"""
