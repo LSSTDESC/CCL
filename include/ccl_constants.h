@@ -88,6 +88,12 @@ extern "C" {
 #define EV_IN_J  GSL_CONST_MKSA_ELECTRON_VOLT
 
 /**
+ * Temperature of the CMB in K
+ */
+#define TCMB 2.725
+//#define TCMB 2.7255 // CLASS value
+
+/**
  * T_ncdm, as taken from CLASS, explanatory.ini
  */
 #define TNCDM 0.71611

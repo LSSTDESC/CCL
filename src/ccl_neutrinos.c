@@ -91,12 +91,12 @@ double nu_phasespace_intg(gsl_interp_accel* accel, double mnuOT, int* status)
 }
 
 /* -------- ROUTINE: Omeganuh2 ---------
-INPUTS: a: scale factor, Nnumass: number of massive neutrino species, mnu: total mass in eV of neutrinos, TCMB: CMB temperature, accel: pointer to an accelerator which will evaluate the neutrino phasespace spline if defined, status: pointer to status integer.
+INPUTS: a: scale factor, Nnumass: number of massive neutrino species, mnu: total mass in eV of neutrinos, T_CMB: CMB temperature, accel: pointer to an accelerator which will evaluate the neutrino phasespace spline if defined, status: pointer to status integer.
 TASK: Compute Omeganu * h^2 as a function of time.
 !! To all practical purposes, Neff is simply N_nu_mass !!
 */
 
-double ccl_Omeganuh2 (double a, int N_nu_mass, double* mnu, double TCMB, gsl_interp_accel* accel, int* status)
+double ccl_Omeganuh2 (double a, int N_nu_mass, double* mnu, double T_CMB, gsl_interp_accel* accel, int* status)
 {
   double Tnu, a4, prefix_massless, mnuone, OmNuh2;
   double Tnu_eff, mnuOT, intval, prefix_massive;
@@ -105,7 +105,7 @@ double ccl_Omeganuh2 (double a, int N_nu_mass, double* mnu, double TCMB, gsl_int
   // First check if N_nu_mass is 0
   if (N_nu_mass==0) return 0.0;  
   
-  Tnu=TCMB*pow(4./11.,1./3.);
+  Tnu=T_CMB*pow(4./11.,1./3.);
   a4=a*a*a*a;  
   // Check if mnu=0. We assume that in the massless case mnu is a pointer to a single element and that element is 0. This should in principle never be called.
   if (mnu[0] < 0.00017) {  // Limit taken from Lesgourges et al. 2012
@@ -114,7 +114,7 @@ double ccl_Omeganuh2 (double a, int N_nu_mass, double* mnu, double TCMB, gsl_int
   }
   
   // And the remaining massive case.
-  // Tnu_eff is used in the massive case because CLASS uses an effective temperature of nonLCDM components to match to mnu / Omeganu =93.14eV. Tnu_eff = T_ncdm * TCMB = 0.71611 * TCMB
+  // Tnu_eff is used in the massive case because CLASS uses an effective temperature of nonLCDM components to match to mnu / Omeganu =93.14eV. Tnu_eff = T_ncdm * T_CMB = 0.71611 * T_CMB
   Tnu_eff = Tnu * TNCDM / (pow(4./11.,1./3.));
   
   // Define the prefix using the effective temperature (to get mnu / Omega = 93.14 eV) for the massive case: 
@@ -135,11 +135,11 @@ double ccl_Omeganuh2 (double a, int N_nu_mass, double* mnu, double TCMB, gsl_int
 }
 
 /* -------- ROUTINE: Omeganuh2_to_Mnu ---------
-INPUTS: OmNuh2: neutrino mass density today Omeganu * h^2, label: how you want to split up the masses, see ccl_neutrinos.h for options, TCMB: CMB temperature, accel: pointer to an accelerator which will evaluate the neutrino phasespace spline if defined, status: pointer to status integer.
+INPUTS: OmNuh2: neutrino mass density today Omeganu * h^2, label: how you want to split up the masses, see ccl_neutrinos.h for options, T_CMB: CMB temperature, accel: pointer to an accelerator which will evaluate the neutrino phasespace spline if defined, status: pointer to status integer.
 TASK: Given Omeganuh2 today, the method of splitting into masses, and the temperature of the CMB, output a pointer to the array of neutrino masses (may be length 1 if label asks for sum) 
 */
 
-double* ccl_nu_masses(double OmNuh2, ccl_neutrino_mass_splits mass_split, double TCMB,  int* status){
+double* ccl_nu_masses(double OmNuh2, ccl_neutrino_mass_splits mass_split, double T_CMB,  int* status){
   
   double sumnu;
   
