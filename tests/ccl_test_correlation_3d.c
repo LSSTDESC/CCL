@@ -82,9 +82,9 @@ static void compare_correlation_3d(int i_model,struct corrs_3d_data * data)
   nr=linecount(f)-1; rewind(f);
 
   // tolerence on abs difference in r^2 xi(r) for the range r = 0.1 - 100 Mpc (40 points in r) for z=0,1,2,3,4,5
-  double CORR_TOLERANCE1[6] = {2.7e-2, 3.4e-3, 1.3e-3, 1.2e-3, 2.0e-4, 1.7e-4};
+  double CORR_TOLERANCE1[6] = {2.7e-2, 3.4e-3, 1.3e-3, 1.2e-3, 2.0e-4, 1.8e-4};
   // tolerence on abs difference in r^2 xi(r) for the range r = 50 - 250 Mpc (100 points in r) for z=0,1,2,3,4,5
-  double CORR_TOLERANCE2[6] = {3.0e-2, 9.4e-3, 4.8e-3, 2.9e-3, 9.5e-4, 6.8e-4};
+  double CORR_TOLERANCE2[6] = {3.0e-2, 9.4e-3, 4.8e-3, 2.9e-3, 9.6e-4, 6.9e-4};
 
   int N1=40;
   double *r_arr1=malloc(N1*sizeof(double));
