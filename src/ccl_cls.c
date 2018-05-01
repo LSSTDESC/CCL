@@ -160,6 +160,7 @@ typedef struct {
 } IntLensPar;
 
 //Integrand for lensing kernel
+//MUSIG
 static double integrand_wl(double chip,void *params)
 {
   IntLensPar *p=(IntLensPar *)params;
@@ -181,6 +182,7 @@ static double integrand_wl(double chip,void *params)
 //spl_pz  -> normalized N(z) spline
 //chi_max -> maximum comoving distance to which the integral is computed
 //win     -> result is stored here
+
 static int window_lensing(double chi,ccl_cosmology *cosmo,SplPar *spl_pz,double chi_max,double *win)
 {
   int gslstatus =0, status =0;
@@ -206,7 +208,7 @@ static int window_lensing(double chi,ccl_cosmology *cosmo,SplPar *spl_pz,double 
   return 0;
 }
 
-//Params for lensing kernel integrand
+//Params for magnification kernel integrand
 typedef struct {
   double chi;
   SplPar *spl_pz;
@@ -836,6 +838,7 @@ static double transfer_wl(int l,double k,
   //return (l+1.)*l*ret/(k*k);
 }
 
+// MUSIG
 static double transfer_cmblens(int l,double k,ccl_cosmology *cosmo,CCL_ClTracer *clt,int *status)
 {
   double chi=(l+0.5)/k;

@@ -499,7 +499,7 @@ INPUT: cosmology
 TASK: if not already there, make a table of growth function and growth rate
       normalize growth to input parameter growth0
 */
-
+// MUSIG
 void ccl_cosmology_compute_growth(ccl_cosmology * cosmo, int * status)
 {
 	

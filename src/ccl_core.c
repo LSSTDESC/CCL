@@ -173,6 +173,8 @@ h: Hubble's constant divided by (100 km/s/Mpc).
 norm_pk: amplitude of the primordial PS (either A_s or sigma_8)
 n_s: index of the primordial PS
 */
+
+// MUSIG
 ccl_cosmology * ccl_cosmology_create_with_params(double Omega_c, double Omega_b, double Omega_k,
 						 double Neff, double* mnu, ccl_mnu_convention mnu_type,
 						 double w0, double wa, double h, double norm_pk, double n_s,
@@ -301,6 +303,7 @@ A_s: amplitude of the primordial PS
 n_s: index of the primordial PS
 
  */
+ // MUSIG
 ccl_parameters ccl_parameters_create(
                      double Omega_c, double Omega_b, double Omega_k,
 				     double Neff, double* mnu, ccl_mnu_convention mnu_type,

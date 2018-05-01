@@ -225,7 +225,7 @@ static void ccl_run_class(ccl_cosmology *cosmo,
   }
   init_arr[i_init++]=1;
 }
-
+// MUSIG
 static double ccl_get_class_As(ccl_cosmology *cosmo, struct file_content *fc, int position_As,
 			       double sigma8, int * status)
 {
@@ -1631,6 +1631,7 @@ typedef struct {
   int* status;
 } SigmaR_pars;
 
+// MUSIG 
 static double sigmaR_integrand(double lk,void *params)
 {
   SigmaR_pars *par=(SigmaR_pars *)params;
@@ -1649,7 +1650,7 @@ static double sigmaR_integrand(double lk,void *params)
 
   return pk*k*k*k*w*w;
 }
-
+//MUSIG
 double ccl_sigmaR(ccl_cosmology *cosmo,double R, int *status)
 {
   SigmaR_pars par;
@@ -1671,7 +1672,7 @@ double ccl_sigmaR(ccl_cosmology *cosmo,double R, int *status)
 
   return sqrt(sigma_R*M_LN10/(2*M_PI*M_PI));
 }
-
+//MUSIG
 double ccl_sigma8(ccl_cosmology *cosmo, int *status)
 {
   return ccl_sigmaR(cosmo,8/cosmo->params.h, status);
