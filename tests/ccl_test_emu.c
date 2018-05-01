@@ -121,11 +121,10 @@ static void compare_emu(int i_model,struct emu_data * data)
   
   //None of the current cosmologies being checked include neutrinos
   ccl_parameters params = ccl_parameters_create(data->Omega_c[i_model-1],data->Omega_b[i_model-1],0.0,data->Neff, data->mnu, data->mnu_type, data->w_0[i_model-1],data->w_a[i_model-1],data->h[i_model-1],data->sigma_8[i_model-1],data->n_s[i_model-1],-1,-1,-1,-1,NULL,NULL, &status);
+  params.Omega_l=params.Omega_l+params.Omega_g;
   params.Omega_g=0;
-  params.sigma_8=data->sigma_8[i_model-1];
   ccl_cosmology * cosmo = ccl_cosmology_create(params, config);
   ASSERT_NOT_NULL(cosmo);
-
   //Each of these files has the smoothed simulated power spectrum for
   //the corresponding cosmology, kindly provided by E. Lawrence.
   sprintf(fname,"./tests/benchmark/emu_smooth_pk_M%d.txt",i_model_vec[i_model-1]);
@@ -163,8 +162,9 @@ CTEST2(emu,model_1) {
   compare_emu(model,data);
 }
 
-/*
+
 //Additional tests for other cosmologies are possible:
+/*
 CTEST2(emu,model_2) {
   int model=2;
   compare_emu(model,data);
