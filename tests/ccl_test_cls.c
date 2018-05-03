@@ -160,6 +160,9 @@ static void compare_cls(char *compare_type,struct cls_data * data)
     cl_ll_22_h=ccl_angular_cl(cosmo,l,tr_wl_2,tr_wl_2,&status)*ell_correct*ell_correct;;
     if (status) printf("%s\n",cosmo->status_message);
 
+    if((ii<20) && (!strcmp(compare_type,"analytic")))
+      printf("%d %lE %lE\n",(int)l,cl_ll_11_h,cl_ll_11);
+    
     if(fabs(cl_dd_11_h/cl_dd_11-1)>CLS_TOLERANCE)
       fraction_failed++;
     if(fabs(cl_dd_12_h/cl_dd_12-1)>CLS_TOLERANCE)
