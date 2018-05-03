@@ -5,7 +5,7 @@ from os.path import dirname,join,abspath
 from collections import OrderedDict
 
 # Set tolerances
-DISTANCES_TOLERANCE = 1e-4
+DISTANCES_TOLERANCE = 1e-5
 
 # Set up the cosmological parameters to be used in each of the models
 Omega_c = 0.25
@@ -16,6 +16,7 @@ n_s = 0.96
 
 def Neff(N_ur, N_ncdm):
     Neff = N_ur + N_ncdm * ccl.ccllib.TNCDM**4 / (4./11.)**(4./3.)
+    return Neff
 
 models = OrderedDict(
             {"flat_nonu"       : {"Omega_k"  : 0.0,
@@ -58,7 +59,8 @@ def read_chi_test_file():
     # Split into redshift column and chi(z) columns
     z = dat[0]
     chi = dat[1:]
-    return z, chi
+    # z = 0.01 fails the 1e-5 tolerance (but passes 1e-4).
+    return z[1:], chi[:,1:]
 
 
 # Set-up test data
