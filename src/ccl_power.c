@@ -1502,6 +1502,8 @@ double ccl_linear_matter_power(ccl_cosmology * cosmo, double k, double a, int * 
       return exp(log_p_1);
     }
   }
+
+  return exp(log_p_1);
 }
 
 

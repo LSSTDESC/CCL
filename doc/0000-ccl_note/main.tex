@@ -92,6 +92,14 @@ This note describes how to install \ccl (Section \ref{sec:install}), how \ccl is
 
   Note that, if you want to use your own version of {\tt CLASS}, you should follow the steps described in Section \ref{sec:extclass} below.
 
+\subsection{Installing Angpow}
+
+{\tt CCL} provides an optional link to the {\tt Angpow} library that enables fast and accurate computations of the angular power spectra without using the Limber approximation (written in C++). We provide a python script to automatically install {\tt Angpow} and make the link with {\tt CCL}. You should first run this script ({\tt \$ python angpow\_install.py}) before carrying out the next steps. The installation downloads the last release of {\tt Angpow} adapted to {\tt CCL} from a dedicated DESC github repository\footnote{\url{https://github.com/LSSTDESC/Angpow4CCL}} and looks for a C++ compiler compatible with OpenMP. It provides a dedicated file {\tt ./angpow/src/angpow\_ccl.cc}` that makes the interface between the {\tt CCL} structures and the {\tt Angpow} classes.
+
+To remove {\tt Angpow}, run {\tt \$ python angpow\_install.py --clean} and install {\tt CCL} again.
+
+
+
 \subsection{Installation Procedure}
 
 \ccl can be installed through an {\tt autotools}-generated configuration file. UNIX users should be familiar with the process: navigate to the directory containing the library and type
@@ -540,7 +548,7 @@ In the {\tt python} implementation, {\tt CCL} allows for either $\sigma 8$ or {\
 \label{sec:cl}
 
 In this section we will distinguish between {\sl observables} (quantities observed on the sky, such as number counts in a redshift bin, shear or CMB temperature fluctuations) and {\sl contributions} to the total observed fluctuations of these observables (such as the biased matter density term in number counts, redshift-space distortions, magnification, ISW, etc.).
-The routines described in this subsection are implemented in {\tt ccl$\_$cls.c}.
+The routines described in this subsection are implemented in {\tt ccl$\_$cls.cc}.
 
 \subsubsection{Exact expressions}
 The angular power spectrum between two observables $a$ and $b$ can be written as:
@@ -563,6 +571,7 @@ where $\mathcal{P}_\Phi(k)$ is the dimensionless power spectrum of the primordia
   \item $\Delta^{\rm M}$ is the contribution from magnification lensing:
         \begin{equation}
           \Delta_\ell^{\rm M}(k)=-\ell(\ell+1)\int \frac{dz}{H(z)} W^{\rm M}(z) T_{\phi+\psi}(k,z) j_\ell(k\chi(z)),
+          \label{eq:deltaM}
         \end{equation}
         where $T_{\phi+\psi}$ is the transfer function for the Newtonian-gauge scalar metric perturbations, and $W^{\rm M}$ is the magnification window function:
         \begin{equation}
@@ -626,68 +635,49 @@ Here ($\Theta(x;x_i,x_f)$) is a top-hat function (1 for $x\in[x_i,x_f]$ and 0 ot
 
 %----------------------------------------------------------------
 %
-%      This is the Angpow section currently under development
+%      Begin of the Angpow section currently under development
 %
 %----------------------------------------------------------------
 
-\begin{comment}
+\subsubsection{Beyond limber}
 
-\subsubsection{Beyond Limber: angpow}
+{\bf Native CCL computation.}
 
-%Text Added JECampagne 27/05/17 START
+\ccl incorporates routines to compute the $C^{ab}_\ell$ angular power spectra as described above but without the Limber approximation. The algorithm performs first the integrals over $z$ for both tracers, and ends with the $k$ integral. This computation is much slower than using the Limber approximation, but it ends up with precise angular power spectra at low $\ell$, and correct cross-correlations between tracers (the Limber approximation fails at reproducing the interference terms $j_\ell(x)\times j_\ell(x')$).
 
-%This reference to Angpow may change as soon as A&A will publish it.
-%@ARTICLE{2017arXiv170103592C,
-%   author = {{Campagne}, J.-E. and {Neveu}, J. and {Plaszczynski}, S.},
-%    title = "{Angpow: a software for the fast computation of accurate tomographic power spectra}",
-%	archivePrefix = "arXiv",
-%   eprint = {1701.03592},
-% keywords = {Astrophysics - Cosmology and Nongalactic Astrophysics},
-%     year = 2017,
-%    month = jan,
-%    journal = {to be published to \aap},
-%   adsurl = {http://adsabs.harvard.edu/abs/2017arXiv170103592C},
-%  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
-%}
+Some parameters are needed to define this integral. First, to fasten the computation the $C^{ab}_\ell$ function is computed for a selection of $\ell$ values (linearly spaced at low-$\ell$ and logarithmicly spaced at high-$\ell$) and then the function is splined. Then the integration step of the redshift integrals must be specified in terms of a comoving distance. It is recommanded to start with a low value ($<3$\,Mpc) for a high precision integration, and then to release this parameter to achieve the user needs in terms of precision and rapidity. A logarithmic step in $k$ must also be provided: it does not correspond to the integration step but to a computation step before splining the transfer functions $\Delta^a_\ell(k)$. Last parameter, a minimum redshift can be given for the redshift integral bound so that the transfer functions are not computed near $z\approx 0$ where they can be numerically undefined.
 
-Our aim is to compute the angular over density power spectrum  $C_{\ell}(z_1, z_2)$ as a cross-correlation between two $z$-shells with mean values ($z_1, z_2$) and also the auto-correlation $C_{\ell}(z_1)$ with $z_1 = z_2$,  taking into account, in both cases, possible redshift selection functions and physical processes such as redshift-space distortions without any Limber numerical approximation. For this purpose, \ccl has been linked to the \texttt{Angpow} code \citep{2017arXiv170103592C}, which is briefly described here.
+The integration bounds in redshift are estimated automatically given the a redshift window so that the integration is preformed where the redshift window is relevant within a given precision (set by the \texttt{CCL\_FRAC\_RELEVANT} parameter). The integration bounds for the $k$ integrals are defined automatically given the $\ell$ multipole and the comoving distances at play.
 
-The angular power spectrum for two shells, $C_{\ell}(z_1, z_2)$, is computed according to the following expression
+It is worth noting that the user can define a threshold multipole $\ell$ from which the $C^{ab}_\ell$ computation switches to the Limber approximation which is faster and generally relevant at high $\ell$ values. 
+
+{\texttt{\bf Angpow}.}
+
+The aim of the \texttt{Angpow} software \citep{2017arXiv170103592C} is to compute the angular power spectra  $C_{\ell}^{ab}$  without any Limber numerical approximation. \ccl has been linked to the \texttt{Angpow} code,  which is briefly described here.
+
+The angular power spectrum for two shells $C_{\ell}^{ab}$ is computed in \texttt{Angpow} according to the following expression
 \begin{equation}
-\begin{split}
-C_{\ell}&(z_1, z_2;\sigma_1, \sigma_2)\\& = \iint_0^\infty \mathrm{d} z \mathrm{d} z^\prime \ W_1(z; z_1, \sigma_1) W_2(z^\prime; z_2, \sigma_2)\\
-&\phantom{\iint_0^\infty \mathrm{d} z \mathrm{d} z^\prime} \times \int_0^\infty \mathrm{d} k\ f_{\ell}(z, k) f_{\ell}(z^\prime, k).
-\end{split}
-\label{eq-clz1z2-obs}
+  C_{\ell}^{ab} = \iint_0^\infty \mathrm{d} z \mathrm{d} z^\prime  p_{z_1}(z_1) p_{z_2}(z^\prime) \times \int_0^\infty \mathrm{d} k\ f_{\ell}(z, k) f_{\ell}(z^\prime, k).
+  \label{eq-clz1z2-obs}
 \end{equation}
-%
-where we have introduced two normalized redshift selection functions $W_1(z;z_1,\sigma_1)$ and $W_2(z^\prime;z_2,\sigma_2)$  around $z_1$ and $z_2$ with typical width $\sigma_1$ and $\sigma_2$, respectively. The auxiliary function $f_\ell(z,k)$ can be defined without loss of generality as
+The auxiliary function $f_\ell(z,k)$ can be defined without loss of generality as
 \begin{equation}
 f_\ell(z,k) \equiv  \sqrt{\frac{2}{\pi}}\  k \sqrt{P(k,z)}\ \widetilde{\Delta}_\ell(z,k)\label{eq-fell-func}
 \end{equation}
 with
 \begin{itemize}
-\item  $P(k,z)$ : the power spectrum at redshift $z$ which is defined either using the primordial power spectrum $P_{in}(k)$ and the transfer function $T(k,z)$ as
+\item  $P(k,z)$ : the matter power spectrum at redshift $z$ 
+\item $\widetilde{\Delta}_\ell(z,k)$: a function describing the physical processes such as matter density fluctuations, redshift-space distortions as described for instance in references \citet{2008cmb..book.....D,2009PhRvD..80h3514Y,2010PhRvD..82h3508Y, 2011PhRvD..84d3516C,2011PhRvD..84f3505B}. Currently, the \texttt{Angpow} version delivered with \ccl only can deal with galaxy clustering tracers (no lensing) and this without the magnification lensing term (equation \ref{eq:deltaM}). The incorporation of those transfer functions is left for future work, but in principle \texttt{Angpow} has already the capability to treat them. For now, for galaxy clustering tracers we defined $\widetilde{\Delta}_\ell(z,k)$ as 
 \begin{equation}
-P(k,z) = P_{in}(k) T(k,z),
+ \widetilde{\Delta}_\ell(z,k) \approx b j_\ell(k \chi(z)) - f(z) j_\ell^{\prime\prime}(k \chi(z)) 
 \end{equation}
-or using an approximation valid at low redshift  with the power spectrum at $z=0$ ($P(k)|_{z=0}$) and the growth factor $G(z)$ as
-\begin{equation}
-P(k,z) = P(k)|_{z=0} G^2(z);
-\end{equation}
-There are abstract classes that one may tune according to the use-case (see \texttt{angpow\_integrand\_base.h} and \texttt{angpow\_powspec\_base.h}). For instance we have specialized in \texttt{angpow\_powspec.h} the computation of a $P(k)$ from an external
-file and a growth rate from \citet{1991MNRAS.251..128L, 1992ARA&A..30..499C}, and in \texttt{angpow\_integrand.h} we have included the RSD term and a constant bias.
-\item $\widetilde{\Delta}_\ell(z,k)$: a function describing the physical processes such as matter density fluctuations, redshift-space distortions as described for instance in references \citet{2008cmb..book.....D,2009PhRvD..80h3514Y,2010PhRvD..82h3508Y, 2011PhRvD..84d3516C,2011PhRvD..84f3505B}. As example \todo{example for galaxy clustering?} with a constant bias $b$ and using the growth factor rate $f_a(z) = d\log G(a(z))/d\log(a(z))$, we can approximate
-\begin{equation}
- \widetilde{\Delta}_\ell(z,k) \approx b j_\ell(k \chi(z)) - f_a(z) j_\ell^{\prime\prime}(k \chi(z)) + \dots
-\end{equation}
-with $j_\ell(x)$ and $j_\ell^{\prime\prime}(x)$ the spherical Bessel function of order $\ell$ and its second derivative, and $\chi(z)$ is the comoving distance at redshift $z$.
+with $j_\ell(x)$ and $j_\ell^{\prime\prime}(x)$ the spherical Bessel function of order $\ell$ and its second derivative, and $f(a)$ the growth rate as defined subsection~\ref{sec:growth} (derivative of the growth function with respect to the scale factor $a$).
 \end{itemize}
 
-To proceed to a numerical evaluation of equation \ref{eq-clz1z2-obs}, we first conduct  inside the rectangle $ [z_{1\mrm{min}},z_{1\mrm{max}}] \times [z_{2\mrm{min}},z_{2\mrm{max}}]$ given by the $W$ selection functions a Cartesian product of one-dimensional (1D) quadrature
- defined by the set of sample nodes $z_i$ and weights $w_i$. In practice, we use the Clenshaw-Curtis quadrature.   The corresponding sampling points $(z_{1i},z_{2j})$ are weighted by the product  $w_i w_j$ using the 1D quadrature sample points and weights on both redshift regions with $i=0,\dots, N_{\mrm{z}_1}-1$ and $j=0,\dots,N_{\mrm{z}_2}-1$. Then, one gets the following approximation:
+To proceed to a numerical evaluation of equation \ref{eq-clz1z2-obs}, \texttt{Angpow} first conducts  inside the rectangle $ [z_{1\mrm{min}},z_{1\mrm{max}}] \times [z_{2\mrm{min}},z_{2\mrm{max}}]$ given by the $p_z(z)$ selection functions a Cartesian product of one-dimensional (1D) quadrature
+ defined by the set of sample nodes $z_i$ and weights $w_i$. In practice, the Clenshaw-Curtis quadrature is used.   The corresponding sampling points $(z_{1i},z_{2j})$ are weighted by the product  $w_i w_j$ using the 1D quadrature sample points and weights on both redshift regions with $i=0,\dots, N_{\mrm{z}_1}-1$ and $j=0,\dots,N_{\mrm{z}_2}-1$. Then, one gets the following approximation:
 \begin{equation}
-C^{\mrm{thick}}_{\ell}(z_1, z_2) \approx  \sum_{i=0}^{N_{\mrm{z}_1}-1}\sum_{j=0}^{N_{\mrm{z}_2}-1} w_i w_j W_1(z_i,z_1)W_2(z_j,z_2) \widehat{P}_\ell(\chi_i,\chi_j)
+C_{\ell}^{ab} \approx  \sum_{i=0}^{N_{\mrm{z}_1}-1}\sum_{j=0}^{N_{\mrm{z}_2}-1} w_i w_j p_{z_1}(z_i)p_{z_2}(z_j) \widehat{P}_\ell(\chi_i,\chi_j)
 \label{eq-cross-zquadra}
 \end{equation}
 with the notations $z_i = z_{1i}$, $z_j = z_{2j}$ and  $\chi_i = \chi(z_{1i})$, $\chi_j = \chi(z_{2j})$ and
@@ -695,31 +685,25 @@ with the notations $z_i = z_{1i}$, $z_j = z_{2j}$ and  $\chi_i = \chi(z_{1i})$, 
 \widehat{P}_\ell(z_i,z_j) =   \int_0^\infty dk\ f_\ell(z_i,k) f_\ell(z_j,k)
 \label{eq-Pellzizj}
 ,\end{equation}
-defined with the $f_\ell(z,k)$ function of equation \ref{eq-fell-func}.
-To conduct the computation of such integral of highly oscillating functions we use the 3C-algorithm described in details in reference \citep{2017arXiv170103592C}.
-
-In brief this algorithm proceeds the following way:
+To conduct the computation of such integral of highly oscillating functions we use the 3C-algorithm described in details in reference \citep{2017arXiv170103592C}. In brief this algorithm proceeds the following way:
 \begin{enumerate}
 \item the total integration $k$ interval (eg. $[k_\mathrm{min}, k_\mathrm{max}]$) in equation (\ref{eq-Pellzizj}) is cut on several $k$-sub-intervals;
 \item  on each sub-interval the functions $f_{i\, \ell}(k) = f_\ell(z_i,k) $ and $f_{j\, \ell}(k) = f_\ell(z_j,k)$ are projected onto Chebyshev series of order $2^N$;
 \item the product of the two Chebyshev series is performed with a $2^{2N}$ Chebyshev series;
 \item then, the integral on the sub-interval is computed thanks to the Clenshaw-Curtis quadrature.
 \end{enumerate}
-All the Chebyshev expansions and the Clenshaw-Curtis quadrature are
-performed via the DCT-I fast transform of FFTW.
+All the Chebyshev expansions and the Clenshaw-Curtis quadrature are performed via the DCT-I fast transform of FFTW.
 
-We have tested the code both on laptop (Linux, MacOSX) as well as on
-Computer Center (CCIN2P3 in France and NERSC in the USA).
-We use OpenMP to distribute the computation of a given $C_\ell$ on a single
-thread. The code wall time  decreases reasonably well with the number of threads
-and a wall time at the $\mathcal{O}$(1s) level can be reached to
-reconstruct these accurate spectra. Such performances are much higher than those obtained
-with {\tt CLASSgal} when not using the Limber approximation.
-For instance using{\tt CLASSgal}  to compute the auto-correlation with a Gaussian selection function with ($z_\mrm{mean}=1$, $\sigma_z=0.02$, $5\sigma_z$-cut) and $k_\mrm{max}=1\ \mrm{Mpc}^{-1}$ and a radial quadrature based on $N_\mrm{pts}=139$ sample points, it takes
-about 15s on 16 threads, which is to be compared to about 0.5s with \texttt{Angpow}.
-%Text Added JECampagne 27/05/17 END
+Thanks to the 3C-algorithm, the \texttt{Angpow} is able to compute the $C_{\ell}^{ab}$ in a fast and accurate way. It was tested against \texttt{CLASS} and the native \ccl computation and can performed the computation an order of magnitude faster, which is more suitable for an extensive exploration of the cosmological parameter space ($\mathcal{O}(1s)$). Note that \texttt{Angpow} is written in C++ with OpenMP, to distribute the computation of a single $C_\ell$ on a single thread. The computation can also be switch by the user to the faster Limber approximation setting a threshold multipole $\ell$.
+ 
 
-\end{comment}
+{\bf Precision tests.}
+
+The code has been compared with \texttt{CLASS} and the native \ccl computation and all three softwares agrees perfectly if precision parameters are pushed to high levels.
+
+A few parameters must be provided to set the precision of this computation. First the order of the Chebyshev polynomials is set to $2^{10}$ by default, and the number of $k$ sub-intervals to 200, and we checked this is enough for the current uses. Then the redshift quadrature stepping is set automatically given the redshift windows to recover the native \ccl computation boosted with high precision parameters: its precision is optimised so that the relative numerical error compared with the native method is two orders of magnitude below the relative cosmic variance $\sqrt{2/(2\ell+1)}$, from $\ell=2$ to $\ell=1000$. The $k_{\rm min}$ and $k_{\rm max}$ bounds are also automatically set given the current multipole $\ell$ and the comoving distance $\chi$ involved in the inner integral.
+
+
 
 
 %----------------------------------------------------------------
