@@ -480,6 +480,29 @@ All spline and grid parameters relevant for computing quantities such as distanc
 \item {\tt N$\_$K$\_$3DCOR}: Number of bins per decade for the wavenumber in the 3d correlation function calculation. 
 The default is {\tt N$\_$K$\_$3DCOR}~=~100,000.
 \end{itemize}
+
+The precision parameters of {\tt GSL} routines can also be set in {\tt ccl$\_$params.ini}. The parameters are organized in a hierarchal fashion, such that more specialized parameters take precedence over more general ones. For example, there is a general tolerance parameter, a tolerance parameter for integrals, and a tolerance parameter for the Limber integral. By default all are set to the value of the general tolerance. Changing the integration tolerance changes the tolerance for all integrals but not for root-finding routines, for example, and changing the Limber integral tolerance only affects that integral and no other.
+The parameters are:
+
+\begin{itemize}
+\item {\tt GSL$\_$EPSREL}: Relative tolerance for {\tt GSL} routines. Default is $10^{-4}$.
+\item {\tt GSL$\_$N$\_$ITERATION}: Maximum number of iterations allowed for {\tt GSL} routines. This parameter also controls the size of the integration workspaces. Default is 1000.
+\item {\tt GSL$\_$INTEGRATION$\_$GAUSS$\_$KRONROD$\_$POINTS}: Number of Gauss-Kronrod points in the {\tt QAG} integration routines. Default is {\tt GSL$\_$INTEG$\_$GAUSS41} (numerical value 4).
+\item {\tt GSL$\_$INTEGRATION$\_$EPSREL}: Relative tolerance for {\tt GSL} integration routines. Default is {\tt GSL$\_$EPSREL}.
+\item {\tt GSL$\_$INTEGRATION$\_$DISTANCE$\_$EPSREL}: Relative tolerance for {\tt GSL} integration routines for distance calculations. Default is $10^{-6}$.
+\item {\tt GSL$\_$INTEGRATION$\_$DNDZ$\_$EPSREL}: Relative tolerance for {\tt GSL} integration routines for  $\frac{dN}{dz}$ calculations. Default is $10^{-6}$.
+\item {\tt GSL$\_$INTEGRATION$\_$SIGMAR$\_$EPSREL}: Relative tolerance for {\tt GSL} integration routines for  $\sigma_R$ calculations. Default is $10^{-5}$.
+\item {\tt GSL$\_$INTEGRATION$\_$NU$\_$EPSREL}: Relative tolerance for {\tt GSL} integration routines for neutrino calculations. Default is $10^{-7}$.
+\item {\tt GSL$\_$INTEGRATION$\_$NU$\_$EPSABS}: Absolute tolerance for {\tt GSL} integration routines for neutrino calculations. Default is $10^{-7}$.
+\item {\tt GSL$\_$INTEGRATION$\_$LIMBER$\_$GAUSS$\_$KRONROD$\_$POINTS}: Number of Gauss-Kronrod points in the {\tt QAG} integration routines for the Limber integral. Default is {\tt GSL$\_$INTEGRATION$\_$GAUSS$\_$KRONROD$\_$POINTS}.
+\item {\tt GSL$\_$INTEGRATION$\_$LIMBER$\_$EPSREL}: Relative tolerance for {\tt GSL} integration routines for Limber integral. Default is {\tt GSL$\_$EPSREL}.
+\item {\tt GSL$\_$ROOT$\_$EPSREL}: Relative tolerance for {\tt GSL} root-finding routines. Default is {\tt GSL$\_$EPSREL}.
+\item {\tt GSL$\_$ROOT$\_$N$\_$ITERATION}: Maximum number of iterations allowed for {\tt GSL} root-finding routines. Default is {\tt GSL$\_$N$\_$ITERATION}.
+\item {\tt GSL$\_$ODE$\_$GROWTH$\_$EPSREL}: Relative tolerance for {\tt GSL} ODE-solving routines for growth factor calculation. Default is $10^{-6}$.
+\end{itemize}
+
+The {\tt GSL} parameters are initialized to their default values and do not need to be listed in {\tt ccl$\_$params.ini} if no adjustments are necessary.
+
 Note that a copy of {\tt ccl$\_$params.ini} is installed along with the library, so changing the version of this file inside the source directory will not have any effect unless you reinstall.
 
 For the matter power spectrum, the spline is performed in two variables: the logarithmically-spaced wavenumber and the linearly-spaced scale factor. Splining the {\tt CLASS} output leads to some precision loss (compared to direct outputs from {\tt CLASS}). We quantify this, along with the impact of extrapolation, in the following subsection.
