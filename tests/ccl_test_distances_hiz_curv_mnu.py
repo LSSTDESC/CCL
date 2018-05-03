@@ -14,6 +14,9 @@ h = 0.7
 A_s = 2.1e-9
 n_s = 0.96
 
+def Neff(N_ur, N_ncdm):
+    Neff = N_ur + N_ncdm * ccl.ccllib.TNCDM**4 / (4./11.)**(4./3.)
+
 models = OrderedDict(
             {"flat_nonu"       : {"Omega_k"  : 0.0,
                                   "Neff"     : 3.0},
@@ -22,21 +25,21 @@ models = OrderedDict(
             "neg_curv_nonu"    : {"Omega_k"  : -0.01,
                                   "Neff"     : 3.0},
             "flat_massnu1"     : {"Omega_k"  : 0.0,
-                                  "Neff"     : 3.0,               # 1 massive neutrino
-                                  "m_nu"     : [0.0, 0.0, 0.1]},  # Mass
+                                  "Neff"     : Neff(N_ur=2.0, N_ncdm=1.0),  # 1 massive neutrino
+                                  "m_nu"     : [0.0, 0.0, 0.1]},            # Mass
             "flat_massnu2"     : {"Omega_k"  : 0.0,
-                                  "Neff"     : 3.0,                # 3 massive neutrinos
-                                  "m_nu"     : [0.03, 0.03, 0.1]}, # Masses
+                                  "Neff"     : Neff(N_ur=0.0, N_ncdm=3.0),   # 3 massive neutrino
+                                  "m_nu"     : [0.03, 0.03, 0.1]},           # Masses
             "flat_massnu3"     : {"Omega_k"  : 0.0,
-                                  "Neff"     : 3.0,                # 3 massive neutrinos
+                                  "Neff"     : Neff(N_ur=0.0, N_ncdm=3.0),   # 3 massive neutrino
                                   "m_nu"     : [0.03, 0.05, 0.1]}, # Masses
             "flat_manynu1"     : {"Omega_k"  : 0.0,
                                   "Neff"     : 6.0},               # 6 massless neutrinos
             "neg_curv_massnu1" : {"Omega_k"  : -0.01,
-                                  "Neff"     : 6.0,               # 4 massless neutrinos
+                                  "Neff"     : Neff(N_ur=4.0, N_ncdm=2.0),   # 4 massless, 2 massive neutrino
                                   "m_nu"     : [0.0, 0.03, 0.1]}, # Masses
             "pos_curv_manynu1" : {"Omega_k"  : 0.01,
-                                  "Neff"     : 6.0,                # 3 massless neutrinos
+                                  "Neff"     : Neff(N_ur=3.0, N_ncdm=3.0),   # 3 massless, 3 massive neutrino
                                   "m_nu"     : [0.03, 0.05, 0.1]}, # Masses
             }
         )
@@ -83,11 +86,11 @@ def test_distance_model_flat_nonu():
     i = 0
     compare_distances_mnu_curv(z, chi[i], **models["flat_nonu"])
 
-def test_distance_model_pos_curv_nonu_nonu():
+def test_distance_model_pos_curv_nonu():
     i = 1
     compare_distances_mnu_curv(z, chi[i], **models["pos_curv_nonu"])
 
-def test_distance_model_neg_curv_nonu_nonu():
+def test_distance_model_neg_curv_nonu():
     i = 2
     compare_distances_mnu_curv(z, chi[i], **models["neg_curv_nonu"])
 
