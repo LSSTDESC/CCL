@@ -1,0 +1,16 @@
+\begin{table}[ht]
+  \centering
+  \begin{tabular}{l | r}
+    \hline
+    Parameter & Range \\
+    \hline
+    $h$ & $[0.5, 0.9]$ \\
+    $\Omega_c$ & $[0.1, 0.4]$ \\
+    $\Omega_b$ & $[0.018, 0.052]$ \\
+    $A_s$ & $[1.5 \times 10^{-9}, 2.5 \times 10^{-9}]$ \\
+    $n_s$ & $[0.93, 0.99]$ \\
+    \hline
+  \end{tabular}
+  \caption{Ranges of $\Lambda$CDM parameters used for the generalised \ccl validation tests of the matter power spectrum.}
+  \label{tab:paramranges}
+\end{table}
