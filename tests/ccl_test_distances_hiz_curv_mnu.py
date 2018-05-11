@@ -59,8 +59,7 @@ def read_chi_test_file():
     # Split into redshift column and chi(z) columns
     z = dat[0]
     chi = dat[1:]
-    # z = 0.01 fails the 1e-5 tolerance (but passes 1e-4).
-    return z[1:], chi[:,1:]
+    return z, chi
 
 
 # Set-up test data
