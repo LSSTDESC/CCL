@@ -6,6 +6,7 @@ from ccl_test_distances import *
 from ccl_test_growth import *
 from ccl_test_core import *
 from ccl_test_power import *
+from ccl_test_distances_hiz_curv_mnu import *
 
 # Overall interface functionality tests
 from ccl_test_pyccl_interface import *
