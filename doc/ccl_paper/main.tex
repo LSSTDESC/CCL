@@ -107,6 +107,7 @@ Currently, the following families of models are supported:
   \end{equation}
  \item A universe with non-zero curvature ($K$) so that the curvature energy density parameter is the difference of the sum of the energy densities of the other components with respect to unity (flatness), i.e. $\Omega_K = 1- \sum_i \Omega_i$.
  \item All of the above, plus an arbitrary, user-defined modified growth function (see description in Section \ref{sec:growth}).
+ \item Relativistic neutrinos in combination with any of hte above, specified by $N_{\rm eff}$ (the number of relativistic neutrino species in the early Universe) and by the number of massive neutrinos today (see next item).
   \item Massive neutrino species in combination with any of the above except the user-defined modified growth function, specified by either $\Sigma m_\nu$ (which maps on to the density $\Omega_{\nu, {\rm m}}$ above), or by the individual masses of each of three neutrino species.
 \end{itemize}
 
@@ -731,7 +732,24 @@ In order to accomodate a wide range of values of the overdensity parameter $\Del
 \subsection{Massive neutrinos}
 \vol{Danielle Leonard}
 
-\cont{Approximations. Approach to performing integrals.}
+When initializing a cosmology with massive neutrinos within \ccl , the user can provide either a single value for $m_\nu$, corresponding to a sum of the masses of three neutrinos, or a set of three values, corresponding directly to the three masses. In the former case, one can also specify how the sum of masses should be split for calculations. The default behavior of \ccl is to split the sum into three masses which are consistent with the normal neutrinio mass hierarchy, but an inverted hierarchy or equal splitting can be requested. (For a review of the neutrino mass hierarchies and relevant particle physics results, see for example \cite{Gerbino2017, Lesgourgues2012}.)
+
+For equal splitting, it is clearly trivial to compute the three neutrino masses. If splitting with respect to the normal or inverted hierarchy is desired, it is slightly more complicated. The relevant known quantity which has been determined via particle physics experiments is the square of the difference of neutrino masses (up to a sign for one of the differences, hence the two possible hierarchies). Because we know the square of the differences rather than the differences themselves, we must solve a set of quadratic equations for the neutrino masses. In \ccl this is accomplished by making use the knowledge that the mass difference between two of the neutrino species is small. This allows us to Taylor expand about this difference, and greatly simplifies solving for the three neutrino masses. This methodology represents an approximation (related to discarding higher-order terms in this Taylor expansion), however it produces discrepancies from the exact solution which result in cosmological predictions which differ at levels far below our required validation levels (detailed below in Section \ref{sec:validation}).
+
+Having then a set of three neutrino masses, we check which of the corresponding neutrino species is non-relativistic today ($m_\nu>0.00017$, \citealt{Lesgourgues2012}), and obtain the number of massive neutrinos in the cosmology. We use this, along with $N_{\rm eff}$, to set the number of relativistic neutrinos species, which is required in computing $\Omega_g$ and $\Omega_{\nu, {\rm rel}}$. We must be slightly careful in doing so, as for massive neutrinos only we modify the relationship between the temperature of the CMB and the neutrino temperature as described below equation \ref{Omnu} above. In order to compute $N_{\nu, {\rm rel}}$  consistent with the $N_{\rm eff}$ passed by the user, we do:
+\begin{equation}
+N_{\nu, {\rm rel}} = N_{\rm eff} - \left(T_{\rm NCDM}\right)^{4} \left(\frac{4}{11}\right)^{-\frac{4}{3}} N_{\nu, {\rm m}}.
+\label{Nnurel}
+\end{equation}
+
+It may sometimes be preferable or necessarily to specify a cosmology in terms of $\Omega_{\nu, {\rm m}}$ instead of $m_\nu$. To facilitate this, \ccl includes a convenience function which returns the latter given the former.
+
+In equation \ref{Omnu} above, we specify how $\Omega_{\nu, {\rm m}}$ is computed for a given cosmology with massive neutrinos. Within this expression is a phase-space integral:
+\begin{equation}
+\int_0^{\infty} dx \, x^2 \frac{\sqrt{x^2 + \left(\mu\right)^2}}{\exp(x) + 1}.
+\label{phasespacenu}
+\end{equation}
+At high and low $\mu$, corresponding to high and low mass neutrinos, this integral need not be evaluated numerically. At high $\mu$, we set the integral equal to $\frac{5\zeta(3)}{18\pi^4}\mu$, while at low $\mu$ it goes to $\frac{7}{8}$. The $\mu$ values at which these approximations are taken can be set by the user. Outside of the regime in which these approximations are valid, the integral is computed numerically using {\tt gsl}, splined, and stored such that for a single cosmology it must only be computed once.
 
 
 %-------------------------------------------------------------------------------
