@@ -1603,7 +1603,7 @@ static double sigmaV_integrand(double lk,void *params)
   return pk*k*w*w/3.0;
 }  
 
-double ccl_sigmaR(ccl_cosmology *cosmo,double R, int *status)
+double ccl_sigmaR(ccl_cosmology *cosmo,double R,double a,int *status)
 {
   SigmaR_pars par;
   par.status = status;
@@ -1622,16 +1622,17 @@ double ccl_sigmaR(ccl_cosmology *cosmo,double R, int *status)
   //TODO: we should check for integration success
   gsl_integration_cquad_workspace_free(workspace);
 
-  return sqrt(sigma_R*M_LN10/(2*M_PI*M_PI));
+  return sqrt(sigma_R*M_LN10/(2*M_PI*M_PI))*ccl_growth_factor(cosmo, a, status);
 }
 
+/*
 // sigma(R,z) - scale z=0 result by growth function (this is approximate!)
-// TODO: This should be moved to ccl_power.c
 double ccl_sigmaRz(ccl_cosmology *cosmo, double R, double a, int * status){ 
   return ccl_sigmaR(cosmo, R, status)*ccl_growth_factor(cosmo, a, status);
 }
+*/
 
-double ccl_sigmaV(ccl_cosmology *cosmo,double R, int *status)
+double ccl_sigmaV(ccl_cosmology *cosmo,double R,double a,int *status)
 {
   SigmaV_pars par;
   par.status = status;
@@ -1651,14 +1652,15 @@ double ccl_sigmaV(ccl_cosmology *cosmo,double R, int *status)
   //TODO: we should check for integration success
   gsl_integration_cquad_workspace_free(workspace);
 
-  return sqrt(sigma_V*M_LN10/(2*M_PI*M_PI));
+  return sqrt(sigma_V*M_LN10/(2*M_PI*M_PI))*ccl_growth_factor(cosmo, a, status);
 }
 
+/*
 // sigma_V(R,z) - scale z=0 result by growth function (this is approximate!)
-// TODO: This should be moved to ccl_power.c
 double ccl_sigmaVz(ccl_cosmology *cosmo, double R, double a, int * status){  
   return ccl_sigmaV(cosmo, R, status)*ccl_growth_factor(cosmo, a, status);
 }
+*/
 
 double ccl_sigma8(ccl_cosmology *cosmo, int *status)
 {

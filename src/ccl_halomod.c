@@ -47,7 +47,7 @@ double Delta_v=200.;
 
 // HMcode parameter: one-halo damping wavenumber: k*  
 double k_star(ccl_cosmology *cosmo, double a, int * status){  
-  return 0.584/ccl_sigmaVz(cosmo, 0., a, status);
+  return 0.584/ccl_sigmaV(cosmo, 0., a, status);
 }
 
 // HMcode parameter: two-halo damping: f  
@@ -57,7 +57,7 @@ double f_damp(ccl_cosmology *cosmo, double a, int * status){
   //return 0.188*pow(sigma8z, 4.29);
 
   //Damping f from Mead et al. (2016)
-  double sigmav100 = ccl_sigmaVz(cosmo, 100., a, status);
+  double sigmav100 = ccl_sigmaV(cosmo, 100., a, status);
   return 0.0095*pow(sigmav100, 1.37); 
 }
 

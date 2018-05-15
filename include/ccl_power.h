@@ -61,24 +61,26 @@ double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double k, double a,int * s
  * Returns sigma(R) for specified cosmology at a = 1.
  * @param cosmo Cosmology parameters and configurations
  * @param R Smoothing scale, in [Mpc] units
+ * @param a scale factor
  * @param status Status flag. 0 if there are no errors, nonzero otherwise.
  * For specific cases see documentation for ccl_error.c
  * @return sigma(R).
  */
-double ccl_sigmaR(ccl_cosmology *cosmo, double R, int * status);
-double ccl_sigmaRz(ccl_cosmology *cosmo, double R, double a, int * status);
+/*double ccl_sigmaR(ccl_cosmology *cosmo, double R, int * status);*/
+double ccl_sigmaR(ccl_cosmology *cosmo, double R, double a, int * status);
 
 /**
  * Variance of the displacement field with (top-hat) smoothing scale R [Mpc]
  * Returns sigma(V(R)) for specified cosmology at a = 1.
  * @param cosmo Cosmology parameters and configurations
  * @param R smoothing scale, in [Mpc] units
+ * @param a scale factor
  * @param status Status flag. 0 if there are no errors, nonzero otherwise.
  * For specific cases see documentation for ccl_error.c
  * @return sigma(R).
  */
-double ccl_sigmaV(ccl_cosmology *cosmo, double R, int * status);
-double ccl_sigmaVz(ccl_cosmology *cosmo, double R, double a, int * status);
+/*double ccl_sigmaV(ccl_cosmology *cosmo, double R, int * status);*/
+double ccl_sigmaV(ccl_cosmology *cosmo, double R, double a, int * status);
 
 /**
  * Computes sigma_8, variance of the matter density field with (top-hat) smoothing scale R = 8 Mpc/h, from linear power spectrum.
