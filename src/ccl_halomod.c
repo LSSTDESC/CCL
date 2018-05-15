@@ -39,7 +39,7 @@ double Delta_v=200.;
 
 // analytic FT of NFW profile, from Cooray & Sheth (2002; Section 3 of https://arxiv.org/abs/astro-ph/0206508)
 // Normalised such that U(k=0)=1
-double u_nfw_c(ccl_cosmology *cosmo, double c, double halomass, double k, double a, int * status){
+static double u_nfw_c(ccl_cosmology *cosmo, double c, double halomass, double k, double a, int * status){
    
   double rv, rs, ks, Dv;
   double f1, f2, f3, fc;
@@ -71,13 +71,13 @@ double u_nfw_c(ccl_cosmology *cosmo, double c, double halomass, double k, double
 
 // Halo "formation redshift" calculated according to the Bullock et al. (2001) prescription
 // TODO: Actually code this up
-double z_formation_Bullock(ccl_cosmology *cosmo, double halomass, double a, int * status){ 
+static double z_formation_Bullock(ccl_cosmology *cosmo, double halomass, double a, int * status){ 
   return 0.;
 }
 
 // The non-linear mass (sigma(M*)=delta_c))
 // TODO: Actually code this up
-double Mstar(){
+static double Mstar(){
   return 1e13;
 }
 
@@ -130,7 +130,7 @@ double ccl_halo_concentration(ccl_cosmology *cosmo, double halomass, double a, i
 }
 
 // Fourier transforms of halo profiles
-double window_function(ccl_cosmology *cosmo, double m, double k, double a, int * status){
+static double window_function(ccl_cosmology *cosmo, double m, double k, double a, int * status){
 
   //Window function for matter power spectrum with NFW haloes
   if(iwin==1){
@@ -159,7 +159,7 @@ typedef struct{
 } Int_one_halo_Par;
 
 // Integrand for the one-halo integral
-double one_halo_integrand(double log10mass, void *params){  
+static double one_halo_integrand(double log10mass, void *params){  
   
   Int_one_halo_Par *p=(Int_one_halo_Par *)params;;
   double halomass = pow(10,log10mass);
@@ -174,7 +174,7 @@ double one_halo_integrand(double log10mass, void *params){
 }
 
 // The one-halo term integral using gsl
-double one_halo_integral(ccl_cosmology *cosmo, double k, double a, int * status){
+static double one_halo_integral(ccl_cosmology *cosmo, double k, double a, int * status){
     
   int one_halo_integral_status = 0, qagstatus;
   double result = 0, eresult;
@@ -209,7 +209,7 @@ typedef struct{
 } Int_two_halo_Par;
 
 // Integrand for the two-halo integral
-double two_halo_integrand(double log10mass, void *params){  
+static double two_halo_integrand(double log10mass, void *params){  
   
   Int_two_halo_Par *p=(Int_two_halo_Par *)params;
   double halomass = pow(10,log10mass);
@@ -228,7 +228,7 @@ double two_halo_integrand(double log10mass, void *params){
 }
 
 // The two-halo term integral using gsl
-double two_halo_integral(ccl_cosmology *cosmo, double k, double a, int * status){
+static double two_halo_integral(ccl_cosmology *cosmo, double k, double a, int * status){
     
   int two_halo_integral_status = 0, qagstatus;
   double result = 0, eresult;
