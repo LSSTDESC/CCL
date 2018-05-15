@@ -37,35 +37,6 @@ double mmax=1e17;
 // Virial density of haloes
 double Delta_v=200.;
 
-// HMcode parameter: one-halo damping wavenumber: k*  
-double k_star(ccl_cosmology *cosmo, double a, int * status){  
-  return 0.584/ccl_sigmaV(cosmo, 0., a, status);
-}
-
-// HMcode parameter: two-halo damping: f  
-double f_damp(ccl_cosmology *cosmo, double a, int * status){ 
-  // Damping f from Mead et al. (2015)
-  //double sigma8z = ccl_sigmaRz(cosmo, 8., a, status);
-  //return 0.188*pow(sigma8z, 4.29);
-
-  //Damping f from Mead et al. (2016)
-  double sigmav100 = ccl_sigmaV(cosmo, 100., a, status);
-  return 0.0095*pow(sigmav100, 1.37); 
-}
-
-// HMcode parameter: spectral index at the collapse scale: neff
-// TODO: Actually code this up
-double collapse_index(ccl_cosmology *cosmo, double a, int * status){
-  return -2.;
-}
-
-// HMcode parameter: smoothing for transition between one- and two-halo regimes: alpha
-double alpha(ccl_cosmology *cosmo, double a, int * status){  
-  double neff = collapse_index(cosmo, a, status);
-  //return 2.93*pow(1.77,neff); //This is the relation from Mead et al. (2015)
-  return 3.24*pow(1.85,neff); //This is the relation from Mead et al. (2016)
-}
-
 // analytic FT of NFW profile, from Cooray & Sheth (2002; Section 3 of https://arxiv.org/abs/astro-ph/0206508)
 // Normalised such that U(k=0)=1
 double u_nfw_c(ccl_cosmology *cosmo, double c, double halomass, double k, double a, int * status){
@@ -105,7 +76,7 @@ double z_formation_Bullock(ccl_cosmology *cosmo, double halomass, double a, int 
 }
 
 // The non-linear mass (sigma(M*)=delta_c))
-// TO DO: Actually code this up
+// TODO: Actually code this up
 double Mstar(){
   return 1e13;
 }
@@ -325,96 +296,6 @@ double ccl_p_1h(ccl_cosmology *cosmo, double k, double a, int * status){
 
 // Computes the full halo-model power
 double ccl_p_halomod(ccl_cosmology *cosmo, double k, double a, int * status){  
-
   // Standard sum of two- and one-halo terms
-  if(ipow==1){
-    return ccl_p_2h(cosmo, k, a, status)+ccl_p_1h(cosmo, k, a, status);
-  }
-
-  // Smooth transition using alpha parameter from Mead et al. (2015)
-  else if(ipow==2){    
-    double alp = alpha(cosmo, a, status);
-    return pow(pow(ccl_p_2h(cosmo, k, a, status),alp)+pow(ccl_p_1h(cosmo, k, a, status),alp),1./alp);
-  }
-
-  // Something went wrong
-  else{
-    exit(0);
-  }
-    
+  return ccl_p_2h(cosmo, k, a, status)+ccl_p_1h(cosmo, k, a, status);   
 }
-
-/*
-// TODO: move this into ccl_massfunc - be careful about the units!
-// Keep for now for immediate testing.
-double massfunc_st(double nu) {
-// Sheth Tormen mass function!
-// Note that nu=dc/sigma(M) and this Sheth & Tormen (1999) use nu=(dc/sigma)^2
-// This accounts for some small differences
-double p=0.3;
-double q=0.707;
-double A=0.21616;
-return A*(1.+pow(q*nu*nu,-p))*exp(-q*nu*nu/2.);
-}
-*/
-
-/*
-  TODO: serious simplification of this function.
-  double inner_I0j (ccl_cosmology *cosmo, double halomass, double k, double a, void *para, int * status){
-  double *array = (double *) para;
-  long double u = 1.0; //the number one?
-  double arr= array[6]; //Array of ...
-  double c = ccl_halo_concentration(cosmo, halomass,a, status); //The halo concentration for this mass and scale factor
-  int l;
-  int j = (int)(array[5]);
-  for (l = 0; l< j; l++){
-  u = u*u_nfw_c(cosmo, c, halomass, k, a, status);
-  }
-  TODO: mass function should be the CCL call - check units due to changes (Msun vs Msun/h, etc)
-  return massfunc(nu(cosmo,halomass,a,status))*halomass*pow(halomass/(RHO_CRITICAL*cosmo->params.Omega_m),(double)j)*u;
-  }
-*/
-
-/*
-// QUESTION: Mead - Why is u = u_nfw*u_nfw rather than pow(u_nfw,2). This would save an evalation?
-double inner_I02(double log10mass, void *params){
-  
-// Integrand for the one-halo integral
-IntI02Par *p=(IntI02Par *)params;
-double halomass = pow(log10mass,10);
-double c = ccl_halo_concentration(p->cosmo,halomass,p->a,p->status); //The halo concentration for this mass and scale factor  
-double Wk_squared = pow(u_nfw_c(p->cosmo, c, halomass, p->k, p->a, p->status),2);
-double rho_matter = RHO_CRITICAL*p->cosmo->params.Omega_m*pow(p->cosmo->params.h,2); // QUESTION: What units does CCL use for this?
-//double rho_matter = 2.775e11*p->cosmo->params.Omega_m*pow(p->cosmo->params.h,2); // Comoving matter density in Msun/Mpc^3
-  
-// TODO: mass function should be the CCL call - check units due to changes (Msun vs Msun/h, etc)
-//return massfunc_st(nu(p->cosmo, halomass, p->a, p->status))*halomass*pow(halomass/(RHO_CRITICAL*p->cosmo->params.Omega_m),2.0)*Wk_squared;
-return massfunc_st(nu(p->cosmo, halomass, p->a, p->status))*halomass/rho_matter;
-}
-*/
-
-/*
-  double I02(ccl_cosmology *cosmo, double k, double a, int * status){
-  // The actual one-halo integral
-  int I02status=0, qagstatus;
-  double result=0, eresult;
-  double log10massmin=10;
-  double log10massmax=15;
-  IntI02Par ipar;
-  gsl_function F;
-  gsl_integration_workspace *w=gsl_integration_workspace_alloc(1000);
-
-  ipar.cosmo=cosmo;
-  ipar.k=k;
-  ipar.a=a;
-  ipar.status=&I02status;
-  F.function=&inner_I02;
-  F.params=&ipar;
-
-  qagstatus=gsl_integration_qag(&F, log10massmin, log10massmax, 0, 1E-4,1000, GSL_INTEG_GAUSS41, w, &result, &eresult);
-
-  gsl_integration_workspace_free(w);
-
-  return result;
-  }
-*/
