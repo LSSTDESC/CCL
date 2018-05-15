@@ -6,7 +6,8 @@ extern "C" {
 
 #include "ccl_core.h"
 
-double ccl_comoving_matter_density(ccl_cosmology *cosmo);
+  //TODO: Remove this entirely
+  //double ccl_comoving_matter_density(ccl_cosmology *cosmo);
 
 /**
  * CLASS power spectrum without splines.
