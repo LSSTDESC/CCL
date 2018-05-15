@@ -14,13 +14,11 @@
 #include "gsl/gsl_roots.h"
 #include "ccl_params.h"
 
-//TODO: Remove this entirely
-/*
 // The comoving density of matter. This is a constant in time. Units are Msun/Mpc^3 (no factors of h)
+//TODO: Remove this entirely
 double ccl_comoving_matter_density(ccl_cosmology *cosmo){  
   return RHO_CRITICAL*cosmo->params.Omega_m*pow(cosmo->params.h,2);
 }
-*/
 
 /* --------- ROUTINE: h_over_h0 ---------
 INPUT: scale factor, cosmology
