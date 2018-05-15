@@ -47,7 +47,6 @@ tests/.ipynb_checkpoints/
 
 # Ignore class directory
 class/
-Mead/
 
 # Ignore document pdf and bibliography
 doc/0000-ccl_note/*.pdf
