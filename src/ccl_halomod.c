@@ -3,18 +3,10 @@
 #include "stdio.h"
 #include "stdlib.h"
 #include "gsl/gsl_integration.h"
-#include "gsl/gsl_interp.h"
-#include "gsl/gsl_spline.h"
 #include "gsl/gsl_sf_expint.h"
-#include "ccl_placeholder.h"
 #include "ccl_background.h"
 #include "ccl_power.h"
 #include "ccl_massfunc.h"
-#include "ccl_error.h"
-#include "class.h"
-#include "ccl_params.h"
-#include "ccl_emu17.h"
-#include "ccl_emu17_params.h"
 
 // Set two-halo term
 // 1 - Standard two-halo term
