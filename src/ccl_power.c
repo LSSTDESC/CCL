@@ -1664,5 +1664,5 @@ double ccl_sigmaVz(ccl_cosmology *cosmo, double R, double a, int * status){
 
 double ccl_sigma8(ccl_cosmology *cosmo, int *status)
 {
-  return ccl_sigmaR(cosmo,8/cosmo->params.h, status);
+  return ccl_sigmaR(cosmo,8/cosmo->params.h, 1.,status);
 }
