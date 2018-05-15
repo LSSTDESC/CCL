@@ -24,6 +24,7 @@ int ipow=1;
 // 3 - Duffy et al. (2008)
 // 4 - Constant concentration (for testing)
 // 5 - Simple Bullock et al. (2001)
+// 6 - Leonard
 int iconc=3;
 
 // Select window function
@@ -120,6 +121,11 @@ double ccl_halo_concentration(ccl_cosmology *cosmo, double halomass, double a, i
   // Simple Bullock et al. (2001) relation
   else if(iconc==5){
     return 9.*pow(halomass/Mstar(),-0.13);
+  }
+
+  // Leonard
+  else if(iconc==6){
+    return 5.*pow(halomass/1e14,-0.1);
   }
 
   // Something went wrong
