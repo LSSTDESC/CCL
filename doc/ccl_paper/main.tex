@@ -663,6 +663,7 @@ where
 The Limber approximation works best for wide radial kernels and high $\ell$.
 
 \subsubsection{Beyond Limber: \texttt{Angpow}}
+\label{sec:angpow}
 \vol{J\'er\'emy Neveu}
 
 \ccl incorporates natively routines to compute the $C^{ab}_\ell$ angular power spectra as described above without the Limber approximation. The algorithm performs first the integrals over $z$ for both tracers, and ends with the $k$ integral. This computation is much slower than using the Limber approximation, but resutls in precise angular power spectra at low $\ell$, and correct cross-correlations between tracers (the Limber approximation fails at reproducing the beat phenomenon $j_\ell(x)\times j_\ell(x')$). \todo{Can we expand on this if it is important or provide a reference? I think the brief mention is confusing if you aren't familiar - DL.} The integration of these routines has been tested against the \texttt{CLASS} code and recovers the same angular power spectra when precision parameters are set to high values.
@@ -687,9 +688,6 @@ with $j_\ell(x)$ and $j_\ell^{\prime\prime}(x)$ the spherical Bessel function of
 
 In \texttt{Angpow}, the inner integral in $k$ is computed first. 
 To conduct the computation of such an integral of highly oscillating functions, the 3C-algorithm described in details in \citep{2017arXiv170103592C} is used. In brief, it relies on the projection of the oscillating $f_\ell(z_,k)$ onto a Chebyshev series of order $2^N$, the product of the two Chebyshev series is performed with a $2^{2N}$ Chebyshev series; then, the integral is computed using Clenshaw-Curtis quadrature. Finally, the integrals over $z$ are performed via again an optimised Clenshaw-Curtis quadrature. All the Chebyshev expansions and the Clenshaw-Curtis quadrature are performed via the \textit{Discrete Cosine Transform} of type I from the DCT-I fast transform of the FFTW library \todo{Do we need a citation to FFTW here? - DL}.
-
-The \texttt{Angpow} software  was tested against \texttt{CLASS} and the native \ccl computation and can perform the same computations approximately an order of magnitude faster ($\mathcal{O}(1s)$). %Note that \texttt{Angpow} is written in C++ with OpenMP, to distribute the computation of a single $C_\ell$ on a single thread.
-Its precision and speed parameters are optimised so that the relative numerical error compared with a high precision computation is two orders of magnitude below the relative cosmic variance $\sqrt{2/(2\ell+1)}$, from $\ell=2$ to $\ell=1000$. 
 
 As in the general case the Limber approximation is valid at high $\ell$ values, the \ccl user can define an $\ell$ threshold to switch from the non-Limber slow computation to the faster Limber approximation.
  
@@ -976,8 +974,19 @@ less than 0.4\% in the range $1 < r < 200$~Mpc rising to about 5\% at $r = 1000$
 \label{fig:analytic_xi}
 \end{figure*}
 
-\todo{Tests that are in the benchmark notebook but not currently in the paper: Angpow. We need to add these in this section.}
+\subsubsection{\tt Angpow}
 
+\ccl performs non-Limber computations of angular power spectra through the {\tt Angpow} library as detailed in Section \ref{sec:angpow}. The \texttt{Angpow} software was tested against \texttt{CLASS} and the native \ccl computation and can perform the same computations approximately an order of magnitude faster ($\mathcal{O}(1s)$). 
+Its precision and speed parameters were optimised so that the relative numerical error compared with a high precision computation is two orders of magnitude below the relative cosmic variance $\sqrt{2/(2\ell+1)}$, from $\ell=2$ to $\ell=1000$. We demonstrate this in Figure \ref{fig:angpow}, where we plot the angular clustering power spectrum for a sample of galaxies with $\langle z \rangle=1$ and a Gaussian redshift distribution that extends between $|z-\langle z \rangle|z<5\sigma_z$, where $\sigma_z=0.02$, for a CCL6 cosmology. 
+The non-Limber prediction deviates from the Limber case at low $l$ as expected. The right panel shows the fractional difference between the non-Limber curves and the Limber case, demonstrating the accuracy of the {\tt Angpow} prediction for our choice of precision and speed prameters. 
+
+\begin{figure*}[htbp]
+\centering
+\includegraphics[width=0.47\textwidth]{angpow1}
+\includegraphics[width=0.47\textwidth]{angpow3}
+\caption{Different predictions for the clustering angular power spectrum of a sample of galaxies with a Gaussian redshift distribution centered on $\langle z \rangle =1$. The left panel shows the $C_l$ predictions from the Limber case (green), the non-Limber case native to \ccl (yellow dot-dashed) and {\tt Angpow} (black). The right panel shows the fractional difference in the predicted clustering angular power spectrum between {\tt Angpow} and the native \ccl non-Limber computation. The relative numerical error compared with a high precision computation is two orders of magnitude below the relative cosmic variance: $\sqrt{2/(2\ell+1)}$.\todo{Fix margins of right panel}}
+\label{fig:angpow}
+\end{figure*}
 
 \section{Usage}
 \label{sec:usage}
