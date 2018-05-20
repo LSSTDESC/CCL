@@ -20,6 +20,9 @@ AC_PROG_CC_STDC
 AC_PROG_INSTALL
 AM_PROG_CC_C_O
 AM_MAINTAINER_MODE
+# Necessary to link Angpow to CCL
+AC_PROG_CXX
+AC_PROG_CXX_C_O
 
 AC_CANONICAL_HOST
 build_linux=no
@@ -62,6 +65,19 @@ else
     AC_SEARCH_LIBS([background_free],[class],[],AC_MSG_ERROR(Couldn't find libclass.))
 fi
 AM_CONDITIONAL([LOCALCLASS], [test x$localclass = xtrue])
+
+# Check for Angpow
+AC_CHECK_FILE("angpow/build/libangpow.a",[AC_MSG_NOTICE([Using the CCL version of Angpow])
+localangpow=true
+ANGPOW_LIB="-L./angpow/build/ -langpow"
+AC_OPENMP
+LDFLAGS="$LDFLAGS $ANGPOW_LIB $OPENMP_CFLAGS $OPENMP_CXXFLAGS"
+CPPFLAGS="$CPPFLAGS -I./angpow/inc -DHAVE_ANGPOW $OPENMP_CFLAGS $OPENMP_CXXFLAGS"],
+[AC_MSG_NOTICE([Angpow not used])
+localangpow=false])
+AM_CONDITIONAL([LOCALANGPOW],[test x$localangpow = xtrue])
+
+
 AC_SEARCH_LIBS([cblas_dgemm],[gslcblas],[],AC_MSG_ERROR(Couldn't find libgslcblas.))
 AC_SEARCH_LIBS([gsl_spline2d_eval_e],[gsl],[],AC_MSG_ERROR(Couldn't find libgsl. GSL V2+ required.))
 AC_SEARCH_LIBS([fftw_plan_dft_1d],[fftw3],[],AC_MSG_ERROR(Couldn't find fftw3. Required.))

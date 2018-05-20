@@ -10,7 +10,7 @@ STYLE CONVENTION USED
         **`function`**
         **`type`** or **`structure`**
 -->
-# CCL     [![Build Status](https://travis-ci.org/LSSTDESC/CCL.svg?branch=master)](https://travis-ci.org/LSSTDESC/CCL)
+# CCL     [![Build Status](https://travis-ci.org/LSSTDESC/CCL.svg?branch=master)](https://travis-ci.org/LSSTDESC/CCL) [![Coverage Status](https://coveralls.io/repos/github/LSSTDESC/CCL/badge.svg?branch=master)](https://coveralls.io/github/LSSTDESC/CCL?branch=master)
 LSST DESC Core Cosmology Library (`CCL`) provides routines to compute basic cosmological observables with validated numerical accuracy.
 
 The library is written in C99 and all functionality is directly callable from C and C++ code.  We also provide python bindings for higher-level functions.
@@ -31,6 +31,11 @@ CCL uses CLASS as one of the possible ways of computing the matter power spectru
 This procedure has one final caveat: if you already have a working installation of CCL, `class_install.py` may fail the first time you run it. This can be fixed by either simply running `class_install.py` a second time, or by starting from scratch (i.e. downloading or cloning CCL).
 
 Note that, if you want to use your own version of CLASS, you should follow the steps described in the section "Compiling against an external version of CLASS" below.
+
+## Installing Angpow
+CCL provides an optional link to the Angpow library that enables fast and accurate computations of the angular power spectra without using the Limber approximation (written in C++). We provide a python script to automatically install Angpow and make the link with CCL. You should first run this script (`python angpow_install.py`) before carrying out the next steps. The installation downloads the last release of Angpow from this [DESC repository](https://github.com/LSSTDESC/Angpow4CCL) and looks for a C++ compiler compatible with OpenMP. It provides a dedicated file `./angpow/src/angpow_ccl.cc` that makes the interface between the CCL structures and the Angpow classes.
+
+To remove Angpow, run `python angpow_install.py --clean` and install CCL again.
 
 ## C-only installation
 Once the CLASS library is installed, `CCL` can be easily installed using an *autotools*-generated configuration file. To install `CCL`, from the base directory (the one where this file is located) run:
@@ -64,24 +69,11 @@ make
 make install
 ```
 
-## Known installation issues
-1. If you are having issues with GSL versions linking, please try the following during the configuration step:
-````sh
-./configure CFLAGS="-I/usr/local/include" LDFLAGS="-L/usr/local/lib"
-````
-2. If you are having issues with FFTW linking, please make sure you have the latest version correctly installed. See more on [FFTW webpage](http://www.fftw.org/download.html)
-3. If you move or delete the source directory after installing `CCL`, some functions may fail. The source directory contains files needed by CLASS (which is contained within `CCL`) at run-time.
-4. If you are planning to compile your own file that calls `CCL`, then you should add the following to your .bashrc:
-````sh
-export LD_LIBRARY_PATH=/path/to/where/ccl/is/installed/lib:$LD_LIBRARY_PATH
-````
-5. We know of one case with Mac OS where `libtools` had the “lock” function set to “yes” and this caused the installation to stall. However, this is very rare. If this happens, after the `configure` step, edit `libtool` to set the “lock” to “no”.
-
 ## C++ compatibility
 `CCL` library can be called from C++ code without any  additional requirements or modifications. To make sure that there are no problems you can run
 ````sh
 make check-cpp
-./tests/ccl_sample_run
+./examples/ccl_sample_run
 ````
 
 ## Python installation
@@ -125,6 +117,34 @@ python setup.py uninstall
 
 For quick introduction to `CCL` in Python look at notebooks in **_tests/_**.
 
+## Known installation issues
+1. If you are having issues with GSL versions linking, please try the following during the configuration step:
+````sh
+./configure CFLAGS="-I/usr/local/include" LDFLAGS="-L/usr/local/lib"
+````
+2. If you are having issues with FFTW linking, please make sure you have the latest version correctly installed. See more on [FFTW webpage](http://www.fftw.org/download.html)
+3. If you move or delete the source directory after installing `CCL`, some functions may fail. The source directory contains files needed by CLASS (which is contained within `CCL`) at run-time.
+4. If you are planning to compile your own file that calls `CCL`, then you should add the following to your .bashrc:
+````sh
+export LD_LIBRARY_PATH=/path/to/where/ccl/is/installed/lib:$LD_LIBRARY_PATH
+````
+5. We know of one case with Mac OS where `libtools` had the “lock” function set to “yes” and this caused the installation to stall. However, this is very rare. If this happens, after the `configure` step, edit `libtool` to set the “lock” to “no”.
+6. We know of one case on a Mac OS where running 
+````sh
+python setup.py install --user
+````
+produced the error 
+
+````sh
+error: can't combine user with prefix, exec_prefix/home, or install_(plat)base
+````
+This issue can be solved by instead running
+
+````sh
+python setup.py install --user --prefix=
+````
+The issue is discussed in detail [here](https://stackoverflow.com/questions/4495120/combine-user-with-prefix-error-with-setup-py-install).
+
 ## Compiling against an external version of CLASS
 
 The default installation procedure for `CCL` implies automatically downloading and installing a tagged version of `CLASS`. Optionally, you can also link `CCL` against an external version of `CLASS`. This is useful if you want to use a modified version of `CLASS`, or a different or more up-to-date version of the standard `CLASS`.
@@ -161,7 +181,7 @@ This Dockerfile currently contains all installed C libraries and the Python wrap
 
 `CCL` has basic [doxygen](http://www.stack.nl/~dimitri/doxygen/) documentation for its C routines. This can be found in the directory ***doc/html*** within the `CCL` repository by opening the ***index.html*** file in your browser. The python routines are documented in situ; you can view the documentation for a function by calling `help(function name)` from within `python`.
 
-This document contains basic information about used structures and functions. At the end of document is provided code which implements these basic functions (also in ***tests/ccl_sample_run.c***). More information about `CCL` functions and implementation can be found in ***doc/0000-ccl_note/0000-ccl_note.pdf***.
+This document contains basic information about used structures and functions. At the end of document is provided code which implements these basic functions (also in ***examples/ccl_sample_run.c***). More information about `CCL` functions and implementation can be found in ***doc/0000-ccl_note/0000-ccl_note.pdf***.
 
 ### Cosmological parameters
 Start by defining cosmological parameters defined in structure **`ccl_parameters`**. This structure (exact definition in ***include/ccl_core.h***) contains densities of matter, parameters of dark energy (`w0`, `wa`), Hubble parameters, primordial power spectra, radiation parameters, derived parameters (`sigma_8`, `Omega_1`, `z_star`) and modified growth rate.
@@ -255,34 +275,53 @@ double ccl_sigma8(ccl_cosmology *cosmo, int * status);
 These and other functions for different matter power spectra can be found in file ***include/ccl_power.h***.
 
 ### Angular power spectra
-`CCL` can compute angular power spectra for two tracer types: galaxy number counts and galaxy weak lensing. Tracer parameters are defined in structure **`CCL_ClTracer`**. In general, you can create this object with function **`ccl_cl_tracer_new`**
+`CCL` can compute angular power spectra for three tracer types: galaxy number counts, galaxy weak lensing and CMB lensing. Tracer parameters are defined in structure **`CCL_ClTracer`**. In general, you can create this object with function **`ccl_cl_tracer`**
 ````c
-CCL_ClTracer *ccl_cl_tracer_new(ccl_cosmology *cosmo,int tracer_type,
+CCL_ClTracer *ccl_cl_tracer(ccl_cosmology *cosmo,int tracer_type,
 				int has_rsd,int has_magnification,int has_intrinsic_alignment,
 				int nz_n,double *z_n,double *n,
 				int nz_b,double *z_b,double *b,
 				int nz_s,double *z_s,double *s,
 				int nz_ba,double *z_ba,double *ba,
-				int nz_rf,double *z_rf,double *rf, int * status);
+				int nz_rf,double *z_rf,double *rf, 
+				double z_source, int * status);
 ````
-Exact definition of these parameters are described in file ***include/ccl_cls.h***. Usually you can use simplified versions of this function, namely **`ccl_cl_tracer_number_counts_new`, `ccl_cl_tracer_number_counts_simple_new`, `ccl_cl_tracer_lensing_new`** or **`ccl_cl_tracer_lensing_simple_new`**. Two most simplified versions (one for number counts and one for shear) take parameters:
+Exact definition of these parameters are described in file ***include/ccl_cls.h***. Usually you can use simplified versions of this function, namely **`ccl_cl_tracer_number_counts`, `ccl_cl_tracer_number_counts_simple`, `ccl_cl_tracer_lensing`, `ccl_cl_tracer_lensing_simple`** or **`ccl_cl_tracer_cmblens`**. Two most simplified versions (one for number counts and one for shear) take parameters:
 ````c
-CCL_ClTracer *ccl_cl_tracer_number_counts_simple_new(ccl_cosmology *cosmo,
+CCL_ClTracer *ccl_cl_tracer_number_counts_simple(ccl_cosmology *cosmo,
 						     int nz_n,double *z_n,double *n,
-                             int nz_b,double *z_b,double *b, int * status);
-CCL_ClTracer *ccl_cl_tracer_lensing_simple_new(ccl_cosmology *cosmo,
+                                                     int nz_b,double *z_b,double *b, int * status);
+CCL_ClTracer *ccl_cl_tracer_lensing_simple(ccl_cosmology *cosmo,
 					       int nz_n,double *z_n,double *n, int * status);
 ````
 where `nz_n` is dimension (number of bins) of arrays `z_n` and `n`. `z_n` and `n` are arrays for the number count of objects per redshift interval (arbitrary normalization - renormalized inside). `nz_b`, `z_b` and `b` are the same for the clustering bias.
 
-With initialized tracers you can compute limber power spectrum with **`ccl_angular_cl`**
+Before computing the angular power spectrum, users must define a workspace structure that contains the relevant parameters for the computation:
 ````c
-double ccl_angular_cl(ccl_cosmology *cosmo,int l,CCL_ClTracer *clt1,CCL_ClTracer *clt2, int * status);
+CCL_ClWorkspace *ccl_cl_workspace_default(int lmax,int l_limber,int non_limber_method,
+					  double l_logstep,int l_linstep,
+					  double dchi,double dlk,double zmin,int *status)
 ````
-After you are done working with tracers, you should free its work space by **`ccl_cl_tracer_free`**
+where `lmax` sets the maximum multipole, `l_limber` the limit multipole from which the Limber approximation is used (`l_limber=-1` means that the Liber approximation is never used). The `non_limber_method` variable can be set to `CCL_NONLIMBER_METHOD_NATIVE` or `CCL_NONLIMBER_METHOD_ANGPOW` to choose the method to compute the non-Limber part of the angular power spectrum (either the native `CCL` code or the [`Angpow` library](https://github.com/LSSTDESC/CCL/blob/non_limber_speedup/README.md#installing-angpow)). Then `l_linstep` sets the maximum multipole until which the angular power spectrum is computed at each multipole, and `l_logstep` the logarithmic stepping to use above `l_linstep` (then the power spectrum is interpolated at each multipole). `dchi` sets the interval in comoving distance to use for the native non-Limber computation and `dlk`the logarithmic stepping for the Fourier k-integration (`Angpow` is not concerned by these two parameters). A simplified workspace is provided for computations that use only the Limber approximation at each multipole:
+````c
+CCL_ClWorkspace *ccl_cl_workspace_default_limber(int lmax,double l_logstep,int l_linstep,
+						 double dlk,int *status)
+````
+
+With initialized tracers and workspace you can compute limber power spectrum with **`ccl_angular_cls`**
+````c
+double ccl_angular_cls(ccl_cosmology *cosmo,int l,CCL_ClTracer *clt1,CCL_ClTracer *clt2, 
+						int nl_out,int *l_out,double *cl_out,int * status);
+````
+with `l_out` and `cl_out` arrays of size `nl_out` that contains the multipoles and the angular power spectrum. 
+
+After you are done working with tracers, you should free its work space by **`ccl_cl_tracer_free`** and **`ccl_cl_workspace_free`** 
 ````c
 void ccl_cl_tracer_free(CCL_ClTracer *clt);
+void ccl_cl_workspace_free(CCL_ClWorkspace *w);
 ````
+
+Note that for the moment `Angpow` can not handle the magnification lensing term for the galaxy number count tracers, and has not been tested for the weak lensing tracer. This limitations will be removed in the near future.
 
 ### Halo mass function
 The halo mass function *dN/dM* can be obtained by function **`ccl_massfunc`**
@@ -294,9 +333,9 @@ where `smooth_mass` is mass smoothing scale (in units of *M_sun*) and `odelta` i
 ### LSST Specifications
 `CCL` includes LSST specifications for the expected galaxy distributions of the full galaxy clustering sample and the lensing source galaxy sample. Start by defining a flexible photometric redshift model given by function
 ````c
-double (* your_pz_func)(double z_ph, double z_spec, void *param, int * status);
+double (* your_pz_func)(double z_ph, double z_s, void *param, int * status);
 ````
-which returns the likelihood of measuring a particular photometric redshift `z_ph` given a spectroscopic redshift `z_spec`, with a pointer to additional arguments `param` and a status flag. Then you call function **`ccl_specs_create_photoz_info`**
+which returns the likelihood of measuring a particular photometric redshift `z_ph` given a spectroscopic redshift `z_s`, with a pointer to additional arguments `param` and a status flag. Then you call function **`ccl_specs_create_photoz_info`**
 ````c
 user_pz_info* ccl_specs_create_photoz_info(void * user_params, 
                                            double(*user_pz_func)(double, double, void*, int*));
@@ -321,10 +360,10 @@ void ccl_specs_free_photoz_info(user_pz_info *my_photoz_info);
 ````
 
 ## Example code
-This code can also be found in ***tests/ccl_sample_run.c*** You can run the following example code. For this you will need to compile with the following command:
+This code can also be found in ***examples/ccl_sample_run.c*** You can run the following example code. For this you will need to compile with the following command:
 ````sh
-gcc -Wall -Wpedantic -g -I/path/to/install/include -std=gnu99 -fPIC tests/ccl_sample_run.c \
--o tests/ccl_sample_run -L/path/to/install/lib -L/usr/local/lib -lgsl -lgslcblas -lm -lccl
+gcc -Wall -Wpedantic -g -I/path/to/install/include -std=gnu99 -fPIC examples/ccl_sample_run.c \
+-o examples/ccl_sample_run -L/path/to/install/lib -L/usr/local/lib -lgsl -lgslcblas -lm -lccl
 ````
 where `/path/to/install/` is the path to the location where the library has been installed.
 
@@ -357,32 +396,34 @@ where `/path/to/install/` is the path to the location where the library has been
 #define MNU 0.0
 
 
-// The user defines a structure of parameters
+
+// The user defines a structure of parameters 
 // to the user-defined function for the photo-z probability 
 struct user_func_params
 {
   double (* sigma_z) (double);
 };
 
-// The user defines a function of the form double function ( z_ph, z_spec, void * user_pz_params)
-// where user_pz_params is a pointer to the parameters of the user-defined function.
-// This returns the probability of obtaining a given photo-z given a particular spec_z.
-double user_pz_probability(double z_ph, double z_spec, void * user_par, int * status)
+// The user defines a function of the form double function ( z_ph, z_s, void * user_pz_params) 
+// where user_pz_params is a pointer to the parameters of the user-defined function. 
+// This returns the probabilty of obtaining a given photo-z given a particular spec_z.
+double user_pz_probability(double z_ph, double z_s, void * user_par, int * status)
 {
-  double sigma_z = ((struct user_func_params *) user_par)->sigma_z(z_spec);
-  return exp(- (z_ph-z_spec)*(z_ph-z_spec) / (2.*sigma_z*sigma_z)) / (pow(2.*M_PI,0.5)*sigma_z);
+  double sigma_z = ((struct user_func_params *) user_par)->sigma_z(z_s);
+  return exp(- (z_ph-z_s)*(z_ph-z_s) / (2.*sigma_z*sigma_z)) / (pow(2.*M_PI,0.5)*sigma_z);
 }
 
 int main(int argc,char **argv)
 {
   //status flag
-  int status = 0;
+  int status =0;
 
   // Initialize cosmological parameters
-  ccl_configuration config = default_config;
-  config.transfer_function_method = ccl_boltzmann_class;
+  ccl_configuration config=default_config;
+  config.transfer_function_method=ccl_boltzmann_class;
   ccl_parameters params = ccl_parameters_create(OC, OB, OK, NREL, NMAS, MNU, W0, WA, HH,
-                                                NORMPS, NS,0,NULL,NULL, &status);
+  		 	  			NORMPS, NS,-1,-1,-1,-1,NULL,NULL, &status);
+  //printf("in sample run w0=%1.12f, wa=%1.12f\n", W0, WA);
   
   // Initialize cosmology object given cosmo params
   ccl_cosmology *cosmo=ccl_cosmology_create(params,config);
@@ -394,6 +435,7 @@ int main(int argc,char **argv)
 	 ZD,ccl_luminosity_distance(cosmo,1./(1+ZD), &status));
   printf("Distance modulus to z = %.3lf is mu = %.3lf Mpc\n",
 	 ZD,ccl_distance_modulus(cosmo,1./(1+ZD), &status));
+  
   
   //Consistency check
   printf("Scale factor is a=%.3lf \n",1./(1+ZD));
@@ -409,14 +451,14 @@ int main(int argc,char **argv)
   printf("z\tOmega_m\tOmega_L\tOmega_r\n");
   double Om, OL, Or;
   for (int z=10000;z!=0;z/=3){
-    Om = ccl_omega_x(cosmo, 1./(z+1), 0, &status);
-    OL = ccl_omega_x(cosmo, 1./(z+1), 1, &status);
-    Or = ccl_omega_x(cosmo, 1./(z+1), 2, &status);
+    Om = ccl_omega_x(cosmo, 1./(z+1), ccl_omega_m_label, &status);
+    OL = ccl_omega_x(cosmo, 1./(z+1), ccl_omega_l_label, &status);
+    Or = ccl_omega_x(cosmo, 1./(z+1), ccl_omega_g_label, &status);
     printf("%i\t%.3f\t%.3f\t%.3f\n", z, Om, OL, Or);
   }
-  Om = ccl_omega_x(cosmo, 1., 0, &status);
-  OL = ccl_omega_x(cosmo, 1., 1, &status);
-  Or = ccl_omega_x(cosmo, 1., 2, &status);
+  Om = ccl_omega_x(cosmo, 1., ccl_omega_m_label, &status);
+  OL = ccl_omega_x(cosmo, 1., ccl_omega_l_label, &status);
+  Or = ccl_omega_x(cosmo, 1., ccl_omega_g_label, &status);
   printf("%i\t%.3f\t%.3f\t%.3f\n", 0, Om, OL, Or);
 
   // Compute sigma_8
@@ -433,23 +475,30 @@ int main(int argc,char **argv)
     nz_arr_sh[i]=exp(-0.5*pow((z_arr_sh[i]-Z0_SH)/SZ_SH,2));
   }
   
+  //CMB lensing tracer
+  CCL_ClTracer *ct_cl=ccl_cl_tracer_cmblens_new(cosmo,1100.,&status);
+
   //Galaxy clustering tracer
-  CCL_ClTracer *ct_gc=ccl_cl_tracer_number_counts_simple_new(cosmo,NZ,z_arr_gc,nz_arr_gc,NZ,
-                                                             z_arr_gc,bz_arr, &status);
+  CCL_ClTracer *ct_gc=ccl_cl_tracer_number_counts_simple_new(cosmo,NZ,
+                                z_arr_gc,nz_arr_gc,NZ,z_arr_gc,bz_arr, &status);
   
   //Cosmic shear tracer
   CCL_ClTracer *ct_wl=ccl_cl_tracer_lensing_simple_new(cosmo,NZ,z_arr_sh,nz_arr_sh, &status);
-  printf("ell C_ell(g,g) C_ell(g,s) C_ell(s,s) | r(g,s)\n");
+  printf("ell C_ell(c,c) C_ell(c,g) C_ell(c,s) C_ell(g,g) C_ell(g,s) C_ell(s,s) \n");
   for(int l=2;l<=NL;l*=2) {
+    double cl_cc=ccl_angular_cl(cosmo,l,ct_cl,ct_cl, &status); //CMBLensing-CMBLensing
+    double cl_cg=ccl_angular_cl(cosmo,l,ct_cl,ct_gc, &status); //CMBLensing-Clustering
+    double cl_cs=ccl_angular_cl(cosmo,l,ct_wl,ct_cl, &status); //CMBLensing-Galaxy lensing
     double cl_gg=ccl_angular_cl(cosmo,l,ct_gc,ct_gc, &status); //Galaxy-galaxy
     double cl_gs=ccl_angular_cl(cosmo,l,ct_gc,ct_wl, &status); //Galaxy-lensing
     double cl_ss=ccl_angular_cl(cosmo,l,ct_wl,ct_wl, &status); //Lensing-lensing
-    printf("%d %.3lE %.3lE %.3lE | %.3lE\n",l,cl_gg,cl_gs,cl_ss,cl_gs/sqrt(cl_gg*cl_ss));
+    printf("%d %.3lE %.3lE %.3lE %.3lE %.3lE %.3lE\n",l,cl_cc,cl_cg,cl_cs,cl_gg,cl_gs,cl_ss);
   }
   printf("\n");
   
   //Free up tracers
   ccl_cl_tracer_free(ct_gc);
+  ccl_cl_tracer_free(ct_cl);
   ccl_cl_tracer_free(ct_wl);
   
   //Halo mass function
@@ -467,8 +516,7 @@ int main(int argc,char **argv)
   printf("Halo bias: z, M, b1(M,z)\n");
   for(int logM=9;logM<=15;logM+=1) {
     for(double z=0; z<=1; z+=0.5) {
-      printf("%.1e %.1e %.2e\n",1.0/(1.0+z),pow(10,logM),
-             ccl_halo_bias(cosmo,pow(10,logM),1.0/(1.0+z), 200., &status));
+      printf("%.1e %.1e %.2e\n",1.0/(1.0+z),pow(10,logM),ccl_halo_bias(cosmo,pow(10,logM),1.0/(1.0+z), 200., &status));
     }
   }
   printf("\n");
@@ -482,7 +530,13 @@ int main(int argc,char **argv)
   user_pz_info * pz_info_example;
   
   // Create the struct to hold the user information about photo_z's.
-  pz_info_example = ccl_specs_create_photoz_info(&my_params_example, &user_pz_probability); 
+  pz_info_example = ccl_specs_create_photoz_info(&my_params_example, &user_pz_probability);
+  
+  // Alternatively, we could have used the built-in Gaussian photo-z pdf, 
+  // which assumes sigma_z = sigma_z0 * (1 + z) (not used in what follows).
+  double sigma_z0 = 0.05;
+  user_pz_info *pz_info_gaussian;
+  pz_info_gaussian = ccl_specs_create_gaussian_photoz_info(sigma_z0);
   
   double z_test;
   double dNdz_tomo;

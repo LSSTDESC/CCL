@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['omeganuh2',['Omeganuh2',['../ccl__neutrinos_8c.html#a51e1234f78bb01f2d18f04afe7bd61f6',1,'Omeganuh2(double a, double Neff, double mnu, double TCMB, gsl_interp_accel *accel, int *status):&#160;ccl_neutrinos.c'],['../ccl__neutrinos_8h.html#a51e1234f78bb01f2d18f04afe7bd61f6',1,'Omeganuh2(double a, double Neff, double mnu, double TCMB, gsl_interp_accel *accel, int *status):&#160;ccl_neutrinos.c']]]
+  ['omeganuh2_5froot',['Omeganuh2_root',['../ccl__neutrinos_8c.html#a1ed7c7b480dcd08f3c1b7cfe416e6d9b',1,'ccl_neutrinos.c']]]
 ];

@@ -8,5 +8,6 @@ var searchData=
   ['omega_5fm',['Omega_m',['../structccl__parameters.html#ad3693ce8fafeecf7a97dd9979ab77214',1,'ccl_parameters']]],
   ['omega_5fn_5fmass',['Omega_n_mass',['../structccl__parameters.html#af0f1d0f60ab271f9837a71d84bd55c1e',1,'ccl_parameters']]],
   ['omega_5fn_5frel',['Omega_n_rel',['../structccl__parameters.html#ac04eef0f1888df60a0b49dbbc16ee6f3',1,'ccl_parameters']]],
-  ['omega_5fv_5fvals',['Omega_v_vals',['../namespaceccl__test__distances.html#a12765193e04eba1a445ea1429b656ef8',1,'ccl_test_distances.Omega_v_vals()'],['../namespaceccl__test__growth.html#a4abfc4891b595cd9d894d978c4ce89f0',1,'ccl_test_growth.Omega_v_vals()']]]
+  ['omega_5fv_5fvals',['Omega_v_vals',['../namespaceccl__test__distances.html#a12765193e04eba1a445ea1429b656ef8',1,'ccl_test_distances.Omega_v_vals()'],['../namespaceccl__test__growth.html#a4abfc4891b595cd9d894d978c4ce89f0',1,'ccl_test_growth.Omega_v_vals()']]],
+  ['omnuh2_5ftarget',['OmNuh2_target',['../struct_om_nuh2__params.html#a8eaaeeff31d3633073efd0340d0adfe3',1,'OmNuh2_params']]]
 ];
