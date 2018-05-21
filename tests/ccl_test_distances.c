@@ -12,9 +12,9 @@ CTEST_DATA(distances) {
   double h;
   double A_s;
   double n_s;
-  double N_nu_rel;
-  double N_nu_mass;
-  double mnu;
+  double Neff;
+  double* mnu;
+  ccl_mnu_convention mnu_type;
   double Omega_v[5];
   double Omega_k[5];
   double w_0[5];
@@ -76,9 +76,11 @@ CTEST_SETUP(distances) {
   data->h = 0.7;
   data->A_s = 2.1e-9;
   data->n_s = 0.96;
-  data->N_nu_rel=0;
-  data->N_nu_mass=0;
-  data->mnu=0;
+  data->Neff=0;
+  double mnuval = 0.;
+  data->mnu= &mnuval;
+  data->mnu_type = ccl_mnu_sum;
+  
 
   // Values that are different for the different models
   double Omega_v[5] = {  0.7,  0.7,  0.7,  0.65, 0.75 };
@@ -104,7 +106,7 @@ static void compare_distances(int model, struct distances_data * data)
   // Make the parameter set from the input data
   // Values of some parameters depend on the model index
   ccl_parameters params = ccl_parameters_create(data->Omega_c, data->Omega_b, data->Omega_k[model],
-						data->N_nu_rel, data->N_nu_mass, data->mnu,
+						data->Neff, data->mnu, data->mnu_type,
 						data->w_0[model], data->w_a[model],
 						data->h, data->A_s, data->n_s,-1,-1,-1,-1,NULL,NULL, &status);
   

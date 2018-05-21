@@ -12,10 +12,10 @@
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
+#include "ccl_params.h"
 #include "ccl_power.h"
 #include "ccl.h"
 #include "fftlog.h"
-
 
 /*--------ROUTINE: taper_cl ------
 TASK:n Apply cosine tapering to Cls to reduce aliasing
@@ -126,19 +126,12 @@ static void ccl_tracer_corr_fftlog(ccl_cosmology *cosmo,
     th_arr[i]=0;
   //Although set here to 0, theta is modified by FFTlog to obtain the correlation at ~1/l
 
-  // FFTlog uses spherical bessel functions, j_n, but for projected
-  // correlations we need bessel functions of first order, J_n.
-  // To compensate for the difference, we use the relation
-  // j_n(x) = sqrt(Pi/2x)J_{n+1/2}(x)
-  // J_{m}(x) = sqrt(2x/Pi) j_{m-1/2}(x)
   int i_bessel=0;
   if(corr_type==CCL_CORR_GG) i_bessel=0;
   if(corr_type==CCL_CORR_GL) i_bessel=2;
   if(corr_type==CCL_CORR_LP) i_bessel=0;
   if(corr_type==CCL_CORR_LM) i_bessel=4;
-  fftlog_ComputeXiLM(i_bessel-0.5,1.5,N_ELL_FFTLOG,l_arr,cl_arr,th_arr,wth_arr);
-  for(i=0;i<N_ELL_FFTLOG;i++)
-    wth_arr[i]*=sqrt(th_arr[i]*2.0*M_PI);
+  fftlog_ComputeXi2D(i_bessel,N_ELL_FFTLOG,l_arr,cl_arr,th_arr,wth_arr);
 
   // Interpolate to output values of theta
   SplPar *wth_spl=ccl_spline_init(N_ELL_FFTLOG,th_arr,wth_arr,wth_arr[0],0);
@@ -430,4 +423,81 @@ void ccl_correlation(ccl_cosmology *cosmo,
   }
 
   ccl_check_status(cosmo,status);
+}
+
+/*--------ROUTINE: ccl_correlation_3d ------
+TASK: Calculate the 3d-correlation function. Do so by using FFTLog. 
+
+INPUT: cosmology, scale factor a,
+       number of r values, r values, 
+       key for tapering, limits of tapering
+
+Correlation function result will be in array xi
+ */
+
+void ccl_correlation_3d(ccl_cosmology *cosmo, double a,
+			int n_r,double *r,double *xi,
+			int do_taper_pk,double *taper_pk_limits,
+			int *status)
+{
+  int i,N_ARR;
+  double *k_arr,*pk_arr,*r_arr,*xi_arr;
+
+  //number of data points for k and pk array
+  N_ARR=(int)(ccl_splines->N_K_3DCOR*log10(ccl_splines->K_MAX/ccl_splines->K_MIN_DEFAULT));  
+
+  k_arr=ccl_log_spacing(ccl_splines->K_MIN_DEFAULT,ccl_splines->K_MAX,N_ARR);
+  if(k_arr==NULL) {
+    *status=CCL_ERROR_MEMORY;
+    strcpy(cosmo->status_message,"ccl_correlation.c: ccl_correlation_3d ran out of memory\n");
+    return;
+  }
+
+  pk_arr=malloc(N_ARR*sizeof(double));
+  if(pk_arr==NULL) {
+    free(k_arr);
+    *status=CCL_ERROR_MEMORY;
+    strcpy(cosmo->status_message,"ccl_correlation.c: ccl_correlation_3d ran out of memory\n");
+    return;
+  }  
+
+  for (i=0; i<N_ARR; i++)
+    pk_arr[i] = ccl_nonlin_matter_power(cosmo, k_arr[i], a, status);
+
+  if (do_taper_pk)
+    taper_cl(N_ARR,k_arr,pk_arr,taper_pk_limits);
+
+  r_arr=malloc(sizeof(double)*N_ARR);
+  if(r_arr==NULL) {
+    free(k_arr);
+    free(pk_arr);
+    *status=CCL_ERROR_MEMORY;
+    strcpy(cosmo->status_message,"ccl_correlation.c: ccl_correlation_3d ran out of memory\n");
+    return;
+  }
+  xi_arr=malloc(sizeof(double)*N_ARR);
+  if(xi_arr==NULL) {
+    free(k_arr); free(pk_arr); free(r_arr);
+    *status=CCL_ERROR_MEMORY;
+    strcpy(cosmo->status_message,"ccl_correlation.c: ccl_correlation_3d ran out of memory\n");
+    return;
+  }
+
+  for(i=0;i<N_ARR;i++)
+    r_arr[i]=0;
+
+  pk2xi(N_ARR,k_arr,pk_arr,r_arr,xi_arr);
+
+  // Interpolate to output values of r
+  SplPar *xi_spl=ccl_spline_init(N_ARR,r_arr,xi_arr,xi_arr[0],0);
+  for(i=0;i<n_r;i++)
+    xi[i]=ccl_spline_eval(r[i],xi_spl);
+  ccl_spline_free(xi_spl);
+
+  free(k_arr); free(pk_arr);
+  free(r_arr); free(xi_arr);
+
+  ccl_check_status(cosmo,status);
+
+  return;
 }

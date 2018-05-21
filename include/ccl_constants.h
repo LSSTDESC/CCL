@@ -45,6 +45,7 @@ extern "C" {
  * Solar mass in units of kg (from GSL)
  */
 #define SOLAR_MASS GSL_CONST_MKSA_SOLAR_MASS
+//#define SOLAR_MASS 1.9885e30 //(from PDG 2015) in Kg
 
 /**
  * Mpc to meters (from PDG 2013)
@@ -90,6 +91,17 @@ extern "C" {
  * T_ncdm, as taken from CLASS, explanatory.ini
  */
 #define TNCDM 0.71611
+
+/**
+ * neutrino mass splitting differences
+ * See Lesgourgues and Pastor, 2012 for these values.
+ * Adv. High Energy Phys. 2012 (2012) 608515, 
+ * arXiv:1212.6154, page 13
+*/
+#define DELTAM12_sq 7.62E-5
+#define DELTAM13_sq_pos 2.55E-3
+#define DELTAM13_sq_neg -2.43E-3
+
 
 //Precision parameters
 /**

@@ -143,6 +143,10 @@ class parameters(_object):
     __swig_getmethods__["h"] = _ccllib.parameters_h_get
     if _newclass:
         h = _swig_property(_ccllib.parameters_h_get, _ccllib.parameters_h_set)
+    __swig_setmethods__["Neff"] = _ccllib.parameters_Neff_set
+    __swig_getmethods__["Neff"] = _ccllib.parameters_Neff_get
+    if _newclass:
+        Neff = _swig_property(_ccllib.parameters_Neff_get, _ccllib.parameters_Neff_set)
     __swig_setmethods__["N_nu_mass"] = _ccllib.parameters_N_nu_mass_set
     __swig_getmethods__["N_nu_mass"] = _ccllib.parameters_N_nu_mass_get
     if _newclass:
@@ -155,6 +159,10 @@ class parameters(_object):
     __swig_getmethods__["mnu"] = _ccllib.parameters_mnu_get
     if _newclass:
         mnu = _swig_property(_ccllib.parameters_mnu_get, _ccllib.parameters_mnu_set)
+    __swig_setmethods__["sum_nu_masses"] = _ccllib.parameters_sum_nu_masses_set
+    __swig_getmethods__["sum_nu_masses"] = _ccllib.parameters_sum_nu_masses_get
+    if _newclass:
+        sum_nu_masses = _swig_property(_ccllib.parameters_sum_nu_masses_get, _ccllib.parameters_sum_nu_masses_set)
     __swig_setmethods__["Omega_n_mass"] = _ccllib.parameters_Omega_n_mass_set
     __swig_getmethods__["Omega_n_mass"] = _ccllib.parameters_Omega_n_mass_get
     if _newclass:
@@ -410,6 +418,10 @@ class cosmology(_object):
 cosmology_swigregister = _ccllib.cosmology_swigregister
 cosmology_swigregister(cosmology)
 
+mnu_list = _ccllib.mnu_list
+mnu_sum = _ccllib.mnu_sum
+mnu_sum_inverted = _ccllib.mnu_sum_inverted
+mnu_sum_equal = _ccllib.mnu_sum_equal
 
 def cosmology_read_config():
     """cosmology_read_config()"""
@@ -419,17 +431,17 @@ def cosmology_create(params, config):
     """cosmology_create(parameters params, configuration config) -> cosmology"""
     return _ccllib.cosmology_create(params, config)
 
-def cosmology_create_with_params(Omega_c, Omega_b, Omega_k, N_nu_rel, N_nu_mass, mnu, w0, wa, h, norm_pk, n_s, bcm_log10Mc, bcm_etab, bcm_ks, nz_mgrowth, zarr_mgrowth, dfarr_mgrowth, config, status):
-    """cosmology_create_with_params(double Omega_c, double Omega_b, double Omega_k, double N_nu_rel, double N_nu_mass, double mnu, double w0, double wa, double h, double norm_pk, double n_s, double bcm_log10Mc, double bcm_etab, double bcm_ks, int nz_mgrowth, double * zarr_mgrowth, double * dfarr_mgrowth, configuration config, int * status) -> cosmology"""
-    return _ccllib.cosmology_create_with_params(Omega_c, Omega_b, Omega_k, N_nu_rel, N_nu_mass, mnu, w0, wa, h, norm_pk, n_s, bcm_log10Mc, bcm_etab, bcm_ks, nz_mgrowth, zarr_mgrowth, dfarr_mgrowth, config, status)
+def cosmology_create_with_params(Omega_c, Omega_b, Omega_k, Neff, mnu, mnu_type, w0, wa, h, norm_pk, n_s, bcm_log10Mc, bcm_etab, bcm_ks, nz_mgrowth, zarr_mgrowth, dfarr_mgrowth, config, status):
+    """cosmology_create_with_params(double Omega_c, double Omega_b, double Omega_k, double Neff, double * mnu, ccl_mnu_convention mnu_type, double w0, double wa, double h, double norm_pk, double n_s, double bcm_log10Mc, double bcm_etab, double bcm_ks, int nz_mgrowth, double * zarr_mgrowth, double * dfarr_mgrowth, configuration config, int * status) -> cosmology"""
+    return _ccllib.cosmology_create_with_params(Omega_c, Omega_b, Omega_k, Neff, mnu, mnu_type, w0, wa, h, norm_pk, n_s, bcm_log10Mc, bcm_etab, bcm_ks, nz_mgrowth, zarr_mgrowth, dfarr_mgrowth, config, status)
 
 def cosmology_create_with_lcdm_params(Omega_c, Omega_b, Omega_k, h, norm_pk, n_s, config, status):
     """cosmology_create_with_lcdm_params(double Omega_c, double Omega_b, double Omega_k, double h, double norm_pk, double n_s, configuration config, int * status) -> cosmology"""
     return _ccllib.cosmology_create_with_lcdm_params(Omega_c, Omega_b, Omega_k, h, norm_pk, n_s, config, status)
 
-def parameters_create(Omega_c, Omega_b, Omega_k, N_nu_rel, N_nu_mass, mnu, w0, wa, h, norm_pk, n_s, bcm_log10Mc, bcm_etab, bcm_ks, nz_mgrowth, zarr_mgrowth, dfarr_mgrowth, status):
-    """parameters_create(double Omega_c, double Omega_b, double Omega_k, double N_nu_rel, double N_nu_mass, double mnu, double w0, double wa, double h, double norm_pk, double n_s, double bcm_log10Mc, double bcm_etab, double bcm_ks, int nz_mgrowth, double * zarr_mgrowth, double * dfarr_mgrowth, int * status) -> parameters"""
-    return _ccllib.parameters_create(Omega_c, Omega_b, Omega_k, N_nu_rel, N_nu_mass, mnu, w0, wa, h, norm_pk, n_s, bcm_log10Mc, bcm_etab, bcm_ks, nz_mgrowth, zarr_mgrowth, dfarr_mgrowth, status)
+def parameters_create(Omega_c, Omega_b, Omega_k, Neff, mnu, mnu_type, w0, wa, h, norm_pk, n_s, bcm_log10Mc, bcm_etab, bcm_ks, nz_mgrowth, zarr_mgrowth, dfarr_mgrowth, status):
+    """parameters_create(double Omega_c, double Omega_b, double Omega_k, double Neff, double * mnu, ccl_mnu_convention mnu_type, double w0, double wa, double h, double norm_pk, double n_s, double bcm_log10Mc, double bcm_etab, double bcm_ks, int nz_mgrowth, double * zarr_mgrowth, double * dfarr_mgrowth, int * status) -> parameters"""
+    return _ccllib.parameters_create(Omega_c, Omega_b, Omega_k, Neff, mnu, mnu_type, w0, wa, h, norm_pk, n_s, bcm_log10Mc, bcm_etab, bcm_ks, nz_mgrowth, zarr_mgrowth, dfarr_mgrowth, status)
 
 def parameters_create_flat_lcdm(Omega_c, Omega_b, h, norm_pk, n_s, status):
     """parameters_create_flat_lcdm(double Omega_c, double Omega_b, double h, double norm_pk, double n_s, int * status) -> parameters"""
@@ -451,21 +463,25 @@ def parameters_create_lcdm(Omega_c, Omega_b, Omega_k, h, norm_pk, n_s, status):
     """parameters_create_lcdm(double Omega_c, double Omega_b, double Omega_k, double h, double norm_pk, double n_s, int * status) -> parameters"""
     return _ccllib.parameters_create_lcdm(Omega_c, Omega_b, Omega_k, h, norm_pk, n_s, status)
 
-def parameters_create_flat_lcdm_nu(Omega_c, Omega_b, h, norm_pk, n_s, N_nu_rel, N_nu_mass, mnu, status):
-    """parameters_create_flat_lcdm_nu(double Omega_c, double Omega_b, double h, double norm_pk, double n_s, double N_nu_rel, double N_nu_mass, double mnu, int * status) -> parameters"""
-    return _ccllib.parameters_create_flat_lcdm_nu(Omega_c, Omega_b, h, norm_pk, n_s, N_nu_rel, N_nu_mass, mnu, status)
+def parameters_create_flat_lcdm_nu(Omega_c, Omega_b, h, norm_pk, n_s, Neff, mnu, mnu_type, status):
+    """parameters_create_flat_lcdm_nu(double Omega_c, double Omega_b, double h, double norm_pk, double n_s, double Neff, double * mnu, ccl_mnu_convention mnu_type, int * status) -> parameters"""
+    return _ccllib.parameters_create_flat_lcdm_nu(Omega_c, Omega_b, h, norm_pk, n_s, Neff, mnu, mnu_type, status)
 
-def parameters_create_flat_wcdm_nu(Omega_c, Omega_b, w0, h, norm_pk, n_s, N_nu_rel, N_nu_mass, mnu, status):
-    """parameters_create_flat_wcdm_nu(double Omega_c, double Omega_b, double w0, double h, double norm_pk, double n_s, double N_nu_rel, double N_nu_mass, double mnu, int * status) -> parameters"""
-    return _ccllib.parameters_create_flat_wcdm_nu(Omega_c, Omega_b, w0, h, norm_pk, n_s, N_nu_rel, N_nu_mass, mnu, status)
+def parameters_create_flat_wcdm_nu(Omega_c, Omega_b, w0, h, norm_pk, n_s, Neff, mnu, mnu_type, status):
+    """parameters_create_flat_wcdm_nu(double Omega_c, double Omega_b, double w0, double h, double norm_pk, double n_s, double Neff, double * mnu, ccl_mnu_convention mnu_type, int * status) -> parameters"""
+    return _ccllib.parameters_create_flat_wcdm_nu(Omega_c, Omega_b, w0, h, norm_pk, n_s, Neff, mnu, mnu_type, status)
 
-def parameters_create_flat_wacdm_nu(Omega_c, Omega_b, w0, wa, h, norm_pk, n_s, N_nu_rel, N_nu_mass, mnu, status):
-    """parameters_create_flat_wacdm_nu(double Omega_c, double Omega_b, double w0, double wa, double h, double norm_pk, double n_s, double N_nu_rel, double N_nu_mass, double mnu, int * status) -> parameters"""
-    return _ccllib.parameters_create_flat_wacdm_nu(Omega_c, Omega_b, w0, wa, h, norm_pk, n_s, N_nu_rel, N_nu_mass, mnu, status)
+def parameters_create_flat_wacdm_nu(Omega_c, Omega_b, w0, wa, h, norm_pk, n_s, Neff, mnu, mnu_type, status):
+    """parameters_create_flat_wacdm_nu(double Omega_c, double Omega_b, double w0, double wa, double h, double norm_pk, double n_s, double Neff, double * mnu, ccl_mnu_convention mnu_type, int * status) -> parameters"""
+    return _ccllib.parameters_create_flat_wacdm_nu(Omega_c, Omega_b, w0, wa, h, norm_pk, n_s, Neff, mnu, mnu_type, status)
 
-def parameters_create_lcdm_nu(Omega_c, Omega_b, Omega_k, h, norm_pk, n_s, N_nu_rel, N_nu_mass, mnu, status):
-    """parameters_create_lcdm_nu(double Omega_c, double Omega_b, double Omega_k, double h, double norm_pk, double n_s, double N_nu_rel, double N_nu_mass, double mnu, int * status) -> parameters"""
-    return _ccllib.parameters_create_lcdm_nu(Omega_c, Omega_b, Omega_k, h, norm_pk, n_s, N_nu_rel, N_nu_mass, mnu, status)
+def parameters_create_lcdm_nu(Omega_c, Omega_b, Omega_k, h, norm_pk, n_s, Neff, mnu, mnu_type, status):
+    """parameters_create_lcdm_nu(double Omega_c, double Omega_b, double Omega_k, double h, double norm_pk, double n_s, double Neff, double * mnu, ccl_mnu_convention mnu_type, int * status) -> parameters"""
+    return _ccllib.parameters_create_lcdm_nu(Omega_c, Omega_b, Omega_k, h, norm_pk, n_s, Neff, mnu, mnu_type, status)
+
+def parameters_free(params):
+    """parameters_free(parameters params)"""
+    return _ccllib.parameters_free(params)
 
 def cosmology_free(cosmo):
     """cosmology_free(cosmology cosmo)"""
@@ -483,15 +499,20 @@ def cosmology_compute_power(cosmo, status):
     """cosmology_compute_power(cosmology cosmo, int * status)"""
     return _ccllib.cosmology_compute_power(cosmo, status)
 
-def parameters_create_vec(Omega_c, Omega_b, Omega_k, N_nu_rel, N_nu_mass, M_nu, w0, wa, h, norm_pk, n_s, bcm_log10Mc, bcm_etab, bcm_ks, zarr, dfarr, status):
-    """parameters_create_vec(double Omega_c, double Omega_b, double Omega_k, double N_nu_rel, double N_nu_mass, double M_nu, double w0, double wa, double h, double norm_pk, double n_s, double bcm_log10Mc, double bcm_etab, double bcm_ks, double * zarr, double * dfarr, int * status) -> parameters"""
-    return _ccllib.parameters_create_vec(Omega_c, Omega_b, Omega_k, N_nu_rel, N_nu_mass, M_nu, w0, wa, h, norm_pk, n_s, bcm_log10Mc, bcm_etab, bcm_ks, zarr, dfarr, status)
-omega_m_label = _ccllib.omega_m_label
-omega_l_label = _ccllib.omega_l_label
-omega_g_label = _ccllib.omega_g_label
-omega_k_label = _ccllib.omega_k_label
-omega_ur_label = _ccllib.omega_ur_label
-omega_nu_label = _ccllib.omega_nu_label
+def parameters_create_nu(Omega_c, Omega_b, Omega_k, Neff, w0, wa, h, norm_pk, n_s, bcm_log10Mc, bcm_etab, bcm_ks, mnu_is_sum, m_nu, status):
+    """parameters_create_nu(double Omega_c, double Omega_b, double Omega_k, double Neff, double w0, double wa, double h, double norm_pk, double n_s, double bcm_log10Mc, double bcm_etab, double bcm_ks, int mnu_is_sum, double * m_nu, int * status) -> parameters"""
+    return _ccllib.parameters_create_nu(Omega_c, Omega_b, Omega_k, Neff, w0, wa, h, norm_pk, n_s, bcm_log10Mc, bcm_etab, bcm_ks, mnu_is_sum, m_nu, status)
+
+def parameters_create_nu_vec(Omega_c, Omega_b, Omega_k, Neff, w0, wa, h, norm_pk, n_s, bcm_log10Mc, bcm_etab, bcm_ks, zarr, dfarr, mnu_is_sum, m_nu, status):
+    """parameters_create_nu_vec(double Omega_c, double Omega_b, double Omega_k, double Neff, double w0, double wa, double h, double norm_pk, double n_s, double bcm_log10Mc, double bcm_etab, double bcm_ks, double * zarr, double * dfarr, int mnu_is_sum, double * m_nu, int * status) -> parameters"""
+    return _ccllib.parameters_create_nu_vec(Omega_c, Omega_b, Omega_k, Neff, w0, wa, h, norm_pk, n_s, bcm_log10Mc, bcm_etab, bcm_ks, zarr, dfarr, mnu_is_sum, m_nu, status)
+species_crit_label = _ccllib.species_crit_label
+species_m_label = _ccllib.species_m_label
+species_l_label = _ccllib.species_l_label
+species_g_label = _ccllib.species_g_label
+species_k_label = _ccllib.species_k_label
+species_ur_label = _ccllib.species_ur_label
+species_nu_label = _ccllib.species_nu_label
 
 def comoving_matter_density(cosmo):
     """comoving_matter_density(cosmology cosmo) -> double"""
@@ -573,8 +594,12 @@ def scale_factor_of_chis(cosmo, nchi, chi, output, status):
     """scale_factor_of_chis(cosmology cosmo, int nchi, double [] chi, double [] output, int * status)"""
     return _ccllib.scale_factor_of_chis(cosmo, nchi, chi, output, status)
 
+def rho_x(cosmo, a, label, is_comoving, status):
+    """rho_x(cosmology cosmo, double a, ccl_species_x_label label, int is_comoving, int * status) -> double"""
+    return _ccllib.rho_x(cosmo, a, label, is_comoving, status)
+
 def omega_x(cosmo, a, label, status):
-    """omega_x(cosmology cosmo, double a, ccl_omega_x_label label, int * status) -> double"""
+    """omega_x(cosmology cosmo, double a, ccl_species_x_label label, int * status) -> double"""
     return _ccllib.omega_x(cosmo, a, label, status)
 
 def growth_factor_vec(cosmo, a, output, status):
@@ -616,6 +641,10 @@ def scale_factor_of_chi_vec(cosmo, chi, output, status):
 def omega_x_vec(cosmo, label, a, output, status):
     """omega_x_vec(cosmology cosmo, int label, double * a, double * output, int * status)"""
     return _ccllib.omega_x_vec(cosmo, label, a, output, status)
+
+def rho_x_vec(cosmo, label, is_comoving, a, output, status):
+    """rho_x_vec(cosmology cosmo, int label, int is_comoving, double * a, double * output, int * status)"""
+    return _ccllib.rho_x_vec(cosmo, label, is_comoving, a, output, status)
 
 def cosmology_write_power_class_z(filename, cosmo, z, status):
     """cosmology_write_power_class_z(char * filename, cosmology cosmo, double z, int * status)"""
@@ -672,9 +701,17 @@ def correlation(cosmo, n_ell, ell, cls, n_theta, theta, wtheta, corr_type, do_ta
     """correlation(cosmology cosmo, int n_ell, double * ell, double * cls, int n_theta, double * theta, double * wtheta, int corr_type, int do_taper_cl, double * taper_cl_limits, int flag_method, int * status)"""
     return _ccllib.correlation(cosmo, n_ell, ell, cls, n_theta, theta, wtheta, corr_type, do_taper_cl, taper_cl_limits, flag_method, status)
 
+def correlation_3d(cosmo, a, n_r, r, xi, do_taper_pk, taper_pk_limits, status):
+    """correlation_3d(cosmology cosmo, double a, int n_r, double * r, double * xi, int do_taper_pk, double * taper_pk_limits, int * status)"""
+    return _ccllib.correlation_3d(cosmo, a, n_r, r, xi, do_taper_pk, taper_pk_limits, status)
+
 def correlation_vec(cosmo, nlarr, nclarr, nt, corr_type, method, output, status):
     """correlation_vec(cosmology cosmo, int nlarr, int nclarr, int nt, int corr_type, int method, double * output, int * status)"""
     return _ccllib.correlation_vec(cosmo, nlarr, nclarr, nt, corr_type, method, output, status)
+
+def correlation_3d_vec(cosmo, a, nr, xi, status):
+    """correlation_3d_vec(cosmology cosmo, double a, int nr, double * xi, int * status)"""
+    return _ccllib.correlation_3d_vec(cosmo, a, nr, xi, status)
 
 def cosmology_compute_sigma(cosmo, status):
     """cosmology_compute_sigma(cosmology cosmo, int * status)"""
@@ -740,6 +777,13 @@ def nu(*args):
 CL_TRACER_NC = _ccllib.CL_TRACER_NC
 CL_TRACER_WL = _ccllib.CL_TRACER_WL
 CL_TRACER_CL = _ccllib.CL_TRACER_CL
+CCL_CLT_NZ = _ccllib.CCL_CLT_NZ
+CCL_CLT_BZ = _ccllib.CCL_CLT_BZ
+CCL_CLT_SZ = _ccllib.CCL_CLT_SZ
+CCL_CLT_RF = _ccllib.CCL_CLT_RF
+CCL_CLT_BA = _ccllib.CCL_CLT_BA
+CCL_CLT_WL = _ccllib.CCL_CLT_WL
+CCL_CLT_WM = _ccllib.CCL_CLT_WM
 class CCL_ClTracer(_object):
     """Proxy of C CCL_ClTracer struct."""
 
@@ -764,6 +808,14 @@ class CCL_ClTracer(_object):
     __swig_getmethods__["chimin"] = _ccllib.CCL_ClTracer_chimin_get
     if _newclass:
         chimin = _swig_property(_ccllib.CCL_ClTracer_chimin_get, _ccllib.CCL_ClTracer_chimin_set)
+    __swig_setmethods__["zmin"] = _ccllib.CCL_ClTracer_zmin_set
+    __swig_getmethods__["zmin"] = _ccllib.CCL_ClTracer_zmin_get
+    if _newclass:
+        zmin = _swig_property(_ccllib.CCL_ClTracer_zmin_get, _ccllib.CCL_ClTracer_zmin_set)
+    __swig_setmethods__["zmax"] = _ccllib.CCL_ClTracer_zmax_set
+    __swig_getmethods__["zmax"] = _ccllib.CCL_ClTracer_zmax_get
+    if _newclass:
+        zmax = _swig_property(_ccllib.CCL_ClTracer_zmax_get, _ccllib.CCL_ClTracer_zmax_set)
     __swig_setmethods__["chi_source"] = _ccllib.CCL_ClTracer_chi_source_set
     __swig_getmethods__["chi_source"] = _ccllib.CCL_ClTracer_chi_source_get
     if _newclass:
@@ -808,6 +860,22 @@ class CCL_ClTracer(_object):
     __swig_getmethods__["spl_wM"] = _ccllib.CCL_ClTracer_spl_wM_get
     if _newclass:
         spl_wM = _swig_property(_ccllib.CCL_ClTracer_spl_wM_get, _ccllib.CCL_ClTracer_spl_wM_set)
+    __swig_setmethods__["computed_transfer"] = _ccllib.CCL_ClTracer_computed_transfer_set
+    __swig_getmethods__["computed_transfer"] = _ccllib.CCL_ClTracer_computed_transfer_get
+    if _newclass:
+        computed_transfer = _swig_property(_ccllib.CCL_ClTracer_computed_transfer_get, _ccllib.CCL_ClTracer_computed_transfer_set)
+    __swig_setmethods__["n_ls"] = _ccllib.CCL_ClTracer_n_ls_set
+    __swig_getmethods__["n_ls"] = _ccllib.CCL_ClTracer_n_ls_get
+    if _newclass:
+        n_ls = _swig_property(_ccllib.CCL_ClTracer_n_ls_get, _ccllib.CCL_ClTracer_n_ls_set)
+    __swig_setmethods__["n_k"] = _ccllib.CCL_ClTracer_n_k_set
+    __swig_getmethods__["n_k"] = _ccllib.CCL_ClTracer_n_k_get
+    if _newclass:
+        n_k = _swig_property(_ccllib.CCL_ClTracer_n_k_get, _ccllib.CCL_ClTracer_n_k_set)
+    __swig_setmethods__["spl_transfer"] = _ccllib.CCL_ClTracer_spl_transfer_set
+    __swig_getmethods__["spl_transfer"] = _ccllib.CCL_ClTracer_spl_transfer_get
+    if _newclass:
+        spl_transfer = _swig_property(_ccllib.CCL_ClTracer_spl_transfer_get, _ccllib.CCL_ClTracer_spl_transfer_set)
 
     def __init__(self):
         """__init__(CCL_ClTracer self) -> CCL_ClTracer"""
@@ -822,45 +890,132 @@ CCL_ClTracer_swigregister = _ccllib.CCL_ClTracer_swigregister
 CCL_ClTracer_swigregister(CCL_ClTracer)
 
 
-def cl_tracer_new(cosmo, tracer_type, has_rsd, has_magnification, has_intrinsic_alignment, nz_n, z_n, n, nz_b, z_b, b, nz_s, z_s, s, nz_ba, z_ba, ba, nz_rf, z_rf, rf, z_source, status):
-    """cl_tracer_new(cosmology cosmo, int tracer_type, int has_rsd, int has_magnification, int has_intrinsic_alignment, int nz_n, double * z_n, double * n, int nz_b, double * z_b, double * b, int nz_s, double * z_s, double * s, int nz_ba, double * z_ba, double * ba, int nz_rf, double * z_rf, double * rf, double z_source, int * status) -> CCL_ClTracer"""
-    return _ccllib.cl_tracer_new(cosmo, tracer_type, has_rsd, has_magnification, has_intrinsic_alignment, nz_n, z_n, n, nz_b, z_b, b, nz_s, z_s, s, nz_ba, z_ba, ba, nz_rf, z_rf, rf, z_source, status)
+def cl_tracer(cosmo, tracer_type, has_rsd, has_magnification, has_intrinsic_alignment, nz_n, z_n, n, nz_b, z_b, b, nz_s, z_s, s, nz_ba, z_ba, ba, nz_rf, z_rf, rf, z_source, status):
+    """cl_tracer(cosmology cosmo, int tracer_type, int has_rsd, int has_magnification, int has_intrinsic_alignment, int nz_n, double * z_n, double * n, int nz_b, double * z_b, double * b, int nz_s, double * z_s, double * s, int nz_ba, double * z_ba, double * ba, int nz_rf, double * z_rf, double * rf, double z_source, int * status) -> CCL_ClTracer"""
+    return _ccllib.cl_tracer(cosmo, tracer_type, has_rsd, has_magnification, has_intrinsic_alignment, nz_n, z_n, n, nz_b, z_b, b, nz_s, z_s, s, nz_ba, z_ba, ba, nz_rf, z_rf, rf, z_source, status)
 
-def cl_tracer_number_counts_new(cosmo, has_rsd, has_magnification, nz_n, z_n, n, nz_b, z_b, b, nz_s, z_s, s, status):
-    """cl_tracer_number_counts_new(cosmology cosmo, int has_rsd, int has_magnification, int nz_n, double * z_n, double * n, int nz_b, double * z_b, double * b, int nz_s, double * z_s, double * s, int * status) -> CCL_ClTracer"""
-    return _ccllib.cl_tracer_number_counts_new(cosmo, has_rsd, has_magnification, nz_n, z_n, n, nz_b, z_b, b, nz_s, z_s, s, status)
+def cl_tracer_number_counts(cosmo, has_rsd, has_magnification, nz_n, z_n, n, nz_b, z_b, b, nz_s, z_s, s, status):
+    """cl_tracer_number_counts(cosmology cosmo, int has_rsd, int has_magnification, int nz_n, double * z_n, double * n, int nz_b, double * z_b, double * b, int nz_s, double * z_s, double * s, int * status) -> CCL_ClTracer"""
+    return _ccllib.cl_tracer_number_counts(cosmo, has_rsd, has_magnification, nz_n, z_n, n, nz_b, z_b, b, nz_s, z_s, s, status)
 
-def cl_tracer_number_counts_simple_new(cosmo, nz_n, z_n, n, nz_b, z_b, b, status):
-    """cl_tracer_number_counts_simple_new(cosmology cosmo, int nz_n, double * z_n, double * n, int nz_b, double * z_b, double * b, int * status) -> CCL_ClTracer"""
-    return _ccllib.cl_tracer_number_counts_simple_new(cosmo, nz_n, z_n, n, nz_b, z_b, b, status)
+def cl_tracer_number_counts_simple(cosmo, nz_n, z_n, n, nz_b, z_b, b, status):
+    """cl_tracer_number_counts_simple(cosmology cosmo, int nz_n, double * z_n, double * n, int nz_b, double * z_b, double * b, int * status) -> CCL_ClTracer"""
+    return _ccllib.cl_tracer_number_counts_simple(cosmo, nz_n, z_n, n, nz_b, z_b, b, status)
 
-def cl_tracer_lensing_new(cosmo, has_alignment, nz_n, z_n, n, nz_ba, z_ba, ba, nz_rf, z_rf, rf, status):
-    """cl_tracer_lensing_new(cosmology cosmo, int has_alignment, int nz_n, double * z_n, double * n, int nz_ba, double * z_ba, double * ba, int nz_rf, double * z_rf, double * rf, int * status) -> CCL_ClTracer"""
-    return _ccllib.cl_tracer_lensing_new(cosmo, has_alignment, nz_n, z_n, n, nz_ba, z_ba, ba, nz_rf, z_rf, rf, status)
+def cl_tracer_lensing(cosmo, has_alignment, nz_n, z_n, n, nz_ba, z_ba, ba, nz_rf, z_rf, rf, status):
+    """cl_tracer_lensing(cosmology cosmo, int has_alignment, int nz_n, double * z_n, double * n, int nz_ba, double * z_ba, double * ba, int nz_rf, double * z_rf, double * rf, int * status) -> CCL_ClTracer"""
+    return _ccllib.cl_tracer_lensing(cosmo, has_alignment, nz_n, z_n, n, nz_ba, z_ba, ba, nz_rf, z_rf, rf, status)
 
-def cl_tracer_lensing_simple_new(cosmo, nz_n, z_n, n, status):
-    """cl_tracer_lensing_simple_new(cosmology cosmo, int nz_n, double * z_n, double * n, int * status) -> CCL_ClTracer"""
-    return _ccllib.cl_tracer_lensing_simple_new(cosmo, nz_n, z_n, n, status)
+def cl_tracer_lensing_simple(cosmo, nz_n, z_n, n, status):
+    """cl_tracer_lensing_simple(cosmology cosmo, int nz_n, double * z_n, double * n, int * status) -> CCL_ClTracer"""
+    return _ccllib.cl_tracer_lensing_simple(cosmo, nz_n, z_n, n, status)
 
-def cl_tracer_cmblens_new(cosmo, z_source, status):
-    """cl_tracer_cmblens_new(cosmology cosmo, double z_source, int * status) -> CCL_ClTracer"""
-    return _ccllib.cl_tracer_cmblens_new(cosmo, z_source, status)
+def cl_tracer_cmblens(cosmo, z_source, status):
+    """cl_tracer_cmblens(cosmology cosmo, double z_source, int * status) -> CCL_ClTracer"""
+    return _ccllib.cl_tracer_cmblens(cosmo, z_source, status)
 
 def cl_tracer_free(clt):
     """cl_tracer_free(CCL_ClTracer clt)"""
     return _ccllib.cl_tracer_free(clt)
 
-def angular_cl(cosmo, l, clt1, clt2, status):
-    """angular_cl(cosmology cosmo, int l, CCL_ClTracer clt1, CCL_ClTracer clt2, int * status) -> double"""
-    return _ccllib.angular_cl(cosmo, l, clt1, clt2, status)
+def get_tracer_fa(cosmo, clt, a, func_code, status):
+    """get_tracer_fa(cosmology cosmo, CCL_ClTracer clt, double a, int func_code, int * status) -> double"""
+    return _ccllib.get_tracer_fa(cosmo, clt, a, func_code, status)
+
+def get_tracer_fas(cosmo, clt, na, a, fa, func_code, status):
+    """get_tracer_fas(cosmology cosmo, CCL_ClTracer clt, int na, double * a, double * fa, int func_code, int * status) -> int"""
+    return _ccllib.get_tracer_fas(cosmo, clt, na, a, fa, func_code, status)
+CCL_NONLIMBER_METHOD_NATIVE = _ccllib.CCL_NONLIMBER_METHOD_NATIVE
+CCL_NONLIMBER_METHOD_ANGPOW = _ccllib.CCL_NONLIMBER_METHOD_ANGPOW
+class CCL_ClWorkspace(_object):
+    """Proxy of C CCL_ClWorkspace struct."""
+
+    __swig_setmethods__ = {}
+    __setattr__ = lambda self, name, value: _swig_setattr(self, CCL_ClWorkspace, name, value)
+    __swig_getmethods__ = {}
+    __getattr__ = lambda self, name: _swig_getattr(self, CCL_ClWorkspace, name)
+    __repr__ = _swig_repr
+    __swig_setmethods__["nlimb_method"] = _ccllib.CCL_ClWorkspace_nlimb_method_set
+    __swig_getmethods__["nlimb_method"] = _ccllib.CCL_ClWorkspace_nlimb_method_get
+    if _newclass:
+        nlimb_method = _swig_property(_ccllib.CCL_ClWorkspace_nlimb_method_get, _ccllib.CCL_ClWorkspace_nlimb_method_set)
+    __swig_setmethods__["zmin"] = _ccllib.CCL_ClWorkspace_zmin_set
+    __swig_getmethods__["zmin"] = _ccllib.CCL_ClWorkspace_zmin_get
+    if _newclass:
+        zmin = _swig_property(_ccllib.CCL_ClWorkspace_zmin_get, _ccllib.CCL_ClWorkspace_zmin_set)
+    __swig_setmethods__["dchi"] = _ccllib.CCL_ClWorkspace_dchi_set
+    __swig_getmethods__["dchi"] = _ccllib.CCL_ClWorkspace_dchi_get
+    if _newclass:
+        dchi = _swig_property(_ccllib.CCL_ClWorkspace_dchi_get, _ccllib.CCL_ClWorkspace_dchi_set)
+    __swig_setmethods__["dlk"] = _ccllib.CCL_ClWorkspace_dlk_set
+    __swig_getmethods__["dlk"] = _ccllib.CCL_ClWorkspace_dlk_get
+    if _newclass:
+        dlk = _swig_property(_ccllib.CCL_ClWorkspace_dlk_get, _ccllib.CCL_ClWorkspace_dlk_set)
+    __swig_setmethods__["lmax"] = _ccllib.CCL_ClWorkspace_lmax_set
+    __swig_getmethods__["lmax"] = _ccllib.CCL_ClWorkspace_lmax_get
+    if _newclass:
+        lmax = _swig_property(_ccllib.CCL_ClWorkspace_lmax_get, _ccllib.CCL_ClWorkspace_lmax_set)
+    __swig_setmethods__["l_limber"] = _ccllib.CCL_ClWorkspace_l_limber_set
+    __swig_getmethods__["l_limber"] = _ccllib.CCL_ClWorkspace_l_limber_get
+    if _newclass:
+        l_limber = _swig_property(_ccllib.CCL_ClWorkspace_l_limber_get, _ccllib.CCL_ClWorkspace_l_limber_set)
+    __swig_setmethods__["l_logstep"] = _ccllib.CCL_ClWorkspace_l_logstep_set
+    __swig_getmethods__["l_logstep"] = _ccllib.CCL_ClWorkspace_l_logstep_get
+    if _newclass:
+        l_logstep = _swig_property(_ccllib.CCL_ClWorkspace_l_logstep_get, _ccllib.CCL_ClWorkspace_l_logstep_set)
+    __swig_setmethods__["l_linstep"] = _ccllib.CCL_ClWorkspace_l_linstep_set
+    __swig_getmethods__["l_linstep"] = _ccllib.CCL_ClWorkspace_l_linstep_get
+    if _newclass:
+        l_linstep = _swig_property(_ccllib.CCL_ClWorkspace_l_linstep_get, _ccllib.CCL_ClWorkspace_l_linstep_set)
+    __swig_setmethods__["n_ls"] = _ccllib.CCL_ClWorkspace_n_ls_set
+    __swig_getmethods__["n_ls"] = _ccllib.CCL_ClWorkspace_n_ls_get
+    if _newclass:
+        n_ls = _swig_property(_ccllib.CCL_ClWorkspace_n_ls_get, _ccllib.CCL_ClWorkspace_n_ls_set)
+    __swig_setmethods__["l_arr"] = _ccllib.CCL_ClWorkspace_l_arr_set
+    __swig_getmethods__["l_arr"] = _ccllib.CCL_ClWorkspace_l_arr_get
+    if _newclass:
+        l_arr = _swig_property(_ccllib.CCL_ClWorkspace_l_arr_get, _ccllib.CCL_ClWorkspace_l_arr_set)
+
+    def __init__(self):
+        """__init__(CCL_ClWorkspace self) -> CCL_ClWorkspace"""
+        this = _ccllib.new_CCL_ClWorkspace()
+        try:
+            self.this.append(this)
+        except __builtin__.Exception:
+            self.this = this
+    __swig_destroy__ = _ccllib.delete_CCL_ClWorkspace
+    __del__ = lambda self: None
+CCL_ClWorkspace_swigregister = _ccllib.CCL_ClWorkspace_swigregister
+CCL_ClWorkspace_swigregister(CCL_ClWorkspace)
+
+
+def cl_workspace_default(lmax, l_limber, non_limber_method, l_logstep, l_linstep, dchi, dlk, zmin, status):
+    """cl_workspace_default(int lmax, int l_limber, int non_limber_method, double l_logstep, int l_linstep, double dchi, double dlk, double zmin, int * status) -> CCL_ClWorkspace"""
+    return _ccllib.cl_workspace_default(lmax, l_limber, non_limber_method, l_logstep, l_linstep, dchi, dlk, zmin, status)
+
+def cl_workspace_default_limber(lmax, l_logstep, l_linstep, dlk, status):
+    """cl_workspace_default_limber(int lmax, double l_logstep, int l_linstep, double dlk, int * status) -> CCL_ClWorkspace"""
+    return _ccllib.cl_workspace_default_limber(lmax, l_logstep, l_linstep, dlk, status)
+
+def cl_workspace_free(w):
+    """cl_workspace_free(CCL_ClWorkspace w)"""
+    return _ccllib.cl_workspace_free(w)
+
+def angular_cls(cosmo, w, clt1, clt2, nl_out, l, cl, status):
+    """angular_cls(cosmology cosmo, CCL_ClWorkspace w, CCL_ClTracer clt1, CCL_ClTracer clt2, int nl_out, int * l, double * cl, int * status)"""
+    return _ccllib.angular_cls(cosmo, w, clt1, clt2, nl_out, l, cl, status)
 
 def cl_tracer_new_wrapper(cosmo, tracer_type, has_rsd, has_magnification, has_intrinsic_alignment, nz_n, nn, nz_b, nb, nz_s, ns, nz_ba, nba, nz_rf, nrf, z_source, status):
     """cl_tracer_new_wrapper(cosmology cosmo, int tracer_type, int has_rsd, int has_magnification, int has_intrinsic_alignment, int nz_n, int nn, int nz_b, int nb, int nz_s, int ns, int nz_ba, int nba, int nz_rf, int nrf, double z_source, int * status) -> CCL_ClTracer"""
     return _ccllib.cl_tracer_new_wrapper(cosmo, tracer_type, has_rsd, has_magnification, has_intrinsic_alignment, nz_n, nn, nz_b, nb, nz_s, ns, nz_ba, nba, nz_rf, nrf, z_source, status)
 
-def angular_cl_vec(cosmo, clt1, clt2, ell, output, status):
-    """angular_cl_vec(cosmology cosmo, CCL_ClTracer clt1, CCL_ClTracer clt2, double * ell, double * output, int * status)"""
-    return _ccllib.angular_cl_vec(cosmo, clt1, clt2, ell, output, status)
+def angular_cl_vec(cosmo, clt1, clt2, l_limber, l_logstep, l_linstep, dchi, dlk, zmin, method, ell, output, status):
+    """angular_cl_vec(cosmology cosmo, CCL_ClTracer clt1, CCL_ClTracer clt2, double l_limber, double l_logstep, double l_linstep, double dchi, double dlk, double zmin, int method, double * ell, double * output, int * status)"""
+    return _ccllib.angular_cl_vec(cosmo, clt1, clt2, l_limber, l_logstep, l_linstep, dchi, dlk, zmin, method, ell, output, status)
+
+def clt_fa_vec(cosmo, clt, func_code, aarr, output, status):
+    """clt_fa_vec(cosmology cosmo, CCL_ClTracer clt, int func_code, double * aarr, double * output, int * status)"""
+    return _ccllib.clt_fa_vec(cosmo, clt, func_code, aarr, output, status)
 GSL_CONST_MKSA_SPEED_OF_LIGHT = _ccllib.GSL_CONST_MKSA_SPEED_OF_LIGHT
 GSL_CONST_MKSA_GRAVITATIONAL_CONSTANT = _ccllib.GSL_CONST_MKSA_GRAVITATIONAL_CONSTANT
 GSL_CONST_MKSA_PLANCKS_CONSTANT_H = _ccllib.GSL_CONST_MKSA_PLANCKS_CONSTANT_H
@@ -976,6 +1131,9 @@ HPLANCK = _ccllib.HPLANCK
 CLIGHT = _ccllib.CLIGHT
 EV_IN_J = _ccllib.EV_IN_J
 TNCDM = _ccllib.TNCDM
+DELTAM12_sq = _ccllib.DELTAM12_sq
+DELTAM13_sq_pos = _ccllib.DELTAM13_sq_pos
+DELTAM13_sq_neg = _ccllib.DELTAM13_sq_neg
 EPSREL_DIST = _ccllib.EPSREL_DIST
 EPSREL_GROWTH = _ccllib.EPSREL_GROWTH
 EPSREL_DNDZ = _ccllib.EPSREL_DNDZ
@@ -1077,26 +1235,30 @@ CCL_MAX_NU_SPECIES = _ccllib.CCL_MAX_NU_SPECIES
 CCL_NU_MNUT_MIN = _ccllib.CCL_NU_MNUT_MIN
 CCL_NU_MNUT_MAX = _ccllib.CCL_NU_MNUT_MAX
 CCL_NU_MNUT_N = _ccllib.CCL_NU_MNUT_N
+nu_normal = _ccllib.nu_normal
+nu_inverted = _ccllib.nu_inverted
+nu_equal = _ccllib.nu_equal
+nu_sum = _ccllib.nu_sum
 
 def calculate_nu_phasespace_spline(status):
     """calculate_nu_phasespace_spline(int * status) -> gsl_spline *"""
     return _ccllib.calculate_nu_phasespace_spline(status)
 
-def Omeganuh2(a, Neff, mnu, TCMB, accel, status):
-    """Omeganuh2(double a, double Neff, double mnu, double TCMB, gsl_interp_accel * accel, int * status) -> double"""
-    return _ccllib.Omeganuh2(a, Neff, mnu, TCMB, accel, status)
+def Omeganuh2(a, N_nu_mass, mnu, TCMB, accel, status):
+    """Omeganuh2(double a, int N_nu_mass, double * mnu, double TCMB, gsl_interp_accel * accel, int * status) -> double"""
+    return _ccllib.Omeganuh2(a, N_nu_mass, mnu, TCMB, accel, status)
 
-def Omeganuh2_to_Mnu(a, Neff, OmNuh2, TCMB, accel, status):
-    """Omeganuh2_to_Mnu(double a, double Neff, double OmNuh2, double TCMB, gsl_interp_accel * accel, int * status) -> double"""
-    return _ccllib.Omeganuh2_to_Mnu(a, Neff, OmNuh2, TCMB, accel, status)
+def nu_masses(OmNuh2, mass_split, TCMB, status):
+    """nu_masses(double OmNuh2, ccl_neutrino_mass_splits mass_split, double TCMB, int * status) -> double *"""
+    return _ccllib.nu_masses(OmNuh2, mass_split, TCMB, status)
 
-def Omeganuh2_vec(Neff, mnu, TCMB, a, output, status):
-    """Omeganuh2_vec(double Neff, double mnu, double TCMB, double * a, double * output, int * status)"""
-    return _ccllib.Omeganuh2_vec(Neff, mnu, TCMB, a, output, status)
+def Omeganuh2_vec(N_nu_mass, TCMB, a, mnu, output, status):
+    """Omeganuh2_vec(int N_nu_mass, double TCMB, double * a, double * mnu, double * output, int * status)"""
+    return _ccllib.Omeganuh2_vec(N_nu_mass, TCMB, a, mnu, output, status)
 
-def Omeganuh2_to_Mnu_vec(Neff, OmNuh2, TCMB, a, output, status):
-    """Omeganuh2_to_Mnu_vec(double Neff, double OmNuh2, double TCMB, double * a, double * output, int * status)"""
-    return _ccllib.Omeganuh2_to_Mnu_vec(Neff, OmNuh2, TCMB, a, output, status)
+def nu_masses_vec(OmNuh2, label, TCMB, output, status):
+    """nu_masses_vec(double OmNuh2, int label, double TCMB, double * output, int * status)"""
+    return _ccllib.nu_masses_vec(OmNuh2, label, TCMB, output, status)
 
 def p_1h(cosmo, k, a, status):
     """p_1h(cosmology cosmo, double k, double a, int * status) -> double"""
@@ -1148,6 +1310,8 @@ tinker10 = _ccllib.tinker10
 watson = _ccllib.watson
 angulo = _ccllib.angulo
 shethtormen = _ccllib.shethtormen
+emu_strict = _ccllib.emu_strict
+emu_equalize = _ccllib.emu_equalize
 class configuration(_object):
     """Proxy of C ccl_configuration struct."""
 
@@ -1172,6 +1336,10 @@ class configuration(_object):
     __swig_getmethods__["mass_function_method"] = _ccllib.configuration_mass_function_method_get
     if _newclass:
         mass_function_method = _swig_property(_ccllib.configuration_mass_function_method_get, _ccllib.configuration_mass_function_method_set)
+    __swig_setmethods__["emulator_neutrinos_method"] = _ccllib.configuration_emulator_neutrinos_method_set
+    __swig_getmethods__["emulator_neutrinos_method"] = _ccllib.configuration_emulator_neutrinos_method_get
+    if _newclass:
+        emulator_neutrinos_method = _swig_property(_ccllib.configuration_emulator_neutrinos_method_get, _ccllib.configuration_emulator_neutrinos_method_set)
 
     def __init__(self):
         """__init__(ccl_configuration self) -> configuration"""
@@ -1201,8 +1369,12 @@ CCL_ERROR_NU_INT = _ccllib.CCL_ERROR_NU_INT
 CCL_ERROR_EMULATOR_BOUND = _ccllib.CCL_ERROR_EMULATOR_BOUND
 CCL_ERROR_NU_SOLVE = _ccllib.CCL_ERROR_NU_SOLVE
 CCL_ERROR_NOT_IMPLEMENTED = _ccllib.CCL_ERROR_NOT_IMPLEMENTED
+CCL_ERROR_MNU_UNPHYSICAL = _ccllib.CCL_ERROR_MNU_UNPHYSICAL
+CCL_ERROR_ANGPOW = _ccllib.CCL_ERROR_ANGPOW
 CCL_ERROR_POLICY_EXIT = _ccllib.CCL_ERROR_POLICY_EXIT
 CCL_ERROR_POLICY_CONTINUE = _ccllib.CCL_ERROR_POLICY_CONTINUE
+CCL_DEBUG_MODE_OFF = _ccllib.CCL_DEBUG_MODE_OFF
+CCL_DEBUG_MODE_ON = _ccllib.CCL_DEBUG_MODE_ON
 
 def raise_exception(err, msg):
     """raise_exception(int err, char * msg)"""
@@ -1211,6 +1383,10 @@ def raise_exception(err, msg):
 def set_error_policy(error_policy):
     """set_error_policy(CCLErrorPolicy error_policy)"""
     return _ccllib.set_error_policy(error_policy)
+
+def set_debug_policy(debug_policy):
+    """set_debug_policy(CCLDebugModePolicy debug_policy)"""
+    return _ccllib.set_debug_policy(debug_policy)
 
 def check_status(cosmo, status):
     """check_status(cosmology cosmo, int * status)"""
@@ -1231,6 +1407,10 @@ def linlog_spacing(xminlog, xmin, xmax, Nlin, Nlog):
 def log_spacing(xmin, xmax, N):
     """log_spacing(double xmin, double xmax, int N) -> double *"""
     return _ccllib.log_spacing(xmin, xmax, N)
+
+def j_bessel(l, x):
+    """j_bessel(int l, double x) -> double"""
+    return _ccllib.j_bessel(l, x)
 class SplPar(_object):
     """Proxy of C SplPar struct."""
 

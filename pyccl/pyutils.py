@@ -28,6 +28,26 @@ def check(status, cosmo=None):
         raise RuntimeError("Error %d: %s" % (status, msg))
 
 
+def debug_mode(debug):
+    """Toggle debug mode on or off. If debug mode is on, the C backend is 
+    forced to print error messages as soon as they are raised, even if the 
+    flow of the program continues. This makes it easier to track down errors. 
+    
+    If debug mode is off, the C code will not print errors, and the Python 
+    wrapper will raise the last error that was detected. If multiple errors 
+    were raised, all but the last will be overwritten within the C code, so the 
+    user will not necessarily be informed of the root cause of the error.
+
+    Args:
+        debug (bool): Switch debug mode on (True) or off (False).
+
+    """
+    if debug:
+        lib.set_debug_policy(lib.CCL_DEBUG_MODE_ON)
+    else:
+        lib.set_debug_policy(lib.CCL_DEBUG_MODE_OFF)
+    
+
 def _cosmology_obj(cosmo):
     """Returns a ccl_cosmology object, given an input object which may be
     ccl_cosmology, the Cosmology wrapper class, or an invalid type.
@@ -56,6 +76,7 @@ def _vectorize_fn_simple(fn, fn_vec, x, returns_status=True):
 
     """
     status = 0
+    if isinstance(x, int): x = float(x)
     if isinstance(x, float):
         # Use single-value function
         if returns_status:
@@ -91,11 +112,14 @@ def _vectorize_fn(fn, fn_vec, cosmo, x, returns_status=True):
         returns_stats (bool): Indicates whether fn returns a status.
 
     """
+    
     # Access ccl_cosmology object
     cosmo_in = cosmo
     cosmo = _cosmology_obj(cosmo)
+    
     status = 0
-
+    
+    if isinstance(x, int): x = float(x)
     if isinstance(x, float):
         # Use single-value function
         if returns_status:
@@ -141,6 +165,7 @@ def _vectorize_fn2(fn, fn_vec, cosmo, x, z, returns_status=True):
     scalar = False
 
     # If a scalar was passed, convert to an array
+    if isinstance(x, int): x = float(x)
     if isinstance(x, float):
         scalar = True
         x = np.array([x,])
@@ -183,7 +208,8 @@ def _vectorize_fn3(fn, fn_vec, cosmo, x, n, returns_status=True):
     cosmo = _cosmology_obj(cosmo)
     status = 0
     scalar = False
-
+    
+    if isinstance(x, int): x = float(x)
     if isinstance(x, float):
         scalar = True
         x=np.array([x,])
@@ -227,7 +253,8 @@ def _vectorize_fn4(fn, fn_vec, cosmo, x, a, d, returns_status=True):
     cosmo = _cosmology_obj(cosmo)
     status = 0
     scalar = False
-
+    
+    if isinstance(x, int): x = float(x)
     if isinstance(x, float):
         scalar = True
         x=np.array([x,])
@@ -251,3 +278,4 @@ def _vectorize_fn4(fn, fn_vec, cosmo, x, a, d, returns_status=True):
         return f[0]
     else:
         return f
+

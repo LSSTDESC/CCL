@@ -8,24 +8,39 @@
 // (Python or other binding default)
 static CCLErrorPolicy _ccl_error_policy = CCL_ERROR_POLICY_EXIT;
 
+// Debug mode policy: whether to print error messages as they are raised. This 
+// is useful for the Python wrapper, which normally allows errors to be 
+// overwritten by the C code until control returns to Python. If debug mode is 
+// switched on, the errors are always printed by the C code when they occur.
+static CCLDebugModePolicy _ccl_debug_mode_policy = CCL_DEBUG_MODE_OFF;
+
 // Set error policy
 void ccl_set_error_policy(CCLErrorPolicy error_policy)
 {
   _ccl_error_policy = error_policy;
 }
 
+// Set debug mode policy
+void ccl_set_debug_policy(CCLDebugModePolicy debug_policy)
+{
+    _ccl_debug_mode_policy = debug_policy;
+}
+
 // Convenience function to raise exceptions in an appropriate way
 void ccl_raise_exception(int err, char* msg)
-{
+{  
   // Print error message and exit if fatal errors are enabled
   if ((_ccl_error_policy == CCL_ERROR_POLICY_EXIT) && (err)) {
-    fprintf(stderr, "%s\n", msg);
+    fprintf(stderr, "ERROR %d: %s\n", err, msg);
     exit(1);
+  }else if ((_ccl_debug_mode_policy == CCL_DEBUG_MODE_ON) && (err)){
+    fprintf(stderr, "ERROR %d: %s\n", err, msg);
   }
 }
 
 void ccl_check_status(ccl_cosmology *cosmo, int * status)
 {
+	
   switch (*status) {
   case 0: // all good, nothing to do
     return;
@@ -42,7 +57,7 @@ void ccl_check_status(ccl_cosmology *cosmo, int * status)
   case CCL_ERROR_NU_SOLVE: // error in converting Omeganuh2-> Mnu: exit. No status_message in cosmo because can't pass cosmology to the function.
     ccl_raise_exception(*status, "Error, in ccl_neutrinos.c. Omeganuh2_to_Mnu(): Root finding did not converge.");
     // TODO: Implement softer error handling, e.g. for integral convergence here	
-  default:
+  default: 
     ccl_raise_exception(*status, cosmo->status_message);
   }
 }
@@ -54,28 +69,41 @@ void ccl_check_status(ccl_cosmology *cosmo, int * status)
 void ccl_check_status_nocosmo(int * status)
 {
   switch (*status) {
-  case 0: //all good, nothing to do
+  case 0: // Nothing to do
     return;
-  case CCL_ERROR_LINSPACE:	// spacing allocation error, always terminate		
-    fprintf(stderr,"%s", "CCL_ERROR_LINSPACE");
-    exit(1);	
-  case CCL_ERROR_SPLINE:	// spline allocation error, always terminate	
-    fprintf(stderr,"%s", "CCL_ERROR_SPLINE");
-    exit(1);
-  case CCL_ERROR_COMPUTECHI:	// compute_chi error //RH
-    fprintf(stderr,"%s", "CCL_ERROR_COMPUTECHI");
-    exit(1);
-  case CCL_ERROR_HMF_INTERP: // terminate if hmf definition not supported
-    fprintf(stderr,"%s", "CCL_ERROR_HMF_INTERP");
-    exit(1);
-  case CCL_ERROR_NU_INT: // error in getting the neutrino integral spline: exit. No status_message in cosmo because can't pass cosmology to the function. //DL
-    fprintf(stderr, "%s", "Error, in ccl_neutrinos.c. ccl_calculate_nu_phasespace_spline(): Error in setting neutrino phasespace spline.");
-    exit(1);
-  case CCL_ERROR_NU_SOLVE: // error in converting Omeganuh2-> Mnu: exit. No status_message in cosmo because can't pass cosmology to the function.
-    fprintf(stderr, "%s", "Error, in ccl_neutrinos.c. Omeganuh2_to_Mnu(): Root finding did not converge.");
-     exit(1);
-  default:		
-    fprintf(stderr,"%s", "OTHER ERROR; SEE gsl_errno.h for ERROR CODES 1-32.");
-    exit(1);
+  case CCL_ERROR_LINSPACE:
+    // Spacing allocation error, always terminate
+    ccl_raise_exception(*status, "CCL_ERROR_LINSPACE: Spacing allocation error.");
+  case CCL_ERROR_SPLINE:
+    // Spline allocation error, always terminate
+    ccl_raise_exception(*status, "CCL_ERROR_SPLINE: Spline allocation error.");
+  case CCL_ERROR_COMPUTECHI:
+    // Compute_chi error
+    ccl_raise_exception(*status, 
+             "CCL_ERROR_COMPUTECHI: Comoving distance chi computation failed.");
+  case CCL_ERROR_HMF_INTERP:
+    // Terminate if hmf definition not supported
+    ccl_raise_exception(*status, 
+          "CCL_ERROR_HMF_INTERP: Halo mass function definition not supported.");
+  case CCL_ERROR_NU_INT:
+    // Error in getting the neutrino integral spline: exit. No status_message 
+    // in cosmo because can't pass cosmology to the function.
+    ccl_raise_exception(*status, 
+      "CCL_ERROR_NU_INT: Error getting the neutrino phase-space integral spline.");
+  case CCL_ERROR_NU_SOLVE:
+    // Error in converting Omeganuh2-> Mnu: exit. No status_message in cosmo 
+    // because can't pass cosmology to the function.
+    ccl_raise_exception(*status, 
+                      "CCL_ERROR_NU_SOLVE: Error converting Omeganuh2 -> Mnu.");
+  case CCL_ERROR_MNU_UNPHYSICAL:
+    // Error in the sum of mnu or Omeganu passed for the hierarchy requested.
+	  ccl_raise_exception(*status, 
+      "CCL_ERROR_MNU_UNPHYSICAL: Sum of neutrinos masses for this Omeganu value is incompatible with the requested mass hierarchy.");
+  case CCL_ERROR_NOT_IMPLEMENTED: 
+    ccl_raise_exception(*status, 
+      "CCL_ERROR_NOT_IMPLEMENTED: the type of m_nu specified is not supported.");
+  default:
+    ccl_raise_exception(*status, 
+             "Unrecognized error code (see gsl_errno.h for error codes 1-32).");
   }
 }
