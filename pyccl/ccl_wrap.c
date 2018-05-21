@@ -4036,23 +4036,25 @@ void nonlin_matter_power_vec(
     }
 }
 
-void sigmaR_vec(ccl_cosmology * cosmo, 
-                        double* R, int nR,
+void sigmaR_vec(ccl_cosmology * cosmo,
+		        double a,
+		        double* R, int nR,
                         double* output, int nout, int *status)
 {
     assert(nout == nR);
     for(int i=0; i < nR; i++){
-        output[i] = ccl_sigmaR(cosmo, R[i], status);
+      output[i] = ccl_sigmaR(cosmo, R[i], a, status);
     }
 }
 
 void sigmaV_vec(ccl_cosmology * cosmo,
-                        double* R, int nR,
+		        double a,
+		        double* R, int nR,
                         double* output, int nout, int *status)
 {
     assert(nout == nR);
     for(int i=0; i < nR; i++){
-        output[i] = ccl_sigmaV(cosmo, R[i], status);
+      output[i] = ccl_sigmaV(cosmo, R[i], a, status);
     }
 }
 
@@ -13175,94 +13177,103 @@ fail:
 SWIGINTERN PyObject *_wrap_sigmaR_vec(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   ccl_cosmology *arg1 = (ccl_cosmology *) 0 ;
-  double *arg2 = (double *) 0 ;
-  int arg3 ;
-  double *arg4 = (double *) 0 ;
-  int arg5 ;
-  int *arg6 = (int *) 0 ;
+  double arg2 ;
+  double *arg3 = (double *) 0 ;
+  int arg4 ;
+  double *arg5 = (double *) 0 ;
+  int arg6 ;
+  int *arg7 = (int *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  PyArrayObject *array2 = NULL ;
-  int is_new_object2 = 0 ;
-  PyObject *array4 = NULL ;
-  int temp6 ;
-  int res6 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyArrayObject *array3 = NULL ;
+  int is_new_object3 = 0 ;
+  PyObject *array5 = NULL ;
+  int temp7 ;
+  int res7 = 0 ;
   PyObject * obj0 = 0 ;
   PyObject * obj1 = 0 ;
   PyObject * obj2 = 0 ;
   PyObject * obj3 = 0 ;
+  PyObject * obj4 = 0 ;
   
-  if (!PyArg_ParseTuple(args,(char *)"OOOO:sigmaR_vec",&obj0,&obj1,&obj2,&obj3)) SWIG_fail;
+  if (!PyArg_ParseTuple(args,(char *)"OOOOO:sigmaR_vec",&obj0,&obj1,&obj2,&obj3,&obj4)) SWIG_fail;
   res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_cosmology, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "sigmaR_vec" "', argument " "1"" of type '" "ccl_cosmology *""'"); 
   }
   arg1 = (ccl_cosmology *)(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "sigmaR_vec" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = (double)(val2);
   {
     npy_intp size[1] = {
       -1 
     };
-    array2 = obj_to_array_contiguous_allow_conversion(obj1,
+    array3 = obj_to_array_contiguous_allow_conversion(obj2,
       NPY_DOUBLE,
-      &is_new_object2);
-    if (!array2 || !require_dimensions(array2, 1) ||
-      !require_size(array2, size, 1)) SWIG_fail;
-    arg2 = (double*) array_data(array2);
-    arg3 = (int) array_size(array2,0);
+      &is_new_object3);
+    if (!array3 || !require_dimensions(array3, 1) ||
+      !require_size(array3, size, 1)) SWIG_fail;
+    arg3 = (double*) array_data(array3);
+    arg4 = (int) array_size(array3,0);
   }
   {
     npy_intp dims[1];
-    if (!PyInt_Check(obj2))
+    if (!PyInt_Check(obj3))
     {
-      const char* typestring = pytype_string(obj2);
+      const char* typestring = pytype_string(obj3);
       PyErr_Format(PyExc_TypeError,
         "Int dimension expected.  '%s' given.",
         typestring);
       SWIG_fail;
     }
-    arg5 = (int) PyInt_AsLong(obj2);
-    dims[0] = (npy_intp) arg5;
-    array4 = PyArray_SimpleNew(1, dims, NPY_DOUBLE);
-    if (!array4) SWIG_fail;
-    arg4 = (double*) array_data(array4);
+    arg6 = (int) PyInt_AsLong(obj3);
+    dims[0] = (npy_intp) arg6;
+    array5 = PyArray_SimpleNew(1, dims, NPY_DOUBLE);
+    if (!array5) SWIG_fail;
+    arg5 = (double*) array_data(array5);
   }
-  if (!(SWIG_IsOK((res6 = SWIG_ConvertPtr(obj3,SWIG_as_voidptrptr(&arg6),SWIGTYPE_p_int,0))))) {
+  if (!(SWIG_IsOK((res7 = SWIG_ConvertPtr(obj4,SWIG_as_voidptrptr(&arg7),SWIGTYPE_p_int,0))))) {
     int val; 
-    int ecode = SWIG_AsVal_int(obj3, &val);
+    int ecode = SWIG_AsVal_int(obj4, &val);
     if (!SWIG_IsOK(ecode)) {
-      SWIG_exception_fail(SWIG_ArgError(ecode), "in method '" "sigmaR_vec" "', argument " "6"" of type '" "int""'");
+      SWIG_exception_fail(SWIG_ArgError(ecode), "in method '" "sigmaR_vec" "', argument " "7"" of type '" "int""'");
     }
-    temp6 = (int)(val);
-    arg6 = &temp6;
-    res6 = SWIG_AddTmpMask(ecode);
+    temp7 = (int)(val);
+    arg7 = &temp7;
+    res7 = SWIG_AddTmpMask(ecode);
   }
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    sigmaR_vec(arg1,arg2,arg3,arg4,arg5,arg6);
+    sigmaR_vec(arg1,arg2,arg3,arg4,arg5,arg6,arg7);
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
   resultobj = SWIG_Py_Void();
   {
-    resultobj = SWIG_Python_AppendOutput(resultobj,(PyObject*)array4);
+    resultobj = SWIG_Python_AppendOutput(resultobj,(PyObject*)array5);
   }
-  if (SWIG_IsTmpObj(res6)) {
-    resultobj = SWIG_Python_AppendOutput(resultobj, SWIG_From_int((*arg6)));
+  if (SWIG_IsTmpObj(res7)) {
+    resultobj = SWIG_Python_AppendOutput(resultobj, SWIG_From_int((*arg7)));
   } else {
-    int new_flags = SWIG_IsNewObj(res6) ? (SWIG_POINTER_OWN |  0 ) :  0 ;
-    resultobj = SWIG_Python_AppendOutput(resultobj, SWIG_NewPointerObj((void*)(arg6), SWIGTYPE_p_int, new_flags));
+    int new_flags = SWIG_IsNewObj(res7) ? (SWIG_POINTER_OWN |  0 ) :  0 ;
+    resultobj = SWIG_Python_AppendOutput(resultobj, SWIG_NewPointerObj((void*)(arg7), SWIGTYPE_p_int, new_flags));
   }
   {
-    if (is_new_object2 && array2)
+    if (is_new_object3 && array3)
     {
-      Py_DECREF(array2); 
+      Py_DECREF(array3); 
     }
   }
   return resultobj;
 fail:
   {
-    if (is_new_object2 && array2)
+    if (is_new_object3 && array3)
     {
-      Py_DECREF(array2); 
+      Py_DECREF(array3); 
     }
   }
   return NULL;
@@ -13272,94 +13283,103 @@ fail:
 SWIGINTERN PyObject *_wrap_sigmaV_vec(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   ccl_cosmology *arg1 = (ccl_cosmology *) 0 ;
-  double *arg2 = (double *) 0 ;
-  int arg3 ;
-  double *arg4 = (double *) 0 ;
-  int arg5 ;
-  int *arg6 = (int *) 0 ;
+  double arg2 ;
+  double *arg3 = (double *) 0 ;
+  int arg4 ;
+  double *arg5 = (double *) 0 ;
+  int arg6 ;
+  int *arg7 = (int *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  PyArrayObject *array2 = NULL ;
-  int is_new_object2 = 0 ;
-  PyObject *array4 = NULL ;
-  int temp6 ;
-  int res6 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyArrayObject *array3 = NULL ;
+  int is_new_object3 = 0 ;
+  PyObject *array5 = NULL ;
+  int temp7 ;
+  int res7 = 0 ;
   PyObject * obj0 = 0 ;
   PyObject * obj1 = 0 ;
   PyObject * obj2 = 0 ;
   PyObject * obj3 = 0 ;
+  PyObject * obj4 = 0 ;
   
-  if (!PyArg_ParseTuple(args,(char *)"OOOO:sigmaV_vec",&obj0,&obj1,&obj2,&obj3)) SWIG_fail;
+  if (!PyArg_ParseTuple(args,(char *)"OOOOO:sigmaV_vec",&obj0,&obj1,&obj2,&obj3,&obj4)) SWIG_fail;
   res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_cosmology, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "sigmaV_vec" "', argument " "1"" of type '" "ccl_cosmology *""'"); 
   }
   arg1 = (ccl_cosmology *)(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "sigmaV_vec" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = (double)(val2);
   {
     npy_intp size[1] = {
       -1 
     };
-    array2 = obj_to_array_contiguous_allow_conversion(obj1,
+    array3 = obj_to_array_contiguous_allow_conversion(obj2,
       NPY_DOUBLE,
-      &is_new_object2);
-    if (!array2 || !require_dimensions(array2, 1) ||
-      !require_size(array2, size, 1)) SWIG_fail;
-    arg2 = (double*) array_data(array2);
-    arg3 = (int) array_size(array2,0);
+      &is_new_object3);
+    if (!array3 || !require_dimensions(array3, 1) ||
+      !require_size(array3, size, 1)) SWIG_fail;
+    arg3 = (double*) array_data(array3);
+    arg4 = (int) array_size(array3,0);
   }
   {
     npy_intp dims[1];
-    if (!PyInt_Check(obj2))
+    if (!PyInt_Check(obj3))
     {
-      const char* typestring = pytype_string(obj2);
+      const char* typestring = pytype_string(obj3);
       PyErr_Format(PyExc_TypeError,
         "Int dimension expected.  '%s' given.",
         typestring);
       SWIG_fail;
     }
-    arg5 = (int) PyInt_AsLong(obj2);
-    dims[0] = (npy_intp) arg5;
-    array4 = PyArray_SimpleNew(1, dims, NPY_DOUBLE);
-    if (!array4) SWIG_fail;
-    arg4 = (double*) array_data(array4);
+    arg6 = (int) PyInt_AsLong(obj3);
+    dims[0] = (npy_intp) arg6;
+    array5 = PyArray_SimpleNew(1, dims, NPY_DOUBLE);
+    if (!array5) SWIG_fail;
+    arg5 = (double*) array_data(array5);
   }
-  if (!(SWIG_IsOK((res6 = SWIG_ConvertPtr(obj3,SWIG_as_voidptrptr(&arg6),SWIGTYPE_p_int,0))))) {
+  if (!(SWIG_IsOK((res7 = SWIG_ConvertPtr(obj4,SWIG_as_voidptrptr(&arg7),SWIGTYPE_p_int,0))))) {
     int val; 
-    int ecode = SWIG_AsVal_int(obj3, &val);
+    int ecode = SWIG_AsVal_int(obj4, &val);
     if (!SWIG_IsOK(ecode)) {
-      SWIG_exception_fail(SWIG_ArgError(ecode), "in method '" "sigmaV_vec" "', argument " "6"" of type '" "int""'");
+      SWIG_exception_fail(SWIG_ArgError(ecode), "in method '" "sigmaV_vec" "', argument " "7"" of type '" "int""'");
     }
-    temp6 = (int)(val);
-    arg6 = &temp6;
-    res6 = SWIG_AddTmpMask(ecode);
+    temp7 = (int)(val);
+    arg7 = &temp7;
+    res7 = SWIG_AddTmpMask(ecode);
   }
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    sigmaV_vec(arg1,arg2,arg3,arg4,arg5,arg6);
+    sigmaV_vec(arg1,arg2,arg3,arg4,arg5,arg6,arg7);
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
   resultobj = SWIG_Py_Void();
   {
-    resultobj = SWIG_Python_AppendOutput(resultobj,(PyObject*)array4);
+    resultobj = SWIG_Python_AppendOutput(resultobj,(PyObject*)array5);
   }
-  if (SWIG_IsTmpObj(res6)) {
-    resultobj = SWIG_Python_AppendOutput(resultobj, SWIG_From_int((*arg6)));
+  if (SWIG_IsTmpObj(res7)) {
+    resultobj = SWIG_Python_AppendOutput(resultobj, SWIG_From_int((*arg7)));
   } else {
-    int new_flags = SWIG_IsNewObj(res6) ? (SWIG_POINTER_OWN |  0 ) :  0 ;
-    resultobj = SWIG_Python_AppendOutput(resultobj, SWIG_NewPointerObj((void*)(arg6), SWIGTYPE_p_int, new_flags));
+    int new_flags = SWIG_IsNewObj(res7) ? (SWIG_POINTER_OWN |  0 ) :  0 ;
+    resultobj = SWIG_Python_AppendOutput(resultobj, SWIG_NewPointerObj((void*)(arg7), SWIGTYPE_p_int, new_flags));
   }
   {
-    if (is_new_object2 && array2)
+    if (is_new_object3 && array3)
     {
-      Py_DECREF(array2); 
+      Py_DECREF(array3); 
     }
   }
   return resultobj;
 fail:
   {
-    if (is_new_object2 && array2)
+    if (is_new_object3 && array3)
     {
-      Py_DECREF(array2); 
+      Py_DECREF(array3); 
     }
   }
   return NULL;
@@ -20780,8 +20800,8 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"sigma8", _wrap_sigma8, METH_VARARGS, (char *)"sigma8(cosmology cosmo, int * status) -> double"},
 	 { (char *)"linear_matter_power_vec", _wrap_linear_matter_power_vec, METH_VARARGS, (char *)"linear_matter_power_vec(cosmology cosmo, double a, double * k, double * output, int * status)"},
 	 { (char *)"nonlin_matter_power_vec", _wrap_nonlin_matter_power_vec, METH_VARARGS, (char *)"nonlin_matter_power_vec(cosmology cosmo, double a, double * k, double * output, int * status)"},
-	 { (char *)"sigmaR_vec", _wrap_sigmaR_vec, METH_VARARGS, (char *)"sigmaR_vec(cosmology cosmo, double * R, double * output, int * status)"},
-	 { (char *)"sigmaV_vec", _wrap_sigmaV_vec, METH_VARARGS, (char *)"sigmaV_vec(cosmology cosmo, double * R, double * output, int * status)"},
+	 { (char *)"sigmaR_vec", _wrap_sigmaR_vec, METH_VARARGS, (char *)"sigmaR_vec(cosmology cosmo, double a, double * R, double * output, int * status)"},
+	 { (char *)"sigmaV_vec", _wrap_sigmaV_vec, METH_VARARGS, (char *)"sigmaV_vec(cosmology cosmo, double a, double * R, double * output, int * status)"},
 	 { (char *)"correlation", _wrap_correlation, METH_VARARGS, (char *)"correlation(cosmology cosmo, int n_ell, double * ell, double * cls, int n_theta, double * theta, double * wtheta, int corr_type, int do_taper_cl, double * taper_cl_limits, int flag_method, int * status)"},
 	 { (char *)"correlation_vec", _wrap_correlation_vec, METH_VARARGS, (char *)"correlation_vec(cosmology cosmo, int nlarr, int nclarr, int nt, int corr_type, int method, double * output, int * status)"},
 	 { (char *)"cosmology_compute_sigma", _wrap_cosmology_compute_sigma, METH_VARARGS, (char *)"cosmology_compute_sigma(cosmology cosmo, int * status)"},

@@ -8,42 +8,13 @@
 #include "ccl_power.h"
 #include "ccl_massfunc.h"
 
-// Set two-halo term
-// 1 - Standard two-halo term
-// 2 - Linear theory
-int i2h=1;
-
-// Set full halo model pwoer spectrum method
-// 1 - Standard sum of two- and one-halo terms
-// 2 - Smooth transition using alpha parameter from Mead et al. (2015)
-int ipow=1;
-
-// Set concentration-mass relation
-// 1 - Bhattaharya et al. (2011)
-// 2 - Full Bullock et al. (2001)
-// 3 - Duffy et al. (2008)
-// 4 - Constant concentration (for testing)
-// 5 - Simple Bullock et al. (2001)
-// 6 - Leonard
-int iconc=3;
-
-// Select window function
-// 1 - NFW profile, appropriate for matter power spectrum
-int iwin=1;
-
-// Set the mass range for the halo-model integration
-double mmin=1e7;
-double mmax=1e17;
-
-// Virial density of haloes
-double Delta_v=200.;
-
 // analytic FT of NFW profile, from Cooray & Sheth (2002; Section 3 of https://arxiv.org/abs/astro-ph/0206508)
 // Normalised such that U(k=0)=1
 static double u_nfw_c(ccl_cosmology *cosmo, double c, double halomass, double k, double a, int * status){
    
   double rv, rs, ks, Dv;
   double f1, f2, f3, fc;
+  double Delta_v=200.; // Virial density of haloes
 
   // Special case to prevent numerical problems if k=0,
   // the result should be unity here because of the normalisation
@@ -89,6 +60,15 @@ static double Mstar(){
 double ccl_halo_concentration(ccl_cosmology *cosmo, double halomass, double a, int * status)
 {
 
+  // Set concentration-mass relation
+  // 1 - Bhattaharya et al. (2011)
+  // 2 - Full Bullock et al. (2001)
+  // 3 - Duffy et al. (2008)
+  // 4 - Constant concentration (for testing)
+  // 5 - Simple Bullock et al. (2001)
+  // 6 - Leonard
+  int iconc=3;
+  
   // Bhattacharya et al. 2011, Delta = 200 rho_{mean} (Table 2)
   if(iconc==1){    
     double gz = ccl_growth_factor(cosmo,a,status);
@@ -138,6 +118,10 @@ double ccl_halo_concentration(ccl_cosmology *cosmo, double halomass, double a, i
 // Fourier transforms of halo profiles
 static double window_function(ccl_cosmology *cosmo, double m, double k, double a, int * status){
 
+  // Select window function
+  // 1 - NFW profile, appropriate for matter power spectrum
+  int iwin=1;
+
   //Window function for matter power spectrum with NFW haloes
   if(iwin==1){
     // The mean background matter density in Msun/Mpc^3
@@ -169,6 +153,7 @@ static double one_halo_integrand(double log10mass, void *params){
   
   Int_one_halo_Par *p=(Int_one_halo_Par *)params;;
   double halomass = pow(10,log10mass);
+  double Delta_v = 200.;// Virial density of haloes
 
   // The squared normalised Fourier Transform of a halo profile (W(k->0 = 1)
   double wk = window_function(p->cosmo,halomass,p->k,p->a,p->status);
@@ -181,7 +166,9 @@ static double one_halo_integrand(double log10mass, void *params){
 
 // The one-halo term integral using gsl
 static double one_halo_integral(ccl_cosmology *cosmo, double k, double a, int * status){
-    
+
+  double mmin=1e7; // Minimum mass for the halo-model integration
+  double mmax=1e17; // Maximum mass for the halo-model integration
   int one_halo_integral_status = 0, qagstatus;
   double result = 0, eresult;
   double log10massmin = log10(mmin);
@@ -219,6 +206,7 @@ static double two_halo_integrand(double log10mass, void *params){
   
   Int_two_halo_Par *p=(Int_two_halo_Par *)params;
   double halomass = pow(10,log10mass);
+  double Delta_v=200.; // Virial density of haloes
 
   // The window function appropriate for the matter power spectrum
   //double wk = halomass*u_nfw_c(p->cosmo,c,halomass,p->k,p->a,p->status)/rho_matter
@@ -235,7 +223,9 @@ static double two_halo_integrand(double log10mass, void *params){
 
 // The two-halo term integral using gsl
 static double two_halo_integral(ccl_cosmology *cosmo, double k, double a, int * status){
-    
+
+  double mmin=1e7; // Minimum mass for the halo-model integration
+  double mmax=1e17; // Maximum mass for the halo-model integration
   int two_halo_integral_status = 0, qagstatus;
   double result = 0, eresult;
   double log10massmin = log10(mmin);
@@ -263,6 +253,13 @@ static double two_halo_integral(ccl_cosmology *cosmo, double k, double a, int * 
 
 // Computes the two-halo term
 double ccl_p_2h(ccl_cosmology *cosmo, double k, double a, int * status){
+
+  // Set two-halo term
+  // 1 - Standard two-halo term
+  // 2 - Linear theory
+  int i2h=1;
+
+  double mmin=1e7; //Minimum mass for the integrals
 
   // The standard formation of the two-halo term
   if(i2h==1){

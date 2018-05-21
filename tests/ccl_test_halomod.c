@@ -15,6 +15,7 @@
 #define WA 0.00
 #define NS 0.96
 #define NORMPS 0.80
+#define T_CMB 2.725
 #define ZD 0.0
 #define NZ 128
 #define Z0_GC 0.50
@@ -216,13 +217,13 @@ int main(void){
       // z=0
       if(iz==1){
 	a=1.0;
-	fp = fopen("/Users/Mead/Physics/CCL_files/data/CCL_power_z0.dat", "w");
+	fp = fopen("/Users/Mead/Physics/CCL_halomod_tests/data/CCL_power_z0.dat", "w");
       } 
 
       // z=1
       if(iz==2){
 	a=0.5;
-	fp = fopen("/Users/Mead/Physics/CCL_files/data/CCL_power_z1.dat", "w");
+	fp = fopen("/Users/Mead/Physics/CCL_halomod_tests/data/CCL_power_z1.dat", "w");
       } 
   
       printf("k\t\t P_lin\t\t P_NL\t\t P_2h\t\t P_1h\t\t P_halo\t\n");

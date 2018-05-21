@@ -45,23 +45,25 @@ void nonlin_matter_power_vec(
     }
 }
 
-void sigmaR_vec(ccl_cosmology * cosmo, 
-                        double* R, int nR,
+void sigmaR_vec(ccl_cosmology * cosmo,
+		        double a,
+		        double* R, int nR,
                         double* output, int nout, int *status)
 {
     assert(nout == nR);
     for(int i=0; i < nR; i++){
-        output[i] = ccl_sigmaR(cosmo, R[i], status);
+      output[i] = ccl_sigmaR(cosmo, R[i], a, status);
     }
 }
 
 void sigmaV_vec(ccl_cosmology * cosmo,
-                        double* R, int nR,
+		        double a,
+		        double* R, int nR,
                         double* output, int nout, int *status)
 {
     assert(nout == nR);
     for(int i=0; i < nR; i++){
-        output[i] = ccl_sigmaV(cosmo, R[i], status);
+      output[i] = ccl_sigmaV(cosmo, R[i], a, status);
     }
 }
 

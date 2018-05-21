@@ -653,13 +653,13 @@ def nonlin_matter_power_vec(cosmo, a, k, output, status):
     """nonlin_matter_power_vec(cosmology cosmo, double a, double * k, double * output, int * status)"""
     return _ccllib.nonlin_matter_power_vec(cosmo, a, k, output, status)
 
-def sigmaR_vec(cosmo, R, output, status):
-    """sigmaR_vec(cosmology cosmo, double * R, double * output, int * status)"""
-    return _ccllib.sigmaR_vec(cosmo, R, output, status)
+def sigmaR_vec(cosmo, a, R, output, status):
+    """sigmaR_vec(cosmology cosmo, double a, double * R, double * output, int * status)"""
+    return _ccllib.sigmaR_vec(cosmo, a, R, output, status)
 
-def sigmaV_vec(cosmo, R, output, status):
-    """sigmaV_vec(cosmology cosmo, double * R, double * output, int * status)"""
-    return _ccllib.sigmaV_vec(cosmo, R, output, status)
+def sigmaV_vec(cosmo, a, R, output, status):
+    """sigmaV_vec(cosmology cosmo, double a, double * R, double * output, int * status)"""
+    return _ccllib.sigmaV_vec(cosmo, a, R, output, status)
 CCL_CORR_LGNDRE = _ccllib.CCL_CORR_LGNDRE
 CCL_CORR_FFTLOG = _ccllib.CCL_CORR_FFTLOG
 CCL_CORR_BESSEL = _ccllib.CCL_CORR_BESSEL
