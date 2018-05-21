@@ -43,7 +43,7 @@ def sigmaR(cosmo, R, a=1.):
         sigmaR (float or array_like): RMS variance in top-hat sphere.
 
     """
-    return _vectorize_fn(lib.sigmaR, 
+    return _vectorize_fn2(lib.sigmaR, 
                          lib.sigmaR_vec, cosmo, R, a)
 
 def sigmaV(cosmo, R, a=1.):
@@ -57,7 +57,7 @@ def sigmaV(cosmo, R, a=1.):
         sigmaV (float or array_like): RMS variance in the displacement sphere in top-hat sphere.
 
     """
-    return _vectorize_fn(lib.sigmaV, 
+    return _vectorize_fn2(lib.sigmaV, 
                          lib.sigmaV_vec, cosmo, R, a)
 def sigma8(cosmo):
     """RMS variance in a top-hat sphere of radius 8 Mpc.
