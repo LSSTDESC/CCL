@@ -1,4 +1,3 @@
-
 from pyccl import ccllib as lib
 from pyccl.pyutils import _vectorize_fn, _vectorize_fn2, _vectorize_fn4
 
@@ -52,7 +51,7 @@ def sigmaM(cosmo, halo_mass, a):
                           lib.sigmaM_vec, cosmo, halo_mass, a)
 
 def halo_bias(cosmo, halo_mass, a, odelta=200):
-    """Tinker et al. (201) halo bias.
+    """Tinker et al. (2010) halo bias.
 
     TODO: implement other halo bias models.
 
