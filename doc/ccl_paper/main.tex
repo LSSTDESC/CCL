@@ -781,7 +781,7 @@ Table \ref{tab:tests} summarises all the \ccl validation tests discussed in this
 
 Comoving radial distances, the growth factor and distance moduli were compared against independently produced benchmarks at a set of low, $z = 0,1,2,3,4,5$, and high redshifts, $10\leq z \leq 10^3$. These comparisons were performed for the cosmologies listed in Table \ref{tab:cosmologies}. The target level of accuracy was $10^{-4}$ and this was achieved or surpassed for all the background quantities. Figure \ref{fig:distancegrow} summarizes our results for cosmologies without massive neutrinos. The left panels show the distance accuracy achieved for different cosmological models (curves of different thickness) as a function of redshift, which is always better than $10^{-6}$. Similarly, the right panels show the growth factor accuracy, which is $<10^{-5}$. 
 
-Analogous comparisons of the comoving radial distances, the growth factor, and the distance moduli were made to independently produced benchmarks at low and high redshifts for cosmologies containing massive neutrinos. These comparisons are displayed in Figure \ref{fig:distancegrow_nu}. The cosmological models used in tests of background quantities for cosmologies with massive neutrinos are given in Table \ref{tab:cosmologies_nu}.In this case, the benchmarks were produced by the {\tt astropy} library \citep{astropy}. We increase the maximum tolerated fractional difference between quantities produced by \ccl and benchmarks in this case to $10^{-3}$, due to the fact that while \ccl uses the full phase-space integral in computing the massive neutrino density as defined above, {\tt astropy} uses a fitting function which is itself not accurate at a $10^{-3}$ level. As can be seen in Table \ref{tab:cosmologies_nu}, we perform comparisons in cosmologies with $N_{eff}=3$ rather than the more standard $N_{eff}=3.046$ in order to ensure the same cosmologies can easily be defined in \ccl and {\tt astropy} \todo{Tilman, add comments on CLASS-based neutrino tests when merged.}
+Analogous comparisons of the comoving radial distances, the growth factor, and the distance moduli were made to independently produced benchmarks at low and high redshifts for cosmologies containing massive neutrinos. These comparisons are displayed in Figure \ref{fig:distancegrow_nu}. \todo{Figure currently only shows distances.} The cosmological models used in tests of background quantities for cosmologies with massive neutrinos are given in Table \ref{tab:cosmologies_nu}.In this case, the benchmarks were produced by the {\tt astropy} library \citep{astropy}. We increase the maximum tolerated fractional difference between quantities produced by \ccl and benchmarks in this case to $10^{-3}$, due to the fact that while \ccl uses the full phase-space integral in computing the massive neutrino density as defined above, {\tt astropy} uses a fitting function which is itself not accurate at a $10^{-3}$ level. As can be seen in Table \ref{tab:cosmologies_nu}, we perform comparisons in cosmologies with $N_{eff}=3$ rather than the more standard $N_{eff}=3.046$ in order to ensure the same cosmologies can easily be defined in \ccl and {\tt astropy} \todo{Tilman, add comments on CLASS-based neutrino tests when merged.}
 
 \input{table_testcosmo}
 
@@ -818,11 +818,9 @@ Analogous comparisons of the comoving radial distances, the growth factor, and t
 
 \begin{figure*}
   \centering
-  \includegraphics[width=0.45\textwidth]{distances.eps}
-  \includegraphics[width=0.45\textwidth]{growth.eps}
-  \includegraphics[width=0.45\textwidth]{distances_hiz.eps}
-  \includegraphics[width=0.45\textwidth]{growth_hiz.eps}
-  \caption{\todo{These are currently the plots for cosmologies without massive neutrinos. Need to add correct plots to this branch.} Accuracy achieved by \ccl in the prediction of distances (left panels) and growth factor (right panels) for models CCL1-5 with massive neutrinos, documented in Table \ref{tab:cosmologies_nu}. Different models correspond to different thickness curves. The top panels represent the accuracy checks at low redshift, while the bottom panels demonstrate accuracy up to high redshift. Note that we allow up to $10^{-3}$ fractional difference between benchmarks and \ccl in this case, because benchmarks utilize a fitting function for the neutrino phase space integral which is itself not accurate to $10^{-4}$. \todo{Fix margins of growth plots.}}
+  \includegraphics[width=0.45\textwidth]{distances_nu}
+  \includegraphics[width=0.45\textwidth]{distances_nu_hiz}
+  \caption{Accuracy achieved by \ccl in the prediction of distances for models CCL7-11 with massive neutrinos, documented in Table \ref{tab:cosmologies_nu}. Different models correspond to different thickness curves. The left panel represent the accuracy checks at low redshift, while the right panel demonstrates accuracy up to high redshift. Note that we allow up to $10^{-3}$ fractional difference between benchmarks and \ccl in this case, because benchmarks utilize a fitting function for the neutrino phase space integral which is itself not accurate to $10^{-4}$.\todo{Mising growth?}}
   \label{fig:distancegrow_nu}
 \end{figure*}
 
@@ -859,8 +857,8 @@ In addition to the above tests in $\Lambda$CDM cosmologies without massive neutr
 
 \begin{figure}
 \centering
-\includegraphics[width=0.47\textwidth]{zdist.eps}
-\caption{\todo{This is a placeholder figure, I need to port the right figure from the benchmark branch.} Fractional difference between the nonlinear matter power spectrum as computed directly via {\tt CLASS} with that computed using {\tt CLASS} via \ccl in cosmologies CCL7, CCL8, and CCL9 with massive neutrinos.}
+\includegraphics[width=0.47\textwidth]{pk_class_nu_NL}
+\caption{Fractional difference between the nonlinear matter power spectrum as computed directly via {\tt CLASS} with that computed using {\tt CLASS} via \ccl in cosmologies CCL7, CCL8, and CCL9 with massive neutrinos.}
 \label{fig:power_nu}
 \end{figure}
 
@@ -926,7 +924,7 @@ We used the BBKS linear matter power spectrum to compare two-point statistics fo
 \item angular galaxy clustering tomography correlation function, in the range $0.01 \deg < \theta < 5 \deg$, using 5 bins per decade, and
 \item angular shear tomography correlation functions ($\xi_+$,$\xi_-$), similarly to above.
 \end{itemize}
-We adopted the following analytic redshift distributions: a Gaussian with $\sigma = 0.15$, centered at $z_1 = 1$; and another Gaussian with the same dispersion but centered at $z_2 = 1.5$. We repeated the exercise for two redshift distribution histograms shown in Figure \ref{fig:zhistos}.
+We adopted the following analytic redshift distributions: a Gaussian with $\sigma = 0.15$, centered at $z_1 = 1$; and another Gaussian with the same dispersion but centered at $z_2 = 1.5$. We repeated the exercise for two redshift distribution histograms shown in Figure \ref{fig:zhistos}. 
 
 %------------------------
 \begin{figure}
@@ -949,18 +947,22 @@ We adopted the following analytic redshift distributions: a Gaussian with $\sigm
 \label{fig:cls_cmblens}
 \end{figure}
 
-\todo{Do we want to mention these conclusions?}
-\begin{itemize}
-\item The cross-correlation between bins is particularly sensitive to the number of points where the kernels have been sampled.
-\item The accuracy of the correlation function is sensitive to $\ell_{\rm max}$. We had to use up to $\ell_{\rm max}=3\times10^4$ for convergence (and we could not achieve $0.01\%$ convergence).
-\item The large scales of the correlation function are sensitive to $\ell_{\rm min}$. The use of the flat-sky approximation is also relevant on these scales.
-\item For sufficiently high precision, the correlation functions are sensitive to how the power spectrum is sampled and interpolated.
-\end{itemize}
+For $C_\ell$ computations, we achieved a relative difference between \ccl and the benchmarks of $<10^{-3}$. This applied both to analytic redshift distributions and histograms, for auto- and cross-correlations between bins for both galaxy clustering and weak lensing, as shown in Figure \ref{fig:cls_limber}. \todo{Need a description of the CMB lensing validation.} 
 
-For $C_\ell$ computations, we required the relative difference between \ccl and the benchmarks to be $<10^{-3}$. We performed the test both for analytic redshift distributions and histograms.\todo{Shown in figure...}
 
-To obtain realistic targets for the convergence of correlation function computations for LSST analyses, we calculated the expected statistical uncertainty of the clustering and lensing correlation functions of the LSST gold sample \todo{Add reference} assuming an effective source galaxy density of $n_\mathrm{eff} = 26\,\mathrm{gal/sq\,arcmin}$ for galaxy shape distortions, and galaxy density of $n_\mathrm{gold} = 45\,\mathrm{gal/sq\,arcmin}$ for number counts. Specifically, we calculates the Gaussian covariance of angular correlation functions following the formalism of \citet{2008A&A...477...43J}, and note that leaving out the non-Gaussian covariance terms makes our accuracy criterion more conservative. We split the galaxy samples into 10 tomography bins, defined to contain equal numbers of galaxies. The accuracy test then proceeded as follows. We compared the difference between \ccl calculated lensing and clustering correlations and the benchmarks, for the analytic redshift distributions and for auto-correlations of redshift bins only. To pass the benchmark test, we required that this difference be smaller than half of the value of the error bar derived from the covariance for each correlation function computed. Specifically, we took the value of the covariance in the bins centered at $z=1$ and $z=1.5$ to compare to the benchmarks. \todo{Add the plots.}
+To obtain realistic targets for the convergence of projected correlation function computations for LSST analyses, we calculated the expected statistical uncertainty of the clustering and lensing correlation functions of the LSST gold sample \todo{Add reference} assuming an effective source galaxy density of $n_\mathrm{eff} = 26\,\mathrm{gal/sq\,arcmin}$ for galaxy shape distortions, and galaxy density of $n_\mathrm{gold} = 45\,\mathrm{gal/sq\,arcmin}$ for number counts. Specifically, we calculated the Gaussian covariance of angular correlation functions following the formalism of \citet{2008A&A...477...43J}, and note that leaving out the non-Gaussian covariance terms makes our accuracy criterion more conservative. We split the galaxy samples into 10 tomography bins, defined to contain equal numbers of galaxies. The accuracy test then proceeded as follows. We compared the difference between \ccl calculated lensing and clustering correlations and the benchmarks, for the analytic redshift distributions and for auto-correlations of redshift bins only. To pass the benchmark test, we required that this difference be smaller than half of the value of the error bar derived from the covariance for each correlation function computed. Specifically, we took the value of the covariance in the bins centered at $z=1$ and $z=1.5$ to compare to the benchmarks.
 
+The results of this validation procedure for the projected correlation function are shown in Figure \ref{fig:corrval}. Our results suggest that the convergence between \ccl predictions and benchmarks is below the expected statitical uncertainty. 
+
+\begin{figure*}
+\centering
+\includegraphics[width=0.47\textwidth]{projected_correlation_error_comparison_analytic} 
+\includegraphics[width=0.47\textwidth]{projected_correlation_error_comparison_histo} 
+\caption{Comparison between the predicted projected correlation functions and the expected uncertainties for LSST. The left panel shows predictions for the analytic redshift distrobutions, while the right panel shows the case of the redshift histograms. The different markers and colors indicate clustering ($w_{gg}$, filled circles) or lensing ($\xi_{\pm}$, filled triangles and squares) auto-correlations of the $1$-$1$ or $2$-$2$ redshift bin combinations.}
+\label{fig:corrval}
+\end{figure*}
+
+  
 The 3-dimensional spatial correlation function $\xi(r)$ was validated by comparing with an independent, precise numerical transform. We calculated $\xi(r)$ 
 by transforming the \ccl non-linear HaloFit power spectrum using this independent code for the five cosmologies listed in Table~\ref{tab:cosmologies} at 
 redshifts $z = 0,1,2,3,4,5$.  We then compared with the $\xi(r)$ from \ccl with a sampling of $P(k)$ 
