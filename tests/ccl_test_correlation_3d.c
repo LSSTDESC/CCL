@@ -69,6 +69,8 @@ static void compare_correlation_3d(int i_model,struct corrs_3d_data * data)
 		data->Neff, data->mnu, data->mnu_type, data->w_0[i_model-1],data->w_a[i_model-1],
 		data->h,data->A_s,data->n_s,-1, -1, -1, -1,NULL,NULL, &status);
   params.Omega_g=0.0;
+  params.Omega_n_rel=0.0;
+  params.Omega_l = 1.0 - params.Omega_m - params.Omega_k;
   params.sigma_8=data->sigma_8;
   ccl_cosmology * cosmo = ccl_cosmology_create(params, config);
   ASSERT_NOT_NULL(cosmo);      

@@ -53,6 +53,9 @@ static void compare_cls(struct cls_data * data)
   config.matter_power_spectrum_method = ccl_linear;
   ccl_parameters params = ccl_parameters_create_flat_lcdm(data->Omega_c,data->Omega_b,data->h,
 							  data->A_s,data->n_s, &status);
+  // params.Omega_g=0.0;
+  params.Omega_n_rel=0.0;
+  params.Omega_l = 1.0 - params.Omega_m - params.Omega_g - params.Omega_k;
   params.sigma_8=data->sigma_8;
   ccl_cosmology * cosmo = ccl_cosmology_create(params, config);
   ASSERT_NOT_NULL(cosmo);
