@@ -35,7 +35,7 @@ mnu = [[0.04, 0., 0.], [0.05, 0.01, 0.], [0.03, 0.02, 0.04], [0.05, 0., 0.], [0.
 Neff_mnu = 3.0
 
 
-def Neff(N_ur, N_ncdm):
+def Neff_from_N_ur_N_ncdm(N_ur, N_ncdm):
     """Calculate N_eff from the number of relativistic and massive neutrinos."""
     Neff = N_ur + N_ncdm * ccl.ccllib.TNCDM**4 / (4./11.)**(4./3.)
     return Neff
@@ -48,21 +48,21 @@ class_models = OrderedDict(
             "neg_curv_nonu"    : {"Omega_k"  : -0.01,
                                   "Neff"     : 3.0},
             "flat_massnu1"     : {"Omega_k"  : 0.0,
-                                  "Neff"     : Neff(N_ur=2.0, N_ncdm=1.0),  # 1 massive neutrino
+                                  "Neff"     : Neff_from_N_ur_N_ncdm(N_ur=2.0, N_ncdm=1.0),  # 1 massive neutrino
                                   "m_nu"     : [0.0, 0.0, 0.1]},            # Mass
             "flat_massnu2"     : {"Omega_k"  : 0.0,
-                                  "Neff"     : Neff(N_ur=0.0, N_ncdm=3.0),   # 3 massive neutrino
+                                  "Neff"     : Neff_from_N_ur_N_ncdm(N_ur=0.0, N_ncdm=3.0),   # 3 massive neutrino
                                   "m_nu"     : [0.03, 0.03, 0.1]},           # Masses
             "flat_massnu3"     : {"Omega_k"  : 0.0,
-                                  "Neff"     : Neff(N_ur=0.0, N_ncdm=3.0),   # 3 massive neutrino
+                                  "Neff"     : Neff_from_N_ur_N_ncdm(N_ur=0.0, N_ncdm=3.0),   # 3 massive neutrino
                                   "m_nu"     : [0.03, 0.05, 0.1]}, # Masses
             "flat_manynu1"     : {"Omega_k"  : 0.0,
                                   "Neff"     : 6.0},               # 6 massless neutrinos
             "neg_curv_massnu1" : {"Omega_k"  : -0.01,
-                                  "Neff"     : Neff(N_ur=4.0, N_ncdm=2.0),   # 4 massless, 2 massive neutrino
+                                  "Neff"     : Neff_from_N_ur_N_ncdm(N_ur=4.0, N_ncdm=2.0),   # 4 massless, 2 massive neutrino
                                   "m_nu"     : [0.0, 0.03, 0.1]}, # Masses
             "pos_curv_manynu1" : {"Omega_k"  : 0.01,
-                                  "Neff"     : Neff(N_ur=3.0, N_ncdm=3.0),   # 3 massless, 3 massive neutrino
+                                  "Neff"     : Neff_from_N_ur_N_ncdm(N_ur=3.0, N_ncdm=3.0),   # 3 massless, 3 massive neutrino
                                   "m_nu"     : [0.03, 0.05, 0.1]}, # Masses
             }
         )
