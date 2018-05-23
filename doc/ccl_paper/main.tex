@@ -485,6 +485,7 @@ This result is consistent with the work of \citet{Watson2013}, which also finds 
 \vol{Antonio Villarreal}
 
 \jab{I'm a bit confused by this section. This is a quantity that CCL can return. But currently the clustering observables can only handle linear (scale-independent) bias? And should we say that the user can specify a linear bias that does not come from this fitting formula?}
+\asv{Including the Tinker fitting function for the halo bias is a fairly natural step considering we are also including the Tinker mass function (on which this is heavily related to). I do not think the fact that the clustering section of the code is currently unready to handle more than linear bias impacts the usefulness of having this built in. That being said, I will specify that currently we do not have a linear bias model built in as an explicit framework, though it can certainly be passed in to other sections of the code.}
 
 An important step in many interpretations of the halo model is to have a measure of the bias of dark matter halos, defined as the ratio of the halo power spectrum to the linear dark matter power spectrum,
 \begin{equation}
@@ -501,6 +502,8 @@ The \citet{Tinker2010} model parameterizes the halo mass function and the halo b
 \end{eqnarray}
 
 Again, while high {\em numerical} accuracy has been verified, there is a remaining uncertainty. \citet{Tinker2010} found a $\sim6\%$ scatter when determining the halo bias due to differences in simulations alone. In addition, this parameterization does not include a careful exploration of any impact due to changes in the dark energy equation of state. As with the halo mass function, studies will be required to reach accuracy at the percent level for any cosmological predictions. 
+
+We note that many observables are currently tuned to utilizing a linear halo bias (e.g. scale independent). While the current functionality of {\tt CCL} is to return the \citet{Tinker2010} model for halo bias, it is entirely possible to generate simpler models of halo bias and pass this into further functions.
 
 \subsection{Halo model}
 \label{sec:halo_model}
