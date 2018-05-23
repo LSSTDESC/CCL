@@ -426,14 +426,14 @@ Being able to calculate the halo abundance as a function of mass is a necessary 
 \bar{\rho}(r_{\Delta}) = \Delta \times \bar{\rho}_{\mathrm{m}},
 \end{equation}
 %
-where a spherical halo with radius $r_{\Delta}$ has an average density $\bar{\rho}$ equal to the overdensity parameter $\Delta$ times the mean background density of the universe at a given redshift, $\bar\rho_{\mathrm{m}}(z)$. \todo{I believe we use the same quantity without bars above. Make consistent? - DL} Within the literature, the choice of $\Delta$ can vary considerably, as observations focusing on the compact cores of halos often take much larger values of $\Delta$ than the fiducial definition in most halo clustering studies, $\Delta = 200$. We note that another common definition exists which utilizes the critical density of the universe, $\rho_{\mathrm{crit}}$; this introduces a simple conversion factor between the two definitions that must be accounted for. Currently, \ccl only accepts overdensity parameters with respect to the mean matter density, but we plan to allow for self-consistent handling of critical density based definitions in the future.
+where a spherical halo with radius $r_{\Delta}$ has an average density $\bar{\rho}$ equal to the overdensity parameter $\Delta$ times the mean background density of the universe at a given redshift, $\bar\rho_{\mathrm{m}}(z)$. \todo{I believe we use the same quantity without bars above. Make consistent? - DL}\asv{I would prefer the usage with bars throughout, as it is more explicit and matches uses in the simulation literature. Either direction I believe works though.} Within the literature, the choice of $\Delta$ can vary considerably, as observations focusing on the compact cores of halos often take much larger values of $\Delta$ than the fiducial definition in most halo clustering studies, $\Delta = 200$. We note that another common definition exists which utilizes the critical density of the universe, $\rho_{\mathrm{crit}}$; this introduces a simple conversion factor between the two definitions that must be accounted for. Currently, \ccl only accepts overdensity parameters with respect to the mean matter density, but we plan to allow for self-consistent handling of critical density based definitions in the future.
 
 The halo mass function is defined as
 \begin{equation}
 \frac{dn}{dM}=f(\sigma)\frac{\bar{\rho}_\mathrm{m}}{M}\frac{d\ln{\sigma^{-1}}}{dM},
 \label{eq:halo_mass_function}
 \end{equation}
-where $n$ is the number density of halos of a given mass $M$ associated with the RMS variance of the matter density field $\sigma^2$ at a given redshift and $f$ is the derived fitting function. \todo{Clarify that this should not be confused with $f$ the linear growth rate of structure as introduced above? - DL}
+where $n$ is the number density of halos of a given mass $M$ associated with the RMS variance of the matter density field $\sigma^2$ at a given redshift and $f$ is the derived fitting function\footnote{Not to be confused with the linear growth rate of structure!}. \todo{Clarify that this should not be confused with $f$ the linear growth rate of structure as introduced above? - DL}
 In \ccl calling this function returns the mass function in logarithmic mass bins, $dn/d\log_{10}{M}$, where the input is the halo mass $M$ and scale factor $a$.
 
 The halo mass $M$ is related to $\sigma$ by first computing the radius $R$ that would enclose a mass $M$ in a homogeneous Universe at $z=0$:
@@ -485,6 +485,7 @@ This result is consistent with the work of \citet{Watson2013}, which also finds 
 \vol{Antonio Villarreal}
 
 \jab{I'm a bit confused by this section. This is a quantity that CCL can return. But currently the clustering observables can only handle linear (scale-independent) bias? And should we say that the user can specify a linear bias that does not come from this fitting formula?}
+\asv{Including the Tinker fitting function for the halo bias is a fairly natural step considering we are also including the Tinker mass function (on which this is heavily related to). I do not think the fact that the clustering section of the code is currently unready to handle more than linear bias impacts the usefulness of having this built in. That being said, I will specify that currently we do not have a linear bias model built in as an explicit framework, though it can certainly be passed in to other sections of the code.}
 
 An important step in many interpretations of the halo model is to have a measure of the bias of dark matter halos, defined as the ratio of the halo power spectrum to the linear dark matter power spectrum,
 \begin{equation}
@@ -501,6 +502,8 @@ The \citet{Tinker2010} model parameterizes the halo mass function and the halo b
 \end{eqnarray}
 
 Again, while high {\em numerical} accuracy has been verified, there is a remaining uncertainty. \citet{Tinker2010} found a $\sim6\%$ scatter when determining the halo bias due to differences in simulations alone. In addition, this parameterization does not include a careful exploration of any impact due to changes in the dark energy equation of state. As with the halo mass function, studies will be required to reach accuracy at the percent level for any cosmological predictions. 
+
+We note that many observables are currently tuned to utilizing a linear halo bias (e.g. scale independent). While the current functionality of {\tt CCL} is to return the \citet{Tinker2010} model for halo bias, it is entirely possible to generate simpler models of halo bias and pass this into further functions.
 
 \subsection{Halo model}
 \label{sec:halo_model}
