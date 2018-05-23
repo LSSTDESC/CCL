@@ -23,11 +23,12 @@
     $C_l$ CMB lensing &(\ref{eq:cls}),(\ref{eq:cmblens}) & CCL6 & $1 \leq l\leq 3000$& $3\times 10^{-3}$ \\
     $\xi_+,\xi_-,\xi$ & (\ref{eq:xi22flat}),(\ref{eq:xi00flat}) & CCL6 & $0.01< \theta/{\rm deg}< 5$&  $0.5\sigma$\\
     3D correlation & (\ref{eq:xi3d}) & CCL1-5 & $1<r/{\rm Mpc}<200$ \& $0 \leq z \leq 5$& $4\times 10^{-3}$  \\
-    \todo{{\tt angpow}?} &  & & &  \\
+    $C_l$ clustering {\tt non-Limber} &  (\ref{eq:cls}),(\ref{eq:transfer_nc}),(\ref{eq:transfer_rsd}) & CCL1 & $500 \leq l < 1000$ & $2\times 10^{-2}$ &  \\
+    $C_l$ clustering {\tt Angpow} & (\ref{eq:cls}),(\ref{eq:transfer_nc}),(\ref{eq:transfer_rsd}) & CCL1 & $1 \leq l < 1000$ & $1\times 10^{-2}$ &   \\
     \todo{{\tt CLASS}?} &  & & &  \\
     \hline
   \end{tabular}
-  \caption{Summary of \ccl validation tests and accuracy achieved. These tests can be reproduced by the user and are integrated into the \ccl repository via TravisCl.\todo{Some questions about the HMF test. We are checking the HMF but also $\sigma$ and $\sigma^{-1}$ with different tolerances. In what way are those checks different from the $\sigma(M)$ check? Also, the units of mass in the $\sigma(M)$ check and HMF check are inconsistent - do we want to change that? For BBKS, do we test Eq. \ref{eq:bbks}? For CMB lensing, we actually have an allowed fraction of $l$s where we don't pass the cut, this is $10^{-3}$. Some cross-checks against text are necesary.}}
+  \caption{Summary of \ccl validation tests and accuracy achieved. These tests can be reproduced by the user and are integrated into the \ccl repository via TravisCl.\todo{Some questions about the HMF test. We are checking the HMF but also $\sigma$ and $\sigma^{-1}$ with different tolerances. In what way are those checks different from the $\sigma(M)$ check? Also, the units of mass in the $\sigma(M)$ check and HMF check are inconsistent - do we want to change that? For BBKS, do we test Eq. \ref{eq:bbks}? For CMB lensing, we actually have an allowed fraction of $l$s where we don't pass the cut, this is $10^{-3}$. Some cross-checks against text are necesary. For non-Limber tests, the quoted precision stands for the ratio between the relative errors between the computed $C_l$s and the cosmic variance. }}
   \label{tab:tests}
 %\end{table*}
 \end{sidewaystable*}

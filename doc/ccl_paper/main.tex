@@ -297,7 +297,7 @@ where $\mathcal{P}_\Phi(k)$ is the dimensionless power spectrum of the primordia
         \end{equation}
         where $j_\ell(x)$ is $\ell$-th order spherical Bessel function, $T_\delta$ is the matter transfer function, $b(z)$ is the linear clustering bias for this tracer and $p_z(z)$ is the normalized distribution of sources in redshift (i.e. the selection function). The fluctuations in the number density of sources in different redshift bins are therefore treated by \ccl as different tracers. Note that \ccl currently does not support non-linear or scale-dependent bias, but future releases will do so under a number of schemes, including perturbative approaches as implemented in e.g. \cite{FASTPT}.
   \item $\Delta^{\rm RSD}$ is the linear contribution from redshift-space distortions (RSDs):
-        \begin{equation}
+        \begin{equation}\label{eq:transfer_rsd}
           \Delta^{\rm RSD}_\ell(k)=\int dz\,\frac{(1+z) p_z(z)}{H(z)}T_\theta(k,z) j_\ell''(k\chi(z)),
         \end{equation}
         where $T_\theta(k,z)$ is the transfer function of $\theta$, the divergence of the comoving velocity field,and $j''_\ell$ is the second order derivative of the spherical Bessel function, $j_\ell$. Note that the RSD contribution to number counts is currently computed by \ccl assuming a linear-theory relation between the matter overdensity and peculiar velocity fields, mediated by the scale-independent growth rate $f$. While this should not be problematic for wide photometric redshift bins and standard cosmological models, users should exercise care when interpreting results for narrow window functions or exotic cosmologies. Additionally, number count tracers with RSD in cosmologies with massive neutrinos are not currently supported.
@@ -426,14 +426,14 @@ Being able to calculate the halo abundance as a function of mass is a necessary 
 \bar{\rho}(r_{\Delta}) = \Delta \times \bar{\rho}_{\mathrm{m}},
 \end{equation}
 %
-where a spherical halo with radius $r_{\Delta}$ has an average density $\bar{\rho}$ equal to the overdensity parameter $\Delta$ times the mean background density of the universe at a given redshift, $\bar\rho_{\mathrm{m}}(z)$. \todo{I believe we use the same quantity without bars above. Make consistent? - DL} Within the literature, the choice of $\Delta$ can vary considerably, as observations focusing on the compact cores of halos often take much larger values of $\Delta$ than the fiducial definition in most halo clustering studies, $\Delta = 200$. We note that another common definition exists which utilizes the critical density of the universe, $\rho_{\mathrm{crit}}$; this introduces a simple conversion factor between the two definitions that must be accounted for. Currently, \ccl only accepts overdensity parameters with respect to the mean matter density, but we plan to allow for self-consistent handling of critical density based definitions in the future.
+where a spherical halo with radius $r_{\Delta}$ has an average density $\bar{\rho}$ equal to the overdensity parameter $\Delta$ times the mean background density of the universe at a given redshift, $\bar\rho_{\mathrm{m}}(z)$. \todo{I believe we use the same quantity without bars above. Make consistent? - DL}\asv{I would prefer the usage with bars throughout, as it is more explicit and matches uses in the simulation literature. Either direction I believe works though.} Within the literature, the choice of $\Delta$ can vary considerably, as observations focusing on the compact cores of halos often take much larger values of $\Delta$ than the fiducial definition in most halo clustering studies, $\Delta = 200$. We note that another common definition exists which utilizes the critical density of the universe, $\rho_{\mathrm{crit}}$; this introduces a simple conversion factor between the two definitions that must be accounted for. Currently, \ccl only accepts overdensity parameters with respect to the mean matter density, but we plan to allow for self-consistent handling of critical density based definitions in the future.
 
 The halo mass function is defined as
 \begin{equation}
 \frac{dn}{dM}=f(\sigma)\frac{\bar{\rho}_\mathrm{m}}{M}\frac{d\ln{\sigma^{-1}}}{dM},
 \label{eq:halo_mass_function}
 \end{equation}
-where $n$ is the number density of halos of a given mass $M$ associated with the RMS variance of the matter density field $\sigma^2$ at a given redshift and $f$ is the derived fitting function. \todo{Clarify that this should not be confused with $f$ the linear growth rate of structure as introduced above? - DL}
+where $n$ is the number density of halos of a given mass $M$ associated with the RMS variance of the matter density field $\sigma^2$ at a given redshift and $f$ is the derived fitting function\footnote{Not to be confused with the linear growth rate of structure!}. \todo{Clarify that this should not be confused with $f$ the linear growth rate of structure as introduced above? - DL}
 In \ccl calling this function returns the mass function in logarithmic mass bins, $dn/d\log_{10}{M}$, where the input is the halo mass $M$ and scale factor $a$.
 
 The halo mass $M$ is related to $\sigma$ by first computing the radius $R$ that would enclose a mass $M$ in a homogeneous Universe at $z=0$:
@@ -485,6 +485,7 @@ This result is consistent with the work of \citet{Watson2013}, which also finds 
 \vol{Antonio Villarreal}
 
 \jab{I'm a bit confused by this section. This is a quantity that CCL can return. But currently the clustering observables can only handle linear (scale-independent) bias? And should we say that the user can specify a linear bias that does not come from this fitting formula?}
+\asv{Including the Tinker fitting function for the halo bias is a fairly natural step considering we are also including the Tinker mass function (on which this is heavily related to). I do not think the fact that the clustering section of the code is currently unready to handle more than linear bias impacts the usefulness of having this built in. That being said, I will specify that currently we do not have a linear bias model built in as an explicit framework, though it can certainly be passed in to other sections of the code.}
 
 An important step in many interpretations of the halo model is to have a measure of the bias of dark matter halos, defined as the ratio of the halo power spectrum to the linear dark matter power spectrum,
 \begin{equation}
@@ -501,6 +502,8 @@ The \citet{Tinker2010} model parameterizes the halo mass function and the halo b
 \end{eqnarray}
 
 Again, while high {\em numerical} accuracy has been verified, there is a remaining uncertainty. \citet{Tinker2010} found a $\sim6\%$ scatter when determining the halo bias due to differences in simulations alone. In addition, this parameterization does not include a careful exploration of any impact due to changes in the dark energy equation of state. As with the halo mass function, studies will be required to reach accuracy at the percent level for any cosmological predictions. 
+
+We note that many observables are currently tuned to utilizing a linear halo bias (e.g. scale independent). While the current functionality of {\tt CCL} is to return the \citet{Tinker2010} model for halo bias, it is entirely possible to generate simpler models of halo bias and pass this into further functions.
 
 \subsection{Halo model}
 \label{sec:halo_model}
@@ -675,7 +678,7 @@ The Limber approximation works best for wide radial kernels and high $\ell$.
 \label{sec:angpow}
 \vol{J\'er\'emy Neveu}
 
-\ccl incorporates natively routines to compute the $C^{ab}_\ell$ angular power spectra as described above without the Limber approximation. The algorithm performs first the integrals over $z$ for both tracers, and ends with the $k$ integral. This computation is much slower than using the Limber approximation, but results in precise angular power spectra at low $\ell$, and correct cross-correlations between tracers (the Limber approximation fails at reproducing the beat phenomenon $j_\ell(x)\times j_\ell(x')$). \todo{Can we expand on this if it is important or provide a reference? I think the brief mention is confusing if you aren't familiar - DL.} The integration of these routines has been tested against the \texttt{CLASS} code and recovers the same angular power spectra when precision parameters are set to high values.
+\ccl incorporates natively routines to compute the $C^{ab}_\ell$ angular power spectra as described above without the Limber approximation. The algorithm performs first the integrals over $z$ for both tracers, and ends with the $k$ integral. This computation is much slower than using the Limber approximation, but results in precise angular power spectra at low $\ell$, and correct cross-correlations between tracers. Indeed as the Limber approximation consists in replacing oscillatory functions by Dirac distributions, the latter fails at reproducing the beat phenomenon $j_\ell(x)\times j_\ell(x')$ appearing when two oscillatory functions are multiplied. The integration of these routines has been tested against the \texttt{CLASS} code and recovers the same angular power spectra when precision parameters are set to high values.
 
 However, the computation of the $C^{ab}_\ell$ without the Limber approximation is too costly in terms of computing time using this method, if one wants to explore extensively a full cosmological parameter space. The aim of the \texttt{Angpow} software \citep{2017arXiv170103592C} is to compute the angular power spectra  $C_{\ell}^{ab}$  without any Limber numerical approximation in a faster way but still accurately. \ccl has been linked to the \texttt{Angpow} code,  which is briefly described here.
 
@@ -688,7 +691,7 @@ The auxiliary function $f_\ell(z,k)$ can be defined without loss of generality a
 \begin{equation}
 f_\ell(z,k) \equiv  \sqrt{\frac{2}{\pi}}\  k \sqrt{P_\delta(k,z)}\ \widetilde{\Delta}_\ell(z,k)\label{eq-fell-func}
 \end{equation}
-with $\widetilde{\Delta}_\ell(z,k)$ the function describing the physical processes such as matter density fluctuations, redshift-space distortions as described for instance in references \citet{2008cmb..book.....D,2009PhRvD..80h3514Y,2010PhRvD..82h3508Y, 2011PhRvD..84d3516C,2011PhRvD..84f3505B}. Currently, the \texttt{Angpow} version delivered with \ccl can only deal with galaxy clustering tracers (no lensing), and this without the magnification lensing term (equation \ref{eq:deltaM}). The incorporation of those transfer functions is left for future work, but in principle \texttt{Angpow} has the capability to treat them. For now, for galaxy clustering tracers we define $\widetilde{\Delta}_\ell(z,k)$ as 
+with $\widetilde{\Delta}_\ell(z,k)$ the function describing the physical processes such as matter density fluctuations, redshift-space distortions as described for instance in references \citet{2008cmb..book.....D,2009PhRvD..80h3514Y,2010PhRvD..82h3508Y, 2011PhRvD..84d3516C,2011PhRvD..84f3505B}. Currently, the \texttt{Angpow} version delivered with \ccl can only deal with galaxy clustering tracers (no lensing), and this without the magnification lensing term (equation \ref{eq:deltaM}). The plug in of those transfer functions is left for future work. For now, for galaxy clustering tracers we define $\widetilde{\Delta}_\ell(z,k)$ as 
 \begin{equation}
  \widetilde{\Delta}_\ell(z,k) \approx b(z) j_\ell(k \chi(z)) - f(z) j_\ell^{\prime\prime}(k \chi(z)) 
 \end{equation}
@@ -696,7 +699,7 @@ with $j_\ell(x)$ and $j_\ell^{\prime\prime}(x)$ the spherical Bessel function of
 %\end{itemize}
 
 In \texttt{Angpow}, the inner integral in $k$ is computed first. 
-To conduct the computation of such an integral of highly oscillating functions, the 3C-algorithm described in details in \citep{2017arXiv170103592C} is used. In brief, it relies on the projection of the oscillating $f_\ell(z_,k)$ onto a Chebyshev series of order $2^N$, the product of the two Chebyshev series is performed with a $2^{2N}$ Chebyshev series; then, the integral is computed using Clenshaw-Curtis quadrature. Finally, the integrals over $z$ are performed via again an optimised Clenshaw-Curtis quadrature. All the Chebyshev expansions and the Clenshaw-Curtis quadrature are performed via the \textit{Discrete Cosine Transform} of type I from the DCT-I fast transform of the FFTW library \citep{FFTW}.
+To conduct the computation of such an integral of highly oscillating functions, the 3C-algorithm described in details in \citep{2017arXiv170103592C} is used. In brief, it relies on the projection of the oscillating $f_\ell(z_,k)$ onto a Chebyshev series of order $2^N$, the product of the two Chebyshev series is performed with a $2^{2N}$ Chebyshev series; then the integral is computed using Clenshaw-Curtis quadrature. Finally, the integrals over $z$ are performed via again an optimised Clenshaw-Curtis quadrature. All the Chebyshev expansions and the Clenshaw-Curtis quadrature are performed via the \textit{Discrete Cosine Transform} of type I from the DCT-I fast transform of the FFTW library \citep{FFTW}.
 
 As in the general case the Limber approximation is valid at high $\ell$ values, the \ccl user can define an $\ell$ threshold to switch from the non-Limber slow computation to the faster Limber approximation.
  
@@ -925,12 +928,12 @@ We note that while we maintain the $10^{-4}$ for our evaluations of $\sigma$, th
 
 We used the BBKS linear matter power spectrum to compare two-point statistics for two redshift bins, resulting in three tomography combinations, ($1-1$),($1-2$),($2-2$). We computed the following quantities:
 \begin{itemize}
-\item projected galaxy clustering tomography power spectra: density term only (no magnification, RSD, etc.) with non-evolving linear bias $b(z) = 1$, in the range $10 < \ell < 10000$, using $5$ bins per decade,
-\item angular convergence tomography power spectra: leading order convergence term only (no magnification), in the same range and with the same resolution as the case above,
-\item angular galaxy clustering tomography correlation function, in the range $0.01 \deg < \theta < 5 \deg$, using 5 bins per decade, and
-\item angular shear tomography correlation functions ($\xi_+$,$\xi_-$), similarly to above.
+\item Number counts angular power spectra: density term only (no magnification, RSD, etc.) with non-evolving linear bias $b(z) = 1$, in the range $10 < \ell < 10000$, using $5$ bins per decade,
+\item Lensing convergence angular power spectra: leading order convergence term only (no magnification or intrinsic alignments), in the same range and with the same resolution as the case above,
+\item Number counts angular correlation functions in the range $0.01 \deg < \theta < 5 \deg$, using 5 bins per decade, and
+\item Lensing shear angular correlation functions ($\xi_+$,$\xi_-$), similarly to above.
 \end{itemize}
-We adopted the following analytic redshift distributions: a Gaussian with $\sigma = 0.15$, centered at $z_1 = 1$; and another Gaussian with the same dispersion but centered at $z_2 = 1.5$. We repeated the exercise for two redshift distribution histograms shown in Figure \ref{fig:zhistos}. 
+We adopted the following analytic redshift distributions: a Gaussian with $\sigma = 0.15$, centered at $z_1 = 1$; and another Gaussian with the same dispersion but centered at $z_2 = 1.5$. We repeated the exercise for two redshift distribution histograms shown in Figure \ref{fig:zhistos}. Besides these two-point functions, we also validated the computation of the CMB lensing power spectrum, using the same $\ell$ binning described above.
 
 %------------------------
 \begin{figure}
@@ -944,7 +947,7 @@ We adopted the following analytic redshift distributions: a Gaussian with $\sigm
 \begin{figure*}
 \includegraphics[width=0.49\textwidth]{Cl_analytic}
 \includegraphics[width=0.49\textwidth]{Cl_histo}
-\caption{Tests of the angular power spectrum accuracy. Benchmark comparisons for for galaxy clustering (solid) and weak lensing (dashed) power spectra are shown for analytic and histogram-based redshift distributions in the left and right panels respectively..}
+\caption{Tests of the angular power spectrum accuracy. Benchmark comparisons for number counts (solid) and weak lensing (dashed) power spectra are shown for analytic and histogram-based redshift distributions in the left and right panels respectively..}
 \label{fig:cls_limber}
 \end{figure*}
 \begin{figure}
@@ -953,8 +956,7 @@ We adopted the following analytic redshift distributions: a Gaussian with $\sigm
 \label{fig:cls_cmblens}
 \end{figure}
 
-For $C_\ell$ computations, we achieved a relative difference between \ccl and the benchmarks of $<10^{-3}$. This applied both to analytic redshift distributions and histograms, for auto- and cross-correlations between bins for both galaxy clustering and weak lensing, as shown in Figure \ref{fig:cls_limber}. \todo{Need a description of the CMB lensing validation.} 
-
+For $C_\ell$ computations, we achieved a relative difference between \ccl and the benchmarks of $<10^{-3}$ ($3\times10^{-3}$ for CMB lensing). This applied both to analytic redshift distributions and histograms, for auto- and cross-correlations between bins for both galaxy clustering and weak lensing, as shown in Figure \ref{fig:cls_limber}. The CMB lensing result is shown in Figure \ref{fig:cls_cmblens}.
 
 To obtain realistic targets for the convergence of projected correlation function computations for LSST analyses, we calculated the expected statistical uncertainty of the clustering and lensing correlation functions of the LSST gold sample \todo{Add reference} assuming an effective source galaxy density of $n_\mathrm{eff} = 26\,\mathrm{gal/sq\,arcmin}$ for galaxy shape distortions, and galaxy density of $n_\mathrm{gold} = 45\,\mathrm{gal/sq\,arcmin}$ for number counts. Specifically, we calculated the Gaussian covariance of angular correlation functions following the formalism of \citet{2008A&A...477...43J}, and note that leaving out the non-Gaussian covariance terms makes our accuracy criterion more conservative. We split the galaxy samples into 10 tomography bins, defined to contain equal numbers of galaxies. The accuracy test then proceeded as follows. We compared the difference between \ccl calculated lensing and clustering correlations and the benchmarks, for the analytic redshift distributions and for auto-correlations of redshift bins only. To pass the benchmark test, we required that this difference be smaller than half of the value of the error bar derived from the covariance for each correlation function computed. Specifically, we took the value of the covariance in the bins centered at $z=1$ and $z=1.5$ to compare to the benchmarks.
 
@@ -1001,8 +1003,9 @@ less than 0.4\% in the range $1 < r < 200$~Mpc rising to about 5\% at $r = 1000$
 \subsubsection{\tt Angpow}
 
 \ccl performs non-Limber computations of angular power spectra through the {\tt Angpow} library as detailed in Section \ref{sec:angpow}. The \texttt{Angpow} software was tested against \texttt{CLASS} and the native \ccl computation and can perform the same computations approximately an order of magnitude faster ($\mathcal{O}(1s)$). 
-Its precision and speed parameters were optimised so that the relative numerical error compared with a high precision computation is two orders of magnitude below the relative cosmic variance $\sqrt{2/(2\ell+1)}$, from $\ell=2$ to $\ell=1000$. We demonstrate this in Figure \ref{fig:angpow}, where we plot the angular clustering power spectrum for a sample of galaxies with $\langle z \rangle=1$ and a Gaussian redshift distribution that extends between $|z-\langle z \rangle|z<5\sigma_z$, where $\sigma_z=0.02$, for a CCL6 cosmology. 
-The non-Limber prediction deviates from the Limber case at low $l$ as expected. The right panel shows the fractional difference between the non-Limber curves and the Limber case, demonstrating the accuracy of the {\tt Angpow} prediction for our choice of precision and speed prameters. 
+Its precision and speed parameters were optimised so that the relative numerical error compared with a high precision computation is two orders of magnitude below the relative cosmic variance $\sqrt{2/(2\ell+1)}$, from $\ell=2$ to $\ell=1000$. We demonstrate this in Figure \ref{fig:angpow}, where we plot the angular clustering power spectrum for a sample of galaxies with $\langle z \rangle=1$ and a Gaussian redshift distribution that extends between $|z-\langle z \rangle|<5\sigma_z$, where $\sigma_z=0.02$, for a CCL6 cosmology. 
+The non-Limber prediction deviates from the Limber case at low $l$ as expected. The right panel shows the fractional difference between the non-Limber curves, demonstrating the accuracy of the {\tt Angpow} prediction for our choice of precision and speed prameters.
+Also the native non-Limber computation and {\tt Angpow} where tested to recover the Limber approximated curve at high $l$ for a wide Gaussian window ($\sigma_z=0.1$). The relative errors with respect to the Limber result at high $l$ are below two orders of margnitudes with respect to cosmic variance. 
 
 \begin{figure*}[htbp]
 \centering
