@@ -29,6 +29,7 @@
 \newcommand{\asv}[1]{\textcolor{purple}{ASV: #1}}
 \newcommand{\revise}{\textcolor{red!55!blue}{\bf Section ready for revision}}
 \newcommand{\jab}[1]{\textcolor{blue}{JAB: #1}}
+\newcommand{\mi}[1]{\textcolor{brown}{MI: #1}}
 
 \newcommand{\ccl}{{\tt CCL}\xspace}
 
@@ -63,15 +64,16 @@ The Core Cosmology Library (\ccl) provides routines to compute basic cosmologica
 \vol{Mustapha Ishak, Elisa Chisari}
 \revise
 
-Starting in the next decade, large-scale galaxy surveys will drive a new era of high precision cosmology \citep{DESCWhite,green11,Laureijs11}. Their overarching goal is to answer the question of the origin of cosmic acceleration. In other words, to elucidate the nature of ``dark energy'', broadly understood as a family of potential models: from a cosmological constant to a dynamical field and modifications of gravity \citep{Weinberg13}. \jab{mention dark matter?}
+Starting in the next decade, large-scale galaxy surveys will drive a new era of high precision cosmology \citep{DESCWhite,green11,Laureijs11}. Their overarching goal is to answer the question of the origin of cosmic acceleration. In other words, to elucidate the nature of ``dark energy'', broadly understood as a family of potential models: from a cosmological constant to a dynamical field and modifications of gravity; see for example  \citep{Carroll2001CC,Peebles2003,
+Padmanabhan2003,Copeland2006,Ishak2007,Weinberg13} and references therein. \jab{mention dark matter?} 
 
-High precision constraints on dark energy models will be achieved by probing at the same time the expansion and growth history of the Universe over a long redshift baseline. For this purpose, it will be crucial to combine measurements of multiple cosmological probes: weak and strong gravitational lensing, the clustering of galaxies, baryon acoustic oscillations, supernovae, and the abundance, clustering and gravitational lensing of galaxy clusters. Current weak lensing surveys have started to take this approach already \citep{Joudaki18,vanUitert18,DEScombined,krause17}. From a theoretical perspective, there are two challenges faced by the next generation of galaxy surveys. 
+High precision constraints on dark energy models will be achieved by probing at the same time the expansion and growth history of the Universe over a long redshift baseline. For this purpose, it will be crucial to combine measurements of multiple cosmological probes: weak and strong gravitational lensing, the clustering of galaxies, baryon acoustic oscillations, distances to supernovae, and the abundance, clustering and gravitational lensing of galaxy clusters. Current weak lensing surveys have started to take this approach already \citep{Joudaki18,vanUitert18,DEScombined,krause17}. From a theoretical perspective, there are two challenges faced by the next generation of galaxy surveys. 
 
-The first one is to ensure that all probes are modeled accurately, [including cosmological, astrophysical, and observational effects,] to avoid potential biases in the final cosmological results. In the context of weak gravitational lensing, for example, phenomena that can lead to biases include the impact of baryons on the distribution of matter and the intrinsic alignments of galaxies \citep[e.g.][]{vanDaalen11,Semboloni11,Troxel14,Krause15,Blazek17}. In the context of galaxy clustering, effects such as magnification of number counts and redshift space distortions need to be included in the models \citep{Alonso15,ghosh18}. 
+The first one is to ensure that all probes are modeled accurately, [including cosmological, astrophysical, and observational effects,] \mi{do we mean to leave the 3 of them here?} to avoid potential biases in the final cosmological results. In the context of weak gravitational lensing, for example, phenomena that can lead to biases include the impact of baryons on the distribution of matter and the intrinsic alignments of galaxies \citep[e.g.][]{vanDaalen11,Semboloni11,Troxel14,Krause15,Blazek17}. In the context of galaxy clustering, effects such as magnification of number counts and redshift space distortions need to be included in the models \citep{Alonso15,ghosh18}. 
 
-Second, even standard cosmological quantities in the simplest models, such as distances in a $\Lambda$CDM cosmology, have to be predicted to a validated degree of accuracy. Achieving this objective is not always trivial, as computing these quantities generally requries, for example, numerical integration or interpolation, both of which are prone to numerical error. To guarantee the validity of our predictions, comparisons must be performed between different numerical tools to ensure no deviations are present. 
+Second, even standard cosmological quantities in the simplest models, such as distances in a $\Lambda$CDM cosmology, have to be predicted to a validated degree of accuracy. Achieving this objective is not always trivial, as computing these quantities generally requries, for example, numerical integration or interpolation, both of which are prone to numerical error. To guarantee the validity of our predictions, comparisons must be performed between different numerical tools to ensure no deviations are present \mi{to ensure the desired accuracy}. 
 
-Faced with these challenges, the Dark Energy Science Collaboration (DESC), one of the science collaborations of the Large Synoptic Survey Telescope (LSST), has built a comprehensive software tool that satisfies the needs of the next generation of cosmological analysis. This paper presents the Core Cosmology Library\footnote{publicly available at \url{https://github.com/LSSTDESC/CCL}} (\ccl). \ccl is a library for making predictions that are validated to a well-documented numerical accuracy for the purpose of constraining cosmology. While \ccl was built with LSST in mind, our goal was to produce user-friendly, well-documented, adaptable software that can be used in any theoretical modeling work in cosmology. 
+Faced with these challenges, the Dark Energy Science Collaboration (DESC), one of the science collaborations of the Large Synoptic Survey Telescope (LSST), has built a comprehensive software tool that satisfies the needs of the next generation of cosmological analysis. \mi{I suggest some rewording to connect the sentence before to the next one}. This paper presents the Core Cosmology Library\footnote{publicly available at \url{https://github.com/LSSTDESC/CCL}} (\ccl). \ccl is a library for making predictions that are validated to a well-documented numerical accuracy for the purpose of constraining cosmology. While \ccl was built with LSST in mind, our goal was to produce user-friendly, well-documented, adaptable software that can be used in any theoretical modeling work in cosmology. 
 
 \ccl computes standard cosmological functions including the Hubble parameter, cosmological distances, density parameters, the halo mass function, halo bias and linear growth functions. It calculates the matter power spectrum using various methods including common approximations, by calling external software such as {\tt CLASS} \citep{class}, or emulators such as the ``Cosmic Emulator'' of \citet{Lawrence17}. It computes 2-point angular power spectra and correlation functions from various probes, going beyond the Limber approximation. 
 
@@ -80,8 +82,8 @@ Faced with these challenges, the Dark Energy Science Collaboration (DESC), one o
 %------------------------
 \begin{figure*}
 \centering
-\includegraphics[width=0.9\textwidth]{CCL_Flowchart3}
-\caption{\ccl structure flowchart. \ccl is written in C with a Python interface. \ccl routines calculate basic cosmological functions such as the Hubble function, density parameters, distances and growth function. It uses various methods to compute the matter-power spectrum including {\tt CLASS}, ``Cosmic Emulator'' developed by \citet{Lawrence17}, or common approximations. It computes 2-point angular power spectra and correlation functions from various probes. \ccl is designed to accommodate multiple methods to calculate cosmological observables. \todo{Do we want to modify this figure to include the 3D correlation function predictions which have been added? - DL. Good idea. Will update figure. MI}}
+\includegraphics[width=0.9\textwidth]{CCL_Flowchart4}
+\caption{\ccl structure flowchart. \ccl is written in C with a Python interface. \ccl routines calculate basic cosmological functions such as the Hubble function, density parameters, distances and growth function. It uses various methods to compute the matter-power spectrum including {\tt CLASS}, ``Cosmic Emulator'' developed by \citet{Lawrence17}, or common approximations. It computes 2-point angular power spectra and correlation functions from various probes. \ccl is designed to accommodate multiple methods to calculate cosmological observables. \mi{Check if more needs to be done for the 3D correlation.}}
 \label{fig:CCL_structure}
 \end{figure*}
 %------------------------
@@ -108,7 +110,7 @@ Currently, the following families of models are supported:
   \end{equation}
  \item A universe with non-zero curvature ($K$) so that the curvature energy density parameter is the difference of the sum of the energy densities of the other components with respect to unity (flatness), i.e. $\Omega_K = 1- \sum_i \Omega_i$.
  \item All of the above, plus an arbitrary, user-defined modified growth function (see description in Section \ref{sec:growth}).
- \item Relativistic neutrinos in combination with any of hte above, specified by $N_{\rm eff}$ (the number of relativistic neutrino species in the early Universe) and by the number of massive neutrinos today (see next item).
+ \item Relativistic neutrinos in combination with any of the above, specified by $N_{\rm eff}$ (the number of relativistic neutrino species in the early Universe) and by the number of massive neutrinos today (see next item).
   \item Massive neutrino species in combination with any of the above except the user-defined modified growth function, specified by either $\Sigma m_\nu$ (which maps on to the density $\Omega_{\nu, {\rm m}}$ above), or by the individual masses of each of three neutrino species.
 \end{itemize}
 
@@ -130,6 +132,7 @@ The models that are specified above map directly onto cosmological observables s
 \frac{H(a)}{H_0} &= a^{-3/2}\Big(\Omega_{m}+\Omega_{\Lambda} a^{-3(w_0+w_a)}
     \exp[3 w_a (a-1)]+\nonumber \\ &\Omega_{K} a +(\Omega_{g} + \Omega_{\nu, {\rm rel}}) a^{-1} + \Omega_{\nu, {\rm m}}(a)a^3\Big)^{\frac{1}{2}} ,
 \end{align}
+\mi{should we use $\Omega_{de}$ above in view of the general scale factor dependence used.}
 which is a function of the energy density in the different components today and the scale factor. In this expression, we have assumed the CPL parameterization described above for the dark energy equation of state. $\Omega_{\nu, {\rm m}}(a)$ is the fractional energy density of massive neutrinos, calculated via
 \begin{align}
 \Omega_{\nu, {\rm m}}(a) &= \frac{7}{8}\sum_{i=1}^{N_\nu} \frac{4 \sigma_{B}}{c^3 \rho_{{\rm crit},0}} \left(\frac{T_{\nu}^{\rm eff}}{a}\right)^4  \left(\int_0^{\infty} dx \, x^2 \frac{\sqrt{x^2 + \left(\mu^i\right)^2}}{\exp(x) + 1}\right).
@@ -171,6 +174,8 @@ along with $a(\chi)$, the inverse function of $\chi(a)$.
 \subsection{Growth of perturbations}
 \vol{Mustapha Ishak}
 \label{sec:growth}
+{\textcolor{red!55!blue}{\bf Once the 2 questions below are addressed this Sub-section is ready for review.}}
+
 
 Probing the growth history of the Universe can allow us to distinguish between cosmological models. 
 To compute the linear growth factor of matter perturbations, $D(a)$, \ccl solves the following differential equation:
@@ -185,13 +190,12 @@ In doing this, \ccl simultaneously computes the logarithmic growth rate $f(a)$, 
   f(a)\equiv \frac{d\ln D}{d\ln a}.
 \end{equation}
 
-\ccl provides different functions that return the growth normalized to $D(a=1)=1$ and to $D(a\ll1)\rightarrow a$. It employs an accelerated spline that is linearly spaced in the scale factor to interpolate the growth functions. 
+\ccl provides functions that return the growth normalized to $D(a=1)=1$ and to $D(a\ll1)\rightarrow a$. It employs an accelerated spline that is linearly spaced in the scale factor to interpolate the growth functions. 
 
 The growth calculations cover flat and curved $\Lambda$CDM, $w$CDM, and $(w_0 + w_a)$CDM cosmologies. However, it should be noted that the above treatment is strictly valid for a Universe containing only dust-like matter components. A scale-independent growth rate is, for example, ill-defined in the presence of massive neutrinos; attempts to compute the growth rate in cosmologies with massive neutrinos will therefore fail by design. \jab{will \ccl crash?}
 
 Finally, \ccl allows for an alternative `modified gravity' cosmological model defined by a regular background $(w_0+w_a)$CDM (\todo{with arbitrary $K$?}) as well as a user-defined $\Delta f(a)$, such that the true growth rate in this model is given by $f(a)=f_0(a)+\Delta f(a)$, where $f_0(a)$ is the growth rate in the background model. Note that this model is only consistently implemented with regards to the computation of the linear growth factor and growth rates.
-All other \ccl functions (including the non-linear power spectrum) will ignore these modifications. This model, and the interpretation of the predictions given by \ccl, should therefore be used with care.
-
+All other \ccl functions (including the non-linear power spectrum) will ignore these modifications. This model, and the interpretation of the predictions given by \ccl, should therefore be used with care. A version of the growth code and transfer functions depending on modified gravity parameters is under development. 
 
 %-------------------------------------------------------------------------------
 \subsection{Matter power spectrum}
@@ -598,11 +602,13 @@ In this section, we note some of the assumptions and implementation details that
 \subsection{Background functions \& growth of perturbations}
 \vol{Mustapha Ishak}
 \label{sec:distances}
+{\textcolor{red!55!blue}{\bf Once we agree on the last paragraph, this Sub-section is ready for review.}}
+
 %\cont{Initial conditions. Normalization. Units and sensitivity to physical constants (G, c etc).}
 
 Cosmological predictions require making assumptions on the values of several physical constants, as defined in the previous sections. We have performed a comparison of the physical constants used in \ccl to those used in {\tt GSL} and {\tt CLASS} as well as published sources such as the NIST Handbook and PDG Review of Particle Physics \citep{Beringer:1900zz}. Where possible, we have set constants to the values that are used internally in {\tt CLASS}. This includes the value of the gravitational constant, the Boltzmann constant, the Planck constant, the speed of light, and the electron charge. {\tt CLASS} does not include a definition of the solar mass or the Stefan-Boltzmann constant so we use the values used by {\tt GSL}. After comparison between the physical constants used in \ccl and those of the sources mentioned above, we have found better than $10^{-4}$ agreement with everything except the gravitational constant.
 
-The value of the gravitational constant, $G$, enters into the critical density. We found that failure to define $G$ with sufficient precision initially resulted in lack of convergence at the $10^{-4}$ level between the \ccl outputs and benchmarks (and among benchmarks). Importantly, note that CAMB barely has $10^{-4}$ precision in $G$ (and similarly, there might be other constants within CAMB/CLASS for which one should check the precision level). For \ccl predictions and benchmarks \todo{Was this the $G$ we used for benchmarks?}, we are using the value from {\tt CLASS}.
+The value of the gravitational constant, $G$, enters into the critical density. We found that failure to define $G$ with sufficient precision initially resulted in lack of convergence at the $10^{-4}$ level between the \ccl outputs and benchmarks (and among benchmarks). Importantly, note that CAMB barely has $10^{-4}$ precision in $G$ (and similarly, there might be other constants within CAMB/CLASS for which one should check the precision level). For \ccl predictions and benchmarks \todo{Was this the $G$ we used for benchmarks?}, we are using the value from {\tt CLASS}.\mi{We should agree on how to revise this last paragraph.}
 
 %Including/excluding radiation in the computation of the comoving distances and the growth function can easily make a difference of $10^{-4}$ at the redshifts required in this comparison.
 
@@ -975,7 +981,7 @@ $r = 0.1 - 250$~Mpc. This corresponds to approximately $0.08\%$ of the Baryon Ac
 \centering
 \includegraphics[width=0.47\textwidth]{benchmark_xi_rel} ~~~
 \includegraphics[width=0.47\textwidth]{benchmark_xi_abs} 
-\caption{Comparison of the CCL calculation of the three-dimensional spatial correlation function $\xi(r)$ with a precise, numerical transform of the \ccl non-linear Halofit power spectrum. The left panel shows the relative error $\Delta \xi(r) / \xi(r)$. The right panel shows the absolute error in $r^2 \xi(r)$. Both panels are for the $w_a$~LCDM model of Table~\ref{table:code_comp} at redshift zero.}
+\caption{Comparison of the CCL calculation of the three-dimensional spatial correlation function $\xi(r)$ with a precise, numerical transform of the \ccl non-linear Halofit power spectrum. The left panel shows the relative error $\Delta \xi(r) / \xi(r)$. The right panel shows the absolute error in $r^2 \xi(r)$. Both panels are for the $w_a$~LCDM model of Table~\ref{table:code_comp} at redshift zero. \mi{Which models: there seems to be a typo.}}
 \label{fig:benchmark_xi}
 \end{figure*}
 %
@@ -1015,7 +1021,7 @@ The non-Limber prediction deviates from the Limber case at low $l$ as expected. 
 
 \ccl is documented using Doxygen\footnote{\url{www.doxygen.org/}}. For convenience, the repository includes multiple example files in C and several {\tt Jupyter} notebooks.
 
-\ccl is released under terms consistent with BSD 3-Clause licensing. 
+\ccl is released under terms consistent with BSD 3-Clause licensing \mi{Maybe a reference here}. 
 
 %-------------------------------------------------------------------------------
 \section{Outlook}
@@ -1029,7 +1035,7 @@ It is the primary goal of the \ccl to become the backbone of all cosmological an
 
 The implementation of \ccl in realistic analysis pipelines has already begun: all likelihood module prototypes under development use it as its backbone, and the first of these, cosmological analysis of angular galaxy clustering cross-correlations, will serve as a model for the design of the joint-probes likelihood of the DESC. This work has allowed us to validate the performance of \ccl in a realistic analysis scenario, verifying its accuracy and efficiency in the context of computationally demanding MCMC runs. %In addition to simulated analysis tests, \ccl has also been validated through its use in the analysis of current datasets \damonge{Do we know external papers that have used CCL?}
 
-Beyond its usefulness in the DESC, the flexible design of \ccl makes it a useful tool for the analysis of other cosmological datasets, as well as for the cross-correlation of different experiments. To this end, and to allow a generic and flexible analysis of the LSST data, further functionality will be added to \ccl. Plans are in place to extend the range of standard and non-standard cosmological models covered by the code. Work is already underway to add a comprehensive implementation of the halo-model calculation of two-point functions \citep{Peacock2000} with sufficient flexibility to include generic parametrizations of observable halo profiles and mass-observable relations. The current simplified treatment of the galaxy-matter connection for galaxy clustering and intrinsic alignments will be improved by implementing generic perturbation-theory approaches to structure formation \citep{2009JCAP...08..020M,FASTPT}. A more complete implementation of all relevant cross-correlations between large-scale structure observables and other cosmological probes (e.g. CMB integrated Sachs-Wolfe effect, \citealt{1967ApJ...147...73S}, and other secondary anisotropies) will also soon be included.
+Beyond its usefulness in the DESC, the flexible design of \ccl makes it a useful tool for the analysis of other cosmological datasets, as well as for the cross-correlation of different experiments. To this end, and to allow a generic and flexible analysis of the LSST data, further functionality will be added to \ccl. Plans are in place to extend the range of standard and non-standard cosmological models covered by the code. Work is already underway to add a comprehensive implementation of the halo-model calculation of two-point functions \citep{Peacock2000} with sufficient flexibility to include generic parametrizations of observable halo profiles and mass-observable relations. The current simplified treatment of the galaxy-matter connection for galaxy clustering and intrinsic alignments will be improved by implementing generic perturbation-theory approaches to structure formation \citep{2009JCAP...08..020M,FASTPT}. A more complete implementation of all relevant cross-correlations between large-scale structure observables and other cosmological probes (e.g. CMB integrated Sachs-Wolfe effect, \citealt{1967ApJ...147...73S}, and other secondary anisotropies) will also soon be included. \mi{Did you mean to have the citation to Sachs-Wolfe in that format?}
 
 In general, although this document presents the functionality and performance of \ccl shortly after its release, we expect the library to be a continuously evolving piece of software. This will allow \ccl to satisfy the analysis needs of future large datasets, as well as more accurate and sophisticated models for a broad range of cosmological and astrophysical observables.
 
