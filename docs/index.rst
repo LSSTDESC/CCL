@@ -21,7 +21,6 @@ The source code is available on github at https://github.com/LSSTDESC/CCL.
    :caption: Getting Started
 
    source/installation
-   source/cosmology_object
    source/reporting_bugs
 
 .. toctree::
