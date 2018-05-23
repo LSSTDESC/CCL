@@ -209,6 +209,7 @@ static int  growth_factor_and_growth_rate(double a,double *gf,double *fg,ccl_cos
   else {
     double y[2];
     double ainit=EPS_SCALEFAC_GROWTH;
+    // MUSIG - have an if statement option here: if mu0 == 0, set to growth_ode_system, otherwise call e.g. growth_ode_system_muSig
     gsl_odeiv2_system sys={growth_ode_system,NULL,2,cosmo}; 
     gsl_odeiv2_driver *d=
       gsl_odeiv2_driver_alloc_y_new(&sys,gsl_odeiv2_step_rkck,0.1*EPS_SCALEFAC_GROWTH,0,EPSREL_GROWTH);
@@ -529,6 +530,8 @@ void ccl_cosmology_compute_growth(ccl_cosmology * cosmo, int * status)
   gsl_integration_cquad_workspace * workspace=NULL;
   gsl_function F;
   gsl_spline *df_a_spline=NULL;
+  
+  // MUSIG: We are not going to go via delta f, so this is not affected - don't wory about this block for mu sigma
   if(cosmo->params.has_mgrowth) {
     double *df_arr=malloc(na*sizeof(double));
     if(df_arr==NULL) {
@@ -610,9 +613,12 @@ void ccl_cosmology_compute_growth(ccl_cosmology * cosmo, int * status)
     return;
   }
   
+  // Get the growth factor and growth rate at z=0
   chistatus|=growth_factor_and_growth_rate(1.,&growth0,&fgrowth0,cosmo, status);
+  // Get the growth factor and growth rate at other redshifts
   for(int i=0; i<na; i++) {
     chistatus|=growth_factor_and_growth_rate(a[i],&(y[i]),&(y2[i]),cosmo, status);
+    // MUSIG The below won't be how we incorporate muSig, don't worry about this block. 
     if(cosmo->params.has_mgrowth) {
       if(a[i]>0) {
 	double df,integ;
@@ -624,7 +630,8 @@ void ccl_cosmology_compute_growth(ccl_cosmology * cosmo, int * status)
 	y[i]*=exp(-integ);
       }
     }
-    y[i]/=growth0;
+    y[i]/=growth0; // Normalizing to the growth factor to the growth today 
+    // MUSIG - is this an issue? Do we still want to normalize the growth to the growth today WITH the modification?
   }
   if(chistatus || status_mg || *status) {
     free(a);

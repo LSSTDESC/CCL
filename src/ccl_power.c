@@ -1473,7 +1473,8 @@ double ccl_linear_matter_power(ccl_cosmology * cosmo, double k, double a, int * 
   double log_p_1;
   int pkstatus;
   
-  
+  // MUSIG: This first if statement shouldn't need to be touched, it just refers 
+  // to the same function in another if statement and to the growth factor which we have taken care of. 
   if(a<ccl_splines->A_SPLINE_MINLOG_PK) {  //Extrapolate linearly at high redshift  
     double pk0=ccl_linear_matter_power(cosmo,k,ccl_splines->A_SPLINE_MINLOG_PK,status);
     double gf=ccl_growth_factor(cosmo,a,status)/ccl_growth_factor(cosmo,ccl_splines->A_SPLINE_MINLOG_PK,status);
@@ -1483,7 +1484,7 @@ double ccl_linear_matter_power(ccl_cosmology * cosmo, double k, double a, int * 
   if (*status!=CCL_ERROR_INCONSISTENT){ 
     if(k<=cosmo->data.k_min_lin) { 
       log_p_1=ccl_power_extrapol_lowk(cosmo,k,a,cosmo->data.p_lin,cosmo->data.k_min_lin,status);
-
+      // MUSIG: Need to add a call to a function here which gives the MG growth factor by which we scale. 
       return exp(log_p_1);
     }
     else if(k<cosmo->data.k_max_lin){
@@ -1494,11 +1495,13 @@ double ccl_linear_matter_power(ccl_cosmology * cosmo, double k, double a, int * 
         return NAN;
       }
       else{
+		// MUSIG: Need to add a call to a function here which gives the MG growth factor by which we scale.  
         return exp(log_p_1);
       }
     }
     else { //Extrapolate using log derivative
       log_p_1 = ccl_power_extrapol_highk(cosmo,k,a,cosmo->data.p_lin,cosmo->data.k_max_lin,status);
+      // MUSIG: Need to add a call to a function here which gives the MG growth factor by which we scale.
       return exp(log_p_1);
     }
   }
@@ -1515,6 +1518,9 @@ TASK: compute the nonlinear power spectrum at a given redshift
 double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double k, double a, int *status)
 {
   double log_p_1, pk;
+  
+  // MUSIG Add a check here - as a first, simplest case, we probably don't want to allow the nonlinear P(k)
+  // to be calculated with mu and Sigma? But we could, it would be the same structural changes as in the linear case. 
   
   switch(cosmo->config.matter_power_spectrum_method) {
     
