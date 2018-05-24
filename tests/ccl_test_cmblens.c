@@ -53,7 +53,6 @@ static void compare_cls(struct cls_data * data)
   config.matter_power_spectrum_method = ccl_linear;
   ccl_parameters params = ccl_parameters_create_flat_lcdm(data->Omega_c,data->Omega_b,data->h,
 							  data->A_s,data->n_s, &status);
-  // params.Omega_g=0.0;
   params.Omega_n_rel=0.0;
   params.Omega_l = 1.0 - params.Omega_m - params.Omega_g - params.Omega_k;
   params.sigma_8=data->sigma_8;
@@ -88,6 +87,10 @@ static void compare_cls(struct cls_data * data)
   CCL_ClWorkspace *w=ccl_cl_workspace_default_limber(ELL_MAX_CL+1,l_logstep,l_linstep,dlk,&status);
   ccl_angular_cls(cosmo,w,tr_cl,tr_cl,ELL_MAX_CL,ells,clarr,&status);
   
+  /*Reset spline parameters after CCL calculations are done.*/
+  ccl_splines->A_SPLINE_NA=na_sv;
+  ccl_splines->A_SPLINE_NA_PK=na_pk_sv;
+  
   double fraction_failed=0;
   for(int ii=0;ii<ELL_MAX_CL;ii++) {
     int l, rtn;
@@ -104,8 +107,6 @@ static void compare_cls(struct cls_data * data)
   printf("%lf %% ",fraction_failed*100);
   ASSERT_TRUE((fraction_failed<CLS_FRACTION));
 
-  ccl_splines->A_SPLINE_NA=na_sv;
-  ccl_splines->A_SPLINE_NA_PK=na_pk_sv;
   ccl_cl_tracer_free(tr_cl);
   ccl_cosmology_free(cosmo);
 }
