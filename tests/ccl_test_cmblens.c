@@ -44,7 +44,7 @@ static void compare_cls(struct cls_data * data)
 {
   int status=0;
   char fname[256];
-  double factor_tol=3.;
+  double factor_tol=2.;
   double zlss=1100.;
   sprintf(fname,"tests/benchmark/codecomp_step2_outputs/run_log_cl_cc.txt");
 
@@ -91,6 +91,7 @@ static void compare_cls(struct cls_data * data)
     double cl_cc,cl_cc_h;
     rtn = fscanf(fi_cc,"%d %lf",&l,&cl_cc);
     cl_cc_h=clarr[l];
+    printf("%lE \n",fabs(cl_cc_h/cl_cc-1));
     if(fabs(cl_cc_h/cl_cc-1)>factor_tol*CLS_TOLERANCE) {
       fraction_failed++;
     }
