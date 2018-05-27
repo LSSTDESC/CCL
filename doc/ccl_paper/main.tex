@@ -23,7 +23,7 @@
 \graphicspath{{./}{./figures/}}
 \newcommand{\nv}{\hat{\bf n}}
 \newcommand{\todo}[1]{\textcolor{magenta}{To do: #1}}
-\newcommand{\vol}[1]{\textcolor{red}{Volunteer(s) in charge: #1}}
+\newcommand{\vol}[1]{\textcolor{red}{Volunteer: #1}}
 \newcommand{\cont}[1]{\textcolor{blue}{Suggested content: #1}}
 \newcommand{\mrm}[1]{\mathrm{#1}}
 \newcommand{\sukhdeep}[1]{\textcolor{magenta}{SS: #1}}
@@ -64,8 +64,6 @@ The Core Cosmology Library (CCL) provides routines to compute basic cosmological
 %-------------------------------------------------------------------------------
 \section{Introduction}
 \label{sec:intro}
-\vol{Mustapha Ishak, Elisa Chisari}
-\revise
 
 Starting in the next decade, large-scale galaxy surveys will drive a new era of high precision cosmology \citep{DESCWhite,green11,Laureijs11}. Their main goal is arguably to answer the question of the origin of cosmic acceleration, in other words, to elucidate the nature of ``dark energy'', broadly understood as a family of potential models: from a cosmological constant to a dynamical field and modifications of gravity (see for example  \cite{Carroll2001CC,Peebles2003,Padmanabhan2003,Copeland2006,Ishak2007,Weinberg13} and references therein). These data will also allow us to shed light on a number of open questions in fundamental physics, such as the nature of dark matter, the mass of neutrinos or the level of non-Gaussianity in the initial conditions \todo{maybe add some references here}.
 
@@ -75,11 +73,11 @@ The first one is to ensure that all probes are modeled accurately, including cos
 
 Second, even standard cosmological quantities in the simplest models, such as distances in a $\Lambda$CDM cosmology, have to be predicted to a validated degree of accuracy. Achieving this objective is not always trivial, as computing these quantities generally requries, for example, numerical integration or interpolation, both of which are prone to numerical error. To guarantee the validity of our predictions, comparisons must be performed between different tools to establish their numerical accuracy. 
 
-Faced with these challenges, the Dark Energy Science Collaboration (DESC), one of the science collaborations of the Large Synoptic Survey Telescope (LSST), has built a comprehensive software tool that satisfies the needs of the next generation of cosmological analysis: the Core Cosmology Library\footnote{publicly available at \url{https://github.com/LSSTDESC/CCL}} (\ccl). \ccl is a software library providing the infrastructure to make theoretical predictions that are validated to a well-documented numerical accuracy for the purpose of constraining cosmology. While \ccl was built with LSST in mind, the goal is to produce user-friendly, well-documented, adaptable software that can be used in any theoretical modeling work in cosmology. 
+Faced with these challenges, the Dark Energy Science Collaboration (DESC), one of the science collaborations of the Large Synoptic Survey Telescope (LSST), has built a comprehensive software tool that satisfies the needs of the next generation of cosmological analysis: the Core Cosmology Library\footnote{publicly available at \url{https://github.com/LSSTDESC/CCL}} (\ccl). \ccl is a software library providing the infrastructure to make theoretical predictions that are validated to a well-documented numerical accuracy for the purpose of constraining cosmology. While \ccl was built with LSST in mind, the goal is to produce a publicly available, user-friendly, well-documented, adaptable software that can be used in any theoretical modeling work in cosmology. 
 
 In its current form, \ccl computes standard cosmological functions including the Hubble parameter, cosmological distances, density parameters, the halo mass function, halo bias and linear growth functions. It calculates the matter power spectrum using various methods including common approximations, by calling external software such as {\tt CLASS} \citep{class}, or emulators, such as the ``Cosmic Emulator'' of \citet{Lawrence17}. It computes 2-point angular power spectra and correlation functions from various probes, going beyond the Limber approximation. 
 
-\ccl 's overall structure is illustrated in Figure \ref{fig:CCL_structure}. Our implementation has support for spatially flat and curved $\Lambda$-Cold Dark Matter ($\Lambda$CDM) cosmologies, and $w$CDM cosmologies with the option of using a time-dependent equation of state. It also allows for cosmologies with multiple massive neutrino species and can be linked to external software for modified gravity predictions \citep[{\tt hi$\_$CLASS},][]{Zumalacarregui17} \todo{Table 1 outdated}.
+\ccl 's overall structure is illustrated in Figure \ref{fig:CCL_structure}. Our implementation has support for spatially flat and curved $\Lambda$-Cold Dark Matter ($\Lambda$CDM) cosmologies, and $w$CDM cosmologies with the option of using a time-dependent equation of state. It also allows for cosmologies with multiple massive neutrino species and can be linked to external software for modified gravity predictions \citep[{\tt hi$\_$CLASS},][]{Zumalacarregui17}.
 
 %------------------------
 \begin{figure*}
@@ -96,8 +94,6 @@ This paper is organized as follows. Section \ref{sec:models} describes the cosmo
 %-------------------------------------------------------------------------------
 \section{Cosmological models and observables}
 \label{sec:models}
-\vol{Renee}
-\revise
 
 The overarching goal of \ccl is to allow seamless integration of different cosmological models of interest to LSST.
 
@@ -105,12 +101,12 @@ The cosmological components include the matter density parameter $\Omega_m$, the
 
 Currently, the following families of models are supported:
 \begin{itemize}
- \item Flat $\Lambda$CDM cosmology with parameters $\Omega_b$, $n_s$, $A_s$ or $\sigma_8$, $\Omega_m$, $\Omega_\Lambda$, and a cosmological constant dark energy model with equation-of-state $w=-1$. \tom{Drop $\Omega_\Lambda$, since for flat LCDM it is always fixed by knowing $\Omega_m$.}
+ \item Flat $\Lambda$CDM cosmology with parameters $\Omega_b$, $n_s$, $A_s$ or $\sigma_8$, $\Omega_m$, and a cosmological constant dark energy model with equation-of-state $w=-1$. 
 \item $w$CDM and the Chevallier-Polarski-Linder (CPL) model for dark energy and its redshift dependence, which adopts the following parametrization for $w$ as a function of the scale factor, $a$ (\citealt{Chevallier01} and \citealt{Linder03}),
   \begin{equation}
     w(a) = w_0+w_a(1-a).
   \end{equation}
- \item A universe with non-zero curvature ($K$) so that the curvature energy density parameter is the difference of the sum of the energy densities of the other components with respect to unity (flatness), i.e. $\Omega_K = 1- \sum_i \Omega_i$.
+ \item A universe with non-zero curvature ($K$) so that the curvature energy density parameter is the difference of the sum of the energy densities of the other components with respect to unity (flatness), i.e. $\Omega_K = 1- \sum_i \Omega_i$, including $\Omega_\Lambda$, the dark energy density.
  \item All of the above, plus an arbitrary, user-defined modified growth function (see description in Section \ref{sec:growth}).
  \item Relativistic neutrinos in combination with any of the above, specified by $N_{\rm eff}$ (the number of relativistic neutrino species in the early Universe) and by the number of massive neutrinos today (see next item).
   \item Massive neutrino species in combination with any of the above except the user-defined modified growth function, specified by either $\Sigma m_\nu$ (which maps on to the density $\Omega_{\nu, {\rm m}}$ above), or by the individual masses of each of three neutrino species.
@@ -118,16 +114,12 @@ Currently, the following families of models are supported:
 
 In the particular case of cosmologies with massive neutrinos, \ccl allows the user to specify either a sum of masses, $\Sigma m_\nu$, or the individual mass of each of three neutrino species. In the former case, \ccl will by default split $\Sigma m_\nu$ into three neutrino masses which are consistent with the normal hierarchy (see, e.g. \cite{Gerbino2017} for a review). However, the user can alternatively ask for $\Sigma m_\nu$ to be split either into masses consistent with the inverted hierarchy, or into equal masses. Each neutrino species is then checked for whether it is non-relativistic (massive) at $z=0$, and this information is used in combination with the user-provided value of $N_{\rm eff}$ (the effective number of relativistic neutrino species in the early universe) to set the number of relativistic neutrino species.
 
-%\todo{Range of validity of the predictions.}
 Not all features of \ccl are available for all models. For a guide to which predictions are available for each model, see Table \ref{tab:cosmo}. Note that if users install their own version of {\tt CLASS}, {\tt CCL} can then make predictions for a more extended set of cosmologies. Users should take care to understand the validity of the {\tt CCL} assumptions for their own models.
 
 \input{table_cosmo}
 
-%\todo{Add discussion of external versions of CLASS and Modified Gravity.}
-
 %-------------------------------------------------------------------------------
 \subsection{Background cosmology}
-\vol{Renee, Shahab}
 
 The models that are specified above map directly onto cosmological observables such as the expansion rate of the Universe, which is parameterized through the Hubble parameter as
 \begin{align}\label{eq:Ha}
@@ -173,7 +165,6 @@ along with $a(\chi)$, the inverse function of $\chi(a)$.
 
 %-------------------------------------------------------------------------------
 \subsection{Growth of perturbations}
-\vol{Mustapha Ishak}
 \label{sec:growth}
 {\textcolor{red!55!blue}{\bf Once the 2 questions below are addressed this Sub-section is ready for review.}}
 
@@ -194,7 +185,7 @@ In doing this, \ccl simultaneously computes the logarithmic growth rate $f(a)$, 
 
 \ccl provides functions that return the growth normalized to $D(a=1)=1$ and to $D(a\ll1)\rightarrow a$. It employs an accelerated spline that is linearly spaced in the scale factor to interpolate the growth functions. 
 
-The growth calculations cover flat and curved $\Lambda$CDM, $w$CDM, and $(w_0 + w_a)$CDM cosmologies. However, it should be noted that the above treatment is strictly valid for a Universe containing only dust-like matter components. A scale-independent growth rate is, for example, ill-defined in the presence of massive neutrinos; attempts to compute the growth rate in cosmologies with massive neutrinos will therefore fail by design. \jab{will \ccl crash?}
+The growth calculations cover flat and curved $\Lambda$CDM, $w$CDM, and $(w_0 + w_a)$CDM cosmologies. However, it should be noted that the above treatment is strictly valid for a Universe containing only dust-like matter components. A scale-independent growth rate is, for example, ill-defined in the presence of massive neutrinos; attempts to compute the growth rate in cosmologies with massive neutrinos will therefore fail by design. \todo{CCL will not crash if the user calls it in this way, issue 380 is open to address this}
 
 Finally, \ccl allows for an alternative `modified gravity' cosmological model defined by a regular background $(w_0+w_a)$CDM (\todo{with arbitrary $K$?}) as well as a user-defined $\Delta f(a)$, such that the true growth rate in this model is given by $f(a)=f_0(a)+\Delta f(a)$, where $f_0(a)$ is the growth rate in the background model. Note that this model is only consistently implemented with regards to the computation of the linear growth factor and growth rates.
 All other \ccl functions (including the non-linear power spectrum) will ignore these modifications. This model, and the interpretation of the predictions given by \ccl, should therefore be used with care. A version of the growth code and transfer functions depending on modified gravity parameters is under development. 
@@ -202,7 +193,6 @@ All other \ccl functions (including the non-linear power spectrum) will ignore t
 %-------------------------------------------------------------------------------
 \subsection{Matter power spectrum}
 \label{sec:matterps}
-\vol{Elisa Chisari}
 
 Theoretical predictions for cosmological observables such as galaxy clustering, gravitational lensing and cluster mass functions rely on knowledge of the distribution of matter from small to large scales in the Universe. The quantity most frequently used to describe the distribution of matter at a given wavenumber and redshift is the matter power spectrum, $P(k,z)$, defined as
 \begin{equation}
@@ -260,7 +250,6 @@ Three effective parameters govern the contribution of baryonic processes to modi
 
 %-------------------------------------------------------------------------------
 \subsection{Two-point correlators}
-\vol{David Alonso, Tom McClintock}
 
 This section describes the theoretical expectations for the two-point correlators of pairs of quantities (fields) defined on the sky. These fields can be classified in terms of their spin $s$ under rotations on the plane tangent to the sphere. In general a spin-$s$ field is defined by two real-valued functions of the spherical coordinates $a_1(\nv)$ and $a_2(\nv)$ (e.g. $\gamma_1$ and $\gamma_2$ for weak lensing or the Stokes parameters $Q$ and $U$ in the case of polarized intensity), from which one can form the complex field $a=a_1+ia_2$.
 
@@ -278,7 +267,6 @@ where $_sY_{\ell m}$ are the spin-weighed spherical harmonics. The harmonic coef
 In what follows we will focus on scalar ($s=0$) quantities such as the overdensity of source number counts or the lensing convergence, and on spin-2 fields such as the lensing shear. We will also distinguish between {\sl tracers} (fields observed on the sky, such as number counts in a redshift bin, shear, or CMB temperature fluctuations) and {\sl contributions} to the total observed fluctuations of these tracers (such as the biased matter density term in number counts, redshift-space distortions, magnification, etc.).
 
 \subsubsection{Angular power spectra}\label{sssec:2pt.pspec}
-\vol{David Alonso}
 
 The angular power spectrum $C^{ab}_\ell$ between two tracers $a$ and $b$ is defined as
 \begin{equation}
@@ -352,8 +340,6 @@ These approximations will be revisited in future versions of the library. \jab{I
 
 
 \subsubsection{Correlation functions}
-\vol{Elisa Chisari, Sukhdeep Singh}
-
 
 Fields can also be correlated in configuration space, and the corresponding correlators are called correlation functions. Let $a$ and $b$ be two fields with spins $s_a$ and $s_b$. We start by defining $\tilde{a}(\nv_1)$ and $\tilde{b}(\nv_2)$ as the fields $a$ and $b$ rotated such that the $x$-axis of the tangential coordinate systems at $\nv_1$ and $\nv_2$ become aligned with the vector connecting both points. We can then define two correlation functions:
 \begin{equation}\nonumber
@@ -420,7 +406,6 @@ In the future \ccl will be expanded to incorporate the calculation of the higher
 
 %-------------------------------------------------------------------------------
 \subsection{Halo mass function}
-\vol{Antonio Villarreal, Tom McClintock}
 
 Being able to calculate the halo abundance as a function of mass is a necessary step to being able to constrain cosmology with probes such as galaxy clusters. While analytic functions are the traditional means of predicting evolution of halo abundances, calibration is frequently required against cosmological simulations. In order to reach the high precision required for cosmological constraints in a self-consistent fashion, it is ultimately necessary to use cosmological simulations; we implement this with halo mass functions with parameters fit to these simulations. The calculation of the halo mass function focuses around the spherical overdensity method of halo finding, in which the size of a halo can be defined with:
 
@@ -483,7 +468,6 @@ We note that these halo mass functions, while implemented to high {\em numerical
 This result is consistent with the work of \citet{Watson2013}, which also finds a $5\%$ level difference in comparison to the Tinker fitting function. Further study will be required in the future in order to gain percent level accuracy in determining the halo mass function.\todo{For what cosmologies was the Tinker mass function tested? I.e., what should go in Table 1?}
 
 \subsection{Halo bias}
-\vol{Antonio Villarreal}
 
 \jab{I'm a bit confused by this section. This is a quantity that CCL can return. But currently the clustering observables can only handle linear (scale-independent) bias? And should we say that the user can specify a linear bias that does not come from this fitting formula?}
 \asv{Including the Tinker fitting function for the halo bias is a fairly natural step considering we are also including the Tinker mass function (on which this is heavily related to). I do not think the fact that the clustering section of the code is currently unready to handle more than linear bias impacts the usefulness of having this built in. That being said, I will specify that currently we do not have a linear bias model built in as an explicit framework, though it can certainly be passed in to other sections of the code.}
@@ -506,6 +490,7 @@ Again, while high {\em numerical} accuracy has been verified, there is a remaini
 
 We note that many observables are currently tuned to utilizing a linear halo bias (e.g. scale independent). While the current functionality of {\tt CCL} is to return the \citet{Tinker2010} model for halo bias, it is entirely possible to generate simpler models of halo bias and pass this into further functions.
 
+\begin{comment}
 \subsection{Halo model}
 \label{sec:halo_model}
 \vol{Alexander Mead}
@@ -576,10 +561,9 @@ c(M)=9\left(\frac{M}{M_*}\right)^{-0.13}\ ,
 \end{equation}
 where $\delta_\mathrm{c}/\sigma(M_*)=1$.
 Note that, in order to be consistent, one should use a value of $\Delta_\mathrm{v}$ and $c(M)$ that is consistent with the halo definition used for the halo mass function and bias.
+\end{comment}
 
 \subsection{Photometric redshifts}
-\vol{Danielle Leonard}
-\revise
 
 Redshifts of LSST galaxies will be obtained via photometry. Therefore, performing any cosmological analysis which incorporates redshift information requires a model for the probability of measuring a photometric redshift $z_{\rm ph}$ for an object with hypothetical spectroscopic redshift $z_{\rm s}$.  In order to maintain agnosticism towards the optimal model, and hence to allow for the future inclusion of advancements from ongoing research, \ccl allows the user to flexibly input a photometric redshift model. In addition, for ease of use, \ccl provides the option of using a built-in function for a simple Gaussian photometric redshift probability distribution. The photometric redshift model can then be used, for example, when computing $\frac{dN}{dz}^i$ in photometric redshift bin $i$, as given by:
 \begin{equation}
@@ -592,35 +576,23 @@ p(z,z') = \frac{1}{\sqrt{2 \pi}\sigma_z} \exp\left(-\frac{(z-z')^2}{2\sigma_z^2}
 \label{pz_gauss}
 \end{equation}
 
-
-
-
 %-------------------------------------------------------------------------------
 \section{Implementation of high-accuracy cosmological functions}
 \label{sec:implement}
-\revise
 
 In this section, we note some of the assumptions and implementation details that are relevant when making accurate cosmological predictions. The validation tests performed for {\tt CCL} are described in detail in Section \ref{sec:validation}.
 
 %-------------------------------------------------------------------------------
 \subsection{Background functions \& growth of perturbations}
-\vol{Mustapha Ishak}
 \label{sec:distances}
 {\textcolor{red!55!blue}{\bf Once we agree on the last paragraph, this Sub-section is ready for review.}}
-
-%\cont{Initial conditions. Normalization. Units and sensitivity to physical constants (G, c etc).}
 
 Cosmological predictions require making assumptions on the values of several physical constants, as defined in the previous sections. We have performed a comparison of the physical constants used in \ccl to those used in {\tt GSL} and {\tt CLASS} as well as published sources such as the NIST Handbook and PDG Review of Particle Physics \citep{Beringer:1900zz}. Where possible, we have set constants to the values that are used internally in {\tt CLASS}. This includes the value of the gravitational constant, the Boltzmann constant, the Planck constant, the speed of light, and the electron charge. {\tt CLASS} does not include a definition of the solar mass or the Stefan-Boltzmann constant so we use the values used by {\tt GSL}. After comparison between the physical constants used in \ccl and those of the sources mentioned above, we have found better than $10^{-4}$ agreement with everything except the gravitational constant.
 
 The value of the gravitational constant, $G$, enters into the critical density. We found that failure to define $G$ with sufficient precision initially resulted in lack of convergence at the $10^{-4}$ level between the \ccl outputs and benchmarks (and among benchmarks). Importantly, note that CAMB barely has $10^{-4}$ precision in $G$ (and similarly, there might be other constants within CAMB/CLASS for which one should check the precision level). For \ccl predictions and benchmarks, we are using the value from {\tt CLASS}. \todo{Was this the $G$ we used for benchmarks?} 
 
-
-%Including/excluding radiation in the computation of the comoving distances and the growth function can easily make a difference of $10^{-4}$ at the redshifts required in this comparison.
-
 %-------------------------------------------------------------------------------
 \subsection{Matter power spectrum}
-\vol{Elisa Chisari, Christiane Lorenz}
-%\cont{Interpolation strategy. Sensitivity to spline parameters and sampling in $k$. Settings that control speed vs. accuracy. }
 
 For speed, the initialization of a cosmological model within {\tt CCL} performs initial computations of the linear and nonlinear matter power spectra, which are then interpolated whenever required. The spline is performed in two variables: the logarithmically-spaced wavenumber and the logarithmically and linearly-spaced scale factor. Splining the power spectra output leads to some precision loss (compared to, for example, direct outputs from {\tt CLASS} or the cosmic emulator) which is quantified in Section \ref{sec:validation}.
 
@@ -642,13 +614,10 @@ The value adopted for {\tt K\_MIN} depends on the choice of power spectrum metho
 
 %-------------------------------------------------------------------------------
 \subsection{Angular power spectra}
-\vol{David Alonso}
 
 Different numerical approaches have been implemented in the library in order to expedite the computation of angular power spectra. We describe these here.
 
 \subsubsection{Limber approximation}
-\vol{David Alonso, J\'er\'emy Neveu}
-
 
 As shown in Section \ref{sssec:2pt.pspec}, computing each transfer function contributing to a given power spectrum involves a radial projection (i.e. an integral over redshift or $z$ or $\chi$), and thus computing full power spectra consists of a triple integral for each $\ell$. This can be computationally intensive, but can be significantly simplified in certain regimes by using the Limber approximation, given by:
 \begin{equation}
@@ -678,11 +647,10 @@ The Limber approximation works best for wide radial kernels and high $\ell$.
 
 \subsubsection{Beyond Limber: \texttt{Angpow}}
 \label{sec:angpow}
-\vol{J\'er\'emy Neveu}
 
-\ccl incorporates natively routines to compute the $C^{ab}_\ell$ angular power spectra as described above without the Limber approximation. The algorithm performs first the integrals over $z$ for both tracers, and ends with the $k$ integral. This computation is much slower than using the Limber approximation, but results in precise angular power spectra at low $\ell$, and correct cross-correlations between tracers (the Limber approximation fails at reproducing the beat phenomenon $j_\ell(x)\times j_\ell(x')$). \todo{Can we expand on this if it is important or provide a reference? I think the brief mention is confusing if you aren't familiar - DL.} The integration of these routines has been tested against the \texttt{CLASS} code and recovers the same angular power spectra when precision parameters are set to high values.
+\ccl incorporates natively routines to compute the $C^{ab}_\ell$ angular power spectra as described above without the Limber approximation. The algorithm performs first the integrals over $z$ for both tracers, and ends with the $k$ integral. This computation is much slower than using the Limber approximation, but results in precise angular power spectra at low $\ell$, and correct cross-correlations between tracers. The integration of these routines has been tested against the \texttt{CLASS} code and recovers the same angular power spectra when precision parameters are set to high values.
 
-However, the computation of the $C^{ab}_\ell$ without the Limber approximation is too costly in terms of computing time using this method, if one wants to explore extensively a full cosmological parameter space. The aim of the \texttt{Angpow} software \citep{2017arXiv170103592C} is to compute the angular power spectra  $C_{\ell}^{ab}$  without any Limber numerical approximation in a faster way but still accurately. \ccl has been linked to the \texttt{Angpow} code,  which is briefly described here.
+However, the computation of the $C^{ab}_\ell$ without the Limber approximation is too costly in terms of computing time using this method, if one wants to explore extensively a full cosmological parameter space. The aim of the \texttt{Angpow} software \citep{2017A&A...602A..72C} is to compute the angular power spectra  $C_{\ell}^{ab}$  without any Limber numerical approximation in a faster way but still accurately. \ccl has been linked to the \texttt{Angpow} code,  which is briefly described here.
 
 The angular power spectrum for two tracers $C_{\ell}^{ab}$ is computed in \texttt{Angpow} according to the following expression
 \begin{equation}
@@ -709,8 +677,6 @@ As in the general case the Limber approximation is valid at high $\ell$ values, 
 
 %-------------------------------------------------------------------------------
 \subsection{Correlation functions}
-\vol{Elisa Chisari, Sukhdeep Singh}
-
 
 The exact Equations (\ref{eq:xi00full}, \ref{eq:xi02full}, \ref{eq:xi22full}) relating the angular correlation functions and power spectra involve carrying out $N_\theta\times\ell_{\rm max}$ operations, where $\ell_{\rm max}\sim O(10^{4-5})$ is the maximum multipole needed to achieve convergence and $N_\theta$ is the number of angular scales $\theta$ at which the angular correlation function needs to be computed. Thus, evaluating these expressions directly becomes prohibitively slow and should be avoided except in regimes where other approximations are not valid. In particular \ccl only supports the brute-force evaluation of these equations for correlations involving at least one spin-0 field. The currently preferred method in \ccl is to use the flat-sky approximation and evaluate the Hankel transforms (Eqs. \ref{eq:xi00flat}, \ref{eq:xi02flat}, \ref{eq:xi22flat}).
 
@@ -727,9 +693,6 @@ We should also note that other approaches relating the correlation functions dir
 
 %-------------------------------------------------------------------------------
 \subsection{Halo mass function}
-\vol{Antonio Villarreal - Could Use Review}
-
-\cont{Evaluation of derivatives. Interpolations for different values of $\Delta$. Precision of $\sigma(M)$ calculation.}
 
 \todo{Some of this seems would be better in the validation section. Can we restrict to implementation here?}
 To achieve $10^{-4}$ precision in $\sigma(M)$ and the normalisation of the power spectrum, one should check that the integral of $\sigma_8$ and $\sigma(M)$ has converged for the chosen values of $\{k_{\rm min},k_{\rm max}\}$. After checking convergence, we achieved the desired precision.
@@ -743,7 +706,6 @@ In order to accomodate a wide range of values of the overdensity parameter $\Del
 
 %-------------------------------------------------------------------------------
 \subsection{Massive neutrinos}
-\vol{Danielle Leonard}
 
 When initializing a cosmology with massive neutrinos within \ccl , the user can provide either a single value for $m_\nu$, corresponding to a sum of the masses of three neutrinos, or a set of three values, corresponding directly to the three masses. In the former case, one can also specify how the sum of masses should be split for calculations. The default behavior of \ccl is to split the sum into three masses which are consistent with the normal neutrinio mass hierarchy, but an inverted hierarchy or equal splitting can be requested. (For a review of the neutrino mass hierarchies and relevant particle physics results, see for example \cite{Gerbino2017, Lesgourgues2012}.)
 
@@ -768,18 +730,6 @@ At high and low $\mu$, corresponding to high and low mass neutrinos, this integr
 %-------------------------------------------------------------------------------
 \section{Validation over the $\Lambda$CDM parameter space}
 \label{sec:validation}
-
-%-------------------------------------------------------------------------------
-%\subsection{Accuracy criteria}
-%\vol{?}
-
-%\cont{Why we chose the $10^{-4}$ level of accuracy. Accuracy summary statistic used in VARRIC.}
-
-%-------------------------------------------------------------------------------
-%\subsection{Validation tests on fiducial parameter sets}
-\vol{Elisa Chisari, Antonio Villarreal, Phil Bull, Elisabeth Krause}
-
-\cont{Overview of the code comparison. How the codes used for comparison were selected. Validation plots for several observables.}
 
 Our goal in building \ccl was to ensure that all outputs are validated to a well established accuracy level. This was achieved by comparing these outputs against one or multiple independent benchmarks obtained in the same configuration (i.e., for the same cosmology). In this section we document the accuracy achieved for each observable. In some cases, the achieved level of accuracy is higher than the impact of other systematics which have not yet been considered in this version of \ccl. \todo{Not sure what this previous sentence refers to.} In the cases where this applies, we make it clear below. 
 Table \ref{tab:tests} summarises all the \ccl validation tests discussed in this section.
@@ -838,7 +788,6 @@ Analogous comparisons of the comoving radial distances were made to independentl
 \subsection{Matter power spectra}
 
 \subsubsection{Analytic expressions}
-\vol{Elisa Chisari}
 
 As discussed in Section \ref{sec:matterps}, several power spectrum methods are implemented in \ccl. Two of them, the BBKS \citep{BBKS} and the Eisenstein \& Hu methods are implemented for validation purposes only and feed into the tests for observables such as angular power spectra and correlation functions, as we will see in subsequent sections. These two implementations have been validated against independent implementations. For BBKS, this test was performed at $0\leq z \leq 5$ in the wavenumber range $10^{-3} \leq k \leq 10 h/$Mpc with 10 bins per decade, and yielded an accuracy level of $10^{-4}$.
 \footnote{We noticed that there are 2 typographical errors for the BBKS transfer function in ``Modern Cosmology'' \citep{DodelsonBook} compared to the original BBKS paper. The quadratic term should be $(16.1q)^2$ and the cubic term should be $(5.46q)^3$. The BBKS equation is correct in \citet{PeacockBook}. Using the wrong equation can give differences in the results above the $10^{-4}$ level.}
@@ -847,7 +796,6 @@ For the Eisenstein \& Hu matter power spectrum, we obtained similar accuracy at 
 The BCM implementation for the impact of baryons on the matter power spectrum, described in Section \ref{sec:matterps} is also analytical, and accurate to $10^{-12}$.
 
 \subsubsection{Validation of interpolation schemes}
-\vol{Elisa Chisari, Christiane Lorenz}
 
 In its default configuration, \ccl adopts the HaloFit \citep{CLASS_halofit} implementation by interpolating {\tt CLASS} power spectra outputs to model the matter power spectrum. The computation of the power spectrum from {\tt CLASS} can be significantly sped up by interpolating the matter power spectra in the range {\tt K$\_$MIN}~$<k<$~{\tt K$\_$MAX$\_$SPLINE} and extrapolating beyond it, as described in Section \ref{sec:implement}. In this section, we describe the loss of accuracy due to this method. The tests presented are performed in a flat $\Lambda$CDM cosmology with $\Omega_c=0.25$, $\Omega_b=0.05$, $A_s=2.1\times10^{-9}$, $h=0.7$ and $n_s=0.96$.
 
@@ -896,8 +844,8 @@ Here, $\Delta_{\rm thres}$ is a target threshold for the fractional deviation be
 \todo{This section still needs discussion and conclusions, right? -DL}
 
 \subsubsection{Validation of the Cosmic Emulator implementation}
-\vol{Elisa Chisari}
 \todo{I think this section should go before the one on generalized validation of the power spectrum over LCDM space, because that one refers to 'the sections above' as being at specific cosmologies, which is the case here. - DL}\todo{The only caveat is that the generalized validation scheme doesnt account for the emulator - EC.}
+
 \citet{Lawrence17} quantified the accuracy of the matter power spectrum from their emulation scheme by comparing their predictions to the resulting power spectra from the numerical simulations used for the calibration of their scheme. We repeated this procedure making the emulator predictions via \ccl for a subset of emulator cosmologies. 
 
 Our results, presented in the form of absolute fractional accuracy of the power spectra, are shown in Figure \ref{fig:emuacc}. For cosmologies without neutrinos, we required the matter power spectrum at $z=0$ to be within $1\%$ of the smoothed simulated power spectrum from \citet{Lawrence17} (see their Figure 6). Similarly, we required $3\%$ accuracy for cosmologies with neutrinos (their Figure 5). The cosmologies that were tested are the ones listed in Table \ref{tab:cosmologies}, which are described in detail in \citet{Lawrence17}.
@@ -961,7 +909,7 @@ We adopted the following analytic redshift distributions: a Gaussian with $\sigm
 For $C_\ell$ computations, we achieved a relative difference between \ccl and the benchmarks of $<10^{-3}$. This applied both to analytic redshift distributions and histograms, for auto- and cross-correlations between bins for both galaxy clustering and weak lensing, as shown in Figure \ref{fig:cls_limber}. The CMB lensing result is shown in Figure \ref{fig:cls_cmblens}.
 
 
-To obtain realistic targets for the convergence of projected correlation function computations for LSST analyses, we calculated the expected statistical uncertainty of the clustering and lensing correlation functions of the LSST gold sample \todo{Add reference} assuming an effective source galaxy density of $n_\mathrm{eff} = 26\,\mathrm{gal/sq\,arcmin}$ for galaxy shape distortions, and galaxy density of $n_\mathrm{gold} = 45\,\mathrm{gal/sq\,arcmin}$ for number counts. Specifically, we calculated the Gaussian covariance of angular correlation functions following the formalism of \citet{2008A&A...477...43J}, and note that leaving out the non-Gaussian covariance terms makes our accuracy criterion more conservative. We split the galaxy samples into 10 tomography bins, defined to contain equal numbers of galaxies. The accuracy test then proceeded as follows. We compared the difference between \ccl calculated lensing and clustering correlations and the benchmarks, for the analytic redshift distributions and for auto-correlations of redshift bins only. To pass the benchmark test, we required that this difference be smaller than half of the value of the error bar derived from the covariance for each correlation function computed. Specifically, we took the value of the covariance in the bins centered at $z=1$ and $z=1.5$ to compare to the benchmarks.
+To obtain realistic targets for the convergence of projected correlation function computations for LSST analyses, we calculated the expected statistical uncertainty of the clustering and lensing correlation functions of the LSST gold sample \citep{LSSTSB} assuming an effective source galaxy density of $n_\mathrm{eff} = 26\,\mathrm{gal/sq\,arcmin}$ for galaxy shape distortions \citep{Chang13}, and galaxy density of $n_\mathrm{gold} = 45\,\mathrm{gal/sq\,arcmin}$ for number counts. Specifically, we calculated the Gaussian covariance of angular correlation functions following the formalism of \citet{2008A&A...477...43J}, and note that leaving out the non-Gaussian covariance terms makes our accuracy criterion more conservative. We split the galaxy samples into 10 tomography bins, defined to contain equal numbers of galaxies. The accuracy test then proceeded as follows. We compared the difference between \ccl calculated lensing and clustering correlations and the benchmarks, for the analytic redshift distributions and for auto-correlations of redshift bins only. To pass the benchmark test, we required that this difference be smaller than half of the value of the error bar derived from the covariance for each correlation function computed. Specifically, we took the value of the covariance in the bins centered at $z=1$ and $z=1.5$ to compare to the benchmarks.
 
 The results of this validation procedure for the projected correlation function are shown in Figure \ref{fig:corrval}. Our results suggest that the convergence between \ccl predictions and benchmarks is below the expected statitical uncertainty. 
 
@@ -986,7 +934,7 @@ $r = 0.1 - 250$~Mpc. This corresponds to approximately $0.08\%$ of the Baryon Ac
 \centering
 \includegraphics[width=0.47\textwidth]{benchmark_xi_rel} ~~~
 \includegraphics[width=0.47\textwidth]{benchmark_xi_abs} 
-\caption{Comparison of the CCL calculation of the three-dimensional spatial correlation function $\xi(r)$ with a precise, numerical transform of the \ccl non-linear Halofit power spectrum. The left panel shows the relative error $\Delta \xi(r) / \xi(r)$. The right panel shows the absolute error in $r^2 \xi(r)$. Both panels are for the $w_a$~LCDM model of Table~\ref{table:code_comp} at redshift zero. \mi{John: Which models: there seems to be a typo.}}
+\caption{Comparison of the CCL calculation of the three-dimensional spatial correlation function $\xi(r)$ with a precise, numerical transform of the \ccl non-linear Halofit power spectrum. The left panel shows the relative error $\Delta \xi(r) / \xi(r)$. The right panel shows the absolute error in $r^2 \xi(r)$. Both panels are for the $w_a$~LCDM model of Table~\ref{table:code_comp} at redshift zero. \mi{John: Which models: there seems to be a typo.}\todo{This is probably CCL3 in the Table \ref{tab:cosmologies}, need to check benchmark notebook - EC.}}
 \label{fig:benchmark_xi}
 \end{figure*}
 %
@@ -1014,26 +962,22 @@ Also the native non-Limber computation and {\tt Angpow} were tested to recover t
 \centering
 \includegraphics[width=0.47\textwidth]{angpow1}
 \includegraphics[width=0.47\textwidth]{angpow3}
-\caption{Different predictions for the clustering angular power spectrum of a sample of galaxies with a Gaussian redshift distribution centered on $\langle z \rangle =1$. The left panel shows the $C_l$ predictions from the Limber case (green), the non-Limber case native to \ccl (yellow dot-dashed) and {\tt Angpow} (black). The right panel shows the fractional difference in the predicted clustering angular power spectrum between {\tt Angpow} and the native \ccl non-Limber computation. The relative numerical error compared with a high precision computation is two orders of magnitude below the relative cosmic variance: $\sqrt{2/(2\ell+1)}$.\todo{Fix margins of right panel}}
+\caption{Different predictions for the clustering angular power spectrum of a sample of galaxies with a Gaussian redshift distribution centered on $\langle z \rangle =1$. The left panel shows the $C_l$ predictions from the Limber case (green), the non-Limber case native to \ccl (yellow dot-dashed) and {\tt Angpow} (black). The right panel shows the fractional difference in the predicted clustering angular power spectrum between {\tt Angpow} and the native \ccl non-Limber computation. The relative numerical error compared with a high precision computation is two orders of magnitude below the relative cosmic variance: $\sqrt{2/(2\ell+1)}$.}
 \label{fig:angpow}
 \end{figure*}
 
 \section{Usage}
 \label{sec:usage}
-\vol{Renee,Elisa}
-\revise
 
 \ccl is a public tool developed by the members of the Dark Energy Science Collaboration of LSST and can be downloaded from the collaboration's github repository at the URL provided in the abstract. Installation instructions are provided in a README file available in that same repository. Instructions on how to generate a Docker\footnote{\url{https://www.docker.com/}} image are provided for portability to different architectures. \ccl dependencies include the GNU Scientific Library\footnote{\url{https://www.gnu.org/software/gsl/}} and FFTW3\footnote{\url{http://www.fftw.org/}}. A suite of tests can be run to ensure installation was successful and all features perform nomrmally. Accuracy checks are performed in C, while a suite of unit tests is available in python.
 
 \ccl is documented using Doxygen\footnote{\url{www.doxygen.org/}}. For convenience, the repository includes multiple example files in C and several {\tt Jupyter} notebooks.
 
-\ccl is released under terms consistent with BSD 3-Clause licensing \mi{Maybe a reference here}. 
+\ccl is released under terms consistent with BSD 3-Clause licensing\footnote{\url{https://github.com/LSSTDESC/CCL/blob/master/LICENSE}}.
 
 %-------------------------------------------------------------------------------
 \section{Outlook}
 \label{sec:conclusion}
-\vol{David Alonso, Elisabeth Krause}
-\revise
 
 Science software development to facilitate the cosmological inference from LSST data is one of the critical tasks of the Dark Energy Science Collaboration (DESC). Recent cosmological analyses of the Dark Energy Survey (DES) relied on CosmoSIS \citep{Zuntz14} and CosmoLike \citep{krause17}, the Kilo-Degree Survey (KiDS) uses CosmoLSS \cite{Joudaki18} and CosmoMC \citep{Lewis02}. All of these frameworks employ {\tt CLASS}, CAMB \citep{Challinor2005}, or the cosmic emulator to compute the density power spectra. Compared to the analyses of DES, KiDS and the Hyper-Suprime Cam Survey (HSC), future data sets (e.g. LSST, {\it Euclid} and {\it WFIRST}) have substantially higher demands on analysis frameworks. Analyses are becoming more complex in terms of cosmological physics that is included in the analyses (neutrinos, modified gravity, and dark matter models) and in terms of modeling astrophysical and observational systematics at the required precision. 
 
@@ -1041,7 +985,7 @@ It is the primary goal of the \ccl to become the backbone of all cosmological an
 
 The implementation of \ccl in realistic analysis pipelines has already begun: all likelihood module prototypes under development use it as its backbone, and the first of these, cosmological analysis of angular galaxy clustering cross-correlations, will serve as a model for the design of the joint-probes likelihood of the DESC. This work has allowed us to validate the performance of \ccl in a realistic analysis scenario, verifying its accuracy and efficiency in the context of computationally demanding MCMC runs. %In addition to simulated analysis tests, \ccl has also been validated through its use in the analysis of current datasets \damonge{Do we know external papers that have used CCL?}
 
-Beyond its usefulness in the DESC, the flexible design of \ccl makes it a useful tool for the analysis of other cosmological datasets, as well as for the cross-correlation of different experiments. To this end, and to allow a generic and flexible analysis of the LSST data, further functionality will be added to \ccl. Plans are in place to extend the range of standard and non-standard cosmological models covered by the code. Work is already underway to add a comprehensive implementation of the halo-model calculation of two-point functions \citep{Peacock2000} with sufficient flexibility to include generic parametrizations of observable halo profiles and mass-observable relations. The current simplified treatment of the galaxy-matter connection for galaxy clustering and intrinsic alignments will be improved by implementing generic perturbation-theory approaches to structure formation \citep{2009JCAP...08..020M,FASTPT}. A more complete implementation of all relevant cross-correlations between large-scale structure observables and other cosmological probes (e.g. CMB integrated Sachs-Wolfe effect, \citealt{1967ApJ...147...73S}, and other secondary anisotropies) will also soon be included. \mi{Did you mean to have the citation to Sachs-Wolfe in that format?}
+Beyond its usefulness in the DESC, the flexible design of \ccl makes it a useful tool for the analysis of other cosmological datasets, as well as for the cross-correlation of different experiments. To this end, and to allow a generic and flexible analysis of the LSST data, further functionality will be added to \ccl. Plans are in place to extend the range of standard and non-standard cosmological models covered by the code. Work is already underway to add a comprehensive implementation of the halo-model calculation of two-point functions \citep{Peacock2000} with sufficient flexibility to include generic parametrizations of observable halo profiles and mass-observable relations. The current simplified treatment of the galaxy-matter connection for galaxy clustering and intrinsic alignments will be improved by implementing generic perturbation-theory approaches to structure formation \citep{2009JCAP...08..020M,FASTPT}. A more complete implementation of all relevant cross-correlations between large-scale structure observables and other cosmological probes (e.g. CMB integrated Sachs-Wolfe effect -\citealt{1967ApJ...147...73S}-, and other secondary anisotropies) will also soon be included. 
 
 In general, although this document presents the functionality and performance of \ccl shortly after its release, we expect the library to be a continuously evolving piece of software. This will allow \ccl to satisfy the analysis needs of future large datasets, as well as more accurate and sophisticated models for a broad range of cosmological and astrophysical observables.
 
