@@ -13,8 +13,6 @@
 
 \usepackage[outdir=./]{epstopdf}
 \usepackage{graphicx,verbatim}
-%\usepackage{subcaption}
-%\captionsetup{compatibility=false}
 \usepackage{xspace}
 \usepackage[figuresright]{rotating}
 \usepackage{tabularx}
@@ -826,7 +824,6 @@ In addition to the above tests in $\Lambda$CDM cosmologies without massive neutr
 %-------------------------------------------------------------------------------
 \subsubsection{Generalized validation of the power spectrum over $\Lambda$CDM parameter space}
 \vol{Phil Bull}
-%\cont{ `Fair' sampling of parameter space with Latin Hypercubes. Summary statistics used, and binning of power spectrum in $k$ and $z$. Precision settings used for CLASS. Estimates of run-time. Results. Range of validity.}
 
 \begin{figure*}
 \centering
@@ -859,13 +856,6 @@ The lower panels in Fig.~\ref{fig:power_paramspace} show the fractional deviatio
 Fig.~\ref{fig:power_paramspace_z2} shows the same comparison, but now for $z=2$. The precision on the linear matter power spectrum is almost an order of magnitude better than at $z=0$ for the standard precision settings, and about the same as at $z=0$ for the high precision settings. The picture is quite different for the Halofit power spectrum however, where large deviations are seen regardless of the precision settings for models with small values of $\Omega_c$. Larger values of $\Omega_c$ produce only slightly worse precision than at $z=0$ however.
 
 These results show that the {\tt CLASS}-based \ccl power spectrum calculations are robust across a broad range of cosmological parameters, especially for the linear power spectrum, but that some caution must be taken when using the Halofit power spectrum in MCMC studies for example. Since other, more realistic, non-linear power spectrum methods are available (e.g. see Sect.~\ref{sec:cosmicemu}), and tend to have larger theoretical errors than the deviations shown in Fig.~\ref{fig:power_paramspace_z2}, this is unlikely to be a serious concern for most users however.
-
-%To quantify the level of agreement between the \ccl and reference power spectra, we use the following summary statistic that can be summed over a chosen set of bins in redshift and wavenumber:
-%\begin{equation}
-%\Delta = \sum_{ij} \Theta \left ( \log_{10} \left | \frac{P_{\rm CCL}(k_i, z_j) - P_{\rm ref}(k_i, z_j)}{P_{\rm ref}(k_i, z_j) \Delta_{\rm thres}} \right | \right ).
-%\end{equation}
-%Here, $\Delta_{\rm thres}$ is a target threshold for the fractional deviation between the power spectra, and we have defined $\Theta(x) \equiv x ~~(x \ge 0)$ and $0$ otherwise. Bins where the \ccl power spectrum deviates from the reference power spectrum by a fraction less than $\Delta_{\rm thres}$ do not contribute to the statistic, so the aim is to have $\Delta = 0$ (i.e. no deviation beyond the threshold in any bin). If deviations are found, however, they are weighted logarithmically -- one large deviation of several orders of magnitude affects the statistic as much as a few smaller deviations of order $\sim \Delta_{\rm thres}$.
-%\todo{This section still needs discussion and conclusions, right? -DL}
 
 
 \subsubsection{Validation of the Cosmic Emulator implementation}
