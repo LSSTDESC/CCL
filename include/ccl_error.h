@@ -36,6 +36,7 @@ typedef enum {
 typedef enum {
   CCL_DEBUG_MODE_OFF = 0,
   CCL_DEBUG_MODE_ON = 1,
+  CCL_DEBUG_MODE_WARNING = 2,
 } CCLDebugModePolicy;
 
 /** Raise an exception
@@ -43,6 +44,18 @@ typedef enum {
  * @return void
  */
 void ccl_raise_exception(int err, char* msg);
+
+/** Raise a warning
+ * Given a status, give a warning message.
+ * @return void
+ */
+void ccl_raise_warning(int err, char* msg);
+
+/** Raise a warning based on a GSL error message
+ * Given a GSL status, give a warning message.
+ * @return void
+ */
+void ccl_raise_gsl_warning(int gslstatus, char* msg);
 
 /** Set the error policy
  * @oaram error_policy the error policy

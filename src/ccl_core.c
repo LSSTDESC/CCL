@@ -16,6 +16,22 @@
 
 const ccl_configuration default_config = {ccl_boltzmann_class, ccl_halofit, ccl_nobaryons, ccl_tinker10, ccl_emu_strict};
 
+const ccl_gsl_params default_gsl_params = {GSL_EPSREL,                          // EPSREL
+                                           GSL_N_ITERATION,                     // N_ITERATION
+                                           GSL_INTEGRATION_GAUSS_KRONROD_POINTS,// INTEGRATION_GAUSS_KRONROD_POINTS
+                                           GSL_EPSREL,                          // INTEGRATION_EPSREL
+                                           GSL_INTEGRATION_GAUSS_KRONROD_POINTS,// INTEGRATION_LIMBER_GAUSS_KRONROD_POINTS
+                                           GSL_EPSREL,                          // INTEGRATION_LIMBER_EPSREL
+                                           GSL_EPSREL_DIST,                     // INTEGRATION_DISTANCE_EPSREL
+                                           GSL_EPSREL_DNDZ,                     // INTEGRATION_DNDZ_EPSREL
+                                           GSL_EPSREL_SIGMAR,                   // INTEGRATION_SIGMAR_EPSREL
+                                           GSL_EPSREL_NU,                       // INTEGRATION_NU_EPSREL
+                                           GSL_EPSABS_NU,                       // INTEGRATION_NU_EPSABS
+                                           GSL_EPSREL,                          // ROOT_EPSREL
+                                           GSL_N_ITERATION,                     // ROOT_N_ITERATION
+                                           GSL_EPSREL_GROWTH                    // ODE_GROWTH_EPSREL
+                                          };
+
 /* ------- ROUTINE: ccl_cosmology_read_config ------
    INPUTS: none, but will look for ini file in include/ dir
    TASK: fill out global variables of splines with user defined input.
@@ -25,6 +41,7 @@ const ccl_configuration default_config = {ccl_boltzmann_class, ccl_halofit, ccl_
 */
 
 ccl_spline_params * ccl_splines; // Global variable
+ccl_gsl_params * ccl_gsl; // Global variable
 
 void ccl_cosmology_read_config(void)
 {
@@ -36,8 +53,6 @@ void ccl_cosmology_read_config(void)
   char var_name[MAX_CONFIG_VAR_LEN];
   char* rtn;
   double var_dbl;
-  
-  ccl_splines = malloc(sizeof(ccl_spline_params));
   
   // Get parameter .ini filename from environment variable or default location
   const char* param_file;
@@ -52,7 +67,16 @@ void ccl_cosmology_read_config(void)
   
   if ((fconfig=fopen(param_file, "r")) == NULL) {
     ccl_raise_exception(EXIT_FAILURE, "ccl_core.c: Failed to open config file");
-  } 
+    return;
+  }
+
+  if(ccl_splines == NULL) {
+    ccl_splines = malloc(sizeof(ccl_spline_params));
+  }
+  if(ccl_gsl == NULL) {
+    ccl_gsl = malloc(sizeof(ccl_gsl_params));
+    memcpy(ccl_gsl, &default_gsl_params, sizeof(ccl_gsl_params));
+  }
 
   while(! feof(fconfig)) {
     rtn = fgets(buf, CONFIG_LINE_BUFFER_SIZE, fconfig);
@@ -61,6 +85,7 @@ void ccl_cosmology_read_config(void)
     }
     else {
       sscanf(buf, "%99[^=]=%le\n",var_name, &var_dbl);
+      // Spline parameters
       if(strcmp(var_name,"A_SPLINE_NA")==0) ccl_splines->A_SPLINE_NA=(int) var_dbl; 
       if(strcmp(var_name,"A_SPLINE_NLOG")==0) ccl_splines->A_SPLINE_NLOG=(int) var_dbl;
       if(strcmp(var_name,"A_SPLINE_MINLOG")==0) ccl_splines->A_SPLINE_MINLOG=var_dbl;
@@ -78,7 +103,24 @@ void ccl_cosmology_read_config(void)
       if(strcmp(var_name,"K_MAX")==0) ccl_splines->K_MAX=var_dbl;
       if(strcmp(var_name,"K_MIN_DEFAULT")==0) ccl_splines->K_MIN_DEFAULT=var_dbl;
       if(strcmp(var_name,"N_K")==0) ccl_splines->N_K=(int) var_dbl;
+      // 3dcorr parameters
       if(strcmp(var_name,"N_K_3DCOR")==0) ccl_splines->N_K_3DCOR=(int) var_dbl;     
+
+      // GSL parameters
+      if(strcmp(var_name,"GSL_EPSREL")==0) ccl_gsl->EPSREL=var_dbl;
+      if(strcmp(var_name,"GSL_N_ITERATION")==0) ccl_gsl->N_ITERATION=(size_t) var_dbl;
+      if(strcmp(var_name,"GSL_INTEGRATION_GAUSS_KRONROD_POINTS")==0) ccl_gsl->INTEGRATION_GAUSS_KRONROD_POINTS=(int) var_dbl;
+      if(strcmp(var_name,"GSL_INTEGRATION_EPSREL")==0) ccl_gsl->INTEGRATION_EPSREL=var_dbl;
+      if(strcmp(var_name,"GSL_INTEGRATION_DISTANCE_EPSREL")==0) ccl_gsl->INTEGRATION_DISTANCE_EPSREL=var_dbl;
+      if(strcmp(var_name,"GSL_INTEGRATION_DNDZ_EPSREL")==0) ccl_gsl->INTEGRATION_DNDZ_EPSREL=var_dbl;
+      if(strcmp(var_name,"GSL_INTEGRATION_SIGMAR_EPSREL")==0) ccl_gsl->INTEGRATION_SIGMAR_EPSREL=var_dbl;
+      if(strcmp(var_name,"GSL_INTEGRATION_NU_EPSREL")==0) ccl_gsl->INTEGRATION_NU_EPSREL=var_dbl;
+      if(strcmp(var_name,"GSL_INTEGRATION_NU_EPSABS")==0) ccl_gsl->INTEGRATION_NU_EPSABS=var_dbl;
+      if(strcmp(var_name,"GSL_INTEGRATION_LIMBER_GAUSS_KRONROD_POINTS")==0) ccl_gsl->INTEGRATION_LIMBER_GAUSS_KRONROD_POINTS=(int) var_dbl;
+      if(strcmp(var_name,"GSL_INTEGRATION_LIMBER_EPSREL")==0) ccl_gsl->INTEGRATION_LIMBER_EPSREL=var_dbl;
+      if(strcmp(var_name,"GSL_ROOT_EPSREL")==0) ccl_gsl->ROOT_EPSREL=var_dbl;
+      if(strcmp(var_name,"GSL_ROOT_N_ITERATION")==0) ccl_gsl->ROOT_N_ITERATION=(int) var_dbl;
+      if(strcmp(var_name,"GSL_ODE_GROWTH_EPSREL")==0) ccl_gsl->ODE_GROWTH_EPSREL=var_dbl;
     }
   }
 
@@ -106,12 +148,6 @@ computed_power, computed_sigma: store status of the computations
 */
 ccl_cosmology * ccl_cosmology_create(ccl_parameters params, ccl_configuration config)
 {
-  #ifndef USE_GSL_ERROR
-    gsl_set_error_handler_off ();
-  #endif
-
-  if(ccl_splines==NULL) ccl_cosmology_read_config();
-  
   ccl_cosmology * cosmo = malloc(sizeof(ccl_cosmology));
   cosmo->params = params;
   cosmo->config = config;
@@ -309,7 +345,24 @@ ccl_parameters ccl_parameters_create(
 				     double bcm_ks, int nz_mgrowth, double *zarr_mgrowth,
 				     double *dfarr_mgrowth, int *status)
 {
+  #ifndef USE_GSL_ERROR
+    gsl_set_error_handler_off ();
+  #endif
+
   ccl_parameters params;
+  
+  /* Check whether ccl_splines and ccl_gsl exist. If either is not set yet, load
+     parameters from the config file. */
+  if(ccl_splines==NULL || ccl_gsl==NULL) {
+    ccl_cosmology_read_config();
+  }
+  /* Exit gracefully if config file can't be opened. */
+  if(ccl_splines==NULL || ccl_gsl==NULL) {
+    ccl_raise_exception(EXIT_FAILURE, "ccl_core.c: Failed to read config file.");
+    *status = EXIT_FAILURE;
+    return params;
+  }
+
   params.mnu = NULL;
   params.z_mgrowth=NULL;
   params.df_mgrowth=NULL;
