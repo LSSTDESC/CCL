@@ -2989,26 +2989,28 @@ SWIG_Python_NonDynamicSetAttr(PyObject *obj, PyObject *name, PyObject *value) {
 #define SWIGTYPE_p_ccl_configuration swig_types[6]
 #define SWIGTYPE_p_ccl_cosmology swig_types[7]
 #define SWIGTYPE_p_ccl_data swig_types[8]
-#define SWIGTYPE_p_ccl_mnu_convention swig_types[9]
-#define SWIGTYPE_p_ccl_neutrino_mass_splits swig_types[10]
-#define SWIGTYPE_p_ccl_parameters swig_types[11]
-#define SWIGTYPE_p_ccl_species_x_label swig_types[12]
-#define SWIGTYPE_p_char swig_types[13]
-#define SWIGTYPE_p_double swig_types[14]
-#define SWIGTYPE_p_emulator_neutrinos_t swig_types[15]
-#define SWIGTYPE_p_f_double_double_p_void_p_int__double swig_types[16]
-#define SWIGTYPE_p_gsl_interp_accel swig_types[17]
-#define SWIGTYPE_p_gsl_spline swig_types[18]
-#define SWIGTYPE_p_gsl_spline2d swig_types[19]
-#define SWIGTYPE_p_int swig_types[20]
-#define SWIGTYPE_p_mass_function_t swig_types[21]
-#define SWIGTYPE_p_matter_power_spectrum_t swig_types[22]
-#define SWIGTYPE_p_p_SplPar swig_types[23]
-#define SWIGTYPE_p_transfer_function_t swig_types[24]
-#define SWIGTYPE_p_user_pz_info swig_types[25]
-#define SWIGTYPE_p_void swig_types[26]
-static swig_type_info *swig_types[28];
-static swig_module_info swig_module = {swig_types, 27, 0, 0, 0, 0};
+#define SWIGTYPE_p_ccl_gsl_params swig_types[9]
+#define SWIGTYPE_p_ccl_mnu_convention swig_types[10]
+#define SWIGTYPE_p_ccl_neutrino_mass_splits swig_types[11]
+#define SWIGTYPE_p_ccl_parameters swig_types[12]
+#define SWIGTYPE_p_ccl_species_x_label swig_types[13]
+#define SWIGTYPE_p_ccl_spline_params swig_types[14]
+#define SWIGTYPE_p_char swig_types[15]
+#define SWIGTYPE_p_double swig_types[16]
+#define SWIGTYPE_p_emulator_neutrinos_t swig_types[17]
+#define SWIGTYPE_p_f_double_double_p_void_p_int__double swig_types[18]
+#define SWIGTYPE_p_gsl_interp_accel swig_types[19]
+#define SWIGTYPE_p_gsl_spline swig_types[20]
+#define SWIGTYPE_p_gsl_spline2d swig_types[21]
+#define SWIGTYPE_p_int swig_types[22]
+#define SWIGTYPE_p_mass_function_t swig_types[23]
+#define SWIGTYPE_p_matter_power_spectrum_t swig_types[24]
+#define SWIGTYPE_p_p_SplPar swig_types[25]
+#define SWIGTYPE_p_transfer_function_t swig_types[26]
+#define SWIGTYPE_p_user_pz_info swig_types[27]
+#define SWIGTYPE_p_void swig_types[28]
+static swig_type_info *swig_types[30];
+static swig_module_info swig_module = {swig_types, 29, 0, 0, 0, 0};
 #define SWIG_TypeQuery(name) SWIG_TypeQueryModule(&swig_module, &swig_module, name)
 #define SWIG_MangledTypeQuery(name) SWIG_MangledTypeQueryModule(&swig_module, &swig_module, name)
 
@@ -4392,6 +4394,162 @@ void nu_masses_vec(double OmNuh2, int label, double T_CMB,
     }
 }
 
+
+
+#define SWIG_FILE_WITH_INIT
+#include "../include/ccl_params.h"
+
+
+SWIGINTERN int
+SWIG_AsVal_unsigned_SS_long (PyObject *obj, unsigned long *val) 
+{
+#if PY_VERSION_HEX < 0x03000000
+  if (PyInt_Check(obj)) {
+    long v = PyInt_AsLong(obj);
+    if (v >= 0) {
+      if (val) *val = v;
+      return SWIG_OK;
+    } else {
+      return SWIG_OverflowError;
+    }
+  } else
+#endif
+  if (PyLong_Check(obj)) {
+    unsigned long v = PyLong_AsUnsignedLong(obj);
+    if (!PyErr_Occurred()) {
+      if (val) *val = v;
+      return SWIG_OK;
+    } else {
+      PyErr_Clear();
+      return SWIG_OverflowError;
+    }
+  }
+#ifdef SWIG_PYTHON_CAST_MODE
+  {
+    int dispatch = 0;
+    unsigned long v = PyLong_AsUnsignedLong(obj);
+    if (!PyErr_Occurred()) {
+      if (val) *val = v;
+      return SWIG_AddCast(SWIG_OK);
+    } else {
+      PyErr_Clear();
+    }
+    if (!dispatch) {
+      double d;
+      int res = SWIG_AddCast(SWIG_AsVal_double (obj,&d));
+      if (SWIG_IsOK(res) && SWIG_CanCastAsInteger(&d, 0, ULONG_MAX)) {
+	if (val) *val = (unsigned long)(d);
+	return res;
+      }
+    }
+  }
+#endif
+  return SWIG_TypeError;
+}
+
+
+#if defined(LLONG_MAX) && !defined(SWIG_LONG_LONG_AVAILABLE)
+#  define SWIG_LONG_LONG_AVAILABLE
+#endif
+
+
+#ifdef SWIG_LONG_LONG_AVAILABLE
+SWIGINTERN int
+SWIG_AsVal_unsigned_SS_long_SS_long (PyObject *obj, unsigned long long *val)
+{
+  int res = SWIG_TypeError;
+  if (PyLong_Check(obj)) {
+    unsigned long long v = PyLong_AsUnsignedLongLong(obj);
+    if (!PyErr_Occurred()) {
+      if (val) *val = v;
+      return SWIG_OK;
+    } else {
+      PyErr_Clear();
+      res = SWIG_OverflowError;
+    }
+  } else {
+    unsigned long v;
+    res = SWIG_AsVal_unsigned_SS_long (obj,&v);
+    if (SWIG_IsOK(res)) {
+      if (val) *val = v;
+      return res;
+    }
+  }
+#ifdef SWIG_PYTHON_CAST_MODE
+  {
+    const double mant_max = 1LL << DBL_MANT_DIG;
+    double d;
+    res = SWIG_AsVal_double (obj,&d);
+    if (SWIG_IsOK(res) && !SWIG_CanCastAsInteger(&d, 0, mant_max))
+      return SWIG_OverflowError;
+    if (SWIG_IsOK(res) && SWIG_CanCastAsInteger(&d, 0, mant_max)) {
+      if (val) *val = (unsigned long long)(d);
+      return SWIG_AddCast(res);
+    }
+    res = SWIG_TypeError;
+  }
+#endif
+  return res;
+}
+#endif
+
+
+SWIGINTERNINLINE int
+SWIG_AsVal_size_t (PyObject * obj, size_t *val)
+{
+  int res = SWIG_TypeError;
+#ifdef SWIG_LONG_LONG_AVAILABLE
+  if (sizeof(size_t) <= sizeof(unsigned long)) {
+#endif
+    unsigned long v;
+    res = SWIG_AsVal_unsigned_SS_long (obj, val ? &v : 0);
+    if (SWIG_IsOK(res) && val) *val = (size_t)(v);
+#ifdef SWIG_LONG_LONG_AVAILABLE
+  } else if (sizeof(size_t) <= sizeof(unsigned long long)) {
+    unsigned long long v;
+    res = SWIG_AsVal_unsigned_SS_long_SS_long (obj, val ? &v : 0);
+    if (SWIG_IsOK(res) && val) *val = (size_t)(v);
+  }
+#endif
+  return res;
+}
+
+
+  #define SWIG_From_long   PyInt_FromLong 
+
+
+SWIGINTERNINLINE PyObject* 
+SWIG_From_unsigned_SS_long  (unsigned long value)
+{
+  return (value > LONG_MAX) ?
+    PyLong_FromUnsignedLong(value) : PyInt_FromLong((long)(value));
+}
+
+
+#ifdef SWIG_LONG_LONG_AVAILABLE
+SWIGINTERNINLINE PyObject* 
+SWIG_From_unsigned_SS_long_SS_long  (unsigned long long value)
+{
+  return (value > LONG_MAX) ?
+    PyLong_FromUnsignedLongLong(value) : PyInt_FromLong((long)(value));
+}
+#endif
+
+
+SWIGINTERNINLINE PyObject *
+SWIG_From_size_t  (size_t value)
+{    
+#ifdef SWIG_LONG_LONG_AVAILABLE
+  if (sizeof(size_t) <= sizeof(unsigned long)) {
+#endif
+    return SWIG_From_unsigned_SS_long  ((unsigned long)(value));
+#ifdef SWIG_LONG_LONG_AVAILABLE
+  } else {
+    /* assume sizeof(size_t) <= sizeof(unsigned long long) */
+    return SWIG_From_unsigned_SS_long_SS_long  ((unsigned long long)(value));
+  }
+#endif
+}
 
 #ifdef __cplusplus
 extern "C" {
@@ -20142,6 +20300,2070 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_spline_params_A_SPLINE_NA_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  struct ccl_spline_params *arg1 = (struct ccl_spline_params *) 0 ;
+  int arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:spline_params_A_SPLINE_NA_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_spline_params, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "spline_params_A_SPLINE_NA_set" "', argument " "1"" of type '" "struct ccl_spline_params *""'"); 
+  }
+  arg1 = (struct ccl_spline_params *)(argp1);
+  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "spline_params_A_SPLINE_NA_set" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = (int)(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->A_SPLINE_NA = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_spline_params_A_SPLINE_NA_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  struct ccl_spline_params *arg1 = (struct ccl_spline_params *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  int result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:spline_params_A_SPLINE_NA_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_spline_params, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "spline_params_A_SPLINE_NA_get" "', argument " "1"" of type '" "struct ccl_spline_params *""'"); 
+  }
+  arg1 = (struct ccl_spline_params *)(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (int) ((arg1)->A_SPLINE_NA);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_int((int)(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_spline_params_A_SPLINE_MIN_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  struct ccl_spline_params *arg1 = (struct ccl_spline_params *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:spline_params_A_SPLINE_MIN_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_spline_params, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "spline_params_A_SPLINE_MIN_set" "', argument " "1"" of type '" "struct ccl_spline_params *""'"); 
+  }
+  arg1 = (struct ccl_spline_params *)(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "spline_params_A_SPLINE_MIN_set" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = (double)(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->A_SPLINE_MIN = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_spline_params_A_SPLINE_MIN_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  struct ccl_spline_params *arg1 = (struct ccl_spline_params *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  double result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:spline_params_A_SPLINE_MIN_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_spline_params, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "spline_params_A_SPLINE_MIN_get" "', argument " "1"" of type '" "struct ccl_spline_params *""'"); 
+  }
+  arg1 = (struct ccl_spline_params *)(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double) ((arg1)->A_SPLINE_MIN);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double((double)(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_spline_params_A_SPLINE_MINLOG_PK_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  struct ccl_spline_params *arg1 = (struct ccl_spline_params *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:spline_params_A_SPLINE_MINLOG_PK_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_spline_params, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "spline_params_A_SPLINE_MINLOG_PK_set" "', argument " "1"" of type '" "struct ccl_spline_params *""'"); 
+  }
+  arg1 = (struct ccl_spline_params *)(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "spline_params_A_SPLINE_MINLOG_PK_set" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = (double)(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->A_SPLINE_MINLOG_PK = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_spline_params_A_SPLINE_MINLOG_PK_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  struct ccl_spline_params *arg1 = (struct ccl_spline_params *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  double result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:spline_params_A_SPLINE_MINLOG_PK_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_spline_params, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "spline_params_A_SPLINE_MINLOG_PK_get" "', argument " "1"" of type '" "struct ccl_spline_params *""'"); 
+  }
+  arg1 = (struct ccl_spline_params *)(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double) ((arg1)->A_SPLINE_MINLOG_PK);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double((double)(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_spline_params_A_SPLINE_MIN_PK_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  struct ccl_spline_params *arg1 = (struct ccl_spline_params *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:spline_params_A_SPLINE_MIN_PK_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_spline_params, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "spline_params_A_SPLINE_MIN_PK_set" "', argument " "1"" of type '" "struct ccl_spline_params *""'"); 
+  }
+  arg1 = (struct ccl_spline_params *)(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "spline_params_A_SPLINE_MIN_PK_set" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = (double)(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->A_SPLINE_MIN_PK = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_spline_params_A_SPLINE_MIN_PK_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  struct ccl_spline_params *arg1 = (struct ccl_spline_params *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  double result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:spline_params_A_SPLINE_MIN_PK_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_spline_params, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "spline_params_A_SPLINE_MIN_PK_get" "', argument " "1"" of type '" "struct ccl_spline_params *""'"); 
+  }
+  arg1 = (struct ccl_spline_params *)(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double) ((arg1)->A_SPLINE_MIN_PK);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double((double)(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_spline_params_A_SPLINE_MAX_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  struct ccl_spline_params *arg1 = (struct ccl_spline_params *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:spline_params_A_SPLINE_MAX_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_spline_params, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "spline_params_A_SPLINE_MAX_set" "', argument " "1"" of type '" "struct ccl_spline_params *""'"); 
+  }
+  arg1 = (struct ccl_spline_params *)(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "spline_params_A_SPLINE_MAX_set" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = (double)(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->A_SPLINE_MAX = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_spline_params_A_SPLINE_MAX_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  struct ccl_spline_params *arg1 = (struct ccl_spline_params *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  double result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:spline_params_A_SPLINE_MAX_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_spline_params, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "spline_params_A_SPLINE_MAX_get" "', argument " "1"" of type '" "struct ccl_spline_params *""'"); 
+  }
+  arg1 = (struct ccl_spline_params *)(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double) ((arg1)->A_SPLINE_MAX);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double((double)(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_spline_params_A_SPLINE_MINLOG_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  struct ccl_spline_params *arg1 = (struct ccl_spline_params *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:spline_params_A_SPLINE_MINLOG_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_spline_params, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "spline_params_A_SPLINE_MINLOG_set" "', argument " "1"" of type '" "struct ccl_spline_params *""'"); 
+  }
+  arg1 = (struct ccl_spline_params *)(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "spline_params_A_SPLINE_MINLOG_set" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = (double)(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->A_SPLINE_MINLOG = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_spline_params_A_SPLINE_MINLOG_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  struct ccl_spline_params *arg1 = (struct ccl_spline_params *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  double result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:spline_params_A_SPLINE_MINLOG_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_spline_params, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "spline_params_A_SPLINE_MINLOG_get" "', argument " "1"" of type '" "struct ccl_spline_params *""'"); 
+  }
+  arg1 = (struct ccl_spline_params *)(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double) ((arg1)->A_SPLINE_MINLOG);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double((double)(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_spline_params_A_SPLINE_NLOG_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  struct ccl_spline_params *arg1 = (struct ccl_spline_params *) 0 ;
+  int arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:spline_params_A_SPLINE_NLOG_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_spline_params, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "spline_params_A_SPLINE_NLOG_set" "', argument " "1"" of type '" "struct ccl_spline_params *""'"); 
+  }
+  arg1 = (struct ccl_spline_params *)(argp1);
+  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "spline_params_A_SPLINE_NLOG_set" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = (int)(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->A_SPLINE_NLOG = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_spline_params_A_SPLINE_NLOG_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  struct ccl_spline_params *arg1 = (struct ccl_spline_params *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  int result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:spline_params_A_SPLINE_NLOG_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_spline_params, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "spline_params_A_SPLINE_NLOG_get" "', argument " "1"" of type '" "struct ccl_spline_params *""'"); 
+  }
+  arg1 = (struct ccl_spline_params *)(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (int) ((arg1)->A_SPLINE_NLOG);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_int((int)(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_spline_params_LOGM_SPLINE_DELTA_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  struct ccl_spline_params *arg1 = (struct ccl_spline_params *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:spline_params_LOGM_SPLINE_DELTA_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_spline_params, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "spline_params_LOGM_SPLINE_DELTA_set" "', argument " "1"" of type '" "struct ccl_spline_params *""'"); 
+  }
+  arg1 = (struct ccl_spline_params *)(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "spline_params_LOGM_SPLINE_DELTA_set" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = (double)(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->LOGM_SPLINE_DELTA = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_spline_params_LOGM_SPLINE_DELTA_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  struct ccl_spline_params *arg1 = (struct ccl_spline_params *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  double result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:spline_params_LOGM_SPLINE_DELTA_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_spline_params, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "spline_params_LOGM_SPLINE_DELTA_get" "', argument " "1"" of type '" "struct ccl_spline_params *""'"); 
+  }
+  arg1 = (struct ccl_spline_params *)(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double) ((arg1)->LOGM_SPLINE_DELTA);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double((double)(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_spline_params_LOGM_SPLINE_NM_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  struct ccl_spline_params *arg1 = (struct ccl_spline_params *) 0 ;
+  int arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:spline_params_LOGM_SPLINE_NM_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_spline_params, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "spline_params_LOGM_SPLINE_NM_set" "', argument " "1"" of type '" "struct ccl_spline_params *""'"); 
+  }
+  arg1 = (struct ccl_spline_params *)(argp1);
+  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "spline_params_LOGM_SPLINE_NM_set" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = (int)(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->LOGM_SPLINE_NM = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_spline_params_LOGM_SPLINE_NM_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  struct ccl_spline_params *arg1 = (struct ccl_spline_params *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  int result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:spline_params_LOGM_SPLINE_NM_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_spline_params, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "spline_params_LOGM_SPLINE_NM_get" "', argument " "1"" of type '" "struct ccl_spline_params *""'"); 
+  }
+  arg1 = (struct ccl_spline_params *)(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (int) ((arg1)->LOGM_SPLINE_NM);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_int((int)(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_spline_params_LOGM_SPLINE_MIN_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  struct ccl_spline_params *arg1 = (struct ccl_spline_params *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:spline_params_LOGM_SPLINE_MIN_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_spline_params, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "spline_params_LOGM_SPLINE_MIN_set" "', argument " "1"" of type '" "struct ccl_spline_params *""'"); 
+  }
+  arg1 = (struct ccl_spline_params *)(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "spline_params_LOGM_SPLINE_MIN_set" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = (double)(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->LOGM_SPLINE_MIN = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_spline_params_LOGM_SPLINE_MIN_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  struct ccl_spline_params *arg1 = (struct ccl_spline_params *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  double result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:spline_params_LOGM_SPLINE_MIN_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_spline_params, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "spline_params_LOGM_SPLINE_MIN_get" "', argument " "1"" of type '" "struct ccl_spline_params *""'"); 
+  }
+  arg1 = (struct ccl_spline_params *)(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double) ((arg1)->LOGM_SPLINE_MIN);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double((double)(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_spline_params_LOGM_SPLINE_MAX_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  struct ccl_spline_params *arg1 = (struct ccl_spline_params *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:spline_params_LOGM_SPLINE_MAX_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_spline_params, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "spline_params_LOGM_SPLINE_MAX_set" "', argument " "1"" of type '" "struct ccl_spline_params *""'"); 
+  }
+  arg1 = (struct ccl_spline_params *)(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "spline_params_LOGM_SPLINE_MAX_set" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = (double)(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->LOGM_SPLINE_MAX = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_spline_params_LOGM_SPLINE_MAX_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  struct ccl_spline_params *arg1 = (struct ccl_spline_params *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  double result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:spline_params_LOGM_SPLINE_MAX_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_spline_params, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "spline_params_LOGM_SPLINE_MAX_get" "', argument " "1"" of type '" "struct ccl_spline_params *""'"); 
+  }
+  arg1 = (struct ccl_spline_params *)(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double) ((arg1)->LOGM_SPLINE_MAX);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double((double)(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_spline_params_A_SPLINE_NA_PK_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  struct ccl_spline_params *arg1 = (struct ccl_spline_params *) 0 ;
+  int arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:spline_params_A_SPLINE_NA_PK_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_spline_params, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "spline_params_A_SPLINE_NA_PK_set" "', argument " "1"" of type '" "struct ccl_spline_params *""'"); 
+  }
+  arg1 = (struct ccl_spline_params *)(argp1);
+  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "spline_params_A_SPLINE_NA_PK_set" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = (int)(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->A_SPLINE_NA_PK = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_spline_params_A_SPLINE_NA_PK_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  struct ccl_spline_params *arg1 = (struct ccl_spline_params *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  int result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:spline_params_A_SPLINE_NA_PK_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_spline_params, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "spline_params_A_SPLINE_NA_PK_get" "', argument " "1"" of type '" "struct ccl_spline_params *""'"); 
+  }
+  arg1 = (struct ccl_spline_params *)(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (int) ((arg1)->A_SPLINE_NA_PK);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_int((int)(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_spline_params_A_SPLINE_NLOG_PK_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  struct ccl_spline_params *arg1 = (struct ccl_spline_params *) 0 ;
+  int arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:spline_params_A_SPLINE_NLOG_PK_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_spline_params, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "spline_params_A_SPLINE_NLOG_PK_set" "', argument " "1"" of type '" "struct ccl_spline_params *""'"); 
+  }
+  arg1 = (struct ccl_spline_params *)(argp1);
+  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "spline_params_A_SPLINE_NLOG_PK_set" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = (int)(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->A_SPLINE_NLOG_PK = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_spline_params_A_SPLINE_NLOG_PK_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  struct ccl_spline_params *arg1 = (struct ccl_spline_params *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  int result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:spline_params_A_SPLINE_NLOG_PK_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_spline_params, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "spline_params_A_SPLINE_NLOG_PK_get" "', argument " "1"" of type '" "struct ccl_spline_params *""'"); 
+  }
+  arg1 = (struct ccl_spline_params *)(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (int) ((arg1)->A_SPLINE_NLOG_PK);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_int((int)(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_spline_params_K_MAX_SPLINE_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  struct ccl_spline_params *arg1 = (struct ccl_spline_params *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:spline_params_K_MAX_SPLINE_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_spline_params, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "spline_params_K_MAX_SPLINE_set" "', argument " "1"" of type '" "struct ccl_spline_params *""'"); 
+  }
+  arg1 = (struct ccl_spline_params *)(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "spline_params_K_MAX_SPLINE_set" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = (double)(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->K_MAX_SPLINE = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_spline_params_K_MAX_SPLINE_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  struct ccl_spline_params *arg1 = (struct ccl_spline_params *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  double result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:spline_params_K_MAX_SPLINE_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_spline_params, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "spline_params_K_MAX_SPLINE_get" "', argument " "1"" of type '" "struct ccl_spline_params *""'"); 
+  }
+  arg1 = (struct ccl_spline_params *)(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double) ((arg1)->K_MAX_SPLINE);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double((double)(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_spline_params_K_MAX_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  struct ccl_spline_params *arg1 = (struct ccl_spline_params *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:spline_params_K_MAX_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_spline_params, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "spline_params_K_MAX_set" "', argument " "1"" of type '" "struct ccl_spline_params *""'"); 
+  }
+  arg1 = (struct ccl_spline_params *)(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "spline_params_K_MAX_set" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = (double)(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->K_MAX = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_spline_params_K_MAX_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  struct ccl_spline_params *arg1 = (struct ccl_spline_params *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  double result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:spline_params_K_MAX_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_spline_params, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "spline_params_K_MAX_get" "', argument " "1"" of type '" "struct ccl_spline_params *""'"); 
+  }
+  arg1 = (struct ccl_spline_params *)(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double) ((arg1)->K_MAX);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double((double)(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_spline_params_K_MIN_DEFAULT_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  struct ccl_spline_params *arg1 = (struct ccl_spline_params *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:spline_params_K_MIN_DEFAULT_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_spline_params, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "spline_params_K_MIN_DEFAULT_set" "', argument " "1"" of type '" "struct ccl_spline_params *""'"); 
+  }
+  arg1 = (struct ccl_spline_params *)(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "spline_params_K_MIN_DEFAULT_set" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = (double)(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->K_MIN_DEFAULT = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_spline_params_K_MIN_DEFAULT_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  struct ccl_spline_params *arg1 = (struct ccl_spline_params *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  double result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:spline_params_K_MIN_DEFAULT_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_spline_params, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "spline_params_K_MIN_DEFAULT_get" "', argument " "1"" of type '" "struct ccl_spline_params *""'"); 
+  }
+  arg1 = (struct ccl_spline_params *)(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double) ((arg1)->K_MIN_DEFAULT);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double((double)(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_spline_params_N_K_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  struct ccl_spline_params *arg1 = (struct ccl_spline_params *) 0 ;
+  int arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:spline_params_N_K_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_spline_params, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "spline_params_N_K_set" "', argument " "1"" of type '" "struct ccl_spline_params *""'"); 
+  }
+  arg1 = (struct ccl_spline_params *)(argp1);
+  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "spline_params_N_K_set" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = (int)(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->N_K = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_spline_params_N_K_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  struct ccl_spline_params *arg1 = (struct ccl_spline_params *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  int result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:spline_params_N_K_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_spline_params, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "spline_params_N_K_get" "', argument " "1"" of type '" "struct ccl_spline_params *""'"); 
+  }
+  arg1 = (struct ccl_spline_params *)(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (int) ((arg1)->N_K);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_int((int)(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_spline_params_N_K_3DCOR_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  struct ccl_spline_params *arg1 = (struct ccl_spline_params *) 0 ;
+  int arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:spline_params_N_K_3DCOR_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_spline_params, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "spline_params_N_K_3DCOR_set" "', argument " "1"" of type '" "struct ccl_spline_params *""'"); 
+  }
+  arg1 = (struct ccl_spline_params *)(argp1);
+  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "spline_params_N_K_3DCOR_set" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = (int)(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->N_K_3DCOR = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_spline_params_N_K_3DCOR_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  struct ccl_spline_params *arg1 = (struct ccl_spline_params *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  int result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:spline_params_N_K_3DCOR_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_spline_params, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "spline_params_N_K_3DCOR_get" "', argument " "1"" of type '" "struct ccl_spline_params *""'"); 
+  }
+  arg1 = (struct ccl_spline_params *)(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (int) ((arg1)->N_K_3DCOR);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_int((int)(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_new_spline_params(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  struct ccl_spline_params *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)":new_spline_params")) SWIG_fail;
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (struct ccl_spline_params *)calloc(1, sizeof(struct ccl_spline_params));
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_ccl_spline_params, SWIG_POINTER_NEW |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_delete_spline_params(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  struct ccl_spline_params *arg1 = (struct ccl_spline_params *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:delete_spline_params",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_spline_params, SWIG_POINTER_DISOWN |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_spline_params" "', argument " "1"" of type '" "struct ccl_spline_params *""'"); 
+  }
+  arg1 = (struct ccl_spline_params *)(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    free((char *) arg1);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *spline_params_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *obj;
+  if (!PyArg_ParseTuple(args,(char *)"O:swigregister", &obj)) return NULL;
+  SWIG_TypeNewClientData(SWIGTYPE_p_ccl_spline_params, SWIG_NewClientData(obj));
+  return SWIG_Py_Void();
+}
+
+SWIGINTERN int Swig_var_splines_set(PyObject *_val) {
+  {
+    void *argp = 0;
+    int res = SWIG_ConvertPtr(_val, &argp, SWIGTYPE_p_ccl_spline_params,  0 );  
+    if (!SWIG_IsOK(res)) {
+      SWIG_exception_fail(SWIG_ArgError(res), "in variable '""ccl_splines""' of type '""ccl_spline_params *""'");
+    }
+    ccl_splines = (ccl_spline_params *)(argp);
+  }
+  return 0;
+fail:
+  return 1;
+}
+
+
+SWIGINTERN PyObject *Swig_var_splines_get(void) {
+  PyObject *pyobj = 0;
+  
+  pyobj = SWIG_NewPointerObj(SWIG_as_voidptr(ccl_splines), SWIGTYPE_p_ccl_spline_params,  0 );
+  return pyobj;
+}
+
+
+SWIGINTERN PyObject *_wrap_gsl_params_EPSREL_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  struct ccl_gsl_params *arg1 = (struct ccl_gsl_params *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:gsl_params_EPSREL_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_gsl_params, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "gsl_params_EPSREL_set" "', argument " "1"" of type '" "struct ccl_gsl_params *""'"); 
+  }
+  arg1 = (struct ccl_gsl_params *)(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "gsl_params_EPSREL_set" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = (double)(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->EPSREL = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_gsl_params_EPSREL_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  struct ccl_gsl_params *arg1 = (struct ccl_gsl_params *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  double result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:gsl_params_EPSREL_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_gsl_params, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "gsl_params_EPSREL_get" "', argument " "1"" of type '" "struct ccl_gsl_params *""'"); 
+  }
+  arg1 = (struct ccl_gsl_params *)(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double) ((arg1)->EPSREL);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double((double)(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_gsl_params_N_ITERATION_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  struct ccl_gsl_params *arg1 = (struct ccl_gsl_params *) 0 ;
+  size_t arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  size_t val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:gsl_params_N_ITERATION_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_gsl_params, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "gsl_params_N_ITERATION_set" "', argument " "1"" of type '" "struct ccl_gsl_params *""'"); 
+  }
+  arg1 = (struct ccl_gsl_params *)(argp1);
+  ecode2 = SWIG_AsVal_size_t(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "gsl_params_N_ITERATION_set" "', argument " "2"" of type '" "size_t""'");
+  } 
+  arg2 = (size_t)(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->N_ITERATION = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_gsl_params_N_ITERATION_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  struct ccl_gsl_params *arg1 = (struct ccl_gsl_params *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  size_t result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:gsl_params_N_ITERATION_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_gsl_params, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "gsl_params_N_ITERATION_get" "', argument " "1"" of type '" "struct ccl_gsl_params *""'"); 
+  }
+  arg1 = (struct ccl_gsl_params *)(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result =  ((arg1)->N_ITERATION);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_size_t((size_t)(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_gsl_params_INTEGRATION_GAUSS_KRONROD_POINTS_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  struct ccl_gsl_params *arg1 = (struct ccl_gsl_params *) 0 ;
+  int arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:gsl_params_INTEGRATION_GAUSS_KRONROD_POINTS_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_gsl_params, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "gsl_params_INTEGRATION_GAUSS_KRONROD_POINTS_set" "', argument " "1"" of type '" "struct ccl_gsl_params *""'"); 
+  }
+  arg1 = (struct ccl_gsl_params *)(argp1);
+  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "gsl_params_INTEGRATION_GAUSS_KRONROD_POINTS_set" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = (int)(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->INTEGRATION_GAUSS_KRONROD_POINTS = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_gsl_params_INTEGRATION_GAUSS_KRONROD_POINTS_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  struct ccl_gsl_params *arg1 = (struct ccl_gsl_params *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  int result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:gsl_params_INTEGRATION_GAUSS_KRONROD_POINTS_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_gsl_params, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "gsl_params_INTEGRATION_GAUSS_KRONROD_POINTS_get" "', argument " "1"" of type '" "struct ccl_gsl_params *""'"); 
+  }
+  arg1 = (struct ccl_gsl_params *)(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (int) ((arg1)->INTEGRATION_GAUSS_KRONROD_POINTS);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_int((int)(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_gsl_params_INTEGRATION_EPSREL_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  struct ccl_gsl_params *arg1 = (struct ccl_gsl_params *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:gsl_params_INTEGRATION_EPSREL_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_gsl_params, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "gsl_params_INTEGRATION_EPSREL_set" "', argument " "1"" of type '" "struct ccl_gsl_params *""'"); 
+  }
+  arg1 = (struct ccl_gsl_params *)(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "gsl_params_INTEGRATION_EPSREL_set" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = (double)(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->INTEGRATION_EPSREL = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_gsl_params_INTEGRATION_EPSREL_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  struct ccl_gsl_params *arg1 = (struct ccl_gsl_params *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  double result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:gsl_params_INTEGRATION_EPSREL_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_gsl_params, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "gsl_params_INTEGRATION_EPSREL_get" "', argument " "1"" of type '" "struct ccl_gsl_params *""'"); 
+  }
+  arg1 = (struct ccl_gsl_params *)(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double) ((arg1)->INTEGRATION_EPSREL);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double((double)(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_gsl_params_INTEGRATION_LIMBER_GAUSS_KRONROD_POINTS_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  struct ccl_gsl_params *arg1 = (struct ccl_gsl_params *) 0 ;
+  int arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:gsl_params_INTEGRATION_LIMBER_GAUSS_KRONROD_POINTS_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_gsl_params, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "gsl_params_INTEGRATION_LIMBER_GAUSS_KRONROD_POINTS_set" "', argument " "1"" of type '" "struct ccl_gsl_params *""'"); 
+  }
+  arg1 = (struct ccl_gsl_params *)(argp1);
+  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "gsl_params_INTEGRATION_LIMBER_GAUSS_KRONROD_POINTS_set" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = (int)(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->INTEGRATION_LIMBER_GAUSS_KRONROD_POINTS = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_gsl_params_INTEGRATION_LIMBER_GAUSS_KRONROD_POINTS_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  struct ccl_gsl_params *arg1 = (struct ccl_gsl_params *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  int result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:gsl_params_INTEGRATION_LIMBER_GAUSS_KRONROD_POINTS_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_gsl_params, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "gsl_params_INTEGRATION_LIMBER_GAUSS_KRONROD_POINTS_get" "', argument " "1"" of type '" "struct ccl_gsl_params *""'"); 
+  }
+  arg1 = (struct ccl_gsl_params *)(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (int) ((arg1)->INTEGRATION_LIMBER_GAUSS_KRONROD_POINTS);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_int((int)(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_gsl_params_INTEGRATION_LIMBER_EPSREL_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  struct ccl_gsl_params *arg1 = (struct ccl_gsl_params *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:gsl_params_INTEGRATION_LIMBER_EPSREL_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_gsl_params, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "gsl_params_INTEGRATION_LIMBER_EPSREL_set" "', argument " "1"" of type '" "struct ccl_gsl_params *""'"); 
+  }
+  arg1 = (struct ccl_gsl_params *)(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "gsl_params_INTEGRATION_LIMBER_EPSREL_set" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = (double)(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->INTEGRATION_LIMBER_EPSREL = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_gsl_params_INTEGRATION_LIMBER_EPSREL_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  struct ccl_gsl_params *arg1 = (struct ccl_gsl_params *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  double result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:gsl_params_INTEGRATION_LIMBER_EPSREL_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_gsl_params, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "gsl_params_INTEGRATION_LIMBER_EPSREL_get" "', argument " "1"" of type '" "struct ccl_gsl_params *""'"); 
+  }
+  arg1 = (struct ccl_gsl_params *)(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double) ((arg1)->INTEGRATION_LIMBER_EPSREL);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double((double)(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_gsl_params_INTEGRATION_DISTANCE_EPSREL_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  struct ccl_gsl_params *arg1 = (struct ccl_gsl_params *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:gsl_params_INTEGRATION_DISTANCE_EPSREL_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_gsl_params, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "gsl_params_INTEGRATION_DISTANCE_EPSREL_set" "', argument " "1"" of type '" "struct ccl_gsl_params *""'"); 
+  }
+  arg1 = (struct ccl_gsl_params *)(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "gsl_params_INTEGRATION_DISTANCE_EPSREL_set" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = (double)(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->INTEGRATION_DISTANCE_EPSREL = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_gsl_params_INTEGRATION_DISTANCE_EPSREL_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  struct ccl_gsl_params *arg1 = (struct ccl_gsl_params *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  double result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:gsl_params_INTEGRATION_DISTANCE_EPSREL_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_gsl_params, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "gsl_params_INTEGRATION_DISTANCE_EPSREL_get" "', argument " "1"" of type '" "struct ccl_gsl_params *""'"); 
+  }
+  arg1 = (struct ccl_gsl_params *)(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double) ((arg1)->INTEGRATION_DISTANCE_EPSREL);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double((double)(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_gsl_params_INTEGRATION_DNDZ_EPSREL_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  struct ccl_gsl_params *arg1 = (struct ccl_gsl_params *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:gsl_params_INTEGRATION_DNDZ_EPSREL_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_gsl_params, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "gsl_params_INTEGRATION_DNDZ_EPSREL_set" "', argument " "1"" of type '" "struct ccl_gsl_params *""'"); 
+  }
+  arg1 = (struct ccl_gsl_params *)(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "gsl_params_INTEGRATION_DNDZ_EPSREL_set" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = (double)(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->INTEGRATION_DNDZ_EPSREL = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_gsl_params_INTEGRATION_DNDZ_EPSREL_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  struct ccl_gsl_params *arg1 = (struct ccl_gsl_params *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  double result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:gsl_params_INTEGRATION_DNDZ_EPSREL_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_gsl_params, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "gsl_params_INTEGRATION_DNDZ_EPSREL_get" "', argument " "1"" of type '" "struct ccl_gsl_params *""'"); 
+  }
+  arg1 = (struct ccl_gsl_params *)(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double) ((arg1)->INTEGRATION_DNDZ_EPSREL);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double((double)(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_gsl_params_INTEGRATION_SIGMAR_EPSREL_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  struct ccl_gsl_params *arg1 = (struct ccl_gsl_params *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:gsl_params_INTEGRATION_SIGMAR_EPSREL_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_gsl_params, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "gsl_params_INTEGRATION_SIGMAR_EPSREL_set" "', argument " "1"" of type '" "struct ccl_gsl_params *""'"); 
+  }
+  arg1 = (struct ccl_gsl_params *)(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "gsl_params_INTEGRATION_SIGMAR_EPSREL_set" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = (double)(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->INTEGRATION_SIGMAR_EPSREL = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_gsl_params_INTEGRATION_SIGMAR_EPSREL_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  struct ccl_gsl_params *arg1 = (struct ccl_gsl_params *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  double result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:gsl_params_INTEGRATION_SIGMAR_EPSREL_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_gsl_params, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "gsl_params_INTEGRATION_SIGMAR_EPSREL_get" "', argument " "1"" of type '" "struct ccl_gsl_params *""'"); 
+  }
+  arg1 = (struct ccl_gsl_params *)(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double) ((arg1)->INTEGRATION_SIGMAR_EPSREL);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double((double)(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_gsl_params_INTEGRATION_NU_EPSREL_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  struct ccl_gsl_params *arg1 = (struct ccl_gsl_params *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:gsl_params_INTEGRATION_NU_EPSREL_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_gsl_params, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "gsl_params_INTEGRATION_NU_EPSREL_set" "', argument " "1"" of type '" "struct ccl_gsl_params *""'"); 
+  }
+  arg1 = (struct ccl_gsl_params *)(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "gsl_params_INTEGRATION_NU_EPSREL_set" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = (double)(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->INTEGRATION_NU_EPSREL = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_gsl_params_INTEGRATION_NU_EPSREL_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  struct ccl_gsl_params *arg1 = (struct ccl_gsl_params *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  double result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:gsl_params_INTEGRATION_NU_EPSREL_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_gsl_params, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "gsl_params_INTEGRATION_NU_EPSREL_get" "', argument " "1"" of type '" "struct ccl_gsl_params *""'"); 
+  }
+  arg1 = (struct ccl_gsl_params *)(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double) ((arg1)->INTEGRATION_NU_EPSREL);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double((double)(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_gsl_params_INTEGRATION_NU_EPSABS_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  struct ccl_gsl_params *arg1 = (struct ccl_gsl_params *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:gsl_params_INTEGRATION_NU_EPSABS_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_gsl_params, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "gsl_params_INTEGRATION_NU_EPSABS_set" "', argument " "1"" of type '" "struct ccl_gsl_params *""'"); 
+  }
+  arg1 = (struct ccl_gsl_params *)(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "gsl_params_INTEGRATION_NU_EPSABS_set" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = (double)(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->INTEGRATION_NU_EPSABS = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_gsl_params_INTEGRATION_NU_EPSABS_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  struct ccl_gsl_params *arg1 = (struct ccl_gsl_params *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  double result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:gsl_params_INTEGRATION_NU_EPSABS_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_gsl_params, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "gsl_params_INTEGRATION_NU_EPSABS_get" "', argument " "1"" of type '" "struct ccl_gsl_params *""'"); 
+  }
+  arg1 = (struct ccl_gsl_params *)(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double) ((arg1)->INTEGRATION_NU_EPSABS);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double((double)(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_gsl_params_ROOT_EPSREL_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  struct ccl_gsl_params *arg1 = (struct ccl_gsl_params *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:gsl_params_ROOT_EPSREL_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_gsl_params, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "gsl_params_ROOT_EPSREL_set" "', argument " "1"" of type '" "struct ccl_gsl_params *""'"); 
+  }
+  arg1 = (struct ccl_gsl_params *)(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "gsl_params_ROOT_EPSREL_set" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = (double)(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->ROOT_EPSREL = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_gsl_params_ROOT_EPSREL_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  struct ccl_gsl_params *arg1 = (struct ccl_gsl_params *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  double result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:gsl_params_ROOT_EPSREL_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_gsl_params, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "gsl_params_ROOT_EPSREL_get" "', argument " "1"" of type '" "struct ccl_gsl_params *""'"); 
+  }
+  arg1 = (struct ccl_gsl_params *)(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double) ((arg1)->ROOT_EPSREL);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double((double)(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_gsl_params_ROOT_N_ITERATION_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  struct ccl_gsl_params *arg1 = (struct ccl_gsl_params *) 0 ;
+  int arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:gsl_params_ROOT_N_ITERATION_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_gsl_params, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "gsl_params_ROOT_N_ITERATION_set" "', argument " "1"" of type '" "struct ccl_gsl_params *""'"); 
+  }
+  arg1 = (struct ccl_gsl_params *)(argp1);
+  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "gsl_params_ROOT_N_ITERATION_set" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = (int)(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->ROOT_N_ITERATION = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_gsl_params_ROOT_N_ITERATION_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  struct ccl_gsl_params *arg1 = (struct ccl_gsl_params *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  int result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:gsl_params_ROOT_N_ITERATION_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_gsl_params, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "gsl_params_ROOT_N_ITERATION_get" "', argument " "1"" of type '" "struct ccl_gsl_params *""'"); 
+  }
+  arg1 = (struct ccl_gsl_params *)(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (int) ((arg1)->ROOT_N_ITERATION);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_int((int)(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_gsl_params_ODE_GROWTH_EPSREL_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  struct ccl_gsl_params *arg1 = (struct ccl_gsl_params *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:gsl_params_ODE_GROWTH_EPSREL_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_gsl_params, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "gsl_params_ODE_GROWTH_EPSREL_set" "', argument " "1"" of type '" "struct ccl_gsl_params *""'"); 
+  }
+  arg1 = (struct ccl_gsl_params *)(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "gsl_params_ODE_GROWTH_EPSREL_set" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = (double)(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->ODE_GROWTH_EPSREL = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_gsl_params_ODE_GROWTH_EPSREL_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  struct ccl_gsl_params *arg1 = (struct ccl_gsl_params *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  double result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:gsl_params_ODE_GROWTH_EPSREL_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_gsl_params, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "gsl_params_ODE_GROWTH_EPSREL_get" "', argument " "1"" of type '" "struct ccl_gsl_params *""'"); 
+  }
+  arg1 = (struct ccl_gsl_params *)(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double) ((arg1)->ODE_GROWTH_EPSREL);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_double((double)(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_new_gsl_params(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  struct ccl_gsl_params *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)":new_gsl_params")) SWIG_fail;
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (struct ccl_gsl_params *)calloc(1, sizeof(struct ccl_gsl_params));
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_ccl_gsl_params, SWIG_POINTER_NEW |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_delete_gsl_params(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  struct ccl_gsl_params *arg1 = (struct ccl_gsl_params *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:delete_gsl_params",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_gsl_params, SWIG_POINTER_DISOWN |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_gsl_params" "', argument " "1"" of type '" "struct ccl_gsl_params *""'"); 
+  }
+  arg1 = (struct ccl_gsl_params *)(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    free((char *) arg1);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *gsl_params_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *obj;
+  if (!PyArg_ParseTuple(args,(char *)"O:swigregister", &obj)) return NULL;
+  SWIG_TypeNewClientData(SWIGTYPE_p_ccl_gsl_params, SWIG_NewClientData(obj));
+  return SWIG_Py_Void();
+}
+
+SWIGINTERN int Swig_var_gsl_set(PyObject *_val) {
+  {
+    void *argp = 0;
+    int res = SWIG_ConvertPtr(_val, &argp, SWIGTYPE_p_ccl_gsl_params,  0 );  
+    if (!SWIG_IsOK(res)) {
+      SWIG_exception_fail(SWIG_ArgError(res), "in variable '""ccl_gsl""' of type '""ccl_gsl_params *""'");
+    }
+    ccl_gsl = (ccl_gsl_params *)(argp);
+  }
+  return 0;
+fail:
+  return 1;
+}
+
+
+SWIGINTERN PyObject *Swig_var_gsl_get(void) {
+  PyObject *pyobj = 0;
+  
+  pyobj = SWIG_NewPointerObj(SWIG_as_voidptr(ccl_gsl), SWIGTYPE_p_ccl_gsl_params,  0 );
+  return pyobj;
+}
+
+
 SWIGINTERN PyObject *_wrap_configuration_transfer_function_method_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   struct ccl_configuration *arg1 = (struct ccl_configuration *) 0 ;
@@ -20531,6 +22753,80 @@ SWIGINTERN PyObject *_wrap_raise_exception(PyObject *SWIGUNUSEDPARM(self), PyObj
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
     ccl_raise_exception(arg1,arg2);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  if (alloc2 == SWIG_NEWOBJ) free((char*)buf2);
+  return resultobj;
+fail:
+  if (alloc2 == SWIG_NEWOBJ) free((char*)buf2);
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_raise_warning(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  int arg1 ;
+  char *arg2 = (char *) 0 ;
+  int val1 ;
+  int ecode1 = 0 ;
+  int res2 ;
+  char *buf2 = 0 ;
+  int alloc2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:raise_warning",&obj0,&obj1)) SWIG_fail;
+  ecode1 = SWIG_AsVal_int(obj0, &val1);
+  if (!SWIG_IsOK(ecode1)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "raise_warning" "', argument " "1"" of type '" "int""'");
+  } 
+  arg1 = (int)(val1);
+  res2 = SWIG_AsCharPtrAndSize(obj1, &buf2, NULL, &alloc2);
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "raise_warning" "', argument " "2"" of type '" "char *""'");
+  }
+  arg2 = (char *)(buf2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    ccl_raise_warning(arg1,arg2);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  if (alloc2 == SWIG_NEWOBJ) free((char*)buf2);
+  return resultobj;
+fail:
+  if (alloc2 == SWIG_NEWOBJ) free((char*)buf2);
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_raise_gsl_warning(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  int arg1 ;
+  char *arg2 = (char *) 0 ;
+  int val1 ;
+  int ecode1 = 0 ;
+  int res2 ;
+  char *buf2 = 0 ;
+  int alloc2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:raise_gsl_warning",&obj0,&obj1)) SWIG_fail;
+  ecode1 = SWIG_AsVal_int(obj0, &val1);
+  if (!SWIG_IsOK(ecode1)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "raise_gsl_warning" "', argument " "1"" of type '" "int""'");
+  } 
+  arg1 = (int)(val1);
+  res2 = SWIG_AsCharPtrAndSize(obj1, &buf2, NULL, &alloc2);
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "raise_gsl_warning" "', argument " "2"" of type '" "char *""'");
+  }
+  arg2 = (char *)(buf2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    ccl_raise_gsl_warning(arg1,arg2);
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
   resultobj = SWIG_Py_Void();
@@ -21716,6 +24012,76 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"nu_masses", _wrap_nu_masses, METH_VARARGS, (char *)"nu_masses(double OmNuh2, ccl_neutrino_mass_splits mass_split, double T_CMB, int * status) -> double *"},
 	 { (char *)"Omeganuh2_vec", _wrap_Omeganuh2_vec, METH_VARARGS, (char *)"Omeganuh2_vec(int N_nu_mass, double T_CMB, double * a, double * mnu, double * output, int * status)"},
 	 { (char *)"nu_masses_vec", _wrap_nu_masses_vec, METH_VARARGS, (char *)"nu_masses_vec(double OmNuh2, int label, double T_CMB, double * output, int * status)"},
+	 { (char *)"spline_params_A_SPLINE_NA_set", _wrap_spline_params_A_SPLINE_NA_set, METH_VARARGS, (char *)"spline_params_A_SPLINE_NA_set(spline_params self, int A_SPLINE_NA)"},
+	 { (char *)"spline_params_A_SPLINE_NA_get", _wrap_spline_params_A_SPLINE_NA_get, METH_VARARGS, (char *)"spline_params_A_SPLINE_NA_get(spline_params self) -> int"},
+	 { (char *)"spline_params_A_SPLINE_MIN_set", _wrap_spline_params_A_SPLINE_MIN_set, METH_VARARGS, (char *)"spline_params_A_SPLINE_MIN_set(spline_params self, double A_SPLINE_MIN)"},
+	 { (char *)"spline_params_A_SPLINE_MIN_get", _wrap_spline_params_A_SPLINE_MIN_get, METH_VARARGS, (char *)"spline_params_A_SPLINE_MIN_get(spline_params self) -> double"},
+	 { (char *)"spline_params_A_SPLINE_MINLOG_PK_set", _wrap_spline_params_A_SPLINE_MINLOG_PK_set, METH_VARARGS, (char *)"spline_params_A_SPLINE_MINLOG_PK_set(spline_params self, double A_SPLINE_MINLOG_PK)"},
+	 { (char *)"spline_params_A_SPLINE_MINLOG_PK_get", _wrap_spline_params_A_SPLINE_MINLOG_PK_get, METH_VARARGS, (char *)"spline_params_A_SPLINE_MINLOG_PK_get(spline_params self) -> double"},
+	 { (char *)"spline_params_A_SPLINE_MIN_PK_set", _wrap_spline_params_A_SPLINE_MIN_PK_set, METH_VARARGS, (char *)"spline_params_A_SPLINE_MIN_PK_set(spline_params self, double A_SPLINE_MIN_PK)"},
+	 { (char *)"spline_params_A_SPLINE_MIN_PK_get", _wrap_spline_params_A_SPLINE_MIN_PK_get, METH_VARARGS, (char *)"spline_params_A_SPLINE_MIN_PK_get(spline_params self) -> double"},
+	 { (char *)"spline_params_A_SPLINE_MAX_set", _wrap_spline_params_A_SPLINE_MAX_set, METH_VARARGS, (char *)"spline_params_A_SPLINE_MAX_set(spline_params self, double A_SPLINE_MAX)"},
+	 { (char *)"spline_params_A_SPLINE_MAX_get", _wrap_spline_params_A_SPLINE_MAX_get, METH_VARARGS, (char *)"spline_params_A_SPLINE_MAX_get(spline_params self) -> double"},
+	 { (char *)"spline_params_A_SPLINE_MINLOG_set", _wrap_spline_params_A_SPLINE_MINLOG_set, METH_VARARGS, (char *)"spline_params_A_SPLINE_MINLOG_set(spline_params self, double A_SPLINE_MINLOG)"},
+	 { (char *)"spline_params_A_SPLINE_MINLOG_get", _wrap_spline_params_A_SPLINE_MINLOG_get, METH_VARARGS, (char *)"spline_params_A_SPLINE_MINLOG_get(spline_params self) -> double"},
+	 { (char *)"spline_params_A_SPLINE_NLOG_set", _wrap_spline_params_A_SPLINE_NLOG_set, METH_VARARGS, (char *)"spline_params_A_SPLINE_NLOG_set(spline_params self, int A_SPLINE_NLOG)"},
+	 { (char *)"spline_params_A_SPLINE_NLOG_get", _wrap_spline_params_A_SPLINE_NLOG_get, METH_VARARGS, (char *)"spline_params_A_SPLINE_NLOG_get(spline_params self) -> int"},
+	 { (char *)"spline_params_LOGM_SPLINE_DELTA_set", _wrap_spline_params_LOGM_SPLINE_DELTA_set, METH_VARARGS, (char *)"spline_params_LOGM_SPLINE_DELTA_set(spline_params self, double LOGM_SPLINE_DELTA)"},
+	 { (char *)"spline_params_LOGM_SPLINE_DELTA_get", _wrap_spline_params_LOGM_SPLINE_DELTA_get, METH_VARARGS, (char *)"spline_params_LOGM_SPLINE_DELTA_get(spline_params self) -> double"},
+	 { (char *)"spline_params_LOGM_SPLINE_NM_set", _wrap_spline_params_LOGM_SPLINE_NM_set, METH_VARARGS, (char *)"spline_params_LOGM_SPLINE_NM_set(spline_params self, int LOGM_SPLINE_NM)"},
+	 { (char *)"spline_params_LOGM_SPLINE_NM_get", _wrap_spline_params_LOGM_SPLINE_NM_get, METH_VARARGS, (char *)"spline_params_LOGM_SPLINE_NM_get(spline_params self) -> int"},
+	 { (char *)"spline_params_LOGM_SPLINE_MIN_set", _wrap_spline_params_LOGM_SPLINE_MIN_set, METH_VARARGS, (char *)"spline_params_LOGM_SPLINE_MIN_set(spline_params self, double LOGM_SPLINE_MIN)"},
+	 { (char *)"spline_params_LOGM_SPLINE_MIN_get", _wrap_spline_params_LOGM_SPLINE_MIN_get, METH_VARARGS, (char *)"spline_params_LOGM_SPLINE_MIN_get(spline_params self) -> double"},
+	 { (char *)"spline_params_LOGM_SPLINE_MAX_set", _wrap_spline_params_LOGM_SPLINE_MAX_set, METH_VARARGS, (char *)"spline_params_LOGM_SPLINE_MAX_set(spline_params self, double LOGM_SPLINE_MAX)"},
+	 { (char *)"spline_params_LOGM_SPLINE_MAX_get", _wrap_spline_params_LOGM_SPLINE_MAX_get, METH_VARARGS, (char *)"spline_params_LOGM_SPLINE_MAX_get(spline_params self) -> double"},
+	 { (char *)"spline_params_A_SPLINE_NA_PK_set", _wrap_spline_params_A_SPLINE_NA_PK_set, METH_VARARGS, (char *)"spline_params_A_SPLINE_NA_PK_set(spline_params self, int A_SPLINE_NA_PK)"},
+	 { (char *)"spline_params_A_SPLINE_NA_PK_get", _wrap_spline_params_A_SPLINE_NA_PK_get, METH_VARARGS, (char *)"spline_params_A_SPLINE_NA_PK_get(spline_params self) -> int"},
+	 { (char *)"spline_params_A_SPLINE_NLOG_PK_set", _wrap_spline_params_A_SPLINE_NLOG_PK_set, METH_VARARGS, (char *)"spline_params_A_SPLINE_NLOG_PK_set(spline_params self, int A_SPLINE_NLOG_PK)"},
+	 { (char *)"spline_params_A_SPLINE_NLOG_PK_get", _wrap_spline_params_A_SPLINE_NLOG_PK_get, METH_VARARGS, (char *)"spline_params_A_SPLINE_NLOG_PK_get(spline_params self) -> int"},
+	 { (char *)"spline_params_K_MAX_SPLINE_set", _wrap_spline_params_K_MAX_SPLINE_set, METH_VARARGS, (char *)"spline_params_K_MAX_SPLINE_set(spline_params self, double K_MAX_SPLINE)"},
+	 { (char *)"spline_params_K_MAX_SPLINE_get", _wrap_spline_params_K_MAX_SPLINE_get, METH_VARARGS, (char *)"spline_params_K_MAX_SPLINE_get(spline_params self) -> double"},
+	 { (char *)"spline_params_K_MAX_set", _wrap_spline_params_K_MAX_set, METH_VARARGS, (char *)"spline_params_K_MAX_set(spline_params self, double K_MAX)"},
+	 { (char *)"spline_params_K_MAX_get", _wrap_spline_params_K_MAX_get, METH_VARARGS, (char *)"spline_params_K_MAX_get(spline_params self) -> double"},
+	 { (char *)"spline_params_K_MIN_DEFAULT_set", _wrap_spline_params_K_MIN_DEFAULT_set, METH_VARARGS, (char *)"spline_params_K_MIN_DEFAULT_set(spline_params self, double K_MIN_DEFAULT)"},
+	 { (char *)"spline_params_K_MIN_DEFAULT_get", _wrap_spline_params_K_MIN_DEFAULT_get, METH_VARARGS, (char *)"spline_params_K_MIN_DEFAULT_get(spline_params self) -> double"},
+	 { (char *)"spline_params_N_K_set", _wrap_spline_params_N_K_set, METH_VARARGS, (char *)"spline_params_N_K_set(spline_params self, int N_K)"},
+	 { (char *)"spline_params_N_K_get", _wrap_spline_params_N_K_get, METH_VARARGS, (char *)"spline_params_N_K_get(spline_params self) -> int"},
+	 { (char *)"spline_params_N_K_3DCOR_set", _wrap_spline_params_N_K_3DCOR_set, METH_VARARGS, (char *)"spline_params_N_K_3DCOR_set(spline_params self, int N_K_3DCOR)"},
+	 { (char *)"spline_params_N_K_3DCOR_get", _wrap_spline_params_N_K_3DCOR_get, METH_VARARGS, (char *)"spline_params_N_K_3DCOR_get(spline_params self) -> int"},
+	 { (char *)"new_spline_params", _wrap_new_spline_params, METH_VARARGS, (char *)"new_spline_params() -> spline_params"},
+	 { (char *)"delete_spline_params", _wrap_delete_spline_params, METH_VARARGS, (char *)"delete_spline_params(spline_params self)"},
+	 { (char *)"spline_params_swigregister", spline_params_swigregister, METH_VARARGS, NULL},
+	 { (char *)"gsl_params_EPSREL_set", _wrap_gsl_params_EPSREL_set, METH_VARARGS, (char *)"gsl_params_EPSREL_set(gsl_params self, double EPSREL)"},
+	 { (char *)"gsl_params_EPSREL_get", _wrap_gsl_params_EPSREL_get, METH_VARARGS, (char *)"gsl_params_EPSREL_get(gsl_params self) -> double"},
+	 { (char *)"gsl_params_N_ITERATION_set", _wrap_gsl_params_N_ITERATION_set, METH_VARARGS, (char *)"gsl_params_N_ITERATION_set(gsl_params self, size_t N_ITERATION)"},
+	 { (char *)"gsl_params_N_ITERATION_get", _wrap_gsl_params_N_ITERATION_get, METH_VARARGS, (char *)"gsl_params_N_ITERATION_get(gsl_params self) -> size_t"},
+	 { (char *)"gsl_params_INTEGRATION_GAUSS_KRONROD_POINTS_set", _wrap_gsl_params_INTEGRATION_GAUSS_KRONROD_POINTS_set, METH_VARARGS, (char *)"gsl_params_INTEGRATION_GAUSS_KRONROD_POINTS_set(gsl_params self, int INTEGRATION_GAUSS_KRONROD_POINTS)"},
+	 { (char *)"gsl_params_INTEGRATION_GAUSS_KRONROD_POINTS_get", _wrap_gsl_params_INTEGRATION_GAUSS_KRONROD_POINTS_get, METH_VARARGS, (char *)"gsl_params_INTEGRATION_GAUSS_KRONROD_POINTS_get(gsl_params self) -> int"},
+	 { (char *)"gsl_params_INTEGRATION_EPSREL_set", _wrap_gsl_params_INTEGRATION_EPSREL_set, METH_VARARGS, (char *)"gsl_params_INTEGRATION_EPSREL_set(gsl_params self, double INTEGRATION_EPSREL)"},
+	 { (char *)"gsl_params_INTEGRATION_EPSREL_get", _wrap_gsl_params_INTEGRATION_EPSREL_get, METH_VARARGS, (char *)"gsl_params_INTEGRATION_EPSREL_get(gsl_params self) -> double"},
+	 { (char *)"gsl_params_INTEGRATION_LIMBER_GAUSS_KRONROD_POINTS_set", _wrap_gsl_params_INTEGRATION_LIMBER_GAUSS_KRONROD_POINTS_set, METH_VARARGS, (char *)"gsl_params_INTEGRATION_LIMBER_GAUSS_KRONROD_POINTS_set(gsl_params self, int INTEGRATION_LIMBER_GAUSS_KRONROD_POINTS)"},
+	 { (char *)"gsl_params_INTEGRATION_LIMBER_GAUSS_KRONROD_POINTS_get", _wrap_gsl_params_INTEGRATION_LIMBER_GAUSS_KRONROD_POINTS_get, METH_VARARGS, (char *)"gsl_params_INTEGRATION_LIMBER_GAUSS_KRONROD_POINTS_get(gsl_params self) -> int"},
+	 { (char *)"gsl_params_INTEGRATION_LIMBER_EPSREL_set", _wrap_gsl_params_INTEGRATION_LIMBER_EPSREL_set, METH_VARARGS, (char *)"gsl_params_INTEGRATION_LIMBER_EPSREL_set(gsl_params self, double INTEGRATION_LIMBER_EPSREL)"},
+	 { (char *)"gsl_params_INTEGRATION_LIMBER_EPSREL_get", _wrap_gsl_params_INTEGRATION_LIMBER_EPSREL_get, METH_VARARGS, (char *)"gsl_params_INTEGRATION_LIMBER_EPSREL_get(gsl_params self) -> double"},
+	 { (char *)"gsl_params_INTEGRATION_DISTANCE_EPSREL_set", _wrap_gsl_params_INTEGRATION_DISTANCE_EPSREL_set, METH_VARARGS, (char *)"gsl_params_INTEGRATION_DISTANCE_EPSREL_set(gsl_params self, double INTEGRATION_DISTANCE_EPSREL)"},
+	 { (char *)"gsl_params_INTEGRATION_DISTANCE_EPSREL_get", _wrap_gsl_params_INTEGRATION_DISTANCE_EPSREL_get, METH_VARARGS, (char *)"gsl_params_INTEGRATION_DISTANCE_EPSREL_get(gsl_params self) -> double"},
+	 { (char *)"gsl_params_INTEGRATION_DNDZ_EPSREL_set", _wrap_gsl_params_INTEGRATION_DNDZ_EPSREL_set, METH_VARARGS, (char *)"gsl_params_INTEGRATION_DNDZ_EPSREL_set(gsl_params self, double INTEGRATION_DNDZ_EPSREL)"},
+	 { (char *)"gsl_params_INTEGRATION_DNDZ_EPSREL_get", _wrap_gsl_params_INTEGRATION_DNDZ_EPSREL_get, METH_VARARGS, (char *)"gsl_params_INTEGRATION_DNDZ_EPSREL_get(gsl_params self) -> double"},
+	 { (char *)"gsl_params_INTEGRATION_SIGMAR_EPSREL_set", _wrap_gsl_params_INTEGRATION_SIGMAR_EPSREL_set, METH_VARARGS, (char *)"gsl_params_INTEGRATION_SIGMAR_EPSREL_set(gsl_params self, double INTEGRATION_SIGMAR_EPSREL)"},
+	 { (char *)"gsl_params_INTEGRATION_SIGMAR_EPSREL_get", _wrap_gsl_params_INTEGRATION_SIGMAR_EPSREL_get, METH_VARARGS, (char *)"gsl_params_INTEGRATION_SIGMAR_EPSREL_get(gsl_params self) -> double"},
+	 { (char *)"gsl_params_INTEGRATION_NU_EPSREL_set", _wrap_gsl_params_INTEGRATION_NU_EPSREL_set, METH_VARARGS, (char *)"gsl_params_INTEGRATION_NU_EPSREL_set(gsl_params self, double INTEGRATION_NU_EPSREL)"},
+	 { (char *)"gsl_params_INTEGRATION_NU_EPSREL_get", _wrap_gsl_params_INTEGRATION_NU_EPSREL_get, METH_VARARGS, (char *)"gsl_params_INTEGRATION_NU_EPSREL_get(gsl_params self) -> double"},
+	 { (char *)"gsl_params_INTEGRATION_NU_EPSABS_set", _wrap_gsl_params_INTEGRATION_NU_EPSABS_set, METH_VARARGS, (char *)"gsl_params_INTEGRATION_NU_EPSABS_set(gsl_params self, double INTEGRATION_NU_EPSABS)"},
+	 { (char *)"gsl_params_INTEGRATION_NU_EPSABS_get", _wrap_gsl_params_INTEGRATION_NU_EPSABS_get, METH_VARARGS, (char *)"gsl_params_INTEGRATION_NU_EPSABS_get(gsl_params self) -> double"},
+	 { (char *)"gsl_params_ROOT_EPSREL_set", _wrap_gsl_params_ROOT_EPSREL_set, METH_VARARGS, (char *)"gsl_params_ROOT_EPSREL_set(gsl_params self, double ROOT_EPSREL)"},
+	 { (char *)"gsl_params_ROOT_EPSREL_get", _wrap_gsl_params_ROOT_EPSREL_get, METH_VARARGS, (char *)"gsl_params_ROOT_EPSREL_get(gsl_params self) -> double"},
+	 { (char *)"gsl_params_ROOT_N_ITERATION_set", _wrap_gsl_params_ROOT_N_ITERATION_set, METH_VARARGS, (char *)"gsl_params_ROOT_N_ITERATION_set(gsl_params self, int ROOT_N_ITERATION)"},
+	 { (char *)"gsl_params_ROOT_N_ITERATION_get", _wrap_gsl_params_ROOT_N_ITERATION_get, METH_VARARGS, (char *)"gsl_params_ROOT_N_ITERATION_get(gsl_params self) -> int"},
+	 { (char *)"gsl_params_ODE_GROWTH_EPSREL_set", _wrap_gsl_params_ODE_GROWTH_EPSREL_set, METH_VARARGS, (char *)"gsl_params_ODE_GROWTH_EPSREL_set(gsl_params self, double ODE_GROWTH_EPSREL)"},
+	 { (char *)"gsl_params_ODE_GROWTH_EPSREL_get", _wrap_gsl_params_ODE_GROWTH_EPSREL_get, METH_VARARGS, (char *)"gsl_params_ODE_GROWTH_EPSREL_get(gsl_params self) -> double"},
+	 { (char *)"new_gsl_params", _wrap_new_gsl_params, METH_VARARGS, (char *)"new_gsl_params() -> gsl_params"},
+	 { (char *)"delete_gsl_params", _wrap_delete_gsl_params, METH_VARARGS, (char *)"delete_gsl_params(gsl_params self)"},
+	 { (char *)"gsl_params_swigregister", gsl_params_swigregister, METH_VARARGS, NULL},
 	 { (char *)"configuration_transfer_function_method_set", _wrap_configuration_transfer_function_method_set, METH_VARARGS, (char *)"configuration_transfer_function_method_set(configuration self, transfer_function_t transfer_function_method)"},
 	 { (char *)"configuration_transfer_function_method_get", _wrap_configuration_transfer_function_method_get, METH_VARARGS, (char *)"configuration_transfer_function_method_get(configuration self) -> transfer_function_t"},
 	 { (char *)"configuration_matter_power_spectrum_method_set", _wrap_configuration_matter_power_spectrum_method_set, METH_VARARGS, (char *)"configuration_matter_power_spectrum_method_set(configuration self, matter_power_spectrum_t matter_power_spectrum_method)"},
@@ -21730,6 +24096,8 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"delete_configuration", _wrap_delete_configuration, METH_VARARGS, (char *)"delete_configuration(configuration self)"},
 	 { (char *)"configuration_swigregister", configuration_swigregister, METH_VARARGS, NULL},
 	 { (char *)"raise_exception", _wrap_raise_exception, METH_VARARGS, (char *)"raise_exception(int err, char * msg)"},
+	 { (char *)"raise_warning", _wrap_raise_warning, METH_VARARGS, (char *)"raise_warning(int err, char * msg)"},
+	 { (char *)"raise_gsl_warning", _wrap_raise_gsl_warning, METH_VARARGS, (char *)"raise_gsl_warning(int gslstatus, char * msg)"},
 	 { (char *)"set_error_policy", _wrap_set_error_policy, METH_VARARGS, (char *)"set_error_policy(CCLErrorPolicy error_policy)"},
 	 { (char *)"set_debug_policy", _wrap_set_debug_policy, METH_VARARGS, (char *)"set_debug_policy(CCLDebugModePolicy debug_policy)"},
 	 { (char *)"check_status", _wrap_check_status, METH_VARARGS, (char *)"check_status(cosmology cosmo, int * status)"},
@@ -21771,10 +24139,12 @@ static swig_type_info _swigt__p_baryons_power_spectrum_t = {"_p_baryons_power_sp
 static swig_type_info _swigt__p_ccl_configuration = {"_p_ccl_configuration", "struct ccl_configuration *|ccl_configuration *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_ccl_cosmology = {"_p_ccl_cosmology", "struct ccl_cosmology *|ccl_cosmology *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_ccl_data = {"_p_ccl_data", "struct ccl_data *|ccl_data *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_ccl_gsl_params = {"_p_ccl_gsl_params", "struct ccl_gsl_params *|ccl_gsl_params *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_ccl_mnu_convention = {"_p_ccl_mnu_convention", "enum ccl_mnu_convention *|ccl_mnu_convention *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_ccl_neutrino_mass_splits = {"_p_ccl_neutrino_mass_splits", "enum ccl_neutrino_mass_splits *|ccl_neutrino_mass_splits *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_ccl_parameters = {"_p_ccl_parameters", "struct ccl_parameters *|ccl_parameters *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_ccl_species_x_label = {"_p_ccl_species_x_label", "enum ccl_species_x_label *|ccl_species_x_label *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_ccl_spline_params = {"_p_ccl_spline_params", "struct ccl_spline_params *|ccl_spline_params *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_char = {"_p_char", "char *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_double = {"_p_double", "double *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_emulator_neutrinos_t = {"_p_emulator_neutrinos_t", "enum emulator_neutrinos_t *|emulator_neutrinos_t *", 0, 0, (void*)0, 0};
@@ -21800,10 +24170,12 @@ static swig_type_info *swig_type_initial[] = {
   &_swigt__p_ccl_configuration,
   &_swigt__p_ccl_cosmology,
   &_swigt__p_ccl_data,
+  &_swigt__p_ccl_gsl_params,
   &_swigt__p_ccl_mnu_convention,
   &_swigt__p_ccl_neutrino_mass_splits,
   &_swigt__p_ccl_parameters,
   &_swigt__p_ccl_species_x_label,
+  &_swigt__p_ccl_spline_params,
   &_swigt__p_char,
   &_swigt__p_double,
   &_swigt__p_emulator_neutrinos_t,
@@ -21829,10 +24201,12 @@ static swig_cast_info _swigc__p_baryons_power_spectrum_t[] = {  {&_swigt__p_bary
 static swig_cast_info _swigc__p_ccl_configuration[] = {  {&_swigt__p_ccl_configuration, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_ccl_cosmology[] = {  {&_swigt__p_ccl_cosmology, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_ccl_data[] = {  {&_swigt__p_ccl_data, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_ccl_gsl_params[] = {  {&_swigt__p_ccl_gsl_params, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_ccl_mnu_convention[] = {  {&_swigt__p_ccl_mnu_convention, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_ccl_neutrino_mass_splits[] = {  {&_swigt__p_ccl_neutrino_mass_splits, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_ccl_parameters[] = {  {&_swigt__p_ccl_parameters, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_ccl_species_x_label[] = {  {&_swigt__p_ccl_species_x_label, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_ccl_spline_params[] = {  {&_swigt__p_ccl_spline_params, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_char[] = {  {&_swigt__p_char, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_double[] = {  {&_swigt__p_double, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_emulator_neutrinos_t[] = {  {&_swigt__p_emulator_neutrinos_t, 0, 0, 0},{0, 0, 0, 0}};
@@ -21858,10 +24232,12 @@ static swig_cast_info *swig_cast_initial[] = {
   _swigc__p_ccl_configuration,
   _swigc__p_ccl_cosmology,
   _swigc__p_ccl_data,
+  _swigc__p_ccl_gsl_params,
   _swigc__p_ccl_mnu_convention,
   _swigc__p_ccl_neutrino_mass_splits,
   _swigc__p_ccl_parameters,
   _swigc__p_ccl_species_x_label,
+  _swigc__p_ccl_spline_params,
   _swigc__p_char,
   _swigc__p_double,
   _swigc__p_emulator_neutrinos_t,
@@ -22721,12 +25097,16 @@ SWIG_init(void) {
   SWIG_Python_SetConstant(d, "DELTAM12_sq",SWIG_From_double((double)(7.62E-5)));
   SWIG_Python_SetConstant(d, "DELTAM13_sq_pos",SWIG_From_double((double)(2.55E-3)));
   SWIG_Python_SetConstant(d, "DELTAM13_sq_neg",SWIG_From_double((double)(-2.43E-3)));
-  SWIG_Python_SetConstant(d, "EPSREL_DIST",SWIG_From_double((double)(1E-6)));
-  SWIG_Python_SetConstant(d, "EPSREL_GROWTH",SWIG_From_double((double)(1E-6)));
-  SWIG_Python_SetConstant(d, "EPSREL_DNDZ",SWIG_From_double((double)(1E-6)));
+  SWIG_Python_SetConstant(d, "GSL_EPSREL",SWIG_From_double((double)(1E-4)));
+  SWIG_Python_SetConstant(d, "GSL_N_ITERATION",SWIG_From_int((int)(1000)));
+  SWIG_Python_SetConstant(d, "GSL_EPSABS_NU",SWIG_From_double((double)(1E-7)));
+  SWIG_Python_SetConstant(d, "GSL_EPSREL_NU",SWIG_From_double((double)(1E-7)));
+  SWIG_Python_SetConstant(d, "GSL_N_ITERATION_NU",SWIG_From_int((int)(1000)));
+  SWIG_Python_SetConstant(d, "GSL_EPSREL_SIGMAR",SWIG_From_double((double)(1E-5)));
+  SWIG_Python_SetConstant(d, "GSL_EPSREL_DIST",SWIG_From_double((double)(1E-6)));
+  SWIG_Python_SetConstant(d, "GSL_EPSREL_GROWTH",SWIG_From_double((double)(1E-6)));
+  SWIG_Python_SetConstant(d, "GSL_EPSREL_DNDZ",SWIG_From_double((double)(1E-6)));
   SWIG_Python_SetConstant(d, "EPS_SCALEFAC_GROWTH",SWIG_From_double((double)(1E-6)));
-  SWIG_Python_SetConstant(d, "EPSREL_CORR_FUNC",SWIG_From_double((double)(1E-3)));
-  SWIG_Python_SetConstant(d, "GSL_INTEGRATION_LIMIT",SWIG_From_int((int)(1000)));
   SWIG_Python_SetConstant(d, "Z_MIN_SOURCES",SWIG_From_double((double)(0.1)));
   SWIG_Python_SetConstant(d, "Z_MAX_SOURCES",SWIG_From_double((double)(3.0)));
   SWIG_Python_SetConstant(d, "DNDZ_WL_CONS",SWIG_From_int((int)(1)));
@@ -22741,6 +25121,9 @@ SWIG_init(void) {
   SWIG_Python_SetConstant(d, "nu_inverted",SWIG_From_int((int)(ccl_nu_inverted)));
   SWIG_Python_SetConstant(d, "nu_equal",SWIG_From_int((int)(ccl_nu_equal)));
   SWIG_Python_SetConstant(d, "nu_sum",SWIG_From_int((int)(ccl_nu_sum)));
+  PyDict_SetItemString(md,(char *)"cvar", SWIG_globals());
+  SWIG_addvarlink(SWIG_globals(),(char *)"splines",Swig_var_splines_get, Swig_var_splines_set);
+  SWIG_addvarlink(SWIG_globals(),(char *)"gsl",Swig_var_gsl_get, Swig_var_gsl_set);
   SWIG_Python_SetConstant(d, "emulator",SWIG_From_int((int)(ccl_emulator)));
   SWIG_Python_SetConstant(d, "none",SWIG_From_int((int)(ccl_none)));
   SWIG_Python_SetConstant(d, "fitting_function",SWIG_From_int((int)(ccl_fitting_function)));
@@ -22761,7 +25144,6 @@ SWIG_init(void) {
   SWIG_Python_SetConstant(d, "angulo",SWIG_From_int((int)(ccl_angulo)));
   SWIG_Python_SetConstant(d, "emu_strict",SWIG_From_int((int)(ccl_emu_strict)));
   SWIG_Python_SetConstant(d, "emu_equalize",SWIG_From_int((int)(ccl_emu_equalize)));
-  PyDict_SetItemString(md,(char *)"cvar", SWIG_globals());
   SWIG_addvarlink(SWIG_globals(),(char *)"default_config",Swig_var_default_config_get, Swig_var_default_config_set);
   SWIG_Python_SetConstant(d, "CCL_ERROR_MEMORY",SWIG_From_int((int)(1025)));
   SWIG_Python_SetConstant(d, "CCL_ERROR_LINSPACE",SWIG_From_int((int)(1026)));
@@ -22785,6 +25167,7 @@ SWIG_init(void) {
   SWIG_Python_SetConstant(d, "CCL_ERROR_POLICY_CONTINUE",SWIG_From_int((int)(CCL_ERROR_POLICY_CONTINUE)));
   SWIG_Python_SetConstant(d, "CCL_DEBUG_MODE_OFF",SWIG_From_int((int)(CCL_DEBUG_MODE_OFF)));
   SWIG_Python_SetConstant(d, "CCL_DEBUG_MODE_ON",SWIG_From_int((int)(CCL_DEBUG_MODE_ON)));
+  SWIG_Python_SetConstant(d, "CCL_DEBUG_MODE_WARNING",SWIG_From_int((int)(CCL_DEBUG_MODE_WARNING)));
   
   /* Initialize threading */
   SWIG_PYTHON_INITIALIZE_THREADS;

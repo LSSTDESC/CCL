@@ -111,28 +111,61 @@ extern "C" {
 
 //Precision parameters
 /**
+ * Default relative precision if not otherwise specified
+ */
+#define GSL_EPSREL 1E-4
+
+/**
+ * Default number of iterations for integration and root-finding if not otherwise
+ * specified
+ */
+#define GSL_N_ITERATION 1000
+
+/**
+ * Default number of Gauss-Kronrod points in QAG integration if not otherwise 
+ * specified
+ */
+#define GSL_INTEGRATION_GAUSS_KRONROD_POINTS GSL_INTEG_GAUSS41
+
+/**
+ * Absolute precision in neutrino root finding
+ */
+#define GSL_EPSABS_NU 1E-7
+
+/**
+ * Relative precision in neutrino root finding
+ */
+#define GSL_EPSREL_NU 1E-7
+
+/**
+ * Number of iterations for neutrino root finding
+ */
+#define GSL_N_ITERATION_NU 1000
+
+/**
+ * Relative precision in sigma_R calculations
+ */
+#define GSL_EPSREL_SIGMAR 1E-5
+
+/**
  * Relative precision in distance calculations
  */
-#define EPSREL_DIST 1E-6
+#define GSL_EPSREL_DIST 1E-6
 
 /**
  * Relative precision in growth calculations
  */
-#define EPSREL_GROWTH 1E-6
+#define GSL_EPSREL_GROWTH 1E-6
 
 /**
  * Relative precision in dNdz calculations
  */
-#define EPSREL_DNDZ 1E-6
+#define GSL_EPSREL_DNDZ 1E-6
 
 /**
  * Absolute precision in growth calculations
  */
 #define EPS_SCALEFAC_GROWTH 1E-6
-
-//Correlation function related parameters
-#define EPSREL_CORR_FUNC 1E-3
-#define GSL_INTEGRATION_LIMIT 1000
 
 //LSST specific numbers
 #define Z_MIN_SOURCES 0.1
