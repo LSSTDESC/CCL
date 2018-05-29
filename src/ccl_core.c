@@ -351,9 +351,12 @@ ccl_parameters ccl_parameters_create(
 
   ccl_parameters params;
   
+  /* Check whether ccl_splines and ccl_gsl exist. If either is not set yet, load
+     parameters from the config file. */
   if(ccl_splines==NULL || ccl_gsl==NULL) {
     ccl_cosmology_read_config();
   }
+  /* Exit gracefully if config file can't be opened. */
   if(ccl_splines==NULL || ccl_gsl==NULL) {
     ccl_raise_exception(EXIT_FAILURE, "ccl_core.c: Failed to read config file.");
     *status = EXIT_FAILURE;
