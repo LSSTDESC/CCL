@@ -185,9 +185,9 @@ In doing this, \ccl simultaneously computes the logarithmic growth rate $f(a)$, 
 
 \ccl provides functions that return the growth normalized to $D(a=1)=1$ and to $D(a\ll1)\rightarrow a$. It employs an accelerated spline that is linearly spaced in the scale factor to interpolate the growth functions. 
 
-The growth calculations cover flat and curved $\Lambda$CDM, $w$CDM, and $(w_0 + w_a)$CDM cosmologies. However, it should be noted that the above treatment is strictly valid for a Universe containing only dust-like matter components. A scale-independent growth rate is, for example, ill-defined in the presence of massive neutrinos; attempts to compute the growth rate in cosmologies with massive neutrinos will therefore fail by design. \todo{CCL will not crash if the user calls it in this way, issue 380 is open to address this}
+The growth calculations cover flat and curved $\Lambda$CDM, $w$CDM, and $(w_0 + w_a)$CDM cosmologies. However, it should be noted that the above treatment is strictly valid for a Universe containing only dust-like matter components. A scale-independent growth rate is, for example, ill-defined in the presence of massive neutrinos, and attempts to compute the growth rate in cosmologies with massive neutrinos will get an inconsistent result.
 
-Finally, \ccl allows for an alternative `modified gravity' cosmological model defined by a regular background $(w_0+w_a)$CDM (\todo{with arbitrary $K$?}) as well as a user-defined $\Delta f(a)$, such that the true growth rate in this model is given by $f(a)=f_0(a)+\Delta f(a)$, where $f_0(a)$ is the growth rate in the background model. Note that this model is only consistently implemented with regards to the computation of the linear growth factor and growth rates.
+Finally, \ccl allows for an alternative `modified gravity' cosmological model defined by a regular curved $(w_0+w_a)$CDM background as well as a user-defined $\Delta f(a)$, such that the true growth rate in this model is given by $f(a)=f_0(a)+\Delta f(a)$, where $f_0(a)$ is the growth rate in the background model. Note that this model is only consistently implemented with regards to the computation of the linear growth factor and growth rates.
 All other \ccl functions (including the non-linear power spectrum) will ignore these modifications. This model, and the interpretation of the predictions given by \ccl, should therefore be used with care. A version of the growth code and transfer functions depending on modified gravity parameters is under development. 
 
 %-------------------------------------------------------------------------------
@@ -332,11 +332,11 @@ Note that \ccl currently does not compute relativistic corrections to number cou
 where $\chi_*\equiv\chi(z_*)$.
 
 \noindent
-It is worth noting that the equations above should be modified for non-flat cosmologies by replacing the spherical Bessel functions $j_\ell$ with their hyperspherical counterparts \citep{1994ApJ...432....7K}. These are currently not supported by \ccl \todo{Clarify in Table 1?}, and their impact is mostly relevant on low multipoles. The library also assumes a factorizable matter power spectrum at unequal times $P_\delta(k,z_1,z_2)=T_\delta(k,z_1)T_\delta(k,z_2)\,2\pi^2\mathcal{P}_\Phi(k)$ (see \citealt{2017PhRvD..95f3522K}). Furthermore, \ccl currently assumes a relation between transfer functions $T_\delta$, $T_\theta$ and $T_{\phi+\psi}$ that is strictly only valid in vanilla $\Lambda$CDM:
+It is worth noting that the equations above should be modified for non-flat cosmologies by replacing the spherical Bessel functions $j_\ell$ with their hyperspherical counterparts \citep{1994ApJ...432....7K}. These are currently not supported by \ccl, and their impact is mostly relevant on low multipoles. The library also assumes a factorizable matter power spectrum at unequal times $P_\delta(k,z_1,z_2)=T_\delta(k,z_1)T_\delta(k,z_2)\,2\pi^2\mathcal{P}_\Phi(k)$ (see \citealt{2017PhRvD..95f3522K}). Furthermore, \ccl currently assumes a relation between transfer functions $T_\delta$, $T_\theta$ and $T_{\phi+\psi}$ that is strictly only valid in vanilla $\Lambda$CDM\footnote{Note that the transfer functions are defined here for the full non-linear density field, as opposed to the more common linear transfer functions.}:
 \begin{equation}
   T_\delta=-\frac{1+z}{H(z)f(z)}T_\theta=-\frac{k^2}{3H_0^2\Omega_M}\frac{T_{\phi+\psi}}{1+z}.
 \end{equation}
-These approximations will be revisited in future versions of the library. \jab{It appears we are defining the transfer function to include both the early universe physics and late-time nonlinear growth. Perhaps we should clarify this to avoid confusion with the standard linear theory transfer function.}
+These approximations will be revisited in future versions of the library.
 
 
 \subsubsection{Correlation functions}
