@@ -5,7 +5,7 @@
 #include <math.h>
 
 // the tolerance in dn/dm
-#define HALOMOD_TOLERANCE 1e-4
+#define HALOMOD_TOLERANCE 1e-2
 
 CTEST_DATA(halomod){
 
@@ -27,34 +27,43 @@ CTEST_DATA(halomod){
   double sigma_8;
   
   // Arrays for power-spectrum data
-  double k[10];
-  double Delta2[10];
+  double k[160];
+  double Delta2[160];
   
 };
 
-static void read_halomod_test_file(double k[10], double Delta2[10]){
+static void read_halomod_test_file(double k[160], double Delta2[160]){
+
+  double spam;
   
-  // Masses are in Msun/h
-  FILE * f = fopen("./tests/benchmark/model1_halomod_fake.txt", "r");
+  // Wavenumbers are k/h in benchmark data
+  //FILE * f = fopen("./tests/benchmark/model1_halomod_fake.txt", "r");
+  FILE * f = fopen("./tests/benchmark/model1_halomod_z0.txt", "r");
   ASSERT_NOT_NULL(f);
 
-  // file is in fixed format - logmass, sigma, invsigma, and hmf, w/ 13 rows
-  for (int i=0; i<10; i++) {
-    int count = fscanf(f, "%le %le\n", &k[i], &Delta2[i]);
-    // Check that all the stuff in the benchmark is there
-    ASSERT_EQUAL(2, count);
+  // 
+  for (int i=0; i<160; i++) {
+
+    // Read in data from the benchmark file
+    //int count = fscanf(f, "%le %le\n", &k[i], &Delta2[i]);
+    int count = fscanf(f, "%le\t %le\t %le\t %le\t %le\n", &k[i], &spam, &spam, &spam, &Delta2[i]);
+    //printf("%d\t %le\n", i, k[i]);
+    
+    // Check that we have enough columns
+    ASSERT_EQUAL(5, count);
+    
   }
   fclose(f);
 }
 
-// set up the cosmological parameters to be used in the test case
+// set up the cosmological parameters structure to be used in the test case
 CTEST_SETUP(halomod){
 
   // only single model at this point
   data->Omega_c = 0.25;
   data->Omega_b = 0.05;
   data->h = 0.7;
-  data->A_s = 2.1e-9;
+  data->A_s = 2.1e-9; // REMOVE THIS EVENTUALLY
   data->n_s = 0.96;
   data->sigma_8 = 0.8;
   data->Neff=0;
@@ -62,6 +71,7 @@ CTEST_SETUP(halomod){
   data->mnu=&mnuval;
   data->mnu_type = ccl_mnu_sum;
 
+  // REMOVE THIS EVENTUALLY
   double Omega_v[1] = { 0.7 };
   double w_0[1]     = {-1.0 };
   double w_a[1]     = { 0.0 };
@@ -94,8 +104,10 @@ static void compare_halomod(int model, struct halomod_data * data)
 
   // Set the default configuration, but with BBKS P(k) and Tinker mass function
   ccl_configuration config = default_config;
-  config.transfer_function_method = ccl_bbks;
-  config.mass_function_method = ccl_tinker;
+  //config.transfer_function_method = ccl_bbks;
+  //config.mass_function_method = ccl_tinker;
+  config.transfer_function_method = ccl_eisenstein_hu;
+  config.mass_function_method = ccl_shethtormen;
 
   // Set the configuration
   ccl_cosmology * cosmo = ccl_cosmology_create(params, config);
@@ -105,28 +117,28 @@ static void compare_halomod(int model, struct halomod_data * data)
 
   // Variables for the test
   double a = 1.0;
-  double logmass = 10;
+  //double logmass = 10;
 
   printf("\n");
   
   // compare to benchmark data
-  for (int j=0; j<10; j++) {
+  for (int j=0; j<160; j++) {
 
     // Set variables inside loop
-    double mass = pow(10,logmass);
-    double sigma_j = ccl_sigmaM(cosmo, mass, a, status);
-    double k = 1.;
-    //double Pk = ccl_p_halomod(cosmo, k, a, status);
+    //double mass = pow(10,logmass);
+    //double sigma_j = ccl_sigmaM(cosmo, mass, a, status);
+    double k = data->k[j]*params.h; //Convert the data k/h to pure k
+    double Pk = 4.*M_PI*pow((k/(2.*M_PI)),3)*ccl_p_halomod(cosmo, k, a, status);
     double absolute_tolerance = HALOMOD_TOLERANCE*data->Delta2[j];
 
     // Do the check
     if (fabs(absolute_tolerance)<1e-12) absolute_tolerance = 1e-12;
-    ASSERT_DBL_NEAR_TOL(data->Delta2[j], sigma_j, absolute_tolerance);
+    ASSERT_DBL_NEAR_TOL(data->Delta2[j], Pk, absolute_tolerance);
 
-    printf("%d\t %f\t %f\t %f\n", j, mass, sigma_j, data->Delta2[j]);
+    printf("%d\t %le\t %le\t %le\t %lf\n", j, k, Pk, data->Delta2[j], Pk/data->Delta2[j]);
 
     //Increment the mass
-    logmass += 0.5;
+    //logmass += 0.5;
   }
   free(cosmo);
 }
