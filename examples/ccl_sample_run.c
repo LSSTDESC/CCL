@@ -19,11 +19,9 @@
 #define SZ_GC 0.05
 #define Z0_SH 0.65
 #define SZ_SH 0.05
-#define NL 512
+#define NL 513
 #define PS 0.1 
-#define NREL 3.046
-#define NMAS 0
-#define MNU 0.0
+#define NEFF 3.046
 
 
 
@@ -45,10 +43,19 @@ int main(int argc,char **argv)
   //status flag
   int status =0;
 
+  // Set neutrino masses
+  double* MNU;
+  double mnuval = 0.;
+  MNU = &mnuval;
+  ccl_mnu_convention MNUTYPE = ccl_mnu_sum;
+  
+  //whether comoving or physical
+  int isco=0;
+
   // Initialize cosmological parameters
   ccl_configuration config=default_config;
   config.transfer_function_method=ccl_boltzmann_class;
-  ccl_parameters params = ccl_parameters_create(OC, OB, OK, NREL, NMAS, MNU, W0, WA, HH, NORMPS, NS,-1,-1,-1,-1,NULL,NULL, &status);
+  ccl_parameters params = ccl_parameters_create(OC, OB, OK, NEFF, MNU, MNUTYPE, W0, WA, HH, NORMPS, NS,-1,-1,-1,-1,NULL,NULL, &status);
   //printf("in sample run w0=%1.12f, wa=%1.12f\n", W0, WA);
   
   // Initialize cosmology object given cosmo params
@@ -73,19 +80,23 @@ int main(int argc,char **argv)
   printf("Growth factor and growth rate at z = %.3lf are D = %.3lf and f = %.3lf\n",
 	 ZD, ccl_growth_factor(cosmo,1./(1+ZD), &status),ccl_growth_rate(cosmo,1./(1+ZD), &status));
  
-  // Compute Omega_m, Omega_L and Omega_r at different times
-  printf("z\tOmega_m\tOmega_L\tOmega_r\n");
-  double Om, OL, Or;
+  // Compute Omega_m, Omega_L, Omega_r, rho_crit, rho_m at different times
+  printf("z\tOmega_m\tOmega_L\tOmega_r\trho_crit\trho_m\tRHO_CRITICAL\n");
+  double Om, OL, Or, rhoc, rhom;
   for (int z=10000;z!=0;z/=3){
-    Om = ccl_omega_x(cosmo, 1./(z+1), ccl_omega_m_label, &status);
-    OL = ccl_omega_x(cosmo, 1./(z+1), ccl_omega_l_label, &status);
-    Or = ccl_omega_x(cosmo, 1./(z+1), ccl_omega_g_label, &status);
-    printf("%i\t%.3f\t%.3f\t%.3f\n", z, Om, OL, Or);
+    Om = ccl_omega_x(cosmo, 1./(z+1), ccl_species_m_label, &status);
+    OL = ccl_omega_x(cosmo, 1./(z+1), ccl_species_l_label, &status);
+    Or = ccl_omega_x(cosmo, 1./(z+1), ccl_species_g_label, &status);
+    rhoc = ccl_rho_x(cosmo, 1./(z+1), ccl_species_crit_label, isco, &status);
+    rhom = ccl_rho_x(cosmo, 1./(z+1), ccl_species_m_label, isco, &status);
+    printf("%i\t%.3f\t%.3f\t%.3f\t%.3e\t%.3e\t%.3e\n", z, Om, OL, Or, rhoc, rhom, RHO_CRITICAL);
   }
-  Om = ccl_omega_x(cosmo, 1., ccl_omega_m_label, &status);
-  OL = ccl_omega_x(cosmo, 1., ccl_omega_l_label, &status);
-  Or = ccl_omega_x(cosmo, 1., ccl_omega_g_label, &status);
-  printf("%i\t%.3f\t%.3f\t%.3f\n", 0, Om, OL, Or);
+  Om = ccl_omega_x(cosmo, 1., ccl_species_m_label, &status);
+  OL = ccl_omega_x(cosmo, 1., ccl_species_l_label, &status);
+  Or = ccl_omega_x(cosmo, 1., ccl_species_g_label, &status);
+  rhoc = ccl_rho_x(cosmo, 1., ccl_species_crit_label, isco, &status);
+  rhom = ccl_rho_x(cosmo, 1., ccl_species_m_label, isco, &status);
+  printf("%i\t%.3f\t%.3f\t%.3f\t%.3e\t%.3e\t%.3e\n", 0, Om, OL, Or, rhoc, rhom, RHO_CRITICAL);
 
   // Compute sigma_8
   printf("Initializing power spectrum...\n");
@@ -108,33 +119,54 @@ int main(int argc,char **argv)
   }
   
   //CMB lensing tracer
-  CCL_ClTracer *ct_cl=ccl_cl_tracer_cmblens_new(cosmo,1100.,&status);
+  CCL_ClTracer *ct_cl=ccl_cl_tracer_cmblens(cosmo,1100.,&status);
 
   //Galaxy clustering tracer
-  CCL_ClTracer *ct_gc=ccl_cl_tracer_number_counts_simple_new(cosmo,NZ,z_arr_gc,nz_arr_gc,NZ,z_arr_gc,bz_arr, &status);
+  CCL_ClTracer *ct_gc=ccl_cl_tracer_number_counts_simple(cosmo,NZ,z_arr_gc,nz_arr_gc,NZ,z_arr_gc,bz_arr, &status);
   
   //Cosmic shear tracer
-  CCL_ClTracer *ct_wl=ccl_cl_tracer_lensing_simple_new(cosmo,NZ,z_arr_sh,nz_arr_sh, &status);
-
+  CCL_ClTracer *ct_wl=ccl_cl_tracer_lensing_simple(cosmo,NZ,z_arr_sh,nz_arr_sh, &status);
+  printf("ell C_ell(c,c) C_ell(c,g) C_ell(c,s) C_ell(g,g) C_ell(g,s) C_ell(s,s) | r(g,s)\n");
+  
   //This function allows you to retrieve some of the tracer's internal functions of redshift
   ccl_get_tracer_fas(cosmo,ct_gc,2*NZ,a_arr_resample,nz_resampled,CCL_CLT_NZ,&status);
+
+  int ells[NL];
+  double cells_cc_limber[NL];
+  double cells_cg_limber[NL];
+  double cells_cl_limber[NL];
+  double cells_ll_limber[NL];
+  double cells_gl_limber[NL];
+  double cells_gg_limber[NL];
+  for(int ii=0;ii<NL;ii++)
+    ells[ii]=ii;
+
+  double linstep = 40;
+  double logstep = 1.15;
+  double dchi = (ct_gc->chimax-ct_gc->chimin)/1000.; // must be below 3 to converge toward limber computation at high ell
+  double dlk = 0.003;
+  double zmin = 0.05;
+  CCL_ClWorkspace *w=ccl_cl_workspace_default(NL+1,-1,CCL_NONLIMBER_METHOD_NATIVE,logstep,linstep,dchi,dlk,zmin,&status);
+  ccl_angular_cls(cosmo,w,ct_cl,ct_cl,NL,ells,cells_cc_limber,&status);
+  ccl_angular_cls(cosmo,w,ct_cl,ct_gc,NL,ells,cells_cg_limber,&status);
+  ccl_angular_cls(cosmo,w,ct_cl,ct_wl,NL,ells,cells_cl_limber,&status);
+  ccl_angular_cls(cosmo,w,ct_gc,ct_gc,NL,ells,cells_gg_limber,&status);
+  ccl_angular_cls(cosmo,w,ct_gc,ct_wl,NL,ells,cells_gl_limber,&status);
+  ccl_angular_cls(cosmo,w,ct_wl,ct_wl,NL,ells,cells_ll_limber,&status);
+
   
-  printf("ell C_ell(c,c) C_ell(c,g) C_ell(c,s) C_ell(g,g) C_ell(g,s) C_ell(s,s)\n");
-  for(int l=2;l<=NL;l*=2) {
-    double cl_cc=ccl_angular_cl(cosmo,l,ct_cl,ct_cl, &status); //CMBLensing-CMBLensing
-    double cl_cg=ccl_angular_cl(cosmo,l,ct_cl,ct_gc, &status); //CMBLensing-Clustering
-    double cl_cs=ccl_angular_cl(cosmo,l,ct_wl,ct_cl, &status); //CMBLensing-Galaxy lensing
-    double cl_gg=ccl_angular_cl(cosmo,l,ct_gc,ct_gc, &status); //Galaxy-galaxy
-    double cl_gs=ccl_angular_cl(cosmo,l,ct_gc,ct_wl, &status); //Galaxy-lensing
-    double cl_ss=ccl_angular_cl(cosmo,l,ct_wl,ct_wl, &status); //Lensing-lensing
-    printf("%d %.3lE %.3lE %.3lE %.3lE %.3lE %.3lE\n",l,cl_cc,cl_cg,cl_cs,cl_gg,cl_gs,cl_ss);
-  }
+  for(int l=2;l<=NL;l*=2)
+    printf("%d %.3lE %.3lE %.3lE %.3lE %.3lE %.3lE | %.3lE\n",l,cells_cc_limber[l],cells_cg_limber[l],cells_cl_limber[l],cells_gg_limber[l],cells_gl_limber[l],cells_ll_limber[l],cells_gl_limber[l]/sqrt(cells_gg_limber[l]*cells_ll_limber[l]));
   printf("\n");
   
   //Free up tracers
-  ccl_cl_tracer_free(ct_gc);
   ccl_cl_tracer_free(ct_cl);
+  ccl_cl_tracer_free(ct_gc);
   ccl_cl_tracer_free(ct_wl);
+  
+  // Free arrays
+  free(a_arr_resample);
+  free(nz_resampled);
   
   //Halo mass function
   printf("M\tdN/dlog10M(z = 0, 0.5, 1))\n");
@@ -222,6 +254,7 @@ int main(int argc,char **argv)
   
   //Free up photo-z info
   ccl_specs_free_photoz_info(pz_info_example);
+  ccl_specs_free_photoz_info_gaussian(pz_info_gaussian);
   
   //Always clean up!!
   ccl_cosmology_free(cosmo);

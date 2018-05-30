@@ -34,10 +34,48 @@ typedef struct ccl_spline_params {
   double K_MAX;
   double K_MIN_DEFAULT;
   int N_K;
+  int N_K_3DCOR;
   
 } ccl_spline_params;
 
 extern ccl_spline_params * ccl_splines;
+
+/** 
+ * Struct that contains parameters that control the accuracy of various GSL
+ * routines.
+ */
+typedef struct ccl_gsl_params {
+  // General parameters. If not otherwise specified, those will be copied to the
+  // more specialised cases.
+  double EPSREL;
+  size_t N_ITERATION;
+
+  // Integration
+  int INTEGRATION_GAUSS_KRONROD_POINTS;
+  double INTEGRATION_EPSREL;
+  // Limber integration
+  int INTEGRATION_LIMBER_GAUSS_KRONROD_POINTS;
+  double INTEGRATION_LIMBER_EPSREL;
+  // Distance integrals
+  double INTEGRATION_DISTANCE_EPSREL;
+  // dndz integrals
+  double INTEGRATION_DNDZ_EPSREL;
+  // sigma_R integral
+  double INTEGRATION_SIGMAR_EPSREL;
+  // Neutrino integral
+  double INTEGRATION_NU_EPSREL;
+  double INTEGRATION_NU_EPSABS;
+
+  // Root finding
+  double ROOT_EPSREL;
+  int ROOT_N_ITERATION;
+
+  // ODE
+  double ODE_GROWTH_EPSREL;
+  
+} ccl_gsl_params;
+
+extern ccl_gsl_params * ccl_gsl;
 
 #ifdef __cplusplus
 }

@@ -10,7 +10,7 @@ STYLE CONVENTION USED
         **`function`**
         **`type`** or **`structure`**
 -->
-# CCL     [![Build Status](https://travis-ci.org/LSSTDESC/CCL.svg?branch=master)](https://travis-ci.org/LSSTDESC/CCL)
+# CCL     [![Build Status](https://travis-ci.org/LSSTDESC/CCL.svg?branch=master)](https://travis-ci.org/LSSTDESC/CCL) [![Coverage Status](https://coveralls.io/repos/github/LSSTDESC/CCL/badge.svg?branch=master)](https://coveralls.io/github/LSSTDESC/CCL?branch=master)
 LSST DESC Core Cosmology Library (`CCL`) provides routines to compute basic cosmological observables with validated numerical accuracy.
 
 The library is written in C99 and all functionality is directly callable from C and C++ code.  We also provide python bindings for higher-level functions.
@@ -37,6 +37,7 @@ be installed independently of each other, instructions are provided below.
   * [GSL](https://www.gnu.org/software/gsl/) version 2.1 or above
   * [FFTW3](http://www.fftw.org/) version 3.1 or above
   * [CLASS](http://class-code.net/) version 2.6.3 or above
+  * [Angpow](https://gitlab.in2p3.fr/campagne/AngPow)
   * FFTlog([here](http://casa.colorado.edu/~ajsh/FFTLog/) and [here](https://github.com/slosar/FFTLog))is provided within `CCL`, with minor modifications.
 
 In addition, the build system for `CCL` relies on the following software:
@@ -368,34 +369,53 @@ double ccl_sigma8(ccl_cosmology *cosmo, int * status);
 These and other functions for different matter power spectra can be found in file ***include/ccl_power.h***.
 
 ### Angular power spectra
-`CCL` can compute angular power spectra for two tracer types: galaxy number counts and galaxy weak lensing. Tracer parameters are defined in structure **`CCL_ClTracer`**. In general, you can create this object with function **`ccl_cl_tracer_new`**
+`CCL` can compute angular power spectra for three tracer types: galaxy number counts, galaxy weak lensing and CMB lensing. Tracer parameters are defined in structure **`CCL_ClTracer`**. In general, you can create this object with function **`ccl_cl_tracer`**
 ````c
-CCL_ClTracer *ccl_cl_tracer_new(ccl_cosmology *cosmo,int tracer_type,
+CCL_ClTracer *ccl_cl_tracer(ccl_cosmology *cosmo,int tracer_type,
 				int has_rsd,int has_magnification,int has_intrinsic_alignment,
 				int nz_n,double *z_n,double *n,
 				int nz_b,double *z_b,double *b,
 				int nz_s,double *z_s,double *s,
 				int nz_ba,double *z_ba,double *ba,
-				int nz_rf,double *z_rf,double *rf, int * status);
+				int nz_rf,double *z_rf,double *rf,
+				double z_source, int * status);
 ````
-Exact definition of these parameters are described in file ***include/ccl_cls.h***. Usually you can use simplified versions of this function, namely **`ccl_cl_tracer_number_counts_new`, `ccl_cl_tracer_number_counts_simple_new`, `ccl_cl_tracer_lensing_new`** or **`ccl_cl_tracer_lensing_simple_new`**. Two most simplified versions (one for number counts and one for shear) take parameters:
+Exact definition of these parameters are described in file ***include/ccl_cls.h***. Usually you can use simplified versions of this function, namely **`ccl_cl_tracer_number_counts`, `ccl_cl_tracer_number_counts_simple`, `ccl_cl_tracer_lensing`, `ccl_cl_tracer_lensing_simple`** or **`ccl_cl_tracer_cmblens`**. Two most simplified versions (one for number counts and one for shear) take parameters:
 ````c
-CCL_ClTracer *ccl_cl_tracer_number_counts_simple_new(ccl_cosmology *cosmo,
+CCL_ClTracer *ccl_cl_tracer_number_counts_simple(ccl_cosmology *cosmo,
 						     int nz_n,double *z_n,double *n,
-                             int nz_b,double *z_b,double *b, int * status);
-CCL_ClTracer *ccl_cl_tracer_lensing_simple_new(ccl_cosmology *cosmo,
+                                                     int nz_b,double *z_b,double *b, int * status);
+CCL_ClTracer *ccl_cl_tracer_lensing_simple(ccl_cosmology *cosmo,
 					       int nz_n,double *z_n,double *n, int * status);
 ````
 where `nz_n` is dimension (number of bins) of arrays `z_n` and `n`. `z_n` and `n` are arrays for the number count of objects per redshift interval (arbitrary normalization - renormalized inside). `nz_b`, `z_b` and `b` are the same for the clustering bias.
 
-With initialized tracers you can compute limber power spectrum with **`ccl_angular_cl`**
+Before computing the angular power spectrum, users must define a workspace structure that contains the relevant parameters for the computation:
 ````c
-double ccl_angular_cl(ccl_cosmology *cosmo,int l,CCL_ClTracer *clt1,CCL_ClTracer *clt2, int * status);
+CCL_ClWorkspace *ccl_cl_workspace_default(int lmax,int l_limber,int non_limber_method,
+					  double l_logstep,int l_linstep,
+					  double dchi,double dlk,double zmin,int *status)
 ````
-After you are done working with tracers, you should free its work space by **`ccl_cl_tracer_free`**
+where `lmax` sets the maximum multipole, `l_limber` the limit multipole from which the Limber approximation is used (`l_limber=-1` means that the Liber approximation is never used). The `non_limber_method` variable can be set to `CCL_NONLIMBER_METHOD_NATIVE` or `CCL_NONLIMBER_METHOD_ANGPOW` to choose the method to compute the non-Limber part of the angular power spectrum (either the native `CCL` code or the [`Angpow` library](https://github.com/LSSTDESC/CCL/blob/non_limber_speedup/README.md#installing-angpow)). Then `l_linstep` sets the maximum multipole until which the angular power spectrum is computed at each multipole, and `l_logstep` the logarithmic stepping to use above `l_linstep` (then the power spectrum is interpolated at each multipole). `dchi` sets the interval in comoving distance to use for the native non-Limber computation and `dlk`the logarithmic stepping for the Fourier k-integration (`Angpow` is not concerned by these two parameters). A simplified workspace is provided for computations that use only the Limber approximation at each multipole:
+````c
+CCL_ClWorkspace *ccl_cl_workspace_default_limber(int lmax,double l_logstep,int l_linstep,
+						 double dlk,int *status)
+````
+
+With initialized tracers and workspace you can compute limber power spectrum with **`ccl_angular_cls`**
+````c
+double ccl_angular_cls(ccl_cosmology *cosmo,int l,CCL_ClTracer *clt1,CCL_ClTracer *clt2,
+						int nl_out,int *l_out,double *cl_out,int * status);
+````
+with `l_out` and `cl_out` arrays of size `nl_out` that contains the multipoles and the angular power spectrum.
+
+After you are done working with tracers, you should free its work space by **`ccl_cl_tracer_free`** and **`ccl_cl_workspace_free`**
 ````c
 void ccl_cl_tracer_free(CCL_ClTracer *clt);
+void ccl_cl_workspace_free(CCL_ClWorkspace *w);
 ````
+
+Note that for the moment `Angpow` can not handle the magnification lensing term for the galaxy number count tracers, and has not been tested for the weak lensing tracer. This limitations will be removed in the near future.
 
 ### Halo mass function
 The halo mass function *dN/dM* can be obtained by function **`ccl_massfunc`**

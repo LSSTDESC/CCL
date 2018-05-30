@@ -92,6 +92,14 @@ This note describes how to install \ccl (Section \ref{sec:install}), how \ccl is
 
   Note that, if you want to use your own version of {\tt CLASS}, you should follow the steps described in Section \ref{sec:extclass} below.
 
+\subsection{Installing Angpow}
+
+{\tt CCL} provides an optional link to the {\tt Angpow} library that enables fast and accurate computations of the angular power spectra without using the Limber approximation (written in C++). We provide a python script to automatically install {\tt Angpow} and make the link with {\tt CCL}. You should first run this script ({\tt \$ python angpow\_install.py}) before carrying out the next steps. The installation downloads the last release of {\tt Angpow} adapted to {\tt CCL} from a dedicated DESC github repository\footnote{\url{https://github.com/LSSTDESC/Angpow4CCL}} and looks for a C++ compiler compatible with OpenMP. It provides a dedicated file {\tt ./angpow/src/angpow\_ccl.cc}` that makes the interface between the {\tt CCL} structures and the {\tt Angpow} classes.
+
+To remove {\tt Angpow}, run {\tt \$ python angpow\_install.py --clean} and install {\tt CCL} again.
+
+
+
 \subsection{Installation Procedure}
 
 \ccl can be installed through an {\tt autotools}-generated configuration file. UNIX users should be familiar with the process: navigate to the directory containing the library and type
@@ -218,7 +226,7 @@ Ultimately, \ccl plans to incorporate theoretical predictions for all cosmologic
  \item wCDM and the CPL model ($w_0+w_a$, \citealt{Chevallier01} and \citealt{Linder03})
  \item Non-zero curvature ($K$)
  \item All of the above, plus an arbitrary, user-defined modified growth function (see description in Section \ref{sec:growth})
-  \item A single massive neutrino species or multiple equal-mass massive neutrinos, in combination with any of the above (except the user-defined modified growth function).
+  \item Massive neutrinos, in combination with any of the above (except the user-defined modified growth function).
 \end{itemize}
 
 Not all features of \ccl are available for all models. For a guide to which predictions are available for each model, see Table \ref{tab:cosmo}. Note that if users install their own version of {\tt CLASS}, {\tt CCL} can then make predictions for a more extended set of cosmologies. Users should take care to understand the validity of the {\tt CCL} assumptions for their own models.
@@ -233,7 +241,7 @@ To use \ccl, the first step is to create a {\tt ccl$\_$cosmology} structure, con
 
 {\tt ccl$\_$parameters} objects contain information about the cosmological parameters of a given model, and are initialized using one of the following routines (the full syntax for each function can be found in the header file {\tt ccl$\_$core.h}):
 \begin{itemize}
- \item {\tt ccl$\_$parameters$\_$create(double Omega$\_$c, double Omega$\_$b, double Omega$\_$k, double N\_nu\_rel, double N\_nu\_mass, double mnu, double w0, double wa, double h, double norm$\_$pk, double n$\_$s,int nz$\_$mgrowth,double *zarr$\_$mgrowth,double *dfarr$\_$mgrowth, int *status)}: general {\tt ccl$\_$parameters} constructor supporting all the models described above.
+ \item {\tt ccl$\_$parameters$\_$create(double Omega$\_$c, double Omega$\_$b, double Omega$\_$k, double N$\_$eff, double *mnu, ccl$\_$mnu$\_$type$\_$label mnu$\_$type, double w0, double wa, double h, double norm$\_$pk, double n$\_$s,int nz$\_$mgrowth,double *zarr$\_$mgrowth,double *dfarr$\_$mgrowth, int *status)}: general {\tt ccl$\_$parameters} constructor supporting all the models described above.
  \item {\tt ccl$\_$parameters$\_$create$\_$flat$\_$lcdm(...)}: particular constructor for flat $\Lambda$CDM cosmologies.
  \item {\tt ccl$\_$parameters$\_$create$\_$flat$\_$wcdm(...)}: constant $w$ cosmologies.
  \item {\tt ccl$\_$parameters$\_$create$\_$flat$\_$wacdm(...)}: $w_0+w_a$.
@@ -241,13 +249,35 @@ To use \ccl, the first step is to create a {\tt ccl$\_$cosmology} structure, con
 \end{itemize}
 The argument ${\tt norm\_pk}$ can be used to specify the power spectrum normalization in terms of either $\sigma_8$ or $A_\mathrm{s}$. The {\tt ccl$\_$parameters$\_$create} functions assume $\sigma_8$ normalization if ${\tt norm\_pk > 1.0e-5}$ and $A_{\mathrm s}$ normalization otherwise.
 
-To include massive neutrinos, the suffix `{\tt $\_$nu}' may be appended to the last four {\tt ccl$\_$parameters\_create} functions above. Using these functions without the {\tt $\_$nu} suffix will set the number of massive neutrinos to 0 and the effective number of massless neutrinos to $3.046$. In the case of non-zero massive neutrinos, it may be desirable to set {\tt N\_nu\_rel} such that $N_{\rm eff}=3.046$ in the early universe. In agreement with {\tt CLASS}, when using the default value of $T_{\rm NCDM}$ as described in section \ref{subsec:densityparam} below, {\tt N\_nu\_rel} can be set to 2.0328, 1.0196, and 0.00641 for 1, 2 and 3 massive neutrinos respectively to achieve this.
-
 {\tt ccl$\_$configuration} objects contain information about the prescriptions to be used to compute transfer functions, power spectra, mass functions, etc. A default {\tt ccl$\_$configuration} object is made available as {\tt default$\_$config}, which specifies that CLASS will be used to compute transfer functions, HaloFit will be used to calculate the matter power spectrum, there will be no impact of baryons included and the Tinker 2010 prescription will be used to compute the halo mass function.
 
 After initializing instances of {\tt ccl$\_$parameters} and {\tt ccl$\_$configuration}, use the function {\tt ccl$\_$cosmology$\_$create(ccl$\_$parameters, ccl$\_$configuration)} to return a pointer to a {\tt ccl$\_$cosmology} structure. You will need to pass this pointer around to every CCL function.
 
 An example of using \ccl is provided in Section \ref{sec:example}. The {\tt README} file has additional extensive documentation for the example run, as well as installation.
+
+\paragraph{Creating a cosmology with massive neutrinos}
+In the parameter construction routines above, {\tt mnu} is a pointer to either a single value, to be interpreted as the sum of neutrino masses, or to an array containing the three neutrino masses, both in eV. {\tt mnu$\_$type} is a label which indicates whether {\tt mnu} points to sum of the masses or to an array of three mass values. In the former case, {\tt mnu$\_$type} also defines which convention should be used to split the sum into three neutrino masses for calculations (options are normal hierarchy, inverted hierarchy, or an equal split).
+
+To set up a cosmology with massive neutrinos, the user should pass {\tt mnu}, {\tt mnu$\_$type}, and {\tt N$\_$eff} to the parameter construction routine. When working from the python wrapper, it suffices to pass {\tt mnu} and {\tt N$\_$eff}; \ccl will infer whether {\tt mnu} is a set of masses or a sum. In the latter case, the default behaviour is to split the sum into masses consistent with the normal hierarchy, but an inverted hierarchy or equal splitting can be requested by passing {\tt mnu$\_$type}. 
+
+In the case where {\tt mnu} corresponds to a sum, we first allocate the three neutrino masses according to the requested convention. The default convention is the normal hierarchy, but users may also request either an inverted hierarchy or a split of the sum into three equal masses. In the latter case it is trivial to compute the three masses. In the former two cases, it is slightly more complicated. The relevant neutrino-mass quantity which has been determined via particle physics experiments is the square of the different of masses (up to a sign for one of the differences, hence the existence of the two hierarchies). Because we know the square of the differences rather than the differences themselves, to get the neutrino masses given these differences and the sum we must solve a set of quadratic equations. This is most easily accomplished by making use the knowledge that the mass difference between two of the species is small; this allows us to taylor expand about this difference and greatly simplifies solving this system of equations. The resulting expressions for the neutrino masses are implemented.
+
+
+Having then a set of three masses regardless of {\tt mnu$\_$type}, we check for which of the three masses the corresponding neutrino species is non-relativistic today ($m_\nu>0.00017$, \citealt{Lesgourgues2012}), and obtain a number of massive neutrinos {\tt N$\_$nu$\_$mass}. We use this along with the {\tt N$\_$eff} value to set the number of relativistic neutrinos species {\tt N$\_$nu$\_$rel}. We must be slightly careful in doing so, as for massive neutrinos only we follow {\tt CLASS} in modifying the relationship between the temperature of the CMB and the neutrino temperature:
+\begin{equation}
+T_{\nu}^{\rm eff} = T_{\rm CMB} T_{\rm NCDM}
+\label{Tnueff}
+\end{equation}
+where the above defines $T_{\rm NCDM}$, an adhoc modification to the equality between $T_{\rm CMB}$ and $T_{\nu}^{\rm eff}$. We follow the nomenclature of {\tt CLASS} here, but we emphasize that $T_{\rm NCDM}$ is a dimensionless scaling factor, not a temperature. Setting $T_{\rm NCDM}=0.71611$ ensures that $m_{\nu} / \Omega_{\nu}^0 = 93.14 {\rm eV}$, in agreement with second-order theoretical calculations which correctly take into account QED effects and electron / positron annihilation (\citealt{Mangano2005}). Therefore to get {\tt N$\_$nu$\_$rel} consistent with the {\tt N$\_$eff} passed by the user, we do:
+\begin{equation}
+{\tt N\_nu\_rel} = {\tt N\_eff} - \left(T_{\rm NCDM}\right)^{4} \left(\frac{4}{11}\right)^{-\frac{4}{3}} {\tt N\_nu\_mass}.
+\label{Nnurel}
+\end{equation}
+
+For easier initiation of cosmologies with massive neutrinos, the suffix `{\tt $\_$nu}' may be appended to the last four {\tt ccl$\_$parameters$\_$create} functions in the previous section. Using these functions without the {\tt $\_$nu} suffix will set the neutrino masses to 0 and the effective number of neutrino species to $3.046$. 
+
+It may sometimes be preferable or necessarily to specify a cosmology in terms of $\Omega_\nu^0$ for massive neutrinos instead of $m_\nu$. To facilitate this, \ccl includes a convenience function {\tt ccl$\_$nu$\_$masses}, which takes as input $\Omega_\nu^0$ for massive neutrinos, the temperature of the CMB, and a label specifying how the neutrino mass should be split amongst species similarly to above. It then outputs a pointer to the resulting neutrino mass(es). 
+
 
 \subsection{Distances}
 \label{sec:distances}
@@ -292,7 +322,7 @@ The routines described in this subsection are implemented in {\tt ccl$\_$backgro
 The density parameter functions $\Omega_X(a)$ can be calculated for six components:
 \begin{itemize}
 \item matter density parameter $\Omega_M(a) = \Omega_{M,0} H_0^2 / (a^3 H^2(a) )$,
-\item dark energy density parameter $\Omega_\Lambda(a) = \Omega_{\Lambda,0} H_0^2 / H^2(a)$,
+\item dark energy density parameter $\Omega_\Lambda(a) = \Omega_{\Lambda,0} a^{-3(1+w_0+w_a)} \exp[3 w_a (a-1)] H_0^2 / H^2(a)$,
 \item radiation density parameter $\Omega_g(a) = \Omega_{g,0} H_0^2 / (a^4 H^2(a) )$,
 \item curvature density parameter $\Omega_K(a) = \Omega_{K,0} H_0^2 / (a^2 H^2(a) )$,
 \item massless neutrino density parameter $\Omega_{\nu, {\rm rel}}(a) = \Omega_{\nu, {\rm rel},0} H_0^2 / (a^4 H^2(a) )$,
@@ -300,22 +330,35 @@ The density parameter functions $\Omega_X(a)$ can be calculated for six componen
 \end{itemize}
 all using the Hubble parameter defined in equation~\ref{eq:Ha}.
 
-For massive neutrinos, $\Omega_{\nu, {\rm m}}(a)$ is calculated by calling a set of functions contained in {\tt ccl\_neutrinos.c}. First, we assume that the mass of one neutrino is equal to $m_{\nu}^{\rm tot} / N_{\rm m}^{\nu}$ (recalling that we assume a single massive neutrino or equal-mass neutrinos). We then compute a quantity called the effective temperature:
+For massive neutrinos, $\Omega_{\nu, {\rm m}}(a)$ is calculated by calling a set of functions contained in {\tt ccl\_neutrinos.c}. For each species of massive neutrino with mass $m_\nu^i$, we define
 \begin{equation}
-T_{\nu}^{\rm eff} = T_{\rm CMB} T_{\rm NCDM}.
-\label{Tnueff}
-\end{equation}
-Here, $T_{\rm NCDM}$ is used to explicitly set the value of $m_{\nu} / \Omega_{\nu}^0$. Note that despite its name, $T_{\rm NCDM}$ is a dimensionless temperature rescaling rather than an actual temperature, following the nomenclature used by {\tt CLASS}. We choose a default value of $T_{\rm NCDM} = 0.71611$, which corresponds to $m_{\nu} / \Omega_{\nu}^0 = 93.14$ eV, to agree with the default value set by {\tt CLASS}. We define
-\begin{equation}
-\mu = \frac{m_{\nu}^{\rm tot}a}{N_{\rm m}^\nu T_{\nu}^{\rm eff}}
+\mu^i = \frac{m_{\nu}^{i}a}{T_{\nu}^{\rm eff}}
 \label{mnuOT}
 \end{equation}
-in units such that $\mu$ is dimensionless. We then conduct the phase-space integral required to get the neutrino density, and multiply by appropriate factors to obtain $\Omega_{\nu, {\rm m}}(a)$:
+in units such that $\mu$ is dimensionless. We conduct once the phase-space integral required to get the neutrino density (the integral over $x$ in equation \ref{Omnu} below), and store the result as a {\tt gsl} spline for subsequent access. Given then the value of this integral, we multiply by appropriate factors to obtain $\Omega_{\nu, {\rm m}}(a)$:
 \begin{equation}
-\Omega_{\nu, {\rm m}}(a) = N_{\rm m}^\nu \frac{8 \pi^2(\pi k_b )^3 k_b}{15(c h_{\rm P})^3} \frac{8 \pi G}{3h^2c^2} \left(\frac{T_{\nu}^{\rm eff}}{a}\right)^4 \left(\frac{7}{8}\int_0^{x_{\rm max}} dx \, x^2 \frac{\sqrt{x^2 + \mu^2}}{\exp(x) + 1}\right)
+\Omega_{\nu, {\rm m}}(a) = \sum_{i=1}^{N_\nu} \frac{8 \pi^2(\pi k_b )^3 k_b}{15(c h_{\rm P})^3} \frac{8 \pi G}{3h^2c^2} \left(\frac{T_{\nu}^{\rm eff}}{a}\right)^4 \left(\frac{7}{8}\int_0^{x_{\rm max}} dx \, x^2 \frac{\sqrt{x^2 + \left(\mu^i\right)^2}}{\exp(x) + 1}\right)
 \label{Omnu}
 \end{equation}
 where $h_{\rm P}$ is Planck's constant and $h$ is $H_0/100$ with $H_0$ in units of km / s / Mpc. $x_{\rm max}$ is set to 1000. The final bracketed term which includes the phase-space integral can be simplified in the limit where $\mu$ is very large or very small: for small $\mu$, it is set to $\frac{7}{8}$, and for large $\mu$, it becomes $\frac{5\zeta(3)}{18\pi^4}\mu\sim 0.2776\mu$.
+
+
+\subsection{Functions of the physical density}
+\label{subsec:physicaldensity}
+
+The routines described in this subsection are implemented in {\tt ccl$\_$background.c}.
+
+The physical density $\rho_X(a)$ can be calculated for seven components:
+\begin{itemize}
+\item critical density $\rho_{\rm crit}(a) = {{3 H^2(a)} \over { 8 \pi G}} = \rho_{\rm crit,0} H^2(a) / H_0^2$,
+\item matter density $\rho_M(a) = \rho_{\rm crit}(a) \Omega_M(a) = \rho_{\rm crit,0} \Omega_{M,0} / a^{3}$,
+\item dark energy density parameter $\rho_\Lambda(a) = \rho_{\rm crit,0} \Omega_{\Lambda,0} a^{-3(1+w_0+w_a)} \exp[3 w_a (a-1)]$,
+\item radiation density parameter $\rho_g(a) = \rho_{\rm crit,0} \Omega_{g,0} / a^{4}$,
+\item curvature density parameter $\rho_K(a) = \rho_{\rm crit,0} \Omega_{K,0} / a^{2}$,
+\item massless neutrino density parameter $\rho_{\nu, {\rm rel}}(a) = \rho_{\rm crit,0} \Omega_{\nu, {\rm rel},0} / a^{4}$,
+\item massive neutrino density parameter $\Omega_{\nu, {\rm m}}(a) = \rho_{\rm crit,0} \Omega_{\nu, {\rm m}}(a) H^2(a) / H_0^2$,
+\end{itemize}
+where $\Omega_{\nu, {\rm m}}(a)$ is given by equation~\ref{Omnu} and the Hubble parameter by equation~\ref{eq:Ha}. \ccl moreover allows for comoving physical densities $\rho_{X, {\rm comoving}}(a) = \rho_X(a) a^3$.
 
 
 \subsection{Growth function}
@@ -334,7 +377,7 @@ In doing this, \ccl simultaneously computes the growth rate $f(a)$, defined as:
 \end{equation}
 \ccl provides different functions that return the growth normalized to $D(a=1)=1$ and to $D(a\ll1)\rightarrow a$.
 
-Note that the above is strictly valid for a Universe containing only dust-like matter components. A scale-independent growth rate is, for example, ill-defined in the presence of massive neutrinos.
+Note that the above is strictly valid for a Universe containing only dust-like matter components. A scale-independent growth rate is, for example, ill-defined in the presence of massive neutrinos; therefore \ccl will raise an error if the user attempts to calculate the growth rate or growth factor in a cosmology with massive neutrinos.
 
 Currently \ccl allows for an alternative `modified gravity' cosmological model defined by a regular background $(w_0+w_a)$CDM (with arbitrary $K$) as well as a user-defined $\Delta f(a)$, such that the true growth rate in this model is given by $f(a)=f_0(a)+\Delta f(a)$, where $f_0(a)$ is the growth rate in the background model. Note that this model is only consistently implemented with regards to the computation of the linear growth factor and growth rates (which will also scale the linear power spectrum). All other \ccl functions (including the non-linear power spectrum) will ignore these modifications. This model, and the interpretation of the predictions given by \ccl, should therefore be used with care.
 
@@ -350,7 +393,10 @@ The routines described in this subsection are implemented in {\tt ccl$\_$power.c
 T(q\equiv k/\Gamma h {\rm Mpc}^{-1}) = \frac{\ln[1+2.34q]}{2.34q}[1+3.89q+(16.2q)^2+(5.47q)^3+(6.71q)^4]^{-0.25}
 \end{equation}
 where $\Gamma = \Omega_m h$.
-The power spectrum is related to the transfer function by $\Delta(k)\propto T^2(k)k^{3+n}$ and $\Delta^2(k)\propto k^3P(k)$. The normalization of the power spectrum is defined at $z=0$ by setting $\sigma_8$ to its value today.
+The power spectrum is related to the transfer function by 
+$P(k) = 2 \pi^2 \Delta^2(k) /k^3  \propto T^2(k) k^{n_s}$, where $\Delta(k)$ is the dimensionless power 
+spectrum and $n_s$ is the spectral index. The normalization of the power spectrum is defined at $z=0$ by 
+setting $\sigma_8$ to its value today.
 The BBKS power spectrum option is primarily used as a precisely-defined input for testing the numerical accuracy of \ccl routines (as described in Sect.~\ref{sec:tests}), and it is not recommended for other uses.
 
 \subsubsection{Eisenstein and Hu}
@@ -383,14 +429,15 @@ The allowed range of cosmological parameters is as follows:
  %
 Actually, $w_a$ and $w_0$ are constrained jointly to be $0.3\leq (-w_0-w_a)^{1/4}$. Note that \ccl only allows a subregion within this parameter space. For models in which w(z) crosses $-1$ at some given redshift, {\tt CLASS} will crash because this value corresponds to a true cosmological constant, which by definition should have no perturbations.\footnote{We thank Emilio Bellini and Miguel Zumalac\'arregui for clarifying this for us.} The linear matter power spectrum is still obtained from {\tt CLASS} as described in the section above.
 
-\paragraph{Neutrino species} The emulator is set up to consider an effective number of relativistic species of $3.04$ and the user can provide $\Omega_\nu h^2$ to set the neutrino mass. This is different from the standard {\tt CCL} configuration, which takes as input the parameters the number of relativistic species, $N_{\nu,{\rm rel}}$, the number of massive neutrinos, $N_{\nu,{\rm mass}}$ and their mass in eV, $m_{\nu}$. For best compatibility with the emulator, the user can decide to pass the following set of parameters to {\tt CCL}:
+\paragraph{Neutrino species} The emulator is set up to consider $N_{\rm eff}=3.04$ and to allow the user to provide $\Omega_\nu h^2$ in order to set the neutrino mass, where it is assumed that the corresponding mass is split equally amongst three neutrinos. This is different from the standard {\tt CCL} configuration, which takes as input the mass(es) of neutrinos in eV, $m_{\nu}$. The assumption of an equal split of masses amongst three neutrino species is also different from the default \ccl choice to split the mass amongst species according to the normal hierarchy. For best compatibility with the emulator, we therefore include a {\tt ccl$\_$configuration} element {\tt emulator$\_$neutrinos$\_$method}, which defaults to {\tt ccl$\_$strict} but can be set to {\tt ccl$\_$equalize} if desired:
 \begin{itemize}
-\item $\{N_{\nu,{\rm rel}},N_{\nu,{\rm mass}},m_{\nu}\}=\{0.00641,3,m_{\nu}\}$ for massive neutrinos or
-\item $\{N_{\nu,{\rm rel}},N_{\nu,{\rm mass}},m_{\nu}\}=\{3.04,0,0\}$ otherwise.
+\item{{\tt ccl$\_$strict} requires the user to pass either a set of three equal neutrino masses, or to pass a sum of masses and to set {\tt ccl$\_$mnu$\_$type} such that the sum is split equally amongst species. If other options are selected when the emulator is in use, \ccl will raise an error and exit. This default option ensures full self-consistency within quantities calculated with a single \ccl cosmology.}
+\item{{\tt ccl$\_$equalize} allows the user to pass an unequal set of neutrino masses, or to pass a sum with {\tt ccl$\_$mnu$\_$type} set such that the sum is not split equally amongst speices. In this case, \ccl will pass redistributed equal neutrino masses to the emulator. This choice may result in internal inconsistency amongst different quantities calculated with the same \ccl cosmology, or indeed even internal inconsistency between the linear and nonlinear parts of the same power spectrum. This option should only be selected for convenience if you are sure you don't care about the mass splitting between neutrino speices.}
 \end{itemize}
-If other combinations of parameters are passed in emulator mode, {\tt CCL} will quit and issue an error.
 
-Notice that ideally we would like pass a non-integer number of massive neutrino species for best compatibility with the emulator set-up. However, since this is not possible within {\tt CCL}, we have opted to verify that neither the growth function nor the comoving radial distance computation are affected by this approximation to more than $10^{-4}$ in the range $0.01<a<1$, where $a$ is the scale factor. We have verified this by comparing this prediction for a fiducial cosmology $\{\Omega_c=0.27,\Omega_b=0.049,h=0.67,\sigma_8=0.8,n_s=0.96\}$ with the following neutrino parameters: $\{N_{\nu,{\rm rel}},N_{\nu,{\rm mass}},m_{\nu}\}=\{0.00641,3,0.06{\rm eV}\}$, $\{N_{\nu,{\rm rel}},N_{\nu,{\rm mass}},m_{\nu}\}=\{0,3.04,0.06{\rm eV}\}$ and $\{N_{\nu,{\rm rel}},N_{\nu,{\rm mass}},m_{\nu}\}=\{0,3.046,0.06{\rm eV}\}$. The discrepancy between distances and growth results between these choices of neutrino parameters can raise above $10^{-4}$ at $a<0.01$ and the user should be mindful of this for their particular application.
+Note also that because the emulator is constructed with $N_{\rm eff}=3.04$, the user is required to pass this when the emulator is in use.  If this is not the case, {\tt CCL} will quit and issue an error.
+
+Notice that ideally we would like to pass a non-integer number of massive neutrino species for best compatibility with the emulator set-up. However, since this is not possible within {\tt CCL}, we have opted to verify that neither the growth function nor the comoving radial distance computation are affected by this approximation to more than $10^{-4}$ in the range $0.01<a<1$, where $a$ is the scale factor. We have verified this by comparing this prediction for a fiducial cosmology $\{\Omega_c=0.27,\Omega_b=0.049,h=0.67,\sigma_8=0.8,n_s=0.96\}$ with the following neutrino parameters: $\{N_{\nu,{\rm rel}},N_{\nu,{\rm mass}},m_{\nu}\}=\{0.00641,3,0.06{\rm eV}\}$, $\{N_{\nu,{\rm rel}},N_{\nu,{\rm mass}},m_{\nu}\}=\{0,3.04,0.06{\rm eV}\}$ and $\{N_{\nu,{\rm rel}},N_{\nu,{\rm mass}},m_{\nu}\}=\{0,3.046,0.06{\rm eV}\}$. The discrepancy between distances and growth results between these choices of neutrino parameters can raise above $10^{-4}$ at $a<0.01$ and the user should be mindful of this for their particular application.
 
 \subsubsection{Impact of baryons}
 
@@ -430,7 +477,32 @@ All spline and grid parameters relevant for computing quantities such as distanc
 \item {\tt K$\_$MAX}: The maximum value of wavenumber when integrating over $k$. The default is {\tt K$\_$MAX}$=1000$/Mpc.
 \item {\tt K$\_$MIN$\_$DEFAULT}:  The minimum value of wavenumber when integrating over $k$. The default is {\tt K$\_$MIN$\_$DEFAULT}$=5 \times 10^{-5}$/Mpc.
 \item {\tt N$\_$K}: Number of bins per decade for the wavenumber. The default is {\tt N$\_$K}$=167$.
+\item {\tt N$\_$K$\_$3DCOR}: Number of bins per decade for the wavenumber in the 3d correlation function calculation. 
+The default is {\tt N$\_$K$\_$3DCOR}~=~100,000.
 \end{itemize}
+
+The precision parameters of {\tt GSL} routines can also be set in {\tt ccl$\_$params.ini}. The parameters are organized in a hierarchal fashion, such that more specialized parameters take precedence over more general ones. For example, there is a general tolerance parameter, a tolerance parameter for integrals, and a tolerance parameter for the Limber integral. By default all are set to the value of the general tolerance. Changing the integration tolerance changes the tolerance for all integrals but not for root-finding routines, for example, and changing the Limber integral tolerance only affects that integral and no other.
+The parameters are:
+
+\begin{itemize}
+\item {\tt GSL$\_$EPSREL}: Relative tolerance for {\tt GSL} routines. Default is $10^{-4}$.
+\item {\tt GSL$\_$N$\_$ITERATION}: Maximum number of iterations allowed for {\tt GSL} routines. This parameter also controls the size of the integration workspaces. Default is 1000.
+\item {\tt GSL$\_$INTEGRATION$\_$GAUSS$\_$KRONROD$\_$POINTS}: Number of Gauss-Kronrod points in the {\tt QAG} integration routines. Default is {\tt GSL$\_$INTEG$\_$GAUSS41} (numerical value 4).
+\item {\tt GSL$\_$INTEGRATION$\_$EPSREL}: Relative tolerance for {\tt GSL} integration routines. Default is {\tt GSL$\_$EPSREL}.
+\item {\tt GSL$\_$INTEGRATION$\_$DISTANCE$\_$EPSREL}: Relative tolerance for {\tt GSL} integration routines for distance calculations. Default is $10^{-6}$.
+\item {\tt GSL$\_$INTEGRATION$\_$DNDZ$\_$EPSREL}: Relative tolerance for {\tt GSL} integration routines for  $\frac{dN}{dz}$ calculations. Default is $10^{-6}$.
+\item {\tt GSL$\_$INTEGRATION$\_$SIGMAR$\_$EPSREL}: Relative tolerance for {\tt GSL} integration routines for  $\sigma_R$ calculations. Default is $10^{-5}$.
+\item {\tt GSL$\_$INTEGRATION$\_$NU$\_$EPSREL}: Relative tolerance for {\tt GSL} integration routines for neutrino calculations. Default is $10^{-7}$.
+\item {\tt GSL$\_$INTEGRATION$\_$NU$\_$EPSABS}: Absolute tolerance for {\tt GSL} integration routines for neutrino calculations. Default is $10^{-7}$.
+\item {\tt GSL$\_$INTEGRATION$\_$LIMBER$\_$GAUSS$\_$KRONROD$\_$POINTS}: Number of Gauss-Kronrod points in the {\tt QAG} integration routines for the Limber integral. Default is {\tt GSL$\_$INTEGRATION$\_$GAUSS$\_$KRONROD$\_$POINTS}.
+\item {\tt GSL$\_$INTEGRATION$\_$LIMBER$\_$EPSREL}: Relative tolerance for {\tt GSL} integration routines for Limber integral. Default is {\tt GSL$\_$EPSREL}.
+\item {\tt GSL$\_$ROOT$\_$EPSREL}: Relative tolerance for {\tt GSL} root-finding routines. Default is {\tt GSL$\_$EPSREL}.
+\item {\tt GSL$\_$ROOT$\_$N$\_$ITERATION}: Maximum number of iterations allowed for {\tt GSL} root-finding routines. Default is {\tt GSL$\_$N$\_$ITERATION}.
+\item {\tt GSL$\_$ODE$\_$GROWTH$\_$EPSREL}: Relative tolerance for {\tt GSL} ODE-solving routines for growth factor calculation. Default is $10^{-6}$.
+\end{itemize}
+
+The {\tt GSL} parameters are initialized to their default values and do not need to be listed in {\tt ccl$\_$params.ini} if no adjustments are necessary.
+
 Note that a copy of {\tt ccl$\_$params.ini} is installed along with the library, so changing the version of this file inside the source directory will not have any effect unless you reinstall.
 
 For the matter power spectrum, the spline is performed in two variables: the logarithmically-spaced wavenumber and the linearly-spaced scale factor. Splining the {\tt CLASS} output leads to some precision loss (compared to direct outputs from {\tt CLASS}). We quantify this, along with the impact of extrapolation, in the following subsection.
@@ -499,7 +571,7 @@ In the {\tt python} implementation, {\tt CCL} allows for either $\sigma 8$ or {\
 \label{sec:cl}
 
 In this section we will distinguish between {\sl observables} (quantities observed on the sky, such as number counts in a redshift bin, shear or CMB temperature fluctuations) and {\sl contributions} to the total observed fluctuations of these observables (such as the biased matter density term in number counts, redshift-space distortions, magnification, ISW, etc.).
-The routines described in this subsection are implemented in {\tt ccl$\_$cls.c}.
+The routines described in this subsection are implemented in {\tt ccl$\_$cls.cc}.
 
 \subsubsection{Exact expressions}
 The angular power spectrum between two observables $a$ and $b$ can be written as:
@@ -518,10 +590,11 @@ where $\mathcal{P}_\Phi(k)$ is the dimensionless power spectrum of the primordia
         \begin{equation}
           \Delta^{\rm RSD}_\ell(k)=\int dz\,p_z(z)\frac{(1+z) p_z(z)}{H(z)}T_\theta(k,z) j_\ell''(k\chi(z)),
         \end{equation}
-        where $T_\theta(k,z)$ is the transfer function of $\theta$, the divergence of the comoving velocity field. $T_\theta(k,z)$ depends on the growth, which \ccl does not compute for massive neutrino cosmologies. $C_\ell$ is instead computed assuming a linear-theory relation between the matter overdensity and peculiar velocity fields. While this should not be problematic for wide photometric redshift bins, users should exercise care when interpreting results for narrow window functions.
+        where $T_\theta(k,z)$ is the transfer function of $\theta$, the divergence of the comoving velocity field. $T_\theta(k,z)$ depends on the growth, which \ccl does not compute for massive neutrino cosmologies; therefore at this time an attempt to create a number count tracer in a cosmology with massive neutrinos will cause \ccl to raise an error. $C_\ell$ is instead computed assuming a linear-theory relation between the matter overdensity and peculiar velocity fields. While this should not be problematic for wide photometric redshift bins, users should exercise care when interpreting results for narrow window functions. 
   \item $\Delta^{\rm M}$ is the contribution from magnification lensing:
         \begin{equation}
           \Delta_\ell^{\rm M}(k)=-\ell(\ell+1)\int \frac{dz}{H(z)} W^{\rm M}(z) T_{\phi+\psi}(k,z) j_\ell(k\chi(z)),
+          \label{eq:deltaM}
         \end{equation}
         where $T_{\phi+\psi}$ is the transfer function for the Newtonian-gauge scalar metric perturbations, and $W^{\rm M}$ is the magnification window function:
         \begin{equation}
@@ -585,68 +658,49 @@ Here ($\Theta(x;x_i,x_f)$) is a top-hat function (1 for $x\in[x_i,x_f]$ and 0 ot
 
 %----------------------------------------------------------------
 %
-%      This is the Angpow section currently under development
+%      Begin of the Angpow section currently under development
 %
 %----------------------------------------------------------------
 
-\begin{comment}
+\subsubsection{Beyond limber}
 
-\subsubsection{Beyond Limber: angpow}
+{\bf Native CCL computation.}
 
-%Text Added JECampagne 27/05/17 START
+\ccl incorporates routines to compute the $C^{ab}_\ell$ angular power spectra as described above but without the Limber approximation. The algorithm performs first the integrals over $z$ for both tracers, and ends with the $k$ integral. This computation is much slower than using the Limber approximation, but it ends up with precise angular power spectra at low $\ell$, and correct cross-correlations between tracers (the Limber approximation fails at reproducing the interference terms $j_\ell(x)\times j_\ell(x')$).
 
-%This reference to Angpow may change as soon as A&A will publish it.
-%@ARTICLE{2017arXiv170103592C,
-%   author = {{Campagne}, J.-E. and {Neveu}, J. and {Plaszczynski}, S.},
-%    title = "{Angpow: a software for the fast computation of accurate tomographic power spectra}",
-%	archivePrefix = "arXiv",
-%   eprint = {1701.03592},
-% keywords = {Astrophysics - Cosmology and Nongalactic Astrophysics},
-%     year = 2017,
-%    month = jan,
-%    journal = {to be published to \aap},
-%   adsurl = {http://adsabs.harvard.edu/abs/2017arXiv170103592C},
-%  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
-%}
+Some parameters are needed to define this integral. First, to fasten the computation the $C^{ab}_\ell$ function is computed for a selection of $\ell$ values (linearly spaced at low-$\ell$ and logarithmicly spaced at high-$\ell$) and then the function is splined. Then the integration step of the redshift integrals must be specified in terms of a comoving distance. It is recommanded to start with a low value ($<3$\,Mpc) for a high precision integration, and then to release this parameter to achieve the user needs in terms of precision and rapidity. A logarithmic step in $k$ must also be provided: it does not correspond to the integration step but to a computation step before splining the transfer functions $\Delta^a_\ell(k)$. Last parameter, a minimum redshift can be given for the redshift integral bound so that the transfer functions are not computed near $z\approx 0$ where they can be numerically undefined.
 
-Our aim is to compute the angular over density power spectrum  $C_{\ell}(z_1, z_2)$ as a cross-correlation between two $z$-shells with mean values ($z_1, z_2$) and also the auto-correlation $C_{\ell}(z_1)$ with $z_1 = z_2$,  taking into account, in both cases, possible redshift selection functions and physical processes such as redshift-space distortions without any Limber numerical approximation. For this purpose, \ccl has been linked to the \texttt{Angpow} code \citep{2017arXiv170103592C}, which is briefly described here.
+The integration bounds in redshift are estimated automatically given the a redshift window so that the integration is preformed where the redshift window is relevant within a given precision (set by the \texttt{CCL\_FRAC\_RELEVANT} parameter). The integration bounds for the $k$ integrals are defined automatically given the $\ell$ multipole and the comoving distances at play.
 
-The angular power spectrum for two shells, $C_{\ell}(z_1, z_2)$, is computed according to the following expression
+It is worth noting that the user can define a threshold multipole $\ell$ from which the $C^{ab}_\ell$ computation switches to the Limber approximation which is faster and generally relevant at high $\ell$ values. 
+
+{\texttt{\bf Angpow}.}
+
+The aim of the \texttt{Angpow} software \citep{2017arXiv170103592C} is to compute the angular power spectra  $C_{\ell}^{ab}$  without any Limber numerical approximation. \ccl has been linked to the \texttt{Angpow} code,  which is briefly described here.
+
+The angular power spectrum for two shells $C_{\ell}^{ab}$ is computed in \texttt{Angpow} according to the following expression
 \begin{equation}
-\begin{split}
-C_{\ell}&(z_1, z_2;\sigma_1, \sigma_2)\\& = \iint_0^\infty \mathrm{d} z \mathrm{d} z^\prime \ W_1(z; z_1, \sigma_1) W_2(z^\prime; z_2, \sigma_2)\\
-&\phantom{\iint_0^\infty \mathrm{d} z \mathrm{d} z^\prime} \times \int_0^\infty \mathrm{d} k\ f_{\ell}(z, k) f_{\ell}(z^\prime, k).
-\end{split}
-\label{eq-clz1z2-obs}
+  C_{\ell}^{ab} = \iint_0^\infty \mathrm{d} z \mathrm{d} z^\prime  p_{z_1}(z_1) p_{z_2}(z^\prime) \times \int_0^\infty \mathrm{d} k\ f_{\ell}(z, k) f_{\ell}(z^\prime, k).
+  \label{eq-clz1z2-obs}
 \end{equation}
-%
-where we have introduced two normalized redshift selection functions $W_1(z;z_1,\sigma_1)$ and $W_2(z^\prime;z_2,\sigma_2)$  around $z_1$ and $z_2$ with typical width $\sigma_1$ and $\sigma_2$, respectively. The auxiliary function $f_\ell(z,k)$ can be defined without loss of generality as
+The auxiliary function $f_\ell(z,k)$ can be defined without loss of generality as
 \begin{equation}
 f_\ell(z,k) \equiv  \sqrt{\frac{2}{\pi}}\  k \sqrt{P(k,z)}\ \widetilde{\Delta}_\ell(z,k)\label{eq-fell-func}
 \end{equation}
 with
 \begin{itemize}
-\item  $P(k,z)$ : the power spectrum at redshift $z$ which is defined either using the primordial power spectrum $P_{in}(k)$ and the transfer function $T(k,z)$ as
+\item  $P(k,z)$ : the matter power spectrum at redshift $z$ 
+\item $\widetilde{\Delta}_\ell(z,k)$: a function describing the physical processes such as matter density fluctuations, redshift-space distortions as described for instance in references \citet{2008cmb..book.....D,2009PhRvD..80h3514Y,2010PhRvD..82h3508Y, 2011PhRvD..84d3516C,2011PhRvD..84f3505B}. Currently, the \texttt{Angpow} version delivered with \ccl only can deal with galaxy clustering tracers (no lensing) and this without the magnification lensing term (equation \ref{eq:deltaM}). The incorporation of those transfer functions is left for future work, but in principle \texttt{Angpow} has already the capability to treat them. For now, for galaxy clustering tracers we defined $\widetilde{\Delta}_\ell(z,k)$ as 
 \begin{equation}
-P(k,z) = P_{in}(k) T(k,z),
+ \widetilde{\Delta}_\ell(z,k) \approx b j_\ell(k \chi(z)) - f(z) j_\ell^{\prime\prime}(k \chi(z)) 
 \end{equation}
-or using an approximation valid at low redshift  with the power spectrum at $z=0$ ($P(k)|_{z=0}$) and the growth factor $G(z)$ as
-\begin{equation}
-P(k,z) = P(k)|_{z=0} G^2(z);
-\end{equation}
-There are abstract classes that one may tune according to the use-case (see \texttt{angpow\_integrand\_base.h} and \texttt{angpow\_powspec\_base.h}). For instance we have specialized in \texttt{angpow\_powspec.h} the computation of a $P(k)$ from an external
-file and a growth rate from \citet{1991MNRAS.251..128L, 1992ARA&A..30..499C}, and in \texttt{angpow\_integrand.h} we have included the RSD term and a constant bias.
-\item $\widetilde{\Delta}_\ell(z,k)$: a function describing the physical processes such as matter density fluctuations, redshift-space distortions as described for instance in references \citet{2008cmb..book.....D,2009PhRvD..80h3514Y,2010PhRvD..82h3508Y, 2011PhRvD..84d3516C,2011PhRvD..84f3505B}. As example \todo{example for galaxy clustering?} with a constant bias $b$ and using the growth factor rate $f_a(z) = d\log G(a(z))/d\log(a(z))$, we can approximate
-\begin{equation}
- \widetilde{\Delta}_\ell(z,k) \approx b j_\ell(k \chi(z)) - f_a(z) j_\ell^{\prime\prime}(k \chi(z)) + \dots
-\end{equation}
-with $j_\ell(x)$ and $j_\ell^{\prime\prime}(x)$ the spherical Bessel function of order $\ell$ and its second derivative, and $\chi(z)$ is the comoving distance at redshift $z$.
+with $j_\ell(x)$ and $j_\ell^{\prime\prime}(x)$ the spherical Bessel function of order $\ell$ and its second derivative, and $f(a)$ the growth rate as defined subsection~\ref{sec:growth} (derivative of the growth function with respect to the scale factor $a$).
 \end{itemize}
 
-To proceed to a numerical evaluation of equation \ref{eq-clz1z2-obs}, we first conduct  inside the rectangle $ [z_{1\mrm{min}},z_{1\mrm{max}}] \times [z_{2\mrm{min}},z_{2\mrm{max}}]$ given by the $W$ selection functions a Cartesian product of one-dimensional (1D) quadrature
- defined by the set of sample nodes $z_i$ and weights $w_i$. In practice, we use the Clenshaw-Curtis quadrature.   The corresponding sampling points $(z_{1i},z_{2j})$ are weighted by the product  $w_i w_j$ using the 1D quadrature sample points and weights on both redshift regions with $i=0,\dots, N_{\mrm{z}_1}-1$ and $j=0,\dots,N_{\mrm{z}_2}-1$. Then, one gets the following approximation:
+To proceed to a numerical evaluation of equation \ref{eq-clz1z2-obs}, \texttt{Angpow} first conducts  inside the rectangle $ [z_{1\mrm{min}},z_{1\mrm{max}}] \times [z_{2\mrm{min}},z_{2\mrm{max}}]$ given by the $p_z(z)$ selection functions a Cartesian product of one-dimensional (1D) quadrature
+ defined by the set of sample nodes $z_i$ and weights $w_i$. In practice, the Clenshaw-Curtis quadrature is used.   The corresponding sampling points $(z_{1i},z_{2j})$ are weighted by the product  $w_i w_j$ using the 1D quadrature sample points and weights on both redshift regions with $i=0,\dots, N_{\mrm{z}_1}-1$ and $j=0,\dots,N_{\mrm{z}_2}-1$. Then, one gets the following approximation:
 \begin{equation}
-C^{\mrm{thick}}_{\ell}(z_1, z_2) \approx  \sum_{i=0}^{N_{\mrm{z}_1}-1}\sum_{j=0}^{N_{\mrm{z}_2}-1} w_i w_j W_1(z_i,z_1)W_2(z_j,z_2) \widehat{P}_\ell(\chi_i,\chi_j)
+C_{\ell}^{ab} \approx  \sum_{i=0}^{N_{\mrm{z}_1}-1}\sum_{j=0}^{N_{\mrm{z}_2}-1} w_i w_j p_{z_1}(z_i)p_{z_2}(z_j) \widehat{P}_\ell(\chi_i,\chi_j)
 \label{eq-cross-zquadra}
 \end{equation}
 with the notations $z_i = z_{1i}$, $z_j = z_{2j}$ and  $\chi_i = \chi(z_{1i})$, $\chi_j = \chi(z_{2j})$ and
@@ -654,31 +708,25 @@ with the notations $z_i = z_{1i}$, $z_j = z_{2j}$ and  $\chi_i = \chi(z_{1i})$, 
 \widehat{P}_\ell(z_i,z_j) =   \int_0^\infty dk\ f_\ell(z_i,k) f_\ell(z_j,k)
 \label{eq-Pellzizj}
 ,\end{equation}
-defined with the $f_\ell(z,k)$ function of equation \ref{eq-fell-func}.
-To conduct the computation of such integral of highly oscillating functions we use the 3C-algorithm described in details in reference \citep{2017arXiv170103592C}.
-
-In brief this algorithm proceeds the following way:
+To conduct the computation of such integral of highly oscillating functions we use the 3C-algorithm described in details in reference \citep{2017arXiv170103592C}. In brief this algorithm proceeds the following way:
 \begin{enumerate}
 \item the total integration $k$ interval (eg. $[k_\mathrm{min}, k_\mathrm{max}]$) in equation (\ref{eq-Pellzizj}) is cut on several $k$-sub-intervals;
 \item  on each sub-interval the functions $f_{i\, \ell}(k) = f_\ell(z_i,k) $ and $f_{j\, \ell}(k) = f_\ell(z_j,k)$ are projected onto Chebyshev series of order $2^N$;
 \item the product of the two Chebyshev series is performed with a $2^{2N}$ Chebyshev series;
 \item then, the integral on the sub-interval is computed thanks to the Clenshaw-Curtis quadrature.
 \end{enumerate}
-All the Chebyshev expansions and the Clenshaw-Curtis quadrature are
-performed via the DCT-I fast transform of FFTW.
+All the Chebyshev expansions and the Clenshaw-Curtis quadrature are performed via the DCT-I fast transform of FFTW.
 
-We have tested the code both on laptop (Linux, MacOSX) as well as on
-Computer Center (CCIN2P3 in France and NERSC in the USA).
-We use OpenMP to distribute the computation of a given $C_\ell$ on a single
-thread. The code wall time  decreases reasonably well with the number of threads
-and a wall time at the $\mathcal{O}$(1s) level can be reached to
-reconstruct these accurate spectra. Such performances are much higher than those obtained
-with {\tt CLASSgal} when not using the Limber approximation.
-For instance using{\tt CLASSgal}  to compute the auto-correlation with a Gaussian selection function with ($z_\mrm{mean}=1$, $\sigma_z=0.02$, $5\sigma_z$-cut) and $k_\mrm{max}=1\ \mrm{Mpc}^{-1}$ and a radial quadrature based on $N_\mrm{pts}=139$ sample points, it takes
-about 15s on 16 threads, which is to be compared to about 0.5s with \texttt{Angpow}.
-%Text Added JECampagne 27/05/17 END
+Thanks to the 3C-algorithm, the \texttt{Angpow} is able to compute the $C_{\ell}^{ab}$ in a fast and accurate way. It was tested against \texttt{CLASS} and the native \ccl computation and can performed the computation an order of magnitude faster, which is more suitable for an extensive exploration of the cosmological parameter space ($\mathcal{O}(1s)$). Note that \texttt{Angpow} is written in C++ with OpenMP, to distribute the computation of a single $C_\ell$ on a single thread. The computation can also be switch by the user to the faster Limber approximation setting a threshold multipole $\ell$.
+ 
 
-\end{comment}
+{\bf Precision tests.}
+
+The code has been compared with \texttt{CLASS} and the native \ccl computation and all three softwares agrees perfectly if precision parameters are pushed to high levels.
+
+A few parameters must be provided to set the precision of this computation. First the order of the Chebyshev polynomials is set to $2^{10}$ by default, and the number of $k$ sub-intervals to 200, and we checked this is enough for the current uses. Then the redshift quadrature stepping is set automatically given the redshift windows to recover the native \ccl computation boosted with high precision parameters: its precision is optimised so that the relative numerical error compared with the native method is two orders of magnitude below the relative cosmic variance $\sqrt{2/(2\ell+1)}$, from $\ell=2$ to $\ell=1000$. The $k_{\rm min}$ and $k_{\rm max}$ bounds are also automatically set given the current multipole $\ell$ and the comoving distance $\chi$ involved in the inner integral.
+
+
 
 
 %----------------------------------------------------------------
@@ -691,7 +739,7 @@ about 15s on 16 threads, which is to be compared to about 0.5s with \texttt{Angp
 \label{sec:corr}
 
 
-The following expressions relating the angular power spectra and correlation functions are valid in the flat-sky approximation\footnote{See the weak lensing review by \citet{Bartelmann01}, page 44 and \citet{Joachimi10}.}. In all cases, $f_K(\chi)$ is comoving angular diameter distance, which differs from the radial comoving distance $\chi$ only in the case of cosmologies with non-zero curvature.
+The following expressions relating the angular power spectra and correlation functions are valid in the flat-sky approximation\footnote{See the weak lensing review by \citet{Bartelmann01}, page 44 and \citet{Joachimi10}.}. In all cases, $f_K(\chi)$ is comoving angular diameter distance, which differs from the radial comoving distance $\chi$ only in the case of cosmologies with non-zero curvature. The routines described in this subsection are implemented in {\tt ccl$\_$correlation.c}.
 
 {\bf Galaxy-galaxy.} The angular correlation function between two number-count tracers (labeled $a$ and $b$ here) is given by
 \begin{equation}
@@ -715,7 +763,14 @@ where the angular lensing convergence power spectrum $C^{ab}_\ell$ is given abov
 
 Note that, in the above, ``Galaxy'' and ``Lensing'' can be replaced by any spin-0 and spin-2 fields on the sphere respectively (e.g. the CMB lensing convergence would play the same role as the galaxy overdensity field in all the formulas above).
 
-For numerical integration of the correlation functions, we make use of the public code {\tt FFTlog}\footnote{\url{http://casa.colorado.edu/~ajsh/FFTLog/}}\citep{Hamilton2000,Talman2009}. In brief, {\tt FFTlog} works on functions periodic in log space, by writing the Hankel Transform as a convolution between Bessel functions and the function of interest (in this case $C_\ell$). A version of this code is included in \ccl with minor modifications.
+{\bf 3d spatial correlation function.} In addition to the angular correlation functions, the 3-dimensional spatial correlation function $\xi(r)$ is also 
+calculated from the power spectrum $P(k)$ using
+\begin{equation}
+\xi(r) = \frac{1}{2 \pi^2} \int dk \; k^2 P(k) \frac{\sin(kr)}{kr}
+\end{equation}
+
+
+To evaluate the numerical integral in the correlation functions, we make use of the public code {\tt FFTlog}\footnote{\url{http://casa.colorado.edu/~ajsh/FFTLog/}}\citep{Hamilton2000,Talman2009}. In brief, {\tt FFTlog} works on functions periodic in log space, by writing the Hankel Transform as a convolution between Bessel functions and the function of interest (in this case either $C_\ell$ or $P(k)$). A version of this code is included in \ccl with minor modifications.
 
 %-----------------------------------------------------------
 %
@@ -793,6 +848,8 @@ where a halo with size $r_{\Delta}$ has an average density $\bar{\rho}$ equal to
 
 In addition to the usage of the most common definition, we have implemented an extension for two of the models. The Tinker 2010 model allows for a value of $\Delta$ to be given between the values of 200 and 3200 and interpolates the fitting parameters within this range in a space of $\log \Delta$ using splines. We also have implemented interpolation in the same range of Tinker 2008 $\Delta$ values. For both Tinker 2008 and Tinker 2010 models we have utilized spline interpolation through {\tt GSL} routines in order to guarantee a match to specified fitting parameters at exact values of $\Delta$. This fitting has slight deviation from the fit as expressed in Tinker 2010.
 
+The halo mass function models implemented in CCL are tuned to simulations without massive neutrinos, therefore are not valid in cosmologies with massive neutrinos. Attempts to calculate the halo mass function, halo bias, or other related quantities within cosmologies with massive neutrinos will cause \ccl to raise an error and quit.
+
 
 With the exception of the Tinker 2010 model, we attempt to keep a common form to the multiplicity function whenever possible for ease of extension:
 \begin{equation}
@@ -828,6 +885,8 @@ The \citet{Tinker2010} model parameterizes both the halo mass function and the h
   f(\nu) = \alpha[1+(\beta\nu)^{-2\phi}]\nu^{2\eta}e(-\gamma\nu^2/2).
 \end{equation}
 The currently implemented model in \ccl allows for an arbitrary overdensity $\Delta$ to be chosen, using the fitting functions provided in \citet{Tinker2010}. Other halo model definitions are not included in the halo bias calculation, though this remains an area of active work to improve upon.
+
+The halo mass function and related quantities
 
 \subsection{Photo-$z$ implementation}
 \label{sec:photoz}
@@ -878,7 +937,7 @@ Finally, the expected (linear, scale-independent) bias of galaxies in the cluste
 b(z) = \frac{0.95}{D(z)}
 \label{clustbias}
 \end{equation}
-where $D(z)$ in the linear growth rate of structure normalized to unity at z=0.
+where $D(z)$ in the linear growth rate of structure normalized to unity at z=0. Note that this bias definition requires the calculation of the linear growth rate and therefore is not yet supported for cosmologies with massive neutrinos.
 
 \section{Tests and validation}
 \label{sec:tests}
@@ -896,10 +955,11 @@ A code comparison project was carried out among members of TJP where the followi
 \end{enumerate}
 These predictions were produced and compared for different cosmologies, which are listed in the table below. The results agree to better than $0.1\%$ relative accuracy for comoving distance and growth factor among all submissions, and for $P(k)$ and $\sigma(M)$ among codes which use the same BBKS conventions.
 
+\begin{table}
 \begin{center}
   \begin{tabular}{ c | c c c c c c c c }
-    \hline
-    \multicolumn{9}{|c|}{Cosmological models for code comparison project} \\
+%    \hline
+%    \multicolumn{9}{|c|}{Cosmological models for code comparison project} \\
     \hline
     \hline
     Model & $\Omega_m$ & $\Omega_b$ & $\Omega_\Lambda$ & $h_0$ & $\sigma_8$ & $n_s$ & $w_0$ & $w_a$ \\
@@ -910,9 +970,11 @@ These predictions were produced and compared for different cosmologies, which ar
     open $w_a$ LCDM & 0.3 & 0.05 & 0.65 & 0.7 & 0.8 & 0.96 & -0.9 & 0.1  \\
     closed $w_a$ LCDM & 0.3 & 0.05 & 0.75 & 0.7 & 0.8 & 0.96 & -0.9 & 0.1  \\
     \hline
-  \end{tabular}
+	\end{tabular}
+	\caption{Cosmological models for the code comparison project.}
+    \label{table:code_comp}
 \end{center}
-
+\end{table}
 We noticed that there are 2 typos for the BBKS transfer function in ``Modern Cosmology'' \citep{DodelsonBook} compared to the original BBKS paper. The quadratic term should be $(16.1q)^2$ and the cubic term should be $(5.46q)^3$. The BBKS equation is correct in \citet{PeacockBook}. Using the wrong equation can give differences in the results above the $10^{-4}$ level.
 
 From the comparison, we were also able to identify some typical issues which affect convergence at the desired level:
@@ -953,6 +1015,36 @@ For $C_\ell$ computations, we required the relative difference between \ccl and 
 
 To obtain realistic targets for the convergence of correlation function computations for LSST analyses, we calculate the expected statistical uncertainty of the clustering and lensing correlation functions of the LSST gold sample (c.f. Sect.~\ref{sec:specs}), assuming an effective source galaxy density of $n_\mathrm{eff} = 26\mathrm{gal/sq\,arcmin}$ for galaxy shape distortions, and galaxy density of $n_\mathrm{gold} = 45\mathrm{gal/sq\,arcmin}$ for number counts. Specifically, we calculate the Gaussian covariance of angular correlation functions following the formalism of \citet{2008A&A...477...43J}, and note that leaving out the non-Gaussian covariance terms makes this convergence criterion more conservative. We split the galaxy samples into 10 tomography bins, defined to contain equal numbers of galaxies. The accuracy test then proceeds as follows. We compared the difference between \ccl calculated lensing and clustering correlations and the benchmarks for the analytic redshift distributions and for auto-correlations of redshift bins only. To pass the benchmark test, we required that this difference be smaller than half of the value of the errorbar derived from the covariance for each correlation function computed. Specifically, we take the value of the covariance in the bins centered at $z=1$ and $z=1.5$ to compare to the benchmarks.
 
+The 3-dimensional correlation function $\xi(r)$ was validated by comparing with an independent, precise numerical transform. We calculated $\xi(r)$ 
+by transforming the CCL non-linear Halofit power spectrum using this independent code for the five cosmologies listed in Table~\ref{table:code_comp} at 
+redshifts $z = 0,1,2,3,4,5$.  We then compared with the $\xi(r)$ from CCL with a sampling of $P(k)$ 
+equal to {\tt N$\_$K$\_$3DCOR} bins per decade. The default value of {\tt N$\_$K$\_$3DCOR}~=~100,000 results in a relative agreement 
+at the level of $\Delta \xi(r) / \xi(r) < 2.5 \times 10^{-3}$ for $0.1 < r < 250$~Mpc and redshift zero. The agreement is better for higher redshifts.
+We also compared the absolute value of $r^2 \xi(r)$ and find a maximum difference of $\Delta (r^2 \xi(r)) < 3.0 \times 10^{-2}$ for the range 
+$r = 0.1 - 250$~Mpc. This corresponds to approximately 0.08\% of the BAO peak value of $r^2 \xi(r)$. At the BAO peak, the difference is 
+only $9.0 \times 10^{-3}$, or 0.024\% of the peak height. The results are shown in Fig.~\ref{fig:benchmark_xi}
+%
+\begin{figure*}
+\centering
+\includegraphics[width=0.47\textwidth]{benchmark_xi_rel} ~~~
+\includegraphics[width=0.47\textwidth]{benchmark_xi_abs} 
+\caption{Comparison of the CCL calculation of the 3d spatial correlation function $\xi(r)$ with a precise, numerical transform of the CCL non-linear Halofit power spectrum. The left panel shows the relative error $\Delta \xi(r) / \xi(r)$. The right panel shows the absolute error in $r^2 \xi(r)$. Both panels are for the $w_a$~LCDM model of Table~\ref{table:code_comp} at redshift zero.}
+\label{fig:benchmark_xi}
+\end{figure*}
+%
+To further validate the $P(k) \to \xi(r)$ transform we performed a test using an analytical function $\xi(r) = (r / r_0)^a$, whose inverse transform $P(k)$ 
+has a known analytic form. We used $r_0 = 5$~Mpc$^{-1}$ and $a = -1.67$, which gives a rough approximation to the actual 3d correlation function.   
+We then compared the CCL calculation of $\xi(r)$ to the known analytic result. The relative difference $\Delta \xi(r) / \xi(r)$ was found to be   
+less than 0.3\% in the range $2 < r < 250$~Mpc rising to about 5\% at $r = 1000$~Mpc (see Fig.~\ref{fig:analytic_xi}). For $r=0.1-0.8$~Mpc the relative difference is $\approx$8\%. The accuracy at low and high distances can be improved by increasing the range over which the power spectrum splines are evaluated.
+%
+\begin{figure*}[htbp]
+\centering
+\includegraphics[width=0.47\textwidth]{analytic_xi}
+\caption{The relative error in the 3d spatial correlation function computed using the CCL algorithm compared to an analytic function $\xi(r) = (r/r_0)^a$ whose inverse transform $P(k)$ is known analytically. In this validation test, the known $P(k)$ was transformed with the CCL algorithm and compared to the known analytic result for $\xi(r)$.}
+\label{fig:analytic_xi}
+\end{figure*}
+
+
 Additionally, independent codes were utilized to test the accuracy of halo mass function predictions. For the halo mass function, we compare the value of $\sigma$, $\log(\sigma^{-1})$, and the value of the halo mass function in the form used in \cite{Tinker2008},
 \begin{equation}
 \log[(M^2/\bar{\rho}_m)dn/dM].
@@ -961,7 +1053,7 @@ We note that while we maintain the $10^{-4}$ for our evaluations of $\sigma$, th
 
 The implementation of the matter power spectrum emulation code from \citet{Lawrence17} in \ccl has been validated at first instance by comparing the direct output of the original code to \ccl for the best fit cosmology (M000) in the range of wavenumbers spanned by the emulator predictions and confirming that the agreement is within the expectation from numerical errors (fractional difference of $<10^{-5}$). We have also compared the \ccl emulator outputs for certain cosmologies to smoothed power spectra from the simulations presented in \citet{Lawrence17}.\footnote{Courtesy of Earl Lawrence and Katrin Heitmann.} The check ensures that the \ccl outputs when calling the emulator are within $3\%$ of the simulation benchmarks at $z=0$ and for the $k$ range of validity of the emulator. This essentially corresponds to a verification of the results presented in Figure 5 and Figure 6 of \citet{Lawrence17}.
 
-Finally, we note that formal tests for predictions in cosmologies with neutrinos are not yet included. The support for neutrino cosmologies in the current release is therefore not yet formally validated, although outputs have been informally compared against other codes where available. Formal validation of this functionality is ongoing.
+Finally, for cosmologies involving massive neutrinos, we have included tests which compare comoving distance and distance modulus predictions from {\tt CCL} from those produced by the {\tt astropy} \citep{astropy} library. In this case, we consider these comparison tests to pass if the agreement between the two predictions is 0.001 or better; this is due to the fact that {\tt astropy} uses a fitting function for the neutrino phase-space integral while we compute the integral directly. The fitting function used by astropy is expected to match the true integral at approximately this level. As a sanity check, we also include a test which verifies that the power spectrum from {\tt CLASS} as called via CCL matches that as called directly from {\tt CLASS} in three test cosmologies with massive neutrinos. 
 
 \ccl has a suite of test routines which, upon compilation, compare its outputs to the benchmarks from code comparison. These are run with {\tt make check}.
 
@@ -1051,6 +1143,8 @@ MCMC Likelihood Analysis.ipynb,
 
 Photo-z example.ipynb,
 
+Correlation_3d.ipynb,
+
 Power spectrum example.ipynb
 \end{verbatim}
 
@@ -1091,7 +1185,6 @@ In the future, we hope that \ccl will include other functionalities. Functionali
 \begin{itemize}
         \item a link to {\tt angpow} \citep{2017arXiv170103592C} for going beyond the Limber approximation,
 	\item a link to {\tt FAST-PT} \citep{FASTPT} for efficient implementation of nonlinear perturbation theory,
-	\item support for cosmologies with multiple unequal-mass neutrinos,
 	\item and more power spectrum methods (see \ref{Pk_wishlist}).
 \end{itemize}
 

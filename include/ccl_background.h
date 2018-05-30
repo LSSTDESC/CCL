@@ -6,15 +6,16 @@ extern "C" {
 #pragma once
 #include "ccl_core.h"
 
-//Omega_x labels
-typedef enum ccl_omega_x_label {
-  ccl_omega_m_label=0,
-  ccl_omega_l_label=1,
-  ccl_omega_g_label=2,
-  ccl_omega_k_label=3,
-  ccl_omega_ur_label=4,
-  ccl_omega_nu_label=5
-} ccl_omega_x_label;
+//species_x labels
+typedef enum ccl_species_x_label {
+  ccl_species_crit_label=0,
+  ccl_species_m_label=1,
+  ccl_species_l_label=2,
+  ccl_species_g_label=3,
+  ccl_species_k_label=4,
+  ccl_species_ur_label=5,
+  ccl_species_nu_label=6,
+} ccl_species_x_label;
 
 /**
  * Normalized expansion rate at scale factor a.
@@ -26,6 +27,9 @@ typedef enum ccl_omega_x_label {
  * @return h_over_h0, the value of H(a)/H0.
  */
 double ccl_h_over_h0(ccl_cosmology * cosmo, double a, int * status);
+
+// Normalized expansion rate at scale factors as given in list a[0..na-1]
+void ccl_h_over_h0s(ccl_cosmology * cosmo, int na, double a[], double output[], int * status);
 
 /**
  * Normalized expansion rate at scale factors as given in list a[0..na-1]
@@ -49,6 +53,9 @@ void ccl_h_over_h0s(ccl_cosmology * cosmo, int na, double a[], double output[], 
  * @return comoving_radial_distance, Comoving radial distance in Mpc
  */
 double ccl_comoving_radial_distance(ccl_cosmology * cosmo, double a, int* status);
+
+// Comoving radial distances in Mpc to scale factors as given in list a[0..na-1]
+void ccl_comoving_radial_distances(ccl_cosmology * cosmo, int na, double a[], double output[], int* status);
 
 /**
  * Comoving radial distances in Mpc to scale factors as given in list a[0..na-1]
@@ -89,6 +96,9 @@ double ccl_sinn(ccl_cosmology *cosmo,double chi, int *status);
  */
 double ccl_comoving_angular_distance(ccl_cosmology * cosmo, double a, int* status);
 
+// Comoving angular distances in Mpc to scale factors as given in list a[0..na-1]
+void ccl_comoving_angular_distances(ccl_cosmology * cosmo, int na, double a[], double output[], int* status);
+
 /**
  * Comoving angular distances in Mpc to scale factors as given in array a[0..na-1]
  * NOTE this quantity is otherwise known as the transverse comoving distance, and is NOT angular diameter
@@ -113,6 +123,9 @@ void ccl_comoving_angular_distances(ccl_cosmology * cosmo, int na, double a[], d
  * @return luminosity_distance, the angular distance in Mpc
  */
 double ccl_luminosity_distance(ccl_cosmology * cosmo, double a, int * status);
+
+// Comoving luminosity distances in Mpc to scale factors as given in list a[0..na-1]
+void ccl_luminosity_distances(ccl_cosmology * cosmo, int na, double a[], double output[], int * status);
 
 /**
  * Comoving luminosity distances in Mpc to scale factors as given in array a[0..na-1]
@@ -161,6 +174,9 @@ void ccl_distance_moduli(ccl_cosmology * cosmo, int na, double a[], double outpu
  */
 double ccl_growth_factor(ccl_cosmology * cosmo, double a, int * status);
 
+// Growth factors at a list of scale factor given in a[0..na-1] normalized to 1 at z=0
+void ccl_growth_factors(ccl_cosmology * cosmo, int na, double a[], double output[], int * status);
+
 /**
  * Growth factors at an array of scale factor given in a[0..na-1], where g(z=0) is normalized to 1
  * @param cosmo Cosmological parameters
@@ -183,6 +199,9 @@ void ccl_growth_factors(ccl_cosmology * cosmo, int na, double a[], double output
  * @return growth_factor_unnorm, Unnormalized growth factor, normalized to the scale factor at early times.
  */
 double ccl_growth_factor_unnorm(ccl_cosmology * cosmo, double a, int * status);
+
+// Growth factors at a list of scale factor given in a[0..na-1] normalized to a in matter domination
+void ccl_growth_factors_unnorm(ccl_cosmology * cosmo, int na, double a[], double output[], int * status);
 
 /**
  * Growth factors at a list of scale factor given in a[0..na-1], where g(a) is normalized to a in matter domination
@@ -207,6 +226,9 @@ void ccl_growth_factors_unnorm(ccl_cosmology * cosmo, int na, double a[], double
  */
 double ccl_growth_rate(ccl_cosmology * cosmo, double a, int* status);
 
+// Logarithmic rates of d ln g/d lna a at alist of  scale factor a [0..na-1]
+void ccl_growth_rates(ccl_cosmology * cosmo, int na, double a[], double output[], int * status);
+
 /**
  * Logarithmic rates of d ln(g)/d ln(a) at an array of scale factors a[0..na-1]
  * @param cosmo Cosmological parameters
@@ -230,6 +252,9 @@ void ccl_growth_rates(ccl_cosmology * cosmo, int na, double a[], double output[]
  */
 double ccl_scale_factor_of_chi(ccl_cosmology * cosmo, double chi, int * status);
 
+// Scale factors for a given list of comoving distances
+void ccl_scale_factor_of_chis(ccl_cosmology * cosmo, int nchi, double chi[], double output[], int* status);
+
 /**
  * Scale factors for a given array of comoving distances chi[0..nchi-1]
  * @param cosmo Cosmological parameters
@@ -244,15 +269,27 @@ double ccl_scale_factor_of_chi(ccl_cosmology * cosmo, double chi, int * status);
 void ccl_scale_factor_of_chis(ccl_cosmology * cosmo, int nchi, double chi[], double output[], int* status);
 
 /**
+ * Physical density (rho) as a function of scale factor.  Critical density is defined as rho_critical = 3 H^2(a)/ (8 pi G). Density of a given species is then rho_x = Omega_x(a) rho_critical(a). For example, rho_matter(a) = Omega_m  a^{-3} / (H^2/H0^2)  3H^2 / (8 pi G) =  Omega_m  a^{-3}  3H0^2 / (8 pi G) =  Omega_m a^{-3}  rho_critical_present. Units of M_sun/(Mpc)^3.
+ * @param cosmo Cosmological parameters
+ * @param a scale factor, normalized to 1 for today
+ * @param label species type. Available: 'critical'(0), 'matter'(1), 'dark_energy'(2), 'radiation'(3), 'curvature'(4), 'massless neutrinos'(5), 'massive neutrinos'(6).
+ * @param int is_comoving. 0 for physical densities, and nonzero for comoving densities (via a^3 factor).
+ * @param status Status flag. 0 if there are no errors, nonzero otherwise. 
+ * For specific cases see documentation for ccl_error.
+ * @return rho_x, physical density at scale factor a. 
+ */
+double ccl_rho_x(ccl_cosmology * cosmo, double a, ccl_species_x_label label, int is_comoving, int* status);
+
+/**
  * Density fraction of a given species at a redshift different than z=0.
  * @param cosmo Cosmological parameters
  * @param a scale factor, normalized to 1 for today
- * @param label species type. Available: 'matter' (0), 'dark_energy'(1), 'radiation'(2), and 'curvature'(3)
+ * @param label species type. Available: 'matter'(1), 'dark_energy'(2), 'radiation'(3), 'curvature'(4), 'massless neutrinos'(5), 'massive neutrinos'(6).
  * @param status Status flag. 0 if there are no errors, nonzero otherwise.
  * For specific cases see documentation for ccl_error.c
  * @return omega_x, Density fraction of a given species at scale factor a.
  */
-double ccl_omega_x(ccl_cosmology * cosmo, double a, ccl_omega_x_label label, int* status);
+double ccl_omega_x(ccl_cosmology * cosmo, double a, ccl_species_x_label label, int* status);
 
 #ifdef __cplusplus
 }

@@ -80,6 +80,18 @@ typedef enum mass_function_t
 } mass_function_t;
 
 /** 
+ * Emulator neutrinos typedef
+ * Specified whether, when the cosmic emulator is switched on,
+ * CCL should exit if non-equal neutrino masses are passed (strict)
+ * or equalize the masses, resulting in potential slight inconsistencies.
+*/
+typedef enum emulator_neutrinos_t
+{
+  ccl_emu_strict   = 1,
+  ccl_emu_equalize = 2
+} emulator_neutrinos_t;
+
+/** 
  * Configuration typedef.
  * This contains the transfer function,
  * matter power spectrum, and mass function
@@ -90,6 +102,7 @@ typedef struct ccl_configuration {
   matter_power_spectrum_t  matter_power_spectrum_method;
   baryons_power_spectrum_t  baryons_power_spectrum_method;
   mass_function_t          mass_function_method;
+  emulator_neutrinos_t emulator_neutrinos_method;
   // TODO: Halo definition
 } ccl_configuration;
 
@@ -97,7 +110,7 @@ typedef struct ccl_configuration {
  * The default configuration object
  * In the default configuration, defined in ccl_core.c
  * CCL runs with:
- * default_config = {ccl_boltzmann_class, ccl_halofit, ccl_nobaryons, ccl_tinker10}
+ * default_config = {ccl_boltzmann_class, ccl_halofit, ccl_nobaryons, ccl_tinker10, ccl_emu_strict}
  */
 extern const ccl_configuration default_config;
 

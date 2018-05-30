@@ -41,6 +41,21 @@ void ccl_correlation(ccl_cosmology *cosmo,
 		     int corr_type,int do_taper_cl,double *taper_cl_limits,int flag_method,
 		     int *status);
 
+/**
+ * Computes the 3dcorrelation function (wrapper)
+ * @param cosmo :Cosmological parameters
+ * @param a : scale factor
+ * @param n_r : number of output values of distance r
+ * @param r : values of the distance in Mpc
+ * @param xi : the values of the correlation function at the distances above will be returned in this array, which should be pre-allocated
+ * @param do_taper_pk : key for tapering (using cosine tapering by default)
+ * @param taper_pk_limits: limits of tapering
+ */
+void ccl_correlation_3d(ccl_cosmology *cosmo,double a,
+		     int n_r,double *r,double *xi,
+		     int do_taper_pk,double *taper_pk_limits,
+		     int *status);
+
 #ifdef __cplusplus
 }
 #endif

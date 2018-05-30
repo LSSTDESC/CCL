@@ -9,8 +9,7 @@ GROWTH_TOLERANCE = 1e-4
 # Values that are the same for all 5 models
 Omega_c = 0.25
 Omega_b = 0.05
-N_nu_rel = 0.
-N_nu_mass = 0.
+Neff = 0.
 m_nu=0.
 h = 0.7
 A_s = 2.1e-9
@@ -43,13 +42,16 @@ def compare_growth(z, gfac_bench, Omega_v, w0, wa):
     Compare growth factor calculated by pyccl with the values in the benchmark 
     file. This test only works if radiation is explicitly set to 0.
     """
+    
     # Set Omega_K in a consistent way
     Omega_k = 1.0 - Omega_c - Omega_b - Omega_v    
     
     # Create new Parameters and Cosmology objects
-    p = ccl.Parameters(Omega_c=Omega_c, Omega_b=Omega_b, N_nu_rel=N_nu_rel, N_nu_mass=N_nu_mass, m_nu=m_nu,
+    
+    p = ccl.Parameters(Omega_c=Omega_c, Omega_b=Omega_b, Neff=Neff, m_nu=m_nu,
                        h=h, A_s=A_s, n_s=n_s, Omega_k=Omega_k,
-                       w0=w0, wa=wa)
+                       w0=w0, wa=wa)                 
+                       
     p.parameters.Omega_g = 0. # Hack to set to same value used for benchmarks
     cosmo = ccl.Cosmology(p)
     
@@ -96,9 +98,9 @@ def test_mgrowth():
         df_mg[i] = 0.1 / (1. + z_mg[i])
     
     # Define two test cosmologies, without and with modified growth respectively
-    p1 = ccl.Parameters(Omega_c=0.25, Omega_b=0.05, Omega_k=0., N_nu_rel=0., N_nu_mass=0., m_nu=0., 
+    p1 = ccl.Parameters(Omega_c=0.25, Omega_b=0.05, Omega_k=0., Neff=0., m_nu=0., 
                         w0=-1., wa=0., h=0.7, A_s=2.1e-9, n_s=0.96)
-    p2 = ccl.Parameters(Omega_c=0.25, Omega_b=0.05, Omega_k=0., N_nu_rel=0., N_nu_mass=0., m_nu=0.,  
+    p2 = ccl.Parameters(Omega_c=0.25, Omega_b=0.05, Omega_k=0., Neff=0., m_nu=0.,  
                         w0=-1., wa=0., h=0.7, A_s=2.1e-9, n_s=0.96, 
                         z_mg=z_mg, df_mg=df_mg)
     cosmo1 = ccl.Cosmology(p1)

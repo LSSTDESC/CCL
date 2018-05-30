@@ -51,8 +51,12 @@ install:
 script:
     - python setup.py build
     - python setup.py test
+    - nosetests tests/run_tests.py --all --debug --detailed-errors --verbose --process-restartworker --with-coverage --cover-package=pyccl
     - sudo make -Cbuild install
     - check_ccl
+
+after_success:
+    - coveralls
 
 # Check why the note creation process crashes
 #    - make -C doc/0000-ccl_note
