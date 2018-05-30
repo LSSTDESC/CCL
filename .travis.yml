@@ -8,6 +8,7 @@ cache:
     - $TRAVIS_BUILD_DIR/build/FFTW/src
     - $TRAVIS_BUILD_DIR/build/SWIG/src
     - $TRAVIS_BUILD_DIR/build/CLASS/src
+    - $TRAVIS_BUILD_DIR/build/ANGPOW/src
     - $HOME/miniconda
 
 # Definition of python build matrix for osx comes from:
@@ -49,9 +50,10 @@ install:
     - python --version
 
 script:
+    # First, building and testing the python module
     - python setup.py build
-    - python setup.py test
     - nosetests tests/run_tests.py --all --debug --detailed-errors --verbose --process-restartworker --with-coverage --cover-package=pyccl
+    # Second, building and testing the C module
     - sudo make -Cbuild install
     - check_ccl
 

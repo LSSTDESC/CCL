@@ -55,3 +55,6 @@ pyccl.egg*
 
 # Ignore rope project
 .ropeproject
+
+# Ignore the automatically generated coverage file
+.coverage
