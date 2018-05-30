@@ -17,6 +17,7 @@ if(NOT FFTW_FOUND )
         BUILD_COMMAND           make -j8
         INSTALL_COMMAND         make install
         BUILD_IN_SOURCE 1)
+        set(FFTW_USE_STATIC_LIBS TRUE)
         set(FFTW_LIBRARY_DIRS ${CMAKE_BINARY_DIR}/extern/lib/ )
         set(FFTW_INCLUDES ${CMAKE_BINARY_DIR}/extern/include/)
         set(FFTW_LIBRARIES -lfftw3)
