@@ -39,9 +39,9 @@ project(ccl VERSION 0.2.1)
     # Compilation flags
     if ("${CMAKE_C_COMPILER_ID}" MATCHES "^(Apple)?Clang$")
       # using Clang, disabling OpenMP support
-      set(CMAKE_C_FLAGS "-O3 -fomit-frame-pointer -fno-common -fPIC -D__CCL_DATA_DIR__=${CMAKE_INSTALL_PREFIX}/share/ccl")
+      set(CMAKE_C_FLAGS "-O3 -fomit-frame-pointer -fno-common -fPIC -std=gnu99 -D__CCL_DATA_DIR__=${CMAKE_INSTALL_PREFIX}/share/ccl")
     else()
-      set(CMAKE_C_FLAGS "-O3 -fomit-frame-pointer -fno-common -fPIC -fopenmp -D__CCL_DATA_DIR__=${CMAKE_INSTALL_PREFIX}/share/ccl")
+      set(CMAKE_C_FLAGS "-O3 -fomit-frame-pointer -fno-common -fPIC -std=gnu99 -fopenmp -D__CCL_DATA_DIR__=${CMAKE_INSTALL_PREFIX}/share/ccl")
     endif()
 
     # Define include and library directories for external dependencies
