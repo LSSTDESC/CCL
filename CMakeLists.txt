@@ -36,15 +36,17 @@ project(ccl VERSION 0.2.1)
       include(BuildCLASS)
     endif(EXTERNAL_CLASS_PATH)
 
-    # Builds local version of Angpow
+    # Builds Angpow
+    # TODO: the same mechanism as for CLASS could be used here to provide the
+    # option to use a pre-installed version of angpow
     include(BuildAngpow)
 
     # Compilation flags
     if ("${CMAKE_C_COMPILER_ID}" MATCHES "^(Apple)?Clang$")
       # using Clang, disabling OpenMP support
-      set(CMAKE_C_FLAGS "-O3 -fomit-frame-pointer -fno-common -fPIC -std=gnu99 -D__CCL_DATA_DIR__=${CMAKE_INSTALL_PREFIX}/share/ccl")
+      set(CMAKE_C_FLAGS "-O3 -fomit-frame-pointer -fno-common -fPIC -std=gnu99 -DHAVE_ANGPOW -D__CCL_DATA_DIR__=${CMAKE_INSTALL_PREFIX}/share/ccl")
     else()
-      set(CMAKE_C_FLAGS "-O3 -fomit-frame-pointer -fno-common -fPIC -std=gnu99 -fopenmp -D__CCL_DATA_DIR__=${CMAKE_INSTALL_PREFIX}/share/ccl")
+      set(CMAKE_C_FLAGS "-O3 -fomit-frame-pointer -fno-common -fPIC -std=gnu99 -fopenmp -DHAVE_ANGPOW -D__CCL_DATA_DIR__=${CMAKE_INSTALL_PREFIX}/share/ccl")
     endif()
 
     # Define include and library directories for external dependencies
@@ -52,7 +54,7 @@ project(ccl VERSION 0.2.1)
     link_directories(${CLASS_LIBRARY_DIRS} ${GSL_LIBRARY_DIRS} ${FFTW_LIBRARY_DIRS} ${ANGPOW_LIBRARY_DIRS})
     # Adds path to CCL include folder
     include_directories(include)
-
+    
     #
     # Builds the main CCL library
     #

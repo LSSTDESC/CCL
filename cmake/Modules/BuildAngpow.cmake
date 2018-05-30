@@ -10,5 +10,5 @@ ExternalProject_Add(Angpow
         DOWNLOAD_NO_PROGRESS 1
         CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/extern)
 set(ANGPOW_LIBRARY_DIRS ${CMAKE_BINARY_DIR}/extern/lib/ )
-set(ANGPOW_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/extern/include/)
-set(ANGPOW_LIBRARIES -langpow)
+set(ANGPOW_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/extern/include/Angpow)
+set(ANGPOW_LIBRARIES -langpow -lstdc++)
