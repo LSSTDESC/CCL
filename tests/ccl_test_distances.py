@@ -309,7 +309,6 @@ def compare_distances_mnu_hiz(z, chi_bench,dm_bench, Omega_v, w0, wa, Neff_mnu, 
 
     assert_allclose(dm, dm_bench[a_not_one], atol=1e-3, rtol = DISTANCES_TOLERANCE_MNU)
 
-@decorators.slow 
 def compare_class_distances(z, chi_bench, Neff=3.0, m_nu=0.0, Omega_k=0.0):
     """
     Compare distances calculated by pyccl with the distances in the CLASS 
