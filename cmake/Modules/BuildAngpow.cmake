@@ -2,7 +2,8 @@ include(ExternalProject)
 
 set(AngpowTag v0.4)
 
-set(CMAKE_PREFIX_PATH "${CMAKE_BINARY_DIR}/libs/opencv-install/lib/pkgconfig")
+# Adds local extern environment to PKG_CONFIG_PATH
+set(ENV{PKG_CONFIG_PATH} "$ENV{PKG_CONFIG_PATH}:${CMAKE_BINARY_DIR}/extern/lib/pkgconfig")
 
 # Downloads and compiles Angpow
 ExternalProject_Add(ANGPOW
