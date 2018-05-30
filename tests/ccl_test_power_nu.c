@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <math.h>
 
-#define POWER_NU_TOL 1.0E-4
+#define POWER_NU_TOL 1.0E-3
 
 CTEST_DATA(power_nu) {
   double Omega_c;
