@@ -15,3 +15,6 @@ target_link_libraries(ccl_sample_power ccl)
 
 add_executable(ccl_sample_run ccl_sample_run.c)
 target_link_libraries(ccl_sample_run ccl)
+
+add_executable(ccl_sample_angpow ccl_sample_angpow.cc)
+target_link_libraries(ccl_sample_angpow ccl)

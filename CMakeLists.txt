@@ -15,7 +15,7 @@ project(ccl VERSION 0.2.1)
                  tests/ccl_test_distances.c tests/ccl_test_distances_hiz.c tests/ccl_test_growth.c
                  tests/ccl_test_growth_hiz.c tests/ccl_test_bbks.c tests/ccl_test_eh.c tests/ccl_test_cls.c
                  tests/ccl_test_cmblens.c tests/ccl_test_sigmaM.c tests/ccl_test_massfunc.c tests/ccl_test_correlation.c
-                 tests/ccl_test_bcm.c tests/ccl_test_emu.c tests/ccl_test_emu_nu.c)
+                 tests/ccl_test_bcm.c tests/ccl_test_emu.c tests/ccl_test_emu_nu.c tests/ccl_test_angpow.c)
 
     # Defines list of extra distribution files to be installed on the system
     set(EXTRA_DIST include/ccl_params.ini README.md LICENSE LICENSE_COSMICEMU)
@@ -36,6 +36,9 @@ project(ccl VERSION 0.2.1)
       include(BuildCLASS)
     endif(EXTERNAL_CLASS_PATH)
 
+    # Builds local version of Angpow
+    include(BuildAngpow)
+
     # Compilation flags
     if ("${CMAKE_C_COMPILER_ID}" MATCHES "^(Apple)?Clang$")
       # using Clang, disabling OpenMP support
@@ -45,8 +48,8 @@ project(ccl VERSION 0.2.1)
     endif()
 
     # Define include and library directories for external dependencies
-    include_directories(${CLASS_INCLUDE_DIRS} ${GSL_INCLUDE_DIRS} ${FFTW_INCLUDES})
-    link_directories(${CLASS_LIBRARY_DIRS} ${GSL_LIBRARY_DIRS} ${FFTW_LIBRARY_DIRS})
+    include_directories(${CLASS_INCLUDE_DIRS} ${GSL_INCLUDE_DIRS} ${FFTW_INCLUDES} ${ANGPOW_INCLUDE_DIRS})
+    link_directories(${CLASS_LIBRARY_DIRS} ${GSL_LIBRARY_DIRS} ${FFTW_LIBRARY_DIRS} ${ANGPOW_LIBRARY_DIRS})
     # Adds path to CCL include folder
     include_directories(include)
 
@@ -70,7 +73,7 @@ project(ccl VERSION 0.2.1)
     # The reason for building ccl as a shared library is that we can link it to
     # class directly, and it's not a dependency anymore
     add_library(ccl SHARED $<TARGET_OBJECTS:objlib>)
-    target_link_libraries(ccl ${GSL_LIBRARIES} ${FFTW_LIBRARIES} ${CLASS_LIBRARIES} m)
+    target_link_libraries(ccl ${GSL_LIBRARIES} ${FFTW_LIBRARIES} ${CLASS_LIBRARIES} ${ANGPOW_LIBRARIES} m)
 
     # Builds the test suite
     add_executable(check_ccl ${TEST_SRC})
@@ -91,9 +94,11 @@ project(ccl VERSION 0.2.1)
                     "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.pc" )
 
     # Installs the CCL library
-    install(TARGETS ccl DESTINATION lib)
-    install(TARGETS check_ccl DESTINATION bin)
-    install(DIRECTORY include DESTINATION include
+    install(TARGETS ccl check_ccl
+            RUNTIME DESTINATION bin
+            LIBRARY DESTINATION lib
+            ARCHIVE DESTINATION lib)
+    install(DIRECTORY include/ DESTINATION include
             FILES_MATCHING PATTERN "*.h")
     install(FILES ${EXTRA_DIST} DESTINATION share/ccl)
     install(FILES ${CMAKE_CURRENT_BINARY_DIR}/ccl.pc DESTINATION lib/pkgconfig)
