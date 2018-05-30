@@ -11,7 +11,7 @@ project(ccl VERSION 0.2.1)
                 src/ccl_emu17.c src/ccl_correlation.c src/fftlog.c)
 
     # Defines list of CCL tests src files
-    # ! Add new tests to this list 
+    # ! Add new tests to this list
     set(TEST_SRC tests/ccl_test.c tests/ccl_test_utils.c tests/ccl_test_params.c tests/ccl_test_cosmology.c
                  tests/ccl_test_distances.c tests/ccl_test_distances_hiz.c tests/ccl_test_growth.c
                  tests/ccl_test_growth_hiz.c tests/ccl_test_bbks.c tests/ccl_test_eh.c tests/ccl_test_cls.c
@@ -63,16 +63,18 @@ project(ccl VERSION 0.2.1)
     # Compiles all the source files
     add_library(objlib OBJECT ${CCL_SRC})
     # Make sure the external projects are correclty built
+    add_dependencies(objlib ANGPOW)
     if(NOT CLASS_EXTERNAL)
       add_dependencies(objlib CLASS)
     endif()
     if(NOT GSL_FOUND)
       add_dependencies(objlib GSL)
+      add_dependencies(ANGPOW GSL)
     endif()
     if(NOT FFTW_FOUND)
       add_dependencies(objlib FFTW)
+      add_dependencies(ANGPOW FFTW)
     endif()
-    add_dependencies(objlib ANGPOW)
 
     # The reason for building ccl as a shared library is that we can link it to
     # class directly, and it's not a dependency anymore
