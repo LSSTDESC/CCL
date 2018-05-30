@@ -115,7 +115,7 @@ double ccl_halo_concentration(ccl_cosmology *cosmo, double halomass, double a, i
 	  
 }
 
-// Fourier transforms of halo profiles
+// Fourier Transforms of halo profiles
 static double window_function(ccl_cosmology *cosmo, double m, double k, double a, int * status){
 
   // Select window function

@@ -36,7 +36,8 @@ endif
 noinst_PROGRAMS = tests/check_ccl
 TESTS = tests/check_ccl tests/check_swig_timestamp.sh
 
-tests_check_ccl_SOURCES = tests/ccl_test.c tests/ccl_test_utils.c tests/ccl_test_params.c tests/ccl_test_params_mnu.c tests/ccl_test_cosmology.c tests/ccl_test_distances.c tests/ccl_test_distances_hiz.c tests/ccl_test_growth.c tests/ccl_test_growth_hiz.c tests/ccl_test_bbks.c tests/ccl_test_eh.c tests/ccl_test_cls.c tests/ccl_test_cmblens.c tests/ccl_test_sigmaM.c tests/ccl_test_massfunc.c tests/ccl_test_correlation.c tests/ccl_test_correlation_3d.c tests/ccl_test_bcm.c tests/ccl_test_emu.c tests/ccl_test_emu_nu.c tests/ccl_test_distances_mnu.c tests/ccl_test_distances_hiz_mnu.c tests/ccl_test_power_nu.c tests/ccl_test_nonlimber.c
+tests_check_ccl_SOURCES = tests/ccl_test.c tests/ccl_test_utils.c tests/ccl_test_params.c tests/ccl_test_params_mnu.c tests/ccl_test_cosmology.c tests/ccl_test_distances.c tests/ccl_test_distances_hiz.c tests/ccl_test_growth.c tests/ccl_test_growth_hiz.c tests/ccl_test_bbks.c tests/ccl_test_eh.c tests/ccl_test_cls.c tests/ccl_test_cmblens.c tests/ccl_test_sigmaM.c tests/ccl_test_massfunc.c tests/ccl_test_correlation.c tests/ccl_test_correlation_3d.c tests/ccl_test_bcm.c tests/ccl_test_emu.c tests/ccl_test_emu_nu.c tests/ccl_test_distances_mnu.c tests/ccl_test_distances_hiz_mnu.c tests/ccl_test_power_nu.c tests/ccl_test_nonlimber.c tests/ccl_test_halomod.c
+#tests_check_ccl_SOURCES = tests/ccl_test.c tests/ccl_test_utils.c tests/ccl_test_params.c tests/ccl_test_massfunc.c tests/ccl_test_halomod.c
 
 tests_check_ccl_CPPFLAGS = -I./tests/ -I./include/
 tests_check_ccl_LDFLAGS =  -L./ -lccl -lgsl -lgslcblas -lfftw3 $(CLASS_LIB)

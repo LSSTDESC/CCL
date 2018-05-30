@@ -38,12 +38,13 @@ def sigmaR(cosmo, R, a=1.):
     Args:
         cosmo (:obj:`ccl.cosmology`): Cosmological parameters.
         R (float or array_like): Radius; Mpc.
+        a (float): optional scale factor; defaults to a=1
 
     Returns:
-        sigmaR (float or array_like): RMS variance in top-hat sphere.
+        sigmaR (float or array_like): RMS variance in the density field in top-hat sphere.
 
     """
-    return _vectorize_fn(lib.sigmaR, 
+    return _vectorize_fn2(lib.sigmaR, 
                          lib.sigmaR_vec, cosmo, R, a)
 
 def sigmaV(cosmo, R, a=1.):
@@ -52,13 +53,15 @@ def sigmaV(cosmo, R, a=1.):
     Args:
         cosmo (:obj:`ccl.cosmology`): Cosmological parameters.
         R (float or array_like): Radius; Mpc.
+        a (float): optional scale factor; defaults to a=1
 
     Returns:
-        sigmaV (float or array_like): RMS variance in the displacement sphere in top-hat sphere.
+        sigmaV (float or array_like): RMS variance in the displacement field in top-hat sphere.
 
     """
-    return _vectorize_fn(lib.sigmaV, 
+    return _vectorize_fn2(lib.sigmaV, 
                          lib.sigmaV_vec, cosmo, R, a)
+
 def sigma8(cosmo):
     """RMS variance in a top-hat sphere of radius 8 Mpc.
 
