@@ -87,6 +87,7 @@ $(function() {
 <code>#include &lt;math.h&gt;</code><br />
 <code>#include &lt;stdio.h&gt;</code><br />
 <code>#include &lt;string.h&gt;</code><br />
+<code>#include &quot;<a class="el" href="ccl__params_8h_source.html">ccl_params.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="ccl__power_8h_source.html">ccl_power.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="ccl_8h_source.html">ccl.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="fftlog_8h_source.html">fftlog.h</a>&quot;</code><br />
@@ -109,6 +110,8 @@ Macros</h2></td></tr>
 Functions</h2></td></tr>
 <tr class="memitem:a05da04dc1bd473fd76209f7c33c6cf24"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__correlation_8c.html#a05da04dc1bd473fd76209f7c33c6cf24">ccl_correlation</a> (<a class="el" href="structccl__cosmology.html">ccl_cosmology</a> *cosmo, int n_ell, double *ell, double *cls, int n_theta, double *theta, double *wtheta, int corr_type, int do_taper_cl, double *taper_cl_limits, int flag_method, int *status)</td></tr>
 <tr class="separator:a05da04dc1bd473fd76209f7c33c6cf24"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7703e8ee184dc5503115bf835e66cc8f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__correlation_8c.html#a7703e8ee184dc5503115bf835e66cc8f">ccl_correlation_3d</a> (<a class="el" href="structccl__cosmology.html">ccl_cosmology</a> *cosmo, double a, int n_r, double *r, double *xi, int do_taper_pk, double *taper_pk_limits, int *status)</td></tr>
+<tr class="separator:a7703e8ee184dc5503115bf835e66cc8f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Macro Definition Documentation</h2>
 <a id="a09a9cdf08131dd0efb8dcff8a4116369"></a>
@@ -263,6 +266,82 @@ Functions</h2></td></tr>
 <li>CCL_CORR_LM : spin2-spin2 (xi-) Currently supported spin-0 fields are number counts and CMB lensing. The only spin-2 is currently shear. </li>
 </ul>
 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a7703e8ee184dc5503115bf835e66cc8f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7703e8ee184dc5503115bf835e66cc8f">&#9670;&nbsp;</a></span>ccl_correlation_3d()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ccl_correlation_3d </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structccl__cosmology.html">ccl_cosmology</a> *&#160;</td>
+          <td class="paramname"><em>cosmo</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>a</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>n_r</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *&#160;</td>
+          <td class="paramname"><em>r</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *&#160;</td>
+          <td class="paramname"><em>xi</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>do_taper_pk</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *&#160;</td>
+          <td class="paramname"><em>taper_pk_limits</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>status</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Computes the 3dcorrelation function (wrapper) </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">cosmo</td><td>:Cosmological parameters </td></tr>
+    <tr><td class="paramname">a</td><td>: scale factor </td></tr>
+    <tr><td class="paramname">n_r</td><td>: number of output values of distance r </td></tr>
+    <tr><td class="paramname">r</td><td>: values of the distance in Mpc </td></tr>
+    <tr><td class="paramname">xi</td><td>: the values of the correlation function at the distances above will be returned in this array, which should be pre-allocated </td></tr>
+    <tr><td class="paramname">do_taper_pk</td><td>: key for tapering (using cosine tapering by default) </td></tr>
+    <tr><td class="paramname">taper_pk_limits</td><td>limits of tapering </td></tr>
   </table>
   </dd>
 </dl>
