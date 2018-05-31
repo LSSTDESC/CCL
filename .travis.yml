@@ -1,43 +1,35 @@
-script:
 language: python
-python:
-  - "2.7"
-  - "3.5"
-  - "3.6"
 
-# Cache pip- and apt-installed dependencies
+# Caching all the depencencies so that they don't have to be redownloaded and
+# compiled everytime
 cache:
-    apt: true
-    pip: true
-    directories:
-        - $TRAVIS_BUILD_DIR/gsl-2.4
+  directories:
+    - $TRAVIS_BUILD_DIR/build/GSL/src
+    - $TRAVIS_BUILD_DIR/build/FFTW/src
+    - $TRAVIS_BUILD_DIR/build/SWIG/src
+    - $TRAVIS_BUILD_DIR/build/CLASS/src
+    - $TRAVIS_BUILD_DIR/build/ANGPOW/src
+    - $HOME/miniconda
 
-sudo: required
+# Definition of python build matrix for osx comes from:
+# https://docs.travis-ci.com/user/multi-os/#Python-example-(unsupported-languages)
+matrix:
+    include:
+        - os: linux
+          python: 2.7
+          sudo: required
+          env: TOXENV=py27
+        - os: linux
+          sudo: required
+          python: 3.6
+          env: TOXENV=py36
+        - os: osx
+          language: generic
+          env: TOXENV=py27
+        - os: osx
+          language: generic
+          env: TOXENV=py36
 
-addons:
-    apt:
-        packages:
-            - fftw3
-            - fftw3-dev
-            - pkg-config
-#            - texlive-latex-recommended
-#            - texlive-latex-extra
-#            - texlive-fonts-recommended
-#            - texlive-fonts-extra
-#            - dvipng
-
-# Travis uses Ubuntu 12.04 and 14.04. None of them have GSL2x in apt-get
-# We have to install it from source (this will make the tests slower)
-# CLASS also needs to be downloaded and compiled, which there is no easy fix for.
-before_install:
-#  - sudo apt-get -qq update
-#  - sudo apt-get install fftw3 fftw3-dev pkg-config
-#  - sudo apt-get install latexmk
-  - pip install numpy
-  - pip install coveralls
-  - ./install-gsl.sh
-  - python class_install.py
-  - python angpow_install.py
 #addons:
 #    apt:
 #        packages:
@@ -47,13 +39,35 @@ before_install:
 #            - texlive-fonts-extra
 #            - dvipng
 
-install: python setup.py install
+install:
+    - ./.travis/install.sh
+    - if ! [[ $TRAVIS_OS_NAME == "linux" ]]; then source $HOME/miniconda/bin/activate; fi
+    - if ! [[ $TRAVIS_OS_NAME == "linux" ]]; then hash -r ; fi
+    - if ! [[ $TRAVIS_OS_NAME == "linux" ]]; then source activate test-environment ; fi
+    - export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
+    - export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/usr/local/lib/pkgconfig
+    - cmake --version
+    - python --version
+
 script:
+    # First, building and testing the python module
+    - python setup.py build
     - nosetests tests/run_tests.py --all --debug --detailed-errors --verbose --process-restartworker --with-coverage --cover-package=pyccl
-    - make check-cpp
+    # Second, building and testing the C module
+    - sudo make -Cbuild install
+    - check_ccl
 
 after_success:
     - coveralls
+
+deploy:
+  provider: pypi
+  user: desc-ccl
+  password:
+    secure: 3IJWS9UggkSS5TGiE9Q1BK/YPgcPogwnR91wid351u3goaHscIyUCHbijkTeJj2h1ulzzoPmSnj0q82FKMhdkjlfo4scMRfGLTtmJ/A1Cx2s9FejMZPf3ROyVjv/qpXIpGHXkSLTDbCIsUi/s+jVhHYdhRdZ6NdiG8AXmd4m1hiZW/wQ6jJ1PpLA7r1VlMQFhpmvL8M94MmNjx9RpaQ+tb2B9c1Y9z3DVAFEvFoEHcuMCMIWu4cc3Y0iVuLW41330Huud1CskPSK1V8g1O3IcT1NzYaORdq3gGR0II8CyFRyNm2FaVgrAGrmvSqcJmM1w3g2qErGBiKCnVYnZyJl2wMualxQvAJeMzjepbI89KRF3xOz5qdXh/ax/duSveeWqRl40DpjT9nvX37GcZFfYbYFf6GClk/G/XvLLapdwvnyjiWFwjPHYp6yIAoLWa9gsD7M4bb9MTj/KrI4u1TB6nVMz8M4xzVV5g9T5SyapjnTxoicgygXK5h1OpnEkEXsmh+cnAURE0TbWjW1hsvpkydOPDPTYFf5E7HXwFVS+UO2T3kzs6bjcVY7smdbywpiKXYISAErjZhx9p24cvWnP5AjtgGfkhM8tpd5XhcL0pQNODfAOG1h1p91zLpiluwQ2s2oxw8Ds2Za7HXTKc4pLm+kOR3hUcsU+ZDrc2ZmmMc=
+  on:
+    tags: true
+    branch: master
 
 # Check why the note creation process crashes
 #    - make -C doc/0000-ccl_note

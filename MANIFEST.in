@@ -1,0 +1,11 @@
+recursive-include cmake *
+recursive-include include *
+recursive-include src *
+recursive-include pyccl *.i CMakeLists.txt
+recursive-include examples *.c *.cc CMakeLists.txt
+recursive-include tests *.c
+include CMakeLists.txt
+include pyccl/CMakeLists.txt
+include LICENSE
+include LICENSE_COSMICEMU
+include README.md
