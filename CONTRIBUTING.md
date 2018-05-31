@@ -161,15 +161,15 @@ $ python setup.py build
 
 Debug mode in Python
 --------------------------------------------
-Because of the way the Python wrapper handles exceptions that occur inside the C code, by default 
-users will only see error messages for the most recent error to occur. If multiple errors occured 
-during a CCL function call, all but the most recent error message will be overwritten. This can 
+Because of the way the Python wrapper handles exceptions that occur inside the C code, by default
+users will only see error messages for the most recent error to occur. If multiple errors occured
+during a CCL function call, all but the most recent error message will be overwritten. This can
 make it difficult to debug the root cause of a problem.
 
-To help with debugging this kind of issue, you can enable debug mode in the Python wrapper. To do 
-this, simply call `pyccl.debug_mode(True)`. This will cause the Python wrapper to print all C 
-error messages to `stderr` whenever they occur. Python exceptions will only be raised for the most 
-recent error, as before, but you can at least see if other exceptions were thrown by inspecting 
+To help with debugging this kind of issue, you can enable debug mode in the Python wrapper. To do
+this, simply call `pyccl.debug_mode(True)`. This will cause the Python wrapper to print all C
+error messages to `stderr` whenever they occur. Python exceptions will only be raised for the most
+recent error, as before, but you can at least see if other exceptions were thrown by inspecting
 the `stderr` output.
 
 (Note that Jupyter notebooks do not print `stderr` messages by default.)
@@ -201,6 +201,8 @@ This will change as the code matures, though. After v1.0 is released, we expect
 to maintain backwards compatibility for all releases with the same major
 version number, i.e. v1.1 should support all the same behaviors that v1.0
 supported, plus whatever new additions are made.
+
+See section below for instructions on how to deploy a new release.
 
 Compiling the CCL note
 --------------------------------------------
@@ -240,3 +242,31 @@ click in your build you will find more information about its status and a log
 describing the process. If your build errors or fails, you can scroll through
 the log to find out what went wrong. If your additions require new dependencies
 make sure that you include them in `.travis.yml`.
+
+
+Creating a new release and deploying on PyPi
+--------------------------------------------
+
+When cutting a new release, the procedure is as follows:
+  - Make sure any API changes are documented in `CHANGELOG.md`
+  - Update the version number in `setup.py`
+  - Commit to master
+  - Create a new release from the GitHub interface here: https://github.com/LSSTDESC/CCL/releases/new
+
+This will trigger a new Travis build and automatically upload the new version to
+PyPi.
+
+This should not be necessary, but in case a release needs to be manually uploaded
+to PyPi, the procedure is as follows:
+  - Manually create a source distribution from the root CCL folder:
+  ```
+  $ python setup.py sdist
+  ```
+  This will create a .tar.gz file in the `dist` folder
+
+  - Upload source distribution to PyPi using `twine` (can be installed using `pip`):
+  ```
+  $ twine upload  dist/pyccl-x.x.x.tar.gz
+  ```
+  Make sure your `twine` and `setuptools` are up to date, otherwise the markdown
+  formatting of the README.md will not be correctly processed on the CCL PyPi page.
