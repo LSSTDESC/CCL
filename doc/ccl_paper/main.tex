@@ -946,12 +946,21 @@ We adopted the following analytic redshift distributions: a Gaussian with $\sigm
 \label{fig:cls_cmblens}
 \end{figure}
 
-For $C_\ell$ computations, we achieved a relative difference between \ccl and the benchmarks of $<10^{-3}$. This applied both to analytic redshift distributions and histograms, for auto- and cross-correlations between bins for both galaxy clustering and weak lensing, as shown in Figure \ref{fig:cls_limber}. The CMB lensing result is shown in Figure \ref{fig:cls_cmblens}.
+For $C_\ell$ computations, we define as our accuracy metric the absolute value of the relative difference between \ccl and an independent realisation:
+\begin{equation}
+  \mathcal{A}=\left|\frac{C_\ell^{\tt CCL}-C_\ell^{(i)}}{C_\ell^{\tt CCL}}\right|.
+\end{equation}
+We achieved a relative difference between \ccl and the benchmarks of $<10^{-3}$. This applied both to analytic redshift distributions and histograms, for auto- and cross-correlations between bins for both galaxy clustering and weak lensing, as shown in Figure \ref{fig:cls_limber}. The CMB lensing result is shown in Figure \ref{fig:cls_cmblens}.\elisa{I think we have a fraction of allowed failures as well - need to check in code.}
 
+Cosmological constraints from current weak lensing surveys are currently derived from modeling correlation functions. As we discussed in Section \ref{sec:models}, the correlation functions are modeled by Eq.(\ref{eq:cl_xi}) and obtained by \ccl through numerical integration of predicted angular power spectra. To ensure that any numerical inaccuracies are small enough for the purposes of obtaining cosmological constraints, we require that the absolute difference between the \ccl prediction and an independent one is smaller than our expected error bars:
+\begin{equation}
+  \mathcal{A}=\left|\xi^{\tt CCL}-\xi^{(i)}\right|<0.5\sigma_{\rm LSST}.
+\end{equation}
+where $\sigma_{\rm LSST}$ is the expected statistical uncertainty of any given correlation function between tracers.
 
-To obtain realistic targets for the convergence of projected correlation function computations for LSST analyses, we calculated the expected statistical uncertainty of the clustering and lensing correlation functions of the LSST gold sample \citep{LSSTSB} assuming an effective source galaxy density of $n_\mathrm{eff} = 26\,\mathrm{gal/sq\,arcmin}$ for galaxy shape distortions \citep{Chang13}, and galaxy density of $n_\mathrm{gold} = 45\,\mathrm{gal/sq\,arcmin}$ for number counts. Specifically, we calculated the Gaussian covariance of angular correlation functions following the formalism of \citet{2008A&A...477...43J}, and note that leaving out the non-Gaussian covariance terms makes our accuracy criterion more conservative. We split the galaxy samples into 10 tomography bins, defined to contain equal numbers of galaxies. The accuracy test then proceeded as follows. We compared the difference between \ccl calculated lensing and clustering correlations and the benchmarks, for the analytic redshift distributions and for auto-correlations of redshift bins only. To pass the benchmark test, we required that this difference be smaller than half of the value of the error bar derived from the covariance for each correlation function computed. Specifically, we took the value of the covariance in the bins centered at $z=1$ and $z=1.5$ to compare to the benchmarks.
+To obtain realistic targets for the convergence of projected correlation function computations for LSST analyses, we calculated the expected statistical uncertainty of the clustering and lensing correlation functions of the LSST gold sample \citep{LSSTSB} assuming an effective source galaxy density of $n_\mathrm{eff} = 26\,\mathrm{gal/sq\,arcmin}$ for galaxy shape distortions \citep{Chang13}, and galaxy density of $n_\mathrm{gold} = 45\,\mathrm{gal/sq\,arcmin}$ for number counts. Specifically, we calculated the Gaussian covariance of angular correlation functions following the formalism of \citet{2008A&A...477...43J}, and note that leaving out the non-Gaussian covariance terms makes our accuracy criterion more conservative. We split the galaxy samples into 10 tomography bins, defined to contain equal numbers of galaxies.
 
-The results of this validation procedure for the projected correlation function are shown in Figure \ref{fig:corrval}. Our results suggest that the convergence between \ccl predictions and benchmarks is below the expected statitical uncertainty. 
+We compared the difference between \ccl calculated lensing and clustering correlations and the benchmarks, for the analytic redshift distributions and for auto-correlations of redshift bins only. Specifically, we took the value of the covariance in the bins centered at $z=1$ and $z=1.5$ to compare to the benchmarks. The results of this validation procedure for the projected correlation function are shown in Figure \ref{fig:corrval}. Our results suggest that the convergence between \ccl predictions and benchmarks is below the expected statitical uncertainty. 
 
 \begin{figure*}
 \centering
@@ -962,13 +971,14 @@ The results of this validation procedure for the projected correlation function 
 \end{figure*}
 
   
-The 3-dimensional spatial correlation function $\xi(r)$ was validated by comparing with an independent, precise numerical transform. We calculated $\xi(r)$ 
-by transforming the \ccl non-linear HaloFit power spectrum using this independent code for the five cosmologies listed in Table~\ref{tab:cosmologies} at 
-redshifts $z = 0,1,2,3,4,5$.  We then compared with the $\xi(r)$ from \ccl with a sampling of $P(k)$ 
-equal to {\tt N$\_$K$\_$3DCOR} bins per decade. The default value of {\tt N$\_$K$\_$3DCOR}~=~100,000 results in a relative agreement 
-at the level of $\Delta \xi(r) / \xi(r) < 2.5 \times 10^{-3}$ for $0.1 < r < 250$~Mpc and $z=0$. The agreement was better for higher redshifts.
-We also compared the absolute value of $r^2 \xi(r)$ and find a maximum difference of $\Delta (r^2 \xi(r)) < 3.0 \times 10^{-2}$ for the range 
-$r = 0.1 - 250$~Mpc. This corresponds to approximately $0.08\%$ of the Baryon Acoustic Oscillation peak value of $r^2 \xi(r)$. At the peak, the difference is only $9.0 \times 10^{-3}$, or 0.024\% of the peak height. The results are shown in Fig.~\ref{fig:benchmark_xi}
+The 3-dimensional spatial correlation function $\xi(r)$ predicted by \ccl was validated by comparing it with an independent, precise numerical transform. We calculated $\xi(r)$  by transforming the \ccl non-linear HaloFit power spectrum using this independent code for the five cosmologies listed in Table~\ref{tab:cosmologies} at redshifts $z = 0,1,2,3,4,5$.  We then compared with the $\xi(r)$ from \ccl with a sampling of $P(k)$ equal to {\tt N$\_$K$\_$3DCOR} bins per decade \elisa{is this parameter defined somewhere?}. The accuracy metric is defined as
+\begin{equation}
+  \mathcal{A}=|\xi^{\tt CCL}(r)-\xi^{(i)}(r)| / \xi^{\tt CCL}(r).
+  \label{eq:accxi}
+\end{equation}
+The default value of {\tt N$\_$K$\_$3DCOR}~=~100,000 results in $\mathcal{A} < 2.5 \times 10^{-3}$ for $0.1 < r < 250$~Mpc and $z=0$. The agreement was better for higher redshifts.
+
+We also compared the absolute value of $r^2 \xi(r)$ and find a maximum difference of $\Delta (r^2 \xi(r)) < 3.0 \times 10^{-2}$ for the range $r = 0.1 - 250$~Mpc. This corresponds to approximately $0.08\%$ of the Baryon Acoustic Oscillation peak value of $r^2 \xi(r)$. At the peak, the difference is only $9.0 \times 10^{-3}$, or 0.024\% of the peak height. The results are shown in Fig.~\ref{fig:benchmark_xi}
 %
 \begin{figure*}
 \centering
@@ -979,10 +989,7 @@ $r = 0.1 - 250$~Mpc. This corresponds to approximately $0.08\%$ of the Baryon Ac
 \end{figure*}
 %
 
-To further validate the $P(k) \to \xi(r)$ transform we performed a test using an analytical function $\xi(r) = (r / r_0)^a$, whose inverse transform $P(k)$ 
-has a known analytic form. We used $r_0 = 5 h^{-1}$~Mpc$^{-1}$ and $a = -1.67$, which approximates the actual three-dimensional correlation function.   
-We then compared the \ccl calculation of $\xi(r)$ to the known analytic result. The relative difference $\Delta \xi(r) / \xi(r)$ was found to be   
-less than 0.4\% in the range $1 < r < 200$~Mpc rising to about 5\% at $r = 1000$~Mpc (see Fig.~\ref{fig:analytic_xi}). For $r=0.1-0.8$~Mpc the relative difference is $\approx$8\%. The accuracy at low and high distances can be improved by increasing the range over which the power spectrum splines are evaluated.
+To further validate the $P(k) \to \xi(r)$ transform we performed a test using an analytical function $\xi(r) = (r / r_0)^a$, whose inverse transform $P(k)$ has a known analytic form. We used $r_0 = 5 h^{-1}$~Mpc$^{-1}$ and $a = -1.67$, which approximates the actual three-dimensional correlation function.  We then compared the \ccl calculation of $\xi(r)$ to the known analytic result, defining an analogous metric to Eq. (\ref{eq:accxi}). This was found to be less than 0.4\% in the range $1 < r < 200$~Mpc rising to about 5\% at $r = 1000$~Mpc (see Fig.~\ref{fig:analytic_xi}). For $r=0.1-0.8$~Mpc the relative difference is $\approx$8\%. The accuracy at low and high distances can be improved by increasing the range over which the power spectrum splines are evaluated.
 %
 \begin{figure*}[htbp]
 \centering
@@ -993,16 +1000,16 @@ less than 0.4\% in the range $1 < r < 200$~Mpc rising to about 5\% at $r = 1000$
 
 \subsubsection{\tt Angpow}
 
-\ccl performs non-Limber computations of angular power spectra through the {\tt Angpow} library as detailed in Section \ref{sec:angpow}. The \texttt{Angpow} software was tested against \texttt{CLASS} and the native \ccl computation and can perform the same computations approximately an order of magnitude faster ($\mathcal{O}(1s)$). 
-Its precision and speed parameters were optimised so that the relative numerical error compared with a high precision computation is two orders of magnitude below the relative cosmic variance $\sqrt{2/(2\ell+1)}$, from $\ell=2$ to $\ell=1000$. We demonstrate this in Figure \ref{fig:angpow}, where we plot the angular clustering power spectrum for a sample of galaxies with $\langle z \rangle=1$ and a Gaussian redshift distribution that extends between $|z-\langle z \rangle|z<5\sigma_z$, where $\sigma_z=0.02$, for a CCL6 cosmology. 
+\ccl performs non-Limber computations of angular power spectra through the {\tt Angpow} library as detailed in Section \ref{sec:angpow}. The \texttt{Angpow} software was tested against \texttt{CLASS} and the native \elisa{Define ``native''} \ccl computation and can perform the same computations approximately an order of magnitude faster ($\mathcal{O}(1s)$). 
+Its precision and speed parameters were optimised so that the relative numerical error compared with a high precision computation is two orders of magnitude below the relative cosmic variance $\sqrt{2/(2\ell+1)}$, from $\ell=2$ to $\ell=1000$. We demonstrate this in Figure \ref{fig:angpow}, where we plot the angular clustering power spectrum for a sample of galaxies with $\langle z \rangle=1$ and a Gaussian redshift distribution that extends between $|z-\langle z \rangle|z<5\sigma_z$, \elisa{is there a typo here?} where $\sigma_z=0.02$, for a CCL6 cosmology. 
 The non-Limber prediction deviates from the Limber case at low $l$ as expected. The right panel shows the fractional difference between the non-Limber curves and the Limber case, demonstrating the accuracy of the {\tt Angpow} prediction for our choice of precision and speed parameters. 
-Also the native non-Limber computation and {\tt Angpow} were tested to recover the Limber approximated curve at high $\ell$ for a wide Gaussian window ($\sigma_z=0.1$). The relative errors with respect to the Limber result at high $\ell$ are below two orders of magnitudes with respect to cosmic variance. 
+Also the native \elisa{try to avoid the word ``native''} non-Limber computation and {\tt Angpow} were tested to recover the Limber approximated curve at high $\ell$ for a wide Gaussian window ($\sigma_z=0.1$). The relative errors with respect to the Limber result at high $\ell$ are two orders of magnitudes below cosmic variance. \todo{Say explicitly what cosmic variance is, how it is calculated.}
 
 \begin{figure*}[htbp]
 \centering
 \includegraphics[width=0.47\textwidth]{angpow1}
 \includegraphics[width=0.47\textwidth]{angpow3}
-\caption{Different predictions for the clustering angular power spectrum of a sample of galaxies with a Gaussian redshift distribution centered on $\langle z \rangle =1$. The left panel shows the $C_l$ predictions from the Limber case (green), the non-Limber case native to \ccl (yellow dot-dashed) and {\tt Angpow} (black). The right panel shows the fractional difference in the predicted clustering angular power spectrum between {\tt Angpow} and the native \ccl non-Limber computation. The relative numerical error compared with a high precision computation is two orders of magnitude below the relative cosmic variance: $\sqrt{2/(2\ell+1)}$.}
+\caption{Different predictions for the clustering angular power spectrum of a sample of galaxies with a Gaussian redshift distribution centered on $\langle z \rangle =1$. The left panel shows the $C_l$ predictions from the Limber case (green), the non-Limber case native to \ccl (yellow dot-dashed) and {\tt Angpow} (black). The right panel shows the fractional difference in the predicted clustering angular power spectrum between {\tt Angpow} and the native \ccl non-Limber computation. The relative numerical error compared with a high precision computation is two orders of magnitude below the relative cosmic variance: $\sqrt{2/(2\ell+1)}$.\todo{Rephrase ``native''}}
 \label{fig:angpow}
 \end{figure*}
 
