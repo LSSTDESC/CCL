@@ -25,8 +25,7 @@ matrix:
     env: TOXENV=py36
 install:
 - "./.travis/install.sh"
-- if ! [[ $TRAVIS_OS_NAME == "linux" ]]; then source $HOME/miniconda/bin/activate;
-  fi
+- if ! [[ $TRAVIS_OS_NAME == "linux" ]]; then source $HOME/miniconda/bin/activate; fi
 - if ! [[ $TRAVIS_OS_NAME == "linux" ]]; then hash -r ; fi
 - if ! [[ $TRAVIS_OS_NAME == "linux" ]]; then source activate test-environment ; fi
 - export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
@@ -35,8 +34,7 @@ install:
 - python --version
 script:
 - python setup.py build
-- nosetests tests/run_tests.py --all --debug --detailed-errors --verbose --process-restartworker
-  --with-coverage --cover-package=pyccl
+- nosetests tests/run_tests.py --all --debug --detailed-errors --verbose --process-restartworker --with-coverage --cover-package=pyccl
 - sudo make -Cbuild install
 - check_ccl
 after_success:
