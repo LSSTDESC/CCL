@@ -395,8 +395,9 @@ In summary, for spins 0 and 2, the three relevant cases for the cosmological obs
                       &=\int_0^\infty\frac{d\ell\,\ell}{2\pi}\,C^{ab}_\ell J_{2\mp2}(\ell\theta)\hspace{16pt}\text{(flat-sky)}
     \end{align}
 \end{itemize}
+In the following sections, we will specifically refer to the clustering correlation function in Eq. (\ref{eq:xi00flat}) as $\xi_{gg}$.
 
-\subsubsection{3-dimensional spatial correlation function.}
+\subsubsection{3-dimensional spatial correlation function}
 In addition to the angular correlation functions, \ccl can also be used to compute the three-dimensional spatial correlation function, $\xi(r)$, from the transform of the matter power spectrum:
 \begin{equation}
 \xi(r) = \frac{1}{2 \pi^2} \int dk \; k^2 P(k) \frac{\sin(kr)}{kr}
@@ -895,9 +896,14 @@ Our results are shown in Figure \ref{fig:emuacc}. For cosmologies without neutri
 
 \subsection{Halo bias and halo mass function}
 
-Independent codes were utilized to test the accuracy of halo mass function predictions. These predictions are computed from power spectra obtained using the BBKS approximation. For the halo mass function, we compare the value of $\sigma$, $\tilde\sigma\equiv\log(\sigma^{-1})$, and the value of the halo mass function in the form used in \cite{Tinker2008},
+Independent codes were utilized to test the accuracy of halo mass function predictions. These predictions are computed from power spectra obtained using the BBKS approximation. For the halo mass function, we compare the value of $\sigma$,
 \begin{equation}
-\mathcal{H}\equiv \log[(M^2/\bar{\rho}_m)dn/dM].
+  \tilde\sigma\equiv\log[\sigma^{-1}(M)],\label{eq:tildesig}
+\end{equation}
+and the value of the halo mass function in the form used in \cite{Tinker2008},
+\begin{equation}
+  \mathcal{H}\equiv \log[(M^2/\bar{\rho}_m)dn/dM].
+  \label{eq:newhmf}
 \end{equation}
 These defines three new accuracy metrics:
 \begin{eqnarray}
@@ -968,7 +974,7 @@ We compared the difference between \ccl calculated lensing and clustering correl
 \centering
 \includegraphics[width=0.47\textwidth]{projected_correlation_error_comparison_analytic} 
 \includegraphics[width=0.47\textwidth]{projected_correlation_error_comparison_histo} 
-\caption{Comparison between the predicted projected correlation functions and the expected uncertainties for LSST. The left panel shows predictions for the analytic redshift distrobutions, while the right panel shows the case of the redshift histograms. The different markers and colors indicate clustering ($w_{gg}$, filled circles) or lensing ($\xi_{\pm}$, filled triangles and squares) auto-correlations of the $1$-$1$ or $2$-$2$ redshift bin combinations.}
+\caption{Comparison between the predicted projected correlation functions and the expected uncertainties for LSST. The left panel shows predictions for the analytic redshift distrobutions, while the right panel shows the case of the redshift histograms. The different markers and colors indicate clustering ($\xi_{gg}$, Eq. \ref{eq:xi00flat}, filled circles) or lensing ($\xi_{\pm}$, Eq. \ref{eq:xi22flat}, filled triangles and squares) auto-correlations of the $1$-$1$ or $2$-$2$ redshift bin combinations.}
 \label{fig:corrval}
 \end{figure*}
 
