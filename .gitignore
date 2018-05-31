@@ -55,3 +55,6 @@ doc/ccl_paper
 
 # Ignore emacs backup files
 *~
+
+# Ignore automake cache
+autom4te.cache/
