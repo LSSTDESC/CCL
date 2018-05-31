@@ -23,7 +23,7 @@ See also our [wiki](https://github.com/LSSTDESC/CCL/wiki).
 
 `CCL` is available as a Python package through PyPi. To install, simply run:
 ```
-$ pip install git+git://github.com/EiffL/CCL.git
+$ pip install pyccl
 ```
 This should work as long as `CMake` is installed on your system (if it doesn't follow the detailed instructions below).
 Once `CCL` is installed, take it for a spin by following some example notebooks [here](examples).
@@ -206,7 +206,7 @@ Here are a few common steps when working on the C library:
 
   - Cloning a local copy and CCL and compiling it:
   ```sh
-  $ git clone https://github.com/EiffL/CCL
+  $ git clone https://github.com/LSSTDESC/CCL
   $ mkdir -p CCL/build && cd CCL/build
   $ cmake ..
   $ make
