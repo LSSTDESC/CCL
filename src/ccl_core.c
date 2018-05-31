@@ -279,16 +279,22 @@ void ccl_parameters_fill_initial(ccl_parameters * params, int *status)
 {
   // Fixed radiation parameters
   // Omega_g * h**2 is known from T_CMB
-  params->T_CMB =  2.725; 
-  params->Omega_g = 4. * STBOLTZ / CLIGHT *pow(params->T_CMB,4.)/(3. * pow(10., 10.) * CLIGHT * CLIGHT *params->h* params->h / (8. * M_PI * GNEWT * MPC_TO_METER * MPC_TO_METER));
+  params->T_CMB =  TCMB;
+  // kg / m^3
+  double rho_g = 4. * STBOLTZ / pow(CLIGHT, 3) * pow(params->T_CMB, 4);
+  // kg / m^3
+  double rho_crit = RHO_CRITICAL * SOLAR_MASS/pow(MPC_TO_METER, 3) * pow(params->h, 2);
+  params->Omega_g = rho_g/rho_crit;
   
   // Get the N_nu_rel from Neff and N_nu_mass
-  params->N_nu_rel = params->Neff - params->N_nu_mass * TNCDM * TNCDM * TNCDM * TNCDM / pow(4./11.,4./3.);
+  params->N_nu_rel = params->Neff - params->N_nu_mass * pow(TNCDM, 4) / pow(4./11.,4./3.);
   
-  //Get the relativistic neutrino Omega_nu. It's more efficient to get this in-line, to avoid computing the phase-space integral if not necessary.
-  double Tnu= (params->T_CMB) *pow(4./11.,1./3.); 
-  params-> Omega_n_rel = params->N_nu_rel* 8. * pow(M_PI,5) *pow((KBOLTZ/ HPLANCK),3)* KBOLTZ/(15. *pow( CLIGHT,3))* (8. * M_PI * GNEWT) / (3. * 100.*100.*1000.*1000. /MPC_TO_METER /MPC_TO_METER  * CLIGHT * CLIGHT)  * Tnu * Tnu * Tnu * Tnu *7./8.;
-  
+  // Temperature of the relativistic neutrinos in K
+  double T_nu= (params->T_CMB) * pow(4./11.,1./3.); 
+  // in kg / m^3
+  double rho_nu_rel = params->N_nu_rel* 7.0/8.0 * 4. * STBOLTZ / pow(CLIGHT, 3) * pow(T_nu, 4);
+  params-> Omega_n_rel = rho_nu_rel/rho_crit;
+    
   // If non-relativistic neutrinos are present, calculate the phase_space integral.
   if((params->N_nu_mass)>0) {
     // Pass NULL for the accelerator here because we don't have our cosmology object defined yet.

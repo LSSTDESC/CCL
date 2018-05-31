@@ -4370,7 +4370,7 @@ user_pz_info* specs_create_photoz_info_from_py(PyObject *pyfunc)
 
 
 
-void Omeganuh2_vec(int N_nu_mass, double TCMB,
+void Omeganuh2_vec(int N_nu_mass, double T_CMB,
                    double* a, int na, 
                    double* mnu, int nm, 
                    double* output, int nout,
@@ -4379,16 +4379,16 @@ void Omeganuh2_vec(int N_nu_mass, double TCMB,
     assert(nout == na);
     assert(nm == 3);
     for(int i=0; i < na; i++){
-        output[i] = ccl_Omeganuh2(a[i], N_nu_mass, mnu, TCMB, NULL, status);
+        output[i] = ccl_Omeganuh2(a[i], N_nu_mass, mnu, T_CMB, NULL, status);
     }   
 }
 
-void nu_masses_vec(double OmNuh2, int label, double TCMB,
+void nu_masses_vec(double OmNuh2, int label, double T_CMB,
                           double* output, int nout,
                           int* status)
 {
     double* mnu;
-    mnu = ccl_nu_masses(OmNuh2, label, TCMB, status);
+    mnu = ccl_nu_masses(OmNuh2, label, T_CMB, status);
     for(int i=0; i < nout; i++){
         output[i] = *(mnu+i);
     }
@@ -24008,10 +24008,10 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"call_py_photoz_fn", _wrap_call_py_photoz_fn, METH_VARARGS, (char *)"call_py_photoz_fn(double z_ph, double z_s, void * py_func_obj, int * status) -> double"},
 	 { (char *)"specs_create_photoz_info_from_py", _wrap_specs_create_photoz_info_from_py, METH_VARARGS, (char *)"specs_create_photoz_info_from_py(PyObject * pyfunc) -> user_pz_info"},
 	 { (char *)"calculate_nu_phasespace_spline", _wrap_calculate_nu_phasespace_spline, METH_VARARGS, (char *)"calculate_nu_phasespace_spline(int * status) -> gsl_spline *"},
-	 { (char *)"Omeganuh2", _wrap_Omeganuh2, METH_VARARGS, (char *)"Omeganuh2(double a, int N_nu_mass, double * mnu, double TCMB, gsl_interp_accel * accel, int * status) -> double"},
-	 { (char *)"nu_masses", _wrap_nu_masses, METH_VARARGS, (char *)"nu_masses(double OmNuh2, ccl_neutrino_mass_splits mass_split, double TCMB, int * status) -> double *"},
-	 { (char *)"Omeganuh2_vec", _wrap_Omeganuh2_vec, METH_VARARGS, (char *)"Omeganuh2_vec(int N_nu_mass, double TCMB, double * a, double * mnu, double * output, int * status)"},
-	 { (char *)"nu_masses_vec", _wrap_nu_masses_vec, METH_VARARGS, (char *)"nu_masses_vec(double OmNuh2, int label, double TCMB, double * output, int * status)"},
+	 { (char *)"Omeganuh2", _wrap_Omeganuh2, METH_VARARGS, (char *)"Omeganuh2(double a, int N_nu_mass, double * mnu, double T_CMB, gsl_interp_accel * accel, int * status) -> double"},
+	 { (char *)"nu_masses", _wrap_nu_masses, METH_VARARGS, (char *)"nu_masses(double OmNuh2, ccl_neutrino_mass_splits mass_split, double T_CMB, int * status) -> double *"},
+	 { (char *)"Omeganuh2_vec", _wrap_Omeganuh2_vec, METH_VARARGS, (char *)"Omeganuh2_vec(int N_nu_mass, double T_CMB, double * a, double * mnu, double * output, int * status)"},
+	 { (char *)"nu_masses_vec", _wrap_nu_masses_vec, METH_VARARGS, (char *)"nu_masses_vec(double OmNuh2, int label, double T_CMB, double * output, int * status)"},
 	 { (char *)"spline_params_A_SPLINE_NA_set", _wrap_spline_params_A_SPLINE_NA_set, METH_VARARGS, (char *)"spline_params_A_SPLINE_NA_set(spline_params self, int A_SPLINE_NA)"},
 	 { (char *)"spline_params_A_SPLINE_NA_get", _wrap_spline_params_A_SPLINE_NA_get, METH_VARARGS, (char *)"spline_params_A_SPLINE_NA_get(spline_params self) -> int"},
 	 { (char *)"spline_params_A_SPLINE_MIN_set", _wrap_spline_params_A_SPLINE_MIN_set, METH_VARARGS, (char *)"spline_params_A_SPLINE_MIN_set(spline_params self, double A_SPLINE_MIN)"},
@@ -25092,6 +25092,7 @@ SWIG_init(void) {
   SWIG_Python_SetConstant(d, "HPLANCK",SWIG_From_double((double)((6.62606896e-34))));
   SWIG_Python_SetConstant(d, "CLIGHT",SWIG_From_double((double)((2.99792458e8))));
   SWIG_Python_SetConstant(d, "EV_IN_J",SWIG_From_double((double)((1.602176487e-19))));
+  SWIG_Python_SetConstant(d, "TCMB",SWIG_From_double((double)(2.725)));
   SWIG_Python_SetConstant(d, "TNCDM",SWIG_From_double((double)(0.71611)));
   SWIG_Python_SetConstant(d, "DELTAM12_sq",SWIG_From_double((double)(7.62E-5)));
   SWIG_Python_SetConstant(d, "DELTAM13_sq_pos",SWIG_From_double((double)(2.55E-3)));

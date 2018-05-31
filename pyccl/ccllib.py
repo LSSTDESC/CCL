@@ -1096,6 +1096,7 @@ STBOLTZ = _ccllib.STBOLTZ
 HPLANCK = _ccllib.HPLANCK
 CLIGHT = _ccllib.CLIGHT
 EV_IN_J = _ccllib.EV_IN_J
+TCMB = _ccllib.TCMB
 TNCDM = _ccllib.TNCDM
 DELTAM12_sq = _ccllib.DELTAM12_sq
 DELTAM13_sq_pos = _ccllib.DELTAM13_sq_pos
@@ -1214,21 +1215,21 @@ def calculate_nu_phasespace_spline(status):
     """calculate_nu_phasespace_spline(int * status) -> gsl_spline *"""
     return _ccllib.calculate_nu_phasespace_spline(status)
 
-def Omeganuh2(a, N_nu_mass, mnu, TCMB, accel, status):
-    """Omeganuh2(double a, int N_nu_mass, double * mnu, double TCMB, gsl_interp_accel * accel, int * status) -> double"""
-    return _ccllib.Omeganuh2(a, N_nu_mass, mnu, TCMB, accel, status)
+def Omeganuh2(a, N_nu_mass, mnu, T_CMB, accel, status):
+    """Omeganuh2(double a, int N_nu_mass, double * mnu, double T_CMB, gsl_interp_accel * accel, int * status) -> double"""
+    return _ccllib.Omeganuh2(a, N_nu_mass, mnu, T_CMB, accel, status)
 
-def nu_masses(OmNuh2, mass_split, TCMB, status):
-    """nu_masses(double OmNuh2, ccl_neutrino_mass_splits mass_split, double TCMB, int * status) -> double *"""
-    return _ccllib.nu_masses(OmNuh2, mass_split, TCMB, status)
+def nu_masses(OmNuh2, mass_split, T_CMB, status):
+    """nu_masses(double OmNuh2, ccl_neutrino_mass_splits mass_split, double T_CMB, int * status) -> double *"""
+    return _ccllib.nu_masses(OmNuh2, mass_split, T_CMB, status)
 
-def Omeganuh2_vec(N_nu_mass, TCMB, a, mnu, output, status):
-    """Omeganuh2_vec(int N_nu_mass, double TCMB, double * a, double * mnu, double * output, int * status)"""
-    return _ccllib.Omeganuh2_vec(N_nu_mass, TCMB, a, mnu, output, status)
+def Omeganuh2_vec(N_nu_mass, T_CMB, a, mnu, output, status):
+    """Omeganuh2_vec(int N_nu_mass, double T_CMB, double * a, double * mnu, double * output, int * status)"""
+    return _ccllib.Omeganuh2_vec(N_nu_mass, T_CMB, a, mnu, output, status)
 
-def nu_masses_vec(OmNuh2, label, TCMB, output, status):
-    """nu_masses_vec(double OmNuh2, int label, double TCMB, double * output, int * status)"""
-    return _ccllib.nu_masses_vec(OmNuh2, label, TCMB, output, status)
+def nu_masses_vec(OmNuh2, label, T_CMB, output, status):
+    """nu_masses_vec(double OmNuh2, int label, double T_CMB, double * output, int * status)"""
+    return _ccllib.nu_masses_vec(OmNuh2, label, T_CMB, output, status)
 class spline_params(_object):
     """Proxy of C ccl_spline_params struct."""
 
