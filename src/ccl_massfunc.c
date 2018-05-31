@@ -543,6 +543,12 @@ necessary.
 
 double ccl_sigmaM(ccl_cosmology * cosmo, double halomass, double a, int * status)
 {
+  if (cosmo->params.N_nu_mass>0){
+	  *status = CCL_ERROR_NOT_IMPLEMENTED;
+	  strcpy(cosmo->status_message,"ccl_background.c: ccl_cosmology_compute_growth(): Support for the sigma(M) function in cosmologies with massive neutrinos is not yet implemented.\n");
+	  return NAN; 
+  }
+  
   double sigmaM;
   // Check if sigma has already been calculated
   if (!cosmo->computed_sigma) {

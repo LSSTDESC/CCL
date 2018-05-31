@@ -1689,6 +1689,7 @@ double ccl_sigmaR(ccl_cosmology *cosmo,double R,double a,int *status)
   double sigma_R;
   *status |=gsl_integration_cquad(&F,log10(ccl_splines->K_MIN_DEFAULT),log10(ccl_splines->K_MAX),
 				  0.0,1E-5,workspace,&sigma_R,NULL,NULL);
+  
   //TODO: log10 could be taken already in the macros.
   //TODO: 1E-5 should be a macro
   //TODO: we should check for integration success
@@ -1696,13 +1697,6 @@ double ccl_sigmaR(ccl_cosmology *cosmo,double R,double a,int *status)
 
   return sqrt(sigma_R*M_LN10/(2*M_PI*M_PI))*ccl_growth_factor(cosmo, a, status);
 }
-
-/*
-// sigma(R,z) - scale z=0 result by growth function (this is approximate!)
-double ccl_sigmaRz(ccl_cosmology *cosmo, double R, double a, int * status){ 
-  return ccl_sigmaR(cosmo, R, status)*ccl_growth_factor(cosmo, a, status);
-}
-*/
 
 double ccl_sigmaV(ccl_cosmology *cosmo,double R,double a,int *status)
 {
@@ -1718,6 +1712,7 @@ double ccl_sigmaV(ccl_cosmology *cosmo,double R,double a,int *status)
   double sigma_V;
   *status |=gsl_integration_cquad(&F,log10(ccl_splines->K_MIN_DEFAULT),log10(ccl_splines->K_MAX),
 				  0.0,1E-5,workspace,&sigma_V,NULL,NULL);
+  
   //TODO: this carries over from the sigmaR TODO list.
   //TODO: log10 could be taken already in the macros.
   //TODO: 1E-5 should be a macro
@@ -1726,13 +1721,6 @@ double ccl_sigmaV(ccl_cosmology *cosmo,double R,double a,int *status)
 
   return sqrt(sigma_V*M_LN10/(2*M_PI*M_PI))*ccl_growth_factor(cosmo, a, status);
 }
-
-/*
-// sigma_V(R,z) - scale z=0 result by growth function (this is approximate!)
-double ccl_sigmaVz(ccl_cosmology *cosmo, double R, double a, int * status){  
-  return ccl_sigmaV(cosmo, R, status)*ccl_growth_factor(cosmo, a, status);
-}
-*/
 
 double ccl_sigma8(ccl_cosmology *cosmo, int *status)
 {
