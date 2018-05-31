@@ -60,6 +60,14 @@ script:
 after_success:
     - coveralls
 
+deploy:
+  provider: pypi
+  user: desc-ccl
+  password: ...
+  on:
+    tags: true
+    branch: master
+
 # Check why the note creation process crashes
 #    - make -C doc/0000-ccl_note
 #after_success:
