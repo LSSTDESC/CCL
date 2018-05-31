@@ -66,7 +66,9 @@ void ccl_cosmology_read_config(void)
   }
   
   if ((fconfig=fopen(param_file, "r")) == NULL) {
-    ccl_raise_exception(EXIT_FAILURE, "ccl_core.c: Failed to open config file");
+    char msg[256];
+    snprintf(msg, 256, "ccl_core.c: Failed to open config file: %s", param_file);
+    ccl_raise_exception(CCL_ERROR_MISSING_CONFIG_FILE, msg);
     return;
   }
 
@@ -356,19 +358,7 @@ ccl_parameters ccl_parameters_create(
   #endif
 
   ccl_parameters params;
-  
-  /* Check whether ccl_splines and ccl_gsl exist. If either is not set yet, load
-     parameters from the config file. */
-  if(ccl_splines==NULL || ccl_gsl==NULL) {
-    ccl_cosmology_read_config();
-  }
-  /* Exit gracefully if config file can't be opened. */
-  if(ccl_splines==NULL || ccl_gsl==NULL) {
-    ccl_raise_exception(EXIT_FAILURE, "ccl_core.c: Failed to read config file.");
-    *status = EXIT_FAILURE;
-    return params;
-  }
-
+  // Initialize params
   params.mnu = NULL;
   params.z_mgrowth=NULL;
   params.df_mgrowth=NULL;
@@ -383,6 +373,18 @@ ccl_parameters ccl_parameters_create(
   params.sum_nu_masses = *mnu;
   double mnusum = *mnu;
   double *mnu_in = NULL;
+  
+  /* Check whether ccl_splines and ccl_gsl exist. If either is not set yet, load
+     parameters from the config file. */
+  if(ccl_splines==NULL || ccl_gsl==NULL) {
+    ccl_cosmology_read_config();
+  }
+  /* Exit gracefully if config file can't be opened. */
+  if(ccl_splines==NULL || ccl_gsl==NULL) {
+    ccl_raise_exception(CCL_ERROR_MISSING_CONFIG_FILE, "ccl_core.c: Failed to read config file.");
+    *status = CCL_ERROR_MISSING_CONFIG_FILE;
+    return params;
+  }
   
   // Decide how to split sum of neutrino masses between 3 neutrinos. See the 
   // CCL note for how we get these expressions for the neutrino masses in 

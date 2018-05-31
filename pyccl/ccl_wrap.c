@@ -25163,6 +25163,7 @@ SWIG_init(void) {
   SWIG_Python_SetConstant(d, "CCL_ERROR_NOT_IMPLEMENTED",SWIG_From_int((int)(1040)));
   SWIG_Python_SetConstant(d, "CCL_ERROR_MNU_UNPHYSICAL",SWIG_From_int((int)(1041)));
   SWIG_Python_SetConstant(d, "CCL_ERROR_ANGPOW",SWIG_From_int((int)(1042)));
+  SWIG_Python_SetConstant(d, "CCL_ERROR_MISSING_CONFIG_FILE",SWIG_From_int((int)(1043)));
   SWIG_Python_SetConstant(d, "CCL_ERROR_POLICY_EXIT",SWIG_From_int((int)(CCL_ERROR_POLICY_EXIT)));
   SWIG_Python_SetConstant(d, "CCL_ERROR_POLICY_CONTINUE",SWIG_From_int((int)(CCL_ERROR_POLICY_CONTINUE)));
   SWIG_Python_SetConstant(d, "CCL_DEBUG_MODE_OFF",SWIG_From_int((int)(CCL_DEBUG_MODE_OFF)));
