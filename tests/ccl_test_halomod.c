@@ -8,59 +8,69 @@
 // Relative error tolerance in the halomodel matter power spectrum
 #define HALOMOD_TOLERANCE 1e-3
 
+// Data structure for the CTEST
 CTEST_DATA(halomod){
 
   // Cosmological parameters
-  double Omega_c;
-  double Omega_b;
+  double Omega_c[3];
+  double Omega_b[3];
   double Omega_k;
   double Neff;
   double* mnu;
   ccl_mnu_convention mnu_type;
   double w_0;
   double w_a;
-  double h;
-  double sigma_8;
-  double n_s;
+  double h[3];
+  double sigma_8[3];
+  double n_s[3];
     
   // Arrays for power-spectrum data
-  double k[2][160];
-  double Delta2[2][160];
+  double k[3][2][128];
+  double Delta2[3][2][128];
   
 };
 
 // Function to read in the benchmark data
-static void read_halomod_test_file(double k[2][160], double Delta2[2][160]){
+static void read_halomod_test_file(double k[3][2][128], double Delta2[3][2][128]){
 
   // Variables for reading in unwanted stuff and file name
   double spam;
   char infile[256];
 
-  // Loop over redshifts
-  for (int i=0; i<2; i++){
+  // Loop over cosmological models
+  for (int model=0; model<3; model++){
 
-    // File names for different redshifts
-    if(i==0){strncpy(infile, "./tests/benchmark/model1_halomod_z0.txt", 256);}
-    if(i==1){strncpy(infile, "./tests/benchmark/model1_halomod_z1.txt", 256);}
+    // Loop over redshifts
+    for (int i=0; i<2; i++){
+
+      // File names for different redshifts and cosmological models
+      if(model==0 && i==0){strncpy(infile, "./tests/benchmark/HMx_power_model1_z0.txt", 256);}
+      if(model==0 && i==1){strncpy(infile, "./tests/benchmark/HMx_power_model1_z1.txt", 256);}
+      if(model==1 && i==0){strncpy(infile, "./tests/benchmark/HMx_power_model2_z0.txt", 256);}
+      if(model==1 && i==1){strncpy(infile, "./tests/benchmark/HMx_power_model2_z1.txt", 256);}
+      if(model==2 && i==0){strncpy(infile, "./tests/benchmark/HMx_power_model3_z0.txt", 256);}
+      if(model==2 && i==1){strncpy(infile, "./tests/benchmark/HMx_power_model3_z1.txt", 256);}
     
-    // Open the files
-    FILE * f = fopen(infile, "r");
-    ASSERT_NOT_NULL(f);
+      // Open the file
+      FILE * f = fopen(infile, "r");
+      ASSERT_NOT_NULL(f);
 
-    // Loop over wavenumbers, which  are k/h in benchmark data, power is Delta^2(k)
-    for (int j=0; j<160; j++) {
+      // Loop over wavenumbers, which  are k/h in benchmark data, power is Delta^2(k)
+      for (int j=0; j<128; j++) {
 
-      // Read in data from the benchmark file
-      int count = fscanf(f, "%le\t %le\t %le\t %le\t %le\n", &k[i][j], &spam, &spam, &spam, &Delta2[i][j]);
+	// Read in data from the benchmark file
+	int count = fscanf(f, "%le\t %le\t %le\t %le\t %le\n", &k[model][i][j], &spam, &spam, &spam, &Delta2[model][i][j]);
     
-      // Check that we have read in enough columns from the benchmark file
-      ASSERT_EQUAL(5, count);
+	// Check that we have read in enough columns from the benchmark file
+	ASSERT_EQUAL(5, count);
+    
+      }
+
+      // Close the file
+      fclose(f);
     
     }
 
-    // Close the file
-    fclose(f);
-    
   }
   
 }
@@ -69,8 +79,6 @@ static void read_halomod_test_file(double k[2][160], double Delta2[2][160]){
 CTEST_SETUP(halomod){
 
   // Move the cosmological parameters to the data structure
-  data->Omega_c = 0.25;
-  data->Omega_b = 0.05;
   data->Omega_k = 0.00;
   data->Neff = 0.00;
   double mnuval = 0.00;
@@ -78,10 +86,23 @@ CTEST_SETUP(halomod){
   data->mnu_type = ccl_mnu_sum;
   data->w_0 = -1.00;
   data->w_a = 0.00;
-  data->h = 0.7;
-  data->sigma_8 = 0.8;
-  data->n_s = 0.96;  
 
+  // Cosmological parameters that are different for different tests
+  double Omega_c[3] = { 0.2500, 0.2265, 0.2685 };
+  double Omega_b[3] = { 0.0500, 0.0455, 0.0490 };
+  double h[3]       = { 0.7000, 0.7040, 0.6711 };
+  double sigma_8[3] = { 0.8000, 0.8100, 0.8340 };
+  double n_s[3]     = { 0.9600, 0.9670, 0.9624 };
+
+  // Fill in the values from these constant arrays
+  for (int model=0; model<3; model++){
+    data->Omega_c[model] = Omega_c[model];
+    data->Omega_b[model] = Omega_b[model];
+    data->h[model]       = h[model];
+    data->sigma_8[model] = sigma_8[model];
+    data->n_s[model]     = n_s[model];
+  }
+  
   // read the file of benchmark data
   read_halomod_test_file(data->k, data->Delta2);
   
@@ -96,9 +117,9 @@ static void compare_halomod(int model, struct halomod_data * data)
   int* status = &stat;
 
   // Set the cosmology
-  ccl_parameters params = ccl_parameters_create(data->Omega_c, data->Omega_b,data->Omega_k,
+  ccl_parameters params = ccl_parameters_create(data->Omega_c[model], data->Omega_b[model],data->Omega_k,
 						data->Neff, data->mnu, data->mnu_type, data->w_0,
-						data->w_a, data->h,data->sigma_8, data->n_s,
+						data->w_a, data->h[model],data->sigma_8[model], data->n_s[model],
 						-1, -1, -1, -1, NULL, NULL, status);
 
   // Set the default configuration, but with Eisenstein & Hu linear P(k) and Sheth & Tormen mass function
@@ -122,18 +143,15 @@ static void compare_halomod(int model, struct halomod_data * data)
     if(i==1){a = 0.5;}
   
     // Loop over wavenumbers
-    for (int j=0; j<160; j++) {
+    for (int j=0; j<128; j++) {
 
       // Set variables inside loop, convert CCL outputs to the same units as benchmark
-      double k = data->k[i][j]*params.h; // Convert the benchmark data k/h to pure k
+      double k = data->k[model][i][j]*params.h; // Convert the benchmark data k/h to pure k
       double Pk = 4.*M_PI*pow((k/(2.*M_PI)),3)*ccl_p_halomod(cosmo, k, a, status); // Convert CCL P(k) -> benchmark Delta^2(k)
-      double absolute_tolerance = HALOMOD_TOLERANCE*data->Delta2[i][j]; // Convert relative -> absolute tolerance
+      double absolute_tolerance = HALOMOD_TOLERANCE*data->Delta2[model][i][j]; // Convert relative -> absolute tolerance      
 
       // Do the check
-      ASSERT_DBL_NEAR_TOL(data->Delta2[i][j], Pk, absolute_tolerance);
-
-      // Write to screen to check
-      //printf("%d\t %le\t %le\t %le\t %lf\n", j, k, Pk, data->Delta2[i][j], Pk/data->Delta2[i][j]);
+      ASSERT_DBL_NEAR_TOL(data->Delta2[model][i][j], Pk, absolute_tolerance);      
 
     }
 
@@ -144,8 +162,18 @@ static void compare_halomod(int model, struct halomod_data * data)
   
 }
 
-// No idea what this is
 CTEST2(halomod, model_1) {
   int model = 0;
   compare_halomod(model, data);
 }
+
+CTEST2(halomod, model_2) {
+  int model = 1;
+  compare_halomod(model, data);
+}
+
+CTEST2(halomod, model_3) {
+  int model = 2;
+  compare_halomod(model, data);
+}
+
