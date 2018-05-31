@@ -3,7 +3,7 @@
 %{
 #define SWIG_FILE_WITH_INIT
 #include "../include/ccl_halomod.h"
-%}
+  %}
 
 // Automatically document arguments and output types of all functions
 %feature("autodoc", "1");
@@ -13,58 +13,58 @@
 
 %include "../include/ccl_halomod.h"
 
-// Enable vectorised arguments for arrays
+ // Enable vectorised arguments for arrays
 %apply (double* IN_ARRAY1, int DIM1) {(double* k, int nk)};
 %apply (double* IN_ARRAY1, int DIM1) {(double* halo_mass, int nm)};
 %apply (double* ARGOUT_ARRAY1, int DIM1) {(double* output, int nout)};
 
 %inline %{
-void p_1h_vec(ccl_cosmology * cosmo,
-                    double a,
-                    double* k, int nk,
-                    double* output, int nout,
-                    int* status)
-{
+  void onehalo_matter_power_vec(ccl_cosmology * cosmo,
+				double a,
+				double* k, int nk,
+				double* output, int nout,
+				int* status)
+  {
     assert(nout == nk);
     for(int i=0; i < nk; i++){
-        output[i] = ccl_p_1h(cosmo, k[i], a, status);
+      output[i] = ccl_onehalo_matter_power(cosmo, k[i], a, status);
     }
-}
+  }
 
-void p_2h_vec(ccl_cosmology * cosmo,
-                    double a,
-                    double* k, int nk,
-                    double* output, int nout,
-                    int* status)
-{
+  void twohalo_matter_power_vec(ccl_cosmology * cosmo,
+				double a,
+				double* k, int nk,
+				double* output, int nout,
+				int* status)
+  {
     assert(nout == nk);
     for(int i=0; i < nk; i++){
-        output[i] = ccl_p_2h(cosmo, k[i], a, status);
+      output[i] = ccl_twohalo_matter_power(cosmo, k[i], a, status);
     }
-}
+  }
 
-void p_halomod_vec(ccl_cosmology * cosmo,
-                     double a,
-                     double* k, int nk,
-                     double* output, int nout,
-                     int* status)
-{
+  void halomodel_matter_power_vec(ccl_cosmology * cosmo,
+				  double a,
+				  double* k, int nk,
+				  double* output, int nout,
+				  int* status)
+  {
     assert(nout == nk);
     for(int i=0; i < nk; i++){
-        output[i] = ccl_p_halomod(cosmo, k[i], a, status);
+      output[i] = ccl_halomodel_matter_power(cosmo, k[i], a, status);
     }
-}
+  }
 
-void halo_concentration_vec(ccl_cosmology * cosmo,
-                                 double a,
-                                 double* halo_mass, int nm,
-                                 double* output, int nout,
-                                 int* status)
-{
+  void halo_concentration_vec(ccl_cosmology * cosmo,
+			      double a,
+			      double* halo_mass, int nm,
+			      double* output, int nout,
+			      int* status)
+  {
     assert(nout == nm);
     for(int i=0; i < nm; i++){
-        output[i] = ccl_halo_concentration(cosmo, halo_mass[i], a, status);
+      output[i] = ccl_halo_concentration(cosmo, halo_mass[i], a, status);
     }
-}
+  }
 
-%}
+  %}

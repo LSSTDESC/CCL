@@ -6,9 +6,6 @@ extern "C" {
 
 #include "ccl_core.h"
 
-  //TODO: Remove this entirely
-  //double ccl_comoving_matter_density(ccl_cosmology *cosmo);
-
 /**
  * CLASS power spectrum without splines.
  * Write k, P(k,z) [1/Mpc, Mpc^3] for given cosmology at the k values used within CLASS (spectra.ln_k[]), using the method specified in config.matter_power_spectrum_method.

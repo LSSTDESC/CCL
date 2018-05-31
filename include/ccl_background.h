@@ -16,9 +16,6 @@ typedef enum ccl_species_x_label {
   ccl_species_ur_label=5,
   ccl_species_nu_label=6,
 } ccl_species_x_label;
-
-  //TODO: Remove this
-double ccl_comoving_matter_density(ccl_cosmology *cosmo);
   
 /**
  * Normalized expansion rate at scale factor a.

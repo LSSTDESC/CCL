@@ -538,7 +538,6 @@ tests_check_ccl_SOURCES = tests/ccl_test.c tests/ccl_test_utils.c \
 	tests/ccl_test_distances_hiz_mnu.c tests/ccl_test_power_nu.c \
 	tests/ccl_test_nonlimber.c tests/ccl_test_halomod.c \
 	$(am__append_3)
-#tests_check_ccl_SOURCES = tests/ccl_test.c tests/ccl_test_utils.c tests/ccl_test_params.c tests/ccl_test_massfunc.c tests/ccl_test_halomod.c
 tests_check_ccl_CPPFLAGS = -I./tests/ -I./include/
 tests_check_ccl_LDFLAGS = -L./ -lccl -lgsl -lgslcblas -lfftw3 $(CLASS_LIB)
 all: config.h

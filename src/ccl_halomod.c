@@ -125,7 +125,8 @@ static double window_function(ccl_cosmology *cosmo, double m, double k, double a
   //Window function for matter power spectrum with NFW haloes
   if(iwin==1){
     // The mean background matter density in Msun/Mpc^3
-    double rho_matter = ccl_comoving_matter_density(cosmo);
+    //double rho_matter = ccl_comoving_matter_density(cosmo);
+    double rho_matter = ccl_rho_x(cosmo, 1., 1, 1, status);
 
     // The halo concentration for this mass and scale factor  
     double c = ccl_halo_concentration(cosmo,m,a,status);
@@ -252,7 +253,7 @@ static double two_halo_integral(ccl_cosmology *cosmo, double k, double a, int * 
 }
 
 // Computes the two-halo term
-double ccl_p_2h(ccl_cosmology *cosmo, double k, double a, int * status){
+double ccl_twohalo_matter_power(ccl_cosmology *cosmo, double k, double a, int * status){
 
   // Set two-halo term
   // 1 - Standard two-halo term
@@ -293,12 +294,12 @@ double ccl_p_2h(ccl_cosmology *cosmo, double k, double a, int * status){
 }
 
 // Computes the one-halo term
-double ccl_p_1h(ccl_cosmology *cosmo, double k, double a, int * status){  
+double ccl_onehalo_matter_power(ccl_cosmology *cosmo, double k, double a, int * status){  
     return one_halo_integral(cosmo, k, a, status);
 }
 
 // Computes the full halo-model power
-double ccl_p_halomod(ccl_cosmology *cosmo, double k, double a, int * status){  
+double ccl_halomodel_matter_power(ccl_cosmology *cosmo, double k, double a, int * status){  
   // Standard sum of two- and one-halo terms
-  return ccl_p_2h(cosmo, k, a, status)+ccl_p_1h(cosmo, k, a, status);   
+  return ccl_twohalo_matter_power(cosmo, k, a, status)+ccl_onehalo_matter_power(cosmo, k, a, status);   
 }

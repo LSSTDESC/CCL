@@ -569,7 +569,8 @@ double ccl_sigmaM(ccl_cosmology * cosmo, double halomass, double a, int * status
 // Converts halo mass to rdelta.
 // TODO: possible that delta should be passed around for consistency checks
 double ccl_r_delta(ccl_cosmology *cosmo, double halomass, double a, double odelta, int * status){    
-  double rho_matter = ccl_comoving_matter_density(cosmo);   
+  //double rho_matter = ccl_comoving_matter_density(cosmo);
+  double rho_matter = ccl_rho_x(cosmo, 1., 1, 1, status);
   return pow(halomass*3.0/(4.0*M_PI*rho_matter*odelta),1.0/3.0);
 }
 
@@ -583,8 +584,7 @@ double ccl_nu(ccl_cosmology *cosmo, double halomass, double a, int * status) {
 
 // Calculates the halo Lagrangian radius as a function of halo mass
 // TODO: Could combine this with ccl_r_delta as a special case when odelta=1?
-double ccl_r_Lagrangian(ccl_cosmology *cosmo, double halomass, double a, int * status){  
-  //double rho_matter = ccl_comoving_matter_density(cosmo);  
+double ccl_r_Lagrangian(ccl_cosmology *cosmo, double halomass, double a, int * status){   
   //return pow(halomass*3.0/(4.0*M_PI*rho_matter),1.0/3.0);
   return ccl_r_delta(cosmo, halomass, a, 1., status);
 }

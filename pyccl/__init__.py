@@ -33,7 +33,7 @@ from pyccl.constants import CLIGHT_HMPC, MPC_TO_METER, PC_TO_METER, \
 
 from pyccl.correlation import correlation, correlation_3d
 
-from pyccl.halomodel import p_1h, p_2h, p_halomod, halo_concentration
+from pyccl.halomodel import onehalo_matter_power, twohalo_matter_power, halomodel_matter_power, halo_concentration
 
 from pyccl.neutrinos import Omeganuh2, nu_masses
 

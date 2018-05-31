@@ -514,10 +514,6 @@ species_k_label = _ccllib.species_k_label
 species_ur_label = _ccllib.species_ur_label
 species_nu_label = _ccllib.species_nu_label
 
-def comoving_matter_density(cosmo):
-    """comoving_matter_density(cosmology cosmo) -> double"""
-    return _ccllib.comoving_matter_density(cosmo)
-
 def h_over_h0(cosmo, a, status):
     """h_over_h0(cosmology cosmo, double a, int * status) -> double"""
     return _ccllib.h_over_h0(cosmo, a, status)
@@ -1260,33 +1256,33 @@ def nu_masses_vec(OmNuh2, label, TCMB, output, status):
     """nu_masses_vec(double OmNuh2, int label, double TCMB, double * output, int * status)"""
     return _ccllib.nu_masses_vec(OmNuh2, label, TCMB, output, status)
 
-def p_1h(cosmo, k, a, status):
-    """p_1h(cosmology cosmo, double k, double a, int * status) -> double"""
-    return _ccllib.p_1h(cosmo, k, a, status)
+def twohalo_matter_power(cosmo, k, a, status):
+    """twohalo_matter_power(cosmology cosmo, double k, double a, int * status) -> double"""
+    return _ccllib.twohalo_matter_power(cosmo, k, a, status)
 
-def p_2h(cosmo, k, a, status):
-    """p_2h(cosmology cosmo, double k, double a, int * status) -> double"""
-    return _ccllib.p_2h(cosmo, k, a, status)
+def onehalo_matter_power(cosmo, k, a, status):
+    """onehalo_matter_power(cosmology cosmo, double k, double a, int * status) -> double"""
+    return _ccllib.onehalo_matter_power(cosmo, k, a, status)
 
-def p_halomod(cosmo, k, a, status):
-    """p_halomod(cosmology cosmo, double k, double a, int * status) -> double"""
-    return _ccllib.p_halomod(cosmo, k, a, status)
+def halomodel_matter_power(cosmo, k, a, status):
+    """halomodel_matter_power(cosmology cosmo, double k, double a, int * status) -> double"""
+    return _ccllib.halomodel_matter_power(cosmo, k, a, status)
 
 def halo_concentration(cosmo, halomass, a, status):
     """halo_concentration(cosmology cosmo, double halomass, double a, int * status) -> double"""
     return _ccllib.halo_concentration(cosmo, halomass, a, status)
 
-def p_1h_vec(cosmo, a, k, output, status):
-    """p_1h_vec(cosmology cosmo, double a, double * k, double * output, int * status)"""
-    return _ccllib.p_1h_vec(cosmo, a, k, output, status)
+def onehalo_matter_power_vec(cosmo, a, k, output, status):
+    """onehalo_matter_power_vec(cosmology cosmo, double a, double * k, double * output, int * status)"""
+    return _ccllib.onehalo_matter_power_vec(cosmo, a, k, output, status)
 
-def p_2h_vec(cosmo, a, k, output, status):
-    """p_2h_vec(cosmology cosmo, double a, double * k, double * output, int * status)"""
-    return _ccllib.p_2h_vec(cosmo, a, k, output, status)
+def twohalo_matter_power_vec(cosmo, a, k, output, status):
+    """twohalo_matter_power_vec(cosmology cosmo, double a, double * k, double * output, int * status)"""
+    return _ccllib.twohalo_matter_power_vec(cosmo, a, k, output, status)
 
-def p_halomod_vec(cosmo, a, k, output, status):
-    """p_halomod_vec(cosmology cosmo, double a, double * k, double * output, int * status)"""
-    return _ccllib.p_halomod_vec(cosmo, a, k, output, status)
+def halomodel_matter_power_vec(cosmo, a, k, output, status):
+    """halomodel_matter_power_vec(cosmology cosmo, double a, double * k, double * output, int * status)"""
+    return _ccllib.halomodel_matter_power_vec(cosmo, a, k, output, status)
 
 def halo_concentration_vec(cosmo, a, halo_mass, output, status):
     """halo_concentration_vec(cosmology cosmo, double a, double * halo_mass, double * output, int * status)"""

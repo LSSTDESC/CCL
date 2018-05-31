@@ -4445,57 +4445,57 @@ void nu_masses_vec(double OmNuh2, int label, double TCMB,
 
 #define SWIG_FILE_WITH_INIT
 #include "../include/ccl_halomod.h"
+  
 
-
-void p_1h_vec(ccl_cosmology * cosmo,
-                    double a,
-                    double* k, int nk,
-                    double* output, int nout,
-                    int* status)
-{
+  void onehalo_matter_power_vec(ccl_cosmology * cosmo,
+				double a,
+				double* k, int nk,
+				double* output, int nout,
+				int* status)
+  {
     assert(nout == nk);
     for(int i=0; i < nk; i++){
-        output[i] = ccl_p_1h(cosmo, k[i], a, status);
+      output[i] = ccl_onehalo_matter_power(cosmo, k[i], a, status);
     }
-}
+  }
 
-void p_2h_vec(ccl_cosmology * cosmo,
-                    double a,
-                    double* k, int nk,
-                    double* output, int nout,
-                    int* status)
-{
+  void twohalo_matter_power_vec(ccl_cosmology * cosmo,
+				double a,
+				double* k, int nk,
+				double* output, int nout,
+				int* status)
+  {
     assert(nout == nk);
     for(int i=0; i < nk; i++){
-        output[i] = ccl_p_2h(cosmo, k[i], a, status);
+      output[i] = ccl_twohalo_matter_power(cosmo, k[i], a, status);
     }
-}
+  }
 
-void p_halomod_vec(ccl_cosmology * cosmo,
-                     double a,
-                     double* k, int nk,
-                     double* output, int nout,
-                     int* status)
-{
+  void halomodel_matter_power_vec(ccl_cosmology * cosmo,
+				  double a,
+				  double* k, int nk,
+				  double* output, int nout,
+				  int* status)
+  {
     assert(nout == nk);
     for(int i=0; i < nk; i++){
-        output[i] = ccl_p_halomod(cosmo, k[i], a, status);
+      output[i] = ccl_halomodel_matter_power(cosmo, k[i], a, status);
     }
-}
+  }
 
-void halo_concentration_vec(ccl_cosmology * cosmo,
-                                 double a,
-                                 double* halo_mass, int nm,
-                                 double* output, int nout,
-                                 int* status)
-{
+  void halo_concentration_vec(ccl_cosmology * cosmo,
+			      double a,
+			      double* halo_mass, int nm,
+			      double* output, int nout,
+			      int* status)
+  {
     assert(nout == nm);
     for(int i=0; i < nm; i++){
-        output[i] = ccl_halo_concentration(cosmo, halo_mass[i], a, status);
+      output[i] = ccl_halo_concentration(cosmo, halo_mass[i], a, status);
     }
-}
+  }
 
-
+  
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -10667,32 +10667,6 @@ fail:
       Py_DECREF(array18); 
     }
   }
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_comoving_matter_density(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  ccl_cosmology *arg1 = (ccl_cosmology *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject * obj0 = 0 ;
-  double result;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:comoving_matter_density",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_cosmology, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "comoving_matter_density" "', argument " "1"" of type '" "ccl_cosmology *""'"); 
-  }
-  arg1 = (ccl_cosmology *)(argp1);
-  {
-    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    result = (double)ccl_comoving_matter_density(arg1);
-    SWIG_PYTHON_THREAD_END_ALLOW;
-  }
-  resultobj = SWIG_From_double((double)(result));
-  return resultobj;
-fail:
   return NULL;
 }
 
@@ -21155,7 +21129,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_p_1h(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_twohalo_matter_power(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   ccl_cosmology *arg1 = (ccl_cosmology *) 0 ;
   double arg2 ;
@@ -21175,27 +21149,27 @@ SWIGINTERN PyObject *_wrap_p_1h(PyObject *SWIGUNUSEDPARM(self), PyObject *args) 
   PyObject * obj3 = 0 ;
   double result;
   
-  if (!PyArg_ParseTuple(args,(char *)"OOOO:p_1h",&obj0,&obj1,&obj2,&obj3)) SWIG_fail;
+  if (!PyArg_ParseTuple(args,(char *)"OOOO:twohalo_matter_power",&obj0,&obj1,&obj2,&obj3)) SWIG_fail;
   res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_cosmology, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "p_1h" "', argument " "1"" of type '" "ccl_cosmology *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "twohalo_matter_power" "', argument " "1"" of type '" "ccl_cosmology *""'"); 
   }
   arg1 = (ccl_cosmology *)(argp1);
   ecode2 = SWIG_AsVal_double(obj1, &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "p_1h" "', argument " "2"" of type '" "double""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "twohalo_matter_power" "', argument " "2"" of type '" "double""'");
   } 
   arg2 = (double)(val2);
   ecode3 = SWIG_AsVal_double(obj2, &val3);
   if (!SWIG_IsOK(ecode3)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "p_1h" "', argument " "3"" of type '" "double""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "twohalo_matter_power" "', argument " "3"" of type '" "double""'");
   } 
   arg3 = (double)(val3);
   if (!(SWIG_IsOK((res4 = SWIG_ConvertPtr(obj3,SWIG_as_voidptrptr(&arg4),SWIGTYPE_p_int,0))))) {
     int val; 
     int ecode = SWIG_AsVal_int(obj3, &val);
     if (!SWIG_IsOK(ecode)) {
-      SWIG_exception_fail(SWIG_ArgError(ecode), "in method '" "p_1h" "', argument " "4"" of type '" "int""'");
+      SWIG_exception_fail(SWIG_ArgError(ecode), "in method '" "twohalo_matter_power" "', argument " "4"" of type '" "int""'");
     }
     temp4 = (int)(val);
     arg4 = &temp4;
@@ -21203,7 +21177,7 @@ SWIGINTERN PyObject *_wrap_p_1h(PyObject *SWIGUNUSEDPARM(self), PyObject *args) 
   }
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    result = (double)ccl_p_1h(arg1,arg2,arg3,arg4);
+    result = (double)ccl_twohalo_matter_power(arg1,arg2,arg3,arg4);
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
   resultobj = SWIG_From_double((double)(result));
@@ -21219,7 +21193,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_p_2h(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_onehalo_matter_power(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   ccl_cosmology *arg1 = (ccl_cosmology *) 0 ;
   double arg2 ;
@@ -21239,27 +21213,27 @@ SWIGINTERN PyObject *_wrap_p_2h(PyObject *SWIGUNUSEDPARM(self), PyObject *args) 
   PyObject * obj3 = 0 ;
   double result;
   
-  if (!PyArg_ParseTuple(args,(char *)"OOOO:p_2h",&obj0,&obj1,&obj2,&obj3)) SWIG_fail;
+  if (!PyArg_ParseTuple(args,(char *)"OOOO:onehalo_matter_power",&obj0,&obj1,&obj2,&obj3)) SWIG_fail;
   res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_cosmology, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "p_2h" "', argument " "1"" of type '" "ccl_cosmology *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "onehalo_matter_power" "', argument " "1"" of type '" "ccl_cosmology *""'"); 
   }
   arg1 = (ccl_cosmology *)(argp1);
   ecode2 = SWIG_AsVal_double(obj1, &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "p_2h" "', argument " "2"" of type '" "double""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "onehalo_matter_power" "', argument " "2"" of type '" "double""'");
   } 
   arg2 = (double)(val2);
   ecode3 = SWIG_AsVal_double(obj2, &val3);
   if (!SWIG_IsOK(ecode3)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "p_2h" "', argument " "3"" of type '" "double""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "onehalo_matter_power" "', argument " "3"" of type '" "double""'");
   } 
   arg3 = (double)(val3);
   if (!(SWIG_IsOK((res4 = SWIG_ConvertPtr(obj3,SWIG_as_voidptrptr(&arg4),SWIGTYPE_p_int,0))))) {
     int val; 
     int ecode = SWIG_AsVal_int(obj3, &val);
     if (!SWIG_IsOK(ecode)) {
-      SWIG_exception_fail(SWIG_ArgError(ecode), "in method '" "p_2h" "', argument " "4"" of type '" "int""'");
+      SWIG_exception_fail(SWIG_ArgError(ecode), "in method '" "onehalo_matter_power" "', argument " "4"" of type '" "int""'");
     }
     temp4 = (int)(val);
     arg4 = &temp4;
@@ -21267,7 +21241,7 @@ SWIGINTERN PyObject *_wrap_p_2h(PyObject *SWIGUNUSEDPARM(self), PyObject *args) 
   }
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    result = (double)ccl_p_2h(arg1,arg2,arg3,arg4);
+    result = (double)ccl_onehalo_matter_power(arg1,arg2,arg3,arg4);
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
   resultobj = SWIG_From_double((double)(result));
@@ -21283,7 +21257,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_p_halomod(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_halomodel_matter_power(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   ccl_cosmology *arg1 = (ccl_cosmology *) 0 ;
   double arg2 ;
@@ -21303,27 +21277,27 @@ SWIGINTERN PyObject *_wrap_p_halomod(PyObject *SWIGUNUSEDPARM(self), PyObject *a
   PyObject * obj3 = 0 ;
   double result;
   
-  if (!PyArg_ParseTuple(args,(char *)"OOOO:p_halomod",&obj0,&obj1,&obj2,&obj3)) SWIG_fail;
+  if (!PyArg_ParseTuple(args,(char *)"OOOO:halomodel_matter_power",&obj0,&obj1,&obj2,&obj3)) SWIG_fail;
   res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_cosmology, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "p_halomod" "', argument " "1"" of type '" "ccl_cosmology *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "halomodel_matter_power" "', argument " "1"" of type '" "ccl_cosmology *""'"); 
   }
   arg1 = (ccl_cosmology *)(argp1);
   ecode2 = SWIG_AsVal_double(obj1, &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "p_halomod" "', argument " "2"" of type '" "double""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "halomodel_matter_power" "', argument " "2"" of type '" "double""'");
   } 
   arg2 = (double)(val2);
   ecode3 = SWIG_AsVal_double(obj2, &val3);
   if (!SWIG_IsOK(ecode3)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "p_halomod" "', argument " "3"" of type '" "double""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "halomodel_matter_power" "', argument " "3"" of type '" "double""'");
   } 
   arg3 = (double)(val3);
   if (!(SWIG_IsOK((res4 = SWIG_ConvertPtr(obj3,SWIG_as_voidptrptr(&arg4),SWIGTYPE_p_int,0))))) {
     int val; 
     int ecode = SWIG_AsVal_int(obj3, &val);
     if (!SWIG_IsOK(ecode)) {
-      SWIG_exception_fail(SWIG_ArgError(ecode), "in method '" "p_halomod" "', argument " "4"" of type '" "int""'");
+      SWIG_exception_fail(SWIG_ArgError(ecode), "in method '" "halomodel_matter_power" "', argument " "4"" of type '" "int""'");
     }
     temp4 = (int)(val);
     arg4 = &temp4;
@@ -21331,7 +21305,7 @@ SWIGINTERN PyObject *_wrap_p_halomod(PyObject *SWIGUNUSEDPARM(self), PyObject *a
   }
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    result = (double)ccl_p_halomod(arg1,arg2,arg3,arg4);
+    result = (double)ccl_halomodel_matter_power(arg1,arg2,arg3,arg4);
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
   resultobj = SWIG_From_double((double)(result));
@@ -21411,7 +21385,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_p_1h_vec(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_onehalo_matter_power_vec(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   ccl_cosmology *arg1 = (ccl_cosmology *) 0 ;
   double arg2 ;
@@ -21435,15 +21409,15 @@ SWIGINTERN PyObject *_wrap_p_1h_vec(PyObject *SWIGUNUSEDPARM(self), PyObject *ar
   PyObject * obj3 = 0 ;
   PyObject * obj4 = 0 ;
   
-  if (!PyArg_ParseTuple(args,(char *)"OOOOO:p_1h_vec",&obj0,&obj1,&obj2,&obj3,&obj4)) SWIG_fail;
+  if (!PyArg_ParseTuple(args,(char *)"OOOOO:onehalo_matter_power_vec",&obj0,&obj1,&obj2,&obj3,&obj4)) SWIG_fail;
   res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_cosmology, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "p_1h_vec" "', argument " "1"" of type '" "ccl_cosmology *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "onehalo_matter_power_vec" "', argument " "1"" of type '" "ccl_cosmology *""'"); 
   }
   arg1 = (ccl_cosmology *)(argp1);
   ecode2 = SWIG_AsVal_double(obj1, &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "p_1h_vec" "', argument " "2"" of type '" "double""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "onehalo_matter_power_vec" "', argument " "2"" of type '" "double""'");
   } 
   arg2 = (double)(val2);
   {
@@ -21478,7 +21452,7 @@ SWIGINTERN PyObject *_wrap_p_1h_vec(PyObject *SWIGUNUSEDPARM(self), PyObject *ar
     int val; 
     int ecode = SWIG_AsVal_int(obj4, &val);
     if (!SWIG_IsOK(ecode)) {
-      SWIG_exception_fail(SWIG_ArgError(ecode), "in method '" "p_1h_vec" "', argument " "7"" of type '" "int""'");
+      SWIG_exception_fail(SWIG_ArgError(ecode), "in method '" "onehalo_matter_power_vec" "', argument " "7"" of type '" "int""'");
     }
     temp7 = (int)(val);
     arg7 = &temp7;
@@ -21486,7 +21460,7 @@ SWIGINTERN PyObject *_wrap_p_1h_vec(PyObject *SWIGUNUSEDPARM(self), PyObject *ar
   }
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    p_1h_vec(arg1,arg2,arg3,arg4,arg5,arg6,arg7);
+    onehalo_matter_power_vec(arg1,arg2,arg3,arg4,arg5,arg6,arg7);
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
   resultobj = SWIG_Py_Void();
@@ -21517,7 +21491,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_p_2h_vec(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_twohalo_matter_power_vec(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   ccl_cosmology *arg1 = (ccl_cosmology *) 0 ;
   double arg2 ;
@@ -21541,15 +21515,15 @@ SWIGINTERN PyObject *_wrap_p_2h_vec(PyObject *SWIGUNUSEDPARM(self), PyObject *ar
   PyObject * obj3 = 0 ;
   PyObject * obj4 = 0 ;
   
-  if (!PyArg_ParseTuple(args,(char *)"OOOOO:p_2h_vec",&obj0,&obj1,&obj2,&obj3,&obj4)) SWIG_fail;
+  if (!PyArg_ParseTuple(args,(char *)"OOOOO:twohalo_matter_power_vec",&obj0,&obj1,&obj2,&obj3,&obj4)) SWIG_fail;
   res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_cosmology, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "p_2h_vec" "', argument " "1"" of type '" "ccl_cosmology *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "twohalo_matter_power_vec" "', argument " "1"" of type '" "ccl_cosmology *""'"); 
   }
   arg1 = (ccl_cosmology *)(argp1);
   ecode2 = SWIG_AsVal_double(obj1, &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "p_2h_vec" "', argument " "2"" of type '" "double""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "twohalo_matter_power_vec" "', argument " "2"" of type '" "double""'");
   } 
   arg2 = (double)(val2);
   {
@@ -21584,7 +21558,7 @@ SWIGINTERN PyObject *_wrap_p_2h_vec(PyObject *SWIGUNUSEDPARM(self), PyObject *ar
     int val; 
     int ecode = SWIG_AsVal_int(obj4, &val);
     if (!SWIG_IsOK(ecode)) {
-      SWIG_exception_fail(SWIG_ArgError(ecode), "in method '" "p_2h_vec" "', argument " "7"" of type '" "int""'");
+      SWIG_exception_fail(SWIG_ArgError(ecode), "in method '" "twohalo_matter_power_vec" "', argument " "7"" of type '" "int""'");
     }
     temp7 = (int)(val);
     arg7 = &temp7;
@@ -21592,7 +21566,7 @@ SWIGINTERN PyObject *_wrap_p_2h_vec(PyObject *SWIGUNUSEDPARM(self), PyObject *ar
   }
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    p_2h_vec(arg1,arg2,arg3,arg4,arg5,arg6,arg7);
+    twohalo_matter_power_vec(arg1,arg2,arg3,arg4,arg5,arg6,arg7);
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
   resultobj = SWIG_Py_Void();
@@ -21623,7 +21597,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_p_halomod_vec(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_halomodel_matter_power_vec(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   ccl_cosmology *arg1 = (ccl_cosmology *) 0 ;
   double arg2 ;
@@ -21647,15 +21621,15 @@ SWIGINTERN PyObject *_wrap_p_halomod_vec(PyObject *SWIGUNUSEDPARM(self), PyObjec
   PyObject * obj3 = 0 ;
   PyObject * obj4 = 0 ;
   
-  if (!PyArg_ParseTuple(args,(char *)"OOOOO:p_halomod_vec",&obj0,&obj1,&obj2,&obj3,&obj4)) SWIG_fail;
+  if (!PyArg_ParseTuple(args,(char *)"OOOOO:halomodel_matter_power_vec",&obj0,&obj1,&obj2,&obj3,&obj4)) SWIG_fail;
   res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ccl_cosmology, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "p_halomod_vec" "', argument " "1"" of type '" "ccl_cosmology *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "halomodel_matter_power_vec" "', argument " "1"" of type '" "ccl_cosmology *""'"); 
   }
   arg1 = (ccl_cosmology *)(argp1);
   ecode2 = SWIG_AsVal_double(obj1, &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "p_halomod_vec" "', argument " "2"" of type '" "double""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "halomodel_matter_power_vec" "', argument " "2"" of type '" "double""'");
   } 
   arg2 = (double)(val2);
   {
@@ -21690,7 +21664,7 @@ SWIGINTERN PyObject *_wrap_p_halomod_vec(PyObject *SWIGUNUSEDPARM(self), PyObjec
     int val; 
     int ecode = SWIG_AsVal_int(obj4, &val);
     if (!SWIG_IsOK(ecode)) {
-      SWIG_exception_fail(SWIG_ArgError(ecode), "in method '" "p_halomod_vec" "', argument " "7"" of type '" "int""'");
+      SWIG_exception_fail(SWIG_ArgError(ecode), "in method '" "halomodel_matter_power_vec" "', argument " "7"" of type '" "int""'");
     }
     temp7 = (int)(val);
     arg7 = &temp7;
@@ -21698,7 +21672,7 @@ SWIGINTERN PyObject *_wrap_p_halomod_vec(PyObject *SWIGUNUSEDPARM(self), PyObjec
   }
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    p_halomod_vec(arg1,arg2,arg3,arg4,arg5,arg6,arg7);
+    halomodel_matter_power_vec(arg1,arg2,arg3,arg4,arg5,arg6,arg7);
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
   resultobj = SWIG_Py_Void();
@@ -23244,7 +23218,6 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"cosmology_compute_power", _wrap_cosmology_compute_power, METH_VARARGS, (char *)"cosmology_compute_power(cosmology cosmo, int * status)"},
 	 { (char *)"parameters_create_nu", _wrap_parameters_create_nu, METH_VARARGS, (char *)"parameters_create_nu(double Omega_c, double Omega_b, double Omega_k, double Neff, double w0, double wa, double h, double norm_pk, double n_s, double bcm_log10Mc, double bcm_etab, double bcm_ks, int mnu_is_sum, double * m_nu, int * status) -> parameters"},
 	 { (char *)"parameters_create_nu_vec", _wrap_parameters_create_nu_vec, METH_VARARGS, (char *)"parameters_create_nu_vec(double Omega_c, double Omega_b, double Omega_k, double Neff, double w0, double wa, double h, double norm_pk, double n_s, double bcm_log10Mc, double bcm_etab, double bcm_ks, double * zarr, double * dfarr, int mnu_is_sum, double * m_nu, int * status) -> parameters"},
-	 { (char *)"comoving_matter_density", _wrap_comoving_matter_density, METH_VARARGS, (char *)"comoving_matter_density(cosmology cosmo) -> double"},
 	 { (char *)"h_over_h0", _wrap_h_over_h0, METH_VARARGS, (char *)"h_over_h0(cosmology cosmo, double a, int * status) -> double"},
 	 { (char *)"h_over_h0s", _wrap_h_over_h0s, METH_VARARGS, (char *)"h_over_h0s(cosmology cosmo, int na, double [] a, double [] output, int * status)"},
 	 { (char *)"comoving_radial_distance", _wrap_comoving_radial_distance, METH_VARARGS, (char *)"comoving_radial_distance(cosmology cosmo, double a, int * status) -> double"},
@@ -23422,13 +23395,13 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"nu_masses", _wrap_nu_masses, METH_VARARGS, (char *)"nu_masses(double OmNuh2, ccl_neutrino_mass_splits mass_split, double TCMB, int * status) -> double *"},
 	 { (char *)"Omeganuh2_vec", _wrap_Omeganuh2_vec, METH_VARARGS, (char *)"Omeganuh2_vec(int N_nu_mass, double TCMB, double * a, double * mnu, double * output, int * status)"},
 	 { (char *)"nu_masses_vec", _wrap_nu_masses_vec, METH_VARARGS, (char *)"nu_masses_vec(double OmNuh2, int label, double TCMB, double * output, int * status)"},
-	 { (char *)"p_1h", _wrap_p_1h, METH_VARARGS, (char *)"p_1h(cosmology cosmo, double k, double a, int * status) -> double"},
-	 { (char *)"p_2h", _wrap_p_2h, METH_VARARGS, (char *)"p_2h(cosmology cosmo, double k, double a, int * status) -> double"},
-	 { (char *)"p_halomod", _wrap_p_halomod, METH_VARARGS, (char *)"p_halomod(cosmology cosmo, double k, double a, int * status) -> double"},
+	 { (char *)"twohalo_matter_power", _wrap_twohalo_matter_power, METH_VARARGS, (char *)"twohalo_matter_power(cosmology cosmo, double k, double a, int * status) -> double"},
+	 { (char *)"onehalo_matter_power", _wrap_onehalo_matter_power, METH_VARARGS, (char *)"onehalo_matter_power(cosmology cosmo, double k, double a, int * status) -> double"},
+	 { (char *)"halomodel_matter_power", _wrap_halomodel_matter_power, METH_VARARGS, (char *)"halomodel_matter_power(cosmology cosmo, double k, double a, int * status) -> double"},
 	 { (char *)"halo_concentration", _wrap_halo_concentration, METH_VARARGS, (char *)"halo_concentration(cosmology cosmo, double halomass, double a, int * status) -> double"},
-	 { (char *)"p_1h_vec", _wrap_p_1h_vec, METH_VARARGS, (char *)"p_1h_vec(cosmology cosmo, double a, double * k, double * output, int * status)"},
-	 { (char *)"p_2h_vec", _wrap_p_2h_vec, METH_VARARGS, (char *)"p_2h_vec(cosmology cosmo, double a, double * k, double * output, int * status)"},
-	 { (char *)"p_halomod_vec", _wrap_p_halomod_vec, METH_VARARGS, (char *)"p_halomod_vec(cosmology cosmo, double a, double * k, double * output, int * status)"},
+	 { (char *)"onehalo_matter_power_vec", _wrap_onehalo_matter_power_vec, METH_VARARGS, (char *)"onehalo_matter_power_vec(cosmology cosmo, double a, double * k, double * output, int * status)"},
+	 { (char *)"twohalo_matter_power_vec", _wrap_twohalo_matter_power_vec, METH_VARARGS, (char *)"twohalo_matter_power_vec(cosmology cosmo, double a, double * k, double * output, int * status)"},
+	 { (char *)"halomodel_matter_power_vec", _wrap_halomodel_matter_power_vec, METH_VARARGS, (char *)"halomodel_matter_power_vec(cosmology cosmo, double a, double * k, double * output, int * status)"},
 	 { (char *)"halo_concentration_vec", _wrap_halo_concentration_vec, METH_VARARGS, (char *)"halo_concentration_vec(cosmology cosmo, double a, double * halo_mass, double * output, int * status)"},
 	 { (char *)"configuration_transfer_function_method_set", _wrap_configuration_transfer_function_method_set, METH_VARARGS, (char *)"configuration_transfer_function_method_set(configuration self, transfer_function_t transfer_function_method)"},
 	 { (char *)"configuration_transfer_function_method_get", _wrap_configuration_transfer_function_method_get, METH_VARARGS, (char *)"configuration_transfer_function_method_get(configuration self) -> transfer_function_t"},

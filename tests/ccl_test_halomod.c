@@ -147,7 +147,7 @@ static void compare_halomod(int model, struct halomod_data * data)
 
       // Set variables inside loop, convert CCL outputs to the same units as benchmark
       double k = data->k[model][i][j]*params.h; // Convert the benchmark data k/h to pure k
-      double Pk = 4.*M_PI*pow((k/(2.*M_PI)),3)*ccl_p_halomod(cosmo, k, a, status); // Convert CCL P(k) -> benchmark Delta^2(k)
+      double Pk = 4.*M_PI*pow((k/(2.*M_PI)),3)*ccl_halomodel_matter_power(cosmo, k, a, status); // Convert CCL P(k) -> benchmark Delta^2(k)
       double absolute_tolerance = HALOMOD_TOLERANCE*data->Delta2[model][i][j]; // Convert relative -> absolute tolerance      
 
       // Do the check
