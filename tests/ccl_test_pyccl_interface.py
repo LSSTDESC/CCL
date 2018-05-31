@@ -338,6 +338,53 @@ def check_massfunc_nu(cosmo):
     assert_raises(TypeError, ccl.sigmaM, cosmo, mhalo_arr, a_arr)
 
 
+def check_halomod(cosmo):
+    """
+    Check that halo model functions can be run.
+    """
+
+    # Time variables
+    z = 0.
+    z_array = np.linspace(0., 2., 10)
+    a = 1.
+    a_array = 1. / (1.+z_array)
+
+    # Mass variables
+    mass_scalar = 1e13
+    mass_list = [1e11, 1e12, 1e13, 1e14, 1e15, 1e16]
+    mass_array = np.array([1e11, 1e12, 1e13, 1e14, 1e15, 1e16])
+
+    # Wave-vector variables
+    k_scalar = 1.
+    k_list = [1e-3, 1e-2, 1e-1, 1e0, 1e1]
+    k_array = np.array([1e-3, 1e-2, 1e-1, 1e0, 1e1])
+
+    # halo concentration
+    assert_( all_finite(ccl.halo_concentration(cosmo, mass_scalar, a)) )
+    assert_( all_finite(ccl.halo_concentration(cosmo, mass_list,   a)) )
+    assert_( all_finite(ccl.halo_concentration(cosmo, mass_array,  a)) )
+
+    assert_raises(TypeError, ccl.halo_concentration, cosmo, mass_scalar, a_array)
+    assert_raises(TypeError, ccl.halo_concentration, cosmo, mass_list,   a_array)
+    assert_raises(TypeError, ccl.halo_concentration, cosmo, mass_array,  a_array)
+    
+    # halo model
+    assert_( all_finite(ccl.halomodel_matter_power(cosmo, k_scalar, a)) )
+    assert_( all_finite(ccl.halomodel_matter_power(cosmo, k_list,   a)) )
+    assert_( all_finite(ccl.halomodel_matter_power(cosmo, k_array,  a)) )
+
+    assert_( all_finite(ccl.twohalo_matter_power(cosmo, k_scalar, a)) )
+    assert_( all_finite(ccl.twohalo_matter_power(cosmo, k_list,   a)) )
+    assert_( all_finite(ccl.twohalo_matter_power(cosmo, k_array,  a)) )
+
+    assert_( all_finite(ccl.onehalo_matter_power(cosmo, k_scalar, a)) )
+    assert_( all_finite(ccl.onehalo_matter_power(cosmo, k_list,   a)) )
+    assert_( all_finite(ccl.onehalo_matter_power(cosmo, k_array,  a)) )
+
+    assert_raises(TypeError, ccl.halomodel_matter_power, cosmo, k_scalar, a_array)
+    assert_raises(TypeError, ccl.halomodel_matter_power, cosmo, k_list,   a_array)
+    assert_raises(TypeError, ccl.halomodel_matter_power, cosmo, k_array,  a_array)
+
 def check_neutrinos():
     """
     Check that neutrino-related functions can be run.
@@ -754,6 +801,13 @@ def test_massfunc():
         
     for cosmo_nu in reference_models_nu():
         yield check_massfunc_nu, cosmo_nu
+
+def test_halomod():
+    """
+    Test halo model and supporting functions.
+    """
+    for cosmo in reference_models():
+        yield check_halomod, cosmo
         
 @decorators.slow
 def test_neutrinos():

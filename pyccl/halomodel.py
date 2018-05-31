@@ -1,7 +1,7 @@
 from pyccl import ccllib as lib
 from pyccl.pyutils import _vectorize_fn, _vectorize_fn2, _vectorize_fn3, _vectorize_fn4
 
-def onehalo_matter_power(cosmo, a, k):
+def onehalo_matter_power(cosmo, k, a):
     """one-halo term for matter power spectrum
     Args:
         cosmo (:obj:`ccl.cosmology`): Cosmological parameters.
@@ -12,9 +12,9 @@ def onehalo_matter_power(cosmo, a, k):
         onehalo_matter_power (float or array_like): one-halo term for matter power spectrum
     """
     return _vectorize_fn2(lib.onehalo_matter_power, 
-                          lib.onehalo_matter_power_vec, cosmo, a, k)
+                          lib.onehalo_matter_power_vec, cosmo, k, a)
 
-def twohalo_matter_power(cosmo, a, k):
+def twohalo_matter_power(cosmo, k, a):
     """two-halo term for matter power spectrum
     Args:
         cosmo (:obj:`ccl.cosmology`): Cosmological parameters.
@@ -25,9 +25,9 @@ def twohalo_matter_power(cosmo, a, k):
         two-halo matter power spectrum (float or array_Like): two-halo term for matter power spectrum
     """
     return _vectorize_fn2(lib.twohalo_matter_power,
-			  lib.twohalo_matter_power_vec, cosmo, a, k)
+			  lib.twohalo_matter_power_vec, cosmo, k, a)
 
-def halomodel_matter_power(cosmo, a, k):
+def halomodel_matter_power(cosmo, k, a):
     """matter power spectrum from halo model
     Args:
         cosmo (:obj:`ccl.cosmology`): Cosmological parameters.
@@ -38,9 +38,9 @@ def halomodel_matter_power(cosmo, a, k):
         halomodel_matter_power (float or array_like): matter power spectrum from halo model
     """
     return _vectorize_fn2(lib.halomodel_matter_power,
-			  lib.halomodel_matter_power_vec, cosmo, a, k)
+			  lib.halomodel_matter_power_vec, cosmo, k, a)
 
-def halo_concentration(cosmo, a, halo_mass):
+def halo_concentration(cosmo, halo_mass, a):
     """halo concentration
     Args:
         cosmo (:obj:`ccl.cosmology`): Cosmological parameters.
@@ -51,5 +51,5 @@ def halo_concentration(cosmo, a, halo_mass):
         halo_concentration: measure of halo concentration
     """
     return _vectorize_fn2(lib.halo_concentration,
-			  lib.halo_concentration_vec, cosmo, a, halo_mass)
+			  lib.halo_concentration_vec, cosmo, halo_mass, a)
 
