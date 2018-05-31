@@ -64,6 +64,30 @@ class_models = OrderedDict(
             "pos_curv_manynu1" : {"Omega_k"  : 0.01,
                                   "Neff"     : Neff_from_N_ur_N_ncdm(N_ur=3.0, N_ncdm=3.0),   # 3 massless, 3 massive neutrino
                                   "m_nu"     : [0.03, 0.05, 0.1]}, # Masses
+            "CCL7"             : {"Omega_k"  : 0.0,
+                                  "Neff"     : Neff_from_N_ur_N_ncdm(N_ur=2.0, N_ncdm=1.0),
+                                  "m_nu"     : [0.04, 0.0, 0.0]},
+            "CCL8"             : {"Omega_k"  : 0.0,
+                                  "w0"       : -0.9,
+                                  "wa"       : 0.0,
+                                  "Neff"     : Neff_from_N_ur_N_ncdm(N_ur=1.0, N_ncdm=2.0),
+                                  "m_nu"     : [0.05, 0.01, 0.0]},
+            "CCL9"             : {"Omega_k"  : 0.0,
+                                  "w0"       : -0.9,
+                                  "wa"       : 0.1,
+                                  "Neff"     : Neff_from_N_ur_N_ncdm(N_ur=0.0, N_ncdm=3.0),
+                                  "m_nu"     : [0.03, 0.02, 0.04]},
+            "CCL10"            : {"Omega_k"  : 0.05,
+                                  "w0"       : -0.9,
+                                  "wa"       : 0.1,
+                                  "Neff"     : Neff_from_N_ur_N_ncdm(N_ur=2.0, N_ncdm=1.0),
+                                  "m_nu"     : [0.05, 0.0, 0.0]},
+            "CCL11"            : {"Omega_k"  : -0.05,
+                                  "w0"       : -0.9,
+                                  "wa"       : 0.1,
+                                  "Neff"     : Neff_from_N_ur_N_ncdm(N_ur=1.0, N_ncdm=2.0),
+                                  "m_nu"     : [0.03, 0.02, 0.0]},
+
             }
         )
 
@@ -146,8 +170,8 @@ def read_class_chi_test_file():
     CLASS. (distances are in Mpc)
     """
     # Load data from file
-    dat = np.genfromtxt(join(path, "benchmark/chi_hiz_mnu_model6-15.txt")).T
-    assert(dat.shape == (10, 10))
+    dat = np.genfromtxt(join(path, "benchmark/chi_hiz_mnu_model6-20.txt")).T
+    assert(dat.shape == (15, 10))
     
     # Split into redshift column and chi(z) columns
     z = dat[0]
@@ -195,6 +219,20 @@ def read_dm_mnu_hiz_test_file():
     dm = dat[1:]
     return z, dm
 
+def read_class_dm_test_file():
+    """
+    Read the file containing all the distance modulus benchmarks from 
+    CLASS.
+    """
+    # Load data from file
+    dat = np.genfromtxt(join(path, "benchmark/dm_hiz_mnu_model6-20.txt")).T
+    assert(dat.shape == (15, 10))
+    
+    # Split into redshift column and dm(z) columns
+    z = dat[0]
+    dm = dat[1:]
+    return z, dm
+
 # Set-up test data
 z, chi = read_chi_test_file()
 zhi, chi_hiz = read_chi_hiz_test_file()
@@ -202,6 +240,7 @@ _, dm = read_dm_test_file()
 znu, chi_nu = read_chi_mnu_test_file()
 znuhi, chi_nu_hiz = read_chi_mnu_hiz_test_file()
 z_class, chi_class = read_class_chi_test_file()
+z_dm_class, dm_class = read_class_dm_test_file()
 _znu, dm_nu = read_dm_mnu_test_file()
 _znuhi, dm_nu_hiz = read_dm_mnu_hiz_test_file()
 
@@ -309,14 +348,16 @@ def compare_distances_mnu_hiz(z, chi_bench,dm_bench, Omega_v, w0, wa, Neff_mnu, 
 
     assert_allclose(dm, dm_bench[a_not_one], atol=1e-3, rtol = DISTANCES_TOLERANCE_MNU)
 
-def compare_class_distances(z, chi_bench, Neff=3.0, m_nu=0.0, Omega_k=0.0):
+def compare_class_distances(z, chi_bench, dm_bench, Neff=3.0, m_nu=0.0, 
+                            Omega_k=0.0, w0=-1.0, wa=0.0):
     """
     Compare distances calculated by pyccl with the distances in the CLASS 
     benchmark file.
     """
     # Create new Parameters and Cosmology objects
     p = ccl.Parameters(Omega_c=Omega_c, Omega_b=Omega_b, Neff=Neff, 
-                       h=h, A_s=A_s, n_s=n_s, Omega_k=Omega_k, m_nu=m_nu)
+                       h=h, A_s=A_s, n_s=n_s, Omega_k=Omega_k, m_nu=m_nu,
+                       w0=w0, wa=wa)
     cosmo = ccl.Cosmology(p)
     
     # Calculate distance using pyccl
@@ -324,6 +365,12 @@ def compare_class_distances(z, chi_bench, Neff=3.0, m_nu=0.0, Omega_k=0.0):
     chi = ccl.comoving_radial_distance(cosmo, a)
     # Compare to benchmark data
     assert_allclose(chi, chi_bench, rtol=DISTANCES_TOLERANCE_CLASS)
+
+    # Compare distance moudli where a!=1
+    a_not_one = a != 1
+    dm = ccl.distance_modulus(cosmo, a[a_not_one])
+    assert_allclose(dm, dm_bench[a_not_one], rtol=DISTANCES_TOLERANCE_CLASS)
+
 
 def test_distance_model_0():
     i = 0
@@ -399,39 +446,59 @@ def test_distance_mnu_hiz_model_4():
     
 def test_class_distance_model_flat_nonu():
     i = 0
-    compare_class_distances(z_class, chi_class[i], **class_models["flat_nonu"])
+    compare_class_distances(z_class, chi_class[i], dm_class[i], **class_models["flat_nonu"])
 
 def test_class_distance_model_pos_curv_nonu():
     i = 1
-    compare_class_distances(z_class, chi_class[i], **class_models["pos_curv_nonu"])
+    compare_class_distances(z_class, chi_class[i], dm_class[i], **class_models["pos_curv_nonu"])
 
 def test_class_distance_model_neg_curv_nonu():
     i = 2
-    compare_class_distances(z_class, chi_class[i], **class_models["neg_curv_nonu"])
+    compare_class_distances(z_class, chi_class[i], dm_class[i], **class_models["neg_curv_nonu"])
 
 def test_class_distance_model_flat_massnu1():
     i = 3
-    compare_class_distances(z_class, chi_class[i], **class_models["flat_massnu1"])
+    compare_class_distances(z_class, chi_class[i], dm_class[i], **class_models["flat_massnu1"])
 
 def test_class_distance_model_flat_massnu2():
     i = 4
-    compare_class_distances(z_class, chi_class[i], **class_models["flat_massnu2"])
+    compare_class_distances(z_class, chi_class[i], dm_class[i], **class_models["flat_massnu2"])
 
 def test_class_distance_model_flat_massnu3():
     i = 5
-    compare_class_distances(z_class, chi_class[i], **class_models["flat_massnu3"])
+    compare_class_distances(z_class, chi_class[i], dm_class[i], **class_models["flat_massnu3"])
 
 def test_class_distance_model_flat_manynu1():
     i = 6
-    compare_class_distances(z_class, chi_class[i], **class_models["flat_manynu1"])
+    compare_class_distances(z_class, chi_class[i], dm_class[i], **class_models["flat_manynu1"])
 
 def test_class_distance_model_neg_curv_massnu1():
     i = 7
-    compare_class_distances(z_class, chi_class[i], **class_models["neg_curv_massnu1"])
+    compare_class_distances(z_class, chi_class[i], dm_class[i], **class_models["neg_curv_massnu1"])
 
 def test_class_distance_model_pos_curv_massnu1():
     i = 8
-    compare_class_distances(z_class, chi_class[i], **class_models["pos_curv_manynu1"])
+    compare_class_distances(z_class, chi_class[i], dm_class[i], **class_models["pos_curv_manynu1"])
+
+def test_class_distance_model_ccl7():
+    i = 9
+    compare_class_distances(z_class, chi_class[i], dm_class[i], **class_models["CCL7"])
+
+def test_class_distance_model_ccl8():
+    i = 10
+    compare_class_distances(z_class, chi_class[i], dm_class[i], **class_models["CCL8"])
+
+def test_class_distance_model_ccl9():
+    i = 11
+    compare_class_distances(z_class, chi_class[i], dm_class[i], **class_models["CCL9"])
+
+def test_class_distance_model_ccl10():
+    i = 12
+    compare_class_distances(z_class, chi_class[i], dm_class[i], **class_models["CCL10"])
+
+def test_class_distance_model_ccl11():
+    i = 13
+    compare_class_distances(z_class, chi_class[i], dm_class[i], **class_models["CCL11"])
 
 if __name__ == "__main__":
     run_module_suite()
