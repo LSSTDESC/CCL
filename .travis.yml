@@ -25,7 +25,8 @@ matrix:
     env: TOXENV=py36
 install:
 - "./.travis/install.sh"
-- if ! [[ $TRAVIS_OS_NAME == "linux" ]]; then source $HOME/miniconda/bin/activate; fi
+- if ! [[ $TRAVIS_OS_NAME == "linux" ]]; then source $HOME/miniconda/bin/activate;
+  fi
 - if ! [[ $TRAVIS_OS_NAME == "linux" ]]; then hash -r ; fi
 - if ! [[ $TRAVIS_OS_NAME == "linux" ]]; then source activate test-environment ; fi
 - export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
@@ -34,7 +35,8 @@ install:
 - python --version
 script:
 - python setup.py build
-- nosetests tests/run_tests.py --all --debug --detailed-errors --verbose --process-restartworker --with-coverage --cover-package=pyccl
+- nosetests tests/run_tests.py --all --debug --detailed-errors --verbose --process-restartworker
+  --with-coverage --cover-package=pyccl
 - sudo make -Cbuild install
 - check_ccl
 after_success:
@@ -43,7 +45,7 @@ deploy:
   provider: pypi
   user: desc-ccl
   password:
-    secure: d903I7Fa08AaAwBwTgddmy8n4JbeGtcrfPFLHKLM9Uxrt7zFsKO4xqxd1BCmarAD4Hx0WcmzlWD1W7kbr9wHHFuiymj6kglKgMH2AAXZdA441BWHZsOIqAYIgJBCVxxQEAdGpbvrSgTGbyQW1b/37EWl617v26WRqDhAcnsdpOY1JByw4SwuyEDBvqN5tpmJfygc/GwRCP/03yUmOr4lJQXrvBpRKoO48fhi3MjkUnOYDn/pNy1DypxA/ECtjZy2BZJbKldW+eKdVxAo0naDF8hjNMuyNj0iyhPyHx3/6cmBNutDM1Y0LLcexuXh4BCAQwdlgCuVHeDEhjyguH87WOBJZ1+UJOSmfiBwEd0T7ZQWeEhDROGw+NbWlY4/wZlAFaietVh0ppJEXAOaBQ8Z0mzH6P9DXE9U0cPA6Di3MPHFoH+ORkjqpG4jA1CHTHyvjnxjjmKzKyPqzOgjMpsEilHDQYpemg1gIx4YQrWix9BkVv8hnUKpV5i1VfCrIoPLXsl2iHSXn5l+KhIpiIxCsIr0odz6O/nedbBafvTd44480xdXN1G4avGcM4YH6d2n3qsQvO2sJJxFKKsFIBAkKAe1yCq+V18Op+QG2U9a2tGCUJ6/rTuk7Jg04eKggWgDa3vIWfkZxTmZ71Nv1dPzTqUCLo5dIq7MvSwlQVpFMGc=
+    secure: mW6yYWqTxSOlqRE4nlaBucmCg7JBEhm2kDRT18imbIA998JSnA+3TNNc87XbrU5KBHeLgtlX6hFGaquNMi69jY64zmVy4880hnuShpFWYGiwHkvdJCqnQe2wHl183/zQxFpgLZrWj5TyzSgz7ESWIbqt6SS8kT87oKpjtE813jLICUv8kwwRoOo2RQ0EVKKlmOsbbDPOh26/lx0MKRHYeU7pzSo96kXty6fLSARKJLngDDq+e8Vph7pYE5N0ZMoOwagAMBHUtv6zXhzTz5Kfu9menaDpClFwJqjkvbP9IhVSa1sJhituk/GG+d4MBMYmVadsH5J9dJlUm7oGrxJsiuwePfENjxafV8O+JcT02Q9RlvP9741bckw9hy1wLN0qOdPnaMx3kdXin3Ooj9Oud+3Uv8Y6HC1IYvkS1H6Od4EoowJCIDBz3NmDjiuGpzCcenRmaxFQJnbwf/H44pedDLkB0c+EnYxfh2U7LJj7ztVmeFS8AV3P/E3aYx0StP/LnPnzvWDBIhStdZSMAX3K1RZBSjvu5nmTbk2w6TMI6ihlKfAmjyTwEOH7KcZtdv/o7A5VbBiz6PGehAJ6MrWLKtkiLVO1K2AeKH/AZ2Bknh8CUyLBpQ4JYg5URHvGa7wvnM4rPVh1dU/LvJrbaVXqlZp4gNVW0wrzVakfu4Q6Qng=
   on:
     tags: true
     branch: master
