@@ -741,7 +741,13 @@ Table \ref{tab:tests} summarises all the \ccl validation tests discussed in this
 
 \subsection{Background quantities \& growth of perturbations}
 
-Comoving radial distances, the growth factor and distance moduli were compared against independently produced benchmarks at a set of low, $z = 0,1,2,3,4,5$, and high redshifts, $10\leq z \leq 10^3$. These comparisons were performed for the cosmologies listed in Table \ref{tab:cosmologies}. The target level of accuracy was $10^{-4}$ and this was achieved or surpassed for all the background quantities. Figure \ref{fig:distancegrow} summarizes our results for cosmologies without massive neutrinos. The left panels show the distance accuracy achieved for different cosmological models (curves of different thickness) as a function of redshift, which is always better than $10^{-6}$. Similarly, the right panels show the growth factor accuracy, which is $<10^{-5}$. 
+Comoving radial distances, the growth factor and distance moduli were compared against independently produced benchmarks at a set of low, $z = 0,1,2,3,4,5$, and high redshifts, $10\leq z \leq 10^3$. These comparisons were performed for the cosmologies listed in Table \ref{tab:cosmologies}. The accuracy metric was the fined as the fractional difference between the prediction made by \ccl and by an independent implementation (labeled $i$), i.e., for the comoving radial distance,
+\begin{equation}
+  \mathcal{A} \equiv \frac{|D_{\tt CCL}(z)-D_{i}(z)|}{D_\ccl(z)}
+\end{equation}
+\todo{Check for all $\mathcal{A}$ definitions whether \ccl is in the denominator in the code.}
+and analogously defined for the growth factor and distance moduli.
+The target level of accuracy was $10^{-4}$ and this was achieved or surpassed for all the background quantities. Figure \ref{fig:distancegrow} summarizes our results for cosmologies without massive neutrinos. The left panels show the distance accuracy achieved for different cosmological models (curves of different thickness) as a function of redshift, which is always better than $10^{-6}$. Similarly, the right panels show the growth factor accuracy, which is $<10^{-5}$. 
 
 Analogous comparisons of the comoving radial distances were made to independently produced benchmarks at low and high redshifts for cosmologies containing massive neutrinos. (Notice that the growth function with massive neutrinos is not supported by \ccl because it is scale-dependent and therefore ill defined in our current framework.) These comparisons are displayed in Figure \ref{fig:distancegrow_nu}. The cosmological models used in tests of background quantities for cosmologies with massive neutrinos are given in Table \ref{tab:cosmologies_nu}. In this case, the benchmarks were produced by the {\tt astropy} library \citep{astropy}. We increase the maximum tolerated fractional difference between quantities produced by \ccl and benchmarks in this case to $10^{-3}$, due to the fact that while \ccl uses the full phase-space integral in computing the massive neutrino density as defined above, {\tt astropy} uses a fitting function which is itself not accurate at a $10^{-3}$ level. As can be seen in Table \ref{tab:cosmologies_nu}, we perform comparisons in cosmologies with $N_{eff}=3$ rather than the more standard $N_{eff}=3.046$ in order to ensure the same cosmologies can easily be defined in \ccl and {\tt astropy} \todo{Tilman, add comments on CLASS-based neutrino tests when merged.}
 
@@ -790,17 +796,22 @@ Analogous comparisons of the comoving radial distances were made to independentl
 
 \subsubsection{Analytic expressions}
 
-As discussed in Section \ref{sec:matterps}, several power spectrum methods are implemented in \ccl. Two of them, the BBKS \citep{BBKS} and the Eisenstein \& Hu methods are implemented for validation purposes only and feed into the tests for observables such as angular power spectra and correlation functions, as we will see in subsequent sections. These two implementations have been validated against independent implementations. For BBKS, this test was performed at $0\leq z \leq 5$ in the wavenumber range $10^{-3} \leq k \leq 10 h/$Mpc with 10 bins per decade, and yielded an accuracy level of $10^{-4}$.
+As discussed in Section \ref{sec:matterps}, several power spectrum methods are implemented in \ccl. Two of them, the BBKS \citep{BBKS} and the Eisenstein \& Hu methods are implemented for validation purposes only and feed into the tests for observables such as angular power spectra and correlation functions, as we will see in subsequent sections. These two implementations have been validated against independent implementations. The accuracy in this case was defined as the absolute fractional difference between the \ccl and the independent predictions:
+\begin{equation}
+  \mathcal{A}\equiv \frac{|P_{\tt CCL}(k,z)-P_{i}(k,z)|}{P_{\tt CCL}(k,z)}
+  \label{eq:pkacc}
+\end{equation}
+For BBKS, this test was performed at $0\leq z \leq 5$ in the wavenumber range $10^{-3} \leq k \leq 10 h/$Mpc with 10 bins per decade, and yielded an accuracy level of $10^{-4}$.
 \footnote{We noticed that there are 2 typographical errors for the BBKS transfer function in ``Modern Cosmology'' \citep{DodelsonBook} compared to the original BBKS paper. The quadratic term should be $(16.1q)^2$ and the cubic term should be $(5.46q)^3$. The BBKS equation is correct in \citet{PeacockBook}. Using the wrong equation can give differences in the results above the $10^{-4}$ level.}
 For the Eisenstein \& Hu matter power spectrum, we obtained similar accuracy at $z=0$ for the same wavenumbers. The cosmologies for which the tests were implemented are specified in Table \ref{tab:tests}.
 
-The BCM implementation for the impact of baryons on the matter power spectrum, described in Section \ref{sec:matterps} is also analytical, and accurate to $10^{-12}$.
+The BCM implementation for the impact of baryons on the matter power spectrum, described in Section \ref{sec:matterps} is also analytical. Following Equation (\ref{eq:pkacc}), we found it to be accurate to $10^{-12}$.
 
 \subsubsection{Validation of interpolation schemes}
 
 In its default configuration, \ccl adopts the HaloFit \citep{CLASS_halofit} implementation by interpolating {\tt CLASS} power spectra outputs to model the matter power spectrum. The computation of the power spectrum from {\tt CLASS} can be significantly sped up by interpolating the matter power spectra in the range {\tt K$\_$MIN}~$<k<$~{\tt K$\_$MAX$\_$SPLINE} and extrapolating beyond it, as described in Section \ref{sec:implement}. In this section, we describe the loss of accuracy due to this method. The tests presented are performed in a flat $\Lambda$CDM cosmology with $\Omega_c=0.25$, $\Omega_b=0.05$, $A_s=2.1\times10^{-9}$, $h=0.7$ and $n_s=0.96$.
 
-The accuracy of this approximation is shown in Figure \ref{fig:NLextrapol} for redshifts $z=0$, $z=3$ and $z=20$. We compare the nonlinear matter power spectrum at these redshifts, computed with the previously described approximation, to the matter power spectrum obtained by setting the power spectrum splines to high-accuracy values. We find that for typical values of $\Delta \ln k=10^{-2}$ and {\tt K$\_$MAX$\_$SPLINE}$=50$/Mpc, $\ln P$ has converged to an accuracy that surpasses the expected impact of baryonic effects on the matter power spectrum at $k>10/$Mpc.  (For an estimate of the impact of baryons on the total matter power spectrum, see \citealt{Schneider15}.) 
+The accuracy of this approximation is shown in Figure \ref{fig:NLextrapol} for redshifts $z=0$, $z=3$ and $z=20$. We compare the nonlinear matter power spectrum at these redshifts, computed with the previously described approximation, to the matter power spectrum obtained by setting the power spectrum splines to high-accuracy values. We find that for typical values of $\Delta \ln k=10^{-2}$ and {\tt K$\_$MAX$\_$SPLINE}$=50$/Mpc, $\ln P$ has converged to an accuracy that surpasses the expected impact of baryonic effects on the matter power spectrum at $k>10/$Mpc. \todo{Christiane, what was extacly the reference fiducial power?} (For an estimate of the impact of baryons on the total matter power spectrum, see \citealt{Schneider15}.) 
 
 %------------------------
 \begin{figure*}
@@ -861,26 +872,38 @@ These results show that the {\tt CLASS}-based \ccl power spectrum calculations a
 
 \subsubsection{Validation of the Cosmic Emulator implementation}
 \label{sec:cosmicemu}
-\todo{I think this section should go before the one on generalized validation of the power spectrum over LCDM space, because that one refers to 'the sections above' as being at specific cosmologies, which is the case here. - DL}\todo{The only caveat is that the generalized validation scheme doesnt account for the emulator - EC.}
+\todo{I think this section should go before the one on generalized validation of the power spectrum over LCDM space, because that one refers to 'the sections above' as being at specific cosmologies, which is the case here. - DL}\elisa{The only caveat is that the generalized validation scheme doesnt account for the emulator.}
 
-\citet{Lawrence17} quantified the accuracy of the matter power spectrum from their emulation scheme by comparing their predictions to the resulting power spectra from the numerical simulations used for the calibration of their scheme. We repeated this procedure making the emulator predictions via \ccl for a subset of emulator cosmologies. 
+\citet{Lawrence17} quantified the accuracy of the matter power spectrum from their emulation scheme by comparing their predictions to the resulting power spectra from the numerical simulations used for the calibration of their scheme. We repeated this procedure making the emulator predictions via \ccl for a subset of emulator cosmologies. In this section, we quantify the accuracy of the \ccl predictions by estimating
+\begin{equation}
+  \mathcal{A}\equiv\frac{|P_{\tt CCL}(k,z)-P_{\rm L17}(k,z)|}{P_{\tt CCL}(k,z)}
+  \label{eq:pkaccemu}
+\end{equation}
+where the label L17 referes to the smoothed simulated power spectra from \citet{Lawrence17}.
 
-Our results, presented in the form of absolute fractional accuracy of the power spectra, are shown in Figure \ref{fig:emuacc}. For cosmologies without neutrinos, we required the matter power spectrum at $z=0$ to be within $1\%$ of the smoothed simulated power spectrum from \citet{Lawrence17} (see their Figure 6). Similarly, we required $3\%$ accuracy for cosmologies with neutrinos (their Figure 5). The cosmologies that were tested are the ones listed in Table \ref{tab:cosmologies}, which are described in detail in \citet{Lawrence17}.
+Our results are shown in Figure \ref{fig:emuacc}. For cosmologies without neutrinos, we required the matter power spectrum at $z=0$ to be within $1\%$ of the smoothed simulated power spectrum from \citet{Lawrence17} (see their Figure 6). Similarly, we required $3\%$ accuracy for cosmologies with neutrinos (their Figure 5). The cosmologies that were tested are the ones listed in Table \ref{tab:cosmologies}, which are described in detail in \citet{Lawrence17}.\elisa{Need to explain $1-3\%$ better.}
 
 \begin{figure*}
   \centering
   \includegraphics[width=0.45\textwidth]{poweremu.eps}
   \includegraphics[width=0.45\textwidth]{poweremu_nu.eps}
-  \caption{Absolute fractional accuracy in the matter power spectra obtained by calling the cosmic emulator from \ccl and the smoothed simulated spectra from \citep{Lawrence17}. The left panel shows the results for cosmologies without neutrinos; the right panel, results for cosmologies with neutrinos.}
+  \caption{Absolute fractional accuracy in the matter power spectra, Eq. (\ref{eq:pkaccemu}), obtained by calling the cosmic emulator from \ccl and the smoothed simulated spectra from \citet{Lawrence17}. The left panel shows the results for cosmologies without neutrinos; the right panel, results for cosmologies with neutrinos.}
   \label{fig:emuacc}
 \end{figure*}
 
 \subsection{Halo bias and halo mass function}
 
-Independent codes were utilized to test the accuracy of halo mass function predictions. These predictions are computed from power spectra obtained using the BBKS approximation. For the halo mass function, we compare the value of $\sigma$, $\log(\sigma^{-1})$, and the value of the halo mass function in the form used in \cite{Tinker2008},
+Independent codes were utilized to test the accuracy of halo mass function predictions. These predictions are computed from power spectra obtained using the BBKS approximation. For the halo mass function, we compare the value of $\sigma$, $\tilde\sigma\equiv\log(\sigma^{-1})$, and the value of the halo mass function in the form used in \cite{Tinker2008},
 \begin{equation}
-\log[(M^2/\bar{\rho}_m)dn/dM].
+\mathcal{H}\equiv \log[(M^2/\bar{\rho}_m)dn/dM].
 \end{equation}
+These defines three new accuracy metrics:
+\begin{eqnarray}
+  \mathcal{A}_{hmf1}&\equiv&\frac{|\sigma_{\tt CCL}-\sigma_i|}{\sigma_{\tt CCL}},\\
+  \mathcal{A}_{hmf2}&\equiv&\frac{|\tilde\sigma_{\tt CCL}-\tilde\sigma_i|}{\tilde\sigma_{\tt CCL}},\\
+  \mathcal{A}_{hmf3}&\equiv&\frac{|\mathcal{H}_{\tt CCL}-\mathcal{H}_i|}{\mathcal{H}_{\tt CCL}}.
+\end{eqnarray}
+
 We note that while we maintain the $10^{-4}$ for our evaluations of $\sigma$, the accuracy degrades to a value of $5\times10^{-3}$ for the halo mass function evaluation, primarily at the high halo mass and high redshift domains. We find that this increased error is acceptable, as the level of precision is significantly better than the accuracy of current halo mass function models. This is demonstrated in Figure~\ref{fig:hmf}, where this calculation has been run for a single cosmology using the Tinker 2010 halo mass function. While there is a degradation in accuracy due to our current spline treatment of the log inverse of $\sigma(M)$, we note that it does not significantly degrade our halo mass function determination. While improvement on this remains a task for the future, the halo mass function varies between fitting functions significantly more than this remaining error. As of this time, we currently do not have independent benchmarks for the halo bias function, though it should be noted that this calculation does not involve any additional functions beyond $\sigma(M)$ and should hold to the $10^{-4}$ tolerance level.
 
 \begin{figure*}
