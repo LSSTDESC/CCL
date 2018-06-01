@@ -2,6 +2,7 @@
 from setuptools.command.build_py import build_py as _build
 from setuptools import setup
 from subprocess import call
+from io import open
 import glob
 import os
 import sys
@@ -25,7 +26,7 @@ class build(_build):
         _build.run(self)
 
 # read the contents of the README file
-with open('README.md') as f:
+with open('README.md', encoding="utf-8") as f:
     long_description = f.read()
 
 setup(name="pyccl",
