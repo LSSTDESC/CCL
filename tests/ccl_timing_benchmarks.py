@@ -1,11 +1,9 @@
-#!/usr/bin/env python
-"""
-Run timing benchmarks on key CCL functions.
-"""
 import numpy as np
 import pyccl as ccl
 import timeit
 
+##### 
+# This script tests the speed of CCL on key CCL functions.
 
 def run_distance():
     """
