@@ -9,13 +9,13 @@ import time
 # Tune the parameters below to explore different scenarios
 #  a) Number of redshift bins (for both sources and lenses)
 nbins=10
-#  b) Type of cosmological model (1-> simple LCDM, 2-> LCDM with massive neutrinos, 3-> Use emulator to obtain P(k))
-which_cosmo=1
+#  b) Type of cosmological model (1-> simple LCDM, 2-> LCDM with single massive neutrino, 3-> Use emulator to obtain P(k, 4-> LCDM with three massive neutrinos, 5-> Use emulator with massive neutrinos ))
+which_cosmo=5
 #  c) Do sources have intrinsic alignments?
 has_ia = True
 #  d) Do lenses have redshift-space distortions?
 #     This must be set to False for cosmologies with massive neutrinos
-has_rsd = True
+has_rsd = False
 #  e) Do lenses have magnification bias?
 has_mag = True
 
@@ -24,9 +24,13 @@ print("Run parameters: ")
 if which_cosmo==1 :
        print(" Vanilla LCDM")
 elif which_cosmo==2 :
-       print(" LCDM + m_nu")
+       print(" LCDM + m_nu CCL7")
 elif which_cosmo==3 :
-       print(" CosmicEmu")
+       print(" CosmicEmu M1")
+elif which_cosmo==4 :
+       print(" LCDM + m_nu CCL 9")
+elif which_cosmo==5 :
+       print(" CosmicEmu M38")
 else :
        raise ValueError("Please choose which_cosmo=1, 2 or 3")
 print(" %d tomographic bins"%nbins)
@@ -55,12 +59,19 @@ t1=time.time()
 
 #####
 # C) Initialize the cosmological model
-if which_cosmo==1 :
-       cosmo = ccl.Cosmology(Omega_c=0.27, Omega_b=0.045, h=0.67, A_s=2.1e-9, n_s=0.96)
-elif which_cosmo==2 :
-       cosmo = ccl.Cosmology(Omega_c=0.27, Omega_b=0.045, h=0.67, A_s=2.1e-9, n_s=0.96,m_nu=0.06)
-elif which_cosmo==3 :
-       cosmo = ccl.Cosmology(Omega_c=0.27, Omega_b=0.045, h=0.7, sigma8=0.8, w0=-1., wa=0., n_s=0.96,Neff=3.04, transfer_function='emulator',matter_power_spectrum='emu')
+if which_cosmo==1 : #CCL1
+       cosmo = ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7,sigma8=0.8, n_s=0.96)
+elif which_cosmo==2 : #CCL7
+       cosmo = ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7,sigma8=0.8, n_s=0.96,m_nu=np.array([0.04,0.0,0.0]))
+elif which_cosmo==3 : #M1
+       cosmo = ccl.Cosmology(Omega_c=3.2759e-01, Omega_b=5.9450e-02, h=6.1670e-01, sigma8=8.7780e-01,n_s=9.6110e-01,w0=-7.0000e-01,wa=6.7220e-01, Neff=3.04, transfer_function='emulator',matter_power_spectrum='emu')
+elif which_cosmo==4 : #CCL9
+       cosmo = ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7,sigma8=0.8, n_s=0.96,w0=-0.9,wa=0.1,m_nu=np.array([0.03,0.02,0.04]))
+elif which_cosmo==5 : #M38
+       Mnu_out = ccl.nu_masses(2.0317e-02*(5.9020e-01)**2, 'equal');
+       cosmo = ccl.Cosmology(Omega_c=3.5595e-01, Omega_b=6.5074e-02, h= 5.9020e-01, n_s=9.5623e-01, 
+                             sigma8=7.3252e-01, w0=-8.0194e-01, wa=3.6280e-01, Neff=3.04,m_nu=Mnu_out,
+                             transfer_function='emulator',matter_power_spectrum='emu')
 t2=time.time()
 report_time('Cosmology creation',t2-t1)
 
