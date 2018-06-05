@@ -23,7 +23,7 @@
 #define Z0_SH 0.65
 #define SZ_SH 0.05
 #define NL 499
-#define PS 0.1 
+#define PS 0.1
 #define NREL 3.046
 #define NMAS 0
 #define MNU 0.0
@@ -163,31 +163,6 @@ int main(int argc,char **argv)
 
   //Always clean up!!
   ccl_cosmology_free(cosmo);
-  
+
   return 0;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
