@@ -14,6 +14,7 @@ which_cosmo=1
 #  c) Do sources have intrinsic alignments?
 has_ia = True
 #  d) Do lenses have redshift-space distortions?
+#     This must be set to False for cosmologies with massive neutrinos
 has_rsd = True
 #  e) Do lenses have magnification bias?
 has_mag = True
