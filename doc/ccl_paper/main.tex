@@ -744,9 +744,8 @@ Table \ref{tab:tests} summarises all the \ccl validation tests discussed in this
 
 Comoving radial distances, the growth factor and distance moduli were compared against independently produced benchmarks at a set of low, $z = 0,1,2,3,4,5$, and high redshifts, $10\leq z \leq 10^3$. These comparisons were performed for the cosmologies listed in Table \ref{tab:cosmologies}. The accuracy metric was the fined as the fractional difference between the prediction made by \ccl and by an independent implementation (labeled $i$), i.e., for the comoving radial distance,
 \begin{equation}
-  \mathcal{A} \equiv \frac{|D_{\tt CCL}(z)-D_{i}(z)|}{D_\ccl(z)}
+  \mathcal{A} \equiv \frac{|D_{\tt CCL}(z)-D_{i}(z)|}{D_i(z)}
 \end{equation}
-\todo{Check for all $\mathcal{A}$ definitions whether \ccl is in the denominator in the code.}
 and analogously defined for the growth factor and distance moduli.
 The target level of accuracy was $10^{-4}$ and this was achieved or surpassed for all the background quantities. Figure \ref{fig:distancegrow} summarizes our results for cosmologies without massive neutrinos. The left panels show the distance accuracy achieved for different cosmological models (curves of different thickness) as a function of redshift, which is always better than $10^{-6}$. Similarly, the right panels show the growth factor accuracy, which is $<10^{-5}$. 
 
@@ -801,7 +800,7 @@ We also compare comoving distances and distance moduli for the cosmologies liste
 
 As discussed in Section \ref{sec:matterps}, several power spectrum methods are implemented in \ccl. Two of them, the BBKS \citep{BBKS} and the Eisenstein \& Hu methods are implemented for validation purposes only and feed into the tests for observables such as angular power spectra and correlation functions, as we will see in subsequent sections. These two implementations have been validated against independent implementations. The accuracy in this case was defined as the absolute fractional difference between the \ccl and the independent predictions:
 \begin{equation}
-  \mathcal{A}\equiv \frac{|P_{\tt CCL}(k,z)-P_{i}(k,z)|}{P_{\tt CCL}(k,z)}
+  \mathcal{A}\equiv \frac{|P_{\tt CCL}(k,z)-P_{i}(k,z)|}{P_i(k,z)}
   \label{eq:pkacc}
 \end{equation}
 For BBKS, this test was performed at $0\leq z \leq 5$ in the wavenumber range $10^{-3} \leq k \leq 10 h/$Mpc with 10 bins per decade, and yielded an accuracy level of $10^{-4}$.
@@ -879,7 +878,7 @@ These results show that the {\tt CLASS}-based \ccl power spectrum calculations a
 
 \citet{Lawrence17} quantified the accuracy of the matter power spectrum from their emulation scheme by comparing their predictions to the resulting power spectra from the numerical simulations used for the calibration of their scheme. We repeated this procedure making the emulator predictions via \ccl for a subset of emulator cosmologies. In this section, we quantify the accuracy of the \ccl predictions by estimating
 \begin{equation}
-  \mathcal{A}\equiv\frac{|P_{\tt CCL}(k,z)-P_{\rm L17}(k,z)|}{P_{\tt CCL}(k,z)}
+  \mathcal{A}\equiv\frac{|P_{\tt CCL}(k,z)-P_{\rm L17}(k,z)|}{P_{\rm L17}(k,z)}
   \label{eq:pkaccemu}
 \end{equation}
 where the label L17 referes to the smoothed simulated power spectra from \citet{Lawrence17}.
@@ -907,9 +906,9 @@ and the value of the halo mass function in the form used in \cite{Tinker2008},
 \end{equation}
 These defines three new accuracy metrics:
 \begin{eqnarray}
-  \mathcal{A}_{hmf1}&\equiv&\frac{|\sigma_{\tt CCL}-\sigma_i|}{\sigma_{\tt CCL}},\\
-  \mathcal{A}_{hmf2}&\equiv&\frac{|\tilde\sigma_{\tt CCL}-\tilde\sigma_i|}{\tilde\sigma_{\tt CCL}},\\
-  \mathcal{A}_{hmf3}&\equiv&\frac{|\mathcal{H}_{\tt CCL}-\mathcal{H}_i|}{\mathcal{H}_{\tt CCL}}.
+  \mathcal{A}_{hmf1}&\equiv&\frac{|\sigma_{\tt CCL}-\sigma_i|}{\sigma_i},\\
+  \mathcal{A}_{hmf2}&\equiv&\frac{|\tilde\sigma_{\tt CCL}-\tilde\sigma_i|}{\tilde\sigma_i},\\
+  \mathcal{A}_{hmf3}&\equiv&\frac{|\mathcal{H}_{\tt CCL}-\mathcal{H}_i|}{\mathcal{H}_i}.
 \end{eqnarray}
 
 We note that while we maintain the $10^{-4}$ for our evaluations of $\sigma$, the accuracy degrades to a value of $5\times10^{-3}$ for the halo mass function evaluation, primarily at the high halo mass and high redshift domains. We find that this increased error is acceptable, as the level of precision is significantly better than the accuracy of current halo mass function models. This is demonstrated in Figure~\ref{fig:hmf}, where this calculation has been run for a single cosmology using the Tinker 2010 halo mass function. While there is a degradation in accuracy due to our current spline treatment of the log inverse of $\sigma(M)$, we note that it does not significantly degrade our halo mass function determination. While improvement on this remains a task for the future, the halo mass function varies between fitting functions significantly more than this remaining error. As of this time, we currently do not have independent benchmarks for the halo bias function, though it should be noted that this calculation does not involve any additional functions beyond $\sigma(M)$ and should hold to the $10^{-4}$ tolerance level.
@@ -956,9 +955,9 @@ We adopted the following analytic redshift distributions: a Gaussian with $\sigm
 
 For $C_\ell$ computations, we define as our accuracy metric the absolute value of the relative difference between \ccl and an independent realisation:
 \begin{equation}
-  \mathcal{A}=\left|\frac{C_\ell^{\tt CCL}-C_\ell^{(i)}}{C_\ell^{\tt CCL}}\right|.
+  \mathcal{A}=\left|\frac{C_\ell^{\tt CCL}-C_\ell^{(i)}}{C_\ell^{(i)}}\right|.
 \end{equation}
-We achieved a relative difference between \ccl and the benchmarks of $<10^{-3}$. This applied both to analytic redshift distributions and histograms, for auto- and cross-correlations between bins for both galaxy clustering and weak lensing, as shown in Figure \ref{fig:cls_limber}. The CMB lensing result is shown in Figure \ref{fig:cls_cmblens}.\elisa{I think we have a fraction of allowed failures as well - need to check in code.}
+Overall, we achieved a relative difference between \ccl and the benchmarks of $<10^{-3}$, but in general we allow $0.1\%$ of the $C_\ell$ evaluations to fail. This applied both to analytic redshift distributions and histograms, for auto- and cross-correlations between bins for both galaxy clustering and weak lensing, as shown in Figure \ref{fig:cls_limber}. The CMB lensing result is shown in Figure \ref{fig:cls_cmblens}.
 
 Cosmological constraints from current weak lensing surveys are currently derived from modeling correlation functions. As we discussed in Section \ref{sec:models}, the correlation functions are modeled by Eq.(\ref{eq:cl_xi}) and obtained by \ccl through numerical integration of predicted angular power spectra. To ensure that any numerical inaccuracies are small enough for the purposes of obtaining cosmological constraints, we require that the absolute difference between the \ccl prediction and an independent one is smaller than our expected error bars:
 \begin{equation}
@@ -1035,7 +1034,7 @@ We also performed and timed four typical likelihood evaluations using \ccl. For 
 \section{Usage}
 \label{sec:usage}
 
-\ccl is a public tool developed by the members of the Dark Energy Science Collaboration of LSST and can be downloaded from the collaboration's github repository at the URL provided in the abstract. Installation instructions are provided in a README file available in that same repository. Instructions on how to generate a Docker\footnote{\url{https://www.docker.com/}} image are provided for portability to different architectures. \ccl dependencies include the GNU Scientific Library\footnote{\url{https://www.gnu.org/software/gsl/}} and FFTW3\footnote{\url{http://www.fftw.org/}}. A suite of tests can be run to ensure installation was successful and all features perform nomrmally. Accuracy checks are performed in C, while a suite of unit tests is available in python.
+\ccl is a public tool developed by the members of the Dark Energy Science Collaboration of LSST and can be downloaded from the collaboration's github repository at the URL provided in the abstract. Installation instructions are provided in a README file available in that same repository. Instructions on how to generate a Docker\footnote{\url{https://www.docker.com/}} image are provided for portability to different architectures. \ccl dependencies include the GNU Scientific Library\footnote{\url{https://www.gnu.org/software/gsl/}} and FFTW3\footnote{\url{http://www.fftw.org/}}. A suite of tests can be run to ensure installation was successful and all features perform normally. Accuracy checks are performed in C, while a suite of unit tests is available in python.
 
 \ccl is documented using Doxygen\footnote{\url{www.doxygen.org/}}. For convenience, the repository includes multiple example files in C and several {\tt Jupyter} notebooks.
 
