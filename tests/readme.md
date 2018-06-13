@@ -7,4 +7,4 @@ To add a new set of tests to the system:
  - Create a new file tests/your_tests.c
  - Add your tests to that file.  You do not need a "main" function. See the examples in tests/ccl_test_params.c for how to write tests, which should use the ctest assertions to check they are working (see the sparse documentation at https://github.com/bvdberg/ctest).
  - In the CMakeLists.txt add tests/your_tests.c to the "TEST_SRC" list towards the top of  the  file
- - Run "make check" to run all your tests
+ - Run "check_ccl" to run all your tests
