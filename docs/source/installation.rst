@@ -2,33 +2,134 @@
 Installation
 ************************
 
-In order to compile CCL you need a few libraries:
+With pip
+========
 
-* GNU Scientific Library `GSL <https://www.gnu.org/software/gsl/>`_. Note that `CCL` uses version 2.1 or higher of GSL (which is not yet standard in all systems).
-* The `SWIG <http://www.swig.org/>`_ Python wrapper generator is not needed to run `CCL`, but must be installed if you intend to modify `CCL` in any way.
-* `FFTW3 <http://www.fftw.org/>`_ is required for computation of correlation functions.
-* FFTlog (`here <http://casa.colorado.edu/~ajsh/FFTLog/>`_ and `here <https://github.com/slosar/FFTLog>`_) is provided within `CCL`, with minor modifications.
-* The C library associated to the CLASS code. The installation of this library is described below.
+CCL is available as a Python package through PyPi. To install, simply run:
 
-Installing CLASS
-================
-CCL uses CLASS as one of the possible ways of computing the matter power spectrum. In order to communicate with CLASS, CCL must be linked to its library. Before installing CCL proper you must therefore install this library first. Since this process is not necessarily straightforward, we provide a python script ``class_install.py`` that automatically downloads and install the latest tagged stable version of CLASS. You should run this script (``python class_install.py``) before carrying out the next steps. By default, the script assumes that your main C compiler is ``gcc``. If that's not the case, pass the name of your C compiler to the script via the command-line argument ``--c_comp`` (i.e. ``python class_install.py --c_comp=[name of compiler]``). Type ``python class_install.py -h`` for further details.
+.. code-block:: bash
 
-This procedure has one final caveat: if you already have a working installation of CCL, ``class_install.py`` may fail the first time you run it. This can be fixed by either simply running ``class_install.py`` a second time, or by starting from scratch (i.e. downloading or cloning CCL).
+   $ pip install pyccl
 
-.. note::
-   
-   If you want to use your own version of CLASS, you should follow the steps described in the section "Compiling against an external version of CLASS" below.
+This should work as long as :code:`CMake` is installed on your system. Once installed, take it for a spin in by following some example notebooks `here <https://github.com/LSSTDESC/CCL/blob/master/examples>`_.
 
-C-only installation
-================================
-Once the CLASS library is installed, `CCL` can be easily installed using an *autotools*-generated configuration file. To install `CCL`, from the base directory (the one where this file is located) run:
+If you want the C library available, you have to follow the manual installation.
+
+Dependencies and Requirements
+=============================
+
+You can also install CCL from the source, however in order to compile CCL you need a few libraries:
+
+* GNU Scientific Library `GSL <https://www.gnu.org/software/gsl/>`_, version 2.1 or above
+* `FFTW3 <http://www.fftw.org/>`_ version 3.1 or above
+* `CLASS <http://class-code.net/>`_ version 2.6.3 or above
+* FFTlog (`here <http://casa.colorado.edu/~ajsh/FFTLog/>`_ and `here <https://github.com/slosar/FFTLog>`_) is provided within CCL, with minor modifications.
+
+Additionally, to build the code you will need
+
+* `CMake <https://cmake.org/>`_ version 3.2 or above.
+* `SWIG <http://www.swig.org/>`_ is needed if you wish to modify CCL and have it availabe in Python.
+
+:code:`CMake` is the only requirement that needs to be installed manually if you are using :code:`pip`.
+
+On Ubuntu:
+
+.. code-block:: bash
+
+   $ sudo apt-get install cmake
+
+On MacOS X you can either install with a DMG from `this page <https://cmake.org/download/>`_ or with a package manager such as brew, MacPorts, or Fink. For instance with brew:
+
+.. code-block:: bash
+
+   $ brew install cmake
+
+You will avoid potential issues if you install :code:`GSL` and :code:`FFTW` on your system before building CCL, but is only necessary if you want to properly install the C library. Otherwise :code:`CMake` will automatically download and build the missing requirements in order to compile CCL.
+
+To install all the dependencies at once, and avoid having :code:`CMake` recompiling them, for instance on Ubuntu:
+
+.. code-block:: bash
+
+   $ sudo apt-get install cmake swig libgsl-dev libfftw3-dev
+
+  
+
+Compile and install the CCL C library
+=====================================
+To download hte latest version of CCL:
+
+.. code-block:: bash
+
+   $ git clone https://github.com/LSSTDESC/CCL.git
+   $ cd CCL
+
+or download and extract the latest stable release from `here <https://github.com/LSSTDESC/CCL/releases>`_. Then, from the base CCL directory run:
+
+.. code-block:: bash
+
+   $ mkdir build && cd build
+   $ cmake ..
+
+This will run the configuration script, try to detect the required dependencies on your machine and generate a Makefile. Once CMake has been configured, to build and install the library simply run for the :code:`build` directory:
 
 .. code:: bash
 
-   ./configure
-   make
-   make install
+   $ make
+   $ make install
+
+Often admin privileges will be needed to install the library. If you have those just type:
+
+.. code:: bash
+
+   $ sudo make install
+
+
+**Note**: This is the default install procedure, but depending on your system you might want to customize the intall process. Here are a few common configuration options:
+
+In case you have several C compilers, you can direct which one for :code:`CMake` to use by setting the environment variable :code:`CC` **before** running :code:`CMake`:
+
+.. code:: bash
+
+   $ export CC=gcc
+
+By default, :code:`CMake` will try to install CCL in :code:`/usr/local`. If you would like to instead install elsewhere (such as if you don't have admin privileges), you can specify it **before** running :code:`CMake` by doing:
+
+.. code:: bash
+
+   $ cmake -DCMAKE_INSTALL_PREFIX=/path/to/install ..
+
+This will instruct :code:`CMake` to install CCL in the following folders: :code:`/path/to/install/include`,:code:`/path/to/install/share`, and :code:`/path/to/install/lib`.
+
+Depending on where you install CCL you might need to add the installation path to your :code:`PATH` and :code:`LD_LIBRARY_PATH` environment variables. In the default case, this is accomplished with:
+
+.. code:: bash
+
+   $ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
+   $ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/bin
+
+To make sure that everything is working properly, you can run all unit tests after installation by running from the root CCL directory:
+
+.. code:: bash
+
+   $ check_ccl
+
+Assuming that the tests pass, you have successfully installed CCL!
+
+If you ever need to uninstall CCL, run the following from the :code:`build` directory:
+
+.. code:: bash
+
+   $ make uninstall
+
+You may need to prepend a :code:`sudo` if you installed CCL in a protected folder.
+
+
+
+
+
+
+Once the CLASS library is installed, `CCL` can be easily installed using an *autotools*-generated configuration file. To install `CCL`, from the base directory (the one where this file is located) run:
+
 
 Often admin privileges will be needed to install the library. If you have those just type:
 
@@ -54,7 +155,7 @@ To make sure that everything is working properly, you can run all unit tests aft
 
 Assuming that the tests pass, you can then move on to installing the Python wrapper (optional).
 
-After pulling a new version of `CCL` from the `git <https://github.com/LSSTDESC/CCL>`_ repository, you can recompile the library by running:
+After pulling a new version of `CCL` from the `GitHub repository <https://github.com/LSSTDESC/CCL>`_, you can recompile the library by running:
 
 .. code:: bash
 	  
@@ -62,118 +163,67 @@ After pulling a new version of `CCL` from the `git <https://github.com/LSSTDESC/
    make
    make install
 
-
-Known installation issues
-=========================
-1. If you are having issues with GSL versions linking, please try the following during the configuration step:
-
-.. code:: bash
-
-   ./configure CFLAGS="-I/usr/local/include" LDFLAGS="-L/usr/local/lib"
-
-2. If you are having issues with FFTW linking, please make sure you have the latest version correctly installed. See more on `FFTW homepage <http://www.fftw.org/download.html>`_.
-3. If you move or delete the source directory after installing `CCL`, some functions may fail. The source directory contains files needed by CLASS (which is contained within `CCL`) at run-time.
-4. If you are planning to compile your own file that calls `CCL`, then you should add the following to your .bashrc:
-
-.. code:: bash
-	  
-   export LD_LIBRARY_PATH=/path/to/where/ccl/is/installed/lib:$LD_LIBRARY_PATH
-
-5. We know of one case with Mac OS where ``libtools`` had the "lock" function set to "yes" and this caused the installation to stall. However, this is very rare. If this happens, after the ``configure`` step, edit ``libtool`` to set the "lock" to "no".
-
-C++ compatibility
-====================
-`CCL` library can be called from C++ code without any  additional requirements or modifications. To make sure that there are no problems you can run
-
-.. code:: bash
-	  
-   make check-cpp
-   ./tests/ccl_sample_run
-
-Python installation
-====================
-The Python wrapper is called ``pyccl``. Generally, you can build and install the ``pyccl`` wrapper directly, without having to first compile the C version of `CCL`. The Python wrapper's build tools currently assume that your C compiler is `gcc`, and that you have a working Python 2.x or 3.x installation with ``numpy`` and ``distutils``. You will also need ``swig`` if you wish to change the `CCL` code itself, rather than just installing it as-is.
-
-The Python wrapper installs the C libraries automatically and requires that GSL2.x and FFTW are already installed. Note that the C libraries will be installed in the same prefix as the Python files.
-
-* To build and install the wrapper for the current user only, run
-
-.. code:: bash
-	  
-   python setup.py install --user
-
-* To build install the wrapper for all users, run
+Install the pyccl Python module
+===============================
+CCL also comes with a Python wrapper, called pyccl, which can be built and installed regardless of whether you install the C library. For convenience, we provide a PyPi hosted package which can be installed simply by running:
 
 .. code:: bash
 
-   sudo python setup.py install
+   $ pip install pyccl # append --user for single user install
 
-* To build the wrapper in-place in the source directory (for testing), run
+This only assumes that :code:`CMake` is available on your system, you don't need to download the source yourself.
 
-.. code:: bash
-	  
-   python setup.py build_ext --inplace
-
-If you choose either of the first two options, the ``pyccl`` module will be installed into a sensible location in your ``PYTHONPATH``, and so should be picked up automatically by your Python interpreter. You can then simply import the module using ``import pyccl``. If you use the last option, however, you must either start your interpreter from the root `CCL` directory, or manually add the root `CCL` directory to your ``PYTHONPATH``.
-
-On some systems, building or installing the Python wrapper fails with a message similar to
+You can also build and install pyccl from the CCL source, again without necessarily installing the C library. Download the latest version of CCL:
 
 .. code:: bash
 
-   fatal error: 'gsl/gsl_interp2d.h' file not found.
+   $ git clone https://github.com/LSSTDESC/CCL.git
+   $ cd CCL
 
-This happens when the build tools fail to find the directory containing the GSL header files, e.g. when they have been installed in a non-standard directory. To work around this problem, use the ``--include-dirs`` option when running the ``setup.py build_ext`` step above, i.e. if the GSL header files are in the directory ``/path/to/include/``, you would run
+And from the root CCL folder, simply run:
 
 .. code:: bash
-	  
-   python setup.py build_ext --library-dirs=/path/to/install/lib/ --rpath=/path/to/install/lib/ --include-dirs=/path/to/include/
 
-and then run one of the ``setup.py install`` commands listed above. (Note: As an alternative to the ``--include-dirs1`` option, you can use ``-I/path/to/include`` instead.)
+   $ python setup.py install # append --user for single user install
 
-You can quickly check whether ``pyccl`` has been installed correctly by running ``python -c "import pyccl"`` and checking that no errors are returned. For a more in-depth test to make sure everything is working, run
+The pyccl module will be installed into a sensible location in your :code:`PYTHONPATH`, and so should be picked up automatically by your Python interpreter. You can then simply import the module using import pyccl.
+
+You can quickly check whether pyccl has been installed correctly by running :code:`python -c "import pyccl"` and checking that no errors are returned.
+
+For a more in-depth test to make sure everything is working, run from the root CCL directory:
 
 .. code:: bash
 	  
    python setup.py test
 
-This will run the embedded unit tests (may take a few minutes). Using this last method to install the Python library allows you to uninstall it simply by running
+This will run the embedded unit tests (may take a few minutes).
+
+Whatever the install method, if you have :code:`pip` installed, you can always uninstall the pyton wrapper by running:
 
 .. code:: bash
 
-   python setup.py uninstall
+   pip uninstall pyccl
 
 For quick introduction to `CCL` in Python look at notebooks in ``**_tests/_**``.
 
 Compiling against an external version of CLASS
-==================================================
-The default installation procedure for `CCL` implies automatically downloading and installing a tagged version of `CLASS`. Optionally, you can also link `CCL` against an external version of `CLASS`. This is useful if you want to use a modified version of `CLASS`, or a different or more up-to-date version of the standard `CLASS`.
+==============================================
 
-To compile `CCL` with an external version of `CLASS`, you must first prepare the external copy so that it can be linked as a shared library. By default, the `CLASS` build tools create a static library. After compiling `CLASS` in the usual way (by running `make`), look for a static library file called ``***libclass.a***`` that should have been placed in the root source directory. Then, run the following command from that directory (Linux only):
+The default installation procedure for CCL implies automatically downloading and installing a tagged version of CLASS. Optionally, you can also link CCL against a different version of CLASS. This is useful if you want to use a modified version of CLASS, or a different or more up-to-date version of the standard CLASS.
 
-.. code:: bash
-
-   gcc -shared -o libclass.so -Wl,--whole-archive libclass.a -Wl,--no-whole-archive -lgomp
-
-This should create a new shared library, ``***libclass.so***``, in the same directory. (N.B. The ``-lgomp`` flag has to appear at the end of the command; otherwise the linker can fail.) If you are running Mac OS X, use the following command instead:
+To compile CCL with an external version of CLASS, just run the following :code:`CMake` command at the first configuration step of the install (from the build directory, make sure it is empty to get a clean configuration):
 
 .. code:: bash
 
-   gcc -fpic -shared -o libclass.dylib -Wl,-all\_load libclass.a -Wl,-noall\_load
+   $ cmake -DEXTERNAL_CLASS_PATH=/path/to/class ..
 
-Next, change to the root `CCL` directory and run ``make clean`` if you have previously run the compilation process. Then, set the ``CLASSDIR`` environment variable to point to the directory containing ***libclass.so***:
-
-.. code:: bash
-
-   export CLASSDIR=/path/to/external/class
-
-Then, run ``./configure`` and compile and install `CCL` as usual. The `CCL` build tools should take care of linking to the external version of `CLASS`.
-
-Once compilation has finished, run ``make check`` to make sure everything is working correctly. Remember to add the external `CLASS` library directory to your system library path, using either ``export LD_LIBRARY_PATH=/path/to/external/class`` (Linux) or ``export DYLD_FALLBACK_LIBRARY_PATH=/path/to/external/class`` (Mac). The system must be able to find both the `CCL` and `CLASS` libraries; it is not enough to only add `CCL` to the library path.
+the rest of the build process should be the same.
 
 Docker image installation
 =========================
-The Dockerfile to generate a Docker image is included in the `CCL` repository as Dockerfile. This can be used to create an image that Docker can spool up as a virtual machine, allowing you to utilize `CCL` on any infrastructure with minimal hassle. The details of Docker and the installation process can be found at `https://www.docker.com/ <https://www.docker.com/>`_. Once Docker is installed, it is a simple process to create an image! In a terminal of your choosing (with Docker running), type the command ``docker build -t ccl .`` in the `CCL` directory.
 
-The resulting Docker image has two primary functionalities. The first is a CMD that will open Jupyter notebook tied to a port on your local machine. This can be used with the following run command: ``docker run -p 8888:8888 ccl``. You can then access the notebook in the browser of your choice at ``localhost:8888``. The second is to access the bash itself, which can be done using ``docker run -it ccl bash``.
+The Dockerfile to generate a Docker image is included in the CCL repository as Dockerfile. This can be used to create an image that Docker can spool up as a virtual machine, allowing you to utilize CCL on any infrastructure with minimal hassle. The details of Docker and the installation process can be found at `this link <https://www.docker.com/>`_. Once Docker is installed, it is a simple process to create an image! In a terminal of your choosing (with Docker running), type the command :code:`docker build -t ccl .` in the CCL directory.
+
+The resulting Docker image has two primary functionalities. The first is a CMD that will open Jupyter notebook tied to a port on your local machine. This can be used with the following run command: :code:`docker run -p 8888:8888 ccl`. You can then access the notebook in the browser of your choice at :code:`localhost:8888`. The second is to access the bash itself, which can be done using :code:`docker run -it ccl bash`.
 
 This Dockerfile currently contains all installed C libraries and the Python wrapper. It currently uses continuumio/anaconda as the base image and supports ipython and Jupyter notebook. There should be minimal slowdown due to the virtualization.
