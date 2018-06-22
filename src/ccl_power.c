@@ -8,6 +8,7 @@
 #include "gsl/gsl_spline.h"
 //#include "gsl/gsl_interp2d.h"
 //#include "gsl/gsl_spline2d.h"
+#include "gsl/gsl_errno.h"
 #include "ccl_placeholder.h"
 #include "ccl_background.h"
 #include "ccl_power.h"
@@ -1402,21 +1403,25 @@ static double ccl_power_extrapol_highk(ccl_cosmology * cosmo, double k, double a
   double lpk_kmid;
   
   lkmid = log(kmax)-2*deltak;
-  int pwstatus =  gsl_spline2d_eval_e(powerspl, lkmid,a,NULL ,NULL ,&lpk_kmid);
-  if (pwstatus) {
+  
+  int gslstatus =  gsl_spline2d_eval_e(powerspl, lkmid,a,NULL ,NULL ,&lpk_kmid);
+  if(gslstatus != GSL_SUCCESS) {
+    ccl_raise_gsl_warning(gslstatus, "ccl_power.c: ccl_power_extrapol_highk():");
     *status = CCL_ERROR_SPLINE_EV;
     sprintf(cosmo->status_message ,"ccl_power.c: ccl_power_extrapol_highk(): Spline evaluation error\n");
     return NAN;
   }
   //GSL derivatives
-  pwstatus = gsl_spline2d_eval_deriv_x_e (powerspl, lkmid, a, NULL,NULL,&deriv_pk_kmid);
-  if (pwstatus) {
+  gslstatus = gsl_spline2d_eval_deriv_x_e (powerspl, lkmid, a, NULL,NULL,&deriv_pk_kmid);
+  if(gslstatus != GSL_SUCCESS) {
+    ccl_raise_gsl_warning(gslstatus, "ccl_power.c: ccl_power_extrapol_highk():");
     *status = CCL_ERROR_SPLINE_EV;
     sprintf(cosmo->status_message ,"ccl_power.c: ccl_power_extrapol_highk(): Spline evaluation error\n");
     return NAN;
   }
-  pwstatus = gsl_spline2d_eval_deriv_xx_e (powerspl, lkmid, a, NULL,NULL,&deriv2_pk_kmid);
-  if (pwstatus) {
+  gslstatus = gsl_spline2d_eval_deriv_xx_e (powerspl, lkmid, a, NULL,NULL,&deriv2_pk_kmid);
+  if(gslstatus != GSL_SUCCESS) {
+    ccl_raise_gsl_warning(gslstatus, "ccl_power.c: ccl_power_extrapol_highk():");
     *status = CCL_ERROR_SPLINE_EV;
     sprintf(cosmo->status_message ,"ccl_power.c: ccl_power_extrapol_highk(): Spline evaluation error\n");
     return NAN;
@@ -1438,9 +1443,10 @@ static double ccl_power_extrapol_lowk(ccl_cosmology * cosmo, double k, double a,
   double deltak=1e-2; //safety step
   double lkmin=log(kmin)+deltak;
   double lpk_kmin;
-  int pwstatus=gsl_spline2d_eval_e(powerspl,lkmin,a,NULL,NULL,&lpk_kmin);
+  int gslstatus = gsl_spline2d_eval_e(powerspl,lkmin,a,NULL,NULL,&lpk_kmin);
 
-  if (pwstatus) {
+  if(gslstatus != GSL_SUCCESS) {
+    ccl_raise_gsl_warning(gslstatus, "ccl_power.c: ccl_power_extrapol_lowk():");
     *status=CCL_ERROR_SPLINE_EV;
     sprintf(cosmo->status_message,"ccl_power.c: ccl_power_extrapol_lowk(): Spline evaluation error\n");
     return NAN;
@@ -1471,10 +1477,9 @@ double ccl_linear_matter_power(ccl_cosmology * cosmo, double k, double a, int * 
   if (!cosmo->computed_power) return NAN;
   
   double log_p_1;
-  int pkstatus;
-  
-  
-  if(a<ccl_splines->A_SPLINE_MINLOG_PK) {  //Extrapolate linearly at high redshift  
+  int gslstatus;
+ 
+  if(a<ccl_splines->A_SPLINE_MINLOG_PK) {  //Extrapolate linearly at high redshift
     double pk0=ccl_linear_matter_power(cosmo,k,ccl_splines->A_SPLINE_MINLOG_PK,status);
     double gf=ccl_growth_factor(cosmo,a,status)/ccl_growth_factor(cosmo,ccl_splines->A_SPLINE_MINLOG_PK,status);
 
@@ -1487,13 +1492,14 @@ double ccl_linear_matter_power(ccl_cosmology * cosmo, double k, double a, int * 
       return exp(log_p_1);
     }
     else if(k<cosmo->data.k_max_lin){
-      pkstatus = gsl_spline2d_eval_e(cosmo->data.p_lin, log(k), a,NULL,NULL,&log_p_1);
-      if (pkstatus) {
+      gslstatus = gsl_spline2d_eval_e(cosmo->data.p_lin, log(k), a,NULL,NULL,&log_p_1);
+      if(gslstatus != GSL_SUCCESS) {
+        ccl_raise_gsl_warning(gslstatus, "ccl_power.c: ccl_linear_matter_power():");
         *status = CCL_ERROR_SPLINE_EV;
         sprintf(cosmo->status_message ,"ccl_power.c: ccl_linear_matter_power(): Spline evaluation error\n");
         return NAN;
       }
-      else{
+      else {
         return exp(log_p_1);
       }
     }
@@ -1540,14 +1546,14 @@ double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double k, double a, int *s
       return exp(log_p_1);
     }
     if(k<cosmo->data.k_max_nl){
-      int pwstatus = gsl_spline2d_eval_e(cosmo->data.p_nl, log(k),
-                                         a, NULL, NULL, &log_p_1);
-      if (pwstatus) {
-	    *status = CCL_ERROR_SPLINE_EV;
-	    sprintf(cosmo->status_message, 
-	       "ccl_power.c: ccl_nonlin_matter_power(): Spline evaluation error\n");
-	    return NAN;
-      }else{
+      int gslstatus =  gsl_spline2d_eval_e(cosmo->data.p_nl, log(k),a,NULL ,NULL ,&log_p_1);
+      if(gslstatus != GSL_SUCCESS) {
+        ccl_raise_gsl_warning(gslstatus, "ccl_power.c: ccl_nonlin_matter_power():");
+	      *status = CCL_ERROR_SPLINE_EV;
+	      sprintf(cosmo->status_message ,"ccl_power.c: ccl_nonlin_matter_power(): Spline evaluation error\n");
+	      return NAN;
+      }
+      else {
         pk = exp(log_p_1);
       }
     }
@@ -1589,15 +1595,16 @@ double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double k, double a, int *s
     }
     
     if(k<cosmo->data.k_max_nl){
-      int pwstatus =  gsl_spline2d_eval_e(cosmo->data.p_nl, log(k),a,NULL ,NULL ,&log_p_1);
-      if (pwstatus) {
-	*status = CCL_ERROR_SPLINE_EV;
-	sprintf(cosmo->status_message ,"ccl_power.c: ccl_nonlin_matter_power(): Spline evaluation error\n");
-	return NAN;
+      int gslstatus =  gsl_spline2d_eval_e(cosmo->data.p_nl, log(k),a,NULL ,NULL ,&log_p_1);
+      if(gslstatus != GSL_SUCCESS) {
+        ccl_raise_gsl_warning(gslstatus, "ccl_power.c: ccl_nonlin_matter_power():");
+        *status = CCL_ERROR_SPLINE_EV;
+        sprintf(cosmo->status_message ,"ccl_power.c: ccl_nonlin_matter_power(): Spline evaluation error\n");
+        return NAN;
       }
-      else{
-	    pk = exp(log_p_1);
-	  }
+      else {
+	      pk = exp(log_p_1);
+	    }
     }
     else { // Extrapolate NL regime using log derivative
       log_p_1 = ccl_power_extrapol_highk(cosmo,k,a,cosmo->data.p_nl,cosmo->data.k_max_nl,status);
@@ -1657,13 +1664,18 @@ double ccl_sigmaR(ccl_cosmology *cosmo,double R, int *status)
   
   par.cosmo=cosmo;
   par.R=R;
-  gsl_integration_cquad_workspace *workspace=gsl_integration_cquad_workspace_alloc(1000);
+  gsl_integration_cquad_workspace *workspace=gsl_integration_cquad_workspace_alloc(ccl_gsl->N_ITERATION);
   gsl_function F;
   F.function=&sigmaR_integrand;
   F.params=&par;
   double sigma_R;
-  *status |=gsl_integration_cquad(&F,log10(ccl_splines->K_MIN_DEFAULT),log10(ccl_splines->K_MAX),
-				  0.0,1E-5,workspace,&sigma_R,NULL,NULL);
+  int gslstatus = gsl_integration_cquad(&F, log10(ccl_splines->K_MIN_DEFAULT), log10(ccl_splines->K_MAX),
+				                                0.0, ccl_gsl->INTEGRATION_SIGMAR_EPSREL,
+                                        workspace,&sigma_R,NULL,NULL);
+  if(gslstatus != GSL_SUCCESS) {
+    ccl_raise_gsl_warning(gslstatus, "ccl_power.c: ccl_sigmaR():");
+    *status |= gslstatus;
+  }
   //TODO: log10 could be taken already in the macros.
   //TODO: 1E-5 should be a macro
   //TODO: we should check for integration success
