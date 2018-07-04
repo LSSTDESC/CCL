@@ -15,14 +15,14 @@ CTEST_DATA(corrs) {
   double Omega_b;
   double h;
   double n_s;
-  double sigma_8;
+  double sigma8;
 };
 
 CTEST_SETUP(corrs) {
   data->Omega_c = 0.30;
   data->Omega_b = 0.00;
   data->h = 0.7;
-  data->sigma_8=0.8;
+  data->sigma8=0.8;
   data->n_s = 0.96;
 }
 
@@ -51,7 +51,7 @@ static void compare_corr(char *compare_type,int algorithm,struct corrs_data * da
   ccl_configuration config = default_config;
   config.transfer_function_method = ccl_bbks;
   ccl_parameters params = ccl_parameters_create_flat_lcdm(data->Omega_c,data->Omega_b,data->h,
-							  data->sigma_8,data->n_s,&status);
+							  data->sigma8,data->n_s,&status);
   ccl_cosmology * cosmo = ccl_cosmology_create(params, config);
   ASSERT_NOT_NULL(cosmo);
 

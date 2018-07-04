@@ -10,7 +10,7 @@ CTEST_DATA(corrs_3d) {
   double h;
   double A_s;
   double n_s;
-  double sigma_8;
+  double sigma8;
   double Neff;
   double* mnu;
   ccl_mnu_convention mnu_type;
@@ -26,7 +26,7 @@ CTEST_SETUP(corrs_3d) {
   data->h = 0.7;
   data->A_s = 0.8;
   data->n_s = 0.96;
-  data->sigma_8=0.8;
+  data->sigma8=0.8;
   data->Neff=3.046;
   double mnuval = 0.;
   data->mnu= &mnuval;
@@ -69,7 +69,7 @@ static void compare_correlation_3d(int i_model,struct corrs_3d_data * data)
 		data->Neff, data->mnu, data->mnu_type, data->w_0[i_model-1],data->w_a[i_model-1],
 		data->h,data->A_s,data->n_s,-1, -1, -1, -1,NULL,NULL, &status);
   params.Omega_g=0.0;
-  params.sigma_8=data->sigma_8;
+  params.sigma8=data->sigma8;
   ccl_cosmology * cosmo = ccl_cosmology_create(params, config);
   ASSERT_NOT_NULL(cosmo);      
   
