@@ -242,7 +242,7 @@ static double ccl_get_class_As(ccl_cosmology *cosmo, struct file_content *fc, in
   struct lensing le;
   struct output op;
 
-  //temporarily overwrite P_k_max_1/Mpc to speed up sigma_8 calculation
+  //temporarily overwrite P_k_max_1/Mpc to speed up sigma8 calculation
   double k_max_old = 0.;
   int position_kmax =2;
   double A_s_guess;
@@ -355,15 +355,15 @@ static void ccl_fill_class_parameters(ccl_cosmology * cosmo, struct file_content
   strcpy(fc->name[17],"T_cmb");
   sprintf(fc->value[17],"%e",cosmo->params.T_CMB);
   
-  //normalization comes last, so that all other parameters are filled in for determining A_s if sigma_8 is specified
-  if (isfinite(cosmo->params.sigma_8) && isfinite(cosmo->params.A_s)){
+  //normalization comes last, so that all other parameters are filled in for determining A_s if sigma8 is specified
+  if (isfinite(cosmo->params.sigma8) && isfinite(cosmo->params.A_s)){
       *status = CCL_ERROR_INCONSISTENT;
-      strcpy(cosmo->status_message ,"ccl_power.c: class_parameters(): Error initializing CLASS parameters: both sigma_8 and A_s defined\n");
+      strcpy(cosmo->status_message ,"ccl_power.c: class_parameters(): Error initializing CLASS parameters: both sigma8 and A_s defined\n");
     return;
   }
-  if (isfinite(cosmo->params.sigma_8)) {
+  if (isfinite(cosmo->params.sigma8)) {
     strcpy(fc->name[parser_length-1],"A_s");
-    sprintf(fc->value[parser_length-1],"%e",ccl_get_class_As(cosmo,fc,parser_length-1,cosmo->params.sigma_8, status));
+    sprintf(fc->value[parser_length-1],"%e",ccl_get_class_As(cosmo,fc,parser_length-1,cosmo->params.sigma8, status));
   }
   else if (isfinite(cosmo->params.A_s)) {
     strcpy(fc->name[parser_length-1],"A_s");
@@ -371,7 +371,7 @@ static void ccl_fill_class_parameters(ccl_cosmology * cosmo, struct file_content
   }
   else {
     *status = CCL_ERROR_INCONSISTENT;
-    strcpy(cosmo->status_message ,"ccl_power.c: class_parameters(): Error initializing CLASS pararmeters: neither sigma_8 nor A_s defined\n");
+    strcpy(cosmo->status_message ,"ccl_power.c: class_parameters(): Error initializing CLASS pararmeters: neither sigma8 nor A_s defined\n");
     return;
   }
 
@@ -818,10 +818,10 @@ static void ccl_cosmology_compute_power_eh(ccl_cosmology * cosmo, int * status)
   double amax = ccl_splines->A_SPLINE_MAX;
   int na = ccl_splines->A_SPLINE_NA_PK + ccl_splines->A_SPLINE_NLOG_PK - 1;
   
-  // Exit if sigma_8 wasn't specified
-  if (isnan(cosmo->params.sigma_8)) {
+  // Exit if sigma8 wasn't specified
+  if (isnan(cosmo->params.sigma8)) {
     *status = CCL_ERROR_INCONSISTENT;
-    strcpy(cosmo->status_message ,"ccl_power.c: ccl_cosmology_compute_power_eh(): sigma_8 was not set, but is required for E&H method\n");
+    strcpy(cosmo->status_message ,"ccl_power.c: ccl_cosmology_compute_power_eh(): sigma8 was not set, but is required for E&H method\n");
     return;
   }
   
@@ -887,11 +887,11 @@ static void ccl_cosmology_compute_power_eh(ccl_cosmology * cosmo, int * status)
     return;
   }
   
-  // Calculate sigma_8 for the unnormalized P(k), using the standard 
+  // Calculate sigma8 for the unnormalized P(k), using the standard 
   // ccl_sigma8() function
   cosmo->data.p_lin = log_power_lin;
   cosmo->computed_power = true; // Temporarily set this to true
-  double sigma_8 = ccl_sigma8(cosmo, status);
+  double sigma8 = ccl_sigma8(cosmo, status);
   cosmo->computed_power = false;
   
   // Check that ccl_sigma8 didn't fail
@@ -903,9 +903,9 @@ static void ccl_cosmology_compute_power_eh(ccl_cosmology * cosmo, int * status)
   
   // Calculate normalization factor using computed value of sigma8, then 
   // recompute P(k, a) using this normalization
-  double log_sigma_8 = 2*(log(cosmo->params.sigma_8) - log(sigma_8));
+  double log_sigma8 = 2*(log(cosmo->params.sigma8) - log(sigma8));
   for (int i=0; i < nk; i++) {
-    y[i] += log_sigma_8;
+    y[i] += log_sigma8;
   }
   for (int j = 0; j < na; j++) {
     gfac = ccl_growth_factor(cosmo, z[j], status);
@@ -992,10 +992,10 @@ static void ccl_cosmology_compute_power_bbks(ccl_cosmology * cosmo, int * status
   double amax = ccl_splines->A_SPLINE_MAX;
   int na = ccl_splines->A_SPLINE_NA_PK+ccl_splines->A_SPLINE_NLOG_PK-1;
   
-  // Exit if sigma_8 wasn't specified
-  if (isnan(cosmo->params.sigma_8)) {
+  // Exit if sigma8 wasn't specified
+  if (isnan(cosmo->params.sigma8)) {
     *status = CCL_ERROR_INCONSISTENT;
-    strcpy(cosmo->status_message ,"ccl_power.c: ccl_cosmology_compute_power_bbks(): sigma_8 not set, required for BBKS\n");
+    strcpy(cosmo->status_message ,"ccl_power.c: ccl_cosmology_compute_power_bbks(): sigma8 not set, required for BBKS\n");
     return;
   }
   
@@ -1048,11 +1048,11 @@ static void ccl_cosmology_compute_power_bbks(ccl_cosmology * cosmo, int * status
     return;
   }
   
-  // Calculate sigma_8 for the unnormalized P(k), using the standard 
+  // Calculate sigma8 for the unnormalized P(k), using the standard 
   // ccl_sigma8() function
   cosmo->data.p_lin=log_power_lin;
   cosmo->computed_power=true;
-  double sigma_8 = ccl_sigma8(cosmo,status);
+  double sigma8 = ccl_sigma8(cosmo,status);
   cosmo->computed_power=false;
   
   // Check that ccl_sigma8 didn't fail
@@ -1064,9 +1064,9 @@ static void ccl_cosmology_compute_power_bbks(ccl_cosmology * cosmo, int * status
   
   // Calculate normalization factor using computed value of sigma8, then 
   // recompute P(k, a) using this normalization
-  double log_sigma_8 = 2*(log(cosmo->params.sigma_8) - log(sigma_8));
+  double log_sigma8 = 2*(log(cosmo->params.sigma8) - log(sigma8));
   for (int i=0; i<nk; i++) {
-    y[i] += log_sigma_8;
+    y[i] += log_sigma8;
   }
   for (int j = 0; j < na; j++) {
     double gfac = ccl_growth_factor(cosmo,z[j], status);
@@ -1197,10 +1197,10 @@ static void ccl_cosmology_compute_power_emu(ccl_cosmology * cosmo, int * status)
     return;
     }
   
-  // Check to see if sigma_8 was defined
-  if(isnan(cosmo->params.sigma_8)){
+  // Check to see if sigma8 was defined
+  if(isnan(cosmo->params.sigma8)){
     *status=CCL_ERROR_INCONSISTENT;
-    strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_emu(): sigma_8 is not defined; specify sigma_8 instead of A_s\n");
+    strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_emu(): sigma8 is not defined; specify sigma8 instead of A_s\n");
     return;
   }
   
@@ -1310,7 +1310,7 @@ static void ccl_cosmology_compute_power_emu(ccl_cosmology * cosmo, int * status)
     //Turn cosmology into xstar:
     xstar[0] = (cosmo->params.Omega_c+cosmo->params.Omega_b)*cosmo->params.h*cosmo->params.h;
     xstar[1] = cosmo->params.Omega_b*cosmo->params.h*cosmo->params.h;
-    xstar[2] = cosmo->params.sigma_8;
+    xstar[2] = cosmo->params.sigma8;
     xstar[3] = cosmo->params.h;
     xstar[4] = cosmo->params.n_s;
     xstar[5] = cosmo->params.w0;

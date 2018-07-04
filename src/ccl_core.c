@@ -40,8 +40,8 @@ const ccl_gsl_params default_gsl_params = {GSL_EPSREL,                          
    The following are the relevant global variables:
 */
 
-ccl_spline_params * ccl_splines; // Global variable
-ccl_gsl_params * ccl_gsl; // Global variable
+ccl_spline_params * ccl_splines=NULL; // Global variable
+ccl_gsl_params * ccl_gsl=NULL; // Global variable
 
 void ccl_cosmology_read_config(void)
 {
@@ -208,7 +208,7 @@ mnu_type: how the neutrino mass(es) should be treated
 w0: Dark energy eqn. of state parameter
 wa: Dark energy eqn. of state parameter, time variation
 h: Hubble's constant divided by (100 km/s/Mpc).
-norm_pk: amplitude of the primordial PS (either A_s or sigma_8)
+norm_pk: amplitude of the primordial PS (either A_s or sigma8)
 n_s: index of the primordial PS
 */
 ccl_cosmology * ccl_cosmology_create_with_params(double Omega_c, double Omega_b, double Omega_k,
@@ -247,7 +247,7 @@ Omega_c: cold dark matter
 Omega_b: baryons
 Omega_k: curvature
 h: Hubble's constant divided by (100 km/s/Mpc).
-norm_pk: amplitude of the primordial PS (either A_s or sigma_8)
+norm_pk: amplitude of the primordial PS (either A_s or sigma8)
 n_s: index of the primordial PS
 */
 ccl_cosmology * ccl_cosmology_create_with_lcdm_params(double Omega_c, double Omega_b, double Omega_k,
@@ -274,7 +274,7 @@ Omega_g = (Omega_g*h^2)/h^2 is the radiation parameter; "g" is for photons, as i
 T_CMB: CMB temperature in Kelvin
 Omega_l: Lambda 
 A_s: amplitude of the primordial PS, enforced here to initially set to NaN
-sigma_8: variance in 8 Mpc/h spheres for normalization of matter PS, enforced here to initially set to NaN
+sigma8: variance in 8 Mpc/h spheres for normalization of matter PS, enforced here to initially set to NaN
 z_star: recombination redshift
  */
 void ccl_parameters_fill_initial(ccl_parameters * params, int *status)
@@ -311,8 +311,8 @@ void ccl_parameters_fill_initial(ccl_parameters * params, int *status)
   params->Omega_l = 1.0 - params->Omega_m - params->Omega_g - params->Omega_n_rel -params->Omega_n_mass- params->Omega_k;
   // Initially undetermined parameters - set to nan to trigger
   // problems if they are mistakenly used.
-  if (isfinite(params->A_s)) {params->sigma_8 = NAN;}
-  if (isfinite(params->sigma_8)) {params->A_s = NAN;}
+  if (isfinite(params->A_s)) {params->sigma8 = NAN;}
+  if (isfinite(params->sigma8)) {params->A_s = NAN;}
   params->z_star = NAN;
 
   if(fabs(params->Omega_k)<1E-6)
@@ -362,7 +362,7 @@ ccl_parameters ccl_parameters_create(
   params.mnu = NULL;
   params.z_mgrowth=NULL;
   params.df_mgrowth=NULL;
-  params.sigma_8 = NAN;
+  params.sigma8 = NAN;
   params.A_s = NAN;
   params.Omega_c = Omega_c;
   params.Omega_b = Omega_b;
@@ -485,7 +485,7 @@ ccl_parameters ccl_parameters_create(
   if(norm_pk<1E-5)
     params.A_s=norm_pk;
   else
-    params.sigma_8=norm_pk;
+    params.sigma8=norm_pk;
   params.n_s = n_s;
 
   //Baryonic params
