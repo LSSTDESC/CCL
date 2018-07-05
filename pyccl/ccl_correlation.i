@@ -18,8 +18,9 @@
                                      (int nlarr,double* larr),
                                      (int nclarr,double* clarr),
                                      (int nt,double *theta),
-                                     (int nr,double *r)}
-%apply (double* ARGOUT_ARRAY1, int DIM1) {(double* output, int nout),(double* xi, int nxi)};
+                                     (int nr,double *r),
+                                     (int ns,double *s)}
+%apply (double* ARGOUT_ARRAY1, int DIM1) {(double* output, int nout),(double* xi, int nxi),(double* xis, int nxis)};
 
 %inline %{
 
@@ -45,5 +46,15 @@ void correlation_3d_vec(ccl_cosmology *cosmo,double a,
   assert(nr==nxi);
 
   ccl_correlation_3d(cosmo,a,nr,r,xi,0,NULL,status);
+}
+
+void ccl_correlation_3dRsd_vec(ccl_cosmology *cosmo,double a,double mu,double beta,
+			       int ns,double *s,
+                               double *xis,int nxis,int do_avg_mu,
+         		       int *status)
+{ 
+  assert(ns==nxis);
+
+  ccl_correlation_3dRsd(cosmo,a,ns,s,mu,beta,xis,do_avg_mu,status);
 }
 %}

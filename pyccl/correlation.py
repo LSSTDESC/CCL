@@ -86,3 +86,35 @@ def correlation_3d(cosmo, a, r):
     check(status, cosmo_in)
     if scalar: return xi[0]
     return xi
+
+def correlation_3dRsd(cosmo, a, s, mu, beta, do_avg_mu = False):
+    """
+    Compute the 3DRsd correlation function.
+
+    Args:
+        cosmo (:obj:`Cosmology`): A Cosmology object.
+        a (float): scale factor.
+        s (float or array_like): distance(s) at which to calculate the 3DRsd correlation function (in Mpc).
+        mu (float): cosine of the angle at which to calculate the 3DRsd correlation function (in Radian).
+        beta (float): growth rate divided by galaxy bias.     
+        do_avg_mu: switch that determines whether the correlation function is averaged at constant s, the value of mu won't matter to the output if it's turned to 'True'.
+    Returns:
+        Value(s) of the correlation function at the input distance(s) & angle.
+    
+    """
+    cosmo_in = cosmo
+    cosmo = _cosmology_obj(cosmo)
+    status = 0
+
+    # Convert scalar input into an array
+    scalar = False
+    if isinstance(s, float) or isinstance(s, int):
+        scalar = True
+        s = np.array([s,])
+
+    # Call 3D correlation function
+    xis, status = lib.correlation_3dRsd_vec(cosmo, a, mu, beta, s, len(s),
+                                            int(do_avg_mu),status)
+    check(status, cosmo_in)
+    if scalar: return xis[0]
+    return xis

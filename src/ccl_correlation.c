@@ -509,3 +509,112 @@ void ccl_correlation_3d(ccl_cosmology *cosmo, double a,
 
   return;
 }
+
+/*--------ROUTINE: ccl_correlation_3dRsd ------
+TASK: Calculate the redshift space distortion correlation function. Do so by using FFTLog. 
+
+INPUT: cosmology, scale factor a,
+       number of s values, s values, cosine of angle, beta factor, 
+       key for averaging over mu
+
+Correlation function result will be in array xi
+ */
+
+void ccl_correlation_3dRsd(ccl_cosmology *cosmo,double a,
+			   int n_s,double *s,double mu,double beta,double *xi,
+			   int do_avg_mu, int *status)
+{
+  int i,N_ARR;
+  double *k_arr,*pk_arr,*s_arr,*xi_arr,*xi_arr0,*xi_arr2,*xi_arr4;
+
+  //number of data points for k and pk array (divided by 10 for faster claculation)
+  N_ARR=(int)(ccl_splines->N_K_3DCOR*log10(ccl_splines->K_MAX/ccl_splines->K_MIN_DEFAULT)/10.);  
+ 
+  k_arr=ccl_log_spacing(ccl_splines->K_MIN_DEFAULT,ccl_splines->K_MAX,N_ARR);
+  if(k_arr==NULL) {
+    *status=CCL_ERROR_MEMORY;
+    strcpy(cosmo->status_message,"ccl_correlation.c: ccl_correlation_3dRsd ran out of memory\n");
+    return;
+  }
+
+  pk_arr=malloc(N_ARR*sizeof(double));
+  if(pk_arr==NULL) {
+    free(k_arr);
+    *status=CCL_ERROR_MEMORY;
+    strcpy(cosmo->status_message,"ccl_correlation.c: ccl_correlation_3dRsd ran out of memory\n");
+    return;
+  }  
+
+  for (i=0; i<N_ARR; i++)
+    pk_arr[i] = ccl_nonlin_matter_power(cosmo, k_arr[i], a, status);
+
+  s_arr=malloc(sizeof(double)*N_ARR);
+  if(s_arr==NULL) {
+    free(k_arr);
+    free(pk_arr);
+    *status=CCL_ERROR_MEMORY;
+    strcpy(cosmo->status_message,"ccl_correlation.c: ccl_correlation_3dRsd ran out of memory\n");
+    return;
+  }
+  xi_arr=malloc(sizeof(double)*N_ARR);
+  if(xi_arr==NULL) {
+    free(k_arr); free(pk_arr); free(s_arr);
+    *status=CCL_ERROR_MEMORY;
+    strcpy(cosmo->status_message,"ccl_correlation.c: ccl_correlation_3dRsd ran out of memory\n");
+    return;
+  }
+  xi_arr0=malloc(sizeof(double)*N_ARR);
+  if(xi_arr0==NULL) {
+    free(k_arr); free(pk_arr); free(s_arr);
+    *status=CCL_ERROR_MEMORY;
+    strcpy(cosmo->status_message,"ccl_correlation.c: ccl_correlation_3dRsd ran out of memory\n");
+    return;
+  }
+  xi_arr2=malloc(sizeof(double)*N_ARR);
+  if(xi_arr2==NULL) {
+    free(k_arr); free(pk_arr); free(s_arr);
+    *status=CCL_ERROR_MEMORY;
+    strcpy(cosmo->status_message,"ccl_correlation.c: ccl_correlation_3dRsd ran out of memory\n");
+    return;
+  }
+  xi_arr4=malloc(sizeof(double)*N_ARR);
+  if(xi_arr4==NULL) {
+    free(k_arr); free(pk_arr); free(s_arr);
+    *status=CCL_ERROR_MEMORY;
+    strcpy(cosmo->status_message,"ccl_correlation.c: ccl_correlation_3dRsd ran out of memory\n");
+    return;
+  }
+  for(i=0;i<N_ARR;i++)
+    s_arr[i]=0;
+
+  //Calculate multipoles
+  fftlog_ComputeXiLM(0, 2, N_ARR,k_arr,pk_arr,s_arr,xi_arr0);
+  fftlog_ComputeXiLM(2, 2, N_ARR,k_arr,pk_arr,s_arr,xi_arr2);
+  fftlog_ComputeXiLM(4, 2, N_ARR,k_arr,pk_arr,s_arr,xi_arr4);
+
+
+  if(do_avg_mu==0){
+    for(i=0;i<N_ARR;i++)
+    xi_arr[i]= (1.+2./3*beta +1./5*beta*beta)*xi_arr0[i]-(4./3*beta+4./7*beta*beta)*xi_arr2[i]*gsl_sf_legendre_Pl(2,mu)+8./35*beta*beta*xi_arr4[i]*gsl_sf_legendre_Pl(4,mu);
+  }
+  else{
+    for(i=0;i<N_ARR;i++)
+    xi_arr[i]= (1.+2./3*beta +1./5*beta*beta)*xi_arr0[i]-(4./3*beta+4./7*beta*beta)*xi_arr2[i]*(1./4)+8./35*beta*beta*xi_arr4[i]*(9./64); //average over theta
+  }
+  
+
+  // Interpolate to output values of s
+  SplPar *xi_spl=ccl_spline_init(N_ARR,s_arr,xi_arr,xi_arr[0],0);
+  for(i=0;i<n_s;i++)
+    xi[i]=ccl_spline_eval(s[i],xi_spl);
+  ccl_spline_free(xi_spl);
+
+  free(k_arr); free(pk_arr);
+  free(s_arr); free(xi_arr);
+  free(xi_arr0); free(xi_arr2); 
+  free(xi_arr4);
+
+  ccl_check_status(cosmo,status);
+
+  return;
+}
