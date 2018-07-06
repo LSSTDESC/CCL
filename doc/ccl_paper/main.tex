@@ -9,7 +9,7 @@
 %\documentclass[]{emulateapj}
 
 \input{macros}
-\bibliographystyle{apj}
+\bibliographystyle{yahapj}
 
 \usepackage[outdir=./]{epstopdf}
 \usepackage{graphicx,verbatim}
@@ -647,7 +647,7 @@ The Limber approximation works best for wide radial kernels and high $\ell$.
 
 \ccl incorporates natively routines to compute the $C^{ab}_\ell$ angular power spectra as described above without the Limber approximation. The algorithm performs first the integrals over $z$ for both tracers, and ends with the $k$ integral. This computation is much slower than using the Limber approximation, but results in precise angular power spectra at low $\ell$, and correct cross-correlations between tracers. The integration of these routines has been tested against the \texttt{CLASS} code and recovers the same angular power spectra when precision parameters are set to high values.
 
-However, the computation of the $C^{ab}_\ell$ without the Limber approximation is too costly in terms of computing time using this method, if one wants to explore extensively a full cosmological parameter space. The aim of the \texttt{Angpow} software \citep{2017A&A...602A..72C} is to compute the angular power spectra  $C_{\ell}^{ab}$  without any Limber numerical approximation in a faster way but still accurately. \ccl has been linked to the \texttt{Angpow} code,  which is briefly described here.
+However, the computation of the $C^{ab}_\ell$ without the Limber approximation is too costly in terms of computing time using this method, if one wants to explore extensively a full cosmological parameter space. \ccl provides fast non-Limber predictions by calling the \texttt{Angpow} software \citep{2017A&A...602A..72C}. 
 
 The angular power spectrum for two tracers $C_{\ell}^{ab}$ is computed in \texttt{Angpow} according to the following expression
 \begin{equation}
@@ -869,7 +869,8 @@ These results show that the {\tt CLASS}-based \ccl power spectrum calculations a
 \label{sec:cosmicemu}
 \todo{I think this section should go before the one on generalized validation of the power spectrum over LCDM space, because that one refers to 'the sections above' as being at specific cosmologies, which is the case here. - DL}\elisa{The only caveat is that the generalized validation scheme doesnt account for the emulator.}
 
-\citet{Lawrence17} quantified the accuracy of the matter power spectrum from their emulation scheme by comparing their predictions to the resulting power spectra from the numerical simulations used for the calibration of their scheme. We repeated this procedure making the emulator predictions via \ccl for a subset of emulator cosmologies. In this section, we quantify the accuracy of the \ccl predictions by estimating
+The matter power spectrum emulation procedure from \citet{Lawrence17} has an intrinsic accuracy compared to the simulated results used for its construction. It effectively provides a fitting scheme which allows interpolation between the simulation results. As a consequence, the method itself has some limitations in how well it can reproduce the simulation results. \ccl takes the emulator predictions and interpolates between the wavenumber and scale-factor notes in the emulator output. To validate the final power spectra coming out of \ccl, we compared them directly to the simulated spectra from \citet{Lawrence17} for a subset of the cosmologies adopted in that work. In this section, we quantify the accuracy of the CCL predictions by estimating
+
 \begin{equation}
   \mathcal{A}\equiv\frac{|P_{\tt CCL}(k,z)-P_{\rm L17}(k,z)|}{P_{\rm L17}(k,z)}
   \label{eq:pkaccemu}
