@@ -9,6 +9,7 @@ The source codes included in this directory can be used to reproduce all benchma
 * **sigmaM_bm.py** : generates the benchmark sigma(M) values used in sigmam:model_1-3.
 * **mfunc_bm.py** : generates the mass function predictions used in massfunc:model_1.
 * **cl_corr_bm** : this folder contains the software needed to reproduce the benchmark files for angular power spectra and correlation functions used in tests cls:histo, cls:analytic, corrs:analytic_bessel and corrs:analytic_fftlog. The C code within that folder (limberjack) should be first compiled before running the script run_all.py.
+* **cl_cmbl_bm.py** : generates the benchmark file for the CMB lensing angular power spectrum used in test cls:cmblens.
 * **bcm_bm.c** : this file shows an excerpt from a modified version of CLASS that was used to generate a benchmark power spectrum containing baryon corrections (used for test bcm:model_1). The file is just an excerpt, and therefore won't compile or run on its own.
 * **create_hiz_curv_massnu_benchmark.ipynb** : this python notebook can be used to generate the files used in tests distances_hiz_mnu:model_1-5.
 * **3dcorr_benchmark.ipynb** : this python notebook can be used to generate the files used in tests corrs_3d:model_1-3.
