@@ -11,7 +11,7 @@ CTEST_DATA(bbks) {
   double h;
   double A_s;
   double n_s;
-  double sigma_8;
+  double sigma8;
   double Neff;
   double* mnu;
   ccl_mnu_convention mnu_type;
@@ -28,7 +28,7 @@ CTEST_SETUP(bbks) {
   //TODO: Don't we have to change this to normpk?
   data->A_s = 2.1e-9;
   data->n_s = 0.96;
-  data->sigma_8=0.8;
+  data->sigma8=0.8;
   data->Neff=0;
   double mnuval = 0.;
   data->mnu=&mnuval;
@@ -69,7 +69,7 @@ static void compare_bbks(int i_model,struct bbks_data * data)
   config.transfer_function_method = ccl_bbks;
   ccl_parameters params = ccl_parameters_create(data->Omega_c,data->Omega_b,data->Omega_k[i_model-1],data->Neff, data->mnu,data->mnu_type, data->w_0[i_model-1],data->w_a[i_model-1],data->h,data->A_s,data->n_s,-1,-1,-1,-1,NULL,NULL, &status);
   params.Omega_g=0;
-  params.sigma_8=data->sigma_8;
+  params.sigma8=data->sigma8;
   ccl_cosmology * cosmo = ccl_cosmology_create(params, config);
   ASSERT_NOT_NULL(cosmo);
   

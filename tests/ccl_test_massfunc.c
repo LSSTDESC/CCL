@@ -22,7 +22,7 @@ CTEST_DATA(massfunc) {
   double Omega_k[1];
   double w_0[1];
   double w_a[1];
-  double sigma_8;
+  double sigma8;
 
   double mass[13];
   double massfunc[3][13];
@@ -57,7 +57,7 @@ CTEST_SETUP(massfunc) {
   data->h = 0.7;
   data->A_s = 2.1e-9;
   data->n_s = 0.96;
-  data->sigma_8 = 0.8;
+  data->sigma8 = 0.8;
   data->Neff=0;
   double mnuval = 0.;
   data->mnu=&mnuval;
@@ -87,7 +87,7 @@ static void compare_massfunc(int model, struct massfunc_data * data)
 						data->w_a[model], data->h,data->A_s, data->n_s,
 						-1, -1, -1, -1, NULL, NULL, status);
 
-  params.sigma_8 = data->sigma_8;
+  params.sigma8 = data->sigma8;
   ccl_configuration config = default_config;
   config.transfer_function_method = ccl_bbks;
   // test file generated using tinker 2008 currently

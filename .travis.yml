@@ -1,68 +1,49 @@
-script:
 language: python
-python:
-  - "2.7"
-  - "3.5"
-  - "3.6"
-
-# Cache pip- and apt-installed dependencies
 cache:
-    apt: true
-    pip: true
-    directories:
-        - $TRAVIS_BUILD_DIR/gsl-2.4
-
-sudo: required
-
-addons:
-    apt:
-        packages:
-            - fftw3
-            - fftw3-dev
-            - pkg-config
-#            - texlive-latex-recommended
-#            - texlive-latex-extra
-#            - texlive-fonts-recommended
-#            - texlive-fonts-extra
-#            - dvipng
-
-# Travis uses Ubuntu 12.04 and 14.04. None of them have GSL2x in apt-get
-# We have to install it from source (this will make the tests slower)
-# CLASS also needs to be downloaded and compiled, which there is no easy fix for.
-before_install:
-#  - sudo apt-get -qq update
-#  - sudo apt-get install fftw3 fftw3-dev pkg-config
-#  - sudo apt-get install latexmk
-  - pip install numpy
-  - pip install coveralls
-  - ./install-gsl.sh
-  - python class_install.py
-  - python angpow_install.py
-#addons:
-#    apt:
-#        packages:
-#            - texlive-latex-recommended
-#            - texlive-latex-extra
-#            - texlive-fonts-recommended
-#            - texlive-fonts-extra
-#            - dvipng
-
-install: python setup.py install
+  directories:
+  - "$TRAVIS_BUILD_DIR/build/GSL/src"
+  - "$TRAVIS_BUILD_DIR/build/FFTW/src"
+  - "$TRAVIS_BUILD_DIR/build/SWIG/src"
+  - "$TRAVIS_BUILD_DIR/build/CLASS/src"
+  - "$TRAVIS_BUILD_DIR/build/ANGPOW/src"
+  - "$HOME/miniconda"
+matrix:
+  include:
+  - os: linux
+    python: 2.7
+    sudo: required
+    env: TOXENV=py27
+  - os: linux
+    sudo: required
+    python: 3.6
+    env: TOXENV=py36
+  - os: osx
+    language: generic
+    env: TOXENV=py27
+  - os: osx
+    language: generic
+    env: TOXENV=py36
+install:
+- "./.travis/install.sh"
+- if ! [[ $TRAVIS_OS_NAME == "linux" ]]; then source $HOME/miniconda/bin/activate; fi
+- if ! [[ $TRAVIS_OS_NAME == "linux" ]]; then hash -r ; fi
+- if ! [[ $TRAVIS_OS_NAME == "linux" ]]; then source activate test-environment ; fi
+- export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
+- export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/usr/local/lib/pkgconfig
+- cmake --version
+- python --version
 script:
-    - nosetests tests/run_tests.py --all --debug --detailed-errors --verbose --process-restartworker --with-coverage --cover-package=pyccl
-    - make check-cpp
-
+- python setup.py build
+- nosetests tests/run_tests.py --all --debug --detailed-errors --verbose --process-restartworker --with-coverage --cover-package=pyccl
+- sudo make -Cbuild install
+- check_ccl
 after_success:
-    - coveralls
-
-# Check why the note creation process crashes
-#    - make -C doc/0000-ccl_note
-#after_success:
-#    if [[ -n "$GITHUB_API_KEY" ]; then
-#        git checkout --orphan pdf
-#        git rm -rf .
-#        cp doc/0000-ccl_note/main.pdf 0000-ccl_note.pdf
-#        git add -f 0000-ccl_note.pdf
-#        git -c user.name='travis' -c user.email='travis' commit -m init
-#        git push -q -f https://drphilmarshall:$GITHUB_API_KEY@github.com/DarkEnergyScienceCollaboration/CCL pdf
-#    fi
+- coveralls
+deploy:
+  provider: pypi
+  user: desc-ccl
+  password:
+    secure: mW6yYWqTxSOlqRE4nlaBucmCg7JBEhm2kDRT18imbIA998JSnA+3TNNc87XbrU5KBHeLgtlX6hFGaquNMi69jY64zmVy4880hnuShpFWYGiwHkvdJCqnQe2wHl183/zQxFpgLZrWj5TyzSgz7ESWIbqt6SS8kT87oKpjtE813jLICUv8kwwRoOo2RQ0EVKKlmOsbbDPOh26/lx0MKRHYeU7pzSo96kXty6fLSARKJLngDDq+e8Vph7pYE5N0ZMoOwagAMBHUtv6zXhzTz5Kfu9menaDpClFwJqjkvbP9IhVSa1sJhituk/GG+d4MBMYmVadsH5J9dJlUm7oGrxJsiuwePfENjxafV8O+JcT02Q9RlvP9741bckw9hy1wLN0qOdPnaMx3kdXin3Ooj9Oud+3Uv8Y6HC1IYvkS1H6Od4EoowJCIDBz3NmDjiuGpzCcenRmaxFQJnbwf/H44pedDLkB0c+EnYxfh2U7LJj7ztVmeFS8AV3P/E3aYx0StP/LnPnzvWDBIhStdZSMAX3K1RZBSjvu5nmTbk2w6TMI6ihlKfAmjyTwEOH7KcZtdv/o7A5VbBiz6PGehAJ6MrWLKtkiLVO1K2AeKH/AZ2Bknh8CUyLBpQ4JYg5URHvGa7wvnM4rPVh1dU/LvJrbaVXqlZp4gNVW0wrzVakfu4Q6Qng=
+  on:
+    tags: true
+    branch: master
