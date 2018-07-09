@@ -250,6 +250,13 @@ To use \ccl, the first step is to create a {\tt ccl$\_$cosmology} structure, con
 \end{itemize}
 The argument ${\tt norm\_pk}$ can be used to specify the power spectrum normalization in terms of either $\sigma_8$ or $A_\mathrm{s}$. The {\tt ccl$\_$parameters$\_$create} functions assume $\sigma_8$ normalization if ${\tt norm\_pk > 1.0e-5}$ and $A_{\mathrm s}$ normalization otherwise.
 
+The arguments ${\tt mu\_0}$ ($\mu_0$) and ${\tt Sigma\_0}$ ($\Sigma_0$) are the parameters governing the amplitude of modifications to the cosmological Poisson equation for massive and massless particles respectively (see sections \ref{sec:growth} and \ref{sec:cl} below for more details). We currently assume the functional forms \citep{Ferreira2010}
+\begin{equation}
+\mu(z) = \mu_0 \frac{\Omega_\Lambda(z)}{\Omega_\Lambda(z=0)}\, , \,\,\, \Sigma(z) = \Sigma_0 \frac{\Omega_\Lambda(z)}{\Omega_\Lambda(z=0)}
+\label{muSigform}
+\end{equation}
+but expect to introduce functionality for a broader range of functional forms in time.
+
 {\tt ccl$\_$configuration} objects contain information about the prescriptions to be used to compute transfer functions, power spectra, mass functions, etc. A default {\tt ccl$\_$configuration} object is made available as {\tt default$\_$config}, which specifies that CLASS will be used to compute transfer functions, HaloFit will be used to calculate the matter power spectrum, there will be no impact of baryons included and the Tinker 2010 prescription will be used to compute the halo mass function.
 
 After initializing instances of {\tt ccl$\_$parameters} and {\tt ccl$\_$configuration}, use the function {\tt ccl$\_$cosmology$\_$create(ccl$\_$parameters, ccl$\_$configuration)} to return a pointer to a {\tt ccl$\_$cosmology} structure. You will need to pass this pointer around to every CCL function.
@@ -380,7 +387,15 @@ In doing this, \ccl simultaneously computes the growth rate $f(a)$, defined as:
 
 Note that the above is strictly valid for a Universe containing only dust-like matter components. A scale-independent growth rate is, for example, ill-defined in the presence of massive neutrinos; therefore \ccl will raise an error if the user attempts to calculate the growth rate or growth factor in a cosmology with massive neutrinos.
 
-Currently \ccl allows for an alternative `modified gravity' cosmological model defined by a regular background $(w_0+w_a)$CDM (with arbitrary $K$) as well as a user-defined $\Delta f(a)$, such that the true growth rate in this model is given by $f(a)=f_0(a)+\Delta f(a)$, where $f_0(a)$ is the growth rate in the background model. Note that this model is only consistently implemented with regards to the computation of the linear growth factor and growth rates (which will also scale the linear power spectrum). All other \ccl functions (including the non-linear power spectrum) will ignore these modifications. This model, and the interpretation of the predictions given by \ccl, should therefore be used with care.
+Currently, \ccl allows for two version of alternative `modified gravity' cosmological models. The first is defined by a regular background $(w_0+w_a)$CDM (with arbitrary $K$) as well as a user-defined $\Delta f(a)$, such that the true growth rate in this model is given by $f(a)=f_0(a)+\Delta f(a)$, where $f_0(a)$ is the growth rate in the background model. Note that this implementation of `modified gravity' is only consistently implemented with regards to the computation of the linear growth factor and growth rates (which will also scale the linear power spectrum). All other \ccl functions (including the non-linear power spectrum) will ignore these modifications. This model, and the interpretation of the predictions given by \ccl, should therefore be used with care.
+
+The second model for deviations from General Relativity supported by \ccl is the quasistatic parameterization, with parameterizing functions $\mu(a)$ (the change to the Poisson equation for massive particles) and $\Sigma(a)$ (the change to the same for massless particles), with functional form assumed to be given as in equation \ref{muSigform}. The background is once again allowed to be defined by $(w_0+w_a)$CDM (with arbitrary $K$). 
+
+The growth factor and growth rate are altered when ${\tt mu\_0} \ne 0$, with the above equation becoming
+\begin{equation}
+  \frac{d}{da}\left(a^3H(a)\frac{dD}{da}\right)=\frac{3}{2}\Omega_M(a)aH(a)(1 + \mu(a))D.
+\end{equation}
+As usual, the resulting growth factor can be returned normalized to $D(a=1)=1$ or to $D(a\ll1)\rightarrow a$. The second normalization is used in returning the matter power spectrum with appropriate modification in this model, as discussed in section \ref{sec:power}.
 
 \subsection{Matter power spectrum}
 \label{sec:power}
@@ -455,6 +470,18 @@ The main consequences of baryonic processes are: to suppress the power spectrum 
 If the BCM parameters are not specified and the user sets \ccl to compute the power spectrym with baryonic feedback included, \ccl will assume the default parameters of \citet{Schneider15}. The user may pass these explicitly if desired. 
 
 Other baryonic impact models might be incorporated in the future as they become available.
+
+\subsubsection{Modified gravity ($\mu, \Sigma$)}
+\ccl supports the quasistatic parameterization of modified gravity with scale-independent deviations from GR which arise at late times (currently with functional form given in equation \ref{muSigform}). Under these conditions, the matter power spectrum in a modified gravity scenario can be computed simply by re-scaling the GR matter power spectrum with the modified gravity growth factor.
+
+For each power spectrum calculation method above, we first first compute the power spectrum in GR at a grid in $a$ and $k$ as usual, in preparation for producing splines in these variables. If ${\tt mu\_0} \ne 0$, we then take the ratio of the growth factor $D$ at the given value of ${\tt mu\_0}$ to the GR (${\tt mu\_0}=0$) growth factor, and multiply the GR power spectrum by this ratio squared:
+\begin{equation}
+P(k,z) = \left(\frac{D^{\mu}(z)}{D^{\rm GR}(z)}\right)^2 P^{\rm GR}(k,z).
+\label{Pkmu}
+\end{equation}
+We then set up splines for the power spectrum as usual. 
+
+Note that the $\mu, \Sigma$ quasistatic parameterization of deviations from GR is technically only valid in the linear regime. We allow the user to do this re-scaling for the non-linear power spectrum, but issue a warning.
 
 \subsubsection{Spline parameters \& the INI file}
 
@@ -586,12 +613,12 @@ where $\mathcal{P}_\Phi(k)$ is the dimensionless power spectrum of the primordia
         \begin{equation}
           \Delta^{\rm D}_\ell(k)=\int dz\,p_z(z)\,b(z)\,T_\delta(k,z)\,j_\ell(k\chi(z)),
         \end{equation}
-        where $T_\delta$ is the matter transfer function. Note that \ccl currently does not support non-linear or scale-dependent bias. Here, $p_z(z)$ is the normalized distribution of sources in redshift (selection function). Thus \ccl understands each individual redshift bin as a separate ``observable''.
+        where $T_\delta$ is the matter transfer function. Note that \ccl currently does not support non-linear or scale-dependent bias. Here, $p_z(z)$ is the normalized distribution of sources in redshift (selection function). Thus \ccl understands each individual redshift bin as a separate ``observable''. Note also that if ${\tt mu\_0 \ne 0}$, the matter transfer function is altered accordingly.
   \item $\Delta^{\rm RSD}$ is the linear contribution from redshift-space distortions:
         \begin{equation}
           \Delta^{\rm RSD}_\ell(k)=\int dz\,p_z(z)\frac{(1+z) p_z(z)}{H(z)}T_\theta(k,z) j_\ell''(k\chi(z)),
         \end{equation}
-        where $T_\theta(k,z)$ is the transfer function of $\theta$, the divergence of the comoving velocity field. $T_\theta(k,z)$ depends on the growth, which \ccl does not compute for massive neutrino cosmologies; therefore at this time an attempt to create a number count tracer in a cosmology with massive neutrinos will cause \ccl to raise an error. $C_\ell$ is instead computed assuming a linear-theory relation between the matter overdensity and peculiar velocity fields. While this should not be problematic for wide photometric redshift bins, users should exercise care when interpreting results for narrow window functions. 
+        where $T_\theta(k,z)$ is the transfer function of $\theta$, the divergence of the comoving velocity field. $T_\theta(k,z)$ depends on the growth, which \ccl does not compute for massive neutrino cosmologies; therefore at this time an attempt to create a number count tracer in a cosmology with massive neutrinos will cause \ccl to raise an error. $C_\ell$ is instead computed assuming a linear-theory relation between the matter overdensity and peculiar velocity fields. While this should not be problematic for wide photometric redshift bins, users should exercise care when interpreting results for narrow window functions. Note also that if the growth is affected by modifications to gravity, this is reflected here.
   \item $\Delta^{\rm M}$ is the contribution from magnification lensing:
         \begin{equation}
           \Delta_\ell^{\rm M}(k)=-\ell(\ell+1)\int \frac{dz}{H(z)} W^{\rm M}(z) T_{\phi+\psi}(k,z) j_\ell(k\chi(z)),
@@ -602,6 +629,13 @@ where $\mathcal{P}_\Phi(k)$ is the dimensionless power spectrum of the primordia
            W^{\rm M}(z)\equiv\int_z^\infty dz' p_z(z')\frac{2-5s(z')}{2}\frac{r(\chi(z')-\chi(z))}{r(\chi(z'))}.
         \end{equation}
         Here $s(z)$ is the magnification bias, given as the logarithmic derivative of the number of sources with magnitude limit, and $r(\chi)$ is the angular comoving distance (see Eq. \ref{eq:angdist}).
+        
+        In the case where the quasistatic parameterization of modified gravity is in use and ${\tt sigma\_0} \ne 0$, equation \ref{eq:deltaM} becomes
+        \begin{equation}
+          \Delta_\ell^{\rm M}(k)=-\ell(\ell+1)\int \frac{dz}{H(z)} W^{\rm M}(z) (1 + \Sigma(z)) T_{\phi+\psi}(k,z) j_\ell(k\chi(z)),
+          \label{eq:deltaM}
+        \end{equation}
+and there is dependence on $\mu(z)$ via modifications to $T_{\phi+\psi}(k,z)$.
 
         Note that \ccl currently does not compute relativistic corrections to number counts \cite{2011PhRvD..84d3516C,2011PhRvD..84f3505B}. Although these should be included in the future, their contribution to the total fluctuation is largely subdominant (see \cite{GReffects} and the two references above), and therefore it is safe to work without them in most cases.
 \end{itemize}
@@ -616,10 +650,17 @@ where $\mathcal{P}_\Phi(k)$ is the dimensionless power spectrum of the primordia
         \begin{equation}
           W^L(z)\equiv\int_z^\infty dz' p_z(z')\frac{r(\chi(z')-\chi(z))}{r(\chi(z'))}.
         \end{equation}
+        
+  When the quasistatic parameterization of modified gravity is in use, we have instead         
+       \begin{equation} \label{eq:transfer_lensing}
+          \Delta_\ell^{\rm L}(k)=-\frac{1}{2}\sqrt{\frac{(\ell+2)!}{(\ell-2)!}}\int \frac{dz}{H(z)} W^{\rm L}(z) (1 + \Sigma(z))T_{\phi+\psi}(k,z) j_\ell(k\chi(z)),
+        \end{equation} 
+        with dependence on $\mu(z)$ via $T_{\phi+\psi}(k,z)$.
   \item $\Delta^{\rm IA}$ is the transfer function for intrinsic galaxy alignments. \ccl currently supports the so-called ``non-linear alignment model'', according to which the galaxy inertia tensor is proportional the local tidal tensor \cite{2004PhRvD..70f3526H,2007MNRAS.381.1197H}.
         \begin{equation}
           \Delta_\ell^{\rm IA}(k)=\sqrt{\frac{(\ell+2)!}{(\ell-2)!}}\int dz\,p_z(z)\,b_{\rm IA}(z)\,f_{\rm red}(z)\,T_\delta(k,z)\,\frac{j_\ell(k\chi(z))}{(k\chi(z))^2}.
         \end{equation}
+        Note that $\Delta_\ell^{\rm IA}(k)$ is unchanged under modified gravity other than via the matter transfer function.
 \end{itemize}
 
 It is worth noting that the equations above should be modified for non-flat cosmologies by replacing the spherical Bessel functions $j_\ell$ with their hyperspherical counterparts \cite{1994ApJ...432....7K}. Since the library currently only uses the Limber approximation (documented below), this is not currently an issue. It will be revisited in future versions of \ccl.
@@ -628,7 +669,11 @@ It is worth noting that the equations above should be modified for non-flat cosm
 \begin{equation} \label{eq:transfer_cmb_lensing}
   \Delta_\ell^{\rm C}(k)=-\frac{\ell(\ell+1)}{2}\int_0^{\chi_{\rm S}} d\chi\,\frac{r(\chi_{\rm S})-r(\chi)}{r(\chi)r(\chi_{\rm S})}T_{\phi+\psi}(k,\chi) j_\ell(k\chi),
 \end{equation}
-where $\chi_{\rm S}\equiv\chi(z_{\rm S})$.
+where $\chi_{\rm S}\equiv\chi(z_{\rm S})$. Once again under the quasistatic parameterization of modified gravity we have
+\begin{equation} \label{eq:transfer_cmb_lensing}
+  \Delta_\ell^{\rm C}(k)=-\frac{\ell(\ell+1)}{2}\int_0^{\chi_{\rm S}} d\chi\,\frac{r(\chi_{\rm S})-r(\chi)}{r(\chi)r(\chi_{\rm S})}(1+\Sigma(z))T_{\phi+\psi}(k,\chi) j_\ell(k\chi),
+\end{equation}
+with dependence on $\mu(z)$ via modifications to $T_{\phi+\psi}(k,\chi)$.
 
 \subsubsection{The Limber approximation}
 As shown above, computing each transfer function involves a radial projection (i.e. an integral over redshift or $\chi$), and thus computing full power spectrum consists of a triple integral for each $\ell$. This can be computationally intensive, but can be significantly simplified in certain regimes by using the Limber approximation, given by:
