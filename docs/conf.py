@@ -25,14 +25,14 @@ if os.path.isdir(root_path):
     sys.path.insert(0, root_path)
 
 on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
-#on_rtd=True
+on_rtd=True
 if on_rtd:
     try:
         from unittest.mock import MagicMock
     except ImportError:
         from mock import Mock as MagicMock
 
-    autodoc_mock_imports = ["pyccl"]
+    autodoc_mock_imports = ["ccllib"]
     class Mock(MagicMock):
         @classmethod
         def __getattr__(cls, name):
@@ -97,7 +97,7 @@ language = None
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This patterns also effect to html_static_path and html_extra_path
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', 'api/pyccl.ccllib.rst']
+exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = 'sphinx'
