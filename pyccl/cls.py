@@ -1,4 +1,4 @@
-import ccllib as lib
+from pyccl import ccllib as lib
 from pyccl import constants as const
 from pyccl.pyutils import _cosmology_obj, check
 import numpy as np
