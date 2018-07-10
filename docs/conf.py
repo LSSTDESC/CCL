@@ -32,6 +32,7 @@ if on_rtd:
     except ImportError:
         from mock import Mock as MagicMock
 
+    autodoc_mock_imports = ["pyccl"]
     class Mock(MagicMock):
         @classmethod
         def __getattr__(cls, name):
