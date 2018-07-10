@@ -37,7 +37,6 @@ if on_rtd:
             return MagicMock()
 
     MOCK_MODULES = ["ccllib"]
-    
     sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
 
 # -- General configuration ------------------------------------------------
