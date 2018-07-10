@@ -37,7 +37,7 @@ if on_rtd:
             return MagicMock()
 
     #MOCK_MODULES = ["_ccllib","numpy","ccllib","pyccl"]
-    MOCK_MODULES = ["pyccl","pyccl.ccllib","numpy"]
+    MOCK_MODULES = ["pyccl","pyccl.ccllib","pyccl.pyutils","numpy"]
     sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
 
 # -- General configuration ------------------------------------------------
