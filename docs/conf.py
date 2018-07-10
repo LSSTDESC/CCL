@@ -19,10 +19,12 @@
 import os
 from os.path import abspath, dirname, join as pjoin
 import sys
-this_dir = dirname(abspath(__file__))
-root_path = abspath(pjoin(this_dir, '../'))
-if os.path.isdir(root_path):
-    sys.path.insert(0, root_path)
+sys.path.insert(0,os.path.abspath('../'))
+sys.path.append(os.path.abspath('../pyccl/')
+#this_dir = dirname(abspath(__file__))
+#root_path = abspath(pjoin(this_dir, '../'))
+#if os.path.isdir(root_path):
+#    sys.path.insert(0, root_path)
 
 on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
 if on_rtd:
