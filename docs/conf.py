@@ -24,20 +24,7 @@ root_path = abspath(pjoin(this_dir, '../'))
 if os.path.isdir(root_path):
     sys.path.insert(0, root_path)
 
-from mock import Mock as MagicMock
-#from unittest.mock import MagicMock
-
-autodoc_mock_imports = ['ccllib']
-class Mock(MagicMock):
-    @classmethod
-    def __getattr__(cls, name):
-        return MagicMock()
-
-MOCK_MODULES = ['ccllib']
-sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
-'''
 on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
-on_rtd=True
 if on_rtd:
     try:
         from unittest.mock import MagicMock
@@ -49,11 +36,8 @@ if on_rtd:
         def __getattr__(cls, name):
             return MagicMock()
 
-    #MOCK_MODULES = ["_ccllib","numpy","ccllib","pyccl"]
-    MOCK_MODULES = ['ccllib']
+    MOCK_MODULES = ["_ccllib","numpy","ccllib","pyccl"]
     sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
-'''
-
 
 # -- General configuration ------------------------------------------------
 
