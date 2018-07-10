@@ -15,6 +15,7 @@
 #include "ccl_params.h"
 #include "ccl_power.h"
 #include "ccl.h"
+#include "ccl_params.h"
 #include "fftlog.h"
 
 /*--------ROUTINE: taper_cl ------
@@ -236,15 +237,22 @@ static void ccl_tracer_corr_bessel(ccl_cosmology *cosmo,
     cp->tiltf=log10(cls[n_ell-1]/cls[n_ell-2])/log10(ell[n_ell-1]/ell[n_ell-2]);
   }
 
-  int ith;
+  int ith, gslstatus;
   double result,eresult;
   gsl_function F;
-  gsl_integration_workspace *w=gsl_integration_workspace_alloc(1000);
+  gsl_integration_workspace *w=gsl_integration_workspace_alloc(ccl_gsl->N_ITERATION);
   for(ith=0;ith<n_theta;ith++) {
     cp->th=theta[ith]*M_PI/180;
     F.function=&corr_bessel_integrand;
     F.params=cp;
-    *status=gsl_integration_qag(&F,0,ELL_MAX_FFTLOG,0,1E-4,1000,GSL_INTEG_GAUSS41,w,&result,&eresult);
+    gslstatus = gsl_integration_qag(&F, 0, ELL_MAX_FFTLOG, 0,
+                                    ccl_gsl->INTEGRATION_EPSREL, ccl_gsl->N_ITERATION,
+                                    ccl_gsl->INTEGRATION_GAUSS_KRONROD_POINTS,
+                                    w, &result, &eresult);
+    if(gslstatus != GSL_SUCCESS) {
+      ccl_raise_gsl_warning(gslstatus, "ccl_correlation.c: ccl_tracer_corr_bessel():");
+      *status |= gslstatus;
+    }
     wtheta[ith]=result/(2*M_PI);
   }
   gsl_integration_workspace_free(w);

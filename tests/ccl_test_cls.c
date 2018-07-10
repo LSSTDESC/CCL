@@ -15,7 +15,7 @@ CTEST_DATA(cls) {
   double h;
   double A_s;
   double n_s;
-  double sigma_8;
+  double sigma8;
 };
 
 CTEST_SETUP(cls) {
@@ -23,7 +23,7 @@ CTEST_SETUP(cls) {
   data->Omega_b = 0.00;
   data->h = 0.7;
   data->A_s = 2.1e-9;
-  data->sigma_8=0.8;
+  data->sigma8=0.8;
   data->n_s = 0.96;
 }
 
@@ -52,7 +52,7 @@ static void compare_cls(char *compare_type,struct cls_data * data)
   params.Omega_g=0;
   params.Omega_n_rel=0;
   params.Omega_l = 1.0 - params.Omega_m;
-  params.sigma_8=data->sigma_8;
+  params.sigma8=data->sigma8;
   ccl_cosmology * cosmo = ccl_cosmology_create(params, config);
   ASSERT_NOT_NULL(cosmo);
 

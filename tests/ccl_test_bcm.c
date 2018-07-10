@@ -11,7 +11,7 @@ CTEST_DATA(bcm) {
   double h;
   double A_s;
   double n_s;
-  double sigma_8;
+  double sigma8;
   double Omega_v[1];
   double Omega_k[1];
   double w_0[1];

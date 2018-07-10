@@ -13,7 +13,7 @@
      of the cosmologies: {38,39,40,42}. Other cosmologies
      are not allowed because CLASS fails when w(z) crosses -1
      and we need the linear power spectrum from CLASS in general
-     for sigma_8 computation.
+     for sigma8 computation.
 */
 
 #define EMU_TOLERANCE 3.0E-2
@@ -24,7 +24,7 @@ CTEST_DATA(emu_nu) {
   double Neff;
   double *mnu[4];
   ccl_mnu_convention mnu_type;
-  double sigma_8[4];
+  double sigma8[4];
   double Omega_c[4];
   double Omega_b[4];
   double n_s[4];
@@ -38,7 +38,7 @@ CTEST_SETUP(emu_nu) {
   data->Neff = 3.04;
   data->mnu_type = ccl_mnu_list;
 
-  double *sigma_8;
+  double *sigma8;
   double *Omega_c;
   double *Omega_b;
   double *Omega_nu;
@@ -54,7 +54,7 @@ CTEST_SETUP(emu_nu) {
   int i;
   ccl_parameters * params;
 
-  sigma_8=malloc(4*sizeof(double));
+  sigma8=malloc(4*sizeof(double));
   Omega_c=malloc(4*sizeof(double));
   Omega_b=malloc(4*sizeof(double));
   n_s=malloc(4*sizeof(double));
@@ -80,7 +80,7 @@ CTEST_SETUP(emu_nu) {
   int omnustatus=0;
   for(int i=0;i<4;i++) {
     
-    status=fscanf(f,"%le %le %le %le %le %le %le %le\n",&Omega_c[i],&Omega_b[i],&h[i],&sigma_8[i],&n_s[i],&w_0[i],&w_a[i],&Omega_nu[i]);
+    status=fscanf(f,"%le %le %le %le %le %le %le %le\n",&Omega_c[i],&Omega_b[i],&h[i],&sigma8[i],&n_s[i],&w_0[i],&w_a[i],&Omega_nu[i]);
     if(status!=8) {
       fprintf(stderr,"Error reading file %s, line %d\n",fname,i);
       exit(1);
@@ -88,7 +88,7 @@ CTEST_SETUP(emu_nu) {
     data->w_0[i] = w_0[i];
     data->w_a[i] = w_a[i];
     data->h[i] = h[i];
-    data->sigma_8[i] = sigma_8[i];
+    data->sigma8[i] = sigma8[i];
     data->Omega_c[i] = Omega_c[i];
     data->Omega_b[i] = Omega_b[i];
     data->n_s[i] = n_s[i];
@@ -129,7 +129,7 @@ static void compare_emu_nu(int i_model,struct emu_nu_data * data)
   config.matter_power_spectrum_method = ccl_emu;
  
   //None of the current cosmologies being checked include neutrinos
-  ccl_parameters params = ccl_parameters_create(data->Omega_c[i_model-1],data->Omega_b[i_model-1],0.0,data->Neff, data->mnu[i_model-1], data->mnu_type, data->w_0[i_model-1],data->w_a[i_model-1],data->h[i_model-1],data->sigma_8[i_model-1],data->n_s[i_model-1],-1,-1,-1,-1,NULL,NULL, &status);
+  ccl_parameters params = ccl_parameters_create(data->Omega_c[i_model-1],data->Omega_b[i_model-1],0.0,data->Neff, data->mnu[i_model-1], data->mnu_type, data->w_0[i_model-1],data->w_a[i_model-1],data->h[i_model-1],data->sigma8[i_model-1],data->n_s[i_model-1],-1,-1,-1,-1,NULL,NULL, &status);
   params.Omega_l=params.Omega_l+params.Omega_g;
   params.Omega_g=0;
   ccl_cosmology * cosmo = ccl_cosmology_create(params, config);

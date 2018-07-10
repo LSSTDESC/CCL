@@ -98,9 +98,9 @@ int main(int argc,char **argv)
   rhom = ccl_rho_x(cosmo, 1., ccl_species_m_label, isco, &status);
   printf("%i\t%.3f\t%.3f\t%.3f\t%.3e\t%.3e\t%.3e\n", 0, Om, OL, Or, rhoc, rhom, RHO_CRITICAL);
 
-  // Compute sigma_8
+  // Compute sigma8
   printf("Initializing power spectrum...\n");
-  printf("sigma_8 = %.3lf\n\n", ccl_sigma8(cosmo, &status));
+  printf("sigma8 = %.3lf\n\n", ccl_sigma8(cosmo, &status));
   
   //Create tracers for angular power spectra
   double z_arr_gc[NZ],z_arr_sh[NZ],nz_arr_gc[NZ],nz_arr_sh[NZ],bz_arr[NZ];
