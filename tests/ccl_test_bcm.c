@@ -11,7 +11,7 @@ CTEST_DATA(bcm) {
   double h;
   double A_s;
   double n_s;
-  double sigma_8;
+  double sigma8;
   double Omega_v[1];
   double Omega_k[1];
   double w_0[1];
@@ -77,7 +77,7 @@ static void compare_bcm(int i_model,struct bcm_data * data)
 						data->Neff, data->m_nu, data->mnu_type,
 						data->w_0[i_model-1],data->w_a[i_model-1],
 						data->h,data->A_s,data->n_s,-1,-1,-1,-1,NULL,NULL, &status);
-  params.sigma_8=data->sigma_8;
+  params.sigma8=data->sigma8;
   params.Omega_g=0;
   ccl_cosmology * cosmo_nobar = ccl_cosmology_create(params_nobar, config_nobar);
   ASSERT_NOT_NULL(cosmo_nobar);

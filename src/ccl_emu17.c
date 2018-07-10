@@ -176,7 +176,7 @@ static void emu(double *xstar, double **ystar, int* status, ccl_cosmology* cosmo
                     break;
                 case 2:
                     sprintf(cosmo->status_message, 
-                            "ccl_pkemu(): sigma_8 must be between %f and %f.\n", 
+                            "ccl_pkemu(): sigma8 must be between %f and %f.\n", 
                             xmin[i], xmax[i]);
                     break;
                 case 3:
