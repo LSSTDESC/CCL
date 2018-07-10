@@ -24,6 +24,7 @@ root_path = abspath(pjoin(this_dir, '../'))
 if os.path.isdir(root_path):
     sys.path.insert(0, root_path)
 
+'''
 from mock import Mock as MagicMock
 #from unittest.mock import MagicMock
 
@@ -35,8 +36,6 @@ class Mock(MagicMock):
 
 MOCK_MODULES = ['ccllib']
 sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
-'''
-'''                        
 '''
 on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
 if on_rtd:
@@ -51,9 +50,8 @@ if on_rtd:
             return MagicMock()
 
     #MOCK_MODULES = ["_ccllib","numpy","ccllib","pyccl"]
-    MOCK_MODULES = ["pyccl","pyccl.ccllib","pyccl.pyutils","numpy","ccllib"]
+    MOCK_MODULES = ['ccllib']
     sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
-'''
 
 
 # -- General configuration ------------------------------------------------
