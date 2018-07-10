@@ -19,13 +19,10 @@
 import os
 from os.path import abspath, dirname, join as pjoin
 import sys
-sys.path.insert(0,os.path.abspath('../'))
-sys.path.append(os.path.abspath('../pyccl/'))
-
-#this_dir = dirname(abspath(__file__))
-#root_path = abspath(pjoin(this_dir, '../'))
-#if os.path.isdir(root_path):
-#    sys.path.insert(0, root_path)
+this_dir = dirname(abspath(__file__))
+root_path = abspath(pjoin(this_dir, '../'))
+if os.path.isdir(root_path):
+    sys.path.insert(0, root_path)
 
 on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
 if on_rtd:
@@ -39,7 +36,7 @@ if on_rtd:
         def __getattr__(cls, name):
             return MagicMock()
 
-    MOCK_MODULES = ["_ccllib","numpy","ccllib","pyccl"]
+    MOCK_MODULES = [] #"_ccllib","numpy","ccllib","pyccl"]
     sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
 
 # -- General configuration ------------------------------------------------
