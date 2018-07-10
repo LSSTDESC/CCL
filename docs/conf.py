@@ -25,7 +25,6 @@ if os.path.isdir(root_path):
     sys.path.insert(0, root_path)
 
 on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
-
 if on_rtd:
     try:
         from unittest.mock import MagicMock
@@ -37,7 +36,7 @@ if on_rtd:
         def __getattr__(cls, name):
             return MagicMock()
 
-    MOCK_MODULES = ["ccllib"]
+    MOCK_MODULES = ["_ccllib","numpy","ccllib","pyccl"]
     sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
 
 # -- General configuration ------------------------------------------------
