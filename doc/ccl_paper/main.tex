@@ -407,7 +407,7 @@ In the future \ccl will be expanded to incorporate the calculation of the higher
 %-------------------------------------------------------------------------------
 \subsection{Halo mass function}
 
-Being able to calculate the halo abundance as a function of mass is a necessary step to being able to constrain cosmology with probes such as galaxy clusters. While analytic functions are the traditional means of predicting evolution of halo abundances, calibration is frequently required against cosmological simulations. In order to reach the high precision required for cosmological constraints in a self-consistent fashion, it is ultimately necessary to use cosmological simulations; we implement this with halo mass functions with parameters fit to these simulations. The calculation of the halo mass function focuses around the spherical overdensity method of halo finding, in which the size of a halo can be defined with:
+Being able to calculate the halo abundance as a function of mass is a necessary step to being able to constrain cosmology with probes such as galaxy clusters. Modern cosmology makes extensive use of fitting functions in order to predict the evolution of halo abundances, which necessarily require derivation from cosmological simulations. In order to reach the high precision required for cosmological constraints in a self-consistent fashion, it is ultimately necessary to use cosmological simulations; we implement this with halo mass functions with parameters fit to these simulations. The calculation of the halo mass function focuses around the spherical overdensity method of halo finding, in which the size of a halo can be defined with:
 
 \begin{equation}
 \bar{\rho}(r_{\Delta}) = \Delta \times \bar{\rho}_{\mathrm{m}},
@@ -439,6 +439,7 @@ where $P(k)$ is the linear matter power spectrum and $\tilde{W}(kR)$ is the Four
 This is commonly related in terms of the mass inside of the Lagrangian scale of the halo, using the following transformation:
 \begin{equation}
 R = (3M/4\pi{\bar\rho_{\mathrm{m}}})^{1/3}.
+\label{eq:lagrangemass}
 \end{equation}
 As a consequence, one can also define $\sigma_M$ as the RMS variance of the density field smoothed on some scale $M$, analogously to Eq.(\ref{eq:sigR}).
 
@@ -459,6 +460,7 @@ where the only change is in the formulation of the second term. Note that the fi
 The \citet{Tinker2010} model parameterizes the halo mass function in terms of the peak height, $\nu = \delta_c/\sigma_M$, where $\delta_c=1.686$ is the critical density for collapse. The function is then re-expressed as
 \begin{equation}
   f(\nu) = \alpha[1+(\beta\nu)^{-2\phi}]\nu^{2\eta}e(-\gamma\nu^2/2).
+  \label{eq:tinkerf}
 \end{equation}
 
 We note that these halo mass functions, while implemented to high {\em numerical} accuracy through comparison against a flat $\Lambda$CDM cosmology (see `CCL1' in Table  \ref{tab:cosmologies}), carry their own uncertainties. It has not been significantly studied whether the halo mass function is universal with respect to changes in dark energy parameterisation.
@@ -480,10 +482,9 @@ An important step in many interpretations of the halo model is to have a measure
 
 As with measures of the halo mass function, high accuracy cosmological constraints requires the use of numerical simulations to develop fitting functions and emulators. We note that we will define haloes as in the above subsection focusing on the halo mass function. {\tt CCL} implements the halo bias fitting function results in \citet{Tinker2010}, though future improvements will likely require the use of emulator methods.
 
-The \citet{Tinker2010} model parameterizes the halo mass function and the halo bias in terms of the peak height and the critical density for collapse as
+The \citet{Tinker2010} model parameterizes the halo mass function (Eq.~\ref{eq:tinkerf}) and the halo bias in terms of the peak height and the critical density for collapse as
 \begin{eqnarray}
   b(\nu) &=& 1 - A\frac{\nu^a}{\nu^a + {\delta_c}^a} + B\nu^b+C\nu^c,\\
-  f(\nu) &=& \alpha[1+(\beta\nu)^{-2\phi}]\nu^{2\eta}e(-\gamma\nu^2/2).
 \end{eqnarray}
 
 Again, while high {\em numerical} accuracy has been verified, there is a remaining uncertainty to the {\em physical accuracy}. \citet{Tinker2010} found a $\sim6\%$ scatter when determining the halo bias due to differences in simulations alone. In addition, this parameterization does not include a careful exploration of any impact due to changes in the dark energy equation of state. As with the halo mass function, studies will be required to reach accuracy at the percent level for any cosmological predictions. \elisa{I think we need some further references here of scale-dependen bias, assembly bias, etc.}
@@ -695,13 +696,11 @@ We should also note that other approaches relating the correlation functions dir
 \subsection{Halo mass function}
 
 \todo{Some of this seems would be better in the validation section. Can we restrict to implementation here?}
-To achieve $10^{-4}$ precision in $\sigma(M)$ and the normalisation of the power spectrum, one should check that the integral of $\sigma_8$ and $\sigma(M)$ has converged for the chosen values of $\{k_{\rm min},k_{\rm max}\}$. After checking convergence, we achieved the desired precision.
+To achieve $10^{-4}$ precision in $\sigma(M)$ (see Eq. \ref{eq:sigR} and \ref{eq:lagrangemass}) and the normalisation of the power spectrum, we have verified that the integral of $\sigma_8$ and $\sigma(M)$ has converged for the chosen values of $\{k_{\rm min},k_{\rm max}\}$. This will be discussed further in Sec.~\ref{sec:}. Also note that for $\sigma(M)$, it is important to set the desired precision level correctly for the numerical integrator. As the integral yields $\sigma^2(M)$, this becomes the relevant concern for numerical accuracy.
 
-Also note that for $\sigma(M)$, it is important to set the desired precision level correctly for the numerical integrator. The integral usually yields $\sigma^2(M)$, and not $\sigma(M)$. Hence, one has to set the desired precision taking the exponent into account.
+Derivatives are calculated utilizing a spline interpolation of $\sigma(M)$. These splines cover the range from $10^6$ to $10^{17} M_\odot$. For each value of $\log(M)$ in our spline evaluation, we calculate the value of $\sigma(M)$ half a step in either direction. We use the difference compared to the mass spacing to calculate an approximate derivative, which is then used in the spline interpolation. This has been tested to meet our necessary precision for the halo mass function within the mass range explored by \citet{Tinker2010}. We note that there the accuracy is reduced at the edges of these splines and exploring extreme mass ranges may require changes in the parameters to initialize these splines.
 
-Derivatives are calculated utilizing a spline that is built off of the previously described $\sigma(M)$ spline. As such, these splines cover the range from $10^6$ to $10^{17} M_\odot$. For each value of $\log(M)$ in our spline evaluation, we calculate the value of $\sigma(M)$ half a step in either direction. We use the difference compared to the mass spacing to calculate an approximate derivative, which is then used in the spline interpolation. This has been tested to meet our necessary precision for the halo mass function within the mass range explored by \citet{Tinker2010}. We note that there the accuracy is reduced at the edges of these splines and exploring extreme mass ranges may require changes in the parameters to initialize these splines.
-
-In order to accomodate a wide range of values of the overdensity parameter $\Delta$, we have generated a spline interpolation between best fit values as defined by \citet{Tinker2008} and \citet{Tinker2010}. This covers a dynamic range from $\Delta=200$ to $3200$, with respect to the mean density. Within this range, we interpolate in the space of the fit parameter and $\log\Delta$ using the Akima interpolation built from piecewise third order polynomials. We have chosen this rather than the fitting formulas utilized in \citet{Tinker2010} in order to assure high precision match to the Tinker halo mass function when choosing a value of $\Delta$ directly from the paper. 
+In order to accomodate a wide range of values of the overdensity parameter $\Delta$, we have generated a spline interpolation between best fit values as defined by \citet{Tinker2008} and \citet{Tinker2010}. This covers a dynamic range from $\Delta=200$ to $3200$, with respect to the mean density. Within this range, we interpolate in the space of the fit parameter and $\log\Delta$ using Akima interpolation built from piecewise third order polynomials. We have chosen this rather than the fitting formulas utilized in \citet{Tinker2010} in order to assure high precision match to the Tinker halo mass function when choosing a value of $\Delta$ directly from the paper. 
 
 
 %-------------------------------------------------------------------------------
@@ -897,7 +896,7 @@ Our results are shown in Figure \ref{fig:emuacc}. For cosmologies without neutri
 
 \subsection{Halo bias and halo mass function}
 
-Independent codes were utilized to test the accuracy of halo mass function predictions. These predictions are computed from power spectra obtained using the BBKS approximation. For the halo mass function, we compare the value of $\sigma$,
+An independent code was utilized to test the accuracy of halo mass function predictions. Our predictions are computed from power spectra obtained using the BBKS approximation. For the halo mass function, we compare the value of $\sigma$,
 \begin{equation}
   \tilde\sigma\equiv\log[\sigma^{-1}(M)],\label{eq:tildesig}
 \end{equation}
