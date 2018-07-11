@@ -1,7 +1,8 @@
 """This file exposes constants present in CCL.
 
 """
-from pyccl.ccllib import \
+#from pyccl.ccllib import \
+from ccllib import \
   CCL_ClTracer, CCL_ClTracer_swigregister, \
   CCL_ERROR_CLASS, CCL_ERROR_INCONSISTENT, CCL_ERROR_INTEG, CCL_ERROR_LINSPACE, \
   CCL_ERROR_MEMORY, CCL_ERROR_ROOT, CCL_ERROR_SPLINE, CCL_ERROR_SPLINE_EV, \
