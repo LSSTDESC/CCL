@@ -1,5 +1,5 @@
-pyccl\.pyutils module
-=====================
+pyccl.pyutils module
+====================
 
 .. automodule:: pyccl.pyutils
     :members:

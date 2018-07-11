@@ -7,6 +7,7 @@ Submodules
 .. toctree::
 
    pyccl.background
+   pyccl.ccllib
    pyccl.cls
    pyccl.constants
    pyccl.core

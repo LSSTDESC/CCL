@@ -1,5 +1,5 @@
-pyccl\.massfunction module
-==========================
+pyccl.massfunction module
+=========================
 
 .. automodule:: pyccl.massfunction
     :members:

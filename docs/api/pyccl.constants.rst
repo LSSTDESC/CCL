@@ -1,5 +1,5 @@
-pyccl\.constants module
-=======================
+pyccl.constants module
+======================
 
 .. automodule:: pyccl.constants
     :members:

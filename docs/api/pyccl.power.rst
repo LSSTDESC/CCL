@@ -1,5 +1,5 @@
-pyccl\.power module
-===================
+pyccl.power module
+==================
 
 .. automodule:: pyccl.power
     :members:

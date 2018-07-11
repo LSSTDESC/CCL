@@ -1,5 +1,5 @@
-pyccl\.background module
-========================
+pyccl.background module
+=======================
 
 .. automodule:: pyccl.background
     :members:

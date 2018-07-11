@@ -124,5 +124,5 @@ project(ccl VERSION 0.2.1)
     endif()
 
     # Optionally builds the python wrapper
-    find_package(PythonInterp 3.5 REQUIRED)
+    #find_package(PythonInterp 3.5 REQUIRED)
     add_subdirectory(pyccl EXCLUDE_FROM_ALL)

@@ -1,5 +1,5 @@
-pyccl\.neutrinos module
-=======================
+pyccl.neutrinos module
+======================
 
 .. automodule:: pyccl.neutrinos
     :members:

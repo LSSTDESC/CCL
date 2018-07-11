@@ -1,5 +1,5 @@
-pyccl\.lsst\_specs module
-=========================
+pyccl.lsst\_specs module
+========================
 
 .. automodule:: pyccl.lsst_specs
     :members:

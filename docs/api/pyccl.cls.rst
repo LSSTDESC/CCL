@@ -1,5 +1,5 @@
-pyccl\.cls module
-=================
+pyccl.cls module
+================
 
 .. automodule:: pyccl.cls
     :members:

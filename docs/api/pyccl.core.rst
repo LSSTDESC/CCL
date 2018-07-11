@@ -1,5 +1,5 @@
-pyccl\.core module
-==================
+pyccl.core module
+=================
 
 .. automodule:: pyccl.core
     :members:

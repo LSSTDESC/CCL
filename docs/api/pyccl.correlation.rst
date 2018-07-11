@@ -1,5 +1,5 @@
-pyccl\.correlation module
-=========================
+pyccl.correlation module
+========================
 
 .. automodule:: pyccl.correlation
     :members:
