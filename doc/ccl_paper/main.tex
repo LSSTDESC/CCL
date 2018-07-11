@@ -493,7 +493,7 @@ The \citet{Tinker2010} model parameterizes the halo mass function and the halo b
 
 Again, while high {\em numerical} accuracy has been verified, there is a remaining uncertainty to the {\em physical accuracy}. \citet{Tinker2010} found a $\sim6\%$ scatter when determining the halo bias due to differences in simulations alone. In addition, this parameterization does not include a careful exploration of any impact due to changes in the dark energy equation of state. As with the halo mass function, studies will be required to reach accuracy at the percent level for any cosmological predictions. \elisa{I think we need some further references here of scale-dependen bias, assembly bias, etc.}
 
-We note that many observables are tuned to utilizing a linear halo bias (e.g. scale independent). While the current functionality of \ccl is to return the \citet{Tinker2010} model for halo bias, it is entirely possible to generate simpler models of halo bias and pass this into further functions. \elisa{I think this is a bit confusing: from this I understand that \ccl can predict $b(k)$ but cannot pass anything but linear bias to the angular power spectra.}
+We note that many observables are tuned to utilizing a linear halo bias (that is to say the bias function is scale independent). While the current functionality of \ccl is to return the \citet{Tinker2010} model for halo bias, it is possible to generate alternative models of linear halo bias and pass these results to \ccl for analysis purposes. \elisa{I think this is a bit confusing: from this I understand that \ccl can predict $b(k)$ but cannot pass anything but linear bias to the angular power spectra.}
 
 \begin{comment}
 \subsection{Halo model}
