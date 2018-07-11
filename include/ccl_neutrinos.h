@@ -43,27 +43,27 @@ gsl_spline* calculate_nu_phasespace_spline(int *status);
  * @param a Scale factor
  * @param Neff The effective number of species with neutrino mass mnu.
  * @param mnu Pointer to array containing neutrino mass (can be 0).
- * @param TCMB Temperature of the CMB
+ * @param T_CMB Temperature of the CMB
  * @param accel - Interpolation accelerator to be used with phasespace spline. If not set yet, pass NULL.
  * @param status Status flag. 0 if there are no errors, nonzero otherwise.
  * For specific cases see documentation for ccl_error.c
  * @return OmNuh2 Fractional energy density of neutrions with mass mnu, multiplied by h squared. 
  */
 
-double ccl_Omeganuh2 (double a, int N_nu_mass, double* mnu, double TCMB, gsl_interp_accel* accel, int * status);
+double ccl_Omeganuh2 (double a, int N_nu_mass, double* mnu, double T_CMB, gsl_interp_accel* accel, int * status);
 
 /** 
  * Returns mass of one neutrino species at a scale factor a. 
  * @param a Scale factor
  * @param Neff The effective number of species with neutrino mass mnu.
  * @param OmNuh2 Fractional energy density of neutrions with mass mnu, multiplied by h squared. (can be 0).
- * @param TCMB Temperature of the CMB
+ * @param T_CMB Temperature of the CMB
  * @param accel - Interpolation accelerator to be used with phasespace spline. If not set yet, pass NULL.
  * @param status Status flag. 0 if there are no errors, nonzero otherwise.
  * For specific cases see documentation for ccl_error.c
  * @return Mnu Neutrino mass [eV]. 
  */
-double* ccl_nu_masses (double OmNuh2, ccl_neutrino_mass_splits mass_split, double TCMB, int * status);
+double* ccl_nu_masses (double OmNuh2, ccl_neutrino_mass_splits mass_split, double T_CMB, int * status);
 
 #ifdef __cplusplus
 }

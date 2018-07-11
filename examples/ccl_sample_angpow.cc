@@ -23,10 +23,8 @@
 #define Z0_SH 0.65
 #define SZ_SH 0.05
 #define NL 499
-#define PS 0.1 
-#define NREL 3.046
-#define NMAS 0
-#define MNU 0.0
+#define PS 0.1
+#define NEFF 3.046
 
 void print_params(int l_limber,const char *fname_params,const char *prefix_out)
 {
@@ -77,7 +75,13 @@ int main(int argc,char **argv)
   ccl_configuration config=default_config;
   config.transfer_function_method=ccl_boltzmann_class;
   config.matter_power_spectrum_method=ccl_linear;
-  ccl_parameters params = ccl_parameters_create(OC, OB, OK, NREL, NMAS, MNU, W0, WA, HH, NORMPS, NS,-1,-1,-1,-1,NULL,NULL, &status);
+
+  // Set neutrino masses
+  double* MNU;
+  double mnuval = 0.;
+  MNU = &mnuval;
+  ccl_mnu_convention MNUTYPE = ccl_mnu_sum;
+  ccl_parameters params = ccl_parameters_create(OC, OB, OK, NEFF, MNU, MNUTYPE, W0, WA, HH, NORMPS, NS,-1,-1,-1,-1,NULL,NULL, &status);
 
   // Initialize cosmology object given cosmo params
   ccl_cosmology *cosmo=ccl_cosmology_create(params,config);
@@ -163,31 +167,6 @@ int main(int argc,char **argv)
 
   //Always clean up!!
   ccl_cosmology_free(cosmo);
-  
+
   return 0;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

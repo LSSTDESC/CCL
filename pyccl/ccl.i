@@ -14,7 +14,7 @@
 %include "numpy.i"
 %init %{
     import_array();
-    // Tell CCL library not to quit when an error is thrown (to let Python 
+    // Tell CCL library not to quit when an error is thrown (to let Python
     // exception handler take over)
     ccl_set_error_policy(CCL_ERROR_POLICY_CONTINUE);
 %}
@@ -40,8 +40,8 @@
 %include "ccl_lsst_specs.i"
 %include "ccl_neutrinos.i"
 %include "ccl_halomod.i"
+%include "ccl_params.i"
 
 %include "../include/ccl_config.h"
 %include "../include/ccl_error.h"
 %include "../include/ccl_utils.h"
-

@@ -412,6 +412,19 @@ def check_neutrinos():
     assert_( all_finite(ccl.nu_masses(OmNuh2, 'equal', TCMB)) )
     assert_( all_finite(ccl.nu_masses(OmNuh2, 'sum', TCMB)) )
 
+    # Check that the right exceptions are raised
+    assert_raises(ValueError, ccl.Cosmology, Omega_c=0.27, Omega_b=0.045, 
+                                             h=0.67, A_s=1e-10, n_s=0.96,
+                                             m_nu=[0.1, 0.2, 0.3, 0.4])
+    assert_raises(ValueError, ccl.Cosmology, Omega_c=0.27, Omega_b=0.045, 
+                                             h=0.67, A_s=1e-10, n_s=0.96,
+                                             m_nu=[0.1, 0.2, 0.3],
+                                             mnu_type="sum")
+    assert_raises(ValueError, ccl.Cosmology, Omega_c=0.27, Omega_b=0.045, 
+                                             h=0.67, A_s=1e-10, n_s=0.96,
+                                             m_nu=42)
+
+
 def check_lsst_specs(cosmo):
     """
     Check that lsst_specs functions can be run.
@@ -754,7 +767,7 @@ def check_corr_3d(cosmo):
     assert_( all_finite(corr2))
     assert_( all_finite(corr3))
     
-    
+
 
 def test_valid_transfer_combos():
     """
@@ -859,6 +872,7 @@ def test_debug_mode():
     """
     ccl.debug_mode(True)
     ccl.debug_mode(False)
+
 
         
 if __name__ == '__main__':

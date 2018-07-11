@@ -11,7 +11,7 @@ CTEST_DATA(power_nu) {
   double h;
   double A_s;
   double n_s;
-  double sigma_8;
+  double sigma8;
   double Neff;
   double mnu0[3], mnu1[3], mnu2[3];
   ccl_mnu_convention mnu_type;
@@ -27,7 +27,7 @@ CTEST_SETUP(power_nu) {
   data->h = 0.7;
   data->A_s = 2.1e-9;
   data->n_s = 0.96;
-  data->sigma_8=0.8;
+  data->sigma8=0.8;
   data->Neff=3.046;
   data->mnu_type =ccl_mnu_list;
   
@@ -65,7 +65,7 @@ CTEST_DATA(power_nu_nl) {
   double h;
   double A_s;
   double n_s;
-  double sigma_8;
+  double sigma8;
   double Neff;
   double mnu0[3], mnu1[3], mnu2[3];
   ccl_mnu_convention mnu_type;
@@ -81,7 +81,7 @@ CTEST_SETUP(power_nu_nl) {
   data->h = 0.7;
   data->A_s = 2.1e-9;
   data->n_s = 0.96;
-  data->sigma_8=0.8;
+  data->sigma8=0.8;
   data->Neff=3.046;
   data->mnu_type =ccl_mnu_list;
   

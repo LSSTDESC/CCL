@@ -8,6 +8,7 @@
 #include "gsl/gsl_integration.h"
 #include "gsl/gsl_interp.h"
 #include "gsl/gsl_spline.h"
+#include "gsl/gsl_errno.h"
 #include "ccl_power.h"
 #include "ccl_massfunc.h"
 #include "ccl_error.h"
@@ -192,6 +193,7 @@ static double massfunc_f(ccl_cosmology *cosmo, double halomass, double a, double
   double delta_c_Tinker, nu;
   
   double sigma=ccl_sigmaM(cosmo, halomass, a, status);
+  int gslstatus;
   
   switch(cosmo->config.mass_function_method) {
 
@@ -232,17 +234,18 @@ static double massfunc_f(ccl_cosmology *cosmo, double halomass, double a, double
       ccl_cosmology_compute_hmfparams(cosmo, status);
       ccl_check_status(cosmo, status);
     }
-    
-    *status |= gsl_spline_eval_e(cosmo->data.alphahmf, log10(odelta), cosmo->data.accelerator_d,&fit_A);
-    *status |= gsl_spline_eval_e(cosmo->data.betahmf, log10(odelta), cosmo->data.accelerator_d,&fit_a);
-    *status |= gsl_spline_eval_e(cosmo->data.gammahmf, log10(odelta), cosmo->data.accelerator_d,&fit_b);
-    *status |= gsl_spline_eval_e(cosmo->data.phihmf, log10(odelta), cosmo->data.accelerator_d,&fit_c);
+    gslstatus = gsl_spline_eval_e(cosmo->data.alphahmf, log10(odelta), cosmo->data.accelerator_d,&fit_A);
+    gslstatus |= gsl_spline_eval_e(cosmo->data.betahmf, log10(odelta), cosmo->data.accelerator_d,&fit_a);
+    gslstatus |= gsl_spline_eval_e(cosmo->data.gammahmf, log10(odelta), cosmo->data.accelerator_d,&fit_b);
+    gslstatus |= gsl_spline_eval_e(cosmo->data.phihmf, log10(odelta), cosmo->data.accelerator_d,&fit_c);
     fit_d = pow(10, -1.0*pow(0.75 / log10(odelta / 75.0), 1.2));
     
     fit_A = fit_A*pow(a, 0.14);
     fit_a = fit_a*pow(a, 0.06);
     fit_b = fit_b*pow(a, fit_d);
-    if (*status) {
+    if(gslstatus != GSL_SUCCESS) {
+      ccl_raise_gsl_warning(gslstatus, "ccl_massfunc.c: ccl_massfunc_f():");
+      *status |= gslstatus;
       strcpy(cosmo->status_message, "ccl_massfunc.c: ccl_massfunc_f(): interpolation error for Tinker MF\n");
       return NAN;      
     }
@@ -266,18 +269,20 @@ static double massfunc_f(ccl_cosmology *cosmo, double halomass, double a, double
     //critical collapse overdensity assumed in this model
     delta_c_Tinker = 1.686;
     nu = delta_c_Tinker/(sigma);
-
-    *status |= gsl_spline_eval_e(cosmo->data.alphahmf, log10(odelta), cosmo->data.accelerator_d,&fit_A); //alpha in Eq. 8
-    *status |= gsl_spline_eval_e(cosmo->data.etahmf, log10(odelta), cosmo->data.accelerator_d,&fit_a); //eta in Eq. 8
-    *status |= gsl_spline_eval_e(cosmo->data.betahmf, log10(odelta), cosmo->data.accelerator_d,&fit_b); //beta in Eq. 8
-    *status |= gsl_spline_eval_e(cosmo->data.gammahmf, log10(odelta), cosmo->data.accelerator_d,&fit_c); //gamma in Eq. 8
-    *status |= gsl_spline_eval_e(cosmo->data.phihmf, log10(odelta), cosmo->data.accelerator_d,&fit_d); //phi in Eq. 8;
+    
+    gslstatus = gsl_spline_eval_e(cosmo->data.alphahmf, log10(odelta), cosmo->data.accelerator_d,&fit_A); //alpha in Eq. 8
+    gslstatus |= gsl_spline_eval_e(cosmo->data.etahmf, log10(odelta), cosmo->data.accelerator_d,&fit_a); //eta in Eq. 8
+    gslstatus |= gsl_spline_eval_e(cosmo->data.betahmf, log10(odelta), cosmo->data.accelerator_d,&fit_b); //beta in Eq. 8
+    gslstatus |= gsl_spline_eval_e(cosmo->data.gammahmf, log10(odelta), cosmo->data.accelerator_d,&fit_c); //gamma in Eq. 8
+    gslstatus |= gsl_spline_eval_e(cosmo->data.phihmf, log10(odelta), cosmo->data.accelerator_d,&fit_d); //phi in Eq. 8;
 
     fit_a *=pow(a, -0.27);
     fit_b *=pow(a, -0.20);
     fit_c *=pow(a, 0.01);
     fit_d *=pow(a, 0.08);
-    if (*status) {
+    if(gslstatus != GSL_SUCCESS) {
+      ccl_raise_gsl_warning(gslstatus, "ccl_massfunc.c: ccl_massfunc_f():");
+      *status |= gslstatus;
       strcpy(cosmo->status_message, "ccl_massfunc.c: ccl_massfunc_f(): interpolation error for Tinker 2010 MF\n");
       return NAN;      
     }
@@ -416,27 +421,30 @@ void ccl_cosmology_compute_sigma(ccl_cosmology * cosmo, int *status)
     return;
   }
   double na, nb;
+  int gslstatus = 0;
   for (int i=0; i<nm; i++) {
     if(i==0) {
-      *status |= gsl_spline_eval_e(logsigma, m[i], NULL,&na);
-      *status |= gsl_spline_eval_e(logsigma, m[i]+ccl_splines->LOGM_SPLINE_DELTA/2., NULL,&nb);
+      gslstatus |= gsl_spline_eval_e(logsigma, m[i], NULL,&na);
+      gslstatus |= gsl_spline_eval_e(logsigma, m[i]+ccl_splines->LOGM_SPLINE_DELTA/2., NULL,&nb);
       y[i] = log(pow(10, na))-log(pow(10,nb));
       y[i] = 2.*y[i] / ccl_splines->LOGM_SPLINE_DELTA;
     }
     else if (i==nm-1) {
-      *status |= gsl_spline_eval_e(logsigma, m[i]-ccl_splines->LOGM_SPLINE_DELTA/2., NULL,&na);
-      *status |= gsl_spline_eval_e(logsigma, m[i], NULL,&nb);
+      gslstatus |= gsl_spline_eval_e(logsigma, m[i]-ccl_splines->LOGM_SPLINE_DELTA/2., NULL,&na);
+      gslstatus |= gsl_spline_eval_e(logsigma, m[i], NULL,&nb);
       y[i] = log(pow(10, na))-log(pow(10,nb));
       y[i] = 2.*y[i] / ccl_splines->LOGM_SPLINE_DELTA;
     }
     else {
-      *status |= gsl_spline_eval_e(logsigma, m[i]-ccl_splines->LOGM_SPLINE_DELTA/2., NULL,&na);
-      *status |= gsl_spline_eval_e(logsigma, m[i]+ccl_splines->LOGM_SPLINE_DELTA/2., NULL,&nb);
+      gslstatus |= gsl_spline_eval_e(logsigma, m[i]-ccl_splines->LOGM_SPLINE_DELTA/2., NULL,&na);
+      gslstatus |= gsl_spline_eval_e(logsigma, m[i]+ccl_splines->LOGM_SPLINE_DELTA/2., NULL,&nb);
       y[i] = (log(pow(10,na))-log(pow(10,nb)));
       y[i] = y[i] / ccl_splines->LOGM_SPLINE_DELTA;
     }
   }
-  if (*status) {
+  if(gslstatus != GSL_SUCCESS) {
+    ccl_raise_gsl_warning(gslstatus, "ccl_massfunc.c: ccl_cosmology_compute_sigma():");
+    *status |= gslstatus;
     free(m);
     free(y);
     gsl_spline_free(logsigma);
@@ -489,7 +497,11 @@ double ccl_massfunc(ccl_cosmology *cosmo, double halomass, double a, double odel
   logmass = log10(halomass);
   rho_m = RHO_CRITICAL*cosmo->params.Omega_m*cosmo->params.h*cosmo->params.h;
   f=massfunc_f(cosmo,halomass,a,odelta,status);
-  *status |= gsl_spline_eval_e(cosmo->data.dlnsigma_dlogm, logmass, cosmo->data.accelerator_m,&deriv);
+  int gslstatus = gsl_spline_eval_e(cosmo->data.dlnsigma_dlogm, logmass, cosmo->data.accelerator_m,&deriv);
+  if(gslstatus != GSL_SUCCESS) {
+    ccl_raise_gsl_warning(gslstatus, "ccl_massfunc.c: ccl_massfunc():");
+    *status |= gslstatus;
+  }
   ccl_check_status(cosmo, status);
   return f*rho_m*deriv/halomass;
 }
@@ -557,9 +569,13 @@ double ccl_sigmaM(ccl_cosmology * cosmo, double halomass, double a, int * status
   }
     
   double lgsigmaM;
-  *status = gsl_spline_eval_e(cosmo->data.logsigma, 
-			      log10(halomass), 
-			      cosmo->data.accelerator_m,&lgsigmaM);
+  int gslstatus = gsl_spline_eval_e(cosmo->data.logsigma, 
+                                    log10(halomass), 
+                                    cosmo->data.accelerator_m,&lgsigmaM);
+  if(gslstatus != GSL_SUCCESS) {
+    ccl_raise_gsl_warning(gslstatus, "ccl_massfunc.c: ccl_sigmaM():");
+    *status |= gslstatus;
+  }
   // Interpolate to get sigma
   sigmaM = pow(10,lgsigmaM)*ccl_growth_factor(cosmo, a, status);
   ccl_check_status(cosmo, status);
