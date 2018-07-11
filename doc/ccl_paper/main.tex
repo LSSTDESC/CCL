@@ -88,20 +88,20 @@ This paper is organized as follows. Section \ref{sec:models} describes the cosmo
 
 The overarching goal of \ccl is to allow seamless integration of different cosmological models of interest to LSST.
 
-The cosmological components include the matter density parameter $\Omega_m$ -which is the addition of the baryonic component $\Omega_b$ and the cold dark matter component $\Omega_c$-, the dark energy density $\Omega_\Lambda$, the radiation density $\Omega_g$ , the curvature density $\Omega_K$, the neutrino density of both massless and massive neutrinos, given by $\Omega_{\nu, {\rm rel}}$ and $\Omega_{\nu, {\rm m}}$ respectively, and parameters for the equation of state of dark energy defined below. The normalization of the density fluctuations is established either in terms of the amplitude of the primordial power spectrum, $A_s$, which is a power-law of index $n_s$, or in terms of the RMS variance in spheres of $8\,h\,\text{Mpc}^{-1}$ today, $\sigma_8$. 
+The cosmological components include the matter density parameter $\Omega_m$, which is the sum of the baryonic component $\Omega_b$ and the cold dark matter component $\Omega_c$, the dark energy density $\Omega_\Lambda$, the radiation density $\Omega_g$, the curvature density $\Omega_K$, the neutrino density of both massless and massive neutrinos, given by $\Omega_{\nu, {\rm rel}}$ and $\Omega_{\nu, {\rm m}}$ respectively, and parameters for the equation of state of dark energy defined below. The normalization of the density fluctuations is established either in terms of the amplitude of the primordial power spectrum, $A_s$, which is a power-law of index $n_s$, or in terms of the RMS variance in spheres of $8\,h\,\text{Mpc}^{-1}$ today, $\sigma_8$. 
 
-The following families of models are supported:
+The following set of features is supported:
 \begin{itemize}
  \item Flat $\Lambda$CDM cosmology with parameters $\Omega_b$, $n_s$, $A_s$ or $\sigma_8$, $\Omega_m$, and a cosmological constant dark energy model with equation-of-state $w=-1$. 
-\item The Chevallier-Polarski-Linder (CPL) model for dark energy and its redshift dependence, which adopts the following parametrization for $w$ as a function of the scale factor, $a$ (\citealt{Chevallier01} and \citealt{Linder03}),
+\item The Chevallier-Polarski-Linder (CPL) model for dark energy, which adopts the following parametrization for $w$ as a function of the scale factor, $a$ (\citealt{Chevallier01} and \citealt{Linder03}),
   \begin{equation}
     w(a) = w_0+w_a(1-a).
   \end{equation}
   Notice that models with constant $w$ are simply a subset of the above where $w_a=0$.
- \item A universe with non-zero curvature ($K$) so that the curvature energy density parameter is the difference of the sum of the energy densities of the other components with respect to unity (flatness), i.e. $\Omega_K = 1- \sum_i \Omega_i$, including $\Omega_\Lambda$, the dark energy density.
- \item All of the above, plus an arbitrary, user-defined modified growth function (see description in Section \ref{sec:growth}).
- \item Relativistic neutrinos in combination with any of the above, specified by $N_{\rm eff}$ (the number of relativistic neutrino species in the early Universe) and by the number of massive neutrinos today (see next item).
-  \item Massive neutrino species in combination with any of the above except the user-defined modified growth function, specified by either $\Sigma m_\nu$ (which maps on to the density $\Omega_{\nu, {\rm m}}$ above), or by the individual masses of each of three neutrino species.
+ \item Non-zero curvature ($K$), so that the curvature density parameter $\Omega_K = 1 - \sum_i \Omega_i$, where $i$ refers to each of the density components. 
+ \item An arbitrary, user-defined modified growth function (see description in Section \ref{sec:growth}). This can be combined with a model that otherwise contains non-zero curvature and evolving dark energy.
+ \item Extra relativistic species, contributing to $N_{\rm eff}$ (the effective number of neutrinos).
+  \item Massive neutrinos specified by either the sum of their masses $\Sigma m_\nu$ (which maps on to the density parameter $\Omega_{\nu, {\rm m}}$ above), or by the individual masses of each of the three neutrino species. This feature is allowed alongside non-zero curvature, extra relativistic species, and evolving dark energy.
 \end{itemize}
 
 In the particular case of cosmologies with massive neutrinos, \ccl allows the user to specify either a sum of masses, $\Sigma m_\nu$, or the individual mass of each of three neutrino species. In the former case, \ccl will by default split $\Sigma m_\nu$ into three neutrino masses which are consistent with the normal hierarchy (see, e.g. \citealt{Gerbino2017} for a review). However, the user can alternatively ask for $\Sigma m_\nu$ to be split either into masses consistent with the inverted hierarchy, or into equal masses. Each neutrino species is then checked for whether it is non-relativistic (massive) at $z=0$, and this information is used in combination with the user-provided value of $N_{\rm eff}$ to set the number of relativistic neutrino species.
@@ -147,17 +147,12 @@ Fitting models to cosmological observables requires predicting cosmological dist
 The comoving angular diameter distance is then computed in terms of the comoving radial distance,
 \begin{equation}\label{eq:angdist}
  r(\chi)=\left\{\begin{array}{cc}
-                 k^{-1/2}\sin(k^{1/2}\chi) & k>0\\
-                 \chi & k=0\\
-                 |k|^{-1/2}\sinh(|k|^{1/2}\chi) & k<0\\
+                 k^{-1/2}\sin(k^{1/2}\chi) & \mathcal{K}>0\\
+                 \chi & \mathcal{K}=0\\
+                 |k|^{-1/2}\sinh(|k|^{1/2}\chi) & \mathcal{K}<0\\
                 \end{array}\right.
 \end{equation}
-where $k = \left({\sum_X \Omega_X -1}\right) c^{-2} H_0^2$ is the curvature.
-This function can be written directly in terms of the present curvature density parameter, $\Omega_{K,0}$, as
-\begin{equation}\label{eq:angdist_omegak}
- r(\chi) = \sqrt{\Omega_{K,0}}\sinh(\sqrt{\Omega_{K,0}}\chi),
-\end{equation}
-which is valid for all forms of the curvature density.
+where $\mathcal{K} = \Omega_K H_0^2 c^{-2}$ is the curvature.
 The angular diameter distance is given by $d_A=a\,r(a)$, and the luminosity distance is
 $d_L=r(a)/a,$ leading to the familiar relation $d_A = a^2d_L$ which is valid in general for all metric theories of gravity.
 The \ccl suite also has the functionality to compute the distance modulus, defined as
