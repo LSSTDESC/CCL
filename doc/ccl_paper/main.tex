@@ -570,12 +570,12 @@ Note that, in order to be consistent, one should use a value of $\Delta_\mathrm{
 
 \subsection{Photometric redshifts}
 
-Redshifts of LSST galaxies will be obtained via photometry. Therefore, performing any cosmological analysis which incorporates redshift information requires a model for the probability of measuring a photometric redshift $z_{\rm ph}$ for an object with hypothetical spectroscopic redshift $z_{\rm s}$.  In order to maintain agnosticism towards the optimal model, and hence to allow for the future inclusion of advancements from ongoing research, \ccl allows the user to flexibly input a photometric redshift model. In addition, for ease of use, \ccl provides the option of using a built-in function for a simple Gaussian photometric redshift probability distribution. The photometric redshift model can then be used, for example, when computing $\frac{dN}{dz}^i$ in photometric redshift bin $i$, as given by:
+Redshifts of LSST galaxies will be obtained via photometry. Therefore, performing any cosmological analysis which incorporates redshift information requires a model for the probability of measuring a photometric redshift $z_{\rm ph}$ for an object with true redshift $z_{\rm t}$.  In order to maintain agnosticism towards the optimal model, and hence to allow for the future inclusion of advancements from ongoing research, \ccl allows the user to flexibly input a photometric redshift model. In addition, for ease of use, \ccl provides the option of using a built-in function for a simple Gaussian photometric redshift probability distribution. The photometric redshift model can then be used, for example, when computing $\frac{dN}{dz}^i$ in photometric redshift bin $i$, as given by:
 \begin{equation}
 \frac{dN}{dz}^i = \frac{\frac{dN}{dz}\int_{z_i}^{z_{i+1}} dz' p(z,z')}{\int_{z_{\rm min}}^{z_{\rm max}}dz \frac{dN}{dz} \int_{z_i}^{z_{i+1}}dz' p(z, z')}
 \label{photoz}
 \end{equation}
-where $p(z,z')$ is the photometric redshift probability distribution, and $z_{i}$ and $z_{i+1}$ are the photo-$z$ edges of the bin in question. In the case of the simple Gaussian photometric redshift model for which support is included in \ccl out of the box, $p(z, z')$ is given as
+where $p(z,z')$ is the photometric redshift probability distribution, and $z_{i}$ and $z_{i+1}$ are the photo-$z$ edges of the bin in question. In the case of the simple Gaussian photometric redshift model for which native support is included in \ccl , $p(z, z')$ is given as
 \begin{equation}
 p(z,z') = \frac{1}{\sqrt{2 \pi}\sigma_z} \exp\left(-\frac{(z-z')^2}{2\sigma_z^2}\right).
 \label{pz_gauss}
@@ -716,13 +716,11 @@ When initializing a cosmology with massive neutrinos within \ccl , the user can 
 
 For equal splitting, it is clearly trivial to compute the three neutrino masses. If splitting with respect to the normal or inverted hierarchy is desired, it is slightly more complicated. The relevant known quantity which has been determined via particle physics experiments is the square of the difference of neutrino masses (up to a sign for one of the differences, hence the two possible hierarchies). Because we know the square of the differences rather than the differences themselves, we must solve a set of quadratic equations for the neutrino masses. In \ccl this is accomplished by making use the knowledge that the mass difference between two of the neutrino species is small. This allows us to Taylor expand about this difference, and greatly simplifies solving for the three neutrino masses. This methodology represents an approximation (related to discarding higher-order terms in this Taylor expansion), however it produces discrepancies from the exact solution which result in cosmological predictions which differ at levels far below our required validation levels (detailed below in Section \ref{sec:validation}).
 
-Having then a set of three neutrino masses, we check which of the corresponding neutrino species is non-relativistic today ($m_\nu>0.00017$, \citealt{Lesgourgues2012}), and obtain the number of massive neutrinos in the cosmology. We use this, along with $N_{\rm eff}$, to set the number of relativistic neutrinos species, which is required in computing $\Omega_g$ and $\Omega_{\nu, {\rm rel}}$. We must be slightly careful in doing so, as for massive neutrinos only we modify the relationship between the temperature of the CMB and the neutrino temperature as described below equation \ref{Omnu} above. In order to compute $N_{\nu, {\rm rel}}$  consistent with the $N_{\rm eff}$ passed by the user, we do:
+Having then a set of three neutrino masses, we check which of the corresponding neutrino species is non-relativistic today ($m_\nu>0.00017$, \citealt{Lesgourgues2012}), and obtain the number of massive neutrinos in the cosmology. We use this, along with $N_{\rm eff}$, to set the number of relativistic neutrinos species, which is required in computing $\Omega_g$ and $\Omega_{\nu, {\rm rel}}$. We must be slightly careful in doing so, as only for massive neutrinos do we modify the relationship between the temperature of the CMB and the neutrino temperature as described following equation \ref{Omnu} above. The value of $N_{\nu, {\rm rel}}$ consistent with the user-provided $N_{\rm eff}$ is given by:
 \begin{equation}
 N_{\nu, {\rm rel}} = N_{\rm eff} - \left(T_{\rm NCDM}\right)^{4} \left(\frac{4}{11}\right)^{-\frac{4}{3}} N_{\nu, {\rm m}}.
 \label{Nnurel}
 \end{equation}
-
-It may sometimes be preferable or necessarily to specify a cosmology in terms of $\Omega_{\nu, {\rm m}}$ instead of $m_\nu$. To facilitate this, \ccl includes a convenience function which returns the latter given the former.
 
 In equation \ref{Omnu} above, we specify how $\Omega_{\nu, {\rm m}}$ is computed for a given cosmology with massive neutrinos. Within this expression is a phase-space integral:
 \begin{equation}
@@ -730,6 +728,13 @@ In equation \ref{Omnu} above, we specify how $\Omega_{\nu, {\rm m}}$ is computed
 \label{phasespacenu}
 \end{equation}
 At high and low $\mu$, corresponding to high and low mass neutrinos, this integral need not be evaluated numerically. At high $\mu$, we set the integral equal to $\frac{5\zeta(3)}{18\pi^4}\mu$, while at low $\mu$ it goes to $\frac{7}{8}$. The $\mu$ values at which these approximations are taken can be set by the user. Outside of the regime in which these approximations are valid, the integral is computed numerically using {\tt gsl}, splined, and stored such that for a single cosmology it must only be computed once.
+
+It may sometimes be preferable or necessary to specify a cosmology in terms of $\Omega_{\nu, {\rm m}}$ instead of $m_\nu$. To facilitate this, \ccl includes a convenience function which returns $m_\nu$ given $\Omega_{\nu, {\rm m}}$. This is achieved via the relationship
+\begin{equation}
+\sum m_\nu = 93.14 {\rm eV} \times \Omega_{\nu, {\rm m}}
+\label{summnu_om}
+\end{equation}
+and then by splitting $\sum m_\nu$ into three neutrinos masses using the convention given by the user (the default being the normal mass hierarchy).
 
 
 %-------------------------------------------------------------------------------
@@ -828,7 +833,7 @@ The accuracy of this approximation is shown in Figure \ref{fig:NLextrapol} for r
 
 With the implementation described above, the power spectrum splines are initialized up to {\tt K$\_$MAX$\_$SPLINE}. This is also true for the linear matter power spectrum, which is used within \ccl in particular to obtain $\sigma_8$ (see Eq. \ref{eq:sigR}). We have tested how this procedure affects the convergence of the linear matter power spectrum. We compare the fiducial \ccl output to the case where we set {\tt K$\_$MAX$\_$SPLINE}~$=5\times 10^3\,\text{Mpc}^{-1}$. The result is shown in Figure \ref{fig:NLextrapol}. For some applications that use the linear power spectrum, the user might need to increase the value of {\tt K$\_$MAX$\_$SPLINE}. While \ccl adopts certain fiducial values of the number of scale factor and wavenumber values to use in the interpolation, we have tested that increasing the sampling does not change the results presented in Figures \ref{fig:NLextrapol}.
 
-In addition to the above tests in $\Lambda$CDM cosmologies without massive neutrinos, we have checked the impact of using splines at low and high $k$ in cosmologies CCL7, CCL8, and CCL9 with massive neutrinos, defined in Table \ref{tab:cosmologies_nu}. We compare the linear and nonlinear matter power spectrum as computed directly via {\tt CLASS} to that computed using {\tt CLASS} via \ccl (i.e. using splines at high and low k). We find that for $k$  between {\tt K$\_$MIN} and {\tt K$\_$MIN$\_$SPLINE}, the two power spectra agree to better than $10^{-4}$ in all models. For $k$ between {\tt K$\_$MAX$\_$SPLINE} and {\tt K$\_$MAX}, agreement is better than $10^{-3}$, which we deem sufficient given the significant uncertainties introduced at these small scales, e.g. baryonic effects. The fractional difference between the two nonlinear power spectra is plotted in Figure \ref{fig:power_nu}. 
+In addition to the above tests in $\Lambda$CDM cosmologies without massive neutrinos, we have checked the impact of using splines (at intermediate $k$) and extrapolation (at low and high $k$) in cosmologies CCL7, CCL8, and CCL9 with massive neutrinos, defined in Table \ref{tab:cosmologies_nu}. We compare the linear and nonlinear matter power spectrum as computed directly via {\tt CLASS} to that computed using {\tt CLASS} via \ccl . We find that for $k$  between {\tt K$\_$MIN} and {\tt K$\_$MIN$\_$SPLINE}, the two power spectra agree to better than $10^{-4}$ in all models. For $k$ between {\tt K$\_$MAX$\_$SPLINE} and {\tt K$\_$MAX}, agreement is better than $10^{-3}$, which we deem sufficient given the significant uncertainties introduced at these small scales, e.g. baryonic effects. The fractional difference between the two nonlinear power spectra is plotted in Figure \ref{fig:power_nu}. 
 
 \begin{figure}
 \centering
