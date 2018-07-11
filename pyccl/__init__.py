@@ -6,7 +6,6 @@ from os import environ, path
 if environ.get("CCL_PARAM_FILE") is None:
     environ["CCL_PARAM_FILE"] = path.dirname(path.abspath(__file__)) + '/ccl_params.ini'
 
-#from pyccl import ccllib as lib
 import pyccl.ccllib as lib
 
 from pyccl import core, constants, background, power, massfunction

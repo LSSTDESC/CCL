@@ -1,7 +1,6 @@
 """Utility functions to analyze status and error messages passed from CCL, as well as wrappers to automatically vectorize functions.
 
 """
-#from pyccl import ccllib as lib
 import pyccl.ccllib as lib
 import numpy as np
 import pyccl.core

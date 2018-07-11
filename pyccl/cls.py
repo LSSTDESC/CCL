@@ -1,4 +1,3 @@
-#from pyccl import ccllib as lib
 import pyccl.ccllib as lib
 from pyccl import constants as const
 from pyccl.pyutils import _cosmology_obj, check

@@ -1,7 +1,6 @@
 """The core functionality of ccl, including the core data types. This includes the cosmology and parameters objects used to instantiate a model from which one can compute a set of theoretical predictions.
 
 """
-#from pyccl import ccllib as lib
 import pyccl.ccllib as lib
 import numpy as np
 from warnings import warn

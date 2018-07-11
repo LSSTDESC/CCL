@@ -1,5 +1,4 @@
 import numpy as np
-#from pyccl import ccllib as lib
 import pyccl.ccllib as lib
 from pyccl.pyutils import check
 
