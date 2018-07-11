@@ -1682,7 +1682,7 @@ static double sigmaV_integrand(double lk,void *params)
   return pk*k*w*w/3.0;
 }
 
-double ccl_sigmaR(ccl_cosmology *cosmo,double R, int *status)
+double ccl_sigmaR(ccl_cosmology *cosmo,double R,double a,int *status)
 {
   SigmaR_pars par;
   par.status = status;
