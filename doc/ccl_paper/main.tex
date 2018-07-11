@@ -41,7 +41,7 @@
 
 \begin{abstract}
 
-The Core Cosmology Library (\ccl) provides routines to compute basic cosmological observables to a high degree of accuracy, which have been verified with an extensive suite of validation tests. Predictions are provided for many cosmological quantities, including distances, angular power spectra, correlation functions, and the halo mass function through state-of-the-art modeling prescriptions available in the literature. Fiducial specifications for the expected galaxy distributions and clustering bias for the Large Synoptic Survey Telescope are also included, together with the capability of computing redshift distributions for a user-defined photometric redshift model. \elisa{A sentence on conclusions from validation.} \ccl is an open source software package written in C, with a Python interface and publicly available at \url{https://github.com/LSSTDESC/CCL}. 
+The Core Cosmology Library (\ccl) provides routines to compute basic cosmological observables to a high degree of accuracy, which have been verified with an extensive suite of validation tests. Predictions are provided for many cosmological quantities, including distances, angular power spectra, correlation functions, and the halo mass function through state-of-the-art modeling prescriptions available in the literature. Fiducial specifications for the expected galaxy distributions and clustering bias for the Large Synoptic Survey Telescope(LSST) are also included, together with the capability of computing redshift distributions for a user-defined photometric redshift model. {\bf Our rigorous validation procedure, based on comparisons between \ccl and independent software packages, ensures that the numerical accuracy of the predictions for correlation functions is within a fraction of the expected statistical uncertainty of LSST observables.} \ccl is an open source software package written in C, with a Python interface and publicly available at \url{https://github.com/LSSTDESC/CCL}. 
 
 \end{abstract}
 
@@ -62,11 +62,13 @@ First, we need to ensure that all probes are modeled accurately from a {\it phys
 
 Second, even standard cosmological quantities in the simplest models, such as distances in a $\Lambda$CDM cosmology, have to be predicted to a validated high degree of {\it numerical} accuracy. Achieving this objective is not always trivial, as computing these quantities generally requries, for example, numerical integration or interpolation, both of which are prone to numerical error. In this work, we establish the numerical accuracy of our predictions by performing comparisons between independent implementations of the same models. 
 
-Faced with these challenges, the Dark Energy Science Collaboration (DESC), one of the science collaborations of the Large Synoptic Survey Telescope (LSST), has built a comprehensive software tool that satisfies the needs of the next generation of cosmological analysis: the Core Cosmology Library\footnote{publicly available at \url{https://github.com/LSSTDESC/CCL}} (\ccl). \ccl is a software library providing the infrastructure to make theoretical predictions that are validated to a well-documented numerical accuracy for the purpose of constraining cosmology. While \ccl was built with LSST in mind, the goal is to produce a publicly available, user-friendly, well-documented, adaptable software that can be used in any theoretical modeling work in cosmology. \elisa{This manuscript describes such and such version of the library.} In addition, all independent implementations used for numerical validation (stand-alone software scripts and packages) are also provided within the \ccl repository. 
+Faced with these challenges, the Dark Energy Science Collaboration (DESC), one of the science collaborations of the Large Synoptic Survey Telescope (LSST), has built a comprehensive software tool that satisfies the needs of the next generation of cosmological analysis: the Core Cosmology Library\footnote{publicly available at \url{https://github.com/LSSTDESC/CCL}} (\ccl). \ccl is a software library providing the infrastructure to make theoretical predictions that are validated to a well-documented high {\it numerical} accuracy for the purpose of constraining cosmology. While \ccl was built with LSST in mind, the goal is to produce a publicly available, user-friendly, well-documented, adaptable software that can be used in any theoretical modeling work in cosmology. \elisa{This manuscript describes such and such version of the library.}
 
-\ccl computes standard cosmological functions including the Hubble parameter, cosmological distances, density parameters, the halo mass function, halo bias and linear growth functions. It calculates the matter power spectrum using various methods including common approximations, by calling external software such as {\tt CLASS} \citep{class}, or emulators, such as the ``Cosmic Emulator'' of \citet{Lawrence17}. It computes 2-point angular power spectra and correlation functions from various probes, going beyond the Limber approximation. While \ccl incorporates state-of-the-art models available in the literature, this manuscript is mainly concerned with documenting their implementation and {\it numerical} accuracy, but does not address the {\it physical} accuracy of each model, for which we point the reader to the relevant references in the following sections. 
+\ccl computes standard cosmological functions including the Hubble parameter, cosmological distances, density parameters, the halo mass function, halo bias and linear growth functions. It calculates the matter power spectrum using various methods including common approximations, by calling external software such as {\tt CLASS} \citep{class}, or emulators, such as the ``Cosmic Emulator'' of \citet{Lawrence17}. It computes 2-point angular power spectra and correlation functions from various probes, going beyond the Limber approximation. While \ccl incorporates state-of-the-art models available in the literature, this manuscript is mainly concerned with documenting their implementation and {\it numerical} accuracy, but does not address the {\it physical} accuracy of each model, for which we point the reader to the relevant references in the following sections.
 
 \ccl 's overall structure is illustrated in Figure \ref{fig:CCL_structure}. Our implementation has support for spatially flat and curved $\Lambda$-Cold Dark Matter ($\Lambda$CDM) cosmologies, and $w$CDM cosmologies with the option of using a time-dependent equation of state. It also allows for cosmologies with multiple massive neutrino species and can be linked to external software for modified gravity predictions \citep[{\tt hi$\_$CLASS},][]{Zumalacarregui17}.
+
+{\bf The validation procedure to assess the {\it numerical} accuracy of each \ccl feature is the following. We compare the \ccl evaluation of each observable or function to an independent implementation from a stand-alone software scripts or package. We set an initial target tolerance for the fractional or absolute difference between outputs that surpasses our expected needs for accurate cosmological constraints. Ultimately, the numerical uncertainties in the different \ccl functions propagate to our predictions for correlation functions, which we expect to be the basis of the core cosmology analysis with LSST (similarly to current DES and KiDS efforts). Hence, our overall goal in this work is to demonstrate that correlation functions obtained by \ccl are accurate to within a fraction of the expected observational uncertainties for the models and in the range of scales of interest to LSST.}
 
 %------------------------
 \begin{figure*}
@@ -123,7 +125,19 @@ which is a function of the energy density in the different components today and 
 \end{align}
 Here, $\sigma_B$ is the Stefan-Boltzmann constant, $c$ is the speed of massless particles, $\rho_{{\rm crit},0}$ is the critical density at $z=0$, and $T_{\nu}^{\rm eff}$ is the present effective temperature of the massive neutrinos. $T_{\nu}^{\rm eff}$ is related to the temperature of the CMB via $T_{\nu}^{\rm eff} = T_{\rm CMB} T_{\rm NCDM}$, where $T_{\rm NCDM}$ is a dimensionless factor ($\simeq1$) used by e.g. {\tt CLASS} to set the ratio ${\sum m_\nu}/{\Omega_{\nu, {\rm m}}}$ to its experimentally measured value. Note that $T_{\rm NCDM}$ is used to modulate the effective temperature of massive neutrinos only; the temperature of relativistic neutrinos follows the usual relation. Finally, $\mu^i$ is a per-species mass-dependent dimensionless constant, given by $\mu^i = m_{\nu}^{i}c^2 a / (k_B T_{\nu}^{\rm eff})$ where $k_B$ is the Boltzmann constant.
 
-The density parameters $\Omega_X(a)$ of a given species $X$ at a given time are defined in terms of the physical background densities $\bar\rho_X(a)$ via $\Omega_X(a) \equiv \rho^{-1}_{\rm crit}(a) \bar\rho_X(a)$, where the critical density $\rho_{\rm crit}(a) = {( 8 \pi G)}^{-1} 3c^2H^2(a) = \rho_{\rm crit,0} H_0^{-2} H^2(a)$. As an example, the physical density of matter is given by $\bar\rho_m(a) = \bar\rho_{m,0} a^{-3} = \rho_{\rm crit,0} \Omega_{m,0} a^{-3}$, and its density parameter is $\Omega_m(a) = \Omega_{m,0} H_0^{2} a^{-3} H^{-2}(a)$. \ccl moreover allows for comoving physical densities $\bar\rho_{X, {\rm com}}(a) = \bar\rho_X(a) a^3$ to be extracted, which in the case of matter reduces to $\bar\rho_{m, {\rm com}} = \rho_{\rm crit,0} \Omega_{m,0}$. We include bars for $\rho_X$ to distinguish from spatially-varying densities in later sections.
+The density parameters $\Omega_X(a)$ of a given species $X$ at a given time are defined in terms of the physical background densities $\bar\rho_X(a)$ via $\Omega_X(a) \equiv \rho^{-1}_{\rm crit}(a) \bar\rho_X(a)$, where the critical density
+\begin{equation}
+  \rho_{\rm crit}(a) = {( 8 \pi G)}^{-1} 3c^2H^2(a) = \rho_{\rm crit,0} H_0^{-2} H^2(a).
+\end{equation}
+As an example, the physical density of matter is given by
+\begin{equation}
+  \bar\rho_m(a) = \bar\rho_{m,0} a^{-3} = \rho_{\rm crit,0} \Omega_{m,0} a^{-3},
+\end{equation}
+and its density parameter is
+\begin{equation}
+  \Omega_m(a) = \Omega_{m,0} H_0^{2} a^{-3} H^{-2}(a).
+\end{equation}
+\ccl moreover allows for comoving physical densities $\bar\rho_{X, {\rm com}}(a) = \bar\rho_X(a) a^3$ to be extracted, which in the case of matter reduces to $\bar\rho_{m, {\rm com}} = \rho_{\rm crit,0} \Omega_{m,0}$. We include bars for $\rho_X$ to distinguish from spatially-varying densities in later sections.
 
 Fitting models to cosmological observables requires predicting cosmological distances for a given model. We consider the comoving radial distance, which is calculated via a numerical integral as
 \begin{equation}
@@ -175,9 +189,9 @@ In doing this, \ccl simultaneously computes the logarithmic growth rate $f(a)$, 
 
 \ccl provides functions that return the growth normalized to $D(a=1)=1$ and to $D(a\ll1)\rightarrow a$. It employs an accelerated spline that is linearly spaced in the scale factor to interpolate the growth functions. 
 
-The growth calculations cover flat and curved $\Lambda$CDM, $w$CDM, and $(w_0 + w_a)$CDM cosmologies. However, it should be noted that the above treatment is ill-defined in the presence of massive neutrinos, and attempts to compute the growth rate in cosmologies with massive neutrinos will get an inconsistent result.
+The growth calculations cover flat and curved $\Lambda$CDM and $w$CDM cosmologies. However, it should be noted that the above treatment is ill-defined in the presence of massive neutrinos, and attempts to compute the growth rate in cosmologies with massive neutrinos will get an inconsistent result.
 
-Finally, \ccl allows for an alternative `modified gravity' cosmological model defined by a regular curved $(w_0+w_a)$CDM background as well as a user-defined $\Delta f(a)$, such that the true growth rate in this model is given by $f(a)=f_0(a)+\Delta f(a)$, where $f_0(a)$ is the growth rate in the background model. Note that this model is only consistently implemented with regards to the computation of the linear growth factor and growth rates.
+Finally, \ccl allows for an alternative `modified gravity' cosmological model defined by a regular curved $w$CDM background as well as a user-defined $\Delta f(a)$, such that the true growth rate in this model is given by $f(a)=f_0(a)+\Delta f(a)$, where $f_0(a)$ is the growth rate in the background model. Note that this model is only consistently implemented with regards to the computation of the linear growth factor and growth rates.
 All other \ccl functions (including the non-linear power spectrum) will ignore these modifications. This model, and the interpretation of the predictions given by \ccl, should therefore be used with care. A version of the growth code and transfer functions depending on modified gravity parameters is under development. 
 
 %-------------------------------------------------------------------------------
@@ -719,15 +733,16 @@ At high and low $\mu$, corresponding to high and low mass neutrinos, this integr
 
 
 %-------------------------------------------------------------------------------
-\section{Validation over the $\Lambda$CDM parameter space}
+\section{Validation}
 \label{sec:validation}
 
-Our goal in building \ccl was to ensure that all outputs are validated to a well established accuracy level. This was achieved by comparing these outputs against one or multiple independent implementations obtained in the same configuration (i.e., for the same cosmology). In this section we document the accuracy achieved for each observable. In some cases, the achieved level of accuracy is higher than the impact of other systematics which have not yet been considered in this version of \ccl. \todo{Not sure what this previous sentence refers to.} In the cases where this applies, we make it clear below. 
-Table \ref{tab:tests} summarises all the \ccl validation tests discussed in this section.
+Our goal in building \ccl was to ensure that all outputs are validated to a well-established high level of numerical accuracy. As mentioned in the introduction, Section \ref{sec:intro}, this was achieved by comparing these outputs against one or multiple independent implementations obtained for the same cosmology. {\bf The ultimate goal was to guarantee that any numerical uncertainty in the predictions for correlation functions are within a fraction of the expected statistical uncertainty for LSST. In this section, we document the numerical accuracy achieved for each observable and demonstrate that our overall goal has been achieved. We emphasise that the hereby presented tests pertain to {\it numerical} accuracy alone, while details of the {\it physical} accuracy of each model are provided in Section \ref{sec:models}. (In some cases, the achieved level of numerical accuracy is higher than the physical accuracy of the model for a particular observable. In the cases where this applies, we make it clear below.) Table \ref{tab:tests} summarises all the \ccl validation tests discussed in this section.}
 
 \input{tests}
 
-\ccl benchmarks are available and documented through the code repository. All plots presented in this section can be reproduced by means of a {\tt python} notebook available with the code. Accuracy checks can also be run automatically upon installation of the software.
+{\bf We described the core of our validation procedure in Section \ref{sec:intro}. For each \ccl prediction, one or more independent implementations were used to make analogous computations. Those independent implementations are provided and within the \ccl repository together with our main software. For each feature, we define a numerical accuracy parameter, $\mathcal{A}$, in the following subsections, which quantifies the relative or absolute difference between the \ccl prediction and the independent one. We quote the level of accuracy achieved and show that we meet our ultimate goal of ensuring that the numerical accuracy of the computed correlation functions from \ccl is at the desired level.}
+
+All plots presented in this section can be reproduced by means of a {\tt python} notebook available with the code. Accuracy checks can also be run automatically upon installation of the software.
 
 \subsection{Background quantities \& growth of perturbations}
 
@@ -824,7 +839,6 @@ In addition to the above tests in $\Lambda$CDM cosmologies without massive neutr
 
 %-------------------------------------------------------------------------------
 \subsubsection{Generalized validation of the power spectrum over $\Lambda$CDM parameter space}
-\vol{Phil Bull}
 
 \begin{figure*}
 \centering
