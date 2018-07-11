@@ -54,7 +54,7 @@ The Core Cosmology Library (\ccl) provides routines to compute basic cosmologica
 \section{Introduction}
 \label{sec:intro}
 
-Starting in the next decade, large-scale galaxy surveys will drive a new era of high precision cosmology \citep{DESCWhite,green11,Laureijs11}. Their main goal is arguably to answer the question of the origin of cosmic acceleration, in other words, to elucidate the nature of ``dark energy'', broadly understood as a family of potential models: from a cosmological constant to a dynamical field and modifications of gravity (see for example  \cite{Carroll2001CC,Peebles2003,Padmanabhan2003,Copeland2006,Ishak2007,Weinberg13} and references therein). These data will also allow us to shed light on a number of open questions in fundamental physics, such as the nature of dark matter, the mass of neutrinos or the level of primordial non-Gaussianity \todo{maybe add some references here}.
+Starting in the next decade, large-scale galaxy surveys will drive a new era of high precision cosmology \citep{DESCWhite,green11,Laureijs11}. Their main goal is arguably to answer the question of the origin of cosmic acceleration, in other words, to elucidate the nature of ``dark energy'', broadly understood as a family of potential models: from a cosmological constant to a dynamical field and modifications of gravity (see for example  \citealt{Carroll2001CC,Peebles2003,Padmanabhan2003,Copeland2006,Ishak2007,Weinberg13} and references therein). These data will also allow us to shed light on a number of open questions in fundamental physics, such as the nature of dark matter, the mass of neutrinos or the level of primordial non-Gaussianity \todo{maybe add some references here}.
 
 High precision constraints on dark energy models will be achieved by probing at the same time the expansion and growth history of the Universe over a long redshift baseline. For this purpose, it will be crucial to combine measurements of multiple cosmological probes: weak and strong gravitational lensing, the clustering of galaxies, distances to supernovae, and the abundance, clustering and gravitational lensing of galaxy clusters. Current weak lensing surveys, such as the Dark Energy Survey\footnote{\url{https://www.darkenergysurvey.org}} and the Kilo-Degree Survey\footnote{\url{http://kids.strw.leidenuniv.nl}}, have started to take this approach already \citep{Joudaki18,vanUitert18,DEScombined,krause17}. From a theoretical perspective, there are two challenges faced by the next generation of galaxy surveys. 
 
@@ -104,7 +104,7 @@ The following families of models are supported:
   \item Massive neutrino species in combination with any of the above except the user-defined modified growth function, specified by either $\Sigma m_\nu$ (which maps on to the density $\Omega_{\nu, {\rm m}}$ above), or by the individual masses of each of three neutrino species.
 \end{itemize}
 
-In the particular case of cosmologies with massive neutrinos, \ccl allows the user to specify either a sum of masses, $\Sigma m_\nu$, or the individual mass of each of three neutrino species. In the former case, \ccl will by default split $\Sigma m_\nu$ into three neutrino masses which are consistent with the normal hierarchy (see, e.g. \cite{Gerbino2017} for a review). However, the user can alternatively ask for $\Sigma m_\nu$ to be split either into masses consistent with the inverted hierarchy, or into equal masses. Each neutrino species is then checked for whether it is non-relativistic (massive) at $z=0$, and this information is used in combination with the user-provided value of $N_{\rm eff}$ to set the number of relativistic neutrino species.
+In the particular case of cosmologies with massive neutrinos, \ccl allows the user to specify either a sum of masses, $\Sigma m_\nu$, or the individual mass of each of three neutrino species. In the former case, \ccl will by default split $\Sigma m_\nu$ into three neutrino masses which are consistent with the normal hierarchy (see, e.g. \citealt{Gerbino2017} for a review). However, the user can alternatively ask for $\Sigma m_\nu$ to be split either into masses consistent with the inverted hierarchy, or into equal masses. Each neutrino species is then checked for whether it is non-relativistic (massive) at $z=0$, and this information is used in combination with the user-provided value of $N_{\rm eff}$ to set the number of relativistic neutrino species.
 
 Not all features of \ccl are available for all models. For a guide to which predictions are available for each model, see Table \ref{tab:cosmo}. Note that if users install their own version of {\tt CLASS}, {\tt CCL} can then make predictions for a more extended set of cosmologies. Users should take care to understand the validity of the {\tt CCL} assumptions for their own models.
 
@@ -289,7 +289,7 @@ where $\mathcal{P}_\Phi(k)$ is the dimensionless power spectrum of the primordia
         \begin{equation}\label{eq:transfer_nc}
           \Delta^{\rm D}_\ell(k)=\int dz\,p_z(z)\,b(z)\,T_\delta(k,z)\,j_\ell(k\chi(z)),
         \end{equation}
-        where $j_\ell(x)$ is $\ell$-th order spherical Bessel function, $T_\delta$ is the matter transfer function, $b(z)$ is the linear clustering bias for this tracer and $p_z(z)$ is the normalized distribution of sources in redshift (i.e. the selection function). The fluctuations in the number density of sources in different redshift bins are therefore treated by \ccl as different tracers. Note that \ccl does not currently support non-linear or scale-dependent bias, but future releases will do so under a number of schemes, including perturbative approaches as implemented in e.g. \cite{FASTPT}.
+        where $j_\ell(x)$ is $\ell$-th order spherical Bessel function, $T_\delta$ is the matter transfer function, $b(z)$ is the linear clustering bias for this tracer and $p_z(z)$ is the normalized distribution of sources in redshift (i.e. the selection function). The fluctuations in the number density of sources in different redshift bins are therefore treated by \ccl as different tracers. Note that \ccl does not currently support non-linear or scale-dependent bias, but future releases will do so under a number of schemes, including perturbative approaches as implemented in e.g. \citet{FASTPT}.
   \item $\Delta^{\rm RSD}$ is the linear contribution from redshift-space distortions (RSDs):
         \begin{equation}\label{eq:transfer_rsd}
           \Delta^{\rm RSD}_\ell(k)=\int dz\,\frac{(1+z) p_z(z)}{H(z)}T_\theta(k,z) j_\ell''(k\chi(z)),
@@ -306,7 +306,7 @@ where $\mathcal{P}_\Phi(k)$ is the dimensionless power spectrum of the primordia
         \end{equation}
         Here, $s(z)$ is the magnification bias, given as the logarithmic derivative of the number of sources with magnitude limit, and $r(\chi)$ is the angular comoving distance (see Eq. \ref{eq:angdist}).
 \end{itemize}
-Note that \ccl does not currently compute relativistic corrections to number counts \citep{2011PhRvD..84d3516C,2011PhRvD..84f3505B}. Although these will be included in the future, their contribution to the total fluctuation is largely subdominant (see \cite{GReffects} and the two references above), and therefore it is safe to ignore them for our purposes.
+Note that \ccl does not currently compute relativistic corrections to number counts \citep{2011PhRvD..84d3516C,2011PhRvD..84f3505B}. Although these will be included in the future, their contribution to the total fluctuation is largely subdominant (see \citealt{GReffects} and the two references above), and therefore it is safe to ignore them for our purposes.
 
 \paragraph{\bf Correlated galaxy shapes.} The transfer function for correlated galaxy shapes (intrinsic and lensed) is decomposed into two terms: $\Delta^{\rm SH}=\Delta^{\rm WL}+\Delta^{\rm IA}$, where
 \begin{itemize}
@@ -320,12 +320,12 @@ Note that \ccl does not currently compute relativistic corrections to number cou
     \begin{equation}
       W^L(z)\equiv\int_z^\infty dz' p_z(z')\frac{r(\chi'-\chi)}{r(\chi')r(\chi)}.
     \end{equation}
-  \item $\Delta^{\rm IA}$ is the transfer function for intrinsic galaxy alignments. \ccl supports the so-called ``non-linear alignment model'', in which the intrinsic galaxy inertia tensor is proportional the local tidal tensor \cite{2004PhRvD..70f3526H,2007MNRAS.381.1197H}:
+  \item $\Delta^{\rm IA}$ is the transfer function for intrinsic galaxy alignments. \ccl supports the so-called ``non-linear alignment model'', in which the intrinsic galaxy inertia tensor is proportional the local tidal tensor \citep{2004PhRvD..70f3526H,2007MNRAS.381.1197H}:
     \begin{align}\nonumber
       \Delta_\ell^{\rm IA}(k)=\sqrt{\frac{(\ell+2)!}{(\ell-2)!}}\int &dz\,p_z(z)\,b_{\rm IA}(z)\,f_{\rm IA}(z)\\
       &T_\delta(k,z)\,\frac{j_\ell(k\chi(z))}{[k\chi(z)]^2}.
     \end{align}
-    Here, $b_{\rm IA}$ is the so-called alignment bias, and $f_{\rm IA}$ is the fraction of aligned galaxies in the sample. Notice that $b_{\rm IA}(z)$ absorbs the typical normalization factors used in the literature for intrinsic alignment amplitude and redshift evolution. It is thus not to be confused with $C_1$ or $A_{\rm IA}$, typical parameters for the linear alignment model, as adopted in works such as \cite{Blazek17,vanUitert18,Joudaki18,Hildebrandt17}.
+    Here, $b_{\rm IA}$ is the so-called alignment bias, and $f_{\rm IA}$ is the fraction of aligned galaxies in the sample. Notice that $b_{\rm IA}(z)$ absorbs the typical normalization factors used in the literature for intrinsic alignment amplitude and redshift evolution. It is thus not to be confused with $C_1$ or $A_{\rm IA}$, typical parameters for the linear alignment model, as adopted in works such as \citet{Blazek17,vanUitert18,Joudaki18,Hildebrandt17}.
 \end{itemize}
 
 \paragraph{\bf Lensing convergence.} The transfer function for the lensing convergence of a given source plane at redshift $z_*$ receives only one contribution, given by
@@ -674,7 +674,7 @@ with $j_\ell(x)$ and $j_\ell^{\prime\prime}(x)$ the spherical Bessel function of
 %\end{itemize}
 
 In \texttt{Angpow}, the inner integral in $k$ is computed first. 
-To conduct the computation of such an integral of highly oscillating functions, the 3C-algorithm described in details in \citep{2017A&A...602A..72C} is used. In brief, it relies on the projection of the oscillating $f_\ell(z_,k)$ onto a Chebyshev series of order $2^N$, the product of the two Chebyshev series is performed with a $2^{2N}$ Chebyshev series; then the integral is computed using Clenshaw-Curtis quadrature. Finally, the integrals over $z$ are performed via again an optimised Clenshaw-Curtis quadrature. All the Chebyshev expansions and the Clenshaw-Curtis quadrature are performed via the \textit{Discrete Cosine Transform} of type I from the DCT-I fast transform of the FFTW library \citep{FFTW}.
+To conduct the computation of such an integral of highly oscillating functions, the 3C-algorithm described in details in \citet{2017A&A...602A..72C} is used. In brief, it relies on the projection of the oscillating $f_\ell(z_,k)$ onto a Chebyshev series of order $2^N$, the product of the two Chebyshev series is performed with a $2^{2N}$ Chebyshev series; then the integral is computed using Clenshaw-Curtis quadrature. Finally, the integrals over $z$ are performed via again an optimised Clenshaw-Curtis quadrature. All the Chebyshev expansions and the Clenshaw-Curtis quadrature are performed via the \textit{Discrete Cosine Transform} of type I from the DCT-I fast transform of the FFTW library \citep{FFTW}.
 
 As in the general case the Limber approximation is valid at high $\ell$ values, the \ccl user can define an $\ell$ threshold to switch from the non-Limber slow computation to the faster Limber approximation.
  
@@ -712,7 +712,7 @@ In order to accomodate a wide range of values of the overdensity parameter $\Del
 %-------------------------------------------------------------------------------
 \subsection{Massive neutrinos}
 
-When initializing a cosmology with massive neutrinos within \ccl , the user can provide either a single value for $m_\nu$, corresponding to a sum of the masses of three neutrinos, or a set of three values, corresponding directly to the three masses. In the former case, one can also specify how the sum of masses should be split for calculations. The default behavior of \ccl is to split the sum into three masses which are consistent with the normal neutrinio mass hierarchy, but an inverted hierarchy or equal splitting can be requested. (For a review of the neutrino mass hierarchies and relevant particle physics results, see for example \cite{Gerbino2017, Lesgourgues2012}.)
+When initializing a cosmology with massive neutrinos within \ccl , the user can provide either a single value for $m_\nu$, corresponding to a sum of the masses of three neutrinos, or a set of three values, corresponding directly to the three masses. In the former case, one can also specify how the sum of masses should be split for calculations. The default behavior of \ccl is to split the sum into three masses which are consistent with the normal neutrinio mass hierarchy, but an inverted hierarchy or equal splitting can be requested. (For a review of the neutrino mass hierarchies and relevant particle physics results, see for example \citealt{Gerbino2017, Lesgourgues2012}.)
 
 For equal splitting, it is clearly trivial to compute the three neutrino masses. If splitting with respect to the normal or inverted hierarchy is desired, it is slightly more complicated. The relevant known quantity which has been determined via particle physics experiments is the square of the difference of neutrino masses (up to a sign for one of the differences, hence the two possible hierarchies). Because we know the square of the differences rather than the differences themselves, we must solve a set of quadratic equations for the neutrino masses. In \ccl this is accomplished by making use the knowledge that the mass difference between two of the neutrino species is small. This allows us to Taylor expand about this difference, and greatly simplifies solving for the three neutrino masses. This methodology represents an approximation (related to discarding higher-order terms in this Taylor expansion), however it produces discrepancies from the exact solution which result in cosmological predictions which differ at levels far below our required validation levels (detailed below in Section \ref{sec:validation}).
 
@@ -901,7 +901,7 @@ Independent codes were utilized to test the accuracy of halo mass function predi
 \begin{equation}
   \tilde\sigma\equiv\log[\sigma^{-1}(M)],\label{eq:tildesig}
 \end{equation}
-and the value of the halo mass function in the form used in \cite{Tinker2008},
+and the value of the halo mass function in the form used in \citet{Tinker2008},
 \begin{equation}
   \mathcal{H}\equiv \log[(M^2/\bar{\rho}_m)dn/dM].
   \label{eq:newhmf}
@@ -1048,7 +1048,7 @@ We also performed and timed four typical likelihood evaluations using \ccl. For 
 \section{Outlook}
 \label{sec:conclusion}
 
-Science software development to facilitate the cosmological inference from LSST data is one of the critical tasks of the DESC. Recent cosmological analyses of the Dark Energy Survey (DES) relied on CosmoSIS \citep{Zuntz14} and CosmoLike \citep{krause17}, the Kilo-Degree Survey (KiDS) uses CosmoLSS \cite{Joudaki18} and CosmoMC \citep{Lewis02}. All of these frameworks employ {\tt CLASS}, CAMB \citep{Challinor2005}, or the cosmic emulator to compute the density power spectra. Compared to the analyses of DES, KiDS and the Hyper-Suprime Cam Survey (HSC), future data sets (e.g. LSST, {\it Euclid} and {\it WFIRST}) have substantially higher demands on analysis frameworks. Analyses are becoming more complex in terms of cosmological physics that is included in the analyses (neutrinos, modified gravity, and dark matter models) and in terms of modeling astrophysical and observational systematics at the required precision. 
+Science software development to facilitate the cosmological inference from LSST data is one of the critical tasks of the DESC. Recent cosmological analyses of the Dark Energy Survey (DES) relied on CosmoSIS \citep{Zuntz14} and CosmoLike \citep{krause17}, the Kilo-Degree Survey (KiDS) uses CosmoLSS \citep{Joudaki18} and CosmoMC \citep{Lewis02}. All of these frameworks employ {\tt CLASS}, CAMB \citep{Challinor2005}, or the cosmic emulator to compute the density power spectra. Compared to the analyses of DES, KiDS and the Hyper-Suprime Cam Survey (HSC), future data sets (e.g. LSST, {\it Euclid} and {\it WFIRST}) have substantially higher demands on analysis frameworks. Analyses are becoming more complex in terms of cosmological physics that is included in the analyses (neutrinos, modified gravity, and dark matter models) and in terms of modeling astrophysical and observational systematics at the required precision. 
 
 It is the primary goal of the \ccl to become the backbone of all cosmological analyses carried out by the LSST-DESC. This unified approach of a validated \ccl will ensure that DESC results that are both consistent (in that they will all be based on the same theory framework) and accurate (in that this framework has undergone a rigorous numerical validation).
 
