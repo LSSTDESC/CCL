@@ -1,5 +1,5 @@
 #from pyccl import ccllib as lib
-import ccllib as lib
+import pyccl.ccllib as lib
 from pyccl.pyutils import _vectorize_fn, _vectorize_fn2, _vectorize_fn3, _vectorize_fn4
 
 species_types = {

@@ -2,7 +2,7 @@
 
 """
 #from pyccl import ccllib as lib
-import ccllib as lib
+import pyccl.ccllib as lib
 import numpy as np
 import pyccl.core
 
