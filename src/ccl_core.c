@@ -216,8 +216,8 @@ n_s: index of the primordial PS
 ccl_cosmology * ccl_cosmology_create_with_params(double Omega_c, double Omega_b, double Omega_k,
 						 double Neff, double* mnu, ccl_mnu_convention mnu_type,
 						 double w0, double wa, double h, double norm_pk, double n_s,
-						 double bcm_log10Mc, double bcm_etab, double bcm_ks,
-						 int nz_mgrowth, double *zarr_mgrowth, 
+						 double bcm_log10Mc, double bcm_etab, double bcm_ks, double mu_0,
+						 double sigma_0, int nz_mgrowth, double *zarr_mgrowth, 
 						 double *dfarr_mgrowth, ccl_configuration config,
 						 int *status)
 {
@@ -226,7 +226,7 @@ ccl_cosmology * ccl_cosmology_create_with_params(double Omega_c, double Omega_b,
   ccl_parameters params;
   
   params = ccl_parameters_create(Omega_c, Omega_b, Omega_k, Neff, mnu, mnu_type, w0, wa,
-				 h, norm_pk, n_s, bcm_log10Mc, bcm_etab, bcm_ks, nz_mgrowth, zarr_mgrowth, dfarr_mgrowth, status);
+				 h, norm_pk, n_s, bcm_log10Mc, bcm_etab, bcm_ks, mu_0, sigma_0, nz_mgrowth, zarr_mgrowth, dfarr_mgrowth, status);
   // Check status
   ccl_check_status_nocosmo(status);
   
@@ -347,13 +347,13 @@ A_s: amplitude of the primordial PS
 n_s: index of the primordial PS
 
  */
- // MUSIG
 ccl_parameters ccl_parameters_create(
                      double Omega_c, double Omega_b, double Omega_k,
 				     double Neff, double* mnu, ccl_mnu_convention mnu_type,
 				     double w0, double wa, double h, double norm_pk,
 				     double n_s, double bcm_log10Mc, double bcm_etab, 
-				     double bcm_ks, int nz_mgrowth, double *zarr_mgrowth,
+				     double bcm_ks, double mu_0, double sigma_0, 
+				     int nz_mgrowth, double *zarr_mgrowth,
 				     double *dfarr_mgrowth, int *status)
 {
   #ifndef USE_GSL_ERROR
@@ -504,6 +504,10 @@ ccl_parameters ccl_parameters_create(
     params.bcm_ks=55.0;
   else
     params.bcm_ks=bcm_ks;
+    
+  // Params of the mu / Sigma parameterisation of MG
+  params.mu_0 = mu_0;
+  params.sigma_0 = sigma_0;
   
   // Set remaining standard and easily derived parameters
   ccl_parameters_fill_initial(&params, status);

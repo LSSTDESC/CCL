@@ -63,6 +63,10 @@ typedef struct ccl_parameters {
   double bcm_etab;
   double bcm_ks;
   
+  // mu / Sigma quasistatica parameterisation of modified gravity params
+  double mu_0;
+  double sigma_0;
+  
   // Derived parameters
   double sigma8;
   double Omega_l;
@@ -161,8 +165,8 @@ ccl_cosmology * ccl_cosmology_create(ccl_parameters params, ccl_configuration co
 ccl_cosmology * ccl_cosmology_create_with_params(double Omega_c, double Omega_b, double Omega_k,
 						 double Neff, double* mnu, ccl_mnu_convention mnu_type,
 						 double w0, double wa, double h, double norm_pk, double n_s,
-						 double bcm_log10Mc, double bcm_etab, double bcm_ks,
-						 int nz_mgrowth, double *zarr_mgrowth, 
+						 double bcm_log10Mc, double bcm_etab, double bcm_ks, double mu_0,
+						 double sigma_0, int nz_mgrowth, double *zarr_mgrowth, 
 						 double *dfarr_mgrowth, ccl_configuration config,
 						 int *status);
 
@@ -200,7 +204,7 @@ ccl_parameters ccl_parameters_create(double Omega_c, double Omega_b, double Omeg
 				     double Neff, double* mnu, ccl_mnu_convention mnu_type,
 				     double w0, double wa, double h, double norm_pk,
 				     double n_s, double bcm_log10Mc, double bcm_etab, double bcm_ks,
-				     int nz_mgrowth,double *zarr_mgrowth,
+				     double mu_0, double sigma_0, int nz_mgrowth,double *zarr_mgrowth,
 				     double *dfarr_mgrowth, int *status);
 
 
