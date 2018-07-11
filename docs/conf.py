@@ -37,7 +37,11 @@ if on_rtd:
         def __getattr__(cls, name):
             return MagicMock()
 
-    MOCK_MODULES = ["pyccl.lib","pyccl.background.lib"]
+    MOCK_MODULES = ["pyccl.lib","pyccl.background.lib","pyccl.constants.lib","pyccl.correlation.lib",
+                    "pyccl.lsst_specs.lib","pyccl.neutrinos.lib","pyccl.libutils.lib",
+                    "pyccl.cls.lib","pyccl.core.lib","pyccl.massfunction.lib","pyccl.power.lib"]
+
+    
     sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
 
 # -- General configuration ------------------------------------------------

@@ -1,4 +1,4 @@
-import pyccl.ccllib as lib
+from pyccl import ccllib as lib
 from pyccl.pyutils import _vectorize_fn, _vectorize_fn2
 
 def linear_matter_power(cosmo, k, a):

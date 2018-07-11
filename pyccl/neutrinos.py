@@ -1,5 +1,5 @@
 import numpy as np
-import pyccl.ccllib as lib
+from pyccl import ccllib as lib
 from pyccl.pyutils import check
 
 neutrino_mass_splits = {
