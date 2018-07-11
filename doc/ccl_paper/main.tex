@@ -585,7 +585,7 @@ p(z,z') = \frac{1}{\sqrt{2 \pi}\sigma_z} \exp\left(-\frac{(z-z')^2}{2\sigma_z^2}
 \section{Implementation of high-accuracy cosmological functions}
 \label{sec:implement}
 
-In this section, we note some of the assumptions and implementation details that are relevant when making accurate cosmological predictions. The validation tests performed for {\tt CCL} are described in detail in Section \ref{sec:validation}.
+In this section, we note some of the assumptions and implementation details that are relevant when making accurate cosmological predictions. In general, we use the publicly available {\tt GSL} library\footnote{\url{https://www.gnu.org/software/gsl/}} to perform all of the integations and interpolations. Most interpolations use the {\tt gsl\_interp\_akima} method, and the power spectra interpolation use a bicubic option provided by {\tt gsl\_interp2d\_bicubic}. We work with double precision quantities throughout. The validation tests performed for {\tt CCL} are described in detail in Section \ref{sec:validation}.
 
 %-------------------------------------------------------------------------------
 \subsection{Background functions \& growth of perturbations}
@@ -599,7 +599,7 @@ The value of the gravitational constant, $G$, enters into the critical density. 
 %-------------------------------------------------------------------------------
 \subsection{Matter power spectrum}
 
-For speed, the initialization of a cosmological model within {\tt CCL} performs initial computations of the linear and nonlinear matter power spectra, which are then interpolated whenever required. The spline is performed in two variables: the logarithmically-spaced wavenumber and the logarithmically and linearly-spaced scale factor. Splining the power spectra output leads to some precision loss (compared to, for example, direct outputs from {\tt CLASS} or the cosmic emulator) which is quantified in Section \ref{sec:validation}.
+For speed, the initialization of a cosmological model within {\tt CCL} performs initial computations of the linear and nonlinear matter power spectra, which are then interpolated whenever required. The bicubic spline is performed in two variables. The first one is the logarithmically-spaced wavenumber. For the scale factor, we adopt a hybrid spacing scheme where this quantity is linearly-spaced for $a>0.1$ and logarithmically-spaced otherwise. The goal of this hybrid scheme is to allow sufficiently fine sampling at low redshift for LSST observables, while at the same time allowing for predictions for CMB lensing without significantly slowing down the computations, as would result from a linear-spacing throughout. The spline interpolation causes soem precision loss in the power spectra output (compared to, for example, direct outputs from {\tt CLASS} or the cosmic emulator) which is quantified in Section \ref{sec:validation}.
 
 We introduce a maximum value $k$ (in units of $\text{Mpc}^{-1}$) up to which we evaluate the power spectra for interpolation; we call this parameter {\tt K$\_$MAX$\_$SPLINE}. A separate {\tt K$\_$MAX} parameter sets the limit of evaluation of the matter power spectrum. The range between {\tt K$\_$MAX$\_$SPLINE}~$<k<$~{\tt K$\_$MAX} is evaluated by performing a second order Taylor expansion in $\ln k$.
 
@@ -925,20 +925,22 @@ We note that while we maintain the $10^{-4}$ for our evaluations of $\sigma$, th
 
 \subsection{Two-point statistics}
 
-We used the BBKS linear matter power spectrum to compare two-point statistics for two redshift bins, resulting in three tomography combinations, ($1-1$),($1-2$),($2-2$). We computed the following quantities:
+We used the BBKS linear matter power spectrum to compare two-point statistics for two redshift bins, resulting in three tomography combinations, ($1-1$),($1-2$),($2-2$). The validation tests were performed for two kinds of redshift distributions: analytic and binned ones. The goal of defining these to sets was to capture any numerical deviation produced by the interpolation of the binned distribution. We adopted the following analytic redshift distributions: a Gaussian with $\sigma = 0.15$, centered at $z_1 = 1$; and another Gaussian with the same dispersion but centered at $z_2 = 1.5$. In the case of the binned distributions, we adopted the two redshift distribution histograms shown in Figure \ref{fig:zhistos}.
+
+For both types of distributions, we computed the following quantities:
 \begin{itemize}
 \item Number counts angular power spectra: density term only (no magnification, RSD, etc.) with non-evolving linear bias $b(z) = 1$, in the range $10 < \ell < 10000$, using $5$ bins per decade,
 \item Lensing convergence angular power spectra: leading order convergence term only (no magnification or intrinsic alignments), in the same range and with the same resolution as the case above,
 \item Number counts angular correlation functions in the range $0.01 \deg < \theta < 5 \deg$, using 5 bins per decade, and
 \item Lensing shear angular correlation functions ($\xi_+$,$\xi_-$), similarly to above.
 \end{itemize}
-We adopted the following analytic redshift distributions: a Gaussian with $\sigma = 0.15$, centered at $z_1 = 1$; and another Gaussian with the same dispersion but centered at $z_2 = 1.5$. We repeated the exercise for two redshift distribution histograms shown in Figure \ref{fig:zhistos}. Besides these two-point functions, we also validated the computation of the CMB lensing power spectrum, using the same $\ell$ binning described above. 
+ Besides these two-point functions, we also validated the computation of the CMB lensing power spectrum, using the same $\ell$ binning described above. 
 
 %------------------------
 \begin{figure}
 \centering
 \includegraphics[width=0.47\textwidth]{zdist.eps}
-\caption{Binned redshift distributions used for code comparison project.}
+\caption{Binned redshift distributions used for validating the computation of angular power spectra and correlation functions.}
 \label{fig:zhistos}
 \end{figure}
 %------------------------
