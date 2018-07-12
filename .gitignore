@@ -18,6 +18,8 @@ install-record.txt
 .deps
 .dirstamp
 class/build
+class/
+autom4te.cache/
 
 # Ignore test outputs
 tests/ccl_test_distances
