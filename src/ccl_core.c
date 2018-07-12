@@ -547,9 +547,11 @@ ccl_parameters ccl_parameters_create_flat_lcdm(double Omega_c, double Omega_b, d
   double mnuval = 0.;
   mnu = &mnuval;
   ccl_mnu_convention mnu_type = ccl_mnu_sum;
+  double mu_0 = 0.;
+  double sigma_0 = 0.;
   
   ccl_parameters params = ccl_parameters_create(Omega_c, Omega_b, Omega_k, Neff,
-						mnu, mnu_type, w0, wa, h, norm_pk, n_s, -1, -1, -1, -1, NULL, NULL, status);
+						mnu, mnu_type, w0, wa, h, norm_pk, n_s, -1, -1, -1, mu_0, sigma_0, -1, NULL, NULL, status);
 			
   return params;
 
@@ -573,9 +575,11 @@ ccl_parameters ccl_parameters_create_flat_lcdm_bar(double Omega_c, double Omega_
   ccl_mnu_convention mnu_type = ccl_mnu_sum;
   double w0 = -1.0;
   double wa = 0.0;
+  double mu_0 = 0.;
+  double sigma_0 = 0.;
   ccl_parameters params = ccl_parameters_create(Omega_c, Omega_b, Omega_k, Neff,
 						mnu, mnu_type, w0, wa, h, norm_pk, n_s, bcm_log10Mc, bcm_etab,
-						bcm_ks, -1, NULL, NULL, status);
+						bcm_ks, mu_0, sigma_0, -1, NULL, NULL, status);
   return params;
 
 }
@@ -591,8 +595,10 @@ ccl_parameters ccl_parameters_create_flat_lcdm_nu(double Omega_c, double Omega_b
   double Omega_k = 0.0;
   double w0 = -1.0;
   double wa = 0.0;
+  double mu_0 = 0.;
+  double sigma_0= 0.;
   ccl_parameters params = ccl_parameters_create(Omega_c, Omega_b, Omega_k, Neff, mnu, mnu_type, w0, wa,
-						h, norm_pk, n_s, -1, -1, -1, -1, NULL, NULL, status);
+						h, norm_pk, n_s, -1, -1, -1, mu_0, sigma_0, -1, NULL, NULL, status);
   return params;
 
 }
@@ -612,9 +618,11 @@ ccl_parameters ccl_parameters_create_lcdm(double Omega_c, double Omega_b, double
   double mnuval = 0.;
   mnu = &mnuval;
   ccl_mnu_convention mnu_type = ccl_mnu_sum;
+  double mu_0 = 0.;
+  double sigma_0 = 0.;
   
   ccl_parameters params = ccl_parameters_create(Omega_c, Omega_b, Omega_k, Neff, mnu, mnu_type, w0, wa,
-						h, norm_pk, n_s, -1, -1, -1,-1,NULL,NULL, status);
+						h, norm_pk, n_s, -1, -1, -1, mu_0, sigma_0, -1,NULL,NULL, status);
   return params;
 }
 
@@ -629,9 +637,11 @@ ccl_parameters ccl_parameters_create_lcdm_nu(double Omega_c, double Omega_b, dou
 {
   double w0 = -1.0;
   double wa = 0.0; 
-
+  double mu_0 = 0.;
+  double sigma_0 =0.;
+  
   ccl_parameters params = ccl_parameters_create(Omega_c, Omega_b, Omega_k, Neff, mnu, mnu_type, w0, wa,
-						h, norm_pk, n_s, -1, -1, -1,-1,NULL,NULL, status);
+						h, norm_pk, n_s, -1, -1, -1, mu_0, sigma_0, -1,NULL,NULL, status);
 
   return params;
 
@@ -652,9 +662,11 @@ ccl_parameters ccl_parameters_create_flat_wcdm(double Omega_c, double Omega_b, d
   double mnuval = 0.;
   mnu = &mnuval;
   ccl_mnu_convention mnu_type = ccl_mnu_sum;
+  double mu_0 = 0.;
+  double sigma_0 = 0.;
 
   ccl_parameters params = ccl_parameters_create(Omega_c, Omega_b, Omega_k, Neff, mnu, mnu_type, w0, wa,
-						h, norm_pk, n_s, -1, -1, -1,-1,NULL,NULL, status);
+						h, norm_pk, n_s, -1, -1, -1, mu_0, sigma_0, -1,NULL,NULL, status);
   return params;
 }
 
@@ -669,8 +681,10 @@ ccl_parameters ccl_parameters_create_flat_wcdm_nu(double Omega_c, double Omega_b
 
   double Omega_k = 0.0;
   double wa = 0.0;
+  double mu_0 = 0.;
+  double sigma_0 = 0.;
   ccl_parameters params = ccl_parameters_create(Omega_c, Omega_b, Omega_k, Neff, mnu, mnu_type, w0, wa, 
-						h, norm_pk, n_s, -1, -1, -1,-1,NULL,NULL, status);
+						h, norm_pk, n_s, -1, -1, -1,mu_0, sigma_0,-1,NULL,NULL, status);
   return params;
 }
 
@@ -688,9 +702,11 @@ ccl_parameters ccl_parameters_create_flat_wacdm(double Omega_c, double Omega_b, 
   double mnuval = 0.;
   mnu = &mnuval;
   ccl_mnu_convention mnu_type = ccl_mnu_sum;
+  double mu_0=0;
+  double sigma_0=0.;
   
   ccl_parameters params = ccl_parameters_create(Omega_c, Omega_b, Omega_k,Neff, mnu, mnu_type, w0, wa,
-						h, norm_pk, n_s, -1, -1, -1,-1,NULL,NULL, status);
+						h, norm_pk, n_s, -1, -1, -1, mu_0, sigma_0, -1,NULL,NULL, status);
   return params;
 }
 
@@ -705,8 +721,10 @@ ccl_parameters ccl_parameters_create_flat_wacdm_nu(double Omega_c, double Omega_
 {
 
   double Omega_k = 0.0;
+  double mu_0 = 0.;
+  double sigma_0 = 0.;
   ccl_parameters params = ccl_parameters_create(Omega_c, Omega_b, Omega_k,Neff, mnu, mnu_type, w0, wa,
-						h, norm_pk, n_s, -1, -1, -1,-1,NULL,NULL, status);
+						h, norm_pk, n_s, -1, -1, -1,mu_0, sigma_0, 1,NULL,NULL, status);
   return params;
 }
 

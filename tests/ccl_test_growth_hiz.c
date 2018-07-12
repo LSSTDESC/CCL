@@ -19,6 +19,8 @@ CTEST_DATA(growth_hiz) {
   double w_0[3];
   double w_a[3];
   ccl_mnu_convention mnu_type;
+  double mu_0;
+  double sigma_0;
   
   double z[7];
   double gf[3][7];
@@ -60,6 +62,8 @@ CTEST_SETUP(growth_hiz) {
   double mnuval = 0.;
   data->mnu= &mnuval;
   data->mnu_type = ccl_mnu_sum;
+  data->mu_0 = 0.;
+  data->sigma_0=0.;
   
   
   // Values that are different for the different models
@@ -84,7 +88,7 @@ static void compare_growth_hiz(int model, struct growth_hiz_data * data)
   int status=0; 	
   // Make the parameter set from the input data
   // Values of some parameters depend on the model index
-  ccl_parameters params = ccl_parameters_create(data->Omega_c, data->Omega_b, data->Omega_k[model], data->Neff, data->mnu, data->mnu_type, data->w_0[model], data->w_a[model], data->h, data->A_s, data->n_s,-1,-1,-1,-1,NULL,NULL, &status);
+  ccl_parameters params = ccl_parameters_create(data->Omega_c, data->Omega_b, data->Omega_k[model], data->Neff, data->mnu, data->mnu_type, data->w_0[model], data->w_a[model], data->h, data->A_s, data->n_s,-1,-1,-1,data->mu_0, data->sigma_0,-1,NULL,NULL, &status);
   params.Omega_g=0;
   // Make a cosmology object from the parameters with the default configuration
   ccl_cosmology * cosmo = ccl_cosmology_create(params, default_config);

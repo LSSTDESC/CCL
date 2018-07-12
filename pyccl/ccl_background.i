@@ -112,5 +112,24 @@ void rho_x_vec(ccl_cosmology * cosmo, int label, int is_comoving,
     }
 }
 
+void mu_MG_vec(ccl_cosmology * cosmo,
+		       double* a,  int na,
+		   double* output, int nout, int *status) {
+    assert(nout == na);
+    for(int i=0; i < na; i++){
+      output[i] = ccl_mu_MG(cosmo, a[i], status);
+    }
+}
+
+void Sig_MG_vec(ccl_cosmology * cosmo,
+		       double* a,  int na,
+		   double* output, int nout, int *status) {
+    assert(nout == na);
+    for(int i=0; i < na; i++){
+      output[i] = ccl_Sig_MG(cosmo, a[i], status);
+    }
+}
+
+
 
 %}

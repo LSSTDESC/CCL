@@ -23,6 +23,8 @@ CTEST_DATA(massfunc) {
   double w_0[1];
   double w_a[1];
   double sigma8;
+  double mu_0;
+  double sigma_0;
 
   double mass[13];
   double massfunc[3][13];
@@ -62,6 +64,8 @@ CTEST_SETUP(massfunc) {
   double mnuval = 0.;
   data->mnu=&mnuval;
   data->mnu_type = ccl_mnu_sum;
+  data->mu_0;
+  data->sigma_0;
 
   double Omega_v[1] = { 0.7 };
   double w_0[1]     = {-1.0 };
@@ -85,7 +89,7 @@ static void compare_massfunc(int model, struct massfunc_data * data)
   ccl_parameters params = ccl_parameters_create(data->Omega_c, data->Omega_b,data->Omega_k[model],
 						data->Neff, data->mnu, data-> mnu_type, data->w_0[model],
 						data->w_a[model], data->h,data->A_s, data->n_s,
-						-1, -1, -1, -1, NULL, NULL, status);
+						-1, -1, -1, data->mu_0, data->sigma_0, -1, NULL, NULL, status);
 
   params.sigma8 = data->sigma8;
   ccl_configuration config = default_config;

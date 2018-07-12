@@ -17,6 +17,8 @@ CTEST_DATA(cosmology) {
   double mnuval;
   ccl_mnu_convention mnu_type;
   int status;
+  double mu_0;
+  double sigma_0;
 };
 
 // This function is one before each test defined below with CTEST2 in the suite.
@@ -36,6 +38,8 @@ CTEST_SETUP(cosmology) {
   data->mnuval =0.;
   data->status=0;
   data->mnu_type =ccl_mnu_sum;
+  data->mu_0=0.;
+  data->sigma_0=0.;
 }
 
 // Check to see if general ccl_cosmology struct is initialized correctly
@@ -46,7 +50,7 @@ CTEST2(cosmology, create_general_cosmo) {
   ccl_cosmology * cosmo = ccl_cosmology_create_with_params(data->Omega_c, data->Omega_b, data->Omega_k, 
 							   data->Neff, &(data->mnuval), data->mnu_type,
 							   data->w0, data->wa, data->h, data->A_s, data->n_s,
-							   -1,-1,-1,-1, NULL, NULL, config, &(data->status));
+							   -1,-1,-1, data->mu_0, data->sigma_0,-1, NULL, NULL, config, &(data->status));
   
   // Pull ccl_parameters object out of ccl_cosmology
   ccl_parameters params = (*cosmo).params;

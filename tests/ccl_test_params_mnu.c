@@ -18,6 +18,8 @@ CTEST_DATA(create_mnu) {
   int status;
   ccl_mnu_convention mnu_type_norm;
   ccl_mnu_convention mnu_type_inv;
+  double mu_0;
+  double sigma_0;
 };
 
 // This function is one before each test defined below with CTEST2 in the suite.
@@ -38,6 +40,8 @@ CTEST_SETUP(create_mnu) {
   data->mnu_type_norm = ccl_mnu_sum;
   data->mnu_type_inv = ccl_mnu_sum_inverted;
   data->status = 0;
+  data->mu_0 =0.;
+  data-> sigma_0 = 0.;
   
 }
 
@@ -50,7 +54,7 @@ CTEST2(create_mnu, create_mnu_norm) {
   ccl_parameters params_norm = ccl_parameters_create(data->Omega_c, data->Omega_b, data->Omega_k,
 						data->Neff, &(data->mnuval), data->mnu_type_norm,
 						data->w0, data->wa,
-						data->h, data->A_s, data->n_s,-1,-1,-1,-1,NULL,NULL, &(data->status));
+						data->h, data->A_s, data->n_s,-1,-1,-1, data->mu_0, data->sigma_0, -1,NULL,NULL, &(data->status));
   						
   ASSERT_DBL_NEAR_TOL(params_norm.mnu[1]*params_norm.mnu[1] - params_norm.mnu[0]*params_norm.mnu[0], DELTAM12_sq, 1e-4);
   ASSERT_DBL_NEAR_TOL(params_norm.mnu[2]*params_norm.mnu[2] - params_norm.mnu[0]*params_norm.mnu[0], DELTAM13_sq_pos, 1e-4);
@@ -61,7 +65,7 @@ CTEST2(create_mnu, create_mnu_inv){
   ccl_parameters params_inv = ccl_parameters_create(data->Omega_c, data->Omega_b, data->Omega_k,
 						data->Neff, &(data->mnuval), data->mnu_type_inv,
 						data->w0, data->wa,
-						data->h, data->A_s, data->n_s,-1,-1,-1,-1,NULL,NULL, &(data->status));
+						data->h, data->A_s, data->n_s,-1,-1,-1, data->mu_0, data->sigma_0,-1,NULL,NULL, &(data->status));
 						
   ASSERT_DBL_NEAR_TOL(params_inv.mnu[1]*params_inv.mnu[1] - params_inv.mnu[0]*params_inv.mnu[0], DELTAM12_sq, 1e-4);
   ASSERT_DBL_NEAR_TOL(params_inv.mnu[2]*params_inv.mnu[2] - params_inv.mnu[0]*params_inv.mnu[0], DELTAM13_sq_neg, 1e-4);

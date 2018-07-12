@@ -91,7 +91,7 @@ class Parameters(object):
     def __init__(self, Omega_c=None, Omega_b=None, h=None, A_s=None, n_s=None, 
                  Omega_k=0., Neff = 3.046, m_nu=0., mnu_type = None, w0=-1., 
                  wa=0., bcm_log10Mc=np.log10(1.2e14), bcm_etab=0.5, bcm_ks=55., 
-                 sigma8=None, z_mg=None, df_mg=None):
+                 mu_0=0., sigma_0=0., sigma8=None, z_mg=None, df_mg=None):
         """
         Creates a set of cosmological parameters.
 
@@ -124,6 +124,10 @@ class Parameters(object):
             bcm_log10Mc (float, optional): One of the parameters of the BCM model.
             bcm_etab (float, optional): One of the parameters of the BCM model.
             bcm_ks (float, optional): One of the parameters of the BCM model.
+            mu_0 (float, optional): One of the parameters of the quasistatic
+                                    modified gravity parameterisation.
+            sigma_0 (float, optional): One of the parameters of the quasistatic
+                                    modified gravity parameterisation.
             sigma8 (float): Variance of matter density perturbations at 8 Mpc/h
                             scale. Optional if A_s is specified.
             df_mg (:obj: array_like): Perturbations to the GR growth rate as a 
@@ -206,7 +210,8 @@ class Parameters(object):
             = lib.parameters_create_nu( Omega_c, Omega_b, Omega_k, Neff, 
                                              w0, wa, h, norm_pk, 
                                              n_s, bcm_log10Mc, bcm_etab, bcm_ks, 
-                                             mnu_types[mnu_type], m_nu, status ) 
+                                             mu_0, sigma_0, mnu_types[mnu_type], 
+                                             m_nu, status ) 
                                              
         else:
             # Create ccl_parameters with modified growth arrays
@@ -214,7 +219,8 @@ class Parameters(object):
             = lib.parameters_create_nu_vec( Omega_c, Omega_b, Omega_k, Neff, 
                                              w0, wa, h, norm_pk, 
                                              n_s, bcm_log10Mc, bcm_etab, bcm_ks, 
-                                             z_mg, df_mg, mnu_types[mnu_type], m_nu, status )
+                                             mu_0, sigma_0, z_mg, df_mg, 
+                                             mnu_types[mnu_type], m_nu, status )
         check(status)    
     
     def __getitem__(self, key):
@@ -262,7 +268,7 @@ class Parameters(object):
         """
         params = ['Omega_c', 'Omega_b', 'Omega_m', 'Omega_k', 'Omega_l',
                   'w0', 'wa', 'H0', 'h', 'A_s', 'n_s', 'bcm_log10Mc', 
-                  'bcm_etab', 'bcm_ks',
+                  'bcm_etab', 'bcm_ks', 'mu_0', 'sigma_0',
                   'Neff', 'mnu', 'Omega_n_mass', 'Omega_n_rel',
                   'T_CMB', 'Omega_g', 'z_star', 'has_mgrowth']
         
@@ -292,7 +298,7 @@ class Cosmology(object):
                  Omega_c=None, Omega_b=None, h=None, A_s=None, n_s=None, 
                  Omega_k=0., Neff=3.046, m_nu=0., mnu_type = None, w0=-1., wa=0.,
                  bcm_log10Mc=np.log10(1.2e14), bcm_etab=0.5, bcm_ks=55., 
-                 sigma8=None, z_mg=None, df_mg=None, 
+                 mu_0=0., sigma_0=0., sigma8=None, z_mg=None, df_mg=None, 
                  transfer_function='boltzmann_class',
                  matter_power_spectrum='halofit',
                  baryons_power_spectrum='nobaryons',
@@ -330,7 +336,8 @@ class Cosmology(object):
                                 m_nu=m_nu, mnu_type=mnu_type, w0=w0, wa=wa, 
                                 sigma8=sigma8, bcm_log10Mc=bcm_log10Mc, 
                                 bcm_etab=bcm_etab, bcm_ks=bcm_ks, 
-                                z_mg=z_mg, df_mg=df_mg)
+                                mu_0=mu_0, sigma_0 = sigma_0, z_mg=z_mg, 
+                                df_mg=df_mg)
 
             self.params = params
             params = params.parameters # We only need the ccl_parameters object
@@ -347,7 +354,8 @@ class Cosmology(object):
                        n_s==None, Omega_k==0., Neff==3.046, m_nu==0., 
                        mnu_type==None, w0==-1., wa==0., 
                        bcm_log10Mc==np.log10(1.2e14), bcm_etab==0.5, 
-                       bcm_ks==55., sigma8==None, z_mg==None, df_mg==None]
+                       bcm_ks==55., mu_0==0., sigma_0==0.,sigma8==None, 
+                       z_mg==None, df_mg==None]
             
             if not all(arg == True for arg in argtest):
                 warn("Cosmological parameter kwargs are ignored if 'params' is "

@@ -143,6 +143,32 @@ double ccl_omega_x(ccl_cosmology * cosmo, double a, ccl_species_x_label label, i
   }
 }
 
+/* --------- ROUTINE: ccl_mu_MG ---------
+INPUT: cosmology object, scale factor
+TASK: Compute mu(a) where mu is one of the the parameterizating functions 
+of modifications to GR in the quasistatic approximation. 
+*/
+
+double ccl_mu_MG(ccl_cosmology * cosmo, double a, int *status)
+{   
+	// This function can be extended to include other 
+	// z-dependences for mu in the future.
+	return cosmo->params.mu_0 * ccl_omega_x(cosmo, a, ccl_species_l_label, status);
+}
+
+/* --------- ROUTINE: ccl_Sig_MG ---------
+INPUT: cosmology object, scale factor
+TASK: Compute Sigma(a) where Sigma is one of the the parameterizating functions 
+of modifications to GR in the quasistatic approximation. 
+*/
+
+double ccl_Sig_MG(ccl_cosmology * cosmo, double a, int *status)
+{   
+	// This function can be extended to include other 
+	// z-dependences for Sigma in the future.
+	return cosmo->params.sigma_0 * ccl_omega_x(cosmo, a, ccl_species_l_label, status);
+}
+
 // Structure to hold parameters of chi_integrand
 typedef struct {
   ccl_cosmology *cosmo;
@@ -172,9 +198,30 @@ static int growth_ode_system(double a,const double y[],double dydt[],void *param
   
   double hnorm=h_over_h0(a,cosmo, &status);
   double om=ccl_omega_x(cosmo, a, ccl_species_m_label, &status);
-
-  dydt[0]=y[1]/(a*a*a*hnorm);
+  
   dydt[1]=1.5*hnorm*a*om*y[0];
+  dydt[0]=y[1]/(a*a*a*hnorm);
+
+  return status;
+}
+
+/* --------- ROUTINE: growth_ode_system_muSig ---------
+INPUT: scale factor
+TASK: Define the ODE system to be solved in order to compute the growth (of the density)
+* in the case in which we use the mu / Sigma quasistatic parameterisation of modified gravity
+*/
+static int growth_ode_system_muSig(double a,const double y[],double dydt[],void *params)
+{
+  int status = 0;
+  ccl_cosmology * cosmo = params;
+  
+  double hnorm=h_over_h0(a,cosmo, &status);
+  double om=ccl_omega_x(cosmo, a, ccl_species_m_label, &status);
+  
+  double mu = ccl_mu_MG(cosmo, a, &status);
+  dydt[1]=1.5*hnorm*a*om*y[0]*(1. + mu);
+ 
+  dydt[0]=y[1]/(a*a*a*hnorm);
 
   return status;
 }
@@ -210,26 +257,53 @@ static int  growth_factor_and_growth_rate(double a,double *gf,double *fg,ccl_cos
     int gslstatus;
     double y[2];
     double ainit=EPS_SCALEFAC_GROWTH;
-    // MUSIG - have an if statement option here: if mu0 == 0, set to growth_ode_system, otherwise call e.g. growth_ode_system_muSig
-    gsl_odeiv2_system sys={growth_ode_system,NULL,2,cosmo}; 
-    gsl_odeiv2_driver *d=
-      gsl_odeiv2_driver_alloc_y_new(&sys,gsl_odeiv2_step_rkck,0.1*EPS_SCALEFAC_GROWTH,0,ccl_gsl->ODE_GROWTH_EPSREL);
-
-    y[0]=EPS_SCALEFAC_GROWTH;
-    y[1]=EPS_SCALEFAC_GROWTH*EPS_SCALEFAC_GROWTH*EPS_SCALEFAC_GROWTH*
-      h_over_h0(EPS_SCALEFAC_GROWTH,cosmo, stat);
-
-    gslstatus=gsl_odeiv2_driver_apply(d,&ainit,a,y);
-    gsl_odeiv2_driver_free(d);
-
-    if(gslstatus != GSL_SUCCESS) {
-      ccl_raise_gsl_warning(gslstatus, "ccl_background.c: growth_factor_and_growth_rate():");
-      return 1;
-    }
     
-    *gf=y[0];
-    *fg=y[1]/(a*a*h_over_h0(a,cosmo, stat)*y[0]);
-    return 0;
+    // if mu0 == 0, call normal growth_ode_system, otherwise call growth_ode_system_muSig
+    
+    if (cosmo->params.mu_0>1e-12 || cosmo->params.mu_0<-1e-12) { 
+		gsl_odeiv2_system sys = {growth_ode_system_muSig,NULL,2,cosmo};
+		
+		gsl_odeiv2_driver *d=
+            gsl_odeiv2_driver_alloc_y_new(&sys,gsl_odeiv2_step_rkck,0.1*EPS_SCALEFAC_GROWTH,0,ccl_gsl->ODE_GROWTH_EPSREL);
+
+        y[0]=EPS_SCALEFAC_GROWTH;
+        y[1]=EPS_SCALEFAC_GROWTH*EPS_SCALEFAC_GROWTH*EPS_SCALEFAC_GROWTH*
+            h_over_h0(EPS_SCALEFAC_GROWTH,cosmo, stat);
+
+        gslstatus=gsl_odeiv2_driver_apply(d,&ainit,a,y);
+        gsl_odeiv2_driver_free(d);
+
+        if(gslstatus != GSL_SUCCESS) {
+          ccl_raise_gsl_warning(gslstatus, "ccl_background.c: growth_factor_and_growth_rate():");
+          return 1;
+          }
+    
+        *gf=y[0];
+        *fg=y[1]/(a*a*h_over_h0(a,cosmo, stat)*y[0]);
+         return 0;
+    } else {
+        gsl_odeiv2_system sys = {growth_ode_system,NULL,2,cosmo};
+        
+        gsl_odeiv2_driver *d=
+            gsl_odeiv2_driver_alloc_y_new(&sys,gsl_odeiv2_step_rkck,0.1*EPS_SCALEFAC_GROWTH,0,ccl_gsl->ODE_GROWTH_EPSREL);
+
+        y[0]=EPS_SCALEFAC_GROWTH;
+        y[1]=EPS_SCALEFAC_GROWTH*EPS_SCALEFAC_GROWTH*EPS_SCALEFAC_GROWTH*
+            h_over_h0(EPS_SCALEFAC_GROWTH,cosmo, stat);
+
+        gslstatus=gsl_odeiv2_driver_apply(d,&ainit,a,y);
+        gsl_odeiv2_driver_free(d);
+
+        if(gslstatus != GSL_SUCCESS) {
+          ccl_raise_gsl_warning(gslstatus, "ccl_background.c: growth_factor_and_growth_rate():");
+          return 1;
+          }
+    
+        *gf=y[0];
+        *fg=y[1]/(a*a*h_over_h0(a,cosmo, stat)*y[0]);
+         return 0;
+        
+    }
   }
 }
 
@@ -540,7 +614,6 @@ void ccl_cosmology_compute_growth(ccl_cosmology * cosmo, int * status)
   gsl_function F;
   gsl_spline *df_a_spline=NULL;
   
-  // MUSIG: We are not going to go via delta f, so this is not affected - don't wory about this block for mu sigma
   if(cosmo->params.has_mgrowth) {
     double *df_arr=malloc(na*sizeof(double));
     if(df_arr==NULL) {
@@ -626,8 +699,7 @@ void ccl_cosmology_compute_growth(ccl_cosmology * cosmo, int * status)
   chistatus|=growth_factor_and_growth_rate(1.,&growth0,&fgrowth0,cosmo, status);
   // Get the growth factor and growth rate at other redshifts
   for(int i=0; i<na; i++) {
-    chistatus|=growth_factor_and_growth_rate(a[i],&(y[i]),&(y2[i]),cosmo, status);
-    // MUSIG The below won't be how we incorporate muSig, don't worry about this block. 
+    chistatus|=growth_factor_and_growth_rate(a[i],&(y[i]),&(y2[i]),cosmo, status); 
     if(cosmo->params.has_mgrowth) {
       if(a[i]>0) {
 	double df,integ;
@@ -648,7 +720,6 @@ void ccl_cosmology_compute_growth(ccl_cosmology * cosmo, int * status)
       }
     }
     y[i]/=growth0; // Normalizing to the growth factor to the growth today 
-    // MUSIG - is this an issue? Do we still want to normalize the growth to the growth today WITH the modification?
   }
   if(chistatus || status_mg || *status) {
     free(a);
