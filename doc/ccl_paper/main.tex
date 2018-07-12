@@ -98,9 +98,9 @@ The following set of features is supported in \ccl:
   \end{equation}
   We note that models with constant $w$ are simply a subset of the above, where $w_a=0$.
  \item Non-zero curvature ($K$), so that the curvature density parameter $\Omega_K = 1 - \sum_i \Omega_i$, where $i$ refers to each of the density components. 
- \item An arbitrary, user-defined modified growth function (see description in Section \ref{sec:growth}). This can be combined with a model that otherwise contains non-zero curvature and evolving dark energy.
  \item Extra relativistic species, contributing to $N_{\rm eff}$ (the effective number of neutrinos).
   \item Massive neutrinos specified by either the sum of their masses $\Sigma m_\nu$ (which maps on to the density parameter $\Omega_{\nu, {\rm m}}$ above), or by the individual masses of each of the three neutrino species. This feature is allowed alongside non-zero curvature, extra relativistic species, and evolving dark energy.
+ \item An arbitrary, user-defined modified growth function (see description in Section \ref{sec:growth}). This can be combined with a model that otherwise contains non-zero curvature and evolving dark energy.
 \end{itemize}
 
 In the particular case of cosmologies with massive neutrinos, \ccl allows the user to specify either a sum of masses, $\Sigma m_\nu$, or the individual mass of each of three neutrino species. In the former case, \ccl will by default split $\Sigma m_\nu$ into three neutrino masses which are consistent with the normal hierarchy (see, e.g. \citealt{Gerbino2017} for a review). However, the user can alternatively ask for $\Sigma m_\nu$ to be split either into masses consistent with the inverted hierarchy, or into equal masses. Each neutrino species is then checked for whether it is non-relativistic (massive) at $z=0$, and this information is used in combination with the user-provided value of $N_{\rm eff}$ to set the number of relativistic neutrino species.
