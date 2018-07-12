@@ -840,7 +840,7 @@ In addition to the above tests in $\Lambda$CDM cosmologies without massive neutr
 
 \begin{figure*}
 \centering
-\includegraphics[width=0.95\textwidth]{pkdev}
+\includegraphics[width=0.95\textwidth]{pkdev_v2_z00}
 \caption{Absolute fractional difference between the matter power spectra at $z=0$ calculated using {\tt CLASS} via \ccl, and {\tt CLASS} directly, for a range of cosmological parameter values, and different {\tt CLASS} precision settings (standard vs. high-precision) and power spectrum types (linear vs. Halofit). The lines are colored according to the value of $\Omega_{\rm c}$ for each set of cosmological parameters (see Table~\ref{tab:paramranges} for the ranges of other parameters).}
 \label{fig:power_paramspace}
 \end{figure*}
@@ -855,7 +855,7 @@ For each set of parameters, we then calculate the linear and non-linear (Halofit
 
 \begin{figure*}
 \centering
-\includegraphics[width=0.95\textwidth]{pkdev_z2}
+\includegraphics[width=0.95\textwidth]{pkdev_v2_z20}
 \caption{Absolute fractional difference between \ccl and {\tt CLASS} matter power spectra, as plotted in Fig.~\ref{fig:power_paramspace}, but now at $z=2$.}
 \label{fig:power_paramspace_z2}
 \end{figure*}
@@ -864,11 +864,11 @@ Fig.~\ref{fig:power_paramspace} shows the fractional difference between the \ccl
 
 As shown in the top two panels of Fig.~\ref{fig:power_paramspace}, \ccl reproduces the standard {\tt CLASS} results well across a broad range of parameter values, always remaining well within the target fractional precision of $10^{-4}$. This demonstrates the robustness of our choice of spline parameters to different cosmological parameter values.
 
-The lower panels in Fig.~\ref{fig:power_paramspace} show the fractional deviation between \ccl (which always uses the `standard' {\tt CLASS} precision) and {\tt CLASS} with high precision settings. These deviations are more significant, especially around the wavenumbers where the BAO feature is most prominent. The precision is still generally better than $10^{-3}$ however, and is only worse than that for the very highest values of $\Omega_c$.
+The lower panels in Fig.~\ref{fig:power_paramspace} show the fractional deviation between \ccl (which always uses the `standard' {\tt CLASS} precision) and {\tt CLASS} with high precision settings. These deviations are more significant, especially around the wavenumbers where the BAO feature is most prominent. The precision is still generally better than $10^{-3}$ however, and is only worse than that for the very lowest values of $\Omega_c$.
 
-Fig.~\ref{fig:power_paramspace_z2} shows the same comparison, but now for $z=2$. The precision on the linear matter power spectrum is almost an order of magnitude better than at $z=0$ for the standard precision settings, and about the same as at $z=0$ for the high precision settings. The picture is quite different for the Halofit power spectrum however, where large deviations are seen regardless of the precision settings for models with small values of $\Omega_c$. Larger values of $\Omega_c$ produce only slightly worse precision than at $z=0$ however.
+Fig.~\ref{fig:power_paramspace_z2} shows the same comparison, but now for $z=2$. The precision on the linear matter power spectrum is almost an order of magnitude better than at $z=0$ for the standard precision settings, and about the same as at $z=0$ for the high precision settings. The picture is slightly different for the Halofit power spectrum however, where moderate deviations are seen for the standard precision settings in models with small values of $\Omega_c$. This appears to be caused by a setting inside {\tt CLASS} that switches off Halofit corrections when a redshift- and cosmology-dependent threshold is reached, and can be mitigated by increasing the value of the {\tt P\_k\_max\_1/Mpc} parameter (which is already set to a relatively high value of $50$ in \ccl by default). Larger values of $\Omega_c$ produce only slightly worse precision than at $z=0$, and the high precision Halofit results are also relatively unchanged.
 
-These results show that the {\tt CLASS}-based \ccl power spectrum calculations are robust across a broad range of cosmological parameters, especially for the linear power spectrum, but that some caution must be taken when using the Halofit power spectrum in MCMC studies for example. Since other, more realistic, non-linear power spectrum methods are available (e.g. see Sect.~\ref{sec:cosmicemu}), and tend to have larger theoretical errors than the deviations shown in Fig.~\ref{fig:power_paramspace_z2}, this is unlikely to be a serious concern for most users however.
+These results show that the {\tt CLASS}-based \ccl power spectrum calculations are robust across a broad range of cosmological parameters, especially for the linear power spectrum, but that some caution must be taken when using the Halofit power spectrum in MCMC studies that involve higher redshifts for example.\footnote{Note that the {\tt K\_MAX\_SPLINE} setting in the {\tt ccl\_params.ini} file can be used to change the value of {\tt P\_k\_max\_1/Mpc} used for the Halofit calculation, so this issue can be avoided at the expense of an increase in runtime.}
 
 
 \subsubsection{Validation of the Cosmic Emulator implementation}
