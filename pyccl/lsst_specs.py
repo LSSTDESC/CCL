@@ -84,7 +84,7 @@ def sigmaz_clustering(z):
     """Photo-z dispersion, sigma(z), for the clustering sample
     at `a`.
 
-    Note: assumes Gaussian uncertainties.
+    .. note:: assumes Gaussian uncertainties.
 
     Args:
         cosmo (:obj:`ccl.cosmology`): Cosmological parameters.
@@ -101,7 +101,7 @@ def sigmaz_clustering(z):
 def sigmaz_sources(z):
     """Photo-z dispersion, sigma(z), for the lensing sample.
 
-    Note: assumes Gaussian uncertainties.
+    .. note:: assumes Gaussian uncertainties.
 
     Args:
         cosmo (:obj:`ccl.cosmology`): Cosmological parameters.

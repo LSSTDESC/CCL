@@ -100,10 +100,7 @@ error_types = {
 class Parameters(object):
     """A set of cosmological parameters.
 
-    Note:
-        Although some arguments default to `None`, they will raise a 
-        ValueError inside this function if not specified, so they are not 
-        optional.
+    .. note:: Although some arguments default to `None`, they will raise a ValueError inside this function if not specified, so they are not optional.
 
     Args:
         Omega_c (float): Cold dark matter density fraction.
@@ -142,10 +139,7 @@ class Parameters(object):
         """
         Creates a set of cosmological parameters.
 
-        Note:
-            Although some arguments default to `None`, they will raise a 
-            ValueError inside this function if not specified, so they are not 
-            optional.
+        .. note:: Although some arguments default to `None`, they will raise a ValueError inside this function if not specified, so they are not optional.
         
         Args:
             Omega_c (float): Cold dark matter density fraction.
@@ -599,7 +593,7 @@ class Cosmology(object):
     def status(self):
         """Get error status of the ccl_cosmology object.
 
-        Note: error status is all currently under development.
+        .. note:: error status is all currently under development.
 
         Returns:
             :obj:`str` containing the status message.

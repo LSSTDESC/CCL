@@ -47,7 +47,7 @@ def growth_rate(cosmo, a):
         a (float or array_like): Scale factor(s), normalized to 1 today.
 
     Returns:
-        float or array_like: Growth rate; .
+        float or array_like: Growth rate.
 
     """
     return _vectorize_fn(lib.growth_rate, 

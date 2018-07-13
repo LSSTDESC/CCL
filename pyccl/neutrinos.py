@@ -13,7 +13,7 @@ neutrino_mass_splits = {
 def Omeganuh2(a, mnu, TCMB=2.725):
     """Omeganuh2
 
-    Note: for all practical purposes, Neff is simply N_nu_mass.
+    .. note:: for all practical purposes, Neff is simply N_nu_mass.
 
     Args:
         a (float): Scale factor, normalized to 1 today.

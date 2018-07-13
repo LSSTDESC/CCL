@@ -3,8 +3,6 @@ from pyccl.pyutils import _vectorize_fn, _vectorize_fn2, _vectorize_fn4
 
 def massfunc(cosmo, halo_mass, a, odelta=200):
     """Tinker et al. (2010) halo mass function.
-
-    TODO: implement other mass functions.
     
     Args:
         cosmo (:obj:`ccl.cosmology`): Cosmological parameters.
@@ -22,7 +20,7 @@ def massfunc(cosmo, halo_mass, a, odelta=200):
 def massfunc_m2r(cosmo, halo_mass):
     """Converts smoothing halo mass into smoothing halo radius.
 
-    Note: this is R=(3M/(4*pi*rho_m))^(1/3), where rho_m is the mean matter density.
+    .. note:: this is R=(3M/(4*pi*rho_m))^(1/3), where rho_m is the mean matter density.
 
     Args:
         cosmo (:obj:`ccl.cosmology`): Cosmological parameters.
@@ -51,9 +49,7 @@ def sigmaM(cosmo, halo_mass, a):
                           lib.sigmaM_vec, cosmo, halo_mass, a)
 
 def halo_bias(cosmo, halo_mass, a, odelta=200):
-    """Tinker et al. (2010) halo bias.
-
-    TODO: implement other halo bias models.
+    """Tinker et al. (2010) halo bias
 
     Args:
         cosmo (:obj:`ccl.cosmology`): Cosmological parameters.

@@ -42,7 +42,7 @@ NoneArr = np.array([])
 class ClTracer(object):
     """ClTracer is a general class used to wrap the cl_tracer found in CCL. A ClTracer is a data structure that contains all information describing the transfer functon of one tracer of the matter distribution. If an object has an angular power spectrum then it can be described by a tracer.
 
-        Note: unless otherwise stated, defaults are None.
+        .. note:: unless otherwise stated, defaults are None.
 
         Args:
             cosmo (:obj:`Cosmology`): Cosmology object.
