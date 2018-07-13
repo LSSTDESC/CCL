@@ -256,7 +256,7 @@ Spin-$s$ quantities can be decomposed into their harmonic coefficients $\,_sa_{\
   \,_sa_{\ell m}=\int d\nv\,a(\nv)\,_sY^*_{\ell m}(\nv),\hspace{12pt}
   a(\nv)=\sum_{\ell m}\,_sa_{\ell m}\,Y_{\ell m}(\nv)
 \end{equation}
-where $_sY_{\ell m}$ are the spin-weighed spherical harmonics. The harmonic coefficients can then be associated with parity-even and parity-odd components ($E$-modes and $B$-modes respectively) as\footnote{We note that for spin-$0$ quantities the minus sign preceding these equations is usually omitted.}
+where $_sY_{\ell m}$ are the spin-weighed spherical harmonics. The harmonic coefficients can then be associated with parity-even and parity-odd components ($E$-modes and $B$-modes respectively) as\footnote{We note that for spin-$0$ quantities the minus sign preceding these equations is usually omitted, and we do so in what follows. Also, all scalar fields discussed here are real-valued, and therefore have zero $B$-modes.}
 \begin{align}\nonumber
    E_{\ell m}&=-\frac{1}{2}\left[\,_{s}a_{\ell m}+(-1)^s\,_{-s}a_{\ell m}\right]\\
   iB_{\ell m}&=-\frac{1}{2}\left[\,_{s}a_{\ell m}-(-1)^s\,_{-s}a_{\ell m}\right]
@@ -270,7 +270,7 @@ The angular power spectrum $C^{ab}_\ell$ between two tracers $a$ and $b$ is defi
 \begin{equation}
   \langle a_{\ell m}b^*_{\ell m}\rangle\equiv C^{ab}\delta_{\ell\ell'}\delta_{mm'},
 \end{equation}
-where $a_{\ell m}$ and $b_{\ell m}$ can be either the $E$-mode or $B$-mode component of the corresponding field. In what follows we will only deal with fields for which the $B$-modes are identically $0$, and therefore all equations refer to the $E$-$E$ power spectrum. In general, this power spectrum can be written as:
+where $a_{\ell m}$ and $b_{\ell m}$ can be either the $E$-mode or $B$-mode component of the corresponding field. In what follows we will only deal with fields for which the $B$-modes are exactly or nearly $0$, and which we will take to be identically $0$. Therefore all equations refer to the $E$-$E$ power spectrum. In general, this power spectrum can be written as:
 \begin{equation}
   C^{ab}_\ell=4\pi\int_0^\infty \frac{dk}{k}\,\mathcal{P}_\Phi(k)\Delta^a_\ell(k)\Delta^b_\ell(k),
   \label{eq:cls}
@@ -298,7 +298,7 @@ where $\mathcal{P}_\Phi(k)$ is the dimensionless power spectrum of the primordia
         \begin{equation}
           W^{\rm M}(z)\equiv\int_z^\infty dz'\,p_z(z')\frac{2-5s(z')}{2}\frac{r(\chi'-\chi)}{r(\chi')r(\chi)}.
         \end{equation}
-        Here, $s(z)$ is the magnification bias, given as the logarithmic derivative of the number of sources with magnitude limit, and $r(\chi)$ is the angular comoving distance (see Eq. \ref{eq:angdist}).
+        Here, $s(z)$ is the logarithmic derivative of the number of sources with magnitude limit, and $r(\chi)$ is the angular comoving distance (see Eq. \ref{eq:angdist}).
 \end{itemize}
 Note that \ccl does not currently compute relativistic corrections to number counts \citep{2011PhRvD..84d3516C,2011PhRvD..84f3505B}. Although these will be included in the future, their contribution to the total fluctuation is largely subdominant (see \citealt{GReffects} and the two references above), and therefore it is safe to ignore them for our purposes.
 
@@ -359,11 +359,9 @@ which reduces to the $EE$ power spectrum when all $B$-modes are 0.
 
 Note that, as scalar quantities are real, any correlation involving at least one spin-$0$ field only has one non-unique correlation function. In these cases, the Wigner-$d$ matrices can also be expressed in terms of associated Legendre polynomials $P^m_\ell$, and therefore Eq. \ref{eq:cl_xi} becomes
 \begin{align}
-  \xi^{ab}(\theta)&=\sum_\ell\frac{2\ell+1}{4\pi}\,C^{ab}_\ell\sqrt{\frac{(\ell-s_a)!}{(\ell+s_a)!}}P^{s_a}_\ell(\cos\theta)\\
-                  &=\sum_\ell\frac{2\ell+1}{4\pi}\,C^{ab}_\ell P_\ell(\cos\theta),
-\label{eq:xigg}
+  \xi^{ab}(\theta)&=\sum_\ell\frac{2\ell+1}{4\pi}\,C^{ab}_\ell\sqrt{\frac{(\ell-s_a)!}{(\ell+s_a)!}}P^{s_a}_\ell(\cos\theta)\label{eq:xigg},
 \end{align}
-where the last equality holds for $s_a=0$, and both expressions assume $s_b=0$.
+where we have assumed $s_b=0$.
 
 In the flat-sky approximation we can take the small-scale limit $\ell\gg s_1,s_2$ and approximate 
 \begin{equation}
@@ -678,13 +676,13 @@ As in the general case the Limber approximation is valid at high $\ell$ values, 
 %-------------------------------------------------------------------------------
 \subsection{Correlation functions}
 
-The exact Equations (\ref{eq:xi00full}, \ref{eq:xi02full}, \ref{eq:xi22full}) relating the angular correlation functions and power spectra involve carrying out $N_\theta\times\ell_{\rm max}$ operations, where $\ell_{\rm max}\sim O(10^{4-5})$ is the maximum multipole needed to achieve convergence and $N_\theta$ is the number of angular scales $\theta$ at which the angular correlation function needs to be computed. Thus, evaluating these expressions directly can become prohibitively slow and should be avoided except in regimes where other approximations are not valid. In particular \ccl only supports the brute-force evaluation of these equations for correlations involving at least one spin-0 field. The default method in \ccl is to use the flat-sky approximation and evaluate the Hankel transforms (Eqs. \ref{eq:xi00flat}, \ref{eq:xi02flat}, \ref{eq:xi22flat}).
+Computing the angular correlation functions essentially involves peforming a linear transformation on the power spectra to go from harmonic to real space. The exact Equations (\ref{eq:xi00full}, \ref{eq:xi02full}, \ref{eq:xi22full}) relating both quantities involve carrying out $N_\theta\times\ell_{\rm max}$ operations, where $\ell_{\rm max}\sim O(10^{4-5})$ is the maximum multipole needed to achieve convergence and $N_\theta$ is the number of angular scales $\theta$ at which the angular correlation function needs to be computed. Thus, evaluating these expressions directly can become prohibitively slow and should be avoided except in regimes where other approximations are not valid. In particular \ccl only supports the brute-force evaluation of these equations for correlations involving at least one spin-0 field. The default method in \ccl is to use the flat-sky approximation and evaluate the Hankel transforms (Eqs. \ref{eq:xi00flat}, \ref{eq:xi02flat}, \ref{eq:xi22flat}).
 
 \ccl provides two methods to compute Hankel transforms:
 
-{\bf Brute-force integration.} \ccl allows users to compute Hankel transforms by brute-force integration over the Bessel functions. The oscillating nature of these functions makes this method slow and not appropriate for likelihood-sampling. The preferred method to compute correlation functions is through the use of {\tt FFTlog} (see below), and we support the brute-force method primarily for testing and validation.
+{\bf Brute-force integration.} \ccl allows users to compute Hankel transforms by brute-force integration over the Bessel functions using an adaptive Gauss-Kronrod algorithm. The oscillating nature of these functions makes this method slow and not appropriate for likelihood-sampling. The preferred method to compute correlation functions is through the use of {\tt FFTlog} (see below), and we support the brute-force method primarily for testing and validation.
 
-{\bf FFTlog.} The public code {\tt FFTlog}\footnote{\url{http://casa.colorado.edu/~ajsh/FFTLog/}} is able to compute fast Hankel transforms through the assumption that the kernels of these transforms are periodic functions in logarithmic space. The Hankel transform can then be solved using Fast Fourier Transforms at a much lower computational expense than brute-force integration \citep{Hamilton2000,Talman2009}. \ccl incorporates a version of the {\tt FFTlog} method with only minor modifications from the original. The only potential drawback of this method is the need to sample the kernels (i.e. the $C_\ell$) on very small scales to ensure the convergence of the method. To do this, \ccl extrapolates the power spectrum as a power law ($C_\ell\propto\ell^\beta$) \todo{How is $\beta$ estimated?}. We have verified that this method agrees with the brute-force integration  well within cosmic-variance uncertainties.
+{\bf FFTlog.} The public code {\tt FFTlog}\footnote{\url{http://casa.colorado.edu/~ajsh/FFTLog/}} is able to compute fast Hankel transforms through the assumption that the kernels of these transforms are periodic functions in logarithmic space. The Hankel transform can then be solved using Fast Fourier Transforms at a much lower computational expense than brute-force integration \citep{Hamilton2000,Talman2009}. \ccl incorporates a version of the {\tt FFTlog} method with only minor modifications from the original. The only potential drawback of this method is the need to sample the kernels (i.e. the $C_\ell$) on very small scales to ensure the convergence of the method. To do this, \ccl extrapolates the power spectrum as a power law, $C_\ell\propto\ell^\beta$, with a tilt $\beta$ estimated from the logarithmic slope of the two last values of $C_\ell$ provided as input. We have verified that this method agrees with the brute-force integration  well within cosmic-variance uncertainties.
 
 We should also note that other approaches relating the correlation functions directly with the 3D matter power spectrum (e.g. \citealt{2017ApJ...845...28C}) could be useful in accelerating this computation, and we will explore these avenues in the future.
 
