@@ -742,14 +742,12 @@ All plots presented in this section can be reproduced by means of a {\tt python}
 
 \subsection{Background quantities \& growth of perturbations}
 
-Comoving radial distances, the growth factor and distance moduli were compared against independently produced benchmarks at a set of low, $z = 0,1,2,3,4,5$, and high redshifts, $10\leq z \leq 10^3$. These comparisons were performed for the cosmologies listed in Table \ref{tab:cosmologies}. The accuracy metric was the fined as the fractional difference between the prediction made by \ccl and by an independent implementation (labeled $i$), i.e., for the comoving radial distance,
+Comoving radial distances, the growth factor and distance moduli were compared against independently produced benchmarks for redshifts between $z = 0.01$ and $z = 1000$. These comparisons were performed for the cosmologies listed in Table \ref{tab:cosmologies} and for the cosmologies with massive neutrinos listed in Table \ref{tab:cosmologies_nu}. (Notice that the growth function with massive neutrinos is not supported by \ccl because it is scale-dependent and therefore ill defined in our framework.) The accuracy metric was defined as the fractional difference between the prediction made by \ccl and by an independent implementation (labeled $i$), i.e., for the growth factor,
 \begin{equation}
   \mathcal{A} \equiv \frac{|D_{\tt CCL}(z)-D_{i}(z)|}{D_i(z)}
 \end{equation}
-and analogously defined for the growth factor and distance moduli.
-The target level of accuracy was $10^{-4}$ and this was achieved or surpassed for all the background quantities. Figure \ref{fig:distancegrow} summarizes our results for cosmologies without massive neutrinos. The left panels show the distance accuracy achieved for different cosmological models (curves of different thickness) as a function of redshift, which is always better than $10^{-6}$. Similarly, the right panels show the growth factor accuracy, which is $<10^{-5}$. 
-
-Analogous comparisons of the comoving radial distances were made to independently produced benchmarks at low and high redshifts for cosmologies containing massive neutrinos. (Notice that the growth function with massive neutrinos is not supported by \ccl because it is scale-dependent and therefore ill defined in our framework.) These comparisons are displayed in Figure \ref{fig:distancegrow_nu}. The cosmological models used in tests of background quantities for cosmologies with massive neutrinos are given in Table \ref{tab:cosmologies_nu}. We calculate $N_{\rm eff}$ according to equation~(\ref{Nnurel}), based on the number of massless and massive neutrino species.
+and analogously defined for the comoving radial distance and distance moduli.
+The target level of accuracy was $10^{-4}$ and this was achieved or surpassed for all the background quantities. Figure \ref{fig:distancegrow} summarizes our results. The left panel shows the distance accuracy achieved for different cosmological models (curves of different thickness) as a function of redshift, which is always better than $10^{-6}$. Similarly, the right panel shows the growth factor accuracy, which is $<10^{-5}$ everywhere.
 
 \input{table_testcosmo}
 
@@ -757,10 +755,7 @@ Analogous comparisons of the comoving radial distances were made to independentl
   \centering
   \includegraphics[width=0.45\textwidth]{distances.eps}
   \includegraphics[width=0.45\textwidth]{growth.eps}
-
-  \includegraphics[width=0.45\textwidth]{distances_hiz.eps}
-  \includegraphics[width=0.45\textwidth]{growth_hiz.eps}
-  \caption{Accuracy achieved by \ccl in the prediction of distances (left panels) and growth factor (right panels) for models CCL1-5 documented in Table \ref{tab:cosmologies}. Different models correspond to different thickness curves. The top panels represent the accuracy checks at low redshift, while the bottom panels demonstrate accuracy up to high redshift.}
+  \caption{Accuracy achieved by \ccl in the prediction of background quantities. Left panel: fractional difference between the predictions of the comoving radial distance by \ccl and the benchmark for models CCL1-5 documented in Table \ref{tab:cosmologies} (solid lines) and models CCL7-11 with massive neutrinos documented in Table \ref{tab:cosmologies_nu} (dashed lines). Right panel: fractional difference between the predictions of the growth factor by \ccl and the benchmark for models CCL1-5. The growth factor in cosmologies with massive neutrinos is scale-dependent and not supported by \ccl.}
   \label{fig:distancegrow}
 \end{figure*}
 
@@ -780,17 +775,10 @@ Analogous comparisons of the comoving radial distances were made to independentl
     CCL11 & closed $w$CDM, $m_\nu$ & 0.3 & 0.05 & 0.75 & 0.7 & 0.8 & 0.96 & -0.9 & 0.1 & 3.026 &\{0.03, 0.02, 0\} \\
     \hline
   \end{tabular}
-  \caption{Cosmological models with massive neutrinos used in testing \ccl against independently produced benchmarks}
+  \caption{Cosmological models with massive neutrinos used in testing \ccl against independently produced benchmarks. We calculate $N_{\rm eff}$ according to equation~(\ref{Nnurel}), based on the number of massless and massive neutrino species.
+}
   \label{tab:cosmologies_nu}
 \end{table*}
-
-\begin{figure*}
-  \centering
-  \includegraphics[width=0.45\textwidth]{distances_mnu_low_z_class}
-  \includegraphics[width=0.45\textwidth]{distances_mnu_high_z_class}
-  \caption{Accuracy achieved by \ccl in the prediction of distances for models CCL7-11 with massive neutrinos, documented in Table \ref{tab:cosmologies_nu}. Different models correspond to different thickness curves. The left panel represent the accuracy checks at low redshift, while the right panel demonstrates accuracy up to high redshift.}
-  \label{fig:distancegrow_nu}
-\end{figure*}
 
 \subsection{Matter power spectra}
 
