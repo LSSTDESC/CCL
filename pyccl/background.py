@@ -1,4 +1,3 @@
-
 from pyccl import ccllib as lib
 from pyccl.pyutils import _vectorize_fn, _vectorize_fn2, _vectorize_fn3, _vectorize_fn4
 
@@ -20,7 +19,7 @@ def growth_factor(cosmo, a):
         a (float or array_like): Scale factor(s), normalized to 1 today.
 
     Returns:
-        growth_factor (float or array_like): Growth factor.
+        float or array_like: Growth factor.
 
     """
     return _vectorize_fn(lib.growth_factor, 
@@ -34,7 +33,7 @@ def growth_factor_unnorm(cosmo, a):
         a (float or array_like): Scale factor(s), normalized to 1 today.
 
     Returns:
-        growth_factor_unnorm (float or array_like): Unnormalized growth factor, normalized to the scale factor at early times.
+        float or array_like: Unnormalized growth factor, normalized to the scale factor at early times.
 
     """
     return _vectorize_fn(lib.growth_factor_unnorm, 
@@ -48,7 +47,7 @@ def growth_rate(cosmo, a):
         a (float or array_like): Scale factor(s), normalized to 1 today.
 
     Returns:
-        growth_rate (float or array_like): Growth rate; .
+        float or array_like: Growth rate.
 
     """
     return _vectorize_fn(lib.growth_rate, 
@@ -62,7 +61,7 @@ def comoving_radial_distance(cosmo, a):
         a (float or array_like): Scale factor(s), normalized to 1 today.
 
     Returns:
-        comoving_radial_distance (float or array_like): Comoving radial distance; Mpc.
+        float or array_like: Comoving radial distance; Mpc.
 
     """
     return _vectorize_fn(lib.comoving_radial_distance, 
@@ -70,15 +69,15 @@ def comoving_radial_distance(cosmo, a):
 
 def comoving_angular_distance(cosmo, a):
     """Comoving angular distance.
-    NOTE this quantity is otherwise known as the transverse comoving distance, and is NOT angular diameter
-    distance or angular separation
+
+    .. note:: this quantity is otherwise known as the transverse comoving distance, and is NOT angular diameter distance or angular separation
     
     Args:
         cosmo (:obj:`ccl.cosmology`): Cosmological parameters.
         a (float or array_like): Scale factor(s), normalized to 1 today.
 
     Returns:
-        comoving_angular_distance (float or array_like): Comoving angular distance; Mpc.
+        float or array_like: Comoving angular distance; Mpc.
 
     """
     return _vectorize_fn(lib.comoving_angular_distance, 
@@ -92,7 +91,7 @@ def h_over_h0(cosmo, a):
         a (float or array_like): Scale factor(s), normalized to 1 today.
 
     Returns:
-        h_over_h0 (float or array_like): H(a)/H0.
+        float or array_like: H(a)/H0.
 
     """
     return _vectorize_fn(lib.h_over_h0, 
@@ -106,7 +105,7 @@ def luminosity_distance(cosmo, a):
         a (float or array_like): Scale factor(s), normalized to 1 today.
 
     Returns:
-        luminosity_distance (float or array_like): Luminosity distance; Mpc.
+        float or array_like: Luminosity distance; Mpc.
 
     """
     return _vectorize_fn(lib.luminosity_distance, 
@@ -120,7 +119,8 @@ def distance_modulus(cosmo, a):
         a (float or array_like): Scale factor(s), normalized to 1 today.
 
     Returns:
-        distance_modulus (float or array_like): Distance modulus at a.  
+        float or array_like: Distance modulus at a.
+
     """
     return _vectorize_fn(lib.distance_modulus,
                          lib.distance_modulus_vec, cosmo, a)
@@ -133,7 +133,7 @@ def scale_factor_of_chi(cosmo, chi):
         chi (float or array_like): Comoving distance(s); Mpc.
 
     Returns:
-        scale_factor_of_chi (float or array_like): Scale factor(s), normalized to 1 today.
+        float or array_like: Scale factor(s), normalized to 1 today.
 
     """
     return _vectorize_fn(lib.scale_factor_of_chi, 
@@ -149,8 +149,7 @@ def omega_x(cosmo, a, label):
                         'radiation', 'curvature', 'neutrinos_rel', and 'neutrinos_massive'
 
     Returns:
-        omega_x (float or array_like): Density fraction of a given species
-        at a scale factor.
+        float or array_like: Density fraction of a given species at a scale factor.
 
     """
     if label not in species_types.keys() :
