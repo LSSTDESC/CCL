@@ -1141,14 +1141,14 @@ static double ccl_angular_cl_native(ccl_cosmology *cosmo,CCL_ClWorkspace *cw,int
 
   // Test if a round-off error occured in the evaluation of the integral
   // If so, try another integration function, more robust but potentially slower
-  if(gslstatus == GSL_EROUND){
+  if(gslstatus == GSL_EROUND) {
     ccl_raise_gsl_warning(gslstatus, "ccl_cls.c: ccl_angular_cl_native(): Default GSL integration failure, attempting backup method.");
     gsl_integration_cquad_workspace *w_cquad= gsl_integration_cquad_workspace_alloc (ccl_gsl->N_ITERATION);
     size_t nevals=0;
     gslstatus=gsl_integration_cquad(&F, lkmin, lkmax, 0,
-			                              ccl_gsl->INTEGRATION_LIMBER_EPSREL,
-																		w_cquad, &result, &eresult, &nevals);
-    gsl_integration_cquad_workspace_free (w_cquad);
+				    ccl_gsl->INTEGRATION_LIMBER_EPSREL,
+				    w_cquad, &result, &eresult, &nevals);
+    gsl_integration_cquad_workspace_free(w_cquad);
   }
   if(gslstatus!=GSL_SUCCESS || *ipar.status) {
     ccl_raise_gsl_warning(gslstatus, "ccl_cls.c: ccl_angular_cl_native():");
