@@ -33,10 +33,9 @@ install:
 - cmake --version
 - python --version
 script:
-- mkdir build && sudo make -Cbuild install
 - python setup.py build
-- rm -rf build
 - nosetests tests/run_tests.py --all --debug --detailed-errors --verbose --process-restartworker --with-coverage --cover-package=pyccl
+- sudo make -Cbuild install
 - check_ccl
 after_success:
 - coveralls
