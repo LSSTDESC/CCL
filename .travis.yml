@@ -33,10 +33,12 @@ install:
 - cmake --version
 - python --version
 script:
-- python setup.py build
-- nosetests tests/run_tests.py --all --debug --detailed-errors --verbose --process-restartworker --with-coverage --cover-package=pyccl
+- make -Cbuild
 - sudo make -Cbuild install
 - check_ccl
+- python setup.py build
+- nosetests tests/run_tests.py --all --debug --detailed-errors --verbose --process-restartworker --with-coverage --cover-package=pyccl
+
 after_success:
 - coveralls
 deploy:
