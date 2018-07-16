@@ -22,8 +22,9 @@ project(ccl VERSION 0.2.1)
 		 tests/ccl_test_power_nu.c tests/ccl_test_nonlimber.c tests/ccl_test_angpow.c)
 
 
-    # Defines list of extra distribution files to be installed on the system
+    # Defines list of extra distribution files and directories to be installed on the system
     set(EXTRA_DIST include/ccl_params.ini README.md LICENSE LICENSE_COSMICEMU)
+    set(EXTRA_DIST_DIRS)
 
     # Uses system libraries or downloads and build if necessary
     include(BuildFFTW)
@@ -111,8 +112,9 @@ project(ccl VERSION 0.2.1)
     install(DIRECTORY include/ DESTINATION include
             FILES_MATCHING PATTERN "*.h")
     install(FILES ${EXTRA_DIST} DESTINATION share/ccl)
+    install(DIRECTORY ${EXTRA_DIST_DIRS} DESTINATION share/ccl)
     install(FILES ${CMAKE_CURRENT_BINARY_DIR}/ccl.pc DESTINATION lib/pkgconfig)
-
+    
     # Adds uninstall target
     if(NOT TARGET uninstall)
       configure_file(
