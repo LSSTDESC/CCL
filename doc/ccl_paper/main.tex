@@ -362,9 +362,9 @@ Note that, as scalar quantities are real, any correlation involving at least one
 \end{align}
 where we have assumed $s_b=0$.
 
-In the flat-sky approximation we can take the small-scale limit $\ell\gg s_1,s_2$ and approximate 
+In the flat-sky approximation we can take the small-scale limit $\ell\gg s_a,s_b$ and approximate 
 \begin{equation}
-  d_{s_1s_2}^\ell(\theta)\longrightarrow J_{s_1-s_2}(\ell\theta),
+  d_{s_as_b}^\ell(\theta)\longrightarrow J_{s_a-s_b}(\ell\theta),
 \end{equation}
 where $J_\alpha(x)$ is the Bessel function of order $\alpha$. Eq. \ref{eq:cl_xi} then becomes\footnote{See the weak lensing review by \citet{Bartelmann01}, page 44 and \citet{Joachimi10}.}
 \begin{equation}
@@ -644,7 +644,7 @@ The Limber approximation works best for wide radial kernels and high $\ell$.
 \subsubsection{Beyond Limber: \texttt{Angpow}}
 \label{sec:angpow}
 
-\ccl incorporates natively a brute-force integration method to compute the $C^{ab}_\ell$ angular power spectra as described above without the Limber approximation. The algorithm performs first the integrals over $z$ for both tracers, and ends with the $k$ integral. This computation is much slower than using the Limber approximation, but results in precise angular power spectra at low $\ell$ and correct cross-correlations between tracers. The integration of these routines has been tested against the \texttt{CLASS} code and recovers the same angular power spectra when precision parameters are set to high values.
+\ccl incorporates natively a brute-force integration method to compute the $C^{ab}_\ell$ angular power spectra as described above without the Limber approximation. The algorithm performs first the integrals over $z$ for both tracers, and ends with the $k$ integral. This computation is much slower than using the Limber approximation, but results in precise angular power spectra at low $\ell$ and correct cross-correlations between tracers. The integration of these routines has been tested against the \texttt{CLASS} code and recovers the same angular power spectra to less than 1\% at low multipoles ($\ell<100$) when precision parameters are set to high values.
 
 However, the computation of the $C^{ab}_\ell$ without the Limber approximation is extremely costly in terms of computing time using this method, if one wants to explore extensively a full cosmological parameter space. \ccl provides fast non-Limber predictions by calling the \texttt{Angpow} software \citep{2017A&A...602A..72C}. 
 
