@@ -37,4 +37,5 @@ if [[ $TRAVIS_OS_NAME == 'osx' ]]; then
 else
     # Install some custom requirements on Linux
     echo "No specific requirements on linux"
+    pip install nose coverage coveralls
 fi

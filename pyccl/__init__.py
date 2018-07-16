@@ -1,7 +1,12 @@
+"""The pyccl package contains all of the submodules that are implemented in individual files in CCL.
+"""
+
 # Sets the environment variable for default config path if it does not exist yet
 from os import environ, path
 if environ.get("CCL_PARAM_FILE") is None:
     environ["CCL_PARAM_FILE"] = path.dirname(path.abspath(__file__)) + '/ccl_params.ini'
+if environ.get("CLASS_PARAM_DIR") is None:
+    environ["CLASS_PARAM_DIR"] = path.dirname(path.abspath(__file__))
 
 from pyccl import ccllib as lib
 

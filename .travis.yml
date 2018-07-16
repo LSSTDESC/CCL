@@ -35,7 +35,7 @@ install:
 script:
 - python setup.py build
 - nosetests tests/run_tests.py --all --debug --detailed-errors --verbose --process-restartworker --with-coverage --cover-package=pyccl
-- sudo make -Cbuild install
+- make -Cbuild && sudo make -Cbuild install
 - check_ccl
 after_success:
 - coveralls

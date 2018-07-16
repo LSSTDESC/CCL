@@ -1,3 +1,11 @@
+# If CLASS was installed via our script, don't include it.
+class
+
+# Ignore RTD documentation special files
+readthedocs/_build
+readthedocs/*~
+readthedocs/source/*~
+
 # Ignore autoconf build files.
 Makefile
 config.h
