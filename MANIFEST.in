@@ -3,7 +3,9 @@ recursive-include include *
 recursive-include src *
 recursive-include pyccl *.i CMakeLists.txt
 recursive-include examples *.c *.cc CMakeLists.txt
+recursive-exclude examples *.ipynb
 recursive-include tests *.c
+recursive-exclude tests *.py benchmark/*
 include CMakeLists.txt
 include pyccl/CMakeLists.txt
 include LICENSE
@@ -12,5 +14,4 @@ include README.md
 prune doc
 prune readthedocs
 prune .travis
-prune tests
 exclude .*
