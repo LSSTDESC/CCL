@@ -5,7 +5,7 @@ recursive-include pyccl *.i CMakeLists.txt
 recursive-include examples *.c *.cc CMakeLists.txt
 recursive-exclude examples *.ipynb
 recursive-include tests *.c
-recursive-exclude tests *.py benchmark/*
+recursive-exclude tests *.py benchmark *.eps
 include CMakeLists.txt
 include pyccl/CMakeLists.txt
 include LICENSE
