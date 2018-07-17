@@ -201,20 +201,14 @@ static double massfunc_f(ccl_cosmology *cosmo, double halomass, double a, double
   // Note that Sheth & Tormen use nu=(dc/sigma)^2 whereas we use nu=dc/sigma
   case ccl_shethtormen:
 
-    //TODO: Mead: I think this is not correct. I think ST was calibrated using virial density defined haloes
-    if (odelta!=200){      
-      *status = CCL_ERROR_HMF_INTERP;
-      strcpy(cosmo->status_message, "ccl_massfunc.c: massfunc_f(): Sheth-Tormen 1999 only supported for Delta = 200\n");
-      return NAN;
-    }
+    //TODO: Mead: Somehow enforce that this should only work with a virial-density Delta_v
 
     //ST mass function fitting parameters
     fit_A = 0.21616;
     fit_p = 0.3;
     fit_a = 0.707;
 
-    //nu = delta_c_Tinker / sigma;
-    //TODO: Mead, Sheth & Tormen used a cosmology-dependent delta_c in their fits and this should be used consistently
+    // nu = delta_c(z) / sigma(M)
     nu=ccl_nu(cosmo, halomass, a, status);
  
     return nu*fit_A*(1.+pow(fit_a*pow(nu,2),-fit_p))*exp(-fit_a*pow(nu,2)/2.);
@@ -324,6 +318,16 @@ static double massfunc_f(ccl_cosmology *cosmo, double halomass, double a, double
     return NAN;
   }
 }
+
+// Cosmology dependence of the critical linear density according to the spherical-collapse model
+// Fitting function from Nakamura & Suto (1997; arXiv:astro-ph/9710107)
+static double dc_NakamuraSuto(ccl_cosmology *cosmo, double a, int *status){
+  double Om_m = ccl_omega_x(cosmo, a, ccl_species_m_label, status);
+  double dc0 = (3./20.)*pow(12.*M_PI,2./3.);
+  double dc = dc0*(1.+0.012299*log10(Om_m));
+  return dc;
+}
+
 static double ccl_halo_b1(ccl_cosmology *cosmo, double halomass, double a, double odelta, int * status)
 {
   double fit_A, fit_B, fit_C, fit_a, fit_b, fit_c, fit_p, overdensity_delta, y;
@@ -336,21 +340,14 @@ static double ccl_halo_b1(ccl_cosmology *cosmo, double halomass, double a, doubl
   // Note that Sheth & Tormen use nu=(dc/sigma)^2 whereas we use nu=dc/sigma
   case ccl_shethtormen:
 
-    //TODO: Mead: I think this is not correct. I think ST was calibrated using virial density defined haloes
-    if (odelta!=200){
-      *status = CCL_ERROR_HMF_INTERP;
-      strcpy(cosmo->status_message, "ccl_massfunc.c: massfunc_f(): Sheth-Tormen 1999 only supported for Delta = 200\n");
-      return NAN;
-    }
+    // TODO:Mead: Somehow enforce that this should only work with a virial-density Delta_v
 
-    //ST bias fitting parameters (which are the same as for the mass function)
+    // ST bias fitting parameters (which are the same as for the mass function)
     fit_p = 0.3;
     fit_a = 0.707;
 
-    //TODO: Mead, this is not correct as Sheth & Tormen used a cosmology-dependent delta_c in their calculations
-    //TODO: Mead, this should be consistent with the definition of nu
-    double delta_c = 1.686;
-
+    // Cosmology dependent delta_c and nu
+    double delta_c = dc_NakamuraSuto(cosmo, a, status);
     nu = ccl_nu(cosmo, halomass, a, status);
  
     return 1.+(fit_a*pow(nu,2)-1.+2.*fit_p/(1.+pow(fit_a*pow(nu,2),fit_p)))/delta_c;
@@ -538,9 +535,10 @@ TASK: takes halo mass and converts to halo radius
 double ccl_massfunc_m2r(ccl_cosmology * cosmo, double halomass, int * status)
 {
   double rho_m, smooth_radius;
-  
-  //TODO: make this neater
-  rho_m = RHO_CRITICAL*cosmo->params.Omega_m*cosmo->params.h*cosmo->params.h;
+
+  // Comoving matter density
+  //rho_m = RHO_CRITICAL*cosmo->params.Omega_m*cosmo->params.h*cosmo->params.h;
+  rho_m = ccl_rho_x(cosmo, 1., ccl_species_m_label, 1, status);
   
   smooth_radius = pow((3.0*halomass) / (4*M_PI*rho_m), (1.0/3.0));
   
@@ -590,11 +588,10 @@ double ccl_r_delta(ccl_cosmology *cosmo, double halomass, double a, double odelt
   return pow(halomass*3.0/(4.0*M_PI*rho_matter*odelta),1.0/3.0);
 }
 
-// The variable nu that is the peak threshold (nu = delta_c / sigma(R))
+// Peak threshold: nu(M,z) = delta_c(z) / sigma(M,z)
 // TODO: Alternatively - just use this in ccl_massfunc as necessary
 double ccl_nu(ccl_cosmology *cosmo, double halomass, double a, int * status) {
-  double delta_c=1.686;
-  return delta_c/ccl_sigmaM(cosmo, halomass, a, status);
+  return dc_NakamuraSuto(cosmo, a, status)/ccl_sigmaM(cosmo, halomass, a, status);
 }
 
 
