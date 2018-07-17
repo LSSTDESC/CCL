@@ -249,7 +249,6 @@ Creating a new release and deploying on PyPi
 
 When cutting a new release, the procedure is as follows:
   - Make sure any API changes are documented in `CHANGELOG.md`
-  - Update the version number in `setup.py`
   - Commit to master
   - Create a new release from the GitHub interface here: https://github.com/LSSTDESC/CCL/releases/new
 
