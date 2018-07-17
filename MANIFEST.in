@@ -11,7 +11,6 @@ include LICENSE_COSMICEMU
 include README.md
 prune doc
 prune readthedocs
-prune examples
 prune .travis
 prune tests
 exclude .*
