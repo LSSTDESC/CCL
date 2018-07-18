@@ -322,9 +322,9 @@ static double massfunc_f(ccl_cosmology *cosmo, double halomass, double a, double
 // Cosmology dependence of the critical linear density according to the spherical-collapse model
 // Fitting function from Nakamura & Suto (1997; arXiv:astro-ph/9710107)
 static double dc_NakamuraSuto(ccl_cosmology *cosmo, double a, int *status){
-  double Om_m = ccl_omega_x(cosmo, a, ccl_species_m_label, status);
+  double Om_mz = ccl_omega_x(cosmo, a, ccl_species_m_label, status);
   double dc0 = (3./20.)*pow(12.*M_PI,2./3.);
-  double dc = dc0*(1.+0.012299*log10(Om_m));
+  double dc = dc0*(1.+0.012299*log10(Om_mz));
   return dc;
 }
 

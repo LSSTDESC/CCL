@@ -12,10 +12,10 @@
 // Fitting function from Bryan & Norman (1998; arXiv:astro-ph/9710107)
 // Here, this is defined relative to the background matter density, not the critical density
 static double Dv_BryanNorman(ccl_cosmology *cosmo, double a, int *status){
-  double Om_m = ccl_omega_x(cosmo, a, ccl_species_m_label, status);
-  double x = 1.-Om_m;
+  double Om_mz = ccl_omega_x(cosmo, a, ccl_species_m_label, status);
+  double x = Om_mz-1.;
   double Dv0 = 18.*pow(M_PI,2);
-  double Dv = (Dv0+82.*x-39.*pow(x,2))/Om_m;
+  double Dv = (Dv0+82.*x-39.*pow(x,2))/Om_mz;
   return Dv;
 }
 
@@ -25,8 +25,7 @@ static double u_nfw_c(ccl_cosmology *cosmo, double c, double halomass, double k,
    
   double rv, rs, ks, Dv;
   double f1, f2, f3, fc;
-  //double Delta_v=200.; 
-  double Delta_v=Dv_BryanNorman(cosmo, a, status); // Virial density of haloes
+  double Delta_v = Dv_BryanNorman(cosmo, a, status); // Virial density of haloes
 
   // Special case to prevent numerical problems if k=0,
   // the result should be unity here because of the normalisation
@@ -76,9 +75,8 @@ double ccl_halo_concentration(ccl_cosmology *cosmo, double halomass, double a, i
   // 1 - Bhattaharya et al. (2011)
   // 2 - Full Bullock et al. (2001)
   // 3 - Virial Duffy et al. (2008)
-  // 4 - Constant concentration (for testing)
+  // 4 - Constant concentration (useful for testing)
   // 5 - Simple Bullock et al. (2001)
-  // 6 - Leonard
   int iconc=3;
   
   // Bhattacharya et al. 2011, Delta = 200 rho_{mean} (Table 2)
@@ -98,10 +96,10 @@ double ccl_halo_concentration(ccl_cosmology *cosmo, double halomass, double a, i
 
   // Duffy et al. (2008; 0804.2486; Table 1, second section: Delta = Virial)
   else if(iconc==3){
-    double Mpiv=2e12/cosmo->params.h; //Pivot mass in Msun (note in the paper units are Msun/h)
-    double A=7.85;
-    double B=-0.081;
-    double C=-0.71;
+    double Mpiv = 2e12/cosmo->params.h; // Pivot mass in Msun (note in the paper units are Msun/h)
+    double A = 7.85;
+    double B = -0.081;
+    double C = -0.71;
     return A*pow(halomass/Mpiv,B)*pow(a,-C); 
   }
 
@@ -113,11 +111,6 @@ double ccl_halo_concentration(ccl_cosmology *cosmo, double halomass, double a, i
   // Simple Bullock et al. (2001) relation
   else if(iconc==5){
     return 9.*pow(halomass/Mstar(),-0.13);
-  }
-
-  // Leonard
-  else if(iconc==6){
-    return 5.*pow(halomass/1e14,-0.1);
   }
 
   // Something went wrong
@@ -166,7 +159,6 @@ static double one_halo_integrand(double log10mass, void *params){
   
   Int_one_halo_Par *p=(Int_one_halo_Par *)params;;
   double halomass = pow(10,log10mass);
-  //double Delta_v = 200.; // Virial density of haloes
   double Delta_v = Dv_BryanNorman(p->cosmo, p->a, p->status); // Virial density of haloes
 
   // The squared normalised Fourier Transform of a halo profile (W(k->0 = 1)
@@ -220,7 +212,6 @@ static double two_halo_integrand(double log10mass, void *params){
   
   Int_two_halo_Par *p=(Int_two_halo_Par *)params;
   double halomass = pow(10,log10mass);
-  //double Delta_v=200.; // Virial density of haloes
   double Delta_v=Dv_BryanNorman(p->cosmo, p->a, p->status);
 
   // The window function appropriate for the matter power spectrum
