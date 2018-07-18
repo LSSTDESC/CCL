@@ -287,7 +287,7 @@ where $\mathcal{P}_\Phi(k)$ is the dimensionless power spectrum of the primordia
         \begin{equation}\label{eq:transfer_rsd}
           \Delta^{\rm RSD}_\ell(k)=\int dz\,\frac{(1+z) p_z(z)}{H(z)}T_\theta(k,z) j_\ell''(k\chi(z)),
         \end{equation}
-        where $T_\theta(k,z)$ is the transfer function of $\theta$, the divergence of the comoving velocity field,and $j''_\ell$ is the second order derivative of the spherical Bessel function, $j_\ell$. Note that the RSD contribution to number counts is computed by \ccl assuming a linear-theory relation between the matter overdensity and peculiar velocity fields, mediated by the scale-independent growth rate $f$ (Eq. \ref{eq':lingrowthf}). While this should not be problematic for wide photometric redshift bins and standard cosmological models, users should exercise care when interpreting results for narrow window functions or exotic cosmologies. Additionally, number count tracers with RSD in cosmologies with massive neutrinos are not currently supported.
+        where $T_\theta(k,z)$ is the transfer function of $\theta$, the divergence of the comoving velocity field,and $j''_\ell$ is the second order derivative of the spherical Bessel function, $j_\ell$. Note that the RSD contribution to number counts is computed by \ccl assuming a linear-theory relation between the matter overdensity and peculiar velocity fields, mediated by the scale-independent growth rate $f$ (Eq. \ref{eq:lingrowthf}). While this should not be problematic for wide photometric redshift bins and standard cosmological models, users should exercise care when interpreting results for narrow window functions or exotic cosmologies. Additionally, number count tracers with RSD in cosmologies with massive neutrinos are not currently supported.
   \item $\Delta^{\rm M}$ is the contribution from lensing magnification:
         \begin{align}\nonumber
           \Delta_\ell^{\rm M}(k)=-\ell(\ell+1)\int & \frac{dz}{H(z)} W^{\rm M}(z) \\\label{eq:deltaM}
@@ -487,15 +487,16 @@ Again, while high {\em numerical} accuracy has been verified, there is a remaini
 
 We note that many observables are tuned to utilizing a linear halo bias (that is to say the bias function is scale independent). While the current functionality of \ccl is to return the \citet{Tinker2010} model for halo bias, it is possible to generate alternative models of linear halo bias and pass these results to \ccl for analysis purposes. \elisa{I think this is a bit confusing: from this I understand that \ccl can predict $b(k)$ but cannot pass anything but linear bias to the angular power spectra.}
 
+%-------------------------------------------------------------------------------
 \begin{comment}
 \subsection{Halo model}
 \label{sec:halo_model}
 \vol{Alexander Mead}
-\todo{This section will most likely be commented out.}
+\todo{This section will hopefully not remain commented out.}
 
-In this section we review a basic halo-model computation \citep{Seljak2000,Peacock2000,Cooray2002} of the cross-correlation between any two cosmological fields and only requires knowledge of the halo profiles of the field in question. For example, in the case of the matter-density auto spectrum we need only know the halo density profiles. For the galaxy spectrum we require knowledge of the number of, and distribution of, galaxies as a function of halo mass. In this simple form the halo model is approximate and makes the assumption that haloes are \emph{linearly} biased with respect to the \emph{linear} matter field and also assumes that haloes are spherical with properties that are determined solely by the halo mass. It is possible to go beyond these simplified assumptions, and we direct the interested reader to \cite{Cooray2002,Smith2007,Giocoli2010,Smith2011}.
+In this section we review a basic halo-model computation \citep{Seljak2000,Peacock2000,Cooray2002} of the cross-correlation between any two cosmological fields. The calculation only requires knowledge of the halo profiles of the field in question. For example, in the case of the matter-density auto spectrum we need only know the halo density profiles. For the galaxy spectrum we require knowledge of the number of, and distribution of, galaxies as a function of halo mass. In this simple form the halo model is approximate and makes the assumption that haloes are \emph{linearly} biased with respect to the \emph{linear} matter field and also assumes that haloes are spherical with properties that are determined solely by their mass. It is possible to go beyond these simplistic assumptions, and we direct the interested reader to \cite{Cooray2002,Smith2007,Giocoli2010,Smith2011} for this.
 
-The eventual aim for \ccl is to have a halo model that can calculate the auto- and cross-spectra for any cosmological field combinations with parameters that can be taken either from numerical simulations or observational data. We have only implemented the case of the matter-density auto spectrum, but we keep the notation as general as possible in the following:
+The eventual aim for \ccl is to have a halo model that can calculate the auto- and cross-spectra for any cosmological field combinations with parameters that can be taken either from numerical simulations or observational data. So far, we have only implemented the case of the halo-model calculation of the density power spectrum, but we keep the notation as general as possible in the following:
 
 Consider two 3D cosmological fields $\rho_i$ and $\rho_j$, the cross power spectrum at a given redshift can be written as a sum of a two- and a one-halo term given by
 \begin{equation}
@@ -507,14 +508,12 @@ P_{2\mathrm{H},ij}(k)=P_{\mathrm{lin}}(k)
 P_{1\mathrm{H},ij}(k)=\int_0^\infty \frac{\mathrm{d}n}{\mathrm{d}M}W_i(M,k)W_j(M,k)\;\mathrm{d}M\ ,
 \label{eq:one_halo}
 \end{equation}
-where $M$ is the halo mass, $\mathrm{d}n/\mathrm{d}M$ is the halo mass function defined in equation~(\ref{eq:halo_mass_function}) and $b(M)$ is the linear halo bias with respect to the linear matter density field, defined as the large-scale limit of equation~(\ref{eq:halo_bias}).
-
-Equations~(\ref{eq:two_halo}) and (\ref{eq:one_halo}) contain the (spherical) Fourier transform of the halo profile, or halo `window function':
+where $M$ is the halo mass, $\mathrm{d}n/\mathrm{d}M$ is the halo mass function defined in equation~(\ref{eq:halo_mass_function}) and $b(M)$ is the linear halo bias with respect to the linear matter density field, defined as the large-scale limit of equation~(\ref{eq:halo_bias}). Equations~(\ref{eq:two_halo}) and (\ref{eq:one_halo}) contain the (spherical) Fourier transform of the halo profile, or halo `window function':
 \begin{equation}
 W_i(M,k)=\int_0^\infty4\pi r^2\frac{\sin(kr)}{kr}\rho_{\mathrm{H},i}(M,r)\;\mathrm{d}r\ ,
 \label{eq:window_function}
 \end{equation}
-where $\rho_{\mathrm{H},i}(M,r)$ is the radial profile for the field $i$ in a host halo of mass $M$. For example, if one is interested in matter fields then this would be the halo density profile, if one were interested in galaxies then this would be the number density and distribution of galaxies around a halo of mass $M$.
+where $\rho_{\mathrm{H},i}(M,r)$ is the radial profile for the field $i$ in a host halo of mass $M$. For example, if one is interested in calculating the standard matter power spectrum then $\rho_{\mathrm{H},i}(M,r)$ would be the density \emph{contrast} profile of a halo of mass $M$.
 
 %The dimensionless mass function, $f(\nu)$, is related to $n(M)$ via
 %\begin{equation}
@@ -531,7 +530,7 @@ where $\rho_{\mathrm{H},i}(M,r)$ is the radial profile for the field $i$ in a ho
 %T(x)=\frac{3}{x^3}(\sin{x}-x\cos{x})\ .
 %\label{eq:top_hat}
 %\end{equation}
-Note that the halo mass function and bias \emph{must} satisfy the following properties for the total power spectrum to have the correct large-scale limit\footnote{Note that achieving these correct limits for some fields is difficult numerically because of the large amount of mass contained in low mass haloes according to most popular mass functions. Special care must be taken with the two-halo integral in the case of matter power spectra.}:
+Note that the halo mass function and bias \emph{must} satisfy the following properties for the total power spectrum to have the correct large-scale limit\footnote{Achieving the correct limits is difficult numerically because of the large amount of mass contained in low mass haloes according to most popular mass functions.}:
 \begin{equation}
 \frac{1}{\bar\rho_\mathrm{m}}\int_0^\infty M\frac{\mathrm{d}n}{\mathrm{d}M}\;\mathrm{d}M=1\ ,
 \label{eq:mf_normalisation}
@@ -540,24 +539,48 @@ Note that the halo mass function and bias \emph{must} satisfy the following prop
 \frac{1}{\bar\rho_\mathrm{m}}\int_0^\infty Mb(M)\frac{\mathrm{d}n}{\mathrm{d}M}\;\mathrm{d}M=1\ .
 \label{eq:bias_normalisation}
 \end{equation}
-If one uses a mass function and bias pair that are related via the peak-background split formalism \citep{Mo1996,Sheth2001} the these conditions are automatically satisfied. In words these equations enforce that all matter is associated to a halo and that matter is on average unbiased with respect to itself. In the convention used in CCL the units of $P(k)$ will be exactly the units of $\rho_i\rho_j / \mathrm{Mpc}^3$. The units of the $W_i$ are those of $\rho_i$ multiplied by volume.
+If one uses a mass function and bias pair that are related via the peak-background split formalism \citep{Mo1996,Sheth2001} then these conditions are automatically satisfied. In words, these equations enforce that all matter is associated to a halo and that matter is on average unbiased with respect to itself. In the convention used in CCL the units of $P(k)$ will be exactly the units of $\rho_i\rho_j / \mathrm{Mpc}^3$. The units of the $W_i$ are those of the field $\rho_i$ multiplied by volume. By default, in the halo-model calculation in \ccl we use the mass function and bias from \cite{Sheth1999}
+\begin{equation}
+f(\nu)\;\mathrm{d}\nu=A\left[1+\frac{1}{(q\nu^2)^p}\right]\mathrm{e}^{-q\nu^2/2}\;\mathrm{d}\nu\ ,
+\label{eq:st_mf}
+\end{equation}
+\begin{equation}
+b(\nu)=1+\frac{1}{\delta_\mathrm{c}}\left[q\nu^2-1+\frac{2p}{1+(q\nu^2)^p}\right]\ ,
+\label{eq:st_bias}
+\end{equation}
+with $p=0.3$, $q=0.707$ and $A=0.21616$.
+
+These relations were fit to haloes measured in $N$-body simulations where haloes were taken to have a cosmology-dependent overdensity criteria that comes from the spherical-collapse model. We use the fitting-formula of \cite{Bryan1998}
+\begin{equation}
+\Delta_\mathrm{v}(z)=\frac{1}{\Omega_\mathrm{m}(z)}\left\{18\pi^2-82[1-\Omega_\mathrm{m}(z)]-39[1-\Omega_\mathrm{m}(z)]^2\right\}\ .
+\label{eq:Deltav_Bryan}
+\end{equation}
+In addition, the relation between $M$ and $nu$ was taken to include the cosmology-dependence of $\delta_\mathrm{c}$, which derives from the spherical-collapse model. For this we use the fitting formula of \cite{Nakamura1997}:
+\begin{equation}
+\delta_\mathrm{c}(z)=\frac{3(12\pi)^{2/3}}{20}\left\{1+0.012299\log_{10}[\Omega_\mathrm{m}(z)]\right\}\ .
+\label{eq:deltac_Nakamura}
+\end{equation}
 
 For the matter power spectrum we use the halo profiles of \citeauthor*{Navarro1997} (NFW; \citeyear{Navarro1997}):
 \begin{equation}
 \rho_\mathrm{H}(M,r)\propto\frac{1}{r/r_\mathrm{s}(1+r/r_\mathrm{s})^2}\ ,
 \label{eq:NFW_profile}
 \end{equation}
-which is written in terms of a scale radius $r_\mathrm{s}$. The constant of proportionality fixed by the condition that the halo has total mass $M$ when the boundary is set at the virial radius $r_\mathrm{v}$, which is set such that the halo has a fixed density $\Delta_\mathrm{v}$ with respect to the mean
+which is written in terms of a scale radius $r_\mathrm{s}$. The constant of proportionality fixed by the condition that the halo has total mass $M$ when the boundary is set at the virial radius $r_\mathrm{v}$, which is set such that the halo has a fixed density $\Delta_\mathrm{v}$ (equation~\ref{eq:Deltav_Bryan}) with respect to the mean
 \begin{equation}
-M=4\pi r_\mathrm{v}^3\Delta_\mathrm{v}\bar\rho\ .
+M=4\pi r_\mathrm{v}^3\Delta_\mathrm{v}\bar\rho_\mathrm{m}\ .
 \label{eq:virial_radius}
 \end{equation}
-Finally, the scale radius is usually expressed in terms of the mass-dependent halo concentration parameter $c(M)=r_\mathrm{v}/r_\mathrm{s}$. We use the simple mass-concentration relation from \cite{Bullock2001}
+Finally, the scale radius is usually expressed in terms of the mass-dependent halo concentration parameter $c(M)=r_\mathrm{v}/r_\mathrm{s}$. We use the mass-concentration relation from \cite{Duffy2008} appropriate for the full sample of haloes defined using a virial $\Delta_\mathrm{v}$ criterion
 \begin{equation}
-c(M)=9\left(\frac{M}{M_*}\right)^{-0.13}\ ,
+c(M,z)=7.85\left(\frac{M}{M_\mathrm{p}}\right)^{-0.081}(1+z)^{-0.71}\ ,
 \end{equation}
-where $\delta_\mathrm{c}/\sigma(M_*)=1$.
-Note that, in order to be consistent, one should use a value of $\Delta_\mathrm{v}$ and $c(M)$ that is consistent with the halo definition used for the halo mass function and bias.
+with $M_\mathrm{p}=2\times10^{12}\,h^{-1}\mathrm{M}_\odot$.
+%\begin{equation}
+%c(M)=9\left(\frac{M}{M_*}\right)^{-0.13}\ ,
+%\end{equation}
+%where $\delta_\mathrm{c}/\sigma(M_*)=1$.
+In order to be consistent one \emph{must} use a value of $\Delta_\mathrm{v}$ and $c(M)$ that is consistent with the halo definition used for the halo mass function and bias.
 \end{comment}
 
 \subsection{Photometric redshifts}
@@ -904,6 +927,20 @@ We note that while we maintain the $10^{-4}$ for our evaluations of $\sigma$, th
 \caption{Three different numerical tests of the halo mass function calculation. In each line, the blue line is the fractional error in the function, while the black dashed line represents our error tolerance. The first panel demonstrates the robust calculation of $\sigma(M)$. The second panel demonstrates a numerical quirk in our spline treatment that is currently not addressed, but does reduce the numerical accuracy in returning the log inverse of $\sigma(M)$. We note that this does not significantly impact the error in the halo mass function in the final panel.}
 \label{fig:hmf}
 \end{figure*}
+
+\begin{comment}
+\subsection{Halo model}
+\label{sec:halo_model_verification}
+\vol{Alexander Mead}
+
+In Figure~\ref{fig:halo_model} we show the power spectrum computed by the \ccl halo model compared to that from \textsc{halofit} and to the linear matter spectrum.
+
+\begin{figure}
+\includegraphics[width=0.45\textwidth]{halo_model.png}
+\caption{Matter power spectrum computed according to linear thoery, \textsc{halofit} and the \ccl halo model. The halo model two- and one-halo terms are also shown, their sum is the total halo-model prediciton. \textsc{halofit} is accurate compared to $N$-body simulations at the $\simeq5\%$ level for the scales shown. The halo-model prediction deviates from \textsc{halofit} at the $\simeq30\%$ level in the transition region when both the two- and one-halo terms are important ($k\simeq0.5\,\mathrm{Mpc}^{-1}$) but shows better agreement at smaller scales.}
+\label{fig:halo_model}
+\end{figure}
+\end{comment}
 
 \subsection{Two-point statistics}
 
