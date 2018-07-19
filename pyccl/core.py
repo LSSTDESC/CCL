@@ -57,17 +57,18 @@ baryons_power_spectrum_types = {
 """
 
 mass_function_types = {
-    'angulo':   lib.angulo,
-    'tinker':   lib.tinker,
-    'tinker10': lib.tinker10,
-    'watson':   lib.watson
+    'angulo':      lib.angulo,
+    'tinker':      lib.tinker,
+    'tinker10':    lib.tinker10,
+    'watson':      lib.watson,
+    'shethtormen': lib.shethtormen
 }
 """dict: Types of halo mass function models. The strings represent possible choices the user can specify for different halo mass function models.
 
 """
 
 emulator_neutrinos_types = {
-	'strict': 	lib.emu_strict,
+	'strict':   lib.emu_strict,
 	'equalize': lib.emu_equalize
 }
 
