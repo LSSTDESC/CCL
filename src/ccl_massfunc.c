@@ -34,7 +34,7 @@ double nu_mass(ccl_cosmology *cosmo, double halomass, double a, int *status) {
   return dc_NakamuraSuto(cosmo, a, status)/ccl_sigmaM(cosmo, halomass, a, status);
 }
 
-/*----- ROUTINE: ccl_r_delta -----
+/*----- ROUTINE: r_delta -----
 INPUT: cosmology, halo mass, scale factor, halo overdensity
 TASK: Computes comoving halo radius assuming the overdensity criteria
 */
@@ -43,17 +43,6 @@ double r_delta(ccl_cosmology *cosmo, double halomass, double a, double odelta, i
   double rho_matter = ccl_rho_x(cosmo, 1., 1, 1, status);
   return pow(halomass*3.0/(4.0*M_PI*rho_matter*odelta),1.0/3.0);
 }
-
-// THIS IS NOT USED
-/*----- ROUTINE: ccl_r_Lagrangian -----
-INPUT: cosmology, halo mass, scale factor
-TASK: Computes halo Lagrangian radius, which is the region 
-containing the mass of the halo in the homogeneous universe.
-*//*
-double ccl_r_Lagrangian(ccl_cosmology *cosmo, double halomass, double a, int *status){   
-  return ccl_r_delta(cosmo, halomass, a, 1., status);
-}
-*/
 
 void ccl_cosmology_compute_hmfparams(ccl_cosmology *cosmo, int *status)
 {
