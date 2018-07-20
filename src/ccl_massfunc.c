@@ -247,8 +247,14 @@ static double massfunc_f(ccl_cosmology *cosmo, double halomass, double a, double
 
   // Equation (10) in arxiv: 9901122
   // Note that Sheth & Tormen (1999) use nu=(dc/sigma)^2 whereas we use nu=dc/sigma
-  // TODO: Mead: Somehow enforce that this should only work with a virial-density Delta_v
   case ccl_shethtormen:
+
+    // Check if odelta is outside the interpolated range
+    if (odelta != Dv_BryanNorman(cosmo, a, status)) {
+      *status = CCL_ERROR_HMF_DV;
+      strcpy(cosmo->status_message, "ccl_massfunc.c: massfunc_f(): Sheth-Tormen called with not virial Delta_v\n");
+      return NAN;
+    }
 
     // ST mass function fitting parameters
     fit_A = 0.21616;
@@ -377,7 +383,14 @@ static double ccl_halo_b1(ccl_cosmology *cosmo, double halomass, double a, doubl
   // Derived using the peak-background split applied to the mass function in the same paper
   // Note that Sheth & Tormen (1999) use nu=(dc/sigma)^2 whereas we use nu=dc/sigma
   // TODO: Mead: Somehow enforce that this should only work with a virial-density Delta_v
-  case ccl_shethtormen:    
+  case ccl_shethtormen:
+
+    // Check if Delta_v is the virial Delta_v
+    if (odelta != Dv_BryanNorman(cosmo, a, status)) {
+      *status = CCL_ERROR_HMF_DV;
+      strcpy(cosmo->status_message, "ccl_massfunc.c: halo_b1(): Sheth-Tormen called with not virial Delta_v\n");
+      return NAN;
+    }
 
     // ST bias fitting parameters (which are the same as for the mass function)
     fit_p = 0.3;

@@ -189,7 +189,6 @@ static double two_halo_integrand(double log10mass, void *params){
   double Delta_v = Dv_BryanNorman(p->cosmo, p->a, p->status);
 
   // The window function appropriate for the matter power spectrum
-  //double wk = halomass*u_nfw_c(p->cosmo,c,halomass,p->k,p->a,p->status)/rho_matter
   double wk = window_function(p->cosmo,halomass, p->k, p->a, NFW, p->status);
 
   // Fairly sure that there should be no ln(10) factor should be here since the integration is being specified in log10 range
