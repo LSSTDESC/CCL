@@ -256,7 +256,11 @@ Here are a few common steps when working on the Python module:
   $ python setup.py build
   $ python setup.py test
   ```
-
+  
+  - Specfic python tests can also be run, for example:
+  ```sh
+  $ python tests/ccl_test_pyccl_interface.py
+  ```
 
 ## Compiling against an external version of CLASS
 
