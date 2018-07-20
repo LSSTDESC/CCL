@@ -219,6 +219,12 @@ Here are a few common steps when working on the C library:
   $ make -Cbuild  # The -C option allows you to run make from a different directory
   $ build/check_ccl
   ```
+  
+  - Tests specific to the feature you are developing can also be run individually, 
+  for example to run only the growth tests:
+  ```sh
+  $ build/check_ccl growth
+  ```
 
   - Compiling (or recompiling) an example in the `CCL/examples` folder:
   ```sh
