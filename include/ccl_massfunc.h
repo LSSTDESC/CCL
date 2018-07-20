@@ -73,6 +73,25 @@ double ccl_massfunc_m2r(ccl_cosmology *cosmo, double smooth_mass, int *status);
  */
 double ccl_sigmaM(ccl_cosmology *cosmo, double smooth_mass, double a, int *status);
 
+  /*
+   * Fitting function for the spherical-model critical linear density for collapse
+   * Fitting formula from Nakamura & Suto (1997; arXiv:astro-ph/9710107)
+   * @param cosmo Cosmological parameters
+   * @param a, scale factor, normalized to a=1 today
+   * @param status Status flag. 0 if there are no errors, nonzero otherwise.
+   */  
+  double dc_NakamuraSuto(ccl_cosmology *cosmo, double a, int *status);
+
+ /*
+  * Fitting function for virial collapse density contrast assuming LCDM.
+  * Density contrast is relative to background *matter* density, *not* critical density
+  * Fitting formula from Bryan & Norman (1998; arXiv:astro-ph/9710107)
+  * @param cosmo Cosmological parameters
+  * @param a, scale factor, normalized to a=1 today
+  * @param status Status flag. 0 if there are no errors, nonzero otherwise.
+  */  
+  double Dv_BryanNorman(ccl_cosmology *cosmo, double a, int *status);
+  
 /*
  * Calcualtes the comoving halo radius assuming a given overdensity criteria
  * @param cosmo Cosmological parameters

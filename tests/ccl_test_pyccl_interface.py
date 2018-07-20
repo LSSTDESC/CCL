@@ -248,6 +248,11 @@ def check_power(cosmo):
     assert_( all_finite(ccl.sigmaR(cosmo, R_scl)) )
     assert_( all_finite(ccl.sigmaR(cosmo, R_lst)) )
     assert_( all_finite(ccl.sigmaR(cosmo, R_arr)) )
+
+    # sigmaV
+    assert_( all_finite(ccl.sigmaV(cosmo, R_scl)) )
+    assert_( all_finite(ccl.sigmaV(cosmo, R_lst)) )
+    assert_( all_finite(ccl.sigmaV(cosmo, R_arr)) )
     
     # sigma8
     assert_( all_finite(ccl.sigma8(cosmo)) )

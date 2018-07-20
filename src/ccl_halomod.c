@@ -2,6 +2,7 @@
 #include "math.h"
 #include "stdio.h"
 #include "stdlib.h"
+#include "gsl/gsl_errno.h"
 #include "gsl/gsl_integration.h"
 #include "gsl/gsl_sf_expint.h"
 #include "ccl_background.h"
@@ -9,20 +10,6 @@
 #include "ccl_massfunc.h"
 #include "ccl_error.h"
 #include "ccl_halomod.h"
-
-// Cosmology dependence of the virial collapse density according to the spherical-collapse model
-// Fitting function from Bryan & Norman (1998; arXiv:astro-ph/9710107)
-// Here, this is defined relative to the background matter density, not the critical density
-static double Dv_BryanNorman(ccl_cosmology *cosmo, double a, int *status){
-  
-  double Om_mz = ccl_omega_x(cosmo, a, ccl_species_m_label, status);
-  double x = Om_mz-1.;
-  double Dv0 = 18.*pow(M_PI,2);
-  double Dv = (Dv0+82.*x-39.*pow(x,2))/Om_mz;
-  
-  return Dv;
-  
-}
 
 // Analytic FT of NFW profile, from Cooray & Sheth (2002; Section 3 of https://arxiv.org/abs/astro-ph/0206508)
 // Normalised such that U(k=0)=1
@@ -177,7 +164,14 @@ static double one_halo_integral(ccl_cosmology *cosmo, double k, double a, int *s
   // Clean up
   gsl_integration_workspace_free(w);
 
-  return result;
+  // Check for errors
+  if(qagstatus != GSL_SUCCESS) {
+    ccl_raise_gsl_warning(qagstatus, "ccl_halomod.c: one_halo_integral:");
+    return NAN;      
+  } else {
+    return result;
+  }
+  
 }
 
 // Parameters structure for the two-halo integrand
@@ -232,7 +226,14 @@ static double two_halo_integral(ccl_cosmology *cosmo, double k, double a, int *s
   // Clean up
   gsl_integration_workspace_free(w);
 
-  return result;
+  // Check for errors
+  if(qagstatus != GSL_SUCCESS) {
+    ccl_raise_gsl_warning(qagstatus, "ccl_halomod.c: two_halo_integral:");
+    return NAN;      
+  } else {
+    return result;
+  }
+  
 }
 
 // Computes the two-halo term
