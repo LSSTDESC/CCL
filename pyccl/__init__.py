@@ -32,8 +32,8 @@ from pyccl.power import linear_matter_power, nonlin_matter_power, sigmaR, \
     sigmaV, sigma8
 
 # Halo mass function
-from pyccl.massfunction import massfunc, massfunc_m2r, sigmaM, halo_bias, \
-    r_delta, r_Lagrangian, nu
+from pyccl.massfunction import massfunc, massfunc_m2r, sigmaM, halo_bias#, \
+#r_delta, nu
 
 # Cl's and tracers
 from pyccl.cls import angular_cl, ClTracer, ClTracerNumberCounts, \
@@ -48,8 +48,11 @@ from pyccl.constants import CLIGHT_HMPC, MPC_TO_METER, PC_TO_METER, \
 
 from pyccl.correlation import correlation, correlation_3d
 
-from pyccl.halomodel import onehalo_matter_power, twohalo_matter_power, halomodel_matter_power, halo_concentration
+# Properties of haloes
+from pyccl.halomodel import halomodel_matter_power, halo_concentration
+#onehalo_matter_power, twohalo_matter_power
 
+# Specific to massive neutrinos
 from pyccl.neutrinos import Omeganuh2, nu_masses
 
 # Expose function to toggle debug mode

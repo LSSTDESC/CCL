@@ -64,7 +64,6 @@ double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double k, double a,int * s
  * For specific cases see documentation for ccl_error.c
  * @return sigma(R).
  */
-/*double ccl_sigmaR(ccl_cosmology *cosmo, double R, int * status);*/
 double ccl_sigmaR(ccl_cosmology *cosmo, double R, double a, int * status);
 
 /**
@@ -77,7 +76,6 @@ double ccl_sigmaR(ccl_cosmology *cosmo, double R, double a, int * status);
  * For specific cases see documentation for ccl_error.c
  * @return sigma(R).
  */
-/*double ccl_sigmaV(ccl_cosmology *cosmo, double R, int * status);*/
 double ccl_sigmaV(ccl_cosmology *cosmo, double R, double a, int * status);
 
 /**

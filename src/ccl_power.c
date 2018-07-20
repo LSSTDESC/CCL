@@ -1631,7 +1631,7 @@ double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double k, double a, int *s
 
 }
 
-//Params for sigma(R) integrand
+// Params for sigma(R) integrand
 typedef struct {
   ccl_cosmology *cosmo;
   double R;
@@ -1644,10 +1644,16 @@ typedef struct {
   int* status;
 } SigmaV_pars;
 
+/* --------- ROUTINE: w_tophat ---------
+INPUT: kR, ususally a wavenumber multiplied by a smoothing radius
+TASK: Output W(x)=[sin(x)-x*cos(x)]*(3/x)^3
+*/
 static double w_tophat(double kR)
 {
   double w;
 
+  // This is the Maclaurin expansion of W(x)=[sin(x)-xcos(x)]*(3/x)**3 to O(x^7), with x=kR.
+  // Necessary numerically because at low x W(x) relies on the fine cancellation of two terms
   if(kR<0.1) {
     w =1.-0.1*kR*kR+0.003571429*kR*kR*kR*kR
       -6.61376E-5*kR*kR*kR*kR*kR*kR
@@ -1658,6 +1664,7 @@ static double w_tophat(double kR)
   return w;
 }
 
+// Integrand for sigmaR integral
 static double sigmaR_integrand(double lk,void *params)
 {
   SigmaR_pars *par=(SigmaR_pars *)params;
@@ -1670,6 +1677,7 @@ static double sigmaR_integrand(double lk,void *params)
   return pk*k*k*k*w*w;
 }
 
+// Integrand for sigmaV integral
 static double sigmaV_integrand(double lk,void *params)
 {
   SigmaV_pars *par=(SigmaV_pars *)params;
@@ -1682,6 +1690,11 @@ static double sigmaV_integrand(double lk,void *params)
   return pk*k*w*w/3.0;
 }
 
+/* --------- ROUTINE: ccl_sigmaR ---------
+INPUT: cosmology, comoving smoothing radius, scale factor
+TASK: compute sigmaR, the variance in the *linear* density field 
+smoothed with a tophat filter of comoving size R
+*/
 double ccl_sigmaR(ccl_cosmology *cosmo,double R,double a,int *status)
 {
   SigmaR_pars par;
@@ -1701,14 +1714,20 @@ double ccl_sigmaR(ccl_cosmology *cosmo,double R,double a,int *status)
     ccl_raise_gsl_warning(gslstatus, "ccl_power.c: ccl_sigmaR():");
     *status |= gslstatus;
   }
-  //TODO: log10 could be taken already in the macros.
-  //TODO: 1E-5 should be a macro
-  //TODO: we should check for integration success
+  // TODO: log10 could be taken already in the macros.
+  // TODO: 1E-5 should be a macro
+  // TODO: we should check for integration success
   gsl_integration_cquad_workspace_free(workspace);
 
   return sqrt(sigma_R*M_LN10/(2*M_PI*M_PI))*ccl_growth_factor(cosmo, a, status);
 }
 
+/* --------- ROUTINE: ccl_sigmaV ---------
+INPUT: cosmology, comoving smoothing radius, scale factor
+TASK: compute sigmaV, the variance in the *linear* displacement field 
+smoothed with a tophat filter of comoving size R
+The linear displacement field is the gradient of the linear density field
+*/
 double ccl_sigmaV(ccl_cosmology *cosmo,double R,double a,int *status)
 {
   SigmaV_pars par;
@@ -1730,14 +1749,19 @@ double ccl_sigmaV(ccl_cosmology *cosmo,double R,double a,int *status)
     *status |= gslstatus;
   }
 
-  //TODO: log10 could be taken already in the macros.
-  //TODO: 1E-5 should be a macro
-  //TODO: we should check for integration success
+  // TODO: log10 could be taken already in the macros.
+  // TODO: 1E-5 should be a macro
+  // TODO: we should check for integration success
   gsl_integration_cquad_workspace_free(workspace);
 
   return sqrt(sigma_V*M_LN10/(2*M_PI*M_PI))*ccl_growth_factor(cosmo, a, status);
 }
 
+/* --------- ROUTINE: ccl_sigma8 ---------
+INPUT: cosmology
+TASK: compute sigma8, the variance in the *linear* density field at a=1
+smoothed with a tophat filter of comoving size 8 Mpc/h
+*/
 double ccl_sigma8(ccl_cosmology *cosmo, int *status)
 {
   return ccl_sigmaR(cosmo,8/cosmo->params.h, 1.,status);

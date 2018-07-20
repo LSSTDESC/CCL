@@ -55,7 +55,7 @@ def halo_bias(cosmo, halo_mass, a, odelta=200):
         cosmo (:obj:`ccl.cosmology`): Cosmological parameters.
         halo_mass (float or array_like): Halo masses; Msun.
         a (float): Scale factor.
-        odelta (float): overdensity parameter (default: 200).
+        odelta (float): Overdensity parameter (default: 200).
 
     Returns:
         float or array_like: Halo bias.
@@ -65,38 +65,23 @@ def halo_bias(cosmo, halo_mass, a, odelta=200):
                           lib.halo_bias_vec, cosmo, halo_mass, a, odelta)
 
 def r_delta(cosmo, halo_mass, a, odelta):
-    """ something something rdelta
+    """The comoving halo radius for a given overdensity criterion
 
     Args:
         cosmo (:obj:`ccl.cosmology`): Cosmological parameters.
         halo_mass (float or array_like): Halo masses; Msun.
         a (float): Scale factor.
-        odelta (float): overdensity parameter
+        odelta (float): Overdensity parameter
 
     Returns:
-        r_delta (float or array_like): something something
+        r_delta (float or array_like): Comoving halo radius
 
     """
     return _vectorize_fn4(lib.r_delta,
 			  lib.r_delta_vec, cosmo, halo_mass, a, odelta)
 
-def r_Lagrangian(cosmo, halo_mass, a, odelta):
-    """ something something r Lagrangian
-
-    Args:
-        cosmo (:obj:`ccl.cosmology`): Cosmological parameters.
-        halo_mass (float or array_like): Halo masses; Msun.
-        a (float): Scale factor.
-
-    Returns:
-        r_Lagrangian (float or array_like): something something
-
-    """
-    return _vectorize_fn2(lib.r_Lagrangian,
-			  lib.r_Lagrangian_vec, cosmo, halo_mass, a)
-
 def nu(cosmo, halo_mass, a):
-    """ something something nu
+    """Dimensionless peak height of a halo of mass M, nu = delta_c(z)/sigma(M)
 
     Args:
         cosmo (:obj:`ccl.cosmology`): Cosmological parameters.
@@ -104,7 +89,7 @@ def nu(cosmo, halo_mass, a):
         a (float): Scale factor.
 
     Returns:
-        nu (float or array_like): something something
+        nu (float or array_like): Peak height
 
     """
     return _vectorize_fn2(lib.r_delta,

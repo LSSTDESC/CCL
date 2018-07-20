@@ -373,13 +373,13 @@ def check_halomod(cosmo):
     assert_( all_finite(ccl.halomodel_matter_power(cosmo, k_list,   a)) )
     assert_( all_finite(ccl.halomodel_matter_power(cosmo, k_array,  a)) )
 
-    assert_( all_finite(ccl.twohalo_matter_power(cosmo, k_scalar, a)) )
-    assert_( all_finite(ccl.twohalo_matter_power(cosmo, k_list,   a)) )
-    assert_( all_finite(ccl.twohalo_matter_power(cosmo, k_array,  a)) )
+    assert_( all_finite(ccl.halomodel.twohalo_matter_power(cosmo, k_scalar, a)) )
+    assert_( all_finite(ccl.halomodel.twohalo_matter_power(cosmo, k_list,   a)) )
+    assert_( all_finite(ccl.halomodel.twohalo_matter_power(cosmo, k_array,  a)) )
 
-    assert_( all_finite(ccl.onehalo_matter_power(cosmo, k_scalar, a)) )
-    assert_( all_finite(ccl.onehalo_matter_power(cosmo, k_list,   a)) )
-    assert_( all_finite(ccl.onehalo_matter_power(cosmo, k_array,  a)) )
+    assert_( all_finite(ccl.halomodel.onehalo_matter_power(cosmo, k_scalar, a)) )
+    assert_( all_finite(ccl.halomodel.onehalo_matter_power(cosmo, k_list,   a)) )
+    assert_( all_finite(ccl.halomodel.onehalo_matter_power(cosmo, k_array,  a)) )
 
     assert_raises(TypeError, ccl.halomodel_matter_power, cosmo, k_scalar, a_array)
     assert_raises(TypeError, ccl.halomodel_matter_power, cosmo, k_list,   a_array)

@@ -48,6 +48,7 @@ def sigmaR(cosmo, R, a=1.):
 
 def sigmaV(cosmo, R, a=1.):
     """RMS variance in the displacement field in a top-hat sphere of radius R.
+    The linear displacement field is the gradient of the linear density field.
 
     Args:
         cosmo (:obj:`ccl.cosmology`): Cosmological parameters.

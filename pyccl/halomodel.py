@@ -1,8 +1,8 @@
 from pyccl import ccllib as lib
-from pyccl.pyutils import _vectorize_fn, _vectorize_fn2, _vectorize_fn3, _vectorize_fn4
+from pyccl.pyutils import _vectorize_fn2, _vectorize_fn4
 
 def onehalo_matter_power(cosmo, k, a):
-    """one-halo term for matter power spectrum
+    """One-halo term for matter power spectrum
     Args:
         cosmo (:obj:`ccl.cosmology`): Cosmological parameters.
         a (float): scale factor.
@@ -15,7 +15,7 @@ def onehalo_matter_power(cosmo, k, a):
                           lib.onehalo_matter_power_vec, cosmo, k, a)
 
 def twohalo_matter_power(cosmo, k, a):
-    """two-halo term for matter power spectrum
+    """Two-halo term for matter power spectrum
     Args:
         cosmo (:obj:`ccl.cosmology`): Cosmological parameters.
         a (float): scale factor.
@@ -28,7 +28,7 @@ def twohalo_matter_power(cosmo, k, a):
 			  lib.twohalo_matter_power_vec, cosmo, k, a)
 
 def halomodel_matter_power(cosmo, k, a):
-    """matter power spectrum from halo model
+    """Matter power spectrum from halo model
     Args:
         cosmo (:obj:`ccl.cosmology`): Cosmological parameters.
         a (float): scale factor.
@@ -40,8 +40,8 @@ def halomodel_matter_power(cosmo, k, a):
     return _vectorize_fn2(lib.halomodel_matter_power,
 			  lib.halomodel_matter_power_vec, cosmo, k, a)
 
-def halo_concentration(cosmo, halo_mass, a):
-    """halo concentration
+def halo_concentration(cosmo, halo_mass, a, label=2):
+    """Halo concentration
     Args:
         cosmo (:obj:`ccl.cosmology`): Cosmological parameters.
         a (float): scale factor
@@ -50,6 +50,6 @@ def halo_concentration(cosmo, halo_mass, a):
     Returns:
         halo_concentration: measure of halo concentration
     """
-    return _vectorize_fn2(lib.halo_concentration,
-			  lib.halo_concentration_vec, cosmo, halo_mass, a)
+    return _vectorize_fn4(lib.halo_concentration,
+			  lib.halo_concentration_vec, cosmo, halo_mass, a, label)
 

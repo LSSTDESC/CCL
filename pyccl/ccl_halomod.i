@@ -19,11 +19,11 @@
 %apply (double* ARGOUT_ARRAY1, int DIM1) {(double* output, int nout)};
 
 %inline %{
-  void onehalo_matter_power_vec(ccl_cosmology * cosmo,
+  void onehalo_matter_power_vec(ccl_cosmology *cosmo,
 				double a,
-				double* k, int nk,
-				double* output, int nout,
-				int* status)
+				double *k, int nk,
+				double *output, int nout,
+				int *status)
   {
     assert(nout == nk);
     for(int i=0; i < nk; i++){
@@ -31,11 +31,11 @@
     }
   }
 
-  void twohalo_matter_power_vec(ccl_cosmology * cosmo,
+  void twohalo_matter_power_vec(ccl_cosmology *cosmo,
 				double a,
-				double* k, int nk,
-				double* output, int nout,
-				int* status)
+				double *k, int nk,
+				double *output, int nout,
+				int *status)
   {
     assert(nout == nk);
     for(int i=0; i < nk; i++){
@@ -43,11 +43,11 @@
     }
   }
 
-  void halomodel_matter_power_vec(ccl_cosmology * cosmo,
+  void halomodel_matter_power_vec(ccl_cosmology *cosmo,
 				  double a,
-				  double* k, int nk,
-				  double* output, int nout,
-				  int* status)
+				  double *k, int nk,
+				  double *output, int nout,
+				  int *status)
   {
     assert(nout == nk);
     for(int i=0; i < nk; i++){
@@ -55,15 +55,16 @@
     }
   }
 
-  void halo_concentration_vec(ccl_cosmology * cosmo,
+  void halo_concentration_vec(ccl_cosmology *cosmo,
 			      double a,
-			      double* halo_mass, int nm,
-			      double* output, int nout,
-			      int* status)
+			      int label,
+			      double *halo_mass, int nm,
+			      double *output, int nout,
+			      int *status)
   {
     assert(nout == nm);
     for(int i=0; i < nm; i++){
-      output[i] = ccl_halo_concentration(cosmo, halo_mass[i], a, status);
+      output[i] = ccl_halo_concentration(cosmo, halo_mass[i], a, label, status);
     }
   }
 

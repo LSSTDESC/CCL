@@ -10,11 +10,52 @@
 #include "gsl/gsl_spline.h"
 #include "gsl/gsl_errno.h"
 #include "ccl_power.h"
-#include "ccl_massfunc.h"
 #include "ccl_error.h"
 #include "ccl_params.h"
 
-void ccl_cosmology_compute_hmfparams(ccl_cosmology * cosmo, int *status)
+/*----- ROUTINE: dc_NakamuraSuto -----
+INPUT: cosmology, scale factor
+TASK: Computes the peak threshold: delta_c(z) assuming LCDM.
+Cosmology dependence of the critical linear density according to the spherical-collapse model.
+Fitting function from Nakamura & Suto (1997; arXiv:astro-ph/9710107).
+*/
+static double dc_NakamuraSuto(ccl_cosmology *cosmo, double a, int *status){
+  double Om_mz = ccl_omega_x(cosmo, a, ccl_species_m_label, status);
+  double dc0 = (3./20.)*pow(12.*M_PI,2./3.);
+  double dc = dc0*(1.+0.012299*log10(Om_mz));
+  return dc;
+}
+
+/*----- ROUTINE: nu_mass -----
+INPUT: cosmology, halo mass, scale factor
+TASK: Computes the peak threshold: nu(M,z) = delta_c(z) / sigma(M,z)
+*/
+double nu_mass(ccl_cosmology *cosmo, double halomass, double a, int *status) {
+  return dc_NakamuraSuto(cosmo, a, status)/ccl_sigmaM(cosmo, halomass, a, status);
+}
+
+/*----- ROUTINE: ccl_r_delta -----
+INPUT: cosmology, halo mass, scale factor, halo overdensity
+TASK: Computes comoving halo radius assuming the overdensity criteria
+*/
+double r_delta(ccl_cosmology *cosmo, double halomass, double a, double odelta, int *status){
+  // TODO: possible that odelta should be passed around for consistency checks
+  double rho_matter = ccl_rho_x(cosmo, 1., 1, 1, status);
+  return pow(halomass*3.0/(4.0*M_PI*rho_matter*odelta),1.0/3.0);
+}
+
+// THIS IS NOT USED
+/*----- ROUTINE: ccl_r_Lagrangian -----
+INPUT: cosmology, halo mass, scale factor
+TASK: Computes halo Lagrangian radius, which is the region 
+containing the mass of the halo in the homogeneous universe.
+*//*
+double ccl_r_Lagrangian(ccl_cosmology *cosmo, double halomass, double a, int *status){   
+  return ccl_r_delta(cosmo, halomass, a, 1., status);
+}
+*/
+
+void ccl_cosmology_compute_hmfparams(ccl_cosmology *cosmo, int *status)
 {
   if(cosmo->computed_hmfparams)
     return;
@@ -173,7 +214,7 @@ void ccl_cosmology_compute_hmfparams(ccl_cosmology * cosmo, int *status)
   }
 }
 
-//TODO some of these are unused, many are included in ccl.h
+//TODO: some of these are unused, many are included in ccl.h
 
 /*----- ROUTINE: ccl_massfunc_f -----
 INPUT: cosmology+parameters, a halo mass, and scale factor
@@ -185,7 +226,6 @@ TASK: Outputs fitting function for use in halo mass function calculation;
     ccl_watson (arxiv 1212.0095 )
     ccl_shethtormen (arxiv 9901122)
 */
-
 static double massfunc_f(ccl_cosmology *cosmo, double halomass, double a, double odelta, int *status)
 {
   double fit_A, fit_a, fit_b, fit_c, fit_d, fit_p, overdensity_delta;
@@ -197,19 +237,18 @@ static double massfunc_f(ccl_cosmology *cosmo, double halomass, double a, double
   
   switch(cosmo->config.mass_function_method) {
 
-  //Equation (10) in arxiv: 9901122
-  // Note that Sheth & Tormen use nu=(dc/sigma)^2 whereas we use nu=dc/sigma
+  // Equation (10) in arxiv: 9901122
+  // Note that Sheth & Tormen (1999) use nu=(dc/sigma)^2 whereas we use nu=dc/sigma
+  // TODO: Mead: Somehow enforce that this should only work with a virial-density Delta_v
   case ccl_shethtormen:
 
-    //TODO: Mead: Somehow enforce that this should only work with a virial-density Delta_v
-
-    //ST mass function fitting parameters
+    // ST mass function fitting parameters
     fit_A = 0.21616;
     fit_p = 0.3;
     fit_a = 0.707;
 
     // nu = delta_c(z) / sigma(M)
-    nu=ccl_nu(cosmo, halomass, a, status);
+    nu = nu_mass(cosmo, halomass, a, status);
  
     return nu*fit_A*(1.+pow(fit_a*pow(nu,2),-fit_p))*exp(-fit_a*pow(nu,2)/2.);
 
@@ -319,16 +358,7 @@ static double massfunc_f(ccl_cosmology *cosmo, double halomass, double a, double
   }
 }
 
-// Cosmology dependence of the critical linear density according to the spherical-collapse model
-// Fitting function from Nakamura & Suto (1997; arXiv:astro-ph/9710107)
-static double dc_NakamuraSuto(ccl_cosmology *cosmo, double a, int *status){
-  double Om_mz = ccl_omega_x(cosmo, a, ccl_species_m_label, status);
-  double dc0 = (3./20.)*pow(12.*M_PI,2./3.);
-  double dc = dc0*(1.+0.012299*log10(Om_mz));
-  return dc;
-}
-
-static double ccl_halo_b1(ccl_cosmology *cosmo, double halomass, double a, double odelta, int * status)
+static double ccl_halo_b1(ccl_cosmology *cosmo, double halomass, double a, double odelta, int *status)
 {
   double fit_A, fit_B, fit_C, fit_a, fit_b, fit_c, fit_p, overdensity_delta, y;
   double delta_c_Tinker, nu;
@@ -337,10 +367,9 @@ static double ccl_halo_b1(ccl_cosmology *cosmo, double halomass, double a, doubl
 
   // Equation (12) in  arXiv: 9901122
   // Derived using the peak-background split applied to the mass function in the same paper
-  // Note that Sheth & Tormen use nu=(dc/sigma)^2 whereas we use nu=dc/sigma
-  case ccl_shethtormen:
-
-    // TODO:Mead: Somehow enforce that this should only work with a virial-density Delta_v
+  // Note that Sheth & Tormen (1999) use nu=(dc/sigma)^2 whereas we use nu=dc/sigma
+  // TODO: Mead: Somehow enforce that this should only work with a virial-density Delta_v
+  case ccl_shethtormen:    
 
     // ST bias fitting parameters (which are the same as for the mass function)
     fit_p = 0.3;
@@ -348,7 +377,7 @@ static double ccl_halo_b1(ccl_cosmology *cosmo, double halomass, double a, doubl
 
     // Cosmology dependent delta_c and nu
     double delta_c = dc_NakamuraSuto(cosmo, a, status);
-    nu = ccl_nu(cosmo, halomass, a, status);
+    nu = nu_mass(cosmo, halomass, a, status);
  
     return 1.+(fit_a*pow(nu,2)-1.+2.*fit_p/(1.+pow(fit_a*pow(nu,2),fit_p)))/delta_c;
 
@@ -380,7 +409,7 @@ static double ccl_halo_b1(ccl_cosmology *cosmo, double halomass, double a, doubl
   }
 }
 
-void ccl_cosmology_compute_sigma(ccl_cosmology * cosmo, int *status)
+void ccl_cosmology_compute_sigma(ccl_cosmology *cosmo, int *status)
 {
   if(cosmo->computed_sigma)
     return;
@@ -475,8 +504,7 @@ void ccl_cosmology_compute_sigma(ccl_cosmology * cosmo, int *status)
 INPUT: ccl_cosmology * cosmo, double halo mass in units of Msun, double scale factor
 TASK: returns halo mass function as dn / dlog10 m
 */
-
-double ccl_massfunc(ccl_cosmology *cosmo, double halomass, double a, double odelta, int * status)
+double ccl_massfunc(ccl_cosmology *cosmo, double halomass, double a, double odelta, int *status)
 {
   if (cosmo->params.N_nu_mass>0){
 	  *status = CCL_ERROR_NOT_IMPLEMENTED;
@@ -507,8 +535,7 @@ double ccl_massfunc(ccl_cosmology *cosmo, double halomass, double a, double odel
 INPUT: ccl_cosmology * cosmo, double halo mass in units of Msun, double scale factor
 TASK: returns linear halo bias
 */
-
-double ccl_halo_bias(ccl_cosmology *cosmo, double halomass, double a, double odelta, int * status)
+double ccl_halo_bias(ccl_cosmology *cosmo, double halomass, double a, double odelta, int *status)
 {
   if (cosmo->params.N_nu_mass>0){
 	  *status = CCL_ERROR_NOT_IMPLEMENTED;
@@ -532,7 +559,7 @@ INPUT: ccl_cosmology * cosmo, halomass in units of Msun
 TASK: takes halo mass and converts to halo radius
   in units of Mpc.
 */
-double ccl_massfunc_m2r(ccl_cosmology * cosmo, double halomass, int * status)
+double ccl_massfunc_m2r(ccl_cosmology *cosmo, double halomass, int *status)
 {
   double rho_m, smooth_radius;
 
@@ -550,8 +577,7 @@ INPUT: ccl_cosmology * cosmo, double halo mass in units of Msun, double scale fa
 TASK: returns sigma from the sigmaM interpolation. Also computes the sigma interpolation if
 necessary.
 */
-
-double ccl_sigmaM(ccl_cosmology * cosmo, double halomass, double a, int * status)
+double ccl_sigmaM(ccl_cosmology *cosmo, double halomass, double a, int *status)
 {
   if (cosmo->params.N_nu_mass>0){
 	  *status = CCL_ERROR_NOT_IMPLEMENTED;
@@ -578,26 +604,4 @@ double ccl_sigmaM(ccl_cosmology * cosmo, double halomass, double a, int * status
   sigmaM = pow(10,lgsigmaM)*ccl_growth_factor(cosmo, a, status);
   ccl_check_status(cosmo, status);
   return sigmaM;
-}
-
-// Converts halo mass to rdelta.
-// TODO: possible that delta should be passed around for consistency checks
-double ccl_r_delta(ccl_cosmology *cosmo, double halomass, double a, double odelta, int * status){    
-  //double rho_matter = ccl_comoving_matter_density(cosmo);
-  double rho_matter = ccl_rho_x(cosmo, 1., 1, 1, status);
-  return pow(halomass*3.0/(4.0*M_PI*rho_matter*odelta),1.0/3.0);
-}
-
-// Peak threshold: nu(M,z) = delta_c(z) / sigma(M,z)
-// TODO: Alternatively - just use this in ccl_massfunc as necessary
-double ccl_nu(ccl_cosmology *cosmo, double halomass, double a, int * status) {
-  return dc_NakamuraSuto(cosmo, a, status)/ccl_sigmaM(cosmo, halomass, a, status);
-}
-
-
-// Calculates the halo Lagrangian radius as a function of halo mass
-// TODO: Could combine this with ccl_r_delta as a special case when odelta=1?
-double ccl_r_Lagrangian(ccl_cosmology *cosmo, double halomass, double a, int * status){   
-  //return pow(halomass*3.0/(4.0*M_PI*rho_matter),1.0/3.0);
-  return ccl_r_delta(cosmo, halomass, a, 1., status);
 }
