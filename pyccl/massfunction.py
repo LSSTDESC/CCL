@@ -64,36 +64,5 @@ def halo_bias(cosmo, halo_mass, a, odelta=200):
     return _vectorize_fn4(lib.halo_bias, 
                           lib.halo_bias_vec, cosmo, halo_mass, a, odelta)
 
-def r_delta(cosmo, halo_mass, a, odelta):
-    """The comoving halo radius for a given overdensity criterion
-
-    Args:
-        cosmo (:obj:`ccl.cosmology`): Cosmological parameters.
-        halo_mass (float or array_like): Halo masses; Msun.
-        a (float): Scale factor.
-        odelta (float): Overdensity parameter
-
-    Returns:
-        r_delta (float or array_like): Comoving halo radius
-
-    """
-    return _vectorize_fn4(lib.r_delta,
-			  lib.r_delta_vec, cosmo, halo_mass, a, odelta)
-
-def nu(cosmo, halo_mass, a):
-    """Dimensionless peak height of a halo of mass M, nu = delta_c(z)/sigma(M)
-
-    Args:
-        cosmo (:obj:`ccl.cosmology`): Cosmological parameters.
-        halo_mass (float or array_like): Halo masses; Msun.
-        a (float): Scale factor.
-
-    Returns:
-        nu (float or array_like): Peak height
-
-    """
-    return _vectorize_fn2(lib.r_delta,
-			  lib.r_delta_vec, cosmo, halo_mass, a)
-
 
 
