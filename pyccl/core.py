@@ -25,7 +25,6 @@ transfer_function_types = {
 
 matter_power_spectrum_types = {
     'halo_model':   lib.halo_model,
-    'halomodel':    lib.halo_model,
     'halofit':      lib.halofit,
     'linear':       lib.linear,
     'emu':          lib.emu
