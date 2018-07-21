@@ -784,8 +784,8 @@ def test_valid_transfer_combos():
     
     assert_raises(ValueError, ccl.Cosmology, transfer_function='emulator', 
                               matter_power_spectrum='linear', **params)
-    assert_raises(ValueError, ccl.Cosmology, transfer_function='boltzmann', 
-                              matter_power_spectrum='halomodel', **params)
+    #assert_raises(ValueError, ccl.Cosmology, transfer_function='boltzmann', 
+    #                          matter_power_spectrum='halomodel', **params)
     assert_raises(ValueError, ccl.Cosmology, transfer_function='bbks', 
                               matter_power_spectrum='emu', **params)
 
