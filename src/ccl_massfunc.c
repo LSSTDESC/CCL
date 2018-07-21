@@ -26,6 +26,7 @@ double dc_NakamuraSuto(ccl_cosmology *cosmo, double a, int *status){
   double dc = dc0*(1.+0.012299*log10(Om_mz));
   
   return dc;
+  
 }
 
 /*----- ROUTINE: Dv_BryanNorman -----
@@ -50,7 +51,9 @@ INPUT: cosmology, halo mass, scale factor
 TASK: Computes the peak threshold: nu(M,z) = delta_c(z) / sigma(M,z)
 */
 double nu_mass(ccl_cosmology *cosmo, double halomass, double a, int *status) {
+  
   return dc_NakamuraSuto(cosmo, a, status)/ccl_sigmaM(cosmo, halomass, a, status);
+  
 }
 
 /*----- ROUTINE: r_delta -----
@@ -58,9 +61,11 @@ INPUT: cosmology, halo mass, scale factor, halo overdensity
 TASK: Computes comoving halo radius assuming the overdensity criteria
 */
 double r_delta(ccl_cosmology *cosmo, double halomass, double a, double odelta, int *status){
-  // TODO: possible that odelta should be passed around for consistency checks
+  
   double rho_matter = ccl_rho_x(cosmo, 1., 1, 1, status);
+  
   return pow(halomass*3.0/(4.0*M_PI*rho_matter*odelta),1.0/3.0);
+  
 }
 
 void ccl_cosmology_compute_hmfparams(ccl_cosmology *cosmo, int *status)

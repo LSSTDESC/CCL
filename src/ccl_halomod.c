@@ -47,8 +47,7 @@ static double u_nfw_c(ccl_cosmology *cosmo, double c, double halomass, double k,
 }
 
 // The concentration-mass relation for haloes
-// TODO: make consistency check so that ccl_halo_concentration only runs if called with appropriate definition
-// TODO: e.g. if Delta != 200 rho_{mean}, should not function (or should it?)
+// TODO: consistency check that routine only runs if called with appropriate halo definition
 double ccl_halo_concentration(ccl_cosmology *cosmo, double halomass, double a, ccl_conc_label label, int *status){
 
   double gz, g0;
@@ -144,8 +143,8 @@ static double one_halo_integral(ccl_cosmology *cosmo, double k, double a, int *s
 
   int one_halo_integral_status = 0, qagstatus;
   double result = 0, eresult;
-  double log10massmin = log10(MMIN);
-  double log10massmax = log10(MMAX);
+  double log10mmin = log10(HM_MMIN);
+  double log10mmax = log10(HM_MMAX);
   Int_one_halo_Par ipar;
   gsl_function F;
   gsl_integration_workspace *w = gsl_integration_workspace_alloc(1000);
@@ -159,7 +158,7 @@ static double one_halo_integral(ccl_cosmology *cosmo, double k, double a, int *s
   F.params = &ipar;
 
   // Actually does the integration
-  qagstatus = gsl_integration_qag(&F, log10massmin, log10massmax, 0, 1E-4, 1000, GSL_INTEG_GAUSS41, w, &result, &eresult);
+  qagstatus = gsl_integration_qag(&F, log10mmin, log10mmax, HM_EPSABS, HM_EPSREL, HM_LIMIT, HM_INT_METHOD, w, &result, &eresult);
 
   // Clean up
   gsl_integration_workspace_free(w);
@@ -205,8 +204,8 @@ static double two_halo_integral(ccl_cosmology *cosmo, double k, double a, int *s
 
   int two_halo_integral_status = 0, qagstatus;
   double result = 0, eresult;
-  double log10massmin = log10(MMIN);
-  double log10massmax = log10(MMAX);
+  double log10mmin = log10(HM_MMIN);
+  double log10mmax = log10(HM_MMAX);
   Int_two_halo_Par ipar;
   gsl_function F;
   gsl_integration_workspace *w = gsl_integration_workspace_alloc(1000);
@@ -220,7 +219,7 @@ static double two_halo_integral(ccl_cosmology *cosmo, double k, double a, int *s
   F.params = &ipar;
 
   // Actually does the integration
-  qagstatus = gsl_integration_qag(&F, log10massmin, log10massmax, 0, 1E-4, 1000, GSL_INTEG_GAUSS41, w, &result, &eresult);
+  qagstatus = gsl_integration_qag(&F, log10mmin, log10mmax, HM_EPSABS, HM_EPSREL, HM_LIMIT, HM_INT_METHOD, w, &result, &eresult);
 
   // Clean up
   gsl_integration_workspace_free(w);
@@ -245,12 +244,12 @@ double ccl_twohalo_matter_power(ccl_cosmology *cosmo, double k, double a, int *s
   double A = 1.-two_halo_integral(cosmo, 0., a, status);
 
   // ...multiplied by the ratio of window functions
-  double W1=window_function(cosmo, MMIN, k,  a, NFW, status);
-  double W2=window_function(cosmo, MMIN, 0., a, NFW, status);
-  A=A*W1/W2;    
+  double W1 = window_function(cosmo, HM_MMIN, k,  a, NFW, status);
+  double W2 = window_function(cosmo, HM_MMIN, 0., a, NFW, status);
+  A = A*W1/W2;    
 
   // Add the additive correction to the calculated integral
-  I2h=I2h+A;
+  I2h = I2h+A;
       
   return ccl_linear_matter_power(cosmo, k, a, status)*I2h*I2h;
   

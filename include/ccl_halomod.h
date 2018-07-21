@@ -5,9 +5,13 @@ extern "C" {
 
 #pragma once
 
-#define MMIN 1e7 // Minimum mass for the halo-model integration
-#define MMAX 1e17 // Maximum mass for the halo-model integration
-
+#define HM_MMIN 1e7 // Minimum mass for the halo-model integration
+#define HM_MMAX 1e17 // Maximum mass for the halo-model integration
+#define HM_EPSABS 0 // Absolute error for the halo-model integration
+#define HM_EPSREL 1E-4 // Relative error for the halo-model integration
+#define HM_LIMIT 1000 // Maximum sub intervals for the halo-model integration
+#define HM_INT_METHOD GSL_INTEG_GAUSS41 // Integration scheme for halo-model integration
+  
 #include "ccl_core.h"  
 
   // concentration-mass relation
