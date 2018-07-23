@@ -1022,13 +1022,44 @@ static void ccl_cosmology_compute_power_bbks(ccl_cosmology * cosmo, int * status
   }
   
   gsl_spline2d * log_power_lin = gsl_spline2d_alloc(PLIN_SPLINE_TYPE, nk,na);
-  for (int j = 0; j < na; j++) {
-    double gfac = ccl_growth_factor(cosmo,z[j], status);
-    double g2 = 2.*log(gfac);
-    for (int i=0; i<nk; i++) {
-      y2d[j*nk+i] = y[i]+g2;
+  
+  // Check if the mu / Sigma modified gravity model is in use and if 
+  // so scale power spectrum accordingly
+  // Else, scale by normal growth factor
+  
+  /*if (fabs(cosmo->params.mu_0)>1e-12){
+	// Set up a second cosmology object with MG parameters set to 0 
+	// This allows us to scale the power spectrum appropriately.
+	ccl_cosmology * cosmo_GR = ccl_cosmology_create_with_params(cosmo->params.Omega_c, 
+	                     cosmo->params.Omega_b, cosmo->params.Omega_k,
+						 cosmo->params.Neff, cosmo.params->mnu, cosmo.params->mnu_type,
+						 cosmo->params.w0, cosmo->params.wa, cosmo->params.h, 
+						 cosmo->params.norm_pk, cosmo->params.n_s, cosmo->params.bcm_log10Mc, 
+						 cosmo->params.bcm_etab, cosmo->params.bcm_ks, 
+						 0., 0., cosmo->params.nz_mgrowth, cosmos->params.zarr_mgrowth, 
+						 cosmo->params.dfarr_mgrowth, cosmo->config,
+						 status)
+	
+	for (int j = 0; j < na; j++) {
+      double gfac_GR_normed = ccl_growth_factor(cosmo_GR,z[j], status);
+      double gfac_GR_unnorm = ccl_growth_factor_unnorm(cosmo_GR, z[j], status);
+      double gfac_MG_unnorm = ccl_growth_factor_unnorm(cosmo, z[j], status);
+      double g2_GR_normed = 2.*log(gfac_GR_normed);
+      double g2_GR_unnorm = 2.*log(gfac_GR_unnorm);
+      double g2_MG_unnorm = 2.*log(gfac_MG_unnorm);
+      for (int i=0; i<nk; i++) {
+        y2d[j*nk+i] = y[i]+g2_GR_normed - g2_GR_unnorm + g2_MG_unnorm;
+      }
     }
-  }
+  } else { */
+	  for (int j = 0; j < na; j++) {
+        double gfac = ccl_growth_factor(cosmo,z[j], status);
+        double g2 = 2.*log(gfac);
+        for (int i=0; i<nk; i++) {
+          y2d[j*nk+i] = y[i]+g2;
+        }
+      }
+  //}
   
   // Check that ccl_growth_factor didn't fail
   if (*status) {
