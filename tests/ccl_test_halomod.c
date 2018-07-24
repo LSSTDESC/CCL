@@ -6,7 +6,7 @@
 #include <string.h>
 
 // Relative error tolerance in the halomodel matter power spectrum
-#define HALOMOD_TOLERANCE 1e-3
+#define HALOMOD_TOLERANCE 3e-3
 
 // Data structure for the CTEST
 CTEST_DATA(halomod){
@@ -26,12 +26,12 @@ CTEST_DATA(halomod){
     
   // Arrays for power-spectrum data
   double k[3][2][256];
-  double Delta2[3][2][256];
+  double Pk[3][2][256];
   
 };
 
 // Function to read in the benchmark data
-static void read_halomod_test_file(double k[3][2][256], double Delta2[3][2][256]){
+static void read_halomod_test_file(double k[3][2][256], double Pk[3][2][256]){
 
   // Variables for reading in unwanted stuff and file name
   double spam;
@@ -44,12 +44,12 @@ static void read_halomod_test_file(double k[3][2][256], double Delta2[3][2][256]
     for (int i=0; i<2; i++){
 
       // File names for different redshifts and cosmological models
-      if(model==0 && i==0){strncpy(infile, "./tests/benchmark/HMx_power_model1_z0.txt", 256);}
-      if(model==0 && i==1){strncpy(infile, "./tests/benchmark/HMx_power_model1_z1.txt", 256);}
-      if(model==1 && i==0){strncpy(infile, "./tests/benchmark/HMx_power_model2_z0.txt", 256);}
-      if(model==1 && i==1){strncpy(infile, "./tests/benchmark/HMx_power_model2_z1.txt", 256);}
-      if(model==2 && i==0){strncpy(infile, "./tests/benchmark/HMx_power_model3_z0.txt", 256);}
-      if(model==2 && i==1){strncpy(infile, "./tests/benchmark/HMx_power_model3_z1.txt", 256);}
+      if(model==0 && i==0){strncpy(infile, "./tests/benchmark/pk_hm_c1_z0.txt", 256);}
+      if(model==0 && i==1){strncpy(infile, "./tests/benchmark/pk_hm_c1_z1.txt", 256);}
+      if(model==1 && i==0){strncpy(infile, "./tests/benchmark/pk_hm_c2_z0.txt", 256);}
+      if(model==1 && i==1){strncpy(infile, "./tests/benchmark/pk_hm_c2_z1.txt", 256);}
+      if(model==2 && i==0){strncpy(infile, "./tests/benchmark/pk_hm_c3_z0.txt", 256);}
+      if(model==2 && i==1){strncpy(infile, "./tests/benchmark/pk_hm_c3_z1.txt", 256);}
     
       // Open the file
       FILE * f = fopen(infile, "r");
@@ -59,7 +59,7 @@ static void read_halomod_test_file(double k[3][2][256], double Delta2[3][2][256]
       for (int j=0; j<256; j++) {
 
 	// Read in data from the benchmark file
-	int count = fscanf(f, "%le\t %le\t %le\t %le\t %le\n", &k[model][i][j], &spam, &spam, &spam, &Delta2[model][i][j]);
+	int count = fscanf(f, "%le\t %le\t %le\t %le\t %le\n", &k[model][i][j], &spam, &spam, &spam, &Pk[model][i][j]);
     
 	// Check that we have read in enough columns from the benchmark file
 	ASSERT_EQUAL(5, count);
@@ -104,7 +104,7 @@ CTEST_SETUP(halomod){
   }
   
   // read the file of benchmark data
-  read_halomod_test_file(data->k, data->Delta2);
+  read_halomod_test_file(data->k, data->Pk);
   
 }
 
@@ -147,11 +147,13 @@ static void compare_halomod(int model, struct halomod_data * data)
 
       // Set variables inside loop, convert CCL outputs to the same units as benchmark
       double k = data->k[model][i][j]*params.h; // Convert the benchmark data k/h to pure k
-      double Pk = 4.*M_PI*pow((k/(2.*M_PI)),3)*ccl_halomodel_matter_power(cosmo, k, a, status); // Convert CCL P(k) -> benchmark Delta^2(k)
-      double absolute_tolerance = HALOMOD_TOLERANCE*data->Delta2[model][i][j]; // Convert relative -> absolute tolerance      
+      double Pk = data->Pk[model][i][j]/pow(params.h,3); // Convert the benchmark data Pk units to remove factors of h
+      
+      double Pk_ccl = ccl_halomodel_matter_power(cosmo, k, a, status); // Get CCL P(k)
+      double absolute_tolerance = HALOMOD_TOLERANCE*data->Pk[model][i][j]; // Convert relative -> absolute tolerance      
 
       // Do the check
-      ASSERT_DBL_NEAR_TOL(data->Delta2[model][i][j], Pk, absolute_tolerance);      
+      ASSERT_DBL_NEAR_TOL(Pk, Pk_ccl, absolute_tolerance);
 
     }
 
