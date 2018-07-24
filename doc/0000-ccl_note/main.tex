@@ -772,6 +772,28 @@ calculated from the power spectrum $P(k)$ using
 
 To evaluate the numerical integral in the correlation functions, we make use of the public code {\tt FFTlog}\footnote{\url{http://casa.colorado.edu/~ajsh/FFTLog/}}\citep{Hamilton2000,Talman2009}. In brief, {\tt FFTlog} works on functions periodic in log space, by writing the Hankel Transform as a convolution between Bessel functions and the function of interest (in this case either $C_\ell$ or $P(k)$). A version of this code is included in \ccl with minor modifications.
 
+{\bf Redshift space distortion.} In redshift space and under the linear approximation \citep{Kaiser1987} the correlation function $\xi(s,\mu)$ can be expanded in multipoles
+\begin{equation}
+\xi(s,\mu) = \sum_{l\geq 0} \xi_l(s) L_l(\mu),
+\end{equation}
+where $\mu$ is the cosine of the separation angle in redshift space and $L_l(x)$ are the Legendre polynomials. The $\xi_l(s)$ are given by
+\begin{equation}
+\xi_l(s) = \frac{i^l}{2 \pi^2} \int_0^{\infty} P_l(k) j_l(k s) k^2 dk,
+\end{equation}
+where $P_l(k)$ are multipoles of $P(k,\mu_k)$ defined as
+\begin{equation}
+P(k,\mu_k) = \sum_{l\geq 0} P_l(k) L_l(\mu_k).
+\end{equation}
+They are also related to the real space matter power spectrum
+\begin{eqnarray}
+&P_0(k) = \left(1+\frac{2}{3}\beta+\frac{1}{5}\beta^2\right)P_r(k),\\
+&P_2(k) = \left(\frac{4}{3}\beta+\frac{4}{7}\beta^2\right)P_r(k),\\
+&P_4(k) = \frac{8}{35}\beta^2 P_r(k),
+\end{eqnarray}
+where $\beta$ is defined as $\beta \equiv f/b$ and all other multipoles are 0.
+
+We use {\tt FFTlog} to calculate $\xi_l(s)$ from $P_l(k)$ in the implementation of $\xi(s,\mu)$.
+
 %-----------------------------------------------------------
 %
 %   Correlation: beyond flat-sky (under development)
