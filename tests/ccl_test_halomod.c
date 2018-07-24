@@ -6,7 +6,7 @@
 #include <string.h>
 
 // Relative error tolerance in the halomodel matter power spectrum
-#define HALOMOD_TOLERANCE 3e-3
+#define HALOMOD_TOLERANCE 1e-3
 
 // Data structure for the CTEST
 CTEST_DATA(halomod){
@@ -150,7 +150,7 @@ static void compare_halomod(int model, struct halomod_data * data)
       double Pk = data->Pk[model][i][j]/pow(params.h,3); // Convert the benchmark data Pk units to remove factors of h
       
       double Pk_ccl = ccl_halomodel_matter_power(cosmo, k, a, status); // Get CCL P(k)
-      double absolute_tolerance = HALOMOD_TOLERANCE*data->Pk[model][i][j]; // Convert relative -> absolute tolerance      
+      double absolute_tolerance = HALOMOD_TOLERANCE*Pk; // Convert relative -> absolute tolerance      
 
       // Do the check
       ASSERT_DBL_NEAR_TOL(Pk, Pk_ccl, absolute_tolerance);
