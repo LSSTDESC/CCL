@@ -774,8 +774,8 @@ The target level of accuracy was $10^{-4}$ and this was achieved or surpassed fo
 
 \begin{figure*}
   \centering
-  \includegraphics[width=0.45\textwidth]{distances.eps}
-  \includegraphics[width=0.45\textwidth]{growth.eps}
+  \includegraphics[width=0.49\textwidth]{distances}
+  \includegraphics[width=0.49\textwidth]{growth}
   \caption{Accuracy achieved by \ccl in the prediction of background quantities. Left panel: fractional difference between the predictions of the comoving radial distance by \ccl and the benchmark for models CCL1-5 documented in Table \ref{tab:cosmologies} (solid lines) and models CCL7-11 with massive neutrinos documented in Table \ref{tab:cosmologies_nu} (dashed lines). Right panel: fractional difference between the predictions of the growth factor by \ccl and the benchmark for models CCL1-5. The growth factor in cosmologies with massive neutrinos is scale-dependent and not supported by \ccl.}
   \label{fig:distancegrow}
 \end{figure*}
@@ -837,7 +837,7 @@ In addition to the above tests in $\Lambda$CDM cosmologies without massive neutr
 
 \begin{figure}
 \centering
-\includegraphics[width=0.47\textwidth]{pk_class_nu_NL}
+\includegraphics[width=0.49\textwidth]{pk_class_nu_NL}
 \caption{Fractional difference between the nonlinear matter power spectrum as computed directly via {\tt CLASS} with that computed using {\tt CLASS} via \ccl in cosmologies CCL7, CCL8, and CCL9 with massive neutrinos.}
 \label{fig:power_nu}
 \end{figure}
@@ -894,8 +894,8 @@ Our results are shown in Figure \ref{fig:emuacc}. For cosmologies without neutri
 
 \begin{figure*}
   \centering
-  \includegraphics[width=0.45\textwidth]{poweremu.eps}
-  \includegraphics[width=0.45\textwidth]{poweremu_nu.eps}
+  \includegraphics[width=0.49\textwidth]{poweremu}
+  \includegraphics[width=0.49\textwidth]{poweremu_nu}
   \caption{Absolute fractional accuracy in the matter power spectra, Eq. (\ref{eq:pkaccemu}), obtained by calling the cosmic emulator from \ccl and the smoothed simulated spectra from \citet{Lawrence17}. The left panel shows the results for cosmologies without neutrinos; the right panel, results for cosmologies with neutrinos.}
   \label{fig:emuacc}
 \end{figure*}
@@ -921,9 +921,9 @@ These defines three new accuracy metrics:
 We note that while we maintain the $10^{-4}$ for our evaluations of $\sigma$, the accuracy degrades to a value of $5\times10^{-3}$ for the halo mass function evaluation, primarily at the high halo mass and high redshift domains. We find that this increased error is acceptable, as the level of precision is significantly better than the accuracy of current halo mass function models. This is demonstrated in Figure~\ref{fig:hmf}, where this calculation has been run for a single cosmology using the Tinker 2010 halo mass function. While there is a degradation in accuracy due to our spline treatment of the log inverse of $\sigma(M)$, we note that it does not significantly degrade our halo mass function determination. While improvement on this remains a task for the future, the halo mass function varies between fitting functions significantly more than this remaining error. As of this time, we do not have independent benchmarks for the halo bias function, though it should be noted that this calculation does not involve any additional functions beyond $\sigma(M)$ and should hold to the $10^{-4}$ tolerance level.
 
 \begin{figure*}
-\includegraphics[width=0.32\textwidth]{hmf_model1.eps}
-\includegraphics[width=0.32\textwidth]{hmf_model1_b.eps}
-\includegraphics[width=0.32\textwidth]{hmf_model1_c.eps}
+\includegraphics[width=0.32\textwidth]{hmf_model1}
+\includegraphics[width=0.32\textwidth]{hmf_model1_b}
+\includegraphics[width=0.32\textwidth]{hmf_model1_c}
 \caption{Three different numerical tests of the halo mass function calculation. In each line, the blue line is the fractional error in the function, while the black dashed line represents our error tolerance. The first panel demonstrates the robust calculation of $\sigma(M)$. The second panel demonstrates a numerical quirk in our spline treatment that is currently not addressed, but does reduce the numerical accuracy in returning the log inverse of $\sigma(M)$. We note that this does not significantly impact the error in the halo mass function in the final panel.}
 \label{fig:hmf}
 \end{figure*}
@@ -936,7 +936,7 @@ We note that while we maintain the $10^{-4}$ for our evaluations of $\sigma$, th
 In Figure~\ref{fig:halo_model} we show the power spectrum computed by the \ccl halo model compared to that from \textsc{halofit} and to the linear matter spectrum.
 
 \begin{figure}
-\includegraphics[width=0.45\textwidth]{halo_model.png}
+\includegraphics[width=0.49\textwidth]{halo_model.png}
 \caption{Matter power spectrum computed according to linear thoery, \textsc{halofit} and the \ccl halo model. The halo model two- and one-halo terms are also shown, their sum is the total halo-model prediciton. \textsc{halofit} is accurate compared to $N$-body simulations at the $\simeq5\%$ level for the scales shown. The halo-model prediction deviates from \textsc{halofit} at the $\simeq30\%$ level in the transition region when both the two- and one-halo terms are important ($k\simeq0.5\,\mathrm{Mpc}^{-1}$) but shows better agreement at smaller scales.}
 \label{fig:halo_model}
 \end{figure}
@@ -958,7 +958,7 @@ For both types of distributions, we computed the following quantities:
 %------------------------
 \begin{figure}
 \centering
-\includegraphics[width=0.47\textwidth]{zdist.eps}
+\includegraphics[width=0.49\textwidth]{dNdz_codecomp}
 \caption{Binned redshift distributions used for validating the computation of angular power spectra and correlation functions.}
 \label{fig:zhistos}
 \end{figure}
@@ -994,8 +994,8 @@ We compared the difference between \ccl calculated lensing and clustering correl
 
 \begin{figure*}
 \centering
-\includegraphics[width=0.47\textwidth]{projected_correlation_error_comparison_analytic} 
-\includegraphics[width=0.47\textwidth]{projected_correlation_error_comparison_histo} 
+\includegraphics[width=0.49\textwidth]{projected_correlation_error_comparison_analytic} 
+\includegraphics[width=0.49\textwidth]{projected_correlation_error_comparison_histo} 
 \caption{Comparison between the predicted projected correlation functions and the expected uncertainties for LSST. The left panel shows predictions for the analytic redshift distrobutions, while the right panel shows the case of the redshift histograms. The different markers and colors indicate clustering ($\xi_{gg}$, Eq. \ref{eq:xi00flat}, filled circles) or lensing ($\xi_{\pm}$, Eq. \ref{eq:xi22flat}, filled triangles and squares) auto-correlations of the $1$-$1$ or $2$-$2$ redshift bin combinations.}
 \label{fig:corrval}
 \end{figure*}
@@ -1012,8 +1012,8 @@ We also compared the absolute value of $r^2 \xi(r)$ and find a maximum differenc
 %
 \begin{figure*}
 \centering
-\includegraphics[width=0.47\textwidth]{benchmark_xi_rel} ~~~
-\includegraphics[width=0.47\textwidth]{benchmark_xi_abs} 
+\includegraphics[width=0.49\textwidth]{benchmark_xi_rel}
+\includegraphics[width=0.49\textwidth]{benchmark_xi_abs} 
 \caption{Comparison of the CCL calculation of the three-dimensional spatial correlation function $\xi(r)$ with a precise, numerical transform of the \ccl non-linear Halofit power spectrum. The left panel shows the relative error $\Delta \xi(r) / \xi(r)$. The right panel shows the absolute error in $r^2 \xi(r)$. Both panels are for the CCL1 model of Table~\ref{tab:cosmologies} at redshift zero. The comparison made with 40 points in the range $r = 0.1 - 100$~Mpc (blue curve) and 100 points in the region $r = 50 - 250$~Mpc encompasing the the Baryon Acoustic Oscillation peak.}
 \label{fig:benchmark_xi}
 \end{figure*}
@@ -1028,7 +1028,7 @@ The transform to $\xi(r)$ was performed using Mathematica and compared to the \c
 %
 \begin{figure*}[htbp]
 \centering
-\includegraphics[width=0.47\textwidth]{3dcorr_analytic}
+\includegraphics[width=0.49\textwidth]{3dcorr_analytic}
 \caption{The relative error in the three-dimensional spatial correlation function computed using the CCL algorithm compared to an analytic function $\xi(r) = (r/r_0)^{1.67}$ (blue curve) whose inverse transform $P(k)$ is known analytically, and using $P(k) = A k / (k_0 + k)^4$ (red dahsed curve) whose transform $\xi(r)$ is also known analytically. In this validation test, the known $P(k)$ was transformed with the \ccl algorithm and compared to the known analytic result for $\xi(r)$.}
 \label{fig:analytic_xi}
 \end{figure*}
@@ -1042,8 +1042,8 @@ Also the brute-force non-Limber computation and {\tt Angpow} were tested to reco
 
 \begin{figure*}[htbp]
 \centering
-\includegraphics[width=0.47\textwidth]{angpow1}
-\includegraphics[width=0.47\textwidth]{angpow3}
+\includegraphics[width=0.49\textwidth]{angpow1}
+\includegraphics[width=0.49\textwidth]{angpow3}
 \caption{Different predictions for the clustering angular power spectrum of a sample of galaxies with a Gaussian redshift distribution centered on $\langle z \rangle =1$. The left panel shows the $C_l$ predictions from the Limber case (green), the non-Limber case native to \ccl (yellow dot-dashed) and {\tt Angpow} (black). The right panel shows the fractional difference in the predicted clustering angular power spectrum between {\tt Angpow} and the brute-force \ccl non-Limber computation. The relative numerical difference between the non-Limber computations is lower than two orders of magnitude.}
 \label{fig:angpow}
 \end{figure*}
