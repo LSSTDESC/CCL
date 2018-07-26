@@ -847,7 +847,7 @@ In addition to the above tests in $\Lambda$CDM cosmologies without massive neutr
 
 \begin{figure*}
 \centering
-\includegraphics[width=0.95\textwidth]{pkdev_v2_z00}
+\includegraphics[width=0.95\textwidth]{pkdev_v2_z0_00}
 \caption{Absolute fractional difference between the matter power spectra at $z=0$ calculated using {\tt CLASS} via \ccl, and {\tt CLASS} directly, for a range of cosmological parameter values, and different {\tt CLASS} precision settings (standard vs. high-precision) and power spectrum types (linear vs. Halofit). The lines are colored according to the value of $\Omega_{\rm c}$ for each set of cosmological parameters (see Table~\ref{tab:paramranges} for the ranges of other parameters).}
 \label{fig:power_paramspace}
 \end{figure*}
@@ -862,7 +862,7 @@ For each set of parameters, we then calculate the linear and non-linear (Halofit
 
 \begin{figure*}
 \centering
-\includegraphics[width=0.95\textwidth]{pkdev_v2_z20}
+\includegraphics[width=0.95\textwidth]{pkdev_v2_z2_00}
 \caption{Absolute fractional difference between \ccl and {\tt CLASS} matter power spectra, as plotted in Fig.~\ref{fig:power_paramspace}, but now at $z=2$.}
 \label{fig:power_paramspace_z2}
 \end{figure*}
@@ -1026,12 +1026,12 @@ The transform to $\xi(r)$ was performed using Mathematica and compared to the \c
 
 
 %
-\begin{figure*}[htbp]
+\begin{figure}[htbp]
 \centering
 \includegraphics[width=0.49\textwidth]{3dcorr_analytic}
 \caption{The relative error in the three-dimensional spatial correlation function computed using the CCL algorithm compared to an analytic function $\xi(r) = (r/r_0)^{1.67}$ (blue curve) whose inverse transform $P(k)$ is known analytically, and using $P(k) = A k / (k_0 + k)^4$ (red dahsed curve) whose transform $\xi(r)$ is also known analytically. In this validation test, the known $P(k)$ was transformed with the \ccl algorithm and compared to the known analytic result for $\xi(r)$.}
 \label{fig:analytic_xi}
-\end{figure*}
+\end{figure}
 
 %\subsubsection*{\tt Angpow}
 
