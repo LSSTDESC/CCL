@@ -55,17 +55,4 @@
     }
   }
 
-  void halo_concentration_vec(ccl_cosmology *cosmo,
-			      double a,
-			      int label,
-			      double *halo_mass, int nm,
-			      double *output, int nout,
-			      int *status)
-  {
-    assert(nout == nm);
-    for(int i=0; i < nm; i++){
-      output[i] = ccl_halo_concentration(cosmo, halo_mass[i], a, label, status);
-    }
-  }
-
   %}

@@ -49,12 +49,12 @@ double Dv_BryanNorman(ccl_cosmology *cosmo, double a, int *status){
 /*----- ROUTINE: nu_mass -----
 INPUT: cosmology, halo mass, scale factor
 TASK: Computes the peak threshold: nu(M,z) = delta_c(z) / sigma(M,z)
-*/
 double nu_mass(ccl_cosmology *cosmo, double halomass, double a, int *status) {
   
   return dc_NakamuraSuto(cosmo, a, status)/ccl_sigmaM(cosmo, halomass, a, status);
   
 }
+*/
 
 /*----- ROUTINE: r_delta -----
 INPUT: cosmology, halo mass, scale factor, halo overdensity
@@ -267,7 +267,8 @@ static double massfunc_f(ccl_cosmology *cosmo, double halomass, double a, double
     fit_a = 0.707;
 
     // nu = delta_c(z) / sigma(M)
-    nu = nu_mass(cosmo, halomass, a, status);
+    //nu = nu_mass(cosmo, halomass, a, status);
+    nu = dc_NakamuraSuto(cosmo, a, status)/ccl_sigmaM(cosmo, halomass, a, status);
  
     return nu*fit_A*(1.+pow(fit_a*pow(nu,2),-fit_p))*exp(-fit_a*pow(nu,2)/2.);
 
@@ -403,7 +404,8 @@ static double ccl_halo_b1(ccl_cosmology *cosmo, double halomass, double a, doubl
 
     // Cosmology dependent delta_c and nu
     double delta_c = dc_NakamuraSuto(cosmo, a, status);
-    nu = nu_mass(cosmo, halomass, a, status);
+    //nu = nu_mass(cosmo, halomass, a, status);
+    nu = delta_c/ccl_sigmaM(cosmo, halomass, a, status);
  
     return 1.+(fit_a*pow(nu,2)-1.+2.*fit_p/(1.+pow(fit_a*pow(nu,2),fit_p)))/delta_c;
 

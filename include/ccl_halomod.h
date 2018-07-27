@@ -62,10 +62,11 @@ extern "C" {
    * @param cosmo: cosmology object containing parameters
    * @param halomass: halo mass in units of Msun
    * @param a: scale factor normalised to a=1 today
+   * @param Delta_v: overdensity criteria (with respect to matter density) used for halo mass
    * @param status: Status flag: 0 if there are no errors, non-zero otherwise
    * @return halo_concentration: the halo concentration
    */
-  double ccl_halo_concentration(ccl_cosmology *cosmo, double halomass, double a, ccl_conc_label label,int *status);
+  double halo_concentration(ccl_cosmology *cosmo, double halomass, double a, double Delta_v, ccl_conc_label label, int *status);
   
 #ifdef __cplusplus
 }

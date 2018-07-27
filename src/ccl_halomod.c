@@ -2,6 +2,7 @@
 #include "math.h"
 #include "stdio.h"
 #include "stdlib.h"
+#include "string.h"
 #include "gsl/gsl_errno.h"
 #include "gsl/gsl_integration.h"
 #include "gsl/gsl_sf_expint.h"
@@ -21,18 +22,18 @@ static double u_nfw_c(ccl_cosmology *cosmo, double c, double halomass, double k,
 
   // Special case to prevent numerical problems if k=0,
   // the result should be unity here because of the normalisation
-  if(k==0.){    
+  if (k==0.) {    
     return 1.;    
   }
 
   // The general k case
   else{
     
-    //Scale radius for NFW (rs=rv/c)
+    // Scale radius for NFW (rs=rv/c)
     rv = r_delta(cosmo, halomass, a, Delta_v, status);
     rs = rv/c;
 
-    //Dimensionless wave-number variable
+    // Dimensionless wave-number variable
     ks = k*rs;
 
     // Various bits for summing together to get final result
@@ -47,23 +48,36 @@ static double u_nfw_c(ccl_cosmology *cosmo, double c, double halomass, double k,
 }
 
 // The concentration-mass relation for haloes
-// TODO: consistency check that routine only runs if called with appropriate halo definition
-double ccl_halo_concentration(ccl_cosmology *cosmo, double halomass, double a, ccl_conc_label label, int *status){
+double halo_concentration(ccl_cosmology *cosmo, double halomass, double a, double odelta, ccl_conc_label label, int *status){
 
-  double gz, g0;
+  double gz, g0, nu, delta_c;
   double Mpiv, A, B, C;
 
   switch(label){
 
     // Bhattacharya et al. (2011; 1005.2239; Delta = 200rho_m; Table 2)
-  case Bhattacharya2011:  
+  case Bhattacharya2011:
+
+    if (odelta != 200.) {
+      *status = CCL_ERROR_CONC_DV;
+      strcpy(cosmo->status_message, "ccl_halomod.c: halo_concentration(): Bhattacharya concentration relation only valid for Delta_v = 200 \n");
+      return NAN;
+    }
     
     gz = ccl_growth_factor(cosmo,a,status);
     g0 = ccl_growth_factor(cosmo,1.0,status);
-    return 9.*pow(nu_mass(cosmo,halomass,a,status),-0.29)*pow(gz/g0,1.15);
+    delta_c = 1.686;
+    nu = delta_c/ccl_sigmaM(cosmo, halomass, a, status);
+    return 9.*pow(nu,-0.29)*pow(gz/g0,1.15);
 
     // Duffy et al. (2008; 0804.2486; Table 1, second section: Delta = Virial)
   case Duffy2008_virial:
+
+    if (odelta != Dv_BryanNorman(cosmo, a, status)) {
+      *status = CCL_ERROR_CONC_DV;
+      strcpy(cosmo->status_message, "ccl_halomod.c: halo_concentration(): Duffy_virial concentration called with non-virial Delta_v\n");
+      return NAN;
+    }
     
     Mpiv = 2e12/cosmo->params.h; // Pivot mass in Msun (note in the paper units are Msun/h)
     A = 7.85;
@@ -87,7 +101,7 @@ double ccl_halo_concentration(ccl_cosmology *cosmo, double halomass, double a, c
 }
 
 // Fourier Transforms of halo profiles
-static double window_function(ccl_cosmology *cosmo, double m, double k, double a, ccl_win_label label, int *status){
+static double window_function(ccl_cosmology *cosmo, double m, double k, double a, double odelta, ccl_win_label label, int *status){
 
   double rho_matter, c;
   
@@ -99,7 +113,7 @@ static double window_function(ccl_cosmology *cosmo, double m, double k, double a
     rho_matter = ccl_rho_x(cosmo, 1., ccl_species_m_label, 1, status);
 
     // The halo concentration for this mass and scale factor  
-    c = ccl_halo_concentration(cosmo, m, a, Duffy2008_virial, status);    
+    c = halo_concentration(cosmo, m, a, odelta, Duffy2008_virial, status);    
 
     // The function U is normalised so multiplying by M/rho turns units to overdensity
     return m*u_nfw_c(cosmo, c, m, k, a, status)/rho_matter;
@@ -130,7 +144,7 @@ static double one_halo_integrand(double log10mass, void *params){
   double Delta_v = Dv_BryanNorman(p->cosmo, p->a, p->status); // Virial density of haloes
 
   // The squared normalised Fourier Transform of a halo profile (W(k->0 = 1)
-  double wk = window_function(p->cosmo,halomass, p->k, p->a, NFW, p->status);
+  double wk = window_function(p->cosmo,halomass, p->k, p->a, Delta_v, NFW, p->status);
 
   // Fairly sure that there should be no ln(10) factor should be here since the integration is being specified in log10 range
   double dn_dlogM = ccl_massfunc(p->cosmo, halomass, p->a, Delta_v, p->status);
@@ -164,7 +178,7 @@ static double one_halo_integral(ccl_cosmology *cosmo, double k, double a, int *s
   gsl_integration_workspace_free(w);
 
   // Check for errors
-  if(qagstatus != GSL_SUCCESS) {
+  if (qagstatus != GSL_SUCCESS) {
     ccl_raise_gsl_warning(qagstatus, "ccl_halomod.c: one_halo_integral:");
     return NAN;      
   } else {
@@ -188,7 +202,7 @@ static double two_halo_integrand(double log10mass, void *params){
   double Delta_v = Dv_BryanNorman(p->cosmo, p->a, p->status);
 
   // The window function appropriate for the matter power spectrum
-  double wk = window_function(p->cosmo,halomass, p->k, p->a, NFW, p->status);
+  double wk = window_function(p->cosmo,halomass, p->k, p->a, Delta_v, NFW, p->status);
 
   // Fairly sure that there should be no ln(10) factor should be here since the integration is being specified in log10 range
   double dn_dlogM = ccl_massfunc(p->cosmo, halomass, p->a, Delta_v, p->status);
@@ -225,7 +239,7 @@ static double two_halo_integral(ccl_cosmology *cosmo, double k, double a, int *s
   gsl_integration_workspace_free(w);
 
   // Check for errors
-  if(qagstatus != GSL_SUCCESS) {
+  if (qagstatus != GSL_SUCCESS) {
     ccl_raise_gsl_warning(qagstatus, "ccl_halomod.c: two_halo_integral:");
     return NAN;      
   } else {
@@ -243,9 +257,12 @@ double ccl_twohalo_matter_power(ccl_cosmology *cosmo, double k, double a, int *s
   // The addative correction is the missing part of the integral below the lower-mass limit
   double A = 1.-two_halo_integral(cosmo, 0., a, status);
 
+  // Virial overdensity
+  double Delta_v = Dv_BryanNorman(cosmo, a, status);
+
   // ...multiplied by the ratio of window functions
-  double W1 = window_function(cosmo, HM_MMIN, k,  a, NFW, status);
-  double W2 = window_function(cosmo, HM_MMIN, 0., a, NFW, status);
+  double W1 = window_function(cosmo, HM_MMIN, k,  a, Delta_v, NFW, status);
+  double W2 = window_function(cosmo, HM_MMIN, 0., a, Delta_v, NFW, status);
   A = A*W1/W2;    
 
   // Add the additive correction to the calculated integral
