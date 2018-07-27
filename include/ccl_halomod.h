@@ -19,6 +19,7 @@ extern "C" {
     Bhattacharya2011 = 1,
     Duffy2008_virial = 2,
     constant = 3,
+    Bullock = 4,
   } ccl_conc_label;
 
   // halo window profiles
