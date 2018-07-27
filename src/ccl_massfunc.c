@@ -526,6 +526,32 @@ void ccl_cosmology_compute_sigma(ccl_cosmology *cosmo, int *status)
   free(y);
 }
 
+/*----- ROUTINE: ccl_dlninvsig_dlogm -----
+INPUT: ccl_cosmology *cosmo, double halo mass in units of Msun
+TASK: returns the value of the derivative of ln(sigma^-1) with respect to log10 in halo mass.
+*/
+
+static double ccl_dlninvsig_dlogm(ccl_cosmology *cosmo, double halomass, int*status)
+{
+  if (!cosmo->computed_sigma) {
+    ccl_cosmology_compute_sigma(cosmo, status);
+    ccl_check_status(cosmo, status);
+  }
+
+  double val, logmass;
+
+  logmass = log10(halomass);
+
+  int gslstatus = gsl_spline_eval_e(cosmo->data.dlnsigma_dlogm, logmass, cosmo->data.accelerator_m,&val);
+  if(gslstatus != GSL_SUCCESS) {
+    ccl_raise_gsl_warning(gslstatus, "ccl_massfunc.c: ccl_massfunc():");
+    *status |= gslstatus;
+  }
+  ccl_check_status(cosmo, status);
+
+  return val;
+}
+
 /*----- ROUTINE: ccl_massfunc -----
 INPUT: ccl_cosmology * cosmo, double halo mass in units of Msun, double scale factor
 TASK: returns halo mass function as dn / dlog10 m
@@ -538,23 +564,12 @@ double ccl_massfunc(ccl_cosmology *cosmo, double halomass, double a, double odel
 	  return NAN; 
   }
 	
-  if (!cosmo->computed_sigma) {
-    ccl_cosmology_compute_sigma(cosmo, status);
-    ccl_check_status(cosmo, status);
-  }
+  double f, rho_m;  
 
-  double f,deriv,rho_m,logmass;
-  
-  logmass = log10(halomass);
   rho_m = RHO_CRITICAL*cosmo->params.Omega_m*cosmo->params.h*cosmo->params.h;
   f=massfunc_f(cosmo,halomass,a,odelta,status);
-  int gslstatus = gsl_spline_eval_e(cosmo->data.dlnsigma_dlogm, logmass, cosmo->data.accelerator_m,&deriv);
-  if(gslstatus != GSL_SUCCESS) {
-    ccl_raise_gsl_warning(gslstatus, "ccl_massfunc.c: ccl_massfunc():");
-    *status |= gslstatus;
-  }
-  ccl_check_status(cosmo, status);
-  return f*rho_m*deriv/halomass;
+
+  return f*rho_m*ccl_dlninvsig_dlogm(cosmo,halomass,status)/halomass;
 }
 
 /*----- ROUTINE: ccl_halob1 -----
