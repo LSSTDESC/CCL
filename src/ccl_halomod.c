@@ -6,6 +6,7 @@
 #include "gsl/gsl_errno.h"
 #include "gsl/gsl_integration.h"
 #include "gsl/gsl_sf_expint.h"
+#include "gsl/gsl_roots.h"
 #include "ccl_background.h"
 #include "ccl_power.h"
 #include "ccl_massfunc.h"
@@ -45,6 +46,64 @@ static double u_nfw_c(ccl_cosmology *cosmo, double c, double halomass, double k,
     return (f1+f2-f3)/fc;
     
   }
+}
+
+struct z_form_bullock_test_params
+  {
+  struct cosmo;
+  double halomass;
+  int status;
+  };
+
+static double z_form_bullock_test(double a_form, void *params)
+{
+  struct z_form_bullock_test_params *p
+    = (struct z_form_bullock_test_params *) params;
+
+  struct cosmo = p->cosmo;
+  double halomass = p->halomass;;
+  int status = p->status;
+
+  return ccl_sigmaM(cosmo, halomass, a_form, status) - 1.686;  
+}
+
+double z_form_bullock(ccl_cosmology *cosmo, double halomass, double a, int *status)
+{
+  int gslstatus;
+  int iter = 0, max_iter = 100;
+  const gsl_root_fsolver_type *T;
+  gsl_root_fsolver *s;
+
+  double res = 0;
+  double a_max = 1.0, a_min = 1./(1.+1000.0);
+  gsl_function F;
+
+  struct z_form_bullock_test_params params = {cosmo, halomass, status};
+
+  F.function = &z_form_bullock_test;
+  F.params = &params;
+
+  T = gsl_root_fsolver_brent;
+  s = gsl_root_fsolver_alloc (T);
+  gsl_root_fsolver_set (s, &F, a_min, a_max);
+
+  do
+    {
+    iter++;
+    gslstatus = gsl_root_fsolver_iterate (s);
+    res = gsl_root_fsolver_root (s);
+    a_min = gsl_root_fsolver_x_lower (s);
+    a_max = gsl_root_fsolver_x_upper (s);
+    gslstatus = gsl_root_test_interval (a_min, a_max, 0., 0.001);
+
+    // testing print statements until it actually works
+    printf("%5d [%.7f, %.7f] %.7f", iter, a_min, a_max, res);
+    }
+  while (status == GSL_CONTINUE && iter < max_iter);
+
+  gsl_root_fsolver_free (s);
+
+  return res;    
 }
 
 // The concentration-mass relation for haloes
