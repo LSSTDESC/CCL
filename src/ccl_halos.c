@@ -88,3 +88,42 @@ double ccl_projected_halo_profile_nfw(ccl_cosmology *cosmo, double c, double hal
     return sigma;
     
 }
+
+
+//cosmo: ccl cosmology object containing cosmological parameters
+//c: halo concentration, needs to be consistent with halo size definition
+//halomass: halo mass
+//massdef_delta: mass definition, overdensity relative to matter density
+//a: scale factor
+//rp: radius at which to calculate output
+//returns mass density at given r
+double ccl_halo_profile_einasto(ccl_cosmology *cosmo, double c, double halomass, double massdef_delta_m, double a, double r, int *status){
+    
+    //haloradius: halo radius for mass definition
+    //rs: scale radius
+    double haloradius, rs;
+    
+    haloradius = r_delta(cosmo, halomass, a, massdef_delta_m, status);
+    rs = haloradius/c; //assuming same formula for scale radius as in NFW(?)
+    
+    //nu: peak height, https://arxiv.org/pdf/1401.1216.pdf eqn1
+    //alpha: Einasto parameter, https://arxiv.org/pdf/1401.1216.pdf eqn5
+    double nu;
+    double alpha;
+    
+    nu = 1.686/ccl_sigmaM(cosmo, halomass, a, status);
+    alpha = 0.155 + 0.0095*nu*nu;
+    
+    //rhos: scale density
+    double rhos;
+    
+    rhos = halomass/(4.*M_PI*pow(rs,3)*helper_fx(c)); //assuming same formula as rho0 in NFW(?)
+    
+    //rho_r: density at r
+    double rho_r;
+    
+    rho_r = rhos*exp(-2.*(pow(r/rs,alpha)-1.)/alpha)
+    
+    return rho_r;
+
+}
