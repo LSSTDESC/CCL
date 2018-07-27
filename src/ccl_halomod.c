@@ -48,23 +48,17 @@ static double u_nfw_c(ccl_cosmology *cosmo, double c, double halomass, double k,
   }
 }
 
-struct z_form_bullock_test_params
-  {
-  struct cosmo;
+
+typedef struct{  
+  ccl_cosmology *cosmo;
   double halomass;
-  int status;
-  };
+  int *status;
+} z_form_bullock_func_Par;
 
-static double z_form_bullock_test(double a_form, void *params)
+static double z_form_bullock_func(double a_form, void *params)
 {
-  struct z_form_bullock_test_params *p
-    = (struct z_form_bullock_test_params *) params;
-
-  struct cosmo = p->cosmo;
-  double halomass = p->halomass;;
-  int status = p->status;
-
-  return ccl_sigmaM(cosmo, halomass, a_form, status) - 1.686;  
+  z_form_bullock_func_Par *p = (z_form_bullock_func_Par *)params;;
+  return ccl_sigmaM(p->cosmo, p->halomass, a_form, p->status) - 1.686;  
 }
 
 double z_form_bullock(ccl_cosmology *cosmo, double halomass, double a, int *status)
@@ -78,10 +72,15 @@ double z_form_bullock(ccl_cosmology *cosmo, double halomass, double a, int *stat
   double a_max = 1.0, a_min = 1./(1.+1000.0);
   gsl_function F;
 
-  struct z_form_bullock_test_params params = {cosmo, halomass, status};
+  z_form_bullock_func_Par fpar;
 
-  F.function = &z_form_bullock_test;
-  F.params = &params;
+
+  fpar.cosmo = cosmo;
+  fpar.halomass = halomass;
+  fpar.status = &gslstatus;
+
+  F.function = &z_form_bullock_func;
+  F.params = &fpar;
 
   T = gsl_root_fsolver_brent;
   s = gsl_root_fsolver_alloc (T);
