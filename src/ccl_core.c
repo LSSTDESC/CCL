@@ -386,47 +386,98 @@ ccl_parameters ccl_parameters_create(
     return params;
   }
   
-  // Decide how to split sum of neutrino masses between 3 neutrinos. See the 
-  // CCL note for how we get these expressions for the neutrino masses in 
-  // normal and inverted hierarchy.
+  // Decide how to split sum of neutrino masses between 3 neutrinos. We use
+  // a Newton's rule numerical solution (thanks M. Jarvis).
+  
   if (mnu_type==ccl_mnu_sum){
 	  // Normal hierarchy
+	  
 	  mnu_in = malloc(3*sizeof(double));
-	  double nfac = -6.*DELTAM12_sq + 12.*DELTAM13_sq_pos + 4.*mnusum*mnusum;
 	  
-	  mnu_in[0] = 2./3. * mnusum - 1./6. * pow(nfac, 0.5) 
-	            - 0.25 * DELTAM12_sq / (2./3.* mnusum - 1./6.*pow(nfac, 0.5));
-	  mnu_in[1] = 2./3.* mnusum - 1./6. * pow(nfac, 0.5) 
-	            + 0.25 * DELTAM12_sq / (2./3.* mnusum - 1./6. * pow(nfac, 0.5));
-	  mnu_in[2] = -1./3. * mnusum + 1./3 * pow(nfac, 0.5); 
+	  // Check if the sum is zero
+	  if (*mnu<1e-15){
+		  mnu_in[0] = 0.;
+		  mnu_in[1] = 0.;
+		  mnu_in[2] = 0.;
+	  } else{
 	  
+	      mnu_in[0] = 0.; // This is a starting guess.
+	  
+	      double sum_check;
+	      // Check that sum is consistent
+	      mnu_in[1] = pow(DELTAM12_sq, 0.5);
+	      mnu_in[2] = pow(DELTAM13_sq_pos, 0.5);
+	      sum_check = mnu_in[0] + pow(DELTAM12_sq, 0.5) + pow(DELTAM13_sq_pos, 0.5);
+	      if (ccl_mnu_sum < sum_check){
+		      *status = CCL_ERROR_MNU_UNPHYSICAL;
+          }
+      
+          double dsdm1;
+          // This is the Newton's method
+          while (fabs(*mnu - sum_check) > 1e-15){
+		  
+              dsdm1 = 1. + mnu_in[0] / mnu_in[1] + mnu_in[0] / mnu_in[2];
+              mnu_in[0] = mnu_in[0] - (sum_check - *mnu) / dsdm1;
+              mnu_in[1] = pow((mnu_in[0]*mnu_in[0] + DELTAM12_sq), 0.5);
+              mnu_in[2] = pow((mnu_in[0]*mnu_in[0] + DELTAM13_sq_pos), 0.5);
+              sum_check = mnu_in[0] + mnu_in[1] + mnu_in[2];
+          }
+	  }
+	  
+	  // Check if the user has provided a sum that is below the physical limit.
 	  if (mnu_in[0]<0 || mnu_in[1]<0 || mnu_in[2]<0){
-	    // The user has provided a sum that is below the physical limit.
 	    if (params.sum_nu_masses < 1e-14){
 			mnu_in[0] = 0.; mnu_in[1] = 0.; mnu_in[2] = 0.;
 		}else{
 			*status = CCL_ERROR_MNU_UNPHYSICAL;
 	    }
+	    
 	  }
   } else if (mnu_type==ccl_mnu_sum_inverted){
-		// Inverted hierarchy
-		mnu_in = malloc(3*sizeof(double));
-		double nfac = -6.*DELTAM12_sq + 12.*DELTAM13_sq_neg + 4.*mnusum*mnusum;
-		
-		mnu_in[0] = 2./3.* mnusum - 1./6.*pow(nfac, 0.5) 
-	              - 0.25 * DELTAM12_sq / (2./3.* mnusum - 1./6.*pow(nfac, 0.5));
-	    mnu_in[1] = 2./3.* mnusum - 1./6. * pow(nfac, 0.5) 
-	              + 0.25 * DELTAM12_sq / (2./3.* mnusum - 1./6. * pow(nfac, 0.5));
-	    mnu_in[2] = -1./3. * mnusum + 1./3 * pow(nfac, 0.5);
-	    
-	    if(mnu_in[0]<0 || mnu_in[1]<0 || mnu_in[2]<0){
-	    // The user has provided a sum that is below the physical limit.
+	  // Inverted hierarchy
+	  
+	  mnu_in = malloc(3*sizeof(double));
+	  
+	  	  // Check if the sum is zero
+	  if (*mnu<1e-15){
+		  mnu_in[0] = 0.;
+		  mnu_in[1] = 0.;
+		  mnu_in[2] = 0.;
+	  } else{
+	  
+	      mnu_in[0] = 0.; // This is a starting guess.
+	  
+	      double sum_check;
+	      // Check that sum is consistent
+	      mnu_in[1] = pow(-1.* DELTAM13_sq_neg - DELTAM12_sq, 0.5);
+	      mnu_in[2] = pow(-1.* DELTAM13_sq_neg, 0.5);
+	      sum_check = mnu_in[0] + mnu_in[1] + mnu_in[2];
+	      if (ccl_mnu_sum < sum_check){
+		      *status = CCL_ERROR_MNU_UNPHYSICAL;
+          }
+      
+      
+          double dsdm1;
+          // This is the Newton's method
+          while (fabs(*mnu- sum_check) > 1e-15){
+              dsdm1 = 1. + (mnu_in[0] / mnu_in[1]) + (mnu_in[0] / mnu_in[2]);
+              mnu_in[0] = mnu_in[0] - (sum_check - *mnu) / dsdm1;
+              mnu_in[1] = pow((mnu_in[0]*mnu_in[0] + DELTAM12_sq), 0.5);
+              mnu_in[2] = pow((mnu_in[0]*mnu_in[0] + DELTAM13_sq_neg), 0.5);
+              sum_check = mnu_in[0] + mnu_in[1] + mnu_in[2];
+          }
+	  
+      }
+      
+	  // Check if the user has provided a sum that is below the physical limit.
+	  if (mnu_in[0]<0 || mnu_in[1]<0 || mnu_in[2]<0){
 	    if (params.sum_nu_masses < 1e-14){
 			mnu_in[0] = 0.; mnu_in[1] = 0.; mnu_in[2] = 0.;
 		}else{
 			*status = CCL_ERROR_MNU_UNPHYSICAL;
 	    }
-	    }
+	    
+	  }
   } else if (mnu_type==ccl_mnu_sum_equal){
 	    // Split the sum of masses equally
 	    mnu_in = malloc(3*sizeof(double));
