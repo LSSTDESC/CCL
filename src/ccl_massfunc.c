@@ -554,17 +554,6 @@ static double ccl_dlninvsig_dlogm(ccl_cosmology *cosmo, double halomass, int*sta
   return val;
 }
 
-/*----- ROUTINE: neff ------
-  INPUT:
-  TASK:
- */
-double neff(ccl_cosmology *cosmo, double halomass, int *status){
-
-  return 6.*ccl_dlninvsig_dlogm(cosmo, halomass, status)/log(10.)-3.
-
-}
-
-
 /*----- ROUTINE: ccl_massfunc -----
 INPUT: ccl_cosmology * cosmo, double halo mass in units of Msun, double scale factor
 TASK: returns halo mass function as dn / dlog10 m
