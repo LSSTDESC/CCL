@@ -1,0 +1,20 @@
+add_executable(ccl_sample_baryons ccl_sample_baryons.c)
+target_link_libraries(ccl_sample_baryons ccl)
+
+add_executable(ccl_sample_neutrinos ccl_sample_neutrinos.c)
+target_link_libraries(ccl_sample_neutrinos ccl)
+
+add_executable(ccl_sample_photoz ccl_sample_photoz.c)
+target_link_libraries(ccl_sample_photoz ccl)
+
+add_executable(ccl_sample_pkemu ccl_sample_pkemu.c)
+target_link_libraries(ccl_sample_pkemu ccl)
+
+add_executable(ccl_sample_power ccl_sample_power.c)
+target_link_libraries(ccl_sample_power ccl)
+
+add_executable(ccl_sample_run ccl_sample_run.c)
+target_link_libraries(ccl_sample_run ccl)
+
+add_executable(ccl_sample_angpow ccl_sample_angpow.cc)
+target_link_libraries(ccl_sample_angpow ccl)

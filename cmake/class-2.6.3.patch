@@ -1,0 +1,44 @@
+diff --git a/source/input.c b/source/input.c
+index 43a2fdd..f4a9367 100755
+--- a/source/input.c
++++ b/source/input.c
+@@ -3167,6 +3167,15 @@ int input_default_params(
+
+ int input_default_precision ( struct precision * ppr ) {
+
++  /** Resolve path to parameter files
++   */
++  FileName param_dir;
++  const char* param_dir_env = getenv("CLASS_PARAM_DIR");
++  if (param_dir_env != NULL)
++    sprintf(param_dir,  param_dir_env);
++  else
++    sprintf(param_dir, __CLASSDIR__);
++
+   /** Initialize presicion parameters for different structures:
+    * - parameters related to the background
+    */
+@@ -3188,7 +3197,7 @@ int input_default_precision ( struct precision * ppr ) {
+    */
+
+   /* for bbn */
+-  sprintf(ppr->sBBN_file,__CLASSDIR__);
++  sprintf(ppr->sBBN_file, param_dir);
+   strcat(ppr->sBBN_file,"/bbn/sBBN_2017.dat");
+
+   /* for recombination */
+@@ -3226,11 +3235,11 @@ int input_default_precision ( struct precision * ppr ) {
+
+   ppr->recfast_H_frac=1.e-3;               /* from recfast 1.4 */
+
+-  sprintf(ppr->hyrec_Alpha_inf_file,__CLASSDIR__);
++  sprintf(ppr->hyrec_Alpha_inf_file, param_dir);
+   strcat(ppr->hyrec_Alpha_inf_file,"/hyrec/Alpha_inf.dat");
+-  sprintf(ppr->hyrec_R_inf_file,__CLASSDIR__);
++  sprintf(ppr->hyrec_R_inf_file, param_dir);
+   strcat(ppr->hyrec_R_inf_file,"/hyrec/R_inf.dat");
+-  sprintf(ppr->hyrec_two_photon_tables_file,__CLASSDIR__);
++  sprintf(ppr->hyrec_two_photon_tables_file, param_dir);
+   strcat(ppr->hyrec_two_photon_tables_file,"/hyrec/two_photon_tables.dat");
+
+   /* for reionization */

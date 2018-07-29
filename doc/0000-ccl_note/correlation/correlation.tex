@@ -1,0 +1,87 @@
+\documentclass[]{article}
+
+\usepackage{natbib}
+\usepackage{subfiles}
+\usepackage{multicol}
+%%%%% AUTHORS - PLACE YOUR OWN PACKAGES HERE %%%%%
+
+% Only include extra packages if you really need them. Common packages are:
+\usepackage{graphicx}	% Including figure files
+\usepackage{amsmath}	% Advanced maths commands
+\usepackage{amssymb}	% Extra maths symbols
+\usepackage{subcaption}
+\usepackage{float}
+\usepackage{color}
+\bibliographystyle{apj}
+
+\newcommand{\sukhdeep}[1]{{\textcolor{magenta}{Sukhdeep: #1}}}
+
+\begin{document}
+
+\section{Correlation Function}
+	We begin by writing the angular space observable, $X$, in terms of the harmonic counterpart 
+	\begin{align}\label{eq:X_harmonic}
+		X(\Omega)=&\sum_{lm}\tilde X_{lm}Y_{lm}(\Omega)
+	\end{align}
+	where $\Omega$ refers to the angular coordinates on the sky.
+	The angular cross correlation function of two (scalar) tracers, $X,Z$ of large scale structure can be written in terms 
+	of their harmonic space counter parts, $\tilde X, \tilde Z$ as
+	\begin{align}
+		\langle XZ \rangle(\theta)=&\left\langle\sum_{\ell,m}\sum_{\ell', m'}\tilde X_{\ell m}\tilde Z_{\ell' m'}
+									Y_{\ell m}(\Omega)
+									Y_{\ell'm'}(\Omega+\theta)\right\rangle\\
+									=&\sum_{\ell,m}C_{\ell}Y_{\ell m}(\Omega)
+									Y_{\ell m}(\Omega+\theta)\\
+		\langle XZ \rangle(\theta)=&\frac{1}{4\pi}\sum_{\ell}(2\ell+1)C_{\ell}P_{\ell}(\cos\theta)\label{eq:xi_pl0}
+	\end{align}
+	We used the identities
+	\begin{align}
+		\langle\tilde X_{\ell m}\tilde Z_{\ell' m'}\rangle=&C_{\ell}\delta_D(m,m')\delta_D(\ell,\ell')\\
+		\sum_{m=-\ell}^{m=\ell}Y_{\ell m}(\Omega)Y_{\ell m}(\Omega+\theta)=&\frac{2\ell+1}{4\pi}\label{eq:Ylm_Pl}
+	\end{align}
+	
+	For the case of shear, since it is a spin-2 object, eq.\ref{eq:X_harmonic} is written in terms of spin harmonics 
+	\citep[see for ex.][]{Castro2005,Kilbinger2017}. Rest of the analysis proceeds similarly, using the relation for spin 
+	harmonics, 
+	analogous to eq.~\ref{eq:Ylm_Pl} \citep[see for ex. ][]{Hu1997}. 
+	
+	Expression of $\xi_+$ is same as eq.~\ref{eq:xi_pl0}. Expressions for galaxy lensing cross correlation 
+	\cite{Putter2010} and $\xi_-$ is given by
+	\begin{align}
+		\langle g\gamma_T\rangle(\theta)&=\frac{1}{4\pi}\sum_{\ell}\frac{(2\ell+1)}{\ell(\ell+1)}C_{\ell}^{g\kappa}
+		P_{\ell}^2(\cos\theta)\label{eq:xi_g_gamma}\\
+		\xi_+(\theta)&=\frac{1}{4\pi}\sum_{\ell}{(2\ell+1)}C_{\ell}^{\kappa\kappa}
+		P_{\ell}(\cos\theta)\label{eq:xi_p}\\
+		\xi_-(\theta)&=\frac{1}{4\pi}\sum_{\ell}\frac{(\ell-4)!}{(\ell+4)!}\ell^4{(2\ell+1)}C_{\ell}^{\kappa\kappa}
+		P_{\ell}^4(\cos\theta)\label{eq:xi_m}
+	\end{align}
+\sukhdeep{$\xi_-$ is a bit of cheating. I'm not familiar with spin harmonics, so I simply took the relation between 
+$P_\ell^m$ and $J_m(\ell \theta)$ to get this expression from the Hankel transform for $\xi_-$. It may not be very accurate at large scale (low $\ell$) as is evident from $g\gamma_T$ expression. I can sort this out later. If somebody knows correct expression already, please feel free to put it in.}
+
+	The ccl\_tracer\_corr\_legendre routine computes these transform to convert $C_\ell$ to correlation functions. We
+	use the associated Legendre function implementation from gsl library.
+	ccl\_tracer\_corr\_legendre routine evaluations can be slow, especially for $P_\ell^m$ with $m>0$. Note that 
+	$P_\ell^m$ evaluations need to be done only once and can then be saved as long as $\ell,\theta$ values do not change.
+	This is not yet implemented, but will be done soon.
+		
+	\subsection{Hankel Transform}
+		Expression in eq.~\ref{eq:xi_g_gamma}--\ref{eq:xi_m} can be written as Hankel transforms using the relation 
+		between $P_{\ell}^m$ and bessel functions $J_m$
+		\begin{align}
+			P_{\ell}^m(\cos\theta)=(-1)^m\frac{(\ell+m)!}{(\ell-m)!}\ell^{-m}J_m(\ell\theta)
+		\end{align}
+
+		We get the following analogous expressions (flat-sky limit)
+		\begin{align}
+			\langle g\gamma_T\rangle(\theta)&=\frac{1}{2\pi}\int d\ell\ell C_\ell J_2(\ell\theta)\\
+			\xi_+(\theta)&=\frac{1}{2\pi}\int d\ell\ell C_\ell J_0(\ell\theta)\\
+			\xi_-(\theta)&=\frac{1}{2\pi}\int d\ell\ell C_\ell J_4(\ell\theta)
+		\end{align}
+		To evaluate Hankel transform, we use the fast FFTlog routine\citep{Hamilton2000,Talman2009}. In brief, FFTlog 
+		works on functions periodic in log space, by writing the Hankel Transform as a convolution between bessel function 
+		and the function of interest (in this case $C_\ell$). The convolution can 
+		then be evaluated using Fourier transforms, with Fourier transform of bessel function evaluated using analytical 
+		functions while Fourier transform of $C_\ell$ and the inverse Fourier transform of the product 
+		evaluated using fast fourier transform routines. 
+	\bibliography{correlation}
+\end{document}
