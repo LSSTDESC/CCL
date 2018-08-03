@@ -97,7 +97,7 @@ double a_form_bullock(ccl_cosmology *cosmo, double halomass, double a, int *stat
     // testing print statements until it actually works
     printf("%5d [%.7f, %.7f] %.7f", iter, a_min, a_max, a_form);
     }
-  while (status == GSL_CONTINUE && iter < max_iter);
+  while (gslstatus == GSL_CONTINUE && iter < max_iter);
 
   gsl_root_fsolver_free (s);
 
