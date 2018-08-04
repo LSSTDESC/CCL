@@ -15,7 +15,7 @@ target_link_libraries(ccl_static ${GSL_LIBRARIES} ${CLASS_LIBRARIES} ${ANGPOW_LI
 add_dependencies(ccl_static ccl)
 
 # Adds include path to GSL headers
-set_property(SOURCE ccl.i PROPERTY INCLUDE_DIRECTORIES ${GSL_INCLUDE_DIRS})
+set_property(SOURCE ccl_constants.i PROPERTY INCLUDE_DIRECTORIES ${GSL_INCLUDE_DIRS})
 
 # Builds swig python module in place
 if(${CMAKE_VERSION} VERSION_LESS "3.8.0")
