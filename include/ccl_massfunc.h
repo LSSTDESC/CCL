@@ -6,7 +6,7 @@ extern "C" {
 #pragma once
 
 #include "ccl_core.h"
-  
+
 /*
  * Computes sigma(R), the power spectrum normalization, over log-spaced values of mass and radii
  * The result is attached to the cosmology object
@@ -48,7 +48,7 @@ double ccl_massfunc(ccl_cosmology *cosmo, double smooth_mass, double a, double o
  * @return hb, the halo bias at the specified parameters
  */
 double ccl_halo_bias(ccl_cosmology *cosmo, double smooth_mass, double a, double odelta, int *status);
-  
+
 /*
  * Convert smoothing halo mass in units of Msun to smoothing halo radius in units of Mpc.
  * @param cosmo Cosmological parameters
@@ -79,7 +79,7 @@ double ccl_sigmaM(ccl_cosmology *cosmo, double smooth_mass, double a, int *statu
    * @param cosmo Cosmological parameters
    * @param a, scale factor, normalized to a=1 today
    * @param status Status flag. 0 if there are no errors, nonzero otherwise.
-   */  
+   */
   double dc_NakamuraSuto(ccl_cosmology *cosmo, double a, int *status);
 
  /*
@@ -89,9 +89,9 @@ double ccl_sigmaM(ccl_cosmology *cosmo, double smooth_mass, double a, int *statu
   * @param cosmo Cosmological parameters
   * @param a, scale factor, normalized to a=1 today
   * @param status Status flag. 0 if there are no errors, nonzero otherwise.
-  */  
+  */
   double Dv_BryanNorman(ccl_cosmology *cosmo, double a, int *status);
-  
+
 /*
  * Calcualtes the comoving halo radius assuming a given overdensity criteria
  * @param cosmo Cosmological parameters
@@ -101,14 +101,15 @@ double ccl_sigmaM(ccl_cosmology *cosmo, double smooth_mass, double a, int *statu
  */
 double r_delta(ccl_cosmology *cosmo, double halomass, double a, double odelta, int *status);
 
+//TODO: Remove this function if no longer useful
 /*
  * Calcualtes the peak height associated with a halo of mass M
  * @param cosmo Cosmological parameters
  * @param halomass in units of Msun
  * @param a, scale factor, normalized to a=1 today
  * @param status Status flag. 0 if there are no errors, nonzero otherwise.
- */ 
-double nu_mass(ccl_cosmology *cosmo, double halomass, double a, int *status);
+ */
+// double nu_mass(ccl_cosmology *cosmo, double halomass, double a, int *status);
 
 #ifdef __cplusplus
 }
