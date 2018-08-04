@@ -67,7 +67,7 @@ extern "C" {
    * @param status: Status flag: 0 if there are no errors, non-zero otherwise
    * @return halo_concentration: the halo concentration
    */
-  double halo_concentration(ccl_cosmology *cosmo, double halomass, double a, double Delta_v, ccl_conc_label label, int *status);
+  double ccl_halo_concentration(ccl_cosmology *cosmo, double halomass, double a, double Delta_v, ccl_conc_label label, int *status);
   
 #ifdef __cplusplus
 }

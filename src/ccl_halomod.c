@@ -48,20 +48,23 @@ static double u_nfw_c(ccl_cosmology *cosmo, double c, double halomass, double k,
   }
 }
 
-
+// Structure to help with calculating Bullock et al. (2001) formation time
 typedef struct{  
   ccl_cosmology *cosmo;
   double halomass;
   int *status;
-} a_form_bullock_func_Par;
+} a_form_Bullock_func_Par;
 
-static double a_form_bullock_func(double a_form, void *params)
+// Function for root solver for scale factor according to Bullock et al. (2001)
+static double a_form_Bullock_func(double a_form, void *params)
 {
-  a_form_bullock_func_Par *p = (a_form_bullock_func_Par *)params;;
-  return ccl_sigmaM(p->cosmo, p->halomass, a_form, p->status) - 1.686;  
+  a_form_Bullock_func_Par *p = (a_form_Bullock_func_Par *)params;;
+  double delta_c = 1.686;
+  return ccl_sigmaM(p->cosmo, p->halomass, a_form, p->status) - delta_c;  
 }
 
-double a_form_bullock(ccl_cosmology *cosmo, double halomass, double a, int *status)
+// Function to return the formation scale factor according to Bullock et al. (2001)
+double a_form_Bullock(ccl_cosmology *cosmo, double halomass, double a, int *status)
 {
   int gslstatus;
   int iter = 0, max_iter = 100;
@@ -72,13 +75,13 @@ double a_form_bullock(ccl_cosmology *cosmo, double halomass, double a, int *stat
   double a_max = 1.0, a_min = 1./(1.+1000.0);
   gsl_function F;
 
-  a_form_bullock_func_Par fpar;
+  a_form_Bullock_func_Par fpar;
 
   fpar.cosmo = cosmo;
   fpar.halomass = halomass;
   fpar.status = &gslstatus;
 
-  F.function = &a_form_bullock_func;
+  F.function = &a_form_Bullock_func;
   F.params = &fpar;
 
   T = gsl_root_fsolver_brent;
@@ -105,18 +108,18 @@ double a_form_bullock(ccl_cosmology *cosmo, double halomass, double a, int *stat
 }
 
 // The concentration-mass relation for haloes
-double halo_concentration(ccl_cosmology *cosmo, double halomass, double a, double odelta, ccl_conc_label label, int *status){
+double ccl_halo_concentration(ccl_cosmology *cosmo, double halomass, double a, double odelta, ccl_conc_label label, int *status){
 
   double gz, g0, nu, delta_c, a_form;
   double Mpiv, A, B, C;
 
   switch(label){
 
-    // something something crazy Bullock
+    // Bullock et al. (2001; xxxx.xxxx; Delta = Virial)
   case Bullock:
 
     A = 4.0;
-    a_form = a_form_bullock(cosmo, halomass, a, status); 
+    a_form = a_form_Bullock(cosmo, halomass, a, status); 
     
     gz = ccl_growth_factor(cosmo,a,status);
     g0 = ccl_growth_factor(cosmo,1.0,status);
@@ -181,7 +184,7 @@ static double window_function(ccl_cosmology *cosmo, double m, double k, double a
     rho_matter = ccl_rho_x(cosmo, 1., ccl_species_m_label, 1, status);
 
     // The halo concentration for this mass and scale factor  
-    c = halo_concentration(cosmo, m, a, odelta, Duffy2008_virial, status);    
+    c = ccl_halo_concentration(cosmo, m, a, odelta, Duffy2008_virial, status);    
 
     // The function U is normalised so multiplying by M/rho turns units to overdensity
     return m*u_nfw_c(cosmo, c, m, k, a, status)/rho_matter;
