@@ -40,24 +40,9 @@ function_types = {
 NoneArr = np.array([])
 
 class ClTracer(object):
-    """ClTracer class used to wrap the cl_tracer found
-    in CCL.
+    """ClTracer is a general class used to wrap the cl_tracer found in CCL. A ClTracer is a data structure that contains all information describing the transfer functon of one tracer of the matter distribution. If an object has an angular power spectrum then it can be described by a tracer.
 
-    A ClTracer is a data structure that contains all information
-    describing the transfer functon of one tracer of the matter
-    distribution.
-
-    """
-
-    def __init__(self, cosmo, tracer_type=None, has_rsd=False,
-                 has_magnification=False, has_intrinsic_alignment=False,
-                 z=None, n=None, bias=None, mag_bias=None, bias_ia=None,
-                 f_red=None,z_source=1100.):
-        """
-        ClTracer is a class for handling tracers that have an angular power
-        spectrum.
-
-        Note: unless otherwise stated, defaults are None.
+        .. note:: unless otherwise stated, defaults are None.
 
         Args:
             cosmo (:obj:`Cosmology`): Cosmology object.
@@ -88,7 +73,13 @@ class ClTracer(object):
             f_red (array_like or tuple, optional): Array of red galaxy
                 fractions f_red(z), or a tuple of arrays (z, f_red(z)).
             z_source (float, optional): Redshift of source plane for CMB lensing.
-        """
+
+    """
+
+    def __init__(self, cosmo, tracer_type=None, has_rsd=False,
+                 has_magnification=False, has_intrinsic_alignment=False,
+                 z=None, n=None, bias=None, mag_bias=None, bias_ia=None,
+                 f_red=None,z_source=1100.):
         # Verify cosmo object
         cosmo = _cosmology_obj(cosmo)
 
@@ -180,7 +171,6 @@ class ClTracer(object):
         
     def __del__(self):
         """Free memory associated with CCL_ClTracer object.
-
         """
         if hasattr(self, 'has_cltracer'):
             if self.has_cltracer:
@@ -188,14 +178,7 @@ class ClTracer(object):
 
 
 class ClTracerNumberCounts(ClTracer):
-    """
-    ClTracer for galaxy number counts (galaxy clustering).
-    """
-
-    def __init__(self, cosmo, has_rsd, has_magnification,
-                 n, bias, z=None, mag_bias=None):
-        """
-        ClTracer class for a tracer of galaxy number counts (galaxy clustering).
+    """ClTracer for galaxy number counts (galaxy clustering).
 
         Args:
             cosmo (:obj:`Cosmology`): Cosmology object.
@@ -217,8 +200,11 @@ class ClTracerNumberCounts(ClTracer):
             mag_bias (array_like or tuple, optional): Array of magnification
                 bias s(z) sampled at the redshifts given in the z array, or a
                 tuple of arrays (z, s(z)).
-        """
 
+    """
+
+    def __init__(self, cosmo, has_rsd, has_magnification,
+                 n, bias, z=None, mag_bias=None):
         # Sanity check on input arguments
         if has_magnification and mag_bias is None:
                 raise ValueError("Keyword arg 'mag_bias' must be specified if "
@@ -234,14 +220,7 @@ class ClTracerNumberCounts(ClTracer):
 
 
 class ClTracerLensing(ClTracer):
-    """
-    ClTracer for weak lensing shear (galaxy shapes).
-    """
-
-    def __init__(self, cosmo, has_intrinsic_alignment,
-                 n, z=None, bias_ia=None, f_red=None):
-        """
-        ClTracer class for a tracer of weak lensing shear (galaxy shapes).
+    """ClTracer for weak lensing shear (galaxy shapes).
 
         Args:
             cosmo (:obj:`Cosmology`): Cosmology object.
@@ -259,8 +238,11 @@ class ClTracerLensing(ClTracer):
                 alignment amplitudes b_IA(z), or a tuple of arrays (z, b_IA(z)).
             f_red (array_like or tuple, optional): Array of red galaxy
                 fractions f_red(z), or a tuple of arrays (z, f_red(z)).
-        """
 
+    """
+
+    def __init__(self, cosmo, has_intrinsic_alignment,
+                 n, z=None, bias_ia=None, f_red=None):
         # Sanity check on input arguments
         if has_intrinsic_alignment \
         and (bias_ia is None or f_red is None):
@@ -277,19 +259,15 @@ class ClTracerLensing(ClTracer):
 
 
 class ClTracerCMBLensing(ClTracer):
-    """
-    ClTracer for CMB lensing.
-    """
-
-    def __init__(self, cosmo, z_source):
-        """
-        ClTracer class for a tracer of CMB lensing.
+    """ClTracer for CMB lensing.
 
         Args:
             cosmo (:obj:`Cosmology`): Cosmology object.
             z_source (float): Redshift of source plane for CMB lensing.
-        """
 
+    """
+
+    def __init__(self, cosmo, z_source):
         # Call ClTracer constructor with appropriate arguments
         super(ClTracerCMBLensing, self).__init__(
                  cosmo=cosmo, tracer_type='cmbl',
@@ -300,9 +278,7 @@ class ClTracerCMBLensing(ClTracer):
 
 
 def _cltracer_obj(cltracer):
-    """
-    Returns a CCL_ClTracer object, given an input object which may be
-    CCL_ClTracer, the ClTracer wrapper class, or an invalid type.
+    """Returns a CCL_ClTracer object, given an input object which may be CCL_ClTracer, the ClTracer wrapper class, or an invalid type.
 
     Args:
         cltracer (:obj:): Either a CCL_ClTracer or the ClTracer wrapper class.
@@ -321,9 +297,7 @@ def _cltracer_obj(cltracer):
 
 
 def _check_array_params(z, f_arg, f_name):
-    """
-    Check whether an argument `f_arg` passed into the constructor of ClTracer()
-    is valid.
+    """Check whether an argument `f_arg` passed into the constructor of ClTracer() is valid.
 
     If the argument is set to `None`, it will be replaced with a special array
     that signals to the CCL wrapper that this argument is NULL.
@@ -354,6 +328,7 @@ def _check_array_params(z, f_arg, f_name):
             f = np.atleast_1d(f_arg)
     return z_f, f
 
+
 def angular_cl(cosmo, cltracer1, cltracer2, ell,
                l_limber=-1.,l_logstep=1.05,l_linstep=20.,dchi=3., dlk=0.003, zmin=0.05,
                non_limber_method="native"):
@@ -376,8 +351,7 @@ def angular_cl(cosmo, cltracer1, cltracer2, ell,
             "native" and "angpow"
 
     Returns:
-        cl (float or array_like): Angular (cross-)power spectrum values, C_ell,
-            for the pair of tracers, as a function of `ell`.
+        float or array_like: Angular (cross-)power spectrum values, :math:`C_\ell`, for the pair of tracers, as a function of :math:`\ell`.
 
     """
     # Access ccl_cosmology object
