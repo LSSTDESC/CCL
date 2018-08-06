@@ -763,10 +763,7 @@ We should also note that other approaches relating the correlation functions dir
 %-------------------------------------------------------------------------------
 \subsection{Halo mass function}
 
-\todo{Some of this seems would be better in the validation section. Can we restrict to implementation here?}
-To achieve $10^{-4}$ precision in $\sigma(M)$ (see Eq. \ref{eq:sigR} and \ref{eq:lagrangemass}) and the normalisation of the power spectrum, we have verified that the integral of $\sigma_8$ and $\sigma(M)$ has converged for the chosen values of $\{k_{\rm min},k_{\rm max}\}$. This will be discussed further in Sec.~\todo{??}. Also note that for $\sigma(M)$, it is important to set the desired precision level correctly for the numerical integrator. As the integral yields $\sigma^2(M)$, this becomes the relevant concern for numerical accuracy.
-
-Derivatives are calculated utilizing a spline interpolation of $\sigma(M)$. These splines cover the range from $10^6$ to $10^{17} M_\odot$. For each value of $\log(M)$ in our spline evaluation, we calculate the value of $\sigma(M)$ half a step in either direction. We use the difference compared to the mass spacing to calculate an approximate derivative, which is then used in the spline interpolation. This has been tested to meet our necessary precision for the halo mass function within the mass range explored by \citet{Tinker2010}. We note that there the accuracy is reduced at the edges of these splines and exploring extreme mass ranges may require changes in the parameters to initialize these splines.
+The computation of the halo mass function requires obtaining the derivative of $\sigma{-1}$ with respect to mass, Eq. (\ref{eq:halo_mass_function}). These derivatives are calculated utilizing a spline interpolation of $\sigma(M)$. These splines cover the range from $10^6$ to $10^{17} M_\odot$. For each value of $\log(M)$ in our spline evaluation, we calculate the value of $\sigma(M)$ half a step in either direction. We use the difference compared to the mass spacing to calculate an approximate derivative, which is then used in the spline interpolation. This has been tested to meet our necessary precision for the halo mass function within the mass range explored by \citet{Tinker2010}. We note that there the accuracy is reduced at the edges of these splines and exploring extreme mass ranges may require changes in the parameters to initialize these splines.
 
 In order to accomodate a wide range of values of the overdensity parameter $\Delta$, we have generated a spline interpolation between best fit values as defined by \citet{Tinker2008} and \citet{Tinker2010}. This covers a dynamic range from $\Delta=200$ to $3200$, with respect to the mean density. Within this range, we interpolate in the space of the fit parameter and $\log\Delta$ using Akima interpolation built from piecewise third order polynomials. We have chosen this rather than the fitting formulas utilized in \citet{Tinker2010} in order to assure high precision match to the Tinker halo mass function when choosing a value of $\Delta$ directly from the paper. 
 
@@ -856,6 +853,7 @@ The target level of accuracy was $10^{-4}$ and this was achieved or surpassed fo
 \subsection{Matter power spectra}
 
 \subsubsection{Analytic expressions}
+\label{ss:bbksval}
 
 As discussed in Section \ref{sec:matterps}, several power spectrum methods are implemented in \ccl. Two of them, the BBKS \citep{BBKS} and the \citet{1998ApJ...496..605E} methods are implemented for validation purposes only and feed into the tests for observables such as angular power spectra and correlation functions, as we will see in subsequent sections. These two implementations have been validated against independent implementations. The accuracy in this case was defined as the absolute fractional difference between the \ccl and the independent predictions:
 \begin{equation}
@@ -879,12 +877,12 @@ The accuracy of this approximation is shown in Figure \ref{fig:NLextrapol} for r
 \begin{figure*}
 \centering
 \includegraphics[width=1.0\textwidth]{plot_power.eps}
-\caption{The relative error compared to power spectra produced with high values of the power spectrum splines, $P_{fid}$, produced by splining the matter power spectrum up to {\tt K$\_$MAX$\_$SPLINE} and extrapolating beyond this value with a second order Taylor expansion the natural logarithm of the matter power spectrum. The left panel shows the relative errors for the linear matter power spectrum at $z=0$, $z=3$ and $z=20$. The right panel shows the results for the non-linear matter power spectrum at the same redshifts. The standard \ccl parameters adopted are those corresponding to the black dashed curve. For comparison, the impact of baryonic physics on the matter power spectrum is $\sim 10\%$ at $k=1\,\text{Mpc}^{-1}$ \citep{Schneider15}.}
+\caption{The relative error compared to power spectra produced with high values of the power spectrum splines, $P_{fid}$, produced by splining the matter power spectrum up to {\tt K$\_$MAX$\_$SPLINE}$=50\,\text{Mpc}^{-1}$ and extrapolating beyond this value with a second order Taylor expansion the natural logarithm of the matter power spectrum. The left panel shows the relative errors for the linear matter power spectrum at $z=0$, $z=3$ and $z=20$. The right panel shows the results for the non-linear matter power spectrum at the same redshifts. The standard \ccl parameters adopted are those corresponding to the black dashed curve. For comparison, the impact of baryonic physics on the matter power spectrum is $\sim 10\%$ at $k=1\,\text{Mpc}^{-1}$ \citep{Schneider15}.}
 \label{fig:NLextrapol}
 \end{figure*}
 %------------------------
 
-With the implementation described above, the power spectrum splines are initialized up to {\tt K$\_$MAX$\_$SPLINE}. This is also true for the linear matter power spectrum, which is used within \ccl in particular to obtain $\sigma_8$ (see Eq. \ref{eq:sigR}). We have tested how this procedure affects the convergence of the linear matter power spectrum. We compare the fiducial \ccl output to the case where we set {\tt K$\_$MAX$\_$SPLINE}~$=5\times 10^3\,\text{Mpc}^{-1}$. The result is shown in Figure \ref{fig:NLextrapol}. For some applications that use the linear power spectrum, the user might need to increase the value of {\tt K$\_$MAX$\_$SPLINE}. While \ccl adopts certain fiducial values of the number of scale factor and wavenumber values to use in the interpolation, we have tested that increasing the sampling does not change the results presented in Figures \ref{fig:NLextrapol}.
+With the implementation described above, the power spectrum splines are initialized up to {\tt K$\_$MAX$\_$SPLINE}. This is also true for the linear matter power spectrum, which is used within \ccl in particular to obtain $\sigma_8$ (see Eq. \ref{eq:sigR}). We have tested how this procedure affects the convergence of the linear matter power spectrum. We compare the fiducial \ccl output to the case where we set {\tt K$\_$MAX$\_$SPLINE}~$=5\times 10^3\,\text{Mpc}^{-1}$. The result is shown in Figure \ref{fig:NLextrapol}. For some applications that use the linear power spectrum, the user might need to increase the value of {\tt K$\_$MAX$\_$SPLINE}. While \ccl adopts certain fiducial values of the number of scale factor and wavenumber values to use in the interpolation, we have tested that increasing the sampling does not change the results presented in Figures \ref{fig:NLextrapol}. 
 
 In addition to the above tests in $\Lambda$CDM cosmologies without massive neutrinos, we have checked the impact of using splines (at intermediate $k$) and extrapolation (at low and high $k$) in cosmologies CCL7, CCL8, and CCL9 with massive neutrinos, defined in Table \ref{tab:cosmologies_nu}. We compare the linear and nonlinear matter power spectrum as computed directly via \class to that computed using \class via \ccl . We find that for $k$  between {\tt K$\_$MIN} and {\tt K$\_$MIN$\_$SPLINE}, the two power spectra agree to better than $10^{-4}$ in all models. For $k$ between {\tt K$\_$MAX$\_$SPLINE} and {\tt K$\_$MAX}, agreement is better than $10^{-3}$, which we deem sufficient given the significant physical uncertainties introduced at these small scales by effects such as galaxy formation \citep{vanDaalen11}. The fractional difference between the two nonlinear power spectra is plotted in Figure \ref{fig:power_nu}. 
 
@@ -941,9 +939,9 @@ The matter power spectrum emulation procedure from \citet{Lawrence17} has an int
   \mathcal{A}\equiv\frac{|P_{\tt CCL}(k,z)-P_{\rm L17}(k,z)|}{P_{\rm L17}(k,z)}
   \label{eq:pkaccemu}
 \end{equation}
-where the label L17 referes to the smoothed simulated power spectra from \citet{Lawrence17}.
+where the label L17 referes to the smoothed simulated power spectra from \citet{Lawrence17}. Notice that the emulator is intrinsically accurate to $1\%$ for cosmologies without massive neutrinos, and to $3\%$ for cosmologies with massive neutrinos. In other words, replacing $P_{\tt CCL}(k,z)$ in Eq. (\ref{eq:pkaccemu}) by the direct emulator output would yield $\mathcal{A}$ of $0.01$ and $0.03$ for the two different families of cosmologies. In the validation test presented in this section, we focus on ensuring that \ccl does not deviate from that overall level of accuracy.
 
-Our results are shown in Figure \ref{fig:emuacc}. For cosmologies without neutrinos, we required the matter power spectrum at $z=0$ to be within $1\%$ of the smoothed simulated power spectrum from \citet{Lawrence17} (see their Figure 6). Similarly, we required $3\%$ accuracy for cosmologies with neutrinos (their Figure 5). The cosmologies that were tested are the ones listed in Table \ref{tab:cosmologies}, which are described in detail in \citet{Lawrence17}.\elisa{Need to explain $1-3\%$ better.}
+Our results are shown in Figure \ref{fig:emuacc}. For cosmologies without neutrinos, we required the matter power spectrum at $z=0$ to be within $1\%$ of the smoothed simulated power spectrum from \citet{Lawrence17} (see their Figure 6). Similarly, we required $3\%$ accuracy for cosmologies with neutrinos (their Figure 5). The cosmologies that were tested are the ones listed in Table \ref{tab:cosmologies}, which are described in detail in \citet{Lawrence17}.
 
 \begin{figure*}
   \centering
@@ -970,6 +968,7 @@ These defines three new accuracy metrics:
   \mathcal{A}_{hmf2}&\equiv&\frac{|\tilde\sigma_{\tt CCL}-\tilde\sigma_i|}{\tilde\sigma_i},\\
   \mathcal{A}_{hmf3}&\equiv&\frac{|\mathcal{H}_{\tt CCL}-\mathcal{H}_i|}{\mathcal{H}_i}.
 \end{eqnarray}
+(Note that for $\sigma(M)$, it is important to set the desired precision level correctly for the numerical integrator. As the integral yields $\sigma^2(M)$, this becomes the relevant concern for numerical accuracy.) \elisa{So is $\sigma$ accurate to $10^{-4}$? Or $\sigma^2$?}
 
 We note that while we maintain the $10^{-4}$ for our evaluations of $\sigma$, the accuracy degrades to a value of $5\times10^{-3}$ for the halo mass function evaluation, primarily at the high halo mass and high redshift domains. We find that this increased error is acceptable, as the level of precision is significantly better than the accuracy of current halo mass function models. This is demonstrated in Figure~\ref{fig:hmf}, where this calculation has been run for a single cosmology using the Tinker 2010 halo mass function. While there is a degradation in accuracy due to our spline treatment of the log inverse of $\sigma(M)$, we note that it does not significantly degrade our halo mass function determination. While improvement on this remains a task for the future, the halo mass function varies between fitting functions significantly more than this remaining error. As of this time, we do not have independent benchmarks for the halo bias function, though it should be noted that this calculation does not involve any additional functions beyond $\sigma(M)$ and should hold to the $10^{-4}$ tolerance level.
 
@@ -977,7 +976,7 @@ We note that while we maintain the $10^{-4}$ for our evaluations of $\sigma$, th
 \includegraphics[width=0.32\textwidth]{hmf_model1}
 \includegraphics[width=0.32\textwidth]{hmf_model1_b}
 \includegraphics[width=0.32\textwidth]{hmf_model1_c}
-\caption{Three different numerical tests of the halo mass function calculation. In each line, the blue line is the fractional error in the function, while the black dashed line represents our error tolerance. The first panel demonstrates the robust calculation of $\sigma(M)$. The second panel demonstrates a numerical quirk in our spline treatment that is currently not addressed, but does reduce the numerical accuracy in returning the log inverse of $\sigma(M)$. We note that this does not significantly impact the error in the halo mass function in the final panel.}
+\caption{Three different numerical tests of the halo mass function calculation. In each line, the blue line is the fractional error in the function, while the black dashed line represents our error tolerance. The first panel demonstrates the robust calculation of $\sigma(M)$. The second panel demonstrates a numerical quirk in our spline treatment that is currently not addressed, but does reduce the numerical accuracy in returning the log inverse of $\sigma(M)$. We note that this does not significantly impact the error in the halo mass function in the final panel.\elisa{We need to re-label the rightmost panel.}}
 \label{fig:hmf}
 \end{figure*}
 
@@ -995,7 +994,9 @@ In Figure~\ref{fig:halo_model} we show the power spectrum computed by the \ccl h
 
 \subsection{Two-point statistics}
 
-We used the BBKS linear matter power spectrum to compare two-point statistics for two redshift bins, resulting in three tomography combinations, ($1-1$),($1-2$),($2-2$). The validation tests were performed for two kinds of redshift distributions: analytic and binned ones. The goal of defining these to sets was to capture any numerical deviation produced by the interpolation of the binned distribution. We adopted the following analytic redshift distributions: a Gaussian with $\sigma = 0.15$, centered at $z_1 = 1$; and another Gaussian with the same dispersion but centered at $z_2 = 1.5$. In the case of the binned distributions, we adopted the two redshift distribution histograms shown in Figure \ref{fig:zhistos}.
+Validation tests for two-point statistics relied on the BBKS linear matter power spectrum. This choice of method was intended to remove any potential discrepancies between the \ccl implementation and the independent one with regards to the matter power spectrum. By using BBKS, we are relying on predictions that we know to be fast and accurate to a high level (Section \ref{ss:bbksval}).
+
+We thus used the BBKS linear matter power spectrum to compare two-point statistics for two redshift bins, resulting in three tomography combinations, ($1-1$),($1-2$),($2-2$). The validation tests were performed for two kinds of redshift distributions: analytic and binned ones. The goal of defining these to sets was to capture any numerical deviation produced by the interpolation of the binned distribution. We adopted the following analytic redshift distributions: a Gaussian with $\sigma = 0.15$, centered at $z_1 = 1$; and another Gaussian with the same dispersion but centered at $z_2 = 1.5$. In the case of the binned distributions, we adopted the two redshift distribution histograms shown in Figure \ref{fig:zhistos}.
 
 For both types of distributions, we computed the following quantities:
 \begin{itemize}
@@ -1004,7 +1005,7 @@ For both types of distributions, we computed the following quantities:
 \item Number counts angular correlation functions in the range $0.01 \deg < \theta < 5 \deg$, using 5 bins per decade, and
 \item Lensing shear angular correlation functions ($\xi_+$,$\xi_-$), similarly to above.
 \end{itemize}
- Besides these two-point functions, we also validated the computation of the CMB lensing power spectrum, using the same $\ell$ binning described above. 
+ Besides these two-point functions, we also validated the computation of the CMB lensing power spectrum against an independent implementation, using the same $\ell$ binning described above. Although we did not directly validate the computation of cross-correlations between number counts and convergence, the only difference of this case with respect to other real space correlation functions is the Bessel function present in the integrand. Hence, we deemed unnecessary to perform further validations. 
 
 %------------------------
 \begin{figure}
@@ -1031,7 +1032,7 @@ For $C_\ell$ computations, we define as our accuracy metric the absolute value o
 \begin{equation}
   \mathcal{A}=\left|\frac{C_\ell^{\tt CCL}-C_\ell^{(i)}}{C_\ell^{(i)}}\right|.
 \end{equation}
-Overall, we achieved a relative difference between \ccl and the benchmarks of $<10^{-3}$, but in general we allow $0.1\%$ of the $C_\ell$ evaluations to fail. This applied both to analytic redshift distributions and histograms, for auto- and cross-correlations between bins for both galaxy clustering and weak lensing, as shown in Figure \ref{fig:cls_limber}. The CMB lensing result is shown in Figure \ref{fig:cls_cmblens}.
+Overall, we achieved a relative difference between \ccl and the benchmarks of $<10^{-3}$, but in general we allow $0.1\%$ of the $C_\ell$ evaluations to fail. This applied both to analytic redshift distributions and histograms, for auto- and cross-correlations between bins for both galaxy clustering and cosmic shear, as shown in Figure \ref{fig:cls_limber}. The CMB lensing result is shown in Figure \ref{fig:cls_cmblens}.
 
 Cosmological constraints from current weak lensing surveys are derived from modeling correlation functions. As we discussed in Section \ref{sec:models}, the correlation functions are modeled by Eq.(\ref{eq:cl_xi}) and obtained by \ccl through numerical integration of predicted angular power spectra. To ensure that any numerical inaccuracies are small enough for the purposes of obtaining cosmological constraints, we require that the absolute difference between the \ccl prediction and an independent one is smaller than our expected error bars:
 \begin{equation}
@@ -1052,7 +1053,7 @@ We compared the difference between \ccl calculated lensing and clustering correl
 \end{figure*}
 
   
-The three-dimensional spatial correlation function $\xi(r)$ predicted by \ccl was validated by comparing it with an independent, precise numerical transform. We calculated $\xi(r)$  by transforming the \ccl non-linear \halofit power spectrum using this independent method for the five cosmologies listed in Table~\ref{tab:cosmologies} at redshifts $z = 0,1,2,3,4,5$.  We then compared with the $\xi(r)$ from \ccl with a sampling of $P(k)$ equal to {\tt N$\_$K$\_$3DCOR} bins per decade \elisa{is this parameter defined somewhere? John: No, this defines it. Not sure where else to do it since N\_K is not defined in the paper.}. The accuracy metric is defined as
+The three-dimensional spatial correlation function $\xi(r)$ predicted by \ccl was validated by comparing it with an independent, precise numerical transform\footnote{this independent implementation is base on the {\tt cluster toolkit} packaged, available at \url{http://cluster-toolkit.readthedocs.io/en/latest/}}. We calculated $\xi(r)$  by transforming the \ccl non-linear \halofit power spectrum using this independent method for the five cosmologies listed in Table~\ref{tab:cosmologies} at redshifts $z = 0,1,2,3,4,5$.  We then compared with the $\xi(r)$ from \ccl with a sampling of $P(k)$ equal to {\tt N$\_$K$\_$3DCOR} bins per decade \elisa{is this parameter defined somewhere? John: No, this defines it. Not sure where else to do it since N\_K is not defined in the paper.}. The accuracy metric is defined as
 \begin{equation}
   \mathcal{A}=|\xi^{\tt CCL}(r)-\xi^{(i)}(r)| / \xi^{\tt CCL}(r).
   \label{eq:accxi}
@@ -1080,7 +1081,7 @@ The transform to $\xi(r)$ was performed using Mathematica and compared to the \c
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=0.49\textwidth]{3dcorr_analytic}
-\caption{The relative error in the three-dimensional spatial correlation function computed using the CCL algorithm compared to an analytic function $\xi(r) = (r/r_0)^{1.67}$ (blue curve) whose inverse transform $P(k)$ is known analytically, and using $P(k) = A k / (k_0 + k)^4$ (red dahsed curve) whose transform $\xi(r)$ is also known analytically. In this validation test, the known $P(k)$ was transformed with the \ccl algorithm and compared to the known analytic result for $\xi(r)$.}
+\caption{The relative error in the three-dimensional spatial correlation function computed using the CCL algorithm compared to an analytic function $\xi(r) = (r/r_0)^{1.67}$ (blue curve) and using $P(k) = A k / (k_0 + k)^4$ (red dashed curve). Both functions have known analytic transforms, $\xi(r)$, but the second one has an asymptotic behavior that matches $P(k)\sim k$ at low $k$. In this validation test, the known $P(k)$ was transformed with the \ccl algorithm and compared to the known analytic result for $\xi(r)$.}
 \label{fig:analytic_xi}
 \end{figure}
 
