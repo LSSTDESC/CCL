@@ -192,9 +192,6 @@ Finally, \ccl allows for growth predictions with an alternative `modified gravit
 \subsection{Matter power spectrum}
 \label{sec:matterps}
 
-%\elisa{We need a paragraph for halo model approach.}
-%\Mead{Done}
-
 Theoretical predictions for cosmological observables such as galaxy clustering, gravitational lensing and cluster mass functions rely on knowledge of the distribution of matter from small to large scales in the Universe. The quantity most frequently used to describe the distribution of matter at a given wavenumber ${\bf k}$ and redshift is the matter power spectrum, $P(k,z)$, defined as
 \begin{equation}
   \langle \tilde\delta({\bf k},z)\tilde\delta({\bf k}^\prime,z)\rangle = (2\pi)^3P(k,z)\
@@ -204,16 +201,17 @@ where $\tilde\delta({\bf k})$ is the Fourier component of the overdensity field 
 \begin{equation}
   \Delta^2(k,z) \equiv \frac{k^3}{2\pi^2}P(k,z).
 \end{equation}
+At sufficiently large scales (small $k$), $P(k,z)$ can be obtained from solving linear perturbation theory equations. In this case, $P(k,z)$ is referred to as the ``linear'' matter power spectrum. At small scales, where perturbation theory breaks down, other approaches based on numerical simulations are needed. In this more general case, $P(k,z)$ is referred to as the ``non-linear'' matter power spectrum.
 
 \ccl implements several different methods for making predictions for the matter power spectrum. Two of those methods, the BBKS \citep{BBKS} and \citet{1998ApJ...496..605E} approximations, are only accurate to within a few percent and are implemented for validation purposes mainly. These approximations provide analytical expressions for the transfer function, $T(k)$, which is related to the matter power spectrum by $\Delta(k)^2 \propto T^2(k) k^{3+n_s}$. The normalization of the power spectrum is either defined at $z=0$ by setting $\sigma_8$ to its value today, or by setting the amplitude of primordial fluctuations, $A_s$. If $\sigma_8$ is provided, a shooting method is used to obtain the corresponding $A_s$ for the specified cosmology.
 
-The default \ccl implementation uses the \class algorithm \citet{class} to obtain predictions for $P(k,z)$. \Mead{\class uses a Boltzmann solver to compute the linear power spectrum and also includes the \halofit \citep{Smith2003,CLASS_halofit} fitting function for the non-linear spectrum.} In addition, \ccl can also generate $P(k,z)$ predictions by emulation of cosmological numerical simuations, in particular, using the ``Cosmic Emulator'' developed by \citet{Lawrence17}.
+The default \ccl implementation uses the \class algorithm \citet{class} to obtain predictions for $P(k,z)$. \class uses a Boltzmann solver to compute the linear power spectrum and also includes the \halofit \citep{Smith2003,CLASS_halofit} fitting function for the non-linear spectrum. In addition, \ccl can also generate $P(k,z)$ predictions by emulation of cosmological numerical simuations, in particular, using the ``Cosmic Emulator'' developed by \citet{Lawrence17}.
 
-\Mead{We provide a basic halo-model calculation of the non-linear matter power spectrum which uses the included halo bias, halo mass function and halo density profiles. The power spectrum calcualted via this method is not accurate enough for precision cosmology, with deviations of as great as 50 per cent compared to numerical simualtions, but is pedagogically useful.}
+We provide a basic halo-model calculation of the non-linear matter power spectrum which uses the included halo bias, halo mass function and halo density profiles. The power spectrum calcualted via this method is not accurate enough for precision cosmology, with deviations of as great as 50 per cent compared to numerical simualtions, but is pedagogically useful and we envisage to expand its functionalities to make it more realistic in the future.
 
-None of the above methods account for the impact of baryonic physics on the distribution of matter, which is known to exceed the percent level at scales $k \gtrsim 1\,\text{Mpc}^{-1}$ \citep{vanDaalen11,Illustris,Hellwing16,Springel17} and can affect the extraction of cosmological parameters \citep{Semboloni11,Semboloni13,Mohammed14,Eifler15,Mohammed17}. To account for this effect, we incorporate in \ccl an effective parametrization \citep{Schneider15} of the redistribution of matter as a consequence of feedback from Active Galactic Nuclei and adiabatic cooling. We give an overview of each method to predict the matter power spectrum in what follows.
+None of the above methods account for the impact of baryonic physics on the distribution of matter, which is known to exceed the percent level at scales $k \gtrsim 1\,\text{Mpc}^{-1}$ \citep{vanDaalen11,Illustris,Hellwing16,Springel17,Chisari18} and can affect the extraction of cosmological parameters \citep{Semboloni11,Semboloni13,Mohammed14,Eifler15,Mohammed17}. To account for this effect, we incorporate in \ccl an effective parametrization \citep{Schneider15} of the redistribution of matter as a consequence of feedback from Active Galactic Nuclei and adiabatic cooling. We give an overview of each method to predict the matter power spectrum in what follows.
 
-{\bf BBKS approximation}. \ccl implements the analytical BBKS approximation to the transfer function \citep{BBKS}, given by
+\paragraph{\bf BBKS approximation}. \ccl implements the analytical BBKS approximation to the transfer function \citep{BBKS}, given by
 \begin{eqnarray}
   \label{eq:bbks}
   T&&(q) = \frac{\ln[1+2.34q]}{2.34q}\times\\
@@ -225,11 +223,11 @@ where $q$ is defined as follows \citep{Sugiyama95}
 \end{equation}
 The BBKS power spectrum option is primarily used as a precisely-defined input for testing the numerical accuracy of \ccl routines (as described in Sec.~\ref{sec:implement}), and it is not recommended for other uses.
 
-{\bf Eisenstein \& Hu approximation}. \ccl also provides an approximation to the matter power spectrum as implemented by \citet{1998ApJ...496..605E} (we refer the reader to this paper for a detailed discussion of the fitting formulae).\footnote{Note that the implementation in \ccl modifies Eq. 5 of \citet{1998ApJ...496..605E} using $a^{-1}=1+z$ instead of the approximation $a^{-1}\sim z$. The difference in the resulting power spectra is negligible, but larger than 1 part in $10^4$ for $k<10\,h\,{\rm Mpc}^{-1}$.}
+\paragraph{\bf Eisenstein \& Hu approximation}. \ccl also provides an approximation to the matter power spectrum as implemented by \citet{1998ApJ...496..605E} (we refer the reader to this paper for a detailed discussion of the fitting formulae).\footnote{Note that the implementation in \ccl modifies Eq. 5 of \citet{1998ApJ...496..605E} using $a^{-1}=1+z$ instead of the approximation $a^{-1}\sim z$. The difference in the resulting power spectra is negligible, but larger than 1 part in $10^4$ for $k<10\,h\,{\rm Mpc}^{-1}$.}
 
-{\bf \tt CLASS.} The default configuration of \ccl adopts predictions for the linear and nonlinear matter power spectrum from the publicly available software \citep{class}. \class computes the non-linear power spectrum using the \halofit prescription of \cite{CLASS_halofit}.
+\paragraph{\bf \tt CLASS.} The default configuration of \ccl adopts predictions for the linear and non-linear matter power spectrum from the publicly available software \citep{class}. \class uses a Boltzmann solver to compute the linear power spectrum and makes predictions for the non-linear power spectrum using the \halofit prescription of \cite{CLASS_halofit}.
 
-{\bf Cosmic emulator.} \todo{In the section on the HMF and halo bias below, there is a lot of emphasis on the fact that these quantities are not themselves without significant uncertainty. Should we include a sentence or two to that effect here as well? - DL} \jab{my general comment in the abstract is related to this.} \tom{I think we should avoid all discussions of physical accuracy and near the top say ``all models presented in the paper (P, HMF, bias, etc.) are themselves physically uncertain. The reader should consult those papers to learn about the physical accuracy.''} The emulator \citep{Lawrence17} provides accurate predictions for the nonlinear matter power spectrum, at the $1\%$ level for $z\leq 2$ and in the wavenumber range $k=[10^{-3},5]$ Mpc$^{-1}$. The allowed range of cosmological parameters that can be passed to the emulator is as follows\footnote{$w_a$ and $w_0$ are constrained jointly to be $0.3\leq (-w_0-w_a)^{1/4}$.}:
+\paragraph{\bf Cosmic emulator.} An emulator method trained on numerical simulations \citep{Lawrence17} provides accurate predictions for the non-linear matter power spectrum for $z\leq 2$ and in the wavenumber range $k=[10^{-3},5]$ Mpc$^{-1}$. The allowed range of cosmological parameters that can be passed to the emulator is as follows\footnote{$w_a$ and $w_0$ are constrained jointly to be $0.3\leq (-w_0-w_a)^{1/4}$.}:
  \begin{eqnarray}
  0.12&\leq& \Omega_{m} h^2 \leq 0.155,\nonumber\\
  0.0215&\leq& \Omega_{b} h^2 \leq 0.0235,\nonumber\\
@@ -240,9 +238,9 @@ The BBKS power spectrum option is primarily used as a precisely-defined input fo
  -1.73&\leq& w_a\leq -0.7,\nonumber\\
  0.0&\leq& \Omega_{\nu, {\rm m}} h^2 \leq 0.01.
  \end{eqnarray}
-In the case of the emulator, the effective number of relativistic neutrino species is set to $N_{\rm eff}=3.04$ and $\Omega_g=0$. In \citet{Lawrence17}, the neutrino component of the power spectrum is not simulated, but either linearly evolved and added to the simulated power spectra at low redshift, or accounted for by a scale-dependent correction to the growth function. More details on this method and its accuracy can be found in \citet{Upadhye14,Castorina15,Heitmann16}.
+In the case of the emulator, the effective number of relativistic neutrino species is set to $N_{\rm eff}=3.04$ and $\Omega_g=0$. In \citet{Lawrence17}, the neutrino component of the power spectrum is not simulated, but either linearly evolved and added to the simulated power spectra at low redshift, or accounted for by a scale-dependent correction to the growth function. The typical accuracy of the emulator with respect to simulated power spectra is at the $<3\%$ level and depends on the cosmological model. More details on this method and its accuracy can be found in \citet{Upadhye14,Castorina15,Heitmann16}.
  
- {\bf Baryonic correction model (BCM).} \ccl incorporates the impact of baryons on the total matter power spectrum via the BCM of \citet{Schneider15}. The main consequences of baryonic processes are: to suppress the power spectrum at intermediate scales ($k\sim$ a few $h\,\text{Mpc}^{-1}$) due to the ejection of gas by Active Galactic Nuclei feedback, and to enhance it at smaller scales due to adiabatic cooling. To account for these effects, BCM uses an effective decomposition for the impact of gas ejection ($G$) and the enhancement of the small scale profile due to star formation ($S$) to estimate the fractional effect of baryonic processes on the dark matter-only power spectrum ($P_{\rm DMO}$):
+\paragraph{\bf Baryonic correction model (BCM).} \ccl incorporates the impact of baryons on the total matter power spectrum via the BCM of \citet{Schneider15}. The main consequences of baryonic processes are: to suppress the power spectrum at intermediate scales ($k\sim$ a few $h\,\text{Mpc}^{-1}$) due to the heating and ejection of gas by Active Galactic Nuclei feedback, and to enhance it at smaller scales due to adiabatic cooling. To account for these effects, BCM uses an effective decomposition for the impact of gas ejection ($G$) and the enhancement of the small scale profile due to star formation ($S$) to estimate the fractional effect of baryonic processes on the dark matter-only power spectrum ($P_{\rm DMO}$):
 \begin{equation}
   P_{\rm BCM}(k,z)=P_{\rm DMO}(k,z) G(k|M_c,\eta_b,z)S(k|k_s)
 \end{equation}
@@ -255,9 +253,9 @@ Three effective parameters govern the contribution of baryonic processes to modi
  If these parameters are not specified by the user, \ccl assumes the default parameters of \citet{Schneider15}, calibrated through different comparisons with observations and simulations in that work.
 
 %-------------------------------------------------------------------------------
-\subsection{Two-point correlators}
+\subsection{Two-point correlators}\label{ss:2point}
 
-This section describes the theoretical expectations for the two-point correlators of pairs of quantities (fields) defined on the sky. These fields can be classified in terms of their spin $s$ under rotations on the plane tangent to the sphere. In general a spin-$s$ field is defined by two real-valued functions of the spherical coordinates $a_1(\nv)$ and $a_2(\nv)$ (e.g. $\gamma_1$ and $\gamma_2$ for weak lensing or the Stokes parameters $Q$ and $U$ in the case of polarized intensity), from which one can form the complex field $a=a_1+ia_2$.
+A given model for the matter power spectrum is one of the necessary components to produce theoretical expectations for the two-point correlators of pairs of quantities (fields) that trace the matter field in the Universe. In this section, we will define these fields on the sky, such as galaxy positions or galaxy shapes. They fields can be classified in terms of their spin $s$ under rotations on the plane tangent to the sphere. In general a spin-$s$ field is defined by two real-valued functions of the spherical coordinates $a_1(\nv)$ and $a_2(\nv)$ (e.g. $\gamma_1$ and $\gamma_2$ for weak lensing or the Stokes parameters $Q$ and $U$ in the case of polarized intensity), from which one can form the complex field $a=a_1+ia_2$.
 
 Spin-$s$ quantities can be decomposed into their harmonic coefficients $\,_sa_{\ell m}$ through a spherical harmonic transform:
 \begin{equation}\nonumber
@@ -274,11 +272,13 @@ In what follows we will focus on scalar ($s=0$) quantities such as the overdensi
 
 \subsubsection{Angular power spectra}\label{sssec:2pt.pspec}
 
+\elisa{Need to define $T_\delta$ and $T_\theta$ somewhere. Perhaps in matter ps section above.}
 The angular power spectrum $C^{ab}_\ell$ between two tracers $a$ and $b$ is defined as
 \begin{equation}
   \langle a_{\ell m}b^*_{\ell m}\rangle\equiv C^{ab}\delta_{\ell\ell'}\delta_{mm'},
+  \label{eq:clgen}
 \end{equation}
-where $a_{\ell m}$ and $b_{\ell m}$ can be either the $E$-mode or $B$-mode component of the corresponding field. In what follows we will only deal with fields for which the $B$-modes are exactly or nearly $0$, and which we will take to be identically $0$. Therefore all equations refer to the $E$-$E$ power spectrum. In general, this power spectrum can be written as:
+where $a_{\ell m}$ and $b_{\ell m}$ can be either the $E$-mode or $B$-mode component of the corresponding field. In what follows we will only work with fields for which the $B$-modes are exactly or nearly $0$, and which we will take to be identically $0$. Therefore all equations refer to the $E$-$E$ power spectrum. In general, this power spectrum can be written as:
 \begin{equation}
   C^{ab}_\ell=4\pi\int_0^\infty \frac{dk}{k}\,\mathcal{P}_\Phi(k)\Delta^a_\ell(k)\Delta^b_\ell(k),
   \label{eq:cls}
@@ -322,18 +322,16 @@ Note that \ccl does not currently compute relativistic corrections to number cou
     \begin{equation}
       W^L(z)\equiv\int_z^\infty dz' p_z(z')\frac{r(\chi'-\chi)}{r(\chi')r(\chi)}.
     \end{equation}
-  \item $\Delta^{\rm IA}$ is the transfer function for intrinsic galaxy alignments. \ccl supports the so-called ``non-linear alignment model'', in which the intrinsic galaxy inertia tensor is proportional the local tidal tensor \citep{2004PhRvD..70f3526H,2007MNRAS.381.1197H}:
+  \item $\Delta^{\rm IA}$ is the transfer function for intrinsic galaxy alignments. \ccl supports the so-called ``non-linear alignment model'' (NLA), in which the intrinsic galaxy inertia tensor is proportional the local tidal tensor \citep{2004PhRvD..70f3526H,2007MNRAS.381.1197H}:
     \begin{align}\nonumber
       \Delta_\ell^{\rm IA}(k)=\sqrt{\frac{(\ell+2)!}{(\ell-2)!}}\int &dz\,p_z(z)\,b_{\rm IA}(z)\,f_{\rm IA}(z)\\
       &T_\delta(k,z)\,\frac{j_\ell(k\chi(z))}{[k\chi(z)]^2}.
     \end{align}
-    Here, $b_{\rm IA}$ is the so-called alignment bias, and $f_{\rm IA}$ is the fraction of aligned galaxies in the sample. Notice that $b_{\rm IA}(z)$ absorbs the typical normalization factors used in the literature for intrinsic alignment amplitude and redshift evolution. It is thus not to be confused with $C_1$ or $A_{\rm IA}$, typical parameters for the linear alignment model, as adopted in works such as \citet{Blazek17,vanUitert18,Joudaki18,Hildebrandt17}.
-
-    \elisa{Some discussion on the accuracy of this model in general is needed. NLA doesn't give us B-modes.}
+    Here, $b_{\rm IA}$ is the so-called alignment bias, and $f_{\rm IA}$ is the fraction of aligned galaxies in the sample. Notice that $b_{\rm IA}(z)$ absorbs the typical normalization factors used in the literature for intrinsic alignment amplitude and redshift evolution. It is thus not to be confused with $C_1$ or $A_{\rm IA}$, typical parameters for adopted in works such as \citet{vanUitert18,Joudaki18,Hildebrandt17}. The NLA model  it has limitations in the modelling of small-scale correlations \citep{Singh15} and does not predict any $B$-mode contributions that can arise from non-linearities at such scales. However, it is a commonly adopted approximation in the current literature and going beyond it is outside of the scope of this work, though future versions of LSST DESC software will provide alternative modeling options \citep{Blazek17}.
     
 \end{itemize}
 
-\paragraph{\bf Lensing convergence.} The transfer function for the lensing convergence of a given source plane at redshift $z_*$ receives only one contribution, given by
+\paragraph{\bf Lensing convergence.} The transfer function for the lensing convergence, $\kappa$, of a given source plane at redshift $z_*$ receives only one contribution, given by
 \begin{equation}
   \Delta_\ell^\kappa(k)=-\frac{\ell(\ell+1)}{2}\int_0^{\chi_*}\frac{dz}{H(z)}\,\frac{r(\chi_*-\chi)}{r(\chi)r(\chi_*)}T_{\phi+\psi}(k,z),
   \label{eq:cmblens}
@@ -350,7 +348,7 @@ These approximations will be revisited in future versions of the library.
 
 \subsubsection{Correlation functions}
 
-Fields can also be correlated in configuration space, and the corresponding correlators are called correlation functions. Let $a$ and $b$ be two fields with spins $s_a$ and $s_b$. We start by defining $\tilde{a}(\nv_1)$ and $\tilde{b}(\nv_2)$ as the fields $a$ and $b$ rotated such that the $x$-axis of the tangential coordinate systems at $\nv_1$ and $\nv_2$ become aligned with the vector connecting both points. We can then define two correlation functions:
+Fields are correlated in configuration space, and the corresponding correlators are called correlation functions. Let $a$ and $b$ be two fields with spins $s_a$ and $s_b$. We start by defining $\tilde{a}(\nv_1)$ and $\tilde{b}(\nv_2)$ as the fields $a$ and $b$ rotated such that the $x$-axis of the tangential coordinate systems at directions $\nv_1$ and $\nv_2$ become aligned with the vector connecting both points. We can then define two correlation functions:
 \begin{equation}\nonumber
   \xi^{ab}_+(\theta)\equiv\left\langle\tilde{a}(\nv_1)\tilde{b}^*(\nv_2)\right\rangle,\hspace{12pt}
   \xi^{ab}_-(\theta)\equiv\left\langle\tilde{a}(\nv_1)\tilde{b}(\nv_2)\right\rangle,
@@ -358,7 +356,7 @@ Fields can also be correlated in configuration space, and the corresponding corr
 \end{equation}
 where $\nv_1\cdot\nv_2\equiv\cos\theta$. 
 
-$\xi_{\pm}$ can be related to the power spectra as
+$\xi_{\pm}$ can be related to the angular power spectra (Eq. \ref{eq:clgen}) as
 \begin{equation}\label{eq:cl_xi}
  \xi^{ab}_\pm = \sum_\ell\frac{2\ell+1}{4\pi}\,(\pm1)^{s_b}\,C^{ab\pm}_\ell\,d^\ell_{s_a,\pm s_b}(\theta),
 \end{equation}
@@ -368,7 +366,7 @@ where $d^\ell_{mm'}$ are the Wigner-$d$ matrices \citep{Ng1999,2004MNRAS.350..91
 \end{equation}
 which reduces to the $EE$ power spectrum when all $B$-modes are 0.
 
-Note that, as scalar quantities are real, any correlation involving at least one spin-$0$ field only has one non-unique correlation function. In these cases, the Wigner-$d$ matrices can also be expressed in terms of associated Legendre polynomials $P^m_\ell$, and therefore Eq. \ref{eq:cl_xi} becomes
+Note that, as scalar quantities are real, any correlation involving at least one spin-$0$ field only has one non-unique correlation function. In these cases, the Wigner-$d$ matrices can also be expressed in terms of associated Legendre polynomials $P^m_\ell$, and therefore Eq. (\ref{eq:cl_xi}) becomes
 \begin{align}
   \xi^{ab}(\theta)&=\sum_\ell\frac{2\ell+1}{4\pi}\,C^{ab}_\ell\sqrt{\frac{(\ell-s_a)!}{(\ell+s_a)!}}P^{s_a}_\ell(\cos\theta)\label{eq:xigg},
 \end{align}
@@ -378,7 +376,7 @@ In the flat-sky approximation we can take the small-scale limit $\ell\gg s_a,s_b
 \begin{equation}
   d_{s_as_b}^\ell(\theta)\longrightarrow J_{s_a-s_b}(\ell\theta),
 \end{equation}
-where $J_\alpha(x)$ is the Bessel function of order $\alpha$. Eq. \ref{eq:cl_xi} then becomes\footnote{See the weak lensing review by \citet{Bartelmann01}, page 44 and \citet{Joachimi10}.}
+where $J_\alpha(x)$ is the Bessel function of order $\alpha$. Eq. (\ref{eq:cl_xi}) then becomes\footnote{See the weak lensing review by \citet{Bartelmann01} and \citet{Joachimi10}.}
 \begin{equation}
   \xi^{ab}_{\pm}(\theta)=\left(\pm1\right)^{s_b}\int\frac{d\ell\,\ell}{2\pi}\,C^{ab\pm}_\ell J_{s_a\mp s_b}(\ell\theta).
 \end{equation}
@@ -415,20 +413,20 @@ In the future \ccl will be expanded to incorporate the calculation of the higher
 %-------------------------------------------------------------------------------
 \subsection{Halo mass function}
 
-Being able to calculate the halo abundance as a function of mass is a necessary step to being able to constrain cosmology with probes such as galaxy clusters. Modern cosmology makes extensive use of fitting functions in order to predict the evolution of halo abundances, which necessarily require derivation from cosmological simulations. In order to reach the high precision required for cosmological constraints in a self-consistent fashion, it is ultimately necessary to use cosmological simulations; we implement this with halo mass functions with parameters fit to these simulations. The calculation of the halo mass function focuses around the spherical overdensity method of halo finding, in which the size of a halo can be defined with:
+\elisa{This paragraph needs some references.} Being able to calculate the halo abundance as a function of mass is a necessary step to being able to constrain cosmology with probes such as galaxy clusters. Modern cosmology makes extensive use of fitting functions in order to predict the evolution of halo abundances, which necessarily require derivation from cosmological simulations. In order to reach the high precision required for cosmological constraints in a self-consistent fashion, it is ultimately necessary to use cosmological simulations; we implement this with halo mass functions with parameters fit to these simulations. The calculation of the halo mass function focuses around the spherical overdensity method of halo finding, in which the size of a halo can be defined with:
 
 \begin{equation}
 \bar{\rho}(r_{\Delta}) = \Delta \times \bar{\rho}_{\mathrm{m}},
 \end{equation}
 %
-where a spherical halo with radius $r_{\Delta}$ has an average density $\bar{\rho}$ equal to the overdensity parameter $\Delta$ times the mean background density of the universe at a given redshift, $\bar\rho_{\mathrm{m}}(z)$. Within the literature, the choice of $\Delta$ can vary considerably, as observations focusing on the compact cores of halos often take much larger values of $\Delta$ than the fiducial definition in most halo clustering studies, $\Delta = 200$. We note that another common definition exists which utilizes the critical density of the universe, $\rho_{\mathrm{crit}}$; this introduces a simple conversion factor between the two definitions that must be accounted for. \ccl only accepts overdensity parameters with respect to the mean matter density, but we plan to allow for self-consistent handling of critical density based definitions in the future.
+where a spherical halo with radius $r_{\Delta}$ has an average density $\bar{\rho}$ equal to the overdensity parameter $\Delta$ times the mean background density of the universe at a given redshift, $\bar\rho_{\mathrm{m}}(z)$. Within the literature, the choice of $\Delta$ can vary considerably, as observations focusing on the compact cores of halos often take much larger values of $\Delta$ than the fiducial definition in most halo clustering studies, $\Delta = 200$. We note that another common definition exists which utilizes the critical density of the universe, $\rho_{\mathrm{crit}}$; this introduces a simple conversion factor between the two definitions that must be accounted for. \ccl only accepts overdensity parameters with respect to the mean matter density, but we plan to allow for self-consistent handling of critical density based definitions in the future. \elisa{Don't we already do this?}
 
 The halo mass function is defined as
 \begin{equation}
 \frac{\mathrm{d}n}{\mathrm{d}M}=f(\sigma)\frac{\bar{\rho}_\mathrm{m}}{M}\frac{\mathrm{d}\ln{\sigma^{-1}}}{\mathrm{d}M},
 \label{eq:halo_mass_function}
 \end{equation}
-where $n$ is the number density of halos of a given mass $M$ associated with the RMS variance of the matter density field $\sigma^2$ at a given redshift and $f$ is a fitting function\footnote{Not to be confused with the linear growth rate of structure defined in Eq. \ref{eq:lingrowthf}}. In \ccl calling this function returns the mass function in logarithmic mass bins, $dn/d\log_{10}{M}$, where the input is the halo mass $M$ and scale factor $a$.
+where $n$ is the number density of halos of a given mass $M$ associated with the RMS variance of the matter density field, $\sigma^2$, at a given redshift and $f$ is a fitting function\footnote{Not to be confused with the linear growth rate of structure defined in Eq. (\ref{eq:lingrowthf}).}. \ccl makes predictions for the mass function in logarithmic mass bins, $dn/d\log_{10}{M}$, where the input is the halo mass $M$ and scale factor $a$.
 
 The halo mass $M$ is related to $\sigma$ by first computing the radius $R$ that would enclose a mass $M$ in a homogeneous Universe at $z=0$:
 \begin{equation}
@@ -436,10 +434,10 @@ The halo mass $M$ is related to $\sigma$ by first computing the radius $R$ that 
 \end{equation}
 The RMS density contrast in spheres of radius $R$ can then be computed as
 \begin{equation}
-  \sigma_R^2 = \frac{1}{2\pi^2}\int dk\,k^2\,P(k)\,\tilde{W}_R^2(k)
+  \sigma_R^2 = \frac{1}{2\pi^2}\int dk\,k^2\,P_{\rm lin}(k)\,\tilde{W}_R^2(k)
   \label{eq:sigR}
 \end{equation}
-where $P(k)$ is the linear matter power spectrum and $\tilde{W}(kR)$ is the Fourier transform of a spherical top hat window function,
+where $P_{\rm lin}(k)$ is the linear matter power spectrum \elisa{At what redshift?} and $\tilde{W}(kR)$ is the Fourier transform of a spherical top hat window function,
 \begin{equation}
 \tilde{W}_R(k) = \frac{3}{(kR)^3}[\sin(kR)-kR\cos(kR)].
 \end{equation}
@@ -449,9 +447,9 @@ This is commonly related in terms of the mass inside of the Lagrangian scale of 
 R = (3M/4\pi{\bar\rho_{\mathrm{m}}})^{1/3}.
 \label{eq:lagrangemass}
 \end{equation}
-As a consequence, one can also define $\sigma_M$ as the RMS variance of the density field smoothed on some scale $M$, analogously to Eq.(\ref{eq:sigR}).
+As a consequence, one can also define $\sigma_M$ as the RMS variance of the density field smoothed on some scale $M$, analogously to Eq. (\ref{eq:sigR}).
 
-One commonly used halo mass function definition within the literature is the \citet{Tinker2010} fitting function. This fitting function has been developed using collisionless $N$-body simulation data, using halos identified by spherical overdensities. This is an extension of the \citet{Tinker2008} halo mass function, which is also included within \ccl as a comparative option. This fitting function assumes little change with respect to cosmological parameters. Further, it includes a redshift scaling which is assumed to sharply end at a redshift of $z = 3$. This halo mass function is calibrated within the range of $10^{10.5} h\mathrm{M}_\odot \leq M \leq 10^{15.5} h\mathrm{M}_\odot$ at a redshift of $z = 0$.
+One commonly used halo mass function definition within the literature is the \citet{Tinker2010} fitting function. This fitting function has been developed using collisionless $N$-body simulation data, using halos identified by spherical overdensities. This is an extension of the \citet{Tinker2008} halo mass function, which is also included within \ccl as a comparative option. This fitting function assumes little change with respect to cosmological parameters. Further, it includes a redshift scaling which is assumed to sharply end at a redshift of $z = 3$. This halo mass function is calibrated within the range of $10^{10.5} h\,\mathrm{M}_\odot \leq M \leq 10^{15.5} h\,\mathrm{M}_\odot$ at a redshift of $z = 0$.
 
 For comparison purposes, we also have included the results of \citet{Angulo2012}, which uses the Millenium XXL simulation in order to study galaxy cluster scaling relations. As part of this study, they have calculated their own fit to the \citet{Tinker2010} fitting function. While this additional halo mass function is available, it has not been extended to a broad range of overdensity parameter $\Delta$, nor has it been extended beyond a redshift of $z = 0$.
 
@@ -465,20 +463,15 @@ f(\sigma)=A\Big[\Big(\frac{b}{\sigma}+1\Big)^{-a}\Big]e^{-c/{\sigma_M}^2},
 \end{equation}
 where the only change is in the formulation of the second term. Note that the fitting parameters in the \citet{Angulo2012} formulation do not contain any redshift dependence and the use of it is primarily for testing and benchmark purposes.
 
-The \citet{Tinker2010} model parameterizes the halo mass function in terms of the peak height, $\nu = \delta_c/\sigma_M$, where $\delta_c=1.686$ \Mead{(independent of cosmological model in \cite{Tinker2010})} is the critical density for collapse. The function is then re-expressed as
+The \citet{Tinker2010} model parameterizes the halo mass function in terms of the peak height, $\nu = \delta_c/\sigma_M$, where $\delta_c=1.686$ is the critical density for collapse (taken to be independent of cosmological model). The function is then re-expressed as
 \begin{equation}
   f(\nu) = \alpha[1+(\beta\nu)^{-2\phi}]\nu^{2\eta}e(-\gamma\nu^2/2).
   \label{eq:tinkerf}
 \end{equation}
 
-We note that these halo mass functions, while implemented to high {\em numerical} accuracy through comparison against a flat $\Lambda$CDM cosmology (see `CCL1' in Table  \ref{tab:cosmologies}), carry their own uncertainties. It has not been significantly studied whether the halo mass function is universal with respect to changes in dark energy parameterisation.
-%Further, \citet{Tinker2010} found a $\sim6\%$ scatter when determining the halo bias due to differences in simulations.
-%This is in addition to a $5\%$ error in the mass function alone.
-\citet{Tinker2008,Tinker2010} quote 5\% accuracy of their mass funcitons.
-This result is consistent with the work of \citet{Watson2013}, which also finds a $5\%$ level difference in comparison to the Tinker fitting function. Further study will be required in the future in order to gain percent level accuracy in determining the halo mass function.\todo{For what cosmologies was the Tinker mass function tested? I.e., what should go in Table 1?}
+\citet{Tinker2008,Tinker2010} quote 5\% accuracy of their parametrised mass functions, compared to the simulations used to calibrate them. \elisa{Antonio, do you agree with the previous sentence?} This result is consistent with the work of \citet{Watson2013}, which also finds a $5\%$ level difference in comparison to the \citet{Tinker2010} fitting function \elisa{is it 2010? or 2008?}. Further study will be required in the future in order to gain percent level accuracy in determining the halo mass function.
 
-%\elisa{aren't these already given above?}
-%\Mead{Moved this}
+We note that these halo mass functions, while implemented to high {\em numerical} accuracy in \ccl, carry their own uncertainties. It has not been significantly studied whether the halo mass function is universal with respect to changes in dark energy parameterisation.
 
 We also include the mass function from \cite{Sheth1999}:
 \begin{equation}
@@ -487,7 +480,7 @@ f(\nu)\;\mathrm{d}\nu=A\left[1+\frac{1}{(q\nu^2)^p}\right]\mathrm{e}^{-q\nu^2/2}
 \end{equation}
 with $p=0.3$, $q=0.707$ and $A\simeq 0.21616$, where $A$ is fixed such that the mass function is normalized.
 
-This mass function was fitted to halos measured in $N$-body simulations where halos were identified with a cosmology-dependent overdensity criterieon from the spherical-collapse model ($\Delta_\mathrm{v}\sim 300$ for $\Omega_\mathrm{m}\sim 0.3$ $\Lambda$CDM; $\Delta_\mathrm{v}\sim 178$ for $\Omega_\mathrm{m}\sim 1$). For the cosmology dependence, we use the fitting-formula of \cite{Bryan1998}
+This mass function was fitted to halos measured in $N$-body simulations where halos were identified with a cosmology-dependent overdensity criterion from the spherical-collapse model ($\Delta_\mathrm{v}\sim 300$ for $\Omega_\mathrm{m}\sim 0.3$ $\Lambda$CDM; $\Delta_\mathrm{v}\sim 178$ for $\Omega_\mathrm{m}\sim 1$). For the cosmology dependence, we use the fitting-formula of \cite{Bryan1998}
 \begin{equation}
 \Delta_\mathrm{v}(z)=\frac{1}{\Omega_\mathrm{m}(z)}\left\{18\pi^2-82[1-\Omega_\mathrm{m}(z)]-39[1-\Omega_\mathrm{m}(z)]^2\right\}\ .
 \label{eq:Deltav_Bryan}
@@ -501,27 +494,23 @@ In addition, in \cite{Sheth1999} the relation between $M$ and $nu$ was taken to 
 
 \subsection{Halo bias}
 
-\jab{I'm a bit confused by this section. This is a quantity that CCL can return. But currently the clustering observables can only handle linear (scale-independent) bias? And should we say that the user can specify a linear bias that does not come from this fitting formula?}
-\asv{Including the Tinker fitting function for the halo bias is a fairly natural step considering we are also including the Tinker mass function (on which this is heavily related to). I do not think the fact that the clustering section of the code is currently unready to handle more than linear bias impacts the usefulness of having this built in. That being said, I will specify that currently we do not have a linear bias model built in as an explicit framework, though it can certainly be passed in to other sections of the code.}
-
 An important step in many interpretations of the halo model is to have a measure of the bias of dark matter halos, defined as the ratio of the halo power spectrum to the linear dark matter power spectrum,
 \begin{equation}
   b^2(k) = \frac{P_h(k)}{P_{\mathrm{lin}}(k)}.
   \label{eq:halo_bias}
 \end{equation}
+This is implemented as a stand-alone function in \ccl and does not currently feed into predictions for galaxy or halo clustering descrined in Section \ref{ss:2point}.
 
-As with measures of the halo mass function, high accuracy cosmological constraints requires the use of numerical simulations to develop fitting functions and emulators. We note that we will define haloes as in the above subsection focusing on the halo mass function. {\tt CCL} implements the halo bias fitting function results in \citet{Tinker2010}, though future improvements will likely require the use of emulator methods.
+As with measures of the halo mass function, high accuracy cosmological constraints require the use of numerical simulations to develop fitting functions and emulators. Here, we define haloes as in the above subsection. {\tt CCL} implements the halo bias fitting function results in \citet{Tinker2010}, though future improvements will likely require the use of emulator methods.
 
-The \citet{Tinker2010} model parameterizes the halo mass function (Eq.~\ref{eq:tinkerf}) and the halo bias in terms of the peak height and the critical density for collapse as
+The \citet{Tinker2010} model parameterizes the the halo bias in terms of the peak height and the critical density for collapse (similarly to Eq.~\ref{eq:tinkerf}) as
 \begin{eqnarray}
   b(\nu) &=& 1 - A\frac{\nu^a}{\nu^a + {\delta_c}^a} + B\nu^b+C\nu^c,\\
 \end{eqnarray}
 
-Again, while high {\em numerical} accuracy has been verified, there is a remaining uncertainty to the {\em physical accuracy}. \citet{Tinker2010} found a $\sim6\%$ scatter when determining the halo bias due to differences in simulations alone. In addition, this parameterization does not include a careful exploration of any impact due to changes in the dark energy equation of state. As with the halo mass function, studies will be required to reach accuracy at the percent level for any cosmological predictions. \elisa{I think we need some further references here of scale-dependent bias, assembly bias, etc.}
+\citet{Tinker2010} found a $\sim6\%$ scatter when determining the halo bias due to differences in simulations alone.There is remaining uncertainty to the {\em physical accuracy} of this model, as this parameterization does not consider any impact due to changes in the dark energy equation of state. As with the halo mass function, studies will be required to reach accuracy at the per cent level for any cosmological predictions. \elisa{I think we need some further references here of scale-dependent bias, assembly bias, etc.}
 
-We note that many observables are tuned to utilizing a linear halo bias (that is to say the bias function is scale independent). While the current functionality of \ccl is to return the \citet{Tinker2010} model for halo bias, it is possible to generate alternative models of linear halo bias and pass these results to \ccl for analysis purposes. \elisa{I think this is a bit confusing: from this I understand that \ccl can predict $b(k)$ but cannot pass anything but linear bias to the angular power spectra.}
-
-We also include the halo bias from \cite{Sheth1999},
+\ccl can also make predictions for the halo bias from \cite{Sheth1999},
 \begin{equation}
 b(\nu)=1+\frac{1}{\delta_\mathrm{c}(z)}\left[q\nu^2-1+\frac{2p}{1+(q\nu^2)^p}\right]\ ,
 \label{eq:st_bias}
@@ -661,7 +650,7 @@ The value of the gravitational constant, $G$, enters into the critical density. 
 %-------------------------------------------------------------------------------
 \subsection{Matter power spectrum}
 
-For speed, the initialization of a cosmological model within {\tt CCL} performs initial computations of the linear and nonlinear matter power spectra, which are then interpolated whenever required. A bicubic spline is performed in two variables. The first one is the logarithmically-spaced wavenumber. For the scale factor, we adopt a hybrid spacing scheme where this quantity is linearly-spaced for $a>0.1$ and logarithmically-spaced otherwise. The goal of this hybrid scheme is to allow sufficiently fine sampling at low redshift for LSST observables, while at the same time allowing for predictions for CMB lensing without significantly slowing down the computations, as would result from a linear-spacing throughout. The spline interpolation causes soem precision loss in the power spectra output (compared to, for example, direct outputs from \class or the cosmic emulator) which is quantified in Section \ref{sec:validation}.
+For speed, the initialization of a cosmological model within {\tt CCL} performs initial computations of the linear and non-linear matter power spectra, which are then interpolated whenever required. A bicubic spline is performed in two variables. The first one is the logarithmically-spaced wavenumber. For the scale factor, we adopt a hybrid spacing scheme where this quantity is linearly-spaced for $a>0.1$ and logarithmically-spaced otherwise. The goal of this hybrid scheme is to allow sufficiently fine sampling at low redshift for LSST observables, while at the same time allowing for predictions for CMB lensing without significantly slowing down the computations, as would result from a linear-spacing throughout. The spline interpolation causes soem precision loss in the power spectra output (compared to, for example, direct outputs from \class or the cosmic emulator) which is quantified in Section \ref{sec:validation}.
 
 We introduce a maximum value $k$ (in units of $\text{Mpc}^{-1}$) up to which we evaluate the power spectra for interpolation; we call this parameter {\tt K$\_$MAX$\_$SPLINE}. A separate {\tt K$\_$MAX} parameter sets the limit of evaluation of the matter power spectrum. The range between {\tt K$\_$MAX$\_$SPLINE}~$<k<$~{\tt K$\_$MAX} is evaluated by performing a second order Taylor expansion in $\ln k$.
 
@@ -677,7 +666,7 @@ We also extrapolate the power spectrum at small wavenumbers. In this case, we in
 \begin{equation}
   \log P(k<{\tt K\_MIN},z) = \log P({\tt K\_MIN},z) + n_s (\log k-\log{\tt K\_MIN})
 \end{equation}
-The value adopted for {\tt K\_MIN} depends on the choice of power spectrum method. Note that an additional parameter, {\tt K\_MIN\_DEFAULT}, sets the minimum $k$ for integrations. This is set to {\tt K\_MIN\_DEFAULT}$=5\times 10^{-5}\,\text{Mpc}^{-1}$. For \class and the nonlinear power spectrum, we adopt {\tt K\_MIN} that coincides with the smallest wavenumber output by \class, {\tt K\_MIN}$=7\times 10^{-6}\,\text{Mpc}^{-1}$.\footnote{For BBKS, the power spectrum is computed analytically at all $k$, i.e., there is no extrapolation. For the \citet{1998ApJ...496..605E} implementation, the splines of the power spectrum span {\tt K\_MIN\_DEFAULT}$<k<${\tt K$\_$MAX$\_$SPLINE}, so there is only extrapolation at high $k$.} As a consequence, when using {\tt CCL} with \class, no extrapolation will occur at low wavenumbers unless the user modified the default values of {\tt K\_MIN\_DEFAULT} and/or {\tt K\_MIN} .
+The value adopted for {\tt K\_MIN} depends on the choice of power spectrum method. Note that an additional parameter, {\tt K\_MIN\_DEFAULT}, sets the minimum $k$ for integrations. This is set to {\tt K\_MIN\_DEFAULT}$=5\times 10^{-5}\,\text{Mpc}^{-1}$. For \class and the non-linear power spectrum, we adopt {\tt K\_MIN} that coincides with the smallest wavenumber output by \class, {\tt K\_MIN}$=7\times 10^{-6}\,\text{Mpc}^{-1}$.\footnote{For BBKS, the power spectrum is computed analytically at all $k$, i.e., there is no extrapolation. For the \citet{1998ApJ...496..605E} implementation, the splines of the power spectrum span {\tt K\_MIN\_DEFAULT}$<k<${\tt K$\_$MAX$\_$SPLINE}, so there is only extrapolation at high $k$.} As a consequence, when using {\tt CCL} with \class, no extrapolation will occur at low wavenumbers unless the user modified the default values of {\tt K\_MIN\_DEFAULT} and/or {\tt K\_MIN} .
 
 %-------------------------------------------------------------------------------
 \subsection{Angular power spectra}
@@ -870,7 +859,7 @@ The BCM implementation for the impact of baryons on the matter power spectrum, d
 
 In its default configuration, \ccl adopts the \halofit \citep{CLASS_halofit} implementation by interpolating \class power spectra outputs to model the matter power spectrum. The computation of the power spectrum from \class can be significantly sped up by interpolating the matter power spectra in the range {\tt K$\_$MIN}~$<k<$~{\tt K$\_$MAX$\_$SPLINE} and extrapolating beyond it, as described in Section \ref{sec:implement}. In this section, we describe the loss of accuracy due to this method. The tests presented are performed in a flat $\Lambda$CDM cosmology with $\Omega_c=0.25$, $\Omega_b=0.05$, $A_s=2.1\times10^{-9}$, $h=0.7$ and $n_s=0.96$.
 
-The accuracy of this approximation is shown in Figure \ref{fig:NLextrapol} for redshifts $z=0$, $z=3$ and $z=20$. We compare the nonlinear matter power spectrum at these redshifts, computed with the previously described approximation, to the matter power spectrum obtained by setting the power spectrum splines to high-accuracy values. We find that for typical values of $\Delta \ln k=10^{-2}$ and {\tt K$\_$MAX$\_$SPLINE}$=50\,\text{Mpc}^{-1}$ $\ln P$ has converged to an accuracy that surpasses the expected impact of baryonic effects on the matter power spectrum at $k>10\,\text{Mpc}^{-1}$. \todo{Christiane, what was extacly the reference fiducial power?} (For an estimate of the impact of baryons on the total matter power spectrum, see \citealt{Schneider15}.) 
+The accuracy of this approximation is shown in Figure \ref{fig:NLextrapol} for redshifts $z=0$, $z=3$ and $z=20$. We compare the non-linear matter power spectrum at these redshifts, computed with the previously described approximation, to the matter power spectrum obtained by setting the power spectrum splines to high-accuracy values. We find that for typical values of $\Delta \ln k=10^{-2}$ and {\tt K$\_$MAX$\_$SPLINE}$=50\,\text{Mpc}^{-1}$ $\ln P$ has converged to an accuracy that surpasses the expected impact of baryonic effects on the matter power spectrum at $k>10\,\text{Mpc}^{-1}$. \todo{Christiane, what was extacly the reference fiducial power?} (For an estimate of the impact of baryons on the total matter power spectrum, see \citealt{Schneider15}.) 
 
 %------------------------
 \begin{figure*}
@@ -883,12 +872,12 @@ The accuracy of this approximation is shown in Figure \ref{fig:NLextrapol} for r
 
 With the implementation described above, the power spectrum splines are initialized up to {\tt K$\_$MAX$\_$SPLINE}. This is also true for the linear matter power spectrum, which is used within \ccl in particular to obtain $\sigma_8$ (see Eq. \ref{eq:sigR}). We have tested how this procedure affects the convergence of the linear matter power spectrum. We compare the fiducial \ccl output to the case where we set {\tt K$\_$MAX$\_$SPLINE}~$=5\times 10^3\,\text{Mpc}^{-1}$. The result is shown in Figure \ref{fig:NLextrapol}. For some applications that use the linear power spectrum, the user might need to increase the value of {\tt K$\_$MAX$\_$SPLINE}. While \ccl adopts certain fiducial values of the number of scale factor and wavenumber values to use in the interpolation, we have tested that increasing the sampling does not change the results presented in Figures \ref{fig:NLextrapol}. 
 
-In addition to the above tests in $\Lambda$CDM cosmologies without massive neutrinos, we have checked the impact of using splines (at intermediate $k$) and extrapolation (at low and high $k$) in cosmologies CCL7, CCL8, and CCL9 with massive neutrinos, defined in Table \ref{tab:cosmologies_nu}. We compare the linear and nonlinear matter power spectrum as computed directly via \class to that computed using \class via \ccl . We find that for $k$  between {\tt K$\_$MIN} and {\tt K$\_$MIN$\_$SPLINE}, the two power spectra agree to better than $10^{-4}$ in all models. For $k$ between {\tt K$\_$MAX$\_$SPLINE} and {\tt K$\_$MAX}, agreement is better than $10^{-3}$, which we deem sufficient given the significant physical uncertainties introduced at these small scales by effects such as galaxy formation \citep{vanDaalen11}. The fractional difference between the two nonlinear power spectra is plotted in Figure \ref{fig:power_nu}. 
+In addition to the above tests in $\Lambda$CDM cosmologies without massive neutrinos, we have checked the impact of using splines (at intermediate $k$) and extrapolation (at low and high $k$) in cosmologies CCL7, CCL8, and CCL9 with massive neutrinos, defined in Table \ref{tab:cosmologies_nu}. We compare the linear and non-linear matter power spectrum as computed directly via \class to that computed using \class via \ccl . We find that for $k$  between {\tt K$\_$MIN} and {\tt K$\_$MIN$\_$SPLINE}, the two power spectra agree to better than $10^{-4}$ in all models. For $k$ between {\tt K$\_$MAX$\_$SPLINE} and {\tt K$\_$MAX}, agreement is better than $10^{-3}$, which we deem sufficient given the significant physical uncertainties introduced at these small scales by effects such as galaxy formation \citep{vanDaalen11}. The fractional difference between the two non-linear power spectra is plotted in Figure \ref{fig:power_nu}. 
 
 \begin{figure}
 \centering
 \includegraphics[width=0.49\textwidth]{pk_class_nu_NL}
-\caption{Fractional difference between the nonlinear matter power spectrum as computed directly via \class with that computed using \class via \ccl in cosmologies CCL7, CCL8, and CCL9 with massive neutrinos.}
+\caption{Fractional difference between the non-linear matter power spectrum as computed directly via \class with that computed using \class via \ccl in cosmologies CCL7, CCL8, and CCL9 with massive neutrinos.}
 \label{fig:power_nu}
 \end{figure}
 
