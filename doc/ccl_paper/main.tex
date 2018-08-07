@@ -121,11 +121,12 @@ The models that are specified above map directly onto cosmological observables s
 \frac{H(a)}{H_0} &= a^{-3/2}\Big(\Omega_{m}+\Omega_{\Lambda} a^{-3(w_0+w_a)}
 \exp[3 w_a (a-1)]~+ \nonumber \\ &\Omega_{K} a + (\Omega_{g} + \Omega_{\nu, {\rm rel}}) a^{-1} + \tilde\Omega_{\nu, {\rm m}}(a)a^3\Big)^{\frac{1}{2}} ,
 \end{align}
-and is a function of the energy density in the different components today and the scale factor. In this expression, we have assumed the CPL parameterization described above for the dark energy equation of state and we have defined $\tilde\Omega_{\nu, {\rm m}}(a) \equiv \rho^{-1}_{\rm crit} \rho_{\nu, {\rm m}}(a)$ as the fractional energy density of massive neutrinos as a function of time.
+and is a function of the energy density in the different components today and the scale factor. In this expression, we have assumed the CPL parameterization described above for the dark energy equation of state and we have defined $\tilde\Omega_{\nu, {\rm m}}(a) \equiv \rho^{-1}_{\rm crit} \rho_{\nu, {\rm m}}(a)$ as the fractional energy density of massive neutrinos as a function of time, where $\rho^{-1}_{\rm crit}$ is the critical density of the Universe today.
 
 In general, the density parameter $\Omega_X(a)$ of a given species $X$ at a given time is defined in terms of the physical background densities $\bar\rho_X(a)$ via $\Omega_X(a) \equiv \rho^{-1}_{\rm crit}(a) \bar\rho_X(a)$, where the critical density
 \begin{equation}
   \rho_{\rm crit}(a) = {( 8 \pi G)}^{-1} 3c^2H^2(a) = \rho_{\rm crit} H_0^{-2} H^2(a).
+  \label{eq:rhocrit}
 \end{equation}
 As an example, the physical density of matter is given by
 \begin{equation}
@@ -339,7 +340,7 @@ Note that \ccl does not currently compute relativistic corrections to number cou
 where $\chi_*\equiv\chi(z_*)$.
 
 \noindent
-It is worth noting that the equations above should be modified for non-flat cosmologies by replacing the spherical Bessel functions $j_\ell$ with their hyperspherical counterparts \citep{1994ApJ...432....7K}. These are currently not supported by \ccl, and their impact is mostly relevant on low multipoles. The library also assumes a factorizable matter power spectrum at unequal times $P_\delta(k,z_1,z_2)=T_\delta(k,z_1)T_\delta(k,z_2)\,2\pi^2\mathcal{P}_\Phi(k)$ (see \citealt{2017PhRvD..95f3522K}). Furthermore, \ccl assumes a relation between transfer functions $T_\delta$, $T_\theta$ and $T_{\phi+\psi}$ that is strictly only valid in vanilla $\Lambda$CDM\footnote{Note that the transfer functions are defined here for the full non-linear density field, as opposed to the more common linear transfer functions.}:
+It is worth noting that the equations above should be modified for non-flat cosmologies by replacing the spherical Bessel functions $j_\ell$ with their hyperspherical counterparts \citep{1994ApJ...432....7K}. These are currently not supported by \ccl, and their impact is mostly relevant on low multipoles. The library also assumes a factorizable matter power spectrum at unequal times $P_\delta(k,z_1,z_2)=T_\delta(k,z_1)T_\delta(k,z_2)\,2\pi^2\mathcal{P}_\Phi(k)$. This approximation is widely used in the literature, but further work is needed to assess its impact on LSST observables \citep{2017PhRvD..95f3522K}. Furthermore, \ccl assumes a relation between transfer functions $T_\delta$, $T_\theta$ and $T_{\phi+\psi}$ that is strictly only valid in vanilla $\Lambda$CDM\footnote{Note that the transfer functions are defined here for the full non-linear density field, as opposed to the more common linear transfer functions.}:
 \begin{equation}
   T_\delta=-\frac{1+z}{H(z)f(z)}T_\theta=-\frac{k^2}{3H_0^2\Omega_m}\frac{T_{\phi+\psi}}{1+z}.
 \end{equation}
@@ -612,15 +613,16 @@ p(z,z') = \frac{1}{\sqrt{2 \pi}\sigma_z} \exp\left(-\frac{(z-z')^2}{2\sigma_z^2}
 \section{Implementation of high-accuracy cosmological functions}
 \label{sec:implement}
 
-In this section, we note some of the assumptions and implementation details that are relevant when making accurate cosmological predictions. In general, we use the publicly available {\tt GSL} library\footnote{\url{https://www.gnu.org/software/gsl/}} to perform all of the integations and interpolations. Most interpolations use the {\tt gsl\_interp\_akima} method, and the power spectra interpolation use a bicubic option provided by {\tt gsl\_interp2d\_bicubic}. We work with double precision quantities throughout. The validation tests performed for {\tt CCL} are described in detail in Section \ref{sec:validation}.
+In this section, we note some of the assumptions and implementation details that are relevant when making accurate cosmological predictions. In general, we use the publicly available {\tt GSL} library\footnote{\url{https://www.gnu.org/software/gsl/}} to perform all of the integations and interpolations. Most interpolations use the {\tt gsl\_interp\_akima} method, and the power spectra interpolation use a bicubic spline provided by {\tt gsl\_interp2d\_bicubic}. We work with double precision quantities throughout. The validation tests performed for {\tt CCL} are described in detail in Section \ref{sec:validation}.
 
 %-------------------------------------------------------------------------------
 \subsection{Background functions \& growth of perturbations}
 \label{sec:distances}
 
-Cosmological predictions require making assumptions on the values of several physical constants, as defined in the previous sections. We have performed a comparison of the physical constants used in \ccl to those used in {\tt GSL} and \class as well as published sources such as the NIST Handbook and PDG Review of Particle Physics \citep{Beringer:1900zz}. Where possible, we have set constants to the values that are used internally in \class. This includes the value of the gravitational constant, the Boltzmann constant, the Planck constant, the speed of light, and the electron charge. \class does not include a definition of the solar mass or the Stefan-Boltzmann constant so we use the values used by {\tt GSL}. After comparison between the physical constants used in \ccl and those of the sources mentioned above, we have found better than $10^{-4}$ agreement with everything except the gravitational constant.
+Cosmological predictions require making assumptions on the values of several physical constants, as defined in the previous sections. \ccl adopts physical constant values from CODATA 2014 \citep{CODATA14} with the exception of the solar mass, which is not provided by this source and which we take from IAU 2015 \citep{IAU15}.
 
-The value of the gravitational constant, $G$, enters into the critical density. We found that failure to define $G$ with sufficient precision initially resulted in lack of convergence at the $10^{-4}$ level between the \ccl outputs and benchmarks (and among benchmarks). Importantly, note that \camb barely has $10^{-4}$ precision in $G$ (and similarly, there might be other constants within \camb/\class for which one should check the precision level). For \ccl predictions and benchmarks, we are using the value from \class. \todo{Was this the $G$ we used for benchmarks?} 
+We have performed a comparison of the physical constants used in \ccl to those used in {\tt GSL} and \class as well as published sources such as the NIST\footnote{\url{https://www.nist.gov}} Handbook and Particle Data Group (PDG) Review of Particle Physics \citep{Beringer:1900zz}. In general, we have found better than $10^{-4}$ agreement except for the gravitational constant and the value of the solar mass, where the discrepancies are nevertheless $<10^{-3}$. Notice that the value of these constants enter into the definition of the the critical density (Eq. \ref{eq:rhocrit}). 
+
 
 %-------------------------------------------------------------------------------
 \subsection{Matter power spectrum}
@@ -692,7 +694,7 @@ The auxiliary function $f_\ell(z,k)$ is defined as
 \begin{equation}
 f_\ell(z,k) \equiv  \sqrt{\frac{2}{\pi}}\  k \sqrt{P_\delta(k,z)}\ \widetilde{\Delta}_\ell(z,k)\label{eq-fell-func}
 \end{equation}
-with $\widetilde{\Delta}_\ell(z,k)$ the function describing the physical processes such as matter density fluctuations and redshift-space distortions as described for instance in \citet{2008cmb..book.....D,2009PhRvD..80h3514Y,2010PhRvD..82h3508Y, 2011PhRvD..84d3516C,2011PhRvD..84f3505B}.  \elisa{Discuss $P(k,z,z')$ assumptions.}
+with $\widetilde{\Delta}_\ell(z,k)$ the function describing the physical processes such as matter density fluctuations and redshift-space distortions as described for instance in \citet{2008cmb..book.....D,2009PhRvD..80h3514Y,2010PhRvD..82h3508Y, 2011PhRvD..84d3516C,2011PhRvD..84f3505B}.
 
 The \texttt{Angpow} version delivered with \ccl can only model galaxy clustering tracers (no graviational lensing), and this without the magnification lensing term (equation \ref{eq:deltaM}). The incorporation of those transfer functions is left for future work, but in principle this is a straightforward extenstion of \texttt{Angpow}. For galaxy clustering tracers we define $\widetilde{\Delta}_\ell(z,k)$ as 
 \begin{equation}
