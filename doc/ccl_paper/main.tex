@@ -78,7 +78,7 @@ Faced with these challenges, the Dark Energy Science Collaboration (DESC), one o
 %------------------------
 \begin{figure*}
 \centering
-\includegraphics[width=0.9\textwidth]{CCL_Flowchart4}
+\includegraphics[width=0.9\textwidth]{CCL_Flowchart5}
 \caption{\ccl structure flowchart. \ccl is written in C with a Python interface. \ccl routines calculate basic cosmological functions such as the Hubble function, density parameters, distances and growth function. It uses various methods to compute the matter-power spectrum including \class, ``Cosmic Emulator'' developed by \citet{Lawrence17}, or common approximations. It computes 2-point angular power spectra and correlation functions from various probes. \ccl is designed to accommodate multiple methods to calculate cosmological observables.}
 \label{fig:CCL_structure}
 \end{figure*}
@@ -91,7 +91,7 @@ This paper is organized as follows. Section \ref{sec:models} describes the cosmo
 \section{Cosmological models and observables}
 \label{sec:models}
 
-The overarching goal of \ccl is to allow seamless integration of different cosmological models of interest to LSST. The cosmological models assume a homogeneous and isotropic spacetime metric, and an inflationary model for the primordial universe described by a power-law with spectral index $n_s$, and amplitude $A_s$. The cosmological components include the matter density parameter $\Omega_m$, which is the sum of the baryonic component $\Omega_b$ and the cold dark matter component $\Omega_c$, the dark energy density $\Omega_\Lambda$, the radiation density $\Omega_g$, the curvature density $\Omega_K$, and the neutrino density of both massless and massive neutrinos, given by $\Omega_{\nu, {\rm rel}}$ and $\Omega_{\nu, {\rm m}}$ respectively. Unless specified, we refer to these densities at the present. The current expansion rate is given by the Hubble constant, $H_0 = 100~h~{\rm km}~{\rm s}^{-1}~{\rm Mpc}^{-1}$. The normalization of the density fluctuations is established either in terms of $A_s$ or in terms of the RMS variance in spheres of $8\,h\,\text{Mpc}^{-1}$ today, $\sigma_8$. 
+The overarching goal of \ccl is to allow seamless integration of different cosmological models of interest to LSST. The cosmological models assume a homogeneous and isotropic spacetime metric, and an inflationary model for the primordial universe described by a power-law with spectral index $n_s$, and amplitude $A_s$. The cosmological components include the matter density parameter $\Omega_m$, which is the sum of the baryonic component $\Omega_b$ and the cold dark matter component $\Omega_c$, the dark energy density\footnote{While we adopt $\Omega_\Lambda$ as notation, this quantity represents the dark energy density also in the case where dark enegry is described by a dynamical field.} $\Omega_\Lambda$, the radiation density $\Omega_g$, the curvature density $\Omega_K$, and the neutrino density of both massless and massive neutrinos, given by $\Omega_{\nu, {\rm rel}}$ and $\Omega_{\nu, {\rm m}}$ respectively. Unless specified, we refer to these densities at the present. The current expansion rate is given by the Hubble constant, $H_0 = 100~h~{\rm km}~{\rm s}^{-1}~{\rm Mpc}^{-1}$. The normalization of the density fluctuations is established either in terms of $A_s$ or in terms of the RMS variance in spheres of $8\,h\,\text{Mpc}^{-1}$ today, $\sigma_8$. 
 
 The following set of features is supported in \ccl:
 \begin{itemize}
@@ -729,15 +729,15 @@ The auxiliary function $f_\ell(z,k)$ is defined as
 \begin{equation}
 f_\ell(z,k) \equiv  \sqrt{\frac{2}{\pi}}\  k \sqrt{P_\delta(k,z)}\ \widetilde{\Delta}_\ell(z,k)\label{eq-fell-func}
 \end{equation}
-with $\widetilde{\Delta}_\ell(z,k)$ the function describing the physical processes such as matter density fluctuations and redshift-space distortions as described for instance in \citet{2008cmb..book.....D,2009PhRvD..80h3514Y,2010PhRvD..82h3508Y, 2011PhRvD..84d3516C,2011PhRvD..84f3505B}. The \texttt{Angpow} version delivered with \ccl can only deal with galaxy clustering tracers (no lensing), and this without the magnification lensing term (equation \ref{eq:deltaM}). The incorporation of those transfer functions is left for future work, but in principle \texttt{Angpow} has the capability to model them.
+with $\widetilde{\Delta}_\ell(z,k)$ the function describing the physical processes such as matter density fluctuations and redshift-space distortions as described for instance in \citet{2008cmb..book.....D,2009PhRvD..80h3514Y,2010PhRvD..82h3508Y, 2011PhRvD..84d3516C,2011PhRvD..84f3505B}.  \elisa{Discuss $P(k,z,z')$ assumptions.}
 
-For galaxy clustering tracers we define $\widetilde{\Delta}_\ell(z,k)$ as 
+The \texttt{Angpow} version delivered with \ccl can only model galaxy clustering tracers (no graviational lensing), and this without the magnification lensing term (equation \ref{eq:deltaM}). The incorporation of those transfer functions is left for future work, but in principle this is a straightforward extenstion of \texttt{Angpow}. For galaxy clustering tracers we define $\widetilde{\Delta}_\ell(z,k)$ as 
 \begin{equation}
  \widetilde{\Delta}_\ell(z,k) \equiv b(z) j_\ell(k \chi(z)) - f(z) j_\ell^{\prime\prime}(k \chi(z)) 
 \end{equation}
 with $j_\ell(x)$ and $j_\ell^{\prime\prime}(x)$ the spherical Bessel function of order $\ell$ and its second derivative, and $f(z)$ the growth rate of structure.
 
-In \texttt{Angpow}, the inner integral in $k$ is computed first. 
+In \texttt{Angpow}, the inner integral in $k$ is computed first.
 To conduct such computation where the integrand is a highly oscillating function, the 3C-algorithm described in details in \citet{2017A&A...602A..72C} is used. In brief, it relies on the projection of the oscillating $f_\ell(z_,k)$ onto a Chebyshev series of order $2^N$. The product of the two Chebyshev series is performed with a $2^{2N}$ Chebyshev series; then the integral is computed using Clenshaw-Curtis quadrature. Finally, the integrals over $z$ are performed once again via an optimised Clenshaw-Curtis quadrature. All the Chebyshev expansions and the Clenshaw-Curtis quadrature are performed via the \textit{Discrete Cosine Transform} of type I from the DCT-I fast transform of the FFTW library \citep{FFTW}.
 
 As in the general case the Limber approximation is valid at high $\ell$ values, the \ccl user can define an $\ell$ threshold to switch from the non-Limber slow computation to the faster Limber approximation.
@@ -786,7 +786,7 @@ In equation \ref{Omnu} above, we specify how $\Omega_{\nu, {\rm m}}$ is computed
 \int_0^{\infty} dx \, x^2 \frac{\sqrt{x^2 + \left(\mu\right)^2}}{\exp(x) + 1}.
 \label{phasespacenu}
 \end{equation}
-At high and low $\mu$, corresponding to high and low mass neutrinos, this integral need not be evaluated numerically. At high $\mu$, we set the integral equal to $\frac{5\zeta(3)}{18\pi^4}\mu$, while at low $\mu$ it goes to $\frac{7}{8}$. The $\mu$ values at which these approximations are taken can be set by the user. Outside of the regime in which these approximations are valid, the integral is computed numerically using {\tt gsl}, splined, and stored such that for a single cosmology it must only be computed once.
+At high and low $\mu$, corresponding to high and low mass neutrinos, this integral need not be evaluated numerically. At high $\mu$, we set the integral equal to $\frac{5\zeta(3)}{18\pi^4}\mu$, while at low $\mu$ it goes to $\frac{7}{8}$. \elisa{Define $\zeta$.} The $\mu$ values at which these approximations are taken can be set by the user. Outside of the regime in which these approximations are valid, the integral is computed numerically using {\tt gsl}, splined, and stored such that for a single cosmology it must only be computed once.
 
 It may sometimes be preferable or necessary to specify a cosmology in terms of $\Omega_{\nu, {\rm m}}$ instead of $m_\nu$. To facilitate this, \ccl includes a convenience function which returns $m_\nu$ given $\Omega_{\nu, {\rm m}}$. This is achieved via the relationship
 \begin{equation}
