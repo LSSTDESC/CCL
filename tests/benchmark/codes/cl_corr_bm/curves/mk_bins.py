@@ -1,6 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+#Generates redshift distribution for angular power spectrum and correlation function benchmarks
+#Contact david.alonso@physics.ox.ac.uk if you have issues running this script
 
 nz=256
 sz=0.15

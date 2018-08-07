@@ -5,6 +5,7 @@ from scipy.interpolate import interp1d
 import astropy.cosmology as csmm
 from astropy.constants import c,G
 from astropy import units as u
+#If you have issues running this script, contact Sukhdeep Singh (nabsukh@gmail.com)
 
 cosmo=csmm.FlatLambdaCDM(70.,0.3,Tcmb0=2.725)
 cosmo_h=cosmo.clone(H0=100)

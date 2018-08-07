@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import py_cosmo_mad as csm
+# Contact david.alonso@physics.ox.ac.uk if you have issues running this script
 
 TCMB=2.725
 PLOT_STUFF=0
@@ -9,6 +10,10 @@ FS=16
 LKMAX=7
 
 def do_all(z_arr,k_arr,cpar,prefix) :
+    """
+    Computes BBKS power spectrum at input z, k and cosmological parameters.
+    Saves results at "<prefix>_pk_bbks.txt"
+    """
     pcs=csm.PcsPar()
     pcs.background_set(cpar['om'],cpar['ol'],cpar['ob'],cpar['w0'],cpar['wa'],cpar['hh'],TCMB)
     pcs.set_linear_pk('BBKS',-3,LKMAX,0.01,cpar['ns'],cpar['s8'])

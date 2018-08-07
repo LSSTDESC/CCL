@@ -2,6 +2,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 import py_cosmo_mad as csm
 
+#Produces all distance benchmarks
+#Contact david.alonso@physics.ox.ac.uk if you have issues running this script
+
 TCMB=2.725
 PLOT_STUFF=0
 WRITE_STUFF=1

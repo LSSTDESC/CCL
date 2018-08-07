@@ -1,11 +1,14 @@
 /** 
-    This file contains the modification made to CLASS to directly output
-    the baryon-corrected matter power spectrum.
+    This file contains the modification made to the hi_class code
+    (1st anniversary release - https://github.com/miguelzuma/hi_class_public/releases/tag/v1.1)
+    to directly output the baryon-corrected matter power spectrum.
     Note that this is an excerpt from the actual code, and therefore won't
     run on its own.
 **/
 ...
 
+
+    //This would be appended after line 169 of nonlinear.c in the version above.
     //add the baryonic effects on top
     if (pnl->method == nl_baryon) {
       if (pnl->nonlinear_verbose > 0)

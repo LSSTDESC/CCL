@@ -1,4 +1,6 @@
 import os
+#Produces all angular power spectrum benchmarks
+#Contact david.alonso@physics.ox.ac.uk if you have issues running this script
 
 def run_task(window_type,bins_type,b1,b2) :
     do_logbin=0
