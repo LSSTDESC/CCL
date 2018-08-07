@@ -48,7 +48,7 @@
 
 \begin{abstract}
 
-The Core Cosmology Library (\ccl) provides routines to compute basic cosmological observables with validated numerical accuracy. These routines have been validated to an accuracy level, documented here, against the results of the Code Comparison Project. In the current version, predictions are provided for distances and background quantities, angular auto- and cross-spectra of cosmic shear and clustering, and the halo mass function. Fiducial specifications for the expected LSST galaxy distributions and clustering bias are also included, together with the capability of computing redshift distributions for a user-defined photometric redshift model. \ccl is written in C, with a Python interface. In this note, we explain the functionality of the publicly released (\ccl v0.3.3) library.
+The Core Cosmology Library (\ccl) provides routines to compute basic cosmological observables with validated numerical accuracy. These routines have been validated to an accuracy level, documented here, against the results of the Code Comparison Project. In the current version, predictions are provided for distances and background quantities, angular auto- and cross-spectra of cosmic shear and clustering, and the halo mass function. Fiducial specifications for the expected LSST galaxy distributions and clustering bias are also included, together with the capability of computing redshift distributions for a user-defined photometric redshift model. \ccl is written in C, with a Python interface. In this note, we explain the functionality of the publicly released (\ccl v0.3.5) library.
 
 \end{abstract}
 
@@ -202,7 +202,11 @@ This will allow for full access to the virtual machine via a terminal, so you ca
 \subsection{Physical constants}
 
 \label{sec:constants}
-We have performed a comparison of the physical constants used in \ccl and included dependencies and external sources. See Table \ref{tab:constants} for percent differences of the constants between these sources. Notice that NIST adopts the CODATA 2014 values. Where possible, we have set constants to the values that are used internally in {\tt CLASS}. This includes the value of the gravitational constant, the Boltzmann constant, the Planck constant, the speed of light, and the electron charge. {\tt CLASS} does not include a definition of the solar mass or the Stefan-Boltzmann constant so we use the values used by {\tt GSL}. After comparison between the physical constants used in \ccl and those of the sources mentioned above, we have found better than $10^{−4}$ agreement for all constants of interest except for the gravitational constant and the value of the solar mass.
+We have performed a comparison of the physical constants used in \ccl and included dependencies and external sources. See Table \ref{tab:constants} for percent differences of the constants between these sources. Notice that NIST adopts the CODATA 2014 values. Our final choice of constants for \ccl mainly relies on CODATA 2014 in as much as possible, except for ${\rm M}_\odot$, where we adopt the IAU 2015 value, and for the conversion between parsec and meters, where we take the PDG 2013 value.
+
+Notice there are some inconsistencies with the constants adopted by {\tt CLASS}. This includes the value of the gravitational constant, the Boltzmann constant, the Planck constant, the speed of light, and the electron charge. Also, the value of $\rho_c$ is derived from other constants, while PDG 2013 fixes it to a given value (this is the reason there is only one entry for that column).
+
+After comparison between the physical constants used in \ccl and those of the sources mentioned above, we have found better than $10^{−4}$ agreement for all constants of interest except for the gravitational constant and the value of the solar mass. 
 
 \input{table_constants}
 
