@@ -414,13 +414,13 @@ In the future \ccl will be expanded to incorporate the calculation of the higher
 %-------------------------------------------------------------------------------
 \subsection{Halo mass function}
 
-\elisa{This paragraph needs some references.} Being able to calculate the halo abundance as a function of mass is a necessary step to being able to constrain cosmology with probes such as galaxy clusters. Modern cosmology makes extensive use of fitting functions in order to predict the evolution of halo abundances, which necessarily require derivation from cosmological simulations. In order to reach the high precision required for cosmological constraints in a self-consistent fashion, it is ultimately necessary to use cosmological simulations; we implement this with halo mass functions with parameters fit to these simulations. The calculation of the halo mass function focuses around the spherical overdensity method of halo finding, in which the size of a halo can be defined with:
+\elisa{This paragraph needs some references.} Being able to calculate the halo abundance as a function of mass is a necessary step to being able to constrain cosmology with probes such as galaxy clusters \cite{Paranjape2014}. Modern cosmology makes extensive use of fitting functions in order to predict the evolution of halo abundances, which necessarily require derivation from cosmological simulations \cite{Tinker2008, Tinker2010, Angulo2012}. In order to reach the high precision required for cosmological constraints in a self-consistent fashion, it is ultimately necessary to use cosmological simulations; we implement this with halo mass functions with parameters fit to these simulations. The calculation of the halo mass function focuses around the spherical overdensity method of halo finding, in which the size of a halo can be defined with:
 
 \begin{equation}
 \bar{\rho}(r_{\Delta}) = \Delta \times \bar{\rho}_{\mathrm{m}},
 \end{equation}
 %
-where a spherical halo with radius $r_{\Delta}$ has an average density $\bar{\rho}$ equal to the overdensity parameter $\Delta$ times the mean background density of the universe at a given redshift, $\bar\rho_{\mathrm{m}}(z)$. Within the literature, the choice of $\Delta$ can vary considerably, as observations focusing on the compact cores of halos often take much larger values of $\Delta$ than the fiducial definition in most halo clustering studies, $\Delta = 200$. We note that another common definition exists which utilizes the critical density of the universe, $\rho_{\mathrm{crit}}$; this introduces a simple conversion factor between the two definitions that must be accounted for. \ccl only accepts overdensity parameters with respect to the mean matter density, but we plan to allow for self-consistent handling of critical density based definitions in the future. \elisa{Don't we already do this?}
+where a spherical halo with radius $r_{\Delta}$ has an average density $\bar{\rho}$ equal to the overdensity parameter $\Delta$ times the mean background density of the universe at a given redshift, $\bar\rho_{\mathrm{m}}(z)$. Within the literature, the choice of $\Delta$ can vary considerably, as observations focusing on the compact cores of halos often take much larger values of $\Delta$ than the fiducial definition in most halo clustering studies, $\Delta = 200$. We note that another common definition exists which utilizes the critical density of the universe, $\rho_{\mathrm{crit}}$; this introduces a simple conversion factor between the two definitions that must be accounted for. \ccl only accepts overdensity parameters with respect to the mean matter density, but we plan to allow for self-consistent handling of critical density based definitions in the future. \elisa{Don't we already do this?}\asv{More no than yes: you can enter critical density based definitions, but externally you need to convert them into their equivalent mean density definition. Ostensibly, we could accept a string as the overdensity input, like '200m' vs '200c' and then be able to actually support it more readily.}
 
 The halo mass function is defined as
 \begin{equation}
@@ -448,7 +448,7 @@ This is commonly related in terms of the mass inside of the Lagrangian scale of 
 R = (3M/4\pi{\bar\rho_{\mathrm{m}}})^{1/3}.
 \label{eq:lagrangemass}
 \end{equation}
-\elisa{Can we unify notation with the section on the halo model. For example, with Eq. (\ref{eq:virial_radius})?}
+\elisa{Can we unify notation with the section on the halo model. For example, with Eq. (\ref{eq:virial_radius})?}\asv{I recall we already unified this section to match others, so we should unify the halo model section to match this.}
 As a consequence, one can also define $\sigma_M$ as the RMS variance of the density field smoothed on some scale $M$, analogously to Eq. (\ref{eq:sigR}).
 
 One commonly used halo mass function definition within the literature is the \citet{Tinker2010} fitting function. This fitting function has been developed using collisionless $N$-body simulation data, using halos identified by spherical overdensities. This is an extension of the \citet{Tinker2008} halo mass function, which is also included within \ccl as a comparative option. This fitting function assumes little change with respect to cosmological parameters. Further, it includes a redshift scaling which is assumed to sharply end at a redshift of $z = 3$. This halo mass function is calibrated within the range of $10^{10.5} h\,\mathrm{M}_\odot \leq M \leq 10^{15.5} h\,\mathrm{M}_\odot$ at a redshift of $z = 0$.
@@ -471,7 +471,7 @@ The \citet{Tinker2010} model parameterizes the halo mass function in terms of th
   \label{eq:tinkerf}
 \end{equation}
 
-\citet{Tinker2008,Tinker2010} quote 5\% accuracy of their parametrised mass functions, compared to the simulations used to calibrate them. \elisa{Antonio, do you agree with the previous sentence?} This result is consistent with the work of \citet{Watson2013}, which also finds a $5\%$ level difference in comparison to the \citet{Tinker2010} fitting function \elisa{is it 2010? or 2008?}. Further study will be required in the future in order to gain percent level accuracy in determining the halo mass function.
+\citet{Tinker2008,Tinker2010} quote 5\% accuracy of their parametrised mass functions, compared to the simulations used to calibrate them. \elisa{Antonio, do you agree with the previous sentence?}\asv{Agreed.} This result is consistent with the work of \citet{Watson2013}, which also finds a $5\%$ level difference in comparison to the \citet{Tinker2008} fitting function \elisa{is it 2010? or 2008?}\asv{Their comparison was against the 2008 fitting function, checking back.}. Further study will be required in the future in order to gain percent level accuracy in determining the halo mass function.
 
 We note that these halo mass functions, while implemented to high {\em numerical} accuracy in \ccl, carry their own uncertainties. It has not been significantly studied whether the halo mass function is universal with respect to changes in dark energy parameterisation.
 
@@ -510,7 +510,7 @@ The \citet{Tinker2010} model parameterizes the the halo bias in terms of the pea
   b(\nu) &=& 1 - A\frac{\nu^a}{\nu^a + {\delta_c}^a} + B\nu^b+C\nu^c,\\
 \end{eqnarray}
 
-\citet{Tinker2010} found a $\sim6\%$ scatter when determining the halo bias due to differences in simulations alone. There is remaining uncertainty to the {\em physical accuracy} of this model, as this parameterization does not consider any impact due to changes in the dark energy equation of state. As with the halo mass function, studies will be required to reach accuracy at the per cent level for any cosmological predictions. \elisa{I think we need some further references here of scale-dependent bias, assembly bias, etc.}
+\citet{Tinker2010} found a $\sim6\%$ scatter when determining the halo bias due to differences in simulations alone. There is remaining uncertainty to the {\em physical accuracy} of this model, as this parameterization does not consider any impact due to changes in the dark energy equation of state. As with the halo mass function, studies will be required to reach accuracy at the per cent level for any cosmological predictions \cite[e.g.]{Gao2005, Schulz2006, Smith2007, Croton2007, Parfrey2011, Sunayama2016, Villarreal2017, Mao2018}. \elisa{I think we need some further references here of scale-dependent bias, assembly bias, etc.}
 
 \ccl can also make predictions for the halo bias from \cite{Sheth1999},
 \begin{equation}
