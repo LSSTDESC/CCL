@@ -13,3 +13,5 @@ The source codes included in this directory can be used to reproduce all benchma
 * **bcm_bm.c** : this file shows an excerpt from a modified version of CLASS that was used to generate a benchmark power spectrum containing baryon corrections (used for test bcm:model_1). The file is just an excerpt, and therefore won't compile or run on its own.
 * **create_hiz_curv_massnu_benchmark.ipynb** : this python notebook can be used to generate the files used in tests distances_hiz_mnu:model_1-5.
 * **3dcorr_benchmark.ipynb** : this python notebook can be used to generate the files used in tests corrs_3d:model_1-3.
+
+Notice that for the cosmic emulator checks, we benchmark against simulated power spectra directly provided by the authors of the cosmic emulator work (Lawrence et al., 2017, arXiv:1705,03388). In addition, VARRIC tests discussed in the CCL paper assess the accuracy of CCL splines against direct CLASS outputs. Similarly for Figure 3 of the CCL paper. These checks are currently not automated. Finally, predictions of angular power spectra delivered by Angpow are benchmarked against a slower, brute force integration method that is available within CCL.
