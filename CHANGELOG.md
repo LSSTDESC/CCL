@@ -45,3 +45,5 @@ Added support for CMB lensing observables, including splines for cosmological qu
 Added the ability to return useful functions such as dNdz for a tracer Cl object.
 
 Clarified license
+
+Values of the physical constants have changed to CODATA2014/IAU2015
