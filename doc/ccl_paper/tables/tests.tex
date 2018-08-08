@@ -1,6 +1,5 @@
 
 %
-%\begin{table*}[ht]
 \begin{sidewaystable*}[!htp]
   \centering
   \begin{tabular}{ l|c c c c}
@@ -14,7 +13,7 @@
     $\log[(M^2/\bar{\rho}_m)dn/dM]$  & (\ref{eq:newhmf}), \citet{Tinker2010} & CCL1 & $10^{10}\leq M/({\rm M}_\odot)\leq 10^{16}$ \& $z=0$ & $5\times 10^{-3}$\\
     $P(k)$ (BBKS) & (\ref{eq:bbks}) & CCL1-3 & $10^{-3}\leq k/(h/{\rm Mpc})\leq 10$ \& $0\leq z\leq 5$ &  $10^{-4}$\\
     $P(k)$ (Eisenstein \& Hu) & \citet{1998ApJ...496..605E}  & CCL1 & $10^{-3}\leq k/(h/{\rm Mpc})\leq 10$ \& $z=0$ & $10^{-4}$ \\
-    $P(k)$ ({\tt CLASS} HaloFit) & \citet{CLASS_halofit}  & ? & $10^{-3}\leq k/(h/{\rm Mpc})\leq 10$ \& ? & ? \\
+    $P(k)$ ({\tt CLASS} linear \& HaloFit) & \citet{CLASS_halofit}  & see Table 5 & $10^{-3}\leq k/{\rm Mpc}\leq 20$ \& $z=\{0,2\}$\&  & $\sim 10^{-3}$ \\
     $P(k)$ (CosmicEmu $w$CDM) & \citet{Lawrence17} & M1,M3,M5,M6,M8,M10 & $10^{-3}\leq k/{\rm Mpc}^{-1}\leq 5$ \& $z=0$  & $3\times 10^{-2}$ \\
     $P(k)$ (CosmicEmu $\nu$CDM) & \citet{Lawrence17} & M38,M39,M40,M42 & $10^{-3}\leq k/{\rm Mpc}^{-1}\leq 5$ \& $z=0$ & $3\times 10^{-2}$ \\
     $P(k)$ (Halo model) & \citet{Cooray2002} & ? & $10^{-3}\leq k/{\rm Mpc}^{-1}\leq 10^{2}$ \& $z=0,1$ & $10^{-3}$ \\
@@ -25,10 +24,9 @@
     $\xi_+,\xi_-,\xi_{gg}$ & (\ref{eq:xi22flat}),(\ref{eq:xi00flat}) & CCL6 & $0.01< \theta/{\rm deg}< 5$&  $0.5\sigma_{\rm LSST}$\\
     3D correlation, $\xi$ & (\ref{eq:xi3d}) & CCL1-5 & $1<r/{\rm Mpc}<200$ \& $0 \leq z \leq 5$& $4\times 10^{-3}$  \\
     $C_\ell$ clustering {\tt non-Limber} &  (\ref{eq:cls}),(\ref{eq:transfer_nc}),(\ref{eq:transfer_rsd}) & CCL1 & $500 \leq \ell < 1000$ & $2\times 10^{-2}$ \\
-    $C_\ell$ clustering {\tt Angpow} & (\ref{eq:cls}),(\ref{eq:transfer_nc}),(\ref{eq:transfer_rsd}) & CCL1 & $1 \leq \ell < 1000$ & $1\times 10^{-2}$  \\
+    $C_\ell$ clustering {\tt Angpow} & (\ref{eq:cls}),(\ref{eq:transfer_nc}),(\ref{eq:transfer_rsd}) & CCL1 & $1 \leq \ell < 1000$ & $3\times 10^{-3}$  \\
     \hline
   \end{tabular}
-  \caption{Summary of \ccl validation tests and accuracy achieved. These tests can be reproduced by the user and are integrated into the \ccl repository via TravisCI.\todo{Some questions about the HMF test. We are checking the HMF but also $\sigma$ and $\sigma^{-1}$ with different tolerances. In what way are those checks different from the $\sigma(M)$ check? Also, the units of mass in the $\sigma(M)$ check and HMF check are inconsistent - do we want to change that? For non-Limber tests, the quoted precision stands for the ratio between the relative errors between the computed $C_l$s and the cosmic variance. We should also clarify here what the difference is between the two $C_l$ non-Limber tests.}}
+  \caption{Summary of \ccl validation tests and accuracy achieved. These tests can be reproduced by the user and are integrated into the \ccl repository.}
   \label{tab:tests}
-%\end{table*}
 \end{sidewaystable*}
