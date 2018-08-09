@@ -802,8 +802,8 @@ static double eh_power(ccl_parameters *params,eh_struct *eh,double k,int wiggled
 
 static void ccl_cosmology_compute_power_eh(ccl_cosmology * cosmo, int * status)
 {
-  cosmo->data.k_min_lin = ccl_splines->K_MIN_DEFAULT;
-  cosmo->data.k_min_nl = ccl_splines->K_MIN_DEFAULT;
+  cosmo->data.k_min_lin = ccl_splines->K_MIN;
+  cosmo->data.k_min_nl = ccl_splines->K_MIN;
   cosmo->data.k_max_lin = ccl_splines->K_MAX;
   cosmo->data.k_max_nl = ccl_splines->K_MAX;
   double kmin = cosmo->data.k_min_lin;
@@ -979,8 +979,8 @@ TASK: provide spline for the BBKS power spectrum with baryonic correction
 
 static void ccl_cosmology_compute_power_bbks(ccl_cosmology * cosmo, int * status)
 {
-  cosmo->data.k_min_lin=ccl_splines->K_MIN_DEFAULT;
-  cosmo->data.k_min_nl=ccl_splines->K_MIN_DEFAULT;
+  cosmo->data.k_min_lin=ccl_splines->K_MIN;
+  cosmo->data.k_min_nl=ccl_splines->K_MIN;
   cosmo->data.k_max_lin=ccl_splines->K_MAX;
   cosmo->data.k_max_nl=ccl_splines->K_MAX;
   double kmin = cosmo->data.k_min_lin;
@@ -1432,7 +1432,7 @@ static double ccl_power_extrapol_highk(ccl_cosmology * cosmo, double k, double a
     
 }
 
-/*------ ROUTINE: ccl_power_extrapol_hxighk ----- 
+/*------ ROUTINE: ccl_power_extrapol_lowk ----- 
 INPUT: ccl_cosmology * cosmo, a, k [1/Mpc]
 TASK: extrapolate power spectrum at low k
 */
@@ -1669,7 +1669,7 @@ double ccl_sigmaR(ccl_cosmology *cosmo,double R, int *status)
   F.function=&sigmaR_integrand;
   F.params=&par;
   double sigma_R;
-  int gslstatus = gsl_integration_cquad(&F, log10(ccl_splines->K_MIN_DEFAULT), log10(ccl_splines->K_MAX),
+  int gslstatus = gsl_integration_cquad(&F, log10(ccl_splines->K_MIN), log10(ccl_splines->K_MAX),
 				                                0.0, ccl_gsl->INTEGRATION_SIGMAR_EPSREL,
                                         workspace,&sigma_R,NULL,NULL);
   if(gslstatus != GSL_SUCCESS) {
