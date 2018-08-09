@@ -631,7 +631,7 @@ For speed, the initialization of a cosmological model within \ccl performs initi
 
 We introduce a maximum value $k$ (in units of $\text{Mpc}^{-1}$) up to which we evaluate the power spectra for interpolation; we call this parameter {\tt K$\_$MAX$\_$SPLINE}. A separate {\tt K$\_$MAX} parameter sets the limit of evaluation of the matter power spectrum. The range between {\tt K$\_$MAX$\_$SPLINE}~$<k<$~{\tt K$\_$MAX} is evaluated by performing a second order Taylor expansion in $\ln k$.
 
-The Taylor expansion is implemented as follows: first, we compute the first and second derivative of $\ln P(k,z)$ at $k_0={\rm \tt K\_MAX}-2\Delta\ln k$ via finite difference derivatives using {\tt GSL}. The fiducial choice for $\Delta\ln k$ is $10^{-2}$. We then apply a second order Taylor expansion to extrapolate the matter power spectrum to $k>$~{\tt K$\_$MAX$\_$SPLINE}. The Taylor expansion gives
+The Taylor expansion is implemented as follows: first, we compute the first and second derivative of $\ln P(k,z)$ at $k_0={\rm \tt K\_MAX\_SPLINE}-2\Delta\ln k$ via finite difference derivatives using {\tt GSL}. The fiducial choice for $\Delta\ln k$ is $10^{-2}$. We then apply a second order Taylor expansion to extrapolate the matter power spectrum to $k>$~{\tt K$\_$MAX$\_$SPLINE}. The Taylor expansion gives
 %
 \begin{eqnarray}
   \ln P(k,z) &\simeq& \ln P(k_0,z) + \frac{d\ln P}{d\ln k}(k_0,z) (\ln k-\ln k_0)  \nonumber\\
@@ -639,15 +639,14 @@ The Taylor expansion is implemented as follows: first, we compute the first and 
   \label{eq:NLPSTaylor}
 \end{eqnarray}
 
-We also extrapolate the power spectrum at small wavenumbers. In this case, we introduce the parameter {\tt K$\_$MIN}, the wavenumber below which the power spectra are obtained by a power-law extrapolation with index $n_s$:
-\begin{equation}
-  \log P(k<{\tt K\_MIN},z) = \log P({\tt K\_MIN},z) + n_s (\log k-\log{\tt K\_MIN})
-\end{equation}
-Note that an additional parameter, {\tt K\_MIN\_DEFAULT}, sets the minimum $k$ for integrations. This is set to {\tt K\_MIN\_DEFAULT}$=5\times 10^{-5}\,\text{Mpc}^{-1}$. The value adopted for {\tt K\_MIN} depends on the choice of power spectrum method. 
+We also extrapolate the power spectrum at small wavenumbers. In this case, we introduce the parameter {\tt K$\_$MIN$\_$SPLINE}, the wavenumber below which the power spectra are obtained by a power-law extrapolation with index $n_s$:
+\begin{eqnarray}
+  \log P(k<{\tt K\_MIN\_SPLINE},z) = \log P({\tt K\_MIN\_SPLINE},z) \nonumber\\
+  + n_s (\log k-\log{\tt K\_MIN\_SPLINE})
+\end{eqnarray}
+Note that an additional parameter, {\tt K\_MIN}, sets the minimum $k$ for integrations. This is set to {\tt K\_MIN}$=5\times 10^{-5}\,\text{Mpc}^{-1}$.
 
-For \class and the non-linear power spectrum, we adopt {\tt K\_MIN} that coincides with the smallest wavenumber output by \class, {\tt K\_MIN}$=7\times 10^{-6}\,\text{Mpc}^{-1}$. As a consequence, when using {\tt CCL} with \class, no extrapolation will occur at low wavenumbers unless the user modified the default values of {\tt K\_MIN\_DEFAULT} and/or {\tt K\_MIN}.
-For BBKS, the power spectrum is computed analytically at all $k$, i.e., there is no extrapolation. For the \citet{1998ApJ...496..605E} implementation, the splines of the power spectrum span {\tt K\_MIN\_DEFAULT}$<k<${\tt K$\_$MAX$\_$SPLINE}, so there is only extrapolation at high $k$.
-\elisa{And for the emulator?}
+The value adopted for {\tt K\_MIN\_SPLINE} depends on the choice of power spectrum method is not accessible by the user. For {\tt CLASS} and the nonlinear power spectrum, we adopt {\tt K\_MIN\_SPLINE} that coincides with the smallest wavenumber output by {\tt CLASS}, {\tt K\_MIN\_SPLINE}$=7\times 10^{-6}$/Mpc. Hence, in practice, no extrapolation is occurring in this case. For BBKS, the power spectrum is computed analytically at all $k$, there is no extrapolation. For the \citet{1998ApJ...496..605E} implementation, the splines of the power spectrum span {\tt K\_MIN}$<k<${\tt K$\_$MAX$\_$SPLINE}, so there is only extrapolation at high $k$. For the nonlinear matter power spectrum from the emulator, {\tt K\_MIN\_SPLINE} and {\tt K\_MAX\_SPLINE} are set to fixed values that are determined from the range of validity of the emulator:  {\tt K\_MIN\_SPLINE}$=10^{-3}$ Mpc$^{-1}$ and {\tt K\_MAX\_SPLINE}$=5$ Mpc$^{-1}$.
 
 %-------------------------------------------------------------------------------
 \subsection{Angular power spectra}
