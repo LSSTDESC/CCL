@@ -511,6 +511,9 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int * statu
             }
         x[i] = log(x[i]);
         }
+        free(D_mu);
+        free(D_GR);
+        free(cosmo_GR);
     } else {
 		// This is the standard case without modifying gravity
 		for (int i=0; i<nk; i++) {
@@ -1457,6 +1460,12 @@ TASK: compute power spectrum
 */
 void ccl_cosmology_compute_power(ccl_cosmology * cosmo, int * status)
 {
+	
+  if ( (cosmo->config.transfer_function_method != ccl_boltzmann_class) && (fabs(cosmo->params.mu_0)>1e-14 || fabs(cosmo->params.sigma_0)>1e-14)){
+	  *status = CCL_ERROR_NOT_IMPLEMENTED;
+	  strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power(): The power spectrum in the mu / Sigma modified gravity parameterisation is only implemented with the ccl_boltzmann_class power spectrum method.\n");
+	  return;
+  }	
   
   if (cosmo->computed_power) return;
     switch(cosmo->config.transfer_function_method){
@@ -1573,15 +1582,11 @@ double ccl_linear_matter_power(ccl_cosmology * cosmo, double k, double a, int * 
 
   if (!cosmo->computed_power) ccl_cosmology_compute_power(cosmo, status);
   // Return if compilation failed
-  //if (cosmo->data.p_lin == NULL) return NAN; 
   if (!cosmo->computed_power) return NAN;
   
   double log_p_1;
 
   int gslstatus;
-  
-  // MUSIG: This first if statement shouldn't need to be touched, it just refers 
-  // to the same function in another if statement and to the growth factor which we have taken care of. 
  
   if(a<ccl_splines->A_SPLINE_MINLOG_PK) {  //Extrapolate linearly at high redshift
     double pk0=ccl_linear_matter_power(cosmo,k,ccl_splines->A_SPLINE_MINLOG_PK,status);
@@ -1592,9 +1597,6 @@ double ccl_linear_matter_power(ccl_cosmology * cosmo, double k, double a, int * 
   if (*status!=CCL_ERROR_INCONSISTENT){ 
     if(k<=cosmo->data.k_min_lin) { 
       log_p_1=ccl_power_extrapol_lowk(cosmo,k,a,cosmo->data.p_lin,cosmo->data.k_min_lin,status);
-      // MUSIG: Need to add a call to a function here which gives the MG growth factor by which we scale. 
-      //////////////////////////////////////////////////////////////////////////////////////////////////
-      //////////////////////////////////////////////////////////////////////////////////////////////////
       return exp(log_p_1);
     }
     else if(k<cosmo->data.k_max_lin){
@@ -1611,7 +1613,6 @@ double ccl_linear_matter_power(ccl_cosmology * cosmo, double k, double a, int * 
     }
     else { //Extrapolate using log derivative
       log_p_1 = ccl_power_extrapol_highk(cosmo,k,a,cosmo->data.p_lin,cosmo->data.k_max_lin,status);
-      // MUSIG: Need to add a call to a function here which gives the MG growth factor by which we scale.
       return exp(log_p_1);
     }
   }
@@ -1629,8 +1630,13 @@ double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double k, double a, int *s
 {
   double log_p_1, pk;
   
-  // MUSIG Add a check here - as a first, simplest case, we probably don't want to allow the nonlinear P(k)
-  // to be calculated with mu and Sigma? But we could, it would be the same structural changes as in the linear case. 
+  // Check if mu / Sigma modified gravity parameterization is in use.
+  // If so, the nonlinear matter power spectrum methods are not valid.
+  if (fabs(cosmo->params.mu_0)>1e-14 || fabs(cosmo->params.sigma_0)>1e-14){
+      *status = CCL_ERROR_NOT_IMPLEMENTED;
+	  strcpy(cosmo->status_message,"ccl_power.c: ccl_nonlin_matter_power(): Nonlinear behaviour for the mu / Sigma parameterization of modified gravity is not implemented. \n");
+	  return;
+  }
   
   switch(cosmo->config.matter_power_spectrum_method) {
     
