@@ -67,8 +67,6 @@ def bias_clustering(cosmo, a):
     """Bias clustering, b(z), at a scale
     factor, a, of the clustering sample.
 
-    TODO: Check the normalization of growth is consistent with LSS input.
-
     Args:
         cosmo (:obj:`ccl.cosmology`): Cosmological parameters.
         a (float or array_like): Scale factor(s), normalized to 1 today.
@@ -84,7 +82,7 @@ def sigmaz_clustering(z):
     """Photo-z dispersion, sigma(z), for the clustering sample
     at `a`.
 
-    Note: assumes Gaussian uncertainties.
+    .. note:: assumes Gaussian uncertainties.
 
     Args:
         cosmo (:obj:`ccl.cosmology`): Cosmological parameters.
@@ -101,7 +99,7 @@ def sigmaz_clustering(z):
 def sigmaz_sources(z):
     """Photo-z dispersion, sigma(z), for the lensing sample.
 
-    Note: assumes Gaussian uncertainties.
+    .. note:: assumes Gaussian uncertainties.
 
     Args:
         cosmo (:obj:`ccl.cosmology`): Cosmological parameters.
@@ -150,7 +148,6 @@ def dNdz_tomog(z, dNdz_type, zmin, zmax, pz_func):
     return dNdz
 
 # Provide aliases for functions to retain consistency with C API
-# TODO: make them consistent one day...
 specs_bias_clustering = bias_clustering
 specs_sigmaz_clustering = sigmaz_clustering
 specs_sigmaz_sources = sigmaz_sources

@@ -48,8 +48,8 @@ int main(int argc, char * argv[])
       return NAN;
     }
   }
-  printf("sigma_8 = %.6lE\n", ccl_sigmaR(cosmo,8./h,&status));
-  printf("Consistency check: sigma_8 = %.6lE\n", ccl_sigma8(cosmo,&status));
+  printf("sigma8 = %.6lE\n", ccl_sigmaR(cosmo,8./h,&status));
+  printf("Consistency check: sigma8 = %.6lE\n", ccl_sigma8(cosmo,&status));
   printf("Completed. Status = %d\n",status);
   
   ccl_cosmology_free(cosmo);

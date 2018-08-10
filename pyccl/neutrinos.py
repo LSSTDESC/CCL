@@ -13,16 +13,15 @@ neutrino_mass_splits = {
 def Omeganuh2(a, mnu, TCMB=2.725):
     """Omeganuh2
 
-    Returns the Omehanuh2 value for a given
-    number of massive neutrino species with mass
-    mnu. 
+    .. note:: for all practical purposes, Neff is simply N_nu_mass.
 
     Args:
         a (float): Scale factor, normalized to 1 today.
         mnu (float or array_like): Neutrino mass (in eV)
         TCMB (float, optional): Temperature of the CMB (K). Default: 2.725.
+
     Returns:
-        Omeganuh2 (float or array_like) corresponding to a given neutrino mass
+        float or array_like: corresponding to a given neutrino mass.
 
     """
     status = 0

@@ -12,16 +12,20 @@ project(ccl VERSION 0.2.1)
 
     # Defines list of CCL tests src files
     # ! Add new tests to this list
-    set(TEST_SRC tests/ccl_test.c tests/ccl_test_utils.c tests/ccl_test_params.c tests/ccl_test_cosmology.c
+    set(TEST_SRC tests/ccl_test.c tests/ccl_test_utils.c tests/ccl_test_params.c tests/ccl_test_params_mnu.c
+    		         tests/ccl_test_cosmology.c
                  tests/ccl_test_distances_class.c tests/ccl_test_distances_cosmomad_hiz.c tests/ccl_test_distances_cosmomad_lowz.c
                  tests/ccl_test_distances_astropy_mnu_lowz.c tests/ccl_test_distances_astropy_mnu_hiz.c
-                 tests/ccl_test_growth.c
-                 tests/ccl_test_growth_hiz.c tests/ccl_test_bbks.c tests/ccl_test_eh.c tests/ccl_test_cls.c
-                 tests/ccl_test_cmblens.c tests/ccl_test_sigmaM.c tests/ccl_test_massfunc.c tests/ccl_test_correlation.c
-                 tests/ccl_test_bcm.c tests/ccl_test_emu.c tests/ccl_test_emu_nu.c tests/ccl_test_angpow.c)
+		             tests/ccl_test_growth.c tests/ccl_test_growth_hiz.c tests/ccl_test_bbks.c tests/ccl_test_eh.c
+		             tests/ccl_test_cls.c tests/ccl_test_cmblens.c tests/ccl_test_sigmaM.c
+		             tests/ccl_test_massfunc.c tests/ccl_test_correlation.c tests/ccl_test_correlation_3d.c
+		             tests/ccl_test_bcm.c tests/ccl_test_emu.c tests/ccl_test_emu_nu.c
+		             tests/ccl_test_power_nu.c tests/ccl_test_nonlimber.c tests/ccl_test_angpow.c)
 
-    # Defines list of extra distribution files to be installed on the system
+
+    # Defines list of extra distribution files and directories to be installed on the system
     set(EXTRA_DIST include/ccl_params.ini README.md LICENSE LICENSE_COSMICEMU)
+    set(EXTRA_DIST_DIRS)
 
     # Uses system libraries or downloads and build if necessary
     include(BuildFFTW)
@@ -109,8 +113,9 @@ project(ccl VERSION 0.2.1)
     install(DIRECTORY include/ DESTINATION include
             FILES_MATCHING PATTERN "*.h")
     install(FILES ${EXTRA_DIST} DESTINATION share/ccl)
+    install(DIRECTORY ${EXTRA_DIST_DIRS} DESTINATION share/ccl)
     install(FILES ${CMAKE_CURRENT_BINARY_DIR}/ccl.pc DESTINATION lib/pkgconfig)
-
+    
     # Adds uninstall target
     if(NOT TARGET uninstall)
       configure_file(

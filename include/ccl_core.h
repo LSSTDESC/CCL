@@ -64,7 +64,7 @@ typedef struct ccl_parameters {
   double bcm_ks;
   
   // Derived parameters
-  double sigma_8;
+  double sigma8;
   double Omega_l;
   double z_star;
   
@@ -183,7 +183,7 @@ ccl_cosmology * ccl_cosmology_create_with_lcdm_params(
  * @param w0 Dark energy EoS parameter
  * @param wa Dark energy EoS parameter
  * @param h Hubble constant in units of 100 km/s/Mpc
- * @param norm_pk the normalization of the power spectrum, either A_s or sigma_8
+ * @param norm_pk the normalization of the power spectrum, either A_s or sigma8
  * @param n_s the power-law index of the power spectrum
  * @param bcm_log10Mc log10 cluster mass, one of the parameters of the BCM model
  * @param bcm_etab ejection radius parameter, one of the parameters of the BCM model
@@ -210,7 +210,7 @@ ccl_parameters ccl_parameters_create(double Omega_c, double Omega_b, double Omeg
  * @param Omega_c Omega_c 
  * @param Omega_b Omega_b 
  * @param h Hubble constant in units of 100 km/s/Mpc
- * @param norm_pk the normalization of the power spectrum, either A_s or sigma_8
+ * @param norm_pk the normalization of the power spectrum, either A_s or sigma8
  * @param n_s the power-law index of the power spectrum
  * @param status Status flag. 0 if there are no errors, nonzero otherwise.
  * For specific cases see documentation for ccl_error.c
@@ -223,7 +223,7 @@ ccl_parameters ccl_parameters_create_flat_lcdm(double Omega_c, double Omega_b, d
  * @param Omega_c Omega_c 
  * @param Omega_b Omega_b 
  * @param h Hubble constant in units of 100 km/s/Mpc
- * @param norm_pk the normalization of the power spectrum, either A_s or sigma_8
+ * @param norm_pk the normalization of the power spectrum, either A_s or sigma8
  * @param n_s the power-law index of the power spectrum
  * @param bcm_log10Mc log10 cluster mass, one of the parameters of the BCM model
  * @param bcm_etab ejection radius parameter, one of the parameters of the BCM model
@@ -242,7 +242,7 @@ ccl_parameters ccl_parameters_create_flat_lcdm_bar(double Omega_c, double Omega_
  * @param Omega_b Omega_b 
  * @param w0 Dark energy EoS parameter
  * @param h Hubble constant in units of 100 km/s/Mpc
- * @param norm_pk the normalization of the power spectrum, either A_s or sigma_8
+ * @param norm_pk the normalization of the power spectrum, either A_s or sigma8
  * @param n_s the power-law index of the power spectrum
  * @param status Status flag. 0 if there are no errors, nonzero otherwise.
  * For specific cases see documentation for ccl_error.c
@@ -257,7 +257,7 @@ ccl_parameters ccl_parameters_create_flat_wcdm(double Omega_c, double Omega_b, d
  * @param w0 Dark energy EoS parameter
  * @param wa Dark energy EoS parameter
  * @param h Hubble constant in units of 100 km/s/Mpc
- * @param norm_pk the normalization of the power spectrum, either A_s or sigma_8
+ * @param norm_pk the normalization of the power spectrum, either A_s or sigma8
  * @param n_s the power-law index of the power spectrum
  * @param status Status flag. 0 if there are no errors, nonzero otherwise.
  * For specific cases see documentation for ccl_error.c
@@ -273,7 +273,7 @@ ccl_parameters ccl_parameters_create_flat_wacdm(double Omega_c, double Omega_b, 
  * @param w0 Dark energy EoS parameter
  * @param wa Dark energy EoS parameter
  * @param h Hubble constant in units of 100 km/s/Mpc
- * @param norm_pk the normalization of the power spectrum, either A_s or sigma_8
+ * @param norm_pk the normalization of the power spectrum, either A_s or sigma8
  * @param n_s the power-law index of the power spectrum
  * @param status Status flag. 0 if there are no errors, nonzero otherwise.
  * For specific cases see documentation for ccl_error.c
