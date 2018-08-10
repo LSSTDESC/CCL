@@ -23,4 +23,4 @@ for i, cpar in enumerate([cpar_model1, cpar_model2, cpar_model3, cpar_model5, cp
 
     growth_factor[i+1] = gf_arr
 
-np.savetxt("../growth_allz_cosmomad_ccl1-5.txt", growth_factor.T ,header="z, D(z) CCL1, D(z) CCL2, D(z) CCL3, D(z) CCL4, D(z) CCL5")
+np.savetxt("../growth_cosmomad_allz.txt", growth_factor.T ,header="z, D(z) CCL1, D(z) CCL2, D(z) CCL3, D(z) CCL4, D(z) CCL5")

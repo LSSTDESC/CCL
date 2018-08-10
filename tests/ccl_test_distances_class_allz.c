@@ -111,7 +111,7 @@ CTEST_SETUP(distances_class) {
   read_benchmark_file("./tests/benchmark/dm_class_allz.txt", data->z_dm, data->dm_benchmark);
 }
 
-static void compare_distances_mnu(int model, struct distances_class_data * data)
+static void compare_distances(int model, struct distances_class_data * data)
 {
   int status=0;
   // Make the parameter set from the input data
@@ -139,7 +139,7 @@ static void compare_distances_mnu(int model, struct distances_class_data * data)
     double chi_ccl = ccl_comoving_radial_distance(cosmo, a, &status);
     if(status) printf("%s\n",cosmo->status_message);
 
-    double absolute_tolerance = DISTANCES_TOLERANCE*data->chi_benchmark[model][i];
+    double absolute_tolerance = DISTANCES_TOLERANCE*data->chi_benchmark[i][model];
     if (fabs(absolute_tolerance)<1e-12) absolute_tolerance = 1e-12;
     ASSERT_DBL_NEAR_TOL(data->chi_benchmark[i][model], chi_ccl, absolute_tolerance);
 
@@ -148,7 +148,7 @@ static void compare_distances_mnu(int model, struct distances_class_data * data)
     double dm_ccl = ccl_distance_modulus(cosmo, a, &status);
     if(status) printf("%s\n",cosmo->status_message);
 
-    absolute_tolerance = DISTANCES_TOLERANCE*data->dm_benchmark[model][i];
+    absolute_tolerance = DISTANCES_TOLERANCE*data->dm_benchmark[i][model];
     if (fabs(absolute_tolerance)<1e-12) absolute_tolerance = 1e-12;
     ASSERT_DBL_NEAR_TOL(data->dm_benchmark[i][model], dm_ccl, absolute_tolerance);
   }
@@ -158,50 +158,50 @@ static void compare_distances_mnu(int model, struct distances_class_data * data)
 
 CTEST2(distances_class, model_1) {
   int model = 0;
-  compare_distances_mnu(model, data);
+  compare_distances(model, data);
 }
 
 CTEST2(distances_class, model_2) {
   int model = 1;
-  compare_distances_mnu(model, data);
+  compare_distances(model, data);
 }
 
 CTEST2(distances_class, model_3) {
   int model = 2;
-  compare_distances_mnu(model, data);
+  compare_distances(model, data);
 }
 
 CTEST2(distances_class, model_4) {
   int model = 3;
-  compare_distances_mnu(model, data);
+  compare_distances(model, data);
 }
 
 CTEST2(distances_class, model_5) {
   int model = 4;
-  compare_distances_mnu(model, data);
+  compare_distances(model, data);
 }
 
 CTEST2(distances_class, model_7) {
   int model = 5;
-  compare_distances_mnu(model, data);
+  compare_distances(model, data);
 }
 
 CTEST2(distances_class, model_8) {
   int model = 6;
-  compare_distances_mnu(model, data);
+  compare_distances(model, data);
 }
 
 CTEST2(distances_class, model_9) {
   int model = 7;
-  compare_distances_mnu(model, data);
+  compare_distances(model, data);
 }
 
 CTEST2(distances_class, model_10) {
   int model = 8;
-  compare_distances_mnu(model, data);
+  compare_distances(model, data);
 }
 
 CTEST2(distances_class, model_11) {
   int model = 9;
-  compare_distances_mnu(model, data);
+  compare_distances(model, data);
 }

@@ -20,10 +20,9 @@ Omega_v_vals = np.array([0.7, 0.7, 0.7, 0.65, 0.75])
 w0_vals = np.array([-1.0, -0.9, -0.9, -0.9, -0.9])
 wa_vals = np.array([0.0, 0.0, 0.1, 0.1, 0.1])
 
-def read_growth_test_file():
+def read_growth_lowz_test_file():
     """
-    Read the file containing all the radial comoving distance benchmarks 
-    (distances are in Mpc/h)
+    Read the file containing growth factor benchmarks for the low redshifts.
     """
     # Load data from file
     dat = np.genfromtxt(join(dirname(__file__),"benchmark/growth_model1-5.txt")).T
@@ -34,8 +33,22 @@ def read_growth_test_file():
     gfac = dat[1:]
     return z, gfac
 
+def read_growth_allz_test_file():
+    """
+    Read the file containing growth factor benchmarks for the whole redshift range.
+    """
+    # Load data from file
+    dat = np.genfromtxt(join(dirname(__file__),"benchmark/growth_cosmomad_allz.txt")).T
+    assert(dat.shape == (6,10))
+    
+    # Split into redshift column and growth(z) columns
+    z = dat[0]
+    gfac = dat[1:]
+    return z, gfac
+
 # Set-up test data
-z, gfac = read_growth_test_file()
+z_lowz, gfac_lowz = read_growth_lowz_test_file()
+z_allz, gfac_allz = read_growth_allz_test_file()
 
 def compare_growth(z, gfac_bench, Omega_v, w0, wa):
     """
@@ -63,26 +76,46 @@ def compare_growth(z, gfac_bench, Omega_v, w0, wa):
     assert_allclose(gfac, gfac_bench, atol=1e-12, rtol=GROWTH_TOLERANCE)
 
 
-def test_growth_model_0():
+def test_growth_lowz_model_0():
     i = 0
-    compare_growth(z, gfac[i], Omega_v_vals[i], w0_vals[i], wa_vals[i])
+    compare_growth(z_lowz, gfac_lowz[i], Omega_v_vals[i], w0_vals[i], wa_vals[i])
 
-def test_growth_model_1():
+def test_growth_lowz_model_1():
     i = 1
-    compare_growth(z, gfac[i], Omega_v_vals[i], w0_vals[i], wa_vals[i])
+    compare_growth(z_lowz, gfac_lowz[i], Omega_v_vals[i], w0_vals[i], wa_vals[i])
 
-def test_growth_model_2():
+def test_growth_lowz_model_2():
     i = 2
-    compare_growth(z, gfac[i], Omega_v_vals[i], w0_vals[i], wa_vals[i])
+    compare_growth(z_lowz, gfac_lowz[i], Omega_v_vals[i], w0_vals[i], wa_vals[i])
 
-def test_growth_model_3():
+def test_growth_lowz_model_3():
     i = 3
-    compare_growth(z, gfac[i], Omega_v_vals[i], w0_vals[i], wa_vals[i])
+    compare_growth(z_lowz, gfac_lowz[i], Omega_v_vals[i], w0_vals[i], wa_vals[i])
 
-def test_growth_model_4():
+def test_growth_lowz_model_4():
     i = 4
-    compare_growth(z, gfac[i], Omega_v_vals[i], w0_vals[i], wa_vals[i])
+    compare_growth(z_lowz, gfac_lowz[i], Omega_v_vals[i], w0_vals[i], wa_vals[i])
 
+# 0.01 < z < 1000 tests
+def test_growth_allz_model_0():
+    i = 0
+    compare_growth(z_allz, gfac_allz[i], Omega_v_vals[i], w0_vals[i], wa_vals[i])
+
+def test_growth_allz_model_1():
+    i = 1
+    compare_growth(z_allz, gfac_allz[i], Omega_v_vals[i], w0_vals[i], wa_vals[i])
+
+def test_growth_allz_model_2():
+    i = 2
+    compare_growth(z_allz, gfac_allz[i], Omega_v_vals[i], w0_vals[i], wa_vals[i])
+
+def test_growth_allz_model_3():
+    i = 3
+    compare_growth(z_allz, gfac_allz[i], Omega_v_vals[i], w0_vals[i], wa_vals[i])
+
+def test_growth_allz_model_4():
+    i = 4
+    compare_growth(z_allz, gfac_allz[i], Omega_v_vals[i], w0_vals[i], wa_vals[i])
 
 def test_mgrowth():
     """

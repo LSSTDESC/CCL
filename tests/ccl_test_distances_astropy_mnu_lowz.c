@@ -10,7 +10,7 @@
 // at greater than a 1.0e-4 level.
 #define DISTANCES_TOLERANCE 1.0e-3
 
-CTEST_DATA(distances_mnu) {
+CTEST_DATA(distances_astropy_mnu_lowz) {
   double Omega_c;
   double Omega_b;
   double h;
@@ -73,7 +73,7 @@ static void read_dm_test_file(double z[5], double dm[5][5])
 
 // Set up the cosmological parameters to be used in each of the
 // models
-CTEST_SETUP(distances_mnu) {
+CTEST_SETUP(distances_astropy_mnu_lowz) {
   // Values that are the same for all 5 models
   data->Omega_c = 0.25;
   data->Omega_b = 0.05;
@@ -130,7 +130,7 @@ CTEST_SETUP(distances_mnu) {
   read_chi_test_file(data->z, data->chi);
 }
 
-static void compare_distances_mnu(int model, struct distances_mnu_data * data)
+static void compare_distances_mnu(int model, struct distances_astropy_mnu_lowz_data * data)
 {
   int status=0;
   // Make the parameter set from the input data
@@ -195,27 +195,27 @@ static void compare_distances_mnu(int model, struct distances_mnu_data * data)
   ccl_cosmology_free(cosmo);
 }
 
-CTEST2(distances_mnu, model_1) {
+CTEST2(distances_astropy_mnu_lowz, model_1) {
   int model = 0;
   compare_distances_mnu(model, data);
 }
 
-CTEST2(distances_mnu, model_2) {
+CTEST2(distances_astropy_mnu_lowz, model_2) {
   int model = 1;
   compare_distances_mnu(model, data);
 }
 
-CTEST2(distances_mnu, model_3) {
+CTEST2(distances_astropy_mnu_lowz, model_3) {
   int model = 2;
   compare_distances_mnu(model, data);
 }
 
-CTEST2(distances_mnu, model_4) {
+CTEST2(distances_astropy_mnu_lowz, model_4) {
   int model = 3;
   compare_distances_mnu(model, data);
 }
 
-CTEST2(distances_mnu, model_5) {
+CTEST2(distances_astropy_mnu_lowz, model_5) {
   int model = 4;
   compare_distances_mnu(model, data);
 }
