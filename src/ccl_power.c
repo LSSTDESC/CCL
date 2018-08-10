@@ -440,25 +440,90 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int * statu
   double * z = ccl_linlog_spacing(amin, ccl_splines->A_SPLINE_MIN_PK, amax, ccl_splines->A_SPLINE_NLOG_PK, ccl_splines->A_SPLINE_NA_PK);
   double * y2d_lin = malloc(nk * na * sizeof(double));
   double * y2d_nl = malloc(nk * na * sizeof(double));
+  
+  
   if (z==NULL|| x==NULL || y2d_lin==NULL || y2d_nl==NULL) {
     *status = CCL_ERROR_SPLINE;
     strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_class(): memory allocation error\n");
   }
   else{  
     // After this loop x will contain log(k), y will contain log(P_nl), z will contain log(P_lin)
+    // DL: IS THE ABOVE COMMENT STILL TRUE???
     // all in Mpc, not Mpc/h units!
     double psout_l,ic;
     int s=0;
-    for (int i=0; i<nk; i++) {
-      for (int j = 0; j < na; j++) {
-	//The 2D interpolation routines access the function values y_{k_ia_j} with the following ordering:
-	//y_ij = y2d[j*N_k + i]
-	//with i = 0,...,N_k-1 and j = 0,...,N_a-1.
-	s |= spectra_pk_at_k_and_z(&ba, &pm, &sp,x[i],1./z[j]-1., &psout_l,&ic);
-	y2d_lin[j*nk+i] = log(psout_l);
-      }
-      x[i] = log(x[i]);
-    }
+    
+    // If scale-independent mu / Sigma modified gravity is in use 
+    // and mu ! = 0 : get the unnormalized growth factor in MG and for 
+    // corresponding GR case, to rescale CLASS power spectrum
+    if ( fabs(cosmo->params.mu_0)>1e-14){
+	    // Set up another cosmology which is exactly the same as the 
+	    // current one but with mu_0 and Sigma_0=0, for scaling P(k)
+	  
+	    // Get a list of the three neutrino masses already calculated
+	    double *mnu_list = NULL;
+	    mnu_list = malloc(3*sizeof(double));
+	    for (int i=0; i< cosmo->params.N_nu_mass; i=i+1){
+		    mnu_list[i] = cosmo->params.mnu[i];
+	    }
+	    if (cosmo->params.N_nu_mass<3){
+		    for (int j=cosmo->params.N_nu_mass; j<3; j=j+3){
+			    mnu_list[j] = 0.;
+		    }
+	    }
+	    
+	    double norm_pk;
+	    if (isfinite(cosmo->params.A_s)){
+			norm_pk = cosmo->params.A_s;
+	    } else if(isfinite(cosmo->params.sigma8)){
+			norm_pk = cosmo->params.sigma8;
+	    } else {
+			 *status = CCL_ERROR_PARAMETERS;
+			 strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_class(): neither A_s nor sigma8 defined.\n");
+	    }
+	    
+	    ccl_cosmology* cosmo_GR = ccl_cosmology_create_with_params(cosmo->params.Omega_c,
+	               cosmo->params.Omega_b, cosmo->params.Omega_k, 
+	               cosmo->params.Neff, mnu_list, ccl_mnu_list, 
+	               cosmo->params.w0, cosmo->params.wa, cosmo->params.h, 
+	               norm_pk, cosmo->params.n_s, 
+	               cosmo->params.bcm_log10Mc, cosmo->params.bcm_etab,
+	               cosmo->params.bcm_ks, 0., 0., cosmo->params.nz_mgrowth,
+	               cosmo->params.z_mgrowth, cosmo->params.df_mgrowth,
+	               cosmo->config, status);
+	    
+	    double * D_mu = malloc(na * sizeof(double)); 
+	    double * D_GR = malloc(na * sizeof(double));          
+	  
+	    for (int i=0; i<na; i++){
+	        D_mu[i] = ccl_growth_factor_unnorm(cosmo, z[i], status);
+	        D_GR[i] = ccl_growth_factor_unnorm(cosmo_GR, z[i], status);
+	    }
+	  
+        for (int i=0; i<nk; i++) {
+            for (int j = 0; j < na; j++) {
+	            //The 2D interpolation routines access the function values y_{k_ia_j} with the following ordering:
+	            //y_ij = y2d[j*N_k + i]
+	            //with i = 0,...,N_k-1 and j = 0,...,N_a-1.
+	            s |= spectra_pk_at_k_and_z(&ba, &pm, &sp,x[i],1./z[j]-1., &psout_l,&ic);
+	            // Scale the GR P(k) from CLASS by the ratio of growth factors
+	            y2d_lin[j*nk+i] = log(psout_l) + 2 * log(D_mu[j]) - 2 * log(D_GR[j]);
+            }
+        x[i] = log(x[i]);
+        }
+    } else {
+		// This is the standard case without modifying gravity
+		for (int i=0; i<nk; i++) {
+            for (int j = 0; j < na; j++) {
+	            //The 2D interpolation routines access the function values y_{k_ia_j} with the following ordering:
+	            //y_ij = y2d[j*N_k + i]
+	            //with i = 0,...,N_k-1 and j = 0,...,N_a-1.
+	            s |= spectra_pk_at_k_and_z(&ba, &pm, &sp,x[i],1./z[j]-1., &psout_l,&ic);
+	            y2d_lin[j*nk+i] = log(psout_l);
+            }
+        x[i] = log(x[i]);
+        }
+	}	
     if(s) {
       free(x); 
       free(z);
@@ -1396,20 +1461,24 @@ void ccl_cosmology_compute_power(ccl_cosmology * cosmo, int * status)
   if (cosmo->computed_power) return;
     switch(cosmo->config.transfer_function_method){
         case ccl_bbks:
-	  ccl_cosmology_compute_power_bbks(cosmo,status);
-	  break;
+	        ccl_cosmology_compute_power_bbks(cosmo,status);
+	        break;
         case ccl_eisenstein_hu:
-	  ccl_cosmology_compute_power_eh(cosmo,status);
-	  break;
+	        ccl_cosmology_compute_power_eh(cosmo,status);
+	        break;
         case ccl_boltzmann_class:
-	  ccl_cosmology_compute_power_class(cosmo,status);
-	  break;
+            ////////////////////////////////////////
+            /////////////////////////////////////////
+	        ccl_cosmology_compute_power_class(cosmo,status);
+	        ////////////////////////////////////////
+	        /////////////////////////////////////////
+	        break;
         case ccl_emulator:
-	  ccl_cosmology_compute_power_emu(cosmo,status);
-	  break;
+	        ccl_cosmology_compute_power_emu(cosmo,status);
+	        break;
         default:
-	  *status = CCL_ERROR_INCONSISTENT;
-	  sprintf(cosmo->status_message ,"ccl_power.c: ccl_cosmology_compute_power(): Unknown or non-implemented transfer function method: %d \n",cosmo->config.transfer_function_method);
+	        *status = CCL_ERROR_INCONSISTENT;
+	        sprintf(cosmo->status_message ,"ccl_power.c: ccl_cosmology_compute_power(): Unknown or non-implemented transfer function method: %d \n",cosmo->config.transfer_function_method);
     }
     
     ccl_check_status(cosmo,status);
@@ -1463,7 +1532,7 @@ static double ccl_power_extrapol_highk(ccl_cosmology * cosmo, double k, double a
     
 }
 
-/*------ ROUTINE: ccl_power_extrapol_hxighk ----- 
+/*------ ROUTINE: ccl_power_extrapol_lowk ----- 
 INPUT: ccl_cosmology * cosmo, a, k [1/Mpc]
 TASK: extrapolate power spectrum at low k
 */
@@ -1524,6 +1593,8 @@ double ccl_linear_matter_power(ccl_cosmology * cosmo, double k, double a, int * 
     if(k<=cosmo->data.k_min_lin) { 
       log_p_1=ccl_power_extrapol_lowk(cosmo,k,a,cosmo->data.p_lin,cosmo->data.k_min_lin,status);
       // MUSIG: Need to add a call to a function here which gives the MG growth factor by which we scale. 
+      //////////////////////////////////////////////////////////////////////////////////////////////////
+      //////////////////////////////////////////////////////////////////////////////////////////////////
       return exp(log_p_1);
     }
     else if(k<cosmo->data.k_max_lin){
@@ -1535,7 +1606,6 @@ double ccl_linear_matter_power(ccl_cosmology * cosmo, double k, double a, int * 
         return NAN;
       }
       else {
-		  // MUSIG: Need to add a call to a function here which gives the MG growth factor by which we scale.
         return exp(log_p_1);
       }
     }
