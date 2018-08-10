@@ -20,7 +20,7 @@ Omega_v_vals = np.array([0.7, 0.7, 0.7, 0.65, 0.75])
 w0_vals = np.array([-1.0, -0.9, -0.9, -0.9, -0.9])
 wa_vals = np.array([0.0, 0.0, 0.1, 0.1, 0.1])
 
-def read_growth_lowz_test_file():
+def read_growth_lowz_benchmark_file():
     """
     Read the file containing growth factor benchmarks for the low redshifts.
     """
@@ -33,7 +33,7 @@ def read_growth_lowz_test_file():
     gfac = dat[1:]
     return z, gfac
 
-def read_growth_allz_test_file():
+def read_growth_allz_benchmark_file():
     """
     Read the file containing growth factor benchmarks for the whole redshift range.
     """
@@ -47,8 +47,8 @@ def read_growth_allz_test_file():
     return z, gfac
 
 # Set-up test data
-z_lowz, gfac_lowz = read_growth_lowz_test_file()
-z_allz, gfac_allz = read_growth_allz_test_file()
+z_lowz, gfac_lowz = read_growth_lowz_benchmark_file()
+z_allz, gfac_allz = read_growth_allz_benchmark_file()
 
 def compare_growth(z, gfac_bench, Omega_v, w0, wa):
     """

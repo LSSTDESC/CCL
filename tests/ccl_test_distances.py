@@ -92,7 +92,7 @@ class_models = OrderedDict(
         )
 
 path = dirname(abspath(__file__))
-def read_chi_test_file():
+def read_chi_benchmark_file():
     """
     Read the file containing all the radial comoving distance benchmarks 
     (distances are in Mpc/h)
@@ -106,7 +106,7 @@ def read_chi_test_file():
     chi = dat[1:]
     return z, chi
 
-def read_chi_hiz_test_file():
+def read_chi_hiz_benchmark_file():
     """
     Read the file containing all the radial comoving distance benchmarks 
     (distances are in Mpc/h)
@@ -120,7 +120,7 @@ def read_chi_hiz_test_file():
     chi = dat[1:]
     return z, chi
     
-def read_chi_mnu_test_file():
+def read_chi_mnu_benchmark_file():
     """
     Read the file containing all the radial comoving distance benchmarks
     with non-zero massive neutrinos 
@@ -135,7 +135,7 @@ def read_chi_mnu_test_file():
     chi = dat[1:]
     return z, chi
 
-def read_chi_hiz_test_file():
+def read_chi_hiz_benchmark_file():
     """
     Read the file containing all the radial comoving distance benchmarks 
     (distances are in Mpc/h)
@@ -149,7 +149,7 @@ def read_chi_hiz_test_file():
     chi = dat[1:]
     return z, chi
     
-def read_chi_mnu_hiz_test_file():
+def read_chi_mnu_hiz_benchmark_file():
     """
     Read the file containing all the radial comoving distance benchmarks
     with non-zero massive neutrinos 
@@ -164,7 +164,7 @@ def read_chi_mnu_hiz_test_file():
     chi = dat[1:]
     return z, chi
 
-def read_class_chi_test_file():
+def read_class_chi_benchmark_file():
     """
     Read the file containing all the radial comoving distance benchmarks from 
     CLASS. (distances are in Mpc)
@@ -178,7 +178,7 @@ def read_class_chi_test_file():
     chi = dat[1:]
     return z, chi
 
-def read_dm_test_file():
+def read_dm_benchmark_file():
     """
     Read the file containing all the distance modulus benchmarks 
     """
@@ -191,7 +191,7 @@ def read_dm_test_file():
     dm = dat[1:]
     return z, dm
     
-def read_dm_mnu_test_file():
+def read_dm_mnu_benchmark_file():
     """
     Read the file containing all the distance modulus benchmarks 
     for non-zero massive neutrinos.
@@ -205,7 +205,7 @@ def read_dm_mnu_test_file():
     dm = dat[1:]
     return z, dm
     
-def read_dm_mnu_hiz_test_file():
+def read_dm_mnu_hiz_benchmark_file():
     """
     Read the file containing all the distance modulus benchmarks 
     for non-zero massive neutrinos at high z.
@@ -219,7 +219,7 @@ def read_dm_mnu_hiz_test_file():
     dm = dat[1:]
     return z, dm
 
-def read_class_dm_test_file():
+def read_class_dm_benchmark_file():
     """
     Read the file containing all the distance modulus benchmarks from 
     CLASS.
@@ -234,15 +234,15 @@ def read_class_dm_test_file():
     return z, dm
 
 # Set-up test data
-z, chi = read_chi_test_file()
-zhi, chi_hiz = read_chi_hiz_test_file()
-_, dm = read_dm_test_file()
-znu, chi_nu = read_chi_mnu_test_file()
-znuhi, chi_nu_hiz = read_chi_mnu_hiz_test_file()
-z_class, chi_class = read_class_chi_test_file()
-z_dm_class, dm_class = read_class_dm_test_file()
-_znu, dm_nu = read_dm_mnu_test_file()
-_znuhi, dm_nu_hiz = read_dm_mnu_hiz_test_file()
+z, chi = read_chi_benchmark_file()
+zhi, chi_hiz = read_chi_hiz_benchmark_file()
+_, dm = read_dm_benchmark_file()
+znu, chi_nu = read_chi_mnu_benchmark_file()
+znuhi, chi_nu_hiz = read_chi_mnu_hiz_benchmark_file()
+z_class, chi_class = read_class_chi_benchmark_file()
+z_dm_class, dm_class = read_class_dm_benchmark_file()
+_znu, dm_nu = read_dm_mnu_benchmark_file()
+_znuhi, dm_nu_hiz = read_dm_mnu_hiz_benchmark_file()
 
 def compare_distances(z, chi_bench,dm_bench, Omega_v, w0, wa):
     """
