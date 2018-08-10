@@ -451,6 +451,13 @@ void ccl_correlation_3d(ccl_cosmology *cosmo, double a,
   int i,N_ARR;
   double *k_arr,*pk_arr,*r_arr,*xi_arr;
 
+  // Print a message informing the user that if they are using mu / Sigma
+  // parameterisation, Cl's will be computed using the linear power spectrum
+  // because we do not have support for nonlinearity in this parameterisation
+  if ( fabs(cosmo->params.mu_0)>1e-15 || fabs(cosmo->params.sigma_0)>1e-15 ){
+      printf("You are using the mu / Sigma parameterisation of modified gravity; the 3d correlation function will be computed using the LINEAR power spectrum.\n");
+  } 
+
   //number of data points for k and pk array
   N_ARR=(int)(ccl_splines->N_K_3DCOR*log10(ccl_splines->K_MAX/ccl_splines->K_MIN_DEFAULT));  
 
@@ -469,9 +476,17 @@ void ccl_correlation_3d(ccl_cosmology *cosmo, double a,
     return;
   }  
 
-  for (i=0; i<N_ARR; i++)
-    pk_arr[i] = ccl_nonlin_matter_power(cosmo, k_arr[i], a, status);
-
+  // If we are using mu / Sigma parameterisation of modified gravity, 
+  // use the linear power spectrum only 
+  if ( fabs(cosmo->params.mu_0)>1e-15 || fabs(cosmo->params.sigma_0>1e-15) ){
+      for (i=0; i<N_ARR; i++){
+          pk_arr[i] = ccl_linear_matter_power(cosmo, k_arr[i], a, status);
+      }
+  } else {
+	  for (i=0; i<N_ARR; i++){
+          pk_arr[i] = ccl_nonlin_matter_power(cosmo, k_arr[i], a, status);
+      }
+  }
   if (do_taper_pk)
     taper_cl(N_ARR,k_arr,pk_arr,taper_pk_limits);
 

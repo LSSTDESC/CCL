@@ -1635,7 +1635,7 @@ double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double k, double a, int *s
   if (fabs(cosmo->params.mu_0)>1e-14 || fabs(cosmo->params.sigma_0)>1e-14){
       *status = CCL_ERROR_NOT_IMPLEMENTED;
 	  strcpy(cosmo->status_message,"ccl_power.c: ccl_nonlin_matter_power(): Nonlinear behaviour for the mu / Sigma parameterization of modified gravity is not implemented. \n");
-	  return;
+	  return NAN;
   }
   
   switch(cosmo->config.matter_power_spectrum_method) {

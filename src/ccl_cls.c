@@ -160,7 +160,6 @@ typedef struct {
 } IntLensPar;
 
 //Integrand for lensing kernel
-//MUSIG
 static double integrand_wl(double chip,void *params)
 {
   IntLensPar *p=(IntLensPar *)params;
@@ -432,9 +431,15 @@ static CCL_ClTracer *cl_tracer(ccl_cosmology *cosmo,int tracer_type,
 	  strcpy(cosmo->status_message,"ccl_cls.c: ccl_cl_tracer(): memory allocation\n");
 	  return NULL;
 	}
-
-	for(int j=0;j<nchi;j++)
+	
+    // If mu / Sigma parameterisation of modified gravity is in effect,
+	// add appropriate factors of Sigma before splining:
+	for(int j=0;j<nchi;j++){
 	  clstatus|=window_magnification(x[j],cosmo,clt->spl_nz,clt->spl_sz,chimax,&(y[j]));
+	  if ( fabs(cosmo->params.sigma_0) ){
+		    y[j] = y[j] * (1. + ccl_Sig_MG(cosmo,ccl_scale_factor_of_chi(cosmo,x[j], status), status));
+	     }
+	}
 	if(clstatus) {
 	  free(y);
 	  free(x);
@@ -495,9 +500,15 @@ static CCL_ClTracer *cl_tracer(ccl_cosmology *cosmo,int tracer_type,
 	strcpy(cosmo->status_message,"ccl_cls.c: ccl_cl_tracer(): memory allocation\n");
 	return NULL;
       }
-
-      for(int j=0;j<nchi;j++)
-	clstatus|=window_lensing(x[j],cosmo,clt->spl_nz,chimax,&(y[j]));
+    // If mu / Sigma parameterisation of modified gravity is in effect,
+	// add appropriate factors of Sigma before splining:
+      for(int j=0;j<nchi;j++){
+	     clstatus|=window_lensing(x[j],cosmo,clt->spl_nz,chimax,&(y[j]));
+	     if ( fabs(cosmo->params.sigma_0) ){
+		    y[j] = y[j] * (1. + ccl_Sig_MG(cosmo,ccl_scale_factor_of_chi(cosmo,x[j], status), status));
+	     }
+	   }
+	   
       if(clstatus) {
 	free(y);
 	free(x);
@@ -577,8 +588,16 @@ CCL_ClTracer *ccl_cl_tracer(ccl_cosmology *cosmo,int tracer_type,
 				int nz_s,double *z_s,double *s,
 				int nz_ba,double *z_ba,double *ba,
 				int nz_rf,double *z_rf,double *rf,
-				double z_source, int * status)
-{
+				double z_source, int * status)	
+{	
+
+  // Print a message informing the user that if they are using mu / Sigma
+  // parameterisation, Cl's will be computed using the linear power spectrum
+  // because we do not have support for nonlinearity in this parameterisation
+  if ( fabs(cosmo->params.mu_0)>1e-15 || fabs(cosmo->params.sigma_0)>1e-15 ){
+      printf("You are using the mu / Sigma parameterisation of modified gravity; cl's and angular correlation functions will be computed using the LINEAR power spectrum.\n");
+  }    	  
+	
   CCL_ClTracer *clt=cl_tracer(cosmo,tracer_type,has_rsd,has_magnification,has_intrinsic_alignment,
 			      nz_n,z_n,n,nz_b,z_b,b,nz_s,z_s,s,
 			      nz_ba,z_ba,ba,nz_rf,z_rf,rf,z_source,status);
@@ -725,7 +744,17 @@ static double transfer_nc(int l,double k,
     double chi0=x0/k;
     if(chi0<=clt->chimax) {
       double a0=ccl_scale_factor_of_chi(cosmo,chi0,status);
-      double pk0=ccl_nonlin_matter_power(cosmo,k,a0,status);
+      
+      // The nonlinear matter power spectrum cannot be computed in the 
+      // mu / Sigma parameterisation of modified gravity. 
+      // In this case, use the linear power spectrum only.
+      double pk0;
+      if (fabs(cosmo->params.mu_0) || fabs(cosmo->params.sigma_0) ){
+		  pk0 = ccl_linear_matter_power(cosmo, k, a0, status);
+      } else {
+		  pk0 =ccl_nonlin_matter_power(cosmo,k,a0,status);
+	  }
+	  
       double jl0=j_bessel_limber(l,k);
       double f_all=f_dens(a0,cosmo,clt,status)*jl0;
       if(clt->has_rsd) {
@@ -733,7 +762,16 @@ static double transfer_nc(int l,double k,
 	double chi1=x1/k;
 	if(chi1<=clt->chimax) {
 	  double a1=ccl_scale_factor_of_chi(cosmo,chi1,status);
-	  double pk1=ccl_nonlin_matter_power(cosmo,k,a1,status);
+	  
+	  // The nonlinear matter power spectrum cannot be computed in the 
+      // mu / Sigma parameterisation of modified gravity. 
+      // In this case, use the linear power spectrum only.
+      double pk1;
+      if (fabs(cosmo->params.mu_0) || fabs(cosmo->params.sigma_0) ){
+		  pk1 = ccl_linear_matter_power(cosmo, k, a1, status);
+      } else {
+		  pk1 =ccl_nonlin_matter_power(cosmo,k,a1,status);
+	  }
 	  double fg0=f_rsd(a0,cosmo,clt,status);
 	  double fg1=f_rsd(a1,cosmo,clt,status);
 	  double jl1=j_bessel_limber(l+1,k);
@@ -751,7 +789,17 @@ static double transfer_nc(int l,double k,
       double chi=clt->chimin+w->dchi*(i+0.5);
       if(chi<=clt->chimax) {
 	double a=ccl_scale_factor_of_chi(cosmo,chi,status);
-	double pk=ccl_nonlin_matter_power(cosmo,k,a,status);
+	
+	  // The nonlinear matter power spectrum cannot be computed in the 
+      // mu / Sigma parameterisation of modified gravity. 
+      // In this case, use the linear power spectrum only.
+      double pk;
+      if (fabs(cosmo->params.mu_0) || fabs(cosmo->params.sigma_0) ){
+		  pk = ccl_linear_matter_power(cosmo, k, a, status);
+      } else {
+		  pk =ccl_nonlin_matter_power(cosmo,k,a,status);
+	  }
+
 	double jl=ccl_j_bessel(l,k*chi);
 	double f_all=f_dens(a,cosmo,clt,status)*jl;
 	if(clt->has_rsd) {
@@ -784,7 +832,7 @@ static double f_lensing(double a,double chi,ccl_cosmology *cosmo,CCL_ClTracer *c
   double wL=ccl_spline_eval(chi,clt->spl_wL);
 
   if(wL<=0)
-    return 0;
+    return 0; 
   else
     return clt->prefac_lensing*wL/(a*chi);
 }
@@ -820,9 +868,19 @@ static double transfer_wl(int l,double k,
     double chi=(l+0.5)/k;
     if(chi<=clt->chimax) {
       double a=ccl_scale_factor_of_chi(cosmo,chi,status);
-      double pk=ccl_nonlin_matter_power(cosmo,k,a,status);
+      
+      // The nonlinear matter power spectrum cannot be computed in the 
+      // mu / Sigma parameterisation of modified gravity. 
+      // In this case, use the linear power spectrum only.
+      double pk;
+      if (fabs(cosmo->params.mu_0) || fabs(cosmo->params.sigma_0) ){
+		  pk = ccl_linear_matter_power(cosmo, k, a, status);
+      } else {
+		  pk =ccl_nonlin_matter_power(cosmo,k,a,status);
+	  }
       double jl=j_bessel_limber(l,k);
-      double f_all=f_lensing(a,chi,cosmo,clt,status)*jl;
+      double f_all;
+      f_all = f_lensing(a,chi,cosmo,clt,status)*jl ;
       if(clt->has_intrinsic_alignment)
 	f_all+=f_IA_NLA(a,chi,cosmo,clt,status)*jl;
 
@@ -835,7 +893,17 @@ static double transfer_wl(int l,double k,
       double chi=clt->chimin+w->dchi*(i+0.5);
       if(chi<=clt->chimax) {
 	double a=ccl_scale_factor_of_chi(cosmo,chi,status);
-	double pk=ccl_nonlin_matter_power(cosmo,k,a,status);
+	
+	  // The nonlinear matter power spectrum cannot be computed in the 
+      // mu / Sigma parameterisation of modified gravity. 
+      // In this case, use the linear power spectrum only.
+      double pk;
+      if (fabs(cosmo->params.mu_0) || fabs(cosmo->params.sigma_0) ){
+		  pk = ccl_linear_matter_power(cosmo, k, a, status);
+      } else {
+		  pk =ccl_nonlin_matter_power(cosmo,k,a,status);
+	  }
+	
 	double jl=ccl_j_bessel(l,k*chi);
 	double f_all=f_lensing(a,chi,cosmo,clt,status)*jl;
 	if(clt->has_intrinsic_alignment)
@@ -851,7 +919,6 @@ static double transfer_wl(int l,double k,
   //return (l+1.)*l*ret/(k*k);
 }
 
-// MUSIG
 static double transfer_cmblens(int l,double k,ccl_cosmology *cosmo,CCL_ClTracer *clt,int *status)
 {
   double chi=(l+0.5)/k;
@@ -862,8 +929,24 @@ static double transfer_cmblens(int l,double k,ccl_cosmology *cosmo,CCL_ClTracer 
     double a=ccl_scale_factor_of_chi(cosmo,chi,status);
     double w=1-chi/clt->chi_source;
     double jl=j_bessel_limber(l,k);
-    double pk=ccl_nonlin_matter_power(cosmo,k,a,status);
-    return clt->prefac_lensing*l*(l+1.)*w*sqrt(pk)*jl/(a*chi*k*k);
+      // The nonlinear matter power spectrum cannot be computed in the 
+      // mu / Sigma parameterisation of modified gravity. 
+      // In this case, use the linear power spectrum only.
+      double pk;
+      if (fabs(cosmo->params.mu_0) || fabs(cosmo->params.sigma_0) ){
+		  pk = ccl_linear_matter_power(cosmo, k, a, status);
+      }
+      else {
+		  pk =ccl_nonlin_matter_power(cosmo,k,a,status);
+	  }
+    
+    // If mu / Sigma parameterisation of modified gravity is in effect,
+	// add appropriate factors of Sigma before splining:
+    if (fabs(cosmo->params.sigma_0)>1e-15){
+        return clt->prefac_lensing*l*(l+1.)*w*sqrt(pk)*jl/(a*chi*k*k) * (1. + ccl_Sig_MG(cosmo, a, status));
+    } else {
+		return clt->prefac_lensing*l*(l+1.)*w*sqrt(pk)*jl/(a*chi*k*k); 
+    }
   }
   return 0;
 }
