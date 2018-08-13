@@ -16,15 +16,15 @@ extern "C" {
 
   // concentration-mass relation
   typedef enum ccl_conc_label {
-    Bhattacharya2011 = 1,
-    Duffy2008_virial = 2,
-    constant = 3,
-    Bullock = 4,
+    ccl_bhattacharya2011 = 1,
+    ccl_duffy2008_virial = 2,
+    ccl_constant_concentration = 3,
+    ccl_bullock2001 = 4,
   } ccl_conc_label;
 
   // halo window profiles
   typedef enum ccl_win_label {
-    NFW = 1,
+    ccl_nfw = 1,
   } ccl_win_label;
 
   /**
@@ -58,8 +58,8 @@ extern "C" {
   double ccl_halomodel_matter_power(ccl_cosmology *cosmo, double k, double a, int *status);
 
   /**
-   * Computes the concentration of a halo of mass M. This is the ratio of virial raidus to scale radius for
-   * an NFW halo
+   * Computes the concentration of a halo of mass M. 
+   * This is the ratio of virial raidus to scale radius for an NFW halo.
    * @param cosmo: cosmology object containing parameters
    * @param halomass: halo mass in units of Msun
    * @param a: scale factor normalised to a=1 today

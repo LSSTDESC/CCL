@@ -6,7 +6,7 @@
 #include <string.h>
 
 // Relative error tolerance in the halomodel matter power spectrum
-#define HALOMOD_TOLERANCE 2e-3
+#define HALOMOD_TOLERANCE 1e-3
 
 // Data structure for the CTEST
 CTEST_DATA(halomod){

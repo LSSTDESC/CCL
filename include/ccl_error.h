@@ -32,6 +32,8 @@ extern "C" {
 #define CCL_ERROR_HALOWIN 1045
 #define CCL_ERROR_HMF_DV 1046
 #define CCL_ERROR_CONC_DV 1047
+#define CCL_ERROR_ONE_HALO_INT 1048
+#define CCL_ERROR_TWO_HALO_INT 1049
 
 typedef enum {
   CCL_ERROR_POLICY_EXIT = 0,
