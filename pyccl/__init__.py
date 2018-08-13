@@ -32,8 +32,7 @@ from pyccl.power import linear_matter_power, nonlin_matter_power, sigmaR, \
     sigmaV, sigma8
 
 # Halo mass function
-from pyccl.massfunction import massfunc, massfunc_m2r, sigmaM, halo_bias#, \
-#r_delta, nu
+from pyccl.massfunction import massfunc, massfunc_m2r, sigmaM, halo_bias
 
 # Cl's and tracers
 from pyccl.cls import angular_cl, ClTracer, ClTracerNumberCounts, \

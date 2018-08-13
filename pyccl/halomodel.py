@@ -2,7 +2,7 @@ from pyccl import ccllib as lib
 from pyccl.pyutils import _vectorize_fn2
 
 def onehalo_matter_power(cosmo, k, a):
-    """One-halo term for matter power spectrum
+    """One-halo term for matter power spectrum assuming NFW density profiles
     Args:
         cosmo (:obj:`ccl.cosmology`): Cosmological parameters.
         a (float): scale factor.
@@ -16,7 +16,7 @@ def onehalo_matter_power(cosmo, k, a):
                           cosmo, k, a)
 
 def twohalo_matter_power(cosmo, k, a):
-    """Two-halo term for matter power spectrum
+    """Two-halo term for matter power spectrum assuming NFW density profiles
     Args:
         cosmo (:obj:`ccl.cosmology`): Cosmological parameters.
         a (float): scale factor.
@@ -31,7 +31,7 @@ def twohalo_matter_power(cosmo, k, a):
 
 def halomodel_matter_power(cosmo,
                            k, a):
-    """Matter power spectrum from halo model
+    """Matter power spectrum from halo model assuming NFW density profiles
     Args:
         cosmo (:obj:`ccl.cosmology`): Cosmological parameters.
         a (float): scale factor.

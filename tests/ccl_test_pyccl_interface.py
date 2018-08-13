@@ -365,13 +365,13 @@ def check_halomod(cosmo):
     k_array = np.array([1e-3, 1e-2, 1e-1, 1e0, 1e1])
 
     # halo concentration
-    #assert_( all_finite(ccl.halo_concentration(cosmo, mass_scalar, a)) )
-    #assert_( all_finite(ccl.halo_concentration(cosmo, mass_list,   a)) )
-    #assert_( all_finite(ccl.halo_concentration(cosmo, mass_array,  a)) )
+    assert_( all_finite(ccl.halomodel.halo_concentration(cosmo, mass_scalar, a)) )
+    assert_( all_finite(ccl.halomodel.halo_concentration(cosmo, mass_list,   a)) )
+    assert_( all_finite(ccl.halomodel.halo_concentration(cosmo, mass_array,  a)) )
 
-    #assert_raises(TypeError, ccl.halo_concentration, cosmo, mass_scalar, a_array)
-    #assert_raises(TypeError, ccl.halo_concentration, cosmo, mass_list,   a_array)
-    #assert_raises(TypeError, ccl.halo_concentration, cosmo, mass_array,  a_array)
+    assert_raises(TypeError, ccl.halomodel.halo_concentration, cosmo, mass_scalar, a_array)
+    assert_raises(TypeError, ccl.halomodel.halo_concentration, cosmo, mass_list,   a_array)
+    assert_raises(TypeError, ccl.halomodel.halo_concentration, cosmo, mass_array,  a_array)
     
     # halo model
     assert_( all_finite(ccl.halomodel_matter_power(cosmo, k_scalar, a)) )

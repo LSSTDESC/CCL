@@ -1714,9 +1714,7 @@ double ccl_sigmaR(ccl_cosmology *cosmo,double R,double a,int *status)
     ccl_raise_gsl_warning(gslstatus, "ccl_power.c: ccl_sigmaR():");
     *status |= gslstatus;
   }
-  // TODO: log10 could be taken already in the macros.
-  // TODO: 1E-5 should be a macro
-  // TODO: we should check for integration success
+
   gsl_integration_cquad_workspace_free(workspace);
 
   return sqrt(sigma_R*M_LN10/(2*M_PI*M_PI))*ccl_growth_factor(cosmo, a, status);
@@ -1749,9 +1747,6 @@ double ccl_sigmaV(ccl_cosmology *cosmo,double R,double a,int *status)
     *status |= gslstatus;
   }
 
-  // TODO: log10 could be taken already in the macros.
-  // TODO: 1E-5 should be a macro
-  // TODO: we should check for integration success
   gsl_integration_cquad_workspace_free(workspace);
 
   return sqrt(sigma_V*M_LN10/(2*M_PI*M_PI))*ccl_growth_factor(cosmo, a, status);
