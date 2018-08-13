@@ -380,19 +380,19 @@ void ccl_cosmology_compute_sigma(ccl_cosmology * cosmo, int *status)
     if(i==0) {
       gslstatus |= gsl_spline_eval_e(logsigma, m[i], NULL,&na);
       gslstatus |= gsl_spline_eval_e(logsigma, m[i]+ccl_splines->LOGM_SPLINE_DELTA/2., NULL,&nb);
-      y[i] = log(pow(10, na))-log(pow(10,nb));
+      y[i] = (na-nb)*log(10.);
       y[i] = 2.*y[i] / ccl_splines->LOGM_SPLINE_DELTA;
     }
     else if (i==nm-1) {
       gslstatus |= gsl_spline_eval_e(logsigma, m[i]-ccl_splines->LOGM_SPLINE_DELTA/2., NULL,&na);
       gslstatus |= gsl_spline_eval_e(logsigma, m[i], NULL,&nb);
-      y[i] = log(pow(10, na))-log(pow(10,nb));
+      y[i] = (na-nb)*log(10.);
       y[i] = 2.*y[i] / ccl_splines->LOGM_SPLINE_DELTA;
     }
     else {
       gslstatus |= gsl_spline_eval_e(logsigma, m[i]-ccl_splines->LOGM_SPLINE_DELTA/2., NULL,&na);
       gslstatus |= gsl_spline_eval_e(logsigma, m[i]+ccl_splines->LOGM_SPLINE_DELTA/2., NULL,&nb);
-      y[i] = (log(pow(10,na))-log(pow(10,nb)));
+      y[i] = (na-nb)*log(10.);
       y[i] = y[i] / ccl_splines->LOGM_SPLINE_DELTA;
     }
   }
