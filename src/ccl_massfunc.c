@@ -229,10 +229,10 @@ static double massfunc_f(ccl_cosmology *cosmo, double halomass, double a, double
     }
     return fit_A*(pow(sigma/fit_b,-fit_a)+1.0)*exp(-fit_c/sigma/sigma);
     break;
-    //this version uses f(nu) parameterization from Eq. 8 in Tinker et al. 2010
-    // use this for consistency with Tinker et al. 2010 fitting function for halo bias
   case ccl_tinker10:
-    
+    // this version uses f(nu) parameterization from Eq. 8 in Tinker et al. 2010
+    // use this for consistency with Tinker et al. 2010 fitting function for halo bias
+
     // Check if odelta is outside the interpolated range
     if ((odelta < 200) || (odelta > 3200)) {
       *status = CCL_ERROR_HMF_INTERP;
