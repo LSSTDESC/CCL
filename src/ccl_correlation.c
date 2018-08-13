@@ -455,7 +455,7 @@ void ccl_correlation_3d(ccl_cosmology *cosmo, double a,
   // parameterisation, Cl's will be computed using the linear power spectrum
   // because we do not have support for nonlinearity in this parameterisation
   if ( fabs(cosmo->params.mu_0)>1e-15 || fabs(cosmo->params.sigma_0)>1e-15 ){
-      printf("You are using the mu / Sigma parameterisation of modified gravity; the 3d correlation function will be computed using the LINEAR power spectrum.\n");
+      ccl_raise_warning(CCL_ERROR_NOT_IMPLEMENTED , "You are using the mu / Sigma parameterisation of modified gravity; the 3d correlation function will be computed using the LINEAR power spectrum.\n");
   } 
 
   //number of data points for k and pk array

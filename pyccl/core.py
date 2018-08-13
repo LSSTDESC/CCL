@@ -47,7 +47,6 @@ valid_transfer_matter_power_combos = {
     'boltzmann_camb':   [],
     'camb':             [],
 }
-
 baryons_power_spectrum_types = {
     'nobaryons':   lib.nobaryons,
     'bcm':         lib.bcm
@@ -55,6 +54,17 @@ baryons_power_spectrum_types = {
 """dict: Types of baryon modifications to power spectra. The strings represent possible choices the user can specify for different baryon modifications to power spectra.
 
 """
+
+#modified_gravity_types = {
+#    'GR':   lib.GR,
+#    'muSigma_MG':  lib.muSigma_MG 
+#}
+"""dict: Types of modified gravity models. The strings represent possible choices the user can specify for different modified gravity specifications.
+
+"""
+
+# List which transfer functions can be used with the muSigma_MG parameterisation of modified gravity
+valid_muSig_transfers = {'boltzmann_class', 'class'}
 
 mass_function_types = {
     'angulo':   lib.angulo,
@@ -377,6 +387,8 @@ class Cosmology(object):
             mnu_type = 'equal', and 'equalize', which will redistribute masses
             to be equal right before calling the emualtor but results in
             internal inconsistencies. Defaults to `strict`.
+            modified_gravity (:obj:`str`, optional): The modified gravity 
+            parameterisation to use, if any. Defaults to GR.
 
         """
         
@@ -457,6 +469,11 @@ class Cosmology(object):
                                   "Available options are: %s" \
                                  % (emulator_neutrinos, 
                                     emulator_neutrinos_types.keys()) )
+            #if modified_gravity not in modified_gravity_types.keys():
+            #    raise ValueError( "'%s' is not a valid modified gravity parameterisation. "
+            #                      "Available options are: %s" \
+            #                     % (modified_gravity, 
+            #                        modified_gravity_types.keys()) )
             
             # Check for valid transfer fn/matter power spectrum combination
             if matter_power_spectrum_types[matter_power_spectrum] \
@@ -464,6 +481,13 @@ class Cosmology(object):
                 raise ValueError("matter_power_spectrum '%s' can't be used "
                                  "with transfer_function '%s'." \
                                  % (matter_power_spectrum, transfer_function))
+                                 
+            # Check for valid transfer fn / modified gravity parameters
+            if ( (abs(mu_0)>1e-14 or abs(sigma_0)>1e-14) and \
+              transfer_function not in valid_muSig_transfers):
+				 raise ValueError("transfer_function '%s' cannot be used with \
+				                  mu_0 or sigma_0 not equal to zero." \
+                                 % transfer_function) 
             
             # Assign values to new ccl_configuration object
             config = lib.configuration()

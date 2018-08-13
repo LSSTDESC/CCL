@@ -184,7 +184,7 @@ def rho_x(cosmo, a, label, is_comoving=False):
                           lib.rho_x_vec, cosmo, a, species_types[label], int(is_comoving))
 
 def Sig_MG(cosmo, a):
-	""" Redshift-dependent modification to Poisson equation for massles particles 
+	""" Redshift-dependent modification to Poisson equation for massless particles 
 	under modified gravity. 
 	Args:
 	    cosmo (:obj:`ccl.cosmology`): Cosmological parameters.

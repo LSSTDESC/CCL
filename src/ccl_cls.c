@@ -595,7 +595,7 @@ CCL_ClTracer *ccl_cl_tracer(ccl_cosmology *cosmo,int tracer_type,
   // parameterisation, Cl's will be computed using the linear power spectrum
   // because we do not have support for nonlinearity in this parameterisation
   if ( fabs(cosmo->params.mu_0)>1e-15 || fabs(cosmo->params.sigma_0)>1e-15 ){
-      printf("You are using the mu / Sigma parameterisation of modified gravity; cl's and angular correlation functions will be computed using the LINEAR power spectrum.\n");
+      ccl_raise_warning(CCL_ERROR_NOT_IMPLEMENTED , "You are using the mu / Sigma parameterisation of modified gravity; cl's and angular correlation functions will be computed using the LINEAR power spectrum.\n");
   }    	  
 	
   CCL_ClTracer *clt=cl_tracer(cosmo,tracer_type,has_rsd,has_magnification,has_intrinsic_alignment,

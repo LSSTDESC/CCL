@@ -1476,11 +1476,7 @@ void ccl_cosmology_compute_power(ccl_cosmology * cosmo, int * status)
 	        ccl_cosmology_compute_power_eh(cosmo,status);
 	        break;
         case ccl_boltzmann_class:
-            ////////////////////////////////////////
-            /////////////////////////////////////////
 	        ccl_cosmology_compute_power_class(cosmo,status);
-	        ////////////////////////////////////////
-	        /////////////////////////////////////////
 	        break;
         case ccl_emulator:
 	        ccl_cosmology_compute_power_emu(cosmo,status);
