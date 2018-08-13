@@ -14,6 +14,8 @@
 #include "ccl_error.h"
 #include "ccl_params.h"
 
+// This checks to make sure all necessary halo mass function parameters have been set-up,
+// as well as associated splines.
 void ccl_cosmology_compute_hmfparams(ccl_cosmology * cosmo, int *status)
 {
   if(cosmo->computed_hmfparams)
