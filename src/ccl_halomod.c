@@ -115,7 +115,7 @@ double ccl_halo_concentration(ccl_cosmology *cosmo, double halomass, double a, d
 
   switch(label){
 
-    // Bullock et al. (2001; xxxx.xxxx; Delta = Virial)
+    // Bullock et al. (2001; arXiv:astro-ph/9908159; Delta = Virial)
   case Bullock:
 
     A = 4.0;

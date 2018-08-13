@@ -46,17 +46,6 @@ double Dv_BryanNorman(ccl_cosmology *cosmo, double a, int *status){
 
 }
 
-/*----- ROUTINE: nu_mass -----
-//TODO: Remove this function if no longer useful
-INPUT: cosmology, halo mass, scale factor
-TASK: Computes the peak threshold: nu(M,z) = delta_c(z) / sigma(M,z)
-double nu_mass(ccl_cosmology *cosmo, double halomass, double a, int *status) {
-
-  return dc_NakamuraSuto(cosmo, a, status)/ccl_sigmaM(cosmo, halomass, a, status);
-
-}
-*/
-
 /*----- ROUTINE: r_delta -----
 INPUT: cosmology, halo mass, scale factor, halo overdensity
 TASK: Computes comoving halo radius assuming the overdensity criteria
@@ -389,7 +378,6 @@ static double ccl_halo_b1(ccl_cosmology *cosmo, double halomass, double a, doubl
   // Equation (12) in  arXiv: 9901122
   // Derived using the peak-background split applied to the mass function in the same paper
   // Note that Sheth & Tormen (1999) use nu=(dc/sigma)^2 whereas we use nu=dc/sigma
-  // TODO: Mead: Somehow enforce that this should only work with a virial-density Delta_v
   case ccl_shethtormen:
 
     // Check if Delta_v is the virial Delta_v
@@ -557,7 +545,7 @@ static double ccl_dlninvsig_dlogm(ccl_cosmology *cosmo, double halomass, int*sta
 
 /*----- ROUTINE: ccl_massfunc -----
 INPUT: ccl_cosmology * cosmo, double halo mass in units of Msun, double scale factor
-TASK: returns halo mass function as dn / dlog10 m
+TASK: returns halo mass function as dn/dlog10(m) in comoving Msun^-1 Mpc^-3 (haloes per mass interval per volume)
 */
 double ccl_massfunc(ccl_cosmology *cosmo, double halomass, double a, double odelta, int *status)
 {
@@ -577,7 +565,7 @@ double ccl_massfunc(ccl_cosmology *cosmo, double halomass, double a, double odel
 
 /*----- ROUTINE: ccl_halob1 -----
 INPUT: ccl_cosmology * cosmo, double halo mass in units of Msun, double scale factor
-TASK: returns linear halo bias
+TASK: returns dimensionless linear halo bias
 */
 double ccl_halo_bias(ccl_cosmology *cosmo, double halomass, double a, double odelta, int *status)
 {
