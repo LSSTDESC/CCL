@@ -274,6 +274,7 @@ static double massfunc_f(ccl_cosmology *cosmo, double halomass, double a, double
       strcpy(cosmo->status_message, "ccl_massfunc.c: ccl_massfunc_f(): Watson HMF only supported for Delta = 200.\n");
       return 0;
     }
+    // these parameters from: Angulo et al 2012 (arxiv 1203.3216 ) 
     Omega_m_a = ccl_omega_x(cosmo, a, ccl_species_m_label,status);
     fit_A = Omega_m_a*(0.990*pow(a,3.216)+0.074);
     fit_a = Omega_m_a*(5.907*pow(a,3.599)+2.344);
@@ -288,6 +289,7 @@ static double massfunc_f(ccl_cosmology *cosmo, double halomass, double a, double
       strcpy(cosmo->status_message, "ccl_massfunc.c: ccl_massfunc_f(): Angulo HMF only supported for Delta = 200.\n");
       return NAN;
     }
+    // these parameters from: Watson et al 2012 (arxiv 1212.0095 )
     fit_A = 0.201;
     fit_a = 2.08;
     fit_b = 1.7;
