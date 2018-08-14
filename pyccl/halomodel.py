@@ -1,5 +1,21 @@
 from pyccl import ccllib as lib
-from pyccl.pyutils import _vectorize_fn2
+from pyccl.pyutils import _vectorize_fn2, _vectorize_fn4
+
+def halo_concentration(cosmo, halo_mass, a, odelta=200):
+    """Halo mass concentration relation
+    
+    Args:
+        cosmo (:obj:`ccl.cosmology`): Cosmological parameters.
+        halo_mass (float or array_like): Halo masses; Msun.
+        a (float): scale factor.
+        odelta (float): overdensity parameter (default: 200)
+
+    Returns:
+        float or array_like: Dimensionless halo concentration, ratio rv/rs
+
+    """
+    return _vectorize_fn4(lib.halo_concentration, 
+                          lib.halo_concentration_vec, cosmo, halo_mass, a, odelta)
 
 def onehalo_matter_power(cosmo, k, a):
     """One-halo term for matter power spectrum assuming NFW density profiles

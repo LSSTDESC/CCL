@@ -12,14 +12,7 @@ extern "C" {
 #define HM_LIMIT 1000 // Maximum sub intervals for the halo-model integration
 #define HM_INT_METHOD GSL_INTEG_GAUSS41 // Integration scheme for halo-model integration
   
-#include "ccl_core.h"  
-
-  // concentration-mass relation
-  typedef enum ccl_conc_label {
-    ccl_bhattacharya2011 = 1,
-    ccl_duffy2008_virial = 2,
-    ccl_constant_concentration = 3,
-  } ccl_conc_label;
+#include "ccl_core.h"
 
   // halo window profiles
   typedef enum ccl_win_label {
@@ -62,11 +55,11 @@ extern "C" {
    * @param cosmo: cosmology object containing parameters
    * @param halomass: halo mass in units of Msun
    * @param a: scale factor normalised to a=1 today
-   * @param Delta_v: overdensity criteria (with respect to matter density) used for halo mass
+   * @param odelta: overdensity criteria (with respect to matter density) used for halo mass
    * @param status: Status flag: 0 if there are no errors, non-zero otherwise
    * @return halo_concentration: the halo concentration
    */
-  double ccl_halo_concentration(ccl_cosmology *cosmo, double halomass, double a, double Delta_v, ccl_conc_label label, int *status);
+  double ccl_halo_concentration(ccl_cosmology *cosmo, double halomass, double a, double odelta, int *status);
   
 #ifdef __cplusplus
 }

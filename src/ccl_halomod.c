@@ -50,12 +50,12 @@ static double u_nfw_c(ccl_cosmology *cosmo, double rv, double c, double k, int *
 INPUT: cosmology, a halo mass [Msun], scale factor, halo definition, concentration model label
 TASK: Computes halo concentration; the ratio of virial raidus to scale radius for an NFW halo.
 */
-double ccl_halo_concentration(ccl_cosmology *cosmo, double halomass, double a, double odelta, ccl_conc_label label, int *status){
+double ccl_halo_concentration(ccl_cosmology *cosmo, double halomass, double a, double odelta, int *status){
 
   double gz, g0, nu, delta_c, a_form;
   double Mpiv, A, B, C;
 
-  switch(label){
+  switch(cosmo->config.halo_concentration_method){
 
     // Bhattacharya et al. (2011; 1005.2239; Delta = 200rho_m; Table 2)
   case ccl_bhattacharya2011:
@@ -118,7 +118,7 @@ static double window_function(ccl_cosmology *cosmo, double m, double k, double a
     rv = r_delta(cosmo, m, a, odelta, status);
 
     // The halo concentration for this halo mass and at this scale factor  
-    c = ccl_halo_concentration(cosmo, m, a, odelta, ccl_duffy2008_virial, status);    
+    c = ccl_halo_concentration(cosmo, m, a, odelta, status);    
 
     // The function U is normalised to 1 for k<<1 so multiplying by M/rho turns units to overdensity
     return m*u_nfw_c(cosmo, rv, c, k, status)/rho_matter;

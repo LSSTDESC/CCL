@@ -6,7 +6,7 @@
 #include <string.h>
 
 // Relative error tolerance in the halomodel matter power spectrum
-#define HALOMOD_TOLERANCE 1e-3
+#define HALOMOD_TOLERANCE 2e-3
 
 // Data structure for the CTEST
 CTEST_DATA(halomod){
@@ -122,10 +122,11 @@ static void compare_halomod(int model, struct halomod_data * data)
 						data->w_a, data->h[model],data->sigma_8[model], data->n_s[model],
 						-1, -1, -1, -1, NULL, NULL, status);
 
-  // Set the default configuration, but with Eisenstein & Hu linear P(k) and Sheth & Tormen mass function
+  // Set the default configuration, but with Eisenstein & Hu linear P(k) and Sheth & Tormen mass function and Duffy (2008) halo concentrations
   ccl_configuration config = default_config;
   config.transfer_function_method = ccl_eisenstein_hu;
   config.mass_function_method = ccl_shethtormen;
+  config.halo_concentration_method = ccl_duffy2008_virial;
 
   // Set the configuration
   ccl_cosmology * cosmo = ccl_cosmology_create(params, config);
