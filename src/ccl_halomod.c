@@ -48,65 +48,6 @@ static double u_nfw_c(ccl_cosmology *cosmo, double c, double halomass, double k,
   }
 }
 
-// Structure to help with calculating Bullock et al. (2001) formation time
-typedef struct{  
-  ccl_cosmology *cosmo;
-  double halomass;
-  int *status;
-} a_form_Bullock_func_Par;
-
-// Function for root solver for scale factor according to Bullock et al. (2001)
-static double a_form_Bullock_func(double a_form, void *params)
-{
-  a_form_Bullock_func_Par *p = (a_form_Bullock_func_Par *)params;;
-  double delta_c = 1.686;
-  return ccl_sigmaM(p->cosmo, p->halomass, a_form, p->status) - delta_c;  
-}
-
-// Function to return the formation scale factor according to Bullock et al. (2001)
-double a_form_Bullock(ccl_cosmology *cosmo, double halomass, double a, int *status)
-{
-  int gslstatus;
-  int iter = 0, max_iter = 100;
-  const gsl_root_fsolver_type *T;
-  gsl_root_fsolver *s;
-
-  double a_form = 0;
-  double a_max = 1.0, a_min = 1./(1.+1000.0);
-  gsl_function F;
-
-  a_form_Bullock_func_Par fpar;
-
-  fpar.cosmo = cosmo;
-  fpar.halomass = halomass;
-  fpar.status = &gslstatus;
-
-  F.function = &a_form_Bullock_func;
-  F.params = &fpar;
-
-  T = gsl_root_fsolver_brent;
-  s = gsl_root_fsolver_alloc (T);
-  gsl_root_fsolver_set (s, &F, a_min, a_max);
-
-  do
-    {
-    iter++;
-    gslstatus = gsl_root_fsolver_iterate (s);
-    a_form = gsl_root_fsolver_root (s);
-    a_min = gsl_root_fsolver_x_lower (s);
-    a_max = gsl_root_fsolver_x_upper (s);
-    gslstatus = gsl_root_test_interval (a_min, a_max, 0., 0.001);
-
-    // testing print statements until it actually works
-    printf("%5d [%.7f, %.7f] %.7f", iter, a_min, a_max, a_form);
-    }
-  while (gslstatus == GSL_CONTINUE && iter < max_iter);
-
-  gsl_root_fsolver_free (s);
-
-  return a_form;    
-}
-
 /*----- ROUTINE: ccl_halo_concentration -----
 INPUT: cosmology, a halo mass [Msun], scale factor, halo definition, concentration model label
 TASK: Computes halo concentration; the ratio of virial raidus to scale radius for an NFW halo.
@@ -117,23 +58,6 @@ double ccl_halo_concentration(ccl_cosmology *cosmo, double halomass, double a, d
   double Mpiv, A, B, C;
 
   switch(label){
-
-    // Bullock et al. (2001; arXiv:astro-ph/9908159; Delta = Virial)
-  case ccl_bullock2001:
-
-    if (odelta != Dv_BryanNorman(cosmo, a, status)) {
-      *status = CCL_ERROR_CONC_DV;
-      strcpy(cosmo->status_message, "ccl_halomod.c: halo_concentration(): Bullock (2001) concentration called with non-virial Delta_v\n");
-      return NAN;
-    }
-
-    A = 4.0;
-    a_form = a_form_Bullock(cosmo, halomass, a, status); 
-    
-    gz = ccl_growth_factor(cosmo,a,status);
-    g0 = ccl_growth_factor(cosmo,1.0,status);
-
-    return A*(a/a_form)*pow(gz/g0,1.5);
 
     // Bhattacharya et al. (2011; 1005.2239; Delta = 200rho_m; Table 2)
   case ccl_bhattacharya2011:

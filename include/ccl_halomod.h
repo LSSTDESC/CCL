@@ -19,7 +19,6 @@ extern "C" {
     ccl_bhattacharya2011 = 1,
     ccl_duffy2008_virial = 2,
     ccl_constant_concentration = 3,
-    ccl_bullock2001 = 4,
   } ccl_conc_label;
 
   // halo window profiles
