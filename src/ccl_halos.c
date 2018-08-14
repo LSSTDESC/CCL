@@ -11,6 +11,9 @@
 #include "ccl_error.h"
 #include "ccl_halomod.h"
 
+
+double r_delta(ccl_cosmology *cosmo, double halomass, double a, double odelta, int *status);
+
 //maths helper function for NFW profile
 static double helper_fx(double x){
     double f;
@@ -82,7 +85,7 @@ double ccl_projected_halo_profile_nfw(ccl_cosmology *cosmo, double c, double hal
         sigma = 2.*rs*rho0;
     }
     else {
-        sigma = 2.*rs*rho0*(1.-2.*atanh(abs((1.-x)/(1.+x)))/sqrt(abs(1.-x*x)));
+        sigma = 2.*rs*rho0*(1.-2.*atanh(fabs((1.-x)/(1.+x)))/sqrt(fabs(1.-x*x)));
     }
     
     return sigma;
@@ -122,7 +125,7 @@ double ccl_halo_profile_einasto(ccl_cosmology *cosmo, double c, double halomass,
     //rho_r: density at r
     double rho_r;
     
-    rho_r = rhos*exp(-2.*(pow(r/rs,alpha)-1.)/alpha)
+    rho_r = rhos*exp(-2.*(pow(r/rs,alpha)-1.)/alpha);
     
     return rho_r;
 

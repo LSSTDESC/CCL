@@ -8,7 +8,7 @@ project(ccl VERSION 0.2.1)
     # Defines list of CCL src files
     set(CCL_SRC src/ccl_background.c src/ccl_core.c src/ccl_error.c src/ccl_lsst_specs.c src/ccl_placeholder.c
                 src/ccl_power.c src/ccl_utils.c src/ccl_cls.c src/ccl_massfunc.c src/ccl_neutrinos.c
-              src/ccl_emu17.c src/ccl_correlation.c src/ccl_halomod.c src/fftlog.c)
+              src/ccl_emu17.c src/ccl_correlation.c src/ccl_halomod.c src/fftlog.c src/ccl_halos.c)
 
     # Defines list of CCL tests src files
     # ! Add new tests to this list
