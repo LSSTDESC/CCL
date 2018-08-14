@@ -226,7 +226,7 @@ static void ccl_run_class(ccl_cosmology *cosmo,
   }
   init_arr[i_init++]=1;
 }
-// MUSIG
+
 static double ccl_get_class_As(ccl_cosmology *cosmo, struct file_content *fc, int position_As,
 			       double sigma8, int * status)
 {

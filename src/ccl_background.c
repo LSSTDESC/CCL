@@ -153,7 +153,7 @@ double ccl_mu_MG(ccl_cosmology * cosmo, double a, int *status)
 {   
 	// This function can be extended to include other 
 	// z-dependences for mu in the future.
-	return cosmo->params.mu_0 * ccl_omega_x(cosmo, a, ccl_species_l_label, status);
+	return cosmo->params.mu_0 * ccl_omega_x(cosmo, a, ccl_species_l_label, status) / cosmo->params.Omega_l;
 }
 
 /* --------- ROUTINE: ccl_Sig_MG ---------
@@ -166,7 +166,7 @@ double ccl_Sig_MG(ccl_cosmology * cosmo, double a, int *status)
 {   
 	// This function can be extended to include other 
 	// z-dependences for Sigma in the future.
-	return cosmo->params.sigma_0 * ccl_omega_x(cosmo, a, ccl_species_l_label, status);
+	return cosmo->params.sigma_0 * ccl_omega_x(cosmo, a, ccl_species_l_label, status) / cosmo->params.Omega_l;
 }
 
 // Structure to hold parameters of chi_integrand
