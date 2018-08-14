@@ -14,16 +14,16 @@ CTEST_DATA(growth) {
   double n_s;
   double Neff;
   double* mnu;
-  double Omega_v[5];
-  double Omega_k[5];
-  double w_0[5];
-  double w_a[5];
+  double Omega_v[9];
+  double Omega_k[9];
+  double w_0[9];
+  double w_a[9];
   ccl_mnu_convention mnu_type;
-  double mu_0;
-  double sigma_0;
+  double mu_0[9];
+  double sigma_0[9];
   
   double z[6];
-  double gf[5][6];
+  double gf[9][6];
 };
 
 // Read the fixed format file containing all the growth factor
@@ -31,6 +31,8 @@ CTEST_DATA(growth) {
 static void read_growth_test_file(double z[6], double gf[5][6])
 {
   //Growth is normalized to ~a at early times
+  
+  // First get orginal benchmark for growth in non-modified-gravity models:
   FILE * f = fopen("./tests/benchmark/growth_model1-5.txt", "r");
   ASSERT_NOT_NULL(f);
   
@@ -47,6 +49,24 @@ static void read_growth_test_file(double z[6], double gf[5][6])
     ASSERT_EQUAL(6, count);
   }
   fclose(f);
+  
+  /*// Now get the growth in the models with non-zero mu_0 and sigma_0
+  FILE * fMG = fopen("./tests/benchmark/growth_model6-9_MG.txt", "r");
+  ASSERT_NOT_NULL(fMG);
+  
+  // Ignore header line
+  char strMG[1024];
+  char* rtnMG;
+  rtnMG = fgets(strMG, 1024, fMG);
+  
+    // File is fixed format - five rows and six columns
+  for (int i=0; i<6; i++) {
+    int count = fscanf(fMG, "%le %le %le %le %le\n", &z[i],
+		       &gf[5][i], &gf[6][i], &gf[7][i], &gf[8][i]);
+    	// Check that all the stuff in the benchmark is there
+    ASSERT_EQUAL(5, count);
+  }
+  fclose(fMG);*/
 }
 
 // Set up the cosmological parameters to be used in each of the
@@ -62,21 +82,23 @@ CTEST_SETUP(growth) {
   double mnuval = 0.;
   data->mnu= &mnuval;
   data-> mnu_type = ccl_mnu_sum;
-  data->mu_0=0.;
-  data->sigma_0=0;
   
   
   // Values that are different for the different models
-  double Omega_v[5] = {  0.7,  0.7,  0.7,  0.65, 0.75 };
-  double w_0[5]     = { -1.0, -0.9, -0.9, -0.9, -0.9  };
-  double w_a[5]     = {  0.0,  0.0,  0.1,  0.1,  0.1  };
+  double Omega_v[9] = {  0.7,  0.7,  0.7,  0.65, 0.75, 0.7, 0.7, 0.7, 0.7 };
+  double w_0[9]     = { -1.0, -0.9, -0.9, -0.9, -0.9, -0.9, -0.9 -0.9, -0.9 };
+  double w_a[9]     = {  0.0,  0.0,  0.1,  0.1,  0.1, 0., 0., 0., 0.  };
+  double mu_0[9]    = {0., 0., 0., 0., 0., 0.1, -0.1, 0.1, -0.1};
+  double sigma_0[9] = {0., 0., 0., 0., 0., 0.1, -0.1, -0.1, 0.1};
   
   // Fill in the values from these constant arrays.
-  for (int i=0; i<5; i++) {
+  for (int i=0; i<9; i++) {
     data->Omega_v[i] = Omega_v[i];
     data->w_0[i]     = w_0[i];
     data->w_a[i]     = w_a[i];
     data->Omega_k[i] = 1.0 - data->Omega_c - data->Omega_b - data->Omega_v[i];
+    data->mu_0[i] = mu_0[i];
+    data->sigma_0[i] = sigma_0[i];
   }
 
   // The file of benchmark data.
@@ -88,8 +110,10 @@ static void compare_growth(int model, struct growth_data * data)
   int status=0; 	
   // Make the parameter set from the input data
   // Values of some parameters depend on the model index
-  ccl_parameters params = ccl_parameters_create(data->Omega_c, data->Omega_b, data->Omega_k[model], data->Neff, data->mnu, data->mnu_type, data->w_0[model], data->w_a[model], data->h, data->A_s, data->n_s,-1,-1,-1,data->mu_0, data->sigma_0,-1,NULL,NULL, &status);
-  params.Omega_g=0;
+  ccl_parameters params = ccl_parameters_create(data->Omega_c, data->Omega_b, data->Omega_k[model], data->Neff, data->mnu, data->mnu_type, data->w_0[model], data->w_a[model], data->h, data->A_s, data->n_s,-1,-1,-1,data->mu_0[model], data->sigma_0[model],-1,NULL,NULL, &status);
+  if (model<=4){   // Don't know yet whether this will be true for MG benchmarks.
+     params.Omega_g=0;
+  }
   // Make a cosmology object from the parameters with the default configuration
   ccl_cosmology * cosmo = ccl_cosmology_create(params, default_config);
   ASSERT_NOT_NULL(cosmo);
@@ -174,6 +198,30 @@ CTEST2(growth, model_5) {
   int model = 4;
   compare_growth(model, data);
 }
+
+/*CTEST2(growth, model_6) {
+  int model = 5;
+  compare_growth(model, data);
+}
+
+
+CTEST2(growth, model_7) {
+  int model = 6;
+  compare_growth(model, data);
+}
+
+
+CTEST2(growth, model_8) {
+  int model = 7;
+  compare_growth(model, data);
+}
+
+
+CTEST2(growth, model_9) {
+  int model = 8;
+  compare_growth(model, data);
+}*/
+
 
 CTEST2(growth,mgrowth) {
   check_mgrowth();
