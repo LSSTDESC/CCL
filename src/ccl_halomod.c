@@ -15,11 +15,10 @@
 
 // Analytic FT of NFW profile, from Cooray & Sheth (2002; Section 3 of https://arxiv.org/abs/astro-ph/0206508)
 // Normalised such that U(k=0)=1
-static double u_nfw_c(ccl_cosmology *cosmo, double c, double halomass, double k, double a, int *status){
+static double u_nfw_c(ccl_cosmology *cosmo, double rv, double c, double k, int *status){
    
-  double rv, rs, ks, Dv;
+  double rs, ks;
   double f1, f2, f3, fc;
-  double Delta_v = Dv_BryanNorman(cosmo, a, status); // Virial density of haloes
 
   // Special case to prevent numerical problems if k=0,
   // the result should be unity here because of the normalisation
@@ -31,7 +30,6 @@ static double u_nfw_c(ccl_cosmology *cosmo, double c, double halomass, double k,
   else{
     
     // Scale radius for NFW (rs=rv/c)
-    rv = r_delta(cosmo, halomass, a, Delta_v, status);
     rs = rv/c;
 
     // Dimensionless wave-number variable
@@ -107,7 +105,7 @@ double ccl_halo_concentration(ccl_cosmology *cosmo, double halomass, double a, d
 // Fourier Transforms of halo profiles
 static double window_function(ccl_cosmology *cosmo, double m, double k, double a, double odelta, ccl_win_label label, int *status){
 
-  double rho_matter, c;
+  double rho_matter, c, rv;
   
   switch(label){
 
@@ -116,11 +114,14 @@ static double window_function(ccl_cosmology *cosmo, double m, double k, double a
     // The mean background matter density in Msun/Mpc^3
     rho_matter = ccl_rho_x(cosmo, 1., ccl_species_m_label, 1, status);
 
-    // The halo concentration for this mass and scale factor  
+    // The halo virial radius
+    rv = r_delta(cosmo, m, a, odelta, status);
+
+    // The halo concentration for this halo mass and at this scale factor  
     c = ccl_halo_concentration(cosmo, m, a, odelta, ccl_duffy2008_virial, status);    
 
-    // The function U is normalised so multiplying by M/rho turns units to overdensity
-    return m*u_nfw_c(cosmo, c, m, k, a, status)/rho_matter;
+    // The function U is normalised to 1 for k<<1 so multiplying by M/rho turns units to overdensity
+    return m*u_nfw_c(cosmo, rv, c, k, status)/rho_matter;
 
     // Something went wrong
   default:
@@ -145,13 +146,13 @@ static double one_halo_integrand(double log10mass, void *params){
   
   Int_one_halo_Par *p = (Int_one_halo_Par *)params;;
   double halomass = pow(10,log10mass);
-  double Delta_v = Dv_BryanNorman(p->cosmo, p->a, p->status); // Virial density of haloes
+  double odelta = Dv_BryanNorman(p->cosmo, p->a, p->status); // Virial density for haloes
 
-  // The squared normalised Fourier Transform of a halo profile (W(k->0 = 1)
-  double wk = window_function(p->cosmo,halomass, p->k, p->a, Delta_v, ccl_nfw, p->status);
+  // The normalised Fourier Transform of a halo density profile
+  double wk = window_function(p->cosmo,halomass, p->k, p->a, odelta, ccl_nfw, p->status);
 
   // Fairly sure that there should be no ln(10) factor should be here since the integration is being specified in log10 range
-  double dn_dlogM = ccl_massfunc(p->cosmo, halomass, p->a, Delta_v, p->status);
+  double dn_dlogM = ccl_massfunc(p->cosmo, halomass, p->a, odelta, p->status);
     
   return dn_dlogM*pow(wk,2);
 }
@@ -203,18 +204,18 @@ typedef struct{
 // Integrand for the two-halo integral
 static double two_halo_integrand(double log10mass, void *params){  
   
-  Int_two_halo_Par *p=(Int_two_halo_Par *)params;
+  Int_two_halo_Par *p = (Int_two_halo_Par *)params;
   double halomass = pow(10,log10mass);
-  double Delta_v = Dv_BryanNorman(p->cosmo, p->a, p->status);
+  double odelta = Dv_BryanNorman(p->cosmo, p->a, p->status); // Virial density for haloes
 
-  // The window function appropriate for the matter power spectrum
-  double wk = window_function(p->cosmo,halomass, p->k, p->a, Delta_v, ccl_nfw, p->status);
+  // The normalised Fourier Transform of a halo density profile
+  double wk = window_function(p->cosmo,halomass, p->k, p->a, odelta, ccl_nfw, p->status);
 
   // Fairly sure that there should be no ln(10) factor should be here since the integration is being specified in log10 range
-  double dn_dlogM = ccl_massfunc(p->cosmo, halomass, p->a, Delta_v, p->status);
+  double dn_dlogM = ccl_massfunc(p->cosmo, halomass, p->a, odelta, p->status);
 
   // Halo bias
-  double b = ccl_halo_bias(p->cosmo, halomass, p->a, Delta_v, p->status);
+  double b = ccl_halo_bias(p->cosmo, halomass, p->a, odelta, p->status);
     
   return b*dn_dlogM*wk;
 }
@@ -268,12 +269,12 @@ double ccl_twohalo_matter_power(ccl_cosmology *cosmo, double k, double a, int *s
   // The addative correction is the missing part of the integral below the lower-mass limit
   double A = 1.-two_halo_integral(cosmo, 0., a, status);
 
-  // Virial overdensity
-  double Delta_v = Dv_BryanNorman(cosmo, a, status);
+  // Virial overdensity for haloes
+  double odelta = Dv_BryanNorman(cosmo, a, status);
 
   // ...multiplied by the ratio of window functions
-  double W1 = window_function(cosmo, HM_MMIN, k,  a, Delta_v, ccl_nfw, status);
-  double W2 = window_function(cosmo, HM_MMIN, 0., a, Delta_v, ccl_nfw, status);
+  double W1 = window_function(cosmo, HM_MMIN, k,  a, odelta, ccl_nfw, status);
+  double W2 = window_function(cosmo, HM_MMIN, 0., a, odelta, ccl_nfw, status);
   A = A*W1/W2;    
 
   // Add the additive correction to the calculated integral
@@ -287,15 +288,19 @@ double ccl_twohalo_matter_power(ccl_cosmology *cosmo, double k, double a, int *s
 INPUT: cosmology, wavenumber [Mpc^-1], scale factor
 TASK: Computes the one-halo power spectrum term in the halo model assuming NFW haloes
 */
-double ccl_onehalo_matter_power(ccl_cosmology *cosmo, double k, double a, int *status){  
+double ccl_onehalo_matter_power(ccl_cosmology *cosmo, double k, double a, int *status){
+  
   return one_halo_integral(cosmo, k, a, status);
+  
 }
 
 /*----- ROUTINE: ccl_onehalo_matter_power -----
 INPUT: cosmology, wavenumber [Mpc^-1], scale factor
 TASK: Computes the halo model power spectrum by summing the two- and one-halo terms
 */
-double ccl_halomodel_matter_power(ccl_cosmology *cosmo, double k, double a, int *status){  
+double ccl_halomodel_matter_power(ccl_cosmology *cosmo, double k, double a, int *status){
+
   // Standard sum of two- and one-halo terms
-  return ccl_twohalo_matter_power(cosmo, k, a, status)+ccl_onehalo_matter_power(cosmo, k, a, status);   
+  return ccl_twohalo_matter_power(cosmo, k, a, status)+ccl_onehalo_matter_power(cosmo, k, a, status);
+  
 }
