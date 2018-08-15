@@ -5,7 +5,19 @@ Summary: added halo model matter power spectrum calculation and halo mass-concen
 ## C library
 In ccl_halomod.c:
 
+Added this source file. Contains functions to compute halo-model matter power spectra and also mass-concentration relations.
+
+In ccl_power.c
+
+Added sigmaV, changed sigma(R) -> sigma(R,a)
+
+In ccl_massfunc.c
+
+Added Sheth & Tormen (1999) mass function.
+
 ## Python library
+
+sigmaR(R) defaults to sigmaR(R,a=1) unless a is specified. sigmaV(R) is also added. New functions ccl.halomodel_matter_power and ccl.halo_concentration.
 
 # v 0.3 API changes:
 
