@@ -555,7 +555,7 @@ W_i(M,k)=\int_0^\infty4\pi r^2\frac{\sin(kr)}{kr}\rho_{\mathrm{H},i}(M,r)\;\math
 \end{equation}
 where $\rho_{\mathrm{H},i}(M,r)$ is the radial profile for the field $i$ in a host halo of mass $M$. For example, if one is interested in calculating the matter power spectrum then $\rho_{\mathrm{H},i}(M,r)$ would be the density \emph{contrast} profile of a halo of mass $M$.
 
-By default, in the halo-model calculation in \ccl we use the mass function and bias from \cite{Sheth1999}. Note that the halo mass function and bias \emph{must} satisfy the following properties for the total power spectrum to have the correct large-scale limit, which is that the power should revert to the linear power spectrum\footnote{Achieving the correct limits is difficult numerically because of the large amount of mass contained in low-mass halos according to most popular mass functions.}:
+By default, in the halo-model calculation in \ccl we use the mass function and bias from \cite{Sheth1999}. Note that the halo mass function and bias \emph{must} satisfy the following properties for the total power spectrum to have the correct large-scale limit, which is that the power should revert to the linear power spectrum
 \begin{equation}
 \frac{1}{\bar\rho_\mathrm{m}}\int_0^\infty M\frac{\mathrm{d}n}{\mathrm{d}M}\;\mathrm{d}M=1\ ,
 \label{eq:mf_normalisation}
@@ -578,18 +578,6 @@ M=4\pi r_\mathrm{v}^3\Delta_\mathrm{v}\bar\rho_\mathrm{m}\ .
 \label{eq:virial_radius}
 \end{equation}
 Finally, the scale radius is usually expressed in terms of the mass-dependent halo concentration parameter $c(M)=r_\mathrm{v}/r_\mathrm{s}$.
-
-We work in Fourier Space, so we actually use the analytical expression for the spherical Fourier transform (equation~\ref{eq:window_function}) of equation~(\ref{eq:NFW_profile}):
-\begin{equation}
-\begin{split}
-W_\delta(M,k) = &\, 4\pi r_\mathrm{s}^3 \times \\%\left\{ \\
-& \left\{\sin(kr_\mathrm{s})\left[\mathrm{Si}([1+c]kr_\mathrm{s})-\mathrm{Si}(kr_\mathrm{s})\right]\right. \\
-+ & \cos(kr_\mathrm{s})\left[\mathrm{Ci}([1+c]kr_\mathrm{s})-\mathrm{Ci}(kr_\mathrm{s})\right] \\
-- & \left.\frac{\sin(kr_\mathrm{v})}{(1+c)kr_\mathrm{s}}\right\}\ ,
-\label{eq:NFW_Fourier}
-\end{split}
-\end{equation}
-where $\mathrm{Si}(x)$ and $\mathrm{Ci}(x)$ are the sine and cosine integral functions.
 
 We use the mass-concentration relation from \cite{Duffy2008} appropriate for the full sample of halos defined using a virial $\Delta_\mathrm{v}$ criterion
 \begin{equation}
@@ -734,7 +722,17 @@ The computation of the halo mass function requires obtaining the derivative of $
 
 In order to accommodate a wide range of values of the overdensity parameter $\Delta$, we have generated a spline interpolation between best fit values as defined by \citet{Tinker2008} and \citet{Tinker2010}. This covers a dynamic range from $\Delta=200$ to $3200$, with respect to the mean density. Within this range, we interpolate in the space of the fit parameter and $\log\Delta$ using Akima interpolation built from piecewise third order polynomials. We have chosen this rather than the fitting formulas utilized in \citet{Tinker2010} in order to assure high precision match to the Tinker halo mass function when choosing a value of $\Delta$ directly from the paper. 
 
-Calculations required to make predictions for halo bias are analytical and are thus implemented in \ccl. In the case of the halo model, this phenomenological approach to modeling the matter power spectrum requires us to perform the integrations in Eqs. (\ref{eq:one_halo},\ref{eq:two_halo} and \ref{eq:window_function}) via...\todo{Alex: please describe any halo model integration or splining. I'm referring to Eqs. 58 and 59 in particular}
+Calculations required to make predictions for halo bias are analytical and are thus implemented in \ccl. In the case of the halo model, this phenomenological approach to modeling the matter power spectrum requires us to perform the integrations in Eqs. (\ref{eq:two_halo}), (\ref{eq:one_halo}) and (\ref{eq:window_function}). For both equation~(\ref{eq:two_halo}) and equation~(\ref{eq:one_halo}) we use {\tt GSL$\_$INTEG$\_$GAUSS41} to perform the integration between the limits of $10^{7}$ and $10^{17}$ Solar masses with a relative error tolerance of $10^{-4}$. Achieving the correct $k\to0$ limit for the two-halo term, which should be exactly the linear power spectrum, is difficult numerically because of the large amount of mass contained in low-mass halos according to most popular mass functions. We deal with this for an arbitrary lower mass limit by enforcing equation~(\ref{eq:mf_normalisation}) by adding the mass missing from the integral as a delta function in mass at the lower limit in the two-halo integral in equation~(\ref{eq:two_halo}). For NFW haloes (equation~\ref{eq:NFW_profile}) the integral in equation~(\ref{eq:window_function}) is analyical:
+\begin{equation}
+\begin{split}
+W_\delta(M,k) = &\, 4\pi r_\mathrm{s}^3 \times \\
+& \left\{\sin(kr_\mathrm{s})\left[\mathrm{Si}([1+c]kr_\mathrm{s})-\mathrm{Si}(kr_\mathrm{s})\right]\right. \\
++ & \cos(kr_\mathrm{s})\left[\mathrm{Ci}([1+c]kr_\mathrm{s})-\mathrm{Ci}(kr_\mathrm{s})\right] \\
+- & \left.\frac{\sin(kr_\mathrm{v})}{(1+c)kr_\mathrm{s}}\right\}\ ,
+\label{eq:NFW_Fourier}
+\end{split}
+\end{equation}
+where $\mathrm{Si}(x)$ and $\mathrm{Ci}(x)$ are the sine and cosine integral functions.
 
 %-------------------------------------------------------------------------------
 \subsection{Massive neutrinos}
