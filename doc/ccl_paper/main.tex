@@ -73,7 +73,7 @@ Faced with these challenges, the Dark Energy Science Collaboration (DESC), one o
 
 \ccl 's overall structure is illustrated in Figure \ref{fig:CCL_structure}. Our implementation has support for spatially flat and curved $\Lambda$-Cold Dark Matter ($\Lambda$CDM) cosmologies, and $w$CDM cosmologies with the option of using a time-dependent equation of state. It also allows for cosmologies with multiple massive neutrino species and can be linked to external software for modified gravity predictions \citep[\hiclass,][]{Zumalacarregui17}. While \ccl was built with LSST in mind, the goal was to produce a publicly available, user-friendly, well-documented, adaptable software that can be used in any theoretical modeling work in cosmology. This manuscript describes version {\tt 0.99} of the library.
 
-The validation procedure to assess the {\it numerical} accuracy of each \ccl feature is key in this work. We compare the \ccl evaluation of each observable or function to an independent implementation from a stand-alone software scripts or package. We set an initial target tolerance for the fractional or absolute difference between outputs that surpasses our expected needs for accurate cosmological constraints. Ultimately, the numerical uncertainties in the different \ccl functions propagate to our predictions for correlation functions, which we expect to be the basis of the core cosmology analysis with LSST (similarly to current DES and KiDS efforts). Hence, our overall goal in this work is to demonstrate that correlation functions obtained by \ccl are accurate to within a fraction of the expected observational uncertainties for the models and in the range of scales of interest to LSST.
+The validation procedure to assess the {\it numerical} accuracy of each \ccl feature is key in this work. We compare the \ccl evaluation of each observable or function to an independent implementation from a stand-alone software package. We set an initial target tolerance for the fractional or absolute difference between outputs that surpasses our expected needs for accurate cosmological constraints. Ultimately, the numerical uncertainties in the different \ccl functions propagate to our predictions for correlation functions, which we expect to be the basis of the core cosmology analysis with LSST (similarly to current DES and KiDS efforts). Hence, our overall goal in this work is to demonstrate that correlation functions obtained by \ccl are accurate to within a fraction of the expected observational uncertainties for the models and in the range of scales of interest to LSST.
 
 %------------------------
 \begin{figure*}
@@ -258,16 +258,20 @@ Three effective parameters govern the contribution of baryonic processes to modi
 
 A given model for the matter power spectrum is one of the necessary components to produce theoretical expectations for the two-point correlators of pairs of quantities (fields) that trace the matter field in the Universe. In this section, we will define these fields on the sky, such as galaxy positions or galaxy shapes. They fields can be classified in terms of their spin $s$ under rotations on the plane tangent to the sphere. In general a spin-$s$ field is defined by two real-valued functions of the spherical coordinates $a_1(\nv)$ and $a_2(\nv)$ (e.g. $\gamma_1$ and $\gamma_2$ for weak lensing or the Stokes parameters $Q$ and $U$ in the case of polarized intensity), from which one can form the complex field $a=a_1+ia_2$.
 
-Spin-$s$ quantities can be decomposed into their harmonic coefficients $\,_sa_{\ell m}$ through a spherical harmonic transform:
+Spin-$s$ quantities can be decomposed into their harmonic coefficients $\,_sa_{\ell m}$ through a spherical harmonic transform \cite{1997PhRvD..55.1830Z,2011A&A...526A.108R}:
 \begin{equation}\nonumber
   \,_sa_{\ell m}=\int d\nv\,a(\nv)\,_sY^*_{\ell m}(\nv),\hspace{12pt}
-  a(\nv)=\sum_{\ell m}\,_sa_{\ell m}\,Y_{\ell m}(\nv)
+  a(\nv)=\sum_{\ell m}\,_sa_{\ell m}\,_sY_{\ell m}(\nv)
 \end{equation}
 where $_sY_{\ell m}$ are the spin-weighed spherical harmonics. The harmonic coefficients can then be associated with parity-even and parity-odd components ($E$-modes and $B$-modes respectively) as\footnote{We note that for spin-$0$ quantities the minus sign preceding these equations is usually omitted, and we do so in what follows. Also, all scalar fields discussed here are real-valued, and therefore have zero $B$-modes.}
 \begin{align}\nonumber
    E_{\ell m}&=-\frac{1}{2}\left[\,_{s}a_{\ell m}+(-1)^s\,_{-s}a_{\ell m}\right]\\
-  iB_{\ell m}&=-\frac{1}{2}\left[\,_{s}a_{\ell m}-(-1)^s\,_{-s}a_{\ell m}\right]
+  iB_{\ell m}&=-\frac{1}{2}\left[\,_{s}a_{\ell m}-(-1)^s\,_{-s}a_{\ell m}\right],
 \end{align}
+where $_{-s}a_{\ell m}$ is defined as
+\begin{equation}\nonumber
+  \,_{-s}a_{\ell m}=\int d\nv\,a^*(\nv)\,_{-s}Y^*_{\ell m}(\nv).
+\end{equation}
 
 In what follows we will focus on scalar ($s=0$) quantities such as the overdensity of source number counts or the lensing convergence, and on spin-2 fields such as the lensing shear. We will also distinguish between {\sl tracers} (fields observed on the sky, such as number counts in a redshift bin, shear, or CMB temperature fluctuations) and {\sl contributions} to the total observed fluctuations of these tracers (such as the biased matter density term in number counts, redshift-space distortions, magnification, etc.).
 
@@ -676,7 +680,7 @@ where
  \frac{1+z_\ell}{\chi_\ell}W^{\rm L}(z_\ell)\\
  &\tilde{\Delta}_\ell^{\rm IA}(k)=\sqrt{\frac{(\ell+2)!}{(\ell-2)!}}\frac{p_z(z_\ell)\,b_{\rm IA}(z_\ell)f_{\rm red}(z_\ell)H(z_\ell)}{(\ell+1/2)^2}.
 \end{align}
-The Limber approximation works best for wide radial kernels and high $\ell$. \elisa{Integration limits in Eq. (\label{eq:limber}) need to be specified to their actual numerical values in \ccl.}
+The Limber approximation works best for wide radial kernels and high $\ell$. The integration in Eq. (\ref{eq:limber}) is performed via \elisa{This needs an explanation o how the Cls are splined and then integrated. We need to explain splining notes and integration limits, and any integration that occurs within the kernels.}
 
 \subsubsection{Beyond Limber: \texttt{Angpow}}
 \label{sec:angpow}
@@ -772,7 +776,7 @@ There are two cases where \ccl is calling external codes to perform the computat
 
 \input{tests}
 
-Table \ref{tab:tests} summarises all the \ccl validation tests discussed in this section. All plots presented in this section can be reproduced by means of a {\tt python} notebook available with the code. Accuracy checks can also be run automatically upon installation of the software.
+Table \ref{tab:tests} summarises all the \ccl validation tests discussed in this section. All plots presented in this section can be reproduced by means of a {\tt python} notebook available with the code. Accuracy checks can also be run automatically upon installation of the software. All the independent scripts used to generate the predictions used to validate \ccl are released together with the \ccl code\footnote{A list of the scripts available can be found in the \ccl wiki: \url{https://github.com/LSSTDESC/CCL/wiki/Benchmarks}}. 
 
 \subsection{Background quantities \& growth of perturbations}
 
@@ -831,7 +835,7 @@ The accuracy of this approximation is shown in Figure \ref{fig:NLextrapol} for r
 
 With the implementation described above, the power spectrum splines are initialized up to {\tt K$\_$MAX$\_$SPLINE}. This is also true for the linear matter power spectrum, which is used within \ccl in particular to obtain $\sigma_8$ (see Eq. \ref{eq:sigR}). We have tested how this procedure affects the convergence of the linear matter power spectrum. We compare the fiducial \ccl output to the case where we set {\tt K$\_$MAX$\_$SPLINE}~$=5\times 10^3\,\text{Mpc}^{-1}$. The result is shown in Figure \ref{fig:NLextrapol}. For some applications that use the linear power spectrum, the user might need to increase the value of {\tt K$\_$MAX$\_$SPLINE}. While \ccl adopts certain fiducial values of the number of scale factor and wavenumber values to use in the interpolation, we have tested that increasing the sampling does not change the results presented in Figure \ref{fig:NLextrapol}. 
 
-In addition to the above tests in $\Lambda$CDM cosmologies without massive neutrinos, we have checked the impact of using splines (at intermediate $k$) and extrapolation (at low and high $k$) in cosmologies CCL7, CCL8, and CCL9 with massive neutrinos, defined in Table \ref{tab:cosmologies_nu}. We compare the linear and non-linear matter power spectrum as computed directly via \class to that computed using \class via \ccl . We find that for $k$  between {\tt K$\_$MIN} and {\tt K$\_$MIN$\_$SPLINE}, the two power spectra agree to better than $10^{-4}$ in all models. For $k$ between {\tt K$\_$MAX$\_$SPLINE} and {\tt K$\_$MAX}, agreement is better than $10^{-3}$, which we deem sufficient given the significant physical uncertainties introduced at these small scales by effects such as galaxy formation \citep{vanDaalen11}. The fractional difference between the two non-linear power spectra is plotted in Figure \ref{fig:power_nu}. 
+In addition to the above tests in $\Lambda$CDM cosmologies without massive neutrinos, we have checked the impact of using splines (at intermediate $k$) and extrapolation (at low and high $k$) in cosmologies CCL7, CCL8, and CCL9 with massive neutrinos, defined in Table \ref{tab:cosmologies_nu}. We compare the linear and non-linear matter power spectrum as computed directly via \class to that computed using \class via \ccl . We find that for $k$  between {\tt K$\_$MIN} and {\tt K$\_$MIN$\_$SPLINE}, the two power spectra agree to better than $10^{-4}$ in all models. For $k$ between {\tt K$\_$MAX$\_$SPLINE} and {\tt K$\_$MAX}, agreement is better than $10^{-3}$, which is sufficient given the significant physical uncertainties introduced at these small scales by effects such as galaxy formation \citep{vanDaalen11}. The fractional difference between the two non-linear power spectra is plotted in Figure \ref{fig:power_nu}. 
 
 \begin{figure}
 \centering
