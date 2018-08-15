@@ -448,7 +448,6 @@ This is commonly related in terms of the mass inside of the Lagrangian scale of 
 R = (3M/4\pi{\bar\rho_{\mathrm{m}}})^{1/3}.
 \label{eq:lagrangemass}
 \end{equation}
-\elisa{Can we unify notation with the section on the halo model. For example, with Eq. (\ref{eq:virial_radius})?}\asv{I recall we already unified this section to match others, so we should unify the halo model section to match this.}
 As a consequence, one can also define $\sigma_M$ as the RMS variance of the density field smoothed on some scale $M$, analogously to Eq. (\ref{eq:sigR}).
 
 One commonly used halo mass function definition within the literature is the \citet{Tinker2010} fitting function. This fitting function has been developed using collisionless $N$-body simulation data, using halos identified by spherical overdensities. This is an extension of the \citet{Tinker2008} halo mass function, which is also included within \ccl as a comparative option. This fitting function assumes little change with respect to cosmological parameters. Further, it includes a redshift scaling which is assumed to sharply end at a redshift of $z = 3$. This halo mass function is calibrated within the range of $10^{10.5} h\,\mathrm{M}_\odot \leq M \leq 10^{15.5} h\,\mathrm{M}_\odot$ at a redshift of $z = 0$.
@@ -484,15 +483,14 @@ with $p=0.3$, $q=0.707$ and $A\simeq 0.21616$, where $A$ is fixed such that the 
 
 This mass function was fitted to halos measured in $N$-body simulations where halos were identified with a cosmology-dependent overdensity criterion from the spherical-collapse model ($\Delta_\mathrm{v}\sim 300$ for $\Omega_\mathrm{m}\sim 0.3$ $\Lambda$CDM; $\Delta_\mathrm{v}\sim 178$ for $\Omega_\mathrm{m}\sim 1$). For the cosmology dependence, we use the fitting-formula of \cite{Bryan1998}
 \begin{equation}
-\Delta_\mathrm{v}(z)=\frac{1}{\Omega_\mathrm{m}(z)}\left\{18\pi^2-82[1-\Omega_\mathrm{m}(z)]-39[1-\Omega_\mathrm{m}(z)]^2\right\}\ .
+\Delta_\mathrm{v}(z)=\frac{1}{\Omega_\mathrm{m}(z)}\left(18\pi^2-82x-39x^2\right)\ ,
 \label{eq:Deltav_Bryan}
 \end{equation}
-In addition, in \cite{Sheth1999} the relation between $M$ and $nu$ was taken to include the cosmology-dependence of $\delta_\mathrm{c}(z)$, which derives from the spherical-collapse model. For this we use the fitting formula of \cite{Nakamura1997}:
+where $x=1-\Omega_\mathrm{m}(z)$. In addition, in \cite{Sheth1999} the relation between $M$ and $nu$ was taken to include the cosmology-dependence of $\delta_\mathrm{c}(z)$, which derives from the spherical-collapse model. For this we use the fitting formula of \cite{Nakamura1997}:
 \begin{equation}
 \delta_\mathrm{c}(z)=\frac{3(12\pi)^{2/3}}{20}\left\{1+0.012299\log_{10}[\Omega_\mathrm{m}(z)]\right\}\ .
 \label{eq:deltac_Nakamura}
 \end{equation}
-
 
 \subsection{Halo bias}
 
@@ -577,13 +575,13 @@ M=4\pi r_\mathrm{v}^3\Delta_\mathrm{v}\bar\rho_\mathrm{m}\ .
 \end{equation}
 Finally, the scale radius is usually expressed in terms of the mass-dependent halo concentration parameter $c(M)=r_\mathrm{v}/r_\mathrm{s}$.
 
-We work in Fourier Space, so we actually use the analytical expression for the spherical Fourier transform of equation~(\ref{eq:NFW_profile}):
+We work in Fourier Space, so we actually use the analytical expression for the spherical Fourier transform (equation~\ref{eq:window_function}) of equation~(\ref{eq:NFW_profile}):
 \begin{equation}
 \begin{split}
-W_\delta(M,k) = &\, 4\pi r_\mathrm{s}^3 \\%\left\{ \\
-& \sin(Kr_\mathrm{s})\left[\mathrm{Si}([1+c]kr_\mathrm{s})-\mathrm{Si}(kr_\mathrm{s})\right] \\
+W_\delta(M,k) = &\, 4\pi r_\mathrm{s}^3 \times \\%\left\{ \\
+& \left\{\sin(kr_\mathrm{s})\left[\mathrm{Si}([1+c]kr_\mathrm{s})-\mathrm{Si}(kr_\mathrm{s})\right]\right. \\
 + & \cos(kr_\mathrm{s})\left[\mathrm{Ci}([1+c]kr_\mathrm{s})-\mathrm{Ci}(kr_\mathrm{s})\right] \\
-- & \frac{\sin(kr_\mathrm{v})}{(1+c)kr_\mathrm{s}}\ ,%\right\}\ ,
+- & \left.\frac{\sin(kr_\mathrm{v})}{(1+c)kr_\mathrm{s}}\right\}\ ,
 \label{eq:NFW_Fourier}
 \end{split}
 \end{equation}
@@ -932,7 +930,7 @@ We note that while we maintain the $10^{-4}$ for our evaluations of $\sigma$, th
 \subsection{Halo model}
 \label{sec:halo_model_verification}
 
-In Figure~\ref{fig:halo_model} we show the power spectrum computed by the \ccl halo model compared to that from \halofit and to the linear matter spectrum. \elisa{Needs more details: what cosmology was used, the accuracy achieved, definition of $\mathcal{A}$ as in sections above, etc.}
+In Figure~\ref{fig:halo_model} we show the power spectrum computed by the \ccl halo model compared to that from \halofit and to the linear matter spectrum for the CCL1 cosmology from Table~\ref{tab:cosmologies} at $z=0$. The halo model predictions show the correct general trend for the non-linear power spectrum but differ in details. Compared to simulations they are only accurate at the $\sim 30\%$ level.
 
 \begin{figure}
 \includegraphics[width=0.49\textwidth]{halo_model.png}
@@ -940,13 +938,14 @@ In Figure~\ref{fig:halo_model} we show the power spectrum computed by the \ccl h
 \label{fig:halo_model}
 \end{figure}
 
+%\elisa{Benchmark code needs to go into the repo. Also benchmark plot needs to go into the jupyter notebook.}
+In Figure~\ref{fig:halo_model_benchmark} we show the accuracy of the halo-model power spectrum compared to our benchmark. We define an accuracy criterion $\mathcal{A}$ as the ratio of power from \ccl compared to that from the benchmark code. With this defintion, we achieve an accuracy of $10^{-3}$ across scales from $10^{-4}h\,\mathrm{Mpc}^{-1}<k<10^2h\,\mathrm{Mpc}^{-1}$ for three different cosmological models (CCL1, WMAP, Planck) at both $z=0$ and $z=1$.
+
 \begin{figure}
 \includegraphics[width=0.49\textwidth]{halo_model_benchmark}
-\caption{\todo{PLACEHOLDER FOR HALO MODEL BENCHMARK CAPTION.}}
+\caption{Accuracy of the halo-model power spectrum calculation compared to our benchmarks. We achieve a precision of $10^{-3}$ for the range of scales shown. Solid lines show $z=0$ while dashed lines show $z=1$. Different colors show different cosmological models.}
 \label{fig:halo_model_benchmark}
 \end{figure}
-
-\elisa{A validation section and plot is in place but it needs a short description of results. Also, the relevant entry in Table 2 needs to be edited and benchmark code needs to go into the repo. Also benchmark plot needs to go into the jupyter notebook.}
 
 \subsection{Two-point statistics}
 
