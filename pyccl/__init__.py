@@ -48,7 +48,7 @@ from pyccl.constants import CLIGHT_HMPC, MPC_TO_METER, PC_TO_METER, \
 from pyccl.correlation import correlation, correlation_3d
 
 # Properties of haloes
-from pyccl.halomodel import halomodel_matter_power
+from pyccl.halomodel import halomodel_matter_power, halo_concentration
 
 # Specific to massive neutrinos
 from pyccl.neutrinos import Omeganuh2, nu_masses

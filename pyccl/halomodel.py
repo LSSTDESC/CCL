@@ -14,7 +14,7 @@ def halo_concentration(cosmo, halo_mass, a, odelta=200):
         float or array_like: Dimensionless halo concentration, ratio rv/rs
 
     """
-    return _vectorize_fn4(lib.halo_concentration, 
+    return _vectorize_fn4(lib.halo_concentration,
                           lib.halo_concentration_vec, cosmo, halo_mass, a, odelta)
 
 def onehalo_matter_power(cosmo, k, a):
