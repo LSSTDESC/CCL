@@ -421,6 +421,7 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int * statu
     return;
   }
 
+  //These are the limits of the splining range
   cosmo->data.k_min_lin=2*exp(sp.ln_k[0]);
   cosmo->data.k_max_lin=ccl_splines->K_MAX_SPLINE;
 
@@ -493,6 +494,7 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int * statu
       strcpy(cosmo->status_message ,"ccl_power.c: ccl_cosmology_compute_power_class(): K_MIN is less than CLASS's kmin. Not yet supported for nonlinear P(k).\n");
     }
 
+    //These are the limits of the splining range
     cosmo->data.k_min_nl=2*exp(sp.ln_k[0]);
     cosmo->data.k_max_nl=ccl_splines->K_MAX_SPLINE;
 
@@ -802,6 +804,7 @@ static double eh_power(ccl_parameters *params,eh_struct *eh,double k,int wiggled
 
 static void ccl_cosmology_compute_power_eh(ccl_cosmology * cosmo, int * status)
 {
+  //These are the limits of the splining range
   cosmo->data.k_min_lin = ccl_splines->K_MIN;
   cosmo->data.k_min_nl = ccl_splines->K_MIN;
   cosmo->data.k_max_lin = ccl_splines->K_MAX;
@@ -979,6 +982,7 @@ TASK: provide spline for the BBKS power spectrum with baryonic correction
 
 static void ccl_cosmology_compute_power_bbks(ccl_cosmology * cosmo, int * status)
 {
+  //These are the limits of the splining range
   cosmo->data.k_min_lin=ccl_splines->K_MIN;
   cosmo->data.k_min_nl=ccl_splines->K_MIN;
   cosmo->data.k_max_lin=ccl_splines->K_MAX;
@@ -1222,9 +1226,10 @@ static void ccl_cosmology_compute_power_emu(ccl_cosmology * cosmo, int * status)
     return;
   }
 
+  //These are the limits of the splining range
   cosmo->data.k_min_lin=2*exp(sp.ln_k[0]); 
   cosmo->data.k_max_lin=ccl_splines->K_MAX_SPLINE;
-//CLASS calculations done - now allocate CCL splines
+  //CLASS calculations done - now allocate CCL splines
   double kmin = cosmo->data.k_min_lin;
   double kmax = ccl_splines->K_MAX_SPLINE;
   //Compute nk from number of decades and N_K = # k per decade
@@ -1286,6 +1291,7 @@ static void ccl_cosmology_compute_power_emu(ccl_cosmology * cosmo, int * status)
   }
 
   //Now start the NL computation with the emulator
+  //These are the limits of the splining range
   cosmo->data.k_min_nl=K_MIN_EMU;
   cosmo->data.k_max_nl=K_MAX_EMU;
   amin = A_MIN_EMU; //limit of the emulator
@@ -1394,7 +1400,7 @@ INPUT: ccl_cosmology * cosmo, a, k [1/Mpc]
 TASK: extrapolate power spectrum at high k
 */
 static double ccl_power_extrapol_highk(ccl_cosmology * cosmo, double k, double a, 
-				       gsl_spline2d * powerspl, double kmax, int * status)
+				       gsl_spline2d * powerspl, double kmax_spline, int * status)
 {
   double log_p_1;
   double deltak=1e-2; //step for numerical derivative;
@@ -1402,7 +1408,7 @@ static double ccl_power_extrapol_highk(ccl_cosmology * cosmo, double k, double a
   double lkmid;
   double lpk_kmid;
   
-  lkmid = log(kmax)-2*deltak;
+  lkmid = log(kmax_spline)-2*deltak;
   
   int gslstatus =  gsl_spline2d_eval_e(powerspl, lkmid,a,NULL ,NULL ,&lpk_kmid);
   if(gslstatus != GSL_SUCCESS) {
@@ -1437,11 +1443,11 @@ INPUT: ccl_cosmology * cosmo, a, k [1/Mpc]
 TASK: extrapolate power spectrum at low k
 */
 static double ccl_power_extrapol_lowk(ccl_cosmology * cosmo, double k, double a,
-				      gsl_spline2d * powerspl, double kmin, int * status)
+				      gsl_spline2d * powerspl, double kmin_spline, int * status)
 {
   double log_p_1;
   double deltak=1e-2; //safety step
-  double lkmin=log(kmin)+deltak;
+  double lkmin=log(kmin_spline)+deltak;
   double lpk_kmin;
   int gslstatus = gsl_spline2d_eval_e(powerspl,lkmin,a,NULL,NULL,&lpk_kmin);
 
