@@ -14,7 +14,7 @@
 #include "ccl_error.h"
 #include <stdlib.h>
 
-const ccl_configuration default_config = {ccl_boltzmann_class, ccl_halofit, ccl_nobaryons, ccl_tinker10, ccl_duffy2008_virial, ccl_emu_strict};
+const ccl_configuration default_config = {ccl_boltzmann_class, ccl_halofit, ccl_nobaryons, ccl_tinker10, ccl_duffy2008, ccl_emu_strict};
 
 const ccl_gsl_params default_gsl_params = {GSL_EPSREL,                          // EPSREL
                                            GSL_N_ITERATION,                     // N_ITERATION

@@ -126,7 +126,7 @@ static void compare_halomod(int model, struct halomod_data * data)
   ccl_configuration config = default_config;
   config.transfer_function_method = ccl_eisenstein_hu;
   config.mass_function_method = ccl_shethtormen;
-  config.halo_concentration_method = ccl_duffy2008_virial;
+  config.halo_concentration_method = ccl_duffy2008;
 
   // Set the configuration
   ccl_cosmology * cosmo = ccl_cosmology_create(params, config);

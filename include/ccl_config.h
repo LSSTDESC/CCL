@@ -86,7 +86,7 @@ typedef enum mass_function_t
 typedef enum halo_concentration_t
 {
   ccl_bhattacharya2011 = 1,
-  ccl_duffy2008_virial = 2,
+  ccl_duffy2008 = 2,
   ccl_constant_concentration = 3,
 } halo_concentration_t;
 
@@ -122,7 +122,7 @@ typedef struct ccl_configuration {
  * The default configuration object
  * In the default configuration, defined in ccl_core.c
  * CCL runs with:
- * default_config = {ccl_boltzmann_class, ccl_halofit, ccl_nobaryons, ccl_tinker10, ccl_duffy2008_virial, ccl_emu_strict}
+ * default_config = {ccl_boltzmann_class, ccl_halofit, ccl_nobaryons, ccl_tinker10, ccl_duffy2008, ccl_emu_strict}
  */
 extern const ccl_configuration default_config;
 

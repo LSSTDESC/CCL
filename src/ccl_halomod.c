@@ -72,20 +72,34 @@ double ccl_halo_concentration(ccl_cosmology *cosmo, double halomass, double a, d
     nu = delta_c/ccl_sigmaM(cosmo, halomass, a, status);
     return 9.*pow(nu,-0.29)*pow(gz/g0,1.15);
 
-    // Duffy et al. (2008; 0804.2486; Table 1, second section: Delta = Virial)
-  case ccl_duffy2008_virial:
+    // Duffy et al. (2008; 0804.2486; Table 1)
+  case ccl_duffy2008:
 
-    if (odelta != Dv_BryanNorman(cosmo, a, status)) {
-      *status = CCL_ERROR_CONC_DV;
-      strcpy(cosmo->status_message, "ccl_halomod.c: halo_concentration(): Duffy (2008) virial concentration called with non-virial Delta_v\n");
-      return NAN;
-    }
-    
     Mpiv = 2e12/cosmo->params.h; // Pivot mass in Msun (note in the paper units are Msun/h)
-    A = 7.85;
-    B = -0.081;
-    C = -0.71;
-    return A*pow(halomass/Mpiv,B)*pow(a,-C); 
+
+    if (odelta == Dv_BryanNorman(cosmo, a, status)) {
+
+      // Duffy et al. (2008) for virial density haloes (second section in Table 1)
+      A = 7.85;
+      B = -0.081;
+      C = -0.71;
+      return A*pow(halomass/Mpiv,B)*pow(a,-C);
+
+    } else if (odelta == 200.) {
+
+      // Duffy et al. (2008) for x200 mean-matter-density haloes (third section in Table 1)
+      A = 10.14;
+      B = -0.081;
+      C = -1.01;
+      return A*pow(halomass/Mpiv,B)*pow(a,-C);
+
+    } else {
+
+      *status = CCL_ERROR_CONC_DV;
+      strcpy(cosmo->status_message, "ccl_halomod.c: halo_concentration(): Duffy (2008) virial concentration only valid for virial Delta_v or 200\n");
+      return NAN;
+      
+    }
 
     // Constant concentration (good for tests)
   case ccl_constant_concentration:

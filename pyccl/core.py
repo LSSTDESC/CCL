@@ -68,7 +68,7 @@ mass_function_types = {
 
 halo_concentration_types = {
     'bhattacharya2011':          lib.bhattacharya2011,
-    'duffy2008_virial':          lib.duffy2008_virial,
+    'duffy2008':                 lib.duffy2008,
     'constant_concentration':    lib.constant_concentration,
 }
 """dict: Types of halo concentration models. The strings represent possible choices the user can specify for different halo concentration models.
@@ -346,7 +346,7 @@ class Cosmology(object):
         mass_function (:obj:`str`, optional): The mass function to use. 
             Defaults to `tinker` (2010).
         halo_concentration (:obj:`str`, optional): The halo concentration relation to use. 
-            Defaults to Duffy et al. (2008) for virial halo defintion `duffy2008_virial`.
+            Defaults to Duffy et al. (2008) `duffy2008`.
 
     """
     
@@ -360,7 +360,7 @@ class Cosmology(object):
                  matter_power_spectrum='halofit',
                  baryons_power_spectrum='nobaryons',
                  mass_function='tinker10',
-                 halo_concentration='duffy2008_virial',
+                 halo_concentration='duffy2008',
                  emulator_neutrinos='strict'):
         """Creates a wrapper for ccl_cosmology.
 
@@ -378,7 +378,7 @@ class Cosmology(object):
             mass_function (:obj:`str`, optional): The mass function to use. 
             Defaults to `tinker` (2010).
             halo_concentration (:obj:`str`, optional): The halo concentration relation to use. 
-            Defaults to Duffy et al. (2008) for virial halo defintion `duffy2008_virial`.
+            Defaults to Duffy et al. (2008) for virial halo defintion `duffy2008`.
             emulator_neutrinos: `str`, optional): If using the emulator for 
             the power spectrum, specified treatment of unequal neutrinos.
             Options are 'strict', which will raise an error and quit if the 
