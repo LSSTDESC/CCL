@@ -6,7 +6,8 @@
 #include <string.h>
 
 // Relative error tolerance in the halomodel matter power spectrum
-#define HALOMOD_TOLERANCE 2e-3
+#define HALOMOD_TOLERANCE 1E-3
+#define NUMK 256
 
 // Data structure for the CTEST
 CTEST_DATA(halomod){
@@ -25,13 +26,13 @@ CTEST_DATA(halomod){
   double n_s[3];
     
   // Arrays for power-spectrum data
-  double k[3][2][256];
-  double Pk[3][2][256];
+  double k[3][2][NUMK];
+  double Pk[3][2][NUMK];
   
 };
 
 // Function to read in the benchmark data
-static void read_halomod_test_file(double k[3][2][256], double Pk[3][2][256]){
+static void read_halomod_test_file(double k[3][2][NUMK], double Pk[3][2][NUMK]){
 
   // Variables for reading in unwanted stuff and file name
   double spam;
@@ -56,7 +57,7 @@ static void read_halomod_test_file(double k[3][2][256], double Pk[3][2][256]){
       ASSERT_NOT_NULL(f);
 
       // Loop over wavenumbers, which  are k/h in benchmark data, power is Delta^2(k)
-      for (int j=0; j<256; j++) {
+      for (int j=0; j<NUMK; j++) {
 
 	// Read in data from the benchmark file
 	int count = fscanf(f, "%le\t %le\t %le\t %le\t %le\n", &k[model][i][j], &spam, &spam, &spam, &Pk[model][i][j]);
@@ -144,7 +145,7 @@ static void compare_halomod(int model, struct halomod_data * data)
     if(i==1){a = 0.5;}
   
     // Loop over wavenumbers
-    for (int j=0; j<256; j++) {
+    for (int j=0; j<NUMK; j++) {
 
       // Set variables inside loop, convert CCL outputs to the same units as benchmark
       double k = data->k[model][i][j]*params.h; // Convert the benchmark data k/h to pure k
