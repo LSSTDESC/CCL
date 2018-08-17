@@ -280,6 +280,7 @@ In what follows we will focus on scalar ($s=0$) quantities such as the overdensi
 \subsubsection{Angular power spectra}\label{sssec:2pt.pspec}
 
 \elisa{Need to define $T_\delta$ and $T_\theta$ somewhere. Perhaps in matter ps section above.}
+{\bf DA: done. Check Eq. 22 and 23.}
 The angular power spectrum $C^{ab}_\ell$ between two tracers $a$ and $b$ is defined as
 \begin{equation}
   \langle a_{\ell m}b^*_{\ell m}\rangle\equiv C^{ab}\delta_{\ell\ell'}\delta_{mm'},
@@ -298,7 +299,16 @@ where $\mathcal{P}_\Phi(k)$ is the dimensionless power spectrum of the primordia
         \begin{equation}\label{eq:transfer_nc}
           \Delta^{\rm D}_\ell(k)=\int dz\,p_z(z)\,b(z)\,T_\delta(k,z)\,j_\ell(k\chi(z)),
         \end{equation}
-        where $j_\ell(x)$ is $\ell$-th order spherical Bessel function, $T_\delta$ is the matter transfer function, $b(z)$ is the linear clustering bias for this tracer and $p_z(z)$ is the normalized distribution of sources in redshift (i.e. the selection function). The fluctuations in the number density of sources in different redshift bins are therefore treated by \ccl as different tracers. Note that \ccl does not currently support non-linear or scale-dependent bias, but future releases will do so under a number of schemes, including perturbative approaches as implemented in e.g. \citet{FASTPT}.
+        where $j_\ell(x)$ is $\ell$-th order spherical Bessel function, $T_\delta$ is the matter overdensity transfer function, $b(z)$ is the linear clustering bias for this tracer and $p_z(z)$ is the normalized distribution of sources in redshift (i.e. the selection function). The fluctuations in the number density of sources in different redshift bins are therefore treated by \ccl as different tracers. Note that \ccl does not currently support non-linear or scale-dependent bias, but future releases will do so under a number of schemes, including perturbative approaches as implemented in e.g. \citet{FASTPT}.
+        
+        It is also worth noting that the matter overdensity transfer function $T_\delta$ in Eq. \ref{eq:transfer_nc} is not the same as the transfer function used in Section \ref{sec:matterps}. While $T(k)$ is defined as \citep{1998ApJ...496..605E} 
+        \begin{equation}
+          T(k)=\frac{\delta(k,z=0)}{\delta(k,z=\infty)}\frac{\delta(k=0,z=\infty)}{\delta(k=0,z=0)},
+        \end{equation}
+        all subscripted transfer functions $T_X$ used here are defined as the ratio between the subscript quantity $X$ and the primordial curvature perturbations:
+        \begin{equation}
+          X({\bf k},z)=T_X(k,z)\,\Phi({\bf k}).
+        \end{equation}        
   \item $\Delta^{\rm RSD}$ is the linear contribution from redshift-space distortions (RSDs):
         \begin{equation}\label{eq:transfer_rsd}
           \Delta^{\rm RSD}_\ell(k)=\int dz\,\frac{(1+z) p_z(z)}{H(z)}T_\theta(k,z) j_\ell''(k\chi(z)),
@@ -310,7 +320,7 @@ where $\mathcal{P}_\Phi(k)$ is the dimensionless power spectrum of the primordia
           &T_{\phi+\psi}(k,z) j_\ell(k\chi(z)),
         \end{align}
         where $T_{\phi+\psi}$ is the transfer function for the Newtonian-gauge scalar metric perturbations, and $W^{\rm M}$ is the magnification window function:
-        \begin{equation}
+        \begin{equation}\label{eq:window_mag}
           W^{\rm M}(z)\equiv\int_z^\infty dz'\,p_z(z')\frac{2-5s(z')}{2}\frac{r(\chi'-\chi)}{r(\chi')r(\chi)}.
         \end{equation}
         Here, $s(z)$ is the logarithmic derivative of the number of sources with magnitude limit, and $r(\chi)$ is the angular comoving distance (see Eq. \ref{eq:angdist}).
@@ -326,7 +336,7 @@ Note that \ccl does not currently compute relativistic corrections to number cou
       &j_\ell(k\chi(z)),
     \end{align}
     where $W^{\rm L}$ is the lensing kernel, given by
-    \begin{equation}
+    \begin{equation}\label{eq:window_shear}
       W^L(z)\equiv\int_z^\infty dz' p_z(z')\frac{r(\chi'-\chi)}{r(\chi')r(\chi)}.
     \end{equation}
   \item $\Delta^{\rm IA}$ is the transfer function for intrinsic galaxy alignments. \ccl supports the so-called ``non-linear alignment model'' (NLA), in which the intrinsic galaxy inertia tensor is proportional the local tidal tensor \citep{2004PhRvD..70f3526H,2007MNRAS.381.1197H}:
@@ -617,7 +627,7 @@ We have performed a comparison of the physical constants used in \ccl to those u
 
 
 %-------------------------------------------------------------------------------
-\subsection{Matter power spectrum}
+\subsection{Matter power spectrum}\label{ssec:mpspec}
 
 For speed, the initialization of a cosmological model within \ccl performs initial computations of the linear and non-linear matter power spectra, which are then interpolated whenever required. A bicubic spline is performed in two variables. The first one is the logarithmically-spaced wavenumber. For the scale factor, we adopt a hybrid spacing scheme where this quantity is linearly-spaced for $a>0.1$ and logarithmically-spaced otherwise. The goal of this hybrid scheme is to allow sufficiently fine sampling at low redshift for LSST observables, while at the same time allowing for predictions for CMB lensing without significantly slowing down the computations, as would result from a linear-spacing throughout. The spline interpolation causes some precision loss in the power spectra output (compared to, for example, direct outputs from \class or the cosmic emulator) which is quantified in Section \ref{sec:validation}.
 
@@ -643,7 +653,7 @@ The value adopted for {\tt K\_MIN\_SPLINE} depends on the choice of power spectr
 %-------------------------------------------------------------------------------
 \subsection{Angular power spectra}
 
-Different numerical approaches have been implemented in the library in order to expedite the computation of angular power spectra. We describe these here.
+Different numerical approaches have been implemented in the library in order to expedite the computation of angular power spectra. We describe these here. In all cases, to avoid calculating power spectra at all integer values of $\ell$, by default \ccl samples the power spectra at particular values of $\ell$ and interpolates between them to obtain the result at the $\ell$ values requested by the user. The sampling scheme is based on a combination of logarithmic samples at low-$\ell$ and linear samples at high-$\ell$, although the particulars of the sampling scheme can be configured by the user. A cubic-spline method is used to do the interpolation.
 
 \subsubsection{Limber approximation}
 
@@ -670,7 +680,7 @@ where
  \frac{1+z_\ell}{\chi_\ell}W^{\rm L}(z_\ell)\\
  &\tilde{\Delta}_\ell^{\rm IA}(k)=\sqrt{\frac{(\ell+2)!}{(\ell-2)!}}\frac{p_z(z_\ell)\,b_{\rm IA}(z_\ell)f_{\rm red}(z_\ell)H(z_\ell)}{(\ell+1/2)^2}.
 \end{align}
-The Limber approximation works best for wide radial kernels and high $\ell$. The integration in Eq. (\ref{eq:limber}) is performed via \elisa{This needs an explanation o how the Cls are splined and then integrated. We need to explain splining notes and integration limits, and any integration that occurs within the kernels.}
+The Limber approximation works best for wide radial kernels and high $\ell$. The integration in Eq. (\ref{eq:limber}) is performed via Gauss-Kronrod quadrature, as are the integrals needed to estimate the lensing and magnification window functions (Eqs. \ref{eq:window_mag} and \ref{eq:window_shear}). The integration limits for Eq. \ref{eq:limber} are adapted to the shape of the window functions entering $\tilde{\Delta}^{a,b}$, with absolute limits given by the {\tt K\_MIN} and {\tt K\_MAX} parameters described in Section \ref{ssec:mpspec}. \elisa{This needs an explanation o how the Cls are splined and then integrated. We need to explain splining notes and integration limits, and any integration that occurs within the kernels.} {\bf Done. Check out the description above and at the beginning of this section.}
 
 \subsubsection{Beyond Limber: \texttt{Angpow}}
 \label{sec:angpow}
