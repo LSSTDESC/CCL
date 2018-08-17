@@ -64,7 +64,6 @@ void ccl_cosmology_read_config(void)
     // Use default ini file
     param_file = EXPAND_STR(__CCL_DATA_DIR__) "/ccl_params.ini";
   }
-  
   if ((fconfig=fopen(param_file, "r")) == NULL) {
     char msg[256];
     snprintf(msg, 256, "ccl_core.c: Failed to open config file: %s", param_file);
@@ -103,7 +102,7 @@ void ccl_cosmology_read_config(void)
       if(strcmp(var_name,"A_SPLINE_NLOG_PK")==0) ccl_splines->A_SPLINE_NLOG_PK=(int) var_dbl;
       if(strcmp(var_name,"K_MAX_SPLINE")==0) ccl_splines->K_MAX_SPLINE=var_dbl;
       if(strcmp(var_name,"K_MAX")==0) ccl_splines->K_MAX=var_dbl;
-      if(strcmp(var_name,"K_MIN_DEFAULT")==0) ccl_splines->K_MIN_DEFAULT=var_dbl;
+      if(strcmp(var_name,"K_MIN")==0) ccl_splines->K_MIN=var_dbl;
       if(strcmp(var_name,"N_K")==0) ccl_splines->N_K=(int) var_dbl;
       // 3dcorr parameters
       if(strcmp(var_name,"N_K_3DCOR")==0) ccl_splines->N_K_3DCOR=(int) var_dbl;     
@@ -386,47 +385,80 @@ ccl_parameters ccl_parameters_create(
     return params;
   }
   
-  // Decide how to split sum of neutrino masses between 3 neutrinos. See the 
-  // CCL note for how we get these expressions for the neutrino masses in 
-  // normal and inverted hierarchy.
+  // Decide how to split sum of neutrino masses between 3 neutrinos. We use
+  // a Newton's rule numerical solution (thanks M. Jarvis).
+  
   if (mnu_type==ccl_mnu_sum){
 	  // Normal hierarchy
+	  
 	  mnu_in = malloc(3*sizeof(double));
-	  double nfac = -6.*DELTAM12_sq + 12.*DELTAM13_sq_pos + 4.*mnusum*mnusum;
 	  
-	  mnu_in[0] = 2./3. * mnusum - 1./6. * pow(nfac, 0.5) 
-	            - 0.25 * DELTAM12_sq / (2./3.* mnusum - 1./6.*pow(nfac, 0.5));
-	  mnu_in[1] = 2./3.* mnusum - 1./6. * pow(nfac, 0.5) 
-	            + 0.25 * DELTAM12_sq / (2./3.* mnusum - 1./6. * pow(nfac, 0.5));
-	  mnu_in[2] = -1./3. * mnusum + 1./3 * pow(nfac, 0.5); 
+	  // Check if the sum is zero
+	  if (*mnu<1e-15){
+		  mnu_in[0] = 0.;
+		  mnu_in[1] = 0.;
+		  mnu_in[2] = 0.;
+	  } else{
 	  
-	  if (mnu_in[0]<0 || mnu_in[1]<0 || mnu_in[2]<0){
-	    // The user has provided a sum that is below the physical limit.
-	    if (params.sum_nu_masses < 1e-14){
-			mnu_in[0] = 0.; mnu_in[1] = 0.; mnu_in[2] = 0.;
-		}else{
-			*status = CCL_ERROR_MNU_UNPHYSICAL;
-	    }
+	      mnu_in[0] = 0.; // This is a starting guess.
+	  
+	      double sum_check;
+	      // Check that sum is consistent
+	      mnu_in[1] = sqrt(DELTAM12_sq);
+	      mnu_in[2] = sqrt(DELTAM13_sq_pos);
+	      sum_check = mnu_in[0] + mnu_in[1] + mnu_in[2];
+	      if (ccl_mnu_sum < sum_check){
+		      *status = CCL_ERROR_MNU_UNPHYSICAL;
+          }
+      
+          double dsdm1;
+          // This is the Newton's method
+          while (fabs(*mnu - sum_check) > 1e-15){
+		  
+              dsdm1 = 1. + mnu_in[0] / mnu_in[1] + mnu_in[0] / mnu_in[2];
+              mnu_in[0] = mnu_in[0] - (sum_check - *mnu) / dsdm1;
+              mnu_in[1] = sqrt(mnu_in[0]*mnu_in[0] + DELTAM12_sq);
+              mnu_in[2] = sqrt(mnu_in[0]*mnu_in[0] + DELTAM13_sq_pos);
+              sum_check = mnu_in[0] + mnu_in[1] + mnu_in[2];
+          }
 	  }
+
   } else if (mnu_type==ccl_mnu_sum_inverted){
-		// Inverted hierarchy
-		mnu_in = malloc(3*sizeof(double));
-		double nfac = -6.*DELTAM12_sq + 12.*DELTAM13_sq_neg + 4.*mnusum*mnusum;
-		
-		mnu_in[0] = 2./3.* mnusum - 1./6.*pow(nfac, 0.5) 
-	              - 0.25 * DELTAM12_sq / (2./3.* mnusum - 1./6.*pow(nfac, 0.5));
-	    mnu_in[1] = 2./3.* mnusum - 1./6. * pow(nfac, 0.5) 
-	              + 0.25 * DELTAM12_sq / (2./3.* mnusum - 1./6. * pow(nfac, 0.5));
-	    mnu_in[2] = -1./3. * mnusum + 1./3 * pow(nfac, 0.5);
-	    
-	    if(mnu_in[0]<0 || mnu_in[1]<0 || mnu_in[2]<0){
-	    // The user has provided a sum that is below the physical limit.
-	    if (params.sum_nu_masses < 1e-14){
-			mnu_in[0] = 0.; mnu_in[1] = 0.; mnu_in[2] = 0.;
-		}else{
-			*status = CCL_ERROR_MNU_UNPHYSICAL;
-	    }
-	    }
+	  // Inverted hierarchy
+	  
+	  mnu_in = malloc(3*sizeof(double));
+	  
+	  	  // Check if the sum is zero
+	  if (*mnu<1e-15){
+		  mnu_in[0] = 0.;
+		  mnu_in[1] = 0.;
+		  mnu_in[2] = 0.;
+	  } else{
+	  
+	      mnu_in[0] = 0.; // This is a starting guess.
+	  
+	      double sum_check;
+	      // Check that sum is consistent
+	      mnu_in[1] = sqrt(-1.* DELTAM13_sq_neg - DELTAM12_sq);
+	      mnu_in[2] = sqrt(-1.* DELTAM13_sq_neg);
+	      sum_check = mnu_in[0] + mnu_in[1] + mnu_in[2];
+	      if (ccl_mnu_sum < sum_check){
+		      *status = CCL_ERROR_MNU_UNPHYSICAL;
+          }
+      
+      
+          double dsdm1;
+          // This is the Newton's method
+          while (fabs(*mnu- sum_check) > 1e-15){
+              dsdm1 = 1. + (mnu_in[0] / mnu_in[1]) + (mnu_in[0] / mnu_in[2]);
+              mnu_in[0] = mnu_in[0] - (sum_check - *mnu) / dsdm1;
+              mnu_in[1] = sqrt(mnu_in[0]*mnu_in[0] + DELTAM12_sq);
+              mnu_in[2] = sqrt(mnu_in[0]*mnu_in[0] + DELTAM13_sq_neg);
+              sum_check = mnu_in[0] + mnu_in[1] + mnu_in[2];
+          }
+	  
+      }
+      
   } else if (mnu_type==ccl_mnu_sum_equal){
 	    // Split the sum of masses equally
 	    mnu_in = malloc(3*sizeof(double));
