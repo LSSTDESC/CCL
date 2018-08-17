@@ -64,7 +64,6 @@ void ccl_cosmology_read_config(void)
     // Use default ini file
     param_file = EXPAND_STR(__CCL_DATA_DIR__) "/ccl_params.ini";
   }
-  
   if ((fconfig=fopen(param_file, "r")) == NULL) {
     char msg[256];
     snprintf(msg, 256, "ccl_core.c: Failed to open config file: %s", param_file);
@@ -103,7 +102,7 @@ void ccl_cosmology_read_config(void)
       if(strcmp(var_name,"A_SPLINE_NLOG_PK")==0) ccl_splines->A_SPLINE_NLOG_PK=(int) var_dbl;
       if(strcmp(var_name,"K_MAX_SPLINE")==0) ccl_splines->K_MAX_SPLINE=var_dbl;
       if(strcmp(var_name,"K_MAX")==0) ccl_splines->K_MAX=var_dbl;
-      if(strcmp(var_name,"K_MIN_DEFAULT")==0) ccl_splines->K_MIN_DEFAULT=var_dbl;
+      if(strcmp(var_name,"K_MIN")==0) ccl_splines->K_MIN=var_dbl;
       if(strcmp(var_name,"N_K")==0) ccl_splines->N_K=(int) var_dbl;
       // 3dcorr parameters
       if(strcmp(var_name,"N_K_3DCOR")==0) ccl_splines->N_K_3DCOR=(int) var_dbl;     
