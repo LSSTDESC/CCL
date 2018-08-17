@@ -279,8 +279,6 @@ In what follows we will focus on scalar ($s=0$) quantities such as the overdensi
 
 \subsubsection{Angular power spectra}\label{sssec:2pt.pspec}
 
-\elisa{Need to define $T_\delta$ and $T_\theta$ somewhere. Perhaps in matter ps section above.}
-{\bf DA: done. Check Eq. 22 and 23.}
 The angular power spectrum $C^{ab}_\ell$ between two tracers $a$ and $b$ is defined as
 \begin{equation}
   \langle a_{\ell m}b^*_{\ell m}\rangle\equiv C^{ab}\delta_{\ell\ell'}\delta_{mm'},
@@ -680,7 +678,7 @@ where
  \frac{1+z_\ell}{\chi_\ell}W^{\rm L}(z_\ell)\\
  &\tilde{\Delta}_\ell^{\rm IA}(k)=\sqrt{\frac{(\ell+2)!}{(\ell-2)!}}\frac{p_z(z_\ell)\,b_{\rm IA}(z_\ell)f_{\rm red}(z_\ell)H(z_\ell)}{(\ell+1/2)^2}.
 \end{align}
-The Limber approximation works best for wide radial kernels and high $\ell$. The integration in Eq. (\ref{eq:limber}) is performed via Gauss-Kronrod quadrature, as are the integrals needed to estimate the lensing and magnification window functions (Eqs. \ref{eq:window_mag} and \ref{eq:window_shear}). The integration limits for Eq. \ref{eq:limber} are adapted to the shape of the window functions entering $\tilde{\Delta}^{a,b}$, with absolute limits given by the {\tt K\_MIN} and {\tt K\_MAX} parameters described in Section \ref{ssec:mpspec}. \elisa{This needs an explanation o how the Cls are splined and then integrated. We need to explain splining notes and integration limits, and any integration that occurs within the kernels.} {\bf Done. Check out the description above and at the beginning of this section.}
+The Limber approximation works best for wide radial kernels and high $\ell$. The integration in Eq. (\ref{eq:limber}) is performed via Gauss-Kronrod quadrature, as are the integrals needed to estimate the lensing and magnification window functions (Eqs. \ref{eq:window_mag} and \ref{eq:window_shear}). The integration limits for Eq. \ref{eq:limber} are adapted to the shape of the window functions entering $\tilde{\Delta}^{a,b}$, with absolute limits given by the {\tt K\_MIN} and {\tt K\_MAX} parameters described in Section \ref{ssec:mpspec}. 
 
 \subsubsection{Beyond Limber: \texttt{Angpow}}
 \label{sec:angpow}
