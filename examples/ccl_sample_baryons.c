@@ -32,7 +32,7 @@ int main(int argc, char * argv[])
   //The linear power spectrum is not changed when baryons are passed
   /*printf("Linear matter PS\n");
   printf("# k [1/Mpc],P(k,z=0),P(k,z=1),P(k,z=2),P(k,z=3)\n");
-  for (k = ccl_splines->K_MIN_DEFAULT; k<ccl_splines->K_MAX; k*=1.05) {
+  for (k = ccl_splines->K_MIN; k<ccl_splines->K_MAX; k*=1.05) {
       p = ccl_linear_matter_power(cosmo, k,1.0, &status);
       p1 = ccl_linear_matter_power(cosmo,k, a_at_z1,&status);
       p2 = ccl_linear_matter_power(cosmo,k, a_at_z2,&status);
@@ -41,7 +41,7 @@ int main(int argc, char * argv[])
       }*/
   printf("# Total matter power spectrum\n");
   printf("# k [1/Mpc],P(k,z=0),P(k,z=1),P(k,z=2),P(k,z=3)\n");
-  for (k = ccl_splines->K_MIN_DEFAULT; k<ccl_splines->K_MAX; k*=1.05) {
+  for (k = ccl_splines->K_MIN; k<ccl_splines->K_MAX; k*=1.05) {
     p = ccl_nonlin_matter_power(cosmo, k,1.0,&status);
     p1 = ccl_nonlin_matter_power(cosmo,k, a_at_z1,&status);
     p2 = ccl_nonlin_matter_power(cosmo,k, a_at_z2,&status);
