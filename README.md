@@ -189,6 +189,11 @@ to the one you want to use. You can specify which C compiler will be used to com
 ```sh
 export CC=gcc
 ```
+2. If upon running the C tests you get an error from CLASS saying it cannot find the file `sBBN_2017.dat`, your system is not finding the local copy of CLASS. To solve this, do
+```sh
+export CLASS_PARAM_DIR=your_ccl_path/CCL/build/extern/share/class/
+```
+or add this to your `.bashrc`.
 
 ## Development workflow
 

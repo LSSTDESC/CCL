@@ -254,6 +254,12 @@ to the one you want to use. You can specify which C compiler will be used to com
 $ export CC=gcc
 \end{verbatim}
 
+If upon running the C tests you get an error from {\tt CLASS} saying it cannot find the file {\tt sBBN\_2017.dat}, your system is not finding the local copy of {\tt CLASS}. To solve this, do
+\begin{verbatim}
+$ export CLASS_PARAM_DIR=your_ccl_path/CCL/build/extern/share/class/
+\end{verbatim}
+or add this to your {\tt .bashrc}.
+
 \subsection{Compiling against an external version of CLASS}
 \label{sec:extclass}
 
