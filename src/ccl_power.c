@@ -1769,7 +1769,7 @@ static double sigmaR_integrand(double lk,void *params)
 
   return pk*k*k*k*w*w;
 }
-//MUSIG
+
 double ccl_sigmaR(ccl_cosmology *cosmo,double R, int *status)
 {
   SigmaR_pars par;
