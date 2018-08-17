@@ -95,7 +95,7 @@ This should work as long as {\tt CMake} is installed on your system (if it isn't
 \item {\tt FFTW3}\footnote{\url{http://www.fftw.org}} version 3.1 or above is required for computation of correlation functions.
 \item {\tt FFTlog}\footnote{\url{http://casa.colorado.edu/~ajsh/FFTLog/} and \url{https://github.com/slosar/FFTLog}} is provided within \ccl, with minor modifications.
 \item The C library associated to the {\tt CLASS} code. (Note that, if you want to use your own version of {\tt CLASS}, you should follow the steps described in Section \ref{sec:extclass} below.)
-  \item {\tt Angpow} for computation of angular power spectra\footnote{\url{https://gitlab.in2p3.fr/campagne/AngPow}}.
+  \item {\tt Angpow} \citep{2017arXiv170103592C} for fast computation of angular power spectra beyond the Limber approximation\footnote{\url{https://gitlab.in2p3.fr/campagne/AngPow}}.
 \end{itemize}
 
 In addition, the build system for \ccl requires
@@ -1262,9 +1262,11 @@ The build process will also create a {\tt pyccl/ccllib.py} file, which is the ra
 
 In the future, we hope that \ccl will include other functionalities. Functionalities which are currently under development:
 \begin{itemize}
-        \item a link to {\tt angpow} \citep{2017arXiv170103592C} for going beyond the Limber approximation,
-	\item a link to {\tt FAST-PT} \citep{FASTPT} for efficient implementation of nonlinear perturbation theory,
-	\item and more power spectrum methods (see \ref{Pk_wishlist}).
+\item further CMB observable predictions (beyond CMB lensing)\footnote{\url{https://github.com/LSSTDESC/CCL/issues/428}},
+\item a link to {\tt FAST-PT} \citep{FASTPT} for efficient implementation of nonlinear perturbation theory,
+\item halo density profiles\footnote{\url{https://github.com/LSSTDESC/CCL/issues/407}}
+\item linear-theory only predictions\footnote{\url{https://github.com/LSSTDESC/CCL/issues/438}}.
+\item and more power spectrum methods (see \ref{Pk_wishlist}).
 \end{itemize}
 
 \section{Feedback}
