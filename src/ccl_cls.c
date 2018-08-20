@@ -594,9 +594,9 @@ CCL_ClTracer *ccl_cl_tracer(ccl_cosmology *cosmo,int tracer_type,
   // Print a message informing the user that if they are using mu / Sigma
   // parameterisation, Cl's will be computed using the linear power spectrum
   // because we do not have support for nonlinearity in this parameterisation
-  if ( fabs(cosmo->params.mu_0)>1e-15 || fabs(cosmo->params.sigma_0)>1e-15 ){
-      ccl_raise_warning(CCL_ERROR_NOT_IMPLEMENTED , "You are using the mu / Sigma parameterisation of modified gravity; cl's and angular correlation functions will be computed using the LINEAR power spectrum.\n");
-  }    	  
+  //if ( fabs(cosmo->params.mu_0)>1e-15 || fabs(cosmo->params.sigma_0)>1e-15 ){
+  //    ccl_raise_warning(CCL_ERROR_NOT_IMPLEMENTED , "You are using the mu / Sigma parameterisation of modified gravity; cl's and angular correlation functions will be computed using the LINEAR power spectrum.\n");
+  //}    	  
 	
   CCL_ClTracer *clt=cl_tracer(cosmo,tracer_type,has_rsd,has_magnification,has_intrinsic_alignment,
 			      nz_n,z_n,n,nz_b,z_b,b,nz_s,z_s,s,
@@ -749,11 +749,11 @@ static double transfer_nc(int l,double k,
       // mu / Sigma parameterisation of modified gravity. 
       // In this case, use the linear power spectrum only.
       double pk0;
-      if (fabs(cosmo->params.mu_0) || fabs(cosmo->params.sigma_0) ){
-		  pk0 = ccl_linear_matter_power(cosmo, k, a0, status);
-      } else {
-		  pk0 =ccl_nonlin_matter_power(cosmo,k,a0,status);
-	  }
+      //if (fabs(cosmo->params.mu_0) || fabs(cosmo->params.sigma_0) ){
+	  //	  pk0 = ccl_linear_matter_power(cosmo, k, a0, status);
+      //} else {
+	  pk0 =ccl_nonlin_matter_power(cosmo,k,a0,status);
+	  //}
 	  
       double jl0=j_bessel_limber(l,k);
       double f_all=f_dens(a0,cosmo,clt,status)*jl0;
@@ -767,11 +767,11 @@ static double transfer_nc(int l,double k,
       // mu / Sigma parameterisation of modified gravity. 
       // In this case, use the linear power spectrum only.
       double pk1;
-      if (fabs(cosmo->params.mu_0) || fabs(cosmo->params.sigma_0) ){
-		  pk1 = ccl_linear_matter_power(cosmo, k, a1, status);
-      } else {
+      //if (fabs(cosmo->params.mu_0) || fabs(cosmo->params.sigma_0) ){
+	//	  pk1 = ccl_linear_matter_power(cosmo, k, a1, status);
+      //} else {
 		  pk1 =ccl_nonlin_matter_power(cosmo,k,a1,status);
-	  }
+	//  }
 	  double fg0=f_rsd(a0,cosmo,clt,status);
 	  double fg1=f_rsd(a1,cosmo,clt,status);
 	  double jl1=j_bessel_limber(l+1,k);
@@ -794,11 +794,11 @@ static double transfer_nc(int l,double k,
       // mu / Sigma parameterisation of modified gravity. 
       // In this case, use the linear power spectrum only.
       double pk;
-      if (fabs(cosmo->params.mu_0) || fabs(cosmo->params.sigma_0) ){
-		  pk = ccl_linear_matter_power(cosmo, k, a, status);
-      } else {
+      //if (fabs(cosmo->params.mu_0) || fabs(cosmo->params.sigma_0) ){
+		//  pk = ccl_linear_matter_power(cosmo, k, a, status);
+     // } else {
 		  pk =ccl_nonlin_matter_power(cosmo,k,a,status);
-	  }
+	  //}
 
 	double jl=ccl_j_bessel(l,k*chi);
 	double f_all=f_dens(a,cosmo,clt,status)*jl;
@@ -873,11 +873,11 @@ static double transfer_wl(int l,double k,
       // mu / Sigma parameterisation of modified gravity. 
       // In this case, use the linear power spectrum only.
       double pk;
-      if (fabs(cosmo->params.mu_0) || fabs(cosmo->params.sigma_0) ){
-		  pk = ccl_linear_matter_power(cosmo, k, a, status);
-      } else {
+      //if (fabs(cosmo->params.mu_0) || fabs(cosmo->params.sigma_0) ){
+	  //	  pk = ccl_linear_matter_power(cosmo, k, a, status);
+      //} else {
 		  pk =ccl_nonlin_matter_power(cosmo,k,a,status);
-	  }
+	  //}
       double jl=j_bessel_limber(l,k);
       double f_all;
       f_all = f_lensing(a,chi,cosmo,clt,status)*jl ;
@@ -898,11 +898,11 @@ static double transfer_wl(int l,double k,
       // mu / Sigma parameterisation of modified gravity. 
       // In this case, use the linear power spectrum only.
       double pk;
-      if (fabs(cosmo->params.mu_0) || fabs(cosmo->params.sigma_0) ){
+      //if (fabs(cosmo->params.mu_0) || fabs(cosmo->params.sigma_0) ){
 		  pk = ccl_linear_matter_power(cosmo, k, a, status);
-      } else {
+      //} else {
 		  pk =ccl_nonlin_matter_power(cosmo,k,a,status);
-	  }
+	  //}
 	
 	double jl=ccl_j_bessel(l,k*chi);
 	double f_all=f_lensing(a,chi,cosmo,clt,status)*jl;
@@ -933,12 +933,12 @@ static double transfer_cmblens(int l,double k,ccl_cosmology *cosmo,CCL_ClTracer 
       // mu / Sigma parameterisation of modified gravity. 
       // In this case, use the linear power spectrum only.
       double pk;
-      if (fabs(cosmo->params.mu_0) || fabs(cosmo->params.sigma_0) ){
-		  pk = ccl_linear_matter_power(cosmo, k, a, status);
-      }
-      else {
+      //if (fabs(cosmo->params.mu_0) || fabs(cosmo->params.sigma_0) ){
+	  //	  pk = ccl_linear_matter_power(cosmo, k, a, status);
+      //}
+      //else {
 		  pk =ccl_nonlin_matter_power(cosmo,k,a,status);
-	  }
+	  //}
     
     // If mu / Sigma parameterisation of modified gravity is in effect,
 	// add appropriate factors of Sigma before splining:
@@ -1258,6 +1258,7 @@ void ccl_angular_cls(ccl_cosmology *cosmo,CCL_ClWorkspace *w,
   //First check if ell range is within workspace
   for(ii=0;ii<nl_out;ii++) {
     if(l_out[ii]>w->lmax) {
+
       *status=CCL_ERROR_SPLINE_EV;
       strcpy(cosmo->status_message,"ccl_cls.c: ccl_angular_cls(); "
 	     "requested l beyond range allowed by workspace\n");
@@ -1290,6 +1291,7 @@ void ccl_angular_cls(ccl_cosmology *cosmo,CCL_ClWorkspace *w,
       if(w->l_arr[ii]<=w->l_limber)
 	do_angpow=1;
     }
+
     //Resort to native method if we have lensing (this will hopefully only be temporary)
     if(clt1->tracer_type==CL_TRACER_WL || clt2->tracer_type==CL_TRACER_WL ||
        clt1->has_magnification || clt2->has_magnification) {

@@ -30,6 +30,10 @@ def test_parameters_valid_input():
     # Check that kwarg order doesn't matter
     assert_no_warnings(ccl.Parameters, h=0.7, Omega_c=0.25, Omega_b=0.05,
                                        A_s=2.1e-9, n_s=0.96)
+                     
+    # Try a set of parameters with non-zero mu0 / Sig0                                   
+    assert_no_warnings(ccl.Parameters, h=0.7, Omega_c=0.25, Omega_b = 0.05,
+                                       A_s=2.1e-9, n_s=0.96, mu_0=0.1, sigma_0=0.1)
     
 def test_parameters_missing():
     """
@@ -47,7 +51,9 @@ def test_parameters_missing():
     assert_raises(ValueError, ccl.Parameters, 0.25, 0.05, 0.7, 2.1e-9, 0.96, 
                                               w0=None)
     assert_raises(ValueError, ccl.Parameters, 0.25, 0.05, 0.7, 2.1e-9, 0.96, 
-                                              wa=None)                                                                                 
+                                              wa=None)     
+    assert_raises(ValueError, ccl.Parameters,0.25, 0.05, 0.7, 2.1e-9, 0.96, 
+                                              mu_0=None, sigma_0=None)                                                                             
 
     # Check that a single missing compulsory parameter is noticed
     assert_raises(ValueError, ccl.Parameters, Omega_c=0.25, Omega_b=0.05, 

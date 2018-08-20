@@ -438,6 +438,13 @@ double ccl_massfunc(ccl_cosmology *cosmo, double halomass, double a, double odel
 	  strcpy(cosmo->status_message,"ccl_background.c: ccl_cosmology_compute_growth(): Support for the halo mass function in cosmologies with massive neutrinos is not yet implemented.\n");
 	  return NAN; 
   }
+  
+  // Raise an error if we have mu / Sigma modifcation to gravity turned on
+  if (fabs(cosmo->params.mu_0)>1e-14 || fabs(cosmo->params.sigma_0)>1e-14){
+	  *status = CCL_ERROR_NOT_IMPLEMENTED;
+	  strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power(): The mass function is not implemented the mu / Sigma modified gravity parameterisation.\n");
+	  return NAN;
+  }	
 	
   if (!cosmo->computed_sigma) {
     ccl_cosmology_compute_sigma(cosmo, status);
@@ -470,6 +477,12 @@ double ccl_halo_bias(ccl_cosmology *cosmo, double halomass, double a, double ode
 	  strcpy(cosmo->status_message,"ccl_background.c: ccl_cosmology_compute_growth(): Support for the halo bias in cosmologies with massive neutrinos is not yet implemented.\n");
 	  return NAN; 
   }
+  
+  if (fabs(cosmo->params.mu_0)>1e-14 || fabs(cosmo->params.sigma_0)>1e-14){
+	  *status = CCL_ERROR_NOT_IMPLEMENTED;
+	  strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power(): The halo bias is not implemented the mu / Sigma modified gravity parameterisation.\n");
+	  return NAN;
+  }	
 		
 	
   if (!cosmo->computed_sigma) {

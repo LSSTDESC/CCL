@@ -1628,7 +1628,8 @@ double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double k, double a, int *s
   
   // Check if mu / Sigma modified gravity parameterization is in use.
   // If so, the nonlinear matter power spectrum methods are not valid.
-  if (fabs(cosmo->params.mu_0)>1e-14 || fabs(cosmo->params.sigma_0)>1e-14){
+  // If matter power spectrum method is not set to linear, raise an error.
+  if ( (fabs(cosmo->params.mu_0)>1e-14 || fabs(cosmo->params.sigma_0)>1e-14) && (cosmo->config.matter_power_spectrum_method != ccl_linear)){
       *status = CCL_ERROR_NOT_IMPLEMENTED;
 	  strcpy(cosmo->status_message,"ccl_power.c: ccl_nonlin_matter_power(): Nonlinear behaviour for the mu / Sigma parameterization of modified gravity is not implemented. \n");
 	  return NAN;

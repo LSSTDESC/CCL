@@ -20,8 +20,6 @@ Omega_v_vals = np.array([0.7, 0.7, 0.7, 0.65, 0.75])
 w0_vals = np.array([-1.0, -0.9, -0.9, -0.9, -0.9])
 wa_vals = np.array([0.0, 0.0, 0.1, 0.1, 0.1])
 
-# List of transfer functions to run
-transfer_fns = ['boltzmann_class', 'eisenstein_hu', 'emulator',]
 
 def all_finite(vals):
     """

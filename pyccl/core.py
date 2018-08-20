@@ -244,9 +244,9 @@ class Parameters(object):
         
         
         # Check if any compulsory parameters are not set
-        compul = [Omega_c, Omega_b, Omega_k, w0, wa, h, norm_pk, n_s]
+        compul = [Omega_c, Omega_b, Omega_k, w0, wa, h, norm_pk, n_s, mu_0, sigma_0]
         names = ['Omega_c', 'Omega_b', 'Omega_k', 'w0', 'wa', 
-                 'h', 'norm_pk', 'n_s']
+                 'h', 'norm_pk', 'n_s', 'mu_0', 'sigma_0']
 
         for nm, item in zip(names, compul):
             if item is None:
