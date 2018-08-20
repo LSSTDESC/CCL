@@ -1399,28 +1399,17 @@ void ccl_cosmology_compute_power(ccl_cosmology * cosmo, int * status)
 INPUT: ccl_cosmology * cosmo, a, k [1/Mpc]
 TASK: extrapolate power spectrum at high k
 */
-<<<<<<< HEAD
-static double ccl_power_extrapol_highk(ccl_cosmology * cosmo, double k, double a,
-				       gsl_spline2d * powerspl, double kmax, int * status)
-=======
 static double ccl_power_extrapol_highk(ccl_cosmology * cosmo, double k, double a, 
 				       gsl_spline2d * powerspl, double kmax_spline, int * status)
->>>>>>> master
 {
   double log_p_1;
   double deltak=1e-2; //step for numerical derivative;
   double deriv_pk_kmid,deriv2_pk_kmid;
   double lkmid;
   double lpk_kmid;
-<<<<<<< HEAD
-
-  lkmid = log(kmax)-2*deltak;
-
-=======
   
   lkmid = log(kmax_spline)-2*deltak;
   
->>>>>>> master
   int gslstatus =  gsl_spline2d_eval_e(powerspl, lkmid,a,NULL ,NULL ,&lpk_kmid);
   if(gslstatus != GSL_SUCCESS) {
     ccl_raise_gsl_warning(gslstatus, "ccl_power.c: ccl_power_extrapol_highk():");
@@ -1449,11 +1438,7 @@ static double ccl_power_extrapol_highk(ccl_cosmology * cosmo, double k, double a
 
 }
 
-<<<<<<< HEAD
-/*------ ROUTINE: ccl_power_extrapol_hxighk -----
-=======
 /*------ ROUTINE: ccl_power_extrapol_lowk ----- 
->>>>>>> master
 INPUT: ccl_cosmology * cosmo, a, k [1/Mpc]
 TASK: extrapolate power spectrum at low k
 */
