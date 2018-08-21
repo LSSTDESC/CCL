@@ -982,13 +982,13 @@ static double *get_lkarr(ccl_cosmology *cosmo,CCL_ClWorkspace *w,
   //First compute relevant k-range for this ell
   double kmin,kmax,lkmin,lkmax;
   if(l>w->l_limber) {
-    kmin=CCL_MAX(ccl_splines->K_MIN_DEFAULT,0.8*(l+0.5)/chimax);
+    kmin=CCL_MAX(ccl_splines->K_MIN,0.8*(l+0.5)/chimax);
     kmax=CCL_MIN(ccl_splines->K_MAX,1.2*(l+0.5)/chimin);
   }
   else {
     double xmin,xmax;
     limits_bessel(l,CCL_FRAC_RELEVANT,&xmin,&xmax);
-    kmin=CCL_MAX(ccl_splines->K_MIN_DEFAULT,xmin/chimax);
+    kmin=CCL_MAX(ccl_splines->K_MIN,xmin/chimax);
     kmax=CCL_MIN(ccl_splines->K_MAX,xmax/chimin);
     //Cap by maximum meaningful argument of the Bessel function
     kmax=CCL_MIN(kmax,2*(w->l_arr[w->n_ls-1]+0.5)/chimin); //Cap by 2 x inverse scale corresponding to l_max
@@ -1165,7 +1165,7 @@ static void get_k_interval(ccl_cosmology *cosmo,CCL_ClWorkspace *w,
 
   if(l<w->l_limber) {
     chimin=2*(l+0.5)/ccl_splines->K_MAX;
-    chimax=0.5*(l+0.5)/ccl_splines->K_MIN_DEFAULT;
+    chimax=0.5*(l+0.5)/ccl_splines->K_MIN;
   }
   else {
     if(cut_low_1) {
@@ -1184,7 +1184,7 @@ static void get_k_interval(ccl_cosmology *cosmo,CCL_ClWorkspace *w,
     }
     else {
       chimin=0.5*(l+0.5)/ccl_splines->K_MAX;
-      chimax=2*(l+0.5)/ccl_splines->K_MIN_DEFAULT;
+      chimax=2*(l+0.5)/ccl_splines->K_MIN;
     }
   }
 
