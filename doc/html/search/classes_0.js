@@ -1,6 +1,7 @@
 var searchData=
 [
   ['ccl_5fcltracer',['CCL_ClTracer',['../struct_c_c_l___cl_tracer.html',1,'']]],
+  ['ccl_5fclworkspace',['CCL_ClWorkspace',['../struct_c_c_l___cl_workspace.html',1,'']]],
   ['ccl_5fconfiguration',['ccl_configuration',['../structccl__configuration.html',1,'']]],
   ['ccl_5fcosmology',['ccl_cosmology',['../structccl__cosmology.html',1,'']]],
   ['ccl_5fdata',['ccl_data',['../structccl__data.html',1,'']]],

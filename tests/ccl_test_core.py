@@ -191,6 +191,8 @@ def test_cosmology_init():
                   baryons_power_spectrum='x')
     assert_raises(KeyError, ccl.Cosmology, params=params, 
                   mass_function='x')
+    assert_raises(KeyError, ccl.Cosmology, params=params, 
+                  halo_concentration='x')
 
 
 def test_cosmology_output():

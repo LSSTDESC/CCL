@@ -66,6 +66,7 @@ $(function() {
 </div><!-- top -->
 <div class="header">
   <div class="summary">
+<a href="#define-members">Macros</a> &#124;
 <a href="#func-members">Functions</a>  </div>
   <div class="headertitle">
 <div class="title">ccl_utils.c File Reference</div>  </div>
@@ -79,6 +80,15 @@ $(function() {
 <code>#include &quot;<a class="el" href="ccl__error_8h_source.html">ccl_error.h</a>&quot;</code><br />
 <code>#include &lt;gsl/gsl_errno.h&gt;</code><br />
 </div><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="define-members"></a>
+Macros</h2></td></tr>
+<tr class="memitem:aa26937410572c9a00842558b4a33d423"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__utils_8c.html#aa26937410572c9a00842558b4a33d423">CCL_GAMMA1</a>&#160;&#160;&#160;2.6789385347077476336556</td></tr>
+<tr class="separator:aa26937410572c9a00842558b4a33d423"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a01f846353bfd5d221345435decfd0f0e"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__utils_8c.html#a01f846353bfd5d221345435decfd0f0e">CCL_GAMMA2</a>&#160;&#160;&#160;1.3541179394264004169452</td></tr>
+<tr class="separator:a01f846353bfd5d221345435decfd0f0e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a645cdddf3d7bb08b636aa3f598dc2e8d"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__utils_8c.html#a645cdddf3d7bb08b636aa3f598dc2e8d">CCL_ROOTPI12</a>&#160;&#160;&#160;21.269446210866192327578</td></tr>
+<tr class="separator:a645cdddf3d7bb08b636aa3f598dc2e8d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
 <tr class="memitem:aa10bf558879f2e45f03c8487701db157"><td class="memItemLeft" align="right" valign="top">double *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__utils_8c.html#aa10bf558879f2e45f03c8487701db157">ccl_linear_spacing</a> (double xmin, double xmax, int N)</td></tr>
@@ -91,10 +101,83 @@ Functions</h2></td></tr>
 <tr class="separator:ae1ad6daadfafe5d994c3ffa6a84caca5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2d6a8bee4886837a266814727396fbf1"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__utils_8c.html#a2d6a8bee4886837a266814727396fbf1">ccl_spline_eval</a> (double x, <a class="el" href="struct_spl_par.html">SplPar</a> *spl)</td></tr>
 <tr class="separator:a2d6a8bee4886837a266814727396fbf1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aea1317bf497149d8d7a9d833953238c9"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__utils_8c.html#aea1317bf497149d8d7a9d833953238c9">ccl_j_bessel</a> (int l, double x)</td></tr>
+<tr class="separator:aea1317bf497149d8d7a9d833953238c9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a55f9fd0f849315fcadd49d66e4ff2cf8"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__utils_8c.html#a55f9fd0f849315fcadd49d66e4ff2cf8">ccl_spline_free</a> (<a class="el" href="struct_spl_par.html">SplPar</a> *spl)</td></tr>
 <tr class="separator:a55f9fd0f849315fcadd49d66e4ff2cf8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
+<h2 class="groupheader">Macro Definition Documentation</h2>
+<a id="aa26937410572c9a00842558b4a33d423"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa26937410572c9a00842558b4a33d423">&#9670;&nbsp;</a></span>CCL_GAMMA1</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define CCL_GAMMA1&#160;&#160;&#160;2.6789385347077476336556</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a01f846353bfd5d221345435decfd0f0e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a01f846353bfd5d221345435decfd0f0e">&#9670;&nbsp;</a></span>CCL_GAMMA2</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define CCL_GAMMA2&#160;&#160;&#160;1.3541179394264004169452</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a645cdddf3d7bb08b636aa3f598dc2e8d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a645cdddf3d7bb08b636aa3f598dc2e8d">&#9670;&nbsp;</a></span>CCL_ROOTPI12</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define CCL_ROOTPI12&#160;&#160;&#160;21.269446210866192327578</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <h2 class="groupheader">Function Documentation</h2>
+<a id="aea1317bf497149d8d7a9d833953238c9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aea1317bf497149d8d7a9d833953238c9">&#9670;&nbsp;</a></span>ccl_j_bessel()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double ccl_j_bessel </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>l</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>x</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="aa10bf558879f2e45f03c8487701db157"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aa10bf558879f2e45f03c8487701db157">&#9670;&nbsp;</a></span>ccl_linear_spacing()</h2>
 

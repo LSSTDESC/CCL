@@ -16,7 +16,7 @@ if environ.get("CLASS_PARAM_DIR") is None:
 
 from pyccl import ccllib as lib
 
-from pyccl import core, constants, background, power, massfunction
+from pyccl import core, constants, background, power, massfunction, halomodel
 
 # Core data structures
 from pyccl.core import Parameters, Cosmology
@@ -29,7 +29,7 @@ from pyccl.background import growth_factor, growth_factor_unnorm, \
 
 # Power spectrum calculations and sigma8
 from pyccl.power import linear_matter_power, nonlin_matter_power, sigmaR, \
-    sigma8
+    sigmaV, sigma8
 
 # Halo mass function
 from pyccl.massfunction import massfunc, massfunc_m2r, sigmaM, halo_bias
@@ -47,6 +47,10 @@ from pyccl.constants import CLIGHT_HMPC, MPC_TO_METER, PC_TO_METER, \
 
 from pyccl.correlation import correlation, correlation_3d
 
+# Properties of haloes
+from pyccl.halomodel import halomodel_matter_power, halo_concentration
+
+# Specific to massive neutrinos
 from pyccl.neutrinos import Omeganuh2, nu_masses
 
 # Expose function to toggle debug mode
