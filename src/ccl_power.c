@@ -1744,7 +1744,7 @@ double ccl_sigmaV(ccl_cosmology *cosmo,double R,double a,int *status)
   F.function=&sigmaV_integrand;
   F.params=&par;
   double sigma_V;
-	int gslstatus = gsl_integration_cquad(&F, log10(ccl_splines->K_MIN_DEFAULT), log10(ccl_splines->K_MAX),
+	int gslstatus = gsl_integration_cquad(&F, log10(ccl_splines->K_MIN), log10(ccl_splines->K_MAX),
 																				0.0, ccl_gsl->INTEGRATION_SIGMAR_EPSREL,
 																				workspace,&sigma_V,NULL,NULL);
 
