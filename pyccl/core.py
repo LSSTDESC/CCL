@@ -25,7 +25,6 @@ transfer_function_types = {
 
 matter_power_spectrum_types = {
     'halo_model':   lib.halo_model,
-    'halomodel':    lib.halo_model,
     'halofit':      lib.halofit,
     'linear':       lib.linear,
     'emu':          lib.emu
@@ -67,17 +66,27 @@ baryons_power_spectrum_types = {
 valid_muSig_transfers = {'boltzmann_class', 'class'}
 
 mass_function_types = {
-    'angulo':   lib.angulo,
-    'tinker':   lib.tinker,
-    'tinker10': lib.tinker10,
-    'watson':   lib.watson
+    'angulo':      lib.angulo,
+    'tinker':      lib.tinker,
+    'tinker10':    lib.tinker10,
+    'watson':      lib.watson,
+    'shethtormen': lib.shethtormen
 }
 """dict: Types of halo mass function models. The strings represent possible choices the user can specify for different halo mass function models.
 
 """
 
+halo_concentration_types = {
+    'bhattacharya2011':          lib.bhattacharya2011,
+    'duffy2008':                 lib.duffy2008,
+    'constant_concentration':    lib.constant_concentration,
+}
+"""dict: Types of halo concentration models. The strings represent possible choices the user can specify for different halo concentration models.
+
+"""
+
 emulator_neutrinos_types = {
-	'strict': 	lib.emu_strict,
+	'strict':   lib.emu_strict,
 	'equalize': lib.emu_equalize
 }
 
@@ -352,6 +361,8 @@ class Cosmology(object):
             baryonic effects to be implemented. Defaults to `nobaryons`.
         mass_function (:obj:`str`, optional): The mass function to use. 
             Defaults to `tinker` (2010).
+        halo_concentration (:obj:`str`, optional): The halo concentration relation to use. 
+            Defaults to Duffy et al. (2008) `duffy2008`.
 
     """
     
@@ -364,7 +375,9 @@ class Cosmology(object):
                  transfer_function='boltzmann_class',
                  matter_power_spectrum='halofit',
                  baryons_power_spectrum='nobaryons',
-                 mass_function='tinker10', emulator_neutrinos='strict'):
+                 mass_function='tinker10',
+                 halo_concentration='duffy2008',
+                 emulator_neutrinos='strict'):
         """Creates a wrapper for ccl_cosmology.
 
         Args:
@@ -380,6 +393,8 @@ class Cosmology(object):
             baryonic effects to be implemented. Defaults to `nobaryons`.
             mass_function (:obj:`str`, optional): The mass function to use. 
             Defaults to `tinker` (2010).
+            halo_concentration (:obj:`str`, optional): The halo concentration relation to use. 
+            Defaults to Duffy et al. (2008) for virial halo defintion `duffy2008`.
             emulator_neutrinos: `str`, optional): If using the emulator for 
             the power spectrum, specified treatment of unequal neutrinos.
             Options are 'strict', which will raise an error and quit if the 
@@ -464,6 +479,11 @@ class Cosmology(object):
                                   "Available options are: %s" \
                                  % (mass_function, 
                                     mass_function_types.keys()) )
+            if halo_concentration not in halo_concentration_types.keys():
+                raise KeyError( "'%s' is not a valid halo_concentration type. "
+                                  "Available options are: %s" \
+                                 % (halo_concentration, 
+                                    halo_concentration_types.keys()) )
             if emulator_neutrinos not in emulator_neutrinos_types.keys():
                 raise ValueError( "'%s' is not a valid emulator neutrinos method. "
                                   "Available options are: %s" \
@@ -500,6 +520,8 @@ class Cosmology(object):
                             baryons_power_spectrum_types[baryons_power_spectrum]
             config.mass_function_method = \
                             mass_function_types[mass_function]
+            config.halo_concentration_method = \
+                            halo_concentration_types[halo_concentration]
             config.emulator_neutrinos_method = \
                             emulator_neutrinos_types[emulator_neutrinos]
             

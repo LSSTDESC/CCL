@@ -14,7 +14,6 @@
 #include "gsl/gsl_roots.h"
 #include "ccl_params.h"
 
-
 /* --------- ROUTINE: h_over_h0 ---------
 INPUT: scale factor, cosmology
 TASK: Compute E(a)=H(a)/H0
@@ -1101,7 +1100,10 @@ void ccl_scale_factor_of_chis(ccl_cosmology * cosmo, int nchi, double chi[], dou
 
 double ccl_growth_factor(ccl_cosmology * cosmo, double a, int * status)
 {
-  if(a>1.) {
+  if(a==1.){
+    return 1.;
+  }
+  else if(a>1.) {
     *status = CCL_ERROR_COMPUTECHI;
     strcpy(cosmo->status_message,"ccl_background.c: scale factor cannot be larger than 1.\n");
     ccl_check_status(cosmo,status);

@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['a',['a',['../struct_om_nuh2__params.html#a99501948ae400494a980f4dea7ed80db',1,'OmNuh2_params']]],
+  ['a',['a',['../struct_int__one__halo___par.html#a23af468385a7645030d646f4874dc72c',1,'Int_one_halo_Par::a()'],['../struct_int__two__halo___par.html#a05cb880a3c368cc0d3e67c594d5c5692',1,'Int_two_halo_Par::a()']]],
   ['a_5fs',['A_s',['../structccl__parameters.html#a315b41a853e710ee2cb280f35e65c191',1,'ccl_parameters::A_s()'],['../namespaceccl__test__distances.html#a4fee99b90c7ad9e42ac56246005f2f99',1,'ccl_test_distances.A_s()'],['../namespaceccl__test__growth.html#ae7c040656adf879c79a4f0266f35e7e7',1,'ccl_test_growth.A_s()']]],
   ['a_5fspline_5fmax',['A_SPLINE_MAX',['../structccl__spline__params.html#aa227bbd087fee06f845b9de60ff09556',1,'ccl_spline_params']]],
   ['a_5fspline_5fmin',['A_SPLINE_MIN',['../structccl__spline__params.html#a43f7b575552fac8d54fd75bd60e42cc7',1,'ccl_spline_params']]],
@@ -11,7 +11,6 @@ var searchData=
   ['a_5fspline_5fna_5fpk',['A_SPLINE_NA_PK',['../structccl__spline__params.html#a1e8edb8505e8a05d62df4d92999dacfc',1,'ccl_spline_params']]],
   ['a_5fspline_5fnlog',['A_SPLINE_NLOG',['../structccl__spline__params.html#a53ec49c7af23118fae9868df9569ff72',1,'ccl_spline_params']]],
   ['a_5fspline_5fnlog_5fpk',['A_SPLINE_NLOG_PK',['../structccl__spline__params.html#afebd711662e73360a7b18968ac5e8f40',1,'ccl_spline_params']]],
-  ['accel',['accel',['../struct_om_nuh2__params.html#a0dea67e6081bd4ae3ea01c7a5a801182',1,'OmNuh2_params']]],
   ['accelerator',['accelerator',['../structccl__data.html#ad8d2aef21dc9cf1fdee8e4afe3778b33',1,'ccl_data']]],
   ['accelerator_5fachi',['accelerator_achi',['../structccl__data.html#a813c89f4e504a5954b47d7b7797c49a3',1,'ccl_data']]],
   ['accelerator_5fd',['accelerator_d',['../structccl__data.html#aef120c743423fc4967e56fe0f60b52c8',1,'ccl_data']]],
@@ -21,5 +20,6 @@ var searchData=
   ['alphab',['alphab',['../structeh__struct.html#a623316721501ca221093de25e216ac9f',1,'eh_struct']]],
   ['alphac',['alphac',['../structeh__struct.html#a58de15592e924e87fe1b838599579a70',1,'eh_struct']]],
   ['alphahmf',['alphahmf',['../structccl__data.html#ad7fad40bf36fed46f5879104247de00b',1,'ccl_data']]],
-  ['avec',['avec',['../namespacetest__neutrino3p04__emu.html#ab8c4bce75a1656e3bd59c06088e516eb',1,'test_neutrino3p04_emu']]]
+  ['args',['args',['../namespacerun__tests.html#a5b1510476d0793c7c91a6e0f733d7c29',1,'run_tests']]],
+  ['argv',['argv',['../namespaceccl__test__power.html#a1b5fdf14c4f06d4a8722a7c41d8dbe1a',1,'ccl_test_power.argv()'],['../namespacerun__tests.html#a8a7b00d6f8aa6bda446535ba55c777fe',1,'run_tests.argv()']]]
 ];
