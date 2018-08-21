@@ -16,9 +16,11 @@ A_s = 2.1e-9
 n_s = 0.96
 
 # Values that are different for the different models
-Omega_v_vals = np.array([0.7, 0.7, 0.7, 0.65, 0.75])
-w0_vals = np.array([-1.0, -0.9, -0.9, -0.9, -0.9])
-wa_vals = np.array([0.0, 0.0, 0.1, 0.1, 0.1])
+Omega_v_vals = np.array([0.7, 0.7, 0.7, 0.65, 0.75, 0.7, 0.7, 0.7, 0.7])
+w0_vals = np.array([-1.0, -0.9, -0.9, -0.9, -0.9, -0.9, -0.9, -0.9, -0.9])
+wa_vals = np.array([0.0, 0.0, 0.1, 0.1, 0.1, 0.0, 0.0, 0.0, 0.0])
+mu0_vals = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.1, -0.1, 0.1, -0.1])
+Sig0_vals = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.1, -0.1, -0.1, 0.1])
 
 def read_growth_test_file():
     """
@@ -29,15 +31,28 @@ def read_growth_test_file():
     dat = np.genfromtxt(join(dirname(__file__),"benchmark/growth_model1-5.txt")).T
     assert(dat.shape == (6,6))
     
-    # Split into redshift column and growth(z) columns
+    """# Load data with mu / Sigma parameterisation of modified gravity
+    dat_MG = np.genfromtxt(join(dirname(__file__),"benchmark/growth_model6-9_MG.txt")).T
+    assert(data.shape == (5, 6))
+    
+    # Check the columns containing redshifts in each file contain the same quantity
+    if len(dat[0])!=len(dat_MG[0]):
+		raise(ValueError, "Growth benchmarks for modified gravity models must use same redshifts as other models.")
+    for i in range(len(dat[0])):
+		if dat[i]!=dat_MG[i]:
+			raise(ValueError, "Growth benchmarks for modified gravity models must use same redshifts as other models.")"""
+    
+    # Split into redshift column and growth(z) columns, and attach all growth columns
     z = dat[0]
+    #gfac = np.column_stack((dat[1:], dat_MG[1:]))
     gfac = dat[1:]
+    
     return z, gfac
 
 # Set-up test data
 z, gfac = read_growth_test_file()
 
-def compare_growth(z, gfac_bench, Omega_v, w0, wa):
+def compare_growth(z, gfac_bench, Omega_v, w0, wa, mu_0, sigma_0):
     """
     Compare growth factor calculated by pyccl with the values in the benchmark 
     file. This test only works if radiation is explicitly set to 0.
@@ -50,7 +65,7 @@ def compare_growth(z, gfac_bench, Omega_v, w0, wa):
     
     p = ccl.Parameters(Omega_c=Omega_c, Omega_b=Omega_b, Neff=Neff, m_nu=m_nu,
                        h=h, A_s=A_s, n_s=n_s, Omega_k=Omega_k,
-                       w0=w0, wa=wa)                 
+                       w0=w0, wa=wa, mu_0=mu_0, sigma_0 = sigma_0)                 
                        
     p.parameters.Omega_g = 0. # Hack to set to same value used for benchmarks
     cosmo = ccl.Cosmology(p)
@@ -65,23 +80,39 @@ def compare_growth(z, gfac_bench, Omega_v, w0, wa):
 
 def test_growth_model_0():
     i = 0
-    compare_growth(z, gfac[i], Omega_v_vals[i], w0_vals[i], wa_vals[i])
+    compare_growth(z, gfac[i], Omega_v_vals[i], w0_vals[i], wa_vals[i], mu0_vals[i], Sig0_vals[i])
 
 def test_growth_model_1():
     i = 1
-    compare_growth(z, gfac[i], Omega_v_vals[i], w0_vals[i], wa_vals[i])
+    compare_growth(z, gfac[i], Omega_v_vals[i], w0_vals[i], wa_vals[i], mu0_vals[i], Sig0_vals[i])
 
 def test_growth_model_2():
     i = 2
-    compare_growth(z, gfac[i], Omega_v_vals[i], w0_vals[i], wa_vals[i])
+    compare_growth(z, gfac[i], Omega_v_vals[i], w0_vals[i], wa_vals[i], mu0_vals[i], Sig0_vals[i])
 
 def test_growth_model_3():
     i = 3
-    compare_growth(z, gfac[i], Omega_v_vals[i], w0_vals[i], wa_vals[i])
+    compare_growth(z, gfac[i], Omega_v_vals[i], w0_vals[i], wa_vals[i], mu0_vals[i], Sig0_vals[i])
 
 def test_growth_model_4():
     i = 4
-    compare_growth(z, gfac[i], Omega_v_vals[i], w0_vals[i], wa_vals[i])
+    compare_growth(z, gfac[i], Omega_v_vals[i], w0_vals[i], wa_vals[i], mu0_vals[i], Sig0_vals[i])
+    
+"""def test_growth_model_5():
+    i = 5
+    compare_growth(z, gfac[i], Omega_v_vals[i], w0_vals[i], wa_vals[i], mu0_vals[i], Sig0_vals[i])
+    
+def test_growth_model_6():
+    i = 6
+    compare_growth(z, gfac[i], Omega_v_vals[i], w0_vals[i], wa_vals[i], mu0_vals[i], Sig0_vals[i])
+
+def test_growth_model_7():
+    i = 7
+    compare_growth(z, gfac[i], Omega_v_vals[i], w0_vals[i], wa_vals[i], mu0_vals[i], Sig0_vals[i])
+    
+def test_growth_model_8():
+    i = 8
+    compare_growth(z, gfac[i], Omega_v_vals[i], w0_vals[i], wa_vals[i], mu0_vals[i], Sig0_vals[i])"""
 
 
 def test_mgrowth():

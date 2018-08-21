@@ -505,8 +505,8 @@ class Cosmology(object):
             # Check for valid transfer fn / modified gravity parameters
             if ( (abs(mu_0)>1e-14 or abs(sigma_0)>1e-14) and \
               transfer_function not in valid_muSig_transfers):
-				 raise ValueError("transfer_function '%s' cannot be used with \
-				                  mu_0 or sigma_0 not equal to zero." \
+				 raise ValueError("transfer_function '%s' cannot be used with "
+				                  "mu_0 or sigma_0 not equal to zero." \
                                  % transfer_function) 
             
             # Assign values to new ccl_configuration object

@@ -28,7 +28,7 @@ CTEST_DATA(growth) {
 
 // Read the fixed format file containing all the growth factor
 // benchmarks
-static void read_growth_test_file(double z[6], double gf[5][6])
+static void read_growth_test_file(double z[6], double gf[9][6])
 {
   //Growth is normalized to ~a at early times
   

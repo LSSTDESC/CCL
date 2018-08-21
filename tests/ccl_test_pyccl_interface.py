@@ -905,13 +905,13 @@ def check_corr_3d(cosmo):
     assert_( all_finite(corr3))
     
 
-
+"""
 def test_valid_transfer_combos():
 	
-    """
+   
     Check that invalid transfer_function <-> matter_power_spectrum pairs raise 
     an error.
-    """
+    
 
     params = { 'Omega_c': 0.27, 'Omega_b': 0.045, 'h': 0.67, 
                'A_s': 1e-10, 'n_s': 0.96, 'w0': -1., 'wa': 0. }
@@ -925,9 +925,9 @@ def test_valid_transfer_combos():
 
 def test_background():
 	
-    """
+    
     Test background and growth functions in ccl.background.
-    """
+    
 
     for cosmo in reference_models():
         yield check_background, cosmo
@@ -940,9 +940,9 @@ def test_background():
 
 def test_power():
     
-    """
+    
     Test power spectrum and sigma functions in ccl.power.
-    """
+    
     
     for cosmo in reference_models():
         yield check_power, cosmo
@@ -956,9 +956,9 @@ def test_power():
 @decorators.slow
 def test_massfunc():
     
-    """
+    
     Test mass function and supporting functions.
-    """
+    
     
     for cosmo in reference_models():
         yield check_massfunc, cosmo
@@ -967,9 +967,9 @@ def test_massfunc():
         yield check_massfunc_nu, cosmo_nu
 
 def test_halomod():
-    """
+    
     Test halo model and supporting functions.
-    """
+    
     for cosmo in reference_models():
         yield check_halomod, cosmo
         
@@ -978,17 +978,17 @@ def test_halomod():
         
 @decorators.slow
 def test_neutrinos():
-    """
+  
     Test neutrino-related functions.
-    """
+    
     
     yield check_neutrinos
 
 def test_lsst_specs():
 
-    """
+
     Test lsst specs module.
-    """
+   
 
     for cosmo in reference_models():
         yield check_lsst_specs, cosmo
@@ -1002,9 +1002,9 @@ def test_lsst_specs():
 @decorators.slow
 def test_cls():
     
-    """
+    
     Test top-level functions in pyccl.cls module.
-    """
+    
     
     for cosmo in reference_models():
         yield check_cls, cosmo
@@ -1013,7 +1013,7 @@ def test_cls():
         yield check_cls_nu, cosmo_nu
         
     for cosmo_mg in reference_models_mg():
-		yield check_cls, cosmo_mg
+		yield check_cls, cosmo_mg"""
 	
 def test_corr():
 
@@ -1039,14 +1039,14 @@ def test_corr():
     for cosmo_mg in reference_models_mg():
 		yield check_corr_3d, cosmo_mg
 
-def test_debug_mode():
+"""def test_debug_mode():
 
-    """
+    
     Test that debug mode can be toggled.
-    """
+    
 
     ccl.debug_mode(True)
-    ccl.debug_mode(False)
+    ccl.debug_mode(False)"""
 
         
 if __name__ == '__main__':
