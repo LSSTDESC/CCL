@@ -46,7 +46,6 @@ ccl_gsl_params * ccl_gsl=NULL; // Global variable
 void ccl_cosmology_read_config(void)
 {
 
-  printf("here in read config\n");
   int CONFIG_LINE_BUFFER_SIZE=100;
   int MAX_CONFIG_VAR_LEN=100;
   FILE *fconfig;
@@ -65,8 +64,6 @@ void ccl_cosmology_read_config(void)
     // Use default ini file
     param_file = EXPAND_STR(__CCL_DATA_DIR__) "/ccl_params.ini";
   }
-  
-  printf("param file=%s\n", param_file);
   
   if ((fconfig=fopen(param_file, "r")) == NULL) {
     char msg[256];
@@ -128,8 +125,6 @@ void ccl_cosmology_read_config(void)
       if(strcmp(var_name,"GSL_ODE_GROWTH_EPSREL")==0) ccl_gsl->ODE_GROWTH_EPSREL=var_dbl;
     }
   }
-  
-  printf("kmin in read=%f\n", ccl_splines->K_MIN);
 
   fclose(fconfig);
 }
@@ -386,8 +381,6 @@ ccl_parameters ccl_parameters_create(
   if(ccl_splines==NULL || ccl_gsl==NULL) {
     ccl_cosmology_read_config();
   }
-  
-  printf("kmin, core=%f\n", ccl_splines->K_MIN);
   
   /* Exit gracefully if config file can't be opened. */
   if(ccl_splines==NULL || ccl_gsl==NULL) {

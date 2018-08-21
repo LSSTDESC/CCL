@@ -1053,23 +1053,17 @@ static void ccl_cosmology_compute_power_bbks(ccl_cosmology * cosmo, int * status
   //These are the limits of the splining range
   cosmo->data.k_min_lin=ccl_splines->K_MIN;
   cosmo->data.k_min_nl=ccl_splines->K_MIN;
-  printf("kmin=%f\n", ccl_splines->K_MIN);
   cosmo->data.k_max_lin=ccl_splines->K_MAX;
   cosmo->data.k_max_nl=ccl_splines->K_MAX;
   double kmin = cosmo->data.k_min_lin;
-  printf("kmin=%f\n", kmin);
   double kmax = ccl_splines->K_MAX;
-  printf("kmax=%f\n", kmax);
+  
   //Compute nk from number of decades and N_K = # k per decade
   double ndecades = log10(kmax) - log10(kmin);
-  printf("ndecades=%f\n", ndecades);
-  printf("ccl spliens nk=%d\n", ccl_splines->N_K);
   int nk = (int)ceil(ndecades*ccl_splines->N_K);
-  printf("n_k=%d\n", nk);
   double amin = ccl_splines->A_SPLINE_MINLOG_PK;
   double amax = ccl_splines->A_SPLINE_MAX;
   int na = ccl_splines->A_SPLINE_NA_PK+ccl_splines->A_SPLINE_NLOG_PK-1;
-  printf("n_a=%d\n", na);
   
   // Exit if sigma8 wasn't specified
   if (isnan(cosmo->params.sigma8)) {
