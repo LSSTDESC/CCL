@@ -31,19 +31,36 @@ def nonlin_matter_power(cosmo, k, a):
     return _vectorize_fn2(lib.nonlin_matter_power, 
                           lib.nonlin_matter_power_vec, cosmo, k, a)
 
-def sigmaR(cosmo, R):
+def sigmaR(cosmo, R, a=1.):
     """RMS variance in a top-hat sphere of radius R in Mpc.
 
     Args:
         cosmo (:obj:`ccl.cosmology`): Cosmological parameters.
         R (float or array_like): Radius; Mpc.
+        a (float): optional scale factor; defaults to a=1
 
     Returns:
-        float or array_like: RMS variance in top-hat sphere; Mpc.
+        float or array_like: RMS variance in the density field in top-hat sphere; Mpc.
 
     """
-    return _vectorize_fn(lib.sigmaR, 
-                         lib.sigmaR_vec, cosmo, R)
+    return _vectorize_fn2(lib.sigmaR, 
+                         lib.sigmaR_vec, cosmo, R, a)
+
+def sigmaV(cosmo, R, a=1.):
+    """RMS variance in the displacement field in a top-hat sphere of radius R.
+    The linear displacement field is the gradient of the linear density field.
+
+    Args:
+        cosmo (:obj:`ccl.cosmology`): Cosmological parameters.
+        R (float or array_like): Radius; Mpc.
+        a (float): optional scale factor; defaults to a=1
+
+    Returns:
+        sigmaV (float or array_like): RMS variance in the displacement field in top-hat sphere.
+
+    """
+    return _vectorize_fn2(lib.sigmaV, 
+                         lib.sigmaV_vec, cosmo, R, a)
 
 def sigma8(cosmo):
     """RMS variance in a top-hat sphere of radius 8 Mpc/h.
