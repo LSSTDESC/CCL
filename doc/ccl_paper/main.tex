@@ -794,7 +794,9 @@ Comoving radial distances, the growth factor and distance moduli were compared a
   \mathcal{A} \equiv \frac{|D_{\tt CCL}(z)-D_{i}(z)|}{D_i(z)}
 \end{equation}
 and analogously defined for the comoving radial distance and distance moduli.
-Figure \ref{fig:distancegrow} summarizes our results. The left panel shows the distance accuracy achieved for different cosmological models (curves of different thickness) as a function of redshift, which is always better than $10^{-6}$. While this Figure relies on independent {\tt CLASS} outputs of the distance, {\tt astropy} returns distance values that are slightly more discrepant with \ccl. We believe this to be caused by the implementation of neutrino masses in {\tt astropy} being different from \ccl. Hence, true accuracy is probably better than quoted and closer to the value reported in the first row, as shown by Fig. \ref{fig:distancegrow}. The right panel shows the growth factor accuracy, which is $<10^{-5}$ everywhere. The accuracy achieved for distance modulus computations, though not shown, was $10^{-3}$.
+Figure \ref{fig:distancegrow} summarizes our results. The left panel shows the distance accuracy achieved for different cosmological models (curves of different thickness) as a function of redshift, which is always better than $10^{-6}$.
+
+Additional, independent distance benchmarks were produced by {\tt astropy} \citep{astropy}. We find that the agreement between \ccl and {\tt astropy} is only at the $10^{-3}$ level for cosmologies with massive neutrinos, in contrast to the much better agreement shown in left panel of Figure~\ref{fig:distancegrow}, which relies on benchmarks produced by {\tt CLASS}. We believe that this is due to the fact that while \ccl uses the full phase-space integral in computing the massive neutrino density as defined in Eq. (\ref{phasespacenu}), while {\tt astropy} uses a fitting function which is itself only accurate at a $10^{-3}$ level. Hence, true accuracy is probably better than quoted and closer to the value reported in the first row, as shown by Fig. \ref{fig:distancegrow}.
 
 \input{table_testcosmo}
 
