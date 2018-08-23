@@ -6,8 +6,7 @@
     \hline
     Quantity & Equation/Reference & Cosmologies & Range & Accuracy, $\mathcal{A}$ & Figure \\
     \hline
-    Comoving radial distance, $\chi$ & (\ref{eq:comrdist}) & CCL1-5 & $0.01 \leq z\leq 1000$ &  $5\times 10^{-7}$ & Fig. \ref{fig:distancegrow}\\
-    Comoving radial distance, $\chi$ & (\ref{eq:comrdist}) & CCL7-11 & $0.01 \leq z\leq 1000$ &  $7\times 10^{-4}$ & Fig. \ref{fig:distancegrow}\\
+    Comoving radial distance, $\chi$ & (\ref{eq:comrdist}) & CCL1-5,7-11 & $0.01 \leq z\leq 1000$ &  $5\times 10^{-7}$ & Fig. \ref{fig:distancegrow}\\
     Growth factor, $D$ & (\ref{eq:growth}) & CCL1-5 &  $0.01 \leq z\leq 1000 $ &  $5\times 10^{-6}$ & Fig. \ref{fig:distancegrow}\\
     $\sigma(M)$ (BBKS) & (\ref{eq:sigR}) & CCL1-3 &  $10^{10}\leq M/{\rm M}_\odot\leq 10^{16}$ &  $10^{-4}$ & Fig. \ref{fig:hmf}\\
     $\log[\sigma^{-1}(M)]$ (BBKS) & (\ref{eq:tildesig}) & CCL1-3 &  $10^{10}\leq M/{\rm M}_\odot\leq 10^{16}$ &  $5\times 10^{-3}$ & Fig. \ref{fig:hmf}\\
@@ -28,6 +27,6 @@
     $C_\ell$ clustering {\tt Angpow} & (\ref{eq:cls}),(\ref{eq:transfer_nc}),(\ref{eq:transfer_rsd}) & CCL1 & $2 \leq \ell < 1000$ & $3\times 10^{-3}$  & Fig. \ref{fig:angpow} (right panel)\\
     \hline
   \end{tabular}
-  \caption{Summary of \ccl validation tests and accuracy achieved. These tests can be reproduced by the user and are integrated into the \ccl repository. The second row quotes the accuracy of the distance tests for cosmologies with neutrinos, which is degraded with respect to Fig. \ref{fig:distancegrow}. While this Figure relies on independent {\tt CLASS} outputs of the distance, {\tt astropy} returns distance values that are slightly more discrepant with \ccl. We believe this to be cause by the implementation of neutrino masses in {\tt astropy} being different from \ccl. Hence, true accuracy is probably better than quoted and closer to the value reported in the first row, as shown by Fig. \ref{fig:distancegrow}. Notice also that the last row of the table compares the {\tt Angpow} output for the clustering $C_\ell$ to the non-Limber implementation available in \ccl. The row immediately above demonstrates that the non-Limber method can reproduce the Limber case at high $\ell$ with sufficient accuracy compared to the expected cosmic variance. For the BCM case, we compared the fractional impact of baryons on the matter power spectrum by dividing the $P(k)$ prediction by the dark-matter-only case. Hence, the choice of cosmology becomes irrelavant in this case.}
+  \caption{Summary of \ccl validation tests and accuracy achieved. These tests can be reproduced by the user and are integrated into the \ccl repository. Notice that the last row of the table compares the {\tt Angpow} output for the clustering $C_\ell$ to the non-Limber implementation available in \ccl. The row immediately above demonstrates that the non-Limber method can reproduce the Limber case at high $\ell$ with sufficient accuracy compared to the expected cosmic variance. For the BCM case, we compared the fractional impact of baryons on the matter power spectrum by dividing the $P(k)$ prediction by the dark-matter-only case. Hence, the choice of cosmology becomes irrelavant in this case.}
   \label{tab:tests}
 \end{sidewaystable*}
