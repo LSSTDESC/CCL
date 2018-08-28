@@ -133,7 +133,7 @@ To download the latest version of \ccl:
 $ git clone https://github.com/LSSTDESC/CCL.git
 $ cd CCL
 \end{verbatim}
-or download and extract the latest stable release from [here](https://github.com/LSSTDESC/CCL/releases). Then, from the base \ccl directory run:
+or download and extract the latest stable release from \url{https://github.com/LSSTDESC/CCL/releases}. Then, from the base \ccl directory run:
 \begin{verbatim}
 $ mkdir build && cd build
 $ cmake ..
@@ -176,7 +176,7 @@ $ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
 $ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/bin
 \end{verbatim}
 
-To make sure that everything is working properly, you can run all unit tests after installation by running from the root \ccl directory:
+To make sure that everything is working properly, you can run all unit tests after installation by running \textbf{from the root \ccl directory}:
 \begin{verbatim}
 $ check_ccl
 \end{verbatim}
@@ -254,11 +254,11 @@ to the one you want to use. You can specify which C compiler will be used to com
 $ export CC=gcc
 \end{verbatim}
 
-If upon running the C tests you get an error from {\tt CLASS} saying it cannot find the file {\tt sBBN\_2017.dat}, your system is not finding the local copy of {\tt CLASS}. To solve this, do
+If upon running the C tests you get an error from {\tt CLASS} saying it cannot find the file {\tt sBBN\_2017.dat}, it means that the {\tt CLASS} parameter files are not properly installed on your system. Make sure you have indeed installed the C library by running:
 \begin{verbatim}
-$ export CLASS_PARAM_DIR=your_ccl_path/CCL/build/extern/share/class/
+$ make install
 \end{verbatim}
-or add this to your {\tt .bashrc}.
+from the  {\tt CCL/build} directory.
 
 \subsection{Compiling against an external version of CLASS}
 \label{sec:extclass}
