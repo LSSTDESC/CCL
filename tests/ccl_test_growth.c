@@ -4,7 +4,7 @@
 #include <math.h>
 
 // The tolerance in D(z) 
-#define GROWTH_TOLERANCE 6.0e-6
+#define GROWTH_TOLERANCE 6e-6
 #define MGROWTH_TOLERANCE 5.0e-5
 
 CTEST_DATA(growth) {
@@ -86,8 +86,8 @@ static void compare_growth(int model, struct growth_data * data)
   // Make the parameter set from the input data
   // Values of some parameters depend on the model index
   ccl_parameters params = ccl_parameters_create(data->Omega_c, data->Omega_b, data->Omega_k[model], data->Neff, data->mnu, data->mnu_type, data->w_0[model], data->w_a[model], data->h, data->A_s, data->n_s,-1,-1,-1,-1,NULL,NULL, &status);
-  params.Omega_g=0; //enforce no radiation
-  params.Omega_l = 1.-params.Omega_m-params.Omega_k; //reomcpute Omega_l without radiation
+  params.Omega_g=0;//enforce no radiation
+  params.Omega_l = 1.-params.Omega_m-params.Omega_k; //recompute Omega_l without radiation
   // Make a cosmology object from the parameters with the default configuration
   ccl_cosmology * cosmo = ccl_cosmology_create(params, default_config);
   ASSERT_NOT_NULL(cosmo);
@@ -125,6 +125,10 @@ static void check_mgrowth(void)
   
   params1=ccl_parameters_create(0.25,0.05,0,0,&mnuval, 1, -1,0,0.7,2.1E-9,0.96,-1,-1,-1,-1,NULL,NULL, &status);
   params2=ccl_parameters_create(0.25,0.05,0,0,&mnuval, 1, -1,0,0.7,2.1E-9,0.96,-1,-1,-1,nz_mg,z_mg,df_mg, &status);
+  params1.Omega_g=0; //enforce no radiation
+  params1.Omega_l = 1.-params1.Omega_m-params1.Omega_k; //reomcpute Omega_l without radiation
+  params2.Omega_g=0; //enforce no radiation
+  params2.Omega_l = 1.-params2.Omega_m-params2.Omega_k; //reomcpute Omega_l without radiation
   cosmo1=ccl_cosmology_create(params1,default_config);
   cosmo2=ccl_cosmology_create(params2,default_config);
 
@@ -132,7 +136,6 @@ static void check_mgrowth(void)
   //This case has an analytic solution, given by D(a) = D_0(a)*exp(K*(a-1))
   //Here we check the growth computed by the library with the analytic solution.
   for(ii=0;ii<nz_mg;ii++) {
-    printf("z=%e\n",z_mg[ii]);
     double a=1./(1+z_mg[ii]);
     double d1=ccl_growth_factor(cosmo1,a,&status);
     double d2=ccl_growth_factor(cosmo2,a,&status);
