@@ -4,7 +4,8 @@
 #include <math.h>
 
 // The tolerance in chi for all the
-#define DISTANCES_TOLERANCE 1.0e-4
+#define DISTANCES_TOLERANCE 5.0e-7
+#define DM_TOLERANCE 1.0E-3
 
 CTEST_DATA(distances) {
   double Omega_c;
@@ -130,7 +131,7 @@ static void compare_distances(int model, struct distances_data * data)
         double dm_ij=ccl_distance_modulus(cosmo,a, &status);
         if (status) printf("%s\n",cosmo->status_message);
         //NOTE tolerances are different!
-        absolute_tolerance = 10*DISTANCES_TOLERANCE*data->dm[model][j];
+        absolute_tolerance = DM_TOLERANCE*data->dm[model][j];
         if (fabs(absolute_tolerance)<1e-4) absolute_tolerance = 1e-4;
         ASSERT_DBL_NEAR_TOL(data->dm[model][j], dm_ij, absolute_tolerance);
     }
