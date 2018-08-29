@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <math.h>
 
-#define EH_TOLERANCE 1.0E-4
+#define EH_TOLERANCE 1.0E-5
 
 CTEST_DATA(eh) {
   double Omega_c;
