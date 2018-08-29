@@ -189,7 +189,12 @@ using a Runge-Kutta Cash-Karp algorithm. We define $g(a)\equiv D/a$ and adopt as
 
 \ccl provides functions that return the growth normalized to $D(a=1)=1$ and to $D(a\ll1)\rightarrow a$. It employs an accelerated spline that is linearly spaced in the scale factor to interpolate the growth functions (for more details, see Section \ref{sec:implement}). The growth calculations cover flat and curved $\Lambda$CDM and $w$CDM cosmologies. However, it should be noted that the above treatment is ill-defined in the presence of massive neutrinos, and attempts to compute the growth rate in cosmologies with massive neutrinos will produce an inconsistencies between growth predictions and the matter power spectrum (sub-section \ref{sec:matterps}), for example.
 
-Finally, \ccl allows for growth predictions with an alternative `modified gravity' cosmological model defined by a regular curved $w$CDM background as well as a user-defined $\Delta f(a)$, such that the true growth rate in this model is given by $f(a)=f_0(a)+\Delta f(a)$, where $f_0(a)$ is the growth rate in the background model. Note that this model is only consistently implemented with regards to the computation of the linear growth factor and growth rates and does not feed into other observables. This model, and the interpretation of the predictions given by \ccl, should therefore be used with care. 
+Finally, \ccl allows for growth predictions with an alternative `modified gravity' cosmological model defined by a regular curved $w$CDM background as well as a user-defined $\Delta f(a)$, such that the true growth rate in this model is given by
+\begin{equation}
+  f(a)=f_0(a)+\Delta f(a),
+\label{eq:mgrowth}
+\end{equation}
+where $f_0(a)$ is the growth rate in the background model. Note that this model is only consistently implemented with regards to the computation of the linear growth factor and growth rates and does not feed into other observables. This model, and the interpretation of the predictions given by \ccl, should therefore be used with care. 
 
 %-------------------------------------------------------------------------------
 \subsection{Matter power spectrum}
@@ -794,7 +799,7 @@ Comoving radial distances, the growth factor and distance moduli were compared a
   \mathcal{A} \equiv \frac{|D_{\tt CCL}(z)-D_{i}(z)|}{D_i(z)}
 \end{equation}
 and analogously defined for the comoving radial distance and distance moduli.
-Figure \ref{fig:distancegrow} summarizes our results. The left panel shows the distance accuracy achieved for different cosmological models (curves of different thickness) as a function of redshift, which is always better than $10^{-6}$.
+Figure \ref{fig:distancegrow} summarizes our results. The left panel shows the distance accuracy achieved for different cosmological models (curves of different thickness) as a function of redshift, which is always better than $5\times 10^{-7}$. Similarly, the growth function is predicted with better than $5\times 10^{-6}$ accuracy in the right panel. \todo{DA: Please add something on the modified growth test.}
 
 Additional, independent distance benchmarks were produced by {\tt astropy} \citep{astropy}. We find that the agreement between \ccl and {\tt astropy} is only at the $10^{-3}$ level for cosmologies with massive neutrinos, in contrast to the much better agreement shown in left panel of Figure~\ref{fig:distancegrow}, which relies on benchmarks produced by {\tt CLASS}. We believe that this is due to the fact that while \ccl uses the full phase-space integral in computing the massive neutrino density as defined in Eq. (\ref{phasespacenu}), while {\tt astropy} uses a fitting function which is itself only accurate at a $10^{-3}$ level. Hence, true accuracy is probably better than quoted and closer to the value reported in the first row, as shown by Fig. \ref{fig:distancegrow}.
 
