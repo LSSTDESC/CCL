@@ -68,7 +68,7 @@ In preparation for constraining cosmology with the Large Synoptic Survey Telesco
 
 The Core Cosmology Library is written in C and incorporates the {\tt CLASS} code \citep{class} to provide predictions for the matter power spectrum. It also incorporates emulated power spectra from the cosmic emulator of \citet{Lawrence17}.\footnote{Future versions of the library will incorporate other power-spectrum libraries and methods.} A Python wrapper is also provided for ease of use.
 
-This note describes how to install \ccl (Section \ref{sec:install}), how \ccl is documented (Section \ref{sec:doc}), its functionality (Section \ref{sec:func}), the relevant unit tests (Section \ref{sec:tests}), directions for finding a \ccl example (Section \ref{sec:example}) in C, a Python example and technical details on the Python wrapper (Section \ref{sec:python:example}), details on the Python implementation are given in Section \ref{sec:python:technical}, future plans (Section \ref{sec:future}), means to contact the developers (Section \ref{sec:feedback}), instructions on how to cite \ccl (and {\tt CLASS}, Section \ref{sec:cite}), and the license under which \ccl is released (Section \ref{sec:license}).
+This note describes how to install \ccl (Section \ref{sec:install}), how \ccl is documented (Section \ref{sec:doc}), its functionality (Section \ref{sec:func}), the relevant unit tests (Section \ref{sec:tests}), directions for finding a \ccl example (Section \ref{sec:example}) in C, a Python example and technical details on the Python wrapper (Section \ref{sec:python:example}), details on the Python implementation (Section \ref{sec:python:technical}), future plans (Section \ref{sec:future}), means to contact the developers (Section \ref{sec:feedback}), instructions on how to cite \ccl (and {\tt CLASS}, Section \ref{sec:cite}), and the license under which \ccl is released (Section \ref{sec:license}).
 
 
 \section{Installation}
@@ -151,7 +151,7 @@ $ sudo make install
 \end{verbatim}
 
 {\bf Note:} This is the default install procedure, but depending on your system
-you might want to customize the intall process. Here are a few common configuration
+you might want to customize the install process. Here are a few common configuration
 options:
 \begin{itemize}
   \item {\bf C compiler}: In case you have several C compilers on your machine, you will probably
@@ -194,8 +194,8 @@ You may need to prepend a {\tt sudo} if you installed \ccl in a protected folder
 \ccl library can be called from C++ code without any additional requirements or modifications.
 To make sure that there are no problems you can run:
 \begin{verbatim}
-$make check-cpp
-$./examples/ccl_sample_run
+$ make check-cpp
+$ ./examples/ccl_sample_run
 \end{verbatim}
 \end{comment}
 
@@ -1233,9 +1233,10 @@ The build process will also create a {\tt pyccl/ccllib.py} file, which is the ra
 In the future, we hope that \ccl will include other functionalities. Functionalities which are currently under development:
 \begin{itemize}
 \item further CMB observable predictions (beyond CMB lensing)\footnote{\url{https://github.com/LSSTDESC/CCL/issues/428}},
-\item a link to {\tt FAST-PT} \citep{FASTPT} for efficient implementation of nonlinear perturbation theory,
-\item halo density profiles\footnote{\url{https://github.com/LSSTDESC/CCL/issues/407}}
-\item linear-theory only predictions\footnote{\url{https://github.com/LSSTDESC/CCL/issues/438}}.
+\item support for non-linear biasing models\footnote{\url{https://github.com/LSSTDESC/CCL/pull/444}}\citep[e.g.][]{FASTPT},
+\item halo density profiles\footnote{\url{https://github.com/LSSTDESC/CCL/issues/407}},
+\item velocity correlation function\footnote{\url{https://github.com/LSSTDESC/CCL/issues/429}},
+\item mass function emulators\footnote{\url{https://github.com/LSSTDESC/CCL/issues/235}},
 \item and more power spectrum methods (see \ref{Pk_wishlist}).
 \end{itemize}
 
