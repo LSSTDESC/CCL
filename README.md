@@ -112,7 +112,7 @@ to your to your `PATH` and `LD_LIBRARY_PATH` environment variables. In the defau
 case, it will look like:
 ```sh
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/bin
+export PATH=$PATH:/usr/local/bin
 ```
 
 To make sure that everything is working properly, you can run all unit tests after installation by running from the root `CCL` directory:
