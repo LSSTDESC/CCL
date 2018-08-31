@@ -8,7 +8,7 @@ project(ccl VERSION 0.2.1)
     # Defines list of CCL src files
     set(CCL_SRC src/ccl_background.c src/ccl_core.c src/ccl_error.c src/ccl_lsst_specs.c src/ccl_placeholder.c
                 src/ccl_power.c src/ccl_utils.c src/ccl_cls.c src/ccl_massfunc.c src/ccl_neutrinos.c
-                src/ccl_emu17.c src/ccl_correlation.c src/fftlog.c)
+              src/ccl_emu17.c src/ccl_correlation.c src/ccl_halomod.c src/fftlog.c)
 
     # Defines list of CCL tests src files
     # ! Add new tests to this list
@@ -19,7 +19,7 @@ project(ccl VERSION 0.2.1)
 		 tests/ccl_test_massfunc.c tests/ccl_test_correlation.c tests/ccl_test_correlation_3d.c
 		 tests/ccl_test_bcm.c tests/ccl_test_emu.c tests/ccl_test_emu_nu.c
 		 tests/ccl_test_distances_mnu.c tests/ccl_test_distances_hiz_mnu.c
-		 tests/ccl_test_power_nu.c tests/ccl_test_nonlimber.c tests/ccl_test_angpow.c)
+     tests/ccl_test_nonlimber.c tests/ccl_test_angpow.c tests/ccl_test_halomod.c tests/ccl_test_power_nu.c )
 
 
     # Defines list of extra distribution files and directories to be installed on the system

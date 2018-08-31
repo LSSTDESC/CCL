@@ -80,6 +80,10 @@ Data Fields</h2></td></tr>
 <tr class="separator:abecca79aa244fbc52bb07faece651988"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad7be7e9b48dfc1259f5a021d51f97eaa"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_c_c_l___cl_tracer.html#ad7be7e9b48dfc1259f5a021d51f97eaa">chimin</a></td></tr>
 <tr class="separator:ad7be7e9b48dfc1259f5a021d51f97eaa"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae44938293ee360a536f3bfd2bb9570c4"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_c_c_l___cl_tracer.html#ae44938293ee360a536f3bfd2bb9570c4">zmin</a></td></tr>
+<tr class="separator:ae44938293ee360a536f3bfd2bb9570c4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad7a6c9c9f67c153a04a047fcc65a7512"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_c_c_l___cl_tracer.html#ad7a6c9c9f67c153a04a047fcc65a7512">zmax</a></td></tr>
+<tr class="separator:ad7a6c9c9f67c153a04a047fcc65a7512"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a30b515b52f45e8281846749af76756ad"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_c_c_l___cl_tracer.html#a30b515b52f45e8281846749af76756ad">chi_source</a></td></tr>
 <tr class="separator:a30b515b52f45e8281846749af76756ad"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2fd0fa101614e87cc8b78fa6fff78b8e"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_c_c_l___cl_tracer.html#a2fd0fa101614e87cc8b78fa6fff78b8e">has_rsd</a></td></tr>
@@ -102,6 +106,14 @@ Data Fields</h2></td></tr>
 <tr class="separator:abae070ecb7e732d57565472d37b89604"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa631eb8b59ffa185566d445558992958"><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_spl_par.html">SplPar</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_c_c_l___cl_tracer.html#aa631eb8b59ffa185566d445558992958">spl_wM</a></td></tr>
 <tr class="separator:aa631eb8b59ffa185566d445558992958"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6148835540b4c561c047aa0a79d88a45"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_c_c_l___cl_tracer.html#a6148835540b4c561c047aa0a79d88a45">computed_transfer</a></td></tr>
+<tr class="separator:a6148835540b4c561c047aa0a79d88a45"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adae6ed5ebe06328d0e6d29f65e82101e"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_c_c_l___cl_tracer.html#adae6ed5ebe06328d0e6d29f65e82101e">n_ls</a></td></tr>
+<tr class="separator:adae6ed5ebe06328d0e6d29f65e82101e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab54f80939d77d30495d694718370c66d"><td class="memItemLeft" align="right" valign="top">int *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_c_c_l___cl_tracer.html#ab54f80939d77d30495d694718370c66d">n_k</a></td></tr>
+<tr class="separator:ab54f80939d77d30495d694718370c66d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3681f7e05d509e38357eddbf85ce3aac"><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_spl_par.html">SplPar</a> **&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_c_c_l___cl_tracer.html#a3681f7e05d509e38357eddbf85ce3aac">spl_transfer</a></td></tr>
+<tr class="separator:a3681f7e05d509e38357eddbf85ce3aac"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>ClTracer structure, used to contain everything that a Cl tracer could have, such as splines for various quantities and limits on the value of chi that this tracer deals with. </p>
@@ -148,6 +160,20 @@ Data Fields</h2></td></tr>
 
 </div>
 </div>
+<a id="a6148835540b4c561c047aa0a79d88a45"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6148835540b4c561c047aa0a79d88a45">&#9670;&nbsp;</a></span>computed_transfer</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int CCL_ClTracer::computed_transfer</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="a7f46320f8de31772bc705f73f1dee4cb"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a7f46320f8de31772bc705f73f1dee4cb">&#9670;&nbsp;</a></span>has_intrinsic_alignment</h2>
 
@@ -184,6 +210,34 @@ Data Fields</h2></td></tr>
       <table class="memname">
         <tr>
           <td class="memname">int CCL_ClTracer::has_rsd</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ab54f80939d77d30495d694718370c66d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab54f80939d77d30495d694718370c66d">&#9670;&nbsp;</a></span>n_k</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int* CCL_ClTracer::n_k</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="adae6ed5ebe06328d0e6d29f65e82101e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adae6ed5ebe06328d0e6d29f65e82101e">&#9670;&nbsp;</a></span>n_ls</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int CCL_ClTracer::n_ls</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -274,6 +328,20 @@ Data Fields</h2></td></tr>
 
 </div>
 </div>
+<a id="a3681f7e05d509e38357eddbf85ce3aac"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3681f7e05d509e38357eddbf85ce3aac">&#9670;&nbsp;</a></span>spl_transfer</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="struct_spl_par.html">SplPar</a>** CCL_ClTracer::spl_transfer</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="abae070ecb7e732d57565472d37b89604"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#abae070ecb7e732d57565472d37b89604">&#9670;&nbsp;</a></span>spl_wL</h2>
 
@@ -310,6 +378,34 @@ Data Fields</h2></td></tr>
       <table class="memname">
         <tr>
           <td class="memname">int CCL_ClTracer::tracer_type</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ad7a6c9c9f67c153a04a047fcc65a7512"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad7a6c9c9f67c153a04a047fcc65a7512">&#9670;&nbsp;</a></span>zmax</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double CCL_ClTracer::zmax</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ae44938293ee360a536f3bfd2bb9570c4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae44938293ee360a536f3bfd2bb9570c4">&#9670;&nbsp;</a></span>zmin</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double CCL_ClTracer::zmin</td>
         </tr>
       </table>
 </div><div class="memdoc">

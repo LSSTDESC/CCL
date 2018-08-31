@@ -1,5 +1,5 @@
 from pyccl import ccllib as lib
-from pyccl.pyutils import _vectorize_fn, _vectorize_fn2, _vectorize_fn4
+from pyccl.pyutils import _vectorize_fn, _vectorize_fn2, _vectorize_fn3, _vectorize_fn4
 
 def massfunc(cosmo, halo_mass, a, odelta=200):
     """Tinker et al. (2010) halo mass function.
@@ -55,7 +55,7 @@ def halo_bias(cosmo, halo_mass, a, odelta=200):
         cosmo (:obj:`ccl.cosmology`): Cosmological parameters.
         halo_mass (float or array_like): Halo masses; Msun.
         a (float): Scale factor.
-        odelta (float): overdensity parameter (default: 200).
+        odelta (float): Overdensity parameter (default: 200).
 
     Returns:
         float or array_like: Halo bias.
@@ -63,3 +63,6 @@ def halo_bias(cosmo, halo_mass, a, odelta=200):
     """
     return _vectorize_fn4(lib.halo_bias, 
                           lib.halo_bias_vec, cosmo, halo_mass, a, odelta)
+
+
+
