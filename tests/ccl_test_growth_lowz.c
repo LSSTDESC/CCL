@@ -6,7 +6,7 @@
 // The tolerance in D(z) for all the
 #define GROWTH_TOLERANCE 1.0e-4
 
-CTEST_DATA(growth) {
+CTEST_DATA(growth_lowz) {
   double Omega_c;
   double Omega_b;
   double h;
@@ -49,7 +49,7 @@ static void read_growth_test_file(double z[6], double gf[5][6])
 
 // Set up the cosmological parameters to be used in each of the
 // models
-CTEST_SETUP(growth) {
+CTEST_SETUP(growth_lowz) {
   // Values that are the same for all 5 models
   data->Omega_c = 0.25;
   data->Omega_b = 0.05;
@@ -79,7 +79,7 @@ CTEST_SETUP(growth) {
   read_growth_test_file(data->z, data->gf);
 }
 
-static void compare_growth(int model, struct growth_data * data)
+static void compare_growth(int model, struct growth_lowz_data * data)
 {
   int status=0; 	
   // Make the parameter set from the input data
@@ -147,31 +147,31 @@ static void check_mgrowth(void)
   ccl_cosmology_free(cosmo2);
 }
 
-CTEST2(growth, model_1) {
+CTEST2(growth_lowz, model_1) {
   int model = 0;
   compare_growth(model, data);
 }
 
-CTEST2(growth, model_2) {
+CTEST2(growth_lowz, model_2) {
   int model = 1;
   compare_growth(model, data);
 }
 
-CTEST2(growth, model_3) {
+CTEST2(growth_lowz, model_3) {
   int model = 2;
   compare_growth(model, data);
 }
 
-CTEST2(growth, model_4) {
+CTEST2(growth_lowz, model_4) {
   int model = 3;
   compare_growth(model, data);
 }
 
-CTEST2(growth, model_5) {
+CTEST2(growth_lowz, model_5) {
   int model = 4;
   compare_growth(model, data);
 }
 
-CTEST2(growth,mgrowth) {
+CTEST2(growth_lowz, mgrowth) {
   check_mgrowth();
 }
