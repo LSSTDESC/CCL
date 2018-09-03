@@ -92,6 +92,8 @@ Typedefs</h2></td></tr>
 <tr class="separator:a5d162459719a580f8c24e9d20b8565eb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8254626f06896ae23ce945320108b732"><td class="memItemLeft" align="right" valign="top">typedef enum <a class="el" href="ccl__config_8h.html#ad544e91cedc9b0865dba11bf4c652091">mass_function_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__config_8h.html#a8254626f06896ae23ce945320108b732">mass_function_t</a></td></tr>
 <tr class="separator:a8254626f06896ae23ce945320108b732"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4e5ac47d0886b624506a7d36db1dff97"><td class="memItemLeft" align="right" valign="top">typedef enum <a class="el" href="ccl__config_8h.html#ac78b0a571f13119cf2bd5a3ff4b85192">emulator_neutrinos_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__config_8h.html#a4e5ac47d0886b624506a7d36db1dff97">emulator_neutrinos_t</a></td></tr>
+<tr class="separator:a4e5ac47d0886b624506a7d36db1dff97"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab55c2da6b25228a0cee69fd96d6a9261"><td class="memItemLeft" align="right" valign="top">typedef struct <a class="el" href="structccl__configuration.html">ccl_configuration</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__config_8h.html#ab55c2da6b25228a0cee69fd96d6a9261">ccl_configuration</a></td></tr>
 <tr class="separator:ab55c2da6b25228a0cee69fd96d6a9261"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
@@ -120,12 +122,20 @@ Enumerations</h2></td></tr>
 <a class="el" href="ccl__config_8h.html#a834a8dab508cb785c7fdcc3b6353a013abb3dcbc64879f682cce4a57ce070f427">ccl_bcm</a> = 1
  }</td></tr>
 <tr class="separator:a834a8dab508cb785c7fdcc3b6353a013"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad544e91cedc9b0865dba11bf4c652091"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__config_8h.html#ad544e91cedc9b0865dba11bf4c652091">mass_function_t</a> { <a class="el" href="ccl__config_8h.html#ad544e91cedc9b0865dba11bf4c652091a636e93eb194de00b00383a4372400505">ccl_tinker</a> = 1, 
+<tr class="memitem:ad544e91cedc9b0865dba11bf4c652091"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__config_8h.html#ad544e91cedc9b0865dba11bf4c652091">mass_function_t</a> { <br />
+&#160;&#160;<a class="el" href="ccl__config_8h.html#ad544e91cedc9b0865dba11bf4c652091a636e93eb194de00b00383a4372400505">ccl_tinker</a> = 1, 
 <a class="el" href="ccl__config_8h.html#ad544e91cedc9b0865dba11bf4c652091aa92ddafbaf0d6d9b13a46ff8a1fafda3">ccl_tinker10</a> = 2, 
 <a class="el" href="ccl__config_8h.html#ad544e91cedc9b0865dba11bf4c652091a296d3638b1183030ff41553cd2446776">ccl_watson</a> = 3, 
-<a class="el" href="ccl__config_8h.html#ad544e91cedc9b0865dba11bf4c652091abbbaf98bbad0dfcf199a23e913cbaf9a">ccl_angulo</a> = 4
+<a class="el" href="ccl__config_8h.html#ad544e91cedc9b0865dba11bf4c652091abbbaf98bbad0dfcf199a23e913cbaf9a">ccl_angulo</a> = 4, 
+<br />
+&#160;&#160;<a class="el" href="ccl__config_8h.html#ad544e91cedc9b0865dba11bf4c652091a9515d4a9c04b6bfcb5f1509c60e95b1b">ccl_shethtormen</a> = 5
+<br />
  }</td></tr>
 <tr class="separator:ad544e91cedc9b0865dba11bf4c652091"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac78b0a571f13119cf2bd5a3ff4b85192"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__config_8h.html#ac78b0a571f13119cf2bd5a3ff4b85192">emulator_neutrinos_t</a> { <a class="el" href="ccl__config_8h.html#ac78b0a571f13119cf2bd5a3ff4b85192aa20214f37e1dd2d7ee91acac5f4cb732">ccl_emu_strict</a> = 1, 
+<a class="el" href="ccl__config_8h.html#ac78b0a571f13119cf2bd5a3ff4b85192add169d4e237c5a4d809cb1c727b1830a">ccl_emu_equalize</a> = 2
+ }</td></tr>
+<tr class="separator:ac78b0a571f13119cf2bd5a3ff4b85192"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="var-members"></a>
 Variables</h2></td></tr>
@@ -160,6 +170,21 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 <p>Configuration typedef. This contains the transfer function, matter power spectrum, and mass function that is being used currently. </p>
+
+</div>
+</div>
+<a id="a4e5ac47d0886b624506a7d36db1dff97"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4e5ac47d0886b624506a7d36db1dff97">&#9670;&nbsp;</a></span>emulator_neutrinos_t</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef enum <a class="el" href="ccl__config_8h.html#ac78b0a571f13119cf2bd5a3ff4b85192">emulator_neutrinos_t</a>  <a class="el" href="ccl__config_8h.html#ac78b0a571f13119cf2bd5a3ff4b85192">emulator_neutrinos_t</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Emulator neutrinos typedef Specified whether, when the cosmic emulator is switched on, CCL should exit if non-equal neutrino masses are passed (strict) or equalize the masses, resulting in potential slight inconsistencies. </p>
 
 </div>
 </div>
@@ -228,6 +253,25 @@ Variables</h2></td></tr>
 
 </div>
 </div>
+<a id="ac78b0a571f13119cf2bd5a3ff4b85192"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac78b0a571f13119cf2bd5a3ff4b85192">&#9670;&nbsp;</a></span>emulator_neutrinos_t</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum <a class="el" href="ccl__config_8h.html#ac78b0a571f13119cf2bd5a3ff4b85192">emulator_neutrinos_t</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Emulator neutrinos typedef Specified whether, when the cosmic emulator is switched on, CCL should exit if non-equal neutrino masses are passed (strict) or equalize the masses, resulting in potential slight inconsistencies. </p>
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="ac78b0a571f13119cf2bd5a3ff4b85192aa20214f37e1dd2d7ee91acac5f4cb732"></a>ccl_emu_strict&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="ac78b0a571f13119cf2bd5a3ff4b85192add169d4e237c5a4d809cb1c727b1830a"></a>ccl_emu_equalize&#160;</td><td class="fielddoc"></td></tr>
+</table>
+
+</div>
+</div>
 <a id="ad544e91cedc9b0865dba11bf4c652091"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ad544e91cedc9b0865dba11bf4c652091">&#9670;&nbsp;</a></span>mass_function_t</h2>
 
@@ -245,6 +289,7 @@ Variables</h2></td></tr>
 <tr><td class="fieldname"><a id="ad544e91cedc9b0865dba11bf4c652091aa92ddafbaf0d6d9b13a46ff8a1fafda3"></a>ccl_tinker10&#160;</td><td class="fielddoc"></td></tr>
 <tr><td class="fieldname"><a id="ad544e91cedc9b0865dba11bf4c652091a296d3638b1183030ff41553cd2446776"></a>ccl_watson&#160;</td><td class="fielddoc"></td></tr>
 <tr><td class="fieldname"><a id="ad544e91cedc9b0865dba11bf4c652091abbbaf98bbad0dfcf199a23e913cbaf9a"></a>ccl_angulo&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="ad544e91cedc9b0865dba11bf4c652091a9515d4a9c04b6bfcb5f1509c60e95b1b"></a>ccl_shethtormen&#160;</td><td class="fielddoc"></td></tr>
 </table>
 
 </div>
@@ -307,7 +352,7 @@ Variables</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>The default configuration object In the default configuration, defined in <a class="el" href="ccl__core_8c.html">ccl_core.c</a> CCL runs with: default_config = {ccl_boltzmann_class, ccl_halofit, ccl_nobaryons, ccl_tinker10} </p>
+<p>The default configuration object In the default configuration, defined in <a class="el" href="ccl__core_8c.html">ccl_core.c</a> CCL runs with: default_config = {ccl_boltzmann_class, ccl_halofit, ccl_nobaryons, ccl_tinker10, ccl_emu_strict} </p>
 
 </div>
 </div>

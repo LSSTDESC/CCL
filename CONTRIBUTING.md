@@ -31,7 +31,8 @@ Reviewing a pull request (PR) on github
     C code and through Python docstrings, and that the doxygen documentation
     has been regenerated. Make sure that example code in the `examples/`
     directory has been updated appropriately, and that the CCL note has been
-    updated if necessary.
+    updated if necessary (including your affiliation and contribution in
+    `authors.csv`).
 
 Things to do if you are adding new features to the CCL C lib
 ------------------------------------------------------------
@@ -49,7 +50,8 @@ Things to do if you are adding new features to the CCL C lib
     (e.g. adding a new dependency).
  7. Any updates to CCL should be documented in the CCL note that you can find
     in `doc/0000-ccl_note/`. You will need to edit `main.tex`, compile with `make`,
-    and commit your changes, including the updated PDF file.
+    and commit your changes, including the updated PDF file. Make sure you update
+    your institution and your contribution in `authors.csv` as well.
  8. If your changes break the CCL API, observe the guidelines in the relevant
     section below.
 

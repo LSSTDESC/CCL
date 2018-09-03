@@ -88,12 +88,15 @@ $(function() {
 <code>#include &quot;<a class="el" href="ccl__params_8h_source.html">ccl_params.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="ccl__emu17_8h_source.html">ccl_emu17.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="ccl__emu17__params_8h_source.html">ccl_emu17_params.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="ccl__neutrinos_8h_source.html">ccl_neutrinos.h</a>&quot;</code><br />
 </div><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
 Data Structures</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structeh__struct.html">eh_struct</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_sigma_r__pars.html">SigmaR_pars</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_sigma_v__pars.html">SigmaV_pars</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
@@ -108,8 +111,10 @@ Functions</h2></td></tr>
 <tr class="separator:a4a4453e1433b557d74fd1936366fb6da"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aade0e22dd71d65253d0c27b7408d00d4"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__power_8c.html#aade0e22dd71d65253d0c27b7408d00d4">ccl_nonlin_matter_power</a> (<a class="el" href="structccl__cosmology.html">ccl_cosmology</a> *cosmo, double k, double a, int *status)</td></tr>
 <tr class="separator:aade0e22dd71d65253d0c27b7408d00d4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab266f9079a8f994df32653b998fee101"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__power_8c.html#ab266f9079a8f994df32653b998fee101">ccl_sigmaR</a> (<a class="el" href="structccl__cosmology.html">ccl_cosmology</a> *cosmo, double R, int *status)</td></tr>
-<tr class="separator:ab266f9079a8f994df32653b998fee101"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1d9db38804b408e259cbd667c4329398"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__power_8c.html#a1d9db38804b408e259cbd667c4329398">ccl_sigmaR</a> (<a class="el" href="structccl__cosmology.html">ccl_cosmology</a> *cosmo, double R, double a, int *status)</td></tr>
+<tr class="separator:a1d9db38804b408e259cbd667c4329398"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a01c0baa2f7e10833e73ae672191d0008"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__power_8c.html#a01c0baa2f7e10833e73ae672191d0008">ccl_sigmaV</a> (<a class="el" href="structccl__cosmology.html">ccl_cosmology</a> *cosmo, double R, double a, int *status)</td></tr>
+<tr class="separator:a01c0baa2f7e10833e73ae672191d0008"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a719bbbcaf0c6275c709247b87baaeee9"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__power_8c.html#a719bbbcaf0c6275c709247b87baaeee9">ccl_sigma8</a> (<a class="el" href="structccl__cosmology.html">ccl_cosmology</a> *cosmo, int *status)</td></tr>
 <tr class="separator:a719bbbcaf0c6275c709247b87baaeee9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
@@ -385,8 +390,8 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="ab266f9079a8f994df32653b998fee101"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab266f9079a8f994df32653b998fee101">&#9670;&nbsp;</a></span>ccl_sigmaR()</h2>
+<a id="a1d9db38804b408e259cbd667c4329398"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1d9db38804b408e259cbd667c4329398">&#9670;&nbsp;</a></span>ccl_sigmaR()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -406,6 +411,12 @@ Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>a</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
           <td class="paramtype">int *&#160;</td>
           <td class="paramname"><em>status</em>&#160;</td>
         </tr>
@@ -420,6 +431,57 @@ Functions</h2></td></tr>
   <table class="params">
     <tr><td class="paramname">cosmo</td><td>Cosmology parameters and configurations </td></tr>
     <tr><td class="paramname">R</td><td>Smoothing scale, in [Mpc] units </td></tr>
+    <tr><td class="paramname">a</td><td>scale factor </td></tr>
+    <tr><td class="paramname">status</td><td>Status flag. 0 if there are no errors, nonzero otherwise. For specific cases see documentation for <a class="el" href="ccl__error_8c.html">ccl_error.c</a> </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>sigma(R). </dd></dl>
+
+</div>
+</div>
+<a id="a01c0baa2f7e10833e73ae672191d0008"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a01c0baa2f7e10833e73ae672191d0008">&#9670;&nbsp;</a></span>ccl_sigmaV()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double ccl_sigmaV </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structccl__cosmology.html">ccl_cosmology</a> *&#160;</td>
+          <td class="paramname"><em>cosmo</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>R</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>a</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>status</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Variance of the displacement field with (top-hat) smoothing scale R [Mpc] Returns sigma(V(R)) for specified cosmology at a = 1. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">cosmo</td><td>Cosmology parameters and configurations </td></tr>
+    <tr><td class="paramname">R</td><td>smoothing scale, in [Mpc] units </td></tr>
+    <tr><td class="paramname">a</td><td>scale factor </td></tr>
     <tr><td class="paramname">status</td><td>Status flag. 0 if there are no errors, nonzero otherwise. For specific cases see documentation for <a class="el" href="ccl__error_8c.html">ccl_error.c</a> </td></tr>
   </table>
   </dd>

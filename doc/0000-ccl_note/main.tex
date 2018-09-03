@@ -48,7 +48,7 @@
 
 \begin{abstract}
 
-The Core Cosmology Library (\ccl) provides routines to compute basic cosmological observables with validated numerical accuracy. These routines have been validated to an accuracy level, documented here, against the results of the Code Comparison Project. In the current version, predictions are provided for distances and background quantities, angular auto- and cross-spectra of cosmic shear and clustering, and the halo mass function. Fiducial specifications for the expected LSST galaxy distributions and clustering bias are also included, together with the capability of computing redshift distributions for a user-defined photometric redshift model. \ccl is written in C, with a Python interface. In this note, we explain the functionality of the publicly released (\ccl v0.2) library.
+The Core Cosmology Library (\ccl) provides routines to compute basic cosmological observables with validated numerical accuracy. These routines have been validated to an accuracy level, documented here, against the results of independent implementations. In the current version, predictions are provided for distances and background quantities, angular auto- and cross-spectra of cosmic shear and clustering, halo bias and the halo mass function. \ccl uses different schemes to obtain the matter power spectrum, including analytical, phenomenological and other schemes calibrated through simulations. Fiducial specifications for the expected LSST galaxy distributions and clustering bias are also included, together with the capability of computing redshift distributions for a user-defined photometric redshift model. \ccl is written in C, with a Python interface. In this note, we explain the functionality of the publicly released (\ccl v0.99) library.
 
 \end{abstract}
 
@@ -68,133 +68,222 @@ In preparation for constraining cosmology with the Large Synoptic Survey Telesco
 
 The Core Cosmology Library is written in C and incorporates the {\tt CLASS} code \citep{class} to provide predictions for the matter power spectrum. It also incorporates emulated power spectra from the cosmic emulator of \citet{Lawrence17}.\footnote{Future versions of the library will incorporate other power-spectrum libraries and methods.} A Python wrapper is also provided for ease of use.
 
-This note describes how to install \ccl (Section \ref{sec:install}), how \ccl is documented (Section \ref{sec:doc}), its functionality (Section \ref{sec:func}), the relevant unit tests (Section \ref{sec:tests}), directions for finding a \ccl example (Section \ref{sec:example}), the Python wrapper (Section \ref{sec:python}), future plans (Section \ref{sec:future}), means to contact the developers (Section \ref{sec:feedback}), instructions on how to cite \ccl (and {\tt CLASS}, Section \ref{sec:cite}), and the license under which \ccl is released (Section \ref{sec:license}).
+This note describes how to install \ccl (Section \ref{sec:install}), how \ccl is documented (Section \ref{sec:doc}), its functionality (Section \ref{sec:func}), the relevant unit tests (Section \ref{sec:tests}), directions for finding a \ccl example (Section \ref{sec:example}) in C, a Python example and technical details on the Python wrapper (Section \ref{sec:python:example}), details on the Python implementation (Section \ref{sec:python:technical}), future plans (Section \ref{sec:future}), means to contact the developers (Section \ref{sec:feedback}), instructions on how to cite \ccl (and {\tt CLASS}, Section \ref{sec:cite}), and the license under which \ccl is released (Section \ref{sec:license}).
 
 
 \section{Installation}
 \label{sec:install}
 
+\subsection{General installation}
+
+\ccl is available as a Python package through PyPi. To install, simply run:
+\begin{verbatim}
+$ pip install pyccl
+\end{verbatim}
+This should work as long as {\tt CMake} is installed on your system (if it isn't, follow the detailed instructions below).
+
+\ccl comes in two forms: a C library and a Python module. These components can be installed independently of each other, instructions are provided below.
+
+{\bf For developers: Note that the installation procedure for development workflow is different than stated here. Detailed instructions are provided in the {\tt README.md} file in the main \ccl directory.}
+
 \subsection{Dependencies}
+
+\ccl requires the following software and libraries
 
 \begin{itemize}
 \item GNU Scientific Library {\tt GSL},\footnote{\url{https://www.gnu.org/software/gsl/}} {\tt GSL-2.1} or higher.
-\item The {\tt SWIG}\footnote{\url{http://www.swig.org/}} Python wrapper generator is not needed to run \ccl, but must be installed if you intend to modify \ccl in any way.
-\item {\tt FFTW3}\footnote{\url{http://www.fftw.org}} is required for computation of correlation functions.
+\item {\tt FFTW3}\footnote{\url{http://www.fftw.org}} version 3.1 or above is required for computation of correlation functions.
 \item {\tt FFTlog}\footnote{\url{http://casa.colorado.edu/~ajsh/FFTLog/} and \url{https://github.com/slosar/FFTLog}} is provided within \ccl, with minor modifications.
-\item The C library associated to the {\tt CLASS} code. The installation of this library is described below. 
-%\item A version of {\tt Angpow} \citep{2017arXiv170103592C} is also incorporated within \ccl.
+\item The C library associated to the {\tt CLASS} code. (Note that, if you want to use your own version of {\tt CLASS}, you should follow the steps described in Section \ref{sec:extclass} below.)
+  \item {\tt Angpow} \citep{2017arXiv170103592C} for fast computation of angular power spectra beyond the Limber approximation\footnote{\url{https://gitlab.in2p3.fr/campagne/AngPow}}.
 \end{itemize}
 
-\subsection{Installing CLASS}
-  {\tt CCL} uses {\tt CLASS} as one of the possible ways of computing the matter power spectrum. In order to communicate with {\tt CLASS}, {\tt CCL} must be linked to its library. Before installing CCL proper you must therefore install this library first. Since this process is not necessarily straightforward, we provide a python script {\tt class\_install.py} that automatically downloads and install the latest tagged stable version of CLASS. You should run this script (i.e. {\tt \$ python class\_install.py}) before carrying out the next steps. By default, the script assumes that your main C compiler is {\tt gcc}. If that's not the case, pass the name of your C compiler to the script via the command-line argument {\tt --c\_comp} (e.g. {\tt \$ python class\_install.py --c\_comp=icc}). Type {\tt python class\_install.py -h} for further details.
+In addition, the build system for \ccl requires
+\begin{itemize}
+\item The {\tt SWIG}\footnote{\url{http://www.swig.org/}} Python wrapper.
+\item {\tt CMake}\footnote{\url{https://cmake.org/}} version 3.2 or above. This is the only requirement that needs to be manually installed (sew below).
+\end{itemize}
 
-  This procedure has one final caveat: if you already have a working installation of {\tt CCL}, {\tt class\_install.py} may fail the first time you run it. This can be fixed by either simply running {\tt class\_install.py} a second time, or by starting from scratch (i.e. downloading or cloning {\tt CCL}).
+\subsection{Installing the dependencies}
 
-  Note that, if you want to use your own version of {\tt CLASS}, you should follow the steps described in Section \ref{sec:extclass} below.
+It is preferable to install {\tt GSL} and {\tt FFTW} on your system before building \ccl, but only necessary if you want to properly install the C library, otherwise {\tt CMake} will automatically download and build the missing requirements in order to compile \ccl.
 
-\subsection{Installing Angpow}
-
-{\tt CCL} provides an optional link to the {\tt Angpow} library that enables fast and accurate computations of the angular power spectra without using the Limber approximation (written in C++). We provide a python script to automatically install {\tt Angpow} and make the link with {\tt CCL}. You should first run this script ({\tt \$ python angpow\_install.py}) before carrying out the next steps. The installation downloads the last release of {\tt Angpow} adapted to {\tt CCL} from a dedicated DESC github repository\footnote{\url{https://github.com/LSSTDESC/Angpow4CCL}} and looks for a C++ compiler compatible with OpenMP. It provides a dedicated file {\tt ./angpow/src/angpow\_ccl.cc}` that makes the interface between the {\tt CCL} structures and the {\tt Angpow} classes.
-
-To remove {\tt Angpow}, run {\tt \$ python angpow\_install.py --clean} and install {\tt CCL} again.
-
-
-
-\subsection{Installation Procedure}
-
-\ccl can be installed through an {\tt autotools}-generated configuration file. UNIX users should be familiar with the process: navigate to the directory containing the library and type
+For {\tt CMake}, you can follow this set of instructions. On Ubuntu:
 \begin{verbatim}
- $ ./configure
- $ make
- $ make install
+  $ sudo apt-get install cmake
 \end{verbatim}
-(You may need to pre-append {\tt sudo} to the last command, depending on your default privileges.) Users without admin privileges can install the library in a user-defined directory (e.g. {\tt /home/desc$\_$fan/}) by running
+ On MacOs X:
+\begin{itemize}
+ \item Install using a {\tt DMG} package from this download page: \url{https://cmake.org/download/}.
+ \item Or install using a package manager (e.g., {\tt brew}\footnote{\url{https://brew.sh/}}), MacPorts\footnote{\url{https://www.macports.org/}}, Fink\footnote{\url{http://www.finkproject.org/}}). For instance, with brew:
 \begin{verbatim}
- $ ./configure --prefix=/home/desc_fan
- $ make
- $ make install
+$ brew install cmake
 \end{verbatim}
-This will create two directories (if not present already): {\tt /home/desc$\_$fan/include} and {\tt /home/desc$\_$fan/lib} where the header and shared library files will be placed after running {\tt make install}. \ccl has been successfully installed on several different Linux and Mac OS X systems.\footnote{We know of one case with Mac OS where libtools had the ``lock'' function set to ``yes'' and this caused the installation to stall. However, this is very rare. If this happens, after the {\tt configure} step, edit libtool to set the ``lock'' to ``no''.}
+\end{itemize}
 
-After installing the C library, you can make sure that it works correctly by typing {\tt make check}, which will run the unit tests described in Section \ref{sec:tests}. Assuming that the tests pass, you can then move on to installing the Python wrapper, as described in Section \ref{sec:python} (or see Section \ref{sec:install:alternative} below).
-
-After pulling a new version of \ccl from the {\tt git} repository, you can recompile the library by running:
+To install all the dependencies at once, and avoid having {\tt CMake} recompiling them, for instance on Ubuntu:
 \begin{verbatim}
- $ make clean; make uninstall
- $ make; make install
-\end{verbatim}
-\ccl library can be called from \CC\ code without any  additional requirements or modifications. To make sure that there are no problems you can run
-\begin{verbatim}
-    $ make check-cpp
-    $ ./examples/ccl_sample_run
-   \end{verbatim}
-
-\subsection{Alternative installation and pip}
-\label{sec:install:alternative}
-
-It is possible to install both the C library and the Python wrapper together in one step, by running
-\begin{verbatim}
- $ python setup.py install --prefix=/home/desc_fan
-\end{verbatim}
-This will automatically perform the previous steps to install the C library, and will also install the Python library in {\tt /home/desc$\_$fan/lib/python2.7/site-packages}. You might need to add this path to the {\tt \$PYTHONPATH} environment variable to be able to use it. In the near future, the package will be made available through {\tt pip}.
-
-Once installed you can check the installation status by typing
-\begin{verbatim}
- $ python setup.py test
+$ sudo apt-get install cmake swig libgsl-dev libfftw3-dev
 \end{verbatim}
 
-This will run the embedded unit tests. Using this last method to install the Python library allows you to uninstall it simply by running
+\subsection{Compile and install the C library}
+
+To download the latest version of \ccl:
 \begin{verbatim}
- $ python setup.py uninstall
+$ git clone https://github.com/LSSTDESC/CCL.git
+$ cd CCL
 \end{verbatim}
+or download and extract the latest stable release from \url{https://github.com/LSSTDESC/CCL/releases}. Then, from the base \ccl directory run:
+\begin{verbatim}
+$ mkdir build && cd build
+$ cmake ..
+\end{verbatim}
+This will run the configuration script, try to detect the required dependencies
+on your machine and generate a Makefile. Once CMake has been configured, to build
+and install the library simply run for the {\tt build} directory:
+\begin{verbatim}
+$ make
+$ make install
+\end{verbatim}
+Often admin privileges will be needed to install the library. If you have those just type:
+\begin{verbatim}
+$ sudo make install
+\end{verbatim}
+
+{\bf Note:} This is the default install procedure, but depending on your system
+you might want to customize the install process. Here are a few common configuration
+options:
+\begin{itemize}
+  \item {\bf C compiler}: In case you have several C compilers on your machine, you will probably
+need to specify which one to use to {\tt CMake} by setting the environment {\tt CC} like
+so, **before** running {\tt CMake}:
+\begin{verbatim}
+$ export CC=gcc
+\end{verbatim}
+  \item {\bf Install directory}: By default, {\tt CMake} will try to install \ccl in {\tt /usr/local}, if you would like to instead install \ccl in a user-defined directory (for instance if you don't have
+ admin privileges), you can specify it to {\tt CMake} by running instead the following command:
+\begin{verbatim}
+$ cmake -DCMAKE_INSTALL_PREFIX=/path/to/install ..
+\end{verbatim}
+This will instruct {\tt CMake} to install \ccl in the following folders: {\tt /path/to/install/include},{\tt /path/to/install/share},{\tt /path/to/install/lib}.
+\end{itemize}
+
+Depending on where you install \ccl your might need to add the installation path
+to your to your {\tt PATH} and {\tt LD\_LIBRARY\_PATH} environment variables. In the default
+case, it will look like:
+\begin{verbatim}
+$ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
+$ export PATH=$PATH:/usr/local/bin
+\end{verbatim}
+
+To make sure that everything is working properly, you can run all unit tests after installation by running \textbf{from the root \ccl directory}:
+\begin{verbatim}
+$ check_ccl
+\end{verbatim}
+Assuming that the tests pass, you have successfully installed \ccl!
+
+If you ever need to uninstall \ccl, run the following from the {\tt build} directory:
+\begin{verbatim}
+$ make uninstall
+\end{verbatim}
+You may need to prepend a {\tt sudo} if you installed \ccl in a protected folder.
+
+\begin{comment}
+\subsection{C++ compatibility}
+
+\ccl library can be called from C++ code without any additional requirements or modifications.
+To make sure that there are no problems you can run:
+\begin{verbatim}
+$ make check-cpp
+$ ./examples/ccl_sample_run
+\end{verbatim}
+\end{comment}
+
+
+\subsection{Install the pyccl Python module}
+
+\ccl also comes with a Python wrapper, called {\tt pyccl}, which can be built and
+installed regardless of whether you install the C library. For convenience, we
+provide a PyPi hosted package which can be installed simply by running:
+\begin{verbatim}
+$ pip install pyccl  
+\end{verbatim}
+(Append {\tt --user} for single user install.)
+This only assumes that {\tt CMake} is available on your system, you don't need to
+download the source yourself.
+
+You can also build and install {\tt pyccl} from the \ccl source, again {\bf without necessarily
+installing the C library}. Download the latest version of \ccl:
+\begin{verbatim}
+$ git clone https://github.com/LSSTDESC/CCL.git
+$ cd CCL
+\end{verbatim}
+
+And from the root \ccl folder, simply run:
+\begin{verbatim}
+$ python setup.py install # append --user for single user install
+\end{verbatim}
+
+The {\tt pyccl} module will be installed into a sensible location in your {\tt PYTHONPATH},
+and so should be picked up automatically by your Python interpreter. You can then simply
+import the module using {\tt import pyccl}.
+
+You can quickly check whether {\tt pyccl} has been installed correctly by running
+{\tt python -c "import pyccl"} and checking that no errors are returned.
+
+For a more in-depth test to make sure everything is working, run from the root
+\ccl directory:
+\begin{verbatim}
+$ python setup.py test
+\end{verbatim}
+This will run the embedded unit tests (may take a few minutes).
+
+Whatever the install method, you can always uninstall the pyton wrapper by running:
+\begin{verbatim}
+$ pip uninstall pyccl
+\end{verbatim}
+
+For quick introduction to \ccl in Python, take a look at notebooks in {\tt tests/}.
+
+\subsection{Known installation issues}
+
+In case you have several C compilers on your system, {\tt CMake} may not default
+to the one you want to use. You can specify which C compiler will be used to compile
+\ccl by setting the {\tt CC} environment variable {\bf before} calling any {\tt cmake} or {\tt python setup.py} commands:
+\begin{verbatim}
+$ export CC=gcc
+\end{verbatim}
+
+If upon running the C tests you get an error from {\tt CLASS} saying it cannot find the file {\tt sBBN\_2017.dat}, it means that the {\tt CLASS} parameter files are not properly installed on your system. Make sure you have indeed installed the C library by running:
+\begin{verbatim}
+$ make install
+\end{verbatim}
+from the  {\tt CCL/build} directory.
 
 \subsection{Compiling against an external version of CLASS}
 \label{sec:extclass}
 
-The default installation procedure for \ccl implies automatically downloading and installing a tagged version of {\tt CLASS}. Optionally, you can also link \ccl against an external version of {\tt CLASS}. This section is useful if you want to use a modified version of {\tt CLASS}, or a different or more up-to-date version of the standard {\tt CLASS}. For example, we have successfully compiled and run \ccl with {\tt hiCLASS} \citep{hiclass}.
+The default installation procedure for \ccl implies automatically downloading and installing a tagged version of {\tt CLASS}. Optionally, you can also link \ccl against a different version of {\tt CLASS}. This is useful if you want to use a modified version of {\tt CLASS}, or a different or more up-to-date version of the standard {\tt CLASS}.
 
-To compile \ccl with an external version of {\tt CLASS}, you must first prepare the external copy so that it can be linked as a shared library. By default, the {\tt CLASS} build tools create a static library. After compiling {\tt CLASS} in the usual way (by running {\tt make}), look for a static library file called {\tt libclass.a} that should have been placed in the root source directory. Then, run the following command from that directory (Linux only):
+To compile \ccl with an external version of {\tt CLASS}, just run the following {\tt CMake} command at the first configuration step of the install (from the {\tt build} directory, make sure it is empty to get a clean configuration):
 \begin{verbatim}
- $ gcc -shared -o libclass.so -Wl,--whole-archive libclass.a \
-                              -Wl,--no-whole-archive -lgomp
+$ cmake -DEXTERNAL_CLASS_PATH=/path/to/class ..
 \end{verbatim}
-This should create a new shared library, {\tt libclass.so}, in the same directory. (N.B. The {\tt -lgomp} flag has to appear at the end of the command; otherwise the linker can fail.) If you are running Mac OS X, use the following command instead:
-\begin{verbatim}
- $ gcc -fpic -shared -o libclass.dylib -Wl,-all_load libclass.a \
-                              -Wl,-noall_load
-\end{verbatim}
+the rest of the build process should be the same.
 
-Next, change to the root \ccl directory and run {\tt make clean} if you have previously run the compilation process. Then, set the {\tt CLASSDIR} environment variable to point to the directory containing {\tt libclass.so}:
-\begin{verbatim}
-export CLASSDIR=/path/to/external/class
-\end{verbatim}
-Then, run {\tt ./configure} and compile and install \ccl as usual. The \ccl build tools should take care of linking to the external version of {\tt CLASS}.
-
-Once compilation has finished, run {\tt make check} to make sure everything is working correctly. Remember to add the external {\tt CLASS} library directory to your system library path, using either {\tt export LD\_LIBRARY\_PATH=/path/to/external/class} (Linux) or {\tt export DYLD\_FALLBACK\_LIBRARY\_PATH=/path/to/external/class} (Mac). The system must be able to find both the \ccl and {\tt CLASS} libraries; it is not enough to only add \ccl to the library path.
 
 \subsection{Creating a Docker Image}
-\ccl supports the use of Docker, for the deployment of applications inside software containers. The Dockerfile included with \ccl makes it possible to quickly create an image file that can be used to run virtual machines that require no additional dependencies beyond the Docker software. The Docker website\footnote{\url{https://www.docker.com}} details the installation and start-up process for most common operating systems.
 
-With Docker installed and the Docker Daemon running, creating an image is relatively straightforward:
-\begin{verbatim}
-docker build -t ccl .
-\end{verbatim}
-This will begin the process of creating the image file for \ccl locally. This Dockerfile contains all of the C libraries needed by \ccl, as well as the Python wrapper. It currently uses {\tt python:2.7} as a base image, and supports both ipython and Jupyter notebook. The virtualization process should have minimum impact on performance.
+The Dockerfile to generate a Docker image is included in the \ccl repository as Dockerfile. This can be used to create an image that Docker can spool up as a virtual machine, allowing you to utilize \ccl on any infrastructure with minimal hassle. The details of Docker and the installation process can be found at \url{https://www.docker.com/}. Once Docker is installed, it is a simple process to create an image. In a terminal of your choosing (with Docker running), type the command {\tt docker build -t ccl .} in the \ccl directory.
 
-The resulting Docker image has two main functions. The first is a command that will open a Jupyter notebook, tied to a port on your local machine. This can be accessed by running:
-\begin{verbatim}
-docker run -p 8888:8888 ccl
-\end{verbatim}
-The Jupyter notebook can then be accessed through a browser at the address {\tt localhost:8888}. The second possibility is to run a {\tt bash} terminal, by issuing the command:
-\begin{verbatim}
-docker run -it ccl bash
-\end{verbatim}
-This will allow for full access to the virtual machine via a terminal, so you can install additional dependencies etc.
+The resulting Docker image has two primary functionalities. The first is a CMD that will open Jupyter notebook tied to a port on your local machine. This can be used with the following run command: {\tt docker run -p 8888:8888 ccl}. You can then access the notebook in the browser of your choice at {\tt localhost:8888}. The second is to access the bash itself, which can be done using {\tt docker run -it ccl bash}.
 
-\subsection{Documentation}
+This Dockerfile currently contains all installed C libraries and the Python wrapper. It currently uses continuumio/anaconda as the base image and supports ipython and Jupyter notebook. There should be minimal slowdown due to the virtualization.
+
+\section{Documentation}
 \label{sec:doc}
 
-\ccl has basic {\tt doxygen}\footnote{\url{http://www.stack.nl/~dimitri/doxygen/}} documentation for its C routines. This can be found in the directory {\tt doc/html} within the \ccl repository by opening the {\tt index.html} file in your browser. The {\tt python} routines are documented in situ; you can view the documentation for a function by calling {\tt help(function\_name)} from within {\tt python}.
+\ccl has basic {\tt doxygen}\footnote{\url{http://www.stack.nl/~dimitri/doxygen/}} documentation for its C routines. This can be found in the directory {\tt doc/html} within the \ccl repository by opening the {\tt index.html} file in your browser. The {\tt python} routines are documented in situ; you can view the documentation for a function by calling {\tt help(function\_name)} from within {\tt python}. A Readthedocs interface is also available, where you can browse the documentation, at: \url{https://readthedocs.org/projects/ccl/}.
 
 \section{Functionality}
 \label{sec:func}
@@ -202,19 +291,10 @@ This will allow for full access to the virtual machine via a terminal, so you ca
 \subsection{Physical constants}
 
 \label{sec:constants}
+
 We have performed a comparison of the physical constants used in \ccl and included dependencies and external sources. See Table \ref{tab:constants} for percent differences of the constants between these sources.
 
 \input{table_constants}
-
-
-
-
-
-
-
-
-
-
 
 
 \subsection{Supported cosmological models}
@@ -226,8 +306,7 @@ Ultimately, \ccl plans to incorporate theoretical predictions for all cosmologic
  \item wCDM and the CPL model ($w_0+w_a$, \citealt{Chevallier01} and \citealt{Linder03})
  \item Non-zero curvature ($K$)
  \item All of the above, plus an arbitrary, user-defined modified growth function (see description in Section \ref{sec:growth})
- \item The $\mu$, $\Sigma$ parameterisation of modifications to General Relativity in the quasistatic regime \citep{Silvestri2013, Ferreira2010}
-  \item Massive neutrinos, in combination with any of the above except the user-defined modified growth function and the $\mu$, $\Sigma$ modified gravity parameterization.
+  \item Massive neutrinos, in combination with any of the above.
 \end{itemize}
 
 Not all features of \ccl are available for all models. For a guide to which predictions are available for each model, see Table \ref{tab:cosmo}. Note that if users install their own version of {\tt CLASS}, {\tt CCL} can then make predictions for a more extended set of cosmologies. Users should take care to understand the validity of the {\tt CCL} assumptions for their own models.
@@ -242,7 +321,7 @@ To use \ccl, the first step is to create a {\tt ccl$\_$cosmology} structure, con
 
 {\tt ccl$\_$parameters} objects contain information about the cosmological parameters of a given model, and are initialized using one of the following routines (the full syntax for each function can be found in the header file {\tt ccl$\_$core.h}):
 \begin{itemize}
- \item {\tt ccl$\_$parameters$\_$create(double Omega$\_$c, double Omega$\_$b, double Omega$\_$k, double N$\_$eff, double *mnu, ccl$\_$mnu$\_$type$\_$label mnu$\_$type, double w0, double wa, double h, double norm$\_$pk, double n$\_$s, double mu$\_$0, double sigma$\_$0, int nz$\_$mgrowth,double *zarr$\_$mgrowth,double *dfarr$\_$mgrowth, int *status)}: general {\tt ccl$\_$parameters} constructor supporting all the models described above.
+ \item {\tt ccl$\_$parameters$\_$create(double Omega$\_$c, double Omega$\_$b, double Omega$\_$k, double N$\_$eff, double *mnu, ccl$\_$mnu$\_$type$\_$label mnu$\_$type, double w0, double wa, double h, double norm$\_$pk, double n$\_$s, int nz$\_$mgrowth,double *zarr$\_$mgrowth,double *dfarr$\_$mgrowth, int *status)}: general {\tt ccl$\_$parameters} constructor supporting all the models described above.
  \item {\tt ccl$\_$parameters$\_$create$\_$flat$\_$lcdm(...)}: particular constructor for flat $\Lambda$CDM cosmologies.
  \item {\tt ccl$\_$parameters$\_$create$\_$flat$\_$wcdm(...)}: constant $w$ cosmologies.
  \item {\tt ccl$\_$parameters$\_$create$\_$flat$\_$wacdm(...)}: $w_0+w_a$.
@@ -261,7 +340,7 @@ In the parameter construction routines above, {\tt mnu} is a pointer to either a
 
 To set up a cosmology with massive neutrinos, the user should pass {\tt mnu}, {\tt mnu$\_$type}, and {\tt N$\_$eff} to the parameter construction routine. When working from the python wrapper, it suffices to pass {\tt mnu} and {\tt N$\_$eff}; \ccl will infer whether {\tt mnu} is a set of masses or a sum. In the latter case, the default behaviour is to split the sum into masses consistent with the normal hierarchy, but an inverted hierarchy or equal splitting can be requested by passing {\tt mnu$\_$type}. 
 
-In the case where {\tt mnu} corresponds to a sum, we first allocate the three neutrino masses according to the requested convention. The default convention is the normal hierarchy, but users may also request either an inverted hierarchy or a split of the sum into three equal masses. In the latter case it is trivial to compute the three masses. In the former two cases, it is slightly more complicated. The relevant neutrino-mass quantity which has been determined via particle physics experiments is the square of the different of masses (up to a sign for one of the differences, hence the existence of the two hierarchies). Because we know the square of the differences rather than the differences themselves, to get the neutrino masses given these differences and the sum we must solve a set of quadratic equations. This is most easily accomplished by making use the knowledge that the mass difference between two of the species is small; this allows us to taylor expand about this difference and greatly simplifies solving this system of equations. The resulting expressions for the neutrino masses are implemented.
+In the case where {\tt mnu} corresponds to a sum, we first allocate the three neutrino masses according to the requested convention. The default convention is the normal hierarchy, but users may also request either an inverted hierarchy or a split of the sum into three equal masses. In the latter case it is trivial to compute the three masses. If splitting with respect to the normal or inverted hierarchy is desired, the mass calculation of the three masses is only marginally more complicated. The relevant known quantity which has been determined via particle physics experiments is the square of the difference of neutrino masses (up to a sign for one of the differences, hence the two possible hierarchies, see \cite{Lesgourgues2012, Gerbino2017}). Because we know the square of the differences rather than the differences themselves, we must solve a set of quadratic equations for the neutrino masses. This is accomplished via a simple implementation of Newton's method, which converges to within machine precision in a few iterations.
 
 
 Having then a set of three masses regardless of {\tt mnu$\_$type}, we check for which of the three masses the corresponding neutrino species is non-relativistic today ($m_\nu>0.00017$, \citealt{Lesgourgues2012}), and obtain a number of massive neutrinos {\tt N$\_$nu$\_$mass}. We use this along with the {\tt N$\_$eff} value to set the number of relativistic neutrinos species {\tt N$\_$nu$\_$rel}. We must be slightly careful in doing so, as for massive neutrinos only we follow {\tt CLASS} in modifying the relationship between the temperature of the CMB and the neutrino temperature:
@@ -886,10 +965,68 @@ The \citet{Tinker2010} model parameterizes both the halo mass function and the h
 \begin{equation}
   b(\nu) = 1 - A\frac{\nu^a}{\nu^a + {\delta_c}^a} + B\nu^b+C\nu^c,
   f(\nu) = \alpha[1+(\beta\nu)^{-2\phi}]\nu^{2\eta}e(-\gamma\nu^2/2).
+  \label{eq:halo_bias_and_mass_function}
 \end{equation}
 The currently implemented model in \ccl allows for an arbitrary overdensity $\Delta$ to be chosen, using the fitting functions provided in \citet{Tinker2010}. Other halo model definitions are not included in the halo bias calculation, though this remains an area of active work to improve upon.
 
 The halo mass function and related quantities
+
+% Written by Alexander Mead
+\subsection{Halo model}
+\label{sec:halo_model}
+
+The routines described in this subsection are implemented in {\tt ccl$\_$halomod.c}.
+
+In this section we review a basic halo-model computation \citep{Seljak2000,Peacock2000,Cooray2002} of the cross-correlation between any two cosmological fields and only requires knowledge of the halo profiles of the field in question. For example, in the case of the matter-density auto spectrum we need only know the halo density profiles. For the galaxy spectrum we require knowledge of the number of, and distribution of, galaxies as a function of halo mass. In this simple form the halo model is approximate and makes the assumption that haloes are \emph{linearly} biased with respect to the \emph{linear} matter field and also assumes that haloes are spherical with properties that are determined solely by the halo mass. It is possible to go beyond these simplified assumptions, and we direct the interested reader to \cite{Cooray2002,Smith2007,Giocoli2010,Smith2011}.
+
+The eventual aim for CCL is to have a halo model that can calculate the auto- and cross-spectra for any cosmological field combinations with parameters that can be taken either from numerical simulations or observational data. Currently we have only implemented the case of the matter-density auto spectrum, but we keep the notation as general as possible in the following:
+
+Consider two 3D cosmological fields $\rho_i$ and $\rho_j$, the cross power spectrum at a given redshift can be written as a sum of a two- and a one-halo term given by
+\begin{equation}
+P_{2\mathrm{H},ij}(k)=P_{\mathrm{lin}}(k)
+\prod_{n=i,j}\left[\int_0^\infty b(M)\frac{\mathrm{d}n}{\mathrm{d}M}W_n(M,k)\;\mathrm{d}M\right]\ ,
+\label{eq:two_halo}
+\end{equation}
+\begin{equation}
+P_{1\mathrm{H},ij}(k)=\int_0^\infty \frac{\mathrm{d}n}{\mathrm{d}M}W_i(M,k)W_j(M,k)\;\mathrm{d}M\ ,
+\label{eq:one_halo}
+\end{equation}
+where $M$ is the halo mass, $\mathrm{d}n/\mathrm{d}M$ is the halo mass function defined as the first of equations~(\ref{eq:halo_bias_and_mass_function}) and $b(M)$ is the linear halo bias with respect to the linear matter density field, defined as the large-scale limit of the second of equations~(\ref{eq:halo_bias_and_mass_function}).
+
+Equations~(\ref{eq:two_halo}) and (\ref{eq:one_halo}) contain the (spherical) Fourier transform of the halo profile, or halo `window function':
+\begin{equation}
+W_i(M,k)=\int_0^\infty4\pi r^2\frac{\sin(kr)}{kr}\rho_{\mathrm{H},i}(M,r)\;\mathrm{d}r\ ,
+\label{eq:window_function}
+\end{equation}
+where $\rho_{\mathrm{H},i}(M,r)$ is the radial profile for the field $i$ in a host halo of mass $M$. For example, if one is interested in matter fields then this would be the halo density profile, if one were interested in galaxies then this would be the number density and distribution of galaxies around a halo of mass $M$.
+
+Note that the halo mass function and bias \emph{must} satisfy the following properties for the total power spectrum to have the correct large-scale limit\footnote{Note that achieving these correct limits for some fields is difficult numerically because of the large amount of mass contained in low mass haloes according to most popular mass functions. Special care must be taken with the two-halo integral in the case of matter power spectra.}:
+\begin{equation}
+\frac{1}{\bar\rho_\mathrm{m}}\int_0^\infty M\frac{\mathrm{d}n}{\mathrm{d}M}\;\mathrm{d}M=1\ ,
+\label{eq:mf_normalisation}
+\end{equation}
+\begin{equation}
+\frac{1}{\bar\rho_\mathrm{m}}\int_0^\infty Mb(M)\frac{\mathrm{d}n}{\mathrm{d}M}\;\mathrm{d}M=1\ .
+\label{eq:bias_normalisation}
+\end{equation}
+If one uses a mass function and bias pair that are related via the peak-background split formalism \citep{Mo1996,Sheth2001}, these conditions are automatically satisfied. In words these equations enforce that all matter is associated to a halo and that matter is on average unbiased with respect to itself. In the convention used in CCL the units of $P(k)$ will be exactly the units of $\rho_i\rho_j / \mathrm{Mpc}^3$. The units of the $W_i$ are those of $\rho_i$ multiplied by volume.
+
+For the matter power spectrum we use the halo profiles of \citeauthor*{Navarro1997} (NFW; \citeyear{Navarro1997}):
+\begin{equation}
+\rho_\mathrm{H}(M,r)\propto\frac{1}{r/r_\mathrm{s}(1+r/r_\mathrm{s})^2}\ ,
+\label{eq:NFW_profile}
+\end{equation}
+which is written in terms of a scale radius $r_\mathrm{s}$. The constant of proportionality fixed by the condition that the halo has total mass $M$ when the boundary is set at the virial radius $r_\mathrm{v}$, which is set such that the halo has a fixed density $\Delta_\mathrm{v}$ with respect to the mean
+\begin{equation}
+M=4\pi r_\mathrm{v}^3\Delta_\mathrm{v}\bar\rho\ .
+\label{eq:virial_radius}
+\end{equation}
+Finally, the scale radius is usually expressed in terms of the mass-dependent halo concentration parameter $c(M)=r_\mathrm{v}/r_\mathrm{s}$. We use the simple mass-concentration relation from \cite{Bullock2001}
+\begin{equation}
+c(M)=9\left(\frac{M}{M_*}\right)^{-0.13}\ ,
+\end{equation}
+where $\delta_\mathrm{c}/\sigma(M_*)=1$.
+Note that, in order to be consistent, one should use a value of $\Delta_\mathrm{v}$ and $c(M)$ that is consistent with the halo definition used for the halo mass function and bias.
 
 \subsection{Photo-$z$ implementation}
 \label{sec:photoz}
@@ -1056,7 +1193,9 @@ We note that while we maintain the $10^{-4}$ for our evaluations of $\sigma$, th
 
 The implementation of the matter power spectrum emulation code from \citet{Lawrence17} in \ccl has been validated at first instance by comparing the direct output of the original code to \ccl for the best fit cosmology (M000) in the range of wavenumbers spanned by the emulator predictions and confirming that the agreement is within the expectation from numerical errors (fractional difference of $<10^{-5}$). We have also compared the \ccl emulator outputs for certain cosmologies to smoothed power spectra from the simulations presented in \citet{Lawrence17}.\footnote{Courtesy of Earl Lawrence and Katrin Heitmann.} The check ensures that the \ccl outputs when calling the emulator are within $3\%$ of the simulation benchmarks at $z=0$ and for the $k$ range of validity of the emulator. This essentially corresponds to a verification of the results presented in Figure 5 and Figure 6 of \citet{Lawrence17}.
 
-Finally, for cosmologies involving massive neutrinos, we have included tests which compare comoving distance and distance modulus predictions from {\tt CCL} from those produced by the {\tt astropy} \citep{astropy} library. In this case, we consider these comparison tests to pass if the agreement between the two predictions is 0.001 or better; this is due to the fact that {\tt astropy} uses a fitting function for the neutrino phase-space integral while we compute the integral directly. The fitting function used by astropy is expected to match the true integral at approximately this level. As a sanity check, we also include a test which verifies that the power spectrum from {\tt CLASS} as called via CCL matches that as called directly from {\tt CLASS} in three test cosmologies with massive neutrinos. 
+In addition to the distance tests based on the TJP code comparison project described above, we include tests based on {\tt CLASS} that cover the benchmark cosmologies listed in Table~\ref{table:code_comp}, as well as cosmologies with massive neutrinos. The agreement between {\tt CLASS} and \ccl on comoving radial distances and distance moduli is better than $10^{-6}$. These tests are done at 10 logarithmically spaced redshifts between 0.01 and 1000. We also include tests of the growth factor for the same redshift range.
+
+Finally, for cosmologies involving massive neutrinos, we have included also tests which compare comoving distance and distance modulus predictions from {\tt CCL} from those produced by the {\tt astropy} \citep{astropy} library. In this case, we consider these comparison tests to pass if the agreement between the two predictions is 0.001 or better; this is due to the fact that {\tt astropy} uses a fitting function for the neutrino phase-space integral while we compute the integral directly. The fitting function used by astropy is expected to match the true integral at approximately this level. As a sanity check, we also include a test which verifies that the power spectrum from {\tt CLASS} as called via CCL matches that as called directly from {\tt CLASS} in three test cosmologies with massive neutrinos. 
 
 \ccl has a suite of test routines which, upon compilation, compare its outputs to the benchmarks from code comparison. These are run with {\tt make check}.
 
@@ -1066,45 +1205,10 @@ Finally, for cosmologies involving massive neutrinos, we have included tests whi
 Examples of how to run \ccl are provided in the {\tt tests} sub-directory of the library. The first resource for a new user should be the {\tt ccl$\_$sample$\_$run.c} file. This starts by setting up the \ccl default configuration. Then, it creates the ``cosmo'' structure, which contains distances and power spectra splines, for example. There are example calls for routines that output comoving radial distances, the scale factor, the growth factor and $\sigma_8$. Toy models are created for the redshift distributions of galaxies in the clustering and lensing samples, and for the bias of the clustering sample ($b(z)=1+z$). These are used for constructing the ``tracer'' structures via {\tt CCL$\_$Cltracer}, which can then be called to obtain the angular power spectra for clustering, cosmic shear and CMB lensing. All functions of redshift associated to each tracer can be retrieved at any arbitrary point using the same interpolation scheme used by \ccl internally.
 
 
-\section{Python wrapper}
-\label{sec:python}
+\section{Python example}
+\label{sec:python:example}
 
 A Python wrapper for \ccl is provided through a module called {\tt pyccl}. The whole \ccl interface can be accessed through regular Python functions and classes, with all of the computation happening in the background through the C code. The functions all support {\tt numpy} arrays as inputs and outputs, with any loops being performed in the C code for speed.
-
-\subsection{Python installation}
-\label{sec:python:install}
-
-Before you can build the Python wrapper, you must have compiled and installed the C version of \ccl, as {\tt pyccl} will be dynamically linked to it. The Python wrapper's build tools currently assume that your C compiler is {\tt gcc}, and that you have a working Python 2.x or 3.x installation with {\tt numpy} and {\tt distutils} with {\tt swig} (the latter is not necessary for using \ccl, only for development). If you have installed \ccl in your default library path, you can build and install the {\tt pyccl} module by going to the root \ccl directory and choosing one of the following options:
-\begin{itemize}
- \item To build and install the wrapper for the current user only, run \\
- {\tt \$ python setup.py install --user}
- \item To build and install the wrapper for all users, run \\
- {\tt \$ sudo python setup.py install}
- \item To build the wrapper in-place in the source directory (for testing), run \\
- {\tt \$ python setup.py build$\_$ext --inplace}
-\end{itemize}
-If you choose either of the first two options, the {\tt pyccl} module will be installed into a sensible location in your {\tt PYTHONPATH}, and so should be automatically picked up by your Python interpreter. You can then simply import the module using {\tt import pyccl}. If you use the last option, however, you must either start your interpreter from the root \ccl directory, or manually add the root \ccl directory to your {\tt PYTHONPATH}.
-
-These options assume that the C library ({\tt libccl}) has been installed somewhere in the default library path. If this isn't the case, you will need to tell the Python build tools where to find the library. This can be achieved by running the following command first, before any of the commands above:
-
-\texttt{python setup.py build$\_$ext --library-dirs=/path/to/lib/ --rpath=/path/to/lib/}
-
-Here, {\tt /path/to/lib/} should point to the directory where you installed the C library. For example, if you ran {\tt ./configure --prefix=/my/path/} before you compiled the C library, the correct path would be {\tt /my/path/lib/}. The command above will build the Python wrapper in-place; you can then run one of the {\tt install} commands, as listed above, to actually install the wrapper. Note that the {\tt rpath} switch makes sure that the \ccl C library can be found at runtime, even if it is not in the default library path. If you use this option, there should therefore be no need to modify the library path yourself.
-
-On some systems, building or installing the Python wrapper fails with a message similar to:
-
-\texttt{fatal error: `gsl/gsl$\_$interp2d.h' file not found.}
-
-This happens when the build tools fail to find the directory containing the GSL header files, e.g. when they have been installed in a non-standard directory. To work around this problem, use the {\tt --include-dirs} option when running the {\tt setup.py build$\_$ext} step above, i.e. if the GSL header files are in the directory {\tt /path/to/include/}, you would run
-
-\texttt{python setup.py build$\_$ext --library-dirs=/path/to/install/lib/ --rpath=/path/to/install/lib/ --include-dirs=/path/to/include/}
-
-and then run one of the {\tt setup.py install} commands listed above. (Note: As an alternative to the {\tt --include-dirs} option, you can use {\tt -I/path/to/include} instead.)
-
-You can quickly check whether {\tt pyccl} has been installed correctly by running {\tt python -c "import pyccl"} and checking that no errors are returned. For a more in-depth test to make sure everything is working, change to the {\tt tests/} sub-directory and run {\tt python run$\_$tests.py}. These tests will take a few minutes. Notice that these are not the same tests that are run via {\tt make check}. In the case of the {\tt python} tests, the library will only check for finite outputs of the routines called from {\tt pyccl}. There is no benchmark comparison in this case.
-
-\subsection{Python example}
-\label{sec:python:example}
 
 The Python module has essentially the same functions as the C library, just presented in a more standard Python-like way. You can inspect the available functions and their arguments by using the built-in Python {\tt help()} function, as with any Python module.
 
@@ -1154,7 +1258,7 @@ Power spectrum example.ipynb
 Note that the likelihood analysis in the last notebook is not intended to be realistic, but it gives an operational example of how {\tt CCL} can be integrated into such an analysis. In particular, the notebook only considers cosmic shear over one wide redshift bin and the covariance matrix adopted solely includes a contribution from cosmic variance. The ``data vector'' is simply a simulated using {\tt CCL} theoretical predictions. For speed, theoretical predictions use the BBKS power spectrum implementation.
 
 
-\subsection{Technical notes on how the Python wrapper is implemented}
+\section{Technical notes on how the Python wrapper is implemented}
 \label{sec:python:technical}
 
 The Python wrapper is built using the {\tt swig} tool, which automatically scans the \ccl C headers and builds a matching interface in Python. The default autogenerated {\tt swig} interface can be accessed through the {\tt pyccl.lib} module if necessary. A more user-friendly wrapper has been written on top of this to provide more structure to the module, allow {\tt numpy} vectorization, and provide more natural Python objects to use (instead of opaque {\tt swig}-generated objects).
@@ -1186,9 +1290,12 @@ The build process will also create a {\tt pyccl/ccllib.py} file, which is the ra
 
 In the future, we hope that \ccl will include other functionalities. Functionalities which are currently under development:
 \begin{itemize}
-        \item a link to {\tt angpow} \citep{2017arXiv170103592C} for going beyond the Limber approximation,
-	\item a link to {\tt FAST-PT} \citep{FASTPT} for efficient implementation of nonlinear perturbation theory,
-	\item and more power spectrum methods (see \ref{Pk_wishlist}).
+\item further CMB observable predictions (beyond CMB lensing)\footnote{\url{https://github.com/LSSTDESC/CCL/issues/428}},
+\item support for non-linear biasing models\footnote{\url{https://github.com/LSSTDESC/CCL/pull/444}}\citep[e.g.][]{FASTPT},
+\item halo density profiles\footnote{\url{https://github.com/LSSTDESC/CCL/issues/407}},
+\item velocity correlation function\footnote{\url{https://github.com/LSSTDESC/CCL/issues/429}},
+\item mass function emulators\footnote{\url{https://github.com/LSSTDESC/CCL/issues/235}},
+\item and more power spectrum methods (see \ref{Pk_wishlist}).
 \end{itemize}
 
 \section{Feedback}
