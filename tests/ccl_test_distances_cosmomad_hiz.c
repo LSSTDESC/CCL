@@ -4,7 +4,7 @@
 #include <math.h>
 
 // The tolerance in chi for all the
-#define DISTANCES_HIZ_TOLERANCE 1.0e-3
+#define DISTANCES_HIZ_TOLERANCE 5.0e-7
 
 CTEST_DATA(distances_cosmomad_hiz) {
   double Omega_c;
@@ -87,7 +87,8 @@ static void compare_distances_hiz(int model, struct distances_cosmomad_hiz_data 
 						data->w_0[model], data->w_a[model],
 						data->h, data->A_s, data->n_s,-1,-1,-1,-1,NULL,NULL, &status);
   
-  params.Omega_g=0;
+  params.Omega_g=0; //enforce no radiation
+  params.Omega_l = 1.-params.Omega_m-params.Omega_k; //reomcpute Omega_l without radiation
   
   // Make a cosmology object from the parameters with the default configuration
   ccl_cosmology * cosmo = ccl_cosmology_create(params, default_config);
