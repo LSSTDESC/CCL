@@ -10,7 +10,7 @@
 // at greater than a 1.0e-4 level.
 #define DISTANCES_TOLERANCE 1.0e-3
 
-CTEST_DATA(distances_hiz_mnu) {
+CTEST_DATA(distances_astropy_mnu_lowz) {
   double Omega_c;
   double Omega_b;
   double h;
@@ -34,7 +34,7 @@ CTEST_DATA(distances_hiz_mnu) {
 static void read_chi_test_file(double z[5], double chi[5][5])
 {
   //Distances are in Mpc
-  FILE * f = fopen("./tests/benchmark/chi_hiz_mnu_model1-5.txt", "r");
+  FILE * f = fopen("./tests/benchmark/chi_mnu_model1-5.txt", "r");
   ASSERT_NOT_NULL(f);
   
   // Ignore header line
@@ -54,7 +54,7 @@ static void read_chi_test_file(double z[5], double chi[5][5])
 static void read_dm_test_file(double z[5], double dm[5][5])
 {
   //Distances are in Mpc
-  FILE * f = fopen("./tests/benchmark/dm_hiz_mnu_model1-5.txt", "r");
+  FILE * f = fopen("./tests/benchmark/dm_mnu_model1-5.txt", "r");
   ASSERT_NOT_NULL(f);
 
   // Ignore header line
@@ -73,13 +73,14 @@ static void read_dm_test_file(double z[5], double dm[5][5])
 
 // Set up the cosmological parameters to be used in each of the
 // models
-CTEST_SETUP(distances_hiz_mnu) {
+CTEST_SETUP(distances_astropy_mnu_lowz) {
   // Values that are the same for all 5 models
   data->Omega_c = 0.25;
   data->Omega_b = 0.05;
   data->h = 0.7;
   data->A_s = 2.1e-9;
   data->n_s = 0.96;
+  data->mnu_type = ccl_mnu_list;
 
   // Values that are different for the different models
   double Omega_v[5] = {  0.7,  0.7,  0.7,  0.65, 0.75 };
@@ -90,7 +91,6 @@ CTEST_SETUP(distances_hiz_mnu) {
   // This is to compare with benchmarks from astropy
   // which splits equally total N between all species
   double Neff[5] 	= {3, 3, 3, 3, 3};
-  data->mnu_type = ccl_mnu_list;
   
   double mnu0[3]	= 	{0.04, 0., 0.};
   double mnu1[3]	= 	{0.05, 0.01, 0.};
@@ -116,7 +116,6 @@ CTEST_SETUP(distances_hiz_mnu) {
   data->mnu3[2] = mnu3[2];
   data->mnu4[2] = mnu4[2];
 
-
   // Fill in the values from these constant arrays.
   for (int i=0; i<5; i++) {
     data->Omega_v[i] = Omega_v[i];
@@ -131,7 +130,7 @@ CTEST_SETUP(distances_hiz_mnu) {
   read_chi_test_file(data->z, data->chi);
 }
 
-static void compare_distances_hiz_mnu(int model, struct distances_hiz_mnu_data * data)
+static void compare_distances_mnu(int model, struct distances_astropy_mnu_lowz_data * data)
 {
   int status=0;
   // Make the parameter set from the input data
@@ -145,7 +144,7 @@ static void compare_distances_hiz_mnu(int model, struct distances_hiz_mnu_data *
   if (model==0){
   
   params = ccl_parameters_create(data->Omega_c, data->Omega_b, data->Omega_k[model],
-						data->Neff[model], data->mnu0, data->mnu_type,
+						data->Neff[model], data->mnu0, data-> mnu_type, 
 						data->w_0[model], data->w_a[model],
 						data->h, data->A_s, data->n_s,-1,-1,-1,-1,NULL,NULL, &status);
   } else if (model==1){
@@ -196,27 +195,27 @@ static void compare_distances_hiz_mnu(int model, struct distances_hiz_mnu_data *
   ccl_cosmology_free(cosmo);
 }
 
-CTEST2(distances_hiz_mnu, model_1) {
+CTEST2(distances_astropy_mnu_lowz, model_1) {
   int model = 0;
-  compare_distances_hiz_mnu(model, data);
+  compare_distances_mnu(model, data);
 }
 
-CTEST2(distances_hiz_mnu, model_2) {
+CTEST2(distances_astropy_mnu_lowz, model_2) {
   int model = 1;
-  compare_distances_hiz_mnu(model, data);
+  compare_distances_mnu(model, data);
 }
 
-CTEST2(distances_hiz_mnu, model_3) {
+CTEST2(distances_astropy_mnu_lowz, model_3) {
   int model = 2;
-  compare_distances_hiz_mnu(model, data);
+  compare_distances_mnu(model, data);
 }
 
-CTEST2(distances_hiz_mnu, model_4) {
+CTEST2(distances_astropy_mnu_lowz, model_4) {
   int model = 3;
-  compare_distances_hiz_mnu(model, data);
+  compare_distances_mnu(model, data);
 }
 
-CTEST2(distances_hiz_mnu, model_5) {
+CTEST2(distances_astropy_mnu_lowz, model_5) {
   int model = 4;
-  compare_distances_hiz_mnu(model, data);
+  compare_distances_mnu(model, data);
 }

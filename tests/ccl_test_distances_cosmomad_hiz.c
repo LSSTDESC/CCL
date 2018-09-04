@@ -6,7 +6,7 @@
 // The tolerance in chi for all the
 #define DISTANCES_HIZ_TOLERANCE 5.0e-7
 
-CTEST_DATA(distances_hiz) {
+CTEST_DATA(distances_cosmomad_hiz) {
   double Omega_c;
   double Omega_b;
   double h;
@@ -48,7 +48,7 @@ static void read_chi_test_file(double z[7], double chi[3][7])
 
 // Set up the cosmological parameters to be used in each of the
 // models
-CTEST_SETUP(distances_hiz) {
+CTEST_SETUP(distances_cosmomad_hiz) {
   // Values that are the same for all 3 models
   data->Omega_c = 0.25;
   data->Omega_b = 0.05;
@@ -77,7 +77,7 @@ CTEST_SETUP(distances_hiz) {
   read_chi_test_file(data->z, data->chi);
 }
 
-static void compare_distances_hiz(int model, struct distances_hiz_data * data)
+static void compare_distances_hiz(int model, struct distances_cosmomad_hiz_data * data)
 {
   int status=0;
   // Make the parameter set from the input data
@@ -107,17 +107,17 @@ static void compare_distances_hiz(int model, struct distances_hiz_data * data)
   ccl_cosmology_free(cosmo);
 }
 
-CTEST2(distances_hiz, model_1) {
+CTEST2(distances_cosmomad_hiz, model_1) {
   int model = 0;
   compare_distances_hiz(model, data);
 }
 
-CTEST2(distances_hiz, model_2) {
+CTEST2(distances_cosmomad_hiz, model_2) {
   int model = 1;
   compare_distances_hiz(model, data);
 }
 
-CTEST2(distances_hiz, model_3) {
+CTEST2(distances_cosmomad_hiz, model_3) {
   int model = 2;
   compare_distances_hiz(model, data);
 }
