@@ -64,4 +64,5 @@ void halo_bias_vec(ccl_cosmology * cosmo,
         output[i] = ccl_halo_bias(cosmo, halo_mass[i], a, odelta, status);
     }
 }
+ 
 %}

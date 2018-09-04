@@ -31,22 +31,23 @@ extern "C" {
 #define K_PIVOT 0.05
 
 /**
- * Lightspeed / H0 in units of Mpc/h
+ * Lightspeed / H0 in units of Mpc/h (from CODATA 2014)
  */
 #define CLIGHT_HMPC 2997.92458 //H0^-1 in Mpc/h
 
 /**
  * Newton's gravitational constant in units of m^3/Kg/s^2 
  */
-//#define GNEWT 6.6738e-11    //(from PDG 2013) in m^3/Kg/s^2
-#define GNEWT 6.67428e-11 // CLASS VALUE
+//#define GNEWT 6.6738e-11  /(from PDG 2013) in m^3/Kg/s^2
+//#define GNEWT 6.67428e-11 // CLASS VALUE
+#define GNEWT 6.67408e-11 // from CODATA 2014
 
 /**
  * Solar mass in units of kg (from GSL)
  */
-#define SOLAR_MASS GSL_CONST_MKSA_SOLAR_MASS
+//#define SOLAR_MASS GSL_CONST_MKSA_SOLAR_MASS
 //#define SOLAR_MASS 1.9885e30 //(from PDG 2015) in Kg
-
+#define SOLAR_MASS 1.9884754153381438e+30 //from IAU 2015
 /**
  * Mpc to meters (from PDG 2013)
  */
@@ -65,27 +66,37 @@ extern "C" {
 /**
  * Boltzmann constant in units of J/K
 */
-#define KBOLTZ  GSL_CONST_MKSA_BOLTZMANN
-
+//#define KBOLTZ  GSL_CONST_MKSA_BOLTZMANN
+#define KBOLTZ 1.38064852e-23 //from CODATA 2014
+  
 /**
  * Stefan-Boltzmann constant in units of kg/s^3 / K^4
  */
-#define STBOLTZ GSL_CONST_MKSA_STEFAN_BOLTZMANN_CONSTANT
-
+//#define STBOLTZ GSL_CONST_MKSA_STEFAN_BOLTZMANN_CONSTANT
+#define STBOLTZ 5.670367e-8 //from CODATA 2014
 /**
  * Planck's constant in units kg m^2 / s
  */
-#define HPLANCK  GSL_CONST_MKSA_PLANCKS_CONSTANT_H 
-
+//#define HPLANCK  GSL_CONST_MKSA_PLANCKS_CONSTANT_H 
+#define HPLANCK 6.626070040e-34 //from CODATA 2014
+  
 /**
  * The speed of light in m/s
  */
-#define CLIGHT   GSL_CONST_MKSA_SPEED_OF_LIGHT
-
+//#define CLIGHT   GSL_CONST_MKSA_SPEED_OF_LIGHT
+#define CLIGHT 299792458.0 //from CODATA 2014
+  
 /**
  * Electron volt to Joules convestion
  */
-#define EV_IN_J  GSL_CONST_MKSA_ELECTRON_VOLT
+//#define EV_IN_J  GSL_CONST_MKSA_ELECTRON_VOLT
+#define EV_IN_J 1.6021766208e-19  //from CODATA 2014
+  
+/**
+ * Temperature of the CMB in K
+ */
+#define TCMB 2.725
+//#define TCMB 2.7255 // CLASS value
 
 /**
  * T_ncdm, as taken from CLASS, explanatory.ini
@@ -105,28 +116,61 @@ extern "C" {
 
 //Precision parameters
 /**
+ * Default relative precision if not otherwise specified
+ */
+#define GSL_EPSREL 1E-4
+
+/**
+ * Default number of iterations for integration and root-finding if not otherwise
+ * specified
+ */
+#define GSL_N_ITERATION 1000
+
+/**
+ * Default number of Gauss-Kronrod points in QAG integration if not otherwise 
+ * specified
+ */
+#define GSL_INTEGRATION_GAUSS_KRONROD_POINTS GSL_INTEG_GAUSS41
+
+/**
+ * Absolute precision in neutrino root finding
+ */
+#define GSL_EPSABS_NU 1E-7
+
+/**
+ * Relative precision in neutrino root finding
+ */
+#define GSL_EPSREL_NU 1E-7
+
+/**
+ * Number of iterations for neutrino root finding
+ */
+#define GSL_N_ITERATION_NU 1000
+
+/**
+ * Relative precision in sigma_R calculations
+ */
+#define GSL_EPSREL_SIGMAR 1E-5
+
+/**
  * Relative precision in distance calculations
  */
-#define EPSREL_DIST 1E-6
+#define GSL_EPSREL_DIST 1E-6
 
 /**
  * Relative precision in growth calculations
  */
-#define EPSREL_GROWTH 1E-6
+#define GSL_EPSREL_GROWTH 1E-6
 
 /**
  * Relative precision in dNdz calculations
  */
-#define EPSREL_DNDZ 1E-6
+#define GSL_EPSREL_DNDZ 1E-6
 
 /**
  * Absolute precision in growth calculations
  */
 #define EPS_SCALEFAC_GROWTH 1E-6
-
-//Correlation function related parameters
-#define EPSREL_CORR_FUNC 1E-3
-#define GSL_INTEGRATION_LIMIT 1000
 
 //LSST specific numbers
 #define Z_MIN_SOURCES 0.1

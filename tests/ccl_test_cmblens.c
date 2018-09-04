@@ -6,7 +6,7 @@
 #include <math.h>
 #include <string.h>
 
-#define CLS_TOLERANCE 1E-3
+#define CLS_TOLERANCE 5E-4
 #define CLS_FRACTION 1E-3
 #define ELL_MAX_CL 3001
 
@@ -16,7 +16,7 @@ CTEST_DATA(cls) {
   double h;
   double A_s;
   double n_s;
-  double sigma_8;
+  double sigma8;
 };
 
 CTEST_SETUP(cls) {
@@ -24,7 +24,7 @@ CTEST_SETUP(cls) {
   data->Omega_b = 0.00;
   data->h = 0.7;
   data->A_s = 2.1e-9;
-  data->sigma_8=0.8;
+  data->sigma8=0.8;
   data->n_s = 0.96;
 }
 
@@ -44,7 +44,6 @@ static void compare_cls(struct cls_data * data)
 {
   int status=0;
   char fname[256];
-  double factor_tol=2.;
   double zlss=1100.;
   sprintf(fname,"tests/benchmark/codecomp_step2_outputs/run_log_cl_cc.txt");
 
@@ -53,16 +52,11 @@ static void compare_cls(struct cls_data * data)
   config.matter_power_spectrum_method = ccl_linear;
   ccl_parameters params = ccl_parameters_create_flat_lcdm(data->Omega_c,data->Omega_b,data->h,
 							  data->A_s,data->n_s, &status);
-  params.sigma_8=data->sigma_8;
+  params.Omega_n_rel=0;
+  params.Omega_l=0.7;
+  params.sigma8=data->sigma8;
   ccl_cosmology * cosmo = ccl_cosmology_create(params, config);
   ASSERT_NOT_NULL(cosmo);
-
-  //Fix spline parameters for the high-redshift needs of the CMB lensing power spectrum
-  //We save them first to restore them to their usual values at the end.
-  int na_sv=ccl_splines->A_SPLINE_NA;
-  int na_pk_sv=ccl_splines->A_SPLINE_NA_PK;
-  ccl_splines->A_SPLINE_NA=10000;
-  ccl_splines->A_SPLINE_NA_PK=500;
 
   FILE *fi_cc;
   CCL_ClTracer *tr_cl=ccl_cl_tracer_cmblens(cosmo,zlss,&status);
@@ -91,8 +85,7 @@ static void compare_cls(struct cls_data * data)
     double cl_cc,cl_cc_h;
     rtn = fscanf(fi_cc,"%d %lf",&l,&cl_cc);
     cl_cc_h=clarr[l];
-    printf("%lE \n",fabs(cl_cc_h/cl_cc-1));
-    if(fabs(cl_cc_h/cl_cc-1)>factor_tol*CLS_TOLERANCE) {
+    if(fabs(cl_cc_h/cl_cc-1)>CLS_TOLERANCE) {
       fraction_failed++;
     }
   }
@@ -102,8 +95,6 @@ static void compare_cls(struct cls_data * data)
   printf("%lf %% ",fraction_failed*100);
   ASSERT_TRUE((fraction_failed<CLS_FRACTION));
 
-  ccl_splines->A_SPLINE_NA=na_sv;
-  ccl_splines->A_SPLINE_NA_PK=na_pk_sv;
   ccl_cl_tracer_free(tr_cl);
   ccl_cosmology_free(cosmo);
 }

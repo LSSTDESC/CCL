@@ -1,7 +1,22 @@
+"""The pyccl package contains all of the submodules that are implemented in individual files in CCL.
+"""
+from pkg_resources import get_distribution, DistributionNotFound
+try:
+    __version__ = get_distribution(__name__).version
+except DistributionNotFound:
+    # package is not installed
+    pass
+
+# Sets the environment variable for default config path if it does not exist yet
+from os import environ, path
+if environ.get("CCL_PARAM_FILE") is None:
+    environ["CCL_PARAM_FILE"] = path.dirname(path.abspath(__file__)) + '/ccl_params.ini'
+if environ.get("CLASS_PARAM_DIR") is None:
+    environ["CLASS_PARAM_DIR"] = path.dirname(path.abspath(__file__))
 
 from pyccl import ccllib as lib
 
-from pyccl import core, constants, background, power, massfunction
+from pyccl import core, constants, background, power, massfunction, halomodel
 
 # Core data structures
 from pyccl.core import Parameters, Cosmology
@@ -14,7 +29,7 @@ from pyccl.background import growth_factor, growth_factor_unnorm, \
 
 # Power spectrum calculations and sigma8
 from pyccl.power import linear_matter_power, nonlin_matter_power, sigmaR, \
-    sigma8
+    sigmaV, sigma8
 
 # Halo mass function
 from pyccl.massfunction import massfunc, massfunc_m2r, sigmaM, halo_bias
@@ -32,6 +47,10 @@ from pyccl.constants import CLIGHT_HMPC, MPC_TO_METER, PC_TO_METER, \
 
 from pyccl.correlation import correlation, correlation_3d
 
+# Properties of haloes
+from pyccl.halomodel import halomodel_matter_power, halo_concentration
+
+# Specific to massive neutrinos
 from pyccl.neutrinos import Omeganuh2, nu_masses
 
 # Expose function to toggle debug mode

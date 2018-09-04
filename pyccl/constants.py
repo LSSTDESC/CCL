@@ -1,4 +1,6 @@
+"""This file exposes constants present in CCL.
 
+"""
 from pyccl.ccllib import \
   CCL_ClTracer, CCL_ClTracer_swigregister, \
   CCL_ERROR_CLASS, CCL_ERROR_INCONSISTENT, CCL_ERROR_INTEG, CCL_ERROR_LINSPACE, \
@@ -9,7 +11,7 @@ from pyccl.ccllib import \
   CCL_CLT_NZ, CCL_CLT_BZ, CCL_CLT_SZ, CCL_CLT_WM, \
   CCL_CLT_RF, CCL_CLT_BA, CCL_CLT_WL, \
   DNDZ_NC, DNDZ_WL_CONS, DNDZ_WL_FID, DNDZ_WL_OPT, \
-  EPSREL_DIST, EPSREL_DNDZ, EPSREL_GROWTH, EPS_SCALEFAC_GROWTH, \
+  EPS_SCALEFAC_GROWTH, \
   GNEWT, \
   K_PIVOT, \
   MPC_TO_METER, PC_TO_METER, RHO_CRITICAL, SOLAR_MASS, \

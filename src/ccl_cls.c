@@ -187,7 +187,7 @@ static int window_lensing(double chi,ccl_cosmology *cosmo,SplPar *spl_pz,double 
   double result,eresult;
   IntLensPar ip;
   gsl_function F;
-  gsl_integration_workspace *w=gsl_integration_workspace_alloc(1000);
+  gsl_integration_workspace *w=gsl_integration_workspace_alloc(ccl_gsl->N_ITERATION);
 
   ip.chi=chi;
   ip.cosmo=cosmo;
@@ -195,11 +195,16 @@ static int window_lensing(double chi,ccl_cosmology *cosmo,SplPar *spl_pz,double 
   ip.status = &status;
   F.function=&integrand_wl;
   F.params=&ip;
-  gslstatus=gsl_integration_qag(&F,chi,chi_max,0,1E-4,1000,GSL_INTEG_GAUSS41,w,&result,&eresult);
+  gslstatus=gsl_integration_qag(&F, chi, chi_max, 0,
+                                ccl_gsl->INTEGRATION_EPSREL, ccl_gsl->N_ITERATION,
+                                ccl_gsl->INTEGRATION_GAUSS_KRONROD_POINTS,
+                                w, &result, &eresult);
   *win=result;
   gsl_integration_workspace_free(w);
-  if(gslstatus!=GSL_SUCCESS || *ip.status)
+  if(gslstatus!=GSL_SUCCESS || *ip.status) {
+    ccl_raise_gsl_warning(gslstatus, "ccl_cls.c: window_lensing():");
     return 1;
+  }
   //TODO: chi_max should be changed to chi_horizon
   //we should precompute this quantity and store it in cosmo by default
 
@@ -247,7 +252,7 @@ static int window_magnification(double chi,ccl_cosmology *cosmo,SplPar *spl_pz,S
   double result,eresult;
   IntMagPar ip;
   gsl_function F;
-  gsl_integration_workspace *w=gsl_integration_workspace_alloc(1000);
+  gsl_integration_workspace *w=gsl_integration_workspace_alloc(ccl_gsl->N_ITERATION);
 
   ip.chi=chi;
   ip.cosmo=cosmo;
@@ -256,11 +261,16 @@ static int window_magnification(double chi,ccl_cosmology *cosmo,SplPar *spl_pz,S
   ip.status = &status;
   F.function=&integrand_mag;
   F.params=&ip;
-  gslstatus=gsl_integration_qag(&F,chi,chi_max,0,1E-4,1000,GSL_INTEG_GAUSS41,w,&result,&eresult);
+  gslstatus=gsl_integration_qag(&F, chi, chi_max, 0,
+                                ccl_gsl->INTEGRATION_EPSREL, ccl_gsl->N_ITERATION,
+                                ccl_gsl->INTEGRATION_GAUSS_KRONROD_POINTS,
+                                w, &result, &eresult);
   *win=result;
   gsl_integration_workspace_free(w);
-  if(gslstatus!=GSL_SUCCESS || *ip.status)
+  if(gslstatus!=GSL_SUCCESS || *ip.status) {
+    ccl_raise_gsl_warning(gslstatus, "ccl_cls.c: window_magnification():");
     return 1;
+  }
   //TODO: chi_max should be changed to chi_horizon
   //we should precompute this quantity and store it in cosmo by default
 
@@ -287,23 +297,22 @@ static CCL_ClTracer *cl_tracer(ccl_cosmology *cosmo,int tracer_type,
 				   int nz_rf,double *z_rf,double *rf,
 				   double z_source, int * status)
 {
-	
-  int clstatus=0;
+  int clstatus=0, gslstatus;
   CCL_ClTracer *clt=(CCL_ClTracer *)malloc(sizeof(CCL_ClTracer));
   if(clt==NULL) {
-	  
+
     *status=CCL_ERROR_MEMORY;
     strcpy(cosmo->status_message,"ccl_cls.c: ccl_cl_tracer(): memory allocation\n");
     return NULL;
   }
-  
+
   if ( ((cosmo->params.N_nu_mass)>0) && tracer_type==CL_TRACER_NC && has_rsd){
 	  free(clt);
 	  *status=CCL_ERROR_NOT_IMPLEMENTED;
 	  strcpy(cosmo->status_message, "ccl_cls.c: ccl_cl_tracer_new(): Number counts tracers with rsd not yet implemented in cosmologies with massive neutrinos.");
 	  return NULL;
   }
-  
+
   clt->tracer_type=tracer_type;
   clt->computed_transfer=0;
 
@@ -334,12 +343,16 @@ static CCL_ClTracer *cl_tracer(ccl_cosmology *cosmo,int tracer_type,
       return NULL;
     }
 
-    gsl_integration_workspace *w=gsl_integration_workspace_alloc(1000);
+    gsl_integration_workspace *w=gsl_integration_workspace_alloc(ccl_gsl->N_ITERATION);
     F.function=&speval_bis;
     F.params=clt->spl_nz;
-    clstatus=gsl_integration_qag(&F,z_n[0],z_n[nz_n-1],0,1E-4,1000,GSL_INTEG_GAUSS41,w,&nz_norm,&nz_enorm);
-    gsl_integration_workspace_free(w); //TODO:check for integration errors
-    if(clstatus!=GSL_SUCCESS) {
+    gslstatus=gsl_integration_qag(&F, z_n[0], z_n[nz_n-1], 0,
+                                  ccl_gsl->INTEGRATION_EPSREL, ccl_gsl->N_ITERATION,
+                                  ccl_gsl->INTEGRATION_GAUSS_KRONROD_POINTS,
+                                  w, &nz_norm, &nz_enorm);
+    gsl_integration_workspace_free(w);
+    if(gslstatus!=GSL_SUCCESS) {
+      ccl_raise_gsl_warning(gslstatus, "ccl_cls.c: cl_tracer():");
       ccl_spline_free(clt->spl_nz);
       free(clt);
       *status=CCL_ERROR_INTEG;
@@ -417,7 +430,7 @@ static CCL_ClTracer *cl_tracer(ccl_cosmology *cosmo,int tracer_type,
 	  strcpy(cosmo->status_message,"ccl_cls.c: ccl_cl_tracer(): memory allocation\n");
 	  return NULL;
 	}
-      
+
 	for(int j=0;j<nchi;j++)
 	  clstatus|=window_magnification(x[j],cosmo,clt->spl_nz,clt->spl_sz,chimax,&(y[j]));
 	if(clstatus) {
@@ -480,7 +493,7 @@ static CCL_ClTracer *cl_tracer(ccl_cosmology *cosmo,int tracer_type,
 	strcpy(cosmo->status_message,"ccl_cls.c: ccl_cl_tracer(): memory allocation\n");
 	return NULL;
       }
-      
+
       for(int j=0;j<nchi;j++)
 	clstatus|=window_lensing(x[j],cosmo,clt->spl_nz,chimax,&(y[j]));
       if(clstatus) {
@@ -505,7 +518,7 @@ static CCL_ClTracer *cl_tracer(ccl_cosmology *cosmo,int tracer_type,
 	return NULL;
       }
       free(x); free(y);
-      
+
       clt->has_intrinsic_alignment=has_intrinsic_alignment;
       if(clt->has_intrinsic_alignment) {
 	clt->spl_rf=ccl_spline_init(nz_rf,z_rf,rf,rf[0],rf[nz_rf-1]);
@@ -576,7 +589,7 @@ void ccl_cl_tracer_free(CCL_ClTracer *clt)
 {
   if((clt->tracer_type==CL_TRACER_NC) || (clt->tracer_type==CL_TRACER_WL))
     ccl_spline_free(clt->spl_nz);
-    
+
   if(clt->tracer_type==CL_TRACER_NC) {
     ccl_spline_free(clt->spl_bz);
     if(clt->has_magnification) {
@@ -688,7 +701,7 @@ static double f_rsd(double a,ccl_cosmology *cosmo,CCL_ClTracer *clt, int * statu
 static double f_mag(double a,double chi,ccl_cosmology *cosmo,CCL_ClTracer *clt, int * status)
 {
   double wM=ccl_spline_eval(chi,clt->spl_wM);
-  
+
   if(wM<=0)
     return 0;
   else
@@ -754,7 +767,7 @@ static double transfer_nc(int l,double k,
 	}
 	if(clt->has_magnification)
 	  f_all+=-2*clt->prefac_lensing*l*(l+1)*f_mag(a,chi,cosmo,clt,status)*jl/(k*k);
-	
+
 	ret+=f_all*sqrt(pk); //TODO: is it worth splining this sqrt?
       }
     }
@@ -767,7 +780,7 @@ static double transfer_nc(int l,double k,
 static double f_lensing(double a,double chi,ccl_cosmology *cosmo,CCL_ClTracer *clt, int * status)
 {
   double wL=ccl_spline_eval(chi,clt->spl_wL);
-  
+
   if(wL<=0)
     return 0;
   else
@@ -785,7 +798,7 @@ static double f_IA_NLA(double a,double chi,ccl_cosmology *cosmo,CCL_ClTracer *cl
     double ba=ccl_spline_eval(z,clt->spl_ba);
     double rf=ccl_spline_eval(z,clt->spl_rf);
     double h=cosmo->params.h*ccl_h_over_h0(cosmo,a,status)/CLIGHT_HMPC;
-    
+
     return pz*ba*rf*h/(chi*chi);
   }
 }
@@ -825,7 +838,7 @@ static double transfer_wl(int l,double k,
 	double f_all=f_lensing(a,chi,cosmo,clt,status)*jl;
 	if(clt->has_intrinsic_alignment)
 	  f_all+=f_IA_NLA(a,chi,cosmo,clt,status)*jl;
-	
+
 	ret+=f_all*sqrt(pk); //TODO: is it worth splining this sqrt?
       }
     }
@@ -847,7 +860,7 @@ static double transfer_cmblens(int l,double k,ccl_cosmology *cosmo,CCL_ClTracer 
     double w=1-chi/clt->chi_source;
     double jl=j_bessel_limber(l,k);
     double pk=ccl_nonlin_matter_power(cosmo,k,a,status);
-    return clt->prefac_lensing*l*(l+1.)*w*sqrt(pk)*jl/(a*chi*k*k); 
+    return clt->prefac_lensing*l*(l+1.)*w*sqrt(pk)*jl/(a*chi*k*k);
   }
   return 0;
 }
@@ -879,24 +892,24 @@ static double *get_lkarr(ccl_cosmology *cosmo,CCL_ClWorkspace *w,
 			 int *status)
 {
   int ik;
-  
+
   //First compute relevant k-range for this ell
   double kmin,kmax,lkmin,lkmax;
   if(l>w->l_limber) {
-    kmin=CCL_MAX(ccl_splines->K_MIN_DEFAULT,0.8*(l+0.5)/chimax);
+    kmin=CCL_MAX(ccl_splines->K_MIN,0.8*(l+0.5)/chimax);
     kmax=CCL_MIN(ccl_splines->K_MAX,1.2*(l+0.5)/chimin);
   }
   else {
     double xmin,xmax;
     limits_bessel(l,CCL_FRAC_RELEVANT,&xmin,&xmax);
-    kmin=CCL_MAX(ccl_splines->K_MIN_DEFAULT,xmin/chimax);
+    kmin=CCL_MAX(ccl_splines->K_MIN,xmin/chimax);
     kmax=CCL_MIN(ccl_splines->K_MAX,xmax/chimin);
     //Cap by maximum meaningful argument of the Bessel function
     kmax=CCL_MIN(kmax,2*(w->l_arr[w->n_ls-1]+0.5)/chimin); //Cap by 2 x inverse scale corresponding to l_max
   }
   lkmin=log10(kmin);
   lkmax=log10(kmax);
-  
+
   //Allocate memory for transfer function
   double *lkarr;
   double lknew=lkmin;
@@ -934,7 +947,7 @@ static double *get_lkarr(ccl_cosmology *cosmo,CCL_ClWorkspace *w,
       lkarr[ik]=log10(kk+dk);
     }
   }
-  
+
   return lkarr;
 }
 
@@ -971,7 +984,7 @@ static void compute_transfer(CCL_ClTracer *clt,ccl_cosmology *cosmo,CCL_ClWorksp
       strcpy(cosmo->status_message,"ccl_cls.c: compute_transfer(): memory allocation\n");
       break;
     }
-	
+
     double *tkarr=(double *)malloc(nk*sizeof(double));
     if(tkarr==NULL) {
       free(lkarr);
@@ -1020,7 +1033,7 @@ static double transfer(int il,double lk,ccl_cosmology *cosmo,
   if(il<w->l_limber) {
     if(!(clt->computed_transfer))
       compute_transfer(clt,cosmo,w,status);
-    
+
     return ccl_spline_eval(lk,clt->spl_transfer[il]);
   } else {
     return transfer_wrap(il,lk,cosmo,w,clt,status);
@@ -1066,7 +1079,7 @@ static void get_k_interval(ccl_cosmology *cosmo,CCL_ClWorkspace *w,
 
   if(l<w->l_limber) {
     chimin=2*(l+0.5)/ccl_splines->K_MAX;
-    chimax=0.5*(l+0.5)/ccl_splines->K_MIN_DEFAULT;
+    chimax=0.5*(l+0.5)/ccl_splines->K_MIN;
   }
   else {
     if(cut_low_1) {
@@ -1085,7 +1098,7 @@ static void get_k_interval(ccl_cosmology *cosmo,CCL_ClWorkspace *w,
     }
     else {
       chimin=0.5*(l+0.5)/ccl_splines->K_MAX;
-      chimax=2*(l+0.5)/ccl_splines->K_MIN_DEFAULT;
+      chimax=2*(l+0.5)/ccl_splines->K_MIN;
     }
   }
 
@@ -1104,12 +1117,12 @@ static void get_k_interval(ccl_cosmology *cosmo,CCL_ClWorkspace *w,
 static double ccl_angular_cl_native(ccl_cosmology *cosmo,CCL_ClWorkspace *cw,int il,
 				    CCL_ClTracer *clt1,CCL_ClTracer *clt2,int * status)
 {
-  int clastatus=0, qagstatus;
+  int clastatus=0, gslstatus;
   IntClPar ipar;
   double result=0,eresult;
   double lkmin,lkmax;
   gsl_function F;
-  gsl_integration_workspace *w=gsl_integration_workspace_alloc(1000);
+  gsl_integration_workspace *w=gsl_integration_workspace_alloc(ccl_gsl->N_ITERATION);
 
   ipar.il=il;
   ipar.cosmo=cosmo;
@@ -1120,9 +1133,25 @@ static double ccl_angular_cl_native(ccl_cosmology *cosmo,CCL_ClWorkspace *cw,int
   F.function=&cl_integrand;
   F.params=&ipar;
   get_k_interval(cosmo,cw,clt1,clt2,cw->l_arr[il],&lkmin,&lkmax);
-  qagstatus=gsl_integration_qag(&F,lkmin,lkmax,0,1E-4,1000,GSL_INTEG_GAUSS41,w,&result,&eresult);
+  gslstatus=gsl_integration_qag(&F, lkmin, lkmax, 0,
+                                ccl_gsl->INTEGRATION_LIMBER_EPSREL, ccl_gsl->N_ITERATION,
+                                ccl_gsl->INTEGRATION_LIMBER_GAUSS_KRONROD_POINTS,
+                                w, &result, &eresult);
   gsl_integration_workspace_free(w);
-  if(qagstatus!=GSL_SUCCESS || *ipar.status) {
+
+  // Test if a round-off error occured in the evaluation of the integral
+  // If so, try another integration function, more robust but potentially slower
+  if(gslstatus == GSL_EROUND) {
+    ccl_raise_gsl_warning(gslstatus, "ccl_cls.c: ccl_angular_cl_native(): Default GSL integration failure, attempting backup method.");
+    gsl_integration_cquad_workspace *w_cquad= gsl_integration_cquad_workspace_alloc (ccl_gsl->N_ITERATION);
+    size_t nevals=0;
+    gslstatus=gsl_integration_cquad(&F, lkmin, lkmax, 0,
+				    ccl_gsl->INTEGRATION_LIMBER_EPSREL,
+				    w_cquad, &result, &eresult, &nevals);
+    gsl_integration_cquad_workspace_free(w_cquad);
+  }
+  if(gslstatus!=GSL_SUCCESS || *ipar.status) {
+    ccl_raise_gsl_warning(gslstatus, "ccl_cls.c: ccl_angular_cl_native():");
     // If an error status was already set, don't overwrite it.
     if(*status == 0){
         *status=CCL_ERROR_INTEG;
@@ -1230,27 +1259,27 @@ static int check_clt_fa_inconsistency(CCL_ClTracer *clt,int func_code)
     return 1;
   return 0;
 }
-    
+
 double ccl_get_tracer_fa(ccl_cosmology *cosmo,CCL_ClTracer *clt,double a,int func_code,int *status)
 {
   SplPar *spl;
   double x=1./a-1; //x-variable is redshift by default
-  
+
   if(check_clt_fa_inconsistency(clt,func_code)) {
     *status=CCL_ERROR_INCONSISTENT;
     sprintf(cosmo->status_message ,"ccl_cls.c: inconsistent combination of tracer and internal function to be evaluated");
     return -1;
   }
 
-  if(func_code==CCL_CLT_NZ) 
+  if(func_code==CCL_CLT_NZ)
     spl=clt->spl_nz;
-  if(func_code==CCL_CLT_BZ) 
+  if(func_code==CCL_CLT_BZ)
     spl=clt->spl_bz;
-  if(func_code==CCL_CLT_SZ) 
+  if(func_code==CCL_CLT_SZ)
     spl=clt->spl_sz;
-  if(func_code==CCL_CLT_RF) 
+  if(func_code==CCL_CLT_RF)
     spl=clt->spl_rf;
-  if(func_code==CCL_CLT_BA) 
+  if(func_code==CCL_CLT_BA)
     spl=clt->spl_ba;
   if((func_code==CCL_CLT_WL) || (func_code==CCL_CLT_WM)) {
     x=ccl_comoving_radial_distance(cosmo,a,status);
@@ -1259,7 +1288,7 @@ double ccl_get_tracer_fa(ccl_cosmology *cosmo,CCL_ClTracer *clt,double a,int fun
     if(func_code==CCL_CLT_WM)
       spl=clt->spl_wM;
   }
-  
+
   return ccl_spline_eval(x,spl);
 }
 
@@ -1267,22 +1296,22 @@ int ccl_get_tracer_fas(ccl_cosmology *cosmo,CCL_ClTracer *clt,int na,double *a,d
 		       int func_code,int *status)
 {
   SplPar *spl;
-  
+
   if(check_clt_fa_inconsistency(clt,func_code)) {
     *status=CCL_ERROR_INCONSISTENT;
     sprintf(cosmo->status_message ,"ccl_cls.c: inconsistent combination of tracer and internal function to be evaluated");
     return -1;
   }
 
-  if(func_code==CCL_CLT_NZ) 
+  if(func_code==CCL_CLT_NZ)
     spl=clt->spl_nz;
-  if(func_code==CCL_CLT_BZ) 
+  if(func_code==CCL_CLT_BZ)
     spl=clt->spl_bz;
-  if(func_code==CCL_CLT_SZ) 
+  if(func_code==CCL_CLT_SZ)
     spl=clt->spl_sz;
-  if(func_code==CCL_CLT_RF) 
+  if(func_code==CCL_CLT_RF)
     spl=clt->spl_rf;
-  if(func_code==CCL_CLT_BA) 
+  if(func_code==CCL_CLT_BA)
     spl=clt->spl_ba;
   if(func_code==CCL_CLT_WL)
     spl=clt->spl_wL;

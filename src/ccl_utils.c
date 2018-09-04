@@ -162,7 +162,7 @@ double ccl_spline_eval(double x,SplPar *spl)
     double y;
     int stat=gsl_spline_eval_e(spl->spline,x,spl->intacc,&y);
     if (stat!=GSL_SUCCESS) {
-      ccl_raise_exception(stat,"ccl_utils.c: ccl_splin_eval(): gsl error\n");
+      ccl_raise_gsl_warning(stat, "ccl_utils.c: ccl_splin_eval():");
       return NAN;
     }
     return y;

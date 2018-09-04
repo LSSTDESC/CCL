@@ -248,6 +248,11 @@ def check_power(cosmo):
     assert_( all_finite(ccl.sigmaR(cosmo, R_scl)) )
     assert_( all_finite(ccl.sigmaR(cosmo, R_lst)) )
     assert_( all_finite(ccl.sigmaR(cosmo, R_arr)) )
+
+    # sigmaV
+    assert_( all_finite(ccl.sigmaV(cosmo, R_scl)) )
+    assert_( all_finite(ccl.sigmaV(cosmo, R_lst)) )
+    assert_( all_finite(ccl.sigmaV(cosmo, R_arr)) )
     
     # sigma8
     assert_( all_finite(ccl.sigma8(cosmo)) )
@@ -338,6 +343,56 @@ def check_massfunc_nu(cosmo):
     assert_raises(TypeError, ccl.sigmaM, cosmo, mhalo_arr, a_arr)
 
 
+def check_halomod(cosmo):
+    """
+    Check that halo model functions can be run.
+    """
+
+    # Time variables
+    z = 0.
+    z_array = np.linspace(0., 2., 10)
+    a = 1.
+    a_array = 1. / (1.+z_array)
+
+    # Halo definition
+    odelta = 200.
+
+    # Mass variables
+    mass_scalar = 1e13
+    mass_list = [1e11, 1e12, 1e13, 1e14, 1e15, 1e16]
+    mass_array = np.array([1e11, 1e12, 1e13, 1e14, 1e15, 1e16])
+
+    # Wave-vector variables
+    k_scalar = 1.
+    k_list = [1e-3, 1e-2, 1e-1, 1e0, 1e1]
+    k_array = np.array([1e-3, 1e-2, 1e-1, 1e0, 1e1])
+
+    # halo concentration
+    assert_( all_finite(ccl.halo_concentration(cosmo, mass_scalar, a, odelta)) )
+    assert_( all_finite(ccl.halo_concentration(cosmo, mass_list,   a, odelta)) )
+    assert_( all_finite(ccl.halo_concentration(cosmo, mass_array,  a, odelta)) )
+
+    assert_raises(TypeError, ccl.halo_concentration, cosmo, mass_scalar, a_array, odelta)
+    assert_raises(TypeError, ccl.halo_concentration, cosmo, mass_list,   a_array, odelta)
+    assert_raises(TypeError, ccl.halo_concentration, cosmo, mass_array,  a_array, odelta)
+    
+    # halo model
+    assert_( all_finite(ccl.halomodel_matter_power(cosmo, k_scalar, a)) )
+    assert_( all_finite(ccl.halomodel_matter_power(cosmo, k_list,   a)) )
+    assert_( all_finite(ccl.halomodel_matter_power(cosmo, k_array,  a)) )
+
+    assert_( all_finite(ccl.halomodel.twohalo_matter_power(cosmo, k_scalar, a)) )
+    assert_( all_finite(ccl.halomodel.twohalo_matter_power(cosmo, k_list,   a)) )
+    assert_( all_finite(ccl.halomodel.twohalo_matter_power(cosmo, k_array,  a)) )
+
+    assert_( all_finite(ccl.halomodel.onehalo_matter_power(cosmo, k_scalar, a)) )
+    assert_( all_finite(ccl.halomodel.onehalo_matter_power(cosmo, k_list,   a)) )
+    assert_( all_finite(ccl.halomodel.onehalo_matter_power(cosmo, k_array,  a)) )
+
+    assert_raises(TypeError, ccl.halomodel_matter_power, cosmo, k_scalar, a_array)
+    assert_raises(TypeError, ccl.halomodel_matter_power, cosmo, k_list,   a_array)
+    assert_raises(TypeError, ccl.halomodel_matter_power, cosmo, k_array,  a_array)
+
 def check_neutrinos():
     """
     Check that neutrino-related functions can be run.
@@ -364,6 +419,19 @@ def check_neutrinos():
     assert_( all_finite(ccl.nu_masses(OmNuh2, 'inverted', TCMB)) )
     assert_( all_finite(ccl.nu_masses(OmNuh2, 'equal', TCMB)) )
     assert_( all_finite(ccl.nu_masses(OmNuh2, 'sum', TCMB)) )
+
+    # Check that the right exceptions are raised
+    assert_raises(ValueError, ccl.Cosmology, Omega_c=0.27, Omega_b=0.045, 
+                                             h=0.67, A_s=1e-10, n_s=0.96,
+                                             m_nu=[0.1, 0.2, 0.3, 0.4])
+    assert_raises(ValueError, ccl.Cosmology, Omega_c=0.27, Omega_b=0.045, 
+                                             h=0.67, A_s=1e-10, n_s=0.96,
+                                             m_nu=[0.1, 0.2, 0.3],
+                                             mnu_type="sum")
+    assert_raises(ValueError, ccl.Cosmology, Omega_c=0.27, Omega_b=0.045, 
+                                             h=0.67, A_s=1e-10, n_s=0.96,
+                                             m_nu=42)
+
 
 def check_lsst_specs(cosmo):
     """
@@ -707,7 +775,7 @@ def check_corr_3d(cosmo):
     assert_( all_finite(corr2))
     assert_( all_finite(corr3))
     
-    
+
 
 def test_valid_transfer_combos():
     """
@@ -719,8 +787,8 @@ def test_valid_transfer_combos():
     
     assert_raises(ValueError, ccl.Cosmology, transfer_function='emulator', 
                               matter_power_spectrum='linear', **params)
-    assert_raises(ValueError, ccl.Cosmology, transfer_function='boltzmann', 
-                              matter_power_spectrum='halomodel', **params)
+    #assert_raises(ValueError, ccl.Cosmology, transfer_function='boltzmann', 
+    #                          matter_power_spectrum='halomodel', **params)
     assert_raises(ValueError, ccl.Cosmology, transfer_function='bbks', 
                               matter_power_spectrum='emu', **params)
 
@@ -754,6 +822,13 @@ def test_massfunc():
         
     for cosmo_nu in reference_models_nu():
         yield check_massfunc_nu, cosmo_nu
+
+def test_halomod():
+    """
+    Test halo model and supporting functions.
+    """
+    for cosmo in reference_models():
+        yield check_halomod, cosmo
         
 @decorators.slow
 def test_neutrinos():
@@ -805,6 +880,7 @@ def test_debug_mode():
     """
     ccl.debug_mode(True)
     ccl.debug_mode(False)
+
 
         
 if __name__ == '__main__':

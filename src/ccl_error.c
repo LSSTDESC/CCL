@@ -3,6 +3,7 @@
 #include "math.h"
 #include "stdio.h"
 #include "stdlib.h"
+#include "gsl/gsl_errno.h"
 
 // Error handling policy: whether to exit on error (C default) or continue 
 // (Python or other binding default)
@@ -12,7 +13,9 @@ static CCLErrorPolicy _ccl_error_policy = CCL_ERROR_POLICY_EXIT;
 // is useful for the Python wrapper, which normally allows errors to be 
 // overwritten by the C code until control returns to Python. If debug mode is 
 // switched on, the errors are always printed by the C code when they occur.
-static CCLDebugModePolicy _ccl_debug_mode_policy = CCL_DEBUG_MODE_OFF;
+// Setting the debug mode to warning allows ccl_raise_warning to print warnings
+// but keeps the behavior of ccl_raise_exception as if debug mode is set to off.
+static CCLDebugModePolicy _ccl_debug_mode_policy = CCL_DEBUG_MODE_WARNING;
 
 // Set error policy
 void ccl_set_error_policy(CCLErrorPolicy error_policy)
@@ -33,9 +36,34 @@ void ccl_raise_exception(int err, char* msg)
   if ((_ccl_error_policy == CCL_ERROR_POLICY_EXIT) && (err)) {
     fprintf(stderr, "ERROR %d: %s\n", err, msg);
     exit(1);
-  }else if ((_ccl_debug_mode_policy == CCL_DEBUG_MODE_ON) && (err)){
+  }
+  // Print error message and exit if debug output is enabled
+  else if ((_ccl_debug_mode_policy == CCL_DEBUG_MODE_ON) && (err)){
     fprintf(stderr, "ERROR %d: %s\n", err, msg);
   }
+}
+
+// Convenience function to handle warnings
+void ccl_raise_warning(int err, char* msg)
+{
+  // For now just print warning to stderr if debug is enabled.
+  // TODO: Implement some kind of error stack that can be passed on to, e.g.,
+  // the python binding.
+  char warning[256];
+  snprintf(warning, 256, "WARNING: %s", msg);
+  if( (_ccl_debug_mode_policy == CCL_DEBUG_MODE_ON) 
+      || (_ccl_debug_mode_policy == CCL_DEBUG_MODE_WARNING) ) {
+    fprintf(stderr, "%s\n", warning);
+  }
+}
+
+// Convenience function to handle warnings
+void ccl_raise_gsl_warning(int gslstatus, char* msg)
+{
+  char warning[256];
+  snprintf(warning, 256, "%s GSL error: %s", msg, gsl_strerror(gslstatus));
+  ccl_raise_warning(gslstatus, warning);
+  return;
 }
 
 void ccl_check_status(ccl_cosmology *cosmo, int * status)
