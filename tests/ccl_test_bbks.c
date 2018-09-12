@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <math.h>
 
-#define BBKS_TOLERANCE 1.0E-4
+#define BBKS_TOLERANCE 1.0E-5
 
 CTEST_DATA(bbks) {
   double Omega_c;
@@ -25,7 +25,6 @@ CTEST_SETUP(bbks) {
   data->Omega_c = 0.25;
   data->Omega_b = 0.05;
   data->h = 0.7;
-  //TODO: Don't we have to change this to normpk?
   data->A_s = 2.1e-9;
   data->n_s = 0.96;
   data->sigma8=0.8;
@@ -69,6 +68,7 @@ static void compare_bbks(int i_model,struct bbks_data * data)
   config.transfer_function_method = ccl_bbks;
   ccl_parameters params = ccl_parameters_create(data->Omega_c,data->Omega_b,data->Omega_k[i_model-1],data->Neff, data->mnu,data->mnu_type, data->w_0[i_model-1],data->w_a[i_model-1],data->h,data->A_s,data->n_s,-1,-1,-1,-1,NULL,NULL, &status);
   params.Omega_g=0;
+  params.Omega_l=data->Omega_v[i_model-1];
   params.sigma8=data->sigma8;
   ccl_cosmology * cosmo = ccl_cosmology_create(params, config);
   ASSERT_NOT_NULL(cosmo);

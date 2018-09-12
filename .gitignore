@@ -70,13 +70,6 @@ pyccl.egg*
 # Ignore VCS files
 .idea/*
 
-
-
-# Ignore document pdf and bibliography
-doc/0000-ccl_note/*.pdf
-doc/0000-ccl_note/*.bbl
-doc/ccl_paper
-
 # Ignore emacs backup files
 *~
 

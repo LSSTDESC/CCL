@@ -1,0 +1,31 @@
+# Install latex, and the various packages used by the start_paper Makefile:
+before_install:
+  - sudo apt-get -qq update
+  - sudo apt-get install -y gsl-bin libgsl0-dev
+  - sudo apt-get install latexmk
+  - sudo apt-get install latex-xcolor
+addons:
+    apt:
+        packages:
+            - texlive-generic-recommended
+            - texlive-latex-recommended
+            - texlive-latex-extra
+            - texlive-fonts-recommended
+            - texlive-fonts-extra
+            - texlive-publishers
+install:
+
+# Now make the PDF, and move it to the top level, ready for deployment.
+script:
+    - make -C doc/{{ cookiecutter.folder_name }}
+    - cp doc/{{ cookiecutter.folder_name }}/{{ cookiecutter.folder_name }}.pdf .
+
+# Finally, force-push the PDF to an otherwise empty "pdf" branch:
+after_success: |
+    if [ -n "$GITHUB_API_KEY" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ] && [ "$TRAVIS_BRANCH" == "master" ]; then
+        git checkout --orphan pdf
+        git rm -rf .
+        git add -f {{ cookiecutter.folder_name }}.pdf
+        git -c user.name='travis' -c user.email='travis' commit -m init
+        git push -q -f https://YourGitHubUserName:$GITHUB_API_KEY@github.com/DarkEnergyScienceCollaboration/{{ cookiecutter.repo_name }} pdf
+    fi

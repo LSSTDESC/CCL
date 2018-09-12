@@ -1,3 +1,24 @@
+# v 0.4 API changes:
+
+Summary: added halo model matter power spectrum calculation and halo mass-concentration relations. Change to sigma(R) function so that it now has time depdence: it is now sigma(R,a). Added a sigmaV(R,a) function, where sigmaV(R,a) is the variance in the displacement field smoothed on scale R at scale-factor a.
+
+## C library
+In ccl_halomod.c:
+
+Added this source file. Contains functions to compute halo-model matter power spectra and also mass-concentration relations.
+
+In ccl_power.c
+
+Added sigmaV, changed sigma(R) -> sigma(R,a)
+
+In ccl_massfunc.c
+
+Added Sheth & Tormen (1999) mass function.
+
+## Python library
+
+sigmaR(R) defaults to sigmaR(R,a=1) unless a is specified. sigmaV(R) is also added. New functions ccl.halomodel_matter_power and ccl.halo_concentration.
+
 # v 0.3 API changes:
 
 Summary: the user interface for setting up cosmologies with neutrinos has been altered. Users should from now on pass Neff, the effective number of relativistic neutrino species in the early universe, and mnu, either a sum or neutrino masses or a set of 3 neutrinos masses.
@@ -45,3 +66,5 @@ Added support for CMB lensing observables, including splines for cosmological qu
 Added the ability to return useful functions such as dNdz for a tracer Cl object.
 
 Clarified license
+
+Values of the physical constants have changed to CODATA2014/IAU2015

@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <math.h>
 
-#define POWER_NU_TOL 1.0E-4
+#define POWER_NU_TOL 1.0E-3
 
 CTEST_DATA(power_nu) {
   double Omega_c;
@@ -164,7 +164,7 @@ static void compare_power_nu(int i_model,struct power_nu_data * data)
     fprintf(stderr,"Error opening file %s\n",fname);
     exit(1);
   }
-  nk=linecount(f)-1; rewind(f);
+  nk=linecount(f); rewind(f);
   
   double k=0.,pk_bench=0.,pk_ccl,err, k_h, pk_h;
   double z=0.; //Other redshift checks are possible but not currently implemented
@@ -229,7 +229,7 @@ static void compare_power_nu_nl(int i_model,struct power_nu_nl_data * data)
     fprintf(stderr,"Error opening file %s\n",fname_nl);
     exit(1);
   }
-  nk_nl=linecount(f_nl)-1; rewind(f_nl);
+  nk_nl=linecount(f_nl); rewind(f_nl);
   
   double k=0.,pk_bench=0.,pk_ccl,err, k_h, pk_h;
   double z=0.; //Other redshift checks are possible but not currently implemented

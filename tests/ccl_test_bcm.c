@@ -70,6 +70,9 @@ static void compare_bcm(int i_model,struct bcm_data * data)
 						data->Neff, data->m_nu, data-> mnu_type,
 						data->w_0[i_model-1],data->w_a[i_model-1],
 						data->h,data->A_s,data->n_s,14,-1,-1,-1,NULL,NULL, &status);
+                                                                        
+  params.Omega_l=params.Omega_l+params.Omega_g;
+  params.Omega_g=0;
   ccl_cosmology * cosmo = ccl_cosmology_create(params, config);
   ASSERT_NOT_NULL(cosmo);
   ccl_configuration config_nobar = default_config;
@@ -77,8 +80,9 @@ static void compare_bcm(int i_model,struct bcm_data * data)
 						data->Neff, data->m_nu, data->mnu_type,
 						data->w_0[i_model-1],data->w_a[i_model-1],
 						data->h,data->A_s,data->n_s,-1,-1,-1,-1,NULL,NULL, &status);
-  params.sigma8=data->sigma8;
-  params.Omega_g=0;
+  //params.sigma_8=data->sigma_8;
+  params_nobar.Omega_l=params_nobar.Omega_l+params_nobar.Omega_g;
+  params_nobar.Omega_g=0;
   ccl_cosmology * cosmo_nobar = ccl_cosmology_create(params_nobar, config_nobar);
   ASSERT_NOT_NULL(cosmo_nobar);
   

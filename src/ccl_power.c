@@ -421,6 +421,7 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int * statu
     return;
   }
 
+  //These are the limits of the splining range
   cosmo->data.k_min_lin=2*exp(sp.ln_k[0]);
   cosmo->data.k_max_lin=ccl_splines->K_MAX_SPLINE;
 
@@ -493,6 +494,7 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int * statu
       strcpy(cosmo->status_message ,"ccl_power.c: ccl_cosmology_compute_power_class(): K_MIN is less than CLASS's kmin. Not yet supported for nonlinear P(k).\n");
     }
 
+    //These are the limits of the splining range
     cosmo->data.k_min_nl=2*exp(sp.ln_k[0]);
     cosmo->data.k_max_nl=ccl_splines->K_MAX_SPLINE;
 
@@ -802,8 +804,9 @@ static double eh_power(ccl_parameters *params,eh_struct *eh,double k,int wiggled
 
 static void ccl_cosmology_compute_power_eh(ccl_cosmology * cosmo, int * status)
 {
-  cosmo->data.k_min_lin = ccl_splines->K_MIN_DEFAULT;
-  cosmo->data.k_min_nl = ccl_splines->K_MIN_DEFAULT;
+  //These are the limits of the splining range
+  cosmo->data.k_min_lin = ccl_splines->K_MIN;
+  cosmo->data.k_min_nl = ccl_splines->K_MIN;
   cosmo->data.k_max_lin = ccl_splines->K_MAX;
   cosmo->data.k_max_nl = ccl_splines->K_MAX;
   double kmin = cosmo->data.k_min_lin;
@@ -979,8 +982,9 @@ TASK: provide spline for the BBKS power spectrum with baryonic correction
 
 static void ccl_cosmology_compute_power_bbks(ccl_cosmology * cosmo, int * status)
 {
-  cosmo->data.k_min_lin=ccl_splines->K_MIN_DEFAULT;
-  cosmo->data.k_min_nl=ccl_splines->K_MIN_DEFAULT;
+  //These are the limits of the splining range
+  cosmo->data.k_min_lin=ccl_splines->K_MIN;
+  cosmo->data.k_min_nl=ccl_splines->K_MIN;
   cosmo->data.k_max_lin=ccl_splines->K_MAX;
   cosmo->data.k_max_nl=ccl_splines->K_MAX;
   double kmin = cosmo->data.k_min_lin;
@@ -1222,9 +1226,10 @@ static void ccl_cosmology_compute_power_emu(ccl_cosmology * cosmo, int * status)
     return;
   }
 
-  cosmo->data.k_min_lin=2*exp(sp.ln_k[0]);
+  //These are the limits of the splining range
+  cosmo->data.k_min_lin=2*exp(sp.ln_k[0]); 
   cosmo->data.k_max_lin=ccl_splines->K_MAX_SPLINE;
-//CLASS calculations done - now allocate CCL splines
+  //CLASS calculations done - now allocate CCL splines
   double kmin = cosmo->data.k_min_lin;
   double kmax = ccl_splines->K_MAX_SPLINE;
   //Compute nk from number of decades and N_K = # k per decade
@@ -1286,6 +1291,7 @@ static void ccl_cosmology_compute_power_emu(ccl_cosmology * cosmo, int * status)
   }
 
   //Now start the NL computation with the emulator
+  //These are the limits of the splining range
   cosmo->data.k_min_nl=K_MIN_EMU;
   cosmo->data.k_max_nl=K_MAX_EMU;
   amin = A_MIN_EMU; //limit of the emulator
@@ -1393,17 +1399,17 @@ void ccl_cosmology_compute_power(ccl_cosmology * cosmo, int * status)
 INPUT: ccl_cosmology * cosmo, a, k [1/Mpc]
 TASK: extrapolate power spectrum at high k
 */
-static double ccl_power_extrapol_highk(ccl_cosmology * cosmo, double k, double a,
-				       gsl_spline2d * powerspl, double kmax, int * status)
+static double ccl_power_extrapol_highk(ccl_cosmology * cosmo, double k, double a, 
+				       gsl_spline2d * powerspl, double kmax_spline, int * status)
 {
   double log_p_1;
   double deltak=1e-2; //step for numerical derivative;
   double deriv_pk_kmid,deriv2_pk_kmid;
   double lkmid;
   double lpk_kmid;
-
-  lkmid = log(kmax)-2*deltak;
-
+  
+  lkmid = log(kmax_spline)-2*deltak;
+  
   int gslstatus =  gsl_spline2d_eval_e(powerspl, lkmid,a,NULL ,NULL ,&lpk_kmid);
   if(gslstatus != GSL_SUCCESS) {
     ccl_raise_gsl_warning(gslstatus, "ccl_power.c: ccl_power_extrapol_highk():");
@@ -1432,16 +1438,16 @@ static double ccl_power_extrapol_highk(ccl_cosmology * cosmo, double k, double a
 
 }
 
-/*------ ROUTINE: ccl_power_extrapol_hxighk -----
+/*------ ROUTINE: ccl_power_extrapol_lowk ----- 
 INPUT: ccl_cosmology * cosmo, a, k [1/Mpc]
 TASK: extrapolate power spectrum at low k
 */
 static double ccl_power_extrapol_lowk(ccl_cosmology * cosmo, double k, double a,
-				      gsl_spline2d * powerspl, double kmin, int * status)
+				      gsl_spline2d * powerspl, double kmin_spline, int * status)
 {
   double log_p_1;
   double deltak=1e-2; //safety step
-  double lkmin=log(kmin)+deltak;
+  double lkmin=log(kmin_spline)+deltak;
   double lpk_kmin;
   int gslstatus = gsl_spline2d_eval_e(powerspl,lkmin,a,NULL,NULL,&lpk_kmin);
 
@@ -1549,9 +1555,9 @@ double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double k, double a, int *s
       int gslstatus =  gsl_spline2d_eval_e(cosmo->data.p_nl, log(k),a,NULL ,NULL ,&log_p_1);
       if(gslstatus != GSL_SUCCESS) {
         ccl_raise_gsl_warning(gslstatus, "ccl_power.c: ccl_nonlin_matter_power():");
-	      *status = CCL_ERROR_SPLINE_EV;
-	      sprintf(cosmo->status_message ,"ccl_power.c: ccl_nonlin_matter_power(): Spline evaluation error\n");
-	      return NAN;
+	*status = CCL_ERROR_SPLINE_EV;
+	sprintf(cosmo->status_message ,"ccl_power.c: ccl_nonlin_matter_power(): Spline evaluation error\n");
+	return NAN;
       }
       else {
         pk = exp(log_p_1);
@@ -1707,16 +1713,14 @@ double ccl_sigmaR(ccl_cosmology *cosmo,double R,double a,int *status)
   F.function=&sigmaR_integrand;
   F.params=&par;
   double sigma_R;
-  int gslstatus = gsl_integration_cquad(&F, log10(ccl_splines->K_MIN_DEFAULT), log10(ccl_splines->K_MAX),
+  int gslstatus = gsl_integration_cquad(&F, log10(ccl_splines->K_MIN), log10(ccl_splines->K_MAX),
 				                                0.0, ccl_gsl->INTEGRATION_SIGMAR_EPSREL,
                                         workspace,&sigma_R,NULL,NULL);
   if(gslstatus != GSL_SUCCESS) {
     ccl_raise_gsl_warning(gslstatus, "ccl_power.c: ccl_sigmaR():");
     *status |= gslstatus;
   }
-  // TODO: log10 could be taken already in the macros.
-  // TODO: 1E-5 should be a macro
-  // TODO: we should check for integration success
+
   gsl_integration_cquad_workspace_free(workspace);
 
   return sqrt(sigma_R*M_LN10/(2*M_PI*M_PI))*ccl_growth_factor(cosmo, a, status);
@@ -1740,7 +1744,7 @@ double ccl_sigmaV(ccl_cosmology *cosmo,double R,double a,int *status)
   F.function=&sigmaV_integrand;
   F.params=&par;
   double sigma_V;
-	int gslstatus = gsl_integration_cquad(&F, log10(ccl_splines->K_MIN_DEFAULT), log10(ccl_splines->K_MAX),
+	int gslstatus = gsl_integration_cquad(&F, log10(ccl_splines->K_MIN), log10(ccl_splines->K_MAX),
 																				0.0, ccl_gsl->INTEGRATION_SIGMAR_EPSREL,
 																				workspace,&sigma_V,NULL,NULL);
 
@@ -1749,9 +1753,6 @@ double ccl_sigmaV(ccl_cosmology *cosmo,double R,double a,int *status)
     *status |= gslstatus;
   }
 
-  // TODO: log10 could be taken already in the macros.
-  // TODO: 1E-5 should be a macro
-  // TODO: we should check for integration success
   gsl_integration_cquad_workspace_free(workspace);
 
   return sqrt(sigma_V*M_LN10/(2*M_PI*M_PI))*ccl_growth_factor(cosmo, a, status);

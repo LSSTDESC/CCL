@@ -12,18 +12,11 @@ extern "C" {
 #define HM_LIMIT 1000 // Maximum sub intervals for the halo-model integration
 #define HM_INT_METHOD GSL_INTEG_GAUSS41 // Integration scheme for halo-model integration
   
-#include "ccl_core.h"  
-
-  // concentration-mass relation
-  typedef enum ccl_conc_label {
-    Bhattacharya2011 = 1,
-    Duffy2008_virial = 2,
-    constant = 3,
-  } ccl_conc_label;
+#include "ccl_core.h"
 
   // halo window profiles
   typedef enum ccl_win_label {
-    NFW = 1,
+    ccl_nfw = 1,
   } ccl_win_label;
 
   /**
@@ -57,15 +50,16 @@ extern "C" {
   double ccl_halomodel_matter_power(ccl_cosmology *cosmo, double k, double a, int *status);
 
   /**
-   * Computes the concentration of a halo of mass M. This is the ratio of virial raidus to scale radius for
-   * an NFW halo
+   * Computes the concentration of a halo of mass M. 
+   * This is the ratio of virial raidus to scale radius for an NFW halo.
    * @param cosmo: cosmology object containing parameters
    * @param halomass: halo mass in units of Msun
    * @param a: scale factor normalised to a=1 today
+   * @param odelta: overdensity criteria (with respect to matter density) used for halo mass
    * @param status: Status flag: 0 if there are no errors, non-zero otherwise
    * @return halo_concentration: the halo concentration
    */
-  double ccl_halo_concentration(ccl_cosmology *cosmo, double halomass, double a, ccl_conc_label label,int *status);
+  double ccl_halo_concentration(ccl_cosmology *cosmo, double halomass, double a, double odelta, int *status);
   
 #ifdef __cplusplus
 }
