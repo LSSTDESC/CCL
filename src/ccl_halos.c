@@ -12,7 +12,7 @@
 #include "ccl_halomod.h"
 
 
-double r_delta(ccl_cosmology *cosmo, double halomass, double a, double odelta, int *status);
+double r_delta(ccl_cosmology *cosmo, double halomass, double a, double odelta, int *status); //in Mpc comving. halomass in Msun, odelta integer.
 
 //maths helper function for NFW profile
 static double helper_fx(double x){
@@ -43,9 +43,9 @@ double ccl_halo_profile_nfw(ccl_cosmology *cosmo, double c, double halomass, dou
     rho0 = halomass/(4.*M_PI*pow(rs,3)*helper_fx(c));
 
     //M_enc: mass enclosed in r
-    double Menc;
+    //double Menc;
 
-    Menc = halomass*helper_fx(r/rs)/helper_fx(c);
+    //Menc = halomass*helper_fx(r/rs)/helper_fx(c);
 
     //rho_r: density at r
     double rho_r;
