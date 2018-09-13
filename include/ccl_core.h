@@ -10,6 +10,7 @@ extern "C" {
 #include "ccl_config.h"
 #include "ccl_constants.h"
 #include <stdbool.h>
+#include <stdio.h>
 
 // Macros for replacing relative paths
 #define EXPAND_STR(s) STRING(s)
@@ -292,6 +293,18 @@ ccl_parameters ccl_parameters_create_lcdm_nu(double Omega_c, double Omega_b, dou
  * @return void
  */
 void ccl_parameters_free(ccl_parameters * params);
+
+
+/**
+ * Write a cosmology parameters object to a file in yaml format, .
+ * @param cosmo Cosmological parameters 
+ * @param filename Name of file to create and write
+ * @param status Status flag. 0 if there are no errors, nonzero otherwise.
+* @return void
+ */
+void ccl_parameters_write_yaml(ccl_parameters * params, const char * filename, int * status);
+
+ccl_parameters ccl_parameters_read_yaml(const char * filename, int *status);
 
 /**
  * Free a cosmology struct

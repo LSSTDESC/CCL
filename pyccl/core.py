@@ -328,6 +328,25 @@ class Parameters(object):
         string += "\n".join(vals)
         return string
 
+    def write_yaml(self, filename):
+        status = 0
+        lib.parameters_write_yaml(self.parameters, filename, status)        
+        # lib.parameters_write_yaml(self.parameters, filename, status)
+        if status != 0:
+            raise IOError("Unable to write YAML file {}".format(filename))
+
+    @classmethod
+    def read_yaml(cls, filename):
+        status = 0
+        parameters,  = lib.parameters_read_yaml(filename, status)        
+
+        if status != 0:
+            raise IOError("Unable to read YAML file {}".format(filename))
+
+        p = cls.__new__(cls)
+        p.parameters = parameters
+        return p
+
 
 class Cosmology(object):
     """Wrapper for the ccl_cosmology object, including cosmological parameters and cached data.
