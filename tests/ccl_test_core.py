@@ -1,7 +1,7 @@
 from __future__ import print_function
 import numpy as np
 from numpy.testing import assert_raises, assert_warns, assert_no_warnings, \
-                          assert_, run_module_suite
+                          assert_, run_module_suite, assert_almost_equal
 import pyccl as ccl
 
 
@@ -166,6 +166,26 @@ def test_parameters_mgrowth():
     assert_raises(AssertionError, ccl.Parameters, 0.25, 0.05, 0.7, 2.1e-9, 0.96, 
                                                   z_mg=zarr,
                                  df_mg=np.column_stack((dfarr, dfarr)) )
+
+def test_parameters_read_write():
+    """Check that Parameters objects can be read and written"""
+    import tempfile
+    params = ccl.Parameters(Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, 
+                            n_s=0.96)
+    
+    with tempfile.NamedTemporaryFile(delete=False) as tmpfile:
+        temp_file_name = tmpfile.name
+
+    params.write_yaml(temp_file_name)
+
+    params2 = ccl.Parameters.read_yaml(temp_file_name)
+
+    assert_almost_equal(params['Omega_c'], params2['Omega_c'])
+    assert_almost_equal(params['Neff'], params2['Neff'])
+    assert_almost_equal(params['sum_nu_masses'], params2['sum_nu_masses'])
+
+
+
 
 def test_cosmology_init():
     """
