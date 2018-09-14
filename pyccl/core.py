@@ -352,7 +352,7 @@ class Parameters(object):
             filename (:obj:`str`) Filename to read parameters from.
         """
         status = 0
-        parameters, _  = lib.parameters_read_yaml(filename, status)
+        parameters, status  = lib.parameters_read_yaml(filename, status)
 
         if status != 0:
             raise IOError("Unable to read YAML file {}".format(filename))

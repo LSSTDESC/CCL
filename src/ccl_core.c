@@ -843,7 +843,7 @@ ccl_parameters ccl_parameters_read_yaml(const char * filename, int *status)
   if (!f){
     *status = CCL_ERROR_FILE_READ;
     ccl_parameters bad_params;
-    printf("badpar\n");exit(1);
+
     ccl_raise_exception(CCL_ERROR_FILE_READ, "ccl_core.c: Failed to read parameters from file.");
 
     return bad_params;

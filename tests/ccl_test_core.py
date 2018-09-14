@@ -184,6 +184,11 @@ def test_parameters_read_write():
     assert_almost_equal(params['Neff'], params2['Neff'])
     assert_almost_equal(params['sum_nu_masses'], params2['sum_nu_masses'])
 
+    with tempfile.NamedTemporaryFile(delete=True) as tmpfile:
+        temp_file_name = tmpfile.name
+
+    assert_raises(IOError, ccl.Parameters.read_yaml, filename=temp_file_name)
+
 
 
 
