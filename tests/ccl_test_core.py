@@ -172,18 +172,22 @@ def test_parameters_read_write():
     import tempfile
     params = ccl.Parameters(Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, 
                             n_s=0.96)
-    
+
+    # Make a temporary file name
     with tempfile.NamedTemporaryFile(delete=False) as tmpfile:
         temp_file_name = tmpfile.name
 
+    # Write out and then eead in the parameters from that file
     params.write_yaml(temp_file_name)
-
     params2 = ccl.Parameters.read_yaml(temp_file_name)
 
+    # Check the read-in params are equal to the written out ones
     assert_almost_equal(params['Omega_c'], params2['Omega_c'])
     assert_almost_equal(params['Neff'], params2['Neff'])
     assert_almost_equal(params['sum_nu_masses'], params2['sum_nu_masses'])
 
+    # Now make a file that will be deleted so it does not exist
+    # and check the right error is raise
     with tempfile.NamedTemporaryFile(delete=True) as tmpfile:
         temp_file_name = tmpfile.name
 
