@@ -85,49 +85,61 @@ void ccl_cosmology_read_config(void)
     memcpy(ccl_gsl, &default_gsl_params, sizeof(ccl_gsl_params));
   }
 
+
+#define MATCH(s, action) if (0 == strcmp(var_name, s)) { action ; continue;} do{} while(0)
+
+  int lineno = 0;
   while(! feof(fconfig)) {
     rtn = fgets(buf, CONFIG_LINE_BUFFER_SIZE, fconfig);
+    lineno ++;
+
     if (buf[0]==';' || buf[0]=='[' || buf[0]=='\n') {
       continue;
     }
     else {
       sscanf(buf, "%99[^=]=%le\n",var_name, &var_dbl);
+
       // Spline parameters
-      if(strcmp(var_name,"A_SPLINE_NA")==0) ccl_splines->A_SPLINE_NA=(int) var_dbl; 
-      if(strcmp(var_name,"A_SPLINE_NLOG")==0) ccl_splines->A_SPLINE_NLOG=(int) var_dbl;
-      if(strcmp(var_name,"A_SPLINE_MINLOG")==0) ccl_splines->A_SPLINE_MINLOG=var_dbl;
-      if(strcmp(var_name,"A_SPLINE_MIN")==0) ccl_splines->A_SPLINE_MIN=var_dbl;
-      if(strcmp(var_name,"A_SPLINE_MINLOG_PK")==0) ccl_splines->A_SPLINE_MINLOG_PK=var_dbl;
-      if(strcmp(var_name,"A_SPLINE_MIN_PK")==0) ccl_splines->A_SPLINE_MIN_PK=var_dbl;
-      if(strcmp(var_name,"A_SPLINE_MAX")==0) ccl_splines->A_SPLINE_MAX=var_dbl;
-      if(strcmp(var_name,"LOGM_SPLINE_DELTA")==0) ccl_splines->LOGM_SPLINE_DELTA=var_dbl;
-      if(strcmp(var_name,"LOGM_SPLINE_NM")==0) ccl_splines->LOGM_SPLINE_NM=(int) var_dbl;
-      if(strcmp(var_name,"LOGM_SPLINE_MIN")==0) ccl_splines->LOGM_SPLINE_MIN=var_dbl;
-      if(strcmp(var_name,"LOGM_SPLINE_MAX")==0) ccl_splines->LOGM_SPLINE_MAX=var_dbl;
-      if(strcmp(var_name,"A_SPLINE_NA_PK")==0) ccl_splines->A_SPLINE_NA_PK=(int) var_dbl;
-      if(strcmp(var_name,"A_SPLINE_NLOG_PK")==0) ccl_splines->A_SPLINE_NLOG_PK=(int) var_dbl;
-      if(strcmp(var_name,"K_MAX_SPLINE")==0) ccl_splines->K_MAX_SPLINE=var_dbl;
-      if(strcmp(var_name,"K_MAX")==0) ccl_splines->K_MAX=var_dbl;
-      if(strcmp(var_name,"K_MIN")==0) ccl_splines->K_MIN=var_dbl;
-      if(strcmp(var_name,"N_K")==0) ccl_splines->N_K=(int) var_dbl;
+      MATCH("A_SPLINE_NA", ccl_splines->A_SPLINE_NA=(int) var_dbl);
+      MATCH("A_SPLINE_NLOG", ccl_splines->A_SPLINE_NLOG=(int) var_dbl);
+      MATCH("A_SPLINE_MINLOG", ccl_splines->A_SPLINE_MINLOG=var_dbl);
+      MATCH("A_SPLINE_MIN", ccl_splines->A_SPLINE_MIN=var_dbl);
+      MATCH("A_SPLINE_MINLOG_PK", ccl_splines->A_SPLINE_MINLOG_PK=var_dbl);
+      MATCH("A_SPLINE_MIN_PK", ccl_splines->A_SPLINE_MIN_PK=var_dbl);
+      MATCH("A_SPLINE_MAX", ccl_splines->A_SPLINE_MAX=var_dbl);
+      MATCH("LOGM_SPLINE_DELTA", ccl_splines->LOGM_SPLINE_DELTA=var_dbl);
+      MATCH("LOGM_SPLINE_NM", ccl_splines->LOGM_SPLINE_NM=(int) var_dbl);
+      MATCH("LOGM_SPLINE_MIN", ccl_splines->LOGM_SPLINE_MIN=var_dbl);
+      MATCH("LOGM_SPLINE_MAX", ccl_splines->LOGM_SPLINE_MAX=var_dbl);
+      MATCH("A_SPLINE_NA_PK", ccl_splines->A_SPLINE_NA_PK=(int) var_dbl);
+      MATCH("A_SPLINE_NLOG_PK", ccl_splines->A_SPLINE_NLOG_PK=(int) var_dbl);
+      MATCH("K_MAX_SPLINE", ccl_splines->K_MAX_SPLINE=var_dbl);
+      MATCH("K_MAX", ccl_splines->K_MAX=var_dbl);
+      MATCH("K_MIN", ccl_splines->K_MIN=var_dbl);
+      MATCH("N_K", ccl_splines->N_K=(int) var_dbl);
+
       // 3dcorr parameters
-      if(strcmp(var_name,"N_K_3DCOR")==0) ccl_splines->N_K_3DCOR=(int) var_dbl;     
+      MATCH("N_K_3DCOR", ccl_splines->N_K_3DCOR=(int) var_dbl);
 
       // GSL parameters
-      if(strcmp(var_name,"GSL_EPSREL")==0) ccl_gsl->EPSREL=var_dbl;
-      if(strcmp(var_name,"GSL_N_ITERATION")==0) ccl_gsl->N_ITERATION=(size_t) var_dbl;
-      if(strcmp(var_name,"GSL_INTEGRATION_GAUSS_KRONROD_POINTS")==0) ccl_gsl->INTEGRATION_GAUSS_KRONROD_POINTS=(int) var_dbl;
-      if(strcmp(var_name,"GSL_INTEGRATION_EPSREL")==0) ccl_gsl->INTEGRATION_EPSREL=var_dbl;
-      if(strcmp(var_name,"GSL_INTEGRATION_DISTANCE_EPSREL")==0) ccl_gsl->INTEGRATION_DISTANCE_EPSREL=var_dbl;
-      if(strcmp(var_name,"GSL_INTEGRATION_DNDZ_EPSREL")==0) ccl_gsl->INTEGRATION_DNDZ_EPSREL=var_dbl;
-      if(strcmp(var_name,"GSL_INTEGRATION_SIGMAR_EPSREL")==0) ccl_gsl->INTEGRATION_SIGMAR_EPSREL=var_dbl;
-      if(strcmp(var_name,"GSL_INTEGRATION_NU_EPSREL")==0) ccl_gsl->INTEGRATION_NU_EPSREL=var_dbl;
-      if(strcmp(var_name,"GSL_INTEGRATION_NU_EPSABS")==0) ccl_gsl->INTEGRATION_NU_EPSABS=var_dbl;
-      if(strcmp(var_name,"GSL_INTEGRATION_LIMBER_GAUSS_KRONROD_POINTS")==0) ccl_gsl->INTEGRATION_LIMBER_GAUSS_KRONROD_POINTS=(int) var_dbl;
-      if(strcmp(var_name,"GSL_INTEGRATION_LIMBER_EPSREL")==0) ccl_gsl->INTEGRATION_LIMBER_EPSREL=var_dbl;
-      if(strcmp(var_name,"GSL_ROOT_EPSREL")==0) ccl_gsl->ROOT_EPSREL=var_dbl;
-      if(strcmp(var_name,"GSL_ROOT_N_ITERATION")==0) ccl_gsl->ROOT_N_ITERATION=(int) var_dbl;
-      if(strcmp(var_name,"GSL_ODE_GROWTH_EPSREL")==0) ccl_gsl->ODE_GROWTH_EPSREL=var_dbl;
+      MATCH("GSL_EPSREL", ccl_gsl->EPSREL=var_dbl);
+      MATCH("GSL_N_ITERATION", ccl_gsl->N_ITERATION=(size_t) var_dbl);
+      MATCH("GSL_INTEGRATION_GAUSS_KRONROD_POINTS", ccl_gsl->INTEGRATION_GAUSS_KRONROD_POINTS=(int) var_dbl);
+      MATCH("GSL_INTEGRATION_EPSREL", ccl_gsl->INTEGRATION_EPSREL=var_dbl);
+      MATCH("GSL_INTEGRATION_DISTANCE_EPSREL", ccl_gsl->INTEGRATION_DISTANCE_EPSREL=var_dbl);
+      MATCH("GSL_INTEGRATION_DNDZ_EPSREL", ccl_gsl->INTEGRATION_DNDZ_EPSREL=var_dbl);
+      MATCH("GSL_INTEGRATION_SIGMAR_EPSREL", ccl_gsl->INTEGRATION_SIGMAR_EPSREL=var_dbl);
+      MATCH("GSL_INTEGRATION_NU_EPSREL", ccl_gsl->INTEGRATION_NU_EPSREL=var_dbl);
+      MATCH("GSL_INTEGRATION_NU_EPSABS", ccl_gsl->INTEGRATION_NU_EPSABS=var_dbl);
+      MATCH("GSL_INTEGRATION_LIMBER_GAUSS_KRONROD_POINTS", ccl_gsl->INTEGRATION_LIMBER_GAUSS_KRONROD_POINTS=(int) var_dbl);
+      MATCH("GSL_INTEGRATION_LIMBER_EPSREL", ccl_gsl->INTEGRATION_LIMBER_EPSREL=var_dbl);
+      MATCH("GSL_ROOT_EPSREL", ccl_gsl->ROOT_EPSREL=var_dbl);
+      MATCH("GSL_ROOT_N_ITERATION", ccl_gsl->ROOT_N_ITERATION=(int) var_dbl);
+      MATCH("GSL_ODE_GROWTH_EPSREL", ccl_gsl->ODE_GROWTH_EPSREL=var_dbl);
+
+      char msg[256];
+      snprintf(msg, 256, "ccl_core.c: Failed to parse config file at line %d: %s", lineno, buf);
+      ccl_raise_exception(CCL_ERROR_MISSING_CONFIG_FILE, msg);
     }
   }
 
