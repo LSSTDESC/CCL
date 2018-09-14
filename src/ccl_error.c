@@ -1,9 +1,10 @@
 #include "ccl_core.h"
 #include "ccl_error.h"
-#include "math.h"
-#include "stdio.h"
-#include "stdlib.h"
-#include "gsl/gsl_errno.h"
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdarg.h>
+#include <gsl/gsl_errno.h>
 
 // Error handling policy: whether to exit on error (C default) or continue 
 // (Python or other binding default)
@@ -30,39 +31,56 @@ void ccl_set_debug_policy(CCLDebugModePolicy debug_policy)
 }
 
 // Convenience function to raise exceptions in an appropriate way
-void ccl_raise_exception(int err, char* msg)
+void ccl_raise_exception(int err, const char* msg, ...)
 {  
+  char message[256];
+
+  va_list va;
+  va_start(va, msg);
+  vsnprintf(message, 250, msg, va);
+  va_end(va);
+
   // Print error message and exit if fatal errors are enabled
   if ((_ccl_error_policy == CCL_ERROR_POLICY_EXIT) && (err)) {
-    fprintf(stderr, "ERROR %d: %s\n", err, msg);
+    fprintf(stderr, "ERROR %d: %s\n", err, message);
     exit(1);
   }
   // Print error message and exit if debug output is enabled
   else if ((_ccl_debug_mode_policy == CCL_DEBUG_MODE_ON) && (err)){
-    fprintf(stderr, "ERROR %d: %s\n", err, msg);
+    fprintf(stderr, "ERROR %d: %s\n", err, message);
   }
 }
 
 // Convenience function to handle warnings
-void ccl_raise_warning(int err, char* msg)
+void ccl_raise_warning(int err, const char* msg, ...)
 {
+  char message[256];
+
+  va_list va;
+  va_start(va, msg);
+  vsnprintf(message, 250, msg, va);
+  va_end(va);
+
   // For now just print warning to stderr if debug is enabled.
   // TODO: Implement some kind of error stack that can be passed on to, e.g.,
   // the python binding.
-  char warning[256];
-  snprintf(warning, 256, "WARNING: %s", msg);
   if( (_ccl_debug_mode_policy == CCL_DEBUG_MODE_ON) 
       || (_ccl_debug_mode_policy == CCL_DEBUG_MODE_WARNING) ) {
-    fprintf(stderr, "%s\n", warning);
+    fprintf(stderr, "WARNING: %s\n", message);
   }
 }
 
 // Convenience function to handle warnings
-void ccl_raise_gsl_warning(int gslstatus, char* msg)
+void ccl_raise_gsl_warning(int gslstatus, const char* msg, ...)
 {
-  char warning[256];
-  snprintf(warning, 256, "%s GSL error: %s", msg, gsl_strerror(gslstatus));
-  ccl_raise_warning(gslstatus, warning);
+  char message[256];
+
+  va_list va;
+  va_start(va, msg);
+  vsnprintf(message, 250, msg, va);
+  va_end(va);
+
+  ccl_raise_warning(gslstatus, "%s GSL error: %s", message, gsl_strerror(gslstatus));
   return;
 }
 
