@@ -3,6 +3,7 @@
 #include "ccl_utils.h"
 #include "ccl_constants.h"
 #include <stdlib.h>
+#include <stdarg.h>
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
@@ -189,7 +190,7 @@ ccl_cosmology * ccl_cosmology_create(ccl_parameters params, ccl_configuration co
   cosmo->computed_sigma = false;
   cosmo->computed_hmfparams = false;
   cosmo->status = 0;
-  strcpy(cosmo->status_message, "");
+  ccl_cosmology_set_status_message(cosmo, "");
   
   return cosmo;
 }
@@ -795,11 +796,13 @@ void ccl_data_free(ccl_data * data)
 INPUT: ccl_cosmology struct, status_string
 TASK: set the status message safely.
 */
-void ccl_cosmology_set_status_message(ccl_cosmology * cosmo, const char * message)
+void ccl_cosmology_set_status_message(ccl_cosmology * cosmo, const char * message, ...)
 {
   const int trunc = 480; /* must be < 500 - 4 */
-
-  strncpy(cosmo->status_message, message, trunc);
+  va_list va;
+  va_start(va, message);
+  vsnprintf(cosmo->status_message, trunc, message, va);
+  va_end(va);
 
   /* if truncation happens, message[trunc - 1] is not NULL, ... will show up. */
   strcpy(&cosmo->status_message[trunc], "...");

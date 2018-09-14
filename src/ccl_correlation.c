@@ -65,14 +65,14 @@ static void ccl_tracer_corr_fftlog(ccl_cosmology *cosmo,
   l_arr=ccl_log_spacing(ELL_MIN_FFTLOG,ELL_MAX_FFTLOG,N_ELL_FFTLOG);
   if(l_arr==NULL) {
     *status=CCL_ERROR_LINSPACE;
-    strcpy(cosmo->status_message,"ccl_correlation.c: ccl_tracer_corr_fftlog ran out of memory\n");
+    ccl_cosmology_set_status_message(cosmo,"ccl_correlation.c: ccl_tracer_corr_fftlog ran out of memory\n");
     return;
   }
   cl_arr=malloc(N_ELL_FFTLOG*sizeof(double));
   if(cl_arr==NULL) {
     free(l_arr);
     *status=CCL_ERROR_MEMORY;
-    strcpy(cosmo->status_message,"ccl_correlation.c: ccl_tracer_corr_fftlog ran out of memory\n");
+    ccl_cosmology_set_status_message(cosmo,"ccl_correlation.c: ccl_tracer_corr_fftlog ran out of memory\n");
     return;
   }
 
@@ -82,7 +82,7 @@ static void ccl_tracer_corr_fftlog(ccl_cosmology *cosmo,
     free(l_arr);
     free(cl_arr);
     *status=CCL_ERROR_MEMORY;
-    strcpy(cosmo->status_message,"ccl_correlation.c: ccl_tracer_corr_fftlog ran out of memory\n");
+    ccl_cosmology_set_status_message(cosmo,"ccl_correlation.c: ccl_tracer_corr_fftlog ran out of memory\n");
     return;
   }
 
@@ -112,14 +112,14 @@ static void ccl_tracer_corr_fftlog(ccl_cosmology *cosmo,
     free(l_arr);
     free(cl_arr);
     *status=CCL_ERROR_MEMORY;
-    strcpy(cosmo->status_message,"ccl_correlation.c: ccl_tracer_corr_fftlog ran out of memory\n");
+    ccl_cosmology_set_status_message(cosmo,"ccl_correlation.c: ccl_tracer_corr_fftlog ran out of memory\n");
     return;
   }
   wth_arr=(double *)malloc(sizeof(double)*N_ELL_FFTLOG);
   if(wth_arr==NULL) {
     free(l_arr); free(cl_arr); free(th_arr);
     *status=CCL_ERROR_MEMORY;
-    strcpy(cosmo->status_message,"ccl_correlation.c: ccl_tracer_corr_fftlog ran out of memory\n");
+    ccl_cosmology_set_status_message(cosmo,"ccl_correlation.c: ccl_tracer_corr_fftlog ran out of memory\n");
     return;
   }
 
@@ -198,7 +198,7 @@ static void ccl_tracer_corr_bessel(ccl_cosmology *cosmo,
   corr_int_par *cp=malloc(sizeof(corr_int_par));
   if(cp==NULL) {
     *status=CCL_ERROR_MEMORY;
-    strcpy(cosmo->status_message,"ccl_correlation.c: ccl_tracer_corr_bessel ran out of memory\n");
+    ccl_cosmology_set_status_message(cosmo,"ccl_correlation.c: ccl_tracer_corr_bessel ran out of memory\n");
     return;
   }
 
@@ -211,7 +211,7 @@ static void ccl_tracer_corr_bessel(ccl_cosmology *cosmo,
   if(cp->cl_spl==NULL) {
     free(cp);
     *status=CCL_ERROR_MEMORY;
-    strcpy(cosmo->status_message,"ccl_correlation.c: ccl_tracer_corr_bessel ran out of memory\n");
+    ccl_cosmology_set_status_message(cosmo,"ccl_correlation.c: ccl_tracer_corr_bessel ran out of memory\n");
     return;
   }
   if(corr_type==CCL_CORR_GG)
@@ -310,20 +310,20 @@ static void ccl_tracer_corr_legendre(ccl_cosmology *cosmo,
 
   if(corr_type==CCL_CORR_LM || corr_type==CCL_CORR_LP){
     *status=CCL_ERROR_NOT_IMPLEMENTED;
-    strcpy(cosmo->status_message,"ccl_correlation.c: CCL does not support full-sky xi+- calcuations.\nhttps://arxiv.org/abs/1702.05301 indicates flat-sky to be sufficient.\n");
+    ccl_cosmology_set_status_message(cosmo,"ccl_correlation.c: CCL does not support full-sky xi+- calcuations.\nhttps://arxiv.org/abs/1702.05301 indicates flat-sky to be sufficient.\n");
     return;
   }
   l_arr=malloc((ELL_MAX_FFTLOG+1)*sizeof(double));
   if(l_arr==NULL) {
     *status=CCL_ERROR_MEMORY;
-    strcpy(cosmo->status_message,"ccl_correlation.c: ccl_tracer_corr_legendre ran out of memory\n");
+    ccl_cosmology_set_status_message(cosmo,"ccl_correlation.c: ccl_tracer_corr_legendre ran out of memory\n");
     return;
   }
   cl_arr=malloc((ELL_MAX_FFTLOG+1)*sizeof(double));
   if(cl_arr==NULL) {
     free(l_arr);
     *status=CCL_ERROR_MEMORY;
-    strcpy(cosmo->status_message,"ccl_correlation.c: ccl_tracer_corr_legendre ran out of memory\n");
+    ccl_cosmology_set_status_message(cosmo,"ccl_correlation.c: ccl_tracer_corr_legendre ran out of memory\n");
     return;
   }
 
@@ -334,7 +334,7 @@ static void ccl_tracer_corr_legendre(ccl_cosmology *cosmo,
     free(cl_arr);
     free(l_arr);
     *status=CCL_ERROR_MEMORY;
-    strcpy(cosmo->status_message,"ccl_correlation.c: ccl_tracer_corr_legendre ran out of memory\n");
+    ccl_cosmology_set_status_message(cosmo,"ccl_correlation.c: ccl_tracer_corr_legendre ran out of memory\n");
     return;
   }
 
@@ -367,7 +367,7 @@ static void ccl_tracer_corr_legendre(ccl_cosmology *cosmo,
     free(cl_arr);
     free(l_arr);
     *status=CCL_ERROR_MEMORY;
-    strcpy(cosmo->status_message,"ccl_correlation.c: ccl_tracer_corr_legendre ran out of memory\n");
+    ccl_cosmology_set_status_message(cosmo,"ccl_correlation.c: ccl_tracer_corr_legendre ran out of memory\n");
     return;
   }
   for (int i=0;i<n_theta;i++) {
@@ -380,7 +380,7 @@ static void ccl_tracer_corr_legendre(ccl_cosmology *cosmo,
 	free(Pl_theta[j]);
       free(Pl_theta);
       *status=CCL_ERROR_MEMORY;
-      strcpy(cosmo->status_message,"ccl_correlation.c: ccl_tracer_corr_legendre ran out of memory\n");
+      ccl_cosmology_set_status_message(cosmo,"ccl_correlation.c: ccl_tracer_corr_legendre ran out of memory\n");
       return;
     }
   }
@@ -427,7 +427,7 @@ void ccl_correlation(ccl_cosmology *cosmo,
   }
   else {
     *status=CCL_ERROR_INCONSISTENT;
-    strcpy(cosmo->status_message,"ccl_correlation.c: ccl_correlation. Unknown algorithm\n");
+    ccl_cosmology_set_status_message(cosmo,"ccl_correlation.c: ccl_correlation. Unknown algorithm\n");
   }
 
   ccl_check_status(cosmo,status);
@@ -457,7 +457,7 @@ void ccl_correlation_3d(ccl_cosmology *cosmo, double a,
   k_arr=ccl_log_spacing(ccl_splines->K_MIN,ccl_splines->K_MAX,N_ARR);
   if(k_arr==NULL) {
     *status=CCL_ERROR_MEMORY;
-    strcpy(cosmo->status_message,"ccl_correlation.c: ccl_correlation_3d ran out of memory\n");
+    ccl_cosmology_set_status_message(cosmo,"ccl_correlation.c: ccl_correlation_3d ran out of memory\n");
     return;
   }
 
@@ -465,7 +465,7 @@ void ccl_correlation_3d(ccl_cosmology *cosmo, double a,
   if(pk_arr==NULL) {
     free(k_arr);
     *status=CCL_ERROR_MEMORY;
-    strcpy(cosmo->status_message,"ccl_correlation.c: ccl_correlation_3d ran out of memory\n");
+    ccl_cosmology_set_status_message(cosmo,"ccl_correlation.c: ccl_correlation_3d ran out of memory\n");
     return;
   }  
 
@@ -480,14 +480,14 @@ void ccl_correlation_3d(ccl_cosmology *cosmo, double a,
     free(k_arr);
     free(pk_arr);
     *status=CCL_ERROR_MEMORY;
-    strcpy(cosmo->status_message,"ccl_correlation.c: ccl_correlation_3d ran out of memory\n");
+    ccl_cosmology_set_status_message(cosmo,"ccl_correlation.c: ccl_correlation_3d ran out of memory\n");
     return;
   }
   xi_arr=malloc(sizeof(double)*N_ARR);
   if(xi_arr==NULL) {
     free(k_arr); free(pk_arr); free(r_arr);
     *status=CCL_ERROR_MEMORY;
-    strcpy(cosmo->status_message,"ccl_correlation.c: ccl_correlation_3d ran out of memory\n");
+    ccl_cosmology_set_status_message(cosmo,"ccl_correlation.c: ccl_correlation_3d ran out of memory\n");
     return;
   }
 
