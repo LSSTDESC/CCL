@@ -152,6 +152,9 @@ typedef enum ccl_mnu_convention {
 void ccl_cosmology_read_config(void);
 ccl_cosmology * ccl_cosmology_create(ccl_parameters params, ccl_configuration config);
 
+/* Internal function to set the status message safely. */
+void ccl_cosmology_set_status_message(ccl_cosmology * cosmo, const char * status_message);
+
 
 // Helper functions to create ccl_cosmology structs directly given a set of params
 ccl_cosmology * ccl_cosmology_create_with_params(double Omega_c, double Omega_b, double Omega_k,

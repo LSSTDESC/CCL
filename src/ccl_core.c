@@ -791,6 +791,20 @@ void ccl_data_free(ccl_data * data)
     gsl_interp_accel_free(data->accelerator_k);
 }
 
+/* ------- ROUTINE: ccl_cosmology_set_status_message -------- 
+INPUT: ccl_cosmology struct, status_string
+TASK: set the status message safely.
+*/
+void ccl_cosmology_set_status_message(ccl_cosmology * cosmo, const char * message)
+{
+  const int trunc = 480; /* must be < 500 - 4 */
+
+  strncpy(cosmo->status_message, message, trunc);
+
+  /* if truncation happens, message[trunc - 1] is not NULL, ... will show up. */
+  strcpy(&cosmo->status_message[trunc], "...");
+}
+
 /* ------- ROUTINE: ccl_parameters_free -------- 
 INPUT: ccl_parameters struct
 TASK: free allocated quantities in the parameters struct
