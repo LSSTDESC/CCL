@@ -13,6 +13,11 @@
 #include "ccl_params.h"
 #include "ccl_error.h"
 #include <stdlib.h>
+//
+// Macros for replacing relative paths
+#define EXPAND_STR(s) STRING(s)
+#define STRING(s) #s
+
 
 const ccl_configuration default_config = {ccl_boltzmann_class, ccl_halofit, ccl_nobaryons, ccl_tinker10, ccl_duffy2008, ccl_emu_strict};
 

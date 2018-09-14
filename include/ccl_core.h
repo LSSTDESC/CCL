@@ -11,10 +11,6 @@ extern "C" {
 #include "ccl_constants.h"
 #include <stdbool.h>
 
-// Macros for replacing relative paths
-#define EXPAND_STR(s) STRING(s)
-#define STRING(s) #s
-
 /**
  * Struct containing the parameters defining a cosmology
  */
