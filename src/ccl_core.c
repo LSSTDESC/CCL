@@ -142,6 +142,7 @@ void ccl_cosmology_read_config(void)
       ccl_raise_exception(CCL_ERROR_MISSING_CONFIG_FILE, msg);
     }
   }
+#undef MATCH
 
   fclose(fconfig);
 }
