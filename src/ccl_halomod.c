@@ -200,7 +200,7 @@ static double one_halo_integral(ccl_cosmology *cosmo, double k, double a, int *s
   if (qagstatus != GSL_SUCCESS) {
     ccl_raise_gsl_warning(qagstatus, "ccl_halomod.c: one_halo_integral():");
     *status = CCL_ERROR_ONE_HALO_INT;
-    ccl_cosmology_set_status_message(cosmo ,"ccl_halomod.c: one_halo_integral(): Integration failure\n");
+    ccl_cosmology_set_status_message(cosmo, "ccl_halomod.c: one_halo_integral(): Integration failure\n");
     return NAN;      
   } else {
     return result;
@@ -263,7 +263,7 @@ static double two_halo_integral(ccl_cosmology *cosmo, double k, double a, int *s
   if (qagstatus != GSL_SUCCESS) {
     ccl_raise_gsl_warning(qagstatus, "ccl_halomod.c: two_halo_integral():");
     *status = CCL_ERROR_TWO_HALO_INT;
-    ccl_cosmology_set_status_message(cosmo ,"ccl_halomod.c: two_halo_integral(): Integration failure\n");
+    ccl_cosmology_set_status_message(cosmo, "ccl_halomod.c: two_halo_integral(): Integration failure\n");
     return NAN;      
   } else {
     return result;
