@@ -2,8 +2,8 @@
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
-#include "gsl/gsl_errno.h"
-#include "gsl/gsl_integration.h"
+#include <gsl/gsl_errno.h>
+#include <gsl/gsl_integration.h>
 #include "ccl_cls.h"
 #include "ccl_power.h"
 #include "ccl_background.h"

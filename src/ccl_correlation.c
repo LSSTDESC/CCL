@@ -1,10 +1,10 @@
-#include "gsl/gsl_integration.h"
+#include <gsl/gsl_integration.h>
 #include "ccl_cls.h"
-#include "gsl/gsl_errno.h"
-#include "gsl/gsl_roots.h"
-#include "gsl/gsl_spline.h"
-#include "gsl/gsl_sf_bessel.h"
-#include "gsl/gsl_sf_legendre.h"
+#include <gsl/gsl_errno.h>
+#include <gsl/gsl_roots.h>
+#include <gsl/gsl_spline.h>
+#include <gsl/gsl_sf_bessel.h>
+#include <gsl/gsl_sf_legendre.h>
 #include "ccl_error.h"
 #include "ccl_utils.h"
 #include "ccl_correlation.h"

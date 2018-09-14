@@ -7,10 +7,10 @@
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
-#include "gsl/gsl_errno.h"
-#include "gsl/gsl_odeiv.h"
-#include "gsl/gsl_spline.h"
-#include "gsl/gsl_integration.h"
+#include <gsl/gsl_errno.h>
+#include <gsl/gsl_odeiv.h>
+#include <gsl/gsl_spline.h>
+#include <gsl/gsl_integration.h>
 #include "ccl_params.h"
 #include "ccl_error.h"
 #include <stdlib.h>
@@ -71,9 +71,7 @@ void ccl_cosmology_read_config(void)
     param_file = EXPAND_STR(__CCL_DATA_DIR__) "/ccl_params.ini";
   }
   if ((fconfig=fopen(param_file, "r")) == NULL) {
-    char msg[256];
-    snprintf(msg, 256, "ccl_core.c: Failed to open config file: %s", param_file);
-    ccl_raise_exception(CCL_ERROR_MISSING_CONFIG_FILE, msg);
+    ccl_raise_exception(CCL_ERROR_MISSING_CONFIG_FILE, "ccl_core.c: Failed to open config file: %s", param_file);
     return;
   }
 
@@ -137,9 +135,7 @@ void ccl_cosmology_read_config(void)
       MATCH("GSL_ROOT_N_ITERATION", ccl_gsl->ROOT_N_ITERATION=(int) var_dbl);
       MATCH("GSL_ODE_GROWTH_EPSREL", ccl_gsl->ODE_GROWTH_EPSREL=var_dbl);
 
-      char msg[256];
-      snprintf(msg, 256, "ccl_core.c: Failed to parse config file at line %d: %s", lineno, buf);
-      ccl_raise_exception(CCL_ERROR_MISSING_CONFIG_FILE, msg);
+      ccl_raise_exception(CCL_ERROR_MISSING_CONFIG_FILE, "ccl_core.c: Failed to parse config file at line %d: %s", lineno, buf);
     }
   }
 #undef MATCH

@@ -7,11 +7,11 @@
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
-#include "gsl/gsl_errno.h"
-#include "gsl/gsl_odeiv2.h"
-#include "gsl/gsl_spline.h"
-#include "gsl/gsl_integration.h"
-#include "gsl/gsl_roots.h"
+#include <gsl/gsl_errno.h>
+#include <gsl/gsl_odeiv2.h>
+#include <gsl/gsl_spline.h>
+#include <gsl/gsl_integration.h>
+#include <gsl/gsl_roots.h>
 #include "ccl_params.h"
 
 /* --------- ROUTINE: h_over_h0 ---------
