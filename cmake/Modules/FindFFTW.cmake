@@ -69,21 +69,25 @@ else()
     FFTW_LIB
     NAMES "fftw3"
     PATHS ${PKG_FFTW_LIBRARY_DIRS} ${LIB_INSTALL_DIR}
+    NO_DEFAULT_PATH
   )
   find_library(
     FFTWF_LIB
     NAMES "fftw3f"
     PATHS ${PKG_FFTW_LIBRARY_DIRS} ${LIB_INSTALL_DIR}
+    NO_DEFAULT_PATH
   )
   find_library(
     FFTWL_LIB
     NAMES "fftw3l"
     PATHS ${PKG_FFTW_LIBRARY_DIRS} ${LIB_INSTALL_DIR}
+    NO_DEFAULT_PATH
   )
   find_path(
     FFTW_INCLUDES
     NAMES "fftw3.h"
     PATHS ${PKG_FFTW_INCLUDE_DIRS} ${INCLUDE_INSTALL_DIR}
+    NO_DEFAULT_PATH
   )
 endif( FFTW_ROOT )
 set(FFTW_LIBRARIES ${FFTW_LIB})
@@ -93,6 +97,7 @@ endif()
 if(FFTWL_LIB)
   set(FFTW_LIBRARIES ${FFTW_LIBRARIES} ${FFTWL_LIB})
 endif()
+
 set( CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES_SAV} )
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(FFTW DEFAULT_MSG
