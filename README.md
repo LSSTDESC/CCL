@@ -240,6 +240,14 @@ Here are a few common steps when working on the C library:
   $ make
   ```
 
+  - Building CCL in Debug mode. This will disable optimizations and allow you to
+  use a debugger:
+  ```sh
+  $ mkdir -p CCL/debug && cd CCL/debug
+  $ cmake -DCMAKE_BUILD_TYPE=Debug ..
+  $ make
+  ```
+
 ### Working on the Python library
 Here are a few common steps when working on the Python module:
 
