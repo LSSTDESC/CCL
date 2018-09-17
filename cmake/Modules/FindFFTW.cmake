@@ -65,11 +65,23 @@ if( FFTW_ROOT )
     NO_DEFAULT_PATH
   )
 else()
+
+  # search twice because many system ships a 'broken'
+  # fftw3.pc that does not properly declare system prefixes (e.g. /usr/lib)
+  # the search-twice trick will search our preferred paths
+  # before the system defaults (recommended in cmake docs).
+  # Without the second find_library,
+  # we will not look for system default paths when fftw3.pc misses /usr/lib
+
   find_library(
     FFTW_LIB
     NAMES "fftw3"
     PATHS ${PKG_FFTW_LIBRARY_DIRS} ${LIB_INSTALL_DIR}
     NO_DEFAULT_PATH
+  )
+  find_library(
+    FFTW_LIB
+    NAMES "fftw3"
   )
   find_library(
     FFTWF_LIB
@@ -78,16 +90,28 @@ else()
     NO_DEFAULT_PATH
   )
   find_library(
+    FFTWF_LIB
+    NAMES "fftw3f"
+  )
+  find_library(
     FFTWL_LIB
     NAMES "fftw3l"
     PATHS ${PKG_FFTW_LIBRARY_DIRS} ${LIB_INSTALL_DIR}
     NO_DEFAULT_PATH
+  )
+  find_library(
+    FFTWL_LIB
+    NAMES "fftw3l"
   )
   find_path(
     FFTW_INCLUDES
     NAMES "fftw3.h"
     PATHS ${PKG_FFTW_INCLUDE_DIRS} ${INCLUDE_INSTALL_DIR}
     NO_DEFAULT_PATH
+  )
+  find_path(
+    FFTW_INCLUDES
+    NAMES "fftw3.h"
   )
 endif( FFTW_ROOT )
 set(FFTW_LIBRARIES ${FFTW_LIB})
