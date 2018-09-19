@@ -1,10 +1,12 @@
 """The core functionality of ccl, including the core data types. This includes the cosmology and parameters objects used to instantiate a model from which one can compute a set of theoretical predictions.
 
 """
+import pyccl
 from pyccl import ccllib as lib
 import numpy as np
 from warnings import warn
 from pyccl.pyutils import check
+import sys, inspect, types
 
 # Configuration types
 transfer_function_types = {
@@ -148,7 +150,8 @@ class Parameters(object):
         """
         Creates a set of cosmological parameters.
 
-        .. note:: Although some arguments default to `None`, they will raise a ValueError inside this function if not specified, so they are not optional.
+        .. note:: Although some arguments default to `None`, they will raise a 
+        ValueError inside this function if not specified, so they are not optional.
         
         Args:
             Omega_c (float): Cold dark matter density fraction.
@@ -249,7 +252,7 @@ class Parameters(object):
                                  "(or set to None)." % nm)                     
                                  
         # Create new instance of ccl_parameters object
-        status = 0 # Create an internal status variable; needed to check massive neutrino integral.
+        status = 0 # Internal status var; needed to check massive nu integral.
         if (nz_mg== -1):
             # Create ccl_parameters without modified growth
             self.parameters, status \
@@ -264,7 +267,8 @@ class Parameters(object):
             = lib.parameters_create_nu_vec( Omega_c, Omega_b, Omega_k, Neff, 
                                              w0, wa, h, norm_pk, 
                                              n_s, bcm_log10Mc, bcm_etab, bcm_ks, 
-                                             z_mg, df_mg, mnu_types[mnu_type], m_nu, status )
+                                             z_mg, df_mg, mnu_types[mnu_type], 
+                                             m_nu, status )
         check(status)    
     
     def __getitem__(self, key):
@@ -330,7 +334,8 @@ class Parameters(object):
 
 
 class Cosmology(object):
-    """Wrapper for the ccl_cosmology object, including cosmological parameters and cached data.
+    """Wrapper for the ccl_cosmology object, including cosmological parameters 
+    and cached data.
 
     Args:
         params (:obj:`Parameters`): Cosmological parameters object.
@@ -345,8 +350,8 @@ class Cosmology(object):
             baryonic effects to be implemented. Defaults to `nobaryons`.
         mass_function (:obj:`str`, optional): The mass function to use. 
             Defaults to `tinker` (2010).
-        halo_concentration (:obj:`str`, optional): The halo concentration relation to use. 
-            Defaults to Duffy et al. (2008) `duffy2008`.
+        halo_concentration (:obj:`str`, optional): The halo concentration 
+            relation to use. Defaults to Duffy et al. (2008) `duffy2008`.
 
     """
     
@@ -377,8 +382,9 @@ class Cosmology(object):
             baryonic effects to be implemented. Defaults to `nobaryons`.
             mass_function (:obj:`str`, optional): The mass function to use. 
             Defaults to `tinker` (2010).
-            halo_concentration (:obj:`str`, optional): The halo concentration relation to use. 
-            Defaults to Duffy et al. (2008) for virial halo defintion `duffy2008`.
+            halo_concentration (:obj:`str`, optional): The halo concentration 
+            relation to use. Defaults to Duffy et al. (2008) for virial halo 
+            defintion `duffy2008`.
             emulator_neutrinos: `str`, optional): If using the emulator for 
             the power spectrum, specified treatment of unequal neutrinos.
             Options are 'strict', which will raise an error and quit if the 
@@ -393,7 +399,7 @@ class Cosmology(object):
         if params is None:
             # Create new Parameters object
             params = Parameters(Omega_c=Omega_c, Omega_b=Omega_b, h=h, A_s=A_s, 
-                                n_s=n_s, Omega_k=Omega_k, Neff = Neff, 
+                                n_s=n_s, Omega_k=Omega_k, Neff=Neff, 
                                 m_nu=m_nu, mnu_type=mnu_type, w0=w0, wa=wa, 
                                 sigma8=sigma8, bcm_log10Mc=bcm_log10Mc, 
                                 bcm_etab=bcm_etab, bcm_ks=bcm_ks, 
@@ -499,10 +505,27 @@ class Cosmology(object):
         # Create new ccl_cosmology instance
         self.cosmo = lib.cosmology_create(self.params.parameters, config)
         
+        # Expose CCL functions as methods of this class (if appropriate)
+        self._expose_ccl_fns()
+        
         # Check status
         if self.cosmo.status != 0:
             raise RuntimeError("(%d): %s" \
                                % (self.cosmo.status, self.cosmo.status_message))
+    
+    def _expose_ccl_fns(self):
+        """
+        Expose CCL module functions as methods of the Cosmology class.
+        """
+        # Use introspection to find all available functions in the CCL module
+        for mname, member in inspect.getmembers(pyccl):
+            if inspect.isfunction(member):
+                # Check if function takes a Cosmology class as an arg
+                if 'cosmo' in inspect.getargspec(member).args:
+                    # Attach fn as member function of this class
+                    assert inspect.getargspec(member).args[0] == 'cosmo', \
+                        "Function arg spec didn't fit expected template."
+                    setattr(self, mname, types.MethodType(member, self))
     
     def __del__(self):
         """Free the ccl_cosmology instance that this Cosmology object is 

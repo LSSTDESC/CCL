@@ -1,6 +1,6 @@
 import numpy as np
 from numpy.testing import assert_raises, assert_warns, assert_no_warnings, \
-                          assert_, decorators, run_module_suite
+                          assert_allclose, assert_, decorators, run_module_suite
 import pyccl as ccl
 import sys
 
@@ -77,6 +77,12 @@ def calc_power_spectrum(Omega_v, w0, wa, transfer_fn, matter_power, linear, rais
                 assert_(all_finite(pk_nl))
             else:
                 assert_raises(RuntimeError,ccl.nonlin_matter_power, cosmo, k, _a)
+    
+    # Test that sigma8 function is exposed as method of the Cosmology object
+    # (could test all other functions, but this should be a good canary if 
+    # anything goes wrong)
+    assert_allclose(cosmo.sigma8(), ccl.sigma8(cosmo), atol=1e-6, rtol=1e-6)
+    
 
 def loop_over_params(transfer_fn, matter_power, lin, raise_errs):
     """
