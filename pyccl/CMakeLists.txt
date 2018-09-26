@@ -3,7 +3,7 @@
 #
 include(BuildSWIG)
 include(UseSWIG)
-set (UseSWIG_TARGET_NAME_PREFERENCE STANDARD)
+#set (UseSWIG_TARGET_NAME_PREFERENCE STANDARD)
 
 find_package(PythonLibsNew)
 find_package(NumPy)
