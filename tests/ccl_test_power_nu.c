@@ -137,7 +137,7 @@ static void compare_power_nu(int i_model,struct power_nu_data * data)
   
   ccl_parameters params;
   
-  parameters_create(data->Omega_c, data->Omega_b, data->Omega_k,data->Neff, 
+  params = ccl_parameters_create(data->Omega_c, data->Omega_b, data->Omega_k,data->Neff, 
 		    i_model==1 ? data->mnu0 : i_model==2 ? data->mnu1 : data->mnu2,
 		    data->mnu_type,data->w_0[i_model-1], data->w_a[i_model-1],
 		    data->h, data->A_s, data->n_s,-1,-1,-1,-1,NULL,NULL, &status);
