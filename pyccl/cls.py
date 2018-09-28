@@ -1,6 +1,6 @@
 from . import ccllib as lib
 from . import constants as const
-from .pyutils import _cosmology_obj, check
+from .core import _cosmology_obj, check
 import numpy as np
 
 # Mapping between names for tracers and internal CCL tracer types

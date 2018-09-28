@@ -1,6 +1,6 @@
 import numpy as np
 from . import ccllib as lib
-from .pyutils import check
+from .core import check
 
 neutrino_mass_splits = {
     'normal':      lib.nu_normal,

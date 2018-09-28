@@ -1,5 +1,7 @@
+import numpy as np
 from . import ccllib as lib
-from .pyutils import _vectorize_fn, _vectorize_fn_simple, np, check
+from .core import check
+from .pyutils import _vectorize_fn, _vectorize_fn_simple
 
 dNdz_types = {
     'nc':           lib.DNDZ_NC,
