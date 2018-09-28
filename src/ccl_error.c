@@ -1,10 +1,11 @@
-#include "ccl_core.h"
-#include "ccl_error.h"
-#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
+#include <math.h>
+
 #include <gsl/gsl_errno.h>
+
+#include "ccl_error.h"
 
 // Error handling policy: whether to exit on error (C default) or continue 
 // (Python or other binding default)

@@ -1,10 +1,13 @@
+#include <stdlib.h>
 #include <math.h>
+
+#include <fftw3.h>
+
+#include "fftlog.h"
+
 #ifndef M_PI
     #define M_PI 3.14159265358979323846
 #endif
-#include <fftw3.h>
-#include <stdlib.h>
-#include "fftlog.h"
 
 /* This code is FFTLog, which is described in arXiv:astro-ph/9905191 */
 

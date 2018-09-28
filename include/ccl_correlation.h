@@ -1,4 +1,6 @@
 /** @file */
+#include "ccl_core.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif

@@ -1,17 +1,20 @@
-#include "ccl_core.h"
-#include "ccl_utils.h"
-#include "ccl_placeholder.h"
-#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
+
 #include <gsl/gsl_integration.h>
 #include <gsl/gsl_spline.h>
 #include <gsl/gsl_errno.h>
+
+#include "ccl_params.h"
+
+#include "ccl_error.h"
+#include "ccl_core.h"
 #include "ccl_background.h"
 #include "ccl_constants.h"
-#include "ccl_error.h"
+#include "ccl_utils.h"
+
 #include "ccl_lsst_specs.h"
-#include "ccl_params.h"
 
 // ---- LSST redshift distributions & current specs -----
 // ---- Consider spline for input dN/dz - pending

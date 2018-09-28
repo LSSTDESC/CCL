@@ -5,8 +5,6 @@ extern "C" {
 
 #pragma once
 
-#include "ccl_core.h"
-
 /*
  * Computes sigma(R), the power spectrum normalization, over log-spaced values of mass and radii
  * The result is attached to the cosmology object

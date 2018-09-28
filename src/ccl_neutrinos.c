@@ -1,14 +1,23 @@
-#include "ccl_neutrinos.h"
-#include "ccl_utils.h"
-#include "ccl_constants.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+#include <string.h>
+
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_spline.h>
 #include <gsl/gsl_integration.h>
 #include <gsl/gsl_const_mksa.h>
 #include <gsl/gsl_roots.h>
-#include "ccl_error.h"
-#include "ccl_core.h"
+
 #include "ccl_params.h"
+
+#include "ccl_core.h"
+#include "ccl_constants.h"
+#include "ccl_error.h"
+#include "ccl_utils.h"
+
+#include "ccl_neutrinos.h"
+
 
 // Global variable to hold the neutrino phase-space spline
 gsl_spline* nu_spline=NULL;
