@@ -1,7 +1,7 @@
-#include "ccl.h"
 #include <math.h>
 #include <stdio.h>
-#include "ccl_params.h"
+#include <ccl_params.h>
+#include <ccl.h>
 
 int main(int argc, char * argv[])
 {
