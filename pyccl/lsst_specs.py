@@ -65,7 +65,7 @@ def bias_clustering(cosmo, a):
     factor, a, of the clustering sample.
 
     Args:
-        cosmo (:obj:`ccl.cosmology`): Cosmological parameters.
+        cosmo (:obj:`Cosmology`): Cosmological parameters.
         a (float or array_like): Scale factor(s), normalized to 1 today.
 
     Returns:
@@ -82,7 +82,7 @@ def sigmaz_clustering(z):
     .. note:: assumes Gaussian uncertainties.
 
     Args:
-        cosmo (:obj:`ccl.cosmology`): Cosmological parameters.
+        cosmo (:obj:`Cosmology`): Cosmological parameters.
         a (float or array_like): Scale factor(s), normalized to 1 today.
 
     Returns:
@@ -100,7 +100,7 @@ def sigmaz_sources(z):
     .. note:: assumes Gaussian uncertainties.
 
     Args:
-        cosmo (:obj:`ccl.cosmology`): Cosmological parameters.
+        cosmo (:obj:`Cosmology`): Cosmological parameters.
         a (float or array_like): Scale factor(s), normalized to 1 today.
 
     Returns:

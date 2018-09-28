@@ -6,7 +6,7 @@ def halo_concentration(cosmo, halo_mass, a, odelta=200):
     """Halo mass concentration relation
 
     Args:
-        cosmo (:obj:`ccl.cosmology`): Cosmological parameters.
+        cosmo (:obj:`Cosmology`): Cosmological parameters.
         halo_mass (float or array_like): Halo masses; Msun.
         a (float): scale factor.
         odelta (float): overdensity parameter (default: 200)
@@ -22,7 +22,7 @@ def halo_concentration(cosmo, halo_mass, a, odelta=200):
 def onehalo_matter_power(cosmo, k, a):
     """One-halo term for matter power spectrum assuming NFW density profiles
     Args:
-        cosmo (:obj:`ccl.cosmology`): Cosmological parameters.
+        cosmo (:obj:`Cosmology`): Cosmological parameters.
         a (float): scale factor.
         k (float or array_like): wavenumber
 
@@ -38,7 +38,7 @@ def onehalo_matter_power(cosmo, k, a):
 def twohalo_matter_power(cosmo, k, a):
     """Two-halo term for matter power spectrum assuming NFW density profiles
     Args:
-        cosmo (:obj:`ccl.cosmology`): Cosmological parameters.
+        cosmo (:obj:`Cosmology`): Cosmological parameters.
         a (float): scale factor.
         k (float or array_like): wavenumber
 
@@ -56,7 +56,7 @@ def twohalo_matter_power(cosmo, k, a):
 def halomodel_matter_power(cosmo, k, a):
     """Matter power spectrum from halo model assuming NFW density profiles
     Args:
-        cosmo (:obj:`ccl.cosmology`): Cosmological parameters.
+        cosmo (:obj:`Cosmology`): Cosmological parameters.
         a (float): scale factor.
         k (float or array_like): wavenumber
 

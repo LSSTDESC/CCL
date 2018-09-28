@@ -6,7 +6,7 @@ def massfunc(cosmo, halo_mass, a, odelta=200):
     """Tinker et al. (2010) halo mass function.
 
     Args:
-        cosmo (:obj:`ccl.cosmology`): Cosmological parameters.
+        cosmo (:obj:`Cosmology`): Cosmological parameters.
         halo_mass (float or array_like): Halo masses; Msun.
         a (float): scale factor.
         odelta (float): overdensity parameter (default: 200)
@@ -25,7 +25,7 @@ def massfunc_m2r(cosmo, halo_mass):
               matter density.
 
     Args:
-        cosmo (:obj:`ccl.cosmology`): Cosmological parameters.
+        cosmo (:obj:`Cosmology`): Cosmological parameters.
         halo_mass (float or array_like): Halo masses; Msun.
 
     Returns:
@@ -40,7 +40,7 @@ def sigmaM(cosmo, halo_mass, a):
     spectrum; Msun.
 
     Args:
-        cosmo (:obj:`ccl.cosmology`): Cosmological parameters.
+        cosmo (:obj:`Cosmology`): Cosmological parameters.
         halo_mass (float or array_like): Halo masses; Msun.
         a (float): scale factor.
 
@@ -55,7 +55,7 @@ def halo_bias(cosmo, halo_mass, a, odelta=200):
     """Tinker et al. (2010) halo bias
 
     Args:
-        cosmo (:obj:`ccl.cosmology`): Cosmological parameters.
+        cosmo (:obj:`Cosmology`): Cosmological parameters.
         halo_mass (float or array_like): Halo masses; Msun.
         a (float): Scale factor.
         odelta (float): Overdensity parameter (default: 200).

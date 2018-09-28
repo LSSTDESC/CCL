@@ -6,7 +6,7 @@ def linear_matter_power(cosmo, k, a):
     """The linear matter power spectrum; Mpc^3.
 
     Args:
-        cosmo (:obj:`ccl.cosmology`): Cosmological parameters.
+        cosmo (:obj:`Cosmology`): Cosmological parameters.
         k (float or array_like): Wavenumber; Mpc^-1.
         a (float): Scale factor.
 
@@ -21,7 +21,7 @@ def nonlin_matter_power(cosmo, k, a):
     """The nonlinear matter power spectrum; Mpc^3.
 
     Args:
-        cosmo (:obj:`ccl.cosmology`): Cosmological parameters.
+        cosmo (:obj:`Cosmology`): Cosmological parameters.
         k (float or array_like): Wavenumber; Mpc^-1.
         a (float): Scale factor.
 
@@ -36,7 +36,7 @@ def sigmaR(cosmo, R, a=1.):
     """RMS variance in a top-hat sphere of radius R in Mpc.
 
     Args:
-        cosmo (:obj:`ccl.cosmology`): Cosmological parameters.
+        cosmo (:obj:`Cosmology`): Cosmological parameters.
         R (float or array_like): Radius; Mpc.
         a (float): optional scale factor; defaults to a=1
 
@@ -52,7 +52,7 @@ def sigmaV(cosmo, R, a=1.):
     The linear displacement field is the gradient of the linear density field.
 
     Args:
-        cosmo (:obj:`ccl.cosmology`): Cosmological parameters.
+        cosmo (:obj:`Cosmology`): Cosmological parameters.
         R (float or array_like): Radius; Mpc.
         a (float): optional scale factor; defaults to a=1
 
@@ -69,7 +69,7 @@ def sigma8(cosmo):
     .. note:: 8 Mpc/h is rescaled based on the Hubble constant.
 
     Args:
-        cosmo (:obj:`ccl.cosmology`): Cosmological parameters.
+        cosmo (:obj:`Cosmology`): Cosmological parameters.
 
     Returns:
         float: RMS variance in top-hat sphere of radius 8 Mpc/h.

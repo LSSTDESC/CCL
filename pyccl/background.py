@@ -16,7 +16,7 @@ def growth_factor(cosmo, a):
     """Growth factor.
 
     Args:
-        cosmo (:obj:`ccl.cosmology`): Cosmological parameters.
+        cosmo (:obj:`Cosmology`): Cosmological parameters.
         a (float or array_like): Scale factor(s), normalized to 1 today.
 
     Returns:
@@ -30,7 +30,7 @@ def growth_factor_unnorm(cosmo, a):
     """Unnormalized growth factor.
 
     Args:
-        cosmo (:obj:`ccl.cosmology`): Cosmological parameters.
+        cosmo (:obj:`Cosmology`): Cosmological parameters.
         a (float or array_like): Scale factor(s), normalized to 1 today.
 
     Returns:
@@ -45,7 +45,7 @@ def growth_rate(cosmo, a):
     """Growth rate.
 
     Args:
-        cosmo (:obj:`ccl.cosmology`): Cosmological parameters.
+        cosmo (:obj:`Cosmology`): Cosmological parameters.
         a (float or array_like): Scale factor(s), normalized to 1 today.
 
     Returns:
@@ -60,7 +60,7 @@ def comoving_radial_distance(cosmo, a):
     """Comoving radial distance.
 
     Args:
-        cosmo (:obj:`ccl.cosmology`): Cosmological parameters.
+        cosmo (:obj:`Cosmology`): Cosmological parameters.
         a (float or array_like): Scale factor(s), normalized to 1 today.
 
     Returns:
@@ -78,7 +78,7 @@ def comoving_angular_distance(cosmo, a):
               distance or angular separation
 
     Args:
-        cosmo (:obj:`ccl.cosmology`): Cosmological parameters.
+        cosmo (:obj:`Cosmology`): Cosmological parameters.
         a (float or array_like): Scale factor(s), normalized to 1 today.
 
     Returns:
@@ -92,7 +92,7 @@ def h_over_h0(cosmo, a):
     """Ratio of Hubble constant at `a` over Hubble constant today.
 
     Args:
-        cosmo (:obj:`ccl.cosmology`): Cosmological parameters.
+        cosmo (:obj:`Cosmology`): Cosmological parameters.
         a (float or array_like): Scale factor(s), normalized to 1 today.
 
     Returns:
@@ -106,7 +106,7 @@ def luminosity_distance(cosmo, a):
     """Luminosity distance.
 
     Args:
-        cosmo (:obj:`ccl.cosmology`): Cosmological parameters.
+        cosmo (:obj:`Cosmology`): Cosmological parameters.
         a (float or array_like): Scale factor(s), normalized to 1 today.
 
     Returns:
@@ -120,7 +120,7 @@ def distance_modulus(cosmo, a):
     """Distance Modulus
 
     Args:
-        cosmo (:obj:`ccl.cosmology`): Cosmological parameters.
+        cosmo (:obj:`Cosmology`): Cosmological parameters.
         a (float or array_like): Scale factor(s), normalized to 1 today.
 
     Returns:
@@ -134,7 +134,7 @@ def scale_factor_of_chi(cosmo, chi):
     """Scale factor, a, at a comoving distance chi.
 
     Args:
-        cosmo (:obj:`ccl.cosmology`): Cosmological parameters.
+        cosmo (:obj:`Cosmology`): Cosmological parameters.
         chi (float or array_like): Comoving distance(s); Mpc.
 
     Returns:
@@ -148,7 +148,7 @@ def omega_x(cosmo, a, label):
     """Density fraction of a given species at a redshift different than z=0.
 
     Args:
-        cosmo (:obj:`ccl.cosmology`): Cosmological parameters.
+        cosmo (:obj:`Cosmology`): Cosmological parameters.
         a (float or array_like): Scale factor(s), normalized to 1 today.
         label (string): species type. Available: 'matter', 'dark_energy',
                         'radiation', 'curvature', 'neutrinos_rel', and
@@ -171,7 +171,7 @@ def rho_x(cosmo, a, label, is_comoving=False):
     """Physical density as a function of scale factor.
 
     Args:
-        cosmo (:obj:`ccl.cosmology`): Cosmological parameters.
+        cosmo (:obj:`Cosmology`): Cosmological parameters.
         a (float or array_like): Scale factor(s), normalized to 1 today.
         label (string): species type. Available: 'critical', 'matter',
                         'dark_energy', 'radiation', 'curvature',
