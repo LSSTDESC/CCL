@@ -20,7 +20,7 @@ def growth_factor(cosmo, a):
         a (float or array_like): Scale factor(s), normalized to 1 today.
 
     Returns:
-        float or array_like: Growth factor.
+        float or array_like: Growth factor, normalized to unity today.
     """
     return _vectorize_fn(lib.growth_factor,
                          lib.growth_factor_vec, cosmo, a)
@@ -42,7 +42,8 @@ def growth_factor_unnorm(cosmo, a):
 
 
 def growth_rate(cosmo, a):
-    """Growth rate.
+    """Growth rate defined as the logarithmic derivative of the
+    growth factor, dlnD/dlna.
 
     Args:
         cosmo (:obj:`Cosmology`): Cosmological parameters.
@@ -73,9 +74,13 @@ def comoving_radial_distance(cosmo, a):
 def comoving_angular_distance(cosmo, a):
     """Comoving angular distance.
 
-    .. note:: this quantity is otherwise known as the transverse
+    .. note:: This quantity is otherwise known as the transverse
               comoving distance, and is NOT angular diameter
-              distance or angular separation
+              distance or angular separation. The comvoing angular distance
+              is defined such that the comoving distance between
+              two objects at a fixed scale factor separated by an angle
+              :math:`\theta` is :math:`\theta D_{T}(a)` where :math:`D_{T}(a)`
+              is the comoving angular distance.
 
     Args:
         cosmo (:obj:`Cosmology`): Cosmological parameters.
@@ -117,7 +122,11 @@ def luminosity_distance(cosmo, a):
 
 
 def distance_modulus(cosmo, a):
-    """Distance Modulus
+    """Distance Modulus, defined as 5 * log(luminosity distance / 10 pc).
+
+    .. note :: The distance modulus can be used to convert between apparent
+               and absolute magnitudes via m = M + distance modulus, where m
+               is the apparent magnitude and M is the absolute magnitude.
 
     Args:
         cosmo (:obj:`Cosmology`): Cosmological parameters.
@@ -131,11 +140,11 @@ def distance_modulus(cosmo, a):
 
 
 def scale_factor_of_chi(cosmo, chi):
-    """Scale factor, a, at a comoving distance chi.
+    """Scale factor, a, at a comoving radial distance chi.
 
     Args:
         cosmo (:obj:`Cosmology`): Cosmological parameters.
-        chi (float or array_like): Comoving distance(s); Mpc.
+        chi (float or array_like): Comoving radial distance(s); Mpc.
 
     Returns:
         float or array_like: Scale factor(s), normalized to 1 today.
@@ -144,13 +153,13 @@ def scale_factor_of_chi(cosmo, chi):
                          lib.scale_factor_of_chi_vec, cosmo, chi)
 
 
-def omega_x(cosmo, a, label):
+def omega_x(cosmo, a, species):
     """Density fraction of a given species at a redshift different than z=0.
 
     Args:
         cosmo (:obj:`Cosmology`): Cosmological parameters.
         a (float or array_like): Scale factor(s), normalized to 1 today.
-        label (string): species type. Available: 'matter', 'dark_energy',
+        species (string): species type. Available: 'matter', 'dark_energy',
                         'radiation', 'curvature', 'neutrinos_rel', and
                         'neutrinos_massive'
 
@@ -158,17 +167,17 @@ def omega_x(cosmo, a, label):
         float or array_like: Density fraction of a given species at a
                              scale factor.
     """
-    if label not in species_types.keys():
+    if species not in species_types.keys():
         raise ValueError("'%s' is not a valid species type. "
                          "Available options are: %s"
-                         % (label, species_types.keys()))
+                         % (species, species_types.keys()))
 
     return _vectorize_fn3(lib.omega_x,
-                          lib.omega_x_vec, cosmo, a, species_types[label])
+                          lib.omega_x_vec, cosmo, a, species_types[species])
 
 
-def rho_x(cosmo, a, label, is_comoving=False):
-    """Physical density as a function of scale factor.
+def rho_x(cosmo, a, species, is_comoving=False):
+    """Physical or comoving density as a function of scale factor.
 
     Args:
         cosmo (:obj:`Cosmology`): Cosmological parameters.
@@ -182,11 +191,11 @@ def rho_x(cosmo, a, label, is_comoving=False):
         rho_x (float or array_like): Physical density of a given species
         at a scale factor.
     """
-    if label not in species_types.keys():
+    if species not in species_types.keys():
         raise ValueError("'%s' is not a valid species type. "
                          "Available options are: %s"
-                         % (label, species_types.keys()))
+                         % (species, species_types.keys()))
 
     return _vectorize_fn4(
         lib.rho_x, lib.rho_x_vec, cosmo, a,
-        species_types[label], int(is_comoving))
+        species_types[species], int(is_comoving))
