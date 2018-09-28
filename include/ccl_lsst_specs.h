@@ -3,8 +3,6 @@
 #ifndef __CCL_LSST_SPECS_INCLUDED__
 #define __CCL_LSST_SPECS_INCLUDED__
 
-#define __CCL_PUBLIC_API__
-
 #include <gsl/gsl_integration.h>
 #include <gsl/gsl_spline.h>
 
@@ -101,6 +99,5 @@ double ccl_specs_sigmaz_clustering(double z);
 double ccl_specs_sigmaz_sources(double z);
 
 CCL_END_DECLS
-#undef __CCL_PUBLIC_API__
 
 #endif

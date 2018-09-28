@@ -3,8 +3,6 @@
 #ifndef __CCL_H_INCLUDED__
 #define __CCL_H_INCLUDED__
 
-#define __CCL_PUBLIC_API__
-
 /*! \mainpage Core Cosmology Library
  * The Core Cosmology Library (CCL) provides routines to compute basic cosmological observables with validated numerical accuracy. In the current version, predictions are provided for distances and background quantities, an
  gular auto- and cross-spectra of cosmic shear and clustering, correlation functions and the halo mass function. Fiducial specifications for the expected LSST galaxy distributions and clustering bias are also included, together with a facility to compute redshift distributions for a user-defined photometric redshift model. CCL is written in C with a Python interface.
@@ -35,5 +33,4 @@
 #include "ccl_massfunc.h"
 #include "ccl_neutrinos.h"
 
-#undef __CCL_PUBLIC_API__
 #endif

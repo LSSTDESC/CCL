@@ -2,8 +2,6 @@
 #ifndef __CCL_PARAMS_H_INCLUDED__
 #define __CCL_PARAMS_H_INCLUDED__
 
-#define __CCL_PUBLIC_API__
-
 CCL_BEGIN_DECLS
 /** 
  * Struct that contains all the parameters needed to create certain splines.
@@ -79,5 +77,4 @@ extern ccl_gsl_params * ccl_gsl;
 
 CCL_END_DECLS
 
-#undef __CCL_PUBLIC_API__
 #endif
