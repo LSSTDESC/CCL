@@ -1,6 +1,7 @@
 """The pyccl package contains all of the submodules that are implemented in
 individual files in CCL.
 """
+# flake8: noqa
 from pkg_resources import get_distribution, DistributionNotFound
 try:
     __version__ = get_distribution(__name__).version
@@ -18,7 +19,6 @@ if environ.get("CLASS_PARAM_DIR") is None:
     environ["CLASS_PARAM_DIR"] = path.dirname(path.abspath(__file__))
 
 from . import ccllib as lib
-
 from . import core, constants, background, power, massfunction, halomodel
 
 # Core data structures
