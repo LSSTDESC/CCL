@@ -13,6 +13,8 @@ Some relevant data structures include:
                                     power spectra
     'mass_function_types': types of halo mass function models
     'halo_concentration_types': types of halo concentration models
+    'emulator_neutrinos_types': emulator neutrino types
+    'mnu_types': types of massive neutrinos
 """
 from . import ccllib as lib
 import numpy as np
@@ -115,8 +117,8 @@ class Parameters(object):
         Omega_c (float): Cold dark matter density fraction.
         Omega_b (float): Baryonic matter density fraction.
         h (float): Hubble constant divided by 100 km/s/Mpc; unitless.
-        A_s (float): Power spectrum normalization. Optional if sigma8
-                     is specified.
+        A_s (float): Power spectrum normalization. Exactly one of A_s
+                     and sigma_8 is required.
         n_s (float): Primordial scalar perturbation spectral index.
         Omega_k (float, optional): Curvature density fraction. Defaults to 0.
         N_nu_rel (float, optional): Number of massless neutrinos present.
@@ -134,7 +136,7 @@ class Parameters(object):
         etab (float, optional): One of the parameters of the BCM model.
         ks (float, optional): One of the parameters of the BCM model.
         sigma8 (float): Variance of matter density perturbations at 8 Mpc/h
-                        scale. Optional if A_s is specified.
+                        scale. Exactly one of A_s and sigma_8 is required.
         df_mg (array_like): Perturbations to the GR growth rate as
                             a function of redshift :math:`\Delta f`.
                             Used to implement simple modified growth
@@ -146,48 +148,6 @@ class Parameters(object):
                  Omega_k=0., Neff=3.046, m_nu=0., mnu_type=None, w0=-1.,
                  wa=0., bcm_log10Mc=np.log10(1.2e14), bcm_etab=0.5, bcm_ks=55.,
                  sigma8=None, z_mg=None, df_mg=None):
-        """
-        Creates a set of cosmological parameters.
-
-        .. note:: Although some arguments default to `None`, they will raise a
-                  ValueError inside this function if not specified, so they are
-                  not optional.
-
-        Args:
-            Omega_c (float): Cold dark matter density fraction.
-            Omega_b (float): Baryonic matter density fraction.
-            h (float): Hubble constant divided by 100 km/s/Mpc; unitless.
-            A_s (float): Power spectrum normalization. Optional if sigma8 is
-                         specified.
-            n_s (float): Primordial scalar perturbation spectral index.
-            Omega_k (float, optional): Curvature density fraction. Defaults
-                                       to 0.
-            Neff (float, optional): Effective number of neutrino species.
-                                    Defaults to 3.046
-            m_nu (float or array-like, optional): If float: total mass in eV of
-            the massive neutrinos present. If array-like, masses of 3 neutrino
-            species (must have length 3).
-            mnu_type (string): treatment for neutrinos.
-                    Available: 'sum', 'sum_inverted', 'sum_equal', 'list'.
-                    Default if m_nu is a float is 'sum', default if m_nu is
-                    array-like with length 3 is 'list'.
-            w0 (float, optional): First order term of dark energy equation of
-                                  state. Defaults to -1.
-            wa (float, optional): Second order term of dark energy equation of
-                                  state. Defaults to 0.
-            bcm_log10Mc (float, optional): One of the parameters of the BCM
-                                           model.
-            bcm_etab (float, optional): One of the parameters of the BCM model.
-            bcm_ks (float, optional): One of the parameters of the BCM model.
-            sigma8 (float): Variance of matter density perturbations at 8 Mpc/h
-                            scale. Optional if A_s is specified.
-            df_mg (:obj: array_like): Perturbations to the GR growth rate as a
-                                      function of redshift, Delta f. Used to
-                                      implement simple modified growth
-                                      scenarios.
-            z_mg (:obj: array_like): Array of redshifts corresponding to df_mg.
-
-        """
         # Set current ccl_parameters object to None
         self.parameters = None
 
@@ -289,18 +249,6 @@ class Parameters(object):
         """
         raise NotImplementedError("Parameters objects are immutable; create a "
                                   "new Parameters() instance instead.")
-        """
-        try:
-            # First check if the key already exists (otherwise the parameter
-            # would be silently added to the ccl_parameters class instance)
-            getattr(self.parameters, key)
-        except AttributeError:
-            raise KeyError("Parameter '%s' not recognized." % key)
-
-        # Set value of parameter
-        setattr(self.parameters, key, val)
-        # TODO: Should update/replace CCL objects appropriately
-        """
 
     def __del__(self):
         """
@@ -340,71 +288,47 @@ class Cosmology(object):
 
     Args:
         params (:obj:`Parameters`): Cosmological parameters object.
-            config (:obj:`ccl_configuration`, optional): Configuration for how
+        config (:obj:`ccl_configuration`, optional): Configuration for how
             to use CCL. Takes precident over any other passed in configuration.
             Defaults to None.
         transfer_function (:obj:`str`, optional): The transfer function to
-            use. Defaults to `boltzmann_class`.
+            use. Defaults to 'boltzmann_class'.
         matter_power_spectrum (:obj:`str`, optional): The matter power
-            spectrum to use. Defaults to `halofit`.
+            spectrum to use. Defaults to 'halofit'.
         baryons_power_spectrum (:obj:`str`, optional): The correction from
-            baryonic effects to be implemented. Defaults to `nobaryons`.
+            baryonic effects to be implemented. Defaults to 'nobaryons'.
         mass_function (:obj:`str`, optional): The mass function to use.
-            Defaults to `tinker` (2010).
+            Defaults to 'tinker10' (2010).
         halo_concentration (:obj:`str`, optional): The halo concentration
-            relation to use. Defaults to Duffy et al. (2008) `duffy2008`.
-    """
-
-    def __init__(self,
-                 params=None, config=None,
-                 Omega_c=None, Omega_b=None, h=None, A_s=None, n_s=None,
-                 Omega_k=0., Neff=3.046, m_nu=0., mnu_type=None, w0=-1., wa=0.,
-                 bcm_log10Mc=np.log10(1.2e14), bcm_etab=0.5, bcm_ks=55.,
-                 sigma8=None, z_mg=None, df_mg=None,
-                 transfer_function='boltzmann_class',
-                 matter_power_spectrum='halofit',
-                 baryons_power_spectrum='nobaryons',
-                 mass_function='tinker10',
-                 halo_concentration='duffy2008',
-                 emulator_neutrinos='strict'):
-        """Creates a wrapper for ccl_cosmology.
-
-        Args:
-            params (:obj:`Parameters`): Cosmological parameters object.
-            config (:obj:`ccl_configuration`, optional): Configuration for how
-            to use CCL. Takes precident over any other passed in configuration.
-            Defaults to None.
-            transfer_function (:obj:`str`, optional): The transfer function to
-            use. Defaults to `boltzmann_class`.
-            matter_power_spectrum (:obj:`str`, optional): The matter power
-            spectrum to use. Defaults to `halofit`.
-            baryons_power_spectrum (:obj:`str`, optional): The correction from
-            baryonic effects to be implemented. Defaults to `nobaryons`.
-            mass_function (:obj:`str`, optional): The mass function to use.
-            Defaults to `tinker` (2010).
-            halo_concentration (:obj:`str`, optional): The halo concentration
-                relation to use. Defaults to Duffy et al. (2008) for virial
-                halo defintion `duffy2008`.
-            emulator_neutrinos: `str`, optional): If using the emulator for
+            relation to use. Defaults to Duffy et al. (2008) 'duffy2008'.
+        emulator_neutrinos: `str`, optional): If using the emulator for
             the power spectrum, specified treatment of unequal neutrinos.
             Options are 'strict', which will raise an error and quit if the
             user fails to pass either a set of three equal masses or a sum with
             mnu_type = 'equal', and 'equalize', which will redistribute masses
             to be equal right before calling the emualtor but results in
-            internal inconsistencies. Defaults to `strict`.
-        """
+            internal inconsistencies. Defaults to 'strict'.
+        **kwargs: Additional kwargs are allowed if params is None, in which
+                  case they are used to build a new :obj:`Parameters` object.
+    """
+
+    def __init__(self,
+                 params=None, config=None,
+                 transfer_function='boltzmann_class',
+                 matter_power_spectrum='halofit',
+                 baryons_power_spectrum='nobaryons',
+                 mass_function='tinker10',
+                 halo_concentration='duffy2008',
+                 emulator_neutrinos='strict',
+                 **kwargs):
 
         # Use either input cosmology parameters or Parameters() object
         if params is None:
             # Create new Parameters object
-            params = Parameters(Omega_c=Omega_c, Omega_b=Omega_b, h=h, A_s=A_s,
-                                n_s=n_s, Omega_k=Omega_k, Neff=Neff,
-                                m_nu=m_nu, mnu_type=mnu_type, w0=w0, wa=wa,
-                                sigma8=sigma8, bcm_log10Mc=bcm_log10Mc,
-                                bcm_etab=bcm_etab, bcm_ks=bcm_ks,
-                                z_mg=z_mg, df_mg=df_mg)
+            params = Parameters(**kwargs)
 
             self.params = params
+
             # We only need the ccl_parameters object
             params = params.parameters
         elif isinstance(params, lib.parameters):
@@ -417,14 +341,7 @@ class Cosmology(object):
 
             # Warn if any cosmological parameters were specified at the same
             # time as a Parameters() object; they will be ignored
-            argtest = [Omega_c is None, Omega_b is None, h is None,
-                       A_s is None, n_s is None, Omega_k == 0., Neff == 3.046,
-                       m_nu == 0., mnu_type is None, w0 == -1., wa == 0.,
-                       bcm_log10Mc == np.log10(1.2e14), bcm_etab == 0.5,
-                       bcm_ks == 55., sigma8 is None, z_mg is None,
-                       df_mg is None]
-
-            if not all(arg for arg in argtest):
+            if kwargs:
                 warn(
                     "Cosmological parameter kwargs are ignored if 'params' is "
                     "not None", UserWarning)
