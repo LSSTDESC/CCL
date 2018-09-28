@@ -9,16 +9,10 @@
 
 #include <class.h> /* from extern/ */
 
-#include "ccl_core.h"
-#include "ccl_background.h"
-#include "ccl_error.h"
+#include "ccl.h"
+#include "ccl_params.h"
 #include "ccl_emu17.h"
 #include "ccl_emu17_params.h"
-#include "ccl_neutrinos.h"
-#include "ccl_params.h"
-#include "ccl_utils.h"
-
-#include "ccl_power.h"
 
 
 /*------ ROUTINE: ccl_cosmology_compute_power_class -----

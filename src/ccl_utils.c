@@ -4,9 +4,7 @@
 
 #include <gsl/gsl_errno.h>
 
-#include "ccl_utils.h"
-
-#include "ccl_error.h"
+#include "ccl.h"
 
 /* ------- ROUTINE: ccl_linear spacing ------
 INPUTS: [xmin,xmax] of the interval to be divided in N bins

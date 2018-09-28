@@ -6,14 +6,8 @@
 #include <gsl/gsl_spline.h>
 #include <gsl/gsl_errno.h>
 
+#include "ccl.h"
 #include "ccl_params.h"
-
-#include "ccl_error.h"
-#include "ccl_core.h"
-#include "ccl_background.h"
-#include "ccl_constants.h"
-#include "ccl_utils.h"
-
 #include "ccl_lsst_specs.h"
 
 // ---- LSST redshift distributions & current specs -----

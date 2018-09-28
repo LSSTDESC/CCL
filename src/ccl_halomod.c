@@ -8,14 +8,9 @@
 #include <gsl/gsl_sf_expint.h>
 #include <gsl/gsl_roots.h>
 
-#include "ccl_error.h"
-#include "ccl_background.h"
-#include "ccl_massfunc.h"
-#include "ccl_power.h"
-#include "ccl_utils.h"
-
+#include "ccl.h"
+#include "ccl_params.h"
 #include "ccl_halomod.h"
-
 
 // Analytic FT of NFW profile, from Cooray & Sheth (2002; Section 3 of https://arxiv.org/abs/astro-ph/0206508)
 // Normalised such that U(k=0)=1

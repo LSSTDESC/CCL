@@ -9,14 +9,8 @@
 #include <gsl/gsl_integration.h>
 #include <gsl/gsl_roots.h>
 
+#include "ccl.h"
 #include "ccl_params.h"
-#include "ccl_constants.h"
-#include "ccl_error.h"
-#include "ccl_neutrinos.h"
-#include "ccl_utils.h"
-
-#include "ccl_background.h"
-
 
 /* --------- ROUTINE: h_over_h0 ---------
 INPUT: scale factor, cosmology

@@ -1,9 +1,8 @@
 /** @file */
-#ifdef __cplusplus
-extern "C" {
-#endif
+#ifndef __CCL_MASSFUNC_H_INCLUDED__
+#define __CCL_MASSFUNC_H_INCLUDED__
 
-#pragma once
+CCL_BEGIN_DECLS
 
 /*
  * Computes sigma(R), the power spectrum normalization, over log-spaced values of mass and radii
@@ -98,7 +97,7 @@ double ccl_sigmaM(ccl_cosmology *cosmo, double smooth_mass, double a, int *statu
  * @param status Status flag. 0 if there are no errors, nonzero otherwise.
  */
 double r_delta(ccl_cosmology *cosmo, double halomass, double a, double odelta, int *status);
-  
-#ifdef __cplusplus
-}
+
+CCL_END_DECLS
+
 #endif

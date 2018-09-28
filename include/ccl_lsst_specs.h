@@ -1,14 +1,26 @@
 /** @file */
-#ifdef __cplusplus
-extern "C" {
-#endif
 
-#pragma once
-#include "ccl_core.h"
-#include "math.h"
-#include "gsl/gsl_integration.h"
-#include "gsl/gsl_spline.h"
+#ifndef __CCL_LSST_SPECS_INCLUDED__
+#define __CCL_LSST_SPECS_INCLUDED__
 
+#define __CCL_PUBLIC_API__
+
+#include <gsl/gsl_integration.h>
+#include <gsl/gsl_spline.h>
+
+// Specifying the dNdz
+// lensing (Chang et al 2013)
+#define DNDZ_WL_CONS 1  //k=0.5
+#define DNDZ_WL_FID 2  //k=1
+#define DNDZ_WL_OPT 3 //k=2
+// Clustering
+#define DNDZ_NC 4
+
+//LSST redshift range for lensing sources
+#define Z_MIN_SOURCES 0.1
+#define Z_MAX_SOURCES 3.0
+
+CCL_BEGIN_DECLS
 /** 
  * A user-defined P(z) function.
  * This is a user-defined P(z) function, 
@@ -88,18 +100,7 @@ double ccl_specs_sigmaz_clustering(double z);
  */
 double ccl_specs_sigmaz_sources(double z);
 
-// Specifying the dNdz
-// lensing (Chang et al 2013)
-#define DNDZ_WL_CONS 1  //k=0.5
-#define DNDZ_WL_FID 2  //k=1
-#define DNDZ_WL_OPT 3 //k=2
-// Clustering
-#define DNDZ_NC 4
+CCL_END_DECLS
+#undef __CCL_PUBLIC_API__
 
-//LSST redshift range for lensing sources
-#define Z_MIN_SOURCES 0.1
-#define Z_MAX_SOURCES 3.0
-
-#ifdef __cplusplus
-}
 #endif

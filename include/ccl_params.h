@@ -1,10 +1,10 @@
 /** @file */
-#ifdef __cplusplus
-extern "C" {
-#endif
+#ifndef __CCL_PARAMS_H_INCLUDED__
+#define __CCL_PARAMS_H_INCLUDED__
 
-#pragma once
+#define __CCL_PUBLIC_API__
 
+CCL_BEGIN_DECLS
 /** 
  * Struct that contains all the parameters needed to create certain splines.
  * This includes splines for the scale factor, masses, and power spectra.
@@ -77,6 +77,7 @@ typedef struct ccl_gsl_params {
 
 extern ccl_gsl_params * ccl_gsl;
 
-#ifdef __cplusplus
-}
+CCL_END_DECLS
+
+#undef __CCL_PUBLIC_API__
 #endif

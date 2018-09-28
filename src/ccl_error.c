@@ -5,7 +5,7 @@
 
 #include <gsl/gsl_errno.h>
 
-#include "ccl_error.h"
+#include "ccl.h"
 
 // Error handling policy: whether to exit on error (C default) or continue 
 // (Python or other binding default)

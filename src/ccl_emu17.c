@@ -16,10 +16,9 @@
 #include <gsl/gsl_spline.h>
 #include <gsl/gsl_errno.h>
 
-#include "ccl_core.h"
-#include "ccl_error.h"
-#include "ccl_emu17_params.h"
+#include "ccl.h"
 
+#include "ccl_emu17_params.h"
 #include "ccl_emu17.h"
 
 // Sizes of stuff
