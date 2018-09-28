@@ -1,12 +1,12 @@
 #include "ccl_utils.h"
-#include "math.h"
-#include "stdio.h"
-#include "stdlib.h"
-#include "string.h"
-#include "gsl/gsl_errno.h"
-#include "gsl/gsl_integration.h"
-#include "gsl/gsl_sf_expint.h"
-#include "gsl/gsl_roots.h"
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <gsl/gsl_errno.h>
+#include <gsl/gsl_integration.h>
+#include <gsl/gsl_sf_expint.h>
+#include <gsl/gsl_roots.h>
 #include "ccl_background.h"
 #include "ccl_power.h"
 #include "ccl_massfunc.h"
@@ -62,7 +62,7 @@ double ccl_halo_concentration(ccl_cosmology *cosmo, double halomass, double a, d
 
     if (odelta != 200.) {
       *status = CCL_ERROR_CONC_DV;
-      strcpy(cosmo->status_message, "ccl_halomod.c: halo_concentration(): Bhattacharya (2011) concentration relation only valid for Delta_v = 200 \n");
+      ccl_cosmology_set_status_message(cosmo, "ccl_halomod.c: halo_concentration(): Bhattacharya (2011) concentration relation only valid for Delta_v = 200 \n");
       return NAN;
     }
     
@@ -96,7 +96,7 @@ double ccl_halo_concentration(ccl_cosmology *cosmo, double halomass, double a, d
     } else {
 
       *status = CCL_ERROR_CONC_DV;
-      strcpy(cosmo->status_message, "ccl_halomod.c: halo_concentration(): Duffy (2008) virial concentration only valid for virial Delta_v or 200\n");
+      ccl_cosmology_set_status_message(cosmo, "ccl_halomod.c: halo_concentration(): Duffy (2008) virial concentration only valid for virial Delta_v or 200\n");
       return NAN;
       
     }
@@ -200,7 +200,7 @@ static double one_halo_integral(ccl_cosmology *cosmo, double k, double a, int *s
   if (qagstatus != GSL_SUCCESS) {
     ccl_raise_gsl_warning(qagstatus, "ccl_halomod.c: one_halo_integral():");
     *status = CCL_ERROR_ONE_HALO_INT;
-    sprintf(cosmo->status_message ,"ccl_halomod.c: one_halo_integral(): Integration failure\n");
+    ccl_cosmology_set_status_message(cosmo, "ccl_halomod.c: one_halo_integral(): Integration failure\n");
     return NAN;      
   } else {
     return result;
@@ -263,7 +263,7 @@ static double two_halo_integral(ccl_cosmology *cosmo, double k, double a, int *s
   if (qagstatus != GSL_SUCCESS) {
     ccl_raise_gsl_warning(qagstatus, "ccl_halomod.c: two_halo_integral():");
     *status = CCL_ERROR_TWO_HALO_INT;
-    sprintf(cosmo->status_message ,"ccl_halomod.c: two_halo_integral(): Integration failure\n");
+    ccl_cosmology_set_status_message(cosmo, "ccl_halomod.c: two_halo_integral(): Integration failure\n");
     return NAN;      
   } else {
     return result;

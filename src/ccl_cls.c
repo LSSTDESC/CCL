@@ -2,8 +2,8 @@
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
-#include "gsl/gsl_errno.h"
-#include "gsl/gsl_integration.h"
+#include <gsl/gsl_errno.h>
+#include <gsl/gsl_integration.h>
 #include "ccl_cls.h"
 #include "ccl_power.h"
 #include "ccl_background.h"
@@ -73,7 +73,7 @@ CCL_ClWorkspace *ccl_cl_workspace_default(int lmax,int l_limber,int non_limber_m
   if(w==NULL) {
     *status=CCL_ERROR_MEMORY;
     //Can't access cosmology object
-    //    strcpy(cosmo->status_message,"ccl_cls.c: ccl_cl_workspace_default(); memory allocation\n");
+    //    ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: ccl_cl_workspace_default(); memory allocation\n");
     return NULL;
   }
 
@@ -91,7 +91,7 @@ CCL_ClWorkspace *ccl_cl_workspace_default(int lmax,int l_limber,int non_limber_m
     free(w);
     *status=CCL_ERROR_INCONSISTENT;
     //Can't access cosmology object
-    //    strcpy(cosmo->status_message,"ccl_cls.c: ccl_cl_workspace_default(); unknown non-limber method\n");
+    //    ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: ccl_cl_workspace_default(); unknown non-limber method\n");
     return NULL;
   }
   w->nlimb_method=non_limber_method;
@@ -120,7 +120,7 @@ CCL_ClWorkspace *ccl_cl_workspace_default(int lmax,int l_limber,int non_limber_m
     free(w);
     *status=CCL_ERROR_MEMORY;
     //Can't access cosmology object
-    //    strcpy(cosmo->status_message,"ccl_cls.c: ccl_cl_workspace_default(); memory allocation\n");
+    //    ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: ccl_cl_workspace_default(); memory allocation\n");
     return NULL;
   }
 
@@ -302,14 +302,14 @@ static CCL_ClTracer *cl_tracer(ccl_cosmology *cosmo,int tracer_type,
   if(clt==NULL) {
 
     *status=CCL_ERROR_MEMORY;
-    strcpy(cosmo->status_message,"ccl_cls.c: ccl_cl_tracer(): memory allocation\n");
+    ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: ccl_cl_tracer(): memory allocation\n");
     return NULL;
   }
 
   if ( ((cosmo->params.N_nu_mass)>0) && tracer_type==CL_TRACER_NC && has_rsd){
 	  free(clt);
 	  *status=CCL_ERROR_NOT_IMPLEMENTED;
-	  strcpy(cosmo->status_message, "ccl_cls.c: ccl_cl_tracer_new(): Number counts tracers with rsd not yet implemented in cosmologies with massive neutrinos.");
+	  ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: ccl_cl_tracer_new(): Number counts tracers with rsd not yet implemented in cosmologies with massive neutrinos.");
 	  return NULL;
   }
 
@@ -327,7 +327,7 @@ static CCL_ClTracer *cl_tracer(ccl_cosmology *cosmo,int tracer_type,
     if(clt->spl_nz==NULL) {
       free(clt);
       *status=CCL_ERROR_SPLINE;
-      strcpy(cosmo->status_message,"ccl_cls.c: ccl_cl_tracer(): error initializing spline for N(z)\n");
+      ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: ccl_cl_tracer(): error initializing spline for N(z)\n");
       return NULL;
     }
 
@@ -339,7 +339,7 @@ static CCL_ClTracer *cl_tracer(ccl_cosmology *cosmo,int tracer_type,
       ccl_spline_free(clt->spl_nz);
       free(clt);
       *status=CCL_ERROR_MEMORY;
-      strcpy(cosmo->status_message,"ccl_cls.c: ccl_cl_tracer(): memory allocation\n");
+      ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: ccl_cl_tracer(): memory allocation\n");
       return NULL;
     }
 
@@ -356,7 +356,7 @@ static CCL_ClTracer *cl_tracer(ccl_cosmology *cosmo,int tracer_type,
       ccl_spline_free(clt->spl_nz);
       free(clt);
       *status=CCL_ERROR_INTEG;
-      strcpy(cosmo->status_message,"ccl_cls.c: ccl_cl_tracer(): integration error when normalizing N(z)\n");
+      ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: ccl_cl_tracer(): integration error when normalizing N(z)\n");
       return NULL;
     }
     for(int ii=0;ii<nz_n;ii++)
@@ -367,7 +367,7 @@ static CCL_ClTracer *cl_tracer(ccl_cosmology *cosmo,int tracer_type,
     if(clt->spl_nz==NULL) {
       free(clt);
       *status=CCL_ERROR_SPLINE;
-      strcpy(cosmo->status_message,"ccl_cls.c: ccl_cl_tracer(): error initializing normalized spline for N(z)\n");
+      ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: ccl_cl_tracer(): error initializing normalized spline for N(z)\n");
       return NULL;
     }
 
@@ -378,7 +378,7 @@ static CCL_ClTracer *cl_tracer(ccl_cosmology *cosmo,int tracer_type,
 	ccl_spline_free(clt->spl_nz);
 	free(clt);
 	*status=CCL_ERROR_SPLINE;
-	strcpy(cosmo->status_message,"ccl_cls.c: ccl_cl_tracer(): error initializing spline for b(z)\n");
+	ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: ccl_cl_tracer(): error initializing spline for b(z)\n");
 	return NULL;
       }
       clt->has_rsd=has_rsd;
@@ -401,7 +401,7 @@ static CCL_ClTracer *cl_tracer(ccl_cosmology *cosmo,int tracer_type,
 	  ccl_spline_free(clt->spl_bz);
 	  free(clt);
 	  *status=CCL_ERROR_SPLINE;
-	  strcpy(cosmo->status_message,
+	  ccl_cosmology_set_status_message(cosmo,
 		 "ccl_cls.c: ccl_cl_tracer(): error initializing spline for s(z)\n");
 	  return NULL;
 	}
@@ -415,7 +415,7 @@ static CCL_ClTracer *cl_tracer(ccl_cosmology *cosmo,int tracer_type,
 	  ccl_spline_free(clt->spl_sz);
 	  free(clt);
 	  *status=CCL_ERROR_LINSPACE;
-	  strcpy(cosmo->status_message,
+	  ccl_cosmology_set_status_message(cosmo,
 		 "ccl_cls.c: ccl_cl_tracer(): Error creating linear spacing in chi\n");
 	  return NULL;
 	}
@@ -427,7 +427,7 @@ static CCL_ClTracer *cl_tracer(ccl_cosmology *cosmo,int tracer_type,
 	  ccl_spline_free(clt->spl_sz);
 	  free(clt);
 	  *status=CCL_ERROR_MEMORY;
-	  strcpy(cosmo->status_message,"ccl_cls.c: ccl_cl_tracer(): memory allocation\n");
+	  ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: ccl_cl_tracer(): memory allocation\n");
 	  return NULL;
 	}
 
@@ -441,7 +441,7 @@ static CCL_ClTracer *cl_tracer(ccl_cosmology *cosmo,int tracer_type,
 	  ccl_spline_free(clt->spl_sz);
 	  free(clt);
 	  *status=CCL_ERROR_INTEG;
-	  strcpy(cosmo->status_message,"ccl_cls.c: ccl_cl_tracer(): error computing lensing window\n");
+	  ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: ccl_cl_tracer(): error computing lensing window\n");
 	  return NULL;
 	}
 
@@ -454,7 +454,7 @@ static CCL_ClTracer *cl_tracer(ccl_cosmology *cosmo,int tracer_type,
 	  ccl_spline_free(clt->spl_sz);
 	  free(clt);
 	  *status=CCL_ERROR_SPLINE;
-	  strcpy(cosmo->status_message,
+	  ccl_cosmology_set_status_message(cosmo,
 		 "ccl_cls.c: ccl_cl_tracer(): error initializing spline for lensing window\n");
 	  return NULL;
 	}
@@ -480,7 +480,7 @@ static CCL_ClTracer *cl_tracer(ccl_cosmology *cosmo,int tracer_type,
 	ccl_spline_free(clt->spl_nz);
 	free(clt);
 	*status=CCL_ERROR_LINSPACE;
-	strcpy(cosmo->status_message,
+	ccl_cosmology_set_status_message(cosmo,
 	       "ccl_cls.c: ccl_cl_tracer(): Error creating linear spacing in chi\n");
 	return NULL;
       }
@@ -490,7 +490,7 @@ static CCL_ClTracer *cl_tracer(ccl_cosmology *cosmo,int tracer_type,
 	ccl_spline_free(clt->spl_nz);
 	free(clt);
 	*status=CCL_ERROR_MEMORY;
-	strcpy(cosmo->status_message,"ccl_cls.c: ccl_cl_tracer(): memory allocation\n");
+	ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: ccl_cl_tracer(): memory allocation\n");
 	return NULL;
       }
 
@@ -502,7 +502,7 @@ static CCL_ClTracer *cl_tracer(ccl_cosmology *cosmo,int tracer_type,
 	ccl_spline_free(clt->spl_nz);
 	free(clt);
 	*status=CCL_ERROR_INTEG;
-	strcpy(cosmo->status_message,"ccl_cls.c: ccl_cl_tracer(): error computing lensing window\n");
+	ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: ccl_cl_tracer(): error computing lensing window\n");
 	return NULL;
       }
 
@@ -513,7 +513,7 @@ static CCL_ClTracer *cl_tracer(ccl_cosmology *cosmo,int tracer_type,
 	ccl_spline_free(clt->spl_nz);
 	free(clt);
 	*status=CCL_ERROR_SPLINE;
-	strcpy(cosmo->status_message,
+	ccl_cosmology_set_status_message(cosmo,
 	       "ccl_cls.c: ccl_cl_tracer(): error initializing spline for lensing window\n");
 	return NULL;
       }
@@ -526,7 +526,7 @@ static CCL_ClTracer *cl_tracer(ccl_cosmology *cosmo,int tracer_type,
 	  ccl_spline_free(clt->spl_nz);
 	  free(clt);
 	  *status=CCL_ERROR_SPLINE;
-	  strcpy(cosmo->status_message,
+	  ccl_cosmology_set_status_message(cosmo,
 		 "ccl_cls.c: ccl_cl_tracer(): error initializing spline for rf(z)\n");
 	  return NULL;
 	}
@@ -536,7 +536,7 @@ static CCL_ClTracer *cl_tracer(ccl_cosmology *cosmo,int tracer_type,
 	  ccl_spline_free(clt->spl_nz);
 	  free(clt);
 	  *status=CCL_ERROR_SPLINE;
-	  strcpy(cosmo->status_message,
+	  ccl_cosmology_set_status_message(cosmo,
 		 "ccl_cls.c: ccl_cl_tracer(): error initializing spline for ba(z)\n");
 	  return NULL;
 	}
@@ -550,7 +550,7 @@ static CCL_ClTracer *cl_tracer(ccl_cosmology *cosmo,int tracer_type,
   }
   else {
     *status=CCL_ERROR_INCONSISTENT;
-    strcpy(cosmo->status_message,"ccl_cls.c: ccl_cl_tracer(): unknown tracer type\n");
+    ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: ccl_cl_tracer(): unknown tracer type\n");
     return NULL;
   }
 
@@ -963,14 +963,14 @@ static void compute_transfer(CCL_ClTracer *clt,ccl_cosmology *cosmo,CCL_ClWorksp
   clt->n_k=(int *)malloc(clt->n_ls*sizeof(int));
   if(clt->n_k==NULL) {
     *status=CCL_ERROR_MEMORY;
-    strcpy(cosmo->status_message,"ccl_cls.c: compute_transfer(): memory allocation\n");
+    ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: compute_transfer(): memory allocation\n");
     return;
   }
   clt->spl_transfer=(SplPar **)malloc(clt->n_ls*sizeof(SplPar *));
   if(clt->spl_transfer==NULL) {
     free(clt->n_k);
     *status=CCL_ERROR_MEMORY;
-    strcpy(cosmo->status_message,"ccl_cls.c: compute_transfer(): memory allocation\n");
+    ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: compute_transfer(): memory allocation\n");
     return;
   }
 
@@ -981,7 +981,7 @@ static void compute_transfer(CCL_ClTracer *clt,ccl_cosmology *cosmo,CCL_ClWorksp
     double *lkarr=get_lkarr(cosmo,w,l,chimin,chimax,&nk,status);
     if(lkarr==NULL) {
       *status=CCL_ERROR_MEMORY;
-      strcpy(cosmo->status_message,"ccl_cls.c: compute_transfer(): memory allocation\n");
+      ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: compute_transfer(): memory allocation\n");
       break;
     }
 
@@ -989,7 +989,7 @@ static void compute_transfer(CCL_ClTracer *clt,ccl_cosmology *cosmo,CCL_ClWorksp
     if(tkarr==NULL) {
       free(lkarr);
       *status=CCL_ERROR_MEMORY;
-      strcpy(cosmo->status_message,"ccl_cls.c: compute_transfer(): memory allocation\n");
+      ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: compute_transfer(): memory allocation\n");
       break;
     }
     clt->n_k[il]=nk;
@@ -1010,7 +1010,7 @@ static void compute_transfer(CCL_ClTracer *clt,ccl_cosmology *cosmo,CCL_ClWorksp
       free(lkarr);
       free(tkarr);
       *status=CCL_ERROR_MEMORY;
-      strcpy(cosmo->status_message,"ccl_cls.c: compute_transfer(): memory allocation\n");
+      ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: compute_transfer(): memory allocation\n");
       break;
     }
     free(lkarr);
@@ -1155,7 +1155,7 @@ static double ccl_angular_cl_native(ccl_cosmology *cosmo,CCL_ClWorkspace *cw,int
     // If an error status was already set, don't overwrite it.
     if(*status == 0){
         *status=CCL_ERROR_INTEG;
-        strcpy(cosmo->status_message,"ccl_cls.c: ccl_angular_cl_native(): error integrating over k\n");
+        ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: ccl_angular_cl_native(): error integrating over k\n");
     }
     return -1;
   }
@@ -1173,7 +1173,7 @@ void ccl_angular_cls(ccl_cosmology *cosmo,CCL_ClWorkspace *w,
   for(ii=0;ii<nl_out;ii++) {
     if(l_out[ii]>w->lmax) {
       *status=CCL_ERROR_SPLINE_EV;
-      strcpy(cosmo->status_message,"ccl_cls.c: ccl_angular_cls(); "
+      ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: ccl_angular_cls(); "
 	     "requested l beyond range allowed by workspace\n");
       return;
     }
@@ -1183,14 +1183,14 @@ void ccl_angular_cls(ccl_cosmology *cosmo,CCL_ClWorkspace *w,
   double *l_nodes=(double *)malloc(w->n_ls*sizeof(double));
   if(l_nodes==NULL) {
     *status=CCL_ERROR_MEMORY;
-    strcpy(cosmo->status_message,"ccl_cls.c: ccl_angular_cls(); memory allocation\n");
+    ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: ccl_angular_cls(); memory allocation\n");
     return;
   }
   double *cl_nodes=(double *)malloc(w->n_ls*sizeof(double));
   if(cl_nodes==NULL) {
     free(l_nodes);
     *status=CCL_ERROR_MEMORY;
-    strcpy(cosmo->status_message,"ccl_cls.c: ccl_cl_angular_cls(); memory allocation\n");
+    ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: ccl_cl_angular_cls(); memory allocation\n");
     return;
   }
   for(ii=0;ii<w->n_ls;ii++)
@@ -1232,7 +1232,7 @@ void ccl_angular_cls(ccl_cosmology *cosmo,CCL_ClWorkspace *w,
   if(spcl_nodes==NULL) {
     free(cl_nodes);
     *status=CCL_ERROR_MEMORY;
-    strcpy(cosmo->status_message,"ccl_cls.c: ccl_cl_angular_cls(); memory allocation\n");
+    ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: ccl_cl_angular_cls(); memory allocation\n");
     return;
   }
   for(ii=0;ii<nl_out;ii++)
@@ -1267,7 +1267,7 @@ double ccl_get_tracer_fa(ccl_cosmology *cosmo,CCL_ClTracer *clt,double a,int fun
 
   if(check_clt_fa_inconsistency(clt,func_code)) {
     *status=CCL_ERROR_INCONSISTENT;
-    sprintf(cosmo->status_message ,"ccl_cls.c: inconsistent combination of tracer and internal function to be evaluated");
+    ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: inconsistent combination of tracer and internal function to be evaluated");
     return -1;
   }
 
@@ -1299,7 +1299,7 @@ int ccl_get_tracer_fas(ccl_cosmology *cosmo,CCL_ClTracer *clt,int na,double *a,d
 
   if(check_clt_fa_inconsistency(clt,func_code)) {
     *status=CCL_ERROR_INCONSISTENT;
-    sprintf(cosmo->status_message ,"ccl_cls.c: inconsistent combination of tracer and internal function to be evaluated");
+    ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: inconsistent combination of tracer and internal function to be evaluated");
     return -1;
   }
 

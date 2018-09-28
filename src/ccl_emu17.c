@@ -165,42 +165,42 @@ static void emu(double *xstar, double **ystar, int* status, ccl_cosmology* cosmo
         if((xstar[i] < xmin[i]) || (xstar[i] > xmax[i])) {
             switch(i) {
                 case 0:
-                    sprintf(cosmo->status_message, 
+                    ccl_cosmology_set_status_message(cosmo, 
                             "ccl_pkemu(): omega_m must be between %f and %f.\n", 
                             xmin[i], xmax[i]);
                     break;
                 case 1:
-                    sprintf(cosmo->status_message, 
+                    ccl_cosmology_set_status_message(cosmo, 
                             "ccl_pkemu(): omega_b must be between %f and %f.\n", 
                             xmin[i], xmax[i]);
                     break;
                 case 2:
-                    sprintf(cosmo->status_message, 
+                    ccl_cosmology_set_status_message(cosmo, 
                             "ccl_pkemu(): sigma8 must be between %f and %f.\n", 
                             xmin[i], xmax[i]);
                     break;
                 case 3:
-                    sprintf(cosmo->status_message, 
+                    ccl_cosmology_set_status_message(cosmo, 
                             "ccl_pkemu(): h must be between %f and %f.\n", 
                             xmin[i], xmax[i]);
                     break;
                 case 4:
-                    sprintf(cosmo->status_message, 
+                    ccl_cosmology_set_status_message(cosmo, 
                             "ccl_pkemu(): n_s must be between %f and %f.\n", 
                             xmin[i], xmax[i]);
                     break;
                 case 5:
-                    sprintf(cosmo->status_message, 
+                    ccl_cosmology_set_status_message(cosmo, 
                             "ccl_pkemu(): w_0 must be between %f and %f.\n", 
                             xmin[i], xmax[i]);
                     break;
                 case 6:
-                    sprintf(cosmo->status_message, 
+                    ccl_cosmology_set_status_message(cosmo, 
                             "ccl_pkemu(): (-w_0-w_a)^(1/4) must be between %f and %f.\n", 
                             xmin[i], xmax[i]);
                     break;
                 case 7:
-                    sprintf(cosmo->status_message, 
+                    ccl_cosmology_set_status_message(cosmo, 
                             "ccl_pkemu(): omega_nu must be between %f and %f.\n", 
                             xmin[i], xmax[i]);
                     break;
@@ -211,7 +211,7 @@ static void emu(double *xstar, double **ystar, int* status, ccl_cosmology* cosmo
         }
     } // for(i=0; i<p; i++)
     if((xstar[p] < z[0]) || (xstar[p] > z[rs-1])) {
-        sprintf(cosmo->status_message, 
+        ccl_cosmology_set_status_message(cosmo, 
                 "ccl_pkemu(): z must be between %f and %f.\n", 
                 z[0], z[rs-1]);
         *status = CCL_ERROR_EMULATOR_BOUND;
