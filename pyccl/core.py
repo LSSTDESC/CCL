@@ -121,8 +121,8 @@ class Parameters(object):
                      and sigma_8 is required.
         n_s (float): Primordial scalar perturbation spectral index.
         Omega_k (float, optional): Curvature density fraction. Defaults to 0.
-        N_nu_rel (float, optional): Number of massless neutrinos present.
-                                    Defaults to 3.046.
+        N_nu_rel (float, optional): Effective number of massless neutrinos
+                                    present. Defaults to 3.046.
         N_nu_mass (float, optional): Number of massive neutrinos present.
                                      Defaults to 0.
         m_nu (float, optional): total mass in eV of the massive neutrinos
@@ -132,9 +132,9 @@ class Parameters(object):
                               state. Defaults to -1.
         wa (float, optional): Second order term of dark energy equation of
                               state. Defaults to 0.
-        log10Mc (float, optional): One of the parameters of the BCM model.
-        etab (float, optional): One of the parameters of the BCM model.
-        ks (float, optional): One of the parameters of the BCM model.
+        bcm_log10Mc (float, optional): One of the parameters of the BCM model.
+        bcm_etab (float, optional): One of the parameters of the BCM model.
+        bcm_ks (float, optional): One of the parameters of the BCM model.
         sigma8 (float): Variance of matter density perturbations at 8 Mpc/h
                         scale. Exactly one of A_s and sigma_8 is required.
         df_mg (array_like): Perturbations to the GR growth rate as
