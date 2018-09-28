@@ -60,6 +60,7 @@ project(ccl VERSION 0.2.1)
     if (NOT "${CMAKE_C_COMPILER_ID}" MATCHES "^(Apple)?Clang$")
       # When not using Clang and in Release mode, enabling OpenMP support
       set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -fopenmp")
+      set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -fopenmp")
     endif()
 
     # Define include and library directories for external dependencies
