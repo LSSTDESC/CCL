@@ -113,6 +113,12 @@ class Parameters(object):
               ValueError inside this function if not specified, so they are not
               optional.
 
+    .. note:: BCM stands for the "baryonic correction model" of Schneider &
+              Teyssier (2015; https://arxiv.org/abs/1510.06034). See the
+              `DESC Note`<https://github.com/LSSTDESC/CCL/blob/master/doc\
+/0000-ccl_note/main.pdf>_
+              for details.
+
     Args:
         Omega_c (float): Cold dark matter density fraction.
         Omega_b (float): Baryonic matter density fraction.
@@ -133,8 +139,11 @@ class Parameters(object):
         wa (float, optional): Second order term of dark energy equation of
                               state. Defaults to 0.
         bcm_log10Mc (float, optional): One of the parameters of the BCM model.
+                                       Defaults to `np.log10(1.2e14)`.
         bcm_etab (float, optional): One of the parameters of the BCM model.
+                                    Defaults to 0.5.
         bcm_ks (float, optional): One of the parameters of the BCM model.
+                                  Defaults to 55.0.
         sigma8 (float): Variance of matter density perturbations at 8 Mpc/h
                         scale. Exactly one of A_s and sigma_8 is required.
         df_mg (array_like): Perturbations to the GR growth rate as
@@ -156,7 +165,10 @@ class Parameters(object):
             # Get growth array size and do sanity check
             z_mg = np.atleast_1d(z_mg)
             df_mg = np.atleast_1d(df_mg)
-            assert z_mg.size == df_mg.size
+            if z_mg.size != df_mg.size:
+                raise ValueError(
+                    "The parameters `z_mg` and `dF_mg` are "
+                    "not the same shape!")
             nz_mg = z_mg.size
         else:
             # If one or both of the MG growth arrays are set to zero, disable
@@ -366,31 +378,36 @@ class Cosmology(object):
 
             # Check validity of configuration-related arguments
             if transfer_function not in transfer_function_types.keys():
-                raise KeyError("'%s' is not a valid transfer_function type. "
-                               "Available options are: %s"
-                               % (transfer_function,
-                                  transfer_function_types.keys()))
+                raise ValueError(
+                    "'%s' is not a valid transfer_function type. "
+                    "Available options are: %s"
+                    % (transfer_function,
+                       transfer_function_types.keys()))
             if matter_power_spectrum not in matter_power_spectrum_types.keys():
-                raise KeyError("'%s' is not a valid matter_power_spectrum "
-                               "type. Available options are: %s"
-                               % (matter_power_spectrum,
-                                  matter_power_spectrum_types.keys()))
+                raise ValueError(
+                    "'%s' is not a valid matter_power_spectrum "
+                    "type. Available options are: %s"
+                    % (matter_power_spectrum,
+                       matter_power_spectrum_types.keys()))
             if (baryons_power_spectrum not in
                     baryons_power_spectrum_types.keys()):
-                raise KeyError("'%s' is not a valid baryons_power_spectrum "
-                               "type. Available options are: %s"
-                               % (baryons_power_spectrum,
-                                  baryons_power_spectrum_types.keys()))
+                raise ValueError(
+                    "'%s' is not a valid baryons_power_spectrum "
+                    "type. Available options are: %s"
+                    % (baryons_power_spectrum,
+                       baryons_power_spectrum_types.keys()))
             if mass_function not in mass_function_types.keys():
-                raise KeyError("'%s' is not a valid mass_function type. "
-                               "Available options are: %s"
-                               % (mass_function,
-                                  mass_function_types.keys()))
+                raise ValueError(
+                    "'%s' is not a valid mass_function type. "
+                    "Available options are: %s"
+                    % (mass_function,
+                       mass_function_types.keys()))
             if halo_concentration not in halo_concentration_types.keys():
-                raise KeyError("'%s' is not a valid halo_concentration type. "
-                               "Available options are: %s"
-                               % (halo_concentration,
-                                  halo_concentration_types.keys()))
+                raise ValueError(
+                    "'%s' is not a valid halo_concentration type. "
+                    "Available options are: %s"
+                    % (halo_concentration,
+                       halo_concentration_types.keys()))
             if emulator_neutrinos not in emulator_neutrinos_types.keys():
                 raise ValueError("'%s' is not a valid emulator neutrinos "
                                  "method. Available options are: %s"
@@ -476,26 +493,19 @@ class Cosmology(object):
         return self.params.__getitem__(key)
 
     def compute_distances(self):
-        """Interfaces with src/compute_background.c: ccl_cosmology_compute_distances().
-        Sets up the splines for the distances.
-        """
+        """Compute the distance splines."""
         status = 0
         status = lib.cosmology_compute_distances(self.cosmo, status)
         check(status, self.cosmo)
 
     def compute_growth(self):
-        """Interfaces with src/ccl_background.c: ccl_cosmology_compute_growth().
-        Sets up the splines for the growth function.
-        """
+        """Compute the growth function."""
         status = 0
         status = lib.cosmology_compute_growth(self.cosmo, status)
         check(status, self.cosmo)
 
     def compute_power(self):
-        """Interfaces with src/ccl_power.c: ccl_cosmology_compute_power().
-        Sets up the splines for the power spectrum.
-
-        """
+        """Compute the power spectrum."""
         status = 0
         status = lib.cosmology_compute_power(self.cosmo, status)
         check(status, self.cosmo)
@@ -535,7 +545,7 @@ class Cosmology(object):
     def status(self):
         """Get error status of the ccl_cosmology object.
 
-        .. note:: error status is all currently under development.
+        .. note:: error statuses are currently under development.
 
         Returns:
             :obj:`str` containing the status message.
