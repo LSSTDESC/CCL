@@ -4,17 +4,16 @@ can compute a set of theoretical predictions.
 
 Some relevant data structures include:
 
-    'transfer_function_types': types of transfer function
-    'matter_power_spectrum_types': types of power spectrum models
-    'valid_transfer_matter_power_combos' list of which matter power spectrum
-                                         types are allowed for each transfer
-                                         function
-    'baryons_power_spectrum_types': types of baryonic modifications to
-                                    power spectra
-    'mass_function_types': types of halo mass function models
-    'halo_concentration_types': types of halo concentration models
-    'emulator_neutrinos_types': emulator neutrino types
-    'mnu_types': types of massive neutrinos
+- 'transfer_function_types': types of transfer function
+- 'matter_power_spectrum_types': types of power spectrum models
+- 'valid_transfer_matter_power_combos': list of which matter power spectrum
+  types are allowed for each transfer function
+- 'baryons_power_spectrum_types': types of baryonic modifications to power
+  spectra
+- 'mass_function_types': types of halo mass function models
+- 'halo_concentration_types': types of halo concentration models
+- 'emulator_neutrinos_types': emulator neutrino types
+- 'mnu_types': types of massive neutrinos
 """
 from . import ccllib as lib
 import numpy as np
@@ -115,8 +114,8 @@ class Parameters(object):
 
     .. note:: BCM stands for the "baryonic correction model" of Schneider &
               Teyssier (2015; https://arxiv.org/abs/1510.06034). See the
-              `DESC Note`<https://github.com/LSSTDESC/CCL/blob/master/doc\
-/0000-ccl_note/main.pdf>_
+              `DESC Note <https://github.com/LSSTDESC/CCL/blob/master/doc\
+/0000-ccl_note/main.pdf>`_
               for details.
 
     Args:
