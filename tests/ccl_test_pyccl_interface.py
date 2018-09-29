@@ -707,7 +707,7 @@ def check_cls_nu(cosmo):
     assert_( all_finite(nc1.get_internal_function(cosmo, 'dndz', a_arr)) )
 
     # Check that invalid options raise errors
-    assert_raises(KeyError, nc1.get_internal_function, cosmo, 'x', a_arr)
+    assert_raises(ValueError, nc1.get_internal_function, cosmo, 'x', a_arr)
     assert_raises(ValueError, ccl.ClTracerNumberCounts, cosmo, True, True,
                   n=(z,n), bias=(z,b))
     assert_raises(KeyError, ccl.ClTracer, cosmo, 'x', True, True,

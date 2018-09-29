@@ -50,8 +50,10 @@ class ClTracer(object):
     Args:
         cosmo (:obj:`Cosmology`): Cosmology object.
         tracer_type (:obj:`str`): Specifies which type of tracer is being
-            specified. Must be one of 'nc', 'number_count', 'wl', 'lensing',
-            'weak_lensing', 'cmbl' or 'cmb_lensing'.
+            specified. Must be one of
+                'nc', 'number_count': number count tracer
+                'wl', 'lensing', 'weak_lensing': lensing tracer
+                'cmbl', 'cmb_lensing': CMB lensing tracer
         has_rsd (bool, optional): Flag for whether the tracer has a
             redshift-space distortion term. Defaults to False.
         has_magnification (bool, optional): Flag for whether the tracer has
@@ -124,7 +126,7 @@ class ClTracer(object):
                             self.z_s, self.s,
                             self.z_ba, self.ba,
                             self.z_rf, self.rf,
-                            self.z_source,
+                            float(self.z_source),
                             status)
 
         if (isinstance(return_val, int)):
@@ -141,8 +143,14 @@ class ClTracer(object):
         Args:
             cosmo (:obj:`Cosmology`): Cosmology object.
             function (:obj:`str`): Specifies which function to evaluate. Must
-                be one of the types specified in the `pyccl.cls.function_types`
-                dictionary.
+                be one of
+                    'dndz': number density
+                    'bz', 'bias': bias
+                    'sz', 'm_bias': magnification bias
+                    'rfz', 'red_fraction': red fraction
+                    'baz', 'a_bias': intrinsic alignment bias
+                    'wL', 'window_lensing': weak lensing window function
+                    'wM', 'window_magnif': magnification window function
             a (:obj: float or array-like): list of scale factors at which to
                 evaluate the function.
 
@@ -155,8 +163,9 @@ class ClTracer(object):
 
         # Check that specified function type exists
         if function not in function_types.keys():
-            raise KeyError("Internal function type '%s' not recognized."
-                           % function)
+            raise ValueError(
+                "Internal function type '%s' not recognized."
+                % function)
 
         # Check input types
         status = 0
@@ -293,8 +302,10 @@ class ClTracerCMBLensing(ClTracer):
 
 
 def _cltracer_obj(cltracer):
-    """Returns a CCL_ClTracer object, given an input object which may be
-    CCL_ClTracer, the ClTracer wrapper class, or an invalid type.
+    """Returns a CCL_ClTracer object from an CCL_ClTracer or
+    the ClTracer wrapper classself.
+
+    Invalid input raises a TypeError.
 
     Args:
         cltracer (:obj:): Either a CCL_ClTracer or the ClTracer wrapper class.
@@ -340,8 +351,8 @@ def _check_array_params(z, f_arg, f_name):
                 raise TypeError("'%s' was specified without a redshift array. "
                                 "Use %s=(z, %s), or pass the 'z' kwarg."
                                 % (f_name, f_name, f_name))
-            z_f = np.atleast_1d(z)
-            f = np.atleast_1d(f_arg)
+            z_f = np.atleast_1d(z, dtype=float)
+            f = np.atleast_1d(f_arg, dtype=float)
     return z_f, f
 
 
@@ -354,18 +365,21 @@ def angular_cl(cosmo, cltracer1, cltracer2, ell,
     Args:
         cosmo (:obj:`Cosmology`): A Cosmology object.
         cltracer1, cltracer2 (:obj:): ClTracer objects, of any kind.
-        ell (float or array_like): Angular wavenumber(s) to evaluate the
-            angular power spectrum at.
+        ell (float or array_like): Angular wavenumber(s) at which to evaluate
+            the angular power spectrum.
         l_limber (float) : Angular wavenumber beyond which Limber's
-            approximation will be used
-        l_logstep (float) : logarithmic step in ell at low multipoles
-        l_linstep (float) : linear step in ell at high multipoles
+            approximation will be used. Defaults to 1.
+        l_logstep (float) : logarithmic step in ell at low multipoles.
+            Defaults to 1.05.
+        l_linstep (float) : linear step in ell at high multipoles.
+            Defaults to 20.
         dchi (float) : comoving distance step size in non-limber native
-            integrals
-        dlk (float) : logarithmic step for the k non-limber native integral
-        zmin (float) : minimal redshift for the integrals
+            integrals. Defaults to 3.
+        dlk (float) : logarithmic step for the k non-limber native integral.
+            Defaults to 0.003.
+        zmin (float) : minimal redshift for the integrals. Defualts to 0.05.
         non_limber_method (str) : non-Limber integration method. Supported:
-            "native" and "angpow"
+            "native" and "angpow". Defaults to 'native'.
 
     Returns:
         float or array_like: Angular (cross-)power spectrum values,
