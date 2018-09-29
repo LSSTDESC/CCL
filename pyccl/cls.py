@@ -351,8 +351,8 @@ def _check_array_params(z, f_arg, f_name):
                 raise TypeError("'%s' was specified without a redshift array. "
                                 "Use %s=(z, %s), or pass the 'z' kwarg."
                                 % (f_name, f_name, f_name))
-            z_f = np.atleast_1d(z, dtype=float)
-            f = np.atleast_1d(f_arg, dtype=float)
+            z_f = np.atleast_1d(np.array(z, dtype=float))
+            f = np.atleast_1d(np.array(f_arg, dtype=float))
     return z_f, f
 
 
