@@ -47,39 +47,40 @@ class ClTracer(object):
     transfer functon of one tracer of the matter distribution. If an object
     has an angular power spectrum then it can be described by a tracer.
 
-        .. note:: unless otherwise stated, defaults are None.
-
-        Args:
-            cosmo (:obj:`Cosmology`): Cosmology object.
-            tracer_type (:obj:`str`): Specifies which type of tracer is being
-                specified. Must be one of the types specified in the
-                `tracer_types` dict in `cls.py`.
-            has_rsd (bool, optional): Flag for whether the tracer has a
-                redshift-space distortion term. Defaults to False.
-            has_magnification (bool, optional): Flag for whether the tracer has
-                a magnification term. Defaults to False.
-            has_intrinsic_alignment (bool, optional): Flag for whether the
-                tracer has an intrinsic alignment term. Defaults to False.
-            z (array_like, optional): Array of redshifts that the following
-                functions are sampled at. This is overriden if tuples of the
-                form (z, fn(z)) are specified for those kwargs instead (this
-                allows the functions to be sampled differently in z).
-            n (array_like or tuple, optional): Array of N(z) sampled at the
-                redshifts given in the z array, or a tuple of arrays (z, N(z)).
-                The units are arbitrary; N(z) will be normalized to unity.
-            bias (array_like or tuple, optional): Array of galaxy bias b(z)
-                sampled at the redshifts given in the z array, or a tuple of
-                arrays (z, b(z)).
-            mag_bias (array_like or tuple, optional): Array of magnification
-                bias s(z) sampled at the redshifts given in the z array, or a
-                tuple of arrays (z, s(z)).
-            bias_ia (array_like or tuple, optional): Array of intrinsic
-                alignment amplitudes b_IA(z), or a tuple of arrays
-                (z, b_IA(z)).
-            f_red (array_like or tuple, optional): Array of red galaxy
-                fractions f_red(z), or a tuple of arrays (z, f_red(z)).
-            z_source (float, optional): Redshift of source plane for CMB
-                lensing.
+    Args:
+        cosmo (:obj:`Cosmology`): Cosmology object.
+        tracer_type (:obj:`str`): Specifies which type of tracer is being
+            specified. Must be one of the types specified in the
+            `tracer_types` dict in `cls.py`.
+        has_rsd (bool, optional): Flag for whether the tracer has a
+            redshift-space distortion term. Defaults to False.
+        has_magnification (bool, optional): Flag for whether the tracer has
+            a magnification term. Defaults to False.
+        has_intrinsic_alignment (bool, optional): Flag for whether the
+            tracer has an intrinsic alignment term. Defaults to False.
+        z (array_like, optional): Array of redshifts that the following
+            functions are sampled at. This is overriden if tuples of the
+            form (z, fn(z)) are specified for those kwargs instead (this
+            allows the functions to be sampled differently in z).
+            Defaults to None.
+        n (array_like or tuple, optional): Array of N(z) sampled at the
+            redshifts given in the z array, or a tuple of arrays (z, N(z)).
+            The units are arbitrary; N(z) will be normalized to unity.
+            Defaults to None.
+        bias (array_like or tuple, optional): Array of galaxy bias b(z)
+            sampled at the redshifts given in the z array, or a tuple of
+            arrays (z, b(z)). Defaults to None.
+        mag_bias (array_like or tuple, optional): Array of magnification
+            bias s(z) sampled at the redshifts given in the z array, or a
+            tuple of arrays (z, s(z)). Defaults to None.
+        bias_ia (array_like or tuple, optional): Array of intrinsic
+            alignment amplitudes b_IA(z), or a tuple of arrays
+            (z, b_IA(z)). Defaults to None.
+        f_red (array_like or tuple, optional): Array of red galaxy
+            fractions f_red(z), or a tuple of arrays (z, f_red(z)).
+            Defaults to None.
+        z_source (float, optional): Redshift of source plane for CMB
+            lensing. Defaults to 1100.
     """
 
     def __init__(self, cosmo, tracer_type=None, has_rsd=False,
