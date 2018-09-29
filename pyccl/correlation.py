@@ -61,7 +61,7 @@ def correlation(cosmo, ell, C_ell, theta, corr_type='gg', method='fftlog'):
     if corr_type not in correlation_types.keys():
         raise ValueError("'%s' is not a valid correlation type." % corr_type)
 
-    if method.lower() not in correlation_methods.keys():
+    if method not in correlation_methods.keys():
         raise ValueError("'%s' is not a valid correlation method." % method)
 
     # Convert scalar input into an array
