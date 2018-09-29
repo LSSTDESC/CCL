@@ -195,24 +195,26 @@ class ClTracerNumberCounts(ClTracer):
 
         Args:
             cosmo (:obj:`Cosmology`): Cosmology object.
-            has_rsd (bool, optional): Flag for whether the tracer has a
-                redshift-space distortion term. Defaults to False.
-            has_magnification (bool, optional): Flag for whether the tracer has
-                a magnification term. Defaults to False. mag_bias must be
+            has_rsd (bool): Flag for whether the tracer has a
+                redshift-space distortion term.
+            has_magnification (bool): Flag for whether the tracer has
+                a magnification term. mag_bias must be
                 specified if set to True.
+            n (array_like or tuple): Array of N(z) sampled at the
+                redshifts given in the z array, or a tuple of arrays (z, N(z)).
+                The units are arbitrary; N(z) will be normalized to unity.
+            bias (array_like or tuple): Array of galaxy bias b(z)
+                sampled at the redshifts given in the z array, or a tuple of
+                arrays (z, b(z)).
             z (array_like, optional): Array of redshifts that the following
                 functions are sampled at. This is overriden if tuples of the
                 form (z, fn(z)) are specified for those kwargs instead (this
                 allows the functions to be sampled differently in z).
-            n (array_like or tuple, optional): Array of N(z) sampled at the
-                redshifts given in the z array, or a tuple of arrays (z, N(z)).
-                The units are arbitrary; N(z) will be normalized to unity.
-            bias (array_like or tuple, optional): Array of galaxy bias b(z)
-                sampled at the redshifts given in the z array, or a tuple of
-                arrays (z, b(z)).
+                Defaults to None.
             mag_bias (array_like or tuple, optional): Array of magnification
                 bias s(z) sampled at the redshifts given in the z array, or a
-                tuple of arrays (z, s(z)).
+                tuple of arrays (z, s(z)). Defaults to None for no
+                magnification bias.
     """
 
     def __init__(self, cosmo, has_rsd, has_magnification,
@@ -236,21 +238,23 @@ class ClTracerLensing(ClTracer):
 
         Args:
             cosmo (:obj:`Cosmology`): Cosmology object.
-            has_intrinsic_alignment (bool, optional): Flag for whether the
-                tracer has an intrinsic alignment term. Defaults to False.
+            has_intrinsic_alignment (bool): Flag for whether the
+                tracer has an intrinsic alignment term.
                 bias_ia and f_red must be specified if set to True.
+            n (array_like or tuple): Array of N(z) sampled at the
+                redshifts given in the z array, or a tuple of arrays (z, N(z)).
+                The units are arbitrary; N(z) will be normalized to unity.
             z (array_like, optional): Array of redshifts that the following
                 functions are sampled at. This is overriden if tuples of the
                 form (z, fn(z)) are specified for those kwargs instead (this
                 allows the functions to be sampled differently in z).
-            n (array_like or tuple, optional): Array of N(z) sampled at the
-                redshifts given in the z array, or a tuple of arrays (z, N(z)).
-                The units are arbitrary; N(z) will be normalized to unity.
+                Defaults to None.
             bias_ia (array_like or tuple, optional): Array of intrinsic
                 alignment amplitudes b_IA(z), or a tuple of arrays
-                (z, b_IA(z)).
+                (z, b_IA(z)). Defaults to None.
             f_red (array_like or tuple, optional): Array of red galaxy
                 fractions f_red(z), or a tuple of arrays (z, f_red(z)).
+                Defaults to None.
     """
 
     def __init__(self, cosmo, has_intrinsic_alignment,
