@@ -42,16 +42,16 @@ NoneArr = np.array([])
 
 
 class ClTracer(object):
-    """ClTracer is a general class used to wrap the cl_tracer found in CCL.
-    A ClTracer is a data structure that contains all information describing the
-    transfer functon of one tracer of the matter distribution. If an object
-    has an angular power spectrum then it can be described by a tracer.
+    """A tracer of the matter density field.
+
+    This class contains all information describing the transfer functon of
+    a tracer (e.g., galaxy density, lensing shear) of the matter distribution.
 
     Args:
         cosmo (:obj:`Cosmology`): Cosmology object.
         tracer_type (:obj:`str`): Specifies which type of tracer is being
-            specified. Must be one of the types specified in the
-            `tracer_types` dict in `cls.py`.
+            specified. Must be one of 'nc', 'number_count', 'wl', 'lensing',
+            'weak_lensing', 'cmbl' or 'cmb_lensing'.
         has_rsd (bool, optional): Flag for whether the tracer has a
             redshift-space distortion term. Defaults to False.
         has_magnification (bool, optional): Flag for whether the tracer has
@@ -61,29 +61,36 @@ class ClTracer(object):
         z (array_like, optional): Array of redshifts that the following
             functions are sampled at. This is overriden if tuples of the
             form (z, fn(z)) are specified for those kwargs instead (this
-            allows the functions to be sampled differently in z).
-            Defaults to None.
+            allows the functions to be sampled differently in z). If `None`,
+            then tuples for the other redshift dependent arguments are
+            expected. Defaults to None.
         n (array_like or tuple, optional): Array of N(z) sampled at the
             redshifts given in the z array, or a tuple of arrays (z, N(z)).
-            The units are arbitrary; N(z) will be normalized to unity.
+            The units are arbitrary; N(z) will be normalized to unity. If
+            `None`, the tracer is assumed to not have a redshift distribution
+            (e.g., it has a single source source redshift like the CMB).
             Defaults to None.
         bias (array_like or tuple, optional): Array of galaxy bias b(z)
             sampled at the redshifts given in the z array, or a tuple of
-            arrays (z, b(z)). Defaults to None.
+            arrays (z, b(z)). If `None`, the tracer is assumbed to not
+            have a bias parameter. Defaults to None.
         mag_bias (array_like or tuple, optional): Array of magnification
             bias s(z) sampled at the redshifts given in the z array, or a
-            tuple of arrays (z, s(z)). Defaults to None.
+            tuple of arrays (z, s(z)). If `None`, the tracer is assumed
+            to not have magnification bias terms. Defaults to None.
         bias_ia (array_like or tuple, optional): Array of intrinsic
             alignment amplitudes b_IA(z), or a tuple of arrays
-            (z, b_IA(z)). Defaults to None.
+            (z, b_IA(z)). If `None`, the tracer is assumped to not have
+            intrinsic alignments. Defaults to None.
         f_red (array_like or tuple, optional): Array of red galaxy
             fractions f_red(z), or a tuple of arrays (z, f_red(z)).
+            If `None`, then the tracer is assumed to not have a red fraction.
             Defaults to None.
         z_source (float, optional): Redshift of source plane for CMB
             lensing. Defaults to 1100.
     """
 
-    def __init__(self, cosmo, tracer_type=None, has_rsd=False,
+    def __init__(self, cosmo, tracer_type, has_rsd=False,
                  has_magnification=False, has_intrinsic_alignment=False,
                  z=None, n=None, bias=None, mag_bias=None, bias_ia=None,
                  f_red=None, z_source=1100.):
@@ -92,7 +99,7 @@ class ClTracer(object):
 
         # Check tracer type
         if tracer_type not in tracer_types.keys():
-            raise KeyError("'%s' is not a valid tracer_type." % tracer_type)
+            raise ValueError("'%s' is not a valid tracer_type." % tracer_type)
 
         # Convert array arguments that are 'None' into 'NoneArr' type, and
         # check whether arrays were specified as tuples or with a common z
@@ -365,7 +372,7 @@ def angular_cl(cosmo, cltracer1, cltracer2, ell,
     cosmo = _cosmology_obj(cosmo)
 
     if non_limber_method not in nonlimber_methods.keys():
-        raise KeyError(
+        raise ValueError(
             "'%s' is not a valid non-Limber integration method." %
             non_limber_method)
 
