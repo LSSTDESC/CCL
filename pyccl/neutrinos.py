@@ -11,7 +11,8 @@ neutrino_mass_splits = {
 
 
 def Omeganuh2(a, mnu, TCMB=2.725):
-    """Omeganuh2
+    """Calculate Omega_nu * h^2 at a given scale factor given the sum of the
+    neutrino masses.
 
     .. note:: for all practical purposes, Neff is simply N_nu_mass.
 
@@ -22,7 +23,6 @@ def Omeganuh2(a, mnu, TCMB=2.725):
 
     Returns:
         float or array_like: corresponding to a given neutrino mass.
-
     """
     status = 0
     scalar = True if isinstance(a, float) else False
@@ -45,10 +45,9 @@ def Omeganuh2(a, mnu, TCMB=2.725):
     return OmNuh2
 
 
-def nu_masses(OmNuh2, mass_split, ccl_TCMB=2.725):
-    """nu_masses
-        Returns the neutrinos mass(es) for a given OmNuh2, according to the
-        splitting convention specified by the user.
+def nu_masses(OmNuh2, mass_split, TCMB=2.725):
+    """Returns the neutrinos mass(es) for a given OmNuh2, according to the
+    splitting convention specified by the user.
 
     Args:
         OmNuh2 (float): Neutrino energy density at z=0 times h^2
@@ -56,7 +55,7 @@ def nu_masses(OmNuh2, mass_split, ccl_TCMB=2.725):
         TCMB (float, optional): Temperature of the CMB (K). Default: 2.725.
 
     Returns:
-        Neutrino mass(es) corresponding to this Omeganuh2
+        float or array-like: Neutrino mass(es) corresponding to this Omeganuh2
     """
     status = 0
 
@@ -70,10 +69,10 @@ def nu_masses(OmNuh2, mass_split, ccl_TCMB=2.725):
     if ((mass_split == 'normal') or
             (mass_split == 'inverted') or (mass_split == 'equal')):
         mnu, status = lib.nu_masses_vec(
-            OmNuh2, neutrino_mass_splits[mass_split], ccl_TCMB, 3, status)
+            OmNuh2, neutrino_mass_splits[mass_split], TCMB, 3, status)
     elif mass_split == 'sum':
         mnu, status = lib.nu_masses_vec(
-            OmNuh2, neutrino_mass_splits[mass_split], ccl_TCMB, 1, status)
+            OmNuh2, neutrino_mass_splits[mass_split], TCMB, 1, status)
         mnu = mnu[0]
 
     # Check status and return
