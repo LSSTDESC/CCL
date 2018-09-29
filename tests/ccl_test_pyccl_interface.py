@@ -710,7 +710,7 @@ def check_cls_nu(cosmo):
     assert_raises(ValueError, nc1.get_internal_function, cosmo, 'x', a_arr)
     assert_raises(ValueError, ccl.ClTracerNumberCounts, cosmo, True, True,
                   n=(z,n), bias=(z,b))
-    assert_raises(KeyError, ccl.ClTracer, cosmo, 'x', True, True,
+    assert_raises(ValueError, ccl.ClTracer, cosmo, 'x', True, True,
                   n=(z,n), bias=(z,b))
     assert_raises(ValueError, ccl.ClTracerLensing, cosmo,
                   has_intrinsic_alignment=True, n=(z,n), bias_ia=(z,n))
@@ -752,9 +752,9 @@ def check_corr(cosmo):
     assert_( all_finite(corr4))
 
     # Check that exceptions are raised for invalid input
-    assert_raises(KeyError, ccl.correlation, cosmo, ells, cls, t_arr,
+    assert_raises(ValueError, ccl.correlation, cosmo, ells, cls, t_arr,
                   corr_type='xx', method='FFTLog')
-    assert_raises(KeyError, ccl.correlation, cosmo, ells, cls, t_arr,
+    assert_raises(ValueError, ccl.correlation, cosmo, ells, cls, t_arr,
                   corr_type='L+', method='xx')
 
 def check_corr_3d(cosmo):
