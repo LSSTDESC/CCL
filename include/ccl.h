@@ -33,4 +33,8 @@
 #include "ccl_massfunc.h"
 #include "ccl_neutrinos.h"
 
+CCL_BEGIN_DECLS
+/* add function and variable declarations here */
+CCL_END_DECLS
+
 #endif
