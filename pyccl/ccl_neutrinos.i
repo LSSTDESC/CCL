@@ -1,7 +1,7 @@
 %module ccl_neutrinos
 
 %{
-#define SWIG_FILE_WITH_INIT
+/* put additional #include here */
 %}
 
 // Strip the ccl_ prefix from function names

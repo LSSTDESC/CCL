@@ -1,7 +1,7 @@
 %module ccl_massfunc
 
 %{
-#define SWIG_FILE_WITH_INIT
+/* put additional #include here */
 %}
 
 // Automatically document arguments and output types of all functions

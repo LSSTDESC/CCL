@@ -1,7 +1,7 @@
 %module ccl_lsst_specs
 
 %{
-#define SWIG_FILE_WITH_INIT
+/* put additional #include here */
 #include "../include/ccl_params.h"
 #include "../include/ccl_lsst_specs.h"
 %}

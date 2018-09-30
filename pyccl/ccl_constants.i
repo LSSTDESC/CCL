@@ -1,7 +1,7 @@
 %module ccl_constants
 
 %{
-#define SWIG_FILE_WITH_INIT
+/* put additional #include here */
 %}
 
 // Automatically document arguments and output types of all functions
@@ -10,5 +10,6 @@
 // Strip the ccl_ prefix from function names
 %rename("%(strip:[ccl_])s") "";
 
+/* FIXME: do we need to scan this gsl module ? */
 %include "gsl/gsl_const_mksa.h"
 %include "../include/ccl_constants.h"

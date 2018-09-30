@@ -1,7 +1,11 @@
 %module ccllib
+/* master file for the CCL swig module;
+ * all other .i files are included by this file
+ * producing a single .c file that is compiled to
+ * a python extension module. */
 
 %{
-
+/* this is the master .c file; need an init function */
 #define SWIG_FILE_WITH_INIT
 /* must include the file explicitly */
 #include "../include/ccl.h"

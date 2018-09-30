@@ -1,7 +1,7 @@
 %module ccl_background
 
 %{
-#define SWIG_FILE_WITH_INIT
+/* put additional #includes here */
 %}
 
 // Automatically document arguments and output types of all functions

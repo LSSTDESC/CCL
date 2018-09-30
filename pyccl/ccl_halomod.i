@@ -1,7 +1,7 @@
 %module ccl_halomod
 
 %{
-#define SWIG_FILE_WITH_INIT
+/* put additional #include here */
 #include "../include/ccl_params.h"
 #include "../include/ccl_halomod.h"
 %}
