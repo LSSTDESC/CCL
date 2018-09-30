@@ -2,8 +2,9 @@
 
 %{
 #define SWIG_FILE_WITH_INIT
+#include "../include/ccl_params.h"
 #include "../include/ccl_halomod.h"
-  %}
+%}
 
 // Automatically document arguments and output types of all functions
 %feature("autodoc", "1");

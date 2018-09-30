@@ -2,7 +2,6 @@
 
 %{
 #define SWIG_FILE_WITH_INIT
-#include "../include/ccl_background.h"
 %}
 
 // Automatically document arguments and output types of all functions

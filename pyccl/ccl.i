@@ -3,11 +3,8 @@
 %{
 
 #define SWIG_FILE_WITH_INIT
+/* must include the file explicitly */
 #include "../include/ccl.h"
-#include "../include/ccl_config.h"
-#include "../include/ccl_error.h"
-#include "../include/ccl_utils.h"
-
 %}
 
 // Enable numpy array support and Python exception handling
@@ -29,6 +26,9 @@
 %apply (int* INOUT) {(int * status)};
 
 %include "../include/ccl.h"
+/* must scan this file for other scans to work */
+/* although ccl.h includes ccl_defs.h swig does not remember macros defined nestedly. */
+%include "../include/ccl_defs.h"
 
 %include "ccl_core.i"
 %include "ccl_background.i"
@@ -42,6 +42,7 @@
 %include "ccl_halomod.i"
 %include "ccl_params.i"
 
+/* list header files not yet having a .i file here */
 %include "../include/ccl_config.h"
 %include "../include/ccl_error.h"
 %include "../include/ccl_utils.h"

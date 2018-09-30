@@ -2,7 +2,6 @@
 
 %{
 #define SWIG_FILE_WITH_INIT
-#include "../include/ccl_neutrinos.h"
 %}
 
 // Strip the ccl_ prefix from function names

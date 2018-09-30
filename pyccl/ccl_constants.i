@@ -1,11 +1,7 @@
 %module ccl_constants
 
 %{
-
 #define SWIG_FILE_WITH_INIT
-#include "gsl/gsl_const_mksa.h"
-#include "../include/ccl_constants.h"
-
 %}
 
 // Automatically document arguments and output types of all functions
