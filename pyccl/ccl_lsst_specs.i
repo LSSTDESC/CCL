@@ -6,12 +6,6 @@
 #include "../include/ccl_lsst_specs.h"
 %}
 
-// Automatically document arguments and output types of all functions
-%feature("autodoc", "1");
-
-// Strip the ccl_ prefix from function names
-%rename("%(strip:[ccl_])s") "";
-
 // Enable vectorised arguments for arrays
 %apply (double* IN_ARRAY1, int DIM1) {
         (double* a, int na),

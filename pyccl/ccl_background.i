@@ -4,18 +4,10 @@
 /* put additional #includes here */
 %}
 
-// Automatically document arguments and output types of all functions
-%feature("autodoc", "1");
-
-// Strip the ccl_ prefix from function names
-%rename("%(strip:[ccl_])s") "";
-
 // Enable vectorised arguments for arrays
 %apply (double* IN_ARRAY1, int DIM1) {(double* a, int na)};
 %apply (double* IN_ARRAY1, int DIM1) {(double* chi, int nchi)};
 %apply (double* ARGOUT_ARRAY1, int DIM1) {(double* output, int nout)};
-// Flag status variable as input/output variable
-/*%apply (int* INOUT) {(int * status)};*/
 
 %include "../include/ccl_background.h"
 
