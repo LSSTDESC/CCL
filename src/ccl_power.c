@@ -1,23 +1,19 @@
-#include "ccl_core.h"
-#include "ccl_utils.h"
-#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
+
 #include <gsl/gsl_integration.h>
 #include <gsl/gsl_interp.h>
 #include <gsl/gsl_spline.h>
-//#include <gsl/gsl_interp2d.h>
-//#include <gsl/gsl_spline2d.h>
 #include <gsl/gsl_errno.h>
-#include "ccl_placeholder.h"
-#include "ccl_background.h"
-#include "ccl_power.h"
-#include "ccl_error.h"
-#include "class.h"
+
+#include <class.h> /* from extern/ */
+
+#include "ccl.h"
 #include "ccl_params.h"
 #include "ccl_emu17.h"
 #include "ccl_emu17_params.h"
-#include "ccl_neutrinos.h"
+
 
 /*------ ROUTINE: ccl_cosmology_compute_power_class -----
 INPUT: ccl_cosmology * cosmo

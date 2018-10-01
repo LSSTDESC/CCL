@@ -1,17 +1,15 @@
-#include "ccl_background.h"
-#include "ccl_utils.h"
-#include "ccl_error.h"
-#include "ccl_neutrinos.h"
-#include "ccl_constants.h"
+#include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include <stdio.h>
 #include <string.h>
+
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_odeiv2.h>
 #include <gsl/gsl_spline.h>
 #include <gsl/gsl_integration.h>
 #include <gsl/gsl_roots.h>
+
+#include "ccl.h"
 #include "ccl_params.h"
 
 /* --------- ROUTINE: h_over_h0 ---------

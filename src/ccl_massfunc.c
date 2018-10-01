@@ -1,17 +1,16 @@
-#include "ccl.h"
-#include "ccl_core.h"
-#include "ccl_utils.h"
-#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 #include <string.h>
+
 #include <gsl/gsl_integration.h>
 #include <gsl/gsl_interp.h>
 #include <gsl/gsl_spline.h>
 #include <gsl/gsl_errno.h>
-#include "ccl_power.h"
-#include "ccl_error.h"
+
+#include "ccl.h"
 #include "ccl_params.h"
+
 
 /*----- ROUTINE: dc_NakamuraSuto -----
 INPUT: cosmology, scale factor

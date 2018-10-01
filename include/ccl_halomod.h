@@ -1,9 +1,7 @@
 /** @file */
-#ifdef __cplusplus
-extern "C" {
-#endif
 
-#pragma once
+#ifndef __CCL_HALOMOD_H_INCLUDED__
+#define __CCL_HALOMOD_H_INCLUDED__
 
 #define HM_MMIN 1e7 // Minimum mass for the halo-model integration
 #define HM_MMAX 1e17 // Maximum mass for the halo-model integration
@@ -12,7 +10,7 @@ extern "C" {
 #define HM_LIMIT 1000 // Maximum sub intervals for the halo-model integration
 #define HM_INT_METHOD GSL_INTEG_GAUSS41 // Integration scheme for halo-model integration
   
-#include "ccl_core.h"
+CCL_BEGIN_DECLS
 
   // halo window profiles
   typedef enum ccl_win_label {
@@ -60,7 +58,7 @@ extern "C" {
    * @return halo_concentration: the halo concentration
    */
   double ccl_halo_concentration(ccl_cosmology *cosmo, double halomass, double a, double odelta, int *status);
-  
-#ifdef __cplusplus
-}
+
+CCL_END_DECLS
+
 #endif

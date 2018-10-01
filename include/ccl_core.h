@@ -1,15 +1,13 @@
 /** @file */
-#ifdef __cplusplus
-extern "C" {
-#endif
+#ifndef __CCL_CORE_H_INCLUDED__
+#define __CCL_CORE_H_INCLUDED__
 
-#pragma once
-#include "gsl/gsl_spline.h"
-#include "gsl/gsl_interp2d.h"
-#include "gsl/gsl_spline2d.h"
-#include "ccl_config.h"
-#include "ccl_constants.h"
 #include <stdbool.h>
+#include <gsl/gsl_spline.h>
+#include <gsl/gsl_interp2d.h>
+#include <gsl/gsl_spline2d.h>
+
+CCL_BEGIN_DECLS
 
 /**
  * Struct containing the parameters defining a cosmology
@@ -329,6 +327,6 @@ void ccl_cosmology_compute_growth(ccl_cosmology * cosmo, int * status);
  */
 void ccl_cosmology_compute_power(ccl_cosmology * cosmo, int* status);
 
-#ifdef __cplusplus
-}
+CCL_END_DECLS
+
 #endif

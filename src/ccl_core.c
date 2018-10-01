@@ -1,19 +1,17 @@
-#include "ccl_core.h"
-#include "ccl_neutrinos.h"
-#include "ccl_utils.h"
-#include "ccl_constants.h"
+#include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
 #include <math.h>
-#include <stdio.h>
 #include <string.h>
+
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_odeiv.h>
 #include <gsl/gsl_spline.h>
 #include <gsl/gsl_integration.h>
+
+#include "ccl.h"
 #include "ccl_params.h"
-#include "ccl_error.h"
-#include <stdlib.h>
+
 //
 // Macros for replacing relative paths
 #define EXPAND_STR(s) STRING(s)
