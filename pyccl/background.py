@@ -1,3 +1,17 @@
+"""Smooth background quantities
+
+CCL defines seven species types:
+
+- 'matter': cold dark matter and baryons
+- 'dark_energy': cosmological constant or otherwise
+- 'radiation': relativistic species besides massless neutrinos (i.e.,
+  only photons)
+- 'curvature': curvature density
+- 'neutrinos_rel': relativistic neutrinos
+- 'neutrinos_massive': massive neutrinos
+
+These strings define the `species` inputs to the functions below.
+"""
 from . import ccllib as lib
 from .pyutils import _vectorize_fn, _vectorize_fn3, _vectorize_fn4
 
@@ -159,9 +173,14 @@ def omega_x(cosmo, a, species):
     Args:
         cosmo (:obj:`Cosmology`): Cosmological parameters.
         a (float or array_like): Scale factor(s), normalized to 1 today.
-        species (string): species type. Available: 'matter', 'dark_energy',
-                        'radiation', 'curvature', 'neutrinos_rel', and
-                        'neutrinos_massive'
+        species (string): species type. Available:
+            'matter': cold dark matter and baryons
+            'dark_energy': cosmological constant or otherwise
+            'radiation': relativistic species besides massless neutrinos (i.e.,
+                only photons)
+            'curvature': curvature density
+            'neutrinos_rel': relativistic neutrinos
+            'neutrinos_massive': massive neutrinos
 
     Returns:
         float or array_like: Density fraction of a given species at a
@@ -182,9 +201,13 @@ def rho_x(cosmo, a, species, is_comoving=False):
     Args:
         cosmo (:obj:`Cosmology`): Cosmological parameters.
         a (float or array_like): Scale factor(s), normalized to 1 today.
-        label (string): species type. Available: 'critical', 'matter',
-                        'dark_energy', 'radiation', 'curvature',
-                        'neutrinos_rel', and 'neutrinos_massive'
+        species (string): species type. Available:
+            'matter': cold dark matter and baryons
+            'dark_energy': cosmological constant or otherwise
+            'radiation': relativistic species besides massless neutrinos
+            'curvature': curvature density
+            'neutrinos_rel': relativistic neutrinos
+            'neutrinos_massive': massive neutrinos
         is_comoving (bool): either physical (False, default) or comoving (True)
 
     Returns:

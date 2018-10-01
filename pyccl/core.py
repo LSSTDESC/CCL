@@ -2,18 +2,61 @@
 the cosmology and parameters objects used to instantiate a model from which one
 can compute a set of theoretical predictions.
 
-Some relevant data structures include:
+The classes in this module accept strings indicating which model to use
+for various physical quantities (e.g., the transfer function). The various
+options are as follows.
 
-- 'transfer_function_types': types of transfer function
-- 'matter_power_spectrum_types': types of power spectrum models
-- 'valid_transfer_matter_power_combos': list of which matter power spectrum
-  types are allowed for each transfer function
-- 'baryons_power_spectrum_types': types of baryonic modifications to power
-  spectra
-- 'mass_function_types': types of halo mass function models
-- 'halo_concentration_types': types of halo concentration models
-- 'emulator_neutrinos_types': emulator neutrino types
-- 'mnu_types': types of massive neutrinos
+transfer_function options
+  - 'emulator': the transfer function defined by the Comsic Emu
+  - 'fitting_function': the Eisenstein and Hu (1998) fitting function
+  - 'eisenstein_hu': the Eisenstein and Hu (1998) fitting function
+  - 'bbks': the BBKS approximation
+  - 'boltzmann': use CLASS to compute the transfer function
+  - 'boltzmann_class': use CLASS to compute the transfer function
+  - 'class': use CLASS to compute the transfer function
+  - 'boltzmann_camb': not implemented
+  - 'camb': not implemented
+
+matter_power_spectrum options
+  - 'halo_model': use a halo model
+  - 'halofit': use HALOFIT
+  - 'linear': neglect non-linear power spectrum contributions
+  - 'emu': use the Cosmic Emu
+
+baryons_power_spectrum options
+  - 'nobaryons': neglect baryonic contributions to the power spectrum
+  - 'bcm': use the baryonic correction model
+
+mass_function options
+  - 'tinker': the Tinker et al. (2008) mass function
+  - 'tinker10': the Tinker et al. (2010) mass function
+  - 'watson': the Watson et al. mass function
+  - 'angulo': the Angulo et al. mass function
+  - 'shethtormen': the Sheth and Tormen mass function
+
+halo_concentration options
+  - 'bhattacharya2011': Bhattacharya et al. (2011) relation
+  - 'duffy2008': Duffy et al. (2008) relation
+  - 'constant_concentration': use a constant concentration
+
+mnu_type options
+  This parameter specifies the model for massive
+  neutrinos.
+    - 'list': specify each mass yourself in eV
+    - 'sum': use the normal hierarchy to convert total mass to individual
+      masses
+    - 'sum_inverted': use the inverted hierarchy to convert total mass to
+      individual masses
+    - 'sum_equal': assume equal masses when converting the total mass to
+      individual masses
+
+emulator_neutrinos options
+  This parameter specifies how to handle inconsistencies in the treatment of
+  neutrinos between the Cosmic Emu (equal masses) and other models.
+    - 'strict': fail unless things are absolutely consistent
+    - 'equalize': redistribute the total mass equaly before using the Cosmic
+      Emu. This option may result in slight internal inconsistencies in the
+      physical model assumed for neutrinos.
 """
 from . import ccllib as lib
 import numpy as np
@@ -131,8 +174,8 @@ class Parameters(object):
         N_nu_mass (float, optional): Number of massive neutrinos present.
                                      Defaults to 0.
         m_nu (float, optional): total mass in eV of the massive neutrinos
-                                present (current must be equal mass).
-                                Defaults to 0.
+                                present. Defaults to 0.
+        mnu_type (:obj:`str`, optional): The type of massive neutrinos.
         w0 (float, optional): First order term of dark energy equation of
                               state. Defaults to -1.
         wa (float, optional): Second order term of dark energy equation of
@@ -316,8 +359,8 @@ class Cosmology(object):
             the power spectrum, specified treatment of unequal neutrinos.
             Options are 'strict', which will raise an error and quit if the
             user fails to pass either a set of three equal masses or a sum with
-            mnu_type = 'equal', and 'equalize', which will redistribute masses
-            to be equal right before calling the emualtor but results in
+            mnu_type = 'sum_equal', and 'equalize', which will redistribute
+            masses to be equal right before calling the emualtor but results in
             internal inconsistencies. Defaults to 'strict'.
         **kwargs: Additional kwargs are allowed if params is None, in which
                   case they are used to build a new :obj:`Parameters` object.
