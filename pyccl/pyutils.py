@@ -138,9 +138,9 @@ def _vectorize_fn2(fn, fn_vec, cosmo, x, z, returns_status=True):
     if isinstance(x, float):
         # Use single-value function
         if returns_status:
-            f, status = fn(cosmo, z, x, status)
+            f, status = fn(cosmo, x, z, status)
         else:
-            f = fn(cosmo, z, x)
+            f = fn(cosmo, x, z)
     elif isinstance(x, np.ndarray):
         # Use vectorised function
         if returns_status:
@@ -184,9 +184,9 @@ def _vectorize_fn3(fn, fn_vec, cosmo, x, n, returns_status=True):
     if isinstance(x, float):
         # Use single-value function
         if returns_status:
-            f, status = fn(cosmo, n, x, status)
+            f, status = fn(cosmo, x, n, status)
         else:
-            f = fn(cosmo, n, x)
+            f = fn(cosmo, x, n)
     elif isinstance(x, np.ndarray):
         # Use vectorised function
         if returns_status:
@@ -230,9 +230,9 @@ def _vectorize_fn4(fn, fn_vec, cosmo, x, a, d, returns_status=True):
         x = float(x)
     if isinstance(x, float):
         if returns_status:
-            f, status = fn(cosmo, a, d, x, status)
+            f, status = fn(cosmo, x, a, d, status)
         else:
-            f = fn(cosmo, a, d, x)
+            f = fn(cosmo, x, a, d)
     elif isinstance(x, np.ndarray):
         # Use vectorised function
         if returns_status:
