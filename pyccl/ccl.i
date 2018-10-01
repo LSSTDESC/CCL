@@ -29,10 +29,11 @@
 // Flag status variable as input/output variable
 %apply (int* INOUT) {(int * status)};
 
-%include "../include/ccl.h"
 /* must scan this file for other scans to work */
 /* although ccl.h includes ccl_defs.h swig does not remember macros defined nestedly. */
 %include "../include/ccl_defs.h"
+
+%include "../include/ccl.h"
 
 %include "ccl_core.i"
 %include "ccl_background.i"
