@@ -1,4 +1,9 @@
 cmake_minimum_required(VERSION 3.2)
+if (NOT CMAKE_BUILD_TYPE)
+		message(STATUS "No build type selected, default to Release")
+		set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build." FORCE)
+endif()
+MESSAGE( STATUS "CMAKE_BUILD_TYPE: " ${CMAKE_BUILD_TYPE} )
 
 # Adding customized cmake module
 list(APPEND CMAKE_MODULE_PATH  "${CMAKE_SOURCE_DIR}/cmake/Modules/")
@@ -50,11 +55,12 @@ project(ccl VERSION 0.2.1)
     include(BuildAngpow)
 
     # Compilation flags
-    if ("${CMAKE_C_COMPILER_ID}" MATCHES "^(Apple)?Clang$")
-      # using Clang, disabling OpenMP support
-      set(CMAKE_C_FLAGS "-O3 -fomit-frame-pointer -fno-common -fPIC -std=gnu99 -DHAVE_ANGPOW -D__CCL_DATA_DIR__=${CMAKE_INSTALL_PREFIX}/share/ccl")
-    else()
-      set(CMAKE_C_FLAGS "-O3 -fomit-frame-pointer -fno-common -fPIC -std=gnu99 -fopenmp -DHAVE_ANGPOW -D__CCL_DATA_DIR__=${CMAKE_INSTALL_PREFIX}/share/ccl")
+    set(CMAKE_C_FLAGS_RELEASE "-O3 -fomit-frame-pointer -fno-common -fPIC -std=gnu99 -DHAVE_ANGPOW -D__CCL_DATA_DIR__=${CMAKE_INSTALL_PREFIX}/share/ccl")
+    set(CMAKE_C_FLAGS_DEBUG   "-Og -fomit-frame-pointer -fno-common -fPIC -std=gnu99 -DHAVE_ANGPOW -D__CCL_DATA_DIR__=${CMAKE_INSTALL_PREFIX}/share/ccl")
+    if (NOT "${CMAKE_C_COMPILER_ID}" MATCHES "^(Apple)?Clang$")
+      # When not using Clang and in Release mode, enabling OpenMP support
+      set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -fopenmp")
+      set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -fopenmp")
     endif()
 
     # Define include and library directories for external dependencies
@@ -116,7 +122,7 @@ project(ccl VERSION 0.2.1)
     install(FILES ${EXTRA_DIST} DESTINATION share/ccl)
     install(DIRECTORY ${EXTRA_DIST_DIRS} DESTINATION share/ccl)
     install(FILES ${CMAKE_CURRENT_BINARY_DIR}/ccl.pc DESTINATION lib/pkgconfig)
-    
+
     # Adds uninstall target
     if(NOT TARGET uninstall)
       configure_file(
