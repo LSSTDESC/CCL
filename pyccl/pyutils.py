@@ -131,16 +131,17 @@ def _vectorize_fn2(fn, fn_vec, cosmo, x, z, returns_status=True):
     cosmo_in = cosmo
     cosmo = _cosmology_obj(cosmo)
     status = 0
-    scalar = False
 
     # If a scalar was passed, convert to an array
     if isinstance(x, int):
         x = float(x)
     if isinstance(x, float):
-        scalar = True
-        x = np.array([x, ])
-
-    if isinstance(x, np.ndarray):
+        # Use single-value function
+        if returns_status:
+            f, status = fn(cosmo, z, x, status)
+        else:
+            f = fn(cosmo, z, x)
+    elif isinstance(x, np.ndarray):
         # Use vectorised function
         if returns_status:
             f, status = fn_vec(cosmo, z, x, x.size, status)
@@ -155,10 +156,7 @@ def _vectorize_fn2(fn, fn_vec, cosmo, x, z, returns_status=True):
 
     # Check result and return
     check(status, cosmo_in)
-    if scalar:
-        return f[0]
-    else:
-        return f
+    return f
 
 
 def _vectorize_fn3(fn, fn_vec, cosmo, x, n, returns_status=True):
@@ -180,15 +178,16 @@ def _vectorize_fn3(fn, fn_vec, cosmo, x, n, returns_status=True):
     cosmo_in = cosmo
     cosmo = _cosmology_obj(cosmo)
     status = 0
-    scalar = False
 
     if isinstance(x, int):
         x = float(x)
     if isinstance(x, float):
-        scalar = True
-        x = np.array([x, ])
-
-    if isinstance(x, np.ndarray):
+        # Use single-value function
+        if returns_status:
+            f, status = fn(cosmo, n, x, status)
+        else:
+            f = fn(cosmo, n, x)
+    elif isinstance(x, np.ndarray):
         # Use vectorised function
         if returns_status:
             f, status = fn_vec(cosmo, n, x, x.size, status)
@@ -203,10 +202,7 @@ def _vectorize_fn3(fn, fn_vec, cosmo, x, n, returns_status=True):
 
     # Check result and return
     check(status, cosmo_in)
-    if scalar:
-        return f[0]
-    else:
-        return f
+    return f
 
 
 def _vectorize_fn4(fn, fn_vec, cosmo, x, a, d, returns_status=True):
@@ -229,15 +225,15 @@ def _vectorize_fn4(fn, fn_vec, cosmo, x, a, d, returns_status=True):
     cosmo_in = cosmo
     cosmo = _cosmology_obj(cosmo)
     status = 0
-    scalar = False
 
     if isinstance(x, int):
         x = float(x)
     if isinstance(x, float):
-        scalar = True
-        x = np.array([x, ])
-
-    if isinstance(x, np.ndarray):
+        if returns_status:
+            f, status = fn(cosmo, a, d, x, status)
+        else:
+            f = fn(cosmo, a, d, x)
+    elif isinstance(x, np.ndarray):
         # Use vectorised function
         if returns_status:
             f, status = fn_vec(cosmo, a, d, x, x.size, status)
@@ -252,7 +248,4 @@ def _vectorize_fn4(fn, fn_vec, cosmo, x, a, d, returns_status=True):
 
     # Check result and return
     check(status, cosmo_in)
-    if scalar:
-        return f[0]
-    else:
-        return f
+    return f
