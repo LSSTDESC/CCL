@@ -36,6 +36,7 @@ install:
 - cmake --version
 - python --version
 script:
+- flake8 pyccl
 - python setup.py build
 - nosetests tests/run_tests.py --all --debug --detailed-errors --verbose --process-restartworker
   --with-coverage --cover-package=pyccl
