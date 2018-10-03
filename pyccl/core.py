@@ -343,7 +343,7 @@ class Parameters(object):
         """
 
         status = 0
-        lib.parameters_write_yaml(self.parameters, filename, status)        
+        lib.parameters_write_yaml(self.parameters, filename, status)
 
         if status != 0:
             raise IOError("Unable to write YAML file {}".format(filename))
@@ -359,7 +359,7 @@ class Parameters(object):
             filename (:obj:`str`) Filename to read parameters from.
         """
         status = 0
-        parameters, status  = lib.parameters_read_yaml(filename, status)
+        parameters, status = lib.parameters_read_yaml(filename, status)
 
         if status != 0:
             raise IOError("Unable to read YAML file {}".format(filename))
