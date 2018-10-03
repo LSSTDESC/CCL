@@ -192,6 +192,7 @@ def test_parameters_read_write():
         temp_file_name = tmpfile.name
 
     assert_raises(IOError, ccl.Parameters.read_yaml, filename=temp_file_name)
+    assert_raises(IOError, params.read_yaml, filename=temp_file_name+"/nonexistent_directory/params.yml")
 
 
 
