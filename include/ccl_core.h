@@ -1,20 +1,14 @@
 /** @file */
-#ifdef __cplusplus
-extern "C" {
-#endif
+#ifndef __CCL_CORE_H_INCLUDED__
+#define __CCL_CORE_H_INCLUDED__
 
-#pragma once
-#include "gsl/gsl_spline.h"
-#include "gsl/gsl_interp2d.h"
-#include "gsl/gsl_spline2d.h"
-#include "ccl_config.h"
-#include "ccl_constants.h"
 #include <stdbool.h>
 #include <stdio.h>
+#include <gsl/gsl_spline.h>
+#include <gsl/gsl_interp2d.h>
+#include <gsl/gsl_spline2d.h>
 
-// Macros for replacing relative paths
-#define EXPAND_STR(s) STRING(s)
-#define STRING(s) #s
+CCL_BEGIN_DECLS
 
 /**
  * Struct containing the parameters defining a cosmology
@@ -156,6 +150,9 @@ typedef enum ccl_mnu_convention {
 // Initialization and life cycle of objects
 void ccl_cosmology_read_config(void);
 ccl_cosmology * ccl_cosmology_create(ccl_parameters params, ccl_configuration config);
+
+/* Internal function to set the status message safely. */
+void ccl_cosmology_set_status_message(ccl_cosmology * cosmo, const char * status_message, ...);
 
 
 // Helper functions to create ccl_cosmology structs directly given a set of params
@@ -349,6 +346,6 @@ void ccl_cosmology_compute_growth(ccl_cosmology * cosmo, int * status);
  */
 void ccl_cosmology_compute_power(ccl_cosmology * cosmo, int* status);
 
-#ifdef __cplusplus
-}
+CCL_END_DECLS
+
 #endif

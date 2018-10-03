@@ -1,9 +1,7 @@
 /** @file */
-#ifdef __cplusplus
-extern "C" {
-#endif
 
-#pragma once
+#ifndef __CCL_CORRELATION_H_INCLUDED__
+#define __CCL_CORRELATION_H_INCLUDED__
 
 #define CCL_CORR_LGNDRE 1001
 #define CCL_CORR_FFTLOG 1002
@@ -12,6 +10,8 @@ extern "C" {
 #define CCL_CORR_GL 2002
 #define CCL_CORR_LP 2003
 #define CCL_CORR_LM 2004
+
+CCL_BEGIN_DECLS
 
 /**
  * Computes the correlation function (wrapper)
@@ -56,6 +56,6 @@ void ccl_correlation_3d(ccl_cosmology *cosmo,double a,
 		     int do_taper_pk,double *taper_pk_limits,
 		     int *status);
 
-#ifdef __cplusplus
-}
+CCL_END_DECLS
+
 #endif
