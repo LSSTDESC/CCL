@@ -90,7 +90,7 @@ def comoving_angular_distance(cosmo, a):
 
     .. note:: This quantity is otherwise known as the transverse
               comoving distance, and is NOT angular diameter
-              distance or angular separation. The comvoing angular distance
+              distance or angular separation. The comovoing angular distance
               is defined such that the comoving distance between
               two objects at a fixed scale factor separated by an angle
               :math:`\theta` is :math:`\theta D_{T}(a)` where :math:`D_{T}(a)`
