@@ -3,6 +3,10 @@ include(ExternalProject)
 set(GSLVersion 2.4)
 set(GSLMD5 dba736f15404807834dc1c7b93e83b92)
 
+if (DEFINED ENV{GSL_DIR} AND NOT(DEFINED ENV{GSL_ROOT_DIR}))    #there in ohpc GSL rpm is no GSL_ROOT_DIR but GSL_DIR. let's use it when it's available
+  set(ENV{GSL_ROOT_DIR} $ENV{GSL_DIR})
+endif()
+
 find_package(GSL 2.1)
 
 # If GSL is not installed, lets go ahead and compile it
