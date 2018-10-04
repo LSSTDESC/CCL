@@ -3,7 +3,7 @@ The functions in lsst_specs provide useful routines
 for making predictions for LSST-specific observables.
 These include routines for predicting the linear bias
 of the clustering sample, the dispersion of photometric
-redshifts for clustering and lensing samples, and for 
+redshifts for clustering and lensing samples, and for
 predicting the redshift distribution of a given tomographic
 photometric redshift bin. We also provide functionality
 for the user to incorporate their own photo-z model
@@ -12,16 +12,16 @@ bins based on photo-z cuts.
 
 These routines are based on the LSST Science book
 and the Chang et al. (2013) paper. These provide several
-options to model the expected redshift distributions 
-of LSST galaxies that we use for the tomographic photo-z binning. 
+options to model the expected redshift distributions
+of LSST galaxies that we use for the tomographic photo-z binning.
 The options are as follows.
 
 dNdz options
  - 'nc': redshift distribution for number counts, i.e., the clustering sample.
  - 'wl_cons': redshift distribution for galaxies with shapes for lensing. This
-              option adopts a conservative cut on shape quality criteria. 
+              option adopts a conservative cut on shape quality criteria.
  - 'wl_fid': redshift distribution for galaxies with shapes for lensing. This
-              option adopts a fiducial cut on shape quality criteria. 
+              option adopts a fiducial cut on shape quality criteria.
  - 'wl_opt': redshift distribution for galaxies with shapes for lensing. This
               option adopts an optimistic cut on shape quality criteria.
 
@@ -115,10 +115,9 @@ def bias_clustering(cosmo, a):
 
 def sigmaz_clustering(z):
     """Photo-z dispersion, sigma(z), for the clustering sample
-    at a given redshift. This function returns the expected 
-    photometric redshift dispersion at a given redshift for 
-    galaxies in the LSST clustering sample. Taken from the
-    LSST Science Book (arXiv:0912.0201).
+    at a given redshift. This function returns the expected
+    photometric redshift dispersion at a given redshift for
+    galaxies in the LSST clustering sample.
 
     .. note:: assumes Gaussian uncertainties.
 
@@ -137,10 +136,9 @@ def sigmaz_clustering(z):
 
 def sigmaz_sources(z):
     """Photo-z dispersion, sigma(z), for the lensing sample.
-    This function returns the expected 
-    photometric redshift dispersion at a given redshift for 
-    galaxies in the LSST weak lensing gold sample. Taken from the
-    LSST Science Book (arXiv:0912.0201).
+    This function returns the expected
+    photometric redshift dispersion at a given redshift for
+    galaxies in the LSST weak lensing gold sample.
 
     .. note:: assumes Gaussian uncertainties.
 
