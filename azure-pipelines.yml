@@ -1,0 +1,79 @@
+jobs:
+- job: Linux
+  pool:
+    vmImage: ubuntu-16.04
+  
+  strategy:
+    matrix: 
+      Python27:
+        python.version: '2.7'
+      Python36:
+        python.version: '3.6'
+      Python37:
+        python.version: '3.7'  
+    maxParallel: 3
+    
+  steps:
+  - task: CondaEnvironment@1
+    inputs:
+      packageSpecs: python=$(python.version) numpy nose coveralls swig flake8
+      updateConda: True
+  - script: |
+      gcc --version
+      cmake --version
+      python --version
+    displayName: 'Checking installed versions'
+  - script: |
+      sudo apt-get install bison -y 
+    displayName: 'Install dependencies'
+  - script: flake8 pyccl
+    displayName: 'Flake8'
+  - script: python setup.py build
+    displayName: 'Install pyCCL'
+  - script: nosetests tests/run_tests.py --all --debug --detailed-errors --verbose --process-restartworker --with-coverage --cover-package=pyccl
+    displayName: 'Nose tests'
+  - script: |
+      export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
+      make -Cbuild 
+      sudo make -Cbuild install
+      /usr/local/bin/check_ccl
+    displayName: 'CCL installation and tests'
+
+- job: macOS
+  pool:
+    vmImage: macOS-10.13
+  
+  strategy:
+    matrix: 
+      Python27:
+        python.version: '2.7'
+      Python36:
+        python.version: '3.6' 
+    maxParallel: 2
+    
+  steps:
+  - task: CondaEnvironment@1
+    inputs:
+      packageSpecs: python=$(python.version) numpy nose coveralls swig flake8
+      updateConda: True
+  - script: |
+      clang --version
+      cmake --version
+      python --version
+    displayName: 'Checking installed versions'
+  - script: |
+      brew install automake bison
+      brew link bison --force 
+    displayName: 'Install dependencies'
+  - script: flake8 pyccl
+    displayName: 'Flake8'
+  - script: python setup.py build
+    displayName: 'Install pyCCL'
+  - script: nosetests tests/run_tests.py --all --debug --detailed-errors --verbose --process-restartworker --with-coverage --cover-package=pyccl
+    displayName: 'Nose tests'
+  - script: |
+      export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
+      make -Cbuild 
+      sudo make -Cbuild install
+      /usr/local/bin/check_ccl
+    displayName: 'CCL installation and tests'
