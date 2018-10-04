@@ -1,10 +1,8 @@
 /** @file */
-#ifdef __cplusplus
-extern "C" {
-#endif
+#ifndef __CCL_BACKGROUND_H_INCLUDED__
+#define __CCL_BACKGROUND_H_INCLUDED__
 
-#pragma once
-#include "ccl_core.h"
+CCL_BEGIN_DECLS
 
 //species_x labels
 typedef enum ccl_species_x_label {
@@ -16,7 +14,7 @@ typedef enum ccl_species_x_label {
   ccl_species_ur_label=5,
   ccl_species_nu_label=6,
 } ccl_species_x_label;
-
+  
 /**
  * Normalized expansion rate at scale factor a.
  * Returns H(a)/H0 in a given cosmology.
@@ -291,6 +289,6 @@ double ccl_rho_x(ccl_cosmology * cosmo, double a, ccl_species_x_label label, int
  */
 double ccl_omega_x(ccl_cosmology * cosmo, double a, ccl_species_x_label label, int* status);
 
-#ifdef __cplusplus
-}
+CCL_END_DECLS
+
 #endif

@@ -1,20 +1,24 @@
-#include "ccl_core.h"
-#include "ccl_neutrinos.h"
-#include "ccl_utils.h"
-#include "ccl_constants.h"
-#include <stdlib.h>
-#include <math.h>
 #include <stdio.h>
-#include <string.h>
-#include "gsl/gsl_errno.h"
-#include "gsl/gsl_odeiv.h"
-#include "gsl/gsl_spline.h"
-#include "gsl/gsl_integration.h"
-#include "ccl_params.h"
-#include "ccl_error.h"
 #include <stdlib.h>
+#include <stdarg.h>
+#include <math.h>
+#include <string.h>
 
-const ccl_configuration default_config = {ccl_boltzmann_class, ccl_halofit, ccl_nobaryons, ccl_tinker10, ccl_emu_strict};
+#include <gsl/gsl_errno.h>
+#include <gsl/gsl_odeiv.h>
+#include <gsl/gsl_spline.h>
+#include <gsl/gsl_integration.h>
+
+#include "ccl.h"
+#include "ccl_params.h"
+
+//
+// Macros for replacing relative paths
+#define EXPAND_STR(s) STRING(s)
+#define STRING(s) #s
+
+
+const ccl_configuration default_config = {ccl_boltzmann_class, ccl_halofit, ccl_nobaryons, ccl_tinker10, ccl_duffy2008, ccl_emu_strict};
 
 const ccl_gsl_params default_gsl_params = {GSL_EPSREL,                          // EPSREL
                                            GSL_N_ITERATION,                     // N_ITERATION
@@ -64,11 +68,8 @@ void ccl_cosmology_read_config(void)
     // Use default ini file
     param_file = EXPAND_STR(__CCL_DATA_DIR__) "/ccl_params.ini";
   }
-  
   if ((fconfig=fopen(param_file, "r")) == NULL) {
-    char msg[256];
-    snprintf(msg, 256, "ccl_core.c: Failed to open config file: %s", param_file);
-    ccl_raise_exception(CCL_ERROR_MISSING_CONFIG_FILE, msg);
+    ccl_raise_exception(CCL_ERROR_MISSING_CONFIG_FILE, "ccl_core.c: Failed to open config file: %s", param_file);
     return;
   }
 
@@ -80,51 +81,62 @@ void ccl_cosmology_read_config(void)
     memcpy(ccl_gsl, &default_gsl_params, sizeof(ccl_gsl_params));
   }
 
+
+#define MATCH(s, action) if (0 == strcmp(var_name, s)) { action ; continue;} do{} while(0)
+
+  int lineno = 0;
   while(! feof(fconfig)) {
     rtn = fgets(buf, CONFIG_LINE_BUFFER_SIZE, fconfig);
+    lineno ++;
+
     if (buf[0]==';' || buf[0]=='[' || buf[0]=='\n') {
       continue;
     }
     else {
       sscanf(buf, "%99[^=]=%le\n",var_name, &var_dbl);
+
       // Spline parameters
-      if(strcmp(var_name,"A_SPLINE_NA")==0) ccl_splines->A_SPLINE_NA=(int) var_dbl; 
-      if(strcmp(var_name,"A_SPLINE_NLOG")==0) ccl_splines->A_SPLINE_NLOG=(int) var_dbl;
-      if(strcmp(var_name,"A_SPLINE_MINLOG")==0) ccl_splines->A_SPLINE_MINLOG=var_dbl;
-      if(strcmp(var_name,"A_SPLINE_MIN")==0) ccl_splines->A_SPLINE_MIN=var_dbl;
-      if(strcmp(var_name,"A_SPLINE_MINLOG_PK")==0) ccl_splines->A_SPLINE_MINLOG_PK=var_dbl;
-      if(strcmp(var_name,"A_SPLINE_MIN_PK")==0) ccl_splines->A_SPLINE_MIN_PK=var_dbl;
-      if(strcmp(var_name,"A_SPLINE_MAX")==0) ccl_splines->A_SPLINE_MAX=var_dbl;
-      if(strcmp(var_name,"LOGM_SPLINE_DELTA")==0) ccl_splines->LOGM_SPLINE_DELTA=var_dbl;
-      if(strcmp(var_name,"LOGM_SPLINE_NM")==0) ccl_splines->LOGM_SPLINE_NM=(int) var_dbl;
-      if(strcmp(var_name,"LOGM_SPLINE_MIN")==0) ccl_splines->LOGM_SPLINE_MIN=var_dbl;
-      if(strcmp(var_name,"LOGM_SPLINE_MAX")==0) ccl_splines->LOGM_SPLINE_MAX=var_dbl;
-      if(strcmp(var_name,"A_SPLINE_NA_PK")==0) ccl_splines->A_SPLINE_NA_PK=(int) var_dbl;
-      if(strcmp(var_name,"A_SPLINE_NLOG_PK")==0) ccl_splines->A_SPLINE_NLOG_PK=(int) var_dbl;
-      if(strcmp(var_name,"K_MAX_SPLINE")==0) ccl_splines->K_MAX_SPLINE=var_dbl;
-      if(strcmp(var_name,"K_MAX")==0) ccl_splines->K_MAX=var_dbl;
-      if(strcmp(var_name,"K_MIN_DEFAULT")==0) ccl_splines->K_MIN_DEFAULT=var_dbl;
-      if(strcmp(var_name,"N_K")==0) ccl_splines->N_K=(int) var_dbl;
+      MATCH("A_SPLINE_NA", ccl_splines->A_SPLINE_NA=(int) var_dbl);
+      MATCH("A_SPLINE_NLOG", ccl_splines->A_SPLINE_NLOG=(int) var_dbl);
+      MATCH("A_SPLINE_MINLOG", ccl_splines->A_SPLINE_MINLOG=var_dbl);
+      MATCH("A_SPLINE_MIN", ccl_splines->A_SPLINE_MIN=var_dbl);
+      MATCH("A_SPLINE_MINLOG_PK", ccl_splines->A_SPLINE_MINLOG_PK=var_dbl);
+      MATCH("A_SPLINE_MIN_PK", ccl_splines->A_SPLINE_MIN_PK=var_dbl);
+      MATCH("A_SPLINE_MAX", ccl_splines->A_SPLINE_MAX=var_dbl);
+      MATCH("LOGM_SPLINE_DELTA", ccl_splines->LOGM_SPLINE_DELTA=var_dbl);
+      MATCH("LOGM_SPLINE_NM", ccl_splines->LOGM_SPLINE_NM=(int) var_dbl);
+      MATCH("LOGM_SPLINE_MIN", ccl_splines->LOGM_SPLINE_MIN=var_dbl);
+      MATCH("LOGM_SPLINE_MAX", ccl_splines->LOGM_SPLINE_MAX=var_dbl);
+      MATCH("A_SPLINE_NA_PK", ccl_splines->A_SPLINE_NA_PK=(int) var_dbl);
+      MATCH("A_SPLINE_NLOG_PK", ccl_splines->A_SPLINE_NLOG_PK=(int) var_dbl);
+      MATCH("K_MAX_SPLINE", ccl_splines->K_MAX_SPLINE=var_dbl);
+      MATCH("K_MAX", ccl_splines->K_MAX=var_dbl);
+      MATCH("K_MIN", ccl_splines->K_MIN=var_dbl);
+      MATCH("N_K", ccl_splines->N_K=(int) var_dbl);
+
       // 3dcorr parameters
-      if(strcmp(var_name,"N_K_3DCOR")==0) ccl_splines->N_K_3DCOR=(int) var_dbl;     
+      MATCH("N_K_3DCOR", ccl_splines->N_K_3DCOR=(int) var_dbl);
 
       // GSL parameters
-      if(strcmp(var_name,"GSL_EPSREL")==0) ccl_gsl->EPSREL=var_dbl;
-      if(strcmp(var_name,"GSL_N_ITERATION")==0) ccl_gsl->N_ITERATION=(size_t) var_dbl;
-      if(strcmp(var_name,"GSL_INTEGRATION_GAUSS_KRONROD_POINTS")==0) ccl_gsl->INTEGRATION_GAUSS_KRONROD_POINTS=(int) var_dbl;
-      if(strcmp(var_name,"GSL_INTEGRATION_EPSREL")==0) ccl_gsl->INTEGRATION_EPSREL=var_dbl;
-      if(strcmp(var_name,"GSL_INTEGRATION_DISTANCE_EPSREL")==0) ccl_gsl->INTEGRATION_DISTANCE_EPSREL=var_dbl;
-      if(strcmp(var_name,"GSL_INTEGRATION_DNDZ_EPSREL")==0) ccl_gsl->INTEGRATION_DNDZ_EPSREL=var_dbl;
-      if(strcmp(var_name,"GSL_INTEGRATION_SIGMAR_EPSREL")==0) ccl_gsl->INTEGRATION_SIGMAR_EPSREL=var_dbl;
-      if(strcmp(var_name,"GSL_INTEGRATION_NU_EPSREL")==0) ccl_gsl->INTEGRATION_NU_EPSREL=var_dbl;
-      if(strcmp(var_name,"GSL_INTEGRATION_NU_EPSABS")==0) ccl_gsl->INTEGRATION_NU_EPSABS=var_dbl;
-      if(strcmp(var_name,"GSL_INTEGRATION_LIMBER_GAUSS_KRONROD_POINTS")==0) ccl_gsl->INTEGRATION_LIMBER_GAUSS_KRONROD_POINTS=(int) var_dbl;
-      if(strcmp(var_name,"GSL_INTEGRATION_LIMBER_EPSREL")==0) ccl_gsl->INTEGRATION_LIMBER_EPSREL=var_dbl;
-      if(strcmp(var_name,"GSL_ROOT_EPSREL")==0) ccl_gsl->ROOT_EPSREL=var_dbl;
-      if(strcmp(var_name,"GSL_ROOT_N_ITERATION")==0) ccl_gsl->ROOT_N_ITERATION=(int) var_dbl;
-      if(strcmp(var_name,"GSL_ODE_GROWTH_EPSREL")==0) ccl_gsl->ODE_GROWTH_EPSREL=var_dbl;
+      MATCH("GSL_EPSREL", ccl_gsl->EPSREL=var_dbl);
+      MATCH("GSL_N_ITERATION", ccl_gsl->N_ITERATION=(size_t) var_dbl);
+      MATCH("GSL_INTEGRATION_GAUSS_KRONROD_POINTS", ccl_gsl->INTEGRATION_GAUSS_KRONROD_POINTS=(int) var_dbl);
+      MATCH("GSL_INTEGRATION_EPSREL", ccl_gsl->INTEGRATION_EPSREL=var_dbl);
+      MATCH("GSL_INTEGRATION_DISTANCE_EPSREL", ccl_gsl->INTEGRATION_DISTANCE_EPSREL=var_dbl);
+      MATCH("GSL_INTEGRATION_DNDZ_EPSREL", ccl_gsl->INTEGRATION_DNDZ_EPSREL=var_dbl);
+      MATCH("GSL_INTEGRATION_SIGMAR_EPSREL", ccl_gsl->INTEGRATION_SIGMAR_EPSREL=var_dbl);
+      MATCH("GSL_INTEGRATION_NU_EPSREL", ccl_gsl->INTEGRATION_NU_EPSREL=var_dbl);
+      MATCH("GSL_INTEGRATION_NU_EPSABS", ccl_gsl->INTEGRATION_NU_EPSABS=var_dbl);
+      MATCH("GSL_INTEGRATION_LIMBER_GAUSS_KRONROD_POINTS", ccl_gsl->INTEGRATION_LIMBER_GAUSS_KRONROD_POINTS=(int) var_dbl);
+      MATCH("GSL_INTEGRATION_LIMBER_EPSREL", ccl_gsl->INTEGRATION_LIMBER_EPSREL=var_dbl);
+      MATCH("GSL_ROOT_EPSREL", ccl_gsl->ROOT_EPSREL=var_dbl);
+      MATCH("GSL_ROOT_N_ITERATION", ccl_gsl->ROOT_N_ITERATION=(int) var_dbl);
+      MATCH("GSL_ODE_GROWTH_EPSREL", ccl_gsl->ODE_GROWTH_EPSREL=var_dbl);
+
+      ccl_raise_exception(CCL_ERROR_MISSING_CONFIG_FILE, "ccl_core.c: Failed to parse config file at line %d: %s", lineno, buf);
     }
   }
+#undef MATCH
 
   fclose(fconfig);
 }
@@ -185,7 +197,7 @@ ccl_cosmology * ccl_cosmology_create(ccl_parameters params, ccl_configuration co
   cosmo->computed_sigma = false;
   cosmo->computed_hmfparams = false;
   cosmo->status = 0;
-  strcpy(cosmo->status_message, "");
+  ccl_cosmology_set_status_message(cosmo, "");
   
   return cosmo;
 }
@@ -737,6 +749,238 @@ ccl_parameters ccl_parameters_create_flat_wacdm_nu(double Omega_c, double Omega_
 }
 
 
+/**
+ * Write a cosmology parameters object to a file in yaml format.
+ * @param cosmo Cosmological parameters 
+ * @param f FILE* pointer opened for reading
+ * @return void
+ */
+void ccl_parameters_write_yaml(ccl_parameters * params, const char * filename, int *status)
+{
+
+  FILE * f = fopen(filename, "w");
+
+  if (!f){
+    *status = CCL_ERROR_FILE_WRITE;
+    return;
+  }
+
+#define WRITE_DOUBLE(name) fprintf(f, #name ": %le\n",params->name)
+#define WRITE_INT(name) fprintf(f, #name ": %d\n",params->name)
+
+  // Densities: CDM, baryons, total matter, curvature
+  WRITE_DOUBLE(Omega_c);
+  WRITE_DOUBLE(Omega_b);
+  WRITE_DOUBLE(Omega_m);
+  WRITE_DOUBLE(Omega_k);
+  WRITE_INT(k_sign);
+
+  // Dark Energy
+  WRITE_DOUBLE(w0);
+  WRITE_DOUBLE(wa);
+
+  // Hubble parameters
+  WRITE_DOUBLE(H0);
+  WRITE_DOUBLE(h);
+
+  // Neutrino properties
+  WRITE_DOUBLE(Neff);
+  WRITE_INT(N_nu_mass);
+  WRITE_DOUBLE(N_nu_rel);
+
+  if (params->N_nu_mass>0){
+    fprintf(f, "mnu = [");
+    for (int i=0; i<params->N_nu_mass; i++){
+      fprintf(f, "%le, ", params->mnu[i]);
+    }
+    fprintf(f, "]\n");
+  }
+
+  WRITE_DOUBLE(sum_nu_masses);
+  WRITE_DOUBLE(Omega_n_mass);
+  WRITE_DOUBLE(Omega_n_rel);
+
+  // Primordial power spectra
+  WRITE_DOUBLE(A_s);
+  WRITE_DOUBLE(n_s);
+  
+  // Radiation parameters
+  WRITE_DOUBLE(Omega_g);
+  WRITE_DOUBLE(T_CMB);
+
+  // BCM baryonic model parameters
+  WRITE_DOUBLE(bcm_log10Mc);
+  WRITE_DOUBLE(bcm_etab);
+  WRITE_DOUBLE(bcm_ks);
+  
+  // Derived parameters
+  WRITE_DOUBLE(sigma8);
+  WRITE_DOUBLE(Omega_l);
+  WRITE_DOUBLE(z_star);
+  
+  WRITE_INT(has_mgrowth);
+  WRITE_INT(nz_mgrowth);
+
+  if (params->has_mgrowth){
+    fprintf(f, "z_mgrowth = [");
+    for (int i=0; i<params->nz_mgrowth; i++){
+      fprintf(f, "%le, ", params->z_mgrowth[i]);
+    }
+    fprintf(f, "]\n");
+
+    fprintf(f, "df_mgrowth = [");
+    for (int i=0; i<params->nz_mgrowth; i++){
+      fprintf(f, "%le, ", params->df_mgrowth[i]);
+    }
+    fprintf(f, "]\n");
+  }
+
+#undef WRITE_DOUBLE
+#undef WRITE_INT
+
+  fclose(f);
+
+}
+
+/**
+ * Write a cosmology parameters object to a file in yaml format.
+ * @param cosmo Cosmological parameters 
+ * @param f FILE* pointer opened for reading
+ * @return void
+ */
+ccl_parameters ccl_parameters_read_yaml(const char * filename, int *status)
+{
+
+  FILE * f = fopen(filename, "r");
+
+  if (!f){
+    *status = CCL_ERROR_FILE_READ;
+    ccl_parameters bad_params;
+
+    ccl_raise_exception(CCL_ERROR_FILE_READ, "ccl_core.c: Failed to read parameters from file.");
+
+    return bad_params;
+  }
+
+#define READ_DOUBLE(name) double name; *status |= (0==fscanf(f, #name ": %le\n",&name));
+#define READ_INT(name) int name; *status |= (0==fscanf(f, #name ": %d\n",&name))
+
+  // Densities: CDM, baryons, total matter, curvature
+  READ_DOUBLE(Omega_c);
+  READ_DOUBLE(Omega_b);
+  READ_DOUBLE(Omega_m);
+  READ_DOUBLE(Omega_k);
+  READ_INT(k_sign);
+
+  // Dark Energy
+  READ_DOUBLE(w0);
+  READ_DOUBLE(wa);
+
+  // Hubble parameters
+  READ_DOUBLE(H0);
+  READ_DOUBLE(h);
+
+  // Neutrino properties
+  READ_DOUBLE(Neff);
+  READ_INT(N_nu_mass);
+  READ_DOUBLE(N_nu_rel);
+
+  double mnu[3] = {0.0, 0.0, 0.0};
+  if (N_nu_mass>0){
+    *status |= (0==fscanf(f, "mnu = ["));
+    for (int i=0; i<N_nu_mass; i++){
+      *status |= (0==fscanf(f, "%le, ", mnu+i));
+    }
+    *status |= (0==fscanf(f, "]\n"));
+  }
+
+  READ_DOUBLE(sum_nu_masses);
+  READ_DOUBLE(Omega_n_mass);
+  READ_DOUBLE(Omega_n_rel);
+
+  // Primordial power spectra
+  READ_DOUBLE(A_s);
+  READ_DOUBLE(n_s);
+  
+  // Radiation parameters
+  READ_DOUBLE(Omega_g);
+  READ_DOUBLE(T_CMB);
+
+  // BCM baryonic model parameters
+  READ_DOUBLE(bcm_log10Mc);
+  READ_DOUBLE(bcm_etab);
+  READ_DOUBLE(bcm_ks);
+  
+  // Derived parameters
+  READ_DOUBLE(sigma8);
+  READ_DOUBLE(Omega_l);
+  READ_DOUBLE(z_star);
+  
+  READ_INT(has_mgrowth);
+  READ_INT(nz_mgrowth);
+
+  double *z_mgrowth;
+  double *df_mgrowth;
+
+
+  if (has_mgrowth){
+    z_mgrowth = malloc(nz_mgrowth*sizeof(double));
+    df_mgrowth = malloc(nz_mgrowth*sizeof(double));
+    *status |= (0==fscanf(f, "z_mgrowth = ["));
+    for (int i=0; i<nz_mgrowth; i++){
+      *status |= (0==fscanf(f, "%le, ", z_mgrowth+i));
+    }
+    *status |= (0==fscanf(f, "]\n"));
+
+    *status |= (0==fscanf(f, "df_mgrowth = ["));
+    for (int i=0; i<nz_mgrowth; i++){
+      *status |= (0==fscanf(f, "%le, ", df_mgrowth+i));
+    }
+    *status |= (0==fscanf(f, "]\n"));
+  }
+  else{
+    z_mgrowth = NULL;
+    df_mgrowth = NULL;
+  }
+
+#undef READ_DOUBLE
+#undef READ_INT
+
+  fclose(f);
+
+
+  if (status){
+    char msg[256];
+    snprintf(msg, 256, "ccl_core.c: Structure of YAML file incorrect: %s", filename);
+    ccl_raise_exception(*status, msg);
+  }
+
+  double norm_pk;
+
+  if (isnan(A_s)){
+    norm_pk = sigma8;
+  }
+  else{
+   norm_pk = A_s; 
+  }
+
+  ccl_parameters params = ccl_parameters_create(
+    Omega_c, Omega_b, Omega_k,
+    Neff, mnu, ccl_mnu_list,
+    w0, wa, h, norm_pk,
+    n_s, bcm_log10Mc, bcm_etab, 
+    bcm_ks, nz_mgrowth, z_mgrowth,
+    df_mgrowth, status);
+
+  if(z_mgrowth) free(z_mgrowth);
+  if (df_mgrowth) free(df_mgrowth);
+
+  return params;
+
+}
+
+
+
 /* ------- ROUTINE: ccl_data_free -------- 
 INPUT: ccl_data
 TASK: free the input data
@@ -785,6 +1029,22 @@ void ccl_data_free(ccl_data * data)
     gsl_interp_accel_free(data->accelerator_m);
   if(data->accelerator_k!=NULL)
     gsl_interp_accel_free(data->accelerator_k);
+}
+
+/* ------- ROUTINE: ccl_cosmology_set_status_message -------- 
+INPUT: ccl_cosmology struct, status_string
+TASK: set the status message safely.
+*/
+void ccl_cosmology_set_status_message(ccl_cosmology * cosmo, const char * message, ...)
+{
+  const int trunc = 480; /* must be < 500 - 4 */
+  va_list va;
+  va_start(va, message);
+  vsnprintf(cosmo->status_message, trunc, message, va);
+  va_end(va);
+
+  /* if truncation happens, message[trunc - 1] is not NULL, ... will show up. */
+  strcpy(&cosmo->status_message[trunc], "...");
 }
 
 /* ------- ROUTINE: ccl_parameters_free -------- 

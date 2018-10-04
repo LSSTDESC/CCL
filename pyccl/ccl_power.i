@@ -1,15 +1,8 @@
 %module ccl_power
 
 %{
-#define SWIG_FILE_WITH_INIT
-#include "../include/ccl_power.h"
+/* put additional #include here */
 %}
-
-// Automatically document arguments and output types of all functions
-%feature("autodoc", "1");
-
-// Strip the ccl_ prefix from function names
-%rename("%(strip:[ccl_])s") "";
 
 // Enable vectorised arguments for arrays
 %apply (double* IN_ARRAY1, int DIM1) {(double* k, int nk)};
@@ -45,13 +38,25 @@ void nonlin_matter_power_vec(
     }
 }
 
-void sigmaR_vec(ccl_cosmology * cosmo, 
-                        double* R, int nR,
+void sigmaR_vec(ccl_cosmology * cosmo,
+		        double a,
+		        double* R, int nR,
                         double* output, int nout, int *status)
 {
     assert(nout == nR);
     for(int i=0; i < nR; i++){
-        output[i] = ccl_sigmaR(cosmo, R[i], status);
+      output[i] = ccl_sigmaR(cosmo, R[i], a, status);
+    }
+}
+
+void sigmaV_vec(ccl_cosmology * cosmo,
+		        double a,
+		        double* R, int nR,
+                        double* output, int nout, int *status)
+{
+    assert(nout == nR);
+    for(int i=0; i < nR; i++){
+      output[i] = ccl_sigmaV(cosmo, R[i], a, status);
     }
 }
 

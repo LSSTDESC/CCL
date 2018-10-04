@@ -100,6 +100,12 @@ Functions</h2></td></tr>
 <tr class="separator:ab8ef6df4a9ad144cad956f5425580291"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1c9a50535fae72296dd3c9b12a9bddab"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__massfunc_8c.html#a1c9a50535fae72296dd3c9b12a9bddab">ccl_sigmaM</a> (<a class="el" href="structccl__cosmology.html">ccl_cosmology</a> *cosmo, double halomass, double a, int *status)</td></tr>
 <tr class="separator:a1c9a50535fae72296dd3c9b12a9bddab"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a35733f2c6f1c3f64f3af9d666167bbaa"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__massfunc_8c.html#a35733f2c6f1c3f64f3af9d666167bbaa">ccl_r_delta</a> (<a class="el" href="structccl__cosmology.html">ccl_cosmology</a> *cosmo, double halomass, double a, double odelta, int *status)</td></tr>
+<tr class="separator:a35733f2c6f1c3f64f3af9d666167bbaa"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aeb0c1c5c8a7f7a9e05423b18a93fd81e"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__massfunc_8c.html#aeb0c1c5c8a7f7a9e05423b18a93fd81e">ccl_nu</a> (<a class="el" href="structccl__cosmology.html">ccl_cosmology</a> *cosmo, double halomass, double a, int *status)</td></tr>
+<tr class="separator:aeb0c1c5c8a7f7a9e05423b18a93fd81e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5c634dd91af12224ba3ededada8e6bd4"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__massfunc_8c.html#a5c634dd91af12224ba3ededada8e6bd4">ccl_r_Lagrangian</a> (<a class="el" href="structccl__cosmology.html">ccl_cosmology</a> *cosmo, double halomass, double a, int *status)</td></tr>
+<tr class="separator:a5c634dd91af12224ba3ededada8e6bd4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Function Documentation</h2>
 <a id="aa78d1e111473b57aaa82e298a3134a0a"></a>
@@ -327,6 +333,132 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>smooth_radius, the equivalent tophat smoothing radius corresponding to smooth_mass </dd></dl>
+
+</div>
+</div>
+<a id="aeb0c1c5c8a7f7a9e05423b18a93fd81e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aeb0c1c5c8a7f7a9e05423b18a93fd81e">&#9670;&nbsp;</a></span>ccl_nu()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double ccl_nu </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structccl__cosmology.html">ccl_cosmology</a> *&#160;</td>
+          <td class="paramname"><em>cosmo</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>halomass</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>a</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>status</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a35733f2c6f1c3f64f3af9d666167bbaa"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a35733f2c6f1c3f64f3af9d666167bbaa">&#9670;&nbsp;</a></span>ccl_r_delta()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double ccl_r_delta </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structccl__cosmology.html">ccl_cosmology</a> *&#160;</td>
+          <td class="paramname"><em>cosmo</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>halomass</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>a</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>odelta</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>status</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a5c634dd91af12224ba3ededada8e6bd4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5c634dd91af12224ba3ededada8e6bd4">&#9670;&nbsp;</a></span>ccl_r_Lagrangian()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double ccl_r_Lagrangian </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structccl__cosmology.html">ccl_cosmology</a> *&#160;</td>
+          <td class="paramname"><em>cosmo</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>halomass</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>a</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>status</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
 
 </div>
 </div>

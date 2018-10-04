@@ -1,10 +1,8 @@
 /** @file */
-#ifdef __cplusplus
-extern "C" {
-#endif
+#ifndef __CCL_ERROR_H_INCLUDED__
+#define __CCL_ERROR_H_INCLUDED__
 
-#pragma once
-#include "ccl_core.h"
+CCL_BEGIN_DECLS
 
 // Whether to do bounds checks on interpolated quantities
 #define CCL_BOUNDS_CHECK_INTERP
@@ -28,6 +26,14 @@ extern "C" {
 #define CCL_ERROR_MNU_UNPHYSICAL 1041
 #define CCL_ERROR_ANGPOW 1042
 #define CCL_ERROR_MISSING_CONFIG_FILE 1043
+#define CCL_ERROR_HALOCONC 1044
+#define CCL_ERROR_HALOWIN 1045
+#define CCL_ERROR_HMF_DV 1046
+#define CCL_ERROR_CONC_DV 1047
+#define CCL_ERROR_ONE_HALO_INT 1048
+#define CCL_ERROR_TWO_HALO_INT 1049
+#define CCL_ERROR_FILE_WRITE 1050
+#define CCL_ERROR_FILE_READ 1051
 
 typedef enum {
   CCL_ERROR_POLICY_EXIT = 0,
@@ -44,19 +50,19 @@ typedef enum {
  * Given a status, give an error message.
  * @return void
  */
-void ccl_raise_exception(int err, char* msg);
+void ccl_raise_exception(int err, const char* msg, ...);
 
 /** Raise a warning
  * Given a status, give a warning message.
  * @return void
  */
-void ccl_raise_warning(int err, char* msg);
+void ccl_raise_warning(int err, const char* msg, ...);
 
 /** Raise a warning based on a GSL error message
  * Given a GSL status, give a warning message.
  * @return void
  */
-void ccl_raise_gsl_warning(int gslstatus, char* msg);
+void ccl_raise_gsl_warning(int gslstatus, const char* msg, ...);
 
 /** Set the error policy
  * @oaram error_policy the error policy
@@ -84,6 +90,6 @@ void ccl_check_status(ccl_cosmology *cosmo, int* status);
  */
 void ccl_check_status_nocosmo(int* status);
 
-#ifdef __cplusplus
-}
+CCL_END_DECLS
+
 #endif

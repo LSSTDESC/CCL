@@ -1,9 +1,8 @@
 /** @file */
-#ifdef __cplusplus
-extern "C" {
-#endif
+#ifndef __CCL_CONFIG_H_INCLUDED__
+#define __CCL_CONFIG_H_INCLUDED__
 
-#pragma once
+CCL_BEGIN_DECLS
 
 /** 
  * Transfer function typedef.
@@ -76,8 +75,19 @@ typedef enum mass_function_t
   ccl_tinker      = 1,
   ccl_tinker10    = 2,
   ccl_watson      = 3,
-  ccl_angulo      = 4
+  ccl_angulo      = 4,
+  ccl_shethtormen = 5
 } mass_function_t;
+
+/**
+ * Halo concentration type definitions
+ */
+typedef enum halo_concentration_t
+{
+  ccl_bhattacharya2011 = 1,
+  ccl_duffy2008 = 2,
+  ccl_constant_concentration = 3,
+} halo_concentration_t;
 
 /** 
  * Emulator neutrinos typedef
@@ -100,9 +110,10 @@ typedef enum emulator_neutrinos_t
 typedef struct ccl_configuration {
   transfer_function_t      transfer_function_method;
   matter_power_spectrum_t  matter_power_spectrum_method;
-  baryons_power_spectrum_t  baryons_power_spectrum_method;
+  baryons_power_spectrum_t baryons_power_spectrum_method;
   mass_function_t          mass_function_method;
-  emulator_neutrinos_t emulator_neutrinos_method;
+  halo_concentration_t     halo_concentration_method;
+  emulator_neutrinos_t     emulator_neutrinos_method;
   // TODO: Halo definition
 } ccl_configuration;
 
@@ -110,10 +121,10 @@ typedef struct ccl_configuration {
  * The default configuration object
  * In the default configuration, defined in ccl_core.c
  * CCL runs with:
- * default_config = {ccl_boltzmann_class, ccl_halofit, ccl_nobaryons, ccl_tinker10, ccl_emu_strict}
+ * default_config = {ccl_boltzmann_class, ccl_halofit, ccl_nobaryons, ccl_tinker10, ccl_duffy2008, ccl_emu_strict}
  */
 extern const ccl_configuration default_config;
 
-#ifdef __cplusplus
-}
+CCL_END_DECLS
+
 #endif
