@@ -55,3 +55,20 @@ CTEST2(params, create_wacdm) {
   ASSERT_DBL_NEAR_TOL(params.w0, -1.0, 1e-10);
   ASSERT_DBL_NEAR_TOL(params.wa, 0.0, 1e-10);
 }
+
+CTEST2(params, read_write) {
+    char filename[32];
+    snprintf(filename, 32, "ccl_test_params_rw_XXXXXX");
+    mkstemp(filename);
+    ccl_parameters params = ccl_parameters_create_flat_lcdm(data->Omega_c, data->Omega_b, data->h, data->A_s, data->n_s, &(data->status));
+    int status = 0;
+    ccl_parameters_write_yaml(&params, filename, &status);
+    ASSERT_EQUAL(status, 0);
+    ccl_parameters params2 = ccl_parameters_read_yaml(filename, &status);
+    ASSERT_EQUAL(status, 0);
+    ASSERT_DBL_NEAR_TOL(params2.Omega_c, data->Omega_c, 1e-10);
+    ASSERT_DBL_NEAR_TOL(params2.Omega_k, 0.0, 1e-10);
+    ASSERT_DBL_NEAR_TOL(params2.w0, -1.0, 1e-10);
+    ASSERT_DBL_NEAR_TOL(params2.wa, 0.0, 1e-10);
+    remove(filename);
+}

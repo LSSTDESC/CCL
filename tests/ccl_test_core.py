@@ -1,7 +1,7 @@
 from __future__ import print_function
 import numpy as np
 from numpy.testing import assert_raises, assert_warns, assert_no_warnings, \
-                          assert_, run_module_suite
+                          assert_, run_module_suite, assert_almost_equal
 import pyccl as ccl
 
 
@@ -166,6 +166,36 @@ def test_parameters_mgrowth():
     assert_raises(ValueError, ccl.Parameters, 0.25, 0.05, 0.7, 2.1e-9, 0.96,
                                               z_mg=zarr,
                                               df_mg=np.column_stack((dfarr, dfarr)) )
+
+def test_parameters_read_write():
+    """Check that Parameters objects can be read and written"""
+    import tempfile
+    params = ccl.Parameters(Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, 
+                            n_s=0.96)
+
+    # Make a temporary file name
+    with tempfile.NamedTemporaryFile(delete=False) as tmpfile:
+        temp_file_name = tmpfile.name
+
+    # Write out and then eead in the parameters from that file
+    params.write_yaml(temp_file_name)
+    params2 = ccl.Parameters.read_yaml(temp_file_name)
+
+    # Check the read-in params are equal to the written out ones
+    assert_almost_equal(params['Omega_c'], params2['Omega_c'])
+    assert_almost_equal(params['Neff'], params2['Neff'])
+    assert_almost_equal(params['sum_nu_masses'], params2['sum_nu_masses'])
+
+    # Now make a file that will be deleted so it does not exist
+    # and check the right error is raise
+    with tempfile.NamedTemporaryFile(delete=True) as tmpfile:
+        temp_file_name = tmpfile.name
+
+    assert_raises(IOError, ccl.Parameters.read_yaml, filename=temp_file_name)
+    assert_raises(IOError, params.read_yaml, filename=temp_file_name+"/nonexistent_directory/params.yml")
+
+
+
 
 def test_cosmology_init():
     """
