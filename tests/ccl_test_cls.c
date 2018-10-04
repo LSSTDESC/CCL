@@ -194,6 +194,7 @@ static void compare_cls(char *compare_type,struct cls_data * data)
       ell_correct=1;
     else
       ell_correct=l*(l+1.)/sqrt((l+2.)*(l+1.)*l*(l-1.));
+
     cl_dd_11  =cls_dd_11_b[ii];
     cl_dd_12  =cls_dd_12_b[ii];
     cl_dd_22  =cls_dd_22_b[ii];

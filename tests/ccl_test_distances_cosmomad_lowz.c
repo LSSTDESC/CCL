@@ -4,7 +4,8 @@
 #include <math.h>
 
 // The tolerance in chi for all the
-#define DISTANCES_TOLERANCE 1.0e-4
+#define DISTANCES_TOLERANCE 5.0e-7
+#define DM_TOLERANCE 1.0E-3
 
 CTEST_DATA(distances_cosmomad_lowz) {
   double Omega_c;
@@ -110,7 +111,8 @@ static void compare_distances(int model, struct distances_cosmomad_lowz_data * d
 						data->w_0[model], data->w_a[model],
 						data->h, data->A_s, data->n_s,-1,-1,-1,-1,NULL,NULL, &status);
   
-  params.Omega_g=0;
+  params.Omega_g=0; //enforce no radiation
+  params.Omega_l = 1.-params.Omega_m-params.Omega_k; //reomcpute Omega_l without radiation
   
   // Make a cosmology object from the parameters with the default configuration
   ccl_cosmology * cosmo = ccl_cosmology_create(params, default_config);
@@ -129,7 +131,7 @@ static void compare_distances(int model, struct distances_cosmomad_lowz_data * d
         double dm_ij=ccl_distance_modulus(cosmo,a, &status);
         if (status) printf("%s\n",cosmo->status_message);
         //NOTE tolerances are different!
-        absolute_tolerance = 10*DISTANCES_TOLERANCE*data->dm[model][j];
+        absolute_tolerance = DM_TOLERANCE*data->dm[model][j];
         if (fabs(absolute_tolerance)<1e-4) absolute_tolerance = 1e-4;
         ASSERT_DBL_NEAR_TOL(data->dm[model][j], dm_ij, absolute_tolerance);
     }

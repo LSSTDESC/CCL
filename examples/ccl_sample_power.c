@@ -1,7 +1,8 @@
-#include "ccl.h"
 #include <math.h>
 #include <stdio.h>
-#include "ccl_params.h"
+
+#include <ccl.h>
+#include <ccl_params.h>
 
 int main(int argc, char * argv[])
 {
@@ -45,10 +46,10 @@ int main(int argc, char * argv[])
     }
     else {
       printf("ccl_sample_power.c: Unknown power spectrum method.\n");
-      return NAN;
+      return 1;
     }
   }
-  printf("sigma8 = %.6lE\n", ccl_sigmaR(cosmo,8./h,&status));
+  printf("sigma8 = %.6lE\n", ccl_sigmaR(cosmo,8./h, 1.0, &status));
   printf("Consistency check: sigma8 = %.6lE\n", ccl_sigma8(cosmo,&status));
   printf("Completed. Status = %d\n",status);
   
