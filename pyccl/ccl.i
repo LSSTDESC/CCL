@@ -4,6 +4,21 @@
  * producing a single .c file that is compiled to
  * a python extension module. */
 
+%pythonbegin %{
+import numpy
+
+class CCLError(RuntimeError):
+    """A CCL-specific RuntimeError"""
+    def __repr__(self):
+        return 'pyccl.CCLError(%r)' % (str(self))
+
+    def __eq__(self, other):
+        return repr(self) == repr(other)
+
+    def __hash__(self):
+        return hash(repr(self))
+%}
+
 %{
 /* this is the master .c file; need an init function */
 #define SWIG_FILE_WITH_INIT
