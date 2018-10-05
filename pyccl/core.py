@@ -670,17 +670,16 @@ def check(status, cosmo=None):
 
 
 def _cosmology_obj(cosmo):
-    """Returns a ccl_cosmology object, given an input object which may be
-    ccl_cosmology, the Cosmology wrapper class, or an invalid type.
+    """Returns a ccl_cosmology object, given an input Cosmology wrapper class.
 
     Args:
-        cosmo (ccl_cosmology or Cosmology): The input cosmology which gets
-                                            converted to a ccl_cosmology.
+        cosmo (:obj:`Cosmology`): The input cosmology which gets
+                                  converted to a ccl_cosmology.
 
+    Returns:
+        ccl_cosmo (:obj:`ccl.cosmology`): The CCL C cosmology object.
     """
-    if isinstance(cosmo, lib.cosmology):
-        return cosmo
-    elif isinstance(cosmo, Cosmology):
+    if isinstance(cosmo, Cosmology):
         return cosmo.cosmo
     else:
-        raise TypeError("Invalid Cosmology or ccl_cosmology object.")
+        raise TypeError("Invalid Cosmology object!")
