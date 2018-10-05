@@ -23,9 +23,7 @@
 %apply (double* ARGOUT_ARRAY1, int DIM1) {(double* output, int nout)};
 
 
-/* The python code here will be executed before all of the functions that
-   follow this directive. */
-%feature("pythonprepend") %{
+%feature("pythonprepend") cl_tracer_new_wrapper %{
     if numpy.shape(z_n) != numpy.shape(n):
         raise CCLError("Input shape for `z_n` must match `n`!")
 
@@ -70,9 +68,7 @@ CCL_ClTracer* cl_tracer_new_wrapper(
 
 %}
 
-/* The python code here will be executed before all of the functions that
-   follow this directive. */
-%feature("pythonprepend") %{
+%feature("pythonprepend") angular_cl_vec %{
     if numpy.shape(ell) != (output,):
         raise CCLError("Input shape for `ell` must match `(output,)`!")
 %}
@@ -113,9 +109,7 @@ void angular_cl_vec(ccl_cosmology * cosmo,
 
 %}
 
-/* The python code here will be executed before all of the functions that
-   follow this directive. */
-%feature("pythonprepend") %{
+%feature("pythonprepend") clt_fa_vec %{
     if numpy.shape(aarr) != (output,):
         raise CCLError("Input shape for `aarr` must match `(output,)`!")
 %}
@@ -132,6 +126,3 @@ void clt_fa_vec(
 }
 
 %}
-
-/* The directive gets carried between files, so we reset it at the end. */
-%feature("pythonprepend") %{ %}

@@ -30,9 +30,7 @@ ccl_parameters parameters_create_nu(
 
 %}
 
-/* The python code here will be executed before all of the functions that
-   follow this directive. */
-%feature("pythonprepend") %{
+%feature("pythonprepend") parameters_create_nu_vec %{
     if numpy.shape(zarr) != numpy.shape(dfarr):
         raise CCLError("Input shape for `zarr` must match `dfarr`!")
 %}
@@ -56,6 +54,3 @@ ccl_parameters parameters_create_nu_vec(
 }
 
 %}
-
-/* The directive gets carried between files, so we reset it at the end. */
-%feature("pythonprepend") %{ %}
