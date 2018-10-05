@@ -107,7 +107,7 @@ static void compare_cls(char *compare_type,struct cls_data * data)
   }
 
   char fname[256];
-  FILE *fi_dd_11,*fi_dd_12,*fi_dd_22,*fi_ll_11,*fi_ll_12,*fi_ll_22;
+  FILE *fi_dd_11,*fi_dd_12,*fi_dd_22,*fi_ll_11,*fi_ll_12,*fi_ll_22,*fi_dl_12;
   CCL_ClTracer *tr_nc_1=ccl_cl_tracer_number_counts_simple(cosmo,nz,zarr_1,pzarr_1,nz,zarr_1,bzarr,&status);
   ASSERT_NOT_NULL(tr_nc_1);
   CCL_ClTracer *tr_nc_2=ccl_cl_tracer_number_counts_simple(cosmo,nz,zarr_2,pzarr_2,nz,zarr_2,bzarr,&status);
@@ -128,6 +128,8 @@ static void compare_cls(char *compare_type,struct cls_data * data)
   fi_ll_12=fopen(fname,"r"); ASSERT_NOT_NULL(fi_ll_12);
   sprintf(fname,"tests/benchmark/codecomp_step2_outputs/run_b2b2%s_log_cl_ll.txt",compare_type);
   fi_ll_22=fopen(fname,"r"); ASSERT_NOT_NULL(fi_ll_22);
+  sprintf(fname,"tests/benchmark/run_b1b2%s_log_cl_dl.txt",compare_type);
+  fi_dl_12=fopen(fname,"r"); ASSERT_NOT_NULL(fi_dl_12);
 
   int *ells=malloc(3001*sizeof(int));
   double *cls_dd_11_b=malloc(3001*sizeof(double));
@@ -136,12 +138,14 @@ static void compare_cls(char *compare_type,struct cls_data * data)
   double *cls_ll_11_b=malloc(3001*sizeof(double));
   double *cls_ll_12_b=malloc(3001*sizeof(double));
   double *cls_ll_22_b=malloc(3001*sizeof(double));
+  double *cls_dl_12_b=malloc(3001*sizeof(double));
   double *cls_dd_11_h=malloc(3001*sizeof(double));
   double *cls_dd_12_h=malloc(3001*sizeof(double));
   double *cls_dd_22_h=malloc(3001*sizeof(double));
   double *cls_ll_11_h=malloc(3001*sizeof(double));
   double *cls_ll_12_h=malloc(3001*sizeof(double));
   double *cls_ll_22_h=malloc(3001*sizeof(double));
+  double *cls_dl_12_h=malloc(3001*sizeof(double));
 
   for(int ii=0;ii<3001;ii++) {
     int l, rtn;
@@ -151,6 +155,7 @@ static void compare_cls(char *compare_type,struct cls_data * data)
     fscanf(fi_ll_11,"%d %lf",&l,&(cls_ll_11_b[ii]));
     fscanf(fi_ll_12,"%d %lf",&l,&(cls_ll_12_b[ii]));
     fscanf(fi_ll_22,"%d %lf",&l,&(cls_ll_22_b[ii]));
+    fscanf(fi_dl_12,"%d %lf",&l,&(cls_dl_12_b[ii]));
     ells[ii]=l;
   }
 
@@ -160,6 +165,7 @@ static void compare_cls(char *compare_type,struct cls_data * data)
   fclose(fi_ll_11);
   fclose(fi_ll_12);
   fclose(fi_ll_22);
+  fclose(fi_dl_12);
 
   double l_logstep = 1.05;
   double l_linstep = 20.;
@@ -178,7 +184,20 @@ static void compare_cls(char *compare_type,struct cls_data * data)
   if (status) printf("%s\n",cosmo->status_message);
   ccl_angular_cls(cosmo,w,tr_wl_2,tr_wl_2,3001,ells,cls_ll_22_h,&status);
   if (status) printf("%s\n",cosmo->status_message);
+  ccl_angular_cls(cosmo,w,tr_nc_1,tr_wl_2,3001,ells,cls_dl_12_h,&status);
+  if (status) printf("%s\n",cosmo->status_message);
 
+  /*
+    ATTN: This is how the current benchmark was generated
+    for the GGL case.
+    The file needs to be replaced by an independent one
+    and these lines need to be removed.
+
+    for(int ii=0;ii<3001;ii++) {
+       fprintf(fi_dl_12,"%d %e\n",ells[ii],cls_dl_12_h[ii]);
+    }
+    fclose(fi_dl_12);*/
+  
   ccl_cl_workspace_free(w);
 
   double fraction_failed=0;
@@ -187,8 +206,10 @@ static void compare_cls(char *compare_type,struct cls_data * data)
     double ell_correct;
     double cl_dd_11,cl_dd_12,cl_dd_22;
     double cl_ll_11,cl_ll_12,cl_ll_22;
+    double cl_dl_12;
     double cl_dd_11_h,cl_dd_12_h,cl_dd_22_h;
     double cl_ll_11_h,cl_ll_12_h,cl_ll_22_h;
+    double cl_dl_12_h;
     
     if(l<=0)
       ell_correct=1;
@@ -201,12 +222,14 @@ static void compare_cls(char *compare_type,struct cls_data * data)
     cl_ll_11  =cls_ll_11_b[ii];
     cl_ll_12  =cls_ll_12_b[ii];
     cl_ll_22  =cls_ll_22_b[ii];
+    cl_dl_12  =cls_dl_12_b[ii]; 
     cl_dd_11_h=cls_dd_11_h[ii];
     cl_dd_12_h=cls_dd_12_h[ii];
     cl_dd_22_h=cls_dd_22_h[ii];
     cl_ll_11_h=cls_ll_11_h[ii]*ell_correct*ell_correct;
     cl_ll_12_h=cls_ll_12_h[ii]*ell_correct*ell_correct;
     cl_ll_22_h=cls_ll_22_h[ii]*ell_correct*ell_correct;
+    cl_dl_12_h=cls_dl_12_h[ii];//do we need an ell_correct factor here? (depends on how the benchmark is set up)
 
     if(fabs(cl_dd_11_h/cl_dd_11-1)>CLS_TOLERANCE)
       fraction_failed++;
@@ -220,6 +243,8 @@ static void compare_cls(char *compare_type,struct cls_data * data)
       fraction_failed++;
     if(fabs(cl_ll_22_h/cl_ll_22-1)>CLS_TOLERANCE)
       fraction_failed++;
+    if(fabs(cl_dl_12_h/cl_dl_12-1)>CLS_TOLERANCE)
+      fraction_failed++;
   }
 
   free(ells);
@@ -227,9 +252,10 @@ static void compare_cls(char *compare_type,struct cls_data * data)
   free(cls_ll_11_b); free(cls_ll_12_b); free(cls_ll_22_b); 
   free(cls_dd_11_h); free(cls_dd_12_h); free(cls_dd_22_h); 
   free(cls_ll_11_h); free(cls_ll_12_h); free(cls_ll_22_h); 
-
+  free(cls_dl_12_h); free(cls_dl_12_b);
+  
   printf("%d, ",(int)fraction_failed);
-  fraction_failed/=6*3001;
+  fraction_failed/=7*3001;
   printf("%lf %% ",fraction_failed*100);
   ASSERT_TRUE((fraction_failed<CLS_FRACTION));
 
