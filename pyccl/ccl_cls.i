@@ -123,13 +123,12 @@ void angular_cl_vec(ccl_cosmology * cosmo,
 %inline %{
 
 void clt_fa_vec(
-    ccl_cosmology *cosmo, CCL_ClTracer *clt, int func_code,
-    double *aarr, int na,
-    double *output, int nout,
-    int *status)
-{
-  assert(nout==na);
-  ccl_get_tracer_fas(cosmo,clt,na,aarr,output,func_code,status);
+        ccl_cosmology *cosmo, CCL_ClTracer *clt, int func_code,
+        double *aarr, int na,
+        double *output, int nout,
+        int *status) {
+    assert(nout==na);
+    ccl_get_tracer_fas(cosmo, clt, na, aarr, output, func_code, status);
 }
 
 %}
