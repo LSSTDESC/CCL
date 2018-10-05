@@ -11,6 +11,8 @@
 
 %include "../include/ccl_background.h"
 
+/* The python code here will be executed before all of the functions that
+   follow this directive. */
 %feature("pythonprepend") %{
     if numpy.shape(a) != (output,):
         raise CCLError("Input shape for `a` must match `(output,)`!")
@@ -92,6 +94,7 @@ void rho_x_vec(ccl_cosmology * cosmo, int label, int is_comoving,
 
 %}
 
+/* Now we change the directive for `chi` instead of `a`. */
 %feature("pythonprepend") %{
     if numpy.shape(chi) != (output,):
         raise CCLError("Input shape for `chi` must match `(output,)`!")
@@ -108,4 +111,5 @@ void scale_factor_of_chi_vec(ccl_cosmology * cosmo,
 
 %}
 
+/* The directive gets carried between files, so we reset it at the end. */
 %feature("pythonprepend") %{ %}
