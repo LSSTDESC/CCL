@@ -8,6 +8,7 @@ def test_cclerror_repr():
     e = pyccl.CCLError("blah")
     e2 = eval(repr(e))
     assert_(str(e2) == str(e))
+    assert_(e2 == e)
 
 
 def test_cclerror_not_equal():
