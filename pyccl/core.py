@@ -62,7 +62,7 @@ import numpy as np
 from warnings import warn
 
 from . import ccllib as lib
-from .errors import CCLError
+from .ccllib import CCLError
 
 # Configuration types
 transfer_function_types = {
