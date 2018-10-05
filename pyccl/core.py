@@ -58,9 +58,11 @@ emulator_neutrinos options
       Emu. This option may result in slight internal inconsistencies in the
       physical model assumed for neutrinos.
 """
-from . import ccllib as lib
 import numpy as np
 from warnings import warn
+
+from . import ccllib as lib
+from .errors import CCLError
 
 # Configuration types
 transfer_function_types = {
@@ -525,7 +527,7 @@ class Cosmology(object):
 
         # Check status
         if self.cosmo.status != 0:
-            raise RuntimeError(
+            raise CCLError(
                 "(%d): %s"
                 % (self.cosmo.status, self.cosmo.status_message))
 
@@ -662,11 +664,11 @@ def check(status, cosmo=None):
 
     # Check for known error status
     if status in error_types.keys():
-        raise RuntimeError("Error %s: %s" % (error_types[status], msg))
+        raise CCLError("Error %s: %s" % (error_types[status], msg))
 
     # Check for unknown error
     if status != 0:
-        raise RuntimeError("Error %d: %s" % (status, msg))
+        raise CCLError("Error %d: %s" % (status, msg))
 
 
 def _cosmology_obj(cosmo):
