@@ -453,7 +453,7 @@ void ccl_cosmology_compute_sigma(ccl_cosmology *cosmo, int *status)
       (m[nm-1]>10E17)
       ) {
     *status = CCL_ERROR_LINSPACE;
-    strcpy(cosmo->status_message,"ccl_cosmology_compute_sigmas(): Error creating linear spacing in m\n");
+    ccl_cosmology_set_status_message(cosmo,"ccl_cosmology_compute_sigmas(): Error creating linear spacing in m\n");
   }
 
   // fill in sigma, if no errors have been triggered at this time.
@@ -468,7 +468,7 @@ void ccl_cosmology_compute_sigma(ccl_cosmology *cosmo, int *status)
 
   if (*status !=0 ) {
     *status = CCL_ERROR_SPLINE ;
-    strcpy(cosmo->status_message, "ccl_massfunc.c: ccl_cosmology_compute_sigma(): Error creating sigma(M) spline\n");
+    ccl_cosmology_set_status_message(cosmo, "ccl_massfunc.c: ccl_cosmology_compute_sigma(): Error creating sigma(M) spline\n");
   }
 
   // again, making splines assuming nothing bad has happened to this point
@@ -500,7 +500,7 @@ void ccl_cosmology_compute_sigma(ccl_cosmology *cosmo, int *status)
     ccl_raise_gsl_warning(gslstatus, "ccl_massfunc.c: ccl_cosmology_compute_sigma():");
     *status |= gslstatus;
     *status = CCL_ERROR_SPLINE ;
-    strcpy(cosmo->status_message, "ccl_massfunc.c: ccl_cosmology_compute_sigma(): Error evaluating grid points for dlnsigma/dlogM spline\n");
+    ccl_cosmology_set_status_message(cosmo, "ccl_massfunc.c: ccl_cosmology_compute_sigma(): Error evaluating grid points for dlnsigma/dlogM spline\n");
   }
 
   if(*status==0) {
@@ -512,7 +512,7 @@ void ccl_cosmology_compute_sigma(ccl_cosmology *cosmo, int *status)
 
   if(*status!=0) {
     *status = CCL_ERROR_SPLINE ;
-    strcpy(cosmo->status_message, "ccl_massfunc.c: ccl_cosmology_compute_sigma(): Error creating dlnsigma/dlogM spline\n");
+    ccl_cosmology_set_status_message(cosmo, "ccl_massfunc.c: ccl_cosmology_compute_sigma(): Error creating dlnsigma/dlogM spline\n");
   }
   
 
