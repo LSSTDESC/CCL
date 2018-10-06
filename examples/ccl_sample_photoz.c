@@ -1,7 +1,9 @@
-#include "ccl_lsst_specs.h"
-#include "math.h"
-#include "stdio.h"
-#include "stdlib.h"
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+#include <ccl.h>
+#include <ccl_lsst_specs.h>
 
 // This is a test file to include a user-defined photo-z function
 

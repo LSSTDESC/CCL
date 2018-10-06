@@ -1,8 +1,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
-#include "ccl.h"
-#include "ccl_lsst_specs.h"
+
+#include <ccl.h>
+#include <ccl_lsst_specs.h>
 
 #define OC 0.25
 #define OB 0.05

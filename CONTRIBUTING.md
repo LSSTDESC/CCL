@@ -21,13 +21,14 @@ Reviewing a pull request (PR) on github
     directory successfully).
  5. Make sure the python tests pass (i.e. run `python setup.py test` from the
     root directory successfully).
- 6. Look at the code (see "Files changed" on the top of the GitHub pull request
+ 6. Make sure flake8 is not generating any warnings on pyccl (i.e., run `flake8 pyccl`).
+ 7. Look at the code (see "Files changed" on the top of the GitHub pull request
     page) and check that the changes make sense to you.
- 7. If new science has been implemented, and if possible, try to compare the
+ 8. If new science has been implemented, and if possible, try to compare the
     output of the code against your own predictions. Ask the developer to
     implement appropriate unit tests for it.
- 8. Make sure that the unit tests pass on Travis-CI.
- 9. Make sure that the changes come with documentation, e.g. internally in the
+ 9. Make sure that the unit tests pass on Travis-CI.
+ 10. Make sure that the changes come with documentation, e.g. internally in the
     C code and through Python docstrings, and that the doxygen documentation
     has been regenerated. Make sure that example code in the `examples/`
     directory has been updated appropriately, and that the CCL note has been
@@ -131,6 +132,8 @@ you have recompiled and reinstalled the C library and the Python wrapper, run:
 This may take some time to run in its entirety. If you changed the API, you may
 have to modify the tests to account for this. You should also add your own
 tests for any new functions or behaviors that were added.
+
+The python syntax can be checked with `flake8 pyccl`. You should run this command as part of the tests while developing `pyccl` features. More information on the capabilities of `flake8` can be found in http://flake8.pycqa.org/en/latest/manpage.html.
 
 Occasionally, modifications made correctly as described above will still not
 function properly. This might be due to multiple `pyccl` installation files not being
@@ -242,7 +245,7 @@ libraries with your new changes and run the unit tests. You can check the
 status of your build here: https://travis-ci.org/LSSTDESC/CCL/builds. If you
 click in your build you will find more information about its status and a log
 describing the process. If your build errors or fails, you can scroll through
-the log to find out what went wrong. If your additions require new dependencies
+the log to find out what went wrong. Warnings from flake8 will result in tests not passing. If your additions require new dependencies
 make sure that you include them in `.travis.yml`.
 
 
