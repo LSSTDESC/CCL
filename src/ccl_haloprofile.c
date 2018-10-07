@@ -1,15 +1,13 @@
-#include "ccl_utils.h"
-#include "math.h"
-#include "stdio.h"
-#include "stdlib.h"
-#include "gsl/gsl_errno.h"
-#include "gsl/gsl_integration.h"
-#include "gsl/gsl_sf_expint.h"
-#include "ccl_background.h"
-#include "ccl_power.h"
-#include "ccl_massfunc.h"
-#include "ccl_error.h"
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <gsl/gsl_errno.h>
+#include <gsl/gsl_integration.h>
+#include <gsl/gsl_sf_expint.h>
+#include "ccl.h"
+#include "ccl_params.h"
 #include "ccl_halomod.h"
+#include "ccl_haloprofile.h"
 
 
 double r_delta(ccl_cosmology *cosmo, double halomass, double a, double odelta, int *status); //in Mpc comving. halomass in Msun, odelta integer.
@@ -51,7 +49,7 @@ double ccl_halo_profile_nfw(ccl_cosmology *cosmo, double c, double halomass, dou
     double rho_r;
 
     rho_r = rho0/((r/rs)*pow(1.+r/rs,2));
-
+    
     return rho_r;
 }
 

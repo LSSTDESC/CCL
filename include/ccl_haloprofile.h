@@ -1,11 +1,9 @@
 /** @file */
-#ifdef __cplusplus
-extern "C" {
-#endif
 
-#pragma once
+#ifndef __CCL_HALOPROFILE_H_INCLUDED__
+#define __CCL_HALOPROFILE_H_INCLUDED__
 
-#include "ccl_core.h"
+CCL_BEGIN_DECLS
 
 
   /**
@@ -30,7 +28,7 @@ extern "C" {
    * @param a: scale factor normalised to a=1 today
    * @param rp: projected radius at which to calculate output
    * @param status: Status flag: 0 if there are no errors, non-zero otherwise
-   * @return sigma: nsurface mass density integrated along line of sight at given projected radius for a NFW halo profile, in units of Msun/Mpc^{2} 
+   * @return sigma: nsurface mass density integrated along line of sight at given projected radius for a NFW halo profile, in units of Msun/Mpc^{2}
    */
   double ccl_projected_halo_profile_nfw(ccl_cosmology *cosmo, double c, double halomass, double massdef_delta_m, double a, double rp, int *status);
 
@@ -47,8 +45,6 @@ extern "C" {
    */
   double ccl_halo_profile_einasto(ccl_cosmology *cosmo, double c, double halomass, double massdef_delta_m, double a, double r, int *status);
 
+  CCL_END_DECLS
 
-
-#ifdef __cplusplus
-}
-#endif
+  #endif
