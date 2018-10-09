@@ -91,6 +91,9 @@ void specs_dNdz_tomog_vec(
     return;
 }
 
+/* The directive gets carried between files, so we reset it at the end. */
+%feature("pythonprepend") %{ %}
+
 // C callback function, to call a pre-specified Python function with
 // call signature def fn(double, double): return double
 static double call_py_photoz_fn(double z_ph, double z_s, void *py_func_obj, int *status)
@@ -143,6 +146,3 @@ user_pz_info* specs_create_photoz_info_from_py(PyObject *pyfunc)
 }
 
 %}
-
-/* The directive gets carried between files, so we reset it at the end. */
-%feature("pythonprepend") %{ %}
