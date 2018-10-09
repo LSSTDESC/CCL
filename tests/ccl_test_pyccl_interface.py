@@ -2,6 +2,7 @@ import numpy as np,math
 from numpy.testing import assert_raises, assert_warns, assert_no_warnings, \
                           assert_, decorators, run_module_suite
 import pyccl as ccl
+from pyccl import CCLError
 
 def reference_models():
     """
@@ -168,19 +169,19 @@ def check_background_nu(cosmo):
     a_arr = np.linspace(0.2, 1., 5)
 
     # growth_factor
-    assert_raises(RuntimeError, ccl.growth_factor, cosmo, a_scl)
-    assert_raises(RuntimeError, ccl.growth_factor, cosmo, a_lst)
-    assert_raises(RuntimeError, ccl.growth_factor, cosmo, a_arr)
+    assert_raises(CCLError, ccl.growth_factor, cosmo, a_scl)
+    assert_raises(CCLError, ccl.growth_factor, cosmo, a_lst)
+    assert_raises(CCLError, ccl.growth_factor, cosmo, a_arr)
 
     # growth_factor_unnorm
-    assert_raises(RuntimeError, ccl.growth_factor_unnorm, cosmo, a_scl)
-    assert_raises(RuntimeError, ccl.growth_factor_unnorm, cosmo, a_lst)
-    assert_raises(RuntimeError, ccl.growth_factor_unnorm, cosmo, a_arr)
+    assert_raises(CCLError, ccl.growth_factor_unnorm, cosmo, a_scl)
+    assert_raises(CCLError, ccl.growth_factor_unnorm, cosmo, a_lst)
+    assert_raises(CCLError, ccl.growth_factor_unnorm, cosmo, a_arr)
 
     # growth_rate
-    assert_raises(RuntimeError,ccl.growth_rate, cosmo, a_scl)
-    assert_raises(RuntimeError,ccl.growth_rate, cosmo, a_lst)
-    assert_raises(RuntimeError,ccl.growth_rate, cosmo, a_arr)
+    assert_raises(CCLError,ccl.growth_rate, cosmo, a_scl)
+    assert_raises(CCLError,ccl.growth_rate, cosmo, a_lst)
+    assert_raises(CCLError,ccl.growth_rate, cosmo, a_arr)
 
     # comoving_radial_distance
     assert_( all_finite(ccl.comoving_radial_distance(cosmo, a_scl)) )
@@ -282,8 +283,8 @@ def check_massfunc(cosmo):
     assert_raises(TypeError, ccl.massfunc, cosmo, mhalo_arr, a_arr, odelta)
 
     # Check whether odelta out of bounds
-    assert_raises(RuntimeError, ccl.massfunc, cosmo, mhalo_scl, a, 199.)
-    assert_raises(RuntimeError, ccl.massfunc, cosmo, mhalo_scl, a, 5000.)
+    assert_raises(CCLError, ccl.massfunc, cosmo, mhalo_scl, a, 199.)
+    assert_raises(CCLError, ccl.massfunc, cosmo, mhalo_scl, a, 5000.)
 
     # massfunc_m2r
     assert_( all_finite(ccl.massfunc_m2r(cosmo, mhalo_scl)) )
@@ -319,14 +320,14 @@ def check_massfunc_nu(cosmo):
     odelta = 200.
 
     # massfunc
-    assert_raises(RuntimeError, ccl.massfunc,cosmo, mhalo_scl, a, odelta)
-    assert_raises(RuntimeError, ccl.massfunc,cosmo, mhalo_lst, a, odelta)
-    assert_raises(RuntimeError, ccl.massfunc,cosmo, mhalo_arr, a, odelta)
+    assert_raises(CCLError, ccl.massfunc,cosmo, mhalo_scl, a, odelta)
+    assert_raises(CCLError, ccl.massfunc,cosmo, mhalo_lst, a, odelta)
+    assert_raises(CCLError, ccl.massfunc,cosmo, mhalo_arr, a, odelta)
 
     # halo bias
-    assert_raises(RuntimeError, ccl.halo_bias, cosmo, mhalo_scl, a, odelta)
-    assert_raises(RuntimeError, ccl.halo_bias, cosmo, mhalo_lst, a, odelta)
-    assert_raises(RuntimeError, ccl.halo_bias, cosmo, mhalo_arr, a, odelta)
+    assert_raises(CCLError, ccl.halo_bias, cosmo, mhalo_scl, a, odelta)
+    assert_raises(CCLError, ccl.halo_bias, cosmo, mhalo_lst, a, odelta)
+    assert_raises(CCLError, ccl.halo_bias, cosmo, mhalo_arr, a, odelta)
 
     # massfunc_m2r
     assert_( all_finite(ccl.massfunc_m2r(cosmo, mhalo_scl)) )
@@ -334,9 +335,9 @@ def check_massfunc_nu(cosmo):
     assert_( all_finite(ccl.massfunc_m2r(cosmo, mhalo_arr)) )
 
     # sigmaM
-    assert_raises(RuntimeError, ccl.sigmaM, cosmo, mhalo_scl, a)
-    assert_raises(RuntimeError, ccl.sigmaM, cosmo, mhalo_lst, a)
-    assert_raises(RuntimeError, ccl.sigmaM, cosmo, mhalo_arr, a)
+    assert_raises(CCLError, ccl.sigmaM, cosmo, mhalo_scl, a)
+    assert_raises(CCLError, ccl.sigmaM, cosmo, mhalo_lst, a)
+    assert_raises(CCLError, ccl.sigmaM, cosmo, mhalo_arr, a)
 
     assert_raises(TypeError, ccl.sigmaM, cosmo, mhalo_scl, a_arr)
     assert_raises(TypeError, ccl.sigmaM, cosmo, mhalo_lst, a_arr)
@@ -529,9 +530,9 @@ def check_lsst_specs_nu(cosmo):
     PZ2 = ccl.PhotoZFunction(pz2)
 
     # bias_clustering
-    assert_raises(RuntimeError,ccl.bias_clustering, cosmo, a_scl)
-    assert_raises(RuntimeError,ccl.bias_clustering, cosmo, a_lst)
-    assert_raises(RuntimeError,ccl.bias_clustering, cosmo, a_arr)
+    assert_raises(CCLError,ccl.bias_clustering, cosmo, a_scl)
+    assert_raises(CCLError,ccl.bias_clustering, cosmo, a_lst)
+    assert_raises(CCLError,ccl.bias_clustering, cosmo, a_arr)
 
     # dNdz_tomog, PhotoZFunction
     # sigmaz_clustering
@@ -671,7 +672,7 @@ def check_cls_nu(cosmo):
     nc1 = ccl.ClTracerNumberCounts(cosmo, False, False, n=(z,n), bias=(z,b))
 
     # Check that for massive neutrinos including rsd raises an error (not yet implemented)
-    assert_raises(RuntimeError, ccl.ClTracerNumberCounts, cosmo, True, False, n=(z,n), bias=(z,b))
+    assert_raises(CCLError, ccl.ClTracerNumberCounts, cosmo, True, False, n=(z,n), bias=(z,b))
 
     cmbl=ccl.ClTracerCMBLensing(cosmo,1100.)
 

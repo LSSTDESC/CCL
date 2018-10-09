@@ -2,6 +2,7 @@ import numpy as np
 from numpy.testing import assert_raises, assert_warns, assert_no_warnings, \
                           assert_, decorators, run_module_suite
 import pyccl as ccl
+from pyccl import CCLError
 import sys
 
 # Set up the cosmological parameters to be used in each of the models
@@ -70,13 +71,13 @@ def calc_power_spectrum(Omega_v, w0, wa, transfer_fn, matter_power, linear, rais
                 pk_lin = ccl.linear_matter_power(cosmo, k, _a)
                 assert_(all_finite(pk_lin))
             else:
-                assert_raises(RuntimeError, ccl.linear_matter_power, cosmo, k, _a)
+                assert_raises(CCLError, ccl.linear_matter_power, cosmo, k, _a)
         else:
             if raise_errors==False:
                 pk_nl = ccl.nonlin_matter_power(cosmo, k, _a)
                 assert_(all_finite(pk_nl))
             else:
-                assert_raises(RuntimeError,ccl.nonlin_matter_power, cosmo, k, _a)
+                assert_raises(CCLError,ccl.nonlin_matter_power, cosmo, k, _a)
 
 def loop_over_params(transfer_fn, matter_power, lin, raise_errs):
     """
