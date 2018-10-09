@@ -7,19 +7,20 @@
 %include "../include/ccl_cls.h"
 
 // Enable vectorised arguments for arrays
-%apply (int DIM1, double* IN_ARRAY1) {
-                                      (int nz_n, double* z_n),
-                                      (int nz_b, double* z_b),
-                                      (int nz_s, double* z_s),
-                                      (int nz_ba, double* z_ba),
-                                      (int nz_rf, double* z_rf),
-                                      (int nn, double* n),
-                                      (int nb, double* b),
-                                      (int ns, double* s),
-                                      (int nba, double* ba),
-                                      (int nrf, double* rf) }
-%apply (double *IN_ARRAY1, int DIM1) {(double *ell, int nell),
-                                      (double *aarr, int na)};
+%apply (double *IN_ARRAY1, int DIM1) {
+    (double *z_n, int nz_n),
+    (double *z_b, int nz_b),
+    (double *z_s, int nz_s),
+    (double *z_ba, int nz_ba),
+    (double *z_rf, int nz_rf),
+    (double *n, int nn),
+    (double *b, int nb),
+    (double *s, int ns),
+    (double *ba, int nba),
+    (double *rf, int nrf)}
+%apply (double *IN_ARRAY1, int DIM1) {
+    (double *ell, int nell),
+    (double *aarr, int na)};
 %apply (int DIM1, double *ARGOUT_ARRAY1) {(int nout, double *output)};
 
 
@@ -45,11 +46,11 @@
 CCL_ClTracer* cl_tracer_new_wrapper(
         ccl_cosmology *cosmo, int tracer_type,
         int has_rsd, int has_magnification, int has_intrinsic_alignment,
-        int nz_n, double *z_n, int nn, double *n,
-        int nz_b, double *z_b, int nb, double *b,
-        int nz_s, double *z_s, int ns, double *s,
-        int nz_ba, double *z_ba, int nba, double *ba,
-        int nz_rf, double *z_rf, int nrf, double *rf,
+        double *z_n, int nz_n, double *n, int nn,
+        double *z_b, int nz_b, double *b, int nb,
+        double *z_s, int nz_s, double *s, int ns,
+        double *z_ba, int nz_ba, double *ba, int nba,
+        double *z_rf, int nz_rf, double *rf, int nrf,
         double z_source,
         int *status) {
     return ccl_cl_tracer(
