@@ -20,7 +20,7 @@ ccl_parameters parameters_create_nu(
                         double Neff, double w0, double wa, double h,
                         double norm_pk, double n_s, double bcm_log10Mc,
                         double bcm_etab, double bcm_ks, int mnu_is_sum,
-                        double* m_nu, int n_m, int* status)
+                        double* m_nu, int n_m, int *status)
 {
     return ccl_parameters_create(
                         Omega_c, Omega_b, Omega_k, Neff, m_nu, mnu_is_sum,
@@ -44,7 +44,7 @@ ccl_parameters parameters_create_nu_vec(
                         double bcm_etab, double bcm_ks,
                         double* zarr, int nz,
                         double* dfarr, int nf, int mnu_is_sum, double* m_nu,
-                        int n_m, int* status)
+                        int n_m, int *status)
 {
     if (nz == 0){ nz = -1; }
     return ccl_parameters_create(

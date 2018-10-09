@@ -7,13 +7,13 @@
 %include "../include/ccl_correlation.h"
 
 // Enable vectorised arguments for arrays
-%apply (int DIM1, double* IN_ARRAY1) {
+%apply (double *IN_ARRAY1, int DIM1) {
     (double *larr, int nlarr),
     (double *clarr, int nclarr),
     (double *theta, int nt),
     (double *r, int nr)}
-%apply (double* ARGOUT_ARRAY1, int DIM1) {
-    (int nout, double* output),
+%apply (int DIM1, double *ARGOUT_ARRAY1) {
+    (int nout, double *output),
     (int nxi, double *xi)};
 
 %feature("pythonprepend") correlation_vec %{

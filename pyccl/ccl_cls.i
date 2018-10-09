@@ -51,7 +51,7 @@ CCL_ClTracer* cl_tracer_new_wrapper(
         int nz_ba, double *z_ba, int nba, double *ba,
         int nz_rf, double *z_rf, int nrf, double *rf,
         double z_source,
-        int* status) {
+        int *status) {
     return ccl_cl_tracer(
         cosmo,
         tracer_type,
@@ -83,7 +83,7 @@ void angular_cl_vec(
         int method,
         double *ell, int nell,
         int nout, double *output,
-        int* status) {
+        int *status) {
   //Cast ells as integers
   int *ell_int = malloc(nell * sizeof(int));
   CCL_ClWorkspace *w = ccl_cl_workspace_default(

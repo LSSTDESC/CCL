@@ -54,5 +54,26 @@ def test_background():
         status)
 
 
+def test_cls():
+    assert False
+
+
+def test_core():
+    status = 0
+    assert_raises(
+        CCLError,
+        ccllib.parameters_create_nu_vec,
+        0.25, 0.05, 0.0, 3.0, -1.0, 0.0, 0.7, 2e-9, 0.95, 1, 0.0, 0.0,
+        [1.0, 2.0],
+        [0.0, 0.3, 0.5],
+        0,
+        [0.02, 0.01, 0.2],
+        status)
+
+
+def test_correlation():
+    assert False
+
+
 if __name__ == '__main__':
     run_module_suite()
