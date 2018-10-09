@@ -122,7 +122,6 @@ void clt_fa_vec(
         double *aarr, int na,
         int nout, double *output,
         int *status) {
-    assert(nout==na);
     ccl_get_tracer_fas(cosmo, clt, na, aarr, output, func_code, status);
 }
 
