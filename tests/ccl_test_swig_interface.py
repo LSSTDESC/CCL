@@ -75,6 +75,31 @@ def test_swig_correlation():
     assert False
 
 
+def test_swig_halomod():
+    status = 0
+    for func in [ccllib.onehalo_matter_power_vec,
+                 ccllib.twohalo_matter_power_vec,
+                 ccllib.halomodel_matter_power_vec]:
+        assert_raises(
+            CCLError,
+            func,
+            COSMO,
+            1.0,
+            [0.1, 1.0],
+            9,
+            status)
+
+    assert_raises(
+        CCLError,
+        ccllib.halo_concentration_vec,
+        COSMO,
+        1.0,
+        200.0,
+        [1e13, 1e14],
+        8,
+        status)
+
+
 def test_swig_massfunc():
     status = 0
     for func in [ccllib.massfunc_vec, ccllib.halo_bias_vec]:
