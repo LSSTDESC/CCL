@@ -658,7 +658,7 @@ def check(status, cosmo=None):
 
     # Get status message from Cosmology object, if there is one
     if cosmo is not None:
-        msg = _cosmology_obj(cosmo).status_message
+        msg = cosmo.cosmo.status_message
     else:
         msg = ""
 
@@ -669,20 +669,3 @@ def check(status, cosmo=None):
     # Check for unknown error
     if status != 0:
         raise CCLError("Error %d: %s" % (status, msg))
-
-
-def _cosmology_obj(cosmo):
-    """Returns a ccl_cosmology object, given an input object which may be
-    ccl_cosmology, the Cosmology wrapper class, or an invalid type.
-
-    Args:
-        cosmo (ccl_cosmology or Cosmology): The input cosmology which gets
-                                            converted to a ccl_cosmology.
-
-    """
-    if isinstance(cosmo, lib.cosmology):
-        return cosmo
-    elif isinstance(cosmo, Cosmology):
-        return cosmo.cosmo
-    else:
-        raise TypeError("Invalid Cosmology or ccl_cosmology object.")

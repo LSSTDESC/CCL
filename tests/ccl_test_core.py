@@ -170,7 +170,7 @@ def test_parameters_mgrowth():
 def test_parameters_read_write():
     """Check that Parameters objects can be read and written"""
     import tempfile
-    params = ccl.Parameters(Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, 
+    params = ccl.Parameters(Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9,
                             n_s=0.96)
 
     # Make a temporary file name
@@ -193,8 +193,6 @@ def test_parameters_read_write():
 
     assert_raises(IOError, ccl.Parameters.read_yaml, filename=temp_file_name)
     assert_raises(IOError, params.read_yaml, filename=temp_file_name+"/nonexistent_directory/params.yml")
-
-
 
 
 def test_cosmology_init():
