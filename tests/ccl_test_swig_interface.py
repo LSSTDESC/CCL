@@ -1,3 +1,4 @@
+import copy
 from numpy.testing import assert_raises, run_module_suite
 import pyccl
 from pyccl import ccllib
@@ -55,7 +56,50 @@ def test_swig_background():
 
 
 def test_swig_cls():
-    assert False
+    status = 0
+    base_args = [
+        [0.0, 1.0],
+        [0.0, 1.0],
+        [0.0, 1.0, 2.0],
+        [0.0, 1.0, 2.0],
+        [0.0, 1.0, 2.0, 3.0],
+        [0.0, 1.0, 2.0, 3.0],
+        [0.0, 1.0, 2.0, 3.0, 4.0],
+        [0.0, 1.0, 2.0, 3.0, 4.0],
+        [0.0, 1.0, 2.0, 3.0, 4.0, 5.0],
+        [0.0, 1.0, 2.0, 3.0, 4.0, 5.0],
+        1.0,
+        status]
+
+    for i in range(5):
+        args = copy.deepcopy(base_args)
+        args[i*2] = [1.0] * 8
+        assert_raises(
+            CCLError,
+            ccllib.cl_tracer_new_wrapper,
+            COSMO, 0,
+            0, 0, 0,
+            *args)
+
+    assert_raises(
+        CCLError,
+        ccllib.angular_cl_vec,
+        COSMO,
+        None, None,
+        1, 1, 1,
+        0, 0, 0,
+        0,
+        [0, 1],
+        5,
+        status)
+
+    assert_raises(
+        CCLError,
+        ccllib.clt_fa_vec,
+        COSMO, None, 0,
+        [0, 1, 2],
+        2,
+        status)
 
 
 def test_swig_core():
@@ -72,7 +116,37 @@ def test_swig_core():
 
 
 def test_swig_correlation():
-    assert False
+    status = 0
+    assert_raises(
+        CCLError,
+        ccllib.correlation_vec,
+        COSMO,
+        [1, 2],
+        [1, 2, 3],
+        [0, 1, 2, 3],
+        0, 0,
+        4,
+        status)
+
+    assert_raises(
+        CCLError,
+        ccllib.correlation_vec,
+        COSMO,
+        [1, 2, 3],
+        [1, 2, 3],
+        [0, 1, 2, 3],
+        0, 0,
+        5,
+        status)
+
+    assert_raises(
+        CCLError,
+        ccllib.correlation_3d_vec,
+        COSMO,
+        1.0,
+        [1, 2, 3],
+        4,
+        status)
 
 
 def test_swig_halomod():
