@@ -18,9 +18,9 @@
                                       (int ns, double* s),
                                       (int nba, double* ba),
                                       (int nrf, double* rf) }
-%apply (double* IN_ARRAY1, int DIM1) {(double* ell, int nell),
-                                      (double *aarr,int na)};
-%apply (double* ARGOUT_ARRAY1, int DIM1) {(double* output, int nout)};
+%apply (double* IN_ARRAY1, int DIM1) {(double *ell, int nell),
+                                      (double *aarr, int na)};
+%apply (int DIM1, double* ARGOUT_ARRAY1) {(int nout, doubl e*output)};
 
 
 %feature("pythonprepend") cl_tracer_new_wrapper %{
@@ -69,8 +69,8 @@ CCL_ClTracer* cl_tracer_new_wrapper(
 %}
 
 %feature("pythonprepend") angular_cl_vec %{
-    if numpy.shape(ell) != (output,):
-        raise CCLError("Input shape for `ell` must match `(output,)`!")
+    if numpy.shape(ell) != (nout,):
+        raise CCLError("Input shape for `ell` must match `(nout,)`!")
 %}
 
 %inline %{
@@ -80,8 +80,8 @@ void angular_cl_vec(ccl_cosmology * cosmo,
                     double l_limber,double l_logstep,double l_linstep,
                     double dchi, double dlk, double zmin,
                     int method,
-                    double* ell, int nell,
-                    double* output, int nout,
+                    double *ell, int nell,
+                    int nout, double *output,
                     int* status)
 {
   //Cast ells as integers
@@ -110,8 +110,8 @@ void angular_cl_vec(ccl_cosmology * cosmo,
 %}
 
 %feature("pythonprepend") clt_fa_vec %{
-    if numpy.shape(aarr) != (output,):
-        raise CCLError("Input shape for `aarr` must match `(output,)`!")
+    if numpy.shape(aarr) != (nout,):
+        raise CCLError("Input shape for `aarr` must match `(nout,)`!")
 %}
 
 %inline %{
@@ -119,7 +119,7 @@ void angular_cl_vec(ccl_cosmology * cosmo,
 void clt_fa_vec(
         ccl_cosmology *cosmo, CCL_ClTracer *clt, int func_code,
         double *aarr, int na,
-        double *output, int nout,
+        int nout, double *output,
         int *status) {
     assert(nout==na);
     ccl_get_tracer_fas(cosmo, clt, na, aarr, output, func_code, status);
