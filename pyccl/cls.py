@@ -1,6 +1,6 @@
 from . import ccllib as lib
 from . import constants as const
-from .core import _cosmology_obj, check
+from .core import check
 import numpy as np
 
 # Mapping between names for tracers and internal CCL tracer types
@@ -97,7 +97,7 @@ class ClTracer(object):
                  z=None, n=None, bias=None, mag_bias=None, bias_ia=None,
                  f_red=None, z_source=1100.):
         # Verify cosmo object
-        cosmo = _cosmology_obj(cosmo)
+        cosmo = cosmo.cosmo
 
         # Check tracer type
         if tracer_type not in tracer_types.keys():
@@ -159,7 +159,7 @@ class ClTracer(object):
         """
         # Access ccl_cosmology object
         cosmo_in = cosmo
-        cosmo = _cosmology_obj(cosmo)
+        cosmo = cosmo.cosmo
 
         # Check that specified function type exists
         if function not in function_types.keys():
@@ -387,7 +387,7 @@ def angular_cl(cosmo, cltracer1, cltracer2, ell,
             :math:`\ell`.
     """
     # Access ccl_cosmology object
-    cosmo = _cosmology_obj(cosmo)
+    cosmo = cosmo.cosmo
 
     if non_limber_method not in nonlimber_methods.keys():
         raise ValueError(
