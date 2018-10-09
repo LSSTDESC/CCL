@@ -7,7 +7,7 @@ COSMO = pyccl.Cosmology(
     Omega_c=0.27, Omega_b=0.045, h=0.67, A_s=1e-10, n_s=0.96).cosmo
 
 
-def test_background():
+def test_swig_background():
     status = 0
     for func in [
             ccllib.growth_factor_vec,
@@ -54,11 +54,11 @@ def test_background():
         status)
 
 
-def test_cls():
+def test_swig_cls():
     assert False
 
 
-def test_core():
+def test_swig_core():
     status = 0
     assert_raises(
         CCLError,
@@ -71,11 +71,41 @@ def test_core():
         status)
 
 
-def test_correlation():
+def test_swig_correlation():
     assert False
 
 
-def test_neurtinos():
+def test_swig_massfunc():
+    status = 0
+    for func in [ccllib.massfunc_vec, ccllib.halo_bias_vec]:
+        assert_raises(
+            CCLError,
+            func,
+            COSMO,
+            1.0, 200.0,
+            [1e13, 1e14],
+            4,
+            status)
+
+    assert_raises(
+        CCLError,
+        ccllib.massfunc_m2r_vec,
+        COSMO,
+        [1e13, 1e14],
+        4,
+        status)
+
+    assert_raises(
+        CCLError,
+        ccllib.sigmaM_vec,
+        COSMO,
+        1.0,
+        [1e13, 1e14],
+        4,
+        status)
+
+
+def test_swig_neurtinos():
     status = 0
     assert_raises(
         CCLError,
@@ -96,7 +126,7 @@ def test_neurtinos():
         status)
 
 
-def test_power():
+def test_swig_power():
     status = 0
     for func in [ccllib.linear_matter_power_vec,
                  ccllib.nonlin_matter_power_vec]:
