@@ -67,7 +67,7 @@ def reference_models_nu():
     """
 
     # Emulator Pk w/neutrinos list
-    p1 = ccl.Cosmology(
+    cosmo1 = ccl.Cosmology(
         Omega_c=0.27, Omega_b=0.022/0.67**2, h=0.67, sigma8=0.8,
         n_s=0.96, Neff=3.04, m_nu=[0.02, 0.02, 0.02],
         transfer_function='emulator',
@@ -598,7 +598,7 @@ def check_cls(cosmo):
 
     # Check if power spectrum type is valid for CMB
     cmb_ok = True
-    if cosmo.configuration.matter_power_spectrum_method \
+    if cosmo._config.matter_power_spectrum_method \
         == ccl.core.matter_power_spectrum_types['emu']: cmb_ok = False
 
     # ClTracer test objects
