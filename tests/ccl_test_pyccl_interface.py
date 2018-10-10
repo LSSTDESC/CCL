@@ -669,7 +669,7 @@ def check_cls_nu(cosmo):
 
     # Check if power spectrum type is valid for CMB
     cmb_ok = True
-    if cosmo.configuration.matter_power_spectrum_method \
+    if cosmo._config.matter_power_spectrum_method \
         == ccl.core.matter_power_spectrum_types['emu']: cmb_ok = False
 
     # ClTracer test objects
