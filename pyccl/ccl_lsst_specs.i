@@ -91,8 +91,12 @@ void specs_dNdz_tomog_vec(
     return;
 }
 
+%}
+
 /* The directive gets carried between files, so we reset it at the end. */
 %feature("pythonprepend") %{ %}
+
+%inline %{
 
 // C callback function, to call a pre-specified Python function with
 // call signature def fn(double, double): return double
