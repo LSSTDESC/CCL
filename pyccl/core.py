@@ -153,6 +153,10 @@ error_types = {
 class Cosmology(object):
     """A cosmology including parameters and associated data.
 
+    .. note:: Although some arguments default to `None`, they will raise a
+              ValueError inside this function if not specified, so they are not
+              optional.
+
     .. note:: BCM stands for the "baryonic correction model" of Schneider &
               Teyssier (2015; https://arxiv.org/abs/1510.06034). See the
               `DESC Note <https://github.com/LSSTDESC/CCL/blob/master/doc\
@@ -210,7 +214,8 @@ class Cosmology(object):
             internal inconsistencies. Defaults to 'strict'.
     """
     def __init__(
-            self, Omega_c, Omega_b, h, n_s, sigma8=None, A_s=None,
+            self, Omega_c=None, Omega_b=None, h=None, n_s=None,
+            sigma8=None, A_s=None,
             Omega_k=0., Neff=3.046, m_nu=0., mnu_type=None, w0=-1.,
             wa=0., bcm_log10Mc=np.log10(1.2e14), bcm_etab=0.5, bcm_ks=55.,
             z_mg=None, df_mg=None,
@@ -303,9 +308,10 @@ class Cosmology(object):
         return cls(**inits)
 
     def _build_config(
-            self, transfer_function, matter_power_spectrum,
-            baryons_power_spectrum, mass_function, halo_concentration,
-            emulator_neutrinos):
+            self, transfer_function=None, matter_power_spectrum=None,
+            baryons_power_spectrum=None,
+            mass_function=None, halo_concentration=None,
+            emulator_neutrinos=None):
         """Build a ccl_configuration struct"""
 
         # Check validity of configuration-related arguments
@@ -374,9 +380,10 @@ class Cosmology(object):
         self._config = config
 
     def _build_parameters(
-            self, Omega_c, Omega_b, h, n_s, sigma8, A_s, Omega_k, Neff,
-            m_nu, mnu_type, w0, wa, bcm_log10Mc, bcm_etab, bcm_ks, z_mg,
-            df_mg):
+            self, Omega_c=None, Omega_b=None, h=None, n_s=None, sigma8=None,
+            A_s=None, Omega_k=None, Neff=None, m_nu=None, mnu_type=None,
+            w0=None, wa=None, bcm_log10Mc=None, bcm_etab=None, bcm_ks=None,
+            z_mg=None, df_mg=None):
         """Build a ccl_parameters struct"""
 
         # Set nz_mg (no. of redshift bins for modified growth fns.)
