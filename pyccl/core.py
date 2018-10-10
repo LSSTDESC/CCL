@@ -303,7 +303,7 @@ class Cosmology(object):
         return cls(**inits)
 
     def _build_config(
-            self, *, transfer_function, matter_power_spectrum,
+            self, transfer_function, matter_power_spectrum,
             baryons_power_spectrum, mass_function, halo_concentration,
             emulator_neutrinos):
         """Build a ccl_configuration struct"""
@@ -374,7 +374,7 @@ class Cosmology(object):
         self._config = config
 
     def _build_parameters(
-            self, *, Omega_c, Omega_b, h, n_s, sigma8, A_s, Omega_k, Neff,
+            self, Omega_c, Omega_b, h, n_s, sigma8, A_s, Omega_k, Neff,
             m_nu, mnu_type, w0, wa, bcm_log10Mc, bcm_etab, bcm_ks, z_mg,
             df_mg):
         """Build a ccl_parameters struct"""
