@@ -210,7 +210,7 @@ class Cosmology(object):
             internal inconsistencies. Defaults to 'strict'.
     """
     def __init__(
-            self, *, Omega_c, Omega_b, h, n_s, sigma8=None, A_s=None,
+            self, Omega_c, Omega_b, h, n_s, sigma8=None, A_s=None,
             Omega_k=0., Neff=3.046, m_nu=0., mnu_type=None, w0=-1.,
             wa=0., bcm_log10Mc=np.log10(1.2e14), bcm_etab=0.5, bcm_ks=55.,
             z_mg=None, df_mg=None,
