@@ -57,8 +57,9 @@ examples/ccl_sample_angpow
 *.pyc
 build/*
 dist/*
-tests/.ipynb_checkpoints/
-*ipynb*
+tests/.ipynb_checkpoints/*
+examples/.ipynb_checkpoints/*
+examples/*.pdf
 *log
 *dat
 *bak
