@@ -58,6 +58,7 @@ emulator_neutrinos options
       Emu. This option may result in slight internal inconsistencies in the
       physical model assumed for neutrinos.
 """
+import copy
 import numpy as np
 import yaml
 
@@ -174,10 +175,12 @@ class Cosmology(object):
         n_s (:obj:`float`): Primordial scalar perturbation spectral index.
         Omega_k (:obj:`float`, optional): Curvature density fraction.
             Defaults to 0.
-        N_nu_rel (:obj:`float`, optional): Effective number of massless
+        Omega_g (:obj:`float`, optional): Density in relativistic species
+            except massless neutrinos. The default of `None` corresponds
+            to setting this from the CMB temperature. Note that if a non-`None`
+            value is given, this may result in a physically inconsistent model.
+        Neff (:obj:`float`, optional): Effective number of massless
             neutrinos present. Defaults to 3.046.
-        N_nu_mass (:obj:`float`, optional): Number of massive neutrinos
-            present. Defaults to 0.
         m_nu (:obj:`float`, optional): Total mass in eV of the massive
             neutrinos present. Defaults to 0.
         mnu_type (:obj:`str`, optional): The type of massive neutrinos.
@@ -216,9 +219,9 @@ class Cosmology(object):
     def __init__(
             self, Omega_c=None, Omega_b=None, h=None, n_s=None,
             sigma8=None, A_s=None,
-            Omega_k=0., Neff=3.046, m_nu=0., mnu_type=None, w0=-1.,
-            wa=0., bcm_log10Mc=np.log10(1.2e14), bcm_etab=0.5, bcm_ks=55.,
-            z_mg=None, df_mg=None,
+            Omega_k=0., Omega_g=None, Neff=3.046, m_nu=0., mnu_type=None,
+            w0=-1., wa=0., bcm_log10Mc=np.log10(1.2e14), bcm_etab=0.5,
+            bcm_ks=55., z_mg=None, df_mg=None,
             transfer_function='boltzmann_class',
             matter_power_spectrum='halofit',
             baryons_power_spectrum='nobaryons',
@@ -229,9 +232,9 @@ class Cosmology(object):
         # going to save these for later
         self._params_init_kwargs = dict(
             Omega_c=Omega_c, Omega_b=Omega_b, h=h, n_s=n_s, sigma8=sigma8,
-            A_s=A_s, Omega_k=Omega_k, Neff=Neff, m_nu=m_nu, mnu_type=mnu_type,
-            w0=w0, wa=wa, bcm_log10Mc=bcm_log10Mc, bcm_etab=bcm_etab,
-            bcm_ks=bcm_ks, z_mg=z_mg, df_mg=df_mg)
+            A_s=A_s, Omega_k=Omega_k, Omega_g=Omega_g, Neff=Neff, m_nu=m_nu,
+            mnu_type=mnu_type, w0=w0, wa=wa, bcm_log10Mc=bcm_log10Mc,
+            bcm_etab=bcm_etab, bcm_ks=bcm_ks, z_mg=z_mg, df_mg=df_mg)
 
         self._config_init_kwargs = dict(
             transfer_function=transfer_function,
@@ -251,7 +254,6 @@ class Cosmology(object):
         self._build_config(**self._config_init_kwargs)
         self.cosmo = lib.cosmology_create(self._params, self._config)
 
-        # Check status
         if self.cosmo.status != 0:
             raise CCLError(
                 "(%d): %s"
@@ -268,6 +270,7 @@ class Cosmology(object):
         status = 0
         lib.parameters_write_yaml(self._params, filename, status)
 
+        # Check status
         if status != 0:
             raise IOError("Unable to write YAML file {}".format(filename))
 
@@ -383,7 +386,7 @@ class Cosmology(object):
             self, Omega_c=None, Omega_b=None, h=None, n_s=None, sigma8=None,
             A_s=None, Omega_k=None, Neff=None, m_nu=None, mnu_type=None,
             w0=None, wa=None, bcm_log10Mc=None, bcm_etab=None, bcm_ks=None,
-            z_mg=None, df_mg=None):
+            z_mg=None, df_mg=None, Omega_g=None):
         """Build a ccl_parameters struct"""
 
         # Set nz_mg (no. of redshift bins for modified growth fns.)
@@ -470,6 +473,14 @@ class Cosmology(object):
                 n_s, bcm_log10Mc, bcm_etab, bcm_ks,
                 z_mg, df_mg, mnu_types[mnu_type], m_nu, status)
         check(status)
+
+        # we cannot set omega_g via the C code directly. Thus we set it by hand
+        # and then put any difference into omega_l, which follows the
+        # what the C code does.
+        if Omega_g is not None:
+            total = self._params.Omega_g + self._params.Omega_l
+            self._params.Omega_g = Omega_g
+            self._params.Omega_l = total - Omega_g
 
     def __getitem__(self, key):
         """Access parameter values by name."""

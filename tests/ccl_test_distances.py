@@ -305,11 +305,7 @@ def compare_distances(z, chi_bench,dm_bench, Omega_v, w0, wa):
 
     cosmo = ccl.Cosmology(Omega_c=Omega_c, Omega_b=Omega_b, Neff = Neff,
                        h=h, A_s=A_s, n_s=n_s, Omega_k=Omega_k,
-                       w0=w0, wa=wa)
-    # Hack to set to same value used for benchmarks
-    cosmo._params.Omega_g = 0.0
-    ccl.ccllib.cosmology_free(cosmo.cosmo)
-    cosmo.cosmo = ccl.ccllib.cosmology_create(cosmo._params, cosmo._config)
+                       w0=w0, wa=wa, Omega_g=0)
 
     # Calculate distance using pyccl
     a = 1. / (1. + z)
@@ -334,11 +330,7 @@ def compare_distances_hiz(z, chi_bench, Omega_v, w0, wa):
 
     cosmo = ccl.Cosmology(Omega_c=Omega_c, Omega_b=Omega_b, Neff=Neff,
                        h=h, A_s=A_s, n_s=n_s, Omega_k=Omega_k,
-                       w0=w0, wa=wa)
-    # Hack to set to same value used for benchmarks
-    cosmo._params.Omega_g = 0.0
-    ccl.ccllib.cosmology_free(cosmo.cosmo)
-    cosmo.cosmo = ccl.ccllib.cosmology_create(cosmo._params, cosmo._config)
+                       w0=w0, wa=wa, Omega_g=0)
 
     # Calculate distance using pyccl
     a = 1. / (1. + z)
