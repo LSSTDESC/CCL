@@ -177,7 +177,9 @@ class Cosmology(object):
         Omega_g (:obj:`float`, optional): Density in relativistic species
             except massless neutrinos. The default of `None` corresponds
             to setting this from the CMB temperature. Note that if a non-`None`
-            value is given, this may result in a physically inconsistent model.
+            value is given, this may result in a physically inconsistent model
+            because the CMB temperature will still be non-zero in the
+            parameters.
         Neff (:obj:`float`, optional): Effective number of massless
             neutrinos present. Defaults to 3.046.
         m_nu (:obj:`float`, optional): Total mass in eV of the massive
