@@ -58,7 +58,6 @@ emulator_neutrinos options
       Emu. This option may result in slight internal inconsistencies in the
       physical model assumed for neutrinos.
 """
-import copy
 import numpy as np
 import yaml
 
