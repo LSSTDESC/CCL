@@ -727,8 +727,8 @@ n = np.ones(z_n.shape)
 
 # Create objects to represent tracers of the weak lensing signal with this
 # number density (with has_intrinsic_alignment=False)
-lens1 = ccl.ClTracerLensing(cosmo, False, n=(z_n, n))
-lens2 = ccl.ClTracerLensing(cosmo, False, n=(z_n, n))
+lens1 = ccl.WeakLensing(cosmo, dndz=(z_n, n))
+lens2 = ccl.WeakLensing(cosmo, dndz=(z_n, n))
 
 # Calculate the angular cross-spectrum of the two tracers as a function of ell
 ell = np.arange(2, 10)
