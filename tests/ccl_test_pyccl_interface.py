@@ -708,10 +708,10 @@ def check_cls_nu(cosmo):
 
     # Check that invalid options raise errors
     assert_raises(ValueError, nc1.get_internal_function, cosmo, 'x', a_arr)
-    assert_raises(ValueError, ccl.NumberCounts, cosmo, True,
+    assert_raises(CCLError, ccl.NumberCounts, cosmo, True,
                   dndz=(z,n), bias=(z,b))
     assert_raises(ValueError, ccl.WeakLensing, cosmo,
-                  has_intrinsic_alignment=True, dndz=(z,n), ia_bias=(z,n))
+                  dndz=(z,n), ia_bias=(z,n))
 
 
 def check_corr(cosmo):
