@@ -116,7 +116,7 @@ def correlation_multipole(cosmo, a, beta, l, s):
     
     """
     cosmo_in = cosmo
-    cosmo = _cosmology_obj(cosmo)
+    cosmo = _cosmo.cosmo
     status = 0
 
     # Convert scalar input into an array
@@ -148,7 +148,7 @@ def correlation_3dRsd(cosmo, a, s, mu, beta, use_spline = True):
     
     """
     cosmo_in = cosmo
-    cosmo = _cosmology_obj(cosmo)
+    cosmo = cosmo.cosmo
     status = 0
 
     # Convert scalar input into an array
@@ -167,7 +167,7 @@ def correlation_3dRsd(cosmo, a, s, mu, beta, use_spline = True):
 def correlation_pi_sigma(cosmo, a, beta, pie, sig, use_spline = True):
     
     cosmo_in = cosmo
-    cosmo = _cosmology_obj(cosmo)
+    cosmo = cosmo.cosmo
     status = 0
 
     # Convert scalar input into an array

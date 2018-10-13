@@ -521,9 +521,9 @@ void ccl_correlation_multipole(ccl_cosmology *cosmo,double a,double beta,
   double *k_arr,*pk_arr,*s_arr,*xi_arr,*xi_arr0;
 
   //number of data points for k and pk array (divided by 10 for faster claculation)
-  N_ARR=(int)(ccl_splines->N_K_3DCOR*log10(ccl_splines->K_MAX/ccl_splines->K_MIN_DEFAULT));  
+  N_ARR=(int)(ccl_splines->N_K_3DCOR*log10(ccl_splines->K_MAX/ccl_splines->K_MIN));  
  
-  k_arr=ccl_log_spacing(ccl_splines->K_MIN_DEFAULT,ccl_splines->K_MAX,N_ARR);
+  k_arr=ccl_log_spacing(ccl_splines->K_MIN,ccl_splines->K_MAX,N_ARR);
   if(k_arr==NULL) {
     *status=CCL_ERROR_MEMORY;
     strcpy(cosmo->status_message,"ccl_correlation.c: ccl_correlation_3dRsd ran out of memory\n");
@@ -615,9 +615,9 @@ void ccl_correlation_multipole_spline(ccl_cosmology *cosmo,double a,int *status)
   double *k_arr,*pk_arr,*s_arr,*xi_arr,*xi_arr0,*xi_arr2,*xi_arr4;
 
   //number of data points for k and pk array (divided by 10 for faster claculation)
-  N_ARR=(int)(ccl_splines->N_K_3DCOR*log10(ccl_splines->K_MAX/ccl_splines->K_MIN_DEFAULT));  
+  N_ARR=(int)(ccl_splines->N_K_3DCOR*log10(ccl_splines->K_MAX/ccl_splines->K_MIN));  
  
-  k_arr=ccl_log_spacing(ccl_splines->K_MIN_DEFAULT,ccl_splines->K_MAX,N_ARR);
+  k_arr=ccl_log_spacing(ccl_splines->K_MIN,ccl_splines->K_MAX,N_ARR);
   if(k_arr==NULL) {
     *status=CCL_ERROR_MEMORY;
     strcpy(cosmo->status_message,"ccl_correlation.c: ccl_correlation_3dRsd ran out of memory\n");
