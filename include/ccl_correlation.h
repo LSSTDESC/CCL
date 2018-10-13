@@ -56,29 +56,22 @@ void ccl_correlation_3d(ccl_cosmology *cosmo,double a,
 		     int do_taper_pk,double *taper_pk_limits,
 		     int *status);
 
-<<<<<<< HEAD
-/**
- * Computes the redshift space distortion correlation function (wrapper)
- * @param cosmo :Cosmological parameters
- * @param a : scale factor
- * @param n_s : number of output values of redshift space distance s
- * @param s : values of the distance in Mpc
- * @param mu : value of the cosine of the angle
- * @param beta : growth factor divided by bias
- * @param xi : the values of the correlation function at the distances and angle above will be returned in this array, which should be pre-allocated
- * @param do_avg_mu : key for averaging over mu (if given a non-zero value, averages xi over angular space at constant s)
- */
+void ccl_correlation_multipole(ccl_cosmology *cosmo,double a,double beta,
+			   int l,int n_s,double *s,double *xi,
+			   int *status);
+
+void ccl_correlation_multipole_spline(ccl_cosmology *cosmo,double a,int *status);
+
+void ccl_correlation_multipole_spline_free();
+
 void ccl_correlation_3dRsd(ccl_cosmology *cosmo,double a,
 			   int n_s,double *s,double mu,double beta,double *xi,
-			   int do_avg_mu,int *status);
+			   int use_spline, int *status);
 
-#ifdef __cplusplus
-}
-||||||| merged common ancestors
-#ifdef __cplusplus
-}
-=======
+void ccl_correlation_pi_sigma(ccl_cosmology *cosmo,double a,double beta,
+			   double pi,int n_sig,double *sig,double *xi,
+			   int use_spline,int *status);
+
 CCL_END_DECLS
 
->>>>>>> master
 #endif
