@@ -87,7 +87,29 @@ def correlation_3d(cosmo, a, r):
     if scalar: return xi[0]
     return xi
 
-def correlation_3dRsd(cosmo, a, s, mu, beta, do_avg_mu = False):
+def correlation_multipole(cosmo, a, beta, l, s):
+    """
+    Compute the correlation multipoles.
+    
+    """
+    cosmo_in = cosmo
+    cosmo = _cosmology_obj(cosmo)
+    status = 0
+
+    # Convert scalar input into an array
+    scalar = False
+    if isinstance(s, float) or isinstance(s, int):
+        scalar = True
+        s = np.array([s,])
+
+    # Call 3D correlation function
+    xis, status = lib.correlation_multipole_vec(cosmo, a, beta, l, s, len(s),
+                                            status)
+    check(status, cosmo_in)
+    if scalar: return xis[0]
+    return xis
+
+def correlation_3dRsd(cosmo, a, s, mu, beta, use_spline = True):
     """
     Compute the 3DRsd correlation function.
 
@@ -114,7 +136,30 @@ def correlation_3dRsd(cosmo, a, s, mu, beta, do_avg_mu = False):
 
     # Call 3D correlation function
     xis, status = lib.correlation_3dRsd_vec(cosmo, a, mu, beta, s, len(s),
-                                            int(do_avg_mu),status)
+                                            int(use_spline),status)
     check(status, cosmo_in)
     if scalar: return xis[0]
     return xis
+
+def correlation_pi_sigma(cosmo, a, beta, pie, sig, use_spline = True):
+    
+    cosmo_in = cosmo
+    cosmo = _cosmology_obj(cosmo)
+    status = 0
+
+    # Convert scalar input into an array
+    scalar = False
+    if isinstance(sig, float) or isinstance(sig, int):
+        scalar = True
+        sig = np.array([sig,])
+
+    # Call 3D correlation function
+    xis, status = lib.correlation_pi_sigma_vec(cosmo, a, beta, pie, sig, len(sig),
+                                                int(use_spline),status)
+    check(status, cosmo_in)
+    if scalar: return xis[0]
+    return xis
+
+def correlation_spline_free():
+    lib.correlation_multipole_spline_free_vec()
+

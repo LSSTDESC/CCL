@@ -34,7 +34,7 @@ from pyccl.lsst_specs import bias_clustering, sigmaz_clustering, \
 from pyccl.constants import CLIGHT_HMPC, MPC_TO_METER, PC_TO_METER, \
                       GNEWT, RHO_CRITICAL, SOLAR_MASS
 
-from pyccl.correlation import correlation, correlation_3d, correlation_3dRsd
+from pyccl.correlation import correlation, correlation_3d, correlation_multipole, correlation_3dRsd, correlation_spline_free, correlation_pi_sigma
 
 from pyccl.neutrinos import Omeganuh2, nu_masses
 
