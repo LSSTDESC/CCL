@@ -112,7 +112,7 @@ to your to your `PATH` and `LD_LIBRARY_PATH` environment variables. In the defau
 case, it will look like:
 ```sh
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/bin
+export PATH=$PATH:/usr/local/bin
 ```
 
 To make sure that everything is working properly, you can run all unit tests after installation by running from the root `CCL` directory:
@@ -189,17 +189,25 @@ to the one you want to use. You can specify which C compiler will be used to com
 ```sh
 export CC=gcc
 ```
+2. If upon running the C tests you get an error from CLASS saying it cannot find the file `sBBN_2017.dat`, your system is not finding the local copy of CLASS. To solve this, do
+```sh
+export CLASS_PARAM_DIR=your_ccl_path/CCL/build/extern/share/class/
+```
+or add this to your `.bashrc`.
 
 ## Development workflow
 
 **Installing `CCL` on the system is not a good idea when doing development**, you
 can compile and run all the libraries and examples directly from your local copy.
+
 The only subtlety when not actually installing the library is that one needs to
 define the environment variable `CCL_PARAM_FILE` pointing to `include/ccl_params.ini` :
+
 ```sh
 export CCL_PARAM_FILE=/path/to/your/ccl/folder/include/ccl_params.ini
 ```
-Failure to define this environment variable will result in violent segfaults !
+
+Failure to define this environment variable will result an exception.
 
 ### Working on the C library
 Here are a few common steps when working on the C library:
@@ -217,6 +225,7 @@ Here are a few common steps when working on the C library:
   ```sh
   $ git pull      # From root folder
   $ make -Cbuild  # The -C option allows you to run make from a different directory
+  $ export CCL_PARAM_FILE=$PWD/include/ccl_params.ini # set the parameter file
   $ build/check_ccl
   ```
 
@@ -232,6 +241,14 @@ Here are a few common steps when working on the C library:
   $ cd build
   $ rm -rf *
   $ cmake ..
+  $ make
+  ```
+
+  - Building CCL in Debug mode. This will disable optimizations and allow you to
+  use a debugger:
+  ```sh
+  $ mkdir -p CCL/debug && cd CCL/debug
+  $ cmake -DCMAKE_BUILD_TYPE=Debug ..
   $ make
   ```
 

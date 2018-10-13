@@ -23,6 +23,13 @@ class build(_build):
         if call(["cp", "build/pyccl/ccllib.py", "pyccl/"]) != 0:
             raise Exception("Could not find python module, SWIG must have failed.")
         call(["cp", "include/ccl_params.ini", "pyccl/"])
+
+        # Copy files required by CLASS
+        if call(["cp","-r", "build/extern/share/class/bbn", "pyccl/"]) != 0:
+            raise Exception("Could not copy the CLASS BBN fikes, CLASS compilation must have failed.")
+        if call(["cp","-r", "build/extern/share/class/hyrec", "pyccl/"]) != 0:
+            raise Exception("Could not copy the CLASS BBN fikes, CLASS compilation must have failed.")
+
         _build.run(self)
 
 # read the contents of the README file
@@ -34,12 +41,13 @@ setup(name="pyccl",
     long_description=long_description,
     long_description_content_type='text/markdown',
     author="LSST DESC",
-    version="0.3.2",
     url="https://github.com/LSSTDESC/CCL",
     packages=['pyccl'],
     provides=['pyccl'],
-    package_data={'pyccl': ['_ccllib.so', 'ccl_params.ini']},
+    package_data={'pyccl': ['_ccllib.so', 'ccl_params.ini', 'bbn/*', 'hyrec/*']},
     include_package_data = True,
+    use_scm_version=True,
+    setup_requires=['setuptools_scm'],
     install_requires=['numpy'],
     test_suite='nose.collector',
     tests_require=['nose'],

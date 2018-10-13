@@ -6,7 +6,7 @@
 #include <math.h>
 #include <string.h>
 
-#define CLS_TOLERANCE 1E-3
+#define CLS_TOLERANCE 5E-4
 #define CLS_FRACTION 1E-3
 #define ELL_MAX_CL 3001
 

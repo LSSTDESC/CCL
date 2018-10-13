@@ -1,13 +1,13 @@
 /** @file */
-#ifdef __cplusplus
-extern "C" {
-#endif
+#ifndef __CCL_UTILS_H_INCLUDED__
+#define __CCL_UTILS_H_INCLUDED__
 
-#pragma once
-#include "gsl/gsl_spline.h"
+#include <gsl/gsl_spline.h>
 
 #define CCL_MIN(a, b)  (((a) < (b)) ? (a) : (b))
 #define CCL_MAX(a, b)  (((a) > (b)) ? (a) : (b))
+
+CCL_BEGIN_DECLS
 
 /**
  * Compute bin edges of N-1 linearly spaced bins on the interval [xmin,xmax]
@@ -59,6 +59,6 @@ double ccl_spline_eval(double x,SplPar *spl);
 
 void ccl_spline_free(SplPar *spl);
 
-#ifdef __cplusplus
-}
+CCL_END_DECLS
+
 #endif

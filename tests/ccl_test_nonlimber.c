@@ -38,7 +38,7 @@ CTEST_SETUP(nonlimber){
   data->A_s = 2.1e-9;
   data->n_s = 0.96;
   data->Omega_n = 0.0;
-  data->Omega_v = 0;
+  data->Omega_v = 0.7;
   data->Neff=3.046;
   double mnuval = 0.;
   data->mnu = &mnuval;
@@ -62,6 +62,8 @@ static void test_nonlimber_precision(struct nonlimber_data * data)
   ccl_config.transfer_function_method=ccl_boltzmann_class;
   ccl_config.matter_power_spectrum_method=ccl_linear;
   ccl_parameters ccl_params = ccl_parameters_create(data->Omega_c, data->Omega_b, data->Omega_k, data->Neff, data->mnu, data->mnu_type,data->w_0, data->w_a, data->h, data->A_s, data->n_s,-1,-1,-1,-1,NULL,NULL, &status);
+  ccl_params.Omega_g=0.;
+  ccl_params.Omega_l=data->Omega_v;
 
   // Initialize cosmology object given cosmo params
   ccl_cosmology *ccl_cosmo=ccl_cosmology_create(ccl_params,ccl_config);

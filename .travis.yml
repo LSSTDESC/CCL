@@ -18,14 +18,17 @@ matrix:
     python: 3.6
     env: TOXENV=py36
   - os: osx
+    osx_image: xcode9.4
     language: generic
     env: TOXENV=py27
   - os: osx
+    osx_image: xcode9.4
     language: generic
     env: TOXENV=py36
 install:
 - "./.travis/install.sh"
-- if ! [[ $TRAVIS_OS_NAME == "linux" ]]; then source $HOME/miniconda/bin/activate; fi
+- if ! [[ $TRAVIS_OS_NAME == "linux" ]]; then source $HOME/miniconda/bin/activate;
+  fi
 - if ! [[ $TRAVIS_OS_NAME == "linux" ]]; then hash -r ; fi
 - if ! [[ $TRAVIS_OS_NAME == "linux" ]]; then source activate test-environment ; fi
 - export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
@@ -33,9 +36,11 @@ install:
 - cmake --version
 - python --version
 script:
+- flake8 pyccl
 - python setup.py build
-- nosetests tests/run_tests.py --all --debug --detailed-errors --verbose --process-restartworker --with-coverage --cover-package=pyccl
-- sudo make -Cbuild install
+- nosetests tests/run_tests.py --all --debug --detailed-errors --verbose --process-restartworker
+  --with-coverage --cover-package=pyccl
+- make -Cbuild && sudo make -Cbuild install
 - check_ccl
 after_success:
 - coveralls
@@ -43,7 +48,7 @@ deploy:
   provider: pypi
   user: desc-ccl
   password:
-    secure: mW6yYWqTxSOlqRE4nlaBucmCg7JBEhm2kDRT18imbIA998JSnA+3TNNc87XbrU5KBHeLgtlX6hFGaquNMi69jY64zmVy4880hnuShpFWYGiwHkvdJCqnQe2wHl183/zQxFpgLZrWj5TyzSgz7ESWIbqt6SS8kT87oKpjtE813jLICUv8kwwRoOo2RQ0EVKKlmOsbbDPOh26/lx0MKRHYeU7pzSo96kXty6fLSARKJLngDDq+e8Vph7pYE5N0ZMoOwagAMBHUtv6zXhzTz5Kfu9menaDpClFwJqjkvbP9IhVSa1sJhituk/GG+d4MBMYmVadsH5J9dJlUm7oGrxJsiuwePfENjxafV8O+JcT02Q9RlvP9741bckw9hy1wLN0qOdPnaMx3kdXin3Ooj9Oud+3Uv8Y6HC1IYvkS1H6Od4EoowJCIDBz3NmDjiuGpzCcenRmaxFQJnbwf/H44pedDLkB0c+EnYxfh2U7LJj7ztVmeFS8AV3P/E3aYx0StP/LnPnzvWDBIhStdZSMAX3K1RZBSjvu5nmTbk2w6TMI6ihlKfAmjyTwEOH7KcZtdv/o7A5VbBiz6PGehAJ6MrWLKtkiLVO1K2AeKH/AZ2Bknh8CUyLBpQ4JYg5URHvGa7wvnM4rPVh1dU/LvJrbaVXqlZp4gNVW0wrzVakfu4Q6Qng=
+    secure: HsuTCvOcmuNWM1RfEPy76xma6x9Kv4bgbP1M0IGpKEA2ZxOB4mHc7zCGDS5rvuft/7HQL5LfUaU/vL84cd5ca0CFMqE8WxUTboh8XwY9+3fV7IlOSHlSjmr7etnAEwWsCQ56dE2Ph73f7EAMREg5FeT/i9OsMWrkyPn8z53F6+PeZP84sPLn2t5rerjXR8ZT7xFLZZx4y5qpgV4HwTAIsJWuVixOE/gTFqLD/yJGIJpiOIptD+sTfxWaploYz27JzHiUn5Y+oDluTJ7yuLCkW55SVukEr/IKaNzyEesbGjVYBuUePVvEc7dl8wVudTib4juUBYTM7KZevCBGHi4fn+DHgdK+8rVasY2+AixrnehDYCOhy3T06c79z6F3R5ZFjsYdiaJQrPoAeWCdW8elwJ3N/KuVEWG6e6SzfVAq+laFY1LYbSD7EMGajYaLUf7hdKkDNbuKbIaDmEN0q4BnpFSiDVpR/7PcVCnpfutRiuBEYTM6QTwS4vkrSJIRJYB92KYXZ0h5XqaeYBMTpXyGlBi5Z6lRTydZPgqgSK/YyKoqcmJ8pnBYaJmt+6mPBvb4d/hLiY3n7m6gLWTiIcKHnFuoo3xMLbLEenNU6Y66nT+y7czp1Dw1jFoVaAjyKkQlEcZuJZUnmAhxweXVHR07vaQQeHiStglQni9QKKLk1Lo=
   on:
     tags: true
     branch: master

@@ -1,0 +1,20 @@
+\begin{table*}
+  \begin{center}
+    \caption{Cosmologies implemented in \ccl and observables supported in each of them. Note that the only reason why angular power spectra appear not to be supported in non-flat cosmologies is that the hyperspherical Bessel functions are currently not implemented, although their impact is fairly limited. Likewise, number counts power spectra are strictly not supported in the presence of massive neutrino cosmologies due to the scale-dependent growth rate that affects the redshift-space distortions term, even though the impact of this is also small for wide tomographic bins. The halo model can make matter power spectrum predictions for all cosmologies, but should not be used for massive neutrino models because the current version does not distinguish between the cold matter, relevant for clustering, and all matter. Finally, we note that \ccl can make predictions for the growth of perturbations for some modified gravity models through a user defined $\Delta f(a)$ as detailed in Section \ref{sec:growth}, and that other extensions are supported via integration of external modified gravity codes.\label{tab:cosmo}}
+    \begin{tabular}{lcccccc}
+      \hline\hline
+      Observable/Model & flat $\Lambda$CDM & $\Lambda$CDM+$K$ & $\Lambda$CDM + $m_\nu$ & $w$CDM \\[3pt] 
+      \hline
+      Distances & \checkmark & \checkmark  & \checkmark & \checkmark \\
+      Growth function  & \checkmark & \checkmark & $X$ & \checkmark    \\
+      $P_m(k,z)$ & \checkmark & \checkmark & \checkmark & \checkmark \\
+      Halo Mass Function & \checkmark & \checkmark & $X$ & \checkmark \\
+      $C_l$, number counts & \checkmark & $X$ & $X$ & \checkmark \\
+      $C_l$, weak/CMB lensing  & \checkmark & $X$ & \checkmark & \checkmark \\
+      Correlation function & \checkmark & $X$ & \checkmark & \checkmark \\
+      Halo model & \checkmark & \checkmark & $X$ & \checkmark \\
+      \hline\hline
+    \end{tabular}
+  \end{center}
+  %\caption{Cosmologies supported.}
+\end{table*}

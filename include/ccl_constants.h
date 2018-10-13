@@ -1,10 +1,7 @@
-#ifdef __cplusplus
-extern "C" {
-#endif
+#ifndef __CCL_CONSTANTS_H_INCLUDED__
+#define __CCL_CONSTANTS_H_INCLUDED__
 
-#pragma once
-
-#include "gsl/gsl_const_mksa.h"
+#include <gsl/gsl_const_mksa.h>
 
 //Spline types
 #define A_SPLINE_TYPE gsl_interp_akima
@@ -31,22 +28,23 @@ extern "C" {
 #define K_PIVOT 0.05
 
 /**
- * Lightspeed / H0 in units of Mpc/h
+ * Lightspeed / H0 in units of Mpc/h (from CODATA 2014)
  */
 #define CLIGHT_HMPC 2997.92458 //H0^-1 in Mpc/h
 
 /**
  * Newton's gravitational constant in units of m^3/Kg/s^2 
  */
-//#define GNEWT 6.6738e-11    //(from PDG 2013) in m^3/Kg/s^2
-#define GNEWT 6.67428e-11 // CLASS VALUE
+//#define GNEWT 6.6738e-11  /(from PDG 2013) in m^3/Kg/s^2
+//#define GNEWT 6.67428e-11 // CLASS VALUE
+#define GNEWT 6.67408e-11 // from CODATA 2014
 
 /**
  * Solar mass in units of kg (from GSL)
  */
-#define SOLAR_MASS GSL_CONST_MKSA_SOLAR_MASS
+//#define SOLAR_MASS GSL_CONST_MKSA_SOLAR_MASS
 //#define SOLAR_MASS 1.9885e30 //(from PDG 2015) in Kg
-
+#define SOLAR_MASS 1.9884754153381438e+30 //from IAU 2015
 /**
  * Mpc to meters (from PDG 2013)
  */
@@ -65,28 +63,32 @@ extern "C" {
 /**
  * Boltzmann constant in units of J/K
 */
-#define KBOLTZ  GSL_CONST_MKSA_BOLTZMANN
-
+//#define KBOLTZ  GSL_CONST_MKSA_BOLTZMANN
+#define KBOLTZ 1.38064852e-23 //from CODATA 2014
+  
 /**
  * Stefan-Boltzmann constant in units of kg/s^3 / K^4
  */
-#define STBOLTZ GSL_CONST_MKSA_STEFAN_BOLTZMANN_CONSTANT
-
+//#define STBOLTZ GSL_CONST_MKSA_STEFAN_BOLTZMANN_CONSTANT
+#define STBOLTZ 5.670367e-8 //from CODATA 2014
 /**
  * Planck's constant in units kg m^2 / s
  */
-#define HPLANCK  GSL_CONST_MKSA_PLANCKS_CONSTANT_H 
-
+//#define HPLANCK  GSL_CONST_MKSA_PLANCKS_CONSTANT_H 
+#define HPLANCK 6.626070040e-34 //from CODATA 2014
+  
 /**
  * The speed of light in m/s
  */
-#define CLIGHT   GSL_CONST_MKSA_SPEED_OF_LIGHT
-
+//#define CLIGHT   GSL_CONST_MKSA_SPEED_OF_LIGHT
+#define CLIGHT 299792458.0 //from CODATA 2014
+  
 /**
  * Electron volt to Joules convestion
  */
-#define EV_IN_J  GSL_CONST_MKSA_ELECTRON_VOLT
-
+//#define EV_IN_J  GSL_CONST_MKSA_ELECTRON_VOLT
+#define EV_IN_J 1.6021766208e-19  //from CODATA 2014
+  
 /**
  * Temperature of the CMB in K
  */
@@ -171,6 +173,4 @@ extern "C" {
 #define Z_MIN_SOURCES 0.1
 #define Z_MAX_SOURCES 3.0
 
-#ifdef __cplusplus
-}
 #endif

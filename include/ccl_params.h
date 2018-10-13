@@ -1,10 +1,8 @@
 /** @file */
-#ifdef __cplusplus
-extern "C" {
-#endif
+#ifndef __CCL_PARAMS_H_INCLUDED__
+#define __CCL_PARAMS_H_INCLUDED__
 
-#pragma once
-
+CCL_BEGIN_DECLS
 /** 
  * Struct that contains all the parameters needed to create certain splines.
  * This includes splines for the scale factor, masses, and power spectra.
@@ -32,7 +30,7 @@ typedef struct ccl_spline_params {
   //k-splines and integrals
   double K_MAX_SPLINE;
   double K_MAX;
-  double K_MIN_DEFAULT;
+  double K_MIN;
   int N_K;
   int N_K_3DCOR;
   
@@ -77,6 +75,6 @@ typedef struct ccl_gsl_params {
 
 extern ccl_gsl_params * ccl_gsl;
 
-#ifdef __cplusplus
-}
+CCL_END_DECLS
+
 #endif

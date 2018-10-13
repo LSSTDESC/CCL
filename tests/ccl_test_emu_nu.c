@@ -130,8 +130,8 @@ static void compare_emu_nu(int i_model,struct emu_nu_data * data)
  
   //None of the current cosmologies being checked include neutrinos
   ccl_parameters params = ccl_parameters_create(data->Omega_c[i_model-1],data->Omega_b[i_model-1],0.0,data->Neff, data->mnu[i_model-1], data->mnu_type, data->w_0[i_model-1],data->w_a[i_model-1],data->h[i_model-1],data->sigma8[i_model-1],data->n_s[i_model-1],-1,-1,-1,-1,NULL,NULL, &status);
+  params.Omega_l=params.Omega_l+params.Omega_g;
   params.Omega_g=0;
-  params.sigma8=data->sigma8[i_model-1];
   ccl_cosmology * cosmo = ccl_cosmology_create(params, config);
   ASSERT_NOT_NULL(cosmo);
 

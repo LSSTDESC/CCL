@@ -1,7 +1,8 @@
-#include "ccl.h"
 #include <math.h>
 #include <stdio.h>
-#include "ccl_params.h"
+
+#include <ccl.h>
+#include <ccl_params.h>
 
 int main(int argc, char * argv[])
 {
@@ -25,7 +26,7 @@ int main(int argc, char * argv[])
   double a_at_z2=1./3.;
   double a_at_z3=0.25;
   if(cosmo->config.matter_power_spectrum_method==ccl_linear) {
-    for (k = ccl_splines->K_MIN_DEFAULT; k<ccl_splines->K_MAX; k*=1.05) {
+    for (k = ccl_splines->K_MIN; k<ccl_splines->K_MAX; k*=1.05) {
       p = ccl_linear_matter_power(cosmo, k,1.0, &status);
       p1 = ccl_linear_matter_power(cosmo,k, a_at_z1,&status);
       p2 = ccl_linear_matter_power(cosmo,k, a_at_z2,&status);
@@ -35,7 +36,7 @@ int main(int argc, char * argv[])
   }
   else {
     if(cosmo->config.matter_power_spectrum_method==ccl_halofit) {
-      for (k = ccl_splines->K_MIN_DEFAULT; k<ccl_splines->K_MAX; k*=1.05) {
+      for (k = ccl_splines->K_MIN; k<ccl_splines->K_MAX; k*=1.05) {
 	p = ccl_nonlin_matter_power(cosmo, k,1.0,&status);
 	p1 = ccl_nonlin_matter_power(cosmo,k, a_at_z1,&status);
 	p2 = ccl_nonlin_matter_power(cosmo,k, a_at_z2,&status);
@@ -45,10 +46,10 @@ int main(int argc, char * argv[])
     }
     else {
       printf("ccl_sample_power.c: Unknown power spectrum method.\n");
-      return NAN;
+      return 1;
     }
   }
-  printf("sigma8 = %.6lE\n", ccl_sigmaR(cosmo,8./h,&status));
+  printf("sigma8 = %.6lE\n", ccl_sigmaR(cosmo,8./h, 1.0, &status));
   printf("Consistency check: sigma8 = %.6lE\n", ccl_sigma8(cosmo,&status));
   printf("Completed. Status = %d\n",status);
   
