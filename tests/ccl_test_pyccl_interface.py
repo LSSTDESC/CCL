@@ -671,7 +671,7 @@ def check_cls_nu(cosmo):
     nc1 = ccl.NumberCounts(cosmo, False, dndz=(z,n), bias=(z,b))
 
     # Check that for massive neutrinos including rsd raises an error (not yet implemented)
-    assert_raises(CCLError, ccl.NumberCounts, cosmo, True, n=(z,n), bias=(z,b))
+    assert_raises(CCLError, ccl.NumberCounts, cosmo, True, dndz=(z,n), bias=(z,b))
 
     cmbl=ccl.CMBLensing(cosmo,1100.)
 
