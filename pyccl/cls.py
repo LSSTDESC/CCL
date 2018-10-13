@@ -36,7 +36,7 @@ class _Tracer(object):
     """
     def __init__(self, *args, **kwargs):
         raise NotImplementedError(
-            "A `Tracer` object cannot be used directly. Use one of "
+            "A `_Tracer` object cannot be used directly. Use one of "
             "`NumberCounts`, `WeakLensing` or `CMBLensing` instead.")
 
     def _build_tracer(
@@ -286,7 +286,7 @@ def angular_cl(cosmo, cltracer1, cltracer2, ell,
 
     Args:
         cosmo (:obj:`Cosmology`): A Cosmology object.
-        cltracer1, cltracer2 (:obj:`Tracer`): Tracer objects, of any kind.
+        cltracer1, cltracer2 (:obj:`_Tracer`): Tracer objects, of any kind.
         ell (float or array_like): Angular wavenumber(s) at which to evaluate
             the angular power spectrum.
         l_limber (float) : Angular wavenumber beyond which Limber's
