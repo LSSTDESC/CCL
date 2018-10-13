@@ -24,7 +24,7 @@ function_types = {
 NoneArr = np.array([])
 
 
-class Tracer(object):
+class _Tracer(object):
     """A tracer of the matter density field.
 
     .. note:: This class cannot be used directly. Use one of
@@ -184,7 +184,7 @@ class Tracer(object):
                 lib.cl_tracer_free(self.cltracer)
 
 
-class NumberCounts(Tracer):
+class NumberCounts(_Tracer):
     """A Tracer for galaxy number counts (galaxy clustering).
 
     Args:
@@ -208,14 +208,14 @@ class NumberCounts(Tracer):
 
     def __init__(self, cosmo, has_rsd, dndz, bias, mag_bias=None):
         # Call Tracer constructor with appropriate arguments
-        super(NumberCounts, self).__init__(
-                 cosmo=cosmo, tracer_type=const.CL_TRACER_NC,
-                 has_rsd=has_rsd,
-                 dndz=dndz, bias=bias, mag_bias=mag_bias,
-                 ia_bias=None, red_frac=None)
+        self._build_tracer(
+            cosmo=cosmo, tracer_type=const.CL_TRACER_NC,
+            has_rsd=has_rsd,
+            dndz=dndz, bias=bias, mag_bias=mag_bias,
+            ia_bias=None, red_frac=None)
 
 
-class WeakLensing(Tracer):
+class WeakLensing(_Tracer):
     """A Tracer for weak lensing shear (galaxy shapes).
 
     Args:
@@ -238,14 +238,14 @@ class WeakLensing(Tracer):
 
     def __init__(self, cosmo, dndz, ia_bias=None, red_frac=None):
         # Call Tracer constructor with appropriate arguments
-        super(WeakLensing, self).__init__(
-                 cosmo=cosmo, tracer_type=const.CL_TRACER_WL,
-                 has_rsd=False,
-                 dndz=dndz, bias=None, mag_bias=None,
-                 ia_bias=ia_bias, red_frac=red_frac)
+        self._build_tracer(
+            cosmo=cosmo, tracer_type=const.CL_TRACER_WL,
+            has_rsd=False,
+            dndz=dndz, bias=None, mag_bias=None,
+            ia_bias=ia_bias, red_frac=red_frac)
 
 
-class CMBLensing(Tracer):
+class CMBLensing(_Tracer):
     """A Tracer for CMB lensing.
 
     Args:
@@ -255,11 +255,11 @@ class CMBLensing(Tracer):
 
     def __init__(self, cosmo, z_source):
         # Call Tracer constructor with appropriate arguments
-        super(CMBLensing, self).__init__(
-                 cosmo=cosmo, tracer_type=const.CL_TRACER_CL,
-                 has_rsd=False,
-                 dndz=None, bias=None, mag_bias=None,
-                 ia_bias=None, red_frac=None, z_source=z_source)
+        self._build_tracer(
+            cosmo=cosmo, tracer_type=const.CL_TRACER_CL,
+            has_rsd=False,
+            dndz=None, bias=None, mag_bias=None,
+            ia_bias=None, red_frac=None, z_source=z_source)
 
 
 def _check_array_params(f_arg):
