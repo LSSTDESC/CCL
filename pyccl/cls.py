@@ -24,7 +24,7 @@ function_types = {
 NoneArr = np.array([])
 
 
-class _Tracer(object):
+class Tracer(object):
     """A tracer of the matter density field.
 
     .. note:: This class cannot be used directly. Use one of
@@ -36,7 +36,7 @@ class _Tracer(object):
     """
     def __init__(self, *args, **kwargs):
         raise NotImplementedError(
-            "A `_Tracer` object cannot be used directly. Use one of "
+            "A `Tracer` object cannot be used directly. Use one of "
             "`NumberCounts`, `WeakLensing` or `CMBLensing` instead.")
 
     def _build_tracer(
@@ -82,12 +82,11 @@ class _Tracer(object):
         cosmo = cosmo.cosmo
 
         has_magnification = mag_bias is not None
-        if ((red_frac is None and ia_bias is not None) or
-                (red_frac is not None and ia_bias is None)):
+        if (red_frac is None) != (ia_bias is None):
             raise ValueError(
                 "Either both or none of `red_frac` and `ia_bias` "
                 "must be specified.")
-        has_intrinsic_alignment = red_frac is not None and ia_bias is not None
+        has_intrinsic_alignment = red_frac is not None
 
         # Convert array arguments that are 'None' into 'NoneArr' type and
         # check whether arrays were specified as tuples
@@ -184,7 +183,7 @@ class _Tracer(object):
                 lib.cl_tracer_free(self.cltracer)
 
 
-class NumberCounts(_Tracer):
+class NumberCounts(Tracer):
     """A Tracer for galaxy number counts (galaxy clustering).
 
     Args:
@@ -215,7 +214,7 @@ class NumberCounts(_Tracer):
             ia_bias=None, red_frac=None)
 
 
-class WeakLensing(_Tracer):
+class WeakLensing(Tracer):
     """A Tracer for weak lensing shear (galaxy shapes).
 
     Args:
@@ -245,7 +244,7 @@ class WeakLensing(_Tracer):
             ia_bias=ia_bias, red_frac=red_frac)
 
 
-class CMBLensing(_Tracer):
+class CMBLensing(Tracer):
     """A Tracer for CMB lensing.
 
     Args:
@@ -286,7 +285,7 @@ def angular_cl(cosmo, cltracer1, cltracer2, ell,
 
     Args:
         cosmo (:obj:`Cosmology`): A Cosmology object.
-        cltracer1, cltracer2 (:obj:`_Tracer`): Tracer objects, of any kind.
+        cltracer1, cltracer2 (:obj:`Tracer`): Tracer objects, of any kind.
         ell (float or array_like): Angular wavenumber(s) at which to evaluate
             the angular power spectrum.
         l_limber (float) : Angular wavenumber beyond which Limber's
