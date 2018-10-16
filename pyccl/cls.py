@@ -28,7 +28,7 @@ class Tracer(object):
     """A tracer of the matter density field.
 
     .. note:: This class cannot be used directly. Use one of
-              :obj:`NumberCounts`, :obj:`WeakLensing` or :obj:`CMBLensing`
+              :obj:`NumberCountsTracer`, :obj:`WeakLensingTracer` or :obj:`CMBLensingTracer`
               instead.
 
     This class contains all information describing the transfer functon of
@@ -37,7 +37,7 @@ class Tracer(object):
     def __init__(self, *args, **kwargs):
         raise NotImplementedError(
             "A `Tracer` object cannot be used directly. Use one of "
-            "`NumberCounts`, `WeakLensing` or `CMBLensing` instead.")
+            "`NumberCountsTracer`, `WeakLensingTracer` or `CMBLensingTracer` instead.")
 
     def _build_tracer(
             self, cosmo, tracer_type, has_rsd=False,
@@ -183,7 +183,7 @@ class Tracer(object):
                 lib.cl_tracer_free(self.cltracer)
 
 
-class NumberCounts(Tracer):
+class NumberCountsTracer(Tracer):
     """A Tracer for galaxy number counts (galaxy clustering).
 
     Args:
@@ -214,7 +214,7 @@ class NumberCounts(Tracer):
             ia_bias=None, red_frac=None)
 
 
-class WeakLensing(Tracer):
+class WeakLensingTracer(Tracer):
     """A Tracer for weak lensing shear (galaxy shapes).
 
     Args:
@@ -244,7 +244,7 @@ class WeakLensing(Tracer):
             ia_bias=ia_bias, red_frac=red_frac)
 
 
-class CMBLensing(Tracer):
+class CMBLensingTracer(Tracer):
     """A Tracer for CMB lensing.
 
     Args:
