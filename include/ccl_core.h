@@ -23,32 +23,32 @@ typedef struct ccl_parameters {
   double sqrtk; /**< Square root of the magnitude of curvature, k */ //TODO check
   int k_sign; /**<Sign of the curvature k */
 
-  
+
   // Dark Energy
   double w0;
   double wa;
-  
+
   // Hubble parameters
   double H0;
   double h;
 
   // Neutrino properties
-  
+
   double Neff; // Effective number of relativistic neutrino species in the early universe.
   int N_nu_mass; // Number of species of neutrinos which are nonrelativistic today
   double N_nu_rel;  // Number of species of neutrinos which are relativistic  today
   double *mnu;  // total mass of massive neutrinos (This is a pointer so that it can hold multiple masses.)
-  double sum_nu_masses; // sum of the neutrino masses. 
-  double Omega_n_mass; // Omega_nu for MASSIVE neutrinos 
+  double sum_nu_masses; // sum of the neutrino masses.
+  double Omega_n_mass; // Omega_nu for MASSIVE neutrinos
   double Omega_n_rel; // Omega_nu for MASSLESS neutrinos
- 
+
   //double Neff_partial[CCL_MAX_NU_SPECIES];
   //double mnu[CCL_MAX_NU_SPECIES];
-  
+
   // Primordial power spectra
   double A_s;
   double n_s;
-  
+
   // Radiation parameters
   double Omega_g;
   double T_CMB;
@@ -57,12 +57,12 @@ typedef struct ccl_parameters {
   double bcm_log10Mc;
   double bcm_etab;
   double bcm_ks;
-  
+
   // Derived parameters
   double sigma8;
   double Omega_l;
   double z_star;
-  
+
   //Modified growth rate
   bool has_mgrowth;
   int nz_mgrowth;
@@ -98,7 +98,7 @@ typedef struct ccl_data{
   // Function of Halo mass M
 
   gsl_spline * logsigma;
-  gsl_spline * dlnsigma_dlogm; 
+  gsl_spline * dlnsigma_dlogm;
 
   // splines for halo mass function
   gsl_spline * alphahmf;
@@ -110,8 +110,8 @@ typedef struct ccl_data{
   // These are all functions of the wavenumber k and the scale factor a.
   gsl_spline2d * p_lin;
   gsl_spline2d * p_nl;
-  double k_min_lin; //k_min  [1/Mpc] <- minimum wavenumber that the power spectrum has been computed to 
-  double k_min_nl; 
+  double k_min_lin; //k_min  [1/Mpc] <- minimum wavenumber that the power spectrum has been computed to
+  double k_min_nl;
   double k_max_lin;
   double k_max_nl;
 } ccl_data;
@@ -124,7 +124,7 @@ typedef struct ccl_cosmology
   ccl_parameters    params;
   ccl_configuration config;
   ccl_data          data;
-  
+
   bool computed_distances;
   bool computed_growth;
   bool computed_power;
@@ -160,24 +160,24 @@ ccl_cosmology * ccl_cosmology_create_with_params(double Omega_c, double Omega_b,
 						 double Neff, double* mnu, ccl_mnu_convention mnu_type,
 						 double w0, double wa, double h, double norm_pk, double n_s,
 						 double bcm_log10Mc, double bcm_etab, double bcm_ks,
-						 int nz_mgrowth, double *zarr_mgrowth, 
+						 int nz_mgrowth, double *zarr_mgrowth,
 						 double *dfarr_mgrowth, ccl_configuration config,
 						 int *status);
 
 ccl_cosmology * ccl_cosmology_create_with_lcdm_params(
-        double Omega_c, double Omega_b, double Omega_k, double h, 
+        double Omega_c, double Omega_b, double Omega_k, double h,
         double norm_pk, double n_s,
         ccl_configuration config, int *status);
 
 // User-facing creation routines
 /**
  * Create a cosmology
- * @param Omega_c Omega_c 
- * @param Omega_b Omega_b 
- * @param Omega_k Omega_k 
+ * @param Omega_c Omega_c
+ * @param Omega_b Omega_b
+ * @param Omega_k Omega_k
  * @param Neff Number of relativistic neutrino species in the early universe
  * @param mnu neutrino mass, either sum or list of length 3
- * @param mnu_type determines neutrino mass convention (ccl_mnu_list, ccl_mnu_sum, ccl_mnu_sum_inverted, ccl_mnu_sum_equal) 
+ * @param mnu_type determines neutrino mass convention (ccl_mnu_list, ccl_mnu_sum, ccl_mnu_sum_inverted, ccl_mnu_sum_equal)
  * @param w0 Dark energy EoS parameter
  * @param wa Dark energy EoS parameter
  * @param h Hubble constant in units of 100 km/s/Mpc
@@ -205,8 +205,8 @@ ccl_parameters ccl_parameters_create(double Omega_c, double Omega_b, double Omeg
 // Specific sub-models
 /**
  * Create a flat LCDM cosmology
- * @param Omega_c Omega_c 
- * @param Omega_b Omega_b 
+ * @param Omega_c Omega_c
+ * @param Omega_b Omega_b
  * @param h Hubble constant in units of 100 km/s/Mpc
  * @param norm_pk the normalization of the power spectrum, either A_s or sigma8
  * @param n_s the power-law index of the power spectrum
@@ -218,8 +218,8 @@ ccl_parameters ccl_parameters_create_flat_lcdm(double Omega_c, double Omega_b, d
 
 /**
  * Create a flat LCDM cosmology with the impact of baryons
- * @param Omega_c Omega_c 
- * @param Omega_b Omega_b 
+ * @param Omega_c Omega_c
+ * @param Omega_b Omega_b
  * @param h Hubble constant in units of 100 km/s/Mpc
  * @param norm_pk the normalization of the power spectrum, either A_s or sigma8
  * @param n_s the power-law index of the power spectrum
@@ -236,8 +236,8 @@ ccl_parameters ccl_parameters_create_flat_lcdm_bar(double Omega_c, double Omega_
 
 /**
  * Create a flat wCDM cosmology
- * @param Omega_c Omega_c 
- * @param Omega_b Omega_b 
+ * @param Omega_c Omega_c
+ * @param Omega_b Omega_b
  * @param w0 Dark energy EoS parameter
  * @param h Hubble constant in units of 100 km/s/Mpc
  * @param norm_pk the normalization of the power spectrum, either A_s or sigma8
@@ -250,8 +250,8 @@ ccl_parameters ccl_parameters_create_flat_wcdm(double Omega_c, double Omega_b, d
 
 /**
  * Create a flat waCDM cosmology
- * @param Omega_c Omega_c 
- * @param Omega_b Omega_b 
+ * @param Omega_c Omega_c
+ * @param Omega_b Omega_b
  * @param w0 Dark energy EoS parameter
  * @param wa Dark energy EoS parameter
  * @param h Hubble constant in units of 100 km/s/Mpc
@@ -265,9 +265,9 @@ ccl_parameters ccl_parameters_create_flat_wacdm(double Omega_c, double Omega_b, 
 
 /**
  * Create an LCDM cosmology with curvature
- * @param Omega_c Omega_c 
- * @param Omega_b Omega_b 
- * @param Omega_k Omega_k 
+ * @param Omega_c Omega_c
+ * @param Omega_b Omega_b
+ * @param Omega_k Omega_k
  * @param w0 Dark energy EoS parameter
  * @param wa Dark energy EoS parameter
  * @param h Hubble constant in units of 100 km/s/Mpc
@@ -294,7 +294,7 @@ void ccl_parameters_free(ccl_parameters * params);
 
 /**
  * Write a cosmology parameters object to a file in yaml format, .
- * @param params Cosmological parameters 
+ * @param params Cosmological parameters
  * @param filename Name of file to create and write
  * @param status Status flag. 0 if there are no errors, nonzero otherwise.
  * @return void
@@ -305,13 +305,13 @@ void ccl_parameters_write_yaml(ccl_parameters * params, const char * filename, i
  * Read a cosmology parameters object from a file in yaml format, .
  * @param filename Name of existing file to read from
  * @param status Status flag. 0 if there are no errors, nonzero otherwise.
- * @return cosmo Cosmological parameters 
+ * @return cosmo Cosmological parameters
  */
 ccl_parameters ccl_parameters_read_yaml(const char * filename, int *status);
 
 /**
  * Free a cosmology struct
- * @param cosmo Cosmological parameters 
+ * @param cosmo Cosmological parameters
  * @return void
  */
 void ccl_cosmology_free(ccl_cosmology * cosmo);
@@ -319,27 +319,29 @@ void ccl_cosmology_free(ccl_cosmology * cosmo);
 /**
  * Compute comoving distances and spline to be stored
  * in the cosmology structure.
- * @param cosmo Cosmological parameters 
+ * @param cosmo Cosmological parameters
  * @param status Status flag. 0 if there are no errors, nonzero otherwise.
  * For specific cases see documentation for ccl_error.c
  * @return void
+ * This function is located in ccl_background.c
  */
 void ccl_cosmology_compute_distances(ccl_cosmology * cosmo,int *status);
 
 /**
  * Compute the growth function and a spline to be stored
  * in the cosmology structure.
- * @param cosmo Cosmological parameters 
+ * @param cosmo Cosmological parameters
  * @param status Status flag. 0 if there are no errors, nonzero otherwise.
  * For specific cases see documentation for ccl_error.c
  * @return void
+ * This function is located in ccl_background.c
  */
 void ccl_cosmology_compute_growth(ccl_cosmology * cosmo, int * status);
 
 /**
  * Compute the power spectrum and create a 2d spline P(k,z) to be stored
  * in the cosmology structure.
- * @param cosmo Cosmological parameters 
+ * @param cosmo Cosmological parameters
  * @param status Status flag. 0 if there are no errors, nonzero otherwise.
  * For specific cases see documentation for ccl_error.c
  * @return void
