@@ -9,9 +9,9 @@
 %include "../include/ccl_halomod.h"
 
  // Enable vectorised arguments for arrays
-%apply (double *IN_ARRAY1, int DIM1) {(double *k, int nk)};
-%apply (double *IN_ARRAY1, int DIM1) {(double *halo_mass, int nm)};
-%apply (int DIM1, double *ARGOUT_ARRAY1) {(int nout, double *output)};
+%apply (double* IN_ARRAY1, int DIM1) {(double* k, int nk)};
+%apply (double* IN_ARRAY1, int DIM1) {(double* halo_mass, int nm)};
+%apply (int DIM1, double* ARGOUT_ARRAY1) {(int nout, double* output)};
 
 /* The python code here will be executed before all of the functions that
    follow this directive. */
@@ -25,8 +25,8 @@
 void onehalo_matter_power_vec(
         ccl_cosmology *cosmo,
         double a,
-        double *k, int nk,
-        int nout, double *output,
+        double* k, int nk,
+        int nout, double* output,
         int *status) {
     for(int i=0; i < nk; i++) {
         output[i] = ccl_onehalo_matter_power(cosmo, k[i], a, status);
@@ -36,8 +36,8 @@ void onehalo_matter_power_vec(
 void twohalo_matter_power_vec(
         ccl_cosmology *cosmo,
         double a,
-        double *k, int nk,
-        int nout, double *output,
+        double* k, int nk,
+        int nout, double* output,
         int *status) {
     for(int i=0; i < nk; i++) {
         output[i] = ccl_twohalo_matter_power(cosmo, k[i], a, status);
@@ -47,8 +47,8 @@ void twohalo_matter_power_vec(
 void halomodel_matter_power_vec(
         ccl_cosmology *cosmo,
         double a,
-        double *k, int nk,
-        int nout, double *output,
+        double* k, int nk,
+        int nout, double* output,
         int *status) {
     for(int i=0; i < nk; i++) {
         output[i] = ccl_halomodel_matter_power(cosmo, k[i], a, status);
@@ -67,8 +67,8 @@ void halo_concentration_vec(
         ccl_cosmology *cosmo,
         double a,
         double odelta,
-        double *halo_mass, int nm,
-        int nout, double *output,
+        double* halo_mass, int nm,
+        int nout, double* output,
         int *status) {
     for(int i=0; i < nm; i++) {
         output[i] = ccl_halo_concentration(cosmo, halo_mass[i], a, odelta, status);

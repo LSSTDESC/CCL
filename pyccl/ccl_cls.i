@@ -7,21 +7,21 @@
 %include "../include/ccl_cls.h"
 
 // Enable vectorised arguments for arrays
-%apply (double *IN_ARRAY1, int DIM1) {
-    (double *z_n, int nz_n),
-    (double *z_b, int nz_b),
-    (double *z_s, int nz_s),
-    (double *z_ba, int nz_ba),
-    (double *z_rf, int nz_rf),
-    (double *n, int nn),
-    (double *b, int nb),
-    (double *s, int ns),
-    (double *ba, int nba),
-    (double *rf, int nrf)}
-%apply (double *IN_ARRAY1, int DIM1) {
-    (double *ell, int nell),
-    (double *aarr, int na)};
-%apply (int DIM1, double *ARGOUT_ARRAY1) {(int nout, double *output)};
+%apply (double* IN_ARRAY1, int DIM1) {
+    (double* z_n, int nz_n),
+    (double* z_b, int nz_b),
+    (double* z_s, int nz_s),
+    (double* z_ba, int nz_ba),
+    (double* z_rf, int nz_rf),
+    (double* n, int nn),
+    (double* b, int nb),
+    (double* s, int ns),
+    (double* ba, int nba),
+    (double* rf, int nrf)}
+%apply (double* IN_ARRAY1, int DIM1) {
+    (double* ell, int nell),
+    (double* aarr, int na)};
+%apply (int DIM1, double* ARGOUT_ARRAY1) {(int nout, double* output)};
 
 
 %feature("pythonprepend") cl_tracer_new_wrapper %{
@@ -46,11 +46,11 @@
 CCL_ClTracer* cl_tracer_new_wrapper(
         ccl_cosmology *cosmo, int tracer_type,
         int has_rsd, int has_magnification, int has_intrinsic_alignment,
-        double *z_n, int nz_n, double *n, int nn,
-        double *z_b, int nz_b, double *b, int nb,
-        double *z_s, int nz_s, double *s, int ns,
-        double *z_ba, int nz_ba, double *ba, int nba,
-        double *z_rf, int nz_rf, double *rf, int nrf,
+        double* z_n, int nz_n, double* n, int nn,
+        double* z_b, int nz_b, double* b, int nb,
+        double* z_s, int nz_s, double* s, int ns,
+        double* z_ba, int nz_ba, double* ba, int nba,
+        double* z_rf, int nz_rf, double* rf, int nrf,
         double z_source,
         int *status) {
     return ccl_cl_tracer(
@@ -82,8 +82,8 @@ void angular_cl_vec(
         double l_limber, double l_logstep, double l_linstep,
         double dchi, double dlk, double zmin,
         int method,
-        double *ell, int nell,
-        int nout, double *output,
+        double* ell, int nell,
+        int nout, double* output,
         int *status) {
   //Cast ells as integers
   int *ell_int = malloc(nell * sizeof(int));
@@ -119,8 +119,8 @@ void angular_cl_vec(
 
 void clt_fa_vec(
         ccl_cosmology *cosmo, CCL_ClTracer *clt, int func_code,
-        double *aarr, int na,
-        int nout, double *output,
+        double* aarr, int na,
+        int nout, double* output,
         int *status) {
     ccl_get_tracer_fas(cosmo, clt, na, aarr, output, func_code, status);
 }
