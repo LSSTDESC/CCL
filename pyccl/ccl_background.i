@@ -19,86 +19,56 @@
 %}
 
 %inline %{
-void growth_factor_vec(
-        ccl_cosmology * cosmo,
-        double* a, int na,
-        int nout, double* output,
-        int *status) {
+void growth_factor_vec(ccl_cosmology * cosmo, double* a, int na,
+                       int nout, double* output, int *status) {
     ccl_growth_factors(cosmo, na, a, output, status);
 }
 
-void growth_factor_unnorm_vec(
-        ccl_cosmology * cosmo,
-        double* a, int na,
-        int nout, double* output,
-        int *status){
+void growth_factor_unnorm_vec(ccl_cosmology * cosmo, double* a, int na,
+                              int nout, double* output, int *status){
     ccl_growth_factors_unnorm(cosmo, na, a, output, status);
 }
 
-void growth_rate_vec(
-        ccl_cosmology * cosmo,
-        double* a, int na,
-        int nout, double* output,
-        int *status) {
+void growth_rate_vec(ccl_cosmology * cosmo, double* a, int na,
+                     int nout, double* output, int *status) {
     ccl_growth_rates(cosmo, na, a, output, status);
 }
 
-void comoving_radial_distance_vec(
-        ccl_cosmology * cosmo,
-        double* a, int na,
-        int nout, double* output,
-        int *status) {
+void comoving_radial_distance_vec(ccl_cosmology * cosmo, double* a, int na,
+                                  int nout, double* output, int *status) {
     ccl_comoving_radial_distances(cosmo, na, a, output, status);
 }
 
-void comoving_angular_distance_vec(
-        ccl_cosmology * cosmo,
-        double* a, int na,
-        int nout, double* output,
-        int *status) {
+void comoving_angular_distance_vec(ccl_cosmology * cosmo, double* a, int na,
+                                   int nout, double* output, int *status) {
     ccl_comoving_angular_distances(cosmo, na, a, output, status);
 }
 
-void h_over_h0_vec(
-        ccl_cosmology * cosmo,
-        double* a, int na,
-        int nout, double* output,
-        int *status) {
+void h_over_h0_vec(ccl_cosmology * cosmo, double* a, int na,
+                   int nout, double* output, int *status) {
     ccl_h_over_h0s(cosmo, na, a, output, status);
 }
 
-void luminosity_distance_vec(
-        ccl_cosmology * cosmo,
-        double* a, int na,
-        int nout, double* output,
-        int *status) {
+void luminosity_distance_vec(ccl_cosmology * cosmo, double* a, int na,
+                             int nout, double* output, int *status) {
     ccl_luminosity_distances(cosmo, na, a, output, status);
 }
 
-void distance_modulus_vec(
-        ccl_cosmology * cosmo,
-        double* a, int na,
-        int nout, double* output,
-        int *status) {
+void distance_modulus_vec(ccl_cosmology * cosmo, double* a, int na,
+                          int nout, double* output, int *status) {
     ccl_distance_moduli(cosmo, na, a, output, status);
 }
 
 
-void omega_x_vec(
-        ccl_cosmology * cosmo, int label,
-        double* a, int na,
-        int nout, double* output,
-        int *status) {
+void omega_x_vec(ccl_cosmology * cosmo, int label, double* a, int na,
+                 int nout, double* output, int *status) {
     for(int i=0; i < na; i++){
       output[i] = ccl_omega_x(cosmo, a[i], label, status);
     }
 }
 
-void rho_x_vec(
-        ccl_cosmology * cosmo, int label, int is_comoving,
-        double* a, int na,
-        int nout, double* output,
-        int *status) {
+void rho_x_vec(ccl_cosmology * cosmo, int label, int is_comoving,
+               double* a, int na, int nout, double* output, int *status) {
     for(int i=0; i < na; i++){
       output[i] = ccl_rho_x(cosmo, a[i], label, is_comoving, status);
     }
@@ -114,11 +84,8 @@ void rho_x_vec(
 
 %inline %{
 
-void scale_factor_of_chi_vec(
-        ccl_cosmology * cosmo,
-        double* chi, int nchi,
-        int nout, double* output,
-        int *status) {
+void scale_factor_of_chi_vec(ccl_cosmology * cosmo, double* chi, int nchi,
+                             int nout, double* output, int *status) {
     ccl_scale_factor_of_chis(cosmo, nchi, chi, output, status);
 }
 

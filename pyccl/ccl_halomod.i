@@ -22,34 +22,22 @@
 
 %inline %{
 
-void onehalo_matter_power_vec(
-        ccl_cosmology *cosmo,
-        double a,
-        double* k, int nk,
-        int nout, double* output,
-        int *status) {
+void onehalo_matter_power_vec(ccl_cosmology *cosmo, double a, double* k, int nk,
+                              int nout, double* output, int *status) {
     for(int i=0; i < nk; i++) {
         output[i] = ccl_onehalo_matter_power(cosmo, k[i], a, status);
     }
 }
 
-void twohalo_matter_power_vec(
-        ccl_cosmology *cosmo,
-        double a,
-        double* k, int nk,
-        int nout, double* output,
-        int *status) {
+void twohalo_matter_power_vec(ccl_cosmology *cosmo, double a, double* k, int nk,
+                              int nout, double* output, int *status) {
     for(int i=0; i < nk; i++) {
         output[i] = ccl_twohalo_matter_power(cosmo, k[i], a, status);
     }
 }
 
-void halomodel_matter_power_vec(
-        ccl_cosmology *cosmo,
-        double a,
-        double* k, int nk,
-        int nout, double* output,
-        int *status) {
+void halomodel_matter_power_vec(ccl_cosmology *cosmo, double a, double* k, int nk,
+                                int nout, double* output, int *status) {
     for(int i=0; i < nk; i++) {
         output[i] = ccl_halomodel_matter_power(cosmo, k[i], a, status);
     }
@@ -63,13 +51,9 @@ void halomodel_matter_power_vec(
 %}
 
 %inline %{
-void halo_concentration_vec(
-        ccl_cosmology *cosmo,
-        double a,
-        double odelta,
-        double* halo_mass, int nm,
-        int nout, double* output,
-        int *status) {
+void halo_concentration_vec(ccl_cosmology *cosmo, double a, double odelta,
+                            double* halo_mass, int nm, int nout, double* output,
+                            int *status) {
     for(int i=0; i < nm; i++) {
         output[i] = ccl_halo_concentration(cosmo, halo_mass[i], a, odelta, status);
     }

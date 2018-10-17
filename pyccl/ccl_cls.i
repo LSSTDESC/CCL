@@ -43,16 +43,14 @@
 
 %inline %{
 
-CCL_ClTracer* cl_tracer_new_wrapper(
-        ccl_cosmology *cosmo, int tracer_type,
-        int has_rsd, int has_magnification, int has_intrinsic_alignment,
-        double* z_n, int nz_n, double* n, int nn,
-        double* z_b, int nz_b, double* b, int nb,
-        double* z_s, int nz_s, double* s, int ns,
-        double* z_ba, int nz_ba, double* ba, int nba,
-        double* z_rf, int nz_rf, double* rf, int nrf,
-        double z_source,
-        int *status) {
+CCL_ClTracer* cl_tracer_new_wrapper(ccl_cosmology *cosmo, int tracer_type,
+                                    int has_rsd, int has_magnification, int has_intrinsic_alignment,
+                                    double* z_n, int nz_n, double* n, int nn,
+                                    double* z_b, int nz_b, double* b, int nb,
+                                    double* z_s, int nz_s, double* s, int ns,
+                                    double* z_ba, int nz_ba, double* ba, int nba,
+                                    double* z_rf, int nz_rf, double* rf, int nrf,
+                                    double z_source, int *status) {
     return ccl_cl_tracer(
         cosmo,
         tracer_type,
@@ -76,15 +74,10 @@ CCL_ClTracer* cl_tracer_new_wrapper(
 
 %inline %{
 
-void angular_cl_vec(
-        ccl_cosmology * cosmo,
-        CCL_ClTracer *clt1, CCL_ClTracer *clt2,
-        double l_limber, double l_logstep, double l_linstep,
-        double dchi, double dlk, double zmin,
-        int method,
-        double* ell, int nell,
-        int nout, double* output,
-        int *status) {
+void angular_cl_vec(ccl_cosmology * cosmo, CCL_ClTracer *clt1, CCL_ClTracer *clt2,
+                    double l_limber, double l_logstep, double l_linstep,
+                    double dchi, double dlk, double zmin, int method,
+                    double* ell, int nell, int nout, double* output, int *status) {
   //Cast ells as integers
   int *ell_int = malloc(nell * sizeof(int));
   CCL_ClWorkspace *w = ccl_cl_workspace_default(
@@ -117,11 +110,8 @@ void angular_cl_vec(
 
 %inline %{
 
-void clt_fa_vec(
-        ccl_cosmology *cosmo, CCL_ClTracer *clt, int func_code,
-        double* aarr, int na,
-        int nout, double* output,
-        int *status) {
+void clt_fa_vec(ccl_cosmology *cosmo, CCL_ClTracer *clt, int func_code,
+                double* aarr, int na, int nout, double* output, int *status) {
     ccl_get_tracer_fas(cosmo, clt, na, aarr, output, func_code, status);
 }
 

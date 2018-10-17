@@ -22,11 +22,8 @@
 
 %inline %{
 
-void specs_bias_clustering_vec(
-        ccl_cosmology * cosmo,
-        double* a, int na,
-        int nout, double* output,
-        int* status) {
+void specs_bias_clustering_vec(ccl_cosmology * cosmo, double* a, int na,
+                               int nout, double* output, int* status) {
     for(int i=0; i < na; i++) {
         output[i] = ccl_specs_bias_clustering(cosmo, a[i], status);
     }
@@ -42,17 +39,13 @@ void specs_bias_clustering_vec(
 
 %inline %{
 
-void specs_sigmaz_clustering_vec(
-        double* z, int nz,
-        int nout, double* output) {
+void specs_sigmaz_clustering_vec(double* z, int nz, int nout, double* output) {
     for(int i=0; i < nz; i++) {
         output[i] = ccl_specs_sigmaz_clustering(z[i]);
     }
 }
 
-void specs_sigmaz_sources_vec(
-        double* z, int nz,
-        int nout, double* output) {
+void specs_sigmaz_sources_vec(double* z, int nz, int nout, double* output) {
     for(int i=0; i < nz; i++) {
         output[i] = ccl_specs_sigmaz_sources(z[i]);
     }
@@ -60,13 +53,9 @@ void specs_sigmaz_sources_vec(
 
 
 // Vectorised version of ccl_specs_dNdz_tomog()
-void specs_dNdz_tomog_vec(
-        int dNdz_type,
-        double bin_zmin, double bin_zmax,
-        user_pz_info* user_info,
-        double* z, int nz,
-        int nout, double* output,
-        int *status) {
+void specs_dNdz_tomog_vec(int dNdz_type, double bin_zmin, double bin_zmax,
+                          user_pz_info* user_info, double* z, int nz,
+                          int nout, double* output, int *status) {
     double val = 0.;
 
     // Loop over z values

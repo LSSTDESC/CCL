@@ -19,23 +19,15 @@
 %}
 
 %inline %{
-void linear_matter_power_vec(
-        ccl_cosmology * cosmo,
-        double a,
-        double* k, int nk,
-        int nout, double* output,
-        int* status) {
+void linear_matter_power_vec(ccl_cosmology * cosmo, double a, double* k, int nk,
+                             int nout, double* output, int* status) {
     for(int i=0; i < nk; i++){
       output[i] = ccl_linear_matter_power(cosmo, k[i], a, status);
     }
 }
 
-void nonlin_matter_power_vec(
-        ccl_cosmology * cosmo,
-        double a,
-        double* k, int nk,
-        int nout, double* output,
-        int* status) {
+void nonlin_matter_power_vec(ccl_cosmology * cosmo, double a, double* k, int nk,
+                             int nout, double* output, int* status) {
     for(int i=0; i < nk; i++){
       output[i] = ccl_nonlin_matter_power(cosmo, k[i], a, status);
     }
@@ -52,23 +44,15 @@ void nonlin_matter_power_vec(
 
 %inline %{
 
-void sigmaR_vec(
-        ccl_cosmology * cosmo,
-        double a,
-        double* R, int nR,
-        int nout, double* output,
-        int *status) {
+void sigmaR_vec(ccl_cosmology * cosmo, double a, double* R, int nR,
+                int nout, double* output, int *status) {
     for(int i=0; i < nR; i++){
       output[i] = ccl_sigmaR(cosmo, R[i], a, status);
     }
 }
 
-void sigmaV_vec(
-        ccl_cosmology * cosmo,
-        double a,
-        double* R, int nR,
-        int nout, double* output,
-        int *status) {
+void sigmaV_vec(ccl_cosmology * cosmo, double a, double* R, int nR,
+                int nout, double* output, int *status) {
     for(int i=0; i < nR; i++){
       output[i] = ccl_sigmaV(cosmo, R[i], a, status);
     }
