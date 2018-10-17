@@ -39,13 +39,13 @@ dNdz_types = {
     'wl_opt':       lib.DNDZ_WL_OPT
 }
 
-
+"""A user-defined photo-z function.
+This functions allows the user to create (or
+delete) a function that returns the likelihood of measuring
+a certain z_ph given a z_spec, allowing for user-defined arguments.
+"""
 class PhotoZFunction(object):
-    """A user-defined photo-z function.
-    This functions allows the user to create (or
-    delete) a function that returns the likelihood of measuring
-    a certain z_ph given a z_spec, allowing for user-defined arguments.
-    """
+
     def __init__(self, func, args=None):
         """Create a new photo-z function.
 
@@ -122,7 +122,7 @@ def sigmaz_clustering(z):
     .. note:: assumes Gaussian uncertainties.
 
     Args:
-        cosmo (:obj:`ccl.cosmology`): Cosmological parameters.
+        cosmo (:obj:`Cosmology`): Cosmological parameters.
         z (float or array_like): Redshift(s).
 
     Returns:
@@ -143,7 +143,7 @@ def sigmaz_sources(z):
     .. note:: assumes Gaussian uncertainties.
 
     Args:
-        cosmo (:obj:`ccl.cosmology`): Cosmological parameters.
+        cosmo (:obj:`Cosmology`): Cosmological parameters.
         z (float or array_like): Redshift(s).
 
     Returns:
