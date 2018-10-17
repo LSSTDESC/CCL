@@ -1,5 +1,5 @@
 import numpy as np
-from numpy.testing import assert_allclose, run_module_suite, assert_
+from numpy.testing import assert_allclose, run_module_suite
 import pyccl as ccl
 from os.path import dirname,join
 # Set tolerances
@@ -26,7 +26,7 @@ def read_growth_lowz_benchmark_file():
     """
     # Load data from file
     dat = np.genfromtxt(join(dirname(__file__),"benchmark/growth_model1-5.txt")).T
-    assert_(dat.shape == (6,6))
+    assert(dat.shape == (6,6))
 
     # Split into redshift column and growth(z) columns
     z = dat[0]
@@ -39,7 +39,7 @@ def read_growth_allz_benchmark_file():
     """
     # Load data from file
     dat = np.genfromtxt(join(dirname(__file__),"benchmark/growth_cosmomad_allz.txt")).T
-    assert_(dat.shape == (6,10))
+    assert(dat.shape == (6,10))
 
     # Split into redshift column and growth(z) columns
     z = dat[0]

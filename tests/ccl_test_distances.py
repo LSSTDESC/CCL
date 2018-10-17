@@ -1,6 +1,5 @@
 import numpy as np
-from numpy.testing import (
-    assert_allclose, run_module_suite, decorators, assert_)
+from numpy.testing import assert_allclose, run_module_suite, decorators
 import pyccl as ccl
 from os.path import dirname,join,abspath
 from collections import OrderedDict
@@ -117,7 +116,7 @@ def read_chi_benchmark_file():
     """
     # Load data from file
     dat = np.genfromtxt(join(path,"benchmark/chi_model1-5.txt")).T
-    assert_(dat.shape == (6,6))
+    assert(dat.shape == (6,6))
 
     # Split into redshift column and chi(z) columns
     z = dat[0]
@@ -131,7 +130,7 @@ def read_chi_hiz_benchmark_file():
     """
     # Load data from file
     dat = np.genfromtxt(join(path,"benchmark/chi_hiz_model1-3.txt")).T
-    assert_(dat.shape == (4,7))
+    assert(dat.shape == (4,7))
 
     # Split into redshift column and chi(z) columns
     z = dat[0]
@@ -146,7 +145,7 @@ def read_chi_mnu_benchmark_file():
     """
     # Load data from file
     dat = np.genfromtxt(join(path,"benchmark/chi_mnu_model1-5.txt")).T
-    assert_(dat.shape == (6,5))
+    assert(dat.shape == (6,5))
 
     # Split into redshift column and chi(z) columns
     z = dat[0]
@@ -160,7 +159,7 @@ def read_chi_hiz_benchmark_file():
     """
     # Load data from file
     dat = np.genfromtxt(join(path,"benchmark/chi_hiz_model1-3.txt")).T
-    assert_(dat.shape == (4,7))
+    assert(dat.shape == (4,7))
 
     # Split into redshift column and chi(z) columns
     z = dat[0]
@@ -175,7 +174,7 @@ def read_chi_mnu_hiz_benchmark_file():
     """
     # Load data from file
     dat = np.genfromtxt(join(path,"benchmark/chi_hiz_mnu_model1-5.txt")).T
-    assert_(dat.shape == (6,7))
+    assert(dat.shape == (6,7))
 
     # Split into redshift column and chi(z) columns
     z = dat[0]
@@ -189,7 +188,7 @@ def read_class_allz_chi_benchmark_file():
     """
     # Load data from file
     dat = np.genfromtxt(join(path, "benchmark/chi_class_allz.txt")).T
-    assert_(dat.shape == (11, 10))
+    assert(dat.shape == (11, 10))
 
     # Split into redshift column and chi(z) columns
     z = dat[0]
@@ -203,7 +202,7 @@ def read_class_mnu_chi_benchmark_file():
     """
     # Load data from file
     dat = np.genfromtxt(join(path, "benchmark/chi_class_extra_mnu.txt")).T
-    assert_(dat.shape == (10, 10))
+    assert(dat.shape == (10, 10))
 
     # Split into redshift column and chi(z) columns
     z = dat[0]
@@ -216,7 +215,7 @@ def read_dm_benchmark_file():
     """
     # Load data from file
     dat = np.genfromtxt(join(path,"benchmark/dm_model1-5.txt")).T
-    assert_(dat.shape == (6,6))
+    assert(dat.shape == (6,6))
 
     # Split into redshift column and chi(z) columns
     z = dat[0]
@@ -230,7 +229,7 @@ def read_dm_mnu_benchmark_file():
     """
     # Load data from file
     dat = np.genfromtxt(join(path,"benchmark/dm_mnu_model1-5.txt")).T
-    assert_(dat.shape == (6,5))
+    assert(dat.shape == (6,5))
 
     # Split into redshift column and chi(z) columns
     z = dat[0]
@@ -244,7 +243,7 @@ def read_dm_mnu_hiz_benchmark_file():
     """
     # Load data from file
     dat = np.genfromtxt(join(path,"benchmark/dm_hiz_mnu_model1-5.txt")).T
-    assert_(dat.shape == (6,7))
+    assert(dat.shape == (6,7))
 
     # Split into redshift column and chi(z) columns
     z = dat[0]
@@ -258,7 +257,7 @@ def read_class_allz_dm_benchmark_file():
     """
     # Load data from file
     dat = np.genfromtxt(join(path, "benchmark/dm_class_allz.txt")).T
-    assert_(dat.shape == (11, 10))
+    assert(dat.shape == (11, 10))
 
     # Split into redshift column and dm(z) columns
     z = dat[0]
@@ -272,7 +271,7 @@ def read_class_mnu_dm_benchmark_file():
     """
     # Load data from file
     dat = np.genfromtxt(join(path, "benchmark/dm_class_extra_mnu.txt")).T
-    assert_(dat.shape == (10, 10))
+    assert(dat.shape == (10, 10))
 
     # Split into redshift column and dm(z) columns
     z = dat[0]
