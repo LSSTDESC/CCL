@@ -44,6 +44,8 @@ This functions allows the user to create (or
 delete) a function that returns the likelihood of measuring
 a certain z_ph given a z_spec, allowing for user-defined arguments.
 """
+
+
 class PhotoZFunction(object):
 
     def __init__(self, func, args=None):
@@ -57,6 +59,7 @@ class PhotoZFunction(object):
         """
         # Wrap user-defined function up so that only two args are needed
         # at run-time
+
         def _func(z_ph, z_s):
             return func(z_ph, z_s, args)
 
@@ -75,6 +78,7 @@ class PhotoZGaussian(PhotoZFunction):
     """
     Gaussian photo-z function with sigma(z) = sigma_z0 (1 + z).
     """
+
     def __init__(self, sigma_z0):
         """Create a new Gaussian photo-z function.
 
