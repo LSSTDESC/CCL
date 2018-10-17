@@ -1,11 +1,33 @@
 import copy
+import numpy as np
 from numpy.testing import assert_raises, run_module_suite
 import pyccl
 from pyccl import ccllib
 from pyccl import CCLError
 
-COSMO = pyccl.Cosmology(
-    Omega_c=0.27, Omega_b=0.045, h=0.67, A_s=1e-10, n_s=0.96).cosmo
+PYCOSMO = pyccl.Cosmology(
+    Omega_c=0.27, Omega_b=0.045, h=0.67, A_s=1e-10, n_s=0.96)
+COSMO = PYCOSMO.cosmo
+
+
+def test_swig_tracer():
+    z = np.linspace(0, 1, 10)
+    bias_ia = z * 2
+    f_red = z / 1
+    dNdz = z * 8
+    pyccl.ClTracerLensing(
+        PYCOSMO,
+        True,
+        n=(z, dNdz),
+        bias_ia=(z, bias_ia),
+        f_red=(z, f_red))
+    assert_raises(
+        CCLError,
+        pyccl.ClTracerLensing,
+        PYCOSMO, True,
+        n=(z, dNdz),
+        bias_ia=(z, bias_ia[0:2]),
+        f_red=(z, f_red))
 
 
 def test_swig_background():
