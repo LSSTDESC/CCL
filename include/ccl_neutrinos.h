@@ -1,13 +1,9 @@
 /** @file */
-#ifdef __cplusplus
-extern "C" {
-#endif
-#pragma once
+#ifndef __CCL_NEUTRINOS_H_INCLUDED__
+#define __CCL_NEUTRINOS_H_INCLUDED__
 
-//#pragma once
-#include "ccl_core.h"
-#include "gsl/gsl_spline.h"
-#include "gsl/gsl_const_mksa.h"
+#include <gsl/gsl_spline.h>
+#include <gsl/gsl_const_mksa.h>
 
 // maximum number of species
 #define CCL_MAX_NU_SPECIES 3
@@ -20,6 +16,8 @@ extern "C" {
 
 // The combination of constants required in Omeganuh2
 #define NU_CONST (8. * pow(M_PI,5) *pow((KBOLTZ/ HPLANCK),3)* KBOLTZ/(15. *pow( CLIGHT,3))* (8. * M_PI * GNEWT) / (3. * 100.*100.*1000.*1000. /MPC_TO_METER /MPC_TO_METER  * CLIGHT * CLIGHT))
+
+CCL_BEGIN_DECLS
 
 typedef enum ccl_neutrino_mass_splits{
   ccl_nu_normal=0,
@@ -65,6 +63,5 @@ double ccl_Omeganuh2 (double a, int N_nu_mass, double* mnu, double T_CMB, gsl_in
  */
 double* ccl_nu_masses (double OmNuh2, ccl_neutrino_mass_splits mass_split, double T_CMB, int * status);
 
-#ifdef __cplusplus
-}
+CCL_END_DECLS
 #endif

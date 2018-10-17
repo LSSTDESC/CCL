@@ -1,9 +1,8 @@
 /** @file */
-#ifdef __cplusplus
-extern "C" {
-#endif
+#ifndef __CCL_CONFIG_H_INCLUDED__
+#define __CCL_CONFIG_H_INCLUDED__
 
-#pragma once
+CCL_BEGIN_DECLS
 
 /** 
  * Transfer function typedef.
@@ -126,6 +125,6 @@ typedef struct ccl_configuration {
  */
 extern const ccl_configuration default_config;
 
-#ifdef __cplusplus
-}
+CCL_END_DECLS
+
 #endif

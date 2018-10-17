@@ -1,7 +1,7 @@
-#include "ccl.h"
 #include <stdio.h>
 #include <math.h>
-#include "ccl_params.h"
+#include <ccl.h>
+#include <ccl_params.h>
 
 int main(int argc, char * argv[])
 {
@@ -22,12 +22,12 @@ int main(int argc, char * argv[])
   config.transfer_function_method = ccl_boltzmann;
   
   // Set parameters and initialize cosmology
-  ccl_parameters params = ccl_parameters_create_lcdm_nu(Omega_c, Omega_b, Omega_k,h, A_s, n_s, Neff, Nmass, mnu, &status);
+  ccl_parameters params = ccl_parameters_create_lcdm_nu(Omega_c, Omega_b, Omega_k,h, A_s, n_s, Neff, &mnu, ccl_mnu_sum, &status);
   ccl_cosmology * cosmo = ccl_cosmology_create(params, config);
   
   // Get Omega_nu(z) for massive neutrinos at a variety of redshifts ( / scale factor values).
   for (double z = 0.; z<=4.; z = z+0.2){
-		Omnu = ccl_omega_x(cosmo, 1./ (1. + z), ccl_omega_nu_label, &status);
+		Omnu = ccl_omega_x(cosmo, 1./ (1. + z), ccl_species_nu_label, &status);
 		printf("z=%.16le, Omnu(z)=%.16le \n",z,Omnu); 
 	  
   } 	  

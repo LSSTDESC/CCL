@@ -1,10 +1,9 @@
-#ifdef __cplusplus
-extern "C" {
-#endif
+/* @file */
 
-#pragma once
+#ifndef __CCL_POWER_H_INCLUDED__
+#define __CCL_POWER_H_INCLUDED__
 
-#include "ccl_core.h"
+CCL_BEGIN_DECLS
 
 /**
  * CLASS power spectrum without splines.
@@ -88,6 +87,6 @@ double ccl_sigmaV(ccl_cosmology *cosmo, double R, double a, int * status);
  */
 double ccl_sigma8(ccl_cosmology *cosmo, int * status);
 
-#ifdef __cplusplus
-}
+CCL_END_DECLS
+
 #endif

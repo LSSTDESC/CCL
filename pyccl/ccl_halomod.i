@@ -1,15 +1,10 @@
 %module ccl_halomod
 
 %{
-#define SWIG_FILE_WITH_INIT
+/* put additional #include here */
+#include "../include/ccl_params.h"
 #include "../include/ccl_halomod.h"
-  %}
-
-// Automatically document arguments and output types of all functions
-%feature("autodoc", "1");
-
-// Strip the ccl_ prefix from function names
-%rename("%(strip:[ccl_])s") "";
+%}
 
 %include "../include/ccl_halomod.h"
 

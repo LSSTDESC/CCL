@@ -1,12 +1,6 @@
 /** @file */
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-#pragma once
-
-#include "ccl_core.h"
-#include "ccl_utils.h"
+#ifndef __CCL_CLS_H_INCLUDED__
+#define __CCL_CLS_H_INCLUDED__
 
 #define CL_TRACER_NC 1 //Tracer type 1: number counts
 #define CL_TRACER_WL 2 //Tracer type 2: weak lensing
@@ -18,6 +12,8 @@ extern "C" {
 #define CCL_CLT_BA 205 //Alignment bias
 #define CCL_CLT_WL 206 //Weak lensing window function
 #define CCL_CLT_WM 207 //Magnification window function
+
+CCL_BEGIN_DECLS
 
 /**
  * ClTracer structure, used to contain everything
@@ -252,8 +248,7 @@ void ccl_angular_cls(ccl_cosmology *cosmo,CCL_ClWorkspace *w,
 		     CCL_ClTracer *clt1,CCL_ClTracer *clt2,
 		     int nl_out,int *l,double *cl,int *status);
 
+CCL_END_DECLS
 
 
-#ifdef __cplusplus
-}
 #endif

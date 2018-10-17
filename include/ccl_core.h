@@ -1,19 +1,14 @@
 /** @file */
-#ifdef __cplusplus
-extern "C" {
-#endif
+#ifndef __CCL_CORE_H_INCLUDED__
+#define __CCL_CORE_H_INCLUDED__
 
-#pragma once
-#include "gsl/gsl_spline.h"
-#include "gsl/gsl_interp2d.h"
-#include "gsl/gsl_spline2d.h"
-#include "ccl_config.h"
-#include "ccl_constants.h"
 #include <stdbool.h>
+#include <stdio.h>
+#include <gsl/gsl_spline.h>
+#include <gsl/gsl_interp2d.h>
+#include <gsl/gsl_spline2d.h>
 
-// Macros for replacing relative paths
-#define EXPAND_STR(s) STRING(s)
-#define STRING(s) #s
+CCL_BEGIN_DECLS
 
 /**
  * Struct containing the parameters defining a cosmology
@@ -156,6 +151,9 @@ typedef enum ccl_mnu_convention {
 void ccl_cosmology_read_config(void);
 ccl_cosmology * ccl_cosmology_create(ccl_parameters params, ccl_configuration config);
 
+/* Internal function to set the status message safely. */
+void ccl_cosmology_set_status_message(ccl_cosmology * cosmo, const char * status_message, ...);
+
 
 // Helper functions to create ccl_cosmology structs directly given a set of params
 ccl_cosmology * ccl_cosmology_create_with_params(double Omega_c, double Omega_b, double Omega_k,
@@ -293,6 +291,24 @@ ccl_parameters ccl_parameters_create_lcdm_nu(double Omega_c, double Omega_b, dou
  */
 void ccl_parameters_free(ccl_parameters * params);
 
+
+/**
+ * Write a cosmology parameters object to a file in yaml format, .
+ * @param params Cosmological parameters 
+ * @param filename Name of file to create and write
+ * @param status Status flag. 0 if there are no errors, nonzero otherwise.
+ * @return void
+ */
+void ccl_parameters_write_yaml(ccl_parameters * params, const char * filename, int * status);
+
+/**
+ * Read a cosmology parameters object from a file in yaml format, .
+ * @param filename Name of existing file to read from
+ * @param status Status flag. 0 if there are no errors, nonzero otherwise.
+ * @return cosmo Cosmological parameters 
+ */
+ccl_parameters ccl_parameters_read_yaml(const char * filename, int *status);
+
 /**
  * Free a cosmology struct
  * @param cosmo Cosmological parameters 
@@ -330,6 +346,6 @@ void ccl_cosmology_compute_growth(ccl_cosmology * cosmo, int * status);
  */
 void ccl_cosmology_compute_power(ccl_cosmology * cosmo, int* status);
 
-#ifdef __cplusplus
-}
+CCL_END_DECLS
+
 #endif
