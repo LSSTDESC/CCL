@@ -53,5 +53,5 @@ CTEST2(cosmology, create_general_cosmo) {
   // So I am going to test some critical things to make sure something
   // happened.
   ASSERT_EQUAL(cosmo->status, 0);
-  ASSERT_DBL_NEAR_TOL(cosmo->data.growth0, 1.);
+  ASSERT_DBL_NEAR_TOL(cosmo->data.growth0, 1., 1e-10);
 }
