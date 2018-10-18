@@ -18,27 +18,27 @@ def test_swig_tracer():
 
     assert_raises(
         CCLError,
-        pyccl.ClTracerLensing,
-        PYCOSMO, True,
-        n=(z, dNdz[0:2]),
-        bias_ia=(z, bias_ia),
-        f_red=(z, f_red))
+        pyccl.WeakLensingTracer,
+        PYCOSMO,
+        dndz=(z, dNdz[0:2]),
+        ia_bias=(z, bias_ia),
+        red_frac=(z, f_red))
 
     assert_raises(
         CCLError,
-        pyccl.ClTracerLensing,
-        PYCOSMO, True,
-        n=(z, dNdz),
-        bias_ia=(z, bias_ia[0:2]),
-        f_red=(z, f_red))
+        pyccl.WeakLensingTracer,
+        PYCOSMO,
+        dndz=(z, dNdz),
+        ia_bias=(z, bias_ia[0:2]),
+        red_frac=(z, f_red))
 
     assert_raises(
         CCLError,
-        pyccl.ClTracerLensing,
-        PYCOSMO, True,
-        n=(z, dNdz),
-        bias_ia=(z, bias_ia),
-        f_red=(z, f_red[0:2]))
+        pyccl.WeakLensingTracer,
+        PYCOSMO,
+        dndz=(z, dNdz),
+        ia_bias=(z, bias_ia),
+        red_frac=(z, f_red[0:2]))
 
 
 def test_swig_background():
