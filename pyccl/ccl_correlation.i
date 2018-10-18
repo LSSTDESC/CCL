@@ -62,6 +62,16 @@ void correlation_3dRsd_vec(ccl_cosmology *cosmo,double a,double mu,double beta,
   ccl_correlation_3dRsd(cosmo,a,ns,s,mu,beta,xis,use_spline,status);
 }
 
+void correlation_3dRsd_avgmu_vec(ccl_cosmology *cosmo,double a,double beta,
+			       int ns,double *s,
+                               double *xis,int nxis,
+         		       int *status)
+{ 
+  assert(ns==nxis);
+
+  ccl_correlation_3dRsd_avgmu(cosmo,a,ns,s,beta,xis,status);
+}
+
 void correlation_pi_sigma_vec(ccl_cosmology *cosmo,double a,double beta,
 			   double pie,int nsig,double *sig,double* xis, int nxis,int use_spline,
 			   int *status)

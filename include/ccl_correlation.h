@@ -68,6 +68,10 @@ void ccl_correlation_3dRsd(ccl_cosmology *cosmo,double a,
 			   int n_s,double *s,double mu,double beta,double *xi,
 			   int use_spline, int *status);
 
+void ccl_correlation_3dRsd_avgmu(ccl_cosmology *cosmo, double a, int n_s, double *s,
+                                 double beta, double *xi,
+                                 int *status);
+
 void ccl_correlation_pi_sigma(ccl_cosmology *cosmo,double a,double beta,
 			   double pi,int n_sig,double *sig,double *xi,
 			   int use_spline,int *status);

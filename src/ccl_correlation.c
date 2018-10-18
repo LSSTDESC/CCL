@@ -525,6 +525,8 @@ void ccl_correlation_multipole(ccl_cosmology *cosmo, double a, double beta,
   int i, N_ARR;
   double *k_arr, *pk_arr, *s_arr, *xi_arr, *xi_arr0;
 
+  N_ARR = (int)(ccl_splines->N_K_3DCOR * log10(ccl_splines->K_MAX / ccl_splines->K_MIN));
+
   k_arr = ccl_log_spacing(ccl_splines->K_MIN, ccl_splines->K_MAX, N_ARR);
   if (k_arr == NULL) {
     *status = CCL_ERROR_MEMORY;
@@ -624,10 +626,7 @@ void ccl_correlation_multipole_spline(ccl_cosmology *cosmo, double a,
   int i, N_ARR;
   double *k_arr, *pk_arr, *s_arr, *xi_arr, *xi_arr0, *xi_arr2, *xi_arr4;
 
-  // number of data points for k and pk array (divided by 10 for faster
-  // claculation)
-  N_ARR = (int)(ccl_splines->N_K_3DCOR *
-                log10(ccl_splines->K_MAX / ccl_splines->K_MIN));
+  N_ARR = (int)(ccl_splines->N_K_3DCOR * log10(ccl_splines->K_MAX / ccl_splines->K_MIN));
 
   k_arr = ccl_log_spacing(ccl_splines->K_MIN, ccl_splines->K_MAX, N_ARR);
   if (k_arr == NULL) {
@@ -795,6 +794,10 @@ void ccl_correlation_3dRsd(ccl_cosmology *cosmo, double a, int n_s, double *s,
     for (i = 0; i < n_s; i++)
       xi[i] = xi_arr0[i] + xi_arr2[i] * gsl_sf_legendre_Pl(2, mu) +
               xi_arr4[i] * gsl_sf_legendre_Pl(4, mu);
+    free(xi_arr0);
+    free(xi_arr2);
+    free(xi_arr4);
+
   } else {
     if (xir_spline[0] == NULL)
       ccl_correlation_multipole_spline(cosmo, a, status);
@@ -808,6 +811,54 @@ void ccl_correlation_3dRsd(ccl_cosmology *cosmo, double a, int n_s, double *s,
               8. / 35 * beta * beta * ccl_spline_eval(s[i], xir_spline[2]) *
                   gsl_sf_legendre_Pl(4, mu);
   }
+
+  ccl_check_status(cosmo, status);
+
+  return;
+}
+
+void ccl_correlation_3dRsd_avgmu(ccl_cosmology *cosmo, double a, int n_s, double *s,
+                                 double beta, double *xi,
+                                 int *status) {
+  int i;
+  double *xi_arr0, *xi_arr2, *xi_arr4;
+
+    xi_arr0 = malloc(sizeof(double) * n_s);
+    if (xi_arr0 == NULL) {
+      *status = CCL_ERROR_MEMORY;
+      strcpy(cosmo->status_message,
+             "ccl_correlation.c: ccl_correlation_3dRsd_avgmu ran out of memory\n");
+      return;
+    }
+    xi_arr2 = malloc(sizeof(double) * n_s);
+    if (xi_arr2 == NULL) {
+      free(xi_arr0);
+      *status = CCL_ERROR_MEMORY;
+      strcpy(cosmo->status_message,
+             "ccl_correlation.c: ccl_correlation_3dRsd_avgmu ran out of memory\n");
+      return;
+    }
+    xi_arr4 = malloc(sizeof(double) * n_s);
+    if (xi_arr4 == NULL) {
+      free(xi_arr2);
+      free(xi_arr4);
+      *status = CCL_ERROR_MEMORY;
+      strcpy(cosmo->status_message,
+             "ccl_correlation.c: ccl_correlation_3dRsd_avgmu ran out of memory\n");
+      return;
+    }
+
+    ccl_correlation_multipole(cosmo, a, beta, 0, n_s, s, xi_arr0, status);
+    ccl_correlation_multipole(cosmo, a, beta, 2, n_s, s, xi_arr2, status);
+    ccl_correlation_multipole(cosmo, a, beta, 4, n_s, s, xi_arr4, status);
+    for (i = 0; i < n_s; i++)
+      xi[i] = xi_arr0[i] + xi_arr2[i] * 1./4 +
+              xi_arr4[i] * 9./64;
+
+  free(xi_arr0);
+  free(xi_arr2);
+  free(xi_arr4);
+
 
   ccl_check_status(cosmo, status);
 
@@ -865,6 +916,12 @@ void ccl_correlation_pi_sigma(ccl_cosmology *cosmo, double a, double beta,
                           use_spline, status);
     xi[i] = xi_arr[i];
   }
+
+  free(mu_arr);
+  free(xi_arr);
+  free(s_arr);
+  
+  ccl_check_status(cosmo, status);
 
   return;
 }

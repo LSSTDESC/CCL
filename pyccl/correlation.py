@@ -164,6 +164,25 @@ def correlation_3dRsd(cosmo, a, s, mu, beta, use_spline = True):
     if scalar: return xis[0]
     return xis
 
+def correlation_3dRsd_avgmu(cosmo, a, s, beta):
+    
+    cosmo_in = cosmo
+    cosmo = cosmo.cosmo
+    status = 0
+
+    # Convert scalar input into an array
+    scalar = False
+    if isinstance(s, float) or isinstance(s, int):
+        scalar = True
+        s = np.array([s,])
+
+    # Call 3D correlation function
+    xis, status = lib.correlation_3dRsd_avgmu_vec(cosmo, a, beta, s, len(s),
+                                                 status)
+    check(status, cosmo_in)
+    if scalar: return xis[0]
+    return xis
+
 def correlation_pi_sigma(cosmo, a, beta, pie, sig, use_spline = True):
     
     cosmo_in = cosmo
