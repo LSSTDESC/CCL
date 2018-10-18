@@ -18,7 +18,7 @@ void ccl_cosmology_write_power_class_z(char *filename, ccl_cosmology * cosmo, do
 /**
  * Correction for the impact of baryonic physics on the matter power spectrum.
  * Returns f(k,a) [dimensionless] for given cosmology, using the method specified for the baryonic transfer function.
- * f(k,z) is the fractional change in the nonlinear matter power spectrum from the BCM model of Schenider & Teyrrsier (2015). The parameters of the model are passed as part of the cosmology class.
+ * f(k,a) is the fractional change in the nonlinear matter power spectrum from the Baryon Correction Model (BCM) of Schenider & Teyrrsier (2015). The parameters of the model are passed as part of the cosmology class.
  * @param cosmo Cosmology parameters and configurations, including baryonic parameters.
  * @param k Fourier mode, in [1/Mpc] units
  * @param a scale factor, normalized to 1 for today
@@ -26,7 +26,7 @@ void ccl_cosmology_write_power_class_z(char *filename, ccl_cosmology * cosmo, do
  * For specific cases see documentation for ccl_error.c
  * @return f(k,a).
  */
-double ccl_bcm_model_fkz(ccl_cosmology * cosmo, double k, double a, int *status);
+double ccl_bcm_model_fka(ccl_cosmology * cosmo, double k, double a, int *status);
 
 /**
  * Linear matter power spectrum.
