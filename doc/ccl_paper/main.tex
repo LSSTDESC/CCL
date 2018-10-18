@@ -157,14 +157,14 @@ Fitting models to cosmological observables requires predicting cosmological dist
 The comoving angular diameter distance is then computed in terms of the comoving radial distance,
 \begin{equation}\label{eq:angdist}
  r(\chi)=\left\{\begin{array}{cc}
-                 k^{-1/2}\sin(k^{1/2}\chi) & \mathcal{K}>0\\
+                 \mathcal{K}^{-1/2}\sin(\mathcal{K}^{1/2}\chi) & \mathcal{K}>0\\
                  \chi & \mathcal{K}=0\\
-                 |k|^{-1/2}\sinh(|k|^{1/2}\chi) & \mathcal{K}<0\\
+                 |\mathcal{K}|^{-1/2}\sinh(|\mathcal{K}|^{1/2}\chi) & \mathcal{K}<0\\
                 \end{array}\right.
 \end{equation}
 where $\mathcal{K} \equiv \Omega_K H_0^2 c^{-2}$ is the curvature.
-The angular diameter distance is given by $d_A=a\,r(a)$, and the luminosity distance is
-$d_L=r(a)/a,$ leading to the familiar relation $d_A = a^2d_L$ which is valid in general for all metric theories of gravity.
+The angular diameter distance is given by $d_A=a\,r(\chi(a))$, and the luminosity distance is
+$d_L=r(\chi(a))/a,$ leading to the familiar relation $d_A = a^2d_L$ which is valid in general for all metric theories of gravity.
 The \ccl suite also has the functionality to compute the distance modulus, defined as
 \begin{equation}\label{eq:distmod}
     \mu = 5 \log_{10}(d_L / {\rm pc})-5,
@@ -187,7 +187,7 @@ using a Runge-Kutta Cash-Karp algorithm. We define $g(a)\equiv D/a$ and adopt as
   \label{eq:lingrowthf}
 \end{equation}
 
-\ccl provides functions that return the growth normalized to $D(a=1)=1$ and to $D(a\ll1)\rightarrow a$. It employs an accelerated spline that is linearly spaced in the scale factor to interpolate the growth functions (for more details, see Section \ref{sec:implement}). The growth calculations cover flat and curved $\Lambda$CDM and $w$CDM cosmologies. However, it should be noted that the above treatment is ill-defined in the presence of massive neutrinos, and attempts to compute the growth rate in cosmologies with massive neutrinos will produce an inconsistencies between growth predictions and the matter power spectrum (Section \ref{sec:matterps}), for example.
+\ccl provides functions that return the growth normalized either to $D(a=1)=1$ or to $D(a\ll1)\rightarrow a$. It employs an accelerated spline that is linearly spaced in the scale factor to interpolate the growth functions (for more details, see Section \ref{sec:implement}). The growth calculations cover flat and curved $\Lambda$CDM and $w$CDM cosmologies. However, it should be noted that the above treatment is ill-defined in the presence of massive neutrinos, and attempts to compute the growth rate in cosmologies with massive neutrinos will produce an inconsistencies between growth predictions and the matter power spectrum (Section \ref{sec:matterps}), for example.
 
 Finally, \ccl allows for growth predictions with an alternative `modified gravity' cosmological model defined by a regular curved $w$CDM background as well as a user-defined $\Delta f(a)$, such that the true growth rate in this model is given by
 \begin{equation}
@@ -248,7 +248,7 @@ where $k$ has units of ${\rm Mpc}^{-1}$. The BBKS power spectrum option is prima
  \end{eqnarray}
 In the case of the emulator, the effective number of relativistic neutrino species is set to $N_{\rm eff}=3.04$ and $\Omega_g=0$. In \citet{Lawrence17}, the neutrino component of the power spectrum is not simulated, but either linearly evolved and added to the simulated power spectra at low redshift, or accounted for by a scale-dependent correction to the growth function. The typical accuracy of the emulator with respect to simulated power spectra is at the $<3\%$ level and depends on the cosmological model. More details on this method and its accuracy can be found in \citet{Upadhye14,Castorina15,Heitmann16}.
  
-\paragraph{\bf Baryonic correction model (BCM).} \ccl incorporates the impact of baryons on the total matter power spectrum via the BCM of \citet{Schneider15}. The main consequences of baryonic processes are: to suppress the power spectrum at intermediate scales ($k\sim$ a few $h\,\text{Mpc}^{-1}$) due to the heating and ejection of gas by Active Galactic Nuclei feedback, and to enhance it at smaller scales due to adiabatic cooling. To account for these effects, BCM uses an effective decomposition for the impact of gas ejection ($G$) and the enhancement of the small scale profile due to star formation ($S$) to estimate the fractional effect of baryonic processes on the dark matter-only power spectrum ($P_{\rm DMO}$):
+\paragraph{\bf Baryonic correction model (BCM).} \ccl incorporates the impact of baryons on the total matter power spectrum via the BCM of \citet{Schneider15}. The main consequences of baryonic processes are: to suppress the power spectrum at intermediate scales ($k\sim$ a few $\text{Mpc}^{-1}$) due to the heating and ejection of gas by Active Galactic Nuclei feedback, and to enhance it at smaller scales due to adiabatic cooling. To account for these effects, BCM uses an effective decomposition for the impact of gas ejection ($G$) and the enhancement of the small scale profile due to star formation ($S$) to estimate the fractional effect of baryonic processes on the dark matter-only power spectrum ($P_{\rm DMO}$):
 \begin{equation}
   P_{\rm BCM}(k,z)=P_{\rm DMO}(k,z) G(k|M_c,\eta_b,z)S(k|k_s)
   \label{eq:bcm}
@@ -486,7 +486,7 @@ where the only change is in the formulation of the second term. Note that the fi
 
 The \citet{Tinker2010} model parameterizes the halo mass function in terms of the peak height, $\nu = \delta_c/\sigma_M$, where $\delta_c=1.686$ is the critical density for collapse (taken to be independent of cosmological model). The function is then re-expressed as
 \begin{equation}
-  f(\nu) = \alpha[1+(\beta\nu)^{-2\phi}]\nu^{2\eta}e(-\gamma\nu^2/2).
+  f(\nu) = \alpha[1+(\beta\nu)^{-2\phi}]\nu^{2\eta}e^{-\gamma\nu^2/2}.
   \label{eq:tinkerf}
 \end{equation}
 
@@ -496,7 +496,7 @@ We note that these halo mass functions, while implemented to high {\em numerical
 
 We also include the mass function from \cite{Sheth1999}:
 \begin{equation}
-f(\nu)\;\mathrm{d}\nu=A\left[1+\frac{1}{(q\nu^2)^p}\right]\mathrm{e}^{-q\nu^2/2}\;\mathrm{d}\nu\ ,
+f(\nu)=A\left[1+\frac{1}{(q\nu^2)^p}\right]\mathrm{e}^{-q\nu^2/2}\ ,
 \label{eq:st_mf}
 \end{equation}
 with $p=0.3$, $q=0.707$ and $A\simeq 0.21616$, where $A$ is fixed such that the mass function is normalized.
