@@ -4,6 +4,11 @@
  * producing a single .c file that is compiled to
  * a python extension module. */
 
+%pythonbegin %{
+import numpy
+from .errors import CCLError
+%}
+
 %{
 /* this is the master .c file; need an init function */
 #define SWIG_FILE_WITH_INIT
