@@ -1,3 +1,32 @@
+"""
+The functions in lsst_specs provide useful routines
+for making predictions for LSST-specific observables.
+These include routines for predicting the linear bias
+of the clustering sample, the dispersion of photometric
+redshifts for clustering and lensing samples, and for
+predicting the redshift distribution of a given tomographic
+photometric redshift bin. We also provide functionality
+for the user to incorporate their own photo-z model
+and to split the redshift distributions in tomographic
+bins based on photo-z cuts.
+
+These routines are based on the LSST Science book
+and the Chang et al. (2013) paper. These provide several
+options to model the expected redshift distributions
+of LSST galaxies that we use for the tomographic photo-z binning.
+The options are as follows.
+
+dNdz options
+ - 'nc': redshift distribution for number counts, i.e., the clustering sample.
+ - 'wl_cons': redshift distribution for galaxies with shapes for lensing. This
+              option adopts a conservative cut on shape quality criteria.
+ - 'wl_fid': redshift distribution for galaxies with shapes for lensing. This
+              option adopts a fiducial cut on shape quality criteria.
+ - 'wl_opt': redshift distribution for galaxies with shapes for lensing. This
+              option adopts an optimistic cut on shape quality criteria.
+
+"""
+
 import numpy as np
 from . import ccllib as lib
 from .core import check
@@ -10,9 +39,14 @@ dNdz_types = {
     'wl_opt':       lib.DNDZ_WL_OPT
 }
 
+"""A user-defined photo-z function.
+This functions allows the user to create (or
+delete) a function that returns the likelihood of measuring
+a certain z_ph given a z_spec, allowing for user-defined arguments.
+"""
+
 
 class PhotoZFunction(object):
-    """A user-defined photo-z function."""
 
     def __init__(self, func, args=None):
         """Create a new photo-z function.
@@ -25,6 +59,7 @@ class PhotoZFunction(object):
         """
         # Wrap user-defined function up so that only two args are needed
         # at run-time
+
         def _func(z_ph, z_s):
             return func(z_ph, z_s, args)
 
@@ -43,6 +78,7 @@ class PhotoZGaussian(PhotoZFunction):
     """
     Gaussian photo-z function with sigma(z) = sigma_z0 (1 + z).
     """
+
     def __init__(self, sigma_z0):
         """Create a new Gaussian photo-z function.
 
@@ -63,8 +99,12 @@ class PhotoZGaussian(PhotoZFunction):
 
 
 def bias_clustering(cosmo, a):
-    """Bias clustering, b(z), at a scale
+    """Bias clustering, b(a), at a scale
     factor, a, of the clustering sample.
+    This function outputs the expected linear bias
+    of galaxies in the LSST clustering sample
+    at a given scale factor a. The function is
+    taken from the LSST Science Book (arXiv:0912.0201).
 
     Args:
         cosmo (:obj:`Cosmology`): Cosmological parameters.
@@ -79,13 +119,15 @@ def bias_clustering(cosmo, a):
 
 def sigmaz_clustering(z):
     """Photo-z dispersion, sigma(z), for the clustering sample
-    at `a`.
+    at a given redshift. This function returns the expected
+    photometric redshift dispersion at a given redshift for
+    galaxies in the LSST clustering sample.
 
     .. note:: assumes Gaussian uncertainties.
 
     Args:
         cosmo (:obj:`Cosmology`): Cosmological parameters.
-        a (float or array_like): Scale factor(s), normalized to 1 today.
+        z (float or array_like): Redshift(s).
 
     Returns:
         specs_sigmaz_clustering (float or array_like): Dispersion at each scale
@@ -98,12 +140,15 @@ def sigmaz_clustering(z):
 
 def sigmaz_sources(z):
     """Photo-z dispersion, sigma(z), for the lensing sample.
+    This function returns the expected
+    photometric redshift dispersion at a given redshift for
+    galaxies in the LSST weak lensing gold sample.
 
     .. note:: assumes Gaussian uncertainties.
 
     Args:
         cosmo (:obj:`Cosmology`): Cosmological parameters.
-        a (float or array_like): Scale factor(s), normalized to 1 today.
+        z (float or array_like): Redshift(s).
 
     Returns:
         specs_sigmaz_sources (float or array_like): Dispersion at each scale
