@@ -1067,11 +1067,18 @@ To further validate the $P(k) \to \xi(r)$ transform we performed a test using an
 Although this function approximates the true three-dimensional correlation distribution over the range of interest in $r$, the transform $P(k)$ does not have the correct behavior at low $k$ where $P(k) \sim  k$. Therefore, a second test was performed with the function $P(k) = A k / (k_0 + k)^4$, where $A = 100$ and $k_0 = 0.045$~Mpc$^{-1}$, that approximates the true behavior of the power spectrum for all $k$.
 The transform to $\xi(r)$ was performed using Mathematica and compared to the \ccl calculation. The results, shown in Figure~\ref{fig:analytic_xi} show agreement to within $10^{-4}$ over most of the range in $r$. Since this power spectrum results in a correlation function that turns negative at $r \approx 150$~Mpc, the accuracy metric is large near this value. 
 
+{\bf
+The differences between the \ccl calculations and the benchmarks are primarily due to the   
+method used to compute the transform of Eq.~\ref{eq:xi3d}. In \ccl we use {\tt FFTLog}, while the benchmarks use either 
+a slower precice numerical integration or an exact analytic expression, and therefore 
+differences at the levels observed are not surprising.
+}
+
 %------------------------
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=0.49\textwidth]{3dcorr_analytic}
-\caption{The relative error in the three-dimensional spatial correlation function computed using the CCL algorithm compared to an analytic function $\xi(r) = (r/r_0)^{1.67}$ (blue curve) and using $P(k) = A k / (k_0 + k)^4$ (orange curve). Both functions have known analytic transforms, $\xi(r)$, but the second one has an asymptotic behavior that matches $P(k)\sim k$ at low $k$. In this validation test, the known $P(k)$ was transformed with the \ccl algorithm and compared to the known analytic result for $\xi(r)$.}
+\caption{The relative error in the three-dimensional spatial correlation function computed using the CCL algorithm compared to an analytic function $\xi(r) = (r/r_0)^{-1.67}$ (blue curve) and using $P(k) = A k / (k_0 + k)^4$ (orange curve). Both functions have known analytic transforms, $\xi(r)$, but the second one has an asymptotic behavior that matches $P(k)\sim k$ at low $k$. In this validation test, the known $P(k)$ was transformed with the \ccl algorithm and compared to the known analytic result for $\xi(r)$.}
 \label{fig:analytic_xi}
 \end{figure}
 %-------------------------
