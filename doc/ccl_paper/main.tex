@@ -773,7 +773,7 @@ In Eq.~(\ref{Omnu}) above, we specify how $\Omega_{\nu, {\rm m}}$ is computed fo
 \end{equation}
 At high and low $\mu$, corresponding to high and low mass neutrinos, this integral need not be evaluated numerically. At high $\mu$, we set the integral equal to $\frac{5\zeta(3)}{18\pi^4}\mu$ (where $\zeta$ is the Riemann zeta function), while at low $\mu$ it goes to $\frac{7}{8}$. The $\mu$ values at which these approximations are taken can be set by the user. Outside of the regime in which these approximations are valid, the integral is computed numerically using {\tt gsl}, splined, and stored such that for a single cosmology it must only be computed once.
 
-It may sometimes be preferable or necessary to specify a cosmology in terms of $\Omega_{\nu, {\rm m}}$ instead of $m_\nu$. To facilitate this, \ccl includes a convenience function which returns $m_\nu$ given $\Omega_{\nu, {\rm m}}$. This is achieved via the relationship
+It may sometimes be preferable or necessary to specify a cosmology in terms of $\Omega_{\nu, {\rm m}}$ instead of $m_\nu$. To facilitate this, \ccl includes a convenience function which returns $m_\nu$ given $\Omega_{\nu, {\rm m}}$. This is achieved via the relationship (see, e.g., \citealt{Lesgourgues2012})
 \begin{equation}
 \sum m_\nu = 93.14 {\rm eV} \times \Omega_{\nu, {\rm m}}
 \label{summnu_om}
