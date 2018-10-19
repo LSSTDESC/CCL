@@ -1,8 +1,9 @@
 import numpy as np
-from numpy.testing import assert_allclose, run_module_suite, decorators
+from numpy.testing import assert_allclose, run_module_suite
+import numpy.testing
 import pyccl as ccl
-from os.path import dirname,join,abspath
-from collections import OrderedDict
+from os.path import dirname, join, abspath
+
 # Set tolerances
 DISTANCES_TOLERANCE = 1e-4
 # The distance tolerance is 1e-3 for distances with massive neutrinos
@@ -28,7 +29,9 @@ Omega_v_vals = np.array([0.7, 0.7, 0.7, 0.65, 0.75])
 w0_vals = np.array([-1.0, -0.9, -0.9, -0.9, -0.9])
 wa_vals = np.array([0.0, 0.0, 0.1, 0.1, 0.1])
 
-mnu = [[0.04, 0., 0.], [0.05, 0.01, 0.], [0.03, 0.02, 0.04], [0.05, 0., 0.], [0.03, 0.02, 0.]]
+mnu = [
+    [0.04, 0., 0.], [0.05, 0.01, 0.], [0.03, 0.02, 0.04], [0.05, 0., 0.],
+    [0.03, 0.02, 0.]]
 # For tests with massive neutrinos, we require N_nu_rel + N_nu_mass = 3
 # Because we compare with astropy for benchmarks
 # Which assumes N total is split equally among all neutrinos.
@@ -300,12 +303,9 @@ def compare_distances(z, chi_bench,dm_bench, Omega_v, w0, wa):
     # Set Omega_K in a consistent way
     Omega_k = 1.0 - Omega_c - Omega_b - Omega_v
 
-    # Create new Parameters and Cosmology objects
-    p = ccl.Parameters(Omega_c=Omega_c, Omega_b=Omega_b, Neff = Neff,
+    cosmo = ccl.Cosmology(Omega_c=Omega_c, Omega_b=Omega_b, Neff = Neff,
                        h=h, A_s=A_s, n_s=n_s, Omega_k=Omega_k,
-                       w0=w0, wa=wa)
-    p.parameters.Omega_g = 0. # Hack to set to same value used for benchmarks
-    cosmo = ccl.Cosmology(p)
+                       w0=w0, wa=wa, Omega_g=0)
 
     # Calculate distance using pyccl
     a = 1. / (1. + z)
@@ -328,12 +328,9 @@ def compare_distances_hiz(z, chi_bench, Omega_v, w0, wa):
     # Set Omega_K in a consistent way
     Omega_k = 1.0 - Omega_c - Omega_b - Omega_v
 
-    # Create new Parameters and Cosmology objects
-    p = ccl.Parameters(Omega_c=Omega_c, Omega_b=Omega_b, Neff=Neff,
+    cosmo = ccl.Cosmology(Omega_c=Omega_c, Omega_b=Omega_b, Neff=Neff,
                        h=h, A_s=A_s, n_s=n_s, Omega_k=Omega_k,
-                       w0=w0, wa=wa)
-    p.parameters.Omega_g = 0. # Hack to set to same value used for benchmarks
-    cosmo = ccl.Cosmology(p)
+                       w0=w0, wa=wa, Omega_g=0)
 
     # Calculate distance using pyccl
     a = 1. / (1. + z)
@@ -341,7 +338,7 @@ def compare_distances_hiz(z, chi_bench, Omega_v, w0, wa):
     # Compare to benchmark data
     assert_allclose(chi, chi_bench, atol=1e-12, rtol=DISTANCES_TOLERANCE)
 
-@decorators.slow
+@numpy.testing.dec.slow
 def compare_distances_mnu(z, chi_bench,dm_bench, Omega_v, w0, wa, Neff, mnu):
     """
     Compare distances calculated by pyccl with the distances in the benchmark
@@ -350,11 +347,9 @@ def compare_distances_mnu(z, chi_bench,dm_bench, Omega_v, w0, wa, Neff, mnu):
     # Set Omega_K in a consistent way
     Omega_k = 1.0 - Omega_c - Omega_b - Omega_v
 
-    # Create new Parameters and Cosmology objects
-    p = ccl.Parameters(Omega_c=Omega_c, Omega_b=Omega_b, Neff=Neff_mnu,
+    cosmo = ccl.Cosmology(Omega_c=Omega_c, Omega_b=Omega_b, Neff=Neff_mnu,
                        h=h, A_s=A_s, n_s=n_s, Omega_k=Omega_k,
                        w0=w0, wa=wa, m_nu=mnu)
-    cosmo = ccl.Cosmology(p)
 
     # Calculate distance using pyccl
     a = 1. / (1. + z)
@@ -368,7 +363,7 @@ def compare_distances_mnu(z, chi_bench,dm_bench, Omega_v, w0, wa, Neff, mnu):
 
     assert_allclose(dm, dm_bench[a_not_one], atol=1e-3, rtol = DISTANCES_TOLERANCE_MNU)
 
-@decorators.slow
+@numpy.testing.dec.slow
 def compare_distances_mnu_hiz(z, chi_bench,dm_bench, Omega_v, w0, wa, Neff_mnu, mnu):
     """
     Compare distances calculated by pyccl with the distances in the benchmark
@@ -377,11 +372,9 @@ def compare_distances_mnu_hiz(z, chi_bench,dm_bench, Omega_v, w0, wa, Neff_mnu, 
     # Set Omega_K in a consistent way
     Omega_k = 1.0 - Omega_c - Omega_b - Omega_v
 
-    # Create new Parameters and Cosmology objects
-    p = ccl.Parameters(Omega_c=Omega_c, Omega_b=Omega_b, Neff=Neff,
+    cosmo = ccl.Cosmology(Omega_c=Omega_c, Omega_b=Omega_b, Neff=Neff,
                        h=h, A_s=A_s, n_s=n_s, Omega_k=Omega_k,
                        w0=w0, wa=wa, m_nu=mnu)
-    cosmo = ccl.Cosmology(p)
 
     # Calculate distance using pyccl
     a = 1. / (1. + z)
@@ -401,11 +394,9 @@ def compare_class_distances(z, chi_bench, dm_bench, Neff=3.0, m_nu=0.0,
     Compare distances calculated by pyccl with the distances in the CLASS
     benchmark file.
     """
-    # Create new Parameters and Cosmology objects
-    p = ccl.Parameters(Omega_c=Omega_c, Omega_b=Omega_b, Neff=Neff,
+    cosmo = ccl.Cosmology(Omega_c=Omega_c, Omega_b=Omega_b, Neff=Neff,
                        h=h, A_s=A_s, n_s=n_s, Omega_k=Omega_k, m_nu=m_nu,
                        w0=w0, wa=wa)
-    cosmo = ccl.Cosmology(p)
 
     # Calculate distance using pyccl
     a = 1. / (1. + z)

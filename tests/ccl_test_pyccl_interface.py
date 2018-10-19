@@ -9,41 +9,46 @@ def reference_models():
     Create a set of reference Cosmology() objects.
     """
     # Standard LCDM model
-    p1 = ccl.Parameters(Omega_c=0.27, Omega_b=0.045, h=0.67, A_s=1e-10, n_s=0.96)
-    cosmo1 = ccl.Cosmology(p1)
+    cosmo1 = ccl.Cosmology(
+        Omega_c=0.27, Omega_b=0.045, h=0.67, A_s=1e-10, n_s=0.96)
 
     # LCDM model with curvature
-    p2 = ccl.Parameters(Omega_c=0.27, Omega_b=0.045, h=0.67, A_s=1e-10,
-                        n_s=0.96, Omega_k=0.05)
-    cosmo2 = ccl.Cosmology(p2)
+    cosmo2 = ccl.Cosmology(
+        Omega_c=0.27, Omega_b=0.045, h=0.67, A_s=1e-10,
+        n_s=0.96, Omega_k=0.05)
 
     # wCDM model
-    p3 = ccl.Parameters(Omega_c=0.27, Omega_b=0.045, h=0.67, A_s=1e-10,
-                        n_s=0.96, w0=-0.95, wa=0.05)
-    cosmo3 = ccl.Cosmology(p3)
+    cosmo3 = ccl.Cosmology(
+        Omega_c=0.27, Omega_b=0.045, h=0.67, A_s=1e-10,
+        n_s=0.96, w0=-0.95, wa=0.05)
 
     # BBKS Pk
-    p4 = ccl.Parameters(Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96)
-    cosmo4 = ccl.Cosmology(p4, transfer_function='bbks')
+    cosmo4 = ccl.Cosmology(
+        Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96,
+        transfer_function='bbks')
 
     # E&H Pk
-    p5 = ccl.Parameters(Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96)
-    cosmo5 = ccl.Cosmology(p5, transfer_function='eisenstein_hu')
+    cosmo5 = ccl.Cosmology(
+        Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96,
+        transfer_function='eisenstein_hu')
 
     # Emulator Pk
-    p6 = ccl.Parameters(Omega_c=0.27, Omega_b=0.022/0.67**2, h=0.67, sigma8=0.8,
-                        n_s=0.96, Neff=3.04, m_nu=0.)
-    cosmo6 = ccl.Cosmology(p6, transfer_function='emulator',
-                           matter_power_spectrum='emu')
+    cosmo6 = ccl.Cosmology(
+        Omega_c=0.27, Omega_b=0.022/0.67**2, h=0.67, sigma8=0.8,
+        n_s=0.96, Neff=3.04, m_nu=0.,
+        transfer_function='emulator',
+        matter_power_spectrum='emu')
 
     # Baryons Pk
-    p8 = ccl.Parameters(Omega_c=0.27, Omega_b=0.045, h=0.67, A_s=1e-10, n_s=0.96)
-    cosmo8 = ccl.Cosmology(p8, baryons_power_spectrum='bcm')
+    cosmo8 = ccl.Cosmology(
+        Omega_c=0.27, Omega_b=0.045, h=0.67, A_s=1e-10, n_s=0.96,
+        baryons_power_spectrum='bcm')
 
     # Baryons Pk with choice of BCM parameters other than default
-    p9 = ccl.Parameters(Omega_c=0.27, Omega_b=0.045, h=0.67, A_s=1e-10, n_s=0.96,
-                        bcm_log10Mc=math.log10(1.7e14), bcm_etab=0.3, bcm_ks=75.)
-    cosmo9 = ccl.Cosmology(p9, baryons_power_spectrum='bcm')
+    cosmo9 = ccl.Cosmology(
+        Omega_c=0.27, Omega_b=0.045, h=0.67, A_s=1e-10, n_s=0.96,
+        bcm_log10Mc=math.log10(1.7e14), bcm_etab=0.3, bcm_ks=75.,
+        baryons_power_spectrum='bcm')
 
     # Emulator Pk w/neutrinos force equalize
     #p10 = ccl.Parameters(Omega_c=0.27, Omega_b=0.022/0.67**2, h=0.67, sigma8=0.8,
@@ -62,10 +67,11 @@ def reference_models_nu():
     """
 
     # Emulator Pk w/neutrinos list
-    p1 = ccl.Parameters(Omega_c=0.27, Omega_b=0.022/0.67**2, h=0.67, sigma8=0.8,
-                        n_s=0.96, Neff=3.04, m_nu=[0.02, 0.02, 0.02])
-    cosmo1 = ccl.Cosmology(p1, transfer_function='emulator',
-                           matter_power_spectrum='emu')
+    cosmo1 = ccl.Cosmology(
+        Omega_c=0.27, Omega_b=0.022/0.67**2, h=0.67, sigma8=0.8,
+        n_s=0.96, Neff=3.04, m_nu=[0.02, 0.02, 0.02],
+        transfer_function='emulator',
+        matter_power_spectrum='emu')
 
     # Emulator Pk with neutrinos, force equalize
     #p2 = ccl.Parameters(Omega_c=0.27, Omega_b=0.022/0.67**2, h=0.67, sigma8=0.8,
@@ -592,7 +598,7 @@ def check_cls(cosmo):
 
     # Check if power spectrum type is valid for CMB
     cmb_ok = True
-    if cosmo.configuration.matter_power_spectrum_method \
+    if cosmo._config.matter_power_spectrum_method \
         == ccl.core.matter_power_spectrum_types['emu']: cmb_ok = False
 
     # ClTracer test objects
@@ -662,7 +668,7 @@ def check_cls_nu(cosmo):
 
     # Check if power spectrum type is valid for CMB
     cmb_ok = True
-    if cosmo.configuration.matter_power_spectrum_method \
+    if cosmo._config.matter_power_spectrum_method \
         == ccl.core.matter_power_spectrum_types['emu']: cmb_ok = False
 
     # ClTracer test objects
