@@ -116,7 +116,7 @@ def correlation_multipole(cosmo, a, beta, l, s):
     
     """
     cosmo_in = cosmo
-    cosmo = _cosmo.cosmo
+    cosmo = cosmo.cosmo
     status = 0
 
     # Convert scalar input into an array
