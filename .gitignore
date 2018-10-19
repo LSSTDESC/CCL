@@ -68,6 +68,7 @@ pyccl/ccllib.py
 pyccl/ccl_params.ini
 pyccl.egg*
 .eggs*
+tests/benchmark/codes/.ipynb_checkpoints/*
 
 # Ignore VCS files
 .idea/*
