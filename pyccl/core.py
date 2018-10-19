@@ -157,6 +157,12 @@ class Cosmology(object):
               ValueError inside this function if not specified, so they are not
               optional.
 
+    .. note:: The parameter Omega_g can be used to set the radiation density
+              (not including relativistic neutrinos) to zero. Doing this will
+              give you a model that is physically inconsistent since the
+              temperature of the CMB will still be non-zero. Note however
+              that this approximation is common for late-time LSS computations.
+
     .. note:: BCM stands for the "baryonic correction model" of Schneider &
               Teyssier (2015; https://arxiv.org/abs/1510.06034). See the
               `DESC Note <https://github.com/LSSTDESC/CCL/blob/master/doc\
@@ -316,7 +322,17 @@ class Cosmology(object):
             baryons_power_spectrum=None,
             mass_function=None, halo_concentration=None,
             emulator_neutrinos=None):
-        """Build a ccl_configuration struct"""
+        """Build a ccl_configuration struct.
+
+        This function builds C ccl_configuration struct. This structure
+        controls which various approximations are used for the transfer
+        function, matter power spectrum, baryonic effect in the matter
+        power spectrum, mass function, halo concentration relation, and
+        neutrino effects in the emulator.
+
+        It also does some error checking on the inputs to make sure they
+        are valid and physically consistent.
+        """
 
         # Check validity of configuration-related arguments
         if transfer_function not in transfer_function_types.keys():
@@ -522,7 +538,14 @@ class Cosmology(object):
         self._build_cosmo()
 
     def __repr__(self):
-        """Make an eval-able string."""
+        """Make an eval-able string.
+
+        This feature can be used like this:
+
+        >>> import pyccl
+        >>> cosmo = pyccl.Cosmology(...)
+        >>> cosmo2 = eval(repr(cosmo))
+        """
 
         string = "pyccl.Cosmology("
         string += ", ".join(

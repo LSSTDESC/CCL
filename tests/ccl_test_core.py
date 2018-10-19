@@ -113,52 +113,53 @@ def test_parameters_mgrowth():
     f_func = lambda z: 0.1 * z
 
     # Valid constructions
-    assert_no_warnings(
-        ccl.Cosmology,
-        Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
-        z_mg=zarr, df_mg=dfarr)
-    assert_no_warnings(
-        ccl.Cosmology,
-        Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
-        z_mg=[0., 0.1, 0.2],
-        df_mg=[0.1, 0.1, 0.1])
+    for omega_g in [None, 0.0, 0.1]:
+        assert_no_warnings(
+            ccl.Cosmology,
+            Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
+            z_mg=zarr, df_mg=dfarr, Omega_g=omega_g)
+        assert_no_warnings(
+            ccl.Cosmology,
+            Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
+            z_mg=[0., 0.1, 0.2],
+            df_mg=[0.1, 0.1, 0.1], Omega_g=omega_g)
 
-    # Invalid constructions
-    assert_raises(
-        ValueError, ccl.Cosmology,
-        Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
-        z_mg=zarr)
-    assert_raises(
-        ValueError, ccl.Cosmology,
-        Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
-        df_mg=dfarr)
-    assert_raises(
-        ValueError, ccl.Cosmology,
-        Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
-        z_mg=None,
-        df_mg=dfarr)
-    assert_raises(
-        ValueError, ccl.Cosmology,
-        Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
-        z_mg=zarr,
-        df_mg=0.1)
-    assert_raises(
-        ValueError, ccl.Cosmology,
-        Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
-        z_mg=zarr,
-        df_mg=f_func)
+        # Invalid constructions
+        assert_raises(
+            ValueError, ccl.Cosmology,
+            Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
+            z_mg=zarr, Omega_g=omega_g)
+        assert_raises(
+            ValueError, ccl.Cosmology,
+            Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
+            df_mg=dfarr, Omega_g=omega_g)
+        assert_raises(
+            ValueError, ccl.Cosmology,
+            Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
+            z_mg=None,
+            df_mg=dfarr, Omega_g=omega_g)
+        assert_raises(
+            ValueError, ccl.Cosmology,
+            Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
+            z_mg=zarr,
+            df_mg=0.1, Omega_g=omega_g)
+        assert_raises(
+            ValueError, ccl.Cosmology,
+            Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
+            z_mg=zarr,
+            df_mg=f_func, Omega_g=omega_g)
 
-    # Mis-matched array sizes and dimensionality
-    assert_raises(
-        ValueError, ccl.Cosmology,
-        Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
-        z_mg=zarr,
-        df_mg=dfarr[1:])
-    assert_raises(
-        ValueError, ccl.Cosmology,
-        Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
-        z_mg=zarr,
-        df_mg=np.column_stack((dfarr, dfarr)))
+        # Mis-matched array sizes and dimensionality
+        assert_raises(
+            ValueError, ccl.Cosmology,
+            Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
+            z_mg=zarr,
+            df_mg=dfarr[1:], Omega_g=omega_g)
+        assert_raises(
+            ValueError, ccl.Cosmology,
+            Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
+            z_mg=zarr,
+            df_mg=np.column_stack((dfarr, dfarr)), Omega_g=omega_g)
 
 
 def test_parameters_read_write():
