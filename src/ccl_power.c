@@ -1545,6 +1545,7 @@ double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double k, double a, int *s
       double gf=ccl_growth_factor(cosmo,a,status)/ccl_growth_factor(cosmo,ccl_splines->A_SPLINE_MINLOG_PK,status);
       return pk0*gf*gf;
     }
+		break;
 
   case ccl_emu:
     if ((cosmo->config.transfer_function_method == ccl_emulator) && (a<A_MIN_EMU)){
@@ -1558,12 +1559,13 @@ double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double k, double a, int *s
       ccl_cosmology_compute_power(cosmo,status);
     }
     if (cosmo->data.p_nl == NULL) return NAN;
+		break;
 
   default:
     ccl_raise_warning(
 			CCL_ERROR_NOT_IMPLEMENTED,
-      "WARNING:  config.matter_power_spectrum_method = %d not yet supported\n \
-       continuing with linear power spectrum\n",cosmo->config.matter_power_spectrum_method);
+      "config.matter_power_spectrum_method = %d not yet supported "
+			"continuing with linear power spectrum\n", cosmo->config.matter_power_spectrum_method);
     cosmo->config.matter_power_spectrum_method=ccl_linear;
     return ccl_linear_matter_power(cosmo,k,a,status);
   } // end switch
