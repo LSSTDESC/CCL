@@ -5,8 +5,8 @@ import numpy as np
 
 # Same mapping for non-Limber integration methods
 nonlimber_methods = {
-    'native': const.CCL_NONLIMBER_METHOD_NATIVE,
     'angpow': const.CCL_NONLIMBER_METHOD_ANGPOW,
+    'native': const.CCL_NONLIMBER_METHOD_NATIVE,
 }
 
 function_types = {
@@ -281,7 +281,7 @@ def _check_array_params(f_arg):
 
 def angular_cl(cosmo, cltracer1, cltracer2, ell,
                l_limber=-1., l_logstep=1.05, l_linstep=20., dchi=3.,
-               dlk=0.003, zmin=0.05, non_limber_method="native"):
+               dlk=0.003, zmin=0.05, non_limber_method="angpow"):
     """Calculate the angular (cross-)power spectrum for a pair of tracers.
 
     Args:
@@ -301,7 +301,8 @@ def angular_cl(cosmo, cltracer1, cltracer2, ell,
             Defaults to 0.003.
         zmin (float) : minimal redshift for the integrals. Defualts to 0.05.
         non_limber_method (str) : non-Limber integration method. Supported:
-            "native" and "angpow". Defaults to 'native'.
+            "angpow" and "native". Defaults to "angpow". The use of the native
+            method is discouraged, and is only used for development purposes.
 
     Returns:
         float or array_like: Angular (cross-)power spectrum values,

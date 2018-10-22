@@ -646,7 +646,6 @@ void ccl_cl_tracer_free(CCL_ClTracer *clt)
   }
   if(clt->computed_transfer) {
     int il;
-    free(clt->n_k);
     for(il=0;il<clt->n_ls;il++)
       ccl_spline_free(clt->spl_transfer[il]);
     free(clt->spl_transfer);
@@ -1003,15 +1002,8 @@ static void compute_transfer(CCL_ClTracer *clt,ccl_cosmology *cosmo,CCL_ClWorksp
 
   //Get how many multipoles and allocate info for each of them
   clt->n_ls=w->n_ls;
-  clt->n_k=(int *)malloc(clt->n_ls*sizeof(int));
-  if(clt->n_k==NULL) {
-    *status=CCL_ERROR_MEMORY;
-    ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: compute_transfer(): memory allocation\n");
-    return;
-  }
   clt->spl_transfer=(SplPar **)malloc(clt->n_ls*sizeof(SplPar *));
   if(clt->spl_transfer==NULL) {
-    free(clt->n_k);
     *status=CCL_ERROR_MEMORY;
     ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: compute_transfer(): memory allocation\n");
     return;
@@ -1035,13 +1027,11 @@ static void compute_transfer(CCL_ClTracer *clt,ccl_cosmology *cosmo,CCL_ClWorksp
       ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: compute_transfer(): memory allocation\n");
       break;
     }
-    clt->n_k[il]=nk;
 
     //Loop over k and compute transfer function
     for(ik=0;ik<nk;ik++)
       tkarr[ik]=transfer_wrap(il,lkarr[ik],cosmo,w,clt,status);
     if(*status) {
-      free(clt->n_k);
       free(lkarr);
       free(tkarr);
       break;
@@ -1060,7 +1050,6 @@ static void compute_transfer(CCL_ClTracer *clt,ccl_cosmology *cosmo,CCL_ClWorksp
     free(tkarr);
   }
   if(*status) {
-    free(clt->n_k);
     int ill;
     for(ill=0;ill<il;ill++)
       ccl_spline_free(clt->spl_transfer[il]);
@@ -1113,18 +1102,20 @@ static void get_k_interval(ccl_cosmology *cosmo,CCL_ClWorkspace *w,
 			   CCL_ClTracer *clt1,CCL_ClTracer *clt2,int l,
 			   double *lkmin,double *lkmax)
 {
-  double chimin,chimax;
-  int cut_low_1=0,cut_low_2=0;
-
-  //Define a minimum distance only if no lensing is needed
-  if((clt1->tracer_type==CL_TRACER_NC) && (clt1->has_magnification==0)) cut_low_1=1;
-  if((clt2->tracer_type==CL_TRACER_NC) && (clt2->has_magnification==0)) cut_low_2=1;
-
   if(l<w->l_limber) {
-    chimin=2*(l+0.5)/ccl_splines->K_MAX;
-    chimax=0.5*(l+0.5)/ccl_splines->K_MIN;
+    //If non-Limber, we need to integrate over the whole range of k.
+    *lkmin=log10(ccl_splines->K_MIN);
+    *lkmax=log10(ccl_splines->K_MAX);
+    return;
   }
   else {
+    double chimin,chimax;
+    int cut_low_1=0,cut_low_2=0;
+    
+    //Define a minimum distance only if no lensing is needed
+    if((clt1->tracer_type==CL_TRACER_NC) && (clt1->has_magnification==0)) cut_low_1=1;
+    if((clt2->tracer_type==CL_TRACER_NC) && (clt2->has_magnification==0)) cut_low_2=1;
+
     if(cut_low_1) {
       if(cut_low_2) {
 	chimin=fmax(clt1->chimin,clt2->chimin);
@@ -1143,13 +1134,13 @@ static void get_k_interval(ccl_cosmology *cosmo,CCL_ClWorkspace *w,
       chimin=0.5*(l+0.5)/ccl_splines->K_MAX;
       chimax=2*(l+0.5)/ccl_splines->K_MIN;
     }
+
+    if(chimin<=0)
+      chimin=0.5*(l+0.5)/ccl_splines->K_MAX;
+
+    *lkmax=log10(fmin(ccl_splines->K_MAX,  2*(l+0.5)/chimin));
+    *lkmin=log10(fmax(ccl_splines->K_MIN,0.5*(l+0.5)/chimax));
   }
-
-  if(chimin<=0)
-    chimin=0.5*(l+0.5)/ccl_splines->K_MAX;
-
-  *lkmax=fmin( 2,log10(2  *(l+0.5)/chimin));
-  *lkmin=fmax(-4,log10(0.5*(l+0.5)/chimax));
 }
 
 //Compute angular power spectrum between two bins
@@ -1314,24 +1305,32 @@ double ccl_get_tracer_fa(ccl_cosmology *cosmo,CCL_ClTracer *clt,double a,int fun
     return -1;
   }
 
-  if(func_code==CCL_CLT_NZ)
+  switch(func_code) {
+  case CCL_CLT_NZ :
     spl=clt->spl_nz;
-  if(func_code==CCL_CLT_BZ)
+    break;
+  case CCL_CLT_BZ :
     spl=clt->spl_bz;
-  if(func_code==CCL_CLT_SZ)
+    break;
+  case CCL_CLT_SZ :
     spl=clt->spl_sz;
-  if(func_code==CCL_CLT_RF)
+    break;
+  case CCL_CLT_RF :
     spl=clt->spl_rf;
-  if(func_code==CCL_CLT_BA)
+    break;
+  case CCL_CLT_BA :
     spl=clt->spl_ba;
-  if((func_code==CCL_CLT_WL) || (func_code==CCL_CLT_WM)) {
+    break;
+  case CCL_CLT_WL :
     x=ccl_comoving_radial_distance(cosmo,a,status);
-    if(func_code==CCL_CLT_WL)
-      spl=clt->spl_wL;
-    if(func_code==CCL_CLT_WM)
-      spl=clt->spl_wM;
+    spl=clt->spl_wL;
+    break;
+  case CCL_CLT_WM :
+    x=ccl_comoving_radial_distance(cosmo,a,status);
+    spl=clt->spl_wM;
+    break;
   }
-
+  
   return ccl_spline_eval(x,spl);
 }
 

@@ -41,7 +41,6 @@ typedef struct {
   SplPar *spl_wM; //Spline for magnification
   int computed_transfer;
   int n_ls;
-  int *n_k;
   SplPar **spl_transfer;
 } CCL_ClTracer;
 
