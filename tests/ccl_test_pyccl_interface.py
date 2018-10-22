@@ -440,9 +440,9 @@ def check_neutrinos():
                                              m_nu=42)
 
 
-def check_lsst_specs(cosmo):
+def check_redshifts(cosmo):
     """
-    Check that lsst_specs functions can be run.
+    Check that redshifts functions can be run.
     """
     # Types of scale factor input (scalar, list, array)
     a_scl = 0.5
@@ -510,9 +510,9 @@ def check_lsst_specs(cosmo):
     assert_raises(TypeError, ccl.dNdz_tomog, z_scl, 'nc', zmin, zmax, z_arr)
     assert_raises(TypeError, ccl.dNdz_tomog, z_scl, 'nc', zmin, zmax, None)
 
-def check_lsst_specs_nu(cosmo):
+def check_redshifts_nu(cosmo):
     """
-    Check that lsst_specs functions can be run.
+    Check that redshifts functions can be run.
     """
     # Types of scale factor input (scalar, list, array)
     a_scl = 0.5
@@ -838,15 +838,15 @@ def test_neutrinos():
     """
     yield check_neutrinos
 
-def test_lsst_specs():
+def test_redshifts():
     """
     Test lsst specs module.
     """
     for cosmo in reference_models():
-        yield check_lsst_specs, cosmo
+        yield check_redshifts, cosmo
 
     for cosmo_nu in reference_models_nu():
-       yield check_lsst_specs_nu, cosmo_nu
+       yield check_redshifts_nu, cosmo_nu
 
 @decorators.slow
 def test_cls():

@@ -5,6 +5,7 @@ var searchData=
   ['ccl_5fconfiguration',['ccl_configuration',['../structccl__configuration.html',1,'']]],
   ['ccl_5fcosmology',['ccl_cosmology',['../structccl__cosmology.html',1,'']]],
   ['ccl_5fdata',['ccl_data',['../structccl__data.html',1,'']]],
+  ['ccl_5fgsl_5fparams',['ccl_gsl_params',['../structccl__gsl__params.html',1,'']]],
   ['ccl_5fparameters',['ccl_parameters',['../structccl__parameters.html',1,'']]],
   ['ccl_5fspline_5fparams',['ccl_spline_params',['../structccl__spline__params.html',1,'']]],
   ['chipar',['chipar',['../structchipar.html',1,'']]],

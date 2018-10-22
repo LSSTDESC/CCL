@@ -463,7 +463,7 @@ The expected *dN/dz* for lensing or clustering galaxies with given binning can b
 void ccl_specs_dNdz_tomog(double z, int dNdz_type, double bin_zmin, double bin_zmax,
                           user_pz_info * user_info,  double *tomoout, int *status);
 ````
-Result is returned in `tomoout`. Allowed types of `dNdz_type` (currently one for clustering and three for lensing - fiducial, optimistic, and conservative - cases are considered) and other information and functions like bias clustering or sigma_z are specified in file ***include/ccl_lsst_specs.h***
+Result is returned in `tomoout`. Allowed types of `dNdz_type` (currently one for clustering and three for lensing - fiducial, optimistic, and conservative - cases are considered) and other information and functions like bias clustering or sigma_z are specified in file ***include/ccl_redshifts.h***
 
 After you are done working with photo_z, you should free its work space by **`ccl_specs_free_photoz_info`**
 ````c
@@ -483,7 +483,7 @@ where `/path/to/install/` is the path to the location where the library has been
 #include <stdio.h>
 #include <math.h>
 #include "ccl.h"
-#include "ccl_lsst_specs.h"
+#include "ccl_redshifts.h"
 
 #define OC 0.25
 #define OB 0.05

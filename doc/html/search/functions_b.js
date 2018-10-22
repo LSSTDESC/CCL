@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['xi2pk',['xi2pk',['../fftlog_8c.html#a132a56c20ed18e3ad4867ddb290df5da',1,'xi2pk(int N, const double r[], const double xi[], double k[], double pk[]):&#160;fftlog.c'],['../fftlog_8h.html#a132a56c20ed18e3ad4867ddb290df5da',1,'xi2pk(int N, const double r[], const double xi[], double k[], double pk[]):&#160;fftlog.c']]]
+  ['write_5fpk_5fclass',['write_Pk_CLASS',['../write___c_l_a_s_s__benchmark_8c.html#a8fc0e38dc286056a32d108eff0432222',1,'write_CLASS_benchmark.c']]]
 ];
