@@ -1,3 +1,4 @@
+#include <gsl/gsl_sf_bessel.h>
 #include "ccl.h"
 #include "ctest.h"
 #include "ccl_params.h"
@@ -42,4 +43,24 @@ CTEST(spacing_tests, linlog_spacing_simple) {
   ASSERT_DBL_NEAR_TOL(30.0, m[11], 1e-10);
   ASSERT_DBL_NEAR_TOL(32.0, m[12], 1e-10);
   free(m);
+}
+
+CTEST(spherical_bessel_tests, compare_gsl) {
+  int l, i;
+  double xmin = 0.0;
+  double xmax = 10.0;
+  int Nx = 10000;
+  double x, dx;
+
+  dx = (xmax - xmin) / (Nx - 1);
+
+  for (l=0; l < 15; ++l) {
+    for (i=0; i < Nx; ++i) {
+      x = dx * i + xmin;
+      ASSERT_DBL_NEAR_TOL(
+        ccl_j_bessel(l, x),
+        gsl_sf_bessel_jl(l, x),
+        1e-4);
+    }
+  }
 }
