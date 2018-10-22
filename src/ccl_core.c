@@ -81,6 +81,11 @@ void ccl_cosmology_read_config(void)
     memcpy(ccl_gsl, &default_gsl_params, sizeof(ccl_gsl_params));
   }
 
+  /* Exit gracefully if we couldn't allocate memory */
+  if(ccl_splines==NULL || ccl_gsl==NULL) {
+    ccl_raise_exception(CCL_ERROR_MEMORY, "ccl_core.c: Failed to allocate memory for config file data.");
+    return;
+  }
 
 #define MATCH(s, action) if (0 == strcmp(var_name, s)) { action ; continue;} do{} while(0)
 
@@ -314,12 +319,6 @@ ccl_parameters ccl_parameters_create(
      parameters from the config file. */
   if(ccl_splines==NULL || ccl_gsl==NULL) {
     ccl_cosmology_read_config();
-  }
-  /* Exit gracefully if config file can't be opened. */
-  if(ccl_splines==NULL || ccl_gsl==NULL) {
-    ccl_raise_exception(CCL_ERROR_MISSING_CONFIG_FILE, "ccl_core.c: Failed to read config file.");
-    *status = CCL_ERROR_MISSING_CONFIG_FILE;
-    return params;
   }
 
   // Decide how to split sum of neutrino masses between 3 neutrinos. We use
