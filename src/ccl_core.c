@@ -712,7 +712,7 @@ void ccl_parameters_write_yaml(ccl_parameters * params, const char * filename, i
   WRITE_DOUBLE(N_nu_rel);
 
   if (params->N_nu_mass>0){
-    fprintf(f, "mnu = [");
+    fprintf(f, "mnu: [");
     for (int i=0; i<params->N_nu_mass; i++){
       fprintf(f, "%le, ", params->mnu[i]);
     }
@@ -745,13 +745,13 @@ void ccl_parameters_write_yaml(ccl_parameters * params, const char * filename, i
   WRITE_INT(nz_mgrowth);
 
   if (params->has_mgrowth){
-    fprintf(f, "z_mgrowth = [");
+    fprintf(f, "z_mgrowth: [");
     for (int i=0; i<params->nz_mgrowth; i++){
       fprintf(f, "%le, ", params->z_mgrowth[i]);
     }
     fprintf(f, "]\n");
 
-    fprintf(f, "df_mgrowth = [");
+    fprintf(f, "df_mgrowth: [");
     for (int i=0; i<params->nz_mgrowth; i++){
       fprintf(f, "%le, ", params->df_mgrowth[i]);
     }
@@ -810,7 +810,7 @@ ccl_parameters ccl_parameters_read_yaml(const char * filename, int *status)
 
   double mnu[3] = {0.0, 0.0, 0.0};
   if (N_nu_mass>0){
-    *status |= (0==fscanf(f, "mnu = ["));
+    *status |= (0==fscanf(f, "mnu: ["));
     for (int i=0; i<N_nu_mass; i++){
       *status |= (0==fscanf(f, "%le, ", mnu+i));
     }
@@ -849,13 +849,13 @@ ccl_parameters ccl_parameters_read_yaml(const char * filename, int *status)
   if (has_mgrowth){
     z_mgrowth = malloc(nz_mgrowth*sizeof(double));
     df_mgrowth = malloc(nz_mgrowth*sizeof(double));
-    *status |= (0==fscanf(f, "z_mgrowth = ["));
+    *status |= (0==fscanf(f, "z_mgrowth: ["));
     for (int i=0; i<nz_mgrowth; i++){
       *status |= (0==fscanf(f, "%le, ", z_mgrowth+i));
     }
     *status |= (0==fscanf(f, "]\n"));
 
-    *status |= (0==fscanf(f, "df_mgrowth = ["));
+    *status |= (0==fscanf(f, "df_mgrowth: ["));
     for (int i=0; i<nz_mgrowth; i++){
       *status |= (0==fscanf(f, "%le, ", df_mgrowth+i));
     }

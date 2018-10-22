@@ -22,7 +22,7 @@ from . import ccllib as lib
 from . import core, constants, background, power, massfunction, halomodel
 
 # Core data structures
-from .core import Parameters, Cosmology
+from .core import Cosmology
 
 # Background cosmology functions and growth functions
 from .background import growth_factor, growth_factor_unnorm, \
