@@ -274,6 +274,267 @@ static int window_magnification(double chi,ccl_cosmology *cosmo,SplPar *spl_pz,S
   return 0;
 }
 
+static void clt_init_nz(CCL_ClTracer *clt,ccl_cosmology *cosmo,
+			int nz_n,double *z_n,double *n,int *status)
+{
+  int gslstatus;
+  //Find redshift range where the N(z) has support
+  get_support_interval(nz_n,z_n,n,CCL_FRAC_RELEVANT,&(clt->zmin),&(clt->zmax));
+  clt->chimax=ccl_comoving_radial_distance(cosmo,1./(1+clt->zmax),status);
+  clt->chimin=ccl_comoving_radial_distance(cosmo,1./(1+clt->zmin),status);
+  clt->spl_nz=ccl_spline_init(nz_n,z_n,n,0,0);
+  if(clt->spl_nz==NULL) {
+    *status=CCL_ERROR_SPLINE;
+    ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: clt_init_nz(): error initializing spline for N(z)\n");
+  }
+
+  //Normalize n(z)
+  gsl_function F;
+  double nz_norm,nz_enorm;
+  double *nz_normalized=(double *)malloc(nz_n*sizeof(double));
+  if(nz_normalized==NULL) {
+    ccl_spline_free(clt->spl_nz);
+    *status=CCL_ERROR_MEMORY;
+    ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: clt_init_nz(): memory allocation\n");
+    return;
+  }
+  
+  gsl_integration_workspace *w=gsl_integration_workspace_alloc(ccl_gsl->N_ITERATION);
+  F.function=&speval_bis;
+  F.params=clt->spl_nz;
+  gslstatus=gsl_integration_qag(&F, z_n[0], z_n[nz_n-1], 0,
+				ccl_gsl->INTEGRATION_EPSREL, ccl_gsl->N_ITERATION,
+				ccl_gsl->INTEGRATION_GAUSS_KRONROD_POINTS,
+				w, &nz_norm, &nz_enorm);
+  gsl_integration_workspace_free(w);
+  if(gslstatus!=GSL_SUCCESS) {
+    ccl_raise_gsl_warning(gslstatus, "ccl_cls.c: clt_init_nz():");
+    ccl_spline_free(clt->spl_nz);
+    free(nz_normalized);
+    *status=CCL_ERROR_INTEG;
+    ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: clt_init_nz(): integration error when normalizing N(z)\n");
+  }
+  for(int ii=0;ii<nz_n;ii++)
+    nz_normalized[ii]=n[ii]/nz_norm;
+  ccl_spline_free(clt->spl_nz);
+  clt->spl_nz=ccl_spline_init(nz_n,z_n,nz_normalized,0,0);
+  free(nz_normalized);
+  if(clt->spl_nz==NULL) {
+    *status=CCL_ERROR_SPLINE;
+    ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: clt_nc_init(): error initializing normalized spline for N(z)\n");
+    return;
+  }
+}
+
+static void clt_init_bz(CCL_ClTracer *clt,ccl_cosmology *cosmo,
+			int nz_b,double *z_b,double *b,int *status)
+{
+  //Initialize bias spline
+  clt->spl_bz=ccl_spline_init(nz_b,z_b,b,b[0],b[nz_b-1]);
+  if(clt->spl_bz==NULL) {
+    ccl_spline_free(clt->spl_nz);
+    *status=CCL_ERROR_SPLINE;
+    ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: clt_nc_init(): error initializing spline for b(z)\n");
+    return;
+  }
+}
+
+static void clt_init_wM(CCL_ClTracer *clt,ccl_cosmology *cosmo,
+			int nz_s,double *z_s,double *s,int *status)
+{
+  //Compute magnification kernel
+  int nchi;
+  double *x,*y;
+  double dchi_here=5.;
+  double zmax=clt->spl_nz->xf;
+  double chimax=ccl_comoving_radial_distance(cosmo,1./(1+zmax),status);
+  //TODO: The interval in chi (5. Mpc) should be made a macro
+
+  //In this case we need to integrate all the way to z=0. Reset zmin and chimin
+  clt->zmin=0;
+  clt->chimin=0;
+  clt->spl_sz=ccl_spline_init(nz_s,z_s,s,s[0],s[nz_s-1]);
+  if(clt->spl_sz==NULL) {
+    ccl_spline_free(clt->spl_nz);
+    ccl_spline_free(clt->spl_bz);
+    *status=CCL_ERROR_SPLINE;
+    ccl_cosmology_set_status_message(cosmo,
+				     "ccl_cls.c: clt_nc_init(): error initializing spline for s(z)\n");
+    return;
+  }
+
+  nchi=(int)(chimax/dchi_here)+1;
+  x=ccl_linear_spacing(0.,chimax,nchi);
+  dchi_here=chimax/nchi;
+  if(x==NULL || (fabs(x[0]-0)>1E-5) || (fabs(x[nchi-1]-chimax)>1e-5)) {
+      ccl_spline_free(clt->spl_nz);
+      ccl_spline_free(clt->spl_bz);
+      ccl_spline_free(clt->spl_sz);
+      *status=CCL_ERROR_LINSPACE;
+      ccl_cosmology_set_status_message(cosmo,
+				       "ccl_cls.c: clt_nc_init(): Error creating linear spacing in chi\n");
+      return;
+  }
+  y=(double *)malloc(nchi*sizeof(double));
+  if(y==NULL) {
+    free(x);
+    ccl_spline_free(clt->spl_nz);
+    ccl_spline_free(clt->spl_bz);
+    ccl_spline_free(clt->spl_sz);
+    *status=CCL_ERROR_MEMORY;
+    ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: clt_nc_init(): memory allocation\n");
+    return;
+  }
+
+  int clstatus=0;
+  for(int j=0;j<nchi;j++)
+    clstatus|=window_magnification(x[j],cosmo,clt->spl_nz,clt->spl_sz,chimax,&(y[j]));
+  if(clstatus) {
+    free(y);
+    free(x);
+    ccl_spline_free(clt->spl_nz);
+    ccl_spline_free(clt->spl_bz);
+    ccl_spline_free(clt->spl_sz);
+    *status=CCL_ERROR_INTEG;
+    ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: clt_nc_init(): error computing lensing window\n");
+    return;
+  }
+
+  clt->spl_wM=ccl_spline_init(nchi,x,y,y[0],0);
+  if(clt->spl_wM==NULL) {
+    free(y);
+    free(x);
+    ccl_spline_free(clt->spl_nz);
+    ccl_spline_free(clt->spl_bz);
+    ccl_spline_free(clt->spl_sz);
+    *status=CCL_ERROR_SPLINE;
+    ccl_cosmology_set_status_message(cosmo,
+				     "ccl_cls.c: ccl_cl_tracer(): error initializing spline for lensing window\n");
+    return;
+  }
+  free(x); free(y);
+}
+
+//CCL_ClTracer initializer for number counts
+static void clt_nc_init(CCL_ClTracer *clt,ccl_cosmology *cosmo,
+			int has_rsd,int has_magnification,
+			int nz_n,double *z_n,double *n,
+			int nz_b,double *z_b,double *b,
+			int nz_s,double *z_s,double *s,int *status)
+{
+  clt->has_rsd=has_rsd;
+  clt->has_magnification=has_magnification;
+
+  clt_init_nz(clt,cosmo,nz_n,z_n,n,status);
+  clt_init_bz(clt,cosmo,nz_b,z_b,b,status);
+  if(clt->has_magnification)
+    clt_init_wM(clt,cosmo,nz_s,z_s,s,status);
+}
+
+static void clt_init_wL(CCL_ClTracer *clt,ccl_cosmology *cosmo,
+			int *status)
+{
+  //Compute weak lensing kernel
+  int nchi;
+  double *x,*y;
+  double dchi_here=5.;
+  double zmax=clt->spl_nz->xf;
+  double chimax=ccl_comoving_radial_distance(cosmo,1./(1+zmax),status);
+  //TODO: The interval in chi (5. Mpc) should be made a macro
+  
+  //In this case we need to integrate all the way to z=0. Reset zmin and chimin
+  clt->zmin=0;
+  clt->chimin=0;
+  nchi=(int)(chimax/dchi_here)+1;
+  x=ccl_linear_spacing(0.,chimax,nchi);
+  dchi_here=chimax/nchi;
+  if(x==NULL || (fabs(x[0]-0)>1E-5) || (fabs(x[nchi-1]-chimax)>1e-5)) {
+    ccl_spline_free(clt->spl_nz);
+    *status=CCL_ERROR_LINSPACE;
+    ccl_cosmology_set_status_message(cosmo,
+				     "ccl_cls.c: ccl_cl_tracer(): Error creating linear spacing in chi\n");
+    return;
+  }
+  y=(double *)malloc(nchi*sizeof(double));
+  if(y==NULL) {
+    free(x);
+    ccl_spline_free(clt->spl_nz);
+    free(clt);
+    *status=CCL_ERROR_MEMORY;
+    ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: ccl_cl_tracer(): memory allocation\n");
+    return;
+  }
+
+  int clstatus=0;
+  for(int j=0;j<nchi;j++)
+    clstatus|=window_lensing(x[j],cosmo,clt->spl_nz,chimax,&(y[j]));
+  if(clstatus) {
+    free(y);
+    free(x);
+    ccl_spline_free(clt->spl_nz);
+    *status=CCL_ERROR_INTEG;
+    ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: ccl_cl_tracer(): error computing lensing window\n");
+    return;
+  }
+  
+  clt->spl_wL=ccl_spline_init(nchi,x,y,y[0],0);
+  if(clt->spl_wL==NULL) {
+    free(y);
+    free(x);
+    ccl_spline_free(clt->spl_nz);
+    *status=CCL_ERROR_SPLINE;
+    ccl_cosmology_set_status_message(cosmo,
+				     "ccl_cls.c: ccl_cl_tracer(): error initializing spline for lensing window\n");
+    return;
+  }
+  free(x); free(y);
+}
+
+static void clt_init_rf(CCL_ClTracer *clt,ccl_cosmology *cosmo,
+			int nz_rf,double *z_rf,double *rf,int *status)
+{
+  //Initialize bias spline
+  clt->spl_rf=ccl_spline_init(nz_rf,z_rf,rf,rf[0],rf[nz_rf-1]);
+  if(clt->spl_rf==NULL) {
+    ccl_spline_free(clt->spl_nz);
+    ccl_spline_free(clt->spl_wL);
+    *status=CCL_ERROR_SPLINE;
+    ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: clt_nc_init(): error initializing spline for b(z)\n");
+    return;
+  }
+}
+
+static void clt_init_ba(CCL_ClTracer *clt,ccl_cosmology *cosmo,
+			int nz_ba,double *z_ba,double *ba,int *status)
+{
+  //Initialize bias spline
+  clt->spl_ba=ccl_spline_init(nz_ba,z_ba,ba,ba[0],ba[nz_ba-1]);
+  if(clt->spl_ba==NULL) {
+    ccl_spline_free(clt->spl_nz);
+    ccl_spline_free(clt->spl_wL);
+    ccl_spline_free(clt->spl_rf);
+    *status=CCL_ERROR_SPLINE;
+    ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: clt_nc_init(): error initializing spline for b(z)\n");
+    return;
+  }
+}
+
+static void clt_wl_init(CCL_ClTracer *clt,ccl_cosmology *cosmo,
+			int has_intrinsic_alignment,
+			int nz_n,double *z_n,double *n,
+			int nz_ba,double *z_ba,double *ba,
+			int nz_rf,double *z_rf,double *rf,int *status)
+{
+  clt->has_intrinsic_alignment=has_intrinsic_alignment;
+
+  clt_init_nz(clt,cosmo,nz_n,z_n,n,status);
+  clt_init_wL(clt,cosmo,status);
+  if(clt->has_intrinsic_alignment) {
+    clt_init_rf(clt,cosmo,nz_rf,z_rf,rf,status);
+    clt_init_ba(clt,cosmo,nz_ba,z_ba,ba,status);
+  }
+}
+
 //CCL_ClTracer creator
 //cosmo   -> ccl_cosmology object
 //tracer_type -> type of tracer. Supported: CL_TRACER_NC, CL_TRACER_WL
@@ -294,7 +555,7 @@ static CCL_ClTracer *cl_tracer(ccl_cosmology *cosmo,int tracer_type,
 				   int nz_rf,double *z_rf,double *rf,
 				   double z_source, int * status)
 {
-  int clstatus=0, gslstatus;
+  int clstatus=0;
   CCL_ClTracer *clt=(CCL_ClTracer *)malloc(sizeof(CCL_ClTracer));
   if(clt==NULL) {
 
@@ -316,230 +577,12 @@ static CCL_ClTracer *cl_tracer(ccl_cosmology *cosmo,int tracer_type,
   double hub=cosmo->params.h*ccl_h_over_h0(cosmo,1.,status)/CLIGHT_HMPC;
   clt->prefac_lensing=1.5*hub*hub*cosmo->params.Omega_m;
 
-  if((tracer_type==CL_TRACER_NC)||(tracer_type==CL_TRACER_WL)) {
-    get_support_interval(nz_n,z_n,n,CCL_FRAC_RELEVANT,&(clt->zmin),&(clt->zmax));
-    clt->chimax=ccl_comoving_radial_distance(cosmo,1./(1+clt->zmax),status);
-    clt->chimin=ccl_comoving_radial_distance(cosmo,1./(1+clt->zmin),status);
-    clt->spl_nz=ccl_spline_init(nz_n,z_n,n,0,0);
-    if(clt->spl_nz==NULL) {
-      free(clt);
-      *status=CCL_ERROR_SPLINE;
-      ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: ccl_cl_tracer(): error initializing spline for N(z)\n");
-      return NULL;
-    }
-
-    //Normalize n(z)
-    gsl_function F;
-    double nz_norm,nz_enorm;
-    double *nz_normalized=(double *)malloc(nz_n*sizeof(double));
-    if(nz_normalized==NULL) {
-      ccl_spline_free(clt->spl_nz);
-      free(clt);
-      *status=CCL_ERROR_MEMORY;
-      ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: ccl_cl_tracer(): memory allocation\n");
-      return NULL;
-    }
-
-    gsl_integration_workspace *w=gsl_integration_workspace_alloc(ccl_gsl->N_ITERATION);
-    F.function=&speval_bis;
-    F.params=clt->spl_nz;
-    gslstatus=gsl_integration_qag(&F, z_n[0], z_n[nz_n-1], 0,
-                                  ccl_gsl->INTEGRATION_EPSREL, ccl_gsl->N_ITERATION,
-                                  ccl_gsl->INTEGRATION_GAUSS_KRONROD_POINTS,
-                                  w, &nz_norm, &nz_enorm);
-    gsl_integration_workspace_free(w);
-    if(gslstatus!=GSL_SUCCESS) {
-      ccl_raise_gsl_warning(gslstatus, "ccl_cls.c: cl_tracer():");
-      ccl_spline_free(clt->spl_nz);
-      free(clt);
-      *status=CCL_ERROR_INTEG;
-      ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: ccl_cl_tracer(): integration error when normalizing N(z)\n");
-      return NULL;
-    }
-    for(int ii=0;ii<nz_n;ii++)
-      nz_normalized[ii]=n[ii]/nz_norm;
-    ccl_spline_free(clt->spl_nz);
-    clt->spl_nz=ccl_spline_init(nz_n,z_n,nz_normalized,0,0);
-    free(nz_normalized);
-    if(clt->spl_nz==NULL) {
-      free(clt);
-      *status=CCL_ERROR_SPLINE;
-      ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: ccl_cl_tracer(): error initializing normalized spline for N(z)\n");
-      return NULL;
-    }
-
-    if(tracer_type==CL_TRACER_NC) {
-      //Initialize bias spline
-      clt->spl_bz=ccl_spline_init(nz_b,z_b,b,b[0],b[nz_b-1]);
-      if(clt->spl_bz==NULL) {
-	ccl_spline_free(clt->spl_nz);
-	free(clt);
-	*status=CCL_ERROR_SPLINE;
-	ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: ccl_cl_tracer(): error initializing spline for b(z)\n");
-	return NULL;
-      }
-      clt->has_rsd=has_rsd;
-      clt->has_magnification=has_magnification;
-      if(clt->has_magnification) {
-	//Compute weak lensing kernel
-	int nchi;
-	double *x,*y;
-	double dchi_here=5.;
-	double zmax=clt->spl_nz->xf;
-	double chimax=ccl_comoving_radial_distance(cosmo,1./(1+zmax),status);
-	//TODO: The interval in chi (5. Mpc) should be made a macro
-
-	//In this case we need to integrate all the way to z=0. Reset zmin and chimin
-	clt->zmin=0;
-	clt->chimin=0;
-	clt->spl_sz=ccl_spline_init(nz_s,z_s,s,s[0],s[nz_s-1]);
-	if(clt->spl_sz==NULL) {
-	  ccl_spline_free(clt->spl_nz);
-	  ccl_spline_free(clt->spl_bz);
-	  free(clt);
-	  *status=CCL_ERROR_SPLINE;
-	  ccl_cosmology_set_status_message(cosmo,
-		 "ccl_cls.c: ccl_cl_tracer(): error initializing spline for s(z)\n");
-	  return NULL;
-	}
-
-	nchi=(int)(chimax/dchi_here)+1;
-	x=ccl_linear_spacing(0.,chimax,nchi);
-	dchi_here=chimax/nchi;
-	if(x==NULL || (fabs(x[0]-0)>1E-5) || (fabs(x[nchi-1]-chimax)>1e-5)) {
-	  ccl_spline_free(clt->spl_nz);
-	  ccl_spline_free(clt->spl_bz);
-	  ccl_spline_free(clt->spl_sz);
-	  free(clt);
-	  *status=CCL_ERROR_LINSPACE;
-	  ccl_cosmology_set_status_message(cosmo,
-		 "ccl_cls.c: ccl_cl_tracer(): Error creating linear spacing in chi\n");
-	  return NULL;
-	}
-	y=(double *)malloc(nchi*sizeof(double));
-	if(y==NULL) {
-	  free(x);
-	  ccl_spline_free(clt->spl_nz);
-	  ccl_spline_free(clt->spl_bz);
-	  ccl_spline_free(clt->spl_sz);
-	  free(clt);
-	  *status=CCL_ERROR_MEMORY;
-	  ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: ccl_cl_tracer(): memory allocation\n");
-	  return NULL;
-	}
-
-	for(int j=0;j<nchi;j++)
-	  clstatus|=window_magnification(x[j],cosmo,clt->spl_nz,clt->spl_sz,chimax,&(y[j]));
-	if(clstatus) {
-	  free(y);
-	  free(x);
-	  ccl_spline_free(clt->spl_nz);
-	  ccl_spline_free(clt->spl_bz);
-	  ccl_spline_free(clt->spl_sz);
-	  free(clt);
-	  *status=CCL_ERROR_INTEG;
-	  ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: ccl_cl_tracer(): error computing lensing window\n");
-	  return NULL;
-	}
-
-	clt->spl_wM=ccl_spline_init(nchi,x,y,y[0],0);
-	if(clt->spl_wM==NULL) {
-	  free(y);
-	  free(x);
-	  ccl_spline_free(clt->spl_nz);
-	  ccl_spline_free(clt->spl_bz);
-	  ccl_spline_free(clt->spl_sz);
-	  free(clt);
-	  *status=CCL_ERROR_SPLINE;
-	  ccl_cosmology_set_status_message(cosmo,
-		 "ccl_cls.c: ccl_cl_tracer(): error initializing spline for lensing window\n");
-	  return NULL;
-	}
-	free(x); free(y);
-      }
-    }
-    else if(tracer_type==CL_TRACER_WL) {
-      //Compute weak lensing kernel
-      int nchi;
-      double *x,*y;
-      double dchi_here=5.;
-      double zmax=clt->spl_nz->xf;
-      double chimax=ccl_comoving_radial_distance(cosmo,1./(1+zmax),status);
-      //TODO: The interval in chi (5. Mpc) should be made a macro
-
-      //In this case we need to integrate all the way to z=0. Reset zmin and chimin
-      clt->zmin=0;
-      clt->chimin=0;
-      nchi=(int)(chimax/dchi_here)+1;
-      x=ccl_linear_spacing(0.,chimax,nchi);
-      dchi_here=chimax/nchi;
-      if(x==NULL || (fabs(x[0]-0)>1E-5) || (fabs(x[nchi-1]-chimax)>1e-5)) {
-	ccl_spline_free(clt->spl_nz);
-	free(clt);
-	*status=CCL_ERROR_LINSPACE;
-	ccl_cosmology_set_status_message(cosmo,
-	       "ccl_cls.c: ccl_cl_tracer(): Error creating linear spacing in chi\n");
-	return NULL;
-      }
-      y=(double *)malloc(nchi*sizeof(double));
-      if(y==NULL) {
-	free(x);
-	ccl_spline_free(clt->spl_nz);
-	free(clt);
-	*status=CCL_ERROR_MEMORY;
-	ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: ccl_cl_tracer(): memory allocation\n");
-	return NULL;
-      }
-
-      for(int j=0;j<nchi;j++)
-	clstatus|=window_lensing(x[j],cosmo,clt->spl_nz,chimax,&(y[j]));
-      if(clstatus) {
-	free(y);
-	free(x);
-	ccl_spline_free(clt->spl_nz);
-	free(clt);
-	*status=CCL_ERROR_INTEG;
-	ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: ccl_cl_tracer(): error computing lensing window\n");
-	return NULL;
-      }
-
-      clt->spl_wL=ccl_spline_init(nchi,x,y,y[0],0);
-      if(clt->spl_wL==NULL) {
-	free(y);
-	free(x);
-	ccl_spline_free(clt->spl_nz);
-	free(clt);
-	*status=CCL_ERROR_SPLINE;
-	ccl_cosmology_set_status_message(cosmo,
-	       "ccl_cls.c: ccl_cl_tracer(): error initializing spline for lensing window\n");
-	return NULL;
-      }
-      free(x); free(y);
-
-      clt->has_intrinsic_alignment=has_intrinsic_alignment;
-      if(clt->has_intrinsic_alignment) {
-	clt->spl_rf=ccl_spline_init(nz_rf,z_rf,rf,rf[0],rf[nz_rf-1]);
-	if(clt->spl_rf==NULL) {
-	  ccl_spline_free(clt->spl_nz);
-	  free(clt);
-	  *status=CCL_ERROR_SPLINE;
-	  ccl_cosmology_set_status_message(cosmo,
-		 "ccl_cls.c: ccl_cl_tracer(): error initializing spline for rf(z)\n");
-	  return NULL;
-	}
-	clt->spl_ba=ccl_spline_init(nz_ba,z_ba,ba,ba[0],ba[nz_ba-1]);
-	if(clt->spl_ba==NULL) {
-	  ccl_spline_free(clt->spl_rf);
-	  ccl_spline_free(clt->spl_nz);
-	  free(clt);
-	  *status=CCL_ERROR_SPLINE;
-	  ccl_cosmology_set_status_message(cosmo,
-		 "ccl_cls.c: ccl_cl_tracer(): error initializing spline for ba(z)\n");
-	  return NULL;
-	}
-      }
-    }
-  }
+  if(tracer_type==CL_TRACER_NC)
+    clt_nc_init(clt,cosmo,has_rsd,has_magnification,
+		nz_n,z_n,n,nz_b,z_b,b,nz_s,z_s,s,status);
+  else if(tracer_type==CL_TRACER_WL)
+    clt_wl_init(clt,cosmo,has_intrinsic_alignment,
+		nz_n,z_n,n,nz_ba,z_ba,ba,nz_rf,z_rf,rf,status);
   else if(tracer_type==CL_TRACER_CL) {
     clt->chi_source=ccl_comoving_radial_distance(cosmo,1./(1+z_source),status);
     clt->chimax=clt->chi_source;
