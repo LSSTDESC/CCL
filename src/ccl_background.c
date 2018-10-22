@@ -345,11 +345,15 @@ static int a_of_chi(double chi, ccl_cosmology *cosmo, int* stat, double *a_old, 
 /* ----- ROUTINE: ccl_cosmology_compute_distances ------
 INPUT: cosmology
 TASK: if not already there, make a table of comoving distances and of E(a)
+
+IN PROGRESS - Tom is reworking this function to have a single return statement and the allocates/frees
+organized so that they appear once. This will make the function more readable.
+
 */
 
 void ccl_cosmology_compute_distances(ccl_cosmology * cosmo, int *status)
 {
-
+  //Do nothing if everything is computed already
   if(cosmo->computed_distances)
     return;
 
@@ -362,6 +366,12 @@ void ccl_cosmology_compute_distances(ccl_cosmology * cosmo, int *status)
   // Create logarithmically and then linearly-spaced values of the scale factor 
   int na = ccl_splines->A_SPLINE_NA+ccl_splines->A_SPLINE_NLOG-1;  
   double * a = ccl_linlog_spacing(ccl_splines->A_SPLINE_MINLOG, ccl_splines->A_SPLINE_MIN, ccl_splines->A_SPLINE_MAX, ccl_splines->A_SPLINE_NLOG, ccl_splines->A_SPLINE_NA);
+  // allocate space for y, which will be all three
+  // of E(a), chi(a), D(a) and f(a) in turn.
+  double *y = malloc(sizeof(double)*na);
+  // Allocate and fill E spline with values we just got
+  gsl_spline * E = gsl_spline_alloc(A_SPLINE_TYPE, na);
+  gsl_spline * chi = gsl_spline_alloc(A_SPLINE_TYPE, na);
                               
   if (a==NULL ||   
       (fabs(a[0]-ccl_splines->A_SPLINE_MINLOG)>1e-5) || 
@@ -373,9 +383,6 @@ void ccl_cosmology_compute_distances(ccl_cosmology * cosmo, int *status)
       return;
   }
 
-  // allocate space for y, which will be all three
-  // of E(a), chi(a), D(a) and f(a) in turn.
-  double *y = malloc(sizeof(double)*na);
   if(y==NULL) {
     free(a);
     // old:    cosmo->status=CCL_ERROR_MEMORY;
@@ -388,9 +395,6 @@ void ccl_cosmology_compute_distances(ccl_cosmology * cosmo, int *status)
   for (int i=0; i<na; i++)
     y[i] = h_over_h0(a[i], cosmo, status);
   
-  // Allocate and fill E spline with values we just got
-  gsl_spline * E = gsl_spline_alloc(A_SPLINE_TYPE, na);
-
   int chistatus = gsl_spline_init(E, a, y, na);
   // Check for errors in creating the spline
   if (chistatus) {
@@ -416,9 +420,7 @@ void ccl_cosmology_compute_distances(ccl_cosmology * cosmo, int *status)
     return;
   }
 
-  gsl_spline * chi = gsl_spline_alloc(A_SPLINE_TYPE, na);
   chistatus = gsl_spline_init(chi, a, y, na); //in Mpc
-
   if (chistatus || *status) {
     free(a);
     free(y);
@@ -433,9 +435,16 @@ void ccl_cosmology_compute_distances(ccl_cosmology * cosmo, int *status)
   double dchi=5.,chi0=y[na-1],chif=y[0],a0=a[na-1],af=a[0];
   //TODO: The interval in chi (5. Mpc) should be made a macro
   free(y); free(a);
+  ////////////////////////////////////////////////////////////////////////////////////////////////////
+  //Below here na (length of some arrays) changes, so this function has to be split at this point.
+  ////////////////////////////////////////////////////////////////////////////////////////////////////
   na=(int)((chif-chi0)/dchi);  
   y=ccl_linear_spacing(chi0,chif,na);
   dchi=(chif-chi0)/na;
+  a=malloc(sizeof(double)*na);
+  const gsl_root_fdfsolver_type *T=gsl_root_fdfsolver_newton;
+  gsl_root_fdfsolver *s=gsl_root_fdfsolver_alloc(T);
+  gsl_spline * achi=gsl_spline_alloc(A_SPLINE_TYPE,na);
   if(y==NULL || (fabs(y[0]-chi0)>1E-5) || (fabs(y[na-1]-chif)>1e-5)) {
     gsl_spline_free(E);
     gsl_spline_free(chi);
@@ -444,7 +453,6 @@ void ccl_cosmology_compute_distances(ccl_cosmology * cosmo, int *status)
     return;
   }
 
-  a=malloc(sizeof(double)*na);
   if(a==NULL) {
     free(y);
     gsl_spline_free(E);
@@ -455,8 +463,6 @@ void ccl_cosmology_compute_distances(ccl_cosmology * cosmo, int *status)
   }
 
   a[0]=a0; a[na-1]=af;
-  const gsl_root_fdfsolver_type *T=gsl_root_fdfsolver_newton;
-  gsl_root_fdfsolver *s=gsl_root_fdfsolver_alloc(T);
   for(int i=1;i<na-1;i++) {
     chistatus|=a_of_chi(y[i],cosmo, status, &a0,s);
     a[i]=a0;
@@ -473,9 +479,7 @@ void ccl_cosmology_compute_distances(ccl_cosmology * cosmo, int *status)
     return;
   }
 
-  gsl_spline * achi=gsl_spline_alloc(A_SPLINE_TYPE,na);
   chistatus=gsl_spline_init(achi,y,a,na);
-
   if (chistatus) {
     free(a);
     free(y);
