@@ -345,10 +345,6 @@ static int a_of_chi(double chi, ccl_cosmology *cosmo, int* stat, double *a_old, 
 /* ----- ROUTINE: ccl_cosmology_compute_distances ------
 INPUT: cosmology
 TASK: if not already there, make a table of comoving distances and of E(a)
-
-IN PROGRESS - Tom is reworking this function to have a single return statement and the allocates/frees
-organized so that they appear once. This will make the function more readable.
-
 */
 
 void ccl_cosmology_compute_distances(ccl_cosmology * cosmo, int *status)
