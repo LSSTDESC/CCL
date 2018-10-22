@@ -794,10 +794,13 @@ static double transfer_nc(int l,double k,
 	double f_all=f_dens(a,cosmo,clt,status)*jl;
 	if(clt->has_rsd) {
 	  double ddjl,x=k*chi;
-	  if(x<1E-10) {
-	    if(l==0) ddjl=0.3333-0.1*x*x;
-	    else if(l==2) ddjl=-0.13333333333+0.05714285714285714*x*x;
-	    else ddjl=0;
+	  if(x<1E-5) { //This is to avoid division by zero
+	    if(l==0) ddjl=0.3333-0.1*x*x; //-j_0''(x) ~ 1/3-x^2/10+O(x^4)
+	    else if(l==1) ddjl=0.2*x; //-j_1''(x) ~ x/5 + O(x^3)
+	    else if(l==2) ddjl=-0.13333333333+0.05714285714285714*x*x; //-j_2''(x) ~ -2/5 + 2 x^2/35 + O(x^4)
+	    else if(l==3) ddjl=-0.05714285714285714*x; //-j_3''(x) ~ -2 x^2/35 + O(x^3)
+	    else if(l==4) ddjl=-0.012698412698412698*x*x; //-4 x^2 /315 + O(x^4)
+	    else ddjl=0; //-j_l''(x) ~ O(x^3) for l>4
           }
 	  else {
 	    double jlp1=ccl_j_bessel(l+1,x);
