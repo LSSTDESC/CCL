@@ -5,7 +5,6 @@
 
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_integration.h>
-#include <gsl/gsl_sf_bessel.h>
 
 #include "ccl.h"
 
@@ -748,7 +747,7 @@ static double transfer_nc(int l,double k,
       if(chi<=clt->chimax) {
 	double a=ccl_scale_factor_of_chi(cosmo,chi,status);
 	double pk=ccl_nonlin_matter_power(cosmo,k,a,status);
-	double jl=gsl_sf_bessel_jl(l,k*chi);
+	double jl=ccl_j_bessel(l,k*chi);
 	double f_all=f_dens(a,cosmo,clt,status)*jl;
 	if(clt->has_rsd) {
 	  double ddjl,x=k*chi;
@@ -758,7 +757,7 @@ static double transfer_nc(int l,double k,
 	    else ddjl=0;
           }
 	  else {
-	    double jlp1=gsl_sf_bessel_jl(l+1,x);
+	    double jlp1=ccl_j_bessel(l+1,x);
 	    ddjl=((x*x-l*(l-1))*jl-2*x*jlp1)/(x*x);
 	  }
 	  f_all+=f_rsd(a,cosmo,clt,status)*ddjl;
@@ -832,7 +831,7 @@ static double transfer_wl(int l,double k,
       if(chi<=clt->chimax) {
 	double a=ccl_scale_factor_of_chi(cosmo,chi,status);
 	double pk=ccl_nonlin_matter_power(cosmo,k,a,status);
-	double jl=gsl_sf_bessel_jl(l,k*chi);
+	double jl=ccl_j_bessel(l,k*chi);
 	double f_all=f_lensing(a,chi,cosmo,clt,status)*jl;
 	if(clt->has_intrinsic_alignment)
 	  f_all+=f_IA_NLA(a,chi,cosmo,clt,status)*jl;
