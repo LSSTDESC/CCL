@@ -808,7 +808,7 @@ static double transfer_nc(int l,double k,
 	if(clt->has_magnification)
 	  f_all+=-2*clt->prefac_lensing*l*(l+1)*f_mag(a,chi,cosmo,clt,status)*jl/(k*k);
 
-	ret+=f_all*sqrt(pk); //TODO: is it worth splining this sqrt?
+	ret+=f_all*sqrt(pk);
       }
     }
     ret*=w->dchi;
@@ -879,7 +879,7 @@ static double transfer_wl(int l,double k,
 	if(clt->has_intrinsic_alignment)
 	  f_all+=f_IA_NLA(a,chi,cosmo,clt,status)*jl;
 
-	ret+=f_all*sqrt(pk); //TODO: is it worth splining this sqrt?
+	ret+=f_all*sqrt(pk);
       }
     }
     ret*=w->dchi;
