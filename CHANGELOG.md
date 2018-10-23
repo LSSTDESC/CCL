@@ -1,3 +1,12 @@
+# v 1.0 API changes (in prep):
+
+## C library
+
+## Python library
+- Deprecated the `Parameters` object in favor of only the `Cosmology` object (#493).
+- Renamed the `ClTracer` family of objects (#496).
+- Various function parameter name changes and documentation improvements (#464).
+
 # v 0.4 API changes:
 
 Summary: added halo model matter power spectrum calculation and halo mass-concentration relations. Change to sigma(R) function so that it now has time depdence: it is now sigma(R,a). Added a sigmaV(R,a) function, where sigmaV(R,a) is the variance in the displacement field smoothed on scale R at scale-factor a.
