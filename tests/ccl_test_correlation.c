@@ -257,8 +257,7 @@ static void compare_corr(char *compare_type,int algorithm,struct corrs_data * da
   double sig_theta_in[15];
 
   char bs[1024];
-  //ATTN: sigma_dl currently missing. We need to fill this out.
-  //FILE *fi_dl_sig=fopen("tests/benchmark/cov_corr/sigma_ggl_Nbin5","r");
+  FILE *fi_dl_sig=fopen("tests/benchmark/cov_corr/sigma_ggl_Nbin5","r");
   FILE *fi_dd_sig=fopen("tests/benchmark/cov_corr/sigma_clustering_Nbin5","r");
   FILE *fi_mm_sig=fopen("tests/benchmark/cov_corr/sigma_xi-_Nbin5","r");
   FILE *fi_pp_sig=fopen("tests/benchmark/cov_corr/sigma_xi+_Nbin5","r");
@@ -274,17 +273,15 @@ static void compare_corr(char *compare_type,int algorithm,struct corrs_data * da
     fprintf(stderr,"Error reading file\n");
     exit(1);
   }
-  //Uncomment this when file is present
-  /*if(fgets(bs,sizeof(bs),fi_dl_sig)==NULL) {
+  if(fgets(bs,sizeof(bs),fi_dl_sig)==NULL) {
     fprintf(stderr,"Error reading file\n");
     exit(1);
-    }*/
+  }
   for(int ii=0;ii<nsig;ii++) {
     int stat;
     double dum;
     stat=fscanf(fi_dd_sig,"%le %le %le %le",&sig_theta_in[ii],&sigwt_dd_11[ii],&sigwt_dd_22[ii],&dum);
-    //Uncomment this when file is present
-    //stat=fscanf(fi_dl_sig,"%le %le",&sig_theta_in[ii],&sigwt_dl_12[ii]);
+    stat=fscanf(fi_dl_sig,"%le %le",&sig_theta_in[ii],&sigwt_dl_12[ii]);
     stat=fscanf(fi_pp_sig,"%le %le %le %le",&sig_theta_in[ii],&sigwt_ll_11_pp[ii],&sigwt_ll_22_pp[ii],&dum);
     stat=fscanf(fi_mm_sig,"%le %le %le %le",&sig_theta_in[ii],&sigwt_ll_11_mm[ii],&sigwt_ll_22_mm[ii],&dum);
     sig_theta_in[ii]=sig_theta_in[ii]/60.; //convert to deg
@@ -292,8 +289,7 @@ static void compare_corr(char *compare_type,int algorithm,struct corrs_data * da
   fclose(fi_dd_sig);
   fclose(fi_mm_sig);
   fclose(fi_pp_sig);
-  //Uncomment this when file is present
-  //fclose(fi_dl_sig);
+  fclose(fi_dl_sig);
 
   /* Spline the covariances */
   gsl_spline *spl_sigwt_dd_11   =gsl_spline_alloc(L_SPLINE_TYPE,nsig);
@@ -309,8 +305,7 @@ static void compare_corr(char *compare_type,int algorithm,struct corrs_data * da
   gsl_spline *spl_sigwt_ll_22_mm=gsl_spline_alloc(L_SPLINE_TYPE,nsig);
   gsl_spline_init(spl_sigwt_ll_22_mm,sig_theta_in,sigwt_ll_22_mm,nsig);
   gsl_spline *spl_sigwt_dl_12   =gsl_spline_alloc(L_SPLINE_TYPE,nsig);
-  //Uncomment this when file is present
-  //gsl_spline_init(spl_sigwt_dl_12   ,sig_theta_in,sigwt_dl_12   ,nsig);
+  gsl_spline_init(spl_sigwt_dl_12,sig_theta_in,sigwt_dl_12 ,nsig);
 
   /* Proceed to the comparison between benchmarks and CCL.
    * If DEBUG flag is set, then produce an output file.
