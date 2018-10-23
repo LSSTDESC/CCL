@@ -39,9 +39,6 @@ typedef struct {
   SplPar *spl_ba; //Spline for alignment bias
   SplPar *spl_wL; //Spline for lensing kernel
   SplPar *spl_wM; //Spline for magnification
-  int computed_transfer;
-  int n_ls;
-  SplPar **spl_transfer;
 } CCL_ClTracer;
 
 
@@ -205,28 +202,22 @@ double ccl_get_tracer_fa(ccl_cosmology *cosmo,CCL_ClTracer *clt,double a,int fun
 int ccl_get_tracer_fas(ccl_cosmology *cosmo,CCL_ClTracer *clt,int na,double *a,double *fa,
 		       int func_code,int *status);
 
-#define CCL_NONLIMBER_METHOD_NATIVE 1
-#define CCL_NONLIMBER_METHOD_ANGPOW 2
 //Workspace for C_ell computations
 typedef struct {
-  int nlimb_method;
-  double zmin;
-  double dchi; //Spacing in comoving distance to use for the LOS integrals
-  double dlk; //Logarithmic spacing in wavenumber
-  int lmax; //Maximum multipole
-  int l_limber; //All power spectra for l>l_limber will be computed using Limber's approximation
-  double l_logstep; //Logarithmic step factor used at low l
-  int l_linstep; //Linear step used at high l
+  int lmax; //*Maximum multipole
+  int l_limber; //*All power spectra for l>l_limber will be computed using Limber's approximation
+  double l_logstep; //*Logarithmic step factor used at low l
+  int l_linstep; //*Linear step used at high l
   int n_ls; //Number of multipoles that result from the previous combination of parameters
-  int *l_arr; //Array of multipole values resulting from the previous parameters
+  int *l_arr; //*Array of multipole values resulting from the previous parameters
 } CCL_ClWorkspace;
 
 //CCL_ClWorkspace constructor
-CCL_ClWorkspace *ccl_cl_workspace_default(int lmax,int l_limber,int non_limber_method,
+CCL_ClWorkspace *ccl_cl_workspace_new(int lmax,int l_limber,
 				      double l_logstep,int l_linstep,
-				      double dchi,double dlk,double zmin,int *status);
+				      int *status);
 //CCL_ClWorkspace simplified constructor
-CCL_ClWorkspace *ccl_cl_workspace_default_limber(int lmax, double l_logstep,int l_linstep,  double dlk,int *status);
+CCL_ClWorkspace *ccl_cl_workspace_new_limber(int lmax, double l_logstep,int l_linstep,int *status);
 //CCL_ClWorkspace destructor
 void ccl_cl_workspace_free(CCL_ClWorkspace *w);
 

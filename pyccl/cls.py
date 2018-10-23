@@ -3,12 +3,6 @@ from . import constants as const
 from .core import check
 import numpy as np
 
-# Same mapping for non-Limber integration methods
-nonlimber_methods = {
-    'angpow': const.CCL_NONLIMBER_METHOD_ANGPOW,
-    'native': const.CCL_NONLIMBER_METHOD_NATIVE,
-}
-
 function_types = {
     'dndz': const.CCL_CLT_NZ,
     'bias': const.CCL_CLT_BZ,
@@ -290,19 +284,11 @@ def angular_cl(cosmo, cltracer1, cltracer2, ell,
         ell (float or array_like): Angular wavenumber(s) at which to evaluate
             the angular power spectrum.
         l_limber (float) : Angular wavenumber beyond which Limber's
-            approximation will be used. Defaults to 1.
+            approximation will be used. Defaults to -1.
         l_logstep (float) : logarithmic step in ell at low multipoles.
             Defaults to 1.05.
         l_linstep (float) : linear step in ell at high multipoles.
             Defaults to 20.
-        dchi (float) : comoving distance step size in non-limber native
-            integrals. Defaults to 3.
-        dlk (float) : logarithmic step for the k non-limber native integral.
-            Defaults to 0.003.
-        zmin (float) : minimal redshift for the integrals. Defualts to 0.05.
-        non_limber_method (str) : non-Limber integration method. Supported:
-            "angpow" and "native". Defaults to "angpow". The use of the native
-            method is discouraged, and is only used for development purposes.
 
     Returns:
         float or array_like: Angular (cross-)power spectrum values,
@@ -311,11 +297,6 @@ def angular_cl(cosmo, cltracer1, cltracer2, ell,
     """
     # Access ccl_cosmology object
     cosmo = cosmo.cosmo
-
-    if non_limber_method not in nonlimber_methods.keys():
-        raise ValueError(
-            "'%s' is not a valid non-Limber integration method." %
-            non_limber_method)
 
     # Access CCL_ClTracer objects
     clt1 = cltracer1.cltracer
@@ -326,18 +307,15 @@ def angular_cl(cosmo, cltracer1, cltracer2, ell,
     if isinstance(ell, float) or isinstance(ell, int):
         # Use single-value function
         cl_one, status = lib.angular_cl_vec(
-            cosmo, clt1, clt2, l_limber, l_logstep, l_linstep, dchi, dlk, zmin,
-            nonlimber_methods[non_limber_method], [ell], 1, status)
+            cosmo, clt1, clt2, l_limber, l_logstep, l_linstep, [ell], 1, status)
         cl = cl_one[0]
     elif isinstance(ell, np.ndarray):
         # Use vectorised function
         cl, status = lib.angular_cl_vec(
-            cosmo, clt1, clt2, l_limber, l_logstep, l_linstep, dchi, dlk, zmin,
-            nonlimber_methods[non_limber_method], ell, ell.size, status)
+            cosmo, clt1, clt2, l_limber, l_logstep, l_linstep, ell, ell.size, status)
     else:
         # Use vectorised function
         cl, status = lib.angular_cl_vec(
-            cosmo, clt1, clt2, l_limber, l_logstep, l_linstep, dchi, dlk, zmin,
-            nonlimber_methods[non_limber_method], ell, len(ell), status)
+            cosmo, clt1, clt2, l_limber, l_logstep, l_linstep, ell, len(ell), status)
     check(status)
     return cl
