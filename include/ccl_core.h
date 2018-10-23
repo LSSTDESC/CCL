@@ -179,96 +179,21 @@ void ccl_cosmology_set_status_message(ccl_cosmology * cosmo, const char * status
  * For specific cases see documentation for ccl_error.c
  * @return void
  */
-
 ccl_parameters ccl_parameters_create(double Omega_c, double Omega_b, double Omega_k,
-				     double Neff, double* mnu, ccl_mnu_convention mnu_type,
-				     double w0, double wa, double h, double norm_pk,
-				     double n_s, double bcm_log10Mc, double bcm_etab, double bcm_ks,
-				     int nz_mgrowth,double *zarr_mgrowth,
-				     double *dfarr_mgrowth, int *status);
+                     double Neff, double* mnu, ccl_mnu_convention mnu_type,
+                     double w0, double wa, double h, double norm_pk,
+                     double n_s, double bcm_log10Mc, double bcm_etab, double bcm_ks,
+                     int nz_mgrowth,double *zarr_mgrowth,
+                     double *dfarr_mgrowth, int *status);
 
 
-// Specific sub-models
-/**
- * Create a flat LCDM cosmology
- * @param Omega_c Omega_c
- * @param Omega_b Omega_b
- * @param h Hubble constant in units of 100 km/s/Mpc
- * @param norm_pk the normalization of the power spectrum, either A_s or sigma8
- * @param n_s the power-law index of the power spectrum
- * @param status Status flag. 0 if there are no errors, nonzero otherwise.
- * For specific cases see documentation for ccl_error.c
- * @return void
- */
-ccl_parameters ccl_parameters_create_flat_lcdm(double Omega_c, double Omega_b, double h, double norm_pk, double n_s, int *status);
+/* ------- ROUTINE: ccl_parameters_create_flat_lcdm --------
+INPUT: some cosmological parameters needed to create a flat LCDM model
+TASK: call ccl_parameters_create to produce an LCDM model
+*/
+ccl_parameters ccl_parameters_create_flat_lcdm(double Omega_c, double Omega_b, double h,
+					       double norm_pk, double n_s, int *status);
 
-/**
- * Create a flat LCDM cosmology with the impact of baryons
- * @param Omega_c Omega_c
- * @param Omega_b Omega_b
- * @param h Hubble constant in units of 100 km/s/Mpc
- * @param norm_pk the normalization of the power spectrum, either A_s or sigma8
- * @param n_s the power-law index of the power spectrum
- * @param bcm_log10Mc log10 cluster mass, one of the parameters of the BCM model
- * @param bcm_etab ejection radius parameter, one of the parameters of the BCM model
- * @param bcm_ks wavenumber for the stellar profile, one of the parameters of the BCM model
- * @param status Status flag. 0 if there are no errors, nonzero otherwise.
- * For specific cases see documentation for ccl_error.c
- * @return void
- */
-ccl_parameters ccl_parameters_create_flat_lcdm_bar(double Omega_c, double Omega_b, double h,
-						   double norm_pk, double n_s, double bcm_log10Mc,
-						   double bcm_etab, double bcm_ks, int *status);
-
-/**
- * Create a flat wCDM cosmology
- * @param Omega_c Omega_c
- * @param Omega_b Omega_b
- * @param w0 Dark energy EoS parameter
- * @param h Hubble constant in units of 100 km/s/Mpc
- * @param norm_pk the normalization of the power spectrum, either A_s or sigma8
- * @param n_s the power-law index of the power spectrum
- * @param status Status flag. 0 if there are no errors, nonzero otherwise.
- * For specific cases see documentation for ccl_error.c
- * @return void
- */
-ccl_parameters ccl_parameters_create_flat_wcdm(double Omega_c, double Omega_b, double w0, double h, double norm_pk, double n_s, int *status);
-
-/**
- * Create a flat waCDM cosmology
- * @param Omega_c Omega_c
- * @param Omega_b Omega_b
- * @param w0 Dark energy EoS parameter
- * @param wa Dark energy EoS parameter
- * @param h Hubble constant in units of 100 km/s/Mpc
- * @param norm_pk the normalization of the power spectrum, either A_s or sigma8
- * @param n_s the power-law index of the power spectrum
- * @param status Status flag. 0 if there are no errors, nonzero otherwise.
- * For specific cases see documentation for ccl_error.c
- * @return void
- */
-ccl_parameters ccl_parameters_create_flat_wacdm(double Omega_c, double Omega_b, double w0,double wa, double h, double norm_pk, double n_s, int *status);
-
-/**
- * Create an LCDM cosmology with curvature
- * @param Omega_c Omega_c
- * @param Omega_b Omega_b
- * @param Omega_k Omega_k
- * @param w0 Dark energy EoS parameter
- * @param wa Dark energy EoS parameter
- * @param h Hubble constant in units of 100 km/s/Mpc
- * @param norm_pk the normalization of the power spectrum, either A_s or sigma8
- * @param n_s the power-law index of the power spectrum
- * @param status Status flag. 0 if there are no errors, nonzero otherwise.
- * For specific cases see documentation for ccl_error.c
- * @return void
- */
-ccl_parameters ccl_parameters_create_lcdm(double Omega_c, double Omega_b, double Omega_k, double h, double norm_pk, double n_s, int *status);
-
-ccl_parameters ccl_parameters_create_flat_lcdm_nu(double Omega_c, double Omega_b, double h, double norm_pk,double n_s, double Neff, double *mnu, ccl_mnu_convention mnu_type, int *status);
-ccl_parameters ccl_parameters_create_flat_wcdm_nu(double Omega_c, double Omega_b, double w0, double h, double norm_pk, double n_s, double Neff, double *mnu, ccl_mnu_convention mnu_type, int *status);
-ccl_parameters ccl_parameters_create_flat_wacdm_nu(double Omega_c, double Omega_b, double w0, double wa,double h, double norm_pk, double n_s, double Neff, double* mnu, ccl_mnu_convention mnu_type, int *status);
-ccl_parameters ccl_parameters_create_lcdm_nu(double Omega_c, double Omega_b, double Omega_k, double h, double norm_pk, double n_s, double Neff, double* mnu, ccl_mnu_convention mnu_type, int *status);
 
 /**
  * Free a parameters struct

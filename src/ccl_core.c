@@ -498,177 +498,22 @@ INPUT: some cosmological parameters needed to create a flat LCDM model
 TASK: call ccl_parameters_create to produce an LCDM model
 */
 ccl_parameters ccl_parameters_create_flat_lcdm(double Omega_c, double Omega_b, double h,
-					       double norm_pk, double n_s, int *status)
+                                               double norm_pk, double n_s, int *status)
 {
   double Omega_k = 0.0;
   double Neff = 3.046;
   double w0 = -1.0;
   double wa = 0.0;
   double *mnu;
-  double mnuval = 0.;
+  double mnuval = 0.;  // a pointer to the variable is not kept past the lifetime of this function
   mnu = &mnuval;
   ccl_mnu_convention mnu_type = ccl_mnu_sum;
 
   ccl_parameters params = ccl_parameters_create(Omega_c, Omega_b, Omega_k, Neff,
-						mnu, mnu_type, w0, wa, h, norm_pk, n_s, -1, -1, -1, -1, NULL, NULL, status);
+        mnu, mnu_type, w0, wa, h, norm_pk, n_s, -1, -1, -1, -1, NULL, NULL, status);
 
   return params;
 
-}
-
-
-
-/* ------- ROUTINE: ccl_parameters_create_flat_lcdm --------
-INPUT: some cosmological parameters needed to create a flat LCDM model
-TASK: call ccl_parameters_create to produce an LCDM model with baryonic effects
-*/
-ccl_parameters ccl_parameters_create_flat_lcdm_bar(double Omega_c, double Omega_b, double h,
-						   double norm_pk, double n_s, double bcm_log10Mc,
-						   double bcm_etab, double bcm_ks, int *status)
-{
-  double Omega_k = 0.0;
-  double Neff = 3.046;
-  double *mnu;
-  double mnuval = 0.;
-  mnu = &mnuval;
-  ccl_mnu_convention mnu_type = ccl_mnu_sum;
-  double w0 = -1.0;
-  double wa = 0.0;
-  ccl_parameters params = ccl_parameters_create(Omega_c, Omega_b, Omega_k, Neff,
-						mnu, mnu_type, w0, wa, h, norm_pk, n_s, bcm_log10Mc, bcm_etab,
-						bcm_ks, -1, NULL, NULL, status);
-  return params;
-
-}
-
-/* ------- ROUTINE: ccl_parameters_create_flat_lcdm_nu --------
-INPUT: some cosmological parameters needed to create a flat LCDM model with neutrinos
-TASK: call ccl_parameters_create to produce an LCDM model
-*/
-ccl_parameters ccl_parameters_create_flat_lcdm_nu(double Omega_c, double Omega_b, double h, double norm_pk,
-						  double n_s, double Neff, double *mnu, ccl_mnu_convention mnu_type,
-						  int *status)
-{
-  double Omega_k = 0.0;
-  double w0 = -1.0;
-  double wa = 0.0;
-  ccl_parameters params = ccl_parameters_create(Omega_c, Omega_b, Omega_k, Neff, mnu, mnu_type, w0, wa,
-						h, norm_pk, n_s, -1, -1, -1, -1, NULL, NULL, status);
-  return params;
-
-}
-
-
-/* ------- ROUTINE: ccl_parameters_create_lcdm --------
-INPUT: some cosmological parameters needed to create an LCDM model with curvature
-TASK: call ccl_parameters_create for this specific model
-*/
-ccl_parameters ccl_parameters_create_lcdm(double Omega_c, double Omega_b, double Omega_k, double h,
-					  double norm_pk, double n_s, int *status)
-{
-  double Neff = 3.046;
-  double w0 = -1.0;
-  double wa = 0.0;
-  double *mnu;
-  double mnuval = 0.;
-  mnu = &mnuval;
-  ccl_mnu_convention mnu_type = ccl_mnu_sum;
-
-  ccl_parameters params = ccl_parameters_create(Omega_c, Omega_b, Omega_k, Neff, mnu, mnu_type, w0, wa,
-						h, norm_pk, n_s, -1, -1, -1,-1,NULL,NULL, status);
-  return params;
-}
-
-
-/* ------- ROUTINE: ccl_parameters_create_lcdm_nu --------
-INPUT: some cosmological parameters needed to create an LCDM model with curvature and neutrinos
-TASK: call ccl_parameters_create for this specific model
-*/
-ccl_parameters ccl_parameters_create_lcdm_nu(double Omega_c, double Omega_b, double Omega_k, double h,
-					     double norm_pk, double n_s, double Neff,
-					     double* mnu, ccl_mnu_convention mnu_type, int *status)
-{
-  double w0 = -1.0;
-  double wa = 0.0;
-
-  ccl_parameters params = ccl_parameters_create(Omega_c, Omega_b, Omega_k, Neff, mnu, mnu_type, w0, wa,
-						h, norm_pk, n_s, -1, -1, -1,-1,NULL,NULL, status);
-
-  return params;
-
-}
-
-/* ------- ROUTINE: ccl_parameters_create_flat_wcdm --------
-INPUT: some cosmological parameters needed to create an LCDM model with wa=0 but w0!=-1
-TASK: call ccl_parameters_create for this specific model
-*/
-ccl_parameters ccl_parameters_create_flat_wcdm(double Omega_c, double Omega_b, double w0, double h,
-					       double norm_pk, double n_s, int *status)
-{
-
-  double Omega_k = 0.0;
-  double Neff = 3.046;
-  double wa = 0.0;
-  double *mnu;
-  double mnuval = 0.;
-  mnu = &mnuval;
-  ccl_mnu_convention mnu_type = ccl_mnu_sum;
-
-  ccl_parameters params = ccl_parameters_create(Omega_c, Omega_b, Omega_k, Neff, mnu, mnu_type, w0, wa,
-						h, norm_pk, n_s, -1, -1, -1,-1,NULL,NULL, status);
-  return params;
-}
-
-
-/* ------- ROUTINE: ccl_parameters_create_wcdm_nu --------
-INPUT: some cosmological parameters needed to create an LCDM model with neutrinos, and wa=0 but w0!=-1
-TASK: call ccl_parameters_create for this specific model
-*/
-ccl_parameters ccl_parameters_create_flat_wcdm_nu(double Omega_c, double Omega_b, double w0, double h,
-						  double norm_pk, double n_s, double Neff, double *mnu, ccl_mnu_convention mnu_type, int *status)
-{
-
-  double Omega_k = 0.0;
-  double wa = 0.0;
-  ccl_parameters params = ccl_parameters_create(Omega_c, Omega_b, Omega_k, Neff, mnu, mnu_type, w0, wa,
-						h, norm_pk, n_s, -1, -1, -1,-1,NULL,NULL, status);
-  return params;
-}
-
-
-/* ------- ROUTINE: ccl_parameters_create_wacdm --------
-INPUT: some cosmological parameters needed to create an LCDM model with curvature wa!=0 and and w0!=-1
-TASK: call ccl_parameters_create for this specific model
-*/
-ccl_parameters ccl_parameters_create_flat_wacdm(double Omega_c, double Omega_b, double w0, double wa,
-						double h, double norm_pk, double n_s, int *status)
-{
-  double Omega_k = 0.0;
-  double Neff = 3.046;
-  double *mnu;
-  double mnuval = 0.;
-  mnu = &mnuval;
-  ccl_mnu_convention mnu_type = ccl_mnu_sum;
-
-  ccl_parameters params = ccl_parameters_create(Omega_c, Omega_b, Omega_k,Neff, mnu, mnu_type, w0, wa,
-						h, norm_pk, n_s, -1, -1, -1,-1,NULL,NULL, status);
-  return params;
-}
-
-
-/* ------- ROUTINE: ccl_parameters_create_wacdm_nu --------
-INPUT: some cosmological parameters needed to create an LCDM model with neutrinoswith curvature wa!=0 and and w0!=-1
-TASK: call ccl_parameters_create for this specific model
-*/
-ccl_parameters ccl_parameters_create_flat_wacdm_nu(double Omega_c, double Omega_b, double w0, double wa,
-						   double h, double norm_pk, double n_s,
-						   double Neff, double* mnu, ccl_mnu_convention mnu_type, int *status)
-{
-
-  double Omega_k = 0.0;
-  ccl_parameters params = ccl_parameters_create(Omega_c, Omega_b, Omega_k,Neff, mnu, mnu_type, w0, wa,
-						h, norm_pk, n_s, -1, -1, -1,-1,NULL,NULL, status);
-  return params;
 }
 
 
