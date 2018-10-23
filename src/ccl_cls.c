@@ -514,7 +514,7 @@ static void clt_wl_init(CCL_ClTracer *clt,ccl_cosmology *cosmo,
 
 //CCL_ClTracer creator
 //cosmo   -> ccl_cosmology object
-//tracer_type -> type of tracer. Supported: CL_TRACER_NC, CL_TRACER_WL
+//tracer_type -> type of tracer. Supported: ccl_number_counts_tracer, ccl_weak_lensing_tracer
 //nz_n -> number of points for N(z)
 //z_n  -> array of z-values for N(z)
 //n    -> corresponding N(z)-values. Normalization is irrelevant
@@ -541,7 +541,7 @@ static CCL_ClTracer *cl_tracer(ccl_cosmology *cosmo,int tracer_type,
     return NULL;
   }
 
-  if ( ((cosmo->params.N_nu_mass)>0) && tracer_type==CL_TRACER_NC && has_rsd){
+  if ( ((cosmo->params.N_nu_mass)>0) && tracer_type==ccl_number_counts_tracer && has_rsd){
 	  free(clt);
 	  *status=CCL_ERROR_NOT_IMPLEMENTED;
 	  ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: ccl_cl_tracer_new(): Number counts tracers with rsd not yet implemented in cosmologies with massive neutrinos.");
@@ -553,13 +553,13 @@ static CCL_ClTracer *cl_tracer(ccl_cosmology *cosmo,int tracer_type,
   double hub=cosmo->params.h*ccl_h_over_h0(cosmo,1.,status)/CLIGHT_HMPC;
   clt->prefac_lensing=1.5*hub*hub*cosmo->params.Omega_m;
 
-  if(tracer_type==CL_TRACER_NC)
+  if(tracer_type==ccl_number_counts_tracer)
     clt_nc_init(clt,cosmo,has_rsd,has_magnification,
 		nz_n,z_n,n,nz_b,z_b,b,nz_s,z_s,s,status);
-  else if(tracer_type==CL_TRACER_WL)
+  else if(tracer_type==ccl_weak_lensing_tracer)
     clt_wl_init(clt,cosmo,has_intrinsic_alignment,
 		nz_n,z_n,n,nz_ba,z_ba,ba,nz_rf,z_rf,rf,status);
-  else if(tracer_type==CL_TRACER_CL) {
+  else if(tracer_type==ccl_cmb_lensing_tracer) {
     clt->chi_source=ccl_comoving_radial_distance(cosmo,1./(1+z_source),status);
     clt->chimax=clt->chi_source;
     clt->chimin=0;
@@ -575,7 +575,7 @@ static CCL_ClTracer *cl_tracer(ccl_cosmology *cosmo,int tracer_type,
 
 //CCL_ClTracer constructor with error checking
 //cosmo   -> ccl_cosmology object
-//tracer_type -> type of tracer. Supported: CL_TRACER_NC, CL_TRACER_WL
+//tracer_type -> type of tracer. Supported: ccl_number_counts_tracer, ccl_weak_lensing_tracer
 //nz_n -> number of points for N(z)
 //z_n  -> array of z-values for N(z)
 //n    -> corresponding N(z)-values. Normalization is irrelevant
@@ -603,17 +603,17 @@ CCL_ClTracer *ccl_cl_tracer(ccl_cosmology *cosmo,int tracer_type,
 //CCL_ClTracer destructor
 void ccl_cl_tracer_free(CCL_ClTracer *clt)
 {
-  if((clt->tracer_type==CL_TRACER_NC) || (clt->tracer_type==CL_TRACER_WL))
+  if((clt->tracer_type==ccl_number_counts_tracer) || (clt->tracer_type==ccl_weak_lensing_tracer))
     ccl_spline_free(clt->spl_nz);
 
-  if(clt->tracer_type==CL_TRACER_NC) {
+  if(clt->tracer_type==ccl_number_counts_tracer) {
     ccl_spline_free(clt->spl_bz);
     if(clt->has_magnification) {
       ccl_spline_free(clt->spl_sz);
       ccl_spline_free(clt->spl_wM);
     }
   }
-  else if(clt->tracer_type==CL_TRACER_WL) {
+  else if(clt->tracer_type==ccl_weak_lensing_tracer) {
     ccl_spline_free(clt->spl_wL);
     if(clt->has_intrinsic_alignment) {
       ccl_spline_free(clt->spl_ba);
@@ -625,7 +625,7 @@ void ccl_cl_tracer_free(CCL_ClTracer *clt)
 
 CCL_ClTracer *ccl_cl_tracer_cmblens(ccl_cosmology *cosmo,double z_source,int *status)
 {
-  return ccl_cl_tracer(cosmo,CL_TRACER_CL,
+  return ccl_cl_tracer(cosmo,ccl_cmb_lensing_tracer,
 			   0,0,0,
 			   0,NULL,NULL,0,NULL,NULL,0,NULL,NULL,
 			   0,NULL,NULL,0,NULL,NULL,z_source,status);
@@ -637,7 +637,7 @@ CCL_ClTracer *ccl_cl_tracer_number_counts(ccl_cosmology *cosmo,
 					      int nz_b,double *z_b,double *b,
 					      int nz_s,double *z_s,double *s, int * status)
 {
-  return ccl_cl_tracer(cosmo,CL_TRACER_NC,has_rsd,has_magnification,0,
+  return ccl_cl_tracer(cosmo,ccl_number_counts_tracer,has_rsd,has_magnification,0,
 			   nz_n,z_n,n,nz_b,z_b,b,nz_s,z_s,s,
 			   -1,NULL,NULL,-1,NULL,NULL,0, status);
 }
@@ -646,7 +646,7 @@ CCL_ClTracer *ccl_cl_tracer_number_counts_simple(ccl_cosmology *cosmo,
 						     int nz_n,double *z_n,double *n,
 						     int nz_b,double *z_b,double *b, int * status)
 {
-  return ccl_cl_tracer(cosmo,CL_TRACER_NC,0,0,0,
+  return ccl_cl_tracer(cosmo,ccl_number_counts_tracer,0,0,0,
 			   nz_n,z_n,n,nz_b,z_b,b,-1,NULL,NULL,
 			   -1,NULL,NULL,-1,NULL,NULL,0, status);
 }
@@ -657,7 +657,7 @@ CCL_ClTracer *ccl_cl_tracer_lensing(ccl_cosmology *cosmo,
 					int nz_ba,double *z_ba,double *ba,
 					int nz_rf,double *z_rf,double *rf, int * status)
 {
-  return ccl_cl_tracer(cosmo,CL_TRACER_WL,0,0,has_alignment,
+  return ccl_cl_tracer(cosmo,ccl_weak_lensing_tracer,0,0,has_alignment,
 			   nz_n,z_n,n,-1,NULL,NULL,-1,NULL,NULL,
 			   nz_ba,z_ba,ba,nz_rf,z_rf,rf,0, status);
 }
@@ -665,7 +665,7 @@ CCL_ClTracer *ccl_cl_tracer_lensing(ccl_cosmology *cosmo,
 CCL_ClTracer *ccl_cl_tracer_lensing_simple(ccl_cosmology *cosmo,
 					       int nz_n,double *z_n,double *n, int * status)
 {
-  return ccl_cl_tracer(cosmo,CL_TRACER_WL,0,0,0,
+  return ccl_cl_tracer(cosmo,ccl_weak_lensing_tracer,0,0,0,
 			   nz_n,z_n,n,-1,NULL,NULL,-1,NULL,NULL,
 			   -1,NULL,NULL,-1,NULL,NULL,0, status);
 }
@@ -705,7 +705,7 @@ static double f_mag(double a,double chi,ccl_cosmology *cosmo,CCL_ClTracer *clt, 
 //k -> wavenumber modulus
 //cosmo -> ccl_cosmology object
 //w -> CCL_ClWorskpace object
-//clt -> CCL_ClTracer object (must be of the CL_TRACER_NC type)
+//clt -> CCL_ClTracer object (must be of the ccl_number_counts_tracer type)
 static double transfer_nc(int l,double k,
 			  ccl_cosmology *cosmo,CCL_ClWorkspace *w,CCL_ClTracer *clt, int * status)
 {
@@ -766,7 +766,7 @@ static double f_IA_NLA(double a,double chi,ccl_cosmology *cosmo,CCL_ClTracer *cl
 //k -> wavenumber modulus
 //cosmo -> ccl_cosmology object
 //w -> CCL_ClWorskpace object
-//clt -> CCL_ClTracer object (must be of the CL_TRACER_WL type)
+//clt -> CCL_ClTracer object (must be of the ccl_weak_lensing_tracer type)
 static double transfer_wl(int l,double k,
 			  ccl_cosmology *cosmo,CCL_ClWorkspace *w,CCL_ClTracer *clt, int * status)
 {
@@ -810,11 +810,11 @@ static double transfer_wrap(int il,double lk,ccl_cosmology *cosmo,
   double transfer_out=0;
   double k=pow(10.,lk);
 
-  if(clt->tracer_type==CL_TRACER_NC)
+  if(clt->tracer_type==ccl_number_counts_tracer)
     transfer_out=transfer_nc(w->l_arr[il],k,cosmo,w,clt,status);
-  else if(clt->tracer_type==CL_TRACER_WL)
+  else if(clt->tracer_type==ccl_weak_lensing_tracer)
     transfer_out=transfer_wl(w->l_arr[il],k,cosmo,w,clt,status);
-  else if(clt->tracer_type==CL_TRACER_CL)
+  else if(clt->tracer_type==ccl_cmb_lensing_tracer)
     transfer_out=transfer_cmblens(w->l_arr[il],k,cosmo,clt,status);
   else
     transfer_out=-1;
@@ -870,8 +870,8 @@ static void get_k_interval(ccl_cosmology *cosmo,CCL_ClWorkspace *w,
     int cut_low_1=0,cut_low_2=0;
 
     //Define a minimum distance only if no lensing is needed
-    if((clt1->tracer_type==CL_TRACER_NC) && (clt1->has_magnification==0)) cut_low_1=1;
-    if((clt2->tracer_type==CL_TRACER_NC) && (clt2->has_magnification==0)) cut_low_2=1;
+    if((clt1->tracer_type==ccl_number_counts_tracer) && (clt1->has_magnification==0)) cut_low_1=1;
+    if((clt2->tracer_type==ccl_number_counts_tracer) && (clt2->has_magnification==0)) cut_low_2=1;
 
     if(cut_low_1) {
       if(cut_low_2) {
@@ -1000,7 +1000,7 @@ void ccl_angular_cls(ccl_cosmology *cosmo,CCL_ClWorkspace *w,
 #endif //HAVE_ANGPOW
   
   //Resort to Limber if we have lensing (this will hopefully only be temporary)
-  if(clt1->tracer_type==CL_TRACER_WL || clt2->tracer_type==CL_TRACER_WL ||
+  if(clt1->tracer_type==ccl_weak_lensing_tracer || clt2->tracer_type==ccl_weak_lensing_tracer ||
      clt1->has_magnification || clt2->has_magnification) {
     do_angpow=0;
   }
@@ -1035,15 +1035,15 @@ void ccl_angular_cls(ccl_cosmology *cosmo,CCL_ClWorkspace *w,
 
 static int check_clt_fa_inconsistency(CCL_ClTracer *clt,int func_code)
 {
-  if(((func_code==CCL_CLT_NZ) && (clt->tracer_type==CL_TRACER_CL)) || //Lensing has no N(z)
-     (((func_code==CCL_CLT_BZ) || (func_code==CCL_CLT_SZ) || (func_code==CCL_CLT_WM)) &&
-      (clt->tracer_type!=CL_TRACER_NC)) || //bias and magnification only for clustering
-     (((func_code==CCL_CLT_RF) || (func_code==CCL_CLT_BA) || (func_code==CCL_CLT_WL)) &&
-      (clt->tracer_type!=CL_TRACER_WL))) //IAs only for weak lensing
+  if(((func_code==ccl_trf_nz) && (clt->tracer_type==ccl_cmb_lensing_tracer)) || //lensing has no n(z)
+     (((func_code==ccl_trf_bz) || (func_code==ccl_trf_sz) || (func_code==ccl_trf_wM)) &&
+      (clt->tracer_type!=ccl_number_counts_tracer)) || //bias and magnification only for clustering
+     (((func_code==ccl_trf_rf) || (func_code==ccl_trf_ba) || (func_code==ccl_trf_wL)) &&
+      (clt->tracer_type!=ccl_weak_lensing_tracer))) //IAs only for weak lensing
     return 1;
-  if((((func_code==CCL_CLT_SZ) || (func_code==CCL_CLT_WM)) &&
-      (clt->has_magnification==0)) || //Correct combination, but no magnification
-     (((func_code==CCL_CLT_RF) || (func_code==CCL_CLT_BA)) &&
+  if((((func_code==ccl_trf_sz) || (func_code==ccl_trf_wM)) &&
+      (clt->has_magnification==0)) || //correct combination, but no magnification
+     (((func_code==ccl_trf_rf) || (func_code==ccl_trf_ba)) &&
       (clt->has_intrinsic_alignment==0))) //Correct combination, but no IAs
     return 1;
   return 0;
@@ -1060,31 +1060,31 @@ double ccl_get_tracer_fa(ccl_cosmology *cosmo,CCL_ClTracer *clt,double a,int fun
   }
 
   switch(func_code) {
-  case CCL_CLT_NZ :
+  case ccl_trf_nz :
     spl=clt->spl_nz;
     break;
-  case CCL_CLT_BZ :
+  case ccl_trf_bz :
     spl=clt->spl_bz;
     break;
-  case CCL_CLT_SZ :
+  case ccl_trf_sz :
     spl=clt->spl_sz;
     break;
-  case CCL_CLT_RF :
+  case ccl_trf_rf :
     spl=clt->spl_rf;
     break;
-  case CCL_CLT_BA :
+  case ccl_trf_ba :
     spl=clt->spl_ba;
     break;
-  case CCL_CLT_WL :
+  case ccl_trf_wL :
     spl=clt->spl_wL;
     break;
-  case CCL_CLT_WM :
+  case ccl_trf_wM :
     spl=clt->spl_wM;
     break;
   }
 
   double x;
-  if((func_code==CCL_CLT_WL) || (func_code==CCL_CLT_WM))
+  if((func_code==ccl_trf_wL) || (func_code==ccl_trf_wM))
     x=ccl_comoving_radial_distance(cosmo,a,status); //x-variable is comoving distance for lensing kernels
   else
     x=1./a-1; //x-variable is redshift by default
@@ -1104,30 +1104,30 @@ int ccl_get_tracer_fas(ccl_cosmology *cosmo,CCL_ClTracer *clt,int na,double *a,d
   }
   
   switch(func_code) {
-  case CCL_CLT_NZ :
+  case ccl_trf_nz :
     spl=clt->spl_nz;
     break;
-  case CCL_CLT_BZ :
+  case ccl_trf_bz :
     spl=clt->spl_bz;
     break;
-  case CCL_CLT_SZ :
+  case ccl_trf_sz :
     spl=clt->spl_sz;
     break;
-  case CCL_CLT_RF :
+  case ccl_trf_rf :
     spl=clt->spl_rf;
     break;
-  case CCL_CLT_BA :
+  case ccl_trf_ba :
     spl=clt->spl_ba;
     break;
-  case CCL_CLT_WL :
+  case ccl_trf_wL :
     spl=clt->spl_wL;
     break;
-  case CCL_CLT_WM :
+  case ccl_trf_wM :
     spl=clt->spl_wM;
     break;
   }
   
-  int compchi = (func_code==CCL_CLT_WL) || (func_code==CCL_CLT_WM);
+  int compchi = (func_code==ccl_trf_wL) || (func_code==ccl_trf_wM);
 
   int ia;
   for(ia=0;ia<na;ia++) {

@@ -2,16 +2,23 @@
 #ifndef __CCL_CLS_H_INCLUDED__
 #define __CCL_CLS_H_INCLUDED__
 
-#define CL_TRACER_NC 1 //Tracer type 1: number counts
-#define CL_TRACER_WL 2 //Tracer type 2: weak lensing
-#define CL_TRACER_CL 3 //Tracer type 2: CMB lensing
-#define CCL_CLT_NZ 201 //Redshift distribution
-#define CCL_CLT_BZ 202 //Clustering bias
-#define CCL_CLT_SZ 203 //Magnification bias
-#define CCL_CLT_RF 204 //Aligned fraction
-#define CCL_CLT_BA 205 //Alignment bias
-#define CCL_CLT_WL 206 //Weak lensing window function
-#define CCL_CLT_WM 207 //Magnification window function
+typedef enum ccl_tracer_t
+{
+  ccl_number_counts_tracer = 1,
+  ccl_weak_lensing_tracer  = 2,
+  ccl_cmb_lensing_tracer   = 3,
+} ccl_tracer_t;
+
+typedef enum ccl_tracer_func_t
+{
+  ccl_trf_nz = 201, //Redshift distribution
+  ccl_trf_bz = 202, //Clustering bias
+  ccl_trf_sz = 203, //Magnification bias
+  ccl_trf_rf = 204, //Aligned fraction
+  ccl_trf_ba = 205, //Alignment bias
+  ccl_trf_wL = 206, //Weak lensing window function
+  ccl_trf_wM = 207, //Magnification window function
+} ccl_tracer_func_t;
 
 CCL_BEGIN_DECLS
 
@@ -44,7 +51,7 @@ typedef struct {
 
 /**
  * Constructor for a ClTracer.
- * @param Tracer_type pass CL_TRACER_NC (number counts), CL_TRACER_WL (weak lensing) or CL_TRACER_CL (CMB lensing)
+ * @param Tracer_type pass ccl_number_counts_tracer (number counts), ccl_weak_lensing_tracer (weak lensing) or ccl_cmb_lensing_tracer (CMB lensing)
  * @param has_rsd Set to 1 if you want to compute the RSD contribution to number counts (0 otherwise)
  * @param has_magnification Set to 1 if you want to compute the magnification contribution to number counts (0 otherwise)
  * @param has_intrinsic_alignment Set to 1 if you want to compute the IA contribution to shear
@@ -175,9 +182,9 @@ void ccl_cl_tracer_free(CCL_ClTracer *clt);
  * @param clt ClTracer object
  * @param a scale factor at which the function is to be evaluated
  * @param func_code integer defining which internal function to evaluate. Choose between:
- * CCL_CLT_NZ (redshift distribution), CCL_CLT_BZ (clustering bias), CCL_CLT_SZ (magnification bias),
- * CCL_CLT_RF (aligned fraction), CCL_CLT_BA (alignment bias),
- * CCL_CLT_WL (weak lensing window function), CCL_CLT_WM (magnification window function)
+ * ccl_trf_nz (redshift distribution), ccl_trf_bz (clustering bias), ccl_trf_sz (magnification bias),
+ * ccl_trf_rf (aligned fraction), ccl_trf_ba (alignment bias),
+ * ccl_trf_wL (weak lensing window function), ccl_trf_wM (magnification window function)
  * @param status Status flag. 0 if there are no errors, nonzero otherwise.
  * For specific cases see documentation for ccl_error.c
  * @return interpolated value of the requested function
@@ -192,9 +199,9 @@ double ccl_get_tracer_fa(ccl_cosmology *cosmo,CCL_ClTracer *clt,double a,int fun
  * @param a na values of the scale factor at which the function is to be evaluated
  * @param fa output array with na values that will store the interpolated function values
  * @param func_code integer defining which internal function to evaluate. Choose between:
- * CCL_CLT_NZ (redshift distribution), CCL_CLT_BZ (clustering bias), CCL_CLT_SZ (magnification bias),
- * CCL_CLT_RF (aligned fraction), CCL_CLT_BA (alignment bias),
- * CCL_CLT_WL (weak lensing window function), CCL_CLT_WM (magnification window function)
+ * ccl_trf_nz (redshift distribution), ccl_trf_bz (clustering bias), ccl_trf_sz (magnification bias),
+ * ccl_trf_rf (aligned fraction), ccl_trf_ba (alignment bias),
+ * ccl_trf_wL (weak lensing window function), ccl_trf_wM (magnification window function)
  * @param status Status flag. 0 if there are no errors, nonzero otherwise.
  * For specific cases see documentation for ccl_error.c
  * @return void

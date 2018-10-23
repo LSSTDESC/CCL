@@ -4,13 +4,13 @@ from .core import check
 import numpy as np
 
 function_types = {
-    'dndz': const.CCL_CLT_NZ,
-    'bias': const.CCL_CLT_BZ,
-    'mag_bias': const.CCL_CLT_SZ,
-    'red_frac': const.CCL_CLT_RF,
-    'ia_bias': const.CCL_CLT_BA,
-    'lensing_win': const.CCL_CLT_WL,
-    'mag_win': const.CCL_CLT_WM,
+    'dndz': lib.trf_nz,
+    'bias': lib.trf_bz,
+    'mag_bias': lib.trf_sz,
+    'red_frac': lib.trf_rf,
+    'ia_bias': lib.trf_ba,
+    'lensing_win': lib.trf_wL,
+    'mag_win': lib.trf_wM,
 }
 
 # Define symbolic 'None' type for arrays, to allow proper handling by swig
@@ -43,9 +43,9 @@ class Tracer(object):
         Args:
             cosmo (:obj:`Cosmology`): Cosmology object.
             tracer_type (:obj:): Specifies the type of tracer. Must be one of
-                    const.CL_TRACER_NC: number count tracer
-                    const.CL_TRACER_WL: lensing tracer
-                    const.CL_TRACER_CL: CMB lensing tracer
+                    lib.number_counts_tracer: number count tracer
+                    lib.weak_lensing_tracer: lensing tracer
+                    lib.cmb_lensing_tracer: CMB lensing tracer
             has_rsd (bool, optional): Flag for whether the tracer has a
                 redshift-space distortion term. Defaults to False.
             dndz (tuple of arrays, optional): A tuple of arrays (z, N(z))
@@ -203,7 +203,7 @@ class NumberCountsTracer(Tracer):
     def __init__(self, cosmo, has_rsd, dndz, bias, mag_bias=None):
         # Call Tracer constructor with appropriate arguments
         self._build_tracer(
-            cosmo=cosmo, tracer_type=const.CL_TRACER_NC,
+            cosmo=cosmo, tracer_type=lib.number_counts_tracer,
             has_rsd=has_rsd,
             dndz=dndz, bias=bias, mag_bias=mag_bias,
             ia_bias=None, red_frac=None)
@@ -233,7 +233,7 @@ class WeakLensingTracer(Tracer):
     def __init__(self, cosmo, dndz, ia_bias=None, red_frac=None):
         # Call Tracer constructor with appropriate arguments
         self._build_tracer(
-            cosmo=cosmo, tracer_type=const.CL_TRACER_WL,
+            cosmo=cosmo, tracer_type=lib.weak_lensing_tracer,
             has_rsd=False,
             dndz=dndz, bias=None, mag_bias=None,
             ia_bias=ia_bias, red_frac=red_frac)
@@ -250,7 +250,7 @@ class CMBLensingTracer(Tracer):
     def __init__(self, cosmo, z_source):
         # Call Tracer constructor with appropriate arguments
         self._build_tracer(
-            cosmo=cosmo, tracer_type=const.CL_TRACER_CL,
+            cosmo=cosmo, tracer_type=lib.cmb_lensing_tracer,
             has_rsd=False,
             dndz=None, bias=None, mag_bias=None,
             ia_bias=None, red_frac=None, z_source=z_source)
