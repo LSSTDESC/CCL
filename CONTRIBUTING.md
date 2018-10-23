@@ -95,7 +95,7 @@ the function is in `ccl_background.c`):
    wrapping CCL structs in more user-friendly classes, automatically handling
    memory management logic, and doing type checking and error checking.
    These files are where you should define classes to manage CCL objects (see
-   the `Parameters` and `Cosmology` classes in `pyccl/core.py` for example), and
+   the `Cosmology` class in `pyccl/core.py` for example), and
    where you should provide easy-to-use wrappers around more complicated
    functions provided through the basic SWIG wrapper. Ideally, you would also
    provide some type checking and error checking code in this part of the

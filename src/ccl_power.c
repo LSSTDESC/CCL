@@ -86,6 +86,8 @@ static void ccl_free_class_structs(ccl_cosmology *cosmo,
       return;
     }
   }
+
+  return;
 }
 
 static void ccl_class_preinit(struct background *ba,
@@ -246,17 +248,17 @@ static double ccl_get_class_As(ccl_cosmology *cosmo, struct file_content *fc, in
 
   if (strcmp(fc->name[position_kmax],"P_k_max_1/Mpc")) {
     k_max_old = strtof(fc->value[position_kmax],NULL);
-    sprintf(fc->value[position_kmax],"%e",10.);
+    sprintf(fc->value[position_kmax],"%.15e",10.);
   }
   A_s_guess = 2.43e-9/0.87659*sigma8;
-  sprintf(fc->value[position_As],"%e",A_s_guess);
+  sprintf(fc->value[position_As],"%.15e",A_s_guess);
 
   ccl_run_class(cosmo, fc,&pr,&ba,&th,&pt,&tr,&pm,&sp,&nl,&le,&op,init_arr,status);
   if (cosmo->status != CCL_ERROR_CLASS) A_s_guess*=pow(sigma8/sp.sigma8,2.);
   ccl_free_class_structs(cosmo, &ba,&th,&pt,&tr,&pm,&sp,&nl,&le,init_arr,status);
 
   if (k_max_old >0) {
-    sprintf(fc->value[position_kmax],"%e",k_max_old);
+    sprintf(fc->value[position_kmax],"%.15e",k_max_old);
   }
   return A_s_guess;
 }
@@ -283,10 +285,10 @@ static void ccl_fill_class_parameters(ccl_cosmology * cosmo, struct file_content
     strcpy(fc->value[1],"none");
 
   strcpy(fc->name[2],"P_k_max_1/Mpc");
-  sprintf(fc->value[2],"%e",ccl_splines->K_MAX_SPLINE); //in units of 1/Mpc, corroborated with ccl_constants.h
+  sprintf(fc->value[2],"%.15e",ccl_splines->K_MAX_SPLINE); //in units of 1/Mpc, corroborated with ccl_constants.h
 
   strcpy(fc->name[3],"z_max_pk");
-  sprintf(fc->value[3],"%e",1./ccl_splines->A_SPLINE_MINLOG_PK-1.);
+  sprintf(fc->value[3],"%.15e",1./ccl_splines->A_SPLINE_MINLOG_PK-1.);
 
   strcpy(fc->name[4],"modes");
   strcpy(fc->value[4],"s");
@@ -296,42 +298,42 @@ static void ccl_fill_class_parameters(ccl_cosmology * cosmo, struct file_content
 
   // now, copy over cosmology parameters
   strcpy(fc->name[6],"h");
-  sprintf(fc->value[6],"%e",cosmo->params.h);
+  sprintf(fc->value[6],"%.15e",cosmo->params.h);
 
   strcpy(fc->name[7],"Omega_cdm");
-  sprintf(fc->value[7],"%e",cosmo->params.Omega_c);
+  sprintf(fc->value[7],"%.15e",cosmo->params.Omega_c);
 
   strcpy(fc->name[8],"Omega_b");
-  sprintf(fc->value[8],"%e",cosmo->params.Omega_b);
+  sprintf(fc->value[8],"%.15e",cosmo->params.Omega_b);
 
   strcpy(fc->name[9],"Omega_k");
-  sprintf(fc->value[9],"%e",cosmo->params.Omega_k);
+  sprintf(fc->value[9],"%.15e",cosmo->params.Omega_k);
 
   strcpy(fc->name[10],"n_s");
-  sprintf(fc->value[10],"%e",cosmo->params.n_s);
+  sprintf(fc->value[10],"%.15e",cosmo->params.n_s);
 
 
   //cosmological constant?
   // set Omega_Lambda = 0.0 if w !=-1
   if ((cosmo->params.w0 !=-1.0) || (cosmo->params.wa !=0)) {
     strcpy(fc->name[11],"Omega_Lambda");
-    sprintf(fc->value[11],"%e",0.0);
+    sprintf(fc->value[11],"%.15e",0.0);
 
     strcpy(fc->name[12],"w0_fld");
-    sprintf(fc->value[12],"%e",cosmo->params.w0);
+    sprintf(fc->value[12],"%.15e",cosmo->params.w0);
 
     strcpy(fc->name[13],"wa_fld");
-    sprintf(fc->value[13],"%e",cosmo->params.wa);
+    sprintf(fc->value[13],"%.15e",cosmo->params.wa);
   }
   //neutrino parameters
   //massless neutrinos
   if (cosmo->params.N_nu_rel > 1.e-4) {
     strcpy(fc->name[14],"N_ur");
-    sprintf(fc->value[14],"%e",cosmo->params.N_nu_rel);
+    sprintf(fc->value[14],"%.15e",cosmo->params.N_nu_rel);
   }
   else {
     strcpy(fc->name[14],"N_ur");
-    sprintf(fc->value[14],"%e", 0.);
+    sprintf(fc->value[14],"%.15e", 0.);
   }
   if (cosmo->params.N_nu_mass > 0) {
     strcpy(fc->name[15],"N_ncdm");
@@ -349,7 +351,7 @@ static void ccl_fill_class_parameters(ccl_cosmology * cosmo, struct file_content
   }
 
   strcpy(fc->name[17],"T_cmb");
-  sprintf(fc->value[17],"%e",cosmo->params.T_CMB);
+  sprintf(fc->value[17],"%.15e",cosmo->params.T_CMB);
 
   //normalization comes last, so that all other parameters are filled in for determining A_s if sigma8 is specified
   if (isfinite(cosmo->params.sigma8) && isfinite(cosmo->params.A_s)){
@@ -359,11 +361,11 @@ static void ccl_fill_class_parameters(ccl_cosmology * cosmo, struct file_content
   }
   if (isfinite(cosmo->params.sigma8)) {
     strcpy(fc->name[parser_length-1],"A_s");
-    sprintf(fc->value[parser_length-1],"%e",ccl_get_class_As(cosmo,fc,parser_length-1,cosmo->params.sigma8, status));
+    sprintf(fc->value[parser_length-1],"%.15e",ccl_get_class_As(cosmo,fc,parser_length-1,cosmo->params.sigma8, status));
   }
   else if (isfinite(cosmo->params.A_s)) {
     strcpy(fc->name[parser_length-1],"A_s");
-    sprintf(fc->value[parser_length-1],"%e",cosmo->params.A_s);
+    sprintf(fc->value[parser_length-1],"%.15e",cosmo->params.A_s);
   }
   else {
     *status = CCL_ERROR_INCONSISTENT;
@@ -477,6 +479,7 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int * statu
       free(y2d_lin);
       gsl_spline2d_free(log_power);
       ccl_free_class_structs(cosmo, &ba,&th,&pt,&tr,&pm,&sp,&nl,&le,init_arr,status);
+      *status = CCL_ERROR_SPLINE;
       ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_cosmology_compute_power_class(): Error creating log_power spline\n");
       return;
     }
@@ -527,6 +530,7 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int * statu
 	free(y2d_lin);
 	gsl_spline2d_free(log_power_nl);
 	ccl_free_class_structs(cosmo, &ba,&th,&pt,&tr,&pm,&sp,&nl,&le,init_arr,status);
+	*status = CCL_ERROR_SPLINE;
 	ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_cosmology_compute_power_class(): Error creating log_power_nl spline\n");
 	return;
       }
@@ -547,7 +551,7 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int * statu
 
 /* BCM correction */
 // See Schneider & Teyssier (2015) for details of the model.
-double ccl_bcm_model_fkz(ccl_cosmology * cosmo, double k, double a, int *status){
+double ccl_bcm_model_fka(ccl_cosmology * cosmo, double k, double a, int *status){
 
   double fkz;
   double b0;
@@ -1278,6 +1282,7 @@ static void ccl_cosmology_compute_power_emu(ccl_cosmology * cosmo, int * status)
       free(y2d_lin);
       gsl_spline2d_free(log_power);
       ccl_free_class_structs(cosmo, &ba,&th,&pt,&tr,&pm,&sp,&nl,&le,init_arr,status);
+      *status = CCL_ERROR_SPLINE;
       ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_cosmology_compute_power_emu(): Error creating log_power spline\n");
       return;
     }
@@ -1567,7 +1572,7 @@ double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double k, double a, int *s
     // Add baryonic correction
     if(cosmo->config.baryons_power_spectrum_method==ccl_bcm){
       int pwstatus=0;
-      double fbcm=ccl_bcm_model_fkz(cosmo,k,a,&pwstatus);
+      double fbcm=ccl_bcm_model_fka(cosmo,k,a,&pwstatus);
       pk=pk*fbcm;
       if(pwstatus){
         *status = CCL_ERROR_SPLINE_EV;
@@ -1615,7 +1620,7 @@ double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double k, double a, int *s
     // Add baryonic correction
     if(cosmo->config.baryons_power_spectrum_method==ccl_bcm){
       int pwstatus=0;
-      double fbcm=ccl_bcm_model_fkz(cosmo,k,a,&pwstatus);
+      double fbcm=ccl_bcm_model_fka(cosmo,k,a,&pwstatus);
       pk = pk*fbcm;
       if(pwstatus){
 	    *status = CCL_ERROR_SPLINE_EV;
@@ -1653,16 +1658,21 @@ TASK: Output W(x)=[sin(x)-x*cos(x)]*(3/x)^3
 static double w_tophat(double kR)
 {
   double w;
-
+  double kR2 = kR*kR;
+  
   // This is the Maclaurin expansion of W(x)=[sin(x)-xcos(x)]*(3/x)**3 to O(x^7), with x=kR.
   // Necessary numerically because at low x W(x) relies on the fine cancellation of two terms
   if(kR<0.1) {
-    w =1.-0.1*kR*kR+0.003571429*kR*kR*kR*kR
+     w = 1. + kR2*(-0.1 +
+		   kR2*(0.003561429 +
+			kR2*(-6.61376e-5 +
+			     kR2*(7.51563e-7))));
+     /*w =1.-0.1*kR*kR+0.003571429*kR*kR*kR*kR
       -6.61376E-5*kR*kR*kR*kR*kR*kR
-      +7.51563E-7*kR*kR*kR*kR*kR*kR*kR*kR;
+      +7.51563E-7*kR*kR*kR*kR*kR*kR*kR*kR;*/
   }
   else
-    w = 3.*(sin(kR) - kR*cos(kR))/(kR*kR*kR);
+    w = 3.*(sin(kR) - kR*cos(kR))/(kR2*kR);
   return w;
 }
 

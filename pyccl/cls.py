@@ -1,18 +1,7 @@
 from . import ccllib as lib
 from . import constants as const
-from .core import _cosmology_obj, check
+from .core import check
 import numpy as np
-
-# Mapping between names for tracers and internal CCL tracer types
-tracer_types = {
-    'nc':               const.CL_TRACER_NC,
-    'number_count':     const.CL_TRACER_NC,
-    'wl':               const.CL_TRACER_WL,
-    'lensing':          const.CL_TRACER_WL,
-    'weak_lensing':     const.CL_TRACER_WL,
-    'cmbl':             const.CL_TRACER_CL,
-    'cmb_lensing':      const.CL_TRACER_CL,
-}
 
 # Same mapping for non-Limber integration methods
 nonlimber_methods = {
@@ -21,19 +10,13 @@ nonlimber_methods = {
 }
 
 function_types = {
-    'dndz':             const.CCL_CLT_NZ,
-    'bz':               const.CCL_CLT_BZ,
-    'bias':             const.CCL_CLT_BZ,
-    'sz':               const.CCL_CLT_SZ,
-    'm_bias':           const.CCL_CLT_SZ,
-    'rfz':              const.CCL_CLT_RF,
-    'red_fraction':     const.CCL_CLT_RF,
-    'baz':              const.CCL_CLT_BA,
-    'a_bias':           const.CCL_CLT_BA,
-    'wL':               const.CCL_CLT_WL,
-    'window_lensing':   const.CCL_CLT_WL,
-    'wM':               const.CCL_CLT_WM,
-    'window_magnif':    const.CCL_CLT_WM,
+    'dndz': const.CCL_CLT_NZ,
+    'bias': const.CCL_CLT_BZ,
+    'mag_bias': const.CCL_CLT_SZ,
+    'red_frac': const.CCL_CLT_RF,
+    'ia_bias': const.CCL_CLT_BA,
+    'lensing_win': const.CCL_CLT_WL,
+    'mag_win': const.CCL_CLT_WM,
 }
 
 # Define symbolic 'None' type for arrays, to allow proper handling by swig
@@ -41,83 +24,85 @@ function_types = {
 NoneArr = np.array([])
 
 
-class ClTracer(object):
+class Tracer(object):
     """A tracer of the matter density field.
+
+    .. note:: This class cannot be used directly. Use one of
+              :obj:`NumberCountsTracer`, :obj:`WeakLensingTracer`
+              or :obj:`CMBLensingTracer` instead.
 
     This class contains all information describing the transfer functon of
     a tracer (e.g., galaxy density, lensing shear) of the matter distribution.
-
-    Args:
-        cosmo (:obj:`Cosmology`): Cosmology object.
-        tracer_type (:obj:`str`): Specifies which type of tracer is being
-            specified. Must be one of
-                'nc', 'number_count': number count tracer
-                'wl', 'lensing', 'weak_lensing': lensing tracer
-                'cmbl', 'cmb_lensing': CMB lensing tracer
-        has_rsd (bool, optional): Flag for whether the tracer has a
-            redshift-space distortion term. Defaults to False.
-        has_magnification (bool, optional): Flag for whether the tracer has
-            a magnification term. Defaults to False.
-        has_intrinsic_alignment (bool, optional): Flag for whether the
-            tracer has an intrinsic alignment term. Defaults to False.
-        z (array_like, optional): Array of redshifts that the following
-            functions are sampled at. This is overriden if tuples of the
-            form (z, fn(z)) are specified for those kwargs instead (this
-            allows the functions to be sampled differently in z). If `None`,
-            then tuples for the other redshift dependent arguments are
-            expected. Defaults to None.
-        n (array_like or tuple, optional): Array of N(z) sampled at the
-            redshifts given in the z array, or a tuple of arrays (z, N(z)).
-            The units are arbitrary; N(z) will be normalized to unity. If
-            `None`, the tracer is assumed to not have a redshift distribution
-            (e.g., it has a single source source redshift like the CMB).
-            Defaults to None.
-        bias (array_like or tuple, optional): Array of galaxy bias b(z)
-            sampled at the redshifts given in the z array, or a tuple of
-            arrays (z, b(z)). If `None`, the tracer is assumbed to not
-            have a bias parameter. Defaults to None.
-        mag_bias (array_like or tuple, optional): Array of magnification
-            bias s(z) sampled at the redshifts given in the z array, or a
-            tuple of arrays (z, s(z)). If `None`, the tracer is assumed
-            to not have magnification bias terms. Defaults to None.
-        bias_ia (array_like or tuple, optional): Array of intrinsic
-            alignment amplitudes b_IA(z), or a tuple of arrays
-            (z, b_IA(z)). If `None`, the tracer is assumped to not have
-            intrinsic alignments. Defaults to None.
-        f_red (array_like or tuple, optional): Array of red galaxy
-            fractions f_red(z), or a tuple of arrays (z, f_red(z)).
-            If `None`, then the tracer is assumed to not have a red fraction.
-            Defaults to None.
-        z_source (float, optional): Redshift of source plane for CMB
-            lensing. Defaults to 1100.
     """
+    def __init__(self, *args, **kwargs):
+        raise NotImplementedError(
+            "A `Tracer` object cannot be used directly. Use one of "
+            "`NumberCountsTracer`, `WeakLensingTracer` or `CMBLensingTracer` "
+            "instead.")
 
-    def __init__(self, cosmo, tracer_type, has_rsd=False,
-                 has_magnification=False, has_intrinsic_alignment=False,
-                 z=None, n=None, bias=None, mag_bias=None, bias_ia=None,
-                 f_red=None, z_source=1100.):
+    def _build_tracer(
+            self, cosmo, tracer_type, has_rsd=False,
+            dndz=None, bias=None, mag_bias=None, ia_bias=None,
+            red_frac=None, z_source=1100.):
+        """Build the CCL_ClTracer.
+
+        Args:
+            cosmo (:obj:`Cosmology`): Cosmology object.
+            tracer_type (:obj:): Specifies the type of tracer. Must be one of
+                    const.CL_TRACER_NC: number count tracer
+                    const.CL_TRACER_WL: lensing tracer
+                    const.CL_TRACER_CL: CMB lensing tracer
+            has_rsd (bool, optional): Flag for whether the tracer has a
+                redshift-space distortion term. Defaults to False.
+            dndz (tuple of arrays, optional): A tuple of arrays (z, N(z))
+                giving the redshift distribution of the objects. The units are
+                arbitrary; N(z) will be normalized to unity. If `None`, the
+                tracer is assumed to not have a redshift distribution (e.g.,
+                it has a single source source redshift like the CMB). Defaults
+                to None.
+            bias (tuple of arrays, optional): A tuple of arrays (z, b(z))
+                giving the galaxy bias. If `None`, the tracer is assumbed to
+                not have a bias parameter. Defaults to None.
+            mag_bias (tuple of arrays, optional): A tuple of arrays (z, s(z))
+                giving the magnification bias as a function of redshift. If
+                `None`, the tracer is assumed to not have magnification bias
+                terms. Defaults to None.
+            ia_bias (tuple of arrays, optional): A tuple of arrays
+                (z, b_IA(z)) giving the intrinsic alignment amplitude b_IA(z).
+                If `None`, the tracer is assumped to not have intrinsic
+                alignments. Defaults to None.
+            red_frac (tuple of arrays,, optional): A tuple of arrays
+                (z, f_red(z)) givng the red fraction of galaxies as a function
+                of redshift. If `None`, then the tracer is assumed to not have
+                a red fraction. Defaults to None.
+            z_source (float, optional): Redshift of source plane for CMB
+                lensing. Defaults to 1100.
+        """
+
         # Verify cosmo object
-        cosmo = _cosmology_obj(cosmo)
+        cosmo = cosmo.cosmo
 
-        # Check tracer type
-        if tracer_type not in tracer_types.keys():
-            raise ValueError("'%s' is not a valid tracer_type." % tracer_type)
+        has_magnification = mag_bias is not None
+        if (red_frac is None) != (ia_bias is None):
+            raise ValueError(
+                "Either both or none of `red_frac` and `ia_bias` "
+                "must be specified.")
+        has_intrinsic_alignment = red_frac is not None
 
-        # Convert array arguments that are 'None' into 'NoneArr' type, and
-        # check whether arrays were specified as tuples or with a common z
-        # array
-        self.z_n, self.n = _check_array_params(z, n, 'n')
-        self.z_b, self.b = _check_array_params(z, bias, 'bias')
-        self.z_s, self.s = _check_array_params(z, mag_bias, 'mag_bias')
-        self.z_ba, self.ba = _check_array_params(z, bias_ia, 'bias_ia')
-        self.z_rf, self.rf = _check_array_params(z, f_red, 'f_red')
+        # Convert array arguments that are 'None' into 'NoneArr' type and
+        # check whether arrays were specified as tuples
+        self.z_n, self.n = _check_array_params(dndz)
+        self.z_b, self.b = _check_array_params(bias)
+        self.z_s, self.s = _check_array_params(mag_bias)
+        self.z_ba, self.ba = _check_array_params(ia_bias)
+        self.z_rf, self.rf = _check_array_params(red_frac)
         self.z_source = z_source
 
         # Construct new ccl_cl_tracer
         status = 0
         return_val = lib.cl_tracer_new_wrapper(
                             cosmo,
-                            tracer_types[tracer_type],
+                            tracer_type,
                             int(has_rsd),
                             int(has_magnification),
                             int(has_intrinsic_alignment),
@@ -145,12 +130,12 @@ class ClTracer(object):
             function (:obj:`str`): Specifies which function to evaluate. Must
                 be one of
                     'dndz': number density
-                    'bz', 'bias': bias
-                    'sz', 'm_bias': magnification bias
-                    'rfz', 'red_fraction': red fraction
-                    'baz', 'a_bias': intrinsic alignment bias
-                    'wL', 'window_lensing': weak lensing window function
-                    'wM', 'window_magnif': magnification window function
+                    'bias': bias
+                    'mag_bias': magnification bias
+                    'red_frac': red fraction
+                    'ia_bias': intrinsic alignment bias
+                    'lensing_win': weak lensing window function
+                    'mag_win': magnification window function
             a (:obj: float or array-like): list of scale factors at which to
                 evaluate the function.
 
@@ -159,7 +144,7 @@ class ClTracer(object):
         """
         # Access ccl_cosmology object
         cosmo_in = cosmo
-        cosmo = _cosmology_obj(cosmo)
+        cosmo = cosmo.cosmo
 
         # Check that specified function type exists
         if function not in function_types.keys():
@@ -199,172 +184,109 @@ class ClTracer(object):
                 lib.cl_tracer_free(self.cltracer)
 
 
-class ClTracerNumberCounts(ClTracer):
-    """ClTracer for galaxy number counts (galaxy clustering).
+class NumberCountsTracer(Tracer):
+    """A Tracer for galaxy number counts (galaxy clustering).
 
-        Args:
-            cosmo (:obj:`Cosmology`): Cosmology object.
-            has_rsd (bool): Flag for whether the tracer has a
-                redshift-space distortion term.
-            has_magnification (bool): Flag for whether the tracer has
-                a magnification term. mag_bias must be
-                specified if set to True.
-            n (array_like or tuple): Array of N(z) sampled at the
-                redshifts given in the z array, or a tuple of arrays (z, N(z)).
-                The units are arbitrary; N(z) will be normalized to unity.
-            bias (array_like or tuple): Array of galaxy bias b(z)
-                sampled at the redshifts given in the z array, or a tuple of
-                arrays (z, b(z)).
-            z (array_like, optional): Array of redshifts that the following
-                functions are sampled at. This is overriden if tuples of the
-                form (z, fn(z)) are specified for those kwargs instead (this
-                allows the functions to be sampled differently in z).
-                Defaults to None.
-            mag_bias (array_like or tuple, optional): Array of magnification
-                bias s(z) sampled at the redshifts given in the z array, or a
-                tuple of arrays (z, s(z)). Defaults to None for no
-                magnification bias.
+    Args:
+        cosmo (:obj:`Cosmology`): Cosmology object.
+        has_rsd (bool): Flag for whether the tracer has a
+            redshift-space distortion term.
+        dndz (tuple of arrays): A tuple of arrays (z, N(z))
+            giving the redshift distribution of the objects. The units are
+            arbitrary; N(z) will be normalized to unity. If `None`, the
+            tracer is assumed to not have a redshift distribution (e.g.,
+            it has a single source source redshift like the CMB). Defaults
+            to None.
+        bias (tuple of arrays): A tuple of arrays (z, b(z))
+            giving the galaxy bias. If `None`, the tracer is assumbed to
+            not have a bias parameter. Defaults to None.
+        mag_bias (tuple of arrays, optional): A tuple of arrays (z, s(z))
+            giving the magnification bias as a function of redshift. If
+            `None`, the tracer is assumed to not have magnification bias
+            terms. Defaults to None.
     """
 
-    def __init__(self, cosmo, has_rsd, has_magnification,
-                 n, bias, z=None, mag_bias=None):
-        # Sanity check on input arguments
-        if has_magnification and mag_bias is None:
-                raise ValueError("Keyword arg 'mag_bias' must be specified if "
-                                 "has_magnification=True.")
-
-        # Call ClTracer constructor with appropriate arguments
-        super(ClTracerNumberCounts, self).__init__(
-                 cosmo=cosmo, tracer_type='nc',
-                 has_rsd=has_rsd, has_magnification=has_magnification,
-                 has_intrinsic_alignment=False,
-                 z=z, n=n, bias=bias, mag_bias=mag_bias,
-                 bias_ia=None, f_red=None)
+    def __init__(self, cosmo, has_rsd, dndz, bias, mag_bias=None):
+        # Call Tracer constructor with appropriate arguments
+        self._build_tracer(
+            cosmo=cosmo, tracer_type=const.CL_TRACER_NC,
+            has_rsd=has_rsd,
+            dndz=dndz, bias=bias, mag_bias=mag_bias,
+            ia_bias=None, red_frac=None)
 
 
-class ClTracerLensing(ClTracer):
-    """ClTracer for weak lensing shear (galaxy shapes).
+class WeakLensingTracer(Tracer):
+    """A Tracer for weak lensing shear (galaxy shapes).
 
-        Args:
-            cosmo (:obj:`Cosmology`): Cosmology object.
-            has_intrinsic_alignment (bool): Flag for whether the
-                tracer has an intrinsic alignment term.
-                bias_ia and f_red must be specified if set to True.
-            n (array_like or tuple): Array of N(z) sampled at the
-                redshifts given in the z array, or a tuple of arrays (z, N(z)).
-                The units are arbitrary; N(z) will be normalized to unity.
-            z (array_like, optional): Array of redshifts that the following
-                functions are sampled at. This is overriden if tuples of the
-                form (z, fn(z)) are specified for those kwargs instead (this
-                allows the functions to be sampled differently in z).
-                Defaults to None.
-            bias_ia (array_like or tuple, optional): Array of intrinsic
-                alignment amplitudes b_IA(z), or a tuple of arrays
-                (z, b_IA(z)). Defaults to None.
-            f_red (array_like or tuple, optional): Array of red galaxy
-                fractions f_red(z), or a tuple of arrays (z, f_red(z)).
-                Defaults to None.
+    Args:
+        cosmo (:obj:`Cosmology`): Cosmology object.
+        dndz (tuple of arrays): A tuple of arrays (z, N(z))
+            giving the redshift distribution of the objects. The units are
+            arbitrary; N(z) will be normalized to unity. If `None`, the
+            tracer is assumed to not have a redshift distribution (e.g.,
+            it has a single source source redshift like the CMB). Defaults
+            to None.
+        ia_bias (tuple of arrays, optional): A tuple of arrays
+            (z, b_IA(z)) giving the intrinsic alignment amplitude b_IA(z).
+            If `None`, the tracer is assumped to not have intrinsic
+            alignments. Defaults to None.
+        red_frac (tuple of arrays,, optional): A tuple of arrays
+            (z, f_red(z)) givng the red fraction of galaxies as a function
+            of redshift. If `None`, then the tracer is assumed to not have
+            a red fraction. Defaults to None.
     """
 
-    def __init__(self, cosmo, has_intrinsic_alignment,
-                 n, z=None, bias_ia=None, f_red=None):
-        # Sanity check on input arguments
-        if (has_intrinsic_alignment and
-                (bias_ia is None or f_red is None)):
-            raise ValueError("Keyword args 'bias_ia' and 'f_red' must be "
-                             "specified if has_intrinsic_alignment=True.")
-
-        # Call ClTracer constructor with appropriate arguments
-        super(ClTracerLensing, self).__init__(
-                 cosmo=cosmo, tracer_type='wl',
-                 has_rsd=False, has_magnification=False,
-                 has_intrinsic_alignment=has_intrinsic_alignment,
-                 z=z, n=n, bias=None, mag_bias=None,
-                 bias_ia=bias_ia, f_red=f_red)
+    def __init__(self, cosmo, dndz, ia_bias=None, red_frac=None):
+        # Call Tracer constructor with appropriate arguments
+        self._build_tracer(
+            cosmo=cosmo, tracer_type=const.CL_TRACER_WL,
+            has_rsd=False,
+            dndz=dndz, bias=None, mag_bias=None,
+            ia_bias=ia_bias, red_frac=red_frac)
 
 
-class ClTracerCMBLensing(ClTracer):
-    """ClTracer for CMB lensing.
+class CMBLensingTracer(Tracer):
+    """A Tracer for CMB lensing.
 
-        Args:
-            cosmo (:obj:`Cosmology`): Cosmology object.
-            z_source (float): Redshift of source plane for CMB lensing.
+    Args:
+        cosmo (:obj:`Cosmology`): Cosmology object.
+        z_source (float): Redshift of source plane for CMB lensing.
     """
 
     def __init__(self, cosmo, z_source):
-        # Call ClTracer constructor with appropriate arguments
-        super(ClTracerCMBLensing, self).__init__(
-                 cosmo=cosmo, tracer_type='cmbl',
-                 has_rsd=False, has_magnification=False,
-                 has_intrinsic_alignment=False,
-                 z=None, n=None, bias=None, mag_bias=None,
-                 bias_ia=None, f_red=None, z_source=z_source)
+        # Call Tracer constructor with appropriate arguments
+        self._build_tracer(
+            cosmo=cosmo, tracer_type=const.CL_TRACER_CL,
+            has_rsd=False,
+            dndz=None, bias=None, mag_bias=None,
+            ia_bias=None, red_frac=None, z_source=z_source)
 
 
-def _cltracer_obj(cltracer):
-    """Returns a CCL_ClTracer object from an CCL_ClTracer or
-    the ClTracer wrapper classself.
-
-    Invalid input raises a TypeError.
-
-    Args:
-        cltracer (:obj:): Either a CCL_ClTracer or the ClTracer wrapper class.
-
-    Returns:
-        cltracer (:obj:): A CCL_ClTracer that can be passed out to the CCL C
-        library.
-    """
-    if isinstance(cltracer, lib.CCL_ClTracer):
-        return cltracer
-    elif isinstance(cltracer, ClTracer):
-        return cltracer.cltracer
-    else:
-        raise TypeError("Invalid ClTracer or CCL_ClTracer object.")
-
-
-def _check_array_params(z, f_arg, f_name):
+def _check_array_params(f_arg):
     """Check whether an argument `f_arg` passed into the constructor of
-    ClTracer() is valid.
+    Tracer() is valid.
 
     If the argument is set to `None`, it will be replaced with a special array
     that signals to the CCL wrapper that this argument is NULL.
-
-    If the argument is given as an array, the redshift array passed to the CCL
-    wrapper will be the `z` argument passed to this function.
-
-    If the argument is given as a tuple of the form (z, fn(z)), the redshift
-    array passed to the CCL wrapper will be the one from the tuple, and *not*
-    the `z` argument passed to this function.
     """
     if f_arg is None:
         # Return empty array if argument is None
         f = NoneArr
         z_f = NoneArr
     else:
-        if len(f_arg) == 2:
-            # Redshift and function arrays were both specified
-            z_f, f = f_arg
-        else:
-            # Only a function array was specified; redshifts must be given in
-            # the 'z' array or an error is thrown.
-            if z is None:
-                raise TypeError("'%s' was specified without a redshift array. "
-                                "Use %s=(z, %s), or pass the 'z' kwarg."
-                                % (f_name, f_name, f_name))
-            z_f = np.atleast_1d(np.array(z, dtype=float))
-            f = np.atleast_1d(np.array(f_arg, dtype=float))
+        z_f = np.atleast_1d(np.array(f_arg[0], dtype=float))
+        f = np.atleast_1d(np.array(f_arg[1], dtype=float))
     return z_f, f
 
 
 def angular_cl(cosmo, cltracer1, cltracer2, ell,
                l_limber=-1., l_logstep=1.05, l_linstep=20., dchi=3.,
                dlk=0.003, zmin=0.05, non_limber_method="native"):
-    """
-    Calculate the angular (cross-)power spectrum for a pair of tracers.
+    """Calculate the angular (cross-)power spectrum for a pair of tracers.
 
     Args:
         cosmo (:obj:`Cosmology`): A Cosmology object.
-        cltracer1, cltracer2 (:obj:): ClTracer objects, of any kind.
+        cltracer1, cltracer2 (:obj:`Tracer`): Tracer objects, of any kind.
         ell (float or array_like): Angular wavenumber(s) at which to evaluate
             the angular power spectrum.
         l_limber (float) : Angular wavenumber beyond which Limber's
@@ -387,7 +309,7 @@ def angular_cl(cosmo, cltracer1, cltracer2, ell,
             :math:`\ell`.
     """
     # Access ccl_cosmology object
-    cosmo = _cosmology_obj(cosmo)
+    cosmo = cosmo.cosmo
 
     if non_limber_method not in nonlimber_methods.keys():
         raise ValueError(
@@ -395,8 +317,8 @@ def angular_cl(cosmo, cltracer1, cltracer2, ell,
             non_limber_method)
 
     # Access CCL_ClTracer objects
-    clt1 = _cltracer_obj(cltracer1)
-    clt2 = _cltracer_obj(cltracer2)
+    clt1 = cltracer1.cltracer
+    clt2 = cltracer2.cltracer
 
     status = 0
     # Return Cl values, according to whether ell is an array or not

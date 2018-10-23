@@ -9,41 +9,46 @@ def reference_models():
     Create a set of reference Cosmology() objects.
     """
     # Standard LCDM model
-    p1 = ccl.Parameters(Omega_c=0.27, Omega_b=0.045, h=0.67, A_s=1e-10, n_s=0.96)
-    cosmo1 = ccl.Cosmology(p1)
+    cosmo1 = ccl.Cosmology(
+        Omega_c=0.27, Omega_b=0.045, h=0.67, A_s=1e-10, n_s=0.96)
 
     # LCDM model with curvature
-    p2 = ccl.Parameters(Omega_c=0.27, Omega_b=0.045, h=0.67, A_s=1e-10,
-                        n_s=0.96, Omega_k=0.05)
-    cosmo2 = ccl.Cosmology(p2)
+    cosmo2 = ccl.Cosmology(
+        Omega_c=0.27, Omega_b=0.045, h=0.67, A_s=1e-10,
+        n_s=0.96, Omega_k=0.05)
 
     # wCDM model
-    p3 = ccl.Parameters(Omega_c=0.27, Omega_b=0.045, h=0.67, A_s=1e-10,
-                        n_s=0.96, w0=-0.95, wa=0.05)
-    cosmo3 = ccl.Cosmology(p3)
+    cosmo3 = ccl.Cosmology(
+        Omega_c=0.27, Omega_b=0.045, h=0.67, A_s=1e-10,
+        n_s=0.96, w0=-0.95, wa=0.05)
 
     # BBKS Pk
-    p4 = ccl.Parameters(Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96)
-    cosmo4 = ccl.Cosmology(p4, transfer_function='bbks')
+    cosmo4 = ccl.Cosmology(
+        Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96,
+        transfer_function='bbks')
 
     # E&H Pk
-    p5 = ccl.Parameters(Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96)
-    cosmo5 = ccl.Cosmology(p5, transfer_function='eisenstein_hu')
+    cosmo5 = ccl.Cosmology(
+        Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96,
+        transfer_function='eisenstein_hu')
 
     # Emulator Pk
-    p6 = ccl.Parameters(Omega_c=0.27, Omega_b=0.022/0.67**2, h=0.67, sigma8=0.8,
-                        n_s=0.96, Neff=3.04, m_nu=0.)
-    cosmo6 = ccl.Cosmology(p6, transfer_function='emulator',
-                           matter_power_spectrum='emu')
+    cosmo6 = ccl.Cosmology(
+        Omega_c=0.27, Omega_b=0.022/0.67**2, h=0.67, sigma8=0.8,
+        n_s=0.96, Neff=3.04, m_nu=0.,
+        transfer_function='emulator',
+        matter_power_spectrum='emu')
 
     # Baryons Pk
-    p8 = ccl.Parameters(Omega_c=0.27, Omega_b=0.045, h=0.67, A_s=1e-10, n_s=0.96)
-    cosmo8 = ccl.Cosmology(p8, baryons_power_spectrum='bcm')
+    cosmo8 = ccl.Cosmology(
+        Omega_c=0.27, Omega_b=0.045, h=0.67, A_s=1e-10, n_s=0.96,
+        baryons_power_spectrum='bcm')
 
     # Baryons Pk with choice of BCM parameters other than default
-    p9 = ccl.Parameters(Omega_c=0.27, Omega_b=0.045, h=0.67, A_s=1e-10, n_s=0.96,
-                        bcm_log10Mc=math.log10(1.7e14), bcm_etab=0.3, bcm_ks=75.)
-    cosmo9 = ccl.Cosmology(p9, baryons_power_spectrum='bcm')
+    cosmo9 = ccl.Cosmology(
+        Omega_c=0.27, Omega_b=0.045, h=0.67, A_s=1e-10, n_s=0.96,
+        bcm_log10Mc=math.log10(1.7e14), bcm_etab=0.3, bcm_ks=75.,
+        baryons_power_spectrum='bcm')
 
     # Emulator Pk w/neutrinos force equalize
     #p10 = ccl.Parameters(Omega_c=0.27, Omega_b=0.022/0.67**2, h=0.67, sigma8=0.8,
@@ -62,10 +67,11 @@ def reference_models_nu():
     """
 
     # Emulator Pk w/neutrinos list
-    p1 = ccl.Parameters(Omega_c=0.27, Omega_b=0.022/0.67**2, h=0.67, sigma8=0.8,
-                        n_s=0.96, Neff=3.04, m_nu=[0.02, 0.02, 0.02])
-    cosmo1 = ccl.Cosmology(p1, transfer_function='emulator',
-                           matter_power_spectrum='emu')
+    cosmo1 = ccl.Cosmology(
+        Omega_c=0.27, Omega_b=0.022/0.67**2, h=0.67, sigma8=0.8,
+        n_s=0.96, Neff=3.04, m_nu=[0.02, 0.02, 0.02],
+        transfer_function='emulator',
+        matter_power_spectrum='emu')
 
     # Emulator Pk with neutrinos, force equalize
     #p2 = ccl.Parameters(Omega_c=0.27, Omega_b=0.022/0.67**2, h=0.67, sigma8=0.8,
@@ -592,17 +598,16 @@ def check_cls(cosmo):
 
     # Check if power spectrum type is valid for CMB
     cmb_ok = True
-    if cosmo.configuration.matter_power_spectrum_method \
+    if cosmo._config.matter_power_spectrum_method \
         == ccl.core.matter_power_spectrum_types['emu']: cmb_ok = False
 
     # ClTracer test objects
-    lens1 = ccl.ClTracerLensing(cosmo, False, n=n, z=z)
-    lens2 = ccl.ClTracerLensing(cosmo, True, n=(z,n), bias_ia=(z,n), f_red=(z,n))
-    nc1 = ccl.ClTracerNumberCounts(cosmo, False, False, n=(z,n), bias=(z,b))
-    nc2 = ccl.ClTracerNumberCounts(cosmo, True, False, n=(z,n), bias=(z,b))
-    nc3 = ccl.ClTracerNumberCounts(cosmo, True, True, n=(z,n), bias=(z,b),
-                                   mag_bias=(z,b))
-    cmbl=ccl.ClTracerCMBLensing(cosmo,1100.)
+    lens1 = ccl.WeakLensingTracer(cosmo, (z, n))
+    lens2 = ccl.WeakLensingTracer(cosmo, dndz=(z,n), ia_bias=(z, n), red_frac=(z,n))
+    nc1 = ccl.NumberCountsTracer(cosmo, False, dndz=(z,n), bias=(z,b))
+    nc2 = ccl.NumberCountsTracer(cosmo, True, dndz=(z,n), bias=(z,b))
+    nc3 = ccl.NumberCountsTracer(cosmo, True, dndz=(z,n), bias=(z,b), mag_bias=(z,b))
+    cmbl=ccl.CMBLensingTracer(cosmo, 1100.)
 
     # Check valid ell input is accepted
     assert_( all_finite(ccl.angular_cl(cosmo, lens1, lens1, ell_scl)) )
@@ -663,18 +668,18 @@ def check_cls_nu(cosmo):
 
     # Check if power spectrum type is valid for CMB
     cmb_ok = True
-    if cosmo.configuration.matter_power_spectrum_method \
+    if cosmo._config.matter_power_spectrum_method \
         == ccl.core.matter_power_spectrum_types['emu']: cmb_ok = False
 
     # ClTracer test objects
-    lens1 = ccl.ClTracerLensing(cosmo, False, n=n, z=z)
-    lens2 = ccl.ClTracerLensing(cosmo, True, n=(z,n), bias_ia=(z,n), f_red=(z,n))
-    nc1 = ccl.ClTracerNumberCounts(cosmo, False, False, n=(z,n), bias=(z,b))
+    lens1 = ccl.WeakLensingTracer(cosmo, dndz=(z,n))
+    lens2 = ccl.WeakLensingTracer(cosmo, dndz=(z,n), ia_bias=(z,n), red_frac=(z,n))
+    nc1 = ccl.NumberCountsTracer(cosmo, False, dndz=(z,n), bias=(z,b))
 
     # Check that for massive neutrinos including rsd raises an error (not yet implemented)
-    assert_raises(CCLError, ccl.ClTracerNumberCounts, cosmo, True, False, n=(z,n), bias=(z,b))
+    assert_raises(CCLError, ccl.NumberCountsTracer, cosmo, True, dndz=(z,n), bias=(z,b))
 
-    cmbl=ccl.ClTracerCMBLensing(cosmo,1100.)
+    cmbl=ccl.CMBLensingTracer(cosmo,1100.)
 
     # Check valid ell input is accepted
     assert_( all_finite(ccl.angular_cl(cosmo, lens1, lens1, ell_scl)) )
@@ -709,15 +714,10 @@ def check_cls_nu(cosmo):
 
     # Check that invalid options raise errors
     assert_raises(ValueError, nc1.get_internal_function, cosmo, 'x', a_arr)
-    assert_raises(ValueError, ccl.ClTracerNumberCounts, cosmo, True, True,
-                  n=(z,n), bias=(z,b))
-    assert_raises(ValueError, ccl.ClTracer, cosmo, 'x', True, True,
-                  n=(z,n), bias=(z,b))
-    assert_raises(ValueError, ccl.ClTracerLensing, cosmo,
-                  has_intrinsic_alignment=True, n=(z,n), bias_ia=(z,n))
-    assert_no_warnings(ccl.cls._cltracer_obj, nc1)
-    assert_no_warnings(ccl.cls._cltracer_obj, nc1.cltracer)
-    assert_raises(TypeError, ccl.cls._cltracer_obj, None)
+    assert_raises(CCLError, ccl.NumberCountsTracer, cosmo, True,
+                  dndz=(z,n), bias=(z,b))
+    assert_raises(ValueError, ccl.WeakLensingTracer, cosmo,
+                  dndz=(z,n), ia_bias=(z,n))
 
 
 def check_corr(cosmo):
@@ -727,8 +727,8 @@ def check_corr(cosmo):
     n = np.ones(z.shape)
 
     # ClTracer test objects
-    lens1 = ccl.ClTracerLensing(cosmo, False, n=n, z=z)
-    lens2 = ccl.ClTracerLensing(cosmo, True, n=(z,n), bias_ia=(z,n), f_red=(z,n))
+    lens1 = ccl.WeakLensingTracer(cosmo, dndz=(z, n))
+    lens2 = ccl.WeakLensingTracer(cosmo, dndz=(z,n), ia_bias=(z,n), red_frac=(z,n))
 
     ells = np.arange(3000)
     cls = ccl.angular_cl(cosmo, lens1, lens2, ells)
