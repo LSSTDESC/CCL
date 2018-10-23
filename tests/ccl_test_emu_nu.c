@@ -180,8 +180,6 @@ CTEST2(emu_nu,model_1) {
 }
 
 
-//Additional tests are possible:
-/*
 CTEST2(emu_nu,model_2) {
   int model=2;
   compare_emu_nu(model,data);
@@ -196,4 +194,3 @@ CTEST2(emu_nu,model_4) {
   int model=4;
   compare_emu_nu(model,data);
   }
-*/
