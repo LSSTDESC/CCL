@@ -1323,7 +1323,6 @@ double ccl_get_tracer_fa(ccl_cosmology *cosmo,CCL_ClTracer *clt,double a,int fun
     spl=clt->spl_wL;
     break;
   case CCL_CLT_WM :
-    x=ccl_comoving_radial_distance(cosmo,a,status);
     spl=clt->spl_wM;
     break;
   }
