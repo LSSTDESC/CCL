@@ -1296,7 +1296,6 @@ static int check_clt_fa_inconsistency(CCL_ClTracer *clt,int func_code)
 double ccl_get_tracer_fa(ccl_cosmology *cosmo,CCL_ClTracer *clt,double a,int func_code,int *status)
 {
   SplPar *spl;
-  double x=1./a-1; //x-variable is redshift by default
 
   if(check_clt_fa_inconsistency(clt,func_code)) {
     *status=CCL_ERROR_INCONSISTENT;
@@ -1321,7 +1320,6 @@ double ccl_get_tracer_fa(ccl_cosmology *cosmo,CCL_ClTracer *clt,double a,int fun
     spl=clt->spl_ba;
     break;
   case CCL_CLT_WL :
-    x=ccl_comoving_radial_distance(cosmo,a,status);
     spl=clt->spl_wL;
     break;
   case CCL_CLT_WM :
@@ -1329,6 +1327,12 @@ double ccl_get_tracer_fa(ccl_cosmology *cosmo,CCL_ClTracer *clt,double a,int fun
     spl=clt->spl_wM;
     break;
   }
+
+  double x;
+  if((func_code==CCL_CLT_WL) || (func_code==CCL_CLT_WM))
+    x=ccl_comoving_radial_distance(cosmo,a,status); //x-variable is comoving distance for lensing kernels
+  else
+    x=1./a-1; //x-variable is redshift by default
   
   return ccl_spline_eval(x,spl);
 }
@@ -1343,32 +1347,39 @@ int ccl_get_tracer_fas(ccl_cosmology *cosmo,CCL_ClTracer *clt,int na,double *a,d
     ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: inconsistent combination of tracer and internal function to be evaluated");
     return -1;
   }
-
-  if(func_code==CCL_CLT_NZ)
+  
+  switch(func_code) {
+  case CCL_CLT_NZ :
     spl=clt->spl_nz;
-  if(func_code==CCL_CLT_BZ)
+    break;
+  case CCL_CLT_BZ :
     spl=clt->spl_bz;
-  if(func_code==CCL_CLT_SZ)
+    break;
+  case CCL_CLT_SZ :
     spl=clt->spl_sz;
-  if(func_code==CCL_CLT_RF)
+    break;
+  case CCL_CLT_RF :
     spl=clt->spl_rf;
-  if(func_code==CCL_CLT_BA)
+    break;
+  case CCL_CLT_BA :
     spl=clt->spl_ba;
-  if(func_code==CCL_CLT_WL)
+    break;
+  case CCL_CLT_WL :
     spl=clt->spl_wL;
-  if(func_code==CCL_CLT_WM)
+    break;
+  case CCL_CLT_WM :
     spl=clt->spl_wM;
-
-  int compchi=0;
-  if((func_code==CCL_CLT_WL) || (func_code==CCL_CLT_WM))
-    compchi=1;
+    break;
+  }
+  
+  int compchi = (func_code==CCL_CLT_WL) || (func_code==CCL_CLT_WM);
 
   int ia;
   for(ia=0;ia<na;ia++) {
     double x;
-    if(compchi)
+    if(compchi) //x-variable is comoving distance for lensing kernels
       x=ccl_comoving_radial_distance(cosmo,a[ia],status);
-    else
+    else //x-variable is redshift by default
       x=1./a[ia]-1;
     fa[ia]=ccl_spline_eval(x,spl);
   }
