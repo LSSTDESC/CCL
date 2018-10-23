@@ -47,6 +47,9 @@ static void compare_cls(struct cls_data * data)
   double zlss=1100.;
   sprintf(fname,"tests/benchmark/codecomp_step2_outputs/run_log_cl_cc.txt");
 
+  double kmax_save=ccl_splines->K_MAX;
+  ccl_splines->K_MAX=1E2;
+  
   ccl_configuration config = default_config;
   config.transfer_function_method = ccl_bbks;
   config.matter_power_spectrum_method = ccl_linear;
@@ -94,6 +97,8 @@ static void compare_cls(struct cls_data * data)
   fraction_failed/=ELL_MAX_CL;
   printf("%lf %% ",fraction_failed*100);
   ASSERT_TRUE((fraction_failed<CLS_FRACTION));
+
+  ccl_splines->K_MAX=kmax_save;
 
   ccl_cl_tracer_free(tr_cl);
   ccl_cosmology_free(cosmo);

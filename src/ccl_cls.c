@@ -1106,12 +1106,11 @@ static void get_k_interval(ccl_cosmology *cosmo,CCL_ClWorkspace *w,
     //If non-Limber, we need to integrate over the whole range of k.
     *lkmin=log10(ccl_splines->K_MIN);
     *lkmax=log10(ccl_splines->K_MAX);
-    return;
   }
   else {
     double chimin,chimax;
     int cut_low_1=0,cut_low_2=0;
-    
+
     //Define a minimum distance only if no lensing is needed
     if((clt1->tracer_type==CL_TRACER_NC) && (clt1->has_magnification==0)) cut_low_1=1;
     if((clt2->tracer_type==CL_TRACER_NC) && (clt2->has_magnification==0)) cut_low_2=1;
@@ -1138,8 +1137,8 @@ static void get_k_interval(ccl_cosmology *cosmo,CCL_ClWorkspace *w,
     if(chimin<=0)
       chimin=0.5*(l+0.5)/ccl_splines->K_MAX;
 
-    *lkmax=log10(fmin(ccl_splines->K_MAX,  2*(l+0.5)/chimin));
-    *lkmin=log10(fmax(ccl_splines->K_MIN,0.5*(l+0.5)/chimax));
+    *lkmax=log10(fmin( ccl_splines->K_MAX  ,2  *(l+0.5)/chimin));
+    *lkmin=log10(fmax( ccl_splines->K_MIN  ,0.5*(l+0.5)/chimax));
   }
 }
 
