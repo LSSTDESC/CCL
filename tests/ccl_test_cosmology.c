@@ -48,10 +48,7 @@ CTEST2(cosmology, create_general_cosmo) {
   // Initialize ccl_cosmology struct
   ccl_cosmology * cosmo = ccl_cosmology_create(params, config);
 
-  // IDK what to test here
-  // If we test everything, we set the API in stone.
-  // So I am going to test some critical things to make sure something
-  // happened.
+  // test a few critical things
   ASSERT_EQUAL(cosmo->status, 0);
   ASSERT_DBL_NEAR_TOL(cosmo->data.growth0, 1., 1e-10);
 }
