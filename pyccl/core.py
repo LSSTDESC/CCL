@@ -202,7 +202,7 @@ class Cosmology(object):
         bcm_ks (:obj:`float`, optional): One of the parameters of the BCM
             model. Defaults to 55.0.
         df_mg (array_like, optional): Perturbations to the GR growth rate as
-            a function of redshift :math:`\Delta f`. Used to implement simple
+            a function of redshift :math:`\\Delta f`. Used to implement simple
             modified growth scenarios.
         z_mg (array_like, optional): Array of redshifts corresponding to df_mg.
         transfer_function (:obj:`str`, optional): The transfer function to
