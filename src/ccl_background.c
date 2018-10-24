@@ -16,7 +16,8 @@
 INPUT: scale factor, cosmology
 TASK: Compute E(a)=H(a)/H0
 */
-static double h_over_h0(double a, ccl_cosmology * cosmo, int *status) {
+static double h_over_h0(double a, ccl_cosmology * cosmo, int *status)
+{
   // Check if massive neutrinos are present - if not, we don't need to
   // compute their contribution
   double Om_mass_nu;
@@ -114,7 +115,8 @@ ccl_species_k_label <- curvature (physical)
 ccl_species_ur_label <- massless neutrinos (physical)
 ccl_species_nu_label <- massive neutrinos (physical)
 */
-double ccl_rho_x(ccl_cosmology * cosmo, double a, ccl_species_x_label label, int is_comoving, int *status) {
+double ccl_rho_x(ccl_cosmology * cosmo, double a, ccl_species_x_label label, int is_comoving, int *status)
+{
   double comfac;
   if (is_comoving) {
      comfac = a*a*a;
@@ -727,7 +729,8 @@ double ccl_h_over_h0(ccl_cosmology * cosmo, double a, int* status)
 }
 
 
-void ccl_h_over_h0s(ccl_cosmology * cosmo, int na, double a[], double output[], int * status) {
+void ccl_h_over_h0s(ccl_cosmology * cosmo, int na, double a[], double output[], int * status)
+{
   int _status;
 
   for (int i=0; i<na; i++) {
@@ -767,7 +770,8 @@ double ccl_comoving_radial_distance(ccl_cosmology * cosmo, double a, int * statu
   }
 }
 
-void ccl_comoving_radial_distances(ccl_cosmology * cosmo, int na, double a[], double output[], int* status) {
+void ccl_comoving_radial_distances(ccl_cosmology * cosmo, int na, double a[], double output[], int* status)
+{
   int _status;
 
   for (int i=0; i<na; i++) {
@@ -829,7 +833,8 @@ double ccl_comoving_angular_distance(ccl_cosmology * cosmo, double a, int* statu
 }
 
 void ccl_comoving_angular_distances(ccl_cosmology * cosmo, int na, double a[],
-                                    double output[], int* status) {
+                                    double output[], int* status)
+{
   int _status;
 
   for (int i=0; i < na; i++) {
@@ -844,7 +849,8 @@ double ccl_luminosity_distance(ccl_cosmology * cosmo, double a, int* status)
   return ccl_comoving_angular_distance(cosmo, a, status) / a;
 }
 
-void ccl_luminosity_distances(ccl_cosmology * cosmo, int na, double a[], double output[], int * status) {
+void ccl_luminosity_distances(ccl_cosmology * cosmo, int na, double a[], double output[], int * status)
+{
   int _status;
 
   for (int i=0; i<na; i++) {
@@ -854,7 +860,8 @@ void ccl_luminosity_distances(ccl_cosmology * cosmo, int na, double a[], double 
   }
 }
 
-double ccl_distance_modulus(ccl_cosmology * cosmo, double a, int* status) {
+double ccl_distance_modulus(ccl_cosmology * cosmo, double a, int* status)
+{
   if((a > (1.0 - 1.e-8)) && (a<=1.0)) {
     *status = CCL_ERROR_COMPUTECHI;
     ccl_cosmology_set_status_message(cosmo, "ccl_background.c: distance_modulus undefined for a=1.\n");
@@ -880,7 +887,8 @@ double ccl_distance_modulus(ccl_cosmology * cosmo, double a, int* status) {
 }
 
 
-void ccl_distance_moduli(ccl_cosmology * cosmo, int na, double a[], double output[], int * status) {
+void ccl_distance_moduli(ccl_cosmology * cosmo, int na, double a[], double output[], int * status)
+{
   int _status;
 
   for (int i=0; i<na; i++) {
@@ -918,7 +926,8 @@ double ccl_scale_factor_of_chi(ccl_cosmology * cosmo, double chi, int * status)
 }
 
 //
-void ccl_scale_factor_of_chis(ccl_cosmology * cosmo, int nchi, double chi[], double output[], int * status) {
+void ccl_scale_factor_of_chis(ccl_cosmology * cosmo, int nchi, double chi[], double output[], int * status)
+{
   int _status;
 
   for (int i=0; i<nchi; i++) {
@@ -961,7 +970,8 @@ double ccl_growth_factor(ccl_cosmology * cosmo, double a, int * status)
   }
 }
 
-void ccl_growth_factors(ccl_cosmology * cosmo, int na, double a[], double output[], int * status) {
+void ccl_growth_factors(ccl_cosmology * cosmo, int na, double a[], double output[], int * status)
+{
   int _status;
 
   for (int i=0; i<na; i++) {
@@ -971,7 +981,8 @@ void ccl_growth_factors(ccl_cosmology * cosmo, int na, double a[], double output
   }
 }
 
-double ccl_growth_factor_unnorm(ccl_cosmology * cosmo, double a, int * status) {
+double ccl_growth_factor_unnorm(ccl_cosmology * cosmo, double a, int * status)
+{
 
   if (!cosmo->computed_growth) {
     ccl_cosmology_compute_growth(cosmo, status);
@@ -985,7 +996,8 @@ double ccl_growth_factor_unnorm(ccl_cosmology * cosmo, double a, int * status) {
   }
 }
 
-void ccl_growth_factors_unnorm(ccl_cosmology * cosmo, int na, double a[], double output[], int * status) {
+void ccl_growth_factors_unnorm(ccl_cosmology * cosmo, int na, double a[], double output[], int * status)
+{
   int _status;
 
   for (int i=0; i<na; i++) {
@@ -1023,7 +1035,8 @@ double ccl_growth_rate(ccl_cosmology * cosmo, double a, int * status)
   }
 }
 
-void ccl_growth_rates(ccl_cosmology * cosmo, int na, double a[], double output[], int * status) {
+void ccl_growth_rates(ccl_cosmology * cosmo, int na, double a[], double output[], int * status)
+{
   int _status;
 
   for (int i=0; i<na; i++) {
