@@ -117,6 +117,11 @@ void ccl_cosmology_read_config(void)
       // 3dcorr parameters
       MATCH("N_K_3DCOR", ccl_splines->N_K_3DCOR=(int) var_dbl);
 
+      // Angular correlation function params
+      MATCH("ELL_MIN_CORR",ccl_splines->ELL_MIN_CORR=(double) var_dbl);
+      MATCH("ELL_MAX_CORR",ccl_splines->ELL_MAX_CORR=(double) var_dbl);
+      MATCH("N_ELL_CORR",ccl_splines->N_ELL_CORR=(int) var_dbl);
+
       // GSL parameters
       MATCH("GSL_EPSREL", ccl_gsl->EPSREL=var_dbl);
       MATCH("GSL_N_ITERATION", ccl_gsl->N_ITERATION=(size_t) var_dbl);
