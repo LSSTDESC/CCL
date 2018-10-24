@@ -349,6 +349,7 @@ TASK: if not already there, make a table of comoving distances and of E(a)
 
 void ccl_cosmology_compute_distances(ccl_cosmology * cosmo, int *status)
 {
+  
   //Do nothing if everything is computed already
   if(cosmo->computed_distances)
     return;
@@ -365,7 +366,7 @@ void ccl_cosmology_compute_distances(ccl_cosmology * cosmo, int *status)
   // allocate space for y, which will be all three
   // of E(a), chi(a), D(a) and f(a) in turn.
   double *y = malloc(sizeof(double)*na);
-  // Allocate and fill E spline with values we just got
+  // Allocate E(a) and chi(a) splines. a(chi) spline allocated below
   gsl_spline * E = gsl_spline_alloc(A_SPLINE_TYPE, na);
   gsl_spline * chi = gsl_spline_alloc(A_SPLINE_TYPE, na);
 
