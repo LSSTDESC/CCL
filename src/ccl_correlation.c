@@ -242,6 +242,8 @@ static void ccl_tracer_corr_bessel(ccl_cosmology *cosmo,
     cp->th=theta[ith]*M_PI/180;
     F.function=&corr_bessel_integrand;
     F.params=cp;
+    //TODO: Split into intervals between first bessel zeros before integrating
+    //This will help both speed and accuracy of the integral.
     gslstatus = gsl_integration_qag(&F, 0, ccl_splines->ELL_MAX_CORR, 0,
                                     ccl_gsl->INTEGRATION_EPSREL, ccl_gsl->N_ITERATION,
                                     ccl_gsl->INTEGRATION_GAUSS_KRONROD_POINTS,
