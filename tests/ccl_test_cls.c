@@ -144,13 +144,37 @@ static void compare_cls(char *compare_type,struct cls_data * data)
   double *cls_ll_22_h=malloc(3001*sizeof(double));
 
   for(int ii=0;ii<3001;ii++) {
-    int l, rtn;
-    fscanf(fi_dd_11,"%d %lf",&l,&(cls_dd_11_b[ii]));
-    fscanf(fi_dd_12,"%d %lf",&l,&(cls_dd_12_b[ii]));
-    fscanf(fi_dd_22,"%d %lf",&l,&(cls_dd_22_b[ii]));
-    fscanf(fi_ll_11,"%d %lf",&l,&(cls_ll_11_b[ii]));
-    fscanf(fi_ll_12,"%d %lf",&l,&(cls_ll_12_b[ii]));
-    fscanf(fi_ll_22,"%d %lf",&l,&(cls_ll_22_b[ii]));
+    int l,stat;
+    stat=fscanf(fi_dd_11,"%d %lf",&l,&(cls_dd_11_b[ii]));
+    if(stat!=2) {
+      fprintf(stderr,"Error reading benchmark file");
+      exit(1);
+    }
+    stat=fscanf(fi_dd_12,"%d %lf",&l,&(cls_dd_12_b[ii]));
+    if(stat!=2) {
+      fprintf(stderr,"Error reading benchmark file");
+      exit(1);
+    }
+    stat=fscanf(fi_dd_22,"%d %lf",&l,&(cls_dd_22_b[ii]));
+    if(stat!=2) {
+      fprintf(stderr,"Error reading benchmark file");
+      exit(1);
+    }
+    stat=fscanf(fi_ll_11,"%d %lf",&l,&(cls_ll_11_b[ii]));
+    if(stat!=2) {
+      fprintf(stderr,"Error reading benchmark file");
+      exit(1);
+    }
+    stat=fscanf(fi_ll_12,"%d %lf",&l,&(cls_ll_12_b[ii]));
+    if(stat!=2) {
+      fprintf(stderr,"Error reading benchmark file");
+      exit(1);
+    }
+    stat=fscanf(fi_ll_22,"%d %lf",&l,&(cls_ll_22_b[ii]));
+    if(stat!=2) {
+      fprintf(stderr,"Error reading benchmark file");
+      exit(1);
+    }
     ells[ii]=l;
   }
 
@@ -181,14 +205,13 @@ static void compare_cls(char *compare_type,struct cls_data * data)
   ccl_cl_workspace_free(w);
 
   double fraction_failed=0;
-  for(int ii=0;ii<3001;ii++) {
+  for(int ii=1;ii<3001;ii++) {
     int l=ells[ii];
     double ell_correct;
     double cl_dd_11,cl_dd_12,cl_dd_22;
     double cl_ll_11,cl_ll_12,cl_ll_22;
     double cl_dd_11_h,cl_dd_12_h,cl_dd_22_h;
     double cl_ll_11_h,cl_ll_12_h,cl_ll_22_h;
-    
     if(l<=0)
       ell_correct=1;
     else

@@ -63,61 +63,61 @@ void ccl_cl_workspace_free(CCL_ClWorkspace *w)
 }
 
 CCL_ClWorkspace *ccl_cl_workspace_new(int lmax,int l_limber,
-					  double l_logstep,int l_linstep,int *status)
+				      double l_logstep,int l_linstep,int *status)
 {
+  int i_l,l0,increment;
   CCL_ClWorkspace *w=(CCL_ClWorkspace *)malloc(sizeof(CCL_ClWorkspace));
-  if(w==NULL) {
+  if(w==NULL)
     *status=CCL_ERROR_MEMORY;
-    return NULL;
+
+  if(*status==0) {
+    //Set params
+    w->lmax=lmax;
+    w->l_limber=l_limber;
+    w->l_logstep=l_logstep;
+    w->l_linstep=l_linstep;
+
+    //Compute number of multipoles
+    i_l=0; l0=0;
+    increment=CCL_MAX(((int)(l0*(w->l_logstep-1.))),1);
+    while((l0 < w->lmax) && (increment < w->l_linstep)) {
+      i_l++;
+      l0+=increment;
+      increment=CCL_MAX(((int)(l0*(w->l_logstep-1))),1);
+    }
+    increment=w->l_linstep;
+    while(l0 < w->lmax) {
+      i_l++;
+      l0+=increment;
+    }
+
+    //Allocate array of multipoles
+    w->n_ls=i_l+1;
+    w->l_arr=(int *)malloc(w->n_ls*sizeof(int));
+    if(w->l_arr==NULL)
+      *status=CCL_ERROR_MEMORY;
   }
 
-  //Set params
-  w->lmax=lmax;
-  w->l_limber=l_limber;
-  w->l_logstep=l_logstep;
-  w->l_linstep=l_linstep;
-
-  //Compute number of multipoles
-  int i_l=0,l0=0;
-  int increment=CCL_MAX(((int)(l0*(w->l_logstep-1.))),1);
-  while((l0 < w->lmax) && (increment < w->l_linstep)) {
-    i_l++;
-    l0+=increment;
-    increment=CCL_MAX(((int)(l0*(w->l_logstep-1))),1);
+  if(*status==0) {
+    //Redo the computation above and store values of ell
+    i_l=0; l0=0;
+    increment=CCL_MAX(((int)(l0*(w->l_logstep-1.))),1);
+    while((l0 < w->lmax) && (increment < w->l_linstep)) {
+      w->l_arr[i_l]=l0;
+      i_l++;
+      l0+=increment;
+      increment=CCL_MAX(((int)(l0*(w->l_logstep-1))),1);
+    }
+    increment=w->l_linstep;
+    while(l0 < w->lmax) {
+      w->l_arr[i_l]=l0;
+      i_l++;
+      l0+=increment;
+    }
+    //Don't go further than lmaw
+    w->l_arr[w->n_ls-1]=w->lmax;
   }
-  increment=w->l_linstep;
-  while(l0 < w->lmax) {
-    i_l++;
-    l0+=increment;
-  }
-
-  //Allocate array of multipoles
-  w->n_ls=i_l+1;
-  w->l_arr=(int *)malloc(w->n_ls*sizeof(int));
-  if(w->l_arr==NULL) {
-    free(w);
-    *status=CCL_ERROR_MEMORY;
-    return NULL;
-  }
-
-  //Redo the computation above and store values of ell
-  i_l=0; l0=0;
-  increment=CCL_MAX(((int)(l0*(w->l_logstep-1.))),1);
-  while((l0 < w->lmax) && (increment < w->l_linstep)) {
-    w->l_arr[i_l]=l0;
-    i_l++;
-    l0+=increment;
-    increment=CCL_MAX(((int)(l0*(w->l_logstep-1))),1);
-  }
-  increment=w->l_linstep;
-  while(l0 < w->lmax) {
-    w->l_arr[i_l]=l0;
-    i_l++;
-    l0+=increment;
-  }
-  //Don't go further than lmaw
-  w->l_arr[w->n_ls-1]=w->lmax;
-
+  
   return w;
 }
 
@@ -170,6 +170,9 @@ static int window_lensing(double chi,ccl_cosmology *cosmo,SplPar *spl_pz,double 
   ip.status = &status;
   F.function=&integrand_wl;
   F.params=&ip;
+  // This conputes the lensing kernel:
+  //   w_L(chi) = Integral[ dN/dchi(chi') * f(chi'-chi)/f(chi') , chi < chi' < chi_horizon ]
+  // Where f(chi) is the comoving angular distance (which is just chi for zero curvature).
   gslstatus=gsl_integration_qag(&F, chi, chi_max, 0,
                                 ccl_gsl->INTEGRATION_EPSREL, ccl_gsl->N_ITERATION,
                                 ccl_gsl->INTEGRATION_GAUSS_KRONROD_POINTS,
@@ -235,6 +238,10 @@ static int window_magnification(double chi,ccl_cosmology *cosmo,SplPar *spl_pz,S
   ip.status = &status;
   F.function=&integrand_mag;
   F.params=&ip;
+  // This conputes the magnification lensing kernel:
+  //   w_M(chi) = Integral[ dN/dchi(chi') * (1-5/2 * s(chi)) * f(chi'-chi)/f(chi') , chi < chi' < chi_horizon ]
+  // Where f(chi) is the comoving angular distance (which is just chi for zero curvature)
+  // and s(chi) is the magnification bias parameter.
   gslstatus=gsl_integration_qag(&F, chi, chi_max, 0,
                                 ccl_gsl->INTEGRATION_EPSREL, ccl_gsl->N_ITERATION,
                                 ccl_gsl->INTEGRATION_GAUSS_KRONROD_POINTS,
@@ -255,6 +262,10 @@ static void clt_init_nz(CCL_ClTracer *clt,ccl_cosmology *cosmo,
 			int nz_n,double *z_n,double *n,int *status)
 {
   int gslstatus;
+  gsl_function F;
+  double nz_norm,nz_enorm;
+  double *nz_normalized;
+  
   //Find redshift range where the N(z) has support
   get_support_interval(nz_n,z_n,n,CCL_FRAC_RELEVANT,&(clt->zmin),&(clt->zmax));
   clt->chimax=ccl_comoving_radial_distance(cosmo,1./(1+clt->zmax),status);
@@ -265,42 +276,45 @@ static void clt_init_nz(CCL_ClTracer *clt,ccl_cosmology *cosmo,
     ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: clt_init_nz(): error initializing spline for N(z)\n");
   }
 
-  //Normalize n(z)
-  gsl_function F;
-  double nz_norm,nz_enorm;
-  double *nz_normalized=(double *)malloc(nz_n*sizeof(double));
-  if(nz_normalized==NULL) {
-    ccl_spline_free(clt->spl_nz);
-    *status=CCL_ERROR_MEMORY;
-    ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: clt_init_nz(): memory allocation\n");
-    return;
+  if(*status==0) {
+    //Normalize n(z)
+    nz_normalized=(double *)malloc(nz_n*sizeof(double));
+    if(nz_normalized==NULL) {
+      *status=CCL_ERROR_MEMORY;
+      ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: clt_init_nz(): memory allocation\n");
+      return;
+    }
   }
   
-  gsl_integration_workspace *w=gsl_integration_workspace_alloc(ccl_gsl->N_ITERATION);
-  F.function=&speval_bis;
-  F.params=clt->spl_nz;
-  gslstatus=gsl_integration_qag(&F, z_n[0], z_n[nz_n-1], 0,
-				ccl_gsl->INTEGRATION_EPSREL, ccl_gsl->N_ITERATION,
-				ccl_gsl->INTEGRATION_GAUSS_KRONROD_POINTS,
-				w, &nz_norm, &nz_enorm);
-  gsl_integration_workspace_free(w);
-  if(gslstatus!=GSL_SUCCESS) {
-    ccl_raise_gsl_warning(gslstatus, "ccl_cls.c: clt_init_nz():");
+  if(*status==0) {
+    gsl_integration_workspace *w=gsl_integration_workspace_alloc(ccl_gsl->N_ITERATION);
+    F.function=&speval_bis;
+    F.params=clt->spl_nz;
+    //Here we're just integrating the N(z) to normalize it to unit probability.
+    gslstatus=gsl_integration_qag(&F, z_n[0], z_n[nz_n-1], 0,
+				  ccl_gsl->INTEGRATION_EPSREL, ccl_gsl->N_ITERATION,
+				  ccl_gsl->INTEGRATION_GAUSS_KRONROD_POINTS,
+				  w, &nz_norm, &nz_enorm);
+    gsl_integration_workspace_free(w);
+    if(gslstatus!=GSL_SUCCESS) {
+      ccl_raise_gsl_warning(gslstatus, "ccl_cls.c: clt_init_nz():");
+      *status=CCL_ERROR_INTEG;
+      ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: clt_init_nz(): integration error when normalizing N(z)\n");
+    }
+  }
+  
+  if(*status==0) {
+    for(int ii=0;ii<nz_n;ii++)
+      nz_normalized[ii]=n[ii]/nz_norm;
     ccl_spline_free(clt->spl_nz);
-    free(nz_normalized);
-    *status=CCL_ERROR_INTEG;
-    ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: clt_init_nz(): integration error when normalizing N(z)\n");
+    clt->spl_nz=ccl_spline_init(nz_n,z_n,nz_normalized,0,0);
+    if(clt->spl_nz==NULL) {
+      *status=CCL_ERROR_SPLINE;
+      ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: clt_init_nz(): error initializing normalized spline for N(z)\n");
+    }
   }
-  for(int ii=0;ii<nz_n;ii++)
-    nz_normalized[ii]=n[ii]/nz_norm;
-  ccl_spline_free(clt->spl_nz);
-  clt->spl_nz=ccl_spline_init(nz_n,z_n,nz_normalized,0,0);
+  
   free(nz_normalized);
-  if(clt->spl_nz==NULL) {
-    *status=CCL_ERROR_SPLINE;
-    ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: clt_nc_init(): error initializing normalized spline for N(z)\n");
-    return;
-  }
 }
 
 static void clt_init_bz(CCL_ClTracer *clt,ccl_cosmology *cosmo,
@@ -309,10 +323,8 @@ static void clt_init_bz(CCL_ClTracer *clt,ccl_cosmology *cosmo,
   //Initialize bias spline
   clt->spl_bz=ccl_spline_init(nz_b,z_b,b,b[0],b[nz_b-1]);
   if(clt->spl_bz==NULL) {
-    ccl_spline_free(clt->spl_nz);
     *status=CCL_ERROR_SPLINE;
-    ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: clt_nc_init(): error initializing spline for b(z)\n");
-    return;
+    ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: clt_init_bz(): error initializing spline for b(z)\n");
   }
 }
 
@@ -332,62 +344,47 @@ static void clt_init_wM(CCL_ClTracer *clt,ccl_cosmology *cosmo,
   clt->chimin=0;
   clt->spl_sz=ccl_spline_init(nz_s,z_s,s,s[0],s[nz_s-1]);
   if(clt->spl_sz==NULL) {
-    ccl_spline_free(clt->spl_nz);
-    ccl_spline_free(clt->spl_bz);
     *status=CCL_ERROR_SPLINE;
     ccl_cosmology_set_status_message(cosmo,
-				     "ccl_cls.c: clt_nc_init(): error initializing spline for s(z)\n");
-    return;
+				     "ccl_cls.c: clt_init_wM(): error initializing spline for s(z)\n");
   }
 
-  nchi=(int)(chimax/dchi_here)+1;
-  x=ccl_linear_spacing(0.,chimax,nchi);
-  dchi_here=chimax/nchi;
-  if(x==NULL || (fabs(x[0]-0)>1E-5) || (fabs(x[nchi-1]-chimax)>1e-5)) {
-      ccl_spline_free(clt->spl_nz);
-      ccl_spline_free(clt->spl_bz);
-      ccl_spline_free(clt->spl_sz);
+  if(*status==0) {
+    nchi=(int)(chimax/dchi_here)+1;
+    x=ccl_linear_spacing(0.,chimax,nchi);
+    dchi_here=chimax/nchi;
+    if(x==NULL || (fabs(x[0]-0)>1E-5) || (fabs(x[nchi-1]-chimax)>1e-5)) {
       *status=CCL_ERROR_LINSPACE;
       ccl_cosmology_set_status_message(cosmo,
-				       "ccl_cls.c: clt_nc_init(): Error creating linear spacing in chi\n");
-      return;
-  }
-  y=(double *)malloc(nchi*sizeof(double));
-  if(y==NULL) {
-    free(x);
-    ccl_spline_free(clt->spl_nz);
-    ccl_spline_free(clt->spl_bz);
-    ccl_spline_free(clt->spl_sz);
-    *status=CCL_ERROR_MEMORY;
-    ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: clt_nc_init(): memory allocation\n");
-    return;
+				       "ccl_cls.c: clt_init_wM(): Error creating linear spacing in chi\n");
+    }
   }
 
-  int clstatus=0;
-  for(int j=0;j<nchi;j++)
-    clstatus|=window_magnification(x[j],cosmo,clt->spl_nz,clt->spl_sz,chimax,&(y[j]));
-  if(clstatus) {
-    free(y);
-    free(x);
-    ccl_spline_free(clt->spl_nz);
-    ccl_spline_free(clt->spl_bz);
-    ccl_spline_free(clt->spl_sz);
-    *status=CCL_ERROR_INTEG;
-    ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: clt_nc_init(): error computing lensing window\n");
-    return;
+  if(*status==0) {
+    y=(double *)malloc(nchi*sizeof(double));
+    if(y==NULL) {
+      *status=CCL_ERROR_MEMORY;
+      ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: clt_init_wM(): memory allocation\n");
+    }
   }
 
-  clt->spl_wM=ccl_spline_init(nchi,x,y,y[0],0);
-  if(clt->spl_wM==NULL) {
-    free(y);
-    free(x);
-    ccl_spline_free(clt->spl_nz);
-    ccl_spline_free(clt->spl_bz);
-    ccl_spline_free(clt->spl_sz);
-    *status=CCL_ERROR_SPLINE;
-    ccl_cosmology_set_status_message(cosmo,
-				     "ccl_cls.c: ccl_cl_tracer(): error initializing spline for lensing window\n");
-    return;
+  if(*status==0) {
+    int clstatus=0;
+    for(int j=0;j<nchi;j++)
+      clstatus|=window_magnification(x[j],cosmo,clt->spl_nz,clt->spl_sz,chimax,&(y[j]));
+    if(clstatus) {
+      *status=CCL_ERROR_INTEG;
+      ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: clt_init_wM(): error computing lensing window\n");
+    }
+  }
+
+  if(*status==0) {
+    clt->spl_wM=ccl_spline_init(nchi,x,y,y[0],0);
+    if(clt->spl_wM==NULL) {
+      *status=CCL_ERROR_SPLINE;
+      ccl_cosmology_set_status_message(cosmo,
+				       "ccl_cls.c: clt_init_wM(): error initializing spline for lensing window\n");
+    }
   }
   free(x); free(y);
 }
@@ -401,6 +398,11 @@ static void clt_nc_init(CCL_ClTracer *clt,ccl_cosmology *cosmo,
 {
   clt->has_rsd=has_rsd;
   clt->has_magnification=has_magnification;
+
+  if ( ((cosmo->params.N_nu_mass)>0) && clt->has_rsd){
+    *status=CCL_ERROR_NOT_IMPLEMENTED;
+    ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: ccl_cl_tracer_new(): Number counts tracers with RSD not yet implemented in cosmologies with massive neutrinos.");
+  }
 
   clt_init_nz(clt,cosmo,nz_n,z_n,n,status);
   clt_init_bz(clt,cosmo,nz_b,z_b,b,status);
@@ -426,43 +428,36 @@ static void clt_init_wL(CCL_ClTracer *clt,ccl_cosmology *cosmo,
   x=ccl_linear_spacing(0.,chimax,nchi);
   dchi_here=chimax/nchi;
   if(x==NULL || (fabs(x[0]-0)>1E-5) || (fabs(x[nchi-1]-chimax)>1e-5)) {
-    ccl_spline_free(clt->spl_nz);
     *status=CCL_ERROR_LINSPACE;
     ccl_cosmology_set_status_message(cosmo,
-				     "ccl_cls.c: ccl_cl_tracer(): Error creating linear spacing in chi\n");
-    return;
-  }
-  y=(double *)malloc(nchi*sizeof(double));
-  if(y==NULL) {
-    free(x);
-    ccl_spline_free(clt->spl_nz);
-    free(clt);
-    *status=CCL_ERROR_MEMORY;
-    ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: ccl_cl_tracer(): memory allocation\n");
-    return;
-  }
-
-  int clstatus=0;
-  for(int j=0;j<nchi;j++)
-    clstatus|=window_lensing(x[j],cosmo,clt->spl_nz,chimax,&(y[j]));
-  if(clstatus) {
-    free(y);
-    free(x);
-    ccl_spline_free(clt->spl_nz);
-    *status=CCL_ERROR_INTEG;
-    ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: ccl_cl_tracer(): error computing lensing window\n");
-    return;
+				     "ccl_cls.c: clt_init_wL(): Error creating linear spacing in chi\n");
   }
   
-  clt->spl_wL=ccl_spline_init(nchi,x,y,y[0],0);
-  if(clt->spl_wL==NULL) {
-    free(y);
-    free(x);
-    ccl_spline_free(clt->spl_nz);
-    *status=CCL_ERROR_SPLINE;
-    ccl_cosmology_set_status_message(cosmo,
-				     "ccl_cls.c: ccl_cl_tracer(): error initializing spline for lensing window\n");
-    return;
+  if(*status==0) {
+    y=(double *)malloc(nchi*sizeof(double));
+    if(y==NULL) {
+      *status=CCL_ERROR_MEMORY;
+      ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: clt_init_wL(): memory allocation\n");
+    }
+  }
+
+  if(*status==0) {
+    int clstatus=0;
+    for(int j=0;j<nchi;j++)
+      clstatus|=window_lensing(x[j],cosmo,clt->spl_nz,chimax,&(y[j]));
+    if(clstatus) {
+      *status=CCL_ERROR_INTEG;
+      ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: clt_init_wL(): error computing lensing window\n");
+    }
+  }
+  
+  if(*status==0) {
+    clt->spl_wL=ccl_spline_init(nchi,x,y,y[0],0);
+    if(clt->spl_wL==NULL) {
+      *status=CCL_ERROR_SPLINE;
+      ccl_cosmology_set_status_message(cosmo,
+				     "ccl_cls.c: clt_init_wL(): error initializing spline for lensing window\n");
+    }
   }
   free(x); free(y);
 }
@@ -473,11 +468,8 @@ static void clt_init_rf(CCL_ClTracer *clt,ccl_cosmology *cosmo,
   //Initialize bias spline
   clt->spl_rf=ccl_spline_init(nz_rf,z_rf,rf,rf[0],rf[nz_rf-1]);
   if(clt->spl_rf==NULL) {
-    ccl_spline_free(clt->spl_nz);
-    ccl_spline_free(clt->spl_wL);
     *status=CCL_ERROR_SPLINE;
-    ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: clt_nc_init(): error initializing spline for b(z)\n");
-    return;
+    ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: clt_init_rf(): error initializing spline for b(z)\n");
   }
 }
 
@@ -487,12 +479,8 @@ static void clt_init_ba(CCL_ClTracer *clt,ccl_cosmology *cosmo,
   //Initialize bias spline
   clt->spl_ba=ccl_spline_init(nz_ba,z_ba,ba,ba[0],ba[nz_ba-1]);
   if(clt->spl_ba==NULL) {
-    ccl_spline_free(clt->spl_nz);
-    ccl_spline_free(clt->spl_wL);
-    ccl_spline_free(clt->spl_rf);
     *status=CCL_ERROR_SPLINE;
-    ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: clt_nc_init(): error initializing spline for b(z)\n");
-    return;
+    ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: clt_init_ba(): error initializing spline for b(z)\n");
   }
 }
 
@@ -535,39 +523,33 @@ static CCL_ClTracer *cl_tracer(ccl_cosmology *cosmo,int tracer_type,
   int clstatus=0;
   CCL_ClTracer *clt=(CCL_ClTracer *)malloc(sizeof(CCL_ClTracer));
   if(clt==NULL) {
-
     *status=CCL_ERROR_MEMORY;
     ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: ccl_cl_tracer(): memory allocation\n");
-    return NULL;
   }
 
-  if ( ((cosmo->params.N_nu_mass)>0) && tracer_type==ccl_number_counts_tracer && has_rsd){
-	  free(clt);
-	  *status=CCL_ERROR_NOT_IMPLEMENTED;
-	  ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: ccl_cl_tracer_new(): Number counts tracers with rsd not yet implemented in cosmologies with massive neutrinos.");
-	  return NULL;
-  }
+  if(*status==0) {
+    clt->tracer_type=tracer_type;
+    
+    double hub=cosmo->params.h*ccl_h_over_h0(cosmo,1.,status)/CLIGHT_HMPC;
+    clt->prefac_lensing=1.5*hub*hub*cosmo->params.Omega_m;
 
-  clt->tracer_type=tracer_type;
-
-  double hub=cosmo->params.h*ccl_h_over_h0(cosmo,1.,status)/CLIGHT_HMPC;
-  clt->prefac_lensing=1.5*hub*hub*cosmo->params.Omega_m;
-
-  if(tracer_type==ccl_number_counts_tracer)
-    clt_nc_init(clt,cosmo,has_rsd,has_magnification,
-		nz_n,z_n,n,nz_b,z_b,b,nz_s,z_s,s,status);
-  else if(tracer_type==ccl_weak_lensing_tracer)
-    clt_wl_init(clt,cosmo,has_intrinsic_alignment,
-		nz_n,z_n,n,nz_ba,z_ba,ba,nz_rf,z_rf,rf,status);
-  else if(tracer_type==ccl_cmb_lensing_tracer) {
-    clt->chi_source=ccl_comoving_radial_distance(cosmo,1./(1+z_source),status);
-    clt->chimax=clt->chi_source;
-    clt->chimin=0;
-  }
-  else {
-    *status=CCL_ERROR_INCONSISTENT;
-    ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: ccl_cl_tracer(): unknown tracer type\n");
-    return NULL;
+    if(tracer_type==ccl_number_counts_tracer)
+      clt_nc_init(clt,cosmo,has_rsd,has_magnification,
+		  nz_n,z_n,n,nz_b,z_b,b,nz_s,z_s,s,status);
+    else if(tracer_type==ccl_weak_lensing_tracer)
+      clt_wl_init(clt,cosmo,has_intrinsic_alignment,
+		  nz_n,z_n,n,nz_ba,z_ba,ba,nz_rf,z_rf,rf,status);
+    else if(tracer_type==ccl_cmb_lensing_tracer) {
+      clt->chi_source=ccl_comoving_radial_distance(cosmo,1./(1+z_source),status);
+      clt->chimax=clt->chi_source;
+      clt->chimin=0;
+    }
+    else {
+      free(clt);
+      *status=CCL_ERROR_INCONSISTENT;
+      ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: ccl_cl_tracer(): unknown tracer type\n");
+      return NULL;
+    }
   }
 
   return clt;
@@ -924,6 +906,10 @@ static double ccl_angular_cl_native(ccl_cosmology *cosmo,CCL_ClWorkspace *cw,int
   F.function=&cl_integrand;
   F.params=&ipar;
   get_k_interval(cosmo,cw,clt1,clt2,cw->l_arr[il],&lkmin,&lkmax);
+  // This computes the angular power spectra in the Limber approximation between two quantities a and b:
+  //  C_ell^ab = 2/(2*ell+1) * Integral[ Delta^a_ell(k) Delta^b_ell(k) * P(k) , k_min < k < k_max ]
+  // Note that we use log10(k) as an integration variable, and the ell-dependent prefactor is included
+  // at the end of this function.
   gslstatus=gsl_integration_qag(&F, lkmin, lkmax, 0,
                                 ccl_gsl->INTEGRATION_LIMBER_EPSREL, ccl_gsl->N_ITERATION,
                                 ccl_gsl->INTEGRATION_LIMBER_GAUSS_KRONROD_POINTS,
@@ -959,7 +945,10 @@ void ccl_angular_cls(ccl_cosmology *cosmo,CCL_ClWorkspace *w,
 		     CCL_ClTracer *clt1,CCL_ClTracer *clt2,
 		     int nl_out,int *l_out,double *cl_out,int *status)
 {
-  int ii;
+  int ii,do_angpow;
+  double *l_nodes,*cl_nodes;
+  SplPar *spcl_nodes;
+  
   //First check if ell range is within workspace
   for(ii=0;ii<nl_out;ii++) {
     if(l_out[ii]>w->lmax) {
@@ -970,63 +959,71 @@ void ccl_angular_cls(ccl_cosmology *cosmo,CCL_ClWorkspace *w,
     }
   }
 
-  //Allocate array for power spectrum at interpolation nodes
-  double *l_nodes=(double *)malloc(w->n_ls*sizeof(double));
-  if(l_nodes==NULL) {
-    *status=CCL_ERROR_MEMORY;
-    ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: ccl_angular_cls(); memory allocation\n");
-    return;
-  }
-  double *cl_nodes=(double *)malloc(w->n_ls*sizeof(double));
-  if(cl_nodes==NULL) {
-    free(l_nodes);
-    *status=CCL_ERROR_MEMORY;
-    ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: ccl_cl_angular_cls(); memory allocation\n");
-    return;
-  }
-  for(ii=0;ii<w->n_ls;ii++)
-    l_nodes[ii]=(double)(w->l_arr[ii]);
-
-  int do_angpow=0;
-  //Now check if angpow is needed at all
-  if(w->l_limber>0) {
-    for(ii=0;ii<w->n_ls;ii++) {
-      if(w->l_arr[ii]<=w->l_limber)
-	do_angpow=1;
+  if(*status==0) {
+    //Allocate array for power spectrum at interpolation nodes
+    l_nodes=(double *)malloc(w->n_ls*sizeof(double));
+    if(l_nodes==NULL) {
+      *status=CCL_ERROR_MEMORY;
+      ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: ccl_angular_cls(); memory allocation\n");
     }
   }
+
+  if(*status==0) {
+    cl_nodes=(double *)malloc(w->n_ls*sizeof(double));
+    if(cl_nodes==NULL) {
+      *status=CCL_ERROR_MEMORY;
+      ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: ccl_cl_angular_cls(); memory allocation\n");
+    }
+  }
+
+  if(*status==0) {
+    for(ii=0;ii<w->n_ls;ii++)
+      l_nodes[ii]=(double)(w->l_arr[ii]);
+
+    do_angpow=0;
+    //Now check if angpow is needed at all
+    if(w->l_limber>0) {
+      for(ii=0;ii<w->n_ls;ii++) {
+	if(w->l_arr[ii]<=w->l_limber)
+	  do_angpow=1;
+      }
+    }
 #ifndef HAVE_ANGPOW
-  do_angpow=0;
+    do_angpow=0;
 #endif //HAVE_ANGPOW
   
-  //Resort to Limber if we have lensing (this will hopefully only be temporary)
-  if(clt1->tracer_type==ccl_weak_lensing_tracer || clt2->tracer_type==ccl_weak_lensing_tracer ||
-     clt1->has_magnification || clt2->has_magnification) {
-    do_angpow=0;
+    //Resort to Limber if we have lensing (this will hopefully only be temporary)
+    if(clt1->tracer_type==ccl_weak_lensing_tracer || clt2->tracer_type==ccl_weak_lensing_tracer ||
+       clt1->has_magnification || clt2->has_magnification) {
+      do_angpow=0;
+    }
+
+    //Use angpow if non-limber is needed
+    if(do_angpow)
+      ccl_angular_cls_angpow(cosmo,w,clt1,clt2,cl_nodes,status);
+    ccl_check_status(cosmo,status);
   }
 
-  //Use angpow if non-limber is needed
-  if(do_angpow)
-    ccl_angular_cls_angpow(cosmo,w,clt1,clt2,cl_nodes,status);
-  ccl_check_status(cosmo,status);
+  if(*status==0) {
+    //Compute limber nodes
+    for(ii=0;ii<w->n_ls;ii++) {
+      if((!do_angpow) || (w->l_arr[ii]>w->l_limber))
+	cl_nodes[ii]=ccl_angular_cl_native(cosmo,w,ii,clt1,clt2,status);
+    }
 
-  //Compute limber nodes
-  for(ii=0;ii<w->n_ls;ii++) {
-    if((!do_angpow) || (w->l_arr[ii]>w->l_limber))
-      cl_nodes[ii]=ccl_angular_cl_native(cosmo,w,ii,clt1,clt2,status);
+    //Interpolate into ells requested by user
+    spcl_nodes=ccl_spline_init(w->n_ls,l_nodes,cl_nodes,0,0);
+    if(spcl_nodes==NULL) {
+      *status=CCL_ERROR_MEMORY;
+      ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: ccl_cl_angular_cls(); memory allocation\n");
+    }
   }
-
-  //Interpolate into ells requested by user
-  SplPar *spcl_nodes=ccl_spline_init(w->n_ls,l_nodes,cl_nodes,0,0);
-  if(spcl_nodes==NULL) {
-    free(cl_nodes);
-    *status=CCL_ERROR_MEMORY;
-    ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: ccl_cl_angular_cls(); memory allocation\n");
-    return;
+  
+  if(*status==0) {
+    for(ii=0;ii<nl_out;ii++)
+      cl_out[ii]=ccl_spline_eval((double)(l_out[ii]),spcl_nodes);
   }
-  for(ii=0;ii<nl_out;ii++)
-    cl_out[ii]=ccl_spline_eval((double)(l_out[ii]),spcl_nodes);
-
+  
   //Cleanup
   ccl_spline_free(spcl_nodes);
   free(cl_nodes);
