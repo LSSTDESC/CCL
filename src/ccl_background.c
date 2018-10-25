@@ -362,7 +362,9 @@ void ccl_cosmology_compute_distances(ccl_cosmology * cosmo, int *status)
 
   // Create logarithmically and then linearly-spaced values of the scale factor 
   int na = ccl_splines->A_SPLINE_NA+ccl_splines->A_SPLINE_NLOG-1;  
-  double * a = ccl_linlog_spacing(ccl_splines->A_SPLINE_MINLOG, ccl_splines->A_SPLINE_MIN, ccl_splines->A_SPLINE_MAX, ccl_splines->A_SPLINE_NLOG, ccl_splines->A_SPLINE_NA);
+  double * a = ccl_linlog_spacing(ccl_splines->A_SPLINE_MINLOG, ccl_splines->A_SPLINE_MIN,
+				  ccl_splines->A_SPLINE_MAX, ccl_splines->A_SPLINE_NLOG,
+				  ccl_splines->A_SPLINE_NA);
   // allocate space for y, which will be all three
   // of E(a), chi(a), D(a) and f(a) in turn.
   double *y = malloc(sizeof(double)*na);
@@ -420,9 +422,6 @@ void ccl_cosmology_compute_distances(ccl_cosmology * cosmo, int *status)
     }
   }
 
-  free(a); //Free these, in preparation for making a(chi) splines
-  free(y); //Note: you are allowed to call free() on NULL
-
   if (*status){//If there was an error, free the GSL splines and return
     gsl_spline_free(E); //Note: you are allowed to call gsl_free() on NULL
     gsl_spline_free(chi);
@@ -432,7 +431,9 @@ void ccl_cosmology_compute_distances(ccl_cosmology * cosmo, int *status)
   //Spline for a(chi)
   double dchi=5.,chi0=y[na-1],chif=y[0],a0=a[na-1],af=a[0];
   //TODO: The interval in chi (5. Mpc) should be made a macro
-  
+  free(a); //Free these, in preparation for making a(chi) splines
+  free(y); //Note: you are allowed to call free() on NULL
+
   ////////////////////////////////////////////////////////////////////////////////////////////////////
   //Below here na (length of some arrays) changes, so this function has to be split at this point.
   ////////////////////////////////////////////////////////////////////////////////////////////////////
