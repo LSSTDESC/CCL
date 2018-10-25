@@ -3,6 +3,8 @@ from . import constants as const
 from .core import check
 import numpy as np
 
+import collections
+
 # Same mapping for non-Limber integration methods
 nonlimber_methods = {
     'native': const.CCL_NONLIMBER_METHOD_NATIVE,
@@ -89,6 +91,20 @@ class Tracer(object):
                 "must be specified.")
         has_intrinsic_alignment = red_frac is not None
 
+        # Passing None for certain arguments causes segmentation faults at the
+        # moment. The following checks try to guard against these instances
+        # but this should probably be checked for at the C level.
+        if tracer_type in [const.CL_TRACER_WL, const.CL_TRACER_NC, const.CL_TRACER_CL]:
+            if not isinstance(dndz, collections.Iterable) or \
+               len(dndz) != 2 or \
+               not (isinstance(dndz[0], np.ndarray) and isinstance(dndz[1], np.ndarray)):
+                raise ValueError("dndz needs to be a tuple of two arrays.")
+        if tracer_type in [const.CL_TRACER_NC]:
+            if not isinstance(bias, collections.Iterable) or \
+               len(bias) != 2 or \
+               not (isinstance(bias[0], np.ndarray) and isinstance(bias[1], np.ndarray)):
+                raise ValueError("bias needs to be a tuple of two arrays.")
+        
         # Convert array arguments that are 'None' into 'NoneArr' type and
         # check whether arrays were specified as tuples
         self.z_n, self.n = _check_array_params(dndz)
