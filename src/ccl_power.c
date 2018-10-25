@@ -1244,7 +1244,7 @@ static void ccl_cosmology_compute_power_emu(ccl_cosmology * cosmo, int * status)
   }
 
   //These are the limits of the splining range
-  cosmo->data.k_min_lin=2*exp(sp.ln_k[0]); 
+  cosmo->data.k_min_lin=2*exp(sp.ln_k[0]);
   cosmo->data.k_max_lin=ccl_splines->K_MAX_SPLINE;
   //CLASS calculations done - now allocate CCL splines
   double kmin = cosmo->data.k_min_lin;
@@ -1417,7 +1417,7 @@ void ccl_cosmology_compute_power(ccl_cosmology * cosmo, int * status)
 INPUT: ccl_cosmology * cosmo, a, k [1/Mpc]
 TASK: extrapolate power spectrum at high k
 */
-static double ccl_power_extrapol_highk(ccl_cosmology * cosmo, double k, double a, 
+static double ccl_power_extrapol_highk(ccl_cosmology * cosmo, double k, double a,
 				       gsl_spline2d * powerspl, double kmax_spline, int * status)
 {
   double log_p_1;
@@ -1425,9 +1425,9 @@ static double ccl_power_extrapol_highk(ccl_cosmology * cosmo, double k, double a
   double deriv_pk_kmid,deriv2_pk_kmid;
   double lkmid;
   double lpk_kmid;
-  
+
   lkmid = log(kmax_spline)-2*deltak;
-  
+
   int gslstatus =  gsl_spline2d_eval_e(powerspl, lkmid,a,NULL ,NULL ,&lpk_kmid);
   if(gslstatus != GSL_SUCCESS) {
     ccl_raise_gsl_warning(gslstatus, "ccl_power.c: ccl_power_extrapol_highk():");
@@ -1456,7 +1456,7 @@ static double ccl_power_extrapol_highk(ccl_cosmology * cosmo, double k, double a
 
 }
 
-/*------ ROUTINE: ccl_power_extrapol_lowk ----- 
+/*------ ROUTINE: ccl_power_extrapol_lowk -----
 INPUT: ccl_cosmology * cosmo, a, k [1/Mpc]
 TASK: extrapolate power spectrum at low k
 */
@@ -1557,53 +1557,17 @@ double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double k, double a, int *s
       ccl_cosmology_compute_power(cosmo, status);
     if (cosmo->data.p_nl == NULL) return NAN; // Return if computation failed
 
-    double log_p_1,pk;
-
     if(a<ccl_splines->A_SPLINE_MINLOG_PK) { //Extrapolate linearly at high redshift
       double pk0=ccl_nonlin_matter_power(cosmo,k,ccl_splines->A_SPLINE_MINLOG_PK,status);
       double gf=ccl_growth_factor(cosmo,a,status)/ccl_growth_factor(cosmo,ccl_splines->A_SPLINE_MINLOG_PK,status);
       return pk0*gf*gf;
     }
-
-    if(k<=cosmo->data.k_min_nl) {
-      log_p_1=ccl_power_extrapol_lowk(cosmo,k,a,cosmo->data.p_nl,cosmo->data.k_min_nl,status);
-      return exp(log_p_1);
-    }
-    if(k<cosmo->data.k_max_nl){
-      int gslstatus =  gsl_spline2d_eval_e(cosmo->data.p_nl, log(k),a,NULL ,NULL ,&log_p_1);
-      if(gslstatus != GSL_SUCCESS) {
-        ccl_raise_gsl_warning(gslstatus, "ccl_power.c: ccl_nonlin_matter_power():");
-	*status = CCL_ERROR_SPLINE_EV;
-	ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_nonlin_matter_power(): Spline evaluation error\n");
-	return NAN;
-      }
-      else {
-        pk = exp(log_p_1);
-      }
-    }
-    else { //Extrapolate NL regime using log derivative
-      log_p_1 = ccl_power_extrapol_highk(cosmo,k,a,cosmo->data.p_nl,cosmo->data.k_max_nl,status);
-      pk = exp(log_p_1);
-    }
-
-    // Add baryonic correction
-    if(cosmo->config.baryons_power_spectrum_method==ccl_bcm){
-      int pwstatus=0;
-      double fbcm=ccl_bcm_model_fka(cosmo,k,a,&pwstatus);
-      pk=pk*fbcm;
-      if(pwstatus){
-        *status = CCL_ERROR_SPLINE_EV;
-        ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_nonlin_matter_power(): Error in BCM correction\n");
-        return NAN;
-      }
-    }
-    return pk;
+		break;
 
   case ccl_emu:
     if ((cosmo->config.transfer_function_method == ccl_emulator) && (a<A_MIN_EMU)){
       *status = CCL_ERROR_EMULATOR_BOUND;
-      ccl_cosmology_set_status_message(cosmo, "ccl_power.c: the cosmic emulator cannot be used above z=2\
-\n");
+      ccl_cosmology_set_status_message(cosmo, "ccl_power.c: the cosmic emulator cannot be used above z=2\n");
       return NAN;
     }
 
@@ -1612,47 +1576,54 @@ double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double k, double a, int *s
       ccl_cosmology_compute_power(cosmo,status);
     }
     if (cosmo->data.p_nl == NULL) return NAN;
-
-    if(k<=cosmo->data.k_min_nl) {
-      log_p_1=ccl_power_extrapol_lowk(cosmo,k,a,cosmo->data.p_nl,cosmo->data.k_min_nl,status);
-      return exp(log_p_1);
-    }
-
-    if(k<cosmo->data.k_max_nl){
-      int gslstatus =  gsl_spline2d_eval_e(cosmo->data.p_nl, log(k),a,NULL ,NULL ,&log_p_1);
-      if(gslstatus != GSL_SUCCESS) {
-        ccl_raise_gsl_warning(gslstatus, "ccl_power.c: ccl_nonlin_matter_power():");
-        *status = CCL_ERROR_SPLINE_EV;
-        ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_nonlin_matter_power(): Spline evaluation error\n");
-        return NAN;
-      }
-      else {
-	      pk = exp(log_p_1);
-	    }
-    }
-    else { // Extrapolate NL regime using log derivative
-      log_p_1 = ccl_power_extrapol_highk(cosmo,k,a,cosmo->data.p_nl,cosmo->data.k_max_nl,status);
-      pk = exp(log_p_1);
-    }
-    // Add baryonic correction
-    if(cosmo->config.baryons_power_spectrum_method==ccl_bcm){
-      int pwstatus=0;
-      double fbcm=ccl_bcm_model_fka(cosmo,k,a,&pwstatus);
-      pk = pk*fbcm;
-      if(pwstatus){
-	    *status = CCL_ERROR_SPLINE_EV;
-	    ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_nonlin_matter_power(): Error in BCM correction\n");
-	    return NAN;
-      }
-    }
-    return pk;
+		break;
 
   default:
-    printf("WARNING:  config.matter_power_spectrum_method = %d not yet supported\n continuing with linear power spectrum\n",cosmo->config.matter_power_spectrum_method);
+    ccl_raise_warning(
+			CCL_ERROR_NOT_IMPLEMENTED,
+      "config.matter_power_spectrum_method = %d not yet supported "
+			"continuing with linear power spectrum\n", cosmo->config.matter_power_spectrum_method);
     cosmo->config.matter_power_spectrum_method=ccl_linear;
     return ccl_linear_matter_power(cosmo,k,a,status);
   } // end switch
 
+  // if we get here, try to evaluate the power spectrum
+  // we need to account for bounds below and above
+  if (k <= cosmo->data.k_min_nl) {
+    // we assume no baryonic effects below k_min_nl
+    log_p_1 = ccl_power_extrapol_lowk(cosmo, k, a, cosmo->data.p_nl, cosmo->data.k_min_nl, status);
+    return exp(log_p_1);
+  }
+
+  if (k < cosmo->data.k_max_nl) {
+    int gslstatus = gsl_spline2d_eval_e(cosmo->data.p_nl, log(k), a, NULL ,NULL, &log_p_1);
+    if (gslstatus != GSL_SUCCESS) {
+      ccl_raise_gsl_warning(gslstatus, "ccl_power.c: ccl_nonlin_matter_power():");
+      *status = CCL_ERROR_SPLINE_EV;
+      ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_nonlin_matter_power(): Spline evaluation error\n");
+      return NAN;
+    } else {
+      pk = exp(log_p_1);
+    }
+  } else {
+    // Extrapolate NL regime using log derivative
+    log_p_1 = ccl_power_extrapol_highk(cosmo, k, a, cosmo->data.p_nl, cosmo->data.k_max_nl, status);
+    pk = exp(log_p_1);
+  }
+
+	// Add baryonic correction
+  if (cosmo->config.baryons_power_spectrum_method == ccl_bcm) {
+    int pwstatus = 0;
+    double fbcm = ccl_bcm_model_fka(cosmo, k, a, &pwstatus);
+    pk *= fbcm;
+    if (pwstatus) {
+      *status = CCL_ERROR_SPLINE_EV;
+      ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_nonlin_matter_power(): Error in BCM correction\n");
+      return NAN;
+    }
+  }
+
+  return pk;
 }
 
 // Params for sigma(R) integrand
@@ -1676,7 +1647,7 @@ static double w_tophat(double kR)
 {
   double w;
   double kR2 = kR*kR;
-  
+
   // This is the Maclaurin expansion of W(x)=[sin(x)-xcos(x)]*(3/x)**3 to O(x^7), with x=kR.
   // Necessary numerically because at low x W(x) relies on the fine cancellation of two terms
   if(kR<0.1) {
@@ -1721,7 +1692,7 @@ static double sigmaV_integrand(double lk,void *params)
 
 /* --------- ROUTINE: ccl_sigmaR ---------
 INPUT: cosmology, comoving smoothing radius, scale factor
-TASK: compute sigmaR, the variance in the *linear* density field 
+TASK: compute sigmaR, the variance in the *linear* density field
 smoothed with a tophat filter of comoving size R
 */
 double ccl_sigmaR(ccl_cosmology *cosmo,double R,double a,int *status)
@@ -1751,7 +1722,7 @@ double ccl_sigmaR(ccl_cosmology *cosmo,double R,double a,int *status)
 
 /* --------- ROUTINE: ccl_sigmaV ---------
 INPUT: cosmology, comoving smoothing radius, scale factor
-TASK: compute sigmaV, the variance in the *linear* displacement field 
+TASK: compute sigmaV, the variance in the *linear* displacement field
 smoothed with a tophat filter of comoving size R
 The linear displacement field is the gradient of the linear density field
 */
