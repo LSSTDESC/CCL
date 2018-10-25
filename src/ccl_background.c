@@ -462,7 +462,7 @@ void ccl_cosmology_compute_distances(ccl_cosmology * cosmo, int *status)
   }
 
   gsl_root_fdfsolver_free(s);
-  if(splstatus) {
+  if(*status) {
     free(a);
     free(y);
     gsl_spline_free(E);
