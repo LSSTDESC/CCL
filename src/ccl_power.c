@@ -439,117 +439,119 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int * statu
   double * a = ccl_linlog_spacing(amin, ccl_splines->A_SPLINE_MIN_PK, amax, ccl_splines->A_SPLINE_NLOG_PK, ccl_splines->A_SPLINE_NA_PK);
   double * y2d_lin = malloc(nk * na * sizeof(double));
   double * y2d_nl = malloc(nk * na * sizeof(double));
+
+  //Status
+  int pwstatus,newstatus;
+  
+  //If error, store status, we will free later
   if (a==NULL|| x==NULL || y2d_lin==NULL || y2d_nl==NULL) {
     *status = CCL_ERROR_SPLINE;
     ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_cosmology_compute_power_class(): memory allocation error\n");
-    ccl_free_class_structs(cosmo, &ba,&th,&pt,&tr,&pm,&sp,&nl,&le,init_arr,status);
-    return;
-  } else {
+  }
+
+  //If not, proceed
+  if(!*status){
+    
     // After this loop x will contain log(k)
     // all in Mpc, not Mpc/h units!
     double psout_l,ic;
-    int s=0;
+    int newstatus=0;
     for (int i=0; i<nk; i++) {
       for (int j = 0; j < na; j++) {
 	//The 2D interpolation routines access the function values y_{k_ia_j} with the following ordering:
 	//y_ij = y2d[j*N_k + i]
 	//with i = 0,...,N_k-1 and j = 0,...,N_a-1.
-	s |= spectra_pk_at_k_and_z(&ba, &pm, &sp,x[i],1./a[j]-1., &psout_l,&ic);
+	newstatus |= spectra_pk_at_k_and_z(&ba, &pm, &sp,x[i],1./a[j]-1., &psout_l,&ic);
 	y2d_lin[j*nk+i] = log(psout_l);
       }
       x[i] = log(x[i]);
     }
-    if(s) {
-      free(x);
-      free(a);
-      free(y2d_nl);
-      free(y2d_lin);
+
+    //If error, store status, we will free later
+    if(newstatus) {
       *status = CCL_ERROR_CLASS;
       ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_cosmology_compute_power_class(): Error computing CLASS power spectrum\n");
-      ccl_free_class_structs(cosmo, &ba,&th,&pt,&tr,&pm,&sp,&nl,&le,init_arr,status);
-      return;
-    }
-    gsl_spline2d * log_power = gsl_spline2d_alloc(PLIN_SPLINE_TYPE, nk,na);
-    int pwstatus = gsl_spline2d_init(log_power, x, a, y2d_lin,nk,na);
-    if (pwstatus) {
-      free(x);
-      free(a);
-      free(y2d_nl);
-      free(y2d_lin);
-      gsl_spline2d_free(log_power);
-      ccl_free_class_structs(cosmo, &ba,&th,&pt,&tr,&pm,&sp,&nl,&le,init_arr,status);
-      *status = CCL_ERROR_SPLINE;
-      ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_cosmology_compute_power_class(): Error creating log_power spline\n");
-      return;
-    }
-    else {
-      cosmo->data.p_lin = log_power;
     }
 
-    // At the moment KMIN can't be less than CLASS's kmin in the nonlinear case.
-    if (kmin<(exp(sp.ln_k[0]))) {
-      free(x);
-      free(a);
-      free(y2d_nl);
-      free(y2d_lin);
-      ccl_free_class_structs(cosmo, &ba,&th,&pt,&tr,&pm,&sp,&nl,&le,init_arr,status);
-      *status = CCL_ERROR_CLASS;
-      ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_cosmology_compute_power_class(): K_MIN is less than CLASS's kmin. Not yet supported for nonlinear P(k).\n");
-      return;
-    } else {
-
-      //These are the limits of the splining range
-      cosmo->data.k_min_nl=2*exp(sp.ln_k[0]);
-      cosmo->data.k_max_nl=ccl_splines->K_MAX_SPLINE;
+    //If not proceed
+    if(!newstatus){
       
-      if(cosmo->config.matter_power_spectrum_method==ccl_halofit) {
-	
-	double psout_nl;
-	
-	for (int i=0; i<nk; i++) {
-	  for (int j = 0; j < na; j++) {
-	    s |= spectra_pk_nl_at_k_and_z(&ba, &pm, &sp,exp(x[i]),1./a[j]-1.,&psout_nl);
-	    y2d_nl[j*nk+i] = log(psout_nl);
-	  }
-	}
-	
-	if(s) {
-	  free(x);
-	  free(a);
-	  free(y2d_nl);
-	  free(y2d_lin);
-	  *status = CCL_ERROR_CLASS;
-	  ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_cosmology_compute_power_class(): Error computing CLASS power spectrum\n");
-	  ccl_free_class_structs(cosmo, &ba,&th,&pt,&tr,&pm,&sp,&nl,&le,init_arr,status);
-	  return;
-	}
+      gsl_spline2d * log_power = gsl_spline2d_alloc(PLIN_SPLINE_TYPE, nk,na);
+      pwstatus = gsl_spline2d_init(log_power, x, a, y2d_lin,nk,na);
 
+      //If error, store status, we will free later
+      if (pwstatus) {
+	*status = CCL_ERROR_SPLINE;
+	ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_cosmology_compute_power_class(): Error creating log_power spline\n");
+      }
+
+      //If not, proceed
+      if(!pwstatus){
+	cosmo->data.p_lin = log_power;
+      }
+    }
+    
+  } else { //Linear power spec failed, so we return without proceeding to nonlinear.
+
+    free(x);
+    free(a);
+    free(y2d_nl);
+    free(y2d_lin);
+    ccl_free_class_structs(cosmo, &ba,&th,&pt,&tr,&pm,&sp,&nl,&le,init_arr,status);
+    return;
+  }
+
+  //Non-linear power
+  //At the moment KMIN can't be less than CLASS's kmin in the nonlinear case.
+  
+    //If error, store status, we will free later
+  if (kmin<(exp(sp.ln_k[0]))) {
+    *status = CCL_ERROR_CLASS;
+    ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_cosmology_compute_power_class(): K_MIN is less than CLASS's kmin. Not yet supported for nonlinear P(k).\n");
+  }
+
+  //If not, proceed
+  if(!*status){
+
+    //These are the limits of the splining range
+    cosmo->data.k_min_nl=2*exp(sp.ln_k[0]);
+    cosmo->data.k_max_nl=ccl_splines->K_MAX_SPLINE;
+    
+    if(cosmo->config.matter_power_spectrum_method==ccl_halofit) {
+	
+      double psout_nl;
+      
+      for (int i=0; i<nk; i++) {
+	for (int j = 0; j < na; j++) {
+	  newstatus |= spectra_pk_nl_at_k_and_z(&ba, &pm, &sp,exp(x[i]),1./a[j]-1.,&psout_nl);
+	  y2d_nl[j*nk+i] = log(psout_nl);
+	}
+      }
+	
+      if(!newstatus){
+	
 	gsl_spline2d * log_power_nl = gsl_spline2d_alloc(PNL_SPLINE_TYPE, nk,na);
 	pwstatus = gsl_spline2d_init(log_power_nl, x, a, y2d_nl,nk,na);
 	
 	if (pwstatus) {
-	  free(x);
-	  free(a);
-	  free(y2d_nl);
-	  free(y2d_lin);
-	  gsl_spline2d_free(log_power_nl);
-	  ccl_free_class_structs(cosmo, &ba,&th,&pt,&tr,&pm,&sp,&nl,&le,init_arr,status);
 	  *status = CCL_ERROR_SPLINE;
 	  ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_cosmology_compute_power_class(): Error creating log_power_nl spline\n");
-	  return;
-	} else {
+	}
+
+	if(!pwstatus){
 	  cosmo->data.p_nl = log_power_nl;
 	}
       }
-      
-      ccl_free_class_structs(cosmo, &ba,&th,&pt,&tr,&pm,&sp,&nl,&le,init_arr,status);
-      free(x);
-      free(y2d_lin);
-      free(a);
-      free(y2d_nl);
     }
-  }
+  } 
+      
+  free(x);
+  free(a);
+  free(y2d_nl);
+  free(y2d_lin);
 
+  return;
+  
 }
 
 /* BCM correction 
@@ -756,7 +758,7 @@ static double tkEH_c(eh_struct *eh,double k)
 static double jbes0(double x)
 {
   double jl;
-  double ax2=fabs(x)*fabs(x);
+  double ax2=x*x;
 
   if(ax2<1e-4) jl=1-ax2*(1-ax2/20.)/6.;
   else jl=sin(x)/x;
