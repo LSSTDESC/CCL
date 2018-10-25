@@ -57,8 +57,9 @@ examples/ccl_sample_angpow
 *.pyc
 build/*
 dist/*
-tests/.ipynb_checkpoints/
-*ipynb*
+tests/.ipynb_checkpoints/*
+examples/.ipynb_checkpoints/*
+examples/*.pdf
 *log
 *dat
 *bak
@@ -67,6 +68,7 @@ pyccl/ccllib.py
 pyccl/ccl_params.ini
 pyccl.egg*
 .eggs*
+tests/benchmark/codes/.ipynb_checkpoints/*
 
 # Ignore VCS files
 .idea/*
