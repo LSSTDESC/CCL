@@ -440,8 +440,6 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int * statu
   double * y2d_lin = malloc(nk * na * sizeof(double));
   double * y2d_nl = malloc(nk * na * sizeof(double));
 
-  //Status
-  int pwstatus,newstatus;
   
   //If error, store status, we will free later
   if (a==NULL|| x==NULL || y2d_lin==NULL || y2d_nl==NULL) {
@@ -449,13 +447,16 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int * statu
     ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_cosmology_compute_power_class(): memory allocation error\n");
   }
 
+  //Status flags
+  int newstatus=0;
+  int pwstatus=0;
+  
   //If not, proceed
   if(!*status){
     
     // After this loop x will contain log(k)
     // all in Mpc, not Mpc/h units!
     double psout_l,ic;
-    int newstatus=0;
     for (int i=0; i<nk; i++) {
       for (int j = 0; j < na; j++) {
 	//The 2D interpolation routines access the function values y_{k_ia_j} with the following ordering:
@@ -467,32 +468,34 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int * statu
       x[i] = log(x[i]);
     }
 
+    
     //If error, store status, we will free later
     if(newstatus) {
       *status = CCL_ERROR_CLASS;
       ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_cosmology_compute_power_class(): Error computing CLASS power spectrum\n");
     }
 
-    //If not proceed
-    if(!newstatus){
       
-      gsl_spline2d * log_power = gsl_spline2d_alloc(PLIN_SPLINE_TYPE, nk,na);
-      pwstatus = gsl_spline2d_init(log_power, x, a, y2d_lin,nk,na);
-
-      //If error, store status, we will free later
-      if (pwstatus) {
-	*status = CCL_ERROR_SPLINE;
-	ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_cosmology_compute_power_class(): Error creating log_power spline\n");
-      }
-
-      //If not, proceed
-      if(!pwstatus){
-	cosmo->data.p_lin = log_power;
-      }
-    }
+  }
+  
+  //If no error, proceed
+  if(!*status) {
     
-  } else { //Linear power spec failed, so we return without proceeding to nonlinear.
+    gsl_spline2d * log_power = gsl_spline2d_alloc(PLIN_SPLINE_TYPE, nk,na);
+    pwstatus = gsl_spline2d_init(log_power, x, a, y2d_lin,nk,na);
+    
+    //If not, proceed
+    if(!pwstatus){
+      cosmo->data.p_lin = log_power;
+    } else {
+      gsl_spline2d_free(log_power);
+      *status = CCL_ERROR_SPLINE;
+      ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_cosmology_compute_power_class(): Error creating log_power spline\n");
+    }
 
+  }
+  
+  if(*status){ //Linear power spec failed, so we return without proceeding to nonlinear.
     free(x);
     free(a);
     free(y2d_nl);
@@ -520,30 +523,35 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int * statu
     if(cosmo->config.matter_power_spectrum_method==ccl_halofit) {
 	
       double psout_nl;
-      
       for (int i=0; i<nk; i++) {
 	for (int j = 0; j < na; j++) {
 	  newstatus |= spectra_pk_nl_at_k_and_z(&ba, &pm, &sp,exp(x[i]),1./a[j]-1.,&psout_nl);
 	  y2d_nl[j*nk+i] = log(psout_nl);
 	}
       }
-	
-      if(!newstatus){
-	
-	gsl_spline2d * log_power_nl = gsl_spline2d_alloc(PNL_SPLINE_TYPE, nk,na);
-	pwstatus = gsl_spline2d_init(log_power_nl, x, a, y2d_nl,nk,na);
-	
-	if (pwstatus) {
-	  *status = CCL_ERROR_SPLINE;
-	  ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_cosmology_compute_power_class(): Error creating log_power_nl spline\n");
-	}
-
-	if(!pwstatus){
-	  cosmo->data.p_nl = log_power_nl;
-	}
-      }
     }
-  } 
+
+    if(newstatus){
+      *status = CCL_ERROR_CLASS;
+      ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_cosmology_compute_power_class(): Error computing CLASS power spectrum\n");
+    }
+    
+  }
+
+  if(!*status){
+	
+    gsl_spline2d * log_power_nl = gsl_spline2d_alloc(PNL_SPLINE_TYPE, nk,na);
+    pwstatus = gsl_spline2d_init(log_power_nl, x, a, y2d_nl,nk,na);
+    
+    if(!pwstatus){
+      cosmo->data.p_nl = log_power_nl;
+    } else {
+      gsl_spline2d_free(log_power_nl);
+      *status = CCL_ERROR_SPLINE;
+      ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_cosmology_compute_power_class(): Error creating log_power_nl spline\n");
+    }
+
+  }
       
   free(x);
   free(a);
@@ -829,7 +837,6 @@ static double eh_power(ccl_parameters *params,eh_struct *eh,double k,int wiggled
   double kinvh=k/params->h; //Changed to h/Mpc
   return pow(k,params->n_s)*tsqr_EH(params,eh,kinvh,wiggled);
 }
-
 static void ccl_cosmology_compute_power_eh(ccl_cosmology * cosmo, int * status)
 {
   //These are the limits of the splining range
