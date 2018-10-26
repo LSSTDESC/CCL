@@ -183,12 +183,10 @@ struct norm_params {
 };
 
 static double ccl_norm_integrand(double z, void* params)
-{
+{	
+	
   // This is a struct that contains a true redshift and a pointer to the information about the photo_z model
   struct pz_params pz_val_p; // parameters for the photoz pdf wrt true-z
-  
-  // This is a struct that contains a true redshift and a pointer to the information about the analytic dNdz
-  //struct dN_params dN_val_p;
   
   double pz_int=0; // pointer to the value of the integral over the photoz model
   struct norm_params *p = (struct norm_params *) params; // parameters of the current function (because of form required for gsl integration)
@@ -246,7 +244,7 @@ void ccl_dNdz_tomog(double z, double bin_zmin, double bin_zmax,
   pz_p_val.z_true = z;
   pz_p_val.status = status;
   pz_p_val.pz_information = photo_info; // pointer to user information
-  
+ 
   // Integrate over the assumed pdf of photo-z wrt true-z in this bin (this goes in the numerator of the result):
   gsl_integration_cquad_workspace * workspace = gsl_integration_cquad_workspace_alloc(ccl_gsl->N_ITERATION);
   gsl_function F;
@@ -254,9 +252,9 @@ void ccl_dNdz_tomog(double z, double bin_zmin, double bin_zmax,
   F.params = &pz_p_val;
   int gslstatus = gsl_integration_cquad(&F, bin_zmin, bin_zmax, 0.0,ccl_gsl->INTEGRATION_DNDZ_EPSREL,workspace,&numerator_integrand, NULL, NULL);
   if(gslstatus != GSL_SUCCESS) {
-    ccl_raise_gsl_warning(gslstatus, "ccl_redshifts.c: ccl_specs_norm_integrand():");
+    ccl_raise_gsl_warning(gslstatus, "ccl_redshifts.c: ccl_norm_integrand():");
     *status |= gslstatus;
-  }  
+  } 
   gsl_integration_cquad_workspace_free(workspace);	
   
   // Now get the denominator, which normalizes dNdz over the photometric bin
@@ -265,13 +263,15 @@ void ccl_dNdz_tomog(double z, double bin_zmin, double bin_zmax,
   F.params = &norm_p_val;
   gslstatus = gsl_integration_cquad(&F, Z_MIN_SOURCES, Z_MAX_SOURCES, 0.0,ccl_gsl->INTEGRATION_DNDZ_EPSREL,workspace,&denom_integrand, NULL, NULL);
   if(gslstatus != GSL_SUCCESS) {
-    ccl_raise_gsl_warning(gslstatus, "ccl_redshifts.c: ccl_specs_norm_integrand():");
+    ccl_raise_gsl_warning(gslstatus, "ccl_redshifts.c: ccl_norm_integrand():");
     *status |= gslstatus;
-  } 
+  }
+   
   gsl_integration_cquad_workspace_free(workspace);
   if (*status) {
     *status = CCL_ERROR_INTEG;
     return;
   }
   *tomoout = dNdz_t * numerator_integrand / denom_integrand;
+
 }
