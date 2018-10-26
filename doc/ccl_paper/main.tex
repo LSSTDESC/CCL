@@ -1049,7 +1049,7 @@ We compared the difference between \ccl calculated lensing and clustering correl
 
 The three-dimensional spatial correlation function $\xi(r)$ predicted by \ccl was validated by comparing it with an independent, precise numerical transform\footnote{This independent implementation is based on the {\tt cluster toolkit} package, available at \url{http://cluster-toolkit.readthedocs.io/en/latest/}.}. We calculated $\xi(r)$  by transforming the \ccl non-linear \halofit power spectrum using this independent method for the five cosmologies listed in Table~\ref{tab:cosmologies} at redshifts $z = 0,1,2,3,4,5$.  We then compared it with the $\xi(r)$ from \ccl with a sampling of $P(k)$ equal to {\tt N$\_$K$\_$3DCOR} bins per decade. The accuracy metric is defined as
 \begin{equation}
-  \mathcal{A}=|\xi^{\tt CCL}(r)-\xi^{(i)}(r)| / \xi^{\tt CCL}(r).
+	\mathcal{A}=|\xi^{\tt CCL}(r)-\xi^{(i)}(r)| / \xi^{(i)}(r).
   \label{eq:accxi}
 \end{equation}
 The default value of {\tt N$\_$K$\_$3DCOR}~=~100,000 results in $\mathcal{A} < 2.5 \times 10^{-3}$ for $0.1 < r < 250$~Mpc and $z=0$. The agreement was better for higher redshifts.
