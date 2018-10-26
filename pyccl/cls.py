@@ -95,8 +95,7 @@ class Tracer(object):
         # moment. The following checks try to guard against these instances
         # but this should probably be checked for at the C level.
         if tracer_type in [const.CL_TRACER_WL,
-                           const.CL_TRACER_NC,
-                           const.CL_TRACER_CL]:
+                           const.CL_TRACER_NC]:
             if not isinstance(dndz, collections.Iterable) \
                or len(dndz) != 2 \
                or not (isinstance(dndz[0], collections.Iterable)
