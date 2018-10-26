@@ -194,6 +194,15 @@ static double ccl_norm_integrand(double z, void* params)
   double z_min = p->bin_zmin_;
   double z_max = p->bin_zmax_;
   
+  // Check whether ccl_splines and ccl_gsl exist; exit gracefully if they 
+  // can't be loaded
+  if(ccl_splines==NULL || ccl_gsl==NULL) ccl_cosmology_read_config();
+  if(ccl_splines==NULL || ccl_gsl==NULL) {
+    ccl_raise_exception(CCL_ERROR_MISSING_CONFIG_FILE, 
+                        "ccl_lsst_specs.c: Failed to read config file.");
+    return NAN;
+  }
+  
   // Set up parameters for the pz part of the intermediary integral.
   pz_val_p.z_true = z;
   pz_val_p.status = p->status;
@@ -231,6 +240,16 @@ void ccl_dNdz_tomog(double z, double bin_zmin, double bin_zmax,
   struct pz_params pz_p_val; //parameters for the integral over the photoz's
   struct norm_params norm_p_val;	
   //struct dN_params dN_p_val; 
+  
+  // Check whether ccl_splines and ccl_gsl exist; exit gracefully if they 
+  // can't be loaded
+  if(ccl_splines==NULL || ccl_gsl==NULL) ccl_cosmology_read_config();
+  if(ccl_splines==NULL || ccl_gsl==NULL) {
+    ccl_raise_exception(CCL_ERROR_MISSING_CONFIG_FILE, 
+                        "ccl_lsst_specs.c: Failed to read config file.");
+    *status = CCL_ERROR_MISSING_CONFIG_FILE;
+    return;
+  }
   
   // Set up the parameters to pass to the normalising integral (of type struct norm_params
   norm_p_val.bin_zmin_=bin_zmin;

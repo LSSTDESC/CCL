@@ -193,13 +193,9 @@ class NumberCountsTracer(Tracer):
             redshift-space distortion term.
         dndz (tuple of arrays): A tuple of arrays (z, N(z))
             giving the redshift distribution of the objects. The units are
-            arbitrary; N(z) will be normalized to unity. If `None`, the
-            tracer is assumed to not have a redshift distribution (e.g.,
-            it has a single source source redshift like the CMB). Defaults
-            to None.
+            arbitrary; N(z) will be normalized to unity.
         bias (tuple of arrays): A tuple of arrays (z, b(z))
-            giving the galaxy bias. If `None`, the tracer is assumbed to
-            not have a bias parameter. Defaults to None.
+            giving the galaxy bias.
         mag_bias (tuple of arrays, optional): A tuple of arrays (z, s(z))
             giving the magnification bias as a function of redshift. If
             `None`, the tracer is assumed to not have magnification bias
@@ -222,10 +218,7 @@ class WeakLensingTracer(Tracer):
         cosmo (:obj:`Cosmology`): Cosmology object.
         dndz (tuple of arrays): A tuple of arrays (z, N(z))
             giving the redshift distribution of the objects. The units are
-            arbitrary; N(z) will be normalized to unity. If `None`, the
-            tracer is assumed to not have a redshift distribution (e.g.,
-            it has a single source source redshift like the CMB). Defaults
-            to None.
+            arbitrary; N(z) will be normalized to unity.
         ia_bias (tuple of arrays, optional): A tuple of arrays
             (z, b_IA(z)) giving the intrinsic alignment amplitude b_IA(z).
             If `None`, the tracer is assumped to not have intrinsic
@@ -305,8 +298,8 @@ def angular_cl(cosmo, cltracer1, cltracer2, ell,
 
     Returns:
         float or array_like: Angular (cross-)power spectrum values,
-            :math:`C_\ell`, for the pair of tracers, as a function of
-            :math:`\ell`.
+            :math:`C_\\ell`, for the pair of tracers, as a function of
+            :math:`\\ell`.
     """
     # Access ccl_cosmology object
     cosmo = cosmo.cosmo
