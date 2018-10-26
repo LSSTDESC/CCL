@@ -14,55 +14,63 @@ OUTPUT: bin edges in range [xmin,xmax]
 double * ccl_linear_spacing(double xmin, double xmax, int N)
 {
   double dx = (xmax-xmin)/(N -1.);
-  
+
   double * x = malloc(sizeof(double)*N);
   if (x==NULL) {
-    fprintf(stderr, "ERROR: Could not allocate memory for linear-spaced array (N=%d)\n", N);
+    ccl_raise_warning(
+      CCL_ERROR_MEMORY,
+      "ERROR: Could not allocate memory for linear-spaced array (N=%d)\n", N);
     return x;
   }
-  
+
   for (int i=0; i<N; i++) {
     x[i] = xmin + dx*i;
   }
   x[0]=xmin; //Make sure roundoff errors don't spoil edges
   x[N-1]=xmax; //Make sure roundoff errors don't spoil edges
-  
+
   return x;
 }
 
 /* ------- ROUTINE: ccl_linlog spacing ------
  * INPUTS: [xminlog,xmax] of the interval to be divided in bins
  *         xmin when linear spacing starts
- *         Nlog number of logarithmically spaced bins 
- *         Nlin number of linearly spaced bins 
+ *         Nlog number of logarithmically spaced bins
+ *         Nlin number of linearly spaced bins
  * OUTPUT: bin edges in range [xminlog,xmax]
  * */
 
 double * ccl_linlog_spacing(double xminlog, double xmin, double xmax, int Nlog, int Nlin)
 {
   if (Nlog<2) {
-    fprintf(stderr, "ERROR: Cannot make log-spaced array with %d points - need at least 2\n", Nlog);
+    ccl_raise_warning(
+      CCL_ERROR_LINLOGSPACE,
+      "ERROR: Cannot make log-spaced array with %d points - need at least 2\n", Nlog);
     return NULL;
   }
 
   if (!(xminlog>0 && xmin>0)) {
-    fprintf(stderr, "ERROR: Cannot make log-spaced array xminlog or xmin  non-positive (had %le, %le)\n", xminlog, xmin);
+    ccl_raise_warning(
+      CCL_ERROR_LINLOGSPACE,
+      "ERROR: Cannot make log-spaced array xminlog or xmin non-positive (had %le, %le)\n", xminlog, xmin);
     return NULL;
   }
 
   if (xminlog>xmin){
-    fprintf(stderr, "ERROR: xminlog must be smaller as xmin");
+    ccl_raise_warning(CCL_ERROR_LINLOGSPACE, "ERROR: xminlog must be smaller as xmin");
     return NULL;
   }
 
   if (xmin>xmax){
-    fprintf(stderr, "ERROR: xmin must be smaller as xmax");
+    ccl_raise_warning(CCL_ERROR_LINLOGSPACE, "ERROR: xmin must be smaller as xmax");
     return NULL;
   }
 
   double * x = malloc(sizeof(double)*(Nlin+Nlog-1));
   if (x==NULL) {
-    fprintf(stderr, "ERROR: Could not allocate memory for array of size (Nlin+Nlog-1)=%d)\n", (Nlin+Nlog-1));
+    ccl_raise_warning(
+      CCL_ERROR_MEMORY,
+      "ERROR: Could not allocate memory for array of size (Nlin+Nlog-1)=%d)\n", (Nlin+Nlog-1));
     return x;
   }
 
@@ -81,7 +89,7 @@ double * ccl_linlog_spacing(double xminlog, double xmin, double xmax, int Nlog, 
   x[0]=xminlog; //Make sure roundoff errors don't spoil edges
   x[Nlog-1]=xmin; //Make sure roundoff errors don't spoil edges
   x[Nlin+Nlog-2]=xmax; //Make sure roundoff errors don't spoil edges
-  
+
   return x;
 }
 
@@ -94,31 +102,38 @@ OUTPUT: bin edges in range [xmin,xmax]
 double * ccl_log_spacing(double xmin, double xmax, int N)
 {
   if (N<2) {
-    fprintf(stderr, "ERROR: Cannot make log-spaced array with %d points - need at least 2\n", N);
+    ccl_raise_warning(
+      CCL_ERROR_LOGSPACE,
+      "ERROR: Cannot make log-spaced array with %d points - need at least 2\n", N);
     return NULL;
   }
-  
+
   if (!(xmin>0 && xmax>0)) {
-    fprintf(stderr, "ERROR: Cannot make log-spaced array xmax or xmax non-positive (had %le, %le)\n", xmin, xmax);
+    ccl_raise_warning(
+      CCL_ERROR_LOGSPACE,
+      "ERROR: Cannot make log-spaced array xmax or xmax non-positive (had %le, %le)\n", xmin, xmax);
     return NULL;
   }
-  
+
   double log_xmax = log(xmax);
   double log_xmin = log(xmin);
   double dlog_x = (log_xmax - log_xmin) /  (N-1.);
-  
+
   double * x = malloc(sizeof(double)*N);
   if (x==NULL) {
-    fprintf(stderr, "ERROR: Could not allocate memory for log-spaced array (N=%d)\n", N);
+    ccl_raise_warning(
+      CCL_ERROR_MEMORY,
+      "ERROR: Could not allocate memory for log-spaced array (N=%d)\n", N);
     return x;
   }
-  
-  for (int i=0; i<N; i++) {
-    x[i] = exp(log_xmin + dlog_x*i);
+
+  double xratio = exp(dlog_x);
+  x[0] = xmin; //Make sure roundoff errors don't spoil edges
+  for (int i=1; i<N-1; i++) {
+    x[i] = x[i-1] * xratio;
   }
-  x[0]=xmin; //Make sure roundoff errors don't spoil edges
   x[N-1]=xmax; //Make sure roundoff errors don't spoil edges
-  
+
   return x;
 }
 
@@ -133,7 +148,7 @@ SplPar *ccl_spline_init(int n,double *x,double *y,double y0,double yf)
   SplPar *spl=malloc(sizeof(SplPar));
   if(spl==NULL)
     return NULL;
-  
+
   spl->intacc=gsl_interp_accel_alloc();
   spl->spline=gsl_spline_alloc(gsl_interp_cspline,n);
   int parstatus=gsl_spline_init(spl->spline,x,y,n);
@@ -156,7 +171,7 @@ double ccl_spline_eval(double x,SplPar *spl)
 {
   if(x<=spl->x0)
     return spl->y0;
-  else if(x>=spl->xf) 
+  else if(x>=spl->xf)
     return spl->yf;
   else {
     double y;
@@ -198,7 +213,7 @@ double ccl_j_bessel(int l,double x)
     else if(l==3) {
       if(ax<0.4)
 	jl=ax*ax2*(1-ax2*(1-ax2/44)/18)/105;
-      else 
+      else
 	jl=(cos(x)*(1-15/ax2)-sin(x)*(6-15/ax2)/ax)/ax;
     }
     else if(l==4) {
@@ -227,7 +242,7 @@ double ccl_j_bessel(int l,double x)
   else {
     double nu=l+0.5;
     double nu2=nu*nu;
-    
+
     if(ax<1.0E-40) jl=0;
     else if((ax2/l)<0.5) {
       jl=(exp(l*log(ax/nu)-M_LN2+nu*(1-M_LN2)-(1-(1-3.5/nu2)/(30*nu2))/(12*nu))/nu)*
@@ -281,7 +296,7 @@ double ccl_j_bessel(int l,double x)
 	double sx2=sx*sx;
 	double secb=pow(sx,0.3333333333333333333333);
 	double sec2b=secb*secb;
-	
+
 	jl=(CCL_GAMMA1*secb+beta*CCL_GAMMA2*sec2b
 	    -(beta2/18-1.0/45.0)*beta*sx*secb*CCL_GAMMA1
 	    -((beta2-1)*beta2/36+1.0/420.0)*sx*sec2b*CCL_GAMMA2
@@ -293,7 +308,7 @@ double ccl_j_bessel(int l,double x)
     }
   }
   if((x<0)&&(l%2!=0)) jl=-jl;
-  
+
   return jl;
 }
 
