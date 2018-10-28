@@ -280,6 +280,15 @@ $ cmake -DEXTERNAL_CLASS_PATH=/path/to/class ..
 ```
 the rest of the build process should be the same.
 
+Note that if your external version of `CLASS` is based on any version from 
+before v2.7.0, you should set the `CLASS_VERSION_PRE27` environment variable to 
+any non-empty value. This will tell `CCL` to use the old version of the `CLASS` 
+API when trying to construct the matter power spectrum. The API for this 
+changed in CLASS v2.7.0, and will cause compilation failures resembling the 
+following if this environment variable is not set: 
+`error: too few arguments to function 'spectra_pk_at_k_and_z'`.
+
+
 ## Docker image installation
 
 The Dockerfile to generate a Docker image is included in the `CCL` repository as Dockerfile. This can be used to create an image that Docker can spool up as a virtual machine, allowing you to utilize `CCL` on any infrastructure with minimal hassle. The details of Docker and the installation process can be found at [https://www.docker.com/](https://www.docker.com/). Once Docker is installed, it is a simple process to create an image! In a terminal of your choosing (with Docker running), type the command `docker build -t ccl .` in the `CCL` directory.

@@ -29,7 +29,8 @@ project(ccl VERSION 0.2.1)
 		 tests/ccl_test_power_nu.c tests/ccl_test_halomod.c tests/ccl_test_nonlimber.c tests/ccl_test_angpow.c)
 
 
-    # Defines list of extra distribution files and directories to be installed on the system
+    # Defines list of extra distribution files and directories to be installed 
+    # on the system
     set(EXTRA_DIST include/ccl_params.ini README.md LICENSE LICENSE_COSMICEMU)
     set(EXTRA_DIST_DIRS)
 
@@ -39,6 +40,7 @@ project(ccl VERSION 0.2.1)
 
     # If a CLASS installation folder is provided, use it,
     # otherwise download and compile CLASS
+    set(CLASS_VERSION_PRE27 $ENV{CLASS_VERSION_PRE27}) # Flag for older CLASS version
     if(EXTERNAL_CLASS_PATH)
       message("Using external install of CLASS")
       set(CLASS_LIBRARY_DIRS ${EXTERNAL_CLASS_PATH})
@@ -48,6 +50,14 @@ project(ccl VERSION 0.2.1)
     else(EXTERNAL_CLASS_PATH)
       include(BuildCLASS)
     endif(EXTERNAL_CLASS_PATH)
+    
+    # Check whether an older version of CLASS is being used
+    if(CLASS_VERSION_PRE27)
+      message("Using an old (pre-v2.7.0) version of CLASS")
+      message("  CLASS_VERSION_PRE27: ${CLASS_VERSION_PRE27}")
+    else(CLASS_VERSION_PRE27)
+      message("Assuming CLASS v2.7.0 or later")
+    endif(CLASS_VERSION_PRE27)
 
     # Builds Angpow
     # TODO: the same mechanism as for CLASS could be used here to provide the
@@ -62,6 +72,12 @@ project(ccl VERSION 0.2.1)
       set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -fopenmp")
       set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -fopenmp")
     endif()
+    
+    # Set flag if older version of CLASS is being used
+    if(CLASS_VERSION_PRE27)
+      set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -DCLASS_VERSION_PRE27")
+      set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -DCLASS_VERSION_PRE27")
+    endif()
 
     # Define include and library directories for external dependencies
     include_directories(${CLASS_INCLUDE_DIRS} ${GSL_INCLUDE_DIRS} ${FFTW_INCLUDES} ${ANGPOW_INCLUDE_DIRS})
@@ -75,7 +91,7 @@ project(ccl VERSION 0.2.1)
 
     # Compiles all the source files
     add_library(objlib OBJECT ${CCL_SRC})
-    # Make sure the external projects are correclty built
+    # Make sure the external projects are correctly built
     add_dependencies(objlib ANGPOW)
     if(NOT CLASS_EXTERNAL)
       add_dependencies(objlib CLASS)

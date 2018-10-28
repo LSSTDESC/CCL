@@ -5,6 +5,9 @@
 
 CCL_BEGIN_DECLS
 
+// Small correction to prevent CLASS interpolation failing due to rounding errors
+#define Z_ROUNDING_CORRECTION 1e-10
+
 /**
  * CLASS power spectrum without splines.
  * Write k, P(k,z) [1/Mpc, Mpc^3] for given cosmology at the k values used within CLASS (spectra.ln_k[]), using the method specified in config.matter_power_spectrum_method.

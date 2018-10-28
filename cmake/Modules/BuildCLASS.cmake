@@ -1,6 +1,6 @@
 include(ExternalProject)
 
-set(CLASSTag v2.6.3)
+set(CLASSTag v2.7.1)
 
 # In case the compiler being used  is clang, remove the omp flag
 if ("${CMAKE_C_COMPILER_ID}" MATCHES "^(Apple)?Clang$")
