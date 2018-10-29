@@ -4,7 +4,7 @@ cache:
   - "$TRAVIS_BUILD_DIR/build/GSL/src"
   - "$TRAVIS_BUILD_DIR/build/FFTW/src"
   - "$TRAVIS_BUILD_DIR/build/SWIG/src"
-  - "$TRAVIS_BUILD_DIR/build/CLASS/src"
+  #- "$TRAVIS_BUILD_DIR/build/CLASS/src"
   - "$TRAVIS_BUILD_DIR/build/ANGPOW/src"
   - "$HOME/miniconda"
 matrix:
@@ -37,7 +37,6 @@ install:
 - python --version
 script:
 - flake8 pyccl
-- ls build/
 - python setup.py build
 - nosetests tests/run_tests.py --all --debug --detailed-errors --verbose --process-restartworker
   --with-coverage --cover-package=pyccl
