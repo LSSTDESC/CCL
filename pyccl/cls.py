@@ -3,6 +3,8 @@ from . import constants as const
 from .core import check
 import numpy as np
 
+import collections
+
 # Same mapping for non-Limber integration methods
 nonlimber_methods = {
     'native': const.CCL_NONLIMBER_METHOD_NATIVE,
@@ -88,6 +90,23 @@ class Tracer(object):
                 "Either both or none of `red_frac` and `ia_bias` "
                 "must be specified.")
         has_intrinsic_alignment = red_frac is not None
+
+        # Passing None for certain arguments causes segmentation faults at the
+        # moment. The following checks try to guard against these instances
+        # but this should probably be checked for at the C level.
+        if tracer_type in [const.CL_TRACER_WL,
+                           const.CL_TRACER_NC]:
+            if not isinstance(dndz, collections.Iterable) \
+               or len(dndz) != 2 \
+               or not (isinstance(dndz[0], collections.Iterable)
+                       and isinstance(dndz[1], collections.Iterable)):
+                raise ValueError("dndz needs to be a tuple of two arrays.")
+        if tracer_type in [const.CL_TRACER_NC]:
+            if not isinstance(bias, collections.Iterable) \
+               or len(bias) != 2 \
+               or not (isinstance(bias[0], collections.Iterable)
+                       and isinstance(bias[1], collections.Iterable)):
+                raise ValueError("bias needs to be a tuple of two arrays.")
 
         # Convert array arguments that are 'None' into 'NoneArr' type and
         # check whether arrays were specified as tuples
@@ -193,13 +212,9 @@ class NumberCountsTracer(Tracer):
             redshift-space distortion term.
         dndz (tuple of arrays): A tuple of arrays (z, N(z))
             giving the redshift distribution of the objects. The units are
-            arbitrary; N(z) will be normalized to unity. If `None`, the
-            tracer is assumed to not have a redshift distribution (e.g.,
-            it has a single source source redshift like the CMB). Defaults
-            to None.
+            arbitrary; N(z) will be normalized to unity.
         bias (tuple of arrays): A tuple of arrays (z, b(z))
-            giving the galaxy bias. If `None`, the tracer is assumbed to
-            not have a bias parameter. Defaults to None.
+            giving the galaxy bias.
         mag_bias (tuple of arrays, optional): A tuple of arrays (z, s(z))
             giving the magnification bias as a function of redshift. If
             `None`, the tracer is assumed to not have magnification bias
@@ -222,10 +237,7 @@ class WeakLensingTracer(Tracer):
         cosmo (:obj:`Cosmology`): Cosmology object.
         dndz (tuple of arrays): A tuple of arrays (z, N(z))
             giving the redshift distribution of the objects. The units are
-            arbitrary; N(z) will be normalized to unity. If `None`, the
-            tracer is assumed to not have a redshift distribution (e.g.,
-            it has a single source source redshift like the CMB). Defaults
-            to None.
+            arbitrary; N(z) will be normalized to unity.
         ia_bias (tuple of arrays, optional): A tuple of arrays
             (z, b_IA(z)) giving the intrinsic alignment amplitude b_IA(z).
             If `None`, the tracer is assumped to not have intrinsic
@@ -305,8 +317,8 @@ def angular_cl(cosmo, cltracer1, cltracer2, ell,
 
     Returns:
         float or array_like: Angular (cross-)power spectrum values,
-            :math:`C_\ell`, for the pair of tracers, as a function of
-            :math:`\ell`.
+            :math:`C_\\ell`, for the pair of tracers, as a function of
+            :math:`\\ell`.
     """
     # Access ccl_cosmology object
     cosmo = cosmo.cosmo
