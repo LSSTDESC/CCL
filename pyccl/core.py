@@ -59,7 +59,7 @@ emulator_neutrinos options
       physical model assumed for neutrinos.
 """
 import numpy as np
-#import yaml
+import yaml
 
 from . import ccllib as lib
 from .errors import CCLError
