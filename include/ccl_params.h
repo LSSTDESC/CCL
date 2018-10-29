@@ -1,9 +1,11 @@
 /** @file */
+#include "ccl_constants.h"
+
 #ifndef __CCL_PARAMS_H_INCLUDED__
 #define __CCL_PARAMS_H_INCLUDED__
 
 CCL_BEGIN_DECLS
-/** 
+/**
  * Struct that contains all the parameters needed to create certain splines.
  * This includes splines for the scale factor, masses, and power spectra.
  */
@@ -16,13 +18,13 @@ typedef struct ccl_spline_params {
   double  A_SPLINE_MAX;
   double A_SPLINE_MINLOG;
   int A_SPLINE_NLOG;
-  
+
   //Mass splines
   double LOGM_SPLINE_DELTA;
   int LOGM_SPLINE_NM;
   double LOGM_SPLINE_MIN;
   double LOGM_SPLINE_MAX;
-  
+
   //PS a and k spline
   int A_SPLINE_NA_PK;
   int A_SPLINE_NLOG_PK;
@@ -42,7 +44,7 @@ typedef struct ccl_spline_params {
 
 extern ccl_spline_params * ccl_splines;
 
-/** 
+/**
  * Struct that contains parameters that control the accuracy of various GSL
  * routines.
  */
@@ -74,7 +76,7 @@ typedef struct ccl_gsl_params {
 
   // ODE
   double ODE_GROWTH_EPSREL;
-  
+
 } ccl_gsl_params;
 
 extern ccl_gsl_params * ccl_gsl;

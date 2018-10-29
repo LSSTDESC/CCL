@@ -1,5 +1,6 @@
 """This file exposes constants present in CCL."""
-from .ccllib import (  # flake8: noqa
+# flake8: noqa
+from .ccllib import (
     CCL_ERROR_CLASS, CCL_ERROR_INCONSISTENT, CCL_ERROR_INTEG,
     CCL_ERROR_LINSPACE, CCL_ERROR_MEMORY, CCL_ERROR_ROOT, CCL_ERROR_SPLINE,
     CCL_ERROR_SPLINE_EV, CLIGHT_HMPC, 
