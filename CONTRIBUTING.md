@@ -83,7 +83,8 @@ be provided such that the user can reproduce the benchmarks.
 Benchmarks should be integrated in automated C tests following the current
 examples in `tests/`. Any plots that check the results of the comparison
 should be added to the `Benchmark_Comparison.ipynb` notebook in the
-`examples` folder.
+`examples` folder. New features and tests should also be documented
+in the CCL note in the `doc` directory.
 
 
 Modifying the Python wrapper
