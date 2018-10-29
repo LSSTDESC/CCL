@@ -21,6 +21,7 @@ ExternalProject_Add(CLASS
         GIT_SHALLOW 1
         DOWNLOAD_NO_PROGRESS 1
         PATCH_COMMAND patch -p1 -i ${CMAKE_CURRENT_SOURCE_DIR}/cmake/class-2.6.3.patch
+        UPDATE_COMMAND ""
         # In the configuration step, we comment out the default compiler and
         # provide an appropriate omp flag
         CONFIGURE_COMMAND     perl -pi -e "s/^CC /# CC /" Makefile &&
