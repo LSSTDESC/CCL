@@ -87,14 +87,14 @@ class Tracer(object):
         # Passing None for certain arguments causes segmentation faults at the
         # moment. The following checks try to guard against these instances
         # but this should probably be checked for at the C level.
-        if tracer_type in [const.CL_TRACER_WL,
-                           const.CL_TRACER_NC]:
+        if tracer_type in [lib.weak_lensing_tracer,
+                           lib.number_counts_tracer]:
             if not isinstance(dndz, collections.Iterable) \
                or len(dndz) != 2 \
                or not (isinstance(dndz[0], collections.Iterable)
                        and isinstance(dndz[1], collections.Iterable)):
                 raise ValueError("dndz needs to be a tuple of two arrays.")
-        if tracer_type in [const.CL_TRACER_NC]:
+        if tracer_type in [lib.number_counts_tracer]:
             if not isinstance(bias, collections.Iterable) \
                or len(bias) != 2 \
                or not (isinstance(bias[0], collections.Iterable)
@@ -286,7 +286,7 @@ def _check_array_params(f_arg):
 
 def angular_cl(cosmo, cltracer1, cltracer2, ell,
                l_limber=-1., l_logstep=1.05, l_linstep=20., dchi=3.,
-               dlk=0.003, zmin=0.05, non_limber_method="angpow"):
+               dlk=0.003, zmin=0.05) :
     """Calculate the angular (cross-)power spectrum for a pair of tracers.
 
     Args:
