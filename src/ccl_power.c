@@ -14,45 +14,6 @@
 #include "ccl_emu17.h"
 #include "ccl_emu17_params.h"
 
-ccl_power_spectrum_t *ccl_power_spectrum_t_new(int na,double *a_arr,
-					       int nk,double *lk_arr,
-					       double *pk_arr,
-					       int extrap_type_lok,
-					       int extrap_type_hik,
-					       int extrap_linear_growth,
-					       double (*growth)(double),
-					       double growth_factor_0,
-					       int *status)
-{
-  ccl_power_spectrum_t *psp=malloc(sizeof(ccl_power_spectrum_t));
-  if(psp==NULL)
-    *status = CCL_ERROR_MEMORY;
-
-  if(*status==0) {
-    psp->lkmin=lk_arr[0];
-    psp->lkmax=lk_arr[nk-1];
-    psp->amin=a_arr[0];
-    psp->amax=a_arr[nk-1];
-    psp->extrap_type_lok=extrap_type_lok;
-    psp->extrap_type_hik=extrap_type_hik;
-    psp->extrap_linear_growth=extrap_linear_growth;
-    psp->is_log=is_pk_log;
-    psp->growth=growth;
-    psp->growth_factor_0=growth_factor_0;
-    
-    psp->pk=gsl_spline2d_alloc(PLIN_SPLINE_TYPE,NULL;
-  }
-  
-  return psp;
-}
-
-void ccl_power_spectrum_t_free(ccl_power_spectrum_t *psp)
-{
-  if(psp->pk!=NULL)
-    gsl_spline2d_free(psp->pk);
-  free(psp);
-}
-
 /*------ ROUTINE: ccl_cosmology_compute_power_class -----
 INPUT: ccl_cosmology * cosmo
 */
