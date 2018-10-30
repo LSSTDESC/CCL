@@ -99,6 +99,6 @@ static void compare_cls(struct cls_data * data)
   ccl_cosmology_free(cosmo);
 }
 
-CTEST2(cls,cmblens) {
+CTEST2_SKIP(cls,cmblens) {
   compare_cls(data);
 }

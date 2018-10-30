@@ -147,7 +147,7 @@ static void compare_bcm(int i_model,struct bcm_data * data)
   ccl_cosmology_free(cosmo);
 }
 
-CTEST2(bcm,model_1) {
+CTEST2_SKIP(bcm,model_1) {
   int model=1;
   compare_bcm(model,data);
 }

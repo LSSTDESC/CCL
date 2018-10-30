@@ -174,23 +174,23 @@ static void compare_emu_nu(int i_model,struct emu_nu_data * data)
   ccl_cosmology_free(cosmo);
 }
 
-CTEST2(emu_nu,model_1) {
+CTEST2_SKIP(emu_nu,model_1) {
   int model=1;
   compare_emu_nu(model,data);
 }
 
 
-CTEST2(emu_nu,model_2) {
+CTEST2_SKIP(emu_nu,model_2) {
   int model=2;
   compare_emu_nu(model,data);
   }
 
-CTEST2(emu_nu,model_3) {
+CTEST2_SKIP(emu_nu,model_3) {
   int model=3;
   compare_emu_nu(model,data);
 }
 
-CTEST2(emu_nu,model_4) {
+CTEST2_SKIP(emu_nu,model_4) {
   int model=4;
   compare_emu_nu(model,data);
   }

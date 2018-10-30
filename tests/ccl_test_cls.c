@@ -245,10 +245,10 @@ static void compare_cls(char *compare_type,struct cls_data * data)
   ccl_cosmology_free(cosmo);
 }
 
-CTEST2(cls,analytic) {
+CTEST2_SKIP(cls,analytic) {
   compare_cls("analytic",data);
 }
 
-CTEST2(cls,histo) {
+CTEST2_SKIP(cls,histo) {
   compare_cls("histo",data);
 }

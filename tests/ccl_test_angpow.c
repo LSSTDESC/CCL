@@ -124,6 +124,6 @@ static void test_angpow_precision(struct angpow_data * data)
   ccl_cosmology_free(ccl_cosmo);  
 }
 
-CTEST2(angpow,precision) {
+CTEST2_SKIP(angpow,precision) {
   test_angpow_precision(data);
 }

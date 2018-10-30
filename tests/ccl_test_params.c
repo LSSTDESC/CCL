@@ -54,7 +54,7 @@ CTEST_SETUP(parameters) {
 
 // If you wanted to you could call other functions in here too and use these
 // assertions there also.
-CTEST2(parameters, create_lcdm) {
+CTEST2_SKIP(parameters, create_lcdm) {
   ccl_parameters params = ccl_parameters_create_flat_lcdm(
     data->Omega_c, data->Omega_b, data->h, data->A_s, data->n_s, &(data->status));
 
@@ -144,7 +144,7 @@ void test_general(ccl_parameters params, struct parameters_data * data) {
 
 }
 
-CTEST2(parameters, create_general_nu_list) {
+CTEST2_SKIP(parameters, create_general_nu_list) {
   int status = 0;
 
   ccl_parameters params =
@@ -179,7 +179,7 @@ CTEST2(parameters, create_general_nu_list) {
   ASSERT_DBL_NEAR_TOL(params.mnu[2], 0.003, 1e-10);
 }
 
-CTEST2(parameters, create_general_nu_sum) {
+CTEST2_SKIP(parameters, create_general_nu_sum) {
   int status = 0;
 
   ccl_parameters params =
@@ -211,7 +211,7 @@ CTEST2(parameters, create_general_nu_sum) {
   ASSERT_DBL_NEAR_TOL(params.sum_nu_masses, data->mnu[0], 1e-10);
 }
 
-CTEST2(parameters, create_general_nu_sum_inverted) {
+CTEST2_SKIP(parameters, create_general_nu_sum_inverted) {
   int status = 0;
 
   ccl_parameters params =
@@ -243,7 +243,7 @@ CTEST2(parameters, create_general_nu_sum_inverted) {
   ASSERT_DBL_NEAR_TOL(params.sum_nu_masses, data->mnu[0], 1e-10);
 }
 
-CTEST2(parameters, create_general_nu_sum_equal) {
+CTEST2_SKIP(parameters, create_general_nu_sum_equal) {
   int status = 0;
 
   ccl_parameters params =
@@ -279,7 +279,7 @@ CTEST2(parameters, create_general_nu_sum_equal) {
 }
 
 
-CTEST2(parameters, read_write) {
+CTEST2_SKIP(parameters, read_write) {
     char filename[32];
     snprintf(filename, 32, "ccl_test_params_rw_XXXXXX");
     mkstemp(filename);

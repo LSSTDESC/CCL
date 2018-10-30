@@ -382,10 +382,10 @@ static void compare_corr(char *compare_type,int algorithm,struct corrs_data * da
   ccl_cl_workspace_free(wyl);
 }
 
-CTEST2(corrs,analytic_fftlog) {
+CTEST2_SKIP(corrs,analytic_fftlog) {
   compare_corr("analytic",CCL_CORR_FFTLOG,data);
 }
 
-CTEST2(corrs,analytic_bessel) {
+CTEST2_SKIP(corrs,analytic_bessel) {
   compare_corr("analytic",CCL_CORR_BESSEL,data);
 }

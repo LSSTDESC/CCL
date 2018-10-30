@@ -5,6 +5,32 @@
 
 CCL_BEGIN_DECLS
 
+typedef struct {
+  double lkmin,lkmax;
+  double amin,amax;
+  int extrap_type_lok;
+  int extrap_type_hik;
+  int extrap_linear_growth;
+  int is_log;
+  double (*growth)(double);
+  double growth_factor_0;
+  gsl_spline2d *pk;
+} ccl_power_spectrum_t;
+
+ccl_power_spectrum_t *ccl_power_spectrum_t_new(int na,double *a_arr,
+					       int nk,double *lk_arr,
+					       double *pk_arr,
+					       int extrap_type_lok,
+					       int extrap_type_hik,
+					       int extrap_linear_growth,
+					       int is_pk_log,
+					       double (*growth)(double),
+					       double growth_factor_0,
+					       int spline_2d_type,
+					       int *status);
+
+void ccl_power_spectrum_t_free(ccl_power_spectrum_t *psp);
+
 /**
  * CLASS power spectrum without splines.
  * Write k, P(k,z) [1/Mpc, Mpc^3] for given cosmology at the k values used within CLASS (spectra.ln_k[]), using the method specified in config.matter_power_spectrum_method.

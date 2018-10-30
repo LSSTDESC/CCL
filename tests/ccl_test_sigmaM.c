@@ -105,17 +105,17 @@ static void compare_sigmam(int i_model,struct sigmam_data * data)
   free(cosmo);
 }
 
-CTEST2(sigmam,model_1) {
+CTEST2_SKIP(sigmam,model_1) {
   int model=1;
   compare_sigmam(model,data);
 }
 
-CTEST2(sigmam,model_2) {
+CTEST2_SKIP(sigmam,model_2) {
   int model=2;
   compare_sigmam(model,data);
 }
 
-CTEST2(sigmam,model_3) {
+CTEST2_SKIP(sigmam,model_3) {
   int model=3;
   compare_sigmam(model,data);
 }

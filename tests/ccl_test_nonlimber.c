@@ -129,6 +129,6 @@ static void test_nonlimber_precision(struct nonlimber_data * data)
   ccl_cosmology_free(ccl_cosmo);  
 }
 
-CTEST2(nonlimber,precision) {
+CTEST2_SKIP(nonlimber,precision) {
   test_nonlimber_precision(data);
 }

@@ -107,17 +107,17 @@ static void compare_distances_hiz(int model, struct distances_cosmomad_hiz_data 
   ccl_cosmology_free(cosmo);
 }
 
-CTEST2(distances_cosmomad_hiz, model_1) {
+CTEST2_SKIP(distances_cosmomad_hiz, model_1) {
   int model = 0;
   compare_distances_hiz(model, data);
 }
 
-CTEST2(distances_cosmomad_hiz, model_2) {
+CTEST2_SKIP(distances_cosmomad_hiz, model_2) {
   int model = 1;
   compare_distances_hiz(model, data);
 }
 
-CTEST2(distances_cosmomad_hiz, model_3) {
+CTEST2_SKIP(distances_cosmomad_hiz, model_3) {
   int model = 2;
   compare_distances_hiz(model, data);
 }

@@ -140,27 +140,27 @@ static void compare_distances(int model, struct distances_cosmomad_lowz_data * d
   ccl_cosmology_free(cosmo);
 }
 
-CTEST2(distances_cosmomad_lowz, model_1) {
+CTEST2_SKIP(distances_cosmomad_lowz, model_1) {
   int model = 0;
   compare_distances(model, data);
 }
 
-CTEST2(distances_cosmomad_lowz, model_2) {
+CTEST2_SKIP(distances_cosmomad_lowz, model_2) {
   int model = 1;
   compare_distances(model, data);
 }
 
-CTEST2(distances_cosmomad_lowz, model_3) {
+CTEST2_SKIP(distances_cosmomad_lowz, model_3) {
   int model = 2;
   compare_distances(model, data);
 }
 
-CTEST2(distances_cosmomad_lowz, model_4) {
+CTEST2_SKIP(distances_cosmomad_lowz, model_4) {
   int model = 3;
   compare_distances(model, data);
 }
 
-CTEST2(distances_cosmomad_lowz, model_5) {
+CTEST2_SKIP(distances_cosmomad_lowz, model_5) {
   int model = 4;
   compare_distances(model, data);
 }

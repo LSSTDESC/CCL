@@ -153,31 +153,31 @@ static void check_mgrowth(void)
   ccl_cosmology_free(cosmo2);
 }
 
-CTEST2(growth_lowz, model_1) {
+CTEST2_SKIP(growth_lowz, model_1) {
   int model = 0;
   compare_growth(model, data);
 }
 
-CTEST2(growth_lowz, model_2) {
+CTEST2_SKIP(growth_lowz, model_2) {
   int model = 1;
   compare_growth(model, data);
 }
 
-CTEST2(growth_lowz, model_3) {
+CTEST2_SKIP(growth_lowz, model_3) {
   int model = 2;
   compare_growth(model, data);
 }
 
-CTEST2(growth_lowz, model_4) {
+CTEST2_SKIP(growth_lowz, model_4) {
   int model = 3;
   compare_growth(model, data);
 }
 
-CTEST2(growth_lowz, model_5) {
+CTEST2_SKIP(growth_lowz, model_5) {
   int model = 4;
   compare_growth(model, data);
 }
 
-CTEST2(growth_lowz, mgrowth) {
+CTEST2_SKIP(growth_lowz, mgrowth) {
   check_mgrowth();
 }
