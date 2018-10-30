@@ -13,7 +13,7 @@ Neff = 3.046
 mnu_sum = 0.06
 mnu_list = [0.02, 0.02, 0.02] # For use with P(k) from emulator
 h = 0.7
-sigma8 = 0.83
+A_s = 2.1e-9
 n_s = 0.96
 
 # Values that are different for the different models
@@ -59,7 +59,7 @@ def calc_power_spectrum(Omega_v, w0, wa, transfer_fn, matter_power, linear, rais
 
     # Create a new Cosmology object
     cosmo = ccl.Cosmology(Omega_c=Omega_c, Omega_b=Omega_b,
-                       h=h, sigma8=sigma8, n_s=n_s, Omega_k=Omega_k,
+                       h=h, A_s=A_s, n_s=n_s, Omega_k=Omega_k,
                        w0=w0, wa=wa, transfer_function=transfer_fn,
                        matter_power_spectrum=matter_power,
                        Neff = Neff, m_nu = mnu)
