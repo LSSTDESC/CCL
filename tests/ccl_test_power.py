@@ -31,7 +31,8 @@ def all_finite(vals):
     return np.all( np.isfinite(vals) )
 
 
-def calc_power_spectrum(Omega_v, w0, wa, transfer_fn, matter_power, linear, raise_errors):
+def calc_power_spectrum(Omega_v, w0, wa, transfer_fn, matter_power, linear, 
+                        raise_errors, neutrinos=True):
     """
     Calculate linear and nonlinear power spectrum for a given set of parameters
     and choices of transfer function and matter power spectrum.
@@ -48,7 +49,7 @@ def calc_power_spectrum(Omega_v, w0, wa, transfer_fn, matter_power, linear, rais
         elif (transfer_fn == 'emulator' and matter_power=='emu'):
             mnu = mnu_list # For the emulator, we must have 3 equal masses
         else:
-            mnu = mnu_sum
+            mnu = mnu_sum if neutrinos else 0.
     elif (raise_errors==True):
         if (transfer_fn =='eisenstein_hu' or transfer_fn =='bbks'):
             mnu = mnu_sum #Use massive neutrinos to deliberately raise an error
@@ -79,15 +80,17 @@ def calc_power_spectrum(Omega_v, w0, wa, transfer_fn, matter_power, linear, rais
             else:
                 assert_raises(CCLError,ccl.nonlin_matter_power, cosmo, k, _a)
 
-def loop_over_params(transfer_fn, matter_power, lin, raise_errs):
+def loop_over_params(transfer_fn, matter_power, lin, raise_errs, neutrinos=True,
+                     idxs=[0,2]):
     """
     Call the power spectrum testing function for each of a set of parameters.
     """
     # Loop over parameters
-    for i in [0,2]: #w0_vals.size):
+    for i in idxs:
         calc_power_spectrum(Omega_v_vals[i], w0_vals[i], wa_vals[i],
                             transfer_fn=transfer_fn, matter_power=matter_power,
-                            linear=lin, raise_errors = raise_errs)
+                            linear=lin, raise_errors=raise_errs, 
+                            neutrinos=neutrinos)
 
 def test_power_spectrum_linear():
     for tfn in ['bbks', 'eisenstein_hu']:
@@ -105,7 +108,8 @@ def test_power_spectrum_halofit():
 @decorators.slow
 def test_power_spectrum_halofit_slow():
     for tfn in ['boltzmann',]:
-        loop_over_params(tfn, 'halofit', lin=True, raise_errs = False)
+        loop_over_params(tfn, 'halofit', lin=True, raise_errs=False, 
+                         neutrinos=False, idxs=[0,])
 
 @decorators.slow
 def test_power_spectrum_emu():
@@ -127,7 +131,7 @@ def test_nonlin_power_spectrum_halofit():
 @decorators.slow
 def test_nonlin_power_spectrum_halofit_slow():
     for tfn in ['boltzmann',]:
-        loop_over_params(tfn, 'halofit', lin=False, raise_errs = False)
+        loop_over_params(tfn, 'halofit', lin=False, raise_errs = False, idxs=[0,])
 
 @decorators.slow
 def test_nonlin_power_spectrum_emu():
