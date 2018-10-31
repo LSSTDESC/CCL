@@ -288,33 +288,33 @@ static void compare_cls(char *compare_type,struct cls_data * data)
   double l_linstep = 20.;
   CCL_ClWorkspace *w=ccl_cl_workspace_new_limber(NELLS,l_logstep,l_linstep,&status);
 
-  ccl_angular_cls(cosmo,w,tr_nc_1,tr_nc_1,NELLS,ells,cls_dd_11_h,&status);
+  ccl_angular_cls(cosmo,w,tr_nc_1,tr_nc_1,NULL,NELLS,ells,cls_dd_11_h,&status);
   if (status) printf("%s\n",cosmo->status_message);
-  ccl_angular_cls(cosmo,w,tr_nc_1,tr_nc_2,NELLS,ells,cls_dd_12_h,&status);
+  ccl_angular_cls(cosmo,w,tr_nc_1,tr_nc_2,NULL,NELLS,ells,cls_dd_12_h,&status);
   if (status) printf("%s\n",cosmo->status_message);
-  ccl_angular_cls(cosmo,w,tr_nc_2,tr_nc_2,NELLS,ells,cls_dd_22_h,&status);
+  ccl_angular_cls(cosmo,w,tr_nc_2,tr_nc_2,NULL,NELLS,ells,cls_dd_22_h,&status);
   if (status) printf("%s\n",cosmo->status_message);
-  ccl_angular_cls(cosmo,w,tr_nc_1,tr_wl_1,NELLS,ells,cls_dl_11_h,&status);
+  ccl_angular_cls(cosmo,w,tr_nc_1,tr_wl_1,NULL,NELLS,ells,cls_dl_11_h,&status);
   if (status) printf("%s\n",cosmo->status_message);
-  ccl_angular_cls(cosmo,w,tr_nc_1,tr_wl_2,NELLS,ells,cls_dl_12_h,&status);
+  ccl_angular_cls(cosmo,w,tr_nc_1,tr_wl_2,NULL,NELLS,ells,cls_dl_12_h,&status);
   if (status) printf("%s\n",cosmo->status_message);
-  ccl_angular_cls(cosmo,w,tr_nc_1,tr_cl,NELLS,ells,cls_dc_1_h,&status);
+  ccl_angular_cls(cosmo,w,tr_nc_1,tr_cl,NULL,NELLS,ells,cls_dc_1_h,&status);
   if (status) printf("%s\n",cosmo->status_message);
-  ccl_angular_cls(cosmo,w,tr_nc_2,tr_cl,NELLS,ells,cls_dc_2_h,&status);
+  ccl_angular_cls(cosmo,w,tr_nc_2,tr_cl,NULL,NELLS,ells,cls_dc_2_h,&status);
   if (status) printf("%s\n",cosmo->status_message);
-  ccl_angular_cls(cosmo,w,tr_nc_2,tr_wl_2,NELLS,ells,cls_dl_22_h,&status);
+  ccl_angular_cls(cosmo,w,tr_nc_2,tr_wl_2,NULL,NELLS,ells,cls_dl_22_h,&status);
   if (status) printf("%s\n",cosmo->status_message);
-  ccl_angular_cls(cosmo,w,tr_wl_1,tr_wl_1,NELLS,ells,cls_ll_11_h,&status);
+  ccl_angular_cls(cosmo,w,tr_wl_1,tr_wl_1,NULL,NELLS,ells,cls_ll_11_h,&status);
   if (status) printf("%s\n",cosmo->status_message);
-  ccl_angular_cls(cosmo,w,tr_wl_1,tr_wl_2,NELLS,ells,cls_ll_12_h,&status);
+  ccl_angular_cls(cosmo,w,tr_wl_1,tr_wl_2,NULL,NELLS,ells,cls_ll_12_h,&status);
   if (status) printf("%s\n",cosmo->status_message);
-  ccl_angular_cls(cosmo,w,tr_wl_2,tr_wl_2,NELLS,ells,cls_ll_22_h,&status);
+  ccl_angular_cls(cosmo,w,tr_wl_2,tr_wl_2,NULL,NELLS,ells,cls_ll_22_h,&status);
   if (status) printf("%s\n",cosmo->status_message);
-  ccl_angular_cls(cosmo,w,tr_wl_1,tr_cl,NELLS,ells,cls_lc_1_h,&status);
+  ccl_angular_cls(cosmo,w,tr_wl_1,tr_cl,NULL,NELLS,ells,cls_lc_1_h,&status);
   if (status) printf("%s\n",cosmo->status_message);
-  ccl_angular_cls(cosmo,w,tr_wl_2,tr_cl,NELLS,ells,cls_lc_2_h,&status);
+  ccl_angular_cls(cosmo,w,tr_wl_2,tr_cl,NULL,NELLS,ells,cls_lc_2_h,&status);
   if (status) printf("%s\n",cosmo->status_message);
-  ccl_angular_cls(cosmo,w,tr_cl,tr_cl,NELLS,ells,cls_cc_h,&status);
+  ccl_angular_cls(cosmo,w,tr_cl,tr_cl,NULL,NELLS,ells,cls_cc_h,&status);
   if (status) printf("%s\n",cosmo->status_message);
   
   for(int ii=2;ii<w->n_ls-1;ii++) {

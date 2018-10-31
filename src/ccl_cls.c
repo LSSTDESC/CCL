@@ -810,6 +810,7 @@ typedef struct {
   CCL_ClWorkspace *w;
   CCL_ClTracer *clt1;
   CCL_ClTracer *clt2;
+  ccl_p2d_t *psp;
   int *status;
 } IntClPar;
 
@@ -828,7 +829,7 @@ static double cl_integrand(double lk,void *params)
   double k=pow(10.,lk);
   double chi=(p->w->l_arr[p->il]+0.5)/k;
   double a=ccl_scale_factor_of_chi(p->cosmo,chi,p->status);
-  double pk=ccl_nonlin_matter_power(p->cosmo,k,a,p->status);
+  double pk=ccl_p2d_t_eval(p->psp,k,a,p->cosmo,p->status);
   
   return k*pk*d1*d2;
 }
@@ -888,20 +889,32 @@ static void get_k_interval(ccl_cosmology *cosmo,CCL_ClWorkspace *w,
 //clt1 -> tracer #1
 //clt2 -> tracer #2
 static double ccl_angular_cl_native(ccl_cosmology *cosmo,CCL_ClWorkspace *cw,int il,
-				    CCL_ClTracer *clt1,CCL_ClTracer *clt2,int * status)
+				    CCL_ClTracer *clt1,CCL_ClTracer *clt2,
+				    ccl_p2d_t *psp,int * status)
 {
   int clastatus=0, gslstatus;
   IntClPar ipar;
   double result=0,eresult;
   double lkmin,lkmax;
+  ccl_p2d_t *psp_use;
   gsl_function F;
   gsl_integration_workspace *w=gsl_integration_workspace_alloc(ccl_gsl->N_ITERATION);
 
+  if(psp==NULL) {
+    if (!cosmo->computed_power) ccl_cosmology_compute_power(cosmo, status);
+    // Return if compilation failed
+    if (!cosmo->computed_power) return NAN;
+    psp_use=cosmo->data.p_nl;
+  }
+  else
+    psp_use=psp;
+  
   ipar.il=il;
   ipar.cosmo=cosmo;
   ipar.w=cw;
   ipar.clt1=clt1;
   ipar.clt2=clt2;
+  ipar.psp=psp_use;
   ipar.status = &clastatus;
   F.function=&cl_integrand;
   F.params=&ipar;
@@ -942,7 +955,7 @@ static double ccl_angular_cl_native(ccl_cosmology *cosmo,CCL_ClWorkspace *cw,int
 }
 
 void ccl_angular_cls(ccl_cosmology *cosmo,CCL_ClWorkspace *w,
-		     CCL_ClTracer *clt1,CCL_ClTracer *clt2,
+		     CCL_ClTracer *clt1,CCL_ClTracer *clt2,ccl_p2d_t *psp,
 		     int nl_out,int *l_out,double *cl_out,int *status)
 {
   int ii,do_angpow;
@@ -1008,7 +1021,7 @@ void ccl_angular_cls(ccl_cosmology *cosmo,CCL_ClWorkspace *w,
     //Compute limber nodes
     for(ii=0;ii<w->n_ls;ii++) {
       if((!do_angpow) || (w->l_arr[ii]>w->l_limber))
-	cl_nodes[ii]=ccl_angular_cl_native(cosmo,w,ii,clt1,clt2,status);
+	cl_nodes[ii]=ccl_angular_cl_native(cosmo,w,ii,clt1,clt2,psp,status);
     }
 
     //Interpolate into ells requested by user
