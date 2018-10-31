@@ -90,7 +90,7 @@ void angular_cl_vec(ccl_cosmology * cosmo, CCL_ClTracer *clt1, CCL_ClTracer *clt
     ell_int[i] = (int)(ell[i]);
 
   //Compute C_ells
-  ccl_angular_cls(cosmo, w, clt1, clt2, nell, ell_int, output, status);
+  ccl_angular_cls(cosmo, w, clt1, clt2, NULL, nell, ell_int, output, status);
 
   free(ell_int);
   ccl_cl_workspace_free(w);

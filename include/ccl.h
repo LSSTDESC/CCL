@@ -23,6 +23,7 @@
 #include "ccl_defs.h"
 #include "ccl_utils.h"
 #include "ccl_config.h"
+#include "ccl_params.h"
 #include "ccl_core.h"
 #include "ccl_error.h"
 #include "ccl_constants.h"

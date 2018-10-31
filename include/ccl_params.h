@@ -44,6 +44,11 @@ typedef struct ccl_spline_params {
 
 extern ccl_spline_params * ccl_splines;
 
+int ccl_get_pk_spline_na(void);
+int ccl_get_pk_spline_nk(void);
+void ccl_get_pk_spline_a_array(int ndout,double* doutput,int *status);
+void ccl_get_pk_spline_lk_array(int ndout,double* doutput,int *status);
+
 /**
  * Struct that contains parameters that control the accuracy of various GSL
  * routines.
