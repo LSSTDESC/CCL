@@ -120,10 +120,8 @@ def test_swig_cls():
         COSMO,
         None, None,
         1, 1, 1,
-        0, 0, 0,
         0,
-        [0, 1],
-        5,
+        "none",
         status)
 
     assert_raises(
@@ -133,7 +131,6 @@ def test_swig_cls():
         [0, 1, 2],
         2,
         status)
-
 
 def test_swig_core():
     status = 0
@@ -314,7 +311,6 @@ def test_swig_power():
             [1.0, 2.0],
             3,
             status)
-
 
 if __name__ == '__main__':
     run_module_suite()

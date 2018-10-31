@@ -46,7 +46,7 @@ CTEST_SETUP(create_mnu) {
 
 // If you wanted to you could call other functions in here too and use these
 // assertions there also.
-CTEST2_SKIP(create_mnu, create_mnu_norm) {
+CTEST2(create_mnu, create_mnu_norm) {
   ccl_parameters params_norm = ccl_parameters_create(data->Omega_c, data->Omega_b, data->Omega_k,
 						data->Neff, &(data->mnuval), data->mnu_type_norm,
 						data->w0, data->wa,
@@ -56,7 +56,7 @@ CTEST2_SKIP(create_mnu, create_mnu_norm) {
   ASSERT_DBL_NEAR_TOL(params_norm.mnu[2]*params_norm.mnu[2] - params_norm.mnu[0]*params_norm.mnu[0], DELTAM13_sq_pos, 1e-4);
 }
 
-CTEST2_SKIP(create_mnu, create_mnu_inv){
+CTEST2(create_mnu, create_mnu_inv){
   
   ccl_parameters params_inv = ccl_parameters_create(data->Omega_c, data->Omega_b, data->Omega_k,
 						data->Neff, &(data->mnuval), data->mnu_type_inv,

@@ -127,7 +127,7 @@ static void compare_massfunc(int model, struct massfunc_data * data)
   free(cosmo);
 }
 
-CTEST2_SKIP(massfunc, model_1) {
+CTEST2(massfunc, model_1) {
    int model = 0;
    compare_massfunc(model, data);
 }

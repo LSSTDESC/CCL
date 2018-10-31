@@ -118,27 +118,27 @@ static void compare_growth(int model, struct growth_allz_data * data)
   ccl_cosmology_free(cosmo);
 }
 
-CTEST2_SKIP(growth_allz, model_1) {
+CTEST2(growth_allz, model_1) {
   int model = 0;
   compare_growth(model, data);
 }
 
-CTEST2_SKIP(growth_allz, model_2) {
+CTEST2(growth_allz, model_2) {
   int model = 1;
   compare_growth(model, data);
 }
 
-CTEST2_SKIP(growth_allz, model_3) {
+CTEST2(growth_allz, model_3) {
   int model = 2;
   compare_growth(model, data);
 }
 
-CTEST2_SKIP(growth_allz, model_4) {
+CTEST2(growth_allz, model_4) {
   int model = 3;
   compare_growth(model, data);
 }
 
-CTEST2_SKIP(growth_allz, model_5) {
+CTEST2(growth_allz, model_5) {
   int model = 4;
   compare_growth(model, data);
 }

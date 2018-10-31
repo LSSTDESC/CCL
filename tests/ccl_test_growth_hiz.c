@@ -104,17 +104,17 @@ static void compare_growth_hiz(int model, struct growth_hiz_data * data)
   ccl_cosmology_free(cosmo);
 }
 
-CTEST2_SKIP(growth_hiz, model_1) {
+CTEST2(growth_hiz, model_1) {
   int model = 0;
   compare_growth_hiz(model, data);
 }
 
-CTEST2_SKIP(growth_hiz, model_2) {
+CTEST2(growth_hiz, model_2) {
   int model = 1;
   compare_growth_hiz(model, data);
 }
 
-CTEST2_SKIP(growth_hiz, model_3) {
+CTEST2(growth_hiz, model_3) {
   int model = 2;
   compare_growth_hiz(model, data);
 }

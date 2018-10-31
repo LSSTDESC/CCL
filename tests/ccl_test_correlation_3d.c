@@ -151,17 +151,17 @@ static void compare_correlation_3d(int i_model,struct corrs_3d_data * data)
   ccl_cosmology_free(cosmo);
 }
 
-CTEST2_SKIP(corrs_3d,model_1) {
+CTEST2(corrs_3d,model_1) {
   int model=1;
   compare_correlation_3d(model,data);
 }
 
-CTEST2_SKIP(corrs_3d,model_2) {
+CTEST2(corrs_3d,model_2) {
   int model=2;
   compare_correlation_3d(model,data);
 }
 
-CTEST2_SKIP(corrs_3d,model_3) {
+CTEST2(corrs_3d,model_3) {
   int model=3;
   compare_correlation_3d(model,data);
 }

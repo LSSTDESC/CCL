@@ -195,27 +195,27 @@ static void compare_distances_mnu(int model, struct distances_astropy_mnu_lowz_d
   ccl_cosmology_free(cosmo);
 }
 
-CTEST2_SKIP(distances_astropy_mnu_lowz, model_1) {
+CTEST2(distances_astropy_mnu_lowz, model_1) {
   int model = 0;
   compare_distances_mnu(model, data);
 }
 
-CTEST2_SKIP(distances_astropy_mnu_lowz, model_2) {
+CTEST2(distances_astropy_mnu_lowz, model_2) {
   int model = 1;
   compare_distances_mnu(model, data);
 }
 
-CTEST2_SKIP(distances_astropy_mnu_lowz, model_3) {
+CTEST2(distances_astropy_mnu_lowz, model_3) {
   int model = 2;
   compare_distances_mnu(model, data);
 }
 
-CTEST2_SKIP(distances_astropy_mnu_lowz, model_4) {
+CTEST2(distances_astropy_mnu_lowz, model_4) {
   int model = 3;
   compare_distances_mnu(model, data);
 }
 
-CTEST2_SKIP(distances_astropy_mnu_lowz, model_5) {
+CTEST2(distances_astropy_mnu_lowz, model_5) {
   int model = 4;
   compare_distances_mnu(model, data);
 }

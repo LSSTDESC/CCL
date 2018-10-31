@@ -59,7 +59,7 @@ CTEST_TEARDOWN(p2d) {
   free(data->pk_arr);
 }
 
-CTEST2_SKIP(p2d,sanity) {
+CTEST2(p2d,sanity) {
   int status=0;
   ccl_p2d_t *psp;
   double pk;

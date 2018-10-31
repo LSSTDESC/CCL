@@ -185,8 +185,7 @@ static void compare_corr(char *compare_type,int algorithm,struct corrs_data * da
   /*Use Limber computation*/
   double l_logstep = 1.05;
   double l_linstep = 20.;
-  double dlk = 0.01;
-  CCL_ClWorkspace *wyl=ccl_cl_workspace_default_limber(ELL_MAX_CL+1,l_logstep,l_linstep,dlk,&status);
+  CCL_ClWorkspace *wyl=ccl_cl_workspace_new_limber(ELL_MAX_CL+1,l_logstep,l_linstep,&status);
 
   wt_dd_11_h=malloc(nofl*sizeof(double));
   ccl_angular_cls(cosmo,wyl,tr_nc_1,tr_nc_1,ELL_MAX_CL,ells,clarr,&status);
@@ -382,10 +381,10 @@ static void compare_corr(char *compare_type,int algorithm,struct corrs_data * da
   ccl_cl_workspace_free(wyl);
 }
 
-CTEST2_SKIP(corrs,analytic_fftlog) {
+CTEST2(corrs,analytic_fftlog) {
   compare_corr("analytic",CCL_CORR_FFTLOG,data);
 }
 
-CTEST2_SKIP(corrs,analytic_bessel) {
+CTEST2(corrs,analytic_bessel) {
   compare_corr("analytic",CCL_CORR_BESSEL,data);
 }

@@ -650,6 +650,7 @@ static eh_struct *eh_struct_new(ccl_parameters *params)
   //////
   // Computes Eisenstein & Hu parameters for
   // P_k and r_sound
+  // see astro-ph/9709112 for the relevant equations
   double OMh2,OBh2;
   double th2p7;
   eh_struct *eh=malloc(sizeof(eh_struct));
@@ -667,7 +668,7 @@ static eh_struct *eh_struct_new(ccl_parameters *params)
   double b1,b2;
   b1=0.313*pow(OMh2,-0.419)*(1+0.607*pow(OMh2,0.674));
   b2=0.238*pow(OMh2,0.223);
-  eh->zdrag=1291*pow(OMh2,0.251)*(1+b1*pow(OBh2,b2))/(1+0.659*pow(OMh2,0.828));
+  eh->zdrag=1291*pow(OMh2,0.251)*(1+b1*pow(OBh2,b2))/(1+0.659*pow(OMh2,0.828)); 
 
   //These are the baryon-to-photon ratios
   //at equality (Req) and drag (Rd) epochs
@@ -737,10 +738,9 @@ static double tkEH_c(eh_struct *eh,double k)
 static double jbes0(double x)
 {
   double jl;
-  double ax=fabs(x);
-  double ax2=ax*ax;
+  double ax2=x*x;
 
-  if(ax<0.01) jl=1-ax2*(1-ax2/20.)/6.;
+  if(ax2<1e-4) jl=1-ax2*(1-ax2/20.)/6.;
   else jl=sin(x)/x;
 
   return jl;
@@ -760,7 +760,7 @@ static double tkEH_b(eh_struct *eh,double k)
     x_bessel=x*pow(1+eh->bnode*eh->bnode*eh->bnode/(x*x*x),-1./3.);
   }
 
-  part1=tkEH_0(eh->keq,k,1,1)/(1+pow(x/5.2,2));
+  part1=tkEH_0(eh->keq,k,1,1)/(1+pow(x/5.2,2)); 
 
   //Second term of Eq. 21
   if(k==0)
@@ -809,7 +809,6 @@ static double eh_power(ccl_parameters *params,eh_struct *eh,double k,int wiggled
   double kinvh=k/params->h;  //Changed to h/Mpc
   return pow(k,params->n_s)*tsqr_EH(params,eh,kinvh,wiggled);
 }
-
 static void ccl_cosmology_compute_power_eh(ccl_cosmology * cosmo, int * status)
 {
   double sigma8,log_sigma8;
@@ -1139,7 +1138,7 @@ static void ccl_cosmology_compute_power_emu(ccl_cosmology * cosmo, int * status)
     }
   }
   double w0wacomb = -cosmo->params.w0 - cosmo->params.wa;
-  if(w0wacomb<0.3*0.3*0.3*0.3){
+  if(w0wacomb<8.1e-3){ //0.3^4
     *status=CCL_ERROR_INCONSISTENT;
     ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_cosmology_compute_power_emu(): w0 and wa do not satisfy the emulator bound\n");
     return;

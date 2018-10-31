@@ -242,32 +242,32 @@ static void compare_power_nu_nl(int i_model,struct power_nu_nl_data * data)
   ccl_cosmology_free(cosmo_nonlin);
 }
 
-CTEST2_SKIP(power_nu,model_1) {
+CTEST2(power_nu,model_1) {
   int model=1;
   compare_power_nu(model,data);
 }
 
-CTEST2_SKIP(power_nu,model_2) {
+CTEST2(power_nu,model_2) {
   int model=2;
   compare_power_nu(model,data);
 }
 
-CTEST2_SKIP(power_nu,model_3) {
+CTEST2(power_nu,model_3) {
   int model=3;
   compare_power_nu(model,data);
 }
 
-CTEST2_SKIP(power_nu_nl,model_1) {
+CTEST2(power_nu_nl,model_1) {
   int model=1;
   compare_power_nu_nl(model,data);
 }
 
-CTEST2_SKIP(power_nu_nl,model_2) {
+CTEST2(power_nu_nl,model_2) {
   int model=2;
   compare_power_nu_nl(model,data);
 }
 
-CTEST2_SKIP(power_nu_nl,model_3) {
+CTEST2(power_nu_nl,model_3) {
   int model=3;
   compare_power_nu_nl(model,data);
 }

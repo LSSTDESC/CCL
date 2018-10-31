@@ -156,52 +156,52 @@ static void compare_distances(int model, struct distances_class_data * data)
   ccl_cosmology_free(cosmo);
 }
 
-CTEST2_SKIP(distances_class, model_1) {
+CTEST2(distances_class, model_1) {
   int model = 0;
   compare_distances(model, data);
 }
 
-CTEST2_SKIP(distances_class, model_2) {
+CTEST2(distances_class, model_2) {
   int model = 1;
   compare_distances(model, data);
 }
 
-CTEST2_SKIP(distances_class, model_3) {
+CTEST2(distances_class, model_3) {
   int model = 2;
   compare_distances(model, data);
 }
 
-CTEST2_SKIP(distances_class, model_4) {
+CTEST2(distances_class, model_4) {
   int model = 3;
   compare_distances(model, data);
 }
 
-CTEST2_SKIP(distances_class, model_5) {
+CTEST2(distances_class, model_5) {
   int model = 4;
   compare_distances(model, data);
 }
 
-CTEST2_SKIP(distances_class, model_7) {
+CTEST2(distances_class, model_7) {
   int model = 5;
   compare_distances(model, data);
 }
 
-CTEST2_SKIP(distances_class, model_8) {
+CTEST2(distances_class, model_8) {
   int model = 6;
   compare_distances(model, data);
 }
 
-CTEST2_SKIP(distances_class, model_9) {
+CTEST2(distances_class, model_9) {
   int model = 7;
   compare_distances(model, data);
 }
 
-CTEST2_SKIP(distances_class, model_10) {
+CTEST2(distances_class, model_10) {
   int model = 8;
   compare_distances(model, data);
 }
 
-CTEST2_SKIP(distances_class, model_11) {
+CTEST2(distances_class, model_11) {
   int model = 9;
   compare_distances(model, data);
 }

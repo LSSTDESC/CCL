@@ -166,17 +166,17 @@ static void compare_halomod(int model, struct halomod_data * data)
   
 }
 
-CTEST2_SKIP(halomod, model_1) {
+CTEST2(halomod, model_1) {
   int model = 0;
   compare_halomod(model, data);
 }
 
-CTEST2_SKIP(halomod, model_2) {
+CTEST2(halomod, model_2) {
   int model = 1;
   compare_halomod(model, data);
 }
 
-CTEST2_SKIP(halomod, model_3) {
+CTEST2(halomod, model_3) {
   int model = 2;
   compare_halomod(model, data);
 }

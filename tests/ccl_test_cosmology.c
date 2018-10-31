@@ -39,7 +39,7 @@ CTEST_SETUP(cosmology) {
 }
 
 // Check to see if general ccl_cosmology struct is initialized correctly
-CTEST2_SKIP(cosmology, create_general_cosmo) {
+CTEST2(cosmology, create_general_cosmo) {
   ccl_configuration config = default_config;
   ccl_parameters params = ccl_parameters_create_flat_lcdm(
     data->Omega_c, data->Omega_b, data->h, data->A_s, data->n_s,

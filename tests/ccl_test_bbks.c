@@ -112,17 +112,17 @@ static void compare_bbks(int i_model,struct bbks_data * data)
   ccl_cosmology_free(cosmo);
 }
 
-CTEST2_SKIP(bbks,model_1) {
+CTEST2(bbks,model_1) {
   int model=1;
   compare_bbks(model,data);
 }
 
-CTEST2_SKIP(bbks,model_2) {
+CTEST2(bbks,model_2) {
   int model=2;
   compare_bbks(model,data);
 }
 
-CTEST2_SKIP(bbks,model_3) {
+CTEST2(bbks,model_3) {
   int model=3;
   compare_bbks(model,data);
 }
