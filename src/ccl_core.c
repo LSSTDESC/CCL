@@ -768,8 +768,8 @@ void ccl_data_free(ccl_data * data)
   gsl_spline_free(data->achi);
   gsl_spline_free(data->logsigma);
   gsl_spline_free(data->dlnsigma_dlogm);
-  gsl_spline2d_free(data->p_lin);
-  gsl_spline2d_free(data->p_nl);
+  ccl_p2d_t_free(data->p_lin);
+  ccl_p2d_t_free(data->p_nl);
   gsl_spline_free(data->alphahmf);
   gsl_spline_free(data->betahmf);
   gsl_spline_free(data->gammahmf);

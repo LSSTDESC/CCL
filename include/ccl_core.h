@@ -10,6 +10,35 @@
 
 CCL_BEGIN_DECLS
 
+
+typedef enum ccl_p2d_extrap_growth_t
+{
+  ccl_p2d_cclgrowth = 401,
+  ccl_p2d_customgrowth = 402,
+  ccl_p2d_constantgrowth = 403,
+  ccl_p2d_no_extrapol = 404,
+} ccl_p2d_extrap_growth_t;
+  
+typedef enum ccl_p2d_interp_t
+{
+  ccl_p2d_3 = 303,
+} ccl_p2d_interp_t;
+
+/**
+ * Struct containing a 2D power spectrum
+ */
+typedef struct {
+  double lkmin,lkmax;
+  double amin,amax;
+  int extrap_order_lok;
+  int extrap_order_hik;
+  ccl_p2d_extrap_growth_t extrap_linear_growth;
+  int is_log;
+  double (*growth)(double);
+  double growth_factor_0;
+  gsl_spline2d *pk;
+} ccl_p2d_t;
+
 /**
  * Struct containing the parameters defining a cosmology
  */
@@ -108,12 +137,8 @@ typedef struct ccl_data{
   gsl_spline * etahmf;
 
   // These are all functions of the wavenumber k and the scale factor a.
-  gsl_spline2d * p_lin;
-  gsl_spline2d * p_nl;
-  double k_min_lin; //k_min  [1/Mpc] <- minimum wavenumber that the power spectrum has been computed to
-  double k_min_nl;
-  double k_max_lin;
-  double k_max_nl;
+  ccl_p2d_t * p_lin;
+  ccl_p2d_t * p_nl;
 } ccl_data;
 
 /**

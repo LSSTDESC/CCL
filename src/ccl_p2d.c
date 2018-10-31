@@ -30,7 +30,8 @@ ccl_p2d_t *ccl_p2d_t_new(int na,double *a_arr,
 
   if((extrap_linear_growth!=ccl_p2d_cclgrowth) &&
      (extrap_linear_growth!=ccl_p2d_customgrowth) &&
-     (extrap_linear_growth!=ccl_p2d_constantgrowth))
+     (extrap_linear_growth!=ccl_p2d_constantgrowth) &&
+     (extrap_linear_growth!=ccl_p2d_no_extrapol))
     *status=CCL_ERROR_INCONSISTENT;
   
   if(*status==0) {
@@ -81,8 +82,13 @@ double ccl_p2d_t_eval(ccl_p2d_t *psp,double k,double a,ccl_cosmology *cosmo,
     *status=CCL_ERROR_SPLINE_EV;
     return -1;
   }
-  else if(is_hiz) //Are we below the interpolation range in a?
+  else if(is_hiz) { //Are we below the interpolation range in a?
+    if(psp->extrap_linear_growth==ccl_p2d_no_extrapol) {
+      *status=CCL_ERROR_SPLINE_EV;
+      return NAN;
+    }
     a_ev=psp->amin;
+  }
 
   double pk_pre,pk_post;
   double lk=log(k);

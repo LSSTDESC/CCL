@@ -43,25 +43,11 @@ CTEST_SETUP(emu) {
   data->mnu=&mnuval;
   data->mnu_type=ccl_mnu_sum;
 
-  double *sigma8;
-  double *Omega_c;
-  double *Omega_b;
-  double *n_s;
-  double *h;
-  double *w_0;
-  double *w_a;
   int status=0;
   char fname[256],str[1024];
   char* rtn;
   FILE *f;
   int i;
-  sigma8=malloc(6*sizeof(double));
-  Omega_c=malloc(6*sizeof(double));
-  Omega_b=malloc(6*sizeof(double));
-  n_s=malloc(6*sizeof(double));
-  h=malloc(6*sizeof(double));
-  w_0=malloc(6*sizeof(double));
-  w_a=malloc(6*sizeof(double));
 
   //Each line of this file corresponds to the cosmological parameters for
   //cosmologies {1,3,5,6,8,10} of the emulator set. Notice that Omega_i
@@ -75,19 +61,11 @@ CTEST_SETUP(emu) {
 
   double tmp;
   for(int i=0;i<6;i++) {
-
-    status=fscanf(f,"%le %le %le %le %le %le %le\n",&Omega_c[i],&Omega_b[i],&h[i],&sigma8[i],&n_s[i],&w_0[i],&w_a[i]);
+    status=fscanf(f,"%le %le %le %le %le %le %le\n",&(data->Omega_c[i]),&(data->Omega_b[i]),&(data->h[i]),&(data->sigma8[i]),&(data->n_s[i]),&(data->w_0[i]),&(data->w_a[i]));
     if(status!=7) {
       fprintf(stderr,"Error reading file %s, line %d\n",fname,i);
       exit(1);
     }
-    data->w_0[i] = w_0[i];
-    data->w_a[i] = w_a[i];
-    data->h[i] = h[i];
-    data->sigma8[i] = sigma8[i];
-    data->Omega_c[i] = Omega_c[i];
-    data->Omega_b[i] = Omega_b[i];
-    data->n_s[i] = n_s[i];
   }
   fclose(f);
 }
@@ -120,7 +98,10 @@ static void compare_emu(int i_model,struct emu_data * data)
   config.matter_power_spectrum_method = ccl_emu;
 
   //None of the current cosmologies being checked include neutrinos
-  ccl_parameters params = ccl_parameters_create(data->Omega_c[i_model-1],data->Omega_b[i_model-1],0.0,data->Neff, data->mnu, data->mnu_type, data->w_0[i_model-1],data->w_a[i_model-1],data->h[i_model-1],data->sigma8[i_model-1],data->n_s[i_model-1],-1,-1,-1,-1,NULL,NULL, &status);
+  ccl_parameters params = ccl_parameters_create(data->Omega_c[i_model-1],data->Omega_b[i_model-1],0.0,data->Neff,
+						data->mnu, data->mnu_type, data->w_0[i_model-1],data->w_a[i_model-1],
+						data->h[i_model-1],data->sigma8[i_model-1],data->n_s[i_model-1],
+						-1,-1,-1,-1,NULL,NULL, &status);
   params.Omega_l=params.Omega_l+params.Omega_g;
   params.Omega_g=0;
   ccl_cosmology * cosmo = ccl_cosmology_create(params, config);
@@ -161,7 +142,6 @@ CTEST2_SKIP(emu,model_1) {
   int model=1;
   compare_emu(model,data);
 }
-
 
 CTEST2_SKIP(emu,model_2) {
   int model=2;

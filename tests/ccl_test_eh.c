@@ -115,7 +115,7 @@ static void compare_eh(int i_model,struct eh_data * data)
   ccl_cosmology_free(cosmo);
 }
 
-CTEST2_SKIP(eh,model_1) {
+CTEST2(eh,model_1) {
   int model=1;
   compare_eh(model,data);
 }

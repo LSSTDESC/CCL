@@ -72,7 +72,7 @@ static void compare_bbks(int i_model,struct bbks_data * data)
   params.sigma8=data->sigma8;
   ccl_cosmology * cosmo = ccl_cosmology_create(params, config);
   ASSERT_NOT_NULL(cosmo);
-  
+
   sprintf(fname,"./tests/benchmark/model%d_pk.txt",i_model);
   f=fopen(fname,"r");
   if(f==NULL) {
@@ -112,17 +112,17 @@ static void compare_bbks(int i_model,struct bbks_data * data)
   ccl_cosmology_free(cosmo);
 }
 
-CTEST2_SKIP(bbks,model_1) {
+CTEST2(bbks,model_1) {
   int model=1;
   compare_bbks(model,data);
 }
 
-CTEST2_SKIP(bbks,model_2) {
+CTEST2(bbks,model_2) {
   int model=2;
   compare_bbks(model,data);
 }
 
-CTEST2_SKIP(bbks,model_3) {
+CTEST2(bbks,model_3) {
   int model=3;
   compare_bbks(model,data);
 }
