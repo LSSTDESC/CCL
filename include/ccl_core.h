@@ -252,38 +252,6 @@ ccl_parameters ccl_parameters_read_yaml(const char * filename, int *status);
  */
 void ccl_cosmology_free(ccl_cosmology * cosmo);
 
-/**
- * Compute comoving distances and spline to be stored
- * in the cosmology structure.
- * @param cosmo Cosmological parameters
- * @param status Status flag. 0 if there are no errors, nonzero otherwise.
- * For specific cases see documentation for ccl_error.c
- * @return void
- * This function is located in ccl_background.c
- */
-void ccl_cosmology_compute_distances(ccl_cosmology * cosmo,int *status);
-
-/**
- * Compute the growth function and a spline to be stored
- * in the cosmology structure.
- * @param cosmo Cosmological parameters
- * @param status Status flag. 0 if there are no errors, nonzero otherwise.
- * For specific cases see documentation for ccl_error.c
- * @return void
- * This function is located in ccl_background.c
- */
-void ccl_cosmology_compute_growth(ccl_cosmology * cosmo, int * status);
-
-/**
- * Compute the power spectrum and create a 2d spline P(k,z) to be stored
- * in the cosmology structure.
- * @param cosmo Cosmological parameters
- * @param status Status flag. 0 if there are no errors, nonzero otherwise.
- * For specific cases see documentation for ccl_error.c
- * @return void
- */
-void ccl_cosmology_compute_power(ccl_cosmology * cosmo, int* status);
-
 CCL_END_DECLS
 
 #endif

@@ -265,6 +265,28 @@ double ccl_rho_x(ccl_cosmology * cosmo, double a, ccl_species_x_label label, int
  */
 double ccl_omega_x(ccl_cosmology * cosmo, double a, ccl_species_x_label label, int* status);
 
+/**
+ * Compute comoving distances and spline to be stored
+ * in the cosmology structure.
+ * @param cosmo Cosmological parameters
+ * @param status Status flag. 0 if there are no errors, nonzero otherwise.
+ * For specific cases see documentation for ccl_error.c
+ * @return void
+ * This function is located in ccl_background.c
+ */
+void ccl_cosmology_compute_distances(ccl_cosmology * cosmo,int *status);
+
+/**
+ * Compute the growth function and a spline to be stored
+ * in the cosmology structure.
+ * @param cosmo Cosmological parameters
+ * @param status Status flag. 0 if there are no errors, nonzero otherwise.
+ * For specific cases see documentation for ccl_error.c
+ * @return void
+ * This function is located in ccl_background.c
+ */
+void ccl_cosmology_compute_growth(ccl_cosmology * cosmo, int * status);
+
 CCL_END_DECLS
 
 #endif
