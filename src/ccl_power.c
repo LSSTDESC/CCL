@@ -15,8 +15,8 @@
 #include "ccl_emu17_params.h"
 
 
-/*------ ROUTINE: ccl_cosmology_compute_power_class -----
-INPUT: ccl_cosmology * cosmo
+/*------ ROUTINE: ccl_free_class_structs -----
+INPUT: ccl_cosmology * cosmo, ...
 */
 static void ccl_free_class_structs(ccl_cosmology *cosmo,
 				   struct background *ba,
@@ -289,6 +289,10 @@ static void ccl_fill_class_parameters(ccl_cosmology * cosmo, struct file_content
 
   strcpy(fc->name[3],"z_max_pk");
   sprintf(fc->value[3],"%.15e",1./ccl_splines->A_SPLINE_MINLOG_PK-1.);
+  
+  // Set Halofit w0-wa rescaling spline max. redshift
+  strcpy(fc->name[18],"pk_eq_z_max");
+  sprintf(fc->value[18],"%.15e",1./ccl_splines->A_SPLINE_MINLOG_PK-1.);
 
   strcpy(fc->name[4],"modes");
   strcpy(fc->value[4],"s");
