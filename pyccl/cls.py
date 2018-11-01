@@ -1,5 +1,4 @@
 from . import ccllib as lib
-from . import constants as const
 from .core import check
 import numpy as np
 import collections
@@ -285,7 +284,7 @@ def _check_array_params(f_arg):
 
 
 def angular_cl(cosmo, cltracer1, cltracer2, ell,
-               l_limber=-1., l_logstep=1.05, l_linstep=20.) :
+               l_limber=-1., l_logstep=1.05, l_linstep=20.):
     """Calculate the angular (cross-)power spectrum for a pair of tracers.
 
     Args:
@@ -317,15 +316,18 @@ def angular_cl(cosmo, cltracer1, cltracer2, ell,
     if isinstance(ell, float) or isinstance(ell, int):
         # Use single-value function
         cl_one, status = lib.angular_cl_vec(
-            cosmo, clt1, clt2, l_limber, l_logstep, l_linstep, [ell], 1, status)
+            cosmo, clt1, clt2, l_limber, l_logstep,
+            l_linstep, [ell], 1, status)
         cl = cl_one[0]
     elif isinstance(ell, np.ndarray):
         # Use vectorised function
         cl, status = lib.angular_cl_vec(
-            cosmo, clt1, clt2, l_limber, l_logstep, l_linstep, ell, ell.size, status)
+            cosmo, clt1, clt2, l_limber, l_logstep,
+            l_linstep, ell, ell.size, status)
     else:
         # Use vectorised function
         cl, status = lib.angular_cl_vec(
-            cosmo, clt1, clt2, l_limber, l_logstep, l_linstep, ell, len(ell), status)
+            cosmo, clt1, clt2, l_limber, l_logstep,
+            l_linstep, ell, len(ell), status)
     check(status)
     return cl
