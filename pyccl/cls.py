@@ -1,6 +1,7 @@
 from . import ccllib as lib
 from . import constants as const
 from .core import check
+from .p2d import Pk2D
 import numpy as np
 import collections
 
@@ -284,9 +285,8 @@ def _check_array_params(f_arg):
     return z_f, f
 
 
-def angular_cl(cosmo, cltracer1, cltracer2, ell,
-               l_limber=-1., l_logstep=1.05, l_linstep=20., dchi=3.,
-               dlk=0.003, zmin=0.05) :
+def angular_cl(cosmo, cltracer1, cltracer2, ell, p_of_k_a=None,
+               l_limber=-1., l_logstep=1.05, l_linstep=20.) :
     """Calculate the angular (cross-)power spectrum for a pair of tracers.
 
     Args:
@@ -294,6 +294,8 @@ def angular_cl(cosmo, cltracer1, cltracer2, ell,
         cltracer1, cltracer2 (:obj:`Tracer`): Tracer objects, of any kind.
         ell (float or array_like): Angular wavenumber(s) at which to evaluate
             the angular power spectrum.
+        p_of_k_a (Pk2D object or None): 3D Power spectrum to project. If None,
+            the non-linear matter power spectrum will be used.
         l_limber (float) : Angular wavenumber beyond which Limber's
             approximation will be used. Defaults to -1.
         l_logstep (float) : logarithmic step in ell at low multipoles.
@@ -309,6 +311,14 @@ def angular_cl(cosmo, cltracer1, cltracer2, ell,
     # Access ccl_cosmology object
     cosmo = cosmo.cosmo
 
+    if p_of_k_a is not None :
+        if isinstance(p_of_k_a,Pk2D) :
+            psp=p_of_k_a.psp
+        else :
+            raise ValueError("p_of_k_a must be either a pyccl.Pk2D object or None")
+    else :
+        psp=None
+    
     # Access CCL_ClTracer objects
     clt1 = cltracer1.cltracer
     clt2 = cltracer2.cltracer
@@ -318,15 +328,15 @@ def angular_cl(cosmo, cltracer1, cltracer2, ell,
     if isinstance(ell, float) or isinstance(ell, int):
         # Use single-value function
         cl_one, status = lib.angular_cl_vec(
-            cosmo, clt1, clt2, l_limber, l_logstep, l_linstep, [ell], 1, status)
+            cosmo, clt1, clt2, psp, l_limber, l_logstep, l_linstep, [ell], 1, status)
         cl = cl_one[0]
     elif isinstance(ell, np.ndarray):
         # Use vectorised function
         cl, status = lib.angular_cl_vec(
-            cosmo, clt1, clt2, l_limber, l_logstep, l_linstep, ell, ell.size, status)
+            cosmo, clt1, clt2, psp, l_limber, l_logstep, l_linstep, ell, ell.size, status)
     else:
         # Use vectorised function
         cl, status = lib.angular_cl_vec(
-            cosmo, clt1, clt2, l_limber, l_logstep, l_linstep, ell, len(ell), status)
+            cosmo, clt1, clt2, psp, l_limber, l_logstep, l_linstep, ell, len(ell), status)
     check(status)
     return cl
