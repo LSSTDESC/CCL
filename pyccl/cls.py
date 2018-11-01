@@ -285,8 +285,7 @@ def _check_array_params(f_arg):
 
 
 def angular_cl(cosmo, cltracer1, cltracer2, ell,
-               l_limber=-1., l_logstep=1.05, l_linstep=20., dchi=3.,
-               dlk=0.003, zmin=0.05) :
+               l_limber=-1., l_logstep=1.05, l_linstep=20.) :
     """Calculate the angular (cross-)power spectrum for a pair of tracers.
 
     Args:
