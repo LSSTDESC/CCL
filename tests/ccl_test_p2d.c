@@ -95,34 +95,34 @@ CTEST2(p2d,sanity) {
   ASSERT_TRUE(status==0);
 
   //Get an error if we evaluate above a=1
-  double ktest=1E-2,atest=0.5;
-  pk=ccl_p2d_t_eval(psp,ktest,1.1,NULL,&status);
+  double lktest=-2.,atest=0.5;
+  pk=ccl_p2d_t_eval(psp,lktest,1.1,NULL,&status);
   ASSERT_TRUE(status);
   ASSERT_DBL_NEAR(-1.,pk);
   status=0;
 
   //Now put some sensible numbers within the redshift and k range
-  pk=ccl_p2d_t_eval(psp,ktest,atest,NULL,&status); 
+  pk=ccl_p2d_t_eval(psp,lktest,atest,NULL,&status); 
   ASSERT_TRUE(status==0);
-  ASSERT_DBL_NEAR(1,pk/pk_model_analytical(ktest,atest));
+  ASSERT_DBL_NEAR(1,pk/pk_model_analytical(exp(lktest),atest));
 
   //Evaluate at very low z and see if it checks out
   double alo=0.02;
-  pk=ccl_p2d_t_eval(psp,ktest,alo,NULL,&status);
+  pk=ccl_p2d_t_eval(psp,lktest,alo,NULL,&status);
   ASSERT_TRUE(status==0);
-  ASSERT_DBL_NEAR(1,pk/pk_model_analytical(ktest,alo));
+  ASSERT_DBL_NEAR(1,pk/pk_model_analytical(exp(lktest),alo));
 
   //Evaluate at very high k and see if it checks out
-  double khi=exp(data->lk_arr[data->n_k-1]*1.1);
-  pk=ccl_p2d_t_eval(psp,khi,atest,NULL,&status);
+  double lkhi=data->lk_arr[data->n_k-1]*1.1;
+  pk=ccl_p2d_t_eval(psp,lkhi,atest,NULL,&status);
   ASSERT_TRUE(status==0);
-  ASSERT_DBL_NEAR(1,pk/pk_model_analytical(khi,atest));
+  ASSERT_DBL_NEAR(1,pk/pk_model_analytical(exp(lkhi),atest));
 
   //Evaluate at very high k and see if it checks out
-  double klo=exp(data->lk_arr[0]*1.1);
-  pk=ccl_p2d_t_eval(psp,klo,atest,NULL,&status);
+  double lklo=data->lk_arr[0]*1.1;
+  pk=ccl_p2d_t_eval(psp,lklo,atest,NULL,&status);
   ASSERT_TRUE(status==0);
-  ASSERT_DBL_NEAR(1,pk/pk_model_analytical(klo,atest));
+  ASSERT_DBL_NEAR(1,pk/pk_model_analytical(exp(lklo),atest));
 
   ccl_p2d_t_free(psp);
 
@@ -160,9 +160,9 @@ CTEST2(p2d,sanity) {
   ASSERT_TRUE(status==0);
 
   //Evaluate at very low z and see if it checks out
-  double pk0=ccl_p2d_t_eval(psp,ktest,data->a_arr[0],NULL,&status);
+  double pk0=ccl_p2d_t_eval(psp,lktest,data->a_arr[0],NULL,&status);
   ASSERT_TRUE(status==0);
-  pk=ccl_p2d_t_eval(psp,ktest,alo,cosmo,&status);
+  pk=ccl_p2d_t_eval(psp,lktest,alo,cosmo,&status);
   ASSERT_TRUE(status==0);
   ASSERT_DBL_NEAR(1,pk/(pk0*gz*gz));
 

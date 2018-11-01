@@ -1373,7 +1373,7 @@ double ccl_linear_matter_power(ccl_cosmology * cosmo, double k, double a, int * 
   // Return if compilation failed
   if (!cosmo->computed_power) return NAN;
 
-  return ccl_p2d_t_eval(cosmo->data.p_lin,k,a,cosmo,status);
+  return ccl_p2d_t_eval(cosmo->data.p_lin,log(k),a,cosmo,status);
 }
 
 /*------ ROUTINE: ccl_nonlin_matter_power -----
@@ -1387,7 +1387,7 @@ double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double k, double a, int *s
   // Return if compilation failed
   if (!cosmo->computed_power) return NAN;
 
-  return ccl_p2d_t_eval(cosmo->data.p_nl,k,a,cosmo,status);
+  return ccl_p2d_t_eval(cosmo->data.p_nl,log(k),a,cosmo,status);
 }
 
 // Params for sigma(R) integrand

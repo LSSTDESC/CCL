@@ -6,7 +6,7 @@ import numpy as np
 #TODO choices about interpolation/extrapolation
 
 class Pk2D(object):
-    def __init__(self,pkfunc=None,a_arr=None,lk_arr=None,pk_arr=None) :
+    def __init__(self,pkfunc=None,a_arr=None,lk_arr=None,pk_arr=None,is_logp=True) :
         status=0
         if(pkfunc is None) : #Initialize power spectrum from 2D array
             #Make sure input makes sense
@@ -38,11 +38,29 @@ class Pk2D(object):
                 pkflat[ia,:]=pkfunc(k=np.exp(lk_arr),a=a)
             pkflat=pkflat.flatten()
             
-        self.psp,status=lib.set_p2d_new_from_arrays(lk_arr,a_arr,pkflat,status)
+        self.psp,status=lib.set_p2d_new_from_arrays(lk_arr,a_arr,pkflat,int(is_logp),status)
         check(status)
         self.has_psp=True
 
-    def eval(self,k,a) :
+    def eval(self,k,a,cosmo=None) :
+        status=0
+        if cosmo is not None :
+            cospass=cosmo.cosmo
+        else :
+            raise NotImplementedError("Currently we need a cosmology to extrapolate growth")
+            cospass=None
+            
+        if isinstance(k,int) :
+            k=float(k)
+        if isinstance(k,float) :
+            f,status=lib.p2d_eval_single(self.psp,np.log(k),a,cospass,status)
+        elif isinstance(k,np.ndarray) :
+            f,status=lib.p2d_eval_multi(self.psp,np.log(k),a,cospass,k.size,status)
+        else :
+            f,status=lib.p2d_eval_multi(self.psp,np.log(k),a,cospass,len(k),status)
+        check(status,cosmo)
+
+        return f
         raise NotImplementedError("Not implemented yet")
     
     def __del__(self) :

@@ -40,12 +40,12 @@ ccl_p2d_t *ccl_p2d_t_new(int na,double *a_arr,
 /**
  * Evaluate power spectrum defined by ccl_p2d_t structure.
  * @param psp ccl_p2d_t structure defining P(k,a).
- * @param k Wavenumber.
+ * @param lk Natural logarithm of the wavenumber.
  * @param a Scale factor.
  * @param cosmo ccl_cosmology structure, only needed if evaluating P(k,a) at small scale factors outside the interpolation range, and if psp was initialized with extrap_linear_growth = ccl_p2d_cclgrowth.
  * @param status Status flag. 0 if there are no errors, nonzero otherwise.
  */
-double ccl_p2d_t_eval(ccl_p2d_t *psp,double k,double a,ccl_cosmology *cosmo,
+double ccl_p2d_t_eval(ccl_p2d_t *psp,double lk,double a,ccl_cosmology *cosmo,
 		      int *status);
 
 /**

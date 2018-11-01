@@ -786,11 +786,10 @@ static double transfer_cmblens(int l,double k,ccl_cosmology *cosmo,CCL_ClTracer 
 //k -> wavenumber modulus
 //cosmo -> ccl_cosmology object
 //clt -> CCL_ClTracer object
-static double transfer_wrap(int il,double lk,ccl_cosmology *cosmo,
+static double transfer_wrap(int il,double k,ccl_cosmology *cosmo,
 			    CCL_ClWorkspace *w,CCL_ClTracer *clt, int * status)
 {
   double transfer_out=0;
-  double k=pow(10.,lk);
 
   if(clt->tracer_type==ccl_number_counts_tracer)
     transfer_out=transfer_nc(w->l_arr[il],k,cosmo,w,clt,status);
@@ -819,17 +818,17 @@ static double cl_integrand(double lk,void *params)
 {
   double d1,d2;
   IntClPar *p=(IntClPar *)params;
-  d1=transfer_wrap(p->il,lk,p->cosmo,p->w,p->clt1,p->status);
+  double k=exp(lk);
+  d1=transfer_wrap(p->il,k,p->cosmo,p->w,p->clt1,p->status);
   if(d1==0)
     return 0;
-  d2=transfer_wrap(p->il,lk,p->cosmo,p->w,p->clt2,p->status);
+  d2=transfer_wrap(p->il,k,p->cosmo,p->w,p->clt2,p->status);
   if(d2==0)
     return 0;
 
-  double k=pow(10.,lk);
   double chi=(p->w->l_arr[p->il]+0.5)/k;
   double a=ccl_scale_factor_of_chi(p->cosmo,chi,p->status);
-  double pk=ccl_p2d_t_eval(p->psp,k,a,p->cosmo,p->status);
+  double pk=ccl_p2d_t_eval(p->psp,lk,a,p->cosmo,p->status);
   
   return k*pk*d1*d2;
 }
@@ -838,15 +837,15 @@ static double cl_integrand(double lk,void *params)
 //clt1 -> tracer #1
 //clt2 -> tracer #2
 //l    -> angular multipole
-//lkmin, lkmax -> log10 of the range of scales where the transfer functions have support
+//lkmin, lkmax -> log of the range of scales where the transfer functions have support
 static void get_k_interval(ccl_cosmology *cosmo,CCL_ClWorkspace *w,
 			   CCL_ClTracer *clt1,CCL_ClTracer *clt2,int l,
 			   double *lkmin,double *lkmax)
 {
   if(l<w->l_limber) {
     //If non-Limber, we need to integrate over the whole range of k.
-    *lkmin=log10(ccl_splines->K_MIN);
-    *lkmax=log10(ccl_splines->K_MAX);
+    *lkmin=log(ccl_splines->K_MIN);
+    *lkmax=log(ccl_splines->K_MAX);
   }
   else {
     double chimin,chimax;
@@ -878,8 +877,8 @@ static void get_k_interval(ccl_cosmology *cosmo,CCL_ClWorkspace *w,
     if(chimin<=0)
       chimin=0.5*(l+0.5)/ccl_splines->K_MAX;
 
-    *lkmax=log10(fmin( ccl_splines->K_MAX  ,2  *(l+0.5)/chimin));
-    *lkmin=log10(fmax( ccl_splines->K_MIN  ,0.5*(l+0.5)/chimax));
+    *lkmax=log(fmin( ccl_splines->K_MAX  ,2  *(l+0.5)/chimin));
+    *lkmin=log(fmax( ccl_splines->K_MIN  ,0.5*(l+0.5)/chimax));
   }
 }
 
@@ -921,7 +920,7 @@ static double ccl_angular_cl_native(ccl_cosmology *cosmo,CCL_ClWorkspace *cw,int
   get_k_interval(cosmo,cw,clt1,clt2,cw->l_arr[il],&lkmin,&lkmax);
   // This computes the angular power spectra in the Limber approximation between two quantities a and b:
   //  C_ell^ab = 2/(2*ell+1) * Integral[ Delta^a_ell(k) Delta^b_ell(k) * P(k) , k_min < k < k_max ]
-  // Note that we use log10(k) as an integration variable, and the ell-dependent prefactor is included
+  // Note that we use log(k) as an integration variable, and the ell-dependent prefactor is included
   // at the end of this function.
   gslstatus=gsl_integration_qag(&F, lkmin, lkmax, 0,
                                 ccl_gsl->INTEGRATION_LIMBER_EPSREL, ccl_gsl->N_ITERATION,
@@ -951,7 +950,7 @@ static double ccl_angular_cl_native(ccl_cosmology *cosmo,CCL_ClWorkspace *cw,int
   }
   ccl_check_status(cosmo,status);
 
-  return result*M_LN10/(cw->l_arr[il]+0.5);
+  return result/(cw->l_arr[il]+0.5);
 }
 
 void ccl_angular_cls(ccl_cosmology *cosmo,CCL_ClWorkspace *w,

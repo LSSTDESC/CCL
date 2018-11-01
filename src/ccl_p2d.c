@@ -71,7 +71,7 @@ ccl_p2d_t *ccl_p2d_t_new(int na,double *a_arr,
   return psp;
 }
 
-double ccl_p2d_t_eval(ccl_p2d_t *psp,double k,double a,ccl_cosmology *cosmo,
+double ccl_p2d_t_eval(ccl_p2d_t *psp,double lk,double a,ccl_cosmology *cosmo,
 		      int *status)
 {
   double a_ev=a;
@@ -91,7 +91,6 @@ double ccl_p2d_t_eval(ccl_p2d_t *psp,double k,double a,ccl_cosmology *cosmo,
   }
 
   double pk_pre,pk_post;
-  double lk=log(k);
   double lk_ev=lk;
   int is_hik= lk>psp->lkmax;
   int is_lok= lk<psp->lkmin;
