@@ -112,7 +112,7 @@ static void compare_cls(char *compare_type,struct cls_data * data)
 
   char fname[256];
   FILE *fi_dd_11,*fi_dd_12,*fi_dd_22;
-  FILE *fi_dl_11,*fi_dl_12,*fi_dl_22;
+  FILE *fi_dl_12;
   FILE *fi_dc_1,*fi_dc_2;
   FILE *fi_ll_11,*fi_ll_12,*fi_ll_22;
   FILE *fi_lc_1,*fi_lc_2;
@@ -135,14 +135,6 @@ static void compare_cls(char *compare_type,struct cls_data * data)
   sprintf(fname,"tests/benchmark/codecomp_step2_outputs/run_b2b2%s_log_cl_dd.txt",compare_type);
   fi_dd_22=fopen(fname,"r"); ASSERT_NOT_NULL(fi_dd_22);
 
-
-  sprintf(fname,"tests/benchmark/codecomp_step2_outputs/run_b1b1%s_log_cl_dl.txt",compare_type);
-  fi_dl_11=fopen(fname,"r"); ASSERT_NOT_NULL(fi_dl_11);
-  sprintf(fname,"tests/benchmark/codecomp_step2_outputs/run_b1b2%s_log_cl_dl.txt",compare_type);
-  fi_dl_12=fopen(fname,"r"); ASSERT_NOT_NULL(fi_dl_12);
-  sprintf(fname,"tests/benchmark/codecomp_step2_outputs/run_b2b2%s_log_cl_dl.txt",compare_type);
-  fi_dl_22=fopen(fname,"r"); ASSERT_NOT_NULL(fi_dl_22);
-
   sprintf(fname,"tests/benchmark/codecomp_step2_outputs/run_b1b1%s_log_cl_dc.txt",compare_type);
   fi_dc_1=fopen(fname,"r"); ASSERT_NOT_NULL(fi_dc_1);
   sprintf(fname,"tests/benchmark/codecomp_step2_outputs/run_b2b2%s_log_cl_dc.txt",compare_type);
@@ -154,6 +146,8 @@ static void compare_cls(char *compare_type,struct cls_data * data)
   fi_ll_12=fopen(fname,"r"); ASSERT_NOT_NULL(fi_ll_12);
   sprintf(fname,"tests/benchmark/codecomp_step2_outputs/run_b2b2%s_log_cl_ll.txt",compare_type);
   fi_ll_22=fopen(fname,"r"); ASSERT_NOT_NULL(fi_ll_22);
+  sprintf(fname,"tests/benchmark/run_b1b2%s_log_cl_dl.txt",compare_type);
+  fi_dl_12=fopen(fname,"r"); ASSERT_NOT_NULL(fi_dl_12);
 
   sprintf(fname,"tests/benchmark/codecomp_step2_outputs/run_b1b1%s_log_cl_lc.txt",compare_type);
   fi_lc_1=fopen(fname,"r"); ASSERT_NOT_NULL(fi_lc_1);
@@ -181,9 +175,7 @@ static void compare_cls(char *compare_type,struct cls_data * data)
   double *cls_dd_11_h=malloc(NELLS*sizeof(double));
   double *cls_dd_12_h=malloc(NELLS*sizeof(double));
   double *cls_dd_22_h=malloc(NELLS*sizeof(double));
-  double *cls_dl_11_h=malloc(NELLS*sizeof(double));
   double *cls_dl_12_h=malloc(NELLS*sizeof(double));
-  double *cls_dl_22_h=malloc(NELLS*sizeof(double));
   double *cls_dc_1_h=malloc(NELLS*sizeof(double));
   double *cls_dc_2_h=malloc(NELLS*sizeof(double));
   double *cls_ll_11_h=malloc(NELLS*sizeof(double));
@@ -210,17 +202,7 @@ static void compare_cls(char *compare_type,struct cls_data * data)
       fprintf(stderr,"Error reading benchmark file");
       exit(1);
     }
-    stat=fscanf(fi_dl_11,"%d %lf",&l,&(cls_dl_11_b[ii]));
-    if(stat!=2) {
-      fprintf(stderr,"Error reading benchmark file");
-      exit(1);
-    }
     stat=fscanf(fi_dl_12,"%d %lf",&l,&(cls_dl_12_b[ii]));
-    if(stat!=2) {
-      fprintf(stderr,"Error reading benchmark file");
-      exit(1);
-    }
-    stat=fscanf(fi_dl_22,"%d %lf",&l,&(cls_dl_22_b[ii]));
     if(stat!=2) {
       fprintf(stderr,"Error reading benchmark file");
       exit(1);
@@ -265,16 +247,13 @@ static void compare_cls(char *compare_type,struct cls_data * data)
       fprintf(stderr,"Error reading benchmark file");
       exit(1);
     }
-
     ells[ii]=l;
   }
 
   fclose(fi_dd_11);
   fclose(fi_dd_12);
   fclose(fi_dd_22);
-  fclose(fi_dl_11);
   fclose(fi_dl_12);
-  fclose(fi_dl_22);
   fclose(fi_dc_1);
   fclose(fi_dc_2);
   fclose(fi_ll_11);
@@ -294,15 +273,11 @@ static void compare_cls(char *compare_type,struct cls_data * data)
   if (status) printf("%s\n",cosmo->status_message);
   ccl_angular_cls(cosmo,w,tr_nc_2,tr_nc_2,NELLS,ells,cls_dd_22_h,&status);
   if (status) printf("%s\n",cosmo->status_message);
-  ccl_angular_cls(cosmo,w,tr_nc_1,tr_wl_1,NELLS,ells,cls_dl_11_h,&status);
-  if (status) printf("%s\n",cosmo->status_message);
   ccl_angular_cls(cosmo,w,tr_nc_1,tr_wl_2,NELLS,ells,cls_dl_12_h,&status);
   if (status) printf("%s\n",cosmo->status_message);
   ccl_angular_cls(cosmo,w,tr_nc_1,tr_cl,NELLS,ells,cls_dc_1_h,&status);
   if (status) printf("%s\n",cosmo->status_message);
   ccl_angular_cls(cosmo,w,tr_nc_2,tr_cl,NELLS,ells,cls_dc_2_h,&status);
-  if (status) printf("%s\n",cosmo->status_message);
-  ccl_angular_cls(cosmo,w,tr_nc_2,tr_wl_2,NELLS,ells,cls_dl_22_h,&status);
   if (status) printf("%s\n",cosmo->status_message);
   ccl_angular_cls(cosmo,w,tr_wl_1,tr_wl_1,NELLS,ells,cls_ll_11_h,&status);
   if (status) printf("%s\n",cosmo->status_message);
@@ -317,38 +292,39 @@ static void compare_cls(char *compare_type,struct cls_data * data)
   ccl_angular_cls(cosmo,w,tr_cl,tr_cl,NELLS,ells,cls_cc_h,&status);
   if (status) printf("%s\n",cosmo->status_message);
   
+  
+  double fraction_failed=0;
   for(int ii=2;ii<w->n_ls-1;ii++) {
     int l=w->l_arr[ii];
-    double ell_correct;
+    double ell_correct,ell_correct2;
     double el_dd_11,el_dd_12,el_dd_22;
-    double el_dl_11,el_dl_12,el_dl_22;
+    double el_dl_12;
     double el_dc_1,el_dc_2;
     double el_ll_11,el_ll_12,el_ll_22;
     double el_lc_1,el_lc_2;
     double el_cc;
     double cl_dd_11,cl_dd_12,cl_dd_22;
-    double cl_dl_11,cl_dl_12,cl_dl_22;
+    double cl_dl_12;
     double cl_dc_1,cl_dc_2;
     double cl_ll_11,cl_ll_12,cl_ll_22;
     double cl_lc_1,cl_lc_2;
     double cl_cc;
     double cl_dd_11_h,cl_dd_12_h,cl_dd_22_h;
-    double cl_dl_11_h,cl_dl_12_h,cl_dl_22_h;
+    double cl_dl_12_h;
     double cl_dc_1_h,cl_dc_2_h;
     double cl_ll_11_h,cl_ll_12_h,cl_ll_22_h;
     double cl_lc_1_h,cl_lc_2_h;
     double cl_cc_h;
     if(l<=1)
       ell_correct=1;
-    else
+    else{
       ell_correct=l*(l+1.)/sqrt((l+2.)*(l+1.)*l*(l-1.));
-
+      ell_correct2=(l+0.5)*(l+0.5)/sqrt((l+2.)*(l+1.)*l*(l-1.));
+    }
     cl_dd_11  =cls_dd_11_b[l];
     cl_dd_12  =cls_dd_12_b[l];
     cl_dd_22  =cls_dd_22_b[l];
-    cl_dl_11  =cls_dl_11_b[l];
     cl_dl_12  =cls_dl_12_b[l];
-    cl_dl_22  =cls_dl_22_b[l];
     cl_dc_1  =cls_dc_1_b[l];
     cl_dc_2  =cls_dc_2_b[l];
     cl_ll_11  =cls_ll_11_b[l];
@@ -363,12 +339,8 @@ static void compare_cls(char *compare_type,struct cls_data * data)
 		  cl_dd_12*CLS_TOLERANCE);
     el_dd_22=fmax(ELS_TOLERANCE*sqrt((cl_dd_22*cl_dd_22+cl_dd_22*cl_dd_22)/(2*l+1.)),
 		  cl_dd_22*CLS_TOLERANCE);
-    el_dl_11=fmax(ELS_TOLERANCE*sqrt((cl_dd_11*cl_ll_11+cl_dl_11*cl_dl_11)/(2*l+1.)),
-		  cl_dl_11*CLS_TOLERANCE);
     el_dl_12=fmax(ELS_TOLERANCE*sqrt((cl_dd_11*cl_ll_22+cl_dl_12*cl_dl_12)/(2*l+1.)),
 		  cl_dl_12*CLS_TOLERANCE);
-    el_dl_22=fmax(ELS_TOLERANCE*sqrt((cl_dd_22*cl_ll_22+cl_dl_22*cl_dl_22)/(2*l+1.)),
-		  cl_dl_22*CLS_TOLERANCE);
     el_dc_1=fmax(ELS_TOLERANCE*sqrt((cl_dd_11*cl_cc+cl_dc_1*cl_dc_1)/(2*l+1.)),
 		 cl_dc_1*CLS_TOLERANCE);
     el_dc_2=fmax(ELS_TOLERANCE*sqrt((cl_dd_22*cl_cc+cl_dc_2*cl_dc_2)/(2*l+1.)),
@@ -388,9 +360,7 @@ static void compare_cls(char *compare_type,struct cls_data * data)
     cl_dd_11_h=cls_dd_11_h[l];
     cl_dd_12_h=cls_dd_12_h[l];
     cl_dd_22_h=cls_dd_22_h[l];
-    cl_dl_11_h=cls_dl_11_h[l]*ell_correct;
-    cl_dl_12_h=cls_dl_12_h[l]*ell_correct;
-    cl_dl_22_h=cls_dl_22_h[l]*ell_correct;
+    cl_dl_12_h=cls_dl_12_h[l]*ell_correct2;
     cl_dc_1_h=cls_dc_1_h[l];
     cl_dc_2_h=cls_dc_2_h[l];
     cl_ll_11_h=cls_ll_11_h[l]*ell_correct*ell_correct;
@@ -403,9 +373,7 @@ static void compare_cls(char *compare_type,struct cls_data * data)
     ASSERT_TRUE(fabs(cl_dd_11_h-cl_dd_11)<el_dd_11);
     ASSERT_TRUE(fabs(cl_dd_12_h-cl_dd_12)<el_dd_12);
     ASSERT_TRUE(fabs(cl_dd_22_h-cl_dd_22)<el_dd_22);
-    ASSERT_TRUE(fabs(cl_dl_11_h-cl_dl_11)<el_dl_11);
     ASSERT_TRUE(fabs(cl_dl_12_h-cl_dl_12)<el_dl_12);
-    ASSERT_TRUE(fabs(cl_dl_22_h-cl_dl_22)<el_dl_22);
     ASSERT_TRUE(fabs(cl_dc_1_h-cl_dc_1)<el_dc_1);
     ASSERT_TRUE(fabs(cl_dc_2_h-cl_dc_2)<el_dc_2);
     ASSERT_TRUE(fabs(cl_ll_11_h-cl_ll_11)<el_ll_11);
@@ -419,14 +387,14 @@ static void compare_cls(char *compare_type,struct cls_data * data)
     
   free(ells);
   free(cls_dd_11_b); free(cls_dd_12_b); free(cls_dd_22_b); 
-  free(cls_dl_11_b); free(cls_dl_12_b); free(cls_dl_22_b); 
+  free(cls_dl_12_b);
   free(cls_dc_1_b); free(cls_dc_2_b);
   free(cls_ll_11_b); free(cls_ll_12_b); free(cls_ll_22_b); 
   free(cls_lc_1_b); free(cls_lc_2_b);
   free(cls_cc_b);
 
   free(cls_dd_11_h); free(cls_dd_12_h); free(cls_dd_22_h); 
-  free(cls_dl_11_h); free(cls_dl_12_h); free(cls_dl_22_h); 
+  free(cls_dl_12_h);
   free(cls_dc_1_h); free(cls_dc_2_h);
   free(cls_ll_11_h); free(cls_ll_12_h); free(cls_ll_22_h); 
   free(cls_lc_1_h); free(cls_lc_2_h);

@@ -112,6 +112,7 @@ static void compare_corr(char *compare_type,int algorithm,struct corrs_data * da
   FILE *fi_dd_11,*fi_dd_12,*fi_dd_22;
   FILE *fi_ll_11_pp,*fi_ll_12_pp,*fi_ll_22_pp;
   FILE *fi_ll_11_mm,*fi_ll_12_mm,*fi_ll_22_mm;
+  FILE *fi_dl_12;
   int has_rsd=0,has_magnification=0, has_intrinsic_alignment=0;
   int status2=0;
   CCL_ClTracer *tr_nc_1=ccl_cl_tracer_number_counts_simple(cosmo,nz,zarr_1,pzarr_1,
@@ -144,16 +145,20 @@ static void compare_corr(char *compare_type,int algorithm,struct corrs_data * da
   fi_ll_12_mm=fopen(fname,"r"); ASSERT_NOT_NULL(fi_ll_12_mm);
   sprintf(fname,"tests/benchmark/codecomp_step2_outputs/run_b2b2%s_log_wt_ll_mm.txt",compare_type);
   fi_ll_22_mm=fopen(fname,"r"); ASSERT_NOT_NULL(fi_ll_22_mm);
+  sprintf(fname,"tests/benchmark/run_b1b2%s_log_wt_dl.txt",compare_type);
+  fi_dl_12=fopen(fname,"r"); ASSERT_NOT_NULL(fi_dl_12);
 
   double fraction_failed=0;
   int nofl=15;
-  double taper_cl_limits[4]={1,2,10000,15000};//{0,0,0,0};
+  double taper_cl_limits[4]={1,2,10000,15000};
   double wt_dd_11[nofl],wt_dd_12[nofl],wt_dd_22[nofl];
   double wt_ll_11_mm[nofl],wt_ll_12_mm[nofl],wt_ll_22_mm[nofl];
   double wt_ll_11_pp[nofl],wt_ll_12_pp[nofl],wt_ll_22_pp[nofl];
+  double wt_dl_12[nofl];
   double *wt_dd_11_h,*wt_dd_12_h,*wt_dd_22_h;
   double *wt_ll_11_h_mm,*wt_ll_12_h_mm,*wt_ll_22_h_mm;
   double *wt_ll_11_h_pp,*wt_ll_12_h_pp,*wt_ll_22_h_pp;
+  double *wt_dl_12_h;
   double theta_in[nofl];
 
   for(ii=0;ii<nofl;ii++) {
@@ -168,25 +173,33 @@ static void compare_corr(char *compare_type,int algorithm,struct corrs_data * da
     stat=fscanf(fi_ll_11_mm,"%lf %lf",&dum,&wt_ll_11_mm[ii]);
     stat=fscanf(fi_ll_12_mm,"%lf %lf",&dum,&wt_ll_12_mm[ii]);
     stat=fscanf(fi_ll_22_mm,"%lf %lf",&dum,&wt_ll_22_mm[ii]);
+    stat=fscanf(fi_dl_12,"%lf %lf",&dum,&wt_dl_12[ii]);
   }
   fclose(fi_dd_11); fclose(fi_dd_12); fclose(fi_dd_22);
   fclose(fi_ll_11_pp); fclose(fi_ll_12_pp); fclose(fi_ll_22_pp);
   fclose(fi_ll_11_mm); fclose(fi_ll_12_mm); fclose(fi_ll_22_mm);
-
+  fclose(fi_dl_12);
+  
   /*Compute the correlation with CCL*/
   double *clarr=malloc(ELL_MAX_CL*sizeof(double));
   double *larr=malloc(ELL_MAX_CL*sizeof(double));
+  double *ellcorr=malloc(ELL_MAX_CL*sizeof(double));
   int *ells=malloc(ELL_MAX_CL*sizeof(int)); // ccl_angular_cls needs int
-  for(int il=0;il<ELL_MAX_CL;il++){
+  for(int il=2;il<ELL_MAX_CL;il++){
     larr[il]=il;
     ells[il]=il;
+    ellcorr[il]=(il+0.5)*(il+0.5)/sqrt((il+2.)*(il+1.)*il*(il-1.));
+  }
+  for(int il=0;il<2;il++){
+    larr[il]=il;
+    ells[il]=il;
+    ellcorr[il]=1.;
   }
 
   /*Use Limber computation*/
   double l_logstep = 1.05;
   double l_linstep = 20.;
   CCL_ClWorkspace *wyl=ccl_cl_workspace_new_limber(ELL_MAX_CL+1,l_logstep,l_linstep,&status);
-
   wt_dd_11_h=malloc(nofl*sizeof(double));
   ccl_angular_cls(cosmo,wyl,tr_nc_1,tr_nc_1,ELL_MAX_CL,ells,clarr,&status);
   ccl_correlation(cosmo,ELL_MAX_CL,larr,clarr,nofl,theta_in,wt_dd_11_h,CCL_CORR_GG,
@@ -223,20 +236,32 @@ static void compare_corr(char *compare_type,int algorithm,struct corrs_data * da
 		  0,taper_cl_limits,algorithm,&status);
   ccl_correlation(cosmo,ELL_MAX_CL,larr,clarr,nofl,theta_in,wt_ll_22_h_mm,CCL_CORR_LM,
 		  0,taper_cl_limits,algorithm,&status);
+
+  wt_dl_12_h=malloc(nofl*sizeof(double));
+  ccl_angular_cls(cosmo,wyl,tr_nc_1,tr_wl_2,ELL_MAX_CL,ells,clarr,&status);
+  //Make the correction for the ell factor of the benchmarks
+  //as in ccl_test_cls.c
+  for(int il=0;il<ELL_MAX_CL;il++){
+    clarr[il]=clarr[il]*ellcorr[il];
+  }
+  ccl_correlation(cosmo,ELL_MAX_CL,larr,clarr,nofl,theta_in,wt_dl_12_h,CCL_CORR_GL,
+		  0,taper_cl_limits,algorithm,&status);
   free(clarr);
   free(larr);
-
+  free(ellcorr);
+  
   /* With the CCL correlation already computed, we proceed to the
   * comparison. Here, we read in the benchmark covariances from CosmoLike, which
   * allow us to set our tolerance.
   */
   int nsig=15;
-  double sigwt_dd_11[15], sigwt_dd_22[15];
+  double sigwt_dd_11[15], sigwt_dd_22[15], sigwt_dl_12[15];
   double sigwt_ll_11_mm[15], sigwt_ll_22_mm[15];
   double sigwt_ll_11_pp[15], sigwt_ll_22_pp[15];
   double sig_theta_in[15];
 
   char bs[1024];
+  FILE *fi_dl_sig=fopen("tests/benchmark/cov_corr/sigma_ggl_Nbin5","r");
   FILE *fi_dd_sig=fopen("tests/benchmark/cov_corr/sigma_clustering_Nbin5","r");
   FILE *fi_mm_sig=fopen("tests/benchmark/cov_corr/sigma_xi-_Nbin5","r");
   FILE *fi_pp_sig=fopen("tests/benchmark/cov_corr/sigma_xi+_Nbin5","r");
@@ -252,10 +277,15 @@ static void compare_corr(char *compare_type,int algorithm,struct corrs_data * da
     fprintf(stderr,"Error reading file\n");
     exit(1);
   }
+  if(fgets(bs,sizeof(bs),fi_dl_sig)==NULL) {
+    fprintf(stderr,"Error reading file\n");
+    exit(1);
+  }
   for(int ii=0;ii<nsig;ii++) {
     int stat;
     double dum;
     stat=fscanf(fi_dd_sig,"%le %le %le %le",&sig_theta_in[ii],&sigwt_dd_11[ii],&sigwt_dd_22[ii],&dum);
+    stat=fscanf(fi_dl_sig,"%le %le",&sig_theta_in[ii],&sigwt_dl_12[ii]);
     stat=fscanf(fi_pp_sig,"%le %le %le %le",&sig_theta_in[ii],&sigwt_ll_11_pp[ii],&sigwt_ll_22_pp[ii],&dum);
     stat=fscanf(fi_mm_sig,"%le %le %le %le",&sig_theta_in[ii],&sigwt_ll_11_mm[ii],&sigwt_ll_22_mm[ii],&dum);
     sig_theta_in[ii]=sig_theta_in[ii]/60.; //convert to deg
@@ -263,7 +293,7 @@ static void compare_corr(char *compare_type,int algorithm,struct corrs_data * da
   fclose(fi_dd_sig);
   fclose(fi_mm_sig);
   fclose(fi_pp_sig);
-
+  fclose(fi_dl_sig);
   /* Spline the covariances */
   gsl_spline *spl_sigwt_dd_11   =gsl_spline_alloc(L_SPLINE_TYPE,nsig);
   gsl_spline_init(spl_sigwt_dd_11   ,sig_theta_in,sigwt_dd_11   ,nsig);
@@ -277,6 +307,8 @@ static void compare_corr(char *compare_type,int algorithm,struct corrs_data * da
   gsl_spline_init(spl_sigwt_ll_11_mm,sig_theta_in,sigwt_ll_11_mm,nsig);
   gsl_spline *spl_sigwt_ll_22_mm=gsl_spline_alloc(L_SPLINE_TYPE,nsig);
   gsl_spline_init(spl_sigwt_ll_22_mm,sig_theta_in,sigwt_ll_22_mm,nsig);
+  gsl_spline *spl_sigwt_dl_12   =gsl_spline_alloc(L_SPLINE_TYPE,nsig);
+  gsl_spline_init(spl_sigwt_dl_12,sig_theta_in,sigwt_dl_12 ,nsig);
 
   /* Proceed to the comparison between benchmarks and CCL.
    * If DEBUG flag is set, then produce an output file.
@@ -302,12 +334,7 @@ static void compare_corr(char *compare_type,int algorithm,struct corrs_data * da
 #ifdef _DEBUG
     fprintf(output,"%.10e %.10e %.10e %.10e",theta_in[ii],wt_dd_11_h[ii],wt_dd_11[ii],tol);
 #endif //_DEBUG
-    //    tol=gsl_spline_eval(spl_sigwt_dd_12,theta_in[ii],NULL);
-    //    if(fabs(wt_dd_12_h[ii]-wt_dd_12[ii])>tol*CORR_ERROR_FRACTION)
-    //      fraction_failed++;
-#ifdef _DEBUG
-    //    fprintf(output," %.10e %.10e",wt_dd_12_h[ii],wt_dd_12[ii]);
-#endif //_DEBUG
+    
     tol=gsl_spline_eval(spl_sigwt_dd_22,theta_in[ii],NULL);
     if(fabs(wt_dd_22_h[ii]-wt_dd_22[ii])>tol*CORR_ERROR_FRACTION)
       fraction_failed++;
@@ -315,6 +342,14 @@ static void compare_corr(char *compare_type,int algorithm,struct corrs_data * da
     fprintf(output," %.10e %.10e %.10e",wt_dd_22_h[ii],wt_dd_22[ii],tol);
 #endif //_DEBUG
 
+    tol=gsl_spline_eval(spl_sigwt_dl_12,theta_in[ii],NULL);
+    if(fabs(wt_dl_12_h[ii]-wt_dl_12[ii])>tol*CORR_ERROR_FRACTION){
+      fraction_failed++;
+      printf("%.10e %.10e %.10e %.10e\n",theta_in[ii],wt_dl_12_h[ii],wt_dl_12[ii],tol);}
+#ifdef _DEBUG
+    fprintf(output,"%.10e %.10e %.10e %.10e",theta_in[ii],wt_dl_12_h[ii],wt_dl_12[ii],tol);
+#endif //_DEBUG
+    
     tol=gsl_spline_eval(spl_sigwt_ll_11_pp,theta_in[ii],NULL);
     if(fabs(wt_ll_11_h_pp[ii]-wt_ll_11_pp[ii])>tol*CORR_ERROR_FRACTION)
       fraction_failed++;
@@ -359,7 +394,7 @@ static void compare_corr(char *compare_type,int algorithm,struct corrs_data * da
 #endif //_DEBUG
   
   //Determine the fraction of points that failed the test
-  fraction_failed/=6*npoints;
+  fraction_failed/=7*npoints;
   printf("%lf %% ",fraction_failed*100);
   //Check is this fraction is larger than we allow
   ASSERT_TRUE((fraction_failed<CORR_FRACTION_PASS));
@@ -367,6 +402,7 @@ static void compare_corr(char *compare_type,int algorithm,struct corrs_data * da
   //Free splines, cosmology and arrays
   gsl_spline_free(spl_sigwt_dd_11);
   gsl_spline_free(spl_sigwt_dd_22);
+  gsl_spline_free(spl_sigwt_dl_12);
   gsl_spline_free(spl_sigwt_ll_11_pp);
   gsl_spline_free(spl_sigwt_ll_22_pp);
   gsl_spline_free(spl_sigwt_ll_11_mm);
@@ -374,6 +410,7 @@ static void compare_corr(char *compare_type,int algorithm,struct corrs_data * da
   free(wt_dd_11_h); free(wt_dd_12_h); free(wt_dd_22_h);
   free(wt_ll_11_h_pp); free(wt_ll_12_h_pp); free(wt_ll_22_h_pp);
   free(wt_ll_11_h_mm); free(wt_ll_12_h_mm); free(wt_ll_22_h_mm);
+  free(wt_dl_12_h); 
   free(zarr_1); free(zarr_2);
   free(pzarr_1); free(pzarr_2);
   free(bzarr);
