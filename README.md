@@ -328,7 +328,7 @@ where:
 * `dfarr_mgrowth`: the modified growth function vector provided
 * `status`: Status flag. 0 if there are no errors, nonzero otherwise.
 
-For some specific cosmologies you can also use functions **`ccl_parameters_create_flat_lcdm`**, **`ccl_parameters_create_flat_wcdm`**, **`ccl_parameters_create_flat_wacdm`**, **`ccl_parameters_create_lcdm`**, which automatically set some parameters. For more information, see file ***include/ccl_core.c***.
+For flat LCDM cosmologies, you can also use **`ccl_parameters_create_flat_lcdm`**.
 
 The status flag `int status = 0` is passed around in almost every `CCL` function. Normally zero is returned while nonzero if there were some errors during a function call. For specific cases see documentation for **`ccl_error.c`**.
 

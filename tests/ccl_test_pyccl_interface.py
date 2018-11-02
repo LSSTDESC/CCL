@@ -609,6 +609,9 @@ def check_cls(cosmo):
     nc3 = ccl.NumberCountsTracer(cosmo, True, dndz=(z,n), bias=(z,b), mag_bias=(z,b))
     cmbl=ccl.CMBLensingTracer(cosmo, 1100.)
 
+    assert_raises(ValueError, ccl.WeakLensingTracer, cosmo, None)
+    assert_raises(ValueError, ccl.NumberCountsTracer, cosmo, False, (z,n), None)
+
     # Check valid ell input is accepted
     assert_( all_finite(ccl.angular_cl(cosmo, lens1, lens1, ell_scl)) )
     assert_( all_finite(ccl.angular_cl(cosmo, lens1, lens1, ell_lst)) )

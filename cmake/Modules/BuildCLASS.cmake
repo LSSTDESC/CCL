@@ -1,5 +1,10 @@
 include(ExternalProject)
 
+# Old versions of cmake don't seem to play nice with the GIT_SHALLOW option
+if(${CMAKE_VERSION} VERSION_GREATER "3.10.0")
+  set(SHALLOW_GIT_CLONE GIT_SHALLOW 1)
+endif()
+
 set(CLASSTag v2.6.3)
 
 # In case the compiler being used  is clang, remove the omp flag
@@ -18,7 +23,7 @@ ExternalProject_Add(CLASS
         PREFIX CLASS
         GIT_REPOSITORY https://github.com/lesgourg/class_public.git
         GIT_TAG ${CLASSTag}
-        GIT_SHALLOW 1
+        ${SHALLOW_GIT_CLONE}
         DOWNLOAD_NO_PROGRESS 1
         PATCH_COMMAND patch -p1 -i ${CMAKE_CURRENT_SOURCE_DIR}/cmake/class-2.6.3.patch
         # In the configuration step, we comment out the default compiler and
