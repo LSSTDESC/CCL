@@ -155,7 +155,7 @@ static void compare_cls(char *compare_type,struct cls_data * data)
     fscanf(fi_ll_11,"%d %lf",&l,&(cls_ll_11_b[ii]));
     fscanf(fi_ll_12,"%d %lf",&l,&(cls_ll_12_b[ii]));
     fscanf(fi_ll_22,"%d %lf",&l,&(cls_ll_22_b[ii]));
-    fscanf(fi_dl_12,"%d %lf",&l,&(cls_dl_12_b[ii]));
+    fscanf(fi_dl_12,"%d %le",&l,&(cls_dl_12_b[ii]));
     ells[ii]=l;
   }
 
@@ -186,24 +186,13 @@ static void compare_cls(char *compare_type,struct cls_data * data)
   if (status) printf("%s\n",cosmo->status_message);
   ccl_angular_cls(cosmo,w,tr_nc_1,tr_wl_2,3001,ells,cls_dl_12_h,&status);
   if (status) printf("%s\n",cosmo->status_message);
-
-  /*
-    ATTN: This is how the current benchmark was generated
-    for the GGL case.
-    The file needs to be replaced by an independent one
-    and these lines need to be removed.
-
-    for(int ii=0;ii<3001;ii++) {
-       fprintf(fi_dl_12,"%d %e\n",ells[ii],cls_dl_12_h[ii]);
-    }
-    fclose(fi_dl_12);*/
   
   ccl_cl_workspace_free(w);
 
   double fraction_failed=0;
-  for(int ii=0;ii<3001;ii++) {
+  for(int ii=2;ii<3001;ii++) {
     int l=ells[ii];
-    double ell_correct;
+    double ell_correct,ell_correct2;
     double cl_dd_11,cl_dd_12,cl_dd_22;
     double cl_ll_11,cl_ll_12,cl_ll_22;
     double cl_dl_12;
@@ -213,8 +202,10 @@ static void compare_cls(char *compare_type,struct cls_data * data)
     
     if(l<=0)
       ell_correct=1;
-    else
+    else{
       ell_correct=l*(l+1.)/sqrt((l+2.)*(l+1.)*l*(l-1.));
+      ell_correct2=(l+0.5)*(l+0.5)/sqrt((l+2.)*(l+1.)*l*(l-1.));
+    }
 
     cl_dd_11  =cls_dd_11_b[ii];
     cl_dd_12  =cls_dd_12_b[ii];
@@ -229,22 +220,23 @@ static void compare_cls(char *compare_type,struct cls_data * data)
     cl_ll_11_h=cls_ll_11_h[ii]*ell_correct*ell_correct;
     cl_ll_12_h=cls_ll_12_h[ii]*ell_correct*ell_correct;
     cl_ll_22_h=cls_ll_22_h[ii]*ell_correct*ell_correct;
-    cl_dl_12_h=cls_dl_12_h[ii];//do we need an ell_correct factor here? (depends on how the benchmark is set up)
+    cl_dl_12_h=cls_dl_12_h[ii]*ell_correct2;//this is because benchmark uses (l+0.5)^2
 
-    if(fabs(cl_dd_11_h/cl_dd_11-1)>CLS_TOLERANCE)
+    if(fabs(cl_dd_11_h/cl_dd_11-1)>CLS_TOLERANCE){
+      fraction_failed++;}
+    if(fabs(cl_dd_12_h/cl_dd_12-1)>CLS_TOLERANCE){
+      fraction_failed++;}
+    if(fabs(cl_dd_22_h/cl_dd_22-1)>CLS_TOLERANCE){
+      fraction_failed++;}
+    if(fabs(cl_ll_11_h/cl_ll_11-1)>CLS_TOLERANCE){
+      fraction_failed++;}
+    if(fabs(cl_ll_12_h/cl_ll_12-1)>CLS_TOLERANCE){
+      fraction_failed++;}
+    if(fabs(cl_ll_22_h/cl_ll_22-1)>CLS_TOLERANCE){
+      fraction_failed++;}
+    if(fabs(cl_dl_12_h/cl_dl_12-1)>CLS_TOLERANCE){
       fraction_failed++;
-    if(fabs(cl_dd_12_h/cl_dd_12-1)>CLS_TOLERANCE)
-      fraction_failed++;
-    if(fabs(cl_dd_22_h/cl_dd_22-1)>CLS_TOLERANCE)
-      fraction_failed++;
-    if(fabs(cl_ll_11_h/cl_ll_11-1)>CLS_TOLERANCE)
-      fraction_failed++;
-    if(fabs(cl_ll_12_h/cl_ll_12-1)>CLS_TOLERANCE)
-      fraction_failed++;
-    if(fabs(cl_ll_22_h/cl_ll_22-1)>CLS_TOLERANCE)
-      fraction_failed++;
-    if(fabs(cl_dl_12_h/cl_dl_12-1)>CLS_TOLERANCE)
-      fraction_failed++;
+    }
   }
 
   free(ells);

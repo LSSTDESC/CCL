@@ -146,11 +146,11 @@ static void compare_corr(char *compare_type,int algorithm,struct corrs_data * da
   sprintf(fname,"tests/benchmark/codecomp_step2_outputs/run_b2b2%s_log_wt_ll_mm.txt",compare_type);
   fi_ll_22_mm=fopen(fname,"r"); ASSERT_NOT_NULL(fi_ll_22_mm);
   sprintf(fname,"tests/benchmark/run_b1b2%s_log_wt_dl.txt",compare_type);
-  fi_dl_12=fopen(fname,"r"); ASSERT_NOT_NULL(fi_ll_22_mm);
+  fi_dl_12=fopen(fname,"r"); ASSERT_NOT_NULL(fi_dl_12);
 
   double fraction_failed=0;
   int nofl=15;
-  double taper_cl_limits[4]={1,2,10000,15000};//{0,0,0,0};
+  double taper_cl_limits[4]={1,2,10000,15000};
   double wt_dd_11[nofl],wt_dd_12[nofl],wt_dd_22[nofl];
   double wt_ll_11_mm[nofl],wt_ll_12_mm[nofl],wt_ll_22_mm[nofl];
   double wt_ll_11_pp[nofl],wt_ll_12_pp[nofl],wt_ll_22_pp[nofl];
@@ -183,10 +183,17 @@ static void compare_corr(char *compare_type,int algorithm,struct corrs_data * da
   /*Compute the correlation with CCL*/
   double *clarr=malloc(ELL_MAX_CL*sizeof(double));
   double *larr=malloc(ELL_MAX_CL*sizeof(double));
+  double *ellcorr=malloc(ELL_MAX_CL*sizeof(double));
   int *ells=malloc(ELL_MAX_CL*sizeof(int)); // ccl_angular_cls needs int
-  for(int il=0;il<ELL_MAX_CL;il++){
+  for(int il=2;il<ELL_MAX_CL;il++){
     larr[il]=il;
     ells[il]=il;
+    ellcorr[il]=(il+0.5)*(il+0.5)/sqrt((il+2.)*(il+1.)*il*(il-1.));
+  }
+  for(int il=0;il<2;il++){
+    larr[il]=il;
+    ells[il]=il;
+    ellcorr[il]=1.;
   }
 
   /*Use Limber computation*/
@@ -234,17 +241,16 @@ static void compare_corr(char *compare_type,int algorithm,struct corrs_data * da
 
   wt_dl_12_h=malloc(nofl*sizeof(double));
   ccl_angular_cls(cosmo,wyl,tr_nc_1,tr_wl_2,ELL_MAX_CL,ells,clarr,&status);
+  //Make the correction for the ell factor of the benchmarks
+  //as in ccl_test_cls.c
+  for(int il=0;il<ELL_MAX_CL;il++){
+    clarr[il]=clarr[il]*ellcorr[il];
+  }
   ccl_correlation(cosmo,ELL_MAX_CL,larr,clarr,nofl,theta_in,wt_dl_12_h,CCL_CORR_GL,
 		  0,taper_cl_limits,algorithm,&status);
   free(clarr);
   free(larr);
-  
-  /* ATTN: This is how the current "fake benchmark" was generated
-     Remove this after replacing by independent benchmark and before merging.
-  for(ii=0;ii<nofl;ii++){
-    fprintf(fi_dl_12,"%i %e\n",ells[ii],wt_dl_12_h[ii]);
-  }
-  fclose(fi_dl_12);*/
+  free(ellcorr);
   
   /* With the CCL correlation already computed, we proceed to the
   * comparison. Here, we read in the benchmark covariances from CosmoLike, which
@@ -331,13 +337,6 @@ static void compare_corr(char *compare_type,int algorithm,struct corrs_data * da
 #ifdef _DEBUG
     fprintf(output,"%.10e %.10e %.10e %.10e",theta_in[ii],wt_dd_11_h[ii],wt_dd_11[ii],tol);
 #endif //_DEBUG
-    //Uncomment when test is ready:
-    /*tol=gsl_spline_eval(spl_sigwt_dl_12,theta_in[ii],NULL);
-    if(fabs(wt_dl_12_h[ii]-wt_dl_12[ii])>tol*CORR_ERROR_FRACTION)
-      fraction_failed++;
-#ifdef _DEBUG
-    fprintf(output,"%.10e %.10e %.10e %.10e",theta_in[ii],wt_dl_12_h[ii],wt_dl_12[ii],tol);
-    #endif //_DEBUG*/
     
     tol=gsl_spline_eval(spl_sigwt_dd_22,theta_in[ii],NULL);
     if(fabs(wt_dd_22_h[ii]-wt_dd_22[ii])>tol*CORR_ERROR_FRACTION)
@@ -346,6 +345,14 @@ static void compare_corr(char *compare_type,int algorithm,struct corrs_data * da
     fprintf(output," %.10e %.10e %.10e",wt_dd_22_h[ii],wt_dd_22[ii],tol);
 #endif //_DEBUG
 
+    tol=gsl_spline_eval(spl_sigwt_dl_12,theta_in[ii],NULL);
+    if(fabs(wt_dl_12_h[ii]-wt_dl_12[ii])>tol*CORR_ERROR_FRACTION){
+      fraction_failed++;
+      printf("%.10e %.10e %.10e %.10e\n",theta_in[ii],wt_dl_12_h[ii],wt_dl_12[ii],tol);}
+#ifdef _DEBUG
+    fprintf(output,"%.10e %.10e %.10e %.10e",theta_in[ii],wt_dl_12_h[ii],wt_dl_12[ii],tol);
+#endif //_DEBUG
+    
     tol=gsl_spline_eval(spl_sigwt_ll_11_pp,theta_in[ii],NULL);
     if(fabs(wt_ll_11_h_pp[ii]-wt_ll_11_pp[ii])>tol*CORR_ERROR_FRACTION)
       fraction_failed++;
@@ -390,8 +397,7 @@ static void compare_corr(char *compare_type,int algorithm,struct corrs_data * da
 #endif //_DEBUG
   
   //Determine the fraction of points that failed the test
-  //Divide by 7 when test is ready:
-  fraction_failed/=6*npoints;
+  fraction_failed/=7*npoints;
   printf("%lf %% ",fraction_failed*100);
   //Check is this fraction is larger than we allow
   ASSERT_TRUE((fraction_failed<CORR_FRACTION_PASS));
