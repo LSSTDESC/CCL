@@ -402,6 +402,7 @@ static void clt_nc_init(CCL_ClTracer *clt,ccl_cosmology *cosmo,
   if ( ((cosmo->params.N_nu_mass)>0) && clt->has_rsd){
     *status=CCL_ERROR_NOT_IMPLEMENTED;
     ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: ccl_cl_tracer_new(): Number counts tracers with RSD not yet implemented in cosmologies with massive neutrinos.");
+    return;
   }
 
   clt_init_nz(clt,cosmo,nz_n,z_n,n,status);
