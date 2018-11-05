@@ -513,13 +513,13 @@ static void clt_wl_init(CCL_ClTracer *clt,ccl_cosmology *cosmo,
 //b    -> corresponding b(z)-values.
 //        b(z) will be assumed constant outside the range covered by z_n
 static CCL_ClTracer *cl_tracer(ccl_cosmology *cosmo,int tracer_type,
-				   int has_rsd,int has_magnification,int has_intrinsic_alignment,
-				   int nz_n,double *z_n,double *n,
-				   int nz_b,double *z_b,double *b,
-				   int nz_s,double *z_s,double *s,
-				   int nz_ba,double *z_ba,double *ba,
-				   int nz_rf,double *z_rf,double *rf,
-				   double z_source, int * status)
+			       int has_rsd,int has_magnification,int has_intrinsic_alignment,
+			       int nz_n,double *z_n,double *n,
+			       int nz_b,double *z_b,double *b,
+			       int nz_s,double *z_s,double *s,
+			       int nz_ba,double *z_ba,double *ba,
+			       int nz_rf,double *z_rf,double *rf,
+			       double z_source, int * status)
 {
   int clstatus=0;
   CCL_ClTracer *clt=(CCL_ClTracer *)malloc(sizeof(CCL_ClTracer));
@@ -553,6 +553,11 @@ static CCL_ClTracer *cl_tracer(ccl_cosmology *cosmo,int tracer_type,
     }
   }
 
+  if(*status) {
+    free(clt);
+    clt=NULL;
+  }
+    
   return clt;
 }
 
