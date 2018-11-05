@@ -42,15 +42,18 @@ double user_dNdz(double z, void * user_par, int *status)
   struct user_dN_params * p = (struct user_dN_params *) user_par;
   
   return pow(z, p->alpha) * exp(- pow(z/(p->z0), p->beta) );
+
 }
 
-// Beginning of test 
 int main(int argc,char **argv)
 {
   // The user declares and sets an instance of parameters to their photo_z function:
   struct user_pz_params my_pz_params_example;
   my_pz_params_example.sigma_z = sigmaz_sources;
   struct user_dN_params my_dN_params_example;
+  my_dN_params_example.alpha = 1.24;
+  my_dN_params_example.beta = 1.01;
+  my_dN_params_example.z0 = 0.51;
   
   // Declare a variable of the type of user_pz_info to hold the struct to be created.
   pz_info * my_pz_info;
@@ -70,77 +73,45 @@ int main(int argc,char **argv)
   double tmp1,tmp2,tmp3,tmp4,tmp5;
   double dNdz_tomo;
   FILE * output;
-  output = fopen("./tests/specs_example_tomo_lens_user_pz.out", "w");
+  output = fopen("./tests/example_tomographic_bins.out", "w");
   for (z=0; z<100; z=z+1) { 
     z_test = 0.035*z;
+
     ccl_dNdz_tomog(z_test,  0.,6.,my_pz_info, my_dN_info, &dNdz_tomo, &status);
     if (status!=0) {
-      printf("You have selected an unsupported dNdz type. Exiting.\n");
+      printf("Error in initiating the tomographic bins. Exiting.\n");
       exit(1);
     }
+    
     ccl_dNdz_tomog(z_test, 0.,0.6,my_pz_info, my_dN_info,  &tmp1, &status);
     if (status!=0) {
-      printf("You have selected an unsupported dNdz type. Exiting.\n");
+      printf("Error in initiating the tomographic bins. Exiting.\n");
       exit(1);
     }	
+    
     ccl_dNdz_tomog(z_test, 0.6,1.2,my_pz_info, my_dN_info,  &tmp2, &status);
     if (status!=0) {
-      printf("You have selected an unsupported dNdz type. Exiting.\n");
+      printf("Error in initiating the tomographic bins. Exiting.\n");
       exit(1);
     }
     ccl_dNdz_tomog(z_test, 1.2,1.8,my_pz_info, my_dN_info,  &tmp3, &status);
     if (status!=0) {
-      printf("You have selected an unsupported dNdz type. Exiting.\n");
+      printf("Error in initiating the tomographic bins. Exiting.\n");
       exit(1);
     }
     ccl_dNdz_tomog(z_test, 1.8,2.4,my_pz_info, my_dN_info,  &tmp4, &status);
     if (status!=0) {
-      printf("You have selected an unsupported dNdz type. Exiting.\n");
+      printf("Error in initiating the tomographic bins. Exiting.\n");
       exit(1);
     }
     ccl_dNdz_tomog(z_test, 2.4,3.0,my_pz_info, my_dN_info,  &tmp5, &status);
     if (status!=0) {
-      printf("You have selected an unsupported dNdz type. Exiting.\n");
+      printf("Error in initiating the tomographic bins. Exiting.\n");
       exit(1);
     }
     fprintf(output, "%f %f %f %f %f %f %f\n", z_test,tmp1,tmp2,tmp3,tmp4,tmp5,dNdz_tomo);
   }
   
-  output = fopen("./tests/specs_example_tomo_clust_user_pz.out", "w");
-  for (z=0; z<100; z=z+1) {
-    z_test = 0.035*z;	
-    ccl_dNdz_tomog(z_test, 0.,6., my_pz_info, my_dN_info, &dNdz_tomo, &status);
-    if (status!=0) {
-      printf("You have selected an unsupported dNdz type. Exiting.\n");
-      exit(1);
-    }
-    ccl_dNdz_tomog(z_test, 0.,0.6,my_pz_info, my_dN_info, &tmp1, &status);
-    if (status!=0) {
-      printf("You have selected an unsupported dNdz type. Exiting.\n");
-      exit(1);
-    }
-    ccl_dNdz_tomog(z_test, 0.6,1.2, my_pz_info, my_dN_info,  &tmp2, &status);
-    if (status!=0) {
-      printf("You have selected an unsupported dNdz type. Exiting.\n");
-      exit(1);
-    }
-    ccl_dNdz_tomog(z_test, 1.2,1.8,my_pz_info, my_dN_info, &tmp3, &status);
-    if (status!=0) {
-      printf("You have selected an unsupported dNdz type. Exiting.\n");
-      exit(1);
-    }
-    ccl_dNdz_tomog(z_test, 1.8,2.4, my_pz_info, my_dN_info, &tmp4, &status);
-    if (status!=0) {
-      printf("You have selected an unsupported dNdz type. Exiting.\n");
-      exit(1);
-    }
-    ccl_dNdz_tomog(z_test, 2.4,3.0, my_pz_info, my_dN_info,  &tmp5, &status);
-    if (status!=0) {
-      printf("You have selected an unsupported dNdz type. Exiting.\n");
-      exit(1);
-    }
-    fprintf(output, "%f %f %f %f %f %f %f\n", z_test,tmp1,tmp2,tmp3,tmp4,tmp5,dNdz_tomo);
-  }
   fclose(output);
   
   // Free the photo_z information

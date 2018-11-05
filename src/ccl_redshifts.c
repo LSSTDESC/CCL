@@ -154,6 +154,7 @@ TASK:  Returns the value of dNdz(z). Change this function to
 
 static double ccl_dNdz(double z, dNdz_info*  params, int* status)
 {  
+		
   return (params->your_dN_func)(z, params->your_dN_params, status);
 }
 
@@ -199,7 +200,7 @@ static double ccl_norm_integrand(double z, void* params)
   if(ccl_splines==NULL || ccl_gsl==NULL) ccl_cosmology_read_config();
   if(ccl_splines==NULL || ccl_gsl==NULL) {
     ccl_raise_exception(CCL_ERROR_MISSING_CONFIG_FILE, 
-                        "ccl_lsst_specs.c: Failed to read config file.");
+                        "ccl_redshift.c: Failed to read config file.");
     return NAN;
   }
   
@@ -220,7 +221,7 @@ static double ccl_norm_integrand(double z, void* params)
   }
   gsl_integration_cquad_workspace_free(workspace);
  
-  return ccl_dNdz(z, p->dN_information, p->status);
+  return ccl_dNdz(z, p->dN_information, p->status) * pz_int ;
 }
 
 /*------ ROUTINE: ccl_specs_dNdz_tomog -----
@@ -233,7 +234,7 @@ TASK:  dNdz in a particular tomographic bin,
 */
 void ccl_dNdz_tomog(double z, double bin_zmin, double bin_zmax, 
               pz_info * photo_info,  dNdz_info * dN_info, double *tomoout, int *status)
-{
+{	
   // This uses equation 33 of Joachimi & Schneider 2009, arxiv:0905.0393
   double numerator_integrand=0, denom_integrand=0, dNdz_t;
   // This struct contains a spec redshift and a pointer to a photoz information struct.
@@ -246,7 +247,7 @@ void ccl_dNdz_tomog(double z, double bin_zmin, double bin_zmax,
   if(ccl_splines==NULL || ccl_gsl==NULL) ccl_cosmology_read_config();
   if(ccl_splines==NULL || ccl_gsl==NULL) {
     ccl_raise_exception(CCL_ERROR_MISSING_CONFIG_FILE, 
-                        "ccl_lsst_specs.c: Failed to read config file.");
+                        "ccl_redshifts.c: Failed to read config file.");
     *status = CCL_ERROR_MISSING_CONFIG_FILE;
     return;
   }
@@ -256,6 +257,7 @@ void ccl_dNdz_tomog(double z, double bin_zmin, double bin_zmax,
   norm_p_val.bin_zmax_=bin_zmax;
   norm_p_val.pz_information = photo_info;	
   norm_p_val.status = status;
+  norm_p_val.dN_information = dN_info;
   
   dNdz_t = ccl_dNdz(z, dN_info, status);
   
