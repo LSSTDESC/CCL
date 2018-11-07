@@ -134,15 +134,15 @@ def correlation_multipole(cosmo, a, beta, l, s):
 
 def correlation_3dRsd(cosmo, a, s, mu, beta, use_spline = True):
     """
-    Compute the 3DRsd correlation function.
+    Compute the 3DRsd correlation function using linear approximation with multipoles.
 
     Args:
         cosmo (:obj:`Cosmology`): A Cosmology object.
         a (float): scale factor.
         s (float or array_like): distance(s) at which to calculate the 3DRsd correlation function (in Mpc).
         mu (float): cosine of the angle at which to calculate the 3DRsd correlation function (in Radian).
-        beta (float): growth rate divided by galaxy bias.     
-        do_avg_mu: switch that determines whether the correlation function is averaged at constant s, the value of mu won't matter to the output if it's turned to 'True'.
+        beta (float): growth rate divided by galaxy bias.  
+        use_spline: switch that determines whether the RSD correlation function is calculated using global splines of multipoles.
     Returns:
         Value(s) of the correlation function at the input distance(s) & angle.
     
@@ -165,6 +165,18 @@ def correlation_3dRsd(cosmo, a, s, mu, beta, use_spline = True):
     return xis
 
 def correlation_3dRsd_avgmu(cosmo, a, s, beta):
+    """
+    Compute the 3DRsd correlation function averaged over mu at constant s.
+
+    Args:
+        cosmo (:obj:`Cosmology`): A Cosmology object.
+        a (float): scale factor.
+        s (float or array_like): distance(s) at which to calculate the 3DRsd correlation function (in Mpc).
+        beta (float): growth rate divided by galaxy bias.     
+    Returns:
+        Value(s) of the correlation function at the input distance(s) & angle.
+    
+    """
     
     cosmo_in = cosmo
     cosmo = cosmo.cosmo
@@ -184,6 +196,19 @@ def correlation_3dRsd_avgmu(cosmo, a, s, beta):
     return xis
 
 def correlation_pi_sigma(cosmo, a, beta, pie, sig, use_spline = True):
+    """
+    Compute the 3DRsd correlation in pi-sigma space.
+
+    Args:
+        cosmo (:obj:`Cosmology`): A Cosmology object.
+        a (float): scale factor.
+        pie (float): distance times cosine of the angle (in Mpc).
+        sig (float or array_like): distance(s) times sine of the angle (in Mpc).
+        beta (float): growth rate divided by galaxy bias.     
+    Returns:
+        Value(s) of the correlation function at the input pi and sigma.
+    
+    """
     
     cosmo_in = cosmo
     cosmo = cosmo.cosmo
@@ -203,5 +228,9 @@ def correlation_pi_sigma(cosmo, a, beta, pie, sig, use_spline = True):
     return xis
 
 def correlation_spline_free():
+    """
+    Clear the global splines created from if 'use_spline' was set to True.
+
+    """ 
     lib.correlation_multipole_spline_free_vec()
 
