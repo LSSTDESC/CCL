@@ -22,7 +22,7 @@ from . import ccllib as lib
 from . import core, constants, background, power, massfunction, halomodel
 
 # Core data structures
-from .core import Parameters, Cosmology
+from .core import Cosmology
 
 # Background cosmology functions and growth functions
 from .background import growth_factor, growth_factor_unnorm, \
@@ -38,8 +38,7 @@ from .power import linear_matter_power, nonlin_matter_power, sigmaR, \
 from .massfunction import massfunc, massfunc_m2r, sigmaM, halo_bias
 
 # Cl's and tracers
-from .cls import angular_cl, ClTracer, ClTracerNumberCounts, \
-    ClTracerLensing, ClTracerCMBLensing
+from .cls import angular_cl, NumberCountsTracer, WeakLensingTracer, CMBLensingTracer
 
 from .lsst_specs import bias_clustering, sigmaz_clustering, \
     sigmaz_sources, dNdz_tomog, PhotoZFunction, PhotoZGaussian
@@ -58,3 +57,5 @@ from .neutrinos import Omeganuh2, nu_masses
 
 # Expose function to toggle debug mode
 from .pyutils import debug_mode
+
+from .errors import CCLError

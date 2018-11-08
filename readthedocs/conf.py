@@ -38,7 +38,7 @@ if on_rtd:
 
     MOCK_MODULES = ["pyccl.ccllib","pyccl.background.ccllib","pyccl.constants.ccllib","pyccl.correlation.ccllib",
                     "pyccl.lsst_specs.ccllib","pyccl.neutrinos.ccllib","pyccl.ccllibutils.ccllib",
-                    "pyccl.cls.ccllib","pyccl.core.ccllib","pyccl.massfunction.ccllib","pyccl.power.ccllib"]
+                    "pyccl.cls.ccllib","pyccl.core.ccllib","pyccl.massfunction.ccllib","pyccl.power.ccllib","yaml"]
 
     
     sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)

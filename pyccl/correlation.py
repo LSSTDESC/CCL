@@ -8,7 +8,7 @@ Choices of algorithms used to compute correlation functions:
 
 from . import ccllib as lib
 from . import constants as const
-from .core import _cosmology_obj, check
+from .core import check
 import numpy as np
 
 correlation_methods = {
@@ -51,7 +51,7 @@ def correlation(cosmo, ell, C_ell, theta, corr_type='gg', method='fftlog'):
             angular separations.
     """
     cosmo_in = cosmo
-    cosmo = _cosmology_obj(cosmo)
+    cosmo = cosmo.cosmo
     status = 0
 
     # Convert to lower case
@@ -94,7 +94,7 @@ def correlation_3d(cosmo, a, r):
         Value(s) of the correlation function at the input distance(s).
     """
     cosmo_in = cosmo
-    cosmo = _cosmology_obj(cosmo)
+    cosmo = cosmo.cosmo
     status = 0
 
     # Convert scalar input into an array

@@ -22,7 +22,7 @@
 #include "ccl_emu17.h"
 
 // Sizes of stuff
-static int m[2] = {111, 36}, neta=2808, peta[2]={7, 28}, rs=8, p=8, nmode=351;
+static int m[2] = {111, 36}, neta=2808, peta[2]={7, 28}, rs=8, p=8;
 
 // Kriging basis computed by emuInit
 // Sizes of each basis will be peta[ee] and m[ee]
@@ -138,14 +138,14 @@ static void emuInit() {
 } // emuInit()
 
 // Actual emulation
-static void emu(double *xstar, double **ystar, int* status, ccl_cosmology* cosmo) {
+void ccl_pkemu(double *xstar, double **ystar, int* status, ccl_cosmology* cosmo) {
     
     static double inited=0;
     int ee, i, j, k;
     double wstar[peta[0]+peta[1]];
     double Sigmastar[2][peta[1]][m[0]];
     double ystaremu[neta];
-    *ystar=(double *)malloc(sizeof(double)*nmode);
+    *ystar=(double *)malloc(sizeof(double)*NK_EMU);
     double ybyz[rs];
     double logc;
     double xstarstd[p];
@@ -209,6 +209,8 @@ static void emu(double *xstar, double **ystar, int* status, ccl_cosmology* cosmo
             }
             *status = CCL_ERROR_EMULATOR_BOUND;
             ccl_raise_exception(*status, cosmo->status_message);
+	    gsl_spline_free(zinterp);
+	    gsl_interp_accel_free(accel);
             return;
         }
     } // for(i=0; i<p; i++)
@@ -218,13 +220,14 @@ static void emu(double *xstar, double **ystar, int* status, ccl_cosmology* cosmo
                 z[0], z[rs-1]);
         *status = CCL_ERROR_EMULATOR_BOUND;
         ccl_raise_exception(*status, cosmo->status_message);
+	gsl_spline_free(zinterp);
+	gsl_interp_accel_free(accel);
         return;
     }
     
     // Standardize the inputs
     for(i=0; i<p; i++) {
         xstarstd[i] = (xstar[i] - xmin[i]) / xrange[i];
-        //printf("%f %f\n", xstar[i], xstarstd[i]);
     }
     
     // compute the covariances between the new input and sims for all the PCs.
@@ -270,7 +273,7 @@ static void emu(double *xstar, double **ystar, int* status, ccl_cosmology* cosmo
         ystaremu[i] = ystaremu[i]*sd + mean[i];
                 
         // Convert to P(k)
-        //ystaremu[i] = ystaremu[i] - 1.5*log10(mode[i % nmode]);
+        //ystaremu[i] = ystaremu[i] - 1.5*log10(mode[i % NK_EMU]);
         //ystaremu[i] = 2*M_PI*M_PI*pow(10, ystaremu[i]);
     }
     
@@ -289,32 +292,28 @@ static void emu(double *xstar, double **ystar, int* status, ccl_cosmology* cosmo
     
     // z doesn't match a training z, interpolate
     if(zmatch == -1) {
-        for(i=0; i<nmode; i++) {
+        for(i=0; i<NK_EMU; i++) {
             for(j=0; j<rs; j++) {
-                ybyz[rs-j-1] = ystaremu[j*nmode+i];
+                ybyz[rs-j-1] = ystaremu[j*NK_EMU+i];
             }
             gsl_spline_init(zinterp, z, ybyz, rs);
             (*ystar)[i] = gsl_spline_eval(zinterp, xstar[p], accel);
             gsl_interp_accel_reset(accel);
         }
         
-        gsl_spline_free(zinterp);
-        gsl_interp_accel_free(accel);
     } else { //otherwise, copy in the emulated z without interpolating
-        for(i=0; i<nmode; i++) {
-	  (*ystar)[i] = ystaremu[zmatch*nmode + i];
+        for(i=0; i<NK_EMU; i++) {
+	  (*ystar)[i] = ystaremu[zmatch*NK_EMU + i];
         }
     }
     
+    gsl_spline_free(zinterp);
+    gsl_interp_accel_free(accel);
+	
     // Convert to P(k)
-    for(i=0; i<nmode; i++) {
+    for(i=0; i<NK_EMU; i++) {
       (*ystar)[i] = (*ystar)[i] - 1.5*log10(mode[i]) + log10(2) + 2*log10(M_PI);
       (*ystar)[i] = pow(10, (*ystar)[i]);
     }
 }
 
-
-void ccl_pkemu(double xstarin[], double **Pkemu, int* status, ccl_cosmology* cosmo) {
-  int i;
-  emu(xstarin, Pkemu, status, cosmo);
-}

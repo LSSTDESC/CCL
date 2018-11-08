@@ -2,6 +2,7 @@ import numpy as np
 from numpy.testing import assert_raises, assert_warns, assert_no_warnings, \
                           assert_, decorators, run_module_suite
 import pyccl as ccl
+from pyccl import CCLError
 import sys
 
 # Set up the cosmological parameters to be used in each of the models
@@ -56,7 +57,7 @@ def calc_power_spectrum(Omega_v, w0, wa, transfer_fn, matter_power, linear, rais
         else:
             raise(ValueError, "Transfer function %s with matter power spectrum method %s has no case for which to test errors are raised." % (transfer_fn, matter_power))
 
-    # Create new Parameters and Cosmology objects
+    # Create a new Cosmology object
     cosmo = ccl.Cosmology(Omega_c=Omega_c, Omega_b=Omega_b,
                        h=h, sigma8=sigma8, n_s=n_s, Omega_k=Omega_k,
                        w0=w0, wa=wa, transfer_function=transfer_fn,
@@ -70,13 +71,13 @@ def calc_power_spectrum(Omega_v, w0, wa, transfer_fn, matter_power, linear, rais
                 pk_lin = ccl.linear_matter_power(cosmo, k, _a)
                 assert_(all_finite(pk_lin))
             else:
-                assert_raises(RuntimeError, ccl.linear_matter_power, cosmo, k, _a)
+                assert_raises(CCLError, ccl.linear_matter_power, cosmo, k, _a)
         else:
             if raise_errors==False:
                 pk_nl = ccl.nonlin_matter_power(cosmo, k, _a)
                 assert_(all_finite(pk_nl))
             else:
-                assert_raises(RuntimeError,ccl.nonlin_matter_power, cosmo, k, _a)
+                assert_raises(CCLError,ccl.nonlin_matter_power, cosmo, k, _a)
 
 def loop_over_params(transfer_fn, matter_power, lin, raise_errs):
     """

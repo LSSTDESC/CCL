@@ -328,7 +328,7 @@ where:
 * `dfarr_mgrowth`: the modified growth function vector provided
 * `status`: Status flag. 0 if there are no errors, nonzero otherwise.
 
-For some specific cosmologies you can also use functions **`ccl_parameters_create_flat_lcdm`**, **`ccl_parameters_create_flat_wcdm`**, **`ccl_parameters_create_flat_wacdm`**, **`ccl_parameters_create_lcdm`**, which automatically set some parameters. For more information, see file ***include/ccl_core.c***.
+For flat LCDM cosmologies, you can also use **`ccl_parameters_create_flat_lcdm`**.
 
 The status flag `int status = 0` is passed around in almost every `CCL` function. Normally zero is returned while nonzero if there were some errors during a function call. For specific cases see documentation for **`ccl_error.c`**.
 
@@ -597,9 +597,9 @@ int main(int argc,char **argv)
   CCL_ClTracer *ct_wl=ccl_cl_tracer_lensing_simple_new(cosmo,NZ,z_arr_sh,nz_arr_sh, &status);
   printf("ell C_ell(c,c) C_ell(c,g) C_ell(c,s) C_ell(g,g) C_ell(g,s) C_ell(s,s) \n");
   for(int l=2;l<=NL;l*=2) {
-    double cl_cc=ccl_angular_cl(cosmo,l,ct_cl,ct_cl, &status); //CMBLensing-CMBLensing
-    double cl_cg=ccl_angular_cl(cosmo,l,ct_cl,ct_gc, &status); //CMBLensing-Clustering
-    double cl_cs=ccl_angular_cl(cosmo,l,ct_wl,ct_cl, &status); //CMBLensing-Galaxy lensing
+    double cl_cc=ccl_angular_cl(cosmo,l,ct_cl,ct_cl, &status); //CMBLensingTracer-CMBLensingTracer
+    double cl_cg=ccl_angular_cl(cosmo,l,ct_cl,ct_gc, &status); //CMBLensingTracer-Clustering
+    double cl_cs=ccl_angular_cl(cosmo,l,ct_wl,ct_cl, &status); //CMBLensingTracer-Galaxy lensing
     double cl_gg=ccl_angular_cl(cosmo,l,ct_gc,ct_gc, &status); //Galaxy-galaxy
     double cl_gs=ccl_angular_cl(cosmo,l,ct_gc,ct_wl, &status); //Galaxy-lensing
     double cl_ss=ccl_angular_cl(cosmo,l,ct_wl,ct_wl, &status); //Lensing-lensing
@@ -727,8 +727,8 @@ n = np.ones(z_n.shape)
 
 # Create objects to represent tracers of the weak lensing signal with this
 # number density (with has_intrinsic_alignment=False)
-lens1 = ccl.ClTracerLensing(cosmo, False, n=(z_n, n))
-lens2 = ccl.ClTracerLensing(cosmo, False, n=(z_n, n))
+lens1 = ccl.WeakLensingTracer(cosmo, dndz=(z_n, n))
+lens2 = ccl.WeakLensingTracer(cosmo, dndz=(z_n, n))
 
 # Calculate the angular cross-spectrum of the two tracers as a function of ell
 ell = np.arange(2, 10)
