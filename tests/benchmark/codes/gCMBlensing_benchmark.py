@@ -17,7 +17,7 @@ cosmo=cosmo.clone(H0=cosmo_fid['h']*100,Ob0=cosmo_fid['Omb'],Om0=cosmo_fid['Om']
                   m_nu=cosmo_fid['m_nu']*u.eV,Neff=cosmo_fid['Neff'],Tcmb0=cosmo_fid['Tcmb0'])
 cosmo_h=cosmo.clone(H0=100)
 
-pk_params={'non_linear':1,'kmax':30,'kmin':1.e-4,'nk':5000}
+pk_params={'non_linear':0,'kmax':1E3,'kmin':5.e-5,'nk':5000}
 
 class Power_Spectra():
     def __init__(self,cosmo_params=cosmo_fid,pk_params=pk_params,cosmo=cosmo,cosmo_h=None):
@@ -173,30 +173,30 @@ if __name__ == "__main__":
     #Binned 1
     zg=np.genfromtxt('../codecomp_step2_outputs/bin1_histo.txt',
                  names=('z','pz'))
-    l,cl_g_cmb=PS.g_kappa_cl(pk_func=PS.ccl_pk_bbks,zs=[1087],p_zs=[1],zg=zg['z'],p_zg=zg['pz'],bias_g=1,)
+    l,cl_g_cmb=PS.g_kappa_cl(pk_func=PS.ccl_pk_bbks,zs=[1100],p_zs=[1],zg=zg['z'],p_zg=zg['pz'],bias_g=1,)
     fname='gCMBl_cl_histo_bin1'
-    np.savetxt(fname+'_CCLbbks.dat',np.column_stack((l,cl_g_cmb)))
+    np.savetxt(fname+'_CCLbbks.dat',np.column_stack((l,cl_g_cmb)),fmt=['%i','%.18e'])
     
     #Binned 2
     zg=np.genfromtxt('../codecomp_step2_outputs/bin2_histo.txt',
                  names=('z','pz'))
-    l,cl_g_cmb=PS.g_kappa_cl(pk_func=PS.ccl_pk_bbks,zs=[1087],p_zs=[1],zg=zg['z'],p_zg=zg['pz'],bias_g=1,)
+    l,cl_g_cmb=PS.g_kappa_cl(pk_func=PS.ccl_pk_bbks,zs=[1100],p_zs=[1],zg=zg['z'],p_zg=zg['pz'],bias_g=1,)
     fname='gCMBl_cl_histo_bin2'
-    np.savetxt(fname+'_CCLbbks.dat',np.column_stack((l,cl_g_cmb)))
+    np.savetxt(fname+'_CCLbbks.dat',np.column_stack((l,cl_g_cmb)),fmt=['%i','%.18e'])
     
     #Analytic
     sigz1=0.15
     zav=np.linspace(0,10.,10000)
     pza=1./(np.sqrt(2*math.pi)*sigz1)*np.exp(-0.5*((zav-1)/sigz1)**2)
     za={'z':zav,'pz':pza}
-    l,cl_g_cmb=PS.g_kappa_cl(pk_func=PS.ccl_pk_bbks,zs=[1087],p_zs=[1],zg=za['z'],p_zg=za['pz'],bias_g=1,)
+    l,cl_g_cmb=PS.g_kappa_cl(pk_func=PS.ccl_pk_bbks,zs=[1100],p_zs=[1],zg=za['z'],p_zg=za['pz'],bias_g=1,)
     fname='gCMBl_cl_analytic_bin1'
-    np.savetxt(fname+'_CCLbbks.dat',np.column_stack((l,cl_g_cmb)))
+    np.savetxt(fname+'_CCLbbks.dat',np.column_stack((l,cl_g_cmb)),fmt=['%i','%.18e'])
     
     #Analytic 2
     pza=1./(np.sqrt(2*math.pi)*sigz1)*np.exp(-0.5*((zav-1.5)/sigz1)**2)
     za={'z':zav,'pz':pza}
-    l,cl_g_cmb=PS.g_kappa_cl(pk_func=PS.ccl_pk_bbks,zs=[1087],p_zs=[1],zg=za['z'],p_zg=za['pz'],bias_g=1,)
+    l,cl_g_cmb=PS.g_kappa_cl(pk_func=PS.ccl_pk_bbks,zs=[1100],p_zs=[1],zg=za['z'],p_zg=za['pz'],bias_g=1,)
     fname='gCMBl_cl_analytic_bin2'
-    np.savetxt(fname+'_CCLbbks.dat',np.column_stack((l,cl_g_cmb)))
+    np.savetxt(fname+'_CCLbbks.dat',np.column_stack((l,cl_g_cmb)),fmt=['%i','%.18e'])
 
