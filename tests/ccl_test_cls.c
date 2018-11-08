@@ -56,8 +56,6 @@ static void compare_cls(char *compare_type,struct cls_data * data)
   params.Omega_l = 0.7;
   params.sigma8=data->sigma8;
   ccl_cosmology * cosmo = ccl_cosmology_create(params, config);
-  double kmax_save=ccl_splines->K_MAX;
-  ccl_splines->K_MAX=1E2;
   ASSERT_NOT_NULL(cosmo);
 
   int nz;
@@ -399,8 +397,6 @@ static void compare_cls(char *compare_type,struct cls_data * data)
   free(cls_ll_11_h); free(cls_ll_12_h); free(cls_ll_22_h); 
   free(cls_lc_1_h); free(cls_lc_2_h);
   free(cls_cc_h);
-
-  ccl_splines->K_MAX=kmax_save;
 
   free(zarr_1);
   free(zarr_2);
