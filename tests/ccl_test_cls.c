@@ -46,8 +46,6 @@ static void compare_cls(char *compare_type,struct cls_data * data)
   int status=0;
   double zlss=1100.;
 
-  double kmax_save=ccl_splines->K_MAX;
-  ccl_splines->K_MAX=1E2;
 
   ccl_configuration config = default_config;
   config.transfer_function_method = ccl_bbks;
@@ -58,6 +56,8 @@ static void compare_cls(char *compare_type,struct cls_data * data)
   params.Omega_l = 0.7;
   params.sigma8=data->sigma8;
   ccl_cosmology * cosmo = ccl_cosmology_create(params, config);
+  double kmax_save=ccl_splines->K_MAX;
+  ccl_splines->K_MAX=1E2;
   ASSERT_NOT_NULL(cosmo);
 
   int nz;
