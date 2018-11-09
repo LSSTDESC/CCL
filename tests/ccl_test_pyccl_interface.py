@@ -465,50 +465,45 @@ def check_redshifts(cosmo):
     PZ1 = ccl.PhotoZFunction(pz1)
     PZ2 = ccl.PhotoZFunction(pz2)
     PZ3 = ccl.PhotoZGaussian(sigma_z0=0.1)
-
-    # bias_clustering
-    assert_( all_finite(ccl.bias_clustering(cosmo, a_scl)) )
-    assert_( all_finite(ccl.bias_clustering(cosmo, a_lst)) )
-    assert_( all_finite(ccl.bias_clustering(cosmo, a_arr)) )
-
-    # dNdz_tomog, PhotoZFunction
-    # sigmaz_clustering
-    assert_( all_finite(ccl.sigmaz_clustering(z_scl)) )
-    assert_( all_finite(ccl.sigmaz_clustering(z_lst)) )
-    assert_( all_finite(ccl.sigmaz_clustering(z_arr)) )
-
-    # sigmaz_sources
-    assert_( all_finite(ccl.sigmaz_sources(z_scl)) )
-    assert_( all_finite(ccl.sigmaz_sources(z_lst)) )
-    assert_( all_finite(ccl.sigmaz_sources(z_arr)) )
+    
+    # dNdz (in terms of true redshift) function for dNdz_tomog
+    def dndz1(z, args):
+        return z**1.24 * np.exp(- (z / 0.51)**1.01)
+        
+    print "here"
+        
+    # dNdzFunction class
+    dNdZ1 = ccl.dNdzFunction(dndz1)
+    
+    print "dNdZ1=", dNdZ1
 
     # dNdz_tomog
     zmin = 0.
     zmax = 1.
-    assert_( all_finite(ccl.dNdz_tomog(z_scl, 'nc', zmin, zmax, PZ1)) )
-    assert_( all_finite(ccl.dNdz_tomog(z_lst, 'nc', zmin, zmax, PZ1)) )
-    assert_( all_finite(ccl.dNdz_tomog(z_arr, 'nc', zmin, zmax, PZ1)) )
+    assert_( all_finite(ccl.dNdz_tomog(z_scl, zmin, zmax, PZ1, dNdZ1)) )
+    #assert_( all_finite(ccl.dNdz_tomog(z_lst, zmin, zmax, PZ1, dNdZ1)) )
+    #assert_( all_finite(ccl.dNdz_tomog(z_arr, zmin, zmax, PZ1, dNdZ1)) )
 
-    assert_( all_finite(ccl.dNdz_tomog(z_scl, 'nc', zmin, zmax, PZ2)) )
-    assert_( all_finite(ccl.dNdz_tomog(z_lst, 'nc', zmin, zmax, PZ2)) )
-    assert_( all_finite(ccl.dNdz_tomog(z_arr, 'nc', zmin, zmax, PZ2)) )
+    #assert_( all_finite(ccl.dNdz_tomog(z_scl, zmin, zmax, PZ2, dNdZ1)) )
+    #assert_( all_finite(ccl.dNdz_tomog(z_lst, zmin, zmax, PZ2, dNdZ1)) )
+    #assert_( all_finite(ccl.dNdz_tomog(z_arr, zmin, zmax, PZ2, dNdZ1)) )
 
-    assert_( all_finite(ccl.dNdz_tomog(z_scl, 'wl_fid', zmin, zmax, PZ1)) )
-    assert_( all_finite(ccl.dNdz_tomog(z_lst, 'wl_fid', zmin, zmax, PZ1)) )
-    assert_( all_finite(ccl.dNdz_tomog(z_arr, 'wl_fid', zmin, zmax, PZ1)) )
+    #assert_( all_finite(ccl.dNdz_tomog(z_scl, zmin, zmax, PZ1, dNdZ1)) )
+    #assert_( all_finite(ccl.dNdz_tomog(z_lst, zmin, zmax, PZ1, dNdZ1)) )
+    #assert_( all_finite(ccl.dNdz_tomog(z_arr, zmin, zmax, PZ1), dNdZ1) )
 
-    assert_( all_finite(ccl.dNdz_tomog(z_scl, 'wl_fid', zmin, zmax, PZ2)) )
-    assert_( all_finite(ccl.dNdz_tomog(z_lst, 'wl_fid', zmin, zmax, PZ2)) )
-    assert_( all_finite(ccl.dNdz_tomog(z_arr, 'wl_fid', zmin, zmax, PZ2)) )
+    #assert_( all_finite(ccl.dNdz_tomog(z_scl, zmin, zmax, PZ2, dNdZ1)) )
+    #assert_( all_finite(ccl.dNdz_tomog(z_lst, zmin, zmax, PZ2, dNdZ1)) )
+    #assert_( all_finite(ccl.dNdz_tomog(z_arr, zmin, zmax, PZ2, dNdZ1)) )
 
     # Argument checking of dNdz_tomog
     # Wrong dNdz_type
-    assert_raises(ValueError, ccl.dNdz_tomog, z_scl, 'nonsense', zmin, zmax, PZ1)
+    #assert_raises(ValueError, ccl.dNdz_tomog, z_scl, 'nonsense', zmin, zmax, PZ1)
 
     # Wrong function type
-    assert_raises(TypeError, ccl.dNdz_tomog, z_scl, 'nc', zmin, zmax, pz1)
-    assert_raises(TypeError, ccl.dNdz_tomog, z_scl, 'nc', zmin, zmax, z_arr)
-    assert_raises(TypeError, ccl.dNdz_tomog, z_scl, 'nc', zmin, zmax, None)
+    #assert_raises(TypeError, ccl.dNdz_tomog, z_scl, zmin, zmax, pz1, dNdZ1)
+    #assert_raises(TypeError, ccl.dNdz_tomog, z_scl,  zmin, zmax, z_arr, dNdZ1)
+    #assert_raises(TypeError, ccl.dNdz_tomog, z_scl, zmin, zmax, None, None)
 
 def check_redshifts_nu(cosmo):
     """
@@ -530,54 +525,41 @@ def check_redshifts_nu(cosmo):
 
     # Lambda function p(z) function for dNdz_tomog
     pz2 = lambda z_ph, z_s, args: np.exp(-(z_ph - z_s)**2. / 2.)
+    
+    # dNdz (in terms of true redshift) function for dNdz_tomog
+    def dndz1(z, args):
+        return z**1.24 * np.exp(- (z / 0.51)**1.01)
 
     # PhotoZFunction classes
     PZ1 = ccl.PhotoZFunction(pz1)
     PZ2 = ccl.PhotoZFunction(pz2)
-
-    # bias_clustering
-    assert_raises(CCLError,ccl.bias_clustering, cosmo, a_scl)
-    assert_raises(CCLError,ccl.bias_clustering, cosmo, a_lst)
-    assert_raises(CCLError,ccl.bias_clustering, cosmo, a_arr)
-
-    # dNdz_tomog, PhotoZFunction
-    # sigmaz_clustering
-    assert_( all_finite(ccl.sigmaz_clustering(z_scl)) )
-    assert_( all_finite(ccl.sigmaz_clustering(z_lst)) )
-    assert_( all_finite(ccl.sigmaz_clustering(z_arr)) )
-
-    # sigmaz_sources
-    assert_( all_finite(ccl.sigmaz_sources(z_scl)) )
-    assert_( all_finite(ccl.sigmaz_sources(z_lst)) )
-    assert_( all_finite(ccl.sigmaz_sources(z_arr)) )
+    
+    # dNdzFunction class
+    dNdZ1 = ccl.dNdzFunction(dndz1)
 
     # dNdz_tomog
     zmin = 0.
     zmax = 1.
-    assert_( all_finite(ccl.dNdz_tomog(z_scl, 'nc', zmin, zmax, PZ1)) )
-    assert_( all_finite(ccl.dNdz_tomog(z_lst, 'nc', zmin, zmax, PZ1)) )
-    assert_( all_finite(ccl.dNdz_tomog(z_arr, 'nc', zmin, zmax, PZ1)) )
+    assert_( all_finite(ccl.dNdz_tomog(z_scl, zmin, zmax, PZ1, dNdZ1)) )
+    assert_( all_finite(ccl.dNdz_tomog(z_lst, zmin, zmax, PZ1, dNdZ1)) )
+    assert_( all_finite(ccl.dNdz_tomog(z_arr, zmin, zmax, PZ1, dNdZ1)) )
 
-    assert_( all_finite(ccl.dNdz_tomog(z_scl, 'nc', zmin, zmax, PZ2)) )
-    assert_( all_finite(ccl.dNdz_tomog(z_lst, 'nc', zmin, zmax, PZ2)) )
-    assert_( all_finite(ccl.dNdz_tomog(z_arr, 'nc', zmin, zmax, PZ2)) )
+    assert_( all_finite(ccl.dNdz_tomog(z_scl, zmin, zmax, PZ2, dNdZ1)) )
+    assert_( all_finite(ccl.dNdz_tomog(z_lst, zmin, zmax, PZ2, dNdZ1)) )
+    assert_( all_finite(ccl.dNdz_tomog(z_arr, zmin, zmax, PZ2, dNdZ1)) )
 
-    assert_( all_finite(ccl.dNdz_tomog(z_scl, 'wl_fid', zmin, zmax, PZ1)) )
-    assert_( all_finite(ccl.dNdz_tomog(z_lst, 'wl_fid', zmin, zmax, PZ1)) )
-    assert_( all_finite(ccl.dNdz_tomog(z_arr, 'wl_fid', zmin, zmax, PZ1)) )
+    assert_( all_finite(ccl.dNdz_tomog(z_scl, zmin, zmax, PZ1, dNdZ1)) )
+    assert_( all_finite(ccl.dNdz_tomog(z_lst, zmin, zmax, PZ1, dNdZ1)) )
+    assert_( all_finite(ccl.dNdz_tomog(z_arr, zmin, zmax, PZ1, dNdZ1)) )
 
-    assert_( all_finite(ccl.dNdz_tomog(z_scl, 'wl_fid', zmin, zmax, PZ2)) )
-    assert_( all_finite(ccl.dNdz_tomog(z_lst, 'wl_fid', zmin, zmax, PZ2)) )
-    assert_( all_finite(ccl.dNdz_tomog(z_arr, 'wl_fid', zmin, zmax, PZ2)) )
-
-    # Argument checking of dNdz_tomog
-    # Wrong dNdz_type
-    assert_raises(ValueError, ccl.dNdz_tomog, z_scl, 'nonsense', zmin, zmax, PZ1)
+    assert_( all_finite(ccl.dNdz_tomog(z_scl, zmin, zmax, PZ2, dNdZ1)) )
+    assert_( all_finite(ccl.dNdz_tomog(z_lst, zmin, zmax, PZ2, dNdZ1)) )
+    assert_( all_finite(ccl.dNdz_tomog(z_arr, zmin, zmax, PZ2, dNdZ1)) )
 
     # Wrong function type
-    assert_raises(TypeError, ccl.dNdz_tomog, z_scl, 'nc', zmin, zmax, pz1)
-    assert_raises(TypeError, ccl.dNdz_tomog, z_scl, 'nc', zmin, zmax, z_arr)
-    assert_raises(TypeError, ccl.dNdz_tomog, z_scl, 'nc', zmin, zmax, None)
+    assert_raises(TypeError, ccl.dNdz_tomog, z_scl, zmin, zmax, pz1, dNdZ1)
+    assert_raises(TypeError, ccl.dNdz_tomog, z_scl, zmin, zmax, z_arr, dNdZ1)
+    assert_raises(TypeError, ccl.dNdz_tomog, z_scl, zmin, zmax, None, None)
 
 
 def check_cls(cosmo):
@@ -843,7 +825,7 @@ def test_neutrinos():
 
 def test_redshifts():
     """
-    Test lsst specs module.
+    Test redshifts module.
     """
     for cosmo in reference_models():
         yield check_redshifts, cosmo

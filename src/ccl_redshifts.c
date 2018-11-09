@@ -13,19 +13,6 @@
 // ---- LSST redshift distributions & current specs -----
 // ---- Consider spline for input dN/dz - pending
 
-/*------ ROUTINE: ccl_specs_bias_clustering -----
-INPUT: ccl_cosmology * cosmo, double a, double par 
-TASK: Return b(z), the bias of the clustering sample.
-      This is input from LSS group.
-      par is empirical and sample-dependent.
-TODO: Check normalization of growth is consistent with LSS input.
-*/
-double ccl_specs_bias_clustering(ccl_cosmology * cosmo, double a, double par, int * status)
-{
-  double D = ccl_growth_factor(cosmo, a, status);
-  return par/D;
-}
-
 /*------ ROUTINE: ccl_create_photoz_info ------
 INPUT: void * params, (double *) pz_func (double, double, void *)
 TASK: create a structure amalgamating the user-input information on the photo-z model.

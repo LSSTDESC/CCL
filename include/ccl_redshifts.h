@@ -52,17 +52,6 @@ typedef struct {
 		double z0;
 	} smail_params;
 
-/**
- * Compute b(a), the bias of the clustering sample of a cosmology at a given scale factor
- * This is input from the LSS group.
- * @param cosmo Cosmological parameters
- * @param a scale factor, normalized to a=1 today.
- * @param status Status flag. 0 if there are no errors, nonzero otherwise.
- * For specific cases see documentation for ccl_error.
- * @return b, the bias at a in cosmo
- */
-double ccl_bias_clustering(ccl_cosmology * cosmo, double a, int * status);
-
 /** 
  * Return dNdz in a particular tomographic bin, 
     convolved with a photo-z model (defined by the user), and normalized.
@@ -125,22 +114,6 @@ pz_info* ccl_create_gaussian_photoz_info(double sigma_z0);
  * @return void
  */
 void ccl_free_photoz_info(pz_info *my_photoz_info);
-
-/** 
- * Return sigma(z), the photo-z dispersion, for the clustering sample
-   This is if you want to assume Gaussian uncertainties.
- *  @param z redshift
- *  @return sigma(z) for the clustering sample
- */
-double ccl_sigmaz_clustering(double z);
-
-/** 
- * Return sigma(z), the photo-z dispersion, for the lensing sample
-   This is if you want to assume Gaussian uncertainties.
- *  @param z redshift
- *  @return sigma(z) for the lensing sample
- */
-double ccl_specs_sigmaz_sources(double z);
 
 CCL_END_DECLS
 
