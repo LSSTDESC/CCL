@@ -11,8 +11,9 @@ The source codes included in this directory can be used to reproduce all benchma
 * **bbks_bm.py** and **ehpk_bm.py** : generates the benchmark BBKS and Eisenstein&Hu power spectra used in bbks:model_1-3 and eh:model_1.
 * **sigmaM_bm.py** : generates the benchmark sigma(M) values used in sigmam:model_1-3.
 * **mfunc_bm.py** : generates the mass function predictions used in massfunc:model_1.
-* **cl_corr_bm** : this folder contains the software needed to reproduce the benchmark files for angular power spectra and correlation functions used in tests cls:histo, cls:analytic, corrs:analytic_bessel and corrs:analytic_fftlog. The C code within that folder (limberjack) should first be compiled before running the script run_all.py.
-* **cl_cmbl_bm.py** : generates the benchmark file for the CMB lensing angular power spectrum used in test cls:cmblens.
+* **cl_corr_bm** : this folder contains the software needed to reproduce many of the benchmark files for angular power spectra and correlation functions used in tests cls:histo, cls:analytic, corrs:analytic_bessel and corrs:analytic_fftlog. The C code within that folder (limberjack) should first be compiled before running the script run_all.py. For concreteness, this code generates the benchmarks currently used for galaxy clustering and shear-shear correlations.
+* **cl_cmbl_bm.py** : generates the benchmark file for the CMB lensing angular power spectrum used in test cls:histo and cls:analytic.
+* **cl_cmblx_bm.py** : generates the benchmark CMB lensing cross correlation power spectra with galaxy clustering and cosmic shear used in cls:histo and cls:analytic. 
 * **bcm_bm.c** : this file shows an excerpt from a modified version of CLASS that was used to generate a benchmark power spectrum containing baryon corrections (used for test bcm:model_1). The file is just an excerpt, and therefore won't compile or run on its own.
 * **3dcorr_benchmark.ipynb** : this python notebook can be used to generate the files used in tests corrs_3d:model_1-3.
 * **halomod_bm.py** : this python script can be used to generate the files used in tests halomod:model_1-3.

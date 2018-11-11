@@ -116,9 +116,9 @@ class Power_Spectra():
             cls[i][:]+=pk_int(l)*u.Mpc
         return cls
 
-    def kappa_cl(self,zl_min=0,zl_max=1100,n_zl=10,log_zl=False,pk_func=None,
+    def kappa_cl(self,zl_min=1.e-4,zl_max=1100,n_zl=10,log_zl=False,pk_func=None,
                 zs1=[1100],p_zs1=[1],zs2=[1100],p_zs2=[1],
-                pk_params=None,cosmo_h=None,l=np.arange(2,3001)):
+                pk_params=None,cosmo_h=None,l=np.arange(0,3001)):
         if not cosmo_h:
             cosmo_h=self.cosmo_h
 
@@ -128,10 +128,13 @@ class Power_Spectra():
             zl=np.linspace(zl_min,zl_max,n_zl)
 
         clz=self.cl_z(z=zl,l=l,cosmo_h=cosmo_h,pk_params=pk_params,pk_func=pk_func)
-        clz*=(c/(cosmo_h.efunc(zl)*cosmo_h.H0))
+        # P(z,k=(l+05)/chi(z))/chi(z)^2 [nz,nl]
+        clz=(clz.T*(c/(cosmo_h.efunc(zl)*cosmo_h.H0))).T
+        # P(z,k=(l+0.5)/chi(z))/(chi(z)^2 H(z)) [nz,nl]
+        #clz*=(c/(cosmo_h.efunc(zl)*cosmo_h.H0))
 
         rho=self.Rho_crit(cosmo_h=cosmo_h)*cosmo_h.Om0
-        sigma_c1=rho/self.sigma_crit(zl=zl,zs=zs1,cosmo_h=cosmo_h)
+        sigma_c1=rho/self.sigma_crit(zl=zl,zs=zs1,cosmo_h=cosmo_h) # 3/2 H0^2 (1+zl) chi(zl) * (1 - chi(zl)/chi(zs)) [n_zs,n_zl]
         sigma_c2=rho/self.sigma_crit(zl=zl,zs=zs2,cosmo_h=cosmo_h)
 
         dzl=np.gradient(zl)
@@ -140,6 +143,7 @@ class Power_Spectra():
 
         cl_zs_12=np.einsum('ji,ki,il',sigma_c2,sigma_c1*dzl,clz)#integrate over zl..
         cl=np.dot(p_zs2*dzs2,np.dot(p_zs1*dzs1,cl_zs_12))
+        #Integral[ P(z,k=(l+0.5)/chi(z))/(H(z) chi(z)^2) Integral[3/2 H0^2 (1+z) p(zs1) chi(z) (1-chi(z)/chi(zs1)), dzs1] Integral[3/2 H0^2 (1+zl) chi(zl) (1+chi(zl)/chi(zs2)), dzs2], dz]
         cl/=np.sum(p_zs2*dzs2)*np.sum(p_zs1*dzs1)
         f=l*(l+1.)/(l+0.5)**2 #correction from Kilbinger+ 2017
         cl*=f**2
@@ -148,7 +152,7 @@ class Power_Spectra():
 
 
     def g_kappa_cl(self,pk_func=None,zs=[1100],p_zs=[1],zg=[1],p_zg=[1],bias_g=1,
-                pk_params=None,cosmo_h=None,l=np.arange(2,3001)):
+                pk_params=None,cosmo_h=None,l=np.arange(0,3001)):
         if not cosmo_h:
             cosmo_h=self.cosmo_h
 
@@ -169,20 +173,18 @@ class Power_Spectra():
 if __name__ == "__main__":
 
     PS=Power_Spectra()
-
+    #CMB lensing x galaxy clustering
     #Binned 1
     zg=np.genfromtxt('../codecomp_step2_outputs/bin1_histo.txt',
                  names=('z','pz'))
     l,cl_g_cmb=PS.g_kappa_cl(pk_func=PS.ccl_pk_bbks,zs=[1100],p_zs=[1],zg=zg['z'],p_zg=zg['pz'],bias_g=1,)
-    fname='gCMBl_cl_histo_bin1'
-    np.savetxt(fname+'_CCLbbks.dat',np.column_stack((l,cl_g_cmb)),fmt=['%i','%.18e'])
+    np.savetxt("../codecomp_step2_outputs/run_b1b1histo_log_cl_dc.txt",np.column_stack((l,cl_g_cmb)),fmt=['%i','%.18e'])
     
     #Binned 2
     zg=np.genfromtxt('../codecomp_step2_outputs/bin2_histo.txt',
                  names=('z','pz'))
     l,cl_g_cmb=PS.g_kappa_cl(pk_func=PS.ccl_pk_bbks,zs=[1100],p_zs=[1],zg=zg['z'],p_zg=zg['pz'],bias_g=1,)
-    fname='gCMBl_cl_histo_bin2'
-    np.savetxt(fname+'_CCLbbks.dat',np.column_stack((l,cl_g_cmb)),fmt=['%i','%.18e'])
+    np.savetxt("../codecomp_step2_outputs/run_b2b2histo_log_cl_dc.txt",np.column_stack((l,cl_g_cmb)),fmt=['%i','%.18e'])
     
     #Analytic
     sigz1=0.15
@@ -190,13 +192,37 @@ if __name__ == "__main__":
     pza=1./(np.sqrt(2*math.pi)*sigz1)*np.exp(-0.5*((zav-1)/sigz1)**2)
     za={'z':zav,'pz':pza}
     l,cl_g_cmb=PS.g_kappa_cl(pk_func=PS.ccl_pk_bbks,zs=[1100],p_zs=[1],zg=za['z'],p_zg=za['pz'],bias_g=1,)
-    fname='gCMBl_cl_analytic_bin1'
-    np.savetxt(fname+'_CCLbbks.dat',np.column_stack((l,cl_g_cmb)),fmt=['%i','%.18e'])
+    np.savetxt("../codecomp_step2_outputs/run_b1b1analytic_log_cl_dc.txt",np.column_stack((l,cl_g_cmb)),fmt=['%i','%.18e'])
     
     #Analytic 2
     pza=1./(np.sqrt(2*math.pi)*sigz1)*np.exp(-0.5*((zav-1.5)/sigz1)**2)
     za={'z':zav,'pz':pza}
     l,cl_g_cmb=PS.g_kappa_cl(pk_func=PS.ccl_pk_bbks,zs=[1100],p_zs=[1],zg=za['z'],p_zg=za['pz'],bias_g=1,)
-    fname='gCMBl_cl_analytic_bin2'
-    np.savetxt(fname+'_CCLbbks.dat',np.column_stack((l,cl_g_cmb)),fmt=['%i','%.18e'])
+    np.savetxt("../codecomp_step2_outputs/run_b2b2analytic_log_cl_dc.txt",np.column_stack((l,cl_g_cmb)),fmt=['%i','%.18e'])
+    
+    #CMB lensing x galaxy lensing (kappa)
+    #Binned 1
+    zg=np.genfromtxt('../codecomp_step2_outputs/bin1_histo.txt',
+                 names=('z','pz'))
+    l,cl_g_cmb=PS.kappa_cl(pk_func=PS.ccl_pk_bbks,n_zl=1000,zs2=zg['z'],p_zs2=zg['pz'],zl_max=10)
+    np.savetxt("../codecomp_step2_outputs/run_b1b1histo_log_cl_lc.txt",np.column_stack((l,cl_g_cmb)),fmt=['%i','%.18e'])
 
+    #Binned 2
+    zg=np.genfromtxt('../codecomp_step2_outputs/bin2_histo.txt',
+                     names=('z','pz'))
+    l,cl_g_cmb=PS.kappa_cl(pk_func=PS.ccl_pk_bbks,n_zl=1000,zs2=zg['z'],p_zs2=zg['pz'],zl_max=10)
+    np.savetxt("../codecomp_step2_outputs/run_b2b2histo_log_cl_lc.txt",np.column_stack((l,cl_g_cmb)),fmt=['%i','%.18e'])
+
+    #Analytic
+    sigz1=0.15
+    zav=np.linspace(0,10.,10000)
+    pza=1./(np.sqrt(2*math.pi)*sigz1)*np.exp(-0.5*((zav-1)/sigz1)**2)
+    za={'z':zav,'pz':pza}
+    l,cl_g_cmb=PS.kappa_cl(pk_func=PS.ccl_pk_bbks,n_zl=1000,zs2=za['z'],p_zs2=za['pz'],zl_max=10)
+    np.savetxt("../codecomp_step2_outputs/run_b1b1analytic_log_cl_lc.txt",np.column_stack((l,cl_g_cmb)),fmt=['%i','%.18e'])
+    
+    #Analytic 2
+    pza=1./(np.sqrt(2*math.pi)*sigz1)*np.exp(-0.5*((zav-1.5)/sigz1)**2)
+    za={'z':zav,'pz':pza}
+    l,cl_g_cmb=PS.kappa_cl(pk_func=PS.ccl_pk_bbks,n_zl=1000,zs2=za['z'],p_zs2=za['pz'],zl_max=10)
+    np.savetxt("../codecomp_step2_outputs/run_b2b2analytic_log_cl_lc.txt",np.column_stack((l,cl_g_cmb)),fmt=['%i','%.18e'])
