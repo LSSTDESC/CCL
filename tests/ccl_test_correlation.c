@@ -6,7 +6,6 @@
 #include <time.h>
 #include <string.h>
 
-#define CORR_FRACTION_PASS 1E-3
 #define CORR_ERROR_FRACTION 0.5
 #define ELL_MAX_CL 3000
 
@@ -148,7 +147,6 @@ static void compare_corr(char *compare_type,int algorithm,struct corrs_data * da
   sprintf(fname,"tests/benchmark/run_b1b2%s_log_wt_dl.txt",compare_type);
   fi_dl_12=fopen(fname,"r"); ASSERT_NOT_NULL(fi_dl_12);
 
-  double fraction_failed=0;
   int nofl=15;
   double taper_cl_limits[4]={1,2,10000,15000};
   double wt_dd_11[nofl],wt_dd_12[nofl],wt_dd_22[nofl];
@@ -310,13 +308,6 @@ static void compare_corr(char *compare_type,int algorithm,struct corrs_data * da
   gsl_spline *spl_sigwt_dl_12   =gsl_spline_alloc(L_SPLINE_TYPE,nsig);
   gsl_spline_init(spl_sigwt_dl_12,sig_theta_in,sigwt_dl_12 ,nsig);
 
-  /* Proceed to the comparison between benchmarks and CCL.
-   * If DEBUG flag is set, then produce an output file.
-   */
-  
-#ifdef _DEBUG
-  FILE *output = fopen("cc_test_corr_out.dat", "w");
-#endif //_DEBUG
   int npoints=0;
   for(ii=0;ii<nofl;ii++) {
     double tol;
@@ -329,75 +320,29 @@ static void compare_corr(char *compare_type,int algorithm,struct corrs_data * da
     /*First time the tolerance is set. The tolerance is equal to the 
      *expected error bar times CORR_ERR_FRACTION=0.5 (default) */
     tol=gsl_spline_eval(spl_sigwt_dd_11,theta_in[ii],NULL);
-    if(fabs(wt_dd_11_h[ii]-wt_dd_11[ii])>tol*CORR_ERROR_FRACTION)
-      fraction_failed++;
-#ifdef _DEBUG
-    fprintf(output,"%.10e %.10e %.10e %.10e",theta_in[ii],wt_dd_11_h[ii],wt_dd_11[ii],tol);
-#endif //_DEBUG
-    
+    ASSERT_TRUE(fabs(wt_dd_11_h[ii]-wt_dd_11[ii])<tol*CORR_ERROR_FRACTION);
+    //    tol=gsl_spline_eval(spl_sigwt_dd_12,theta_in[ii],NULL);
+    //    ASSERT_TRUE(fabs(wt_ll_12_h_pp[ii]-wt_ll_12_pp[ii])<tol*CORR_ERROR_FRACTION);
     tol=gsl_spline_eval(spl_sigwt_dd_22,theta_in[ii],NULL);
-    if(fabs(wt_dd_22_h[ii]-wt_dd_22[ii])>tol*CORR_ERROR_FRACTION)
-      fraction_failed++;
-#ifdef _DEBUG
-    fprintf(output," %.10e %.10e %.10e",wt_dd_22_h[ii],wt_dd_22[ii],tol);
-#endif //_DEBUG
+    ASSERT_TRUE(fabs(wt_dd_22_h[ii]-wt_dd_22[ii])<tol*CORR_ERROR_FRACTION);
 
     tol=gsl_spline_eval(spl_sigwt_dl_12,theta_in[ii],NULL);
-    if(fabs(wt_dl_12_h[ii]-wt_dl_12[ii])>tol*CORR_ERROR_FRACTION){
-      fraction_failed++;
-      printf("%.10e %.10e %.10e %.10e\n",theta_in[ii],wt_dl_12_h[ii],wt_dl_12[ii],tol);}
-#ifdef _DEBUG
-    fprintf(output,"%.10e %.10e %.10e %.10e",theta_in[ii],wt_dl_12_h[ii],wt_dl_12[ii],tol);
-#endif //_DEBUG
+    ASSERT_TRUE(fabs(wt_dl_12_h[ii]-wt_dl_12[ii])<tol*CORR_ERROR_FRACTION);
     
     tol=gsl_spline_eval(spl_sigwt_ll_11_pp,theta_in[ii],NULL);
-    if(fabs(wt_ll_11_h_pp[ii]-wt_ll_11_pp[ii])>tol*CORR_ERROR_FRACTION)
-      fraction_failed++;
-#ifdef _DEBUG
-    fprintf(output," %.10e %.10e %.10e",wt_ll_11_h_pp[ii],wt_ll_11_pp[ii],tol);
-#endif //_DEBUG
+    ASSERT_TRUE(fabs(wt_ll_11_h_pp[ii]-wt_ll_11_pp[ii])<tol*CORR_ERROR_FRACTION);
     //    tol=gsl_spline_eval(spl_sigwt_ll_12_pp,theta_in[ii],NULL);
-    //    if(fabs(wt_ll_12_h_pp[ii]-wt_ll_12_pp[ii])>tol*CORR_ERROR_FRACTION)
-    //      fraction_failed++;
-#ifdef _DEBUG
-    //    fprintf(output," %.10e %.10e",wt_ll_12_h_pp[ii],wt_ll_12_pp[ii]);
-#endif //_DEBUG
+    //    ASSERT_TRUE(fabs(wt_ll_12_h_pp[ii]-wt_ll_12_pp[ii])<tol*CORR_ERROR_FRACTION);
     tol=gsl_spline_eval(spl_sigwt_ll_22_pp,theta_in[ii],NULL);
-    if(fabs(wt_ll_22_h_pp[ii]-wt_ll_22_pp[ii])>tol*CORR_ERROR_FRACTION)
-      fraction_failed++;
-#ifdef _DEBUG
-    fprintf(output," %.10e %.10e %.10e",wt_ll_22_h_pp[ii],wt_ll_22_pp[ii],tol);
-#endif //_DEBUG
+    ASSERT_TRUE(fabs(wt_ll_22_h_pp[ii]-wt_ll_22_pp[ii])<tol*CORR_ERROR_FRACTION);
 
     tol=gsl_spline_eval(spl_sigwt_ll_11_mm,theta_in[ii],NULL);
-    if(fabs(wt_ll_11_h_mm[ii]-wt_ll_11_mm[ii])>tol*CORR_ERROR_FRACTION)
-      fraction_failed++;
-#ifdef _DEBUG
-    fprintf(output," %.10e %.10e %.10e",wt_ll_11_h_mm[ii],wt_ll_11_mm[ii],tol);
-#endif //_DEBUG
+    ASSERT_TRUE(fabs(wt_ll_11_h_mm[ii]-wt_ll_11_mm[ii])<tol*CORR_ERROR_FRACTION);
     //    tol=gsl_spline_eval(spl_sigwt_ll_12_mm,theta_in[ii],NULL);
-    //    if(fabs(wt_ll_12_h_mm[ii]-wt_ll_12_mm[ii])>tol*CORR_ERROR_FRACTION)
-    //      fraction_failed++;
-#ifdef _DEBUG
-    //    fprintf(output," %.10e %.10e",wt_ll_12_h_mm[ii],wt_ll_12_mm[ii]);
-#endif //_DEBUG
+    //    ASSERT_TRUE(fabs(wt_ll_12_h_mm[ii]-wt_ll_12_mm[ii])<tol*CORR_ERROR_FRACTION)
     tol=gsl_spline_eval(spl_sigwt_ll_22_mm,theta_in[ii],NULL);
-    if(fabs(wt_ll_22_h_mm[ii]-wt_ll_22_mm[ii])>tol*CORR_ERROR_FRACTION)
-      fraction_failed++;
-#ifdef _DEBUG
-    fprintf(output," %.10e %.10e %.10e",wt_ll_22_h_mm[ii],wt_ll_22_mm[ii],tol);
-    fprintf(output,"\n");
-#endif //_DEBUG
+    ASSERT_TRUE(fabs(wt_ll_22_h_mm[ii]-wt_ll_22_mm[ii])<tol*CORR_ERROR_FRACTION);;
   }
-#ifdef _DEBUG
-  fclose(output);
-#endif //_DEBUG
-  
-  //Determine the fraction of points that failed the test
-  fraction_failed/=7*npoints;
-  printf("%lf %% ",fraction_failed*100);
-  //Check is this fraction is larger than we allow
-  ASSERT_TRUE((fraction_failed<CORR_FRACTION_PASS));
   
   //Free splines, cosmology and arrays
   gsl_spline_free(spl_sigwt_dd_11);
