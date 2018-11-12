@@ -1026,7 +1026,7 @@ For $C_\ell$ computations, we define as our accuracy metric the absolute value o
   \mathcal{A}=\left|\frac{C_\ell^{\tt CCL}-C_\ell^{(i)}}{\mathcal{E}_\ell}\right|,
   \label{eq:errorCl}
 \end{equation}
-where $\mathcal{E}_\ell$ is an absolute error threshold defined as the maximum at a given $\ell$ between the uncertainty expected from cosmic variance and a tolerance threshold of $0.1\%$. Hence, our numerical accuracy is always better than the maximum of the two. This applied both to analytic redshift distributions and histograms, for auto- and cross-correlations between bins for both galaxy clustering, galaxy-galaxy lensing and cosmic shear, as shown in Figure \ref{fig:cls_limber}.\todo{Add a panel for GGL.}
+where $\mathcal{E}_\ell$ is an absolute error threshold defined as the maximum at a given $\ell$ between the uncertainty expected from cosmic variance and a tolerance threshold of $0.1\%$. Hence, our numerical accuracy is always better than the maximum of the two. This applied both to analytic redshift distributions and histograms, for auto- and cross-correlations between bins for both galaxy clustering, galaxy-galaxy lensing and cosmic shear, as shown in Figure \ref{fig:cls_limber}.\todo{Add GGL panel}
 
 The CMB lensing auto- and cross-spectra equivalent results are shown in Figure \ref{fig:cls_cmblens} and the same criteria as in Eq. (\ref{eq:errorCl}) was applied. {\bf The differences between the \ccl~results and the benchmarks are mostly due to the integration and interpolation methods (particularly, the interpolation of the redshift distributions in the case of number counts). In the case of CMB lensing, we note that the results are particularly sensitive to numerical errors in the computation of the distance to the last scattering surface.}
 
@@ -1038,7 +1038,7 @@ where $\sigma_{\rm LSST}$ is the expected statistical uncertainty of any given c
 
 To obtain realistic targets for the convergence of projected correlation function computations for LSST analyses, we calculated the expected statistical uncertainty of the clustering and lensing correlation functions of the LSST gold sample \citep{LSSTSB} assuming an effective source galaxy density of $n_\mathrm{eff} = 26\,\mathrm{gal/sq\,arcmin}$ for galaxy shape distortions \citep{Chang13}, and galaxy density of $n_\mathrm{gold} = 45\,\mathrm{gal/sq\,arcmin}$ for number counts. Specifically, we calculated the Gaussian covariance of angular correlation functions following the formalism of \citet{2008A&A...477...43J}, and note that leaving out the non-Gaussian covariance terms makes our accuracy criterion more conservative. We split the galaxy samples into 10 tomography bins, defined to contain equal numbers of galaxies.
 
-We compared the difference between \ccl calculated cosmic shear and clustering correlations and the benchmarks, for the analytic redshift distributions and for auto-correlations of redshift bins only. Specifically, we took the value of the covariance in the bins centered at $z=1$ and $z=1.5$ to compare to the benchmarks. For the galaxy-galaxy lensing correlation, we repeated the procedure but for the cross-correlation of low redshift lenses and high redshift sources. The results of this validation procedure for the projected correlation function are shown in Figure \ref{fig:corrval}. These suggest that the convergence between \ccl predictions and benchmarks is below the expected statistical uncertainty. 
+We compared the difference between \ccl calculated cosmic shear and clustering correlations and the benchmarks, for the analytic redshift distributions and for auto-correlations of redshift bins only. Specifically, we took the value of the covariance in the bins centered at $z=1$ and $z=1.5$ to compare to the benchmarks. For the galaxy-galaxy lensing correlation, we repeated the procedure but for the cross-correlation of low redshift lenses and high redshift sources. The results of this validation procedure for the projected correlation function are shown in Figures \ref{fig:corrval} and \ref{fig:corrval2}. These suggest that the convergence between \ccl predictions and benchmarks is below the expected statistical uncertainty. 
 
 %------------------------
 \begin{figure*}
@@ -1048,6 +1048,13 @@ We compared the difference between \ccl calculated cosmic shear and clustering c
 \caption{Comparison between the predicted projected correlation functions and the expected uncertainties for LSST. The left panel shows predictions for the analytic redshift distributions, while the right panel shows the case of the redshift histograms. The different markers and colors indicate clustering ($\xi_{gg}$, Eq. \ref{eq:xi00flat}, filled circles) or lensing ($\xi_{\pm}$, Eq. \ref{eq:xi22flat}, filled triangles and squares) auto-correlations of the $1$-$1$ or $2$-$2$ redshift bin combinations.}
 \label{fig:corrval}
 \end{figure*}
+%------------------------
+\begin{figure}
+\centering
+\includegraphics[width=0.49\textwidth]{projected_xiggl_error_comparison_analytic}
+\caption{Comparison between the predicted galaxy-galaxy lensing projected correlation function and the expected uncertainty for LSST. The results are for the analytic redshift distribution and the combination of bins $1-2$ only, with galaxies in bin $1$.}
+\label{fig:corrval2}
+\end{figure}
 %------------------------
 
 The three-dimensional spatial correlation function $\xi(r)$ predicted by \ccl was validated by comparing it with an independent, precise numerical transform\footnote{This independent implementation is based on the {\tt cluster toolkit} package, available at \url{http://cluster-toolkit.readthedocs.io/en/latest/}.}. We calculated $\xi(r)$  by transforming the \ccl non-linear \halofit power spectrum using this independent method for the five cosmologies listed in Table~\ref{tab:cosmologies} at redshifts $z = 0,1,2,3,4,5$.  We then compared it with the $\xi(r)$ from \ccl with a sampling of $P(k)$ equal to {\tt N$\_$K$\_$3DCOR} bins per decade. The accuracy metric is defined as
