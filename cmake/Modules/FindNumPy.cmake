@@ -65,8 +65,8 @@ if(NOT _NUMPY_SEARCH_SUCCESS MATCHES 0)
 endif()
 
 # Convert the process output into a list
-string(REGEX REPLACE ";" "\\\\;" _NUMPY_VALUES ${_NUMPY_VALUES})
-string(REGEX REPLACE "\n" ";" _NUMPY_VALUES ${_NUMPY_VALUES})
+string(REGEX REPLACE ";" "\\\\;" _NUMPY_VALUES "${_NUMPY_VALUES}")
+string(REGEX REPLACE "\n" ";" _NUMPY_VALUES "${_NUMPY_VALUES}")
 list(GET _NUMPY_VALUES 0 NUMPY_VERSION)
 list(GET _NUMPY_VALUES 1 NUMPY_INCLUDE_DIRS)
 

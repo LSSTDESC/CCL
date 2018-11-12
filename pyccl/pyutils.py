@@ -2,7 +2,7 @@
 well as wrappers to automatically vectorize functions."""
 from . import ccllib as lib
 import numpy as np
-from .core import check, _cosmology_obj
+from .core import check
 
 
 def debug_mode(debug):
@@ -81,7 +81,7 @@ def _vectorize_fn(fn, fn_vec, cosmo, x, returns_status=True):
 
     # Access ccl_cosmology object
     cosmo_in = cosmo
-    cosmo = _cosmology_obj(cosmo)
+    cosmo = cosmo.cosmo
 
     status = 0
 
@@ -129,7 +129,7 @@ def _vectorize_fn2(fn, fn_vec, cosmo, x, z, returns_status=True):
     """
     # Access ccl_cosmology object
     cosmo_in = cosmo
-    cosmo = _cosmology_obj(cosmo)
+    cosmo = cosmo.cosmo
     status = 0
 
     # If a scalar was passed, convert to an array
@@ -176,7 +176,7 @@ def _vectorize_fn3(fn, fn_vec, cosmo, x, n, returns_status=True):
     """
     # Access ccl_cosmology object
     cosmo_in = cosmo
-    cosmo = _cosmology_obj(cosmo)
+    cosmo = cosmo.cosmo
     status = 0
 
     if isinstance(x, int):
@@ -223,7 +223,7 @@ def _vectorize_fn4(fn, fn_vec, cosmo, x, a, d, returns_status=True):
     """
     # Access ccl_cosmology object
     cosmo_in = cosmo
-    cosmo = _cosmology_obj(cosmo)
+    cosmo = cosmo.cosmo
     status = 0
 
     if isinstance(x, int):

@@ -128,7 +128,7 @@ static void compare_bcm(int i_model,struct bcm_data * data)
     }
     k=k_h*data->h;
     //Check baryonic correction directly
-    fbcm_bench=ccl_bcm_model_fkz(cosmo,k,1.,&status);
+    fbcm_bench=ccl_bcm_model_fka(cosmo,k,1.,&status);
     if (status) printf("%s\n",cosmo->status_message);
     err=fabs(psbar/psnobar/fbcm_bench-1);
     ASSERT_DBL_NEAR_TOL(err,0.,BCM_TOLERANCE);
