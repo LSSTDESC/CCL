@@ -985,15 +985,15 @@ In Figure~\ref{fig:halo_model_benchmark} we show the accuracy of the halo model 
 
 Validation tests for two-point statistics relied on the BBKS linear matter power spectrum. This choice of method was intended to remove any potential discrepancies between the \ccl implementation and the independent one with regards to the matter power spectrum. By using BBKS, we are relying on predictions that we know to be fast and which we have already validated to known numerical accuracy (Section \ref{ss:bbksval}).
 
-We thus used the BBKS linear matter power spectrum to compare two-point statistics for two redshift bins, resulting in three tomographic combinations, ($1-1$),($1-2$),($2-2$). The validation tests were performed for two kinds of redshift distributions: analytic and binned ones. The goal of defining these two sets was to capture any numerical deviation produced by the interpolation of the binned distribution. We adopted the following analytic redshift distributions: a Gaussian with $\sigma = 0.15$, centered at $z_1 = 1$; and another Gaussian with the same dispersion but centered at $z_2 = 1.5$. In the case of the binned distributions, we adopted the two redshift distribution histograms shown in Figure \ref{fig:zhistos}.
+We thus used the BBKS linear matter power spectrum to compare two-point statistics for two redshift bins, resulting in three tomographic combinations, labelled 1-1, 1-2 and 2-2. The validation tests were performed for two kinds of redshift distributions: analytic and binned ones. The goal of defining these two sets was to capture any numerical deviation produced by the interpolation of the binned distribution. We adopted the following analytic redshift distributions: a Gaussian with $\sigma = 0.15$, centered at $z_1 = 1$; and another Gaussian with the same dispersion but centered at $z_2 = 1.5$. In the case of the binned distributions, we adopted the two redshift distribution histograms shown in Figure \ref{fig:zhistos}.
 
 For both types of distributions, we computed the following quantities:
 \begin{itemize}
 \item Number counts angular power spectra: density term only (no magnification, RSD, etc.) with non-evolving linear bias $b(z) = 1$, in the range $2 \leq \ell \leq 3000$.
-\item Lensing $E$-mode angular power spectra: leading order term only (no magnification or intrinsic alignments, on the same scales).
-\item The cross-power spectrum between both quantities (galaxy-galaxy lensing, on the same scales).
-\item The cross-power spectrum between number counts and CMB lensing (on the same scales).
-\item The cross-power spectrum between weak lensing and CMB lensing (on the same scales).
+\item Lensing $E$-mode angular power spectra: leading order term only (no magnification or intrinsic alignments), on the same scales.
+\item The cross-power spectrum between both quantities (galaxy-galaxy lensing), on the same scales.
+\item The cross-power spectrum between number counts and CMB lensing, on the same scales.
+\item The cross-power spectrum between weak lensing and CMB lensing, on the same scales.
 \item Number counts angular correlation functions in the range $0.01 \deg < \theta < 5 \deg$, using 5 bins per decade, and
 \item Lensing shear angular correlation functions ($\xi_+$,$\xi_-$), similarly to above.
 \item The cross-correlation between both quantities (galaxy-galaxy lensing), as above.
@@ -1008,27 +1008,31 @@ Notice that intrinsic alignments, RSD and magnification predictions are not curr
 \label{fig:zhistos}
 \end{figure}
 %------------------------
-\begin{figure*}
-\includegraphics[width=0.49\textwidth]{Cl_analytic}
-\includegraphics[width=0.49\textwidth]{Cl_histo}
-\caption{Tests of the angular power spectrum accuracy. Benchmark comparisons for number counts (solid) and weak lensing (dashed) power spectra are shown for analytic and histogram-based redshift distributions in the left and right panels, respectively. The dashed lines in both panels represents the achieved accuracy of our predictions.}
-\label{fig:cls_limber}
-\end{figure*}
 \begin{figure}
-\includegraphics[width=0.49\textwidth]{Cl_cmblens}
-\caption{Same as Figure \ref{fig:cls_limber} for the CMB lensing power spectrum.}
+\includegraphics[width=0.49\textwidth]{Cl_dd}
+\includegraphics[width=0.49\textwidth]{Cl_dl}
+\includegraphics[width=0.49\textwidth]{Cl_ll}
+\caption{Tests of the angular power spectrum accuracy. {\sl Top:} benchmark comparisons for power spectra between number counts in pairs of redshift bins. Results are shown for analytic (solid) and binned (dashed) redshift distributions, for the bin pairs 1-1 (blue), 1-2 (orange) and 2-2 (green). {\sl Middle:} same as the top panel for cross-correlations between number counts and weak lensing. {\sl Bottom:} same as before for the weak lensing power spectra.}
+\label{fig:cls_limber}
+\end{figure}
+\begin{figure}
+\includegraphics[width=0.49\textwidth]{Cl_dc}
+\includegraphics[width=0.49\textwidth]{Cl_lc}
+\caption{Same as Figure \ref{fig:cls_limber} for power spectra involving CMB lensing. {\sl Top:} cross-correlations with number counts and CMB auto-correlation. {\sl Bottom:} cross-correlations with weak lensing.}
 \label{fig:cls_cmblens}
 \end{figure}
 %------------------------
 
-For $C_\ell$ computations, we define as our accuracy metric the absolute value of the relative difference between \ccl and an independent realisation, $i$:
+For $C_\ell$ computations, we define as our accuracy metric the absolute value of the difference between \ccl and an independent realisation, $i$, as a fraction of the cosmic-variance-limit uncertainties:
 \begin{equation}
-  \mathcal{A}=\left|\frac{C_\ell^{\tt CCL}-C_\ell^{(i)}}{\mathcal{E}_\ell}\right|,
+  \mathcal{A}=\left|\frac{C_\ell^{\tt CCL}-C_\ell^{(i)}}{\sigma_\ell}\right|.
   \label{eq:errorCl}
 \end{equation}
-where $\mathcal{E}_\ell$ is an absolute error threshold defined as the maximum at a given $\ell$ between the uncertainty expected from cosmic variance and a tolerance threshold of $0.1\%$. Hence, our numerical accuracy is always better than the maximum of the two. This applied both to analytic redshift distributions and histograms, for auto- and cross-correlations between bins for both galaxy clustering, galaxy-galaxy lensing and cosmic shear, as shown in Figure \ref{fig:cls_limber}.\todo{Add GGL panel}
-
-The CMB lensing auto- and cross-spectra equivalent results are shown in Figure \ref{fig:cls_cmblens} and the same criteria as in Eq. (\ref{eq:errorCl}) was applied. {\bf The differences between the \ccl~results and the benchmarks are mostly due to the integration and interpolation methods (particularly, the interpolation of the redshift distributions in the case of number counts). In the case of CMB lensing, we note that the results are particularly sensitive to numerical errors in the computation of the distance to the last scattering surface.}
+For the power spectrum $C^{ab}_\ell$ between two fields $a$ and $b$, the cosmic variance errors are given by
+\begin{equation}
+  \sigma_\ell^2=\frac{C^{aa}_\ell C^{bb}_\ell+(C^{ab}_\ell)^2}{2\ell+1}.
+\end{equation}
+Our accuracy requirement, for all auto- and cross-correlations with analytic and binned redshift distributions is $\mathcal{A}<0.1$ (i.e. differences must be smaller than one tenth of the cosmic-variance errors). The results for the auto- and cross-correlations between number counts and weak lensing are shown in Figure \ref{fig:cls_limber}, while those involving CMB lensing are shown in Figure \ref{fig:cls_cmblens}. {\bf The differences between the \ccl~results and the benchmarks are mostly due to the integration and interpolation methods (particularly, the interpolation of the redshift distributions in the case of number counts). In the case of CMB lensing, we note that the results are particularly sensitive to numerical errors in the computation of the distance to the last scattering surface.}
 
 Cosmological constraints from current weak lensing surveys are also derived from correlation functions. As we discussed in Section \ref{sec:models}, the correlation functions are modeled by Eq.(\ref{eq:cl_xi}) and obtained by \ccl through numerical integration of predicted angular power spectra. We require that the absolute difference between the \ccl prediction and an independent one is smaller than our expected error bars:
 \begin{equation}
