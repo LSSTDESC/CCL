@@ -17,12 +17,15 @@ This software is a publicly released LSST DESC product which was developed withi
 
 The list of publicly released versions of this package can be found [here](https://github.com/LSSTDESC/CCL/releases). The master branch is the most recent (non-released) stable branch, but under development. We recommend using one of the public releases unless working on the development on the library.
 
-Installation instructions can be found in [INSTALL.md](https://github.com/LSSTDESC/CCL/blob/master/INSTALL.md) in this directory. Documentation for `CCL` can be found in:
-* [DOC.md](https://github.com/LSSTDESC/CCL/blob/master/DOC.md) in this directory for an overview, 
+<<<<<<< HEAD
+Installation instructions can be found in [INSTALL.md](https://github.com/LSSTDESC/CCL/blob/master/INSTALL.md) in this directory. Documentation for `CCL` can be found:
+* in [DOC.md](https://github.com/LSSTDESC/CCL/blob/master/DOC.md) in this directory for an overview, 
 * in our [wiki](https://github.com/LSSTDESC/CCL/wiki) for a description of benchmarks and known installation issues, 
-* in the `CCL` [readthedocs page](https://readthedocs.org/projects/ccl/) for the `python` routines, and 
+* in the `CCL` [readthedocs page](https://readthedocs.org/projects/ccl/) for the `python` routines,  
+* by calling `help(function name)` from within `python`, and
 * in the doxygen docs contained in the `doc` folder within the repository for the C routines. 
 * There are also multiple examples in C, python and jupyter notebooks available in the `examples` folder.
+
 
 For known installation issues and further information on how CCL was benchmarked during development, see our [wiki](https://github.com/LSSTDESC/CCL/wiki).
 
