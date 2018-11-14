@@ -17,7 +17,6 @@ This software is a publicly released LSST DESC product which was developed withi
 
 The list of publicly released versions of this package can be found [here](https://github.com/LSSTDESC/CCL/releases). The master branch is the most recent (non-released) stable branch, but under development. We recommend using one of the public releases unless working on the development on the library.
 
-<<<<<<< HEAD
 Installation instructions can be found in [INSTALL.md](https://github.com/LSSTDESC/CCL/blob/master/INSTALL.md) in this directory. Documentation for `CCL` can be found:
 * in [DOC.md](https://github.com/LSSTDESC/CCL/blob/master/DOC.md) in this directory for an overview, 
 * in our [wiki](https://github.com/LSSTDESC/CCL/wiki) for a description of benchmarks and known installation issues, 
