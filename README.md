@@ -13,7 +13,7 @@ STYLE CONVENTION USED
 # CCL     [![Build Status](https://travis-ci.org/LSSTDESC/CCL.svg?branch=master)](https://travis-ci.org/LSSTDESC/CCL) [![Coverage Status](https://coveralls.io/repos/github/LSSTDESC/CCL/badge.svg?branch=master)](https://coveralls.io/github/LSSTDESC/CCL?branch=master)
 LSST DESC Core Cosmology Library (`CCL`) provides routines to compute basic cosmological observables with validated numerical accuracy. The library is written in C99 and all functionality is directly callable from C and C++ code.  We also provide python bindings for higher-level functions.
 
-This software is a publicly released LSST DESC product which was developed within the LSST DESC using LSST DESC resources. DESC users should use it in with the [LSST DESC publication policy](http://lsstdesc.org/Collaborators). External users are welcome to use the code outside DESC in accordance with the licensing information below.
+This software is a publicly released LSST DESC product which was developed within the LSST DESC using LSST DESC resources. DESC users should use it in accordance with the [LSST DESC publication policy](http://lsstdesc.org/Collaborators). External users are welcome to use the code outside DESC in accordance with the licensing information below.
 
 The list of publicly released versions of this package can be found [here](https://github.com/LSSTDESC/CCL/releases). The master branch is the most recent (non-released) stable branch, but under development. We recommend using one of the public releases unless working on the development on the library.
 
