@@ -848,44 +848,37 @@ static void get_k_interval(ccl_cosmology *cosmo,CCL_ClWorkspace *w,
 			   CCL_ClTracer *clt1,CCL_ClTracer *clt2,int l,
 			   double *lkmin,double *lkmax)
 {
-  if(l<w->l_limber) {
-    //If non-Limber, we need to integrate over the whole range of k.
-    *lkmin=log10(ccl_splines->K_MIN);
-    *lkmax=log10(ccl_splines->K_MAX);
-  }
-  else {
-    double chimin,chimax;
-    int cut_low_1=0,cut_low_2=0;
-
-    //Define a minimum distance only if no lensing is needed
-    if((clt1->tracer_type==ccl_number_counts_tracer) && (clt1->has_magnification==0)) cut_low_1=1;
-    if((clt2->tracer_type==ccl_number_counts_tracer) && (clt2->has_magnification==0)) cut_low_2=1;
-
-    if(cut_low_1) {
-      if(cut_low_2) {
-	chimin=fmax(clt1->chimin,clt2->chimin);
-	chimax=fmin(clt1->chimax,clt2->chimax);
-      }
-      else {
-	chimin=clt1->chimin;
-	chimax=clt1->chimax;
-      }
-    }
-    else if(cut_low_2) {
-      chimin=clt2->chimin;
-      chimax=clt2->chimax;
+  double chimin,chimax;
+  int cut_low_1=0,cut_low_2=0;
+  
+  //Define a minimum distance only if no lensing is needed
+  if((clt1->tracer_type==ccl_number_counts_tracer) && (clt1->has_magnification==0)) cut_low_1=1;
+  if((clt2->tracer_type==ccl_number_counts_tracer) && (clt2->has_magnification==0)) cut_low_2=1;
+  
+  if(cut_low_1) {
+    if(cut_low_2) {
+      chimin=fmax(clt1->chimin,clt2->chimin);
+      chimax=fmin(clt1->chimax,clt2->chimax);
     }
     else {
-      chimin=0.5*(l+0.5)/ccl_splines->K_MAX;
-      chimax=2*(l+0.5)/ccl_splines->K_MIN;
+      chimin=clt1->chimin;
+      chimax=clt1->chimax;
     }
-
-    if(chimin<=0)
-      chimin=0.5*(l+0.5)/ccl_splines->K_MAX;
-
-    *lkmax=log10(fmin( ccl_splines->K_MAX  ,2  *(l+0.5)/chimin));
-    *lkmin=log10(fmax( ccl_splines->K_MIN  ,0.5*(l+0.5)/chimax));
   }
+  else if(cut_low_2) {
+    chimin=clt2->chimin;
+    chimax=clt2->chimax;
+  }
+  else {
+    chimin=0.5*(l+0.5)/ccl_splines->K_MAX;
+    chimax=2*(l+0.5)/ccl_splines->K_MIN;
+  }
+  
+  if(chimin<=0)
+    chimin=0.5*(l+0.5)/ccl_splines->K_MAX;
+  
+  *lkmax=log10(fmin( ccl_splines->K_MAX  ,2  *(l+0.5)/chimin));
+  *lkmin=log10(fmax( ccl_splines->K_MIN  ,0.5*(l+0.5)/chimax));
 }
 
 //Compute angular power spectrum between two bins
