@@ -1,4 +1,5 @@
 #include "ccl.h"
+#include "../include/ccl_params.h"
 #include "ctest.h"
 #include <stdlib.h>
 #include <stdio.h>
@@ -7,7 +8,8 @@
 
 #define SZ_VAL 0.4 //This will cancel the magnification contribution
 #define CLS_TOLERANCE 1E-3
-#define CLS_FRACTION 1E-3
+#define ELS_TOLERANCE 0.1
+#define NELLS 3001
 
 CTEST_DATA(cls) {
   double Omega_c;
@@ -42,16 +44,16 @@ static int linecount(FILE *f)
 static void compare_cls(char *compare_type,struct cls_data * data)
 {
   int status=0;
+  double zlss=1100.;
+
 
   ccl_configuration config = default_config;
   config.transfer_function_method = ccl_bbks;
   config.matter_power_spectrum_method = ccl_linear;
   ccl_parameters params = ccl_parameters_create_flat_lcdm(data->Omega_c,data->Omega_b,data->h,
 							  data->A_s,data->n_s, &status);
-  params.Omega_k=0;
-  params.Omega_g=0;
   params.Omega_n_rel=0;
-  params.Omega_l = 1.0 - params.Omega_m;
+  params.Omega_l = 0.7;
   params.sigma8=data->sigma8;
   ccl_cosmology * cosmo = ccl_cosmology_create(params, config);
   ASSERT_NOT_NULL(cosmo);
@@ -107,7 +109,12 @@ static void compare_cls(char *compare_type,struct cls_data * data)
   }
 
   char fname[256];
-  FILE *fi_dd_11,*fi_dd_12,*fi_dd_22,*fi_ll_11,*fi_ll_12,*fi_ll_22;
+  FILE *fi_dd_11,*fi_dd_12,*fi_dd_22;
+  FILE *fi_dl_12,*fi_dl_11,*fi_dl_22,*fi_dl_21;
+  FILE *fi_dc_1,*fi_dc_2;
+  FILE *fi_ll_11,*fi_ll_12,*fi_ll_22;
+  FILE *fi_lc_1,*fi_lc_2;
+  FILE *fi_cc;
   CCL_ClTracer *tr_nc_1=ccl_cl_tracer_number_counts_simple(cosmo,nz,zarr_1,pzarr_1,nz,zarr_1,bzarr,&status);
   ASSERT_NOT_NULL(tr_nc_1);
   CCL_ClTracer *tr_nc_2=ccl_cl_tracer_number_counts_simple(cosmo,nz,zarr_2,pzarr_2,nz,zarr_2,bzarr,&status);
@@ -116,122 +123,314 @@ static void compare_cls(char *compare_type,struct cls_data * data)
   ASSERT_NOT_NULL(tr_wl_1);
   CCL_ClTracer *tr_wl_2=ccl_cl_tracer_lensing_simple(cosmo,nz,zarr_2,pzarr_2,&status);
   ASSERT_NOT_NULL(tr_wl_2);
+  CCL_ClTracer *tr_cl=ccl_cl_tracer_cmblens(cosmo,zlss,&status);
+  ASSERT_NOT_NULL(tr_cl);
+
   sprintf(fname,"tests/benchmark/codecomp_step2_outputs/run_b1b1%s_log_cl_dd.txt",compare_type);
   fi_dd_11=fopen(fname,"r"); ASSERT_NOT_NULL(fi_dd_11);
   sprintf(fname,"tests/benchmark/codecomp_step2_outputs/run_b1b2%s_log_cl_dd.txt",compare_type);
   fi_dd_12=fopen(fname,"r"); ASSERT_NOT_NULL(fi_dd_12);
   sprintf(fname,"tests/benchmark/codecomp_step2_outputs/run_b2b2%s_log_cl_dd.txt",compare_type);
   fi_dd_22=fopen(fname,"r"); ASSERT_NOT_NULL(fi_dd_22);
+
+  sprintf(fname,"tests/benchmark/codecomp_step2_outputs/run_b1b1%s_log_cl_dc.txt",compare_type);
+  fi_dc_1=fopen(fname,"r"); ASSERT_NOT_NULL(fi_dc_1);
+  sprintf(fname,"tests/benchmark/codecomp_step2_outputs/run_b2b2%s_log_cl_dc.txt",compare_type);
+  fi_dc_2=fopen(fname,"r"); ASSERT_NOT_NULL(fi_dc_2);
+
   sprintf(fname,"tests/benchmark/codecomp_step2_outputs/run_b1b1%s_log_cl_ll.txt",compare_type);
   fi_ll_11=fopen(fname,"r"); ASSERT_NOT_NULL(fi_ll_11);
   sprintf(fname,"tests/benchmark/codecomp_step2_outputs/run_b1b2%s_log_cl_ll.txt",compare_type);
   fi_ll_12=fopen(fname,"r"); ASSERT_NOT_NULL(fi_ll_12);
   sprintf(fname,"tests/benchmark/codecomp_step2_outputs/run_b2b2%s_log_cl_ll.txt",compare_type);
   fi_ll_22=fopen(fname,"r"); ASSERT_NOT_NULL(fi_ll_22);
+  sprintf(fname,"tests/benchmark/codecomp_step2_outputs/run_b1b1%s_log_cl_dl.txt",compare_type);
+  fi_dl_11=fopen(fname,"r"); ASSERT_NOT_NULL(fi_dl_11);
+  sprintf(fname,"tests/benchmark/codecomp_step2_outputs/run_b1b2%s_log_cl_dl.txt",compare_type);
+  fi_dl_12=fopen(fname,"r"); ASSERT_NOT_NULL(fi_dl_12);
+  sprintf(fname,"tests/benchmark/codecomp_step2_outputs/run_b2b2%s_log_cl_dl.txt",compare_type);
+  fi_dl_22=fopen(fname,"r"); ASSERT_NOT_NULL(fi_dl_22);
+  sprintf(fname,"tests/benchmark/codecomp_step2_outputs/run_b2b1%s_log_cl_dl.txt",compare_type);
+  fi_dl_21=fopen(fname,"r"); ASSERT_NOT_NULL(fi_dl_21);
 
-  int *ells=malloc(3001*sizeof(int));
-  double *cls_dd_11_b=malloc(3001*sizeof(double));
-  double *cls_dd_12_b=malloc(3001*sizeof(double));
-  double *cls_dd_22_b=malloc(3001*sizeof(double));
-  double *cls_ll_11_b=malloc(3001*sizeof(double));
-  double *cls_ll_12_b=malloc(3001*sizeof(double));
-  double *cls_ll_22_b=malloc(3001*sizeof(double));
-  double *cls_dd_11_h=malloc(3001*sizeof(double));
-  double *cls_dd_12_h=malloc(3001*sizeof(double));
-  double *cls_dd_22_h=malloc(3001*sizeof(double));
-  double *cls_ll_11_h=malloc(3001*sizeof(double));
-  double *cls_ll_12_h=malloc(3001*sizeof(double));
-  double *cls_ll_22_h=malloc(3001*sizeof(double));
+  sprintf(fname,"tests/benchmark/codecomp_step2_outputs/run_b1b1%s_log_cl_lc.txt",compare_type);
+  fi_lc_1=fopen(fname,"r"); ASSERT_NOT_NULL(fi_lc_1);
+  sprintf(fname,"tests/benchmark/codecomp_step2_outputs/run_b2b2%s_log_cl_lc.txt",compare_type);
+  fi_lc_2=fopen(fname,"r"); ASSERT_NOT_NULL(fi_lc_2);
 
-  for(int ii=0;ii<3001;ii++) {
-    int l, rtn;
-    fscanf(fi_dd_11,"%d %lf",&l,&(cls_dd_11_b[ii]));
-    fscanf(fi_dd_12,"%d %lf",&l,&(cls_dd_12_b[ii]));
-    fscanf(fi_dd_22,"%d %lf",&l,&(cls_dd_22_b[ii]));
-    fscanf(fi_ll_11,"%d %lf",&l,&(cls_ll_11_b[ii]));
-    fscanf(fi_ll_12,"%d %lf",&l,&(cls_ll_12_b[ii]));
-    fscanf(fi_ll_22,"%d %lf",&l,&(cls_ll_22_b[ii]));
+  sprintf(fname,"tests/benchmark/codecomp_step2_outputs/run_log_cl_cc.txt");
+  fi_cc=fopen(fname,"r"); ASSERT_NOT_NULL(fi_cc);
+  
+  int *ells=malloc(NELLS*sizeof(int));
+  double *cls_dd_11_b=malloc(NELLS*sizeof(double));
+  double *cls_dd_12_b=malloc(NELLS*sizeof(double));
+  double *cls_dd_22_b=malloc(NELLS*sizeof(double));
+  double *cls_dl_11_b=malloc(NELLS*sizeof(double));
+  double *cls_dl_12_b=malloc(NELLS*sizeof(double));
+  double *cls_dl_21_b=malloc(NELLS*sizeof(double));
+  double *cls_dl_22_b=malloc(NELLS*sizeof(double));
+  double *cls_dc_1_b=malloc(NELLS*sizeof(double));
+  double *cls_dc_2_b=malloc(NELLS*sizeof(double));
+  double *cls_ll_11_b=malloc(NELLS*sizeof(double));
+  double *cls_ll_12_b=malloc(NELLS*sizeof(double));
+  double *cls_ll_22_b=malloc(NELLS*sizeof(double));
+  double *cls_lc_1_b=malloc(NELLS*sizeof(double));
+  double *cls_lc_2_b=malloc(NELLS*sizeof(double));
+  double *cls_cc_b=malloc(NELLS*sizeof(double));
+  double *cls_dd_11_h=malloc(NELLS*sizeof(double));
+  double *cls_dd_12_h=malloc(NELLS*sizeof(double));
+  double *cls_dd_22_h=malloc(NELLS*sizeof(double));
+  double *cls_dl_11_h=malloc(NELLS*sizeof(double));
+  double *cls_dl_12_h=malloc(NELLS*sizeof(double));
+  double *cls_dl_22_h=malloc(NELLS*sizeof(double));
+  double *cls_dl_21_h=malloc(NELLS*sizeof(double));
+  double *cls_dc_1_h=malloc(NELLS*sizeof(double));
+  double *cls_dc_2_h=malloc(NELLS*sizeof(double));
+  double *cls_ll_11_h=malloc(NELLS*sizeof(double));
+  double *cls_ll_12_h=malloc(NELLS*sizeof(double));
+  double *cls_ll_22_h=malloc(NELLS*sizeof(double));
+  double *cls_lc_1_h=malloc(NELLS*sizeof(double));
+  double *cls_lc_2_h=malloc(NELLS*sizeof(double));
+  double *cls_cc_h=malloc(NELLS*sizeof(double));
+
+  for(int ii=0;ii<NELLS;ii++) {
+    int l,stat;
+    stat=fscanf(fi_dd_11,"%d %lf",&l,&(cls_dd_11_b[ii]));
+    if(stat!=2) {
+      fprintf(stderr,"Error reading benchmark file");
+      exit(1);
+    }
+    stat=fscanf(fi_dd_12,"%d %lf",&l,&(cls_dd_12_b[ii]));
+    if(stat!=2) {
+      fprintf(stderr,"Error reading benchmark file");
+      exit(1);
+    }
+    stat=fscanf(fi_dd_22,"%d %lf",&l,&(cls_dd_22_b[ii]));
+    if(stat!=2) {
+      fprintf(stderr,"Error reading benchmark file");
+      exit(1);
+    }
+    stat=fscanf(fi_dl_11,"%d %lf",&l,&(cls_dl_11_b[ii]));
+    if(stat!=2) {
+      fprintf(stderr,"Error reading benchmark file");
+      exit(1);
+    }
+    stat=fscanf(fi_dl_12,"%d %lf",&l,&(cls_dl_12_b[ii]));
+    if(stat!=2) {
+      fprintf(stderr,"Error reading benchmark file");
+      exit(1);
+    }
+    stat=fscanf(fi_dl_22,"%d %lf",&l,&(cls_dl_22_b[ii]));
+    if(stat!=2) {
+      fprintf(stderr,"Error reading benchmark file");
+      exit(1);
+    }
+    stat=fscanf(fi_dl_21,"%d %lf",&l,&(cls_dl_21_b[ii]));
+    if(stat!=2) {
+      fprintf(stderr,"Error reading benchmark file");
+      exit(1);
+    }
+    stat=fscanf(fi_dc_1,"%d %lf",&l,&(cls_dc_1_b[ii]));
+    if(stat!=2) {
+      fprintf(stderr,"Error reading benchmark file");
+      exit(1);
+    }
+    stat=fscanf(fi_dc_2,"%d %lf",&l,&(cls_dc_2_b[ii]));
+    if(stat!=2) {
+      fprintf(stderr,"Error reading benchmark file");
+      exit(1);
+    }
+    stat=fscanf(fi_ll_11,"%d %lf",&l,&(cls_ll_11_b[ii]));
+    if(stat!=2) {
+      fprintf(stderr,"Error reading benchmark file");
+      exit(1);
+    }
+    stat=fscanf(fi_ll_12,"%d %lf",&l,&(cls_ll_12_b[ii]));
+    if(stat!=2) {
+      fprintf(stderr,"Error reading benchmark file");
+      exit(1);
+    }
+    stat=fscanf(fi_ll_22,"%d %lf",&l,&(cls_ll_22_b[ii]));
+    if(stat!=2) {
+      fprintf(stderr,"Error reading benchmark file");
+      exit(1);
+    }
+    stat=fscanf(fi_lc_1,"%d %lf",&l,&(cls_lc_1_b[ii]));
+    if(stat!=2) {
+      fprintf(stderr,"Error reading benchmark file");
+      exit(1);
+    }
+    stat=fscanf(fi_lc_2,"%d %lf",&l,&(cls_lc_2_b[ii]));
+    if(stat!=2) {
+      fprintf(stderr,"Error reading benchmark file");
+      exit(1);
+    }
+    stat=fscanf(fi_cc,"%d %lf",&l,&(cls_cc_b[ii]));
+    if(stat!=2) {
+      fprintf(stderr,"Error reading benchmark file");
+      exit(1);
+    }
     ells[ii]=l;
   }
 
   fclose(fi_dd_11);
   fclose(fi_dd_12);
   fclose(fi_dd_22);
+  fclose(fi_dl_12);
+  fclose(fi_dl_11);
+  fclose(fi_dl_21);
+  fclose(fi_dl_22);
+  fclose(fi_dc_1);
+  fclose(fi_dc_2);
   fclose(fi_ll_11);
   fclose(fi_ll_12);
   fclose(fi_ll_22);
+  fclose(fi_lc_1);
+  fclose(fi_lc_2);
+  fclose(fi_cc);
 
   double l_logstep = 1.05;
   double l_linstep = 20.;
-  double dlk = 0.01;
-  CCL_ClWorkspace *w=ccl_cl_workspace_default_limber(3001,l_logstep,l_linstep,dlk,&status);
+  CCL_ClWorkspace *w=ccl_cl_workspace_new_limber(NELLS,l_logstep,l_linstep,&status);
 
-  ccl_angular_cls(cosmo,w,tr_nc_1,tr_nc_1,3001,ells,cls_dd_11_h,&status);
+  ccl_angular_cls(cosmo,w,tr_nc_1,tr_nc_1,NELLS,ells,cls_dd_11_h,&status);
   if (status) printf("%s\n",cosmo->status_message);
-  ccl_angular_cls(cosmo,w,tr_nc_1,tr_nc_2,3001,ells,cls_dd_12_h,&status);
+  ccl_angular_cls(cosmo,w,tr_nc_1,tr_nc_2,NELLS,ells,cls_dd_12_h,&status);
   if (status) printf("%s\n",cosmo->status_message);
-  ccl_angular_cls(cosmo,w,tr_nc_2,tr_nc_2,3001,ells,cls_dd_22_h,&status);
+  ccl_angular_cls(cosmo,w,tr_nc_2,tr_nc_2,NELLS,ells,cls_dd_22_h,&status);
   if (status) printf("%s\n",cosmo->status_message);
-  ccl_angular_cls(cosmo,w,tr_wl_1,tr_wl_1,3001,ells,cls_ll_11_h,&status);
+  ccl_angular_cls(cosmo,w,tr_nc_1,tr_wl_1,NELLS,ells,cls_dl_11_h,&status);
   if (status) printf("%s\n",cosmo->status_message);
-  ccl_angular_cls(cosmo,w,tr_wl_1,tr_wl_2,3001,ells,cls_ll_12_h,&status);
+  ccl_angular_cls(cosmo,w,tr_nc_1,tr_wl_2,NELLS,ells,cls_dl_12_h,&status);
   if (status) printf("%s\n",cosmo->status_message);
-  ccl_angular_cls(cosmo,w,tr_wl_2,tr_wl_2,3001,ells,cls_ll_22_h,&status);
+  ccl_angular_cls(cosmo,w,tr_nc_2,tr_wl_2,NELLS,ells,cls_dl_22_h,&status);
   if (status) printf("%s\n",cosmo->status_message);
-
-  ccl_cl_workspace_free(w);
-
+  ccl_angular_cls(cosmo,w,tr_nc_2,tr_wl_1,NELLS,ells,cls_dl_21_h,&status);
+  if (status) printf("%s\n",cosmo->status_message);
+  ccl_angular_cls(cosmo,w,tr_nc_1,tr_cl,NELLS,ells,cls_dc_1_h,&status);
+  if (status) printf("%s\n",cosmo->status_message);
+  ccl_angular_cls(cosmo,w,tr_nc_2,tr_cl,NELLS,ells,cls_dc_2_h,&status);
+  if (status) printf("%s\n",cosmo->status_message);
+  ccl_angular_cls(cosmo,w,tr_wl_1,tr_wl_1,NELLS,ells,cls_ll_11_h,&status);
+  if (status) printf("%s\n",cosmo->status_message);
+  ccl_angular_cls(cosmo,w,tr_wl_1,tr_wl_2,NELLS,ells,cls_ll_12_h,&status);
+  if (status) printf("%s\n",cosmo->status_message);
+  ccl_angular_cls(cosmo,w,tr_wl_2,tr_wl_2,NELLS,ells,cls_ll_22_h,&status);
+  if (status) printf("%s\n",cosmo->status_message);
+  ccl_angular_cls(cosmo,w,tr_wl_1,tr_cl,NELLS,ells,cls_lc_1_h,&status);
+  if (status) printf("%s\n",cosmo->status_message);
+  ccl_angular_cls(cosmo,w,tr_wl_2,tr_cl,NELLS,ells,cls_lc_2_h,&status);
+  if (status) printf("%s\n",cosmo->status_message);
+  ccl_angular_cls(cosmo,w,tr_cl,tr_cl,NELLS,ells,cls_cc_h,&status);
+  if (status) printf("%s\n",cosmo->status_message);
+  
+  
   double fraction_failed=0;
-  for(int ii=0;ii<3001;ii++) {
-    int l=ells[ii];
-    double ell_correct;
+  for(int ii=2;ii<w->n_ls-1;ii++) {
+    int l=w->l_arr[ii];
+    double ell_correct,ell_correct2;
+    double el_dd_11,el_dd_12,el_dd_22;
+    double el_dl_12,el_dl_11,el_dl_21,el_dl_22;
+    double el_dc_1,el_dc_2;
+    double el_ll_11,el_ll_12,el_ll_22;
+    double el_lc_1,el_lc_2;
+    double el_cc;
     double cl_dd_11,cl_dd_12,cl_dd_22;
+    double cl_dl_12,cl_dl_11,cl_dl_21,cl_dl_22;
+    double cl_dc_1,cl_dc_2;
     double cl_ll_11,cl_ll_12,cl_ll_22;
+    double cl_lc_1,cl_lc_2;
+    double cl_cc;
     double cl_dd_11_h,cl_dd_12_h,cl_dd_22_h;
+    double cl_dl_12_h,cl_dl_11_h,cl_dl_21_h,cl_dl_22_h;
+    double cl_dc_1_h,cl_dc_2_h;
     double cl_ll_11_h,cl_ll_12_h,cl_ll_22_h;
-    
-    if(l<=0)
+    double cl_lc_1_h,cl_lc_2_h;
+    double cl_cc_h;
+    if(l<=1)
       ell_correct=1;
-    else
+    else{
       ell_correct=l*(l+1.)/sqrt((l+2.)*(l+1.)*l*(l-1.));
+      ell_correct2=(l+0.5)*(l+0.5)/sqrt((l+2.)*(l+1.)*l*(l-1.));
+    }
+    cl_dd_11  =cls_dd_11_b[l];
+    cl_dd_12  =cls_dd_12_b[l];
+    cl_dd_22  =cls_dd_22_b[l];
+    cl_dl_12  =cls_dl_12_b[l];
+    cl_dl_11  =cls_dl_11_b[l];
+    cl_dl_21  =cls_dl_21_b[l];
+    cl_dl_22  =cls_dl_22_b[l];
+    cl_dc_1  =cls_dc_1_b[l];
+    cl_dc_2  =cls_dc_2_b[l];
+    cl_ll_11  =cls_ll_11_b[l];
+    cl_ll_12  =cls_ll_12_b[l];
+    cl_ll_22  =cls_ll_22_b[l];
+    cl_lc_1  =cls_lc_1_b[l];
+    cl_lc_2  =cls_lc_2_b[l];
+    cl_cc    =cls_cc_b[l];
+    el_dd_11=ELS_TOLERANCE*sqrt((cl_dd_11*cl_dd_11+cl_dd_11*cl_dd_11)/(2*l+1.));
+    el_dd_12=ELS_TOLERANCE*sqrt((cl_dd_11*cl_dd_22+cl_dd_12*cl_dd_12)/(2*l+1.));
+    el_dd_22=ELS_TOLERANCE*sqrt((cl_dd_22*cl_dd_22+cl_dd_22*cl_dd_22)/(2*l+1.));
+    el_dl_12=ELS_TOLERANCE*sqrt((cl_dd_11*cl_ll_22+cl_dl_12*cl_dl_12)/(2*l+1.));
+    el_dl_11=ELS_TOLERANCE*sqrt((cl_dd_11*cl_ll_11+cl_dl_11*cl_dl_11)/(2*l+1.));
+    el_dl_21=ELS_TOLERANCE*sqrt((cl_dd_11*cl_ll_22+cl_dl_21*cl_dl_21)/(2*l+1.));
+    el_dl_22=ELS_TOLERANCE*sqrt((cl_dd_22*cl_ll_22+cl_dl_22*cl_dl_22)/(2*l+1.));
+    el_dc_1=ELS_TOLERANCE*sqrt((cl_dd_11*cl_cc+cl_dc_1*cl_dc_1)/(2*l+1.));
+    el_dc_2=ELS_TOLERANCE*sqrt((cl_dd_22*cl_cc+cl_dc_2*cl_dc_2)/(2*l+1.));
+    el_ll_11=ELS_TOLERANCE*sqrt((cl_ll_11*cl_ll_11+cl_ll_11*cl_ll_11)/(2*l+1.));
+    el_ll_12=ELS_TOLERANCE*sqrt((cl_ll_11*cl_ll_22+cl_ll_12*cl_ll_12)/(2*l+1.));
+    el_ll_22=ELS_TOLERANCE*sqrt((cl_ll_22*cl_ll_22+cl_ll_22*cl_ll_22)/(2*l+1.));
+    el_lc_1=ELS_TOLERANCE*sqrt((cl_ll_11*cl_cc+cl_lc_1*cl_lc_1)/(2*l+1.));
+    el_lc_2=ELS_TOLERANCE*sqrt((cl_ll_22*cl_cc+cl_lc_2*cl_lc_2)/(2*l+1.));
+    el_cc=ELS_TOLERANCE*sqrt((cl_cc*cl_cc+cl_cc*cl_cc)/(2*l+1.));
+    cl_dd_11_h=cls_dd_11_h[l];
+    cl_dd_12_h=cls_dd_12_h[l];
+    cl_dd_22_h=cls_dd_22_h[l];
+    cl_dl_12_h=cls_dl_12_h[l]*ell_correct2;
+    cl_dl_11_h=cls_dl_11_h[l]*ell_correct2;
+    cl_dl_21_h=cls_dl_21_h[l]*ell_correct2;
+    cl_dl_22_h=cls_dl_22_h[l]*ell_correct2;
+    cl_dc_1_h=cls_dc_1_h[l];
+    cl_dc_2_h=cls_dc_2_h[l];
+    cl_ll_11_h=cls_ll_11_h[l]*ell_correct*ell_correct;
+    cl_ll_12_h=cls_ll_12_h[l]*ell_correct*ell_correct;
+    cl_ll_22_h=cls_ll_22_h[l]*ell_correct*ell_correct;
+    cl_lc_1_h=cls_lc_1_h[l]*ell_correct;
+    cl_lc_2_h=cls_lc_2_h[l]*ell_correct;
+    cl_cc_h=cls_cc_h[l];
 
-    cl_dd_11  =cls_dd_11_b[ii];
-    cl_dd_12  =cls_dd_12_b[ii];
-    cl_dd_22  =cls_dd_22_b[ii];
-    cl_ll_11  =cls_ll_11_b[ii];
-    cl_ll_12  =cls_ll_12_b[ii];
-    cl_ll_22  =cls_ll_22_b[ii];
-    cl_dd_11_h=cls_dd_11_h[ii];
-    cl_dd_12_h=cls_dd_12_h[ii];
-    cl_dd_22_h=cls_dd_22_h[ii];
-    cl_ll_11_h=cls_ll_11_h[ii]*ell_correct*ell_correct;
-    cl_ll_12_h=cls_ll_12_h[ii]*ell_correct*ell_correct;
-    cl_ll_22_h=cls_ll_22_h[ii]*ell_correct*ell_correct;
-
-    if(fabs(cl_dd_11_h/cl_dd_11-1)>CLS_TOLERANCE)
-      fraction_failed++;
-    if(fabs(cl_dd_12_h/cl_dd_12-1)>CLS_TOLERANCE)
-      fraction_failed++;
-    if(fabs(cl_dd_22_h/cl_dd_22-1)>CLS_TOLERANCE)
-      fraction_failed++;
-    if(fabs(cl_ll_11_h/cl_ll_11-1)>CLS_TOLERANCE)
-      fraction_failed++;
-    if(fabs(cl_ll_12_h/cl_ll_12-1)>CLS_TOLERANCE)
-      fraction_failed++;
-    if(fabs(cl_ll_22_h/cl_ll_22-1)>CLS_TOLERANCE)
-      fraction_failed++;
+    ASSERT_TRUE(fabs(cl_dd_11_h-cl_dd_11)<el_dd_11);
+    ASSERT_TRUE(fabs(cl_dd_12_h-cl_dd_12)<el_dd_12);
+    ASSERT_TRUE(fabs(cl_dd_22_h-cl_dd_22)<el_dd_22);
+    ASSERT_TRUE(fabs(cl_dl_12_h-cl_dl_12)<el_dl_12);
+    ASSERT_TRUE(fabs(cl_dl_11_h-cl_dl_11)<el_dl_11);
+    ASSERT_TRUE(fabs(cl_dl_21_h-cl_dl_21)<el_dl_21);
+    ASSERT_TRUE(fabs(cl_dl_22_h-cl_dl_22)<el_dl_22);
+    ASSERT_TRUE(fabs(cl_dc_1_h-cl_dc_1)<el_dc_1);
+    ASSERT_TRUE(fabs(cl_dc_2_h-cl_dc_2)<el_dc_2);
+    ASSERT_TRUE(fabs(cl_ll_11_h-cl_ll_11)<el_ll_11);
+    ASSERT_TRUE(fabs(cl_ll_12_h-cl_ll_12)<el_ll_12);
+    ASSERT_TRUE(fabs(cl_ll_22_h-cl_ll_22)<el_ll_22);
+    ASSERT_TRUE(fabs(cl_lc_1_h-cl_lc_1)<el_lc_1);
+    ASSERT_TRUE(fabs(cl_lc_2_h-cl_lc_2)<el_lc_2);
+    ASSERT_TRUE(fabs(cl_cc_h-cl_cc)<el_cc);
   }
-
+  ccl_cl_workspace_free(w);
+    
   free(ells);
   free(cls_dd_11_b); free(cls_dd_12_b); free(cls_dd_22_b); 
+  free(cls_dl_12_b);free(cls_dl_21_b);free(cls_dl_11_b);free(cls_dl_22_b);
+  free(cls_dc_1_b); free(cls_dc_2_b);
   free(cls_ll_11_b); free(cls_ll_12_b); free(cls_ll_22_b); 
-  free(cls_dd_11_h); free(cls_dd_12_h); free(cls_dd_22_h); 
-  free(cls_ll_11_h); free(cls_ll_12_h); free(cls_ll_22_h); 
+  free(cls_lc_1_b); free(cls_lc_2_b);
+  free(cls_cc_b);
 
-  printf("%d, ",(int)fraction_failed);
-  fraction_failed/=6*3001;
-  printf("%lf %% ",fraction_failed*100);
-  ASSERT_TRUE((fraction_failed<CLS_FRACTION));
+  free(cls_dd_11_h); free(cls_dd_12_h); free(cls_dd_22_h); 
+  free(cls_dl_12_h);free(cls_dl_11_h);free(cls_dl_21_h);free(cls_dl_22_h);
+  free(cls_dc_1_h); free(cls_dc_2_h);
+  free(cls_ll_11_h); free(cls_ll_12_h); free(cls_ll_22_h); 
+  free(cls_lc_1_h); free(cls_lc_2_h);
+  free(cls_cc_h);
 
   free(zarr_1);
   free(zarr_2);
@@ -242,6 +441,7 @@ static void compare_cls(char *compare_type,struct cls_data * data)
   ccl_cl_tracer_free(tr_nc_2);
   ccl_cl_tracer_free(tr_wl_1);
   ccl_cl_tracer_free(tr_wl_2);
+  ccl_cl_tracer_free(tr_cl);
   ccl_cosmology_free(cosmo);
 }
 
