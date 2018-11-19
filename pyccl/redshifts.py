@@ -100,11 +100,8 @@ class dNdzFunction(object):
         """
         # Wrap user-defined function up so that only one arg is needed
         # at run-time
-
         def _func(z):
             return func(z, args)
-            
-        print "func=", _func(0.5)
 
         # Create user_pz_info object
         self.dN_func = lib.create_dNdz_info_from_py(_func)
