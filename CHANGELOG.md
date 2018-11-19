@@ -1,8 +1,10 @@
 # v 1.0 API changes (in prep):
 
 ## C library
+- Deprecated the `native` non-Limber angular power spectrum method (#506).
 
 ## Python library
+- Deprecated the `native` non-Limber angular power spectrum method (#506).
 - Deprecated the `Parameters` object in favor of only the `Cosmology` object (#493).
 - Renamed the `ClTracer` family of objects (#496).
 - Various function parameter name changes and documentation improvements (#464).
