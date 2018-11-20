@@ -72,14 +72,11 @@ static double call_py_photoz_fn(double z_ph, double z_s, void *py_func_obj, int 
     // Get Python function object and construct argument list
     func = (PyObject *) py_func_obj;
     arglist = Py_BuildValue("dd", z_ph, z_s); // Assumed to take two double args
-    printf("arglist=%f\n", PyFloat_AsDouble(arglist));
 
     // Call Python function and dereference argument list
     result = PyObject_CallObject(func, arglist); // PyEval_CallObject
     Py_DECREF(arglist);
     
-    printf("result=%f\n", PyFloat_AsDouble(result));
-
     // Check result; raise error if the function call failed
     if(result){
         p = PyFloat_AsDouble(result);
@@ -125,14 +122,12 @@ static double call_py_dN_fn(double z, void *py_func_obj, int *status)
 
     // Get Python function object and construct argument list
     func = (PyObject *) py_func_obj;
-    arglist = Py_BuildValue("d", z); // Assumed to take one double arg
-    printf("arglist=%f\n", PyFloat_AsDouble(arglist));
+    arglist = Py_BuildValue("(d)", z); // Assumed to take one double arg
 
     // Call Python function and dereference argument list
     result = PyObject_CallObject(func, arglist); // PyEval_CallObject
     Py_DECREF(arglist);
-    
-    printf("result=%f\n", PyFloat_AsDouble(result));
+    PyErr_Print();
 
     // Check result; raise error if the function call failed
     if(result){

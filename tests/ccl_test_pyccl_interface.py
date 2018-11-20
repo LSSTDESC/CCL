@@ -455,8 +455,9 @@ def check_redshifts(cosmo):
     z_arr = np.array(z_lst)
 
     # p(z) function for dNdz_tomog
+    import math
     def pz1(z_ph, z_s, args):
-        return np.exp(- (z_ph - z_s)**2. / 2.)
+        return math.exp(- (z_ph - z_s)**2. / 2.)
 
     # Lambda function p(z) function for dNdz_tomog
     pz2 = lambda z_ph, z_s, args: np.exp(-(z_ph - z_s)**2. / 2.)
@@ -468,14 +469,10 @@ def check_redshifts(cosmo):
     
     # dNdz (in terms of true redshift) function for dNdz_tomog
     def dndz1(z, args):
-        return z**1.24 * np.exp(- (z / 0.51)**1.01)
-        
-    print "here"
+        return z**1.24 * math.exp(- (z / 0.51)**1.01)
         
     # dNdzFunction class
     dNdZ1 = ccl.dNdzFunction(dndz1)
-    
-    print "dNdZ1=", dNdZ1
 
     # dNdz_tomog
     zmin = 0.
