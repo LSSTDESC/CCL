@@ -49,6 +49,8 @@ ccl_gsl_params * ccl_gsl=NULL; // Global variable
 
 void ccl_cosmology_read_config(void)
 {
+	
+  printf("read config\n");	
 
   int CONFIG_LINE_BUFFER_SIZE=100;
   int MAX_CONFIG_VAR_LEN=100;
@@ -126,6 +128,8 @@ void ccl_cosmology_read_config(void)
       MATCH("ELL_MIN_CORR",ccl_splines->ELL_MIN_CORR=(double) var_dbl);
       MATCH("ELL_MAX_CORR",ccl_splines->ELL_MAX_CORR=(double) var_dbl);
       MATCH("N_ELL_CORR",ccl_splines->N_ELL_CORR=(int) var_dbl);
+      
+      printf("in core=%d\n", ccl_splines->N_ELL_CORR);
 
       // GSL parameters
       MATCH("GSL_EPSREL", ccl_gsl->EPSREL=var_dbl);
@@ -303,6 +307,8 @@ ccl_parameters ccl_parameters_create(
     gsl_set_error_handler_off ();
   #endif
 
+  printf("in params create\n");
+
   ccl_parameters params;
   // Initialize params
   params.mnu = NULL;
@@ -323,6 +329,7 @@ ccl_parameters ccl_parameters_create(
   /* Check whether ccl_splines and ccl_gsl exist. If either is not set yet, load
      parameters from the config file. */
   if(ccl_splines==NULL || ccl_gsl==NULL) {
+	  printf("reading config\n");
     ccl_cosmology_read_config();
   }
 
