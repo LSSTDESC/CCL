@@ -109,37 +109,34 @@ class dNdzFunction(object):
     def __del__(self):
         """Destructor for PhotoZFunction object."""
         try:
-            lib.free_photoz_info(self.dN_func)
+            lib.free_dNdz_info(self.dN_func)
         except Exception:
             pass
 
-class dNdzSmail(object):
+class dNdzSmail(dNdzFunction):
 
-    def __init__(self, func, args=None):
-        """Create a new dNdz function.
+    def __init__(self, alpha, beta, z0):
+        """Create a new dNdz function of the Smail type.
+        z**alpha * exp(-(z/z0)**beta)
 
         Args:
-            func (:obj: callable): Must have the call signature
-                                   func(z, args).
-            args (tuple, optional): Extra arguments to be passed as the third
-                                    argument of func().
-        """
-        # Wrap user-defined function up so that only two args are needed
-        # at run-time
-
-        def _func(z):
-            return func(z, args)
-
-        # Create user_pz_info object
-        self.dN_func = lib.create_photoz_info_from_py(_func)
+           alpha (float): alpha parameter
+           beta (float) : beta parameter
+           z0 (float): z0 parameter 
+        """    
+            
+        self.alpha = alpha
+        self.beta = beta
+        self.z0 = z0
+        self.dN_func = lib.create_Smail_dNdz_info(alpha, beta, z0)
 
     def __del__(self):
         """Destructor for PhotoZFunction object."""
         try:
-            lib.free_photoz_info(self.dN_func)
+            lib.free_dNdz_info(self.dN_func)
         except Exception:
             pass
-
+            
 
 def dNdz_tomog(z, zmin, zmax, pz_func, dNdz_func):
     """Calculates dNdz in a particular tomographic bin, convolved

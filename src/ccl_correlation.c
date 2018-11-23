@@ -55,8 +55,6 @@ static void ccl_tracer_corr_fftlog(ccl_cosmology *cosmo,
 {
   int i;
   double *l_arr,*cl_arr,*th_arr,*wth_arr;
-  
-  printf("nell=%d\n", ccl_splines->N_ELL_CORR);
 
   l_arr=ccl_log_spacing(ccl_splines->ELL_MIN_CORR,ccl_splines->ELL_MAX_CORR,ccl_splines->N_ELL_CORR);
   if(l_arr==NULL) {

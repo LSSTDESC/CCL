@@ -1,6 +1,7 @@
 import numpy as np,math
 from numpy.testing import assert_raises, assert_warns, assert_no_warnings, \
-                          assert_, decorators, run_module_suite
+                          assert_, decorators, run_module_suite, assert_allclose
+from scipy.integrate import simps
 import pyccl as ccl
 from pyccl import CCLError
 
@@ -471,36 +472,54 @@ def check_redshifts(cosmo):
     def dndz1(z, args):
         return z**1.24 * math.exp(- (z / 0.51)**1.01)
         
-    # dNdzFunction class
+    # dNdzFunction classes
     dNdZ1 = ccl.dNdzFunction(dndz1)
+    dNdZ2 = ccl.dNdzSmail(alpha = 1.24, beta = 1.01, z0 = 0.51)
 
-    # dNdz_tomog
+    # Check that dNdz_tomog is finite with the various combinations
+    # of PhotoZ and dNdz functions
     zmin = 0.
     zmax = 1.
     assert_( all_finite(ccl.dNdz_tomog(z_scl, zmin, zmax, PZ1, dNdZ1)) )
-    #assert_( all_finite(ccl.dNdz_tomog(z_lst, zmin, zmax, PZ1, dNdZ1)) )
-    #assert_( all_finite(ccl.dNdz_tomog(z_arr, zmin, zmax, PZ1, dNdZ1)) )
+    assert_( all_finite(ccl.dNdz_tomog(z_lst, zmin, zmax, PZ1, dNdZ1)) )
+    assert_( all_finite(ccl.dNdz_tomog(z_arr, zmin, zmax, PZ1, dNdZ1)) )
 
-    #assert_( all_finite(ccl.dNdz_tomog(z_scl, zmin, zmax, PZ2, dNdZ1)) )
-    #assert_( all_finite(ccl.dNdz_tomog(z_lst, zmin, zmax, PZ2, dNdZ1)) )
-    #assert_( all_finite(ccl.dNdz_tomog(z_arr, zmin, zmax, PZ2, dNdZ1)) )
-
-    #assert_( all_finite(ccl.dNdz_tomog(z_scl, zmin, zmax, PZ1, dNdZ1)) )
-    #assert_( all_finite(ccl.dNdz_tomog(z_lst, zmin, zmax, PZ1, dNdZ1)) )
-    #assert_( all_finite(ccl.dNdz_tomog(z_arr, zmin, zmax, PZ1), dNdZ1) )
-
-    #assert_( all_finite(ccl.dNdz_tomog(z_scl, zmin, zmax, PZ2, dNdZ1)) )
-    #assert_( all_finite(ccl.dNdz_tomog(z_lst, zmin, zmax, PZ2, dNdZ1)) )
-    #assert_( all_finite(ccl.dNdz_tomog(z_arr, zmin, zmax, PZ2, dNdZ1)) )
-
-    # Argument checking of dNdz_tomog
-    # Wrong dNdz_type
-    #assert_raises(ValueError, ccl.dNdz_tomog, z_scl, 'nonsense', zmin, zmax, PZ1)
+    assert_( all_finite(ccl.dNdz_tomog(z_scl, zmin, zmax, PZ2, dNdZ1)) )
+    assert_( all_finite(ccl.dNdz_tomog(z_lst, zmin, zmax, PZ2, dNdZ1)) )
+    assert_( all_finite(ccl.dNdz_tomog(z_arr, zmin, zmax, PZ2, dNdZ1)) )
+    
+    assert_( all_finite(ccl.dNdz_tomog(z_scl, zmin, zmax, PZ3, dNdZ1)) )
+    assert_( all_finite(ccl.dNdz_tomog(z_lst, zmin, zmax, PZ3, dNdZ1)) )
+    assert_( all_finite(ccl.dNdz_tomog(z_arr, zmin, zmax, PZ3, dNdZ1)) )
+    
+    assert_( all_finite(ccl.dNdz_tomog(z_scl, zmin, zmax, PZ1, dNdZ2)) )
+    assert_( all_finite(ccl.dNdz_tomog(z_lst, zmin, zmax, PZ1, dNdZ2)) )
+    assert_( all_finite(ccl.dNdz_tomog(z_arr, zmin, zmax, PZ1, dNdZ2)) )
+    
+    assert_( all_finite(ccl.dNdz_tomog(z_scl, zmin, zmax, PZ2, dNdZ2)) )
+    assert_( all_finite(ccl.dNdz_tomog(z_lst, zmin, zmax, PZ2, dNdZ2)) )
+    assert_( all_finite(ccl.dNdz_tomog(z_arr, zmin, zmax, PZ2, dNdZ2)) )
+    
+    assert_( all_finite(ccl.dNdz_tomog(z_scl, zmin, zmax, PZ3, dNdZ2)) )
+    assert_( all_finite(ccl.dNdz_tomog(z_lst, zmin, zmax, PZ3, dNdZ2)) )
+    assert_( all_finite(ccl.dNdz_tomog(z_arr, zmin, zmax, PZ3, dNdZ2)) )
+    
+    # Check that if we integrate over a dNdz_tomog bin with these 
+    # different dNdz and pz definitions, we get normalization = 1.
+    
+    # Pick a range that is not 0-1 in case this hides norm problems.
+    zmin=0.3
+    zmax=0.5
+    z_arr_finer = np.linspace(0., 2.5, 100000)
+    
+    assert_allclose(simps(ccl.dNdz_tomog(z_arr_finer, zmin, zmax, PZ1, dNdZ1), z_arr_finer), 1., 1e-4)
+    
+    
 
     # Wrong function type
-    #assert_raises(TypeError, ccl.dNdz_tomog, z_scl, zmin, zmax, pz1, dNdZ1)
-    #assert_raises(TypeError, ccl.dNdz_tomog, z_scl,  zmin, zmax, z_arr, dNdZ1)
-    #assert_raises(TypeError, ccl.dNdz_tomog, z_scl, zmin, zmax, None, None)
+    assert_raises(TypeError, ccl.dNdz_tomog, z_scl, zmin, zmax, pz1, z_arr)
+    assert_raises(TypeError, ccl.dNdz_tomog, z_scl,  zmin, zmax, z_arr, dNdZ1)
+    assert_raises(TypeError, ccl.dNdz_tomog, z_scl, zmin, zmax, None, None)
 
 def check_redshifts_nu(cosmo):
     """
