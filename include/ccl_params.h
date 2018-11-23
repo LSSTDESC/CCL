@@ -36,6 +36,10 @@ typedef struct ccl_spline_params {
   int N_K;
   int N_K_3DCOR;
 
+  //Correlation function parameters
+  double ELL_MIN_CORR;
+  double ELL_MAX_CORR;
+  int N_ELL_CORR;
 } ccl_spline_params;
 
 extern ccl_spline_params * ccl_splines;
