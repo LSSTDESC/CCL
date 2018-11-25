@@ -64,9 +64,9 @@ static void compare_cls(char *compare_type,struct cls_data * data)
     char str[1024];
     char* rtn;
     int stat;
-    FILE *ampz1=fopen("./tests/benchmark/codecomp_step2_outputs/cclamparranalytic1nz512.txt","r");
+    FILE *ampz1=fopen("./tests/benchmark/codecomp_step2_outputs/cclamparranalytic1nz512nb.txt","r");
     ASSERT_NOT_NULL(ampz1);
-    FILE *ampz2=fopen("./tests/benchmark/codecomp_step2_outputs/cclamparranalytic2nz512.txt","r");
+    FILE *ampz2=fopen("./tests/benchmark/codecomp_step2_outputs/cclamparranalytic2nz512nb.txt","r");
     ASSERT_NOT_NULL(ampz2);
     //Create arrays for N(z)
     double zmean_1=1.0,sigz_1=0.15;
@@ -81,8 +81,6 @@ static void compare_cls(char *compare_type,struct cls_data * data)
     rz1arr=malloc(nz*sizeof(double));
     az2arr=malloc(nz*sizeof(double));
     rz2arr=malloc(nz*sizeof(double));
-    rtn = fgets(str,1024,ampz1);
-    rtn = fgets(str,1024,ampz2);
     for(int ii=0;ii<nz;ii++) {
       double zia1,zia2,aia1,aia2;
       stat = fscanf(ampz1,"%lf %lf",&zia1,&aia1);
@@ -110,9 +108,9 @@ static void compare_cls(char *compare_type,struct cls_data * data)
     ASSERT_NOT_NULL(fnz1);
     FILE *fnz2=fopen("./tests/benchmark/codecomp_step2_outputs/bin2_histo.txt","r");
     ASSERT_NOT_NULL(fnz2);
-    FILE *ampz1=fopen("./tests/benchmark/codecomp_step2_outputs/cclamparrhisto1nz.txt","r");
+    FILE *ampz1=fopen("./tests/benchmark/codecomp_step2_outputs/cclamparrhisto1nznb.txt","r");
     ASSERT_NOT_NULL(ampz1);
-    FILE *ampz2=fopen("./tests/benchmark/codecomp_step2_outputs/cclamparrhisto2nz.txt","r");
+    FILE *ampz2=fopen("./tests/benchmark/codecomp_step2_outputs/cclamparrhisto2nznb.txt","r");
     ASSERT_NOT_NULL(ampz2);
     nz=linecount(fnz1)-1; rewind(fnz1);
     zarr_1=malloc(nz*sizeof(double));
@@ -126,8 +124,6 @@ static void compare_cls(char *compare_type,struct cls_data * data)
     rz2arr=malloc(nz*sizeof(double));
     rtn = fgets(str,1024,fnz1);
     rtn = fgets(str,1024,fnz2);
-    rtn = fgets(str,1024,ampz1);
-    rtn = fgets(str,1024,ampz2);
     for(int ii=0;ii<nz;ii++) {
       double z1,z2,nz1,nz2,zia1,zia2,aia1,aia2;
       stat = fscanf(fnz1,"%lf %lf",&z1,&nz1);
@@ -640,6 +636,8 @@ static void compare_cls(char *compare_type,struct cls_data * data)
     cl_lc_2_h=cls_lc_2_h[l]*ell_correct;
     cl_cc_h=cls_cc_h[l];
 
+//    printf("%d,%e,%e,%e,%e\n",l,fabs(cl_dd_11_h-cl_dd_11)/el_dd_11,cl_dd_11_h,cl_dd_11,el_dd_11);
+//    printf("%d\n",l);
     ASSERT_TRUE(fabs(cl_dd_11_h-cl_dd_11)<el_dd_11);
     ASSERT_TRUE(fabs(cl_dd_12_h-cl_dd_12)<el_dd_12);
     ASSERT_TRUE(fabs(cl_dd_22_h-cl_dd_22)<el_dd_22);
