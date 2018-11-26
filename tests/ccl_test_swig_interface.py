@@ -212,7 +212,7 @@ def test_swig_redshifts():
 
     assert_raises(
         CCLError,
-        ccllib.specs_dNdz_tomog_vec,
+        ccllib.dNdz_tomog_vec,
         0,
         0.0, 1.0,
         None,
