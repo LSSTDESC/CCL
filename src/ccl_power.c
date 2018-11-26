@@ -583,6 +583,9 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int * statu
       ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_cosmology_compute_power_class(): Error creating log_power_nl spline\n");
     } // end error check
   } // end status check
+      
+  ccl_free_class_structs(cosmo, &ba, &th, &pt, &tr, &pm, &sp, &nl, &le, 
+                         init_arr, status);
   
   // Free allocated variables and return
   free(x); free(a); free(y2d_nl); free(y2d_lin);
@@ -1382,6 +1385,7 @@ static void ccl_cosmology_compute_power_emu(ccl_cosmology * cosmo, int * status)
     }
     else {
       cosmo->data.p_lin = log_power;
+      ccl_free_class_structs(cosmo, &ba,&th,&pt,&tr,&pm,&sp,&nl,&le,init_arr,status);
     }
   }
 

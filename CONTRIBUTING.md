@@ -71,6 +71,22 @@ directory. To refresh the docs to reflect new changes, run
 `doxygen doxygen/Doxyfile` in the directory `doc` (assuming you already have
 it installed).
 
+Adding new benchmarks
+---------------------------------------------------------
+Every new feature in CCL is benchmarked against an independent implementation.
+If you are adding a new feature, make sure someone can provide you with
+an independent output for cross-checks. Independent codes should be
+publicly available and linked in the benchmark tab
+of the wiki, and a script to run them should
+be provided such that the user can reproduce the benchmarks.
+
+Benchmarks should be integrated in automated C tests following the current
+examples in `tests/`. Any plots that check the results of the comparison
+should be added to the `Benchmark_Comparison.ipynb` notebook in the
+`examples` folder. New features and tests should also be documented
+in the CCL note in the `doc` directory.
+
+
 Modifying the Python wrapper
 ---------------------------------------------------------
 If you make changes to the public CCL API, you will also have to update the
