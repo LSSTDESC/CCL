@@ -443,7 +443,7 @@ def check_neutrinos():
 
 def check_redshifts(cosmo):
     """
-    Check that redshifts functions can be run.
+    Check that redshift functions can be run and produce finite values.
     """
     # Types of scale factor input (scalar, list, array)
     a_scl = 0.5
@@ -504,18 +504,6 @@ def check_redshifts(cosmo):
     assert_( all_finite(ccl.dNdz_tomog(z_lst, zmin, zmax, PZ3, dNdZ2)) )
     assert_( all_finite(ccl.dNdz_tomog(z_arr, zmin, zmax, PZ3, dNdZ2)) )
     
-    # Check that if we integrate over a dNdz_tomog bin with these 
-    # different dNdz and pz definitions, we get normalization = 1.
-    
-    # Pick a range that is not 0-1 in case this hides norm problems.
-    zmin=0.3
-    zmax=0.5
-    z_arr_finer = np.linspace(0., 2.5, 100000)
-    
-    assert_allclose(simps(ccl.dNdz_tomog(z_arr_finer, zmin, zmax, PZ1, dNdZ1), z_arr_finer), 1., 1e-4)
-    
-    
-
     # Wrong function type
     assert_raises(TypeError, ccl.dNdz_tomog, z_scl, zmin, zmax, pz1, z_arr)
     assert_raises(TypeError, ccl.dNdz_tomog, z_scl,  zmin, zmax, z_arr, dNdZ1)
@@ -523,7 +511,7 @@ def check_redshifts(cosmo):
 
 def check_redshifts_nu(cosmo):
     """
-    Check that redshifts functions can be run.
+    Check that redshift functions can be run in neutrino cosmologies.
     """
     # Types of scale factor input (scalar, list, array)
     a_scl = 0.5
@@ -549,11 +537,18 @@ def check_redshifts_nu(cosmo):
     # PhotoZFunction classes
     PZ1 = ccl.PhotoZFunction(pz1)
     PZ2 = ccl.PhotoZFunction(pz2)
+    PZ3 = ccl.PhotoZGaussian(sigma_z0=0.1)
     
-    # dNdzFunction class
+    # dNdz (in terms of true redshift) function for dNdz_tomog
+    def dndz1(z, args):
+        return z**1.24 * math.exp(- (z / 0.51)**1.01)
+        
+    # dNdzFunction classes
     dNdZ1 = ccl.dNdzFunction(dndz1)
+    dNdZ2 = ccl.dNdzSmail(alpha = 1.24, beta = 1.01, z0 = 0.51)
 
-    # dNdz_tomog
+    # Check that dNdz_tomog is finite with the various combinations
+    # of PhotoZ and dNdz functions
     zmin = 0.
     zmax = 1.
     assert_( all_finite(ccl.dNdz_tomog(z_scl, zmin, zmax, PZ1, dNdZ1)) )
@@ -563,14 +558,22 @@ def check_redshifts_nu(cosmo):
     assert_( all_finite(ccl.dNdz_tomog(z_scl, zmin, zmax, PZ2, dNdZ1)) )
     assert_( all_finite(ccl.dNdz_tomog(z_lst, zmin, zmax, PZ2, dNdZ1)) )
     assert_( all_finite(ccl.dNdz_tomog(z_arr, zmin, zmax, PZ2, dNdZ1)) )
-
-    assert_( all_finite(ccl.dNdz_tomog(z_scl, zmin, zmax, PZ1, dNdZ1)) )
-    assert_( all_finite(ccl.dNdz_tomog(z_lst, zmin, zmax, PZ1, dNdZ1)) )
-    assert_( all_finite(ccl.dNdz_tomog(z_arr, zmin, zmax, PZ1, dNdZ1)) )
-
-    assert_( all_finite(ccl.dNdz_tomog(z_scl, zmin, zmax, PZ2, dNdZ1)) )
-    assert_( all_finite(ccl.dNdz_tomog(z_lst, zmin, zmax, PZ2, dNdZ1)) )
-    assert_( all_finite(ccl.dNdz_tomog(z_arr, zmin, zmax, PZ2, dNdZ1)) )
+    
+    assert_( all_finite(ccl.dNdz_tomog(z_scl, zmin, zmax, PZ3, dNdZ1)) )
+    assert_( all_finite(ccl.dNdz_tomog(z_lst, zmin, zmax, PZ3, dNdZ1)) )
+    assert_( all_finite(ccl.dNdz_tomog(z_arr, zmin, zmax, PZ3, dNdZ1)) )
+    
+    assert_( all_finite(ccl.dNdz_tomog(z_scl, zmin, zmax, PZ1, dNdZ2)) )
+    assert_( all_finite(ccl.dNdz_tomog(z_lst, zmin, zmax, PZ1, dNdZ2)) )
+    assert_( all_finite(ccl.dNdz_tomog(z_arr, zmin, zmax, PZ1, dNdZ2)) )
+    
+    assert_( all_finite(ccl.dNdz_tomog(z_scl, zmin, zmax, PZ2, dNdZ2)) )
+    assert_( all_finite(ccl.dNdz_tomog(z_lst, zmin, zmax, PZ2, dNdZ2)) )
+    assert_( all_finite(ccl.dNdz_tomog(z_arr, zmin, zmax, PZ2, dNdZ2)) )
+    
+    assert_( all_finite(ccl.dNdz_tomog(z_scl, zmin, zmax, PZ3, dNdZ2)) )
+    assert_( all_finite(ccl.dNdz_tomog(z_lst, zmin, zmax, PZ3, dNdZ2)) )
+    assert_( all_finite(ccl.dNdz_tomog(z_arr, zmin, zmax, PZ3, dNdZ2)) )
 
     # Wrong function type
     assert_raises(TypeError, ccl.dNdz_tomog, z_scl, zmin, zmax, pz1, dNdZ1)

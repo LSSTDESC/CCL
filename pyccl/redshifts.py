@@ -29,7 +29,6 @@ dNdz options
 import numpy as np
 from . import ccllib as lib
 from .core import check
-from .pyutils import _vectorize_fn, _vectorize_fn_simple
 
 """A user-defined photo-z function.
 This functions allows the user to create (or
@@ -64,7 +63,8 @@ class PhotoZFunction(object):
             lib.free_photoz_info(self.pz_func)
         except Exception:
             pass
-            
+
+
 class PhotoZGaussian(PhotoZFunction):
     """
     Gaussian photo-z function with sigma(z) = sigma_z0 (1 + z).
@@ -86,7 +86,8 @@ class PhotoZGaussian(PhotoZFunction):
             lib.free_photoz_info(self.pz_func)
         except Exception:
             pass
-            
+
+
 class dNdzFunction(object):
 
     def __init__(self, func, args=None):
@@ -112,6 +113,7 @@ class dNdzFunction(object):
             lib.free_dNdz_info(self.dN_func)
         except Exception:
             pass
+
 
 class dNdzSmail(dNdzFunction):
 
@@ -159,14 +161,13 @@ def dNdz_tomog(z, zmin, zmax, pz_func, dNdz_func):
     # Do type-check for pz_func argument
     if not isinstance(pz_func, PhotoZFunction):
         raise TypeError("pz_func must be a PhotoZFunction instance.")
-        
+
     # Do type-check for dNdz_func argument
     if not isinstance(dNdz_func, dNdzFunction):
         raise TypeError("dNdz_func must be a dNdzFunction instance.")
 
     # Call dNdz tomography function
     status = 0
-    dNdz, status = lib.dNdz_tomog_vec(zmin, zmax, pz_func.pz_func,
-                                    dNdz_func.dN_func, z, z.size, status)
+    dNdz, status = lib.dNdz_tomog_vec(zmin, zmax, pz_func.pz_func, dNdz_func.dN_func, z, z.size, status)
     check(status)
     return dNdz
