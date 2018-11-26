@@ -46,7 +46,6 @@ static void compare_cls(char *compare_type,struct cls_data * data)
   int status=0;
   double zlss=1100.;
 
-
   ccl_configuration config = default_config;
   config.transfer_function_method = ccl_bbks;
   config.matter_power_spectrum_method = ccl_linear;
@@ -57,6 +56,14 @@ static void compare_cls(char *compare_type,struct cls_data * data)
   params.sigma8=data->sigma8;
   ccl_cosmology * cosmo = ccl_cosmology_create(params, config);
   ASSERT_NOT_NULL(cosmo);
+
+  double epsrel_save;
+  if(!strcmp(compare_type,"histo")) { //This is needed for the histogrammed N(z) in order to pass the IA tests
+    epsrel_save=ccl_gsl->INTEGRATION_LIMBER_EPSREL;
+    ccl_gsl->INTEGRATION_LIMBER_EPSREL=2.5E-5;
+    ccl_gsl->INTEGRATION_EPSREL=2.5E-5;
+    ccl_set_debug_policy(CCL_DEBUG_MODE_OFF);
+  }
 
   int nz;
   double *zarr_1,*pzarr_1,*zarr_2,*pzarr_2,*bzarr,*az1arr,*rz1arr,*az2arr,*rz2arr;
@@ -171,33 +178,28 @@ static void compare_cls(char *compare_type,struct cls_data * data)
   fi_dd_12=fopen(fname,"r"); ASSERT_NOT_NULL(fi_dd_12);
   sprintf(fname,"tests/benchmark/codecomp_step2_outputs/run_b2b2%s_log_cl_dd.txt",compare_type);
   fi_dd_22=fopen(fname,"r"); ASSERT_NOT_NULL(fi_dd_22);
-
   sprintf(fname,"tests/benchmark/codecomp_step2_outputs/run_b1b1%s_log_cl_dc.txt",compare_type);
   fi_dc_1=fopen(fname,"r"); ASSERT_NOT_NULL(fi_dc_1);
   sprintf(fname,"tests/benchmark/codecomp_step2_outputs/run_b2b2%s_log_cl_dc.txt",compare_type);
   fi_dc_2=fopen(fname,"r"); ASSERT_NOT_NULL(fi_dc_2);
-
   sprintf(fname,"tests/benchmark/codecomp_step2_outputs/run_b1b1%s_log_cl_ll.txt",compare_type);
   fi_ll_11=fopen(fname,"r"); ASSERT_NOT_NULL(fi_ll_11);
   sprintf(fname,"tests/benchmark/codecomp_step2_outputs/run_b1b2%s_log_cl_ll.txt",compare_type);
   fi_ll_12=fopen(fname,"r"); ASSERT_NOT_NULL(fi_ll_12);
   sprintf(fname,"tests/benchmark/codecomp_step2_outputs/run_b2b2%s_log_cl_ll.txt",compare_type);
   fi_ll_22=fopen(fname,"r"); ASSERT_NOT_NULL(fi_ll_22);
-
   sprintf(fname,"tests/benchmark/codecomp_step2_outputs/run_b1b1%s_log_cl_ii.txt",compare_type);
   fi_ii_11=fopen(fname,"r"); ASSERT_NOT_NULL(fi_ii_11);
   sprintf(fname,"tests/benchmark/codecomp_step2_outputs/run_b1b2%s_log_cl_ii.txt",compare_type);
   fi_ii_12=fopen(fname,"r"); ASSERT_NOT_NULL(fi_ii_12);
   sprintf(fname,"tests/benchmark/codecomp_step2_outputs/run_b2b2%s_log_cl_ii.txt",compare_type);
   fi_ii_22=fopen(fname,"r"); ASSERT_NOT_NULL(fi_ii_22);
-
   sprintf(fname,"tests/benchmark/codecomp_step2_outputs/run_b1b1%s_log_cl_li.txt",compare_type);
   fi_li_11=fopen(fname,"r"); ASSERT_NOT_NULL(fi_li_11);
   sprintf(fname,"tests/benchmark/codecomp_step2_outputs/run_b1b2%s_log_cl_li.txt",compare_type);
   fi_li_12=fopen(fname,"r"); ASSERT_NOT_NULL(fi_li_12);
   sprintf(fname,"tests/benchmark/codecomp_step2_outputs/run_b2b2%s_log_cl_li.txt",compare_type);
   fi_li_22=fopen(fname,"r"); ASSERT_NOT_NULL(fi_li_22);
-
   sprintf(fname,"tests/benchmark/codecomp_step2_outputs/run_b1b1%s_log_cl_dl.txt",compare_type);
   fi_dl_11=fopen(fname,"r"); ASSERT_NOT_NULL(fi_dl_11);
   sprintf(fname,"tests/benchmark/codecomp_step2_outputs/run_b1b2%s_log_cl_dl.txt",compare_type);
@@ -206,7 +208,6 @@ static void compare_cls(char *compare_type,struct cls_data * data)
   fi_dl_21=fopen(fname,"r"); ASSERT_NOT_NULL(fi_dl_21);
   sprintf(fname,"tests/benchmark/codecomp_step2_outputs/run_b2b2%s_log_cl_dl.txt",compare_type);
   fi_dl_22=fopen(fname,"r"); ASSERT_NOT_NULL(fi_dl_22);
-
   sprintf(fname,"tests/benchmark/codecomp_step2_outputs/run_b1b1%s_log_cl_di.txt",compare_type);
   fi_di_11=fopen(fname,"r"); ASSERT_NOT_NULL(fi_di_11);
   sprintf(fname,"tests/benchmark/codecomp_step2_outputs/run_b1b2%s_log_cl_di.txt",compare_type);
@@ -215,12 +216,10 @@ static void compare_cls(char *compare_type,struct cls_data * data)
   fi_di_21=fopen(fname,"r"); ASSERT_NOT_NULL(fi_di_21);
   sprintf(fname,"tests/benchmark/codecomp_step2_outputs/run_b2b2%s_log_cl_di.txt",compare_type);
   fi_di_22=fopen(fname,"r"); ASSERT_NOT_NULL(fi_di_22);
-
   sprintf(fname,"tests/benchmark/codecomp_step2_outputs/run_b1b1%s_log_cl_lc.txt",compare_type);
   fi_lc_1=fopen(fname,"r"); ASSERT_NOT_NULL(fi_lc_1);
   sprintf(fname,"tests/benchmark/codecomp_step2_outputs/run_b2b2%s_log_cl_lc.txt",compare_type);
   fi_lc_2=fopen(fname,"r"); ASSERT_NOT_NULL(fi_lc_2);
-
   sprintf(fname,"tests/benchmark/codecomp_step2_outputs/run_log_cl_cc.txt");
   fi_cc=fopen(fname,"r"); ASSERT_NOT_NULL(fi_cc);
   
@@ -451,10 +450,6 @@ static void compare_cls(char *compare_type,struct cls_data * data)
   if (status) printf("%s\n",cosmo->status_message);
   ccl_angular_cls(cosmo,w,tr_nc_2,tr_wl_1,NELLS,ells,cls_dl_21_h,&status);
   if (status) printf("%s\n",cosmo->status_message);
-
-
-
-
   ccl_angular_cls(cosmo,w,tr_nc_1,tr_wli_1,NELLS,ells,cls_dltot_11_h,&status);
   if (status) printf("%s\n",cosmo->status_message);
   ccl_angular_cls(cosmo,w,tr_nc_1,tr_wli_2,NELLS,ells,cls_dltot_12_h,&status);
@@ -463,14 +458,12 @@ static void compare_cls(char *compare_type,struct cls_data * data)
   if (status) printf("%s\n",cosmo->status_message);
   ccl_angular_cls(cosmo,w,tr_nc_2,tr_wli_2,NELLS,ells,cls_dltot_22_h,&status);
   if (status) printf("%s\n",cosmo->status_message);
-
   ccl_angular_cls(cosmo,w,tr_wli_1,tr_wli_1,NELLS,ells,cls_lltot_11_h,&status);
   if (status) printf("%s\n",cosmo->status_message);
   ccl_angular_cls(cosmo,w,tr_wli_1,tr_wli_2,NELLS,ells,cls_lltot_12_h,&status);
   if (status) printf("%s\n",cosmo->status_message);
   ccl_angular_cls(cosmo,w,tr_wli_2,tr_wli_2,NELLS,ells,cls_lltot_22_h,&status);
   if (status) printf("%s\n",cosmo->status_message);
-
   ccl_angular_cls(cosmo,w,tr_wl_1,tr_wli_1,NELLS,ells,cls_lli_11_h,&status);
   if (status) printf("%s\n",cosmo->status_message);
   ccl_angular_cls(cosmo,w,tr_wl_1,tr_wli_2,NELLS,ells,cls_lli_12_h,&status);
@@ -479,10 +472,6 @@ static void compare_cls(char *compare_type,struct cls_data * data)
   if (status) printf("%s\n",cosmo->status_message);
   ccl_angular_cls(cosmo,w,tr_wl_2,tr_wli_2,NELLS,ells,cls_lli_22_h,&status);
   if (status) printf("%s\n",cosmo->status_message);
-
-
-
-
   ccl_angular_cls(cosmo,w,tr_nc_1,tr_cl,NELLS,ells,cls_dc_1_h,&status);
   if (status) printf("%s\n",cosmo->status_message);
   ccl_angular_cls(cosmo,w,tr_nc_2,tr_cl,NELLS,ells,cls_dc_2_h,&status);
@@ -499,7 +488,6 @@ static void compare_cls(char *compare_type,struct cls_data * data)
   if (status) printf("%s\n",cosmo->status_message);
   ccl_angular_cls(cosmo,w,tr_cl,tr_cl,NELLS,ells,cls_cc_h,&status);
   if (status) printf("%s\n",cosmo->status_message);
-  
   
   double fraction_failed=0;
   for(int ii=2;ii<w->n_ls-1;ii++) {
@@ -636,8 +624,6 @@ static void compare_cls(char *compare_type,struct cls_data * data)
     cl_lc_2_h=cls_lc_2_h[l]*ell_correct;
     cl_cc_h=cls_cc_h[l];
 
-//    printf("%d,%e,%e,%e,%e\n",l,fabs(cl_dd_11_h-cl_dd_11)/el_dd_11,cl_dd_11_h,cl_dd_11,el_dd_11);
-//    printf("%d\n",l);
     ASSERT_TRUE(fabs(cl_dd_11_h-cl_dd_11)<el_dd_11);
     ASSERT_TRUE(fabs(cl_dd_12_h-cl_dd_12)<el_dd_12);
     ASSERT_TRUE(fabs(cl_dd_22_h-cl_dd_22)<el_dd_22);
@@ -648,7 +634,7 @@ static void compare_cls(char *compare_type,struct cls_data * data)
     ASSERT_TRUE(fabs(cl_dl_12_h-cl_dl_12)<el_dl_12);
     ASSERT_TRUE(fabs(cl_dl_21_h-cl_dl_21)<el_dl_21);
     ASSERT_TRUE(fabs(cl_dl_22_h-cl_dl_22)<el_dl_22);
-//  comparing galaxy-intrinsic wrt full GGL error, CCL needs to be further improved to avoid spikes
+    //  comparing galaxy-intrinsic wrt full GGL error, CCL needs to be further improved to avoid spikes
     ASSERT_TRUE(fabs(cl_di_11_h-cl_di_11)<el_dltot_11); 
     ASSERT_TRUE(fabs(cl_di_12_h-cl_di_12)<el_dltot_12);
     ASSERT_TRUE(fabs(cl_di_21_h-cl_di_21)<el_dltot_21);
@@ -657,7 +643,7 @@ static void compare_cls(char *compare_type,struct cls_data * data)
     ASSERT_TRUE(fabs(cl_ll_11_h-cl_ll_11)<el_ll_11);
     ASSERT_TRUE(fabs(cl_ll_12_h-cl_ll_12)<el_ll_12);
     ASSERT_TRUE(fabs(cl_ll_22_h-cl_ll_22)<el_ll_22);
-//  comparing shear-intrinsic and intrinsic-intrinsic wrt full cosmic shear error, CCL needs to be further improved to avoid spikes
+    //  comparing shear-intrinsic and intrinsic-intrinsic wrt full cosmic shear error, CCL needs to be further improved to avoid spikes
     ASSERT_TRUE(fabs(cl_li_11_h-cl_li_11)<el_lltot_11);
     ASSERT_TRUE(fabs(cl_li_12_h-cl_li_12)<el_lltot_12);
     ASSERT_TRUE(fabs(cl_li_22_h-cl_li_22)<el_lltot_22);
@@ -670,6 +656,11 @@ static void compare_cls(char *compare_type,struct cls_data * data)
     ASSERT_TRUE(fabs(cl_lc_2_h-cl_lc_2)<el_lc_2);
   }
   ccl_cl_workspace_free(w);
+  if(!strcmp(compare_type,"histo")) {
+    ccl_gsl->INTEGRATION_EPSREL=epsrel_save;
+    ccl_gsl->INTEGRATION_LIMBER_EPSREL=epsrel_save;
+    ccl_set_debug_policy(CCL_DEBUG_MODE_WARNING);
+  }
     
   free(ells);
   free(cls_dd_11_b); free(cls_dd_12_b); free(cls_dd_22_b); 
