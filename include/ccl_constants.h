@@ -115,8 +115,7 @@
 /**
  * Default relative precision if not otherwise specified
  */
-#define GSL_EPSREL 2.5E-5
-//#define GSL_EPSREL 1E-4
+#define GSL_EPSREL 1E-4
 
 /**
  * Default number of iterations for integration and root-finding if not otherwise
