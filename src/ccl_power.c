@@ -1637,7 +1637,7 @@ double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double k, double a, int *s
 
   // If the matter PS specified was linear, then do the linear compuation
   case ccl_linear:
-    return ccl_linear_matter_power(cosmo,k,a,status);
+    return ccl_linear_matter_power(cosmo, k, a, status);
 
   case ccl_halofit:
     if (!cosmo->computed_power)
@@ -1762,26 +1762,26 @@ static double w_tophat(double kR)
 }
 
 // Integrand for sigmaR integral
-static double sigmaR_integrand(double lk,void *params)
+static double sigmaR_integrand(double lk, void *params)
 {
-  SigmaR_pars *par=(SigmaR_pars *)params;
+  SigmaR_pars *par = (SigmaR_pars *)params;
 
-  double k=pow(10.,lk);
-  double pk=ccl_linear_matter_power(par->cosmo,k, 1.,par->status);
-  double kR=k*par->R;
+  double k = pow(10., lk);
+  double pk = ccl_linear_matter_power(par->cosmo, k, 1., par->status);
+  double kR = k * par->R;
   double w = w_tophat(kR);
 
   return pk*k*k*k*w*w;
 }
 
 // Integrand for sigmaV integral
-static double sigmaV_integrand(double lk,void *params)
+static double sigmaV_integrand(double lk, void *params)
 {
-  SigmaV_pars *par=(SigmaV_pars *)params;
+  SigmaV_pars *par = (SigmaV_pars *)params;
 
-  double k=pow(10.,lk);
-  double pk=ccl_linear_matter_power(par->cosmo,k, 1.,par->status);
-  double kR=k*par->R;
+  double k = pow(10., lk);
+  double pk = ccl_linear_matter_power(par->cosmo, k, 1., par->status);
+  double kR = k * par->R;
   double w = w_tophat(kR);
 
   return pk*k*w*w/3.0;
@@ -1792,26 +1792,28 @@ INPUT: cosmology, comoving smoothing radius, scale factor
 TASK: compute sigmaR, the variance in the *linear* density field
 smoothed with a tophat filter of comoving size R
 */
-double ccl_sigmaR(ccl_cosmology *cosmo,double R,double a,int *status)
+double ccl_sigmaR(ccl_cosmology *cosmo, double R, double a, int *status)
 {
   SigmaR_pars par;
   par.status = status;
-
-  par.cosmo=cosmo;
-  par.R=R;
-  gsl_integration_cquad_workspace *workspace=gsl_integration_cquad_workspace_alloc(ccl_gsl->N_ITERATION);
+  par.cosmo = cosmo;
+  par.R = R;
+  gsl_integration_cquad_workspace *workspace = 
+                    gsl_integration_cquad_workspace_alloc(ccl_gsl->N_ITERATION);
   gsl_function F;
-  F.function=&sigmaR_integrand;
-  F.params=&par;
+  F.function = &sigmaR_integrand;
+  F.params = &par;
   double sigma_R;
-  int gslstatus = gsl_integration_cquad(&F, log10(ccl_splines->K_MIN), log10(ccl_splines->K_MAX),
-				                                0.0, ccl_gsl->INTEGRATION_SIGMAR_EPSREL,
-                                        workspace,&sigma_R,NULL,NULL);
+  int gslstatus = gsl_integration_cquad(&F, 
+                                        log10(ccl_splines->K_MIN), 
+                                        log10(ccl_splines->K_MAX),
+                                        0.0, 
+                                        ccl_gsl->INTEGRATION_SIGMAR_EPSREL,
+                                        workspace, &sigma_R, NULL, NULL);
   if(gslstatus != GSL_SUCCESS) {
     ccl_raise_gsl_warning(gslstatus, "ccl_power.c: ccl_sigmaR():");
     *status |= gslstatus;
   }
-
   gsl_integration_cquad_workspace_free(workspace);
 
   return sqrt(sigma_R*M_LN10/(2*M_PI*M_PI))*ccl_growth_factor(cosmo, a, status);
@@ -1828,22 +1830,25 @@ double ccl_sigmaV(ccl_cosmology *cosmo,double R,double a,int *status)
   SigmaV_pars par;
   par.status = status;
 
-  par.cosmo=cosmo;
-  par.R=R;
-  gsl_integration_cquad_workspace *workspace=gsl_integration_cquad_workspace_alloc(ccl_gsl->N_ITERATION);
+  par.cosmo = cosmo;
+  par.R = R;
+  gsl_integration_cquad_workspace *workspace = 
+                    gsl_integration_cquad_workspace_alloc(ccl_gsl->N_ITERATION);
   gsl_function F;
-  F.function=&sigmaV_integrand;
-  F.params=&par;
+  F.function = &sigmaV_integrand;
+  F.params = &par;
   double sigma_V;
-	int gslstatus = gsl_integration_cquad(&F, log10(ccl_splines->K_MIN), log10(ccl_splines->K_MAX),
-																				0.0, ccl_gsl->INTEGRATION_SIGMAR_EPSREL,
-																				workspace,&sigma_V,NULL,NULL);
+  int gslstatus = gsl_integration_cquad(&F, 
+	                                    log10(ccl_splines->K_MIN), 
+	                                    log10(ccl_splines->K_MAX),
+	                                    0.0, 
+	                                    ccl_gsl->INTEGRATION_SIGMAR_EPSREL,	
+	                                    workspace, &sigma_V, NULL, NULL);
 
   if(gslstatus != GSL_SUCCESS) {
     ccl_raise_gsl_warning(gslstatus, "ccl_power.c: ccl_sigmaV():");
     *status |= gslstatus;
   }
-
   gsl_integration_cquad_workspace_free(workspace);
 
   return sqrt(sigma_V*M_LN10/(2*M_PI*M_PI))*ccl_growth_factor(cosmo, a, status);
@@ -1856,5 +1861,5 @@ smoothed with a tophat filter of comoving size 8 Mpc/h
 */
 double ccl_sigma8(ccl_cosmology *cosmo, int *status)
 {
-  return ccl_sigmaR(cosmo,8/cosmo->params.h, 1.,status);
+  return ccl_sigmaR(cosmo, 8./cosmo->params.h, 1., status);
 }
