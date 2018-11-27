@@ -1472,30 +1472,34 @@ TASK: compute power spectrum
 */
 void ccl_cosmology_compute_power(ccl_cosmology * cosmo, int * status)
 {
-
+  
+  // Don't recompute if power spectra have already been computed
   if (cosmo->computed_power) return;
-    switch(cosmo->config.transfer_function_method){
-        case ccl_bbks:
-	  ccl_cosmology_compute_power_bbks(cosmo,status);
-	  break;
-        case ccl_eisenstein_hu:
-	  ccl_cosmology_compute_power_eh(cosmo,status);
-	  break;
-        case ccl_boltzmann_class:
-	  ccl_cosmology_compute_power_class(cosmo,status);
-	  break;
-        case ccl_emulator:
-	  ccl_cosmology_compute_power_emu(cosmo,status);
-	  break;
-        default:
-	  *status = CCL_ERROR_INCONSISTENT;
-	  ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_cosmology_compute_power(): Unknown or non-implemented transfer function method: %d \n", cosmo->config.transfer_function_method);
-    }
-
-    ccl_check_status(cosmo,status);
-    if (*status==0){
-		cosmo->computed_power = true;
-    }
+  
+  // Select which power spectrum method to use
+  switch(cosmo->config.transfer_function_method){
+    case ccl_bbks:
+        ccl_cosmology_compute_power_bbks(cosmo, status);
+        break;
+    case ccl_eisenstein_hu:
+        ccl_cosmology_compute_power_eh(cosmo, status);
+        break;
+    case ccl_boltzmann_class:
+        ccl_cosmology_compute_power_class(cosmo, status);
+        break;
+    case ccl_emulator:
+        ccl_cosmology_compute_power_emu(cosmo, status);
+        break;
+    default:
+        *status = CCL_ERROR_INCONSISTENT;
+        ccl_cosmology_set_status_message(cosmo, 
+            "ccl_power.c: ccl_cosmology_compute_power(): Unknown or non-implemented transfer function method: %d \n", 
+            cosmo->config.transfer_function_method);
+  } // end switch
+  
+  // Check status
+  ccl_check_status(cosmo, status);
+  if (*status==0) cosmo->computed_power = true;
   return;
 }
 
@@ -1504,41 +1508,54 @@ void ccl_cosmology_compute_power(ccl_cosmology * cosmo, int * status)
 INPUT: ccl_cosmology * cosmo, a, k [1/Mpc]
 TASK: extrapolate power spectrum at high k
 */
-static double ccl_power_extrapol_highk(ccl_cosmology * cosmo, double k, double a,
-				       gsl_spline2d * powerspl, double kmax_spline, int * status)
+static double ccl_power_extrapol_highk(ccl_cosmology * cosmo, double k, 
+                                       double a, gsl_spline2d * powerspl, 
+                                       double kmax_spline, int * status)
 {
   double log_p_1;
-  double deltak=1e-2; //step for numerical derivative;
-  double deriv_pk_kmid,deriv2_pk_kmid;
+  double deltak = 1e-2; // Step for numerical derivative;
+  double deriv_pk_kmid, deriv2_pk_kmid;
   double lkmid;
   double lpk_kmid;
+  
+  lkmid = log(kmax_spline) - 2*deltak;
 
-  lkmid = log(kmax_spline)-2*deltak;
-
-  int gslstatus =  gsl_spline2d_eval_e(powerspl, lkmid,a,NULL ,NULL ,&lpk_kmid);
+  int gslstatus = gsl_spline2d_eval_e(powerspl, lkmid, a, NULL, NULL, &lpk_kmid);
   if(gslstatus != GSL_SUCCESS) {
     ccl_raise_gsl_warning(gslstatus, "ccl_power.c: ccl_power_extrapol_highk():");
     *status = CCL_ERROR_SPLINE_EV;
-    ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_power_extrapol_highk(): Spline evaluation error\n");
+    ccl_cosmology_set_status_message(cosmo, 
+          "ccl_power.c: ccl_power_extrapol_highk(): Spline evaluation error\n");
     return NAN;
   }
-  //GSL derivatives
-  gslstatus = gsl_spline2d_eval_deriv_x_e (powerspl, lkmid, a, NULL,NULL,&deriv_pk_kmid);
+  
+  // GSL derivatives
+  // First derivative
+  gslstatus = gsl_spline2d_eval_deriv_x_e(powerspl, lkmid, a, NULL, NULL, 
+                                          &deriv_pk_kmid);
   if(gslstatus != GSL_SUCCESS) {
     ccl_raise_gsl_warning(gslstatus, "ccl_power.c: ccl_power_extrapol_highk():");
     *status = CCL_ERROR_SPLINE_EV;
-    ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_power_extrapol_highk(): Spline evaluation error\n");
+    ccl_cosmology_set_status_message(cosmo, 
+          "ccl_power.c: ccl_power_extrapol_highk(): Spline evaluation error\n");
     return NAN;
   }
-  gslstatus = gsl_spline2d_eval_deriv_xx_e (powerspl, lkmid, a, NULL,NULL,&deriv2_pk_kmid);
+  
+  // Second derivative
+  gslstatus = gsl_spline2d_eval_deriv_xx_e(powerspl, lkmid, a, NULL, NULL, 
+                                           &deriv2_pk_kmid);
   if(gslstatus != GSL_SUCCESS) {
     ccl_raise_gsl_warning(gslstatus, "ccl_power.c: ccl_power_extrapol_highk():");
     *status = CCL_ERROR_SPLINE_EV;
-    ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_power_extrapol_highk(): Spline evaluation error\n");
+    ccl_cosmology_set_status_message(cosmo, 
+          "ccl_power.c: ccl_power_extrapol_highk(): Spline evaluation error\n");
     return NAN;
   }
-  log_p_1=lpk_kmid+deriv_pk_kmid*(log(k)-lkmid)+deriv2_pk_kmid/2.*(log(k)-lkmid)*(log(k)-lkmid);
-
+  
+  // Second order Taylor expansion
+  log_p_1 = lpk_kmid
+          + deriv_pk_kmid * (log(k)-lkmid)
+          + 0.5 * deriv2_pk_kmid * (log(k)-lkmid) * (log(k)-lkmid);
   return log_p_1;
 
 }
@@ -1551,19 +1568,19 @@ static double ccl_power_extrapol_lowk(ccl_cosmology * cosmo, double k, double a,
 				      gsl_spline2d * powerspl, double kmin_spline, int * status)
 {
   double log_p_1;
-  double deltak=1e-2; //safety step
-  double lkmin=log(kmin_spline)+deltak;
+  double deltak = 1e-2; // safety step
+  double lkmin = log(kmin_spline) + deltak;
   double lpk_kmin;
-  int gslstatus = gsl_spline2d_eval_e(powerspl,lkmin,a,NULL,NULL,&lpk_kmin);
+  int gslstatus = gsl_spline2d_eval_e(powerspl, lkmin, a, NULL, NULL, &lpk_kmin);
 
   if(gslstatus != GSL_SUCCESS) {
     ccl_raise_gsl_warning(gslstatus, "ccl_power.c: ccl_power_extrapol_lowk():");
     *status=CCL_ERROR_SPLINE_EV;
-    ccl_cosmology_set_status_message(cosmo,"ccl_power.c: ccl_power_extrapol_lowk(): Spline evaluation error\n");
+    ccl_cosmology_set_status_message(cosmo, 
+           "ccl_power.c: ccl_power_extrapol_lowk(): Spline evaluation error\n");
     return NAN;
   }
-
-  return lpk_kmin+cosmo->params.n_s*(log(k)-lkmin);
+  return lpk_kmin + cosmo->params.n_s * (log(k) - lkmin);
 }
 
 
@@ -1574,51 +1591,72 @@ TASK: compute the linear power spectrum at a given redshift
 */
 
 double ccl_linear_matter_power(ccl_cosmology * cosmo, double k, double a, int * status)
-
 {
-  if ((cosmo->config.transfer_function_method == ccl_emulator) && (a<A_MIN_EMU)){
+  // Check CosmicEmu redshift range
+  if (   (cosmo->config.transfer_function_method == ccl_emulator) 
+      && (a<A_MIN_EMU))
+  {
     *status = CCL_ERROR_INCONSISTENT;
-    ccl_cosmology_set_status_message(cosmo, "ccl_power.c: the cosmic emulator cannot be used above a=%f\n",A_MIN_EMU);
+    ccl_cosmology_set_status_message(cosmo, 
+                "ccl_power.c: the cosmic emulator cannot be used above a=%f\n", 
+                A_MIN_EMU);
     return NAN;
   }
-
+  
+  // Calculate power spectrum if not already calculated
   if (!cosmo->computed_power) ccl_cosmology_compute_power(cosmo, status);
-  // Return if compilation failed
-  //if (cosmo->data.p_lin == NULL) return NAN;
+  // Return if computation failed
   if (!cosmo->computed_power) return NAN;
 
   double log_p_1;
   int gslstatus;
-
-  if(a<ccl_splines->A_SPLINE_MINLOG_PK) {  //Extrapolate linearly at high redshift
-    double pk0=ccl_linear_matter_power(cosmo,k,ccl_splines->A_SPLINE_MINLOG_PK,status);
-    double gf=ccl_growth_factor(cosmo,a,status)/ccl_growth_factor(cosmo,ccl_splines->A_SPLINE_MINLOG_PK,status);
-
+  
+  // High redshift: Extrapolate power spectrum linearly
+  if(a < ccl_splines->A_SPLINE_MINLOG_PK)
+  {
+    double pk0 = ccl_linear_matter_power(cosmo, k, 
+                                         ccl_splines->A_SPLINE_MINLOG_PK, 
+                                         status);
+    double gf = ccl_growth_factor(cosmo, a, status)
+              / ccl_growth_factor(cosmo, ccl_splines->A_SPLINE_MINLOG_PK, status);
     return pk0*gf*gf;
   }
-  if (*status!=CCL_ERROR_INCONSISTENT){
-    if(k<=cosmo->data.k_min_lin) {
-      log_p_1=ccl_power_extrapol_lowk(cosmo,k,a,cosmo->data.p_lin,cosmo->data.k_min_lin,status);
-
+  
+  if (*status != CCL_ERROR_INCONSISTENT){
+    
+    // Case 1: Low-k (k <= k_min_lin)
+    if(k <= cosmo->data.k_min_lin)
+    {
+      log_p_1 = ccl_power_extrapol_lowk(cosmo, k, a, cosmo->data.p_lin, 
+                                        cosmo->data.k_min_lin, status);
       return exp(log_p_1);
     }
-    else if(k<cosmo->data.k_max_lin){
-      gslstatus = gsl_spline2d_eval_e(cosmo->data.p_lin, log(k), a,NULL,NULL,&log_p_1);
+    
+    // Case 2: Intermediate k (k_min_lin < k < k_max_lin)
+    if (k < cosmo->data.k_max_lin)
+    {
+      // Evaluate 2D spline as normal
+      gslstatus = gsl_spline2d_eval_e(cosmo->data.p_lin, 
+                                      log(k), a, NULL, NULL, &log_p_1);
       if(gslstatus != GSL_SUCCESS) {
-        ccl_raise_gsl_warning(gslstatus, "ccl_power.c: ccl_linear_matter_power():");
+        ccl_raise_gsl_warning(gslstatus, 
+                              "ccl_power.c: ccl_linear_matter_power():");
         *status = CCL_ERROR_SPLINE_EV;
-        ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_linear_matter_power(): Spline evaluation error\n");
+        ccl_cosmology_set_status_message(cosmo, 
+           "ccl_power.c: ccl_linear_matter_power(): Spline evaluation error\n");
         return NAN;
-      }
-      else {
+      } else {
+        // Success; return result of spline eval
         return exp(log_p_1);
       }
-    }
-    else { //Extrapolate using log derivative
-      log_p_1 = ccl_power_extrapol_highk(cosmo,k,a,cosmo->data.p_lin,cosmo->data.k_max_lin,status);
+    
+    } else {
+      // Case 3: Extrapolate using log derivative at high-k
+      log_p_1 = ccl_power_extrapol_highk(cosmo, k, a, cosmo->data.p_lin, 
+                                         cosmo->data.k_max_lin, status);
       return exp(log_p_1);
     }
-  }
+  } // end CCL_ERROR_INCONSISTENT check
 
   return exp(log_p_1);
 }
