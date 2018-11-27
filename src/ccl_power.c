@@ -263,14 +263,15 @@ static double ccl_get_class_As(ccl_cosmology *cosmo, struct file_content *fc, in
   return A_s_guess;
 }
 
-static void ccl_fill_class_parameters(ccl_cosmology * cosmo, struct file_content * fc,
-				      int parser_length, int * status)
-
+static void ccl_fill_class_parameters(ccl_cosmology * cosmo, 
+                                      struct file_content * fc,
+				                      int parser_length, int * status)
 {
 
-  // initialize fc fields
-  //silences Valgrind's "Conditional jump or move depends on uninitialised value" warning
-  for (int i = 0; i< parser_length; i++){
+  // Initialize fc fields
+  // Silences Valgrind's "Conditional jump or move depends on uninitialised 
+  // value" warning
+  for (int i = 0; i < parser_length; i++){
     strcpy(fc->name[i]," ");
     strcpy(fc->value[i]," ");
   }
@@ -291,6 +292,8 @@ static void ccl_fill_class_parameters(ccl_cosmology * cosmo, struct file_content
   sprintf(fc->value[3],"%.15e",1./ccl_splines->A_SPLINE_MINLOG_PK-1.);
   
   // Set Halofit w0-wa rescaling spline max. redshift
+  // This determines how far out in redshift the rescaling spline should 
+  // go; it can cause a *serious* performance hit if set too large
   strcpy(fc->name[18],"pk_eq_z_max");
   sprintf(fc->value[18],"%.15e",1./ccl_splines->A_SPLINE_MINLOG_PK-1.);
 
@@ -1243,8 +1246,9 @@ static void ccl_cosmology_compute_power_emu(ccl_cosmology * cosmo, int * status)
     return;
   }
 
-  // Check if the cosmology has been set up with equal neutrino masses for the emulator
-  // If not, check if the user has forced redistribution of masses and if so do this.
+  // Check if the cosmology has been set up with equal neutrino masses for 
+  // the emulator. If not, check if the user has forced redistribution of 
+  // masses and if so do this.
   if(cosmo->params.N_nu_mass>0) {
 	  if (cosmo->config.emulator_neutrinos_method == ccl_emu_strict){
 		  if (cosmo->params.N_nu_mass==3){
@@ -1252,7 +1256,9 @@ static void ccl_cosmology_compute_power_emu(ccl_cosmology * cosmo, int * status)
 			  //double diff2 = pow((cosmo->params.mnu[1] - cosmo->params.mnu[2]) * (cosmo->params.mnu[1] - cosmo->params.mnu[2]), 0.5);
 			  //double diff3 = pow((cosmo->params.mnu[2] - cosmo->params.mnu[0]) * (cosmo->params.mnu[2] - cosmo->params.mnu[0]), 0.5);
 			  //if (diff1>1e-12 || diff2>1e-12 || diff3>1e-12){
-			  if (cosmo->params.mnu[0] != cosmo->params.mnu[1] || cosmo->params.mnu[0] != cosmo->params.mnu[2] || cosmo->params.mnu[1] != cosmo->params.mnu[2]){
+			  if (   cosmo->params.mnu[0] != cosmo->params.mnu[1] 
+			      || cosmo->params.mnu[0] != cosmo->params.mnu[2] 
+			      || cosmo->params.mnu[1] != cosmo->params.mnu[2]){
 				*status = CCL_ERROR_INCONSISTENT;
 				ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_cosmology_compute_power_emu(): In the default configuration, you must pass a list of 3 equal neutrino masses or pass a sum and set mnu_type = ccl_mnu_sum_equal. If you wish to over-ride this, set config->emulator_neutrinos_method = 'ccl_emu_equalize'. This will force the neutrinos to be of equal mass but will result in internal inconsistencies.\n");
 				return;
@@ -1629,7 +1635,7 @@ double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double k, double a, int *s
 
   switch(cosmo->config.matter_power_spectrum_method) {
 
-  //If the matter PS specified was linear, then do the linear compuation
+  // If the matter PS specified was linear, then do the linear compuation
   case ccl_linear:
     return ccl_linear_matter_power(cosmo,k,a,status);
 
@@ -1638,9 +1644,12 @@ double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double k, double a, int *s
       ccl_cosmology_compute_power(cosmo, status);
     if (cosmo->data.p_nl == NULL) return NAN; // Return if computation failed
 
-    if(a<ccl_splines->A_SPLINE_MINLOG_PK) { //Extrapolate linearly at high redshift
-      double pk0=ccl_nonlin_matter_power(cosmo,k,ccl_splines->A_SPLINE_MINLOG_PK,status);
-      double gf=ccl_growth_factor(cosmo,a,status)/ccl_growth_factor(cosmo,ccl_splines->A_SPLINE_MINLOG_PK,status);
+    if(a < ccl_splines->A_SPLINE_MINLOG_PK) { // Extrapolate linearly at high redshift
+      double pk0 = ccl_nonlin_matter_power(cosmo, k, 
+                                           ccl_splines->A_SPLINE_MINLOG_PK, 
+                                           status);
+      double gf = ccl_growth_factor(cosmo, a, status)
+                / ccl_growth_factor(cosmo, ccl_splines->A_SPLINE_MINLOG_PK, status);
       return pk0*gf*gf;
     }
 		break;
@@ -1662,33 +1671,39 @@ double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double k, double a, int *s
   default:
     ccl_raise_warning(
 			CCL_ERROR_NOT_IMPLEMENTED,
-      "config.matter_power_spectrum_method = %d not yet supported "
-			"continuing with linear power spectrum\n", cosmo->config.matter_power_spectrum_method);
-    cosmo->config.matter_power_spectrum_method=ccl_linear;
-    return ccl_linear_matter_power(cosmo,k,a,status);
+            "config.matter_power_spectrum_method = %d not yet supported "
+			"continuing with linear power spectrum\n", 
+			cosmo->config.matter_power_spectrum_method );
+    cosmo->config.matter_power_spectrum_method = ccl_linear;
+    return ccl_linear_matter_power(cosmo, k, a, status);
   } // end switch
 
-  // if we get here, try to evaluate the power spectrum
-  // we need to account for bounds below and above
+  // If we get here, try to evaluate the power spectrum
+  // (need to account for bounds below and above)
   if (k <= cosmo->data.k_min_nl) {
-    // we assume no baryonic effects below k_min_nl
-    log_p_1 = ccl_power_extrapol_lowk(cosmo, k, a, cosmo->data.p_nl, cosmo->data.k_min_nl, status);
+    // We assume no baryonic effects below k_min_nl
+    log_p_1 = ccl_power_extrapol_lowk(cosmo, k, a, cosmo->data.p_nl, 
+                                      cosmo->data.k_min_nl, status);
     return exp(log_p_1);
   }
-
+  
+  // Normal case: 
   if (k < cosmo->data.k_max_nl) {
-    int gslstatus = gsl_spline2d_eval_e(cosmo->data.p_nl, log(k), a, NULL ,NULL, &log_p_1);
+    int gslstatus = gsl_spline2d_eval_e(cosmo->data.p_nl, log(k), a, 
+                                        NULL, NULL, &log_p_1);
     if (gslstatus != GSL_SUCCESS) {
       ccl_raise_gsl_warning(gslstatus, "ccl_power.c: ccl_nonlin_matter_power():");
       *status = CCL_ERROR_SPLINE_EV;
-      ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_nonlin_matter_power(): Spline evaluation error\n");
+      ccl_cosmology_set_status_message(cosmo, 
+           "ccl_power.c: ccl_nonlin_matter_power(): Spline evaluation error\n");
       return NAN;
     } else {
       pk = exp(log_p_1);
     }
   } else {
     // Extrapolate NL regime using log derivative
-    log_p_1 = ccl_power_extrapol_highk(cosmo, k, a, cosmo->data.p_nl, cosmo->data.k_max_nl, status);
+    log_p_1 = ccl_power_extrapol_highk(cosmo, k, a, cosmo->data.p_nl, 
+                                       cosmo->data.k_max_nl, status);
     pk = exp(log_p_1);
   }
 
@@ -1729,13 +1744,14 @@ static double w_tophat(double kR)
   double w;
   double kR2 = kR*kR;
 
-  // This is the Maclaurin expansion of W(x)=[sin(x)-xcos(x)]*(3/x)**3 to O(x^7), with x=kR.
-  // Necessary numerically because at low x W(x) relies on the fine cancellation of two terms
-  if(kR<0.1) {
+  // This is the Maclaurin expansion of W(x)=[sin(x)-xcos(x)]*(3/x)**3 to O(x^7), 
+  // with x=kR. Necessary numerically because at low x W(x) relies on the fine 
+  // cancellation of two terms.
+  if(kR < 0.1) {
      w = 1. + kR2*(-0.1 +
-		   kR2*(0.003561429 +
-			kR2*(-6.61376e-5 +
-			     kR2*(7.51563e-7))));
+                   kR2*(0.003561429 +
+                        kR2*(-6.61376e-5 +
+                             kR2*(7.51563e-7)) ) );
      /*w =1.-0.1*kR*kR+0.003571429*kR*kR*kR*kR
       -6.61376E-5*kR*kR*kR*kR*kR*kR
       +7.51563E-7*kR*kR*kR*kR*kR*kR*kR*kR;*/
