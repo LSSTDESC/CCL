@@ -1635,16 +1635,17 @@ double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double k, double a, int *s
 
   switch(cosmo->config.matter_power_spectrum_method) {
 
-  // If the matter PS specified was linear, then do the linear compuation
+  // LINEAR: Just return linear power spectrum
   case ccl_linear:
     return ccl_linear_matter_power(cosmo, k, a, status);
-
+  
+  // HALOFIT: Use CLASS halofit power spectrum
   case ccl_halofit:
-    if (!cosmo->computed_power)
-      ccl_cosmology_compute_power(cosmo, status);
+    if (!cosmo->computed_power) ccl_cosmology_compute_power(cosmo, status);
     if (cosmo->data.p_nl == NULL) return NAN; // Return if computation failed
-
-    if(a < ccl_splines->A_SPLINE_MINLOG_PK) { // Extrapolate linearly at high redshift
+    
+    // Extrapolate linearly at high redshift
+    if(a < ccl_splines->A_SPLINE_MINLOG_PK) {
       double pk0 = ccl_nonlin_matter_power(cosmo, k, 
                                            ccl_splines->A_SPLINE_MINLOG_PK, 
                                            status);
@@ -1652,22 +1653,25 @@ double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double k, double a, int *s
                 / ccl_growth_factor(cosmo, ccl_splines->A_SPLINE_MINLOG_PK, status);
       return pk0*gf*gf;
     }
-		break;
-
+    break;
+  
+  // EMU: Use CosmicEmu power spectrum
   case ccl_emu:
-    if ((cosmo->config.transfer_function_method == ccl_emulator) && (a<A_MIN_EMU)){
+    if (   (cosmo->config.transfer_function_method == ccl_emulator) 
+        && (a < A_MIN_EMU))
+    {
       *status = CCL_ERROR_EMULATOR_BOUND;
-      ccl_cosmology_set_status_message(cosmo, "ccl_power.c: the cosmic emulator cannot be used above z=2\n");
+      ccl_cosmology_set_status_message(cosmo, 
+                 "ccl_power.c: the cosmic emulator cannot be used above z=2\n");
       return NAN;
     }
 
     // Compute power spectrum if needed; return if computation failed
-    if (!cosmo->computed_power){
-      ccl_cosmology_compute_power(cosmo,status);
-    }
+    if (!cosmo->computed_power) ccl_cosmology_compute_power(cosmo, status);
     if (cosmo->data.p_nl == NULL) return NAN;
-		break;
-
+    break;
+  
+  // DEFAULT: No NL power spectrum specified; returns linear by default
   default:
     ccl_raise_warning(
 			CCL_ERROR_NOT_IMPLEMENTED,
@@ -1678,8 +1682,8 @@ double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double k, double a, int *s
     return ccl_linear_matter_power(cosmo, k, a, status);
   } // end switch
 
-  // If we get here, try to evaluate the power spectrum
-  // (need to account for bounds below and above)
+  // Evaluate the power spectrum spline or extrapolate, depending on k value
+  // Case 1: Low-k (extrapolate)
   if (k <= cosmo->data.k_min_nl) {
     // We assume no baryonic effects below k_min_nl
     log_p_1 = ccl_power_extrapol_lowk(cosmo, k, a, cosmo->data.p_nl, 
@@ -1687,7 +1691,7 @@ double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double k, double a, int *s
     return exp(log_p_1);
   }
   
-  // Normal case: 
+  // Case 2: Intermediate k (k_min_nl < k < k_max_nl)
   if (k < cosmo->data.k_max_nl) {
     int gslstatus = gsl_spline2d_eval_e(cosmo->data.p_nl, log(k), a, 
                                         NULL, NULL, &log_p_1);
@@ -1697,17 +1701,15 @@ double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double k, double a, int *s
       ccl_cosmology_set_status_message(cosmo, 
            "ccl_power.c: ccl_nonlin_matter_power(): Spline evaluation error\n");
       return NAN;
-    } else {
-      pk = exp(log_p_1);
-    }
+    } else { pk = exp(log_p_1); }
   } else {
-    // Extrapolate NL regime using log derivative
+    // Case 3: Extrapolate into NL regime using log derivative
     log_p_1 = ccl_power_extrapol_highk(cosmo, k, a, cosmo->data.p_nl, 
                                        cosmo->data.k_max_nl, status);
     pk = exp(log_p_1);
-  }
+  } // end k-range cases
 
-	// Add baryonic correction
+  // Add baryonic correction
   if (cosmo->config.baryons_power_spectrum_method == ccl_bcm) {
     int pwstatus = 0;
     double fbcm = ccl_bcm_model_fka(cosmo, k, a, &pwstatus);
@@ -1717,7 +1719,7 @@ double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double k, double a, int *s
       ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_nonlin_matter_power(): Error in BCM correction\n");
       return NAN;
     }
-  }
+  } // end baryonic correction
 
   return pk;
 }
