@@ -239,27 +239,27 @@ static double ccl_get_class_As(ccl_cosmology *cosmo, struct file_content *fc, in
   struct nonlinear nl;        // for non-linear spectra
   struct lensing le;
   struct output op;
-
-  //temporarily overwrite P_k_max_1/Mpc to speed up sigma8 calculation
+  
   double k_max_old = 0.;
-  int position_kmax =2;
+  int position_kmax = 2;
   double A_s_guess;
-  int init_arr[7]={0,0,0,0,0,0,0};
-
-  if (strcmp(fc->name[position_kmax],"P_k_max_1/Mpc")) {
-    k_max_old = strtof(fc->value[position_kmax],NULL);
-    sprintf(fc->value[position_kmax],"%.15e",10.);
+  int init_arr[7] = {0,0,0,0,0,0,0};
+  
+  // Temporarily overwrite P_k_max_1/Mpc to speed up sigma8 calculation
+  if (strcmp(fc->name[position_kmax], "P_k_max_1/Mpc")) {
+    k_max_old = strtof(fc->value[position_kmax], NULL);
+    sprintf(fc->value[position_kmax], "%.15e", 10.);
   }
-  A_s_guess = 2.43e-9/0.87659*sigma8;
-  sprintf(fc->value[position_As],"%.15e",A_s_guess);
-
-  ccl_run_class(cosmo, fc,&pr,&ba,&th,&pt,&tr,&pm,&sp,&nl,&le,&op,init_arr,status);
-  if (cosmo->status != CCL_ERROR_CLASS) A_s_guess*=pow(sigma8/sp.sigma8,2.);
-  ccl_free_class_structs(cosmo, &ba,&th,&pt,&tr,&pm,&sp,&nl,&le,init_arr,status);
-
-  if (k_max_old >0) {
-    sprintf(fc->value[position_kmax],"%.15e",k_max_old);
-  }
+  A_s_guess = 2.43e-9/0.87659 * sigma8;
+  sprintf(fc->value[position_As], "%.15e", A_s_guess);
+  
+  // Run CLASS to calculate sigma8
+  ccl_run_class(cosmo, fc, &pr, &ba, &th, &pt, &tr, &pm, &sp, &nl, &le, 
+                &op, init_arr, status);
+  if (cosmo->status != CCL_ERROR_CLASS) A_s_guess *= pow(sigma8/sp.sigma8, 2.);
+  ccl_free_class_structs(cosmo, &ba, &th, &pt, &tr, &pm, &sp, &nl, &le, 
+                         init_arr, status);
+  if (k_max_old > 0) sprintf(fc->value[position_kmax], "%.15e", k_max_old);
   return A_s_guess;
 }
 
@@ -272,107 +272,113 @@ static void ccl_fill_class_parameters(ccl_cosmology * cosmo,
   // Silences Valgrind's "Conditional jump or move depends on uninitialised 
   // value" warning
   for (int i = 0; i < parser_length; i++){
-    strcpy(fc->name[i]," ");
-    strcpy(fc->value[i]," ");
+    strcpy(fc->name[i], " ");
+    strcpy(fc->value[i], " ");
   }
 
-  strcpy(fc->name[0],"output");
-  strcpy(fc->value[0],"mPk");
+  strcpy(fc->name[0], "output");
+  strcpy(fc->value[0], "mPk");
 
-  strcpy(fc->name[1],"non linear");
+  strcpy(fc->name[1], "non linear");
   if (cosmo->config.matter_power_spectrum_method == ccl_halofit)
-    strcpy(fc->value[1],"Halofit");
+    strcpy(fc->value[1], "Halofit");
   else
-    strcpy(fc->value[1],"none");
+    strcpy(fc->value[1], "none");
 
-  strcpy(fc->name[2],"P_k_max_1/Mpc");
-  sprintf(fc->value[2],"%.15e",ccl_splines->K_MAX_SPLINE); //in units of 1/Mpc, corroborated with ccl_constants.h
+  strcpy(fc->name[2], "P_k_max_1/Mpc");
+  sprintf(fc->value[2], "%.15e", ccl_splines->K_MAX_SPLINE);
+  // in units of 1/Mpc, corroborated with ccl_constants.h
 
-  strcpy(fc->name[3],"z_max_pk");
-  sprintf(fc->value[3],"%.15e",1./ccl_splines->A_SPLINE_MINLOG_PK-1.);
+  strcpy(fc->name[3], "z_max_pk");
+  sprintf(fc->value[3], "%.15e", 1./ccl_splines->A_SPLINE_MINLOG_PK - 1.);
   
   // Set Halofit w0-wa rescaling spline max. redshift
   // This determines how far out in redshift the rescaling spline should 
   // go; it can cause a *serious* performance hit if set too large
-  strcpy(fc->name[18],"pk_eq_z_max");
-  sprintf(fc->value[18],"%.15e",1./ccl_splines->A_SPLINE_MINLOG_PK-1.);
+  strcpy(fc->name[18], "pk_eq_z_max");
+  sprintf(fc->value[18], "%.15e", 1./ccl_splines->A_SPLINE_MINLOG_PK - 1.);
 
-  strcpy(fc->name[4],"modes");
-  strcpy(fc->value[4],"s");
+  strcpy(fc->name[4], "modes");
+  strcpy(fc->value[4], "s");
 
-  strcpy(fc->name[5],"lensing");
-  strcpy(fc->value[5],"no");
+  strcpy(fc->name[5], "lensing");
+  strcpy(fc->value[5], "no");
 
-  // now, copy over cosmology parameters
-  strcpy(fc->name[6],"h");
-  sprintf(fc->value[6],"%.15e",cosmo->params.h);
+  // Copy over cosmology parameters
+  strcpy(fc->name[6], "h");
+  sprintf(fc->value[6], "%.15e", cosmo->params.h);
 
-  strcpy(fc->name[7],"Omega_cdm");
-  sprintf(fc->value[7],"%.15e",cosmo->params.Omega_c);
+  strcpy(fc->name[7], "Omega_cdm");
+  sprintf(fc->value[7], "%.15e", cosmo->params.Omega_c);
 
-  strcpy(fc->name[8],"Omega_b");
-  sprintf(fc->value[8],"%.15e",cosmo->params.Omega_b);
+  strcpy(fc->name[8], "Omega_b");
+  sprintf(fc->value[8], "%.15e", cosmo->params.Omega_b);
 
-  strcpy(fc->name[9],"Omega_k");
-  sprintf(fc->value[9],"%.15e",cosmo->params.Omega_k);
+  strcpy(fc->name[9], "Omega_k");
+  sprintf(fc->value[9], "%.15e", cosmo->params.Omega_k);
 
-  strcpy(fc->name[10],"n_s");
-  sprintf(fc->value[10],"%.15e",cosmo->params.n_s);
+  strcpy(fc->name[10], "n_s");
+  sprintf(fc->value[10], "%.15e", cosmo->params.n_s);
 
 
-  //cosmological constant?
+  // Cosmological constant?
   // set Omega_Lambda = 0.0 if w !=-1
   if ((cosmo->params.w0 !=-1.0) || (cosmo->params.wa !=0)) {
-    strcpy(fc->name[11],"Omega_Lambda");
-    sprintf(fc->value[11],"%.15e",0.0);
+    strcpy(fc->name[11], "Omega_Lambda");
+    sprintf(fc->value[11], "%.15e", 0.0);
 
-    strcpy(fc->name[12],"w0_fld");
-    sprintf(fc->value[12],"%.15e",cosmo->params.w0);
+    strcpy(fc->name[12], "w0_fld");
+    sprintf(fc->value[12], "%.15e", cosmo->params.w0);
 
-    strcpy(fc->name[13],"wa_fld");
-    sprintf(fc->value[13],"%.15e",cosmo->params.wa);
+    strcpy(fc->name[13], "wa_fld");
+    sprintf(fc->value[13], "%.15e", cosmo->params.wa);
   }
-  //neutrino parameters
-  //massless neutrinos
+  
+  // Massless neutrinos
   if (cosmo->params.N_nu_rel > 1.e-4) {
-    strcpy(fc->name[14],"N_ur");
-    sprintf(fc->value[14],"%.15e",cosmo->params.N_nu_rel);
+    strcpy(fc->name[14], "N_ur");
+    sprintf(fc->value[14], "%.15e", cosmo->params.N_nu_rel);
+  } else {
+    strcpy(fc->name[14], "N_ur");
+    sprintf(fc->value[14], "%.15e", 0.);
   }
-  else {
-    strcpy(fc->name[14],"N_ur");
-    sprintf(fc->value[14],"%.15e", 0.);
-  }
+  
+  // Massive neutrinos
   if (cosmo->params.N_nu_mass > 0) {
-    strcpy(fc->name[15],"N_ncdm");
-    sprintf(fc->value[15],"%d",cosmo->params.N_nu_mass);
-    strcpy(fc->name[16],"m_ncdm");
-    sprintf(fc->value[16],"%f", (cosmo->params.mnu)[0]);
-    if (cosmo->params.N_nu_mass >=1){
-		for (int i = 1; i < cosmo->params.N_nu_mass; i++) {
+    strcpy(fc->name[15], "N_ncdm");
+    sprintf(fc->value[15], "%d",cosmo->params.N_nu_mass);
+    strcpy(fc->name[16], "m_ncdm");
+    sprintf(fc->value[16], "%f", (cosmo->params.mnu)[0]);
+    if (cosmo->params.N_nu_mass >= 1){
+		// Loop over massive neutrinos
+		for (int i=1; i < cosmo->params.N_nu_mass; i++) {
 			char tmp[20];
-			sprintf(tmp,", %f",(cosmo->params.mnu)[i]);
-			strcat(fc->value[16],tmp);
+			sprintf(tmp,", %f", (cosmo->params.mnu)[i]);
+			strcat(fc->value[16], tmp);
 		}
 	}
+  } // end massive neutrino block
+  
+  // CMB temperature
+  strcpy(fc->name[17], "T_cmb");
+  sprintf(fc->value[17], "%.15e", cosmo->params.T_CMB);
 
-  }
-
-  strcpy(fc->name[17],"T_cmb");
-  sprintf(fc->value[17],"%.15e",cosmo->params.T_CMB);
-
-  //normalization comes last, so that all other parameters are filled in for determining A_s if sigma8 is specified
+  // Normalization comes last, so that all other parameters are filled in 
+  // for determining A_s if sigma8 is specified
   if (isfinite(cosmo->params.sigma8) && isfinite(cosmo->params.A_s)){
       *status = CCL_ERROR_INCONSISTENT;
       ccl_cosmology_set_status_message(cosmo, "ccl_power.c: class_parameters(): Error initializing CLASS parameters: both sigma8 and A_s defined\n");
     return;
   }
   if (isfinite(cosmo->params.sigma8)) {
-    strcpy(fc->name[parser_length-1],"A_s");
-    sprintf(fc->value[parser_length-1],"%.15e",ccl_get_class_As(cosmo,fc,parser_length-1,cosmo->params.sigma8, status));
+    strcpy(fc->name[parser_length-1], "A_s");
+    sprintf(fc->value[parser_length-1], "%.15e", 
+            ccl_get_class_As(cosmo, fc, parser_length-1, 
+                             cosmo->params.sigma8, status));
   }
   else if (isfinite(cosmo->params.A_s)) {
-    strcpy(fc->name[parser_length-1],"A_s");
-    sprintf(fc->value[parser_length-1],"%.15e",cosmo->params.A_s);
+    strcpy(fc->name[parser_length-1], "A_s");
+    sprintf(fc->value[parser_length-1], "%.15e", cosmo->params.A_s);
   }
   else {
     *status = CCL_ERROR_INCONSISTENT;
@@ -1249,13 +1255,11 @@ static void ccl_cosmology_compute_power_emu(ccl_cosmology * cosmo, int * status)
   // Check if the cosmology has been set up with equal neutrino masses for 
   // the emulator. If not, check if the user has forced redistribution of 
   // masses and if so do this.
-  if(cosmo->params.N_nu_mass>0) {
+  if(cosmo->params.N_nu_mass > 0) {
+      // Case 1: Apply strict validity conditions to input neutrino para,s
 	  if (cosmo->config.emulator_neutrinos_method == ccl_emu_strict){
-		  if (cosmo->params.N_nu_mass==3){
-			  //double diff1 = pow((cosmo->params.mnu[0] - cosmo->params.mnu[1]) * (cosmo->params.mnu[0] - cosmo->params.mnu[1]), 0.5);
-			  //double diff2 = pow((cosmo->params.mnu[1] - cosmo->params.mnu[2]) * (cosmo->params.mnu[1] - cosmo->params.mnu[2]), 0.5);
-			  //double diff3 = pow((cosmo->params.mnu[2] - cosmo->params.mnu[0]) * (cosmo->params.mnu[2] - cosmo->params.mnu[0]), 0.5);
-			  //if (diff1>1e-12 || diff2>1e-12 || diff3>1e-12){
+		  if (cosmo->params.N_nu_mass == 3){
+              // Condition: all 3 neutrinos must have equal mass
 			  if (   cosmo->params.mnu[0] != cosmo->params.mnu[1] 
 			      || cosmo->params.mnu[0] != cosmo->params.mnu[2] 
 			      || cosmo->params.mnu[1] != cosmo->params.mnu[2]){
@@ -1263,30 +1267,40 @@ static void ccl_cosmology_compute_power_emu(ccl_cosmology * cosmo, int * status)
 				ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_cosmology_compute_power_emu(): In the default configuration, you must pass a list of 3 equal neutrino masses or pass a sum and set mnu_type = ccl_mnu_sum_equal. If you wish to over-ride this, set config->emulator_neutrinos_method = 'ccl_emu_equalize'. This will force the neutrinos to be of equal mass but will result in internal inconsistencies.\n");
 				return;
 			    }
-          }else if (cosmo->params.N_nu_mass!=3){
-			    *status = CCL_ERROR_INCONSISTENT;
-				ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_cosmology_compute_power_emu(): In the default configuration, you must pass a list of 3 equal neutrino masses or pass a sum and set mnu_type = ccl_mnu_sum_equal. If you wish to over-ride this, set config->emulator_neutrinos_method = 'ccl_emu_equalize'. This will force the neutrinos to be of equal mass but will result in internal inconsistencies.\n");
-				return;
-			}
+          }else if (cosmo->params.N_nu_mass != 3){
+            // Condition: Only three neutrinos are allowed
+            *status = CCL_ERROR_INCONSISTENT;
+			ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_cosmology_compute_power_emu(): In the default configuration, you must pass a list of 3 equal neutrino masses or pass a sum and set mnu_type = ccl_mnu_sum_equal. If you wish to over-ride this, set config->emulator_neutrinos_method = 'ccl_emu_equalize'. This will force the neutrinos to be of equal mass but will result in internal inconsistencies.\n");
+            return;
+		  }
+      
       }else if (cosmo->config.emulator_neutrinos_method == ccl_emu_equalize){
-          // Reset the masses to equal
-          double mnu_eq[3] = {cosmo->params.sum_nu_masses / 3., cosmo->params.sum_nu_masses / 3., cosmo->params.sum_nu_masses / 3.};
-          Omeganuh2_eq = ccl_Omeganuh2(1.0, 3, mnu_eq, cosmo->params.T_CMB, cosmo->data.accelerator, status);
+          // Case 2: Divide sum of neutrino masses equally between 3 neutrinos
+          double mnu_eq[3] = { cosmo->params.sum_nu_masses / 3., 
+                               cosmo->params.sum_nu_masses / 3., 
+                               cosmo->params.sum_nu_masses / 3. };
+          Omeganuh2_eq = ccl_Omeganuh2(1., 3, mnu_eq, cosmo->params.T_CMB, 
+                                       cosmo->data.accelerator, status);
        }
   } else {
-    if(fabs(cosmo->params.N_nu_rel - 3.04)>1.e-6){
+    // Condition: N_nu_rel must be equal to 3.04
+    if(fabs(cosmo->params.N_nu_rel - 3.04) > 1.e-6){
       *status=CCL_ERROR_INCONSISTENT;
       ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_cosmology_compute_power_emu(): Set Neff = 3.04 for cosmic emulator predictions in absence of massive neutrinos.\n");
       return;
     }
-    }
+  } // end
+  
+  // Apply w0-wa validity condition
   double w0wacomb = -cosmo->params.w0 - cosmo->params.wa;
-  if(w0wacomb<8.1e-3){ //0.3^4
+  if(w0wacomb < 8.1e-3){ //0.3^4
     *status=CCL_ERROR_INCONSISTENT;
     ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_cosmology_compute_power_emu(): w0 and wa do not satisfy the emulator bound\n");
     return;
   }
-  if(cosmo->params.Omega_n_mass*cosmo->params.h*cosmo->params.h>0.01){
+  
+  // Apply Omega_nu,mass h^2 validity condition
+  if(cosmo->params.Omega_n_mass*cosmo->params.h*cosmo->params.h > 0.01){
     *status=CCL_ERROR_INCONSISTENT;
     ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_cosmology_compute_power_emu(): Omega_nu does not satisfy the emulator bound\n");
     return;
@@ -1300,27 +1314,32 @@ static void ccl_cosmology_compute_power_emu(ccl_cosmology * cosmo, int * status)
   }
 
   // Prepare to run CLASS for linear scales
-  ccl_fill_class_parameters(cosmo,&fc,parser_length, status);
+  ccl_fill_class_parameters(cosmo, &fc, parser_length, status);
 
   if (*status != CCL_ERROR_CLASS)
-    ccl_run_class(cosmo, &fc,&pr,&ba,&th,&pt,&tr,&pm,&sp,&nl,&le,&op,init_arr,status);
+    ccl_run_class(cosmo, &fc, &pr, &ba, &th, &pt, &tr, &pm, &sp, &nl, &le, 
+                  &op, init_arr, status);
 
   if (*status == CCL_ERROR_CLASS) {
-    //printed error message while running CLASS
-    ccl_free_class_structs(cosmo, &ba,&th,&pt,&tr,&pm,&sp,&nl,&le,init_arr,status);
+    // Error message was printed while running CLASS
+    ccl_free_class_structs(cosmo, &ba, &th, &pt, &tr, &pm, &sp, &nl, &le, 
+                           init_arr, status);
     return;
   }
+  
   if (parser_free(&fc)== _FAILURE_) {
     *status = CCL_ERROR_CLASS;
     ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_cosmology_compute_power_class(): Error freeing CLASS parser\n");
-    ccl_free_class_structs(cosmo, &ba,&th,&pt,&tr,&pm,&sp,&nl,&le,init_arr,status);
+    ccl_free_class_structs(cosmo, &ba, &th, &pt, &tr, &pm, &sp, &nl, &le, 
+                           init_arr, status);
     return;
   }
 
-  //These are the limits of the splining range
-  cosmo->data.k_min_lin=2*exp(sp.ln_k[0]);
-  cosmo->data.k_max_lin=ccl_splines->K_MAX_SPLINE;
-  //CLASS calculations done - now allocate CCL splines
+  // These are the limits of the splining range
+  cosmo->data.k_min_lin = 2*exp(sp.ln_k[0]);
+  cosmo->data.k_max_lin = ccl_splines->K_MAX_SPLINE;
+  
+  // CLASS calculations done; now allocate CCL splines
   double kmin = cosmo->data.k_min_lin;
   double kmax = ccl_splines->K_MAX_SPLINE;
   //Compute nk from number of decades and N_K = # k per decade
@@ -1328,18 +1347,19 @@ static void ccl_cosmology_compute_power_emu(ccl_cosmology * cosmo, int * status)
   int nk = (int)ceil(ndecades*ccl_splines->N_K);
   double amin = ccl_splines->A_SPLINE_MINLOG_PK;
   double amax = ccl_splines->A_SPLINE_MAX;
-  int na = ccl_splines->A_SPLINE_NA_PK+ccl_splines->A_SPLINE_NLOG_PK-1;
+  int na = ccl_splines->A_SPLINE_NA_PK + ccl_splines->A_SPLINE_NLOG_PK - 1;
 
   // The x array is initially k, but will later
   // be overwritten with log(k)
   double * x = ccl_log_spacing(kmin, kmax, nk);
-  double * a = ccl_linlog_spacing(amin, ccl_splines->A_SPLINE_MIN_PK, amax, ccl_splines->A_SPLINE_NLOG_PK, ccl_splines->A_SPLINE_NA_PK);
+  double * a = ccl_linlog_spacing(amin, ccl_splines->A_SPLINE_MIN_PK, 
+                                  amax, ccl_splines->A_SPLINE_NLOG_PK, 
+                                  ccl_splines->A_SPLINE_NA_PK);
   double * y2d_lin = malloc(nk * na * sizeof(double));
-  if (a==NULL|| x==NULL || y2d_lin==NULL) {
+  if (a==NULL || x==NULL || y2d_lin==NULL) {
     *status = CCL_ERROR_SPLINE;
     ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_cosmology_compute_power_class(): memory allocation error\n");
-  }
-  else{
+  }else{
     // After this loop x will contain log(k), y will contain log(P_nl), z will 
     // contain log(P_lin) all in Mpc, not Mpc/h units!
     double psout_l = 0.; double psout_cb_l = 0.;
@@ -1377,26 +1397,28 @@ static void ccl_cosmology_compute_power_emu(ccl_cosmology * cosmo, int * status)
                              init_arr, status);
       return;
     }
-    gsl_spline2d * log_power = gsl_spline2d_alloc(PLIN_SPLINE_TYPE, nk,na);
-    int pwstatus = gsl_spline2d_init(log_power, x, a, y2d_lin,nk,na);
+    
+    // Allocate and initialise spline
+    gsl_spline2d * log_power = gsl_spline2d_alloc(PLIN_SPLINE_TYPE, nk, na);
+    int pwstatus = gsl_spline2d_init(log_power, x, a, y2d_lin, nk, na);
     if (pwstatus) {
-      free(x);
-      free(a);
-      free(y2d_lin);
+      free(x); free(a); free(y2d_lin);
       gsl_spline2d_free(log_power);
-      ccl_free_class_structs(cosmo, &ba,&th,&pt,&tr,&pm,&sp,&nl,&le,init_arr,status);
+      ccl_free_class_structs(cosmo, &ba, &th, &pt, &tr, &pm, &sp, &nl, &le, 
+                             init_arr, status);
       *status = CCL_ERROR_SPLINE;
       ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_cosmology_compute_power_emu(): Error creating log_power spline\n");
       return;
-    }
-    else {
+    }else{
+      // Store pointer to spline and free CLASS structs
       cosmo->data.p_lin = log_power;
-      ccl_free_class_structs(cosmo, &ba,&th,&pt,&tr,&pm,&sp,&nl,&le,init_arr,status);
+      ccl_free_class_structs(cosmo, &ba, &th, &pt, &tr, &pm, &sp, &nl, &le, 
+                             init_arr, status);
     }
-  }
+  } // end CLASS calculation and spline assignment
 
-  //Now start the NL computation with the emulator
-  //These are the limits of the splining range
+  // Now start the NL computation with the emulator
+  // These are the limits of the splining range
   cosmo->data.k_min_nl=K_MIN_EMU;
   cosmo->data.k_max_nl=K_MAX_EMU;
   amin = A_MIN_EMU; //limit of the emulator
