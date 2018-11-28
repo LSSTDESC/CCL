@@ -144,7 +144,9 @@ static void compare_corr(char *compare_type,int algorithm,struct corrs_data * da
   fi_ll_12_mm=fopen(fname,"r"); ASSERT_NOT_NULL(fi_ll_12_mm);
   sprintf(fname,"tests/benchmark/codecomp_step2_outputs/run_b2b2%s_log_wt_ll_mm.txt",compare_type);
   fi_ll_22_mm=fopen(fname,"r"); ASSERT_NOT_NULL(fi_ll_22_mm);
-  sprintf(fname,"tests/benchmark/run_b1b2%s_log_wt_dl.txt",compare_type);
+//  sprintf(fname,"tests/benchmark/run_b1b2%s_log_wt_dl.txt",compare_type);
+//  fi_dl_12=fopen(fname,"r"); ASSERT_NOT_NULL(fi_dl_12);
+  sprintf(fname,"tests/benchmark/codecomp_step2_outputs/run_b1b2%s_log_wt_dl.txt",compare_type);
   fi_dl_12=fopen(fname,"r"); ASSERT_NOT_NULL(fi_dl_12);
 
   int nofl=15;
@@ -254,6 +256,7 @@ static void compare_corr(char *compare_type,int algorithm,struct corrs_data * da
   */
   int nsig=15;
   double sigwt_dd_11[15], sigwt_dd_22[15], sigwt_dl_12[15];
+  double sigwt_ll_12_mm[15], sigwt_ll_12_pp[15];
   double sigwt_ll_11_mm[15], sigwt_ll_22_mm[15];
   double sigwt_ll_11_pp[15], sigwt_ll_22_pp[15];
   double sig_theta_in[15];
@@ -284,8 +287,8 @@ static void compare_corr(char *compare_type,int algorithm,struct corrs_data * da
     double dum;
     stat=fscanf(fi_dd_sig,"%le %le %le %le",&sig_theta_in[ii],&sigwt_dd_11[ii],&sigwt_dd_22[ii],&dum);
     stat=fscanf(fi_dl_sig,"%le %le",&sig_theta_in[ii],&sigwt_dl_12[ii]);
-    stat=fscanf(fi_pp_sig,"%le %le %le %le",&sig_theta_in[ii],&sigwt_ll_11_pp[ii],&sigwt_ll_22_pp[ii],&dum);
-    stat=fscanf(fi_mm_sig,"%le %le %le %le",&sig_theta_in[ii],&sigwt_ll_11_mm[ii],&sigwt_ll_22_mm[ii],&dum);
+    stat=fscanf(fi_pp_sig,"%le %le %le %le",&sig_theta_in[ii],&sigwt_ll_11_pp[ii],&sigwt_ll_22_pp[ii],&sigwt_ll_12_pp[ii]);
+    stat=fscanf(fi_mm_sig,"%le %le %le %le",&sig_theta_in[ii],&sigwt_ll_11_mm[ii],&sigwt_ll_22_mm[ii],&sigwt_ll_12_mm[ii]);
     sig_theta_in[ii]=sig_theta_in[ii]/60.; //convert to deg
   }
   fclose(fi_dd_sig);
@@ -301,10 +304,14 @@ static void compare_corr(char *compare_type,int algorithm,struct corrs_data * da
   gsl_spline_init(spl_sigwt_ll_11_pp,sig_theta_in,sigwt_ll_11_pp,nsig);
   gsl_spline *spl_sigwt_ll_22_pp=gsl_spline_alloc(L_SPLINE_TYPE,nsig);
   gsl_spline_init(spl_sigwt_ll_22_pp,sig_theta_in,sigwt_ll_22_pp,nsig);
+  gsl_spline *spl_sigwt_ll_12_pp=gsl_spline_alloc(L_SPLINE_TYPE,nsig);
+  gsl_spline_init(spl_sigwt_ll_12_pp,sig_theta_in,sigwt_ll_12_pp,nsig);
   gsl_spline *spl_sigwt_ll_11_mm=gsl_spline_alloc(L_SPLINE_TYPE,nsig);
   gsl_spline_init(spl_sigwt_ll_11_mm,sig_theta_in,sigwt_ll_11_mm,nsig);
   gsl_spline *spl_sigwt_ll_22_mm=gsl_spline_alloc(L_SPLINE_TYPE,nsig);
   gsl_spline_init(spl_sigwt_ll_22_mm,sig_theta_in,sigwt_ll_22_mm,nsig);
+  gsl_spline *spl_sigwt_ll_12_mm=gsl_spline_alloc(L_SPLINE_TYPE,nsig);
+  gsl_spline_init(spl_sigwt_ll_12_mm,sig_theta_in,sigwt_ll_12_mm,nsig);
   gsl_spline *spl_sigwt_dl_12   =gsl_spline_alloc(L_SPLINE_TYPE,nsig);
   gsl_spline_init(spl_sigwt_dl_12,sig_theta_in,sigwt_dl_12 ,nsig);
 
@@ -331,17 +338,17 @@ static void compare_corr(char *compare_type,int algorithm,struct corrs_data * da
     
     tol=gsl_spline_eval(spl_sigwt_ll_11_pp,theta_in[ii],NULL);
     ASSERT_TRUE(fabs(wt_ll_11_h_pp[ii]-wt_ll_11_pp[ii])<tol*CORR_ERROR_FRACTION);
-    //    tol=gsl_spline_eval(spl_sigwt_ll_12_pp,theta_in[ii],NULL);
-    //    ASSERT_TRUE(fabs(wt_ll_12_h_pp[ii]-wt_ll_12_pp[ii])<tol*CORR_ERROR_FRACTION);
+    tol=gsl_spline_eval(spl_sigwt_ll_12_pp,theta_in[ii],NULL);
+    ASSERT_TRUE(fabs(wt_ll_12_h_pp[ii]-wt_ll_12_pp[ii])<tol*CORR_ERROR_FRACTION);
     tol=gsl_spline_eval(spl_sigwt_ll_22_pp,theta_in[ii],NULL);
     ASSERT_TRUE(fabs(wt_ll_22_h_pp[ii]-wt_ll_22_pp[ii])<tol*CORR_ERROR_FRACTION);
 
     tol=gsl_spline_eval(spl_sigwt_ll_11_mm,theta_in[ii],NULL);
     ASSERT_TRUE(fabs(wt_ll_11_h_mm[ii]-wt_ll_11_mm[ii])<tol*CORR_ERROR_FRACTION);
-    //    tol=gsl_spline_eval(spl_sigwt_ll_12_mm,theta_in[ii],NULL);
-    //    ASSERT_TRUE(fabs(wt_ll_12_h_mm[ii]-wt_ll_12_mm[ii])<tol*CORR_ERROR_FRACTION)
+    tol=gsl_spline_eval(spl_sigwt_ll_12_mm,theta_in[ii],NULL);
+    ASSERT_TRUE(fabs(wt_ll_12_h_mm[ii]-wt_ll_12_mm[ii])<tol*CORR_ERROR_FRACTION);
     tol=gsl_spline_eval(spl_sigwt_ll_22_mm,theta_in[ii],NULL);
-    ASSERT_TRUE(fabs(wt_ll_22_h_mm[ii]-wt_ll_22_mm[ii])<tol*CORR_ERROR_FRACTION);;
+    ASSERT_TRUE(fabs(wt_ll_22_h_mm[ii]-wt_ll_22_mm[ii])<tol*CORR_ERROR_FRACTION);
   }
   
   //Free splines, cosmology and arrays
@@ -350,8 +357,10 @@ static void compare_corr(char *compare_type,int algorithm,struct corrs_data * da
   gsl_spline_free(spl_sigwt_dl_12);
   gsl_spline_free(spl_sigwt_ll_11_pp);
   gsl_spline_free(spl_sigwt_ll_22_pp);
+  gsl_spline_free(spl_sigwt_ll_12_pp);
   gsl_spline_free(spl_sigwt_ll_11_mm);
   gsl_spline_free(spl_sigwt_ll_22_mm);
+  gsl_spline_free(spl_sigwt_ll_12_mm);
   free(wt_dd_11_h); free(wt_dd_12_h); free(wt_dd_22_h);
   free(wt_ll_11_h_pp); free(wt_ll_12_h_pp); free(wt_ll_22_h_pp);
   free(wt_ll_11_h_mm); free(wt_ll_12_h_mm); free(wt_ll_22_h_mm);
