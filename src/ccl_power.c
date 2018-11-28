@@ -103,19 +103,19 @@ static void ccl_class_preinit(struct background *ba,
   // Prevents crashes if *_init()failed and did not initialize all tables 
   // freed by *_free()
 
-  //init for background_free
+  // init for background_free
   ba->tau_table = NULL;
   ba->z_table = NULL;
   ba->d2tau_dz2_table = NULL;
   ba->background_table = NULL;
   ba->d2background_dtau2_table = NULL;
 
-  //init for thermodynamics_free
+  // init for thermodynamics_free
   th->z_table = NULL;
   th->thermodynamics_table = NULL;
   th->d2thermodynamics_dz2_table = NULL;
 
-  //init for perturb_free
+  // init for perturb_free
   pt->tau_sampling = NULL;
   pt->tp_size = NULL;
   pt->ic_size = NULL;
@@ -125,7 +125,7 @@ static void ccl_class_preinit(struct background *ba,
   pt->k_size = NULL;
   pt->sources = NULL;
 
-  //init for primordial_free
+  // init for primordial_free
   pm->amplitude = NULL;
   pm->tilt = NULL;
   pm->running = NULL;
@@ -136,13 +136,13 @@ static void ccl_class_preinit(struct background *ba,
   pm->ic_ic_size = NULL;
   pm->lnk = NULL;
 
-  //init for nonlinear_free
+  // init for nonlinear_free
   nl->k = NULL;
   nl->tau = NULL;
   nl->nl_corr_density = NULL;
   nl->k_nl = NULL;
 
-  //init for transfer_free
+  // init for transfer_free
   tr->tt_size = NULL;
   tr->l_size_tt = NULL;
   tr->l_size = NULL;
@@ -151,8 +151,8 @@ static void ccl_class_preinit(struct background *ba,
   tr->k = NULL;
   tr->transfer = NULL;
 
-  //init for spectra_free
-  //spectra_free checks all other data fields before freeing
+  // init for spectra_free
+  // spectra_free checks all other data fields before freeing
   sp->is_non_zero = NULL;
   sp->ic_size = NULL;
   sp->ic_ic_size = NULL;
