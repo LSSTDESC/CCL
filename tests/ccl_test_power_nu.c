@@ -252,11 +252,10 @@ CTEST2(power_nu,model_2) {
   compare_power_nu(model,data);
 }
 
-/*
 CTEST2(power_nu,model_3) {
   int model=3;
   compare_power_nu(model,data);
-}*/
+}
 
 CTEST2(power_nu_nl,model_1) {
   int model=1;

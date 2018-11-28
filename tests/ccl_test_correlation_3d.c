@@ -151,12 +151,10 @@ static void compare_correlation_3d(int i_model,struct corrs_3d_data * data)
   ccl_cosmology_free(cosmo);
 }
 
-/* Commented out: Curvature causes CLASS NL calc to take a long time
 CTEST2(corrs_3d,model_3) {
   int model=3;
   compare_correlation_3d(model,data);
 }
-*/
 
 CTEST2(corrs_3d,model_2) {
   int model=2;
