@@ -107,6 +107,7 @@ void ccl_cosmology_read_config(void)
       MATCH("A_SPLINE_MIN", ccl_splines->A_SPLINE_MIN=var_dbl);
       MATCH("A_SPLINE_MINLOG_PK", ccl_splines->A_SPLINE_MINLOG_PK=var_dbl);
       MATCH("A_SPLINE_MIN_PK", ccl_splines->A_SPLINE_MIN_PK=var_dbl);
+      MATCH("A_SPLINE_MIN_HALOFIT", ccl_splines->A_SPLINE_MIN_HALOFIT=var_dbl);
       MATCH("A_SPLINE_MAX", ccl_splines->A_SPLINE_MAX=var_dbl);
       MATCH("LOGM_SPLINE_DELTA", ccl_splines->LOGM_SPLINE_DELTA=var_dbl);
       MATCH("LOGM_SPLINE_NM", ccl_splines->LOGM_SPLINE_NM=(int) var_dbl);

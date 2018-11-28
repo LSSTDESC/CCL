@@ -298,7 +298,7 @@ static void ccl_fill_class_parameters(ccl_cosmology * cosmo,
   // go; it can cause a *serious* performance hit if set too large
   if (cosmo->config.matter_power_spectrum_method == ccl_halofit){
     strcpy(fc->name[18], "pk_eq_z_max");
-    sprintf(fc->value[18], "%.15e", 1./ccl_splines->A_SPLINE_MINLOG_PK - 1.);
+    sprintf(fc->value[18], "%.15e", 1./ccl_splines->A_SPLINE_MIN_HALOFIT - 1. + 0.1);
   }
 
   strcpy(fc->name[4], "modes");
@@ -349,7 +349,7 @@ static void ccl_fill_class_parameters(ccl_cosmology * cosmo,
   // Massive neutrinos
   if (cosmo->params.N_nu_mass > 0) {
     strcpy(fc->name[15], "N_ncdm");
-    sprintf(fc->value[15], "%d",cosmo->params.N_nu_mass);
+    sprintf(fc->value[15], "%d", cosmo->params.N_nu_mass);
     strcpy(fc->name[16], "m_ncdm");
     sprintf(fc->value[16], "%f", (cosmo->params.mnu)[0]);
     if (cosmo->params.N_nu_mass >= 1){
@@ -544,77 +544,82 @@ void cosmology_compute_power_class(ccl_cosmology* cosmo, int* status,
 
   // Calculate non-linear power if requested
   if (calc_nonlin){
-  
-  // Allocate 2D array for NL power
-  double * y2d_nl = malloc(nk * na * sizeof(double));
-  
-  // If error, store status, we will free later
-  if (y2d_lin==NULL) {
-    *status = CCL_ERROR_SPLINE;
-    ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_cosmology_compute_power_class(): memory allocation error\n");
-  }
-  
-  // At the moment KMIN can't be less than CLASS's kmin in the nonlinear case.
-  // If error, store status, we will free later
-  if (kmin < (exp(sp.ln_k[0]))) {
-    *status = CCL_ERROR_CLASS;
-    ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_cosmology_compute_power_class(): K_MIN is less than CLASS's kmin. Not yet supported for nonlinear P(k).\n");
-  }
-
-  // If no errors, proceed to calculate power spectrum on 2D grid
-  if(!*status){
-
-    //These are the limits of the splining range
-    cosmo->data.k_min_nl = 2*exp(sp.ln_k[0]);
-    cosmo->data.k_max_nl = ccl_splines->K_MAX_SPLINE;
+    newstatus = 0;
+    pwstatus = 0;
     
-    if(cosmo->config.matter_power_spectrum_method == ccl_halofit) {
-      double psout_nl = 0.; double psout_cb_nl = 0.;
-      double z_val;
-      for (int i=0; i<nk; i++) {
-	    for (int j = 0; j < na; j++) {
-	      z_val = 1./a[j] - 1. + Z_ROUNDING_CORRECTION;
-	      // Versions of CLASS prior to v2.7.0 have different call signature here
-          #ifdef CLASS_VERSION_PRE27
-	      newstatus |= spectra_pk_nl_at_k_and_z(&ba, &pm, &sp, exp(x[i]), z_val, 
-	                                            &psout_nl);
-	      #else
-	      newstatus |= spectra_pk_nl_at_k_and_z(&ba, &pm, &sp, exp(x[i]), z_val, 
-	                                            &psout_nl, &psout_cb_nl);
-	      #endif
-	      y2d_nl[j*nk+i] = log(psout_nl);
-	    } // end j loop
-      } // end i loop
-    } // end halofit test
+    // Reallocate scale factor and x array
+    free(a);
+    a = ccl_linear_spacing(ccl_splines->A_SPLINE_MIN_HALOFIT, 
+                           ccl_splines->A_SPLINE_MAX, 
+                           ccl_splines->A_SPLINE_NA_PK);
+    na = ccl_splines->A_SPLINE_NA_PK;
     
-    // Check for errors
-    if(newstatus){
-      *status = CCL_ERROR_CLASS;
-      ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_cosmology_compute_power_class(): Error computing CLASS power spectrum\n");
-    }
-  } // end status check
+    // Allocate 2D array for NL power
+    double * y2d_nl = malloc(nk * na * sizeof(double));
   
-  // If no errors, construct 2D spline for nonlinear power
-  if(!*status){
-	
-	// Build 2D spline
-    gsl_spline2d * log_power_nl = gsl_spline2d_alloc(PNL_SPLINE_TYPE, nk, na);
-    pwstatus = gsl_spline2d_init(log_power_nl, x, a, y2d_nl, nk, na);
-    
-    // If no error, store reference to 2D spline
-    if(!pwstatus){
-      cosmo->data.p_nl = log_power_nl;
-    }else{
-      free(y2d_nl);
-      gsl_spline2d_free(log_power_nl);
+    // If error, store status, we will free later
+    if (a == NULL || x == NULL || y2d_nl == NULL) {
       *status = CCL_ERROR_SPLINE;
-      ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_cosmology_compute_power_class(): Error creating log_power_nl spline\n");
-    } // end error check
-  } // end status check
-  
-  // Free allocated 2D array
-  free(y2d_nl);
+      ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_cosmology_compute_power_class(): memory allocation error\n");
+    }
+
+    // If no errors, proceed to calculate power spectrum on 2D grid
+    if(!*status){
+      
+      // Set limits of splining range
+      cosmo->data.k_min_nl = 2*exp(sp.ln_k[0]);
+      cosmo->data.k_max_nl = ccl_splines->K_MAX_SPLINE;
+      
+      if(cosmo->config.matter_power_spectrum_method == ccl_halofit){
+        double psout_nl = 0.; double psout_cb_nl = 0.;
+        double z_val;
+        for (int i=0; i < nk; i++) {
+	      for (int j=0; j < na; j++) {
+	        z_val = 1./a[j] - 1. + Z_ROUNDING_CORRECTION;
+	        
+	        // Versions of CLASS prior to v2.7.0 have different call signature
+            #ifdef CLASS_VERSION_PRE27
+	        newstatus |= spectra_pk_nl_at_k_and_z(&ba, &pm, &sp, exp(x[i]), 
+	                                              z_val, &psout_nl);
+	        #else
+	        newstatus |= spectra_pk_nl_at_k_and_z(&ba, &pm, &sp, exp(x[i]), 
+	                                              z_val, &psout_nl, &psout_cb_nl);
+	        #endif
+	        y2d_nl[j*nk+i] = log(psout_nl);
+	      } // end j loop
+        } // end i loop
+      } // end halofit test
+    
+      // Check for errors
+      if(newstatus){
+        *status = CCL_ERROR_CLASS;
+        ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_cosmology_compute_power_class(): Error computing CLASS power spectrum\n");
+      }
+    } // end status check
+    
+    // If no errors, construct 2D spline for nonlinear power
+    if(!*status){
+	  // Build 2D spline
+      gsl_spline2d * log_power_nl = gsl_spline2d_alloc(PNL_SPLINE_TYPE, nk, na);
+      pwstatus = gsl_spline2d_init(log_power_nl, x, a, y2d_nl, nk, na);
+      
+      // If no error, store reference to 2D spline
+      if(!pwstatus){
+        cosmo->data.p_nl = log_power_nl;
+      }else{
+        free(y2d_nl);
+        gsl_spline2d_free(log_power_nl);
+        *status = CCL_ERROR_SPLINE;
+        ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_cosmology_compute_power_class(): Error creating log_power_nl spline\n");
+      } // end error check
+    } // end status check
+    
+    // Free allocated 2D array
+    free(y2d_nl);
+    
   } // end calc_nonlin check
+  
+  if (!*status) cosmo->computed_power = true;
   
   ccl_free_class_structs(cosmo, &ba, &th, &pt, &tr, &pm, &sp, &nl, &le, 
                          init_arr, status);
@@ -1311,6 +1316,7 @@ static void ccl_cosmology_compute_power_emu(ccl_cosmology * cosmo, int * status)
   // Run CLASS for linear scales only
   cosmology_compute_power_class(cosmo, status, 0);
   ccl_check_status(cosmo, status);
+  cosmo->computed_power = false; // Reset to false in case of failure later
 
   // NL computation with the emulator
   // These are the limits of the splining range
@@ -1605,14 +1611,25 @@ double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double k, double a, int *s
     if (cosmo->data.p_nl == NULL) return NAN; // Return if computation failed
     
     // Extrapolate linearly at high redshift
-    if(a < ccl_splines->A_SPLINE_MINLOG_PK) {
+    if(a < ccl_splines->A_SPLINE_MIN_HALOFIT) {
       double pk0 = ccl_nonlin_matter_power(cosmo, k, 
-                                           ccl_splines->A_SPLINE_MINLOG_PK, 
+                                           ccl_splines->A_SPLINE_MIN_HALOFIT, 
                                            status);
       double gf = ccl_growth_factor(cosmo, a, status)
-                / ccl_growth_factor(cosmo, ccl_splines->A_SPLINE_MINLOG_PK, status);
+                / ccl_growth_factor(cosmo, ccl_splines->A_SPLINE_MIN_HALOFIT, 
+                                    status);
       return pk0*gf*gf;
     }
+    
+    /*
+    // Return error message if Halofit a < A_SPLINE_MIN_HALOFIT
+    if (a < ccl_splines->A_SPLINE_MIN_HALOFIT)
+    {
+      *status = CCL_ERROR_HALOFIT_BOUND;
+      ccl_cosmology_set_status_message(cosmo, "ccl_power.c: Halofit NL power spectrum cannot be used at a < A_SPLINE_MIN_HALOFIT\n");
+      return NAN;
+    }*/
+    
     break;
   
   // EMU: Use CosmicEmu power spectrum
