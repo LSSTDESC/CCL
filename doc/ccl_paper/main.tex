@@ -84,7 +84,7 @@ This paper is organized as follows. Section \ref{sec:models} describes the cosmo
 \section{Cosmological models and observables}
 \label{sec:models}
 
-The overarching goal of \ccl is to allow seamless integration of different cosmological models of interest to LSST. The cosmological models assume a homogeneous and isotropic space-time metric, and an inflationary model for the primordial universe described by a power-law with spectral index $n_s$, and amplitude $A_s$. The cosmological components include the matter density parameter $\Omega_m$, which is the sum of the baryonic component $\Omega_b$ and the cold dark matter component $\Omega_c$, the dark energy density\footnote{While we adopt $\Omega_\Lambda$ as notation, this quantity represents the dark energy density also in the case where dark energy is described by a dynamical field.} $\Omega_\Lambda$, the radiation density $\Omega_\gamma$ (excluding neutrinos), the curvature density $\Omega_K$, and the neutrino density of both mass-less and massive neutrinos, given by $\Omega_{\nu, {\rm rel}}$ and $\Omega_{\nu, {\rm m}}$ respectively. Unless otherwise specified, we refer to these densities at the present. The current expansion rate is given by the Hubble constant, $H_0 = 100~h~{\rm km}~{\rm s}^{-1}~{\rm Mpc}^{-1}$. The normalization of the density fluctuations is established either in terms of $A_s$ or in terms of the RMS variance in spheres of $8\,h\,\text{Mpc}^{-1}$ today, $\sigma_8$. 
+The overarching goal of \ccl is to allow seamless integration of different cosmological models of interest to LSST. The cosmological models assume a homogeneous and isotropic space-time metric, and an inflationary model for the primordial universe described by a power-law with spectral index $n_s$, and amplitude $A_s$ defined at a pivot scale of $k_0=0.05\,{\rm Mpc}^{-1}$. The cosmological components include the matter density parameter $\Omega_m$, which is the sum of the baryonic component $\Omega_b$ and the cold dark matter component $\Omega_c$, the dark energy density\footnote{While we adopt $\Omega_\Lambda$ as notation, this quantity represents the dark energy density also in the case where dark energy is described by a dynamical field.} $\Omega_\Lambda$, the radiation density $\Omega_\gamma$ (excluding neutrinos), the curvature density $\Omega_K$, and the neutrino density of both mass-less and massive neutrinos, given by $\Omega_{\nu, {\rm rel}}$ and $\Omega_{\nu, {\rm m}}$ respectively. Unless otherwise specified, we refer to these densities at the present. The current expansion rate is given by the Hubble constant, $H_0 = 100~h~{\rm km}~{\rm s}^{-1}~{\rm Mpc}^{-1}$. The normalization of the density fluctuations is established either in terms of $A_s$ or in terms of the RMS variance in spheres of $8\,h\,\text{Mpc}^{-1}$ today, $\sigma_8$. 
 
 The following set of models is supported in \ccl:
 \begin{itemize}
@@ -155,7 +155,7 @@ The comoving angular diameter distance is then computed in terms of the comoving
 \end{equation}
 where $K \equiv \Omega_K H_0^2 c^{-2}$ is the curvature.
 The angular diameter distance is given by $d_A=a\,r(\chi(a))$, and the luminosity distance is
-$d_L=r(\chi(a))/a,$ leading to the familiar relation $d_A = a^2d_L$ which is valid in general for all metric theories of gravity.
+$d_L=r(\chi(a))/a,$ leading to the familiar relation $d_A = a^2d_L$.
 The \ccl suite also has the functionality to compute the distance modulus, defined as
 \begin{equation}\label{eq:distmod}
     \mu = 5 \log_{10}(d_L / {\rm pc})-5,
@@ -172,13 +172,13 @@ In conjunction with the expansion rate, the growth history of the Universe can a
   \frac{d}{da}\left(a^3H(a)\frac{dD}{da}\right)=\frac{3}{2}\Omega_m(a)aH(a)D,
   \label{eq:growth}
 \end{equation}
-using a Runge-Kutta Cash-Karp algorithm. We define $g(a)\equiv D/a$ and adopt as initial conditions $g(a)=1$ and $g'(a)=0$ at sufficiently high redshift, during the matter-dominated era \citep{Cooray04}. \ccl simultaneously computes the logarithmic growth rate $f(a)$, defined as:
+using a Runge-Kutta Cash-Karp algorithm. We define $g(a)\equiv D/a$ and adopt as initial conditions $g(a)=1$ and $g'(a)=0$ at sufficiently high redshift, during the matter-dominated era. \ccl simultaneously computes the logarithmic growth rate $f(a)$, defined as:
 \begin{equation}
   f(a)\equiv \frac{d\ln D}{d\ln a}.
   \label{eq:lingrowthf}
 \end{equation}
 
-\ccl provides functions that return the growth normalized either to $D(a=1)=1$ or to $D(a\ll1)\rightarrow a$. It employs an accelerated spline that is linearly spaced in the scale factor to interpolate the growth functions (for more details, see Section \ref{sec:implement}). The growth calculations cover flat and curved $\Lambda$CDM and $w$CDM cosmologies. However, it should be noted that the above treatment is ill-defined in the presence of massive neutrinos, and attempts to compute the growth rate in cosmologies with massive neutrinos will produce an inconsistencies between growth predictions and the matter power spectrum (Section \ref{sec:matterps}), for example.
+\ccl provides functions that return the growth normalized either to $D(a=1)=1$ or to $D(a\ll1)\rightarrow a$. It employs an accelerated spline that is linearly spaced in the scale factor to interpolate the growth functions (for more details, see Section \ref{sec:implement}). The growth calculations cover flat and curved $\Lambda$CDM and $w$CDM cosmologies. However, it should be noted that the above treatment is ill-defined in the presence of massive neutrinos, and attempts to compute the growth rate in cosmologies with massive neutrinos will produce an inconsistency between growth predictions and the matter power spectrum (Section \ref{sec:matterps}), for example.
 
 Finally, \ccl allows for growth predictions with an alternative `modified gravity' cosmological model defined by a regular curved $w$CDM background as well as a user-defined $\Delta f(a)$, such that the true growth rate in this model is given by
 \begin{equation}
