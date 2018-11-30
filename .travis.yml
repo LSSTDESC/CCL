@@ -4,7 +4,7 @@ cache:
   - "$TRAVIS_BUILD_DIR/build/GSL/src"
   - "$TRAVIS_BUILD_DIR/build/FFTW/src"
   - "$TRAVIS_BUILD_DIR/build/SWIG/src"
-  #- "$TRAVIS_BUILD_DIR/build/CLASS/src"
+  - "$TRAVIS_BUILD_DIR/build/CLASS/src"
   - "$TRAVIS_BUILD_DIR/build/ANGPOW/src"
   - "$HOME/miniconda"
 matrix:
