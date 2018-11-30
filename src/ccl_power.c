@@ -15,8 +15,12 @@
 #include "ccl_emu17_params.h"
 
 
-/*------ ROUTINE: ccl_free_class_structs -----
-INPUT: ccl_cosmology * cosmo, ...
+/* --------- ROUTINE: ccl_free_class_structs ---------
+INPUT: ccl_cosmology, struct background, struct thermo, struct perturbs, 
+       struct transfers, struct primordial, struct spectra, struct nonlinear, 
+       struct lensing, int init_arr, int status
+TASK: Free memory allocated to structures used by CLASS calculations.
+RETURNS: Nothing.
 */
 static void ccl_free_class_structs(ccl_cosmology *cosmo,
 				   struct background *ba,
@@ -90,6 +94,15 @@ static void ccl_free_class_structs(ccl_cosmology *cosmo,
   return;
 }
 
+
+/* --------- ROUTINE: ccl_class_preinit ---------
+INPUT: struct background, struct thermo, struct perturbs, struct transfers, 
+       struct primordial, struct spectra, struct nonlinear, struct lensing
+TASK: Pre-initialize all fields that are freed by the *_free() routine. 
+      Prevents crashes if *_init() failed and did not initialize all tables 
+      that subsequently need to be freed.
+RETURNS: Initialized CLASS structs.
+*/
 static void ccl_class_preinit(struct background *ba,
 			      struct thermo *th,
 			      struct perturbs *pt,
@@ -99,10 +112,6 @@ static void ccl_class_preinit(struct background *ba,
 			      struct nonlinear *nl,
 			      struct lensing *le)
 {
-  // Pre-initialize all fields that are freed by *_free() routine
-  // Prevents crashes if *_init()failed and did not initialize all tables 
-  // freed by *_free()
-
   // init for background_free
   ba->tau_table = NULL;
   ba->z_table = NULL;
@@ -158,6 +167,19 @@ static void ccl_class_preinit(struct background *ba,
   sp->ic_ic_size = NULL;
 }
 
+
+/* --------- ROUTINE: ccl_run_class ---------
+INPUT: ccl_cosmology, struct file_content, struct background, struct thermo, 
+       struct perturbs, struct transfers, struct primordial, struct spectra, 
+       struct nonlinear, struct lensing, struct output, int init_arr, 
+       int status
+       N.B. struct file_content contains the 'parameter file' for the CLASS run
+TASK: Run CLASS to calculate linear/nonlinear power spectra for the parameters 
+      given in ccl_cosmology. Results are stored in the CLASS structs for now. 
+      The file_content (i.e. the CLASS parameter file) must have already been 
+      populated by another function, e.g. ccl_fill_class_parameters().
+RETURNS: Results returned in CLASS structs.
+*/
 static void ccl_run_class(ccl_cosmology *cosmo,
 			  struct file_content *fc,
 			  struct precision* pr,
@@ -227,10 +249,22 @@ static void ccl_run_class(ccl_cosmology *cosmo,
   init_arr[i_init++] = 1;
 }
 
+
+/* --------- ROUTINE: ccl_get_class_As ---------
+INPUT: ccl_cosmology, struct file_content, int position_As, double sigma8, 
+       int status
+       
+       int position_As: Which position (integer index) in the file_content 
+               struct that the A_s parameter is stored in.
+       double sigma8: Value of sigma_8 to calculate A_s for.
+TASK: Find approximate value of A_s that corresponds to sigma_8, for a given 
+      set of cosmological parameters.
+RETURNS: double A_s.
+*/
 static double ccl_get_class_As(ccl_cosmology *cosmo, struct file_content *fc, 
                                int position_As, double sigma8, int * status)
 {
-  //structures for class test run
+  // Structures for class test run
   struct precision pr;        // for precision parameters
   struct background ba;       // for cosmological background
   struct thermo th;           // for thermodynamics
@@ -265,6 +299,15 @@ static double ccl_get_class_As(ccl_cosmology *cosmo, struct file_content *fc,
   return A_s_guess;
 }
 
+
+/* --------- ROUTINE: ccl_fill_class_parameters ---------
+INPUT: ccl_cosmology, struct file_content, int parser_length, int status
+       int parser_length: Length of CLASS 'parameter file' to construct (in 
+                          lines).
+TASK: Construct CLASS parameter struct for a given CCL cosmology and power 
+      spectrum settings.
+RETURNS: Outputs a filled file_content struct.
+*/
 static void ccl_fill_class_parameters(ccl_cosmology * cosmo, 
                                       struct file_content * fc,
 				                      int parser_length, int * status)
@@ -388,15 +431,19 @@ static void ccl_fill_class_parameters(ccl_cosmology * cosmo,
     ccl_cosmology_set_status_message(cosmo, "ccl_power.c: class_parameters(): Error initializing CLASS pararmeters: neither sigma8 nor A_s defined\n");
     return;
   }
-
 }
 
 
-static void ccl_cosmology_compute_power_class(ccl_cosmology* cosmo, int* status)
-{
-    cosmology_compute_power_class(cosmo, status, 1);
-}
-
+/* --------- ROUTINE: cosmology_compute_power_class ---------
+INPUT: ccl_cosmology, int status, int calc_nonlin
+       calc_nonlin: If True, calculate Halofit nonlinear power spectrum as well 
+                    as the linear power spectrum. Otherwise, only calculate 
+                    the lineat power spectrum.
+TASK: Helper function to calculate CLASS linear and/or nonlinear (halofit) 
+      power spectra. Stores results as splines in k and z in the ccl_cosmology 
+      object.
+RETURNS: Inserts power spectrum splines into ccl_cosmology object.
+*/
 void cosmology_compute_power_class(ccl_cosmology* cosmo, int* status, 
                                    int calc_nonlin)
 {
@@ -630,12 +677,24 @@ void cosmology_compute_power_class(ccl_cosmology* cosmo, int* status,
 }
 
 
-/* BCM correction 
-   See Schneider & Teyssier (2015) for details of the model.
-   The equations inside this function correspond to those in that
-   work for:
-   gf -> G(k)
-   scomp -> S(k)
+/* --------- ROUTINE: ccl_cosmology_compute_power_class ---------
+INPUT: ccl_cosmology, int status
+TASK: Calculate CLASS linear and nonlinear (halofit) power spectra and store 
+      results as splines in k and z.
+RETURNS: Inserts power spectrum splines into ccl_cosmology object.
+*/
+static void ccl_cosmology_compute_power_class(ccl_cosmology* cosmo, int* status)
+{
+    cosmology_compute_power_class(cosmo, status, 1);
+}
+
+
+/* --------- ROUTINE: ccl_bcm_model_fka ---------
+INPUT: ccl_cosmology, double k, double a, int status
+TASK: Calculate BCM baryonic correction to power spectrum; see Schneider & 
+      Teyssier (2015) for details of the model. The equations inside this 
+      function correspond to those in that work for gf -> G(k), scomp -> S(k).
+RETURNS: double: (gf * scomp)(k,a), the BCM correction as a function of k, a.
 */
 double ccl_bcm_model_fka(ccl_cosmology * cosmo, double k, double a, int *status)
 {
@@ -651,6 +710,12 @@ double ccl_bcm_model_fka(ccl_cosmology * cosmo, double k, double a, int *status)
   return gf * scomp;
 }
 
+
+/* --------- ROUTINE: ccl_cosmology_write_power_class_z ---------
+INPUT: char* filename, ccl_cosmology, double z, int status
+TASK: Write CLASS linear power spectrum as a function of z into a file.
+RETURNS: Nothing (outputs to file).
+*/
 void ccl_cosmology_write_power_class_z(char *filename, ccl_cosmology * cosmo, double z, int * status)
 {
   struct precision pr;        // for precision parameters
@@ -746,6 +811,9 @@ void ccl_cosmology_write_power_class_z(char *filename, ccl_cosmology * cosmo, do
 }
 
 
+/* --------- STRUCT: eh_struct ---------
+Struct containing parameters needed for Eisenstein-Hu power spectrum method.
+*/
 typedef struct {
   double rsound;
   double zeq;
@@ -761,6 +829,13 @@ typedef struct {
   double bnode;
 } eh_struct;
 
+
+/* --------- ROUTINE: eh_struct_new ---------
+INPUT: ccl_parameters
+TASK: Create and fill an eh_struct (settings for the Eisenstein-Hu power 
+      spectrum method) from a ccl_parameters object.
+RETURNS: allocated eh_struct.
+*/
 static eh_struct *eh_struct_new(ccl_parameters *params)
 {
   // Computes Eisenstein & Hu parameters for
@@ -826,25 +901,41 @@ static eh_struct *eh_struct_new(ccl_parameters *params)
   return eh;
 }
 
-static double tkEH_0(double keq,double k,double a,double b)
+
+/* --------- ROUTINE: tkEH_0 ---------
+INPUT: double keq, double k, double a, double b
+TASK: Eisenstein & Hu's Tk_0 (transfer function). See astro-ph/9709112 for 
+      the relevant equations.
+RETURNS: double tkEH.
+*/
+static double tkEH_0(double keq, double k, double a, double b)
 {
-  // Eisentstein & Hu's Tk_0
-  // see astro-ph/9709112 for the relevant equations
   double q = k / (13.41*keq); // Eq 10
   double c = 14.2 / a + 386./(1 + 69.9 * pow(q, 1.08)); // Eq 20
   double l = log(M_E + 1.8*b*q); // Change of var for Eq 19
   return l / (l + c*q*q); // Returns Eq 19
 }
 
+
+/* --------- ROUTINE: tkEH_c ---------
+INPUT: eh_struct, double k
+TASK: Eisenstein & Hu's Tk_c (CDM transfer function). See astro-ph/9709112 for 
+      the relevant equations.
+RETURNS: double tkEH_c.
+*/
 static double tkEH_c(eh_struct *eh, double k)
 {
-  // Eisenstein & Hu's Tk_c
-  // see astro-ph/9709112 for the relevant equations
   double f = 1 / (1 + pow(k*eh->rsound/5.4, 4)); // Eq 18
   return f * tkEH_0(eh->keq, k, 1, eh->betac) 
        + (1 - f) * tkEH_0(eh->keq, k, eh->alphac, eh->betac); // Returns Eq 17
 }
 
+
+/* --------- ROUTINE: jbes0 ---------
+INPUT: double x
+TASK: Spherical Bessel function j_0, used by Eisenstein-Hu power spectrum.
+RETURNS: double j0.
+*/
 static double jbes0(double x)
 {
   double jl;
@@ -854,10 +945,15 @@ static double jbes0(double x)
   return jl;
 }
 
-static double tkEH_b(eh_struct *eh,double k)
+
+/* --------- ROUTINE: tkEH_b ---------
+INPUT: eh_struct, double k
+TASK: Eisenstein & Hu's Tk_c (baryon transfer function, Eq. 21). See 
+      astro-ph/9709112 for the relevant equations.
+RETURNS: double tkEH_b.
+*/
+static double tkEH_b(eh_struct *eh, double k)
 {
-  // Eisenstein & Hu's Tk_b (Eq 21)
-  // see astro-ph/9709112 for the relevant equations
   double x_bessel, part1, part2, jbes;
   double x = k * eh->rsound;
 
@@ -878,14 +974,17 @@ static double tkEH_b(eh_struct *eh,double k)
   return jbes0(x_bessel) * (part1 + part2);
 }
 
+
+/* --------- ROUTINE: tsqr_EH ---------
+INPUT: ccl_parameters, eh_struct, double k, int wiggled
+       int wiggled: Controls whether to introduce wiggles (BAO) in the power 
+                    spectrum (wiggled=1 switches BAO on).
+TASK: Eisenstein-Hu transfer function-squared.
+RETURNS: double tsqr_EH.
+*/
 static double tsqr_EH(ccl_parameters *params, eh_struct * eh, 
                       double k, int wiggled)
 {
-  // Eisenstein & Hu's Tk_c
-  // see astro-ph/9709112 for the relevant equations
-  // Notice the last parameter in eh_power controls
-  // whether to introduce wiggles (BAO) in the power spectrum.
-  // We do this by default when obtaining the power spectrum.
   double tk;
   double b_frac = params->Omega_b / params->Omega_m;
   if(wiggled){
@@ -916,16 +1015,32 @@ static double tsqr_EH(ccl_parameters *params, eh_struct * eh,
   return tk*tk; // Return T_0^2
 }
 
-static double eh_power(ccl_parameters *params,eh_struct *eh,double k,int wiggled)
+
+/* --------- ROUTINE: eh_power ---------
+INPUT: ccl_parameters, eh_struct, double k, int wiggled
+       int wiggled: Controls whether to introduce wiggles (BAO) in the power 
+                    spectrum.
+TASK: Calculate the Eisenstein-Hu power spectrum for a given k.
+RETURNS: double tsqr_EH.
+*/
+static double eh_power(ccl_parameters *params, eh_struct *eh, double k, 
+                       int wiggled)
 {
   // Wavenumber in units of Mpc^-1
   double kinvh = k / params->h; // Changed to h/Mpc
   return pow(k, params->n_s) * tsqr_EH(params, eh, kinvh, wiggled);
 }
 
+
+/* --------- ROUTINE: ccl_cosmology_compute_power_eh ---------
+INPUT: ccl_cosmology, int status
+TASK: Compute linear matter power spectrum using the Eisenstein-Hu method and 
+      store spline of results in the ccl_cosmology object.
+RETURNS: Power spectrum (stored in ccl_cosmology).
+*/
 static void ccl_cosmology_compute_power_eh(ccl_cosmology * cosmo, int * status)
 {
-  //These are the limits of the splining range
+  // These are the limits of the splining range
   cosmo->data.k_min_lin = ccl_splines->K_MIN;
   cosmo->data.k_min_nl = ccl_splines->K_MIN;
   cosmo->data.k_max_lin = ccl_splines->K_MAX;
@@ -1037,7 +1152,8 @@ static void ccl_cosmology_compute_power_eh(ccl_cosmology * cosmo, int * status)
       y2d[j*nk+i] = y[i]+g2; // Replace previous values
     } // end k loop
   } // end a loop
-
+  
+  // Initialise spline of (log of) linear power spectrum
   splinstatus = gsl_spline2d_init(log_power_lin, x, a, y2d, nk, na);
   if (splinstatus) {
     free(eh); free(x); free(y); free(a); free(y2d);
@@ -1086,25 +1202,24 @@ static double tsqr_BBKS(ccl_parameters * params, double k)
              0.5);
 }
 
+
 /*------ ROUTINE: bbks_power -----
 INPUT: ccl_parameters and k wavenumber in 1/Mpc
 TASK: provide the BBKS power spectrum with baryonic correction at single k
 */
-
-//Calculate Normalization see Cosmology Notes 8.105 (TODO: whose comment is this?)
 static double bbks_power(ccl_parameters * params, double k)
 {
   return pow(k,params->n_s)*tsqr_BBKS(params, k);
 }
 
+
 /*------ ROUTINE: ccl_cosmology_compute_bbks_power -----
 INPUT: cosmology
 TASK: provide spline for the BBKS power spectrum with baryonic correction
 */
-
 static void ccl_cosmology_compute_power_bbks(ccl_cosmology * cosmo, int * status)
 {
-  //These are the limits of the splining range
+  // These are the limits of the splining range
   cosmo->data.k_min_lin = ccl_splines->K_MIN;
   cosmo->data.k_min_nl = ccl_splines->K_MIN;
   cosmo->data.k_max_lin = ccl_splines->K_MAX;
@@ -1112,7 +1227,7 @@ static void ccl_cosmology_compute_power_bbks(ccl_cosmology * cosmo, int * status
   double kmin = cosmo->data.k_min_lin;
   double kmax = ccl_splines->K_MAX;
   
-  //Compute nk from number of decades and N_K = # k per decade
+  // Compute nk from number of decades and N_K = # k per decade
   double ndecades = log10(kmax) - log10(kmin);
   int nk = (int)ceil(ndecades*ccl_splines->N_K);
   double amin = ccl_splines->A_SPLINE_MINLOG_PK;
@@ -1146,7 +1261,8 @@ static void ccl_cosmology_compute_power_bbks(ccl_cosmology * cosmo, int * status
     y[i] = log(bbks_power(&cosmo->params, x[i]));
     x[i] = log(x[i]);
   }
-
+  
+  // Initialise (log) power spectrum spline
   gsl_spline2d * log_power_lin = gsl_spline2d_alloc(PLIN_SPLINE_TYPE, nk,na);
   for (int j = 0; j < na; j++) {
     double gfac = ccl_growth_factor(cosmo,a[j], status);
@@ -1201,8 +1317,9 @@ static void ccl_cosmology_compute_power_bbks(ccl_cosmology * cosmo, int * status
       y2d[j*nk+i] = y[i]+g2;
     }
   }
-
-  splinstatus = gsl_spline2d_init(log_power_lin, x, a, y2d,nk,na);
+  
+  // Create spline for normalized power spectrum
+  splinstatus = gsl_spline2d_init(log_power_lin, x, a, y2d, nk, na);
   if (splinstatus) {
     free(x); free(y); free(a); free(y2d);
     gsl_spline2d_free(log_power_lin);
@@ -1235,12 +1352,10 @@ static void ccl_cosmology_compute_power_bbks(ccl_cosmology * cosmo, int * status
 }
 
 
-
 /*------ ROUTINE: ccl_cosmology_compute_power_emu -----
-INPUT: cosmology
-TASK: provide spline for the emulated power spectrum from Cosmic EMU
+INPUT: ccl_cosmology, int status
+TASK: Provide spline for the emulated power spectrum from Cosmic EMU
 */
-
 static void ccl_cosmology_compute_power_emu(ccl_cosmology * cosmo, int * status)
 {
   double Omeganuh2_eq;
