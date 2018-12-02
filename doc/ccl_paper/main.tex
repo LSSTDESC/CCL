@@ -112,9 +112,9 @@ The following sub-sections describe the cosmological predictions implemented in 
 The models that are specified above map directly onto cosmological observables such as the expansion rate of the Universe, which is parameterized through the Hubble parameter as
 \begin{align}\label{eq:Ha}
 \frac{H(a)}{H_0} &= a^{-3/2}\Big(\Omega_{m}+\Omega_{\Lambda} a^{-3(w_0+w_a)}
-\exp[3 w_a (a-1)]~+ \nonumber \\ &\Omega_{K} a + (\Omega_{\gamma} + \Omega_{\nu, {\rm rel}}) a^{-1} + \Omega_{\nu, {\rm m}}(a)a^3\Big)^{\frac{1}{2}} ,
+\exp[3 w_a (a-1)]~+ \nonumber \\ &\Omega_{K} a + (\Omega_{\gamma} + \Omega_{\nu, {\rm rel}}) a^{-1} + \tilde\Omega_{\nu, {\rm m}}(a)a^3\Big)^{\frac{1}{2}} ,
 \end{align}
-and is a function of the scale factor and of the energy density in the different components today. In this expression, we have assumed the CPL parameterization described above for the dark energy equation of state and we have defined $\Omega_{\nu, {\rm m}}(a) \equiv \rho^{-1}_{\rm crit} \rho_{\nu, {\rm m}}(a)$ as the fractional energy density of massive neutrinos as a function of time, where $\rho_{\rm crit}$ is the critical density of the Universe today.
+and is a function of the scale factor and of the energy density in the different components today. In this expression, we have assumed the CPL parameterization described above for the dark energy equation of state and we have defined $\tilde\Omega_{\nu, {\rm m}}(a) \equiv \rho^{-1}_{\rm crit} \rho_{\nu, {\rm m}}(a)$ as the fractional energy density of massive neutrinos as a function of time, where $\rho_{\rm crit}$ is the critical density of the Universe today.
 
 In general, the density parameter $\Omega_X(a)$ of a given species $X$ at a given time is defined in terms of the physical background densities $\bar\rho_X(a)$ via $\Omega_X(a) \equiv \rho^{-1}_{\rm crit}(a) \bar\rho_X(a)$, where the critical density of the Universe at a given time is
 \begin{equation}
@@ -131,9 +131,9 @@ and its density parameter is
 \end{equation}
 Moreover, \ccl allows for comoving physical densities $\bar\rho_{X, {\rm com}}(a) = \bar\rho_X(a) a^3$ to be extracted, which in the case of matter reduces to a time-independent $\bar\rho_{m, {\rm com}} = \rho_{\rm crit} \Omega_{m}$. We include bars for $\rho_X$ to distinguish from spatially-varying densities in later sections.
 
-The specific case of $\Omega_{\nu, {\rm m}}(a)$ in Eq. (\ref{eq:Ha}) is calculated via
+The specific case of $\tilde\Omega_{\nu, {\rm m}}(a)$ in Eq. (\ref{eq:Ha}) is calculated via
 \begin{align}
-\Omega_{\nu, {\rm m}}(a) &= \frac{7}{8}\sum_{i=1}^{N_\nu} \frac{4 \sigma_{B}}{c \rho_{{\rm crit}}} \left(\frac{T_{\nu}^{\rm eff}}{a}\right)^4  \int_0^{\infty} dx \, x^2 \frac{\sqrt{x^2 + \left(\mu^i\right)^2}}{\exp(x) + 1}.
+\tilde\Omega_{\nu, {\rm m}}(a) &= \frac{7}{8}\sum_{i=1}^{N_\nu} \frac{4 \sigma_{B}}{c \rho_{{\rm crit}}} \left(\frac{T_{\nu}^{\rm eff}}{a}\right)^4  \int_0^{\infty} dx \, x^2 \frac{\sqrt{x^2 + \left(\mu^i\right)^2}}{\exp(x) + 1}.
 \label{Omnu}
 \end{align}
 Here, $\sigma_B$ is the Stefan-Boltzmann constant, $c$ is the speed of mass-less particles, $\rho_{{\rm crit}}$ is the present critical density, and $T_{\nu}^{\rm eff}$ is the present effective temperature of the massive neutrinos. $T_{\nu}^{\rm eff}$ is related to the temperature of the CMB via $T_{\nu}^{\rm eff} = T_{\rm CMB} T_{\rm NCDM}$, where $T_{\rm NCDM}$ is a dimensionless factor ($\simeq1$) used by e.g. \class to set the ratio ${\sum m_\nu}/{\Omega_{\nu, {\rm m}}}$ to its experimentally measured value. Note that $T_{\rm NCDM}$ is used to modulate the effective temperature of massive neutrinos only; the temperature of relativistic neutrinos follows the usual relation in which $T_\nu = T_{\rm CMB} \left(\frac{4}{11}\right)^{1/3}$. Finally, $\mu^i$ is a per-species mass-dependent dimensionless constant, given by $\mu^i = m_{\nu}^{i}c^2 a / (k_B T_{\nu}^{\rm eff})$ where $k_B$ is the Boltzmann constant.
