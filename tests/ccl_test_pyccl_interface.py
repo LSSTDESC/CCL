@@ -470,9 +470,26 @@ def check_redshifts(cosmo):
     def dndz1(z, args):
         return z**1.24 * np.exp(- (z / 0.51)**1.01)
         
+    # Introduce an unrealistic, simple true function for dNdz for which
+    # we can calculate dNdz_tomog analytically for comparison.
+    def dndz_ana(z, args):
+		if ((z>=0.) and (z<=1.0)): 
+			return 1.0
+		else:
+			return 0. 
+			
+	# And also introduce a function to return the analytic answer,
+	# to which we compare
+	def dNdz_tomog_analytic(z, sigz, zmin, zmax):
+		return (0.5 * np.sqrt(sigz) * (-1. + (-np.exp(-(zmax-1)**2 / 2. 
+		        / sigz**2) + np.exp(-zmax**2 / 2. * sigz**2) + np.exp(
+		        -(zmin-1)**2 / 2. / sigz**2) - np.exp(-zmin**2 / 2 
+		        /sigz**2)) * np.sqrt(2. / np.pi)*sigz 
+        
     # dNdzFunction classes
     dNdZ1 = ccl.dNdzFunction(dndz1)
     dNdZ2 = ccl.dNdzSmail(alpha = 1.24, beta = 1.01, z0 = 0.51)
+    dNdZ_ana = ccl.dNdzFunction(dndz_ana)
 
     # Check that dNdz_tomog is finite with the various combinations
     # of PhotoZ and dNdz functions

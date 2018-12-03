@@ -168,7 +168,8 @@ def dNdz_tomog(z, zmin, zmax, pz_func, dNdz_func):
 
     # Call dNdz tomography function
     status = 0
-    dNdz, status = lib.dNdz_tomog_vec(zmin, zmax, pz_func.pz_func, 
-    dNdz_func.dN_func, z, z.size, status)
+    dNdz, status = lib.dNdz_tomog_vec(zmin, zmax, pz_func.pz_func,
+                                      dNdz_func.dN_func, z, z.size, 
+                                      status)
     check(status)
     return dNdz
