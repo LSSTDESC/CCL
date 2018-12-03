@@ -1,7 +1,6 @@
 import numpy as np,math
 from numpy.testing import assert_raises, assert_warns, assert_no_warnings, \
                           assert_, decorators, run_module_suite, assert_allclose
-from scipy.integrate import simps
 import pyccl as ccl
 from pyccl import CCLError
 
@@ -456,9 +455,8 @@ def check_redshifts(cosmo):
     z_arr = np.array(z_lst)
 
     # p(z) function for dNdz_tomog
-    import math
     def pz1(z_ph, z_s, args):
-        return math.exp(- (z_ph - z_s)**2. / 2.)
+        return np.exp(- (z_ph - z_s)**2. / 2.)
 
     # Lambda function p(z) function for dNdz_tomog
     pz2 = lambda z_ph, z_s, args: np.exp(-(z_ph - z_s)**2. / 2.)
@@ -470,7 +468,7 @@ def check_redshifts(cosmo):
     
     # dNdz (in terms of true redshift) function for dNdz_tomog
     def dndz1(z, args):
-        return z**1.24 * math.exp(- (z / 0.51)**1.01)
+        return z**1.24 * np.exp(- (z / 0.51)**1.01)
         
     # dNdzFunction classes
     dNdZ1 = ccl.dNdzFunction(dndz1)
@@ -538,10 +536,6 @@ def check_redshifts_nu(cosmo):
     PZ1 = ccl.PhotoZFunction(pz1)
     PZ2 = ccl.PhotoZFunction(pz2)
     PZ3 = ccl.PhotoZGaussian(sigma_z0=0.1)
-    
-    # dNdz (in terms of true redshift) function for dNdz_tomog
-    def dndz1(z, args):
-        return z**1.24 * math.exp(- (z / 0.51)**1.01)
         
     # dNdzFunction classes
     dNdZ1 = ccl.dNdzFunction(dndz1)
@@ -846,7 +840,7 @@ def test_redshifts():
         yield check_redshifts, cosmo
 
     for cosmo_nu in reference_models_nu():
-       yield check_redshifts_nu, cosmo_nu
+       yield check_redshifts, cosmo_nu
 
 @decorators.slow
 def test_cls():

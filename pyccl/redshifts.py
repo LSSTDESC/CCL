@@ -124,9 +124,9 @@ class dNdzSmail(dNdzFunction):
         Args:
            alpha (float): alpha parameter
            beta (float) : beta parameter
-           z0 (float): z0 parameter 
-        """    
-            
+           z0 (float): z0 parameter
+        """
+
         self.alpha = alpha
         self.beta = beta
         self.z0 = z0
@@ -138,7 +138,7 @@ class dNdzSmail(dNdzFunction):
             lib.free_dNdz_info(self.dN_func)
         except Exception:
             pass
-            
+
 
 def dNdz_tomog(z, zmin, zmax, pz_func, dNdz_func):
     """Calculates dNdz in a particular tomographic bin, convolved
@@ -168,6 +168,7 @@ def dNdz_tomog(z, zmin, zmax, pz_func, dNdz_func):
 
     # Call dNdz tomography function
     status = 0
-    dNdz, status = lib.dNdz_tomog_vec(zmin, zmax, pz_func.pz_func, dNdz_func.dN_func, z, z.size, status)
+    dNdz, status = lib.dNdz_tomog_vec(zmin, zmax, pz_func.pz_func, 
+    dNdz_func.dN_func, z, z.size, status)
     check(status)
     return dNdz
