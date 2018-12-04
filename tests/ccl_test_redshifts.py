@@ -6,7 +6,7 @@ import pyccl as ccl
 # Set tolerances
 TOLERANCE = 1e-4
 
-def check_redshift_analytic():
+def test_redshift_analytic():
     """
     Compare the redshift functions to an analytic toy case.
     """
@@ -58,11 +58,11 @@ def check_redshift_analytic():
     zmax = 1.
     # math erf funcs are not vectorized so loop over z values
     for z in z_lst:
-		assert_allclose(ccl.dNdz_tomog(z, zmin, zmax, PZ_ana, 
+        assert_allclose(ccl.dNdz_tomog(z, zmin, zmax, PZ_ana, 
 		               dNdZ_ana), dNdz_tomog_analytic(z, 0.1, zmin, 
 		               zmax), rtol=TOLERANCE)       
 		            
-def check_redshift_numerical():
+def test_redshift_numerical():
     """
     Compare the redshift functions to a high precision integral.
     """
@@ -78,8 +78,8 @@ def check_redshift_numerical():
     
     # Set up a function equivalent to the PhotoZGaussian
     def pz3(z_ph, z_s, sigz):
-		sig = sigz*(1.+ z_s)
-		return (np.exp(- (z_ph - z_s)**2. / 2. / sig**2) / np.sqrt(2.
+        sig = sigz*(1.+ z_s)
+        return (np.exp(- (z_ph - z_s)**2. / 2. / sig**2) / np.sqrt(2.
 		        *np.pi) / sig)
 
     # PhotoZFunction classes
@@ -117,33 +117,18 @@ def check_redshift_numerical():
     # Check that for the analytic case introduced above, we get the 
     # correct value.
     for i in range(0, len(z_lst)):
-		assert_allclose(ccl.dNdz_tomog(z_lst[i], zmin, zmax, PZ1, 
+        assert_allclose(ccl.dNdz_tomog(z_lst[i], zmin, zmax, PZ1, 
 		               dNdZ1), np_dndz_1[i], rtol=TOLERANCE) 
-		assert_allclose(ccl.dNdz_tomog(z_lst[i], zmin, zmax, PZ1, 
+        assert_allclose(ccl.dNdz_tomog(z_lst[i], zmin, zmax, PZ1, 
 		               dNdZ2), np_dndz_1[i], rtol=TOLERANCE)  
-		assert_allclose(ccl.dNdz_tomog(z_lst[i], zmin, zmax, PZ2, 
+        assert_allclose(ccl.dNdz_tomog(z_lst[i], zmin, zmax, PZ2, 
 		               dNdZ1), np_dndz_2[i], rtol=TOLERANCE) 
-		assert_allclose(ccl.dNdz_tomog(z_lst[i], zmin, zmax, PZ2, 
+        assert_allclose(ccl.dNdz_tomog(z_lst[i], zmin, zmax, PZ2, 
 		               dNdZ2), np_dndz_2[i], rtol=TOLERANCE)  
-		assert_allclose(ccl.dNdz_tomog(z_lst[i], zmin, zmax, PZ3, 
+        assert_allclose(ccl.dNdz_tomog(z_lst[i], zmin, zmax, PZ3, 
 		               dNdZ1), np_dndz_3[i], rtol=TOLERANCE) 
-		assert_allclose(ccl.dNdz_tomog(z_lst[i], zmin, zmax, PZ3, 
+        assert_allclose(ccl.dNdz_tomog(z_lst[i], zmin, zmax, PZ3, 
 		               dNdZ2), np_dndz_3[i], rtol=TOLERANCE)  
-
-def test_redshift_analytic():
-    """
-    Test dNdz_tomog values against analytic toy example.
-    """
-
-    check_redshift_analytic()
-    
-def test_redshift_numerical():
-    """
-    Test dNdz_tomog values against high prec integral in numpy.
-    """
-
-    check_redshift_numerical()
-
 
 if __name__ == "__main__":
     run_module_suite()
