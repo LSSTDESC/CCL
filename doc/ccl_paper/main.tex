@@ -338,6 +338,7 @@ Note that \ccl does not currently compute relativistic corrections to number cou
     \begin{align}\nonumber
       \Delta_\ell^{\rm IA}(k)=\sqrt{\frac{(\ell+2)!}{(\ell-2)!}}\int &dz\,p_z(z)\,b_{\rm IA}(z)\,f_{\rm IA}(z)\\
       &T_\delta(k,z)\,\frac{j_\ell(k\chi(z))}{[k\chi(z)]^2}.
+      \label{eq:transfer_ia}
     \end{align}
     Here, $b_{\rm IA}$ is the so-called alignment bias, and $f_{\rm IA}$ is the fraction of aligned galaxies in the sample. Notice that $b_{\rm IA}(z)$ absorbs the typical normalization factors used in the literature for intrinsic alignment amplitude and redshift evolution. It is thus not to be confused with $C_1$ or $A_{\rm IA}$, typical parameters for adopted in works such as \citet{vanUitert18,Joudaki18,Hildebrandt17}. The NLA model  it has limitations in the modelling of small-scale correlations \citep{Singh15} and does not predict any $B$-mode contributions that can arise from non-linearities at such scales. However, it is a commonly adopted approximation in the current literature and going beyond it is outside of the scope of this work, though future versions of LSST DESC software will provide alternative modeling options \citep{Blazek17}.
     
@@ -984,20 +985,22 @@ In Figure~\ref{fig:halo_model_benchmark} we show the accuracy of the halo model 
 
 Validation tests for two-point statistics relied on the BBKS linear matter power spectrum. This choice of method was intended to remove any potential discrepancies between the \ccl implementation and the independent one with regards to the matter power spectrum. By using BBKS, we are relying on predictions that we know to be fast and which we have already validated to known numerical accuracy (Section \ref{ss:bbksval}).
 
-We thus used the BBKS linear matter power spectrum to compare two-point statistics for two redshift bins, resulting in three tomographic combinations, labelled 1-1, 1-2 and 2-2. The validation tests were performed for two kinds of redshift distributions: analytic and binned ones. The goal of defining these two sets was to capture any numerical deviation produced by the interpolation of the binned distribution. We adopted the following analytic redshift distributions: a Gaussian with $\sigma = 0.15$, centered at $z_1 = 1$; and another Gaussian with the same dispersion but centered at $z_2 = 1.5$. In the case of the binned distributions, we adopted the two redshift distribution histograms shown in Figure \ref{fig:zhistos}.
+We thus used the BBKS linear matter power spectrum to compare two-point statistics for two redshift bins, resulting in four tomographic combinations, labelled 1-1, 1-2, 2-1 and 2-2. The validation tests were performed for two kinds of redshift distributions: analytic and binned ones. The goal of defining these two sets was to capture any numerical deviation produced by the interpolation of the binned distribution. We adopted the following analytic redshift distributions: a Gaussian with $\sigma = 0.15$, centered at $z_1 = 1$; and another Gaussian with the same dispersion but centered at $z_2 = 1.5$. In the case of the binned distributions, we adopted the two redshift distribution histograms shown in Figure \ref{fig:zhistos}.
 
 For both types of distributions, we computed the following quantities:
 \begin{itemize}
 \item Number counts angular power spectra: density term only (no magnification, RSD, etc.) with non-evolving linear bias $b(z) = 1$, in the range $2 \leq \ell \leq 3000$.
-\item Lensing $E$-mode angular power spectra: leading order term only (no magnification or intrinsic alignments), on the same scales.
-\item The cross-power spectrum between both quantities (galaxy-galaxy lensing), on the same scales.
+\item Lensing $E$-mode angular power spectra: leading order term only (no magnification), on the same scales.
+\item The cross-power spectrum between galaxy positions and galaxy shear (galaxy-galaxy lensing), on the same scales.
+\item Intrinsic alignments $E$-mode angular power spectra, cross-spectra with galaxy shear and galaxy positions, on the same scales.
+  %, with $b_{\rm IA}(z)=1$ and $f_{\rm IA}(z)=1$.
 \item The cross-power spectrum between number counts and CMB lensing, on the same scales.
 \item The cross-power spectrum between weak lensing and CMB lensing, on the same scales.
 \item Number counts angular correlation functions in the range $0.01 \deg < \theta < 5 \deg$, using 5 bins per decade, and
 \item Lensing shear angular correlation functions ($\xi_+$,$\xi_-$), similarly to above.
 \item The cross-correlation between both quantities (galaxy-galaxy lensing), as above.
 \end{itemize}
-Notice that intrinsic alignments, RSD and magnification predictions are not currently validated. We do not include real-space (correlation function) benchmarks involving CMB lensing, since they are functionally the same as number counts (i.e. a spin-0 quantity).
+Notice that RSD and magnification predictions are not currently validated. We do not include real-space (correlation function) benchmarks involving CMB lensing, since they are functionally the same as number counts (i.e. a spin-0 quantity).
 
 %------------------------
 \begin{figure}
@@ -1011,7 +1014,7 @@ Notice that intrinsic alignments, RSD and magnification predictions are not curr
 \includegraphics[width=0.49\textwidth]{Cl_dd}
 \includegraphics[width=0.49\textwidth]{Cl_dl}
 \includegraphics[width=0.49\textwidth]{Cl_ll}
-\caption{Tests of the angular power spectra accuracy. The black dot-dashed line indicates the target numerical accuracy of $0.1\sigma_\ell$. {\sl Top:} benchmark comparisons for power spectra between number counts in pairs of redshift bins. Results are shown for analytic (solid) and binned (dashed) redshift distributions, for the bin pairs 1-1 (blue), 1-2 (orange) and 2-2 (green). {\sl Middle:} same as the top panel for cross-correlations between number counts and weak lensing. {\sl Bottom:} same as before for the weak lensing power spectra.}
+\caption{Tests of the angular power spectra accuracy. The black dot-dashed line indicates the target numerical accuracy of $0.1\sigma_\ell$. {\sl Top:} benchmark comparisons for power spectra between number counts in pairs of redshift bins. Results are shown for analytic (solid) and binned (dashed) redshift distributions, for the bin pairs 1-1 (blue), 1-2 (orange), 2-2 (green). {\sl Middle:} same as the top panel for cross-correlations between number counts and weak lensing, this time including the tomographic bin combination 2-1 (red). {\sl Bottom:} same as the top panel, but for the weak lensing power spectra.}
 \label{fig:cls_limber}
 \end{figure}
 \begin{figure}
@@ -1032,7 +1035,9 @@ For the power spectrum $C^{ab}_\ell$ between two fields $a$ and $b$, the cosmic 
   \sigma_\ell^2=\frac{C^{aa}_\ell C^{bb}_\ell+(C^{ab}_\ell)^2}{2\ell+1}.
   \label{eq:sigmaell}
 \end{equation}
-Our accuracy requirement, for all auto- and cross-correlations with analytic and binned redshift distributions is $\mathcal{A}<0.1$ (i.e. differences must be smaller than one tenth of the cosmic-variance errors). The results for the auto- and cross-correlations between number counts and weak lensing are shown in Figure \ref{fig:cls_limber}, while those involving CMB lensing are shown in Figure \ref{fig:cls_cmblens}. The differences between the \ccl~results and the benchmarks are mostly due to the integration and interpolation methods (particularly, the interpolation of the redshift distributions in the case of number counts). In the case of CMB lensing, we note that the results are particularly sensitive to numerical errors in the computation of the distance to the last scattering surface.
+Our accuracy requirement, for all auto- and cross-correlations with analytic and binned redshift distributions is $\mathcal{A}<0.1$ (i.e. differences must be smaller than one tenth of the cosmic-variance errors). The results for the auto- and cross-correlations between number counts and weak lensing are shown in Figure \ref{fig:cls_limber}, while those involving CMB lensing are shown in Figure \ref{fig:cls_cmblens}. In addition, we have verified that intrinsic alignments auto-spectra and the cross-spectra of galaxy positions and intrinsic alignments also satisfy our accuracy requirement. In this case, the denominator in Eq. (\ref{eq:errorCl}) includes the lensing contribution as well.
+
+The differences between the \ccl~results and the benchmarks are mostly due to the integration and interpolation methods (particularly, the interpolation of the redshift distributions in the case of number counts). In the case of CMB lensing, we note that the results are particularly sensitive to numerical errors in the computation of the distance to the last scattering surface.
 
 Cosmological constraints from current weak lensing surveys are also derived from correlation functions. As we discussed in Section \ref{sec:models}, the correlation functions are modeled by Eq.(\ref{eq:cl_xi}) and obtained by \ccl through numerical integration of predicted angular power spectra. We require that the absolute difference between the \ccl prediction and an independent one is smaller than our expected error bars:
 \begin{equation}
