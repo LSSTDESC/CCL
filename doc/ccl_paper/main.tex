@@ -133,10 +133,10 @@ Moreover, \ccl allows for comoving physical densities $\bar\rho_{X, {\rm com}}(a
 
 The specific case of $\tilde\Omega_{\nu, {\rm m}}(a)$ in Eq. (\ref{eq:Ha}) is calculated via
 \begin{align}
-\tilde\Omega_{\nu, {\rm m}}(a) &= \frac{7}{8}\sum_{i=1}^{N_\nu} \frac{4 \sigma_{B}}{c \rho_{{\rm crit}}} \left(\frac{T_{\nu}^{\rm eff}}{a}\right)^4  \int_0^{\infty} dx \, x^2 \frac{\sqrt{x^2 + \left(\mu^i\right)^2}}{\exp(x) + 1}.
+\tilde\Omega_{\nu, {\rm m}}(a) &= \frac{7}{8}\sum_{i=1}^{N_\nu} \frac{4 \sigma_{B}}{c \rho_{{\rm crit}}} \left(\frac{T_{\nu}^{\rm eff}}{a}\right)^4  \int_0^{\infty} dx \, x^2 \frac{\sqrt{x^2 + \left(\tilde{m}^i\right)^2}}{\exp(x) + 1}.
 \label{Omnu}
 \end{align}
-Here, $\sigma_B$ is the Stefan-Boltzmann constant, $c$ is the speed of mass-less particles, $\rho_{{\rm crit}}$ is the present critical density, and $T_{\nu}^{\rm eff}$ is the present effective temperature of the massive neutrinos. $T_{\nu}^{\rm eff}$ is related to the temperature of the CMB via $T_{\nu}^{\rm eff} = T_{\rm CMB} T_{\rm NCDM}$, where $T_{\rm NCDM}$ is a dimensionless factor ($\simeq1$) used by e.g. \class to set the ratio ${\sum m_\nu}/{\Omega_{\nu, {\rm m}}}$ to its experimentally measured value. Note that $T_{\rm NCDM}$ is used to modulate the effective temperature of massive neutrinos only; the temperature of relativistic neutrinos follows the usual relation in which $T_\nu = T_{\rm CMB} \left(\frac{4}{11}\right)^{1/3}$. Finally, $\mu^i$ is a per-species mass-dependent dimensionless constant, given by $\mu^i = m_{\nu}^{i}c^2 a / (k_B T_{\nu}^{\rm eff})$ where $k_B$ is the Boltzmann constant.
+Here, $\sigma_B$ is the Stefan-Boltzmann constant, $c$ is the speed of mass-less particles, $\rho_{{\rm crit}}$ is the present critical density, and $T_{\nu}^{\rm eff}$ is the present effective temperature of the massive neutrinos. $T_{\nu}^{\rm eff}$ is related to the temperature of the CMB via $T_{\nu}^{\rm eff} = T_{\rm CMB} T_{\rm NCDM}$, where $T_{\rm NCDM}$ is a dimensionless factor ($\simeq1$) used by e.g. \class to set the ratio ${\sum m_\nu}/{\Omega_{\nu, {\rm m}}}$ to its experimentally measured value. Note that $T_{\rm NCDM}$ is used to modulate the effective temperature of massive neutrinos only; the temperature of relativistic neutrinos follows the usual relation in which $T_\nu = T_{\rm CMB} \left(\frac{4}{11}\right)^{1/3}$. Finally, $\tilde{m}^i$ is a per-species mass-dependent dimensionless constant, given by $\tilde{m}^i = m_{\nu}^{i}c^2 a / (k_B T_{\nu}^{\rm eff})$ where $k_B$ is the Boltzmann constant.
 
 
 
@@ -762,10 +762,10 @@ N_{\nu, {\rm rel}} = N_{\rm eff} - \left(T_{\rm NCDM}\right)^{4} \left(\frac{4}{
 
 In Eq.~(\ref{Omnu}) above, we specify how $\Omega_{\nu, {\rm m}}$ is computed for a given cosmology with massive neutrinos. Within this expression is a phase-space integral:
 \begin{equation}
-\int_0^{\infty} dx \, x^2 \frac{\sqrt{x^2 + \mu^2}}{\exp(x) + 1}.
+\int_0^{\infty} dx \, x^2 \frac{\sqrt{x^2 + \tilde{m}^2}}{\exp(x) + 1}.
 \label{phasespacenu}
 \end{equation}
-At high and low $\mu$, corresponding to high and low mass neutrinos, this integral need not be evaluated numerically. At high $\mu$, we set the integral equal to $5\zeta(3)\mu/(18\pi^4)$ (where $\zeta$ is the Riemann zeta function), while at low $\mu$, it goes to $\frac{7}{8}$. The $\mu$ values at which these approximations are taken can be set by the user. Outside of the regime in which these approximations are valid, the integral is computed numerically using {\tt GSL}, splined, and stored such that for a single cosmology it must only be computed once.
+At high and low $\tilde{m}$, corresponding to high and low mass neutrinos, this integral need not be evaluated numerically. At high $\tilde{m}$, we set the integral equal to $5\zeta(3)\tilde{m}/(18\pi^4)$ (where $\zeta$ is the Riemann zeta function), while at low $\tilde{m}$, it goes to $\frac{7}{8}$. The $\tilde{m}$ values at which these approximations are taken can be set by the user. Outside of the regime in which these approximations are valid, the integral is computed numerically using {\tt GSL}, splined, and stored such that for a single cosmology it must only be computed once.
 
 It may sometimes be preferable or necessary to specify a cosmology in terms of $\Omega_{\nu, {\rm m}}$ instead of $m_\nu$. To facilitate this, \ccl includes a convenience function which returns $m_\nu$ given $\Omega_{\nu, {\rm m}}$. This is achieved via the relationship (see, e.g., \citealt{Lesgourgues2012})
 \begin{equation}
