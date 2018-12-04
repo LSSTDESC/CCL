@@ -460,11 +460,18 @@ def check_redshifts(cosmo):
 
     # Lambda function p(z) function for dNdz_tomog
     pz2 = lambda z_ph, z_s, args: np.exp(-(z_ph - z_s)**2. / 2.)
+    
+    # p(z) function for which we can calculate and analytic dNdz_tomog
+    # when pairs with the toy dndz_ana below
+    def pz_ana(z_ph, z_s, args):
+        return (np.exp(- (z_ph - z_s)**2. / 2. / 0.1**2) / np.sqrt(2.
+                * np.pi) / 0.1)
 
     # PhotoZFunction classes
     PZ1 = ccl.PhotoZFunction(pz1)
     PZ2 = ccl.PhotoZFunction(pz2)
     PZ3 = ccl.PhotoZGaussian(sigma_z0=0.1)
+    PZ_ana = ccl.PhotoZFunction(pz_ana)
     
     # dNdz (in terms of true redshift) function for dNdz_tomog
     def dndz1(z, args):
@@ -473,27 +480,52 @@ def check_redshifts(cosmo):
     # Introduce an unrealistic, simple true function for dNdz for which
     # we can calculate dNdz_tomog analytically for comparison.
     def dndz_ana(z, args):
-		if ((z>=0.) and (z<=1.0)): 
-			return 1.0
-		else:
-			return 0. 
-			
-	# And also introduce a function to return the analytic answer,
-	# to which we compare
-	def dNdz_tomog_analytic(z, sigz, zmin, zmax):
-		return (0.5 * np.sqrt(sigz) * (-1. + (-np.exp(-(zmax-1)**2 / 2. 
-		        / sigz**2) + np.exp(-zmax**2 / 2. * sigz**2) + np.exp(
-		        -(zmin-1)**2 / 2. / sigz**2) - np.exp(-zmin**2 / 2 
-		        /sigz**2)) * np.sqrt(2. / np.pi)*sigz 
+        if ((z>=0.) and (z<=1.0)): 
+            return 1.0
+        else:
+            return 0. 
+	
+    # import math erf and erfc functions:
+    from math import erf, erfc
+    # And introduce a function to return the analytic result of using 
+    # dndz_ana with a Gaussian p(z,z'), to which we compare
+    def dNdz_tomog_analytic(z, sigz, zmin, zmax):
+        if ( (z>=0.) and (z<=1.0) ):
+            return (erf((z-zmin) / np.sqrt(2.)/sigz) - erf((z-zmax)/
+                    np.sqrt(2.)/sigz)) / (-1. + (-np.exp(-(zmax-1)**2 
+                    / 2. / sigz**2) + np.exp(-zmax**2 / 2. / sigz**2) + 
+                    np.exp(-(zmin-1)**2 / 2. / sigz**2) - np.exp(
+                    -zmin**2 / 2 /sigz**2)) * np.sqrt(2. / np.pi)*sigz 
+                    + erf( (zmax-1) / np.sqrt(2.) /  sigz) + erfc( 
+                    (zmin-1.)/np.sqrt(2.)/sigz) + zmax * (erf(zmax/
+                    np.sqrt(2.)/sigz) - erf( (zmax-1.) / np.sqrt(2.)/
+                    sigz)) + zmin * ( erf( (zmin-1.)/np.sqrt(2.)
+		            / sigz) - erf(zmin/np.sqrt(2.)/sigz)))
+        else:
+            return 0.
         
     # dNdzFunction classes
     dNdZ1 = ccl.dNdzFunction(dndz1)
     dNdZ2 = ccl.dNdzSmail(alpha = 1.24, beta = 1.01, z0 = 0.51)
     dNdZ_ana = ccl.dNdzFunction(dndz_ana)
+    
+    
+    # Check that for the analytic case introduced above, we get the 
+    # correct value.
+    zmin = 0.
+    zmax = 1.
+    
+    print "tomog=", ccl.dNdz_tomog(z_scl, zmin, zmax, PZ_ana, dNdZ_ana)
+    print "analytic=", dNdz_tomog_analytic(z_scl, 0.1, zmin, zmax)
+    
+    assert_allclose(ccl.dNdz_tomog(z_scl, zmin, zmax, PZ_ana, dNdZ_ana),
+                    dNdz_tomog_analytic(z_scl, 0.1, zmin, zmax), 
+                    rtol=1e-4)
+                  
 
     # Check that dNdz_tomog is finite with the various combinations
     # of PhotoZ and dNdz functions
-    zmin = 0.
+    """zmin = 0.
     zmax = 1.
     assert_( all_finite(ccl.dNdz_tomog(z_scl, zmin, zmax, PZ1, dNdZ1)) )
     assert_( all_finite(ccl.dNdz_tomog(z_lst, zmin, zmax, PZ1, dNdZ1)) )
@@ -522,7 +554,7 @@ def check_redshifts(cosmo):
     # Wrong function type
     assert_raises(TypeError, ccl.dNdz_tomog, z_scl, zmin, zmax, pz1, z_arr)
     assert_raises(TypeError, ccl.dNdz_tomog, z_scl,  zmin, zmax, z_arr, dNdZ1)
-    assert_raises(TypeError, ccl.dNdz_tomog, z_scl, zmin, zmax, None, None)
+    assert_raises(TypeError, ccl.dNdz_tomog, z_scl, zmin, zmax, None, None)"""
 
 def check_cls(cosmo):
     """

@@ -6,17 +6,11 @@
 #include <gsl/gsl_integration.h>
 #include <gsl/gsl_spline.h>
 
-// Specifying the dNdz
-// lensing (Chang et al 2013)
-#define DNDZ_WL_CONS 1  //k=0.5
-#define DNDZ_WL_FID 2  //k=1
-#define DNDZ_WL_OPT 3 //k=2
-// Clustering
-#define DNDZ_NC 4
-
-//LSST redshift range for lensing sources
-#define Z_MIN_SOURCES 0.1
-#define Z_MAX_SOURCES 3.0
+/**
+ * We assume no relevant source redshift distributions exceed z= 5
+ */
+#define Z_MIN_SOURCES 0.
+#define Z_MAX_SOURCES 5.0
 
 CCL_BEGIN_DECLS
 /** 

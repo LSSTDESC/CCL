@@ -227,7 +227,6 @@ void ccl_dNdz_tomog(double z, double bin_zmin, double bin_zmax,
   // This struct contains a spec redshift and a pointer to a photoz information struct.
   struct pz_params pz_p_val; //parameters for the integral over the photoz's
   struct norm_params norm_p_val;	
-  //struct dN_params dN_p_val; 
   
   // Check whether ccl_splines and ccl_gsl exist; exit gracefully if they 
   // can't be loaded
