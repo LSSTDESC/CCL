@@ -204,31 +204,12 @@ def test_swig_halomod():
         status)
 
 
-def test_swig_lsst_spec():
+def test_swig_redshifts():
     status = 0
-    assert_raises(
-        CCLError,
-        ccllib.specs_bias_clustering_vec,
-        COSMO,
-        [0.0, 1.0],
-        7,
-        status)
 
     assert_raises(
         CCLError,
-        ccllib.specs_sigmaz_clustering_vec,
-        [0.0, 1.0],
-        7)
-
-    assert_raises(
-        CCLError,
-        ccllib.specs_sigmaz_sources_vec,
-        [0.0, 1.0],
-        7)
-
-    assert_raises(
-        CCLError,
-        ccllib.specs_dNdz_tomog_vec,
+        ccllib.dNdz_tomog_vec,
         0,
         0.0, 1.0,
         None,

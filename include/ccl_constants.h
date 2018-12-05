@@ -169,8 +169,5 @@
  */
 #define EPS_SCALEFAC_GROWTH 1E-6
 
-//LSST specific numbers
-#define Z_MIN_SOURCES 0.1
-#define Z_MAX_SOURCES 3.0
 
 #endif
