@@ -32,8 +32,16 @@ def test_redshift_analytic():
 	
     # import math erf and erfc functions:
     from math import erf, erfc
-    # And introduce a function to return the analytic result of using 
-    # dndz_ana with a Gaussian p(z,z'), to which we compare
+    
+    # Return the analytic result for dNdz_tomog using 
+    # dndz_ana with a Gaussian p(z,z'), to which we compare.
+    
+    # This is obtained by analytically evaluating (in pseudo-latex):
+    # \frac{ dndz_ana(z) \int_{zpmin}^{zpmax} dz_p pz_ana(z_p, z_s)}
+    # {\int_{0}^{1} dz_s dndz_ana(z_s) \int_{zpmin}^{zpmax} dz_p 
+    # pz_ana(z_p, z_s)}
+    # (which we did using Wolfram Mathematica)
+    
     def dNdz_tomog_analytic(z, sigz, zmin, zmax):
         if ( (z>=0.) and (z<=1.0) ):
             return (erf((z-zmin) / np.sqrt(2.)/sigz) - erf((z-zmax)/
