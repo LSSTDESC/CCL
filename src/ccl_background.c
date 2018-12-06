@@ -392,10 +392,8 @@ void ccl_cosmology_compute_distances(ccl_cosmology * cosmo, int *status)
       E_a[i] = h_over_h0(a[i], cosmo, status);
   
   // Create a E(a) spline
-  int extra_status = 0; //This status tracks GSL errors.
   if (!*status){
-    extra_status |= gsl_spline_init(E, a, E_a, na);
-    if (extra_status) {
+    if (gsl_spline_init(E, a, E_a, na)){
       *status = CCL_ERROR_SPLINE; 
       ccl_cosmology_set_status_message(cosmo, "ccl_background.c: ccl_cosmology_compute_distances(): Error creating  E(a) spline\n");
     }
@@ -413,8 +411,7 @@ void ccl_cosmology_compute_distances(ccl_cosmology * cosmo, int *status)
 
   // Initialize chi(a) spline
   if (!*status){
-    extra_status = gsl_spline_init(chi, a, chi_a, na); //in Mpc
-    if (extra_status){
+    if (gsl_spline_init(chi, a, chi_a, na)){//in Mpc
       *status = CCL_ERROR_SPLINE;
       ccl_cosmology_set_status_message(cosmo, "ccl_background.c: ccl_cosmology_compute_distances(): Error creating  chi(a) spline\n"); 
     }
@@ -423,13 +420,17 @@ void ccl_cosmology_compute_distances(ccl_cosmology * cosmo, int *status)
   if (*status){//If there was an error, free the GSL splines and return
     gsl_spline_free(E); //Note: you are allowed to call gsl_free() on NULL
     gsl_spline_free(chi);
-    return;
   }
 
   // Set up the boundaries for the a(chi) spline
-  double dchi=5.;
-  double chi0=chi_a[na-1], chif=chi_a[0];
-  double a0=a[na-1], af=a[0];
+  double dchi, chi0, chif, a0, af;
+  if(!*status){
+    dchi=5.;
+    chi0=chi_a[na-1];
+    chif=chi_a[0];
+    a0=a[na-1];
+    af=a[0];
+  }
 
   //TODO: The interval in chi (5. Mpc) should be made a macro
   free(a); //Free these, in preparation for making a(chi) splines
@@ -440,6 +441,7 @@ void ccl_cosmology_compute_distances(ccl_cosmology * cosmo, int *status)
   ////////////////////////////////////////////////////////////////////////////////////////////////////
   //Below here na (length of some arrays) changes, so this function has to be split at this point.
   ////////////////////////////////////////////////////////////////////////////////////////////////////
+  
   na = (int)((chif-chi0)/dchi);
   dchi  = (chif-chi0)/na; // <=5, since na is an integer
   //Allocate new arrays for a and chi(a)
@@ -448,19 +450,15 @@ void ccl_cosmology_compute_distances(ccl_cosmology * cosmo, int *status)
   //Allocate space for GSL root finders
   const gsl_root_fdfsolver_type *T=gsl_root_fdfsolver_newton;
   gsl_root_fdfsolver *s=gsl_root_fdfsolver_alloc(T);
-  gsl_spline * achi=gsl_spline_alloc(A_SPLINE_TYPE, na);
+  gsl_spline *achi;
 
   //Check for too little memory
   if (!*status){
+    achi=gsl_spline_alloc(A_SPLINE_TYPE, na);
     if (a==NULL || chi_a==NULL){
       *status=CCL_ERROR_MEMORY; 
       ccl_cosmology_set_status_message(cosmo, "ccl_background.c: ccl_cosmology_compute_distances(): ran out of memory\n");
-    }
-  }
-
-  //Check for messed up chi conditions
-  if (!*status){
-    if((fabs(chi_a[0]-chi0)>1e-5) || (fabs(chi_a[na-1]-chif)>1e-5)) {
+    }else if(fabs(chi_a[0]-chi0)>1e-5 || fabs(chi_a[na-1]-chif)>1e-5) { //Check for messed up chi conditions
       *status = CCL_ERROR_LINSPACE; 
       ccl_cosmology_set_status_message(cosmo, "ccl_background.c: ccl_cosmology_compute_distances(): Error creating linear spacing in chi\n");
     }
@@ -475,7 +473,6 @@ void ccl_cosmology_compute_distances(ccl_cosmology * cosmo, int *status)
       a_of_chi(chi_a[i],cosmo, status, &a0, s);
       a[i]=a0;
     }
-    gsl_root_fdfsolver_free(s);
     if(*status) {
       *status = CCL_ERROR_ROOT; 
       ccl_cosmology_set_status_message(cosmo, "ccl_background.c: ccl_cosmology_compute_distances(): a(chi) root-finding error \n");
@@ -484,8 +481,7 @@ void ccl_cosmology_compute_distances(ccl_cosmology * cosmo, int *status)
 
   // Initialize the a(chi) spline
   if (!*status){
-    extra_status=gsl_spline_init(achi, chi_a, a, na);
-    if (extra_status) {
+    if(gsl_spline_init(achi, chi_a, a, na)){
       *status = CCL_ERROR_SPLINE;
       ccl_cosmology_set_status_message(cosmo, "ccl_background.c: ccl_cosmology_compute_distances(): Error creating  a(chi) spline\n"); 
     }
@@ -493,6 +489,7 @@ void ccl_cosmology_compute_distances(ccl_cosmology * cosmo, int *status)
 
   free(a);
   free(chi_a); //Note: you are allowed to call free() on NULL
+  gsl_root_fdfsolver_free(s);
   if (*status){//If there was an error, free the GSL splines and return
     gsl_spline_free(E); //Note: you are allowed to call gsl_free() on NULL
     gsl_spline_free(chi);
