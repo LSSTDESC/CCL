@@ -4,10 +4,10 @@ var indexSectionsWithContent =
   1: "cdefinpsu",
   2: "cr",
   3: "cfrw",
-  4: "acfglmnprtwx",
+  4: "acdfglmnprtwx",
   5: "abcdefghiklmnoprstuwxyz",
-  6: "bcemst",
-  7: "bcemt",
+  6: "bcehmst",
+  7: "bcehmt",
   8: "c",
   9: "_abcdefghiklmnoprstwz",
   10: "cw"

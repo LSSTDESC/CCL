@@ -120,10 +120,8 @@ def test_swig_cls():
         COSMO,
         None, None,
         1, 1, 1,
-        0, 0, 0,
         0,
-        [0, 1],
-        5,
+        "none",
         status)
 
     assert_raises(
@@ -133,7 +131,6 @@ def test_swig_cls():
         [0, 1, 2],
         2,
         status)
-
 
 def test_swig_core():
     status = 0
@@ -207,31 +204,12 @@ def test_swig_halomod():
         status)
 
 
-def test_swig_lsst_spec():
+def test_swig_redshifts():
     status = 0
-    assert_raises(
-        CCLError,
-        ccllib.specs_bias_clustering_vec,
-        COSMO,
-        [0.0, 1.0],
-        7,
-        status)
 
     assert_raises(
         CCLError,
-        ccllib.specs_sigmaz_clustering_vec,
-        [0.0, 1.0],
-        7)
-
-    assert_raises(
-        CCLError,
-        ccllib.specs_sigmaz_sources_vec,
-        [0.0, 1.0],
-        7)
-
-    assert_raises(
-        CCLError,
-        ccllib.specs_dNdz_tomog_vec,
+        ccllib.dNdz_tomog_vec,
         0,
         0.0, 1.0,
         None,
@@ -314,7 +292,6 @@ def test_swig_power():
             [1.0, 2.0],
             3,
             status)
-
 
 if __name__ == '__main__':
     run_module_suite()

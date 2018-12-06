@@ -11,13 +11,19 @@ STYLE CONVENTION USED
         **`type`** or **`structure`**
 -->
 # CCL     [![Build Status](https://travis-ci.org/LSSTDESC/CCL.svg?branch=master)](https://travis-ci.org/LSSTDESC/CCL) [![Coverage Status](https://coveralls.io/repos/github/LSSTDESC/CCL/badge.svg?branch=master)](https://coveralls.io/github/LSSTDESC/CCL?branch=master)
-LSST DESC Core Cosmology Library (`CCL`) provides routines to compute basic cosmological observables with validated numerical accuracy.
+LSST DESC Core Cosmology Library (`CCL`) provides routines to compute basic cosmological observables with validated numerical accuracy. The library is written in C99 and all functionality is directly callable from C and C++ code.  We also provide python bindings for higher-level functions.
 
-The library is written in C99 and all functionality is directly callable from C and C++ code.  We also provide python bindings for higher-level functions.
+This software is a publicly released LSST DESC product which was developed within the LSST DESC using LSST DESC resources. DESC users should use it in accordance with the [LSST DESC publication policy](http://lsstdesc.org/Collaborators). External users are welcome to use the code outside DESC in accordance with the licensing information below.
 
-See also our [wiki](https://github.com/LSSTDESC/CCL/wiki).
+The list of publicly released versions of this package can be found [here](https://github.com/LSSTDESC/CCL/releases). The master branch is the most recent (non-released) stable branch, but under development. We recommend using one of the public releases unless working on the development on the library.
 
-# Installation
+Installation instructions can be found in [INSTALL.md](https://github.com/LSSTDESC/CCL/blob/master/INSTALL.md) in this directory. Documentation for `CCL` can be found:
+* in [DOC.md](https://github.com/LSSTDESC/CCL/blob/master/DOC.md) in this directory for an overview, 
+* in our [wiki](https://github.com/LSSTDESC/CCL/wiki) for a description of benchmarks and known installation issues, 
+* in the `CCL` [readthedocs page](https://readthedocs.org/projects/ccl/) for the `python` routines,  
+* by calling `help(function name)` from within `python`, and
+* in the doxygen docs contained in the `doc` folder within the repository for the C routines. 
+* There are also multiple examples in C, python and jupyter notebooks available in the `examples` folder.
 
 ## TLDR
 
@@ -328,7 +334,7 @@ where:
 * `dfarr_mgrowth`: the modified growth function vector provided
 * `status`: Status flag. 0 if there are no errors, nonzero otherwise.
 
-For some specific cosmologies you can also use functions **`ccl_parameters_create_flat_lcdm`**, **`ccl_parameters_create_flat_wcdm`**, **`ccl_parameters_create_flat_wacdm`**, **`ccl_parameters_create_lcdm`**, which automatically set some parameters. For more information, see file ***include/ccl_core.c***.
+For flat LCDM cosmologies, you can also use **`ccl_parameters_create_flat_lcdm`**.
 
 The status flag `int status = 0` is passed around in almost every `CCL` function. Normally zero is returned while nonzero if there were some errors during a function call. For specific cases see documentation for **`ccl_error.c`**.
 
@@ -463,7 +469,7 @@ The expected *dN/dz* for lensing or clustering galaxies with given binning can b
 void ccl_specs_dNdz_tomog(double z, int dNdz_type, double bin_zmin, double bin_zmax,
                           user_pz_info * user_info,  double *tomoout, int *status);
 ````
-Result is returned in `tomoout`. Allowed types of `dNdz_type` (currently one for clustering and three for lensing - fiducial, optimistic, and conservative - cases are considered) and other information and functions like bias clustering or sigma_z are specified in file ***include/ccl_lsst_specs.h***
+Result is returned in `tomoout`. Allowed types of `dNdz_type` (currently one for clustering and three for lensing - fiducial, optimistic, and conservative - cases are considered) and other information and functions like bias clustering or sigma_z are specified in file ***include/ccl_redshifts.h***
 
 After you are done working with photo_z, you should free its work space by **`ccl_specs_free_photoz_info`**
 ````c
@@ -483,7 +489,7 @@ where `/path/to/install/` is the path to the location where the library has been
 #include <stdio.h>
 #include <math.h>
 #include "ccl.h"
-#include "ccl_lsst_specs.h"
+#include "ccl_redshifts.h"
 
 #define OC 0.25
 #define OB 0.05
@@ -736,6 +742,10 @@ cls = ccl.angular_cl(cosmo, lens1, lens2, ell)
 print cls
 ````
 
+For known installation issues and further information on how CCL was benchmarked during development, see our [wiki](https://github.com/LSSTDESC/CCL/wiki).
 
 # License, Credits, Feedback etc
-The `CCL` is still under development and should be considered research in progress. You are welcome to re-use the code, which is open source and available under terms consistent with [BSD 3-Clause](https://opensource.org/licenses/BSD-3-Clause) licensing. If you make use of any of the ideas or software in this package in your own research, please cite them as "(LSST DESC, in preparation)" and provide a link to this repository: https://github.com/LSSTDESC/CCL. For free use of the `CLASS` library, the `CLASS` developers require that the `CLASS` paper be cited: CLASS II: Approximation schemes, D. Blas, J. Lesgourgues, T. Tram, arXiv:1104.2933, JCAP 1107 (2011) 034. The `CLASS` repository can be found in http://class-code.net. If you have comments, questions, or feedback, please [write us an issue](https://github.com/LSSTDESC/CCL/issues). Finally, CCL uses code from the [FFTLog](http://casa.colorado.edu/~ajsh/FFTLog/) package.  We have obtained permission from the FFTLog author to include modified versions of his source code.
+This code has been released by DESC, although it is still under active development. When it reaches v1 status it will be accompanied by a journal paper that describes the development and validation of `CCL`. You are welcome to re-use the code, which is open source and available under terms consistent with our [LICENSE](https://github.com/LSSTDESC/CCL/blob/master/LICENSE), which is a [BSD 3-Clause](https://opensource.org/licenses/BSD-3-Clause) license. If you make use of any of the ideas or software in this package in your own research, please cite them as "(LSST DESC, in preparation)" and provide a link to this repository: https://github.com/LSSTDESC/CCL. For free use of the `CLASS` library, the `CLASS` developers require that the `CLASS` paper be cited: CLASS II: Approximation schemes, D. Blas, J. Lesgourgues, T. Tram, arXiv:1104.2933, JCAP 1107 (2011) 034. The `CLASS` repository can be found in http://class-code.net. Finally, CCL uses code from the [FFTLog](http://casa.colorado.edu/~ajsh/FFTLog/) package.  We have obtained permission from the FFTLog author to include modified versions of his source code.
+
+# Contact
+If you have comments, questions, or feedback, please [write us an issue](https://github.com/LSSTDESC/CCL/issues). You can also contact the [administrators](https://github.com/LSSTDESC/CCL/CCL-administrators).
