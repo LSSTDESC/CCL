@@ -6,8 +6,9 @@
 #include <time.h>
 #include <string.h>
 
-#define CORR_ERROR_FRACTION 0.3
-#define ELL_MAX_CL 3000
+#define CORR_ERROR_FRACTION 0.1
+#define ELL_MAX_CL 10000
+double fftlogfactor; //this is the factor by which FFTLog performs more weakly than the brute-force integration approach (Bessel)
 
 CTEST_DATA(corrs) {
   double Omega_c;
@@ -120,6 +121,7 @@ static void compare_corr(char *compare_type,int algorithm,struct corrs_data * da
     rz2arr=malloc(nz*sizeof(double));
     rtn=fgets(str,1024,fnz1);
     rtn=fgets(str,1024,fnz2);
+
     for(ii=0;ii<nz;ii++) {
       int stat;
       double z1,z2,nz1,nz2,zia1,zia2,aia1,aia2;
@@ -348,6 +350,12 @@ static void compare_corr(char *compare_type,int algorithm,struct corrs_data * da
   for(int il=0;il<2;il++){
     larr[il]=il;
     ells[il]=il;
+  }
+
+  //Here, we are degrading CORR_ERROR_FRACTION by fftlogfactor (only deviates from 1 for FFTLog, i.e. this factor is only applied when using FFTLog for integration)
+  fftlogfactor=1.0;
+  if(algorithm==1002){
+    fftlogfactor = 2.0;
   }
 
   /*Use Limber computation*/
@@ -649,89 +657,89 @@ static void compare_corr(char *compare_type,int algorithm,struct corrs_data * da
     /*First time the tolerance is set. The tolerance is equal to the 
      *expected error bar times CORR_ERR_FRACTION=0.5 (default) */
     tol=gsl_spline_eval(spl_sigwt_dd_11,theta_in[ii],NULL);
-    ASSERT_TRUE(fabs(wt_dd_11_h[ii]-wt_dd_11[ii])<tol*CORR_ERROR_FRACTION);
+    ASSERT_TRUE(fabs(wt_dd_11_h[ii]-wt_dd_11[ii])<tol*CORR_ERROR_FRACTION*fftlogfactor);
     //The dd_12 term commented out below because do not currently have the covariance.
     //    tol=gsl_spline_eval(spl_sigwt_dd_12,theta_in[ii],NULL);
-    //    ASSERT_TRUE(fabs(wt_dd_12_h_pp[ii]-wt_dd_12_pp[ii])<tol*CORR_ERROR_FRACTION);
+    //    ASSERT_TRUE(fabs(wt_dd_12_h_pp[ii]-wt_dd_12_pp[ii])<tol*CORR_ERROR_FRACTION*fftlogfactor);
     tol=gsl_spline_eval(spl_sigwt_dd_22,theta_in[ii],NULL);
-    ASSERT_TRUE(fabs(wt_dd_22_h[ii]-wt_dd_22[ii])<tol*CORR_ERROR_FRACTION);
+    ASSERT_TRUE(fabs(wt_dd_22_h[ii]-wt_dd_22[ii])<tol*CORR_ERROR_FRACTION*fftlogfactor);
 
     //Only considering the GG covariance since do not have one with intrinsic alignments included. 
     //Also assuming covariance approximately the same for analytic and histogram n(z).
     tol=gsl_spline_eval(spl_sigwt_ll_11_pp,theta_in[ii],NULL);
-    ASSERT_TRUE(fabs(wt_ll_11_h_pp[ii]-wt_ll_11_pp[ii])<tol*CORR_ERROR_FRACTION);
+    ASSERT_TRUE(fabs(wt_ll_11_h_pp[ii]-wt_ll_11_pp[ii])<tol*CORR_ERROR_FRACTION*fftlogfactor);
     tol=gsl_spline_eval(spl_sigwt_ll_12_pp,theta_in[ii],NULL);
-    ASSERT_TRUE(fabs(wt_ll_12_h_pp[ii]-wt_ll_12_pp[ii])<tol*CORR_ERROR_FRACTION);
+    ASSERT_TRUE(fabs(wt_ll_12_h_pp[ii]-wt_ll_12_pp[ii])<tol*CORR_ERROR_FRACTION*fftlogfactor);
     tol=gsl_spline_eval(spl_sigwt_ll_22_pp,theta_in[ii],NULL);
-    ASSERT_TRUE(fabs(wt_ll_22_h_pp[ii]-wt_ll_22_pp[ii])<tol*CORR_ERROR_FRACTION);
+    ASSERT_TRUE(fabs(wt_ll_22_h_pp[ii]-wt_ll_22_pp[ii])<tol*CORR_ERROR_FRACTION*fftlogfactor);
     tol=gsl_spline_eval(spl_sigwt_ll_11_mm,theta_in[ii],NULL);
-    ASSERT_TRUE(fabs(wt_ll_11_h_mm[ii]-wt_ll_11_mm[ii])<tol*CORR_ERROR_FRACTION);
+    ASSERT_TRUE(fabs(wt_ll_11_h_mm[ii]-wt_ll_11_mm[ii])<tol*CORR_ERROR_FRACTION*fftlogfactor);
     tol=gsl_spline_eval(spl_sigwt_ll_12_mm,theta_in[ii],NULL);
-    ASSERT_TRUE(fabs(wt_ll_12_h_mm[ii]-wt_ll_12_mm[ii])<tol*CORR_ERROR_FRACTION);
+    ASSERT_TRUE(fabs(wt_ll_12_h_mm[ii]-wt_ll_12_mm[ii])<tol*CORR_ERROR_FRACTION*fftlogfactor);
     tol=gsl_spline_eval(spl_sigwt_ll_22_mm,theta_in[ii],NULL);
-    ASSERT_TRUE(fabs(wt_ll_22_h_mm[ii]-wt_ll_22_mm[ii])<tol*CORR_ERROR_FRACTION);
+    ASSERT_TRUE(fabs(wt_ll_22_h_mm[ii]-wt_ll_22_mm[ii])<tol*CORR_ERROR_FRACTION*fftlogfactor);
     tol=gsl_spline_eval(spl_sigwt_ll_11_pp,theta_in[ii],NULL);
-    ASSERT_TRUE(fabs(wt_li_11_h_pp[ii]-wt_li_11_pp[ii])<tol*CORR_ERROR_FRACTION);
+    ASSERT_TRUE(fabs(wt_li_11_h_pp[ii]-wt_li_11_pp[ii])<tol*CORR_ERROR_FRACTION*fftlogfactor);
     tol=gsl_spline_eval(spl_sigwt_ll_12_pp,theta_in[ii],NULL);
-    ASSERT_TRUE(fabs(wt_li_12_h_pp[ii]-wt_li_12_pp[ii])<tol*CORR_ERROR_FRACTION);
+    ASSERT_TRUE(fabs(wt_li_12_h_pp[ii]-wt_li_12_pp[ii])<tol*CORR_ERROR_FRACTION*fftlogfactor);
     tol=gsl_spline_eval(spl_sigwt_ll_22_pp,theta_in[ii],NULL);
-    ASSERT_TRUE(fabs(wt_li_22_h_pp[ii]-wt_li_22_pp[ii])<tol*CORR_ERROR_FRACTION);
+    ASSERT_TRUE(fabs(wt_li_22_h_pp[ii]-wt_li_22_pp[ii])<tol*CORR_ERROR_FRACTION*fftlogfactor);
     tol=gsl_spline_eval(spl_sigwt_ll_11_mm,theta_in[ii],NULL);
-    ASSERT_TRUE(fabs(wt_li_11_h_mm[ii]-wt_li_11_mm[ii])<tol*CORR_ERROR_FRACTION);
+    ASSERT_TRUE(fabs(wt_li_11_h_mm[ii]-wt_li_11_mm[ii])<tol*CORR_ERROR_FRACTION*fftlogfactor);
     tol=gsl_spline_eval(spl_sigwt_ll_12_mm,theta_in[ii],NULL);
-    ASSERT_TRUE(fabs(wt_li_12_h_mm[ii]-wt_li_12_mm[ii])<tol*CORR_ERROR_FRACTION);
+    ASSERT_TRUE(fabs(wt_li_12_h_mm[ii]-wt_li_12_mm[ii])<tol*CORR_ERROR_FRACTION*fftlogfactor);
     tol=gsl_spline_eval(spl_sigwt_ll_22_mm,theta_in[ii],NULL);
-    ASSERT_TRUE(fabs(wt_li_22_h_mm[ii]-wt_li_22_mm[ii])<tol*CORR_ERROR_FRACTION);
+    ASSERT_TRUE(fabs(wt_li_22_h_mm[ii]-wt_li_22_mm[ii])<tol*CORR_ERROR_FRACTION*fftlogfactor);
     tol=gsl_spline_eval(spl_sigwt_ll_11_pp,theta_in[ii],NULL);
-    ASSERT_TRUE(fabs(wt_ii_11_h_pp[ii]-wt_ii_11_pp[ii])<tol*CORR_ERROR_FRACTION);
+    ASSERT_TRUE(fabs(wt_ii_11_h_pp[ii]-wt_ii_11_pp[ii])<tol*CORR_ERROR_FRACTION*fftlogfactor);
     tol=gsl_spline_eval(spl_sigwt_ll_12_pp,theta_in[ii],NULL);
-    ASSERT_TRUE(fabs(wt_ii_12_h_pp[ii]-wt_ii_12_pp[ii])<tol*CORR_ERROR_FRACTION);
+    ASSERT_TRUE(fabs(wt_ii_12_h_pp[ii]-wt_ii_12_pp[ii])<tol*CORR_ERROR_FRACTION*fftlogfactor);
     tol=gsl_spline_eval(spl_sigwt_ll_22_pp,theta_in[ii],NULL);
-    ASSERT_TRUE(fabs(wt_ii_22_h_pp[ii]-wt_ii_22_pp[ii])<tol*CORR_ERROR_FRACTION);
+    ASSERT_TRUE(fabs(wt_ii_22_h_pp[ii]-wt_ii_22_pp[ii])<tol*CORR_ERROR_FRACTION*fftlogfactor);
     tol=gsl_spline_eval(spl_sigwt_ll_11_mm,theta_in[ii],NULL);
-    ASSERT_TRUE(fabs(wt_ii_11_h_mm[ii]-wt_ii_11_mm[ii])<tol*CORR_ERROR_FRACTION);
+    ASSERT_TRUE(fabs(wt_ii_11_h_mm[ii]-wt_ii_11_mm[ii])<tol*CORR_ERROR_FRACTION*fftlogfactor);
     tol=gsl_spline_eval(spl_sigwt_ll_12_mm,theta_in[ii],NULL);
-    ASSERT_TRUE(fabs(wt_ii_12_h_mm[ii]-wt_ii_12_mm[ii])<tol*CORR_ERROR_FRACTION);
+    ASSERT_TRUE(fabs(wt_ii_12_h_mm[ii]-wt_ii_12_mm[ii])<tol*CORR_ERROR_FRACTION*fftlogfactor);
     tol=gsl_spline_eval(spl_sigwt_ll_22_mm,theta_in[ii],NULL);
-    ASSERT_TRUE(fabs(wt_ii_22_h_mm[ii]-wt_ii_22_mm[ii])<tol*CORR_ERROR_FRACTION);
+    ASSERT_TRUE(fabs(wt_ii_22_h_mm[ii]-wt_ii_22_mm[ii])<tol*CORR_ERROR_FRACTION*fftlogfactor);
     tol=gsl_spline_eval(spl_sigwt_ll_11_pp,theta_in[ii],NULL);
-    ASSERT_TRUE(fabs(wt_lltot_11_h_pp[ii]-wt_lltot_11_pp[ii])<tol*CORR_ERROR_FRACTION);
+    ASSERT_TRUE(fabs(wt_lltot_11_h_pp[ii]-wt_lltot_11_pp[ii])<tol*CORR_ERROR_FRACTION*fftlogfactor);
     tol=gsl_spline_eval(spl_sigwt_ll_12_pp,theta_in[ii],NULL);
-    ASSERT_TRUE(fabs(wt_lltot_12_h_pp[ii]-wt_lltot_12_pp[ii])<tol*CORR_ERROR_FRACTION);
+    ASSERT_TRUE(fabs(wt_lltot_12_h_pp[ii]-wt_lltot_12_pp[ii])<tol*CORR_ERROR_FRACTION*fftlogfactor);
     tol=gsl_spline_eval(spl_sigwt_ll_22_pp,theta_in[ii],NULL);
-    ASSERT_TRUE(fabs(wt_lltot_22_h_pp[ii]-wt_lltot_22_pp[ii])<tol*CORR_ERROR_FRACTION);
+    ASSERT_TRUE(fabs(wt_lltot_22_h_pp[ii]-wt_lltot_22_pp[ii])<tol*CORR_ERROR_FRACTION*fftlogfactor);
     tol=gsl_spline_eval(spl_sigwt_ll_11_mm,theta_in[ii],NULL);
-    ASSERT_TRUE(fabs(wt_lltot_11_h_mm[ii]-wt_lltot_11_mm[ii])<tol*CORR_ERROR_FRACTION);
+    ASSERT_TRUE(fabs(wt_lltot_11_h_mm[ii]-wt_lltot_11_mm[ii])<tol*CORR_ERROR_FRACTION*fftlogfactor);
     tol=gsl_spline_eval(spl_sigwt_ll_12_mm,theta_in[ii],NULL);
-    ASSERT_TRUE(fabs(wt_lltot_12_h_mm[ii]-wt_lltot_12_mm[ii])<tol*CORR_ERROR_FRACTION);
+    ASSERT_TRUE(fabs(wt_lltot_12_h_mm[ii]-wt_lltot_12_mm[ii])<tol*CORR_ERROR_FRACTION*fftlogfactor);
     tol=gsl_spline_eval(spl_sigwt_ll_22_mm,theta_in[ii],NULL);
-    ASSERT_TRUE(fabs(wt_lltot_22_h_mm[ii]-wt_lltot_22_mm[ii])<tol*CORR_ERROR_FRACTION);
+    ASSERT_TRUE(fabs(wt_lltot_22_h_mm[ii]-wt_lltot_22_mm[ii])<tol*CORR_ERROR_FRACTION*fftlogfactor);
 
-    //GGL terms
+    //GGL terms. Analogous to cosmic shear, only considering the gG covariance since do not have one with intrinsic alignments included.
     tol=gsl_spline_eval(spl_sigwt_dl_11,theta_in[ii],NULL);
-    ASSERT_TRUE(fabs(wt_dl_11_h[ii]-wt_dl_11[ii])<tol*CORR_ERROR_FRACTION);
+    ASSERT_TRUE(fabs(wt_dl_11_h[ii]-wt_dl_11[ii])<tol*CORR_ERROR_FRACTION*fftlogfactor);
     tol=gsl_spline_eval(spl_sigwt_dl_12,theta_in[ii],NULL);
-    ASSERT_TRUE(fabs(wt_dl_12_h[ii]-wt_dl_12[ii])<tol*CORR_ERROR_FRACTION);
+    ASSERT_TRUE(fabs(wt_dl_12_h[ii]-wt_dl_12[ii])<tol*CORR_ERROR_FRACTION*fftlogfactor);
     tol=gsl_spline_eval(spl_sigwt_dl_21,theta_in[ii],NULL);
-    ASSERT_TRUE(fabs(wt_dl_21_h[ii]-wt_dl_21[ii])<tol*CORR_ERROR_FRACTION);
+    ASSERT_TRUE(fabs(wt_dl_21_h[ii]-wt_dl_21[ii])<tol*CORR_ERROR_FRACTION*fftlogfactor);
     tol=gsl_spline_eval(spl_sigwt_dl_22,theta_in[ii],NULL);
-    ASSERT_TRUE(fabs(wt_dl_22_h[ii]-wt_dl_22[ii])<tol*CORR_ERROR_FRACTION);
+    ASSERT_TRUE(fabs(wt_dl_22_h[ii]-wt_dl_22[ii])<tol*CORR_ERROR_FRACTION*fftlogfactor);
     tol=gsl_spline_eval(spl_sigwt_dl_11,theta_in[ii],NULL);
-    ASSERT_TRUE(fabs(wt_di_11_h[ii]-wt_di_11[ii])<tol*CORR_ERROR_FRACTION);
+    ASSERT_TRUE(fabs(wt_di_11_h[ii]-wt_di_11[ii])<tol*CORR_ERROR_FRACTION*fftlogfactor);
     tol=gsl_spline_eval(spl_sigwt_dl_12,theta_in[ii],NULL);
-    ASSERT_TRUE(fabs(wt_di_12_h[ii]-wt_di_12[ii])<tol*CORR_ERROR_FRACTION);
+    ASSERT_TRUE(fabs(wt_di_12_h[ii]-wt_di_12[ii])<tol*CORR_ERROR_FRACTION*fftlogfactor);
     tol=gsl_spline_eval(spl_sigwt_dl_21,theta_in[ii],NULL);
-    ASSERT_TRUE(fabs(wt_di_21_h[ii]-wt_di_21[ii])<tol*CORR_ERROR_FRACTION);
+    ASSERT_TRUE(fabs(wt_di_21_h[ii]-wt_di_21[ii])<tol*CORR_ERROR_FRACTION*fftlogfactor);
     tol=gsl_spline_eval(spl_sigwt_dl_22,theta_in[ii],NULL);
-    ASSERT_TRUE(fabs(wt_di_22_h[ii]-wt_di_22[ii])<tol*CORR_ERROR_FRACTION);
+    ASSERT_TRUE(fabs(wt_di_22_h[ii]-wt_di_22[ii])<tol*CORR_ERROR_FRACTION*fftlogfactor);
     tol=gsl_spline_eval(spl_sigwt_dl_11,theta_in[ii],NULL);
-    ASSERT_TRUE(fabs(wt_dltot_11_h[ii]-wt_dltot_11[ii])<tol*CORR_ERROR_FRACTION);    
+    ASSERT_TRUE(fabs(wt_dltot_11_h[ii]-wt_dltot_11[ii])<tol*CORR_ERROR_FRACTION*fftlogfactor);    
     tol=gsl_spline_eval(spl_sigwt_dl_12,theta_in[ii],NULL);
-    ASSERT_TRUE(fabs(wt_dltot_12_h[ii]-wt_dltot_12[ii])<tol*CORR_ERROR_FRACTION);    
+    ASSERT_TRUE(fabs(wt_dltot_12_h[ii]-wt_dltot_12[ii])<tol*CORR_ERROR_FRACTION*fftlogfactor);    
     tol=gsl_spline_eval(spl_sigwt_dl_21,theta_in[ii],NULL);
-    ASSERT_TRUE(fabs(wt_dltot_21_h[ii]-wt_dltot_21[ii])<tol*CORR_ERROR_FRACTION);    
+    ASSERT_TRUE(fabs(wt_dltot_21_h[ii]-wt_dltot_21[ii])<tol*CORR_ERROR_FRACTION*fftlogfactor);    
     tol=gsl_spline_eval(spl_sigwt_dl_22,theta_in[ii],NULL);
-    ASSERT_TRUE(fabs(wt_dltot_22_h[ii]-wt_dltot_22[ii])<tol*CORR_ERROR_FRACTION);    
+    ASSERT_TRUE(fabs(wt_dltot_22_h[ii]-wt_dltot_22[ii])<tol*CORR_ERROR_FRACTION*fftlogfactor);    
   }
   
   //Free splines, cosmology and arrays
@@ -756,18 +764,9 @@ static void compare_corr(char *compare_type,int algorithm,struct corrs_data * da
   free(wt_ii_11_h_mm); free(wt_ii_12_h_mm); free(wt_ii_22_h_mm);
   free(wt_lltot_11_h_pp); free(wt_lltot_12_h_pp); free(wt_lltot_22_h_pp);
   free(wt_lltot_11_h_mm); free(wt_lltot_12_h_mm); free(wt_lltot_22_h_mm);
-  free(wt_dl_11_h); 
-  free(wt_dl_12_h); 
-  free(wt_dl_21_h); 
-  free(wt_dl_22_h); 
-  free(wt_di_11_h); 
-  free(wt_di_12_h); 
-  free(wt_di_21_h); 
-  free(wt_di_22_h); 
-  free(wt_dltot_11_h); 
-  free(wt_dltot_12_h); 
-  free(wt_dltot_21_h); 
-  free(wt_dltot_22_h); 
+  free(wt_dl_11_h); free(wt_dl_12_h); free(wt_dl_21_h); free(wt_dl_22_h);
+  free(wt_di_11_h); free(wt_di_12_h); free(wt_di_21_h); free(wt_di_22_h);
+  free(wt_dltot_11_h); free(wt_dltot_12_h); free(wt_dltot_21_h); free(wt_dltot_22_h);
   free(zarr_1); free(zarr_2);
   free(pzarr_1); free(pzarr_2);
   free(bzarr);
@@ -792,4 +791,3 @@ CTEST2(corrs,analytic_bessel) {
 CTEST2(corrs,histo_bessel) {
   compare_corr("histo",CCL_CORR_BESSEL,data);
 }
-
