@@ -1,4 +1,6 @@
 var searchData=
 [
-  ['gaussian_5fpz',['gaussian_pz',['../ccl__lsst__specs_8c.html#ae2c8ccc63807abd82914c90eef26b76b',1,'ccl_lsst_specs.c']]]
+  ['fftlog_5fcomputexi2d',['fftlog_ComputeXi2D',['../fftlog_8c.html#a268c1a29622fea9b03b13afc5e7d0c48',1,'fftlog_ComputeXi2D(double bessel_order, int N, const double l[], const double cl[], double th[], double xi[]):&#160;fftlog.c'],['../fftlog_8h.html#a268c1a29622fea9b03b13afc5e7d0c48',1,'fftlog_ComputeXi2D(double bessel_order, int N, const double l[], const double cl[], double th[], double xi[]):&#160;fftlog.c']]],
+  ['fftlog_5fcomputexilm',['fftlog_ComputeXiLM',['../fftlog_8c.html#ac653459a71b0793a0f78255d1a28bce6',1,'fftlog_ComputeXiLM(double l, double m, int N, const double k[], const double pk[], double r[], double xi[]):&#160;fftlog.c'],['../fftlog_8h.html#ac653459a71b0793a0f78255d1a28bce6',1,'fftlog_ComputeXiLM(double l, double m, int N, const double k[], const double pk[], double r[], double xi[]):&#160;fftlog.c']]],
+  ['fht',['fht',['../fftlog_8c.html#a878323021756e834675a5e725f150132',1,'fht(int N, const double r[], const double complex a[], double k[], double complex b[], double mu, double q, double kcrc, int noring, double complex *u):&#160;fftlog.c'],['../fftlog_8h.html#a878323021756e834675a5e725f150132',1,'fht(int N, const double r[], const double complex a[], double k[], double complex b[], double mu, double q, double kcrc, int noring, double complex *u):&#160;fftlog.c']]]
 ];
