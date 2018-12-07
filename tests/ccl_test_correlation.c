@@ -1,4 +1,5 @@
 #include "ccl.h"
+#include "../include/ccl_params.h"
 #include "ctest.h"
 #include <stdlib.h>
 #include <stdio.h>
@@ -54,6 +55,14 @@ static void compare_corr(char *compare_type,int algorithm,struct corrs_data * da
 							  data->sigma8,data->n_s,&status);
   ccl_cosmology * cosmo = ccl_cosmology_create(params, config);
   ASSERT_NOT_NULL(cosmo);
+
+  double epsrel_save;
+  if(!strcmp(compare_type,"histo")) { //This is needed for the histogrammed N(z) in order to pass the IA tests
+    epsrel_save=ccl_gsl->INTEGRATION_LIMBER_EPSREL;
+    ccl_gsl->INTEGRATION_LIMBER_EPSREL=2.5E-5;
+    ccl_gsl->INTEGRATION_EPSREL=2.5E-5;
+    ccl_set_debug_policy(CCL_DEBUG_MODE_OFF);
+  }
 
   /*Create arrays for redshift distributions in the case of analytic benchmarks*/
   int nz;
@@ -774,6 +783,11 @@ static void compare_corr(char *compare_type,int algorithm,struct corrs_data * da
   free(rz1arr); free(rz2arr);
   ccl_cosmology_free(cosmo);
   ccl_cl_workspace_free(wyl);
+  if(!strcmp(compare_type,"histo")) {
+    ccl_gsl->INTEGRATION_EPSREL=epsrel_save;
+    ccl_gsl->INTEGRATION_LIMBER_EPSREL=epsrel_save;
+    ccl_set_debug_policy(CCL_DEBUG_MODE_WARNING);
+  }
 }
 
 CTEST2(corrs,analytic_fftlog) {
