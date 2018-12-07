@@ -1170,94 +1170,91 @@ static void ccl_cosmology_compute_power_emu(ccl_cosmology * cosmo, int * status)
   struct file_content fc;
 
   double Omeganuh2_eq;
-
+  double w0wacomb = -cosmo->params.w0 - cosmo->params.wa;
+  
   ErrorMsg errmsg; // for error messages
   // generate file_content structure
   // Configuration parameters will be passed through this structure,
   // to avoid writing and reading .ini files for every call
   int parser_length = 20;
   int init_arr[7]={0,0,0,0,0,0,0};
+
+  //Check initialization
   if (parser_init(&fc,parser_length,"none",errmsg) == _FAILURE_) {
     *status = CCL_ERROR_CLASS;
     ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_cosmology_compute_power_class(): parser init error:%s\n", errmsg);
-    return;
   }
 
   // Check ranges to see if the cosmology is valid
   if((cosmo->params.h<0.55) || (cosmo->params.h>0.85)){
     *status=CCL_ERROR_INCONSISTENT;
     ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_cosmology_compute_power_emu(): h is outside allowed range\n");
-    return;
   }
-
-  // Check if the cosmology has been set up with equal neutrino masses for the emulator
-  // If not, check if the user has forced redistribution of masses and if so do this.
-  if(cosmo->params.N_nu_mass>0) {
-	  if (cosmo->config.emulator_neutrinos_method == ccl_emu_strict){
-		  if (cosmo->params.N_nu_mass==3){
-			  //double diff1 = pow((cosmo->params.mnu[0] - cosmo->params.mnu[1]) * (cosmo->params.mnu[0] - cosmo->params.mnu[1]), 0.5);
-			  //double diff2 = pow((cosmo->params.mnu[1] - cosmo->params.mnu[2]) * (cosmo->params.mnu[1] - cosmo->params.mnu[2]), 0.5);
-			  //double diff3 = pow((cosmo->params.mnu[2] - cosmo->params.mnu[0]) * (cosmo->params.mnu[2] - cosmo->params.mnu[0]), 0.5);
-			  //if (diff1>1e-12 || diff2>1e-12 || diff3>1e-12){
-			  if (cosmo->params.mnu[0] != cosmo->params.mnu[1] || cosmo->params.mnu[0] != cosmo->params.mnu[2] || cosmo->params.mnu[1] != cosmo->params.mnu[2]){
-				*status = CCL_ERROR_INCONSISTENT;
-				ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_cosmology_compute_power_emu(): In the default configuration, you must pass a list of 3 equal neutrino masses or pass a sum and set mnu_type = ccl_mnu_sum_equal. If you wish to over-ride this, set config->emulator_neutrinos_method = 'ccl_emu_equalize'. This will force the neutrinos to be of equal mass but will result in internal inconsistencies.\n");
-				return;
-			    }
-          }else if (cosmo->params.N_nu_mass!=3){
-			    *status = CCL_ERROR_INCONSISTENT;
-				ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_cosmology_compute_power_emu(): In the default configuration, you must pass a list of 3 equal neutrino masses or pass a sum and set mnu_type = ccl_mnu_sum_equal. If you wish to over-ride this, set config->emulator_neutrinos_method = 'ccl_emu_equalize'. This will force the neutrinos to be of equal mass but will result in internal inconsistencies.\n");
-				return;
-			}
-      }else if (cosmo->config.emulator_neutrinos_method == ccl_emu_equalize){
-          // Reset the masses to equal
-          double mnu_eq[3] = {cosmo->params.sum_nu_masses / 3., cosmo->params.sum_nu_masses / 3., cosmo->params.sum_nu_masses / 3.};
-          Omeganuh2_eq = ccl_Omeganuh2(1.0, 3, mnu_eq, cosmo->params.T_CMB, cosmo->data.accelerator, status);
-       }
-  } else {
-    if(fabs(cosmo->params.N_nu_rel - 3.04)>1.e-6){
-      *status=CCL_ERROR_INCONSISTENT;
-      ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_cosmology_compute_power_emu(): Set Neff = 3.04 for cosmic emulator predictions in absence of massive neutrinos.\n");
-      return;
-    }
-    }
-  double w0wacomb = -cosmo->params.w0 - cosmo->params.wa;
   if(w0wacomb<8.1e-3){ //0.3^4
     *status=CCL_ERROR_INCONSISTENT;
     ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_cosmology_compute_power_emu(): w0 and wa do not satisfy the emulator bound\n");
-    return;
   }
   if(cosmo->params.Omega_n_mass*cosmo->params.h*cosmo->params.h>0.01){
     *status=CCL_ERROR_INCONSISTENT;
     ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_cosmology_compute_power_emu(): Omega_nu does not satisfy the emulator bound\n");
-    return;
-    }
-
+  }
+  
   // Check to see if sigma8 was defined
   if(isnan(cosmo->params.sigma8)){
     *status=CCL_ERROR_INCONSISTENT;
     ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_cosmology_compute_power_emu(): sigma8 is not defined; specify sigma8 instead of A_s\n");
-    return;
   }
 
-  // Prepare to run CLASS for linear scales
-  ccl_fill_class_parameters(cosmo,&fc,parser_length, status);
+  //If one of the previous test was unsuccessful, quit:
+  if(status) return;
 
-  if (*status != CCL_ERROR_CLASS)
+  // Check if the cosmology has been set up with equal neutrino masses for the emulator
+  // If not, check if the user has forced redistribution of masses and if so do this.
+  if(cosmo->params.N_nu_mass>0) {
+    if (cosmo->config.emulator_neutrinos_method == ccl_emu_strict){
+      if (cosmo->params.N_nu_mass==3){
+	//double diff1 = pow((cosmo->params.mnu[0] - cosmo->params.mnu[1]) * (cosmo->params.mnu[0] - cosmo->params.mnu[1]), 0.5);
+	//double diff2 = pow((cosmo->params.mnu[1] - cosmo->params.mnu[2]) * (cosmo->params.mnu[1] - cosmo->params.mnu[2]), 0.5);
+	//double diff3 = pow((cosmo->params.mnu[2] - cosmo->params.mnu[0]) * (cosmo->params.mnu[2] - cosmo->params.mnu[0]), 0.5);
+	//if (diff1>1e-12 || diff2>1e-12 || diff3>1e-12){
+	if (cosmo->params.mnu[0] != cosmo->params.mnu[1] || cosmo->params.mnu[0] != cosmo->params.mnu[2] || cosmo->params.mnu[1] != cosmo->params.mnu[2]){
+	  *status = CCL_ERROR_INCONSISTENT;
+	  ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_cosmology_compute_power_emu(): In the default configuration, you must pass a list of 3 equal neutrino masses or pass a sum and set mnu_type = ccl_mnu_sum_equal. If you wish to over-ride this, set config->emulator_neutrinos_method = 'ccl_emu_equalize'. This will force the neutrinos to be of equal mass but will result in internal inconsistencies.\n");
+	}
+      } else if (cosmo->params.N_nu_mass!=3){
+	*status = CCL_ERROR_INCONSISTENT;
+	ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_cosmology_compute_power_emu(): In the default configuration, you must pass a list of 3 equal neutrino masses or pass a sum and set mnu_type = ccl_mnu_sum_equal. If you wish to over-ride this, set config->emulator_neutrinos_method = 'ccl_emu_equalize'. This will force the neutrinos to be of equal mass but will result in internal inconsistencies.\n");
+      }
+    } else if (cosmo->config.emulator_neutrinos_method == ccl_emu_equalize){
+      // Reset the masses to equal
+      double mnu_eq[3] = {cosmo->params.sum_nu_masses / 3., cosmo->params.sum_nu_masses / 3., cosmo->params.sum_nu_masses / 3.};
+      Omeganuh2_eq = ccl_Omeganuh2(1.0, 3, mnu_eq, cosmo->params.T_CMB, cosmo->data.accelerator, status);
+    }
+  } else {
+    if(fabs(cosmo->params.N_nu_rel - 3.04)>1.e-6){
+      *status=CCL_ERROR_INCONSISTENT;
+      ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_cosmology_compute_power_emu(): Set Neff = 3.04 for cosmic emulator predictions in absence of massive neutrinos.\n");
+    }
+  }
+
+  if(!*status){
+    // Prepare to run CLASS for linear scales
+    ccl_fill_class_parameters(cosmo,&fc,parser_length, status);
+  }
+  
+  if (!*status){
     ccl_run_class(cosmo, &fc,&pr,&ba,&th,&pt,&tr,&pm,&sp,&nl,&le,&op,init_arr,status);
-
-  if (*status == CCL_ERROR_CLASS) {
-    //printed error message while running CLASS
-    ccl_free_class_structs(cosmo, &ba,&th,&pt,&tr,&pm,&sp,&nl,&le,init_arr,status);
-    return;
-  }
-  if (parser_free(&fc)== _FAILURE_) {
-    *status = CCL_ERROR_CLASS;
-    ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_cosmology_compute_power_class(): Error freeing CLASS parser\n");
-    ccl_free_class_structs(cosmo, &ba,&th,&pt,&tr,&pm,&sp,&nl,&le,init_arr,status);
-    return;
   }
 
+  if (status){
+    ccl_free_class_structs(cosmo, &ba,&th,&pt,&tr,&pm,&sp,&nl,&le,init_arr,status);
+    if (parser_free(&fc)== _FAILURE_) {
+      *status = CCL_ERROR_CLASS;
+      ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_cosmology_compute_power_class(): Error freeing CLASS parser\n");
+    }
+    return;
+  }
+  
   //These are the limits of the splining range
   cosmo->data.k_min_lin=2*exp(sp.ln_k[0]);
   cosmo->data.k_max_lin=ccl_splines->K_MAX_SPLINE;
