@@ -1207,7 +1207,7 @@ static void ccl_cosmology_compute_power_emu(ccl_cosmology * cosmo, int * status)
   }
 
   //If one of the previous test was unsuccessful, quit:
-  if(status) return;
+  if(*status) return;
 
   // Check if the cosmology has been set up with equal neutrino masses for the emulator
   // If not, check if the user has forced redistribution of masses and if so do this.
@@ -1247,7 +1247,7 @@ static void ccl_cosmology_compute_power_emu(ccl_cosmology * cosmo, int * status)
     ccl_run_class(cosmo, &fc,&pr,&ba,&th,&pt,&tr,&pm,&sp,&nl,&le,&op,init_arr,status);
   }
 
-  if (status){
+  if (*status){
     ccl_free_class_structs(cosmo, &ba,&th,&pt,&tr,&pm,&sp,&nl,&le,init_arr,status);
     if (parser_free(&fc)== _FAILURE_) {
       *status = CCL_ERROR_CLASS;
