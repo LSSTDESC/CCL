@@ -722,7 +722,7 @@ Computing the angular correlation functions essentially involves performing a li
 
 \paragraph{\bf Brute-force integration.} \ccl allows users to compute Hankel transforms by brute-force integration over the Bessel functions using an adaptive Gauss-Kronrod algorithm. The oscillating nature of these functions makes this method slow and not appropriate for likelihood-sampling.
 
-The preferred method to compute correlation functions is through the use of {\tt FFTlog} (see below), and we support the brute-force method primarily for testing and validation.
+Thus, despite the higher precision of the brute-force integration approach, the preferred method to compute correlation functions is through the use of {\tt FFTlog} (see below), and we support the brute-force method primarily for testing and validation.
 
 \paragraph{\bf FFTlog.} The public code {\tt FFTlog}\footnote{\url{http://casa.colorado.edu/~ajsh/FFTLog/}} is able to compute fast Hankel transforms through the assumption that the kernels of these transforms are periodic functions in logarithmic space. The Hankel transform can then be solved using Fast Fourier Transforms at a much lower computational expense than brute-force integration \citep{Hamilton2000,Talman2009}. \ccl incorporates a version of the {\tt FFTlog} method with only minor modifications from the original. The only potential drawback of this method is the need to sample the kernels (i.e., the $C_\ell$) on very small scales to ensure the convergence of the method. To do this, \ccl extrapolates the power spectrum as a power law, assuming $C_\ell\propto\ell^\beta$, with a tilt $\beta$ estimated from the logarithmic slope of the two last values of the $C_\ell$ provided as input. We have verified that this method agrees with the brute-force integration to well within cosmic-variance uncertainties.
 
@@ -994,12 +994,12 @@ For both types of distributions, we computed the following quantities:
 \item The cross-power spectrum between galaxy positions and galaxy shear (galaxy-galaxy lensing), on the same scales.
 \item Intrinsic alignments $E$-mode angular power spectra, cross-spectra with galaxy shear and galaxy positions, on the same scales, with $b_{\rm IA}(z)$ set to correspond to the commonly used parameterization of alignment amplitude \citep[e.g.][]{Joudaki18} with $A_{\rm IA}=1$ and $f_{\rm IA}(z)=1$.
 \item The cross-power spectrum between number counts and CMB lensing, on the same scales.
-\item The cross-power spectrum between weak lensing and CMB lensing, on the same scales.
-\item Number counts angular correlation functions in the range $0.01 \deg < \theta < 5 \deg$, using 5 bins per decade, and
+\item The cross-power spectrum between galaxy weak lensing and CMB weak lensing, on the same scales.
+\item Number counts angular correlation functions in the range $0.01 \deg < \theta < 8 \deg$, using 5 bins per decade, and
 \item Lensing shear angular correlation functions ($\xi_+$,$\xi_-$), similarly to above.
 \item The cross-correlation between both quantities (galaxy-galaxy lensing), as above.
 \end{itemize}
-Notice that RSD and magnification predictions are not currently validated. We do not include real-space (correlation function) benchmarks involving CMB lensing, since they are functionally the same as number counts (i.e. a spin-0 quantity).
+Notice that RSD and magnification predictions are not currently validated. We do not include real-space (correlation function) benchmarks involving CMB lensing, since they are functionally the same as number counts (i.e. a spin-0 quantity). Angular power spectrum and correlation function benchmarks for the full `$3 \times 2{\rm{pt}}$' calculation of galaxy clustering and weak lensing observables was created internally by {\tt CosmoLSS}\footnote{\url{https://github.com/sjoudaki/cosmolss}} and other independent codes.
 
 %------------------------
 \begin{figure}
@@ -1034,7 +1034,7 @@ For the power spectrum $C^{ab}_\ell$ between two fields $a$ and $b$, the cosmic 
   \sigma_\ell^2=\frac{C^{aa}_\ell C^{bb}_\ell+(C^{ab}_\ell)^2}{2\ell+1}.
   \label{eq:sigmaell}
 \end{equation}
-Our accuracy requirement, for all auto- and cross-correlations with analytic and binned redshift distributions is $\mathcal{A}<0.1$ (i.e. differences must be smaller than one tenth of the cosmic-variance errors). The results for the auto- and cross-correlations between number counts and weak lensing are shown in Figure \ref{fig:cls_limber}, while those involving CMB lensing are shown in Figure \ref{fig:cls_cmblens}. In addition, we have verified that intrinsic alignments auto-spectra and the cross-spectra of galaxy positions and intrinsic alignments also satisfy our accuracy requirement. In this case, the denominator in Eq. (\ref{eq:errorCl}) includes the lensing contribution as well.
+Our accuracy requirement, for all auto- and cross-correlations with analytic and binned redshift distributions is $\mathcal{A}<0.1$ (i.e. differences must be smaller than one tenth of the cosmic-variance errors). The results for the auto- and cross-correlations between number counts and weak lensing are shown in Figure \ref{fig:cls_limber}, while those involving CMB lensing are shown in Figure \ref{fig:cls_cmblens}. In addition, we have verified that the intrinsic alignment auto-spectra and cross-spectra with shear and galaxy positions satisfy our accuracy requirement (intrinsic-intrinsic, shear-intrinsic, galaxy-intrinsic, and the full observables, i.e, II, GI, gI, GG+II+GI, gG+gI). In this case, the denominator in Eq. (\ref{eq:errorCl}) includes the lensing contribution as well.
 
 The differences between the \ccl~results and the benchmarks are mostly due to the integration and interpolation methods (particularly, the interpolation of the redshift distributions in the case of number counts). In the case of CMB lensing, we note that the results are particularly sensitive to numerical errors in the computation of the distance to the last scattering surface.
 
@@ -1046,7 +1046,7 @@ where $\sigma_{\rm LSST}$ is the expected statistical uncertainty of any given c
 
 To obtain realistic targets for the convergence of projected correlation function computations for LSST analyses, we calculated the expected statistical uncertainty of the clustering and lensing correlation functions of the LSST gold sample \citep{LSSTSB} assuming an effective source galaxy density of $n_\mathrm{eff} = 26\,\mathrm{gal/sq\,arcmin}$ for galaxy shape distortions \citep{Chang13}, and galaxy density of $n_\mathrm{gold} = 45\,\mathrm{gal/sq\,arcmin}$ for number counts. Specifically, we calculated the Gaussian covariance of angular correlation functions following the formalism of \citet{2008A&A...477...43J}, and note that leaving out the non-Gaussian covariance terms makes our accuracy criterion more conservative. We split the galaxy samples into 10 tomography bins, defined to contain equal numbers of galaxies.
 
-We compared the difference between \ccl calculated cosmic shear and clustering correlations and the benchmarks, for the analytic redshift distributions and for auto-correlations of redshift bins only. Specifically, we took the value of the covariance in the bins centered at $z=1$ and $z=1.5$ to compare to the benchmarks. For the galaxy-galaxy lensing correlation, we repeated the procedure but for the cross-correlation of low redshift lenses and high redshift sources. The results of this validation procedure for the projected correlation function are shown in Figures \ref{fig:corrval} and \ref{fig:corrval2}. These suggest that the convergence between \ccl predictions and benchmarks is below the expected statistical uncertainty. 
+We compared the difference between \ccl and the benchmarks for the cosmic shear, galaxy-galaxy lensing, and galaxy clustering correlations, for all tomographic bin combinations and both redshift distributions. Specifically, we took the value of the covariance in the bins centered at $z=1$ and $z=1.5$ to compare to the benchmarks. The results of this validation procedure for the projected correlation function are shown in Figures \ref{fig:corrval} and \ref{fig:corrval2}. These suggest that the convergence between \ccl predictions and benchmarks is below the expected statistical uncertainty. Similar to the power spectra, we have verified that the target precision is achieved when including intrinsic alignments.
 
 %------------------------
 \begin{figure*}
@@ -1059,8 +1059,8 @@ We compared the difference between \ccl calculated cosmic shear and clustering c
 %------------------------
 \begin{figure}
 \centering
-\includegraphics[width=0.49\textwidth]{projected_xiggl_error_comparison_analytic}
-\caption{Comparison between the predicted galaxy-galaxy lensing projected correlation function and the expected uncertainty for LSST. The results are for the analytic redshift distribution and the combination of bins $1-2$ only, with galaxies in bin $1$.}
+\includegraphics[width=0.49\textwidth]{projected_xiggl_error_comparison_bothnz_p5sigma}
+\caption{Comparison between the predicted galaxy-galaxy lensing projected correlation function and the expected uncertainty for LSST for both redshift distributions.}
 \label{fig:corrval2}
 \end{figure}
 %------------------------
@@ -1136,7 +1136,7 @@ An example run corresponding to this case can be found in the {\tt 3x2demo} note
 \section{Outlook}
 \label{sec:conclusion}
 
-Science software development to facilitate the cosmological inference from LSST data is one of the critical tasks of the DESC. Recent cosmological analyses of the Dark Energy Survey (DES) relied on {\tt CosmoSIS} \citep{Zuntz14} and {\tt CosmoLike} \citep{krause17}, the Kilo-Degree Survey (KiDS) uses {\tt CosmoLSS} \citep{Joudaki18} and {\tt CosmoMC} \citep{Lewis02}. All of these frameworks employ \class, \camb \citep{Challinor2005}, or the Cosmic Emulator to compute the density power spectra. Compared to the analyses of DES, KiDS and the Hyper-Suprime Cam Survey (HSC), future data sets (e.g. LSST, {\it Euclid} and {\it WFIRST}) have substantially higher demands on analysis frameworks. Analyses are becoming more complex in terms of cosmological physics that is included in the analyses (neutrinos, modified gravity, and dark matter models) and in terms of modeling astrophysical and observational systematics at the required precision. 
+Science software development to facilitate the cosmological inference from LSST data is one of the critical tasks of the DESC. Recent cosmological analyses of the Dark Energy Survey (DES) have relied on {\tt CosmoSIS} \citep{Zuntz14} and {\tt CosmoLike} \citep{krause17}, while analyses of the Kilo Degree Survey (KiDS) have relied on {\tt CosmoLSS} \citep{Joudaki18} (based on {\tt CosmoMC} \citep{Lewis02}) and {\tt Monte Python} \citep{Audren12}. All of these frameworks employ \class, \camb \citep{Challinor2005}, or the Cosmic Emulator to compute the density power spectra. Compared to the analyses of DES, KiDS and the Hyper-Suprime Cam Survey (HSC), future data sets (e.g. LSST, {\it Euclid} and {\it WFIRST}) have substantially higher demands on analysis frameworks. Analyses are becoming more complex in terms of cosmological physics that is included in the analyses (neutrinos, modified gravity, and dark matter models) and in terms of modeling astrophysical and observational systematics at the required precision. 
 
 It is the primary goal of \ccl to become the back-bone of all cosmological analyses carried out by the LSST-DESC. \ccl can also have applications for analytic covariance calculations needed for future analyses of cosmological observables. This unified approach of a validated \ccl will ensure that LSST-DESC results are both consistent (in that they will all be based on the same theory framework) and accurate (in that this framework has undergone a rigorous numerical validation).
 
