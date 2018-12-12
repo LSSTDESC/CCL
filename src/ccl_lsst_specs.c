@@ -218,6 +218,15 @@ static double ccl_specs_norm_integrand(double z, void* params)
   double z_max = p->bin_zmax_;
   int type = p->type_;
   
+  // Check whether ccl_splines and ccl_gsl exist; exit gracefully if they 
+  // can't be loaded
+  if(ccl_splines==NULL || ccl_gsl==NULL) ccl_cosmology_read_config();
+  if(ccl_splines==NULL || ccl_gsl==NULL) {
+    ccl_raise_exception(CCL_ERROR_MISSING_CONFIG_FILE, 
+                        "ccl_lsst_specs.c: Failed to read config file.");
+    return NAN;
+  }
+  
   // Extract "type" (which denotes which Chang et al 2013 dndz we use) 
   // and pass it to dNdz params.
   struct dNdz_sources_params dNdz_vals; // parameters of dNdz unnormalized function.
@@ -265,7 +274,17 @@ void ccl_specs_dNdz_tomog(double z, int dNdz_type, double bin_zmin, double bin_z
   // This struct contains a spec redshift and a pointer to a user information struct.
   struct pz_params valparams; //parameters for the integral over the photoz's
   struct norm_params norm_p_val;	
-  struct dNdz_sources_params dNdz_p_val; 
+  struct dNdz_sources_params dNdz_p_val;
+  
+  // Check whether ccl_splines and ccl_gsl exist; exit gracefully if they 
+  // can't be loaded
+  if(ccl_splines==NULL || ccl_gsl==NULL) ccl_cosmology_read_config();
+  if(ccl_splines==NULL || ccl_gsl==NULL) {
+    ccl_raise_exception(CCL_ERROR_MISSING_CONFIG_FILE, 
+                        "ccl_lsst_specs.c: Failed to read config file.");
+    *status = CCL_ERROR_MISSING_CONFIG_FILE;
+    return;
+  }
   
   // Set up the parameters to pass to the normalising integral (of type struct norm_params
   norm_p_val.bin_zmin_=bin_zmin;

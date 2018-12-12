@@ -609,6 +609,9 @@ def check_cls(cosmo):
     nc3 = ccl.NumberCountsTracer(cosmo, True, dndz=(z,n), bias=(z,b), mag_bias=(z,b))
     cmbl=ccl.CMBLensingTracer(cosmo, 1100.)
 
+    assert_raises(ValueError, ccl.WeakLensingTracer, cosmo, None)
+    assert_raises(ValueError, ccl.NumberCountsTracer, cosmo, False, (z,n), None)
+
     # Check valid ell input is accepted
     assert_( all_finite(ccl.angular_cl(cosmo, lens1, lens1, ell_scl)) )
     assert_( all_finite(ccl.angular_cl(cosmo, lens1, lens1, ell_lst)) )
@@ -621,8 +624,7 @@ def check_cls(cosmo):
     if cmb_ok: assert_( all_finite(ccl.angular_cl(cosmo, cmbl, cmbl, ell_arr)) )
 
     # Check non-limber calculations
-    assert_( all_finite(ccl.angular_cl(cosmo, nc1, nc1, ell_arr, l_limber=20, non_limber_method="native")))
-    assert_( all_finite(ccl.angular_cl(cosmo, nc1, nc1, ell_arr, l_limber=20, non_limber_method="angpow")))
+    assert_( all_finite(ccl.angular_cl(cosmo, nc1, nc1, ell_arr, l_limber=20)))
 
     # Check various cross-correlation combinations
     assert_( all_finite(ccl.angular_cl(cosmo, lens1, lens2, ell_arr)) )
@@ -644,9 +646,6 @@ def check_cls(cosmo):
     # Check that reversing order of ClTracer inputs works
     assert_( all_finite(ccl.angular_cl(cosmo, nc1, lens1, ell_arr)) )
     assert_( all_finite(ccl.angular_cl(cosmo, nc1, lens2, ell_arr)) )
-
-    # Wrong non limber method
-    assert_raises(ValueError, ccl.angular_cl, cosmo, lens1, lens1, ell_scl, non_limber_method='xx')
 
 
 

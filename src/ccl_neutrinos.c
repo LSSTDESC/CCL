@@ -38,8 +38,20 @@ gsl_spline* calculate_nu_phasespace_spline(int *status) {
     // Not setting a status_message here because we can't easily pass a cosmology to this function - message printed in ccl_error.c.
     *status = CCL_ERROR_NU_INT;
   }
+  
+  // Check whether ccl_splines and ccl_gsl exist; exit gracefully if they 
+  // can't be loaded
+  if(ccl_splines==NULL || ccl_gsl==NULL) ccl_cosmology_read_config();
+  if(ccl_splines==NULL || ccl_gsl==NULL) {
+    ccl_raise_exception(CCL_ERROR_MISSING_CONFIG_FILE, 
+                        "ccl_neutrinos.c: Failed to read config file.");
+    *status = CCL_ERROR_MISSING_CONFIG_FILE;
+    return NULL;
+  }
+  
   int stat=0, gslstatus;
-  gsl_integration_cquad_workspace * workspace = gsl_integration_cquad_workspace_alloc(ccl_gsl->N_ITERATION);
+  gsl_integration_cquad_workspace * workspace = \
+                gsl_integration_cquad_workspace_alloc(ccl_gsl->N_ITERATION);
   gsl_function F;
   F.function = &nu_integrand;
   for (int i=0; i<CCL_NU_MNUT_N; i++) {
