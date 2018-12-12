@@ -1,0 +1,38 @@
+\hypertarget{ccl__emu17_8c}{}\section{ccl\+\_\+emu17.\+c File Reference}
+\label{ccl__emu17_8c}\index{ccl\+\_\+emu17.\+c@{ccl\+\_\+emu17.\+c}}
+{\ttfamily \#include $<$stdio.\+h$>$}\newline
+{\ttfamily \#include $<$stdlib.\+h$>$}\newline
+{\ttfamily \#include $<$math.\+h$>$}\newline
+{\ttfamily \#include $<$string.\+h$>$}\newline
+{\ttfamily \#include $<$gsl/gsl\+\_\+matrix.\+h$>$}\newline
+{\ttfamily \#include $<$gsl/gsl\+\_\+linalg.\+h$>$}\newline
+{\ttfamily \#include $<$gsl/gsl\+\_\+spline.\+h$>$}\newline
+{\ttfamily \#include $<$gsl/gsl\+\_\+errno.\+h$>$}\newline
+{\ttfamily \#include \char`\"{}ccl.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}ccl\+\_\+emu17\+\_\+params.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}ccl\+\_\+emu17.\+h\char`\"{}}\newline
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \mbox{\hyperlink{ccl__emu17_8c_a9507cc4aa61c36816ab0623ca116390d}{ccl\+\_\+pkemu}} (double $\ast$xstar, double $\ast$$\ast$ystar, int $\ast$status, \mbox{\hyperlink{structccl__cosmology}{ccl\+\_\+cosmology}} $\ast$cosmo)
+\end{DoxyCompactItemize}
+
+
+\subsection{Function Documentation}
+\mbox{\Hypertarget{ccl__emu17_8c_a9507cc4aa61c36816ab0623ca116390d}\label{ccl__emu17_8c_a9507cc4aa61c36816ab0623ca116390d}} 
+\index{ccl\+\_\+emu17.\+c@{ccl\+\_\+emu17.\+c}!ccl\+\_\+pkemu@{ccl\+\_\+pkemu}}
+\index{ccl\+\_\+pkemu@{ccl\+\_\+pkemu}!ccl\+\_\+emu17.\+c@{ccl\+\_\+emu17.\+c}}
+\subsubsection{\texorpdfstring{ccl\+\_\+pkemu()}{ccl\_pkemu()}}
+{\footnotesize\ttfamily void ccl\+\_\+pkemu (\begin{DoxyParamCaption}\item[{double $\ast$}]{xstarin,  }\item[{double $\ast$$\ast$}]{Pkemu,  }\item[{int $\ast$}]{status,  }\item[{\mbox{\hyperlink{structccl__cosmology}{ccl\+\_\+cosmology}} $\ast$}]{cosmo }\end{DoxyParamCaption})}
+
+Emulator power spectrum Obtain P(k,z) \mbox{[}Mpc$^\wedge$3\mbox{]} for a given set of input parameters. 
+\begin{DoxyParams}{Parameters}
+{\em xstarin} & vector of input parameters for the emulator, including redshift. \\
+\hline
+{\em Pkemu} & output P(k,z) power spectrum \\
+\hline
+{\em status} & Status flag. 0 if there are no errors, nonzero otherwise. \\
+\hline
+{\em cosmo} & Cosmology parameters and configurations (only relevant for storing status) \\
+\hline
+\end{DoxyParams}
