@@ -2,10 +2,10 @@
 
 ## C library
 - Deprecated the `native` non-Limber angular power spectrum method (#506).
-- Renamed `ccl\_lsst\_specs.c` to `ccl\_redshifts.c`, deprecated LSST-specific redshift distribution functionality, introduced user-defined true dNdz (changes in call signature of `ccl\_dNdz\_tomog`). (#528).
+- Renamed `ccl_lsst_specs.c` to `ccl_redshifts.c`, deprecated LSST-specific redshift distribution functionality, introduced user-defined true dNdz (changes in call signature of `ccl_dNdz_tomog`). (#528).
 
 ## Python library
-- Renamed `lsst\_specs.py` to `redshifts.py`, deprecated LSST-specific redshift distribution functionality, introduced user-defined true dNdz (changes in call signature of `dNdz\_tomog`). (#528).
+- Renamed `lsst_specs.py` to `redshifts.py`, deprecated LSST-specific redshift distribution functionality, introduced user-defined true dNdz (changes in call signature of `dNdz_tomog`). (#528).
 - Deprecated the `native` non-Limber angular power spectrum method (#506).
 - Deprecated the `Parameters` object in favor of only the `Cosmology` object (#493).
 - Renamed the `ClTracer` family of objects (#496).
