@@ -181,7 +181,7 @@ $ python setup.py test
 ````
 This will run the embedded unit tests (may take a few minutes).
 
-Whatever the install method, you can always uninstall the pyton wrapper by running:
+Whatever the install method, you can always uninstall the python wrapper by running:
 ````sh
 $ pip uninstall pyccl
 ````
