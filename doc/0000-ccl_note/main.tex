@@ -750,7 +750,7 @@ Here ($\Theta(x;x_i,x_f)$) is a top-hat function (1 for $x\in[x_i,x_f]$ and 0 ot
 
 {\bf Native CCL computation.}
 
-{\bf Note:} This capability has been deprecated in {\tt v1} in favor of {\tt Angpow}, described below. But it is still available in previous versions of the library.
+{\bf Note:} This capability has been deprecated in {\tt v1}, superseded by {\tt Angpow}, described below. But it is still available in previous versions of the library.
 
 \ccl incorporates routines to compute the $C^{ab}_\ell$ angular power spectra as described above but without the Limber approximation. The algorithm performs first the integrals over $z$ for both tracers, and ends with the $k$ integral. This computation is much slower than using the Limber approximation, but it ends up with precise angular power spectra at low $\ell$, and correct cross-correlations between tracers (the Limber approximation fails at reproducing the interference terms $j_\ell(x)\times j_\ell(x')$).
 
@@ -1085,123 +1085,11 @@ where $D(z)$ in the linear growth rate of structure normalized to unity at z=0. 
 \section{Tests and validation}
 \label{sec:tests}
 
-Our goal is for outputs of \ccl to be validated against the results of a code-comparison project run within LSST-DESC down to a $10^{-4}$ or pre-established accuracy level if possible. In some cases, this level of accuracy is not necessary, as other systematics which have not been considered in this version of \ccl yet are expected to have a larger fractional impact. In the cases where this applies, we make it clear below.
+Our goal is for outputs of \ccl to be validated against independent benchmark codes. This process is documented in the \ccl paper that can be found in the {\tt doc/ccl\_paper} folder.
 
+For each \ccl prediction, at least one independent code was used to produce the same result. Predictions were compared and the resulting numerical accuracy, documented in the paper. (See Table 2 for a summary of these results.) Potential differences in the implementation of the relevant algorithms were discussed there as well. For specific cases, such as the matter power spectrum provided by the Cosmic Emulator, angular power spectra and projected correlation functions, we established target accuracies for \ccl to achieve, though a more detailed forecasting exercise should be pursued in the future to establish whether results are compatible with the expected requirements of LSST DESC cosmological analyses in the next decade.
 
-A code comparison project was carried out among members of TJP where the following outputs of cosmological forecast codes were compared and validated:
-\begin{enumerate}
-\item growth factor at $z = 0,1,2,3,4,5$,
-\item comoving radial distance $[$Mpc$/h]$ at the same redshifts, as well as the corresponding distance moduli,
-\item linear matter power spectrum, $P(k)$, from BBKS \citep{BBKS} in units of $($Mpc$/h)^3$ at $z=0,2$ in the range $10^{-3} \leq k \leq 10 h/$Mpc with 10 bins per decade,
-\item Eisenstein \& Hu matter power spectrum in units of $($Mpc$/h)^3$ at $z=0$ in the range $10^{-3} \leq k \leq 10 h/$Mpc with 10 bins per decade, and
-\item the mass variance at $z=0$, $\sigma(M,z=0)$ for $M =\{10^6, 10^8, 10^{10}, 10^{12}, 10^{14}, 10^{16}\} $M$_\odot/h$.
-\end{enumerate}
-These predictions were produced and compared for different cosmologies, which are listed in the table below. The results agree to better than $0.1\%$ relative accuracy for comoving distance and growth factor among all submissions, and for $P(k)$ and $\sigma(M)$ among codes which use the same BBKS conventions.
-
-\begin{table}
-\begin{center}
-  \begin{tabular}{ c | c c c c c c c c }
-%    \hline
-%    \multicolumn{9}{|c|}{Cosmological models for code comparison project} \\
-    \hline
-    \hline
-    Model & $\Omega_m$ & $\Omega_b$ & $\Omega_\Lambda$ & $h_0$ & $\sigma_8$ & $n_s$ & $w_0$ & $w_a$ \\
-    \hline
-    flat LCDM & 0.3 & 0.05 & 0.7 & 0.7 & 0.8 & 0.96 & -1 & 0 \\
-    $w_0$ LCDM & 0.3 & 0.05 & 0.7 & 0.7 & 0.8 & 0.96 & -0.9 & 0  \\
-    $w_a$ LCDM & 0.3 & 0.05 & 0.7 & 0.7 & 0.8 & 0.96 & -0.9 & 0.1  \\
-    open $w_a$ LCDM & 0.3 & 0.05 & 0.65 & 0.7 & 0.8 & 0.96 & -0.9 & 0.1  \\
-    closed $w_a$ LCDM & 0.3 & 0.05 & 0.75 & 0.7 & 0.8 & 0.96 & -0.9 & 0.1  \\
-    \hline
-	\end{tabular}
-	\caption{Cosmological models for the code comparison project.}
-    \label{table:code_comp}
-\end{center}
-\end{table}
-We noticed that there are 2 typos for the BBKS transfer function in ``Modern Cosmology'' \citep{DodelsonBook} compared to the original BBKS paper. The quadratic term should be $(16.1q)^2$ and the cubic term should be $(5.46q)^3$. The BBKS equation is correct in \citet{PeacockBook}. Using the wrong equation can give differences in the results above the $10^{-4}$ level.
-
-From the comparison, we were also able to identify some typical issues which affect convergence at the desired level:
-\begin{itemize}
-\item For achieving $10^{-4}$ precision in $\sigma(M)$ and the normalisation of the power spectrum, one should check that the integral of $\sigma_8$ and $\sigma(M)$ has converged for the chosen values of $\{k_{\rm min},k_{\rm max}\}$. After checking convergence, we achieved the desired precision.
-\item Also note that for $\sigma(M)$, it is important to set the desired precision level correctly for the numerical integrator. The integral usually yields $\sigma^2(M)$, and not $\sigma(M)$. Hence, one has to set the desired precision taking the exponent into account.
-\item The value of the gravitational constant, $G$, enters into the critical density. We found that failure to define $G$ with sufficient precision would result in lack of convergence at the $10^{-4}$ level between the different submissions. Importantly, note that CAMB barely has $10^{-4}$ precision in $G$ (and similarly, there might be other constants within CAMB/CLASS for which one should check the precision level). For \ccl, we are using the value from the Particle Physics Handbook.
-\item Including/excluding radiation in the computation of the comoving distances and the growth function can easily make a difference of $10^{-4}$ at the redshifts required in this comparison.
-\end{itemize}
-
-In a second stage, we used the BBKS linear matter power spectrum from the previous step to compare two-point statistics for two redshift bins, resulting in three tomography combinations, ($1-1$),($1-2$),($2-2$). We computed the following quantities:
-\begin{itemize}
-\item projected galaxy clustering tomography power spectra: density term only (no magnification, RSD, etc.) with non-evolving linear bias $b(z) = 1$, in the range $10 < \ell < 10000$, using $5$ bins per decade,
-\item angular convergence tomography power spectra: leading order convergence term only (no magnification), in the same range and with the same resolution as the case above,
-\item angular galaxy clustering tomography correlation function, in the range $0.01 \deg < \theta < 5 \deg$, using 5 bins per decade, and
-\item angular shear tomography correlation functions ($\xi_+$,$\xi_-$), similarly to above.
-\end{itemize}
-We adopted the following analytic redshift distributions: a Gaussian with $\sigma = 0.15$, centered at $z_1 = 1$; and another Gaussian with the same dispersion but centered at $z_2 = 1.5$. We repeated the exercise for two redshift distribution histograms shown in Figure \ref{fig:zhistos}.
-
-%------------------------
-\begin{figure}
-\centering
-\includegraphics[width=0.6\textwidth]{zdist.eps}
-\caption{Binned redshift distributions used for code comparison project.}
-\label{fig:zhistos}
-\end{figure}
-%------------------------
-
-In this second step, only 2 codes have been compared so far. More outputs are needed to guarantee convergence. Preliminarily, from these outputs, we have concluded that:
-\begin{itemize}
-\item The cross-correlation between bins is particularly sensitive to the number of points where the kernels have been sampled.
-\item The accuracy of the correlation function is sensitive to $\ell_{\rm max}$. We had to use up to $\ell_{\rm max}=3\times10^4$ for convergence (and we could not achieve $0.01\%$ convergence).
-\item The large scales of the correlation function are sensitive to $\ell_{\rm min}$. The use of the flat-sky approximation is also relevant on these scales.
-\item For sufficiently high precision, the correlation functions are sensitive to how the power spectrum is sampled and interpolated.
-\end{itemize}
-
-For $C_\ell$ computations, we required the relative difference between \ccl and the benchmarks to be $<10^{-3}$. We performed the test both for analytic redshift distributions and histograms.
-
-To obtain realistic targets for the convergence of correlation function computations for LSST analyses, we calculate the expected statistical uncertainty of the clustering and lensing correlation functions of the LSST gold sample (c.f. Sect.~\ref{sec:specs}), assuming an effective source galaxy density of $n_\mathrm{eff} = 26\mathrm{gal/sq\,arcmin}$ for galaxy shape distortions, and galaxy density of $n_\mathrm{gold} = 45\mathrm{gal/sq\,arcmin}$ for number counts. Specifically, we calculate the Gaussian covariance of angular correlation functions following the formalism of \citet{2008A&A...477...43J}, and note that leaving out the non-Gaussian covariance terms makes this convergence criterion more conservative. We split the galaxy samples into 10 tomography bins, defined to contain equal numbers of galaxies. The accuracy test then proceeds as follows. We compared the difference between \ccl calculated lensing and clustering correlations and the benchmarks for the analytic redshift distributions and for auto-correlations of redshift bins only. To pass the benchmark test, we required that this difference be smaller than half of the value of the errorbar derived from the covariance for each correlation function computed. Specifically, we take the value of the covariance in the bins centered at $z=1$ and $z=1.5$ to compare to the benchmarks.
-
-The 3-dimensional correlation function $\xi(r)$ was validated by comparing with an independent, precise numerical transform. We calculated $\xi(r)$
-by transforming the CCL non-linear Halofit power spectrum using this independent code for the five cosmologies listed in Table~\ref{table:code_comp} at
-redshifts $z = 0,1,2,3,4,5$.  We then compared with the $\xi(r)$ from CCL with a sampling of $P(k)$
-equal to {\tt N$\_$K$\_$3DCOR} bins per decade. The default value of {\tt N$\_$K$\_$3DCOR}~=~100,000 results in a relative agreement
-at the level of $\Delta \xi(r) / \xi(r) < 2.5 \times 10^{-3}$ for $0.1 < r < 250$~Mpc and redshift zero. The agreement is better for higher redshifts.
-We also compared the absolute value of $r^2 \xi(r)$ and find a maximum difference of $\Delta (r^2 \xi(r)) < 3.0 \times 10^{-2}$ for the range
-$r = 0.1 - 250$~Mpc. This corresponds to approximately 0.08\% of the BAO peak value of $r^2 \xi(r)$. At the BAO peak, the difference is
-only $9.0 \times 10^{-3}$, or 0.024\% of the peak height. The results are shown in Fig.~\ref{fig:benchmark_xi}
-%
-\begin{figure*}
-\centering
-\includegraphics[width=0.49\textwidth]{benchmark_xi_rel}
-\includegraphics[width=0.49\textwidth]{benchmark_xi_abs} 
-\caption{Comparison of the CCL calculation of the three-dimensional spatial correlation function $\xi(r)$ with a precise, numerical transform of the \ccl non-linear Halofit power spectrum. The left panel shows the relative error $\Delta \xi(r) / \xi(r)$. The right panel shows the absolute error in $r^2 \xi(r)$. Both panels are for the CCL1 model of Table~\ref{tab:cosmologies} at redshift zero. The comparison made with 40 points in the range $r = 0.1 - 100$~Mpc (blue curve) and 100 points in the region $r = 50 - 250$~Mpc encompassing the the Baryon Acoustic Oscillation peak.}
-\label{fig:benchmark_xi}
-\end{figure*}
-%
-To further validate the $P(k) \to \xi(r)$ transform we performed a test using an analytical function $\xi(r) = (r / r_0)^a$, whose inverse transform $P(k)$
-has a known analytic form. We used $r_0 = 5$~Mpc$^{-1}$ and $a = -1.67$, which gives a rough approximation to the actual 3d correlation function.
-We then compared the CCL calculation of $\xi(r)$ to the known analytic result. The relative difference $\Delta \xi(r) / \xi(r)$ was found to be
-less than 0.3\% in the range $2 < r < 250$~Mpc rising to about 5\% at $r = 1000$~Mpc (see Fig.~\ref{fig:analytic_xi}). For $r=0.1-0.8$~Mpc the relative difference is $\approx$8\%. The accuracy at low and high distances can be improved by increasing the range over which the power spectrum splines are evaluated.
-
-Although this function approximates the true three-dimensional correlation distribution over the range of interest in $r$, the transform $P(k)$ does not have the correct behavior at low $k$ where $P(k) \sim  k$. Therefore, a second test was performed with the function $P(k) = A k / (k_0 + k)^4$, where $A = 100$ and $k_0 = 0.045$~Mpc$^{-1}$, that approximates the true behavior of the power spectrum for all $k$.
-The transform to $\xi(r)$ was performed using Mathematica and compared to the \ccl calculation. The results, shown in Figure~\ref{fig:analytic_xi} show agreement to within $10^{-4}$ over most of the range in $r$. Since this power spectrum results in a correlation function that turns negative at $r \approx 150$~Mpc, the accuracy metric is large near this value. 
-%
-\begin{figure}[htbp]
-\centering
-\includegraphics[width=0.49\textwidth]{3dcorr_analytic}
-\caption{The relative error in the three-dimensional spatial correlation function computed using the CCL algorithm compared to an analytic function $\xi(r) = (r/r_0)^{1.67}$ (blue curve) and using $P(k) = A k / (k_0 + k)^4$ (red dashed curve). Both functions have known analytic transforms, $\xi(r)$, but the second one has an asymptotic behavior that matches $P(k)\sim k$ at low $k$. In this validation test, the known $P(k)$ was transformed with the \ccl algorithm and compared to the known analytic result for $\xi(r)$.}
-\label{fig:analytic_xi}
-\end{figure}
-
-
-Additionally, independent codes were utilized to test the accuracy of halo mass function predictions. For the halo mass function, we compare the value of $\sigma$, $\log(\sigma^{-1})$, and the value of the halo mass function in the form used in \cite{Tinker2008},
-\begin{equation}
-\log[(M^2/\bar{\rho}_m)dn/dM].
-\end{equation}
-We note that while we maintain the $10^{-4}$ for our evaluations of $\sigma$, the accuracy degrades to a value of $5\times10^{-3}$ for the halo mass function evaluation, primarily at the high halo mass and high redshift domains. We find that this increased error is acceptable, as the level of precision is significantly better than the accuracy of current halo mass function models.
-
-The implementation of the matter power spectrum emulation code from \citet{Lawrence17} in \ccl has been validated at first instance by comparing the direct output of the original code to \ccl for the best fit cosmology (M000) in the range of wavenumbers spanned by the emulator predictions and confirming that the agreement is within the expectation from numerical errors (fractional difference of $<10^{-5}$). We have also compared the \ccl emulator outputs for certain cosmologies to smoothed power spectra from the simulations presented in \citet{Lawrence17}.\footnote{Courtesy of Earl Lawrence and Katrin Heitmann.} The check ensures that the \ccl outputs when calling the emulator are within $3\%$ of the simulation benchmarks at $z=0$ and for the $k$ range of validity of the emulator. This essentially corresponds to a verification of the results presented in Figure 5 and Figure 6 of \citet{Lawrence17}.
-
-In addition to the distance tests based on the TJP code comparison project described above, we include tests based on {\tt CLASS} that cover the benchmark cosmologies listed in Table~\ref{table:code_comp}, as well as cosmologies with massive neutrinos. The agreement between {\tt CLASS} and \ccl on comoving radial distances and distance moduli is better than $10^{-6}$. These tests are done at 10 logarithmically spaced redshifts between 0.01 and 1000. We also include tests of the growth factor for the same redshift range.
-
-Finally, for cosmologies involving massive neutrinos, we have included also tests which compare comoving distance and distance modulus predictions from {\tt CCL} from those produced by the {\tt astropy} \citep{astropy} library. In this case, we consider these comparison tests to pass if the agreement between the two predictions is 0.001 or better; this is due to the fact that {\tt astropy} uses a fitting function for the neutrino phase-space integral while we compute the integral directly. The fitting function used by astropy is expected to match the true integral at approximately this level. As a sanity check, we also include a test which verifies that the power spectrum from {\tt CLASS} as called via CCL matches that as called directly from {\tt CLASS} in three test cosmologies with massive neutrinos.
+All benchmark codes are either made public within the \ccl repository or made available online and described in the \ccl wiki\footnote{\url{https://github.com/LSSTDESC/CCL/wiki}}. 
 
 \ccl has a suite of test routines which, upon compilation, compare its outputs to the benchmarks from code comparison. These are run from the \ccl root directory with the command {\tt ./build/check\_ccl}.
 
