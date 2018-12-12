@@ -2,7 +2,7 @@ var searchData=
 [
   ['a',['a',['../struct_int__one__halo___par.html#a23af468385a7645030d646f4874dc72c',1,'Int_one_halo_Par::a()'],['../struct_int__two__halo___par.html#a05cb880a3c368cc0d3e67c594d5c5692',1,'Int_two_halo_Par::a()']]],
   ['a_5fmin_5femu',['A_MIN_EMU',['../ccl__emu17_8h.html#a605b961a751fa528c986559d81b65640',1,'ccl_emu17.h']]],
-  ['a_5fs',['A_s',['../structccl__parameters.html#a315b41a853e710ee2cb280f35e65c191',1,'ccl_parameters::A_s()'],['../namespaceccl__test__distances.html#a4fee99b90c7ad9e42ac56246005f2f99',1,'ccl_test_distances.A_s()'],['../namespaceccl__test__growth.html#ae7c040656adf879c79a4f0266f35e7e7',1,'ccl_test_growth.A_s()']]],
+  ['a_5fs',['A_s',['../structccl__parameters.html#a315b41a853e710ee2cb280f35e65c191',1,'ccl_parameters::A_s()'],['../namespaceccl__test__distances.html#a4fee99b90c7ad9e42ac56246005f2f99',1,'ccl_test_distances.A_s()'],['../namespaceccl__test__growth.html#ae7c040656adf879c79a4f0266f35e7e7',1,'ccl_test_growth.A_s()'],['../ccl__test__correlation__3dbis_8c.html#a5254db3d693bd2886cd02e9b722c817d',1,'A_S():&#160;ccl_test_correlation_3dbis.c'],['../pxi__fidtest_8c.html#a5254db3d693bd2886cd02e9b722c817d',1,'A_S():&#160;pxi_fidtest.c'],['../pxi__test_8c.html#a5254db3d693bd2886cd02e9b722c817d',1,'A_S():&#160;pxi_test.c']]],
   ['a_5fspline_5fmax',['A_SPLINE_MAX',['../structccl__spline__params.html#aa227bbd087fee06f845b9de60ff09556',1,'ccl_spline_params']]],
   ['a_5fspline_5fmin',['A_SPLINE_MIN',['../structccl__spline__params.html#a43f7b575552fac8d54fd75bd60e42cc7',1,'ccl_spline_params']]],
   ['a_5fspline_5fmin_5fpk',['A_SPLINE_MIN_PK',['../structccl__spline__params.html#a800c10517429ab9b35ffccf3bff5f1f0',1,'ccl_spline_params']]],
@@ -25,7 +25,7 @@ var searchData=
   ['alphahmf',['alphahmf',['../structccl__data.html#ad7fad40bf36fed46f5879104247de00b',1,'ccl_data']]],
   ['args',['args',['../namespacerun__tests.html#a5b1510476d0793c7c91a6e0f733d7c29',1,'run_tests']]],
   ['argv',['argv',['../namespaceccl__test__power.html#a1b5fdf14c4f06d4a8722a7c41d8dbe1a',1,'ccl_test_power.argv()'],['../namespacerun__tests.html#a8a7b00d6f8aa6bda446535ba55c777fe',1,'run_tests.argv()']]],
-  ['assert_5fdata',['assert_data',['../ctest_8h.html#a4f298d8886e4178ebc16046bd47df4f9',1,'assert_data(const unsigned char *exp, size_t expsize, const unsigned char *real, size_t realsize, const char *caller, int line):&#160;ctest.h'],['../ctest_8h.html#a78490b8914d1af53dda97d8b9e8a716b',1,'ASSERT_DATA():&#160;ctest.h']]],
+  ['assert_5fdata',['ASSERT_DATA',['../ctest_8h.html#a78490b8914d1af53dda97d8b9e8a716b',1,'ASSERT_DATA():&#160;ctest.h'],['../ctest_8h.html#a4f298d8886e4178ebc16046bd47df4f9',1,'assert_data(const unsigned char *exp, size_t expsize, const unsigned char *real, size_t realsize, const char *caller, int line):&#160;ctest.h']]],
   ['assert_5fdbl_5ffar',['assert_dbl_far',['../ctest_8h.html#a25213745af9771a8a48e13135f88e620',1,'assert_dbl_far(double exp, double real, double tol, const char *caller, int line):&#160;ctest.h'],['../ctest_8h.html#ac775f4ecc848afa6be74049e8f9f1787',1,'ASSERT_DBL_FAR():&#160;ctest.h']]],
   ['assert_5fdbl_5ffar_5ftol',['ASSERT_DBL_FAR_TOL',['../ctest_8h.html#a2386bc6fccda782c5c4998f138d9be76',1,'ctest.h']]],
   ['assert_5fdbl_5fnear',['assert_dbl_near',['../ctest_8h.html#a2057ffc2d430fb69d5947d75b454d4ee',1,'assert_dbl_near(double exp, double real, double tol, const char *caller, int line):&#160;ctest.h'],['../ctest_8h.html#a1e3e0e91f10397ecd528d0c32db542ce',1,'ASSERT_DBL_NEAR():&#160;ctest.h']]],
@@ -40,5 +40,6 @@ var searchData=
   ['assert_5fnot_5fnull',['assert_not_null',['../ctest_8h.html#accbd1f4f9134e53a3dbd116db010c3f0',1,'assert_not_null(const void *real, const char *caller, int line):&#160;ctest.h'],['../ctest_8h.html#a394d08d820205bd0e9d2619f1efe4a70',1,'ASSERT_NOT_NULL():&#160;ctest.h']]],
   ['assert_5fnull',['assert_null',['../ctest_8h.html#a5c76be759e341f0673459c52d252d984',1,'assert_null(void *real, const char *caller, int line):&#160;ctest.h'],['../ctest_8h.html#af11d4883ce9564b40da9babe22daf8c7',1,'ASSERT_NULL():&#160;ctest.h']]],
   ['assert_5fstr',['assert_str',['../ctest_8h.html#aa269c84c24cee6f05a7df86ff2eabba9',1,'assert_str(const char *exp, const char *real, const char *caller, int line):&#160;ctest.h'],['../ctest_8h.html#ab92b8925680d33abc0f7811120ac1eb2',1,'ASSERT_STR():&#160;ctest.h']]],
-  ['assert_5ftrue',['assert_true',['../ctest_8h.html#a9f478abb98645ed176b8cb9ddf21fe5f',1,'assert_true(int real, const char *caller, int line):&#160;ctest.h'],['../ctest_8h.html#ac17b85dc623b2a742a4bf4ff69b9edf2',1,'ASSERT_TRUE():&#160;ctest.h']]]
+  ['assert_5ftrue',['assert_true',['../ctest_8h.html#a9f478abb98645ed176b8cb9ddf21fe5f',1,'assert_true(int real, const char *caller, int line):&#160;ctest.h'],['../ctest_8h.html#ac17b85dc623b2a742a4bf4ff69b9edf2',1,'ASSERT_TRUE():&#160;ctest.h']]],
+  ['avec',['avec',['../namespacetest__neutrino3p04__emu.html#ab8c4bce75a1656e3bd59c06088e516eb',1,'test_neutrino3p04_emu']]]
 ];

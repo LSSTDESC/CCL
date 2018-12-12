@@ -70,8 +70,8 @@ $(function() {
 <ul>
 <li>Create a new file tests/your_tests.c</li>
 <li>Add your tests to that file. You do not need a "main" function. See the examples in <a class="el" href="ccl__test__params_8c.html">tests/ccl_test_params.c</a> for how to write tests, which should use the ctest assertions to check they are working (see the sparse documentation at <a href="https://github.com/bvdberg/ctest">https://github.com/bvdberg/ctest</a>).</li>
-<li>In the Makefile add tests/your_tests.c to the line starting "TESTS="</li>
-<li>Run "make check" to run all your tests </li>
+<li>In the CMakeLists.txt add tests/your_tests.c to the "TEST_SRC" list towards the top of the file</li>
+<li>Run "check_ccl" to run all your tests </li>
 </ul>
 </div></div><!-- contents -->
 <!-- start footer part -->

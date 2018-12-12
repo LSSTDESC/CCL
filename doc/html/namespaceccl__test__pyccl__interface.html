@@ -86,6 +86,8 @@ Functions</h2></td></tr>
 <tr class="separator:af18b1262baf153cf44e7cd4fe4ebf02f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ade98af8ec8a8309c2012c63e9a3766ae"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceccl__test__pyccl__interface.html#ade98af8ec8a8309c2012c63e9a3766ae">check_massfunc_nu</a> (cosmo)</td></tr>
 <tr class="separator:ade98af8ec8a8309c2012c63e9a3766ae"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a54fc00031b869f3aa6aa6f383d0aeec8"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceccl__test__pyccl__interface.html#a54fc00031b869f3aa6aa6f383d0aeec8">check_halomod</a> (cosmo)</td></tr>
+<tr class="separator:a54fc00031b869f3aa6aa6f383d0aeec8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a45d1e6f91fd168f5b48149bfdfa6aa8b"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceccl__test__pyccl__interface.html#a45d1e6f91fd168f5b48149bfdfa6aa8b">check_neutrinos</a> ()</td></tr>
 <tr class="separator:a45d1e6f91fd168f5b48149bfdfa6aa8b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a27273d6dfec680812f3b054c9f2a15a4"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceccl__test__pyccl__interface.html#a27273d6dfec680812f3b054c9f2a15a4">check_lsst_specs</a> (cosmo)</td></tr>
@@ -108,6 +110,8 @@ Functions</h2></td></tr>
 <tr class="separator:aa0fa1e5e5f099cfa4e0c55e8cc80f585"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7aa32506e6319a810450e886106d3207"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceccl__test__pyccl__interface.html#a7aa32506e6319a810450e886106d3207">test_massfunc</a> ()</td></tr>
 <tr class="separator:a7aa32506e6319a810450e886106d3207"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1936b759676e55f5a5c9a339af0bba48"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceccl__test__pyccl__interface.html#a1936b759676e55f5a5c9a339af0bba48">test_halomod</a> ()</td></tr>
+<tr class="separator:a1936b759676e55f5a5c9a339af0bba48"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae4c580c07c1b1ff62524d160ea8d6756"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceccl__test__pyccl__interface.html#ae4c580c07c1b1ff62524d160ea8d6756">test_neutrinos</a> ()</td></tr>
 <tr class="separator:ae4c580c07c1b1ff62524d160ea8d6756"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab7e376bb71698d3c1901f4a7d4aad095"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceccl__test__pyccl__interface.html#ab7e376bb71698d3c1901f4a7d4aad095">test_lsst_specs</a> ()</td></tr>
@@ -250,6 +254,25 @@ exit gracefully in functions with massive neutrinos (not implemented yet).
       </table>
 </div><div class="memdoc">
 
+</div>
+</div>
+<a id="a54fc00031b869f3aa6aa6f383d0aeec8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a54fc00031b869f3aa6aa6f383d0aeec8">&#9670;&nbsp;</a></span>check_halomod()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">def ccl_test_pyccl_interface.check_halomod </td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>cosmo</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<pre class="fragment">Check that halo model functions can be run.
+</pre> 
 </div>
 </div>
 <a id="a27273d6dfec680812f3b054c9f2a15a4"></a>
@@ -399,7 +422,7 @@ exit gracefully in functions with massive neutrinos (not implemented yet).
 </div><div class="memdoc">
 <pre class="fragment">Create a set of reference cosmological models with massive neutrinos.
 This is separate because certain functionality is not yes implemented
-for massive neutrino cosmologies so will throw errors. 
+for massive neutrino cosmologies so will throw errors.
 </pre> 
 </div>
 </div>
@@ -472,6 +495,24 @@ for massive neutrino cosmologies so will throw errors.
       </table>
 </div><div class="memdoc">
 <pre class="fragment">Test that debug mode can be toggled.
+</pre> 
+</div>
+</div>
+<a id="a1936b759676e55f5a5c9a339af0bba48"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1936b759676e55f5a5c9a339af0bba48">&#9670;&nbsp;</a></span>test_halomod()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">def ccl_test_pyccl_interface.test_halomod </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<pre class="fragment">Test halo model and supporting functions.
 </pre> 
 </div>
 </div>
@@ -561,7 +602,7 @@ for massive neutrino cosmologies so will throw errors.
         </tr>
       </table>
 </div><div class="memdoc">
-<pre class="fragment">Check that invalid transfer_function &lt;-&gt; matter_power_spectrum pairs raise 
+<pre class="fragment">Check that invalid transfer_function &lt;-&gt; matter_power_spectrum pairs raise
 an error.
 </pre> 
 </div>
