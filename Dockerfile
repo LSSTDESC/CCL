@@ -7,7 +7,7 @@ RUN apt-get install -y libgsl-dev libfftw3-dev
 RUN pip install numpy scipy matplotlib jupyter
 
 # Installing CCL C library
-RUN git clone https://github.com/LSSTDESC/CCL && cd CCL && git checkout changelog && \
+RUN git clone https://github.com/LSSTDESC/CCL && cd CCL && git checkout releases/1.0 && \
     mkdir -p build && (cd build; cmake .. ; make; make install)
 
 # Installing CCL Python module
