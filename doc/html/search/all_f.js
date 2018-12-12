@@ -20,5 +20,7 @@ var searchData=
   ['pxi_5ffidtest_2ec',['pxi_fidtest.c',['../pxi__fidtest_8c.html',1,'']]],
   ['pxi_5ftest_2ec',['pxi_test.c',['../pxi__test_8c.html',1,'']]],
   ['pycosmo',['PYCOSMO',['../namespaceccl__test__swig__interface.html#abc24f5e95297d21e2f05fc865e056c99',1,'ccl_test_swig_interface']]],
+  ['pz_5finfo',['pz_info',['../structpz__info.html',1,'']]],
+  ['pz_5finformation',['pz_information',['../structpz__params.html#a5d8a16c566f118a07c58d5e4e67e0963',1,'pz_params::pz_information()'],['../structnorm__params.html#a8a5df03d132c8f5ccbbe582a38a91e52',1,'norm_params::pz_information()']]],
   ['pz_5fparams',['pz_params',['../structpz__params.html',1,'']]]
 ];

@@ -244,6 +244,22 @@ $(function() {
 : <a class="el" href="ccl__power_8c.html#a250e3f7272c9756f14a7ca3c3ad05cab">ccl_power.c</a>
 , <a class="el" href="ccl__power_8h.html#a91bc3a4eebb25939fc7eac7cea433fa7">ccl_power.h</a>
 </li>
+<li>ccl_create_dNdz_info()
+: <a class="el" href="ccl__redshifts_8c.html#a7948b3beac30c7ab979119af8b9e4962">ccl_redshifts.c</a>
+, <a class="el" href="ccl__redshifts_8h.html#a7948b3beac30c7ab979119af8b9e4962">ccl_redshifts.h</a>
+</li>
+<li>ccl_create_gaussian_photoz_info()
+: <a class="el" href="ccl__redshifts_8c.html#a5515ce8720230ae24c5274c83e84f0ad">ccl_redshifts.c</a>
+, <a class="el" href="ccl__redshifts_8h.html#a5515ce8720230ae24c5274c83e84f0ad">ccl_redshifts.h</a>
+</li>
+<li>ccl_create_photoz_info()
+: <a class="el" href="ccl__redshifts_8c.html#af02a45c294befea7cef5f0be05a5658d">ccl_redshifts.c</a>
+, <a class="el" href="ccl__redshifts_8h.html#af02a45c294befea7cef5f0be05a5658d">ccl_redshifts.h</a>
+</li>
+<li>ccl_create_Smail_dNdz_info()
+: <a class="el" href="ccl__redshifts_8c.html#a9c6353bc19fbff73d32ee4345733f034">ccl_redshifts.c</a>
+, <a class="el" href="ccl__redshifts_8h.html#a9c6353bc19fbff73d32ee4345733f034">ccl_redshifts.h</a>
+</li>
 <li>ccl_data
 : <a class="el" href="ccl__core_8h.html#a3df333543b1ebed84ae6759e2aa73393">ccl_core.h</a>
 </li>
@@ -266,6 +282,10 @@ $(function() {
 <li>ccl_distance_modulus()
 : <a class="el" href="ccl__background_8c.html#a7b3a3c99ab4e66269058dd9db45d0ce8">ccl_background.c</a>
 , <a class="el" href="ccl__background_8h.html#a7b3a3c99ab4e66269058dd9db45d0ce8">ccl_background.h</a>
+</li>
+<li>ccl_dNdz_tomog()
+: <a class="el" href="ccl__redshifts_8c.html#ac48dbc3c488fb83f13609cbc8e54fa74">ccl_redshifts.c</a>
+, <a class="el" href="ccl__redshifts_8h.html#ac48dbc3c488fb83f13609cbc8e54fa74">ccl_redshifts.h</a>
 </li>
 <li>ccl_duffy2008
 : <a class="el" href="ccl__config_8h.html#a62567120aeaafb79d8467612498cc7eda72b97eb2dd7e345168ec5fc1110fd18f">ccl_config.h</a>
@@ -389,6 +409,14 @@ $(function() {
 </li>
 <li>CCL_FRAC_RELEVANT
 : <a class="el" href="ccl__cls_8c.html#a162e342b807cec39ad1a2427d544f09b">ccl_cls.c</a>
+</li>
+<li>ccl_free_dNdz_info()
+: <a class="el" href="ccl__redshifts_8c.html#a50246ddf63a5b3bc64e29d5ea3634df5">ccl_redshifts.c</a>
+, <a class="el" href="ccl__redshifts_8h.html#a6dfec7d21706f416bc7e04e43520ae68">ccl_redshifts.h</a>
+</li>
+<li>ccl_free_photoz_info()
+: <a class="el" href="ccl__redshifts_8c.html#a8c4c56ef64d822376e966ba4defb46cc">ccl_redshifts.c</a>
+, <a class="el" href="ccl__redshifts_8h.html#a8c4c56ef64d822376e966ba4defb46cc">ccl_redshifts.h</a>
 </li>
 <li>CCL_GAMMA1
 : <a class="el" href="ccl__utils_8c.html#aa26937410572c9a00842558b4a33d423">ccl_utils.c</a>
@@ -634,8 +662,8 @@ $(function() {
 , <a class="el" href="ccl__background_8h.html#a5cc167cf9c0245221b87ae6160309e96">ccl_background.h</a>
 </li>
 <li>ccl_scale_factor_of_chis()
-: <a class="el" href="ccl__background_8c.html#a8ae2922751e5e98c10cad713069f29ff">ccl_background.c</a>
-, <a class="el" href="ccl__background_8h.html#a8ae2922751e5e98c10cad713069f29ff">ccl_background.h</a>
+: <a class="el" href="ccl__background_8h.html#a8ae2922751e5e98c10cad713069f29ff">ccl_background.h</a>
+, <a class="el" href="ccl__background_8c.html#a8ae2922751e5e98c10cad713069f29ff">ccl_background.c</a>
 </li>
 <li>ccl_set_debug_policy()
 : <a class="el" href="ccl__error_8c.html#a93eb3407613c1354312da01119778a2c">ccl_error.c</a>
@@ -653,20 +681,20 @@ $(function() {
 , <a class="el" href="ccl__power_8h.html#a719bbbcaf0c6275c709247b87baaeee9">ccl_power.h</a>
 </li>
 <li>ccl_sigmaM()
-: <a class="el" href="ccl__massfunc_8c.html#a1c9a50535fae72296dd3c9b12a9bddab">ccl_massfunc.c</a>
-, <a class="el" href="ccl__massfunc_8h.html#a70de7be1de602db04934ffa1aedee70b">ccl_massfunc.h</a>
+: <a class="el" href="ccl__massfunc_8h.html#a70de7be1de602db04934ffa1aedee70b">ccl_massfunc.h</a>
+, <a class="el" href="ccl__massfunc_8c.html#a1c9a50535fae72296dd3c9b12a9bddab">ccl_massfunc.c</a>
 </li>
 <li>ccl_sigmaR()
 : <a class="el" href="ccl__power_8c.html#a1d9db38804b408e259cbd667c4329398">ccl_power.c</a>
 , <a class="el" href="ccl__power_8h.html#a1d9db38804b408e259cbd667c4329398">ccl_power.h</a>
 </li>
 <li>ccl_sigmaV()
-: <a class="el" href="ccl__power_8c.html#a01c0baa2f7e10833e73ae672191d0008">ccl_power.c</a>
-, <a class="el" href="ccl__power_8h.html#a01c0baa2f7e10833e73ae672191d0008">ccl_power.h</a>
+: <a class="el" href="ccl__power_8h.html#a01c0baa2f7e10833e73ae672191d0008">ccl_power.h</a>
+, <a class="el" href="ccl__power_8c.html#a01c0baa2f7e10833e73ae672191d0008">ccl_power.c</a>
 </li>
 <li>ccl_sinn()
-: <a class="el" href="ccl__background_8h.html#ae1cafa2f119062c65d6dc680aa9210bb">ccl_background.h</a>
-, <a class="el" href="ccl__background_8c.html#ae1cafa2f119062c65d6dc680aa9210bb">ccl_background.c</a>
+: <a class="el" href="ccl__background_8c.html#ae1cafa2f119062c65d6dc680aa9210bb">ccl_background.c</a>
+, <a class="el" href="ccl__background_8h.html#ae1cafa2f119062c65d6dc680aa9210bb">ccl_background.h</a>
 </li>
 <li>ccl_species_crit_label
 : <a class="el" href="ccl__background_8h.html#a3ab9842523d3f98e1ab5c57f0249a15da5aaeabb8008e5d37ca6bad5f3e1dca8b">ccl_background.h</a>
@@ -692,38 +720,6 @@ $(function() {
 <li>ccl_species_x_label
 : <a class="el" href="ccl__background_8h.html#a3ab9842523d3f98e1ab5c57f0249a15d">ccl_background.h</a>
 </li>
-<li>ccl_specs_bias_clustering()
-: <a class="el" href="ccl__lsst__specs_8c.html#a60698c8f659955abb29ec354ca326da1">ccl_lsst_specs.c</a>
-, <a class="el" href="ccl__lsst__specs_8h.html#a60698c8f659955abb29ec354ca326da1">ccl_lsst_specs.h</a>
-</li>
-<li>ccl_specs_create_gaussian_photoz_info()
-: <a class="el" href="ccl__lsst__specs_8c.html#aa80704ddbe4c5900e659244c4301e201">ccl_lsst_specs.c</a>
-, <a class="el" href="ccl__lsst__specs_8h.html#aa80704ddbe4c5900e659244c4301e201">ccl_lsst_specs.h</a>
-</li>
-<li>ccl_specs_create_photoz_info()
-: <a class="el" href="ccl__lsst__specs_8c.html#a4b71aaa4ed22dbb5b71678bc57c31651">ccl_lsst_specs.c</a>
-, <a class="el" href="ccl__lsst__specs_8h.html#a4b71aaa4ed22dbb5b71678bc57c31651">ccl_lsst_specs.h</a>
-</li>
-<li>ccl_specs_dNdz_tomog()
-: <a class="el" href="ccl__lsst__specs_8c.html#a01f783c5be18196d2ec1bcd755f42524">ccl_lsst_specs.c</a>
-, <a class="el" href="ccl__lsst__specs_8h.html#a01f783c5be18196d2ec1bcd755f42524">ccl_lsst_specs.h</a>
-</li>
-<li>ccl_specs_free_photoz_info()
-: <a class="el" href="ccl__lsst__specs_8c.html#aa5bd8ff5331c06a781686b74b4e4b895">ccl_lsst_specs.c</a>
-, <a class="el" href="ccl__lsst__specs_8h.html#aa5bd8ff5331c06a781686b74b4e4b895">ccl_lsst_specs.h</a>
-</li>
-<li>ccl_specs_free_photoz_info_gaussian()
-: <a class="el" href="ccl__lsst__specs_8c.html#af462074f1d3b92eae793143562778dbd">ccl_lsst_specs.c</a>
-, <a class="el" href="ccl__lsst__specs_8h.html#af462074f1d3b92eae793143562778dbd">ccl_lsst_specs.h</a>
-</li>
-<li>ccl_specs_sigmaz_clustering()
-: <a class="el" href="ccl__lsst__specs_8c.html#a7501f2b4b435b14d9d96bcd929d2b959">ccl_lsst_specs.c</a>
-, <a class="el" href="ccl__lsst__specs_8h.html#a7501f2b4b435b14d9d96bcd929d2b959">ccl_lsst_specs.h</a>
-</li>
-<li>ccl_specs_sigmaz_sources()
-: <a class="el" href="ccl__lsst__specs_8c.html#a3198015e10f2bad1ae76f5472ab08ee0">ccl_lsst_specs.c</a>
-, <a class="el" href="ccl__lsst__specs_8h.html#a3198015e10f2bad1ae76f5472ab08ee0">ccl_lsst_specs.h</a>
-</li>
 <li>ccl_spline_eval()
 : <a class="el" href="ccl__utils_8c.html#a2d6a8bee4886837a266814727396fbf1">ccl_utils.c</a>
 , <a class="el" href="ccl__utils_8h.html#a2d6a8bee4886837a266814727396fbf1">ccl_utils.h</a>
@@ -733,8 +729,8 @@ $(function() {
 , <a class="el" href="ccl__utils_8h.html#a55f9fd0f849315fcadd49d66e4ff2cf8">ccl_utils.h</a>
 </li>
 <li>ccl_spline_init()
-: <a class="el" href="ccl__utils_8h.html#ae1ad6daadfafe5d994c3ffa6a84caca5">ccl_utils.h</a>
-, <a class="el" href="ccl__utils_8c.html#ae1ad6daadfafe5d994c3ffa6a84caca5">ccl_utils.c</a>
+: <a class="el" href="ccl__utils_8c.html#ae1ad6daadfafe5d994c3ffa6a84caca5">ccl_utils.c</a>
+, <a class="el" href="ccl__utils_8h.html#ae1ad6daadfafe5d994c3ffa6a84caca5">ccl_utils.h</a>
 </li>
 <li>ccl_spline_params
 : <a class="el" href="ccl__params_8h.html#ad9b1ec3df4c5196d16fe519aed2ffa2a">ccl_params.h</a>
@@ -753,7 +749,7 @@ $(function() {
 : <a class="el" href="ccl__cls_8h.html#ad40f84d4342c4ba1b55267186a8002e8">ccl_cls.h</a>
 </li>
 <li>ccl_tracer_t
-: <a class="el" href="ccl__cls_8h.html#ae9cffa03bd70ee729a29166964f79538">ccl_cls.h</a>
+: <a class="el" href="ccl__cls_8h.html#ad89f3ee4117e3c2eeff11256df700ea6">ccl_cls.h</a>
 </li>
 <li>ccl_trf_ba
 : <a class="el" href="ccl__cls_8h.html#ad40f84d4342c4ba1b55267186a8002e8a84267651f4bba6044040c05f300b9126">ccl_cls.h</a>
@@ -817,50 +813,53 @@ $(function() {
 <li>CORR_SPLINE_TYPE
 : <a class="el" href="ccl__constants_8h.html#ac769da88943b671a096e7e7bb526dbe7">ccl_constants.h</a>
 </li>
-<li>CTEST()
-: <a class="el" href="ccl__test__utils_8c.html#ae737b10e5c82f513a69141759c000cea">ccl_test_utils.c</a>
-, <a class="el" href="ctest_8h.html#a52a1ee634beaee554d1035a83baa99c8">ctest.h</a>
+<li>CTEST
+: <a class="el" href="ctest_8h.html#a52a1ee634beaee554d1035a83baa99c8">ctest.h</a>
 , <a class="el" href="ccl__test__utils_8c.html#a0e6bd996cca5bec66d528905b02e9911">ccl_test_utils.c</a>
 </li>
 <li>CTEST2()
-: <a class="el" href="ccl__test__growth__lowz_8c.html#a4a119182992e0147b642a597de4e8dae">ccl_test_growth_lowz.c</a>
-, <a class="el" href="ccl__test__growth__allz_8c.html#a77790fd4244acd061f308665e5d92c76">ccl_test_growth_allz.c</a>
+: <a class="el" href="ccl__test__growth__allz_8c.html#a77790fd4244acd061f308665e5d92c76">ccl_test_growth_allz.c</a>
 , <a class="el" href="ccl__test__correlation__3d_8c.html#addddda44e6c014fc5ed0b67d515df45f">ccl_test_correlation_3d.c</a>
 , <a class="el" href="ccl__test__emu_8c.html#af9c18399e8721b07c9b706c6ceec96dd">ccl_test_emu.c</a>
-, <a class="el" href="ccl__test__correlation_8c.html#a879e3c70dc36fd2df6f88a76a427f5d7">ccl_test_correlation.c</a>
 , <a class="el" href="ccl__test__distances__astropy__mnu__lowz_8c.html#a5e23040be250b419bebea9910aad21a5">ccl_test_distances_astropy_mnu_lowz.c</a>
+, <a class="el" href="ccl__test__growth__lowz_8c.html#a4a119182992e0147b642a597de4e8dae">ccl_test_growth_lowz.c</a>
 , <a class="el" href="ccl__test__power__nu_8c.html#a65e00ddb39ce01f1b737f169eadc2c05">ccl_test_power_nu.c</a>
+, <a class="el" href="ccl__test__correlation_8c.html#a3b8a09101d611e29f82fc0b28032f823">ccl_test_correlation.c</a>
 , <a class="el" href="ccl__test__distances__astropy__mnu__hiz_8c.html#a963c70b498da7fbc21c10393fe26429e">ccl_test_distances_astropy_mnu_hiz.c</a>
 , <a class="el" href="ccl__test__growth__allz_8c.html#a7cd02fc277ccca85d84454143d92d594">ccl_test_growth_allz.c</a>
 , <a class="el" href="pxi__fidtest_8c.html#a84be1c377b0abdcffe048ea42b47b7e9">pxi_fidtest.c</a>
+, <a class="el" href="ccl__test__params_8c.html#a1a9a1bdacf1a8a003b6d61ca8f7bdbd9">ccl_test_params.c</a>
 , <a class="el" href="ccl__test__cosmology_8c.html#a1535c7ddef8831b850231472c6b6ec3e">ccl_test_cosmology.c</a>
 , <a class="el" href="ccl__test__distances__astropy__mnu__hiz_8c.html#aab2323860424f421b900bc222cd40e43">ccl_test_distances_astropy_mnu_hiz.c</a>
 , <a class="el" href="ccl__test__massfunc_8c.html#afa1d2610ddccf8721a843f997ddd861b">ccl_test_massfunc.c</a>
 , <a class="el" href="ccl__test__growth__allz_8c.html#ad38e1aea2369782559558979ae50b95a">ccl_test_growth_allz.c</a>
 , <a class="el" href="ccl__test__params_8c.html#af6d37532ecd3da33e766d672d6188f6c">ccl_test_params.c</a>
+, <a class="el" href="ccl__test__bbks_8c.html#a523a743cc21b7959ad92d612b77c9fab">ccl_test_bbks.c</a>
 , <a class="el" href="ccl__test__growth__hiz_8c.html#ad965ac3f1ca0eb4c75c47cbf26183570">ccl_test_growth_hiz.c</a>
 , <a class="el" href="ccl__test__emu__nu_8c.html#ab9a0beced33c9a2011bd91ebd8d0cb67">ccl_test_emu_nu.c</a>
 , <a class="el" href="ccl__test__correlation__3d_8c.html#ac8277f061b3af95eb6edffcc07673931">ccl_test_correlation_3d.c</a>
-, <a class="el" href="ccl__test__params_8c.html#a1a9a1bdacf1a8a003b6d61ca8f7bdbd9">ccl_test_params.c</a>
 , <a class="el" href="ccl__test__growth__lowz_8c.html#ad33ef0998946754de10702a37a52977b">ccl_test_growth_lowz.c</a>
-, <a class="el" href="ccl__test__cls_8c.html#a35cadb62fed14956c4e493b2cfaa4056">ccl_test_cls.c</a>
+, <a class="el" href="ccl__test__correlation_8c.html#a5facfba7a076454a5b3c982ecfa7fb6e">ccl_test_correlation.c</a>
 , <a class="el" href="ccl__test__growth__lowz_8c.html#a8a5cd02a115f2e0013df18db462c344f">ccl_test_growth_lowz.c</a>
-, <a class="el" href="ctest_8h.html#aaa46a2a9e9fca53933c2439c51dfb2be">ctest.h</a>
-, <a class="el" href="ccl__test__bbks_8c.html#a523a743cc21b7959ad92d612b77c9fab">ccl_test_bbks.c</a>
+, <a class="el" href="ccl__test__halomod_8c.html#a5f1a142109276d7f4d37a48376a3f23c">ccl_test_halomod.c</a>
+, <a class="el" href="ccl__test__bbks_8c.html#a5b200b806fc1c56de2090f2b37169323">ccl_test_bbks.c</a>
 , <a class="el" href="ccl__test__halomod_8c.html#a9493eaaf6d2569732791ebbfc76fdf6d">ccl_test_halomod.c</a>
 , <a class="el" href="ccl__test__params_8c.html#acb62bf5c7f5c31a9bc67a9419595f575">ccl_test_params.c</a>
-, <a class="el" href="ccl__test__angpow_8c.html#a8f1cec54f15bfe6578449fac9ee17f39">ccl_test_angpow.c</a>
-, <a class="el" href="ccl__test__correlation__3d_8c.html#a3cffbbc1f07794df67c841c96cfb6361">ccl_test_correlation_3d.c</a>
-, <a class="el" href="ccl__test__params__mnu_8c.html#ae21b49c10b06420078c383e1d2ea6a85">ccl_test_params_mnu.c</a>
+, <a class="el" href="ctest_8h.html#aaa46a2a9e9fca53933c2439c51dfb2be">ctest.h</a>
+, <a class="el" href="ccl__test__params_8c.html#a725cd9b8eb3e00c9fe268886bad89d0a">ccl_test_params.c</a>
 , <a class="el" href="ccl__test__bbks_8c.html#ab4595332bb0dc2b7b28a5e8fa159e099">ccl_test_bbks.c</a>
-, <a class="el" href="ccl__test__cls_8c.html#a78fbe1023cce9e02ae8488728eab34be">ccl_test_cls.c</a>
+, <a class="el" href="ccl__test__correlation__3d_8c.html#a3cffbbc1f07794df67c841c96cfb6361">ccl_test_correlation_3d.c</a>
+, <a class="el" href="ccl__test__angpow_8c.html#a8f1cec54f15bfe6578449fac9ee17f39">ccl_test_angpow.c</a>
+, <a class="el" href="ccl__test__params__mnu_8c.html#ae21b49c10b06420078c383e1d2ea6a85">ccl_test_params_mnu.c</a>
+, <a class="el" href="ccl__test__bcm_8c.html#a5c876512076d939ca6228c89060fed5b">ccl_test_bcm.c</a>
+, <a class="el" href="ccl__test__correlation_8c.html#a5a3727966c6032339b7f8a7dc4677dce">ccl_test_correlation.c</a>
 , <a class="el" href="ccl__test__distances__class__allz_8c.html#a3ab56abfc90a1eda9cc20ade883ee333">ccl_test_distances_class_allz.c</a>
 , <a class="el" href="ccl__test__distances__cosmomad__lowz_8c.html#a362ad413a078af8e54676e55bc436c46">ccl_test_distances_cosmomad_lowz.c</a>
 , <a class="el" href="ccl__test__params_8c.html#ac9dcc5578623b1d4b196f8a69d8d7324">ccl_test_params.c</a>
 , <a class="el" href="ccl__test__power__nu_8c.html#a3095f6b0c3c245ee910488c42e08402f">ccl_test_power_nu.c</a>
 , <a class="el" href="ccl__test__halomod_8c.html#a7b2385a6483c0aaba1787223e731e02a">ccl_test_halomod.c</a>
 , <a class="el" href="ccl__test__distances__astropy__mnu__hiz_8c.html#a75521bd323ab25db175ac9229a95e9b7">ccl_test_distances_astropy_mnu_hiz.c</a>
-, <a class="el" href="ccl__test__bbks_8c.html#a5b200b806fc1c56de2090f2b37169323">ccl_test_bbks.c</a>
+, <a class="el" href="ccl__test__cls_8c.html#a35cadb62fed14956c4e493b2cfaa4056">ccl_test_cls.c</a>
 , <a class="el" href="ccl__test__distances__astropy__mnu__hiz_8c.html#a488655b6073459dd9af4eaa127f5302b">ccl_test_distances_astropy_mnu_hiz.c</a>
 , <a class="el" href="ccl__test__distances__astropy__mnu__lowz_8c.html#aa25d6ceb27963910e60a232be10d309a">ccl_test_distances_astropy_mnu_lowz.c</a>
 , <a class="el" href="ccl__test__power__nu_8c.html#a582e1a125d06ae6170d57f86f101f685">ccl_test_power_nu.c</a>
@@ -875,14 +874,14 @@ $(function() {
 , <a class="el" href="ccl__test__sigma_m_8c.html#a799bbf018dfa6663e6130164b4cfc14e">ccl_test_sigmaM.c</a>
 , <a class="el" href="ccl__test__distances__astropy__mnu__hiz_8c.html#ad5f3ba642804d7243fe7dc9cd483e115">ccl_test_distances_astropy_mnu_hiz.c</a>
 , <a class="el" href="ccl__test__growth__lowz_8c.html#a5f7b9d95603ebe07050868473faf815a">ccl_test_growth_lowz.c</a>
-, <a class="el" href="ccl__test__correlation_8c.html#a5facfba7a076454a5b3c982ecfa7fb6e">ccl_test_correlation.c</a>
+, <a class="el" href="ccl__test__correlation_8c.html#a879e3c70dc36fd2df6f88a76a427f5d7">ccl_test_correlation.c</a>
 , <a class="el" href="ccl__test__growth__allz_8c.html#a32547237b7cc835c98e87e2979940210">ccl_test_growth_allz.c</a>
 , <a class="el" href="ccl__test__params_8c.html#a7a60aedf89338bfd6002b7b924d7a471">ccl_test_params.c</a>
 , <a class="el" href="ccl__test__distances__cosmomad__lowz_8c.html#a6226116a0e9557d22727456eb552fe92">ccl_test_distances_cosmomad_lowz.c</a>
 , <a class="el" href="ccl__test__power__nu_8c.html#acf5ff28c087d747add66eaf84ae8beca">ccl_test_power_nu.c</a>
 , <a class="el" href="ccl__test__eh_8c.html#afa5c02181a3edb35515acb9c67ee0f25">ccl_test_eh.c</a>
 , <a class="el" href="ccl__test__emu_8c.html#a9a4b6ca2dbf91e86a35082fc804bddbe">ccl_test_emu.c</a>
-, <a class="el" href="ccl__test__bcm_8c.html#a5c876512076d939ca6228c89060fed5b">ccl_test_bcm.c</a>
+, <a class="el" href="ccl__test__cls_8c.html#a78fbe1023cce9e02ae8488728eab34be">ccl_test_cls.c</a>
 , <a class="el" href="ccl__test__emu__nu_8c.html#aa396d4851788a5c956184aa2f84a539f">ccl_test_emu_nu.c</a>
 , <a class="el" href="ccl__test__distances__class__allz_8c.html#aff7b7c1079cfbdb8e0bd3146e4b4388f">ccl_test_distances_class_allz.c</a>
 , <a class="el" href="ccl__test__growth__allz_8c.html#a9104c7a98409b7d97a1f47e6cdf9f463">ccl_test_growth_allz.c</a>
@@ -908,19 +907,19 @@ $(function() {
 : <a class="el" href="ctest_8h.html#a7443bedbd368d837d00c9223c56bf454">ctest.h</a>
 </li>
 <li>CTEST_DATA()
-: <a class="el" href="ccl__test__bcm_8c.html#a2caec0c33e1c22fbe2d6e05931da1659">ccl_test_bcm.c</a>
-, <a class="el" href="ccl__test__cls_8c.html#add4e714f5748a8905f854c450734d239">ccl_test_cls.c</a>
+: <a class="el" href="ccl__test__correlation_8c.html#a69a64dfc8dc62aac0a9298c5e98b3df1">ccl_test_correlation.c</a>
+, <a class="el" href="ccl__test__correlation__3dbis_8c.html#abe3f2c338ad0edf6124991e2e8c2d527">ccl_test_correlation_3dbis.c</a>
+, <a class="el" href="ccl__test__sigma_m_8c.html#a19e6111e3bcdaae54a8b669db9c97060">ccl_test_sigmaM.c</a>
+, <a class="el" href="ccl__test__cosmology_8c.html#a62ef896c3931f434f4d4ff6ccd933bae">ccl_test_cosmology.c</a>
 , <a class="el" href="ccl__test__distances__class__allz_8c.html#a030899e3818c94829a6f3f039aca8132">ccl_test_distances_class_allz.c</a>
-, <a class="el" href="ccl__test__emu_8c.html#a38d8ce90b9afd3fce5898f1d2c93271e">ccl_test_emu.c</a>
-, <a class="el" href="ccl__test__distances__astropy__mnu__lowz_8c.html#a54b735b6b1870aa31a3972dad5d2ae40">ccl_test_distances_astropy_mnu_lowz.c</a>
+, <a class="el" href="pxi__fidtest_8c.html#a8d7f31965f52eff4ed47503873ff20dc">pxi_fidtest.c</a>
 , <a class="el" href="ccl__test__power__nu_8c.html#a70b80de2791cb7282ba43be83e5abe1f">ccl_test_power_nu.c</a>
 , <a class="el" href="ccl__test__distances__cosmomad__lowz_8c.html#a5003566e98acf08cf81b3da8a54371e7">ccl_test_distances_cosmomad_lowz.c</a>
 , <a class="el" href="ccl__test__massfunc_8c.html#abfdaf1605c1fa1bc1edb795d07d231c8">ccl_test_massfunc.c</a>
+, <a class="el" href="ccl__test__distances__astropy__mnu__lowz_8c.html#a54b735b6b1870aa31a3972dad5d2ae40">ccl_test_distances_astropy_mnu_lowz.c</a>
 , <a class="el" href="ccl__test__growth__hiz_8c.html#a12179a7d2fc2e1aef4c8746a3a7a9700">ccl_test_growth_hiz.c</a>
 , <a class="el" href="ccl__test__halomod_8c.html#aa321f00d2b69a63e83e97f7cc3cf6312">ccl_test_halomod.c</a>
-, <a class="el" href="pxi__fidtest_8c.html#a8d7f31965f52eff4ed47503873ff20dc">pxi_fidtest.c</a>
 , <a class="el" href="ccl__test__eh_8c.html#a936ee033bba017ff3ea43d7327701e3c">ccl_test_eh.c</a>
-, <a class="el" href="ccl__test__sigma_m_8c.html#a19e6111e3bcdaae54a8b669db9c97060">ccl_test_sigmaM.c</a>
 , <a class="el" href="ccl__test__bbks_8c.html#a472d844492773e2a9913a420fe442827">ccl_test_bbks.c</a>
 , <a class="el" href="ccl__test__correlation__3d_8c.html#a8d7f31965f52eff4ed47503873ff20dc">ccl_test_correlation_3d.c</a>
 , <a class="el" href="ccl__test__params__mnu_8c.html#a8f942d41f0420ed54650f3a688b68eff">ccl_test_params_mnu.c</a>
@@ -929,13 +928,13 @@ $(function() {
 , <a class="el" href="ccl__test__distances__astropy__mnu__hiz_8c.html#ae9468ddd2fcd58d81608805b22297b78">ccl_test_distances_astropy_mnu_hiz.c</a>
 , <a class="el" href="ccl__test__emu__nu_8c.html#ad799a8627b545e31b0c79a91baa69b50">ccl_test_emu_nu.c</a>
 , <a class="el" href="ccl__test__distances__cosmomad__hiz_8c.html#af34687a8d4a8b395d13598de66ed55a0">ccl_test_distances_cosmomad_hiz.c</a>
-, <a class="el" href="ccl__test__cosmology_8c.html#a62ef896c3931f434f4d4ff6ccd933bae">ccl_test_cosmology.c</a>
+, <a class="el" href="ccl__test__growth__lowz_8c.html#a85333725ac8b357edf35c50e7811bb0d">ccl_test_growth_lowz.c</a>
 , <a class="el" href="ccl__test__angpow_8c.html#a17b26ed89ee14e436204b441ae2773dc">ccl_test_angpow.c</a>
 , <a class="el" href="ctest_8h.html#a5f2e345f0d4c77ff822458841168ad50">ctest.h</a>
-, <a class="el" href="ccl__test__correlation_8c.html#a69a64dfc8dc62aac0a9298c5e98b3df1">ccl_test_correlation.c</a>
+, <a class="el" href="ccl__test__cls_8c.html#add4e714f5748a8905f854c450734d239">ccl_test_cls.c</a>
+, <a class="el" href="ccl__test__emu_8c.html#a38d8ce90b9afd3fce5898f1d2c93271e">ccl_test_emu.c</a>
 , <a class="el" href="ccl__test__growth__allz_8c.html#ab6718c99e7d44f2bcc1315ff23e7ceeb">ccl_test_growth_allz.c</a>
-, <a class="el" href="ccl__test__correlation__3dbis_8c.html#abe3f2c338ad0edf6124991e2e8c2d527">ccl_test_correlation_3dbis.c</a>
-, <a class="el" href="ccl__test__growth__lowz_8c.html#a85333725ac8b357edf35c50e7811bb0d">ccl_test_growth_lowz.c</a>
+, <a class="el" href="ccl__test__bcm_8c.html#a2caec0c33e1c22fbe2d6e05931da1659">ccl_test_bcm.c</a>
 </li>
 <li>CTEST_ERR()
 : <a class="el" href="ctest_8h.html#aef728d776d708f1b50cfe7cb161ef038">ctest.h</a>
@@ -947,34 +946,34 @@ $(function() {
 : <a class="el" href="ccl__test_8c.html#a0a894b4e27b56338c24d368733937714">ccl_test.c</a>
 </li>
 <li>CTEST_SETUP()
-: <a class="el" href="ccl__test__distances__cosmomad__hiz_8c.html#a1680632ddceebe7afed8b312da8f0a55">ccl_test_distances_cosmomad_hiz.c</a>
-, <a class="el" href="ccl__test__correlation__3d_8c.html#aa8b689dbc742682b11d6d878ed5462f6">ccl_test_correlation_3d.c</a>
-, <a class="el" href="ccl__test__correlation__3dbis_8c.html#a6d4d87d4845e6c0c7bc3956ea22e10ea">ccl_test_correlation_3dbis.c</a>
-, <a class="el" href="ccl__test__cls_8c.html#a6ab3a0cc886210fe268b0c32a6712c40">ccl_test_cls.c</a>
+: <a class="el" href="pxi__fidtest_8c.html#aa8b689dbc742682b11d6d878ed5462f6">pxi_fidtest.c</a>
+, <a class="el" href="ccl__test__angpow_8c.html#ac6eecd077fc3551b4c3e5af2f7c39bff">ccl_test_angpow.c</a>
 , <a class="el" href="ccl__test__emu_8c.html#a55a7357a64ec90e9c8a0f6d514488466">ccl_test_emu.c</a>
-, <a class="el" href="ccl__test__distances__cosmomad__lowz_8c.html#a2526b188aa64b5c18b55dd56ac132ea0">ccl_test_distances_cosmomad_lowz.c</a>
-, <a class="el" href="ccl__test__growth__allz_8c.html#a49d602f014b14571510ee3de99dae371">ccl_test_growth_allz.c</a>
+, <a class="el" href="ccl__test__massfunc_8c.html#ac67c149e6c77dedcf661f15c0aeb1cc6">ccl_test_massfunc.c</a>
+, <a class="el" href="ccl__test__halomod_8c.html#abe12f6b13fac579608024a691786bfba">ccl_test_halomod.c</a>
+, <a class="el" href="ccl__test__distances__cosmomad__hiz_8c.html#a1680632ddceebe7afed8b312da8f0a55">ccl_test_distances_cosmomad_hiz.c</a>
+, <a class="el" href="ccl__test__cls_8c.html#a6ab3a0cc886210fe268b0c32a6712c40">ccl_test_cls.c</a>
 , <a class="el" href="ccl__test__growth__hiz_8c.html#a5453078a0ccf7af2fcbf714d5a448eff">ccl_test_growth_hiz.c</a>
 , <a class="el" href="ccl__test__params_8c.html#a83a795e846ccaec5db83ee6b266f71a1">ccl_test_params.c</a>
 , <a class="el" href="ccl__test__power__nu_8c.html#a234aa4b1108ae3feca680bcb3261d85c">ccl_test_power_nu.c</a>
 , <a class="el" href="ccl__test__bcm_8c.html#aa6151c929c67841d07b3b783363beee8">ccl_test_bcm.c</a>
-, <a class="el" href="ccl__test__distances__astropy__mnu__lowz_8c.html#a97a4d4b7b4e3bdc54126d7fd6551fa7c">ccl_test_distances_astropy_mnu_lowz.c</a>
-, <a class="el" href="ccl__test__power__nu_8c.html#a796c89ee5797afba8388ae36ba740eca">ccl_test_power_nu.c</a>
-, <a class="el" href="ccl__test__cosmology_8c.html#a015b34b17dc8d517d72808ecb65dd8f1">ccl_test_cosmology.c</a>
-, <a class="el" href="ccl__test__growth__lowz_8c.html#a179cd44498da38d77228b164292b5c09">ccl_test_growth_lowz.c</a>
-, <a class="el" href="pxi__fidtest_8c.html#aa8b689dbc742682b11d6d878ed5462f6">pxi_fidtest.c</a>
-, <a class="el" href="ccl__test__params__mnu_8c.html#ae371f2c3600ba9dd3a08ab820c06b99a">ccl_test_params_mnu.c</a>
-, <a class="el" href="ccl__test__distances__class__allz_8c.html#a8e10c4133a9e72c8bd2f7e53e32393be">ccl_test_distances_class_allz.c</a>
-, <a class="el" href="ccl__test__eh_8c.html#a2dfb0a43a355defbffb469a810da9a10">ccl_test_eh.c</a>
 , <a class="el" href="ccl__test__sigma_m_8c.html#ae3901f649f04c495641e419c4521fbad">ccl_test_sigmaM.c</a>
-, <a class="el" href="ccl__test__distances__astropy__mnu__hiz_8c.html#ac8ed9b3f7a96a13f26a3c7cd7f29e771">ccl_test_distances_astropy_mnu_hiz.c</a>
-, <a class="el" href="ccl__test__emu__nu_8c.html#a7f52c5b2ed6b09d022e8daa7ac3ae7d6">ccl_test_emu_nu.c</a>
-, <a class="el" href="ctest_8h.html#af981fd8d49315f7a464c815deb81592f">ctest.h</a>
+, <a class="el" href="ccl__test__correlation__3d_8c.html#aa8b689dbc742682b11d6d878ed5462f6">ccl_test_correlation_3d.c</a>
 , <a class="el" href="ccl__test__correlation_8c.html#aaf5172a7d4f8ec8d74a42865cd307901">ccl_test_correlation.c</a>
-, <a class="el" href="ccl__test__angpow_8c.html#ac6eecd077fc3551b4c3e5af2f7c39bff">ccl_test_angpow.c</a>
-, <a class="el" href="ccl__test__halomod_8c.html#abe12f6b13fac579608024a691786bfba">ccl_test_halomod.c</a>
+, <a class="el" href="ccl__test__growth__allz_8c.html#a49d602f014b14571510ee3de99dae371">ccl_test_growth_allz.c</a>
+, <a class="el" href="ccl__test__distances__class__allz_8c.html#a8e10c4133a9e72c8bd2f7e53e32393be">ccl_test_distances_class_allz.c</a>
+, <a class="el" href="ccl__test__growth__lowz_8c.html#a179cd44498da38d77228b164292b5c09">ccl_test_growth_lowz.c</a>
+, <a class="el" href="ccl__test__power__nu_8c.html#a796c89ee5797afba8388ae36ba740eca">ccl_test_power_nu.c</a>
+, <a class="el" href="ccl__test__eh_8c.html#a2dfb0a43a355defbffb469a810da9a10">ccl_test_eh.c</a>
+, <a class="el" href="ccl__test__distances__astropy__mnu__hiz_8c.html#ac8ed9b3f7a96a13f26a3c7cd7f29e771">ccl_test_distances_astropy_mnu_hiz.c</a>
+, <a class="el" href="ccl__test__distances__cosmomad__lowz_8c.html#a2526b188aa64b5c18b55dd56ac132ea0">ccl_test_distances_cosmomad_lowz.c</a>
+, <a class="el" href="ccl__test__emu__nu_8c.html#a7f52c5b2ed6b09d022e8daa7ac3ae7d6">ccl_test_emu_nu.c</a>
+, <a class="el" href="ccl__test__cosmology_8c.html#a015b34b17dc8d517d72808ecb65dd8f1">ccl_test_cosmology.c</a>
+, <a class="el" href="ctest_8h.html#af981fd8d49315f7a464c815deb81592f">ctest.h</a>
+, <a class="el" href="ccl__test__correlation__3dbis_8c.html#a6d4d87d4845e6c0c7bc3956ea22e10ea">ccl_test_correlation_3dbis.c</a>
+, <a class="el" href="ccl__test__distances__astropy__mnu__lowz_8c.html#a97a4d4b7b4e3bdc54126d7fd6551fa7c">ccl_test_distances_astropy_mnu_lowz.c</a>
 , <a class="el" href="ccl__test__bbks_8c.html#a1d86dffd459d568853a18c3e1ac5c093">ccl_test_bbks.c</a>
-, <a class="el" href="ccl__test__massfunc_8c.html#ac67c149e6c77dedcf661f15c0aeb1cc6">ccl_test_massfunc.c</a>
+, <a class="el" href="ccl__test__params__mnu_8c.html#ae371f2c3600ba9dd3a08ab820c06b99a">ccl_test_params_mnu.c</a>
 </li>
 <li>CTEST_SKIP
 : <a class="el" href="ctest_8h.html#a39826980c3d7ce9834c7b8f92a96b6fb">ctest.h</a>

@@ -1,4 +1,4 @@
-# v 1.0 API changes (in prep):
+# v 1.0 API changes :
 
 ## C library
 - Deprecated the `native` non-Limber angular power spectrum method (#506).
@@ -11,7 +11,7 @@
 
 # v 0.4 API changes:
 
-Summary: added halo model matter power spectrum calculation and halo mass-concentration relations. Change to sigma(R) function so that it now has time depdence: it is now sigma(R,a). Added a sigmaV(R,a) function, where sigmaV(R,a) is the variance in the displacement field smoothed on scale R at scale-factor a.
+Summary: added halo model matter power spectrum calculation and halo mass-concentration relations. Change to sigma(R) function so that it now has time dependence: it is now sigma(R,a). Added a sigmaV(R,a) function, where sigmaV(R,a) is the variance in the displacement field smoothed on scale R at scale-factor a.
 
 ## C library
 In ccl_halomod.c:

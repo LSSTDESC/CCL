@@ -12,5 +12,6 @@ var searchData=
   ['distances_5ftolerance',['DISTANCES_TOLERANCE',['../namespaceccl__test__distances.html#a24d703f3624b8dbed19048286420f986',1,'ccl_test_distances']]],
   ['distances_5ftolerance_5fclass',['DISTANCES_TOLERANCE_CLASS',['../namespaceccl__test__distances.html#a1ca232f4f29884f49cac06c8238573fd',1,'ccl_test_distances']]],
   ['distances_5ftolerance_5fmnu',['DISTANCES_TOLERANCE_MNU',['../namespaceccl__test__distances.html#a5f8c7c48eb6f00fecddfacef60daece3',1,'ccl_test_distances']]],
-  ['dlnsigma_5fdlogm',['dlnsigma_dlogm',['../structccl__data.html#abbc06d5374095c69022c3ec9532ec146',1,'ccl_data']]]
+  ['dlnsigma_5fdlogm',['dlnsigma_dlogm',['../structccl__data.html#abbc06d5374095c69022c3ec9532ec146',1,'ccl_data']]],
+  ['dn_5finformation',['dN_information',['../structnorm__params.html#ae0fd83adc177602d32bd25a2bf800f42',1,'norm_params']]]
 ];
