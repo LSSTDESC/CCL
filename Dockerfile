@@ -7,15 +7,15 @@ RUN apt-get install -y libgsl-dev libfftw3-dev
 RUN pip install numpy scipy matplotlib jupyter
 
 # Installing CCL C library
-RUN git clone https://github.com/LSSTDESC/CCL && cd CCL && \
-    mkdir -p build && (cd build; cmake .. ; make install)
+RUN git clone https://github.com/LSSTDESC/CCL && cd CCL && git checkout changelog && \
+    mkdir -p build && (cd build; cmake .. ; make; make install)
 
 # Installing CCL Python module
-RUN pip install git+git://github.com/LSSTDESC/CCL.git
+RUN cd CCL && python setup.py install
 
 ENV LD_LIBRARY_PATH /usr/local/lib
 ENV PKG_CONFIG_PATH /usr/local/lib/pkgconfig
 
-WORKDIR /home/CCL
+WORKDIR /CCL
 
 CMD jupyter notebook --no-browser --allow-root --port=8888 --ip=0.0.0.0
