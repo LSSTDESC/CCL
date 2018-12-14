@@ -106,8 +106,8 @@ def test_redshift_numerical():
     # Do the integral in question directly in numpy at high precision
     zmin = 0.
     zmax = 1.
-    zp = np.linspace(zmin, zmax, 1e4)
-    zs = np.linspace(0., 5., 1e4) # Assume any dNdz does not extend 
+    zp = np.linspace(zmin, zmax, 10000)
+    zs = np.linspace(0., 5., 10000) # Assume any dNdz does not extend 
     # above z=5
     denom_zp_1 =np.asarray([np.trapz(pz1(zp, z, []), zp) for z in zs])
     denom_zp_2 =np.asarray([np.trapz(pz2(zp, z, []), zp) for z in zs])

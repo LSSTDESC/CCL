@@ -17,9 +17,11 @@ var searchData=
   ['accelerator_5fk',['accelerator_k',['../structccl__data.html#af4d4a86009087a7fd3013885cc2811b1',1,'ccl_data']]],
   ['accelerator_5fm',['accelerator_m',['../structccl__data.html#a80406bf4aa0f060bedc245b2b960c547',1,'ccl_data']]],
   ['achi',['achi',['../structccl__data.html#a0b1087588bd517142a5b6f8c352218e0',1,'ccl_data']]],
+  ['alpha',['alpha',['../structsmail__params.html#acd8cd1e6aa420da9133e41207c675811',1,'smail_params']]],
   ['alphab',['alphab',['../structeh__struct.html#a623316721501ca221093de25e216ac9f',1,'eh_struct']]],
   ['alphac',['alphac',['../structeh__struct.html#a58de15592e924e87fe1b838599579a70',1,'eh_struct']]],
   ['alphahmf',['alphahmf',['../structccl__data.html#ad7fad40bf36fed46f5879104247de00b',1,'ccl_data']]],
   ['args',['args',['../namespacerun__tests.html#a5b1510476d0793c7c91a6e0f733d7c29',1,'run_tests']]],
-  ['argv',['argv',['../namespaceccl__test__power.html#a1b5fdf14c4f06d4a8722a7c41d8dbe1a',1,'ccl_test_power.argv()'],['../namespacerun__tests.html#a8a7b00d6f8aa6bda446535ba55c777fe',1,'run_tests.argv()']]]
+  ['argv',['argv',['../namespaceccl__test__power.html#a1b5fdf14c4f06d4a8722a7c41d8dbe1a',1,'ccl_test_power.argv()'],['../namespacerun__tests.html#a8a7b00d6f8aa6bda446535ba55c777fe',1,'run_tests.argv()']]],
+  ['avec',['avec',['../namespacetest__neutrino3p04__emu.html#ab8c4bce75a1656e3bd59c06088e516eb',1,'test_neutrino3p04_emu']]]
 ];

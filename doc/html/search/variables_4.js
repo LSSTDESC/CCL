@@ -2,6 +2,8 @@ var searchData=
 [
   ['e',['E',['../structccl__data.html#a6e2b679360c102f536705767dcce3f87',1,'ccl_data']]],
   ['ell0',['ell0',['../structcorr__int__par.html#a02759f9e9fe2db38ec73bfddc5587a76',1,'corr_int_par']]],
+  ['ell_5fmax_5fcorr',['ELL_MAX_CORR',['../structccl__spline__params.html#a3407f2c11713c908ee9e5b6d8c36a1ac',1,'ccl_spline_params']]],
+  ['ell_5fmin_5fcorr',['ELL_MIN_CORR',['../structccl__spline__params.html#ab5be4e564bbd28fc51ffcbb0797957d5',1,'ccl_spline_params']]],
   ['ellf',['ellf',['../structcorr__int__par.html#aeca683439bd6397d99317d39477b3c23',1,'corr_int_par']]],
   ['emulator_5fneutrinos_5fmethod',['emulator_neutrinos_method',['../structccl__configuration.html#a26c550f4cdb6dd645edd568e6ad84948',1,'ccl_configuration']]],
   ['epsrel',['EPSREL',['../structccl__gsl__params.html#adb9fee16dc600f05838baead9d45bc12',1,'ccl_gsl_params']]],

@@ -6,9 +6,9 @@ var searchData=
   ['th2p7',['th2p7',['../structeh__struct.html#afd9583995f4670685035d05749c385f0',1,'eh_struct']]],
   ['tilt0',['tilt0',['../structcorr__int__par.html#afd5c7f46c3055457c5c01288aa686d74',1,'corr_int_par']]],
   ['tiltf',['tiltf',['../structcorr__int__par.html#a713ce7a30183713e4ed13509253c0299',1,'corr_int_par']]],
+  ['tolerance',['TOLERANCE',['../namespaceccl__test__redshifts.html#ad867df656798ce3f541052449522b8f2',1,'ccl_test_redshifts']]],
   ['tracer_5ftype',['tracer_type',['../struct_c_c_l___cl_tracer.html#a782f0812a2c0ebf86f9dda4d2d893507',1,'CCL_ClTracer']]],
   ['transfer_5ffns',['transfer_fns',['../namespaceccl__test__power.html#a540d8a33297c93fd4d595c7007e5e929',1,'ccl_test_power']]],
   ['transfer_5ffunction_5fmethod',['transfer_function_method',['../structccl__configuration.html#aad3d79052deba5c55552e6fd70a5a1ec',1,'ccl_configuration']]],
-  ['ttname',['ttname',['../structctest.html#a18c814d874c53cd386192525a2045954',1,'ctest']]],
-  ['type_5f',['type_',['../structd_ndz__sources__params.html#aee0b6e213d196aa6193c2329c2e2d115',1,'dNdz_sources_params::type_()'],['../structnorm__params.html#afa0ed267c2014bc4e6d983f69372406f',1,'norm_params::type_()']]]
+  ['ttname',['ttname',['../structctest.html#a18c814d874c53cd386192525a2045954',1,'ctest']]]
 ];

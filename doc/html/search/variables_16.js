@@ -6,5 +6,5 @@ var searchData=
   ['zdrag',['zdrag',['../structeh__struct.html#af3d1d22e42cdf316b3572a9149d98596',1,'eh_struct']]],
   ['zeq',['zeq',['../structeh__struct.html#a115be04402be00203663cbf0cdeb6ccc',1,'eh_struct']]],
   ['zmax',['zmax',['../struct_c_c_l___cl_tracer.html#ad7a6c9c9f67c153a04a047fcc65a7512',1,'CCL_ClTracer']]],
-  ['zmin',['zmin',['../struct_c_c_l___cl_tracer.html#ae44938293ee360a536f3bfd2bb9570c4',1,'CCL_ClTracer::zmin()'],['../struct_c_c_l___cl_workspace.html#a286cd54578e4ada8a9147b1fcab35857',1,'CCL_ClWorkspace::zmin()']]]
+  ['zmin',['zmin',['../struct_c_c_l___cl_tracer.html#ae44938293ee360a536f3bfd2bb9570c4',1,'CCL_ClTracer']]]
 ];
