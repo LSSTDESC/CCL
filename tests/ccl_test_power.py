@@ -1,6 +1,7 @@
 import numpy as np
+from numpy.testing import dec as decorators
 from numpy.testing import assert_raises, assert_warns, assert_no_warnings, \
-                          assert_, decorators, run_module_suite
+                          assert_, run_module_suite
 import pyccl as ccl
 from pyccl import CCLError
 import sys

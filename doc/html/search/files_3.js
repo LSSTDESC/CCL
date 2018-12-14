@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['write_5fclass_5fbenchmark_2ec',['write_CLASS_benchmark.c',['../write___c_l_a_s_s__benchmark_8c.html',1,'']]]
+  ['readme_2emd',['readme.md',['../readme_8md.html',1,'']]],
+  ['run_5ftests_2epy',['run_tests.py',['../run__tests_8py.html',1,'']]]
 ];

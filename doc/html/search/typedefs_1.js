@@ -9,5 +9,7 @@ var searchData=
   ['ccl_5fparameters',['ccl_parameters',['../ccl__core_8h.html#afb5201eda68de31b9d4fed8e490b3e0f',1,'ccl_core.h']]],
   ['ccl_5fspecies_5fx_5flabel',['ccl_species_x_label',['../ccl__background_8h.html#a4234504857419743ba27448ecb7ffc8d',1,'ccl_background.h']]],
   ['ccl_5fspline_5fparams',['ccl_spline_params',['../ccl__params_8h.html#ad9b1ec3df4c5196d16fe519aed2ffa2a',1,'ccl_params.h']]],
+  ['ccl_5ftracer_5ffunc_5ft',['ccl_tracer_func_t',['../ccl__cls_8h.html#a2c5378a71a12307c8ad49d72b25e6d23',1,'ccl_cls.h']]],
+  ['ccl_5ftracer_5ft',['ccl_tracer_t',['../ccl__cls_8h.html#ae9cffa03bd70ee729a29166964f79538',1,'ccl_cls.h']]],
   ['ccl_5fwin_5flabel',['ccl_win_label',['../ccl__halomod_8h.html#a950e7f2ae51dd6c8131f0d7c55558439',1,'ccl_halomod.h']]]
 ];

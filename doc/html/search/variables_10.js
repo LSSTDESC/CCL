@@ -9,7 +9,6 @@ var searchData=
   ['spl_5fpz',['spl_pz',['../struct_int_lens_par.html#af03176bfdcc66117c6317bf3a21d4eb2',1,'IntLensPar::spl_pz()'],['../struct_int_mag_par.html#a9711181f7691f7270f82075dd3e383a1',1,'IntMagPar::spl_pz()']]],
   ['spl_5frf',['spl_rf',['../struct_c_c_l___cl_tracer.html#a9895e56acfba92f8448a68acbf32c495',1,'CCL_ClTracer']]],
   ['spl_5fsz',['spl_sz',['../struct_int_mag_par.html#a18d0a9ebe5e5ed4fbb945e52ef5c7be7',1,'IntMagPar::spl_sz()'],['../struct_c_c_l___cl_tracer.html#a05f318f42d39d6fcb15dbb7ca23c45eb',1,'CCL_ClTracer::spl_sz()']]],
-  ['spl_5ftransfer',['spl_transfer',['../struct_c_c_l___cl_tracer.html#a3681f7e05d509e38357eddbf85ce3aac',1,'CCL_ClTracer']]],
   ['spl_5fwl',['spl_wL',['../struct_c_c_l___cl_tracer.html#abae070ecb7e732d57565472d37b89604',1,'CCL_ClTracer']]],
   ['spl_5fwm',['spl_wM',['../struct_c_c_l___cl_tracer.html#aa631eb8b59ffa185566d445558992958',1,'CCL_ClTracer']]],
   ['spline',['spline',['../struct_spl_par.html#ae8f88172b1b5531e97049f3996734d61',1,'SplPar']]],

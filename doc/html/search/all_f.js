@@ -1,5 +1,10 @@
 var searchData=
 [
+  ['p1',['p1',['../namespacetest__neutrino3p04__emu.html#aba118a45ebd63ce00b0cf57a7d24cb47',1,'test_neutrino3p04_emu']]],
+  ['p2',['p2',['../namespacetest__neutrino3p04__emu.html#ae38bd5e89826b602a0e4afa45e901cf2',1,'test_neutrino3p04_emu']]],
+  ['p3',['p3',['../namespacetest__neutrino3p04__emu.html#abc3174dd87e66d5848d9388b72778e8d',1,'test_neutrino3p04_emu']]],
+  ['p3p04',['p3p04',['../namespacetest__neutrino3p04__emu.html#a5a60bda8e1cc737d68ac73e9627c03b0',1,'test_neutrino3p04_emu']]],
+  ['p3p046',['p3p046',['../namespacetest__neutrino3p04__emu.html#a047f6b27f49c4776e73967b3ca976bae',1,'test_neutrino3p04_emu']]],
   ['p_5flin',['p_lin',['../structccl__data.html#aa965346f6aa1fe399a7a0d759fb85312',1,'ccl_data']]],
   ['p_5fnl',['p_nl',['../structccl__data.html#ad55e7ec9ee6a6d8ad95b3c9eb1eef92b',1,'ccl_data']]],
   ['params',['params',['../structccl__cosmology.html#ad58413720be45a206716254d9c1cc923',1,'ccl_cosmology']]],
@@ -11,7 +16,11 @@ var searchData=
   ['pnl_5fspline_5ftype',['PNL_SPLINE_TYPE',['../ccl__constants_8h.html#acce559487718e5f9706b85d57b6209c6',1,'ccl_constants.h']]],
   ['power_5fnu_5ftol',['POWER_NU_TOL',['../ccl__test__power__nu_8c.html#a998d4dbffa831cfa565bf8a83a453d7c',1,'ccl_test_power_nu.c']]],
   ['prefac_5flensing',['prefac_lensing',['../struct_c_c_l___cl_tracer.html#ae8f4fab867f33693c511b4faa5040844',1,'CCL_ClTracer']]],
-  ['ps',['PS',['../ccl__3dcorr__sample_8c.html#ad7f630556c2cd30d8d8976e0f6e7f749',1,'PS():&#160;ccl_3dcorr_sample.c'],['../ccl__corr__sample_8c.html#ad7f630556c2cd30d8d8976e0f6e7f749',1,'PS():&#160;ccl_corr_sample.c']]],
+  ['ps',['PS',['../ccl__3dcorr__sample_8c.html#ad7f630556c2cd30d8d8976e0f6e7f749',1,'PS():&#160;ccl_3dcorr_sample.c'],['../ccl__corr__sample_8c.html#ad7f630556c2cd30d8d8976e0f6e7f749',1,'PS():&#160;ccl_corr_sample.c'],['../ccl__sample___omnu_8c.html#ad7f630556c2cd30d8d8976e0f6e7f749',1,'PS():&#160;ccl_sample_Omnu.c'],['../ccl__test__correlation__3dbis_8c.html#ad7f630556c2cd30d8d8976e0f6e7f749',1,'PS():&#160;ccl_test_correlation_3dbis.c'],['../pxi__fidtest_8c.html#ad7f630556c2cd30d8d8976e0f6e7f749',1,'PS():&#160;pxi_fidtest.c'],['../pxi__test_8c.html#ad7f630556c2cd30d8d8976e0f6e7f749',1,'PS():&#160;pxi_test.c']]],
+  ['pxi_5ffidtest_2ec',['pxi_fidtest.c',['../pxi__fidtest_8c.html',1,'']]],
+  ['pxi_5ftest_2ec',['pxi_test.c',['../pxi__test_8c.html',1,'']]],
   ['pycosmo',['PYCOSMO',['../namespaceccl__test__swig__interface.html#abc24f5e95297d21e2f05fc865e056c99',1,'ccl_test_swig_interface']]],
+  ['pz_5finfo',['pz_info',['../structpz__info.html',1,'']]],
+  ['pz_5finformation',['pz_information',['../structpz__params.html#a5d8a16c566f118a07c58d5e4e67e0963',1,'pz_params::pz_information()'],['../structnorm__params.html#a8a5df03d132c8f5ccbbe582a38a91e52',1,'norm_params::pz_information()']]],
   ['pz_5fparams',['pz_params',['../structpz__params.html',1,'']]]
 ];
