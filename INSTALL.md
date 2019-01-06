@@ -187,6 +187,10 @@ export CC=gcc
 export CLASS_PARAM_DIR=your_ccl_path/CCL/build/extern/share/class/
 ```
 or add this to your `.bashrc`.
+3. In some systems (for example, NERSC) the `-ffast-math` compiler flag used to compile CLASS will cause segfaults. To avoid this, you can disable this flag by adding `-DCLASS_NO_FFAST_MATH=ON` when calling `cmake` from the `build` directory. I.e.:
+```sh
+$ cmake -DCLASS_NO_FFAST_MATH=ON < any other -D cmake flags > ..
+```
 
 ## Development workflow
 
