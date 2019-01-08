@@ -1202,11 +1202,16 @@ only $9.0 \times 10^{-3}$, or 0.024\% of the peak height. The results are shown 
 \label{fig:benchmark_xi}
 \end{figure*}
 %
+
 To further validate the $P(k) \to \xi(r)$ transform we performed a test using an analytical function $\xi(r) = (r / r_0)^a$, whose inverse transform $P(k)$
 has a known analytic form. We used $r_0 = 5$~Mpc$^{-1}$ and $a = -1.67$, which gives a rough approximation to the actual 3d correlation function.
 We then compared the CCL calculation of $\xi(r)$ to the known analytic result. The relative difference $\Delta \xi(r) / \xi(r)$ was found to be
 less than 0.3\% in the range $2 < r < 250$~Mpc rising to about 5\% at $r = 1000$~Mpc (see Fig.~\ref{fig:analytic_xi}). For $r=0.1-0.8$~Mpc the relative difference is $\approx$8\%. The accuracy at low and high distances can be improved by increasing the range over which the power spectrum splines are evaluated.
 %
+
+The redshift-space correlation function was validated by comparing with CosmoMAD~\footnote{\tt{https://github.com/damonge/CosmoMAD}}. We computed the relative difference in $\xi(s)$ and the absolute difference in $s^2 \xi(s)$ for the range $0.1 < s < 250$~Mpc and we find agreement to within $5.3 \times 10^{-3}$ for the relative difference and $5.8 \times 10^{-2}$  for the absolute difference. This corresponds to 0.1\% of the BAO peak value of $s^2 \xi(s)$.
+In the region of the BAO peak the absolute difference is only $1.8 \times 10^{-2}$, corresponding to  0.03\% of the peak height.
+
 \begin{figure*}[htbp]
 \centering
 \includegraphics[width=0.47\textwidth]{analytic_xi}
