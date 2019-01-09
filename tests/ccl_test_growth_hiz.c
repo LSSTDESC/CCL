@@ -3,8 +3,8 @@
 #include <stdio.h>
 #include <math.h>
 
-// The tolerance in D(z) for all the
-#define GROWTH_HIZ_TOLERANCE 1.0e-4
+// The tolerance in D(z) 
+#define GROWTH_HIZ_TOLERANCE 6.0e-6
 
 CTEST_DATA(growth_hiz) {
   double Omega_c;
@@ -113,7 +113,8 @@ static void compare_growth_hiz(int model, struct growth_hiz_data * data)
   // Make the parameter set from the input data
   // Values of some parameters depend on the model index
   ccl_parameters params = ccl_parameters_create(data->Omega_c, data->Omega_b, data->Omega_k[model], data->Neff, data->mnu, data->mnu_type, data->w_0[model], data->w_a[model], data->h, data->A_s, data->n_s,-1,-1,-1,data->mu_0[model], data->sigma_0[model],-1,NULL,NULL, &status);
-  params.Omega_g=0;
+  params.Omega_g=0; //enforce no radiation
+  params.Omega_l = 1.-params.Omega_m-params.Omega_k; //reomcpute Omega_l without radiation
   // Make a cosmology object from the parameters with the default configuration
   ccl_cosmology * cosmo = ccl_cosmology_create(params, default_config);
   ASSERT_NOT_NULL(cosmo);

@@ -1,0 +1,67 @@
+# =============================================================================
+# authors.csv
+#
+# While we wait for the LSST DESC publications system to generate files
+# like this from its database, we'll need to edit authors.csv by hand.
+# Below are some example entries.
+#
+# Notes:
+#   - If someone has two affiliations, they get two rows, and the last row is
+#     is used for their contribution.
+#   - mkauthlist cannot deal with empty rows, so please avoid them!
+#   - Try to make your one-sentence contribution statement as informative as
+#     possible, so that it's clear who did what.
+#   - The contribution statement is a _summary of your impact on the project_,
+#     not a _timecard_. So, if you spent 90% of your time debugging, but 10%
+#     of your time designing and implementing the framework that then needed
+#     debugging, your statement should emphasize the design and implementation
+#     rather than the debugging.
+#   - BUG: contributions are re-formatted by mkauthlist into Title case,
+#     removing all other capitalizations. Sorry about this!
+#
+# Example rows for you to adapt:
+#
+# Drlica-Wagner,Alex,A.~Drlica-Wagner,Contact,"Fermi National Accelerator Laboratory, P. O. Box 500, Batavia, IL 60510, USA","Developed algorithms for switching between document styles and generating author lists, implemented and tested software.",kadrlica@fnal.gov
+# Marshall,Phil,P.~Marshall,Contributor,"SLAC National Accelerator Laboratory, Menlo Park, CA 94025, USA","Initiated and led project.",dr.phil.marshall@gmail.com
+# Marshall,Phil,P.~Marshall,Contributor,"Kavli Institute for Particle Astrophysics \& Cosmology, P. O. Box 2450, Stanford University, Stanford, CA 94305, USA","Initiated and led project, designed templates, tested system.",dr.phil.marshall@gmail.com
+# Digel,Seth,S.~Digel,Builder,"SLAC National Accelerator Laboratory, Menlo Park, CA 94025, USA","Advised on LSST DESC publication system requirements.",digel@stanford.edu
+# Digel,Seth,S.~Digel,Builder,"Kavli Institute for Particle Astrophysics \& Cosmology, P. O. Box 2450, Stanford University, Stanford, CA 94305, USA","Advised on LSST DESC publication system requirements.",digel@stanford.edu
+#
+# =============================================================================
+Lastname,Firstname,Authorname,AuthorType,Affiliation,Contribution,Email
+Chisari,Elisa,"Nora Elisa Chisari",Contributor,"Department of Physics, University of Oxford, Denys Wilkinson Building, Keble Road, Oxford OX1 3RH, United Kingdom","Co-led project, coordinated hack projects \& communication, contributed to: correlation function \& power spectrum implementation, documentation, and comparisons with benchmarks.",elisa.chisari@physics.ox.ac.uk
+Alonso,David,"David Alonso",Contributor,"School of Physics and Astronomy, Cardiff University, The Parade, Cardiff, CF24 3AA, United Kingdom","Co-led project; developed structure for angular power spectra; implemented autotools; integrated into LSS pipeline; contributed to: background, power spectrum, mass function, documentation and benchmarks; reviewed code.",david.alonso@physics.ox.ac.uk
+Alonso,David,"David Alonso",Contributor,"Department of Physics, University of Oxford, Denys Wilkinson Building, Keble Road, Oxford OX1 3RH, United Kingdom","Co-led project; developed structure for angular power spectra; implemented autotools; integrated into LSS pipeline; contributed to: background, power spectrum, mass function, documentation and benchmarks; reviewed code",david.alonso@physics.ox.ac.uk
+Krause,Elisabeth,Elisabeth Krause,Contributor,"Steward Observatory/Department of Astronomy, University of Arizona, 933 North Cherry Avenue, Tucson, AZ 85721, USA",Initiated and co-led project; developed CLASS interface and error handling; contributed to other code; reviewed pull requests.,lise@slac.stanford.edu
+Krause,Elisabeth,Elisabeth Krause,Contributor,"Kavli Institute for Particle Astrophysics and Cosmology, Stanford, CA 94305-4085, USA",Initiated and co-led project; developed CLASS interface and error handling; contributed to other code; reviewed pull requests.,lise@slac.stanford.edu
+Leonard,Danielle,"C. Danielle Leonard",Contributor,"McWilliams Center for Cosmology, Department of Physics, Carnegie Mellon University, Pittsburgh, PA 15213, USA","Wrote and tested code for LSST specifications, user-defined photo-z interface, and support of neutrinos; reviewed other code; wrote text for this note.",danielll@andrew.cmu.edu
+Bull,Philip,"Philip Bull",Contributor,"School of Physics \& Astronomy, Queen Mary University of London, 327 Mile End Road, London E1 4NS, UK","Implemented and documented the Python wrapper; extensive infrastructure work, including maintenance of the build system and unit tests, bug fixes, and code review; enhanced the error handling system; performed power spectrum comparison across parameter space; various architecture/design contributions.",p.bull@qmul.ac.uk
+Bull,Philip,"Philip Bull",Contributor,"Department of Astronomy, University of California Berkeley, Berkeley, CA 94720, USA","Implemented and documented the Python wrapper; extensive infrastructure work, including maintenance of the build system and unit tests, bug fixes, and code review; enhanced the error handling system; performed power spectrum comparison across parameter space; various architecture/design contributions.",p.bull@qmul.ac.uk
+Neveu,J\'er\'emy,"J\'er\'emy Neveu",Contributor,"Laboratoire de l'Acc\'el\'erateur Lin\'eaire, Universit\'e Paris-Sud, CNRS/IN2P3, Universit\'e Paris-Saclay, Orsay, France","Contributed to Angpow, built the interface with CCL and the comparisons with benchmarks.",jneveu@lal.in2p3.fr
+Villarreal,Antonio,"Antonio Villarreal",Contributor,"Argonne National Laboratory, Argonne, IL 60439, USA","Contributed to initial benchmarking, halo mass function code, and general code and issues review.",asv13@pitt.edu
+Singh,Sukhdeep,"Sukhdeep Singh",Contributor,"Berkeley Center for Cosmological Physics and Department of Physics, University of California, Berkeley, California","Contributed to the correlation functions code and weak lensing benchmarks.",sukhdeep1@berkeley.edu
+Singh,Sukhdeep,"Sukhdeep Singh",Contributor,"McWilliams Center for Cosmology, Department of Physics, Carnegie Mellon University, Pittsburgh, PA 15213, USA","Contributed to the correlation functions code and weak lensing benchmarks.",sukhdeep1@berkeley.edu
+McClintock, Thomas, "Thomas McClintock", Contributor, "Department of Physics, University of Arizona, Tucson, AZ 85721, USA","Wrote Python and doxygen documentation.",tmcclintock@email.arizona.edu
+Ellison,John,"John Ellison",Contributor,"Department of Physics and Astronomy, University of California, Riverside, CA 92521, USA","Implemented the 3d correlation function; documentation of 3d correlation function.",john.ellison@ucr.edu
+Du,Zilong,"Zilong Du",Contributor,"Department of Physics and Astronomy, University of California, Riverside, CA 92521, USA","Implemented the 3d correlation function.",zdu011@ucr.edu
+Zuntz,Joe,"Joe Zuntz",Contributor,"Institute for Astronomy, Royal Observatory Edinburgh, Edinburgh EH9 3HJ, UK","Wrote initial infrastructure, C testing setup, and reviewed code.",joezuntz@googlemail.com
+Mead, Alexander, "Alexander Mead", Contributor, "Department of Physics and Astronomy, University of British Columbia, 6224 Agricultural Road, Vancouver, BC V6T 1Z1, Canada", "Wrote halo-model code and documentation", alexander.j.mead@googlemail.com
+Joudaki,Shahab,"Shahab Joudaki",Contributor,"Department of Physics, University of Oxford, Denys Wilkinson Building, Keble Road, Oxford OX1 3RH, United Kingdom","Performed benchmarking of angular power spectra and correlation functions for galaxy clustering, galaxy-galaxy lensing, and cosmic shear (including intrinsic alignments); reviewed all CCL benchmarks; contributed to implementation of background functions and documentation.",shahab.joudaki@physics.ox.ac.uk
+Lorenz,Christiane,"Christiane S. Lorenz",Contributor,"Department of Physics, University of Oxford, Denys Wilkinson Building, Keble Road, Oxford OX1 3RH, United Kingdom","Contributed to accurate high-redshift cosmological background quantities and benchmarked background splines.",christiane.lorenz@physics.ox.ac.uk
+Tr\"oster,Tilman,Tilman Tr\"oster,Contributor,"Institute for Astronomy, Royal Observatory Edinburgh, Edinburgh EH9 3HJ, UK","Wrote code for user-changable precision parameters and distance tests, found and fixed bugs.",ttr@roe.ac.uk
+Sanchez,Javier,"Javier Sanchez",Contributor,"Department of Physics and Astronomy, University of California, Irvine, CA 92697, USA","Modified setup.py to allow pip installation and uninstall.",francs1@uci.edu
+Lanusse,Francois,"Francois Lanusse",Contributor,"McWilliams Center for Cosmology, Department of Physics, Carnegie Mellon University, Pittsburgh, PA 15213, USA","Contributed to improving installation options.",flanusse@andrew.cmu.edu
+Ishak, Mustapha,"Mustapha Ishak",Contributor,"Department of Physics, The University of Texas at Dallas, Richardson, TX 75083, USA","Contributed to planning of code capabilities and structure; reviewed code; identified bugs and wrote code to fix them; wrote text for this note.",mishak@utdallas.edu
+Hlozek,Ren\'ee,"Ren\'ee Hlozek",Contributor,"Dunlap Institute for Astronomy and Astrophysics \& Department for Astronomy and Astrophysics, University of Toronto, ON M5S 3H4", "Contributed initial code for error handling structures, reviewed other code edits.", hlozek@dunlap.utoronto.ca
+Blazek,Jonathan,"Jonathan Blazek",Contributor,"Center for Cosmology and Astroparticle Physics, Ohio State, Columbus, OH 43210, USA","Planning capabilities and structure; documentation, review, and testing.",blazek@berkeley.edu
+Blazek,Jonathan,"Jonathan Blazek",Contributor,"SNSF Ambizione, Laboratory of Astrophysics, \'Ecole Polytechnique F\'ed\'erale de Lausanne (EPFL), 1290 Versoix, Switzerland","Planning capabilities and structure; documentation, review, and testing.",blazek@berkeley.edu
+Campagne,Jean-Eric,"Jean-Eric Campagne",Contributor,"Laboratoire de l'Acc\'el\'erateur Lin\'eaire, Universit\'e Paris-Sud, CNRS/IN2P3, Universit\'e Paris-Saclay, Orsay, France","Angpow main builder.",campagne@lal.in2p3.fr
+Almoubayyed,Husni,"Husni Almoubayyed",Contributor,"McWilliams Center for Cosmology, Department of Physics, Carnegie Mellon University, Pittsburgh, PA 15213, USA", "Reviewed code/contributed to example notebooks and issues.",halmouba@andrew.cmu.edu.
+Eifler,Tim,Tim Eifler,Contributor,"Steward Observatory/Department of Astronomy, University of Arizona, 933 North Cherry Avenue, Tucson, AZ 85721, USA",Reviewed/tested code.,timeifler@gmail.com
+Eifler,Tim,Tim Eifler,Contributor,"Jet Propulsion Laboratory, California Institute of Technology, Pasadena, CA 91109, USA",Reviewed/tested code.,timeifler@gmail.com
+Kirby, Matthew, "Matthew Kirby", Contributor, "Department of Physics, University of Arizona, Tucson, AZ 85721, USA","Performed comparison of physical constants.",matthewkirby@email.arizona.edu
+Kirkby,David,"David Kirkby",Contributor,"Department of Physics and Astronomy, University of California, Irvine, CA 92697, USA","Writing, testing and reviewing code. Asking questions.",dkirkby@uci.edu
+Plaszczynski,St\'ephane,"St\'ephane Plaszczynski",Contributor,"Laboratoire de l'Acc\'el\'erateur Lin\'eaire, Universit\'e Paris-Sud, CNRS/IN2P3, Universit\'e Paris-Saclay, Orsay, France","Contributed to Angpow.",plaszczy@lal.in2p3.fr
+Slosar,Anze,"An\v{z}e Slosar",Contributor,"Brookhaven National Laboratory, Physics Department, Upton, NY 11973, USA","Wrote and reviewed code.",anze@bnl.gov
+Vrastil,Michal,"Michal Vrastil",Contributor,"Institute of Physics CAS, Prague, 182 21, CZ","Wrote documentation and example code, reviewed code.",vrastil@fzu.cz
+Wagoner,Erika,"Erika L. Wagoner",Contributor,"Department of Physics, University of Arizona, Tucson, AZ 85721, USA","Set up logarithmic binning in wave number.",wagoner47@email.arizona.edu

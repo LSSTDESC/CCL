@@ -1,11 +1,8 @@
 /** @file */
-#ifdef __cplusplus
-extern "C" {
-#endif
+#ifndef __CCL_MASSFUNC_H_INCLUDED__
+#define __CCL_MASSFUNC_H_INCLUDED__
 
-#pragma once
-
-#include "ccl_core.h"
+CCL_BEGIN_DECLS
 
 /*
  * Computes sigma(R), the power spectrum normalization, over log-spaced values of mass and radii
@@ -15,14 +12,6 @@ extern "C" {
  * For specific cases see documentation for ccl_error.
  */
 void ccl_cosmology_compute_sigma(ccl_cosmology *cosmo, int *status);
-
-/*
- * Updates Tinker mass function fitting formulas for specific Delta
- * @param cosmo Cosmological parameters
- * @param status Status flag. 0 if there are no errors, nonzero otherwise.
- * For specific cases see documentation for ccl_error.
- */
-void ccl_cosmology_compute_hmfparams(ccl_cosmology *cosmo, int *status);
 
 // TODO: smooth_mass is not really correct in this function, tho it makes sense in compute_sigma
 /*
@@ -100,7 +89,7 @@ double ccl_sigmaM(ccl_cosmology *cosmo, double smooth_mass, double a, int *statu
  * @param status Status flag. 0 if there are no errors, nonzero otherwise.
  */
 double r_delta(ccl_cosmology *cosmo, double halomass, double a, double odelta, int *status);
-  
-#ifdef __cplusplus
-}
+
+CCL_END_DECLS
+
 #endif

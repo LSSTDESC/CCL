@@ -1,7 +1,11 @@
 var searchData=
 [
-  ['y0',['y0',['../struct_spl_par.html#a49d3136602dec3eff0bfd5c631615cb0',1,'SplPar']]],
-  ['yf',['yf',['../struct_spl_par.html#a3e483146b3649beeaa42e854f7b7a386',1,'SplPar']]],
-  ['your_5fpz_5ffunc',['your_pz_func',['../structuser__pz__info.html#a9856b389a2d21b6c04c4cc356d154328',1,'user_pz_info']]],
-  ['your_5fpz_5fparams',['your_pz_params',['../structuser__pz__info.html#a5e94fb6fc2858efc5233a864836d9e70',1,'user_pz_info']]]
+  ['z0',['z0',['../structsmail__params.html#a41e25302d48c03f63cfdfcae8c19789a',1,'smail_params']]],
+  ['z_5fmgrowth',['z_mgrowth',['../structccl__parameters.html#a32c039c86113132e1a7c7a1d2a109ba2',1,'ccl_parameters']]],
+  ['z_5fstar',['z_star',['../structccl__parameters.html#a9d8e2f05bbb7d49baa63171c4fc5ec4d',1,'ccl_parameters']]],
+  ['z_5ftrue',['z_true',['../structpz__params.html#a3da0c3d23be2e3d319a506fa6e8a995a',1,'pz_params']]],
+  ['zdrag',['zdrag',['../structeh__struct.html#af3d1d22e42cdf316b3572a9149d98596',1,'eh_struct']]],
+  ['zeq',['zeq',['../structeh__struct.html#a115be04402be00203663cbf0cdeb6ccc',1,'eh_struct']]],
+  ['zmax',['zmax',['../struct_c_c_l___cl_tracer.html#ad7a6c9c9f67c153a04a047fcc65a7512',1,'CCL_ClTracer']]],
+  ['zmin',['zmin',['../struct_c_c_l___cl_tracer.html#ae44938293ee360a536f3bfd2bb9570c4',1,'CCL_ClTracer']]]
 ];

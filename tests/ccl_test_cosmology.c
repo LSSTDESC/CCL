@@ -2,7 +2,7 @@
 #include "ctest.h"
 
 // We can define any constants we want to use in a set of tests here.
-// They are accessible as data->Omega_c, etc., in the tests themselves below. 
+// They are accessible as data->Omega_c, etc., in the tests themselves below.
 // "params" is the name of the whole suite of tests.
 CTEST_DATA(cosmology) {
   double Omega_c;
@@ -45,36 +45,15 @@ CTEST_SETUP(cosmology) {
 // Check to see if general ccl_cosmology struct is initialized correctly
 CTEST2(cosmology, create_general_cosmo) {
   ccl_configuration config = default_config;
-  
-  // Initialize ccl_cosmology struct
-  ccl_cosmology * cosmo = ccl_cosmology_create_with_params(data->Omega_c, data->Omega_b, data->Omega_k, 
-							   data->Neff, &(data->mnuval), data->mnu_type,
-							   data->w0, data->wa, data->h, data->A_s, data->n_s,
-							   -1,-1,-1, data->mu_0, data->sigma_0,-1, NULL, NULL, config, &(data->status));
-  
-  // Pull ccl_parameters object out of ccl_cosmology
-  ccl_parameters params = (*cosmo).params;
-  
-  ASSERT_DBL_NEAR_TOL(params.Omega_c, data->Omega_c, 1e-10);
-  ASSERT_DBL_NEAR_TOL(params.w0, -1.0, 1e-10);
-  ASSERT_DBL_NEAR_TOL(params.wa, data->wa, 1e-10);
-  ASSERT_DBL_NEAR_TOL(params.bcm_etab, 0.5, 1e-10);
-  ASSERT_DBL_NEAR_TOL((params.mnu)[0], data->mnuval, 1e-10);
-}
+  ccl_parameters params = ccl_parameters_create_flat_lcdm(
+    data->Omega_c, data->Omega_b, data->h, data->A_s, data->n_s,
+    &(data->status));
 
-// Check to see if LCDM ccl_cosmology struct is initialized correctly
-CTEST2(cosmology, create_lcdm_cosmo) {
-  ccl_configuration config = default_config;
-  
+
   // Initialize ccl_cosmology struct
-  ccl_cosmology * cosmo = ccl_cosmology_create_with_lcdm_params(data->Omega_c, data->Omega_b, data->Omega_k,
-								data->h,data->A_s, data->n_s, config,
-								&(data->status));
-  
-  // Pull ccl_parameters object out of ccl_cosmology
-  ccl_parameters params = (*cosmo).params;
-  
-  ASSERT_DBL_NEAR_TOL(params.Omega_c, data->Omega_c, 1e-10);
-  ASSERT_DBL_NEAR_TOL(params.w0, -1.0, 1e-10);
-  ASSERT_DBL_NEAR_TOL(params.wa, 0.0, 1e-10);
+  ccl_cosmology * cosmo = ccl_cosmology_create(params, config);
+
+  // test a few critical things
+  ASSERT_EQUAL(cosmo->status, 0);
+  ASSERT_DBL_NEAR_TOL(cosmo->data.growth0, 1., 1e-10);
 }

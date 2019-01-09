@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <math.h>
 
-#define EH_TOLERANCE 1.0E-4
+#define EH_TOLERANCE 1.0E-5
 
 CTEST_DATA(eh) {
   double Omega_c;
@@ -76,11 +76,11 @@ static void compare_eh(int i_model,struct eh_data * data)
 						data->h,data->A_s,data->n_s,-1,-1,-1,data->mu_0, data->sigma_0, -1,NULL,NULL, &status);
   params.sigma8=data->sigma8;
   params.Omega_g=0;
+  params.Omega_l=data->Omega_v[i_model-1];
   ccl_cosmology * cosmo = ccl_cosmology_create(params, config);
   ASSERT_NOT_NULL(cosmo);
   
   sprintf(fname,"./tests/benchmark/model%d_pk_eh.txt",i_model);
-  //  sprintf(fname,"./tests/benchmark/model%d_pk_eh_ekrause.txt",i_model);
   f=fopen(fname,"r");
   if(f==NULL) {
     fprintf(stderr,"Error opening file %s\n",fname);

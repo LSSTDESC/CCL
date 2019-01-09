@@ -71,11 +71,12 @@ $(function() {
 <div class="title">ccl_error.c File Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><code>#include &quot;<a class="el" href="ccl__core_8h_source.html">ccl_core.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="ccl__error_8h_source.html">ccl_error.h</a>&quot;</code><br />
-<code>#include &quot;math.h&quot;</code><br />
-<code>#include &quot;stdio.h&quot;</code><br />
-<code>#include &quot;stdlib.h&quot;</code><br />
+<div class="textblock"><code>#include &lt;stdio.h&gt;</code><br />
+<code>#include &lt;stdlib.h&gt;</code><br />
+<code>#include &lt;stdarg.h&gt;</code><br />
+<code>#include &lt;math.h&gt;</code><br />
+<code>#include &lt;gsl/gsl_errno.h&gt;</code><br />
+<code>#include &quot;<a class="el" href="ccl_8h_source.html">ccl.h</a>&quot;</code><br />
 </div><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
@@ -83,8 +84,12 @@ Functions</h2></td></tr>
 <tr class="separator:a2a3f0b4a5242e0449531d67cded51db4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a93eb3407613c1354312da01119778a2c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__error_8c.html#a93eb3407613c1354312da01119778a2c">ccl_set_debug_policy</a> (<a class="el" href="ccl__error_8h.html#a784d183322b75b63d0d21036b6dd0819">CCLDebugModePolicy</a> debug_policy)</td></tr>
 <tr class="separator:a93eb3407613c1354312da01119778a2c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad3732c22f257c6712afba50868baebe9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__error_8c.html#ad3732c22f257c6712afba50868baebe9">ccl_raise_exception</a> (int err, char *msg)</td></tr>
-<tr class="separator:ad3732c22f257c6712afba50868baebe9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a134e3c23cc4c900d937b1894c0771daa"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__error_8c.html#a134e3c23cc4c900d937b1894c0771daa">ccl_raise_exception</a> (int err, const char *msg,...)</td></tr>
+<tr class="separator:a134e3c23cc4c900d937b1894c0771daa"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6a67bba6bd70702d096ed7199dc5cebc"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__error_8c.html#a6a67bba6bd70702d096ed7199dc5cebc">ccl_raise_warning</a> (int err, const char *msg,...)</td></tr>
+<tr class="separator:a6a67bba6bd70702d096ed7199dc5cebc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0b83c849de9b1a52171290a2156a06a5"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__error_8c.html#a0b83c849de9b1a52171290a2156a06a5">ccl_raise_gsl_warning</a> (int gslstatus, const char *msg,...)</td></tr>
+<tr class="separator:a0b83c849de9b1a52171290a2156a06a5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a126e49c08e43673521d219f058e73cff"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__error_8c.html#a126e49c08e43673521d219f058e73cff">ccl_check_status</a> (<a class="el" href="structccl__cosmology.html">ccl_cosmology</a> *cosmo, int *status)</td></tr>
 <tr class="separator:a126e49c08e43673521d219f058e73cff"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9fee933eba8c4acb1743c75da52c7698"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__error_8c.html#a9fee933eba8c4acb1743c75da52c7698">ccl_check_status_nocosmo</a> (int *status)</td></tr>
@@ -139,8 +144,8 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="ad3732c22f257c6712afba50868baebe9"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad3732c22f257c6712afba50868baebe9">&#9670;&nbsp;</a></span>ccl_raise_exception()</h2>
+<a id="a134e3c23cc4c900d937b1894c0771daa"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a134e3c23cc4c900d937b1894c0771daa">&#9670;&nbsp;</a></span>ccl_raise_exception()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -154,8 +159,14 @@ Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">char *&#160;</td>
-          <td class="paramname"><em>msg</em>&#160;</td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname"><em>msg</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>...</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -165,6 +176,76 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 <p>Raise an exception Given a status, give an error message. </p><dl class="section return"><dt>Returns</dt><dd>void </dd></dl>
+
+</div>
+</div>
+<a id="a0b83c849de9b1a52171290a2156a06a5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0b83c849de9b1a52171290a2156a06a5">&#9670;&nbsp;</a></span>ccl_raise_gsl_warning()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ccl_raise_gsl_warning </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>gslstatus</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname"><em>msg</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>...</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Raise a warning based on a GSL error message Given a GSL status, give a warning message. </p><dl class="section return"><dt>Returns</dt><dd>void </dd></dl>
+
+</div>
+</div>
+<a id="a6a67bba6bd70702d096ed7199dc5cebc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6a67bba6bd70702d096ed7199dc5cebc">&#9670;&nbsp;</a></span>ccl_raise_warning()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ccl_raise_warning </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>err</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname"><em>msg</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>...</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Raise a warning Given a status, give a warning message. </p><dl class="section return"><dt>Returns</dt><dd>void </dd></dl>
 
 </div>
 </div>

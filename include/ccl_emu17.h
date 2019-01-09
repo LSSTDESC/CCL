@@ -1,16 +1,12 @@
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-#pragma once
+#ifndef __CCL_EMU17_INCLUDED__
+#define __CCL_EMU17_INCLUDED__
 
 #define A_MIN_EMU 1./3.
 #define K_MAX_EMU 5.0
 #define K_MIN_EMU 1.0000000474974513E-003
+#define NK_EMU 351
 
-#pragma once
-#include "ccl_core.h"
-
+CCL_BEGIN_DECLS
 /**
  * Emulator power spectrum
  * Obtain P(k,z) [Mpc^3] for a given set of input parameters.
@@ -21,6 +17,5 @@ extern "C" {
  */
 void ccl_pkemu(double *xstarin, double **Pkemu, int *status, ccl_cosmology* cosmo);
 
-#ifdef __cplusplus
-}
+CCL_END_DECLS
 #endif

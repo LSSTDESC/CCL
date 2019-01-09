@@ -1,41 +1,34 @@
 %module ccl_neutrinos
 
 %{
-#define SWIG_FILE_WITH_INIT
-#include "../include/ccl_neutrinos.h"
+/* put additional #include here */
 %}
-
-// Strip the ccl_ prefix from function names
-%rename("%(strip:[ccl_])s") "";
-
-// Automatically document arguments and output types of all functions
-%feature("autodoc", "1");
 
 %include "../include/ccl_neutrinos.h"
 
 // Enable vectorised arguments for arrays
 %apply (double* IN_ARRAY1, int DIM1) {(double* a, int na), (double* mnu, int nm)};
-%apply (double* ARGOUT_ARRAY1, int DIM1){(double* output, int nout)};
+%apply (int DIM1, double* ARGOUT_ARRAY1){(int nout, double* output)};
+
+%feature("pythonprepend") Omeganuh2_vec %{
+    if numpy.shape(a) != (nout,):
+        raise CCLError("Input shape for `a` must match `(nout,)`!")
+
+    if numpy.shape(mnu) != (3,):
+        raise CCLError("Input shape for `mnu` must match `(3,)`!")
+%}
 
 %inline %{
 
-void Omeganuh2_vec(int N_nu_mass, double T_CMB,
-                   double* a, int na, 
-                   double* mnu, int nm, 
-                   double* output, int nout,
-                   int* status)
-{
-    assert(nout == na);
-    assert(nm == 3);
+void Omeganuh2_vec(int N_nu_mass, double T_CMB, double* a, int na,
+                   double* mnu, int nm, int nout, double* output, int* status) {
     for(int i=0; i < na; i++){
         output[i] = ccl_Omeganuh2(a[i], N_nu_mass, mnu, T_CMB, NULL, status);
-    }   
+    }
 }
 
 void nu_masses_vec(double OmNuh2, int label, double T_CMB,
-                          double* output, int nout,
-                          int* status)
-{
+                   int nout, double* output, int* status) {
     double* mnu;
     mnu = ccl_nu_masses(OmNuh2, label, T_CMB, status);
     for(int i=0; i < nout; i++){

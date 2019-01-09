@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <math.h>
 
-#define SIGMAM_TOLERANCE 1.0E-4
+#define SIGMAM_TOLERANCE 3.0E-5
 
 CTEST_DATA(sigmam) {
   double Omega_c;
@@ -75,6 +75,9 @@ static void compare_sigmam(int i_model,struct sigmam_data * data)
 						data->w_0[i_model-1],data->w_a[i_model-1],data->h,
 						data->A_s,data->n_s,-1,-1,-1,data->mu_0, data->sigma_0,-1,NULL,NULL, &status);
   params.sigma8=data->sigma8;
+  params.Omega_g=0.;
+  params.Omega_l=data->Omega_v[i_model-1];
+  
   ccl_cosmology * cosmo = ccl_cosmology_create(params, config);
   ASSERT_NOT_NULL(cosmo);
 
@@ -99,8 +102,7 @@ static void compare_sigmam(int i_model,struct sigmam_data * data)
     sm_h=ccl_sigmaM(cosmo,m,1.,&status);
     if (status) printf("%s\n",cosmo->status_message);
     err=sm_h/sm_bench-1;
-    //printf("%le\n", err);
-    ASSERT_DBL_NEAR_TOL(err,0.,1E-4);
+    ASSERT_DBL_NEAR_TOL(err,0.,SIGMAM_TOLERANCE);
   }
   fclose(f);
 

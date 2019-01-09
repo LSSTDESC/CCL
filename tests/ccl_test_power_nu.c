@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <math.h>
 
-#define POWER_NU_TOL 1.0E-4
+#define POWER_NU_TOL 1.0E-3
 
 CTEST_DATA(power_nu) {
   double Omega_c;
@@ -145,23 +145,10 @@ static void compare_power_nu(int i_model,struct power_nu_data * data)
   
   ccl_parameters params;
   
-  if (i_model==1){
-  
-      params = ccl_parameters_create(data->Omega_c, data->Omega_b, data->Omega_k,
-						data->Neff, data->mnu0, data-> mnu_type, 
-						data->w_0[i_model-1], data->w_a[i_model-1],
-						data->h, data->A_s, data->n_s,-1,-1,-1,data->mu_0, data->sigma_0,-1,NULL,NULL, &status);
-  } else if (i_model==2){
-	  params = ccl_parameters_create(data->Omega_c, data->Omega_b, data->Omega_k,
-						data->Neff, data->mnu1, data->mnu_type,
-						data->w_0[i_model-1], data->w_a[i_model-1],
-						data->h, data->A_s, data->n_s,-1,-1,-1,data->mu_0, data->sigma_0,-1,NULL,NULL, &status);
-  } else if (i_model==3){
-	 params = ccl_parameters_create(data->Omega_c, data->Omega_b, data->Omega_k,
-						data->Neff, data->mnu2, data->mnu_type,
-						data->w_0[i_model-1], data->w_a[i_model-1],
-						data->h, data->A_s, data->n_s,-1,-1,-1,data->mu_0, data->sigma_0,-1,NULL,NULL, &status);
-  }
+  params = ccl_parameters_create(data->Omega_c, data->Omega_b, data->Omega_k,data->Neff, 
+		    i_model==1 ? data->mnu0 : i_model==2 ? data->mnu1 : data->mnu2,
+		    data->mnu_type,data->w_0[i_model-1], data->w_a[i_model-1],
+		    data->h, data->A_s, data->n_s,-1,-1,-1,-1,NULL,NULL, &status);
 
   ccl_cosmology * cosmo_linear = ccl_cosmology_create(params, config_linear);
   ASSERT_NOT_NULL(cosmo_linear);
@@ -172,7 +159,7 @@ static void compare_power_nu(int i_model,struct power_nu_data * data)
     fprintf(stderr,"Error opening file %s\n",fname);
     exit(1);
   }
-  nk=linecount(f)-1; rewind(f);
+  nk=linecount(f); rewind(f);
   
   double k=0.,pk_bench=0.,pk_ccl,err, k_h, pk_h;
   double z=0.; //Other redshift checks are possible but not currently implemented
@@ -237,7 +224,7 @@ static void compare_power_nu_nl(int i_model,struct power_nu_nl_data * data)
     fprintf(stderr,"Error opening file %s\n",fname_nl);
     exit(1);
   }
-  nk_nl=linecount(f_nl)-1; rewind(f_nl);
+  nk_nl=linecount(f_nl); rewind(f_nl);
   
   double k=0.,pk_bench=0.,pk_ccl,err, k_h, pk_h;
   double z=0.; //Other redshift checks are possible but not currently implemented

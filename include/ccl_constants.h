@@ -1,10 +1,7 @@
-#ifdef __cplusplus
-extern "C" {
-#endif
+#ifndef __CCL_CONSTANTS_H_INCLUDED__
+#define __CCL_CONSTANTS_H_INCLUDED__
 
-#pragma once
-
-#include "gsl/gsl_const_mksa.h"
+#include <gsl/gsl_const_mksa.h>
 
 //Spline types
 #define A_SPLINE_TYPE gsl_interp_akima
@@ -172,10 +169,5 @@ extern "C" {
  */
 #define EPS_SCALEFAC_GROWTH 1E-6
 
-//LSST specific numbers
-#define Z_MIN_SOURCES 0.1
-#define Z_MAX_SOURCES 3.0
 
-#ifdef __cplusplus
-}
 #endif

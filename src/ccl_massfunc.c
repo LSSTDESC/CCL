@@ -1,17 +1,16 @@
-#include "ccl.h"
-#include "ccl_core.h"
-#include "ccl_utils.h"
-#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 #include <string.h>
-#include "gsl/gsl_integration.h"
-#include "gsl/gsl_interp.h"
-#include "gsl/gsl_spline.h"
-#include "gsl/gsl_errno.h"
-#include "ccl_power.h"
-#include "ccl_error.h"
+
+#include <gsl/gsl_integration.h>
+#include <gsl/gsl_interp.h>
+#include <gsl/gsl_spline.h>
+#include <gsl/gsl_errno.h>
+
+#include "ccl.h"
 #include "ccl_params.h"
+
 
 /*----- ROUTINE: dc_NakamuraSuto -----
 INPUT: cosmology, scale factor
@@ -58,7 +57,9 @@ double r_delta(ccl_cosmology *cosmo, double halomass, double a, double odelta, i
 
 }
 
-void ccl_cosmology_compute_hmfparams(ccl_cosmology *cosmo, int *status)
+// This checks to make sure all necessary halo mass function parameters have been set-up,
+// as well as associated splines.
+static void ccl_cosmology_compute_hmfparams(ccl_cosmology *cosmo, int *status)
 {
   if(cosmo->computed_hmfparams)
     return;
@@ -85,7 +86,7 @@ void ccl_cosmology_compute_hmfparams(ccl_cosmology *cosmo, int *status)
     if (*status) {
       gsl_spline_free(alphahmf);
       *status = CCL_ERROR_SPLINE ;
-      strcpy(cosmo->status_message, "ccl_massfunc.c: ccl_cosmology_compute_hmfparams(): Error creating alpha(D) spline\n");
+      ccl_cosmology_set_status_message(cosmo, "ccl_massfunc.c: ccl_cosmology_compute_hmfparams(): Error creating alpha(D) spline\n");
       return;
     }
 
@@ -95,7 +96,7 @@ void ccl_cosmology_compute_hmfparams(ccl_cosmology *cosmo, int *status)
       gsl_spline_free(alphahmf);
       gsl_spline_free(betahmf);
       *status = CCL_ERROR_SPLINE ;
-      strcpy(cosmo->status_message, "ccl_massfunc.c: ccl_cosmology_compute_hmfparams(): Error creating beta(D) spline\n");
+      ccl_cosmology_set_status_message(cosmo, "ccl_massfunc.c: ccl_cosmology_compute_hmfparams(): Error creating beta(D) spline\n");
       return;
     }
 
@@ -106,7 +107,7 @@ void ccl_cosmology_compute_hmfparams(ccl_cosmology *cosmo, int *status)
       gsl_spline_free(betahmf);
       gsl_spline_free(gammahmf);
       *status = CCL_ERROR_SPLINE ;
-      strcpy(cosmo->status_message, "ccl_massfunc.c: ccl_cosmology_compute_hmfparams(): Error creating gamma(D) spline\n");
+      ccl_cosmology_set_status_message(cosmo, "ccl_massfunc.c: ccl_cosmology_compute_hmfparams(): Error creating gamma(D) spline\n");
       return;
     }
 
@@ -118,7 +119,7 @@ void ccl_cosmology_compute_hmfparams(ccl_cosmology *cosmo, int *status)
       gsl_spline_free(gammahmf);
       gsl_spline_free(phihmf);
       *status = CCL_ERROR_SPLINE ;
-      strcpy(cosmo->status_message, "ccl_massfunc.c: ccl_cosmology_compute_hmfparams(): Error creating phi(D) spline\n");
+      ccl_cosmology_set_status_message(cosmo, "ccl_massfunc.c: ccl_cosmology_compute_hmfparams(): Error creating phi(D) spline\n");
       return;
     }
 
@@ -131,7 +132,7 @@ void ccl_cosmology_compute_hmfparams(ccl_cosmology *cosmo, int *status)
       gsl_spline_free(phihmf);
       gsl_spline_free(etahmf);
       *status = CCL_ERROR_SPLINE ;
-      strcpy(cosmo->status_message, "ccl_massfunc.c: ccl_cosmology_compute_hmfparams(): Error creating eta(D) spline\n");
+      ccl_cosmology_set_status_message(cosmo, "ccl_massfunc.c: ccl_cosmology_compute_hmfparams(): Error creating eta(D) spline\n");
       return;
     }
     if(cosmo->data.accelerator_d==NULL)
@@ -164,7 +165,7 @@ void ccl_cosmology_compute_hmfparams(ccl_cosmology *cosmo, int *status)
     if (*status) {
       gsl_spline_free(alphahmf);
       *status = CCL_ERROR_SPLINE ;
-      strcpy(cosmo->status_message, "ccl_massfunc.c: ccl_cosmology_compute_hmfparams(): Error creating alpha(D) spline\n");
+      ccl_cosmology_set_status_message(cosmo, "ccl_massfunc.c: ccl_cosmology_compute_hmfparams(): Error creating alpha(D) spline\n");
       return;
     }
 
@@ -174,7 +175,7 @@ void ccl_cosmology_compute_hmfparams(ccl_cosmology *cosmo, int *status)
       gsl_spline_free(alphahmf);
       gsl_spline_free(betahmf);
       *status = CCL_ERROR_SPLINE ;
-      strcpy(cosmo->status_message, "ccl_massfunc.c: ccl_cosmology_compute_hmfparams(): Error creating beta(D) spline\n");
+      ccl_cosmology_set_status_message(cosmo, "ccl_massfunc.c: ccl_cosmology_compute_hmfparams(): Error creating beta(D) spline\n");
       return;
     }
 
@@ -185,7 +186,7 @@ void ccl_cosmology_compute_hmfparams(ccl_cosmology *cosmo, int *status)
       gsl_spline_free(betahmf);
       gsl_spline_free(gammahmf);
       *status = CCL_ERROR_SPLINE ;
-      strcpy(cosmo->status_message, "ccl_massfunc.c: ccl_cosmology_compute_hmfparams(): Error creating gamma(D) spline\n");
+      ccl_cosmology_set_status_message(cosmo, "ccl_massfunc.c: ccl_cosmology_compute_hmfparams(): Error creating gamma(D) spline\n");
       return;
     }
 
@@ -197,7 +198,7 @@ void ccl_cosmology_compute_hmfparams(ccl_cosmology *cosmo, int *status)
       gsl_spline_free(gammahmf);
       gsl_spline_free(phihmf);
       *status = CCL_ERROR_SPLINE ;
-      strcpy(cosmo->status_message, "ccl_massfunc.c: ccl_cosmology_compute_hmfparams(): Error creating phi(D) spline\n");
+      ccl_cosmology_set_status_message(cosmo, "ccl_massfunc.c: ccl_cosmology_compute_hmfparams(): Error creating phi(D) spline\n");
       return;
     }
 
@@ -212,7 +213,8 @@ void ccl_cosmology_compute_hmfparams(ccl_cosmology *cosmo, int *status)
     break;
   }
   default:
-    //TODO: Error message goes here. Currently has no way to ever come up.
+    // Error message could go here if we decide to make this public facing. 
+    // Currently not accessible from the API though.
     break;
   }
 }
@@ -247,7 +249,7 @@ static double massfunc_f(ccl_cosmology *cosmo, double halomass, double a, double
     // Check if odelta is outside the interpolated range
     if (odelta != Dv_BryanNorman(cosmo, a, status)) {
       *status = CCL_ERROR_HMF_DV;
-      strcpy(cosmo->status_message, "ccl_massfunc.c: massfunc_f(): Sheth-Tormen called with not virial Delta_v\n");
+      ccl_cosmology_set_status_message(cosmo, "ccl_massfunc.c: massfunc_f(): Sheth-Tormen called with not virial Delta_v\n");
       return NAN;
     }
 
@@ -266,7 +268,7 @@ static double massfunc_f(ccl_cosmology *cosmo, double halomass, double a, double
     // Check if odelta is outside the interpolated range
     if ((odelta < 200) || (odelta > 3200)) {
       *status = CCL_ERROR_HMF_INTERP;
-      strcpy(cosmo->status_message, "ccl_massfunc.c: massfunc_f(): Tinker 2008 only supported in range of Delta = 200 to Delta = 3200.\n");
+      ccl_cosmology_set_status_message(cosmo, "ccl_massfunc.c: massfunc_f(): Tinker 2008 only supported in range of Delta = 200 to Delta = 3200.\n");
       return NAN;
     }
 
@@ -288,19 +290,19 @@ static double massfunc_f(ccl_cosmology *cosmo, double halomass, double a, double
     if(gslstatus != GSL_SUCCESS) {
       ccl_raise_gsl_warning(gslstatus, "ccl_massfunc.c: ccl_massfunc_f():");
       *status |= gslstatus;
-      strcpy(cosmo->status_message, "ccl_massfunc.c: ccl_massfunc_f(): interpolation error for Tinker MF\n");
+      ccl_cosmology_set_status_message(cosmo, "ccl_massfunc.c: ccl_massfunc_f(): interpolation error for Tinker MF\n");
       return NAN;
     }
     return fit_A*(pow(sigma/fit_b,-fit_a)+1.0)*exp(-fit_c/sigma/sigma);
     break;
-    //this version uses f(nu) parameterization from Eq. 8 in Tinker et al. 2010
-    // use this for consistency with Tinker et al. 2010 fitting function for halo bias
   case ccl_tinker10:
+    // this version uses f(nu) parameterization from Eq. 8 in Tinker et al. 2010
+    // use this for consistency with Tinker et al. 2010 fitting function for halo bias
 
     // Check if odelta is outside the interpolated range
     if ((odelta < 200) || (odelta > 3200)) {
       *status = CCL_ERROR_HMF_INTERP;
-      strcpy(cosmo->status_message, "ccl_massfunc.c: massfunc_f(): Tinker 2010 only supported in range of Delta = 200 to Delta = 3200.\n");
+      ccl_cosmology_set_status_message(cosmo, "ccl_massfunc.c: massfunc_f(): Tinker 2010 only supported in range of Delta = 200 to Delta = 3200.\n");
       return 0;
     }
 
@@ -325,7 +327,7 @@ static double massfunc_f(ccl_cosmology *cosmo, double halomass, double a, double
     if(gslstatus != GSL_SUCCESS) {
       ccl_raise_gsl_warning(gslstatus, "ccl_massfunc.c: ccl_massfunc_f():");
       *status |= gslstatus;
-      strcpy(cosmo->status_message, "ccl_massfunc.c: ccl_massfunc_f(): interpolation error for Tinker 2010 MF\n");
+      ccl_cosmology_set_status_message(cosmo, "ccl_massfunc.c: ccl_massfunc_f(): interpolation error for Tinker 2010 MF\n");
       return NAN;
     }
     return nu*fit_A*(1.+pow(fit_b*nu,-2.*fit_d))*pow(nu, 2.*fit_a)*exp(-0.5*fit_c*nu*nu);
@@ -334,9 +336,10 @@ static double massfunc_f(ccl_cosmology *cosmo, double halomass, double a, double
   case ccl_watson:
     if(odelta!=200.) {
       *status = CCL_ERROR_HMF_INTERP;
-      strcpy(cosmo->status_message, "ccl_massfunc.c: ccl_massfunc_f(): Watson HMF only supported for Delta = 200.\n");
+      ccl_cosmology_set_status_message(cosmo, "ccl_massfunc.c: ccl_massfunc_f(): Watson HMF only supported for Delta = 200.\n");
       return NAN;
     }
+    // these parameters from: Angulo et al 2012 (arxiv 1203.3216 ) 
     Omega_m_a = ccl_omega_x(cosmo, a, ccl_species_m_label,status);
     fit_A = Omega_m_a*(0.990*pow(a,3.216)+0.074);
     fit_a = Omega_m_a*(5.907*pow(a,3.599)+2.344);
@@ -348,9 +351,10 @@ static double massfunc_f(ccl_cosmology *cosmo, double halomass, double a, double
   case ccl_angulo:
     if(odelta!=200.) {
       *status = CCL_ERROR_HMF_INTERP;
-      strcpy(cosmo->status_message, "ccl_massfunc.c: ccl_massfunc_f(): Angulo HMF only supported for Delta = 200.\n");
+      ccl_cosmology_set_status_message(cosmo, "ccl_massfunc.c: ccl_massfunc_f(): Angulo HMF only supported for Delta = 200.\n");
       return NAN;
     }
+    // these parameters from: Watson et al 2012 (arxiv 1212.0095 )
     fit_A = 0.201;
     fit_a = 2.08;
     fit_b = 1.7;
@@ -360,7 +364,7 @@ static double massfunc_f(ccl_cosmology *cosmo, double halomass, double a, double
 
   default:
     *status = CCL_ERROR_MF;
-    sprintf(cosmo->status_message ,
+    ccl_cosmology_set_status_message(cosmo ,
 	    "ccl_massfunc.c: ccl_massfunc(): Unknown or non-implemented mass function method: %d \n",
 	    cosmo->config.mass_function_method);
     return NAN;
@@ -382,7 +386,7 @@ static double ccl_halo_b1(ccl_cosmology *cosmo, double halomass, double a, doubl
     // Check if Delta_v is the virial Delta_v
     if (odelta != Dv_BryanNorman(cosmo, a, status)) {
       *status = CCL_ERROR_HMF_DV;
-      strcpy(cosmo->status_message, "ccl_massfunc.c: halo_b1(): Sheth-Tormen called with not virial Delta_v\n");
+      ccl_cosmology_set_status_message(cosmo, "ccl_massfunc.c: halo_b1(): Sheth-Tormen called with not virial Delta_v\n");
       return NAN;
     }
 
@@ -417,7 +421,7 @@ static double ccl_halo_b1(ccl_cosmology *cosmo, double halomass, double a, doubl
 
   default:
     *status = CCL_ERROR_MF;
-    sprintf(cosmo->status_message ,
+    ccl_cosmology_set_status_message(cosmo ,
 	    "ccl_massfunc.c: ccl_halo_b1(): No b(M) fitting function implemented for mass_function_method: %d \n",
       cosmo->config.mass_function_method);
     return 0;
@@ -432,87 +436,97 @@ void ccl_cosmology_compute_sigma(ccl_cosmology *cosmo, int *status)
   // create linearly-spaced values of the mass.
   int nm=ccl_splines->LOGM_SPLINE_NM;
   double * m = ccl_linear_spacing(ccl_splines->LOGM_SPLINE_MIN, ccl_splines->LOGM_SPLINE_MAX, nm);
+
+  // create space for y, to be filled with sigma and dlnsigma_dlogm
+  double * y = malloc(sizeof(double)*nm);
+  double smooth_radius;
+  double na, nb;
+
+  // start up of GSL pointers
+  int gslstatus = 0;
+  gsl_spline *logsigma;
+  gsl_spline *dlnsigma_dlogm;
+
   if (m==NULL ||
       (fabs(m[0]-ccl_splines->LOGM_SPLINE_MIN)>1e-5) ||
       (fabs(m[nm-1]-ccl_splines->LOGM_SPLINE_MAX)>1e-5) ||
       (m[nm-1]>10E17)
       ) {
-    *status =CCL_ERROR_LINSPACE;
-    strcpy(cosmo->status_message,"ccl_cosmology_compute_sigmas(): Error creating linear spacing in m\n");
-    return;
+    *status = CCL_ERROR_LINSPACE;
+    ccl_cosmology_set_status_message(cosmo,"ccl_cosmology_compute_sigmas(): Error creating linear spacing in m\n");
   }
 
-  // allocate space for y, to be filled with sigma and dlnsigma_dlogm
-  double *y = malloc(sizeof(double)*nm);
-  double smooth_radius;
-
-  // fill in sigma
-  for (int i=0; i<nm; i++) {
-    smooth_radius = ccl_massfunc_m2r(cosmo, pow(10,m[i]), status);
-    y[i] = log10(ccl_sigmaR(cosmo, smooth_radius, 1., status));
+  // fill in sigma, if no errors have been triggered at this time.
+  if (*status == 0) {
+    for (int i=0; i<nm; i++) {
+      smooth_radius = ccl_massfunc_m2r(cosmo, pow(10,m[i]), status);
+      y[i] = log10(ccl_sigmaR(cosmo, smooth_radius, 1., status));
+    }
+    logsigma = gsl_spline_alloc(M_SPLINE_TYPE, nm);
+    *status = gsl_spline_init(logsigma, m, y, nm);
   }
-  gsl_spline * logsigma = gsl_spline_alloc(M_SPLINE_TYPE, nm);
-  *status = gsl_spline_init(logsigma, m, y, nm);
-  if (*status) {
-    free(m);
-    free(y);
-    gsl_spline_free(logsigma);
+
+  if (*status !=0 ) {
     *status = CCL_ERROR_SPLINE ;
-    strcpy(cosmo->status_message, "ccl_massfunc.c: ccl_cosmology_compute_sigma(): Error creating sigma(M) spline\n");
-    return;
+    ccl_cosmology_set_status_message(cosmo, "ccl_massfunc.c: ccl_cosmology_compute_sigma(): Error creating sigma(M) spline\n");
   }
-  double na, nb;
-  int gslstatus = 0;
-  for (int i=0; i<nm; i++) {
-    if(i==0) {
-      gslstatus |= gsl_spline_eval_e(logsigma, m[i], NULL,&na);
-      gslstatus |= gsl_spline_eval_e(logsigma, m[i]+ccl_splines->LOGM_SPLINE_DELTA/2., NULL,&nb);
-      y[i] = log(pow(10, na))-log(pow(10,nb));
-      y[i] = 2.*y[i] / ccl_splines->LOGM_SPLINE_DELTA;
-    }
-    else if (i==nm-1) {
-      gslstatus |= gsl_spline_eval_e(logsigma, m[i]-ccl_splines->LOGM_SPLINE_DELTA/2., NULL,&na);
-      gslstatus |= gsl_spline_eval_e(logsigma, m[i], NULL,&nb);
-      y[i] = log(pow(10, na))-log(pow(10,nb));
-      y[i] = 2.*y[i] / ccl_splines->LOGM_SPLINE_DELTA;
-    }
-    else {
-      gslstatus |= gsl_spline_eval_e(logsigma, m[i]-ccl_splines->LOGM_SPLINE_DELTA/2., NULL,&na);
-      gslstatus |= gsl_spline_eval_e(logsigma, m[i]+ccl_splines->LOGM_SPLINE_DELTA/2., NULL,&nb);
-      y[i] = (log(pow(10,na))-log(pow(10,nb)));
-      y[i] = y[i] / ccl_splines->LOGM_SPLINE_DELTA;
+
+  // again, making splines assuming nothing bad has happened to this point
+
+  if (*status == 0 ) {
+    for (int i=0; i<nm; i++) {
+      if(i==0) {
+        gslstatus |= gsl_spline_eval_e(logsigma, m[i], NULL,&na);
+        gslstatus |= gsl_spline_eval_e(logsigma, m[i]+ccl_splines->LOGM_SPLINE_DELTA/2., NULL,&nb);
+        y[i] = (na-nb)*log(10.);
+        y[i] = 2.*y[i] / ccl_splines->LOGM_SPLINE_DELTA;
+      }
+      else if (i==nm-1) {
+        gslstatus |= gsl_spline_eval_e(logsigma, m[i]-ccl_splines->LOGM_SPLINE_DELTA/2., NULL,&na);
+        gslstatus |= gsl_spline_eval_e(logsigma, m[i], NULL,&nb);
+        y[i] = (na-nb)*log(10.);
+        y[i] = 2.*y[i] / ccl_splines->LOGM_SPLINE_DELTA;
+      }
+      else {
+        gslstatus |= gsl_spline_eval_e(logsigma, m[i]-ccl_splines->LOGM_SPLINE_DELTA/2., NULL,&na);
+        gslstatus |= gsl_spline_eval_e(logsigma, m[i]+ccl_splines->LOGM_SPLINE_DELTA/2., NULL,&nb);
+        y[i] = (na-nb)*log(10.);
+        y[i] = y[i] / ccl_splines->LOGM_SPLINE_DELTA;
+      }
     }
   }
+
   if(gslstatus != GSL_SUCCESS) {
     ccl_raise_gsl_warning(gslstatus, "ccl_massfunc.c: ccl_cosmology_compute_sigma():");
     *status |= gslstatus;
-    free(m);
-    free(y);
-    gsl_spline_free(logsigma);
     *status = CCL_ERROR_SPLINE ;
-    strcpy(cosmo->status_message, "ccl_massfunc.c: ccl_cosmology_compute_sigma(): Error evaluating grid points for dlnsigma/dlogM spline\n");
-    return;
+    ccl_cosmology_set_status_message(cosmo, "ccl_massfunc.c: ccl_cosmology_compute_sigma(): Error evaluating grid points for dlnsigma/dlogM spline\n");
   }
 
-  gsl_spline * dlnsigma_dlogm = gsl_spline_alloc(M_SPLINE_TYPE, nm);
-  *status = gsl_spline_init(dlnsigma_dlogm, m, y, nm);
-  if (*status) {
-    free(m);
-    free(y);
-    gsl_spline_free(logsigma);
-    *status = CCL_ERROR_SPLINE ;
-    strcpy(cosmo->status_message, "ccl_massfunc.c: ccl_cosmology_compute_sigma(): Error creating dlnsigma/dlogM spline\n");
-    return;
+  if(*status==0) {
+    dlnsigma_dlogm = gsl_spline_alloc(M_SPLINE_TYPE, nm);
+    *status = gsl_spline_init(dlnsigma_dlogm, m, y, nm);
+    if(cosmo->data.accelerator_m==NULL)
+      cosmo->data.accelerator_m=gsl_interp_accel_alloc();
   }
 
-  if(cosmo->data.accelerator_m==NULL)
-    cosmo->data.accelerator_m=gsl_interp_accel_alloc();
+  if(*status!=0) {
+    *status = CCL_ERROR_SPLINE ;
+    ccl_cosmology_set_status_message(cosmo, "ccl_massfunc.c: ccl_cosmology_compute_sigma(): Error creating dlnsigma/dlogM spline\n");
+  }
+  
+
   cosmo->data.logsigma = logsigma;
   cosmo->data.dlnsigma_dlogm = dlnsigma_dlogm;
   cosmo->computed_sigma = true;
 
   free(m);
   free(y);
+  if(*status != 0) {
+    gsl_spline_free(logsigma);
+    gsl_spline_free(dlnsigma_dlogm);
+  }
+  return;
 }
 
 /*----- ROUTINE: ccl_dlninvsig_dlogm -----
@@ -563,7 +577,7 @@ double ccl_massfunc(ccl_cosmology *cosmo, double halomass, double a, double odel
 {
   if (cosmo->params.N_nu_mass>0){
 	  *status = CCL_ERROR_NOT_IMPLEMENTED;
-	  strcpy(cosmo->status_message,"ccl_background.c: ccl_cosmology_compute_growth(): Support for the halo mass function in cosmologies with massive neutrinos is not yet implemented.\n");
+	  ccl_cosmology_set_status_message(cosmo, "ccl_background.c: ccl_cosmology_compute_growth(): Support for the halo mass function in cosmologies with massive neutrinos is not yet implemented.\n");
 	  return NAN;
   }
   
@@ -589,7 +603,7 @@ double ccl_halo_bias(ccl_cosmology *cosmo, double halomass, double a, double ode
 {
   if (cosmo->params.N_nu_mass>0){
 	  *status = CCL_ERROR_NOT_IMPLEMENTED;
-	  strcpy(cosmo->status_message,"ccl_background.c: ccl_cosmology_compute_growth(): Support for the halo bias in cosmologies with massive neutrinos is not yet implemented.\n");
+	  ccl_cosmology_set_status_message(cosmo, "ccl_background.c: ccl_cosmology_compute_growth(): Support for the halo bias in cosmologies with massive neutrinos is not yet implemented.\n");
 	  return NAN;
   }
   
@@ -636,7 +650,7 @@ double ccl_sigmaM(ccl_cosmology *cosmo, double halomass, double a, int *status)
 {
   if (cosmo->params.N_nu_mass>0){
 	  *status = CCL_ERROR_NOT_IMPLEMENTED;
-	  strcpy(cosmo->status_message,"ccl_background.c: ccl_cosmology_compute_growth(): Support for the sigma(M) function in cosmologies with massive neutrinos is not yet implemented.\n");
+	  ccl_cosmology_set_status_message(cosmo, "ccl_background.c: ccl_cosmology_compute_growth(): Support for the sigma(M) function in cosmologies with massive neutrinos is not yet implemented.\n");
 	  return NAN;
   }
 
@@ -648,13 +662,16 @@ double ccl_sigmaM(ccl_cosmology *cosmo, double halomass, double a, int *status)
   }
 
   double lgsigmaM;
-  int gslstatus = gsl_spline_eval_e(cosmo->data.logsigma,
-                                    log10(halomass),
+
+  int gslstatus = gsl_spline_eval_e(cosmo->data.logsigma, 
+                                    log10(halomass), 
                                     cosmo->data.accelerator_m,&lgsigmaM);
+
   if(gslstatus != GSL_SUCCESS) {
     ccl_raise_gsl_warning(gslstatus, "ccl_massfunc.c: ccl_sigmaM():");
     *status |= gslstatus;
   }
+
   // Interpolate to get sigma
   sigmaM = pow(10,lgsigmaM)*ccl_growth_factor(cosmo, a, status);
   ccl_check_status(cosmo, status);

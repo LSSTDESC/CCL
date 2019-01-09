@@ -8,7 +8,7 @@
 #define SZ_GC 0.02
 #define NL 499
 
-#define CLS_PRECISION 1E-2 // with respect to cosmic variance
+#define CLS_PRECISION 3E-3 
 
 CTEST_DATA(angpow) {
   double Omega_c;
@@ -19,7 +19,6 @@ CTEST_DATA(angpow) {
   double Neff;
   double* mnu;
   ccl_mnu_convention mnu_type;
-  double Omega_n;
   double Omega_v;
   double Omega_k;
   double w_0;
@@ -38,8 +37,7 @@ CTEST_SETUP(angpow){
   data->h = 0.7;
   data->A_s = 2.1e-9;
   data->n_s = 0.96;
-  data->Omega_n = 0.0;
-  data->Omega_v = 0;
+  data->Omega_v = 0.7;
   data->Neff=3.046;
   double mnuval = 0.;
   data->mnu = &mnuval;
@@ -64,17 +62,19 @@ static void test_angpow_precision(struct angpow_data * data)
   ccl_config.matter_power_spectrum_method=ccl_linear;
   ccl_parameters ccl_params = ccl_parameters_create(data->Omega_c, data->Omega_b, data->Omega_k, data->Neff, data->mnu, data->mnu_type,data->w_0, data->w_a, data->h, data->A_s, data->n_s,-1,-1,-1,data->mu_0, data->sigma_0,-1,NULL,NULL, &status);
 
+  ccl_params.Omega_g=0.;
+  ccl_params.Omega_l=data->Omega_v;
+
   // Initialize cosmology object given cosmo params
   ccl_cosmology *ccl_cosmo=ccl_cosmology_create(ccl_params,ccl_config);
 
   // Create tracers for angular power spectra
-  double z_arr_gc[NZ],nz_arr_gc[NZ],bz_arr[NZ],sz_arr[NZ];
+  double z_arr_gc[NZ],nz_arr_gc[NZ],bz_arr[NZ];
   for(int i=0;i<NZ;i++)
     {
       z_arr_gc[i]=Z0_GC-5*SZ_GC+10*SZ_GC*(i+0.5)/NZ;
       nz_arr_gc[i]=exp(-0.5*pow((z_arr_gc[i]-Z0_GC)/SZ_GC,2));
-      bz_arr[i]=1;//+z_arr_gc[i];
-      sz_arr[i]=exp(-0.5*pow((z_arr_gc[i]-Z0_GC)/SZ_GC,2));
+      bz_arr[i]=1;
     }
   
   // Galaxy clustering tracer
@@ -85,8 +85,6 @@ static void test_angpow_precision(struct angpow_data * data)
   
   int *ells=malloc(NL*sizeof(int));
   double *cells_gg_angpow=malloc(NL*sizeof(double));
-  double *cells_gg_native=malloc(NL*sizeof(double));
-  double *cells_gg_limber=malloc(NL*sizeof(double));
   for(int ii=0;ii<NL;ii++)
     ells[ii]=ii;
 
@@ -95,50 +93,31 @@ static void test_angpow_precision(struct angpow_data * data)
   double linstep = 40;
   double logstep = 1.15;
   double dchi = (ct_gc_A->chimax-ct_gc_A->chimin)/1000.; 
-  double dlk = 0.003;
-  double zmin = 0.05;
-  CCL_ClWorkspace *wlim=ccl_cl_workspace_default_limber(NL+1,logstep,linstep,dlk,&status);
-  CCL_ClWorkspace *wnl=ccl_cl_workspace_default(NL+1,2*ells[NL-1],CCL_NONLIMBER_METHOD_NATIVE,logstep,linstep,dchi,dlk,zmin,&status);
-  CCL_ClWorkspace *wap=ccl_cl_workspace_default(NL+1,2*ells[NL-1],CCL_NONLIMBER_METHOD_ANGPOW,logstep,linstep,dchi,dlk,zmin,&status);
-
+  CCL_ClWorkspace *wap=ccl_cl_workspace_new(NL+1,2*ells[NL-1],logstep,linstep,&status);
   
   // Compute C_ell
-  ccl_angular_cls(ccl_cosmo,wlim,ct_gc_A,ct_gc_A,NL,ells,cells_gg_limber,&status);
-  ccl_angular_cls(ccl_cosmo,wnl,ct_gc_B,ct_gc_B,NL,ells,cells_gg_native,&status);
   ccl_angular_cls(ccl_cosmo,wap,ct_gc_A,ct_gc_A,NL,ells,cells_gg_angpow,&status);
   double rel_precision = 0.;
-  //double rel_precision_lim = 0.;
+  FILE *f=fopen("./tests/benchmark/angpow_gg.txt","r");
   for(int ii=2;ii<NL;ii++) {
-    int l = ells[ii];
-    double cl_gg_nl=cells_gg_native[ii];
-    double cl_gg_ap=cells_gg_angpow[ii];
-    double cl_gg_lim=cells_gg_limber[ii];
-    double ratio = fabs(cl_gg_nl-cl_gg_ap)/cl_gg_nl;
-    //double ratio_lim = fabs(cl_gg_nl-cl_gg_lim)/cl_gg_lim;
-    rel_precision += ratio / sqrt(2./(2*l+1));
-    //if(l>NL/2)
-    //  rel_precision_lim += ratio_lim / sqrt(2./(2*l+1));
-    //printf("%d %.3g %.3g %.3g %.3g\n",l,cl_gg_nl,cl_gg_lim,ratio_lim,ratio_lim / sqrt(2./(2*l+1)));
+    int l;
+    double ratio,cl_gg_nl,cl_gg_ap=cells_gg_angpow[ii];
+    int stat=fscanf(f,"%d %lE",&l,&cl_gg_nl);
+    ASSERT_TRUE(l==ells[ii]);
+    ASSERT_TRUE(stat==2);
+    ratio = fabs(cl_gg_nl-cl_gg_ap)/cl_gg_nl;
+    rel_precision += ratio;
   }
+  fclose(f);
   rel_precision /= NL;
-  //rel_precision_lim /= NL/2;
-  //printf("precision %.3g\n",rel_precision);
-  //printf("precision %.3g\n",rel_precision_lim);
-
-  //ASSERT_TRUE((rel_precision < CLS_PRECISION)&&(rel_precision_lim < CLS_PRECISION));
   ASSERT_TRUE(rel_precision < CLS_PRECISION);
-
   
   //Free up tracers
   ccl_cl_tracer_free(ct_gc_A);
   ccl_cl_tracer_free(ct_gc_B);
   free(ells);
   ccl_cl_workspace_free(wap);
-  ccl_cl_workspace_free(wnl);
-  ccl_cl_workspace_free(wlim);
   free(cells_gg_angpow);
-  free(cells_gg_native);
-  free(cells_gg_limber);
   ccl_cosmology_free(ccl_cosmo);  
 }
 

@@ -1,8 +1,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
-#include "ccl.h"
-#include "time.h"
+#include <ccl.h>
+#include <time.h>
 
 #define OC 0.25
 #define OB 0.05

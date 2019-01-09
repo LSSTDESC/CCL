@@ -21,17 +21,19 @@ Reviewing a pull request (PR) on github
     directory successfully).
  5. Make sure the python tests pass (i.e. run `python setup.py test` from the
     root directory successfully).
- 6. Look at the code (see "Files changed" on the top of the GitHub pull request
+ 6. Make sure flake8 is not generating any warnings on pyccl (i.e., run `flake8 pyccl`).
+ 7. Look at the code (see "Files changed" on the top of the GitHub pull request
     page) and check that the changes make sense to you.
- 7. If new science has been implemented, and if possible, try to compare the
+ 8. If new science has been implemented, and if possible, try to compare the
     output of the code against your own predictions. Ask the developer to
     implement appropriate unit tests for it.
- 8. Make sure that the unit tests pass on Travis-CI.
- 9. Make sure that the changes come with documentation, e.g. internally in the
+ 9. Make sure that the unit tests pass on Travis-CI.
+ 10. Make sure that the changes come with documentation, e.g. internally in the
     C code and through Python docstrings, and that the doxygen documentation
     has been regenerated. Make sure that example code in the `examples/`
     directory has been updated appropriately, and that the CCL note has been
-    updated if necessary.
+    updated if necessary (including your affiliation and contribution in
+    `authors.csv`).
 
 Things to do if you are adding new features to the CCL C lib
 ------------------------------------------------------------
@@ -49,7 +51,8 @@ Things to do if you are adding new features to the CCL C lib
     (e.g. adding a new dependency).
  7. Any updates to CCL should be documented in the CCL note that you can find
     in `doc/0000-ccl_note/`. You will need to edit `main.tex`, compile with `make`,
-    and commit your changes, including the updated PDF file.
+    and commit your changes, including the updated PDF file. Make sure you update
+    your institution and your contribution in `authors.csv` as well.
  8. If your changes break the CCL API, observe the guidelines in the relevant
     section below.
 
@@ -67,6 +70,22 @@ To view the doxygen documentation, open any .html file in the `html/`
 directory. To refresh the docs to reflect new changes, run
 `doxygen doxygen/Doxyfile` in the directory `doc` (assuming you already have
 it installed).
+
+Adding new benchmarks
+---------------------------------------------------------
+Every new feature in CCL is benchmarked against an independent implementation.
+If you are adding a new feature, make sure someone can provide you with
+an independent output for cross-checks. Independent codes should be
+publicly available and linked in the benchmark tab
+of the wiki, and a script to run them should
+be provided such that the user can reproduce the benchmarks.
+
+Benchmarks should be integrated in automated C tests following the current
+examples in `tests/`. Any plots that check the results of the comparison
+should be added to the `Benchmark_Comparison.ipynb` notebook in the
+`examples` folder. New features and tests should also be documented
+in the CCL note in the `doc` directory.
+
 
 Modifying the Python wrapper
 ---------------------------------------------------------
@@ -92,7 +111,7 @@ the function is in `ccl_background.c`):
    wrapping CCL structs in more user-friendly classes, automatically handling
    memory management logic, and doing type checking and error checking.
    These files are where you should define classes to manage CCL objects (see
-   the `Parameters` and `Cosmology` classes in `pyccl/core.py` for example), and
+   the `Cosmology` class in `pyccl/core.py` for example), and
    where you should provide easy-to-use wrappers around more complicated
    functions provided through the basic SWIG wrapper. Ideally, you would also
    provide some type checking and error checking code in this part of the
@@ -129,6 +148,8 @@ you have recompiled and reinstalled the C library and the Python wrapper, run:
 This may take some time to run in its entirety. If you changed the API, you may
 have to modify the tests to account for this. You should also add your own
 tests for any new functions or behaviors that were added.
+
+The python syntax can be checked with `flake8 pyccl`. You should run this command as part of the tests while developing `pyccl` features. More information on the capabilities of `flake8` can be found in http://flake8.pycqa.org/en/latest/manpage.html.
 
 Occasionally, modifications made correctly as described above will still not
 function properly. This might be due to multiple `pyccl` installation files not being
@@ -240,7 +261,7 @@ libraries with your new changes and run the unit tests. You can check the
 status of your build here: https://travis-ci.org/LSSTDESC/CCL/builds. If you
 click in your build you will find more information about its status and a log
 describing the process. If your build errors or fails, you can scroll through
-the log to find out what went wrong. If your additions require new dependencies
+the log to find out what went wrong. Warnings from flake8 will result in tests not passing. If your additions require new dependencies
 make sure that you include them in `.travis.yml`.
 
 

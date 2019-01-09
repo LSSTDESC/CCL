@@ -3,12 +3,12 @@
 #include <stdio.h>
 #include <math.h>
 
-/*   Automated test for power spectrum emulation within CCL 
+/*   Automated test for power spectrum emulation within CCL
      using the Lawrence et al. (2017) code.
      The test compares the smoothed simulated power spectra
-     provided by the paper authors to the CCL output of the 
+     provided by the paper authors to the CCL output of the
      power spectrum via the emulator. This test corresponds
-     to Figure 6 of the emulator paper, for a specific subset 
+     to Figure 6 of the emulator paper, for a specific subset
      of the cosmologies: {1,3,5,6,8,10}. Other cosmologies
      are not allowed because CLASS fails when w(z) crosses -1
      and we need the linear power spectrum from CLASS in general
@@ -18,7 +18,7 @@
 
 #define EMU_TOLERANCE 3.0E-2
 //This is the tolerance we have required based on the emulator
-//paper results (Section 3.3, Fig 6). 
+//paper results (Section 3.3, Fig 6).
 
 CTEST_DATA(emu) {
   double Neff;
@@ -76,10 +76,10 @@ CTEST_SETUP(emu) {
     fprintf(stderr,"Error opening file %s\n",fname);
     exit(1);
   }
-  
+
   double tmp;
   for(int i=0;i<6;i++) {
-    
+
     status=fscanf(f,"%le %le %le %le %le %le %le\n",&Omega_c[i],&Omega_b[i],&h[i],&sigma8[i],&n_s[i],&w_0[i],&w_a[i]);
     if(status!=7) {
       fprintf(stderr,"Error reading file %s, line %d\n",fname,i);
@@ -118,18 +118,17 @@ static void compare_emu(int i_model,struct emu_data * data)
   int i_model_vec[6]={1,3,5,6,8,10};
   //The emulator cosmologies we can compare to
   //without CLASS failing due to w(z) crossing -1.
-  
+
   ccl_configuration config = default_config;
   config.transfer_function_method = ccl_emulator;
   config.matter_power_spectrum_method = ccl_emu;
-  
+
   //None of the current cosmologies being checked include neutrinos
   ccl_parameters params = ccl_parameters_create(data->Omega_c[i_model-1],data->Omega_b[i_model-1],0.0,data->Neff, data->mnu, data->mnu_type, data->w_0[i_model-1],data->w_a[i_model-1],data->h[i_model-1],data->sigma8[i_model-1],data->n_s[i_model-1],-1,-1,-1,data->mu_0, data->sigma_0,-1,NULL,NULL, &status);
+  params.Omega_l=params.Omega_l+params.Omega_g;
   params.Omega_g=0;
-  params.sigma8=data->sigma8[i_model-1];
   ccl_cosmology * cosmo = ccl_cosmology_create(params, config);
   ASSERT_NOT_NULL(cosmo);
-
   //Each of these files has the smoothed simulated power spectrum for
   //the corresponding cosmology, kindly provided by E. Lawrence.
   sprintf(fname,"./tests/benchmark/emu_smooth_pk_M%d.txt",i_model_vec[i_model-1]);
@@ -139,12 +138,12 @@ static void compare_emu(int i_model,struct emu_data * data)
     exit(1);
   }
   nk=linecount(f)-1; rewind(f);
-  
+
   double k=0.,pk_bench=0.,pk_ccl,err;
   double z=0.; //Other redshift checks are possible but not currently implemented
   int stat=0;
-  
-  for(i=0;i<nk;i++) {      
+
+  for(i=0;i<nk;i++) {
     stat=fscanf(f,"%le %le\n",&k, &pk_bench);
     if(stat!=2) {
       fprintf(stderr,"Error reading file %s, line %d\n",fname,i);
@@ -167,30 +166,30 @@ CTEST2(emu,model_1) {
   compare_emu(model,data);
 }
 
-/*
-//Additional tests for other cosmologies are possible:
+
 CTEST2(emu,model_2) {
   int model=2;
   compare_emu(model,data);
 }
 
+/*
 CTEST2(emu,model_3) {
   int model=3;
   compare_emu(model,data);
 }
-
+*/
 CTEST2(emu,model_4) {
   int model=4;
   compare_emu(model,data);
 }
 
+/*
 CTEST2(emu,model_5) {
   int model=5;
   compare_emu(model,data);
 }
-
+*/
 CTEST2(emu,model_6) {
   int model=6;
   compare_emu(model,data);
 }
-*/

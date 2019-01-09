@@ -1,8 +1,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
-#include "ccl.h"
-#include "ccl_lsst_specs.h"
+
+#include <ccl.h>
+#include <ccl_redshifts.h>
 
 #define OC 0.25
 #define OB 0.05
@@ -31,11 +32,34 @@ struct user_func_params
   double (* sigma_z) (double);
 };
 
+// Define the function we want to use for sigma_z which is included in the above struct.
+double sigmaz_sources(double z)
+{
+  return 0.05*(1.0+z);
+}
+
 // The user defines a function of the form double function ( z_ph, z_spec, void * user_pz_params) where user_pz_params is a pointer to the parameters of the user-defined function. This returns the probabilty of obtaining a given photo-z given a particular spec_z.
 double user_pz_probability(double z_ph, double z_s, void * user_par, int * status)
 {
   double sigma_z = ((struct user_func_params *) user_par)->sigma_z(z_s);
   return exp(- (z_ph-z_s)*(z_ph-z_s) / (2.*sigma_z*sigma_z)) / (pow(2.*M_PI,0.5)*sigma_z);
+}
+
+// The user defines a structure of parameters to the user-defined function for the true dNdz
+struct user_dN_params {
+  double alpha;
+  double beta;
+  double z0;
+};
+
+// The user defines a function of the form double function ( z, void * params, int *status) where params is a pointer to the parameters of the user-defined function. This returns the true dNdz.
+
+double user_dNdz(double z, void * user_par, int *status)
+{
+  struct user_dN_params * p = (struct user_dN_params *) user_par;
+  
+  return pow(z, p->alpha) * exp(- pow(z/(p->z0), p->beta) );
+
 }
 
 int main(int argc,char **argv)
@@ -188,22 +212,42 @@ int main(int argc,char **argv)
   }
   printf("\n");
   
-  // LSST Specification
-  // The user declares and sets an instance of parameters to their photo_z function:
-  struct user_func_params my_params_example;
-  my_params_example.sigma_z = ccl_specs_sigmaz_sources;
+  // If you don't have an external N(z) you are loading, CCL also has functionality
+  // to produce this for you from an analytic form.
   
-  // Declare a variable of the type of user_pz_info to hold the struct to be created.
-  user_pz_info * pz_info_example;
+  // The user declares and sets an instance of parameters to their photo_z and dNdz function:
+  struct user_func_params my_params_example;
+  my_params_example.sigma_z = sigmaz_sources;
+  struct user_dN_params my_dN_params_example;
+  my_dN_params_example.alpha = 1.24;
+  my_dN_params_example.beta = 1.01;
+  my_dN_params_example.z0 = 0.51;
+  
+  // Declare a variable of the type of to hold the struct to be created.
+  pz_info * pz_info_example;
   
   // Create the struct to hold the user information about photo_z's.
-  pz_info_example = ccl_specs_create_photoz_info(&my_params_example, &user_pz_probability);
+  pz_info_example = ccl_create_photoz_info(&my_params_example, &user_pz_probability);
   
   // Alternatively, we could have used the built-in Gaussian photo-z pdf, 
   // which assumes sigma_z = sigma_z0 * (1 + z) (not used in what follows).
   double sigma_z0 = 0.05;
-  user_pz_info *pz_info_gaussian;
-  pz_info_gaussian = ccl_specs_create_gaussian_photoz_info(sigma_z0);
+  pz_info *pz_info_gaussian;
+  pz_info_gaussian = ccl_create_gaussian_photoz_info(sigma_z0);
+  
+  // Declare a variable of the type of dN_info to hold the struct to be created
+  dNdz_info * dN_info_example; 
+  
+  // Create a simple analytic true redshift distribution:
+  dN_info_example = ccl_create_dNdz_info(&my_dN_params_example, &user_dNdz);
+  
+  // Alternatively, we could have used the built-in Smail-type dNdz
+  // (not used in what follows
+  dNdz_info *dN_info_gaussian;
+  double alpha = 1.24; 
+  double beta = 1.01;
+  double z0 = 0.51;
+  dN_info_gaussian = ccl_create_Smail_dNdz_info(alpha, beta, z0);
   
   double z_test;
   double dNdz_tomo;
@@ -213,8 +257,8 @@ int main(int argc,char **argv)
   //Try splitting dNdz (lensing) into 5 redshift bins
   double tmp1,tmp2,tmp3,tmp4,tmp5;
   printf("Trying splitting dNdz (lensing) into 5 redshift bins. "
-         "Output written into file tests/specs_example_tomo_lens.out\n");
-  output = fopen("./tests/specs_example_tomo_lens.out", "w"); 
+         "Output written into file tests/example_tomographic_bins.out\n");
+  output = fopen("./tests/example_tomographic_bins.out", "w"); 
   
   if(!output) {
     fprintf(stderr, "Could not write to 'tests' subdirectory"
@@ -224,37 +268,24 @@ int main(int argc,char **argv)
   status = 0;
   for (z=0; z<100; z=z+1) {
     z_test = 0.035*z;
-    ccl_specs_dNdz_tomog(z_test, DNDZ_WL_FID, 0.,6., pz_info_example,&dNdz_tomo,&status); 
-    ccl_specs_dNdz_tomog(z_test, DNDZ_WL_FID, 0.,0.6, pz_info_example,&tmp1,&status); 
-    ccl_specs_dNdz_tomog(z_test, DNDZ_WL_FID, 0.6,1.2, pz_info_example,&tmp2,&status);
-    ccl_specs_dNdz_tomog(z_test, DNDZ_WL_FID, 1.2,1.8, pz_info_example,&tmp3,&status);
-    ccl_specs_dNdz_tomog(z_test, DNDZ_WL_FID, 1.8,2.4, pz_info_example,&tmp4,&status); 
-    ccl_specs_dNdz_tomog(z_test, DNDZ_WL_FID, 2.4,3.0, pz_info_example,&tmp5,&status);
+    ccl_dNdz_tomog(z_test, 0.,6., pz_info_example, dN_info_example, &dNdz_tomo,&status); 
+    ccl_dNdz_tomog(z_test, 0.,0.6, pz_info_example,dN_info_example, &tmp1,&status); 
+    ccl_dNdz_tomog(z_test, 0.6,1.2, pz_info_example,dN_info_example, &tmp2,&status);
+    ccl_dNdz_tomog(z_test, 1.2,1.8, pz_info_example,dN_info_example, &tmp3,&status);
+    ccl_dNdz_tomog(z_test, 1.8,2.4, pz_info_example,dN_info_example, &tmp4,&status); 
+    ccl_dNdz_tomog(z_test, 2.4,3.0, pz_info_example,dN_info_example, &tmp5,&status);
     fprintf(output, "%f %f %f %f %f %f %f\n", z_test,tmp1,tmp2,tmp3,tmp4,tmp5,dNdz_tomo);
   }
   
-  fclose(output);
-  
-  //Try splitting dNdz (clustering) into 5 redshift bins
-  printf("Trying splitting dNdz (clustering) into 5 redshift bins. "
-         "Output written into file tests/specs_example_tomo_clu.out\n");
-  output = fopen("./tests/specs_example_tomo_clu.out", "w");     
-  for (z=0; z<100; z=z+1) {
-    z_test = 0.035*z;
-    ccl_specs_dNdz_tomog(z_test, DNDZ_NC,0.,6., pz_info_example,&dNdz_tomo,&status); 
-    ccl_specs_dNdz_tomog(z_test, DNDZ_NC,0.,0.6, pz_info_example,&tmp1,&status);
-    ccl_specs_dNdz_tomog(z_test, DNDZ_NC,0.6,1.2, pz_info_example,&tmp2,&status);
-    ccl_specs_dNdz_tomog(z_test, DNDZ_NC,1.2,1.8, pz_info_example,&tmp3,&status);
-    ccl_specs_dNdz_tomog(z_test, DNDZ_NC,1.8,2.4, pz_info_example,&tmp4,&status);
-    ccl_specs_dNdz_tomog(z_test, DNDZ_NC,2.4,3.0, pz_info_example,&tmp5,&status);
-    fprintf(output, "%f %f %f %f %f %f %f\n", z_test,tmp1,tmp2,tmp3,tmp4,tmp5,dNdz_tomo);
-  }
-  printf("ccl_sample_run completed, status = %d\n",status);
   fclose(output);
   
   //Free up photo-z info
-  ccl_specs_free_photoz_info(pz_info_example);
-  ccl_specs_free_photoz_info_gaussian(pz_info_gaussian);
+  ccl_free_photoz_info(pz_info_example);
+  ccl_free_photoz_info(pz_info_gaussian);
+  
+  // Free the dNdz information
+  ccl_free_dNdz_info(dN_info_example);
+  ccl_free_dNdz_info(dN_info_gaussian);
   
   //Always clean up!!
   ccl_cosmology_free(cosmo);

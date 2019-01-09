@@ -1,0 +1,195 @@
+% {% raw %}
+% This file provides the functionality for switching between journals.
+% \setjournal{<journalname>}
+%
+% Class names:
+% revtex
+% aastex
+% emulateapj
+% mnras
+% lsstdescnote
+%
+% Journal names:
+% apj (aastex61)
+% apjl (emulateapj)
+% prl (revtex)
+% prd (revtex)
+% mnras (mnras)
+% tex (lsstdescnote)
+%
+% Alex Drlica-Wagner <kadrlica@fnal.gov>
+%
+
+\RequirePackage{etoolbox}
+
+\newtoggle{revtex}
+\newtoggle{aastex}
+\newtoggle{aastex61}
+\newtoggle{mnras}
+\newtoggle{emulateapj}
+\newtoggle{lsstdescnote}
+\newtoggle{default}
+
+\newcommand{\toggle@class}[1]{%
+  % Initialize the toggles
+  \togglefalse{revtex}
+  \togglefalse{aastex}
+  \togglefalse{aastex61}
+  \togglefalse{mnras}
+  \togglefalse{emulateapj}
+
+  % Journals that map to revtex
+  \ifdefstring{#1}{revtex}{\toggletrue{revtex}}{}%
+  \ifdefstring{#1}{prl}{\toggletrue{revtex}}{}%
+  \ifdefstring{#1}{prd}{\toggletrue{revtex}}{}%
+
+  % Journals that map to aastex
+  \ifdefstring{#1}{aastex}{\toggletrue{aastex}}{}%
+
+  % Journals that map to aastex61   
+  \ifdefstring{#1}{aastex61}{\toggletrue{aastex61}}{}%
+  \ifdefstring{#1}{apjl}{\toggletrue{aastex61}}{}%
+  \ifdefstring{#1}{apj}{\toggletrue{aastex61}}{}%
+
+  % Journals that map to emulateapj   
+  \ifdefstring{#1}{emulateapj}{\toggletrue{emulateapj}}{}%
+
+  % Journals that map to mnras
+  \ifdefstring{#1}{mnras}{\toggletrue{mnras}}{}%
+
+  % Journals that map to lsstdescnote
+  \ifdefstring{#1}{lsstdescnote}{\toggletrue{lsstdescnote}}{}%
+  \ifdefstring{#1}{tex}{\toggletrue{lsstdescnote}}{}%
+
+  % Set default journal
+  \ifdefempty{#1}{\toggletrue{revtex}}{}%
+}
+
+\newcommand{\setjournal}[1]{
+  \toggle@class{#1}
+
+  % Set up some default values (revtex):
+  %\providecommand\docopts{aps,prl,reprint,superscriptaddress,
+  %  floatfix,nofootinbib,showkeys,showpacs}
+  \providecommand\docopts{}
+  \providecommand\docclass{revtex4-1}
+  \providecommand\docmacros{aps_macros}
+  \providecommand\doctitle{
+    \input{\authlist}
+    \date{\today}
+    \maketitle
+  }
+  \providecommand\maketitlepre{}
+  \providecommand\maketitlepost{\doctitle}
+  \providecommand\dockeys{\keywords}
+
+  \ifdef{\authlist}{}{
+    \providecommand\authlist{authors}
+  }
+  \providecommand\tabletype{table}
+  \providecommand\hypopts{all}
+  \providecommand\bibsty{apsrev4-1}
+  \providecommand\linenums{}
+
+  % Set the values for lsstdescnote
+  \iftoggle{lsstdescnote}{
+    \renewcommand\docopts{modern}
+    \renewcommand\docclass{lsstdescnote}
+    \renewcommand\docmacros{aas_macros}
+    \renewcommand\doctitle{
+      \input{\authlist}
+      \maketitle
+    }
+    \renewcommand\tabletype{deluxetable}
+    \renewcommand\bibsty{apj}
+  }{}
+
+  % Journals derived from revtex
+  \iftoggle{revtex}{
+    \renewcommand\docopts{aps,prl,reprint,superscriptaddress,
+      floatfix,nofootinbib,showkeys,showpacs}
+    \renewcommand\docclass{revtex4-1}
+    \renewcommand\docmacros{aps_macros}
+    \renewcommand\doctitle{
+      \input{\authlist}
+      \date{\today}
+      \maketitle
+    }
+    \renewcommand\tabletype{table}
+    \renewcommand\bibsty{apsrev4-1}
+
+    % Use the defaults for PRL
+    \ifdefstring{#1}{prl}{
+      \renewcommand\docopts{aps,prl,reprint,superscriptaddress,
+        floatfix,nofootinbib,showkeys,showpacs}
+    }{}
+
+    % Set the values for PRD
+    \ifdefstring{#1}{prd}{
+      \renewcommand\docopts{aps,prd,preprint,superscriptaddress,
+        floatfix,nofootinbib,showkeys}
+    }{}
+  }{}
+
+  % Set the values for emulateapj
+  \iftoggle{emulateapj}{
+    \renewcommand\docopts{iop,revtex4-1}
+    \renewcommand\docclass{emulateapj}
+    \renewcommand\docmacros{aas_macros}
+    \renewcommand\doctitle{
+      \input{\authlist}
+      \maketitle
+    }
+    \renewcommand\hypopts{figure,figure*}
+    \renewcommand\tabletype{deluxetable*}
+    \renewcommand\bibsty{apj}
+  }{}
+
+  % Set the values for aastex
+  \iftoggle{aastex}{
+    \renewcommand\docopts{preprint}
+    \renewcommand\docclass{aastex}
+    \renewcommand\docmacros{aas_macros}
+    \renewcommand\doctitle{
+      \input{\authlist}
+      \maketitle
+    }
+    \renewcommand\tabletype{deluxetable}
+    \renewcommand\bibsty{apj}
+  }{}
+
+  % Set values for aastex61
+  \iftoggle{aastex61}{
+    \renewcommand\docopts{twocolumn}
+    \renewcommand\docclass{aastex61}
+    \renewcommand\docmacros{aas_macros}
+    \renewcommand\doctitle{
+      \input{\authlist}
+    }
+    \renewcommand\tabletype{deluxetable}
+    \renewcommand\bibsty{apj}
+
+    % Set the values for ApJ
+    \ifdefstring{#1}{apj}{
+      \renewcommand\docopts{twocolumn}
+    }{}
+
+    % Set the values for ApJL
+    \ifdefstring{#1}{apjl}{
+      \renewcommand\docopts{twocolumn,tighten}
+    }{}
+  }{}
+
+  % Set the values for MNRAS
+  \iftoggle{mnras}{
+    \renewcommand\docopts{a4paper,fleqn,usenatbib}
+    \renewcommand\docclass{mnras}
+    \renewcommand\docmacros{aas_macros}
+    \renewcommand\dockeys[1]{\begin{keywords}{##1}\end{keywords}}
+    \renewcommand\bibsty{mnras}
+    \renewcommand\maketitlepre{\doctitle}
+    \renewcommand\maketitlepost{}
+  }{}
+
+}
+% {% endraw %}

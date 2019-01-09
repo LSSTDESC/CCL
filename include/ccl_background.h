@@ -1,10 +1,8 @@
 /** @file */
-#ifdef __cplusplus
-extern "C" {
-#endif
+#ifndef __CCL_BACKGROUND_H_INCLUDED__
+#define __CCL_BACKGROUND_H_INCLUDED__
 
-#pragma once
-#include "ccl_core.h"
+CCL_BEGIN_DECLS
 
 //species_x labels
 typedef enum ccl_species_x_label {
@@ -16,7 +14,7 @@ typedef enum ccl_species_x_label {
   ccl_species_ur_label=5,
   ccl_species_nu_label=6,
 } ccl_species_x_label;
-  
+
 /**
  * Normalized expansion rate at scale factor a.
  * Returns H(a)/H0 in a given cosmology.
@@ -27,9 +25,6 @@ typedef enum ccl_species_x_label {
  * @return h_over_h0, the value of H(a)/H0.
  */
 double ccl_h_over_h0(ccl_cosmology * cosmo, double a, int * status);
-
-// Normalized expansion rate at scale factors as given in list a[0..na-1]
-void ccl_h_over_h0s(ccl_cosmology * cosmo, int na, double a[], double output[], int * status);
 
 /**
  * Normalized expansion rate at scale factors as given in list a[0..na-1]
@@ -53,9 +48,6 @@ void ccl_h_over_h0s(ccl_cosmology * cosmo, int na, double a[], double output[], 
  * @return comoving_radial_distance, Comoving radial distance in Mpc
  */
 double ccl_comoving_radial_distance(ccl_cosmology * cosmo, double a, int* status);
-
-// Comoving radial distances in Mpc to scale factors as given in list a[0..na-1]
-void ccl_comoving_radial_distances(ccl_cosmology * cosmo, int na, double a[], double output[], int* status);
 
 /**
  * Comoving radial distances in Mpc to scale factors as given in list a[0..na-1]
@@ -96,9 +88,6 @@ double ccl_sinn(ccl_cosmology *cosmo,double chi, int *status);
  */
 double ccl_comoving_angular_distance(ccl_cosmology * cosmo, double a, int* status);
 
-// Comoving angular distances in Mpc to scale factors as given in list a[0..na-1]
-void ccl_comoving_angular_distances(ccl_cosmology * cosmo, int na, double a[], double output[], int* status);
-
 /**
  * Comoving angular distances in Mpc to scale factors as given in array a[0..na-1]
  * NOTE this quantity is otherwise known as the transverse comoving distance, and is NOT angular diameter
@@ -123,9 +112,6 @@ void ccl_comoving_angular_distances(ccl_cosmology * cosmo, int na, double a[], d
  * @return luminosity_distance, the angular distance in Mpc
  */
 double ccl_luminosity_distance(ccl_cosmology * cosmo, double a, int * status);
-
-// Comoving luminosity distances in Mpc to scale factors as given in list a[0..na-1]
-void ccl_luminosity_distances(ccl_cosmology * cosmo, int na, double a[], double output[], int * status);
 
 /**
  * Comoving luminosity distances in Mpc to scale factors as given in array a[0..na-1]
@@ -174,9 +160,6 @@ void ccl_distance_moduli(ccl_cosmology * cosmo, int na, double a[], double outpu
  */
 double ccl_growth_factor(ccl_cosmology * cosmo, double a, int * status);
 
-// Growth factors at a list of scale factor given in a[0..na-1] normalized to 1 at z=0
-void ccl_growth_factors(ccl_cosmology * cosmo, int na, double a[], double output[], int * status);
-
 /**
  * Growth factors at an array of scale factor given in a[0..na-1], where g(z=0) is normalized to 1
  * @param cosmo Cosmological parameters
@@ -199,9 +182,6 @@ void ccl_growth_factors(ccl_cosmology * cosmo, int na, double a[], double output
  * @return growth_factor_unnorm, Unnormalized growth factor, normalized to the scale factor at early times.
  */
 double ccl_growth_factor_unnorm(ccl_cosmology * cosmo, double a, int * status);
-
-// Growth factors at a list of scale factor given in a[0..na-1] normalized to a in matter domination
-void ccl_growth_factors_unnorm(ccl_cosmology * cosmo, int na, double a[], double output[], int * status);
 
 /**
  * Growth factors at a list of scale factor given in a[0..na-1], where g(a) is normalized to a in matter domination
@@ -226,9 +206,6 @@ void ccl_growth_factors_unnorm(ccl_cosmology * cosmo, int na, double a[], double
  */
 double ccl_growth_rate(ccl_cosmology * cosmo, double a, int* status);
 
-// Logarithmic rates of d ln g/d lna a at alist of  scale factor a [0..na-1]
-void ccl_growth_rates(ccl_cosmology * cosmo, int na, double a[], double output[], int * status);
-
 /**
  * Logarithmic rates of d ln(g)/d ln(a) at an array of scale factors a[0..na-1]
  * @param cosmo Cosmological parameters
@@ -252,9 +229,6 @@ void ccl_growth_rates(ccl_cosmology * cosmo, int na, double a[], double output[]
  */
 double ccl_scale_factor_of_chi(ccl_cosmology * cosmo, double chi, int * status);
 
-// Scale factors for a given list of comoving distances
-void ccl_scale_factor_of_chis(ccl_cosmology * cosmo, int nchi, double chi[], double output[], int* status);
-
 /**
  * Scale factors for a given array of comoving distances chi[0..nchi-1]
  * @param cosmo Cosmological parameters
@@ -274,9 +248,9 @@ void ccl_scale_factor_of_chis(ccl_cosmology * cosmo, int nchi, double chi[], dou
  * @param a scale factor, normalized to 1 for today
  * @param label species type. Available: 'critical'(0), 'matter'(1), 'dark_energy'(2), 'radiation'(3), 'curvature'(4), 'massless neutrinos'(5), 'massive neutrinos'(6).
  * @param int is_comoving. 0 for physical densities, and nonzero for comoving densities (via a^3 factor).
- * @param status Status flag. 0 if there are no errors, nonzero otherwise. 
+ * @param status Status flag. 0 if there are no errors, nonzero otherwise.
  * For specific cases see documentation for ccl_error.
- * @return rho_x, physical density at scale factor a. 
+ * @return rho_x, physical density at scale factor a.
  */
 double ccl_rho_x(ccl_cosmology * cosmo, double a, ccl_species_x_label label, int is_comoving, int* status);
 
@@ -313,4 +287,28 @@ double ccl_mu_MG(ccl_cosmology * cosmo, double a, int *status);
 
 #ifdef __cplusplus
 }
+
+
+/**
+ * Compute comoving distances and spline to be stored
+ * in the cosmology structure.
+ * @param cosmo Cosmological parameters 
+ * @param status Status flag. 0 if there are no errors, nonzero otherwise.
+ * For specific cases see documentation for ccl_error.c
+ * @return void
+ */
+void ccl_cosmology_compute_distances(ccl_cosmology * cosmo,int *status);
+
+/**
+ * Compute the growth function and a spline to be stored
+ * in the cosmology structure.
+ * @param cosmo Cosmological parameters 
+ * @param status Status flag. 0 if there are no errors, nonzero otherwise.
+ * For specific cases see documentation for ccl_error.c
+ * @return void
+ */
+void ccl_cosmology_compute_growth(ccl_cosmology * cosmo, int * status);
+
+CCL_END_DECLS
+
 #endif

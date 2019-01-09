@@ -5,9 +5,9 @@
 #include <math.h>
 
 // the tolerance in dn/dm
-#define SIGMA_TOLERANCE 1e-4
-#define INVSIGMA_TOLERANCE 5e-3
-#define MASSFUNC_TOLERANCE 5e-3
+#define SIGMA_TOLERANCE 3e-5
+#define INVSIGMA_TOLERANCE 1e-3
+#define MASSFUNC_TOLERANCE 5e-5
 
 CTEST_DATA(massfunc) {
   double Omega_c;
@@ -92,6 +92,8 @@ static void compare_massfunc(int model, struct massfunc_data * data)
 						-1, -1, -1, data->mu_0, data->sigma_0, -1, NULL, NULL, status);
 
   params.sigma8 = data->sigma8;
+  params.Omega_g=0.;
+  params.Omega_l=data->Omega_v[model];
   ccl_configuration config = default_config;
   config.transfer_function_method = ccl_bbks;
   // test file generated using tinker 2008 currently
