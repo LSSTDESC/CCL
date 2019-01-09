@@ -372,13 +372,14 @@ static void clt_init_wM(CCL_ClTracer *clt,ccl_cosmology *cosmo,
 
   if(*status==0) {
     int clstatus=0;
-    for(int j=0;j<nchi;j++)
+    for(int j=0;j<nchi;j++){
       clstatus|=window_magnification(x[j],cosmo,clt->spl_nz,clt->spl_sz,chimax,&(y[j]));
       // If mu / Sigma parameterisation of modified gravity is in effect,
 	  // add appropriate factors of Sigma before splining:
       if ( fabs(cosmo->params.sigma_0) ){
 		    y[j] = y[j] * (1. + ccl_Sig_MG(cosmo,ccl_scale_factor_of_chi(cosmo,x[j], status), status));
 	     }
+	  }
     if(clstatus) {
       *status=CCL_ERROR_INTEG;
       ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: clt_init_wM(): error computing lensing window\n");
@@ -451,14 +452,14 @@ static void clt_init_wL(CCL_ClTracer *clt,ccl_cosmology *cosmo,
 
   if(*status==0) {
     int clstatus=0;
-    for(int j=0;j<nchi;j++)
+    for(int j=0;j<nchi;j++){
       clstatus|=window_lensing(x[j],cosmo,clt->spl_nz,chimax,&(y[j]));
       // If mu / Sigma parameterisation of modified gravity is in effect,
 	  // add appropriate factors of Sigma before splining:
       if ( fabs(cosmo->params.sigma_0) ){
 		    y[j] = y[j] * (1. + ccl_Sig_MG(cosmo,ccl_scale_factor_of_chi(cosmo,x[j], status), status));
 	     }
-	   }
+	  }
     if(clstatus) {
       *status=CCL_ERROR_INTEG;
       ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: clt_init_wL(): error computing lensing window\n");

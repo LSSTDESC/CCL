@@ -85,14 +85,13 @@ def reference_models_mg():
     """ Create a set of reference cosmological models with the mu / Sigma
     parameterisation of modified gravity. """
 	
-    p1 = ccl.Parameters(Omega_c = 0.27, Omega_b = 0.022/0.67**2, h = 0.67, sigma8 = 0.8,
-                         n_s = 0.96, mu_0 = 0.1, sigma_0 = 0.1)
-	
 	# Ask for linear matter power spectrum because that is what is implemented
 	# for mu / Sigma.                                       
-    cosmo1 = ccl.Cosmology(p1, matter_power_spectrum='linear')
+    cosmo1 = ccl.Cosmology(Omega_c = 0.27, Omega_b = 0.022/0.67**2, h = 0.67, sigma8 = 0.8,
+                         n_s = 0.96, mu_0 = 0.1, sigma_0 = 0.1, matter_power_spectrum='linear')
     # And ask for halofit to make sure we can throw an error if this is called.
-    cosmo2 = ccl.Cosmology(p1, matter_power_spectrum='halofit')
+    cosmo2 = ccl.Cosmology(Omega_c = 0.27, Omega_b = 0.022/0.67**2, h = 0.67, sigma8 = 0.8,
+                         n_s = 0.96, mu_0 = 0.1, sigma_0 = 0.1, matter_power_spectrum='halofit')
     
     return [cosmo1]
 
@@ -849,9 +848,9 @@ def test_valid_transfer_combos():
 
 def test_background():
 	
-    
+    """
     Test background and growth functions in ccl.background.
-    
+    """
 
     for cosmo in reference_models():
         yield check_background, cosmo
@@ -864,9 +863,9 @@ def test_background():
 
 def test_power():
     
-    
+    """
     Test power spectrum and sigma functions in ccl.power.
-    
+    """
     
     for cosmo in reference_models():
         yield check_power, cosmo
@@ -880,9 +879,9 @@ def test_power():
 @decorators.slow
 def test_massfunc():
     
-    
+    """
     Test mass function and supporting functions.
-    
+    """
     
     for cosmo in reference_models():
         yield check_massfunc, cosmo
@@ -891,8 +890,9 @@ def test_massfunc():
         yield check_massfunc_nu, cosmo_nu
 
 def test_halomod():
-    
+    """
     Test halo model and supporting functions.
+    """
     
     for cosmo in reference_models():
         yield check_halomod, cosmo
@@ -902,9 +902,9 @@ def test_halomod():
 
 @decorators.slow
 def test_neutrinos():
-  
+    """ 
     Test neutrino-related functions.
-    
+    """
     
     yield check_neutrinos
 
@@ -922,9 +922,9 @@ def test_redshifts():
 @decorators.slow
 def test_cls():
     
-    
+    """
     Test top-level functions in pyccl.cls module.
-    
+    """
     
     for cosmo in reference_models():
         yield check_cls, cosmo
@@ -961,9 +961,9 @@ def test_corr():
 
 def test_debug_mode():
 
-    
+    """
     Test that debug mode can be toggled.
-    
+    """
 
     ccl.debug_mode(True)
     ccl.debug_mode(False)

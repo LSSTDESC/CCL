@@ -23,7 +23,8 @@ CTEST_DATA(distances_class) {
   double Omega_k[N_MODEL];
   double w_0[N_MODEL];
   double w_a[N_MODEL];
-  
+  double mu_0;
+  double sigma_0;
   double z_chi[N_Z];
   double z_dm[N_Z];
 
@@ -71,6 +72,8 @@ CTEST_SETUP(distances_class) {
   data->A_s = 2.1e-9;
   data->n_s = 0.96;
   data->mnu_type = ccl_mnu_list;
+  data->mu_0 = 0.;
+  data->sigma_0 = 0.;
 
   // Values that are different for the different models
   double Omega_k[N_MODEL] = {  0.0, 0.0, 0.0, 0.05, -0.05,
@@ -125,7 +128,7 @@ static void compare_distances(int model, struct distances_class_data * data)
 						                     data->Neff[model], data->mnu[model], data->mnu_type, 
 						                     data->w_0[model], data->w_a[model],
 						                     data->h, data->A_s, data->n_s,
-                                 -1,-1,-1,-1,NULL,NULL, &status);
+                                 -1,-1,-1, data->mu_0, data->sigma_0,-1,NULL,NULL, &status);
   ASSERT_EQUAL(0, status);
   
   // Make a cosmology object from the parameters with the default configuration

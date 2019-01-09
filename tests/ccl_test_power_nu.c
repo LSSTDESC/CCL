@@ -148,7 +148,7 @@ static void compare_power_nu(int i_model,struct power_nu_data * data)
   params = ccl_parameters_create(data->Omega_c, data->Omega_b, data->Omega_k,data->Neff, 
 		    i_model==1 ? data->mnu0 : i_model==2 ? data->mnu1 : data->mnu2,
 		    data->mnu_type,data->w_0[i_model-1], data->w_a[i_model-1],
-		    data->h, data->A_s, data->n_s,-1,-1,-1,-1,NULL,NULL, &status);
+		    data->h, data->A_s, data->n_s,-1,-1,-1,data->mu_0, data->sigma_0,-1,NULL,NULL, &status);
 
   ccl_cosmology * cosmo_linear = ccl_cosmology_create(params, config_linear);
   ASSERT_NOT_NULL(cosmo_linear);

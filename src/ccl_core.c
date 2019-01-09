@@ -537,21 +537,6 @@ ccl_parameters ccl_parameters_create_flat_lcdm(double Omega_c, double Omega_b, d
  */
 void ccl_parameters_write_yaml(ccl_parameters * params, const char * filename, int *status)
 {
-  double Omega_k = 0.0;
-  double Neff = 3.046;
-  double *mnu;
-  double mnuval = 0.;
-  mnu = &mnuval;
-  ccl_mnu_convention mnu_type = ccl_mnu_sum;
-  double w0 = -1.0;
-  double wa = 0.0;
-  double mu_0 = 0.;
-  double sigma_0 = 0.;
-  ccl_parameters params = ccl_parameters_create(Omega_c, Omega_b, Omega_k, Neff,
-						mnu, mnu_type, w0, wa, h, norm_pk, n_s, bcm_log10Mc, bcm_etab,
-						bcm_ks, mu_0, sigma_0, -1, NULL, NULL, status);
-  return params;
-
   FILE * f = fopen(filename, "w");
 
   if (!f){
@@ -606,6 +591,10 @@ void ccl_parameters_write_yaml(ccl_parameters * params, const char * filename, i
   WRITE_DOUBLE(bcm_log10Mc);
   WRITE_DOUBLE(bcm_etab);
   WRITE_DOUBLE(bcm_ks);
+  
+  // Modified gravity parameters
+  WRITE_DOUBLE(mu_0);
+  WRITE_DOUBLE(sigma_0);
 
   // Derived parameters
   WRITE_DOUBLE(sigma8);
@@ -702,6 +691,10 @@ ccl_parameters ccl_parameters_read_yaml(const char * filename, int *status)
   READ_DOUBLE(bcm_log10Mc);
   READ_DOUBLE(bcm_etab);
   READ_DOUBLE(bcm_ks);
+  
+  // Modified gravity parameters
+  READ_DOUBLE(mu_0);
+  READ_DOUBLE(sigma_0);
 
   // Derived parameters
   READ_DOUBLE(sigma8);
@@ -761,7 +754,7 @@ ccl_parameters ccl_parameters_read_yaml(const char * filename, int *status)
     Neff, mnu, ccl_mnu_list,
     w0, wa, h, norm_pk,
     n_s, bcm_log10Mc, bcm_etab,
-    bcm_ks, nz_mgrowth, z_mgrowth,
+    bcm_ks, mu_0, sigma_0, nz_mgrowth, z_mgrowth,
     df_mgrowth, status);
 
   if(z_mgrowth) free(z_mgrowth);

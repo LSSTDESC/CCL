@@ -117,11 +117,15 @@ static void check_transfer_error(ccl_configuration config, struct power_MG_data 
 {
   int status=0;
   
+  ccl_parameters params;
+  
   // Initialize ccl_cosmology struct
-  ccl_cosmology * cosmo = ccl_cosmology_create_with_params(data->Omega_c, data->Omega_b, data->Omega_k, 
-							   data->Neff, &(data->mnuval), data->mnu_type,
-							   data->w0, data->wa, data->h, data->A_s, data->n_s,
-							   -1,-1,-1, data->mu_0[0], data->sigma_0[0],-1, NULL, NULL, config, &status);
+  params = ccl_parameters_create(data->Omega_c, data->Omega_b, data->Omega_k,
+		data->Neff, &(data->mnuval), data-> mnu_type, 
+		data->w0, data->wa,  data->h, data->A_s, 
+		data->n_s,-1,-1,-1,data->mu_0[0], data->sigma_0[0],-1,NULL,NULL, &status);
+
+  ccl_cosmology * cosmo= ccl_cosmology_create(params, config);
   ASSERT_NOT_NULL(cosmo);
   
   // Call P(k) with unacceptable transfer function methods, check we get expected error.
@@ -137,11 +141,15 @@ static void check_nonlin_error(struct power_MG_data * data)
   
   ccl_configuration config = default_config;
   
+  ccl_parameters params;
+  
   // Initialize ccl_cosmology struct
-  ccl_cosmology * cosmo = ccl_cosmology_create_with_params(data->Omega_c, data->Omega_b, data->Omega_k, 
-							   data->Neff, &(data->mnuval), data->mnu_type,
-							   data->w0, data->wa, data->h, data->A_s, data->n_s,
-							   -1,-1,-1, data->mu_0[0], data->sigma_0[0],-1, NULL, NULL, config, &status);
+  params = ccl_parameters_create(data->Omega_c, data->Omega_b, data->Omega_k,
+		data->Neff, &(data->mnuval), data-> mnu_type, 
+		data->w0, data->wa,  data->h, data->A_s, 
+		data->n_s,-1,-1,-1,data->mu_0[0], data->sigma_0[0],-1,NULL,NULL, &status);
+
+  ccl_cosmology * cosmo= ccl_cosmology_create(params, config);
   ASSERT_NOT_NULL(cosmo);
   
   // Call P(k) trying to get the nonlinear power spectrum, check we get expected error.

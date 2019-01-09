@@ -77,45 +77,45 @@ def compare_growth(z, gfac_bench, Omega_v, w0, wa, mu_0, sigma_0):
 
 def test_growth_lowz_model_0():
     i = 0
-    compare_growth(z, gfac[i], Omega_v_vals[i], w0_vals[i], wa_vals[i], mu0_vals[i], Sig0_vals[i])
+    compare_growth(z_lowz, gfac_lowz[i], Omega_v_vals[i], w0_vals[i], wa_vals[i], mu0_vals[i], Sig0_vals[i])
 
 
 def test_growth_lowz_model_1():
     i = 1
-    compare_growth(z, gfac[i], Omega_v_vals[i], w0_vals[i], wa_vals[i], mu0_vals[i], Sig0_vals[i])
+    compare_growth(z_lowz, gfac_lowz[i], Omega_v_vals[i], w0_vals[i], wa_vals[i], mu0_vals[i], Sig0_vals[i])
 
 def test_growth_lowz_model_2():
     i = 2
-    compare_growth(z, gfac[i], Omega_v_vals[i], w0_vals[i], wa_vals[i], mu0_vals[i], Sig0_vals[i])
+    compare_growth(z_lowz, gfac_lowz[i], Omega_v_vals[i], w0_vals[i], wa_vals[i], mu0_vals[i], Sig0_vals[i])
 
 def test_growth_lowz_model_3():
     i = 3
-    compare_growth(z, gfac[i], Omega_v_vals[i], w0_vals[i], wa_vals[i], mu0_vals[i], Sig0_vals[i])
+    compare_growth(z_lowz, gfac_lowz[i], Omega_v_vals[i], w0_vals[i], wa_vals[i], mu0_vals[i], Sig0_vals[i])
 
 def test_growth_lowz_model_4():
     i = 4
-    compare_growth(z, gfac[i], Omega_v_vals[i], w0_vals[i], wa_vals[i], mu0_vals[i], Sig0_vals[i])
+    compare_growth(z_lowz, gfac_lowz[i], Omega_v_vals[i], w0_vals[i], wa_vals[i], mu0_vals[i], Sig0_vals[i])
 
 # 0.01 < z < 1000 tests
 def test_growth_allz_model_0():
     i = 0
-    compare_growth(z_allz, gfac_allz[i], Omega_v_vals[i], w0_vals[i], wa_vals[i])
+    compare_growth(z_allz, gfac_allz[i], Omega_v_vals[i], w0_vals[i], wa_vals[i], mu0_vals[i], Sig0_vals[i])
 
 def test_growth_allz_model_1():
     i = 1
-    compare_growth(z_allz, gfac_allz[i], Omega_v_vals[i], w0_vals[i], wa_vals[i])
+    compare_growth(z_allz, gfac_allz[i], Omega_v_vals[i], w0_vals[i], wa_vals[i], mu0_vals[i], Sig0_vals[i])
 
 def test_growth_allz_model_2():
     i = 2
-    compare_growth(z_allz, gfac_allz[i], Omega_v_vals[i], w0_vals[i], wa_vals[i])
+    compare_growth(z_allz, gfac_allz[i], Omega_v_vals[i], w0_vals[i], wa_vals[i], mu0_vals[i], Sig0_vals[i])
 
 def test_growth_allz_model_3():
     i = 3
-    compare_growth(z_allz, gfac_allz[i], Omega_v_vals[i], w0_vals[i], wa_vals[i])
+    compare_growth(z_allz, gfac_allz[i], Omega_v_vals[i], w0_vals[i], wa_vals[i], mu0_vals[i], Sig0_vals[i])
 
 def test_growth_allz_model_4():
     i = 4
-    compare_growth(z_allz, gfac_allz[i], Omega_v_vals[i], w0_vals[i], wa_vals[i])
+    compare_growth(z_allz, gfac_allz[i], Omega_v_vals[i], w0_vals[i], wa_vals[i], mu0_vals[i], Sig0_vals[i])
 
 def test_mgrowth():
     """

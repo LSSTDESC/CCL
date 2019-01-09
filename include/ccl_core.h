@@ -158,20 +158,6 @@ ccl_cosmology * ccl_cosmology_create(ccl_parameters params, ccl_configuration co
 /* Internal function to set the status message safely. */
 void ccl_cosmology_set_status_message(ccl_cosmology * cosmo, const char * status_message, ...);
 
-// Helper functions to create ccl_cosmology structs directly given a set of params
-ccl_cosmology * ccl_cosmology_create_with_params(double Omega_c, double Omega_b, double Omega_k,
-						 double Neff, double* mnu, ccl_mnu_convention mnu_type,
-						 double w0, double wa, double h, double norm_pk, double n_s,
-						 double bcm_log10Mc, double bcm_etab, double bcm_ks, double mu_0,
-						 double sigma_0, int nz_mgrowth, double *zarr_mgrowth, 
-						 double *dfarr_mgrowth, ccl_configuration config,
-						 int *status);
-
-ccl_cosmology * ccl_cosmology_create_with_lcdm_params(
-        double Omega_c, double Omega_b, double Omega_k, double h, 
-        double norm_pk, double n_s,
-        ccl_configuration config, int *status);
-
 // User-facing creation routines
 /**
  * Create a cosmology
@@ -202,6 +188,14 @@ ccl_parameters ccl_parameters_create(double Omega_c, double Omega_b, double Omeg
 				     double n_s, double bcm_log10Mc, double bcm_etab, double bcm_ks,
 				     double mu_0, double sigma_0, int nz_mgrowth,double *zarr_mgrowth,
 				     double *dfarr_mgrowth, int *status);
+
+/* ------- ROUTINE: ccl_parameters_create_flat_lcdm --------
+INPUT: some cosmological parameters needed to create a flat LCDM model
+TASK: call ccl_parameters_create to produce an LCDM model
+*/
+ccl_parameters ccl_parameters_create_flat_lcdm(double Omega_c, double Omega_b, double h,
+double norm_pk, double n_s, int *status);
+
 
 /**
  * Free a parameters struct

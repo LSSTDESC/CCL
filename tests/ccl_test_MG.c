@@ -48,10 +48,13 @@ static void call_mu_ofz(struct MG_data * data)
   ccl_configuration config = default_config;
   
   // Initialize ccl_cosmology struct
-  ccl_cosmology * cosmo = ccl_cosmology_create_with_params(data->Omega_c, data->Omega_b, data->Omega_k, 
+  ccl_parameters params = ccl_parameters_create(data->Omega_c, data->Omega_b, data->Omega_k, 
 							   data->Neff, &(data->mnuval), data->mnu_type,
 							   data->w0, data->wa, data->h, data->A_s, data->n_s,
-							   -1,-1,-1, data->mu_0, data->sigma_0,-1, NULL, NULL, config, &(data->status));
+							   -1,-1,-1, data->mu_0, data->sigma_0,-1, NULL, NULL, &(data->status));
+							   
+  ccl_cosmology * cosmo = ccl_cosmology_create(params, config);
+  
   ASSERT_NOT_NULL(cosmo);
   
   // Call mu(z)
@@ -70,10 +73,13 @@ static void call_sig_ofz(struct MG_data * data)
   ccl_configuration config = default_config;
   
   // Initialize ccl_cosmology struct
-  ccl_cosmology * cosmo = ccl_cosmology_create_with_params(data->Omega_c, data->Omega_b, data->Omega_k, 
+  ccl_parameters params = ccl_parameters_create(data->Omega_c, data->Omega_b, data->Omega_k, 
 							   data->Neff, &(data->mnuval), data->mnu_type,
 							   data->w0, data->wa, data->h, data->A_s, data->n_s,
-							   -1,-1,-1, data->mu_0, data->sigma_0,-1, NULL, NULL, config, &(data->status));
+							   -1,-1,-1, data->mu_0, data->sigma_0,-1, NULL, NULL, &(data->status));
+							   
+  ccl_cosmology * cosmo = ccl_cosmology_create(params, config);
+  
   ASSERT_NOT_NULL(cosmo);
   
   // Call mu(z)

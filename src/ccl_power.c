@@ -391,7 +391,7 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int * statu
 
   ErrorMsg errmsg; // for error messages
   // generate file_content structure
-  // CLASS configuration parameters will be passed through this structure,
+  // CLASS configuration parametesrs will be passed through this structure,
   // to avoid writing and reading .ini files for every call
   int parser_length = 20;
   int init_arr[7]={0,0,0,0,0,0,0};
@@ -485,15 +485,16 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int * statu
 			 strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_class(): neither A_s nor sigma8 defined.\n");
 	    }
 	    
-	    ccl_cosmology* cosmo_GR = ccl_cosmology_create_with_params(cosmo->params.Omega_c,
+	    ccl_parameters params_GR = ccl_parameters_create(cosmo->params.Omega_c,
 	               cosmo->params.Omega_b, cosmo->params.Omega_k, 
 	               cosmo->params.Neff, mnu_list, ccl_mnu_list, 
 	               cosmo->params.w0, cosmo->params.wa, cosmo->params.h, 
 	               norm_pk, cosmo->params.n_s, 
 	               cosmo->params.bcm_log10Mc, cosmo->params.bcm_etab,
 	               cosmo->params.bcm_ks, 0., 0., cosmo->params.nz_mgrowth,
-	               cosmo->params.z_mgrowth, cosmo->params.df_mgrowth,
-	               cosmo->config, status);
+	               cosmo->params.z_mgrowth, cosmo->params.df_mgrowth, status);
+	    ccl_cosmology* cosmo_GR = ccl_cosmology_create(params_GR,
+	               cosmo->config);
 	    
 	    double * D_mu = malloc(na * sizeof(double)); 
 	    double * D_GR = malloc(na * sizeof(double));          
@@ -508,7 +509,7 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int * statu
 	            //The 2D interpolation routines access the function values y_{k_ia_j} with the following ordering:
 	            //y_ij = y2d[j*N_k + i]
 	            //with i = 0,...,N_k-1 and j = 0,...,N_a-1.
-	            s |= spectra_pk_at_k_and_z(&ba, &pm, &sp,x[i],1./z[j]-1., &psout_l,&ic);
+	            newstatus |= spectra_pk_at_k_and_z(&ba, &pm, &sp,x[i],1./z[j]-1., &psout_l,&ic);
 	            // Scale the GR P(k) from CLASS by the ratio of growth factors
 	            y2d_lin[j*nk+i] = log(psout_l) + 2 * log(D_mu[j]) - 2 * log(D_GR[j]);
             }
@@ -529,6 +530,7 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int * statu
                }
             x[i] = log(x[i]);
         }
+      }
 
     
     //If error, store status, we will free later

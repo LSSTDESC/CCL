@@ -30,7 +30,7 @@ def test_parameters_valid_input():
                                        A_s=2.1e-9, n_s=0.96)
                      
     # Try a set of parameters with non-zero mu0 / Sig0                                   
-    assert_no_warnings(ccl.Parameters, h=0.7, Omega_c=0.25, Omega_b = 0.05,
+    assert_no_warnings(ccl.Cosmology, h=0.7, Omega_c=0.25, Omega_b = 0.05,
                                        A_s=2.1e-9, n_s=0.96, mu_0=0.1, sigma_0=0.1)
     
 def test_parameters_missing():

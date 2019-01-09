@@ -228,5 +228,6 @@ CTEST2(growth_lowz, model_9) {
   compare_growth(model, data);
 }*/
 
+CTEST2(growth_lowz, mgrowth){
   check_mgrowth();
 }

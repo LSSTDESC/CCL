@@ -425,11 +425,9 @@ def compare_distances_muSig(z, chi_bench,dm_bench, Omega_v, w0, wa):
     Omega_k = 1.0 - Omega_c - Omega_b - Omega_v    
     
     # Create new Parameters and Cosmology objects
-    p = ccl.Parameters(Omega_c=Omega_c, Omega_b=Omega_b, Neff = Neff, 
+    cosmo = ccl.Cosmology(Omega_c=Omega_c, Omega_b=Omega_b, Neff = Neff, 
                        h=h, A_s=A_s, n_s=n_s, Omega_k=Omega_k,
-                       w0=w0, wa=wa, mu_0=mu_0, sigma_0=sigma_0)
-    p.parameters.Omega_g = 0. # Hack to set to same value used for benchmarks
-    cosmo = ccl.Cosmology(p)
+                       w0=w0, wa=wa, mu_0=mu_0, sigma_0=sigma_0, Omega_g = 0.)
     
     # Calculate distance using pyccl
     a = 1. / (1. + z)
@@ -454,11 +452,9 @@ def compare_distances_hiz_muSig(z, chi_bench, Omega_v, w0, wa):
     Omega_k = 1.0 - Omega_c - Omega_b - Omega_v    
     
     # Create new Parameters and Cosmology objects
-    p = ccl.Parameters(Omega_c=Omega_c, Omega_b=Omega_b, Neff=Neff, 
+    cosmo = ccl.Cosmology(Omega_c=Omega_c, Omega_b=Omega_b, Neff=Neff, 
                        h=h, A_s=A_s, n_s=n_s, Omega_k=Omega_k,
-                       w0=w0, wa=wa, mu_0=mu_0, sigma_0=sigma_0)
-    p.parameters.Omega_g = 0. # Hack to set to same value used for benchmarks
-    cosmo = ccl.Cosmology(p)
+                       w0=w0, wa=wa, mu_0=mu_0, sigma_0=sigma_0, Omega_g = 0.)
     
     # Calculate distance using pyccl
     a = 1. / (1. + z)
@@ -647,7 +643,7 @@ def test_distance_hiz_muSig_model_1():
 def test_distance_hiz_muSig_model_2():
     i = 2
     compare_distances_hiz_muSig(zhi, chi_hiz[i], Omega_v_vals[i], w0_vals[i], wa_vals[i])
-=======
+
 def test_class_allz_distance_model_ccl10():
     i = 8
     compare_class_distances(z_class_allz, chi_class_allz[i], dm_class_allz[i], **class_models["CCL10"])

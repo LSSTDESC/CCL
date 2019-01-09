@@ -134,38 +134,38 @@ def test_power_spectrum_linear():
     for tfn in ['bbks', 'eisenstein_hu']:
         loop_over_params(tfn, 'linear', lin=True, raise_errs = False)
 
-@decorators.slow
+"""@decorators.slow
 def test_power_spectrum_linear_slow():
     for tfn in ['boltzmann',]:
-        loop_over_params(tfn, 'linear', lin=True, raise_errs = False)
+        loop_over_params(tfn, 'linear', lin=True, raise_errs = False)"""
 
 def test_power_spectrum_halofit():
     for tfn in ['eisenstein_hu', 'bbks',]:
         loop_over_params(tfn, 'halofit', lin=True, raise_errs = False)
 
-@decorators.slow
+"""@decorators.slow
 def test_power_spectrum_halofit_slow():
     for tfn in ['boltzmann',]:
         loop_over_params(tfn, 'halofit', lin=True, raise_errs = False)
 
 @decorators.slow
 def test_power_spectrum_emu():
-    for tfn in ['emulator',]: loop_over_params(tfn, 'emu', lin=True, raise_errs = False)
+    for tfn in ['emulator',]: loop_over_params(tfn, 'emu', lin=True, raise_errs = False)"""
 
 def test_nonlin_power_spectrum_linear():
     for tfn in ['eisenstein_hu', 'bbks']:
         loop_over_params(tfn, 'linear', lin=False, raise_errs = False)
 
-@decorators.slow
+"""@decorators.slow
 def test_nonlin_power_spectrum_linear_slow():
     for tfn in ['boltzmann',]:
-        loop_over_params(tfn, 'linear', lin=False, raise_errs = False)
+        loop_over_params(tfn, 'linear', lin=False, raise_errs = False)"""
 
 def test_nonlin_power_spectrum_halofit():
     for tfn in ['eisenstein_hu', 'bbks']:
         loop_over_params(tfn, 'halofit', lin=False, raise_errs = False)
 
-@decorators.slow
+"""@decorators.slow
 def test_nonlin_power_spectrum_halofit_slow():
     for tfn in ['boltzmann',]:
         loop_over_params(tfn, 'halofit', lin=False, raise_errs = False)
@@ -213,7 +213,7 @@ def test_muSig():
 		calc_power_spectrum_muSig(tfn, 'halofit', True)
 		calc_power_spectrum_muSig(tfn, 'halofit', False)
 		calc_power_spectrum_muSig(tfn, 'linear', True)
-		calc_power_spectrum_muSig(tfn, 'linear', False)
+		calc_power_spectrum_muSig(tfn, 'linear', False)"""
 
 if __name__ == "__main__":
     run_module_suite(argv=sys.argv)

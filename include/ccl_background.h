@@ -285,10 +285,6 @@ double ccl_Sig_MG(ccl_cosmology * cosmo, double a, int *status);
 */
 double ccl_mu_MG(ccl_cosmology * cosmo, double a, int *status);
 
-#ifdef __cplusplus
-}
-
-
 /**
  * Compute comoving distances and spline to be stored
  * in the cosmology structure.
@@ -312,3 +308,4 @@ void ccl_cosmology_compute_growth(ccl_cosmology * cosmo, int * status);
 CCL_END_DECLS
 
 #endif
+
