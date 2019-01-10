@@ -249,7 +249,7 @@ static int  growth_factor_and_growth_rate(double a,double *gf,double *fg,ccl_cos
 
     // if mu0 == 0, call normal growth_ode_system, otherwise call growth_ode_system_muSig
     
-    if (cosmo->params.mu_0>1e-12 || cosmo->params.mu_0<-1e-12) { 
+    if (cosmo->params.mu_0>1e-12 || cosmo->params.mu_0<-1e-12) {  
 		gsl_odeiv2_system sys = {growth_ode_system_muSig,NULL,2,cosmo};
 		
 		gsl_odeiv2_driver *d=
@@ -269,6 +269,7 @@ static int  growth_factor_and_growth_rate(double a,double *gf,double *fg,ccl_cos
     
         *gf=y[0];
         *fg=y[1]/(a*a*h_over_h0(a,cosmo, stat)*y[0]);
+        
          return 0;
     } else {
         gsl_odeiv2_system sys = {growth_ode_system,NULL,2,cosmo};
@@ -600,7 +601,6 @@ void ccl_cosmology_compute_growth(ccl_cosmology * cosmo, int * status)
 
   if(cosmo->computed_growth)
     return;
-
   // Create logarithmically and then linearly-spaced values of the scale factor
   int  chistatus = 0, na = ccl_splines->A_SPLINE_NA+ccl_splines->A_SPLINE_NLOG-1;
   double * a = ccl_linlog_spacing(ccl_splines->A_SPLINE_MINLOG, ccl_splines->A_SPLINE_MIN, ccl_splines->A_SPLINE_MAX, ccl_splines->A_SPLINE_NLOG, ccl_splines->A_SPLINE_NA);
@@ -680,7 +680,6 @@ void ccl_cosmology_compute_growth(ccl_cosmology * cosmo, int * status)
     F.function=&df_integrand;
     F.params=df_a_spline;
   }
-
   // allocate space for y, which will be all three
   // of E(a), chi(a), D(a) and f(a) in turn.
   int  status_mg=0, gslstatus;
@@ -700,7 +699,6 @@ void ccl_cosmology_compute_growth(ccl_cosmology * cosmo, int * status)
     ccl_cosmology_set_status_message(cosmo, "ccl_background.c: ccl_cosmology_compute_distances(): ran out of memory\n");
     return;
   }
-
   // Get the growth factor and growth rate at z=0
   chistatus|=growth_factor_and_growth_rate(1.,&growth0,&fgrowth0,cosmo, status);
   // Get the growth factor and growth rate at other redshifts
@@ -1025,17 +1023,17 @@ void ccl_scale_factor_of_chis(ccl_cosmology * cosmo, int nchi, double chi[], dou
 
 double ccl_growth_factor(ccl_cosmology * cosmo, double a, int * status)
 {
-  if(a==1.){
+  if(a==1.){ 
     return 1.;
   }
-  else if(a>1.) {
+  else if(a>1.) { 
     *status = CCL_ERROR_COMPUTECHI;
     ccl_cosmology_set_status_message(cosmo, "ccl_background.c: scale factor cannot be larger than 1.\n");
     ccl_check_status(cosmo,status);
     return NAN;
   }
   else {
-    if (!cosmo->computed_growth) {
+    if (!cosmo->computed_growth){
       ccl_cosmology_compute_growth(cosmo, status);
       ccl_check_status(cosmo, status);
     }

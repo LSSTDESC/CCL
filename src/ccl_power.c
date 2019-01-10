@@ -448,7 +448,6 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int * statu
   //Status flags
   int newstatus=0;
   int pwstatus=0;
-  
   //If not, proceed
   if(!*status){
     
@@ -500,8 +499,8 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int * statu
 	    double * D_GR = malloc(na * sizeof(double));          
 	  
 	    for (int i=0; i<na; i++){
-	        D_mu[i] = ccl_growth_factor_unnorm(cosmo, z[i], status);
-	        D_GR[i] = ccl_growth_factor_unnorm(cosmo_GR, z[i], status);
+	        D_mu[i] = ccl_growth_factor_unnorm(cosmo, a[i], status);
+	        D_GR[i] = ccl_growth_factor_unnorm(cosmo_GR, a[i], status);
 	    }
 	  
         for (int i=0; i<nk; i++) {
@@ -509,7 +508,7 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int * statu
 	            //The 2D interpolation routines access the function values y_{k_ia_j} with the following ordering:
 	            //y_ij = y2d[j*N_k + i]
 	            //with i = 0,...,N_k-1 and j = 0,...,N_a-1.
-	            newstatus |= spectra_pk_at_k_and_z(&ba, &pm, &sp,x[i],1./z[j]-1., &psout_l,&ic);
+	            newstatus |= spectra_pk_at_k_and_z(&ba, &pm, &sp,x[i],1./a[j]-1., &psout_l,&ic);
 	            // Scale the GR P(k) from CLASS by the ratio of growth factors
 	            y2d_lin[j*nk+i] = log(psout_l) + 2 * log(D_mu[j]) - 2 * log(D_GR[j]);
             }
@@ -545,7 +544,6 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int * statu
   
   //If no error, proceed
   if(!*status) {
-    
     gsl_spline2d * log_power = gsl_spline2d_alloc(PLIN_SPLINE_TYPE, nk,na);
     pwstatus = gsl_spline2d_init(log_power, x, a, y2d_lin,nk,na);
     
@@ -1575,9 +1573,8 @@ TASK: compute the linear power spectrum at a given redshift
       by rescaling using the growth function
 */
 
-double ccl_linear_matter_power(ccl_cosmology * cosmo, double k, double a, int * status)
+double ccl_linear_matter_power(ccl_cosmology * cosmo, double k, double a, int * status){
 
-{
   if ((cosmo->config.transfer_function_method == ccl_emulator) && (a<A_MIN_EMU)){
     *status = CCL_ERROR_INCONSISTENT;
     ccl_cosmology_set_status_message(cosmo, "ccl_power.c: the cosmic emulator cannot be used above a=%f\n",A_MIN_EMU);
@@ -1585,6 +1582,7 @@ double ccl_linear_matter_power(ccl_cosmology * cosmo, double k, double a, int * 
   }
 
   if (!cosmo->computed_power) ccl_cosmology_compute_power(cosmo, status);
+
   // Return if compilation failed
 
   //if (cosmo->data.p_lin == NULL) return NAN;
@@ -1594,19 +1592,21 @@ double ccl_linear_matter_power(ccl_cosmology * cosmo, double k, double a, int * 
   double log_p_1;
 
   int gslstatus;
-
   if(a<ccl_splines->A_SPLINE_MINLOG_PK) {  //Extrapolate linearly at high redshift
     double pk0=ccl_linear_matter_power(cosmo,k,ccl_splines->A_SPLINE_MINLOG_PK,status);
     double gf=ccl_growth_factor(cosmo,a,status)/ccl_growth_factor(cosmo,ccl_splines->A_SPLINE_MINLOG_PK,status);
 
     return pk0*gf*gf;
   }
+
   if (*status!=CCL_ERROR_INCONSISTENT){
+ 
     if(k<=cosmo->data.k_min_lin) {
       log_p_1=ccl_power_extrapol_lowk(cosmo,k,a,cosmo->data.p_lin,cosmo->data.k_min_lin,status);
       return exp(log_p_1);
     }
     else if(k<cosmo->data.k_max_lin){
+	
       gslstatus = gsl_spline2d_eval_e(cosmo->data.p_lin, log(k), a,NULL,NULL,&log_p_1);
       if(gslstatus != GSL_SUCCESS) {
         ccl_raise_gsl_warning(gslstatus, "ccl_power.c: ccl_linear_matter_power():");
