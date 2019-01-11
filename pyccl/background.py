@@ -231,7 +231,7 @@ def Sig_MG(cosmo, a):
 	    cosmo (:obj:`ccl.cosmology`): Cosmological parameters.
 	    a (float or array_like): Scale factor(s), normalized to 1 today.
 	Returns:
-	    mu_MG (float or array_like): Modification to Poisson equation 
+	    Sig_MG (float or array_like): Modification to Poisson equation 
 	    under modified gravity at a scale factor. 
 	"""
 	

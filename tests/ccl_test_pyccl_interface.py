@@ -324,10 +324,10 @@ def check_power_MG(cosmo):
     assert_raises(TypeError, ccl.linear_matter_power, cosmo, k_lst, a_arr)
     assert_raises(TypeError, ccl.linear_matter_power, cosmo, k_arr, a_arr)
     
-    """# nonlin_matter_power
+    # nonlin_matter_power
     ### Changes mean that this check of whether the power spectrum tag is 
     ### linear or not doesn't work anymore. Need to fix this. 
-    if (cosmo.__getitem__(matter_power_spectrum)== 'linear'):
+    """if (cosmo.__getitem__(matter_power_spectrum)== 'linear'):
         assert_( all_finite(ccl.nonlin_matter_power(cosmo, k_scl, a)) )
         assert_( all_finite(ccl.nonlin_matter_power(cosmo, k_lst, a)) )
         assert_( all_finite(ccl.nonlin_matter_power(cosmo, k_arr, a)) )
