@@ -817,48 +817,19 @@ void ccl_correlation_3dRsd(ccl_cosmology *cosmo, double a, int n_s, double *s,
   return;
 }
 
+/*--------ROUTINE: ccl_correlation_3dRsd_avgmu ------
+TASK: Calculate the average of redshift-space correlation function xi(s,mu) over mu at constant s 
+
+INPUT:  cosmology, scale factor a, number of s values, s values, beta (= growth rate / bias)
+
+The result will be in array xi
+*/
+
 void ccl_correlation_3dRsd_avgmu(ccl_cosmology *cosmo, double a, int n_s, double *s,
                                  double beta, double *xi,
                                  int *status) {
-  int i;
-  double *xi_arr0, *xi_arr2, *xi_arr4;
-
-    xi_arr0 = malloc(sizeof(double) * n_s);
-    if (xi_arr0 == NULL) {
-      *status = CCL_ERROR_MEMORY;
-      strcpy(cosmo->status_message,
-             "ccl_correlation.c: ccl_correlation_3dRsd_avgmu ran out of memory\n");
-      return;
-    }
-    xi_arr2 = malloc(sizeof(double) * n_s);
-    if (xi_arr2 == NULL) {
-      free(xi_arr0);
-      *status = CCL_ERROR_MEMORY;
-      strcpy(cosmo->status_message,
-             "ccl_correlation.c: ccl_correlation_3dRsd_avgmu ran out of memory\n");
-      return;
-    }
-    xi_arr4 = malloc(sizeof(double) * n_s);
-    if (xi_arr4 == NULL) {
-      free(xi_arr2);
-      free(xi_arr4);
-      *status = CCL_ERROR_MEMORY;
-      strcpy(cosmo->status_message,
-             "ccl_correlation.c: ccl_correlation_3dRsd_avgmu ran out of memory\n");
-      return;
-    }
-
-    ccl_correlation_multipole(cosmo, a, beta, 0, n_s, s, xi_arr0, status);
-    ccl_correlation_multipole(cosmo, a, beta, 2, n_s, s, xi_arr2, status);
-    ccl_correlation_multipole(cosmo, a, beta, 4, n_s, s, xi_arr4, status);
-    for (i = 0; i < n_s; i++)
-      xi[i] = xi_arr0[i] + xi_arr2[i] * 1./4 +
-              xi_arr4[i] * 9./64;
-
-  free(xi_arr0);
-  free(xi_arr2);
-  free(xi_arr4);
-
+// The average is just the l=0 multipole - the higher multiples inetegrate to zero.
+  ccl_correlation_multipole(cosmo, a, beta, 0, n_s, s, xi, status);  
 
   ccl_check_status(cosmo, status);
 
