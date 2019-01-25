@@ -1,5 +1,10 @@
 include(ExternalProject)
 
+# Old versions of cmake don't seem to play nice with the GIT_SHALLOW option
+if(${CMAKE_VERSION} VERSION_GREATER "3.10.0")
+  set(SHALLOW_GIT_CLONE GIT_SHALLOW 1)
+endif()
+
 set(CLASSTag v2.6.3)
 
 # In case the compiler being used  is clang, remove the omp flag
@@ -10,6 +15,13 @@ else()
   set(CLASS_OMPFLAG "OMPFLAG   = -fopenmp")
 endif()
 
+#At NERSC, -ffast-math causes trouble
+if (CLASS_NO_FFAST_MATH)
+   set(CLASS_OPTFLAG "OPTFLAG = -O4")
+else()
+   set(CLASS_OPTFLAG "OPTFLAG = -O4 -ffast-math")
+endif()
+
 # Define class install path and sscape the slashes for the Perl command
 STRING(REPLACE "/" "\\/" CLASS_INSTALL_DIR "__CLASSDIR__='\"${CMAKE_INSTALL_PREFIX}/share/ccl\"'")
 
@@ -18,12 +30,14 @@ ExternalProject_Add(CLASS
         PREFIX CLASS
         GIT_REPOSITORY https://github.com/lesgourg/class_public.git
         GIT_TAG ${CLASSTag}
+        ${SHALLOW_GIT_CLONE}
         DOWNLOAD_NO_PROGRESS 1
         PATCH_COMMAND patch -p1 -i ${CMAKE_CURRENT_SOURCE_DIR}/cmake/class-2.6.3.patch
         # In the configuration step, we comment out the default compiler and
         # provide an appropriate omp flag
         CONFIGURE_COMMAND     perl -pi -e "s/^CC /# CC /" Makefile &&
                               perl -pi -e "s/^OMPFLAG .*/${CLASS_OMPFLAG}/" Makefile &&
+                              perl -pi -e "s/^OPTFLAG .*/${CLASS_OPTFLAG}/" Makefile &&
                               perl -pi -e "s/__CLASSDIR__.*/${CLASS_INSTALL_DIR}/" Makefile
         BUILD_COMMAND         make CC=${CMAKE_C_COMPILER} libclass.a
         INSTALL_COMMAND       mkdir -p ${CMAKE_BINARY_DIR}/extern/lib &&

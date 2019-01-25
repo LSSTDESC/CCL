@@ -1,6 +1,7 @@
 import numpy as np
+from numpy.testing import dec as decorators
 from numpy.testing import assert_raises, assert_warns, assert_no_warnings, \
-                          assert_, decorators, run_module_suite
+                          assert_, run_module_suite
 import pyccl as ccl
 from pyccl import CCLError
 import sys
@@ -57,7 +58,7 @@ def calc_power_spectrum(Omega_v, w0, wa, transfer_fn, matter_power, linear, rais
         else:
             raise(ValueError, "Transfer function %s with matter power spectrum method %s has no case for which to test errors are raised." % (transfer_fn, matter_power))
 
-    # Create new Parameters and Cosmology objects
+    # Create a new Cosmology object
     cosmo = ccl.Cosmology(Omega_c=Omega_c, Omega_b=Omega_b,
                        h=h, sigma8=sigma8, n_s=n_s, Omega_k=Omega_k,
                        w0=w0, wa=wa, transfer_function=transfer_fn,

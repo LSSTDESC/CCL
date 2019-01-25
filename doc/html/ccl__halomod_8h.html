@@ -66,15 +66,43 @@ $(function() {
 </div><!-- top -->
 <div class="header">
   <div class="summary">
+<a href="#define-members">Macros</a> &#124;
+<a href="#typedef-members">Typedefs</a> &#124;
+<a href="#enum-members">Enumerations</a> &#124;
 <a href="#func-members">Functions</a>  </div>
   <div class="headertitle">
 <div class="title">ccl_halomod.h File Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><code>#include &quot;<a class="el" href="ccl__core_8h_source.html">ccl_core.h</a>&quot;</code><br />
-</div>
+
 <p><a href="ccl__halomod_8h_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="define-members"></a>
+Macros</h2></td></tr>
+<tr class="memitem:a43280101e6b08728406a683537e55539"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__halomod_8h.html#a43280101e6b08728406a683537e55539">HM_MMIN</a>&#160;&#160;&#160;1e7</td></tr>
+<tr class="separator:a43280101e6b08728406a683537e55539"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2a4961f32cf3f0ebbc255fbb4018ae7a"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__halomod_8h.html#a2a4961f32cf3f0ebbc255fbb4018ae7a">HM_MMAX</a>&#160;&#160;&#160;1e17</td></tr>
+<tr class="separator:a2a4961f32cf3f0ebbc255fbb4018ae7a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa45e5826c69d5f458325cbab3e132e4e"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__halomod_8h.html#aa45e5826c69d5f458325cbab3e132e4e">HM_EPSABS</a>&#160;&#160;&#160;0</td></tr>
+<tr class="separator:aa45e5826c69d5f458325cbab3e132e4e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a42d823f95333d2af4af5b7cdb99224ff"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__halomod_8h.html#a42d823f95333d2af4af5b7cdb99224ff">HM_EPSREL</a>&#160;&#160;&#160;1E-4</td></tr>
+<tr class="separator:a42d823f95333d2af4af5b7cdb99224ff"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6f707fcb7566b2288488b671a9b6bf04"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__halomod_8h.html#a6f707fcb7566b2288488b671a9b6bf04">HM_LIMIT</a>&#160;&#160;&#160;1000</td></tr>
+<tr class="separator:a6f707fcb7566b2288488b671a9b6bf04"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af180b285f420f4ef91cbfd8e2ba994cf"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__halomod_8h.html#af180b285f420f4ef91cbfd8e2ba994cf">HM_INT_METHOD</a>&#160;&#160;&#160;GSL_INTEG_GAUSS41</td></tr>
+<tr class="separator:af180b285f420f4ef91cbfd8e2ba994cf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="typedef-members"></a>
+Typedefs</h2></td></tr>
+<tr class="memitem:a950e7f2ae51dd6c8131f0d7c55558439"><td class="memItemLeft" align="right" valign="top">typedef <a class="el" href="ccl__defs_8h.html#ae8d446df269cba1dff8f88922459a7d4">CCL_BEGIN_DECLS</a> enum <a class="el" href="ccl__halomod_8h.html#af64312ab2a4e0ea6abfffab2835bfd9a">ccl_win_label</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__halomod_8h.html#a950e7f2ae51dd6c8131f0d7c55558439">ccl_win_label</a></td></tr>
+<tr class="separator:a950e7f2ae51dd6c8131f0d7c55558439"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="enum-members"></a>
+Enumerations</h2></td></tr>
+<tr class="memitem:af64312ab2a4e0ea6abfffab2835bfd9a"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__halomod_8h.html#af64312ab2a4e0ea6abfffab2835bfd9a">ccl_win_label</a> { <a class="el" href="ccl__halomod_8h.html#af64312ab2a4e0ea6abfffab2835bfd9aa527b07b06ca6100e159fe3881b35cdd9">ccl_nfw</a> = 1
+ }</td></tr>
+<tr class="separator:af64312ab2a4e0ea6abfffab2835bfd9a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
 <tr class="memitem:a2e0dd999bf3e17abd90f7bc3f8092bd7"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__halomod_8h.html#a2e0dd999bf3e17abd90f7bc3f8092bd7">ccl_twohalo_matter_power</a> (<a class="el" href="structccl__cosmology.html">ccl_cosmology</a> *cosmo, double k, double a, int *status)</td></tr>
@@ -83,12 +111,130 @@ Functions</h2></td></tr>
 <tr class="separator:a873688aa3035a8ff79795a92c58ea307"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3f1bbe4d32d59d52704361b5381fd5cf"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__halomod_8h.html#a3f1bbe4d32d59d52704361b5381fd5cf">ccl_halomodel_matter_power</a> (<a class="el" href="structccl__cosmology.html">ccl_cosmology</a> *cosmo, double k, double a, int *status)</td></tr>
 <tr class="separator:a3f1bbe4d32d59d52704361b5381fd5cf"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad6322c201a4a0ae8bf957059b20e9cd0"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__halomod_8h.html#ad6322c201a4a0ae8bf957059b20e9cd0">ccl_halo_concentration</a> (<a class="el" href="structccl__cosmology.html">ccl_cosmology</a> *cosmo, double halomass, double a, int *status)</td></tr>
-<tr class="separator:ad6322c201a4a0ae8bf957059b20e9cd0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a70fc230a1590ca9229dbe045c386e952"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__halomod_8h.html#a70fc230a1590ca9229dbe045c386e952">ccl_halo_concentration</a> (<a class="el" href="structccl__cosmology.html">ccl_cosmology</a> *cosmo, double halomass, double a, double odelta, int *status)</td></tr>
+<tr class="separator:a70fc230a1590ca9229dbe045c386e952"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
+<h2 class="groupheader">Macro Definition Documentation</h2>
+<a id="aa45e5826c69d5f458325cbab3e132e4e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa45e5826c69d5f458325cbab3e132e4e">&#9670;&nbsp;</a></span>HM_EPSABS</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define HM_EPSABS&#160;&#160;&#160;0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a42d823f95333d2af4af5b7cdb99224ff"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a42d823f95333d2af4af5b7cdb99224ff">&#9670;&nbsp;</a></span>HM_EPSREL</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define HM_EPSREL&#160;&#160;&#160;1E-4</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="af180b285f420f4ef91cbfd8e2ba994cf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af180b285f420f4ef91cbfd8e2ba994cf">&#9670;&nbsp;</a></span>HM_INT_METHOD</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define HM_INT_METHOD&#160;&#160;&#160;GSL_INTEG_GAUSS41</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a6f707fcb7566b2288488b671a9b6bf04"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6f707fcb7566b2288488b671a9b6bf04">&#9670;&nbsp;</a></span>HM_LIMIT</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define HM_LIMIT&#160;&#160;&#160;1000</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a2a4961f32cf3f0ebbc255fbb4018ae7a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2a4961f32cf3f0ebbc255fbb4018ae7a">&#9670;&nbsp;</a></span>HM_MMAX</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define HM_MMAX&#160;&#160;&#160;1e17</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a43280101e6b08728406a683537e55539"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a43280101e6b08728406a683537e55539">&#9670;&nbsp;</a></span>HM_MMIN</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define HM_MMIN&#160;&#160;&#160;1e7</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<h2 class="groupheader">Typedef Documentation</h2>
+<a id="a950e7f2ae51dd6c8131f0d7c55558439"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a950e7f2ae51dd6c8131f0d7c55558439">&#9670;&nbsp;</a></span>ccl_win_label</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef <a class="el" href="ccl__defs_8h.html#ae8d446df269cba1dff8f88922459a7d4">CCL_BEGIN_DECLS</a> enum <a class="el" href="ccl__halomod_8h.html#af64312ab2a4e0ea6abfffab2835bfd9a">ccl_win_label</a>  <a class="el" href="ccl__halomod_8h.html#af64312ab2a4e0ea6abfffab2835bfd9a">ccl_win_label</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<h2 class="groupheader">Enumeration Type Documentation</h2>
+<a id="af64312ab2a4e0ea6abfffab2835bfd9a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af64312ab2a4e0ea6abfffab2835bfd9a">&#9670;&nbsp;</a></span>ccl_win_label</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum <a class="el" href="ccl__halomod_8h.html#af64312ab2a4e0ea6abfffab2835bfd9a">ccl_win_label</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="af64312ab2a4e0ea6abfffab2835bfd9aa527b07b06ca6100e159fe3881b35cdd9"></a>ccl_nfw&#160;</td><td class="fielddoc"></td></tr>
+</table>
+
+</div>
+</div>
 <h2 class="groupheader">Function Documentation</h2>
-<a id="ad6322c201a4a0ae8bf957059b20e9cd0"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad6322c201a4a0ae8bf957059b20e9cd0">&#9670;&nbsp;</a></span>ccl_halo_concentration()</h2>
+<a id="a70fc230a1590ca9229dbe045c386e952"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a70fc230a1590ca9229dbe045c386e952">&#9670;&nbsp;</a></span>ccl_halo_concentration()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -114,6 +260,12 @@ Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>odelta</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
           <td class="paramtype">int *&#160;</td>
           <td class="paramname"><em>status</em>&#160;</td>
         </tr>
@@ -124,11 +276,12 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Computes the concentration of a halo of mass M. This is the ratio of virial raidus to scale radius for an NFW halo </p><dl class="params"><dt>Parameters</dt><dd>
+<p>Computes the concentration of a halo of mass M. This is the ratio of virial raidus to scale radius for an NFW halo. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">cosmo</td><td>cosmology object containing parameters </td></tr>
     <tr><td class="paramname">halomass</td><td>halo mass in units of Msun </td></tr>
     <tr><td class="paramname">a</td><td>scale factor normalised to a=1 today </td></tr>
+    <tr><td class="paramname">odelta</td><td>overdensity criteria (with respect to matter density) used for halo mass </td></tr>
     <tr><td class="paramname">status</td><td>Status flag: 0 if there are no errors, non-zero otherwise </td></tr>
   </table>
   </dd>

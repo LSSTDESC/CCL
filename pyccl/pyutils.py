@@ -25,7 +25,10 @@ def debug_mode(debug):
         lib.set_debug_policy(lib.CCL_DEBUG_MODE_OFF)
 
 
-def _vectorize_fn_simple(fn, fn_vec, x, returns_status=True):
+# This function is not used anymore so we don't want Coveralls to
+# include it, but we keep it in case it is needed at some point.
+def _vectorize_fn_simple(fn, fn_vec, x,
+                         returns_status=True):  # pragma: no cover
     """Generic wrapper to allow vectorized (1D array) access to CCL functions with
     one vector argument (but no dependence on cosmology).
 

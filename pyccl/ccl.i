@@ -4,6 +4,11 @@
  * producing a single .c file that is compiled to
  * a python extension module. */
 
+%pythonbegin %{
+import numpy
+from .errors import CCLError
+%}
+
 %{
 /* this is the master .c file; need an init function */
 #define SWIG_FILE_WITH_INIT
@@ -18,6 +23,8 @@
     // Tell CCL library not to quit when an error is thrown (to let Python
     // exception handler take over)
     ccl_set_error_policy(CCL_ERROR_POLICY_CONTINUE);
+    // Tell CCL to not print to stdout/stderr for debugging.
+    ccl_set_debug_policy(CCL_DEBUG_MODE_OFF);
 %}
 
 // Automatically document arguments and output types of all functions
@@ -42,7 +49,7 @@
 %include "ccl_massfunc.i"
 %include "ccl_cls.i"
 %include "ccl_constants.i"
-%include "ccl_lsst_specs.i"
+%include "ccl_redshifts.i"
 %include "ccl_neutrinos.i"
 %include "ccl_halomod.i"
 %include "ccl_params.i"
