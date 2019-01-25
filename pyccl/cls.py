@@ -385,7 +385,7 @@ def angular_cl(cosmo, cltracer1, cltracer2, ell,
         float or array_like: Angular (cross-)power spectrum values,
             :math:`C_\ell`, for the pair of tracers, as a function of
             :math:`\ell`.
-    """
+    """  # noqa: W605
     # Access ccl_cosmology object
     cosmo = cosmo.cosmo
 

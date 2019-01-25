@@ -195,7 +195,7 @@ class Parameters(object):
                             Used to implement simple modified growth
                             scenarios.
         z_mg (array_like): Array of redshifts corresponding to df_mg.
-    """
+    """  # noqa: W605
 
     def __init__(self, Omega_c=None, Omega_b=None, h=None, A_s=None, n_s=None,
                  Omega_k=0., Neff=3.046, m_nu=0., mnu_type=None, w0=-1.,
