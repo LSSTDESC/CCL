@@ -69,28 +69,28 @@ void correlation_3d_vec(ccl_cosmology *cosmo,double a, double* r, int nr,
 }
 
 void correlation_multipole_vec(ccl_cosmology *cosmo,double a,double beta,
-			       int l,int ns,double *s,
-                               double *xis,int nxis,
+			       int l,double *s,int ns,
+                               int nxis,double *xis,
          		       int *status){
   ccl_correlation_multipole(cosmo,a,beta,l,ns,s,xis,status);
 }
 
 void correlation_3dRsd_vec(ccl_cosmology *cosmo,double a,double mu,double beta,
-			       int ns,double *s,
-                               double *xis,int nxis,int use_spline,
+			       double *s,int ns,
+                               int nxis,double *xis,int use_spline,
          		       int *status){
   ccl_correlation_3dRsd(cosmo,a,ns,s,mu,beta,xis,use_spline,status);
 }
 
 void correlation_3dRsd_avgmu_vec(ccl_cosmology *cosmo,double a,double beta,
-			       int ns,double *s,
-                               double *xis,int nxis,
+			       double *s,int ns,
+                               int nxis,double *xis,
          		       int *status){
   ccl_correlation_3dRsd_avgmu(cosmo,a,ns,s,beta,xis,status);
 }
 
 void correlation_pi_sigma_vec(ccl_cosmology *cosmo,double a,double beta,
-			   double pie,int nsig,double *sig,double* xis, int nxis,int use_spline,
+			   double pie,double *sig,int nsig,int nxis,double* xis,int use_spline,
 			   int *status){
     ccl_correlation_pi_sigma(cosmo,a,beta,pie,nsig,sig,xis,use_spline,status);
 }
