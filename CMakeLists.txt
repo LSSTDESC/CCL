@@ -24,7 +24,7 @@ project(ccl VERSION 0.2.1)
 		 tests/ccl_test_growth_lowz.c tests/ccl_test_growth_hiz.c tests/ccl_test_growth_allz.c
                  tests/ccl_test_bbks.c tests/ccl_test_eh.c
 		 tests/ccl_test_cls.c tests/ccl_test_sigmaM.c
-		 tests/ccl_test_massfunc.c tests/ccl_test_correlation.c tests/ccl_test_correlation_3d.c
+		 tests/ccl_test_massfunc.c tests/ccl_test_correlation.c tests/ccl_test_correlation_3d.c tests/ccl_test_correlation_3dRSD.c
 		 tests/ccl_test_bcm.c tests/ccl_test_emu.c tests/ccl_test_emu_nu.c
 		 tests/ccl_test_power_nu.c tests/ccl_test_halomod.c tests/ccl_test_angpow.c)
 

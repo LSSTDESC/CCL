@@ -465,7 +465,7 @@ def check_redshifts(cosmo):
     PZ1 = ccl.PhotoZFunction(pz1)
     PZ2 = ccl.PhotoZFunction(pz2)
     PZ3 = ccl.PhotoZGaussian(sigma_z0=0.1)
-    
+
     # dNdz (in terms of true redshift) function for dNdz_tomog
     def dndz1(z, args):
         return z**1.24 * np.exp(- (z / 0.51)**1.01)
@@ -477,7 +477,7 @@ def check_redshifts(cosmo):
     # of PhotoZ and dNdz functions
     zmin = 0.
     zmax = 1.
-    
+
     assert_( all_finite(ccl.dNdz_tomog(z_scl, zmin, zmax, PZ1, dNdZ1)) )
     assert_( all_finite(ccl.dNdz_tomog(z_lst, zmin, zmax, PZ1, dNdZ1)) )
     assert_( all_finite(ccl.dNdz_tomog(z_arr, zmin, zmax, PZ1, dNdZ1)) )
@@ -485,23 +485,23 @@ def check_redshifts(cosmo):
     assert_( all_finite(ccl.dNdz_tomog(z_scl, zmin, zmax, PZ2, dNdZ1)) )
     assert_( all_finite(ccl.dNdz_tomog(z_lst, zmin, zmax, PZ2, dNdZ1)) )
     assert_( all_finite(ccl.dNdz_tomog(z_arr, zmin, zmax, PZ2, dNdZ1)) )
-    
+
     assert_( all_finite(ccl.dNdz_tomog(z_scl, zmin, zmax, PZ3, dNdZ1)) )
     assert_( all_finite(ccl.dNdz_tomog(z_lst, zmin, zmax, PZ3, dNdZ1)) )
     assert_( all_finite(ccl.dNdz_tomog(z_arr, zmin, zmax, PZ3, dNdZ1)) )
-    
+
     assert_( all_finite(ccl.dNdz_tomog(z_scl, zmin, zmax, PZ1, dNdZ2)) )
     assert_( all_finite(ccl.dNdz_tomog(z_lst, zmin, zmax, PZ1, dNdZ2)) )
     assert_( all_finite(ccl.dNdz_tomog(z_arr, zmin, zmax, PZ1, dNdZ2)) )
-    
+
     assert_( all_finite(ccl.dNdz_tomog(z_scl, zmin, zmax, PZ2, dNdZ2)) )
     assert_( all_finite(ccl.dNdz_tomog(z_lst, zmin, zmax, PZ2, dNdZ2)) )
     assert_( all_finite(ccl.dNdz_tomog(z_arr, zmin, zmax, PZ2, dNdZ2)) )
-    
+
     assert_( all_finite(ccl.dNdz_tomog(z_scl, zmin, zmax, PZ3, dNdZ2)) )
     assert_( all_finite(ccl.dNdz_tomog(z_lst, zmin, zmax, PZ3, dNdZ2)) )
     assert_( all_finite(ccl.dNdz_tomog(z_arr, zmin, zmax, PZ3, dNdZ2)) )
-    
+
     # Wrong function type
     assert_raises(TypeError, ccl.dNdz_tomog, z_scl, zmin, zmax, pz1, z_arr)
     assert_raises(TypeError, ccl.dNdz_tomog, z_scl,  zmin, zmax, z_arr, dNdZ1)
@@ -684,6 +684,7 @@ def check_corr(cosmo):
     assert_raises(ValueError, ccl.correlation, cosmo, ells, cls, t_arr,
                   corr_type='L+', method='xx')
 
+
 def check_corr_3d(cosmo):
 
     # Scale factor
@@ -703,6 +704,59 @@ def check_corr_3d(cosmo):
     assert_( all_finite(corr3))
 
 
+def check_corr_3dRSD(cosmo):
+
+    # Scale factor
+    a = 0.8
+
+    # Cosine of the angle
+    mu = 0.7
+
+    # Growth rate divided by galaxy bias
+    beta = 0.5
+
+    # Distances (in Mpc)
+    s_int = 50
+    s = 50.
+    s_lst = np.linspace(50,100,10)
+
+    # Make sure 3d correlation functions work for valid inputs
+    corr1 = ccl.correlation_3dRsd(cosmo, a, s_int, mu, beta)
+    corr2 = ccl.correlation_3dRsd(cosmo, a, s, mu, beta)
+    corr3 = ccl.correlation_3dRsd(cosmo, a, s_lst, mu, beta)
+    assert_( all_finite(corr1))
+    assert_( all_finite(corr2))
+    assert_( all_finite(corr3))
+
+    corr4 = ccl.correlation_3dRsd_avgmu(cosmo, a, s_int, beta)
+    corr5 = ccl.correlation_3dRsd_avgmu(cosmo, a, s, beta)
+    corr6 = ccl.correlation_3dRsd_avgmu(cosmo, a, s_lst, beta)
+    assert_( all_finite(corr4))
+    assert_( all_finite(corr5))
+    assert_( all_finite(corr6))
+
+    corr7 = ccl.correlation_multipole(cosmo, a, beta, 0, s_lst)
+    corr8 = ccl.correlation_multipole(cosmo, a, beta, 2, s_lst)
+    corr9 = ccl.correlation_multipole(cosmo, a, beta, 4, s_lst)
+    assert_( all_finite(corr7))
+    assert_( all_finite(corr8))
+    assert_( all_finite(corr9))
+
+    # Distances (in Mpc)
+    pie = 50.
+    sig_int = 50
+    sig = 50.
+    sig_lst = np.linspace(50,100,10)
+
+    corr10 = ccl.correlation_pi_sigma(cosmo, a, beta, pie, sig_int)
+    corr11 = ccl.correlation_pi_sigma(cosmo, a, beta, pie, sig)
+    corr12 = ccl.correlation_pi_sigma(cosmo, a, beta, pie, sig_lst)
+    assert_( all_finite(corr10))
+    assert_( all_finite(corr11))
+    assert_( all_finite(corr12))
+
+    #free spline
+    ccl.correlation_spline_free()
 
 def test_valid_transfer_combos():
     """
@@ -800,6 +854,12 @@ def test_corr():
 
     for cosmo_nu in reference_models_nu():
         yield check_corr_3d, cosmo_nu
+
+    for cosmo in reference_models():
+        yield check_corr_3dRSD, cosmo
+
+    for cosmo_nu in reference_models_nu():
+        yield check_corr_3dRSD, cosmo_nu
 
 def test_debug_mode():
     """

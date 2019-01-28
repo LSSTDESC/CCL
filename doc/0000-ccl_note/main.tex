@@ -858,6 +858,37 @@ calculated from the power spectrum $P(k)$ using
 
 To evaluate the numerical integral in the correlation functions, we make use of the public code {\tt FFTlog}\footnote{\url{http://casa.colorado.edu/~ajsh/FFTLog/}}\citep{Hamilton2000,Talman2009}. In brief, {\tt FFTlog} works on functions periodic in log space, by writing the Hankel Transform as a convolution between Bessel functions and the function of interest (in this case either $C_\ell$ or $P(k)$). A version of this code is included in \ccl with minor modifications.
 
+
+{\bf Redshift-space distortions.} In redshift space and under the linear approximation \citep{Kaiser1987} the correlation function $\xi(s,\mu)$ can be expanded in multipoles:
+\begin{equation}
+\xi(s,\mu) = \sum_{l\geq 0} \xi_l(s) L_l(\mu),
+\end{equation}
+where $s$ is the magnitude of the galaxy separation vector in redshift space $\bf s$, $\mu$ is the cosine of the separation angle between $\bf s$ and the line of sight, and $L_l(x)$ are the Legendre polynomials. The multipoles of the correlation function are given by
+\begin{equation}
+\xi_l(s) = \frac{i^l}{2 \pi^2} \int_0^{\infty} P_l(k) j_l(k s) k^2 dk,
+\end{equation}
+where $P_l(k)$ are multipoles of the power spectrum in redshift space $P(k,\mu_{\bf k})$ defined by
+\begin{equation}
+P(k,\mu_{\bf k}) = \sum_{l\geq 0} P_l(k) L_l(\mu_{\bf k}).
+\end{equation}
+In the linear approximation only the $l = 0,2,4$ multipoles are non-zero. They are related to the 
+real-space power spectrum $P(k)$ by
+\begin{eqnarray}
+&P_0(k) = \left(1+\frac{2}{3}\beta+\frac{1}{5}\beta^2\right)P(k),\\
+&P_2(k) = \left(\frac{4}{3}\beta+\frac{4}{7}\beta^2\right)P(k),\\
+&P_4(k) = \frac{8}{35}\beta^2 P(k),
+\end{eqnarray}
+where $\beta$ is the ratio of the growth rate $f$ and bias factor $b$, $\beta = f/b$.
+
+\ccl implements the redshift space correlation function $\xi(s, \mu)$, it's average at constant $s$, $\xi(s)$,
+the multiploes $\xi_l(s)$, and $\xi(\pi, \sigma)$, where $\pi$ is the galaxy pair separation 
+parallel to the line of sight and $\sigma$ is the separation perpendicular to the line of sight. 
+We use {\tt FFTlog} to calculate $\xi_l(s)$ from $P_l(k)$ in the implementation of $\xi(s,\mu)$.
+
+
+In order to speed up the calculations, we provide the option to create a spline of the multipole functions $\xi_l(s)$ and store them in global splines for subsequent access. After calculating the redshift-space correlation functions for a given cosmology the splines should be freed using the provided function before calculating for a different cosmology. 
+
+
 %-----------------------------------------------------------
 %
 %   Correlation: beyond flat-sky (under development)
