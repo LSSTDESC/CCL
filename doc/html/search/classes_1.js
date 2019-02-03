@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['dndz_5fsources_5fparams',['dNdz_sources_params',['../structd_ndz__sources__params.html',1,'']]]
+  ['dndz_5finfo',['dNdz_info',['../structd_ndz__info.html',1,'']]]
 ];
