@@ -452,7 +452,7 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int * statu
 
   double kmin,kmax,ndecades,amin,amax,ic;
   int nk,na,s;
-  double *x, *z, *y2d_lin, *y2d_nl;
+  double *x=NULL, *z=NULL, *y2d_lin=NULL, *y2d_nl=NULL;
   if (*status == 0) {
     //CLASS calculations done - now allocate CCL splines
     kmin = 2*exp(sp.ln_k[0]);
@@ -839,7 +839,7 @@ static void ccl_cosmology_compute_power_eh(ccl_cosmology * cosmo, int * status)
 
   // The x array is initially k, but will later
   // be overwritten with log(k)
-  double *x, *y, *z, *y2d;
+  double *x=NULL, *y=NULL, *z=NULL, *y2d=NULL;
   if(*status==0) {
     x=ccl_log_spacing(kmin, kmax, nk);
     if(x==NULL) {
@@ -980,7 +980,7 @@ static void ccl_cosmology_compute_power_bbks(ccl_cosmology * cosmo, int * status
 
   // The x array is initially k, but will later
   // be overwritten with log(k)
-  double *x, *y, *z, *y2d;
+  double *x=NULL, *y=NULL, *z=NULL, *y2d=NULL;
   x=ccl_log_spacing(kmin, kmax, nk);
   if(x==NULL) {
     *status = CCL_ERROR_MEMORY;
@@ -1171,8 +1171,8 @@ static void ccl_cosmology_compute_power_emu(ccl_cosmology * cosmo, int * status)
 
   double kmin,kmax,ndecades,amin,amax,ic;
   int nk,na,s;
-  double *x,*z,*y2d_lin;
-  double *y,*logx,*xstar,*zemu,*y2d_nl;
+  double *x=NULL,*z=NULL,*y2d_lin=NULL;
+  double *y=NULL,*logx=NULL,*xstar=NULL,*zemu=NULL,*y2d_nl=NULL;
   if (*status == 0) {
     //CLASS calculations done - now allocate CCL splines
     kmin = 2*exp(sp.ln_k[0]);
@@ -1382,7 +1382,6 @@ TASK: compute the nonlinear power spectrum at a given redshift
 */
 double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double k, double a, int *status)
 {
-
   if (!cosmo->computed_power) ccl_cosmology_compute_power(cosmo, status);
   // Return if compilation failed
   if (!cosmo->computed_power) return NAN;
@@ -1502,10 +1501,10 @@ double ccl_sigmaV(ccl_cosmology *cosmo,double R,double a,int *status)
   F.function=&sigmaV_integrand;
   F.params=&par;
   double sigma_V;
-	int gslstatus = gsl_integration_cquad(&F, log10(ccl_splines->K_MIN), log10(ccl_splines->K_MAX),
-																				0.0, ccl_gsl->INTEGRATION_SIGMAR_EPSREL,
-																				workspace,&sigma_V,NULL,NULL);
-
+  int gslstatus = gsl_integration_cquad(&F, log10(ccl_splines->K_MIN), log10(ccl_splines->K_MAX),
+					0.0, ccl_gsl->INTEGRATION_SIGMAR_EPSREL,
+					workspace,&sigma_V,NULL,NULL);
+  
   if(gslstatus != GSL_SUCCESS) {
     ccl_raise_gsl_warning(gslstatus, "ccl_power.c: ccl_sigmaV():");
     *status |= gslstatus;

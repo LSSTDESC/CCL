@@ -1,6 +1,19 @@
+# v 1.0 API changes :
+
+## C library
+- Deprecated the `native` non-Limber angular power spectrum method (#506).
+- Renamed `ccl_lsst_specs.c` to `ccl_redshifts.c`, deprecated LSST-specific redshift distribution functionality, introduced user-defined true dNdz (changes in call signature of `ccl_dNdz_tomog`). (#528).
+
+## Python library
+- Renamed `lsst_specs.py` to `redshifts.py`, deprecated LSST-specific redshift distribution functionality, introduced user-defined true dNdz (changes in call signature of `dNdz_tomog`). (#528).
+- Deprecated the `native` non-Limber angular power spectrum method (#506).
+- Deprecated the `Parameters` object in favor of only the `Cosmology` object (#493).
+- Renamed the `ClTracer` family of objects (#496).
+- Various function parameter name changes and documentation improvements (#464).
+
 # v 0.4 API changes:
 
-Summary: added halo model matter power spectrum calculation and halo mass-concentration relations. Change to sigma(R) function so that it now has time depdence: it is now sigma(R,a). Added a sigmaV(R,a) function, where sigmaV(R,a) is the variance in the displacement field smoothed on scale R at scale-factor a.
+Summary: added halo model matter power spectrum calculation and halo mass-concentration relations. Change to sigma(R) function so that it now has time dependence: it is now sigma(R,a). Added a sigmaV(R,a) function, where sigmaV(R,a) is the variance in the displacement field smoothed on scale R at scale-factor a.
 
 ## C library
 In ccl_halomod.c:

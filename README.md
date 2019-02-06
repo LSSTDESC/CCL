@@ -11,13 +11,19 @@ STYLE CONVENTION USED
         **`type`** or **`structure`**
 -->
 # CCL     [![Build Status](https://travis-ci.org/LSSTDESC/CCL.svg?branch=master)](https://travis-ci.org/LSSTDESC/CCL) [![Coverage Status](https://coveralls.io/repos/github/LSSTDESC/CCL/badge.svg?branch=master)](https://coveralls.io/github/LSSTDESC/CCL?branch=master)
-LSST DESC Core Cosmology Library (`CCL`) provides routines to compute basic cosmological observables with validated numerical accuracy.
+LSST DESC Core Cosmology Library (`CCL`) provides routines to compute basic cosmological observables with validated numerical accuracy. The library is written in C99 and all functionality is directly callable from C and C++ code.  We also provide python bindings for higher-level functions.
 
-The library is written in C99 and all functionality is directly callable from C and C++ code.  We also provide python bindings for higher-level functions.
+This software is a publicly released LSST DESC product which was developed within the LSST DESC using LSST DESC resources. DESC users should use it in accordance with the [LSST DESC publication policy](http://lsstdesc.org/Collaborators). External users are welcome to use the code outside DESC in accordance with the licensing information below.
 
-See also our [wiki](https://github.com/LSSTDESC/CCL/wiki).
+The list of publicly released versions of this package can be found [here](https://github.com/LSSTDESC/CCL/releases). The master branch is the most recent (non-released) stable branch, but under development. We recommend using one of the public releases unless working on the development on the library.
 
-# Installation
+Installation instructions can be found in [INSTALL.md](https://github.com/LSSTDESC/CCL/blob/master/INSTALL.md) in this directory. Documentation for `CCL` can be found:
+* in [DOC.md](https://github.com/LSSTDESC/CCL/blob/master/DOC.md) in this directory for an overview, 
+* in our [wiki](https://github.com/LSSTDESC/CCL/wiki) for a description of benchmarks and known installation issues, 
+* in the `CCL` [readthedocs page](https://readthedocs.org/projects/ccl/) for the `python` routines,  
+* by calling `help(function name)` from within `python`, and
+* in the doxygen docs contained in the `doc` folder within the repository for the C routines. 
+* There are also multiple examples in C, python and jupyter notebooks available in the `examples` folder.
 
 ## TLDR
 
@@ -175,7 +181,7 @@ $ python setup.py test
 ````
 This will run the embedded unit tests (may take a few minutes).
 
-Whatever the install method, you can always uninstall the pyton wrapper by running:
+Whatever the install method, you can always uninstall the python wrapper by running:
 ````sh
 $ pip uninstall pyccl
 ````
@@ -328,7 +334,7 @@ where:
 * `dfarr_mgrowth`: the modified growth function vector provided
 * `status`: Status flag. 0 if there are no errors, nonzero otherwise.
 
-For some specific cosmologies you can also use functions **`ccl_parameters_create_flat_lcdm`**, **`ccl_parameters_create_flat_wcdm`**, **`ccl_parameters_create_flat_wacdm`**, **`ccl_parameters_create_lcdm`**, which automatically set some parameters. For more information, see file ***include/ccl_core.c***.
+For flat LCDM cosmologies, you can also use **`ccl_parameters_create_flat_lcdm`**.
 
 The status flag `int status = 0` is passed around in almost every `CCL` function. Normally zero is returned while nonzero if there were some errors during a function call. For specific cases see documentation for **`ccl_error.c`**.
 
@@ -441,34 +447,52 @@ double ccl_massfunc(ccl_cosmology * cosmo, double smooth_mass, double a, double 
 ````
 where `smooth_mass` is mass smoothing scale (in units of *M_sun*) and `odelta` is choice of Delta. For more details (or other functions like **`sigma_M`**) see ***include/ccl_massfunc.h*** and ***src/mass_func.c***.
 
-### LSST Specifications
-`CCL` includes LSST specifications for the expected galaxy distributions of the full galaxy clustering sample and the lensing source galaxy sample. Start by defining a flexible photometric redshift model given by function
+### Redshift distributions
+In computing observables such as power spectra and correlation functions, the user can of course load their own redshift distribution. However, `CCL` also includes convenience functions to compute redshift distributions in tomographic bins defined by photo-z cuts, given a model for the photometric redshift model and for the true redshift distribution. 
+
+Start by defining a photometric redshift model given by a function
 ````c
 double (* your_pz_func)(double z_ph, double z_s, void *param, int * status);
 ````
-which returns the likelihood of measuring a particular photometric redshift `z_ph` given a spectroscopic redshift `z_s`, with a pointer to additional arguments `param` and a status flag. Then you call function **`ccl_specs_create_photoz_info`**
+which returns the likelihood of measuring a particular photometric redshift `z_ph` given a spectroscopic redshift `z_s`, with a pointer to additional arguments `param` and a status flag. Then you call function **`ccl_create_photoz_info`**
 ````c
-user_pz_info* ccl_specs_create_photoz_info(void * user_params,
-                                           double(*user_pz_func)(double, double, void*, int*));
+pz_info* ccl_create_photoz_info(void * params,
+                                           double(*pz_func)(double, double, void*, int*));
 ````
-which creates a strcture **`user_pz_info`** which holds information needed to compute *dN/dz*
+which creates a strcture **`pz_info`** which holds information needed to compute *p(z,z')*
 ````c
 typedef struct {
   double (* your_pz_func)(double, double, void *, int*);
   void *  your_pz_params;
-} user_pz_info;
+} pz_info;
 ````
-The expected *dN/dz* for lensing or clustering galaxies with given binning can be obtained by function **`ccl_specs_dNdz_tomog`**
-````c
-void ccl_specs_dNdz_tomog(double z, int dNdz_type, double bin_zmin, double bin_zmax,
-                          user_pz_info * user_info,  double *tomoout, int *status);
-````
-Result is returned in `tomoout`. Allowed types of `dNdz_type` (currently one for clustering and three for lensing - fiducial, optimistic, and conservative - cases are considered) and other information and functions like bias clustering or sigma_z are specified in file ***include/ccl_lsst_specs.h***
 
-After you are done working with photo_z, you should free its work space by **`ccl_specs_free_photoz_info`**
+Similarly, define an analytic form for the true redshift distribution:
 ````c
-void ccl_specs_free_photoz_info(user_pz_info *my_photoz_info);
+double (* your_dN_func)(double z_s, void *param, int * status);
+```` 
+then call function **`ccl_create_dNdz_info`**
+````c
+dNdz_info* ccl_create_dNdz_info(void * params,
+                                           double(*dNdz_func)( double, void*, int*));
 ````
+
+The expected *dN/dz* for lensing or clustering galaxies with a given binning can be obtained by function **`ccl_dNdz_tomog`**
+````c
+void ccl_dNdz_tomog(double z, double bin_zmin, double bin_zmax, pz_info * photo_info,
+                            dNdz_info * dN_info, double *tomoout, int *status);
+````
+Result is returned in `tomoout`.
+
+After you are done working with photo_z, you should free its work space by **`ccl_free_photoz_info`**
+````c
+void ccl_free_photoz_info(pz_info *my_photoz_info);
+````
+and similarly for the true redshift distribution:
+````c
+void ccl_free_dNdz_info(dNdz_info *my_dN_info);
+````
+
 
 ## Example code
 This code can also be found in ***examples/ccl_sample_run.c*** You can run the following example code. For this you will need to compile with the following command:
@@ -482,8 +506,9 @@ where `/path/to/install/` is the path to the location where the library has been
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
-#include "ccl.h"
-#include "ccl_lsst_specs.h"
+
+#include <ccl.h>
+#include <ccl_redshifts.h>
 
 #define OC 0.25
 #define OB 0.05
@@ -500,28 +525,46 @@ where `/path/to/install/` is the path to the location where the library has been
 #define SZ_GC 0.05
 #define Z0_SH 0.65
 #define SZ_SH 0.05
-#define NL 512
-#define PS 0.1
-#define NREL 3.046
-#define NMAS 0
-#define MNU 0.0
+#define NL 513
+#define PS 0.1 
+#define NEFF 3.046
 
 
 
-// The user defines a structure of parameters
-// to the user-defined function for the photo-z probability
+// The user defines a structure of parameters to the user-defined function for the photo-z probability 
 struct user_func_params
 {
   double (* sigma_z) (double);
 };
 
-// The user defines a function of the form double function ( z_ph, z_s, void * user_pz_params)
-// where user_pz_params is a pointer to the parameters of the user-defined function.
-// This returns the probabilty of obtaining a given photo-z given a particular spec_z.
+// Define the function we want to use for sigma_z which is included in the above struct.
+double sigmaz_sources(double z)
+{
+  return 0.05*(1.0+z);
+}
+
+// The user defines a function of the form double function ( z_ph, z_spec, void * user_pz_params) where user_pz_params is a pointer to the parameters of the user-defined function. This returns the probabilty of obtaining a given photo-z given a particular spec_z.
 double user_pz_probability(double z_ph, double z_s, void * user_par, int * status)
 {
   double sigma_z = ((struct user_func_params *) user_par)->sigma_z(z_s);
   return exp(- (z_ph-z_s)*(z_ph-z_s) / (2.*sigma_z*sigma_z)) / (pow(2.*M_PI,0.5)*sigma_z);
+}
+
+// The user defines a structure of parameters to the user-defined function for the true dNdz
+struct user_dN_params {
+  double alpha;
+  double beta;
+  double z0;
+};
+
+// The user defines a function of the form double function ( z, void * params, int *status) where params is a pointer to the parameters of the user-defined function. This returns the true dNdz.
+
+double user_dNdz(double z, void * user_par, int *status)
+{
+  struct user_dN_params * p = (struct user_dN_params *) user_par;
+  
+  return pow(z, p->alpha) * exp(- pow(z/(p->z0), p->beta) );
+
 }
 
 int main(int argc,char **argv)
@@ -529,13 +572,21 @@ int main(int argc,char **argv)
   //status flag
   int status =0;
 
+  // Set neutrino masses
+  double* MNU;
+  double mnuval = 0.;
+  MNU = &mnuval;
+  ccl_mnu_convention MNUTYPE = ccl_mnu_sum;
+  
+  //whether comoving or physical
+  int isco=0;
+
   // Initialize cosmological parameters
   ccl_configuration config=default_config;
   config.transfer_function_method=ccl_boltzmann_class;
-  ccl_parameters params = ccl_parameters_create(OC, OB, OK, NREL, NMAS, MNU, W0, WA, HH,
-  		 	  			NORMPS, NS,-1,-1,-1,-1,NULL,NULL, &status);
+  ccl_parameters params = ccl_parameters_create(OC, OB, OK, NEFF, MNU, MNUTYPE, W0, WA, HH, NORMPS, NS,-1,-1,-1,-1,NULL,NULL, &status);
   //printf("in sample run w0=%1.12f, wa=%1.12f\n", W0, WA);
-
+  
   // Initialize cosmology object given cosmo params
   ccl_cosmology *cosmo=ccl_cosmology_create(params,config);
 
@@ -546,36 +597,40 @@ int main(int argc,char **argv)
 	 ZD,ccl_luminosity_distance(cosmo,1./(1+ZD), &status));
   printf("Distance modulus to z = %.3lf is mu = %.3lf Mpc\n",
 	 ZD,ccl_distance_modulus(cosmo,1./(1+ZD), &status));
-
-
+  
+  
   //Consistency check
   printf("Scale factor is a=%.3lf \n",1./(1+ZD));
   printf("Consistency: Scale factor at chi=%.3lf Mpc is a=%.3lf\n",
 	 ccl_comoving_radial_distance(cosmo,1./(1+ZD), &status),
 	 ccl_scale_factor_of_chi(cosmo,ccl_comoving_radial_distance(cosmo,1./(1+ZD), &status), &status));
-
+  
   // Compute growth factor and growth rate (see include/ccl_background.h for more routines)
   printf("Growth factor and growth rate at z = %.3lf are D = %.3lf and f = %.3lf\n",
 	 ZD, ccl_growth_factor(cosmo,1./(1+ZD), &status),ccl_growth_rate(cosmo,1./(1+ZD), &status));
-
-  // Compute Omega_m, Omega_L and Omega_r at different times
-  printf("z\tOmega_m\tOmega_L\tOmega_r\n");
-  double Om, OL, Or;
+ 
+  // Compute Omega_m, Omega_L, Omega_r, rho_crit, rho_m at different times
+  printf("z\tOmega_m\tOmega_L\tOmega_r\trho_crit\trho_m\tRHO_CRITICAL\n");
+  double Om, OL, Or, rhoc, rhom;
   for (int z=10000;z!=0;z/=3){
-    Om = ccl_omega_x(cosmo, 1./(z+1), ccl_omega_m_label, &status);
-    OL = ccl_omega_x(cosmo, 1./(z+1), ccl_omega_l_label, &status);
-    Or = ccl_omega_x(cosmo, 1./(z+1), ccl_omega_g_label, &status);
-    printf("%i\t%.3f\t%.3f\t%.3f\n", z, Om, OL, Or);
+    Om = ccl_omega_x(cosmo, 1./(z+1), ccl_species_m_label, &status);
+    OL = ccl_omega_x(cosmo, 1./(z+1), ccl_species_l_label, &status);
+    Or = ccl_omega_x(cosmo, 1./(z+1), ccl_species_g_label, &status);
+    rhoc = ccl_rho_x(cosmo, 1./(z+1), ccl_species_crit_label, isco, &status);
+    rhom = ccl_rho_x(cosmo, 1./(z+1), ccl_species_m_label, isco, &status);
+    printf("%i\t%.3f\t%.3f\t%.3f\t%.3e\t%.3e\t%.3e\n", z, Om, OL, Or, rhoc, rhom, RHO_CRITICAL);
   }
-  Om = ccl_omega_x(cosmo, 1., ccl_omega_m_label, &status);
-  OL = ccl_omega_x(cosmo, 1., ccl_omega_l_label, &status);
-  Or = ccl_omega_x(cosmo, 1., ccl_omega_g_label, &status);
-  printf("%i\t%.3f\t%.3f\t%.3f\n", 0, Om, OL, Or);
+  Om = ccl_omega_x(cosmo, 1., ccl_species_m_label, &status);
+  OL = ccl_omega_x(cosmo, 1., ccl_species_l_label, &status);
+  Or = ccl_omega_x(cosmo, 1., ccl_species_g_label, &status);
+  rhoc = ccl_rho_x(cosmo, 1., ccl_species_crit_label, isco, &status);
+  rhom = ccl_rho_x(cosmo, 1., ccl_species_m_label, isco, &status);
+  printf("%i\t%.3f\t%.3f\t%.3f\t%.3e\t%.3e\t%.3e\n", 0, Om, OL, Or, rhoc, rhom, RHO_CRITICAL);
 
-  // Compute sigma_8
+  // Compute sigma8
   printf("Initializing power spectrum...\n");
-  printf("sigma_8 = %.3lf\n\n", ccl_sigma8(cosmo, &status));
-
+  printf("sigma8 = %.3lf\n\n", ccl_sigma8(cosmo, &status));
+  
   //Create tracers for angular power spectra
   double z_arr_gc[NZ],z_arr_sh[NZ],nz_arr_gc[NZ],nz_arr_sh[NZ],bz_arr[NZ];
   for(int i=0;i<NZ;i++) {
@@ -585,33 +640,63 @@ int main(int argc,char **argv)
     z_arr_sh[i]=Z0_SH-5*SZ_SH+10*SZ_SH*(i+0.5)/NZ;
     nz_arr_sh[i]=exp(-0.5*pow((z_arr_sh[i]-Z0_SH)/SZ_SH,2));
   }
-
+  double *a_arr_resample=(double *)malloc(2*NZ*sizeof(double));
+  double *nz_resampled=(double *)malloc(2*NZ*sizeof(double));
+  for(int i=0;i<2*NZ;i++) {
+    double z=(i+0.5)/NZ;
+    a_arr_resample[i]=1./(1+z);
+  }
+  
   //CMB lensing tracer
-  CCL_ClTracer *ct_cl=ccl_cl_tracer_cmblens_new(cosmo,1100.,&status);
+  CCL_ClTracer *ct_cl=ccl_cl_tracer_cmblens(cosmo,1100.,&status);
 
   //Galaxy clustering tracer
-  CCL_ClTracer *ct_gc=ccl_cl_tracer_number_counts_simple_new(cosmo,NZ,
-                                z_arr_gc,nz_arr_gc,NZ,z_arr_gc,bz_arr, &status);
-
+  CCL_ClTracer *ct_gc=ccl_cl_tracer_number_counts_simple(cosmo,NZ,z_arr_gc,nz_arr_gc,NZ,z_arr_gc,bz_arr, &status);
+  
   //Cosmic shear tracer
-  CCL_ClTracer *ct_wl=ccl_cl_tracer_lensing_simple_new(cosmo,NZ,z_arr_sh,nz_arr_sh, &status);
-  printf("ell C_ell(c,c) C_ell(c,g) C_ell(c,s) C_ell(g,g) C_ell(g,s) C_ell(s,s) \n");
-  for(int l=2;l<=NL;l*=2) {
-    double cl_cc=ccl_angular_cl(cosmo,l,ct_cl,ct_cl, &status); //CMBLensingTracer-CMBLensingTracer
-    double cl_cg=ccl_angular_cl(cosmo,l,ct_cl,ct_gc, &status); //CMBLensingTracer-Clustering
-    double cl_cs=ccl_angular_cl(cosmo,l,ct_wl,ct_cl, &status); //CMBLensingTracer-Galaxy lensing
-    double cl_gg=ccl_angular_cl(cosmo,l,ct_gc,ct_gc, &status); //Galaxy-galaxy
-    double cl_gs=ccl_angular_cl(cosmo,l,ct_gc,ct_wl, &status); //Galaxy-lensing
-    double cl_ss=ccl_angular_cl(cosmo,l,ct_wl,ct_wl, &status); //Lensing-lensing
-    printf("%d %.3lE %.3lE %.3lE %.3lE %.3lE %.3lE\n",l,cl_cc,cl_cg,cl_cs,cl_gg,cl_gs,cl_ss);
-  }
+  CCL_ClTracer *ct_wl=ccl_cl_tracer_lensing_simple(cosmo,NZ,z_arr_sh,nz_arr_sh, &status);
+  printf("ell C_ell(c,c) C_ell(c,g) C_ell(c,s) C_ell(g,g) C_ell(g,s) C_ell(s,s) | r(g,s)\n");
+  
+  //This function allows you to retrieve some of the tracer's internal functions of redshift
+  ccl_get_tracer_fas(cosmo,ct_gc,2*NZ,a_arr_resample,nz_resampled,CCL_CLT_NZ,&status);
+
+  int ells[NL];
+  double cells_cc_limber[NL];
+  double cells_cg_limber[NL];
+  double cells_cl_limber[NL];
+  double cells_ll_limber[NL];
+  double cells_gl_limber[NL];
+  double cells_gg_limber[NL];
+  for(int ii=0;ii<NL;ii++)
+    ells[ii]=ii;
+
+  double linstep = 40;
+  double logstep = 1.15;
+  double dchi = (ct_gc->chimax-ct_gc->chimin)/1000.; // must be below 3 to converge toward limber computation at high ell
+  double dlk = 0.003;
+  double zmin = 0.05;
+  CCL_ClWorkspace *w=ccl_cl_workspace_default(NL+1,-1,CCL_NONLIMBER_METHOD_NATIVE,logstep,linstep,dchi,dlk,zmin,&status);
+  ccl_angular_cls(cosmo,w,ct_cl,ct_cl,NL,ells,cells_cc_limber,&status);
+  ccl_angular_cls(cosmo,w,ct_cl,ct_gc,NL,ells,cells_cg_limber,&status);
+  ccl_angular_cls(cosmo,w,ct_cl,ct_wl,NL,ells,cells_cl_limber,&status);
+  ccl_angular_cls(cosmo,w,ct_gc,ct_gc,NL,ells,cells_gg_limber,&status);
+  ccl_angular_cls(cosmo,w,ct_gc,ct_wl,NL,ells,cells_gl_limber,&status);
+  ccl_angular_cls(cosmo,w,ct_wl,ct_wl,NL,ells,cells_ll_limber,&status);
+
+  
+  for(int l=2;l<=NL;l*=2)
+    printf("%d %.3lE %.3lE %.3lE %.3lE %.3lE %.3lE | %.3lE\n",l,cells_cc_limber[l],cells_cg_limber[l],cells_cl_limber[l],cells_gg_limber[l],cells_gl_limber[l],cells_ll_limber[l],cells_gl_limber[l]/sqrt(cells_gg_limber[l]*cells_ll_limber[l]));
   printf("\n");
-
+  
   //Free up tracers
-  ccl_cl_tracer_free(ct_gc);
   ccl_cl_tracer_free(ct_cl);
+  ccl_cl_tracer_free(ct_gc);
   ccl_cl_tracer_free(ct_wl);
-
+  
+  // Free arrays
+  free(a_arr_resample);
+  free(nz_resampled);
+  
   //Halo mass function
   printf("M\tdN/dlog10M(z = 0, 0.5, 1))\n");
   for(int logM=9;logM<=15;logM+=1) {
@@ -622,7 +707,7 @@ int main(int argc,char **argv)
     printf("\n");
   }
   printf("\n");
-
+  
   //Halo bias
   printf("Halo bias: z, M, b1(M,z)\n");
   for(int logM=9;logM<=15;logM+=1) {
@@ -631,35 +716,55 @@ int main(int argc,char **argv)
     }
   }
   printf("\n");
-
-  // LSST Specification
-  // The user declares and sets an instance of parameters to their photo_z function:
+  
+  // If you don't have an external N(z) you are loading, CCL also has functionality
+  // to produce this for you from an analytic form.
+  
+  // The user declares and sets an instance of parameters to their photo_z and dNdz function:
   struct user_func_params my_params_example;
-  my_params_example.sigma_z = ccl_specs_sigmaz_sources;
-
-  // Declare a variable of the type of user_pz_info to hold the struct to be created.
-  user_pz_info * pz_info_example;
-
+  my_params_example.sigma_z = sigmaz_sources;
+  struct user_dN_params my_dN_params_example;
+  my_dN_params_example.alpha = 1.24;
+  my_dN_params_example.beta = 1.01;
+  my_dN_params_example.z0 = 0.51;
+  
+  // Declare a variable of the type of to hold the struct to be created.
+  pz_info * pz_info_example;
+  
   // Create the struct to hold the user information about photo_z's.
-  pz_info_example = ccl_specs_create_photoz_info(&my_params_example, &user_pz_probability);
-
-  // Alternatively, we could have used the built-in Gaussian photo-z pdf,
+  pz_info_example = ccl_create_photoz_info(&my_params_example, &user_pz_probability);
+  
+  // Alternatively, we could have used the built-in Gaussian photo-z pdf, 
   // which assumes sigma_z = sigma_z0 * (1 + z) (not used in what follows).
   double sigma_z0 = 0.05;
-  user_pz_info *pz_info_gaussian;
-  pz_info_gaussian = ccl_specs_create_gaussian_photoz_info(sigma_z0);
-
+  pz_info *pz_info_gaussian;
+  pz_info_gaussian = ccl_create_gaussian_photoz_info(sigma_z0);
+  
+  // Declare a variable of the type of dN_info to hold the struct to be created
+  dNdz_info * dN_info_example; 
+  
+  // Create a simple analytic true redshift distribution:
+  dN_info_example = ccl_create_dNdz_info(&my_dN_params_example, &user_dNdz);
+  
+  // Alternatively, we could have used the built-in Smail-type dNdz
+  // (not used in what follows
+  dNdz_info *dN_info_gaussian;
+  double alpha = 1.24; 
+  double beta = 1.01;
+  double z0 = 0.51;
+  dN_info_gaussian = ccl_create_Smail_dNdz_info(alpha, beta, z0);
+  
   double z_test;
   double dNdz_tomo;
   int z;
   FILE * output;
-
+  
   //Try splitting dNdz (lensing) into 5 redshift bins
   double tmp1,tmp2,tmp3,tmp4,tmp5;
   printf("Trying splitting dNdz (lensing) into 5 redshift bins. "
-         "Output written into file tests/specs_example_tomo_lens.out\n");
-  output = fopen("./tests/specs_example_tomo_lens.out", "w");
-
+         "Output written into file tests/example_tomographic_bins.out\n");
+  output = fopen("./tests/example_tomographic_bins.out", "w"); 
+  
   if(!output) {
     fprintf(stderr, "Could not write to 'tests' subdirectory"
                     " - please run this program from the main CCL directory\n");
@@ -668,40 +773,28 @@ int main(int argc,char **argv)
   status = 0;
   for (z=0; z<100; z=z+1) {
     z_test = 0.035*z;
-    ccl_specs_dNdz_tomog(z_test, DNDZ_WL_FID, 0.,6., pz_info_example,&dNdz_tomo,&status);
-    ccl_specs_dNdz_tomog(z_test, DNDZ_WL_FID, 0.,0.6, pz_info_example,&tmp1,&status);
-    ccl_specs_dNdz_tomog(z_test, DNDZ_WL_FID, 0.6,1.2, pz_info_example,&tmp2,&status);
-    ccl_specs_dNdz_tomog(z_test, DNDZ_WL_FID, 1.2,1.8, pz_info_example,&tmp3,&status);
-    ccl_specs_dNdz_tomog(z_test, DNDZ_WL_FID, 1.8,2.4, pz_info_example,&tmp4,&status);
-    ccl_specs_dNdz_tomog(z_test, DNDZ_WL_FID, 2.4,3.0, pz_info_example,&tmp5,&status);
+    ccl_dNdz_tomog(z_test, 0.,6., pz_info_example, dN_info_example, &dNdz_tomo,&status); 
+    ccl_dNdz_tomog(z_test, 0.,0.6, pz_info_example,dN_info_example, &tmp1,&status); 
+    ccl_dNdz_tomog(z_test, 0.6,1.2, pz_info_example,dN_info_example, &tmp2,&status);
+    ccl_dNdz_tomog(z_test, 1.2,1.8, pz_info_example,dN_info_example, &tmp3,&status);
+    ccl_dNdz_tomog(z_test, 1.8,2.4, pz_info_example,dN_info_example, &tmp4,&status); 
+    ccl_dNdz_tomog(z_test, 2.4,3.0, pz_info_example,dN_info_example, &tmp5,&status);
     fprintf(output, "%f %f %f %f %f %f %f\n", z_test,tmp1,tmp2,tmp3,tmp4,tmp5,dNdz_tomo);
   }
-
+  
   fclose(output);
-
-  //Try splitting dNdz (clustering) into 5 redshift bins
-  printf("Trying splitting dNdz (clustering) into 5 redshift bins. "
-         "Output written into file tests/specs_example_tomo_clu.out\n");
-  output = fopen("./tests/specs_example_tomo_clu.out", "w");     
-  for (z=0; z<100; z=z+1) {
-    z_test = 0.035*z;
-    ccl_specs_dNdz_tomog(z_test, DNDZ_NC,0.,6., pz_info_example,&dNdz_tomo,&status);
-    ccl_specs_dNdz_tomog(z_test, DNDZ_NC,0.,0.6, pz_info_example,&tmp1,&status);
-    ccl_specs_dNdz_tomog(z_test, DNDZ_NC,0.6,1.2, pz_info_example,&tmp2,&status);
-    ccl_specs_dNdz_tomog(z_test, DNDZ_NC,1.2,1.8, pz_info_example,&tmp3,&status);
-    ccl_specs_dNdz_tomog(z_test, DNDZ_NC,1.8,2.4, pz_info_example,&tmp4,&status);
-    ccl_specs_dNdz_tomog(z_test, DNDZ_NC,2.4,3.0, pz_info_example,&tmp5,&status);
-    fprintf(output, "%f %f %f %f %f %f %f\n", z_test,tmp1,tmp2,tmp3,tmp4,tmp5,dNdz_tomo);
-  }
-  printf("ccl_sample_run completed, status = %d\n",status);
-  fclose(output);
-
+  
   //Free up photo-z info
-  ccl_specs_free_photoz_info(pz_info_example);
-
+  ccl_free_photoz_info(pz_info_example);
+  ccl_free_photoz_info(pz_info_gaussian);
+  
+  // Free the dNdz information
+  ccl_free_dNdz_info(dN_info_example);
+  ccl_free_dNdz_info(dN_info_gaussian);
+  
   //Always clean up!!
   ccl_cosmology_free(cosmo);
-
+  
   return 0;
 }
 ````
@@ -736,6 +829,10 @@ cls = ccl.angular_cl(cosmo, lens1, lens2, ell)
 print cls
 ````
 
+For known installation issues and further information on how CCL was benchmarked during development, see our [wiki](https://github.com/LSSTDESC/CCL/wiki).
 
 # License, Credits, Feedback etc
-The `CCL` is still under development and should be considered research in progress. You are welcome to re-use the code, which is open source and available under terms consistent with [BSD 3-Clause](https://opensource.org/licenses/BSD-3-Clause) licensing. If you make use of any of the ideas or software in this package in your own research, please cite them as "(LSST DESC, in preparation)" and provide a link to this repository: https://github.com/LSSTDESC/CCL. For free use of the `CLASS` library, the `CLASS` developers require that the `CLASS` paper be cited: CLASS II: Approximation schemes, D. Blas, J. Lesgourgues, T. Tram, arXiv:1104.2933, JCAP 1107 (2011) 034. The `CLASS` repository can be found in http://class-code.net. If you have comments, questions, or feedback, please [write us an issue](https://github.com/LSSTDESC/CCL/issues). Finally, CCL uses code from the [FFTLog](http://casa.colorado.edu/~ajsh/FFTLog/) package.  We have obtained permission from the FFTLog author to include modified versions of his source code.
+This code has been released by DESC, although it is still under active development. It is accompanied by a journal paper that describes the development and validation of `CCL`, which you can find the in the `doc/ccl_paper` folder. You are welcome to re-use the code, which is open source and available under terms consistent with our [LICENSE](https://github.com/LSSTDESC/CCL/blob/master/LICENSE), which is a [BSD 3-Clause](https://opensource.org/licenses/BSD-3-Clause) license. If you make use of any of the ideas or software in this package in your own research, please cite them as "(LSST DESC, in preparation)" and provide a link to this repository: https://github.com/LSSTDESC/CCL. For free use of the `CLASS` library, the `CLASS` developers require that the `CLASS` paper be cited: CLASS II: Approximation schemes, D. Blas, J. Lesgourgues, T. Tram, arXiv:1104.2933, JCAP 1107 (2011) 034. The `CLASS` repository can be found in http://class-code.net. Finally, CCL uses code from the [FFTLog](http://casa.colorado.edu/~ajsh/FFTLog/) package.  We have obtained permission from the FFTLog author to include modified versions of his source code.
+
+# Contact
+If you have comments, questions, or feedback, please [write us an issue](https://github.com/LSSTDESC/CCL/issues). You can also contact the [administrators](https://github.com/LSSTDESC/CCL/CCL-administrators).

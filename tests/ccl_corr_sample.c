@@ -54,18 +54,22 @@ int main(int argc,char **argv)
   }
 
   // Define a galaxy clustering tracer and calculate C_ell's
-  CCL_ClTracer *ct_gc = ccl_cl_tracer_number_counts_simple_new(cosmo, 
-							       NZ, z_arr_gc, nz_arr_gc,
-							       NZ, z_arr_gc, bz_arr,
-							       &status);
+  double l_logstep = 1.05;
+  double l_linstep = 5.;
+  CCL_ClWorkspace *w=ccl_cl_workspace_new_limber(ELL_MAX_CL+1,l_logstep,l_linstep,&status);
+  //CCL_ClTracer *tr_nc_1=ccl_cl_tracer_number_counts_simple(cosmo,nz,zarr_1,pzarr_1,nz,zarr_1,bzarr,&status);
+  CCL_ClTracer *ct_gc = ccl_cl_tracer_number_counts_simple(cosmo, 
+							   NZ, z_arr_gc, nz_arr_gc,
+							   NZ, z_arr_gc, bz_arr,
+							   &status);
   int il;
   double *clarr = malloc(ELL_MAX_CL*sizeof(double));
+  int *ilarr = malloc(ELL_MAX_CL*sizeof(int));
   double *larr = malloc(ELL_MAX_CL*sizeof(double));
-  for(il=0; il < ELL_MAX_CL; il++){
+  for(il=0; il < ELL_MAX_CL; il++)
     // Calculate auto-correlation of this tracer
     larr[il] = il;
-    clarr[il] = ccl_angular_cl(cosmo, il, ct_gc, ct_gc, &status);
-  }
+  ccl_angular_cls(cosmo, w, ct_gc, ct_gc, NULL,ELL_MAX_CL, ilarr, clarr, &status);
   
   // Define cosine tapering, to reduce ringing. The first two numbers are 
   // [lmin, lmax] for the low-ell taper, and the last two are [lmin, lmax] for 
@@ -88,9 +92,11 @@ int main(int argc,char **argv)
     printf("%le %le\n", theta[it], clustering_corr[it]);
   
   // Free tracers and other allocated memory
+  ccl_cl_workspace_free(w);
   ccl_cl_tracer_free(ct_gc);
   ccl_cosmology_free(cosmo);
   free(clustering_corr);
+  free(ilarr);
   free(larr);
   free(clarr);
 

@@ -1,5 +1,4 @@
 from . import ccllib as lib
-from . import constants as const
 from .core import check
 from .p2d import Pk2D
 import numpy as np
@@ -328,15 +327,18 @@ def angular_cl(cosmo, cltracer1, cltracer2, ell, p_of_k_a=None,
     if isinstance(ell, float) or isinstance(ell, int):
         # Use single-value function
         cl_one, status = lib.angular_cl_vec(
-            cosmo, clt1, clt2, psp, l_limber, l_logstep, l_linstep, [ell], 1, status)
+            cosmo, clt1, clt2, psp, l_limber, l_logstep,
+            l_linstep, [ell], 1, status)
         cl = cl_one[0]
     elif isinstance(ell, np.ndarray):
         # Use vectorised function
         cl, status = lib.angular_cl_vec(
-            cosmo, clt1, clt2, psp, l_limber, l_logstep, l_linstep, ell, ell.size, status)
+            cosmo, clt1, clt2, psp, l_limber, l_logstep,
+            l_linstep, ell, ell.size, status)
     else:
         # Use vectorised function
         cl, status = lib.angular_cl_vec(
-            cosmo, clt1, clt2, psp, l_limber, l_logstep, l_linstep, ell, len(ell), status)
+            cosmo, clt1, clt2, psp, l_limber, l_logstep,
+            l_linstep, ell, len(ell), status)
     check(status)
     return cl

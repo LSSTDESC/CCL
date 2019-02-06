@@ -11,9 +11,9 @@ list(APPEND CMAKE_MODULE_PATH  "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 project(ccl VERSION 0.2.1)
 
     # Defines list of CCL src files
-    set(CCL_SRC src/ccl_background.c src/ccl_params.c src/ccl_core.c src/ccl_error.c src/ccl_lsst_specs.c
+    set(CCL_SRC src/ccl_background.c src/ccl_params.c src/ccl_core.c src/ccl_error.c src/ccl_redshifts.c
                 src/ccl_p2d.c src/ccl_power.c src/ccl_utils.c src/ccl_cls.c src/ccl_massfunc.c src/ccl_neutrinos.c
-              src/ccl_emu17.c src/ccl_correlation.c src/ccl_halomod.c src/fftlog.c)
+                src/ccl_emu17.c src/ccl_correlation.c src/ccl_halomod.c src/fftlog.c)
 
     # Defines list of CCL tests src files
     # ! Add new tests to this list
@@ -24,7 +24,7 @@ project(ccl VERSION 0.2.1)
 		 tests/ccl_test_growth_lowz.c tests/ccl_test_growth_hiz.c tests/ccl_test_growth_allz.c
                  tests/ccl_test_bbks.c tests/ccl_test_eh.c
 		 tests/ccl_test_cls.c tests/ccl_test_sigmaM.c
-		 tests/ccl_test_massfunc.c tests/ccl_test_correlation.c tests/ccl_test_correlation_3d.c
+		 tests/ccl_test_massfunc.c tests/ccl_test_correlation.c tests/ccl_test_correlation_3d.c tests/ccl_test_correlation_3dRSD.c
 		 tests/ccl_test_bcm.c tests/ccl_test_emu.c tests/ccl_test_emu_nu.c
 		 tests/ccl_test_power_nu.c tests/ccl_test_halomod.c tests/ccl_test_angpow.c
 		 tests/ccl_test_p2d.c)

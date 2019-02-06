@@ -402,6 +402,7 @@ static void clt_nc_init(CCL_ClTracer *clt,ccl_cosmology *cosmo,
   if ( ((cosmo->params.N_nu_mass)>0) && clt->has_rsd){
     *status=CCL_ERROR_NOT_IMPLEMENTED;
     ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: ccl_cl_tracer_new(): Number counts tracers with RSD not yet implemented in cosmologies with massive neutrinos.");
+    return;
   }
 
   clt_init_nz(clt,cosmo,nz_n,z_n,n,status);
@@ -512,13 +513,13 @@ static void clt_wl_init(CCL_ClTracer *clt,ccl_cosmology *cosmo,
 //b    -> corresponding b(z)-values.
 //        b(z) will be assumed constant outside the range covered by z_n
 static CCL_ClTracer *cl_tracer(ccl_cosmology *cosmo,int tracer_type,
-				   int has_rsd,int has_magnification,int has_intrinsic_alignment,
-				   int nz_n,double *z_n,double *n,
-				   int nz_b,double *z_b,double *b,
-				   int nz_s,double *z_s,double *s,
-				   int nz_ba,double *z_ba,double *ba,
-				   int nz_rf,double *z_rf,double *rf,
-				   double z_source, int * status)
+			       int has_rsd,int has_magnification,int has_intrinsic_alignment,
+			       int nz_n,double *z_n,double *n,
+			       int nz_b,double *z_b,double *b,
+			       int nz_s,double *z_s,double *s,
+			       int nz_ba,double *z_ba,double *ba,
+			       int nz_rf,double *z_rf,double *rf,
+			       double z_source, int * status)
 {
   int clstatus=0;
   CCL_ClTracer *clt=(CCL_ClTracer *)malloc(sizeof(CCL_ClTracer));
@@ -552,6 +553,11 @@ static CCL_ClTracer *cl_tracer(ccl_cosmology *cosmo,int tracer_type,
     }
   }
 
+  if(*status) {
+    free(clt);
+    clt=NULL;
+  }
+    
   return clt;
 }
 
@@ -842,44 +848,37 @@ static void get_k_interval(ccl_cosmology *cosmo,CCL_ClWorkspace *w,
 			   CCL_ClTracer *clt1,CCL_ClTracer *clt2,int l,
 			   double *lkmin,double *lkmax)
 {
-  if(l<w->l_limber) {
-    //If non-Limber, we need to integrate over the whole range of k.
-    *lkmin=log(ccl_splines->K_MIN);
-    *lkmax=log(ccl_splines->K_MAX);
-  }
-  else {
-    double chimin,chimax;
-    int cut_low_1=0,cut_low_2=0;
-
-    //Define a minimum distance only if no lensing is needed
-    if((clt1->tracer_type==ccl_number_counts_tracer) && (clt1->has_magnification==0)) cut_low_1=1;
-    if((clt2->tracer_type==ccl_number_counts_tracer) && (clt2->has_magnification==0)) cut_low_2=1;
-
-    if(cut_low_1) {
-      if(cut_low_2) {
-	chimin=fmax(clt1->chimin,clt2->chimin);
-	chimax=fmin(clt1->chimax,clt2->chimax);
-      }
-      else {
-	chimin=clt1->chimin;
-	chimax=clt1->chimax;
-      }
-    }
-    else if(cut_low_2) {
-      chimin=clt2->chimin;
-      chimax=clt2->chimax;
+  double chimin,chimax;
+  int cut_low_1=0,cut_low_2=0;
+  
+  //Define a minimum distance only if no lensing is needed
+  if((clt1->tracer_type==ccl_number_counts_tracer) && (clt1->has_magnification==0)) cut_low_1=1;
+  if((clt2->tracer_type==ccl_number_counts_tracer) && (clt2->has_magnification==0)) cut_low_2=1;
+  
+  if(cut_low_1) {
+    if(cut_low_2) {
+      chimin=fmax(clt1->chimin,clt2->chimin);
+      chimax=fmin(clt1->chimax,clt2->chimax);
     }
     else {
-      chimin=0.5*(l+0.5)/ccl_splines->K_MAX;
-      chimax=2*(l+0.5)/ccl_splines->K_MIN;
+      chimin=clt1->chimin;
+      chimax=clt1->chimax;
     }
-
-    if(chimin<=0)
-      chimin=0.5*(l+0.5)/ccl_splines->K_MAX;
-
-    *lkmax=log(fmin( ccl_splines->K_MAX  ,2  *(l+0.5)/chimin));
-    *lkmin=log(fmax( ccl_splines->K_MIN  ,0.5*(l+0.5)/chimax));
   }
+  else if(cut_low_2) {
+    chimin=clt2->chimin;
+    chimax=clt2->chimax;
+  }
+  else {
+    chimin=0.5*(l+0.5)/ccl_splines->K_MAX;
+    chimax=2*(l+0.5)/ccl_splines->K_MIN;
+  }
+  
+  if(chimin<=0)
+    chimin=0.5*(l+0.5)/ccl_splines->K_MAX;
+  
+  *lkmax=log(fmin( ccl_splines->K_MAX  ,2  *(l+0.5)/chimin));
+  *lkmin=log(fmax( ccl_splines->K_MIN  ,0.5*(l+0.5)/chimax));
 }
 
 //Compute angular power spectrum between two bins

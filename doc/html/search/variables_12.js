@@ -1,5 +1,8 @@
 var searchData=
 [
-  ['unnormedfunc',['unnormedfunc',['../structnorm__params.html#a48273359055ff760c2ce87d54742011d',1,'norm_params']]],
-  ['user_5finformation',['user_information',['../structpz__params.html#a93510e399c602d610deb9e3c52cdf5ac',1,'pz_params::user_information()'],['../structnorm__params.html#a65059583138398e21e9a70bb0dfac2a0',1,'norm_params::user_information()']]]
+  ['w',['w',['../struct_int_cl_par.html#a1b7adafbc56d9fdb5edbe80c950062b6',1,'IntClPar']]],
+  ['w0',['w0',['../structccl__parameters.html#a9261f6431c8611e66833061ec9790b4c',1,'ccl_parameters']]],
+  ['w0_5fvals',['w0_vals',['../namespaceccl__test__distances.html#a3cd2fd2656b01e8fa9d3b3b1905570b4',1,'ccl_test_distances.w0_vals()'],['../namespaceccl__test__growth.html#ab846706326cba20d21f5963cbe5af568',1,'ccl_test_growth.w0_vals()'],['../namespaceccl__test__power.html#aea53fa09107f79b1ea572fc722716147',1,'ccl_test_power.w0_vals()']]],
+  ['wa',['wa',['../structccl__parameters.html#acdbe3508eec17046824f497225bde82e',1,'ccl_parameters']]],
+  ['wa_5fvals',['wa_vals',['../namespaceccl__test__distances.html#aa22d23c41d186cbb885841df67b5eaa2',1,'ccl_test_distances.wa_vals()'],['../namespaceccl__test__growth.html#a3b5a7ad847705c7a11bd75b81a268e5f',1,'ccl_test_growth.wa_vals()'],['../namespaceccl__test__power.html#af24a271b345239e7f2d22fd15a615fea',1,'ccl_test_power.wa_vals()']]]
 ];
