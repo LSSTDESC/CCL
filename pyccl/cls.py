@@ -285,7 +285,7 @@ def _check_array_params(f_arg):
 
 
 def angular_cl(cosmo, cltracer1, cltracer2, ell, p_of_k_a=None,
-               l_limber=-1., l_logstep=1.05, l_linstep=20.) :
+               l_limber=-1., l_logstep=1.05, l_linstep=20.):
     """Calculate the angular (cross-)power spectrum for a pair of tracers.
 
     Args:
@@ -310,14 +310,15 @@ def angular_cl(cosmo, cltracer1, cltracer2, ell, p_of_k_a=None,
     # Access ccl_cosmology object
     cosmo = cosmo.cosmo
 
-    if p_of_k_a is not None :
-        if isinstance(p_of_k_a,Pk2D) :
-            psp=p_of_k_a.psp
-        else :
-            raise ValueError("p_of_k_a must be either a pyccl.Pk2D object or None")
-    else :
-        psp=None
-    
+    if p_of_k_a is not None:
+        if isinstance(p_of_k_a, Pk2D):
+            psp = p_of_k_a.psp
+        else:
+            raise ValueError("p_of_k_a must be either a "
+                             "pyccl.Pk2D object or None")
+    else:
+        psp = None
+
     # Access CCL_ClTracer objects
     clt1 = cltracer1.cltracer
     clt2 = cltracer2.cltracer
