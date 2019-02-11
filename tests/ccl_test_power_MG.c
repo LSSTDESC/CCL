@@ -15,12 +15,11 @@ CTEST_DATA(power_MG) {
   double Neff;
   double mnuval;
   ccl_mnu_convention mnu_type;
-  double Omega_v;
   double Omega_k;
   double w0;
   double wa;
-  double mu_0[4];
-  double sigma_0[4];
+  double mu_0[5];
+  double sigma_0[5];
 };
 
 CTEST_SETUP(power_MG) {
@@ -28,20 +27,19 @@ CTEST_SETUP(power_MG) {
   data->Omega_b = 0.05;
   data->h = 0.7;
   data->A_s = 2.1e-9;
+  data->sigma8 = 0.8;
   data->n_s = 0.96;
-  data->sigma8=0.8;
   data->Neff=3.046;
-  data->mnu_type =ccl_mnu_list;
+  data->mnu_type =ccl_mnu_sum;
   data->mnuval = 0.;
-  data->Omega_v=0.7;
   data->w0= -1.0;
   data->wa = 0.0;
   data-> Omega_k = 0.;
   
-  double mu_0[4]={0.1, -0.1, 0.1, -0.1};
-  double sigma_0[4] = {0.1, -0.1, -0.1, 0.1};
+  double mu_0[5]={0., 0.1, -0.1, 0.1, -0.1};
+  double sigma_0[5] = {0., 0.1, -0.1, -0.1, 0.1};
 
-  for(int i=0;i<4;i++) {
+  for(int i=0;i<5;i++) {
     data->mu_0[i] = mu_0[i];
     data->sigma_0[i] = sigma_0[i];
   }
@@ -78,7 +76,8 @@ static void compare_power_MG(int i_model,struct power_MG_data * data)
   ccl_cosmology * cosmo= ccl_cosmology_create(params, config_linear);
   ASSERT_NOT_NULL(cosmo);
   
-  sprintf(fname,"./tests/benchmark/model%d_pk_MG.txt",i_model);
+  sprintf(fname,"./tests/benchmark/model%d_pk_MG.dat",i_model);
+  //sprintf(fname,"./tests/benchmark/GR_UToptions_physicalparams_matterpower.dat");
   f=fopen(fname,"r");
   if(f==NULL) {
     fprintf(stderr,"Error opening file %s\n",fname);
@@ -101,9 +100,15 @@ static void compare_power_MG(int i_model,struct power_MG_data * data)
     k=k_h*data->h;
     pk_bench=pk_h/pow(data->h,3);
     
+    //printf("pk_bench=%f\n", pk_bench);
+    
     pk_ccl=ccl_linear_matter_power(cosmo,k,1./(1+z),&status);
+    
+    //printf("pk_ccl=%f\n", pk_ccl);
     if (status) printf("%s\n",cosmo->status_message);
     err=fabs(pk_ccl/pk_bench-1);
+    printf("err=%f\n", err);
+    printf("k=%f\n", k);
     ASSERT_DBL_NEAR_TOL(err,0.,POWER_MG_TOL);
     }
     
@@ -161,7 +166,7 @@ static void check_nonlin_error(struct power_MG_data * data)
   ccl_cosmology_free(cosmo);
 }
 
-
+/*
 CTEST2(power_MG, MG_emu_error) {
 
   ccl_configuration config_emu = {ccl_emulator, ccl_emu, ccl_nobaryons, ccl_tinker10, ccl_emu_strict};	
@@ -188,11 +193,17 @@ CTEST2(power_MG, MG_nonlin_error) {
   check_nonlin_error(data);
 }
 
-/*CTEST2(power_MG, MG_pk_model1) {
+CTEST2(power_MG, MG_pk_model0) {
+  int model=0;	
+  compare_power_MG(model,data);
+}*/
+
+CTEST2(power_MG, MG_pk_model1) {
   int model=1;	
   compare_power_MG(model,data);
 }
 
+/*
 CTEST2(power_MG, MG_pk_model2) {
   int model=2;	
   compare_power_MG(model,data);

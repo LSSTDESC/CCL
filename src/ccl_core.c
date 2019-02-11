@@ -335,7 +335,7 @@ ccl_parameters ccl_parameters_create(
 	  // Normal hierarchy
 
 	  mnu_in = malloc(3*sizeof(double));
-
+	  
 	  // Check if the sum is zero
 	  if (*mnu<1e-15){
 		  mnu_in[0] = 0.;

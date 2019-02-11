@@ -17,7 +17,7 @@ project(ccl VERSION 0.2.1)
 
     # Defines list of CCL tests src files
     # ! Add new tests to this list
-    set(TEST_SRC tests/ccl_test.c tests/ccl_test_utils.c tests/ccl_test_params.c tests/ccl_test_params_mnu.c
+    set(TEST_SRC tests/ccl_test_power_MG.c tests/ccl_test.c tests/ccl_test_utils.c tests/ccl_test_params.c tests/ccl_test_params_mnu.c
 	             tests/ccl_test_cosmology.c
     		 tests/ccl_test_distances_class_allz.c tests/ccl_test_distances_cosmomad_hiz.c tests/ccl_test_distances_cosmomad_lowz.c
                  tests/ccl_test_distances_astropy_mnu_lowz.c tests/ccl_test_distances_astropy_mnu_hiz.c
