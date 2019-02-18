@@ -2,7 +2,6 @@
 #include <stdio.h>
 
 #include <ccl.h>
-#include <ccl_params.h>
 
 int main(int argc, char * argv[])
 {
@@ -25,7 +24,7 @@ int main(int argc, char * argv[])
 							      other_bcm_log10Mc, other_bcm_etab,
 							      other_bcm_ks, &status);
   ccl_cosmology * cosmo = ccl_cosmology_create(params, config);
-  
+
   double k,p,p1,p2,p3=0;
   double a_at_z1=0.5;
   double a_at_z2=1./3.;
@@ -51,7 +50,7 @@ int main(int argc, char * argv[])
   }
 
   printf("Completed. Status = %d\n",status);
-  
+
   ccl_cosmology_free(cosmo);
 
   return 0;

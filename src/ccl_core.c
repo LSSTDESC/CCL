@@ -10,7 +10,6 @@
 #include <gsl/gsl_integration.h>
 
 #include "ccl.h"
-#include "ccl_params.h"
 
 //
 // Macros for replacing relative paths
@@ -18,138 +17,108 @@
 #define STRING(s) #s
 
 
-const ccl_configuration default_config = {ccl_boltzmann_class, ccl_halofit, ccl_nobaryons, ccl_tinker10, ccl_duffy2008, ccl_emu_strict};
+const ccl_configuration default_config = {
+  ccl_boltzmann_class, ccl_halofit, ccl_nobaryons,
+  ccl_tinker10, ccl_duffy2008, ccl_emu_strict};
 
-const ccl_gsl_params default_gsl_params = {GSL_EPSREL,                          // EPSREL
-                                           GSL_N_ITERATION,                     // N_ITERATION
-                                           GSL_INTEGRATION_GAUSS_KRONROD_POINTS,// INTEGRATION_GAUSS_KRONROD_POINTS
-                                           GSL_EPSREL,                          // INTEGRATION_EPSREL
-                                           GSL_INTEGRATION_GAUSS_KRONROD_POINTS,// INTEGRATION_LIMBER_GAUSS_KRONROD_POINTS
-                                           GSL_EPSREL,                          // INTEGRATION_LIMBER_EPSREL
-                                           GSL_EPSREL_DIST,                     // INTEGRATION_DISTANCE_EPSREL
-                                           GSL_EPSREL_DNDZ,                     // INTEGRATION_DNDZ_EPSREL
-                                           GSL_EPSREL_SIGMAR,                   // INTEGRATION_SIGMAR_EPSREL
-                                           GSL_EPSREL_NU,                       // INTEGRATION_NU_EPSREL
-                                           GSL_EPSABS_NU,                       // INTEGRATION_NU_EPSABS
-                                           GSL_EPSREL,                          // ROOT_EPSREL
-                                           GSL_N_ITERATION,                     // ROOT_N_ITERATION
-                                           GSL_EPSREL_GROWTH                    // ODE_GROWTH_EPSREL
-                                          };
 
-/* ------- ROUTINE: ccl_cosmology_read_config ------
-   INPUTS: none, but will look for ini file in include/ dir
-   TASK: fill out global variables of splines with user defined input.
-   The variables are defined in ccl_params.h.
+//Precision parameters
+/**
+ * Default relative precision if not otherwise specified
+ */
+#define GSL_EPSREL 1E-4
 
-   The following are the relevant global variables:
-*/
+/**
+ * Default number of iterations for integration and root-finding if not otherwise
+ * specified
+ */
+#define GSL_N_ITERATION 1000
 
-ccl_spline_params * ccl_splines=NULL; // Global variable
-ccl_gsl_params * ccl_gsl=NULL; // Global variable
+/**
+ * Default number of Gauss-Kronrod points in QAG integration if not otherwise
+ * specified
+ */
+#define GSL_INTEGRATION_GAUSS_KRONROD_POINTS GSL_INTEG_GAUSS41
 
-void ccl_cosmology_read_config(void)
-{
+/**
+ * Relative precision in sigma_R calculations
+ */
+#define GSL_EPSREL_SIGMAR 1E-5
 
-  int CONFIG_LINE_BUFFER_SIZE=100;
-  int MAX_CONFIG_VAR_LEN=100;
-  FILE *fconfig;
-  char buf[CONFIG_LINE_BUFFER_SIZE];
-  char var_name[MAX_CONFIG_VAR_LEN];
-  char* rtn;
-  double var_dbl;
+/**
+ * Relative precision in distance calculations
+ */
+#define GSL_EPSREL_DIST 1E-6
 
-  // Get parameter .ini filename from environment variable or default location
-  const char* param_file;
-  const char* param_file_env = getenv("CCL_PARAM_FILE");
-  if (param_file_env != NULL) {
-    param_file = param_file_env;
-  }
-  else {
-    // Use default ini file
-    param_file = EXPAND_STR(__CCL_DATA_DIR__) "/ccl_params.ini";
-  }
-  if ((fconfig=fopen(param_file, "r")) == NULL) {
-    ccl_raise_exception(CCL_ERROR_MISSING_CONFIG_FILE, "ccl_core.c: Failed to open config file: %s", param_file);
-    return;
-  }
+/**
+ * Relative precision in growth calculations
+ */
+#define GSL_EPSREL_GROWTH 1E-6
 
-  if(ccl_splines == NULL) {
-    ccl_splines = malloc(sizeof(ccl_spline_params));
-  }
-  if(ccl_gsl == NULL) {
-    ccl_gsl = malloc(sizeof(ccl_gsl_params));
-    memcpy(ccl_gsl, &default_gsl_params, sizeof(ccl_gsl_params));
-  }
+/**
+ * Relative precision in dNdz calculations
+ */
+#define GSL_EPSREL_DNDZ 1E-6
 
-  /* Exit gracefully if we couldn't allocate memory */
-  if(ccl_splines==NULL || ccl_gsl==NULL) {
-    ccl_raise_exception(CCL_ERROR_MEMORY, "ccl_core.c: Failed to allocate memory for config file data.");
-    return;
-  }
+const ccl_gsl_params default_gsl_params = {
+  GSL_EPSREL,                          // EPSREL
+  GSL_N_ITERATION,                     // N_ITERATION
+  GSL_INTEGRATION_GAUSS_KRONROD_POINTS,// INTEGRATION_GAUSS_KRONROD_POINTS
+  GSL_EPSREL,                          // INTEGRATION_EPSREL
+  GSL_INTEGRATION_GAUSS_KRONROD_POINTS,// INTEGRATION_LIMBER_GAUSS_KRONROD_POINTS
+  GSL_EPSREL,                          // INTEGRATION_LIMBER_EPSREL
+  GSL_EPSREL_DIST,                     // INTEGRATION_DISTANCE_EPSREL
+  GSL_EPSREL_DNDZ,                     // INTEGRATION_DNDZ_EPSREL
+  GSL_EPSREL_SIGMAR,                   // INTEGRATION_SIGMAR_EPSREL
+  GSL_EPSREL,                          // ROOT_EPSREL
+  GSL_N_ITERATION,                     // ROOT_N_ITERATION
+  GSL_EPSREL_GROWTH,                   // ODE_GROWTH_EPSREL
+  1E-6                                 // EPS_SCALEFAC_GROWTH
+  };
 
-#define MATCH(s, action) if (0 == strcmp(var_name, s)) { action ; continue;} do{} while(0)
+#undef GSL_EPSREL
+#undef GSL_N_ITERATION
+#undef GSL_INTEGRATION_GAUSS_KRONROD_POINTS
+#undef GSL_EPSREL_SIGMAR
+#undef GSL_EPSREL_DIST
+#undef GSL_EPSREL_GROWTH
+#undef GSL_EPSREL_DNDZ
 
-  int lineno = 0;
-  while(! feof(fconfig)) {
-    rtn = fgets(buf, CONFIG_LINE_BUFFER_SIZE, fconfig);
-    lineno ++;
 
-    if (buf[0]==';' || buf[0]=='[' || buf[0]=='\n') {
-      continue;
-    }
-    else {
-      sscanf(buf, "%99[^=]=%le\n",var_name, &var_dbl);
+const ccl_spline_params default_spline_params = {
 
-      // Spline parameters
-      MATCH("A_SPLINE_NA", ccl_splines->A_SPLINE_NA=(int) var_dbl);
-      MATCH("A_SPLINE_NLOG", ccl_splines->A_SPLINE_NLOG=(int) var_dbl);
-      MATCH("A_SPLINE_MINLOG", ccl_splines->A_SPLINE_MINLOG=var_dbl);
-      MATCH("A_SPLINE_MIN", ccl_splines->A_SPLINE_MIN=var_dbl);
-      MATCH("A_SPLINE_MINLOG_PK", ccl_splines->A_SPLINE_MINLOG_PK=var_dbl);
-      MATCH("A_SPLINE_MIN_PK", ccl_splines->A_SPLINE_MIN_PK=var_dbl);
-      MATCH("A_SPLINE_MAX", ccl_splines->A_SPLINE_MAX=var_dbl);
-      MATCH("LOGM_SPLINE_DELTA", ccl_splines->LOGM_SPLINE_DELTA=var_dbl);
-      MATCH("LOGM_SPLINE_NM", ccl_splines->LOGM_SPLINE_NM=(int) var_dbl);
-      MATCH("LOGM_SPLINE_MIN", ccl_splines->LOGM_SPLINE_MIN=var_dbl);
-      MATCH("LOGM_SPLINE_MAX", ccl_splines->LOGM_SPLINE_MAX=var_dbl);
-      MATCH("A_SPLINE_NA_PK", ccl_splines->A_SPLINE_NA_PK=(int) var_dbl);
-      MATCH("A_SPLINE_NLOG_PK", ccl_splines->A_SPLINE_NLOG_PK=(int) var_dbl);
-      MATCH("K_MAX_SPLINE", ccl_splines->K_MAX_SPLINE=var_dbl);
-      MATCH("K_MAX", ccl_splines->K_MAX=var_dbl);
-      MATCH("K_MIN", ccl_splines->K_MIN=var_dbl);
-      MATCH("N_K", ccl_splines->N_K=(int) var_dbl);
+  // scale factor spline params
+  250,  // A_SPLINE_NA
+  0.1,  // A_SPLINE_MIN
+  0.01,  // A_SPLINE_MINLOG_PK
+  0.1,  // A_SPLINE_MIN_PK,
+  1.0,  // A_SPLINE_MAX,
+  0.0001,  // A_SPLINE_MINLOG,
+  250,  // A_SPLINE_NLOG,
 
-      // 3dcorr parameters
-      MATCH("N_K_3DCOR", ccl_splines->N_K_3DCOR=(int) var_dbl);
+  // mass splines
+  0.025,  // LOGM_SPLINE_DELTA
+  440,  // LOGM_SPLINE_NM
+  6,  // LOGM_SPLINE_MIN
+  17,  // LOGM_SPLINE_MAX
 
-      // Angular correlation function params
-      MATCH("ELL_MIN_CORR",ccl_splines->ELL_MIN_CORR=(double) var_dbl);
-      MATCH("ELL_MAX_CORR",ccl_splines->ELL_MAX_CORR=(double) var_dbl);
-      MATCH("N_ELL_CORR",ccl_splines->N_ELL_CORR=(int) var_dbl);
+  // PS a and k spline
+  40,  // A_SPLINE_NA_PK
+  11,  // A_SPLINE_NLOG_PK
 
-      // GSL parameters
-      MATCH("GSL_EPSREL", ccl_gsl->EPSREL=var_dbl);
-      MATCH("GSL_N_ITERATION", ccl_gsl->N_ITERATION=(size_t) var_dbl);
-      MATCH("GSL_INTEGRATION_GAUSS_KRONROD_POINTS", ccl_gsl->INTEGRATION_GAUSS_KRONROD_POINTS=(int) var_dbl);
-      MATCH("GSL_INTEGRATION_EPSREL", ccl_gsl->INTEGRATION_EPSREL=var_dbl);
-      MATCH("GSL_INTEGRATION_DISTANCE_EPSREL", ccl_gsl->INTEGRATION_DISTANCE_EPSREL=var_dbl);
-      MATCH("GSL_INTEGRATION_DNDZ_EPSREL", ccl_gsl->INTEGRATION_DNDZ_EPSREL=var_dbl);
-      MATCH("GSL_INTEGRATION_SIGMAR_EPSREL", ccl_gsl->INTEGRATION_SIGMAR_EPSREL=var_dbl);
-      MATCH("GSL_INTEGRATION_NU_EPSREL", ccl_gsl->INTEGRATION_NU_EPSREL=var_dbl);
-      MATCH("GSL_INTEGRATION_NU_EPSABS", ccl_gsl->INTEGRATION_NU_EPSABS=var_dbl);
-      MATCH("GSL_INTEGRATION_LIMBER_GAUSS_KRONROD_POINTS", ccl_gsl->INTEGRATION_LIMBER_GAUSS_KRONROD_POINTS=(int) var_dbl);
-      MATCH("GSL_INTEGRATION_LIMBER_EPSREL", ccl_gsl->INTEGRATION_LIMBER_EPSREL=var_dbl);
-      MATCH("GSL_ROOT_EPSREL", ccl_gsl->ROOT_EPSREL=var_dbl);
-      MATCH("GSL_ROOT_N_ITERATION", ccl_gsl->ROOT_N_ITERATION=(int) var_dbl);
-      MATCH("GSL_ODE_GROWTH_EPSREL", ccl_gsl->ODE_GROWTH_EPSREL=var_dbl);
+  // k-splines and integrals
+  50,  // K_MAX_SPLINE
+  1E3,  // K_MAX
+  5E-5,  // K_MIN
+  167,  // N_K
+  100000,  // N_K_3DCOR
 
-      ccl_raise_exception(CCL_ERROR_MISSING_CONFIG_FILE, "ccl_core.c: Failed to parse config file at line %d: %s", lineno, buf);
-    }
-  }
-#undef MATCH
+  // correlation function parameters
+  0.01,  // ELL_MIN_CORR
+  60000,  // ELL_MAX_CORR
+  5000,  // N_ELL_CORR
 
-  fclose(fconfig);
-}
+};
 
 
 /* ------- ROUTINE: ccl_cosmology_create ------
@@ -175,6 +144,8 @@ ccl_cosmology * ccl_cosmology_create(ccl_parameters params, ccl_configuration co
   ccl_cosmology * cosmo = malloc(sizeof(ccl_cosmology));
   cosmo->params = params;
   cosmo->config = config;
+  cosmo->gsl_params = default_gsl_params;
+  cosmo->spline_params = default_spline_params;
 
   cosmo->data.chi = NULL;
   cosmo->data.growth = NULL;
@@ -319,12 +290,6 @@ ccl_parameters ccl_parameters_create(
   params.sum_nu_masses = *mnu;
   double mnusum = *mnu;
   double *mnu_in = NULL;
-
-  /* Check whether ccl_splines and ccl_gsl exist. If either is not set yet, load
-     parameters from the config file. */
-  if(ccl_splines==NULL || ccl_gsl==NULL) {
-    ccl_cosmology_read_config();
-  }
 
   // Decide how to split sum of neutrino masses between 3 neutrinos. We use
   // a Newton's rule numerical solution (thanks M. Jarvis).

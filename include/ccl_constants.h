@@ -15,13 +15,6 @@
 
 /** @file */
 
-#ifndef M_PI
-/**
- *  PI (in case it's not defined from math.h)
-*/
-#define M_PI 3.14159265358979323846
-#endif
-
 /**
  *  k pivot. These are in units of Mpc (no factor of h)
 */
@@ -33,7 +26,7 @@
 #define CLIGHT_HMPC 2997.92458 //H0^-1 in Mpc/h
 
 /**
- * Newton's gravitational constant in units of m^3/Kg/s^2 
+ * Newton's gravitational constant in units of m^3/Kg/s^2
  */
 //#define GNEWT 6.6738e-11  /(from PDG 2013) in m^3/Kg/s^2
 //#define GNEWT 6.67428e-11 // CLASS VALUE
@@ -55,7 +48,7 @@
  */
 #define PC_TO_METER 3.08567758149e16
 
-/** 
+/**
  * Rho critical in units of M_sun/h / (Mpc/h)^3
  */
 #define RHO_CRITICAL ((3*100*100)/(8*M_PI*GNEWT)) * (1000*1000*MPC_TO_METER/SOLAR_MASS)
@@ -65,7 +58,7 @@
 */
 //#define KBOLTZ  GSL_CONST_MKSA_BOLTZMANN
 #define KBOLTZ 1.38064852e-23 //from CODATA 2014
-  
+
 /**
  * Stefan-Boltzmann constant in units of kg/s^3 / K^4
  */
@@ -74,21 +67,21 @@
 /**
  * Planck's constant in units kg m^2 / s
  */
-//#define HPLANCK  GSL_CONST_MKSA_PLANCKS_CONSTANT_H 
+//#define HPLANCK  GSL_CONST_MKSA_PLANCKS_CONSTANT_H
 #define HPLANCK 6.626070040e-34 //from CODATA 2014
-  
+
 /**
  * The speed of light in m/s
  */
 //#define CLIGHT   GSL_CONST_MKSA_SPEED_OF_LIGHT
 #define CLIGHT 299792458.0 //from CODATA 2014
-  
+
 /**
  * Electron volt to Joules convestion
  */
 //#define EV_IN_J  GSL_CONST_MKSA_ELECTRON_VOLT
 #define EV_IN_J 1.6021766208e-19  //from CODATA 2014
-  
+
 /**
  * Temperature of the CMB in K
  */
@@ -103,71 +96,11 @@
 /**
  * neutrino mass splitting differences
  * See Lesgourgues and Pastor, 2012 for these values.
- * Adv. High Energy Phys. 2012 (2012) 608515, 
+ * Adv. High Energy Phys. 2012 (2012) 608515,
  * arXiv:1212.6154, page 13
 */
 #define DELTAM12_sq 7.62E-5
 #define DELTAM13_sq_pos 2.55E-3
 #define DELTAM13_sq_neg -2.43E-3
-
-
-//Precision parameters
-/**
- * Default relative precision if not otherwise specified
- */
-#define GSL_EPSREL 1E-4
-
-/**
- * Default number of iterations for integration and root-finding if not otherwise
- * specified
- */
-#define GSL_N_ITERATION 1000
-
-/**
- * Default number of Gauss-Kronrod points in QAG integration if not otherwise 
- * specified
- */
-#define GSL_INTEGRATION_GAUSS_KRONROD_POINTS GSL_INTEG_GAUSS41
-
-/**
- * Absolute precision in neutrino root finding
- */
-#define GSL_EPSABS_NU 1E-7
-
-/**
- * Relative precision in neutrino root finding
- */
-#define GSL_EPSREL_NU 1E-7
-
-/**
- * Number of iterations for neutrino root finding
- */
-#define GSL_N_ITERATION_NU 1000
-
-/**
- * Relative precision in sigma_R calculations
- */
-#define GSL_EPSREL_SIGMAR 1E-5
-
-/**
- * Relative precision in distance calculations
- */
-#define GSL_EPSREL_DIST 1E-6
-
-/**
- * Relative precision in growth calculations
- */
-#define GSL_EPSREL_GROWTH 1E-6
-
-/**
- * Relative precision in dNdz calculations
- */
-#define GSL_EPSREL_DNDZ 1E-6
-
-/**
- * Absolute precision in growth calculations
- */
-#define EPS_SCALEFAC_GROWTH 1E-6
-
 
 #endif

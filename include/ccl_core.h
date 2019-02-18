@@ -11,6 +11,80 @@
 CCL_BEGIN_DECLS
 
 /**
+ * Struct that contains all the parameters needed to create certain splines.
+ * This includes splines for the scale factor, masses, and power spectra.
+ */
+typedef struct ccl_spline_params {
+  // scale factor splines
+  int A_SPLINE_NA;
+  double A_SPLINE_MIN;
+  double A_SPLINE_MINLOG_PK;
+  double A_SPLINE_MIN_PK;
+  double A_SPLINE_MAX;
+  double A_SPLINE_MINLOG;
+  int A_SPLINE_NLOG;
+
+  //Mass splines
+  double LOGM_SPLINE_DELTA;
+  int LOGM_SPLINE_NM;
+  double LOGM_SPLINE_MIN;
+  double LOGM_SPLINE_MAX;
+
+  //PS a and k spline
+  int A_SPLINE_NA_PK;
+  int A_SPLINE_NLOG_PK;
+
+  //k-splines and integrals
+  double K_MAX_SPLINE;
+  double K_MAX;
+  double K_MIN;
+  int N_K;
+  int N_K_3DCOR;
+
+  //Correlation function parameters
+  double ELL_MIN_CORR;
+  double ELL_MAX_CORR;
+  int N_ELL_CORR;
+
+} ccl_spline_params;
+
+
+/**
+ * Struct that contains parameters that control the accuracy of various GSL
+ * routines.
+ */
+typedef struct ccl_gsl_params {
+  // General parameters. If not otherwise specified, those will be copied to the
+  // more specialised cases.
+  double EPSREL;
+  size_t N_ITERATION;
+
+  // Integration
+  int INTEGRATION_GAUSS_KRONROD_POINTS;
+  double INTEGRATION_EPSREL;
+  // Limber integration
+  int INTEGRATION_LIMBER_GAUSS_KRONROD_POINTS;
+  double INTEGRATION_LIMBER_EPSREL;
+  // Distance integrals
+  double INTEGRATION_DISTANCE_EPSREL;
+  // dndz integrals
+  double INTEGRATION_DNDZ_EPSREL;
+  // sigma_R integral
+  double INTEGRATION_SIGMAR_EPSREL;
+
+  // Root finding
+  double ROOT_EPSREL;
+  int ROOT_N_ITERATION;
+
+  // ODE
+  double ODE_GROWTH_EPSREL;
+
+  // growth
+  double EPS_SCALEFAC_GROWTH;
+} ccl_gsl_params;
+
+
+/**
  * Struct containing the parameters defining a cosmology
  */
 typedef struct ccl_parameters {
@@ -68,6 +142,13 @@ typedef struct ccl_parameters {
   int nz_mgrowth;
   double *z_mgrowth;
   double *df_mgrowth;
+
+  // these have to be here since params is made before cosmo
+  int N_ITERATION;
+  double INTEGRATION_NU_EPSABS;
+  double INTEGRATION_NU_EPSREL;
+  gsl_spline* nu_spline;
+  gsl_interp_accel *accelerator;
 } ccl_parameters;
 
 
@@ -124,6 +205,8 @@ typedef struct ccl_cosmology
   ccl_parameters    params;
   ccl_configuration config;
   ccl_data          data;
+  ccl_spline_params spline_params;
+  ccl_gsl_params    gsl_params;
 
   bool computed_distances;
   bool computed_growth;
@@ -140,15 +223,14 @@ typedef struct ccl_cosmology
 
 // Label for whether you are passing a pointer to a sum of neutrino masses or a pointer to a list of 3 masses.
 typedef enum ccl_mnu_convention {
-  ccl_mnu_list=0,   // you pass a list of three neutrino masses
-  ccl_mnu_sum =1,  // sum, defaults to splitting with normal hierarchy
+  ccl_mnu_list = 0,   // you pass a list of three neutrino masses
+  ccl_mnu_sum = 1,  // sum, defaults to splitting with normal hierarchy
   ccl_mnu_sum_inverted = 2, //sum, split with inverted hierarchy
   ccl_mnu_sum_equal = 3, //sum, split into equal masses
   // More options could be added here
 } ccl_mnu_convention;
 
 // Initialization and life cycle of objects
-void ccl_cosmology_read_config(void);
 ccl_cosmology * ccl_cosmology_create(ccl_parameters params, ccl_configuration config);
 
 /* Internal function to set the status message safely. */
