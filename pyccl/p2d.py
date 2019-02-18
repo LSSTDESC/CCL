@@ -11,7 +11,7 @@ class Pk2D(object):
     arbitrary function of wavenumber and scale factor.
     """
     def __init__(self, pkfunc=None, a_arr=None, lk_arr=None, pk_arr=None,
-                 is_logp=True):
+                 is_logp=True, interp_order_lok=1, interp_order_hik=2):
         """Constructor for Pk2D objects.
 
         Args:
@@ -23,7 +23,10 @@ class Pk2D(object):
                   (or its natural logarithm, depending on the value of
                   `is_logp`. The power spectrum units should be compatible
                   with those used by CCL (e.g. if you're passing a matter power
-                  spectrum, its units should be Mpc^3).
+                  spectrum, its units should be Mpc^3). If this argument is not
+                  `None`, this function will be sampled at the values of k and
+                  a used internally by CCL to store the linear and non-linear
+                  power spectra.
             a_arr (array): an array holding values of the scale factor
             lk_arr (array): an array holding values of the natural logarithm
                   of the wavenumber (in units of Mpc^-1).
@@ -37,7 +40,16 @@ class Pk2D(object):
                   spectrum, depending on the value of `is_logp`. If `pkfunc`
                   is not None, then `a_arr`, `lk_arr` and `pk_arr` are ignored.
                   However, either `pkfunc` or all of the last three array must
-                  be non-None.
+                  be non-None. Note that, if you pass your own Pk array, you
+                  are responsible of making sure that it is sufficiently well
+                  sampled (i.e. the resolution of `a_arr` and `lk_arr` is high
+                  enough to sample the main features in the power spectrum).
+                  For reference, CCL will use bicubic interpolation to evaluate
+                  the power spectrum at any intermediate point in k and a.
+            interp_order_lok (int): extrapolation order to be used on k-values
+                  below the minimum of the splines (use 0, 1 or 2).
+            interp_order_hik (int): extrapolation order to be used on k-values
+                  above the maximum of the splines (use 0, 1 or 2).
             is_logp (boolean): if True, pkfunc/pkarr return/hold the natural
                   logarithm of the power spectrum. Otherwise, the true value
                   of the power spectrum is expected.
@@ -75,6 +87,8 @@ class Pk2D(object):
             pkflat = pkflat.flatten()
 
         self.psp, status = lib.set_p2d_new_from_arrays(lk_arr, a_arr, pkflat,
+                                                       int(interp_order_lok),
+                                                       int(interp_order_hik),
                                                        int(is_logp), status)
         check(status)
         self.has_psp = True

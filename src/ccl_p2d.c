@@ -130,7 +130,6 @@ double ccl_p2d_t_eval(ccl_p2d_t *psp,double lk,double a,ccl_cosmology *cosmo,
   }
   else if(is_lok) {
     pk_post=pk_pre;
-    pk_post=pk_pre;
     if(psp->extrap_order_lok>0) {
       double pd;
       double dlk=lk-lk_ev;

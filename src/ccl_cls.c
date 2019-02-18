@@ -1018,10 +1018,12 @@ void ccl_angular_cls(ccl_cosmology *cosmo,CCL_ClWorkspace *w,
   if(*status==0) {
     //Compute limber nodes
     for(ii=0;ii<w->n_ls;ii++) {
-      if((!do_angpow) || (w->l_arr[ii]>w->l_limber))
+      if(((!do_angpow) || (w->l_arr[ii]>w->l_limber)) && (*status==0))
 	cl_nodes[ii]=ccl_angular_cl_native(cosmo,w,ii,clt1,clt2,psp,status);
     }
+  }
 
+  if(*status==0) {
     //Interpolate into ells requested by user
     spcl_nodes=ccl_spline_init(w->n_ls,l_nodes,cl_nodes,0,0);
     if(spcl_nodes==NULL) {

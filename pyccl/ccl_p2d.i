@@ -18,6 +18,7 @@
 ccl_p2d_t *set_p2d_new_from_arrays(double* lkarr,int nk,
 				   double* aarr,int na,
 				   double* pkarr,int npk,
+				   int order_lok,int order_hik,
 				   int is_logp,
 				   int *status)
 {

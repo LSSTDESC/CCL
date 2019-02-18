@@ -32,8 +32,8 @@ typedef enum ccl_p2d_interp_t
 typedef struct {
   double lkmin,lkmax; /**< Edges in log(k)*/
   double amin,amax; /**< Edges in a*/
-  int extrap_order_lok; /**< Order of extrapolating polynomial in log(k) for low k*/
-  int extrap_order_hik; /**< Order of extrapolating polynomial in log(k) for high k*/
+  int extrap_order_lok; /**< Order of extrapolating polynomial in log(k) for low k (0, 1 or 2)*/
+  int extrap_order_hik; /**< Order of extrapolating polynomial in log(k) for high k (0, 1 or 2)*/
   ccl_p2d_extrap_growth_t extrap_linear_growth;  /**< Extrapolation type at high redshifts*/
   int is_log; /**< Do I hold the values of log(P(k,a))?*/
   double (*growth)(double); /**< Custom extrapolating growth function*/
