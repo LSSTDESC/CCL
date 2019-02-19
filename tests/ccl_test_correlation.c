@@ -8,6 +8,7 @@
 
 #define CORR_ERROR_FRACTION 0.1
 #define ELL_MAX_CL 10000
+#define L_SPLINE_TYPE gsl_interp_akima
 double fftlogfactor; //this is the factor by which FFTLog performs more weakly than the brute-force integration approach (Bessel)
 
 CTEST_DATA(corrs) {

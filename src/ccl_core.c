@@ -7,6 +7,8 @@
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_odeiv.h>
 #include <gsl/gsl_spline.h>
+#include <gsl/gsl_interp2d.h>
+#include <gsl/gsl_spline2d.h>
 #include <gsl/gsl_integration.h>
 
 #include "ccl.h"
@@ -118,7 +120,109 @@ const ccl_spline_params default_spline_params = {
   60000,  // ELL_MAX_CORR
   5000,  // N_ELL_CORR
 
+  //Spline types
+  NULL,
+  NULL,
+  NULL,
+  NULL,
+  NULL,
+  NULL,
+  NULL
 };
+
+
+ccl_physical_constants ccl_constants = {
+  /**
+   *  k pivot. These are in units of Mpc (no factor of h)
+  */
+  0.05,
+
+  /**
+   * Lightspeed / H0 in units of Mpc/h (from CODATA 2014)
+   */
+  2997.92458,
+
+  /**
+   * Newton's gravitational constant in units of m^3/Kg/s^2
+   */
+  //6.6738e-11,  /(from PDG 2013) in m^3/Kg/s^2
+  //6.67428e-11, // CLASS VALUE
+  6.67408e-11, // from CODATA 2014
+
+  /**
+   * Solar mass in units of kg (from GSL)
+   */
+  //GSL_CONST_MKSA_SOLAR_MASS,
+  //1.9885e30, //(from PDG 2015) in Kg
+  1.9884754153381438E+30, //from IAU 2015
+
+  /**
+   * Mpc to meters (from PDG 2013)
+   */
+  3.08567758149E+22,
+
+  /**
+   * pc to meters (from PDG 2013)
+   */
+  3.08567758149E+16,
+
+  /**
+   * Rho critical in units of M_sun/h / (Mpc/h)^3
+   */
+  ((3*100*100)/(8*M_PI*6.67408e-11)) * (1000*1000*3.08567758149E+22/1.9884754153381438E+30),
+
+  /**
+   * Boltzmann constant in units of J/K
+  */
+  //GSL_CONST_MKSA_BOLTZMANN,
+  1.38064852E-23, //from CODATA 2014
+
+  /**
+   * Stefan-Boltzmann constant in units of kg/s^3 / K^4
+   */
+  //GSL_CONST_MKSA_STEFAN_BOLTZMANN_CONSTANT,
+  5.670367E-8, //from CODATA 2014
+
+  /**
+   * Planck's constant in units kg m^2 / s
+   */
+  //GSL_CONST_MKSA_PLANCKS_CONSTANT_H,
+  6.626070040E-34, //from CODATA 2014
+
+  /**
+   * The speed of light in m/s
+   */
+  //GSL_CONST_MKSA_SPEED_OF_LIGHT,
+  299792458.0, //from CODATA 2014
+
+  /**
+   * Electron volt to Joules convestion
+   */
+  //GSL_CONST_MKSA_ELECTRON_VOLT,
+  1.6021766208e-19,  //from CODATA 2014
+
+  /**
+   * Temperature of the CMB in K
+   */
+  2.725,
+  //2.7255, // CLASS value
+
+  /**
+   * T_ncdm, as taken from CLASS, explanatory.ini
+   */
+  0.71611,
+
+  /**
+   * neutrino mass splitting differences
+   * See Lesgourgues and Pastor, 2012 for these values.
+   * Adv. High Energy Phys. 2012 (2012) 608515,
+   * arXiv:1212.6154, page 13
+  */
+  7.62E-5,
+  2.55E-3,
+  -2.43E-3
+};
+
 
 
 /* ------- ROUTINE: ccl_cosmology_create ------
@@ -146,18 +250,25 @@ ccl_cosmology * ccl_cosmology_create(ccl_parameters params, ccl_configuration co
   cosmo->config = config;
   cosmo->gsl_params = default_gsl_params;
   cosmo->spline_params = default_spline_params;
+  cosmo->spline_params.A_SPLINE_TYPE = gsl_interp_akima;
+  cosmo->spline_params.K_SPLINE_TYPE = gsl_interp_akima;
+  cosmo->spline_params.M_SPLINE_TYPE = gsl_interp_akima;
+  cosmo->spline_params.D_SPLINE_TYPE = gsl_interp_akima;
+  cosmo->spline_params.PNL_SPLINE_TYPE = gsl_interp2d_bicubic;
+  cosmo->spline_params.PLIN_SPLINE_TYPE = gsl_interp2d_bicubic;
+  cosmo->spline_params.CORR_SPLINE_TYPE = gsl_interp_akima;
 
   cosmo->data.chi = NULL;
   cosmo->data.growth = NULL;
   cosmo->data.fgrowth = NULL;
   cosmo->data.E = NULL;
-  cosmo->data.accelerator=NULL;
-  cosmo->data.accelerator_achi=NULL;
-  cosmo->data.accelerator_m=NULL;
-  cosmo->data.accelerator_d=NULL;
-  cosmo->data.accelerator_k=NULL;
+  cosmo->data.accelerator = NULL;
+  cosmo->data.accelerator_achi = NULL;
+  cosmo->data.accelerator_m = NULL;
+  cosmo->data.accelerator_d = NULL;
+  cosmo->data.accelerator_k = NULL;
   cosmo->data.growth0 = 1.;
-  cosmo->data.achi=NULL;
+  cosmo->data.achi = NULL;
 
   cosmo->data.logsigma = NULL;
   cosmo->data.dlnsigma_dlogm = NULL;
@@ -171,7 +282,6 @@ ccl_cosmology * ccl_cosmology_create(ccl_parameters params, ccl_configuration co
 
   cosmo->data.p_lin = NULL;
   cosmo->data.p_nl = NULL;
-  //cosmo->data.nu_pspace_int = NULL;
   cosmo->computed_distances = false;
   cosmo->computed_growth = false;
   cosmo->computed_power = false;
@@ -198,26 +308,33 @@ void ccl_parameters_fill_initial(ccl_parameters * params, int *status)
 {
   // Fixed radiation parameters
   // Omega_g * h**2 is known from T_CMB
-  params->T_CMB =  TCMB;
+  params->T_CMB =  ccl_constants.TCMB;
   // kg / m^3
-  double rho_g = 4. * STBOLTZ / pow(CLIGHT, 3) * pow(params->T_CMB, 4);
+  double rho_g = 4. * ccl_constants.STBOLTZ / pow(ccl_constants.CLIGHT, 3) * pow(params->T_CMB, 4);
   // kg / m^3
-  double rho_crit = RHO_CRITICAL * SOLAR_MASS/pow(MPC_TO_METER, 3) * pow(params->h, 2);
+  double rho_crit =
+    ccl_constants.RHO_CRITICAL *
+    ccl_constants.SOLAR_MASS/pow(ccl_constants.MPC_TO_METER, 3) *
+    pow(params->h, 2);
   params->Omega_g = rho_g/rho_crit;
 
   // Get the N_nu_rel from Neff and N_nu_mass
-  params->N_nu_rel = params->Neff - params->N_nu_mass * pow(TNCDM, 4) / pow(4./11.,4./3.);
+  params->N_nu_rel = params->Neff - params->N_nu_mass * pow(ccl_constants.TNCDM, 4) / pow(4./11.,4./3.);
 
   // Temperature of the relativistic neutrinos in K
   double T_nu= (params->T_CMB) * pow(4./11.,1./3.);
   // in kg / m^3
-  double rho_nu_rel = params->N_nu_rel* 7.0/8.0 * 4. * STBOLTZ / pow(CLIGHT, 3) * pow(T_nu, 4);
+  double rho_nu_rel =
+    params->N_nu_rel* 7.0/8.0 * 4. *
+    ccl_constants.STBOLTZ / pow(ccl_constants.CLIGHT, 3) *
+    pow(T_nu, 4);
   params-> Omega_n_rel = rho_nu_rel/rho_crit;
 
   // If non-relativistic neutrinos are present, calculate the phase_space integral.
   if((params->N_nu_mass)>0) {
     // Pass NULL for the accelerator here because we don't have our cosmology object defined yet.
-    params->Omega_n_mass = ccl_Omeganuh2(1.0, params->N_nu_mass, params->mnu, params->T_CMB, NULL, status) / ((params->h)*(params->h));
+    params->Omega_n_mass = ccl_Omeganuh2(
+      1.0, params->N_nu_mass, params->mnu, params->T_CMB, NULL, status) / ((params->h)*(params->h));
     ccl_check_status_nocosmo(status);
   }
   else{
@@ -238,7 +355,7 @@ void ccl_parameters_fill_initial(ccl_parameters * params, int *status)
     params->k_sign=-1;
   else
     params->k_sign=1;
-  params->sqrtk=sqrt(fabs(params->Omega_k))*params->h/CLIGHT_HMPC;
+  params->sqrtk=sqrt(fabs(params->Omega_k))*params->h/ccl_constants.CLIGHT_HMPC;
 }
 
 
@@ -310,8 +427,8 @@ ccl_parameters ccl_parameters_create(
 
 	      double sum_check;
 	      // Check that sum is consistent
-	      mnu_in[1] = sqrt(DELTAM12_sq);
-	      mnu_in[2] = sqrt(DELTAM13_sq_pos);
+	      mnu_in[1] = sqrt(ccl_constants.DELTAM12_sq);
+	      mnu_in[2] = sqrt(ccl_constants.DELTAM13_sq_pos);
 	      sum_check = mnu_in[0] + mnu_in[1] + mnu_in[2];
 	      if (ccl_mnu_sum < sum_check){
 		      *status = CCL_ERROR_MNU_UNPHYSICAL;
@@ -323,8 +440,8 @@ ccl_parameters ccl_parameters_create(
 
               dsdm1 = 1. + mnu_in[0] / mnu_in[1] + mnu_in[0] / mnu_in[2];
               mnu_in[0] = mnu_in[0] - (sum_check - *mnu) / dsdm1;
-              mnu_in[1] = sqrt(mnu_in[0]*mnu_in[0] + DELTAM12_sq);
-              mnu_in[2] = sqrt(mnu_in[0]*mnu_in[0] + DELTAM13_sq_pos);
+              mnu_in[1] = sqrt(mnu_in[0]*mnu_in[0] + ccl_constants.DELTAM12_sq);
+              mnu_in[2] = sqrt(mnu_in[0]*mnu_in[0] + ccl_constants.DELTAM13_sq_pos);
               sum_check = mnu_in[0] + mnu_in[1] + mnu_in[2];
           }
 	  }
@@ -345,8 +462,8 @@ ccl_parameters ccl_parameters_create(
 
 	      double sum_check;
 	      // Check that sum is consistent
-	      mnu_in[1] = sqrt(-1.* DELTAM13_sq_neg - DELTAM12_sq);
-	      mnu_in[2] = sqrt(-1.* DELTAM13_sq_neg);
+	      mnu_in[1] = sqrt(-1.* ccl_constants.DELTAM13_sq_neg - ccl_constants.DELTAM12_sq);
+	      mnu_in[2] = sqrt(-1.* ccl_constants.DELTAM13_sq_neg);
 	      sum_check = mnu_in[0] + mnu_in[1] + mnu_in[2];
 	      if (ccl_mnu_sum < sum_check){
 		      *status = CCL_ERROR_MNU_UNPHYSICAL;
@@ -358,8 +475,8 @@ ccl_parameters ccl_parameters_create(
           while (fabs(*mnu- sum_check) > 1e-15){
               dsdm1 = 1. + (mnu_in[0] / mnu_in[1]) + (mnu_in[0] / mnu_in[2]);
               mnu_in[0] = mnu_in[0] - (sum_check - *mnu) / dsdm1;
-              mnu_in[1] = sqrt(mnu_in[0]*mnu_in[0] + DELTAM12_sq);
-              mnu_in[2] = sqrt(mnu_in[0]*mnu_in[0] + DELTAM13_sq_neg);
+              mnu_in[1] = sqrt(mnu_in[0]*mnu_in[0] + ccl_constants.DELTAM12_sq);
+              mnu_in[2] = sqrt(mnu_in[0]*mnu_in[0] + ccl_constants.DELTAM13_sq_neg);
               sum_check = mnu_in[0] + mnu_in[1] + mnu_in[2];
           }
 

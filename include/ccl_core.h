@@ -7,8 +7,96 @@
 #include <gsl/gsl_spline.h>
 #include <gsl/gsl_interp2d.h>
 #include <gsl/gsl_spline2d.h>
+#include <gsl/gsl_const_mksa.h>
 
 CCL_BEGIN_DECLS
+
+/**
+ * Struct to hold physical constants.
+ */
+typedef struct ccl_physical_constants {
+  /**
+   *  k pivot. These are in units of Mpc (no factor of h)
+  */
+  double K_PIVOT;
+
+  /**
+   * Lightspeed / H0 in units of Mpc/h (from CODATA 2014)
+   */
+  double CLIGHT_HMPC;
+
+  /**
+   * Newton's gravitational constant in units of m^3/Kg/s^2
+   */
+  double GNEWT;
+
+  /**
+   * Solar mass in units of kg (from GSL)
+   */
+  double SOLAR_MASS;
+
+  /**
+   * Mpc to meters (from PDG 2013)
+   */
+  double MPC_TO_METER;
+
+  /**
+   * pc to meters (from PDG 2013)
+   */
+  double PC_TO_METER;
+
+  /**
+   * Rho critical in units of M_sun/h / (Mpc/h)^3
+   */
+  double RHO_CRITICAL;
+
+  /**
+   * Boltzmann constant in units of J/K
+  */
+  double KBOLTZ;
+
+  /**
+   * Stefan-Boltzmann constant in units of kg/s^3 / K^4
+   */
+  double STBOLTZ;
+
+  /**
+   * Planck's constant in units kg m^2 / s
+   */
+  double HPLANCK;
+
+  /**
+   * The speed of light in m/s
+   */
+  double CLIGHT;
+
+  /**
+   * Electron volt to Joules convestion
+   */
+  double EV_IN_J;
+
+  /**
+   * Temperature of the CMB in K
+   */
+  double TCMB;
+
+  /**
+   * T_ncdm, as taken from CLASS, explanatory.ini
+   */
+  double TNCDM;
+
+  /**
+   * neutrino mass splitting differences
+   * See Lesgourgues and Pastor, 2012 for these values.
+   * Adv. High Energy Phys. 2012 (2012) 608515,
+   * arXiv:1212.6154, page 13
+  */
+  double DELTAM12_sq;
+  double DELTAM13_sq_pos;
+  double DELTAM13_sq_neg;
+} ccl_physical_constants;
+
+extern ccl_physical_constants ccl_constants;
 
 /**
  * Struct that contains all the parameters needed to create certain splines.
@@ -46,8 +134,17 @@ typedef struct ccl_spline_params {
   double ELL_MAX_CORR;
   int N_ELL_CORR;
 
+  // interpolation types
+  gsl_interp_type* A_SPLINE_TYPE;
+  gsl_interp_type* K_SPLINE_TYPE;
+  gsl_interp_type* M_SPLINE_TYPE;
+  gsl_interp_type* D_SPLINE_TYPE;
+  gsl_interp2d_type* PNL_SPLINE_TYPE;
+  gsl_interp2d_type* PLIN_SPLINE_TYPE;
+  gsl_interp_type* CORR_SPLINE_TYPE;
 } ccl_spline_params;
 
+extern const ccl_spline_params default_spline_params;
 
 /**
  * Struct that contains parameters that control the accuracy of various GSL
@@ -83,6 +180,7 @@ typedef struct ccl_gsl_params {
   double EPS_SCALEFAC_GROWTH;
 } ccl_gsl_params;
 
+extern const ccl_gsl_params default_gsl_params;
 
 /**
  * Struct containing the parameters defining a cosmology
@@ -148,7 +246,7 @@ typedef struct ccl_parameters {
 /**
  * Struct containing references to gsl splines for distance and acceleration calculations
  */
-typedef struct ccl_data{
+typedef struct ccl_data {
   // These are all functions of the scale factor a.
 
   // Distances are defined in Mpc
@@ -193,8 +291,7 @@ typedef struct ccl_data{
 /**
  * Sturct containing references to instances of the above structs, and boolean flags of precomputed values.
  */
-typedef struct ccl_cosmology
-{
+typedef struct ccl_cosmology {
   ccl_parameters    params;
   ccl_configuration config;
   ccl_data          data;

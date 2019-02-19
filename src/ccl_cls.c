@@ -142,7 +142,7 @@ static double integrand_wl(double chip,void *params)
   double a=ccl_scale_factor_of_chi(p->cosmo,chip, p->status);
   double z=1./a-1;
   double pz=ccl_spline_eval(z,p->spl_pz);
-  double h=p->cosmo->params.h*ccl_h_over_h0(p->cosmo,a, p->status)/CLIGHT_HMPC;
+  double h=p->cosmo->params.h*ccl_h_over_h0(p->cosmo,a, p->status)/ccl_constants.CLIGHT_HMPC;
 
   if(chi==0)
     return h*pz;
@@ -207,7 +207,7 @@ static double integrand_mag(double chip,void *params)
   double z=1./a-1;
   double pz=ccl_spline_eval(z,p->spl_pz);
   double sz=ccl_spline_eval(z,p->spl_sz);
-  double h=p->cosmo->params.h*ccl_h_over_h0(p->cosmo,a, p->status)/CLIGHT_HMPC;
+  double h=p->cosmo->params.h*ccl_h_over_h0(p->cosmo,a, p->status)/ccl_constants.CLIGHT_HMPC;
 
   if(chi==0)
     return h*pz*(1-2.5*sz);
@@ -531,7 +531,7 @@ static CCL_ClTracer *cl_tracer(ccl_cosmology *cosmo,int tracer_type,
   if(*status==0) {
     clt->tracer_type=tracer_type;
 
-    double hub=cosmo->params.h*ccl_h_over_h0(cosmo,1.,status)/CLIGHT_HMPC;
+    double hub=cosmo->params.h*ccl_h_over_h0(cosmo,1.,status)/ccl_constants.CLIGHT_HMPC;
     clt->prefac_lensing=1.5*hub*hub*cosmo->params.Omega_m;
 
     if(tracer_type==ccl_number_counts_tracer)
@@ -663,7 +663,7 @@ static double f_dens(double a,ccl_cosmology *cosmo,CCL_ClTracer *clt, int * stat
   double z=1./a-1;
   double pz=ccl_spline_eval(z,clt->spl_nz);
   double bz=ccl_spline_eval(z,clt->spl_bz);
-  double h=cosmo->params.h*ccl_h_over_h0(cosmo,a,status)/CLIGHT_HMPC;
+  double h=cosmo->params.h*ccl_h_over_h0(cosmo,a,status)/ccl_constants.CLIGHT_HMPC;
 
   return pz*bz*h;
 }
@@ -673,7 +673,7 @@ static double f_rsd(double a,ccl_cosmology *cosmo,CCL_ClTracer *clt, int * statu
   double z=1./a-1;
   double pz=ccl_spline_eval(z,clt->spl_nz);
   double fg=ccl_growth_rate(cosmo,a,status);
-  double h=cosmo->params.h*ccl_h_over_h0(cosmo,a,status)/CLIGHT_HMPC;
+  double h=cosmo->params.h*ccl_h_over_h0(cosmo,a,status)/ccl_constants.CLIGHT_HMPC;
 
   return pz*fg*h;
 }
@@ -743,7 +743,7 @@ static double f_IA_NLA(double a,double chi,ccl_cosmology *cosmo,CCL_ClTracer *cl
     double pz=ccl_spline_eval(z,clt->spl_nz);
     double ba=ccl_spline_eval(z,clt->spl_ba);
     double rf=ccl_spline_eval(z,clt->spl_rf);
-    double h=cosmo->params.h*ccl_h_over_h0(cosmo,a,status)/CLIGHT_HMPC;
+    double h=cosmo->params.h*ccl_h_over_h0(cosmo,a,status)/ccl_constants.CLIGHT_HMPC;
 
     return pz*ba*rf*h/(chi*chi);
   }

@@ -79,7 +79,7 @@ gsl_spline* calculate_nu_phasespace_spline(int *status) {
   double renorm=1./y[0];
   for (int i=0; i<CCL_NU_MNUT_N; i++)
     y[i]*=renorm;
-  gsl_spline* spl = gsl_spline_alloc(A_SPLINE_TYPE, CCL_NU_MNUT_N);
+  gsl_spline* spl = gsl_spline_alloc(gsl_interp_akima, CCL_NU_MNUT_N);
   stat |= gsl_spline_init(spl, mnut, y, CCL_NU_MNUT_N);
 
   // Check for errors in creating the spline
@@ -150,7 +150,7 @@ double ccl_Omeganuh2 (double a, int N_nu_mass, double* mnu, double T_CMB, gsl_in
 
   // And the remaining massive case.
   // Tnu_eff is used in the massive case because CLASS uses an effective temperature of nonLCDM components to match to mnu / Omeganu =93.14eV. Tnu_eff = T_ncdm * T_CMB = 0.71611 * T_CMB
-  Tnu_eff = Tnu * TNCDM / (pow(4./11.,1./3.));
+  Tnu_eff = Tnu * ccl_constants.TNCDM / (pow(4./11.,1./3.));
 
   // Define the prefix using the effective temperature (to get mnu / Omega = 93.14 eV) for the massive case:
   prefix_massive = NU_CONST * Tnu_eff * Tnu_eff * Tnu_eff * Tnu_eff;
@@ -159,7 +159,7 @@ double ccl_Omeganuh2 (double a, int N_nu_mass, double* mnu, double T_CMB, gsl_in
   for(int i=0; i<N_nu_mass; i++){
 	// Get mass over T (mass (eV) / ((kb eV/s/K) Tnu_eff (K))
 	// This returns the density normalized so that we get nuh2 at a=0
-	mnuOT = mnu[i] / (Tnu_eff/a) * (EV_IN_J / (KBOLTZ));
+	mnuOT = mnu[i] / (Tnu_eff/a) * (ccl_constants.EV_IN_J / (ccl_constants.KBOLTZ));
 
 	// Get the value of the phase-space integral
 	intval=nu_phasespace_intg(accel,mnuOT, status);
@@ -188,11 +188,13 @@ double* ccl_nu_masses(double OmNuh2, ccl_neutrino_mass_splits mass_split, double
 	 mnu = malloc(3*sizeof(double));
 
      // See CCL note for how we get these expressions for the neutrino masses in normal and inverted hierarchy.
-	 mnu[0] = 2./3.* sumnu - 1./6. * pow(-6. * DELTAM12_sq + 12. * DELTAM13_sq_pos + 4. * sumnu*sumnu, 0.5)
-	         - 0.25 * DELTAM12_sq / (2./3.* sumnu - 1./6. * pow(-6. * DELTAM12_sq + 12. * DELTAM13_sq_pos + 4. * sumnu*sumnu, 0.5));
-	 mnu[1] = 2./3.* sumnu - 1./6. * pow(-6. * DELTAM12_sq + 12. * DELTAM13_sq_pos + 4. * sumnu*sumnu, 0.5)
-	         + 0.25 * DELTAM12_sq / (2./3.* sumnu - 1./6. * pow(-6. * DELTAM12_sq + 12. * DELTAM13_sq_pos + 4. * sumnu*sumnu, 0.5));
-	 mnu[2] = -1./3. * sumnu + 1./3 * pow(-6. * DELTAM12_sq + 12. * DELTAM13_sq_pos + 4. * sumnu*sumnu, 0.5);
+	 mnu[0] = 2./3.* sumnu - 1./6. * pow(-6. * ccl_constants.DELTAM12_sq + 12. * ccl_constants.DELTAM13_sq_pos + 4. * sumnu*sumnu, 0.5)
+	         - 0.25 * ccl_constants.DELTAM12_sq / (2./3.* sumnu - 1./6. * pow(-6. * ccl_constants.DELTAM12_sq + 12. *
+             ccl_constants.DELTAM13_sq_pos + 4. * sumnu*sumnu, 0.5));
+	 mnu[1] = 2./3.* sumnu - 1./6. * pow(-6. * ccl_constants.DELTAM12_sq + 12. * ccl_constants.DELTAM13_sq_pos + 4. * sumnu*sumnu, 0.5)
+	         + 0.25 * ccl_constants.DELTAM12_sq / (2./3.* sumnu - 1./6. * pow(-6. * ccl_constants.DELTAM12_sq + 12. *
+             ccl_constants.DELTAM13_sq_pos + 4. * sumnu*sumnu, 0.5));
+	 mnu[2] = -1./3. * sumnu + 1./3 * pow(-6. * ccl_constants.DELTAM12_sq + 12. * ccl_constants.DELTAM13_sq_pos + 4. * sumnu*sumnu, 0.5);
 	 if (mnu[0]<0 || mnu[1]<0 || mnu[2]<0){
 	    // The user has provided a sum that is below the physical limit.
 	    if (sumnu<1e-14){
@@ -210,11 +212,13 @@ double* ccl_nu_masses(double OmNuh2, ccl_neutrino_mass_splits mass_split, double
 
 	double *mnu;
 	mnu = malloc(3*sizeof(double));
-	mnu[0] = 2./3.* sumnu - 1./6. * pow(-6. * DELTAM12_sq + 12. * DELTAM13_sq_neg + 4. * sumnu * sumnu, 0.5)
-	         - 0.25 * DELTAM12_sq / (2./3.* sumnu - 1./6. * pow(-6. * DELTAM12_sq + 12. * DELTAM13_sq_neg + 4. * sumnu * sumnu, 0.5));
-	mnu[1] = 2./3.* sumnu - 1./6. * pow(-6. * DELTAM12_sq + 12. * DELTAM13_sq_neg + 4. * sumnu*sumnu, 0.5)
-	         + 0.25 * DELTAM12_sq / (2./3.* sumnu - 1./6. * pow(-6. * DELTAM12_sq + 12. * DELTAM13_sq_neg + 4. * sumnu*sumnu, 0.5));
-	mnu[2] = -1./3. * sumnu + 1./3 * pow(-6. * DELTAM12_sq + 12. * DELTAM13_sq_neg + 4. * sumnu*sumnu, 0.5);
+	mnu[0] = 2./3.* sumnu - 1./6. * pow(-6. * ccl_constants.DELTAM12_sq + 12. * ccl_constants.DELTAM13_sq_neg + 4. * sumnu * sumnu, 0.5)
+	         - 0.25 * ccl_constants.DELTAM12_sq / (2./3.* sumnu - 1./6. * pow(-6. * ccl_constants.DELTAM12_sq + 12. *
+             ccl_constants.DELTAM13_sq_neg + 4. * sumnu * sumnu, 0.5));
+	mnu[1] = 2./3.* sumnu - 1./6. * pow(-6. * ccl_constants.DELTAM12_sq + 12. * ccl_constants.DELTAM13_sq_neg + 4. * sumnu*sumnu, 0.5)
+	         + 0.25 * ccl_constants.DELTAM12_sq / (2./3.* sumnu - 1./6. * pow(-6. *
+             ccl_constants.DELTAM12_sq + 12. * ccl_constants.DELTAM13_sq_neg + 4. * sumnu*sumnu, 0.5));
+	mnu[2] = -1./3. * sumnu + 1./3 * pow(-6. * ccl_constants.DELTAM12_sq + 12. * ccl_constants.DELTAM13_sq_neg + 4. * sumnu*sumnu, 0.5);
 	if(mnu[0]<0 || mnu[1]<0 || mnu[2]<0){
 	// The user has provided a sum that is below the physical limit.
 	    if (sumnu<1e-14){

@@ -80,7 +80,7 @@ static void ccl_cosmology_compute_hmfparams(ccl_cosmology *cosmo, int *status)
       lgdelta[i] = log10(delta[i]);
     }
 
-    gsl_spline * alphahmf = gsl_spline_alloc(D_SPLINE_TYPE, nd);
+    gsl_spline * alphahmf = gsl_spline_alloc(cosmo->spline_params.D_SPLINE_TYPE, nd);
     *status = gsl_spline_init(alphahmf, lgdelta, alpha, nd);
     if (*status) {
       gsl_spline_free(alphahmf);
@@ -89,7 +89,7 @@ static void ccl_cosmology_compute_hmfparams(ccl_cosmology *cosmo, int *status)
       return;
     }
 
-    gsl_spline * betahmf  = gsl_spline_alloc(D_SPLINE_TYPE, nd);
+    gsl_spline * betahmf  = gsl_spline_alloc(cosmo->spline_params.D_SPLINE_TYPE, nd);
     *status = gsl_spline_init(betahmf, lgdelta, beta, nd);
     if (*status) {
       gsl_spline_free(alphahmf);
@@ -99,7 +99,7 @@ static void ccl_cosmology_compute_hmfparams(ccl_cosmology *cosmo, int *status)
       return;
     }
 
-    gsl_spline * gammahmf = gsl_spline_alloc(D_SPLINE_TYPE, nd);
+    gsl_spline * gammahmf = gsl_spline_alloc(cosmo->spline_params.D_SPLINE_TYPE, nd);
     *status = gsl_spline_init(gammahmf, lgdelta, gamma, nd);
     if (*status) {
       gsl_spline_free(alphahmf);
@@ -110,7 +110,7 @@ static void ccl_cosmology_compute_hmfparams(ccl_cosmology *cosmo, int *status)
       return;
     }
 
-    gsl_spline * phihmf   = gsl_spline_alloc(D_SPLINE_TYPE, nd);
+    gsl_spline * phihmf   = gsl_spline_alloc(cosmo->spline_params.D_SPLINE_TYPE, nd);
     *status = gsl_spline_init(phihmf, lgdelta, phi, nd);
     if (*status) {
       gsl_spline_free(alphahmf);
@@ -122,7 +122,7 @@ static void ccl_cosmology_compute_hmfparams(ccl_cosmology *cosmo, int *status)
       return;
     }
 
-    gsl_spline * etahmf   = gsl_spline_alloc(D_SPLINE_TYPE, nd);
+    gsl_spline * etahmf   = gsl_spline_alloc(cosmo->spline_params.D_SPLINE_TYPE, nd);
     *status = gsl_spline_init(etahmf, lgdelta, eta, nd);
     if (*status) {
       gsl_spline_free(alphahmf);
@@ -159,7 +159,7 @@ static void ccl_cosmology_compute_hmfparams(ccl_cosmology *cosmo, int *status)
       lgdelta[i] = log10(delta[i]);
     }
 
-    gsl_spline * alphahmf = gsl_spline_alloc(D_SPLINE_TYPE, nd);
+    gsl_spline * alphahmf = gsl_spline_alloc(cosmo->spline_params.D_SPLINE_TYPE, nd);
     *status = gsl_spline_init(alphahmf, lgdelta, alpha, nd);
     if (*status) {
       gsl_spline_free(alphahmf);
@@ -168,7 +168,7 @@ static void ccl_cosmology_compute_hmfparams(ccl_cosmology *cosmo, int *status)
       return;
     }
 
-    gsl_spline * betahmf  = gsl_spline_alloc(D_SPLINE_TYPE, nd);
+    gsl_spline * betahmf  = gsl_spline_alloc(cosmo->spline_params.D_SPLINE_TYPE, nd);
     *status = gsl_spline_init(betahmf, lgdelta, beta, nd);
     if (*status) {
       gsl_spline_free(alphahmf);
@@ -178,7 +178,7 @@ static void ccl_cosmology_compute_hmfparams(ccl_cosmology *cosmo, int *status)
       return;
     }
 
-    gsl_spline * gammahmf = gsl_spline_alloc(D_SPLINE_TYPE, nd);
+    gsl_spline * gammahmf = gsl_spline_alloc(cosmo->spline_params.D_SPLINE_TYPE, nd);
     *status = gsl_spline_init(gammahmf, lgdelta, gamma, nd);
     if (*status) {
       gsl_spline_free(alphahmf);
@@ -189,7 +189,7 @@ static void ccl_cosmology_compute_hmfparams(ccl_cosmology *cosmo, int *status)
       return;
     }
 
-    gsl_spline * phihmf   = gsl_spline_alloc(D_SPLINE_TYPE, nd);
+    gsl_spline * phihmf   = gsl_spline_alloc(cosmo->spline_params.D_SPLINE_TYPE, nd);
     *status = gsl_spline_init(phihmf, lgdelta, phi, nd);
     if (*status) {
       gsl_spline_free(alphahmf);
@@ -461,7 +461,7 @@ void ccl_cosmology_compute_sigma(ccl_cosmology *cosmo, int *status)
       smooth_radius = ccl_massfunc_m2r(cosmo, pow(10,m[i]), status);
       y[i] = log10(ccl_sigmaR(cosmo, smooth_radius, 1., status));
     }
-    logsigma = gsl_spline_alloc(M_SPLINE_TYPE, nm);
+    logsigma = gsl_spline_alloc(cosmo->spline_params.M_SPLINE_TYPE, nm);
     *status = gsl_spline_init(logsigma, m, y, nm);
   }
 
@@ -503,7 +503,7 @@ void ccl_cosmology_compute_sigma(ccl_cosmology *cosmo, int *status)
   }
 
   if(*status==0) {
-    dlnsigma_dlogm = gsl_spline_alloc(M_SPLINE_TYPE, nm);
+    dlnsigma_dlogm = gsl_spline_alloc(cosmo->spline_params.M_SPLINE_TYPE, nm);
     *status = gsl_spline_init(dlnsigma_dlogm, m, y, nm);
     if(cosmo->data.accelerator_m==NULL)
       cosmo->data.accelerator_m=gsl_interp_accel_alloc();
@@ -568,7 +568,7 @@ double ccl_massfunc(ccl_cosmology *cosmo, double halomass, double a, double odel
 
   double f, rho_m;
 
-  rho_m = RHO_CRITICAL*cosmo->params.Omega_m*cosmo->params.h*cosmo->params.h;
+  rho_m = ccl_constants.RHO_CRITICAL*cosmo->params.Omega_m*cosmo->params.h*cosmo->params.h;
   f=massfunc_f(cosmo,halomass,a,odelta,status);
 
   return f*rho_m*ccl_dlninvsig_dlogm(cosmo,halomass,status)/halomass;
@@ -607,7 +607,7 @@ double ccl_massfunc_m2r(ccl_cosmology *cosmo, double halomass, int *status)
   double rho_m, smooth_radius;
 
   // Comoving matter density
-  //rho_m = RHO_CRITICAL*cosmo->params.Omega_m*cosmo->params.h*cosmo->params.h;
+  //rho_m = ccl_constants.RHO_CRITICAL*cosmo->params.Omega_m*cosmo->params.h*cosmo->params.h;
   rho_m = ccl_rho_x(cosmo, 1., ccl_species_m_label, 1, status);
 
   smooth_radius = pow((3.0*halomass) / (4*M_PI*rho_m), (1.0/3.0));

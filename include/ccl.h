@@ -25,7 +25,6 @@
 #include "ccl_config.h"
 #include "ccl_core.h"
 #include "ccl_error.h"
-#include "ccl_constants.h"
 #include "ccl_power.h"
 #include "ccl_cls.h"
 #include "ccl_background.h"

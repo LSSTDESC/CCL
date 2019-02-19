@@ -124,7 +124,7 @@ double ccl_rho_x(ccl_cosmology * cosmo, double a, ccl_species_x_label label, int
   }
   double hnorm = h_over_h0(a, cosmo, status);
   double rhocrit =
-    RHO_CRITICAL *
+    ccl_constants.RHO_CRITICAL *
     (cosmo->params.h) *
     (cosmo->params.h) * hnorm * hnorm * comfac;
 
@@ -146,7 +146,7 @@ static double chi_integrand(double a, void * params_void)
   ccl_cosmology * cosmo = ((chipar *)params_void)->cosmo;
   int *status = ((chipar *)params_void)->status;
 
-  return CLIGHT_HMPC/(a*a*h_over_h0(a, cosmo, status));
+  return ccl_constants.CLIGHT_HMPC/(a*a*h_over_h0(a, cosmo, status));
 }
 
 /* --------- ROUTINE: growth_ode_system ---------
@@ -367,8 +367,8 @@ void ccl_cosmology_compute_distances(ccl_cosmology * cosmo, int *status)
   double *E_a = malloc(sizeof(double)*na);
   double *chi_a = malloc(sizeof(double)*na);
   // Allocate E(a) and chi(a) splines
-  gsl_spline * E = gsl_spline_alloc(A_SPLINE_TYPE, na);
-  gsl_spline * chi = gsl_spline_alloc(A_SPLINE_TYPE, na);
+  gsl_spline * E = gsl_spline_alloc(cosmo->spline_params.A_SPLINE_TYPE, na);
+  gsl_spline * chi = gsl_spline_alloc(cosmo->spline_params.A_SPLINE_TYPE, na);
   // a(chi) spline allocated below
 
   //Check for too little memory
@@ -456,7 +456,7 @@ void ccl_cosmology_compute_distances(ccl_cosmology * cosmo, int *status)
 
   //Check for too little memory
   if (!*status){
-    achi=gsl_spline_alloc(A_SPLINE_TYPE, na);
+    achi=gsl_spline_alloc(cosmo->spline_params.A_SPLINE_TYPE, na);
     if (a==NULL || chi_a==NULL){
       *status=CCL_ERROR_MEMORY;
       ccl_cosmology_set_status_message(cosmo, "ccl_background.c: ccl_cosmology_compute_distances(): ran out of memory\n");
@@ -560,7 +560,7 @@ void ccl_cosmology_compute_growth(ccl_cosmology * cosmo, int * status)
       return;
     }
     //Generate spline for Delta f(z) that we will then interpolate into an array of a
-    gsl_spline *df_z_spline=gsl_spline_alloc(A_SPLINE_TYPE,cosmo->params.nz_mgrowth);
+    gsl_spline *df_z_spline=gsl_spline_alloc(cosmo->spline_params.A_SPLINE_TYPE,cosmo->params.nz_mgrowth);
     chistatus=gsl_spline_init(df_z_spline,cosmo->params.z_mgrowth,cosmo->params.df_mgrowth,
 			      cosmo->params.nz_mgrowth);
 
@@ -597,7 +597,7 @@ void ccl_cosmology_compute_growth(ccl_cosmology * cosmo, int * status)
     gsl_spline_free(df_z_spline);
 
     //Generate Delta(f) spline
-    df_a_spline=gsl_spline_alloc(A_SPLINE_TYPE,na);
+    df_a_spline=gsl_spline_alloc(cosmo->spline_params.A_SPLINE_TYPE,na);
     chistatus=gsl_spline_init(df_a_spline,a,df_arr,na);
     free(df_arr);
     if (chistatus) {
@@ -683,7 +683,7 @@ void ccl_cosmology_compute_growth(ccl_cosmology * cosmo, int * status)
     gsl_integration_cquad_workspace_free(workspace);
   }
 
-  gsl_spline * growth = gsl_spline_alloc(A_SPLINE_TYPE, na);
+  gsl_spline * growth = gsl_spline_alloc(cosmo->spline_params.A_SPLINE_TYPE, na);
   chistatus = gsl_spline_init(growth, a, y, na);
   if(chistatus) {
     free(a);
@@ -695,7 +695,7 @@ void ccl_cosmology_compute_growth(ccl_cosmology * cosmo, int * status)
     return;
   }
 
-  gsl_spline * fgrowth = gsl_spline_alloc(A_SPLINE_TYPE, na);
+  gsl_spline * fgrowth = gsl_spline_alloc(cosmo->spline_params.A_SPLINE_TYPE, na);
   chistatus = gsl_spline_init(fgrowth, a, y2, na);
   if(chistatus) {
     free(a);

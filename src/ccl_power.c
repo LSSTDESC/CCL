@@ -497,7 +497,7 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int * statu
   //If no error, proceed
   if(!*status) {
 
-    gsl_spline2d * log_power = gsl_spline2d_alloc(PLIN_SPLINE_TYPE, nk,na);
+    gsl_spline2d * log_power = gsl_spline2d_alloc(cosmo->spline_params.PLIN_SPLINE_TYPE, nk,na);
     pwstatus = gsl_spline2d_init(log_power, x, a, y2d_lin,nk,na);
 
     //If not, proceed
@@ -556,7 +556,7 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int * statu
 
   if(!*status){
 
-    gsl_spline2d * log_power_nl = gsl_spline2d_alloc(PNL_SPLINE_TYPE, nk,na);
+    gsl_spline2d * log_power_nl = gsl_spline2d_alloc(cosmo->spline_params.PNL_SPLINE_TYPE, nk,na);
     pwstatus = gsl_spline2d_init(log_power_nl, x, a, y2d_nl,nk,na);
 
     if(!pwstatus){
@@ -916,7 +916,7 @@ static void ccl_cosmology_compute_power_eh(ccl_cosmology * cosmo, int * status)
 
   // Apply growth factor, D(a), to P(k) and store in 2D (k, a) array
   double gfac, g2;
-  gsl_spline2d *log_power_lin = gsl_spline2d_alloc(PLIN_SPLINE_TYPE, nk,na);
+  gsl_spline2d *log_power_lin = gsl_spline2d_alloc(cosmo->spline_params.PLIN_SPLINE_TYPE, nk,na);
   for (int j = 0; j < na; j++) {
     gfac = ccl_growth_factor(cosmo, a[j], status);
     g2 = 2.*log(gfac);
@@ -983,7 +983,7 @@ static void ccl_cosmology_compute_power_eh(ccl_cosmology * cosmo, int * status)
 
   // Allocate a 2D spline for the nonlinear P(k) [which is just a copy of the
   // linear one for E&H]
-  gsl_spline2d * log_power_nl = gsl_spline2d_alloc(PNL_SPLINE_TYPE, nk, na);
+  gsl_spline2d * log_power_nl = gsl_spline2d_alloc(cosmo->spline_params.PNL_SPLINE_TYPE, nk, na);
   splinstatus = gsl_spline2d_init(log_power_nl, x, a, y2d, nk, na);
 
   if (splinstatus) {
@@ -1091,7 +1091,7 @@ static void ccl_cosmology_compute_power_bbks(ccl_cosmology * cosmo, int * status
   if(!*status){
 
     // Initialize a 2D spline over P(k, a) [which is still unnormalized by sigma8]
-    gsl_spline2d * log_power_lin_unnorm = gsl_spline2d_alloc(PLIN_SPLINE_TYPE, nk,na);
+    gsl_spline2d * log_power_lin_unnorm = gsl_spline2d_alloc(cosmo->spline_params.PLIN_SPLINE_TYPE, nk,na);
     splinstatus = gsl_spline2d_init(log_power_lin_unnorm, x, a, y2d,nk,na);
 
     //If not, proceed
@@ -1136,7 +1136,7 @@ static void ccl_cosmology_compute_power_bbks(ccl_cosmology * cosmo, int * status
   //Check growth didn't fail
   if (!*status) {
 
-    gsl_spline2d * log_power_lin = gsl_spline2d_alloc(PLIN_SPLINE_TYPE, nk,na);
+    gsl_spline2d * log_power_lin = gsl_spline2d_alloc(cosmo->spline_params.PLIN_SPLINE_TYPE, nk,na);
     splinstatus = gsl_spline2d_init(log_power_lin, x, a, y2d,nk,na);
 
     if (!splinstatus) {
@@ -1151,7 +1151,7 @@ static void ccl_cosmology_compute_power_bbks(ccl_cosmology * cosmo, int * status
   if(!*status){
     // Allocate a 2D spline for the nonlinear P(k)
     //[which is just a copy of the linear one for BBKS]
-    gsl_spline2d * log_power_nl = gsl_spline2d_alloc(PNL_SPLINE_TYPE, nk,na);
+    gsl_spline2d * log_power_nl = gsl_spline2d_alloc(cosmo->spline_params.PNL_SPLINE_TYPE, nk,na);
     splinstatus = gsl_spline2d_init(log_power_nl, x, a, y2d,nk,na);
     if (!splinstatus) {
       cosmo->data.p_nl = log_power_nl;
@@ -1342,7 +1342,7 @@ static void ccl_cosmology_compute_power_emu(ccl_cosmology * cosmo, int * status)
 
   if(!*status){
 
-    gsl_spline2d * log_power = gsl_spline2d_alloc(PLIN_SPLINE_TYPE, nk,na);
+    gsl_spline2d * log_power = gsl_spline2d_alloc(cosmo->spline_params.PLIN_SPLINE_TYPE, nk,na);
     int pwstatus = gsl_spline2d_init(log_power, x, a, y2d_lin,nk,na);
     if (!pwstatus) {
       cosmo->data.p_lin = log_power;
@@ -1416,7 +1416,7 @@ static void ccl_cosmology_compute_power_emu(ccl_cosmology * cosmo, int * status)
 
   if(!*status){
 
-    gsl_spline2d * log_power_nl = gsl_spline2d_alloc(PLIN_SPLINE_TYPE, NK_EMU,na);
+    gsl_spline2d * log_power_nl = gsl_spline2d_alloc(cosmo->spline_params.PLIN_SPLINE_TYPE, NK_EMU,na);
     int splinstatus = gsl_spline2d_init(log_power_nl, logx, aemu, y2d,NK_EMU,na);
     //Note the minimum k of the spline is different from the linear one.
 
