@@ -142,13 +142,6 @@ typedef struct ccl_parameters {
   int nz_mgrowth;
   double *z_mgrowth;
   double *df_mgrowth;
-
-  // these have to be here since params is made before cosmo
-  int N_ITERATION;
-  double INTEGRATION_NU_EPSABS;
-  double INTEGRATION_NU_EPSREL;
-  gsl_spline* nu_spline;
-  gsl_interp_accel *accelerator;
 } ccl_parameters;
 
 
