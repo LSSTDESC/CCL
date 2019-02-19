@@ -17,6 +17,8 @@ matrix:
 
 install:
   - "./.travis/install.sh"
+  # this is a hack for osx compilers
+  - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then export CONDA_BUILD_SYSROOT=/; fi
   - export PATH=$HOME/miniconda/bin:$PATH
   - source activate test-environment
 
