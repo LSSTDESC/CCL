@@ -28,7 +28,7 @@ script:
   - flake8 pyccl
   - mkdir -p build && cd build && cmake .. && make && sudo make install && cd ..
   - ./build/check_ccl
-  - python setup.py build
+  - sudo python setup.py build
   - nosetests tests/run_tests.py --all --debug --detailed-errors --verbose --process-restartworker
     --with-coverage --cover-package=pyccl
 

@@ -32,11 +32,11 @@ case "${TOXENV}" in
 py27)
   conda create -q -n test-environment python=2.7 pip \
     numpy nose coveralls flake8 pyyaml gsl fftw cmake swig \
-    compilers
+    compilers pkg-config
   ;;
 py36)
   conda create -q -n test-environment python=3.6 pip \
     numpy nose coveralls flake8 pyyaml gsl fftw cmake swig \
-    compilers
+    compilers pkg-config
   ;;
 esac;
