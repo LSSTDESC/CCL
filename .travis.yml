@@ -1,29 +1,22 @@
-language: python
+language: generic
 cache:
   directories:
-  - "$TRAVIS_BUILD_DIR/build/GSL/src"
-  - "$TRAVIS_BUILD_DIR/build/FFTW/src"
-  - "$TRAVIS_BUILD_DIR/build/SWIG/src"
   - "$TRAVIS_BUILD_DIR/build/CLASS/src"
   - "$TRAVIS_BUILD_DIR/build/ANGPOW/src"
   - "$HOME/miniconda"
 matrix:
   include:
   - os: linux
-    python: 2.7
     sudo: required
     env: TOXENV=py27
   - os: linux
     sudo: required
-    python: 3.6
     env: TOXENV=py36
   - os: osx
     osx_image: xcode9.4
-    language: generic
     env: TOXENV=py27
   - os: osx
     osx_image: xcode9.4
-    language: generic
     env: TOXENV=py36
 install:
 - "./.travis/install.sh"
