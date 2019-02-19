@@ -6,10 +6,6 @@ else
     CONDA_INST=Linux
 fi
 
-# Install some custom requirements on OS X
-# if test -e $HOME/miniconda/bin; then
-#   echo "miniconda already installed.";
-# else
 echo "Installing miniconda.";
 rm -rf $HOME/miniconda;
 mkdir -p $HOME/download;

@@ -1,11 +1,5 @@
 language: generic
 
-# cache:
-#   directories:
-#   - "$TRAVIS_BUILD_DIR/build/CLASS/src"
-#   - "$TRAVIS_BUILD_DIR/build/ANGPOW/src"
-#   - "$HOME/miniconda"
-
 matrix:
   include:
   - os: linux
@@ -30,7 +24,7 @@ script:
   - flake8 pyccl
   - mkdir -p build
   - cd build && cmake .. && make && cd ..
-  - ./check_ccl
+  - ./build/check_ccl
   - python setup.py build
   - nosetests tests/run_tests.py --all --debug --detailed-errors --verbose --process-restartworker
     --with-coverage --cover-package=pyccl
