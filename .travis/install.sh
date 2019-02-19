@@ -3,22 +3,22 @@
 if [[ $TRAVIS_OS_NAME == 'osx' ]]; then
     CONDA_INST=MacOSX
     echo "removing homewbrew"
-    wget https://raw.githubusercontent.com/Homebrew/install/master/uninstall .
-    chmod u+x ./uninstall
-    ./uninstall -f
+    curl https://raw.githubusercontent.com/Homebrew/install/master/uninstall -o uninstall_homebrew.sh
+    chmod u+x ./uninstall_homebrew.sh
+    ./uninstall_homebrew.sh -f -q
 else
     CONDA_INST=Linux
 fi
 
-echo "Installing miniconda.";
-rm -rf $HOME/miniconda;
-mkdir -p $HOME/download;
+echo "installing miniconda"
+rm -rf $HOME/miniconda
+mkdir -p $HOME/download
 if [ "${TOXENV}" = py27 ]; then
-wget https://repo.continuum.io/miniconda/Miniconda2-latest-${CONDA_INST}-x86_64.sh -O $HOME/download/miniconda.sh;
+    curl https://repo.continuum.io/miniconda/Miniconda2-latest-${CONDA_INST}-x86_64.sh -o $HOME/download/miniconda.sh
 else
-wget https://repo.continuum.io/miniconda/Miniconda3-latest-${CONDA_INST}-x86_64.sh -O $HOME/download/miniconda.sh;
-fi;
-bash $HOME/download/miniconda.sh -b -p $HOME/miniconda;
+    curl https://repo.continuum.io/miniconda/Miniconda3-latest-${CONDA_INST}-x86_64.sh -o $HOME/download/miniconda.sh
+fi
+bash $HOME/download/miniconda.sh -b -p $HOME/miniconda
 
 export PATH=$HOME/miniconda/bin:$PATH
 
