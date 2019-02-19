@@ -32,10 +32,10 @@ if [[ $TRAVIS_OS_NAME == 'osx' ]]; then
     esac;
 
     source activate test-environment
-    pip install numpy nose coveralls flake8 pyyaml
+    conda install numpy nose coveralls flake8 pyyaml gsl fftw3 cmake swig
 
 else
     # Install some custom requirements on Linux
     echo "No specific requirements on linux"
-    pip install nose coverage coveralls flake8 pyyaml
+    conda install nose coverage coveralls flake8 pyyaml gsl fftw3 cmake swig
 fi
