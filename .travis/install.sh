@@ -23,6 +23,8 @@ fi;
 source $HOME/miniconda/bin/activate
 hash -r
 conda config --set always_yes yes --set changeps1 no
+conda config --add channels defaults
+conda config --add channels conda-forge
 conda update -q conda
 conda info -a
 

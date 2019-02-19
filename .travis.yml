@@ -27,10 +27,9 @@ matrix:
     env: TOXENV=py36
 install:
 - "./.travis/install.sh"
-- if ! [[ $TRAVIS_OS_NAME == "linux" ]]; then source $HOME/miniconda/bin/activate;
-  fi
-- if ! [[ $TRAVIS_OS_NAME == "linux" ]]; then hash -r ; fi
-- if ! [[ $TRAVIS_OS_NAME == "linux" ]]; then source activate test-environment ; fi
+- source $HOME/miniconda/bin/activate;
+- hash -r
+- source activate test-environment
 - export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
 - export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/usr/local/lib/pkgconfig
 - cmake --version
