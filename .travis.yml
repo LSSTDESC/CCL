@@ -22,7 +22,7 @@ install:
 
 script:
   - flake8 pyccl
-  - mkdir -p build && cd build && cmake .. && make && make install && cd ..
+  - mkdir -p build && cd build && cmake .. && make && cd ..
   - ./build/check_ccl
   - python setup.py build
   - nosetests tests/run_tests.py --all --debug --detailed-errors --verbose --process-restartworker

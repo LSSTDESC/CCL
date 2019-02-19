@@ -2,6 +2,10 @@
 
 if [[ $TRAVIS_OS_NAME == 'osx' ]]; then
     CONDA_INST=MacOSX
+    echo "removing homewbrew"
+    wget https://raw.githubusercontent.com/Homebrew/install/master/uninstall .
+    chmod u+x ./uninstall
+    ./uninstall -f
 else
     CONDA_INST=Linux
 fi
