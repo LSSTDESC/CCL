@@ -20,19 +20,13 @@ matrix:
     env: TOXENV=py36
 install:
 - "./.travis/install.sh"
-- source $HOME/miniconda/bin/activate;
-- hash -r
+- export PATH=$HOME/miniconda/bin:$PATH
 - source activate test-environment
-# - export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
-# - export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/usr/local/lib/pkgconfig
-# - cmake --version
-# - python --version
 script:
 - flake8 pyccl
 - mkdir -p build
 - cd build && cmake .. && make && cd ..
-# - make -Cbuild && sudo make -Cbuild install
-- check_ccl
+- ./check_ccl
 - python setup.py build
 - nosetests tests/run_tests.py --all --debug --detailed-errors --verbose --process-restartworker
   --with-coverage --cover-package=pyccl

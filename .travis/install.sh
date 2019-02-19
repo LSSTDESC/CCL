@@ -20,8 +20,8 @@ else
   fi;
   bash $HOME/download/miniconda.sh -b -p $HOME/miniconda;
 fi;
-source $HOME/miniconda/bin/activate
-hash -r
+export PATH=$HOME/miniconda/bin:$PATH
+
 conda config --set always_yes yes --set changeps1 no
 conda config --add channels defaults
 conda config --add channels conda-forge
@@ -30,12 +30,11 @@ conda info -a
 
 case "${TOXENV}" in
     py27)
-        conda create -q -n test-environment python=2.7 pip
+        conda create -q -n test-environment python=2.7 pip \
+            numpy nose coveralls flake8 pyyaml gsl fftw cmake swig
         ;;
     py36)
-        conda create -q -n test-environment python=3.6 pip
+        conda create -q -n test-environment python=3.6 pip \
+            numpy nose coveralls flake8 pyyaml gsl fftw cmake swig
         ;;
 esac;
-
-source activate test-environment
-conda install numpy nose coveralls flake8 pyyaml gsl fftw cmake swig
