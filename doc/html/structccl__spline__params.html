@@ -102,12 +102,18 @@ Data Fields</h2></td></tr>
 <tr class="separator:a2d964b09cc43201bee6c11e3b54aa26a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab4952ddcd26e8645d5196db737650dfb"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structccl__spline__params.html#ab4952ddcd26e8645d5196db737650dfb">K_MAX</a></td></tr>
 <tr class="separator:ab4952ddcd26e8645d5196db737650dfb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1c031cca98af44e320102566af933f07"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structccl__spline__params.html#a1c031cca98af44e320102566af933f07">K_MIN_DEFAULT</a></td></tr>
-<tr class="separator:a1c031cca98af44e320102566af933f07"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a69fe54941947403eb626f996ff941d73"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structccl__spline__params.html#a69fe54941947403eb626f996ff941d73">K_MIN</a></td></tr>
+<tr class="separator:a69fe54941947403eb626f996ff941d73"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aaded1b8452c591250ef44051fa8681a8"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structccl__spline__params.html#aaded1b8452c591250ef44051fa8681a8">N_K</a></td></tr>
 <tr class="separator:aaded1b8452c591250ef44051fa8681a8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a68330cc26e66cb4eca93aca832ee6366"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structccl__spline__params.html#a68330cc26e66cb4eca93aca832ee6366">N_K_3DCOR</a></td></tr>
 <tr class="separator:a68330cc26e66cb4eca93aca832ee6366"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab5be4e564bbd28fc51ffcbb0797957d5"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structccl__spline__params.html#ab5be4e564bbd28fc51ffcbb0797957d5">ELL_MIN_CORR</a></td></tr>
+<tr class="separator:ab5be4e564bbd28fc51ffcbb0797957d5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3407f2c11713c908ee9e5b6d8c36a1ac"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structccl__spline__params.html#a3407f2c11713c908ee9e5b6d8c36a1ac">ELL_MAX_CORR</a></td></tr>
+<tr class="separator:a3407f2c11713c908ee9e5b6d8c36a1ac"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae38764273f047b530ffbc5ccb1935428"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structccl__spline__params.html#ae38764273f047b530ffbc5ccb1935428">N_ELL_CORR</a></td></tr>
+<tr class="separator:ae38764273f047b530ffbc5ccb1935428"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Struct that contains all the parameters needed to create certain splines. This includes splines for the scale factor, masses, and power spectra. </p>
@@ -238,6 +244,34 @@ Data Fields</h2></td></tr>
 
 </div>
 </div>
+<a id="a3407f2c11713c908ee9e5b6d8c36a1ac"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3407f2c11713c908ee9e5b6d8c36a1ac">&#9670;&nbsp;</a></span>ELL_MAX_CORR</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double ccl_spline_params::ELL_MAX_CORR</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ab5be4e564bbd28fc51ffcbb0797957d5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab5be4e564bbd28fc51ffcbb0797957d5">&#9670;&nbsp;</a></span>ELL_MIN_CORR</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double ccl_spline_params::ELL_MIN_CORR</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="ab4952ddcd26e8645d5196db737650dfb"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ab4952ddcd26e8645d5196db737650dfb">&#9670;&nbsp;</a></span>K_MAX</h2>
 
@@ -266,14 +300,14 @@ Data Fields</h2></td></tr>
 
 </div>
 </div>
-<a id="a1c031cca98af44e320102566af933f07"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1c031cca98af44e320102566af933f07">&#9670;&nbsp;</a></span>K_MIN_DEFAULT</h2>
+<a id="a69fe54941947403eb626f996ff941d73"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a69fe54941947403eb626f996ff941d73">&#9670;&nbsp;</a></span>K_MIN</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">double ccl_spline_params::K_MIN_DEFAULT</td>
+          <td class="memname">double ccl_spline_params::K_MIN</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -330,6 +364,20 @@ Data Fields</h2></td></tr>
       <table class="memname">
         <tr>
           <td class="memname">int ccl_spline_params::LOGM_SPLINE_NM</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ae38764273f047b530ffbc5ccb1935428"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae38764273f047b530ffbc5ccb1935428">&#9670;&nbsp;</a></span>N_ELL_CORR</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int ccl_spline_params::N_ELL_CORR</td>
         </tr>
       </table>
 </div><div class="memdoc">

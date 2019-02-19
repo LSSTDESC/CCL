@@ -71,16 +71,13 @@ $(function() {
 <div class="title">ccl_massfunc.h File Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><code>#include &quot;<a class="el" href="ccl__core_8h_source.html">ccl_core.h</a>&quot;</code><br />
-</div>
+
 <p><a href="ccl__massfunc_8h_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a56275610db4d008b0e6441b62ba7a2f6"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__massfunc_8h.html#a56275610db4d008b0e6441b62ba7a2f6">ccl_cosmology_compute_sigma</a> (<a class="el" href="structccl__cosmology.html">ccl_cosmology</a> *cosmo, int *status)</td></tr>
-<tr class="separator:a56275610db4d008b0e6441b62ba7a2f6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa78d1e111473b57aaa82e298a3134a0a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__massfunc_8h.html#aa78d1e111473b57aaa82e298a3134a0a">ccl_cosmology_compute_hmfparams</a> (<a class="el" href="structccl__cosmology.html">ccl_cosmology</a> *cosmo, int *status)</td></tr>
-<tr class="separator:aa78d1e111473b57aaa82e298a3134a0a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af4aa4d3590e38557c30228fe9a8c328e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="ccl__defs_8h.html#ae8d446df269cba1dff8f88922459a7d4">CCL_BEGIN_DECLS</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__massfunc_8h.html#af4aa4d3590e38557c30228fe9a8c328e">ccl_cosmology_compute_sigma</a> (<a class="el" href="structccl__cosmology.html">ccl_cosmology</a> *cosmo, int *status)</td></tr>
+<tr class="separator:af4aa4d3590e38557c30228fe9a8c328e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a15a32b2892c84956df55ef011f69f3e9"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__massfunc_8h.html#a15a32b2892c84956df55ef011f69f3e9">ccl_massfunc</a> (<a class="el" href="structccl__cosmology.html">ccl_cosmology</a> *cosmo, double smooth_mass, double a, double odelta, int *status)</td></tr>
 <tr class="separator:a15a32b2892c84956df55ef011f69f3e9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a73583b7e48a97f5190a99535099a1298"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__massfunc_8h.html#a73583b7e48a97f5190a99535099a1298">ccl_halo_bias</a> (<a class="el" href="structccl__cosmology.html">ccl_cosmology</a> *cosmo, double smooth_mass, double a, double odelta, int *status)</td></tr>
@@ -89,22 +86,22 @@ Functions</h2></td></tr>
 <tr class="separator:a4140905edb231c113f448554f454a64d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a70de7be1de602db04934ffa1aedee70b"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__massfunc_8h.html#a70de7be1de602db04934ffa1aedee70b">ccl_sigmaM</a> (<a class="el" href="structccl__cosmology.html">ccl_cosmology</a> *cosmo, double smooth_mass, double a, int *status)</td></tr>
 <tr class="separator:a70de7be1de602db04934ffa1aedee70b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a35733f2c6f1c3f64f3af9d666167bbaa"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__massfunc_8h.html#a35733f2c6f1c3f64f3af9d666167bbaa">ccl_r_delta</a> (<a class="el" href="structccl__cosmology.html">ccl_cosmology</a> *cosmo, double halomass, double a, double odelta, int *status)</td></tr>
-<tr class="separator:a35733f2c6f1c3f64f3af9d666167bbaa"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5c634dd91af12224ba3ededada8e6bd4"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__massfunc_8h.html#a5c634dd91af12224ba3ededada8e6bd4">ccl_r_Lagrangian</a> (<a class="el" href="structccl__cosmology.html">ccl_cosmology</a> *cosmo, double halomass, double a, int *status)</td></tr>
-<tr class="separator:a5c634dd91af12224ba3ededada8e6bd4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aeb0c1c5c8a7f7a9e05423b18a93fd81e"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__massfunc_8h.html#aeb0c1c5c8a7f7a9e05423b18a93fd81e">ccl_nu</a> (<a class="el" href="structccl__cosmology.html">ccl_cosmology</a> *cosmo, double halomass, double a, int *status)</td></tr>
-<tr class="separator:aeb0c1c5c8a7f7a9e05423b18a93fd81e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aee80f0e350144b832d4c6289f94b7b4c"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__massfunc_8h.html#aee80f0e350144b832d4c6289f94b7b4c">dc_NakamuraSuto</a> (<a class="el" href="structccl__cosmology.html">ccl_cosmology</a> *cosmo, double a, int *status)</td></tr>
+<tr class="separator:aee80f0e350144b832d4c6289f94b7b4c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acbc5631ef23151a6b34936c5faa04691"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__massfunc_8h.html#acbc5631ef23151a6b34936c5faa04691">Dv_BryanNorman</a> (<a class="el" href="structccl__cosmology.html">ccl_cosmology</a> *cosmo, double a, int *status)</td></tr>
+<tr class="separator:acbc5631ef23151a6b34936c5faa04691"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a026a90e4cb4ab81a0b4b726b8badb850"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__massfunc_8h.html#a026a90e4cb4ab81a0b4b726b8badb850">r_delta</a> (<a class="el" href="structccl__cosmology.html">ccl_cosmology</a> *cosmo, double halomass, double a, double odelta, int *status)</td></tr>
+<tr class="separator:a026a90e4cb4ab81a0b4b726b8badb850"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Function Documentation</h2>
-<a id="aa78d1e111473b57aaa82e298a3134a0a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa78d1e111473b57aaa82e298a3134a0a">&#9670;&nbsp;</a></span>ccl_cosmology_compute_hmfparams()</h2>
+<a id="af4aa4d3590e38557c30228fe9a8c328e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af4aa4d3590e38557c30228fe9a8c328e">&#9670;&nbsp;</a></span>ccl_cosmology_compute_sigma()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void ccl_cosmology_compute_hmfparams </td>
+          <td class="memname"><a class="el" href="ccl__defs_8h.html#ae8d446df269cba1dff8f88922459a7d4">CCL_BEGIN_DECLS</a> void ccl_cosmology_compute_sigma </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="structccl__cosmology.html">ccl_cosmology</a> *&#160;</td>
           <td class="paramname"><em>cosmo</em>, </td>
@@ -122,48 +119,6 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Updates Tinker mass function fitting formulas for specific Delta </p><dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">cosmo</td><td>Cosmological parameters </td></tr>
-    <tr><td class="paramname">status</td><td>Status flag. 0 if there are no errors, nonzero otherwise. For specific cases see documentation for ccl_error. </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="a56275610db4d008b0e6441b62ba7a2f6"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a56275610db4d008b0e6441b62ba7a2f6">&#9670;&nbsp;</a></span>ccl_cosmology_compute_sigma()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void ccl_cosmology_compute_sigma </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="structccl__cosmology.html">ccl_cosmology</a> *&#160;</td>
-          <td class="paramname"><em>cosmo</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">int *&#160;</td>
-          <td class="paramname"><em>status</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<p>Computes sigma(R), the power spectrum normalization, over log-spaced values of mass and radii The result is attached to the cosmology object </p><dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">cosmo</td><td>Cosmological parameters </td></tr>
-    <tr><td class="paramname">status</td><td>Status flag. 0 if there are no errors, nonzero otherwise. For specific cases see documentation for ccl_error. </td></tr>
-  </table>
-  </dd>
-</dl>
 
 </div>
 </div>
@@ -210,16 +165,6 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Compute the linear halo bias for a cosmology and mass scale </p><dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">cosmo</td><td>Cosmological parameters </td></tr>
-    <tr><td class="paramname">smooth_mass</td><td>Mass to compute at, in units of Msun </td></tr>
-    <tr><td class="paramname">a</td><td>Scale factor, normalized to a=1 today </td></tr>
-    <tr><td class="paramname">status</td><td>Status flag. 0 if there are no errors, nonzero otherwise. For specific cases see documentation for ccl_error. </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>hb, the halo bias at the specified parameters </dd></dl>
 
 </div>
 </div>
@@ -266,17 +211,6 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Compute halo mass function at a given mass for a given cosmology as dn/ dlog10(M) </p><dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">cosmo</td><td>Cosmological parameters </td></tr>
-    <tr><td class="paramname">smooth_mass</td><td>Mass to compute at, in units of Msun </td></tr>
-    <tr><td class="paramname">a</td><td>Scale factor, normalized to a=1 today </td></tr>
-    <tr><td class="paramname">odelta</td><td>choice of Delta </td></tr>
-    <tr><td class="paramname">status</td><td>Status flag. 0 if there are no errors, nonzero otherwise. For specific cases see documentation for ccl_error. </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>massfunc, the value of the mass function at the specified parameters </dd></dl>
 
 </div>
 </div>
@@ -297,143 +231,6 @@ Functions</h2></td></tr>
           <td></td>
           <td class="paramtype">double&#160;</td>
           <td class="paramname"><em>smooth_mass</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">int *&#160;</td>
-          <td class="paramname"><em>status</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<p>Convert smoothing halo mass in units of Msun to smoothing halo radius in units of Mpc. </p><dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">cosmo</td><td>Cosmological parameters </td></tr>
-    <tr><td class="paramname">smooth_mass</td><td>Mass to compute at, in units of Msun </td></tr>
-    <tr><td class="paramname">a</td><td>Scale factor, normalized to a=1 today </td></tr>
-    <tr><td class="paramname">odelta</td><td>choice of Delta </td></tr>
-    <tr><td class="paramname">status</td><td>Status flag. 0 if there are no errors, nonzero otherwise. For specific cases see documentation for ccl_error. </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>smooth_radius, the equivalent tophat smoothing radius corresponding to smooth_mass </dd></dl>
-
-</div>
-</div>
-<a id="aeb0c1c5c8a7f7a9e05423b18a93fd81e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aeb0c1c5c8a7f7a9e05423b18a93fd81e">&#9670;&nbsp;</a></span>ccl_nu()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">double ccl_nu </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="structccl__cosmology.html">ccl_cosmology</a> *&#160;</td>
-          <td class="paramname"><em>cosmo</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">double&#160;</td>
-          <td class="paramname"><em>halomass</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">double&#160;</td>
-          <td class="paramname"><em>a</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">int *&#160;</td>
-          <td class="paramname"><em>status</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="a35733f2c6f1c3f64f3af9d666167bbaa"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a35733f2c6f1c3f64f3af9d666167bbaa">&#9670;&nbsp;</a></span>ccl_r_delta()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">double ccl_r_delta </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="structccl__cosmology.html">ccl_cosmology</a> *&#160;</td>
-          <td class="paramname"><em>cosmo</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">double&#160;</td>
-          <td class="paramname"><em>halomass</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">double&#160;</td>
-          <td class="paramname"><em>a</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">double&#160;</td>
-          <td class="paramname"><em>odelta</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">int *&#160;</td>
-          <td class="paramname"><em>status</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="a5c634dd91af12224ba3ededada8e6bd4"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5c634dd91af12224ba3ededada8e6bd4">&#9670;&nbsp;</a></span>ccl_r_Lagrangian()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">double ccl_r_Lagrangian </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="structccl__cosmology.html">ccl_cosmology</a> *&#160;</td>
-          <td class="paramname"><em>cosmo</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">double&#160;</td>
-          <td class="paramname"><em>halomass</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">double&#160;</td>
-          <td class="paramname"><em>a</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -488,16 +285,120 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Calculate the standard deviation of density at smoothing mass M via interpolation. Return sigma from the sigmaM interpolation. Also computes the sigma interpolation if necessary. </p><dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">cosmo</td><td>Cosmological parameters </td></tr>
-    <tr><td class="paramname">smooth_mass</td><td>Mass to compute at, in units of Msun </td></tr>
-    <tr><td class="paramname">a</td><td>Scale factor, normalized to a=1 today </td></tr>
-    <tr><td class="paramname">status</td><td>Status flag. 0 if there are no errors, nonzero otherwise. For specific cases see documentation for ccl_error. </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>sigmaM, the standard deviation of density at mass scale M </dd></dl>
+
+</div>
+</div>
+<a id="aee80f0e350144b832d4c6289f94b7b4c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aee80f0e350144b832d4c6289f94b7b4c">&#9670;&nbsp;</a></span>dc_NakamuraSuto()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double dc_NakamuraSuto </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structccl__cosmology.html">ccl_cosmology</a> *&#160;</td>
+          <td class="paramname"><em>cosmo</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>a</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>status</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="acbc5631ef23151a6b34936c5faa04691"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acbc5631ef23151a6b34936c5faa04691">&#9670;&nbsp;</a></span>Dv_BryanNorman()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double Dv_BryanNorman </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structccl__cosmology.html">ccl_cosmology</a> *&#160;</td>
+          <td class="paramname"><em>cosmo</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>a</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>status</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a026a90e4cb4ab81a0b4b726b8badb850"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a026a90e4cb4ab81a0b4b726b8badb850">&#9670;&nbsp;</a></span>r_delta()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double r_delta </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structccl__cosmology.html">ccl_cosmology</a> *&#160;</td>
+          <td class="paramname"><em>cosmo</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>halomass</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>a</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>odelta</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>status</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
 
 </div>
 </div>

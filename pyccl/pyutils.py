@@ -2,7 +2,7 @@
 well as wrappers to automatically vectorize functions."""
 from . import ccllib as lib
 import numpy as np
-from .core import check, _cosmology_obj
+from .core import check
 
 
 def debug_mode(debug):
@@ -25,7 +25,10 @@ def debug_mode(debug):
         lib.set_debug_policy(lib.CCL_DEBUG_MODE_OFF)
 
 
-def _vectorize_fn_simple(fn, fn_vec, x, returns_status=True):
+# This function is not used anymore so we don't want Coveralls to
+# include it, but we keep it in case it is needed at some point.
+def _vectorize_fn_simple(fn, fn_vec, x,
+                         returns_status=True):  # pragma: no cover
     """Generic wrapper to allow vectorized (1D array) access to CCL functions with
     one vector argument (but no dependence on cosmology).
 
@@ -81,7 +84,7 @@ def _vectorize_fn(fn, fn_vec, cosmo, x, returns_status=True):
 
     # Access ccl_cosmology object
     cosmo_in = cosmo
-    cosmo = _cosmology_obj(cosmo)
+    cosmo = cosmo.cosmo
 
     status = 0
 
@@ -129,7 +132,7 @@ def _vectorize_fn2(fn, fn_vec, cosmo, x, z, returns_status=True):
     """
     # Access ccl_cosmology object
     cosmo_in = cosmo
-    cosmo = _cosmology_obj(cosmo)
+    cosmo = cosmo.cosmo
     status = 0
 
     # If a scalar was passed, convert to an array
@@ -176,7 +179,7 @@ def _vectorize_fn3(fn, fn_vec, cosmo, x, n, returns_status=True):
     """
     # Access ccl_cosmology object
     cosmo_in = cosmo
-    cosmo = _cosmology_obj(cosmo)
+    cosmo = cosmo.cosmo
     status = 0
 
     if isinstance(x, int):
@@ -223,7 +226,7 @@ def _vectorize_fn4(fn, fn_vec, cosmo, x, a, d, returns_status=True):
     """
     # Access ccl_cosmology object
     cosmo_in = cosmo
-    cosmo = _cosmology_obj(cosmo)
+    cosmo = cosmo.cosmo
     status = 0
 
     if isinstance(x, int):

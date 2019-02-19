@@ -163,30 +163,29 @@ CTEST2(emu,model_1) {
 }
 
 
-//Additional tests for other cosmologies are possible:
-/*
 CTEST2(emu,model_2) {
   int model=2;
   compare_emu(model,data);
 }
 
+/*
 CTEST2(emu,model_3) {
   int model=3;
   compare_emu(model,data);
 }
-
+*/
 CTEST2(emu,model_4) {
   int model=4;
   compare_emu(model,data);
 }
 
+/*
 CTEST2(emu,model_5) {
   int model=5;
   compare_emu(model,data);
 }
-
+*/
 CTEST2(emu,model_6) {
   int model=6;
   compare_emu(model,data);
 }
-*/

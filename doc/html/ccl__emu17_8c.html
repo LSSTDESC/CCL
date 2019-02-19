@@ -72,25 +72,25 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><code>#include &lt;stdio.h&gt;</code><br />
-<code>#include &lt;math.h&gt;</code><br />
 <code>#include &lt;stdlib.h&gt;</code><br />
+<code>#include &lt;math.h&gt;</code><br />
 <code>#include &lt;string.h&gt;</code><br />
 <code>#include &lt;gsl/gsl_matrix.h&gt;</code><br />
 <code>#include &lt;gsl/gsl_linalg.h&gt;</code><br />
 <code>#include &lt;gsl/gsl_spline.h&gt;</code><br />
 <code>#include &lt;gsl/gsl_errno.h&gt;</code><br />
+<code>#include &quot;<a class="el" href="ccl_8h_source.html">ccl.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="ccl__emu17__params_8h_source.html">ccl_emu17_params.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="ccl__core_8h_source.html">ccl_core.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="ccl__error_8h_source.html">ccl_error.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="ccl__emu17_8h_source.html">ccl_emu17.h</a>&quot;</code><br />
 </div><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:aa187a4a421e067c92b260d173c445562"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__emu17_8c.html#aa187a4a421e067c92b260d173c445562">ccl_pkemu</a> (double xstarin[], double **Pkemu, int *status, <a class="el" href="structccl__cosmology.html">ccl_cosmology</a> *cosmo)</td></tr>
-<tr class="separator:aa187a4a421e067c92b260d173c445562"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9507cc4aa61c36816ab0623ca116390d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__emu17_8c.html#a9507cc4aa61c36816ab0623ca116390d">ccl_pkemu</a> (double *xstar, double **ystar, int *status, <a class="el" href="structccl__cosmology.html">ccl_cosmology</a> *cosmo)</td></tr>
+<tr class="separator:a9507cc4aa61c36816ab0623ca116390d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Function Documentation</h2>
-<a id="aa187a4a421e067c92b260d173c445562"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa187a4a421e067c92b260d173c445562">&#9670;&nbsp;</a></span>ccl_pkemu()</h2>
+<a id="a9507cc4aa61c36816ab0623ca116390d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9507cc4aa61c36816ab0623ca116390d">&#9670;&nbsp;</a></span>ccl_pkemu()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -98,8 +98,8 @@ Functions</h2></td></tr>
         <tr>
           <td class="memname">void ccl_pkemu </td>
           <td>(</td>
-          <td class="paramtype">double&#160;</td>
-          <td class="paramname"><em>xstarin</em>[], </td>
+          <td class="paramtype">double *&#160;</td>
+          <td class="paramname"><em>xstarin</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -126,6 +126,15 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Emulator power spectrum Obtain P(k,z) [Mpc^3] for a given set of input parameters. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">xstarin</td><td>vector of input parameters for the emulator, including redshift. </td></tr>
+    <tr><td class="paramname">Pkemu</td><td>output P(k,z) power spectrum </td></tr>
+    <tr><td class="paramname">status</td><td>Status flag. 0 if there are no errors, nonzero otherwise. </td></tr>
+    <tr><td class="paramname">cosmo</td><td>Cosmology parameters and configurations (only relevant for storing status) </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>

@@ -8,7 +8,7 @@ Choices of algorithms used to compute correlation functions:
 
 from . import ccllib as lib
 from . import constants as const
-from .core import _cosmology_obj, check
+from .core import check
 import numpy as np
 
 correlation_methods = {
@@ -51,7 +51,7 @@ def correlation(cosmo, ell, C_ell, theta, corr_type='gg', method='fftlog'):
             angular separations.
     """
     cosmo_in = cosmo
-    cosmo = _cosmology_obj(cosmo)
+    cosmo = cosmo.cosmo
     status = 0
 
     # Convert to lower case
@@ -94,7 +94,7 @@ def correlation_3d(cosmo, a, r):
         Value(s) of the correlation function at the input distance(s).
     """
     cosmo_in = cosmo
-    cosmo = _cosmology_obj(cosmo)
+    cosmo = cosmo.cosmo
     status = 0
 
     # Convert scalar input into an array
@@ -109,3 +109,143 @@ def correlation_3d(cosmo, a, r):
     if scalar:
         return xi[0]
     return xi
+
+
+def correlation_multipole(cosmo, a, beta, l, s):
+    """
+    Compute the correlation multipoles.
+
+    """
+    cosmo_in = cosmo
+    cosmo = cosmo.cosmo
+    status = 0
+
+    # Convert scalar input into an array
+    scalar = False
+    if isinstance(s, float) or isinstance(s, int):
+        scalar = True
+        s = np.array([s, ])
+
+    # Call 3D correlation function
+    xis, status = lib.correlation_multipole_vec(cosmo, a, beta, l, s, len(s),
+                                                status)
+    check(status, cosmo_in)
+    if scalar:
+        return xis[0]
+    return xis
+
+
+def correlation_3dRsd(cosmo, a, s, mu, beta, use_spline=True):
+    """
+    Compute the 3DRsd correlation function using linear approximation
+with multipoles.
+
+    Args:
+        cosmo (:obj:`Cosmology`): A Cosmology object.
+        a (float): scale factor.
+        s (float or array_like): distance(s) at which to calculate the
+3DRsd correlation function (in Mpc).
+        mu (float): cosine of the angle at which to calculate the 3DRsd
+correlation function (in Radian).
+        beta (float): growth rate divided by galaxy bias.
+        use_spline: switch that determines whether the RSD correlation
+function is calculated using global splines of multipoles.
+    Returns:
+        Value(s) of the correlation function at the input distance(s) & angle.
+
+    """
+    cosmo_in = cosmo
+    cosmo = cosmo.cosmo
+    status = 0
+
+    # Convert scalar input into an array
+    scalar = False
+    if isinstance(s, float) or isinstance(s, int):
+        scalar = True
+        s = np.array([s, ])
+
+    # Call 3D correlation function
+    xis, status = lib.correlation_3dRsd_vec(cosmo, a, mu, beta, s, len(s),
+                                            int(use_spline), status)
+    check(status, cosmo_in)
+    if scalar:
+        return xis[0]
+    return xis
+
+
+def correlation_3dRsd_avgmu(cosmo, a, s, beta):
+    """
+    Compute the 3DRsd correlation function averaged over mu at constant s.
+
+    Args:
+        cosmo (:obj:`Cosmology`): A Cosmology object.
+        a (float): scale factor.
+        s (float or array_like): distance(s) at which to calculate the 3DRsd
+correlation function (in Mpc).
+        beta (float): growth rate divided by galaxy bias.
+    Returns:
+        Value(s) of the correlation function at the input distance(s) & angle.
+
+    """
+
+    cosmo_in = cosmo
+    cosmo = cosmo.cosmo
+    status = 0
+
+    # Convert scalar input into an array
+    scalar = False
+    if isinstance(s, float) or isinstance(s, int):
+        scalar = True
+        s = np.array([s, ])
+
+    # Call 3D correlation function
+    xis, status = lib.correlation_3dRsd_avgmu_vec(cosmo, a, beta, s, len(s),
+                                                  status)
+    check(status, cosmo_in)
+    if scalar:
+        return xis[0]
+    return xis
+
+
+def correlation_pi_sigma(cosmo, a, beta, pie, sig, use_spline=True):
+    """
+    Compute the 3DRsd correlation in pi-sigma space.
+
+    Args:
+        cosmo (:obj:`Cosmology`): A Cosmology object.
+        a (float): scale factor.
+        pie (float): distance times cosine of the angle (in Mpc).
+        sig (float or array_like): distance(s) times sine of the
+angle (in Mpc).
+        beta (float): growth rate divided by galaxy bias.
+    Returns:
+        Value(s) of the correlation function at the input pi and sigma.
+
+    """
+
+    cosmo_in = cosmo
+    cosmo = cosmo.cosmo
+    status = 0
+
+    # Convert scalar input into an array
+    scalar = False
+    if isinstance(sig, float) or isinstance(sig, int):
+        scalar = True
+        sig = np.array([sig, ])
+
+    # Call 3D correlation function
+    xis, status = lib.correlation_pi_sigma_vec(cosmo, a, beta, pie, sig,
+                                               len(sig), int(use_spline),
+                                               status)
+    check(status, cosmo_in)
+    if scalar:
+        return xis[0]
+    return xis
+
+
+def correlation_spline_free():
+    """
+    Clear the global splines created from if 'use_spline' was set to True.
+
+    """
+    lib.correlation_multipole_spline_free_vec()

@@ -71,7 +71,8 @@ $(function() {
 <div class="title">ccl_test_utils.c File Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><code>#include &quot;<a class="el" href="ccl_8h_source.html">ccl.h</a>&quot;</code><br />
+<div class="textblock"><code>#include &lt;gsl/gsl_sf_bessel.h&gt;</code><br />
+<code>#include &quot;<a class="el" href="ccl_8h_source.html">ccl.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="ctest_8h_source.html">ctest.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="ccl__params_8h_source.html">ccl_params.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="ccl__core_8h_source.html">ccl_core.h</a>&quot;</code><br />
@@ -80,12 +81,16 @@ $(function() {
 Functions</h2></td></tr>
 <tr class="memitem:a0e6bd996cca5bec66d528905b02e9911"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__test__utils_8c.html#a0e6bd996cca5bec66d528905b02e9911">CTEST</a> (spacing_tests, linear_spacing_simple)</td></tr>
 <tr class="separator:a0e6bd996cca5bec66d528905b02e9911"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0b863a6e08254a580e5c16b09631c562"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__test__utils_8c.html#a0b863a6e08254a580e5c16b09631c562">CTEST</a> (spacing_tests, linear_spacing_spline_limits)</td></tr>
-<tr class="separator:a0b863a6e08254a580e5c16b09631c562"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad397baed7983c6e3f53d28926a1fd470"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__test__utils_8c.html#ad397baed7983c6e3f53d28926a1fd470">CTEST</a> (spacing_tests, log_spacing_simple)</td></tr>
+<tr class="separator:ad397baed7983c6e3f53d28926a1fd470"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae737b10e5c82f513a69141759c000cea"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__test__utils_8c.html#ae737b10e5c82f513a69141759c000cea">CTEST</a> (spacing_tests, linlog_spacing_simple)</td></tr>
+<tr class="separator:ae737b10e5c82f513a69141759c000cea"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7ce7f25f1ea09ff0fd03854d808ed957"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__test__utils_8c.html#a7ce7f25f1ea09ff0fd03854d808ed957">CTEST</a> (spherical_bessel_tests, compare_gsl)</td></tr>
+<tr class="separator:a7ce7f25f1ea09ff0fd03854d808ed957"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Function Documentation</h2>
 <a id="a0e6bd996cca5bec66d528905b02e9911"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0e6bd996cca5bec66d528905b02e9911">&#9670;&nbsp;</a></span>CTEST() <span class="overload">[1/2]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a0e6bd996cca5bec66d528905b02e9911">&#9670;&nbsp;</a></span>CTEST() <span class="overload">[1/4]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -112,8 +117,8 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="a0b863a6e08254a580e5c16b09631c562"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0b863a6e08254a580e5c16b09631c562">&#9670;&nbsp;</a></span>CTEST() <span class="overload">[2/2]</span></h2>
+<a id="ad397baed7983c6e3f53d28926a1fd470"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad397baed7983c6e3f53d28926a1fd470">&#9670;&nbsp;</a></span>CTEST() <span class="overload">[2/4]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -127,7 +132,63 @@ Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">linear_spacing_spline_limits&#160;</td>
+          <td class="paramtype">log_spacing_simple&#160;</td>
+          <td class="paramname">&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ae737b10e5c82f513a69141759c000cea"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae737b10e5c82f513a69141759c000cea">&#9670;&nbsp;</a></span>CTEST() <span class="overload">[3/4]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">CTEST </td>
+          <td>(</td>
+          <td class="paramtype">spacing_tests&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">linlog_spacing_simple&#160;</td>
+          <td class="paramname">&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a7ce7f25f1ea09ff0fd03854d808ed957"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7ce7f25f1ea09ff0fd03854d808ed957">&#9670;&nbsp;</a></span>CTEST() <span class="overload">[4/4]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">CTEST </td>
+          <td>(</td>
+          <td class="paramtype">spherical_bessel_tests&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">compare_gsl&#160;</td>
           <td class="paramname">&#160;</td>
         </tr>
         <tr>

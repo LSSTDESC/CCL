@@ -11,7 +11,9 @@ class build(_build):
     """Specialized Python source builder."""
     def run(self):
         call(["mkdir", "-p", "build"])
-        if call(["cmake", "-H.", "-Bbuild"]) != 0:
+        v = sys.version_info
+        if call(["cmake", "-H.", "-Bbuild" ,
+                 "-DPYTHON_VERSION=%d.%d.%d"%(v.major, v.minor, v.micro)]) != 0:
             raise Exception("Could not run CMake configuration. Make sure CMake is installed !")
         if call(["make", "-Cbuild", "_ccllib"]) != 0:
             raise Exception("Could not build CCL")
@@ -48,7 +50,7 @@ setup(name="pyccl",
     include_package_data = True,
     use_scm_version=True,
     setup_requires=['setuptools_scm'],
-    install_requires=['numpy'],
+    install_requires=['numpy', 'pyyaml'],
     test_suite='nose.collector',
     tests_require=['nose'],
     cmdclass={'build_py': build},

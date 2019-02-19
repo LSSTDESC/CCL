@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['readme_2emd',['readme.md',['../readme_8md.html',1,'']]],
-  ['run_5ftests_2epy',['run_tests.py',['../run__tests_8py.html',1,'']]]
+  ['pxi_5ffidtest_2ec',['pxi_fidtest.c',['../pxi__fidtest_8c.html',1,'']]],
+  ['pxi_5ftest_2ec',['pxi_test.c',['../pxi__test_8c.html',1,'']]]
 ];

@@ -1,6 +1,7 @@
 var searchData=
 [
   ['a_5fmin_5femu',['A_MIN_EMU',['../ccl__emu17_8h.html#a605b961a751fa528c986559d81b65640',1,'ccl_emu17.h']]],
+  ['a_5fs',['A_S',['../ccl__test__correlation__3dbis_8c.html#a5254db3d693bd2886cd02e9b722c817d',1,'A_S():&#160;ccl_test_correlation_3dbis.c'],['../pxi__fidtest_8c.html#a5254db3d693bd2886cd02e9b722c817d',1,'A_S():&#160;pxi_fidtest.c'],['../pxi__test_8c.html#a5254db3d693bd2886cd02e9b722c817d',1,'A_S():&#160;pxi_test.c']]],
   ['a_5fspline_5ftype',['A_SPLINE_TYPE',['../ccl__constants_8h.html#a751ebc907f37cb6afad10d406ae552f1',1,'ccl_constants.h']]],
   ['assert_5fdata',['ASSERT_DATA',['../ctest_8h.html#a78490b8914d1af53dda97d8b9e8a716b',1,'ctest.h']]],
   ['assert_5fdbl_5ffar',['ASSERT_DBL_FAR',['../ctest_8h.html#ac775f4ecc848afa6be74049e8f9f1787',1,'ctest.h']]],
