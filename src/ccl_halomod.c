@@ -174,11 +174,11 @@ static double one_halo_integral(ccl_cosmology *cosmo, double k, double a, int *s
 
   int one_halo_integral_status = 0, qagstatus;
   double result = 0, eresult;
-  double log10mmin = log10(HM_MMIN);
-  double log10mmax = log10(HM_MMAX);
+  double log10mmin = log10(cosmo->gsl_params.HM_MMIN);
+  double log10mmax = log10(cosmo->gsl_params.HM_MMAX);
   Int_one_halo_Par ipar;
   gsl_function F;
-  gsl_integration_workspace *w = gsl_integration_workspace_alloc(1000);
+  gsl_integration_workspace *w = gsl_integration_workspace_alloc(cosmo->gsl_params.HM_LIMIT);
 
   // Structure required for the gsl integration
   ipar.cosmo = cosmo;
@@ -189,7 +189,13 @@ static double one_halo_integral(ccl_cosmology *cosmo, double k, double a, int *s
   F.params = &ipar;
 
   // Actually does the integration
-  qagstatus = gsl_integration_qag(&F, log10mmin, log10mmax, HM_EPSABS, HM_EPSREL, HM_LIMIT, HM_INT_METHOD, w, &result, &eresult);
+  qagstatus = gsl_integration_qag(
+    &F, log10mmin, log10mmax,
+    cosmo->gsl_params.HM_EPSABS,
+    cosmo->gsl_params.HM_EPSREL,
+    cosmo->gsl_params.HM_LIMIT,
+    cosmo->gsl_params.HM_INT_METHOD, w,
+    &result, &eresult);
 
   // Clean up
   gsl_integration_workspace_free(w);
@@ -237,11 +243,11 @@ static double two_halo_integral(ccl_cosmology *cosmo, double k, double a, int *s
 
   int two_halo_integral_status = 0, qagstatus;
   double result = 0, eresult;
-  double log10mmin = log10(HM_MMIN);
-  double log10mmax = log10(HM_MMAX);
+  double log10mmin = log10(cosmo->gsl_params.HM_MMIN);
+  double log10mmax = log10(cosmo->gsl_params.HM_MMAX);
   Int_two_halo_Par ipar;
   gsl_function F;
-  gsl_integration_workspace *w = gsl_integration_workspace_alloc(1000);
+  gsl_integration_workspace *w = gsl_integration_workspace_alloc(cosmo->gsl_params.HM_LIMIT);
 
   // Structure required for the gsl integration
   ipar.cosmo = cosmo;
@@ -252,7 +258,13 @@ static double two_halo_integral(ccl_cosmology *cosmo, double k, double a, int *s
   F.params = &ipar;
 
   // Actually does the integration
-  qagstatus = gsl_integration_qag(&F, log10mmin, log10mmax, HM_EPSABS, HM_EPSREL, HM_LIMIT, HM_INT_METHOD, w, &result, &eresult);
+  qagstatus = gsl_integration_qag(
+    &F, log10mmin, log10mmax,
+    cosmo->gsl_params.HM_EPSABS,
+    cosmo->gsl_params.HM_EPSREL,
+    cosmo->gsl_params.HM_LIMIT,
+    cosmo->gsl_params.HM_INT_METHOD, w,
+    &result, &eresult);
 
   // Clean up
   gsl_integration_workspace_free(w);
@@ -285,8 +297,8 @@ double ccl_twohalo_matter_power(ccl_cosmology *cosmo, double k, double a, int *s
   double odelta = Dv_BryanNorman(cosmo, a, status);
 
   // ...multiplied by the ratio of window functions
-  double W1 = window_function(cosmo, HM_MMIN, k,  a, odelta, ccl_nfw, status);
-  double W2 = window_function(cosmo, HM_MMIN, 0., a, odelta, ccl_nfw, status);
+  double W1 = window_function(cosmo, cosmo->gsl_params.HM_MMIN, k,  a, odelta, ccl_nfw, status);
+  double W2 = window_function(cosmo, cosmo->gsl_params.HM_MMIN, 0., a, odelta, ccl_nfw, status);
   A = A*W1/W2;
 
   // Add the additive correction to the calculated integral

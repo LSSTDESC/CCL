@@ -2,13 +2,6 @@
 
 #ifndef __CCL_HALOMOD_H_INCLUDED__
 #define __CCL_HALOMOD_H_INCLUDED__
-
-#define HM_MMIN 1e7 // Minimum mass for the halo-model integration
-#define HM_MMAX 1e17 // Maximum mass for the halo-model integration
-#define HM_EPSABS 0 // Absolute error for the halo-model integration
-#define HM_EPSREL 1E-4 // Relative error for the halo-model integration
-#define HM_LIMIT 1000 // Maximum sub intervals for the halo-model integration
-#define HM_INT_METHOD GSL_INTEG_GAUSS41 // Integration scheme for halo-model integration
   
 CCL_BEGIN_DECLS
 
@@ -26,7 +19,7 @@ CCL_BEGIN_DECLS
    * @return 2halo_matter_power: halo-model two-halo matter power spectrum, P(k), units of Mpc^{3}
    */
   double ccl_twohalo_matter_power(ccl_cosmology *cosmo, double k, double a, int *status);
-  
+
   /**
    * Computes the halo model density-density power spectrum one-halo term.
    * @param cosmo: cosmology object containing parameters
@@ -48,7 +41,7 @@ CCL_BEGIN_DECLS
   double ccl_halomodel_matter_power(ccl_cosmology *cosmo, double k, double a, int *status);
 
   /**
-   * Computes the concentration of a halo of mass M. 
+   * Computes the concentration of a halo of mass M.
    * This is the ratio of virial raidus to scale radius for an NFW halo.
    * @param cosmo: cosmology object containing parameters
    * @param halomass: halo mass in units of Msun

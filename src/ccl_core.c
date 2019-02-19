@@ -75,7 +75,13 @@ const ccl_gsl_params default_gsl_params = {
   GSL_EPSREL,                          // ROOT_EPSREL
   GSL_N_ITERATION,                     // ROOT_N_ITERATION
   GSL_EPSREL_GROWTH,                   // ODE_GROWTH_EPSREL
-  1E-6                                 // EPS_SCALEFAC_GROWTH
+  1E-6,                                // EPS_SCALEFAC_GROWTH
+  1E7,                                 // HM_MMIN
+  1E17,                                // HM_MMAX
+  0.0,                                 // HM_EPSABS
+  1E-4,                                // HM_EPSREL
+  1000,                                // HM_LIMIT
+  GSL_INTEG_GAUSS41                    // HM_INT_METHOD
   };
 
 #undef GSL_EPSREL

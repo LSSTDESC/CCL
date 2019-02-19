@@ -178,6 +178,15 @@ typedef struct ccl_gsl_params {
 
   // growth
   double EPS_SCALEFAC_GROWTH;
+
+  // halo model
+  double HM_MMIN;
+  double HM_MMAX;
+  double HM_EPSABS;
+  double HM_EPSREL;
+  size_t HM_LIMIT;
+  int HM_INT_METHOD;
+
 } ccl_gsl_params;
 
 extern const ccl_gsl_params default_gsl_params;
