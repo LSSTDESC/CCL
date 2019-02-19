@@ -93,7 +93,6 @@ static void compare_distances_hiz(int model, struct distances_cosmomad_hiz_data 
   // Make a cosmology object from the parameters with the default configuration
   ccl_cosmology * cosmo = ccl_cosmology_create(params, default_config);
   ASSERT_NOT_NULL(cosmo);
-  cosmo->gsl_params.INTEGRATION_DISTANCE_EPSREL = 1E-8;
 
   // Compare to benchmark data
   for (int j=0; j<7; j++) {
