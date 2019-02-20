@@ -1,8 +1,10 @@
 # Unreleased
 
 ## C library
-- Fixed a bug where CLASS would crash due to small rounding errors at z = 0
+- Fixed memory leak in CLASS power spectrum computations (#561, #562).
+- Fixed a bug where CLASS would crash due to small rounding errors at z = 0 
   when evaluating power spectra (#563, #564).
+- Fixed bug in fftlog for some complex arguments (#565, #566).
 
 ## Python library
 - Improved error reporting for `angular_cl` computations (#567).
