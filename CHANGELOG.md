@@ -3,6 +3,7 @@
 ## C library
 - Fixed a bug where CLASS would crash due to small rounding errors at z = 0 
   when evaluating power spectra (#563, #564).
+- Fixed bug in fftlog for some complex arguments (#565, #566).
 
 # v 1.0 API changes :
 
