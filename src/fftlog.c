@@ -28,7 +28,7 @@ static double complex gamma_fftlog(double complex z)
   };
   
   if(creal(z) < 0.5)
-    return M_PI / (sin(M_PI*z)*gamma_fftlog(1. - z));
+    return M_PI / (csin(M_PI*z)*gamma_fftlog(1. - z));
   z -= 1;
   double complex x = p[0];
   for(int n = 1; n < 9; n++)
