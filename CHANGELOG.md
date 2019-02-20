@@ -1,3 +1,8 @@
+# Unreleased
+
+## C library
+- Fixed memory leak in CLASS power spectrum computations (#561, #562).
+
 # v 1.0 API changes :
 
 ## C library
