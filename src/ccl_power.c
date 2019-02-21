@@ -443,13 +443,11 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int * statu
   if (*status != CCL_ERROR_CLASS)
     ccl_run_class(cosmo, &fc,&pr,&ba,&th,&pt,&tr,&pm,&sp,&nl,&le,&op,init_arr,status);
 
-  if (*status == 0) {
-    if (parser_free(&fc)== _FAILURE_) {
-      *status = CCL_ERROR_CLASS;
-      ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_cosmology_compute_power_class(): Error freeing CLASS parser\n");
-    }
+  if (parser_free(&fc)== _FAILURE_) {
+    *status = CCL_ERROR_CLASS;
+    ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_cosmology_compute_power_class(): Error freeing CLASS parser\n");
   }
-
+  
   double kmin,kmax,ndecades,amin,amax,ic;
   int nk,na,s;
   double *x=NULL, *z=NULL, *y2d_lin=NULL, *y2d_nl=NULL;
@@ -1165,11 +1163,9 @@ static void ccl_cosmology_compute_power_emu(ccl_cosmology * cosmo, int * status)
   if (*status != CCL_ERROR_CLASS)
     ccl_run_class(cosmo, &fc,&pr,&ba,&th,&pt,&tr,&pm,&sp,&nl,&le,&op,init_arr,status);
 
-  if (*status == 0) {
-    if (parser_free(&fc)== _FAILURE_) {
-      *status = CCL_ERROR_CLASS;
-      ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_cosmology_compute_power_class(): Error freeing CLASS parser\n");
-    }
+  if (parser_free(&fc)== _FAILURE_) {
+    *status = CCL_ERROR_CLASS;
+    ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_cosmology_compute_power_class(): Error freeing CLASS parser\n");
   }
 
   double kmin,kmax,ndecades,amin,amax,ic;
