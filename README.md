@@ -826,7 +826,7 @@ lens2 = ccl.WeakLensingTracer(cosmo, dndz=(z_n, n))
 # Calculate the angular cross-spectrum of the two tracers as a function of ell
 ell = np.arange(2, 10)
 cls = ccl.angular_cl(cosmo, lens1, lens2, ell)
-print cls
+print(cls)
 ````
 
 For known installation issues and further information on how CCL was benchmarked during development, see our [wiki](https://github.com/LSSTDESC/CCL/wiki).

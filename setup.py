@@ -11,7 +11,9 @@ class build(_build):
     """Specialized Python source builder."""
     def run(self):
         call(["mkdir", "-p", "build"])
-        if call(["cmake", "-H.", "-Bbuild"]) != 0:
+        v = sys.version_info
+        if call(["cmake", "-H.", "-Bbuild" ,
+                 "-DPYTHON_VERSION=%d.%d.%d"%(v.major, v.minor, v.micro)]) != 0:
             raise Exception("Could not run CMake configuration. Make sure CMake is installed !")
         if call(["make", "-Cbuild", "_ccllib"]) != 0:
             raise Exception("Could not build CCL")

@@ -507,7 +507,7 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int * statu
 	//The 2D interpolation routines access the function values y_{k_ia_j} with the following ordering:
 	//y_ij = y2d[j*N_k + i]
 	//with i = 0,...,N_k-1 and j = 0,...,N_a-1.
-	s |= spectra_pk_at_k_and_z(&ba, &pm, &sp,x[i],1./z[j]-1., &psout_l,&ic);
+	s |= spectra_pk_at_k_and_z(&ba, &pm, &sp,x[i],1./z[j]-1.+1e-10, &psout_l,&ic);
 	y2d_lin[j*nk+i] = log(psout_l);
       }
       x[i] = log(x[i]);
@@ -536,9 +536,9 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int * statu
     for (int i=0; i<nk; i++) {
       for (int j = 0; j < na; j++) {
 	if(cosmo->config.matter_power_spectrum_method==ccl_halofit)
-	  s |= spectra_pk_nl_at_k_and_z(&ba, &pm, &sp,exp(x[i]),1./z[j]-1.,&psout_nl);
+	  s |= spectra_pk_nl_at_k_and_z(&ba, &pm, &sp,exp(x[i]),1./z[j]-1.+1e-10,&psout_nl);
 	else
-	  s |= spectra_pk_at_k_and_z(&ba, &pm, &sp,exp(x[i]),1./z[j]-1., &psout_nl,&ic);
+	  s |= spectra_pk_at_k_and_z(&ba, &pm, &sp,exp(x[i]),1./z[j]-1.+1e-10, &psout_nl,&ic);
 	y2d_nl[j*nk+i] = log(psout_nl);
       }
     }
@@ -598,6 +598,9 @@ void ccl_cosmology_write_power_class_z(char *filename, ccl_cosmology * cosmo, do
   if (*status == CCL_ERROR_CLASS) {
     //printed error message while running CLASS
     ccl_free_class_structs(cosmo, &ba,&th,&pt,&tr,&pm,&sp,&nl,&le,init_arr,status);
+    
+    // free the parser
+    parser_free(&fc);
     return;
   }
   if (parser_free(&fc)== _FAILURE_) {
@@ -1220,7 +1223,7 @@ static void ccl_cosmology_compute_power_emu(ccl_cosmology * cosmo, int * status)
 	//The 2D interpolation routines access the function values y_{k_ia_j} with the following ordering:
 	//y_ij = y2d[j*N_k + i]
 	//with i = 0,...,N_k-1 and j = 0,...,N_a-1.
-	s |= spectra_pk_at_k_and_z(&ba, &pm, &sp,x[i],1./z[j]-1., &psout_l,&ic);
+	s |= spectra_pk_at_k_and_z(&ba, &pm, &sp,x[i],1./z[j]-1.+1e-10, &psout_l,&ic);
 	y2d_lin[j*nk+i] = log(psout_l);
       }
       x[i] = log(x[i]);

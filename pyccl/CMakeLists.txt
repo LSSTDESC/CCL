@@ -5,7 +5,7 @@ include(BuildSWIG)
 include(UseSWIG)
 #set (UseSWIG_TARGET_NAME_PREFERENCE STANDARD)
 
-find_package(PythonLibsNew)
+find_package(PythonLibsNew ${PYTHON_VERSION})
 find_package(NumPy)
 include_directories(BEFORE ${PYTHON_INCLUDE_DIRS} ${NUMPY_INCLUDE_DIRS})
 
