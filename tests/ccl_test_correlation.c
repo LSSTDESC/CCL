@@ -56,7 +56,6 @@ static void compare_corr(char *compare_type,int algorithm,struct corrs_data * da
   ccl_cosmology * cosmo = ccl_cosmology_create(params, config);
   ASSERT_NOT_NULL(cosmo);
 
-  double epsrel_save;
   if(!strcmp(compare_type,"histo")) { //This is needed for the histogrammed N(z) in order to pass the IA tests
     cosmo->gsl_params.INTEGRATION_LIMBER_EPSREL = 2.5E-5;
     cosmo->gsl_params.INTEGRATION_EPSREL = 2.5E-5;
