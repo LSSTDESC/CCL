@@ -1,5 +1,8 @@
 #include "ccl.h"
 #include "ccl_haloprofile.h"
+#include "ccl_params.h"
+#include "ccl_massfunc.h"
+#include "ccl_halomod.h"
 #include "ctest.h"
 #include <stdio.h>
 #include <math.h>
@@ -9,6 +12,7 @@
 #define HALOPROFILE_TOLERANCE 1E-3
 #define NUMR 256
 
+// Data structure for the CTEST
 CTEST_DATA(haloprofile){
 
   // Cosmological parameters
@@ -25,30 +29,38 @@ CTEST_DATA(haloprofile){
   double n_s;
 
   // Arrays for halo profile data
-  double R[NUMR];
-  double RHOR[NUMR];
-  double SIGMAR[NUMR];
+  double R[3][NUMR];
+  double RHOR[3][NUMR];
 
 };
 
 // Function to read in the benchmark data
-static void read_haloprofile_test_file(double R[NUMR], double RHOR[NUMR], double SIGMAR[NUMR]){
-   // Masses are in Msun/h
-   FILE * f = fopen("./tests/benchmark/haloprofile_colossus.txt", "r");
-   ASSERT_NOT_NULL(f);
+static void read_haloprofile_test_file(double R[3][NUMR], double RHOR[3][NUMR]){
 
-   // Ignore header line
-   char str[1024];
-   char* rtn;
-   rtn = fgets(str, 1024, f);
+    char infile[256];
 
-   // file is in fixed format - R, RHOR, SIGMAR, w/ NUMR rows
-   for (int i=0; i<NUMR; i++) {
-     int count = fscanf(f, "%le %le %le\n", &R[i], &RHOR[i], &SIGMAR[i]);
-     // Check that all the stuff in the benchmark is there
-     ASSERT_EQUAL(3, count);
-   }
-   fclose(f);
+    // Masses are in Msun/h
+    for (int model=0; model<3; model++){
+        if (model==0) {strncpy(infile, "./tests/benchmark/haloprofile_nfw_colossus.txt", 256);}
+        if (model==1) {strncpy(infile, "./tests/benchmark/haloprofile_einasto_colossus.txt", 256);}
+        if (model==2) {strncpy(infile, "./tests/benchmark/haloprofile_hernquist_colossus.txt", 256);}
+        // Open the file
+        FILE * f = fopen(infile, "r");
+        ASSERT_NOT_NULL(f);
+
+        // Ignore header line
+        char str[1024];
+        char* rtn;
+        rtn = fgets(str, 1024, f);
+
+        // file is in fixed format - R, RHOR, w/ NUMR rows
+        for (int i=0; i<NUMR; i++) {
+            int count = fscanf(f, "%le %le\n", &R[model][i], &RHOR[model][i]);
+            // Check that all the stuff in the benchmark is there
+            ASSERT_EQUAL(2, count);
+        }
+        fclose(f);
+    }
 }
 
 // set up the cosmological parameters structure to be used in the test case
@@ -69,7 +81,7 @@ CTEST_SETUP(haloprofile){
   data->sigma_8 = 0.8159;
 
   // read the file of benchmark data
-  read_haloprofile_test_file(data->R, data->RHOR, data->SIGMAR);
+  read_haloprofile_test_file(data->R, data->RHOR);
 
 }
 
@@ -105,24 +117,37 @@ static void compare_haloprofile(int model, struct haloprofile_data * data)
   double rmin = 0.01;
   double rmax = 100;
 
+  double rho3d;
   // compare to benchmark data
   for (int j=0; j<NUMR; j++) {
     double r = exp(log(rmin)+log(rmax/rmin)*j/(NUMR-1.));
-    double nfw3d = ccl_halo_profile_nfw(cosmo, concentration, halomass, halomassdef, a, r, &status);
-    double nfw2d = ccl_projected_halo_profile_nfw(cosmo, concentration, halomass, halomassdef, a, r, &status);
-
-    double absolute_tolerance = HALOPROFILE_TOLERANCE*data->RHOR[j];
+    if (model==0) {
+        rho3d = ccl_halo_profile_nfw(cosmo, concentration, halomass, halomassdef, a, r, status);
+    }
+    if (model==1) {
+        rho3d = ccl_halo_profile_einasto(cosmo, concentration, halomass, halomassdef, a, r, status);
+    }
+    if (model==2) {
+        rho3d = ccl_halo_profile_hernquist(cosmo, concentration, halomass, halomassdef, a, r, status);
+    }
+    double absolute_tolerance = HALOPROFILE_TOLERANCE*data->RHOR[model][j];
     if (fabs(absolute_tolerance)<1e-12) absolute_tolerance = 1e-12;
-    ASSERT_DBL_NEAR_TOL(data->RHOR[j], nfw3d, absolute_tolerance);
-
-    absolute_tolerance = HALOPROFILE_TOLERANCE*data->SIGMAR[j];
-    if (fabs(absolute_tolerance)<1e-12) absolute_tolerance = 1e-12;
-    ASSERT_DBL_NEAR_TOL(data->SIGMAR[j], nfw2d, absolute_tolerance);
+    ASSERT_DBL_NEAR_TOL(data->RHOR[model][j], rho3d, absolute_tolerance);
   }
   free(cosmo);
 }
 
 CTEST2(haloprofile, model_1) {
   int model = 0;
+  compare_haloprofile(model, data);
+}
+
+CTEST2(haloprofile, model_2) {
+  int model = 1;
+  compare_haloprofile(model, data);
+}
+
+CTEST2(haloprofile, model_3) {
+  int model = 2;
   compare_haloprofile(model, data);
 }
