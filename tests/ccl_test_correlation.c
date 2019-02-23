@@ -58,7 +58,6 @@ static void compare_corr(char *compare_type,int algorithm,struct corrs_data * da
 
   double epsrel_save;
   if(!strcmp(compare_type,"histo")) { //This is needed for the histogrammed N(z) in order to pass the IA tests
-    epsrel_save = cosmo->gsl_params.INTEGRATION_LIMBER_EPSREL;
     cosmo->gsl_params.INTEGRATION_LIMBER_EPSREL = 2.5E-5;
     cosmo->gsl_params.INTEGRATION_EPSREL = 2.5E-5;
     ccl_set_debug_policy(CCL_DEBUG_MODE_OFF);
@@ -784,8 +783,6 @@ static void compare_corr(char *compare_type,int algorithm,struct corrs_data * da
   ccl_cosmology_free(cosmo);
   ccl_cl_workspace_free(wyl);
   if(!strcmp(compare_type,"histo")) {
-    cosmo->gsl_params.INTEGRATION_EPSREL = epsrel_save;
-    cosmo->gsl_params.INTEGRATION_LIMBER_EPSREL = epsrel_save;
     ccl_set_debug_policy(CCL_DEBUG_MODE_WARNING);
   }
 }
