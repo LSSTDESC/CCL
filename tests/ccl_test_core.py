@@ -303,5 +303,15 @@ def test_cosmology_repr():
         ccl.comoving_radial_distance(cosmo3, 0.5))
 
 
+def test_cosmology_context():
+    with ccl.Cosmology(
+            Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
+            m_nu=np.array([0.02, 0.1, 0.05]), mnu_type='list',
+            z_mg=np.array([0.0, 1.0]), df_mg=np.array([0.01, 0.0])) as cosmo:
+        pass
+    assert_(not hasattr(cosmo, "cosmo"))
+    assert_(not hasattr(cosmo, "_params"))
+
+
 if __name__ == '__main__':
     run_module_suite()
