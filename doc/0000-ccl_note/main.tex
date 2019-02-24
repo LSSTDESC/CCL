@@ -538,7 +538,7 @@ Other baryonic impact models might be incorporated in the future as they become 
 
 \subsubsection{Spline parameters}
 
-All spline and grid parameters relevant for computing quantities such as distances, growth functions, power spectra, and halo mass functions can be set by assigning values to the members of the {\tt spline_params} structure in each {\tt ccl_cosmology} structure.
+All spline and grid parameters relevant for computing quantities such as distances, growth functions, power spectra, and halo mass functions can be set by assigning values to the members of the {\tt spline$\_$params} structure in each {\tt ccl$\_$cosmology} structure.
 The user can configure the following constants:
 
 \begin{itemize}
@@ -563,7 +563,7 @@ The user can configure the following constants:
 The default is {\tt N$\_$K$\_$3DCOR}~=~100,000.
 \end{itemize}
 
-The precision parameters of {\tt GSL} routines can be set by assigning values to the members of the {\tt gsl_params} structure in each {\tt ccl_cosmology} structure. The parameters are organized in a hierarchal fashion, such that more specialized parameters take precedence over more general ones. For example, there is a general tolerance parameter, a tolerance parameter for integrals, and a tolerance parameter for the Limber integral. By default all are set to the value of the general tolerance. Changing the integration tolerance changes the tolerance for all integrals but not for root-finding routines, for example, and changing the Limber integral tolerance only affects that integral and no other.
+The precision parameters of {\tt GSL} routines can be set by assigning values to the members of the {\tt gsl$\_$params} structure in each {\tt ccl$\_$cosmology} structure. The parameters are organized in a hierarchal fashion, such that more specialized parameters take precedence over more general ones. For example, there is a general tolerance parameter, a tolerance parameter for integrals, and a tolerance parameter for the Limber integral. By default all are set to the value of the general tolerance. Changing the integration tolerance changes the tolerance for all integrals but not for root-finding routines, for example, and changing the Limber integral tolerance only affects that integral and no other.
 The parameters are:
 
 \begin{itemize}
