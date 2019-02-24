@@ -16,11 +16,6 @@ CCL_BEGIN_DECLS
  */
 typedef struct ccl_physical_constants {
   /**
-   *  k pivot. These are in units of Mpc (no factor of h)
-  */
-  double K_PIVOT;
-
-  /**
    * Lightspeed / H0 in units of Mpc/h (from CODATA 2014)
    */
   double CLIGHT_HMPC;
@@ -151,9 +146,7 @@ extern const ccl_spline_params default_spline_params;
  * routines.
  */
 typedef struct ccl_gsl_params {
-  // General parameters. If not otherwise specified, those will be copied to the
-  // more specialised cases.
-  double EPSREL;
+  // General parameters
   size_t N_ITERATION;
 
   // Integration
@@ -164,8 +157,6 @@ typedef struct ccl_gsl_params {
   double INTEGRATION_LIMBER_EPSREL;
   // Distance integrals
   double INTEGRATION_DISTANCE_EPSREL;
-  // dndz integrals
-  double INTEGRATION_DNDZ_EPSREL;
   // sigma_R integral
   double INTEGRATION_SIGMAR_EPSREL;
 

@@ -63,14 +63,12 @@ const ccl_configuration default_config = {
 #define GSL_EPSREL_DNDZ 1E-6
 
 const ccl_gsl_params default_gsl_params = {
-  GSL_EPSREL,                          // EPSREL
   GSL_N_ITERATION,                     // N_ITERATION
   GSL_INTEGRATION_GAUSS_KRONROD_POINTS,// INTEGRATION_GAUSS_KRONROD_POINTS
   GSL_EPSREL,                          // INTEGRATION_EPSREL
   GSL_INTEGRATION_GAUSS_KRONROD_POINTS,// INTEGRATION_LIMBER_GAUSS_KRONROD_POINTS
   GSL_EPSREL,                          // INTEGRATION_LIMBER_EPSREL
   GSL_EPSREL_DIST,                     // INTEGRATION_DISTANCE_EPSREL
-  GSL_EPSREL_DNDZ,                     // INTEGRATION_DNDZ_EPSREL
   GSL_EPSREL_SIGMAR,                   // INTEGRATION_SIGMAR_EPSREL
   GSL_EPSREL,                          // ROOT_EPSREL
   GSL_N_ITERATION,                     // ROOT_N_ITERATION
@@ -138,11 +136,6 @@ const ccl_spline_params default_spline_params = {
 
 
 ccl_physical_constants ccl_constants = {
-  /**
-   *  k pivot. These are in units of Mpc (no factor of h)
-  */
-  0.05,
-
   /**
    * Lightspeed / H0 in units of Mpc/h (from CODATA 2014)
    */
