@@ -87,7 +87,10 @@ def loop_over_params(transfer_fn, matter_power, lin, raise_errs):
     print(">>> (%s; %s)" % (transfer_fn, matter_power))
 
     # Loop over parameters
-    for i in [0,2]: #w0_vals.size):
+    for i in [0,2]:
+        if matter_power=='halofit' and (w0_vals[i] != -1. or wa_vals[i] != 0.):
+            continue # Halofit disabled for w != -1
+            
         calc_power_spectrum(Omega_v_vals[i], w0_vals[i], wa_vals[i],
                             transfer_fn=transfer_fn, matter_power=matter_power,
                             linear=lin, raise_errors = raise_errs)

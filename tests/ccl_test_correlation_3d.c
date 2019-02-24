@@ -156,6 +156,7 @@ CTEST2(corrs_3d,model_1) {
   compare_correlation_3d(model,data);
 }
 
+/*
 CTEST2(corrs_3d,model_2) {
   int model=2;
   compare_correlation_3d(model,data);
@@ -165,3 +166,4 @@ CTEST2(corrs_3d,model_3) {
   int model=3;
   compare_correlation_3d(model,data);
 }
+*/

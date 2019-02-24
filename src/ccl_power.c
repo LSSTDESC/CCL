@@ -458,6 +458,20 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int * statu
   struct file_content fc;
 
   ErrorMsg errmsg; // for error messages
+  
+  // Check if w!=-1 and halofit is enabled (raise error if so). CLASS uses a 
+  // spline to rescale the LambdaCDM halofit output if w!=-1, but this takes 
+  // an extremely long time if z_max_pk is set to a large value (which it is 
+  // by default in CCL). Instead of using a different z_max_pk (actually, 
+  // pk_eq_z_max) for different power spectrum methods, we just raise an error 
+  // for this method if w!=-1. 
+  if(   (cosmo->config.matter_power_spectrum_method==ccl_halofit) 
+     && (cosmo->params.w0 != -1.) && (cosmo->params.wa != 0.) ) {
+        *status = CCL_ERROR_CLASS;
+        ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_cosmology_compute_power_class(): Halofit power spectrum method is disabled for cosmologies with w!=-1. This is due to a spline issue that causes CCL to hang.\n");
+        return;
+  } // end Halofit safety check
+  
   // generate file_content structure
   // CLASS configuration parameters will be passed through this structure,
   // to avoid writing and reading .ini files for every call
@@ -530,17 +544,34 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int * statu
 
     // After this loop x will contain log(k)
     // all in Mpc, not Mpc/h units!
-    double psout_l,ic;
+    double psout_l = 0.; double psout_cb_l = 0.;
+    double *ic = NULL; double *ic_cb = NULL;
+    double z_val;
     for (int i=0; i<nk; i++) {
       for (int j = 0; j < na; j++) {
-	//The 2D interpolation routines access the function values y_{k_ia_j} with the following ordering:
-	//y_ij = y2d[j*N_k + i]
-	//with i = 0,...,N_k-1 and j = 0,...,N_a-1.
-	newstatus |= spectra_pk_at_k_and_z(&ba, &pm, &sp,x[i],1./a[j]-1.+1e-10, &psout_l,&ic);
-	y2d_lin[j*nk+i] = log(psout_l);
-      }
+        
+        // The 2D interpolation routines access the function values y_{k_ia_j} 
+	    // with the following ordering:
+	    //      y_ij = y2d[j*N_k + i]
+	    // with i = 0,...,N_k-1 and j = 0,...,N_a-1.
+        
+        // NB. The _cb output variables are for the CDM+baryon power spectrum 
+	    // only (not total matter power), and are currently ignored.
+	    z_val = 1./a[j] - 1. + Z_ROUNDING_CORRECTION;
+
+ 	    // Versions of CLASS prior to v2.7.0 have a different call signature here
+        #ifdef CLASS_VERSION_PRE27
+	    newstatus |= spectra_pk_at_k_and_z(&ba, &pm, &sp, x[i], z_val, 
+	                                       &psout_l, ic);
+	    #else
+	    newstatus |= spectra_pk_at_k_and_z(&ba, &pm, &sp, x[i], z_val, 
+	                                       &psout_l, ic, &psout_cb_l, ic_cb);
+	    #endif
+        
+	    y2d_lin[j*nk+i] = log(psout_l);
+      } // end j loop
       x[i] = log(x[i]);
-    }
+    } // end i loop
 
 
     //If error, store status, we will free later
@@ -597,13 +628,24 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int * statu
 
     if(cosmo->config.matter_power_spectrum_method==ccl_halofit) {
 
-      double psout_nl;
+      double psout_nl = 0.; double psout_cb_nl = 0.;
+      double z_val;
       for (int i=0; i<nk; i++) {
-	for (int j = 0; j < na; j++) {
-	  newstatus |= spectra_pk_nl_at_k_and_z(&ba, &pm, &sp,exp(x[i]),1./a[j]-1.+1e-10,&psout_nl);
-	  y2d_nl[j*nk+i] = log(psout_nl);
-	}
-      }
+	    for (int j = 0; j < na; j++) {
+	        
+	        z_val = 1./a[j] - 1. + Z_ROUNDING_CORRECTION;
+	        
+	        // Versions of CLASS prior to v2.7.0 have different call signature
+            #ifdef CLASS_VERSION_PRE27
+	        newstatus |= spectra_pk_nl_at_k_and_z(&ba, &pm, &sp, exp(x[i]), 
+	                                              z_val, &psout_nl);
+	        #else
+	        newstatus |= spectra_pk_nl_at_k_and_z(&ba, &pm, &sp, exp(x[i]), 
+	                                              z_val, &psout_nl, &psout_cb_nl);
+	        #endif
+	        y2d_nl[j*nk+i] = log(psout_nl);
+	    } // end j loop
+      } // end i loop
     }
 
     if(newstatus){
@@ -724,10 +766,28 @@ void ccl_cosmology_write_power_class_z(char *filename, ccl_cosmology * cosmo, do
     fclose(f);
     return;
   }
-  double psout_l,ic;
+  
+  // Get CLASS power spectrum and write to file
+  // (N.B. Currently gets total matter power spectrum; ignores separate 
+  // CDM+baryon spectrum output
+  double psout_l = 0.; double psout_cb_l = 0.;
+  double *ic = NULL; double *ic_cb = NULL;
+  
+  // Add small correction to z to prevent rounding errors in CLASS interpolator
+  double z_val = z + Z_ROUNDING_CORRECTION;
+  
   int s=0;
   for (int i=0; i<sp.ln_k_size; i++) {
-    s |= spectra_pk_at_k_and_z(&ba, &pm, &sp,exp(sp.ln_k[i]),z, &psout_l,&ic);
+
+    // Versions of CLASS prior to v2.7.0 have a different call signature here
+    #ifdef CLASS_VERSION_PRE27
+    s |= spectra_pk_at_k_and_z(&ba, &pm, &sp, exp(sp.ln_k[i]), z_val, 
+                               &psout_l, ic);
+    #else
+    s |= spectra_pk_at_k_and_z(&ba, &pm, &sp, exp(sp.ln_k[i]), z_val, 
+                               &psout_l, ic, &psout_cb_l, ic_cb);
+    #endif
+    
     fprintf(f,"%e %e\n",exp(sp.ln_k[i]),psout_l);
   }
   fclose(f);
@@ -1436,19 +1496,29 @@ static void ccl_cosmology_compute_power_emu(ccl_cosmology * cosmo, int * status)
   if(!*status){
     // After this loop x will contain log(k), y will contain log(P_nl), z will contain log(P_lin)
     // all in Mpc, not Mpc/h units!
-    double psout_l,ic;
-    int s=0;
+    double psout_l = 0.; double psout_cb_l = 0.;
+    double *ic = NULL; double *ic_cb = NULL;
+    double z_val;
+    int newstatus = 0;
     for (int i=0; i<nk; i++) {
       for (int j = 0; j < na; j++) {
-	//The 2D interpolation routines access the function values y_{k_ia_j} with the following ordering:
-	//y_ij = y2d[j*N_k + i]
-	//with i = 0,...,N_k-1 and j = 0,...,N_a-1.
-	s |= spectra_pk_at_k_and_z(&ba, &pm, &sp,x[i],1./a[j]-1.+1e-10, &psout_l,&ic);
-	y2d_lin[j*nk+i] = log(psout_l);
+      
+        z_val = 1./a[j] - 1. + Z_ROUNDING_CORRECTION;
+	    
+	    // Versions of CLASS prior to v2.7.0 have a different call signature here
+        #ifdef CLASS_VERSION_PRE27
+	    newstatus |= spectra_pk_at_k_and_z(&ba, &pm, &sp, x[i], z_val, 
+	                                       &psout_l, ic);
+	    #else
+	    newstatus |= spectra_pk_at_k_and_z(&ba, &pm, &sp, x[i], z_val, 
+	                                       &psout_l, ic, &psout_cb_l, ic_cb);
+	    #endif
+	    
+	    y2d_lin[j*nk+i] = log(psout_l);
       }
       x[i] = log(x[i]);
     }
-    if(s) {
+    if(newstatus) {
       *status = CCL_ERROR_CLASS;
       ccl_cosmology_set_status_message(
         cosmo, "ccl_power.c: ccl_cosmology_compute_power_emu(): Error computing CLASS power spectrum\n");
