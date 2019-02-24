@@ -14,8 +14,12 @@
 #include "ccl_emu17_params.h"
 
 
-/*------ ROUTINE: ccl_cosmology_compute_power_class -----
-INPUT: ccl_cosmology * cosmo
+/* --------- ROUTINE: ccl_free_class_structs ---------
+INPUT: ccl_cosmology, struct background, struct thermo, struct perturbs, 
+       struct transfers, struct primordial, struct spectra, struct nonlinear, 
+       struct lensing, int init_arr, int status
+TASK: Free memory allocated to structures used by CLASS calculations.
+RETURNS: Nothing.
 */
 static void ccl_free_class_structs(ccl_cosmology *cosmo,
 				   struct background *ba,
