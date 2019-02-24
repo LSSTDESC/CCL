@@ -2,12 +2,14 @@
 
 ## C library
 - Fixed memory leak in CLASS power spectrum computations (#561, #562).
-- Fixed a bug where CLASS would crash due to small rounding errors at z = 0 
+- Fixed a bug where CLASS would crash due to small rounding errors at z = 0
   when evaluating power spectra (#563, #564).
 - Fixed bug in fftlog for some complex arguments (#565, #566).
+- Deprecated the `ccl_redshifts.h` functions (#579).
 
 ## Python library
 - Improved error reporting for `angular_cl` computations (#567).
+- Deprecated the `pyccl.redshifts` module (#579).
 
 # v 1.0 API changes :
 
