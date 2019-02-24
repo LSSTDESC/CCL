@@ -154,6 +154,7 @@ CTEST2(corrs_3dRSD,model_1) {
   compare_correlation_3dRSD(model,data);
 }
 
+/*
 CTEST2(corrs_3dRSD,model_2) {
   int model=2;
   compare_correlation_3dRSD(model,data);
@@ -163,3 +164,4 @@ CTEST2(corrs_3dRSD,model_3) {
   int model=3;
   compare_correlation_3dRSD(model,data);
 }
+*/
