@@ -5,7 +5,7 @@ if(${CMAKE_VERSION} VERSION_GREATER "3.10.0")
   set(SHALLOW_GIT_CLONE GIT_SHALLOW 1)
 endif()
 
-set(CLASSTag v2.6.3)
+set(CLASSTag v2.7.1)
 
 # In case the compiler being used  is clang, remove the omp flag
 if ("${CMAKE_C_COMPILER_ID}" MATCHES "^(Apple)?Clang$")
@@ -33,6 +33,8 @@ ExternalProject_Add(CLASS
         ${SHALLOW_GIT_CLONE}
         DOWNLOAD_NO_PROGRESS 1
         PATCH_COMMAND patch -p1 -i ${CMAKE_CURRENT_SOURCE_DIR}/cmake/class-2.6.3.patch
+        UPDATE_COMMAND ""
+        
         # In the configuration step, we comment out the default compiler and
         # provide an appropriate omp flag
         CONFIGURE_COMMAND     perl -pi -e "s/^CC /# CC /" Makefile &&
