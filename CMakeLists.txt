@@ -30,7 +30,7 @@ project(ccl VERSION 0.2.1)
 
 
     # Defines list of extra distribution files and directories to be installed on the system
-    set(EXTRA_DIST include/ccl_params.ini README.md LICENSE LICENSE_COSMICEMU)
+    set(EXTRA_DIST README.md LICENSE LICENSE_COSMICEMU)
     set(EXTRA_DIST_DIRS)
 
     # Uses system libraries or downloads and build if necessary

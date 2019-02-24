@@ -1,5 +1,4 @@
 #include "ccl.h"
-#include "../include/ccl_params.h"
 #include "ctest.h"
 #include <stdlib.h>
 #include <stdio.h>
@@ -9,6 +8,7 @@
 
 #define CORR_ERROR_FRACTION 0.1
 #define ELL_MAX_CL 10000
+#define L_SPLINE_TYPE gsl_interp_akima
 double fftlogfactor; //this is the factor by which FFTLog performs more weakly than the brute-force integration approach (Bessel)
 
 CTEST_DATA(corrs) {
@@ -56,11 +56,9 @@ static void compare_corr(char *compare_type,int algorithm,struct corrs_data * da
   ccl_cosmology * cosmo = ccl_cosmology_create(params, config);
   ASSERT_NOT_NULL(cosmo);
 
-  double epsrel_save;
   if(!strcmp(compare_type,"histo")) { //This is needed for the histogrammed N(z) in order to pass the IA tests
-    epsrel_save=ccl_gsl->INTEGRATION_LIMBER_EPSREL;
-    ccl_gsl->INTEGRATION_LIMBER_EPSREL=2.5E-5;
-    ccl_gsl->INTEGRATION_EPSREL=2.5E-5;
+    cosmo->gsl_params.INTEGRATION_LIMBER_EPSREL = 2.5E-5;
+    cosmo->gsl_params.INTEGRATION_EPSREL = 2.5E-5;
     ccl_set_debug_policy(CCL_DEBUG_MODE_OFF);
   }
 
@@ -343,7 +341,7 @@ static void compare_corr(char *compare_type,int algorithm,struct corrs_data * da
   fclose(fi_dl_11); fclose(fi_dl_12); fclose(fi_dl_21); fclose(fi_dl_22);
   fclose(fi_di_11); fclose(fi_di_12); fclose(fi_di_21); fclose(fi_di_22);
   fclose(fi_dltot_11); fclose(fi_dltot_12); fclose(fi_dltot_21); fclose(fi_dltot_22);
-  
+
   /*Compute the correlation with CCL*/
   double *clarr=malloc(ELL_MAX_CL*sizeof(double));
   double *clarr1=malloc(ELL_MAX_CL*sizeof(double));
@@ -581,13 +579,13 @@ static void compare_corr(char *compare_type,int algorithm,struct corrs_data * da
   free(clarr3);
   free(clarr4);
   free(larr);
-  
+
   /* With the CCL correlation already computed, we proceed to the
   * comparison. Here, we read in the benchmark covariances from CosmoLike, which
   * allow us to set our tolerance.
   */
   int nsig=15;
-  double sigwt_dd_11[15], sigwt_dd_22[15]; 
+  double sigwt_dd_11[15], sigwt_dd_22[15];
   double sigwt_dl_11[15], sigwt_dl_12[15], sigwt_dl_21[15], sigwt_dl_22[15];
   double sigwt_ll_12_mm[15], sigwt_ll_12_pp[15];
   double sigwt_ll_11_mm[15], sigwt_ll_22_mm[15];
@@ -657,13 +655,13 @@ static void compare_corr(char *compare_type,int algorithm,struct corrs_data * da
   int npoints=0;
   for(ii=0;ii<nofl;ii++) {
     double tol;
-    
+
     if((theta_in[ii]<sig_theta_in[0]) ||(theta_in[ii]>sig_theta_in[nsig-1]))
       continue;
     else
       npoints++;
 
-    /*First time the tolerance is set. The tolerance is equal to the 
+    /*First time the tolerance is set. The tolerance is equal to the
      *expected error bar times CORR_ERR_FRACTION=0.5 (default) */
     tol=gsl_spline_eval(spl_sigwt_dd_11,theta_in[ii],NULL);
     ASSERT_TRUE(fabs(wt_dd_11_h[ii]-wt_dd_11[ii])<tol*CORR_ERROR_FRACTION*fftlogfactor);
@@ -673,7 +671,7 @@ static void compare_corr(char *compare_type,int algorithm,struct corrs_data * da
     tol=gsl_spline_eval(spl_sigwt_dd_22,theta_in[ii],NULL);
     ASSERT_TRUE(fabs(wt_dd_22_h[ii]-wt_dd_22[ii])<tol*CORR_ERROR_FRACTION*fftlogfactor);
 
-    //Only considering the GG covariance since do not have one with intrinsic alignments included. 
+    //Only considering the GG covariance since do not have one with intrinsic alignments included.
     //Also assuming covariance approximately the same for analytic and histogram n(z).
     tol=gsl_spline_eval(spl_sigwt_ll_11_pp,theta_in[ii],NULL);
     ASSERT_TRUE(fabs(wt_ll_11_h_pp[ii]-wt_ll_11_pp[ii])<tol*CORR_ERROR_FRACTION*fftlogfactor);
@@ -742,15 +740,15 @@ static void compare_corr(char *compare_type,int algorithm,struct corrs_data * da
     tol=gsl_spline_eval(spl_sigwt_dl_22,theta_in[ii],NULL);
     ASSERT_TRUE(fabs(wt_di_22_h[ii]-wt_di_22[ii])<tol*CORR_ERROR_FRACTION*fftlogfactor);
     tol=gsl_spline_eval(spl_sigwt_dl_11,theta_in[ii],NULL);
-    ASSERT_TRUE(fabs(wt_dltot_11_h[ii]-wt_dltot_11[ii])<tol*CORR_ERROR_FRACTION*fftlogfactor);    
+    ASSERT_TRUE(fabs(wt_dltot_11_h[ii]-wt_dltot_11[ii])<tol*CORR_ERROR_FRACTION*fftlogfactor);
     tol=gsl_spline_eval(spl_sigwt_dl_12,theta_in[ii],NULL);
-    ASSERT_TRUE(fabs(wt_dltot_12_h[ii]-wt_dltot_12[ii])<tol*CORR_ERROR_FRACTION*fftlogfactor);    
+    ASSERT_TRUE(fabs(wt_dltot_12_h[ii]-wt_dltot_12[ii])<tol*CORR_ERROR_FRACTION*fftlogfactor);
     tol=gsl_spline_eval(spl_sigwt_dl_21,theta_in[ii],NULL);
-    ASSERT_TRUE(fabs(wt_dltot_21_h[ii]-wt_dltot_21[ii])<tol*CORR_ERROR_FRACTION*fftlogfactor);    
+    ASSERT_TRUE(fabs(wt_dltot_21_h[ii]-wt_dltot_21[ii])<tol*CORR_ERROR_FRACTION*fftlogfactor);
     tol=gsl_spline_eval(spl_sigwt_dl_22,theta_in[ii],NULL);
-    ASSERT_TRUE(fabs(wt_dltot_22_h[ii]-wt_dltot_22[ii])<tol*CORR_ERROR_FRACTION*fftlogfactor);    
+    ASSERT_TRUE(fabs(wt_dltot_22_h[ii]-wt_dltot_22[ii])<tol*CORR_ERROR_FRACTION*fftlogfactor);
   }
-  
+
   //Free splines, cosmology and arrays
   gsl_spline_free(spl_sigwt_dd_11);
   gsl_spline_free(spl_sigwt_dd_22);
@@ -784,8 +782,6 @@ static void compare_corr(char *compare_type,int algorithm,struct corrs_data * da
   ccl_cosmology_free(cosmo);
   ccl_cl_workspace_free(wyl);
   if(!strcmp(compare_type,"histo")) {
-    ccl_gsl->INTEGRATION_EPSREL=epsrel_save;
-    ccl_gsl->INTEGRATION_LIMBER_EPSREL=epsrel_save;
     ccl_set_debug_policy(CCL_DEBUG_MODE_WARNING);
   }
 }

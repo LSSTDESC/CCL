@@ -14,11 +14,11 @@ Submodules
    pyccl.correlation
    pyccl.errors
    pyccl.halomodel
-   pyccl.lsst_specs
    pyccl.massfunction
    pyccl.neutrinos
    pyccl.power
    pyccl.pyutils
+   pyccl.redshifts
 
 Module contents
 ---------------

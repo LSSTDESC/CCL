@@ -12,9 +12,6 @@ except DistributionNotFound:
 # Sets the environment variable for default config path if it does not
 # exist yet
 from os import environ, path
-if environ.get("CCL_PARAM_FILE") is None:
-    environ["CCL_PARAM_FILE"] = (
-        path.dirname(path.abspath(__file__)) + '/ccl_params.ini')
 if environ.get("CLASS_PARAM_DIR") is None:
     environ["CLASS_PARAM_DIR"] = path.dirname(path.abspath(__file__))
 
@@ -43,8 +40,7 @@ from .cls import angular_cl, NumberCountsTracer, WeakLensingTracer, CMBLensingTr
 from .redshifts import  dNdz_tomog, PhotoZFunction, PhotoZGaussian, dNdzFunction, dNdzSmail
 
 # Useful constants and unit conversions
-from .constants import CLIGHT_HMPC, MPC_TO_METER, PC_TO_METER, \
-                      GNEWT, RHO_CRITICAL, SOLAR_MASS
+physical_constants = lib.cvar.constants
 
 from .correlation import correlation, correlation_3d, correlation_multipole, correlation_3dRsd, correlation_3dRsd_avgmu, correlation_spline_free, correlation_pi_sigma
 

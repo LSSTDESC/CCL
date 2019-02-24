@@ -95,13 +95,13 @@ static void compare_massfunc(int model, struct massfunc_data * data)
   // test file generated using tinker 2008 currently
   config.mass_function_method = ccl_tinker;
   ccl_cosmology * cosmo = ccl_cosmology_create(params, config);
-  
+
   ASSERT_NOT_NULL(cosmo);
 
   double a = 1.0;
   double logmass = 10;
   double odelta = 200;
-  double rho_m = RHO_CRITICAL*cosmo->params.Omega_m*cosmo->params.h*cosmo->params.h;
+  double rho_m = ccl_constants.RHO_CRITICAL*cosmo->params.Omega_m*cosmo->params.h*cosmo->params.h;
 
   // compare to benchmark data
   for (int j=0; j<13; j++) {
@@ -121,7 +121,7 @@ static void compare_massfunc(int model, struct massfunc_data * data)
     absolute_tolerance = MASSFUNC_TOLERANCE*fabs(data->massfunc[2][j]);
     if (fabs(absolute_tolerance)<1e-12) absolute_tolerance = 1e-12;
     ASSERT_DBL_NEAR_TOL(fabs(data->massfunc[2][j]), fabs(logmassfunc_j), absolute_tolerance);
-   
+
     logmass += 0.5;
   }
   free(cosmo);
