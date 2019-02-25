@@ -11,7 +11,7 @@
 - Improved error reporting for `angular_cl` computations (#567).
 - Remove global splines for RSD correlation functions. These are now stored
   per cosmology. Further, they are now rebuilt on-the-fly for a given
-  cosmology if a new scale factor is requested. (#581)
+  cosmology if a new scale factor is requested. (#582)
 
 # v 1.0 API changes :
 
