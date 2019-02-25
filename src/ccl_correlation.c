@@ -113,7 +113,9 @@ static void ccl_tracer_corr_fftlog(ccl_cosmology *cosmo,
   }
   wth_arr=(double *)malloc(sizeof(double)*cosmo->spline_params.N_ELL_CORR);
   if(wth_arr==NULL) {
-    free(l_arr); free(cl_arr); free(th_arr);
+    free(l_arr);
+    free(cl_arr);
+    free(th_arr);
     *status=CCL_ERROR_MEMORY;
     ccl_cosmology_set_status_message(cosmo, "ccl_correlation.c: ccl_tracer_corr_fftlog ran out of memory\n");
     return;
@@ -132,12 +134,23 @@ static void ccl_tracer_corr_fftlog(ccl_cosmology *cosmo,
 
   // Interpolate to output values of theta
   SplPar *wth_spl=ccl_spline_init(cosmo->spline_params.N_ELL_CORR,th_arr,wth_arr,wth_arr[0],0);
+  if (wth_spl == NULL) {
+    free(l_arr);
+    free(cl_arr);
+    free(th_arr);
+    free(wth_arr);
+    *status = CCL_ERROR_MEMORY;
+    ccl_cosmology_set_status_message(cosmo, "ccl_correlation.c: ccl_tracer_corr_fftlog ran out of memory\n");
+    return;
+  }
   for(i=0;i<n_theta;i++)
     wtheta[i]=ccl_spline_eval(theta[i]*M_PI/180.,wth_spl);
   ccl_spline_free(wth_spl);
 
-  free(l_arr); free(cl_arr);
-  free(th_arr); free(wth_arr);
+  free(l_arr);
+  free(cl_arr);
+  free(th_arr);
+  free(wth_arr);
 
   return;
 }
@@ -301,7 +314,7 @@ static void ccl_tracer_corr_legendre(ccl_cosmology *cosmo,
 				     int *status)
 {
   int i;
-  double *l_arr,*cl_arr,*Pl_theta;
+  double *l_arr = NULL, *cl_arr = NULL, *Pl_theta = NULL;
   SplPar *cl_spl;
 
   if(corr_type==CCL_CORR_LM || corr_type==CCL_CORR_LP){
@@ -468,7 +481,9 @@ void ccl_correlation_3d(ccl_cosmology *cosmo, double a,
   }
   xi_arr=malloc(sizeof(double)*N_ARR);
   if(xi_arr==NULL) {
-    free(k_arr); free(pk_arr); free(r_arr);
+    free(k_arr);
+    free(pk_arr);
+    free(r_arr);
     *status=CCL_ERROR_MEMORY;
     ccl_cosmology_set_status_message(cosmo, "ccl_correlation.c: ccl_correlation_3d ran out of memory\n");
     return;
@@ -481,12 +496,23 @@ void ccl_correlation_3d(ccl_cosmology *cosmo, double a,
 
   // Interpolate to output values of r
   SplPar *xi_spl=ccl_spline_init(N_ARR,r_arr,xi_arr,xi_arr[0],0);
+  if (xi_spl == NULL) {
+    free(k_arr);
+    free(pk_arr);
+    free(r_arr);
+    free(xi_arr);
+    *status=CCL_ERROR_MEMORY;
+    ccl_cosmology_set_status_message(cosmo, "ccl_correlation.c: ccl_correlation_3d ran out of memory\n");
+    return;
+  }
   for(i=0;i<n_r;i++)
     xi[i]=ccl_spline_eval(r[i],xi_spl);
   ccl_spline_free(xi_spl);
 
-  free(k_arr); free(pk_arr);
-  free(r_arr); free(xi_arr);
+  free(k_arr);
+  free(pk_arr);
+  free(r_arr);
+  free(xi_arr);
 
   ccl_check_status(cosmo,status);
 
@@ -554,6 +580,7 @@ void ccl_correlation_multipole(ccl_cosmology *cosmo, double a, double beta,
     free(k_arr);
     free(pk_arr);
     free(s_arr);
+    free(xi_arr);
     *status = CCL_ERROR_MEMORY;
     strcpy(cosmo->status_message,
            "ccl_correlation.c: ccl_correlation_multipole ran out of memory\n");
@@ -582,6 +609,16 @@ void ccl_correlation_multipole(ccl_cosmology *cosmo, double a, double beta,
 
   // Interpolate to output values of s
   SplPar *xi_spl = ccl_spline_init(N_ARR, s_arr, xi_arr, xi_arr[0], 0);
+  if (xi_spl == NULL) {
+    free(k_arr);
+    free(pk_arr);
+    free(s_arr);
+    free(xi_arr);
+    free(xi_arr0);
+    *status = CCL_ERROR_MEMORY;
+    strcpy(cosmo->status_message,
+           "ccl_correlation.c: ccl_correlation_multipole ran out of memory\n");
+  }
   for (i = 0; i < n_s; i++) xi[i] = ccl_spline_eval(s[i], xi_spl);
   ccl_spline_free(xi_spl);
 
@@ -659,6 +696,7 @@ void ccl_correlation_multipole_spline(ccl_cosmology *cosmo, double a,
     free(k_arr);
     free(pk_arr);
     free(s_arr);
+    free(xi_arr);
     *status = CCL_ERROR_MEMORY;
     strcpy(cosmo->status_message,
            "ccl_correlation.c: ccl_correlation_multipole_spline ran out of "
@@ -670,6 +708,8 @@ void ccl_correlation_multipole_spline(ccl_cosmology *cosmo, double a,
     free(k_arr);
     free(pk_arr);
     free(s_arr);
+    free(xi_arr);
+    free(xi_arr0);
     *status = CCL_ERROR_MEMORY;
     strcpy(cosmo->status_message,
            "ccl_correlation.c: ccl_correlation_multipole_spline ran out of "
@@ -681,6 +721,9 @@ void ccl_correlation_multipole_spline(ccl_cosmology *cosmo, double a,
     free(k_arr);
     free(pk_arr);
     free(s_arr);
+    free(xi_arr);
+    free(xi_arr0);
+    free(xi_arr2);
     *status = CCL_ERROR_MEMORY;
     strcpy(cosmo->status_message,
            "ccl_correlation.c: ccl_correlation_multipole_spline ran out of "
@@ -698,8 +741,55 @@ void ccl_correlation_multipole_spline(ccl_cosmology *cosmo, double a,
 
   // Interpolate to output values of s
   xir_spline[0] = ccl_spline_init(N_ARR, s_arr, xi_arr0, xi_arr0[0], 0);
+  if (xir_spline[0] == NULL) {
+    free(k_arr);
+    free(pk_arr);
+    free(s_arr);
+    free(xi_arr);
+    free(xi_arr0);
+    free(xi_arr2);
+    free(xi_arr4);
+    *status = CCL_ERROR_MEMORY;
+    strcpy(cosmo->status_message,
+           "ccl_correlation.c: ccl_correlation_multipole_spline ran out of "
+           "memory\n");
+    return;
+  }
+
   xir_spline[1] = ccl_spline_init(N_ARR, s_arr, xi_arr2, xi_arr2[0], 0);
+  if (xir_spline[1] == NULL) {
+    free(k_arr);
+    free(pk_arr);
+    free(s_arr);
+    free(xi_arr);
+    free(xi_arr0);
+    free(xi_arr2);
+    free(xi_arr4);
+    ccl_spline_free(xir_spline[0]);
+    *status = CCL_ERROR_MEMORY;
+    strcpy(cosmo->status_message,
+           "ccl_correlation.c: ccl_correlation_multipole_spline ran out of "
+           "memory\n");
+    return;
+  }
+
   xir_spline[2] = ccl_spline_init(N_ARR, s_arr, xi_arr4, xi_arr4[0], 0);
+  if (xir_spline[2] == NULL) {
+    free(k_arr);
+    free(pk_arr);
+    free(s_arr);
+    free(xi_arr);
+    free(xi_arr0);
+    free(xi_arr2);
+    free(xi_arr4);
+    ccl_spline_free(xir_spline[0]);
+    ccl_spline_free(xir_spline[1]);
+    *status = CCL_ERROR_MEMORY;
+    strcpy(cosmo->status_message,
+           "ccl_correlation.c: ccl_correlation_multipole_spline ran out of "
+           "memory\n");
+    return;
+  }
 
   free(k_arr);
   free(pk_arr);
@@ -763,8 +853,8 @@ void ccl_correlation_3dRsd(ccl_cosmology *cosmo, double a, int n_s, double *s,
     }
     xi_arr4 = malloc(sizeof(double) * n_s);
     if (xi_arr4 == NULL) {
+      free(xi_arr0);
       free(xi_arr2);
-      free(xi_arr4);
       *status = CCL_ERROR_MEMORY;
       strcpy(cosmo->status_message,
              "ccl_correlation.c: ccl_correlation_3dRsd ran out of memory\n");
@@ -846,6 +936,7 @@ void ccl_correlation_pi_sigma(ccl_cosmology *cosmo, double a, double beta,
 
   s_arr = malloc(sizeof(double) * n_sig);
   if (s_arr == NULL) {
+    free(mu_arr);
     *status = CCL_ERROR_MEMORY;
     strcpy(cosmo->status_message,
            "ccl_correlation.c: ccl_correlation_pi_sigma ran out of memory\n");
@@ -854,6 +945,8 @@ void ccl_correlation_pi_sigma(ccl_cosmology *cosmo, double a, double beta,
 
   xi_arr = malloc(sizeof(double) * n_sig);
   if (xi_arr == NULL) {
+    free(mu_arr);
+    free(s_arr);
     *status = CCL_ERROR_MEMORY;
     strcpy(cosmo->status_message,
            "ccl_correlation.c: ccl_correlation_pi_sigma ran out of memory\n");
