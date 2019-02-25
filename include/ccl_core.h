@@ -9,6 +9,8 @@
 #include <gsl/gsl_spline2d.h>
 #include <gsl/gsl_const_mksa.h>
 
+#include "ccl_utils.h"
+
 CCL_BEGIN_DECLS
 
 /**
@@ -268,7 +270,6 @@ typedef struct ccl_data {
   gsl_interp_accel *accelerator_k;
 
   // Function of Halo mass M
-
   gsl_spline * logsigma;
   gsl_spline * dlnsigma_dlogm;
 
@@ -286,6 +287,9 @@ typedef struct ccl_data {
   double k_min_nl;
   double k_max_lin;
   double k_max_nl;
+
+  // real-space splines for RSD
+  SplPar* rsd_splines[3];
 } ccl_data;
 
 /**
