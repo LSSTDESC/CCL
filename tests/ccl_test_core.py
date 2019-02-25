@@ -304,6 +304,7 @@ def test_cosmology_repr():
 
 
 def test_cosmology_context():
+    """Check that using a Cosmology object in a context manager frees C resources properly."""
     with ccl.Cosmology(
             Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
             m_nu=np.array([0.02, 0.1, 0.05]), mnu_type='list',
