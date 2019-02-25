@@ -1345,8 +1345,8 @@ static void ccl_cosmology_compute_power_bbks(ccl_cosmology * cosmo, int * status
 
 
 /*------ ROUTINE: ccl_cosmology_compute_power_emu -----
-INPUT: cosmology	INPUT: ccl_cosmology, int status
-TASK: provide spline for the emulated power spectrum from Cosmic EMU	TASK: Provide spline for the emulated power spectrum from Cosmic EMU
+INPUT: ccl_cosmology, int status
+TASK: Provide spline for the emulated power spectrum from Cosmic EMU
 */
 static void ccl_cosmology_compute_power_emu(ccl_cosmology * cosmo, int * status)
 {
