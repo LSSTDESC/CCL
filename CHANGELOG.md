@@ -6,6 +6,7 @@
   when evaluating power spectra (#563, #564).
 - Fixed bug in fftlog for some complex arguments (#565, #566).
 - Replaced custom gamma function with that from GSL (#570).
+- Fixed memory leaks in `ccl_correlation.c` (#581).
 
 ## Python library
 - Improved error reporting for `angular_cl` computations (#567).
