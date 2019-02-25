@@ -660,6 +660,21 @@ class Cosmology(object):
             if self._params is not None:
                 lib.parameters_free(self._params)
 
+        # finally delete some attributes we don't want to be around for safety
+        # when the context manager exits or if __del__ is called twice
+        if hasattr(self, "cosmo"):
+            delattr(self, "cosmo")
+        if hasattr(self, "_params"):
+            delattr(self, "_params")
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, type, value, traceback):
+        """Free the C memory this object is managing when the context manager
+        exits."""
+        self.__del__()
+
     def __getstate__(self):
         # we are removing any C data before pickling so that the
         # is pure python when pickled.
