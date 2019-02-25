@@ -14,9 +14,6 @@
 
 #include "ccl.h"
 
-// Global variable to hold the redshift space correlation multipole function spline
-SplPar* xir_spline[3]={NULL,NULL,NULL};
-
 /*--------ROUTINE: taper_cl ------
 TASK:n Apply cosine tapering to Cls to reduce aliasing
 INPUT: number of ell bins for Cl, ell vector, C_ell vector, limits for tapering
@@ -638,7 +635,7 @@ TASK: Store multipoles of the redshift-space correlation in global splines
 
 INPUT:  cosmology, scale factor a
 
-Result is stored in xir_spline[]
+Result is stored in cosmo->data.rsd_splines[]
  */
 
 void ccl_correlation_multipole_spline(ccl_cosmology *cosmo, double a,
@@ -739,9 +736,17 @@ void ccl_correlation_multipole_spline(ccl_cosmology *cosmo, double a,
   fftlog_ComputeXiLM(2, 2, N_ARR, k_arr, pk_arr, s_arr, xi_arr2);
   fftlog_ComputeXiLM(4, 2, N_ARR, k_arr, pk_arr, s_arr, xi_arr4);
 
+  // free any memory that may have been allocated
+  ccl_spline_free(cosmo->data.rsd_splines[0]);
+  ccl_spline_free(cosmo->data.rsd_splines[1]);
+  ccl_spline_free(cosmo->data.rsd_splines[2]);
+  cosmo->data.rsd_splines[0] = NULL;
+  cosmo->data.rsd_splines[1] = NULL;
+  cosmo->data.rsd_splines[1] = NULL;
+
   // Interpolate to output values of s
-  xir_spline[0] = ccl_spline_init(N_ARR, s_arr, xi_arr0, xi_arr0[0], 0);
-  if (xir_spline[0] == NULL) {
+  cosmo->data.rsd_splines[0] = ccl_spline_init(N_ARR, s_arr, xi_arr0, xi_arr0[0], 0);
+  if (cosmo->data.rsd_splines[0] == NULL) {
     free(k_arr);
     free(pk_arr);
     free(s_arr);
@@ -756,8 +761,8 @@ void ccl_correlation_multipole_spline(ccl_cosmology *cosmo, double a,
     return;
   }
 
-  xir_spline[1] = ccl_spline_init(N_ARR, s_arr, xi_arr2, xi_arr2[0], 0);
-  if (xir_spline[1] == NULL) {
+  cosmo->data.rsd_splines[1] = ccl_spline_init(N_ARR, s_arr, xi_arr2, xi_arr2[0], 0);
+  if (cosmo->data.rsd_splines[1] == NULL) {
     free(k_arr);
     free(pk_arr);
     free(s_arr);
@@ -765,7 +770,8 @@ void ccl_correlation_multipole_spline(ccl_cosmology *cosmo, double a,
     free(xi_arr0);
     free(xi_arr2);
     free(xi_arr4);
-    ccl_spline_free(xir_spline[0]);
+    ccl_spline_free(cosmo->data.rsd_splines[0]);
+    cosmo->data.rsd_splines[0] = NULL;
     *status = CCL_ERROR_MEMORY;
     strcpy(cosmo->status_message,
            "ccl_correlation.c: ccl_correlation_multipole_spline ran out of "
@@ -773,8 +779,8 @@ void ccl_correlation_multipole_spline(ccl_cosmology *cosmo, double a,
     return;
   }
 
-  xir_spline[2] = ccl_spline_init(N_ARR, s_arr, xi_arr4, xi_arr4[0], 0);
-  if (xir_spline[2] == NULL) {
+  cosmo->data.rsd_splines[2] = ccl_spline_init(N_ARR, s_arr, xi_arr4, xi_arr4[0], 0);
+  if (cosmo->data.rsd_splines[2] == NULL) {
     free(k_arr);
     free(pk_arr);
     free(s_arr);
@@ -782,14 +788,19 @@ void ccl_correlation_multipole_spline(ccl_cosmology *cosmo, double a,
     free(xi_arr0);
     free(xi_arr2);
     free(xi_arr4);
-    ccl_spline_free(xir_spline[0]);
-    ccl_spline_free(xir_spline[1]);
+    ccl_spline_free(cosmo->data.rsd_splines[0]);
+    cosmo->data.rsd_splines[0] = NULL;
+    ccl_spline_free(cosmo->data.rsd_splines[1]);
+    cosmo->data.rsd_splines[1] = NULL;
     *status = CCL_ERROR_MEMORY;
     strcpy(cosmo->status_message,
            "ccl_correlation.c: ccl_correlation_multipole_spline ran out of "
            "memory\n");
     return;
   }
+
+  // set the scale factor
+  cosmo->data.rsd_splines_scalefactor = a;
 
   free(k_arr);
   free(pk_arr);
@@ -800,21 +811,6 @@ void ccl_correlation_multipole_spline(ccl_cosmology *cosmo, double a,
   free(xi_arr4);
 
   ccl_check_status(cosmo, status);
-
-  return;
-}
-
-/*--------ROUTINE: ccl_correlation_3dRsd ------
-TASK: free the splines
-
-*/
-void ccl_correlation_multipole_spline_free() {
-  ccl_spline_free(xir_spline[0]);
-  ccl_spline_free(xir_spline[1]);
-  ccl_spline_free(xir_spline[2]);
-  xir_spline[0] = NULL;
-  xir_spline[1] = NULL;
-  xir_spline[2] = NULL;
 
   return;
 }
@@ -872,16 +868,19 @@ void ccl_correlation_3dRsd(ccl_cosmology *cosmo, double a, int n_s, double *s,
     free(xi_arr4);
 
   } else {
-    if (xir_spline[0] == NULL)
+    if ((cosmo->data.rsd_splines[0] == NULL) ||
+        (cosmo->data.rsd_splines[1] == NULL) ||
+        (cosmo->data.rsd_splines[2] == NULL) ||
+        (cosmo->data.rsd_splines_scalefactor != a))
       ccl_correlation_multipole_spline(cosmo, a, status);
 
     for (i = 0; i < n_s; i++)
       xi[i] = (1. + 2. / 3 * beta + 1. / 5 * beta * beta) *
-                  ccl_spline_eval(s[i], xir_spline[0]) -
+                  ccl_spline_eval(s[i], cosmo->data.rsd_splines[0]) -
               (4. / 3 * beta + 4. / 7 * beta * beta) *
-                  ccl_spline_eval(s[i], xir_spline[1]) *
+                  ccl_spline_eval(s[i], cosmo->data.rsd_splines[1]) *
                   gsl_sf_legendre_Pl(2, mu) +
-              8. / 35 * beta * beta * ccl_spline_eval(s[i], xir_spline[2]) *
+              8. / 35 * beta * beta * ccl_spline_eval(s[i], cosmo->data.rsd_splines[2]) *
                   gsl_sf_legendre_Pl(4, mu);
   }
 

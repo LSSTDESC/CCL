@@ -290,6 +290,7 @@ typedef struct ccl_data {
 
   // real-space splines for RSD
   SplPar* rsd_splines[3];
+  double rsd_splines_scalefactor;
 } ccl_data;
 
 /**

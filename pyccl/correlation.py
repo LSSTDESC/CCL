@@ -215,8 +215,8 @@ def correlation_pi_sigma(cosmo, a, beta, pie, sig, use_spline=True):
         cosmo (:obj:`Cosmology`): A Cosmology object.
         a (float): scale factor.
         pie (float): distance times cosine of the angle (in Mpc).
-        sig (float or array_like): distance(s) times sine of the
-angle (in Mpc).
+        sig (float or array-like): distance(s) times sine of the angle
+                                   (in Mpc).
         beta (float): growth rate divided by galaxy bias.
     Returns:
         Value(s) of the correlation function at the input pi and sigma.
@@ -241,11 +241,3 @@ angle (in Mpc).
     if scalar:
         return xis[0]
     return xis
-
-
-def correlation_spline_free():
-    """
-    Clear the global splines created from if 'use_spline' was set to True.
-
-    """
-    lib.correlation_multipole_spline_free_vec()
