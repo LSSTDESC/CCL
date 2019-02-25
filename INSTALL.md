@@ -301,6 +301,11 @@ $ cmake -DEXTERNAL_CLASS_PATH=/path/to/class ..
 ```
 the rest of the build process should be the same.
 
+Note: If you want to compile against a version of CLASS older than v2.7, set 
+the environment variable `CLASS_VERSION_PRE27=1` before configuring/compiling 
+the code. This will use the old call signatures of certain CLASS functions, 
+which changed in v2.7.
+
 ## Docker image installation
 
 The Dockerfile to generate a Docker image is included in the `CCL` repository as Dockerfile. This can be used to create an image that Docker can spool up as a virtual machine, allowing you to utilize `CCL` on any infrastructure with minimal hassle. The details of Docker and the installation process can be found at [https://www.docker.com/](https://www.docker.com/). Once Docker is installed, it is a simple process to create an image! In a terminal of your choosing (with Docker running), type the command `docker build -t ccl .` in the `CCL` directory.
