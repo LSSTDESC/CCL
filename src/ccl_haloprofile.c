@@ -5,7 +5,6 @@
 #include <gsl/gsl_integration.h>
 #include <gsl/gsl_sf_expint.h>
 #include "ccl.h"
-#include "ccl_params.h"
 #include "ccl_massfunc.h"
 #include "ccl_halomod.h"
 #include "ccl_haloprofile.h"
