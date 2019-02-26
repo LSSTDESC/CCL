@@ -223,29 +223,30 @@ def rho_x(cosmo, a, species, is_comoving=False):
     return _vectorize_fn4(
         lib.rho_x, lib.rho_x_vec, cosmo, a,
         species_types[species], int(is_comoving))
-        
+
+
 def Sig_MG(cosmo, a):
-	""" Redshift-dependent modification to Poisson equation for massless particles 
-	under modified gravity. 
-	Args:
-	    cosmo (:obj:`ccl.cosmology`): Cosmological parameters.
-	    a (float or array_like): Scale factor(s), normalized to 1 today.
-	Returns:
-	    Sig_MG (float or array_like): Modification to Poisson equation 
-	    under modified gravity at a scale factor. 
-	"""
-	
-	return _vectorize_fn(lib.Sig_MG, lib.Sig_MG_vec, cosmo, a)
-	
-                          
+    """ Redshift-dependent modification to Poisson equation for massless particles
+    under modified gravity.
+    Args:
+        cosmo (:obj:`ccl.cosmology`): Cosmological parameters.
+        a (float or array_like): Scale factor(s), normalized to 1 today.
+    Returns:
+        Sig_MG (float or array_like): Modification to Poisson equation
+        under modified gravity at a scale factor.
+    """
+
+    return _vectorize_fn(lib.Sig_MG, lib.Sig_MG_vec, cosmo, a)
+
+
 def mu_MG(cosmo, a):
-	""" Redshift-dependent modification to Poisson equation under modified gravity. 
-	Args:
-	    cosmo (:obj:`ccl.cosmology`): Cosmological parameters.
-	    a (float or array_like): Scale factor(s), normalized to 1 today.
-	Returns:
-	    mu_MG (float or array_like): Modification to Poisson equation 
-	    under modified gravity at a scale factor. 
-	"""
-	
-	return _vectorize_fn(lib.mu_MG, lib.mu_MG_vec, cosmo, a)
+    """ Redshift-dependent modification to Poisson equation under modified gravity.
+    Args:
+        cosmo (:obj:`ccl.cosmology`): Cosmological parameters.
+        a (float or array_like): Scale factor(s), normalized to 1 today.
+    Returns:
+        mu_MG (float or array_like): Modification to Poisson equation
+        under modified gravity at a scale factor.
+    """
+
+    return _vectorize_fn(lib.mu_MG, lib.mu_MG_vec, cosmo, a)

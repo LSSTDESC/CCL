@@ -104,15 +104,17 @@ baryons_power_spectrum_types = {
     'bcm':         lib.bcm
 }
 
-#modified_gravity_types = {
+# modified_gravity_types = {
 #    'GR':   lib.GR,
-#    'muSigma_MG':  lib.muSigma_MG 
-#}
-"""dict: Types of modified gravity models. The strings represent possible choices the user can specify for different modified gravity specifications.
-
+#    'muSigma_MG':  lib.muSigma_MG
+# }
+"""dict: Types of modified gravity models.
+The strings represent possible choices the user can specify
+for different modified gravity specifications.
 """
 
-# List which transfer functions can be used with the muSigma_MG parameterisation of modified gravity
+# List which transfer functions can be used with the muSigma_MG
+# parameterisation of modified gravity
 valid_muSig_transfers = {'boltzmann_class', 'class'}
 
 mass_function_types = {
@@ -475,8 +477,9 @@ class Cosmology(object):
                              "length 3.")
 
         # Check if any compulsory parameters are not set
-        compul = [Omega_c, Omega_b, Omega_k, w0, wa, h, norm_pk, n_s, mu_0, sigma_0]
-        names = ['Omega_c', 'Omega_b', 'Omega_k', 'w0', 'wa', 
+        compul = [Omega_c, Omega_b, Omega_k, w0, wa, h, norm_pk,
+                  n_s, mu_0, sigma_0]
+        names = ['Omega_c', 'Omega_b', 'Omega_k', 'w0', 'wa',
                  'h', 'norm_pk', 'n_s', 'mu_0', 'sigma_0']
         for nm, item in zip(names, compul):
             if item is None:
@@ -490,21 +493,20 @@ class Cosmology(object):
         if nz_mg == -1:
             # Create ccl_parameters without modified growth
 
-            self._params, status \
-            = lib.parameters_create_nu( Omega_c, Omega_b, Omega_k, Neff, 
-                                             w0, wa, h, norm_pk, 
-                                             n_s, bcm_log10Mc, bcm_etab, bcm_ks, 
-                                             mu_0, sigma_0, mnu_types[mnu_type], 
-                                             m_nu, status ) 
-                                             
+            self._params, status = lib.parameters_create_nu(
+               Omega_c, Omega_b, Omega_k, Neff,
+               w0, wa, h, norm_pk,
+               n_s, bcm_log10Mc, bcm_etab, bcm_ks,
+               mu_0, sigma_0, mnu_types[mnu_type],
+               m_nu, status)
         else:
             # Create ccl_parameters with modified growth arrays
-            self._params, status \
-            = lib.parameters_create_nu_vec( Omega_c, Omega_b, Omega_k, Neff, 
-                                             w0, wa, h, norm_pk, 
-                                             n_s, bcm_log10Mc, bcm_etab, bcm_ks, 
-                                             mu_0, sigma_0, z_mg, df_mg, 
-                                             mnu_types[mnu_type], m_nu, status )
+            self._params, status = lib.parameters_create_nu_vec(
+               Omega_c, Omega_b, Omega_k, Neff,
+               w0, wa, h, norm_pk,
+               n_s, bcm_log10Mc, bcm_etab, bcm_ks,
+               mu_0, sigma_0, z_mg, df_mg,
+               mnu_types[mnu_type], m_nu, status)
         check(status)
 
         if Omega_g is not None:
@@ -564,7 +566,6 @@ class Cosmology(object):
             "%s=%s" % (k, v)
             for k, v in self._params_init_kwargs.items()
             if k not in ['m_nu', 'mnu_type', 'z_mg', 'df_mg'])
-
 
         if hasattr(self._params_init_kwargs['m_nu'], '__len__'):
             string += ", m_nu=[%s, %s, %s]" % tuple(
