@@ -117,7 +117,7 @@ CCL_ClWorkspace *ccl_cl_workspace_new(int lmax,int l_limber,
     //Don't go further than lmaw
     w->l_arr[w->n_ls-1]=w->lmax;
   }
-  
+
   return w;
 }
 
@@ -142,7 +142,7 @@ static double integrand_wl(double chip,void *params)
   double a=ccl_scale_factor_of_chi(p->cosmo,chip, p->status);
   double z=1./a-1;
   double pz=ccl_spline_eval(z,p->spl_pz);
-  double h=p->cosmo->params.h*ccl_h_over_h0(p->cosmo,a, p->status)/CLIGHT_HMPC;
+  double h=p->cosmo->params.h*ccl_h_over_h0(p->cosmo,a, p->status)/ccl_constants.CLIGHT_HMPC;
 
   if(chi==0)
     return h*pz;
@@ -162,7 +162,7 @@ static int window_lensing(double chi,ccl_cosmology *cosmo,SplPar *spl_pz,double 
   double result,eresult;
   IntLensPar ip;
   gsl_function F;
-  gsl_integration_workspace *w=gsl_integration_workspace_alloc(ccl_gsl->N_ITERATION);
+  gsl_integration_workspace *w=gsl_integration_workspace_alloc(cosmo->gsl_params.N_ITERATION);
 
   ip.chi=chi;
   ip.cosmo=cosmo;
@@ -174,8 +174,8 @@ static int window_lensing(double chi,ccl_cosmology *cosmo,SplPar *spl_pz,double 
   //   w_L(chi) = Integral[ dN/dchi(chi') * f(chi'-chi)/f(chi') , chi < chi' < chi_horizon ]
   // Where f(chi) is the comoving angular distance (which is just chi for zero curvature).
   gslstatus=gsl_integration_qag(&F, chi, chi_max, 0,
-                                ccl_gsl->INTEGRATION_EPSREL, ccl_gsl->N_ITERATION,
-                                ccl_gsl->INTEGRATION_GAUSS_KRONROD_POINTS,
+                                cosmo->gsl_params.INTEGRATION_EPSREL, cosmo->gsl_params.N_ITERATION,
+                                cosmo->gsl_params.INTEGRATION_GAUSS_KRONROD_POINTS,
                                 w, &result, &eresult);
   *win=result;
   gsl_integration_workspace_free(w);
@@ -207,7 +207,7 @@ static double integrand_mag(double chip,void *params)
   double z=1./a-1;
   double pz=ccl_spline_eval(z,p->spl_pz);
   double sz=ccl_spline_eval(z,p->spl_sz);
-  double h=p->cosmo->params.h*ccl_h_over_h0(p->cosmo,a, p->status)/CLIGHT_HMPC;
+  double h=p->cosmo->params.h*ccl_h_over_h0(p->cosmo,a, p->status)/ccl_constants.CLIGHT_HMPC;
 
   if(chi==0)
     return h*pz*(1-2.5*sz);
@@ -229,7 +229,7 @@ static int window_magnification(double chi,ccl_cosmology *cosmo,SplPar *spl_pz,S
   double result,eresult;
   IntMagPar ip;
   gsl_function F;
-  gsl_integration_workspace *w=gsl_integration_workspace_alloc(ccl_gsl->N_ITERATION);
+  gsl_integration_workspace *w=gsl_integration_workspace_alloc(cosmo->gsl_params.N_ITERATION);
 
   ip.chi=chi;
   ip.cosmo=cosmo;
@@ -243,8 +243,8 @@ static int window_magnification(double chi,ccl_cosmology *cosmo,SplPar *spl_pz,S
   // Where f(chi) is the comoving angular distance (which is just chi for zero curvature)
   // and s(chi) is the magnification bias parameter.
   gslstatus=gsl_integration_qag(&F, chi, chi_max, 0,
-                                ccl_gsl->INTEGRATION_EPSREL, ccl_gsl->N_ITERATION,
-                                ccl_gsl->INTEGRATION_GAUSS_KRONROD_POINTS,
+                                cosmo->gsl_params.INTEGRATION_EPSREL, cosmo->gsl_params.N_ITERATION,
+                                cosmo->gsl_params.INTEGRATION_GAUSS_KRONROD_POINTS,
                                 w, &result, &eresult);
   *win=result;
   gsl_integration_workspace_free(w);
@@ -265,7 +265,7 @@ static void clt_init_nz(CCL_ClTracer *clt,ccl_cosmology *cosmo,
   gsl_function F;
   double nz_norm,nz_enorm;
   double *nz_normalized;
-  
+
   //Find redshift range where the N(z) has support
   get_support_interval(nz_n,z_n,n,CCL_FRAC_RELEVANT,&(clt->zmin),&(clt->zmax));
   clt->chimax=ccl_comoving_radial_distance(cosmo,1./(1+clt->zmax),status);
@@ -285,15 +285,15 @@ static void clt_init_nz(CCL_ClTracer *clt,ccl_cosmology *cosmo,
       return;
     }
   }
-  
+
   if(*status==0) {
-    gsl_integration_workspace *w=gsl_integration_workspace_alloc(ccl_gsl->N_ITERATION);
+    gsl_integration_workspace *w=gsl_integration_workspace_alloc(cosmo->gsl_params.N_ITERATION);
     F.function=&speval_bis;
     F.params=clt->spl_nz;
     //Here we're just integrating the N(z) to normalize it to unit probability.
     gslstatus=gsl_integration_qag(&F, z_n[0], z_n[nz_n-1], 0,
-				  ccl_gsl->INTEGRATION_EPSREL, ccl_gsl->N_ITERATION,
-				  ccl_gsl->INTEGRATION_GAUSS_KRONROD_POINTS,
+				  cosmo->gsl_params.INTEGRATION_EPSREL, cosmo->gsl_params.N_ITERATION,
+				  cosmo->gsl_params.INTEGRATION_GAUSS_KRONROD_POINTS,
 				  w, &nz_norm, &nz_enorm);
     gsl_integration_workspace_free(w);
     if(gslstatus!=GSL_SUCCESS) {
@@ -302,7 +302,7 @@ static void clt_init_nz(CCL_ClTracer *clt,ccl_cosmology *cosmo,
       ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: clt_init_nz(): integration error when normalizing N(z)\n");
     }
   }
-  
+
   if(*status==0) {
     for(int ii=0;ii<nz_n;ii++)
       nz_normalized[ii]=n[ii]/nz_norm;
@@ -313,7 +313,7 @@ static void clt_init_nz(CCL_ClTracer *clt,ccl_cosmology *cosmo,
       ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: clt_init_nz(): error initializing normalized spline for N(z)\n");
     }
   }
-  
+
   free(nz_normalized);
 }
 
@@ -421,7 +421,7 @@ static void clt_init_wL(CCL_ClTracer *clt,ccl_cosmology *cosmo,
   double zmax=clt->spl_nz->xf;
   double chimax=ccl_comoving_radial_distance(cosmo,1./(1+zmax),status);
   //TODO: The interval in chi (5. Mpc) should be made a macro
-  
+
   //In this case we need to integrate all the way to z=0. Reset zmin and chimin
   clt->zmin=0;
   clt->chimin=0;
@@ -433,7 +433,7 @@ static void clt_init_wL(CCL_ClTracer *clt,ccl_cosmology *cosmo,
     ccl_cosmology_set_status_message(cosmo,
 				     "ccl_cls.c: clt_init_wL(): Error creating linear spacing in chi\n");
   }
-  
+
   if(*status==0) {
     y=(double *)malloc(nchi*sizeof(double));
     if(y==NULL) {
@@ -451,7 +451,7 @@ static void clt_init_wL(CCL_ClTracer *clt,ccl_cosmology *cosmo,
       ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: clt_init_wL(): error computing lensing window\n");
     }
   }
-  
+
   if(*status==0) {
     clt->spl_wL=ccl_spline_init(nchi,x,y,y[0],0);
     if(clt->spl_wL==NULL) {
@@ -530,8 +530,8 @@ static CCL_ClTracer *cl_tracer(ccl_cosmology *cosmo,int tracer_type,
 
   if(*status==0) {
     clt->tracer_type=tracer_type;
-    
-    double hub=cosmo->params.h*ccl_h_over_h0(cosmo,1.,status)/CLIGHT_HMPC;
+
+    double hub=cosmo->params.h*ccl_h_over_h0(cosmo,1.,status)/ccl_constants.CLIGHT_HMPC;
     clt->prefac_lensing=1.5*hub*hub*cosmo->params.Omega_m;
 
     if(tracer_type==ccl_number_counts_tracer)
@@ -557,7 +557,7 @@ static CCL_ClTracer *cl_tracer(ccl_cosmology *cosmo,int tracer_type,
     free(clt);
     clt=NULL;
   }
-    
+
   return clt;
 }
 
@@ -663,7 +663,7 @@ static double f_dens(double a,ccl_cosmology *cosmo,CCL_ClTracer *clt, int * stat
   double z=1./a-1;
   double pz=ccl_spline_eval(z,clt->spl_nz);
   double bz=ccl_spline_eval(z,clt->spl_bz);
-  double h=cosmo->params.h*ccl_h_over_h0(cosmo,a,status)/CLIGHT_HMPC;
+  double h=cosmo->params.h*ccl_h_over_h0(cosmo,a,status)/ccl_constants.CLIGHT_HMPC;
 
   return pz*bz*h;
 }
@@ -673,7 +673,7 @@ static double f_rsd(double a,ccl_cosmology *cosmo,CCL_ClTracer *clt, int * statu
   double z=1./a-1;
   double pz=ccl_spline_eval(z,clt->spl_nz);
   double fg=ccl_growth_rate(cosmo,a,status);
-  double h=cosmo->params.h*ccl_h_over_h0(cosmo,a,status)/CLIGHT_HMPC;
+  double h=cosmo->params.h*ccl_h_over_h0(cosmo,a,status)/ccl_constants.CLIGHT_HMPC;
 
   return pz*fg*h;
 }
@@ -743,7 +743,7 @@ static double f_IA_NLA(double a,double chi,ccl_cosmology *cosmo,CCL_ClTracer *cl
     double pz=ccl_spline_eval(z,clt->spl_nz);
     double ba=ccl_spline_eval(z,clt->spl_ba);
     double rf=ccl_spline_eval(z,clt->spl_rf);
-    double h=cosmo->params.h*ccl_h_over_h0(cosmo,a,status)/CLIGHT_HMPC;
+    double h=cosmo->params.h*ccl_h_over_h0(cosmo,a,status)/ccl_constants.CLIGHT_HMPC;
 
     return pz*ba*rf*h/(chi*chi);
   }
@@ -765,7 +765,7 @@ static double transfer_wl(int l,double k,
     double f_all=f_lensing(a,chi,cosmo,clt,status);
     if(clt->has_intrinsic_alignment)
       f_all+=f_IA_NLA(a,chi,cosmo,clt,status);
-    
+
     ret=f_all;
   }
 
@@ -835,7 +835,7 @@ static double cl_integrand(double lk,void *params)
   double chi=(p->w->l_arr[p->il]+0.5)/k;
   double a=ccl_scale_factor_of_chi(p->cosmo,chi,p->status);
   double pk=ccl_nonlin_matter_power(p->cosmo,k,a,p->status);
-  
+
   return k*pk*d1*d2;
 }
 
@@ -850,11 +850,11 @@ static void get_k_interval(ccl_cosmology *cosmo,CCL_ClWorkspace *w,
 {
   double chimin,chimax;
   int cut_low_1=0,cut_low_2=0;
-  
+
   //Define a minimum distance only if no lensing is needed
   if((clt1->tracer_type==ccl_number_counts_tracer) && (clt1->has_magnification==0)) cut_low_1=1;
   if((clt2->tracer_type==ccl_number_counts_tracer) && (clt2->has_magnification==0)) cut_low_2=1;
-  
+
   if(cut_low_1) {
     if(cut_low_2) {
       chimin=fmax(clt1->chimin,clt2->chimin);
@@ -870,15 +870,15 @@ static void get_k_interval(ccl_cosmology *cosmo,CCL_ClWorkspace *w,
     chimax=clt2->chimax;
   }
   else {
-    chimin=0.5*(l+0.5)/ccl_splines->K_MAX;
-    chimax=2*(l+0.5)/ccl_splines->K_MIN;
+    chimin=0.5*(l+0.5)/cosmo->spline_params.K_MAX;
+    chimax=2*(l+0.5)/cosmo->spline_params.K_MIN;
   }
-  
+
   if(chimin<=0)
-    chimin=0.5*(l+0.5)/ccl_splines->K_MAX;
-  
-  *lkmax=log10(fmin( ccl_splines->K_MAX  ,2  *(l+0.5)/chimin));
-  *lkmin=log10(fmax( ccl_splines->K_MIN  ,0.5*(l+0.5)/chimax));
+    chimin=0.5*(l+0.5)/cosmo->spline_params.K_MAX;
+
+  *lkmax=log10(fmin( cosmo->spline_params.K_MAX  ,2  *(l+0.5)/chimin));
+  *lkmin=log10(fmax( cosmo->spline_params.K_MIN  ,0.5*(l+0.5)/chimax));
 }
 
 //Compute angular power spectrum between two bins
@@ -894,7 +894,7 @@ static double ccl_angular_cl_native(ccl_cosmology *cosmo,CCL_ClWorkspace *cw,int
   double result=0,eresult;
   double lkmin,lkmax;
   gsl_function F;
-  gsl_integration_workspace *w=gsl_integration_workspace_alloc(ccl_gsl->N_ITERATION);
+  gsl_integration_workspace *w=gsl_integration_workspace_alloc(cosmo->gsl_params.N_ITERATION);
 
   ipar.il=il;
   ipar.cosmo=cosmo;
@@ -910,8 +910,8 @@ static double ccl_angular_cl_native(ccl_cosmology *cosmo,CCL_ClWorkspace *cw,int
   // Note that we use log10(k) as an integration variable, and the ell-dependent prefactor is included
   // at the end of this function.
   gslstatus=gsl_integration_qag(&F, lkmin, lkmax, 0,
-                                ccl_gsl->INTEGRATION_LIMBER_EPSREL, ccl_gsl->N_ITERATION,
-                                ccl_gsl->INTEGRATION_LIMBER_GAUSS_KRONROD_POINTS,
+                                cosmo->gsl_params.INTEGRATION_LIMBER_EPSREL, cosmo->gsl_params.N_ITERATION,
+                                cosmo->gsl_params.INTEGRATION_LIMBER_GAUSS_KRONROD_POINTS,
                                 w, &result, &eresult);
   gsl_integration_workspace_free(w);
 
@@ -919,10 +919,10 @@ static double ccl_angular_cl_native(ccl_cosmology *cosmo,CCL_ClWorkspace *cw,int
   // If so, try another integration function, more robust but potentially slower
   if(gslstatus == GSL_EROUND) {
     ccl_raise_gsl_warning(gslstatus, "ccl_cls.c: ccl_angular_cl_native(): Default GSL integration failure, attempting backup method.");
-    gsl_integration_cquad_workspace *w_cquad= gsl_integration_cquad_workspace_alloc (ccl_gsl->N_ITERATION);
+    gsl_integration_cquad_workspace *w_cquad= gsl_integration_cquad_workspace_alloc (cosmo->gsl_params.N_ITERATION);
     size_t nevals=0;
     gslstatus=gsl_integration_cquad(&F, lkmin, lkmax, 0,
-				    ccl_gsl->INTEGRATION_LIMBER_EPSREL,
+				    cosmo->gsl_params.INTEGRATION_LIMBER_EPSREL,
 				    w_cquad, &result, &eresult, &nevals);
     gsl_integration_cquad_workspace_free(w_cquad);
   }
@@ -947,7 +947,7 @@ void ccl_angular_cls(ccl_cosmology *cosmo,CCL_ClWorkspace *w,
   int ii,do_angpow;
   double *l_nodes,*cl_nodes;
   SplPar *spcl_nodes;
-  
+
   //First check if ell range is within workspace
   for(ii=0;ii<nl_out;ii++) {
     if(l_out[ii]>w->lmax) {
@@ -990,7 +990,7 @@ void ccl_angular_cls(ccl_cosmology *cosmo,CCL_ClWorkspace *w,
 #ifndef HAVE_ANGPOW
     do_angpow=0;
 #endif //HAVE_ANGPOW
-  
+
     //Resort to Limber if we have lensing (this will hopefully only be temporary)
     if(clt1->tracer_type==ccl_weak_lensing_tracer || clt2->tracer_type==ccl_weak_lensing_tracer ||
        clt1->has_magnification || clt2->has_magnification) {
@@ -1017,12 +1017,12 @@ void ccl_angular_cls(ccl_cosmology *cosmo,CCL_ClWorkspace *w,
       ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: ccl_cl_angular_cls(); memory allocation\n");
     }
   }
-  
+
   if(*status==0) {
     for(ii=0;ii<nl_out;ii++)
       cl_out[ii]=ccl_spline_eval((double)(l_out[ii]),spcl_nodes);
   }
-  
+
   //Cleanup
   ccl_spline_free(spcl_nodes);
   free(cl_nodes);
@@ -1084,7 +1084,7 @@ double ccl_get_tracer_fa(ccl_cosmology *cosmo,CCL_ClTracer *clt,double a,int fun
     x=ccl_comoving_radial_distance(cosmo,a,status); //x-variable is comoving distance for lensing kernels
   else
     x=1./a-1; //x-variable is redshift by default
-  
+
   return ccl_spline_eval(x,spl);
 }
 
@@ -1098,7 +1098,7 @@ int ccl_get_tracer_fas(ccl_cosmology *cosmo,CCL_ClTracer *clt,int na,double *a,d
     ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: inconsistent combination of tracer and internal function to be evaluated");
     return -1;
   }
-  
+
   switch(func_code) {
   case ccl_trf_nz :
     spl=clt->spl_nz;
@@ -1122,7 +1122,7 @@ int ccl_get_tracer_fas(ccl_cosmology *cosmo,CCL_ClTracer *clt,int na,double *a,d
     spl=clt->spl_wM;
     break;
   }
-  
+
   int compchi = (func_code==ccl_trf_wL) || (func_code==ccl_trf_wM);
 
   int ia;

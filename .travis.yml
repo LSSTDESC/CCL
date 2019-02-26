@@ -1,49 +1,41 @@
-language: python
-cache:
-  directories:
-  - "$TRAVIS_BUILD_DIR/build/GSL/src"
-  - "$TRAVIS_BUILD_DIR/build/FFTW/src"
-  - "$TRAVIS_BUILD_DIR/build/SWIG/src"
-  - "$TRAVIS_BUILD_DIR/build/CLASS/src"
-  - "$TRAVIS_BUILD_DIR/build/ANGPOW/src"
-  - "$HOME/miniconda"
+language: generic
+
 matrix:
   include:
   - os: linux
-    python: 2.7
     sudo: required
     env: TOXENV=py27
   - os: linux
     sudo: required
-    python: 3.6
     env: TOXENV=py36
   - os: osx
     osx_image: xcode9.4
-    language: generic
     env: TOXENV=py27
   - os: osx
     osx_image: xcode9.4
-    language: generic
     env: TOXENV=py36
+
 install:
-- "./.travis/install.sh"
-- if ! [[ $TRAVIS_OS_NAME == "linux" ]]; then source $HOME/miniconda/bin/activate;
-  fi
-- if ! [[ $TRAVIS_OS_NAME == "linux" ]]; then hash -r ; fi
-- if ! [[ $TRAVIS_OS_NAME == "linux" ]]; then source activate test-environment ; fi
-- export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
-- export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/usr/local/lib/pkgconfig
-- cmake --version
-- python --version
+  - "./.travis/install.sh"
+  # this is a hack for conda osx compilers
+  - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then export CONDA_BUILD_SYSROOT=/; fi
+  - export PATH=$HOME/miniconda/bin:$PATH
+  - source activate test-environment
+  # this is a hack for conda osx compilers
+  - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then export DYLD_FALLBACK_LIBRARY_PATH=${CONDA_PREFIX}/lib; fi
+
 script:
-- flake8 pyccl
-- python setup.py build
-- nosetests tests/run_tests.py --all --debug --detailed-errors --verbose --process-restartworker
-  --with-coverage --cover-package=pyccl
-- make -Cbuild && sudo make -Cbuild install
-- check_ccl
+  - flake8 pyccl
+  - mkdir -p build && cd build && cmake .. && make && sudo make install && cd ..
+  - ./build/check_ccl
+  - rm -rf build
+  - python setup.py install
+  - nosetests tests/run_tests.py --all --debug --detailed-errors --verbose --process-restartworker
+    --with-coverage --cover-package=pyccl
+
 after_success:
-- coveralls
+  - coveralls
+
 deploy:
   provider: pypi
   user: desc-ccl

@@ -2,7 +2,6 @@
 
 %{
 /* put additional #include here */
-#include "../include/ccl_params.h"
 #include "../include/ccl_redshifts.h"
 %}
 
@@ -25,7 +24,7 @@
 
 // Vectorised version of ccl_specs_dNdz_tomog()
 void dNdz_tomog_vec(double bin_zmin, double bin_zmax,
-                          pz_info* user_pz_info, dNdz_info* user_dN_info, 
+                          pz_info* user_pz_info, dNdz_info* user_dN_info,
                           double* z, int nz, int nout, double* output, int *status) {
     double val = 0.;
 
@@ -33,7 +32,7 @@ void dNdz_tomog_vec(double bin_zmin, double bin_zmax,
     for(int i=0; i < nz; i++) {
 
         // Calculate dNdz value
-        ccl_dNdz_tomog(z[i], bin_zmin, bin_zmax, user_pz_info, user_dN_info, 
+        ccl_dNdz_tomog(z[i], bin_zmin, bin_zmax, user_pz_info, user_dN_info,
                           &val, status);
         // Check status
         if (*status != 0){
@@ -76,7 +75,7 @@ static double call_py_photoz_fn(double z_ph, double z_s, void *py_func_obj, int 
     // Call Python function and dereference argument list
     result = PyObject_CallObject(func, arglist); // PyEval_CallObject
     Py_DECREF(arglist);
-    
+
     // Check result; raise error if the function call failed
     if(result){
         p = PyFloat_AsDouble(result);

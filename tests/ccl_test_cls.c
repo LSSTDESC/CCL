@@ -1,5 +1,4 @@
 #include "ccl.h"
-#include "../include/ccl_params.h"
 #include "ctest.h"
 #include <stdlib.h>
 #include <stdio.h>
@@ -59,9 +58,9 @@ static void compare_cls(char *compare_type,struct cls_data * data)
 
   double epsrel_save;
   if(!strcmp(compare_type,"histo")) { //This is needed for the histogrammed N(z) in order to pass the IA tests
-    epsrel_save=ccl_gsl->INTEGRATION_LIMBER_EPSREL;
-    ccl_gsl->INTEGRATION_LIMBER_EPSREL=2.5E-5;
-    ccl_gsl->INTEGRATION_EPSREL=2.5E-5;
+    epsrel_save = cosmo->gsl_params.INTEGRATION_LIMBER_EPSREL;
+    cosmo->gsl_params.INTEGRATION_LIMBER_EPSREL = 2.5E-5;
+    cosmo->gsl_params.INTEGRATION_EPSREL = 2.5E-5;
     ccl_set_debug_policy(CCL_DEBUG_MODE_OFF);
   }
 
@@ -222,7 +221,7 @@ static void compare_cls(char *compare_type,struct cls_data * data)
   fi_lc_2=fopen(fname,"r"); ASSERT_NOT_NULL(fi_lc_2);
   sprintf(fname,"tests/benchmark/codecomp_step2_outputs/run_log_cl_cc.txt");
   fi_cc=fopen(fname,"r"); ASSERT_NOT_NULL(fi_cc);
-  
+
   int *ells=malloc(NELLS*sizeof(int));
   double *cls_dd_11_b=malloc(NELLS*sizeof(double));
   double *cls_dd_12_b=malloc(NELLS*sizeof(double));
@@ -488,7 +487,7 @@ static void compare_cls(char *compare_type,struct cls_data * data)
   if (status) printf("%s\n",cosmo->status_message);
   ccl_angular_cls(cosmo,w,tr_cl,tr_cl,NELLS,ells,cls_cc_h,&status);
   if (status) printf("%s\n",cosmo->status_message);
-  
+
   double fraction_failed=0;
   for(int ii=2;ii<w->n_ls-1;ii++) {
     int l=w->l_arr[ii];
@@ -635,7 +634,7 @@ static void compare_cls(char *compare_type,struct cls_data * data)
     ASSERT_TRUE(fabs(cl_dl_21_h-cl_dl_21)<el_dl_21);
     ASSERT_TRUE(fabs(cl_dl_22_h-cl_dl_22)<el_dl_22);
     //  comparing galaxy-intrinsic wrt full GGL error, CCL needs to be further improved to avoid spikes
-    ASSERT_TRUE(fabs(cl_di_11_h-cl_di_11)<el_dltot_11); 
+    ASSERT_TRUE(fabs(cl_di_11_h-cl_di_11)<el_dltot_11);
     ASSERT_TRUE(fabs(cl_di_12_h-cl_di_12)<el_dltot_12);
     ASSERT_TRUE(fabs(cl_di_21_h-cl_di_21)<el_dltot_21);
     ASSERT_TRUE(fabs(cl_di_22_h-cl_di_22)<el_dltot_22);
@@ -657,29 +656,29 @@ static void compare_cls(char *compare_type,struct cls_data * data)
   }
   ccl_cl_workspace_free(w);
   if(!strcmp(compare_type,"histo")) {
-    ccl_gsl->INTEGRATION_EPSREL=epsrel_save;
-    ccl_gsl->INTEGRATION_LIMBER_EPSREL=epsrel_save;
+    cosmo->gsl_params.INTEGRATION_EPSREL = epsrel_save;
+    cosmo->gsl_params.INTEGRATION_LIMBER_EPSREL = epsrel_save;
     ccl_set_debug_policy(CCL_DEBUG_MODE_WARNING);
   }
-    
+
   free(ells);
-  free(cls_dd_11_b); free(cls_dd_12_b); free(cls_dd_22_b); 
+  free(cls_dd_11_b); free(cls_dd_12_b); free(cls_dd_22_b);
   free(cls_dl_12_b);free(cls_dl_21_b);free(cls_dl_11_b);free(cls_dl_22_b);
   free(cls_di_12_b);free(cls_di_21_b);free(cls_di_11_b);free(cls_di_22_b);
   free(cls_dc_1_b); free(cls_dc_2_b);
-  free(cls_ll_11_b); free(cls_ll_12_b); free(cls_ll_22_b); 
-  free(cls_li_11_b); free(cls_li_12_b); free(cls_li_22_b); 
-  free(cls_ii_11_b); free(cls_ii_12_b); free(cls_ii_22_b); 
+  free(cls_ll_11_b); free(cls_ll_12_b); free(cls_ll_22_b);
+  free(cls_li_11_b); free(cls_li_12_b); free(cls_li_22_b);
+  free(cls_ii_11_b); free(cls_ii_12_b); free(cls_ii_22_b);
   free(cls_lc_1_b); free(cls_lc_2_b);
   free(cls_cc_b);
 
-  free(cls_dd_11_h); free(cls_dd_12_h); free(cls_dd_22_h); 
+  free(cls_dd_11_h); free(cls_dd_12_h); free(cls_dd_22_h);
   free(cls_dl_12_h);free(cls_dl_11_h);free(cls_dl_21_h);free(cls_dl_22_h);
   free(cls_dltot_12_h);free(cls_dltot_11_h);free(cls_dltot_21_h);free(cls_dltot_22_h);
   free(cls_dc_1_h); free(cls_dc_2_h);
-  free(cls_ll_11_h); free(cls_ll_12_h); free(cls_ll_22_h); 
-  free(cls_lltot_11_h); free(cls_lltot_12_h); free(cls_lltot_22_h); 
-  free(cls_lli_11_h); free(cls_lli_12_h); free(cls_lli_21_h); free(cls_lli_22_h); 
+  free(cls_ll_11_h); free(cls_ll_12_h); free(cls_ll_22_h);
+  free(cls_lltot_11_h); free(cls_lltot_12_h); free(cls_lltot_22_h);
+  free(cls_lli_11_h); free(cls_lli_12_h); free(cls_lli_21_h); free(cls_lli_22_h);
   free(cls_lc_1_h); free(cls_lc_2_h);
   free(cls_cc_h);
 
