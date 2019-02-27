@@ -192,7 +192,7 @@ where $f_0(a)$ is the growth rate in the background model. Note that this model 
 Theoretical predictions for cosmological observables such as galaxy clustering, gravitational lensing and cluster mass functions rely on knowledge of the distribution of matter from small to large scales in the Universe. To second order, the distribution of matter density fluctuations at a given wavenumber ${\bf k}$ and redshift is described by the matter power spectrum, $P(k,z)$, defined as
 \begin{equation}
   \langle \tilde\delta({\bf k},z)\tilde\delta({\bf k}^\prime,z)\rangle = (2\pi)^3P(k,z)\
-\delta_D^3({\bf k}-{\bf k}')
+\delta_D^3({\bf k}+{\bf k}')
 \end{equation}
 where $\tilde\delta({\bf k})$ is the Fourier component of the density field at a given wavenumber and $\delta_D^3$ is the Dirac delta function. $P(k,z)$ has units of volume and a dimensionless analogue is often defined as
 \begin{equation}
@@ -270,7 +270,7 @@ where $_{-s}a_{\ell m}$ is defined as
   \,_{-s}a_{\ell m}=\int d\nv\,a^*(\nv)\,_{-s}Y^*_{\ell m}(\nv).
 \end{equation}
 
-In what follows we will focus on scalar ($s=0$) quantities such as the overdensity of source number counts or the lensing convergence, and on spin-2 fields such as the lensing shear. We will also distinguish between {\sl tracers} (fields observed on the sky, such as number counts in a redshift bin, shear, or CMB temperature fluctuations) and {\sl contributions} to the total observed fluctuations of these tracers (such as the biased matter density term in number counts, redshift-space distortions, magnification, etc.).
+In what follows we will focus on scalar ($s=0$) quantities such as the overdensity of source number counts or the CMB lensing convergence, and on spin-2 fields such as the lensing shear. We will also distinguish between {\sl tracers} (fields observed on the sky, such as number counts in a redshift bin, shear, or CMB temperature fluctuations) and {\sl contributions} to the total observed fluctuations of these tracers (such as the biased matter density term in number counts, redshift-space distortions, magnification, etc.).
 
 \subsubsection{Angular power spectra}\label{sssec:2pt.pspec}
 
@@ -284,7 +284,7 @@ where $a_{\ell m}$ and $b_{\ell m}$ can be either the $E$-mode or $B$-mode compo
   C^{ab}_\ell=4\pi\int_0^\infty \frac{dk}{k}\,\mathcal{P}_\Phi(k)\Delta^a_\ell(k)\Delta^b_\ell(k),
   \label{eq:cls}
 \end{equation}
-where $\mathcal{P}_\Phi(k)$ is the dimensionless power spectrum of the primordial curvature perturbations, and $\Delta^a$ and $\Delta^b$ are the transfer functions corresponding to these tracers. Each transfer function will receive contributions from different terms. \ccl supports three types of tracers: number counts, galaxy shape distortions and lensing convergence, with the following contributions\footnote{Note that we use units where the speed of light is $c=1$ throughout.}:
+where $\mathcal{P}_\Phi(k)$ is the dimensionless power spectrum of the primordial curvature perturbations, and $\Delta^a$ and $\Delta^b$ are the transfer functions corresponding to these tracers. Each transfer function will receive contributions from different terms. \ccl supports three types of tracers: number counts, galaxy shape distortions and CMB lensing convergence, with the following contributions\footnote{Note that we use units where the speed of light is $c=1$ throughout.}:
 
 \paragraph{\bf Number counts.} The transfer function for number counts can be decomposed into three contributions: $\Delta^{\rm NC}=\Delta^{\rm D}+\Delta^{\rm RSD}+\Delta^{\rm M}$, where
 \begin{itemize}
@@ -318,7 +318,7 @@ where $\mathcal{P}_\Phi(k)$ is the dimensionless power spectrum of the primordia
         \end{equation}
         Here, $s(z)$ is the logarithmic derivative of the number of sources with magnitude limit, and $r(\chi)$ is the angular comoving distance (see Eq. \ref{eq:angdist}).
 \end{itemize}
-Note that \ccl does not currently compute relativistic corrections to number counts \citep{2011PhRvD..84d3516C,2011PhRvD..84f3505B}. Although these will be included in the future, their contribution to the total fluctuation is largely sub-dominant (see \citealt{GReffects} and the two references above), and therefore it is safe to ignore them for our purposes.
+Note that \ccl does not currently compute relativistic corrections to number counts other than magnification bias \citep{2011PhRvD..84d3516C,2011PhRvD..84f3505B}. Although these will be included in the future, their contribution to the total fluctuation is largely sub-dominant (see \citealt{GReffects} and the two references above), and therefore it is safe to ignore them for our purposes.
 
 \paragraph{\bf Correlated galaxy shapes.} The transfer function for correlated galaxy shapes (intrinsic and lensed) is decomposed into two terms: $\Delta^{\rm SH}=\Delta^{\rm WL}+\Delta^{\rm IA}$, where
 \begin{itemize}
@@ -338,11 +338,11 @@ Note that \ccl does not currently compute relativistic corrections to number cou
       &T_\delta(k,z)\,\frac{j_\ell(k\chi(z))}{[k\chi(z)]^2}.
       \label{eq:transfer_ia}
     \end{align}
-    Here, $b_{\rm IA}$ is the so-called alignment bias, and $f_{\rm IA}$ is the fraction of aligned galaxies in the sample. Notice that $b_{\rm IA}(z)$ absorbs the typical normalization factors used in the literature for intrinsic alignment amplitude and redshift evolution. It is thus not to be confused with $C_1$ or $A_{\rm IA}$, typical parameters for adopted in works such as \citet{vanUitert18,Joudaki18,Hildebrandt17}. The NLA model  it has limitations in the modelling of small-scale correlations \citep{Singh15} and does not predict any $B$-mode contributions that can arise from non-linearities at such scales. However, it is a commonly adopted approximation in the current literature and going beyond it is outside of the scope of this work, though future versions of LSST DESC software will provide alternative modeling options \citep{Blazek17}.
+    Here, $b_{\rm IA}$ is the so-called alignment bias, and $f_{\rm IA}$ is the fraction of aligned galaxies in the sample. Notice that $b_{\rm IA}(z)$ absorbs the typical normalization factors used in the literature for intrinsic alignment amplitude and redshift evolution. It is thus not to be confused with $C_1$ or $A_{\rm IA}$, typical parameters for adopted in works such as \citet{vanUitert18,Joudaki18,Hildebrandt17}. The NLA model has limitations in the modelling of small-scale correlations \citep{Singh15} and does not predict any $B$-mode contributions that can arise from non-linearities at such scales. However, it is a commonly adopted approximation in the current literature and going beyond it is outside of the scope of this work, though future versions of LSST DESC software will provide alternative modeling options \citep{Blazek17}.
     
 \end{itemize}
 
-\paragraph{\bf Lensing convergence.} The transfer function for the lensing convergence, $\kappa$, of a given source plane at redshift $z_*$ receives only one contribution, given by
+\paragraph{\bf CMB lensing.} The transfer function for the lensing convergence, $\kappa$, of a given source plane at redshift $z_*$ receives only one contribution, given by
 \begin{equation}
   \Delta_\ell^\kappa(k)=-\frac{\ell(\ell+1)}{2}\int_0^{\chi_*}\frac{dz}{H(z)}\,\frac{r(\chi_*-\chi)}{r(\chi)r(\chi_*)}T_{\phi+\psi}(k,z),
   \label{eq:cmblens}
@@ -517,7 +517,7 @@ As with measures of the halo mass function, high accuracy cosmological constrain
 
 The \citet{Tinker2010} model parameterizes the halo bias in terms of the peak height and the critical density for collapse (similarly to Eq.~\ref{eq:tinkerf}) as
 \begin{eqnarray}
-  b(\nu) &=& 1 - A\frac{\nu^a}{\nu^a + {\delta_c}^a} + B\nu^b+C\nu^c,\\
+  b(\nu) &=& 1 - A\frac{\nu^a}{\nu^a + {\delta_c}^a} + B\nu^b+C\nu^c,
 \end{eqnarray}
 
 \citet{Tinker2010} found a $\sim6\%$ scatter when determining the halo bias due to differences in simulations alone. There is remaining uncertainty to the {\em physical accuracy} of this model, as this parameterization does not consider any impact due to changes in the dark energy equation of state. As with the halo mass function, studies will be required to reach accuracy at the per cent level for any cosmological predictions \citep[e.g.][]{Gao2005, Schulz2006, Smith2007, Croton2007, Parfrey2011, Sunayama2016, Villarreal2017, Mao2018}.
@@ -1032,7 +1032,9 @@ For the power spectrum $C^{ab}_\ell$ between two fields $a$ and $b$, the cosmic 
   \sigma_\ell^2=\frac{C^{aa}_\ell C^{bb}_\ell+(C^{ab}_\ell)^2}{2\ell+1}.
   \label{eq:sigmaell}
 \end{equation}
-Our accuracy requirement, for all auto- and cross-correlations with analytic and binned redshift distributions is $\mathcal{A}<0.1$ (i.e. differences must be smaller than one tenth of the cosmic-variance errors). The results for the auto- and cross-correlations between number counts and weak lensing are shown in Figure \ref{fig:cls_limber}, while those involving CMB lensing are shown in Figure \ref{fig:cls_cmblens}. In addition, we have verified that the intrinsic alignment auto-spectra and cross-spectra with shear and galaxy positions satisfy our accuracy requirement (intrinsic-intrinsic, shear-intrinsic, galaxy-intrinsic, and the full observables, i.e, II, GI, gI, GG+II+GI, gG+gI). In this case, the denominator in Eq. (\ref{eq:errorCl}) includes the lensing contribution as well.
+Our accuracy requirement, for all auto- and cross-correlations with analytic and binned redshift distributions is $\mathcal{A}<0.1$ (i.e. differences must be smaller than one tenth of the cosmic-variance errors). {\bf Notice that Eq. (\ref{eq:sigmaell}) assumes a full-sky survey. As a consequence, our requirement is conservative compared to a survey covering $40\%$ of the sky, as expected for LSST, where the uncertainty from cosmic variace would be $\sim 60\%$ larger}.
+
+The results for the auto- and cross-correlations between number counts and weak lensing are shown in Figure \ref{fig:cls_limber}, while those involving CMB lensing are shown in Figure \ref{fig:cls_cmblens}. In addition, we have verified that the intrinsic alignment auto-spectra and cross-spectra with shear and galaxy positions satisfy our accuracy requirement (intrinsic-intrinsic, shear-intrinsic, galaxy-intrinsic, and the full observables, i.e, II, GI, gI, GG+II+GI, gG+gI). In this case, the denominator in Eq. (\ref{eq:errorCl}) includes the lensing contribution as well.
 
 The differences between the \ccl~results and the benchmarks are mostly due to the integration and interpolation methods (particularly, the interpolation of the redshift distributions in the case of number counts). In the case of CMB lensing, we note that the results are particularly sensitive to numerical errors in the computation of the distance to the last scattering surface.
 
