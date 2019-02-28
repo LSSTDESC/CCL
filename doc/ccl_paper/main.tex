@@ -338,7 +338,7 @@ Note that \ccl does not currently compute relativistic corrections to number cou
       &T_\delta(k,z)\,\frac{j_\ell(k\chi(z))}{[k\chi(z)]^2}.
       \label{eq:transfer_ia}
     \end{align}
-    Here, $b_{\rm IA}$ is the so-called alignment bias, and $f_{\rm IA}$ is the fraction of aligned galaxies in the sample. Notice that $b_{\rm IA}(z)$ absorbs the typical normalization factors used in the literature for intrinsic alignment amplitude and redshift evolution. It is thus not to be confused with $C_1$ or $A_{\rm IA}$, typical parameters for adopted in works such as \citet{vanUitert18,Joudaki18,Hildebrandt17}. The NLA model has limitations in the modelling of small-scale correlations \citep{Singh15} and does not predict any $B$-mode contributions that can arise from non-linearities at such scales. However, it is a commonly adopted approximation in the current literature and going beyond it is outside of the scope of this work, though future versions of LSST DESC software will provide alternative modeling options \citep{Blazek17}.
+    Here, $b_{\rm IA}$ is the so-called alignment bias, and $f_{\rm IA}$ is the fraction of aligned galaxies in the sample. Notice that $b_{\rm IA}(z)$ absorbs the typical normalization factors used in the literature for intrinsic alignment amplitude and redshift evolution. It is thus not to be confused with $C_1$ or $A_{\rm IA}$, typical parameters for adopted in works such as \citet{vanUitert18,Joudaki18,Hildebrandt17}. In particular, the product $b_{\rm IA}\,f_{\rm IA}$ is equivalent to the quantity defined in Equation 8 of \cite{Hildebrandt17}. The NLA model has limitations in the modelling of small-scale correlations \citep{Singh15} and does not predict any $B$-mode contributions that can arise from non-linearities at such scales. However, it is a commonly adopted approximation in the current literature and going beyond it is outside of the scope of this work, though future versions of LSST DESC software will provide alternative modeling options \citep{Blazek17}.
     
 \end{itemize}
 
@@ -373,11 +373,11 @@ $\xi_{\pm}$ can be related to the angular power spectra (Eq. \ref{eq:clgen}) as
 \end{equation}
 where $d^\ell_{mm'}$ are the Wigner-$d$ matrices \citep{Ng1999,2004MNRAS.350..914C} and we have defined the power spectra
 \begin{equation}
-  C^{ab\pm}_\ell\equiv\left(C^{a_Eb_E}_\ell\pm C^{a_Bb_B}_\ell\right)+i\left(C^{a_Bb_E}_\ell\pm C^{a_Eb_B}_\ell\right),
+  C^{ab\pm}_\ell\equiv\left(C^{a_Eb_E}_\ell\pm C^{a_Bb_B}_\ell\right)+i\left(C^{a_Bb_E}_\ell\mp C^{a_Eb_B}_\ell\right),
 \end{equation}
 which reduces to the $EE$ power spectrum when all $B$-modes are 0.
 
-Note that, as scalar quantities are real, any correlation involving at least one spin-$0$ field only has one non-unique correlation function. In these cases, the Wigner-$d$ matrices can also be expressed in terms of associated Legendre polynomials $P^m_\ell$, and therefore Eq. (\ref{eq:cl_xi}) becomes
+Note that, as scalar quantities are real, any correlation involving at least one spin-$0$ field only has one unique correlation function. In these cases, the Wigner-$d$ matrices can also be expressed in terms of associated Legendre polynomials $P^m_\ell$, and therefore Eq. (\ref{eq:cl_xi}) becomes
 \begin{align}
   \xi^{ab}(\theta)&=\sum_\ell\frac{2\ell+1}{4\pi}\,C^{ab}_\ell\sqrt{\frac{(\ell-s_a)!}{(\ell+s_a)!}}P^{s_a}_\ell(\cos\theta)\label{eq:xigg},
 \end{align}
@@ -657,7 +657,7 @@ Different numerical approaches have been implemented in the library in order to 
 
 \subsubsection{Limber approximation}
 
-As shown in Section \ref{sssec:2pt.pspec}, computing each transfer function contributing to a given power spectrum involves a radial projection (i.e. an integral over redshift or $z$ or $\chi$), and thus computing full power spectra consists of a triple integral for each $\ell$. This can be computationally intensive, but can be significantly simplified in certain regimes by using the Limber approximation, given by:
+As shown in Section \ref{sssec:2pt.pspec}, computing each transfer function contributing to a given power spectrum involves a radial projection (i.e. an integral over redshift or $z$ or $\chi$), and thus computing full power spectra consists of a triple integral for each $\ell$. This can be computationally intensive, but can be significantly simplified in certain regimes by using the Limber approximation \citep{1954ApJ...119..655L,2004PhRvD..69h3524A}, given by:
 \begin{equation}
  j_\ell(x)\simeq\sqrt{\frac{\pi}{2\ell+1}}\,\delta\left(\ell+\frac{1}{2}-x\right).
 \end{equation}
