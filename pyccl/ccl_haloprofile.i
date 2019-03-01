@@ -33,13 +33,12 @@ void projected_halo_profile_nfw_vec(ccl_cosmology *cosmo, double c, double halom
         ccl_projected_halo_profile_nfw(cosmo, c, halomass, massdef_delta_m, a, r, nr, output, status);
 }
 
-
-void halo_profile_einasto_vec(ccl_cosmology *cosmo, double c, double halomass,  double massdef_delta_m, double a,
+void halo_profile_einasto_vec(ccl_cosmology *cosmo, double c, double halomass, double massdef_delta_m, double a,
                                 double* r, int nr, int nout, double* output, int *status) {
         ccl_halo_profile_einasto(cosmo, c, halomass, massdef_delta_m, a, r, nr, output, status);
 }
 
-void halo_profile_hernquist_vec(ccl_cosmology *cosmo, double c, double halomass,  double massdef_delta_m, double a,
+void halo_profile_hernquist_vec(ccl_cosmology *cosmo, double c, double halomass, double massdef_delta_m, double a,
                                 double* r, int nr, int nout, double* output, int *status) {
         ccl_halo_profile_hernquist(cosmo, c, halomass, massdef_delta_m, a, r, nr, output, status);
 }

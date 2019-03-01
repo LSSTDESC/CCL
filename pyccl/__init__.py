@@ -51,7 +51,7 @@ from .halomodel import halomodel_matter_power, halo_concentration
 from .neutrinos import Omeganuh2, nu_masses
 
 # Halo profiles
-from .haloprofile import NFW_profile_2D, NFW_profile_3D
+from .haloprofile import nfw_profile_2d, nfw_profile_3d, einasto_profile_3d, hernquist_profile_3d
 
 # Expose function to toggle debug mode
 from .pyutils import debug_mode

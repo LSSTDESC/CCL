@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <gsl/gsl_errno.h>
+#include <gsl/gsl_roots.h>
 #include <gsl/gsl_integration.h>
 #include <gsl/gsl_sf_expint.h>
 #include "ccl.h"
@@ -10,42 +11,12 @@
 #include "ccl_halomod.h"
 #include "ccl_haloprofile.h"
 
-
-double r_delta(ccl_cosmology *cosmo, double halomass, double a, double odelta, int *status); //in Mpc comving. halomass in Msun, odelta integer.
-double ccl_sigmaM(ccl_cosmology *cosmo, double halomass, double a, int *status); //returns sigma from the sigmaM interpolation.
-double Dv_BryanNorman(ccl_cosmology *cosmo, double a, int *status); //Computes the virial collapse density contrast with respect to the matter density assuming LCDM.
-
 //maths helper function for NFW profile
 static double helper_fx(double x){
     double f;
     f = log(1.+x)-x/(1.+x);
     return f;
 }
-
-
-//take vectorized r.
-//implement inner and outer separately and let user choose combining method.
-//take flexible arguments.
-//For h&w:
-/*----- ROUTINE: ccl_halob1 -----
-INPUT: ccl_cosmology * cosmo, double halo mass in units of Msun, double scale factor
-TASK: returns dimensionless linear halo bias
-*/
-//double ccl_halo_bias(ccl_cosmology *cosmo, double halomass, double a, double odelta, int *status)
-/*--------ROUTINE: ccl_correlation_3d ------
-TASK: Calculate the 3d-correlation function. Do so by using FFTLog.
-
-INPUT: cosmology, scale factor a,
-       number of r values, r values,
-       key for tapering, limits of tapering
-
-Correlation function result will be in array xi
- */
-//void ccl_correlation_3d(ccl_cosmology *cosmo, double a,
-//			int n_r,double *r,double *xi,
-//			int do_taper_pk,double *taper_pk_limits,
-//			int *status)
-
 
 //cosmo: ccl cosmology object containing cosmological parameters
 //c: halo concentration, needs to be consistent with halo size definition
@@ -68,16 +39,13 @@ void ccl_halo_profile_nfw(ccl_cosmology *cosmo, double c, double halomass, doubl
     //rhos: NFW density parameter
     double rhos;
 
-    rhos = halomass/(4.*M_PI*pow(rs,3)*helper_fx(c));
-
-    //M_enc: mass enclosed in r
-    //double Menc;
-
-    //Menc = halomass*helper_fx(r/rs)/helper_fx(c);
+    rhos = halomass/(4.*M_PI*(rs*rs*rs)*helper_fx(c));
 
     int i;
+    double x;
     for(i=0; i < nr; i++) {
-        rho_r[i] = rhos/((r[i]/rs)*pow(1.+r[i]/rs,2));
+        x = r[i]/rs;
+        rho_r[i] = rhos/(x*(1.+x)*(1.+x));
     }
     return;
 }
@@ -103,7 +71,7 @@ void ccl_projected_halo_profile_nfw(ccl_cosmology *cosmo, double c, double halom
     //rhos: NFW density parameter
     double rhos;
 
-    rhos = halomass/(4.*M_PI*pow(rs,3)*helper_fx(c));
+    rhos = halomass/(4.*M_PI*(rs*rs*rs)*helper_fx(c));
 
     double x;
 
@@ -125,46 +93,102 @@ void ccl_projected_halo_profile_nfw(ccl_cosmology *cosmo, double c, double halom
 
 }
 
-//solve for cvir from different mass definition iteratively, assuming NFW profile.
-static double solve_cvir(double rhs, double initial_guess){    //10^-5 accuracy
-    double c_small, c_large;
-    if (helper_fx(initial_guess)/pow(initial_guess,3)<rhs){
-        c_large = initial_guess;
-        c_small = c_large/2.;
-        while (helper_fx(c_small)/pow(c_small,3)<rhs) {
-            c_large = c_small;
-            c_small /= 2.;
-        }
-    }
-    else {
-        c_small = initial_guess;
-        c_large = c_small*2.;
-        while (helper_fx(c_large)/pow(c_large,3)>rhs) {
-            c_small = c_large;
-            c_large *= 2.;
-        }
-    }
-    while (c_large-c_small>0.00001) {
-        if (helper_fx((c_small+c_large)/2.)/pow((c_small+c_large)/2.,3)<rhs) {
-            c_large = (c_small+c_large)/2.;
-        }
-        else {
-            c_small = (c_small+c_large)/2.;
-        }
-    }
+//maths helper function for Einasto profile
+static double helper_solve_cvir(double c, void *rhs_pointer){
+    double rhs = *(double*)rhs_pointer;
+    return (log(1.+c)-c/(1.+c))/(c*c*c) - rhs;
+}
 
-    return c_small;
+//solve for cvir from different mass definition iteratively, assuming NFW profile.
+static double solve_cvir(ccl_cosmology *cosmo, double rhs, double initial_guess, int *status){
+
+    int rootstatus;
+    int iter = 0, max_iter = 100;
+    const gsl_root_fsolver_type *T;
+    gsl_root_fsolver *s;
+    double cvir;
+    double c_lo = 0.1, c_hi = initial_guess*100.;
+    gsl_function F;
+
+    F.function = &helper_solve_cvir;
+    F.params = &rhs;
+
+    T = gsl_root_fsolver_brent;
+    s = gsl_root_fsolver_alloc (T);
+    gsl_root_fsolver_set (s, &F, c_lo, c_hi);
+
+    do
+      {
+        iter++;
+        gsl_root_fsolver_iterate (s);
+        cvir = gsl_root_fsolver_root (s);
+        c_lo = gsl_root_fsolver_x_lower (s);
+        c_hi = gsl_root_fsolver_x_upper (s);
+        rootstatus = gsl_root_test_interval (c_lo, c_hi, 0, 0.0001);
+      }
+    while (rootstatus == GSL_CONTINUE && iter < max_iter);
+
+    gsl_root_fsolver_free (s);
+
+
+    // Check for errors
+    if (rootstatus != GSL_SUCCESS) {
+        ccl_raise_gsl_warning(rootstatus, "ccl_haloprofile.c: solve_cvir():");
+        *status = CCL_ERROR_PROFILE_ROOT;
+        ccl_cosmology_set_status_message(cosmo, "ccl_haloprofile.c: solve_cvir(): Root finding failure\n");
+        return NAN;
+    } else {
+        return cvir;
+    }
+}
+
+// Parameters structure for the Einasto integrand
+typedef struct{
+  ccl_cosmology *cosmo;
+  double alpha, rs;
+} Int_Einasto_Par;
+
+static double integrand_einasto(double r, void *params){
+
+    Int_Einasto_Par *p = (Int_Einasto_Par *)params;
+    double alpha = p->alpha;
+    double rs = p->rs;
+
+    return 4.*M_PI*r*r*exp(-2.*(pow(r/rs,alpha)-1)/alpha);
 }
 
 //integrate einasto profile to get normalization of rhos
-static double integrate_einasto(double R, double alpha, double rs){
-    double i;
-    double integral;
-    integral = 0;
-    for (i = 1.; i < 1001.; i+=1.) {
-        integral += 4.*M_PI*pow(R*i/1000.,2)*exp(-2.*(pow((R*i/(1000.*rs)),alpha)-1)/alpha)*R/1000.;
+static double integrate_einasto(ccl_cosmology *cosmo, double R, double alpha, double rs, int *status){
+    int qagstatus;
+    double result = 0, eresult;
+    Int_Einasto_Par ipar;
+    gsl_function F;
+    gsl_integration_workspace *w = gsl_integration_workspace_alloc(1000);
+
+    // Structure required for the gsl integration
+    ipar.cosmo = cosmo;
+    ipar.alpha = alpha;
+    ipar.rs = rs;
+    F.function = &integrand_einasto;
+    F.params = &ipar;
+
+    // Actually does the integration
+    qagstatus = gsl_integration_qag(
+      &F, 0, R, 0, 0.0001, 1000, 3, w,
+      &result, &eresult);
+
+    // Clean up
+    gsl_integration_workspace_free(w);
+
+    // Check for errors
+    if (qagstatus != GSL_SUCCESS) {
+      ccl_raise_gsl_warning(qagstatus, "ccl_haloprofile.c: integrate_einasto():");
+      *status = CCL_ERROR_PROFILE_INT;
+      ccl_cosmology_set_status_message(cosmo, "ccl_haloprofile.c: integrate_einasto(): Integration failure\n");
+      return NAN;
+    } else {
+      return result;
     }
-    return integral;
 }
 
 
@@ -201,10 +225,9 @@ void ccl_halo_profile_einasto(ccl_cosmology *cosmo, double c, double halomass, d
     }
     else{
         double rhs; //NFW equation for cvir: f(Rvir/Rs)/f(c)=(Rvir^3*Delta_v)/(R^3*massdef) -> f(cvir)/cvir^3 = rhs
-        rhs = (helper_fx(c)*pow(rs,3)*Delta_v)/(pow(haloradius,3)*massdef_delta_m);
-        Mvir = halomass*helper_fx(solve_cvir(rhs, haloradius))/helper_fx(c);
+        rhs = (helper_fx(c)*(rs*rs*rs)*Delta_v)/((haloradius*haloradius*haloradius)*massdef_delta_m);
+        Mvir = halomass*helper_fx(solve_cvir(cosmo, rhs, c, status))/helper_fx(c);
     }
-
 
     nu = 1.686/ccl_sigmaM(cosmo, Mvir, a, status); //delta_c_Tinker
     alpha = 0.155 + 0.0095*nu*nu;
@@ -212,7 +235,7 @@ void ccl_halo_profile_einasto(ccl_cosmology *cosmo, double c, double halomass, d
     //rhos: scale density
     double rhos;
 
-    rhos = halomass/integrate_einasto(haloradius, alpha, rs); //normalize
+    rhos = halomass/integrate_einasto(cosmo, haloradius, alpha, rs, status); //normalize
 
     int i;
     for(i=0; i < nr; i++) {
@@ -223,18 +246,53 @@ void ccl_halo_profile_einasto(ccl_cosmology *cosmo, double c, double halomass, d
 
 }
 
+// Parameters structure for the Einasto integrand
+typedef struct{
+  ccl_cosmology *cosmo;
+  double rs;
+} Int_Hernquist_Par;
 
-double integrate_hernquist(double R, double rs){
-        double i;
-        double integral;
-        double r;
-        integral = 0;
-        for (i = 1.; i < 1001.; i+=1.) {
-            r = R*i/1000.;
-            integral += 4.*M_PI*pow(r,2)*(R/1000.)/((r/rs)*pow((1.+r/rs),3));
-        }
-        return integral;
+static double integrand_hernquist(double r, void *params){
+
+    Int_Hernquist_Par *p = (Int_Hernquist_Par *)params;
+    double rs = p->rs;
+
+    return 4.*M_PI*r*r/((r/rs)*(1.+r/rs)*(1.+r/rs)*(1.+r/rs));
 }
+
+//integrate einasto profile to get normalization of rhos
+static double integrate_hernquist(ccl_cosmology *cosmo, double R, double rs, int *status){
+    int qagstatus;
+    double result = 0, eresult;
+    Int_Hernquist_Par ipar;
+    gsl_function F;
+    gsl_integration_workspace *w = gsl_integration_workspace_alloc(1000);
+
+    // Structure required for the gsl integration
+    ipar.cosmo = cosmo;
+    ipar.rs = rs;
+    F.function = &integrand_hernquist;
+    F.params = &ipar;
+
+    // Actually does the integration
+    qagstatus = gsl_integration_qag(
+      &F, 0, R, 0, 0.0001, 1000, 3, w,
+      &result, &eresult);
+
+    // Clean up
+    gsl_integration_workspace_free(w);
+
+    // Check for errors
+    if (qagstatus != GSL_SUCCESS) {
+      ccl_raise_gsl_warning(qagstatus, "ccl_haloprofile.c: integrate_hernquist():");
+      *status = CCL_ERROR_PROFILE_INT;
+      ccl_cosmology_set_status_message(cosmo, "ccl_haloprofile.c: integrate_hernquist(): Integration failure\n");
+      return NAN;
+    } else {
+      return result;
+    }
+}
+
 
 //cosmo: ccl cosmology object containing cosmological parameters
 //c: halo concentration, needs to be consistent with halo size definition
@@ -257,23 +315,15 @@ void ccl_halo_profile_hernquist(ccl_cosmology *cosmo, double c, double halomass,
     //rhos: scale density
     double rhos;
 
-    rhos = halomass/integrate_hernquist(haloradius, rs); //normalize
+    rhos = halomass/integrate_hernquist(cosmo, haloradius, rs, status); //normalize
 
     int i;
+    double x;
     for(i=0; i < nr; i++) {
-        rho_r[i] = rhos/((r[i]/rs)*pow((1.+r[i]/rs),3));
+        x = r[i]/rs;
+        rho_r[i] = rhos/(x*pow((1.+x),3));
     }
 
     return;
 
 }
-
-
-//cosmo: ccl cosmology object containing cosmological parameters
-//c: halo concentration, needs to be consistent with halo size definition
-//halomass: halo mass
-//massdef_delta: mass definition, overdensity relative to matter density
-//a: scale factor
-//r: radius at which to calculate output
-//returns mass density at given r
-/*double ccl_halo_profile_diemer(ccl_cosmology *cosmo, double c, double halomass, double massdef_delta_m, double a, double r, int *status){}*/
