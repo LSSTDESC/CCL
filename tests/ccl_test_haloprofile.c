@@ -28,21 +28,22 @@ CTEST_DATA(haloprofile){
   double n_s;
 
   // Arrays for halo profile data
-  double R[3][NUMR];
-  double RHOR[3][NUMR];
+  double R[4][NUMR];
+  double RESULT[4][NUMR];
 
 };
 
 // Function to read in the benchmark data
-static void read_haloprofile_test_file(double R[3][NUMR], double RHOR[3][NUMR]){
+static void read_haloprofile_test_file(double R[4][NUMR], double RESULT[4][NUMR]){
 
     char infile[256];
 
     // Masses are in Msun/h
-    for (int model=0; model<3; model++){
+    for (int model=0; model<4; model++){
         if (model==0) {strncpy(infile, "./tests/benchmark/haloprofile_nfw_colossus.txt", 256);}
-        if (model==1) {strncpy(infile, "./tests/benchmark/haloprofile_einasto_colossus.txt", 256);}
-        if (model==2) {strncpy(infile, "./tests/benchmark/haloprofile_hernquist_colossus.txt", 256);}
+        if (model==1) {strncpy(infile, "./tests/benchmark/haloprofile_projected_nfw_colossus.txt", 256);}
+        if (model==2) {strncpy(infile, "./tests/benchmark/haloprofile_einasto_colossus.txt", 256);}
+        if (model==3) {strncpy(infile, "./tests/benchmark/haloprofile_hernquist_colossus.txt", 256);}
         // Open the file
         FILE * f = fopen(infile, "r");
         ASSERT_NOT_NULL(f);
@@ -52,9 +53,9 @@ static void read_haloprofile_test_file(double R[3][NUMR], double RHOR[3][NUMR]){
         char* rtn;
         rtn = fgets(str, 1024, f);
 
-        // file is in fixed format - R, RHOR, w/ NUMR rows
+        // file is in fixed format - R, RESULT, w/ NUMR rows
         for (int i=0; i<NUMR; i++) {
-            int count = fscanf(f, "%le %le\n", &R[model][i], &RHOR[model][i]);
+            int count = fscanf(f, "%le %le\n", &R[model][i], &RESULT[model][i]);
             // Check that all the stuff in the benchmark is there
             ASSERT_EQUAL(2, count);
         }
@@ -80,7 +81,7 @@ CTEST_SETUP(haloprofile){
   data->sigma_8 = 0.8159;
 
   // read the file of benchmark data
-  read_haloprofile_test_file(data->R, data->RHOR);
+  read_haloprofile_test_file(data->R, data->RESULT);
 
 }
 
@@ -115,24 +116,32 @@ static void compare_haloprofile(int model, struct haloprofile_data * data)
   double halomassdef = 200;
   double rmin = 0.01;
   double rmax = 100;
-
-  double rho3d;
+  double* result;
+  double* r;
+  r = malloc(NUMR*sizeof(double));
+  result = malloc(NUMR*sizeof(double));
   // compare to benchmark data
   for (int j=0; j<NUMR; j++) {
-    double r = exp(log(rmin)+log(rmax/rmin)*j/(NUMR-1.));
-    if (model==0) {
-        rho3d = ccl_halo_profile_nfw(cosmo, concentration, halomass, halomassdef, a, r, status);
-    }
-    if (model==1) {
-        rho3d = ccl_halo_profile_einasto(cosmo, concentration, halomass, halomassdef, a, r, status);
-    }
-    if (model==2) {
-        rho3d = ccl_halo_profile_hernquist(cosmo, concentration, halomass, halomassdef, a, r, status);
-    }
-    double absolute_tolerance = HALOPROFILE_TOLERANCE*data->RHOR[model][j];
-    if (fabs(absolute_tolerance)<1e-12) absolute_tolerance = 1e-12;
-    ASSERT_DBL_NEAR_TOL(data->RHOR[model][j], rho3d, absolute_tolerance);
+      r[j] = exp(log(rmin)+log(rmax/rmin)*j/(NUMR-1.));
   }
+  if (model==0) {
+      ccl_halo_profile_nfw(cosmo, concentration, halomass, halomassdef, a, r, NUMR, result, status);
+  }
+  if (model==1) {
+      ccl_projected_halo_profile_nfw(cosmo, concentration, halomass, halomassdef, a, r, NUMR, result, status);
+  }
+  else if (model==2) {
+      ccl_halo_profile_einasto(cosmo, concentration, halomass, halomassdef, a, r, NUMR, result, status);
+  }
+  else if (model==3) {
+      ccl_halo_profile_hernquist(cosmo, concentration, halomass, halomassdef, a, r, NUMR, result, status);
+  }
+  for (int j=0; j<NUMR; j++) {
+      double absolute_tolerance = HALOPROFILE_TOLERANCE*data->RESULT[model][j];
+      if (fabs(absolute_tolerance)<1e-12) absolute_tolerance = 1e-12;
+      ASSERT_DBL_NEAR_TOL(data->RESULT[model][j], result[j], absolute_tolerance);
+  }
+
   free(cosmo);
 }
 
@@ -148,5 +157,10 @@ CTEST2(haloprofile, model_2) {
 
 CTEST2(haloprofile, model_3) {
   int model = 2;
+  compare_haloprofile(model, data);
+}
+
+CTEST2(haloprofile, model_4) {
+  int model = 3;
   compare_haloprofile(model, data);
 }

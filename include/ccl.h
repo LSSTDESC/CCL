@@ -31,6 +31,7 @@
 #include "ccl_correlation.h"
 #include "ccl_massfunc.h"
 #include "ccl_neutrinos.h"
+#include "ccl_haloprofile.h"
 
 CCL_BEGIN_DECLS
 /* add function and variable declarations here */

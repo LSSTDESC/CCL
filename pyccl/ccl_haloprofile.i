@@ -23,25 +23,25 @@
 
 %inline %{
 
-void halo_profile_nfw_vec(ccl_cosmology *cosmo, double c, double halomass,  double massdef_delta_m, double a,
+void halo_profile_nfw_vec(ccl_cosmology *cosmo, double c, double halomass, double massdef_delta_m, double a,
                                 double* r, int nr, int nout, double* output, int *status) {
-    for(int i=0; i < nr; i++) {
-        output[i] = ccl_halo_profile_nfw(cosmo, c, halomass, massdef_delta_m, a, r[i], status);
-    }
+        ccl_halo_profile_nfw(cosmo, c, halomass, massdef_delta_m, a, r, nr, output, status);
 }
+
+void projected_halo_profile_nfw_vec(ccl_cosmology *cosmo, double c, double halomass, double massdef_delta_m, double a,
+                                double* r, int nr, int nout, double* output, int *status){
+        ccl_projected_halo_profile_nfw(cosmo, c, halomass, massdef_delta_m, a, r, nr, output, status);
+}
+
 
 void halo_profile_einasto_vec(ccl_cosmology *cosmo, double c, double halomass,  double massdef_delta_m, double a,
                                 double* r, int nr, int nout, double* output, int *status) {
-    for(int i=0; i < nr; i++) {
-        output[i] = ccl_halo_profile_einasto(cosmo, c, halomass, massdef_delta_m, a, r[i], status);
-    }
+        ccl_halo_profile_einasto(cosmo, c, halomass, massdef_delta_m, a, r, nr, output, status);
 }
 
 void halo_profile_hernquist_vec(ccl_cosmology *cosmo, double c, double halomass,  double massdef_delta_m, double a,
                                 double* r, int nr, int nout, double* output, int *status) {
-    for(int i=0; i < nr; i++) {
-        output[i] = ccl_halo_profile_hernquist(cosmo, c, halomass, massdef_delta_m, a, r[i], status);
-    }
+        ccl_halo_profile_hernquist(cosmo, c, halomass, massdef_delta_m, a, r, nr, output, status);
 }
 
 %}

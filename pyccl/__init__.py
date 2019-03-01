@@ -16,7 +16,7 @@ if environ.get("CLASS_PARAM_DIR") is None:
     environ["CLASS_PARAM_DIR"] = path.dirname(path.abspath(__file__))
 
 from . import ccllib as lib
-from . import core, constants, background, power, massfunction, halomodel
+from . import core, constants, background, power, massfunction, halomodel, haloprofile
 
 # Core data structures
 from .core import Cosmology
@@ -49,6 +49,9 @@ from .halomodel import halomodel_matter_power, halo_concentration
 
 # Specific to massive neutrinos
 from .neutrinos import Omeganuh2, nu_masses
+
+# Halo profiles
+from .haloprofile import NFW_profile_2D, NFW_profile_3D
 
 # Expose function to toggle debug mode
 from .pyutils import debug_mode

@@ -5,6 +5,7 @@
 #include <gsl/gsl_integration.h>
 #include <gsl/gsl_sf_expint.h>
 #include "ccl.h"
+#include "ccl_correlation.h"
 #include "ccl_massfunc.h"
 #include "ccl_halomod.h"
 #include "ccl_haloprofile.h"
@@ -21,14 +22,41 @@ static double helper_fx(double x){
     return f;
 }
 
+
+//take vectorized r.
+//implement inner and outer separately and let user choose combining method.
+//take flexible arguments.
+//For h&w:
+/*----- ROUTINE: ccl_halob1 -----
+INPUT: ccl_cosmology * cosmo, double halo mass in units of Msun, double scale factor
+TASK: returns dimensionless linear halo bias
+*/
+//double ccl_halo_bias(ccl_cosmology *cosmo, double halomass, double a, double odelta, int *status)
+/*--------ROUTINE: ccl_correlation_3d ------
+TASK: Calculate the 3d-correlation function. Do so by using FFTLog.
+
+INPUT: cosmology, scale factor a,
+       number of r values, r values,
+       key for tapering, limits of tapering
+
+Correlation function result will be in array xi
+ */
+//void ccl_correlation_3d(ccl_cosmology *cosmo, double a,
+//			int n_r,double *r,double *xi,
+//			int do_taper_pk,double *taper_pk_limits,
+//			int *status)
+
+
 //cosmo: ccl cosmology object containing cosmological parameters
 //c: halo concentration, needs to be consistent with halo size definition
 //halomass: halo mass
 //massdef_delta: mass definition, overdensity relative to matter density
 //a: scale factor
-//r: radius at which to calculate output
-//returns mass density at given r
-double ccl_halo_profile_nfw(ccl_cosmology *cosmo, double c, double halomass, double massdef_delta_m, double a, double r, int *status){
+//r: radii at which to calculate output
+//nr: number of radii for calculation
+//rho_r: stores densities at r
+//returns void
+void ccl_halo_profile_nfw(ccl_cosmology *cosmo, double c, double halomass, double massdef_delta_m, double a, double *r, int nr, double *rho_r, int *status){
 
     //haloradius: halo radius for mass definition
     //rs: scale radius
@@ -47,12 +75,11 @@ double ccl_halo_profile_nfw(ccl_cosmology *cosmo, double c, double halomass, dou
 
     //Menc = halomass*helper_fx(r/rs)/helper_fx(c);
 
-    //rho_r: density at r
-    double rho_r;
-
-    rho_r = rhos/((r/rs)*pow(1.+r/rs,2));
-
-    return rho_r;
+    int i;
+    for(i=0; i < nr; i++) {
+        rho_r[i] = rhos/((r[i]/rs)*pow(1.+r[i]/rs,2));
+    }
+    return;
 }
 
 //cosmo: ccl cosmology object containing cosmological parameters
@@ -61,8 +88,10 @@ double ccl_halo_profile_nfw(ccl_cosmology *cosmo, double c, double halomass, dou
 //massdef_delta: mass definition, overdensity relative to matter density
 //a: scale factor
 //rp: radius at which to calculate output
-//returns surface mass density (integrated along line of sight) at given projected r
-/*double ccl_projected_halo_profile_nfw(ccl_cosmology *cosmo, double c, double halomass, double massdef_delta_m, double a, double rp, int *status){
+//nr: number of radii for calculation
+//sigma_r: stores surface mass density (integrated along line of sight) at given projected rp
+//returns void
+void ccl_projected_halo_profile_nfw(ccl_cosmology *cosmo, double c, double halomass, double massdef_delta_m, double a, double *rp, int nr, double *sigma_r, int *status){
 
     //haloradius: halo radius for mass definition
     //rs: scale radius
@@ -77,22 +106,24 @@ double ccl_halo_profile_nfw(ccl_cosmology *cosmo, double c, double halomass, dou
     rhos = halomass/(4.*M_PI*pow(rs,3)*helper_fx(c));
 
     double x;
-    double sigma;
 
-    x = rp/rs;
+    int i;
+    for(i=0; i < nr; i++){
 
-    if (x==1.){
-        sigma = 2.*rs*rhos/3.;
+        x = rp[i]/rs;
+        if (x==1.){
+            sigma_r[i] = 2.*rs*rhos/3.;
+        }
+        else if (x<1.){
+            sigma_r[i] = 2.*rs*rhos*(1.-2.*atanh(sqrt(fabs((1.-x)/(1.+x))))/sqrt(fabs(1.-x*x)))/(x*x-1.);
+        }
+        else {
+            sigma_r[i] = 2.*rs*rhos*(1.-2.*atan(sqrt(fabs((1.-x)/(1.+x))))/sqrt(fabs(1.-x*x)))/(x*x-1.);
+        }
     }
-    else if (x<1.){
-        sigma = 2.*rs*rhos*(1.-2.*atanh(sqrt(fabs((1.-x)/(1.+x))))/sqrt(fabs(1.-x*x)))/(x*x-1.);
-    }
-    else {
-        sigma = 2.*rs*rhos*(1.-2.*atan(sqrt(fabs((1.-x)/(1.+x))))/sqrt(fabs(1.-x*x)))/(x*x-1.);
-    }
-    return sigma;
+    return;
 
-}*/
+}
 
 //solve for cvir from different mass definition iteratively, assuming NFW profile.
 static double solve_cvir(double rhs, double initial_guess){    //10^-5 accuracy
@@ -142,9 +173,11 @@ static double integrate_einasto(double R, double alpha, double rs){
 //halomass: halo mass
 //massdef_delta: mass definition, overdensity relative to matter density
 //a: scale factor
-//rp: radius at which to calculate output
-//returns mass density at given r
-double ccl_halo_profile_einasto(ccl_cosmology *cosmo, double c, double halomass, double massdef_delta_m, double a, double r, int *status){
+//r: radii at which to calculate output
+//nr: number of radii for calculation
+//rho_r: stores densities at r
+//returns void
+void ccl_halo_profile_einasto(ccl_cosmology *cosmo, double c, double halomass, double massdef_delta_m, double a, double *r, int nr, double *rho_r, int *status){
 
     //haloradius: halo radius for mass definition
     //rs: scale radius
@@ -181,11 +214,12 @@ double ccl_halo_profile_einasto(ccl_cosmology *cosmo, double c, double halomass,
 
     rhos = halomass/integrate_einasto(haloradius, alpha, rs); //normalize
 
-    //rho_r: density at r
-    double rho_r;
-    rho_r = rhos*exp(-2.*(pow(r/rs,alpha)-1.)/alpha);
+    int i;
+    for(i=0; i < nr; i++) {
+        rho_r[i] = rhos*exp(-2.*(pow(r[i]/rs,alpha)-1.)/alpha);
+    }
 
-    return rho_r;
+    return;
 
 }
 
@@ -207,9 +241,11 @@ double integrate_hernquist(double R, double rs){
 //halomass: halo mass
 //massdef_delta: mass definition, overdensity relative to matter density
 //a: scale factor
-//r: radius at which to calculate output
-//returns mass density at given r
-double ccl_halo_profile_hernquist(ccl_cosmology *cosmo, double c, double halomass, double massdef_delta_m, double a, double r, int *status){
+//r: radii at which to calculate output
+//nr: number of radii for calculation
+//rho_r: stores densities at r
+//returns void
+void ccl_halo_profile_hernquist(ccl_cosmology *cosmo, double c, double halomass, double massdef_delta_m, double a, double *r, int nr, double *rho_r, int *status){
 
     //haloradius: halo radius for mass definition
     //rs: scale radius
@@ -223,11 +259,12 @@ double ccl_halo_profile_hernquist(ccl_cosmology *cosmo, double c, double halomas
 
     rhos = halomass/integrate_hernquist(haloradius, rs); //normalize
 
-    //rho_r: density at r
-    double rho_r;
-    rho_r = rhos/((r/rs)*pow((1.+r/rs),3));
+    int i;
+    for(i=0; i < nr; i++) {
+        rho_r[i] = rhos/((r[i]/rs)*pow((1.+r[i]/rs),3));
+    }
 
-    return rho_r;
+    return;
 
 }
 
