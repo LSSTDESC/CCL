@@ -31,8 +31,10 @@ def NFW_profile_3D(cosmo, concentration, halo_mass, odelta, a, r):
 
     cosmo = cosmo.cosmo
     # Call function
-    rho_r, status = lib.halo_profile_nfw_vec(cosmo, concentration, halo_mass,
-                                            odelta, a, r, nr, status)
+    rho_r, status = lib.halo_profile_nfw_vec(
+    cosmo, concentration, halo_mass,
+    odelta, a, r, nr, status
+    )
 
     # Check status and return
     check(status)
@@ -71,8 +73,10 @@ def NFW_profile_2D(cosmo, concentration, halo_mass, odelta, a, r):
 
     cosmo = cosmo.cosmo
     # Call function
-    sigma_r, status = lib.projected_halo_profile_nfw_vec(cosmo, concentration,
-                                                    halo_mass, odelta, a, r, nr, status)
+    sigma_r, status = lib.projected_halo_profile_nfw_vec(
+    cosmo, concentration,
+    halo_mass, odelta, a, r, nr, status
+    )
 
     # Check status and return
     check(status)
