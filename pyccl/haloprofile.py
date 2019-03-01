@@ -14,7 +14,8 @@ def NFW_profile_3D(cosmo, concentration, halo_mass, odelta, a, r):
         halo_mass (float): halo masses; in units of Msun.
         odelta (float): overdensity parameter.
         a (float): scale factor.
-        r (float or array_like): radius or radii to calculate profile for, in units of Mpc.
+        r (float or array_like): radius or radii to calculate profile for,
+         in units of Mpc.
 
     Returns:
         float or array_like: 3D NFW density at r, in units of Msun/Mpc^3.
@@ -30,7 +31,8 @@ def NFW_profile_3D(cosmo, concentration, halo_mass, odelta, a, r):
 
     cosmo = cosmo.cosmo
     # Call function
-    rho_r, status = lib.halo_profile_nfw_vec(cosmo, concentration, halo_mass, odelta, a, r, nr, status)
+    rho_r, status = lib.halo_profile_nfw_vec(cosmo, concentration, halo_mass,
+                                            odelta, a, r, nr, status)
 
     # Check status and return
     check(status)
@@ -40,7 +42,8 @@ def NFW_profile_3D(cosmo, concentration, halo_mass, odelta, a, r):
 
 
 def NFW_profile_2D(cosmo, concentration, halo_mass, odelta, a, r):
-    """Calculate the 2D projected NFW halo profile at a given radius or an array of radii,
+    """Calculate the 2D projected NFW halo profile
+    at a given radius or an array of radii,
     for a halo with a given mass, mass definition, and concentration,
     at a given scale factor, with a cosmology dependence.
 
@@ -50,10 +53,12 @@ def NFW_profile_2D(cosmo, concentration, halo_mass, odelta, a, r):
         halo_mass (float): halo masses; in units of Msun.
         odelta (float): overdensity parameter.
         a (float): scale factor.
-        r (float or array_like): radius or radii to calculate profile for, in units of Mpc.
+        r (float or array_like): radius or radii to calculate profile for,
+         in units of Mpc.
 
     Returns:
-        float or array_like: 2D projected NFW density at r, in units of Msun/Mpc^2.
+        float or array_like: 2D projected NFW density at r,
+         in units of Msun/Mpc^2.
     """
     status = 0
     scalar = True if isinstance(r, float) else False
@@ -66,7 +71,8 @@ def NFW_profile_2D(cosmo, concentration, halo_mass, odelta, a, r):
 
     cosmo = cosmo.cosmo
     # Call function
-    sigma_r, status = lib.projected_halo_profile_nfw_vec(cosmo, concentration, halo_mass, odelta, a, r, nr, status)
+    sigma_r, status = lib.projected_halo_profile_nfw_vec(cosmo, concentration,
+                                                    halo_mass, odelta, a, r, nr, status)
 
     # Check status and return
     check(status)
