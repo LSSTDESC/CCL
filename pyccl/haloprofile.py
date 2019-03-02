@@ -84,7 +84,8 @@ def nfw_profile_2d(cosmo, concentration, halo_mass, odelta, a, r):
 
 
 def einasto_profile_3d(cosmo, concentration, halo_mass, odelta, a, r):
-    """Calculate the 3D Einasto halo profile at a given radius or an array of radii,
+    """Calculate the 3D Einasto halo profile
+    at a given radius or an array of radii,
     for a halo with a given mass, mass definition, and concentration,
     at a given scale factor, with a cosmology dependence.
 
@@ -121,8 +122,10 @@ def einasto_profile_3d(cosmo, concentration, halo_mass, odelta, a, r):
         return rho_r[0]
     return rho_r
 
+
 def hernquist_profile_3d(cosmo, concentration, halo_mass, odelta, a, r):
-    """Calculate the 3D Hernquist halo profile at a given radius or an array of radii,
+    """Calculate the 3D Hernquist halo profile
+    at a given radius or an array of radii,
     for a halo with a given mass, mass definition, and concentration,
     at a given scale factor, with a cosmology dependence.
 
