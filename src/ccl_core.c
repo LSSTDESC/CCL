@@ -420,7 +420,14 @@ ccl_parameters ccl_parameters_create(
 		  mnu_in[0] = 0.;
 		  mnu_in[1] = 0.;
 		  mnu_in[2] = 0.;
-	  } else{
+	  } 
+    else if(*mnu>1e-15 && *mnu<0.06){
+    *status = CCL_ERROR_LOWMNU;
+    ccl_raise_exception(*status, "The neutrino mass is too low to satisfy \
+    the mass difference measurements in the case of normal hierarchy.\
+    In this low mass case, set mnu_type to sum_inverted or sum_equal.");
+      }
+    else{
 
 	      mnu_in[0] = 0.; // This is a starting guess.
 
@@ -432,7 +439,7 @@ ccl_parameters ccl_parameters_create(
 	      if (ccl_mnu_sum < sum_check){
 		      *status = CCL_ERROR_MNU_UNPHYSICAL;
           }
-
+          
           double dsdm1;
           // This is the Newton's method
           while (fabs(*mnu - sum_check) > 1e-15){
