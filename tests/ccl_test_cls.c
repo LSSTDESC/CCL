@@ -51,6 +51,7 @@ static void compare_cls(char *compare_type,struct cls_data * data)
   config.matter_power_spectrum_method = ccl_linear;
   ccl_parameters params = ccl_parameters_create_flat_lcdm(data->Omega_c,data->Omega_b,data->h,
 							  data->A_s,data->n_s, &status);
+  params.T_CMB=2.7;
   params.Omega_n_rel=0;
   params.Omega_l = 0.7;
   params.sigma8=data->sigma8;

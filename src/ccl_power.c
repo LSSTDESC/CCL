@@ -432,25 +432,26 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int * statu
   // to avoid writing and reading .ini files for every call
   int parser_length = 20;
   int init_arr[7]={0,0,0,0,0,0,0};
+  int init_parser=0;
   if (parser_init(&fc,parser_length,"none",errmsg) == _FAILURE_) {
     *status = CCL_ERROR_CLASS;
     ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_cosmology_compute_power_class(): parser init error:%s\n", errmsg);
-    return;
   }
 
-  ccl_fill_class_parameters(cosmo,&fc,parser_length, status);
+  if(*status==0)
+    ccl_fill_class_parameters(cosmo,&fc,parser_length, status);
 
-  if (*status != CCL_ERROR_CLASS)
+  if (*status==0) {
+    init_parser=1;
     ccl_run_class(cosmo, &fc,&pr,&ba,&th,&pt,&tr,&pm,&sp,&nl,&le,&op,init_arr,status);
-
-  if (parser_free(&fc)== _FAILURE_) {
-    *status = CCL_ERROR_CLASS;
-    ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_cosmology_compute_power_class(): Error freeing CLASS parser\n");
   }
+  
+  if(init_parser)
+    parser_free(&fc);
   
   double kmin,kmax,ndecades,amin,amax,ic;
   int nk,na,s;
-  double *x=NULL, *z=NULL, *y2d_lin=NULL, *y2d_nl=NULL;
+  double *lk=NULL, *aa=NULL, *lpk_ln=NULL, *lpk_nl=NULL;
   if (*status == 0) {
     //CLASS calculations done - now allocate CCL splines
     kmin = 2*exp(sp.ln_k[0]);
@@ -464,51 +465,52 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int * statu
 
     // The x array is initially k, but will later
     // be overwritten with log(k)
-    x=ccl_log_spacing(kmin, kmax, nk);
-    if(x==NULL) {
+    lk=ccl_log_spacing(kmin, kmax, nk);
+    if(lk==NULL) {
       *status = CCL_ERROR_MEMORY;
       ccl_cosmology_set_status_message(cosmo,"ccl_power.c: ccl_cosmology_compute_power_class(): memory allocation\n");
     }
   }
   
   if (*status == 0) {
-    z=ccl_linlog_spacing(amin, ccl_splines->A_SPLINE_MIN_PK,
+    aa=ccl_linlog_spacing(amin, ccl_splines->A_SPLINE_MIN_PK,
 			 amax, ccl_splines->A_SPLINE_NLOG_PK,
 			 ccl_splines->A_SPLINE_NA_PK);
-    if(z==NULL) {
+    if(aa==NULL) {
       *status = CCL_ERROR_MEMORY;
       ccl_cosmology_set_status_message(cosmo,"ccl_power.c: ccl_cosmology_compute_power_class(): memory allocation\n");
     }
   }
+  
   if(*status==0) {
-    y2d_lin = malloc(nk * na * sizeof(double));
-    if(y2d_lin==NULL) {
+    lpk_ln = malloc(nk * na * sizeof(double));
+    if(lpk_ln==NULL) {
       *status = CCL_ERROR_MEMORY;
       ccl_cosmology_set_status_message(cosmo,"ccl_power.c: ccl_cosmology_compute_power_class(): memory allocation\n");
     }
   }
+  
   if(*status==0) {
-    y2d_nl = malloc(nk * na * sizeof(double));
-    if(y2d_nl==NULL) {
+    lpk_nl = malloc(nk * na * sizeof(double));
+    if(lpk_nl==NULL) {
       *status = CCL_ERROR_MEMORY;
       ccl_cosmology_set_status_message(cosmo,"ccl_power.c: ccl_cosmology_compute_power_class(): memory allocation\n");
     }
   }
 
   if(*status==0) {
-    // After this loop x will contain log(k), y will contain log(P_nl), z will contain log(P_lin)
-    // all in Mpc, not Mpc/h units!
+    // After this loop lk will contain log(k), lpk_ln will contain log(P_lin), all in Mpc, not Mpc/h units!
     double psout_l;
     s=0;
     for (int i=0; i<nk; i++) {
       for (int j = 0; j < na; j++) {
-	//The 2D interpolation routines access the function values y_{k_ia_j} with the following ordering:
-	//y_ij = y2d[j*N_k + i]
+	//The 2D interpolation routines access the function values pk_{k_ia_j} with the following ordering:
+	//pk_ij = pk[j*N_k + i]
 	//with i = 0,...,N_k-1 and j = 0,...,N_a-1.
-	s |= spectra_pk_at_k_and_z(&ba, &pm, &sp,x[i],1./z[j]-1.+1e-10, &psout_l,&ic);
-	y2d_lin[j*nk+i] = log(psout_l);
+	s |= spectra_pk_at_k_and_z(&ba, &pm, &sp,lk[i],1./aa[j]-1.+1e-10, &psout_l,&ic);
+	lpk_ln[j*nk+i] = log(psout_l);
       }
-      x[i] = log(x[i]);
+      lk[i] = log(lk[i]);
     }
     if(s) {
       *status = CCL_ERROR_CLASS;
@@ -517,7 +519,7 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int * statu
   }
 
   if(*status==0)
-    cosmo->data.p_lin=ccl_p2d_t_new(na,z,nk,x,y2d_lin,1,2,ccl_p2d_cclgrowth,1,NULL,0,ccl_p2d_3,status);
+    cosmo->data.p_lin=ccl_p2d_t_new(na,aa,nk,lk,lpk_ln,1,2,ccl_p2d_cclgrowth,1,NULL,0,ccl_p2d_3,status);
 
   if(*status==0) {
     // At the moment KMIN can't be less than CLASS's kmin in the nonlinear case.
@@ -534,10 +536,10 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int * statu
     for (int i=0; i<nk; i++) {
       for (int j = 0; j < na; j++) {
 	if(cosmo->config.matter_power_spectrum_method==ccl_halofit)
-	  s |= spectra_pk_nl_at_k_and_z(&ba, &pm, &sp,exp(x[i]),1./z[j]-1.+1e-10,&psout_nl);
+	  s |= spectra_pk_nl_at_k_and_z(&ba, &pm, &sp,exp(lk[i]),1./aa[j]-1.+1e-10,&psout_nl);
 	else
-	  s |= spectra_pk_at_k_and_z(&ba, &pm, &sp,exp(x[i]),1./z[j]-1.+1e-10, &psout_nl,&ic);
-	y2d_nl[j*nk+i] = log(psout_nl);
+	  s |= spectra_pk_at_k_and_z(&ba, &pm, &sp,exp(lk[i]),1./aa[j]-1.+1e-10, &psout_nl,&ic);
+	lpk_nl[j*nk+i] = log(psout_nl);
       }
     }
       
@@ -549,17 +551,17 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int * statu
   
   if(*status==0) {
     if(cosmo->config.baryons_power_spectrum_method==ccl_bcm)
-      correct_bcm(cosmo,na,z,nk,x,y2d_nl,status);
+      correct_bcm(cosmo,na,aa,nk,lk,lpk_nl,status);
   }
   
   if(*status==0)    
-    cosmo->data.p_nl=ccl_p2d_t_new(na,z,nk,x,y2d_nl,1,2,ccl_p2d_cclgrowth,1,NULL,0,ccl_p2d_3,status);
+    cosmo->data.p_nl=ccl_p2d_t_new(na,aa,nk,lk,lpk_nl,1,2,ccl_p2d_cclgrowth,1,NULL,0,ccl_p2d_3,status);
 
-  ccl_free_class_structs(cosmo, &ba,&th,&pt,&tr,&pm,&sp,&nl,&le,init_arr,status);
-  free(x);
-  free(z);
-  free(y2d_nl);
-  free(y2d_lin);
+  ccl_free_class_structs(cosmo,&ba,&th,&pt,&tr,&pm,&sp,&nl,&le,init_arr,status);
+  free(lk);
+  free(aa);
+  free(lpk_nl);
+  free(lpk_ln);
 }
 
 typedef struct {
@@ -891,263 +893,165 @@ TASK: provide spline for the emulated power spectrum from Cosmic EMU
 
 static void ccl_cosmology_compute_power_emu(ccl_cosmology * cosmo, int * status)
 {
-  struct precision pr;        // for precision parameters
-  struct background ba;       // for cosmological background
-  struct thermo th;           // for thermodynamics
-  struct perturbs pt;         // for source functions
-  struct transfers tr;        // for transfer functions
-  struct primordial pm;       // for primordial spectra
-  struct spectra sp;          // for output spectra
-  struct nonlinear nl;        // for non-linear spectra
-  struct lensing le;
-  struct output op;
-  struct file_content fc;
-
   double Omeganuh2_eq;
 
-  ErrorMsg errmsg; // for error messages
-  // generate file_content structure
-  // Configuration parameters will be passed through this structure,
-  // to avoid writing and reading .ini files for every call
-  int parser_length = 20;
-  int init_arr[7]={0,0,0,0,0,0,0};
-  if (parser_init(&fc,parser_length,"none",errmsg) == _FAILURE_) {
-    *status = CCL_ERROR_CLASS;
-    ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_cosmology_compute_power_emu(): parser init error:%s\n", errmsg);
-    return;
-  }
-
   // Check ranges to see if the cosmology is valid
-  if((cosmo->params.h<0.55) || (cosmo->params.h>0.85)){
-    *status=CCL_ERROR_INCONSISTENT;
-    ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_cosmology_compute_power_emu(): h is outside allowed range\n");
-    return;
+  if(*status==0) {
+    if((cosmo->params.h<0.55) || (cosmo->params.h>0.85)){
+      *status=CCL_ERROR_INCONSISTENT;
+      ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_cosmology_compute_power_emu(): h is outside allowed range\n");
+    }
   }
 
-  // Check if the cosmology has been set up with equal neutrino masses for the emulator
-  // If not, check if the user has forced redistribution of masses and if so do this.
-  if(cosmo->params.N_nu_mass>0) {
-    if (cosmo->config.emulator_neutrinos_method == ccl_emu_strict){
-      if (cosmo->params.N_nu_mass==3){
-	if (cosmo->params.mnu[0] != cosmo->params.mnu[1] || cosmo->params.mnu[0] != cosmo->params.mnu[2] || cosmo->params.mnu[1] != cosmo->params.mnu[2]){
+  if(*status==0) { 
+   // Check if the cosmology has been set up with equal neutrino masses for the emulator
+    // If not, check if the user has forced redistribution of masses and if so do this.
+    if(cosmo->params.N_nu_mass>0) {
+      if (cosmo->config.emulator_neutrinos_method == ccl_emu_strict){
+	if (cosmo->params.N_nu_mass==3){
+	  if (cosmo->params.mnu[0] != cosmo->params.mnu[1] || cosmo->params.mnu[0] != cosmo->params.mnu[2] || cosmo->params.mnu[1] != cosmo->params.mnu[2]){
+	    *status = CCL_ERROR_INCONSISTENT;
+	    ccl_cosmology_set_status_message(cosmo,
+					     "ccl_power.c: ccl_cosmology_compute_power_emu(): In the default configuration, you must pass a list of 3 "
+					     "equal neutrino masses or pass a sum and set mnu_type = ccl_mnu_sum_equal. If you wish to over-ride this, "
+					     "set config->emulator_neutrinos_method = 'ccl_emu_equalize'. This will force the neutrinos to be of equal "
+					     "mass but will result in internal inconsistencies.\n");
+	  }
+	}else if (cosmo->params.N_nu_mass!=3){
 	  *status = CCL_ERROR_INCONSISTENT;
 	  ccl_cosmology_set_status_message(cosmo,
 					   "ccl_power.c: ccl_cosmology_compute_power_emu(): In the default configuration, you must pass a list of 3 "
 					   "equal neutrino masses or pass a sum and set mnu_type = ccl_mnu_sum_equal. If you wish to over-ride this, "
 					   "set config->emulator_neutrinos_method = 'ccl_emu_equalize'. This will force the neutrinos to be of equal "
 					   "mass but will result in internal inconsistencies.\n");
-	  return;
 	}
-      }else if (cosmo->params.N_nu_mass!=3){
-	*status = CCL_ERROR_INCONSISTENT;
-	ccl_cosmology_set_status_message(cosmo,
-					 "ccl_power.c: ccl_cosmology_compute_power_emu(): In the default configuration, you must pass a list of 3 "
-					 "equal neutrino masses or pass a sum and set mnu_type = ccl_mnu_sum_equal. If you wish to over-ride this, "
-					 "set config->emulator_neutrinos_method = 'ccl_emu_equalize'. This will force the neutrinos to be of equal "
-					 "mass but will result in internal inconsistencies.\n");
-	return;
+      }else if (cosmo->config.emulator_neutrinos_method == ccl_emu_equalize){
+	// Reset the masses to equal
+	double mnu_eq[3] = {cosmo->params.sum_nu_masses / 3., cosmo->params.sum_nu_masses / 3., cosmo->params.sum_nu_masses / 3.};
+	Omeganuh2_eq = ccl_Omeganuh2(1.0, 3, mnu_eq, cosmo->params.T_CMB, cosmo->data.accelerator, status);
       }
-    }else if (cosmo->config.emulator_neutrinos_method == ccl_emu_equalize){
-      // Reset the masses to equal
-      double mnu_eq[3] = {cosmo->params.sum_nu_masses / 3., cosmo->params.sum_nu_masses / 3., cosmo->params.sum_nu_masses / 3.};
-      Omeganuh2_eq = ccl_Omeganuh2(1.0, 3, mnu_eq, cosmo->params.T_CMB, cosmo->data.accelerator, status);
-    }
-  } else {
-    if(fabs(cosmo->params.N_nu_rel - 3.04)>1.e-6){
-      *status=CCL_ERROR_INCONSISTENT;
-      ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_cosmology_compute_power_emu(): Set Neff = 3.04 for cosmic emulator predictions in absence of massive neutrinos.\n");
-      return;
-    }
-  }
-  double w0wacomb = -cosmo->params.w0 - cosmo->params.wa;
-  if(w0wacomb<8.1e-3){ //0.3^4
-    *status=CCL_ERROR_INCONSISTENT;
-    ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_cosmology_compute_power_emu(): w0 and wa do not satisfy the emulator bound\n");
-    return;
-  }
-  if(cosmo->params.Omega_n_mass*cosmo->params.h*cosmo->params.h>0.01){
-    *status=CCL_ERROR_INCONSISTENT;
-    ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_cosmology_compute_power_emu(): Omega_nu does not satisfy the emulator bound\n");
-    return;
-  }
-
-  // Check to see if sigma8 was defined
-  if(isnan(cosmo->params.sigma8)){
-    *status=CCL_ERROR_INCONSISTENT;
-    ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_cosmology_compute_power_emu(): sigma8 is not defined; specify sigma8 instead of A_s\n");
-    return;
-  }
-
-  // Prepare to run CLASS for linear scales
-  ccl_fill_class_parameters(cosmo,&fc,parser_length, status);
-
-  if (*status != CCL_ERROR_CLASS)
-    ccl_run_class(cosmo, &fc,&pr,&ba,&th,&pt,&tr,&pm,&sp,&nl,&le,&op,init_arr,status);
-
-  if (parser_free(&fc)== _FAILURE_) {
-    *status = CCL_ERROR_CLASS;
-    ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_cosmology_compute_power_class(): Error freeing CLASS parser\n");
-  }
-
-  double kmin,kmax,ndecades,amin,amax,ic;
-  int nk,na,s;
-  double *x=NULL,*z=NULL,*y2d_lin=NULL;
-  double *y=NULL,*logx=NULL,*xstar=NULL,*zemu=NULL,*y2d_nl=NULL;
-  if (*status == 0) {
-    //CLASS calculations done - now allocate CCL splines
-    kmin = 2*exp(sp.ln_k[0]);
-    kmax = ccl_splines->K_MAX_SPLINE;
-    //Compute nk from number of decades and N_K = # k per decade
-    ndecades = log10(kmax) - log10(kmin);
-    nk = (int)ceil(ndecades*ccl_splines->N_K);
-    amin = ccl_splines->A_SPLINE_MINLOG_PK;
-    amax = ccl_splines->A_SPLINE_MAX;
-    na = ccl_splines->A_SPLINE_NA_PK+ccl_splines->A_SPLINE_NLOG_PK-1;
-
-    // The x array is initially k, but will later
-    // be overwritten with log(k)
-    x = ccl_log_spacing(kmin, kmax, nk);
-    if(x==NULL) {
-      *status = CCL_ERROR_MEMORY;
-      ccl_cosmology_set_status_message(cosmo,"ccl_power.c: ccl_cosmology_compute_power_class(): memory allocation\n");
-    }
-  }
-
-  if (*status == 0) {
-    z = ccl_linlog_spacing(amin, ccl_splines->A_SPLINE_MIN_PK,
-			   amax, ccl_splines->A_SPLINE_NLOG_PK,
-			   ccl_splines->A_SPLINE_NA_PK);
-    if(z==NULL) {
-      *status = CCL_ERROR_MEMORY;
-      ccl_cosmology_set_status_message(cosmo,"ccl_power.c: ccl_cosmology_compute_power_class(): memory allocation\n");
-    }
-  }
-  if (*status == 0) {
-    y2d_lin = malloc(nk * na * sizeof(double));
-    if(y2d_lin==NULL) {
-      *status = CCL_ERROR_SPLINE;
-      ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_cosmology_compute_power_class(): memory allocation error\n");
+    } else {
+      if(fabs(cosmo->params.N_nu_rel - 3.04)>1.e-6){
+	*status=CCL_ERROR_INCONSISTENT;
+	ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_cosmology_compute_power_emu(): Set Neff = 3.04 for cosmic emulator predictions in absence of massive neutrinos.\n");
+      }
     }
   }
 
   if(*status==0) {
-    // After this loop x will contain log(k), y will contain log(P_nl), z will contain log(P_lin)
-    // all in Mpc, not Mpc/h units!
-    double psout_l;
-    s=0;
-    for (int i=0; i<nk; i++) {
-      for (int j = 0; j < na; j++) {
-	//The 2D interpolation routines access the function values y_{k_ia_j} with the following ordering:
-	//y_ij = y2d[j*N_k + i]
-	//with i = 0,...,N_k-1 and j = 0,...,N_a-1.
-	s |= spectra_pk_at_k_and_z(&ba, &pm, &sp,x[i],1./z[j]-1.+1e-10, &psout_l,&ic);
-	y2d_lin[j*nk+i] = log(psout_l);
-      }
-      x[i] = log(x[i]);
+    double w0wacomb = -cosmo->params.w0 - cosmo->params.wa;
+    if(w0wacomb<8.1e-3){ //0.3^4
+      *status=CCL_ERROR_INCONSISTENT;
+      ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_cosmology_compute_power_emu(): w0 and wa do not satisfy the emulator bound\n");
     }
-    if(s) {
-      *status = CCL_ERROR_CLASS;
-      ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_cosmology_compute_power_class(): Error computing CLASS power spectrum\n");
+  }
+  
+  if(*status==0) {
+    if(cosmo->params.Omega_n_mass*cosmo->params.h*cosmo->params.h>0.01){
+      *status=CCL_ERROR_INCONSISTENT;
+      ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_cosmology_compute_power_emu(): Omega_nu does not satisfy the emulator bound\n");
     }
   }
 
-  if(*status==0)
-    cosmo->data.p_lin=ccl_p2d_t_new(na,z,nk,x,y2d_lin,1,2,ccl_p2d_cclgrowth,1,NULL,0,ccl_p2d_3,status);
+  if(*status==0) {
+    // Check to see if sigma8 was defined
+    if(isnan(cosmo->params.sigma8)){
+      *status=CCL_ERROR_INCONSISTENT;
+      ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_cosmology_compute_power_emu(): sigma8 is not defined; specify sigma8 instead of A_s\n");
+    }
+  }
 
+  //Initially compute linear power spectrum with CLASS
+  if(*status==0)
+    ccl_cosmology_compute_power_class(cosmo,status);
+
+  //Free up non-linear pk spline, since we'll replace that with the emulator
+  if(*status==0)
+    ccl_p2d_t_free(cosmo->data.p_nl);
+  
+  int na=ccl_splines->A_SPLINE_NA_PK;
+  double *lpk_1a=NULL,*lk=NULL,*aemu=NULL,*lpk_nl=NULL;
   if (*status == 0) {
     //Now start the NL computation with the emulator
     //These are the limits of the splining range
-    amin = A_MIN_EMU; //limit of the emulator
-    amax = ccl_splines->A_SPLINE_MAX;
-    na = ccl_splines->A_SPLINE_NA_PK;
-    // The x array is initially k, but will later
-    // be overwritten with log(k)
-    logx= malloc(NK_EMU*sizeof(double));
-    if(logx==NULL) {
+    aemu = ccl_linear_spacing(A_MIN_EMU,ccl_splines->A_SPLINE_MAX, na);
+    if(aemu==NULL) {
       *status=CCL_ERROR_MEMORY;
       ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_cosmology_compute_power_emu(): memory allocation error\n");
     }
   }
   if (*status == 0) {
-    xstar = malloc(9 * sizeof(double));
-    if(xstar==NULL) {
+    lk=malloc(NK_EMU*sizeof(double));
+    if(lk==NULL) {
+      *status=CCL_ERROR_MEMORY;
+      ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_cosmology_compute_power_emu(): memory allocation error\n");
+    }
+  }
+  if (*status == 0) { //The emulator only computes power spectra at fixed nodes in k, given by the global variable "mode"
+    for (int i=0; i<NK_EMU; i++)
+      lk[i] = log(mode[i]);
+  }
+  if (*status == 0) {
+    lpk_nl = malloc(NK_EMU * na * sizeof(double));
+    if(lpk_nl==NULL) {
       *status=CCL_ERROR_MEMORY;
       ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_cosmology_compute_power_emu(): memory allocation error\n");
     }
   }
   if (*status == 0) {
-    zemu = ccl_linear_spacing(amin,amax, na);
-    if(zemu==NULL) {
-      *status=CCL_ERROR_MEMORY;
-      ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_cosmology_compute_power_emu(): memory allocation error\n");
-    }
-  }
-  if (*status == 0) {
-    y2d_nl = malloc(NK_EMU * na * sizeof(double));
-    if(y2d_nl==NULL) {
-      *status=CCL_ERROR_MEMORY;
-      ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_cosmology_compute_power_emu(): memory allocation error\n");
-    }
-  }
-  if (*status == 0) {
-    y=malloc(NK_EMU*sizeof(double));
-    if(y2d_nl==NULL) {
+    lpk_1a=malloc(NK_EMU*sizeof(double));
+    if(lpk_1a==NULL) {
       *status=CCL_ERROR_MEMORY;
       ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_cosmology_compute_power_emu(): memory allocation error\n");
     }
   }
   
   if (*status == 0) {
+    double emu_par[9];
     //For each redshift:
     for (int j = 0; j < na; j++){
-      //Turn cosmology into xstar:
-      xstar[0] = (cosmo->params.Omega_c+cosmo->params.Omega_b)*cosmo->params.h*cosmo->params.h;
-      xstar[1] = cosmo->params.Omega_b*cosmo->params.h*cosmo->params.h;
-      xstar[2] = cosmo->params.sigma8;
-      xstar[3] = cosmo->params.h;
-      xstar[4] = cosmo->params.n_s;
-      xstar[5] = cosmo->params.w0;
-      xstar[6] = cosmo->params.wa;
+      //Turn cosmology into emu_par:
+      emu_par[0] = (cosmo->params.Omega_c+cosmo->params.Omega_b)*cosmo->params.h*cosmo->params.h;
+      emu_par[1] = cosmo->params.Omega_b*cosmo->params.h*cosmo->params.h;
+      emu_par[2] = cosmo->params.sigma8;
+      emu_par[3] = cosmo->params.h;
+      emu_par[4] = cosmo->params.n_s;
+      emu_par[5] = cosmo->params.w0;
+      emu_par[6] = cosmo->params.wa;
       if ((cosmo->params.N_nu_mass>0) && (cosmo->config.emulator_neutrinos_method == ccl_emu_equalize)){
-	xstar[7] = Omeganuh2_eq;
+	emu_par[7] = Omeganuh2_eq;
       }else{
-        xstar[7] = cosmo->params.Omega_n_mass*cosmo->params.h*cosmo->params.h;
+	emu_par[7] = cosmo->params.Omega_n_mass*cosmo->params.h*cosmo->params.h;
       }
-      xstar[8] = 1./zemu[j]-1;
+      emu_par[8] = 1./aemu[j]-1;
       //Need to have this here because otherwise overwritten by emu in each loop
       
       //Call emulator at this redshift
-      ccl_pkemu(xstar,NK_EMU,y, status, cosmo);
-      ccl_check_status(cosmo, status);
-      if (y == NULL) {
+      ccl_pkemu(emu_par,NK_EMU,lpk_1a, status, cosmo);
+      if (*status) {
 	*status=CCL_ERROR_MEMORY;
 	ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_cosmology_compute_power_emu(): memory allocation error\n");
 	break;
       }
-      for (int i=0; i<NK_EMU; i++){
-	logx[i] = log(mode[i]);
-	y2d_nl[j*NK_EMU+i] = log(y[i]);
-      }
+      for (int i=0; i<NK_EMU; i++)
+	lpk_nl[j*NK_EMU+i] = log(lpk_1a[i]);
     }
   }
 
   if (*status == 0) {
     if(cosmo->config.baryons_power_spectrum_method==ccl_bcm)
-      correct_bcm(cosmo,na,zemu,NK_EMU,logx,y2d_nl,status);
+      correct_bcm(cosmo,na,aemu,NK_EMU,lk,lpk_nl,status);
   }
 
   if(*status==0) {
-    cosmo->data.p_nl=ccl_p2d_t_new(na,zemu,NK_EMU,logx,y2d_nl,1,2,ccl_p2d_no_extrapol,
+    cosmo->data.p_nl=ccl_p2d_t_new(na,aemu,NK_EMU,lk,lpk_nl,1,2,ccl_p2d_no_extrapol,
 				   1,NULL,0,ccl_p2d_3,status);
   }
 
-  free(x);
-  free(y);
-  free(y2d_lin);
-  free(logx);
-  free(xstar);
-  free(zemu);
-  free(y2d_nl);
+  free(lpk_1a);
+  free(lk);
+  free(aemu);
+  free(lpk_nl);
 }
 
 /*------ ROUTINE: ccl_cosmology_compute_power -----
