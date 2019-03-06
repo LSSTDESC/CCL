@@ -41,9 +41,13 @@ class Pk2D(object):
              For reference, CCL will use bicubic interpolation to evaluate
              the power spectrum at any intermediate point in k and a.
         interp_order_lok (int): extrapolation order to be used on k-values
-             below the minimum of the splines (use 0, 1 or 2).
+             below the minimum of the splines (use 0, 1 or 2). Note that
+             the extrapolation will be done in either log(P(k)) or P(k),
+             depending on the value of `is_logp`.
         interp_order_hik (int): extrapolation order to be used on k-values
-             above the maximum of the splines (use 0, 1 or 2).
+             above the maximum of the splines (use 0, 1 or 2). Note that
+             the extrapolation will be done in either log(P(k)) or P(k),
+             depending on the value of `is_logp`.
         is_logp (boolean): if True, pkfunc/pkarr return/hold the natural
              logarithm of the power spectrum. Otherwise, the true value
              of the power spectrum is expected.
