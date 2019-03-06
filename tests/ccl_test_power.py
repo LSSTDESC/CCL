@@ -96,7 +96,7 @@ def calc_power_spectrum_muSig(transfer_fn, matter_power, linear):
           
     for _a in a:
         if ((transfer_fn !=	'boltzmann') and (transfer_fn != 'boltzmann_class') and (transfer_fn!='class')):
-		    assert_raises(ValueError, ccl.Cosmology, Omega_c=Omega_c, Omega_b=Omega_b, 
+            assert_raises(ValueError, ccl.Cosmology, Omega_c=Omega_c, Omega_b=Omega_b,
                        h=h, sigma8=sigma8, n_s=n_s, Omega_k=Omega_k,
                        w0=w0_vals[0], wa=wa_vals[0], transfer_function=transfer_fn,
                        matter_power_spectrum=matter_power,
@@ -116,7 +116,7 @@ def calc_power_spectrum_muSig(transfer_fn, matter_power, linear):
                     pk_lin = ccl.nonlin_matter_power(cosmo, k, _a)
                     assert_(all_finite(pk_lin))
                 else:
-					assert_raises(RuntimeError, ccl.nonlin_matter_power, cosmo, k, _a)
+                    assert_raises(RuntimeError, ccl.nonlin_matter_power, cosmo, k, _a)
 
 def loop_over_params(transfer_fn, matter_power, lin, raise_errs):
     """
