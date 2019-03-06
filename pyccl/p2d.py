@@ -7,7 +7,7 @@ import numpy as np
 class Pk2D(object):
     """A power spectrum class holding the information needed to reconstruct an
     arbitrary function of wavenumber and scale factor.
-    
+
     Args:
         pkfunc (:obj:function): a function returning a floating point
              number or numpy array with the signature `f(k,a)`, where k
@@ -53,14 +53,15 @@ class Pk2D(object):
              wavenumber.
     """
     def __init__(self, pkfunc=None, a_arr=None, lk_arr=None, pk_arr=None,
-                 is_logp=True, interp_order_lok=1, interp_order_hik=2, cosmo=None):
+                 is_logp=True, interp_order_lok=1, interp_order_hik=2,
+                 cosmo=None):
 
         status = 0
         if pkfunc is None:  # Initialize power spectrum from 2D array
             # Make sure input makes sense
             if (a_arr is None) or (lk_arr is None) or (pk_arr is None):
                 raise ValueError("If you do not provide a function, "
-                                "you must provide arrays")
+                                 "you must provide arrays")
 
             pkflat = pk_arr.flatten()
             # Check dimensions make sense
@@ -74,7 +75,8 @@ class Pk2D(object):
                 raise ValueError("Can't use input function")
 
             if cosmo is None:
-                raise ValueError("A cosmology is needed if initializing power spectrum from a function")
+                raise ValueError("A cosmology is needed if initializing "
+                                 "power spectrum from a function")
 
             # Set k and a sampling from CCL parameters
             nk = lib.get_pk_spline_nk(cosmo.cosmo)
