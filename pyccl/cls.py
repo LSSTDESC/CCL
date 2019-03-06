@@ -308,6 +308,7 @@ def angular_cl(cosmo, cltracer1, cltracer2, ell, p_of_k_a=None,
             :math:`\\ell`.
     """
     # Access ccl_cosmology object
+    cosmo_in = cosmo
     cosmo = cosmo.cosmo
 
     if p_of_k_a is not None:
@@ -341,5 +342,5 @@ def angular_cl(cosmo, cltracer1, cltracer2, ell, p_of_k_a=None,
         cl, status = lib.angular_cl_vec(
             cosmo, clt1, clt2, psp, l_limber, l_logstep,
             l_linstep, ell, len(ell), status)
-    check(status)
+    check(status, cosmo=cosmo_in)
     return cl

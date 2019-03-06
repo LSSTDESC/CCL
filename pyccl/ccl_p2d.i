@@ -12,7 +12,6 @@
 
 %include "../include/ccl_p2d.h"
 %include "../include/ccl_core.h"
-%include "../include/ccl_params.h"
 
 %inline %{
 ccl_p2d_t *set_p2d_new_from_arrays(double* lkarr,int nk,
@@ -28,14 +27,14 @@ ccl_p2d_t *set_p2d_new_from_arrays(double* lkarr,int nk,
   return psp;
 }
 
-void get_pk_spline_a(int ndout,double* doutput,int *status)
+void get_pk_spline_a(ccl_cosmology *cosmo,int ndout,double* doutput,int *status)
 {
-  ccl_get_pk_spline_a_array(ndout,doutput,status);
+  ccl_get_pk_spline_a_array(cosmo,ndout,doutput,status);
 }
 
-void get_pk_spline_lk(int ndout,double* doutput,int *status)
+void get_pk_spline_lk(ccl_cosmology *cosmo,int ndout,double* doutput,int *status)
 {
-  ccl_get_pk_spline_lk_array(ndout,doutput,status);
+  ccl_get_pk_spline_lk_array(cosmo,ndout,doutput,status);
 }
 
 double p2d_eval_single(ccl_p2d_t *psp,double lk,double a,ccl_cosmology *cosmo,int *status)

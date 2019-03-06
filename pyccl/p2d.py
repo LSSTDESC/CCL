@@ -11,7 +11,7 @@ class Pk2D(object):
     arbitrary function of wavenumber and scale factor.
     """
     def __init__(self, pkfunc=None, a_arr=None, lk_arr=None, pk_arr=None,
-                 is_logp=True, interp_order_lok=1, interp_order_hik=2):
+                 is_logp=True, interp_order_lok=1, interp_order_hik=2, cosmo=None):
         """Constructor for Pk2D objects.
 
         Args:
@@ -53,6 +53,10 @@ class Pk2D(object):
             is_logp (boolean): if True, pkfunc/pkarr return/hold the natural
                   logarithm of the power spectrum. Otherwise, the true value
                   of the power spectrum is expected.
+            cosmo (:obj:`Cosmology`): Cosmology object. The cosmology object
+                  is needed in order if `pkfunc` is not `None`. The object is
+                  used to determine the sampling rate in scale factor and
+                  wavenumber.
         """
         status = 0
         if(pkfunc is None):  # Initialize power spectrum from 2D array
@@ -72,12 +76,15 @@ class Pk2D(object):
             except Exception:
                 raise TypeError("Can't use input function")
 
+            if cosmo is None:
+                raise ValueError("A cosmology is needed if initializing power spectrum from a function")
+
             # Set k and a sampling from CCL parameters
-            nk = lib.get_pk_spline_nk()
-            na = lib.get_pk_spline_na()
-            a_arr, status = lib.get_pk_spline_a(na, status)
+            nk = lib.get_pk_spline_nk(cosmo.cosmo)
+            na = lib.get_pk_spline_na(cosmo.cosmo)
+            a_arr, status = lib.get_pk_spline_a(cosmo.cosmo, na, status)
             check(status)
-            lk_arr, status = lib.get_pk_spline_lk(nk, status)
+            lk_arr, status = lib.get_pk_spline_lk(cosmo.cosmo, nk, status)
             check(status)
 
             # Compute power spectrum on 2D grid

@@ -1,7 +1,6 @@
 #include <gsl/gsl_sf_bessel.h>
 #include "ccl.h"
 #include "ctest.h"
-#include "ccl_params.h"
 #include "ccl_core.h"
 
 CTEST(spacing_tests, linear_spacing_simple) {

@@ -10,7 +10,6 @@
 #include <class.h> /* from extern/ */
 
 #include "ccl.h"
-#include "ccl_params.h"
 #include "ccl_emu17.h"
 #include "ccl_emu17_params.h"
 
@@ -322,10 +321,10 @@ static void ccl_fill_class_parameters(ccl_cosmology * cosmo, struct file_content
     strcpy(fc->value[1],"none");
 
   strcpy(fc->name[2],"P_k_max_1/Mpc");
-  sprintf(fc->value[2],"%.15e",ccl_splines->K_MAX_SPLINE); //in units of 1/Mpc, corroborated with ccl_constants.h
+  sprintf(fc->value[2],"%.15e",cosmo->spline_params.K_MAX_SPLINE); //in units of 1/Mpc, corroborated with ccl_constants.h
 
   strcpy(fc->name[3],"z_max_pk");
-  sprintf(fc->value[3],"%.15e",1./ccl_splines->A_SPLINE_MINLOG_PK-1.);
+  sprintf(fc->value[3],"%.15e",1./cosmo->spline_params.A_SPLINE_MINLOG_PK-1.);
 
   strcpy(fc->name[4],"modes");
   strcpy(fc->value[4],"s");
@@ -455,13 +454,13 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int * statu
   if (*status == 0) {
     //CLASS calculations done - now allocate CCL splines
     kmin = 2*exp(sp.ln_k[0]);
-    kmax = ccl_splines->K_MAX_SPLINE;
+    kmax = cosmo->spline_params.K_MAX_SPLINE;
     //Compute nk from number of decades and N_K = # k per decade
     ndecades = log10(kmax) - log10(kmin);
-    nk = (int)ceil(ndecades*ccl_splines->N_K);
-    amin = ccl_splines->A_SPLINE_MINLOG_PK;
-    amax = ccl_splines->A_SPLINE_MAX;
-    na = ccl_splines->A_SPLINE_NA_PK+ccl_splines->A_SPLINE_NLOG_PK-1;
+    nk = (int)ceil(ndecades*cosmo->spline_params.N_K);
+    amin = cosmo->spline_params.A_SPLINE_MINLOG_PK;
+    amax = cosmo->spline_params.A_SPLINE_MAX;
+    na = cosmo->spline_params.A_SPLINE_NA_PK+cosmo->spline_params.A_SPLINE_NLOG_PK-1;
 
     // The x array is initially k, but will later
     // be overwritten with log(k)
@@ -473,9 +472,9 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int * statu
   }
   
   if (*status == 0) {
-    aa=ccl_linlog_spacing(amin, ccl_splines->A_SPLINE_MIN_PK,
-			 amax, ccl_splines->A_SPLINE_NLOG_PK,
-			 ccl_splines->A_SPLINE_NA_PK);
+    aa=ccl_linlog_spacing(amin, cosmo->spline_params.A_SPLINE_MIN_PK,
+			 amax, cosmo->spline_params.A_SPLINE_NLOG_PK,
+			 cosmo->spline_params.A_SPLINE_NA_PK);
     if(aa==NULL) {
       *status = CCL_ERROR_MEMORY;
       ccl_cosmology_set_status_message(cosmo,"ccl_power.c: ccl_cosmology_compute_power_class(): memory allocation\n");
@@ -775,15 +774,15 @@ static void ccl_cosmology_compute_power_analytic(ccl_cosmology * cosmo, void *pa
 {
   double sigma8,log_sigma8;
   //These are the limits of the splining range
-  double kmin = ccl_splines->K_MIN;
-  double kmax = ccl_splines->K_MAX;
+  double kmin = cosmo->spline_params.K_MIN;
+  double kmax = cosmo->spline_params.K_MAX;
   //Compute nk from number of decades and N_K = # k per decade
   double ndecades = log10(kmax) - log10(kmin);
-  int nk = (int)ceil(ndecades*ccl_splines->N_K);
+  int nk = (int)ceil(ndecades*cosmo->spline_params.N_K);
   // Compute na using predefined spline spacing
-  double amin = ccl_splines->A_SPLINE_MINLOG_PK;
-  double amax = ccl_splines->A_SPLINE_MAX;
-  int na = ccl_splines->A_SPLINE_NA_PK+ccl_splines->A_SPLINE_NLOG_PK-1;
+  double amin = cosmo->spline_params.A_SPLINE_MINLOG_PK;
+  double amax = cosmo->spline_params.A_SPLINE_MAX;
+  int na = cosmo->spline_params.A_SPLINE_NA_PK+cosmo->spline_params.A_SPLINE_NLOG_PK-1;
 
   // Exit if sigma8 wasn't specified
   if (isnan(cosmo->params.sigma8)) {
@@ -808,9 +807,9 @@ static void ccl_cosmology_compute_power_analytic(ccl_cosmology * cosmo, void *pa
     }
   }
   if(*status==0) {
-    z=ccl_linlog_spacing(amin, ccl_splines->A_SPLINE_MIN_PK,
-			 amax, ccl_splines->A_SPLINE_NLOG_PK,
-			 ccl_splines->A_SPLINE_NA_PK);
+    z=ccl_linlog_spacing(amin, cosmo->spline_params.A_SPLINE_MIN_PK,
+			 amax, cosmo->spline_params.A_SPLINE_NLOG_PK,
+			 cosmo->spline_params.A_SPLINE_NA_PK);
     if(z==NULL) {
       *status = CCL_ERROR_MEMORY;
       ccl_cosmology_set_status_message(cosmo,"ccl_power.c: ccl_cosmology_compute_power_analytic(): memory allocation\n");
@@ -961,12 +960,12 @@ static void ccl_cosmology_compute_power_emu(ccl_cosmology * cosmo, int * status)
   if(*status==0)
     ccl_p2d_t_free(cosmo->data.p_nl);
   
-  int na=ccl_splines->A_SPLINE_NA_PK;
+  int na=cosmo->spline_params.A_SPLINE_NA_PK;
   double *lpk_1a=NULL,*lk=NULL,*aemu=NULL,*lpk_nl=NULL;
   if (*status == 0) {
     //Now start the NL computation with the emulator
     //These are the limits of the splining range
-    aemu = ccl_linear_spacing(A_MIN_EMU,ccl_splines->A_SPLINE_MAX, na);
+    aemu = ccl_linear_spacing(A_MIN_EMU,cosmo->spline_params.A_SPLINE_MAX, na);
     if(aemu==NULL) {
       *status=CCL_ERROR_MEMORY;
       ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_cosmology_compute_power_emu(): memory allocation error\n");
@@ -1185,13 +1184,13 @@ double ccl_sigmaR(ccl_cosmology *cosmo,double R,double a,int *status)
 
   par.cosmo=cosmo;
   par.R=R;
-  gsl_integration_cquad_workspace *workspace=gsl_integration_cquad_workspace_alloc(ccl_gsl->N_ITERATION);
+  gsl_integration_cquad_workspace *workspace=gsl_integration_cquad_workspace_alloc(cosmo->gsl_params.N_ITERATION);
   gsl_function F;
   F.function=&sigmaR_integrand;
   F.params=&par;
   double sigma_R;
-  int gslstatus = gsl_integration_cquad(&F, log10(ccl_splines->K_MIN), log10(ccl_splines->K_MAX),
-				                                0.0, ccl_gsl->INTEGRATION_SIGMAR_EPSREL,
+  int gslstatus = gsl_integration_cquad(&F, log10(cosmo->spline_params.K_MIN), log10(cosmo->spline_params.K_MAX),
+				                                0.0, cosmo->gsl_params.INTEGRATION_SIGMAR_EPSREL,
                                         workspace,&sigma_R,NULL,NULL);
   if(gslstatus != GSL_SUCCESS) {
     ccl_raise_gsl_warning(gslstatus, "ccl_power.c: ccl_sigmaR():");
@@ -1216,13 +1215,13 @@ double ccl_sigmaV(ccl_cosmology *cosmo,double R,double a,int *status)
 
   par.cosmo=cosmo;
   par.R=R;
-  gsl_integration_cquad_workspace *workspace=gsl_integration_cquad_workspace_alloc(ccl_gsl->N_ITERATION);
+  gsl_integration_cquad_workspace *workspace=gsl_integration_cquad_workspace_alloc(cosmo->gsl_params.N_ITERATION);
   gsl_function F;
   F.function=&sigmaV_integrand;
   F.params=&par;
   double sigma_V;
-  int gslstatus = gsl_integration_cquad(&F, log10(ccl_splines->K_MIN), log10(ccl_splines->K_MAX),
-					0.0, ccl_gsl->INTEGRATION_SIGMAR_EPSREL,
+  int gslstatus = gsl_integration_cquad(&F, log10(cosmo->spline_params.K_MIN), log10(cosmo->spline_params.K_MAX),
+					0.0, cosmo->gsl_params.INTEGRATION_SIGMAR_EPSREL,
 					workspace,&sigma_V,NULL,NULL);
   
   if(gslstatus != GSL_SUCCESS) {

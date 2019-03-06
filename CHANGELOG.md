@@ -2,9 +2,16 @@
 
 ## C library
 - Fixed memory leak in CLASS power spectrum computations (#561, #562).
-- Fixed a bug where CLASS would crash due to small rounding errors at z = 0 
+- Fixed a bug where CLASS would crash due to small rounding errors at z = 0
   when evaluating power spectra (#563, #564).
 - Fixed bug in fftlog for some complex arguments (#565, #566).
+- Refactored spline and numerical parameters to be allocated per cosmology (#557).
+- Allow global physical constants to be changed (#557).
+- Fixed memory leaks in `ccl_correlation.c` (#581).
+
+## Python library
+- Improved error reporting for `angular_cl` computations (#567).
+- Allow spline, numerical and constant parameters to be set from Python (#557).
 
 # v 1.0 API changes :
 
@@ -60,7 +67,7 @@ The function ccl\_Omeganuh2\_to\_Mnu has been renamed ccl\_nu\_masses. The argum
 ## Python wrapper
 In core.py:
 
-In the Parameters class, the arguments 'N\_nu\_rel', and 'N\_nu\_mass' have been removed. The optional arguments 'Neff', 'mnu\_type', 'bcm\_log10Mc', 'bcm\_etab', and 'bcm\_ks' have been added. Similar changes occur in the Cosmology class. 
+In the Parameters class, the arguments 'N\_nu\_rel', and 'N\_nu\_mass' have been removed. The optional arguments 'Neff', 'mnu\_type', 'bcm\_log10Mc', 'bcm\_etab', and 'bcm\_ks' have been added. Similar changes occur in the Cosmology class.
 
 In neutrinos.py:
 

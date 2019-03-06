@@ -11,7 +11,7 @@ list(APPEND CMAKE_MODULE_PATH  "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 project(ccl VERSION 0.2.1)
 
     # Defines list of CCL src files
-    set(CCL_SRC src/ccl_background.c src/ccl_params.c src/ccl_core.c src/ccl_error.c src/ccl_redshifts.c
+    set(CCL_SRC src/ccl_background.c src/ccl_core.c src/ccl_error.c src/ccl_redshifts.c
                 src/ccl_p2d.c src/ccl_power.c src/ccl_utils.c src/ccl_cls.c src/ccl_massfunc.c src/ccl_neutrinos.c
                 src/ccl_emu17.c src/ccl_correlation.c src/ccl_halomod.c src/fftlog.c)
 
@@ -31,7 +31,7 @@ project(ccl VERSION 0.2.1)
 
 
     # Defines list of extra distribution files and directories to be installed on the system
-    set(EXTRA_DIST include/ccl_params.ini README.md LICENSE LICENSE_COSMICEMU)
+    set(EXTRA_DIST README.md LICENSE LICENSE_COSMICEMU)
     set(EXTRA_DIST_DIRS)
 
     # Uses system libraries or downloads and build if necessary
