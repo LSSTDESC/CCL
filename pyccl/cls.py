@@ -325,22 +325,13 @@ def angular_cl(cosmo, cltracer1, cltracer2, ell, p_of_k_a=None,
     clt2 = cltracer2.cltracer
 
     status = 0
+    ell_use = np.atleast_1d(ell)
     # Return Cl values, according to whether ell is an array or not
-    if isinstance(ell, float) or isinstance(ell, int):
-        # Use single-value function
-        cl_one, status = lib.angular_cl_vec(
-            cosmo, clt1, clt2, psp, l_limber, l_logstep,
-            l_linstep, [ell], 1, status)
-        cl = cl_one[0]
-    elif isinstance(ell, np.ndarray):
-        # Use vectorised function
-        cl, status = lib.angular_cl_vec(
-            cosmo, clt1, clt2, psp, l_limber, l_logstep,
-            l_linstep, ell, ell.size, status)
-    else:
-        # Use vectorised function
-        cl, status = lib.angular_cl_vec(
-            cosmo, clt1, clt2, psp, l_limber, l_logstep,
-            l_linstep, ell, len(ell), status)
+    cl, status = lib.angular_cl_vec(
+        cosmo, clt1, clt2, psp, l_limber, l_logstep,
+        l_linstep, ell_use, ell_use.size, status)
+    if ell_use.size==1:
+        cl = cl[0]
+
     check(status, cosmo=cosmo_in)
     return cl
