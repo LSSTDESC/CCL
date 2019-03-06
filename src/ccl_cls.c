@@ -451,7 +451,7 @@ static void clt_init_wL(CCL_ClTracer *clt,ccl_cosmology *cosmo,
       ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: clt_init_wL(): error computing lensing window\n");
     }
   }
-  
+
   if(*status==0) {
     clt->spl_wL=ccl_spline_init(nchi,x,y,y[0],0);
     if(clt->spl_wL==NULL) {

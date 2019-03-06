@@ -293,7 +293,7 @@ def angular_cl(cosmo, cltracer1, cltracer2, ell, p_of_k_a=None,
         cltracer1, cltracer2 (:obj:`Tracer`): Tracer objects, of any kind.
         ell (float or array_like): Angular wavenumber(s) at which to evaluate
             the angular power spectrum.
-        p_of_k_a (Pk2D object or None): 3D Power spectrum to project. If None,
+        p_of_k_a (:obj:`Pk2D` or None): 3D Power spectrum to project. If None,
             the non-linear matter power spectrum will be used.
         l_limber (float) : Angular wavenumber beyond which Limber's
             approximation will be used. Defaults to -1.
@@ -330,7 +330,7 @@ def angular_cl(cosmo, cltracer1, cltracer2, ell, p_of_k_a=None,
     cl, status = lib.angular_cl_vec(
         cosmo, clt1, clt2, psp, l_limber, l_logstep,
         l_linstep, ell_use, ell_use.size, status)
-    if ell_use.size==1:
+    if np.isscalar(ell):
         cl = cl[0]
 
     check(status, cosmo=cosmo_in)

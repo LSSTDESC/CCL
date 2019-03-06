@@ -3,8 +3,6 @@ from . import ccllib as lib
 from .core import check
 import numpy as np
 
-# TODO choices about interpolation/extrapolation
-
 
 class Pk2D(object):
     """A power spectrum class holding the information needed to reconstruct an
@@ -58,7 +56,7 @@ class Pk2D(object):
                  is_logp=True, interp_order_lok=1, interp_order_hik=2, cosmo=None):
 
         status = 0
-        if(pkfunc is None):  # Initialize power spectrum from 2D array
+        if pkfunc is None:  # Initialize power spectrum from 2D array
             # Make sure input makes sense
             if (a_arr is None) or (lk_arr is None) or (pk_arr is None):
                 raise ValueError("If you do not provide a function, "
@@ -127,7 +125,7 @@ class Pk2D(object):
             f, status = lib.p2d_eval_single(self.psp, np.log(k), a, cospass,
                                             status)
         else:
-            k_use=np.atleast_1d(k)
+            k_use = np.atleast_1d(k)
             f, status = lib.p2d_eval_multi(self.psp, np.log(k_use), a, cospass,
                                            k_use.size, status)
         check(status, cosmo)
@@ -138,5 +136,5 @@ class Pk2D(object):
         """Free memory associated with this Pk2D structure
         """
         if hasattr(self, 'has_psp'):
-            if self.has_psp:
+            if self.has_psp and hasattr(self, 'psp'):
                 lib.p2d_t_free(self.psp)
