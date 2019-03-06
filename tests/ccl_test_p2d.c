@@ -106,7 +106,7 @@ CTEST2(p2d,sanity) {
   ASSERT_TRUE(status==0);
   ASSERT_DBL_NEAR(1,pk/pk_model_analytical(exp(lktest),atest));
 
-  //Evaluate at very low z and see if it checks out
+  //Evaluate at very high z and see if it checks out
   double alo=0.02;
   pk=ccl_p2d_t_eval(psp,lktest,alo,NULL,&status);
   ASSERT_TRUE(status==0);
