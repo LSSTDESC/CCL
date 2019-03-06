@@ -522,14 +522,6 @@ static void ccl_cosmology_compute_power_class(ccl_cosmology * cosmo, int * statu
     cosmo->data.p_lin=ccl_p2d_t_new(na,aa,nk,lk,lpk_ln,1,2,ccl_p2d_cclgrowth,1,NULL,0,ccl_p2d_3,status);
 
   if(*status==0) {
-    // At the moment KMIN can't be less than CLASS's kmin in the nonlinear case.
-    if (kmin<(exp(sp.ln_k[0]))) {
-      *status = CCL_ERROR_CLASS;
-      ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_cosmology_compute_power_class(): K_MIN is less than CLASS's kmin. Not yet supported for nonlinear P(k).\n");
-    }
-  }
-  
-  if(*status==0) {
     double psout_nl;
     
     s=0;
