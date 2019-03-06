@@ -6,10 +6,13 @@
   when evaluating power spectra (#563, #564).
 - Fixed bug in fftlog for some complex arguments (#565, #566).
 - Replaced custom gamma function with that from GSL (#570).
+- Refactored spline and numerical parameters to be allocated per cosmology (#557).
+- Allow global physical constants to be changed (#557).
 - Fixed memory leaks in `ccl_correlation.c` (#581).
 
 ## Python library
 - Improved error reporting for `angular_cl` computations (#567).
+- Allow spline, numerical and constant parameters to be set from Python (#557).
 
 # v 1.0 API changes :
 
