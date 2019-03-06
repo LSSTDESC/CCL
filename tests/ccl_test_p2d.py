@@ -21,22 +21,19 @@ def all_finite(vals):
     """
     return np.all( np.isfinite(vals) )
 
-def check_p2d_init():
-    """
-    Check that background and growth functions can be run.
-    """
-    
 def test_p2d_init():
     """
     Test initialization of Pk2D objects
     """
 
+    cosmo = ccl.Cosmology(Omega_c=0.27, Omega_b=0.045, h=0.67, A_s=1e-10, n_s=0.96)
+
     #If no input
-    assert_raises(TypeError, ccl.Pk2D)
+    assert_raises(ValueError, ccl.Pk2D)
 
     #Input function has incorrect signature
-    assert_raises(TypeError, ccl.Pk2D, pkfunc=pk1d)
-    ccl.Pk2D(pkfunc=lpk2d)
+    assert_raises(ValueError, ccl.Pk2D, pkfunc=pk1d)
+    ccl.Pk2D(pkfunc=lpk2d,cosmo=cosmo)
 
     #Input arrays have incorrect sizes
     lkarr=-4.+6*np.arange(100)/99.
@@ -45,7 +42,6 @@ def test_p2d_init():
     assert_raises(ValueError, ccl.Pk2D, a_arr=aarr, lk_arr=lkarr, pk_arr=pkarr[1:])
 
     #Check all goes well if we initialize things correctly
-    cosmo = ccl.Cosmology(Omega_c=0.27, Omega_b=0.045, h=0.67, A_s=1e-10, n_s=0.96)
     psp=ccl.Pk2D(a_arr=aarr, lk_arr=lkarr, pk_arr=pkarr)
     assert_(not np.isnan(psp.eval(1E-2,0.5,cosmo)))
 
@@ -56,7 +52,7 @@ def test_p2d_function():
 
     cosmo = ccl.Cosmology(Omega_c=0.27, Omega_b=0.045, h=0.67, A_s=1e-10, n_s=0.96)
 
-    psp=ccl.Pk2D(pkfunc=lpk2d)
+    psp=ccl.Pk2D(pkfunc=lpk2d,cosmo=cosmo)
 
     #Test at single point
     ktest=1E-2; atest=0.5;
@@ -71,7 +67,7 @@ def test_p2d_function():
     assert_allclose(phere,ptrue,rtol=1E-6)
 
     #Test input is not logarithmic
-    psp=ccl.Pk2D(pkfunc=pk2d,is_logp=False)
+    psp=ccl.Pk2D(pkfunc=pk2d,is_logp=False,cosmo=cosmo)
     phere=psp.eval(ktest,atest,cosmo)
     assert_allclose(phere,ptrue,rtol=1E-6)
 
@@ -101,7 +97,7 @@ def test_p2d_cls():
     assert_raises(ValueError,ccl.angular_cl,cosmo,lens1,lens1,ells,p_of_k_a=1)
     
     #Check that passing a correct power spectrum runs as expected
-    psp=ccl.Pk2D(pkfunc=lpk2d)
+    psp=ccl.Pk2D(pkfunc=lpk2d,cosmo=cosmo)
     cells=ccl.angular_cl(cosmo,lens1,lens1,ells,p_of_k_a=psp)
     
 if __name__ == '__main__':

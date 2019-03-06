@@ -119,7 +119,7 @@ CTEST2(p2d,sanity) {
   ASSERT_DBL_NEAR(1,pk/pk_model_analytical(exp(lkhi),atest));
 
   //Evaluate at very high k and see if it checks out
-  double lklo=data->lk_arr[0]*1.1;
+  double lklo=data->lk_arr[0]/1.1;
   pk=ccl_p2d_t_eval(psp,lklo,atest,NULL,&status);
   ASSERT_TRUE(status==0);
   ASSERT_DBL_NEAR(1,pk/pk_model_analytical(exp(lklo),atest));

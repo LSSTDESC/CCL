@@ -80,7 +80,7 @@ double ccl_p2d_t_eval(ccl_p2d_t *psp,double lk,double a,ccl_cosmology *cosmo,
 
   if(is_loz) { //Are we above the interpolation range in a?
     *status=CCL_ERROR_SPLINE_EV;
-    return -1;
+    return NAN;
   }
   else if(is_hiz) { //Are we below the interpolation range in a?
     if(psp->extrap_linear_growth==ccl_p2d_no_extrapol) {
@@ -103,7 +103,7 @@ double ccl_p2d_t_eval(ccl_p2d_t *psp,double lk,double a,ccl_cosmology *cosmo,
   int spstatus=gsl_spline2d_eval_e(psp->pk,lk_ev,a_ev,NULL,NULL,&pk_pre);
   if(spstatus) {
     *status=CCL_ERROR_SPLINE_EV;
-    return -1;
+    return NAN;
   }
 
   //Now extrapolate in k if needed
@@ -115,14 +115,14 @@ double ccl_p2d_t_eval(ccl_p2d_t *psp,double lk,double a,ccl_cosmology *cosmo,
       spstatus=gsl_spline2d_eval_deriv_x_e(psp->pk,lk_ev,a_ev,NULL,NULL,&pd);
       if(spstatus) {
 	*status=CCL_ERROR_SPLINE_EV;
-	return -1;
+	return NAN;
       }
       pk_post+=pd*dlk;
       if(psp->extrap_order_hik>1) {
 	spstatus=gsl_spline2d_eval_deriv_xx_e(psp->pk,lk_ev,a_ev,NULL,NULL,&pd);
 	if(spstatus) {
 	  *status=CCL_ERROR_SPLINE_EV;
-	  return -1;
+	  return NAN;
 	}
 	pk_post+=pd*dlk*dlk*0.5;
       }
@@ -136,14 +136,14 @@ double ccl_p2d_t_eval(ccl_p2d_t *psp,double lk,double a,ccl_cosmology *cosmo,
       spstatus=gsl_spline2d_eval_deriv_x_e(psp->pk,lk_ev,a_ev,NULL,NULL,&pd);
       if(spstatus) {
 	*status=CCL_ERROR_SPLINE_EV;
-	return -1;
+	return NAN;
       }
       pk_post+=pd*dlk;
       if(psp->extrap_order_lok>1) {
 	spstatus=gsl_spline2d_eval_deriv_xx_e(psp->pk,lk_ev,a_ev,NULL,NULL,&pd);
 	if(spstatus) {
 	  *status=CCL_ERROR_SPLINE_EV;
-	  return -1;
+	  return NAN;
 	}
 	pk_post+=pd*dlk*dlk*0.5;
       }
