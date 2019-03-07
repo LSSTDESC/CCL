@@ -50,7 +50,8 @@ class Pk2D(object):
              depending on the value of `is_logp`.
         is_logp (boolean): if True, pkfunc/pkarr return/hold the natural
              logarithm of the power spectrum. Otherwise, the true value
-             of the power spectrum is expected.
+             of the power spectrum is expected. Note that arrays will be
+             interpolated in log space if `is_logp` is set to `True`.
         cosmo (:obj:`Cosmology`): Cosmology object. The cosmology object
              is needed in order if `pkfunc` is not `None`. The object is
              used to determine the sampling rate in scale factor and
