@@ -53,6 +53,7 @@ static void compare_corr(char *compare_type,int algorithm,struct corrs_data * da
   config.transfer_function_method = ccl_bbks;
   ccl_parameters params = ccl_parameters_create_flat_lcdm(data->Omega_c,data->Omega_b,data->h,
 							  data->sigma8,data->n_s,&status);
+  params.T_CMB=2.7;
   ccl_cosmology * cosmo = ccl_cosmology_create(params, config);
   ASSERT_NOT_NULL(cosmo);
 

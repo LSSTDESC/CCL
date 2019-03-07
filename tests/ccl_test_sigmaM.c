@@ -70,6 +70,7 @@ static void compare_sigmam(int i_model,struct sigmam_data * data)
 						data->Neff, data->mnu, data->mnu_type,
 						data->w_0[i_model-1],data->w_a[i_model-1],data->h,
 						data->A_s,data->n_s,-1,-1,-1,-1,NULL,NULL, &status);
+  params.T_CMB=2.7;
   params.sigma8=data->sigma8;
   params.Omega_g=0.;
   params.Omega_l=data->Omega_v[i_model-1];
