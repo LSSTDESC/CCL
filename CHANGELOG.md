@@ -3,6 +3,7 @@
 ## C library
 - Deprecated the `native` non-Limber angular power spectrum method (#506).
 - Renamed `ccl_lsst_specs.c` to `ccl_redshifts.c`, deprecated LSST-specific redshift distribution functionality, introduced user-defined true dNdz (changes in call signature of `ccl_dNdz_tomog`). (#528).
+- Fixed bug in BBKS power spectrum implementation.
 
 ## Python library
 - Renamed `lsst_specs.py` to `redshifts.py`, deprecated LSST-specific redshift distribution functionality, introduced user-defined true dNdz (changes in call signature of `dNdz_tomog`). (#528).
