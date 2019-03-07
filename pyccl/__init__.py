@@ -45,7 +45,9 @@ from .redshifts import  dNdz_tomog, PhotoZFunction, PhotoZGaussian, dNdzFunction
 # Useful constants and unit conversions
 physical_constants = lib.cvar.constants
 
-from .correlation import correlation, correlation_3d, correlation_multipole, correlation_3dRsd, correlation_3dRsd_avgmu, correlation_spline_free, correlation_pi_sigma
+from .correlation import (
+    correlation, correlation_3d, correlation_multipole, correlation_3dRsd,
+    correlation_3dRsd_avgmu, correlation_pi_sigma)
 
 # Properties of haloes
 from .halomodel import halomodel_matter_power, halo_concentration

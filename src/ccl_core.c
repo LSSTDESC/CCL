@@ -279,6 +279,10 @@ ccl_cosmology * ccl_cosmology_create(ccl_parameters params, ccl_configuration co
   cosmo->data.phihmf = NULL;
   cosmo->data.etahmf = NULL;
 
+  cosmo->data.rsd_splines[0] = NULL;
+  cosmo->data.rsd_splines[1] = NULL;
+  cosmo->data.rsd_splines[2] = NULL;
+
   cosmo->data.p_lin = NULL;
   cosmo->data.p_nl = NULL;
   cosmo->computed_distances = false;
@@ -864,6 +868,9 @@ void ccl_data_free(ccl_data * data)
   gsl_interp_accel_free(data->accelerator_d);
   gsl_interp_accel_free(data->accelerator_m);
   gsl_interp_accel_free(data->accelerator_k);
+  ccl_spline_free(data->rsd_splines[0]);
+  ccl_spline_free(data->rsd_splines[1]);
+  ccl_spline_free(data->rsd_splines[2]);
 }
 
 /* ------- ROUTINE: ccl_cosmology_set_status_message --------
