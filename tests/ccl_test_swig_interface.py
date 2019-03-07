@@ -118,7 +118,7 @@ def test_swig_cls():
         CCLError,
         ccllib.angular_cl_vec,
         COSMO,
-        None, None,
+        None, None, None,
         1, 1, 1,
         0,
         "none",
