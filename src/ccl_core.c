@@ -289,6 +289,7 @@ ccl_cosmology * ccl_cosmology_create(ccl_parameters params, ccl_configuration co
   cosmo->status = 0;
   ccl_cosmology_set_status_message(cosmo, "");
 
+
   return cosmo;
 }
 
@@ -421,14 +422,13 @@ ccl_parameters ccl_parameters_create(
 		  mnu_in[1] = 0.;
 		  mnu_in[2] = 0.;
 	  } 
-    else if(*mnu>1e-15 && *mnu<0.06){
-    *status = CCL_ERROR_LOWMNU;
-    ccl_raise_exception(*status, "The neutrino mass is too low to satisfy \
+    //else if(*mnu>1e-15 && *mnu<0.06){
+    //*status = CCL_ERROR_LOWMNU;
+    //ccl_raise_exception(*status, "The neutrino mass is too low to satisfy \
     the mass difference measurements in the case of normal hierarchy.\
     In this low mass case, set mnu_type to sum_inverted or sum_equal.");
-      }
+    //  }
     else{
-
 	      mnu_in[0] = 0.; // This is a starting guess.
 
 	      double sum_check;
@@ -436,10 +436,11 @@ ccl_parameters ccl_parameters_create(
 	      mnu_in[1] = sqrt(ccl_constants.DELTAM12_sq);
 	      mnu_in[2] = sqrt(ccl_constants.DELTAM13_sq_pos);
 	      sum_check = mnu_in[0] + mnu_in[1] + mnu_in[2];
-	      if (ccl_mnu_sum < sum_check){
+	      if (*mnu < sum_check){
 		      *status = CCL_ERROR_MNU_UNPHYSICAL;
+		      ccl_check_status_nocosmo(status);
+		      return;
           }
-          
           double dsdm1;
           // This is the Newton's method
           while (fabs(*mnu - sum_check) > 1e-15){
@@ -471,11 +472,11 @@ ccl_parameters ccl_parameters_create(
 	      mnu_in[1] = sqrt(-1.* ccl_constants.DELTAM13_sq_neg - ccl_constants.DELTAM12_sq);
 	      mnu_in[2] = sqrt(-1.* ccl_constants.DELTAM13_sq_neg);
 	      sum_check = mnu_in[0] + mnu_in[1] + mnu_in[2];
-	      if (ccl_mnu_sum < sum_check){
+	      if (*mnu < sum_check){
 		      *status = CCL_ERROR_MNU_UNPHYSICAL;
+		      ccl_check_status_nocosmo(status);
+		      return;
           }
-
-
           double dsdm1;
           // This is the Newton's method
           while (fabs(*mnu- sum_check) > 1e-15){
@@ -502,6 +503,7 @@ ccl_parameters ccl_parameters_create(
   } else {
 	  *status = CCL_ERROR_NOT_IMPLEMENTED;
   }
+  
   // Check for errors in the neutrino set up (e.g. unphysical mnu)
   ccl_check_status_nocosmo(status);
 
