@@ -9,6 +9,8 @@
 #include <gsl/gsl_spline2d.h>
 #include <gsl/gsl_const_mksa.h>
 
+#include "ccl_utils.h"
+
 CCL_BEGIN_DECLS
 
 
@@ -299,7 +301,6 @@ typedef struct ccl_data {
   gsl_interp_accel *accelerator_k;
 
   // Function of Halo mass M
-
   gsl_spline * logsigma;
   gsl_spline * dlnsigma_dlogm;
 
@@ -310,9 +311,13 @@ typedef struct ccl_data {
   gsl_spline * phihmf;
   gsl_spline * etahmf;
 
-  // These are all functions of the wavenumber k and the scale factor a.
+  // power spectrum splines
   ccl_p2d_t * p_lin;
   ccl_p2d_t * p_nl;
+
+  // real-space splines for RSD
+  SplPar* rsd_splines[3];
+  double rsd_splines_scalefactor;
 } ccl_data;
 
 /**
