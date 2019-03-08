@@ -443,7 +443,7 @@ ccl_parameters ccl_parameters_create(
 	      if (*mnu < sum_check){
 		      *status = CCL_ERROR_MNU_UNPHYSICAL;
 		      ccl_check_status_nocosmo(status);
-		      return;
+		      return NAN;
           }
           double dsdm1;
           // This is the Newton's method
@@ -479,7 +479,7 @@ ccl_parameters ccl_parameters_create(
 	      if (*mnu < sum_check){
 		      *status = CCL_ERROR_MNU_UNPHYSICAL;
 		      ccl_check_status_nocosmo(status);
-		      return;
+		      return NAN;
           }
           double dsdm1;
           // This is the Newton's method
