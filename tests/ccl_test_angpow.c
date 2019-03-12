@@ -91,7 +91,7 @@ static void test_angpow_precision(struct angpow_data * data)
   CCL_ClWorkspace *wap=ccl_cl_workspace_new(NL+1,2*ells[NL-1],logstep,linstep,&status);
   
   // Compute C_ell
-  ccl_angular_cls(ccl_cosmo,wap,ct_gc_A,ct_gc_A,NL,ells,cells_gg_angpow,&status);
+  ccl_angular_cls(ccl_cosmo,wap,ct_gc_A,ct_gc_A,NULL,NL,ells,cells_gg_angpow,&status);
   double rel_precision = 0.;
   FILE *f=fopen("./tests/benchmark/angpow_gg.txt","r");
   for(int ii=2;ii<NL;ii++) {

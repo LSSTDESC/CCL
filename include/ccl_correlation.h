@@ -62,8 +62,6 @@ void ccl_correlation_multipole(ccl_cosmology *cosmo,double a,double beta,
 
 void ccl_correlation_multipole_spline(ccl_cosmology *cosmo,double a,int *status);
 
-void ccl_correlation_multipole_spline_free();
-
 void ccl_correlation_3dRsd(ccl_cosmology *cosmo,double a,
 			   int n_s,double *s,double mu,double beta,double *xi,
 			   int use_spline, int *status);

@@ -138,14 +138,13 @@ static void emuInit() {
 } // emuInit()
 
 // Actual emulation
-void ccl_pkemu(double *xstar, double **ystar, int* status, ccl_cosmology* cosmo) {
-    
+void ccl_pkemu(double *xstar, int sizeofystar, double *ystar, int* status, ccl_cosmology* cosmo)
+{
     static double inited=0;
     int ee, i, j, k;
     double wstar[peta[0]+peta[1]];
     double Sigmastar[2][peta[1]][m[0]];
     double ystaremu[neta];
-    *ystar=(double *)malloc(sizeof(double)*NK_EMU);
     double ybyz[rs];
     double logc;
     double xstarstd[p];
@@ -153,6 +152,16 @@ void ccl_pkemu(double *xstar, double **ystar, int* status, ccl_cosmology* cosmo)
     gsl_spline *zinterp = gsl_spline_alloc(gsl_interp_cspline, rs);
     gsl_interp_accel *accel = gsl_interp_accel_alloc();
     
+    if(sizeofystar!=NK_EMU) {
+      *status = CCL_ERROR_MEMORY;
+      ccl_cosmology_set_status_message(cosmo,
+				       "ccl_pkemu(): must pass an array with %d elements to populate\n",
+				       NK_EMU);
+      ccl_raise_exception(*status, cosmo->status_message);
+      gsl_spline_free(zinterp);
+      gsl_interp_accel_free(accel);
+      return;
+    }
     
     // Initialize if necessary
     if(inited==0) {
@@ -297,13 +306,13 @@ void ccl_pkemu(double *xstar, double **ystar, int* status, ccl_cosmology* cosmo)
                 ybyz[rs-j-1] = ystaremu[j*NK_EMU+i];
             }
             gsl_spline_init(zinterp, z, ybyz, rs);
-            (*ystar)[i] = gsl_spline_eval(zinterp, xstar[p], accel);
+            ystar[i] = gsl_spline_eval(zinterp, xstar[p], accel);
             gsl_interp_accel_reset(accel);
         }
         
     } else { //otherwise, copy in the emulated z without interpolating
         for(i=0; i<NK_EMU; i++) {
-	  (*ystar)[i] = ystaremu[zmatch*NK_EMU + i];
+	  ystar[i] = ystaremu[zmatch*NK_EMU + i];
         }
     }
     
@@ -312,8 +321,8 @@ void ccl_pkemu(double *xstar, double **ystar, int* status, ccl_cosmology* cosmo)
 	
     // Convert to P(k)
     for(i=0; i<NK_EMU; i++) {
-      (*ystar)[i] = (*ystar)[i] - 1.5*log10(mode[i]) + log10(2) + 2*log10(M_PI);
-      (*ystar)[i] = pow(10, (*ystar)[i]);
+      ystar[i] = ystar[i] - 1.5*log10(mode[i]) + log10(2) + 2*log10(M_PI);
+      ystar[i] = pow(10, ystar[i]);
     }
 }
 

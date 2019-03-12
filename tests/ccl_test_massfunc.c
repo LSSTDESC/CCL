@@ -87,6 +87,7 @@ static void compare_massfunc(int model, struct massfunc_data * data)
 						data->w_a[model], data->h,data->A_s, data->n_s,
 						-1, -1, -1, -1, NULL, NULL, status);
 
+  params.T_CMB=2.7;
   params.sigma8 = data->sigma8;
   params.Omega_g=0.;
   params.Omega_l=data->Omega_v[model];
