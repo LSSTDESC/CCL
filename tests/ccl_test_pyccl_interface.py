@@ -755,9 +755,6 @@ def check_corr_3dRSD(cosmo):
     assert_( all_finite(corr11))
     assert_( all_finite(corr12))
 
-    #free spline
-    ccl.correlation_spline_free()
-
 def test_valid_transfer_combos():
     """
     Check that invalid transfer_function <-> matter_power_spectrum pairs raise

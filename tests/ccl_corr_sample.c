@@ -69,7 +69,7 @@ int main(int argc,char **argv)
   for(il=0; il < ELL_MAX_CL; il++)
     // Calculate auto-correlation of this tracer
     larr[il] = il;
-  ccl_angular_cls(cosmo, w, ct_gc, ct_gc, ELL_MAX_CL, ilarr, clarr, &status);
+  ccl_angular_cls(cosmo, w, ct_gc, ct_gc, NULL,ELL_MAX_CL, ilarr, clarr, &status);
   
   // Define cosine tapering, to reduce ringing. The first two numbers are 
   // [lmin, lmax] for the low-ell taper, and the last two are [lmin, lmax] for 
