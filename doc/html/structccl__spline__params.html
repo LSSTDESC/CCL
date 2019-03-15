@@ -68,7 +68,7 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
-<p><code>#include &lt;<a class="el" href="ccl__params_8h_source.html">ccl_params.h</a>&gt;</code></p>
+<p><code>#include &lt;<a class="el" href="ccl__core_8h_source.html">ccl_core.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
 Data Fields</h2></td></tr>
@@ -114,6 +114,20 @@ Data Fields</h2></td></tr>
 <tr class="separator:a3407f2c11713c908ee9e5b6d8c36a1ac"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae38764273f047b530ffbc5ccb1935428"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structccl__spline__params.html#ae38764273f047b530ffbc5ccb1935428">N_ELL_CORR</a></td></tr>
 <tr class="separator:ae38764273f047b530ffbc5ccb1935428"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af2971beb5a86401be3dc4b6533ec0650"><td class="memItemLeft" align="right" valign="top">gsl_interp_type *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structccl__spline__params.html#af2971beb5a86401be3dc4b6533ec0650">A_SPLINE_TYPE</a></td></tr>
+<tr class="separator:af2971beb5a86401be3dc4b6533ec0650"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad14251b631795d430f91f09834f90bca"><td class="memItemLeft" align="right" valign="top">gsl_interp_type *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structccl__spline__params.html#ad14251b631795d430f91f09834f90bca">K_SPLINE_TYPE</a></td></tr>
+<tr class="separator:ad14251b631795d430f91f09834f90bca"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a488c1778d23bed9662e0b1af5cac0f12"><td class="memItemLeft" align="right" valign="top">gsl_interp_type *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structccl__spline__params.html#a488c1778d23bed9662e0b1af5cac0f12">M_SPLINE_TYPE</a></td></tr>
+<tr class="separator:a488c1778d23bed9662e0b1af5cac0f12"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2561d961fffd4a95d0f8276162747f1d"><td class="memItemLeft" align="right" valign="top">gsl_interp_type *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structccl__spline__params.html#a2561d961fffd4a95d0f8276162747f1d">D_SPLINE_TYPE</a></td></tr>
+<tr class="separator:a2561d961fffd4a95d0f8276162747f1d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0f5ea33f8960f01c3d802109e06feb21"><td class="memItemLeft" align="right" valign="top">gsl_interp2d_type *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structccl__spline__params.html#a0f5ea33f8960f01c3d802109e06feb21">PNL_SPLINE_TYPE</a></td></tr>
+<tr class="separator:a0f5ea33f8960f01c3d802109e06feb21"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abad631f5a17908c332c846cf32c1d66e"><td class="memItemLeft" align="right" valign="top">gsl_interp2d_type *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structccl__spline__params.html#abad631f5a17908c332c846cf32c1d66e">PLIN_SPLINE_TYPE</a></td></tr>
+<tr class="separator:abad631f5a17908c332c846cf32c1d66e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a626831cd3240afa8801a5575382f4989"><td class="memItemLeft" align="right" valign="top">gsl_interp_type *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structccl__spline__params.html#a626831cd3240afa8801a5575382f4989">CORR_SPLINE_TYPE</a></td></tr>
+<tr class="separator:a626831cd3240afa8801a5575382f4989"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Struct that contains all the parameters needed to create certain splines. This includes splines for the scale factor, masses, and power spectra. </p>
@@ -244,6 +258,48 @@ Data Fields</h2></td></tr>
 
 </div>
 </div>
+<a id="af2971beb5a86401be3dc4b6533ec0650"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af2971beb5a86401be3dc4b6533ec0650">&#9670;&nbsp;</a></span>A_SPLINE_TYPE</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">gsl_interp_type* ccl_spline_params::A_SPLINE_TYPE</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a626831cd3240afa8801a5575382f4989"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a626831cd3240afa8801a5575382f4989">&#9670;&nbsp;</a></span>CORR_SPLINE_TYPE</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">gsl_interp_type* ccl_spline_params::CORR_SPLINE_TYPE</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a2561d961fffd4a95d0f8276162747f1d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2561d961fffd4a95d0f8276162747f1d">&#9670;&nbsp;</a></span>D_SPLINE_TYPE</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">gsl_interp_type* ccl_spline_params::D_SPLINE_TYPE</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="a3407f2c11713c908ee9e5b6d8c36a1ac"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a3407f2c11713c908ee9e5b6d8c36a1ac">&#9670;&nbsp;</a></span>ELL_MAX_CORR</h2>
 
@@ -314,6 +370,20 @@ Data Fields</h2></td></tr>
 
 </div>
 </div>
+<a id="ad14251b631795d430f91f09834f90bca"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad14251b631795d430f91f09834f90bca">&#9670;&nbsp;</a></span>K_SPLINE_TYPE</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">gsl_interp_type* ccl_spline_params::K_SPLINE_TYPE</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="a9c3639db1ee0c3f352886b0d2cfe7b74"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a9c3639db1ee0c3f352886b0d2cfe7b74">&#9670;&nbsp;</a></span>LOGM_SPLINE_DELTA</h2>
 
@@ -370,6 +440,20 @@ Data Fields</h2></td></tr>
 
 </div>
 </div>
+<a id="a488c1778d23bed9662e0b1af5cac0f12"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a488c1778d23bed9662e0b1af5cac0f12">&#9670;&nbsp;</a></span>M_SPLINE_TYPE</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">gsl_interp_type* ccl_spline_params::M_SPLINE_TYPE</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="ae38764273f047b530ffbc5ccb1935428"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ae38764273f047b530ffbc5ccb1935428">&#9670;&nbsp;</a></span>N_ELL_CORR</h2>
 
@@ -412,8 +496,36 @@ Data Fields</h2></td></tr>
 
 </div>
 </div>
+<a id="abad631f5a17908c332c846cf32c1d66e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abad631f5a17908c332c846cf32c1d66e">&#9670;&nbsp;</a></span>PLIN_SPLINE_TYPE</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">gsl_interp2d_type* ccl_spline_params::PLIN_SPLINE_TYPE</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a0f5ea33f8960f01c3d802109e06feb21"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0f5ea33f8960f01c3d802109e06feb21">&#9670;&nbsp;</a></span>PNL_SPLINE_TYPE</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">gsl_interp2d_type* ccl_spline_params::PNL_SPLINE_TYPE</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <hr/>The documentation for this struct was generated from the following file:<ul>
-<li><a class="el" href="ccl__params_8h_source.html">ccl_params.h</a></li>
+<li><a class="el" href="ccl__core_8h_source.html">ccl_core.h</a></li>
 </ul>
 </div><!-- contents -->
 <!-- start footer part -->
