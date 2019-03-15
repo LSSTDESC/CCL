@@ -94,8 +94,4 @@ void correlation_pi_sigma_vec(ccl_cosmology *cosmo,double a,double beta,
 			   int *status){
     ccl_correlation_pi_sigma(cosmo,a,beta,pie,nsig,sig,xis,use_spline,status);
 }
-
-void correlation_multipole_spline_free_vec(){
-    ccl_correlation_multipole_spline_free();
-}
 %}

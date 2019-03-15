@@ -242,7 +242,7 @@ void ccl_cl_workspace_free(CCL_ClWorkspace *w);
  * @return void
  */
 void ccl_angular_cls(ccl_cosmology *cosmo,CCL_ClWorkspace *w,
-		     CCL_ClTracer *clt1,CCL_ClTracer *clt2,
+		     CCL_ClTracer *clt1,CCL_ClTracer *clt2,ccl_p2d_t *psp,
 		     int nl_out,int *l,double *cl,int *status);
 
 CCL_END_DECLS
