@@ -51,10 +51,14 @@ static void get_cls_arr(ccl_cosmology *cosmo,
   double *ls=malloc(ELL_MAX_CL*sizeof(double));
   for(int ii=0;l<=ELL_MAX_CL;ii++) {
     ls[ii]=l;
-    if(l<50)
+    if(l<100)
       l+=1;
-    else
+    else if(l<200)
       l+=5;
+    else if(l<400)
+      l+=10;
+    else
+      l+=20;
     nls++;
   }
 
