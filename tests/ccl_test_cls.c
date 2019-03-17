@@ -40,6 +40,16 @@ static int linecount(FILE *f)
   return i0;
 }
 
+//Wrapper that computes array of power spectra 
+void get_cls_arr(ccl_cosmology *cosmo,CCL_ClTracer *tr1,CCL_ClTracer *tr2,
+		 int nl,int *ls,double *cls,int *status)
+{
+  int ii;
+  //Loop over ells
+  for(ii=0;ii<nl;ii++)
+    cls[ii]=ccl_angular_cl_limber(cosmo,tr1,tr2,NULL,(double)(ls[ii]),status);
+}
+
 static void compare_cls(char *compare_type,struct cls_data * data)
 {
   int status=0;
@@ -434,59 +444,58 @@ static void compare_cls(char *compare_type,struct cls_data * data)
 
   double l_logstep = 1.05;
   double l_linstep = 5.;
-  CCL_ClWorkspace *w=ccl_cl_workspace_new_limber(NELLS,l_logstep,l_linstep,&status);
 
-  ccl_angular_cls(cosmo,w,tr_nc_1,tr_nc_1,NULL,NELLS,ells,cls_dd_11_h,&status);
+  get_cls_arr(cosmo,tr_nc_1,tr_nc_1,NELLS,ells,cls_dd_11_h,&status);
   if (status) printf("%s\n",cosmo->status_message);
-  ccl_angular_cls(cosmo,w,tr_nc_1,tr_nc_2,NULL,NELLS,ells,cls_dd_12_h,&status);
+  get_cls_arr(cosmo,tr_nc_1,tr_nc_2,NELLS,ells,cls_dd_12_h,&status);
   if (status) printf("%s\n",cosmo->status_message);
-  ccl_angular_cls(cosmo,w,tr_nc_2,tr_nc_2,NULL,NELLS,ells,cls_dd_22_h,&status);
+  get_cls_arr(cosmo,tr_nc_2,tr_nc_2,NELLS,ells,cls_dd_22_h,&status);
   if (status) printf("%s\n",cosmo->status_message);
-  ccl_angular_cls(cosmo,w,tr_nc_1,tr_wl_1,NULL,NELLS,ells,cls_dl_11_h,&status);
+  get_cls_arr(cosmo,tr_nc_1,tr_wl_1,NELLS,ells,cls_dl_11_h,&status);
   if (status) printf("%s\n",cosmo->status_message);
-  ccl_angular_cls(cosmo,w,tr_nc_1,tr_wl_2,NULL,NELLS,ells,cls_dl_12_h,&status);
+  get_cls_arr(cosmo,tr_nc_1,tr_wl_2,NELLS,ells,cls_dl_12_h,&status);
   if (status) printf("%s\n",cosmo->status_message);
-  ccl_angular_cls(cosmo,w,tr_nc_2,tr_wl_2,NULL,NELLS,ells,cls_dl_22_h,&status);
+  get_cls_arr(cosmo,tr_nc_2,tr_wl_2,NELLS,ells,cls_dl_22_h,&status);
   if (status) printf("%s\n",cosmo->status_message);
-  ccl_angular_cls(cosmo,w,tr_nc_2,tr_wl_1,NULL,NELLS,ells,cls_dl_21_h,&status);
+  get_cls_arr(cosmo,tr_nc_2,tr_wl_1,NELLS,ells,cls_dl_21_h,&status);
   if (status) printf("%s\n",cosmo->status_message);
-  ccl_angular_cls(cosmo,w,tr_nc_1,tr_wli_1,NULL,NELLS,ells,cls_dltot_11_h,&status);
+  get_cls_arr(cosmo,tr_nc_1,tr_wli_1,NELLS,ells,cls_dltot_11_h,&status);
   if (status) printf("%s\n",cosmo->status_message);
-  ccl_angular_cls(cosmo,w,tr_nc_1,tr_wli_2,NULL,NELLS,ells,cls_dltot_12_h,&status);
+  get_cls_arr(cosmo,tr_nc_1,tr_wli_2,NELLS,ells,cls_dltot_12_h,&status);
   if (status) printf("%s\n",cosmo->status_message);
-  ccl_angular_cls(cosmo,w,tr_nc_2,tr_wli_1,NULL,NELLS,ells,cls_dltot_21_h,&status);
+  get_cls_arr(cosmo,tr_nc_2,tr_wli_1,NELLS,ells,cls_dltot_21_h,&status);
   if (status) printf("%s\n",cosmo->status_message);
-  ccl_angular_cls(cosmo,w,tr_nc_2,tr_wli_2,NULL,NELLS,ells,cls_dltot_22_h,&status);
+  get_cls_arr(cosmo,tr_nc_2,tr_wli_2,NELLS,ells,cls_dltot_22_h,&status);
   if (status) printf("%s\n",cosmo->status_message);
-  ccl_angular_cls(cosmo,w,tr_wli_1,tr_wli_1,NULL,NELLS,ells,cls_lltot_11_h,&status);
+  get_cls_arr(cosmo,tr_wli_1,tr_wli_1,NELLS,ells,cls_lltot_11_h,&status);
   if (status) printf("%s\n",cosmo->status_message);
-  ccl_angular_cls(cosmo,w,tr_wli_1,tr_wli_2,NULL,NELLS,ells,cls_lltot_12_h,&status);
+  get_cls_arr(cosmo,tr_wli_1,tr_wli_2,NELLS,ells,cls_lltot_12_h,&status);
   if (status) printf("%s\n",cosmo->status_message);
-  ccl_angular_cls(cosmo,w,tr_wli_2,tr_wli_2,NULL,NELLS,ells,cls_lltot_22_h,&status);
+  get_cls_arr(cosmo,tr_wli_2,tr_wli_2,NELLS,ells,cls_lltot_22_h,&status);
   if (status) printf("%s\n",cosmo->status_message);
-  ccl_angular_cls(cosmo,w,tr_wl_1,tr_wli_1,NULL,NELLS,ells,cls_lli_11_h,&status);
+  get_cls_arr(cosmo,tr_wl_1,tr_wli_1,NELLS,ells,cls_lli_11_h,&status);
   if (status) printf("%s\n",cosmo->status_message);
-  ccl_angular_cls(cosmo,w,tr_wl_1,tr_wli_2,NULL,NELLS,ells,cls_lli_12_h,&status);
+  get_cls_arr(cosmo,tr_wl_1,tr_wli_2,NELLS,ells,cls_lli_12_h,&status);
   if (status) printf("%s\n",cosmo->status_message);
-  ccl_angular_cls(cosmo,w,tr_wl_2,tr_wli_1,NULL,NELLS,ells,cls_lli_21_h,&status);
+  get_cls_arr(cosmo,tr_wl_2,tr_wli_1,NELLS,ells,cls_lli_21_h,&status);
   if (status) printf("%s\n",cosmo->status_message);
-  ccl_angular_cls(cosmo,w,tr_wl_2,tr_wli_2,NULL,NELLS,ells,cls_lli_22_h,&status);
+  get_cls_arr(cosmo,tr_wl_2,tr_wli_2,NELLS,ells,cls_lli_22_h,&status);
   if (status) printf("%s\n",cosmo->status_message);
-  ccl_angular_cls(cosmo,w,tr_nc_1,tr_cl,NULL,NELLS,ells,cls_dc_1_h,&status);
+  get_cls_arr(cosmo,tr_nc_1,tr_cl,NELLS,ells,cls_dc_1_h,&status);
   if (status) printf("%s\n",cosmo->status_message);
-  ccl_angular_cls(cosmo,w,tr_nc_2,tr_cl,NULL,NELLS,ells,cls_dc_2_h,&status);
+  get_cls_arr(cosmo,tr_nc_2,tr_cl,NELLS,ells,cls_dc_2_h,&status);
   if (status) printf("%s\n",cosmo->status_message);
-  ccl_angular_cls(cosmo,w,tr_wl_1,tr_wl_1,NULL,NELLS,ells,cls_ll_11_h,&status);
+  get_cls_arr(cosmo,tr_wl_1,tr_wl_1,NELLS,ells,cls_ll_11_h,&status);
   if (status) printf("%s\n",cosmo->status_message);
-  ccl_angular_cls(cosmo,w,tr_wl_1,tr_wl_2,NULL,NELLS,ells,cls_ll_12_h,&status);
+  get_cls_arr(cosmo,tr_wl_1,tr_wl_2,NELLS,ells,cls_ll_12_h,&status);
   if (status) printf("%s\n",cosmo->status_message);
-  ccl_angular_cls(cosmo,w,tr_wl_2,tr_wl_2,NULL,NELLS,ells,cls_ll_22_h,&status);
+  get_cls_arr(cosmo,tr_wl_2,tr_wl_2,NELLS,ells,cls_ll_22_h,&status);
   if (status) printf("%s\n",cosmo->status_message);
-  ccl_angular_cls(cosmo,w,tr_wl_1,tr_cl,NULL,NELLS,ells,cls_lc_1_h,&status);
+  get_cls_arr(cosmo,tr_wl_1,tr_cl,NELLS,ells,cls_lc_1_h,&status);
   if (status) printf("%s\n",cosmo->status_message);
-  ccl_angular_cls(cosmo,w,tr_wl_2,tr_cl,NULL,NELLS,ells,cls_lc_2_h,&status);
+  get_cls_arr(cosmo,tr_wl_2,tr_cl,NELLS,ells,cls_lc_2_h,&status);
   if (status) printf("%s\n",cosmo->status_message);
-  ccl_angular_cls(cosmo,w,tr_cl,tr_cl,NULL,NELLS,ells,cls_cc_h,&status);
+  get_cls_arr(cosmo,tr_cl,tr_cl,NELLS,ells,cls_cc_h,&status);
   if (status) printf("%s\n",cosmo->status_message);
 
   double fraction_failed=0;
@@ -655,7 +664,6 @@ static void compare_cls(char *compare_type,struct cls_data * data)
     ASSERT_TRUE(fabs(cl_lc_1_h-cl_lc_1)<el_lc_1);
     ASSERT_TRUE(fabs(cl_lc_2_h-cl_lc_2)<el_lc_2);
   }
-  ccl_cl_workspace_free(w);
   if(!strcmp(compare_type,"histo")) {
     cosmo->gsl_params.INTEGRATION_EPSREL = epsrel_save;
     cosmo->gsl_params.INTEGRATION_LIMBER_EPSREL = epsrel_save;
