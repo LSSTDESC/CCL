@@ -13,7 +13,7 @@ options are as follows.
 transfer_function options
   - 'eisenstein_hu': the Eisenstein and Hu (1998) fitting function
   - 'bbks': the BBKS approximation
-  - 'class': use CLASS to compute the transfer function
+  - 'boltzmann_class': use CLASS to compute the transfer function
 
 matter_power_spectrum options
   - 'halo_model': use a halo model
