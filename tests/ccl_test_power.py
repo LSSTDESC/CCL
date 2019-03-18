@@ -46,14 +46,14 @@ def calc_power_spectrum(Omega_v, w0, wa, transfer_fn, matter_power, linear, rais
     if (raise_errors == False):
         if (transfer_fn == 'eisenstein_hu' or transfer_fn == 'bbks'):
             mnu = 0. # The bbks and E-H P(k) are not defined for massive neutrinos.
-        elif (transfer_fn == 'emulator' and matter_power=='emu'):
+        elif (transfer_fn == 'boltzmann_class' and matter_power=='emu'):
             mnu = mnu_list # For the emulator, we must have 3 equal masses
         else:
             mnu = mnu_sum
     elif (raise_errors==True):
         if (transfer_fn =='eisenstein_hu' or transfer_fn =='bbks'):
             mnu = mnu_sum #Use massive neutrinos to deliberately raise an error
-        elif (transfer_fn == 'emulator' and matter_power == 'emu'):
+        elif (transfer_fn == 'boltzmann_class' and matter_power == 'emu'):
             mnu = mnu_sum #Use a sum instead of an equal list to deliberately raise an error.
         else:
             raise(ValueError, "Transfer function %s with matter power spectrum method %s has no case for which to test errors are raised." % (transfer_fn, matter_power))
@@ -154,12 +154,12 @@ def test_raise_error_EH_bbks_nonlin_linear():
 
 @decorators.slow
 def test_raise_error_emu():
-    transfer_fns = ['emulator',]
+    transfer_fns = ['boltzmann_class',]
     for tfn in transfer_fns: loop_over_params(tfn, 'emu', lin=True, raise_errs = True)
 
 @decorators.slow
 def test_raise_error_emu_nonlin():
-    transfer_fns = ['emulator',]
+    transfer_fns = ['boltzmann_class',]
     for tfn in transfer_fns: loop_over_params(tfn, 'emu', lin=False, raise_errs = True)
 
 if __name__ == "__main__":

@@ -25,12 +25,14 @@ def reference_models():
     # BBKS Pk
     cosmo4 = ccl.Cosmology(
         Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96,
-        transfer_function='bbks')
+        transfer_function='bbks',
+        matter_power_spectrum='linear')
 
     # E&H Pk
     cosmo5 = ccl.Cosmology(
         Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96,
-        transfer_function='eisenstein_hu')
+        transfer_function='eisenstein_hu',
+        matter_power_spectrum='linear')
 
     # Emulator Pk
     cosmo6 = ccl.Cosmology(
