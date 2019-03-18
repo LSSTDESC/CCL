@@ -2,7 +2,7 @@
 #include "ctest.h"
 #include <stdlib.h>
 #include <stdio.h>
-#include <math.h> 
+#include <math.h>
 
 CTEST_DATA(corrs_3d) {
   double Omega_c;
@@ -64,7 +64,7 @@ static void compare_correlation_3d(int i_model,struct corrs_3d_data * data)
   FILE *f;
   ccl_configuration config = default_config;
   config.matter_power_spectrum_method= ccl_halofit;
-  config.transfer_function_method = ccl_boltzmann;
+  config.transfer_function_method = ccl_boltzmann_class;
   ccl_parameters params = ccl_parameters_create(data->Omega_c,data->Omega_b,data->Omega_k[i_model-1],
 		data->Neff, data->mnu, data->mnu_type, data->w_0[i_model-1],data->w_a[i_model-1],
 		data->h,data->A_s,data->n_s,-1, -1, -1, -1,NULL,NULL, &status);
@@ -72,8 +72,8 @@ static void compare_correlation_3d(int i_model,struct corrs_3d_data * data)
   params.Omega_l=data->Omega_v[i_model-1];
   params.sigma8=data->sigma8;
   ccl_cosmology * cosmo = ccl_cosmology_create(params, config);
-  ASSERT_NOT_NULL(cosmo);      
-  
+  ASSERT_NOT_NULL(cosmo);
+
   sprintf(fname,"./tests/benchmark/model%d_xi.txt",i_model);
   f=fopen(fname,"r");
   if(f==NULL) {
@@ -91,7 +91,7 @@ static void compare_correlation_3d(int i_model,struct corrs_3d_data * data)
   double *r_arr1=malloc(N1*sizeof(double));
   double *r_arr2=malloc((nr-N1)*sizeof(double));
   double (*ximm_bench_arr)[6]=malloc(6*nr*sizeof(double));
-  
+
   rtn = fgets(str, 1024, f);
   for(i=0;i<nr;i++) {
     double r_h;
@@ -108,7 +108,7 @@ static void compare_correlation_3d(int i_model,struct corrs_3d_data * data)
       r_arr2[i-N1]=r_h;
 
     for(j=0;j<6;j++) {
-      double ximm_bench;      
+      double ximm_bench;
       stat=fscanf(f,"%lf",&ximm_bench);
       if(stat!=1) {
 	fprintf(stderr,"Error reading file %s, line %d\n",fname,i+2);
@@ -123,30 +123,30 @@ static void compare_correlation_3d(int i_model,struct corrs_3d_data * data)
   double *ximm_ccl_out2=malloc((nr-N1)*sizeof(double));
 
    for(j=0;j<6;j++) {
-      double z = j+0.;	
+      double z = j+0.;
       ccl_correlation_3d(cosmo,1.0/(j+1),N1,r_arr1,ximm_ccl_out1,0,NULL,&status);
       ccl_correlation_3d(cosmo,1.0/(j+1),nr-N1,r_arr2,ximm_ccl_out2,0,NULL,&status);
 
       if (status) printf("%s\n",cosmo->status_message);
-      for(i=0;i<nr;i++){     
+      for(i=0;i<nr;i++){
       double err;
       if(i<N1){
-      err=fabs(r_arr1[i]*r_arr1[i]*(ximm_ccl_out1[i]-ximm_bench_arr[i][j])); 
+      err=fabs(r_arr1[i]*r_arr1[i]*(ximm_ccl_out1[i]-ximm_bench_arr[i][j]));
       ASSERT_DBL_NEAR_TOL(0.,err,CORR_TOLERANCE1[j]);
       }
       else{
-      err=fabs(r_arr2[i-N1]*r_arr2[i-N1]*(ximm_ccl_out2[i-N1]-ximm_bench_arr[i][j])); 
+      err=fabs(r_arr2[i-N1]*r_arr2[i-N1]*(ximm_ccl_out2[i-N1]-ximm_bench_arr[i][j]));
       ASSERT_DBL_NEAR_TOL(0.,err,CORR_TOLERANCE2[j]);
       }
-      }   
+      }
   }
   fclose(f);
-  
+
   free(r_arr1);
   free(r_arr2);
   free(ximm_bench_arr);
   free(ximm_ccl_out1);
-  free(ximm_ccl_out2); 
+  free(ximm_ccl_out2);
 
   ccl_cosmology_free(cosmo);
 }

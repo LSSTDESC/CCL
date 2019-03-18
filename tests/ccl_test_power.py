@@ -23,7 +23,7 @@ w0_vals = np.array([-1.0, -0.9, -0.9, -0.9, -0.9])
 wa_vals = np.array([0.0, 0.0, 0.1, 0.1, 0.1])
 
 # List of transfer functions to run
-transfer_fns = ['boltzmann_class', 'eisenstein_hu', 'emulator',]
+transfer_fns = ['boltzmann_class', 'eisenstein_hu']
 
 def all_finite(vals):
     """
@@ -98,7 +98,7 @@ def test_power_spectrum_linear():
 
 @decorators.slow
 def test_power_spectrum_linear_slow():
-    for tfn in ['boltzmann',]:
+    for tfn in ['boltzmann_class',]:
         loop_over_params(tfn, 'linear', lin=True, raise_errs = False)
 
 def test_power_spectrum_halofit():
@@ -107,12 +107,12 @@ def test_power_spectrum_halofit():
 
 @decorators.slow
 def test_power_spectrum_halofit_slow():
-    for tfn in ['boltzmann',]:
+    for tfn in ['boltzmann_class',]:
         loop_over_params(tfn, 'halofit', lin=True, raise_errs = False)
 
 @decorators.slow
 def test_power_spectrum_emu():
-    for tfn in ['emulator',]: loop_over_params(tfn, 'emu', lin=True, raise_errs = False)
+    for tfn in ['boltzmann_class',]: loop_over_params(tfn, 'emu', lin=True, raise_errs = False)
 
 def test_nonlin_power_spectrum_linear():
     for tfn in ['eisenstein_hu', 'bbks']:
@@ -120,7 +120,7 @@ def test_nonlin_power_spectrum_linear():
 
 @decorators.slow
 def test_nonlin_power_spectrum_linear_slow():
-    for tfn in ['boltzmann',]:
+    for tfn in ['boltzmann_class',]:
         loop_over_params(tfn, 'linear', lin=False, raise_errs = False)
 
 def test_nonlin_power_spectrum_halofit():
@@ -129,12 +129,12 @@ def test_nonlin_power_spectrum_halofit():
 
 @decorators.slow
 def test_nonlin_power_spectrum_halofit_slow():
-    for tfn in ['boltzmann',]:
+    for tfn in ['boltzmann_class',]:
         loop_over_params(tfn, 'halofit', lin=False, raise_errs = False)
 
 @decorators.slow
 def test_nonlin_power_spectrum_emu():
-    transfer_fns = ['emulator',]
+    transfer_fns = ['boltzmann_class',]
     for tfn in transfer_fns: loop_over_params(tfn, 'emu', lin=False, raise_errs = False)
 
 @decorators.slow
