@@ -117,8 +117,8 @@ Functions</h2></td></tr>
 <tr class="separator:a9c6f21435da561952dac1fa848456c5c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad4a7f39518bc2d05831ccd108a3439c8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_c_c_l___cl_tracer.html">CCL_ClTracer</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__cls_8c.html#ad4a7f39518bc2d05831ccd108a3439c8">ccl_cl_tracer_lensing_simple</a> (<a class="el" href="structccl__cosmology.html">ccl_cosmology</a> *cosmo, int nz_n, double *z_n, double *n, int *status)</td></tr>
 <tr class="separator:ad4a7f39518bc2d05831ccd108a3439c8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a24f216263d2434abb4a2238dbe933aa5"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__cls_8c.html#a24f216263d2434abb4a2238dbe933aa5">ccl_angular_cls</a> (<a class="el" href="structccl__cosmology.html">ccl_cosmology</a> *cosmo, <a class="el" href="struct_c_c_l___cl_workspace.html">CCL_ClWorkspace</a> *w, <a class="el" href="struct_c_c_l___cl_tracer.html">CCL_ClTracer</a> *clt1, <a class="el" href="struct_c_c_l___cl_tracer.html">CCL_ClTracer</a> *clt2, int nl_out, int *l_out, double *cl_out, int *status)</td></tr>
-<tr class="separator:a24f216263d2434abb4a2238dbe933aa5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aae0183dbbffcf452bb7ddd09a24d5627"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__cls_8c.html#aae0183dbbffcf452bb7ddd09a24d5627">ccl_angular_cls</a> (<a class="el" href="structccl__cosmology.html">ccl_cosmology</a> *cosmo, <a class="el" href="struct_c_c_l___cl_workspace.html">CCL_ClWorkspace</a> *w, <a class="el" href="struct_c_c_l___cl_tracer.html">CCL_ClTracer</a> *clt1, <a class="el" href="struct_c_c_l___cl_tracer.html">CCL_ClTracer</a> *clt2, <a class="el" href="structccl__p2d__t.html">ccl_p2d_t</a> *psp, int nl_out, int *l_out, double *cl_out, int *status)</td></tr>
+<tr class="separator:aae0183dbbffcf452bb7ddd09a24d5627"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a22a046fe3b7689a530d02e4706f228c8"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__cls_8c.html#a22a046fe3b7689a530d02e4706f228c8">ccl_get_tracer_fa</a> (<a class="el" href="structccl__cosmology.html">ccl_cosmology</a> *cosmo, <a class="el" href="struct_c_c_l___cl_tracer.html">CCL_ClTracer</a> *clt, double a, int func_code, int *status)</td></tr>
 <tr class="separator:a22a046fe3b7689a530d02e4706f228c8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a80ec8795adef4d6fa35fd0ecae77f6ab"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__cls_8c.html#a80ec8795adef4d6fa35fd0ecae77f6ab">ccl_get_tracer_fas</a> (<a class="el" href="structccl__cosmology.html">ccl_cosmology</a> *cosmo, <a class="el" href="struct_c_c_l___cl_tracer.html">CCL_ClTracer</a> *clt, int na, double *a, double *fa, int func_code, int *status)</td></tr>
@@ -140,8 +140,8 @@ Functions</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Function Documentation</h2>
-<a id="a24f216263d2434abb4a2238dbe933aa5"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a24f216263d2434abb4a2238dbe933aa5">&#9670;&nbsp;</a></span>ccl_angular_cls()</h2>
+<a id="aae0183dbbffcf452bb7ddd09a24d5627"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aae0183dbbffcf452bb7ddd09a24d5627">&#9670;&nbsp;</a></span>ccl_angular_cls()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -169,6 +169,12 @@ Functions</h2></td></tr>
           <td></td>
           <td class="paramtype"><a class="el" href="struct_c_c_l___cl_tracer.html">CCL_ClTracer</a> *&#160;</td>
           <td class="paramname"><em>clt2</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structccl__p2d__t.html">ccl_p2d_t</a> *&#160;</td>
+          <td class="paramname"><em>psp</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>

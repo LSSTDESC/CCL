@@ -8,9 +8,10 @@
 {\ttfamily \#include $<$gsl/gsl\+\_\+errno.\+h$>$}\newline
 {\ttfamily \#include $<$gsl/gsl\+\_\+odeiv.\+h$>$}\newline
 {\ttfamily \#include $<$gsl/gsl\+\_\+spline.\+h$>$}\newline
+{\ttfamily \#include $<$gsl/gsl\+\_\+interp2d.\+h$>$}\newline
+{\ttfamily \#include $<$gsl/gsl\+\_\+spline2d.\+h$>$}\newline
 {\ttfamily \#include $<$gsl/gsl\+\_\+integration.\+h$>$}\newline
 {\ttfamily \#include \char`\"{}ccl.\+h\char`\"{}}\newline
-{\ttfamily \#include \char`\"{}ccl\+\_\+params.\+h\char`\"{}}\newline
 \subsection*{Macros}
 \begin{DoxyCompactItemize}
 \item 
@@ -18,7 +19,19 @@
 \item 
 \#define \mbox{\hyperlink{ccl__core_8c_a8f7bd5242b15da973671df869db5fe85}{S\+T\+R\+I\+NG}}(s)~\#s
 \item 
-\#define \mbox{\hyperlink{ccl__core_8c_ab67b57fc9e2af7c734799954dff21301}{M\+A\+T\+CH}}(s,  action)~if (0 == strcmp(var\+\_\+name, s)) \{ action ; continue;\} do\{\} while(0)
+\#define \mbox{\hyperlink{ccl__core_8c_ae3628da4026daea1dc6e0e4cb62e24ee}{G\+S\+L\+\_\+\+E\+P\+S\+R\+EL}}~1\+E-\/4
+\item 
+\#define \mbox{\hyperlink{ccl__core_8c_acffe6aeb31ce6d8f9435c9351dd27051}{G\+S\+L\+\_\+\+N\+\_\+\+I\+T\+E\+R\+A\+T\+I\+ON}}~1000
+\item 
+\#define \mbox{\hyperlink{ccl__core_8c_a7d7c3cd0548be2bb016b6d0ffb84423f}{G\+S\+L\+\_\+\+I\+N\+T\+E\+G\+R\+A\+T\+I\+O\+N\+\_\+\+G\+A\+U\+S\+S\+\_\+\+K\+R\+O\+N\+R\+O\+D\+\_\+\+P\+O\+I\+N\+TS}}~G\+S\+L\+\_\+\+I\+N\+T\+E\+G\+\_\+\+G\+A\+U\+S\+S41
+\item 
+\#define \mbox{\hyperlink{ccl__core_8c_a0c14aa96b52b122e4b0795c0314b0139}{G\+S\+L\+\_\+\+E\+P\+S\+R\+E\+L\+\_\+\+S\+I\+G\+M\+AR}}~1\+E-\/5
+\item 
+\#define \mbox{\hyperlink{ccl__core_8c_a21c3b7c07529ee2acaf9ee8375c253ea}{G\+S\+L\+\_\+\+E\+P\+S\+R\+E\+L\+\_\+\+D\+I\+ST}}~1\+E-\/6
+\item 
+\#define \mbox{\hyperlink{ccl__core_8c_ac832e4c5330968a496f4acb40545f313}{G\+S\+L\+\_\+\+E\+P\+S\+R\+E\+L\+\_\+\+G\+R\+O\+W\+TH}}~1\+E-\/6
+\item 
+\#define \mbox{\hyperlink{ccl__core_8c_aea1294a700276280c0c080220c888cd9}{G\+S\+L\+\_\+\+E\+P\+S\+R\+E\+L\+\_\+\+D\+N\+DZ}}~1\+E-\/6
 \item 
 \#define \mbox{\hyperlink{ccl__core_8c_a0fa6d24512bcf8adbf84760f3d476f0f}{W\+R\+I\+T\+E\+\_\+\+D\+O\+U\+B\+LE}}(name)~fprintf(f, \#name \char`\"{}\+: \%le\textbackslash{}n\char`\"{},params-\/$>$name)
 \item 
@@ -30,8 +43,6 @@
 \end{DoxyCompactItemize}
 \subsection*{Functions}
 \begin{DoxyCompactItemize}
-\item 
-void \mbox{\hyperlink{ccl__core_8c_a6bbd58676f7fdbccdab7a07c4045c3b2}{ccl\+\_\+cosmology\+\_\+read\+\_\+config}} (void)
 \item 
 \mbox{\hyperlink{structccl__cosmology}{ccl\+\_\+cosmology}} $\ast$ \mbox{\hyperlink{ccl__core_8c_abe4eaf6cda07cabc127eb4f59b46e559}{ccl\+\_\+cosmology\+\_\+create}} (\mbox{\hyperlink{structccl__parameters}{ccl\+\_\+parameters}} params, \mbox{\hyperlink{structccl__configuration}{ccl\+\_\+configuration}} config)
 \item 
@@ -52,17 +63,25 @@ void \mbox{\hyperlink{ccl__core_8c_a8d71e8d2368ef92b7a63ca6807901a5e}{ccl\+\_\+c
 void \mbox{\hyperlink{ccl__core_8c_a5e4b1876b0a4afa24af5e71f8aaff1f3}{ccl\+\_\+parameters\+\_\+free}} (\mbox{\hyperlink{structccl__parameters}{ccl\+\_\+parameters}} $\ast$params)
 \item 
 void \mbox{\hyperlink{ccl__core_8c_ae25a333e0dfbe6fadd4c5796bdcf659a}{ccl\+\_\+cosmology\+\_\+free}} (\mbox{\hyperlink{structccl__cosmology}{ccl\+\_\+cosmology}} $\ast$cosmo)
+\item 
+int \mbox{\hyperlink{ccl__core_8c_a593680f9bf1f6b6b903abdd8795d41e2}{ccl\+\_\+get\+\_\+pk\+\_\+spline\+\_\+na}} (\mbox{\hyperlink{structccl__cosmology}{ccl\+\_\+cosmology}} $\ast$cosmo)
+\item 
+void \mbox{\hyperlink{ccl__core_8c_acb12954d7395809c9615cd1f94b8763f}{ccl\+\_\+get\+\_\+pk\+\_\+spline\+\_\+a\+\_\+array}} (\mbox{\hyperlink{structccl__cosmology}{ccl\+\_\+cosmology}} $\ast$cosmo, int ndout, double $\ast$doutput, int $\ast$status)
+\item 
+int \mbox{\hyperlink{ccl__core_8c_afd929e0f8cdfd84078d4876091a93eb4}{ccl\+\_\+get\+\_\+pk\+\_\+spline\+\_\+nk}} (\mbox{\hyperlink{structccl__cosmology}{ccl\+\_\+cosmology}} $\ast$cosmo)
+\item 
+void \mbox{\hyperlink{ccl__core_8c_a272d2bef0609519728c1934e285e2ff5}{ccl\+\_\+get\+\_\+pk\+\_\+spline\+\_\+lk\+\_\+array}} (\mbox{\hyperlink{structccl__cosmology}{ccl\+\_\+cosmology}} $\ast$cosmo, int ndout, double $\ast$doutput, int $\ast$status)
 \end{DoxyCompactItemize}
 \subsection*{Variables}
 \begin{DoxyCompactItemize}
 \item 
-const \mbox{\hyperlink{structccl__configuration}{ccl\+\_\+configuration}} \mbox{\hyperlink{ccl__core_8c_a71e38b37263fd3d61ba6e6885769e6f1}{default\+\_\+config}} = \{\mbox{\hyperlink{ccl__config_8h_a8746e6d3648e86a8233d4c2813415e15a2b9083c5271eb911d72cc8dc0553fec0}{ccl\+\_\+boltzmann\+\_\+class}}, \mbox{\hyperlink{ccl__config_8h_a33c02fcf871bde5a88799d19418fb615a37d2e0996d26b30ebc58c6d0ca7ec13a}{ccl\+\_\+halofit}}, \mbox{\hyperlink{ccl__config_8h_a834a8dab508cb785c7fdcc3b6353a013afceb68dd5a80a8523d88026d2f67cfbf}{ccl\+\_\+nobaryons}}, \mbox{\hyperlink{ccl__config_8h_ad544e91cedc9b0865dba11bf4c652091aa92ddafbaf0d6d9b13a46ff8a1fafda3}{ccl\+\_\+tinker10}}, \mbox{\hyperlink{ccl__config_8h_a62567120aeaafb79d8467612498cc7eda72b97eb2dd7e345168ec5fc1110fd18f}{ccl\+\_\+duffy2008}}, \mbox{\hyperlink{ccl__config_8h_ac78b0a571f13119cf2bd5a3ff4b85192aa20214f37e1dd2d7ee91acac5f4cb732}{ccl\+\_\+emu\+\_\+strict}}\}
+const \mbox{\hyperlink{structccl__configuration}{ccl\+\_\+configuration}} \mbox{\hyperlink{ccl__core_8c_a71e38b37263fd3d61ba6e6885769e6f1}{default\+\_\+config}}
 \item 
 const \mbox{\hyperlink{structccl__gsl__params}{ccl\+\_\+gsl\+\_\+params}} \mbox{\hyperlink{ccl__core_8c_a51a81788c4b417668a0db77918d90b39}{default\+\_\+gsl\+\_\+params}}
 \item 
-\mbox{\hyperlink{structccl__spline__params}{ccl\+\_\+spline\+\_\+params}} $\ast$ \mbox{\hyperlink{ccl__core_8c_ab550bc78638f37d464cc89d378e6c677}{ccl\+\_\+splines}} =N\+U\+LL
+const \mbox{\hyperlink{structccl__spline__params}{ccl\+\_\+spline\+\_\+params}} \mbox{\hyperlink{ccl__core_8c_a62833ca45c5ab0c9c93758deb6d8bc5c}{default\+\_\+spline\+\_\+params}}
 \item 
-\mbox{\hyperlink{structccl__gsl__params}{ccl\+\_\+gsl\+\_\+params}} $\ast$ \mbox{\hyperlink{ccl__core_8c_add1426d169622b7e1706eb4c86400de1}{ccl\+\_\+gsl}} =N\+U\+LL
+\mbox{\hyperlink{structccl__physical__constants}{ccl\+\_\+physical\+\_\+constants}} \mbox{\hyperlink{ccl__core_8c_a1fe79c455a3a6fe01e7409d0c594bf0c}{ccl\+\_\+constants}}
 \end{DoxyCompactItemize}
 
 
@@ -73,13 +92,49 @@ const \mbox{\hyperlink{structccl__gsl__params}{ccl\+\_\+gsl\+\_\+params}} \mbox{
 \subsubsection{\texorpdfstring{E\+X\+P\+A\+N\+D\+\_\+\+S\+TR}{EXPAND\_STR}}
 {\footnotesize\ttfamily \#define E\+X\+P\+A\+N\+D\+\_\+\+S\+TR(\begin{DoxyParamCaption}\item[{}]{s }\end{DoxyParamCaption})~\mbox{\hyperlink{ccl__core_8c_a8f7bd5242b15da973671df869db5fe85}{S\+T\+R\+I\+NG}}(s)}
 
-\mbox{\Hypertarget{ccl__core_8c_ab67b57fc9e2af7c734799954dff21301}\label{ccl__core_8c_ab67b57fc9e2af7c734799954dff21301}} 
-\index{ccl\+\_\+core.\+c@{ccl\+\_\+core.\+c}!M\+A\+T\+CH@{M\+A\+T\+CH}}
-\index{M\+A\+T\+CH@{M\+A\+T\+CH}!ccl\+\_\+core.\+c@{ccl\+\_\+core.\+c}}
-\subsubsection{\texorpdfstring{M\+A\+T\+CH}{MATCH}}
-{\footnotesize\ttfamily \#define M\+A\+T\+CH(\begin{DoxyParamCaption}\item[{}]{s,  }\item[{}]{action }\end{DoxyParamCaption})~if (0 == strcmp(var\+\_\+name, s)) \{ action ; continue;\} do\{\} while(0)}
+\mbox{\Hypertarget{ccl__core_8c_ae3628da4026daea1dc6e0e4cb62e24ee}\label{ccl__core_8c_ae3628da4026daea1dc6e0e4cb62e24ee}} 
+\index{ccl\+\_\+core.\+c@{ccl\+\_\+core.\+c}!G\+S\+L\+\_\+\+E\+P\+S\+R\+EL@{G\+S\+L\+\_\+\+E\+P\+S\+R\+EL}}
+\index{G\+S\+L\+\_\+\+E\+P\+S\+R\+EL@{G\+S\+L\+\_\+\+E\+P\+S\+R\+EL}!ccl\+\_\+core.\+c@{ccl\+\_\+core.\+c}}
+\subsubsection{\texorpdfstring{G\+S\+L\+\_\+\+E\+P\+S\+R\+EL}{GSL\_EPSREL}}
+{\footnotesize\ttfamily \#define G\+S\+L\+\_\+\+E\+P\+S\+R\+EL~1\+E-\/4}
 
-\mbox{\Hypertarget{ccl__core_8c_a104c4be277dd5b147427a2fe896fa621}\label{ccl__core_8c_a104c4be277dd5b147427a2fe896fa621}} 
+Default relative precision if not otherwise specified \mbox{\Hypertarget{ccl__core_8c_a21c3b7c07529ee2acaf9ee8375c253ea}\label{ccl__core_8c_a21c3b7c07529ee2acaf9ee8375c253ea}} 
+\index{ccl\+\_\+core.\+c@{ccl\+\_\+core.\+c}!G\+S\+L\+\_\+\+E\+P\+S\+R\+E\+L\+\_\+\+D\+I\+ST@{G\+S\+L\+\_\+\+E\+P\+S\+R\+E\+L\+\_\+\+D\+I\+ST}}
+\index{G\+S\+L\+\_\+\+E\+P\+S\+R\+E\+L\+\_\+\+D\+I\+ST@{G\+S\+L\+\_\+\+E\+P\+S\+R\+E\+L\+\_\+\+D\+I\+ST}!ccl\+\_\+core.\+c@{ccl\+\_\+core.\+c}}
+\subsubsection{\texorpdfstring{G\+S\+L\+\_\+\+E\+P\+S\+R\+E\+L\+\_\+\+D\+I\+ST}{GSL\_EPSREL\_DIST}}
+{\footnotesize\ttfamily \#define G\+S\+L\+\_\+\+E\+P\+S\+R\+E\+L\+\_\+\+D\+I\+ST~1\+E-\/6}
+
+Relative precision in distance calculations \mbox{\Hypertarget{ccl__core_8c_aea1294a700276280c0c080220c888cd9}\label{ccl__core_8c_aea1294a700276280c0c080220c888cd9}} 
+\index{ccl\+\_\+core.\+c@{ccl\+\_\+core.\+c}!G\+S\+L\+\_\+\+E\+P\+S\+R\+E\+L\+\_\+\+D\+N\+DZ@{G\+S\+L\+\_\+\+E\+P\+S\+R\+E\+L\+\_\+\+D\+N\+DZ}}
+\index{G\+S\+L\+\_\+\+E\+P\+S\+R\+E\+L\+\_\+\+D\+N\+DZ@{G\+S\+L\+\_\+\+E\+P\+S\+R\+E\+L\+\_\+\+D\+N\+DZ}!ccl\+\_\+core.\+c@{ccl\+\_\+core.\+c}}
+\subsubsection{\texorpdfstring{G\+S\+L\+\_\+\+E\+P\+S\+R\+E\+L\+\_\+\+D\+N\+DZ}{GSL\_EPSREL\_DNDZ}}
+{\footnotesize\ttfamily \#define G\+S\+L\+\_\+\+E\+P\+S\+R\+E\+L\+\_\+\+D\+N\+DZ~1\+E-\/6}
+
+Relative precision in d\+Ndz calculations \mbox{\Hypertarget{ccl__core_8c_ac832e4c5330968a496f4acb40545f313}\label{ccl__core_8c_ac832e4c5330968a496f4acb40545f313}} 
+\index{ccl\+\_\+core.\+c@{ccl\+\_\+core.\+c}!G\+S\+L\+\_\+\+E\+P\+S\+R\+E\+L\+\_\+\+G\+R\+O\+W\+TH@{G\+S\+L\+\_\+\+E\+P\+S\+R\+E\+L\+\_\+\+G\+R\+O\+W\+TH}}
+\index{G\+S\+L\+\_\+\+E\+P\+S\+R\+E\+L\+\_\+\+G\+R\+O\+W\+TH@{G\+S\+L\+\_\+\+E\+P\+S\+R\+E\+L\+\_\+\+G\+R\+O\+W\+TH}!ccl\+\_\+core.\+c@{ccl\+\_\+core.\+c}}
+\subsubsection{\texorpdfstring{G\+S\+L\+\_\+\+E\+P\+S\+R\+E\+L\+\_\+\+G\+R\+O\+W\+TH}{GSL\_EPSREL\_GROWTH}}
+{\footnotesize\ttfamily \#define G\+S\+L\+\_\+\+E\+P\+S\+R\+E\+L\+\_\+\+G\+R\+O\+W\+TH~1\+E-\/6}
+
+Relative precision in growth calculations \mbox{\Hypertarget{ccl__core_8c_a0c14aa96b52b122e4b0795c0314b0139}\label{ccl__core_8c_a0c14aa96b52b122e4b0795c0314b0139}} 
+\index{ccl\+\_\+core.\+c@{ccl\+\_\+core.\+c}!G\+S\+L\+\_\+\+E\+P\+S\+R\+E\+L\+\_\+\+S\+I\+G\+M\+AR@{G\+S\+L\+\_\+\+E\+P\+S\+R\+E\+L\+\_\+\+S\+I\+G\+M\+AR}}
+\index{G\+S\+L\+\_\+\+E\+P\+S\+R\+E\+L\+\_\+\+S\+I\+G\+M\+AR@{G\+S\+L\+\_\+\+E\+P\+S\+R\+E\+L\+\_\+\+S\+I\+G\+M\+AR}!ccl\+\_\+core.\+c@{ccl\+\_\+core.\+c}}
+\subsubsection{\texorpdfstring{G\+S\+L\+\_\+\+E\+P\+S\+R\+E\+L\+\_\+\+S\+I\+G\+M\+AR}{GSL\_EPSREL\_SIGMAR}}
+{\footnotesize\ttfamily \#define G\+S\+L\+\_\+\+E\+P\+S\+R\+E\+L\+\_\+\+S\+I\+G\+M\+AR~1\+E-\/5}
+
+Relative precision in sigma\+\_\+R calculations \mbox{\Hypertarget{ccl__core_8c_a7d7c3cd0548be2bb016b6d0ffb84423f}\label{ccl__core_8c_a7d7c3cd0548be2bb016b6d0ffb84423f}} 
+\index{ccl\+\_\+core.\+c@{ccl\+\_\+core.\+c}!G\+S\+L\+\_\+\+I\+N\+T\+E\+G\+R\+A\+T\+I\+O\+N\+\_\+\+G\+A\+U\+S\+S\+\_\+\+K\+R\+O\+N\+R\+O\+D\+\_\+\+P\+O\+I\+N\+TS@{G\+S\+L\+\_\+\+I\+N\+T\+E\+G\+R\+A\+T\+I\+O\+N\+\_\+\+G\+A\+U\+S\+S\+\_\+\+K\+R\+O\+N\+R\+O\+D\+\_\+\+P\+O\+I\+N\+TS}}
+\index{G\+S\+L\+\_\+\+I\+N\+T\+E\+G\+R\+A\+T\+I\+O\+N\+\_\+\+G\+A\+U\+S\+S\+\_\+\+K\+R\+O\+N\+R\+O\+D\+\_\+\+P\+O\+I\+N\+TS@{G\+S\+L\+\_\+\+I\+N\+T\+E\+G\+R\+A\+T\+I\+O\+N\+\_\+\+G\+A\+U\+S\+S\+\_\+\+K\+R\+O\+N\+R\+O\+D\+\_\+\+P\+O\+I\+N\+TS}!ccl\+\_\+core.\+c@{ccl\+\_\+core.\+c}}
+\subsubsection{\texorpdfstring{G\+S\+L\+\_\+\+I\+N\+T\+E\+G\+R\+A\+T\+I\+O\+N\+\_\+\+G\+A\+U\+S\+S\+\_\+\+K\+R\+O\+N\+R\+O\+D\+\_\+\+P\+O\+I\+N\+TS}{GSL\_INTEGRATION\_GAUSS\_KRONROD\_POINTS}}
+{\footnotesize\ttfamily \#define G\+S\+L\+\_\+\+I\+N\+T\+E\+G\+R\+A\+T\+I\+O\+N\+\_\+\+G\+A\+U\+S\+S\+\_\+\+K\+R\+O\+N\+R\+O\+D\+\_\+\+P\+O\+I\+N\+TS~G\+S\+L\+\_\+\+I\+N\+T\+E\+G\+\_\+\+G\+A\+U\+S\+S41}
+
+Default number of Gauss-\/\+Kronrod points in Q\+AG integration if not otherwise specified \mbox{\Hypertarget{ccl__core_8c_acffe6aeb31ce6d8f9435c9351dd27051}\label{ccl__core_8c_acffe6aeb31ce6d8f9435c9351dd27051}} 
+\index{ccl\+\_\+core.\+c@{ccl\+\_\+core.\+c}!G\+S\+L\+\_\+\+N\+\_\+\+I\+T\+E\+R\+A\+T\+I\+ON@{G\+S\+L\+\_\+\+N\+\_\+\+I\+T\+E\+R\+A\+T\+I\+ON}}
+\index{G\+S\+L\+\_\+\+N\+\_\+\+I\+T\+E\+R\+A\+T\+I\+ON@{G\+S\+L\+\_\+\+N\+\_\+\+I\+T\+E\+R\+A\+T\+I\+ON}!ccl\+\_\+core.\+c@{ccl\+\_\+core.\+c}}
+\subsubsection{\texorpdfstring{G\+S\+L\+\_\+\+N\+\_\+\+I\+T\+E\+R\+A\+T\+I\+ON}{GSL\_N\_ITERATION}}
+{\footnotesize\ttfamily \#define G\+S\+L\+\_\+\+N\+\_\+\+I\+T\+E\+R\+A\+T\+I\+ON~1000}
+
+Default number of iterations for integration and root-\/finding if not otherwise specified \mbox{\Hypertarget{ccl__core_8c_a104c4be277dd5b147427a2fe896fa621}\label{ccl__core_8c_a104c4be277dd5b147427a2fe896fa621}} 
 \index{ccl\+\_\+core.\+c@{ccl\+\_\+core.\+c}!R\+E\+A\+D\+\_\+\+D\+O\+U\+B\+LE@{R\+E\+A\+D\+\_\+\+D\+O\+U\+B\+LE}}
 \index{R\+E\+A\+D\+\_\+\+D\+O\+U\+B\+LE@{R\+E\+A\+D\+\_\+\+D\+O\+U\+B\+LE}!ccl\+\_\+core.\+c@{ccl\+\_\+core.\+c}}
 \subsubsection{\texorpdfstring{R\+E\+A\+D\+\_\+\+D\+O\+U\+B\+LE}{READ\_DOUBLE}}
@@ -132,12 +187,6 @@ Free a cosmology struct
 \begin{DoxyReturn}{Returns}
 void 
 \end{DoxyReturn}
-\mbox{\Hypertarget{ccl__core_8c_a6bbd58676f7fdbccdab7a07c4045c3b2}\label{ccl__core_8c_a6bbd58676f7fdbccdab7a07c4045c3b2}} 
-\index{ccl\+\_\+core.\+c@{ccl\+\_\+core.\+c}!ccl\+\_\+cosmology\+\_\+read\+\_\+config@{ccl\+\_\+cosmology\+\_\+read\+\_\+config}}
-\index{ccl\+\_\+cosmology\+\_\+read\+\_\+config@{ccl\+\_\+cosmology\+\_\+read\+\_\+config}!ccl\+\_\+core.\+c@{ccl\+\_\+core.\+c}}
-\subsubsection{\texorpdfstring{ccl\+\_\+cosmology\+\_\+read\+\_\+config()}{ccl\_cosmology\_read\_config()}}
-{\footnotesize\ttfamily void ccl\+\_\+cosmology\+\_\+read\+\_\+config (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption})}
-
 \mbox{\Hypertarget{ccl__core_8c_a8d71e8d2368ef92b7a63ca6807901a5e}\label{ccl__core_8c_a8d71e8d2368ef92b7a63ca6807901a5e}} 
 \index{ccl\+\_\+core.\+c@{ccl\+\_\+core.\+c}!ccl\+\_\+cosmology\+\_\+set\+\_\+status\+\_\+message@{ccl\+\_\+cosmology\+\_\+set\+\_\+status\+\_\+message}}
 \index{ccl\+\_\+cosmology\+\_\+set\+\_\+status\+\_\+message@{ccl\+\_\+cosmology\+\_\+set\+\_\+status\+\_\+message}!ccl\+\_\+core.\+c@{ccl\+\_\+core.\+c}}
@@ -149,6 +198,30 @@ void
 \index{ccl\+\_\+data\+\_\+free@{ccl\+\_\+data\+\_\+free}!ccl\+\_\+core.\+c@{ccl\+\_\+core.\+c}}
 \subsubsection{\texorpdfstring{ccl\+\_\+data\+\_\+free()}{ccl\_data\_free()}}
 {\footnotesize\ttfamily void ccl\+\_\+data\+\_\+free (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structccl__data}{ccl\+\_\+data}} $\ast$}]{data }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{ccl__core_8c_acb12954d7395809c9615cd1f94b8763f}\label{ccl__core_8c_acb12954d7395809c9615cd1f94b8763f}} 
+\index{ccl\+\_\+core.\+c@{ccl\+\_\+core.\+c}!ccl\+\_\+get\+\_\+pk\+\_\+spline\+\_\+a\+\_\+array@{ccl\+\_\+get\+\_\+pk\+\_\+spline\+\_\+a\+\_\+array}}
+\index{ccl\+\_\+get\+\_\+pk\+\_\+spline\+\_\+a\+\_\+array@{ccl\+\_\+get\+\_\+pk\+\_\+spline\+\_\+a\+\_\+array}!ccl\+\_\+core.\+c@{ccl\+\_\+core.\+c}}
+\subsubsection{\texorpdfstring{ccl\+\_\+get\+\_\+pk\+\_\+spline\+\_\+a\+\_\+array()}{ccl\_get\_pk\_spline\_a\_array()}}
+{\footnotesize\ttfamily void ccl\+\_\+get\+\_\+pk\+\_\+spline\+\_\+a\+\_\+array (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structccl__cosmology}{ccl\+\_\+cosmology}} $\ast$}]{cosmo,  }\item[{int}]{ndout,  }\item[{double $\ast$}]{doutput,  }\item[{int $\ast$}]{status }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{ccl__core_8c_a272d2bef0609519728c1934e285e2ff5}\label{ccl__core_8c_a272d2bef0609519728c1934e285e2ff5}} 
+\index{ccl\+\_\+core.\+c@{ccl\+\_\+core.\+c}!ccl\+\_\+get\+\_\+pk\+\_\+spline\+\_\+lk\+\_\+array@{ccl\+\_\+get\+\_\+pk\+\_\+spline\+\_\+lk\+\_\+array}}
+\index{ccl\+\_\+get\+\_\+pk\+\_\+spline\+\_\+lk\+\_\+array@{ccl\+\_\+get\+\_\+pk\+\_\+spline\+\_\+lk\+\_\+array}!ccl\+\_\+core.\+c@{ccl\+\_\+core.\+c}}
+\subsubsection{\texorpdfstring{ccl\+\_\+get\+\_\+pk\+\_\+spline\+\_\+lk\+\_\+array()}{ccl\_get\_pk\_spline\_lk\_array()}}
+{\footnotesize\ttfamily void ccl\+\_\+get\+\_\+pk\+\_\+spline\+\_\+lk\+\_\+array (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structccl__cosmology}{ccl\+\_\+cosmology}} $\ast$}]{cosmo,  }\item[{int}]{ndout,  }\item[{double $\ast$}]{doutput,  }\item[{int $\ast$}]{status }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{ccl__core_8c_a593680f9bf1f6b6b903abdd8795d41e2}\label{ccl__core_8c_a593680f9bf1f6b6b903abdd8795d41e2}} 
+\index{ccl\+\_\+core.\+c@{ccl\+\_\+core.\+c}!ccl\+\_\+get\+\_\+pk\+\_\+spline\+\_\+na@{ccl\+\_\+get\+\_\+pk\+\_\+spline\+\_\+na}}
+\index{ccl\+\_\+get\+\_\+pk\+\_\+spline\+\_\+na@{ccl\+\_\+get\+\_\+pk\+\_\+spline\+\_\+na}!ccl\+\_\+core.\+c@{ccl\+\_\+core.\+c}}
+\subsubsection{\texorpdfstring{ccl\+\_\+get\+\_\+pk\+\_\+spline\+\_\+na()}{ccl\_get\_pk\_spline\_na()}}
+{\footnotesize\ttfamily int ccl\+\_\+get\+\_\+pk\+\_\+spline\+\_\+na (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structccl__cosmology}{ccl\+\_\+cosmology}} $\ast$}]{cosmo }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{ccl__core_8c_afd929e0f8cdfd84078d4876091a93eb4}\label{ccl__core_8c_afd929e0f8cdfd84078d4876091a93eb4}} 
+\index{ccl\+\_\+core.\+c@{ccl\+\_\+core.\+c}!ccl\+\_\+get\+\_\+pk\+\_\+spline\+\_\+nk@{ccl\+\_\+get\+\_\+pk\+\_\+spline\+\_\+nk}}
+\index{ccl\+\_\+get\+\_\+pk\+\_\+spline\+\_\+nk@{ccl\+\_\+get\+\_\+pk\+\_\+spline\+\_\+nk}!ccl\+\_\+core.\+c@{ccl\+\_\+core.\+c}}
+\subsubsection{\texorpdfstring{ccl\+\_\+get\+\_\+pk\+\_\+spline\+\_\+nk()}{ccl\_get\_pk\_spline\_nk()}}
+{\footnotesize\ttfamily int ccl\+\_\+get\+\_\+pk\+\_\+spline\+\_\+nk (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structccl__cosmology}{ccl\+\_\+cosmology}} $\ast$}]{cosmo }\end{DoxyParamCaption})}
 
 \mbox{\Hypertarget{ccl__core_8c_a6a35ee485eac121317f33a30968eab65}\label{ccl__core_8c_a6a35ee485eac121317f33a30968eab65}} 
 \index{ccl\+\_\+core.\+c@{ccl\+\_\+core.\+c}!ccl\+\_\+parameters\+\_\+create@{ccl\+\_\+parameters\+\_\+create}}
@@ -259,24 +332,24 @@ void
 
 
 \subsection{Variable Documentation}
-\mbox{\Hypertarget{ccl__core_8c_add1426d169622b7e1706eb4c86400de1}\label{ccl__core_8c_add1426d169622b7e1706eb4c86400de1}} 
-\index{ccl\+\_\+core.\+c@{ccl\+\_\+core.\+c}!ccl\+\_\+gsl@{ccl\+\_\+gsl}}
-\index{ccl\+\_\+gsl@{ccl\+\_\+gsl}!ccl\+\_\+core.\+c@{ccl\+\_\+core.\+c}}
-\subsubsection{\texorpdfstring{ccl\+\_\+gsl}{ccl\_gsl}}
-{\footnotesize\ttfamily \mbox{\hyperlink{structccl__gsl__params}{ccl\+\_\+gsl\+\_\+params}}$\ast$ ccl\+\_\+gsl =N\+U\+LL}
-
-\mbox{\Hypertarget{ccl__core_8c_ab550bc78638f37d464cc89d378e6c677}\label{ccl__core_8c_ab550bc78638f37d464cc89d378e6c677}} 
-\index{ccl\+\_\+core.\+c@{ccl\+\_\+core.\+c}!ccl\+\_\+splines@{ccl\+\_\+splines}}
-\index{ccl\+\_\+splines@{ccl\+\_\+splines}!ccl\+\_\+core.\+c@{ccl\+\_\+core.\+c}}
-\subsubsection{\texorpdfstring{ccl\+\_\+splines}{ccl\_splines}}
-{\footnotesize\ttfamily \mbox{\hyperlink{structccl__spline__params}{ccl\+\_\+spline\+\_\+params}}$\ast$ ccl\+\_\+splines =N\+U\+LL}
+\mbox{\Hypertarget{ccl__core_8c_a1fe79c455a3a6fe01e7409d0c594bf0c}\label{ccl__core_8c_a1fe79c455a3a6fe01e7409d0c594bf0c}} 
+\index{ccl\+\_\+core.\+c@{ccl\+\_\+core.\+c}!ccl\+\_\+constants@{ccl\+\_\+constants}}
+\index{ccl\+\_\+constants@{ccl\+\_\+constants}!ccl\+\_\+core.\+c@{ccl\+\_\+core.\+c}}
+\subsubsection{\texorpdfstring{ccl\+\_\+constants}{ccl\_constants}}
+{\footnotesize\ttfamily \mbox{\hyperlink{structccl__physical__constants}{ccl\+\_\+physical\+\_\+constants}} ccl\+\_\+constants}
 
 \mbox{\Hypertarget{ccl__core_8c_a71e38b37263fd3d61ba6e6885769e6f1}\label{ccl__core_8c_a71e38b37263fd3d61ba6e6885769e6f1}} 
 \index{ccl\+\_\+core.\+c@{ccl\+\_\+core.\+c}!default\+\_\+config@{default\+\_\+config}}
 \index{default\+\_\+config@{default\+\_\+config}!ccl\+\_\+core.\+c@{ccl\+\_\+core.\+c}}
 \subsubsection{\texorpdfstring{default\+\_\+config}{default\_config}}
-{\footnotesize\ttfamily const \mbox{\hyperlink{structccl__configuration}{ccl\+\_\+configuration}} default\+\_\+config = \{\mbox{\hyperlink{ccl__config_8h_a8746e6d3648e86a8233d4c2813415e15a2b9083c5271eb911d72cc8dc0553fec0}{ccl\+\_\+boltzmann\+\_\+class}}, \mbox{\hyperlink{ccl__config_8h_a33c02fcf871bde5a88799d19418fb615a37d2e0996d26b30ebc58c6d0ca7ec13a}{ccl\+\_\+halofit}}, \mbox{\hyperlink{ccl__config_8h_a834a8dab508cb785c7fdcc3b6353a013afceb68dd5a80a8523d88026d2f67cfbf}{ccl\+\_\+nobaryons}}, \mbox{\hyperlink{ccl__config_8h_ad544e91cedc9b0865dba11bf4c652091aa92ddafbaf0d6d9b13a46ff8a1fafda3}{ccl\+\_\+tinker10}}, \mbox{\hyperlink{ccl__config_8h_a62567120aeaafb79d8467612498cc7eda72b97eb2dd7e345168ec5fc1110fd18f}{ccl\+\_\+duffy2008}}, \mbox{\hyperlink{ccl__config_8h_ac78b0a571f13119cf2bd5a3ff4b85192aa20214f37e1dd2d7ee91acac5f4cb732}{ccl\+\_\+emu\+\_\+strict}}\}}
+{\footnotesize\ttfamily const \mbox{\hyperlink{structccl__configuration}{ccl\+\_\+configuration}} default\+\_\+config}
 
+{\bfseries Initial value\+:}
+\begin{DoxyCode}
+= \{
+  \mbox{\hyperlink{ccl__config_8h_a8746e6d3648e86a8233d4c2813415e15a2b9083c5271eb911d72cc8dc0553fec0}{ccl\_boltzmann\_class}}, \mbox{\hyperlink{ccl__config_8h_a33c02fcf871bde5a88799d19418fb615a37d2e0996d26b30ebc58c6d0ca7ec13a}{ccl\_halofit}}, \mbox{\hyperlink{ccl__config_8h_a834a8dab508cb785c7fdcc3b6353a013afceb68dd5a80a8523d88026d2f67cfbf}{ccl\_nobaryons}},
+  \mbox{\hyperlink{ccl__config_8h_ad544e91cedc9b0865dba11bf4c652091aa92ddafbaf0d6d9b13a46ff8a1fafda3}{ccl\_tinker10}}, \mbox{\hyperlink{ccl__config_8h_a62567120aeaafb79d8467612498cc7eda72b97eb2dd7e345168ec5fc1110fd18f}{ccl\_duffy2008}}, \mbox{\hyperlink{ccl__config_8h_ac78b0a571f13119cf2bd5a3ff4b85192aa20214f37e1dd2d7ee91acac5f4cb732}{ccl\_emu\_strict}}\}
+\end{DoxyCode}
 The default configuration object In the default configuration, defined in \mbox{\hyperlink{ccl__core_8c}{ccl\+\_\+core.\+c}} C\+CL runs with\+: default\+\_\+config = \{ccl\+\_\+boltzmann\+\_\+class, ccl\+\_\+halofit, ccl\+\_\+nobaryons, ccl\+\_\+tinker10, ccl\+\_\+duffy2008, ccl\+\_\+emu\+\_\+strict\} \mbox{\Hypertarget{ccl__core_8c_a51a81788c4b417668a0db77918d90b39}\label{ccl__core_8c_a51a81788c4b417668a0db77918d90b39}} 
 \index{ccl\+\_\+core.\+c@{ccl\+\_\+core.\+c}!default\+\_\+gsl\+\_\+params@{default\+\_\+gsl\+\_\+params}}
 \index{default\+\_\+gsl\+\_\+params@{default\+\_\+gsl\+\_\+params}!ccl\+\_\+core.\+c@{ccl\+\_\+core.\+c}}
@@ -285,21 +358,29 @@ The default configuration object In the default configuration, defined in \mbox{
 
 {\bfseries Initial value\+:}
 \begin{DoxyCode}
-= \{\mbox{\hyperlink{ccl__constants_8h_ae3628da4026daea1dc6e0e4cb62e24ee}{GSL\_EPSREL}},                          
-                                           \mbox{\hyperlink{ccl__constants_8h_acffe6aeb31ce6d8f9435c9351dd27051}{GSL\_N\_ITERATION}},                     
-                                           \mbox{\hyperlink{ccl__constants_8h_a7d7c3cd0548be2bb016b6d0ffb84423f}{GSL\_INTEGRATION\_GAUSS\_KRONROD\_POINTS}}
-      ,
-                                           \mbox{\hyperlink{ccl__constants_8h_ae3628da4026daea1dc6e0e4cb62e24ee}{GSL\_EPSREL}},                          
-                                           \mbox{\hyperlink{ccl__constants_8h_a7d7c3cd0548be2bb016b6d0ffb84423f}{GSL\_INTEGRATION\_GAUSS\_KRONROD\_POINTS}}
-      ,
-                                           \mbox{\hyperlink{ccl__constants_8h_ae3628da4026daea1dc6e0e4cb62e24ee}{GSL\_EPSREL}},                          
-                                           \mbox{\hyperlink{ccl__constants_8h_a21c3b7c07529ee2acaf9ee8375c253ea}{GSL\_EPSREL\_DIST}},                     
-                                           \mbox{\hyperlink{ccl__constants_8h_aea1294a700276280c0c080220c888cd9}{GSL\_EPSREL\_DNDZ}},                     
-                                           \mbox{\hyperlink{ccl__constants_8h_a0c14aa96b52b122e4b0795c0314b0139}{GSL\_EPSREL\_SIGMAR}},                   
-                                           \mbox{\hyperlink{ccl__constants_8h_ae20ff840c19e36575e72b50ad5da8983}{GSL\_EPSREL\_NU}},                       
-                                           \mbox{\hyperlink{ccl__constants_8h_aad6145144eccd081bf3f6a919f798c7c}{GSL\_EPSABS\_NU}},                       
-                                           \mbox{\hyperlink{ccl__constants_8h_ae3628da4026daea1dc6e0e4cb62e24ee}{GSL\_EPSREL}},                          
-                                           \mbox{\hyperlink{ccl__constants_8h_acffe6aeb31ce6d8f9435c9351dd27051}{GSL\_N\_ITERATION}},                     
-                                           \mbox{\hyperlink{ccl__constants_8h_ac832e4c5330968a496f4acb40545f313}{GSL\_EPSREL\_GROWTH}}                    
-                                          \}
+= \{
+  \mbox{\hyperlink{ccl__core_8c_acffe6aeb31ce6d8f9435c9351dd27051}{GSL\_N\_ITERATION}},                     
+  \mbox{\hyperlink{ccl__core_8c_a7d7c3cd0548be2bb016b6d0ffb84423f}{GSL\_INTEGRATION\_GAUSS\_KRONROD\_POINTS}},
+  \mbox{\hyperlink{ccl__core_8c_ae3628da4026daea1dc6e0e4cb62e24ee}{GSL\_EPSREL}},                          
+  \mbox{\hyperlink{ccl__core_8c_a7d7c3cd0548be2bb016b6d0ffb84423f}{GSL\_INTEGRATION\_GAUSS\_KRONROD\_POINTS}},
+  \mbox{\hyperlink{ccl__core_8c_ae3628da4026daea1dc6e0e4cb62e24ee}{GSL\_EPSREL}},                          
+  \mbox{\hyperlink{ccl__core_8c_a21c3b7c07529ee2acaf9ee8375c253ea}{GSL\_EPSREL\_DIST}},                     
+  \mbox{\hyperlink{ccl__core_8c_a0c14aa96b52b122e4b0795c0314b0139}{GSL\_EPSREL\_SIGMAR}},                   
+  \mbox{\hyperlink{ccl__core_8c_ae3628da4026daea1dc6e0e4cb62e24ee}{GSL\_EPSREL}},                          
+  \mbox{\hyperlink{ccl__core_8c_acffe6aeb31ce6d8f9435c9351dd27051}{GSL\_N\_ITERATION}},                     
+  \mbox{\hyperlink{ccl__core_8c_ac832e4c5330968a496f4acb40545f313}{GSL\_EPSREL\_GROWTH}},                   
+  1E-6,                                
+  1E7,                                 
+  1E17,                                
+  0.0,                                 
+  1E-4,                                
+  1000,                                
+  GSL\_INTEG\_GAUSS41                    
+  \}
 \end{DoxyCode}
+\mbox{\Hypertarget{ccl__core_8c_a62833ca45c5ab0c9c93758deb6d8bc5c}\label{ccl__core_8c_a62833ca45c5ab0c9c93758deb6d8bc5c}} 
+\index{ccl\+\_\+core.\+c@{ccl\+\_\+core.\+c}!default\+\_\+spline\+\_\+params@{default\+\_\+spline\+\_\+params}}
+\index{default\+\_\+spline\+\_\+params@{default\+\_\+spline\+\_\+params}!ccl\+\_\+core.\+c@{ccl\+\_\+core.\+c}}
+\subsubsection{\texorpdfstring{default\+\_\+spline\+\_\+params}{default\_spline\_params}}
+{\footnotesize\ttfamily const \mbox{\hyperlink{structccl__spline__params}{ccl\+\_\+spline\+\_\+params}} default\+\_\+spline\+\_\+params}
+

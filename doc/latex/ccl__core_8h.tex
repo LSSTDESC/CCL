@@ -5,8 +5,18 @@
 {\ttfamily \#include $<$gsl/gsl\+\_\+spline.\+h$>$}\newline
 {\ttfamily \#include $<$gsl/gsl\+\_\+interp2d.\+h$>$}\newline
 {\ttfamily \#include $<$gsl/gsl\+\_\+spline2d.\+h$>$}\newline
+{\ttfamily \#include $<$gsl/gsl\+\_\+const\+\_\+mksa.\+h$>$}\newline
+{\ttfamily \#include \char`\"{}ccl\+\_\+utils.\+h\char`\"{}}\newline
 \subsection*{Data Structures}
 \begin{DoxyCompactItemize}
+\item 
+struct \mbox{\hyperlink{structccl__p2d__t}{ccl\+\_\+p2d\+\_\+t}}
+\item 
+struct \mbox{\hyperlink{structccl__physical__constants}{ccl\+\_\+physical\+\_\+constants}}
+\item 
+struct \mbox{\hyperlink{structccl__spline__params}{ccl\+\_\+spline\+\_\+params}}
+\item 
+struct \mbox{\hyperlink{structccl__gsl__params}{ccl\+\_\+gsl\+\_\+params}}
 \item 
 struct \mbox{\hyperlink{structccl__parameters}{ccl\+\_\+parameters}}
 \item 
@@ -17,7 +27,17 @@ struct \mbox{\hyperlink{structccl__cosmology}{ccl\+\_\+cosmology}}
 \subsection*{Typedefs}
 \begin{DoxyCompactItemize}
 \item 
-typedef \mbox{\hyperlink{ccl__defs_8h_ae8d446df269cba1dff8f88922459a7d4}{C\+C\+L\+\_\+\+B\+E\+G\+I\+N\+\_\+\+D\+E\+C\+LS}} struct \mbox{\hyperlink{structccl__parameters}{ccl\+\_\+parameters}} \mbox{\hyperlink{ccl__core_8h_afb5201eda68de31b9d4fed8e490b3e0f}{ccl\+\_\+parameters}}
+typedef \mbox{\hyperlink{ccl__defs_8h_ae8d446df269cba1dff8f88922459a7d4}{C\+C\+L\+\_\+\+B\+E\+G\+I\+N\+\_\+\+D\+E\+C\+LS}} enum \mbox{\hyperlink{ccl__core_8h_a7c3bb0ab563e8da9e642173d5abdb208}{ccl\+\_\+p2d\+\_\+extrap\+\_\+growth\+\_\+t}} \mbox{\hyperlink{ccl__core_8h_a30125f88aa5d4b7fd9a77c44662d587d}{ccl\+\_\+p2d\+\_\+extrap\+\_\+growth\+\_\+t}}
+\item 
+typedef enum \mbox{\hyperlink{ccl__core_8h_ae3cd178ed38927c026efe52f72cad865}{ccl\+\_\+p2d\+\_\+interp\+\_\+t}} \mbox{\hyperlink{ccl__core_8h_acb90659c83e9cd18b8951ef1cc6d41dd}{ccl\+\_\+p2d\+\_\+interp\+\_\+t}}
+\item 
+typedef struct \mbox{\hyperlink{structccl__physical__constants}{ccl\+\_\+physical\+\_\+constants}} \mbox{\hyperlink{ccl__core_8h_a9a4526ce225c6985803b24fda92a8a77}{ccl\+\_\+physical\+\_\+constants}}
+\item 
+typedef struct \mbox{\hyperlink{structccl__spline__params}{ccl\+\_\+spline\+\_\+params}} \mbox{\hyperlink{ccl__core_8h_aff9a6d76d27e88885d9af70bbd5e4baa}{ccl\+\_\+spline\+\_\+params}}
+\item 
+typedef struct \mbox{\hyperlink{structccl__gsl__params}{ccl\+\_\+gsl\+\_\+params}} \mbox{\hyperlink{ccl__core_8h_a428fe96396157807a36906e4c8a35d0c}{ccl\+\_\+gsl\+\_\+params}}
+\item 
+typedef struct \mbox{\hyperlink{structccl__parameters}{ccl\+\_\+parameters}} \mbox{\hyperlink{ccl__core_8h_a2ec21871929aa41fd42e2687f9c3b08a}{ccl\+\_\+parameters}}
 \item 
 typedef struct \mbox{\hyperlink{structccl__data}{ccl\+\_\+data}} \mbox{\hyperlink{ccl__core_8h_a3df333543b1ebed84ae6759e2aa73393}{ccl\+\_\+data}}
 \item 
@@ -28,16 +48,23 @@ typedef enum \mbox{\hyperlink{ccl__core_8h_a8c23ee4dd2faea6685776fc39c32104b}{cc
 \subsection*{Enumerations}
 \begin{DoxyCompactItemize}
 \item 
-enum \mbox{\hyperlink{ccl__core_8h_a8c23ee4dd2faea6685776fc39c32104b}{ccl\+\_\+mnu\+\_\+convention}} \{ \mbox{\hyperlink{ccl__core_8h_a8c23ee4dd2faea6685776fc39c32104ba863d166dcf778b0a229f6cbb707280ed}{ccl\+\_\+mnu\+\_\+list}} =0, 
-\mbox{\hyperlink{ccl__core_8h_a8c23ee4dd2faea6685776fc39c32104ba455e7ae7ae20bb7b8270f823baa2bb33}{ccl\+\_\+mnu\+\_\+sum}} =1, 
+enum \mbox{\hyperlink{ccl__core_8h_a7c3bb0ab563e8da9e642173d5abdb208}{ccl\+\_\+p2d\+\_\+extrap\+\_\+growth\+\_\+t}} \{ \mbox{\hyperlink{ccl__core_8h_a7c3bb0ab563e8da9e642173d5abdb208acb97878e0f59f74a51a732122007568b}{ccl\+\_\+p2d\+\_\+cclgrowth}} = 401, 
+\mbox{\hyperlink{ccl__core_8h_a7c3bb0ab563e8da9e642173d5abdb208a9224637be03c9b1ad4e6d4682b89c023}{ccl\+\_\+p2d\+\_\+customgrowth}} = 402, 
+\mbox{\hyperlink{ccl__core_8h_a7c3bb0ab563e8da9e642173d5abdb208ab547f046ee94ed5704fc743dce9dfb3e}{ccl\+\_\+p2d\+\_\+constantgrowth}} = 403, 
+\mbox{\hyperlink{ccl__core_8h_a7c3bb0ab563e8da9e642173d5abdb208a56d140fcd64b6b04aae30aee21d09ef7}{ccl\+\_\+p2d\+\_\+no\+\_\+extrapol}} = 404
+ \}
+\item 
+enum \mbox{\hyperlink{ccl__core_8h_ae3cd178ed38927c026efe52f72cad865}{ccl\+\_\+p2d\+\_\+interp\+\_\+t}} \{ \mbox{\hyperlink{ccl__core_8h_ae3cd178ed38927c026efe52f72cad865a5cf88b8641841072bc9d0dd084791f72}{ccl\+\_\+p2d\+\_\+3}} = 303
+ \}
+\item 
+enum \mbox{\hyperlink{ccl__core_8h_a8c23ee4dd2faea6685776fc39c32104b}{ccl\+\_\+mnu\+\_\+convention}} \{ \mbox{\hyperlink{ccl__core_8h_a8c23ee4dd2faea6685776fc39c32104ba863d166dcf778b0a229f6cbb707280ed}{ccl\+\_\+mnu\+\_\+list}} = 0, 
+\mbox{\hyperlink{ccl__core_8h_a8c23ee4dd2faea6685776fc39c32104ba455e7ae7ae20bb7b8270f823baa2bb33}{ccl\+\_\+mnu\+\_\+sum}} = 1, 
 \mbox{\hyperlink{ccl__core_8h_a8c23ee4dd2faea6685776fc39c32104ba56cceac9e012a684ac86bc4c212f4315}{ccl\+\_\+mnu\+\_\+sum\+\_\+inverted}} = 2, 
 \mbox{\hyperlink{ccl__core_8h_a8c23ee4dd2faea6685776fc39c32104ba97e16a7fbdf82ce10b4340015e1b1f49}{ccl\+\_\+mnu\+\_\+sum\+\_\+equal}} = 3
  \}
 \end{DoxyCompactItemize}
 \subsection*{Functions}
 \begin{DoxyCompactItemize}
-\item 
-void \mbox{\hyperlink{ccl__core_8h_a6bbd58676f7fdbccdab7a07c4045c3b2}{ccl\+\_\+cosmology\+\_\+read\+\_\+config}} (void)
 \item 
 \mbox{\hyperlink{structccl__cosmology}{ccl\+\_\+cosmology}} $\ast$ \mbox{\hyperlink{ccl__core_8h_abe4eaf6cda07cabc127eb4f59b46e559}{ccl\+\_\+cosmology\+\_\+create}} (\mbox{\hyperlink{structccl__parameters}{ccl\+\_\+parameters}} params, \mbox{\hyperlink{structccl__configuration}{ccl\+\_\+configuration}} config)
 \item 
@@ -54,6 +81,23 @@ void \mbox{\hyperlink{ccl__core_8h_a7a38624ef91f501786d287e5739c0324}{ccl\+\_\+p
 \mbox{\hyperlink{structccl__parameters}{ccl\+\_\+parameters}} \mbox{\hyperlink{ccl__core_8h_acfc1fd4d94fdb675376269cbc02882b3}{ccl\+\_\+parameters\+\_\+read\+\_\+yaml}} (const char $\ast$filename, int $\ast$status)
 \item 
 void \mbox{\hyperlink{ccl__core_8h_ae25a333e0dfbe6fadd4c5796bdcf659a}{ccl\+\_\+cosmology\+\_\+free}} (\mbox{\hyperlink{structccl__cosmology}{ccl\+\_\+cosmology}} $\ast$cosmo)
+\item 
+int \mbox{\hyperlink{ccl__core_8h_a593680f9bf1f6b6b903abdd8795d41e2}{ccl\+\_\+get\+\_\+pk\+\_\+spline\+\_\+na}} (\mbox{\hyperlink{structccl__cosmology}{ccl\+\_\+cosmology}} $\ast$cosmo)
+\item 
+int \mbox{\hyperlink{ccl__core_8h_afd929e0f8cdfd84078d4876091a93eb4}{ccl\+\_\+get\+\_\+pk\+\_\+spline\+\_\+nk}} (\mbox{\hyperlink{structccl__cosmology}{ccl\+\_\+cosmology}} $\ast$cosmo)
+\item 
+void \mbox{\hyperlink{ccl__core_8h_acb12954d7395809c9615cd1f94b8763f}{ccl\+\_\+get\+\_\+pk\+\_\+spline\+\_\+a\+\_\+array}} (\mbox{\hyperlink{structccl__cosmology}{ccl\+\_\+cosmology}} $\ast$cosmo, int ndout, double $\ast$doutput, int $\ast$status)
+\item 
+void \mbox{\hyperlink{ccl__core_8h_a272d2bef0609519728c1934e285e2ff5}{ccl\+\_\+get\+\_\+pk\+\_\+spline\+\_\+lk\+\_\+array}} (\mbox{\hyperlink{structccl__cosmology}{ccl\+\_\+cosmology}} $\ast$cosmo, int ndout, double $\ast$doutput, int $\ast$status)
+\end{DoxyCompactItemize}
+\subsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{structccl__physical__constants}{ccl\+\_\+physical\+\_\+constants}} \mbox{\hyperlink{ccl__core_8h_a1fe79c455a3a6fe01e7409d0c594bf0c}{ccl\+\_\+constants}}
+\item 
+const \mbox{\hyperlink{structccl__spline__params}{ccl\+\_\+spline\+\_\+params}} \mbox{\hyperlink{ccl__core_8h_a62833ca45c5ab0c9c93758deb6d8bc5c}{default\+\_\+spline\+\_\+params}}
+\item 
+const \mbox{\hyperlink{structccl__gsl__params}{ccl\+\_\+gsl\+\_\+params}} \mbox{\hyperlink{ccl__core_8h_a51a81788c4b417668a0db77918d90b39}{default\+\_\+gsl\+\_\+params}}
 \end{DoxyCompactItemize}
 
 
@@ -70,19 +114,49 @@ Sturct containing references to instances of the above structs, and boolean flag
 \subsubsection{\texorpdfstring{ccl\+\_\+data}{ccl\_data}}
 {\footnotesize\ttfamily typedef struct \mbox{\hyperlink{structccl__data}{ccl\+\_\+data}}  \mbox{\hyperlink{structccl__data}{ccl\+\_\+data}}}
 
-Struct containing references to gsl splines for distance and acceleration calculations \mbox{\Hypertarget{ccl__core_8h_ac03cc22eac8301690f42123426bd6ebe}\label{ccl__core_8h_ac03cc22eac8301690f42123426bd6ebe}} 
+Struct containing references to gsl splines for distance and acceleration calculations \mbox{\Hypertarget{ccl__core_8h_a428fe96396157807a36906e4c8a35d0c}\label{ccl__core_8h_a428fe96396157807a36906e4c8a35d0c}} 
+\index{ccl\+\_\+core.\+h@{ccl\+\_\+core.\+h}!ccl\+\_\+gsl\+\_\+params@{ccl\+\_\+gsl\+\_\+params}}
+\index{ccl\+\_\+gsl\+\_\+params@{ccl\+\_\+gsl\+\_\+params}!ccl\+\_\+core.\+h@{ccl\+\_\+core.\+h}}
+\subsubsection{\texorpdfstring{ccl\+\_\+gsl\+\_\+params}{ccl\_gsl\_params}}
+{\footnotesize\ttfamily typedef struct \mbox{\hyperlink{structccl__gsl__params}{ccl\+\_\+gsl\+\_\+params}}  \mbox{\hyperlink{structccl__gsl__params}{ccl\+\_\+gsl\+\_\+params}}}
+
+Struct that contains parameters that control the accuracy of various G\+SL routines. \mbox{\Hypertarget{ccl__core_8h_ac03cc22eac8301690f42123426bd6ebe}\label{ccl__core_8h_ac03cc22eac8301690f42123426bd6ebe}} 
 \index{ccl\+\_\+core.\+h@{ccl\+\_\+core.\+h}!ccl\+\_\+mnu\+\_\+convention@{ccl\+\_\+mnu\+\_\+convention}}
 \index{ccl\+\_\+mnu\+\_\+convention@{ccl\+\_\+mnu\+\_\+convention}!ccl\+\_\+core.\+h@{ccl\+\_\+core.\+h}}
 \subsubsection{\texorpdfstring{ccl\+\_\+mnu\+\_\+convention}{ccl\_mnu\_convention}}
 {\footnotesize\ttfamily typedef enum \mbox{\hyperlink{ccl__core_8h_a8c23ee4dd2faea6685776fc39c32104b}{ccl\+\_\+mnu\+\_\+convention}}  \mbox{\hyperlink{ccl__core_8h_a8c23ee4dd2faea6685776fc39c32104b}{ccl\+\_\+mnu\+\_\+convention}}}
 
-\mbox{\Hypertarget{ccl__core_8h_afb5201eda68de31b9d4fed8e490b3e0f}\label{ccl__core_8h_afb5201eda68de31b9d4fed8e490b3e0f}} 
+\mbox{\Hypertarget{ccl__core_8h_a30125f88aa5d4b7fd9a77c44662d587d}\label{ccl__core_8h_a30125f88aa5d4b7fd9a77c44662d587d}} 
+\index{ccl\+\_\+core.\+h@{ccl\+\_\+core.\+h}!ccl\+\_\+p2d\+\_\+extrap\+\_\+growth\+\_\+t@{ccl\+\_\+p2d\+\_\+extrap\+\_\+growth\+\_\+t}}
+\index{ccl\+\_\+p2d\+\_\+extrap\+\_\+growth\+\_\+t@{ccl\+\_\+p2d\+\_\+extrap\+\_\+growth\+\_\+t}!ccl\+\_\+core.\+h@{ccl\+\_\+core.\+h}}
+\subsubsection{\texorpdfstring{ccl\+\_\+p2d\+\_\+extrap\+\_\+growth\+\_\+t}{ccl\_p2d\_extrap\_growth\_t}}
+{\footnotesize\ttfamily typedef \mbox{\hyperlink{ccl__defs_8h_ae8d446df269cba1dff8f88922459a7d4}{C\+C\+L\+\_\+\+B\+E\+G\+I\+N\+\_\+\+D\+E\+C\+LS}} enum \mbox{\hyperlink{ccl__core_8h_a7c3bb0ab563e8da9e642173d5abdb208}{ccl\+\_\+p2d\+\_\+extrap\+\_\+growth\+\_\+t}}  \mbox{\hyperlink{ccl__core_8h_a7c3bb0ab563e8da9e642173d5abdb208}{ccl\+\_\+p2d\+\_\+extrap\+\_\+growth\+\_\+t}}}
+
+\mbox{\Hypertarget{ccl__core_8h_acb90659c83e9cd18b8951ef1cc6d41dd}\label{ccl__core_8h_acb90659c83e9cd18b8951ef1cc6d41dd}} 
+\index{ccl\+\_\+core.\+h@{ccl\+\_\+core.\+h}!ccl\+\_\+p2d\+\_\+interp\+\_\+t@{ccl\+\_\+p2d\+\_\+interp\+\_\+t}}
+\index{ccl\+\_\+p2d\+\_\+interp\+\_\+t@{ccl\+\_\+p2d\+\_\+interp\+\_\+t}!ccl\+\_\+core.\+h@{ccl\+\_\+core.\+h}}
+\subsubsection{\texorpdfstring{ccl\+\_\+p2d\+\_\+interp\+\_\+t}{ccl\_p2d\_interp\_t}}
+{\footnotesize\ttfamily typedef enum \mbox{\hyperlink{ccl__core_8h_ae3cd178ed38927c026efe52f72cad865}{ccl\+\_\+p2d\+\_\+interp\+\_\+t}}  \mbox{\hyperlink{ccl__core_8h_ae3cd178ed38927c026efe52f72cad865}{ccl\+\_\+p2d\+\_\+interp\+\_\+t}}}
+
+\mbox{\Hypertarget{ccl__core_8h_a2ec21871929aa41fd42e2687f9c3b08a}\label{ccl__core_8h_a2ec21871929aa41fd42e2687f9c3b08a}} 
 \index{ccl\+\_\+core.\+h@{ccl\+\_\+core.\+h}!ccl\+\_\+parameters@{ccl\+\_\+parameters}}
 \index{ccl\+\_\+parameters@{ccl\+\_\+parameters}!ccl\+\_\+core.\+h@{ccl\+\_\+core.\+h}}
 \subsubsection{\texorpdfstring{ccl\+\_\+parameters}{ccl\_parameters}}
-{\footnotesize\ttfamily typedef \mbox{\hyperlink{ccl__defs_8h_ae8d446df269cba1dff8f88922459a7d4}{C\+C\+L\+\_\+\+B\+E\+G\+I\+N\+\_\+\+D\+E\+C\+LS}} struct \mbox{\hyperlink{structccl__parameters}{ccl\+\_\+parameters}}  \mbox{\hyperlink{structccl__parameters}{ccl\+\_\+parameters}}}
+{\footnotesize\ttfamily typedef struct \mbox{\hyperlink{structccl__parameters}{ccl\+\_\+parameters}}  \mbox{\hyperlink{structccl__parameters}{ccl\+\_\+parameters}}}
 
-Struct containing the parameters defining a cosmology 
+Struct containing the parameters defining a cosmology \mbox{\Hypertarget{ccl__core_8h_a9a4526ce225c6985803b24fda92a8a77}\label{ccl__core_8h_a9a4526ce225c6985803b24fda92a8a77}} 
+\index{ccl\+\_\+core.\+h@{ccl\+\_\+core.\+h}!ccl\+\_\+physical\+\_\+constants@{ccl\+\_\+physical\+\_\+constants}}
+\index{ccl\+\_\+physical\+\_\+constants@{ccl\+\_\+physical\+\_\+constants}!ccl\+\_\+core.\+h@{ccl\+\_\+core.\+h}}
+\subsubsection{\texorpdfstring{ccl\+\_\+physical\+\_\+constants}{ccl\_physical\_constants}}
+{\footnotesize\ttfamily typedef struct \mbox{\hyperlink{structccl__physical__constants}{ccl\+\_\+physical\+\_\+constants}}  \mbox{\hyperlink{structccl__physical__constants}{ccl\+\_\+physical\+\_\+constants}}}
+
+Struct to hold physical constants. \mbox{\Hypertarget{ccl__core_8h_aff9a6d76d27e88885d9af70bbd5e4baa}\label{ccl__core_8h_aff9a6d76d27e88885d9af70bbd5e4baa}} 
+\index{ccl\+\_\+core.\+h@{ccl\+\_\+core.\+h}!ccl\+\_\+spline\+\_\+params@{ccl\+\_\+spline\+\_\+params}}
+\index{ccl\+\_\+spline\+\_\+params@{ccl\+\_\+spline\+\_\+params}!ccl\+\_\+core.\+h@{ccl\+\_\+core.\+h}}
+\subsubsection{\texorpdfstring{ccl\+\_\+spline\+\_\+params}{ccl\_spline\_params}}
+{\footnotesize\ttfamily typedef struct \mbox{\hyperlink{structccl__spline__params}{ccl\+\_\+spline\+\_\+params}}  \mbox{\hyperlink{structccl__spline__params}{ccl\+\_\+spline\+\_\+params}}}
+
+Struct that contains all the parameters needed to create certain splines. This includes splines for the scale factor, masses, and power spectra. 
 
 \subsection{Enumeration Type Documentation}
 \mbox{\Hypertarget{ccl__core_8h_a8c23ee4dd2faea6685776fc39c32104b}\label{ccl__core_8h_a8c23ee4dd2faea6685776fc39c32104b}} 
@@ -109,6 +183,42 @@ ccl\+\_\+mnu\+\_\+sum\+\_\+equal&\\
 \hline
 
 \end{DoxyEnumFields}
+\mbox{\Hypertarget{ccl__core_8h_a7c3bb0ab563e8da9e642173d5abdb208}\label{ccl__core_8h_a7c3bb0ab563e8da9e642173d5abdb208}} 
+\index{ccl\+\_\+core.\+h@{ccl\+\_\+core.\+h}!ccl\+\_\+p2d\+\_\+extrap\+\_\+growth\+\_\+t@{ccl\+\_\+p2d\+\_\+extrap\+\_\+growth\+\_\+t}}
+\index{ccl\+\_\+p2d\+\_\+extrap\+\_\+growth\+\_\+t@{ccl\+\_\+p2d\+\_\+extrap\+\_\+growth\+\_\+t}!ccl\+\_\+core.\+h@{ccl\+\_\+core.\+h}}
+\subsubsection{\texorpdfstring{ccl\+\_\+p2d\+\_\+extrap\+\_\+growth\+\_\+t}{ccl\_p2d\_extrap\_growth\_t}}
+{\footnotesize\ttfamily enum \mbox{\hyperlink{ccl__core_8h_a7c3bb0ab563e8da9e642173d5abdb208}{ccl\+\_\+p2d\+\_\+extrap\+\_\+growth\+\_\+t}}}
+
+\begin{DoxyEnumFields}{Enumerator}
+\raisebox{\heightof{T}}[0pt][0pt]{\index{ccl\+\_\+p2d\+\_\+cclgrowth@{ccl\+\_\+p2d\+\_\+cclgrowth}!ccl\+\_\+core.\+h@{ccl\+\_\+core.\+h}}\index{ccl\+\_\+core.\+h@{ccl\+\_\+core.\+h}!ccl\+\_\+p2d\+\_\+cclgrowth@{ccl\+\_\+p2d\+\_\+cclgrowth}}}\mbox{\Hypertarget{ccl__core_8h_a7c3bb0ab563e8da9e642173d5abdb208acb97878e0f59f74a51a732122007568b}\label{ccl__core_8h_a7c3bb0ab563e8da9e642173d5abdb208acb97878e0f59f74a51a732122007568b}} 
+ccl\+\_\+p2d\+\_\+cclgrowth&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{ccl\+\_\+p2d\+\_\+customgrowth@{ccl\+\_\+p2d\+\_\+customgrowth}!ccl\+\_\+core.\+h@{ccl\+\_\+core.\+h}}\index{ccl\+\_\+core.\+h@{ccl\+\_\+core.\+h}!ccl\+\_\+p2d\+\_\+customgrowth@{ccl\+\_\+p2d\+\_\+customgrowth}}}\mbox{\Hypertarget{ccl__core_8h_a7c3bb0ab563e8da9e642173d5abdb208a9224637be03c9b1ad4e6d4682b89c023}\label{ccl__core_8h_a7c3bb0ab563e8da9e642173d5abdb208a9224637be03c9b1ad4e6d4682b89c023}} 
+ccl\+\_\+p2d\+\_\+customgrowth&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{ccl\+\_\+p2d\+\_\+constantgrowth@{ccl\+\_\+p2d\+\_\+constantgrowth}!ccl\+\_\+core.\+h@{ccl\+\_\+core.\+h}}\index{ccl\+\_\+core.\+h@{ccl\+\_\+core.\+h}!ccl\+\_\+p2d\+\_\+constantgrowth@{ccl\+\_\+p2d\+\_\+constantgrowth}}}\mbox{\Hypertarget{ccl__core_8h_a7c3bb0ab563e8da9e642173d5abdb208ab547f046ee94ed5704fc743dce9dfb3e}\label{ccl__core_8h_a7c3bb0ab563e8da9e642173d5abdb208ab547f046ee94ed5704fc743dce9dfb3e}} 
+ccl\+\_\+p2d\+\_\+constantgrowth&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{ccl\+\_\+p2d\+\_\+no\+\_\+extrapol@{ccl\+\_\+p2d\+\_\+no\+\_\+extrapol}!ccl\+\_\+core.\+h@{ccl\+\_\+core.\+h}}\index{ccl\+\_\+core.\+h@{ccl\+\_\+core.\+h}!ccl\+\_\+p2d\+\_\+no\+\_\+extrapol@{ccl\+\_\+p2d\+\_\+no\+\_\+extrapol}}}\mbox{\Hypertarget{ccl__core_8h_a7c3bb0ab563e8da9e642173d5abdb208a56d140fcd64b6b04aae30aee21d09ef7}\label{ccl__core_8h_a7c3bb0ab563e8da9e642173d5abdb208a56d140fcd64b6b04aae30aee21d09ef7}} 
+ccl\+\_\+p2d\+\_\+no\+\_\+extrapol&\\
+\hline
+
+\end{DoxyEnumFields}
+\mbox{\Hypertarget{ccl__core_8h_ae3cd178ed38927c026efe52f72cad865}\label{ccl__core_8h_ae3cd178ed38927c026efe52f72cad865}} 
+\index{ccl\+\_\+core.\+h@{ccl\+\_\+core.\+h}!ccl\+\_\+p2d\+\_\+interp\+\_\+t@{ccl\+\_\+p2d\+\_\+interp\+\_\+t}}
+\index{ccl\+\_\+p2d\+\_\+interp\+\_\+t@{ccl\+\_\+p2d\+\_\+interp\+\_\+t}!ccl\+\_\+core.\+h@{ccl\+\_\+core.\+h}}
+\subsubsection{\texorpdfstring{ccl\+\_\+p2d\+\_\+interp\+\_\+t}{ccl\_p2d\_interp\_t}}
+{\footnotesize\ttfamily enum \mbox{\hyperlink{ccl__core_8h_ae3cd178ed38927c026efe52f72cad865}{ccl\+\_\+p2d\+\_\+interp\+\_\+t}}}
+
+\begin{DoxyEnumFields}{Enumerator}
+\raisebox{\heightof{T}}[0pt][0pt]{\index{ccl\+\_\+p2d\+\_\+3@{ccl\+\_\+p2d\+\_\+3}!ccl\+\_\+core.\+h@{ccl\+\_\+core.\+h}}\index{ccl\+\_\+core.\+h@{ccl\+\_\+core.\+h}!ccl\+\_\+p2d\+\_\+3@{ccl\+\_\+p2d\+\_\+3}}}\mbox{\Hypertarget{ccl__core_8h_ae3cd178ed38927c026efe52f72cad865a5cf88b8641841072bc9d0dd084791f72}\label{ccl__core_8h_ae3cd178ed38927c026efe52f72cad865a5cf88b8641841072bc9d0dd084791f72}} 
+ccl\+\_\+p2d\+\_\+3&\\
+\hline
+
+\end{DoxyEnumFields}
 
 
 \subsection{Function Documentation}
@@ -132,17 +242,35 @@ Free a cosmology struct
 \begin{DoxyReturn}{Returns}
 void 
 \end{DoxyReturn}
-\mbox{\Hypertarget{ccl__core_8h_a6bbd58676f7fdbccdab7a07c4045c3b2}\label{ccl__core_8h_a6bbd58676f7fdbccdab7a07c4045c3b2}} 
-\index{ccl\+\_\+core.\+h@{ccl\+\_\+core.\+h}!ccl\+\_\+cosmology\+\_\+read\+\_\+config@{ccl\+\_\+cosmology\+\_\+read\+\_\+config}}
-\index{ccl\+\_\+cosmology\+\_\+read\+\_\+config@{ccl\+\_\+cosmology\+\_\+read\+\_\+config}!ccl\+\_\+core.\+h@{ccl\+\_\+core.\+h}}
-\subsubsection{\texorpdfstring{ccl\+\_\+cosmology\+\_\+read\+\_\+config()}{ccl\_cosmology\_read\_config()}}
-{\footnotesize\ttfamily void ccl\+\_\+cosmology\+\_\+read\+\_\+config (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption})}
-
 \mbox{\Hypertarget{ccl__core_8h_a52529d5da0d886523c86b13174e6d373}\label{ccl__core_8h_a52529d5da0d886523c86b13174e6d373}} 
 \index{ccl\+\_\+core.\+h@{ccl\+\_\+core.\+h}!ccl\+\_\+cosmology\+\_\+set\+\_\+status\+\_\+message@{ccl\+\_\+cosmology\+\_\+set\+\_\+status\+\_\+message}}
 \index{ccl\+\_\+cosmology\+\_\+set\+\_\+status\+\_\+message@{ccl\+\_\+cosmology\+\_\+set\+\_\+status\+\_\+message}!ccl\+\_\+core.\+h@{ccl\+\_\+core.\+h}}
 \subsubsection{\texorpdfstring{ccl\+\_\+cosmology\+\_\+set\+\_\+status\+\_\+message()}{ccl\_cosmology\_set\_status\_message()}}
 {\footnotesize\ttfamily void ccl\+\_\+cosmology\+\_\+set\+\_\+status\+\_\+message (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structccl__cosmology}{ccl\+\_\+cosmology}} $\ast$}]{cosmo,  }\item[{const char $\ast$}]{status\+\_\+message,  }\item[{}]{... }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{ccl__core_8h_acb12954d7395809c9615cd1f94b8763f}\label{ccl__core_8h_acb12954d7395809c9615cd1f94b8763f}} 
+\index{ccl\+\_\+core.\+h@{ccl\+\_\+core.\+h}!ccl\+\_\+get\+\_\+pk\+\_\+spline\+\_\+a\+\_\+array@{ccl\+\_\+get\+\_\+pk\+\_\+spline\+\_\+a\+\_\+array}}
+\index{ccl\+\_\+get\+\_\+pk\+\_\+spline\+\_\+a\+\_\+array@{ccl\+\_\+get\+\_\+pk\+\_\+spline\+\_\+a\+\_\+array}!ccl\+\_\+core.\+h@{ccl\+\_\+core.\+h}}
+\subsubsection{\texorpdfstring{ccl\+\_\+get\+\_\+pk\+\_\+spline\+\_\+a\+\_\+array()}{ccl\_get\_pk\_spline\_a\_array()}}
+{\footnotesize\ttfamily void ccl\+\_\+get\+\_\+pk\+\_\+spline\+\_\+a\+\_\+array (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structccl__cosmology}{ccl\+\_\+cosmology}} $\ast$}]{cosmo,  }\item[{int}]{ndout,  }\item[{double $\ast$}]{doutput,  }\item[{int $\ast$}]{status }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{ccl__core_8h_a272d2bef0609519728c1934e285e2ff5}\label{ccl__core_8h_a272d2bef0609519728c1934e285e2ff5}} 
+\index{ccl\+\_\+core.\+h@{ccl\+\_\+core.\+h}!ccl\+\_\+get\+\_\+pk\+\_\+spline\+\_\+lk\+\_\+array@{ccl\+\_\+get\+\_\+pk\+\_\+spline\+\_\+lk\+\_\+array}}
+\index{ccl\+\_\+get\+\_\+pk\+\_\+spline\+\_\+lk\+\_\+array@{ccl\+\_\+get\+\_\+pk\+\_\+spline\+\_\+lk\+\_\+array}!ccl\+\_\+core.\+h@{ccl\+\_\+core.\+h}}
+\subsubsection{\texorpdfstring{ccl\+\_\+get\+\_\+pk\+\_\+spline\+\_\+lk\+\_\+array()}{ccl\_get\_pk\_spline\_lk\_array()}}
+{\footnotesize\ttfamily void ccl\+\_\+get\+\_\+pk\+\_\+spline\+\_\+lk\+\_\+array (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structccl__cosmology}{ccl\+\_\+cosmology}} $\ast$}]{cosmo,  }\item[{int}]{ndout,  }\item[{double $\ast$}]{doutput,  }\item[{int $\ast$}]{status }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{ccl__core_8h_a593680f9bf1f6b6b903abdd8795d41e2}\label{ccl__core_8h_a593680f9bf1f6b6b903abdd8795d41e2}} 
+\index{ccl\+\_\+core.\+h@{ccl\+\_\+core.\+h}!ccl\+\_\+get\+\_\+pk\+\_\+spline\+\_\+na@{ccl\+\_\+get\+\_\+pk\+\_\+spline\+\_\+na}}
+\index{ccl\+\_\+get\+\_\+pk\+\_\+spline\+\_\+na@{ccl\+\_\+get\+\_\+pk\+\_\+spline\+\_\+na}!ccl\+\_\+core.\+h@{ccl\+\_\+core.\+h}}
+\subsubsection{\texorpdfstring{ccl\+\_\+get\+\_\+pk\+\_\+spline\+\_\+na()}{ccl\_get\_pk\_spline\_na()}}
+{\footnotesize\ttfamily int ccl\+\_\+get\+\_\+pk\+\_\+spline\+\_\+na (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structccl__cosmology}{ccl\+\_\+cosmology}} $\ast$}]{cosmo }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{ccl__core_8h_afd929e0f8cdfd84078d4876091a93eb4}\label{ccl__core_8h_afd929e0f8cdfd84078d4876091a93eb4}} 
+\index{ccl\+\_\+core.\+h@{ccl\+\_\+core.\+h}!ccl\+\_\+get\+\_\+pk\+\_\+spline\+\_\+nk@{ccl\+\_\+get\+\_\+pk\+\_\+spline\+\_\+nk}}
+\index{ccl\+\_\+get\+\_\+pk\+\_\+spline\+\_\+nk@{ccl\+\_\+get\+\_\+pk\+\_\+spline\+\_\+nk}!ccl\+\_\+core.\+h@{ccl\+\_\+core.\+h}}
+\subsubsection{\texorpdfstring{ccl\+\_\+get\+\_\+pk\+\_\+spline\+\_\+nk()}{ccl\_get\_pk\_spline\_nk()}}
+{\footnotesize\ttfamily int ccl\+\_\+get\+\_\+pk\+\_\+spline\+\_\+nk (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structccl__cosmology}{ccl\+\_\+cosmology}} $\ast$}]{cosmo }\end{DoxyParamCaption})}
 
 \mbox{\Hypertarget{ccl__core_8h_a6a35ee485eac121317f33a30968eab65}\label{ccl__core_8h_a6a35ee485eac121317f33a30968eab65}} 
 \index{ccl\+\_\+core.\+h@{ccl\+\_\+core.\+h}!ccl\+\_\+parameters\+\_\+create@{ccl\+\_\+parameters\+\_\+create}}
@@ -266,3 +394,24 @@ Write a cosmology parameters object to a file in yaml format.
 \begin{DoxyReturn}{Returns}
 void 
 \end{DoxyReturn}
+
+
+\subsection{Variable Documentation}
+\mbox{\Hypertarget{ccl__core_8h_a1fe79c455a3a6fe01e7409d0c594bf0c}\label{ccl__core_8h_a1fe79c455a3a6fe01e7409d0c594bf0c}} 
+\index{ccl\+\_\+core.\+h@{ccl\+\_\+core.\+h}!ccl\+\_\+constants@{ccl\+\_\+constants}}
+\index{ccl\+\_\+constants@{ccl\+\_\+constants}!ccl\+\_\+core.\+h@{ccl\+\_\+core.\+h}}
+\subsubsection{\texorpdfstring{ccl\+\_\+constants}{ccl\_constants}}
+{\footnotesize\ttfamily \mbox{\hyperlink{structccl__physical__constants}{ccl\+\_\+physical\+\_\+constants}} ccl\+\_\+constants}
+
+\mbox{\Hypertarget{ccl__core_8h_a51a81788c4b417668a0db77918d90b39}\label{ccl__core_8h_a51a81788c4b417668a0db77918d90b39}} 
+\index{ccl\+\_\+core.\+h@{ccl\+\_\+core.\+h}!default\+\_\+gsl\+\_\+params@{default\+\_\+gsl\+\_\+params}}
+\index{default\+\_\+gsl\+\_\+params@{default\+\_\+gsl\+\_\+params}!ccl\+\_\+core.\+h@{ccl\+\_\+core.\+h}}
+\subsubsection{\texorpdfstring{default\+\_\+gsl\+\_\+params}{default\_gsl\_params}}
+{\footnotesize\ttfamily const \mbox{\hyperlink{structccl__gsl__params}{ccl\+\_\+gsl\+\_\+params}} default\+\_\+gsl\+\_\+params}
+
+\mbox{\Hypertarget{ccl__core_8h_a62833ca45c5ab0c9c93758deb6d8bc5c}\label{ccl__core_8h_a62833ca45c5ab0c9c93758deb6d8bc5c}} 
+\index{ccl\+\_\+core.\+h@{ccl\+\_\+core.\+h}!default\+\_\+spline\+\_\+params@{default\+\_\+spline\+\_\+params}}
+\index{default\+\_\+spline\+\_\+params@{default\+\_\+spline\+\_\+params}!ccl\+\_\+core.\+h@{ccl\+\_\+core.\+h}}
+\subsubsection{\texorpdfstring{default\+\_\+spline\+\_\+params}{default\_spline\_params}}
+{\footnotesize\ttfamily const \mbox{\hyperlink{structccl__spline__params}{ccl\+\_\+spline\+\_\+params}} default\+\_\+spline\+\_\+params}
+

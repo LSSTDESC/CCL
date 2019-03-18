@@ -40,8 +40,6 @@ from .massfunction import massfunc, massfunc_m2r, sigmaM, halo_bias
 # Cl's and tracers
 from .cls import angular_cl, NumberCountsTracer, WeakLensingTracer, CMBLensingTracer
 
-from .redshifts import  dNdz_tomog, PhotoZFunction, PhotoZGaussian, dNdzFunction, dNdzSmail
-
 # Useful constants and unit conversions
 physical_constants = lib.cvar.constants
 

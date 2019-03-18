@@ -108,18 +108,14 @@ Data Fields</h2></td></tr>
 <tr class="separator:a6417dfa54222033c8c229d3ca5e0866e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1dea641d6ae09c5e2ee8811a21c6ceda"><td class="memItemLeft" align="right" valign="top">gsl_spline *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structccl__data.html#a1dea641d6ae09c5e2ee8811a21c6ceda">etahmf</a></td></tr>
 <tr class="separator:a1dea641d6ae09c5e2ee8811a21c6ceda"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa965346f6aa1fe399a7a0d759fb85312"><td class="memItemLeft" align="right" valign="top">gsl_spline2d *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structccl__data.html#aa965346f6aa1fe399a7a0d759fb85312">p_lin</a></td></tr>
-<tr class="separator:aa965346f6aa1fe399a7a0d759fb85312"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad55e7ec9ee6a6d8ad95b3c9eb1eef92b"><td class="memItemLeft" align="right" valign="top">gsl_spline2d *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structccl__data.html#ad55e7ec9ee6a6d8ad95b3c9eb1eef92b">p_nl</a></td></tr>
-<tr class="separator:ad55e7ec9ee6a6d8ad95b3c9eb1eef92b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac33675ca1fd015c79fcf3e18623ed405"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structccl__data.html#ac33675ca1fd015c79fcf3e18623ed405">k_min_lin</a></td></tr>
-<tr class="separator:ac33675ca1fd015c79fcf3e18623ed405"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2ab9d362ddf213f30d73c4cac4c60141"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structccl__data.html#a2ab9d362ddf213f30d73c4cac4c60141">k_min_nl</a></td></tr>
-<tr class="separator:a2ab9d362ddf213f30d73c4cac4c60141"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a36afcf1cc6daf98b42b8e9c55338dad7"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structccl__data.html#a36afcf1cc6daf98b42b8e9c55338dad7">k_max_lin</a></td></tr>
-<tr class="separator:a36afcf1cc6daf98b42b8e9c55338dad7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a26b24c2ae6bb9b41b2f3a64a14fc65af"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structccl__data.html#a26b24c2ae6bb9b41b2f3a64a14fc65af">k_max_nl</a></td></tr>
-<tr class="separator:a26b24c2ae6bb9b41b2f3a64a14fc65af"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa2daa15d06d8739adae5a45be494c2c5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structccl__p2d__t.html">ccl_p2d_t</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structccl__data.html#aa2daa15d06d8739adae5a45be494c2c5">p_lin</a></td></tr>
+<tr class="separator:aa2daa15d06d8739adae5a45be494c2c5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad5cbffe11bc08c851293f7b72b6a2f90"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structccl__p2d__t.html">ccl_p2d_t</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structccl__data.html#ad5cbffe11bc08c851293f7b72b6a2f90">p_nl</a></td></tr>
+<tr class="separator:ad5cbffe11bc08c851293f7b72b6a2f90"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac655eaa75acfd755a45bb39e2344d800"><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_spl_par.html">SplPar</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structccl__data.html#ac655eaa75acfd755a45bb39e2344d800">rsd_splines</a> [3]</td></tr>
+<tr class="separator:ac655eaa75acfd755a45bb39e2344d800"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad599220fa8b248458b36d48906b75d1d"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structccl__data.html#ad599220fa8b248458b36d48906b75d1d">rsd_splines_scalefactor</a></td></tr>
+<tr class="separator:ad599220fa8b248458b36d48906b75d1d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Struct containing references to gsl splines for distance and acceleration calculations </p>
@@ -348,62 +344,6 @@ Data Fields</h2></td></tr>
 
 </div>
 </div>
-<a id="a36afcf1cc6daf98b42b8e9c55338dad7"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a36afcf1cc6daf98b42b8e9c55338dad7">&#9670;&nbsp;</a></span>k_max_lin</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">double ccl_data::k_max_lin</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="a26b24c2ae6bb9b41b2f3a64a14fc65af"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a26b24c2ae6bb9b41b2f3a64a14fc65af">&#9670;&nbsp;</a></span>k_max_nl</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">double ccl_data::k_max_nl</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="ac33675ca1fd015c79fcf3e18623ed405"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac33675ca1fd015c79fcf3e18623ed405">&#9670;&nbsp;</a></span>k_min_lin</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">double ccl_data::k_min_lin</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="a2ab9d362ddf213f30d73c4cac4c60141"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a2ab9d362ddf213f30d73c4cac4c60141">&#9670;&nbsp;</a></span>k_min_nl</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">double ccl_data::k_min_nl</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
 <a id="a8b877a586de0aa78c7585338730b3139"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a8b877a586de0aa78c7585338730b3139">&#9670;&nbsp;</a></span>logsigma</h2>
 
@@ -418,28 +358,28 @@ Data Fields</h2></td></tr>
 
 </div>
 </div>
-<a id="aa965346f6aa1fe399a7a0d759fb85312"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa965346f6aa1fe399a7a0d759fb85312">&#9670;&nbsp;</a></span>p_lin</h2>
+<a id="aa2daa15d06d8739adae5a45be494c2c5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa2daa15d06d8739adae5a45be494c2c5">&#9670;&nbsp;</a></span>p_lin</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">gsl_spline2d* ccl_data::p_lin</td>
+          <td class="memname"><a class="el" href="structccl__p2d__t.html">ccl_p2d_t</a>* ccl_data::p_lin</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
 </div>
 </div>
-<a id="ad55e7ec9ee6a6d8ad95b3c9eb1eef92b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad55e7ec9ee6a6d8ad95b3c9eb1eef92b">&#9670;&nbsp;</a></span>p_nl</h2>
+<a id="ad5cbffe11bc08c851293f7b72b6a2f90"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad5cbffe11bc08c851293f7b72b6a2f90">&#9670;&nbsp;</a></span>p_nl</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">gsl_spline2d* ccl_data::p_nl</td>
+          <td class="memname"><a class="el" href="structccl__p2d__t.html">ccl_p2d_t</a>* ccl_data::p_nl</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -454,6 +394,34 @@ Data Fields</h2></td></tr>
       <table class="memname">
         <tr>
           <td class="memname">gsl_spline* ccl_data::phihmf</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ac655eaa75acfd755a45bb39e2344d800"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac655eaa75acfd755a45bb39e2344d800">&#9670;&nbsp;</a></span>rsd_splines</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="struct_spl_par.html">SplPar</a>* ccl_data::rsd_splines[3]</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ad599220fa8b248458b36d48906b75d1d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad599220fa8b248458b36d48906b75d1d">&#9670;&nbsp;</a></span>rsd_splines_scalefactor</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double ccl_data::rsd_splines_scalefactor</td>
         </tr>
       </table>
 </div><div class="memdoc">

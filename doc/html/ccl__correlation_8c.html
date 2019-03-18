@@ -84,7 +84,6 @@ $(function() {
 <code>#include &lt;gsl/gsl_sf_legendre.h&gt;</code><br />
 <code>#include &quot;<a class="el" href="fftlog_8h_source.html">fftlog.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="ccl_8h_source.html">ccl.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="ccl__params_8h_source.html">ccl_params.h</a>&quot;</code><br />
 </div><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
 Data Structures</h2></td></tr>
@@ -97,6 +96,16 @@ Functions</h2></td></tr>
 <tr class="separator:a05da04dc1bd473fd76209f7c33c6cf24"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7703e8ee184dc5503115bf835e66cc8f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__correlation_8c.html#a7703e8ee184dc5503115bf835e66cc8f">ccl_correlation_3d</a> (<a class="el" href="structccl__cosmology.html">ccl_cosmology</a> *cosmo, double a, int n_r, double *r, double *xi, int do_taper_pk, double *taper_pk_limits, int *status)</td></tr>
 <tr class="separator:a7703e8ee184dc5503115bf835e66cc8f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8b82941f7ab7d99c9e80da97c7b99343"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__correlation_8c.html#a8b82941f7ab7d99c9e80da97c7b99343">ccl_correlation_multipole</a> (<a class="el" href="structccl__cosmology.html">ccl_cosmology</a> *cosmo, double a, double beta, int l, int n_s, double *s, double *xi, int *status)</td></tr>
+<tr class="separator:a8b82941f7ab7d99c9e80da97c7b99343"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a70f6f5e105deba4f4038ae7210950766"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__correlation_8c.html#a70f6f5e105deba4f4038ae7210950766">ccl_correlation_multipole_spline</a> (<a class="el" href="structccl__cosmology.html">ccl_cosmology</a> *cosmo, double a, int *status)</td></tr>
+<tr class="separator:a70f6f5e105deba4f4038ae7210950766"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1add8b720ecdc9eebababca9422c1746"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__correlation_8c.html#a1add8b720ecdc9eebababca9422c1746">ccl_correlation_3dRsd</a> (<a class="el" href="structccl__cosmology.html">ccl_cosmology</a> *cosmo, double a, int n_s, double *s, double mu, double beta, double *xi, int use_spline, int *status)</td></tr>
+<tr class="separator:a1add8b720ecdc9eebababca9422c1746"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9b2a0132f78cc707d559281f1db7419f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__correlation_8c.html#a9b2a0132f78cc707d559281f1db7419f">ccl_correlation_3dRsd_avgmu</a> (<a class="el" href="structccl__cosmology.html">ccl_cosmology</a> *cosmo, double a, int n_s, double *s, double beta, double *xi, int *status)</td></tr>
+<tr class="separator:a9b2a0132f78cc707d559281f1db7419f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a79a31d455250614f00f4594c2ce9f2db"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__correlation_8c.html#a79a31d455250614f00f4594c2ce9f2db">ccl_correlation_pi_sigma</a> (<a class="el" href="structccl__cosmology.html">ccl_cosmology</a> *cosmo, double a, double beta, double pi, int n_sig, double *sig, double *xi, int use_spline, int *status)</td></tr>
+<tr class="separator:a79a31d455250614f00f4594c2ce9f2db"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Function Documentation</h2>
 <a id="a05da04dc1bd473fd76209f7c33c6cf24"></a>
@@ -287,6 +296,302 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
+
+</div>
+</div>
+<a id="a1add8b720ecdc9eebababca9422c1746"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1add8b720ecdc9eebababca9422c1746">&#9670;&nbsp;</a></span>ccl_correlation_3dRsd()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ccl_correlation_3dRsd </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structccl__cosmology.html">ccl_cosmology</a> *&#160;</td>
+          <td class="paramname"><em>cosmo</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>a</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>n_s</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *&#160;</td>
+          <td class="paramname"><em>s</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>mu</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>beta</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *&#160;</td>
+          <td class="paramname"><em>xi</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>use_spline</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>status</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a9b2a0132f78cc707d559281f1db7419f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9b2a0132f78cc707d559281f1db7419f">&#9670;&nbsp;</a></span>ccl_correlation_3dRsd_avgmu()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ccl_correlation_3dRsd_avgmu </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structccl__cosmology.html">ccl_cosmology</a> *&#160;</td>
+          <td class="paramname"><em>cosmo</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>a</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>n_s</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *&#160;</td>
+          <td class="paramname"><em>s</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>beta</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *&#160;</td>
+          <td class="paramname"><em>xi</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>status</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a8b82941f7ab7d99c9e80da97c7b99343"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8b82941f7ab7d99c9e80da97c7b99343">&#9670;&nbsp;</a></span>ccl_correlation_multipole()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ccl_correlation_multipole </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structccl__cosmology.html">ccl_cosmology</a> *&#160;</td>
+          <td class="paramname"><em>cosmo</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>a</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>beta</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>l</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>n_s</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *&#160;</td>
+          <td class="paramname"><em>s</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *&#160;</td>
+          <td class="paramname"><em>xi</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>status</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a70f6f5e105deba4f4038ae7210950766"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a70f6f5e105deba4f4038ae7210950766">&#9670;&nbsp;</a></span>ccl_correlation_multipole_spline()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ccl_correlation_multipole_spline </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structccl__cosmology.html">ccl_cosmology</a> *&#160;</td>
+          <td class="paramname"><em>cosmo</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>a</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>status</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a79a31d455250614f00f4594c2ce9f2db"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a79a31d455250614f00f4594c2ce9f2db">&#9670;&nbsp;</a></span>ccl_correlation_pi_sigma()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ccl_correlation_pi_sigma </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structccl__cosmology.html">ccl_cosmology</a> *&#160;</td>
+          <td class="paramname"><em>cosmo</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>a</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>beta</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>pi</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>n_sig</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *&#160;</td>
+          <td class="paramname"><em>sig</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *&#160;</td>
+          <td class="paramname"><em>xi</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>use_spline</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>status</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
 
 </div>
 </div>
