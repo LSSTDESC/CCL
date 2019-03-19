@@ -9,6 +9,7 @@
 - Refactored spline and numerical parameters to be allocated per cosmology (#557).
 - Allow global physical constants to be changed (#557).
 - Fixed memory leaks in `ccl_correlation.c` (#581).
+- Fixed infinite loop bug in splitting sum of neutrino masses into individual masses (#605)
 
 ## Python library
 - Improved error reporting for `angular_cl` computations (#567).

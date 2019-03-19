@@ -426,12 +426,6 @@ ccl_parameters ccl_parameters_create(
 		  mnu_in[1] = 0.;
 		  mnu_in[2] = 0.;
 	  } 
-    //else if(*mnu>1e-15 && *mnu<0.06){
-    //*status = CCL_ERROR_LOWMNU;
-    //ccl_raise_exception(*status, "The neutrino mass is too low to satisfy \
-    the mass difference measurements in the case of normal hierarchy.\
-    In this low mass case, set mnu_type to sum_inverted or sum_equal.");
-    //  }
     else{
 	      mnu_in[0] = 0.; // This is a starting guess.
 
