@@ -11,6 +11,7 @@ for various physical quantities (e.g., the transfer function). The various
 options are as follows.
 
 transfer_function options
+  - None : do not compute a linear power spectrum
   - 'eisenstein_hu': the Eisenstein and Hu (1998) fitting function
   - 'bbks': the BBKS approximation
   - 'boltzmann_class': use CLASS to compute the transfer function
@@ -188,6 +189,7 @@ from .errors import CCLError
 
 # Configuration types
 transfer_function_types = {
+    None:               lib.transfer_none,
     'eisenstein_hu':    lib.eisenstein_hu,
     'bbks':             lib.bbks,
     'boltzmann_class':  lib.boltzmann_class,

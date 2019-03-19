@@ -15,7 +15,7 @@ CCL_BEGIN_DECLS
  */
 typedef enum transfer_function_t
 {
-  ccl_none              = 0,
+  ccl_transfer_none     = 0,
   ccl_eisenstein_hu     = 1,
   ccl_bbks              = 2,
   ccl_boltzmann_class   = 3

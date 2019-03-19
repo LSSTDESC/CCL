@@ -420,6 +420,9 @@ void ccl_cosmology_compute_power(ccl_cosmology* cosmo, int* status)
 
   // get linear P(k)
   switch (cosmo->config.transfer_function_method) {
+    case ccl_transfer_none:
+      break;
+
     case ccl_bbks:
       ccl_cosmology_compute_linpower_analytic(cosmo, NULL, bbks_power, status);
       break;
