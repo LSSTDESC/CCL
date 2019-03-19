@@ -407,17 +407,17 @@ ccl_parameters ccl_parameters_create(
   params.Omega_k = Omega_k;
   params.Neff = Neff;
 
-  // Set the sum of neutrino masses
-  params.sum_nu_masses = *mnu;
-  double mnusum = *mnu;
-  double *mnu_in = NULL;
+    double *mnu_in = NULL;
 
   // Decide how to split sum of neutrino masses between 3 neutrinos. We use
   // a Newton's rule numerical solution (thanks M. Jarvis).
 
   if (mnu_type==ccl_mnu_sum){
 	  // Normal hierarchy
-
+	  
+	  // Set the sum of neutrino masses
+      params.sum_nu_masses = *mnu;
+	  
 	  mnu_in = malloc(3*sizeof(double));
 
 	  // Check if the sum is zero
@@ -437,7 +437,6 @@ ccl_parameters ccl_parameters_create(
 	      if (*mnu < sum_check){
 		      *status = CCL_ERROR_MNU_UNPHYSICAL;
 		      ccl_check_status_nocosmo(status);
-		      return NAN;
           }
           double dsdm1;
           // This is the Newton's method
@@ -453,6 +452,9 @@ ccl_parameters ccl_parameters_create(
 
   } else if (mnu_type==ccl_mnu_sum_inverted){
 	  // Inverted hierarchy
+	  
+	  // Set the sum of neutrino masses
+      params.sum_nu_masses = *mnu;
 
 	  mnu_in = malloc(3*sizeof(double));
 
@@ -473,7 +475,6 @@ ccl_parameters ccl_parameters_create(
 	      if (*mnu < sum_check){
 		      *status = CCL_ERROR_MNU_UNPHYSICAL;
 		      ccl_check_status_nocosmo(status);
-		      return NAN;
           }
           double dsdm1;
           // This is the Newton's method
@@ -488,6 +489,10 @@ ccl_parameters ccl_parameters_create(
       }
 
   } else if (mnu_type==ccl_mnu_sum_equal){
+	  
+	    // Set the sum of neutrino masses
+        params.sum_nu_masses = *mnu;
+	  
 	    // Split the sum of masses equally
 	    mnu_in = malloc(3*sizeof(double));
 	    mnu_in[0] = params.sum_nu_masses / 3.;
