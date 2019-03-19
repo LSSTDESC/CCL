@@ -103,7 +103,7 @@ def test_power_spectrum_linear_slow():
 
 def test_power_spectrum_halofit():
     for tfn in ['eisenstein_hu', 'bbks',]:
-        loop_over_params(tfn, 'halofit', lin=True, raise_errs = False)
+        loop_over_params(tfn, 'halofit', lin=True, raise_errs = True)
 
 @decorators.slow
 def test_power_spectrum_halofit_slow():
@@ -125,7 +125,7 @@ def test_nonlin_power_spectrum_linear_slow():
 
 def test_nonlin_power_spectrum_halofit():
     for tfn in ['eisenstein_hu', 'bbks']:
-        loop_over_params(tfn, 'halofit', lin=False, raise_errs = False)
+        loop_over_params(tfn, 'halofit', lin=False, raise_errs = True)
 
 @decorators.slow
 def test_nonlin_power_spectrum_halofit_slow():
