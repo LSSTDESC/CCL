@@ -204,20 +204,6 @@ def test_swig_halomod():
         status)
 
 
-def test_swig_redshifts():
-    status = 0
-
-    assert_raises(
-        CCLError,
-        ccllib.dNdz_tomog_vec,
-        0,
-        0.0, 1.0,
-        None,
-        [0.0, 1.0],
-        7,
-        status)
-
-
 def test_swig_massfunc():
     status = 0
     for func in [ccllib.massfunc_vec, ccllib.halo_bias_vec]:

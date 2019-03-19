@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['dndz_5finfo',['dNdz_info',['../structd_ndz__info.html',1,'']]]
+  ['eh_5fstruct',['eh_struct',['../structeh__struct.html',1,'']]]
 ];

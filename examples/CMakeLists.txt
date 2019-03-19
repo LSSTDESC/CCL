@@ -4,9 +4,6 @@ target_link_libraries(ccl_sample_baryons ccl)
 add_executable(ccl_sample_neutrinos ccl_sample_neutrinos.c)
 target_link_libraries(ccl_sample_neutrinos ccl)
 
-add_executable(ccl_sample_photoz ccl_sample_photoz.c)
-target_link_libraries(ccl_sample_photoz ccl)
-
 add_executable(ccl_sample_pkemu ccl_sample_pkemu.c)
 target_link_libraries(ccl_sample_pkemu ccl)
 

@@ -48,7 +48,7 @@
 
 \begin{abstract}
 
-The Core Cosmology Library (\ccl) provides routines to compute basic cosmological observables with validated numerical accuracy. These routines have been validated to an accuracy level, documented here, against the results of independent implementations. In the current version, predictions are provided for distances and background quantities, angular auto- and cross-spectra of cosmic shear, galaxy-galaxy lensing, intrinsic alignments and clustering, halo bias and the halo mass function. \ccl uses different schemes to obtain the matter power spectrum, including analytical, phenomenological and other schemes calibrated through simulations. Fiducial specifications for the expected LSST galaxy distributions and clustering bias are also included, together with the capability of computing redshift distributions for a user-defined photometric redshift model. \ccl is written in C, with a Python interface. In this note, we explain the functionality of the publicly released (\ccl v1.0.0) library.
+The Core Cosmology Library (\ccl) provides routines to compute basic cosmological observables with validated numerical accuracy. These routines have been validated to an accuracy level, documented here, against the results of independent implementations. In the current version, predictions are provided for distances and background quantities, angular auto- and cross-spectra of cosmic shear, galaxy-galaxy lensing, intrinsic alignments and clustering, halo bias and the halo mass function. \ccl uses different schemes to obtain the matter power spectrum, including analytical, phenomenological and other schemes calibrated through simulations. \ccl is written in C, with a Python interface. In this note, we explain the functionality of the publicly released (\ccl v1.0.0) library.
 
 \end{abstract}
 
@@ -1058,28 +1058,6 @@ c(M)=9\left(\frac{M}{M_*}\right)^{-0.13}\ ,
 \end{equation}
 where $\delta_\mathrm{c}/\sigma(M_*)=1$.
 Note that, in order to be consistent, one should use a value of $\Delta_\mathrm{v}$ and $c(M)$ that is consistent with the halo definition used for the halo mass function and bias.
-
-\subsection{Redshift distributions}
-\label{sec:photoz}
-\ccl includes convenience functions which allow the user to compute the redshift distribution in a tomographic bin defined by cuts on photometric redshift, given a photometric redshift model and an analytic form for the true redshift distribution of the sample. This functionality is implemented in {\tt ccl\_redshifts.c}. Mathematically, it is described by:
-\begin{equation}
-\frac{dN^i}{dz} = \frac{\frac{dN}{dz}\int_{z_i}^{z_{i+1}} dz' p(z,z')}{\int_{z_{\rm min}}^{z_{\rm max}}dz \frac{dN}{dz} \int_{z_i}^{z_{i+1}}dz' p(z, z')}
-\label{photoz}
-\end{equation}
-where $z$ is the true redshift, $z'$ is the photometric redshift, $\frac{dN}{dz}$ is the true redshift distribution of the full sample, $p(z,z')$ is the probability of measuring photometric redshift $z'$ for an object with true redshift $z$, and $z_{i}$ and $z_{i+1}$ are the photo-z edges of the bin in question.
-
-To include a user-defined photometric redshift model, the user writes a function which accepts as input a photometric redshift, a spectroscopic redshift, and a void pointer to a structure containing any further parameters of the photo-z model. This function will return the probability of measuring the input photometric redshift given the input spectroscopic redshift. Explicitly, it should take the form:
-
-{\tt user$\_$pz$\_$probability(double z$\_$ph, double z$\_$s, void * user$\_$pz$\_$par)\{...\}}
-
-Similarly, for the user-defined $\frac{dN}{dz}$, the user writes a function which accepts a spectroscopic redshift and a void pointer to a structure containing the parameters of the assumed analytic form:
-
-{\tt user$\_$dNdz$\_$probability(double z$\_$s, void * user$\_$dN$\_$par)\{...\}}
-
-An example of how the user can construct the required functions and structures can be found in {\tt ccl\_sample\_run.c}. Built-in functions are also included for a Gaussian $p(z,z')$ and / or a true redshift distribution of the form:
-\begin{equation}
-\frac{dN}{dz} \propto z^{\alpha} {\rm exp}\left(-\left(\frac{z}{z_0}\right)^\beta\right).
-\end{equation}
 
 
 \section{Tests and validation}
