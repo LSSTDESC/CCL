@@ -390,20 +390,6 @@ static void ccl_fill_class_parameters(ccl_cosmology * cosmo, struct file_content
 
 }
 
-// this function has been copied out of ccl_power.c until our own halofit
-// implementation is done
-static void correct_bcm(ccl_cosmology *cosmo, int na, double *a_arr, int nk,
-                        double *lk_arr,double *pk2d, int *status) {
-  for(int ii=0;ii<na;ii++) {
-    double a=a_arr[ii];
-    for(int jj=0;jj<nk;jj++) {
-      double k=exp(lk_arr[jj]);
-      double fbcm=ccl_bcm_model_fka(cosmo,k,a,status);
-      pk2d[jj+nk*ii]+=log(fbcm);
-    }
-  }
-}
-
 /*
  * Compute the power spectrum using CLASS
  * @param cosmo Cosmological parameters
@@ -522,36 +508,6 @@ void ccl_cosmology_compute_linpower_class(ccl_cosmology* cosmo, int* status) {
 
   if(*status==0)
     cosmo->data.p_lin=ccl_p2d_t_new(na,aa,nk,lk,lpk_ln,1,2,ccl_p2d_cclgrowth,1,NULL,0,ccl_p2d_3,status);
-
-  // we do halofit now since we won't have class computed later
-  // this will be removed when we implement our own halofit
-  if (cosmo->config.matter_power_spectrum_method == ccl_halofit) {
-    if (*status==0) {
-      double psout_nl;
-
-      s=0;
-      for (int i=0; i<nk; i++) {
-        for (int j = 0; j < na; j++) {
-            s |= spectra_pk_nl_at_k_and_z(&ba, &pm, &sp,exp(lk[i]),1./aa[j]-1.+1e-10,&psout_nl);
-          lpk_nl[j*nk+i] = log(psout_nl);
-        }
-      }
-
-      if(s) {
-        *status = CCL_ERROR_CLASS;
-        ccl_cosmology_set_status_message(
-          cosmo, "ccl_power.c: ccl_cosmology_compute_power_class(): Error computing CLASS power spectrum\n");
-      }
-    }
-
-    if(*status==0) {
-      if(cosmo->config.baryons_power_spectrum_method == ccl_bcm)
-        correct_bcm(cosmo,na,aa,nk,lk,lpk_nl,status);
-    }
-
-    if(*status==0)
-      cosmo->data.p_nl=ccl_p2d_t_new(na,aa,nk,lk,lpk_nl,1,2,ccl_p2d_cclgrowth,1,NULL,0,ccl_p2d_3,status);
-  }
 
   ccl_free_class_structs(cosmo,&ba,&th,&pt,&tr,&pm,&sp,&nl,&le,init_arr,status);
   free(lk);

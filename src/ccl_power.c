@@ -461,30 +461,29 @@ void ccl_cosmology_compute_power(ccl_cosmology* cosmo, int* status)
     switch (cosmo->config.matter_power_spectrum_method) {
 
       case ccl_linear: {
-          // temporarily set computed_power to true
-          cosmo->computed_power = true;
-          ccl_cosmology_spline_nonlinpower(cosmo, linear_power, NULL, status);
-          cosmo->computed_power = false;}
+        // temporarily set computed_power to true
+        cosmo->computed_power = true;
+        ccl_cosmology_spline_nonlinpower(cosmo, linear_power, NULL, status);
+        cosmo->computed_power = false;}
         break;
 
       // this is temporary - once
       case ccl_halofit: {
-        if (cosmo->config.transfer_function_method != ccl_boltzmann_class) {
-          *status = CCL_ERROR_INCONSISTENT;
-          ccl_cosmology_set_status_message(
-            cosmo,
-            "ccl_power.c: ccl_cosmology_compute_power(): "
-            "halofit cannot yet be used with transfer function method %d \n",
-            cosmo->config.transfer_function_method);
-        }
-      }
-      break;
+        // temporarily set computed_power to true
+        cosmo->computed_power = true;
+        halofit_struct *hf = NULL;
+        hf = ccl_halofit_struct_new(cosmo, status);
+        if (*status == 0)
+          ccl_cosmology_spline_nonlinpower(cosmo, halofit_power, (void*)hf, status);
+        ccl_halofit_struct_free(hf);
+        cosmo->computed_power = false;}
+        break;
 
       case ccl_halo_model: {
-          // temporarily set computed_power to true
-          cosmo->computed_power = true;
-          ccl_cosmology_spline_nonlinpower(cosmo, halomodel_power, NULL, status);
-          cosmo->computed_power = false;}
+        // temporarily set computed_power to true
+        cosmo->computed_power = true;
+        ccl_cosmology_spline_nonlinpower(cosmo, halomodel_power, NULL, status);
+        cosmo->computed_power = false;}
         break;
 
       case ccl_emu:
@@ -502,7 +501,7 @@ void ccl_cosmology_compute_power(ccl_cosmology* cosmo, int* status)
     }
   }
 
-  ccl_check_status(cosmo,status);
+  ccl_check_status(cosmo, status);
   if (*status == 0)
     cosmo->computed_power = true;
   return;
