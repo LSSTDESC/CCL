@@ -147,14 +147,6 @@ static void ccl_cosmology_compute_linpower_analytic(
     cosmo->data.p_lin=ccl_p2d_t_new(na,z,nk,x,y2d,1,2,ccl_p2d_cclgrowth,1,NULL,0,ccl_p2d_3,status);
   }
 
-  // if(*status==0) {
-  //   if(cosmo->config.baryons_power_spectrum_method==ccl_bcm)
-  //     correct_bcm(cosmo,na,z,nk,x,y2d,status);
-  // }
-  //
-  // if(*status==0)
-  //   cosmo->data.p_nl=ccl_p2d_t_new(na,z,nk,x,y2d,1,2,ccl_p2d_cclgrowth,1,NULL,0,ccl_p2d_3,status);
-
   free(x);
   free(y);
   free(z);
@@ -242,14 +234,6 @@ static void ccl_cosmology_compute_power_emu(ccl_cosmology * cosmo, int * status)
                "sigma8 is not defined; specify sigma8 instead of A_s\n");
     }
   }
-
-  // //Initially compute linear power spectrum with CLASS
-  // if(*status==0)
-  //   ccl_cosmology_compute_power_class(cosmo,status);
-  //
-  // //Free up non-linear pk spline, since we'll replace that with the emulator
-  // if(*status==0)
-  //   ccl_p2d_t_free(cosmo->data.p_nl);
 
   int na=cosmo->spline_params.A_SPLINE_NA_PK;
   double *lpk_1a=NULL,*lk=NULL,*aemu=NULL,*lpk_nl=NULL;
