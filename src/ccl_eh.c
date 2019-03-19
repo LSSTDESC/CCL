@@ -1,6 +1,5 @@
 #include <math.h>
 #include "ccl.h"
-#include "ccl_eh.h"
 
 /*
  * Allocate a new struct for storing EH98 data

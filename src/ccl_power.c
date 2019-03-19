@@ -12,11 +12,6 @@
 #include "ccl.h"
 #include "ccl_emu17.h"
 #include "ccl_emu17_params.h"
-#include "ccl_bbks.h"
-#include "ccl_bcm.h"
-#include "ccl_eh.h"
-#include "ccl_class.h"
-#include "ccl_halomod.h"
 
 // helper function for BCM corrections
 static void correct_bcm(ccl_cosmology *cosmo, int na, double *a_arr, int nk,
