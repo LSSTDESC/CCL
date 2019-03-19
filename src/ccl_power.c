@@ -35,6 +35,19 @@ static double eh_power(ccl_parameters *params, void *p, double k) {
   return ccl_eh_power(params, (eh_struct*)p, k);
 }
 
+// helper functions for non-linear power tabulation
+static double halomodel_power(ccl_cosmology* cosmo, double k, double a, void *p, int* status) {
+  return ccl_halomodel_matter_power(cosmo, k, a, status);
+}
+
+static double linear_power(ccl_cosmology* cosmo, double k, double a, void *p, int* status) {
+  return ccl_linear_matter_power(cosmo, k, a, status);
+}
+
+static double halofit_power(ccl_cosmology* cosmo, double k, double a, void *p, int* status) {
+  return ccl_halofit_power(cosmo, k, a, (halofit_struct*)p, status);
+}
+
 /*------ ROUTINE: ccl_cosmology_compute_power_analytic -----
 INPUT: cosmology
 TASK: provide spline for an analytic power spectrum with baryonic correction
@@ -323,7 +336,8 @@ static void ccl_cosmology_compute_power_emu(ccl_cosmology * cosmo, int * status)
 
 static void ccl_cosmology_spline_nonlinpower(
     ccl_cosmology* cosmo,
-    double (*pk)(ccl_cosmology* cosmo, double k, double a, int* status),
+    double (*pk)(ccl_cosmology* cosmo, double k, double a, void *p, int* status),
+    void *data,
     int* status) {
 
   double sigma8,log_sigma8;
@@ -381,7 +395,7 @@ static void ccl_cosmology_spline_nonlinpower(
     for (int i=0; i<nk; i++) {
       for (int j = 0; j<na; j++) {
         if (*status == 0)
-          y2d[j*nk + i] = log((*pk)(cosmo, x[i], z[j], status));
+          y2d[j*nk + i] = log((*pk)(cosmo, x[i], z[j], data, status));
       }
     }
 
@@ -449,7 +463,7 @@ void ccl_cosmology_compute_power(ccl_cosmology* cosmo, int* status)
       case ccl_linear: {
           // temporarily set computed_power to true
           cosmo->computed_power = true;
-          ccl_cosmology_spline_nonlinpower(cosmo, ccl_linear_matter_power, status);
+          ccl_cosmology_spline_nonlinpower(cosmo, linear_power, NULL, status);
           cosmo->computed_power = false;}
         break;
 
@@ -469,7 +483,7 @@ void ccl_cosmology_compute_power(ccl_cosmology* cosmo, int* status)
       case ccl_halo_model: {
           // temporarily set computed_power to true
           cosmo->computed_power = true;
-          ccl_cosmology_spline_nonlinpower(cosmo, ccl_halomodel_matter_power, status);
+          ccl_cosmology_spline_nonlinpower(cosmo, halomodel_power, NULL, status);
           cosmo->computed_power = false;}
         break;
 
