@@ -34,8 +34,6 @@
   ambiguity (#610).
 - Refactored transfer function and matter power spectrum options to allow
   any combination, even unphysical ones (#610).
-- Refactored transfer function and matter power spectrum options to allow
-  any combination, even unphysical ones (#610).
 - Added capability to use the halo model power spectrum as the primary
   non-linear power spectrum in the code (#610).
 
