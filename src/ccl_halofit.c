@@ -85,7 +85,7 @@ static double rsigma_func(double rsigma, void *p) {
     ccl_raise_gsl_warning(
       gsl_status,
       "ccl_halofit.c: rsigma_func(): error in integration "
-      "for finding the halofit non-linear scale");
+      "for finding the halofit non-linear scale\n");
     *(hfd->status) |= gsl_status;
   }
 
@@ -93,7 +93,8 @@ static double rsigma_func(double rsigma, void *p) {
 }
 
 static double get_rsigma(double a, struct hf_int_data data) {
-  double rsigma, rlow = 0.0001, rhigh = 100.0;
+  double rsigma, rlow = 1e-2, rhigh = 1e2;
+  double flow, fhigh;
   int itr, max_itr = 1000, gsl_status;
   const gsl_root_fsolver_type *T;
   gsl_root_fsolver *s;
@@ -103,6 +104,14 @@ static double get_rsigma(double a, struct hf_int_data data) {
   F.function = &rsigma_func;
   F.params = &data;
 
+  // we have to bound the root, otherwise return -1
+  // we will fiil in any -1's in the calling routine
+  flow = rsigma_func(rlow, &data);
+  fhigh = rsigma_func(rhigh, &data);
+  if (flow * fhigh > 0) {
+    return -1;
+  }
+
   T = gsl_root_fsolver_brent;
   s = gsl_root_fsolver_alloc(T);
   gsl_root_fsolver_set(s, &F, rlow, rhigh);
@@ -111,8 +120,7 @@ static double get_rsigma(double a, struct hf_int_data data) {
   do {
     itr++;
     gsl_status = gsl_root_fsolver_iterate(s);
-    *(data.status) |= gsl_status;
-    if (*(data.status) != 0)
+    if (gsl_status == GSL_EBADFUNC)
       break;
 
     rsigma = gsl_root_fsolver_root(s);
@@ -123,17 +131,13 @@ static double get_rsigma(double a, struct hf_int_data data) {
       rlow, rhigh,
       data.cosmo->gsl_params.INTEGRATION_SIGMAR_EPSREL,
       data.cosmo->gsl_params.INTEGRATION_SIGMAR_EPSREL);
-    *(data.status) |= gsl_status;
-    if (*(data.status) != 0)
-      break;
-
   } while (gsl_status == GSL_CONTINUE && itr < max_itr);
 
   gsl_root_fsolver_free(s);
 
   if (gsl_status != GSL_SUCCESS || itr >= max_itr) {
     ccl_raise_gsl_warning(
-      gsl_status, "ccl_halofit.c: get_rsigma: error in root finding for the halofit non-linear scale");
+      gsl_status, "ccl_halofit.c: get_rsigma: error in root finding for the halofit non-linear scale\n");
     *(data.status) |= gsl_status;
   }
 
@@ -240,6 +244,25 @@ halofit_struct* ccl_halofit_struct_new(ccl_cosmology *cosmo, int *status) {
         break;
       }
     }
+
+    // now go backwards and fill any -1's
+    // any scale factor above 0.15 should work ok, so set an error if not
+    for (i=0; i<n_a; ++i) {
+      if (a_vec[i] >= 0.15 && vals[i] == -1) {
+        *status = CCL_ERROR_ROOT;
+        ccl_cosmology_set_status_message(
+          cosmo,
+          "ccl_halofit.c: ccl_halofit_struct_new(): "
+          "could not solve for non-linear scale for halofit\n");
+        break;
+      }
+    }
+    if (*status == 0) {
+      for (i=n_a-2; i>=0; --i) {
+        if (vals[i] == -1)
+          vals[i] = vals[i+1];
+      }
+    }
   }
 
   // spline the non-linear scales
@@ -328,7 +351,7 @@ halofit_struct* ccl_halofit_struct_new(ccl_cosmology *cosmo, int *status) {
         ccl_raise_gsl_warning(
           gsl_status,
           "ccl_power.c: ccl_halofit_struct_new(): could not eval "
-          "points for n_eff spline");
+          "points for n_eff spline\n");
         ccl_cosmology_set_status_message(
           cosmo,
           "ccl_halofit.c: ccl_halofit_struct_new(): could not eval "
@@ -392,7 +415,7 @@ halofit_struct* ccl_halofit_struct_new(ccl_cosmology *cosmo, int *status) {
         ccl_raise_gsl_warning(
           gsl_status,
           "ccl_power.c: ccl_halofit_struct_new(): could not eval "
-          "points for C spline");
+          "points for C spline\n");
         ccl_cosmology_set_status_message(
           cosmo,
           "ccl_halofit.c: ccl_halofit_struct_new(): could not eval "
@@ -434,8 +457,10 @@ halofit_struct* ccl_halofit_struct_new(ccl_cosmology *cosmo, int *status) {
   // free stuff on the way out
   // if the status is non-zero, then we should free any data already
   // accumulated
-  if (*status != 0)
+  if (*status != 0) {
     ccl_halofit_struct_free(hf);
+    hf = NULL;
+  }
   gsl_integration_cquad_workspace_free(workspace);
   free(a_vec);
   free(vals);
@@ -449,26 +474,89 @@ halofit_struct* ccl_halofit_struct_new(ccl_cosmology *cosmo, int *status) {
  */
 void ccl_halofit_struct_free(halofit_struct *hf) {
   if (hf != NULL) {
-    if (hf->rsigma != NULL) {
+    if (hf->rsigma != NULL)
       gsl_spline_free(hf->rsigma);
-      hf->rsigma = NULL;
-    }
 
-    if (hf->sigma2 != NULL) {
+    if (hf->sigma2 != NULL)
       gsl_spline_free(hf->sigma2);
-      hf->sigma2 = NULL;
-    }
 
-    if (hf->n_eff != NULL) {
+    if (hf->n_eff != NULL)
       gsl_spline_free(hf->n_eff);
-      hf->n_eff = NULL;
-    }
 
-    if (hf->C != NULL) {
+    if (hf->C != NULL)
       gsl_spline_free(hf->C);
-      hf->C = NULL;
-    }
 
     free(hf);
   }
+}
+
+/**
+ * Computes the halofit non-linear power spectrum
+ * @param cosmo: cosmology object containing parameters
+ * @param k: wavenumber in units of Mpc^{-1}
+ * @param a: scale factor normalised to a=1 today
+ * @param status: Status flag: 0 if there are no errors, non-zero otherwise
+ * @param hf: halofit splines for evaluating the power spectrum
+ * @return halofit_matter_power: halofit power spectrum, P(k), units of Mpc^{3}
+ */
+double ccl_halofit_power(ccl_cosmology *cosmo, double k, double a, halofit_struct *hf, int *status) {
+  double rsigma, neff, C;
+  double ksigma, weffa, omegaMz, omegaDEwz;
+  double PkL, PkNL, f1, f2, f3, an, bn, cn, gamman, alphan, betan, nun, mun, y, fy;
+  double DeltakL, DeltakQ, DeltakH, DeltakHprime, DeltakNL;
+
+  // eqns A4 - A5
+  rsigma = gsl_spline_eval(hf->rsigma, a, NULL);
+  neff = gsl_spline_eval(hf->n_eff, a, NULL);
+  C = gsl_spline_eval(hf->C, a, NULL);
+
+  ksigma = 1.0 / rsigma;
+
+  // for w0-wa we use the effective w formalism for w0-wa
+  // we taylor expand log(a) = log(1 + x) ~ x - x * x / 2
+  // near a = 1 or x = 0 for numerical reasons
+  if (a < 1.0 - 1e-12)
+    weffa = cosmo->params.w0 + cosmo->params.wa - cosmo->params.wa * (a - 1.0) / log(a);
+  else
+    weffa = cosmo->params.w0 + cosmo->params.wa - cosmo->params.wa  / (1.0 - fabs(a - 1.0) / 2);
+  omegaMz = ccl_omega_x(cosmo, a, ccl_species_m_label, status);
+  omegaDEwz = ccl_omega_x(cosmo, a, ccl_species_l_label, status);
+
+  // eqns A6 - A13 of Takahashi et al.
+  an = pow(
+    10.0,
+    1.5222 + 2.8553*neff + 2.3706*neff*neff + 0.9903*neff*neff*neff +
+    0.2250*neff*neff*neff*neff - 0.6038*C + 0.1749*omegaDEwz*(1.0 + weffa));
+  bn = pow(10.0, -0.5642 + 0.5864*neff + 0.5716*neff*neff - 1.5474*C + 0.2279*omegaDEwz*(1.0 + weffa));
+  cn = pow(10.0, 0.3698 + 2.0404*neff + 0.8161*neff*neff + 0.5869*C);
+  gamman = 0.1971 - 0.0843*neff + 0.8460*C;
+  alphan = fabs(6.0835 + 1.3373*neff - 0.1959*neff*neff - 5.5274*C);
+  betan = 2.0379 - 0.7354*neff + 0.3157*neff*neff + 1.2490*neff*neff*neff + 0.3980*neff*neff*neff*neff - 0.1682*C;
+  mun = 0.0;
+  nun = pow(10.0, 5.2105 + 3.6902*neff);
+
+  // eqns A14
+  f1 = pow(omegaMz,-0.0307);
+  f2 = pow(omegaMz,-0.0585);
+  f3 = pow(omegaMz,0.0743);
+
+  // eqns A1 - A3
+  PkL = ccl_linear_matter_power(cosmo, k, a, status);
+  y = k/ksigma;
+  fy = y/4.0 + y*y/8.0;
+  DeltakL = PkL*k*k*k/2.0/M_PI/M_PI;
+
+  DeltakQ = DeltakL * pow(1.0 + DeltakL, betan) / (1.0 + alphan*DeltakL) * exp(-1.0*fy);
+
+  DeltakHprime = an * pow(y, 3.0*f1) / (1.0 + bn*pow(y, f2) + pow(cn*f3*y, 3.0 - gamman));
+  DeltakH = DeltakHprime / (1.0 + mun/y + nun/y/y);
+
+  DeltakNL = DeltakQ + DeltakH;
+  PkNL = DeltakNL / (k*k*k/2.0/M_PI/M_PI);
+
+  // we check the status once
+  if(*status != 0)
+    return NAN;
+  else
+    return PkNL;
 }
