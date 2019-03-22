@@ -12,6 +12,9 @@ typedef struct halofit_struct {
   gsl_spline *sigma2;
   gsl_spline *n_eff;
   gsl_spline *C;
+  gsl_spline *weff;
+  gsl_spline *omeff;
+  gsl_spline *deeff;
 } halofit_struct;
 
 /*

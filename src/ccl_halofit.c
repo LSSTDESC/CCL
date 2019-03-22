@@ -10,6 +10,141 @@
 
 #include "ccl.h"
 
+/*
+ * We use the remapping procedure in https://arxiv.org/pdf/1601.07230.pdf
+ * to map w0-wa models onto wa == 0 models.
+ * The functions below implement this procedure.
+*/
+
+// I snuck a private function from backgrounc.c into here. :P
+void compute_chi(double a, ccl_cosmology *cosmo, double * chi, int * stat);
+
+static double zdrag_eh(ccl_parameters *params) {
+  // eqn 4 of Eisenstein & Hu 1998
+  double OMh2 = params->Omega_m * params->h * params->h;
+  double OBh2 = params->Omega_b * params->h * params->h;
+  double b1 = 0.313 * pow(OMh2, -0.419) * (1 + 0.607*pow(OMh2, 0.674));
+  double b2 = 0.238 * pow(OMh2, 0.223);
+  return 1291 * pow(OMh2, 0.251) * (1 + b1*pow(OBh2, b2)) / (1 + 0.659*pow(OMh2, 0.828));
+}
+
+struct hf_model_match_data {
+  double chi_drag;
+  double a;
+  ccl_cosmology *cosmo;
+  int *status;
+};
+
+static ccl_cosmology *create_w0eff_cosmo(double w0eff, ccl_cosmology *cosmo, int *status) {
+  ccl_parameters params_w0eff;
+  double norm_pk;
+
+  if (isnan(cosmo->params.A_s))
+    norm_pk = cosmo->params.sigma8;
+  else
+    norm_pk = cosmo->params.A_s;
+
+  params_w0eff = ccl_parameters_create(
+    cosmo->params.Omega_c, cosmo->params.Omega_b, cosmo->params.Omega_k,
+    cosmo->params.Neff, cosmo->params.mnu, ccl_mnu_list,
+    w0eff, 0, cosmo->params.h, norm_pk,
+    cosmo->params.n_s, cosmo->params.bcm_log10Mc, cosmo->params.bcm_etab,
+    cosmo->params.bcm_ks, cosmo->params.nz_mgrowth,
+    cosmo->params.z_mgrowth, cosmo->params.df_mgrowth, status);
+
+    if(*status != 0)
+      return NULL;
+
+    return ccl_cosmology_create(params_w0eff, cosmo->config);
+}
+
+static double w0eff_func(double w0eff, void *p) {
+  struct hf_model_match_data *hfd = (struct hf_model_match_data*)p;
+  ccl_cosmology *cosmo_w0eff = NULL;
+  double chi_drag_w0eff, tmp, zdrag_w0eff;
+
+  // make the equivalent cosmology
+  cosmo_w0eff = create_w0eff_cosmo(w0eff, hfd->cosmo, hfd->status);
+  if (cosmo_w0eff == NULL) {
+    *(hfd->status) = CCL_ERROR_MEMORY;
+    return NAN;
+  }
+
+  // get the comoving distance to zdrag
+  zdrag_w0eff = zdrag_eh(&(cosmo_w0eff->params));
+  compute_chi(1.0 / (1.0 + zdrag_w0eff), cosmo_w0eff, &tmp, hfd->status);
+  chi_drag_w0eff = tmp;
+  compute_chi(hfd->a, cosmo_w0eff, &tmp, hfd->status);
+  chi_drag_w0eff -= tmp;
+  if (*(hfd->status) != 0) {
+    return NAN;
+  }
+
+  ccl_cosmology_free(cosmo_w0eff);
+  return chi_drag_w0eff - hfd->chi_drag;
+}
+
+static double get_w0eff(double a, struct hf_model_match_data data) {
+  double w0eff, w0eff_low = -2.0, w0eff_high = -0.35;
+  double flow, fhigh;
+  int itr, max_itr = 1000, gsl_status;
+  const gsl_root_fsolver_type *T;
+  gsl_root_fsolver *s;
+  gsl_function F;
+
+  data.a = a;
+  data.chi_drag = ccl_comoving_radial_distance(data.cosmo, 1.0 / (1.0 + zdrag_eh(&(data.cosmo->params))), data.status);
+  data.chi_drag -= ccl_comoving_radial_distance(data.cosmo, a, data.status);
+  if(*(data.status) != 0) {
+    ccl_cosmology_set_status_message(
+      data.cosmo,
+      "ccl_halofit.c: ccl_halofit_struct_new(): "
+      "could not compute chi_drag for cosmology\n");
+  }
+
+  F.function = &w0eff_func;
+  F.params = &data;
+
+  // we have to bound the root, otherwise return -1
+  // we will fiil in any -1's in the calling routine
+  flow = w0eff_func(w0eff_low, &data);
+  fhigh = w0eff_func(w0eff_high, &data);
+  if (flow * fhigh > 0) {
+    return -1;
+  }
+
+  T = gsl_root_fsolver_brent;
+  s = gsl_root_fsolver_alloc(T);
+  gsl_root_fsolver_set(s, &F, w0eff_low, w0eff_high);
+
+  itr = 0;
+  do {
+    itr++;
+    gsl_status = gsl_root_fsolver_iterate(s);
+    if (gsl_status == GSL_EBADFUNC)
+      break;
+
+    w0eff = gsl_root_fsolver_root(s);
+    w0eff_low = gsl_root_fsolver_x_lower(s);
+    w0eff_high = gsl_root_fsolver_x_upper(s);
+
+    gsl_status = gsl_root_test_interval(
+      w0eff_low, w0eff_high,
+      1e-6,
+      1e-6);
+  } while (gsl_status == GSL_CONTINUE && itr < max_itr);
+
+  gsl_root_fsolver_free(s);
+
+  if (gsl_status != GSL_SUCCESS || itr >= max_itr) {
+    ccl_raise_gsl_warning(
+      gsl_status, "ccl_halofit.c: get_w0eff: error in root finding for the halofit matching cosmology\n");
+    *(data.status) |= gsl_status;
+  }
+
+  return w0eff;
+}
+
 /* helper data and functions for integrals
 
  the integral is
@@ -155,12 +290,16 @@ halofit_struct* ccl_halofit_struct_new(ccl_cosmology *cosmo, int *status) {
   double lnkmin, lnkmax;
   double *a_vec = NULL;
   double *vals = NULL;
+  double *vals_om = NULL;
+  double *vals_de = NULL;
   halofit_struct *hf = NULL;
   struct hf_int_data data;
   gsl_function F;
   gsl_integration_cquad_workspace *workspace = NULL;
   double result;
   double sigma2, rsigma, dsigma2drsigma;
+  struct hf_model_match_data data_w0eff;
+  ccl_cosmology *cosmo_w0eff = NULL;
 
   // compute spline point locations and integral bounds
   // note that the spline point locations in `a` determine a radius by
@@ -187,6 +326,9 @@ halofit_struct* ccl_halofit_struct_new(ccl_cosmology *cosmo, int *status) {
     hf->sigma2 = NULL;
     hf->n_eff = NULL;
     hf->C = NULL;
+    hf->weff = NULL;
+    hf->omeff = NULL;
+    hf->deeff = NULL;
   }
 
   if (*status == 0) {
@@ -225,8 +367,158 @@ halofit_struct* ccl_halofit_struct_new(ccl_cosmology *cosmo, int *status) {
     }
   }
 
+  if (*status == 0) {
+    vals_om = (double*)malloc(sizeof(double) * n_a);
+    if (vals_om == NULL) {
+      *status = CCL_ERROR_MEMORY;
+      ccl_cosmology_set_status_message(
+        cosmo,
+        "ccl_halofit.c: ccl_halofit_struct_new(): "
+        "memory could not be allocated for OmegaM results vector\n");
+    }
+  }
+
+  if (*status == 0) {
+    vals_de = (double*)malloc(sizeof(double) * n_a);
+    if (vals_de == NULL) {
+      *status = CCL_ERROR_MEMORY;
+      ccl_cosmology_set_status_message(
+        cosmo,
+        "ccl_halofit.c: ccl_halofit_struct_new(): "
+        "memory could not be allocated for OmegaDE results vector\n");
+    }
+  }
+
+  ////////////////////////////////////////////////////////
+  // if wa != 0, then we need to find an equivalent
+  // cosmology with wa = 0
+  if (cosmo->params.wa != 0) {
+    data_w0eff.cosmo = cosmo;
+    data_w0eff.status = status;
+  }
+
+  if (*status == 0) {
+    if (cosmo->params.wa != 0) {
+      for(i=0; i<n_a; ++i) {
+        vals[i] = get_w0eff(a_vec[i], data_w0eff);
+        if (*status != 0) {
+          *status = CCL_ERROR_ROOT;
+          ccl_cosmology_set_status_message(
+            cosmo,
+            "ccl_halofit.c: ccl_halofit_struct_new(): "
+            "could not solve for effective value of w0 for w0-wa cosmology\n");
+          break;
+        }
+
+        // now get omeff and deff
+        cosmo_w0eff = create_w0eff_cosmo(vals[i], cosmo, status);
+        if (cosmo_w0eff == NULL) {
+          *status = CCL_ERROR_MEMORY;
+          ccl_cosmology_set_status_message(
+            cosmo,
+            "ccl_halofit.c: ccl_halofit_struct_new(): "
+            "could not allocat memory for effective w0 for w0-wa cosmology\n");
+          break;
+        }
+
+        vals_om[i] = ccl_omega_x(cosmo_w0eff, a_vec[i], ccl_species_m_label, status);
+        vals_de[i] = ccl_omega_x(cosmo_w0eff, a_vec[i], ccl_species_l_label, status);
+
+        ccl_cosmology_free(cosmo_w0eff);
+        cosmo_w0eff = NULL;
+
+        if (*status != 0) {
+          ccl_cosmology_set_status_message(
+            cosmo,
+            "ccl_halofit.c: ccl_halofit_struct_new(): "
+            "could not compute OmegaM and OmegaDE for cosmology\n");
+          break;
+        }
+      }
+    } else {
+      for(i=0; i<n_a; ++i) {
+        vals[i] = cosmo->params.w0;
+        vals_om[i] = ccl_omega_x(cosmo, a_vec[i], ccl_species_m_label, status);
+        vals_de[i] = ccl_omega_x(cosmo, a_vec[i], ccl_species_l_label, status);
+        if (*status != 0) {
+          ccl_cosmology_set_status_message(
+            cosmo,
+            "ccl_halofit.c: ccl_halofit_struct_new(): "
+            "could not compute OmegaM and OmegaDE for cosmology\n");
+          break;
+        }
+      }
+    }
+  }
+
+  // spline the weff values
+  if (*status == 0) {
+    hf->weff = gsl_spline_alloc(gsl_interp_akima, n_a);
+    if (hf->weff == NULL) {
+      *status = CCL_ERROR_MEMORY;
+      ccl_cosmology_set_status_message(
+        cosmo,
+        "ccl_halofit.c: ccl_halofit_struct_new(): "
+        "memory could not be allocated for weff spline\n");
+    }
+  }
+
+  if (*status == 0) {
+    gsl_status = gsl_spline_init(hf->weff, a_vec, vals, n_a);
+    if (gsl_status != GSL_SUCCESS) {
+      *status = CCL_ERROR_SPLINE;
+      ccl_cosmology_set_status_message(
+        cosmo,
+        "ccl_halofit.c: ccl_halofit_struct_new(): could not build weff spline\n");
+    }
+  }
+
+  // spline the omeff values
+  if (*status == 0) {
+    hf->omeff = gsl_spline_alloc(gsl_interp_akima, n_a);
+    if (hf->omeff == NULL) {
+      *status = CCL_ERROR_MEMORY;
+      ccl_cosmology_set_status_message(
+        cosmo,
+        "ccl_halofit.c: ccl_halofit_struct_new(): "
+        "memory could not be allocated for omeff spline\n");
+    }
+  }
+
+  if (*status == 0) {
+    gsl_status = gsl_spline_init(hf->omeff, a_vec, vals_om, n_a);
+    if (gsl_status != GSL_SUCCESS) {
+      *status = CCL_ERROR_SPLINE;
+      ccl_cosmology_set_status_message(
+        cosmo,
+        "ccl_halofit.c: ccl_halofit_struct_new(): could not build omeff spline\n");
+    }
+  }
+
+  // spline the deeff values
+  if (*status == 0) {
+    hf->deeff = gsl_spline_alloc(gsl_interp_akima, n_a);
+    if (hf->deeff == NULL) {
+      *status = CCL_ERROR_MEMORY;
+      ccl_cosmology_set_status_message(
+        cosmo,
+        "ccl_halofit.c: ccl_halofit_struct_new(): "
+        "memory could not be allocated for deeff spline\n");
+    }
+  }
+
+  if (*status == 0) {
+    gsl_status = gsl_spline_init(hf->deeff, a_vec, vals_de, n_a);
+    if (gsl_status != GSL_SUCCESS) {
+      *status = CCL_ERROR_SPLINE;
+      ccl_cosmology_set_status_message(
+        cosmo,
+        "ccl_halofit.c: ccl_halofit_struct_new(): could not build deeff spline\n");
+    }
+  }
+
   ///////////////////////////////////////////////////////
-  // first find the nonlinear scale at each scale factor
+  // find the nonlinear scale at each scale factor
   if (*status == 0) {
     // setup for integrations
     data.status = status;
@@ -490,6 +782,10 @@ halofit_struct* ccl_halofit_struct_new(ccl_cosmology *cosmo, int *status) {
   gsl_integration_cquad_workspace_free(workspace);
   free(a_vec);
   free(vals);
+  free(vals_om);
+  free(vals_de);
+  if (cosmo_w0eff != NULL)
+    ccl_cosmology_free(cosmo_w0eff);
 
   return hf;
 }
@@ -511,6 +807,15 @@ void ccl_halofit_struct_free(halofit_struct *hf) {
 
     if (hf->C != NULL)
       gsl_spline_free(hf->C);
+
+    if (hf->weff != NULL)
+      gsl_spline_free(hf->weff);
+
+    if (hf->omeff != NULL)
+      gsl_spline_free(hf->omeff);
+
+    if (hf->deeff != NULL)
+      gsl_spline_free(hf->deeff);
 
     free(hf);
   }
@@ -542,14 +847,14 @@ double ccl_halofit_power(ccl_cosmology *cosmo, double k, double a, halofit_struc
   neff = gsl_spline_eval(hf->n_eff, a, NULL);
   C = gsl_spline_eval(hf->C, a, NULL);
 
+  weffa = gsl_spline_eval(hf->weff, a, NULL);
+  omegaMz = gsl_spline_eval(hf->omeff, a, NULL);
+  omegaDEwz = gsl_spline_eval(hf->deeff, a, NULL);
+
   ksigma = 1.0 / rsigma;
   neff2 = neff * neff;
   neff3 = neff2 * neff;
   neff4 = neff3 * neff;
-
-  weffa = cosmo->params.w0;  // formally only correct for wa == 0
-  omegaMz = ccl_omega_x(cosmo, a, ccl_species_m_label, status);
-  omegaDEwz = ccl_omega_x(cosmo, a, ccl_species_l_label, status);
 
   delta2_norm = k*k*k/2.0/M_PI/M_PI;
 
