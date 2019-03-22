@@ -467,7 +467,6 @@ void ccl_cosmology_compute_power(ccl_cosmology* cosmo, int* status)
         cosmo->computed_power = false;}
         break;
 
-      // this is temporary - once
       case ccl_halofit: {
         // temporarily set computed_power to true
         cosmo->computed_power = true;

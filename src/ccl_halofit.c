@@ -240,27 +240,53 @@ halofit_struct* ccl_halofit_struct_new(ccl_cosmology *cosmo, int *status) {
         ccl_cosmology_set_status_message(
           cosmo,
           "ccl_halofit.c: ccl_halofit_struct_new(): "
-          "could not solve for non-linear scale for halofit\n");
+          "could not solve for non-linear scale for halofit at scale factor %f\n", a_vec[i]);
         break;
       }
     }
 
     // now go backwards and fill any -1's
-    // any scale factor above 0.15 should work ok, so set an error if not
-    for (i=0; i<n_a; ++i) {
-      if (a_vec[i] >= 0.15 && vals[i] == -1) {
-        *status = CCL_ERROR_ROOT;
-        ccl_cosmology_set_status_message(
-          cosmo,
-          "ccl_halofit.c: ccl_halofit_struct_new(): "
-          "could not solve for non-linear scale for halofit\n");
-        break;
-      }
+    // one must work, so set an error if not
+    if (vals[n_a-1] == -1) {
+      *status = CCL_ERROR_ROOT;
+      ccl_cosmology_set_status_message(
+        cosmo,
+        "ccl_halofit.c: ccl_halofit_struct_new(): "
+        "could not solve for non-linear scale for halofit at least once\n");
     }
     if (*status == 0) {
-      for (i=n_a-2; i>=0; --i) {
-        if (vals[i] == -1)
-          vals[i] = vals[i+1];
+      // linearly set rsigma to a very small number at high-z
+      double min_a = -1, max_a = -1;
+      double max_val = -1;
+      double w;
+
+      // first non -1 value and scale factor of last -1 value
+      for (i=1; i<n_a; ++i) {
+        if (vals[i] != -1) {
+          max_a = a_vec[i];
+          max_val = vals[i];
+          break;
+        }
+      }
+      // scale factor of first -1 value
+      for (i=0; i<n_a; ++i) {
+        if (vals[i] == -1) {
+          min_a = a_vec[i];
+          break;
+        }
+      }
+
+      if (min_a != -1) {
+        // at least one value is -1 so set the zeroth value
+        vals[0] = 1e-6;
+
+        // interp any values that remain -1
+        for(i=1; i<n_a-1; ++i) {
+          if (vals[i] == -1) {
+            w = (a_vec[i] - min_a) / (max_a - min_a);
+            vals[i] = w * max_val + (1.0 - w) * vals[0];
+          }
+        }
       }
     }
   }
@@ -501,58 +527,91 @@ void ccl_halofit_struct_free(halofit_struct *hf) {
  */
 double ccl_halofit_power(ccl_cosmology *cosmo, double k, double a, halofit_struct *hf, int *status) {
   double rsigma, neff, C;
-  double ksigma, weffa, omegaMz, omegaDEwz;
+  double ksigma, weffa, omegaMz, omegaDEwz, kh;
   double PkL, PkNL, f1, f2, f3, an, bn, cn, gamman, alphan, betan, nun, mun, y, fy;
-  double DeltakL, DeltakQ, DeltakH, DeltakHprime, DeltakNL;
+  double DeltakL, DeltakL_tilde, DeltakQ, DeltakH, DeltakHprime, DeltakNL;
+  double Qnu, fnu;
+  double f1a, f2a, f3a, f1b, f2b, f3b, fb_frac;
+  double neff2, neff3, neff4;
+  double kh2, y2;
+  double delta2_norm;
 
+  // all eqns are from Takahashi et al. unless stated otherwise
   // eqns A4 - A5
   rsigma = gsl_spline_eval(hf->rsigma, a, NULL);
   neff = gsl_spline_eval(hf->n_eff, a, NULL);
   C = gsl_spline_eval(hf->C, a, NULL);
 
   ksigma = 1.0 / rsigma;
+  neff2 = neff * neff;
+  neff3 = neff2 * neff;
+  neff4 = neff3 * neff;
 
-  // for w0-wa we use the effective w formalism for w0-wa
-  // we taylor expand log(a) = log(1 + x) ~ x - x * x / 2
-  // near a = 1 or x = 0 for numerical reasons
-  if (a < 1.0 - 1e-12)
-    weffa = cosmo->params.w0 + cosmo->params.wa - cosmo->params.wa * (a - 1.0) / log(a);
-  else
-    weffa = cosmo->params.w0 + cosmo->params.wa - cosmo->params.wa  / (1.0 - fabs(a - 1.0) / 2);
+  weffa = cosmo->params.w0;  // formally only correct for wa == 0
   omegaMz = ccl_omega_x(cosmo, a, ccl_species_m_label, status);
   omegaDEwz = ccl_omega_x(cosmo, a, ccl_species_l_label, status);
+
+  delta2_norm = k*k*k/2.0/M_PI/M_PI;
+
+  // compute the present day neutrino massive neutrino fraction
+  fnu = ccl_omega_x(cosmo, 1, ccl_species_nu_label, status) / ccl_omega_x(cosmo, 1, ccl_species_m_label, status);
 
   // eqns A6 - A13 of Takahashi et al.
   an = pow(
     10.0,
-    1.5222 + 2.8553*neff + 2.3706*neff*neff + 0.9903*neff*neff*neff +
-    0.2250*neff*neff*neff*neff - 0.6038*C + 0.1749*omegaDEwz*(1.0 + weffa));
-  bn = pow(10.0, -0.5642 + 0.5864*neff + 0.5716*neff*neff - 1.5474*C + 0.2279*omegaDEwz*(1.0 + weffa));
-  cn = pow(10.0, 0.3698 + 2.0404*neff + 0.8161*neff*neff + 0.5869*C);
+    1.5222 + 2.8553*neff + 2.3706*neff2 + 0.9903*neff3 +
+    0.2250*neff4 - 0.6038*C + 0.1749*omegaDEwz*(1.0 + weffa));
+  bn = pow(10.0, -0.5642 + 0.5864*neff + 0.5716*neff2 - 1.5474*C + 0.2279*omegaDEwz*(1.0 + weffa));
+  cn = pow(10.0, 0.3698 + 2.0404*neff + 0.8161*neff2 + 0.5869*C);
   gamman = 0.1971 - 0.0843*neff + 0.8460*C;
-  alphan = fabs(6.0835 + 1.3373*neff - 0.1959*neff*neff - 5.5274*C);
-  betan = 2.0379 - 0.7354*neff + 0.3157*neff*neff + 1.2490*neff*neff*neff + 0.3980*neff*neff*neff*neff - 0.1682*C;
+  alphan = fabs(6.0835 + 1.3373*neff - 0.1959*neff2 - 5.5274*C);
+  betan = 2.0379 - 0.7354*neff + 0.3157*neff2 + 1.2490*neff3 + 0.3980*neff4 - 0.1682*C;
   mun = 0.0;
   nun = pow(10.0, 5.2105 + 3.6902*neff);
 
-  // eqns A14
-  f1 = pow(omegaMz,-0.0307);
-  f2 = pow(omegaMz,-0.0585);
-  f3 = pow(omegaMz,0.0743);
+  // eqns C17 and C18 for Smith et al.
+  if (fabs(1.0 - omegaMz) > 0.01) {
+    f1a = pow(omegaMz, -0.0732);
+    f2a = pow(omegaMz, -0.1423);
+    f3a = pow(omegaMz, 0.0725);
+    f1b = pow(omegaMz, -0.0307);
+    f2b = pow(omegaMz, -0.0585);
+    f3b = pow(omegaMz, 0.0743);
+    fb_frac = omegaDEwz / (1.0 - omegaMz);
+    f1 = fb_frac * f1b + (1.0 - fb_frac) * f1a;
+    f2 = fb_frac * f2b + (1.0 - fb_frac) * f2a;
+    f3 = fb_frac * f3b + (1.0 - fb_frac) * f3a;
+  } else {
+    f1 = 1.0;
+    f2 = 1.0;
+    f3 = 1.0;
+  }
+
+  // correction to betan from Bird et al., eqn A10
+  betan += (fnu * (1.081 + 0.395*neff2));
 
   // eqns A1 - A3
   PkL = ccl_linear_matter_power(cosmo, k, a, status);
   y = k/ksigma;
-  fy = y/4.0 + y*y/8.0;
-  DeltakL = PkL*k*k*k/2.0/M_PI/M_PI;
+  y2 = y * y;
+  fy = y/4.0 + y2/8.0;
+  DeltakL = PkL * delta2_norm;
 
-  DeltakQ = DeltakL * pow(1.0 + DeltakL, betan) / (1.0 + alphan*DeltakL) * exp(-1.0*fy);
+  // correction to DeltakL from Bird et al., eqn A9
+  kh = k / cosmo->params.h;
+  kh2 = kh * kh;
+  DeltakL_tilde = DeltakL * (1.0 + fnu * (47.48 * kh2) / (1.0 + 1.5 * kh2));
+  DeltakQ = DeltakL * pow(1.0 + DeltakL_tilde, betan) / (1.0 + alphan*DeltakL_tilde) * exp(-fy);
 
   DeltakHprime = an * pow(y, 3.0*f1) / (1.0 + bn*pow(y, f2) + pow(cn*f3*y, 3.0 - gamman));
-  DeltakH = DeltakHprime / (1.0 + mun/y + nun/y/y);
+  DeltakH = DeltakHprime / (1.0 + mun/y + nun/y2);
+
+  // correction to DeltakH from Bird et al., eqn A6-A7
+  Qnu = fnu * (0.977 - 18.015 * (cosmo->params.Omega_m - 0.3));
+  DeltakH *= (1.0 + Qnu);
 
   DeltakNL = DeltakQ + DeltakH;
-  PkNL = DeltakNL / (k*k*k/2.0/M_PI/M_PI);
+  PkNL = DeltakNL / delta2_norm;
 
   // we check the status once
   if(*status != 0)
