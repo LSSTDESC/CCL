@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <math.h>
 
-#define POWER_NU_TOL 2E-2
+#define POWER_NU_TOL 1E-3
 
 CTEST_DATA(power_nu) {
   double Omega_c;
@@ -242,21 +242,6 @@ static void compare_power_nu_nl(int i_model,struct power_nu_nl_data * data)
   ccl_cosmology_free(cosmo_nonlin);
 }
 
-CTEST2(power_nu_nl,model_1) {
-  int model=1;
-  compare_power_nu_nl(model,data);
-}
-
-CTEST2(power_nu_nl,model_2) {
-  int model=2;
-  compare_power_nu_nl(model,data);
-}
-
-CTEST2(power_nu_nl,model_3) {
-  int model=3;
-  compare_power_nu_nl(model,data);
-}
-
 CTEST2(power_nu,model_1) {
   int model=1;
   compare_power_nu(model,data);
@@ -270,4 +255,19 @@ CTEST2(power_nu,model_2) {
 CTEST2(power_nu,model_3) {
   int model=3;
   compare_power_nu(model,data);
+}
+
+CTEST2(power_nu_nl,model_1) {
+  int model=1;
+  compare_power_nu_nl(model,data);
+}
+
+CTEST2(power_nu_nl,model_2) {
+  int model=2;
+  compare_power_nu_nl(model,data);
+}
+
+CTEST2(power_nu_nl,model_3) {
+  int model=3;
+  compare_power_nu_nl(model,data);
 }

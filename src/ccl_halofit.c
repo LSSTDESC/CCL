@@ -421,7 +421,8 @@ halofit_struct* ccl_halofit_struct_new(ccl_cosmology *cosmo, int *status) {
           break;
         }
 
-        vals_om[i] = ccl_omega_x(cosmo_w0eff, a_vec[i], ccl_species_m_label, status);
+        vals_om[i] = ccl_omega_x(cosmo_w0eff, a_vec[i], ccl_species_m_label, status) +
+          ccl_omega_x(cosmo_w0eff, a_vec[i], ccl_species_nu_label, status);
         vals_de[i] = ccl_omega_x(cosmo_w0eff, a_vec[i], ccl_species_l_label, status);
 
         ccl_cosmology_free(cosmo_w0eff);
@@ -438,7 +439,8 @@ halofit_struct* ccl_halofit_struct_new(ccl_cosmology *cosmo, int *status) {
     } else {
       for(i=0; i<n_a; ++i) {
         vals[i] = cosmo->params.w0;
-        vals_om[i] = ccl_omega_x(cosmo, a_vec[i], ccl_species_m_label, status);
+        vals_om[i] = ccl_omega_x(cosmo, a_vec[i], ccl_species_m_label, status) +
+          ccl_omega_x(cosmo, a_vec[i], ccl_species_nu_label, status);
         vals_de[i] = ccl_omega_x(cosmo, a_vec[i], ccl_species_l_label, status);
         if (*status != 0) {
           ccl_cosmology_set_status_message(
@@ -839,7 +841,7 @@ double ccl_halofit_power(ccl_cosmology *cosmo, double k, double a, halofit_struc
   double f1a, f2a, f3a, f1b, f2b, f3b, fb_frac;
   double neff2, neff3, neff4;
   double kh2, y2;
-  double delta2_norm;
+  double delta2_norm, om_nu;
 
   // all eqns are from Takahashi et al. unless stated otherwise
   // eqns A4 - A5
@@ -847,9 +849,15 @@ double ccl_halofit_power(ccl_cosmology *cosmo, double k, double a, halofit_struc
   neff = gsl_spline_eval(hf->n_eff, a, NULL);
   C = gsl_spline_eval(hf->C, a, NULL);
 
-  weffa = gsl_spline_eval(hf->weff, a, NULL);
-  omegaMz = gsl_spline_eval(hf->omeff, a, NULL);
-  omegaDEwz = gsl_spline_eval(hf->deeff, a, NULL);
+  weffa = cosmo->params.w0;
+  omegaMz = ccl_omega_x(cosmo, a, ccl_species_m_label, status) +
+    ccl_omega_x(cosmo, a, ccl_species_nu_label, status);
+  omegaDEwz = ccl_omega_x(cosmo, a, ccl_species_l_label, status);
+
+  // not using these to match CLASS better - might be a bug in CLASS
+  // weffa = gsl_spline_eval(hf->weff, a, NULL);
+  // omegaMz = gsl_spline_eval(hf->omeff, a, NULL);
+  // omegaDEwz = gsl_spline_eval(hf->deeff, a, NULL);
 
   ksigma = 1.0 / rsigma;
   neff2 = neff * neff;
@@ -859,7 +867,9 @@ double ccl_halofit_power(ccl_cosmology *cosmo, double k, double a, halofit_struc
   delta2_norm = k*k*k/2.0/M_PI/M_PI;
 
   // compute the present day neutrino massive neutrino fraction
-  fnu = ccl_omega_x(cosmo, 1, ccl_species_nu_label, status) / ccl_omega_x(cosmo, 1, ccl_species_m_label, status);
+  // uses all neutrinos even if they are moving fast
+  om_nu = cosmo->params.sum_nu_masses / 93.14 / cosmo->params.h / cosmo->params.h;
+  fnu = om_nu / (cosmo->params.Omega_m + om_nu);
 
   // eqns A6 - A13 of Takahashi et al.
   an = pow(
@@ -912,7 +922,7 @@ double ccl_halofit_power(ccl_cosmology *cosmo, double k, double a, halofit_struc
   DeltakH = DeltakHprime / (1.0 + mun/y + nun/y2);
 
   // correction to DeltakH from Bird et al., eqn A6-A7
-  Qnu = fnu * (0.977 - 18.015 * (cosmo->params.Omega_m - 0.3));
+  Qnu = fnu * (0.977 - 18.015 * (cosmo->params.Omega_m + om_nu - 0.3));
   DeltakH *= (1.0 + Qnu);
 
   DeltakNL = DeltakQ + DeltakH;
