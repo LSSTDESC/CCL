@@ -38,6 +38,13 @@ struct hf_model_match_data {
 static ccl_cosmology *create_w0eff_cosmo(double w0eff, ccl_cosmology *cosmo, int *status) {
   ccl_parameters params_w0eff;
   double norm_pk;
+  double mnu[3];
+  int i;
+
+  for(i=0; i<3; ++i)
+    mnu[i] = 0;
+  for(i=0; i<cosmo->params.N_nu_mass; ++i)
+    mnu[i] = cosmo->params.mnu[i];
 
   if (isnan(cosmo->params.A_s))
     norm_pk = cosmo->params.sigma8;
@@ -46,7 +53,7 @@ static ccl_cosmology *create_w0eff_cosmo(double w0eff, ccl_cosmology *cosmo, int
 
   params_w0eff = ccl_parameters_create(
     cosmo->params.Omega_c, cosmo->params.Omega_b, cosmo->params.Omega_k,
-    cosmo->params.Neff, cosmo->params.mnu, ccl_mnu_list,
+    cosmo->params.Neff, mnu, ccl_mnu_list,
     w0eff, 0, cosmo->params.h, norm_pk,
     cosmo->params.n_s, cosmo->params.bcm_log10Mc, cosmo->params.bcm_etab,
     cosmo->params.bcm_ks, cosmo->params.nz_mgrowth,
@@ -392,10 +399,8 @@ halofit_struct* ccl_halofit_struct_new(ccl_cosmology *cosmo, int *status) {
   ////////////////////////////////////////////////////////
   // if wa != 0, then we need to find an equivalent
   // cosmology with wa = 0
-  if (cosmo->params.wa != 0) {
-    data_w0eff.cosmo = cosmo;
-    data_w0eff.status = status;
-  }
+  data_w0eff.cosmo = cosmo;
+  data_w0eff.status = status;
 
   if (*status == 0) {
     if (cosmo->params.wa != 0) {
