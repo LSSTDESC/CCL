@@ -181,14 +181,14 @@ CTEST2(parameters, create_general_nu_list) {
 
 CTEST2(parameters, create_general_nu_sum) {
   int status = 0;
-
+ 
   ccl_parameters params =
     ccl_parameters_create(
       data->Omega_c,
       data->Omega_b,
       data->Omega_k,
       data->Neff,
-      data->mnu,
+      &(data->mnu[0]),
       ccl_mnu_sum,
       data->w0,
       data->wa,
@@ -220,7 +220,7 @@ CTEST2(parameters, create_general_nu_sum_inverted) {
       data->Omega_b,
       data->Omega_k,
       data->Neff,
-      data->mnu,
+      &(data->mnu[0]),
       ccl_mnu_sum,
       data->w0,
       data->wa,
@@ -252,7 +252,7 @@ CTEST2(parameters, create_general_nu_sum_equal) {
       data->Omega_b,
       data->Omega_k,
       data->Neff,
-      data->mnu,
+      &(data->mnu[0]),
       ccl_mnu_sum_equal,
       data->w0,
       data->wa,
@@ -277,6 +277,61 @@ CTEST2(parameters, create_general_nu_sum_equal) {
   ASSERT_DBL_NEAR_TOL(params.mnu[1], data->mnu[0]/3, 1e-10);
   ASSERT_DBL_NEAR_TOL(params.mnu[2], data->mnu[0]/3, 1e-10);
 }
+
+/*CTEST2(parameters, exit_for_bad_nu) {
+  int status = 0;
+  double mnu_low;
+  mnu_low = 0.05;
+
+  // For the normal hierarchy, the sum of neutrino masses can't 
+  // be below 0.059 
+  ccl_parameters params_sum =
+    ccl_parameters_create(
+      data->Omega_c,
+      data->Omega_b,
+      data->Omega_k,
+      data->Neff,
+      &mnu_low,
+      ccl_mnu_sum,
+      data->w0,
+      data->wa,
+      data->h,
+      data->A_s,
+      data->n_s,
+      data->bcm_log10Mc,
+      data->bcm_etab,
+      data->bcm_ks,
+      -1,
+      NULL,
+      NULL,
+      &status);
+      
+  // For the normal hierarchy, the sum of neutrino masses can't 
+  // be below 0.098 
+  ccl_parameters params_sum_inverted =
+    ccl_parameters_create(
+      data->Omega_c,
+      data->Omega_b,
+      data->Omega_k,
+      data->Neff,
+      &mnu_low,
+      ccl_mnu_sum_inverted,
+      data->w0,
+      data->wa,
+      data->h,
+      data->A_s,
+      data->n_s,
+      data->bcm_log10Mc,
+      data->bcm_etab,
+      data->bcm_ks,
+      -1,
+      NULL,
+      NULL,
+      &status);      
+
+  ASSERT_NOT_EQUAL(status, 0);
+
+}*/
 
 
 CTEST2(parameters, read_write) {

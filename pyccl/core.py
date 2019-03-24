@@ -579,10 +579,23 @@ class Cosmology(object):
         if norm_pk < 1e-5 and sigma8 is not None:
             raise ValueError("sigma8 must be greater than 1e-5.")
 
+        # Make sure the neutrino parameters are consistent.
         if isinstance(m_nu, float):
             if mnu_type is None:
                 mnu_type = 'sum'
             m_nu = [m_nu]
+            if (mnu_type == 'sum'
+                    and m_nu[0] < (np.sqrt(7.62E-5) + np.sqrt(2.55E-3))
+                    and (m_nu[0] > 1e-15)):
+                raise ValueError("if mnu_type= sum, we are using the "
+                                 "normal hierarchy and so m_nu must "
+                                 "be less than (~)0.0592")
+            elif (mnu_type == 'sum_inverted' and
+                  m_nu[0] < (np.sqrt(2.43e-3 - 7.62e-5) + np.sqrt(2.43e-3))
+                  and (m_nu[0] > 1e-15)):
+                raise ValueError("if mnu_type= sum_inverted, we are using the "
+                                 "inverted hierarchy and so m_nu must "
+                                 "be less than (~)0.0978")
         elif hasattr(m_nu, "__len__"):
             if (len(m_nu) != 3):
                 raise ValueError("m_nu must be a float or array-like object "
