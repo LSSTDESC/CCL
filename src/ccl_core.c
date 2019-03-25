@@ -293,6 +293,7 @@ ccl_cosmology * ccl_cosmology_create(ccl_parameters params, ccl_configuration co
   cosmo->status = 0;
   ccl_cosmology_set_status_message(cosmo, "");
 
+
   return cosmo;
 }
 
@@ -406,17 +407,17 @@ ccl_parameters ccl_parameters_create(
   params.Omega_k = Omega_k;
   params.Neff = Neff;
 
-  // Set the sum of neutrino masses
-  params.sum_nu_masses = *mnu;
-  double mnusum = *mnu;
-  double *mnu_in = NULL;
+    double *mnu_in = NULL;
 
   // Decide how to split sum of neutrino masses between 3 neutrinos. We use
   // a Newton's rule numerical solution (thanks M. Jarvis).
 
   if (mnu_type==ccl_mnu_sum){
 	  // Normal hierarchy
-
+	  
+	  // Set the sum of neutrino masses
+      params.sum_nu_masses = *mnu;
+	  
 	  mnu_in = malloc(3*sizeof(double));
 
 	  // Check if the sum is zero
@@ -424,8 +425,8 @@ ccl_parameters ccl_parameters_create(
 		  mnu_in[0] = 0.;
 		  mnu_in[1] = 0.;
 		  mnu_in[2] = 0.;
-	  } else{
-
+	  } 
+    else{
 	      mnu_in[0] = 0.; // This is a starting guess.
 
 	      double sum_check;
@@ -433,10 +434,10 @@ ccl_parameters ccl_parameters_create(
 	      mnu_in[1] = sqrt(ccl_constants.DELTAM12_sq);
 	      mnu_in[2] = sqrt(ccl_constants.DELTAM13_sq_pos);
 	      sum_check = mnu_in[0] + mnu_in[1] + mnu_in[2];
-	      if (ccl_mnu_sum < sum_check){
+	      if (*mnu < sum_check){
 		      *status = CCL_ERROR_MNU_UNPHYSICAL;
+		      ccl_check_status_nocosmo(status);
           }
-
           double dsdm1;
           // This is the Newton's method
           while (fabs(*mnu - sum_check) > 1e-15){
@@ -451,6 +452,9 @@ ccl_parameters ccl_parameters_create(
 
   } else if (mnu_type==ccl_mnu_sum_inverted){
 	  // Inverted hierarchy
+	  
+	  // Set the sum of neutrino masses
+      params.sum_nu_masses = *mnu;
 
 	  mnu_in = malloc(3*sizeof(double));
 
@@ -468,11 +472,10 @@ ccl_parameters ccl_parameters_create(
 	      mnu_in[1] = sqrt(-1.* ccl_constants.DELTAM13_sq_neg - ccl_constants.DELTAM12_sq);
 	      mnu_in[2] = sqrt(-1.* ccl_constants.DELTAM13_sq_neg);
 	      sum_check = mnu_in[0] + mnu_in[1] + mnu_in[2];
-	      if (ccl_mnu_sum < sum_check){
+	      if (*mnu < sum_check){
 		      *status = CCL_ERROR_MNU_UNPHYSICAL;
+		      ccl_check_status_nocosmo(status);
           }
-
-
           double dsdm1;
           // This is the Newton's method
           while (fabs(*mnu- sum_check) > 1e-15){
@@ -486,6 +489,10 @@ ccl_parameters ccl_parameters_create(
       }
 
   } else if (mnu_type==ccl_mnu_sum_equal){
+	  
+	    // Set the sum of neutrino masses
+        params.sum_nu_masses = *mnu;
+	  
 	    // Split the sum of masses equally
 	    mnu_in = malloc(3*sizeof(double));
 	    mnu_in[0] = params.sum_nu_masses / 3.;
@@ -499,6 +506,7 @@ ccl_parameters ccl_parameters_create(
   } else {
 	  *status = CCL_ERROR_NOT_IMPLEMENTED;
   }
+  
   // Check for errors in the neutrino set up (e.g. unphysical mnu)
   ccl_check_status_nocosmo(status);
 

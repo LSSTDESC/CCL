@@ -318,6 +318,25 @@ def test_cosmology_context():
     assert_(not hasattr(cosmo, "cosmo"))
     assert_(not hasattr(cosmo, "_params"))
     assert_raises(AttributeError, cosmo.has_growth)
+    
+def test_cosmology_neutrinos():
+    """ Make sure an error is raised if inconsistent neutrino options /
+    parameters are passed."""
+	
+    assert_raises(
+        ValueError, ccl.Cosmology,
+        Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
+        m_nu=0.05)
+        
+    assert_raises(
+        ValueError, ccl.Cosmology,
+        Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
+        m_nu=0.05, mnu_type='sum')
+        
+    assert_raises(
+        ValueError, ccl.Cosmology,
+        Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
+        m_nu=0.08, mnu_type='sum_inverted')     
 
 
 if __name__ == '__main__':

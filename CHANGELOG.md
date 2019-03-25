@@ -19,6 +19,7 @@
 - Added additional header and source files for clarity (#610).
 - Added capability to use the halo model power spectrum as the primary
   non-linear power spectrum in the code (#610).
+- Fixed infinite loop bug in splitting sum of neutrino masses into individual masses (#605)
 
 ## Python library
 - Improved error reporting for `angular_cl` computations (#567).
@@ -36,6 +37,7 @@
   any combination, even unphysical ones (#610).
 - Added capability to use the halo model power spectrum as the primary
   non-linear power spectrum in the code (#610).
+- Fixed infinite loop bug in splitting sum of neutrino masses into individual masses (#605)
 
 # v 1.0 API changes :
 
