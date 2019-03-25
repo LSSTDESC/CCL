@@ -3,10 +3,6 @@ import numpy as np
 import pandas as pd
 import pyccl as ccl
 
-SIGMA_TOLERANCE = 3e-5
-INVSIGMA_TOLERANCE = 1e-3
-MASSFUNC_TOLERANCE = 5e-5
-
 
 def test_mass_function():
     df = pd.read_csv(
