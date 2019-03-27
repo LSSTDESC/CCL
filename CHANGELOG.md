@@ -5,6 +5,7 @@
 - Fixed a bug where CLASS would crash due to small rounding errors at z = 0
   when evaluating power spectra (#563, #564).
 - Fixed bug in fftlog for some complex arguments (#565, #566).
+- Replaced custom gamma function with that from GSL (#570).
 - Deprecated the `ccl_redshifts.h` functions (#579).
 - Refactored spline and numerical parameters to be allocated per cosmology (#557).
 - Allow global physical constants to be changed (#557).
