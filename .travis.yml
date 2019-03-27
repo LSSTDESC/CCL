@@ -26,12 +26,14 @@ install:
 
 script:
   - flake8 pyccl
+  - flake8 benchmarks
   - mkdir -p build && cd build && cmake .. && make && sudo make install && cd ..
   - ./build/check_ccl
   - rm -rf build
   - python setup.py install
   - nosetests tests/run_tests.py --all --debug --detailed-errors --verbose --process-restartworker
     --with-coverage --cover-package=pyccl
+  - pytest -vv benchmarks
 
 after_success:
   - coveralls
