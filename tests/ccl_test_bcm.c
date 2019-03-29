@@ -65,27 +65,30 @@ static void compare_bcm(int i_model,struct bcm_data * data)
   char* rtn;
   FILE *f,*f2;
   ccl_configuration config = default_config;
-  config.baryons_power_spectrum_method=ccl_bcm;
-  ccl_parameters params = ccl_parameters_create(data->Omega_c,data->Omega_b,data->Omega_k[i_model-1],
-						data->Neff, data->m_nu, data-> mnu_type,
-						data->w_0[i_model-1],data->w_a[i_model-1],
-						data->h,data->A_s,data->n_s,14,-1,-1,-1,NULL,NULL, &status);
-                                                                        
+  config.baryons_power_spectrum_method = ccl_bcm;
+  ccl_parameters params = ccl_parameters_create(
+    data->Omega_c,data->Omega_b,data->Omega_k[i_model-1],
+    data->Neff, data->m_nu, data-> mnu_type,
+    data->w_0[i_model-1],data->w_a[i_model-1],
+    data->h,data->A_s,data->n_s,14,-1,-1,-1,NULL,NULL, &status);
+
   params.Omega_l=params.Omega_l+params.Omega_g;
   params.Omega_g=0;
   ccl_cosmology * cosmo = ccl_cosmology_create(params, config);
   ASSERT_NOT_NULL(cosmo);
   ccl_configuration config_nobar = default_config;
-  ccl_parameters params_nobar = ccl_parameters_create(data->Omega_c,data->Omega_b,data->Omega_k[i_model-1],
-						data->Neff, data->m_nu, data->mnu_type,
-						data->w_0[i_model-1],data->w_a[i_model-1],
-						data->h,data->A_s,data->n_s,-1,-1,-1,-1,NULL,NULL, &status);
+  ccl_parameters params_nobar = ccl_parameters_create(
+    data->Omega_c,data->Omega_b,data->Omega_k[i_model-1],
+    data->Neff, data->m_nu, data->mnu_type,
+    data->w_0[i_model-1],data->w_a[i_model-1],
+    data->h,data->A_s,data->n_s,-1,-1,-1,-1,NULL,NULL, &status);
+
   //params.sigma_8=data->sigma_8;
   params_nobar.Omega_l=params_nobar.Omega_l+params_nobar.Omega_g;
   params_nobar.Omega_g=0;
   ccl_cosmology * cosmo_nobar = ccl_cosmology_create(params_nobar, config_nobar);
   ASSERT_NOT_NULL(cosmo_nobar);
-  
+
   sprintf(fname,"./tests/benchmark/bcm/w_baryonspk_nl.dat");
   f=fopen(fname,"r");
   if(f==NULL) {
@@ -105,12 +108,12 @@ static void compare_bcm(int i_model,struct bcm_data * data)
   rtn = fgets(str, 1024, f);
   rtn = fgets(str, 1024, f);
   rtn = fgets(str, 1024, f);
-  
+
   rtn = fgets(str, 1024, f2);
   rtn = fgets(str, 1024, f2);
   rtn = fgets(str, 1024, f2);
   rtn = fgets(str, 1024, f2);
-  
+
   for(i=0;i<nk-4;i++) {
     double k_h,k;
     int stat;
@@ -139,11 +142,11 @@ static void compare_bcm(int i_model,struct bcm_data * data)
     if (status) printf("%s\n",cosmo_nobar->status_message);
     err=fabs(psbar/psnobar/(psbar_bench/psnobar_bench)-1);
     ASSERT_DBL_NEAR_TOL(err,0.,BCM_TOLERANCE);
-    
+
   }
   fclose(f);
   fclose(f2);
-  
+
   ccl_cosmology_free(cosmo);
 }
 

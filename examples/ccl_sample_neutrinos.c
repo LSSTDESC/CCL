@@ -18,7 +18,7 @@ int main(int argc, char * argv[])
 
   // Initialize the default configuration and set the transfer function method to use CLASS.
   ccl_configuration config = default_config;
-  config.transfer_function_method = ccl_boltzmann;
+  config.transfer_function_method = ccl_boltzmann_class;
 
   // Set parameters and initialize cosmology
   ccl_parameters params = ccl_parameters_create_lcdm_nu(Omega_c, Omega_b, Omega_k,h, A_s, n_s, Neff, &mnu, ccl_mnu_sum, &status);

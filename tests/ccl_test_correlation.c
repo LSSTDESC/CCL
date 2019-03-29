@@ -51,6 +51,7 @@ static void compare_corr(char *compare_type,int algorithm,struct corrs_data * da
    */
   ccl_configuration config = default_config;
   config.transfer_function_method = ccl_bbks;
+  config.matter_power_spectrum_method = ccl_linear;
   ccl_parameters params = ccl_parameters_create_flat_lcdm(data->Omega_c,data->Omega_b,data->h,
 							  data->sigma8,data->n_s,&status);
   params.T_CMB=2.7;

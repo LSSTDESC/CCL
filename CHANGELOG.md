@@ -10,6 +10,16 @@
 - Refactored spline and numerical parameters to be allocated per cosmology (#557).
 - Allow global physical constants to be changed (#557).
 - Fixed memory leaks in `ccl_correlation.c` (#581).
+- Deprecated transfer function options 'ccl_emulator', 'ccl_fitting_function'
+  'ccl_boltzmann', 'ccl_boltzmann_class' and 'ccl_boltzmann_camb' (#610). These
+  were either not implemented or aliases for another option.
+- Renamed transfer function option 'ccl_none' to 'ccl_transfer_none' to avoid
+  ambiguity (#610).
+- Refactored transfer function and matter power spectrum options to allow
+  any combination, even unphysical ones (#610).
+- Added additional header and source files for clarity (#610).
+- Added capability to use the halo model power spectrum as the primary
+  non-linear power spectrum in the code (#610).
 - Fixed infinite loop bug in splitting sum of neutrino masses into individual masses (#605)
 
 ## Python library
@@ -19,6 +29,16 @@
   per cosmology. Further, they are now rebuilt on-the-fly for a given
   cosmology if a new scale factor is requested. (#582)
 - Allow spline, numerical and constant parameters to be set from Python (#557).
+- Deprecated transfer function options 'ccl_emulator', 'ccl_fitting_function'
+  'ccl_boltzmann', 'ccl_boltzmann_class' and 'ccl_boltzmann_camb' (#610). These
+  were either not implemented or aliases for another option.
+- Renamed transfer function option 'ccl_none' to 'ccl_transfer_none' to avoid
+  ambiguity (#610).
+- Refactored transfer function and matter power spectrum options to allow
+  any combination, even unphysical ones (#610).
+- Added capability to use the halo model power spectrum as the primary
+  non-linear power spectrum in the code (#610).
+- Fixed infinite loop bug in splitting sum of neutrino masses into individual masses (#605)
 
 # v 1.0 API changes :
 

@@ -11,15 +11,10 @@ for various physical quantities (e.g., the transfer function). The various
 options are as follows.
 
 transfer_function options
-  - 'emulator': the transfer function defined by the Comsic Emu
-  - 'fitting_function': the Eisenstein and Hu (1998) fitting function
+  - None : do not compute a linear power spectrum
   - 'eisenstein_hu': the Eisenstein and Hu (1998) fitting function
   - 'bbks': the BBKS approximation
-  - 'boltzmann': use CLASS to compute the transfer function
   - 'boltzmann_class': use CLASS to compute the transfer function
-  - 'class': use CLASS to compute the transfer function
-  - 'boltzmann_camb': not implemented
-  - 'camb': not implemented
 
 matter_power_spectrum options
   - 'halo_model': use a halo model
@@ -194,16 +189,10 @@ from .errors import CCLError
 
 # Configuration types
 transfer_function_types = {
-    'none':             lib.none,
-    'emulator':         lib.emulator,
-    'fitting_function': lib.fitting_function,
+    None:               lib.transfer_none,
     'eisenstein_hu':    lib.eisenstein_hu,
     'bbks':             lib.bbks,
-    'boltzmann':        lib.boltzmann,
-    'boltzmann_camb':   lib.boltzmann_camb,
-    'camb':             lib.boltzmann_camb,
     'boltzmann_class':  lib.boltzmann_class,
-    'class':            lib.boltzmann_class,
 }
 
 matter_power_spectrum_types = {
@@ -211,20 +200,6 @@ matter_power_spectrum_types = {
     'halofit':      lib.halofit,
     'linear':       lib.linear,
     'emu':          lib.emu
-}
-
-# List which matter_power_spectrum types are allowed for each transfer_function
-valid_transfer_matter_power_combos = {
-    'none':             [],
-    'emulator':         [lib.emu, ],
-    'fitting_function': [lib.linear, lib.halofit, lib.halo_model],
-    'eisenstein_hu':    [lib.linear, lib.halofit, lib.halo_model],
-    'bbks':             [lib.linear, lib.halofit, lib.halo_model],
-    'boltzmann':        [lib.linear, lib.halofit],
-    'boltzmann_class':  [lib.linear, lib.halofit],
-    'class':            [lib.linear, lib.halofit],
-    'boltzmann_camb':   [],
-    'camb':             [],
 }
 
 baryons_power_spectrum_types = {
@@ -509,14 +484,6 @@ class Cosmology(object):
                              "method. Available options are: %s"
                              % (emulator_neutrinos,
                                 emulator_neutrinos_types.keys()))
-
-        # Check for valid transfer fn/matter power spectrum combination
-        if (matter_power_spectrum_types[matter_power_spectrum]
-                not in
-                valid_transfer_matter_power_combos[transfer_function]):
-            raise ValueError("matter_power_spectrum '%s' can't be used "
-                             "with transfer_function '%s'."
-                             % (matter_power_spectrum, transfer_function))
 
         # Assign values to new ccl_configuration object
         config = lib.configuration()
