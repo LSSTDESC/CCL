@@ -279,6 +279,10 @@ ccl_cosmology * ccl_cosmology_create(ccl_parameters params, ccl_configuration co
   cosmo->data.phihmf = NULL;
   cosmo->data.etahmf = NULL;
 
+  cosmo->data.rsd_splines[0] = NULL;
+  cosmo->data.rsd_splines[1] = NULL;
+  cosmo->data.rsd_splines[2] = NULL;
+
   cosmo->data.p_lin = NULL;
   cosmo->data.p_nl = NULL;
   cosmo->computed_distances = false;
@@ -288,6 +292,7 @@ ccl_cosmology * ccl_cosmology_create(ccl_parameters params, ccl_configuration co
   cosmo->computed_hmfparams = false;
   cosmo->status = 0;
   ccl_cosmology_set_status_message(cosmo, "");
+
 
   return cosmo;
 }
@@ -402,17 +407,17 @@ ccl_parameters ccl_parameters_create(
   params.Omega_k = Omega_k;
   params.Neff = Neff;
 
-  // Set the sum of neutrino masses
-  params.sum_nu_masses = *mnu;
-  double mnusum = *mnu;
-  double *mnu_in = NULL;
+    double *mnu_in = NULL;
 
   // Decide how to split sum of neutrino masses between 3 neutrinos. We use
   // a Newton's rule numerical solution (thanks M. Jarvis).
 
   if (mnu_type==ccl_mnu_sum){
 	  // Normal hierarchy
-
+	  
+	  // Set the sum of neutrino masses
+      params.sum_nu_masses = *mnu;
+	  
 	  mnu_in = malloc(3*sizeof(double));
 
 	  // Check if the sum is zero
@@ -420,8 +425,8 @@ ccl_parameters ccl_parameters_create(
 		  mnu_in[0] = 0.;
 		  mnu_in[1] = 0.;
 		  mnu_in[2] = 0.;
-	  } else{
-
+	  } 
+    else{
 	      mnu_in[0] = 0.; // This is a starting guess.
 
 	      double sum_check;
@@ -429,10 +434,10 @@ ccl_parameters ccl_parameters_create(
 	      mnu_in[1] = sqrt(ccl_constants.DELTAM12_sq);
 	      mnu_in[2] = sqrt(ccl_constants.DELTAM13_sq_pos);
 	      sum_check = mnu_in[0] + mnu_in[1] + mnu_in[2];
-	      if (ccl_mnu_sum < sum_check){
+	      if (*mnu < sum_check){
 		      *status = CCL_ERROR_MNU_UNPHYSICAL;
+		      ccl_check_status_nocosmo(status);
           }
-
           double dsdm1;
           // This is the Newton's method
           while (fabs(*mnu - sum_check) > 1e-15){
@@ -447,6 +452,9 @@ ccl_parameters ccl_parameters_create(
 
   } else if (mnu_type==ccl_mnu_sum_inverted){
 	  // Inverted hierarchy
+	  
+	  // Set the sum of neutrino masses
+      params.sum_nu_masses = *mnu;
 
 	  mnu_in = malloc(3*sizeof(double));
 
@@ -464,11 +472,10 @@ ccl_parameters ccl_parameters_create(
 	      mnu_in[1] = sqrt(-1.* ccl_constants.DELTAM13_sq_neg - ccl_constants.DELTAM12_sq);
 	      mnu_in[2] = sqrt(-1.* ccl_constants.DELTAM13_sq_neg);
 	      sum_check = mnu_in[0] + mnu_in[1] + mnu_in[2];
-	      if (ccl_mnu_sum < sum_check){
+	      if (*mnu < sum_check){
 		      *status = CCL_ERROR_MNU_UNPHYSICAL;
+		      ccl_check_status_nocosmo(status);
           }
-
-
           double dsdm1;
           // This is the Newton's method
           while (fabs(*mnu- sum_check) > 1e-15){
@@ -482,6 +489,10 @@ ccl_parameters ccl_parameters_create(
       }
 
   } else if (mnu_type==ccl_mnu_sum_equal){
+	  
+	    // Set the sum of neutrino masses
+        params.sum_nu_masses = *mnu;
+	  
 	    // Split the sum of masses equally
 	    mnu_in = malloc(3*sizeof(double));
 	    mnu_in[0] = params.sum_nu_masses / 3.;
@@ -495,6 +506,7 @@ ccl_parameters ccl_parameters_create(
   } else {
 	  *status = CCL_ERROR_NOT_IMPLEMENTED;
   }
+  
   // Check for errors in the neutrino set up (e.g. unphysical mnu)
   ccl_check_status_nocosmo(status);
 
@@ -854,8 +866,8 @@ void ccl_data_free(ccl_data * data)
   gsl_spline_free(data->achi);
   gsl_spline_free(data->logsigma);
   gsl_spline_free(data->dlnsigma_dlogm);
-  gsl_spline2d_free(data->p_lin);
-  gsl_spline2d_free(data->p_nl);
+  ccl_p2d_t_free(data->p_lin);
+  ccl_p2d_t_free(data->p_nl);
   gsl_spline_free(data->alphahmf);
   gsl_spline_free(data->betahmf);
   gsl_spline_free(data->gammahmf);
@@ -864,6 +876,9 @@ void ccl_data_free(ccl_data * data)
   gsl_interp_accel_free(data->accelerator_d);
   gsl_interp_accel_free(data->accelerator_m);
   gsl_interp_accel_free(data->accelerator_k);
+  ccl_spline_free(data->rsd_splines[0]);
+  ccl_spline_free(data->rsd_splines[1]);
+  ccl_spline_free(data->rsd_splines[2]);
 }
 
 /* ------- ROUTINE: ccl_cosmology_set_status_message --------
@@ -911,4 +926,51 @@ void ccl_cosmology_free(ccl_cosmology * cosmo)
 {
   ccl_data_free(&cosmo->data);
   free(cosmo);
+}
+
+int ccl_get_pk_spline_na(ccl_cosmology *cosmo)
+{
+  return cosmo->spline_params.A_SPLINE_NA_PK + cosmo->spline_params.A_SPLINE_NLOG_PK - 1;
+}
+
+void ccl_get_pk_spline_a_array(ccl_cosmology *cosmo,int ndout,double* doutput,int *status)
+{
+  double *d;
+  if(ndout!=ccl_get_pk_spline_na(cosmo))
+    *status=CCL_ERROR_INCONSISTENT;
+  if(*status==0) {
+    d=ccl_linlog_spacing(cosmo->spline_params.A_SPLINE_MINLOG_PK,
+			 cosmo->spline_params.A_SPLINE_MIN_PK,
+			 cosmo->spline_params.A_SPLINE_MAX,
+			 cosmo->spline_params.A_SPLINE_NLOG_PK,
+			 cosmo->spline_params.A_SPLINE_NA_PK);
+    if(d==NULL)
+      *status=CCL_ERROR_MEMORY;
+  }
+  if(*status==0)
+    memcpy(doutput,d,ndout*sizeof(double));
+  free(d);
+}
+
+int ccl_get_pk_spline_nk(ccl_cosmology *cosmo)
+{
+  double ndecades = log10(cosmo->spline_params.K_MAX) - log10(cosmo->spline_params.K_MIN);
+  return (int)ceil(ndecades*cosmo->spline_params.N_K);
+}
+
+void ccl_get_pk_spline_lk_array(ccl_cosmology *cosmo,int ndout,double* doutput,int *status)
+{
+  double *d;
+  if(ndout!=ccl_get_pk_spline_nk(cosmo))
+    *status=CCL_ERROR_INCONSISTENT;
+  if(*status==0) {
+    d=ccl_log_spacing(cosmo->spline_params.K_MIN,cosmo->spline_params.K_MAX,ndout);
+    if(d==NULL)
+      *status=CCL_ERROR_MEMORY;
+  }
+  if(*status==0) {
+    for(int ii=0;ii<ndout;ii++)
+      doutput[ii]=log(d[ii]);
+  }
+  free(d);
 }

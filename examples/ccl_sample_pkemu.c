@@ -28,7 +28,7 @@ int main(int argc, char * argv[])
   //double mnu[1] = {0};
 
   ccl_configuration config = default_config;
-  config.transfer_function_method = ccl_emulator;
+  config.transfer_function_method = ccl_boltzmann_class;
   config.matter_power_spectrum_method = ccl_emu;
 
   ccl_parameters params = ccl_parameters_create_lcdm_nu(Omega_c, Omega_b, Omega_k,h, normp, n_s, Neff, mnu, mnutype, &status);

@@ -87,11 +87,13 @@ static void compare_massfunc(int model, struct massfunc_data * data)
 						data->w_a[model], data->h,data->A_s, data->n_s,
 						-1, -1, -1, -1, NULL, NULL, status);
 
+  params.T_CMB=2.7;
   params.sigma8 = data->sigma8;
   params.Omega_g=0.;
   params.Omega_l=data->Omega_v[model];
   ccl_configuration config = default_config;
   config.transfer_function_method = ccl_bbks;
+  config.matter_power_spectrum_method = ccl_linear;
   // test file generated using tinker 2008 currently
   config.mass_function_method = ccl_tinker;
   ccl_cosmology * cosmo = ccl_cosmology_create(params, config);

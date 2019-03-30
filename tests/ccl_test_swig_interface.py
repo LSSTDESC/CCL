@@ -118,7 +118,7 @@ def test_swig_cls():
         CCLError,
         ccllib.angular_cl_vec,
         COSMO,
-        None, None,
+        None, None, None,
         1, 1, 1,
         0,
         "none",
@@ -201,20 +201,6 @@ def test_swig_halomod():
         200.0,
         [1e13, 1e14],
         8,
-        status)
-
-
-def test_swig_redshifts():
-    status = 0
-
-    assert_raises(
-        CCLError,
-        ccllib.dNdz_tomog_vec,
-        0,
-        0.0, 1.0,
-        None,
-        [0.0, 1.0],
-        7,
         status)
 
 

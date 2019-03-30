@@ -1,8 +1,6 @@
 var searchData=
 [
-  ['int_5fone_5fhalo_5fpar',['Int_one_halo_Par',['../struct_int__one__halo___par.html',1,'']]],
-  ['int_5ftwo_5fhalo_5fpar',['Int_two_halo_Par',['../struct_int__two__halo___par.html',1,'']]],
-  ['intclpar',['IntClPar',['../struct_int_cl_par.html',1,'']]],
-  ['intlenspar',['IntLensPar',['../struct_int_lens_par.html',1,'']]],
-  ['intmagpar',['IntMagPar',['../struct_int_mag_par.html',1,'']]]
+  ['sigmar_5fpars',['SigmaR_pars',['../struct_sigma_r__pars.html',1,'']]],
+  ['sigmav_5fpars',['SigmaV_pars',['../struct_sigma_v__pars.html',1,'']]],
+  ['splpar',['SplPar',['../struct_spl_par.html',1,'']]]
 ];

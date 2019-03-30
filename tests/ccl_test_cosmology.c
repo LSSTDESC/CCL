@@ -35,7 +35,7 @@ CTEST_SETUP(cosmology) {
   data->Neff = 0.;
   data->mnuval =0.;
   data->status=0;
-  data->mnu_type =ccl_mnu_sum;
+  data->mnu_type = ccl_mnu_sum;
 }
 
 // Check to see if general ccl_cosmology struct is initialized correctly

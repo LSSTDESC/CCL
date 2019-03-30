@@ -315,7 +315,9 @@ double ccl_j_bessel(int l,double x)
 //Spline destructor
 void ccl_spline_free(SplPar *spl)
 {
-  gsl_spline_free(spl->spline);
-  gsl_interp_accel_free(spl->intacc);
+  if (spl != NULL) {
+    gsl_spline_free(spl->spline);
+    gsl_interp_accel_free(spl->intacc);
+  }
   free(spl);
 }

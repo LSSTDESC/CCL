@@ -66,14 +66,16 @@ static void compare_sigmam(int i_model,struct sigmam_data * data)
   int status=0;
   ccl_configuration config = default_config;
   config.transfer_function_method = ccl_bbks;
+  config.matter_power_spectrum_method = ccl_linear;
   ccl_parameters params = ccl_parameters_create(data->Omega_c,data->Omega_b,data->Omega_k[i_model-1],
 						data->Neff, data->mnu, data->mnu_type,
 						data->w_0[i_model-1],data->w_a[i_model-1],data->h,
 						data->A_s,data->n_s,-1,-1,-1,-1,NULL,NULL, &status);
+  params.T_CMB=2.7;
   params.sigma8=data->sigma8;
   params.Omega_g=0.;
   params.Omega_l=data->Omega_v[i_model-1];
-  
+
   ccl_cosmology * cosmo = ccl_cosmology_create(params, config);
   ASSERT_NOT_NULL(cosmo);
 
@@ -84,7 +86,7 @@ static void compare_sigmam(int i_model,struct sigmam_data * data)
     exit(1);
   }
   nm=linecount(f)-1; rewind(f);
-  
+
   rtn = fgets(str, 1024, f);
   for(i=0;i<nm;i++) {
     double m,m_h,sm_bench,sm_h,err;

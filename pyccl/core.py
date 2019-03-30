@@ -11,15 +11,10 @@ for various physical quantities (e.g., the transfer function). The various
 options are as follows.
 
 transfer_function options
-  - 'emulator': the transfer function defined by the Comsic Emu
-  - 'fitting_function': the Eisenstein and Hu (1998) fitting function
+  - None : do not compute a linear power spectrum
   - 'eisenstein_hu': the Eisenstein and Hu (1998) fitting function
   - 'bbks': the BBKS approximation
-  - 'boltzmann': use CLASS to compute the transfer function
   - 'boltzmann_class': use CLASS to compute the transfer function
-  - 'class': use CLASS to compute the transfer function
-  - 'boltzmann_camb': not implemented
-  - 'camb': not implemented
 
 matter_power_spectrum options
   - 'halo_model': use a halo model
@@ -194,16 +189,10 @@ from .errors import CCLError
 
 # Configuration types
 transfer_function_types = {
-    'none':             lib.none,
-    'emulator':         lib.emulator,
-    'fitting_function': lib.fitting_function,
+    None:               lib.transfer_none,
     'eisenstein_hu':    lib.eisenstein_hu,
     'bbks':             lib.bbks,
-    'boltzmann':        lib.boltzmann,
-    'boltzmann_camb':   lib.boltzmann_camb,
-    'camb':             lib.boltzmann_camb,
     'boltzmann_class':  lib.boltzmann_class,
-    'class':            lib.boltzmann_class,
 }
 
 matter_power_spectrum_types = {
@@ -211,20 +200,6 @@ matter_power_spectrum_types = {
     'halofit':      lib.halofit,
     'linear':       lib.linear,
     'emu':          lib.emu
-}
-
-# List which matter_power_spectrum types are allowed for each transfer_function
-valid_transfer_matter_power_combos = {
-    'none':             [],
-    'emulator':         [lib.emu, ],
-    'fitting_function': [lib.linear, lib.halofit, lib.halo_model],
-    'eisenstein_hu':    [lib.linear, lib.halofit, lib.halo_model],
-    'bbks':             [lib.linear, lib.halofit, lib.halo_model],
-    'boltzmann':        [lib.linear, lib.halofit],
-    'boltzmann_class':  [lib.linear, lib.halofit],
-    'class':            [lib.linear, lib.halofit],
-    'boltzmann_camb':   [],
-    'camb':             [],
 }
 
 baryons_power_spectrum_types = {
@@ -510,14 +485,6 @@ class Cosmology(object):
                              % (emulator_neutrinos,
                                 emulator_neutrinos_types.keys()))
 
-        # Check for valid transfer fn/matter power spectrum combination
-        if (matter_power_spectrum_types[matter_power_spectrum]
-                not in
-                valid_transfer_matter_power_combos[transfer_function]):
-            raise ValueError("matter_power_spectrum '%s' can't be used "
-                             "with transfer_function '%s'."
-                             % (matter_power_spectrum, transfer_function))
-
         # Assign values to new ccl_configuration object
         config = lib.configuration()
 
@@ -579,10 +546,23 @@ class Cosmology(object):
         if norm_pk < 1e-5 and sigma8 is not None:
             raise ValueError("sigma8 must be greater than 1e-5.")
 
+        # Make sure the neutrino parameters are consistent.
         if isinstance(m_nu, float):
             if mnu_type is None:
                 mnu_type = 'sum'
             m_nu = [m_nu]
+            if (mnu_type == 'sum'
+                    and m_nu[0] < (np.sqrt(7.62E-5) + np.sqrt(2.55E-3))
+                    and (m_nu[0] > 1e-15)):
+                raise ValueError("if mnu_type= sum, we are using the "
+                                 "normal hierarchy and so m_nu must "
+                                 "be less than (~)0.0592")
+            elif (mnu_type == 'sum_inverted' and
+                  m_nu[0] < (np.sqrt(2.43e-3 - 7.62e-5) + np.sqrt(2.43e-3))
+                  and (m_nu[0] > 1e-15)):
+                raise ValueError("if mnu_type= sum_inverted, we are using the "
+                                 "inverted hierarchy and so m_nu must "
+                                 "be less than (~)0.0978")
         elif hasattr(m_nu, "__len__"):
             if (len(m_nu) != 3):
                 raise ValueError("m_nu must be a float or array-like object "

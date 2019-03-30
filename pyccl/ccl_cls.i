@@ -75,6 +75,7 @@ CCL_ClTracer* cl_tracer_new_wrapper(ccl_cosmology *cosmo, int tracer_type,
 %inline %{
 
 void angular_cl_vec(ccl_cosmology * cosmo, CCL_ClTracer *clt1, CCL_ClTracer *clt2,
+		    ccl_p2d_t *pspec,
                     double l_limber, double l_logstep, double l_linstep,
                     double* ell, int nell, int nout, double* output, int *status) {
   //Cast ells as integers
@@ -90,7 +91,7 @@ void angular_cl_vec(ccl_cosmology * cosmo, CCL_ClTracer *clt1, CCL_ClTracer *clt
     ell_int[i] = (int)(ell[i]);
 
   //Compute C_ells
-  ccl_angular_cls(cosmo, w, clt1, clt2, nell, ell_int, output, status);
+  ccl_angular_cls(cosmo, w, clt1, clt2, pspec, nell, ell_int, output, status);
 
   free(ell_int);
   ccl_cl_workspace_free(w);
