@@ -1,0 +1,44 @@
+
+%
+\begin{sidewaystable*}[!htp]
+  \vskip 4cm
+  \centering
+  \begin{tabular}{ l|c c c c c}
+    \hline
+    Quantity & Equation/ & Cosmologies & Range & Agreement with & Figure \\
+    & Reference &  & & benchmarks, $\mathcal{A}$ & \\
+    \hline
+    Comoving radial distance, $\chi$ & (\ref{eq:comrdist}) & CCL1-5,7-11 & $0.01 \leq z\leq 1000$ &  $5\times 10^{-7}$ & Fig. \ref{fig:distancegrow}\\
+    Growth factor, $D$ & (\ref{eq:growth}) & CCL1-5 &  $0.01 \leq z\leq 1000 $ &  $6\times 10^{-6}$ & Fig. \ref{fig:distancegrow}\\
+    $\sigma(M)$ (BBKS) & (\ref{eq:sigR}) & CCL1-3 &  $10^{10}\leq M/{\rm M}_\odot\leq 10^{16}$ &  $3\times 10^{-5}$ & Fig. \ref{fig:hmf}\\
+    $\log[\sigma^{-1}(M)]$ (BBKS) & (\ref{eq:tildesig}) & CCL1 &  $10^{10}\leq M/{\rm M}_\odot\leq 10^{16}$ &  $10^{-3}$ & Fig. \ref{fig:hmf}\\
+    $\mathcal H \equiv \log[(M^2/\bar{\rho}_m)dn/dM]$  & (\ref{eq:newhmf}), \citet{Tinker2010} & CCL1 & $10^{10}\leq M/{\rm M}_\odot\leq 10^{16}$ \& $z=0$ & $5\times 10^{-5}$ & Fig. \ref{fig:hmf}\\
+    $P(k)$ (BBKS) & (\ref{eq:bbks}) & CCL1-3 & $10^{-3}\leq k/(h/{\rm Mpc})\leq 10$ \& $0\leq z\leq 5$ &  $10^{-5}$ & -\\
+    $P(k)$ (Eisenstein \& Hu) & \citet{1998ApJ...496..605E}  & CCL1 & $10^{-3}\leq k/(h/{\rm Mpc})\leq 10$ \& $z=0$ & $10^{-5}$ & -\\
+    $P(k)$ ({\tt CLASS} linear \& HaloFit)$^\star$ & \citet{CLASS_halofit}  & see Table 5 & $10^{-3}\leq k/{\rm Mpc}\leq 20$ \& $z=\{0,2\}$  &$\sim 10^{-3}$ & Figs. \ref{fig:NLextrapol} , \ref{fig:power_nu}, \ref{fig:power_paramspace} \& \ref{fig:power_paramspace_z2} \\
+    $P(k)$ (CosmicEmu $w$CDM)$^\dag$ & \citet{Lawrence17} & M1,M3,M & $10^{-3}\leq k/{\rm Mpc}^{-1}\leq 5$ \& $z=0$  & $10^{-2}$ & Fig. \ref{fig:emuacc} \\
+    & & M6,M8,M10 & & & (left panel)\\
+    $P(k)$ (CosmicEmu $\nu$CDM)$^\dag$ & \citet{Lawrence17} & M38,M39,M40 & $10^{-3}\leq k/{\rm Mpc}^{-1}\leq 5$ \& $z=0$ & $3\times 10^{-2}$ & Fig. \ref{fig:emuacc} \\
+    &  & M42 &  &  & (right panel)\\
+    $P(k)$ (Halo model) & \citet{Cooray2002} & CCL1, {\it WMAP7} & $10^{-4}\leq k/h{\rm Mpc}^{-1}\leq 10^{2}$ \& $z=0,1$ & $10^{-3}$ & Fig. \ref{fig:halo_model_benchmark}\\
+     &  & {\it Planck} 2013 &  & \\
+    $P(k)$ (baryonic) & (\ref{eq:bcm}), \citet{Schneider15} &  - & $10^{-5}\leq k/h{\rm Mpc}^{-1}\leq 10$ \& $z=0$ & $10^{-12}$ & -\\
+    $C_\ell$ clustering & (\ref{eq:cls}),(\ref{eq:transfer_nc})& CCL6 &$2 \leq \ell\leq 3000$ &  $0.1\sigma_\ell$  & Fig. \ref{fig:cls_limber}\\
+    $C_\ell$ weak lensing & (\ref{eq:cls}),(\ref{eq:transfer_lensing})& CCL6 &$2 \leq \ell\leq 3000$ &  $0.1\sigma_\ell$  & Fig. \ref{fig:cls_limber}\\
+    $C_\ell$ gxy-gxy lensing & (\ref{eq:cls}),(\ref{eq:transfer_nc}),(\ref{eq:transfer_lensing})& CCL6 &$2 \leq \ell\leq 3000$ &  $0.1\sigma_\ell$ & Fig. \ref{fig:cls_limber}\\
+    $C_\ell$ intrinsic alignments & (\ref{eq:cls}),(\ref{eq:transfer_ia})& CCL6 &$2 \leq \ell\leq 3000$ &  $0.1\sigma_\ell$  & -\\
+    $C_\ell$ CMB lensing auto &(\ref{eq:cls}),(\ref{eq:cmblens}) & CCL6 & $2 \leq \ell\leq 3000$& $0.1\sigma_l$  & Fig. \ref{fig:cls_cmblens}\\
+    $C_\ell$ CMB lensing cross &(\ref{eq:cls}),(\ref{eq:transfer_nc}),(\ref{eq:transfer_lensing}),(\ref{eq:cmblens}) & CCL6 & $2 \leq \ell\leq 3000$& $0.1\sigma_\ell$  & Fig. \ref{fig:cls_cmblens}\\
+    $\xi_{\pm},\xi_{gg},\xi_{ggl}$ & (\ref{eq:xi22flat}),(\ref{eq:xi02flat}),(\ref{eq:xi00flat}) & CCL6 & $0.01< \theta/{\rm deg}< 5$&  $0.5\sigma_{\rm LSST}$ & Figs. \ref{fig:corrval} and \ref{fig:corrval2}\\
+    3D correlation$^\S$, $\xi$ & (\ref{eq:xi3d}) & CCL1-3 & $0.1<r/{\rm Mpc}<250$ \& $0 \leq z \leq 5$& $4\times 10^{-2}$ & Figs. \ref{fig:benchmark_xi} and \ref{fig:analytic_xi} \\
+    $C_\ell$ clustering {\tt non-Limber} &  (\ref{eq:cls}),(\ref{eq:transfer_nc}),(\ref{eq:transfer_rsd}) & CCL1 & $500 \leq \ell < 1000$ & $2\times 10^{-2}$ & - \\
+    $C_\ell$ clustering {\tt Angpow} & (\ref{eq:cls}),(\ref{eq:transfer_nc}),(\ref{eq:transfer_rsd}) & CCL1 & $2 \leq \ell < 1000$ & $3\times 10^{-3}$  & Fig. \ref{fig:angpow} (right panel)\\
+    \hline
+  \end{tabular}
+  \caption{Summary of \ccl validation tests and the level of agreement achieved with respect to the benchmarks ($\mathcal{A}$). These tests can be reproduced by the user and are integrated into the \ccl repository. The $C_\ell$ accuracy is set to $10\%$ of the expected uncertainty due to cosmic variance, $\sigma_\ell$, given in Eq. (\ref{eq:sigmaell}). In the case of intrinsic alignments, we validate auto-spectra as well as cross-spectra with galaxy shear and positions. For this case, $\sigma_\ell$ includes the lensing contribution as well. Notice that the last row of the table compares the {\tt Angpow} output for the clustering $C_\ell$ to an independent non-Limber implementation. The row immediately above demonstrates that the non-Limber method can also reproduce the Limber case at high $\ell$ with sufficient accuracy compared to the expected cosmic variance. For the BCM case, we compared the fractional impact of baryons on the matter power spectrum by dividing the $P(k)$ prediction by the dark-matter-only case. Hence, the choice of cosmology becomes irrelevant in this case. Cosmologies are documented in Tables \ref{tab:cosmologies} and \ref{tab:cosmologies_nu} for the ``CCL'' case, and in \citet{Lawrence17} for the ``M'' cosmologies.\\
+    {\bf $^\star$ indicates the accuracy was established against a known higher precision implementation.}\\
+    {\bf $^\dag$ indicates a given level of accuracy was required in comparison to simulations.}\\
+    {\bf $^\S$ indicates at least one test was performed against an analytical solution.}
+  }
+  \label{tab:tests}
+\end{sidewaystable*}
