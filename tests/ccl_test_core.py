@@ -336,7 +336,13 @@ def test_cosmology_neutrinos():
     assert_raises(
         ValueError, ccl.Cosmology,
         Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
-        m_nu=0.08, mnu_type='sum_inverted')     
+        m_nu=0.08, mnu_type='sum_inverted')  
+        
+    assert_raises(
+        ValueError, ccl.Cosmology, Omega_c = 0.27, Omega_b = 0.049, 
+        h = 0.67, sigma8 = 0.8, n_s = 0.96, m_nu=[0.03, 0.02, 0.04], 
+        Neff = 3., mnu_type = 'list')
+               
 
 
 if __name__ == '__main__':

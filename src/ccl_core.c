@@ -324,6 +324,12 @@ void ccl_parameters_fill_initial(ccl_parameters * params, int *status)
 
   // Get the N_nu_rel from Neff and N_nu_mass
   params->N_nu_rel = params->Neff - params->N_nu_mass * pow(ccl_constants.TNCDM, 4) / pow(4./11.,4./3.);
+  // Make sure that the user hasn't set Neff and m_nu(->N_nu_mass)
+  // such that N_nu_rel is negative.
+  if (params->N_nu_rel<0.){
+		      *status = CCL_ERROR_MNU_UNPHYSICAL;
+		      ccl_check_status_nocosmo(status);
+          }
 
   // Temperature of the relativistic neutrinos in K
   double T_nu= (params->T_CMB) * pow(4./11.,1./3.);

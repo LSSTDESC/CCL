@@ -563,6 +563,53 @@ class Cosmology(object):
                 raise ValueError("if mnu_type= sum_inverted, we are using the "
                                  "inverted hierarchy and so m_nu must "
                                  "be less than (~)0.0978")
+            # If mnu is non-zero, we have to compute the individual masses
+            # here so that we can throw an error in python if the resulting
+            # Neff is negative.
+            # This is repeated work in C. It's only necessary here because
+            # we can't pass an error back from C when we don't have a
+            # cosmology object yet as in ccl_create_parameters
+            if (m_nu[0] > 1e-15):
+                if (mnu_type == 'sum'):
+                    mnu_list = [0]*3
+                    # This is a starting guess.
+                    mnu_list[0] = 0.
+                    mnu_list[1] = np.sqrt(7.62E-5)
+                    mnu_list[2] = np.sqrt(2.55E-3)
+                    sum_check = mnu_list[0] + mnu_list[1] + mnu_list[2]
+                    # This is the Newton's method
+                    while (np.abs(m_nu[0] - sum_check) > 1e-15):
+                        dsdm1 = (1. + mnu_list[0] / mnu_list[1]
+                                 + mnu_list[0] / mnu_list[2])
+                        mnu_list[0] = mnu_list[0] - (sum_check
+                                                     - m_nu[0]) / dsdm1
+                        mnu_list[1] = np.sqrt(mnu_list[0]*mnu_list[0]
+                                              + 7.62E-5)
+                        mnu_list[2] = np.sqrt(mnu_list[0]*mnu_list[0]
+                                              + 2.55E-3)
+                        sum_check = mnu_list[0] + mnu_list[1] + mnu_list[2]
+                elif (mnu_type == 'sum_inverted'):
+                    mnu_list = [0]*3
+                    mnu_list[0] = 0.  # This is a starting guess.
+                    mnu_list[1] = np.sqrt(2.43e-3 - 7.62E-5)
+                    mnu_list[2] = np.sqrt(2.43e-3)
+                    sum_check = mnu_list[0] + mnu_list[1] + mnu_list[2]
+                    # This is the Newton's method
+                    while (np.abs(m_nu[0] - sum_check) > 1e-15):
+                        dsdm1 = (1. + (mnu_list[0] / mnu_list[1])
+                                 + (mnu_list[0] / mnu_list[2]))
+                        mnu_list[0] = mnu_list[0] - (sum_check
+                                                     - m_nu[0]) / dsdm1
+                        mnu_list[1] = np.sqrt(mnu_list[0]*mnu_list[0]
+                                              + 7.62E-5)
+                        mnu_list[2] = np.sqrt(mnu_list[0]*mnu_list[0]
+                                              - 2.55E-3)
+                        sum_check = mnu_list[0] + mnu_list[1] + mnu_list[2]
+                elif (mnu_type == 'sum_equal'):
+                    mnu_list = [0]*3
+                    mnu_list[0] = m_nu[0]/3.
+                    mnu_list[1] = m_nu[1]/3.
+                    mnu_list[2] = m_nu[2]/3.
         elif hasattr(m_nu, "__len__"):
             if (len(m_nu) != 3):
                 raise ValueError("m_nu must be a float or array-like object "
@@ -575,9 +622,24 @@ class Cosmology(object):
                     "of neutrino masses, only with a sum." % mnu_type)
             elif mnu_type is None:
                 mnu_type = 'list'  # False
+            mnu_list = [0]*3
+            mnu_list[0] = m_nu[0]
+            mnu_list[1] = m_nu[1]
+            mnu_list[2] = m_nu[2]
         else:
             raise ValueError("m_nu must be a float or array-like object with "
                              "length 3.")
+
+        # Check which of the neutrino species are non-relativistic today
+        if (np.abs(np.amax(m_nu) > 1e-15)):
+            N_nu_mass = 0
+            for i in range(0, 3):
+                if (mnu_list[i] > 0.00017):  # Lesgourges et al. 2012
+                    N_nu_mass = N_nu_mass + 1
+            N_nu_rel = Neff - (N_nu_mass * 0.71611**4 * (4./11.)**(-4./3.))
+            if N_nu_rel < 0.:
+                raise ValueError("Neff and m_nu must result in a positive"
+                                 "number of relativistic neutrino species.")
 
         # Check if any compulsory parameters are not set
         compul = [Omega_c, Omega_b, Omega_k, w0, wa, h, norm_pk, n_s]

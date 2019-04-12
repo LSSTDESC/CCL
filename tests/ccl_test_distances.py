@@ -338,56 +338,6 @@ def compare_distances_hiz(z, chi_bench, Omega_v, w0, wa):
     # Compare to benchmark data
     assert_allclose(chi, chi_bench, atol=1e-12, rtol=DISTANCES_TOLERANCE)
 
-@numpy.testing.dec.slow
-def compare_distances_mnu(z, chi_bench,dm_bench, Omega_v, w0, wa, Neff, mnu):
-    """
-    Compare distances calculated by pyccl with the distances in the benchmark
-    file.
-    """
-    # Set Omega_K in a consistent way
-    Omega_k = 1.0 - Omega_c - Omega_b - Omega_v
-
-    cosmo = ccl.Cosmology(Omega_c=Omega_c, Omega_b=Omega_b, Neff=Neff_mnu,
-                       h=h, A_s=A_s, n_s=n_s, Omega_k=Omega_k,
-                       w0=w0, wa=wa, m_nu=mnu)
-
-    # Calculate distance using pyccl
-    a = 1. / (1. + z)
-    chi = ccl.comoving_radial_distance(cosmo, a)
-    # Compare to benchmark data
-    assert_allclose(chi, chi_bench, atol=1e-12, rtol=DISTANCES_TOLERANCE_MNU)
-
-    #compare distance moudli where a!=1
-    a_not_one = (a!=1).nonzero()
-    dm = ccl.distance_modulus(cosmo,a[a_not_one])
-
-    assert_allclose(dm, dm_bench[a_not_one], atol=1e-3, rtol = DISTANCES_TOLERANCE_MNU)
-
-@numpy.testing.dec.slow
-def compare_distances_mnu_hiz(z, chi_bench,dm_bench, Omega_v, w0, wa, Neff_mnu, mnu):
-    """
-    Compare distances calculated by pyccl with the distances in the benchmark
-    file.
-    """
-    # Set Omega_K in a consistent way
-    Omega_k = 1.0 - Omega_c - Omega_b - Omega_v
-
-    cosmo = ccl.Cosmology(Omega_c=Omega_c, Omega_b=Omega_b, Neff=Neff,
-                       h=h, A_s=A_s, n_s=n_s, Omega_k=Omega_k,
-                       w0=w0, wa=wa, m_nu=mnu)
-
-    # Calculate distance using pyccl
-    a = 1. / (1. + z)
-    chi = ccl.comoving_radial_distance(cosmo, a)
-    # Compare to benchmark data
-    assert_allclose(chi, chi_bench, atol=1e-12, rtol=DISTANCES_TOLERANCE_MNU)
-
-    #compare distance moudli where a!=1
-    a_not_one = (a!=1).nonzero()
-    dm = ccl.distance_modulus(cosmo,a[a_not_one])
-
-    assert_allclose(dm, dm_bench[a_not_one], atol=1e-3, rtol = DISTANCES_TOLERANCE_MNU)
-
 def compare_class_distances(z, chi_bench, dm_bench, Neff=3.0, m_nu=0.0,
                             Omega_k=0.0, w0=-1.0, wa=0.0):
     """
@@ -441,46 +391,6 @@ def test_distance_hiz_model_1():
 def test_distance_hiz_model_2():
     i = 2
     compare_distances_hiz(zhi, chi_hiz[i], Omega_v_vals[i], w0_vals[i], wa_vals[i])
-
-def test_distance_mnu_model_0():
-	i=0
-	compare_distances_mnu(znu, chi_nu[i],dm_nu[i], Omega_v_vals[i], w0_vals[i], wa_vals[i], Neff, mnu[i])
-
-def test_distance_mnu_model_1():
-	i=1
-	compare_distances_mnu(znu, chi_nu[i],dm_nu[i], Omega_v_vals[i], w0_vals[i], wa_vals[i], Neff, mnu[i])
-
-def test_distance_mnu_model_2():
-	i=2
-	compare_distances_mnu(znu, chi_nu[i],dm_nu[i], Omega_v_vals[i], w0_vals[i], wa_vals[i], Neff, mnu[i])
-
-def test_distance_mnu_model_3():
-	i=3
-	compare_distances_mnu(znu, chi_nu[i],dm_nu[i], Omega_v_vals[i], w0_vals[i], wa_vals[i], Neff, mnu[i])
-
-def test_distance_mnu_model_4():
-	i=4
-	compare_distances_mnu(znu, chi_nu[i],dm_nu[i], Omega_v_vals[i], w0_vals[i], wa_vals[i], Neff, mnu[i])
-
-def test_distance_mnu_hiz_model_0():
-	i=0
-	compare_distances_mnu(znuhi, chi_nu_hiz[i],dm_nu_hiz[i], Omega_v_vals[i], w0_vals[i], wa_vals[i], Neff, mnu[i])
-
-def test_distance_mnu_hiz_model_1():
-	i=1
-	compare_distances_mnu(znuhi, chi_nu_hiz[i],dm_nu_hiz[i], Omega_v_vals[i], w0_vals[i], wa_vals[i], Neff, mnu[i])
-
-def test_distance_mnu_hiz_model_2():
-	i=2
-	compare_distances_mnu(znuhi, chi_nu_hiz[i],dm_nu_hiz[i], Omega_v_vals[i], w0_vals[i], wa_vals[i], Neff, mnu[i])
-
-def test_distance_mnu_hiz_model_3():
-	i=3
-	compare_distances_mnu(znuhi, chi_nu_hiz[i],dm_nu_hiz[i], Omega_v_vals[i], w0_vals[i], wa_vals[i], Neff, mnu[i])
-
-def test_distance_mnu_hiz_model_4():
-	i=4
-	compare_distances_mnu(znuhi, chi_nu_hiz[i],dm_nu_hiz[i], Omega_v_vals[i], w0_vals[i], wa_vals[i], Neff, mnu[i])
 
 def test_class_distance_model_flat_nonu():
     i = 0

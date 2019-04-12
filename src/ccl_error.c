@@ -145,7 +145,7 @@ void ccl_check_status_nocosmo(int * status)
   case CCL_ERROR_MNU_UNPHYSICAL:
     // Error in the sum of mnu or Omeganu passed for the hierarchy requested.
 	  ccl_raise_exception(*status, 
-      "CCL_ERROR_MNU_UNPHYSICAL: Sum of neutrinos masses for this Omeganu value is incompatible with the requested mass hierarchy.");
+      "CCL_ERROR_MNU_UNPHYSICAL: Either the sum of m_nu is incompatible with the requested mass hierarchy, or N_nu_rel is negative for the given Neff and m_nu.");
   case CCL_ERROR_NOT_IMPLEMENTED: 
     ccl_raise_exception(*status, 
       "CCL_ERROR_NOT_IMPLEMENTED: the type of m_nu specified is not supported.");
