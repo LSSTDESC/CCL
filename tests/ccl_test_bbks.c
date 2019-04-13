@@ -65,6 +65,7 @@ static void compare_bbks(int i_model,struct bbks_data * data)
   char* rtn;
   FILE *f;
   ccl_configuration config = default_config;
+  config.matter_power_spectrum_method = ccl_linear;
   config.transfer_function_method = ccl_bbks;
   ccl_parameters params = ccl_parameters_create(data->Omega_c,data->Omega_b,data->Omega_k[i_model-1],data->Neff, data->mnu,data->mnu_type, data->w_0[i_model-1],data->w_a[i_model-1],data->h,data->A_s,data->n_s,-1,-1,-1,-1,NULL,NULL, &status);
   params.T_CMB=2.7;
@@ -81,7 +82,7 @@ static void compare_bbks(int i_model,struct bbks_data * data)
     exit(1);
   }
   nk=linecount(f)-1; rewind(f);
-  
+
   rtn = fgets(str, 1024, f);
   for(i=0;i<nk;i++) {
     double k_h,k;
@@ -95,7 +96,7 @@ static void compare_bbks(int i_model,struct bbks_data * data)
     for(j=0;j<6;j++) {
       double pk_h,pk_bench,pk_ccl,err;
       double z=j+0.;
-      
+
       stat=fscanf(f,"%lf",&pk_h);
       if(stat!=1) {
 	fprintf(stderr,"Error reading file %s, line %d\n",fname,i+2);

@@ -25,18 +25,20 @@ def reference_models():
     # BBKS Pk
     cosmo4 = ccl.Cosmology(
         Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96,
-        transfer_function='bbks')
+        transfer_function='bbks',
+        matter_power_spectrum='linear')
 
     # E&H Pk
     cosmo5 = ccl.Cosmology(
         Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96,
-        transfer_function='eisenstein_hu')
+        transfer_function='eisenstein_hu',
+        matter_power_spectrum='linear')
 
     # Emulator Pk
     cosmo6 = ccl.Cosmology(
         Omega_c=0.27, Omega_b=0.022/0.67**2, h=0.67, sigma8=0.8,
         n_s=0.96, Neff=3.04, m_nu=0.,
-        transfer_function='emulator',
+        transfer_function='boltzmann_class',
         matter_power_spectrum='emu')
 
     # Baryons Pk
@@ -70,7 +72,7 @@ def reference_models_nu():
     cosmo1 = ccl.Cosmology(
         Omega_c=0.27, Omega_b=0.022/0.67**2, h=0.67, sigma8=0.8,
         n_s=0.96, Neff=3.04, m_nu=[0.02, 0.02, 0.02],
-        transfer_function='emulator',
+        transfer_function='boltzmann_class',
         matter_power_spectrum='emu')
 
     # Emulator Pk with neutrinos, force equalize
@@ -687,21 +689,6 @@ def check_corr_3dRSD(cosmo):
     assert_( all_finite(corr10))
     assert_( all_finite(corr11))
     assert_( all_finite(corr12))
-
-def test_valid_transfer_combos():
-    """
-    Check that invalid transfer_function <-> matter_power_spectrum pairs raise
-    an error.
-    """
-    params = { 'Omega_c': 0.27, 'Omega_b': 0.045, 'h': 0.67,
-               'A_s': 1e-10, 'n_s': 0.96, 'w0': -1., 'wa': 0. }
-
-    assert_raises(ValueError, ccl.Cosmology, transfer_function='emulator',
-                              matter_power_spectrum='linear', **params)
-    #assert_raises(ValueError, ccl.Cosmology, transfer_function='boltzmann',
-    #                          matter_power_spectrum='halomodel', **params)
-    assert_raises(ValueError, ccl.Cosmology, transfer_function='bbks',
-                              matter_power_spectrum='emu', **params)
 
 def test_background():
     """

@@ -94,7 +94,7 @@ static void compare_emu(int i_model,struct emu_data * data)
   //without CLASS failing due to w(z) crossing -1.
 
   ccl_configuration config = default_config;
-  config.transfer_function_method = ccl_emulator;
+  config.transfer_function_method = ccl_bbks;
   config.matter_power_spectrum_method = ccl_emu;
 
   //None of the current cosmologies being checked include neutrinos
