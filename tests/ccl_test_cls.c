@@ -67,7 +67,6 @@ static void compare_cls_arr(ccl_cosmology *cosmo,CCL_ClTracer *tr1,CCL_ClTracer 
     int l=ls[ii];
     double cl_here=ccl_angular_cl_limber(cosmo,tr1,tr2,NULL,(double)l,status)*ell_correct[ii];
     double el_here=ELS_TOLERANCE*sqrt((cl_a1b1[l]*cl_a2b2[l]+cl_a2b1[l]*cl_a1b2[l])/(2*l+1.));
-    //    printf("%d %d %lE %lE\n",ii,ls[ii],fabs(cl_here-cls_bm[ls[ii]]),el_here);
     ASSERT_TRUE(fabs(cl_here-cls_bm[ls[ii]])<el_here);
   }
 }
@@ -191,12 +190,12 @@ static void compare_cls(char *compare_type,struct cls_data * data)
   ASSERT_NOT_NULL(tr_wl_1);
   CCL_ClTracer *tr_wl_2=ccl_cl_tracer_lensing_simple(cosmo,nz,zarr_2,pzarr_2,&status);
   ASSERT_NOT_NULL(tr_wl_2);
-  CCL_ClTracer *tr_wli_1=ccl_cl_tracer_lensing(cosmo,1,nz,zarr_1,pzarr_1,
+  CCL_ClTracer *tr_ia_1=ccl_cl_tracer_lensing(cosmo,0,1,nz,zarr_1,pzarr_1,
 					       nz,zarr_1,az1arr,nz,zarr_1,rz1arr,&status);
-  ASSERT_NOT_NULL(tr_wli_1);
-  CCL_ClTracer *tr_wli_2=ccl_cl_tracer_lensing(cosmo,1,nz,zarr_2,pzarr_2,
+  ASSERT_NOT_NULL(tr_ia_1);
+  CCL_ClTracer *tr_ia_2=ccl_cl_tracer_lensing(cosmo,0,1,nz,zarr_2,pzarr_2,
 					       nz,zarr_2,az2arr,nz,zarr_2,rz2arr,&status);
-  ASSERT_NOT_NULL(tr_wli_2);
+  ASSERT_NOT_NULL(tr_ia_2);
   CCL_ClTracer *tr_cl=ccl_cl_tracer_cmblens(cosmo,zlss,&status);
   ASSERT_NOT_NULL(tr_cl);
 
@@ -539,8 +538,8 @@ static void compare_cls(char *compare_type,struct cls_data * data)
   ccl_cl_tracer_free(tr_nc_2);
   ccl_cl_tracer_free(tr_wl_1);
   ccl_cl_tracer_free(tr_wl_2);
-  ccl_cl_tracer_free(tr_wli_1);
-  ccl_cl_tracer_free(tr_wli_2);
+  ccl_cl_tracer_free(tr_ia_1);
+  ccl_cl_tracer_free(tr_ia_2);
   ccl_cl_tracer_free(tr_cl);
   ccl_cosmology_free(cosmo);
 }

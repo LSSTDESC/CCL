@@ -220,9 +220,9 @@ static void compare_corr(char *compare_type,int algorithm,struct corrs_data * da
   ASSERT_NOT_NULL(tr_wl_1);
   CCL_ClTracer *tr_wl_2=ccl_cl_tracer_lensing_simple(cosmo,nz,zarr_2,pzarr_2,&status2);
   ASSERT_NOT_NULL(tr_wl_2);
-  CCL_ClTracer *tr_wli_1=ccl_cl_tracer_lensing(cosmo,1,nz,zarr_1,pzarr_1,nz,zarr_1,az1arr,nz,zarr_1,rz1arr,&status);
+  CCL_ClTracer *tr_wli_1=ccl_cl_tracer_lensing(cosmo,1,1,nz,zarr_1,pzarr_1,nz,zarr_1,az1arr,nz,zarr_1,rz1arr,&status);
   ASSERT_NOT_NULL(tr_wli_1);
-  CCL_ClTracer *tr_wli_2=ccl_cl_tracer_lensing(cosmo,1,nz,zarr_2,pzarr_2,nz,zarr_2,az2arr,nz,zarr_2,rz2arr,&status);
+  CCL_ClTracer *tr_wli_2=ccl_cl_tracer_lensing(cosmo,1,1,nz,zarr_2,pzarr_2,nz,zarr_2,az2arr,nz,zarr_2,rz2arr,&status);
   ASSERT_NOT_NULL(tr_wli_2);
 
   /* Read in the benchmark correlations*/

@@ -36,8 +36,10 @@ typedef struct {
   double zmin; //Limits in chi where we care about this tracer
   double zmax;
   double chi_source; //Comoving distance to the source (for CMB lensing)
+  int has_density;
   int has_rsd;
   int has_magnification;
+  int has_shear;
   int has_intrinsic_alignment;
   SplPar *spl_nz; //Spline for normalized N(z)
   SplPar *spl_bz; //Spline for linear bias
@@ -52,8 +54,10 @@ typedef struct {
 /**
  * Constructor for a ClTracer.
  * @param Tracer_type pass ccl_number_counts_tracer (number counts), ccl_weak_lensing_tracer (weak lensing) or ccl_cmb_lensing_tracer (CMB lensing)
+ * @param has_density Set to 1 if you want to add a contribution proportional to the matter overdensity.
  * @param has_rsd Set to 1 if you want to compute the RSD contribution to number counts (0 otherwise)
  * @param has_magnification Set to 1 if you want to compute the magnification contribution to number counts (0 otherwise)
+ * @param has_shear set to 1 if you want to include the weak lensing shear contribution
  * @param has_intrinsic_alignment Set to 1 if you want to compute the IA contribution to shear
  * @param nz_n Number of bins in z_n and n
  * @param z_n Redshifts for each redshift interval of n
@@ -76,17 +80,19 @@ typedef struct {
  * @return CCL_ClTracer object
  */
 CCL_ClTracer *ccl_cl_tracer(ccl_cosmology *cosmo,int tracer_type,
-				int has_rsd,int has_magnification,int has_intrinsic_alignment,
-				int nz_n,double *z_n,double *n,
-				int nz_b,double *z_b,double *b,
-				int nz_s,double *z_s,double *s,
-				int nz_ba,double *z_ba,double *ba,
-				int nz_rf,double *z_rf,double *rf,
-				double z_source,int * status);
+			    int has_density,int has_rsd,int has_magnification,
+			    int has_shear,int has_intrinsic_alignment,
+			    int nz_n,double *z_n,double *n,
+			    int nz_b,double *z_b,double *b,
+			    int nz_s,double *z_s,double *s,
+			    int nz_ba,double *z_ba,double *ba,
+			    int nz_rf,double *z_rf,double *rf,
+			    double z_source,int * status);
 
 /**
  * Simplified constructor for a clustering ClTracer.
  * @param cosmo Cosmological parameters
+ * @param has_density Set to 1 if you want to add a contribution proportional to the matter overdensity.
  * @param has_rsd Set to 1 if you want to compute the RSD contribution to number counts (0 otherwise)
  * @param has_magnification Set to 1 if you want to compute the magnification contribution to number counts (0 otherwise)
  * @param nz_n Number of bins in z_n and n
@@ -103,10 +109,10 @@ CCL_ClTracer *ccl_cl_tracer(ccl_cosmology *cosmo,int tracer_type,
  * @return CCL_ClTracer object
  */
 CCL_ClTracer *ccl_cl_tracer_number_counts(ccl_cosmology *cosmo,
-					      int has_rsd,int has_magnification,
-					      int nz_n,double *z_n,double *n,
-					      int nz_b,double *z_b,double *b,
-					      int nz_s,double *z_s,double *s, int * status);
+					  int has_density,int has_rsd,int has_magnification,
+					  int nz_n,double *z_n,double *n,
+					  int nz_b,double *z_b,double *b,
+					  int nz_s,double *z_s,double *s, int * status);
 
 
 /**
@@ -122,11 +128,12 @@ CCL_ClTracer *ccl_cl_tracer_number_counts(ccl_cosmology *cosmo,
  * @return CCL_ClTracer object
  */
 CCL_ClTracer *ccl_cl_tracer_number_counts_simple(ccl_cosmology *cosmo,
-						     int nz_n,double *z_n,double *n,
-						     int nz_b,double *z_b,double *b, int * status);
+						 int nz_n,double *z_n,double *n,
+						 int nz_b,double *z_b,double *b, int * status);
 
 /**
  * Simplified constructor for a lensing ClTracer.
+ * @param has_shear set to 1 if you want to include the weak lensing shear contribution
  * @param has_intrinsic_alignment Set to 1 if you want to compute the IA contribution to shear
  * @param nz_n Number of bins in z_n and n
  * @param z_n Redshifts for each redshift interval of n
@@ -142,10 +149,10 @@ CCL_ClTracer *ccl_cl_tracer_number_counts_simple(ccl_cosmology *cosmo,
  * @return CCL_ClTracer object
  */
 CCL_ClTracer *ccl_cl_tracer_lensing(ccl_cosmology *cosmo,
-					int has_alignment,
-					int nz_n,double *z_n,double *n,
-					int nz_ba,double *z_ba,double *ba,
-					int nz_rf,double *z_rf,double *rf, int * status);
+				    int has_shear,int has_alignment,
+				    int nz_n,double *z_n,double *n,
+				    int nz_ba,double *z_ba,double *ba,
+				    int nz_rf,double *z_rf,double *rf, int * status);
 
 /**
  * Simplified constructor for a lensing ClTracer without intrinsic alignment.
@@ -157,7 +164,7 @@ CCL_ClTracer *ccl_cl_tracer_lensing(ccl_cosmology *cosmo,
  * @return CCL_ClTracer object
  */
 CCL_ClTracer *ccl_cl_tracer_lensing_simple(ccl_cosmology *cosmo,
-					       int nz_n,double *z_n,double *n, int * status);
+					   int nz_n,double *z_n,double *n, int * status);
 
 
 /**
