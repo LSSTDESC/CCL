@@ -258,6 +258,7 @@ static void compare_cls(char *compare_type,struct cls_data * data)
   double *ell_correct_dl=malloc(nls*sizeof(double));
   double *ell_correct_ll=malloc(nls*sizeof(double));
   double *ell_correct_lc=malloc(nls*sizeof(double));
+  double *ell_correct_li=malloc(nls*sizeof(double));
   for(int ii=0;ii<50;ii++)
     ells[ii]=2+ii;
   for(int ii=50;ii<nls;ii++)
@@ -268,6 +269,7 @@ static void compare_cls(char *compare_type,struct cls_data * data)
     ell_correct_dl[ii]=(l+0.5)*(l+0.5)/sqrt((l+2.)*(l+1.)*l*(l-1.));
     ell_correct_ll[ii]=ell_correct_dl[ii]*ell_correct_dl[ii];
     ell_correct_lc[ii]=l*(l+1.)/sqrt((l+2.)*(l+1.)*l*(l-1.));
+    ell_correct_li[ii]=2*ell_correct_dl[ii];
   }
 
   //Now compute all power spectra and compare with benchmarks
@@ -286,6 +288,7 @@ static void compare_cls(char *compare_type,struct cls_data * data)
 		  cls_dd_22_b,cls_dd_22_b,cls_dd_22_b,cls_dd_22_b,
 		  ell_correct_one,&status);
   if (status) printf("%s\n",cosmo->status_message);
+
   //NC1-WL1
   compare_cls_arr(cosmo,tr_nc_1,tr_wl_1,nls,ells,cls_dl_11_b,
 		  cls_dd_11_b,cls_dl_11_b,cls_dl_11_b,cls_ll_11_b,
@@ -306,6 +309,39 @@ static void compare_cls(char *compare_type,struct cls_data * data)
 		  cls_dd_22_b,cls_dl_22_b,cls_dl_22_b,cls_ll_22_b,
 		  ell_correct_dl,&status);
   if (status) printf("%s\n",cosmo->status_message);
+
+  //NC1-IA1
+  compare_cls_arr(cosmo,tr_nc_1,tr_ia_1,nls,ells,cls_di_11_b,
+		  cls_dd_11_b,cls_di_11_b,cls_di_11_b,cls_ii_11_b,
+		  ell_correct_dl,&status);
+  if (status) printf("%s\n",cosmo->status_message);
+  //NC1-IA2
+  compare_cls_arr(cosmo,tr_nc_1,tr_ia_2,nls,ells,cls_di_12_b,
+		  cls_dd_11_b,cls_di_12_b,cls_di_12_b,cls_ii_22_b,
+		  ell_correct_dl,&status);
+  if (status) printf("%s\n",cosmo->status_message);
+  //NC2-IA1
+  compare_cls_arr(cosmo,tr_nc_2,tr_ia_1,nls,ells,cls_di_21_b,
+		  cls_dd_22_b,cls_di_21_b,cls_di_21_b,cls_ii_11_b,
+		  ell_correct_dl,&status);
+  if (status) printf("%s\n",cosmo->status_message);
+  //NC2-IA2
+  compare_cls_arr(cosmo,tr_nc_2,tr_ia_2,nls,ells,cls_di_22_b,
+		  cls_dd_22_b,cls_di_22_b,cls_di_22_b,cls_ii_22_b,
+		  ell_correct_dl,&status);
+  if (status) printf("%s\n",cosmo->status_message);
+
+  //IA1-WL1
+  compare_cls_arr(cosmo,tr_wl_1,tr_ia_1,nls,ells,cls_li_11_b,
+  		  cls_ii_11_b,cls_li_11_b,cls_li_11_b,cls_ll_11_b,
+		  ell_correct_li,&status);
+  if (status) printf("%s\n",cosmo->status_message);
+  //IA2-WL2
+  compare_cls_arr(cosmo,tr_wl_2,tr_ia_2,nls,ells,cls_li_22_b,
+  		  cls_ii_22_b,cls_li_22_b,cls_li_22_b,cls_ll_22_b,
+		  ell_correct_li,&status);
+  if (status) printf("%s\n",cosmo->status_message);
+
   //WL1-WL1
   compare_cls_arr(cosmo,tr_wl_1,tr_wl_1,nls,ells,cls_ll_11_b,
 		  cls_ll_11_b,cls_ll_11_b,cls_ll_11_b,cls_ll_11_b,
@@ -318,6 +354,22 @@ static void compare_cls(char *compare_type,struct cls_data * data)
   if (status) printf("%s\n",cosmo->status_message);
   //WL2-WL2
   compare_cls_arr(cosmo,tr_wl_2,tr_wl_2,nls,ells,cls_ll_22_b,
+		  cls_ll_22_b,cls_ll_22_b,cls_ll_22_b,cls_ll_22_b,
+		  ell_correct_ll,&status);
+  if (status) printf("%s\n",cosmo->status_message);
+
+  //IA1-IA1
+  compare_cls_arr(cosmo,tr_ia_1,tr_ia_1,nls,ells,cls_ii_11_b,
+		  cls_ii_11_b,cls_ii_11_b,cls_ii_11_b,cls_ii_11_b,
+		  ell_correct_ll,&status);
+  if (status) printf("%s\n",cosmo->status_message);
+  //IA1-IA2
+  compare_cls_arr(cosmo,tr_ia_1,tr_ia_2,nls,ells,cls_ii_12_b,
+		  cls_ii_11_b,cls_ii_12_b,cls_ii_12_b,cls_ii_22_b,
+		  ell_correct_ll,&status);
+  if (status) printf("%s\n",cosmo->status_message);
+  //IA2-IA2
+  compare_cls_arr(cosmo,tr_ia_2,tr_ia_2,nls,ells,cls_ii_22_b,
 		  cls_ll_22_b,cls_ll_22_b,cls_ll_22_b,cls_ll_22_b,
 		  ell_correct_ll,&status);
   if (status) printf("%s\n",cosmo->status_message);
@@ -350,160 +402,6 @@ static void compare_cls(char *compare_type,struct cls_data * data)
 		  ell_correct_one,&status);
   if (status) printf("%s\n",cosmo->status_message);
 
-  /*
-    //Missing: li, di, ii
-  */
-
-  /*
-  for(int ii=0;ii<nls;ii++) {
-    int l=ells[ii];
-    double ell_correct,ell_correct2;
-    double el_dd_11,el_dd_12,el_dd_22;
-    double el_dl_11,el_dl_12,el_dl_21,el_dl_22;
-    double el_dltot_11,el_dltot_12,el_dltot_21,el_dltot_22;
-    double el_dc_1,el_dc_2;
-    double el_ll_11,el_ll_12,el_ll_22;
-    double el_li_11,el_li_12,el_li_22;
-    double el_ii_11,el_ii_12,el_ii_22;
-    double el_lltot_11,el_lltot_12,el_lltot_22;
-    double el_lc_1,el_lc_2;
-    double el_cc;
-    double cl_dd_11,cl_dd_12,cl_dd_22;
-    double cl_dl_12,cl_dl_11,cl_dl_21,cl_dl_22;
-    double cl_di_12,cl_di_11,cl_di_21,cl_di_22;
-    double cl_dltot_12,cl_dltot_11,cl_dltot_21,cl_dltot_22;
-    double cl_lltot_11,cl_lltot_12,cl_lltot_22;
-    double cl_dc_1,cl_dc_2;
-    double cl_ll_11,cl_ll_12,cl_ll_22;
-    double cl_li_11,cl_li_12,cl_li_22;
-    double cl_ii_11,cl_ii_12,cl_ii_22;
-    double cl_lc_1,cl_lc_2;
-    double cl_cc;
-    double cl_dd_11_h,cl_dd_12_h,cl_dd_22_h;
-    double cl_dl_12_h,cl_dl_11_h,cl_dl_21_h,cl_dl_22_h;
-    double cl_di_12_h,cl_di_11_h,cl_di_21_h,cl_di_22_h;
-    double cl_dltot_12_h,cl_dltot_11_h,cl_dltot_21_h,cl_dltot_22_h;
-    double cl_dc_1_h,cl_dc_2_h;
-    double cl_ll_11_h,cl_ll_12_h,cl_ll_22_h;
-    double cl_li_11_h,cl_li_12_h,cl_li_22_h;
-    double cl_ii_11_h,cl_ii_12_h,cl_ii_22_h;
-    double cl_lltot_11_h,cl_lltot_12_h,cl_lltot_22_h;
-    double cl_lc_1_h,cl_lc_2_h;
-    double cl_cc_h;
-    if(l<=1)
-      ell_correct=1;
-    else{
-      ell_correct=l*(l+1.)/sqrt((l+2.)*(l+1.)*l*(l-1.));
-      ell_correct2=(l+0.5)*(l+0.5)/sqrt((l+2.)*(l+1.)*l*(l-1.));
-    }
-    cl_dd_11  =cls_dd_11_b[l];
-    cl_dd_12  =cls_dd_12_b[l];
-    cl_dd_22  =cls_dd_22_b[l];
-    cl_dl_12  =cls_dl_12_b[l];
-    cl_dl_11  =cls_dl_11_b[l];
-    cl_dl_21  =cls_dl_21_b[l];
-    cl_dl_22  =cls_dl_22_b[l];
-    cl_di_12  =cls_di_12_b[l];
-    cl_di_11  =cls_di_11_b[l];
-    cl_di_21  =cls_di_21_b[l];
-    cl_di_22  =cls_di_22_b[l];
-    cl_dltot_11=cl_dl_11+cl_di_11;
-    cl_dltot_12=cl_dl_12+cl_di_12;
-    cl_dltot_21=cl_dl_21+cl_di_21;
-    cl_dltot_22=cl_dl_22+cl_di_22;
-    cl_dc_1  =cls_dc_1_b[l];
-    cl_dc_2  =cls_dc_2_b[l];
-    cl_ll_11  =cls_ll_11_b[l];
-    cl_ll_12  =cls_ll_12_b[l];
-    cl_ll_22  =cls_ll_22_b[l];
-    cl_li_11  =cls_li_11_b[l];
-    cl_li_12  =cls_li_12_b[l];
-    cl_li_22  =cls_li_22_b[l];
-    cl_ii_11  =cls_ii_11_b[l];
-    cl_ii_12  =cls_ii_12_b[l];
-    cl_ii_22  =cls_ii_22_b[l];
-    cl_lltot_11=cl_ll_11+cl_li_11+cl_ii_11;
-    cl_lltot_12=cl_ll_12+cl_li_12+cl_ii_12;
-    cl_lltot_22=cl_ll_22+cl_li_22+cl_ii_22;
-    cl_lc_1  =cls_lc_1_b[l];
-    cl_lc_2  =cls_lc_2_b[l];
-    cl_cc    =cls_cc_b[l];
-    el_dd_11=ELS_TOLERANCE*sqrt((cl_dd_11*cl_dd_11+cl_dd_11*cl_dd_11)/(2*l+1.));
-    el_dd_12=ELS_TOLERANCE*sqrt((cl_dd_11*cl_dd_22+cl_dd_12*cl_dd_12)/(2*l+1.));
-    el_dd_22=ELS_TOLERANCE*sqrt((cl_dd_22*cl_dd_22+cl_dd_22*cl_dd_22)/(2*l+1.));
-    el_dl_11=ELS_TOLERANCE*sqrt((cl_dd_11*cl_ll_11+cl_dl_11*cl_dl_11)/(2*l+1.));
-    el_dl_12=ELS_TOLERANCE*sqrt((cl_dd_11*cl_ll_22+cl_dl_12*cl_dl_12)/(2*l+1.));
-    el_dl_21=ELS_TOLERANCE*sqrt((cl_dd_22*cl_ll_11+cl_dl_21*cl_dl_21)/(2*l+1.));
-    el_dl_22=ELS_TOLERANCE*sqrt((cl_dd_22*cl_ll_22+cl_dl_22*cl_dl_22)/(2*l+1.));
-    el_dltot_11=ELS_TOLERANCE*sqrt((cl_dd_11*cl_lltot_11+cl_dltot_11*cl_dltot_11)/(2*l+1.));
-    el_dltot_12=ELS_TOLERANCE*sqrt((cl_dd_11*cl_lltot_22+cl_dltot_12*cl_dltot_12)/(2*l+1.));
-    el_dltot_21=ELS_TOLERANCE*sqrt((cl_dd_22*cl_lltot_11+cl_dltot_21*cl_dltot_21)/(2*l+1.));
-    el_dltot_22=ELS_TOLERANCE*sqrt((cl_dd_22*cl_lltot_22+cl_dltot_22*cl_dltot_22)/(2*l+1.));
-    el_dc_1=ELS_TOLERANCE*sqrt((cl_dd_11*cl_cc+cl_dc_1*cl_dc_1)/(2*l+1.));
-    el_dc_2=ELS_TOLERANCE*sqrt((cl_dd_22*cl_cc+cl_dc_2*cl_dc_2)/(2*l+1.));
-    el_ll_11=ELS_TOLERANCE*sqrt((cl_ll_11*cl_ll_11+cl_ll_11*cl_ll_11)/(2*l+1.));
-    el_ll_12=ELS_TOLERANCE*sqrt((cl_ll_11*cl_ll_22+cl_ll_12*cl_ll_12)/(2*l+1.));
-    el_ll_22=ELS_TOLERANCE*sqrt((cl_ll_22*cl_ll_22+cl_ll_22*cl_ll_22)/(2*l+1.));
-    el_li_11=ELS_TOLERANCE*sqrt((cl_li_11*cl_li_11+cl_li_11*cl_li_11)/(2*l+1.));
-    el_li_12=ELS_TOLERANCE*sqrt((cl_li_11*cl_li_22+cl_li_12*cl_li_12)/(2*l+1.));
-    el_li_22=ELS_TOLERANCE*sqrt((cl_li_22*cl_li_22+cl_li_22*cl_li_22)/(2*l+1.));
-    el_ii_11=ELS_TOLERANCE*sqrt((cl_ii_11*cl_ii_11+cl_ii_11*cl_ii_11)/(2*l+1.));
-    el_ii_12=ELS_TOLERANCE*sqrt((cl_ii_11*cl_ii_22+cl_ii_12*cl_ii_12)/(2*l+1.));
-    el_ii_22=ELS_TOLERANCE*sqrt((cl_ii_22*cl_ii_22+cl_ii_22*cl_ii_22)/(2*l+1.));
-    el_lltot_11=ELS_TOLERANCE*sqrt((cl_lltot_11*cl_lltot_11+cl_lltot_11*cl_lltot_11)/(2*l+1.));
-    el_lltot_12=ELS_TOLERANCE*sqrt((cl_lltot_11*cl_lltot_22+cl_lltot_12*cl_lltot_12)/(2*l+1.));
-    el_lltot_22=ELS_TOLERANCE*sqrt((cl_lltot_22*cl_lltot_22+cl_lltot_22*cl_lltot_22)/(2*l+1.));
-    el_lc_1=ELS_TOLERANCE*sqrt((cl_ll_11*cl_cc+cl_lc_1*cl_lc_1)/(2*l+1.));
-    el_lc_2=ELS_TOLERANCE*sqrt((cl_ll_22*cl_cc+cl_lc_2*cl_lc_2)/(2*l+1.));
-    el_cc=ELS_TOLERANCE*sqrt((cl_cc*cl_cc+cl_cc*cl_cc)/(2*l+1.));
-    cl_dd_11_h=cls_dd_11_h[l];
-    cl_dd_12_h=cls_dd_12_h[l];
-    cl_dd_22_h=cls_dd_22_h[l];
-    cl_dl_11_h=cls_dl_11_h[l]*ell_correct2;
-    cl_dl_12_h=cls_dl_12_h[l]*ell_correct2;
-    cl_dl_21_h=cls_dl_21_h[l]*ell_correct2;
-    cl_dl_22_h=cls_dl_22_h[l]*ell_correct2;
-    cl_dltot_11_h=cls_dltot_11_h[l]*ell_correct2;
-    cl_dltot_12_h=cls_dltot_12_h[l]*ell_correct2;
-    cl_dltot_21_h=cls_dltot_21_h[l]*ell_correct2;
-    cl_dltot_22_h=cls_dltot_22_h[l]*ell_correct2;
-    cl_di_11_h=cl_dltot_11_h-cl_dl_11_h;
-    cl_di_12_h=cl_dltot_12_h-cl_dl_12_h;
-    cl_di_21_h=cl_dltot_21_h-cl_dl_21_h;
-    cl_di_22_h=cl_dltot_22_h-cl_dl_22_h;
-    cl_dc_1_h=cls_dc_1_h[l];
-    cl_dc_2_h=cls_dc_2_h[l];
-    cl_ll_11_h=cls_ll_11_h[l]*ell_correct2*ell_correct2;
-    cl_ll_12_h=cls_ll_12_h[l]*ell_correct2*ell_correct2;
-    cl_ll_22_h=cls_ll_22_h[l]*ell_correct2*ell_correct2;
-    cl_li_11_h=2*(cls_lli_11_h[l]-cls_ll_11_h[l])*ell_correct2*ell_correct2;
-    cl_li_12_h=(cls_lli_12_h[l]+cls_lli_21_h[l]-2*cls_ll_12_h[l])*ell_correct2*ell_correct2;
-    cl_li_22_h=2*(cls_lli_22_h[l]-cls_ll_22_h[l])*ell_correct2*ell_correct2;
-    cl_ii_11_h=(cls_lltot_11_h[l]+cls_ll_11_h[l]-2*cls_lli_11_h[l])*ell_correct2*ell_correct2;
-    cl_ii_12_h=(cls_lltot_12_h[l]+cls_ll_12_h[l]-cls_lli_12_h[l]-cls_lli_21_h[l])*ell_correct2*ell_correct2;
-    cl_ii_22_h=(cls_lltot_22_h[l]+cls_ll_22_h[l]-2*cls_lli_22_h[l])*ell_correct2*ell_correct2;
-    cl_lltot_11_h=cls_lltot_11_h[l]*ell_correct2*ell_correct2;
-    cl_lltot_12_h=cls_lltot_12_h[l]*ell_correct2*ell_correct2;
-    cl_lltot_22_h=cls_lltot_22_h[l]*ell_correct2*ell_correct2;
-    cl_lc_1_h=cls_lc_1_h[l]*ell_correct;
-    cl_lc_2_h=cls_lc_2_h[l]*ell_correct;
-    cl_cc_h=cls_cc_h[l];
-
-    //  comparing galaxy-intrinsic wrt full GGL error, CCL needs to be further improved to avoid spikes
-    printf("%lE %lE\n",fabs(cl_di_11_h-cl_di_11),el_dltot_11);
-    printf("%lE %lE\n",fabs(cl_di_12_h-cl_di_12),el_dltot_12);
-    printf("%lE %lE\n",fabs(cl_di_21_h-cl_di_21),el_dltot_21);
-    printf("%lE %lE\n",fabs(cl_di_22_h-cl_di_22),el_dltot_22);
-
-    //  comparing shear-intrinsic and intrinsic-intrinsic wrt full cosmic shear error, CCL needs to be further improved to avoid spikes
-    printf("%lE %lE\n",fabs(cl_li_11_h-cl_li_11),el_lltot_11);
-    printf("%lE %lE\n",fabs(cl_li_12_h-cl_li_12),el_lltot_12);
-    printf("%lE %lE\n",fabs(cl_li_22_h-cl_li_22),el_lltot_22);
-    printf("%lE %lE\n",fabs(cl_ii_11_h-cl_ii_11),el_lltot_11);
-    printf("%lE %lE\n",fabs(cl_ii_12_h-cl_ii_12),el_lltot_12);
-    printf("%lE %lE\n",fabs(cl_ii_22_h-cl_ii_22),el_lltot_22);
-  }
-  */
   if(!strcmp(compare_type,"histo")) {
     cosmo->gsl_params.INTEGRATION_EPSREL = epsrel_save;
     cosmo->gsl_params.INTEGRATION_LIMBER_EPSREL = epsrel_save;
@@ -524,6 +422,7 @@ static void compare_cls(char *compare_type,struct cls_data * data)
   free(ell_correct_dl);
   free(ell_correct_ll);
   free(ell_correct_lc);
+  free(ell_correct_li);
 
   free(zarr_1);
   free(zarr_2);
