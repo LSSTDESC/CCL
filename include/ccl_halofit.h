@@ -20,7 +20,7 @@ typedef struct halofit_struct {
 /*
  * Allocate a new struct for storing halofit data
  * @param cosmo Cosmological data
- * @param int, status of computations
+ * @return int, status of computations
  */
 halofit_struct* ccl_halofit_struct_new(ccl_cosmology *cosmo, int *status);
 

@@ -17,6 +17,9 @@
 */
 
 // I snuck a private function from backgrounc.c into here. :P
+// The default routines create a full spline but we just need one value.
+// This may seem like over optimizing, but in testing initializing halofit
+// is an order of magnitude or more slower if we don't do this.
 void compute_chi(double a, ccl_cosmology *cosmo, double * chi, int * stat);
 
 static double zdrag_eh(ccl_parameters *params) {
@@ -36,6 +39,8 @@ struct hf_model_match_data {
 };
 
 static ccl_cosmology *create_w0eff_cosmo(double w0eff, ccl_cosmology *cosmo, int *status) {
+  // create a cosmology with the same parameters as the input except w0-wa. Instead
+  // the cosmology is created with w0 = w0eff.
   ccl_parameters params_w0eff;
   double norm_pk;
   double mnu[3];
@@ -66,6 +71,9 @@ static ccl_cosmology *create_w0eff_cosmo(double w0eff, ccl_cosmology *cosmo, int
 }
 
 static double w0eff_func(double w0eff, void *p) {
+  // function used to compare the distance to the CMB in a test cosmology to
+  // to the value in the original cosmology
+  // returns chi_eff - chi
   struct hf_model_match_data *hfd = (struct hf_model_match_data*)p;
   ccl_cosmology *cosmo_w0eff = NULL;
   double chi_drag_w0eff, tmp, zdrag_w0eff;
@@ -92,6 +100,10 @@ static double w0eff_func(double w0eff, void *p) {
 }
 
 static double get_w0eff(double a, struct hf_model_match_data data) {
+  // For a given input w0-wa cosmology, this function solves for the value of
+  // w0eff such that the comoving distance from a to the CMB in a cosmology
+  // with the same parameters, but with w0, wa = w0eff, 0, is the same as the
+  // original cosmology.
   double w0eff, w0eff_low = -2.0, w0eff_high = -0.35;
   double flow, fhigh;
   int itr, max_itr = 1000, gsl_status;
