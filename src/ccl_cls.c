@@ -860,10 +860,22 @@ static void get_k_interval(ccl_cosmology *cosmo,
 {
   double chimin,chimax;
   int cut_low_1=0,cut_low_2=0;
-  
-  //Define a minimum distance only if no lensing is needed
-  if((clt1->has_shear==0) && (clt1->has_magnification==0)) cut_low_1=1;
-  if((clt2->has_shear==0) && (clt2->has_magnification==0)) cut_low_2=1;
+
+  // The next couple of lines determine whether the transfer function of a given
+  // tracer is localized in redshift. This is important in order to determine optimal
+  // integration limits for the Limber integrator. Otherwise the GSL integration
+  // methods can sometimes just take values in ranges where the transfer function
+  // is zero and just return zero after a few function evaluations.
+  // This is also a good idea in order to speed up the Limber integrator a bit.
+  // The only contributions that would make a tracer not localized in redshift would
+  // be lensing shear, lensing magnification or CMB lensing, all of which have a
+  // cumulative kernel.
+  if((clt1->has_shear==0) &&
+     (clt1->has_magnification==0) &&
+     (clt1->tracer_type!=ccl_cmb_lensing_tracer)) cut_low_1=1;
+  if((clt2->has_shear==0) &&
+     (clt2->has_magnification==0) &&
+     (clt2->tracer_type!=ccl_cmb_lensing_tracer)) cut_low_2=1;
   
   if(cut_low_1) {
     if(cut_low_2) {
@@ -967,20 +979,41 @@ void ccl_angular_cls_nonlimber(ccl_cosmology *cosmo,double l_logstep,int l_linst
 			       CCL_ClTracer *clt1,CCL_ClTracer *clt2,ccl_p2d_t *psp,
 			       int nl_out,int *l_out,double *cl_out,int *status)
 {
-  int ii,do_angpow;
+  int ii,lmax,do_angpow;
   double *l_nodes=NULL,*cl_nodes=NULL;
   SplPar *spcl_nodes=NULL;
   CCL_ClWorkspace *w=NULL;
 
-  //First, find maximum ell
-  int lmax=0;
-  for(ii=0;ii<nl_out;ii++) {
-    if(l_out[ii]>lmax)
-      lmax=l_out[ii];
+  //Check if we can use ANGPOW at all
+#ifndef HAVE_ANGPOW
+  *status=CCL_ERROR_INCONSISTENT;
+  ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: ccl_angular_cls_nonlimber(): non-Limber integrator not loaded\n");
+#endif //HAVE_ANGPOW
+
+  if(*status==0) { //Check if the conditions for ANGPOW apply
+    if(clt1->tracer_type!=ccl_number_counts_tracer ||
+       clt2->tracer_type!=ccl_number_counts_tracer ||
+       clt1->has_magnification ||
+       clt2->has_magnification) {
+      *status=CCL_ERROR_INCONSISTENT;
+      ccl_cosmology_set_status_message(cosmo,
+				       "ccl_cls.c: ccl_angular_cls_nonlimber(): "
+				       "non-Limber integrator only implemented "
+				       "for galaxy clustering without magnification\n");
+    }
   }
 
-  //Now initialize workspace
-  w=ccl_cl_workspace_new(lmax,2*lmax,l_logstep,l_linstep,status);
+  if(*status==0) {
+    //First, find maximum ell
+    lmax=0;
+    for(ii=0;ii<nl_out;ii++) {
+      if(l_out[ii]>lmax)
+	lmax=l_out[ii];
+    }
+  
+    //Now initialize workspace
+    w=ccl_cl_workspace_new(lmax,2*lmax,l_logstep,l_linstep,status);
+  }
   
   if(*status==0) {
     //Allocate array for power spectrum at interpolation nodes
@@ -1000,29 +1033,10 @@ void ccl_angular_cls_nonlimber(ccl_cosmology *cosmo,double l_logstep,int l_linst
   }
 
   if(*status==0) {
+    //Compute power spectra at interpolation nodes
     for(ii=0;ii<w->n_ls;ii++)
       l_nodes[ii]=(double)(w->l_arr[ii]);
-
-    // Check if we can use angpow
-#ifdef HAVE_ANGPOW
-    do_angpow=1;
-#else
-    do_angpow=0;
-#endif //HAVE_ANGPOW
-  
-    //Resort to Limber if we have lensing (this will hopefully only be temporary)
-    if(clt1->tracer_type==ccl_weak_lensing_tracer || clt2->tracer_type==ccl_weak_lensing_tracer ||
-       clt1->has_magnification || clt2->has_magnification) {
-      do_angpow=0;
-    }
-
-    //Use angpow if possible
-    if(do_angpow)
-      ccl_angular_cls_angpow(cosmo,w,clt1,clt2,cl_nodes,status);
-    else {
-      for(ii=0;ii<w->n_ls;ii++)
-	cl_nodes[ii]=ccl_angular_cl_limber(cosmo,clt1,clt2,psp,(double)(l_nodes[ii]),status);
-    }
+    ccl_angular_cls_angpow(cosmo,w,clt1,clt2,cl_nodes,status);
     ccl_check_status(cosmo,status);
   }
 
@@ -1036,6 +1050,7 @@ void ccl_angular_cls_nonlimber(ccl_cosmology *cosmo,double l_logstep,int l_linst
   }
   
   if(*status==0) {
+    //Interpolate into input multipoles
     for(ii=0;ii<nl_out;ii++)
       cl_out[ii]=ccl_spline_eval((double)(l_out[ii]),spcl_nodes);
   }
