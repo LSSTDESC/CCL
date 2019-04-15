@@ -243,7 +243,7 @@ double ccl_angular_cl_limber(ccl_cosmology *cosmo,
 
 
 /**
- * Computes limber or non-limber power spectrum for two different tracers
+ * Computes non-Limber power spectrum for two different tracers
  * @param cosmo Cosmological parameters
  * @param l_logstep Logarithmic step factor used at low l
  * @param l_linstep Linear step used at high l
