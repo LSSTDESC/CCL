@@ -45,7 +45,7 @@ set(TEST_SRC
     tests/ccl_test_halomod.c
 
     # Cls and correlation functions
-    # tests/ccl_test_angpow.c
+    tests/ccl_test_angpow.c
     tests/ccl_test_cls.c
     tests/ccl_test_correlation.c
     tests/ccl_test_correlation_3d.c

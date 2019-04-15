@@ -55,6 +55,70 @@ static double speval_bis(double x,void *params)
   return ccl_spline_eval(x,(SplPar *)params);
 }
 
+static void ccl_cl_workspace_free(CCL_ClWorkspace *w)
+{
+  free(w->l_arr);
+  free(w);
+}
+
+static CCL_ClWorkspace *ccl_cl_workspace_new(int lmax,int l_limber,
+					     double l_logstep,int l_linstep,int *status)
+{
+  int i_l,l0,increment;
+  CCL_ClWorkspace *w=(CCL_ClWorkspace *)malloc(sizeof(CCL_ClWorkspace));
+  if(w==NULL)
+    *status=CCL_ERROR_MEMORY;
+
+  if(*status==0) {
+    //Set params
+    w->lmax=lmax;
+    w->l_limber=l_limber;
+    w->l_logstep=l_logstep;
+    w->l_linstep=l_linstep;
+
+    //Compute number of multipoles
+    i_l=0; l0=0;
+    increment=CCL_MAX(((int)(l0*(w->l_logstep-1.))),1);
+    while((l0 < w->lmax) && (increment < w->l_linstep)) {
+      i_l++;
+      l0+=increment;
+      increment=CCL_MAX(((int)(l0*(w->l_logstep-1))),1);
+    }
+    increment=w->l_linstep;
+    while(l0 < w->lmax) {
+      i_l++;
+      l0+=increment;
+    }
+
+    //Allocate array of multipoles
+    w->n_ls=i_l+1;
+    w->l_arr=(int *)malloc(w->n_ls*sizeof(int));
+    if(w->l_arr==NULL)
+      *status=CCL_ERROR_MEMORY;
+  }
+
+  if(*status==0) {
+    //Redo the computation above and store values of ell
+    i_l=0; l0=0;
+    increment=CCL_MAX(((int)(l0*(w->l_logstep-1.))),1);
+    while((l0 < w->lmax) && (increment < w->l_linstep)) {
+      w->l_arr[i_l]=l0;
+      i_l++;
+      l0+=increment;
+      increment=CCL_MAX(((int)(l0*(w->l_logstep-1))),1);
+    }
+    increment=w->l_linstep;
+    while(l0 < w->lmax) {
+      w->l_arr[i_l]=l0;
+      i_l++;
+      l0+=increment;
+    }
+    //Don't go further than lmaw
+    w->l_arr[w->n_ls-1]=w->lmax;
+  }
+
+  return w;
+}
 
 //Params for lensing kernel integrand
 typedef struct {
@@ -899,25 +963,25 @@ double ccl_angular_cl_limber(ccl_cosmology *cosmo,
   return result/(l+0.5);
 }
 
-/*
-void ccl_angular_cls(ccl_cosmology *cosmo,CCL_ClWorkspace *w,
-		     CCL_ClTracer *clt1,CCL_ClTracer *clt2,ccl_p2d_t *psp,
-		     int nl_out,int *l_out,double *cl_out,int *status)
+void ccl_angular_cls_nonlimber(ccl_cosmology *cosmo,double l_logstep,int l_linstep,
+			       CCL_ClTracer *clt1,CCL_ClTracer *clt2,ccl_p2d_t *psp,
+			       int nl_out,int *l_out,double *cl_out,int *status)
 {
   int ii,do_angpow;
-  double *l_nodes,*cl_nodes;
-  SplPar *spcl_nodes;
-  
-  //First check if ell range is within workspace
+  double *l_nodes=NULL,*cl_nodes=NULL;
+  SplPar *spcl_nodes=NULL;
+  CCL_ClWorkspace *w=NULL;
+
+  //First, find maximum ell
+  int lmax=0;
   for(ii=0;ii<nl_out;ii++) {
-    if(l_out[ii]>w->lmax) {
-      *status=CCL_ERROR_SPLINE_EV;
-      ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: ccl_angular_cls(); "
-	     "requested l beyond range allowed by workspace\n");
-      return;
-    }
+    if(l_out[ii]>lmax)
+      lmax=l_out[ii];
   }
 
+  //Now initialize workspace
+  w=ccl_cl_workspace_new(lmax,2*lmax,l_logstep,l_linstep,status);
+  
   if(*status==0) {
     //Allocate array for power spectrum at interpolation nodes
     l_nodes=(double *)malloc(w->n_ls*sizeof(double));
@@ -939,15 +1003,10 @@ void ccl_angular_cls(ccl_cosmology *cosmo,CCL_ClWorkspace *w,
     for(ii=0;ii<w->n_ls;ii++)
       l_nodes[ii]=(double)(w->l_arr[ii]);
 
-    do_angpow=0;
-    //Now check if angpow is needed at all
-    if(w->l_limber>0) {
-      for(ii=0;ii<w->n_ls;ii++) {
-	if(w->l_arr[ii]<=w->l_limber)
-	  do_angpow=1;
-      }
-    }
-#ifndef HAVE_ANGPOW
+    // Check if we can use angpow
+#ifdef HAVE_ANGPOW
+    do_angpow=1;
+#else
     do_angpow=0;
 #endif //HAVE_ANGPOW
   
@@ -957,18 +1016,14 @@ void ccl_angular_cls(ccl_cosmology *cosmo,CCL_ClWorkspace *w,
       do_angpow=0;
     }
 
-    //Use angpow if non-limber is needed
+    //Use angpow if possible
     if(do_angpow)
       ccl_angular_cls_angpow(cosmo,w,clt1,clt2,cl_nodes,status);
-    ccl_check_status(cosmo,status);
-  }
-
-  if(*status==0) {
-    //Compute limber nodes
-    for(ii=0;ii<w->n_ls;ii++) {
-      if(((!do_angpow) || (w->l_arr[ii]>w->l_limber)) && (*status==0))
-	cl_nodes[ii]=ccl_angular_cl_native(cosmo,w,ii,clt1,clt2,psp,status);
+    else {
+      for(ii=0;ii<w->n_ls;ii++)
+	cl_nodes[ii]=ccl_angular_cl_limber(cosmo,clt1,clt2,psp,(double)(l_nodes[ii]),status);
     }
+    ccl_check_status(cosmo,status);
   }
 
   if(*status==0) {
@@ -989,8 +1044,8 @@ void ccl_angular_cls(ccl_cosmology *cosmo,CCL_ClWorkspace *w,
   ccl_spline_free(spcl_nodes);
   free(cl_nodes);
   free(l_nodes);
+  ccl_cl_workspace_free(w);
 }
-*/
 
 static int check_clt_fa_inconsistency(CCL_ClTracer *clt,int func_code)
 {

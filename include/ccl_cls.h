@@ -226,15 +226,6 @@ typedef struct {
   int *l_arr; //*Array of multipole values resulting from the previous parameters
 } CCL_ClWorkspace;
 
-//CCL_ClWorkspace constructor
-CCL_ClWorkspace *ccl_cl_workspace_new(int lmax,int l_limber,
-				      double l_logstep,int l_linstep,
-				      int *status);
-//CCL_ClWorkspace simplified constructor
-CCL_ClWorkspace *ccl_cl_workspace_new_limber(int lmax, double l_logstep,int l_linstep,int *status);
-//CCL_ClWorkspace destructor
-void ccl_cl_workspace_free(CCL_ClWorkspace *w);
-
 /**
  * Computes Limber power spectrum for two different tracers at a given ell.
  * @param cosmo Cosmological parameters
@@ -254,19 +245,21 @@ double ccl_angular_cl_limber(ccl_cosmology *cosmo,
 /**
  * Computes limber or non-limber power spectrum for two different tracers
  * @param cosmo Cosmological parameters
- * @param w a ClWorkspace
+ * @param l_logstep Logarithmic step factor used at low l
+ * @param l_linstep Linear step used at high l
  * @param clt1 a Cltracer
  * @param clt2 a Cltracer
+ * @param psp the p2d_t object representing the 3D power spectrum to integrate over. Pass null to use the non-linear matter power spectrum.
  * @param nl_out the maximum to ell to compute C_ell
  * @param l an array of ell values
- * @param cl the C_ell output array
+x * @param cl the C_ell output array
  * @param status Status flag. 0 if there are no errors, nonzero otherwise.
  * For specific cases see documentation for ccl_error.c
  * @return void
  */
-//void ccl_angular_cls(ccl_cosmology *cosmo,CCL_ClWorkspace *w,
-//		     CCL_ClTracer *clt1,CCL_ClTracer *clt2,ccl_p2d_t *psp,
-//		     int nl_out,int *l,double *cl,int *status);
+void ccl_angular_cls_nonlimber(ccl_cosmology *cosmo,double l_logstep,int l_linstep,
+			       CCL_ClTracer *clt1,CCL_ClTracer *clt2,ccl_p2d_t *psp,
+			       int nl_out,int *l,double *cl,int *status);
 
 CCL_END_DECLS
 
