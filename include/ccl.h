@@ -35,6 +35,7 @@
 #include "ccl_bcm.h"
 #include "ccl_bbks.h"
 #include "ccl_eh.h"
+#include "ccl_halofit.h"
 #include "ccl_halomod.h"
 #include "ccl_class.h"
 
