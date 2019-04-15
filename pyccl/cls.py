@@ -47,7 +47,7 @@ class Tracer(object):
                     lib.number_counts_tracer: number count tracer
                     lib.weak_lensing_tracer: lensing tracer
                     lib.cmb_lensing_tracer: CMB lensing tracer
-            has_shear (bool, optional): Flag for whether the tracer has a
+            has_shear (bool): Flag for whether the tracer has a
                 lensing shear term.
             has_rsd (bool, optional): Flag for whether the tracer has a
                 redshift-space distortion term. Defaults to False.
