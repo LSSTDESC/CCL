@@ -206,7 +206,8 @@ class NumberCountsTracer(Tracer):
             giving the redshift distribution of the objects. The units are
             arbitrary; N(z) will be normalized to unity.
         bias (tuple of arrays): A tuple of arrays (z, b(z))
-            giving the galaxy bias.
+            giving the galaxy bias. If `None`, this tracer won't include
+            a term proportional to the matter density contrast.
         mag_bias (tuple of arrays, optional): A tuple of arrays (z, s(z))
             giving the magnification bias as a function of redshift. If
             `None`, the tracer is assumed to not have magnification bias
