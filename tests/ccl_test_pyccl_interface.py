@@ -486,6 +486,8 @@ def check_cls(cosmo):
 
     # Check non-limber calculations
     assert_( all_finite(ccl.angular_cl(cosmo, nc1, nc1, ell_arr, l_limber=20)))
+    # Non-Limber only implemented for number counts
+    assert_raises(CCLError, ccl.angular_cl, cosmo, lens1, lens1, ell_arr, l_limber=20)
 
     # Check various cross-correlation combinations
     assert_( all_finite(ccl.angular_cl(cosmo, lens1, lens2, ell_arr)) )

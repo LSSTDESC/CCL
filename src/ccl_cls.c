@@ -979,7 +979,7 @@ void ccl_angular_cls_nonlimber(ccl_cosmology *cosmo,double l_logstep,int l_linst
 			       CCL_ClTracer *clt1,CCL_ClTracer *clt2,ccl_p2d_t *psp,
 			       int nl_out,int *l_out,double *cl_out,int *status)
 {
-  int ii,lmax,do_angpow;
+  int ii,lmax;
   double *l_nodes=NULL,*cl_nodes=NULL;
   SplPar *spcl_nodes=NULL;
   CCL_ClWorkspace *w=NULL;
@@ -1056,10 +1056,12 @@ void ccl_angular_cls_nonlimber(ccl_cosmology *cosmo,double l_logstep,int l_linst
   }
   
   //Cleanup
-  ccl_spline_free(spcl_nodes);
+  if(spcl_nodes!=NULL)
+    ccl_spline_free(spcl_nodes);
   free(cl_nodes);
   free(l_nodes);
-  ccl_cl_workspace_free(w);
+  if(w!=NULL)
+    ccl_cl_workspace_free(w);
 }
 
 static int check_clt_fa_inconsistency(CCL_ClTracer *clt,int func_code)
