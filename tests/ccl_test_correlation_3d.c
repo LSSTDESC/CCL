@@ -84,9 +84,9 @@ static void compare_correlation_3d(int i_model,struct corrs_3d_data * data)
 
   // FIXME: these are not real standards
   // tolerence on abs difference in r^2 xi(r) for the range r = 0.1 - 100 Mpc (40 points in r) for z=0,1,2,3,4,5
-  double CORR_TOLERANCE1[6] = {4.0e-2, 1.0e-2, 5.0e-3, 4.0e-3, 1.0e-3, 8.0e-4};
+  double CORR_TOLERANCE1[6] = {5.0e-2, 5.0e-2, 5.0e-2, 5.0e-2, 5.0e-2, 5.0e-2};
   // tolerence on abs difference in r^2 xi(r) for the range r = 50 - 250 Mpc (100 points in r) for z=0,1,2,3,4,5
-  double CORR_TOLERANCE2[6] = {4.0e-2, 1.0e-2, 5.0e-3, 4.0e-3, 1.0e-3, 8.0e-4};
+  double CORR_TOLERANCE2[6] = {5.0e-2, 5.0e-2, 5.0e-2, 5.0e-2, 5.0e-2, 5.0e-2};
 
   int N1=40;
   double *r_arr1=malloc(N1*sizeof(double));

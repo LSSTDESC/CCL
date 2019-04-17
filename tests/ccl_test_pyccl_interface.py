@@ -223,7 +223,7 @@ def check_power(cosmo):
     """
     # Types of scale factor
     a = 0.9
-    a_arr = np.linspace(0.2, 1., 5.)
+    a_arr = np.linspace(0.2, 1., 5)
 
     # Types of wavenumber input (scalar, list, array)
     k_scl = 1e-1
@@ -472,7 +472,6 @@ def check_cls(cosmo):
     cmbl=ccl.CMBLensingTracer(cosmo, 1100.)
 
     assert_raises(ValueError, ccl.WeakLensingTracer, cosmo, None)
-    assert_raises(ValueError, ccl.NumberCountsTracer, cosmo, False, (z,n), None)
 
     # Check valid ell input is accepted
     assert_( all_finite(ccl.angular_cl(cosmo, lens1, lens1, ell_scl)) )
@@ -487,6 +486,8 @@ def check_cls(cosmo):
 
     # Check non-limber calculations
     assert_( all_finite(ccl.angular_cl(cosmo, nc1, nc1, ell_arr, l_limber=20)))
+    # Non-Limber only implemented for number counts
+    assert_raises(CCLError, ccl.angular_cl, cosmo, lens1, lens1, ell_arr, l_limber=20)
 
     # Check various cross-correlation combinations
     assert_( all_finite(ccl.angular_cl(cosmo, lens1, lens2, ell_arr)) )
@@ -774,7 +775,6 @@ def test_debug_mode():
     """
     ccl.debug_mode(True)
     ccl.debug_mode(False)
-
 
 
 if __name__ == '__main__':

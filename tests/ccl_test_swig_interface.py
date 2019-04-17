@@ -103,7 +103,6 @@ def test_swig_cls():
         [0.0, 1.0, 2.0, 3.0, 4.0, 5.0],
         1.0,
         status]
-
     for i in range(5):
         args = copy.deepcopy(base_args)
         args[i*2] = [1.0] * 8
@@ -111,7 +110,7 @@ def test_swig_cls():
             CCLError,
             ccllib.cl_tracer_new_wrapper,
             COSMO, 0,
-            0, 0, 0,
+            0, 0, 0, 0, 0,
             *args)
 
     assert_raises(

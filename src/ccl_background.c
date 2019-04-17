@@ -228,7 +228,7 @@ INPUT: scale factor, cosmology
 OUTPUT: chi -> radial comoving distance
 TASK: compute radial comoving distance at a
 */
-static void compute_chi(double a, ccl_cosmology *cosmo, double * chi, int * stat)
+void compute_chi(double a, ccl_cosmology *cosmo, double * chi, int * stat)
 {
   int gslstatus;
   double result;
