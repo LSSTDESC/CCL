@@ -171,7 +171,7 @@ basic physical constants
   - HPLANCK: Planck's constant in units kg m^2 / s
   - CLIGHT: speed of light in m/s
   - EV_IN_J: conversion factor between electron volts and Joules
-  - TCMB: temperature of the CMB in K
+  - T_CMB: temperature of the CMB in K
   - TNCDM: temperature of the cosmological neutrino background in K
 
 neutrino mass splittings
