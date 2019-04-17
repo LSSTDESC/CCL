@@ -24,11 +24,11 @@ CTEST_DATA(halomod){
   double h[3];
   double sigma_8[3];
   double n_s[3];
-    
+
   // Arrays for power-spectrum data
   double k[3][2][NUMK];
   double Pk[3][2][NUMK];
-  
+
 };
 
 // Function to read in the benchmark data
@@ -51,7 +51,7 @@ static void read_halomod_test_file(double k[3][2][NUMK], double Pk[3][2][NUMK]){
       if(model==1 && i==1){strncpy(infile, "./tests/benchmark/pk_hm_c2_z1.txt", 256);}
       if(model==2 && i==0){strncpy(infile, "./tests/benchmark/pk_hm_c3_z0.txt", 256);}
       if(model==2 && i==1){strncpy(infile, "./tests/benchmark/pk_hm_c3_z1.txt", 256);}
-    
+
       // Open the file
       FILE * f = fopen(infile, "r");
       ASSERT_NOT_NULL(f);
@@ -61,19 +61,19 @@ static void read_halomod_test_file(double k[3][2][NUMK], double Pk[3][2][NUMK]){
 
 	// Read in data from the benchmark file
 	int count = fscanf(f, "%le\t %le\t %le\t %le\t %le\n", &k[model][i][j], &spam, &spam, &spam, &Pk[model][i][j]);
-    
+
 	// Check that we have read in enough columns from the benchmark file
 	ASSERT_EQUAL(5, count);
-    
+
       }
 
       // Close the file
       fclose(f);
-    
+
     }
 
   }
-  
+
 }
 
 // set up the cosmological parameters structure to be used in the test case
@@ -103,10 +103,10 @@ CTEST_SETUP(halomod){
     data->sigma_8[model] = sigma_8[model];
     data->n_s[model]     = n_s[model];
   }
-  
+
   // read the file of benchmark data
   read_halomod_test_file(data->k, data->Pk);
-  
+
 }
 
 // Function to actually do the comparison
@@ -126,6 +126,7 @@ static void compare_halomod(int model, struct halomod_data * data)
   // Set the default configuration, but with Eisenstein & Hu linear P(k) and Sheth & Tormen mass function and Duffy (2008) halo concentrations
   ccl_configuration config = default_config;
   config.transfer_function_method = ccl_eisenstein_hu;
+  config.matter_power_spectrum_method = ccl_halo_model;
   config.mass_function_method = ccl_shethtormen;
   config.halo_concentration_method = ccl_duffy2008;
 
@@ -140,19 +141,19 @@ static void compare_halomod(int model, struct halomod_data * data)
 
     // Variables for the test
     double a;
-    
+
     if(i==0){a = 1.0;}
     if(i==1){a = 0.5;}
-  
+
     // Loop over wavenumbers
     for (int j=0; j<NUMK; j++) {
 
       // Set variables inside loop, convert CCL outputs to the same units as benchmark
       double k = data->k[model][i][j]*params.h; // Convert the benchmark data k/h to pure k
       double Pk = data->Pk[model][i][j]/pow(params.h,3); // Convert the benchmark data Pk units to remove factors of h
-      
+
       double Pk_ccl = ccl_halomodel_matter_power(cosmo, k, a, status); // Get CCL P(k)
-      double absolute_tolerance = HALOMOD_TOLERANCE*Pk; // Convert relative -> absolute tolerance      
+      double absolute_tolerance = HALOMOD_TOLERANCE*Pk; // Convert relative -> absolute tolerance
 
       // Do the check
       ASSERT_DBL_NEAR_TOL(Pk, Pk_ccl, absolute_tolerance);
@@ -163,7 +164,7 @@ static void compare_halomod(int model, struct halomod_data * data)
 
   // Free the cosmology object
   free(cosmo);
-  
+
 }
 
 CTEST2(halomod, model_1) {
@@ -180,4 +181,3 @@ CTEST2(halomod, model_3) {
   int model = 2;
   compare_halomod(model, data);
 }
-

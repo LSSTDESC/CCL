@@ -14,7 +14,7 @@
 \subsection*{Functions}
 \begin{DoxyCompactItemize}
 \item 
-\mbox{\hyperlink{ccl__defs_8h_ae8d446df269cba1dff8f88922459a7d4}{C\+C\+L\+\_\+\+B\+E\+G\+I\+N\+\_\+\+D\+E\+C\+LS}} void \mbox{\hyperlink{ccl__emu17_8h_aeaacf30c32ee61a88b8380237a053752}{ccl\+\_\+pkemu}} (double $\ast$xstarin, double $\ast$$\ast$Pkemu, int $\ast$status, \mbox{\hyperlink{structccl__cosmology}{ccl\+\_\+cosmology}} $\ast$cosmo)
+\mbox{\hyperlink{ccl__defs_8h_ae8d446df269cba1dff8f88922459a7d4}{C\+C\+L\+\_\+\+B\+E\+G\+I\+N\+\_\+\+D\+E\+C\+LS}} void \mbox{\hyperlink{ccl__emu17_8h_a9b23760607ffa35f8fc41b203a3a8154}{ccl\+\_\+pkemu}} (double $\ast$xstarin, int nkemu, double $\ast$Pkemu, int $\ast$status, \mbox{\hyperlink{structccl__cosmology}{ccl\+\_\+cosmology}} $\ast$cosmo)
 \end{DoxyCompactItemize}
 
 
@@ -46,15 +46,17 @@
 
 
 \subsection{Function Documentation}
-\mbox{\Hypertarget{ccl__emu17_8h_aeaacf30c32ee61a88b8380237a053752}\label{ccl__emu17_8h_aeaacf30c32ee61a88b8380237a053752}} 
+\mbox{\Hypertarget{ccl__emu17_8h_a9b23760607ffa35f8fc41b203a3a8154}\label{ccl__emu17_8h_a9b23760607ffa35f8fc41b203a3a8154}} 
 \index{ccl\+\_\+emu17.\+h@{ccl\+\_\+emu17.\+h}!ccl\+\_\+pkemu@{ccl\+\_\+pkemu}}
 \index{ccl\+\_\+pkemu@{ccl\+\_\+pkemu}!ccl\+\_\+emu17.\+h@{ccl\+\_\+emu17.\+h}}
 \subsubsection{\texorpdfstring{ccl\+\_\+pkemu()}{ccl\_pkemu()}}
-{\footnotesize\ttfamily \mbox{\hyperlink{ccl__defs_8h_ae8d446df269cba1dff8f88922459a7d4}{C\+C\+L\+\_\+\+B\+E\+G\+I\+N\+\_\+\+D\+E\+C\+LS}} void ccl\+\_\+pkemu (\begin{DoxyParamCaption}\item[{double $\ast$}]{xstarin,  }\item[{double $\ast$$\ast$}]{Pkemu,  }\item[{int $\ast$}]{status,  }\item[{\mbox{\hyperlink{structccl__cosmology}{ccl\+\_\+cosmology}} $\ast$}]{cosmo }\end{DoxyParamCaption})}
+{\footnotesize\ttfamily \mbox{\hyperlink{ccl__defs_8h_ae8d446df269cba1dff8f88922459a7d4}{C\+C\+L\+\_\+\+B\+E\+G\+I\+N\+\_\+\+D\+E\+C\+LS}} void ccl\+\_\+pkemu (\begin{DoxyParamCaption}\item[{double $\ast$}]{xstarin,  }\item[{int}]{nkemu,  }\item[{double $\ast$}]{Pkemu,  }\item[{int $\ast$}]{status,  }\item[{\mbox{\hyperlink{structccl__cosmology}{ccl\+\_\+cosmology}} $\ast$}]{cosmo }\end{DoxyParamCaption})}
 
 Emulator power spectrum Obtain P(k,z) \mbox{[}Mpc$^\wedge$3\mbox{]} for a given set of input parameters. 
 \begin{DoxyParams}{Parameters}
 {\em xstarin} & vector of input parameters for the emulator, including redshift. \\
+\hline
+{\em nkemu} & number of elements to which Pkemu has been allocated. \\
 \hline
 {\em Pkemu} & output P(k,z) power spectrum \\
 \hline

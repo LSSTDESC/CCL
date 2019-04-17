@@ -13,7 +13,7 @@
 \item 
 \#define \mbox{\hyperlink{ccl__neutrinos_8h_a92840299cfc97af44cb7689594f7babd}{C\+C\+L\+\_\+\+N\+U\+\_\+\+M\+N\+U\+T\+\_\+N}}~1000
 \item 
-\#define \mbox{\hyperlink{ccl__neutrinos_8h_a671563ad8bf05e3484ad13907b1362d8}{N\+U\+\_\+\+C\+O\+N\+ST}}~(8. $\ast$ pow(\mbox{\hyperlink{ccl__constants_8h_ae71449b1cc6e6250b91f539153a7a0d3}{M\+\_\+\+PI}},5) $\ast$pow((\mbox{\hyperlink{ccl__constants_8h_a3310d88a53520e9ed91b871d83d13294}{K\+B\+O\+L\+TZ}}/ \mbox{\hyperlink{ccl__constants_8h_a32c64516e5ad4b3ec65b54deb3f27457}{H\+P\+L\+A\+N\+CK}}),3)$\ast$ \mbox{\hyperlink{ccl__constants_8h_a3310d88a53520e9ed91b871d83d13294}{K\+B\+O\+L\+TZ}}/(15. $\ast$pow( \mbox{\hyperlink{ccl__constants_8h_a579085cbd9e0993223cae68700a306cf}{C\+L\+I\+G\+HT}},3))$\ast$ (8. $\ast$ \mbox{\hyperlink{ccl__constants_8h_ae71449b1cc6e6250b91f539153a7a0d3}{M\+\_\+\+PI}} $\ast$ \mbox{\hyperlink{ccl__constants_8h_a9996e4de1a8a98001c7d92c044ff7abd}{G\+N\+E\+WT}}) / (3. $\ast$ 100.$\ast$100.$\ast$1000.$\ast$1000. /\mbox{\hyperlink{ccl__constants_8h_a8bda9125de78a9e4b0afb9fe4ce0032d}{M\+P\+C\+\_\+\+T\+O\+\_\+\+M\+E\+T\+ER}} /\mbox{\hyperlink{ccl__constants_8h_a8bda9125de78a9e4b0afb9fe4ce0032d}{M\+P\+C\+\_\+\+T\+O\+\_\+\+M\+E\+T\+ER}}  $\ast$ \mbox{\hyperlink{ccl__constants_8h_a579085cbd9e0993223cae68700a306cf}{C\+L\+I\+G\+HT}} $\ast$ \mbox{\hyperlink{ccl__constants_8h_a579085cbd9e0993223cae68700a306cf}{C\+L\+I\+G\+HT}}))
+\#define \mbox{\hyperlink{ccl__neutrinos_8h_a671563ad8bf05e3484ad13907b1362d8}{N\+U\+\_\+\+C\+O\+N\+ST}}
 \end{DoxyCompactItemize}
 \subsection*{Typedefs}
 \begin{DoxyCompactItemize}
@@ -69,8 +69,19 @@ double $\ast$ \mbox{\hyperlink{ccl__neutrinos_8h_a54081eb2475d7371d695156b072127
 \index{ccl\+\_\+neutrinos.\+h@{ccl\+\_\+neutrinos.\+h}!N\+U\+\_\+\+C\+O\+N\+ST@{N\+U\+\_\+\+C\+O\+N\+ST}}
 \index{N\+U\+\_\+\+C\+O\+N\+ST@{N\+U\+\_\+\+C\+O\+N\+ST}!ccl\+\_\+neutrinos.\+h@{ccl\+\_\+neutrinos.\+h}}
 \subsubsection{\texorpdfstring{N\+U\+\_\+\+C\+O\+N\+ST}{NU\_CONST}}
-{\footnotesize\ttfamily \#define N\+U\+\_\+\+C\+O\+N\+ST~(8. $\ast$ pow(\mbox{\hyperlink{ccl__constants_8h_ae71449b1cc6e6250b91f539153a7a0d3}{M\+\_\+\+PI}},5) $\ast$pow((\mbox{\hyperlink{ccl__constants_8h_a3310d88a53520e9ed91b871d83d13294}{K\+B\+O\+L\+TZ}}/ \mbox{\hyperlink{ccl__constants_8h_a32c64516e5ad4b3ec65b54deb3f27457}{H\+P\+L\+A\+N\+CK}}),3)$\ast$ \mbox{\hyperlink{ccl__constants_8h_a3310d88a53520e9ed91b871d83d13294}{K\+B\+O\+L\+TZ}}/(15. $\ast$pow( \mbox{\hyperlink{ccl__constants_8h_a579085cbd9e0993223cae68700a306cf}{C\+L\+I\+G\+HT}},3))$\ast$ (8. $\ast$ \mbox{\hyperlink{ccl__constants_8h_ae71449b1cc6e6250b91f539153a7a0d3}{M\+\_\+\+PI}} $\ast$ \mbox{\hyperlink{ccl__constants_8h_a9996e4de1a8a98001c7d92c044ff7abd}{G\+N\+E\+WT}}) / (3. $\ast$ 100.$\ast$100.$\ast$1000.$\ast$1000. /\mbox{\hyperlink{ccl__constants_8h_a8bda9125de78a9e4b0afb9fe4ce0032d}{M\+P\+C\+\_\+\+T\+O\+\_\+\+M\+E\+T\+ER}} /\mbox{\hyperlink{ccl__constants_8h_a8bda9125de78a9e4b0afb9fe4ce0032d}{M\+P\+C\+\_\+\+T\+O\+\_\+\+M\+E\+T\+ER}}  $\ast$ \mbox{\hyperlink{ccl__constants_8h_a579085cbd9e0993223cae68700a306cf}{C\+L\+I\+G\+HT}} $\ast$ \mbox{\hyperlink{ccl__constants_8h_a579085cbd9e0993223cae68700a306cf}{C\+L\+I\+G\+HT}}))}
+{\footnotesize\ttfamily \#define N\+U\+\_\+\+C\+O\+N\+ST}
 
+{\bfseries Value\+:}
+\begin{DoxyCode}
+( \(\backslash\)
+  8. * pow(\mbox{\hyperlink{fftlog_8c_ae71449b1cc6e6250b91f539153a7a0d3}{M\_PI}},5) *pow((\mbox{\hyperlink{ccl__core_8c_a1fe79c455a3a6fe01e7409d0c594bf0c}{ccl\_constants}}.\mbox{\hyperlink{structccl__physical__constants_aa3595b23d409d96fb37fa4d233288bc3}{KBOLTZ}}/ 
+      \mbox{\hyperlink{ccl__core_8c_a1fe79c455a3a6fe01e7409d0c594bf0c}{ccl\_constants}}.\mbox{\hyperlink{structccl__physical__constants_a51240deeb4abc83d445f948df465618f}{HPLANCK}}),3)* \(\backslash\)
+  ccl\_constants.KBOLTZ/(15. *pow( \mbox{\hyperlink{ccl__core_8c_a1fe79c455a3a6fe01e7409d0c594bf0c}{ccl\_constants}}.\mbox{\hyperlink{structccl__physical__constants_a06e87731251b94440d38270a513ebac9}{CLIGHT}},3))* \(\backslash\)
+  (8. * \mbox{\hyperlink{fftlog_8c_ae71449b1cc6e6250b91f539153a7a0d3}{M\_PI}} * \mbox{\hyperlink{ccl__core_8c_a1fe79c455a3a6fe01e7409d0c594bf0c}{ccl\_constants}}.\mbox{\hyperlink{structccl__physical__constants_ab084addac340a33bd51797cabc440f83}{GNEWT}}) / \(\backslash\)
+  (3. * 100.*100.*1000.*1000. /\mbox{\hyperlink{ccl__core_8c_a1fe79c455a3a6fe01e7409d0c594bf0c}{ccl\_constants}}.\mbox{\hyperlink{structccl__physical__constants_a56a2796740bd82659582fb73cd877bf8}{MPC\_TO\_METER}} /
+      \mbox{\hyperlink{ccl__core_8c_a1fe79c455a3a6fe01e7409d0c594bf0c}{ccl\_constants}}.\mbox{\hyperlink{structccl__physical__constants_a56a2796740bd82659582fb73cd877bf8}{MPC\_TO\_METER}}  * \mbox{\hyperlink{ccl__core_8c_a1fe79c455a3a6fe01e7409d0c594bf0c}{ccl\_constants}}.
+      \mbox{\hyperlink{structccl__physical__constants_a06e87731251b94440d38270a513ebac9}{CLIGHT}} * \mbox{\hyperlink{ccl__core_8c_a1fe79c455a3a6fe01e7409d0c594bf0c}{ccl\_constants}}.\mbox{\hyperlink{structccl__physical__constants_a06e87731251b94440d38270a513ebac9}{CLIGHT}}))
+\end{DoxyCode}
 
 
 \subsection{Typedef Documentation}

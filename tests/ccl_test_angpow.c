@@ -56,7 +56,10 @@ static void test_angpow_precision(struct angpow_data * data)
   ccl_configuration ccl_config=default_config;
   ccl_config.transfer_function_method=ccl_boltzmann_class;
   ccl_config.matter_power_spectrum_method=ccl_linear;
-  ccl_parameters ccl_params = ccl_parameters_create(data->Omega_c, data->Omega_b, data->Omega_k, data->Neff, data->mnu, data->mnu_type,data->w_0, data->w_a, data->h, data->A_s, data->n_s,-1,-1,-1,-1,NULL,NULL, &status);
+  ccl_parameters ccl_params = ccl_parameters_create(data->Omega_c, data->Omega_b, data->Omega_k,
+						    data->Neff, data->mnu, data->mnu_type,data->w_0,
+						    data->w_a, data->h, data->A_s, data->n_s,
+						    -1,-1,-1,-1,NULL,NULL, &status);
   ccl_params.Omega_g=0.;
   ccl_params.Omega_l=data->Omega_v;
   
@@ -73,10 +76,14 @@ static void test_angpow_precision(struct angpow_data * data)
     }
   
   // Galaxy clustering tracer
-  bool has_rsd = true;
-  bool has_magnification = false;
-  CCL_ClTracer *ct_gc_A=ccl_cl_tracer_number_counts(ccl_cosmo,has_rsd,has_magnification,NZ,z_arr_gc,nz_arr_gc,NZ,z_arr_gc,bz_arr,-1,NULL,NULL, &status);
-  CCL_ClTracer *ct_gc_B=ccl_cl_tracer_number_counts(ccl_cosmo,has_rsd,has_magnification,NZ,z_arr_gc,nz_arr_gc,NZ,z_arr_gc,bz_arr,-1,NULL,NULL, &status);
+  CCL_ClTracer *ct_gc_A=ccl_cl_tracer_number_counts(ccl_cosmo,1,1,0,
+						    NZ,z_arr_gc,nz_arr_gc,
+						    NZ,z_arr_gc,bz_arr,
+						    -1,NULL,NULL, &status);
+  CCL_ClTracer *ct_gc_B=ccl_cl_tracer_number_counts(ccl_cosmo,1,1,0,
+						    NZ,z_arr_gc,nz_arr_gc,
+						    NZ,z_arr_gc,bz_arr,
+						    -1,NULL,NULL, &status);
   
   int *ells=malloc(NL*sizeof(int));
   double *cells_gg_angpow=malloc(NL*sizeof(double));
@@ -87,11 +94,11 @@ static void test_angpow_precision(struct angpow_data * data)
   // Workspaces
   double linstep = 40;
   double logstep = 1.15;
-  double dchi = (ct_gc_A->chimax-ct_gc_A->chimin)/1000.; 
-  CCL_ClWorkspace *wap=ccl_cl_workspace_new(NL+1,2*ells[NL-1],logstep,linstep,&status);
   
   // Compute C_ell
-  ccl_angular_cls(ccl_cosmo,wap,ct_gc_A,ct_gc_A,NL,ells,cells_gg_angpow,&status);
+  ccl_angular_cls_nonlimber(ccl_cosmo,logstep,linstep,
+			    ct_gc_A,ct_gc_A,NULL,
+			    NL,ells,cells_gg_angpow,&status);
   double rel_precision = 0.;
   FILE *f=fopen("./tests/benchmark/angpow_gg.txt","r");
   for(int ii=2;ii<NL;ii++) {
@@ -111,7 +118,6 @@ static void test_angpow_precision(struct angpow_data * data)
   ccl_cl_tracer_free(ct_gc_A);
   ccl_cl_tracer_free(ct_gc_B);
   free(ells);
-  ccl_cl_workspace_free(wap);
   free(cells_gg_angpow);
   ccl_cosmology_free(ccl_cosmo);  
 }

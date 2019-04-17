@@ -5,13 +5,46 @@
 - Fixed a bug where CLASS would crash due to small rounding errors at z = 0
   when evaluating power spectra (#563, #564).
 - Fixed bug in fftlog for some complex arguments (#565, #566).
+- Replaced custom gamma function with that from GSL (#570).
+- Deprecated the `ccl_redshifts.h` functions (#579).
 - Refactored spline and numerical parameters to be allocated per cosmology (#557).
 - Allow global physical constants to be changed (#557).
 - Fixed memory leaks in `ccl_correlation.c` (#581).
+- Deprecated transfer function options 'ccl_emulator', 'ccl_fitting_function'
+  'ccl_boltzmann', 'ccl_boltzmann_class' and 'ccl_boltzmann_camb' (#610). These
+  were either not implemented or aliases for another option.
+- Renamed transfer function option 'ccl_none' to 'ccl_transfer_none' to avoid
+  ambiguity (#610).
+- Refactored transfer function and matter power spectrum options to allow
+  any combination, even unphysical ones (#610).
+- Added additional header and source files for clarity (#610).
+- Added capability to use the halo model power spectrum as the primary
+  non-linear power spectrum in the code (#610).
+- Fixed infinite loop bug in splitting sum of neutrino masses into individual masses (#605).
+- Added custom Halofit code (#611).
+- Separated Limber and Non-Limber C_ell calculations (#614)
+- Added `has_density` and `has_shear` flags to ClTracers (#614)
+- Simplified C_ell unit tests (#614)
 
 ## Python library
 - Improved error reporting for `angular_cl` computations (#567).
+- Deprecated the `pyccl.redshifts` module (#579).
+- Remove global splines for RSD correlation functions. These are now stored
+  per cosmology. Further, they are now rebuilt on-the-fly for a given
+  cosmology if a new scale factor is requested. (#582)
 - Allow spline, numerical and constant parameters to be set from Python (#557).
+- Deprecated transfer function options 'ccl_emulator', 'ccl_fitting_function'
+  'ccl_boltzmann', 'ccl_boltzmann_class' and 'ccl_boltzmann_camb' (#610). These
+  were either not implemented or aliases for another option.
+- Renamed transfer function option 'ccl_none' to 'ccl_transfer_none' to avoid
+  ambiguity (#610).
+- Refactored transfer function and matter power spectrum options to allow
+  any combination, even unphysical ones (#610).
+- Added capability to use the halo model power spectrum as the primary
+  non-linear power spectrum in the code (#610).
+- Fixed infinite loop bug in splitting sum of neutrino masses into individual masses (#605).
+- Added custom Halofit code (#611).
+- Added `has_density` and `has_shear` tags to `Tracer` constructors.
 
 # v 1.0 API changes :
 

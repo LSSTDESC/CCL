@@ -65,6 +65,7 @@ static void compare_eh(int i_model,struct eh_data * data)
   char* rtn;
   FILE *f;
   ccl_configuration config = default_config;
+  config.matter_power_spectrum_method = ccl_linear;
   config.transfer_function_method = ccl_eisenstein_hu;
   ccl_parameters params = ccl_parameters_create(data->Omega_c,data->Omega_b,data->Omega_k[i_model-1],
 						data->Neff, data->m_nu, data->mnu_type,
@@ -75,7 +76,7 @@ static void compare_eh(int i_model,struct eh_data * data)
   params.Omega_l=data->Omega_v[i_model-1];
   ccl_cosmology * cosmo = ccl_cosmology_create(params, config);
   ASSERT_NOT_NULL(cosmo);
-  
+
   sprintf(fname,"./tests/benchmark/model%d_pk_eh.txt",i_model);
   f=fopen(fname,"r");
   if(f==NULL) {
@@ -83,7 +84,7 @@ static void compare_eh(int i_model,struct eh_data * data)
     exit(1);
   }
   nk=linecount(f)-1; rewind(f);
-  
+
   rtn = fgets(str, 1024, f);
   for(i=0;i<nk;i++) {
     double k_h,k;

@@ -44,7 +44,8 @@
 %inline %{
 
 CCL_ClTracer* cl_tracer_new_wrapper(ccl_cosmology *cosmo, int tracer_type,
-                                    int has_rsd, int has_magnification, int has_intrinsic_alignment,
+                                    int has_density, int has_rsd, int has_magnification,
+				    int has_shear, int has_intrinsic_alignment,
                                     double* z_n, int nz_n, double* n, int nn,
                                     double* z_b, int nz_b, double* b, int nb,
                                     double* z_s, int nz_s, double* s, int ns,
@@ -54,8 +55,8 @@ CCL_ClTracer* cl_tracer_new_wrapper(ccl_cosmology *cosmo, int tracer_type,
     return ccl_cl_tracer(
         cosmo,
         tracer_type,
-        has_rsd, has_magnification,
-        has_intrinsic_alignment,
+        has_density, has_rsd, has_magnification,
+        has_shear, has_intrinsic_alignment,
         nz_n, z_n, n,
         nz_b, z_b, b,
         nz_s, z_s, s,
@@ -75,25 +76,33 @@ CCL_ClTracer* cl_tracer_new_wrapper(ccl_cosmology *cosmo, int tracer_type,
 %inline %{
 
 void angular_cl_vec(ccl_cosmology * cosmo, CCL_ClTracer *clt1, CCL_ClTracer *clt2,
+		    ccl_p2d_t *pspec,
                     double l_limber, double l_logstep, double l_linstep,
                     double* ell, int nell, int nout, double* output, int *status) {
-  //Cast ells as integers
-  int *ell_int = malloc(nell * sizeof(int));
-  CCL_ClWorkspace *w = ccl_cl_workspace_new(
-					    (int)(ell[nell - 1]) + 1,
-					    (int)l_limber,
-					    l_logstep,
-					    (int)l_linstep,
-					    status);
+  //Check if we need non-Limber power spectra
+  int index_nonlimber_last=-1;
+  for(int i=0; i < nell; i++) {
+    if(ell[i]<l_limber)
+      index_nonlimber_last=i;
+    else
+      break;
+  }
 
-  for(int i=0; i < nell; i++)
-    ell_int[i] = (int)(ell[i]);
+  //Compute non-Limber power spectra
+  if(index_nonlimber_last>=0) {
+    //Cast ells as integers
+    int *ell_int = malloc((index_nonlimber_last+1) * sizeof(int));
+    for(int i=0; i <= index_nonlimber_last; i++)
+      ell_int[i] = (int)(ell[i]);
+    // Non-Limber computation
+    ccl_angular_cls_nonlimber(cosmo, l_logstep, l_linstep, clt1, clt2, pspec,
+			      index_nonlimber_last+1, ell_int, output, status);
+    free(ell_int);
+  }
 
-  //Compute C_ells
-  ccl_angular_cls(cosmo, w, clt1, clt2, nell, ell_int, output, status);
-
-  free(ell_int);
-  ccl_cl_workspace_free(w);
+  //Compute Limber part
+  for(int i=index_nonlimber_last+1;i<nell;i++)
+    output[i]=ccl_angular_cl_limber(cosmo, clt1, clt2, pspec, ell[i], status);
 }
 
 %}

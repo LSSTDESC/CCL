@@ -16,7 +16,7 @@ if environ.get("CLASS_PARAM_DIR") is None:
     environ["CLASS_PARAM_DIR"] = path.dirname(path.abspath(__file__))
 
 from . import ccllib as lib
-from . import core, constants, background, power, massfunction, halomodel
+from . import core, constants, background, power, massfunction, halomodel, p2d
 
 # Core data structures
 from .core import Cosmology
@@ -26,6 +26,9 @@ from .background import growth_factor, growth_factor_unnorm, \
     growth_rate, comoving_radial_distance, comoving_angular_distance, \
     h_over_h0, luminosity_distance, distance_modulus, scale_factor_of_chi, \
     omega_x, rho_x
+
+# Generalized power spectra
+from .p2d import Pk2D
 
 # Power spectrum calculations and sigma8
 from .power import linear_matter_power, nonlin_matter_power, sigmaR, \
@@ -37,12 +40,12 @@ from .massfunction import massfunc, massfunc_m2r, sigmaM, halo_bias
 # Cl's and tracers
 from .cls import angular_cl, NumberCountsTracer, WeakLensingTracer, CMBLensingTracer
 
-from .redshifts import  dNdz_tomog, PhotoZFunction, PhotoZGaussian, dNdzFunction, dNdzSmail
-
 # Useful constants and unit conversions
 physical_constants = lib.cvar.constants
 
-from .correlation import correlation, correlation_3d, correlation_multipole, correlation_3dRsd, correlation_3dRsd_avgmu, correlation_spline_free, correlation_pi_sigma
+from .correlation import (
+    correlation, correlation_3d, correlation_multipole, correlation_3dRsd,
+    correlation_3dRsd_avgmu, correlation_pi_sigma)
 
 # Properties of haloes
 from .halomodel import halomodel_matter_power, halo_concentration

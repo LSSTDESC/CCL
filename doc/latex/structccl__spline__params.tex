@@ -2,7 +2,7 @@
 \label{structccl__spline__params}\index{ccl\+\_\+spline\+\_\+params@{ccl\+\_\+spline\+\_\+params}}
 
 
-{\ttfamily \#include $<$ccl\+\_\+params.\+h$>$}
+{\ttfamily \#include $<$ccl\+\_\+core.\+h$>$}
 
 \subsection*{Data Fields}
 \begin{DoxyCompactItemize}
@@ -48,6 +48,20 @@ double \mbox{\hyperlink{structccl__spline__params_ab5be4e564bbd28fc51ffcbb079795
 double \mbox{\hyperlink{structccl__spline__params_a3407f2c11713c908ee9e5b6d8c36a1ac}{E\+L\+L\+\_\+\+M\+A\+X\+\_\+\+C\+O\+RR}}
 \item 
 int \mbox{\hyperlink{structccl__spline__params_ae38764273f047b530ffbc5ccb1935428}{N\+\_\+\+E\+L\+L\+\_\+\+C\+O\+RR}}
+\item 
+gsl\+\_\+interp\+\_\+type $\ast$ \mbox{\hyperlink{structccl__spline__params_af2971beb5a86401be3dc4b6533ec0650}{A\+\_\+\+S\+P\+L\+I\+N\+E\+\_\+\+T\+Y\+PE}}
+\item 
+gsl\+\_\+interp\+\_\+type $\ast$ \mbox{\hyperlink{structccl__spline__params_ad14251b631795d430f91f09834f90bca}{K\+\_\+\+S\+P\+L\+I\+N\+E\+\_\+\+T\+Y\+PE}}
+\item 
+gsl\+\_\+interp\+\_\+type $\ast$ \mbox{\hyperlink{structccl__spline__params_a488c1778d23bed9662e0b1af5cac0f12}{M\+\_\+\+S\+P\+L\+I\+N\+E\+\_\+\+T\+Y\+PE}}
+\item 
+gsl\+\_\+interp\+\_\+type $\ast$ \mbox{\hyperlink{structccl__spline__params_a2561d961fffd4a95d0f8276162747f1d}{D\+\_\+\+S\+P\+L\+I\+N\+E\+\_\+\+T\+Y\+PE}}
+\item 
+gsl\+\_\+interp2d\+\_\+type $\ast$ \mbox{\hyperlink{structccl__spline__params_a0f5ea33f8960f01c3d802109e06feb21}{P\+N\+L\+\_\+\+S\+P\+L\+I\+N\+E\+\_\+\+T\+Y\+PE}}
+\item 
+gsl\+\_\+interp2d\+\_\+type $\ast$ \mbox{\hyperlink{structccl__spline__params_abad631f5a17908c332c846cf32c1d66e}{P\+L\+I\+N\+\_\+\+S\+P\+L\+I\+N\+E\+\_\+\+T\+Y\+PE}}
+\item 
+gsl\+\_\+interp\+\_\+type $\ast$ \mbox{\hyperlink{structccl__spline__params_a626831cd3240afa8801a5575382f4989}{C\+O\+R\+R\+\_\+\+S\+P\+L\+I\+N\+E\+\_\+\+T\+Y\+PE}}
 \end{DoxyCompactItemize}
 
 
@@ -109,6 +123,24 @@ Struct that contains all the parameters needed to create certain splines. This i
 \subsubsection{\texorpdfstring{A\+\_\+\+S\+P\+L\+I\+N\+E\+\_\+\+N\+L\+O\+G\+\_\+\+PK}{A\_SPLINE\_NLOG\_PK}}
 {\footnotesize\ttfamily int ccl\+\_\+spline\+\_\+params\+::\+A\+\_\+\+S\+P\+L\+I\+N\+E\+\_\+\+N\+L\+O\+G\+\_\+\+PK}
 
+\mbox{\Hypertarget{structccl__spline__params_af2971beb5a86401be3dc4b6533ec0650}\label{structccl__spline__params_af2971beb5a86401be3dc4b6533ec0650}} 
+\index{ccl\+\_\+spline\+\_\+params@{ccl\+\_\+spline\+\_\+params}!A\+\_\+\+S\+P\+L\+I\+N\+E\+\_\+\+T\+Y\+PE@{A\+\_\+\+S\+P\+L\+I\+N\+E\+\_\+\+T\+Y\+PE}}
+\index{A\+\_\+\+S\+P\+L\+I\+N\+E\+\_\+\+T\+Y\+PE@{A\+\_\+\+S\+P\+L\+I\+N\+E\+\_\+\+T\+Y\+PE}!ccl\+\_\+spline\+\_\+params@{ccl\+\_\+spline\+\_\+params}}
+\subsubsection{\texorpdfstring{A\+\_\+\+S\+P\+L\+I\+N\+E\+\_\+\+T\+Y\+PE}{A\_SPLINE\_TYPE}}
+{\footnotesize\ttfamily gsl\+\_\+interp\+\_\+type$\ast$ ccl\+\_\+spline\+\_\+params\+::\+A\+\_\+\+S\+P\+L\+I\+N\+E\+\_\+\+T\+Y\+PE}
+
+\mbox{\Hypertarget{structccl__spline__params_a626831cd3240afa8801a5575382f4989}\label{structccl__spline__params_a626831cd3240afa8801a5575382f4989}} 
+\index{ccl\+\_\+spline\+\_\+params@{ccl\+\_\+spline\+\_\+params}!C\+O\+R\+R\+\_\+\+S\+P\+L\+I\+N\+E\+\_\+\+T\+Y\+PE@{C\+O\+R\+R\+\_\+\+S\+P\+L\+I\+N\+E\+\_\+\+T\+Y\+PE}}
+\index{C\+O\+R\+R\+\_\+\+S\+P\+L\+I\+N\+E\+\_\+\+T\+Y\+PE@{C\+O\+R\+R\+\_\+\+S\+P\+L\+I\+N\+E\+\_\+\+T\+Y\+PE}!ccl\+\_\+spline\+\_\+params@{ccl\+\_\+spline\+\_\+params}}
+\subsubsection{\texorpdfstring{C\+O\+R\+R\+\_\+\+S\+P\+L\+I\+N\+E\+\_\+\+T\+Y\+PE}{CORR\_SPLINE\_TYPE}}
+{\footnotesize\ttfamily gsl\+\_\+interp\+\_\+type$\ast$ ccl\+\_\+spline\+\_\+params\+::\+C\+O\+R\+R\+\_\+\+S\+P\+L\+I\+N\+E\+\_\+\+T\+Y\+PE}
+
+\mbox{\Hypertarget{structccl__spline__params_a2561d961fffd4a95d0f8276162747f1d}\label{structccl__spline__params_a2561d961fffd4a95d0f8276162747f1d}} 
+\index{ccl\+\_\+spline\+\_\+params@{ccl\+\_\+spline\+\_\+params}!D\+\_\+\+S\+P\+L\+I\+N\+E\+\_\+\+T\+Y\+PE@{D\+\_\+\+S\+P\+L\+I\+N\+E\+\_\+\+T\+Y\+PE}}
+\index{D\+\_\+\+S\+P\+L\+I\+N\+E\+\_\+\+T\+Y\+PE@{D\+\_\+\+S\+P\+L\+I\+N\+E\+\_\+\+T\+Y\+PE}!ccl\+\_\+spline\+\_\+params@{ccl\+\_\+spline\+\_\+params}}
+\subsubsection{\texorpdfstring{D\+\_\+\+S\+P\+L\+I\+N\+E\+\_\+\+T\+Y\+PE}{D\_SPLINE\_TYPE}}
+{\footnotesize\ttfamily gsl\+\_\+interp\+\_\+type$\ast$ ccl\+\_\+spline\+\_\+params\+::\+D\+\_\+\+S\+P\+L\+I\+N\+E\+\_\+\+T\+Y\+PE}
+
 \mbox{\Hypertarget{structccl__spline__params_a3407f2c11713c908ee9e5b6d8c36a1ac}\label{structccl__spline__params_a3407f2c11713c908ee9e5b6d8c36a1ac}} 
 \index{ccl\+\_\+spline\+\_\+params@{ccl\+\_\+spline\+\_\+params}!E\+L\+L\+\_\+\+M\+A\+X\+\_\+\+C\+O\+RR@{E\+L\+L\+\_\+\+M\+A\+X\+\_\+\+C\+O\+RR}}
 \index{E\+L\+L\+\_\+\+M\+A\+X\+\_\+\+C\+O\+RR@{E\+L\+L\+\_\+\+M\+A\+X\+\_\+\+C\+O\+RR}!ccl\+\_\+spline\+\_\+params@{ccl\+\_\+spline\+\_\+params}}
@@ -139,6 +171,12 @@ Struct that contains all the parameters needed to create certain splines. This i
 \subsubsection{\texorpdfstring{K\+\_\+\+M\+IN}{K\_MIN}}
 {\footnotesize\ttfamily double ccl\+\_\+spline\+\_\+params\+::\+K\+\_\+\+M\+IN}
 
+\mbox{\Hypertarget{structccl__spline__params_ad14251b631795d430f91f09834f90bca}\label{structccl__spline__params_ad14251b631795d430f91f09834f90bca}} 
+\index{ccl\+\_\+spline\+\_\+params@{ccl\+\_\+spline\+\_\+params}!K\+\_\+\+S\+P\+L\+I\+N\+E\+\_\+\+T\+Y\+PE@{K\+\_\+\+S\+P\+L\+I\+N\+E\+\_\+\+T\+Y\+PE}}
+\index{K\+\_\+\+S\+P\+L\+I\+N\+E\+\_\+\+T\+Y\+PE@{K\+\_\+\+S\+P\+L\+I\+N\+E\+\_\+\+T\+Y\+PE}!ccl\+\_\+spline\+\_\+params@{ccl\+\_\+spline\+\_\+params}}
+\subsubsection{\texorpdfstring{K\+\_\+\+S\+P\+L\+I\+N\+E\+\_\+\+T\+Y\+PE}{K\_SPLINE\_TYPE}}
+{\footnotesize\ttfamily gsl\+\_\+interp\+\_\+type$\ast$ ccl\+\_\+spline\+\_\+params\+::\+K\+\_\+\+S\+P\+L\+I\+N\+E\+\_\+\+T\+Y\+PE}
+
 \mbox{\Hypertarget{structccl__spline__params_a9c3639db1ee0c3f352886b0d2cfe7b74}\label{structccl__spline__params_a9c3639db1ee0c3f352886b0d2cfe7b74}} 
 \index{ccl\+\_\+spline\+\_\+params@{ccl\+\_\+spline\+\_\+params}!L\+O\+G\+M\+\_\+\+S\+P\+L\+I\+N\+E\+\_\+\+D\+E\+L\+TA@{L\+O\+G\+M\+\_\+\+S\+P\+L\+I\+N\+E\+\_\+\+D\+E\+L\+TA}}
 \index{L\+O\+G\+M\+\_\+\+S\+P\+L\+I\+N\+E\+\_\+\+D\+E\+L\+TA@{L\+O\+G\+M\+\_\+\+S\+P\+L\+I\+N\+E\+\_\+\+D\+E\+L\+TA}!ccl\+\_\+spline\+\_\+params@{ccl\+\_\+spline\+\_\+params}}
@@ -163,6 +201,12 @@ Struct that contains all the parameters needed to create certain splines. This i
 \subsubsection{\texorpdfstring{L\+O\+G\+M\+\_\+\+S\+P\+L\+I\+N\+E\+\_\+\+NM}{LOGM\_SPLINE\_NM}}
 {\footnotesize\ttfamily int ccl\+\_\+spline\+\_\+params\+::\+L\+O\+G\+M\+\_\+\+S\+P\+L\+I\+N\+E\+\_\+\+NM}
 
+\mbox{\Hypertarget{structccl__spline__params_a488c1778d23bed9662e0b1af5cac0f12}\label{structccl__spline__params_a488c1778d23bed9662e0b1af5cac0f12}} 
+\index{ccl\+\_\+spline\+\_\+params@{ccl\+\_\+spline\+\_\+params}!M\+\_\+\+S\+P\+L\+I\+N\+E\+\_\+\+T\+Y\+PE@{M\+\_\+\+S\+P\+L\+I\+N\+E\+\_\+\+T\+Y\+PE}}
+\index{M\+\_\+\+S\+P\+L\+I\+N\+E\+\_\+\+T\+Y\+PE@{M\+\_\+\+S\+P\+L\+I\+N\+E\+\_\+\+T\+Y\+PE}!ccl\+\_\+spline\+\_\+params@{ccl\+\_\+spline\+\_\+params}}
+\subsubsection{\texorpdfstring{M\+\_\+\+S\+P\+L\+I\+N\+E\+\_\+\+T\+Y\+PE}{M\_SPLINE\_TYPE}}
+{\footnotesize\ttfamily gsl\+\_\+interp\+\_\+type$\ast$ ccl\+\_\+spline\+\_\+params\+::\+M\+\_\+\+S\+P\+L\+I\+N\+E\+\_\+\+T\+Y\+PE}
+
 \mbox{\Hypertarget{structccl__spline__params_ae38764273f047b530ffbc5ccb1935428}\label{structccl__spline__params_ae38764273f047b530ffbc5ccb1935428}} 
 \index{ccl\+\_\+spline\+\_\+params@{ccl\+\_\+spline\+\_\+params}!N\+\_\+\+E\+L\+L\+\_\+\+C\+O\+RR@{N\+\_\+\+E\+L\+L\+\_\+\+C\+O\+RR}}
 \index{N\+\_\+\+E\+L\+L\+\_\+\+C\+O\+RR@{N\+\_\+\+E\+L\+L\+\_\+\+C\+O\+RR}!ccl\+\_\+spline\+\_\+params@{ccl\+\_\+spline\+\_\+params}}
@@ -181,8 +225,20 @@ Struct that contains all the parameters needed to create certain splines. This i
 \subsubsection{\texorpdfstring{N\+\_\+\+K\+\_\+3\+D\+C\+OR}{N\_K\_3DCOR}}
 {\footnotesize\ttfamily int ccl\+\_\+spline\+\_\+params\+::\+N\+\_\+\+K\+\_\+3\+D\+C\+OR}
 
+\mbox{\Hypertarget{structccl__spline__params_abad631f5a17908c332c846cf32c1d66e}\label{structccl__spline__params_abad631f5a17908c332c846cf32c1d66e}} 
+\index{ccl\+\_\+spline\+\_\+params@{ccl\+\_\+spline\+\_\+params}!P\+L\+I\+N\+\_\+\+S\+P\+L\+I\+N\+E\+\_\+\+T\+Y\+PE@{P\+L\+I\+N\+\_\+\+S\+P\+L\+I\+N\+E\+\_\+\+T\+Y\+PE}}
+\index{P\+L\+I\+N\+\_\+\+S\+P\+L\+I\+N\+E\+\_\+\+T\+Y\+PE@{P\+L\+I\+N\+\_\+\+S\+P\+L\+I\+N\+E\+\_\+\+T\+Y\+PE}!ccl\+\_\+spline\+\_\+params@{ccl\+\_\+spline\+\_\+params}}
+\subsubsection{\texorpdfstring{P\+L\+I\+N\+\_\+\+S\+P\+L\+I\+N\+E\+\_\+\+T\+Y\+PE}{PLIN\_SPLINE\_TYPE}}
+{\footnotesize\ttfamily gsl\+\_\+interp2d\+\_\+type$\ast$ ccl\+\_\+spline\+\_\+params\+::\+P\+L\+I\+N\+\_\+\+S\+P\+L\+I\+N\+E\+\_\+\+T\+Y\+PE}
+
+\mbox{\Hypertarget{structccl__spline__params_a0f5ea33f8960f01c3d802109e06feb21}\label{structccl__spline__params_a0f5ea33f8960f01c3d802109e06feb21}} 
+\index{ccl\+\_\+spline\+\_\+params@{ccl\+\_\+spline\+\_\+params}!P\+N\+L\+\_\+\+S\+P\+L\+I\+N\+E\+\_\+\+T\+Y\+PE@{P\+N\+L\+\_\+\+S\+P\+L\+I\+N\+E\+\_\+\+T\+Y\+PE}}
+\index{P\+N\+L\+\_\+\+S\+P\+L\+I\+N\+E\+\_\+\+T\+Y\+PE@{P\+N\+L\+\_\+\+S\+P\+L\+I\+N\+E\+\_\+\+T\+Y\+PE}!ccl\+\_\+spline\+\_\+params@{ccl\+\_\+spline\+\_\+params}}
+\subsubsection{\texorpdfstring{P\+N\+L\+\_\+\+S\+P\+L\+I\+N\+E\+\_\+\+T\+Y\+PE}{PNL\_SPLINE\_TYPE}}
+{\footnotesize\ttfamily gsl\+\_\+interp2d\+\_\+type$\ast$ ccl\+\_\+spline\+\_\+params\+::\+P\+N\+L\+\_\+\+S\+P\+L\+I\+N\+E\+\_\+\+T\+Y\+PE}
+
 
 
 The documentation for this struct was generated from the following file\+:\begin{DoxyCompactItemize}
 \item 
-\mbox{\hyperlink{ccl__params_8h}{ccl\+\_\+params.\+h}}\end{DoxyCompactItemize}
+\mbox{\hyperlink{ccl__core_8h}{ccl\+\_\+core.\+h}}\end{DoxyCompactItemize}

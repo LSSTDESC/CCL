@@ -14,20 +14,22 @@
 \subsection*{Functions}
 \begin{DoxyCompactItemize}
 \item 
-void \mbox{\hyperlink{ccl__emu17_8c_a9507cc4aa61c36816ab0623ca116390d}{ccl\+\_\+pkemu}} (double $\ast$xstar, double $\ast$$\ast$ystar, int $\ast$status, \mbox{\hyperlink{structccl__cosmology}{ccl\+\_\+cosmology}} $\ast$cosmo)
+void \mbox{\hyperlink{ccl__emu17_8c_a2ce2a981f7a51cd71a5f7336855e931e}{ccl\+\_\+pkemu}} (double $\ast$xstar, int sizeofystar, double $\ast$ystar, int $\ast$status, \mbox{\hyperlink{structccl__cosmology}{ccl\+\_\+cosmology}} $\ast$cosmo)
 \end{DoxyCompactItemize}
 
 
 \subsection{Function Documentation}
-\mbox{\Hypertarget{ccl__emu17_8c_a9507cc4aa61c36816ab0623ca116390d}\label{ccl__emu17_8c_a9507cc4aa61c36816ab0623ca116390d}} 
+\mbox{\Hypertarget{ccl__emu17_8c_a2ce2a981f7a51cd71a5f7336855e931e}\label{ccl__emu17_8c_a2ce2a981f7a51cd71a5f7336855e931e}} 
 \index{ccl\+\_\+emu17.\+c@{ccl\+\_\+emu17.\+c}!ccl\+\_\+pkemu@{ccl\+\_\+pkemu}}
 \index{ccl\+\_\+pkemu@{ccl\+\_\+pkemu}!ccl\+\_\+emu17.\+c@{ccl\+\_\+emu17.\+c}}
 \subsubsection{\texorpdfstring{ccl\+\_\+pkemu()}{ccl\_pkemu()}}
-{\footnotesize\ttfamily void ccl\+\_\+pkemu (\begin{DoxyParamCaption}\item[{double $\ast$}]{xstarin,  }\item[{double $\ast$$\ast$}]{Pkemu,  }\item[{int $\ast$}]{status,  }\item[{\mbox{\hyperlink{structccl__cosmology}{ccl\+\_\+cosmology}} $\ast$}]{cosmo }\end{DoxyParamCaption})}
+{\footnotesize\ttfamily void ccl\+\_\+pkemu (\begin{DoxyParamCaption}\item[{double $\ast$}]{xstarin,  }\item[{int}]{nkemu,  }\item[{double $\ast$}]{Pkemu,  }\item[{int $\ast$}]{status,  }\item[{\mbox{\hyperlink{structccl__cosmology}{ccl\+\_\+cosmology}} $\ast$}]{cosmo }\end{DoxyParamCaption})}
 
 Emulator power spectrum Obtain P(k,z) \mbox{[}Mpc$^\wedge$3\mbox{]} for a given set of input parameters. 
 \begin{DoxyParams}{Parameters}
 {\em xstarin} & vector of input parameters for the emulator, including redshift. \\
+\hline
+{\em nkemu} & number of elements to which Pkemu has been allocated. \\
 \hline
 {\em Pkemu} & output P(k,z) power spectrum \\
 \hline
