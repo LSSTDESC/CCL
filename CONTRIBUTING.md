@@ -7,6 +7,9 @@ If you want to make changes to CCL, please follow the procedures listed here
 to make sure that they conform to our coding standards, and that all of the
 necessary files, wrappers etc. are properly updated.
 
+Developers should seek consensus with the CCL team as needed about new features 
+being incorporated (especially for API changes or additions). 
+
 Reviewing a pull request (PR) on github
 ---------------------------------------
  1. Checkout the branch.
