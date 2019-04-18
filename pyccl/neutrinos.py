@@ -36,7 +36,8 @@ def Omeganuh2(a, mnu, T_CMB=2.725):
     N_nu_mass = len(mnu)
 
     # Call function
-    OmNuh2, status = lib.Omeganuh2_vec(N_nu_mass, T_CMB, a, mnu, a.size, status)
+    OmNuh2, status = lib.Omeganuh2_vec(N_nu_mass, T_CMB,
+                                       a, mnu, a.size, status)
 
     # Check status and return
     check(status)
