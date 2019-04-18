@@ -555,16 +555,12 @@ static double w_tophat(double kR)
   double w;
   double kR2 = kR*kR;
 
-  // This is the Maclaurin expansion of W(x)=[sin(x)-xcos(x)]*(3/x)**3 to O(x^7), with x=kR.
+  // This is the Maclaurin expansion of W(x)=[sin(x)-xcos(x)]*3/x**3 to O(x^10), with x=kR.
   // Necessary numerically because at low x W(x) relies on the fine cancellation of two terms
   if(kR<0.1) {
-     w = 1. + kR2*(-0.1 +
-       kR2*(0.003561429 +
-      kR2*(-6.61376e-5 +
-           kR2*(7.51563e-7))));
-     /*w =1.-0.1*kR*kR+0.003571429*kR*kR*kR*kR
-      -6.61376E-5*kR*kR*kR*kR*kR*kR
-      +7.51563E-7*kR*kR*kR*kR*kR*kR*kR*kR;*/
+    w= 1. + kR2*(-1.0/10.0 + kR2*(1.0/280.0 +
+      kR2*(-1.0/15120.0 + kR2*(1.0/1330560.0 +
+      kR2* (-1.0/172972800.0)))));
   }
   else
     w = 3.*(sin(kR) - kR*cos(kR))/(kR2*kR);

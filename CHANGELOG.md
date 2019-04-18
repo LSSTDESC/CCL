@@ -25,6 +25,7 @@
 - Separated Limber and Non-Limber C_ell calculations (#614)
 - Added `has_density` and `has_shear` flags to ClTracers (#614)
 - Simplified C_ell unit tests (#614)
+- Fixed a small bug in the w_tophat expression and increased precision (#607)
 
 ## Python library
 - Improved error reporting for `angular_cl` computations (#567).
