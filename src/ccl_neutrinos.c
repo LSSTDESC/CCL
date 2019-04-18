@@ -96,11 +96,11 @@ gsl_spline* calculate_nu_phasespace_spline(int *status) {
 }
 
 /* ------- ROUTINE: ccl_nu_phasespace_intg ------
-INPUTS: accel: pointer to an accelerator which will evaluate the neutrino phasespace spline if defined, mnuOT: the dimensionless mass / temperature of a single massive neutrino
+INPUTS: mnuOT: the dimensionless mass / temperature of a single massive neutrino
 TASK: Get the value of the phase space integral at mnuOT
 */
 
-double nu_phasespace_intg(gsl_interp_accel* accel, double mnuOT, int* status)
+double nu_phasespace_intg(double mnuOT, int* status)
 {
   // Check if the global variable for the phasespace spline has been defined yet:
   if (nu_spline==NULL) nu_spline =calculate_nu_phasespace_spline(status);
@@ -116,8 +116,7 @@ double nu_phasespace_intg(gsl_interp_accel* accel, double mnuOT, int* status)
     return 0.2776566337*mnuOT;
   }
 
-  // Evaluate the spline - this will use the accelerator if it has been defined.
-  int gslstatus = gsl_spline_eval_e(nu_spline, log(mnuOT),accel, &integral_value);
+  int gslstatus = gsl_spline_eval_e(nu_spline, log(mnuOT), NULL, &integral_value);
   if(gslstatus != GSL_SUCCESS) {
     ccl_raise_gsl_warning(gslstatus, "ccl_neutrinos.c: nu_phasespace_intg():");
     *status |= gslstatus;
@@ -126,12 +125,12 @@ double nu_phasespace_intg(gsl_interp_accel* accel, double mnuOT, int* status)
 }
 
 /* -------- ROUTINE: Omeganuh2 ---------
-INPUTS: a: scale factor, Nnumass: number of massive neutrino species, mnu: total mass in eV of neutrinos, T_CMB: CMB temperature, accel: pointer to an accelerator which will evaluate the neutrino phasespace spline if defined, status: pointer to status integer.
+INPUTS: a: scale factor, Nnumass: number of massive neutrino species, mnu: total mass in eV of neutrinos, T_CMB: CMB temperature, status: pointer to status integer.
 TASK: Compute Omeganu * h^2 as a function of time.
 !! To all practical purposes, Neff is simply N_nu_mass !!
 */
 
-double ccl_Omeganuh2 (double a, int N_nu_mass, double* mnu, double T_CMB, gsl_interp_accel* accel, int* status)
+double ccl_Omeganuh2 (double a, int N_nu_mass, double* mnu, double T_CMB, int* status)
 {
   double Tnu, a4, prefix_massless, mnuone, OmNuh2;
   double Tnu_eff, mnuOT, intval, prefix_massive;
@@ -162,7 +161,7 @@ double ccl_Omeganuh2 (double a, int N_nu_mass, double* mnu, double T_CMB, gsl_in
 	mnuOT = mnu[i] / (Tnu_eff/a) * (ccl_constants.EV_IN_J / (ccl_constants.KBOLTZ));
 
 	// Get the value of the phase-space integral
-	intval=nu_phasespace_intg(accel,mnuOT, status);
+	intval = nu_phasespace_intg(mnuOT, status);
 	OmNuh2 = intval*prefix_massive/a4 + OmNuh2;
   }
 
@@ -170,7 +169,7 @@ double ccl_Omeganuh2 (double a, int N_nu_mass, double* mnu, double T_CMB, gsl_in
 }
 
 /* -------- ROUTINE: Omeganuh2_to_Mnu ---------
-INPUTS: OmNuh2: neutrino mass density today Omeganu * h^2, label: how you want to split up the masses, see ccl_neutrinos.h for options, T_CMB: CMB temperature, accel: pointer to an accelerator which will evaluate the neutrino phasespace spline if defined, status: pointer to status integer.
+INPUTS: OmNuh2: neutrino mass density today Omeganu * h^2, label: how you want to split up the masses, see ccl_neutrinos.h for options, T_CMB: CMB temperature, status: pointer to status integer.
 TASK: Given Omeganuh2 today, the method of splitting into masses, and the temperature of the CMB, output a pointer to the array of neutrino masses (may be length 1 if label asks for sum)
 */
 

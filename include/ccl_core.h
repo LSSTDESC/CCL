@@ -14,7 +14,7 @@
 CCL_BEGIN_DECLS
 
 
-//p2d extrapolation types for early times 
+//p2d extrapolation types for early times
 typedef enum ccl_p2d_extrap_growth_t
 {
   ccl_p2d_cclgrowth = 401, //Use CCL's linear growth
@@ -289,16 +289,6 @@ typedef struct ccl_data {
   gsl_spline * fgrowth;
   gsl_spline * E;
   gsl_spline * achi;
-
-  // All these splines use the same accelerator so that
-  // if one calls them successively with the same a value
-  // they will be much faster.
-  gsl_interp_accel *accelerator;
-  gsl_interp_accel *accelerator_achi;
-  gsl_interp_accel *accelerator_m;
-  gsl_interp_accel *accelerator_d;
-  //TODO: it seems like we're not really using this accelerator, and we should
-  gsl_interp_accel *accelerator_k;
 
   // Function of Halo mass M
   gsl_spline * logsigma;

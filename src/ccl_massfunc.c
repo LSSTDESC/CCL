@@ -134,8 +134,6 @@ static void ccl_cosmology_compute_hmfparams(ccl_cosmology *cosmo, int *status)
       ccl_cosmology_set_status_message(cosmo, "ccl_massfunc.c: ccl_cosmology_compute_hmfparams(): Error creating eta(D) spline\n");
       return;
     }
-    if(cosmo->data.accelerator_d==NULL)
-      cosmo->data.accelerator_d=gsl_interp_accel_alloc();
     cosmo->data.alphahmf = alphahmf;
     cosmo->data.betahmf = betahmf;
     cosmo->data.gammahmf = gammahmf;
@@ -201,8 +199,6 @@ static void ccl_cosmology_compute_hmfparams(ccl_cosmology *cosmo, int *status)
       return;
     }
 
-    if(cosmo->data.accelerator_d==NULL)
-      cosmo->data.accelerator_d=gsl_interp_accel_alloc();
     cosmo->data.alphahmf = alphahmf;
     cosmo->data.betahmf = betahmf;
     cosmo->data.gammahmf = gammahmf;
@@ -277,10 +273,10 @@ static double massfunc_f(ccl_cosmology *cosmo, double halomass, double a, double
       ccl_cosmology_compute_hmfparams(cosmo, status);
       ccl_check_status(cosmo, status);
     }
-    gslstatus = gsl_spline_eval_e(cosmo->data.alphahmf, log10(odelta), cosmo->data.accelerator_d,&fit_A);
-    gslstatus |= gsl_spline_eval_e(cosmo->data.betahmf, log10(odelta), cosmo->data.accelerator_d,&fit_a);
-    gslstatus |= gsl_spline_eval_e(cosmo->data.gammahmf, log10(odelta), cosmo->data.accelerator_d,&fit_b);
-    gslstatus |= gsl_spline_eval_e(cosmo->data.phihmf, log10(odelta), cosmo->data.accelerator_d,&fit_c);
+    gslstatus = gsl_spline_eval_e(cosmo->data.alphahmf, log10(odelta), NULL, &fit_A);
+    gslstatus |= gsl_spline_eval_e(cosmo->data.betahmf, log10(odelta), NULL, &fit_a);
+    gslstatus |= gsl_spline_eval_e(cosmo->data.gammahmf, log10(odelta), NULL, &fit_b);
+    gslstatus |= gsl_spline_eval_e(cosmo->data.phihmf, log10(odelta), NULL, &fit_c);
     fit_d = pow(10, -1.0*pow(0.75 / log10(odelta / 75.0), 1.2));
 
     fit_A = fit_A*pow(a, 0.14);
@@ -313,11 +309,11 @@ static double massfunc_f(ccl_cosmology *cosmo, double halomass, double a, double
     delta_c_Tinker = 1.686;
     nu = delta_c_Tinker/(sigma);
 
-    gslstatus = gsl_spline_eval_e(cosmo->data.alphahmf, log10(odelta), cosmo->data.accelerator_d,&fit_A); //alpha in Eq. 8
-    gslstatus |= gsl_spline_eval_e(cosmo->data.etahmf, log10(odelta), cosmo->data.accelerator_d,&fit_a); //eta in Eq. 8
-    gslstatus |= gsl_spline_eval_e(cosmo->data.betahmf, log10(odelta), cosmo->data.accelerator_d,&fit_b); //beta in Eq. 8
-    gslstatus |= gsl_spline_eval_e(cosmo->data.gammahmf, log10(odelta), cosmo->data.accelerator_d,&fit_c); //gamma in Eq. 8
-    gslstatus |= gsl_spline_eval_e(cosmo->data.phihmf, log10(odelta), cosmo->data.accelerator_d,&fit_d); //phi in Eq. 8;
+    gslstatus = gsl_spline_eval_e(cosmo->data.alphahmf, log10(odelta), NULL, &fit_A); //alpha in Eq. 8
+    gslstatus |= gsl_spline_eval_e(cosmo->data.etahmf, log10(odelta), NULL, &fit_a); //eta in Eq. 8
+    gslstatus |= gsl_spline_eval_e(cosmo->data.betahmf, log10(odelta), NULL, &fit_b); //beta in Eq. 8
+    gslstatus |= gsl_spline_eval_e(cosmo->data.gammahmf, log10(odelta), NULL, &fit_c); //gamma in Eq. 8
+    gslstatus |= gsl_spline_eval_e(cosmo->data.phihmf, log10(odelta), NULL, &fit_d); //phi in Eq. 8;
 
     fit_a *=pow(a, -0.27);
     fit_b *=pow(a, -0.20);
@@ -505,8 +501,6 @@ void ccl_cosmology_compute_sigma(ccl_cosmology *cosmo, int *status)
   if(*status==0) {
     dlnsigma_dlogm = gsl_spline_alloc(cosmo->spline_params.M_SPLINE_TYPE, nm);
     *status = gsl_spline_init(dlnsigma_dlogm, m, y, nm);
-    if(cosmo->data.accelerator_m==NULL)
-      cosmo->data.accelerator_m=gsl_interp_accel_alloc();
   }
 
   if(*status!=0) {
@@ -544,7 +538,7 @@ static double ccl_dlninvsig_dlogm(ccl_cosmology *cosmo, double halomass, int*sta
 
   logmass = log10(halomass);
 
-  int gslstatus = gsl_spline_eval_e(cosmo->data.dlnsigma_dlogm, logmass, cosmo->data.accelerator_m,&val);
+  int gslstatus = gsl_spline_eval_e(cosmo->data.dlnsigma_dlogm, logmass, NULL, &val);
   if(gslstatus != GSL_SUCCESS) {
     ccl_raise_gsl_warning(gslstatus, "ccl_massfunc.c: ccl_massfunc():");
     *status |= gslstatus;
@@ -637,9 +631,7 @@ double ccl_sigmaM(ccl_cosmology *cosmo, double halomass, double a, int *status)
 
   double lgsigmaM;
 
-  int gslstatus = gsl_spline_eval_e(cosmo->data.logsigma,
-                                    log10(halomass),
-                                    cosmo->data.accelerator_m,&lgsigmaM);
+  int gslstatus = gsl_spline_eval_e(cosmo->data.logsigma, log10(halomass), NULL, &lgsigmaM);
 
   if(gslstatus != GSL_SUCCESS) {
     ccl_raise_gsl_warning(gslstatus, "ccl_massfunc.c: ccl_sigmaM():");
