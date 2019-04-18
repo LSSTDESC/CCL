@@ -23,7 +23,7 @@
 void Omeganuh2_vec(int N_nu_mass, double T_CMB, double* a, int na,
                    double* mnu, int nm, int nout, double* output, int* status) {
     for(int i=0; i < na; i++){
-        output[i] = ccl_Omeganuh2(a[i], N_nu_mass, mnu, T_CMB, NULL, status);
+        output[i] = ccl_Omeganuh2(a[i], N_nu_mass, mnu, T_CMB, status);
     }
 }
 
