@@ -156,19 +156,19 @@ ccl_physical_constants ccl_constants = {
   1.9884754153381438E+30, //from IAU 2015
 
   /**
-   * Mpc to meters (from PDG 2013)
+   * Mpc to meters (from PDG 2016 and using M_PI)
    */
-  3.08567758149E+22,
+  3.085677581491367399198952281E+22,
 
   /**
-   * pc to meters (from PDG 2013)
+   * pc to meters (from PDG 2016 and using M_PI)
    */
-  3.08567758149E+16,
+  3.085677581491367399198952281E+16,
 
   /**
    * Rho critical in units of M_sun/h / (Mpc/h)^3
    */
-  ((3*100*100)/(8*M_PI*6.67408e-11)) * (1000*1000*3.08567758149E+22/1.9884754153381438E+30),
+  ((3*100*100)/(8*M_PI*6.67408e-11)) * (1000*1000*3.085677581491367399198952281E+22/1.9884754153381438E+30),
 
   /**
    * Boltzmann constant in units of J/K
