@@ -20,7 +20,12 @@
 - Added additional header and source files for clarity (#610).
 - Added capability to use the halo model power spectrum as the primary
   non-linear power spectrum in the code (#610).
-- Fixed infinite loop bug in splitting sum of neutrino masses into individual masses (#605)
+- Fixed infinite loop bug in splitting sum of neutrino masses into individual masses (#605).
+- Added custom Halofit code (#611).
+- Separated Limber and Non-Limber C_ell calculations (#614)
+- Added `has_density` and `has_shear` flags to ClTracers (#614)
+- Simplified C_ell unit tests (#614)
+- Fixed a small bug in the w_tophat expression and increased precision (#607)
 
 ## Python library
 - Improved error reporting for `angular_cl` computations (#567).
@@ -38,7 +43,9 @@
   any combination, even unphysical ones (#610).
 - Added capability to use the halo model power spectrum as the primary
   non-linear power spectrum in the code (#610).
-- Fixed infinite loop bug in splitting sum of neutrino masses into individual masses (#605)
+- Fixed infinite loop bug in splitting sum of neutrino masses into individual masses (#605).
+- Added custom Halofit code (#611).
+- Added `has_density` and `has_shear` tags to `Tracer` constructors.
 
 # v 1.0 API changes :
 

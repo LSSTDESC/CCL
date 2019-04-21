@@ -85,9 +85,9 @@ static void compare_correlation_3dRSD(int i_model,struct corrs_3dRSD_data * data
 
   // FIXME: these are not real standards
   // tolerence on abs difference in r^2 xi(r) for the range r = 0.1 - 100 Mpc (40 points in r) for z=0
-  double CORR_TOLERANCE1 = 0.08;
+  double CORR_TOLERANCE1 = 0.10;
   // tolerence on abs difference in r^2 xi(r) for the range r = 50 - 250 Mpc (100 points in r) for z=0
-  double CORR_TOLERANCE2 = 0.08;
+  double CORR_TOLERANCE2 = 0.10;
 
   int N1=40;
   double *r_arr1=malloc(N1*sizeof(double));

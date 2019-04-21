@@ -35,6 +35,19 @@ static double eh_power(ccl_parameters *params, void *p, double k) {
   return ccl_eh_power(params, (eh_struct*)p, k);
 }
 
+// helper functions for non-linear power tabulation
+static double halomodel_power(ccl_cosmology* cosmo, double k, double a, void *p, int* status) {
+  return ccl_halomodel_matter_power(cosmo, k, a, status);
+}
+
+static double linear_power(ccl_cosmology* cosmo, double k, double a, void *p, int* status) {
+  return ccl_linear_matter_power(cosmo, k, a, status);
+}
+
+static double halofit_power(ccl_cosmology* cosmo, double k, double a, void *p, int* status) {
+  return ccl_halofit_power(cosmo, k, a, (halofit_struct*)p, status);
+}
+
 /*------ ROUTINE: ccl_cosmology_compute_power_analytic -----
 INPUT: cosmology
 TASK: provide spline for an analytic power spectrum with baryonic correction
@@ -323,7 +336,8 @@ static void ccl_cosmology_compute_power_emu(ccl_cosmology * cosmo, int * status)
 
 static void ccl_cosmology_spline_nonlinpower(
     ccl_cosmology* cosmo,
-    double (*pk)(ccl_cosmology* cosmo, double k, double a, int* status),
+    double (*pk)(ccl_cosmology* cosmo, double k, double a, void *p, int* status),
+    void *data,
     int* status) {
 
   double sigma8,log_sigma8;
@@ -381,7 +395,7 @@ static void ccl_cosmology_spline_nonlinpower(
     for (int i=0; i<nk; i++) {
       for (int j = 0; j<na; j++) {
         if (*status == 0)
-          y2d[j*nk + i] = log((*pk)(cosmo, x[i], z[j], status));
+          y2d[j*nk + i] = log((*pk)(cosmo, x[i], z[j], data, status));
       }
     }
 
@@ -447,30 +461,28 @@ void ccl_cosmology_compute_power(ccl_cosmology* cosmo, int* status)
     switch (cosmo->config.matter_power_spectrum_method) {
 
       case ccl_linear: {
-          // temporarily set computed_power to true
-          cosmo->computed_power = true;
-          ccl_cosmology_spline_nonlinpower(cosmo, ccl_linear_matter_power, status);
-          cosmo->computed_power = false;}
+        // temporarily set computed_power to true
+        cosmo->computed_power = true;
+        ccl_cosmology_spline_nonlinpower(cosmo, linear_power, NULL, status);
+        cosmo->computed_power = false;}
         break;
 
-      // this is temporary - once
       case ccl_halofit: {
-        if (cosmo->config.transfer_function_method != ccl_boltzmann_class) {
-          *status = CCL_ERROR_INCONSISTENT;
-          ccl_cosmology_set_status_message(
-            cosmo,
-            "ccl_power.c: ccl_cosmology_compute_power(): "
-            "halofit cannot yet be used with transfer function method %d \n",
-            cosmo->config.transfer_function_method);
-        }
-      }
-      break;
+        // temporarily set computed_power to true
+        cosmo->computed_power = true;
+        halofit_struct *hf = NULL;
+        hf = ccl_halofit_struct_new(cosmo, status);
+        if (*status == 0)
+          ccl_cosmology_spline_nonlinpower(cosmo, halofit_power, (void*)hf, status);
+        ccl_halofit_struct_free(hf);
+        cosmo->computed_power = false;}
+        break;
 
       case ccl_halo_model: {
-          // temporarily set computed_power to true
-          cosmo->computed_power = true;
-          ccl_cosmology_spline_nonlinpower(cosmo, ccl_halomodel_matter_power, status);
-          cosmo->computed_power = false;}
+        // temporarily set computed_power to true
+        cosmo->computed_power = true;
+        ccl_cosmology_spline_nonlinpower(cosmo, halomodel_power, NULL, status);
+        cosmo->computed_power = false;}
         break;
 
       case ccl_emu:
@@ -488,7 +500,7 @@ void ccl_cosmology_compute_power(ccl_cosmology* cosmo, int* status)
     }
   }
 
-  ccl_check_status(cosmo,status);
+  ccl_check_status(cosmo, status);
   if (*status == 0)
     cosmo->computed_power = true;
   return;
@@ -543,16 +555,12 @@ static double w_tophat(double kR)
   double w;
   double kR2 = kR*kR;
 
-  // This is the Maclaurin expansion of W(x)=[sin(x)-xcos(x)]*(3/x)**3 to O(x^7), with x=kR.
+  // This is the Maclaurin expansion of W(x)=[sin(x)-xcos(x)]*3/x**3 to O(x^10), with x=kR.
   // Necessary numerically because at low x W(x) relies on the fine cancellation of two terms
   if(kR<0.1) {
-     w = 1. + kR2*(-0.1 +
-       kR2*(0.003561429 +
-      kR2*(-6.61376e-5 +
-           kR2*(7.51563e-7))));
-     /*w =1.-0.1*kR*kR+0.003571429*kR*kR*kR*kR
-      -6.61376E-5*kR*kR*kR*kR*kR*kR
-      +7.51563E-7*kR*kR*kR*kR*kR*kR*kR*kR;*/
+    w= 1. + kR2*(-1.0/10.0 + kR2*(1.0/280.0 +
+      kR2*(-1.0/15120.0 + kR2*(1.0/1330560.0 +
+      kR2* (-1.0/172972800.0)))));
   }
   else
     w = 3.*(sin(kR) - kR*cos(kR))/(kR2*kR);

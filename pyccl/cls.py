@@ -36,7 +36,7 @@ class Tracer(object):
             "instead.")
 
     def _build_tracer(
-            self, cosmo, tracer_type, has_rsd=False,
+            self, cosmo, tracer_type, has_shear, has_rsd=False,
             dndz=None, bias=None, mag_bias=None, ia_bias=None,
             red_frac=None, z_source=1100.):
         """Build the CCL_ClTracer.
@@ -47,6 +47,8 @@ class Tracer(object):
                     lib.number_counts_tracer: number count tracer
                     lib.weak_lensing_tracer: lensing tracer
                     lib.cmb_lensing_tracer: CMB lensing tracer
+            has_shear (bool): Flag for whether the tracer has a
+                lensing shear term.
             has_rsd (bool, optional): Flag for whether the tracer has a
                 redshift-space distortion term. Defaults to False.
             dndz (tuple of arrays, optional): A tuple of arrays (z, N(z))
@@ -77,6 +79,7 @@ class Tracer(object):
         # Verify cosmo object
         cosmo = cosmo.cosmo
 
+        has_density = bias is not None
         has_magnification = mag_bias is not None
         if (red_frac is None) != (ia_bias is None):
             raise ValueError(
@@ -94,12 +97,6 @@ class Tracer(object):
                or not (isinstance(dndz[0], collections.Iterable)
                        and isinstance(dndz[1], collections.Iterable)):
                 raise ValueError("dndz needs to be a tuple of two arrays.")
-        if tracer_type in [lib.number_counts_tracer]:
-            if not isinstance(bias, collections.Iterable) \
-               or len(bias) != 2 \
-               or not (isinstance(bias[0], collections.Iterable)
-                       and isinstance(bias[1], collections.Iterable)):
-                raise ValueError("bias needs to be a tuple of two arrays.")
 
         # Convert array arguments that are 'None' into 'NoneArr' type and
         # check whether arrays were specified as tuples
@@ -115,8 +112,10 @@ class Tracer(object):
         return_val = lib.cl_tracer_new_wrapper(
                             cosmo,
                             tracer_type,
+                            int(has_density),
                             int(has_rsd),
                             int(has_magnification),
+                            int(has_shear),
                             int(has_intrinsic_alignment),
                             self.z_n, self.n,
                             self.z_b, self.b,
@@ -207,7 +206,8 @@ class NumberCountsTracer(Tracer):
             giving the redshift distribution of the objects. The units are
             arbitrary; N(z) will be normalized to unity.
         bias (tuple of arrays): A tuple of arrays (z, b(z))
-            giving the galaxy bias.
+            giving the galaxy bias. If `None`, this tracer won't include
+            a term proportional to the matter density contrast.
         mag_bias (tuple of arrays, optional): A tuple of arrays (z, s(z))
             giving the magnification bias as a function of redshift. If
             `None`, the tracer is assumed to not have magnification bias
@@ -218,7 +218,7 @@ class NumberCountsTracer(Tracer):
         # Call Tracer constructor with appropriate arguments
         self._build_tracer(
             cosmo=cosmo, tracer_type=lib.number_counts_tracer,
-            has_rsd=has_rsd,
+            has_shear=False, has_rsd=has_rsd,
             dndz=dndz, bias=bias, mag_bias=mag_bias,
             ia_bias=None, red_frac=None)
 
@@ -231,6 +231,8 @@ class WeakLensingTracer(Tracer):
         dndz (tuple of arrays): A tuple of arrays (z, N(z))
             giving the redshift distribution of the objects. The units are
             arbitrary; N(z) will be normalized to unity.
+        has_shear (bool): set to `False` if you want to omit the lensing shear
+            contribution from this tracer.
         ia_bias (tuple of arrays, optional): A tuple of arrays
             (z, b_IA(z)) giving the intrinsic alignment amplitude b_IA(z).
             If `None`, the tracer is assumped to not have intrinsic
@@ -241,11 +243,12 @@ class WeakLensingTracer(Tracer):
             a red fraction. Defaults to None.
     """
 
-    def __init__(self, cosmo, dndz, ia_bias=None, red_frac=None):
+    def __init__(self, cosmo, dndz, has_shear=True,
+                 ia_bias=None, red_frac=None):
         # Call Tracer constructor with appropriate arguments
         self._build_tracer(
             cosmo=cosmo, tracer_type=lib.weak_lensing_tracer,
-            has_rsd=False,
+            has_shear=has_shear, has_rsd=False,
             dndz=dndz, bias=None, mag_bias=None,
             ia_bias=ia_bias, red_frac=red_frac)
 
@@ -262,7 +265,7 @@ class CMBLensingTracer(Tracer):
         # Call Tracer constructor with appropriate arguments
         self._build_tracer(
             cosmo=cosmo, tracer_type=lib.cmb_lensing_tracer,
-            has_rsd=False,
+            has_shear=False, has_rsd=False,
             dndz=None, bias=None, mag_bias=None,
             ia_bias=None, red_frac=None, z_source=z_source)
 
@@ -297,9 +300,11 @@ def angular_cl(cosmo, cltracer1, cltracer2, ell, p_of_k_a=None,
             the non-linear matter power spectrum will be used.
         l_limber (float) : Angular wavenumber beyond which Limber's
             approximation will be used. Defaults to -1.
-        l_logstep (float) : logarithmic step in ell at low multipoles.
+        l_logstep (float) : logarithmic step in ell at low multipoles
+            used for interpolating the non-Limber power spectrum.
             Defaults to 1.05.
-        l_linstep (float) : linear step in ell at high multipoles.
+        l_linstep (float) : linear step in ell at high multipoles
+            used for interpolating the non-Limber power spectrum.
             Defaults to 20.
 
     Returns:
@@ -326,6 +331,11 @@ def angular_cl(cosmo, cltracer1, cltracer2, ell, p_of_k_a=None,
 
     status = 0
     ell_use = np.atleast_1d(ell)
+
+    # Check the values of ell are monotonically increasing
+    if not (ell_use[:-1] < ell_use[1:]).all():
+        raise ValueError("ell values must be monotonically increasing")
+
     # Return Cl values, according to whether ell is an array or not
     cl, status = lib.angular_cl_vec(
         cosmo, clt1, clt2, psp, l_limber, l_logstep,

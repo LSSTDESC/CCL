@@ -18,7 +18,9 @@ set(CCL_SRC
     src/ccl_utils.c src/ccl_cls.c src/ccl_massfunc.c
     src/ccl_neutrinos.c
     src/ccl_emu17.c src/ccl_correlation.c
-    src/ccl_halomod.c src/fftlog.c
+    src/ccl_halomod.c
+    src/ccl_halofit.c
+    src/fftlog.c
     src/ccl_haloprofile.c)
 
 # Defines list of CCL tests src files
@@ -54,7 +56,7 @@ set(TEST_SRC
 
     # and mass function stuff
     tests/ccl_test_massfunc.c
-    
+
     # halo profiles
     tests/ccl_test_haloprofile.c
 )
