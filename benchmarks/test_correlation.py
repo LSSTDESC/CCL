@@ -90,7 +90,7 @@ def check_cls(nztyp, corr_method, error_fraction):
         th, xi = np.loadtxt(fname, unpack=True)
         return th, xi
 
-    pre = "tests/benchmark/codecomp_step2_outputs/run_"
+    pre = os.path.dirname(__file__) + '/data/run_'
     post = nztyp + "_log_wt_"
     theta, xi_dd_11 = read_bm(pre + 'b1b1' + post + 'dd.txt')
     _, xi_dd_12 = read_bm(pre + 'b1b2' + post + 'dd.txt')

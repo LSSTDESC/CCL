@@ -93,7 +93,7 @@ def check_cls(typ):
         _, cl = np.loadtxt(fname, unpack=True)
         return cl[ells.astype(int)]
 
-    pre = "tests/benchmark/codecomp_step2_outputs/run_"
+    pre = os.path.dirname(__file__) + '/data/run_'
     post = typ + "_log_cl_"
     cl_dd_11 = read_bm(pre + 'b1b1' + post + 'dd.txt')
     cl_dd_12 = read_bm(pre + 'b1b2' + post + 'dd.txt')
