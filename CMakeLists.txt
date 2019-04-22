@@ -48,7 +48,6 @@ set(TEST_SRC
 
     # Cls and correlation functions
     tests/ccl_test_angpow.c
-    tests/ccl_test_correlation.c
     tests/ccl_test_correlation_3d.c
     tests/ccl_test_correlation_3dRSD.c
 
