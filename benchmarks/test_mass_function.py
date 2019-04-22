@@ -11,7 +11,7 @@ def test_mass_function():
         names=['logmass', 'sigma', 'invsigma', 'logmf'],
         skiprows=1)
 
-    ccl.physical_constants.TCMB = 2.7
+    ccl.physical_constants.T_CMB = 2.7
     with ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, Omega_g=0, Omega_k=0,
                        h=0.7, sigma8=0.8, n_s=0.96, Neff=0, m_nu=0.0,
                        w0=-1, wa=0, transfer_function='bbks',

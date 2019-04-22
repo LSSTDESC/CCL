@@ -106,7 +106,7 @@ typedef struct ccl_physical_constants {
   /**
    * Temperature of the CMB in K
    */
-  double TCMB;
+  double T_CMB;
 
   /**
    * T_ncdm, as taken from CLASS, explanatory.ini

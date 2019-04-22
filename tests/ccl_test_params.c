@@ -78,7 +78,7 @@ CTEST2(parameters, create_lcdm) {
   ASSERT_DBL_NEAR_TOL(params.sum_nu_masses, 0.0, 1e-10);
   ASSERT_DBL_NEAR_TOL(params.mnu[0], 0.0, 1e-10);
   ASSERT_DBL_NEAR_TOL(params.Omega_n_mass, 0.0, 1e-10);
-  ASSERT_DBL_NEAR_TOL(params.T_CMB, ccl_constants.TCMB, 1e-10);
+  ASSERT_DBL_NEAR_TOL(params.T_CMB, ccl_constants.T_CMB, 1e-10);
 
   ASSERT_DBL_NEAR_TOL(params.bcm_ks, 55.0, 1e-10);
   ASSERT_DBL_NEAR_TOL(params.bcm_log10Mc, log10(1.2e14), 1e-10);
@@ -120,7 +120,7 @@ void test_general(ccl_parameters params, struct parameters_data * data) {
   ASSERT_TRUE(isnan(params.sigma8));
   ASSERT_TRUE(isnan(params.z_star));
   ASSERT_DBL_NEAR_TOL(params.Neff, data->Neff, 1e-10);
-  ASSERT_DBL_NEAR_TOL(params.T_CMB, ccl_constants.TCMB, 1e-10);
+  ASSERT_DBL_NEAR_TOL(params.T_CMB, ccl_constants.T_CMB, 1e-10);
 
   ASSERT_DBL_NEAR_TOL(params.bcm_ks, data->bcm_ks, 1e-10);
   ASSERT_DBL_NEAR_TOL(params.bcm_log10Mc, data->bcm_log10Mc, 1e-10);

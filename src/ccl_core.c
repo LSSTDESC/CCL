@@ -312,7 +312,7 @@ void ccl_parameters_fill_initial(ccl_parameters * params, int *status)
 {
   // Fixed radiation parameters
   // Omega_g * h**2 is known from T_CMB
-  params->T_CMB =  ccl_constants.TCMB;
+  params->T_CMB =  ccl_constants.T_CMB;
   // kg / m^3
   double rho_g = 4. * ccl_constants.STBOLTZ / pow(ccl_constants.CLIGHT, 3) * pow(params->T_CMB, 4);
   // kg / m^3

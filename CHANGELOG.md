@@ -25,6 +25,7 @@
 - Separated Limber and Non-Limber C_ell calculations (#614)
 - Added `has_density` and `has_shear` flags to ClTracers (#614)
 - Simplified C_ell unit tests (#614)
+- Changed TCMB to T_CMB everywhere (#615)	
 - Fixed a small bug in the w_tophat expression and increased precision (#607)
 
 ## Python library
@@ -46,7 +47,8 @@
 - Fixed infinite loop bug in splitting sum of neutrino masses into individual masses (#605).
 - Added custom Halofit code (#611).
 - Added `has_density` and `has_shear` tags to `Tracer` constructors.
-
+- Changed TCMB to T_CMB everywhere (#615)
+	
 # v 1.0 API changes :
 
 ## C library
@@ -107,7 +109,7 @@ In neutrinos.py:
 
 In the function Omeganuh2, the argument 'Neff' has been removed. It is now fixed to the length of the argument 'mnu'.
 The function 'Omeganuh2\_to\_Mnu' has been renamed 'nu\_masses'. The arguments 'a' and 'Neff' have been removed. The argument 'mass\_split' has been added.
-
+The argument 'TCMB' has been changed to 'T_CMB'.
 
 ## Other changes since release 0.2.1 (September 2017):
 
