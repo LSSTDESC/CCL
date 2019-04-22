@@ -12,8 +12,8 @@ def test_mass_function():
         skiprows=1)
 
     with ccl.Cosmology(Omega_c=0.2603, Omega_b=0.0486, Omega_g=0, Omega_k=0,
-                       h=0.6774, sigma8=0.8159, n_s=0.9667, Neff=3.046, m_nu=0.0,
-                       w0=-1, wa=0) as c:
+                       h=0.6774, sigma8=0.8159, n_s=0.9667,
+                       Neff=3.046, m_nu=0.0, w0=-1, wa=0) as c:
 
         concentration = 5.0
         halo_mass = 6e13
