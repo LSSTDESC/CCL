@@ -2,9 +2,18 @@ import os
 import numpy as np
 import pyccl as ccl
 from scipy.interpolate import interp1d
+import pytest
 
 
-def set_up():
+@pytest.fixture(scope='module', params=['fftlog', 'bessel'])
+def corr_method(request):
+    errfacs = {'fftlog': 0.2, 'bessel': 0.1}
+    return request.param, errfacs[request.param]
+
+
+@pytest.fixture(scope='module', params=['analytic', 'histo'])
+def set_up(request):
+    nztyp = request.param
     dirdat = os.path.dirname(__file__) + '/data/'
     cosmo = ccl.Cosmology(Omega_c=0.30, Omega_b=0.00, Omega_g=0, Omega_k=0,
                           h=0.7, sigma8=0.8, n_s=0.96, Neff=0, m_nu=0.0,
@@ -15,68 +24,9 @@ def set_up():
     cosmo.cosmo.gsl_params.INTEGRATION_LIMBER_EPSREL = 2.5E-5
     cosmo.cosmo.gsl_params.INTEGRATION_EPSREL = 2.5E-5
 
-    arrays = {}
-    # Analytic case
-    arrays['analytic'] = {}
-    zmean_1 = 1.0
-    sigz_1 = 0.15
-    zmean_2 = 1.5
-    sigz_2 = 0.15
-    z1, a1 = np.loadtxt(dirdat + "ia_amp_analytic_1.txt", unpack=True)
-    z2, a2 = np.loadtxt(dirdat + "ia_amp_analytic_2.txt", unpack=True)
-    pz1 = np.exp(-0.5 * ((z1 - zmean_1) / sigz_1)**2)
-    pz2 = np.exp(-0.5 * ((z2 - zmean_2) / sigz_2)**2)
-    arrays['analytic']['z1'] = z1
-    arrays['analytic']['z2'] = z2
-    arrays['analytic']['a1'] = a1
-    arrays['analytic']['a2'] = a2
-    arrays['analytic']['p1'] = pz1
-    arrays['analytic']['p2'] = pz2
-    arrays['analytic']['bz'] = np.ones_like(pz1)
-    arrays['analytic']['rz'] = np.ones_like(pz1)
-
-    # Histogram case
-    arrays['histo'] = {}
-    z1, pz1 = np.loadtxt(dirdat + "bin1_histo.txt", unpack=True)[:, 1:]
-    zz1, a1 = np.loadtxt(dirdat + "ia_amp_histo_1.txt", unpack=True)
-    z2, pz2 = np.loadtxt(dirdat + "bin2_histo.txt",  unpack=True)[:, 1:]
-    _, a2 = np.loadtxt(dirdat + "ia_amp_histo_2.txt", unpack=True)
-    arrays['histo']['z1'] = z1
-    arrays['histo']['z2'] = z2
-    arrays['histo']['a1'] = a1
-    arrays['histo']['a2'] = a2
-    arrays['histo']['p1'] = pz1
-    arrays['histo']['p2'] = pz2
-    arrays['histo']['bz'] = np.ones_like(pz1)
-    arrays['histo']['rz'] = np.ones_like(pz1)
-
-    return cosmo, arrays
-
-
-def check_cls(nztyp, corr_method, error_fraction):
-    cosmo, arrs = set_up()
-
-    # Generate tracers
-    a = arrs[nztyp]
-    g1 = ccl.NumberCountsTracer(cosmo, False,
-                                (a['z1'], a['p1']),
-                                (a['z1'], a['bz']))
-    g2 = ccl.NumberCountsTracer(cosmo, False,
-                                (a['z2'], a['p2']),
-                                (a['z2'], a['bz']))
-    l1 = ccl.WeakLensingTracer(cosmo, (a['z1'], a['p1']))
-    l2 = ccl.WeakLensingTracer(cosmo, (a['z2'], a['p2']))
-    i1 = ccl.WeakLensingTracer(cosmo, (a['z1'], a['p1']),
-                               has_shear=False,
-                               ia_bias=(a['z1'], a['a1']),
-                               red_frac=(a['z1'], a['rz']))
-    i2 = ccl.WeakLensingTracer(cosmo, (a['z2'], a['p2']),
-                               has_shear=False,
-                               ia_bias=(a['z2'], a['a2']),
-                               red_frac=(a['z2'], a['rz']))
-
     # Ell-dependent correction factors
     # Set up array of ells
+    fl = {}
     lmax = 10000
     nls = (lmax - 400)//20+141
     ells = np.zeros(nls)
@@ -84,202 +34,177 @@ def check_cls(nztyp, corr_method, error_fraction):
     ells[101:121] = ells[100] + (np.arange(20) + 1) * 5
     ells[121:141] = ells[120] + (np.arange(20) + 1) * 10
     ells[141:] = ells[140] + (np.arange(nls - 141) + 1) * 20
+    fl['lmax'] = lmax
+    fl['ells'] = ells
+
+    # Initialize tracers
+    if nztyp == 'analytic':
+        # Analytic case
+        zmean_1 = 1.0
+        sigz_1 = 0.15
+        zmean_2 = 1.5
+        sigz_2 = 0.15
+        z1, a1 = np.loadtxt(dirdat + "ia_amp_analytic_1.txt", unpack=True)
+        z2, a2 = np.loadtxt(dirdat + "ia_amp_analytic_2.txt", unpack=True)
+        pz1 = np.exp(-0.5 * ((z1 - zmean_1) / sigz_1)**2)
+        pz2 = np.exp(-0.5 * ((z2 - zmean_2) / sigz_2)**2)
+    elif nztyp == 'histo':
+        # Histogram case
+        z1, pz1 = np.loadtxt(dirdat + "bin1_histo.txt", unpack=True)[:, 1:]
+        _, a1 = np.loadtxt(dirdat + "ia_amp_histo_1.txt", unpack=True)
+        z2, pz2 = np.loadtxt(dirdat + "bin2_histo.txt",  unpack=True)[:, 1:]
+        _, a2 = np.loadtxt(dirdat + "ia_amp_histo_2.txt", unpack=True)
+    else:
+        raise ValueError("Wrong Nz type " + nztyp)
+    bz = np.ones_like(pz1)
+    rz = np.ones_like(pz1)
+
+    # Initialize tracers
+    trc = {}
+    trc['g1'] = ccl.NumberCountsTracer(cosmo, False,
+                                       (z1, pz1),
+                                       (z2, bz))
+    trc['g2'] = ccl.NumberCountsTracer(cosmo, False,
+                                       (z2, pz2),
+                                       (z2, bz))
+    trc['l1'] = ccl.WeakLensingTracer(cosmo, (z1, pz1))
+    trc['l2'] = ccl.WeakLensingTracer(cosmo, (z2, pz2))
+    trc['i1'] = ccl.WeakLensingTracer(cosmo, (z1, pz1),
+                                      has_shear=False,
+                                      ia_bias=(z1, a1),
+                                      red_frac=(z1, rz))
+    trc['i2'] = ccl.WeakLensingTracer(cosmo, (z2, pz2),
+                                      has_shear=False,
+                                      ia_bias=(z2, a2),
+                                      red_frac=(z2, rz))
+    trc['ct'] = ccl.CMBLensingTracer(cosmo, 1100.)
 
     # Read benchmarks
     def read_bm(fname):
         th, xi = np.loadtxt(fname, unpack=True)
         return th, xi
 
-    pre = os.path.dirname(__file__) + '/data/run_'
+    pre = dirdat + 'run_'
     post = nztyp + "_log_wt_"
-    theta, xi_dd_11 = read_bm(pre + 'b1b1' + post + 'dd.txt')
-    _, xi_dd_12 = read_bm(pre + 'b1b2' + post + 'dd.txt')
-    _, xi_dd_22 = read_bm(pre + 'b2b2' + post + 'dd.txt')
-    _, xi_dl_11 = read_bm(pre + 'b1b1' + post + 'dl.txt')
-    _, xi_dl_12 = read_bm(pre + 'b1b2' + post + 'dl.txt')
-    _, xi_dl_21 = read_bm(pre + 'b2b1' + post + 'dl.txt')
-    _, xi_dl_22 = read_bm(pre + 'b2b2' + post + 'dl.txt')
-    _, xi_di_11 = read_bm(pre + 'b1b1' + post + 'di.txt')
-    _, xi_di_12 = read_bm(pre + 'b1b2' + post + 'di.txt')
-    _, xi_di_21 = read_bm(pre + 'b2b1' + post + 'di.txt')
-    _, xi_di_22 = read_bm(pre + 'b2b2' + post + 'di.txt')
-    _, xi_ll_11_p = read_bm(pre + 'b1b1' + post + 'll_pp.txt')
-    _, xi_ll_12_p = read_bm(pre + 'b1b2' + post + 'll_pp.txt')
-    _, xi_ll_22_p = read_bm(pre + 'b2b2' + post + 'll_pp.txt')
-    _, xi_ll_11_m = read_bm(pre + 'b1b1' + post + 'll_mm.txt')
-    _, xi_ll_12_m = read_bm(pre + 'b1b2' + post + 'll_mm.txt')
-    _, xi_ll_22_m = read_bm(pre + 'b2b2' + post + 'll_mm.txt')
-    _, xi_li_11_p = read_bm(pre + 'b1b1' + post + 'li_pp.txt')
-    _, xi_li_12_p = read_bm(pre + 'b1b2' + post + 'li_pp.txt')
-    _, xi_li_22_p = read_bm(pre + 'b2b2' + post + 'li_pp.txt')
-    _, xi_li_11_m = read_bm(pre + 'b1b1' + post + 'li_mm.txt')
-    _, xi_li_12_m = read_bm(pre + 'b1b2' + post + 'li_mm.txt')
-    _, xi_li_22_m = read_bm(pre + 'b2b2' + post + 'li_mm.txt')
-    _, xi_ii_11_p = read_bm(pre + 'b1b1' + post + 'ii_pp.txt')
-    _, xi_ii_12_p = read_bm(pre + 'b1b2' + post + 'ii_pp.txt')
-    _, xi_ii_22_p = read_bm(pre + 'b2b2' + post + 'ii_pp.txt')
-    _, xi_ii_11_m = read_bm(pre + 'b1b1' + post + 'ii_mm.txt')
-    _, xi_ii_12_m = read_bm(pre + 'b1b2' + post + 'ii_mm.txt')
-    _, xi_ii_22_m = read_bm(pre + 'b2b2' + post + 'ii_mm.txt')
+    bms = {}
+    theta, bms['dd_11'] = read_bm(pre + 'b1b1' + post + 'dd.txt')
+    _, bms['dd_12'] = read_bm(pre + 'b1b2' + post + 'dd.txt')
+    _, bms['dd_22'] = read_bm(pre + 'b2b2' + post + 'dd.txt')
+    _, bms['dl_11'] = read_bm(pre + 'b1b1' + post + 'dl.txt')
+    _, bms['dl_12'] = read_bm(pre + 'b1b2' + post + 'dl.txt')
+    _, bms['dl_21'] = read_bm(pre + 'b2b1' + post + 'dl.txt')
+    _, bms['dl_22'] = read_bm(pre + 'b2b2' + post + 'dl.txt')
+    _, bms['di_11'] = read_bm(pre + 'b1b1' + post + 'di.txt')
+    _, bms['di_12'] = read_bm(pre + 'b1b2' + post + 'di.txt')
+    _, bms['di_21'] = read_bm(pre + 'b2b1' + post + 'di.txt')
+    _, bms['di_22'] = read_bm(pre + 'b2b2' + post + 'di.txt')
+    _, bms['ll_11_p'] = read_bm(pre + 'b1b1' + post + 'll_pp.txt')
+    _, bms['ll_12_p'] = read_bm(pre + 'b1b2' + post + 'll_pp.txt')
+    _, bms['ll_22_p'] = read_bm(pre + 'b2b2' + post + 'll_pp.txt')
+    _, bms['ll_11_m'] = read_bm(pre + 'b1b1' + post + 'll_mm.txt')
+    _, bms['ll_12_m'] = read_bm(pre + 'b1b2' + post + 'll_mm.txt')
+    _, bms['ll_22_m'] = read_bm(pre + 'b2b2' + post + 'll_mm.txt')
+    _, bms['li_11_p'] = read_bm(pre + 'b1b1' + post + 'li_pp.txt')
+    _, bms['li_12_p'] = read_bm(pre + 'b1b2' + post + 'li_pp.txt')
+    _, bms['li_22_p'] = read_bm(pre + 'b2b2' + post + 'li_pp.txt')
+    _, bms['li_11_m'] = read_bm(pre + 'b1b1' + post + 'li_mm.txt')
+    _, bms['li_12_m'] = read_bm(pre + 'b1b2' + post + 'li_mm.txt')
+    _, bms['li_22_m'] = read_bm(pre + 'b2b2' + post + 'li_mm.txt')
+    _, bms['ii_11_p'] = read_bm(pre + 'b1b1' + post + 'ii_pp.txt')
+    _, bms['ii_12_p'] = read_bm(pre + 'b1b2' + post + 'ii_pp.txt')
+    _, bms['ii_22_p'] = read_bm(pre + 'b2b2' + post + 'ii_pp.txt')
+    _, bms['ii_11_m'] = read_bm(pre + 'b1b1' + post + 'ii_mm.txt')
+    _, bms['ii_12_m'] = read_bm(pre + 'b1b2' + post + 'ii_mm.txt')
+    _, bms['ii_22_m'] = read_bm(pre + 'b2b2' + post + 'ii_mm.txt')
+    bms['theta'] = theta
 
     # Read error bars
+    ers = {}
     d = np.loadtxt("tests/benchmark/cov_corr/sigma_clustering_Nbin5",
                    unpack=True)
-    exi_dd_11 = interp1d(d[0] / 60., d[1],
-                         fill_value=d[1][0],
-                         bounds_error=False)(theta)
-    exi_dd_22 = interp1d(d[0] / 60., d[2],
-                         fill_value=d[2][0],
-                         bounds_error=False)(theta)
+    ers['dd_11'] = interp1d(d[0] / 60., d[1],
+                            fill_value=d[1][0],
+                            bounds_error=False)(theta)
+    ers['dd_22'] = interp1d(d[0] / 60., d[2],
+                            fill_value=d[2][0],
+                            bounds_error=False)(theta)
     d = np.loadtxt("tests/benchmark/cov_corr/sigma_ggl_Nbin5",
                    unpack=True)
-    exi_dl_12 = interp1d(d[0] / 60., d[1],
-                         fill_value=d[1][0],
-                         bounds_error=False)(theta)
-    exi_dl_11 = interp1d(d[0] / 60., d[2],
-                         fill_value=d[2][0],
-                         bounds_error=False)(theta)
-    exi_dl_22 = interp1d(d[0] / 60., d[3],
-                         fill_value=d[3][0],
-                         bounds_error=False)(theta)
-    exi_dl_21 = interp1d(d[0] / 60., d[4],
-                         fill_value=d[4][0],
-                         bounds_error=False)(theta)
+    ers['dl_12'] = interp1d(d[0] / 60., d[1],
+                            fill_value=d[1][0],
+                            bounds_error=False)(theta)
+    ers['dl_11'] = interp1d(d[0] / 60., d[2],
+                            fill_value=d[2][0],
+                            bounds_error=False)(theta)
+    ers['dl_22'] = interp1d(d[0] / 60., d[3],
+                            fill_value=d[3][0],
+                            bounds_error=False)(theta)
+    ers['dl_21'] = interp1d(d[0] / 60., d[4],
+                            fill_value=d[4][0],
+                            bounds_error=False)(theta)
     d = np.loadtxt("tests/benchmark/cov_corr/sigma_xi+_Nbin5",
                    unpack=True)
-    exi_ll_11_p = interp1d(d[0] / 60., d[1],
-                           fill_value=d[1][0],
-                           bounds_error=False)(theta)
-    exi_ll_22_p = interp1d(d[0] / 60., d[2],
-                           fill_value=d[2][0],
-                           bounds_error=False)(theta)
-    exi_ll_12_p = interp1d(d[0] / 60., d[3],
-                           fill_value=d[3][0],
-                           bounds_error=False)(theta)
+    ers['ll_11_p'] = interp1d(d[0] / 60., d[1],
+                              fill_value=d[1][0],
+                              bounds_error=False)(theta)
+    ers['ll_22_p'] = interp1d(d[0] / 60., d[2],
+                              fill_value=d[2][0],
+                              bounds_error=False)(theta)
+    ers['ll_12_p'] = interp1d(d[0] / 60., d[3],
+                              fill_value=d[3][0],
+                              bounds_error=False)(theta)
     d = np.loadtxt("tests/benchmark/cov_corr/sigma_xi-_Nbin5",
                    unpack=True)
-    exi_ll_11_m = interp1d(d[0] / 60., d[1],
-                           fill_value=d[1][0],
-                           bounds_error=False)(theta)
-    exi_ll_22_m = interp1d(d[0] / 60., d[2],
-                           fill_value=d[2][0],
-                           bounds_error=False)(theta)
-    exi_ll_12_m = interp1d(d[0] / 60., d[3],
-                           fill_value=d[3][0],
-                           bounds_error=False)(theta)
-
-    # Check power spectra
-    def compare_xis(cosmo, t1, t2, ls, th,
-                    xi_bm, e_xi, typ, method, prefactor=1):
-        cl = ccl.angular_cl(cosmo, t1, t2, ls)
-        ell = np.arange(lmax)
-        cli = interp1d(ls, cl, kind='cubic')(ell)
-        xi = ccl.correlation(cosmo, ell, cli, th,
-                             corr_type=typ, method=method)
-        xi *= prefactor
-        assert np.all(np.fabs(xi-xi_bm) < e_xi * error_fraction)
-
-    # NC1-NC1
-    compare_xis(cosmo, g1, g1, ells, theta, xi_dd_11,
-                exi_dd_11, 'gg', corr_method)
-    # NC1-NC2
-    # Commented out because we do not currently have the covariance.
-    # compare_xis(cosmo, g1, g2, ells, theta, xi_dd_12,
-    #             exi_dd_12, 'gg', corr_method)
-    # NC2-NC2
-    compare_xis(cosmo, g2, g2, ells, theta, xi_dd_22,
-                exi_dd_22, 'gg', corr_method)
-    # NC1-WL1
-    compare_xis(cosmo, g1, l1, ells, theta, xi_dl_11,
-                exi_dl_11, 'gl', corr_method)
-    # NC1-WL2
-    compare_xis(cosmo, g1, l2, ells, theta, xi_dl_12,
-                exi_dl_12, 'gl', corr_method)
-    # NC2-WL1
-    compare_xis(cosmo, g2, l1, ells, theta, xi_dl_21,
-                exi_dl_21, 'gl', corr_method)
-    # NC2-WL2
-    compare_xis(cosmo, g2, l2, ells, theta, xi_dl_22,
-                exi_dl_22, 'gl', corr_method)
-    # NC1-IA1
-    compare_xis(cosmo, g1, i1, ells, theta, xi_di_11,
-                exi_dl_11, 'gl', corr_method)
-    # NC1-IA2
-    compare_xis(cosmo, g1, i2, ells, theta, xi_di_12,
-                exi_dl_12, 'gl', corr_method)
-    # NC2-IA1
-    compare_xis(cosmo, g2, i1, ells, theta, xi_di_21,
-                exi_dl_21, 'gl', corr_method)
-    # NC2-IA2
-    compare_xis(cosmo, g2, i2, ells, theta, xi_di_22,
-                exi_dl_22, 'gl', corr_method)
-    # WL1-WL1, +
-    compare_xis(cosmo, l1, l1, ells, theta, xi_ll_11_p,
-                exi_ll_11_p, 'l+', corr_method)
-    # WL1-WL2, +
-    compare_xis(cosmo, l1, l2, ells, theta, xi_ll_12_p,
-                exi_ll_12_p, 'l+', corr_method)
-    # WL2-WL2, +
-    compare_xis(cosmo, l2, l2, ells, theta, xi_ll_22_p,
-                exi_ll_22_p, 'l+', corr_method)
-    # WL1-WL1, -
-    compare_xis(cosmo, l1, l1, ells, theta, xi_ll_11_m,
-                exi_ll_11_m, 'l-', corr_method)
-    # WL1-WL2, -
-    compare_xis(cosmo, l1, l2, ells, theta, xi_ll_12_m,
-                exi_ll_12_m, 'l-', corr_method)
-    # WL2-WL2, -
-    compare_xis(cosmo, l2, l2, ells, theta, xi_ll_22_m,
-                exi_ll_22_m, 'l-', corr_method)
-    # IA1-WL1, +
-    compare_xis(cosmo, i1, l1, ells, theta, xi_li_11_p,
-                exi_ll_11_p, 'l+', corr_method, prefactor=2)
-    # IA1-WL2, +
-    compare_xis(cosmo, i1, l2, ells, theta, xi_li_12_p,
-                exi_ll_11_p, 'l+', corr_method)
-    # IA2-WL2, +
-    compare_xis(cosmo, i2, l2, ells, theta, xi_li_22_p,
-                exi_ll_22_p, 'l+', corr_method, prefactor=2)
-    # IA1-WL1, -
-    compare_xis(cosmo, i1, l1, ells, theta, xi_li_11_m,
-                exi_ll_11_m, 'l-', corr_method, prefactor=2)
-    # IA1-WL2, -
-    compare_xis(cosmo, i1, l2, ells, theta, xi_li_12_m,
-                exi_ll_11_m, 'l-', corr_method)
-    # IA2-WL2, -
-    compare_xis(cosmo, i2, l2, ells, theta, xi_li_22_m,
-                exi_ll_22_m, 'l-', corr_method, prefactor=2)
-    # IA1-IA1, +
-    compare_xis(cosmo, i1, i1, ells, theta, xi_ii_11_p,
-                exi_ll_11_p, 'l+', corr_method)
-    # IA1-IA2, +
-    compare_xis(cosmo, i1, i2, ells, theta, xi_ii_12_p,
-                exi_ll_11_p, 'l+', corr_method)
-    # IA2-IA2, +
-    compare_xis(cosmo, i2, i2, ells, theta, xi_ii_22_p,
-                exi_ll_22_p, 'l+', corr_method)
-    # IA1-IA1, -
-    compare_xis(cosmo, i1, i1, ells, theta, xi_ii_11_m,
-                exi_ll_11_m, 'l-', corr_method)
-    # IA1-IA2, -
-    compare_xis(cosmo, i1, i2, ells, theta, xi_ii_12_m,
-                exi_ll_11_m, 'l-', corr_method)
-    # IA2-IA2, -
-    compare_xis(cosmo, i2, i2, ells, theta, xi_ii_22_m,
-                exi_ll_22_m, 'l-', corr_method)
+    ers['ll_11_m'] = interp1d(d[0] / 60., d[1],
+                              fill_value=d[1][0],
+                              bounds_error=False)(theta)
+    ers['ll_22_m'] = interp1d(d[0] / 60., d[2],
+                              fill_value=d[2][0],
+                              bounds_error=False)(theta)
+    ers['ll_12_m'] = interp1d(d[0] / 60., d[3],
+                              fill_value=d[3][0],
+                              bounds_error=False)(theta)
+    return cosmo, trc, bms, ers, fl
 
 
-def test_xi_analytic_fftlog():
-    check_cls('analytic', 'fftlog', 0.2)
-
-
-def test_xi_histo_fftlog():
-    check_cls('histo', 'fftlog', 0.2)
-
-
-def test_xi_analytic_bessel():
-    check_cls('analytic', 'bessel', 0.1)
-
-
-def test_xi_histo_bessel():
-    check_cls('histo', 'bessel', 0.1)
+# Commented out because we don't have this covariance
+# ('g1', 'g2', 'dd_12', 'dd_12', 'gg', 1),
+@pytest.mark.parametrize("t1,t2,bm,er,kind,pref",
+                         [('g1', 'g1', 'dd_11', 'dd_11', 'gg', 1),
+                          ('g2', 'g2', 'dd_22', 'dd_22', 'gg', 1),
+                          ('g1', 'l1', 'dl_11', 'dl_11', 'gl', 1),
+                          ('g1', 'l2', 'dl_12', 'dl_12', 'gl', 1),
+                          ('g2', 'l1', 'dl_21', 'dl_21', 'gl', 1),
+                          ('g2', 'l2', 'dl_22', 'dl_22', 'gl', 1),
+                          ('g1', 'i1', 'di_11', 'dl_11', 'gl', 1),
+                          ('g1', 'i2', 'di_12', 'dl_12', 'gl', 1),
+                          ('g2', 'i1', 'di_21', 'dl_21', 'gl', 1),
+                          ('g2', 'i2', 'di_22', 'dl_22', 'gl', 1),
+                          ('l1', 'l1', 'll_11_p', 'll_11_p', 'l+', 1),
+                          ('l1', 'l2', 'll_12_p', 'll_12_p', 'l+', 1),
+                          ('l2', 'l2', 'll_22_p', 'll_22_p', 'l+', 1),
+                          ('l1', 'l1', 'll_11_m', 'll_11_m', 'l-', 1),
+                          ('l1', 'l2', 'll_12_m', 'll_12_m', 'l-', 1),
+                          ('l2', 'l2', 'll_22_m', 'll_22_m', 'l-', 1),
+                          ('i1', 'l1', 'li_11_p', 'll_11_p', 'l+', 2),
+                          ('i1', 'l2', 'li_12_p', 'll_11_p', 'l+', 1),
+                          ('i2', 'l2', 'li_22_p', 'll_22_p', 'l+', 2),
+                          ('i1', 'l1', 'li_11_m', 'll_11_m', 'l-', 2),
+                          ('i1', 'l2', 'li_12_m', 'll_11_m', 'l-', 1),
+                          ('i2', 'l2', 'li_22_m', 'll_22_m', 'l-', 2),
+                          ('i1', 'i1', 'ii_11_p', 'll_11_p', 'l+', 1),
+                          ('i1', 'i2', 'ii_12_p', 'll_12_p', 'l+', 1),
+                          ('i2', 'i2', 'ii_22_p', 'll_22_p', 'l+', 1),
+                          ('i1', 'i1', 'ii_11_m', 'll_11_m', 'l-', 1),
+                          ('i1', 'i2', 'ii_12_m', 'll_12_m', 'l-', 1),
+                          ('i2', 'i2', 'ii_22_m', 'll_22_m', 'l-', 1)])
+def test_xi(set_up, corr_method, t1, t2, bm, er, kind, pref):
+    cosmo, trcs, bms, ers, fls = set_up
+    method, errfac = corr_method
+    cl = ccl.angular_cl(cosmo, trcs[t1], trcs[t2], fls['ells'])
+    ell = np.arange(fls['lmax'])
+    cli = interp1d(fls['ells'], cl, kind='cubic')(ell)
+    xi = ccl.correlation(cosmo, ell, cli, bms['theta'],
+                         corr_type=kind, method=method)
+    xi *= pref
+    assert np.all(np.fabs(xi - bms[bm]) < ers[er] * errfac)
