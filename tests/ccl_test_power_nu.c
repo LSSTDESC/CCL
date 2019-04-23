@@ -145,7 +145,7 @@ static void compare_power_nu(int i_model,struct power_nu_data * data)
   ccl_cosmology * cosmo_linear = ccl_cosmology_create(params, config_linear);
   ASSERT_NOT_NULL(cosmo_linear);
 
-  sprintf(fname,"./benchmarks/data/model%d_pk_nu.txt",i_model);
+  sprintf(fname,"./tests/benchmark/model%d_pk_nu.txt",i_model);
   f=fopen(fname,"r");
   if(f==NULL) {
     fprintf(stderr,"Error opening file %s\n",fname);
@@ -210,7 +210,7 @@ static void compare_power_nu_nl(int i_model,struct power_nu_nl_data * data)
   ccl_cosmology * cosmo_nonlin = ccl_cosmology_create(params, config_nonlinear);
   ASSERT_NOT_NULL(cosmo_nonlin);
 
-  sprintf(fname_nl,"./benchmarks/data/model%d_pk_nl_nu.txt",i_model);
+  sprintf(fname_nl,"./tests/benchmark/model%d_pk_nl_nu.txt",i_model);
   f_nl=fopen(fname_nl,"r");
   if(f_nl==NULL) {
     fprintf(stderr,"Error opening file %s\n",fname_nl);

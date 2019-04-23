@@ -89,13 +89,13 @@ static void compare_bcm(int i_model,struct bcm_data * data)
   ccl_cosmology * cosmo_nobar = ccl_cosmology_create(params_nobar, config_nobar);
   ASSERT_NOT_NULL(cosmo_nobar);
 
-  sprintf(fname,"./benchmarks/data/w_baryonspk_nl.dat");
+  sprintf(fname,"./tests/benchmark/bcm/w_baryonspk_nl.dat");
   f=fopen(fname,"r");
   if(f==NULL) {
     fprintf(stderr,"Error opening file %s\n",fname);
     exit(1);
   }
-  sprintf(fname2,"./benchmarks/data/wo_baryonspk_nl.dat");
+  sprintf(fname2,"./tests/benchmark/bcm/wo_baryonspk_nl.dat");
   f2=fopen(fname2,"r");
   if(f2==NULL) {
     fprintf(stderr,"Error opening file %s\n",fname2);

@@ -3,10 +3,10 @@
 #include <stdio.h>
 #include <math.h>
 
-// The tolerance in chi for all the
-#define DISTANCES_HIZ_TOLERANCE 5.0e-7
+// The tolerance in D(z) 
+#define GROWTH_HIZ_TOLERANCE 6.0e-6
 
-CTEST_DATA(distances_cosmomad_hiz) {
+CTEST_DATA(growth_hiz) {
   double Omega_c;
   double Omega_b;
   double h;
@@ -14,33 +14,34 @@ CTEST_DATA(distances_cosmomad_hiz) {
   double n_s;
   double Neff;
   double* mnu;
-  ccl_mnu_convention mnu_type;
   double Omega_v[3];
   double Omega_k[3];
   double w_0[3];
   double w_a[3];
-
+  ccl_mnu_convention mnu_type;
+  
   double z[7];
-  double chi[3][7];
+  double gf[3][7];
 };
 
-// Read the fixed format file containing all the radial comoving
-// distance benchmarks
-static void read_chi_test_file(double z[7], double chi[3][7])
+// Read the fixed format file containing all the growth factor
+// benchmarks
+static void read_growth_hiz_test_file(double z[7], double gf[3][7])
 {
-  //Distances are in Mpc/h
-  FILE * f = fopen("./benchmarks/data/chi_hiz_model1-3.txt", "r");
+  //Growth is normalized to ~a at early times
+  FILE * f = fopen("./tests/benchmark/growth_hiz_model1-3.txt", "r");
   ASSERT_NOT_NULL(f);
-
+  
   // Ignore header line
   char str[1024];
-  fgets(str, 1024, f);
-
-  // File is fixed format - five rows and six columns
+  char* rtn;
+  rtn = fgets(str, 1024, f);
+  
+    // File is fixed format - five rows and six columns
   for (int i=0; i<7; i++) {
-    int count = fscanf(f, "%le %le %le %le \n", &z[i],
-		       &chi[0][i], &chi[1][i], &chi[2][i]);
-    // Check that all the stuff in the benchmark is there
+    int count = fscanf(f, "%le %le %le %le\n", &z[i],
+		       &gf[0][i], &gf[1][i], &gf[2][i]);
+    	// Check that all the stuff in the benchmark is there
     ASSERT_EQUAL(4, count);
   }
   fclose(f);
@@ -48,7 +49,7 @@ static void read_chi_test_file(double z[7], double chi[3][7])
 
 // Set up the cosmological parameters to be used in each of the
 // models
-CTEST_SETUP(distances_cosmomad_hiz) {
+CTEST_SETUP(growth_hiz) {
   // Values that are the same for all 3 models
   data->Omega_c = 0.25;
   data->Omega_b = 0.05;
@@ -59,12 +60,13 @@ CTEST_SETUP(distances_cosmomad_hiz) {
   double mnuval = 0.;
   data->mnu= &mnuval;
   data->mnu_type = ccl_mnu_sum;
-
+  
+  
   // Values that are different for the different models
   double Omega_v[3] = {  0.7,  0.7,  0.7};
   double w_0[3]     = { -1.0, -0.9, -0.9};
   double w_a[3]     = {  0.0,  0.0,  0.1};
-
+  
   // Fill in the values from these constant arrays.
   for (int i=0; i<3; i++) {
     data->Omega_v[i] = Omega_v[i];
@@ -74,50 +76,45 @@ CTEST_SETUP(distances_cosmomad_hiz) {
   }
 
   // The file of benchmark data.
-  read_chi_test_file(data->z, data->chi);
+  read_growth_hiz_test_file(data->z, data->gf);
 }
 
-static void compare_distances_hiz(int model, struct distances_cosmomad_hiz_data * data)
+static void compare_growth_hiz(int model, struct growth_hiz_data * data)
 {
-  int status=0;
+  int status=0; 	
   // Make the parameter set from the input data
   // Values of some parameters depend on the model index
-  ccl_parameters params = ccl_parameters_create(data->Omega_c, data->Omega_b, data->Omega_k[model],
-						data->Neff, data->mnu, data->mnu_type,
-						data->w_0[model], data->w_a[model],
-						data->h, data->A_s, data->n_s,-1,-1,-1,-1,NULL,NULL, &status);
-
+  ccl_parameters params = ccl_parameters_create(data->Omega_c, data->Omega_b, data->Omega_k[model], data->Neff, data->mnu, data->mnu_type, data->w_0[model], data->w_a[model], data->h, data->A_s, data->n_s,-1,-1,-1,-1,NULL,NULL, &status);
   params.Omega_g=0; //enforce no radiation
   params.Omega_l = 1.-params.Omega_m-params.Omega_k; //reomcpute Omega_l without radiation
-
   // Make a cosmology object from the parameters with the default configuration
   ccl_cosmology * cosmo = ccl_cosmology_create(params, default_config);
   ASSERT_NOT_NULL(cosmo);
-
+  
   // Compare to benchmark data
   for (int j=0; j<7; j++) {
     double a = 1/(1.+data->z[j]);
-    double chi_ij=ccl_comoving_radial_distance(cosmo,a, &status)*data->h;
+    double gf_ij=ccl_growth_factor_unnorm(cosmo,a, &status);
     if (status) printf("%s\n",cosmo->status_message);
-    double absolute_tolerance = DISTANCES_HIZ_TOLERANCE*data->chi[model][j];
+    double absolute_tolerance = GROWTH_HIZ_TOLERANCE*data->gf[model][j];
     if (fabs(absolute_tolerance)<1e-12) absolute_tolerance = 1e-12;
-    ASSERT_DBL_NEAR_TOL(data->chi[model][j], chi_ij, absolute_tolerance);
+    ASSERT_DBL_NEAR_TOL(data->gf[model][j], gf_ij, absolute_tolerance);
   }
 
   ccl_cosmology_free(cosmo);
 }
 
-CTEST2(distances_cosmomad_hiz, model_1) {
+CTEST2(growth_hiz, model_1) {
   int model = 0;
-  compare_distances_hiz(model, data);
+  compare_growth_hiz(model, data);
 }
 
-CTEST2(distances_cosmomad_hiz, model_2) {
+CTEST2(growth_hiz, model_2) {
   int model = 1;
-  compare_distances_hiz(model, data);
+  compare_growth_hiz(model, data);
 }
 
-CTEST2(distances_cosmomad_hiz, model_3) {
+CTEST2(growth_hiz, model_3) {
   int model = 2;
-  compare_distances_hiz(model, data);
+  compare_growth_hiz(model, data);
 }

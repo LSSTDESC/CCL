@@ -3,41 +3,41 @@
 #include <stdio.h>
 #include <math.h>
 
-#define EH_TOLERANCE 1.0E-5
+#define BBKS_TOLERANCE 1.0E-5
 
-CTEST_DATA(eh) {
+CTEST_DATA(bbks) {
   double Omega_c;
   double Omega_b;
   double h;
   double A_s;
   double n_s;
   double sigma8;
-  double Omega_v[1];
-  double Omega_k[1];
-  double w_0[1];
-  double w_a[1];
   double Neff;
-  double* m_nu;
+  double* mnu;
   ccl_mnu_convention mnu_type;
+  double Omega_v[5];
+  double Omega_k[5];
+  double w_0[5];
+  double w_a[5];
 };
 
-CTEST_SETUP(eh) {
+CTEST_SETUP(bbks) {
   data->Omega_c = 0.25;
   data->Omega_b = 0.05;
   data->h = 0.7;
   data->A_s = 2.1e-9;
-  data->sigma8=0.8;
   data->n_s = 0.96;
-  data->Neff = 0.;
+  data->sigma8=0.8;
+  data->Neff=0;
   double mnuval = 0.;
-  data->m_nu= &mnuval;
-  data-> mnu_type = ccl_mnu_sum;
+  data->mnu=&mnuval;
+  data->mnu_type =ccl_mnu_sum;
 
-  double Omega_v[1]={0.7};
-  double w_0[1] = {-1.0};
-  double w_a[1] = {0.0};
+  double Omega_v[5]={0.7, 0.7, 0.7, 0.65, 0.75};
+  double w_0[5] = {-1.0, -0.9, -0.9, -0.9, -0.9};
+  double w_a[5] = {0.0, 0.0, 0.1, 0.1, 0.1};
 
-  for(int i=0;i<1;i++) {
+  for(int i=0;i<5;i++) {
     data->Omega_v[i] = Omega_v[i];
     data->w_0[i] = w_0[i];
     data->w_a[i] = w_a[i];
@@ -57,27 +57,25 @@ static int linecount(FILE *f)
   return i0;
 }
 
-static void compare_eh(int i_model,struct eh_data * data)
+static void compare_bbks(int i_model,struct bbks_data * data)
 {
   int nk,i,j;
-  int status =0;
+  int status=0;
   char fname[256],str[1024];
   char* rtn;
   FILE *f;
   ccl_configuration config = default_config;
   config.matter_power_spectrum_method = ccl_linear;
-  config.transfer_function_method = ccl_eisenstein_hu;
-  ccl_parameters params = ccl_parameters_create(data->Omega_c,data->Omega_b,data->Omega_k[i_model-1],
-						data->Neff, data->m_nu, data->mnu_type,
-						data->w_0[i_model-1],data->w_a[i_model-1],
-						data->h,data->A_s,data->n_s,-1,-1,-1,-1,NULL,NULL, &status);
-  params.sigma8=data->sigma8;
+  config.transfer_function_method = ccl_bbks;
+  ccl_parameters params = ccl_parameters_create(data->Omega_c,data->Omega_b,data->Omega_k[i_model-1],data->Neff, data->mnu,data->mnu_type, data->w_0[i_model-1],data->w_a[i_model-1],data->h,data->A_s,data->n_s,-1,-1,-1,-1,NULL,NULL, &status);
+  params.T_CMB=2.7;
   params.Omega_g=0;
   params.Omega_l=data->Omega_v[i_model-1];
+  params.sigma8=data->sigma8;
   ccl_cosmology * cosmo = ccl_cosmology_create(params, config);
   ASSERT_NOT_NULL(cosmo);
 
-  sprintf(fname,"./benchmarks/data/model%d_pk_eh.txt",i_model);
+  sprintf(fname,"./tests/benchmark/model%d_pk.txt",i_model);
   f=fopen(fname,"r");
   if(f==NULL) {
     fprintf(stderr,"Error opening file %s\n",fname);
@@ -95,10 +93,10 @@ static void compare_eh(int i_model,struct eh_data * data)
       exit(1);
     }
     k=k_h*data->h;
-    for(j=0;j<1;j++) {
+    for(j=0;j<6;j++) {
       double pk_h,pk_bench,pk_ccl,err;
-      double z=2*j+0.;
-      int status=0;
+      double z=j+0.;
+
       stat=fscanf(f,"%lf",&pk_h);
       if(stat!=1) {
 	fprintf(stderr,"Error reading file %s, line %d\n",fname,i+2);
@@ -108,7 +106,7 @@ static void compare_eh(int i_model,struct eh_data * data)
       pk_ccl=ccl_linear_matter_power(cosmo,k,1./(1+z),&status);
       if (status) printf("%s\n",cosmo->status_message);
       err=fabs(pk_ccl/pk_bench-1);
-      ASSERT_DBL_NEAR_TOL(err,0.,EH_TOLERANCE);
+      ASSERT_DBL_NEAR_TOL(err,0.,BBKS_TOLERANCE);
     }
   }
   fclose(f);
@@ -116,7 +114,17 @@ static void compare_eh(int i_model,struct eh_data * data)
   ccl_cosmology_free(cosmo);
 }
 
-CTEST2(eh,model_1) {
+CTEST2(bbks,model_1) {
   int model=1;
-  compare_eh(model,data);
+  compare_bbks(model,data);
+}
+
+CTEST2(bbks,model_2) {
+  int model=2;
+  compare_bbks(model,data);
+}
+
+CTEST2(bbks,model_3) {
+  int model=3;
+  compare_bbks(model,data);
 }

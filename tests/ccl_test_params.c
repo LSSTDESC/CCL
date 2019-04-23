@@ -22,7 +22,7 @@ CTEST_DATA(parameters) {
   int status;
 };
 
-// This function is one before each test defined below with CTEST2_SKIP in the suite.
+// This function is one before each test defined below with CTEST2 in the suite.
 // It is used to set up any values needed by the tests.  The data
 // that can be passed to the tests are always in a struct called "data"
 // and defined above.
@@ -45,7 +45,7 @@ CTEST_SETUP(parameters) {
   data->status=0;
 }
 
-// The 2 on the end of CTEST2_SKIP means that for this test we use
+// The 2 on the end of CTEST2 means that for this test we use
 // the data defined above in CTEST_DATA and given values in CTEST_SETUP function.
 // We could also define CTEST_TEARDOWN(params) that would be run after the tests.
 

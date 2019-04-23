@@ -100,7 +100,7 @@ static void test_angpow_precision(struct angpow_data * data)
 			    ct_gc_A,ct_gc_A,NULL,
 			    NL,ells,cells_gg_angpow,&status);
   double rel_precision = 0.;
-  FILE *f=fopen("./benchmarks/data/angpow_gg.txt","r");
+  FILE *f=fopen("./tests/benchmark/angpow_gg.txt","r");
   for(int ii=2;ii<NL;ii++) {
     int l;
     double ratio,cl_gg_nl,cl_gg_ap=cells_gg_angpow[ii];

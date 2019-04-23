@@ -79,7 +79,7 @@ static void compare_sigmam(int i_model,struct sigmam_data * data)
   ccl_cosmology * cosmo = ccl_cosmology_create(params, config);
   ASSERT_NOT_NULL(cosmo);
 
-  sprintf(fname,"./benchmarks/data/model%d_sm.txt",i_model);
+  sprintf(fname,"./tests/benchmark/model%d_sm.txt",i_model);
   f=fopen(fname,"r");
   if(f==NULL) {
     fprintf(stderr,"Error opening file %s\n",fname);
