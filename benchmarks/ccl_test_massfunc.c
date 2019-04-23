@@ -31,7 +31,7 @@ CTEST_DATA(massfunc) {
 static void read_massfunc_test_file(double mass[13], double massfunc[3][13])
 {
    // Masses are in Msun/h
-   FILE * f = fopen("./tests/benchmark/model1_hmf.txt", "r");
+   FILE * f = fopen("./benchmarks/data/model1_hmf.txt", "r");
    ASSERT_NOT_NULL(f);
 
    // Ignore header line

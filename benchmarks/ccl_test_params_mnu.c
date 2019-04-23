@@ -20,7 +20,7 @@ CTEST_DATA(create_mnu) {
   ccl_mnu_convention mnu_type_inv;
 };
 
-// This function is one before each test defined below with CTEST2 in the suite.
+// This function is one before each test defined below with CTEST2_SKIP in the suite.
 // It is used to set up any values needed by the tests.  The data
 // that can be passed to the tests are always in a struct called "data"
 // and defined above.
