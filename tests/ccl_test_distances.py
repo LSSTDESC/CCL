@@ -2,7 +2,6 @@ import numpy as np
 from numpy.testing import assert_allclose, run_module_suite
 import numpy.testing
 import pyccl as ccl
-from os.path import dirname, join, abspath
 
 # Set tolerances
 DISTANCES_TOLERANCE = 1e-4
@@ -111,14 +110,13 @@ class_models = {
 
             }
 
-path = dirname(abspath(__file__))
 def read_chi_benchmark_file():
     """
     Read the file containing all the radial comoving distance benchmarks
     (distances are in Mpc/h)
     """
     # Load data from file
-    dat = np.genfromtxt(join(path,"benchmark/chi_model1-5.txt")).T
+    dat = np.genfromtxt("benchmarks/data/chi_model1-5.txt").T
     assert(dat.shape == (6,6))
 
     # Split into redshift column and chi(z) columns
@@ -132,7 +130,7 @@ def read_chi_hiz_benchmark_file():
     (distances are in Mpc/h)
     """
     # Load data from file
-    dat = np.genfromtxt(join(path,"benchmark/chi_hiz_model1-3.txt")).T
+    dat = np.genfromtxt("benchmarks/data/chi_hiz_model1-3.txt").T
     assert(dat.shape == (4,7))
 
     # Split into redshift column and chi(z) columns
@@ -147,7 +145,7 @@ def read_chi_mnu_benchmark_file():
     (distances are in Mpc)
     """
     # Load data from file
-    dat = np.genfromtxt(join(path,"benchmark/chi_mnu_model1-5.txt")).T
+    dat = np.genfromtxt("benchmarks/data/chi_mnu_model1-5.txt").T
     assert(dat.shape == (6,5))
 
     # Split into redshift column and chi(z) columns
@@ -161,7 +159,7 @@ def read_chi_hiz_benchmark_file():
     (distances are in Mpc/h)
     """
     # Load data from file
-    dat = np.genfromtxt(join(path,"benchmark/chi_hiz_model1-3.txt")).T
+    dat = np.genfromtxt("benchmarks/data/chi_hiz_model1-3.txt").T
     assert(dat.shape == (4,7))
 
     # Split into redshift column and chi(z) columns
@@ -176,7 +174,7 @@ def read_chi_mnu_hiz_benchmark_file():
     (distances are in Mpc)
     """
     # Load data from file
-    dat = np.genfromtxt(join(path,"benchmark/chi_hiz_mnu_model1-5.txt")).T
+    dat = np.genfromtxt("benchmarks/data/chi_hiz_mnu_model1-5.txt").T
     assert(dat.shape == (6,7))
 
     # Split into redshift column and chi(z) columns
@@ -190,7 +188,7 @@ def read_class_allz_chi_benchmark_file():
     CLASS for the CCL paper models. (distances are in Mpc)
     """
     # Load data from file
-    dat = np.genfromtxt(join(path, "benchmark/chi_class_allz.txt")).T
+    dat = np.genfromtxt("benchmarks/data/chi_class_allz.txt").T
     assert(dat.shape == (11, 10))
 
     # Split into redshift column and chi(z) columns
@@ -204,7 +202,7 @@ def read_class_mnu_chi_benchmark_file():
     CLASS additional massive neutrino models. (distances are in Mpc)
     """
     # Load data from file
-    dat = np.genfromtxt(join(path, "benchmark/chi_class_extra_mnu.txt")).T
+    dat = np.genfromtxt("benchmarks/data/chi_class_extra_mnu.txt").T
     assert(dat.shape == (10, 10))
 
     # Split into redshift column and chi(z) columns
@@ -217,7 +215,7 @@ def read_dm_benchmark_file():
     Read the file containing all the distance modulus benchmarks
     """
     # Load data from file
-    dat = np.genfromtxt(join(path,"benchmark/dm_model1-5.txt")).T
+    dat = np.genfromtxt("benchmarks/data/dm_model1-5.txt").T
     assert(dat.shape == (6,6))
 
     # Split into redshift column and chi(z) columns
@@ -231,7 +229,7 @@ def read_dm_mnu_benchmark_file():
     for non-zero massive neutrinos.
     """
     # Load data from file
-    dat = np.genfromtxt(join(path,"benchmark/dm_mnu_model1-5.txt")).T
+    dat = np.genfromtxt("benchmarks/data/dm_mnu_model1-5.txt").T
     assert(dat.shape == (6,5))
 
     # Split into redshift column and chi(z) columns
@@ -245,7 +243,7 @@ def read_dm_mnu_hiz_benchmark_file():
     for non-zero massive neutrinos at high z.
     """
     # Load data from file
-    dat = np.genfromtxt(join(path,"benchmark/dm_hiz_mnu_model1-5.txt")).T
+    dat = np.genfromtxt("benchmarks/data/dm_hiz_mnu_model1-5.txt").T
     assert(dat.shape == (6,7))
 
     # Split into redshift column and chi(z) columns
@@ -259,7 +257,7 @@ def read_class_allz_dm_benchmark_file():
     CLASS for the CCL paper models.
     """
     # Load data from file
-    dat = np.genfromtxt(join(path, "benchmark/dm_class_allz.txt")).T
+    dat = np.genfromtxt("benchmarks/data/dm_class_allz.txt").T
     assert(dat.shape == (11, 10))
 
     # Split into redshift column and dm(z) columns
@@ -273,7 +271,7 @@ def read_class_mnu_dm_benchmark_file():
     CLASS for additional massive neutrino models.
     """
     # Load data from file
-    dat = np.genfromtxt(join(path, "benchmark/dm_class_extra_mnu.txt")).T
+    dat = np.genfromtxt("benchmarks/data/dm_class_extra_mnu.txt").T
     assert(dat.shape == (10, 10))
 
     # Split into redshift column and dm(z) columns

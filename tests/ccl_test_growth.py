@@ -1,7 +1,6 @@
 import numpy as np
 from numpy.testing import assert_allclose, run_module_suite
 import pyccl as ccl
-from os.path import dirname, join
 # Set tolerances
 GROWTH_TOLERANCE = 1e-4
 
@@ -25,7 +24,7 @@ def read_growth_lowz_benchmark_file():
     Read the file containing growth factor benchmarks for the low redshifts.
     """
     # Load data from file
-    dat = np.genfromtxt(join(dirname(__file__),"benchmark/growth_model1-5.txt")).T
+    dat = np.genfromtxt("benchmarks/data/growth_model1-5.txt").T
     assert(dat.shape == (6,6))
 
     # Split into redshift column and growth(z) columns
@@ -38,7 +37,7 @@ def read_growth_allz_benchmark_file():
     Read the file containing growth factor benchmarks for the whole redshift range.
     """
     # Load data from file
-    dat = np.genfromtxt(join(dirname(__file__),"benchmark/growth_cosmomad_allz.txt")).T
+    dat = np.genfromtxt("benchmarks/data/growth_cosmomad_allz.txt").T
     assert(dat.shape == (6,10))
 
     # Split into redshift column and growth(z) columns

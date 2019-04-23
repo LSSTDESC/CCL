@@ -50,9 +50,6 @@ set(TEST_SRC
     benchmarks/ccl_test_angpow.c
     benchmarks/ccl_test_correlation_3d.c
     benchmarks/ccl_test_correlation_3dRSD.c
-
-    # and mass function stuff
-    benchmarks/ccl_test_massfunc.c
 )
 
 
