@@ -507,7 +507,9 @@ void ccl_cosmology_compute_linpower_class(ccl_cosmology* cosmo, int* status) {
   }
 
   if(*status==0)
-    cosmo->data.p_lin=ccl_f2d_t_new(na,aa,nk,lk,lpk_ln,1,2,ccl_f2d_cclgrowth,1,NULL,0,2,ccl_f2d_3,status);
+    cosmo->data.p_lin=ccl_f2d_t_new(na,aa,nk,lk,lpk_ln,NULL,NULL,0,
+				    1,2,ccl_f2d_cclgrowth,1,NULL,0,2,
+				    ccl_f2d_3,status);
 
   ccl_free_class_structs(cosmo,&ba,&th,&pt,&tr,&pm,&sp,&nl,&le,init_arr,status);
   free(lk);

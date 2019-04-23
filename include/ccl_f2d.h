@@ -16,10 +16,13 @@ CCL_BEGIN_DECLS
  * @param nk number of elements of lk_arr.
  * @param lk_arr array of logarithmic wavenumbers at which the function is defined (i.e. this array contains ln(k), NOT k). The array should be ordered.
  * @param fka_arr array of size na * nk containing the 2D function. The 2D ordering is such that fka_arr[ia*nk+ik] = f(k=exp(lk_arr[ik]),a=a_arr[ia]).
+ * @param fk_arr array of size nk containing the k-dependent part of the function. Only relevant if is_factorizable is true.
+ * @param fa_arr array of size na containing the a-dependent part of the function. Only relevant if is_factorizable is true.
+ * @param is_factorizable if not 0, fk_arr and fa_arr will be used as 1-D arrays to construct a factorizable 2D function.
  * @param extrap_order_lok Order of the polynomial that extrapolates on wavenumbers smaller than the minimum of lk_arr. Allowed values: 0 (constant), 1 (linear extrapolation) and 2 (quadratic extrapolation). Extrapolation happens in ln(k).
  * @param extrap_order_hik Order of the polynomial that extrapolates on wavenumbers larger than the maximum of lk_arr. Allowed values: 0 (constant), 1 (linear extrapolation) and 2 (quadratic extrapolation). Extrapolation happens in ln(k).
  * @param extrap_linear_growth: ccl_f2d_extrap_growth_t value defining how the function with scale factors below the interpolation range. Allowed values: ccl_f2d_cclgrowth (scale with the CCL linear growth factor), ccl_f2d_customgrowth (scale with a custom function of redshift passed through `growth`), ccl_f2d_constantgrowth (scale by multiplying the function at the earliest available scale factor by a constant number, defined by `growth_factor_0`), ccl_f2d_no_extrapol (throw an error if the function is ever evaluated outside the interpolation range in a).
- * @param is_fka_log: if not zero, `fka_arr` contains ln(f(k,a)) instead of f(k,a).
+ * @param is_fka_log: if not zero, `fka_arr` contains ln(f(k,a)) instead of f(k,a). If the function is factorizable, then `fk_arr` holds ln(K(k)) and `fa_arr` holds ln(A(a)), where f(k,a)=K(k)*A(a).
  * @param growth: custom growth function. Irrelevant if extrap_linear_growth!=ccl_f2d_customgrowth.
  * @param growth_factor_0: custom growth function. Irrelevant if extrap_linear_growth!=ccl_f2d_constantgrowth.
  * @param growth_exponent: power to which the extrapolating growth factor should be exponentiated when extrapolating (e.g. usually 2 for linear power spectra).
@@ -29,6 +32,9 @@ CCL_BEGIN_DECLS
 ccl_f2d_t *ccl_f2d_t_new(int na,double *a_arr,
 			 int nk,double *lk_arr,
 			 double *fka_arr,
+			 double *fk_arr,
+			 double *fa_arr,
+			 int is_factorizable,
 			 int extrap_order_lok,
 			 int extrap_order_hik,
 			 ccl_f2d_extrap_growth_t extrap_linear_growth,

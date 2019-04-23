@@ -10,9 +10,14 @@ double growth_function(double a)
   return pow(a,0.375);
 }
 
-double pk_model_analytical(double k,double a)
+double k_function(double k)
 {
-  return pow(k/0.1,-1.)*growth_function(a)*growth_function(a);
+  return pow(k/0.1,-1.);
+}
+
+double fka_model_analytical(double k,double a)
+{
+  return k_function(k)*growth_function(a)*growth_function(a);
 }
 
 CTEST_DATA(f2d) {
@@ -20,7 +25,9 @@ CTEST_DATA(f2d) {
   double *a_arr;
   int n_k;
   double *lk_arr;
-  double *pk_arr;
+  double *fk_arr;
+  double *fa_arr;
+  double *fka_arr;
   double Omega_c;
   double Omega_b;
   double h;
@@ -40,91 +47,185 @@ CTEST_SETUP(f2d) {
   data->n_a=100;
   data->n_k=10;
   data->a_arr=malloc(data->n_a*sizeof(double));
+  data->fa_arr=malloc(data->n_a*sizeof(double));
   data->lk_arr=malloc(data->n_k*sizeof(double));
-  for(int ii=0;ii<data->n_a;ii++)
+  data->fk_arr=malloc(data->n_k*sizeof(double));
+  for(int ii=0;ii<data->n_a;ii++) {
     data->a_arr[ii]=0.05+0.95*ii/(data->n_a-1.);
-  for(int ii=0;ii<data->n_k;ii++)
+    data->fa_arr[ii]=2*log(growth_function(data->a_arr[ii]));
+  }
+  for(int ii=0;ii<data->n_k;ii++) {
     data->lk_arr[ii]=log(1E-4)+log(1E6)*(ii+0.5)/data->n_k;
-  data->pk_arr=malloc(data->n_a*data->n_k*sizeof(double));
+    data->fk_arr[ii]=log(k_function(exp(data->lk_arr[ii])));
+  }
+  data->fka_arr=malloc(data->n_a*data->n_k*sizeof(double));
   for(int ii=0;ii<data->n_a;ii++) {
     for(int jj=0;jj<data->n_k;jj++)
-      data->pk_arr[ii*data->n_k+jj]=log(pk_model_analytical(exp(data->lk_arr[jj]),data->a_arr[ii]));
+      data->fka_arr[ii*data->n_k+jj]=log(fka_model_analytical(exp(data->lk_arr[jj]),data->a_arr[ii]));
   }
-  //P(k,a)=(k/0.1)**-1*a**0.75
+  //f(k,a)=(k/0.1)**-1*a**0.75
 }
 
 CTEST_TEARDOWN(f2d) {
   free(data->a_arr);
   free(data->lk_arr);
-  free(data->pk_arr);
+  free(data->fk_arr);
+  free(data->fa_arr);
+  free(data->fka_arr);
 }
 
-CTEST2(f2d,sanity) {
+CTEST2(f2d,a_overflow_init) {
   int status=0;
   ccl_f2d_t *psp;
-  double pk;
+  double fka;
 
   //First check that if we do not populate the P(k) all the way to z=0 we get an error
   data->a_arr[data->n_a-1]=1.1;
   psp=ccl_f2d_t_new(data->n_a,data->a_arr,
 		    data->n_k,data->lk_arr,
-		    data->pk_arr,
+		    data->fka_arr,
+		    NULL, NULL, 0,
 		    0, //extrap_lok
 		    2, //extrap_hik
 		    ccl_f2d_constantgrowth, //extrap_growth
-		    1, //is_pk_log
+		    1, //is_fka_log
 		    NULL,0,2,
 		    ccl_f2d_3,
 		    &status);
   ASSERT_TRUE(status);
   ccl_f2d_t_free(psp);
+}
 
-  //Now populate properly
+CTEST2(f2d,a_overflow) {
+  int status=0;
+  ccl_f2d_t *psp;
+  double fka;
+  double lktest=-2.,atest=0.5;
+
+  //Populate properly
   status=0;
   data->a_arr[data->n_a-1]=1.;
   psp=ccl_f2d_t_new(data->n_a,data->a_arr,
   		    data->n_k,data->lk_arr,
-  		    data->pk_arr,
+  		    data->fka_arr,
+		    NULL, NULL, 0,
   		    2, //extrap_lok
 		    2, //extrap_hik
   		    ccl_f2d_customgrowth, //extrap_growth
-  		    1, //is_pk_log
+  		    1, //is_fka_log
   		    growth_function,0,2,
   		    ccl_f2d_3,
   		    &status);
   ASSERT_TRUE(status==0);
 
   //Get an error if we evaluate above a=1
-  double lktest=-2.,atest=0.5;
-  pk=ccl_f2d_t_eval(psp,lktest,1.1,NULL,&status);
+  fka=ccl_f2d_t_eval(psp,lktest,1.1,NULL,&status);
   ASSERT_TRUE(status);
-  ASSERT_DBL_NEAR(-1.,pk);
+  ASSERT_DBL_NEAR(-1.,fka);
+}
+
+CTEST2(f2d,sanity) {
+  int status=0;
+  ccl_f2d_t *psp;
+  double fka;
+  double lktest=-2.,atest=0.5;
+  double alo=0.02;
+
+  //Now populate properly
   status=0;
+  data->a_arr[data->n_a-1]=1.;
+  psp=ccl_f2d_t_new(data->n_a,data->a_arr,
+  		    data->n_k,data->lk_arr,
+  		    data->fka_arr,
+		    NULL, NULL, 0,
+  		    2, //extrap_lok
+		    2, //extrap_hik
+  		    ccl_f2d_customgrowth, //extrap_growth
+  		    1, //is_fka_log
+  		    growth_function,0,2,
+  		    ccl_f2d_3,
+  		    &status);
+  ASSERT_TRUE(status==0);
 
   //Now put some sensible numbers within the redshift and k range
-  pk=ccl_f2d_t_eval(psp,lktest,atest,NULL,&status); 
+  fka=ccl_f2d_t_eval(psp,lktest,atest,NULL,&status); 
   ASSERT_TRUE(status==0);
-  ASSERT_DBL_NEAR(1,pk/pk_model_analytical(exp(lktest),atest));
+  ASSERT_DBL_NEAR(1,fka/fka_model_analytical(exp(lktest),atest));
 
   //Evaluate at very high z and see if it checks out
-  double alo=0.02;
-  pk=ccl_f2d_t_eval(psp,lktest,alo,NULL,&status);
+  fka=ccl_f2d_t_eval(psp,lktest,alo,NULL,&status);
   ASSERT_TRUE(status==0);
-  ASSERT_DBL_NEAR(1,pk/pk_model_analytical(exp(lktest),alo));
+  ASSERT_DBL_NEAR(1,fka/fka_model_analytical(exp(lktest),alo));
 
   //Evaluate at very high k and see if it checks out
   double lkhi=data->lk_arr[data->n_k-1]*1.1;
-  pk=ccl_f2d_t_eval(psp,lkhi,atest,NULL,&status);
+  fka=ccl_f2d_t_eval(psp,lkhi,atest,NULL,&status);
   ASSERT_TRUE(status==0);
-  ASSERT_DBL_NEAR(1,pk/pk_model_analytical(exp(lkhi),atest));
+  ASSERT_DBL_NEAR(1,fka/fka_model_analytical(exp(lkhi),atest));
 
-  //Evaluate at very high k and see if it checks out
+  //Evaluate at very low k and see if it checks out
   double lklo=data->lk_arr[0]/1.1;
-  pk=ccl_f2d_t_eval(psp,lklo,atest,NULL,&status);
+  fka=ccl_f2d_t_eval(psp,lklo,atest,NULL,&status);
   ASSERT_TRUE(status==0);
-  ASSERT_DBL_NEAR(1,pk/pk_model_analytical(exp(lklo),atest));
+  ASSERT_DBL_NEAR(1,fka/fka_model_analytical(exp(lklo),atest));
 
   ccl_f2d_t_free(psp);
+}
+
+CTEST2(f2d,factorize) {
+  int status=0;
+  ccl_f2d_t *psp;
+  double fka;
+  double lktest=-2.,atest=0.5;
+  double alo=0.02;
+
+  //Now populate properly
+  status=0;
+  data->a_arr[data->n_a-1]=1.;
+  psp=ccl_f2d_t_new(data->n_a,data->a_arr,
+  		    data->n_k,data->lk_arr,
+  		    NULL,
+		    data->fk_arr,data->fa_arr,1,
+  		    2, //extrap_lok
+		    2, //extrap_hik
+  		    ccl_f2d_customgrowth, //extrap_growth
+  		    1, //is_fka_log
+  		    growth_function,0,2,
+  		    ccl_f2d_3,
+  		    &status);
+  ASSERT_TRUE(status==0);
+
+  //Now put some sensible numbers within the redshift and k range
+  fka=ccl_f2d_t_eval(psp,lktest,atest,NULL,&status); 
+  ASSERT_TRUE(status==0);
+  ASSERT_DBL_NEAR(1,fka/fka_model_analytical(exp(lktest),atest));
+
+  //Evaluate at very high z and see if it checks out
+  fka=ccl_f2d_t_eval(psp,lktest,alo,NULL,&status);
+  ASSERT_TRUE(status==0);
+  ASSERT_DBL_NEAR(1,fka/fka_model_analytical(exp(lktest),alo));
+
+  //Evaluate at very high k and see if it checks out
+  double lkhi=data->lk_arr[data->n_k-1]*1.1;
+  fka=ccl_f2d_t_eval(psp,lkhi,atest,NULL,&status);
+  ASSERT_TRUE(status==0);
+  ASSERT_DBL_NEAR(1,fka/fka_model_analytical(exp(lkhi),atest));
+
+  //Evaluate at very low k and see if it checks out
+  double lklo=data->lk_arr[0]/1.1;
+  fka=ccl_f2d_t_eval(psp,lklo,atest,NULL,&status);
+  ASSERT_TRUE(status==0);
+  ASSERT_DBL_NEAR(1,fka/fka_model_analytical(exp(lklo),atest));
+
+  ccl_f2d_t_free(psp);
+}
+
+CTEST2(f2d,pk) {
+  int status=0;
+  ccl_f2d_t *psp;
+  double fka;
+  double lktest=-2.,atest=0.5;
+  double alo=0.02;
 
   //Now verify that things scale with the CCL growth factor as intended
   //First initialize the cosmology object
@@ -150,22 +251,23 @@ CTEST2(f2d,sanity) {
   data->a_arr[data->n_a-1]=1.;
   psp=ccl_f2d_t_new(data->n_a,data->a_arr,
   		    data->n_k,data->lk_arr,
-  		    data->pk_arr,
+  		    data->fka_arr,
+		    NULL, NULL, 0,
   		    2, //extrap_lok
 		    2, //extrap_hik
   		    ccl_f2d_cclgrowth, //extrap_growth
-  		    1, //is_pk_log
+  		    1, //is_fka_log
   		    NULL,0,2,
   		    ccl_f2d_3,
   		    &status);
   ASSERT_TRUE(status==0);
 
   //Evaluate at very low z and see if it checks out
-  double pk0=ccl_f2d_t_eval(psp,lktest,data->a_arr[0],NULL,&status);
+  double fka0=ccl_f2d_t_eval(psp,lktest,data->a_arr[0],NULL,&status);
   ASSERT_TRUE(status==0);
-  pk=ccl_f2d_t_eval(psp,lktest,alo,cosmo,&status);
+  fka=ccl_f2d_t_eval(psp,lktest,alo,cosmo,&status);
   ASSERT_TRUE(status==0);
-  ASSERT_DBL_NEAR(1,pk/(pk0*gz*gz));
+  ASSERT_DBL_NEAR(1,fka/(fka0*gz*gz));
 
   ccl_f2d_t_free(psp);
   

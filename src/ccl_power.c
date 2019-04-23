@@ -134,7 +134,9 @@ static void ccl_cosmology_compute_linpower_analytic(
   }
 
   if(*status==0) {
-    cosmo->data.p_lin=ccl_f2d_t_new(na,z,nk,x,y2d,1,2,ccl_f2d_cclgrowth,1,NULL,0,2,ccl_f2d_3,status);
+    cosmo->data.p_lin=ccl_f2d_t_new(na,z,nk,x,y2d,NULL,NULL,0,
+				    1,2,ccl_f2d_cclgrowth,1,NULL,0,2,
+				    ccl_f2d_3,status);
     cosmo->computed_power=true;
     sigma8 = ccl_sigma8(cosmo,status);
     cosmo->computed_power=false;
@@ -152,7 +154,9 @@ static void ccl_cosmology_compute_linpower_analytic(
     // Free the previous P(k,a) spline, and allocate a new one to store the
     // properly-normalized P(k,a)
     ccl_f2d_t_free(cosmo->data.p_lin);
-    cosmo->data.p_lin=ccl_f2d_t_new(na,z,nk,x,y2d,1,2,ccl_f2d_cclgrowth,1,NULL,0,2,ccl_f2d_3,status);
+    cosmo->data.p_lin=ccl_f2d_t_new(na,z,nk,x,y2d,NULL,NULL,0,
+				    1,2,ccl_f2d_cclgrowth,1,NULL,0,2,
+				    ccl_f2d_3,status);
   }
 
   free(x);
@@ -323,7 +327,8 @@ static void ccl_cosmology_compute_power_emu(ccl_cosmology * cosmo, int * status)
   }
 
   if(*status==0) {
-    cosmo->data.p_nl=ccl_f2d_t_new(na,aemu,NK_EMU,lk,lpk_nl,1,2,ccl_f2d_no_extrapol,
+    cosmo->data.p_nl=ccl_f2d_t_new(na,aemu,NK_EMU,lk,lpk_nl,NULL,NULL,0,
+				   1,2,ccl_f2d_no_extrapol,
 				   1,NULL,0,2,ccl_f2d_3,status);
   }
 
@@ -410,8 +415,8 @@ static void ccl_cosmology_spline_nonlinpower(
   }
 
   if(*status == 0)
-    cosmo->data.p_nl = ccl_f2d_t_new(na, z, nk, x, y2d, 1, 2,
-				     ccl_f2d_cclgrowth, 1, NULL,
+    cosmo->data.p_nl = ccl_f2d_t_new(na, z, nk, x, y2d, NULL, NULL, 0,
+				     1, 2, ccl_f2d_cclgrowth, 1, NULL,
 				     0, 2, ccl_f2d_3, status);
 
   free(x);

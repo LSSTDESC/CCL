@@ -35,14 +35,17 @@ typedef enum ccl_f2d_interp_t
 typedef struct {
   double lkmin,lkmax; /**< Edges in log(k)*/
   double amin,amax; /**< Edges in a*/
+  int is_factorizable; /**< Is this factorizable into k- and a-dependent functions? */
   int extrap_order_lok; /**< Order of extrapolating polynomial in log(k) for low k (0, 1 or 2)*/
   int extrap_order_hik; /**< Order of extrapolating polynomial in log(k) for high k (0, 1 or 2)*/
   ccl_f2d_extrap_growth_t extrap_linear_growth;  /**< Extrapolation type at high redshifts*/
-  int is_log; /**< Do I hold the values of log(P(k,a))?*/
+  int is_log; /**< Do I hold the values of log(f(k,a))?*/
   double (*growth)(double); /**< Custom extrapolating growth function*/
   double growth_factor_0; /**< Constant extrapolating growth factor*/
   int growth_exponent; /**< Power to which growth should be exponentiated*/
-  gsl_spline2d *fka; /**< Spline holding the values of P(k,a)*/
+  gsl_spline *fk; /**< Spline holding the values of the k-dependent factor*/
+  gsl_spline *fa; /**< Spline holding the values of the a-dependent factor*/
+  gsl_spline2d *fka; /**< Spline holding the values of f(k,a)*/
 } ccl_f2d_t;
 
 /**
