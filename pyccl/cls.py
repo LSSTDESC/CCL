@@ -1,6 +1,6 @@
 from . import ccllib as lib
 from .core import check
-from .p2d import Pk2D
+from .pk2d import Pk2D
 import numpy as np
 import collections
 

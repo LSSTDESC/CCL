@@ -231,7 +231,7 @@ typedef struct {
  * @param cosmo Cosmological parameters
  * @param clt1 a Cltracer
  * @param clt2 a Cltracer
- * @param psp the p2d_t object representing the 3D power spectrum to integrate over. Pass null to use the non-linear matter power spectrum.
+ * @param psp the f2d_t object representing the 3D power spectrum to integrate over. Pass null to use the non-linear matter power spectrum.
  * @param l multipole
  * @param status Status flag. 0 if there are no errors, nonzero otherwise.
  * For specific cases see documentation for ccl_error.c
@@ -239,7 +239,7 @@ typedef struct {
  */
 double ccl_angular_cl_limber(ccl_cosmology *cosmo,
 			     CCL_ClTracer *clt1,CCL_ClTracer *clt2,
-			     ccl_p2d_t *psp,double l,int * status);
+			     ccl_f2d_t *psp,double l,int * status);
 
 
 /**
@@ -249,7 +249,7 @@ double ccl_angular_cl_limber(ccl_cosmology *cosmo,
  * @param l_linstep Linear step used at high l
  * @param clt1 a Cltracer
  * @param clt2 a Cltracer
- * @param psp the p2d_t object representing the 3D power spectrum to integrate over. Pass null to use the non-linear matter power spectrum.
+ * @param psp the f2d_t object representing the 3D power spectrum to integrate over. Pass null to use the non-linear matter power spectrum.
  * @param nl_out the maximum to ell to compute C_ell
  * @param l an array of ell values
 x * @param cl the C_ell output array
@@ -258,7 +258,7 @@ x * @param cl the C_ell output array
  * @return void
  */
 void ccl_angular_cls_nonlimber(ccl_cosmology *cosmo,double l_logstep,int l_linstep,
-			       CCL_ClTracer *clt1,CCL_ClTracer *clt2,ccl_p2d_t *psp,
+			       CCL_ClTracer *clt1,CCL_ClTracer *clt2,ccl_f2d_t *psp,
 			       int nl_out,int *l,double *cl,int *status);
 
 CCL_END_DECLS

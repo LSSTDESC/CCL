@@ -76,7 +76,7 @@ CCL_ClTracer* cl_tracer_new_wrapper(ccl_cosmology *cosmo, int tracer_type,
 %inline %{
 
 void angular_cl_vec(ccl_cosmology * cosmo, CCL_ClTracer *clt1, CCL_ClTracer *clt2,
-		    ccl_p2d_t *pspec,
+		    ccl_f2d_t *pspec,
                     double l_limber, double l_logstep, double l_linstep,
                     double* ell, int nell, int nout, double* output, int *status) {
   //Check if we need non-Limber power spectra

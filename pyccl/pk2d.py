@@ -144,4 +144,4 @@ class Pk2D(object):
         """
         if hasattr(self, 'has_psp'):
             if self.has_psp and hasattr(self, 'psp'):
-                lib.p2d_t_free(self.psp)
+                lib.f2d_t_free(self.psp)

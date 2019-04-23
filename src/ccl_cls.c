@@ -825,7 +825,7 @@ typedef struct {
   ccl_cosmology *cosmo;
   CCL_ClTracer *clt1;
   CCL_ClTracer *clt2;
-  ccl_p2d_t *psp;
+  ccl_f2d_t *psp;
   int *status;
 } IntClPar;
 
@@ -844,7 +844,7 @@ static double cl_integrand(double lk,void *params)
 
   double chi=(p->l+0.5)/k;
   double a=ccl_scale_factor_of_chi(p->cosmo,chi,p->status);
-  double pk=ccl_p2d_t_eval(p->psp,lk,a,p->cosmo,p->status);
+  double pk=ccl_f2d_t_eval(p->psp,lk,a,p->cosmo,p->status);
   
   return k*pk*d1*d2;
 }
@@ -911,13 +911,13 @@ static void get_k_interval(ccl_cosmology *cosmo,
 //psp -> 3D power spectrum to integrate over
 double ccl_angular_cl_limber(ccl_cosmology *cosmo,
 			     CCL_ClTracer *clt1,CCL_ClTracer *clt2,
-			     ccl_p2d_t *psp,double l,int * status)
+			     ccl_f2d_t *psp,double l,int * status)
 {
   int clastatus=0, gslstatus;
   IntClPar ipar;
   double result=0,eresult;
   double lkmin,lkmax;
-  ccl_p2d_t *psp_use;
+  ccl_f2d_t *psp_use;
   gsl_function F;
   gsl_integration_workspace *w=gsl_integration_workspace_alloc(cosmo->gsl_params.N_ITERATION);
 
@@ -976,7 +976,7 @@ double ccl_angular_cl_limber(ccl_cosmology *cosmo,
 }
 
 void ccl_angular_cls_nonlimber(ccl_cosmology *cosmo,double l_logstep,int l_linstep,
-			       CCL_ClTracer *clt1,CCL_ClTracer *clt2,ccl_p2d_t *psp,
+			       CCL_ClTracer *clt1,CCL_ClTracer *clt2,ccl_f2d_t *psp,
 			       int nl_out,int *l_out,double *cl_out,int *status)
 {
   int ii,lmax;
