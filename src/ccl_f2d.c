@@ -17,6 +17,7 @@ ccl_f2d_t *ccl_f2d_t_new(int na,double *a_arr,
 			 int is_fka_log,
 			 double (*growth)(double),
 			 double growth_factor_0,
+			 int growth_exponent,
 			 ccl_f2d_interp_t interp_type,
 			 int *status)
 {
@@ -45,6 +46,7 @@ ccl_f2d_t *ccl_f2d_t_new(int na,double *a_arr,
     f2d->is_log=is_fka_log;
     f2d->growth=growth;
     f2d->growth_factor_0=growth_factor_0;
+    f2d->growth_exponent=growth_exponent;
     f2d->fka=NULL;
     if(fabs(f2d->amax-1)>1E-4)
       *status=CCL_ERROR_SPLINE;
@@ -165,7 +167,7 @@ double ccl_f2d_t_eval(ccl_f2d_t *f2d,double lk,double a,ccl_cosmology *cosmo,
       gz=f2d->growth(a)/f2d->growth(a_ev);
     else //Use constant growth factor
       gz=f2d->growth_factor_0;
-    fka_post*=gz*gz;
+    fka_post*=pow(gz,f2d->growth_exponent);
   }
 
   return fka_post;

@@ -73,7 +73,7 @@ CTEST2(f2d,sanity) {
 		    2, //extrap_hik
 		    ccl_f2d_constantgrowth, //extrap_growth
 		    1, //is_pk_log
-		    NULL,0,
+		    NULL,0,2,
 		    ccl_f2d_3,
 		    &status);
   ASSERT_TRUE(status);
@@ -89,7 +89,7 @@ CTEST2(f2d,sanity) {
 		    2, //extrap_hik
   		    ccl_f2d_customgrowth, //extrap_growth
   		    1, //is_pk_log
-  		    growth_function,0,
+  		    growth_function,0,2,
   		    ccl_f2d_3,
   		    &status);
   ASSERT_TRUE(status==0);
@@ -155,7 +155,7 @@ CTEST2(f2d,sanity) {
 		    2, //extrap_hik
   		    ccl_f2d_cclgrowth, //extrap_growth
   		    1, //is_pk_log
-  		    NULL,0,
+  		    NULL,0,2,
   		    ccl_f2d_3,
   		    &status);
   ASSERT_TRUE(status==0);

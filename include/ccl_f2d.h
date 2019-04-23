@@ -22,6 +22,7 @@ CCL_BEGIN_DECLS
  * @param is_fka_log: if not zero, `fka_arr` contains ln(f(k,a)) instead of f(k,a).
  * @param growth: custom growth function. Irrelevant if extrap_linear_growth!=ccl_f2d_customgrowth.
  * @param growth_factor_0: custom growth function. Irrelevant if extrap_linear_growth!=ccl_f2d_constantgrowth.
+ * @param growth_exponent: power to which the extrapolating growth factor should be exponentiated when extrapolating (e.g. usually 2 for linear power spectra).
  * @param interp_type: 2D interpolation method. Currently only ccl_f2d_3 is implemented (bicubic interpolation).
  * @param status Status flag. 0 if there are no errors, nonzero otherwise.
  */
@@ -34,6 +35,7 @@ ccl_f2d_t *ccl_f2d_t_new(int na,double *a_arr,
 			 int is_fka_log,
 			 double (*growth)(double),
 			 double growth_factor_0,
+			 int growth_exponent,
 			 ccl_f2d_interp_t interp_type,
 			 int *status);
 
