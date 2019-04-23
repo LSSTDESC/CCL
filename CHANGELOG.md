@@ -27,6 +27,7 @@
 - Simplified C_ell unit tests (#614)
 - Changed TCMB to T_CMB everywhere (#615)	
 - Fixed a small bug in the w_tophat expression and increased precision (#607)
+- Deprecated the use of GSL spline accelerators (#626)
 
 ## Python library
 - Improved error reporting for `angular_cl` computations (#567).
