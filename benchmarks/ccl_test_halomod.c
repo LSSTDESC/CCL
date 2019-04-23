@@ -45,12 +45,12 @@ static void read_halomod_test_file(double k[3][2][NUMK], double Pk[3][2][NUMK]){
     for (int i=0; i<2; i++){
 
       // File names for different redshifts and cosmological models
-      if(model==0 && i==0){strncpy(infile, "./tests/benchmark/pk_hm_c1_z0.txt", 256);}
-      if(model==0 && i==1){strncpy(infile, "./tests/benchmark/pk_hm_c1_z1.txt", 256);}
-      if(model==1 && i==0){strncpy(infile, "./tests/benchmark/pk_hm_c2_z0.txt", 256);}
-      if(model==1 && i==1){strncpy(infile, "./tests/benchmark/pk_hm_c2_z1.txt", 256);}
-      if(model==2 && i==0){strncpy(infile, "./tests/benchmark/pk_hm_c3_z0.txt", 256);}
-      if(model==2 && i==1){strncpy(infile, "./tests/benchmark/pk_hm_c3_z1.txt", 256);}
+      if(model==0 && i==0){strncpy(infile, "./benchmarks/data/pk_hm_c1_z0.txt", 256);}
+      if(model==0 && i==1){strncpy(infile, "./benchmarks/data/pk_hm_c1_z1.txt", 256);}
+      if(model==1 && i==0){strncpy(infile, "./benchmarks/data/pk_hm_c2_z0.txt", 256);}
+      if(model==1 && i==1){strncpy(infile, "./benchmarks/data/pk_hm_c2_z1.txt", 256);}
+      if(model==2 && i==0){strncpy(infile, "./benchmarks/data/pk_hm_c3_z0.txt", 256);}
+      if(model==2 && i==1){strncpy(infile, "./benchmarks/data/pk_hm_c3_z1.txt", 256);}
 
       // Open the file
       FILE * f = fopen(infile, "r");

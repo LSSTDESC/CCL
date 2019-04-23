@@ -120,7 +120,7 @@ def set_up(request):
 
     # Read error bars
     ers = {}
-    d = np.loadtxt("tests/benchmark/cov_corr/sigma_clustering_Nbin5",
+    d = np.loadtxt("benchmarks/data/sigma_clustering_Nbin5",
                    unpack=True)
     ers['dd_11'] = interp1d(d[0] / 60., d[1],
                             fill_value=d[1][0],
@@ -128,7 +128,7 @@ def set_up(request):
     ers['dd_22'] = interp1d(d[0] / 60., d[2],
                             fill_value=d[2][0],
                             bounds_error=False)(theta)
-    d = np.loadtxt("tests/benchmark/cov_corr/sigma_ggl_Nbin5",
+    d = np.loadtxt("benchmarks/data/sigma_ggl_Nbin5",
                    unpack=True)
     ers['dl_12'] = interp1d(d[0] / 60., d[1],
                             fill_value=d[1][0],
@@ -142,7 +142,7 @@ def set_up(request):
     ers['dl_21'] = interp1d(d[0] / 60., d[4],
                             fill_value=d[4][0],
                             bounds_error=False)(theta)
-    d = np.loadtxt("tests/benchmark/cov_corr/sigma_xi+_Nbin5",
+    d = np.loadtxt("benchmarks/data/sigma_xi+_Nbin5",
                    unpack=True)
     ers['ll_11_p'] = interp1d(d[0] / 60., d[1],
                               fill_value=d[1][0],
@@ -153,7 +153,7 @@ def set_up(request):
     ers['ll_12_p'] = interp1d(d[0] / 60., d[3],
                               fill_value=d[3][0],
                               bounds_error=False)(theta)
-    d = np.loadtxt("tests/benchmark/cov_corr/sigma_xi-_Nbin5",
+    d = np.loadtxt("benchmarks/data/sigma_xi-_Nbin5",
                    unpack=True)
     ers['ll_11_m'] = interp1d(d[0] / 60., d[1],
                               fill_value=d[1][0],

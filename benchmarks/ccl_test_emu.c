@@ -52,7 +52,7 @@ CTEST_SETUP(emu) {
   //Each line of this file corresponds to the cosmological parameters for
   //cosmologies {1,3,5,6,8,10} of the emulator set. Notice that Omega_i
   //are big Omegas and not little omegas (Omega_i*h**2=omega_i)
-  sprintf(fname,"./tests/benchmark/emu_cosmologies.txt");
+  sprintf(fname,"./benchmarks/data/emu_cosmologies.txt");
   f=fopen(fname,"r");
   if(f==NULL) {
     fprintf(stderr,"Error opening file %s\n",fname);
@@ -108,7 +108,7 @@ static void compare_emu(int i_model,struct emu_data * data)
   ASSERT_NOT_NULL(cosmo);
   //Each of these files has the smoothed simulated power spectrum for
   //the corresponding cosmology, kindly provided by E. Lawrence.
-  sprintf(fname,"./tests/benchmark/emu_smooth_pk_M%d.txt",i_model_vec[i_model-1]);
+  sprintf(fname,"./benchmarks/data/emu_smooth_pk_M%d.txt",i_model_vec[i_model-1]);
   f=fopen(fname,"r");
   if(f==NULL) {
     fprintf(stderr,"Error opening file %s\n",fname);
