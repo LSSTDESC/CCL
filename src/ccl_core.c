@@ -233,8 +233,6 @@ chi: comoving distance [Mpc]
 growth: growth function (density)
 fgrowth: logarithmic derivative of the growth (density) (dlnD/da?)
 E: E(a)=H(a)/H0
-accelerator: interpolation accelerator for functions of a
-accelerator_achi: interpolation accelerator for functions of chi
 growth0: growth at z=0, defined to be 1
 sigma: ?
 p_lin: linear matter power spectrum at z=0?
@@ -261,11 +259,6 @@ ccl_cosmology * ccl_cosmology_create(ccl_parameters params, ccl_configuration co
   cosmo->data.growth = NULL;
   cosmo->data.fgrowth = NULL;
   cosmo->data.E = NULL;
-  cosmo->data.accelerator = NULL;
-  cosmo->data.accelerator_achi = NULL;
-  cosmo->data.accelerator_m = NULL;
-  cosmo->data.accelerator_d = NULL;
-  cosmo->data.accelerator_k = NULL;
   cosmo->data.growth0 = 1.;
   cosmo->data.achi = NULL;
 
@@ -336,9 +329,8 @@ void ccl_parameters_fill_initial(ccl_parameters * params, int *status)
 
   // If non-relativistic neutrinos are present, calculate the phase_space integral.
   if((params->N_nu_mass)>0) {
-    // Pass NULL for the accelerator here because we don't have our cosmology object defined yet.
     params->Omega_n_mass = ccl_Omeganuh2(
-      1.0, params->N_nu_mass, params->mnu, params->T_CMB, NULL, status) / ((params->h)*(params->h));
+      1.0, params->N_nu_mass, params->mnu, params->T_CMB, status) / ((params->h)*(params->h));
     ccl_check_status_nocosmo(status);
   }
   else{
@@ -414,10 +406,10 @@ ccl_parameters ccl_parameters_create(
 
   if (mnu_type==ccl_mnu_sum){
 	  // Normal hierarchy
-	  
+
 	  // Set the sum of neutrino masses
       params.sum_nu_masses = *mnu;
-	  
+
 	  mnu_in = malloc(3*sizeof(double));
 
 	  // Check if the sum is zero
@@ -425,7 +417,7 @@ ccl_parameters ccl_parameters_create(
 		  mnu_in[0] = 0.;
 		  mnu_in[1] = 0.;
 		  mnu_in[2] = 0.;
-	  } 
+	  }
     else{
 	      mnu_in[0] = 0.; // This is a starting guess.
 
@@ -452,7 +444,7 @@ ccl_parameters ccl_parameters_create(
 
   } else if (mnu_type==ccl_mnu_sum_inverted){
 	  // Inverted hierarchy
-	  
+
 	  // Set the sum of neutrino masses
       params.sum_nu_masses = *mnu;
 
@@ -489,10 +481,10 @@ ccl_parameters ccl_parameters_create(
       }
 
   } else if (mnu_type==ccl_mnu_sum_equal){
-	  
+
 	    // Set the sum of neutrino masses
         params.sum_nu_masses = *mnu;
-	  
+
 	    // Split the sum of masses equally
 	    mnu_in = malloc(3*sizeof(double));
 	    mnu_in[0] = params.sum_nu_masses / 3.;
@@ -506,7 +498,7 @@ ccl_parameters ccl_parameters_create(
   } else {
 	  *status = CCL_ERROR_NOT_IMPLEMENTED;
   }
-  
+
   // Check for errors in the neutrino set up (e.g. unphysical mnu)
   ccl_check_status_nocosmo(status);
 
@@ -860,8 +852,6 @@ void ccl_data_free(ccl_data * data)
   gsl_spline_free(data->chi);
   gsl_spline_free(data->growth);
   gsl_spline_free(data->fgrowth);
-  gsl_interp_accel_free(data->accelerator);
-  gsl_interp_accel_free(data->accelerator_achi);
   gsl_spline_free(data->E);
   gsl_spline_free(data->achi);
   gsl_spline_free(data->logsigma);
@@ -873,9 +863,6 @@ void ccl_data_free(ccl_data * data)
   gsl_spline_free(data->gammahmf);
   gsl_spline_free(data->phihmf);
   gsl_spline_free(data->etahmf);
-  gsl_interp_accel_free(data->accelerator_d);
-  gsl_interp_accel_free(data->accelerator_m);
-  gsl_interp_accel_free(data->accelerator_k);
   ccl_spline_free(data->rsd_splines[0]);
   ccl_spline_free(data->rsd_splines[1]);
   ccl_spline_free(data->rsd_splines[2]);

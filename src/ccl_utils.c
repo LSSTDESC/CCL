@@ -149,11 +149,9 @@ SplPar *ccl_spline_init(int n,double *x,double *y,double y0,double yf)
   if(spl==NULL)
     return NULL;
 
-  spl->intacc=gsl_interp_accel_alloc();
   spl->spline=gsl_spline_alloc(gsl_interp_cspline,n);
   int parstatus=gsl_spline_init(spl->spline,x,y,n);
   if(parstatus) {
-    gsl_interp_accel_free(spl->intacc);
     gsl_spline_free(spl->spline);
     return NULL;
   }
@@ -175,7 +173,7 @@ double ccl_spline_eval(double x,SplPar *spl)
     return spl->yf;
   else {
     double y;
-    int stat=gsl_spline_eval_e(spl->spline,x,spl->intacc,&y);
+    int stat=gsl_spline_eval_e(spl->spline,x,NULL,&y);
     if (stat!=GSL_SUCCESS) {
       ccl_raise_gsl_warning(stat, "ccl_utils.c: ccl_splin_eval():");
       return NAN;
@@ -317,7 +315,6 @@ void ccl_spline_free(SplPar *spl)
 {
   if (spl != NULL) {
     gsl_spline_free(spl->spline);
-    gsl_interp_accel_free(spl->intacc);
   }
   free(spl);
 }

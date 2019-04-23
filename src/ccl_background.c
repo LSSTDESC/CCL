@@ -23,7 +23,7 @@ static double h_over_h0(double a, ccl_cosmology * cosmo, int *status)
   if ((cosmo->params.N_nu_mass)>1e-12) {
     Om_mass_nu = ccl_Omeganuh2(
       a, cosmo->params.N_nu_mass, cosmo->params.mnu, cosmo->params.T_CMB,
-      cosmo->data.accelerator, status) / (cosmo->params.h) / (cosmo->params.h);
+      status) / (cosmo->params.h) / (cosmo->params.h);
     ccl_check_status(cosmo, status);
   }
   else {
@@ -67,7 +67,7 @@ double ccl_omega_x(ccl_cosmology * cosmo, double a, ccl_species_x_label label, i
   if ((cosmo->params.N_nu_mass) > 0.0001) {
     // Call the massive neutrino density function just once at this redshift.
     OmNuh2 = ccl_Omeganuh2(a, cosmo->params.N_nu_mass, cosmo->params.mnu,
-		       cosmo->params.T_CMB, cosmo->data.accelerator, status);
+		       cosmo->params.T_CMB, status);
     ccl_check_status(cosmo, status);
   }
   else {
@@ -500,8 +500,6 @@ void ccl_cosmology_compute_distances(ccl_cosmology * cosmo, int *status)
   }
 
   //If there were no errors, attach the splines to the cosmo struct and end the function.
-  if(cosmo->data.accelerator==NULL)
-    cosmo->data.accelerator=gsl_interp_accel_alloc();
   cosmo->data.E             = E;
   cosmo->data.chi           = chi;
   cosmo->data.achi          = achi;
@@ -708,10 +706,7 @@ void ccl_cosmology_compute_growth(ccl_cosmology * cosmo, int * status)
     return;
   }
 
-  // Initialize the accelerator which speeds the splines and
   // assign all the splines we've just made to the structure.
-  if(cosmo->data.accelerator==NULL)
-    cosmo->data.accelerator=gsl_interp_accel_alloc();
   cosmo->data.growth = growth;
   cosmo->data.fgrowth = fgrowth;
   cosmo->data.growth0 = growth0;
@@ -735,7 +730,7 @@ double ccl_h_over_h0(ccl_cosmology * cosmo, double a, int* status)
   }
 
   double h_over_h0;
-  int gslstatus = gsl_spline_eval_e(cosmo->data.E, a, cosmo->data.accelerator,&h_over_h0);
+  int gslstatus = gsl_spline_eval_e(cosmo->data.E, a, NULL, &h_over_h0);
   if(gslstatus != GSL_SUCCESS) {
     ccl_raise_gsl_warning(gslstatus, "ccl_background.c: ccl_h_over_h0():");
     *status = gslstatus;
@@ -777,7 +772,7 @@ double ccl_comoving_radial_distance(ccl_cosmology * cosmo, double a, int * statu
     }
 
     double crd;
-    int gslstatus = gsl_spline_eval_e(cosmo->data.chi, a, cosmo->data.accelerator, &crd);
+    int gslstatus = gsl_spline_eval_e(cosmo->data.chi, a, NULL, &crd);
     if(gslstatus != GSL_SUCCESS) {
       ccl_raise_gsl_warning(gslstatus, "ccl_background.c: ccl_comoving_radial_distance():");
       *status = gslstatus;
@@ -839,8 +834,7 @@ double ccl_comoving_angular_distance(ccl_cosmology * cosmo, double a, int* statu
     }
 
     double chi;
-    int gslstatus = gsl_spline_eval_e(cosmo->data.chi, a,
-                                      cosmo->data.accelerator,&chi);
+    int gslstatus = gsl_spline_eval_e(cosmo->data.chi, a, NULL, &chi);
     if(gslstatus != GSL_SUCCESS) {
       ccl_raise_gsl_warning(gslstatus, "ccl_background.c: ccl_comoving_angular_distance():");
       *status |= gslstatus;
@@ -935,7 +929,7 @@ double ccl_scale_factor_of_chi(ccl_cosmology * cosmo, double chi, int * status)
       ccl_check_status(cosmo,status);
     }
     double a;
-    int gslstatus = gsl_spline_eval_e(cosmo->data.achi, chi,cosmo->data.accelerator_achi, &a);
+    int gslstatus = gsl_spline_eval_e(cosmo->data.achi, chi, NULL, &a);
     if(gslstatus != GSL_SUCCESS) {
       ccl_raise_gsl_warning(gslstatus, "ccl_background.c: ccl_scale_factor_of_chi():");
       *status |= gslstatus;
@@ -974,7 +968,7 @@ double ccl_growth_factor(ccl_cosmology * cosmo, double a, int * status)
     }
     if (*status!= CCL_ERROR_NOT_IMPLEMENTED) {
       double D;
-      int gslstatus = gsl_spline_eval_e(cosmo->data.growth, a, cosmo->data.accelerator,&D);
+      int gslstatus = gsl_spline_eval_e(cosmo->data.growth, a, NULL, &D);
       if(gslstatus != GSL_SUCCESS) {
         ccl_raise_gsl_warning(gslstatus, "ccl_background.c: ccl_growth_factor():");
         *status |= gslstatus;
@@ -1040,7 +1034,7 @@ double ccl_growth_rate(ccl_cosmology * cosmo, double a, int * status)
     }
     if(*status != CCL_ERROR_NOT_IMPLEMENTED) {
       double g;
-      int gslstatus = gsl_spline_eval_e(cosmo->data.fgrowth, a, cosmo->data.accelerator,&g);
+      int gslstatus = gsl_spline_eval_e(cosmo->data.fgrowth, a, NULL ,&g);
       if(gslstatus != GSL_SUCCESS) {
         ccl_raise_gsl_warning(gslstatus, "ccl_background.c: ccl_growth_rate():");
         *status |= gslstatus;
