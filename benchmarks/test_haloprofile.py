@@ -4,7 +4,7 @@ import pandas as pd
 import pyccl as ccl
 
 
-def test_mass_function():
+def test_halo_profile():
     df = pd.read_csv(
         os.path.join(os.path.dirname(__file__), 'data/haloprofile_models.txt'),
         sep=' ',
@@ -29,6 +29,10 @@ def test_mass_function():
                 c, concentration, halo_mass, overdensity_factor, a, r)
             sigma_nfw = ccl.nfw_profile_2d(
                 c, concentration, halo_mass, overdensity_factor, a, r)
+
+            print(r)
+            print(rho_ein)
+            print(df['rho_ein'].values[i])
 
             assert np.allclose(
                 rho_nfw, df['rho_nfw'].values[i], rtol=1e-3)
