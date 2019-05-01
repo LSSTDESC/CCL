@@ -43,17 +43,13 @@ gsl\+\_\+spline $\ast$ \mbox{\hyperlink{structccl__data_a6417dfa54222033c8c229d3
 \item 
 gsl\+\_\+spline $\ast$ \mbox{\hyperlink{structccl__data_a1dea641d6ae09c5e2ee8811a21c6ceda}{etahmf}}
 \item 
-gsl\+\_\+spline2d $\ast$ \mbox{\hyperlink{structccl__data_aa965346f6aa1fe399a7a0d759fb85312}{p\+\_\+lin}}
+\mbox{\hyperlink{structccl__p2d__t}{ccl\+\_\+p2d\+\_\+t}} $\ast$ \mbox{\hyperlink{structccl__data_aa2daa15d06d8739adae5a45be494c2c5}{p\+\_\+lin}}
 \item 
-gsl\+\_\+spline2d $\ast$ \mbox{\hyperlink{structccl__data_ad55e7ec9ee6a6d8ad95b3c9eb1eef92b}{p\+\_\+nl}}
+\mbox{\hyperlink{structccl__p2d__t}{ccl\+\_\+p2d\+\_\+t}} $\ast$ \mbox{\hyperlink{structccl__data_ad5cbffe11bc08c851293f7b72b6a2f90}{p\+\_\+nl}}
 \item 
-double \mbox{\hyperlink{structccl__data_ac33675ca1fd015c79fcf3e18623ed405}{k\+\_\+min\+\_\+lin}}
+\mbox{\hyperlink{struct_spl_par}{Spl\+Par}} $\ast$ \mbox{\hyperlink{structccl__data_ac655eaa75acfd755a45bb39e2344d800}{rsd\+\_\+splines}} \mbox{[}3\mbox{]}
 \item 
-double \mbox{\hyperlink{structccl__data_a2ab9d362ddf213f30d73c4cac4c60141}{k\+\_\+min\+\_\+nl}}
-\item 
-double \mbox{\hyperlink{structccl__data_a36afcf1cc6daf98b42b8e9c55338dad7}{k\+\_\+max\+\_\+lin}}
-\item 
-double \mbox{\hyperlink{structccl__data_a26b24c2ae6bb9b41b2f3a64a14fc65af}{k\+\_\+max\+\_\+nl}}
+double \mbox{\hyperlink{structccl__data_ad599220fa8b248458b36d48906b75d1d}{rsd\+\_\+splines\+\_\+scalefactor}}
 \end{DoxyCompactItemize}
 
 
@@ -157,53 +153,41 @@ Struct containing references to gsl splines for distance and acceleration calcul
 \subsubsection{\texorpdfstring{growth0}{growth0}}
 {\footnotesize\ttfamily double ccl\+\_\+data\+::growth0}
 
-\mbox{\Hypertarget{structccl__data_a36afcf1cc6daf98b42b8e9c55338dad7}\label{structccl__data_a36afcf1cc6daf98b42b8e9c55338dad7}} 
-\index{ccl\+\_\+data@{ccl\+\_\+data}!k\+\_\+max\+\_\+lin@{k\+\_\+max\+\_\+lin}}
-\index{k\+\_\+max\+\_\+lin@{k\+\_\+max\+\_\+lin}!ccl\+\_\+data@{ccl\+\_\+data}}
-\subsubsection{\texorpdfstring{k\+\_\+max\+\_\+lin}{k\_max\_lin}}
-{\footnotesize\ttfamily double ccl\+\_\+data\+::k\+\_\+max\+\_\+lin}
-
-\mbox{\Hypertarget{structccl__data_a26b24c2ae6bb9b41b2f3a64a14fc65af}\label{structccl__data_a26b24c2ae6bb9b41b2f3a64a14fc65af}} 
-\index{ccl\+\_\+data@{ccl\+\_\+data}!k\+\_\+max\+\_\+nl@{k\+\_\+max\+\_\+nl}}
-\index{k\+\_\+max\+\_\+nl@{k\+\_\+max\+\_\+nl}!ccl\+\_\+data@{ccl\+\_\+data}}
-\subsubsection{\texorpdfstring{k\+\_\+max\+\_\+nl}{k\_max\_nl}}
-{\footnotesize\ttfamily double ccl\+\_\+data\+::k\+\_\+max\+\_\+nl}
-
-\mbox{\Hypertarget{structccl__data_ac33675ca1fd015c79fcf3e18623ed405}\label{structccl__data_ac33675ca1fd015c79fcf3e18623ed405}} 
-\index{ccl\+\_\+data@{ccl\+\_\+data}!k\+\_\+min\+\_\+lin@{k\+\_\+min\+\_\+lin}}
-\index{k\+\_\+min\+\_\+lin@{k\+\_\+min\+\_\+lin}!ccl\+\_\+data@{ccl\+\_\+data}}
-\subsubsection{\texorpdfstring{k\+\_\+min\+\_\+lin}{k\_min\_lin}}
-{\footnotesize\ttfamily double ccl\+\_\+data\+::k\+\_\+min\+\_\+lin}
-
-\mbox{\Hypertarget{structccl__data_a2ab9d362ddf213f30d73c4cac4c60141}\label{structccl__data_a2ab9d362ddf213f30d73c4cac4c60141}} 
-\index{ccl\+\_\+data@{ccl\+\_\+data}!k\+\_\+min\+\_\+nl@{k\+\_\+min\+\_\+nl}}
-\index{k\+\_\+min\+\_\+nl@{k\+\_\+min\+\_\+nl}!ccl\+\_\+data@{ccl\+\_\+data}}
-\subsubsection{\texorpdfstring{k\+\_\+min\+\_\+nl}{k\_min\_nl}}
-{\footnotesize\ttfamily double ccl\+\_\+data\+::k\+\_\+min\+\_\+nl}
-
 \mbox{\Hypertarget{structccl__data_a8b877a586de0aa78c7585338730b3139}\label{structccl__data_a8b877a586de0aa78c7585338730b3139}} 
 \index{ccl\+\_\+data@{ccl\+\_\+data}!logsigma@{logsigma}}
 \index{logsigma@{logsigma}!ccl\+\_\+data@{ccl\+\_\+data}}
 \subsubsection{\texorpdfstring{logsigma}{logsigma}}
 {\footnotesize\ttfamily gsl\+\_\+spline$\ast$ ccl\+\_\+data\+::logsigma}
 
-\mbox{\Hypertarget{structccl__data_aa965346f6aa1fe399a7a0d759fb85312}\label{structccl__data_aa965346f6aa1fe399a7a0d759fb85312}} 
+\mbox{\Hypertarget{structccl__data_aa2daa15d06d8739adae5a45be494c2c5}\label{structccl__data_aa2daa15d06d8739adae5a45be494c2c5}} 
 \index{ccl\+\_\+data@{ccl\+\_\+data}!p\+\_\+lin@{p\+\_\+lin}}
 \index{p\+\_\+lin@{p\+\_\+lin}!ccl\+\_\+data@{ccl\+\_\+data}}
 \subsubsection{\texorpdfstring{p\+\_\+lin}{p\_lin}}
-{\footnotesize\ttfamily gsl\+\_\+spline2d$\ast$ ccl\+\_\+data\+::p\+\_\+lin}
+{\footnotesize\ttfamily \mbox{\hyperlink{structccl__p2d__t}{ccl\+\_\+p2d\+\_\+t}}$\ast$ ccl\+\_\+data\+::p\+\_\+lin}
 
-\mbox{\Hypertarget{structccl__data_ad55e7ec9ee6a6d8ad95b3c9eb1eef92b}\label{structccl__data_ad55e7ec9ee6a6d8ad95b3c9eb1eef92b}} 
+\mbox{\Hypertarget{structccl__data_ad5cbffe11bc08c851293f7b72b6a2f90}\label{structccl__data_ad5cbffe11bc08c851293f7b72b6a2f90}} 
 \index{ccl\+\_\+data@{ccl\+\_\+data}!p\+\_\+nl@{p\+\_\+nl}}
 \index{p\+\_\+nl@{p\+\_\+nl}!ccl\+\_\+data@{ccl\+\_\+data}}
 \subsubsection{\texorpdfstring{p\+\_\+nl}{p\_nl}}
-{\footnotesize\ttfamily gsl\+\_\+spline2d$\ast$ ccl\+\_\+data\+::p\+\_\+nl}
+{\footnotesize\ttfamily \mbox{\hyperlink{structccl__p2d__t}{ccl\+\_\+p2d\+\_\+t}}$\ast$ ccl\+\_\+data\+::p\+\_\+nl}
 
 \mbox{\Hypertarget{structccl__data_a6417dfa54222033c8c229d3ca5e0866e}\label{structccl__data_a6417dfa54222033c8c229d3ca5e0866e}} 
 \index{ccl\+\_\+data@{ccl\+\_\+data}!phihmf@{phihmf}}
 \index{phihmf@{phihmf}!ccl\+\_\+data@{ccl\+\_\+data}}
 \subsubsection{\texorpdfstring{phihmf}{phihmf}}
 {\footnotesize\ttfamily gsl\+\_\+spline$\ast$ ccl\+\_\+data\+::phihmf}
+
+\mbox{\Hypertarget{structccl__data_ac655eaa75acfd755a45bb39e2344d800}\label{structccl__data_ac655eaa75acfd755a45bb39e2344d800}} 
+\index{ccl\+\_\+data@{ccl\+\_\+data}!rsd\+\_\+splines@{rsd\+\_\+splines}}
+\index{rsd\+\_\+splines@{rsd\+\_\+splines}!ccl\+\_\+data@{ccl\+\_\+data}}
+\subsubsection{\texorpdfstring{rsd\+\_\+splines}{rsd\_splines}}
+{\footnotesize\ttfamily \mbox{\hyperlink{struct_spl_par}{Spl\+Par}}$\ast$ ccl\+\_\+data\+::rsd\+\_\+splines\mbox{[}3\mbox{]}}
+
+\mbox{\Hypertarget{structccl__data_ad599220fa8b248458b36d48906b75d1d}\label{structccl__data_ad599220fa8b248458b36d48906b75d1d}} 
+\index{ccl\+\_\+data@{ccl\+\_\+data}!rsd\+\_\+splines\+\_\+scalefactor@{rsd\+\_\+splines\+\_\+scalefactor}}
+\index{rsd\+\_\+splines\+\_\+scalefactor@{rsd\+\_\+splines\+\_\+scalefactor}!ccl\+\_\+data@{ccl\+\_\+data}}
+\subsubsection{\texorpdfstring{rsd\+\_\+splines\+\_\+scalefactor}{rsd\_splines\_scalefactor}}
+{\footnotesize\ttfamily double ccl\+\_\+data\+::rsd\+\_\+splines\+\_\+scalefactor}
 
 
 

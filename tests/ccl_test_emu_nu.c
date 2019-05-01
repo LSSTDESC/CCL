@@ -4,12 +4,12 @@
 #include <stdio.h>
 #include <math.h>
 
-/*   Automated test for power spectrum emulation within CCL 
+/*   Automated test for power spectrum emulation within CCL
      using the Lawrence et al. (2017) code.
      The test compares the smoothed simulated power spectra
-     provided by the paper authors to the CCL output of the 
+     provided by the paper authors to the CCL output of the
      power spectrum via the emulator. This test corresponds
-     to Figure 5 of the emulator paper, for a specific subset 
+     to Figure 5 of the emulator paper, for a specific subset
      of the cosmologies: {38,39,40,42}. Other cosmologies
      are not allowed because CLASS fails when w(z) crosses -1
      and we need the linear power spectrum from CLASS in general
@@ -36,7 +36,7 @@ CTEST_DATA(emu_nu) {
 };
 
 CTEST_SETUP(emu_nu) {
-  
+
   data->Neff = 3.04;
   data->mnu_type = ccl_mnu_list;
   data->mu_0=0.;
@@ -66,7 +66,7 @@ CTEST_SETUP(emu_nu) {
   w_0=malloc(4*sizeof(double));
   w_a=malloc(4*sizeof(double));
   Omega_nu=malloc(4*sizeof(double));
-  
+
   // Omeganuh2_to_mnu will output a pointer to an array of 3 neutrino masses.
   Mnu_out=malloc(3*sizeof(double));
 
@@ -79,11 +79,11 @@ CTEST_SETUP(emu_nu) {
     fprintf(stderr,"Error opening file %s\n",fname);
     exit(1);
   }
-  
+
   double tmp;
   int omnustatus=0;
   for(int i=0;i<4;i++) {
-    
+
     status=fscanf(f,"%le %le %le %le %le %le %le %le\n",&Omega_c[i],&Omega_b[i],&h[i],&sigma8[i],&n_s[i],&w_0[i],&w_a[i],&Omega_nu[i]);
     if(status!=8) {
       fprintf(stderr,"Error reading file %s, line %d\n",fname,i);
@@ -126,12 +126,12 @@ static void compare_emu_nu(int i_model,struct emu_nu_data * data)
   char fname[256],str[1024];
   char* rtn;
   FILE *f;
-  int i_model_vec[4]={38,39,40,42}; //The emulator cosmologies we can compare to 
-  
+  int i_model_vec[4]={38,39,40,42}; //The emulator cosmologies we can compare to
+
   ccl_configuration config = default_config;
-  config.transfer_function_method = ccl_emulator;
+  config.transfer_function_method = ccl_boltzmann_class;
   config.matter_power_spectrum_method = ccl_emu;
- 
+
   //None of the current cosmologies being checked include neutrinos
   ccl_parameters params = ccl_parameters_create(data->Omega_c[i_model-1],data->Omega_b[i_model-1],0.0,data->Neff, data->mnu[i_model-1], data->mnu_type, data->w_0[i_model-1],data->w_a[i_model-1],data->h[i_model-1],data->sigma8[i_model-1],data->n_s[i_model-1],-1,-1,-1,data->mu_0, data->sigma_0,-1,NULL,NULL, &status);
   params.Omega_l=params.Omega_l+params.Omega_g;
@@ -141,7 +141,7 @@ static void compare_emu_nu(int i_model,struct emu_nu_data * data)
 
   //These files contain the smoothed power spectra with neutrinos
   //These are obtained as follows:
-  // (1) Find the z=0 P(k) corresponding to M038. This would be column 304 of the 
+  // (1) Find the z=0 P(k) corresponding to M038. This would be column 304 of the
   //     'yalt...' file (with column numbering starting in 1).
   // (2) This column has log10(Delta_cb^2/k^1.5), so convert accordingly to Delta_cb^2.
   // (3) Take the power spectrum in the file ‘pk_lin...' for M038 (second column for P(k) in Mpc^3)
@@ -155,12 +155,12 @@ static void compare_emu_nu(int i_model,struct emu_nu_data * data)
     exit(1);
   }
   nk=linecount(f)-1; rewind(f);
-  
+
   double k=0.,pk_bench=0.,pk_ccl,err;
   double z=0.; //Other redshift checks are possible but not currently implemented
   int stat=0;
-  
-  for(i=0;i<nk;i++) {      
+
+  for(i=0;i<nk;i++) {
     stat=fscanf(f,"%le %le\n",&k, &pk_bench);
     if(stat!=2) {
       fprintf(stderr,"Error reading file %s, line %d\n",fname,i);
@@ -187,7 +187,7 @@ CTEST2(emu_nu,model_1) {
 CTEST2(emu_nu,model_2) {
   int model=2;
   compare_emu_nu(model,data);
-  }
+}
 
 CTEST2(emu_nu,model_3) {
   int model=3;
@@ -197,4 +197,4 @@ CTEST2(emu_nu,model_3) {
 CTEST2(emu_nu,model_4) {
   int model=4;
   compare_emu_nu(model,data);
-  }
+}

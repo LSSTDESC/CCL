@@ -21,7 +21,6 @@ CTEST_DATA(distances_cosmomad_hiz) {
   double w_a[3];
   double mu_0;
   double sigma_0;
-  
   double z[7];
   double chi[3][7];
 };
@@ -33,11 +32,11 @@ static void read_chi_test_file(double z[7], double chi[3][7])
   //Distances are in Mpc/h
   FILE * f = fopen("./tests/benchmark/chi_hiz_model1-3.txt", "r");
   ASSERT_NOT_NULL(f);
-  
+
   // Ignore header line
   char str[1024];
   fgets(str, 1024, f);
-  
+
   // File is fixed format - five rows and six columns
   for (int i=0; i<7; i++) {
     int count = fscanf(f, "%le %le %le %le \n", &z[i],
@@ -90,14 +89,14 @@ static void compare_distances_hiz(int model, struct distances_cosmomad_hiz_data 
 						data->Neff, data->mnu, data->mnu_type,
 						data->w_0[model], data->w_a[model],
 						data->h, data->A_s, data->n_s,-1,-1,-1,data->mu_0, data->sigma_0,-1,NULL,NULL, &status);
-  
+
   params.Omega_g=0; //enforce no radiation
   params.Omega_l = 1.-params.Omega_m-params.Omega_k; //reomcpute Omega_l without radiation
-  
+
   // Make a cosmology object from the parameters with the default configuration
   ccl_cosmology * cosmo = ccl_cosmology_create(params, default_config);
   ASSERT_NOT_NULL(cosmo);
-  
+
   // Compare to benchmark data
   for (int j=0; j<7; j++) {
     double a = 1/(1.+data->z[j]);
@@ -107,7 +106,7 @@ static void compare_distances_hiz(int model, struct distances_cosmomad_hiz_data 
     if (fabs(absolute_tolerance)<1e-12) absolute_tolerance = 1e-12;
     ASSERT_DBL_NEAR_TOL(data->chi[model][j], chi_ij, absolute_tolerance);
   }
-  
+
   ccl_cosmology_free(cosmo);
 }
 

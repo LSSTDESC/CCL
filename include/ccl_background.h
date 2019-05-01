@@ -288,7 +288,7 @@ double ccl_mu_MG(ccl_cosmology * cosmo, double a, int *status);
 /**
  * Compute comoving distances and spline to be stored
  * in the cosmology structure.
- * @param cosmo Cosmological parameters 
+ * @param cosmo Cosmological parameters
  * @param status Status flag. 0 if there are no errors, nonzero otherwise.
  * For specific cases see documentation for ccl_error.c
  * @return void
@@ -298,7 +298,7 @@ void ccl_cosmology_compute_distances(ccl_cosmology * cosmo,int *status);
 /**
  * Compute the growth function and a spline to be stored
  * in the cosmology structure.
- * @param cosmo Cosmological parameters 
+ * @param cosmo Cosmological parameters
  * @param status Status flag. 0 if there are no errors, nonzero otherwise.
  * For specific cases see documentation for ccl_error.c
  * @return void

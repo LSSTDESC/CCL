@@ -3,20 +3,19 @@ the cosmology and parameters objects used to instantiate a model from which one
 can compute a set of theoretical predictions.
 can compute a set of theoretical predictions.
 
+------------------------------------------------------------
+Supported Models for the Power Spectrum, Mass Function, etc.
+------------------------------------------------------------
+
 The classes in this module accept strings indicating which model to use
 for various physical quantities (e.g., the transfer function). The various
 options are as follows.
 
 transfer_function options
-  - 'emulator': the transfer function defined by the Comsic Emu
-  - 'fitting_function': the Eisenstein and Hu (1998) fitting function
+  - None : do not compute a linear power spectrum
   - 'eisenstein_hu': the Eisenstein and Hu (1998) fitting function
   - 'bbks': the BBKS approximation
-  - 'boltzmann': use CLASS to compute the transfer function
   - 'boltzmann_class': use CLASS to compute the transfer function
-  - 'class': use CLASS to compute the transfer function
-  - 'boltzmann_camb': not implemented
-  - 'camb': not implemented
 
 matter_power_spectrum options
   - 'halo_model': use a halo model
@@ -58,6 +57,130 @@ emulator_neutrinos options
     - 'equalize': redistribute the total mass equaly before using the Cosmic
       Emu. This option may result in slight internal inconsistencies in the
       physical model assumed for neutrinos.
+
+------------------------------------------
+Controlling Splines and Numerical Accuracy
+------------------------------------------
+
+The internal splines and integration accuracy are controlled by the
+attributes of :obj:`Cosmology.cosmo.spline_params` and
+:obj:`Cosmology.cosmo.gsl_params`. These should be set after instantiation,
+but before the object is used. For example, you can set the generic relative
+accuracy for integration by executing
+``c = Cosmology(...); c.cosmo.gsl_params.INTEGRATION_EPSREL = 1e-5``. The
+default values for these parameters are located in ``src/ccl_core.c``.
+
+The intrnal splines are controlled by the following
+parameters.
+  - A_SPLINE_NLOG: the number of logarithmically spaced bins between
+    A_SPLINE_MINLOG and A_SPLINE_MIN.
+  - A_SPLINE_NA: the number of linearly spaced bins between
+    A_SPLINE_MIN and A_SPLINE_MAX.
+  - A_SPLINE_MINLOG: the minimum value of the scale factor splines used for
+    distances, etc.
+  - A_SPLINE_MIN: the transition scale factor between logarithmically spaced
+    spline points and linearly spaced spline points.
+  - A_SPLINE_MAX: the the maximum value of the scale factor splines used for
+    distances, etc.
+  - LOGM_SPLINE_NM: the number of logarithmically spaced values in mass for
+    splines used in the computation of the halo mass function.
+  - LOGM_SPLINE_MIN: the base-10 logarithm of the minimum halo mass for
+    splines used in the computation of the halo mass function.
+  - LOGM_SPLINE_MAX: the base-10 logarithm of the maximum halo mass for
+    splines used in the computation of the halo mass function.
+  - LOGM_SPLINE_DELTA: the step in base-10 logarithmic units for computing
+    finite difference derivatives in the computation of the mass function.
+  - A_SPLINE_NLOG_PK: the number of logarithmically spaced bins between
+    A_SPLINE_MINLOG_PK and A_SPLINE_MIN_PK.
+  - A_SPLINE_NA_PK: the number of linearly spaced bins between
+    A_SPLINE_MIN_PK and A_SPLINE_MAX.
+  - A_SPLINE_MINLOG_PK: the minimum value of the scale factor used
+    for the power spectrum splines.
+  - A_SPLINE_MIN_PK: the transition scale factor between logarithmically
+    spaced spline points and linearly spaced spline points for the power
+    spectrum.
+  - K_MIN: the minimum wavenumber for the power spectrum splines for
+    analytic models (e.g., BBKS, Eisenstein & Hu, etc.).
+  - K_MAX: the maximum wavenumber for the power spectrum splines for
+    analytic models (e.g., BBKS, Eisenstein & Hu, etc.).
+  - K_MAX_SPLINE: the maximum wavenumber for the power spectrum splines for
+    numerical models (e.g., ComsicEmu, CLASS, etc.).
+  - N_K: the number of spline nodes per decade for the power spectrum
+    splines.
+  - N_K_3DCOR: the number of spline points in wavenumber per decade used for
+    computing the 3D correlation function.
+  - ELL_MIN_CORR: the minimum value of the spline in angular wavenumber for
+    correlation function computations with FFTlog.
+  - ELL_MAX_CORR: the maximum value of the spline in angular wavenumber for
+    correlation function computations with FFTlog.
+  - N_ELL_CORR: the number of logarithmically spaced bins in angular
+    wavenumber between ELL_MIN_CORR and ELL_MAX_CORR.
+
+The numrical accuracy of GSL computations are controlled by the following
+parameters.
+  - N_ITERATION: the size of the GSL workspace for numerical
+    integration.
+  - INTEGRATION_GAUSS_KRONROD_POINTS: the Gauss-Kronrod quadrature rule used
+    for adaptive integrations.
+  - INTEGRATION_EPSREL: the relative error tolerance for numerical
+    integration; used if not specified by a more specific parameter.
+  - INTEGRATION_LIMBER_GAUSS_KRONROD_POINTS: the Gauss-Kronrod quadrature
+    rule used for adaptive integrations on subintervals for Limber integrals.
+  - INTEGRATION_LIMBER_EPSREL: the relative error tolerance for numerical
+    integration of Limber integrals.
+  - INTEGRATION_DISTANCE_EPSREL: the relative error tolerance for numerical
+    integration of distance integrals.
+  - INTEGRATION_SIGMAR_EPSREL: the relative error tolerance for numerical
+    integration of power spectrum variance intrgals for the mass function.
+  - ROOT_EPSREL: the relative error tolerance for root finding used to
+    invert the relationship between comoving distance and scale factor.
+  - ROOT_N_ITERATION: the maximum number of iterations used to for root
+    finding to invert the relationship between comoving distance and
+    scale factor.
+  - ODE_GROWTH_EPSREL: the relative error tolerance for integrating the
+    linear growth ODEs.
+  - EPS_SCALEFAC_GROWTH: 10x the starting step size for integrating the
+    linear growth ODEs and the scale factor of the initial condition for the
+    linear growth ODEs.
+  - HM_MMIN: the minimum mass for halo model integrations.
+  - HM_MMAX: the maximum mass for halo model integrations.
+  - HM_EPSABS: the absolute error tolerance for halo model integrations.
+  - HM_EPSREL: the relative error tolerance for halo model integrations.
+  - HM_LIMIT: the size of the GSL workspace for halo moodel integrations.
+  - HM_INT_METHOD: the Gauss-Kronrod quadrature rule used for adaptive
+    integrations for the halo model comptutations.
+
+-----------------------------
+Specifying Physical Constants
+-----------------------------
+
+The values of physical constants are set globally. These can be changed by
+assigning a new value to the attributes of ``pyccl.physical_constants``.
+The following constants are defined and their default values are located
+in ``src/ccl_core.c``. Note that the neutrino mass splittings are taken
+from Lesgourgues & Pastor (2012; 1212.6154).
+
+basic physical constants
+  - CLIGHT_HMPC: speed of light / H0 in units of Mpc/h
+  - GNEWT: Newton's gravitational constant in units of m^3/Kg/s^2
+  - SOLAR_MASS: solar mass in units of kg
+  - MPC_TO_METER: conversion factor for Mpc to meters.
+  - PC_TO_METER: conversion factor for parsecs to meters.
+  - RHO_CRITICAL: critical density in units of M_sun/h / (Mpc/h)^3
+  - KBOLTZ: Boltzmann constant in units of J/K
+  - STBOLTZ: Stefan-Boltzmann constant in units of kg/s^3 / K^4
+  - HPLANCK: Planck's constant in units kg m^2 / s
+  - CLIGHT: speed of light in m/s
+  - EV_IN_J: conversion factor between electron volts and Joules
+  - T_CMB: temperature of the CMB in K
+  - TNCDM: temperature of the cosmological neutrino background in K
+
+neutrino mass splittings
+  - DELTAM12_sq: squared mass difference between eigenstates 2 and 1.
+  - DELTAM13_sq_pos: squared mass difference between eigenstates 3 and 1 for
+    the normal hierarchy.
+  - DELTAM13_sq_neg: squared mass difference between eigenstates 3 and 1 for
+    the inverted hierarchy.
 """
 import numpy as np
 import yaml
@@ -67,16 +190,10 @@ from .errors import CCLError
 
 # Configuration types
 transfer_function_types = {
-    'none':             lib.none,
-    'emulator':         lib.emulator,
-    'fitting_function': lib.fitting_function,
+    None:               lib.transfer_none,
     'eisenstein_hu':    lib.eisenstein_hu,
     'bbks':             lib.bbks,
-    'boltzmann':        lib.boltzmann,
-    'boltzmann_camb':   lib.boltzmann_camb,
-    'camb':             lib.boltzmann_camb,
     'boltzmann_class':  lib.boltzmann_class,
-    'class':            lib.boltzmann_class,
 }
 
 matter_power_spectrum_types = {
@@ -86,19 +203,6 @@ matter_power_spectrum_types = {
     'emu':          lib.emu
 }
 
-# List which matter_power_spectrum types are allowed for each transfer_function
-valid_transfer_matter_power_combos = {
-    'none':             [],
-    'emulator':         [lib.emu, ],
-    'fitting_function': [lib.linear, lib.halofit, lib.halo_model],
-    'eisenstein_hu':    [lib.linear, lib.halofit, lib.halo_model],
-    'bbks':             [lib.linear, lib.halofit, lib.halo_model],
-    'boltzmann':        [lib.linear, lib.halofit],
-    'boltzmann_class':  [lib.linear, lib.halofit],
-    'class':            [lib.linear, lib.halofit],
-    'boltzmann_camb':   [],
-    'camb':             [],
-}
 baryons_power_spectrum_types = {
     'nobaryons':   lib.nobaryons,
     'bcm':         lib.bcm
@@ -181,6 +285,16 @@ class Cosmology(object):
               `DESC Note <https://github.com/LSSTDESC/CCL/blob/master/doc\
 /0000-ccl_note/main.pdf>`_
               for details.
+
+    .. note:: After instantiation, you can set parameters related to the
+              internal splines and numerical integration accuracy by setting
+              the values of the attributes of
+              :obj:`Cosmology.cosmo.spline_params` and
+              :obj:`Cosmology.cosmo.gsl_params`. For example, you can set
+              the generic relative accuracy for integration by executing
+              ``c = Cosmology(...); c.cosmo.gsl_params.INTEGRATION_EPSREL \
+= 1e-5``.
+              See the module level documetaion of `pyccl.core` for details.
 
     Args:
         Omega_c (:obj:`float`): Cold dark matter density fraction.
@@ -387,14 +501,6 @@ class Cosmology(object):
                              % (emulator_neutrinos,
                                 emulator_neutrinos_types.keys()))
 
-        # Check for valid transfer fn/matter power spectrum combination
-        if (matter_power_spectrum_types[matter_power_spectrum]
-                not in
-                valid_transfer_matter_power_combos[transfer_function]):
-            raise ValueError("matter_power_spectrum '%s' can't be used "
-                             "with transfer_function '%s'."
-                             % (matter_power_spectrum, transfer_function))
-
         # Assign values to new ccl_configuration object
         config = lib.configuration()
 
@@ -456,10 +562,23 @@ class Cosmology(object):
         if norm_pk < 1e-5 and sigma8 is not None:
             raise ValueError("sigma8 must be greater than 1e-5.")
 
+        # Make sure the neutrino parameters are consistent.
         if isinstance(m_nu, float):
             if mnu_type is None:
                 mnu_type = 'sum'
             m_nu = [m_nu]
+            if (mnu_type == 'sum'
+                    and m_nu[0] < (np.sqrt(7.62E-5) + np.sqrt(2.55E-3))
+                    and (m_nu[0] > 1e-15)):
+                raise ValueError("if mnu_type= sum, we are using the "
+                                 "normal hierarchy and so m_nu must "
+                                 "be less than (~)0.0592")
+            elif (mnu_type == 'sum_inverted' and
+                  m_nu[0] < (np.sqrt(2.43e-3 - 7.62e-5) + np.sqrt(2.43e-3))
+                  and (m_nu[0] > 1e-15)):
+                raise ValueError("if mnu_type= sum_inverted, we are using the "
+                                 "inverted hierarchy and so m_nu must "
+                                 "be less than (~)0.0978")
         elif hasattr(m_nu, "__len__"):
             if (len(m_nu) != 3):
                 raise ValueError("m_nu must be a float or array-like object "
@@ -536,6 +655,21 @@ class Cosmology(object):
         if hasattr(self, "_params"):
             if self._params is not None:
                 lib.parameters_free(self._params)
+
+        # finally delete some attributes we don't want to be around for safety
+        # when the context manager exits or if __del__ is called twice
+        if hasattr(self, "cosmo"):
+            delattr(self, "cosmo")
+        if hasattr(self, "_params"):
+            delattr(self, "_params")
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, type, value, traceback):
+        """Free the C memory this object is managing when the context manager
+        exits."""
+        self.__del__()
 
     def __getstate__(self):
         # we are removing any C data before pickling so that the
@@ -676,6 +810,7 @@ def check(status, cosmo=None):
     Args:
         status (int or :obj:`core.error_types`): Flag or error describing the
                                                  success of a function.
+        cosmo (:obj:`Cosmology`, optional): A Cosmology object.
     """
     # Check for normal status (no action required)
     if status == 0:

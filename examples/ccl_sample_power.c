@@ -2,7 +2,6 @@
 #include <stdio.h>
 
 #include <ccl.h>
-#include <ccl_params.h>
 
 int main(int argc, char * argv[])
 {
@@ -20,7 +19,7 @@ int main(int argc, char * argv[])
   ccl_cosmology * cosmo = ccl_cosmology_create(params, config);
 
   printf("# k [1/Mpc],P(k,z=0),P(k,z=1),P(k,z=2),P(k,z=3)\n");
-  
+
   double k,p,p1,p2,p3=0;
   double a_at_z1=0.5;
   double a_at_z2=1./3.;
@@ -52,7 +51,7 @@ int main(int argc, char * argv[])
   printf("sigma8 = %.6lE\n", ccl_sigmaR(cosmo,8./h, 1.0, &status));
   printf("Consistency check: sigma8 = %.6lE\n", ccl_sigma8(cosmo,&status));
   printf("Completed. Status = %d\n",status);
-  
+
   ccl_cosmology_free(cosmo);
 
   return 0;

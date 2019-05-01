@@ -47,8 +47,8 @@
 \maketitlepre
 
 \begin{abstract}
-  
-The Core Cosmology Library (\ccl) provides routines to compute basic cosmological observables with validated numerical accuracy. These routines have been validated to an accuracy level, documented here, against the results of independent implementations. In the current version, predictions are provided for distances and background quantities, angular auto- and cross-spectra of cosmic shear, galaxy-galaxy lensing, intrinsic alignments and clustering, halo bias and the halo mass function. \ccl uses different schemes to obtain the matter power spectrum, including analytical, phenomenological and other schemes calibrated through simulations. Fiducial specifications for the expected LSST galaxy distributions and clustering bias are also included, together with the capability of computing redshift distributions for a user-defined photometric redshift model. \ccl is written in C, with a Python interface. In this note, we explain the functionality of the publicly released (\ccl v1.0.0) library.
+
+The Core Cosmology Library (\ccl) provides routines to compute basic cosmological observables with validated numerical accuracy. These routines have been validated to an accuracy level, documented here, against the results of independent implementations. In the current version, predictions are provided for distances and background quantities, angular auto- and cross-spectra of cosmic shear, galaxy-galaxy lensing, intrinsic alignments and clustering, halo bias and the halo mass function. \ccl uses different schemes to obtain the matter power spectrum, including analytical, phenomenological and other schemes calibrated through simulations. \ccl is written in C, with a Python interface. In this note, we explain the functionality of the publicly released (\ccl v1.0.0) library.
 
 \end{abstract}
 
@@ -314,7 +314,7 @@ Ultimately, \ccl plans to incorporate theoretical predictions for all cosmologic
 \ccl also provides support for modeling the impact of baryons on the matter power spectrum, as described in Sec. \ref{ss:baryons}.
 Not all features of \ccl are available for all models. For a guide to which predictions are available for each model, see Table \ref{tab:cosmo}. Note that if users install their own version of {\tt CLASS}, {\tt CCL} can then make predictions for a more extended set of cosmologies. Users should take care to understand the validity of the {\tt CCL} assumptions for their own models.
 
-In its default configuration, \ccl adopts the nonlinear matter power spectrum from {\tt CLASS} through the Halofit implementation and the Tinker mass function for cluster number counts. 
+In its default configuration, \ccl adopts the nonlinear matter power spectrum from {\tt CLASS} through the Halofit implementation and the Tinker mass function for cluster number counts.
 
 \subsection{Creating a cosmology}
 
@@ -479,8 +479,15 @@ As usual, the resulting growth factor can be returned normalized to $D(a=1)=1$ o
 \subsection{Matter power spectrum}
 \label{sec:power}
 
-There are several options for obtaining the matter power spectrum in \ccl.
-The routines described in this subsection are implemented in {\tt ccl$\_$power.c}.
+There are several options for obtaining the linear and non-linear matter power spectrum in \ccl.
+We parameterize the linear matter power spectrum via the transfer function via the relationship
+$P(k) = 2 \pi^2 \Delta^2(k) /k^3  \propto T^2(k) k^{n_s}$, where $\Delta(k)$ is the dimensionless power
+spectrum and $n_s$ is the spectral index. The normalization of the power spectrum is defined at $z=0$ by
+setting $\sigma_8$ to its value today or by setting the initial value $A_s$ depending on the option.
+The non-linear matter power spectrum options either use the linear matter power spectrum as inputs (e.g., the halo model)
+or supply their own values (e.g., an emulator). Both power spectra are interpolated in a two-dimensional
+table of scale factor and redshift for later use. The routines described in this subsection are
+implemented in {\tt ccl$\_$power.c} and related files for each specific model.
 
 \subsubsection{BBKS}
 \ccl implements the analytical BBKS approximation to the transfer function \citep{BBKS}, given by
@@ -488,27 +495,48 @@ The routines described in this subsection are implemented in {\tt ccl$\_$power.c
 T(q\equiv k/\Gamma h {\rm Mpc}^{-1}) = \frac{\ln[1+2.34q]}{2.34q}[1+3.89q+(16.2q)^2+(5.47q)^3+(6.71q)^4]^{-0.25}
 \end{equation}
 where $\Gamma = \Omega_m h$.
-The power spectrum is related to the transfer function by
-$P(k) = 2 \pi^2 \Delta^2(k) /k^3  \propto T^2(k) k^{n_s}$, where $\Delta(k)$ is the dimensionless power
-spectrum and $n_s$ is the spectral index. The normalization of the power spectrum is defined at $z=0$ by
-setting $\sigma_8$ to its value today.
-The BBKS power spectrum option is primarily used as a precisely-defined input for testing the numerical accuracy of \ccl routines (as described in Sect.~\ref{sec:tests}), and it is not recommended for other uses.
+
+The BBKS power spectrum option is primarily used as a precisely-defined input for testing the numerical accuracy of \ccl routines (as described in Section~\ref{sec:tests}), and it is not recommended for other uses.
 
 \subsubsection{Eisenstein and Hu}
-\ccl also provides an approximation to the matter power spectrum as implemented by \citet{1998ApJ...496..605E} (E\&H; we refer the reader to this paper for a detailed discussion of the fitting formulae).\footnote{Note that the implementation in \ccl modifies Eq. 5 of \citet{1998ApJ...496..605E} using $a^{-1}=1+z$ instead of the approximation $a^{-1}\sim z$. The difference in the resulting power spectra is negligible, but larger than 1 part in $10^4$ for $k<10\,h\,{\rm Mpc}^{-1}$.}
+\ccl also provides an approximation to the transfer function as implemented by
+\citet{1998ApJ...496..605E} (E\&H; we refer the reader to this paper for a detailed
+discussion of the fitting formulae).\footnote{Note that the implementation in \ccl modifies Eq. 5 of \citet{1998ApJ...496..605E} using $a^{-1}=1+z$ instead of the approximation $a^{-1}\sim z$. The difference in the resulting power spectra is negligible, but larger than 1 part in $10^4$ for $k<10\,h\,{\rm Mpc}^{-1}$.}
 
-The Eisenstein \& Hu and BBKS approximations are not very accurate (generally only to within a few percent), and so should not be used to derive precise cosmological constraints. They are, however, computationally faster, and therefore useful for code testing and comparison.
+The Eisenstein \& Hu and BBKS approximations are not very accurate
+(generally only to within a few percent), and so should not be used to derive
+precise cosmological constraints. They are, however, computationally faster,
+and therefore useful for code testing and comparison.
 
 \subsubsection{CLASS}
-The fiducial configuration calls the {\tt CLASS} software \citep{class} within \ccl to obtain either linear or nonlinear matter power spectra at given redshifts. On initializing the cosmology object, we construct a bi-dimensional spline in $k$ and the scale-factor which is then evaluated by the relevant routines to obtain the matter power spectrum at the desired wavenumber and redshift. The relevant routines can be found within {\tt ccl$\_$power.c}. CLASS currently computes the non-linear power spectrum using the HaloFit prescription of \cite{CLASS_halofit}.
+The fiducial configuration calls the {\tt CLASS} software \citep{class} within \ccl to obtain the
+linear matter power spectrum at given redshift. On initializing the cosmology object, we construct a
+bi-dimensional spline in $k$ and the scale-factor which is then evaluated by the relevant routines
+to obtain the matter power spectrum at the desired wavenumber and redshift. The relevant routines
+can be found within {\tt ccl$\_$class.c}.
 
 As discussed in Section \ref{sec:extclass}, the user can compile \ccl with an external version of {\tt CLASS} as well.
 
+\subsubsection{Halofit}
+We provide a Halofit implementation that applies a correction to any input linear matter power spectrum
+to compute an approximation to the non-linear matter power spectrum. We use the model from \citet{CLASS_halofit}
+which is accruate to roughly $10\%$.
+
+\subsubsection{Halo Model}
+We also provide a halo model implementation for computing the non-linear matter power spectrum. Halo model
+computations are known to be innacurate at the $10\%$ level or more. See Section~\ref{sec:halo_model} for
+details.
+
 \subsubsection{Cosmic emulator}
 
-The cosmic emulator of \citet{Lawrence17} is integrated into \ccl and it is available as one of the matter power spectrum and transfer function methods (both have to be specified). The cosmic emulator provides predictions for the matter power spectrum based on an interpolation over simulation outputs spanning a defined set of cosmological parameter values.
+The cosmic emulator of \citet{Lawrence17} is integrated into \ccl and it is available as one of the non-linear matter power spectrum
+options. The cosmic emulator provides predictions for the non-linear matter power spectrum based on an
+interpolation over simulation outputs spanning a defined set of cosmological parameter values.
 
-The emulator provides accurate predictions for the nonlinear matter power spectrum, at the $1\%$ level, for $z\leq 2$ and in the wavenumber range $k=[10^{-3},5]$ Mpc$^{-1}$. If a redshift above $z=2$ is passed, the emulator will quit and return an error message. For $k$ values below and above the previously specified range, we extrapolate in the manner specified in the following section.
+The emulator provides accurate predictions for the nonlinear matter power spectrum, at the $1\%$ level,
+for $z\leq 2$ and in the wavenumber range $k=[10^{-3},5]$ Mpc$^{-1}$. If a redshift above $z=2$ is passed,
+the emulator will quit and return an error message. For $k$ values below and above the previously
+specified range, we extrapolate in the manner specified in the following section.
 
 The allowed range of cosmological parameters is as follows:
 \begin{eqnarray}
@@ -522,7 +550,11 @@ The allowed range of cosmological parameters is as follows:
 0.0&\leq& \Omega_\nu h^2 \leq 0.01.
 \end{eqnarray}
  %
-Actually, $w_a$ and $w_0$ are constrained jointly to be $0.3\leq (-w_0-w_a)^{1/4}$. Note that \ccl only allows a subregion within this parameter space. For models in which w(z) crosses $-1$ at some given redshift, {\tt CLASS} will crash because this value corresponds to a true cosmological constant, which by definition should have no perturbations.\footnote{We thank Emilio Bellini and Miguel Zumalac\'arregui for clarifying this for us.} The linear matter power spectrum is still obtained from {\tt CLASS} as described in the section above.
+Actually, $w_a$ and $w_0$ are constrained jointly to be $0.3\leq (-w_0-w_a)^{1/4}$. Note that \ccl
+only allows a subregion within this parameter space. For models in which w(z) crosses $-1$ at some
+given redshift, {\tt CLASS} will crash because this value corresponds to a true cosmological
+constant, which by definition should have no perturbations.\footnote{We thank Emilio Bellini and 
+Miguel Zumalac\'arregui for clarifying this for us.}
 
 \paragraph{Neutrino species} The emulator is set up to consider $N_{\rm eff}=3.04$ and to allow the user to provide $\Omega_\nu h^2$ in order to set the neutrino mass, where it is assumed that the corresponding mass is split equally amongst three neutrinos. This is different from the standard {\tt CCL} configuration, which takes as input the mass(es) of neutrinos in eV, $m_{\nu}$. The assumption of an equal split of masses amongst three neutrino species is also different from the default \ccl choice to split the mass amongst species according to the normal hierarchy. For best compatibility with the emulator, we therefore include a {\tt ccl$\_$configuration} element {\tt emulator$\_$neutrinos$\_$method}, which defaults to {\tt ccl$\_$strict} but can be set to {\tt ccl$\_$equalize} if desired:
 \begin{itemize}
@@ -563,9 +595,10 @@ We then set up splines for the power spectrum as usual.
 
 Note that the $\mu, \Sigma$ quasistatic parameterization of deviations from GR is technically only valid in the linear regime. We allow the user to do this re-scaling for the non-linear power spectrum, but issue a warning.
 
-\subsubsection{Spline parameters \& the INI file}
+\subsubsection{Spline parameters}
 
-All spline and grid parameters relevant for computing quantities such as distances, growth functions, power spectra, and halo mass functions are defined in the {\tt ccl$\_$params.ini} file in the {\tt include} folder of the repository. This file allows the user to configure the following constants:
+All spline and grid parameters relevant for computing quantities such as distances, growth functions, power spectra, and halo mass functions can be set by assigning values to the members of the {\tt spline$\_$params} structure in each {\tt ccl$\_$cosmology} structure.
+The user can configure the following constants:
 
 \begin{itemize}
 \item {\tt A$\_$SPLINE$\_$NLOG}: number of points in the logarithmic part of the scale factor spline. The default is {\tt A$\_$SPLINE$\_$NLOG}$=250$.
@@ -589,7 +622,7 @@ All spline and grid parameters relevant for computing quantities such as distanc
 The default is {\tt N$\_$K$\_$3DCOR}~=~100,000.
 \end{itemize}
 
-The precision parameters of {\tt GSL} routines can also be set in {\tt ccl$\_$params.ini}. The parameters are organized in a hierarchal fashion, such that more specialized parameters take precedence over more general ones. For example, there is a general tolerance parameter, a tolerance parameter for integrals, and a tolerance parameter for the Limber integral. By default all are set to the value of the general tolerance. Changing the integration tolerance changes the tolerance for all integrals but not for root-finding routines, for example, and changing the Limber integral tolerance only affects that integral and no other.
+The precision parameters of {\tt GSL} routines can be set by assigning values to the members of the {\tt gsl$\_$params} structure in each {\tt ccl$\_$cosmology} structure. The parameters are organized in a hierarchal fashion, such that more specialized parameters take precedence over more general ones. For example, there is a general tolerance parameter, a tolerance parameter for integrals, and a tolerance parameter for the Limber integral. By default all are set to the value of the general tolerance. Changing the integration tolerance changes the tolerance for all integrals but not for root-finding routines, for example, and changing the Limber integral tolerance only affects that integral and no other.
 The parameters are:
 
 \begin{itemize}
@@ -608,10 +641,6 @@ The parameters are:
 \item {\tt GSL$\_$ROOT$\_$N$\_$ITERATION}: Maximum number of iterations allowed for {\tt GSL} root-finding routines. Default is {\tt GSL$\_$N$\_$ITERATION}.
 \item {\tt GSL$\_$ODE$\_$GROWTH$\_$EPSREL}: Relative tolerance for {\tt GSL} ODE-solving routines for growth factor calculation. Default is $10^{-6}$.
 \end{itemize}
-
-The {\tt GSL} parameters are initialized to their default values and do not need to be listed in {\tt ccl$\_$params.ini} if no adjustments are necessary.
-
-{\bf Note} that a copy of {\tt ccl$\_$params.ini} is installed along with the library, so changing the version of this file inside the source directory will not have any effect unless you reinstall.
 
 For the matter power spectrum, the spline is performed in two variables: the logarithmically-spaced wavenumber and the linearly-spaced scale factor. Splining the {\tt CLASS} output leads to some precision loss (compared to direct outputs from {\tt CLASS}). We quantify this, along with the impact of extrapolation, in the following subsection.
 
@@ -635,7 +664,7 @@ We also extrapolate the power spectrum at small wavenumbers within the static ro
 \begin{equation}
   \log P(k<{\tt K\_MIN\_SPLINE},z) = \log P({\tt K\_MIN\_SPLINE},z) + n_s (\log k-\log{\tt K\_MIN\_SPLINE})
 \end{equation}
-The value adopted for {\tt K\_MIN\_SPLINE} depends on the choice of power spectrum method and is not currently accessible to the user via the .ini file. For {\tt CLASS} and the nonlinear power spectrum, we adopt {\tt K\_MIN\_SPLINE} that coincides with the smallest wavenumber output by {\tt CLASS}, {\tt K\_MIN\_SPLINE}$=7\times 10^{-6}$/Mpc.  Note that this parameter is different from {\tt K\_MIN}, which sets the minimum $k$ for integrations and which is set by default to {\tt K\_MIN}$=5\times 10^{-5}$/Mpc. Hence, in practice, no extrapolation is occurring in this case, unless the user specifically asks for an output power spectra below {\tt K\_MIN} for their own purposes.
+The value adopted for {\tt K\_MIN\_SPLINE} depends on the choice of power spectrum method and is not currently settable by the user. For {\tt CLASS} and the nonlinear power spectrum, we adopt {\tt K\_MIN\_SPLINE} that coincides with the smallest wavenumber output by {\tt CLASS}, {\tt K\_MIN\_SPLINE}$=7\times 10^{-6}$/Mpc.  Note that this parameter is different from {\tt K\_MIN}, which sets the minimum $k$ for integrations and which is set by default to {\tt K\_MIN}$=5\times 10^{-5}$/Mpc. Hence, in practice, no extrapolation is occurring in this case, unless the user specifically asks for an output power spectra below {\tt K\_MIN} for their own purposes.
 
 For BBKS, the power spectrum is computed analytically at all $k$, there is no extrapolation. For the Eisenstein \& Hu implementation, the splines of the power spectrum span {\tt K\_MIN}$<k<${\tt K$\_$MAX$\_$SPLINE}, so there is only extrapolation at high $k$. For the nonlinear matter power spectrum from the emulator, {\tt K\_MIN\_SPLINE} and {\tt K\_MAX\_SPLINE} are set to fixed values that are determined from the range of validity of the emulator:  {\tt K\_MIN\_SPLINE}$=10^{-3}$ Mpc$^{-1}$ and {\tt K\_MAX\_SPLINE}$=5$ Mpc$^{-1}$.
 
@@ -904,6 +933,37 @@ calculated from the power spectrum $P(k)$ using
 
 To evaluate the numerical integral in the correlation functions, we make use of the public code {\tt FFTlog}\footnote{\url{http://casa.colorado.edu/~ajsh/FFTLog/}}\citep{Hamilton2000,Talman2009}. In brief, {\tt FFTlog} works on functions periodic in log space, by writing the Hankel Transform as a convolution between Bessel functions and the function of interest (in this case either $C_\ell$ or $P(k)$). A version of this code is included in \ccl with minor modifications.
 
+
+{\bf Redshift-space distortions.} In redshift space and under the linear approximation \citep{Kaiser1987} the correlation function $\xi(s,\mu)$ can be expanded in multipoles:
+\begin{equation}
+\xi(s,\mu) = \sum_{l\geq 0} \xi_l(s) L_l(\mu),
+\end{equation}
+where $s$ is the magnitude of the galaxy separation vector in redshift space $\bf s$, $\mu$ is the cosine of the separation angle between $\bf s$ and the line of sight, and $L_l(x)$ are the Legendre polynomials. The multipoles of the correlation function are given by
+\begin{equation}
+\xi_l(s) = \frac{i^l}{2 \pi^2} \int_0^{\infty} P_l(k) j_l(k s) k^2 dk,
+\end{equation}
+where $P_l(k)$ are multipoles of the power spectrum in redshift space $P(k,\mu_{\bf k})$ defined by
+\begin{equation}
+P(k,\mu_{\bf k}) = \sum_{l\geq 0} P_l(k) L_l(\mu_{\bf k}).
+\end{equation}
+In the linear approximation only the $l = 0,2,4$ multipoles are non-zero. They are related to the
+real-space power spectrum $P(k)$ by
+\begin{eqnarray}
+&P_0(k) = \left(1+\frac{2}{3}\beta+\frac{1}{5}\beta^2\right)P(k),\\
+&P_2(k) = \left(\frac{4}{3}\beta+\frac{4}{7}\beta^2\right)P(k),\\
+&P_4(k) = \frac{8}{35}\beta^2 P(k),
+\end{eqnarray}
+where $\beta$ is the ratio of the growth rate $f$ and bias factor $b$, $\beta = f/b$.
+
+\ccl implements the redshift space correlation function $\xi(s, \mu)$, it's average at constant $s$, $\xi(s)$,
+the multiploes $\xi_l(s)$, and $\xi(\pi, \sigma)$, where $\pi$ is the galaxy pair separation
+parallel to the line of sight and $\sigma$ is the separation perpendicular to the line of sight.
+We use {\tt FFTlog} to calculate $\xi_l(s)$ from $P_l(k)$ in the implementation of $\xi(s,\mu)$.
+
+
+In order to speed up the calculations, we provide the option to create a spline of the multipole functions $\xi_l(s)$ and store them in global splines for subsequent access. After calculating the redshift-space correlation functions for a given cosmology the splines should be freed using the provided function before calculating for a different cosmology.
+
+
 %-----------------------------------------------------------
 %
 %   Correlation: beyond flat-sky (under development)
@@ -1077,28 +1137,6 @@ c(M)=9\left(\frac{M}{M_*}\right)^{-0.13}\ ,
 where $\delta_\mathrm{c}/\sigma(M_*)=1$.
 Note that, in order to be consistent, one should use a value of $\Delta_\mathrm{v}$ and $c(M)$ that is consistent with the halo definition used for the halo mass function and bias.
 
-\subsection{Redshift distributions}
-\label{sec:photoz}
-\ccl includes convenience functions which allow the user to compute the redshift distribution in a tomographic bin defined by cuts on photometric redshift, given a photometric redshift model and an analytic form for the true redshift distribution of the sample. This functionality is implemented in {\tt ccl\_redshifts.c}. Mathematically, it is described by:
-\begin{equation}
-\frac{dN^i}{dz} = \frac{\frac{dN}{dz}\int_{z_i}^{z_{i+1}} dz' p(z,z')}{\int_{z_{\rm min}}^{z_{\rm max}}dz \frac{dN}{dz} \int_{z_i}^{z_{i+1}}dz' p(z, z')}
-\label{photoz}
-\end{equation}
-where $z$ is the true redshift, $z'$ is the photometric redshift, $\frac{dN}{dz}$ is the true redshift distribution of the full sample, $p(z,z')$ is the probability of measuring photometric redshift $z'$ for an object with true redshift $z$, and $z_{i}$ and $z_{i+1}$ are the photo-z edges of the bin in question. 
-
-To include a user-defined photometric redshift model, the user writes a function which accepts as input a photometric redshift, a spectroscopic redshift, and a void pointer to a structure containing any further parameters of the photo-z model. This function will return the probability of measuring the input photometric redshift given the input spectroscopic redshift. Explicitly, it should take the form:
-
-{\tt user$\_$pz$\_$probability(double z$\_$ph, double z$\_$s, void * user$\_$pz$\_$par)\{...\}}
-
-Similarly, for the user-defined $\frac{dN}{dz}$, the user writes a function which accepts a spectroscopic redshift and a void pointer to a structure containing the parameters of the assumed analytic form:
-
-{\tt user$\_$dNdz$\_$probability(double z$\_$s, void * user$\_$dN$\_$par)\{...\}}
-
-An example of how the user can construct the required functions and structures can be found in {\tt ccl\_sample\_run.c}. Built-in functions are also included for a Gaussian $p(z,z')$ and / or a true redshift distribution of the form:
-\begin{equation}
-\frac{dN}{dz} \propto z^{\alpha} {\rm exp}\left(-\left(\frac{z}{z_0}\right)^\beta\right).
-\end{equation} 
-
 
 \section{Tests and validation}
 \label{sec:tests}
@@ -1107,7 +1145,7 @@ Our goal is for outputs of \ccl to be validated against independent benchmark co
 
 For each \ccl prediction, at least one independent code was used to produce the same result. Predictions were compared and the resulting numerical accuracy, documented in the paper. (See Table 2 for a summary of these results.) Potential differences in the implementation of the relevant algorithms were discussed there as well. For specific cases, such as the matter power spectrum provided by the Cosmic Emulator, angular power spectra and projected correlation functions, we established target accuracies for \ccl to achieve, though a more detailed forecasting exercise should be pursued in the future to establish whether results are compatible with the expected requirements of LSST DESC cosmological analyses in the next decade.
 
-All benchmark codes are either made public within the \ccl repository or made available online and described in the \ccl wiki\footnote{\url{https://github.com/LSSTDESC/CCL/wiki}}. 
+All benchmark codes are either made public within the \ccl repository or made available online and described in the \ccl wiki\footnote{\url{https://github.com/LSSTDESC/CCL/wiki}}.
 
 \ccl has a suite of test routines which, upon compilation, compare its outputs to the benchmarks from code comparison. These are run from the \ccl root directory with the command {\tt ./build/check\_ccl}.
 
@@ -1213,7 +1251,7 @@ In the future, we hope that \ccl will include other functionalities. Functionali
 \section{Feedback}
 \label{sec:feedback}
 
-If you would like to provide feedback on \ccl or contact the administrators, please do so through the \ccl github repository located at \url{https://github.com/LSSTDESC/CCL}. We welcome users opening github issues. 
+If you would like to provide feedback on \ccl or contact the administrators, please do so through the \ccl github repository located at \url{https://github.com/LSSTDESC/CCL}. We welcome users opening github issues.
 
 \section{Citing \& using \ccl}
 \label{sec:cite}

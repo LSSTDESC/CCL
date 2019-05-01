@@ -12,7 +12,6 @@
 {\ttfamily \#include $<$gsl/gsl\+\_\+sf\+\_\+legendre.\+h$>$}\newline
 {\ttfamily \#include \char`\"{}fftlog.\+h\char`\"{}}\newline
 {\ttfamily \#include \char`\"{}ccl.\+h\char`\"{}}\newline
-{\ttfamily \#include \char`\"{}ccl\+\_\+params.\+h\char`\"{}}\newline
 \subsection*{Data Structures}
 \begin{DoxyCompactItemize}
 \item 
@@ -24,6 +23,16 @@ struct \mbox{\hyperlink{structcorr__int__par}{corr\+\_\+int\+\_\+par}}
 void \mbox{\hyperlink{ccl__correlation_8c_a05da04dc1bd473fd76209f7c33c6cf24}{ccl\+\_\+correlation}} (\mbox{\hyperlink{structccl__cosmology}{ccl\+\_\+cosmology}} $\ast$cosmo, int n\+\_\+ell, double $\ast$ell, double $\ast$cls, int n\+\_\+theta, double $\ast$theta, double $\ast$wtheta, int corr\+\_\+type, int do\+\_\+taper\+\_\+cl, double $\ast$taper\+\_\+cl\+\_\+limits, int flag\+\_\+method, int $\ast$status)
 \item 
 void \mbox{\hyperlink{ccl__correlation_8c_a7703e8ee184dc5503115bf835e66cc8f}{ccl\+\_\+correlation\+\_\+3d}} (\mbox{\hyperlink{structccl__cosmology}{ccl\+\_\+cosmology}} $\ast$cosmo, double a, int n\+\_\+r, double $\ast$r, double $\ast$xi, int do\+\_\+taper\+\_\+pk, double $\ast$taper\+\_\+pk\+\_\+limits, int $\ast$status)
+\item 
+void \mbox{\hyperlink{ccl__correlation_8c_a8b82941f7ab7d99c9e80da97c7b99343}{ccl\+\_\+correlation\+\_\+multipole}} (\mbox{\hyperlink{structccl__cosmology}{ccl\+\_\+cosmology}} $\ast$cosmo, double a, double beta, int l, int n\+\_\+s, double $\ast$s, double $\ast$xi, int $\ast$status)
+\item 
+void \mbox{\hyperlink{ccl__correlation_8c_a70f6f5e105deba4f4038ae7210950766}{ccl\+\_\+correlation\+\_\+multipole\+\_\+spline}} (\mbox{\hyperlink{structccl__cosmology}{ccl\+\_\+cosmology}} $\ast$cosmo, double a, int $\ast$status)
+\item 
+void \mbox{\hyperlink{ccl__correlation_8c_a1add8b720ecdc9eebababca9422c1746}{ccl\+\_\+correlation\+\_\+3d\+Rsd}} (\mbox{\hyperlink{structccl__cosmology}{ccl\+\_\+cosmology}} $\ast$cosmo, double a, int n\+\_\+s, double $\ast$s, double mu, double beta, double $\ast$xi, int use\+\_\+spline, int $\ast$status)
+\item 
+void \mbox{\hyperlink{ccl__correlation_8c_a9b2a0132f78cc707d559281f1db7419f}{ccl\+\_\+correlation\+\_\+3d\+Rsd\+\_\+avgmu}} (\mbox{\hyperlink{structccl__cosmology}{ccl\+\_\+cosmology}} $\ast$cosmo, double a, int n\+\_\+s, double $\ast$s, double beta, double $\ast$xi, int $\ast$status)
+\item 
+void \mbox{\hyperlink{ccl__correlation_8c_a79a31d455250614f00f4594c2ce9f2db}{ccl\+\_\+correlation\+\_\+pi\+\_\+sigma}} (\mbox{\hyperlink{structccl__cosmology}{ccl\+\_\+cosmology}} $\ast$cosmo, double a, double beta, double pi, int n\+\_\+sig, double $\ast$sig, double $\ast$xi, int use\+\_\+spline, int $\ast$status)
 \end{DoxyCompactItemize}
 
 
@@ -93,3 +102,33 @@ Computes the 3dcorrelation function (wrapper)
 {\em taper\+\_\+pk\+\_\+limits} & limits of tapering \\
 \hline
 \end{DoxyParams}
+\mbox{\Hypertarget{ccl__correlation_8c_a1add8b720ecdc9eebababca9422c1746}\label{ccl__correlation_8c_a1add8b720ecdc9eebababca9422c1746}} 
+\index{ccl\+\_\+correlation.\+c@{ccl\+\_\+correlation.\+c}!ccl\+\_\+correlation\+\_\+3d\+Rsd@{ccl\+\_\+correlation\+\_\+3d\+Rsd}}
+\index{ccl\+\_\+correlation\+\_\+3d\+Rsd@{ccl\+\_\+correlation\+\_\+3d\+Rsd}!ccl\+\_\+correlation.\+c@{ccl\+\_\+correlation.\+c}}
+\subsubsection{\texorpdfstring{ccl\+\_\+correlation\+\_\+3d\+Rsd()}{ccl\_correlation\_3dRsd()}}
+{\footnotesize\ttfamily void ccl\+\_\+correlation\+\_\+3d\+Rsd (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structccl__cosmology}{ccl\+\_\+cosmology}} $\ast$}]{cosmo,  }\item[{double}]{a,  }\item[{int}]{n\+\_\+s,  }\item[{double $\ast$}]{s,  }\item[{double}]{mu,  }\item[{double}]{beta,  }\item[{double $\ast$}]{xi,  }\item[{int}]{use\+\_\+spline,  }\item[{int $\ast$}]{status }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{ccl__correlation_8c_a9b2a0132f78cc707d559281f1db7419f}\label{ccl__correlation_8c_a9b2a0132f78cc707d559281f1db7419f}} 
+\index{ccl\+\_\+correlation.\+c@{ccl\+\_\+correlation.\+c}!ccl\+\_\+correlation\+\_\+3d\+Rsd\+\_\+avgmu@{ccl\+\_\+correlation\+\_\+3d\+Rsd\+\_\+avgmu}}
+\index{ccl\+\_\+correlation\+\_\+3d\+Rsd\+\_\+avgmu@{ccl\+\_\+correlation\+\_\+3d\+Rsd\+\_\+avgmu}!ccl\+\_\+correlation.\+c@{ccl\+\_\+correlation.\+c}}
+\subsubsection{\texorpdfstring{ccl\+\_\+correlation\+\_\+3d\+Rsd\+\_\+avgmu()}{ccl\_correlation\_3dRsd\_avgmu()}}
+{\footnotesize\ttfamily void ccl\+\_\+correlation\+\_\+3d\+Rsd\+\_\+avgmu (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structccl__cosmology}{ccl\+\_\+cosmology}} $\ast$}]{cosmo,  }\item[{double}]{a,  }\item[{int}]{n\+\_\+s,  }\item[{double $\ast$}]{s,  }\item[{double}]{beta,  }\item[{double $\ast$}]{xi,  }\item[{int $\ast$}]{status }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{ccl__correlation_8c_a8b82941f7ab7d99c9e80da97c7b99343}\label{ccl__correlation_8c_a8b82941f7ab7d99c9e80da97c7b99343}} 
+\index{ccl\+\_\+correlation.\+c@{ccl\+\_\+correlation.\+c}!ccl\+\_\+correlation\+\_\+multipole@{ccl\+\_\+correlation\+\_\+multipole}}
+\index{ccl\+\_\+correlation\+\_\+multipole@{ccl\+\_\+correlation\+\_\+multipole}!ccl\+\_\+correlation.\+c@{ccl\+\_\+correlation.\+c}}
+\subsubsection{\texorpdfstring{ccl\+\_\+correlation\+\_\+multipole()}{ccl\_correlation\_multipole()}}
+{\footnotesize\ttfamily void ccl\+\_\+correlation\+\_\+multipole (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structccl__cosmology}{ccl\+\_\+cosmology}} $\ast$}]{cosmo,  }\item[{double}]{a,  }\item[{double}]{beta,  }\item[{int}]{l,  }\item[{int}]{n\+\_\+s,  }\item[{double $\ast$}]{s,  }\item[{double $\ast$}]{xi,  }\item[{int $\ast$}]{status }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{ccl__correlation_8c_a70f6f5e105deba4f4038ae7210950766}\label{ccl__correlation_8c_a70f6f5e105deba4f4038ae7210950766}} 
+\index{ccl\+\_\+correlation.\+c@{ccl\+\_\+correlation.\+c}!ccl\+\_\+correlation\+\_\+multipole\+\_\+spline@{ccl\+\_\+correlation\+\_\+multipole\+\_\+spline}}
+\index{ccl\+\_\+correlation\+\_\+multipole\+\_\+spline@{ccl\+\_\+correlation\+\_\+multipole\+\_\+spline}!ccl\+\_\+correlation.\+c@{ccl\+\_\+correlation.\+c}}
+\subsubsection{\texorpdfstring{ccl\+\_\+correlation\+\_\+multipole\+\_\+spline()}{ccl\_correlation\_multipole\_spline()}}
+{\footnotesize\ttfamily void ccl\+\_\+correlation\+\_\+multipole\+\_\+spline (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structccl__cosmology}{ccl\+\_\+cosmology}} $\ast$}]{cosmo,  }\item[{double}]{a,  }\item[{int $\ast$}]{status }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{ccl__correlation_8c_a79a31d455250614f00f4594c2ce9f2db}\label{ccl__correlation_8c_a79a31d455250614f00f4594c2ce9f2db}} 
+\index{ccl\+\_\+correlation.\+c@{ccl\+\_\+correlation.\+c}!ccl\+\_\+correlation\+\_\+pi\+\_\+sigma@{ccl\+\_\+correlation\+\_\+pi\+\_\+sigma}}
+\index{ccl\+\_\+correlation\+\_\+pi\+\_\+sigma@{ccl\+\_\+correlation\+\_\+pi\+\_\+sigma}!ccl\+\_\+correlation.\+c@{ccl\+\_\+correlation.\+c}}
+\subsubsection{\texorpdfstring{ccl\+\_\+correlation\+\_\+pi\+\_\+sigma()}{ccl\_correlation\_pi\_sigma()}}
+{\footnotesize\ttfamily void ccl\+\_\+correlation\+\_\+pi\+\_\+sigma (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structccl__cosmology}{ccl\+\_\+cosmology}} $\ast$}]{cosmo,  }\item[{double}]{a,  }\item[{double}]{beta,  }\item[{double}]{pi,  }\item[{int}]{n\+\_\+sig,  }\item[{double $\ast$}]{sig,  }\item[{double $\ast$}]{xi,  }\item[{int}]{use\+\_\+spline,  }\item[{int $\ast$}]{status }\end{DoxyParamCaption})}
+

@@ -5,7 +5,7 @@ if(${CMAKE_VERSION} VERSION_GREATER "3.10.0")
   set(SHALLOW_GIT_CLONE GIT_SHALLOW 1)
 endif()
 
-set(AngpowTag v0.4.1)
+set(AngpowTag v0.4.2)
 
 # Downloads and compiles Angpow
 ExternalProject_Add(ANGPOW

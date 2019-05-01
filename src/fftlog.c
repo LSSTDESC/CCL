@@ -3,6 +3,9 @@
 
 #include <fftw3.h>
 
+#include <gsl/gsl_sf_result.h>
+#include <gsl/gsl_sf_gamma.h>
+
 #include "fftlog.h"
 
 #ifndef M_PI
@@ -11,42 +14,22 @@
 
 /* This code is FFTLog, which is described in arXiv:astro-ph/9905191 */
 
-/* Computes the Gamma function using the Lanczos approximation */
+static double complex lngamma_fftlog(double complex z)
+{
+  gsl_sf_result lnr, phi;
+  gsl_sf_lngamma_complex_e(creal(z), cimag(z), &lnr, &phi);
+  return lnr.val + I*phi.val;
+}
+
 static double complex gamma_fftlog(double complex z)
 {
-  /* Lanczos coefficients for g = 7 */
-  static double p[] = {
-    0.99999999999980993227684700473478,
-    676.520368121885098567009190444019,
-    -1259.13921672240287047156078755283,
-    771.3234287776530788486528258894,
-    -176.61502916214059906584551354,
-    12.507343278686904814458936853,
-    -0.13857109526572011689554707,
-    9.984369578019570859563e-6,
-    1.50563273514931155834e-7
-  };
-  
-  if(creal(z) < 0.5)
-    return M_PI / (sin(M_PI*z)*gamma_fftlog(1. - z));
-  z -= 1;
-  double complex x = p[0];
-  for(int n = 1; n < 9; n++)
-    x += p[n] / (z + (double)(n));
-  double complex t = z + 7.5;
-  return sqrt(2*M_PI) * cpow(t, z+0.5) * cexp(-t) * x;
+  return cexp(lngamma_fftlog(z));
 }
 
 static double complex polar (double r, double phi)
 {
   return (r*cos(phi) +I*(r*sin(phi)));
 }
-
-static double complex lngamma_fftlog(double complex z)
-{
-  return clog(gamma_fftlog(z));
-}
-
 
 static void lngamma_4(double x, double y, double* lnr, double* arg)
 {
@@ -75,7 +58,7 @@ void compute_u_coefficients(int N, double mu, double q, double L, double kcrc, d
   double y = M_PI/L;
   double k0r0 = kcrc * exp(-L);
   double t = -2*y*log(k0r0/2);
-  
+
   if(q == 0) {
     double x = (mu+1)/2;
     double lnr, phi;
@@ -94,7 +77,7 @@ void compute_u_coefficients(int N, double mu, double q, double L, double kcrc, d
       u[m] = polar(exp(q*log(2) + lnrp - lnrm), m*t + phip - phim);
     }
   }
-  
+
   for(int m = N/2+1; m < N; m++)
     u[m] = conj(u[N-m]);
   if((N % 2) == 0)
@@ -109,11 +92,11 @@ void fht(int N, const double r[], const double complex a[], double k[], double c
   if(u == NULL) {
     if(noring)
       kcrc = goodkr(N, mu, q, L, kcrc);
-    ulocal = malloc (sizeof(complex double)*N); 
+    ulocal = malloc (sizeof(complex double)*N);
     compute_u_coefficients(N, mu, q, L, kcrc, ulocal);
     u = ulocal;
   }
-  
+
   /* Compute the convolution b = a*u using FFTs */
   fftw_plan forward_plan = fftw_plan_dft_1d(N, (fftw_complex*) a, (fftw_complex*) b,  -1, FFTW_ESTIMATE);
   fftw_plan reverse_plan = fftw_plan_dft_1d(N, (fftw_complex*) b, (fftw_complex*) b, +1, FFTW_ESTIMATE);
@@ -123,7 +106,7 @@ void fht(int N, const double r[], const double complex a[], double k[], double c
   fftw_execute(reverse_plan);
   fftw_destroy_plan(forward_plan);
   fftw_destroy_plan(reverse_plan);
-  
+
   /* Reverse b array */
   double complex tmp;
   for(int n = 0; n < N/2; n++) {
@@ -131,13 +114,13 @@ void fht(int N, const double r[], const double complex a[], double k[], double c
     b[n] = b[N-n-1];
     b[N-n-1] = tmp;
   }
-  
+
   /* Compute k's corresponding to input r's */
   double k0r0 = kcrc * exp(-L);
   k[0] = k0r0/r[0];
   for(int n = 1; n < N; n++)
     k[n] = k[0] * exp(n*L/N);
-  
+
   free(ulocal);
 }
 
@@ -146,29 +129,29 @@ void fftlog_ComputeXi2D(double bessel_order,int N,const double l[],const double 
 {
   double complex* a = malloc(sizeof(complex double)*N);
   double complex* b = malloc(sizeof(complex double)*N);
-  
+
   for(int i=0;i<N;i++)
     a[i]=l[i]*cl[i];
   fht(N,l,a,th,b,bessel_order,0,1,1,NULL);
   for(int i=0;i<N;i++)
     xi[i]=creal(b[i]/(2*M_PI*th[i]));
-  
+
   free(a);
   free(b);
 }
 
-void fftlog_ComputeXiLM(double l, double m, int N, const double k[], const double pk[], 
+void fftlog_ComputeXiLM(double l, double m, int N, const double k[], const double pk[],
 			double r[], double xi[])
 {
   double complex* a = malloc(sizeof(complex double)*N);
   double complex* b = malloc(sizeof(complex double)*N);
-  
+
   for(int i = 0; i < N; i++)
     a[i] = pow(k[i], m - 0.5) * pk[i];
   fht(N, k, a, r, b, l + 0.5, 0, 1, 1, NULL);
   for(int i = 0; i < N; i++)
     xi[i] = creal(pow(2*M_PI*r[i], -(m-0.5)) * b[i]);
-  
+
   free(a);
   free(b);
 }
@@ -185,4 +168,3 @@ void xi2pk(int N, const double r[], const double xi[], double k[], double pk[])
   for(int j = 0; j < N; j++)
     pk[j] *= TwoPiCubed;
 }
-
