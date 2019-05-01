@@ -69,7 +69,7 @@ CTEST_SETUP(emu_nu) {
   //Each line of this file corresponds to the cosmological parameters for
   //cosmologies {38,39,40,42} of the emulator set. Notice that Omega_i
   //are big Omegas and not little omegas (Omega_i*h**2=omega_i)
-  sprintf(fname,"./tests/benchmark/emu_nu_cosmologies.txt");
+  sprintf(fname,"./benchmarks/data/emu_nu_cosmologies.txt");
   f=fopen(fname,"r");
   if(f==NULL) {
     fprintf(stderr,"Error opening file %s\n",fname);
@@ -144,7 +144,7 @@ static void compare_emu_nu(int i_model,struct emu_nu_data * data)
   //     and convert to Delta_nu^2 by multiplying by k^3/(2pi^2).
   // (4) Add to obtain Delta_tot=(sqrt(Delta_nu)+sqrt(Delta_cb))^2.
   // (5) Convert back to P(k)
-  sprintf(fname,"./tests/benchmark/emu_nu_smooth_pk_M%d.txt",i_model_vec[i_model-1]);
+  sprintf(fname,"./benchmarks/data/emu_nu_smooth_pk_M%d.txt",i_model_vec[i_model-1]);
   f=fopen(fname,"r");
   if(f==NULL) {
     fprintf(stderr,"Error opening file %s\n",fname);
