@@ -33,7 +33,7 @@ Boundaries of CCL (with respect to various models and systematics)
 
 - Not all models need to have equal support. CCL aims to support the DESC analyses, not to support all possible statistics in all models.
 
-- CCL should provide a generic framework to enable modeling of systematics effects. However, overly specific models for systematics are best located in other repositories (e.g., firecrown).
+- CCL should provide a generic framework to enable modeling of systematics effects. However, overly specific models for systematics, for example, for galaxy bias, detector effects or intrinsic alignments, are best located in other repositories (e.g., firecrown).
 
 Boundaries of CCL (with respect to other TJP software)
 
@@ -52,7 +52,7 @@ Standards to establish the quality of code that can be part of CCL
 	   
 	2. Tests should run in continuous integration scheme used for CCL.
 
-	3. Unit tests should be written as identified in code review.
+	3. Unit tests should be written following the suggestions of the PR reviewers.
 
 - All PRs are code reviewed by at least one person (two are suggested for PRs that bring in new features or propose significant changes to the CCL API).
 
