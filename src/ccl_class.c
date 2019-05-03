@@ -534,8 +534,8 @@ void ccl_cosmology_compute_linpower_class(ccl_cosmology* cosmo, int* status) {
 	    double * D_GR = malloc(na * sizeof(double));          
 	  
 	    for (int i=0; i<na; i++){
-	        D_mu[i] = ccl_growth_factor_unnorm(cosmo, a[i], status);
-	        D_GR[i] = ccl_growth_factor_unnorm(cosmo_GR, a[i], status);
+	        D_mu[i] = ccl_growth_factor_unnorm(cosmo, aa[i], status);
+	        D_GR[i] = ccl_growth_factor_unnorm(cosmo_GR, aa[i], status);
 	    }
     
         for (int i=0; i<nk; i++) {
@@ -560,7 +560,7 @@ void ccl_cosmology_compute_linpower_class(ccl_cosmology* cosmo, int* status) {
                     //pk_ij = pk[j*N_k + i]
                     //with i = 0,...,N_k-1 and j = 0,...,N_a-1.
                     s |= spectra_pk_at_k_and_z(&ba, &pm, &sp,lk[i],1./aa[j]-1.+1e-10, &psout_l,&ic);
-                    lpk_ln[j*nk+i] = log(psout_l) + 2 * log(D_mu[j]) - 2 * log(D_GR[j]);
+                    lpk_ln[j*nk+i] = log(psout_l);
                     }
                 lk[i] = log(lk[i]);
                 }
@@ -571,7 +571,7 @@ void ccl_cosmology_compute_linpower_class(ccl_cosmology* cosmo, int* status) {
       ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_cosmology_compute_power_class(): "
                "Error computing CLASS power spectrum\n");
     }
-  }
+  
 
   if(*status==0)
     cosmo->data.p_lin=ccl_p2d_t_new(na,aa,nk,lk,lpk_ln,1,2,ccl_p2d_cclgrowth,1,NULL,0,ccl_p2d_3,status);

@@ -40,7 +40,7 @@ CTEST_SETUP(emu_nu) {
   data->Neff = 3.04;
   data->mnu_type = ccl_mnu_list;
   data->mu_0=0.;
-  data->sigma_0;
+  data->sigma_0=0.;
 
   double *sigma8;
   double *Omega_c;

@@ -45,16 +45,13 @@ set(TEST_SRC
     tests/ccl_test_bcm.c
     tests/ccl_test_emu.c tests/ccl_test_emu_nu.c
     tests/ccl_test_power_nu.c
-    tests/ccl_test_power_MG.c
     tests/ccl_test_halomod.c
+    #tests/ccl_test_power_MG.c
 
     # Cls and correlation functions
     tests/ccl_test_angpow.c
     tests/ccl_test_correlation_3d.c
     tests/ccl_test_correlation_3dRSD.c
-
-    # and mass function stuff
-    tests/ccl_test_massfunc.c
 )
 
 

@@ -1058,33 +1058,10 @@ void ccl_angular_cls_nonlimber(ccl_cosmology *cosmo,double l_logstep,int l_linst
     //Compute power spectra at interpolation nodes
     for(ii=0;ii<w->n_ls;ii++)
       l_nodes[ii]=(double)(w->l_arr[ii]);
-
-    do_angpow=0;
-    //Now check if angpow is needed at all
-    if(w->l_limber>0) {
-      for(ii=0;ii<w->n_ls;ii++) {
-	if(w->l_arr[ii]<=w->l_limber)
-	  do_angpow=1;
-      }
-    }
-
-#ifndef HAVE_ANGPOW
-    do_angpow=0;
-#endif //HAVE_ANGPOW
-  
-    //Resort to Limber if we have lensing (this will hopefully only be temporary)
-    if(clt1->tracer_type==ccl_weak_lensing_tracer || clt2->tracer_type==ccl_weak_lensing_tracer ||
-       clt1->has_magnification || clt2->has_magnification) {
-      do_angpow=0;
-    }
-
-    //Use angpow if non-limber is needed
-    if(do_angpow)
-      ccl_angular_cls_angpow(cosmo,w,clt1,clt2,cl_nodes,status);
-      
+    ccl_angular_cls_angpow(cosmo,w,clt1,clt2,cl_nodes,status);
     ccl_check_status(cosmo,status);
   }
-
+    
   if(*status==0) {
     //Interpolate into ells requested by user
     spcl_nodes=ccl_spline_init(w->n_ls,l_nodes,cl_nodes,0,0);
@@ -1092,7 +1069,7 @@ void ccl_angular_cls_nonlimber(ccl_cosmology *cosmo,double l_logstep,int l_linst
       *status=CCL_ERROR_MEMORY;
       ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: ccl_cl_angular_cls(); memory allocation\n");
     }
-  }
+  }  
   
   if(*status==0) {
     //Interpolate into input multipoles

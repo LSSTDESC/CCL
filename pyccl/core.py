@@ -597,9 +597,9 @@ class Cosmology(object):
 
         # Check if any compulsory parameters are not set
         compul = [Omega_c, Omega_b, Omega_k, w0, wa, h, norm_pk,
-                  n_s, mu_0, sigma_0]
+                  n_s]
         names = ['Omega_c', 'Omega_b', 'Omega_k', 'w0', 'wa',
-                 'h', 'norm_pk', 'n_s', 'mu_0', 'sigma_0']
+                 'h', 'norm_pk', 'n_s']
         for nm, item in zip(names, compul):
             if item is None:
                 raise ValueError("Necessary parameter '%s' was not set "

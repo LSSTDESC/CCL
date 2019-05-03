@@ -33,8 +33,8 @@ CTEST_SETUP(corrs_3d) {
   double mnuval = 0.;
   data->mnu= &mnuval;
   data->mnu_type = ccl_mnu_sum;
-  data->mu_0;
-  data->sigma_0;
+  data->mu_0=0.;
+  data->sigma_0=0.;
 
   double Omega_v[5]={0.7, 0.7, 0.7, 0.65, 0.75};
   double w_0[5] = {-1.0, -0.9, -0.9, -0.9, -0.9};

@@ -96,7 +96,7 @@ def calc_power_spectrum(
             else:
                 assert_raises(CCLError, ccl.nonlin_matter_power, cosmo, k, _a)
                 
-def calc_power_spectrum_muSig(transfer_fn, matter_power, linear):
+def calc_power_spectrum_muSig(transfer_fn, matter_power):
     """ Check the behaviour of the calculation of the linear and 
     nonlinear power spectrum in the mu / Sigma parameterisation of
     modified gravity. """
@@ -107,28 +107,19 @@ def calc_power_spectrum_muSig(transfer_fn, matter_power, linear):
     Omega_k = 1.0 - Omega_c - Omega_b - Omega_v_vals[0]
           
     for _a in a:
-        if ((transfer_fn !=	'boltzmann') and (transfer_fn != 'boltzmann_class') and (transfer_fn!='class')):
-		    assert_raises(ValueError, ccl.Cosmology, Omega_c=Omega_c, Omega_b=Omega_b, 
-                       h=h, sigma8=sigma8, n_s=n_s, Omega_k=Omega_k,
-                       w0=w0_vals[0], wa=wa_vals[0], transfer_function=transfer_fn,
-                       matter_power_spectrum=matter_power,
-                       Neff = Neff, mu_0 = mu_0, sigma_0 = sigma_0)
-        else:
-            cosmo = ccl.Cosmology(Omega_c=Omega_c, Omega_b=Omega_b, 
-                       h=h, sigma8=sigma8, n_s=n_s, Omega_k=Omega_k,
-                       w0=w0_vals[0], wa=wa_vals[0], transfer_function=transfer_fn,
-                       matter_power_spectrum=matter_power,
-                       Neff = Neff, mu_0 = mu_0, sigma_0 = sigma_0)
-			
-            if linear:
+        cosmo = ccl.Cosmology(Omega_c=Omega_c, Omega_b=Omega_b, 
+                              h=h, sigma8=sigma8, n_s=n_s, Omega_k=Omega_k,
+                              w0=w0_vals[0], wa=wa_vals[0], transfer_function=transfer_fn,
+                              matter_power_spectrum=matter_power,
+                              Neff = Neff, mu_0 = mu_0, sigma_0 = sigma_0)
+        if matter_power=='linear':
+            if (transfer_fn!='boltzmann_class'):
+                assert_raises(CCLError, ccl.linear_matter_power, cosmo, k, _a)
+            else:   
                 pk_lin = ccl.linear_matter_power(cosmo, k, _a)
                 assert_(all_finite(pk_lin))
-            else:
-                if (matter_power=='linear'):
-                    pk_lin = ccl.nonlin_matter_power(cosmo, k, _a)
-                    assert_(all_finite(pk_lin))
-                else:
-					assert_raises(CCLError, ccl.nonlin_matter_power, cosmo, k, _a)
+        else:
+				assert_raises(CCLError, ccl.nonlin_matter_power, cosmo, k, _a)
 
 def loop_over_params(transfer_fn, matter_power, lin, raise_errs):
     """
@@ -221,17 +212,15 @@ def test_raise_error_emu_nonlin():
 @decorators.slow
 def test_muSig():
     for tfn in ['eisenstein_hu', 'bbks']:
-        calc_power_spectrum_muSig(tfn, 'linear', True)
-        calc_power_spectrum_muSig(tfn, 'linear', False)
+        calc_power_spectrum_muSig(tfn, 'linear')
+        calc_power_spectrum_muSig(tfn, 'linear')
         
     for tfn in ['emulator']:
-		calc_power_spectrum_muSig(tfn, 'emu', False)
+		calc_power_spectrum_muSig(None, 'emu')
     
     for tfn in ['boltzmann_class']:
-		calc_power_spectrum_muSig(tfn, 'halofit', True)
-		calc_power_spectrum_muSig(tfn, 'halofit', False)
-		calc_power_spectrum_muSig(tfn, 'linear', True)
-		calc_power_spectrum_muSig(tfn, 'linear', False)
+		calc_power_spectrum_muSig(tfn, 'halofit')
+		calc_power_spectrum_muSig(tfn, 'linear')
 
 if __name__ == "__main__":
     run_module_suite(argv=sys.argv)
