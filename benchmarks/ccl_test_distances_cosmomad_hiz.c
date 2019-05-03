@@ -30,7 +30,7 @@ CTEST_DATA(distances_cosmomad_hiz) {
 static void read_chi_test_file(double z[7], double chi[3][7])
 {
   //Distances are in Mpc/h
-  FILE * f = fopen("./tests/benchmark/chi_hiz_model1-3.txt", "r");
+  FILE * f = fopen("./benchmarks/data/chi_hiz_model1-3.txt", "r");
   ASSERT_NOT_NULL(f);
 
   // Ignore header line

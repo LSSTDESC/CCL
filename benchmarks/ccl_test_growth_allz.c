@@ -90,7 +90,7 @@ CTEST_SETUP(growth_allz) {
   }
 
   // The file of benchmark data.
-  read_growth_test_file("./tests/benchmark/growth_cosmomad_allz.txt", data->z, data->gf);
+  read_growth_test_file("./benchmarks/data/growth_cosmomad_allz.txt", data->z, data->gf);
 }
 
 static void compare_growth(int model, struct growth_allz_data * data)

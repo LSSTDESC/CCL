@@ -110,8 +110,8 @@ CTEST_SETUP(distances_class) {
   }
 
   // The file of benchmark data.
-  read_benchmark_file("./tests/benchmark/chi_class_allz.txt", data->z_chi, data->chi_benchmark);
-  read_benchmark_file("./tests/benchmark/dm_class_allz.txt", data->z_dm, data->dm_benchmark);
+  read_benchmark_file("./benchmarks/data/chi_class_allz.txt", data->z_chi, data->chi_benchmark);
+  read_benchmark_file("./benchmarks/data/dm_class_allz.txt", data->z_dm, data->dm_benchmark);
 }
 
 static void compare_distances(int model, struct distances_class_data * data)

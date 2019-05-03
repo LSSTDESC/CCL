@@ -26,32 +26,32 @@ set(CCL_SRC
 # ! Add new tests to this list
 set(TEST_SRC
     # test core code first
-    tests/ccl_test.c tests/ccl_test_utils.c
-    tests/ccl_test_cosmology.c
-    tests/ccl_test_params.c
-    tests/ccl_test_params_mnu.c
-    tests/ccl_test_MG.c
+    benchmarks/ccl_test.c benchmarks/ccl_test_utils.c
+    benchmarks/ccl_test_cosmology.c
+    benchmarks/ccl_test_params.c
+    benchmarks/ccl_test_params_mnu.c
+    benchmarks/ccl_test_MG.c
 
     # now the distances
-    tests/ccl_test_distances_class_allz.c tests/ccl_test_distances_cosmomad_hiz.c
-    tests/ccl_test_distances_cosmomad_lowz.c
-    tests/ccl_test_distances_astropy_mnu_lowz.c tests/ccl_test_distances_astropy_mnu_hiz.c
-    tests/ccl_test_growth_lowz.c tests/ccl_test_growth_hiz.c tests/ccl_test_growth_allz.c
+    benchmarks/ccl_test_distances_class_allz.c benchmarks/ccl_test_distances_cosmomad_hiz.c
+    benchmarks/ccl_test_distances_cosmomad_lowz.c
+    benchmarks/ccl_test_distances_astropy_mnu_lowz.c benchmarks/ccl_test_distances_astropy_mnu_hiz.c
+    benchmarks/ccl_test_growth_lowz.c benchmarks/ccl_test_growth_hiz.c benchmarks/ccl_test_growth_allz.c
 
     # now power spectra stuff in order of use roughly
-    tests/ccl_test_p2d.c
-    tests/ccl_test_bbks.c tests/ccl_test_eh.c
-    tests/ccl_test_sigmaM.c
-    tests/ccl_test_bcm.c
-    tests/ccl_test_emu.c tests/ccl_test_emu_nu.c
-    tests/ccl_test_power_nu.c
-    tests/ccl_test_halomod.c
-    #tests/ccl_test_power_MG.c
+    benchmarks/ccl_test_p2d.c
+    benchmarks/ccl_test_bbks.c benchmarks/ccl_test_eh.c
+    benchmarks/ccl_test_sigmaM.c
+    benchmarks/ccl_test_bcm.c
+    benchmarks/ccl_test_emu.c benchmarks/ccl_test_emu_nu.c
+    benchmarks/ccl_test_power_nu.c
+    benchmarks/ccl_test_halomod.c
+    #benchmarks/ccl_test_power_MG.c
 
     # Cls and correlation functions
-    tests/ccl_test_angpow.c
-    tests/ccl_test_correlation_3d.c
-    tests/ccl_test_correlation_3dRSD.c
+    benchmarks/ccl_test_angpow.c
+    benchmarks/ccl_test_correlation_3d.c
+    benchmarks/ccl_test_correlation_3dRSD.c
 )
 
 

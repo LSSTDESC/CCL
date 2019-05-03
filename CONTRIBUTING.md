@@ -79,8 +79,8 @@ publicly available and linked in the benchmark tab
 of the wiki, and a script to run them should
 be provided such that the user can reproduce the benchmarks.
 
-Benchmarks should be integrated in automated C tests following the current
-examples in `tests/`. Any plots that check the results of the comparison
+Benchmarks should be integrated in automated python tests following the current
+examples in `benchmarks/`. Any plots that check the results of the comparison
 should be added to the `Benchmark_Comparison.ipynb` notebook in the
 `examples` folder. New features and tests should also be documented
 in the CCL note in the `doc` directory.

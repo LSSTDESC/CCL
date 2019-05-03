@@ -3,9 +3,9 @@
 #include <stdio.h>
 #include <math.h>
 
-#define BBKS_TOLERANCE 1.0E-5
+#define SIGMAM_TOLERANCE 3.0E-5
 
-CTEST_DATA(bbks) {
+CTEST_DATA(sigmam) {
   double Omega_c;
   double Omega_b;
   double h;
@@ -23,19 +23,19 @@ CTEST_DATA(bbks) {
   double sigma_0;
 };
 
-CTEST_SETUP(bbks) {
+CTEST_SETUP(sigmam) {
   data->Omega_c = 0.25;
   data->Omega_b = 0.05;
   data->h = 0.7;
   data->A_s = 2.1e-9;
-  data->n_s = 0.96;
   data->sigma8=0.8;
+  data->n_s = 0.96;
   data->Neff=0;
   double mnuval = 0.;
   data->mnu=&mnuval;
-  data->mnu_type =ccl_mnu_sum;
-  data->mu_0 =0.;
-  data->sigma_0 =0.;
+  data-> mnu_type = ccl_mnu_sum;
+  data->mu_0;
+  data->sigma_0;
 
   double Omega_v[5]={0.7, 0.7, 0.7, 0.65, 0.75};
   double w_0[5] = {-1.0, -0.9, -0.9, -0.9, -0.9};
@@ -61,74 +61,67 @@ static int linecount(FILE *f)
   return i0;
 }
 
-static void compare_bbks(int i_model,struct bbks_data * data)
+static void compare_sigmam(int i_model,struct sigmam_data * data)
 {
-  int nk,i,j;
-  int status=0;
+  int nm,i;
   char fname[256],str[1024];
   char* rtn;
   FILE *f;
+  int status=0;
   ccl_configuration config = default_config;
-  config.matter_power_spectrum_method = ccl_linear;
   config.transfer_function_method = ccl_bbks;
-  ccl_parameters params = ccl_parameters_create(data->Omega_c,data->Omega_b,data->Omega_k[i_model-1],data->Neff, data->mnu,data->mnu_type, data->w_0[i_model-1],data->w_a[i_model-1],data->h,data->A_s,data->n_s,-1,-1,-1,data->mu_0, data->sigma_0,-1,NULL,NULL, &status);
+  config.matter_power_spectrum_method = ccl_linear;
+  ccl_parameters params = ccl_parameters_create(data->Omega_c,data->Omega_b,data->Omega_k[i_model-1],
+						data->Neff, data->mnu, data->mnu_type,
+						data->w_0[i_model-1],data->w_a[i_model-1],data->h,
+						data->A_s,data->n_s,-1,-1,-1,data->mu_0, data->sigma_0,-1,NULL,NULL, &status);
   params.T_CMB=2.7;
-  params.Omega_g=0;
-  params.Omega_l=data->Omega_v[i_model-1];
   params.sigma8=data->sigma8;
+  params.Omega_g=0.;
+  params.Omega_l=data->Omega_v[i_model-1];
+
   ccl_cosmology * cosmo = ccl_cosmology_create(params, config);
   ASSERT_NOT_NULL(cosmo);
 
-  sprintf(fname,"./tests/benchmark/model%d_pk.txt",i_model);
+  sprintf(fname,"./benchmarks/data/model%d_sm.txt",i_model);
   f=fopen(fname,"r");
   if(f==NULL) {
     fprintf(stderr,"Error opening file %s\n",fname);
     exit(1);
   }
-  nk=linecount(f)-1; rewind(f);
+  nm=linecount(f)-1; rewind(f);
 
   rtn = fgets(str, 1024, f);
-  for(i=0;i<nk;i++) {
-    double k_h,k;
+  for(i=0;i<nm;i++) {
+    double m,m_h,sm_bench,sm_h,err;
     int stat;
-    stat=fscanf(f,"%lf",&k_h);
-    if(stat!=1) {
+    stat=fscanf(f,"%lf %lf",&m_h,&sm_bench);
+    if(stat!=2) {
       fprintf(stderr,"Error reading file %s, line %d\n",fname,i+2);
       exit(1);
     }
-    k=k_h*data->h;
-    for(j=0;j<6;j++) {
-      double pk_h,pk_bench,pk_ccl,err;
-      double z=j+0.;
-
-      stat=fscanf(f,"%lf",&pk_h);
-      if(stat!=1) {
-	fprintf(stderr,"Error reading file %s, line %d\n",fname,i+2);
-	exit(1);
-      }
-      pk_bench=pk_h/pow(data->h,3);
-      pk_ccl=ccl_linear_matter_power(cosmo,k,1./(1+z),&status);
-      if (status) printf("%s\n",cosmo->status_message);
-      err=fabs(pk_ccl/pk_bench-1);
-      ASSERT_DBL_NEAR_TOL(err,0.,BBKS_TOLERANCE);
-    }
+    m=m_h/data->h;
+    sm_h=ccl_sigmaM(cosmo,m,1.,&status);
+    if (status) printf("%s\n",cosmo->status_message);
+    err=sm_h/sm_bench-1;
+    ASSERT_DBL_NEAR_TOL(err,0.,SIGMAM_TOLERANCE);
   }
   fclose(f);
 
-  ccl_cosmology_free(cosmo);
+  free(cosmo);
 }
 
-CTEST2(bbks,model_1) {
+CTEST2(sigmam,model_1) {
   int model=1;
-  compare_bbks(model,data);
+  compare_sigmam(model,data);
 }
 
-CTEST2(bbks,model_2) {
+CTEST2(sigmam,model_2) {
   int model=2;
-  compare_bbks(model,data);
+  compare_sigmam(model,data);
 }
 
-CTEST2(bbks,model_3) {
+CTEST2(sigmam,model_3) {
   int model=3;
-  compare_bbks(model,data);
+  compare_sigmam(model,data);
 }

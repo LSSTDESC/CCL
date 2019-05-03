@@ -34,7 +34,7 @@ static void read_growth_hiz_test_file(double z[7], double gf[3][7])
   // First get orginal benchmark for growth in non-modified-gravity models:
    	
   //Growth is normalized to ~a at early times
-  FILE * f = fopen("./tests/benchmark/growth_hiz_model1-3.txt", "r");
+  FILE * f = fopen("./benchmarks/data/growth_hiz_model1-3.txt", "r");
   ASSERT_NOT_NULL(f);
   
   // Ignore header line

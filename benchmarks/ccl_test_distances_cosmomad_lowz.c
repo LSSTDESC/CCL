@@ -32,7 +32,7 @@ CTEST_DATA(distances_cosmomad_lowz) {
 static void read_chi_test_file(double z[6], double chi[5][6])
 {
   //Distances are in Mpc/h
-  FILE * f = fopen("./tests/benchmark/chi_model1-5.txt", "r");
+  FILE * f = fopen("./benchmarks/data/chi_model1-5.txt", "r");
   ASSERT_NOT_NULL(f);
 
   // Ignore header line
@@ -52,7 +52,7 @@ static void read_chi_test_file(double z[6], double chi[5][6])
 static void read_dm_test_file(double z[6], double dm[5][6])
 {
   //Distances are in Mpc/h
-  FILE * f = fopen("./tests/benchmark/dm_model1-5.txt", "r");
+  FILE * f = fopen("./benchmarks/data/dm_model1-5.txt", "r");
   ASSERT_NOT_NULL(f);
 
   // Ignore header line
