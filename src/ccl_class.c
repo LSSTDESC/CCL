@@ -529,6 +529,8 @@ void ccl_cosmology_compute_linpower_class(ccl_cosmology* cosmo, int* status) {
 	               cosmo->params.z_mgrowth, cosmo->params.df_mgrowth, status);
 	    ccl_cosmology* cosmo_GR = ccl_cosmology_create(params_GR,
 	               cosmo->config);
+	               
+	    printf("status 1=%d\n", *status);           
 	    
 	    double * D_mu = malloc(na * sizeof(double)); 
 	    double * D_GR = malloc(na * sizeof(double));          
@@ -537,6 +539,8 @@ void ccl_cosmology_compute_linpower_class(ccl_cosmology* cosmo, int* status) {
 	        D_mu[i] = ccl_growth_factor_unnorm(cosmo, aa[i], status);
 	        D_GR[i] = ccl_growth_factor_unnorm(cosmo_GR, aa[i], status);
 	    }
+	    
+	    printf("status 2=%d\n", *status);
     
         for (int i=0; i<nk; i++) {
             for (int j = 0; j < na; j++) {
@@ -566,6 +570,7 @@ void ccl_cosmology_compute_linpower_class(ccl_cosmology* cosmo, int* status) {
                 }
             }
         }    
+    printf("status 3=%d\n", *status);    
     if(s) {
       *status = CCL_ERROR_CLASS;
       ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_cosmology_compute_power_class(): "

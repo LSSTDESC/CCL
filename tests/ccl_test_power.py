@@ -119,7 +119,7 @@ def calc_power_spectrum_muSig(transfer_fn, matter_power):
                 pk_lin = ccl.linear_matter_power(cosmo, k, _a)
                 assert_(all_finite(pk_lin))
         else:
-				assert_raises(CCLError, ccl.nonlin_matter_power, cosmo, k, _a)
+            assert_raises(CCLError, ccl.nonlin_matter_power, cosmo, k, _a)
 				
 def loop_over_params(transfer_fn, matter_power, lin, raise_errs):
     """

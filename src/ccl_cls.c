@@ -414,6 +414,8 @@ static void clt_nc_init(CCL_ClTracer *clt,ccl_cosmology *cosmo,
   if(clt->has_density)
     clt_init_bz(clt,cosmo,nz_b,z_b,b,status);
   if(clt->has_magnification)
+    // If magnification is present within mu / Sigma parameterisation
+    // of modified gravity, that is accounted for in this function.
     clt_init_wM(clt,cosmo,nz_s,z_s,s,status);
 }
 
@@ -599,14 +601,7 @@ CCL_ClTracer *ccl_cl_tracer(ccl_cosmology *cosmo,int tracer_type,
 			                int nz_ba,double *z_ba,double *ba,
 			                int nz_rf,double *z_rf,double *rf,
 			                double z_source, int * status)
-{	
-
-  // Print a message informing the user that if they are using mu / Sigma
-  // parameterisation, Cl's will be computed using the linear power spectrum
-  // because we do not have support for nonlinearity in this parameterisation
-  //if ( fabs(cosmo->params.mu_0)>1e-15 || fabs(cosmo->params.sigma_0)>1e-15 ){
-  //    ccl_raise_warning(CCL_ERROR_NOT_IMPLEMENTED , "You are using the mu / Sigma parameterisation of modified gravity; cl's and angular correlation functions will be computed using the LINEAR power spectrum.\n");
-  //}    	  
+{	  	  
 
   CCL_ClTracer *clt=cl_tracer(cosmo,tracer_type,has_density,has_rsd,has_magnification,
 			      has_shear,has_intrinsic_alignment,
@@ -741,6 +736,8 @@ static double transfer_nc(double l,double k,
       double chi1=x1/k;
       if(chi1<=clt->chimax) {
 	double a1=ccl_scale_factor_of_chi(cosmo,chi1,status);
+	// if mu / Sigma parameterisation of modified gravity is in effect,
+	// pk0 and pk1 will be modified power spectra affected mu0
 	double pk0=ccl_nonlin_matter_power(cosmo,k,a0,status);
 	double pk1=ccl_nonlin_matter_power(cosmo,k,a1,status);
 	double fg0=f_rsd(a0,cosmo,clt,status);
@@ -815,6 +812,10 @@ static double transfer_cmblens(int l,double k,ccl_cosmology *cosmo,CCL_ClTracer 
   if(chi<=clt->chimax) {
     double a=ccl_scale_factor_of_chi(cosmo,chi,status);
     double w=1-chi/clt->chi_source;
+    // If muSigma parameterisation of gravity is in effect and 
+    // Sigma0>0, add the relevant factor here.
+    if (fabs(cosmo->params.sigma_0)>1e-15){
+        w = w * (1. + ccl_Sig_MG(cosmo,ccl_scale_factor_of_chi(cosmo,chi, status), status))    
     return clt->prefac_lensing*l*(l+1.)*w/(a*chi*k*k);
   }
   return 0;
@@ -947,6 +948,8 @@ double ccl_angular_cl_limber(ccl_cosmology *cosmo,
     if (!cosmo->computed_power) ccl_cosmology_compute_power(cosmo, status);
     // Return if compilation failed
     if (!cosmo->computed_power) return NAN;
+    // If muSigma modification to gravity is in effect, this p(k)
+    // will be modified by mu_0.
     psp_use=cosmo->data.p_nl;
   }
   else
