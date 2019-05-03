@@ -32,8 +32,6 @@ CTEST_DATA(growth_lowz) {
 static void read_growth_test_file(double z[6], double gf[9][6])
 {
   //Growth is normalized to ~a at early times
- f = fopen("./tests/benchmark/growth_model1-5.txt", "r");
-
   FILE * f = fopen("./benchmarks/data/growth_model1-5.txt", "r");
   ASSERT_NOT_NULL(f);
   
