@@ -66,6 +66,7 @@ $(function() {
 </div><!-- top -->
 <div class="header">
   <div class="summary">
+<a href="#define-members">Macros</a> &#124;
 <a href="#func-members">Functions</a> &#124;
 <a href="#var-members">Variables</a>  </div>
   <div class="headertitle">
@@ -82,8 +83,16 @@ $(function() {
 <code>#include &lt;gsl/gsl_const_mksa.h&gt;</code><br />
 <code>#include &lt;gsl/gsl_roots.h&gt;</code><br />
 <code>#include &quot;<a class="el" href="ccl_8h_source.html">ccl.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="ccl__params_8h_source.html">ccl_params.h</a>&quot;</code><br />
 </div><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="define-members"></a>
+Macros</h2></td></tr>
+<tr class="memitem:aad6145144eccd081bf3f6a919f798c7c"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__neutrinos_8c.html#aad6145144eccd081bf3f6a919f798c7c">GSL_EPSABS_NU</a>&#160;&#160;&#160;1E-7</td></tr>
+<tr class="separator:aad6145144eccd081bf3f6a919f798c7c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae20ff840c19e36575e72b50ad5da8983"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__neutrinos_8c.html#ae20ff840c19e36575e72b50ad5da8983">GSL_EPSREL_NU</a>&#160;&#160;&#160;1E-7</td></tr>
+<tr class="separator:ae20ff840c19e36575e72b50ad5da8983"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae88db5e07a19fe2044883b9ddfef2668"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__neutrinos_8c.html#ae88db5e07a19fe2044883b9ddfef2668">GSL_N_ITERATION_NU</a>&#160;&#160;&#160;1000</td></tr>
+<tr class="separator:ae88db5e07a19fe2044883b9ddfef2668"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
 <tr class="memitem:a4cca2a68898f67a6fdadd21cd3df23a0"><td class="memItemLeft" align="right" valign="top">gsl_spline *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__neutrinos_8c.html#a4cca2a68898f67a6fdadd21cd3df23a0">calculate_nu_phasespace_spline</a> (int *status)</td></tr>
@@ -100,6 +109,52 @@ Variables</h2></td></tr>
 <tr class="memitem:aea78ee990dac0263c18d69c07d84ecc9"><td class="memItemLeft" align="right" valign="top">gsl_spline *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__neutrinos_8c.html#aea78ee990dac0263c18d69c07d84ecc9">nu_spline</a> =NULL</td></tr>
 <tr class="separator:aea78ee990dac0263c18d69c07d84ecc9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
+<h2 class="groupheader">Macro Definition Documentation</h2>
+<a id="aad6145144eccd081bf3f6a919f798c7c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aad6145144eccd081bf3f6a919f798c7c">&#9670;&nbsp;</a></span>GSL_EPSABS_NU</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define GSL_EPSABS_NU&#160;&#160;&#160;1E-7</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Absolute precision in neutrino root finding </p>
+
+</div>
+</div>
+<a id="ae20ff840c19e36575e72b50ad5da8983"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae20ff840c19e36575e72b50ad5da8983">&#9670;&nbsp;</a></span>GSL_EPSREL_NU</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define GSL_EPSREL_NU&#160;&#160;&#160;1E-7</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Relative precision in neutrino root finding </p>
+
+</div>
+</div>
+<a id="ae88db5e07a19fe2044883b9ddfef2668"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae88db5e07a19fe2044883b9ddfef2668">&#9670;&nbsp;</a></span>GSL_N_ITERATION_NU</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define GSL_N_ITERATION_NU&#160;&#160;&#160;1000</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Number of iterations for neutrino root finding </p>
+
+</div>
+</div>
 <h2 class="groupheader">Function Documentation</h2>
 <a id="a4cca2a68898f67a6fdadd21cd3df23a0"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a4cca2a68898f67a6fdadd21cd3df23a0">&#9670;&nbsp;</a></span>calculate_nu_phasespace_spline()</h2>

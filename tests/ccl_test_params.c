@@ -82,7 +82,7 @@ CTEST2(parameters, create_lcdm) {
   ASSERT_DBL_NEAR_TOL(params.sum_nu_masses, 0.0, 1e-10);
   ASSERT_DBL_NEAR_TOL(params.mnu[0], 0.0, 1e-10);
   ASSERT_DBL_NEAR_TOL(params.Omega_n_mass, 0.0, 1e-10);
-  ASSERT_DBL_NEAR_TOL(params.T_CMB, TCMB, 1e-10);
+  ASSERT_DBL_NEAR_TOL(params.T_CMB, ccl_constants.T_CMB, 1e-10);
 
   ASSERT_DBL_NEAR_TOL(params.bcm_ks, 55.0, 1e-10);
   ASSERT_DBL_NEAR_TOL(params.bcm_log10Mc, log10(1.2e14), 1e-10);
@@ -113,7 +113,7 @@ void test_general(ccl_parameters params, struct parameters_data * data) {
   ASSERT_DBL_NEAR_TOL(params.Omega_b, data->Omega_b, 1e-10);
   ASSERT_DBL_NEAR_TOL(params.Omega_m, data->Omega_b + data->Omega_c, 1e-10);
   ASSERT_DBL_NEAR_TOL(params.Omega_k, data->Omega_k, 1e-10);
-  ASSERT_DBL_NEAR_TOL(params.sqrtk, sqrt(fabs(data->Omega_k))*data->h/CLIGHT_HMPC, 1e-10);
+  ASSERT_DBL_NEAR_TOL(params.sqrtk, sqrt(fabs(data->Omega_k))*data->h/ccl_constants.CLIGHT_HMPC, 1e-10);
   ASSERT_DBL_NEAR_TOL(params.k_sign, -1.0, 1e-10);
   ASSERT_DBL_NEAR_TOL(params.w0, data->w0, 1e-10);
   ASSERT_DBL_NEAR_TOL(params.wa, data->wa, 1e-10);
@@ -124,7 +124,7 @@ void test_general(ccl_parameters params, struct parameters_data * data) {
   ASSERT_TRUE(isnan(params.sigma8));
   ASSERT_TRUE(isnan(params.z_star));
   ASSERT_DBL_NEAR_TOL(params.Neff, data->Neff, 1e-10);
-  ASSERT_DBL_NEAR_TOL(params.T_CMB, TCMB, 1e-10);
+  ASSERT_DBL_NEAR_TOL(params.T_CMB, ccl_constants.T_CMB, 1e-10);
 
   ASSERT_DBL_NEAR_TOL(params.bcm_ks, data->bcm_ks, 1e-10);
   ASSERT_DBL_NEAR_TOL(params.bcm_log10Mc, data->bcm_log10Mc, 1e-10);
@@ -187,14 +187,14 @@ CTEST2(parameters, create_general_nu_list) {
 
 CTEST2(parameters, create_general_nu_sum) {
   int status = 0;
-
+ 
   ccl_parameters params =
     ccl_parameters_create(
       data->Omega_c,
       data->Omega_b,
       data->Omega_k,
       data->Neff,
-      data->mnu,
+      &(data->mnu[0]),
       ccl_mnu_sum,
       data->w0,
       data->wa,
@@ -228,7 +228,7 @@ CTEST2(parameters, create_general_nu_sum_inverted) {
       data->Omega_b,
       data->Omega_k,
       data->Neff,
-      data->mnu,
+      &(data->mnu[0]),
       ccl_mnu_sum,
       data->w0,
       data->wa,
@@ -262,7 +262,7 @@ CTEST2(parameters, create_general_nu_sum_equal) {
       data->Omega_b,
       data->Omega_k,
       data->Neff,
-      data->mnu,
+      &(data->mnu[0]),
       ccl_mnu_sum_equal,
       data->w0,
       data->wa,
@@ -289,6 +289,61 @@ CTEST2(parameters, create_general_nu_sum_equal) {
   ASSERT_DBL_NEAR_TOL(params.mnu[1], data->mnu[0]/3, 1e-10);
   ASSERT_DBL_NEAR_TOL(params.mnu[2], data->mnu[0]/3, 1e-10);
 }
+
+/*CTEST2(parameters, exit_for_bad_nu) {
+  int status = 0;
+  double mnu_low;
+  mnu_low = 0.05;
+
+  // For the normal hierarchy, the sum of neutrino masses can't 
+  // be below 0.059 
+  ccl_parameters params_sum =
+    ccl_parameters_create(
+      data->Omega_c,
+      data->Omega_b,
+      data->Omega_k,
+      data->Neff,
+      &mnu_low,
+      ccl_mnu_sum,
+      data->w0,
+      data->wa,
+      data->h,
+      data->A_s,
+      data->n_s,
+      data->bcm_log10Mc,
+      data->bcm_etab,
+      data->bcm_ks,
+      -1,
+      NULL,
+      NULL,
+      &status);
+      
+  // For the normal hierarchy, the sum of neutrino masses can't 
+  // be below 0.098 
+  ccl_parameters params_sum_inverted =
+    ccl_parameters_create(
+      data->Omega_c,
+      data->Omega_b,
+      data->Omega_k,
+      data->Neff,
+      &mnu_low,
+      ccl_mnu_sum_inverted,
+      data->w0,
+      data->wa,
+      data->h,
+      data->A_s,
+      data->n_s,
+      data->bcm_log10Mc,
+      data->bcm_etab,
+      data->bcm_ks,
+      -1,
+      NULL,
+      NULL,
+      &status);      
+
+  ASSERT_NOT_EQUAL(status, 0);
+
+}*/
 
 
 CTEST2(parameters, read_write) {

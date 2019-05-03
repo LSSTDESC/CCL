@@ -7,13 +7,12 @@ If you want to make changes to CCL, please follow the procedures listed here
 to make sure that they conform to our coding standards, and that all of the
 necessary files, wrappers etc. are properly updated.
 
+Developers should seek consensus with the CCL team as needed about new features 
+being incorporated (especially for API changes or additions). 
+
 Reviewing a pull request (PR) on github
 ---------------------------------------
  1. Checkout the branch.
- 2. Make sure you have exported the environment variable `CCL_PARAM_FILE` pointing
-    to the parameter file of your checked out branch (i.e.
-    `export CCL_PARAM_FILE=[path to CCL branch]/include/ccl_params.ini`). This
-    is to let you test CCL without actually installing it on your system.
  2. Make sure you can build the C library (i.e. `cmake .. && make` from the `build` directory).
  3. Make sure you can build the python module (i.e. `python setup.py build` from
     the root directory).
@@ -161,7 +160,7 @@ procedure is as follows:
  1. Run clean scripts
 
    - Execute `pip uninstall pyccl` (try it multiple times to make sure you got
-     all installed version of `pyccl`)
+     all installed versions of `pyccl`)
 
  2. Delete built/installed python files
 

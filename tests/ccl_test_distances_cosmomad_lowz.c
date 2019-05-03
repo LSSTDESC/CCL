@@ -22,7 +22,6 @@ CTEST_DATA(distances_cosmomad_lowz) {
   double w_a[5];
   double mu_0;
   double sigma_0;
-  
   double z[6];
   double chi[5][6];
   double dm[5][6];
@@ -35,11 +34,11 @@ static void read_chi_test_file(double z[6], double chi[5][6])
   //Distances are in Mpc/h
   FILE * f = fopen("./tests/benchmark/chi_model1-5.txt", "r");
   ASSERT_NOT_NULL(f);
-  
+
   // Ignore header line
   char str[1024];
   fgets(str, 1024, f);
-  
+
   // File is fixed format - five rows and six columns
   for (int i=0; i<6; i++) {
     int count = fscanf(f, "%le %le %le %le %le %le\n", &z[i],
@@ -85,7 +84,6 @@ CTEST_SETUP(distances_cosmomad_lowz) {
   data->mnu_type = ccl_mnu_sum;
   data->mu_0 = 0.;
   data->sigma_0 = 0.;
-  
 
   // Values that are different for the different models
   double Omega_v[5] = {  0.7,  0.7,  0.7,  0.65, 0.75 };
@@ -113,15 +111,15 @@ static void compare_distances(int model, struct distances_cosmomad_lowz_data * d
   ccl_parameters params = ccl_parameters_create(data->Omega_c, data->Omega_b, data->Omega_k[model],
 						data->Neff, data->mnu, data->mnu_type,
 						data->w_0[model], data->w_a[model],
-						data->h, data->A_s, data->n_s,-1,-1,-1,data-> mu_0, data->sigma_0, -1,NULL,NULL, &status);
-  
+						data->h, data->A_s, data->n_s,-1,-1,-1,data-> mu_0, data->sigma_0,-1,NULL,NULL, &status);
+
   params.Omega_g=0; //enforce no radiation
   params.Omega_l = 1.-params.Omega_m-params.Omega_k; //reomcpute Omega_l without radiation
-  
+
   // Make a cosmology object from the parameters with the default configuration
   ccl_cosmology * cosmo = ccl_cosmology_create(params, default_config);
   ASSERT_NOT_NULL(cosmo);
-  
+
   // Compare to benchmark data
   for (int j=0; j<6; j++) {
     double a = 1/(1.+data->z[j]);
@@ -140,7 +138,7 @@ static void compare_distances(int model, struct distances_cosmomad_lowz_data * d
         ASSERT_DBL_NEAR_TOL(data->dm[model][j], dm_ij, absolute_tolerance);
     }
   }
-  
+
   ccl_cosmology_free(cosmo);
 }
 

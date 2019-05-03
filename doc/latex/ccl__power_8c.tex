@@ -9,7 +9,6 @@
 {\ttfamily \#include $<$gsl/gsl\+\_\+errno.\+h$>$}\newline
 {\ttfamily \#include $<$class.\+h$>$}\newline
 {\ttfamily \#include \char`\"{}ccl.\+h\char`\"{}}\newline
-{\ttfamily \#include \char`\"{}ccl\+\_\+params.\+h\char`\"{}}\newline
 {\ttfamily \#include \char`\"{}ccl\+\_\+emu17.\+h\char`\"{}}\newline
 {\ttfamily \#include \char`\"{}ccl\+\_\+emu17\+\_\+params.\+h\char`\"{}}\newline
 \subsection*{Data Structures}
@@ -25,8 +24,6 @@ struct \mbox{\hyperlink{struct_sigma_v__pars}{Sigma\+V\+\_\+pars}}
 \begin{DoxyCompactItemize}
 \item 
 double \mbox{\hyperlink{ccl__power_8c_af61e4cfbd50af0e9c32dac18ff77764c}{ccl\+\_\+bcm\+\_\+model\+\_\+fka}} (\mbox{\hyperlink{structccl__cosmology}{ccl\+\_\+cosmology}} $\ast$cosmo, double k, double a, int $\ast$status)
-\item 
-void \mbox{\hyperlink{ccl__power_8c_a250e3f7272c9756f14a7ca3c3ad05cab}{ccl\+\_\+cosmology\+\_\+write\+\_\+power\+\_\+class\+\_\+z}} (char $\ast$filename, \mbox{\hyperlink{structccl__cosmology}{ccl\+\_\+cosmology}} $\ast$cosmo, double z, int $\ast$status)
 \item 
 void \mbox{\hyperlink{ccl__power_8c_a63464fa52a7a72554028a32d274cd092}{ccl\+\_\+cosmology\+\_\+compute\+\_\+power}} (\mbox{\hyperlink{structccl__cosmology}{ccl\+\_\+cosmology}} $\ast$cosmo, int $\ast$status)
 \item 
@@ -79,23 +76,6 @@ Compute the power spectrum and create a 2d spline P(k,z) to be stored in the cos
 \begin{DoxyReturn}{Returns}
 void 
 \end{DoxyReturn}
-\mbox{\Hypertarget{ccl__power_8c_a250e3f7272c9756f14a7ca3c3ad05cab}\label{ccl__power_8c_a250e3f7272c9756f14a7ca3c3ad05cab}} 
-\index{ccl\+\_\+power.\+c@{ccl\+\_\+power.\+c}!ccl\+\_\+cosmology\+\_\+write\+\_\+power\+\_\+class\+\_\+z@{ccl\+\_\+cosmology\+\_\+write\+\_\+power\+\_\+class\+\_\+z}}
-\index{ccl\+\_\+cosmology\+\_\+write\+\_\+power\+\_\+class\+\_\+z@{ccl\+\_\+cosmology\+\_\+write\+\_\+power\+\_\+class\+\_\+z}!ccl\+\_\+power.\+c@{ccl\+\_\+power.\+c}}
-\subsubsection{\texorpdfstring{ccl\+\_\+cosmology\+\_\+write\+\_\+power\+\_\+class\+\_\+z()}{ccl\_cosmology\_write\_power\_class\_z()}}
-{\footnotesize\ttfamily void ccl\+\_\+cosmology\+\_\+write\+\_\+power\+\_\+class\+\_\+z (\begin{DoxyParamCaption}\item[{char $\ast$}]{filename,  }\item[{\mbox{\hyperlink{structccl__cosmology}{ccl\+\_\+cosmology}} $\ast$}]{cosmo,  }\item[{double}]{z,  }\item[{int $\ast$}]{status }\end{DoxyParamCaption})}
-
-C\+L\+A\+SS power spectrum without splines. Write k, P(k,z) \mbox{[}1/\+Mpc, Mpc$^\wedge$3\mbox{]} for given cosmology at the k values used within C\+L\+A\+SS (spectra.\+ln\+\_\+k\mbox{[}\mbox{]}), using the method specified in config.\+matter\+\_\+power\+\_\+spectrum\+\_\+method. 
-\begin{DoxyParams}{Parameters}
-{\em filename} & File into which k, P(k,a) will be written \\
-\hline
-{\em cosmo} & Cosmology parameters and configurations \\
-\hline
-{\em z} & Redshift at which the power spectrum is evaluated \\
-\hline
-{\em status} & Status flag. 0 if there are no errors, nonzero otherwise. \\
-\hline
-\end{DoxyParams}
 \mbox{\Hypertarget{ccl__power_8c_a4a4453e1433b557d74fd1936366fb6da}\label{ccl__power_8c_a4a4453e1433b557d74fd1936366fb6da}} 
 \index{ccl\+\_\+power.\+c@{ccl\+\_\+power.\+c}!ccl\+\_\+linear\+\_\+matter\+\_\+power@{ccl\+\_\+linear\+\_\+matter\+\_\+power}}
 \index{ccl\+\_\+linear\+\_\+matter\+\_\+power@{ccl\+\_\+linear\+\_\+matter\+\_\+power}!ccl\+\_\+power.\+c@{ccl\+\_\+power.\+c}}

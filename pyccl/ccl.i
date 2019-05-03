@@ -43,16 +43,14 @@ from .errors import CCLError
 %include "../include/ccl.h"
 
 %include "ccl_core.i"
+%include "ccl_p2d.i"
 %include "ccl_background.i"
 %include "ccl_power.i"
 %include "ccl_correlation.i"
 %include "ccl_massfunc.i"
 %include "ccl_cls.i"
-%include "ccl_constants.i"
-%include "ccl_redshifts.i"
 %include "ccl_neutrinos.i"
 %include "ccl_halomod.i"
-%include "ccl_params.i"
 
 /* list header files not yet having a .i file here */
 %include "../include/ccl_config.h"

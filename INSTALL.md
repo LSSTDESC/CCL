@@ -175,6 +175,29 @@ $ pip uninstall pyccl
 
 For quick introduction to `CCL` in Python look at notebooks in **_tests/_**.
 
+## Conda installation
+
+In this case, first, you should create a CCL environment with conda and activate it as follows:
+
+````sh
+$ conda create --name CCL
+$ conda activate CCL
+````
+
+Next, install the necessary dependencies via conda:
+
+````sh
+$ conda install cmake pkgconfig automake swig
+$ conda install gsl 
+````
+
+And finally, proceed to the CCL installation via pip:
+
+````sh
+$ pip install pyccl
+````
+
+
 ## Known installation issues
 1. In case you have several C compilers on your system, `CMake` may not default
 to the one you want to use. You can specify which C compiler will be used to compile
@@ -187,6 +210,11 @@ export CC=gcc
 export CLASS_PARAM_DIR=your_ccl_path/CCL/build/extern/share/class/
 ```
 or add this to your `.bashrc`.
+3. In some systems (for example, NERSC) the `-ffast-math` compiler flag used to compile CLASS will cause segfaults. To avoid this, you can disable this flag by adding `-DCLASS_NO_FFAST_MATH=ON` when calling `cmake` from the `build` directory. I.e.:
+```sh
+$ cmake -DCLASS_NO_FFAST_MATH=ON < any other -D cmake flags > ..
+```
+4. For known installation issues regarding building CCL in a conda environment, see the CCL wiki.
 
 ## Development workflow
 

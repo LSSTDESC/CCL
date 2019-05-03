@@ -4,7 +4,7 @@
 
 CCL_BEGIN_DECLS
 
-/** 
+/**
  * Transfer function typedef.
  * Contains all information that describes a specific
  * transfer function. This includes whether there is an
@@ -15,23 +15,15 @@ CCL_BEGIN_DECLS
  */
 typedef enum transfer_function_t
 {
-  // If using an emulator for P_NL
-  ccl_emulator          = 0,
-  ccl_none              = 0,
-  
-  ccl_fitting_function  = 1,
+  ccl_transfer_none     = 0,
   ccl_eisenstein_hu     = 1,
-  
   ccl_bbks              = 2,
-
-  ccl_boltzmann         = 3,
-  ccl_boltzmann_class   = 3,
-  
-  ccl_boltzmann_camb    = 4,
-  
+  ccl_boltzmann_class   = 3
+  // not implemented - left here to reserve it for later
+  // ccl_boltzmann_camb    = 4,
 } transfer_function_t;
 
-/** 
+/**
  * Matter power spectrum typedef.
  * Contains all information that describes a specific
  * matter power spectrum. This inclues whether we
@@ -41,15 +33,12 @@ typedef enum transfer_function_t
 typedef enum matter_power_spectrum_t
 {
     ccl_linear           = 0,
-
     ccl_halofit          = 1,
-    // more?
     ccl_halo_model       = 3,
-    // even more kinds ...
     ccl_emu              = 4
 } matter_power_spectrum_t;
 
-/** 
+/**
  * Bayrons power spectrum typedef.
  * Specified what model is being used for accounting
  * for the impact of baryonic processes on the total
@@ -58,9 +47,8 @@ typedef enum matter_power_spectrum_t
 typedef enum baryons_power_spectrum_t
 {
   ccl_nobaryons           = 0,
-  
   ccl_bcm                 = 1
-  // even more kinds ... 
+  // even more kinds ...
 } baryons_power_spectrum_t;
 
 /** 
@@ -95,7 +83,7 @@ typedef enum halo_concentration_t
   ccl_constant_concentration = 3,
 } halo_concentration_t;
 
-/** 
+/**
  * Emulator neutrinos typedef
  * Specified whether, when the cosmic emulator is switched on,
  * CCL should exit if non-equal neutrino masses are passed (strict)
@@ -107,7 +95,7 @@ typedef enum emulator_neutrinos_t
   ccl_emu_equalize = 2
 } emulator_neutrinos_t;
 
-/** 
+/**
  * Configuration typedef.
  * This contains the transfer function,
  * matter power spectrum, and mass function

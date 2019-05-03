@@ -81,7 +81,6 @@ $(function() {
 <code>#include &lt;gsl/gsl_errno.h&gt;</code><br />
 <code>#include &lt;class.h&gt;</code><br />
 <code>#include &quot;<a class="el" href="ccl_8h_source.html">ccl.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="ccl__params_8h_source.html">ccl_params.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="ccl__emu17_8h_source.html">ccl_emu17.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="ccl__emu17__params_8h_source.html">ccl_emu17_params.h</a>&quot;</code><br />
 </div><table class="memberdecls">
@@ -98,8 +97,6 @@ Data Structures</h2></td></tr>
 Functions</h2></td></tr>
 <tr class="memitem:af61e4cfbd50af0e9c32dac18ff77764c"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__power_8c.html#af61e4cfbd50af0e9c32dac18ff77764c">ccl_bcm_model_fka</a> (<a class="el" href="structccl__cosmology.html">ccl_cosmology</a> *cosmo, double k, double a, int *status)</td></tr>
 <tr class="separator:af61e4cfbd50af0e9c32dac18ff77764c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a250e3f7272c9756f14a7ca3c3ad05cab"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__power_8c.html#a250e3f7272c9756f14a7ca3c3ad05cab">ccl_cosmology_write_power_class_z</a> (char *filename, <a class="el" href="structccl__cosmology.html">ccl_cosmology</a> *cosmo, double z, int *status)</td></tr>
-<tr class="separator:a250e3f7272c9756f14a7ca3c3ad05cab"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a63464fa52a7a72554028a32d274cd092"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__power_8c.html#a63464fa52a7a72554028a32d274cd092">ccl_cosmology_compute_power</a> (<a class="el" href="structccl__cosmology.html">ccl_cosmology</a> *cosmo, int *status)</td></tr>
 <tr class="separator:a63464fa52a7a72554028a32d274cd092"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4a4453e1433b557d74fd1936366fb6da"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__power_8c.html#a4a4453e1433b557d74fd1936366fb6da">ccl_linear_matter_power</a> (<a class="el" href="structccl__cosmology.html">ccl_cosmology</a> *cosmo, double k, double a, int *status)</td></tr>
@@ -197,55 +194,6 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>void </dd></dl>
-
-</div>
-</div>
-<a id="a250e3f7272c9756f14a7ca3c3ad05cab"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a250e3f7272c9756f14a7ca3c3ad05cab">&#9670;&nbsp;</a></span>ccl_cosmology_write_power_class_z()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void ccl_cosmology_write_power_class_z </td>
-          <td>(</td>
-          <td class="paramtype">char *&#160;</td>
-          <td class="paramname"><em>filename</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="structccl__cosmology.html">ccl_cosmology</a> *&#160;</td>
-          <td class="paramname"><em>cosmo</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">double&#160;</td>
-          <td class="paramname"><em>z</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">int *&#160;</td>
-          <td class="paramname"><em>status</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<p>CLASS power spectrum without splines. Write k, P(k,z) [1/Mpc, Mpc^3] for given cosmology at the k values used within CLASS (spectra.ln_k[]), using the method specified in config.matter_power_spectrum_method. </p><dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">filename</td><td>File into which k, P(k,a) will be written </td></tr>
-    <tr><td class="paramname">cosmo</td><td>Cosmology parameters and configurations </td></tr>
-    <tr><td class="paramname">z</td><td>Redshift at which the power spectrum is evaluated </td></tr>
-    <tr><td class="paramname">status</td><td>Status flag. 0 if there are no errors, nonzero otherwise. </td></tr>
-  </table>
-  </dd>
-</dl>
 
 </div>
 </div>

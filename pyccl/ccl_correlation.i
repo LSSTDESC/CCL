@@ -11,10 +11,13 @@
     (double* larr, int nlarr),
     (double* clarr, int nclarr),
     (double* theta, int nt),
-    (double* r, int nr)}
+    (double* r, int nr),
+    (double* s, int ns),
+    (double* sig, int nsig)}
 %apply (int DIM1, double* ARGOUT_ARRAY1) {
     (int nout, double* output),
-    (int nxi, double* xi)};
+    (int nxi, double* xi),
+    (int nxis, double* xis)};
 
 %feature("pythonprepend") correlation_vec %{
     if numpy.shape(larr) != numpy.shape(clarr):
@@ -29,6 +32,25 @@
         raise CCLError("Input shape for `r` must match `(nxi,)`!")
 %}
 
+%feature("pythonprepend") correlation_multipole_vec %{
+    if numpy.shape(s) != (nxis,):
+        raise CCLError("Input shape for `s` must match `(nxis,)`!")
+%}
+
+%feature("pythonprepend") correlation_3dRsd_vec %{
+    if numpy.shape(s) != (nxis,):
+        raise CCLError("Input shape for `s` must match `(nxis,)`!")
+%}
+
+%feature("pythonprepend") correlation_3dRsd_avgmu_vec %{
+    if numpy.shape(s) != (nxis,):
+        raise CCLError("Input shape for `s` must match `(nxis,)`!")
+%}
+
+%feature("pythonprepend") correlation_pi_sigma_vec %{
+    if numpy.shape(sig) != (nxis,):
+        raise CCLError("Input shape for `sig` must match `(nxis,)`!")
+%}
 
 %inline %{
 
@@ -46,4 +68,30 @@ void correlation_3d_vec(ccl_cosmology *cosmo,double a, double* r, int nr,
   ccl_correlation_3d(cosmo, a, nr, r, xi, 0, NULL, status);
 }
 
+void correlation_multipole_vec(ccl_cosmology *cosmo,double a,double beta,
+			       int l,double *s,int ns,
+                               int nxis,double *xis,
+         		       int *status){
+  ccl_correlation_multipole(cosmo,a,beta,l,ns,s,xis,status);
+}
+
+void correlation_3dRsd_vec(ccl_cosmology *cosmo,double a,double mu,double beta,
+			       double *s,int ns,
+                               int nxis,double *xis,int use_spline,
+         		       int *status){
+  ccl_correlation_3dRsd(cosmo,a,ns,s,mu,beta,xis,use_spline,status);
+}
+
+void correlation_3dRsd_avgmu_vec(ccl_cosmology *cosmo,double a,double beta,
+			       double *s,int ns,
+                               int nxis,double *xis,
+         		       int *status){
+  ccl_correlation_3dRsd_avgmu(cosmo,a,ns,s,beta,xis,status);
+}
+
+void correlation_pi_sigma_vec(ccl_cosmology *cosmo,double a,double beta,
+			   double pie,double *sig,int nsig,int nxis,double* xis,int use_spline,
+			   int *status){
+    ccl_correlation_pi_sigma(cosmo,a,beta,pie,nsig,sig,xis,use_spline,status);
+}
 %}

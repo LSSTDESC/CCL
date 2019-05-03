@@ -88,8 +88,8 @@ Macros</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:aeaacf30c32ee61a88b8380237a053752"><td class="memItemLeft" align="right" valign="top"><a class="el" href="ccl__defs_8h.html#ae8d446df269cba1dff8f88922459a7d4">CCL_BEGIN_DECLS</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__emu17_8h.html#aeaacf30c32ee61a88b8380237a053752">ccl_pkemu</a> (double *xstarin, double **Pkemu, int *status, <a class="el" href="structccl__cosmology.html">ccl_cosmology</a> *cosmo)</td></tr>
-<tr class="separator:aeaacf30c32ee61a88b8380237a053752"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9b23760607ffa35f8fc41b203a3a8154"><td class="memItemLeft" align="right" valign="top"><a class="el" href="ccl__defs_8h.html#ae8d446df269cba1dff8f88922459a7d4">CCL_BEGIN_DECLS</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__emu17_8h.html#a9b23760607ffa35f8fc41b203a3a8154">ccl_pkemu</a> (double *xstarin, int nkemu, double *Pkemu, int *status, <a class="el" href="structccl__cosmology.html">ccl_cosmology</a> *cosmo)</td></tr>
+<tr class="separator:a9b23760607ffa35f8fc41b203a3a8154"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Macro Definition Documentation</h2>
 <a id="a605b961a751fa528c986559d81b65640"></a>
@@ -149,8 +149,8 @@ Functions</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Function Documentation</h2>
-<a id="aeaacf30c32ee61a88b8380237a053752"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aeaacf30c32ee61a88b8380237a053752">&#9670;&nbsp;</a></span>ccl_pkemu()</h2>
+<a id="a9b23760607ffa35f8fc41b203a3a8154"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9b23760607ffa35f8fc41b203a3a8154">&#9670;&nbsp;</a></span>ccl_pkemu()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -164,7 +164,13 @@ Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">double **&#160;</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>nkemu</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *&#160;</td>
           <td class="paramname"><em>Pkemu</em>, </td>
         </tr>
         <tr>
@@ -189,6 +195,7 @@ Functions</h2></td></tr>
 <p>Emulator power spectrum Obtain P(k,z) [Mpc^3] for a given set of input parameters. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">xstarin</td><td>vector of input parameters for the emulator, including redshift. </td></tr>
+    <tr><td class="paramname">nkemu</td><td>number of elements to which Pkemu has been allocated. </td></tr>
     <tr><td class="paramname">Pkemu</td><td>output P(k,z) power spectrum </td></tr>
     <tr><td class="paramname">status</td><td>Status flag. 0 if there are no errors, nonzero otherwise. </td></tr>
     <tr><td class="paramname">cosmo</td><td>Cosmology parameters and configurations (only relevant for storing status) </td></tr>

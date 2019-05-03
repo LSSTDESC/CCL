@@ -15,6 +15,13 @@ else()
   set(CLASS_OMPFLAG "OMPFLAG   = -fopenmp")
 endif()
 
+#At NERSC, -ffast-math causes trouble
+if (CLASS_NO_FFAST_MATH)
+   set(CLASS_OPTFLAG "OPTFLAG = -O4")
+else()
+   set(CLASS_OPTFLAG "OPTFLAG = -O4 -ffast-math")
+endif()
+
 # Define class install path and sscape the slashes for the Perl command
 STRING(REPLACE "/" "\\/" CLASS_INSTALL_DIR "__CLASSDIR__='\"${CMAKE_INSTALL_PREFIX}/share/ccl\"'")
 
@@ -30,6 +37,7 @@ ExternalProject_Add(CLASS
         # provide an appropriate omp flag
         CONFIGURE_COMMAND     perl -pi -e "s/^CC /# CC /" Makefile &&
                               perl -pi -e "s/^OMPFLAG .*/${CLASS_OMPFLAG}/" Makefile &&
+                              perl -pi -e "s/^OPTFLAG .*/${CLASS_OPTFLAG}/" Makefile &&
                               perl -pi -e "s/__CLASSDIR__.*/${CLASS_INSTALL_DIR}/" Makefile
         BUILD_COMMAND         make CC=${CMAKE_C_COMPILER} libclass.a
         INSTALL_COMMAND       mkdir -p ${CMAKE_BINARY_DIR}/extern/lib &&
