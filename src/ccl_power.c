@@ -427,7 +427,6 @@ void ccl_cosmology_compute_power(ccl_cosmology* cosmo, int* status)
 {
 
   if ( (cosmo->config.transfer_function_method != ccl_boltzmann_class) && (fabs(cosmo->params.mu_0)>1e-14 || fabs(cosmo->params.sigma_0)>1e-14)){
-	  printf ("here, not boltzmann\n");
 	  *status = CCL_ERROR_NOT_IMPLEMENTED;
 	  strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power(): The power spectrum in the mu / Sigma modified gravity parameterisation is only implemented with the ccl_boltzmann_class power spectrum method.\n");
 	  return;
@@ -451,7 +450,6 @@ void ccl_cosmology_compute_power(ccl_cosmology* cosmo, int* status)
       break;
 
     case ccl_boltzmann_class:
-      printf("here, case of class\n");
       ccl_cosmology_compute_linpower_class(cosmo, status);
       break;
 
