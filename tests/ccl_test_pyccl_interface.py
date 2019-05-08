@@ -821,7 +821,7 @@ def check_corr_3dRSD(cosmo):
     assert_( all_finite(corr12))
 
 def test_background():
-	
+    
     """
     Test background and growth functions in ccl.background.
     """
@@ -833,7 +833,7 @@ def test_background():
         yield check_background_nu, cosmo_nu
         
     for cosmo_mg in reference_models_mg():
-		yield check_background, cosmo_mg
+        yield check_background, cosmo_mg
 
 def test_power():
     
@@ -848,7 +848,7 @@ def test_power():
         yield check_power, cosmo_nu
         
     for cosmo_mg in reference_models_mg():
-		yield check_power_MG, cosmo_mg
+        yield check_power_MG, cosmo_mg
 
 @decorators.slow
 def test_massfunc():
@@ -896,7 +896,7 @@ def test_cls():
         yield check_cls_nu, cosmo_nu
         
     for cosmo_mg in reference_models_mg():
-		yield check_cls, cosmo_mg
+        yield check_cls, cosmo_mg
 	
 def test_corr():
 
@@ -917,10 +917,10 @@ def test_corr():
         yield check_corr_3d, cosmo_nu
         
     for cosmo_mg in reference_models_mg():
-		yield check_corr, cosmo_mg
+        yield check_corr, cosmo_mg
 		
     for cosmo_mg in reference_models_mg():
-		yield check_corr_3d, cosmo_mg
+        yield check_corr_3d, cosmo_mg
 
     for cosmo in reference_models():
         yield check_corr_3dRSD, cosmo
