@@ -872,7 +872,7 @@ def test_halomod():
         yield check_halomod, cosmo
 
     for cosmo_mg in reference_models_mg():
-		yield check_massfunc_MG, cosmo_mg
+        yield check_massfunc_MG, cosmo_mg
 
 @decorators.slow
 def test_neutrinos():
