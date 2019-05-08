@@ -216,11 +216,11 @@ def test_muSig():
         calc_power_spectrum_muSig(tfn, 'linear')
         
     for tfn in ['emulator']:
-		calc_power_spectrum_muSig(None, 'emu')
+        calc_power_spectrum_muSig(None, 'emu')
     
     for tfn in ['boltzmann_class']:
-		calc_power_spectrum_muSig(tfn, 'halofit')
-		calc_power_spectrum_muSig(tfn, 'linear')
+        calc_power_spectrum_muSig(tfn, 'halofit')
+        calc_power_spectrum_muSig(tfn, 'linear')
 
 if __name__ == "__main__":
     run_module_suite(argv=sys.argv)
