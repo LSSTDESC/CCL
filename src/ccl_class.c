@@ -420,7 +420,6 @@ void ccl_cosmology_compute_linpower_class(ccl_cosmology* cosmo, int* status) {
     ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_cosmology_compute_power_class(): "
              "parser init error:%s\n", errmsg);
   }
-  printf("status 1=%d\n", *status);
   if(*status==0) {
     init_parser=1;
     ccl_fill_class_parameters(cosmo,&fc,parser_length, status);
@@ -428,7 +427,6 @@ void ccl_cosmology_compute_linpower_class(ccl_cosmology* cosmo, int* status) {
 
   if (*status==0)
     ccl_run_class(cosmo, &fc,&pr,&ba,&th,&pt,&tr,&pm,&sp,&nl,&le,&op,init_arr,status);
-  printf("status 2=%d\n", *status);  
 
   if(init_parser)
     parser_free(&fc);
@@ -456,7 +454,6 @@ void ccl_cosmology_compute_linpower_class(ccl_cosmology* cosmo, int* status) {
                "memory allocation\n");
     }
   }
-  printf("status 3=%d\n", *status);
 
   if (*status == 0) {
     aa=ccl_linlog_spacing(amin, cosmo->spline_params.A_SPLINE_MIN_PK,
@@ -468,7 +465,6 @@ void ccl_cosmology_compute_linpower_class(ccl_cosmology* cosmo, int* status) {
                "memory allocation\n");
     }
   }
-  printf("status 4=%d\n", *status);
 
   if(*status==0) {
     lpk_ln = malloc(nk * na * sizeof(double));
@@ -478,7 +474,6 @@ void ccl_cosmology_compute_linpower_class(ccl_cosmology* cosmo, int* status) {
                "memory allocation\n");
     }
   }
-  printf("status 5=%d\n", *status);
 
   if(*status==0) {
     lpk_nl = malloc(nk * na * sizeof(double));
@@ -488,7 +483,6 @@ void ccl_cosmology_compute_linpower_class(ccl_cosmology* cosmo, int* status) {
                "memory allocation\n");
     }
   }
-  printf("status 6=%d\n", *status);
 
   if(*status==0) {
     // After this loop lk will contain log(k), lpk_ln will contain log(P_lin), all in Mpc, not Mpc/h units!
@@ -570,8 +564,7 @@ void ccl_cosmology_compute_linpower_class(ccl_cosmology* cosmo, int* status) {
                 lk[i] = log(lk[i]);
                 }
             }
-        }
-    printf("status 7=%d\n", *status);          
+        }         
     if(s) {
       *status = CCL_ERROR_CLASS;
       ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_cosmology_compute_power_class(): "
@@ -581,8 +574,6 @@ void ccl_cosmology_compute_linpower_class(ccl_cosmology* cosmo, int* status) {
 
   if(*status==0)
     cosmo->data.p_lin=ccl_p2d_t_new(na,aa,nk,lk,lpk_ln,1,2,ccl_p2d_cclgrowth,1,NULL,0,ccl_p2d_3,status);
-    
-  printf("status 8=%d\n", *status);  
 
   ccl_free_class_structs(cosmo,&ba,&th,&pt,&tr,&pm,&sp,&nl,&le,init_arr,status);
   free(lk);
