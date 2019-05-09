@@ -1,7 +1,6 @@
 """The core functionality of ccl, including the core data types. This includes
 the cosmology and parameters objects used to instantiate a model from which one
 can compute a set of theoretical predictions.
-can compute a set of theoretical predictions.
 
 ------------------------------------------------------------
 Supported Models for the Power Spectrum, Mass Function, etc.
@@ -815,7 +814,7 @@ def check(status, cosmo=None):
     # Check for normal status (no action required)
     if status == 0:
         return
-
+    
     # Get status message from Cosmology object, if there is one
     if cosmo is not None:
         msg = cosmo.cosmo.status_message

@@ -93,21 +93,21 @@ static void compare_power_MG(int i_model,struct power_MG_data * data)
   int stat=0;
 
 	for(i=0;i<nk;i++) {      
-    stat=fscanf(f,"%le %le\n",&k_h, &pk_h);
-    if(stat!=2) {
-      fprintf(stderr,"Error reading file %s, line %d\n",fname,i);
-      exit(1);
-    }
+      stat=fscanf(f,"%le %le\n",&k_h, &pk_h);
+      if(stat!=2) {
+        fprintf(stderr,"Error reading file %s, line %d\n",fname,i);
+        exit(1);
+      }
      
-    // This is required if benchmark is in little h units. (Mpc/h etc)
-    k=k_h*data->h;
-    pk_bench=pk_h/pow(data->h,3);
+      // This is required if benchmark is in little h units. (Mpc/h etc)
+      k=k_h*data->h;
+      pk_bench=pk_h/pow(data->h,3);
     
-    pk_ccl=ccl_linear_matter_power(cosmo,k,1./(1+z),&status);
+      pk_ccl=ccl_linear_matter_power(cosmo,k,1./(1+z),&status);
     
-    err=fabs(pk_ccl/pk_bench-1);
-    ASSERT_DBL_NEAR_TOL(err,0.,POWER_MG_TOL);
-    }
+      err=fabs(pk_ccl/pk_bench-1);
+      ASSERT_DBL_NEAR_TOL(err,0.,POWER_MG_TOL);
+      }
     
   fclose(f);
 
@@ -125,14 +125,18 @@ static void check_transfer_error(ccl_configuration config, struct power_MG_data 
   params = ccl_parameters_create(data->Omega_c, data->Omega_b, data->Omega_k,
 		data->Neff, &(data->mnuval), data-> mnu_type, 
 		data->w0, data->wa,  data->h, data->A_s, 
-		data->n_s,-1,-1,-1,data->mu_0[0], data->sigma_0[0],-1,NULL,NULL, &status);
+		data->n_s,-1,-1,-1,data->mu_0[1], data->sigma_0[1],-1,NULL,NULL, &status);
 
   ccl_cosmology * cosmo= ccl_cosmology_create(params, config);
   ASSERT_NOT_NULL(cosmo);
   
   // Call P(k) with unacceptable transfer function methods, check we get expected error.
   ccl_cosmology_compute_power(cosmo, &status);
+  if (config.transfer_function_method==ccl_emu){
+	  ASSERT_STR(cosmo->status_message, "ccl_power.c: ccl_cosmology_compute_power(): The power spectrum in the mu / Sigma modified gravity parameterisation is only implemented with the linear power spectrum.\n");
+  }else{
   ASSERT_STR(cosmo->status_message, "ccl_power.c: ccl_cosmology_compute_power(): The power spectrum in the mu / Sigma modified gravity parameterisation is only implemented with the ccl_boltzmann_class power spectrum method.\n");
+  }
   
   ccl_cosmology_free(cosmo);
 }
@@ -149,7 +153,7 @@ static void check_nonlin_error(struct power_MG_data * data)
   params = ccl_parameters_create(data->Omega_c, data->Omega_b, data->Omega_k,
 		data->Neff, &(data->mnuval), data-> mnu_type, 
 		data->w0, data->wa,  data->h, data->A_s, 
-		data->n_s,-1,-1,-1,data->mu_0[0], data->sigma_0[0],-1,NULL,NULL, &status);
+		data->n_s,-1,-1,-1,data->mu_0[1], data->sigma_0[1],-1,NULL,NULL, &status);
 
   ccl_cosmology * cosmo= ccl_cosmology_create(params, config);
   ASSERT_NOT_NULL(cosmo);
@@ -158,15 +162,14 @@ static void check_nonlin_error(struct power_MG_data * data)
   double k = 0.1;
   double a = 1.;
   double pk = ccl_nonlin_matter_power(cosmo, k, a, &status);
-  ASSERT_STR(cosmo->status_message, "ccl_power.c: ccl_nonlin_matter_power(): Nonlinear behaviour for the mu / Sigma parameterization of modified gravity is not implemented. \n");
+  ASSERT_STR(cosmo->status_message, "ccl_power.c: ccl_cosmology_compute_power(): The power spectrum in the mu / Sigma modified gravity parameterisation is only implemented with the linear power spectrum.\n");
   
   ccl_cosmology_free(cosmo);
 }
 
-/*
 CTEST2(power_MG, MG_emu_error) {
 
-  ccl_configuration config_emu = {ccl_emulator, ccl_emu, ccl_nobaryons, ccl_tinker10, ccl_emu_strict};	
+  ccl_configuration config_emu = {ccl_transfer_none, ccl_emu, ccl_nobaryons, ccl_tinker10, ccl_emu_strict};	
 	
   check_transfer_error(config_emu, data);
 }
@@ -188,7 +191,7 @@ CTEST2(power_MG, MG_bbks_error) {
 CTEST2(power_MG, MG_nonlin_error) {
 	
   check_nonlin_error(data);
-}*/
+}
 
 CTEST2(power_MG, MG_pk_model0) {
   int model=0;	

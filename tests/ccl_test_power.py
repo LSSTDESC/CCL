@@ -101,8 +101,12 @@ def calc_power_spectrum_muSig(transfer_fn, matter_power):
     nonlinear power spectrum in the mu / Sigma parameterisation of
     modified gravity. """
 	
-    k = np.logspace(-5., 1., 300)
-    a = np.logspace(np.log10(0.51), 0., 5) # Emulator only works at z<2
+    #k = np.logspace(-5., 1., 300)
+    #a = np.logspace(np.log10(0.51), 0., 5) # Emulator only works at z<2
+    k = [0.01]
+    a = [1.]
+    print "matter_power=", matter_power
+    print "transfer function=", transfer_fn
 	
     Omega_k = 1.0 - Omega_c - Omega_b - Omega_v_vals[0]
           
@@ -113,12 +117,16 @@ def calc_power_spectrum_muSig(transfer_fn, matter_power):
                               matter_power_spectrum=matter_power,
                               Neff = Neff, mu_0 = mu_0, sigma_0 = sigma_0)
         if matter_power=='linear':
+            print "here 1"
             if (transfer_fn!='boltzmann_class'):
+                print "here 1a"
                 assert_raises(CCLError, ccl.linear_matter_power, cosmo, k, _a)
             else:   
+                print "here 1b"
                 pk_lin = ccl.linear_matter_power(cosmo, k, _a)
                 assert_(all_finite(pk_lin))
         else:
+            print "here 2"
             assert_raises(CCLError, ccl.nonlin_matter_power, cosmo, k, _a)
 				
 def loop_over_params(transfer_fn, matter_power, lin, raise_errs):
@@ -211,15 +219,21 @@ def test_raise_error_emu_nonlin():
     
 @decorators.slow
 def test_muSig():
-    for tfn in ['eisenstein_hu', 'bbks']:
-        calc_power_spectrum_muSig(tfn, 'linear')
-        calc_power_spectrum_muSig(tfn, 'linear')
+    #print "hello"
+    #for tfn in ['eisenstein_hu', 'bbks']:
+        #print "hello hello"
+        #print "tfn=", tfn
+        #calc_power_spectrum_muSig(tfn, 'linear')
+        #calc_power_spectrum_muSig(tfn, 'linear')
         
-    for tfn in ['emulator']:
-        calc_power_spectrum_muSig(None, 'emu')
+    #for tfn in ['emulator']:
+        #print "tfn=", tfn
+        #calc_power_spectrum_muSig(None, 'emu')
     
     for tfn in ['boltzmann_class']:
-        calc_power_spectrum_muSig(tfn, 'halofit')
+        #print "tfn=", tfn, "halofit:"
+        #calc_power_spectrum_muSig(tfn, 'halofit')
+        print "tfn=", tfn, "linear:"
         calc_power_spectrum_muSig(tfn, 'linear')
 
 if __name__ == "__main__":

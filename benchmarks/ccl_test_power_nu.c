@@ -90,8 +90,8 @@ CTEST_SETUP(power_nu_nl) {
   data->sigma8=0.8;
   data->Neff=3.046;
   data->mnu_type =ccl_mnu_list;
-  data->mu_0;
-  data->sigma_0;
+  data->mu_0=0.;
+  data->sigma_0=0.;
 
   double mnu0[3]	= 	{0.04, 0., 0.};
   double mnu1[3]	= 	{0.05, 0.01, 0.};

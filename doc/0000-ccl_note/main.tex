@@ -586,7 +586,7 @@ Other baryonic impact models might be incorporated in the future as they become 
 \subsubsection{Modified gravity ($\mu, \Sigma$)}
 \ccl supports the quasistatic parameterization of modified gravity with scale-independent deviations from GR which arise at late times (currently with functional form given in equation \ref{muSigform}). Under these conditions, the matter power spectrum in a modified gravity scenario can be computed simply by re-scaling the GR matter power spectrum with the modified gravity growth factor.
 
-For each power spectrum calculation method above, we first first compute the power spectrum in GR at a grid in $a$ and $k$ as usual, in preparation for producing splines in these variables. If ${\tt mu\_0} \ne 0$, we then take the ratio of the growth factor $D$ at the given value of ${\tt mu\_0}$ to the GR (${\tt mu\_0}=0$) growth factor, and multiply the GR power spectrum by this ratio squared:
+For each power spectrum calculation method above, we first compute the power spectrum in GR at a grid in $a$ and $k$ as usual, in preparation for producing splines in these variables. If ${\tt mu\_0} \ne 0$, we then take the ratio of the growth factor $D$ at the given value of ${\tt mu\_0}$ to the GR (${\tt mu\_0}=0$) growth factor, and multiply the GR power spectrum by this ratio squared:
 \begin{equation}
 P(k,z) = \left(\frac{D^{\mu}(z)}{D^{\rm GR}(z)}\right)^2 P^{\rm GR}(k,z).
 \label{Pkmu}

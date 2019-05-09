@@ -48,24 +48,6 @@ static void read_growth_test_file(double z[6], double gf[9][6])
     ASSERT_EQUAL(6, count);
   }
   fclose(f);
-  
-  /*// Now get the growth in the models with non-zero mu_0 and sigma_0
-  FILE * fMG = fopen("./tests/benchmark/growth_model6-9_MG.txt", "r");
-  ASSERT_NOT_NULL(fMG);
-  
-  // Ignore header line
-  char strMG[1024];
-  char* rtnMG;
-  rtnMG = fgets(strMG, 1024, fMG);
-  
-    // File is fixed format - five rows and six columns
-  for (int i=0; i<6; i++) {
-    int count = fscanf(fMG, "%le %le %le %le %le\n", &z[i],
-		       &gf[5][i], &gf[6][i], &gf[7][i], &gf[8][i]);
-    	// Check that all the stuff in the benchmark is there
-    ASSERT_EQUAL(5, count);
-  }
-  fclose(fMG);*/
 }
 
 // Set up the cosmological parameters to be used in each of the
@@ -110,9 +92,7 @@ static void compare_growth(int model, struct growth_lowz_data * data)
   // Make the parameter set from the input data
   // Values of some parameters depend on the model index
   ccl_parameters params = ccl_parameters_create(data->Omega_c, data->Omega_b, data->Omega_k[model], data->Neff, data->mnu, data->mnu_type, data->w_0[model], data->w_a[model], data->h, data->A_s, data->n_s,-1,-1,-1,data->mu_0[model], data->sigma_0[model],-1,NULL,NULL, &status);
-  if (model<=4){   // Don't know yet whether this will be true for MG benchmarks.
-     params.Omega_g=0; //enforce no radiation
-  }
+  params.Omega_g=0; //enforce no radiation
   params.Omega_l = 1.-params.Omega_m-params.Omega_k; //recompute Omega_l without radiation
   // Make a cosmology object from the parameters with the default configuration
   ccl_cosmology * cosmo = ccl_cosmology_create(params, default_config);
@@ -202,29 +182,6 @@ CTEST2(growth_lowz, model_5) {
   int model = 4;
   compare_growth(model, data);
 }
-
-/*CTEST2(growth_lowz, model_6) {
-  int model = 5;
-  compare_growth(model, data);
-}
-
-
-CTEST2(growth_lowz, model_7) {
-  int model = 6;
-  compare_growth(model, data);
-}
-
-
-CTEST2(growth_lowz, model_8) {
-  int model = 7;
-  compare_growth(model, data);
-}
-
-
-CTEST2(growth_lowz, model_9) {
-  int model = 8;
-  compare_growth(model, data);
-}*/
 
 CTEST2(growth_lowz, mgrowth){
   check_mgrowth();

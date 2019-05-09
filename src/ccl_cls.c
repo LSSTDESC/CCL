@@ -378,6 +378,10 @@ static void clt_init_wM(CCL_ClTracer *clt,ccl_cosmology *cosmo,
       *status=CCL_ERROR_INTEG;
       ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: clt_init_wM(): error computing lensing window\n");
     }
+    if(*status){
+	  ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: clt_init_wM(): error computing MG factor\n"	
+	}
+    
   }
 
   if(*status==0) {
@@ -464,6 +468,9 @@ static void clt_init_wL(CCL_ClTracer *clt,ccl_cosmology *cosmo,
       *status=CCL_ERROR_INTEG;
       ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: clt_init_wL(): error computing lensing window\n");
     }
+    if(*status){
+	  ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: clt_init_wL(): error computing MG factor\n"); 	
+      }
   }
 
   if(*status==0) {
@@ -816,7 +823,11 @@ static double transfer_cmblens(int l,double k,ccl_cosmology *cosmo,CCL_ClTracer 
     // Sigma0>0, add the relevant factor here.
     if (fabs(cosmo->params.sigma_0)>1e-15){
         w = w * (1. + ccl_Sig_MG(cosmo,ccl_scale_factor_of_chi(cosmo,chi, status), status)); 
-    }       
+    }
+    if (*status){
+		ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: transfer_cmblens: error computing MG factor\n"); 	
+      }
+		       
     return clt->prefac_lensing*l*(l+1.)*w/(a*chi*k*k);
   }
   return 0;

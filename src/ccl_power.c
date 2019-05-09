@@ -450,6 +450,7 @@ void ccl_cosmology_compute_power(ccl_cosmology* cosmo, int* status)
       break;
 
     case ccl_boltzmann_class:
+      printf("here in compute power boltzmann class\n");
       ccl_cosmology_compute_linpower_class(cosmo, status);
       break;
 
@@ -475,6 +476,8 @@ void ccl_cosmology_compute_power(ccl_cosmology* cosmo, int* status)
         break;
 
       case ccl_halofit: {
+		  printf("in halofit\n");
+		  printf("mu0=%f, sig0=%f\n", cosmo->params.mu_0, cosmo->params.sigma_0);
         
         if (fabs(cosmo->params.mu_0)>1e-14 || fabs(cosmo->params.sigma_0)>1e-14){
 	       *status = CCL_ERROR_NOT_IMPLEMENTED;
