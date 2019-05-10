@@ -814,7 +814,7 @@ def check(status, cosmo=None):
     # Check for normal status (no action required)
     if status == 0:
         return
-    
+
     # Get status message from Cosmology object, if there is one
     if cosmo is not None:
         msg = cosmo.cosmo.status_message
