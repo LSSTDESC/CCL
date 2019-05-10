@@ -379,7 +379,7 @@ static void clt_init_wM(CCL_ClTracer *clt,ccl_cosmology *cosmo,
       ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: clt_init_wM(): error computing lensing window\n");
     }
     if(*status){
-	  ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: clt_init_wM(): error computing MG factor\n"	
+	  ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: clt_init_wM(): error computing MG factor\n");	
 	}
     
   }
