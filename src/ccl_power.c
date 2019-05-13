@@ -475,8 +475,6 @@ void ccl_cosmology_compute_power(ccl_cosmology* cosmo, int* status)
         break;
 
       case ccl_halofit: {
-		  printf("mu0=%f, sig0=%f\n", cosmo->params.mu_0, cosmo->params.sigma_0);
-        
         if (fabs(cosmo->params.mu_0)>1e-14 || fabs(cosmo->params.sigma_0)>1e-14){
 	       *status = CCL_ERROR_NOT_IMPLEMENTED;
 	       strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power(): The power spectrum in the mu / Sigma modified gravity parameterisation is only implemented with the linear power spectrum.\n");

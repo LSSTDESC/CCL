@@ -7,7 +7,7 @@
 // comparing to benchmarks produced with CAMB. At our current default 
 // precision settings for CLASS, we only agree even in GR at 
 // around 3e-3 
-#define POWER_MG_TOL 5e-3
+#define POWER_MG_TOL 1e-2
 
 CTEST_DATA(power_MG) {
   double Omega_c;
@@ -80,7 +80,7 @@ static void compare_power_MG(int i_model,struct power_MG_data * data)
   ccl_cosmology * cosmo= ccl_cosmology_create(params, config_linear);
   ASSERT_NOT_NULL(cosmo);
   
-  sprintf(fname,"./tests/benchmark/model%d_pk_MG.dat",i_model);
+  sprintf(fname,"./benchmarks/data/model%d_pk_MG.dat",i_model);
    f=fopen(fname,"r");
   if(f==NULL) {
     fprintf(stderr,"Error opening file %s\n",fname);
@@ -104,9 +104,13 @@ static void compare_power_MG(int i_model,struct power_MG_data * data)
       pk_bench=pk_h/pow(data->h,3);
     
       pk_ccl=ccl_linear_matter_power(cosmo,k,1./(1+z),&status);
-    
-      err=fabs(pk_ccl/pk_bench-1);
-      ASSERT_DBL_NEAR_TOL(err,0.,POWER_MG_TOL);
+      if (i_model==0){	  
+        err=fabs(pk_ccl/pk_bench-1);
+        ASSERT_DBL_NEAR_TOL(err,0.,POWER_MG_TOL);
+      } else if (k_h>5e-3) {
+		err=fabs(pk_ccl/pk_bench-1);
+        ASSERT_DBL_NEAR_TOL(err,0.,POWER_MG_TOL);
+      }    
       }
     
   fclose(f);
@@ -198,12 +202,11 @@ CTEST2(power_MG, MG_pk_model0) {
   compare_power_MG(model,data);
 }
 
-/*CTEST2(power_MG, MG_pk_model1) {
+CTEST2(power_MG, MG_pk_model1) {
   int model=1;	
   compare_power_MG(model,data);
 }
 
-/*
 CTEST2(power_MG, MG_pk_model2) {
   int model=2;	
   compare_power_MG(model,data);
@@ -217,5 +220,5 @@ CTEST2(power_MG, MG_pk_model3) {
 CTEST2(power_MG, MG_pk_model4) {
   int model=4;	
   compare_power_MG(model,data);
-}*/
+}
 
