@@ -52,12 +52,6 @@ typedef enum baryons_power_spectrum_t
 } baryons_power_spectrum_t;
 
 /** 
- * Modified gravity typedef.
- * Specified what, if any, parameterisation
- * is being used for modifications to GR
- */
-
-/** 
  * Mass function typedef
  * Contains all information that describes a specific
  * mass function. This is basically a switch that chooses

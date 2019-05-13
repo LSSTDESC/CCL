@@ -207,15 +207,6 @@ baryons_power_spectrum_types = {
     'bcm':         lib.bcm
 }
 
-# modified_gravity_types = {
-#    'GR':   lib.GR,
-#    'muSigma_MG':  lib.muSigma_MG
-# }
-"""dict: Types of modified gravity models.
-The strings represent possible choices the user can specify
-for different modified gravity specifications.
-"""
-
 # List which transfer functions can be used with the muSigma_MG
 # parameterisation of modified gravity
 valid_muSig_transfers = {'boltzmann_class', 'class'}

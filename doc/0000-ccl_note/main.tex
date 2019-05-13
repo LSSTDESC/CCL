@@ -746,7 +746,7 @@ where $T_\theta(k,z)$ is the transfer function of $\theta$, the divergence of th
         In the case where the quasistatic parameterization of modified gravity is in use and ${\tt sigma\_0} \ne 0$, equation \ref{eq:deltaM} becomes
         \begin{equation}
           \Delta_\ell^{\rm M}(k)=-\ell(\ell+1)\int \frac{dz}{H(z)} W^{\rm M}(z) (1 + \Sigma(z)) T_{\phi+\psi}(k,z) j_\ell(k\chi(z)),
-          \label{eq:deltaM}
+          \label{eq:deltaM_MG}
         \end{equation}
 and there is dependence on $\mu(z)$ via modifications to $T_{\phi+\psi}(k,z)$.
 
@@ -765,10 +765,9 @@ and there is dependence on $\mu(z)$ via modifications to $T_{\phi+\psi}(k,z)$.
         \end{equation}
         
   When the quasistatic parameterization of modified gravity is in use, we have instead         
-       \begin{equation} \label{eq:transfer_lensing}
-          \Delta_\ell^{\rm L}(k)=-\frac{1}{2}\sqrt{\frac{(\ell+2)!}{(\ell-2)!}}\int \frac{dz}{H(z)} W^{\rm L}(z) (1 + \Sigma(z))T_{\phi+\psi}(k,z) j_\ell(k\chi(z)),
+       \begin{equation} \label{eq:transfer_lensing_MG}
+          \Delta_\ell^{\rm L}(k)=-\frac{1}{2}\sqrt{\frac{(\ell+2)!}{(\ell-2)!}}\int \frac{dz}{H(z)} W^{\rm L}(z) (1 + \Sigma(z))T_{\phi+\psi}(k,z) j_\ell(k\chi(z)).
         \end{equation} 
-        with dependence on $\mu(z)$ via $T_{\phi+\psi}(k,z)$.
   \item $\Delta^{\rm IA}$ is the transfer function for intrinsic galaxy alignments. \ccl currently supports the so-called ``non-linear alignment model'', according to which the galaxy inertia tensor is proportional the local tidal tensor \cite{2004PhRvD..70f3526H,2007MNRAS.381.1197H}.
         \begin{equation}
           \Delta_\ell^{\rm IA}(k)=\sqrt{\frac{(\ell+2)!}{(\ell-2)!}}\int dz\,p_z(z)\,b_{\rm IA}(z)\,f_{\rm red}(z)\,T_\delta(k,z)\,\frac{j_\ell(k\chi(z))}{(k\chi(z))^2}.
@@ -783,7 +782,7 @@ It is worth noting that the equations above should be modified for non-flat cosm
   \Delta_\ell^{\rm C}(k)=-\frac{\ell(\ell+1)}{2}\int_0^{\chi_{\rm S}} d\chi\,\frac{r(\chi_{\rm S})-r(\chi)}{r(\chi)r(\chi_{\rm S})}T_{\phi+\psi}(k,\chi) j_\ell(k\chi),
 \end{equation}
 where $\chi_{\rm S}\equiv\chi(z_{\rm S})$. Once again under the quasistatic parameterization of modified gravity we have
-\begin{equation} \label{eq:transfer_cmb_lensing}
+\begin{equation} \label{eq:transfer_cmb_lensing_MG}
   \Delta_\ell^{\rm C}(k)=-\frac{\ell(\ell+1)}{2}\int_0^{\chi_{\rm S}} d\chi\,\frac{r(\chi_{\rm S})-r(\chi)}{r(\chi)r(\chi_{\rm S})}(1+\Sigma(z))T_{\phi+\psi}(k,\chi) j_\ell(k\chi),
 \end{equation}
 with dependence on $\mu(z)$ via modifications to $T_{\phi+\psi}(k,\chi)$.
@@ -813,7 +812,7 @@ where
  &\tilde{\Delta}_\ell^{\rm IA}(k)=\sqrt{\frac{(\ell+2)!}{(\ell-2)!}}\frac{p_z(z_\ell)\,b_{\rm IA}(z_\ell)f_{\rm red}(z_\ell)H(z_\ell)}{(\ell+1/2)^2}\\
  &\tilde{\Delta}_\ell^{\rm C}(k)=\frac{3}{2}\Omega_{M,0}H_0^2\,\ell(\ell+1)\frac{1+z_\ell}{k^2}\,\frac{r(\chi_{\rm S})-r(\chi_\ell)}{r(\chi_\ell)r(\chi_{\rm S})}\,\Theta(\chi_\ell;0,\chi_{\rm S}).
 \end{align}
-Here ($\Theta(x;x_i,x_f)$) is a top-hat function (1 for $x\in[x_i,x_f]$ and 0 otherwise).
+Here ($\Theta(x;x_i,x_f)$) is a top-hat function (1 for $x\in[x_i,x_f]$ and 0 otherwise). Of course, in the case where gravity is modified from GR, the Limber calculation proceeds similarly with the appropriately modified transfer functions where applicable (see equations \ref{eq:deltaM_MG}, \ref{eq:transfer_lensing_MG}, \ref{eq:transfer_cmb_lensing_MG}).
 
 %----------------------------------------------------------------
 %
