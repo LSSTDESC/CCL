@@ -20,6 +20,7 @@ set(CCL_SRC
     src/ccl_emu17.c src/ccl_correlation.c
     src/ccl_halomod.c
     src/ccl_halofit.c
+    src/ccl_haloprofile.c
     src/fftlog.c)
 
 # Defines list of CCL tests src files
@@ -50,6 +51,9 @@ set(TEST_SRC
     benchmarks/ccl_test_angpow.c
     benchmarks/ccl_test_correlation_3d.c
     benchmarks/ccl_test_correlation_3dRSD.c
+
+    # halo profiles
+    benchmarks/ccl_test_haloprofile.c
 )
 
 
