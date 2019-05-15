@@ -412,22 +412,22 @@ def check_neutrinos():
     a_arr = 1. / (1.+z_arr)
     a_lst = [_a for _a in a_arr]
 
-    TCMB = 2.725
+    T_CMB = 2.725
     N_nu_mass = 3
     mnu = [0.02, 0.02, 0.02]
 
     # Omeganuh2
-    assert_( all_finite(ccl.Omeganuh2(a, mnu, TCMB)) )
-    assert_( all_finite(ccl.Omeganuh2(a_lst, mnu, TCMB)) )
-    assert_( all_finite(ccl.Omeganuh2(a_arr, mnu, TCMB)) )
+    assert_( all_finite(ccl.Omeganuh2(a, mnu, T_CMB)) )
+    assert_( all_finite(ccl.Omeganuh2(a_lst, mnu, T_CMB)) )
+    assert_( all_finite(ccl.Omeganuh2(a_arr, mnu, T_CMB)) )
 
     OmNuh2 = 0.01
 
     # Omeganuh2_to_Mnu
-    assert_( all_finite(ccl.nu_masses(OmNuh2, 'normal', TCMB)) )
-    assert_( all_finite(ccl.nu_masses(OmNuh2, 'inverted', TCMB)) )
-    assert_( all_finite(ccl.nu_masses(OmNuh2, 'equal', TCMB)) )
-    assert_( all_finite(ccl.nu_masses(OmNuh2, 'sum', TCMB)) )
+    assert_( all_finite(ccl.nu_masses(OmNuh2, 'normal', T_CMB)) )
+    assert_( all_finite(ccl.nu_masses(OmNuh2, 'inverted', T_CMB)) )
+    assert_( all_finite(ccl.nu_masses(OmNuh2, 'equal', T_CMB)) )
+    assert_( all_finite(ccl.nu_masses(OmNuh2, 'sum', T_CMB)) )
 
     # Check that the right exceptions are raised
     assert_raises(ValueError, ccl.Cosmology, Omega_c=0.27, Omega_b=0.045,

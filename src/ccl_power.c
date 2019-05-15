@@ -205,7 +205,7 @@ static void ccl_cosmology_compute_power_emu(ccl_cosmology * cosmo, int * status)
       }else if (cosmo->config.emulator_neutrinos_method == ccl_emu_equalize){
   // Reset the masses to equal
   double mnu_eq[3] = {cosmo->params.sum_nu_masses / 3., cosmo->params.sum_nu_masses / 3., cosmo->params.sum_nu_masses / 3.};
-  Omeganuh2_eq = ccl_Omeganuh2(1.0, 3, mnu_eq, cosmo->params.T_CMB, cosmo->data.accelerator, status);
+  Omeganuh2_eq = ccl_Omeganuh2(1.0, 3, mnu_eq, cosmo->params.T_CMB, status);
       }
     } else {
       if(fabs(cosmo->params.N_nu_rel - 3.04)>1.e-6){
