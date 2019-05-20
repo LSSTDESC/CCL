@@ -499,12 +499,17 @@ void ccl_cosmology_compute_linpower_class(ccl_cosmology* cosmo, int* status) {
 	    // Get a list of the three neutrino masses already calculated
 	    double *mnu_list = NULL;
 	    mnu_list = malloc(3*sizeof(double));
+	    printf("N_nu_mass=%d\n", cosmo->params.N_nu_mass);
 	    for (int i=0; i< cosmo->params.N_nu_mass; i=i+1){
+			printf("i=%d\n", i);
 		    mnu_list[i] = cosmo->params.mnu[i];
+		    printf("mnu=%f\n", mnu_list[i]);
        }
 	    if (cosmo->params.N_nu_mass<3){
-		    for (int j=cosmo->params.N_nu_mass; j<3; j=j+3){
+		    for (int j=cosmo->params.N_nu_mass; j<3; j=j+1){
 			    mnu_list[j] = 0.;
+			    printf("j=%d\n", j);
+			    printf("mnu=%f\n", mnu_list[j]);
 		    }
 	    }
 	    
@@ -519,7 +524,7 @@ void ccl_cosmology_compute_linpower_class(ccl_cosmology* cosmo, int* status) {
 			 *status = CCL_ERROR_PARAMETERS;
 			 strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_class(): neither A_s nor sigma8 defined.\n");
 	    }
-	    printf("before create GR cosmo, power\n");
+	    //printf("before create GR cosmo, power\n");
 	    ccl_parameters params_GR = ccl_parameters_create(cosmo->params.Omega_c,
 	               cosmo->params.Omega_b, cosmo->params.Omega_k, 
 	               cosmo->params.Neff, mnu_list, ccl_mnu_list, 
@@ -530,21 +535,21 @@ void ccl_cosmology_compute_linpower_class(ccl_cosmology* cosmo, int* status) {
 	               cosmo->params.z_mgrowth, cosmo->params.df_mgrowth, status);
 	    ccl_cosmology* cosmo_GR = ccl_cosmology_create(params_GR,
 	               cosmo->config);       
-	    printf("after create GR cosmo, power\n");   
+	    //printf("after create GR cosmo, power\n");   
 	    
 	    double * D_mu = malloc(na * sizeof(double)); 
 	    double * D_GR = malloc(na * sizeof(double));          
 	  
-	    printf("before growth rate MG\n");
+	    //printf("before growth rate MG\n");
 	    for (int i=0; i<na; i++){
 	        D_mu[i] = ccl_growth_factor_unnorm(cosmo, aa[i], status);
 	    }
-	    printf("after growth rate MG\n");
-	    printf("before growth rate GR\n");
+	    //printf("after growth rate MG\n");
+	    //printf("before growth rate GR\n");
 	    for (int i=0; i<na; i++){
 	        D_GR[i] = ccl_growth_factor_unnorm(cosmo_GR, aa[i], status);
 	    }
-	    printf("after growth rate GR\n");
+	    //printf("after growth rate GR\n");
     
         for (int i=0; i<nk; i++) {
             for (int j = 0; j < na; j++) {
