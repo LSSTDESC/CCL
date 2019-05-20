@@ -102,8 +102,9 @@ static void compare_power_MG(int i_model,struct power_MG_data * data)
       // This is required if benchmark is in little h units. (Mpc/h etc)
       k=k_h*data->h;
       pk_bench=pk_h/pow(data->h,3);
-    
+      printf("before linear matter power\n");
       pk_ccl=ccl_linear_matter_power(cosmo,k,1./(1+z),&status);
+      printf("after linear matter power\n");
       if (i_model==0){	  
         err=fabs(pk_ccl/pk_bench-1);
         ASSERT_DBL_NEAR_TOL(err,0.,POWER_MG_TOL);
