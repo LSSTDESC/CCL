@@ -6,10 +6,6 @@
 #include <gsl/gsl_integration.h>
 #include <gsl/gsl_sf_expint.h>
 #include "ccl.h"
-#include "ccl_correlation.h"
-#include "ccl_massfunc.h"
-#include "ccl_halomod.h"
-#include "ccl_haloprofile.h"
 
 //maths helper function for NFW profile
 static double helper_fx(double x){
@@ -21,7 +17,7 @@ static double helper_fx(double x){
 //cosmo: ccl cosmology object containing cosmological parameters
 //c: halo concentration, needs to be consistent with halo size definition
 //halomass: halo mass
-//massdef_delta: mass definition, overdensity relative to matter density
+//massdef_delta: mass definition, overdensity relative to mean matter density
 //a: scale factor
 //r: radii at which to calculate output
 //nr: number of radii for calculation
@@ -53,7 +49,7 @@ void ccl_halo_profile_nfw(ccl_cosmology *cosmo, double c, double halomass, doubl
 //cosmo: ccl cosmology object containing cosmological parameters
 //c: halo concentration, needs to be consistent with halo size definition
 //halomass: halo mass
-//massdef_delta: mass definition, overdensity relative to matter density
+//massdef_delta: mass definition, overdensity relative to mean matter density
 //a: scale factor
 //rp: radius at which to calculate output
 //nr: number of radii for calculation
@@ -93,7 +89,7 @@ void ccl_projected_halo_profile_nfw(ccl_cosmology *cosmo, double c, double halom
 
 }
 
-//maths helper function for Einasto profile
+//maths helper function assuming NFW approximation
 static double helper_solve_cvir(double c, void *rhs_pointer){
     double rhs = *(double*)rhs_pointer;
     return (log(1.+c)-c/(1.+c))/(c*c*c) - rhs;
@@ -142,7 +138,7 @@ static double solve_cvir(ccl_cosmology *cosmo, double rhs, double initial_guess,
     }
 }
 
-// Parameters structure for the Einasto integrand
+// Structure to hold parameters of integrand_einasto
 typedef struct{
   ccl_cosmology *cosmo;
   double alpha, rs;
@@ -195,7 +191,7 @@ static double integrate_einasto(ccl_cosmology *cosmo, double R, double alpha, do
 //cosmo: ccl cosmology object containing cosmological parameters
 //c: halo concentration, needs to be consistent with halo size definition
 //halomass: halo mass
-//massdef_delta: mass definition, overdensity relative to matter density
+//massdef_delta: mass definition, overdensity relative to mean matter density
 //a: scale factor
 //r: radii at which to calculate output
 //nr: number of radii for calculation
@@ -246,7 +242,7 @@ void ccl_halo_profile_einasto(ccl_cosmology *cosmo, double c, double halomass, d
 
 }
 
-// Parameters structure for the Einasto integrand
+// Structure to hold parameters of integrand_hernquist
 typedef struct{
   ccl_cosmology *cosmo;
   double rs;
@@ -260,7 +256,7 @@ static double integrand_hernquist(double r, void *params){
     return 4.*M_PI*r*r/((r/rs)*(1.+r/rs)*(1.+r/rs)*(1.+r/rs));
 }
 
-//integrate einasto profile to get normalization of rhos
+//integrate hernquist profile to get normalization of rhos
 static double integrate_hernquist(ccl_cosmology *cosmo, double R, double rs, int *status){
     int qagstatus;
     double result = 0, eresult;
@@ -297,7 +293,7 @@ static double integrate_hernquist(ccl_cosmology *cosmo, double R, double rs, int
 //cosmo: ccl cosmology object containing cosmological parameters
 //c: halo concentration, needs to be consistent with halo size definition
 //halomass: halo mass
-//massdef_delta: mass definition, overdensity relative to matter density
+//massdef_delta: mass definition, overdensity relative to mean matter density
 //a: scale factor
 //r: radii at which to calculate output
 //nr: number of radii for calculation

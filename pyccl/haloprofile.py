@@ -12,7 +12,7 @@ def nfw_profile_3d(cosmo, concentration, halo_mass, odelta, a, r):
         cosmo (:obj:`Cosmology`): cosmological parameters.
         concentration (float): halo concentration.
         halo_mass (float): halo masses; in units of Msun.
-        odelta (float): overdensity parameter.
+        odelta (float): overdensity with respect to mean matter density.
         a (float): scale factor.
         r (float or array_like): radius or radii to calculate profile for,
          in units of Mpc.
@@ -21,7 +21,7 @@ def nfw_profile_3d(cosmo, concentration, halo_mass, odelta, a, r):
         float or array_like: 3D NFW density at r, in units of Msun/Mpc^3.
     """
     status = 0
-    scalar = True if isinstance(r, float) else False
+    scalar = True if np.ndim(r) == 0 else False
 
     # Convert to array if it's not already an array
     if not isinstance(r, np.ndarray):
@@ -52,7 +52,7 @@ def nfw_profile_2d(cosmo, concentration, halo_mass, odelta, a, r):
         cosmo (:obj:`Cosmology`): cosmological parameters.
         concentration (float): halo concentration.
         halo_mass (float): halo masses; in units of Msun.
-        odelta (float): overdensity parameter.
+        odelta (float): overdensity with respect to mean matter density.
         a (float): scale factor.
         r (float or array_like): radius or radii to calculate profile for,
          in units of Mpc.
@@ -62,7 +62,7 @@ def nfw_profile_2d(cosmo, concentration, halo_mass, odelta, a, r):
          in units of Msun/Mpc^2.
     """
     status = 0
-    scalar = True if isinstance(r, float) else False
+    scalar = True if np.ndim(r) == 0 else False
 
     # Convert to array if it's not already an array
     if not isinstance(r, np.ndarray):
@@ -88,12 +88,14 @@ def einasto_profile_3d(cosmo, concentration, halo_mass, odelta, a, r):
     at a given radius or an array of radii,
     for a halo with a given mass, mass definition, and concentration,
     at a given scale factor, with a cosmology dependence.
+    The alpha parameter is calibrated using the relation with peak height in
+    https://arxiv.org/pdf/1401.1216.pdf eqn5, assuming virial mass.
 
     Args:
         cosmo (:obj:`Cosmology`): cosmological parameters.
         concentration (float): halo concentration.
         halo_mass (float): halo masses; in units of Msun.
-        odelta (float): overdensity parameter.
+        odelta (float): overdensity with respect to mean matter density.
         a (float): scale factor.
         r (float or array_like): radius or radii to calculate profile for,
          in units of Mpc.
@@ -102,7 +104,7 @@ def einasto_profile_3d(cosmo, concentration, halo_mass, odelta, a, r):
         float or array_like: 3D NFW density at r, in units of Msun/Mpc^3.
     """
     status = 0
-    scalar = True if isinstance(r, float) else False
+    scalar = True if np.ndim(r) == 0 else False
 
     # Convert to array if it's not already an array
     if not isinstance(r, np.ndarray):
@@ -133,7 +135,7 @@ def hernquist_profile_3d(cosmo, concentration, halo_mass, odelta, a, r):
         cosmo (:obj:`Cosmology`): cosmological parameters.
         concentration (float): halo concentration.
         halo_mass (float): halo masses; in units of Msun.
-        odelta (float): overdensity parameter.
+        odelta (float): overdensity with respect to mean matter density.
         a (float): scale factor.
         r (float or array_like): radius or radii to calculate profile for,
          in units of Mpc.
@@ -142,7 +144,7 @@ def hernquist_profile_3d(cosmo, concentration, halo_mass, odelta, a, r):
         float or array_like: 3D NFW density at r, in units of Msun/Mpc^3.
     """
     status = 0
-    scalar = True if isinstance(r, float) else False
+    scalar = True if np.ndim(r) == 0 else False
 
     # Convert to array if it's not already an array
     if not isinstance(r, np.ndarray):

@@ -1,12 +1,5 @@
 %module ccl_haloprofile
 
-%{
-/* put additional #include here */
-#include "../include/ccl_halomod.h"
-#include "../include/ccl_massfunc.h"
-#include "../include/ccl_haloprofile.h"
-%}
-
 #include "../include/ccl_haloprofile.h"
 
 // Enable vectorised arguments for arrays

@@ -1,7 +1,4 @@
 #include "ccl.h"
-#include "ccl_haloprofile.h"
-#include "ccl_massfunc.h"
-#include "ccl_halomod.h"
 #include "ctest.h"
 #include <stdio.h>
 #include <math.h>
