@@ -259,7 +259,7 @@ static void clt_init_nz(CCL_ClTracer *clt,ccl_cosmology *cosmo,
   gsl_function F;
   double nz_norm,nz_enorm;
   double *nz_normalized;
-  
+
   //Find redshift range where the N(z) has support
   get_support_interval(nz_n,z_n,n,CCL_FRAC_RELEVANT,&(clt->zmin),&(clt->zmax));
   clt->chimax=ccl_comoving_radial_distance(cosmo,1./(1+clt->zmax),status);
@@ -279,7 +279,7 @@ static void clt_init_nz(CCL_ClTracer *clt,ccl_cosmology *cosmo,
       return;
     }
   }
-  
+
   if(*status==0) {
     gsl_integration_workspace *w=gsl_integration_workspace_alloc(cosmo->gsl_params.N_ITERATION);
     F.function=&speval_bis;
@@ -296,7 +296,7 @@ static void clt_init_nz(CCL_ClTracer *clt,ccl_cosmology *cosmo,
       ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: clt_init_nz(): integration error when normalizing N(z)\n");
     }
   }
-  
+
   if(*status==0) {
     for(int ii=0;ii<nz_n;ii++)
       nz_normalized[ii]=n[ii]/nz_norm;
@@ -307,7 +307,7 @@ static void clt_init_nz(CCL_ClTracer *clt,ccl_cosmology *cosmo,
       ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: clt_init_nz(): error initializing normalized spline for N(z)\n");
     }
   }
-  
+
   free(nz_normalized);
 }
 
@@ -419,7 +419,7 @@ static void clt_init_wL(CCL_ClTracer *clt,ccl_cosmology *cosmo,
   double zmax=clt->spl_nz->xf;
   double chimax=ccl_comoving_radial_distance(cosmo,1./(1+zmax),status);
   //TODO: The interval in chi (5. Mpc) should be made a macro
-  
+
   //In this case we need to integrate all the way to z=0. Reset zmin and chimin
   clt->zmin=0;
   clt->chimin=0;
@@ -431,7 +431,7 @@ static void clt_init_wL(CCL_ClTracer *clt,ccl_cosmology *cosmo,
     ccl_cosmology_set_status_message(cosmo,
 				     "ccl_cls.c: clt_init_wL(): Error creating linear spacing in chi\n");
   }
-  
+
   if(*status==0) {
     y=(double *)malloc(nchi*sizeof(double));
     if(y==NULL) {
@@ -534,7 +534,7 @@ static CCL_ClTracer *cl_tracer(ccl_cosmology *cosmo,int tracer_type,
 
   if(*status==0) {
     clt->tracer_type=tracer_type;
-    
+
     double hub=cosmo->params.h*ccl_h_over_h0(cosmo,1.,status)/ccl_constants.CLIGHT_HMPC;
     clt->prefac_lensing=1.5*hub*hub*cosmo->params.Omega_m;
 
@@ -561,7 +561,7 @@ static CCL_ClTracer *cl_tracer(ccl_cosmology *cosmo,int tracer_type,
     free(clt);
     clt=NULL;
   }
-    
+
   return clt;
 }
 
@@ -704,7 +704,7 @@ static double f_mag(double a,double chi,ccl_cosmology *cosmo,CCL_ClTracer *clt, 
 //w -> CCL_ClWorskpace object
 //clt -> CCL_ClTracer object (must be of the ccl_number_counts_tracer type)
 static double transfer_nc(double l,double k,
-			  ccl_cosmology *cosmo,CCL_ClTracer *clt, int * status)
+			  ccl_cosmology *cosmo,CCL_ClTracer *clt, ccl_p2d_t *psp, int * status)
 {
   double ret=0;
   double x0=(l+0.5);
@@ -719,8 +719,9 @@ static double transfer_nc(double l,double k,
       double chi1=x1/k;
       if(chi1<=clt->chimax) {
 	double a1=ccl_scale_factor_of_chi(cosmo,chi1,status);
-	double pk0=ccl_nonlin_matter_power(cosmo,k,a0,status);
-	double pk1=ccl_nonlin_matter_power(cosmo,k,a1,status);
+  double lk = log(k);
+	double pk0=ccl_p2d_t_eval(psp,lk,a0,cosmo,status);
+	double pk1=ccl_p2d_t_eval(psp,lk,a1,cosmo,status);
 	double fg0=f_rsd(a0,cosmo,clt,status);
 	double fg1=f_rsd(a1,cosmo,clt,status);
 	f_all+=fg0*(1.-l*(l-1.)/(x0*x0))-fg1*2.*sqrt((l+0.5)*pk1/((l+1.5)*pk0))/x1;
@@ -777,7 +778,7 @@ static double transfer_wl(double l,double k,
       f_all+=f_lensing(a,chi,cosmo,clt,status);
     if(clt->has_intrinsic_alignment)
       f_all+=f_IA_NLA(a,chi,cosmo,clt,status);
-    
+
     ret=f_all;
   }
 
@@ -804,12 +805,12 @@ static double transfer_cmblens(int l,double k,ccl_cosmology *cosmo,CCL_ClTracer 
 //cosmo -> ccl_cosmology object
 //clt -> CCL_ClTracer object
 static double transfer_wrap(double l,double k,ccl_cosmology *cosmo,
-			    CCL_ClTracer *clt, int * status)
+			    CCL_ClTracer *clt, ccl_p2d_t *psp, int * status)
 {
   double transfer_out=0;
 
   if(clt->tracer_type==ccl_number_counts_tracer)
-    transfer_out=transfer_nc(l,k,cosmo,clt,status);
+    transfer_out=transfer_nc(l,k,cosmo,clt,psp,status);
   else if(clt->tracer_type==ccl_weak_lensing_tracer)
     transfer_out=transfer_wl(l,k,cosmo,clt,status);
   else if(clt->tracer_type==ccl_cmb_lensing_tracer)
@@ -835,17 +836,17 @@ static double cl_integrand(double lk,void *params)
   double d1,d2;
   IntClPar *p=(IntClPar *)params;
   double k=exp(lk);
-  d1=transfer_wrap(p->l,k,p->cosmo,p->clt1,p->status);
+  d1=transfer_wrap(p->l,k,p->cosmo,p->clt1,p->psp,p->status);
   if(d1==0)
     return 0;
-  d2=transfer_wrap(p->l,k,p->cosmo,p->clt2,p->status);
+  d2=transfer_wrap(p->l,k,p->cosmo,p->clt2,p->psp,p->status);
   if(d2==0)
     return 0;
 
   double chi=(p->l+0.5)/k;
   double a=ccl_scale_factor_of_chi(p->cosmo,chi,p->status);
   double pk=ccl_p2d_t_eval(p->psp,lk,a,p->cosmo,p->status);
-  
+
   return k*pk*d1*d2;
 }
 
@@ -876,7 +877,7 @@ static void get_k_interval(ccl_cosmology *cosmo,
   if((clt2->has_shear==0) &&
      (clt2->has_magnification==0) &&
      (clt2->tracer_type!=ccl_cmb_lensing_tracer)) cut_low_2=1;
-  
+
   if(cut_low_1) {
     if(cut_low_2) {
       chimin=fmax(clt1->chimin,clt2->chimin);
@@ -895,10 +896,10 @@ static void get_k_interval(ccl_cosmology *cosmo,
     chimin=0.5*(l+0.5)/cosmo->spline_params.K_MAX;
     chimax=2*(l+0.5)/cosmo->spline_params.K_MIN;
   }
-  
+
   if(chimin<=0)
     chimin=0.5*(l+0.5)/cosmo->spline_params.K_MAX;
-  
+
   *lkmax=log(fmin( cosmo->spline_params.K_MAX  ,2  *(l+0.5)/chimin));
   *lkmin=log(fmax( cosmo->spline_params.K_MIN  ,0.5*(l+0.5)/chimax));
 }
@@ -1010,11 +1011,11 @@ void ccl_angular_cls_nonlimber(ccl_cosmology *cosmo,double l_logstep,int l_linst
       if(l_out[ii]>lmax)
 	lmax=l_out[ii];
     }
-  
+
     //Now initialize workspace
     w=ccl_cl_workspace_new(lmax,2*lmax,l_logstep,l_linstep,status);
   }
-  
+
   if(*status==0) {
     //Allocate array for power spectrum at interpolation nodes
     l_nodes=(double *)malloc(w->n_ls*sizeof(double));
@@ -1048,13 +1049,13 @@ void ccl_angular_cls_nonlimber(ccl_cosmology *cosmo,double l_logstep,int l_linst
       ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: ccl_cl_angular_cls(); memory allocation\n");
     }
   }
-  
+
   if(*status==0) {
     //Interpolate into input multipoles
     for(ii=0;ii<nl_out;ii++)
       cl_out[ii]=ccl_spline_eval((double)(l_out[ii]),spcl_nodes);
   }
-  
+
   //Cleanup
   if(spcl_nodes!=NULL)
     ccl_spline_free(spcl_nodes);
@@ -1119,7 +1120,7 @@ double ccl_get_tracer_fa(ccl_cosmology *cosmo,CCL_ClTracer *clt,double a,int fun
     x=ccl_comoving_radial_distance(cosmo,a,status); //x-variable is comoving distance for lensing kernels
   else
     x=1./a-1; //x-variable is redshift by default
-  
+
   return ccl_spline_eval(x,spl);
 }
 
@@ -1133,7 +1134,7 @@ int ccl_get_tracer_fas(ccl_cosmology *cosmo,CCL_ClTracer *clt,int na,double *a,d
     ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: inconsistent combination of tracer and internal function to be evaluated");
     return -1;
   }
-  
+
   switch(func_code) {
   case ccl_trf_nz :
     spl=clt->spl_nz;
@@ -1157,7 +1158,7 @@ int ccl_get_tracer_fas(ccl_cosmology *cosmo,CCL_ClTracer *clt,int na,double *a,d
     spl=clt->spl_wM;
     break;
   }
-  
+
   int compchi = (func_code==ccl_trf_wL) || (func_code==ccl_trf_wM);
 
   int ia;
