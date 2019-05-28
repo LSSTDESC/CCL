@@ -25,9 +25,11 @@
 - Separated Limber and Non-Limber C_ell calculations (#614)
 - Added `has_density` and `has_shear` flags to ClTracers (#614)
 - Simplified C_ell unit tests (#614)
-- Changed TCMB to T_CMB everywhere (#615)	
+- Changed TCMB to T_CMB everywhere (#615)
 - Fixed a small bug in the w_tophat expression and increased precision (#607)
 - Deprecated the use of GSL spline accelerators (#626)
+- Fixed bug in use of the input power spectrum for the RSD part of the number
+  counts transfer function (#637)
 
 ## Python library
 - Improved error reporting for `angular_cl` computations (#567).
@@ -49,7 +51,7 @@
 - Added custom Halofit code (#611).
 - Added `has_density` and `has_shear` tags to `Tracer` constructors.
 - Changed TCMB to T_CMB everywhere (#615)
-	
+
 # v 1.0 API changes :
 
 ## C library
