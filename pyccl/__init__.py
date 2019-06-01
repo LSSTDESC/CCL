@@ -16,7 +16,7 @@ if environ.get("CLASS_PARAM_DIR") is None:
     environ["CLASS_PARAM_DIR"] = path.dirname(path.abspath(__file__))
 
 from . import ccllib as lib
-from . import core, constants, background, power, massfunction, halomodel, p2d
+from . import core, constants, background, power, massfunction, halomodel, p2d, haloprofile
 
 # Core data structures
 from .core import Cosmology
@@ -49,6 +49,9 @@ from .correlation import (
 
 # Properties of haloes
 from .halomodel import halomodel_matter_power, halo_concentration
+
+# Halo density profiles
+from .haloprofile import nfw_profile_3d, einasto_profile_3d, hernquist_profile_3d, nfw_profile_2d
 
 # Specific to massive neutrinos
 from .neutrinos import Omeganuh2, nu_masses
