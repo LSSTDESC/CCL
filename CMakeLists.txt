@@ -13,7 +13,7 @@ project(ccl VERSION 0.2.1)
 # Defines list of CCL src files
 set(CCL_SRC
     src/ccl_background.c src/ccl_core.c src/ccl_error.c
-    src/ccl_bbks.c src/ccl_f2d.c src/ccl_power.c src/ccl_bcm.c
+    src/ccl_bbks.c src/ccl_f1d.c src/ccl_f2d.c src/ccl_power.c src/ccl_bcm.c
     src/ccl_eh.c src/ccl_class.c
     src/ccl_utils.c src/ccl_cls.c src/ccl_massfunc.c
     src/ccl_neutrinos.c
@@ -47,7 +47,8 @@ set(TEST_SRC
     tests/ccl_test_halomod.c
 
     # Cls and correlation functions
-    tests/ccl_test_angpow.c
+    # Uncomment below when we bring ANGPOW back
+    #tests/ccl_test_angpow.c
     tests/ccl_test_correlation_3d.c
     tests/ccl_test_correlation_3dRSD.c
 
@@ -76,10 +77,11 @@ else(EXTERNAL_CLASS_PATH)
     include(BuildCLASS)
 endif(EXTERNAL_CLASS_PATH)
 
+# Uncomment below when we bring ANGPOW back
 # Builds Angpow
 # TODO: the same mechanism as for CLASS could be used here to provide the
 # option to use a pre-installed version of angpow
-include(BuildAngpow)
+#include(BuildAngpow)
 
 # Compilation flags
 set(CMAKE_C_FLAGS_RELEASE "-O3 -fomit-frame-pointer -fno-common -fPIC -std=gnu99 -DHAVE_ANGPOW -D__CCL_DATA_DIR__=${CMAKE_INSTALL_PREFIX}/share/ccl")
@@ -103,17 +105,20 @@ include_directories(include)
 # Compiles all the source files
 add_library(objlib OBJECT ${CCL_SRC})
 # Make sure the external projects are correclty built
-add_dependencies(objlib ANGPOW)
+# Uncomment below when we bring ANGPOW back
+#add_dependencies(objlib ANGPOW)
 if(NOT CLASS_EXTERNAL)
     add_dependencies(objlib CLASS)
 endif()
 if(NOT GSL_FOUND)
     add_dependencies(objlib GSL)
-    add_dependencies(ANGPOW GSL)
+# Uncomment below when we bring ANGPOW back
+#    add_dependencies(ANGPOW GSL)
 endif()
 if(NOT FFTW_FOUND)
     add_dependencies(objlib FFTW)
-    add_dependencies(ANGPOW FFTW)
+# Uncomment below when we bring ANGPOW back
+#    add_dependencies(ANGPOW FFTW)
 endif()
 
 # The reason for building ccl as a shared library is that we can link it to

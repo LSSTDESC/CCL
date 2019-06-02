@@ -41,13 +41,13 @@ typedef struct {
   int has_magnification;
   int has_shear;
   int has_intrinsic_alignment;
-  SplPar *spl_nz; //Spline for normalized N(z)
-  SplPar *spl_bz; //Spline for linear bias
-  SplPar *spl_sz; //Spline for magnification bias
-  SplPar *spl_rf; //Spline for red fraction
-  SplPar *spl_ba; //Spline for alignment bias
-  SplPar *spl_wL; //Spline for lensing kernel
-  SplPar *spl_wM; //Spline for magnification
+  ccl_f1d_t *spl_nz; //Spline for normalized N(z)
+  ccl_f1d_t *spl_bz; //Spline for linear bias
+  ccl_f1d_t *spl_sz; //Spline for magnification bias
+  ccl_f1d_t *spl_rf; //Spline for red fraction
+  ccl_f1d_t *spl_ba; //Spline for alignment bias
+  ccl_f1d_t *spl_wL; //Spline for lensing kernel
+  ccl_f1d_t *spl_wM; //Spline for magnification
 } CCL_ClTracer;
 
 

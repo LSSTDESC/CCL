@@ -92,7 +92,7 @@ ccl_f2d_t *ccl_f2d_t_new(int na,double *a_arr,
   return f2d;
 }
 
-double ccl_f2d_t_eval(ccl_f2d_t *f2d,double lk,double a,ccl_cosmology *cosmo,
+double ccl_f2d_t_eval(ccl_f2d_t *f2d,double lk,double a,void *cosmo,
 		      int *status)
 {
   double a_ev=a;
@@ -203,8 +203,10 @@ double ccl_f2d_t_eval(ccl_f2d_t *f2d,double lk,double a,ccl_cosmology *cosmo,
   //Extrapolate in a if needed
   if(is_hiz) {
     double gz;
-    if(f2d->extrap_linear_growth==ccl_f2d_cclgrowth) //Use CCL's growth function
-      gz=ccl_growth_factor(cosmo,a,status)/ccl_growth_factor(cosmo,a_ev,status);
+    if(f2d->extrap_linear_growth==ccl_f2d_cclgrowth) {//Use CCL's growth function
+      ccl_cosmology *csm=(ccl_cosmology *)cosmo;
+      gz=ccl_growth_factor(csm,a,status)/ccl_growth_factor(csm,a_ev,status);
+    }
     else if(f2d->extrap_linear_growth==ccl_f2d_customgrowth) //Use internal growth function
       gz=f2d->growth(a)/f2d->growth(a_ev);
     else //Use constant growth factor

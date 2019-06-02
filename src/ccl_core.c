@@ -863,9 +863,9 @@ void ccl_data_free(ccl_data * data)
   gsl_spline_free(data->gammahmf);
   gsl_spline_free(data->phihmf);
   gsl_spline_free(data->etahmf);
-  ccl_spline_free(data->rsd_splines[0]);
-  ccl_spline_free(data->rsd_splines[1]);
-  ccl_spline_free(data->rsd_splines[2]);
+  ccl_f1d_t_free(data->rsd_splines[0]);
+  ccl_f1d_t_free(data->rsd_splines[1]);
+  ccl_f1d_t_free(data->rsd_splines[2]);
 }
 
 /* ------- ROUTINE: ccl_cosmology_set_status_message --------

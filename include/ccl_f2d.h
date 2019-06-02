@@ -8,7 +8,41 @@
 #include <gsl/gsl_spline2d.h>
 
 CCL_BEGIN_DECLS
-  
+
+//f2d extrapolation types for early times
+typedef enum ccl_f2d_extrap_growth_t
+{
+  ccl_f2d_cclgrowth = 401, //Use CCL's linear growth
+  ccl_f2d_customgrowth = 402, //Use a custom growth function
+  ccl_f2d_constantgrowth = 403, //Use a constant growth factor
+  ccl_f2d_no_extrapol = 404, //Do not extrapolate, just throw an exception
+} ccl_f2d_extrap_growth_t;
+
+//f2d interpolation types
+typedef enum ccl_f2d_interp_t
+{
+  ccl_f2d_3 = 303, //Bicubic interpolation
+} ccl_f2d_interp_t;
+
+/**
+ * Struct containing a 2D power spectrum
+ */
+typedef struct {
+  double lkmin,lkmax; /**< Edges in log(k)*/
+  double amin,amax; /**< Edges in a*/
+  int is_factorizable; /**< Is this factorizable into k- and a-dependent functions? */
+  int extrap_order_lok; /**< Order of extrapolating polynomial in log(k) for low k (0, 1 or 2)*/
+  int extrap_order_hik; /**< Order of extrapolating polynomial in log(k) for high k (0, 1 or 2)*/
+  ccl_f2d_extrap_growth_t extrap_linear_growth;  /**< Extrapolation type at high redshifts*/
+  int is_log; /**< Do I hold the values of log(f(k,a))?*/
+  double (*growth)(double); /**< Custom extrapolating growth function*/
+  double growth_factor_0; /**< Constant extrapolating growth factor*/
+  int growth_exponent; /**< Power to which growth should be exponentiated*/
+  gsl_spline *fk; /**< Spline holding the values of the k-dependent factor*/
+  gsl_spline *fa; /**< Spline holding the values of the a-dependent factor*/
+  gsl_spline2d *fka; /**< Spline holding the values of f(k,a)*/
+} ccl_f2d_t;
+
 /**
  * Create a ccl_f2d_t structure.
  * @param na number of elements in a_arr.
@@ -53,7 +87,7 @@ ccl_f2d_t *ccl_f2d_t_new(int na,double *a_arr,
  * @param cosmo ccl_cosmology structure, only needed if evaluating f(k,a) at small scale factors outside the interpolation range, and if fka was initialized with extrap_linear_growth = ccl_f2d_cclgrowth.
  * @param status Status flag. 0 if there are no errors, nonzero otherwise.
  */
-double ccl_f2d_t_eval(ccl_f2d_t *fka,double lk,double a,ccl_cosmology *cosmo,
+double ccl_f2d_t_eval(ccl_f2d_t *fka,double lk,double a,void *cosmo,
 		      int *status);
 
 /**
