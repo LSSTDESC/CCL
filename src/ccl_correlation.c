@@ -93,7 +93,7 @@ static void ccl_tracer_corr_fftlog(ccl_cosmology *cosmo,
     if(l_arr[i]>=l_edge)
       cl_arr[i]=cl_edge*pow(l_arr[i]/l_edge,cl_tilt);
     else
-      cl_arr[i]=ccl_f1d_t_eval(l_arr[i],cl_spl);
+      cl_arr[i]=ccl_f1d_t_eval(cl_spl,l_arr[i]);
   }
   ccl_f1d_t_free(cl_spl);
 
@@ -141,7 +141,7 @@ static void ccl_tracer_corr_fftlog(ccl_cosmology *cosmo,
     return;
   }
   for(i=0;i<n_theta;i++)
-    wtheta[i]=ccl_f1d_t_eval(theta[i]*M_PI/180.,wth_spl);
+    wtheta[i]=ccl_f1d_t_eval(wth_spl,theta[i]*M_PI/180.);
   ccl_f1d_t_free(wth_spl);
 
   free(l_arr);
@@ -186,7 +186,7 @@ static double corr_bessel_integrand(double l,void *params)
       cl=0;
   }
   else
-    cl=ccl_f1d_t_eval(l,p->cl_spl);
+    cl=ccl_f1d_t_eval(p->cl_spl,l);
 
   jbes=gsl_sf_bessel_Jn(p->i_bessel,x);
 
@@ -361,7 +361,7 @@ static void ccl_tracer_corr_legendre(ccl_cosmology *cosmo,
       if(l>=l_edge)
 	cl_arr[i]=cl_edge*pow(l/l_edge,cl_tilt);
       else
-	cl_arr[i]=ccl_f1d_t_eval(l,cl_spl);
+	cl_arr[i]=ccl_f1d_t_eval(cl_spl,l);
     }
     ccl_f1d_t_free(cl_spl);
 
@@ -503,7 +503,7 @@ void ccl_correlation_3d(ccl_cosmology *cosmo, double a,
     return;
   }
   for(i=0;i<n_r;i++)
-    xi[i]=ccl_f1d_t_eval(r[i],xi_spl);
+    xi[i]=ccl_f1d_t_eval(xi_spl,r[i]);
   ccl_f1d_t_free(xi_spl);
 
   free(k_arr);
@@ -616,7 +616,7 @@ void ccl_correlation_multipole(ccl_cosmology *cosmo, double a, double beta,
     strcpy(cosmo->status_message,
            "ccl_correlation.c: ccl_correlation_multipole ran out of memory\n");
   }
-  for (i = 0; i < n_s; i++) xi[i] = ccl_f1d_t_eval(s[i], xi_spl);
+  for (i = 0; i < n_s; i++) xi[i] = ccl_f1d_t_eval(xi_spl,s[i]);
   ccl_f1d_t_free(xi_spl);
 
   free(k_arr);
@@ -876,12 +876,12 @@ void ccl_correlation_3dRsd(ccl_cosmology *cosmo, double a, int n_s, double *s,
 
     for (i = 0; i < n_s; i++)
       xi[i] = (1. + 2. / 3 * beta + 1. / 5 * beta * beta) *
-                  ccl_f1d_t_eval(s[i], cosmo->data.rsd_splines[0]) -
-              (4. / 3 * beta + 4. / 7 * beta * beta) *
-                  ccl_f1d_t_eval(s[i], cosmo->data.rsd_splines[1]) *
-                  gsl_sf_legendre_Pl(2, mu) +
-              8. / 35 * beta * beta * ccl_f1d_t_eval(s[i], cosmo->data.rsd_splines[2]) *
-                  gsl_sf_legendre_Pl(4, mu);
+	ccl_f1d_t_eval(cosmo->data.rsd_splines[0],s[i]) -
+	(4. / 3 * beta + 4. / 7 * beta * beta) *
+	ccl_f1d_t_eval(cosmo->data.rsd_splines[1],s[i]) *
+	gsl_sf_legendre_Pl(2, mu) +
+	8. / 35 * beta * beta * ccl_f1d_t_eval(cosmo->data.rsd_splines[2],s[i]) *
+	gsl_sf_legendre_Pl(4, mu);
   }
 
   ccl_check_status(cosmo, status);

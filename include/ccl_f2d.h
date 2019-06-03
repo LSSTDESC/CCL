@@ -1,4 +1,4 @@
-/* @file */
+/** @file */
 
 #ifndef __CCL_F2D_H_INCLUDED__
 #define __CCL_F2D_H_INCLUDED__

@@ -19,7 +19,7 @@ typedef struct {
 
 ccl_f1d_t *ccl_f1d_t_new(int n,double *x,double *y,double y0,double yf);
 
-double ccl_f1d_t_eval(double x,ccl_f1d_t *spl);
+double ccl_f1d_t_eval(ccl_f1d_t *spl,double x);
 
 void ccl_f1d_t_free(ccl_f1d_t *spl);
 

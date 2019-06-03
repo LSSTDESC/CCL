@@ -53,7 +53,7 @@ static void get_support_interval(int n,double *x,double *y,double frac,
 //Wrapper around spline_eval with GSL function syntax
 static double speval_bis(double x,void *params)
 {
-  return ccl_f1d_t_eval(x,(ccl_f1d_t *)params);
+  return ccl_f1d_t_eval((ccl_f1d_t *)params,x);
 }
 
 static void ccl_cl_workspace_free(CCL_ClWorkspace *w)
@@ -136,7 +136,7 @@ static double integrand_wl(double chip,void *params)
   double chi=p->chi;
   double a=ccl_scale_factor_of_chi(p->cosmo,chip, p->status);
   double z=1./a-1;
-  double pz=ccl_f1d_t_eval(z,p->spl_pz);
+  double pz=ccl_f1d_t_eval(p->spl_pz,z);
   double h=p->cosmo->params.h*ccl_h_over_h0(p->cosmo,a, p->status)/ccl_constants.CLIGHT_HMPC;
 
   if(chi==0)
@@ -200,8 +200,8 @@ static double integrand_mag(double chip,void *params)
   double chi=p->chi;
   double a=ccl_scale_factor_of_chi(p->cosmo,chip, p->status);
   double z=1./a-1;
-  double pz=ccl_f1d_t_eval(z,p->spl_pz);
-  double sz=ccl_f1d_t_eval(z,p->spl_sz);
+  double pz=ccl_f1d_t_eval(p->spl_pz,z);
+  double sz=ccl_f1d_t_eval(p->spl_sz,z);
   double h=p->cosmo->params.h*ccl_h_over_h0(p->cosmo,a, p->status)/ccl_constants.CLIGHT_HMPC;
 
   if(chi==0)
@@ -671,8 +671,8 @@ CCL_ClTracer *ccl_cl_tracer_lensing_simple(ccl_cosmology *cosmo,
 static double f_dens(double a,ccl_cosmology *cosmo,CCL_ClTracer *clt, int * status)
 {
   double z=1./a-1;
-  double pz=ccl_f1d_t_eval(z,clt->spl_nz);
-  double bz=ccl_f1d_t_eval(z,clt->spl_bz);
+  double pz=ccl_f1d_t_eval(clt->spl_nz,z);
+  double bz=ccl_f1d_t_eval(clt->spl_bz,z);
   double h=cosmo->params.h*ccl_h_over_h0(cosmo,a,status)/ccl_constants.CLIGHT_HMPC;
 
   return pz*bz*h;
@@ -681,7 +681,7 @@ static double f_dens(double a,ccl_cosmology *cosmo,CCL_ClTracer *clt, int * stat
 static double f_rsd(double a,ccl_cosmology *cosmo,CCL_ClTracer *clt, int * status)
 {
   double z=1./a-1;
-  double pz=ccl_f1d_t_eval(z,clt->spl_nz);
+  double pz=ccl_f1d_t_eval(clt->spl_nz,z);
   double fg=ccl_growth_rate(cosmo,a,status);
   double h=cosmo->params.h*ccl_h_over_h0(cosmo,a,status)/ccl_constants.CLIGHT_HMPC;
 
@@ -690,7 +690,7 @@ static double f_rsd(double a,ccl_cosmology *cosmo,CCL_ClTracer *clt, int * statu
 
 static double f_mag(double a,double chi,ccl_cosmology *cosmo,CCL_ClTracer *clt, int * status)
 {
-  double wM=ccl_f1d_t_eval(chi,clt->spl_wM);
+  double wM=ccl_f1d_t_eval(clt->spl_wM,chi);
 
   if(wM<=0)
     return 0;
@@ -737,7 +737,7 @@ static double transfer_nc(double l,double k,
 
 static double f_lensing(double a,double chi,ccl_cosmology *cosmo,CCL_ClTracer *clt, int * status)
 {
-  double wL=ccl_f1d_t_eval(chi,clt->spl_wL);
+  double wL=ccl_f1d_t_eval(clt->spl_wL,chi);
 
   if(wL<=0)
     return 0;
@@ -752,9 +752,9 @@ static double f_IA_NLA(double a,double chi,ccl_cosmology *cosmo,CCL_ClTracer *cl
   else {
     double a=ccl_scale_factor_of_chi(cosmo,chi, status);
     double z=1./a-1;
-    double pz=ccl_f1d_t_eval(z,clt->spl_nz);
-    double ba=ccl_f1d_t_eval(z,clt->spl_ba);
-    double rf=ccl_f1d_t_eval(z,clt->spl_rf);
+    double pz=ccl_f1d_t_eval(clt->spl_nz,z);
+    double ba=ccl_f1d_t_eval(clt->spl_ba,z);
+    double rf=ccl_f1d_t_eval(clt->spl_rf,z);
     double h=cosmo->params.h*ccl_h_over_h0(cosmo,a,status)/ccl_constants.CLIGHT_HMPC;
 
     return pz*ba*rf*h/(chi*chi);
@@ -1057,7 +1057,7 @@ void ccl_angular_cls_nonlimber(ccl_cosmology *cosmo,double l_logstep,int l_linst
   if(*status==0) {
     //Interpolate into input multipoles
     for(ii=0;ii<nl_out;ii++)
-      cl_out[ii]=ccl_f1d_t_eval((double)(l_out[ii]),spcl_nodes);
+      cl_out[ii]=ccl_f1d_t_eval(spcl_nodes,(double)(l_out[ii]));
   }
   
   //Cleanup
@@ -1126,7 +1126,7 @@ double ccl_get_tracer_fa(ccl_cosmology *cosmo,CCL_ClTracer *clt,double a,int fun
   else
     x=1./a-1; //x-variable is redshift by default
   
-  return ccl_f1d_t_eval(x,spl);
+  return ccl_f1d_t_eval(spl,x);
 }
 
 int ccl_get_tracer_fas(ccl_cosmology *cosmo,CCL_ClTracer *clt,int na,double *a,double *fa,
@@ -1173,7 +1173,7 @@ int ccl_get_tracer_fas(ccl_cosmology *cosmo,CCL_ClTracer *clt,int na,double *a,d
       x=ccl_comoving_radial_distance(cosmo,a[ia],status);
     else //x-variable is redshift by default
       x=1./a[ia]-1;
-    fa[ia]=ccl_f1d_t_eval(x,spl);
+    fa[ia]=ccl_f1d_t_eval(spl,x);
   }
 
   return 0;

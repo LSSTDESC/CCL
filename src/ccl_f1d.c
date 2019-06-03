@@ -34,7 +34,7 @@ ccl_f1d_t *ccl_f1d_t_new(int n,double *x,double *y,double y0,double yf)
 }
 
 //Evaluates spline at x checking for bound errors
-double ccl_f1d_t_eval(double x,ccl_f1d_t *spl)
+double ccl_f1d_t_eval(ccl_f1d_t *spl,double x)
 {
   if(x<=spl->x0)
     return spl->y0;
