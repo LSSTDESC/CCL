@@ -39,6 +39,7 @@
 #include "ccl_halofit.h"
 #include "ccl_halomod.h"
 #include "ccl_class.h"
+#include "ccl_haloprofile.h"
 
 CCL_BEGIN_DECLS
 /* add function and variable declarations here */
