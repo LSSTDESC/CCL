@@ -82,8 +82,7 @@ def set_up(request):
         th, xi = np.loadtxt(fname, unpack=True)
         return th, xi
 
-    # DL: need to add a bunch of benchmarks here but also make sure the
-    # names are correct.
+    # DL: need to make sure the names are correct.
     pre = dirdat + 'run_'
     post = nztyp + "_log_wt_"
     bms = {}
@@ -103,7 +102,7 @@ def set_up(request):
     bms['theta'] = theta
 
     # Read error bars
-    # DL: what are we using for errors?? Not sure at all. Ask on telecon.
+    # DL: need to make sure these match what we are using.
     ers = {}
     d = np.loadtxt("benchmarks/data/sigma_clustering_Nbin5",
                    unpack=True)
@@ -151,6 +150,8 @@ def set_up(request):
                               bounds_error=False)(theta)
     return cosmo, trc, bms, ers, fl
 
+# DL probably need to change this back to less bins to match where
+# we have error calculations.
 @pytest.mark.parametrize("t1,t2,bm,er,kind,pref",
                          [('g1', 'g1', 'dd_11', 'dd_11', 'gg', 1),
                           ('g2', 'g2', 'dd_22', 'dd_22', 'gg', 1),
