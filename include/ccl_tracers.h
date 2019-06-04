@@ -5,11 +5,15 @@
 
 CCL_BEGIN_DECLS
 
+#define CCL_FRAC_RELEVANT 5E-4
+
 typedef struct {
   int der_bessel;
   int der_angles;
   ccl_f2d_t *transfer;
   ccl_f1d_t *kernel;
+  double chi_min;
+  double chi_max;
 } ccl_cl_tracer_t;
 
 ccl_cl_tracer_t *ccl_cl_tracer_t_new(ccl_cosmology *cosmo,
@@ -22,6 +26,8 @@ ccl_cl_tracer_t *ccl_cl_tracer_t_new(ccl_cosmology *cosmo,
 				     double *fk_arr,
 				     double *fa_arr,
 				     int is_factorizable,
+				     int is_k_powerlaw,
+				     double k_powerlaw_exponent,
 				     int extrap_order_lok,
 				     int extrap_order_hik,
 				     int *status);

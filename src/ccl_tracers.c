@@ -14,6 +14,8 @@ ccl_cl_tracer_t *ccl_cl_tracer_t_new(ccl_cosmology *cosmo,
 				     double *fk_arr,
 				     double *fa_arr,
 				     int is_factorizable,
+				     int is_k_powerlaw,
+				     double k_powerlaw_exponent,
 				     int extrap_order_lok,
 				     int extrap_order_hik,
 				     int *status)
@@ -42,12 +44,51 @@ ccl_cl_tracer_t *ccl_cl_tracer_t_new(ccl_cosmology *cosmo,
     tr->der_bessel=der_bessel;
     tr->kernel=NULL; //Initialize these to NULL
     tr->transfer=NULL; //Initialize these to NULL
-
+    tr->chi_min=0;
+    tr->chi_max=1E15;
+  }
+  
+  if(*status==0) {
     //Initialize radial kernel
     if((n_w>0) && (chi_w!=NULL) && (w_w!=NULL)) {
       tr->kernel=ccl_f1d_t_new(n_w,chi_w,w_w,0,0);
       if(tr->kernel==NULL) //CHECK IF THIS IS EXPECTED
 	*status=CCL_ERROR_MEMORY;
+    }
+  }
+
+  //Find kernel edges
+  if(*status=0) {
+    int ichi;
+    double w_max=w_w[0];
+
+    //Find maximum of radial kernel
+    for(ichi=0;ichi<n_w;ichi++) {
+      if(w_w[ichi]>=w_max)
+	w_max=w_w[ichi];
+    }
+
+    //Multiply by fraction
+    w_max*=CCL_FRAC_RELEVANT;
+
+    // Initialize as the original edges in case we don't find an interval
+    tr->chi_min=chi_w[0];
+    tr->chi_max=chi_w[n_w-1];
+
+    //Find minimum
+    for(ichi=0;ichi<n_w;ichi++) {
+      if(w_w[ichi]>=w_max) {
+	tr->chi_min=chi_w[ichi];
+	break;
+      }
+    }
+
+    //Find maximum
+    for(ichi=n_w-1;ichi>=0;ichi--) {
+      if(w_w[ichi]>=w_max) {
+	tr->chi_max=chi_w[ichi];
+	break;
+      }
     }
   }
 
@@ -62,6 +103,8 @@ ccl_cl_tracer_t *ccl_cl_tracer_t_new(ccl_cosmology *cosmo,
 				 fk_arr, //fk_arr
 				 fa_arr, //fa_arr
 				 is_factorizable, //is factorizable
+				 is_k_powerlaw, //is_k_powerlaw
+				 k_powerlaw_exponent, //k_powerlaw_exponent
 				 extrap_order_lok, //extrap_order_lok
 				 extrap_order_hik, //extrap_order_hik
 				 ccl_f2d_constantgrowth, //extrap_linear_growth

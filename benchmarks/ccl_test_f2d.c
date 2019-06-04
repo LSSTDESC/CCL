@@ -84,7 +84,7 @@ CTEST2(f2d,a_overflow_init) {
   psp=ccl_f2d_t_new(data->n_a,data->a_arr,
 		    data->n_k,data->lk_arr,
 		    data->fka_arr,
-		    NULL, NULL, 0,
+		    NULL, NULL, 0, 0, 0,
 		    0, //extrap_lok
 		    2, //extrap_hik
 		    ccl_f2d_constantgrowth, //extrap_growth
@@ -108,7 +108,7 @@ CTEST2(f2d,a_overflow) {
   psp=ccl_f2d_t_new(data->n_a,data->a_arr,
   		    data->n_k,data->lk_arr,
   		    data->fka_arr,
-		    NULL, NULL, 0,
+		    NULL, NULL, 0, 0, 0,
   		    2, //extrap_lok
 		    2, //extrap_hik
   		    ccl_f2d_customgrowth, //extrap_growth
@@ -137,7 +137,7 @@ CTEST2(f2d,sanity) {
   psp=ccl_f2d_t_new(data->n_a,data->a_arr,
   		    data->n_k,data->lk_arr,
   		    data->fka_arr,
-		    NULL, NULL, 0,
+		    NULL, NULL, 0, 0, 0,
   		    2, //extrap_lok
 		    2, //extrap_hik
   		    ccl_f2d_customgrowth, //extrap_growth
@@ -185,7 +185,7 @@ CTEST2(f2d,factorize) {
   psp=ccl_f2d_t_new(data->n_a,data->a_arr,
   		    data->n_k,data->lk_arr,
   		    NULL,
-		    data->fk_arr,data->fa_arr,1,
+		    data->fk_arr,data->fa_arr,1, 0, 0,
   		    2, //extrap_lok
 		    2, //extrap_hik
   		    ccl_f2d_customgrowth, //extrap_growth
@@ -214,6 +214,49 @@ CTEST2(f2d,factorize) {
   //Evaluate at very low k and see if it checks out
   double lklo=data->lk_arr[0]/1.1;
   fka=ccl_f2d_t_eval(psp,lklo,atest,NULL,&status);
+  ASSERT_TRUE(status==0);
+  ASSERT_DBL_NEAR(1,fka/fka_model_analytical(exp(lklo),atest));
+
+  ccl_f2d_t_free(psp);
+}
+
+CTEST2(f2d,powerlaw) {
+  int status=0;
+  ccl_f2d_t *psp;
+  double fka;
+  double lktest=-2.,atest=0.5;
+  double alo=0.02;
+
+  //Now populate properly
+  status=0;
+  data->a_arr[data->n_a-1]=1.;
+  psp=ccl_f2d_t_new(data->n_a,data->a_arr,
+  		    -1,NULL, //data->n_k,data->lk_arr,
+  		    NULL,
+		    NULL,data->fa_arr,1, 1, -1.,
+  		    2, //extrap_lok
+		    2, //extrap_hik
+  		    ccl_f2d_customgrowth, //extrap_growth
+  		    1, //is_fka_log
+  		    growth_function,0,2,
+  		    ccl_f2d_3,
+  		    &status);
+  ASSERT_TRUE(status==0);
+
+  //Now put some sensible numbers within the redshift and k range
+  fka=ccl_f2d_t_eval(psp,lktest,atest,NULL,&status)*0.1; //Missing 0.1 factor in power law 
+  ASSERT_TRUE(status==0);
+  ASSERT_DBL_NEAR(1,fka/fka_model_analytical(exp(lktest),atest));
+
+  //Evaluate at very high k and see if it checks out
+  double lkhi=data->lk_arr[data->n_k-1]*1.1;
+  fka=ccl_f2d_t_eval(psp,lkhi,atest,NULL,&status)*0.1; //Missing 0.1 factor in power law 
+  ASSERT_TRUE(status==0);
+  ASSERT_DBL_NEAR(1,fka/fka_model_analytical(exp(lkhi),atest));
+
+  //Evaluate at very low k and see if it checks out
+  double lklo=data->lk_arr[0]/1.1;
+  fka=ccl_f2d_t_eval(psp,lklo,atest,NULL,&status)*0.1; //Missing 0.1 factor in power law 
   ASSERT_TRUE(status==0);
   ASSERT_DBL_NEAR(1,fka/fka_model_analytical(exp(lklo),atest));
 
@@ -252,7 +295,7 @@ CTEST2(f2d,pk) {
   psp=ccl_f2d_t_new(data->n_a,data->a_arr,
   		    data->n_k,data->lk_arr,
   		    data->fka_arr,
-		    NULL, NULL, 0,
+		    NULL, NULL, 0, 0, 0,
   		    2, //extrap_lok
 		    2, //extrap_hik
   		    ccl_f2d_cclgrowth, //extrap_growth
