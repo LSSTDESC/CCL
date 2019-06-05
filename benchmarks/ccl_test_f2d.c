@@ -74,25 +74,71 @@ CTEST_TEARDOWN(f2d) {
   free(data->fka_arr);
 }
 
-CTEST2(f2d,a_overflow_init) {
+CTEST2(f2d,constant) {
   int status=0;
   ccl_f2d_t *psp;
   double fka;
+  double lktest=-2.,atest=0.5;
 
-  //First check that if we do not populate the P(k) all the way to z=0 we get an error
-  data->a_arr[data->n_a-1]=1.1;
+  //Constant in k
+  status=0;
   psp=ccl_f2d_t_new(data->n_a,data->a_arr,
+		    -1,NULL,
+		    NULL,NULL,data->fa_arr,
+		    1,0,0,
+		    2,
+		    2,
+		    ccl_f2d_customgrowth,
+		    1,
+		    growth_function,0,2,
+		    ccl_f2d_3,
+		    &status);
+  ASSERT_TRUE(status==0);
+
+  fka=ccl_f2d_t_eval(psp,lktest,atest,NULL,&status);
+  ASSERT_TRUE(status==0);
+  ASSERT_DBL_NEAR(1,fka/(growth_function(atest)*growth_function(atest)));
+  ccl_f2d_t_free(psp);
+
+  //Constant in a
+  status=0;
+  psp=ccl_f2d_t_new(-1,NULL,
 		    data->n_k,data->lk_arr,
-		    data->fka_arr,
-		    NULL, NULL, 0, 0, 0,
-		    0, //extrap_lok
-		    2, //extrap_hik
-		    ccl_f2d_constantgrowth, //extrap_growth
-		    1, //is_fka_log
+		    NULL,data->fk_arr,NULL,
+		    1,0,0,
+		    2,
+		    2,
+		    ccl_f2d_customgrowth,
+		    1,
 		    NULL,0,2,
 		    ccl_f2d_3,
 		    &status);
-  ASSERT_TRUE(status);
+  ASSERT_TRUE(status==0);
+
+  fka=ccl_f2d_t_eval(psp,lktest,atest,NULL,&status);
+  ASSERT_TRUE(status==0);
+  ASSERT_DBL_NEAR(1,fka/k_function(exp(lktest)));
+  ccl_f2d_t_free(psp);
+  
+  //Constant in k and a
+  status=0;
+  psp=ccl_f2d_t_new(-1,NULL,
+		    -1,NULL,
+		    NULL,NULL,NULL,
+		    0,0,0,
+		    2,
+		    2,
+		    ccl_f2d_customgrowth,
+		    1,
+		    NULL,0,2,
+		    ccl_f2d_3,
+		    &status);
+  ASSERT_TRUE(status==0);
+
+  fka=ccl_f2d_t_eval(psp,lktest,atest,NULL,&status);
+  ASSERT_TRUE(status==0);
+  ASSERT_DBL_NEAR(1,fka);
+  
   ccl_f2d_t_free(psp);
 }
 
@@ -122,6 +168,7 @@ CTEST2(f2d,a_overflow) {
   fka=ccl_f2d_t_eval(psp,lktest,1.1,NULL,&status);
   ASSERT_TRUE(status);
   ASSERT_DBL_NEAR(-1.,fka);
+  ccl_f2d_t_free(psp);
 }
 
 CTEST2(f2d,sanity) {

@@ -33,6 +33,8 @@ typedef struct {
   int is_factorizable; /**< Is this factorizable into k- and a-dependent functions? */
   int is_k_powerlaw; /**< Is the k-dependent factor of the form k^alpha */
   double k_powerlaw_exponent; /**< if is_k_powerlaw, then this is the power law index */
+  int is_k_constant; /**< no k-dependence, just return 1*/
+  int is_a_constant; /**< no a-dependence, just return 1*/
   int extrap_order_lok; /**< Order of extrapolating polynomial in log(k) for low k (0, 1 or 2)*/
   int extrap_order_hik; /**< Order of extrapolating polynomial in log(k) for high k (0, 1 or 2)*/
   ccl_f2d_extrap_growth_t extrap_linear_growth;  /**< Extrapolation type at high redshifts*/

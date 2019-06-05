@@ -32,17 +32,14 @@ ccl_f2d_t *ccl_f2d_t_new(int na,double *a_arr,
     *status = CCL_ERROR_MEMORY;
 
   if(*status==0) {
+    is_factorizable=is_factorizable || (a_arr==NULL) || (lk_arr==NULL) || (fka_arr==NULL);
     if(!is_factorizable) //Power-law k-dependence only applies if it's factorizable
       is_k_powerlaw=0;
-    if(!is_k_powerlaw) {
-      f2d->lkmin=lk_arr[0];
-      f2d->lkmax=lk_arr[nk-1];
-    }
-    f2d->amin=a_arr[0];
-    f2d->amax=a_arr[na-1];
     f2d->is_factorizable=is_factorizable;
     f2d->is_k_powerlaw=is_k_powerlaw;
     f2d->k_powerlaw_exponent=k_powerlaw_exponent;
+    f2d->is_k_constant=((lk_arr==NULL) || ((fka_arr==NULL) && (fk_arr==NULL)));
+    f2d->is_a_constant=((a_arr==NULL) || ((fka_arr==NULL) && (fa_arr==NULL)));
     f2d->extrap_order_lok=extrap_order_lok;
     f2d->extrap_order_hik=extrap_order_hik;
     f2d->extrap_linear_growth=extrap_linear_growth;
@@ -53,10 +50,18 @@ ccl_f2d_t *ccl_f2d_t_new(int na,double *a_arr,
     f2d->fka=NULL;
     f2d->fk=NULL;
     f2d->fa=NULL;
-    if(fabs(f2d->amax-1)>1E-4)
-      *status=CCL_ERROR_SPLINE;
+
+    if(!((f2d->is_k_powerlaw) || (f2d->is_k_constant))) { //If it's not constant or power-law
+      f2d->lkmin=lk_arr[0];
+      f2d->lkmax=lk_arr[nk-1];
+    }
+    if(!(f2d->is_a_constant)) {
+      f2d->amin=a_arr[0];
+      f2d->amax=a_arr[na-1];
+    }
   }
 
+  
   if((extrap_order_lok>2) || (extrap_order_lok<0) || (extrap_order_hik>2) || (extrap_order_hik<0))
     *status=CCL_ERROR_INCONSISTENT;
 
@@ -70,33 +75,52 @@ ccl_f2d_t *ccl_f2d_t_new(int na,double *a_arr,
     switch(interp_type) {
     case(ccl_f2d_3):
       if(f2d->is_factorizable) {
-	if(f2d->is_k_powerlaw)
+	//Do not allocate spline if constant or power law
+	if((f2d->is_k_powerlaw) || (f2d->is_k_constant))
 	  f2d->fk=NULL;
-	else
+	else { //Otherwise allocate and check
 	  f2d->fk=gsl_spline_alloc(gsl_interp_cspline,nk);
-	f2d->fa=gsl_spline_alloc(gsl_interp_cspline,na);
+	  if(f2d->fk==NULL)
+	    *status = CCL_ERROR_MEMORY;
+	}
+	//Do not allocate spline if constant
+	if(f2d->is_a_constant)
+	  f2d->fa=NULL;
+	else { //Otherwise allocate and check
+	  f2d->fa=gsl_spline_alloc(gsl_interp_cspline,na);
+	  if(f2d->fa==NULL)
+	    *status = CCL_ERROR_MEMORY;
+	}
       }
-      else
-	f2d->fka=gsl_spline2d_alloc(gsl_interp2d_bicubic,nk,na);
+      else {
+	//Do not allocate spline if constant
+	if((f2d->is_k_constant) || (f2d->is_a_constant))
+	  f2d->fka=NULL;
+	else { //Otherwise allocate and check
+	  f2d->fka=gsl_spline2d_alloc(gsl_interp2d_bicubic,nk,na);
+	  if(f2d->fka==NULL)
+	    *status = CCL_ERROR_MEMORY;
+	}
+      }
       break;
     default:
       f2d->fk=NULL;
       f2d->fa=NULL;
       f2d->fka=NULL;
     }
-    if((f2d->fka==NULL) && (f2d->fa==NULL))
-      *status = CCL_ERROR_MEMORY;
   }
 
   if(*status==0) {
     if(f2d->is_factorizable){
       s2dstatus=0;
-      if(!(f2d->is_k_powerlaw))
+      if(f2d->fk!=NULL)
 	s2dstatus|=gsl_spline_init(f2d->fk,lk_arr,fk_arr,nk);
-      s2dstatus|=gsl_spline_init(f2d->fa,a_arr,fa_arr,na);
+      if(f2d->fa!=NULL)
+	s2dstatus|=gsl_spline_init(f2d->fa,a_arr,fa_arr,na);
     }
     else {
-      s2dstatus=gsl_spline2d_init(f2d->fka,lk_arr,a_arr,fka_arr,nk,na);
+      if(f2d->fka!=NULL)
+	s2dstatus=gsl_spline2d_init(f2d->fka,lk_arr,a_arr,fka_arr,nk,na);
     }
     if(s2dstatus)
       *status = CCL_ERROR_SPLINE;
@@ -108,26 +132,32 @@ ccl_f2d_t *ccl_f2d_t_new(int na,double *a_arr,
 double ccl_f2d_t_eval(ccl_f2d_t *f2d,double lk,double a,void *cosmo,
 		      int *status)
 {
+  int is_hiz, is_loz;
   double a_ev=a;
-  int is_hiz= a<f2d->amin;
-  int is_loz= a>f2d->amax;
-
-  if(is_loz) { //Are we above the interpolation range in a?
-    *status=CCL_ERROR_SPLINE_EV;
-    return NAN;
+  if(f2d->is_a_constant) {
+    is_hiz=0;
+    is_loz=0;
   }
-  else if(is_hiz) { //Are we below the interpolation range in a?
-    if(f2d->extrap_linear_growth==ccl_f2d_no_extrapol) {
+  else {
+    is_hiz= a<f2d->amin;
+    is_loz= a>f2d->amax;  
+    if(is_loz) { //Are we above the interpolation range in a?
       *status=CCL_ERROR_SPLINE_EV;
       return NAN;
     }
-    a_ev=f2d->amin;
+    else if(is_hiz) { //Are we below the interpolation range in a?
+      if(f2d->extrap_linear_growth==ccl_f2d_no_extrapol) {
+	*status=CCL_ERROR_SPLINE_EV;
+	return NAN;
+      }
+      a_ev=f2d->amin;
+    }
   }
 
   int is_hik,is_lok;
   double fka_pre,fka_post;
   double lk_ev=lk;
-  if(f2d->is_k_powerlaw) {
+  if((f2d->is_k_powerlaw) || (f2d->is_k_constant)) {
     is_hik=0;
     is_lok=0;
   }
@@ -151,16 +181,37 @@ double ccl_f2d_t_eval(ccl_f2d_t *f2d,double lk,double a,void *cosmo,
       else
 	fk=exp(f2d->k_powerlaw_exponent*lk_ev);
     }
+    else if(f2d->fk==NULL) {
+      if(f2d->is_log)
+	fk=0;
+      else
+	fk=1;
+    }
     else
       spstatus|=gsl_spline_eval_e(f2d->fk,lk_ev,NULL,&fk);
-    spstatus|=gsl_spline_eval_e(f2d->fa,a_ev,NULL,&fa);
+    if(f2d->fa==NULL) {
+      if(f2d->is_log)
+	fa=0;
+      else
+	fa=1;
+    }
+    else
+      spstatus|=gsl_spline_eval_e(f2d->fa,a_ev,NULL,&fa);
     if(f2d->is_log)
       fka_pre = fk+fa;
     else
       fka_pre = fk*fa;
   }
-  else
-    spstatus=gsl_spline2d_eval_e(f2d->fka,lk_ev,a_ev,NULL,NULL,&fka_pre);
+  else {
+    if(f2d->fka==NULL) {
+      if(f2d->is_log)
+	fka_pre=0;
+      else
+	fka_pre=1;
+    }
+    else
+      spstatus=gsl_spline2d_eval_e(f2d->fka,lk_ev,a_ev,NULL,NULL,&fka_pre);
+  }
   if(spstatus) {
     *status=CCL_ERROR_SPLINE_EV;
     return NAN;
