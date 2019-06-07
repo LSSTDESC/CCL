@@ -499,21 +499,14 @@ void ccl_cosmology_compute_linpower_class(ccl_cosmology* cosmo, int* status) {
 	    // Get a list of the three neutrino masses already calculated
 	    double *mnu_list = NULL;
 	    mnu_list = malloc(3*sizeof(double));
-	    printf("N_nu_mass=%d\n", cosmo->params.N_nu_mass);
 	    for (int i=0; i< cosmo->params.N_nu_mass; i=i+1){
-			printf("i=%d\n", i);
 		    mnu_list[i] = cosmo->params.mnu[i];
-		    printf("mnu=%f\n", mnu_list[i]);
        }
 	    if (cosmo->params.N_nu_mass<3){
 		    for (int j=cosmo->params.N_nu_mass; j<3; j=j+1){
 			    mnu_list[j] = 0.;
-			    printf("j=%d\n", j);
-			    printf("mnu=%f\n", mnu_list[j]);
 		    }
 	    }
-	    
-	    printf("mnu1=%f, mnu2=%f, mnu3=%f\n", mnu_list[0], mnu_list[1], mnu_list[2]);
 	    
 	    double norm_pk;
 	    if (isfinite(cosmo->params.A_s)){
