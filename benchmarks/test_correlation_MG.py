@@ -17,9 +17,14 @@ def set_up(request):
     dirdat = os.path.dirname(__file__) + '/data/'
     h0 = 0.70001831054687500
     logA = 3.05 # log(10^10 A_s)
+    #cosmo = ccl.Cosmology(Omega_c=0.12/h0**2, Omega_b=0.0221/h0**2, Omega_k=0,
+    #                      h=h0, A_s = np.exp(logA)/10**10, n_s=0.96, Neff=3.046, m_nu=0.0,
+    #                      w0=-1, wa=0, mu_0=0., sigma_0=0., transfer_function='boltzmann_class',
+    #                      matter_power_spectrum='linear')
+    
     cosmo = ccl.Cosmology(Omega_c=0.12/h0**2, Omega_b=0.0221/h0**2, Omega_k=0,
                           h=h0, A_s = np.exp(logA)/10**10, n_s=0.96, Neff=3.046, m_nu=0.0,
-                          w0=-1, wa=0, mu_0=0.1, sigma_0=0.1, transfer_function='boltzmann_class',
+                          w0=-1, wa=0, transfer_function='boltzmann_class',
                           matter_power_spectrum='linear')
                       
     cosmo.cosmo.params.T_CMB = 2.7255
@@ -136,11 +141,15 @@ def set_up(request):
 def test_xi(set_up, corr_method, t1, t2, bm, er, kind, pref):
     cosmo, trcs, bms, ers, fls = set_up
     method, errfac = corr_method
-    cl = ccl.angular_cl(cosmo, trcs[t1], trcs[t2], fls['ells'])
     
-    #plt.figure()
-    #plt.loglog(fls['ells'], cl)
-    #plt.title(t1+'_'+t2)
+    # Debugging - define the  same cosmology but in GR
+    
+    cl = ccl.angular_cl(cosmo, trcs[t1], trcs[t2], fls['ells']) 
+    
+    plt.figure()
+    plt.loglog(fls['ells'], cl)
+    plt.title(t1+'_'+t2)
+    plt.savefig('./Cl_'+t1+'_'+t2+'.png')
     #plt.show()
     
     ell = np.arange(fls['lmax'])
@@ -149,11 +158,12 @@ def test_xi(set_up, corr_method, t1, t2, bm, er, kind, pref):
                          corr_type=kind, method=method)
     xi *= pref
     
-    #plt.figure()
-    #plt.loglog(bms['theta'], bms[bm], label='benchmark')
-    #plt.loglog(bms['theta'], xi, label='CCL')
-    #plt.title(t1+'_'+t2)
-    #plt.legend()
+    plt.figure()
+    plt.loglog(bms['theta'], bms[bm], label='benchmark')
+    plt.loglog(bms['theta'], xi, label='CCL')
+    plt.title(t1+'_'+t2)
+    plt.legend()
+    plt.savefig('./corr_'+t1+'_'+t2+'_CCLgr.png')
     #plt.show()
     
     assert np.all(np.fabs(xi - bms[bm]) < ers[er] * errfac)
