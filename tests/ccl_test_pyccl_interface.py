@@ -532,6 +532,57 @@ def check_halomod(cosmo):
     assert_raises(TypeError, ccl.halomodel_matter_power, cosmo, k_list,   a_array)
     assert_raises(TypeError, ccl.halomodel_matter_power, cosmo, k_array,  a_array)
 
+def check_haloprofile(cosmo):
+    """
+    Check that halo profile functions can be run.
+    """
+
+    # Time variables
+    z = 0.
+    z_array = np.linspace(0., 2., 10)
+    a = 1.
+    a_array = 1. / (1.+z_array)
+
+    # Halo definition
+    odelta = 200.
+
+    # Halo concentration
+    c = 5.
+
+    # Mass variables
+    mass_scalar = 1e13
+    mass_array = np.array([1e11, 1e12, 1e13, 1e14, 1e15, 1e16])
+
+    # Radii
+    r_scalar = 10.
+    r_list = [1., 10., 100.]
+    r_array = np.array([1., 10., 100.])
+
+    # halo model
+    assert_(all_finite(ccl.nfw_profile_3d(cosmo, c, mass_scalar, odelta, a, r_scalar)))
+    assert_(all_finite(ccl.nfw_profile_3d(cosmo, c, mass_scalar, odelta, a, r_list)))
+    assert_(all_finite(ccl.nfw_profile_3d(cosmo, c, mass_scalar, odelta, a, r_array)))
+
+    assert_(all_finite(ccl.einasto_profile_3d(cosmo, c, mass_scalar, odelta, a, r_scalar)))
+    assert_(all_finite(ccl.einasto_profile_3d(cosmo, c, mass_scalar, odelta, a, r_list)))
+    assert_(all_finite(ccl.einasto_profile_3d(cosmo, c, mass_scalar, odelta, a, r_array)))
+
+    assert_(all_finite(ccl.hernquist_profile_3d(cosmo, c, mass_scalar, odelta, a, r_scalar)))
+    assert_(all_finite(ccl.hernquist_profile_3d(cosmo, c, mass_scalar, odelta, a, r_list)))
+    assert_(all_finite(ccl.hernquist_profile_3d(cosmo, c, mass_scalar, odelta, a, r_array)))
+
+    assert_(all_finite(ccl.nfw_profile_2d(cosmo, c, mass_scalar, odelta, a, r_scalar)))
+    assert_(all_finite(ccl.nfw_profile_2d(cosmo, c, mass_scalar, odelta, a, r_list)))
+    assert_(all_finite(ccl.nfw_profile_2d(cosmo, c, mass_scalar, odelta, a, r_array)))
+
+    assert_raises(TypeError, ccl.nfw_profile_3d, cosmo, c, mass_array, odelta, a, r_scalar)
+    assert_raises(TypeError, ccl.nfw_profile_3d, cosmo, c, mass_array, odelta, a, r_list)
+    assert_raises(TypeError, ccl.nfw_profile_3d, cosmo, c, mass_array, odelta, a, r_array)
+
+    assert_raises(TypeError, ccl.nfw_profile_3d, cosmo, c, mass_scalar, odelta, a_array, r_scalar)
+    assert_raises(TypeError, ccl.nfw_profile_3d, cosmo, c, mass_scalar, odelta, a_array, r_list)
+    assert_raises(TypeError, ccl.nfw_profile_3d, cosmo, c, mass_scalar, odelta, a_array, r_array)
+
 def check_neutrinos():
     """
     Check that neutrino-related functions can be run.
@@ -873,6 +924,13 @@ def test_halomod():
 
     for cosmo_mg in reference_models_mg():
         yield check_massfunc_MG, cosmo_mg
+
+def test_haloprofile():
+    """
+    Test halo profile functions.
+    """
+    for cosmo in reference_models():
+        yield check_haloprofile, cosmo
 
 @decorators.slow
 def test_neutrinos():
