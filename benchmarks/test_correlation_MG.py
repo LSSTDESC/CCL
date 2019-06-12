@@ -3,12 +3,12 @@ import numpy as np
 import pyccl as ccl
 from scipy.interpolate import interp1d
 import pytest
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 
 
-@pytest.fixture(scope='module', params=['fftlog'])#params=['fftlog', 'bessel'])
+@pytest.fixture(scope='module', params=['fftlog', 'bessel'])
 def corr_method(request):
-    errfacs = {'fftlog': 0.2}#, 'bessel': 0.1}
+    errfacs = {'fftlog': 0.2, 'bessel': 0.1}
     return request.param, errfacs[request.param]
 
 
@@ -16,17 +16,13 @@ def corr_method(request):
 def set_up(request):
     dirdat = os.path.dirname(__file__) + '/data/'
     h0 = 0.70001831054687500
-    logA = 3.05 # log(10^10 A_s)
+    logA = 3.05  # log(10^10 A_s)
     cosmo = ccl.Cosmology(Omega_c=0.12/h0**2, Omega_b=0.0221/h0**2, Omega_k=0,
-                          h=h0, A_s = np.exp(logA)/10**10, n_s=0.96, Neff=3.046, m_nu=0.0,
-                          w0=-1, wa=0, mu_0=0.1, sigma_0=0.1, transfer_function='boltzmann_class',
+                          h=h0, A_s=np.exp(logA)/10**10, n_s=0.96, Neff=3.046,
+                          m_nu=0.0, w0=-1, wa=0, mu_0=0.1, sigma_0=0.1,
+                          transfer_function='boltzmann_class',
                           matter_power_spectrum='linear')
-    
-    #cosmo = ccl.Cosmology(Omega_c=0.12/h0**2, Omega_b=0.0221/h0**2, Omega_k=0,
-    #                      h=h0, A_s = np.exp(logA)/10**10, n_s=0.96, Neff=3.046, m_nu=0.0,
-    #                      w0=-1, wa=0, transfer_function='boltzmann_class',
-    #                      matter_power_spectrum='linear')
-                      
+
     cosmo.cosmo.params.T_CMB = 2.7255
     cosmo.cosmo.gsl_params.INTEGRATION_LIMBER_EPSREL = 2.5E-5
     cosmo.cosmo.gsl_params.INTEGRATION_EPSREL = 2.5E-5
@@ -43,20 +39,19 @@ def set_up(request):
     ells[141:] = ells[140] + (np.arange(nls - 141) + 1) * 20
     fl['lmax'] = lmax
     fl['ells'] = ells
-    
-    # Load dNdz's                               
+
+    # Load dNdz's
     z1, pz1 = np.loadtxt(dirdat + "bin1_histo.txt", unpack=True)
-    z2, pz2 = np.loadtxt(dirdat + "bin2_histo.txt",  unpack=True)                                  
-    
-    # Set up the linear galaxy bias as used in generating benchmarks                                      
+    z2, pz2 = np.loadtxt(dirdat + "bin2_histo.txt",  unpack=True)
+
+    # Set up the linear galaxy bias as used in generating benchmarks
     bz1 = 1.45*np.ones_like(pz1)
     bz2 = 1.55*np.ones_like(pz2)
 
     # Initialize tracers
     trc = {}
     trc['g1'] = ccl.NumberCountsTracer(cosmo, False, (z1, pz1), (z1, bz1))
-    trc['g2'] = ccl.NumberCountsTracer(cosmo, False, (z2, pz2), (z2, bz2))                                                                                                      
-                                       
+    trc['g2'] = ccl.NumberCountsTracer(cosmo, False, (z2, pz2), (z2, bz2))
     trc['l1'] = ccl.WeakLensingTracer(cosmo, (z1, pz1))
     trc['l2'] = ccl.WeakLensingTracer(cosmo, (z2, pz2))
 
@@ -125,6 +120,7 @@ def set_up(request):
                               bounds_error=False)(theta)
     return cosmo, trc, bms, ers, fl
 
+
 @pytest.mark.parametrize("t1,t2,bm,er,kind,pref",
                          [('g1', 'g1', 'dd_11', 'dd_11', 'gg', 1),
                           ('g2', 'g2', 'dd_22', 'dd_22', 'gg', 1),
@@ -141,18 +137,11 @@ def set_up(request):
 def test_xi(set_up, corr_method, t1, t2, bm, er, kind, pref):
     cosmo, trcs, bms, ers, fls = set_up
     method, errfac = corr_method
-    
+
     # Debugging - define the  same cosmology but in GR
-    
-    cl = ccl.angular_cl(cosmo, trcs[t1], trcs[t2], fls['ells']) 
-    
-    #plt.figure()
-    #plt.loglog(fls['ells'], cl)
-    #plt.title(t1+'_'+t2)
-    #plt.savefig('./Cl_'+t1+'_'+t2+'.png')
-    #plt.close()
-    #plt.show()
-    
+
+    cl = ccl.angular_cl(cosmo, trcs[t1], trcs[t2], fls['ells'])
+
     ell = np.arange(fls['lmax'])
     cli = interp1d(fls['ells'], cl, kind='cubic')(ell)
     # Our benchmarks have theta in arcmin
@@ -161,14 +150,14 @@ def test_xi(set_up, corr_method, t1, t2, bm, er, kind, pref):
     xi = ccl.correlation(cosmo, ell, cli, theta_deg,
                          corr_type=kind, method=method)
     xi *= pref
-    
-    #plt.figure()
-    #plt.loglog(bms['theta'], bms[bm], label='benchmark')
-    #plt.loglog(bms['theta'], xi, label='CCL')
-    #plt.title(t1+'_'+t2)
-    #plt.legend()
-    #plt.savefig('./corr_'+t1+'_'+t2+'.png')
-    #plt.show()
-    #plt.close()
-    
+
+    # plt.figure()
+    # plt.loglog(bms['theta'], bms[bm], label='benchmark')
+    # plt.loglog(bms['theta'], xi, label='CCL')
+    # plt.title(t1+'_'+t2)
+    # plt.legend()
+    # plt.savefig('./corr_'+t1+'_'+t2+'.png')
+    # plt.show()
+    # plt.close()
+
     assert np.all(np.fabs(xi - bms[bm]) < ers[er] * errfac)
