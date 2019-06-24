@@ -14,8 +14,6 @@ ccl_f2d_t *ccl_f2d_t_new(int na,double *a_arr,
 			 double *fk_arr,
 			 double *fa_arr,
 			 int is_factorizable,
-			 int is_k_powerlaw,
-			 double k_powerlaw_exponent,
 			 int extrap_order_lok,
 			 int extrap_order_hik,
 			 ccl_f2d_extrap_growth_t extrap_linear_growth,
@@ -33,11 +31,7 @@ ccl_f2d_t *ccl_f2d_t_new(int na,double *a_arr,
 
   if(*status==0) {
     is_factorizable=is_factorizable || (a_arr==NULL) || (lk_arr==NULL) || (fka_arr==NULL);
-    if(!is_factorizable) //Power-law k-dependence only applies if it's factorizable
-      is_k_powerlaw=0;
     f2d->is_factorizable=is_factorizable;
-    f2d->is_k_powerlaw=is_k_powerlaw;
-    f2d->k_powerlaw_exponent=k_powerlaw_exponent;
     f2d->is_k_constant=((lk_arr==NULL) || ((fka_arr==NULL) && (fk_arr==NULL)));
     f2d->is_a_constant=((a_arr==NULL) || ((fka_arr==NULL) && (fa_arr==NULL)));
     f2d->extrap_order_lok=extrap_order_lok;
@@ -51,7 +45,7 @@ ccl_f2d_t *ccl_f2d_t_new(int na,double *a_arr,
     f2d->fk=NULL;
     f2d->fa=NULL;
 
-    if(!((f2d->is_k_powerlaw) || (f2d->is_k_constant))) { //If it's not constant or power-law
+    if(!(f2d->is_k_constant)) { //If it's not constant
       f2d->lkmin=lk_arr[0];
       f2d->lkmax=lk_arr[nk-1];
     }
@@ -75,8 +69,8 @@ ccl_f2d_t *ccl_f2d_t_new(int na,double *a_arr,
     switch(interp_type) {
     case(ccl_f2d_3):
       if(f2d->is_factorizable) {
-	//Do not allocate spline if constant or power law
-	if((f2d->is_k_powerlaw) || (f2d->is_k_constant))
+	//Do not allocate spline if constant
+	if(f2d->is_k_constant)
 	  f2d->fk=NULL;
 	else { //Otherwise allocate and check
 	  f2d->fk=gsl_spline_alloc(gsl_interp_cspline,nk);
@@ -157,7 +151,7 @@ double ccl_f2d_t_eval(ccl_f2d_t *f2d,double lk,double a,void *cosmo,
   int is_hik,is_lok;
   double fka_pre,fka_post;
   double lk_ev=lk;
-  if((f2d->is_k_powerlaw) || (f2d->is_k_constant)) {
+  if(f2d->is_k_constant) {
     is_hik=0;
     is_lok=0;
   }
@@ -175,13 +169,7 @@ double ccl_f2d_t_eval(ccl_f2d_t *f2d,double lk,double a,void *cosmo,
   if(f2d->is_factorizable) {
     double fk,fa;
     spstatus=0;
-    if(f2d->is_k_powerlaw) {
-      if(f2d->is_log)
-	fk=f2d->k_powerlaw_exponent*lk_ev;
-      else
-	fk=exp(f2d->k_powerlaw_exponent*lk_ev);
-    }
-    else if(f2d->fk==NULL) {
+    if(f2d->fk==NULL) {
       if(f2d->is_log)
 	fk=0;
       else

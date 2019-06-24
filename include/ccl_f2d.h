@@ -31,8 +31,6 @@ typedef struct {
   double lkmin,lkmax; /**< Edges in log(k)*/
   double amin,amax; /**< Edges in a*/
   int is_factorizable; /**< Is this factorizable into k- and a-dependent functions? */
-  int is_k_powerlaw; /**< Is the k-dependent factor of the form k^alpha */
-  double k_powerlaw_exponent; /**< if is_k_powerlaw, then this is the power law index */
   int is_k_constant; /**< no k-dependence, just return 1*/
   int is_a_constant; /**< no a-dependence, just return 1*/
   int extrap_order_lok; /**< Order of extrapolating polynomial in log(k) for low k (0, 1 or 2)*/
@@ -57,8 +55,6 @@ typedef struct {
  * @param fk_arr array of size nk containing the k-dependent part of the function. Only relevant if is_factorizable is true.
  * @param fa_arr array of size na containing the a-dependent part of the function. Only relevant if is_factorizable is true.
  * @param is_factorizable if not 0, fk_arr and fa_arr will be used as 1-D arrays to construct a factorizable 2D function.
- * @param is_k_powerlaw if not 0, and if is_factorizable is also not 0, then the k-dependent part of this function will be assumed to be of the form k^alpha.
- * @param k_powerlaw_exponent if `is_k_powerlaw`, then this is the power law index.
  * @param extrap_order_lok Order of the polynomial that extrapolates on wavenumbers smaller than the minimum of lk_arr. Allowed values: 0 (constant), 1 (linear extrapolation) and 2 (quadratic extrapolation). Extrapolation happens in ln(k).
  * @param extrap_order_hik Order of the polynomial that extrapolates on wavenumbers larger than the maximum of lk_arr. Allowed values: 0 (constant), 1 (linear extrapolation) and 2 (quadratic extrapolation). Extrapolation happens in ln(k).
  * @param extrap_linear_growth: ccl_f2d_extrap_growth_t value defining how the function with scale factors below the interpolation range. Allowed values: ccl_f2d_cclgrowth (scale with the CCL linear growth factor), ccl_f2d_customgrowth (scale with a custom function of redshift passed through `growth`), ccl_f2d_constantgrowth (scale by multiplying the function at the earliest available scale factor by a constant number, defined by `growth_factor_0`), ccl_f2d_no_extrapol (throw an error if the function is ever evaluated outside the interpolation range in a).
@@ -75,8 +71,6 @@ ccl_f2d_t *ccl_f2d_t_new(int na,double *a_arr,
 			 double *fk_arr,
 			 double *fa_arr,
 			 int is_factorizable,
-			 int is_k_powerlaw,
-			 double k_powerlaw_exponent,
 			 int extrap_order_lok,
 			 int extrap_order_hik,
 			 ccl_f2d_extrap_growth_t extrap_linear_growth,
