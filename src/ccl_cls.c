@@ -52,7 +52,7 @@ static void get_k_interval(ccl_cosmology *cosmo,
 
   //Don't go beyond kmax
   *lkmax=log(fmin(cosmo->spline_params.K_MAX,2  *(l+0.5)/chi_min));
-  *lkmin=log(fmax(cosmo->spline_params.K_MIN,0.5*(l+0.5)/chi_max));
+  *lkmin=log(fmax(cosmo->spline_params.K_MIN,(l+0.5)/chi_max));
 }
 
 static double transfer_limber_single(ccl_cl_tracer_t *tr,
@@ -106,7 +106,7 @@ static double transfer_limber_wrap(double l,double lk,double k,double chi,double
 
   for(itr=0;itr<trc->n_tracers;itr++) {
     transfer+=transfer_limber_single(trc->ts[itr],l,lk,k,chi,a,cosmo,psp,status);
-    if(*status==0)
+    if(*status!=0)
       return -1;
   }
   return transfer;

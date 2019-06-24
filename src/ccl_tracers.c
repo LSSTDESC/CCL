@@ -648,7 +648,7 @@ ccl_cl_tracer_t *ccl_cl_tracer_t_new(ccl_cosmology *cosmo,
   if((der_bessel<-1) || (der_bessel>2)) {
     *status=CCL_ERROR_INCONSISTENT;
     ccl_cosmology_set_status_message(cosmo, "ccl_tracers.c: ccl_cl_tracer_new: "
-				     "der_bessel must be between 0 and 2\n");
+				     "der_bessel must be between -1 and 2\n");
   }
 
   if(*status==0) {
@@ -718,9 +718,7 @@ ccl_cl_tracer_t *ccl_cl_tracer_t_new(ccl_cosmology *cosmo,
   }
 
   if(*status==0) {
-    if(((fka_arr!=NULL) ||
-	((fk_arr!=NULL) &&
-	 (fa_arr!=NULL)))) {
+    if((fka_arr!=NULL) || (fk_arr!=NULL) || (fa_arr!=NULL)) {
       tr->transfer=ccl_f2d_t_new(na_ka,a_ka, //na, a_arr
 				 nk_ka,lk_ka, //nk, lk_arr
 				 fka_arr, //fka_arr
@@ -788,7 +786,7 @@ double ccl_cl_tracer_t_get_transfer(ccl_cl_tracer_t *tr,double lk,double a,int *
 {
   if(tr!=NULL) {
     if(tr->transfer!=NULL)
-      ccl_f2d_t_eval(tr->transfer,lk,a,NULL,status);
+      return ccl_f2d_t_eval(tr->transfer,lk,a,NULL,status);
     else
       return 1;
   }

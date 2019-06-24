@@ -136,8 +136,11 @@ double ccl_f2d_t_eval(ccl_f2d_t *f2d,double lk,double a,void *cosmo,
     is_hiz= a<f2d->amin;
     is_loz= a>f2d->amax;  
     if(is_loz) { //Are we above the interpolation range in a?
-      *status=CCL_ERROR_SPLINE_EV;
-      return NAN;
+      if(f2d->extrap_linear_growth==ccl_f2d_no_extrapol) {
+	*status=CCL_ERROR_SPLINE_EV;
+	return NAN;
+      }
+      a_ev=f2d->amax;
     }
     else if(is_hiz) { //Are we below the interpolation range in a?
       if(f2d->extrap_linear_growth==ccl_f2d_no_extrapol) {
