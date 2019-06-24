@@ -645,7 +645,7 @@ ccl_cl_tracer_t *ccl_cl_tracer_t_new(ccl_cosmology *cosmo,
     ccl_cosmology_set_status_message(cosmo, "ccl_tracers.c: ccl_cl_tracer_new: "
 				     "der_angles must be between 0 and 2\n");
   }
-  if((der_bessel<0) || (der_bessel>2)) {
+  if((der_bessel<-1) || (der_bessel>2)) {
     *status=CCL_ERROR_INCONSISTENT;
     ccl_cosmology_set_status_message(cosmo, "ccl_tracers.c: ccl_cl_tracer_new: "
 				     "der_bessel must be between 0 and 2\n");
@@ -676,7 +676,7 @@ ccl_cl_tracer_t *ccl_cl_tracer_t_new(ccl_cosmology *cosmo,
   }
 
   //Find kernel edges
-  if(*status=0) {
+  if(*status==0) {
     //If no radial kernel, set limits to zero and maximum distance
     if(tr->kernel==NULL) {
       tr->chi_min=0;
@@ -740,6 +740,7 @@ ccl_cl_tracer_t *ccl_cl_tracer_t_new(ccl_cosmology *cosmo,
 	*status=CCL_ERROR_MEMORY;
     }
   }
+  return tr;
 }
 
 void ccl_cl_tracer_t_free(ccl_cl_tracer_t *tr)
