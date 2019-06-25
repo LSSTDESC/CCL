@@ -37,8 +37,9 @@ from .power import linear_matter_power, nonlin_matter_power, sigmaR, \
 # Halo mass function
 from .massfunction import massfunc, massfunc_m2r, sigmaM, halo_bias
 
-# Cl's and tracers
-from .cls import angular_cl, NumberCountsTracer, WeakLensingTracer, CMBLensingTracer
+from .tracers import Tracer, NumberCountsTracer, WeakLensingTracer, CMBLensingTracer
+## Cl's and tracers
+#from .cls import angular_cl, NumberCountsTracer, WeakLensingTracer, CMBLensingTracer
 
 # Useful constants and unit conversions
 physical_constants = lib.cvar.constants
