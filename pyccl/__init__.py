@@ -39,7 +39,7 @@ from .massfunction import massfunc, massfunc_m2r, sigmaM, halo_bias
 
 from .tracers import Tracer, NumberCountsTracer, WeakLensingTracer, CMBLensingTracer
 ## Cl's and tracers
-#from .cls import angular_cl, NumberCountsTracer, WeakLensingTracer, CMBLensingTracer
+from .cls import angular_cl
 
 # Useful constants and unit conversions
 physical_constants = lib.cvar.constants
