@@ -164,10 +164,10 @@ CTEST2(f2d,a_overflow) {
   		    &status);
   ASSERT_TRUE(status==0);
 
-  //Get an error if we evaluate above a=1
+  //Check that the function stays constant above a=1
   fka=ccl_f2d_t_eval(psp,lktest,1.1,NULL,&status);
-  ASSERT_TRUE(status);
-  ASSERT_DBL_NEAR(-1.,fka);
+  ASSERT_TRUE(status==0);
+  ASSERT_DBL_NEAR(ccl_f2d_t_eval(psp,lktest,1.,NULL,&status),fka);
   ccl_f2d_t_free(psp);
 }
 
