@@ -3,7 +3,7 @@ import numpy as np
 import pyccl as ccl
 from scipy.interpolate import interp1d
 import pytest
-# import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 
 
 @pytest.fixture(scope='module', params=['fftlog', 'bessel'])
@@ -19,7 +19,7 @@ def set_up(request):
     logA = 3.05  # log(10^10 A_s)
     cosmo = ccl.Cosmology(Omega_c=0.12/h0**2, Omega_b=0.0221/h0**2, Omega_k=0,
                           h=h0, A_s=np.exp(logA)/10**10, n_s=0.96, Neff=3.046,
-                          m_nu=0.0, w0=-1, wa=0, mu_0=0.1, sigma_0=0.1,
+                          m_nu=0.0, w0=-1, wa=0, mu_0=0.1, sigma_0=0.,
                           transfer_function='boltzmann_class',
                           matter_power_spectrum='linear')
 
@@ -76,46 +76,46 @@ def set_up(request):
     ers = {}
     d = np.loadtxt("benchmarks/data/sigma_clustering_Nbin5",
                    unpack=True)
-    ers['dd_11'] = interp1d(d[0] / 60., d[1],
+    ers['dd_11'] = interp1d(d[0], d[1],
                             fill_value=d[1][0],
                             bounds_error=False)(theta)
-    ers['dd_22'] = interp1d(d[0] / 60., d[2],
+    ers['dd_22'] = interp1d(d[0], d[2],
                             fill_value=d[2][0],
                             bounds_error=False)(theta)
     d = np.loadtxt("benchmarks/data/sigma_ggl_Nbin5",
                    unpack=True)
-    ers['dl_12'] = interp1d(d[0] / 60., d[1],
+    ers['dl_12'] = interp1d(d[0], d[1],
                             fill_value=d[1][0],
                             bounds_error=False)(theta)
-    ers['dl_11'] = interp1d(d[0] / 60., d[2],
+    ers['dl_11'] = interp1d(d[0], d[2],
                             fill_value=d[2][0],
                             bounds_error=False)(theta)
-    ers['dl_22'] = interp1d(d[0] / 60., d[3],
+    ers['dl_22'] = interp1d(d[0], d[3],
                             fill_value=d[3][0],
                             bounds_error=False)(theta)
-    ers['dl_21'] = interp1d(d[0] / 60., d[4],
+    ers['dl_21'] = interp1d(d[0], d[4],
                             fill_value=d[4][0],
                             bounds_error=False)(theta)
     d = np.loadtxt("benchmarks/data/sigma_xi+_Nbin5",
                    unpack=True)
-    ers['ll_11_p'] = interp1d(d[0] / 60., d[1],
+    ers['ll_11_p'] = interp1d(d[0], d[1],
                               fill_value=d[1][0],
                               bounds_error=False)(theta)
-    ers['ll_22_p'] = interp1d(d[0] / 60., d[2],
+    ers['ll_22_p'] = interp1d(d[0] , d[2],
                               fill_value=d[2][0],
                               bounds_error=False)(theta)
-    ers['ll_12_p'] = interp1d(d[0] / 60., d[3],
+    ers['ll_12_p'] = interp1d(d[0] , d[3],
                               fill_value=d[3][0],
                               bounds_error=False)(theta)
     d = np.loadtxt("benchmarks/data/sigma_xi-_Nbin5",
                    unpack=True)
-    ers['ll_11_m'] = interp1d(d[0] / 60., d[1],
+    ers['ll_11_m'] = interp1d(d[0], d[1],
                               fill_value=d[1][0],
                               bounds_error=False)(theta)
-    ers['ll_22_m'] = interp1d(d[0] / 60., d[2],
+    ers['ll_22_m'] = interp1d(d[0] , d[2],
                               fill_value=d[2][0],
                               bounds_error=False)(theta)
-    ers['ll_12_m'] = interp1d(d[0] / 60., d[3],
+    ers['ll_12_m'] = interp1d(d[0] , d[3],
                               fill_value=d[3][0],
                               bounds_error=False)(theta)
     return cosmo, trc, bms, ers, fl
@@ -150,14 +150,16 @@ def test_xi(set_up, corr_method, t1, t2, bm, er, kind, pref):
     xi = ccl.correlation(cosmo, ell, cli, theta_deg,
                          corr_type=kind, method=method)
     xi *= pref
+    
+    np.savetxt('./corr_'+t1+'_'+t2+'.txt', xi)
 
-    # plt.figure()
-    # plt.loglog(bms['theta'], bms[bm], label='benchmark')
-    # plt.loglog(bms['theta'], xi, label='CCL')
-    # plt.title(t1+'_'+t2)
-    # plt.legend()
-    # plt.savefig('./corr_'+t1+'_'+t2+'.png')
-    # plt.show()
-    # plt.close()
+    plt.figure()
+    plt.loglog(bms['theta'], bms[bm], label='benchmark')
+    plt.loglog(bms['theta'], xi, label='CCL')
+    plt.title(t1+'_'+t2)
+    plt.legend()
+    plt.savefig('./corr_'+t1+'_'+t2+'.png')
+    plt.show()
+    plt.close()
 
     assert np.all(np.fabs(xi - bms[bm]) < ers[er] * errfac)
