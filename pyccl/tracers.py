@@ -67,7 +67,7 @@ class Tracer(object):
             if (not is_k_constant) and (lk_s.shape != tk_s.shape):
                 raise ValueError("Scale-dependent transfer arrays should have the same shape") 
         else:
-            a_s, lk_s, tka_s = _check_array_params(transfer_ka)
+            a_s, lk_s, tka_s = _check_array_params(transfer_ka, arr3=True)
             if tka_s.shape != (len(a_s),len(lk_s)):
                 raise ValueError("2D transfer array has inconsistent shape. Should be (na,nk)")
             tka_s = tka_s.flatten()

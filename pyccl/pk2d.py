@@ -97,10 +97,10 @@ class Pk2D(object):
                 pkflat[ia, :] = pkfunc(k=np.exp(lk_arr), a=a)
             pkflat = pkflat.flatten()
 
-        self.psp, status = lib.set_p2d_new_from_arrays(lk_arr, a_arr, pkflat,
-                                                       int(extrap_order_lok),
-                                                       int(extrap_order_hik),
-                                                       int(is_logp), status)
+        self.psp, status = lib.set_pk2d_new_from_arrays(lk_arr, a_arr, pkflat,
+                                                        int(extrap_order_lok),
+                                                        int(extrap_order_hik),
+                                                        int(is_logp), status)
         check(status)
         self.has_psp = True
 

@@ -159,6 +159,8 @@ ccl_cl_tracer_t *cl_tracer_t_new_wrapper(ccl_cosmology *cosmo,
     }
   }
   else {
+    lk_ka=lk_s;
+    a_ka=a_s;
     fk_arr=NULL;
     fa_arr=NULL;
     fka_arr=tka_s;
