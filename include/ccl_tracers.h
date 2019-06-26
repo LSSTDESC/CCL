@@ -67,7 +67,7 @@ ccl_cl_tracer_collection_t *ccl_cl_tracer_collection_t_new(int *status);
 
 void ccl_cl_tracer_collection_t_free(ccl_cl_tracer_collection_t *trc);
 
-void ccl_add_cl_tracer_to_collection(ccl_cl_tracer_collection_t *trc,ccl_cl_tracer_t *tr);
+void ccl_add_cl_tracer_to_collection(ccl_cl_tracer_collection_t *trc,ccl_cl_tracer_t *tr,int *status);
 
 CCL_END_DECLS
 

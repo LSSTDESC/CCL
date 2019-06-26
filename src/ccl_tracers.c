@@ -34,8 +34,12 @@ void ccl_cl_tracer_collection_t_free(ccl_cl_tracer_collection_t *trc)
   }
 }
 
-void ccl_add_cl_tracer_to_collection(ccl_cl_tracer_collection_t *trc,ccl_cl_tracer_t *tr)
+void ccl_add_cl_tracer_to_collection(ccl_cl_tracer_collection_t *trc,ccl_cl_tracer_t *tr,int *status)
 {
+  if(trc->n_tracers>=100) {
+    *status=CCL_ERROR_MEMORY;
+    return;
+  }
   trc->ts[trc->n_tracers]=tr;
   trc->n_tracers++;
 }
@@ -439,10 +443,18 @@ double ccl_cl_tracer_t_get_f_ell(ccl_cl_tracer_t *tr,double ell,int *status)
     if(tr->der_angles==1)
       return ell*(ell+1.);
     else if(tr->der_angles==2) {
-      if(ell>1)
-	return sqrt((ell+2)*(ell+1)*ell*(ell-1));
-      else
+      if(ell<=1) // This is identically 0
 	return 0;
+      else if(ell<=10) // Use full expression in this case
+	return sqrt((ell+2)*(ell+1)*ell*(ell-1));
+      else {
+	double lp1h=ell+0.5;
+	double lp1h2=lp1h*lp1h;
+	if(ell<=1000)  //This is accurate to 5E-5 for l<=1000
+	  return lp1h2*(1-1.25/lp1h2);
+	else //This is accurate to 1E-6 for l>1000
+	  return lp1h2;
+      }
     }
     else
       return 1;
