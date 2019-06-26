@@ -22,9 +22,89 @@
 //%apply (double* IN_ARRAY1, int DIM1) {
 //    (double* ell, int nell),
 //    (double* aarr, int na)};
-//%apply (int DIM1, double* ARGOUT_ARRAY1) {(int nout, double* output)};
+%apply (int DIM1, double* ARGOUT_ARRAY1) {(int nout, double* output)};
 
-%feature("pythonprepend") cl_tracer_t_new_wrapped %{
+%inline %{
+int get_nchi_lensing_kernel_wrapper(double *z_n, int nz_n)
+{
+  int status=0;
+  return ccl_get_nchi_lensing_kernel(nz_n,z_n,&status);
+}
+%}
+
+%inline %{
+void get_chis_lensing_kernel_wrapper(ccl_cosmology *cosmo,
+				     double z_max,
+				     int nout,double *output,
+				     int *status)
+{
+  ccl_get_chis_lensing_kernel(cosmo,nout,z_max,output,status);
+}
+%}
+
+%feature("pythonprepend") get_lensing_kernel_wrapper %{
+    if numpy.shape(z_n) != numpy.shape(n):
+        raise CCLError("Input shape for `z_n` must match `n`!")
+
+    if numpy.shape(z_b) != numpy.shape(b):
+        raise CCLError("Input shape for `z_b` must match `b`!")
+%}
+
+%inline %{
+void get_lensing_kernel_wrapper(ccl_cosmology *cosmo,
+				double *z_n, int nz_n,
+				double *n, int nn,
+				double z_max,
+				int has_magbias,
+				double *z_b, int nz_b,
+				double *b, int nb,
+				double *chi_s, int nchi,
+				int nout,double *output,
+				int *status)
+{
+  int nz_s=-1;
+  double *zs_arr=NULL;
+  double *sz_arr=NULL;
+
+  if(has_magbias) {
+    nz_s=nz_b;
+    zs_arr=z_b;
+    sz_arr=b;
+  }
+  ccl_get_lensing_mag_kernel(cosmo,
+			     nz_n, z_n, n, 1, z_max,
+			     nz_s,zs_arr,sz_arr,
+			     nchi,chi_s,output,status);
+}
+%}
+
+%inline %{
+void get_kappa_kernel_wrapper(ccl_cosmology *cosmo,double chi_source,
+			      double* chi_s, int nchi,
+			      int nout,double *output,
+			      int *status)
+{
+  ccl_get_kappa_kernel(cosmo,chi_source,nchi,chi_s,output,status);
+}
+%}
+
+%feature("pythonprepend") get_number_counts_kernel_wrapper %{
+    if numpy.shape(z_n) != numpy.shape(n):
+        raise CCLError("Input shape for `z_n` must match `n`!")
+%}
+
+%inline %{
+void get_number_counts_kernel_wrapper(ccl_cosmology *cosmo,
+				      double *z_n, int nz_n,
+				      double *n, int nn,
+				      int nout,double *output,
+				      int *status)
+{
+  ccl_get_number_counts_kernel(cosmo,nz_n,z_n,n,1,output,status);
+}
+%}
+
+%feature("pythonprepend") cl_tracer_t_new_wrapper %{
     if numpy.shape(chi_s) != numpy.shape(wchi_s):
         raise CCLError("Input shape for `chi_s` must match `wchi_s`!")
 %}
@@ -97,117 +177,4 @@ ccl_cl_tracer_t *cl_tracer_t_new_wrapper(ccl_cosmology *cosmo,
 
   return t;
 }
-%}
-
-%feature("pythonprepend") tracer_get_nc_dens %{
-    if numpy.shape(z_n) != numpy.shape(n):
-        raise CCLError("Input shape for `z_n` must match `n`!")
-
-    if numpy.shape(z_b) != numpy.shape(b):
-        raise CCLError("Input shape for `z_b` must match `b`!")
-%}
-
-%inline %{
-
-ccl_cl_tracer_t *tracer_get_nc_dens(ccl_cosmology *cosmo,
-				    double* z_n, int nz_n, double *n, int nn,
-				    double* z_b, int nz_b, double *b, int nb,
-				    int *status)
-{
-  ccl_cl_tracer_t *t=ccl_nc_dens_tracer_new(cosmo,nz_n,z_n,n,nz_b,z_b,b,1,status);
-  return t;
-}
-
-%}
-
-%feature("pythonprepend") tracer_get_nc_rsd %{
-    if numpy.shape(z_n) != numpy.shape(n):
-        raise CCLError("Input shape for `z_n` must match `n`!")
-%}
-
-%inline %{
-
-ccl_cl_tracer_t *tracer_get_nc_rsd(ccl_cosmology *cosmo,
-				   double* z_n, int nz_n, double *n, int nn,
-				   int *status)
-{
-  ccl_cl_tracer_t *t=ccl_nc_rsd_tracer_new(cosmo,nz_n,z_n,n,1,status);
-  return t;
-}
-
-%}
-
-%feature("pythonprepend") tracer_get_nc_mag %{
-    if numpy.shape(z_n) != numpy.shape(n):
-        raise CCLError("Input shape for `z_n` must match `n`!")
-
-    if numpy.shape(z_b) != numpy.shape(b):
-        raise CCLError("Input shape for `z_b` must match `b`!")
-%}
-
-%inline %{
-
-ccl_cl_tracer_t *tracer_get_nc_mag(ccl_cosmology *cosmo,
-				   double* z_n, int nz_n, double *n, int nn,
-				   double* z_b, int nz_b, double *b, int nb,
-				   int *status)
-{
-  ccl_cl_tracer_t *t=ccl_nc_mag_tracer_new(cosmo,nz_n,z_n,n,nz_b,z_b,b,1,status);
-  return t;
-}
-
-%}
-
-%feature("pythonprepend") tracer_get_wl_ia %{
-    if numpy.shape(z_n) != numpy.shape(n):
-        raise CCLError("Input shape for `z_n` must match `n`!")
-
-    if numpy.shape(z_b) != numpy.shape(b):
-        raise CCLError("Input shape for `z_b` must match `b`!")
-%}
-
-%inline %{
-
-ccl_cl_tracer_t *tracer_get_wl_ia(ccl_cosmology *cosmo,
-				   double* z_n, int nz_n, double *n, int nn,
-				   double* z_b, int nz_b, double *b, int nb,
-				   int *status)
-{
-  ccl_cl_tracer_t *t=ccl_wl_ia_tracer_new(cosmo,nz_n,z_n,n,nz_b,z_b,b,1,status);
-  return t;
-}
-
-%}
-
-%feature("pythonprepend") tracer_get_wl_shear %{
-    if numpy.shape(z_n) != numpy.shape(n):
-        raise CCLError("Input shape for `z_n` must match `n`!")
-%}
-
-%inline %{
-
-ccl_cl_tracer_t *tracer_get_wl_shear(ccl_cosmology *cosmo,
-				     double* z_n, int nz_n, double *n, int nn,
-				     int *status)
-{
-  ccl_cl_tracer_t *t=ccl_wl_shear_tracer_new(cosmo,nz_n,z_n,n,1,status);
-  return t;
-}
-
-%}
-
-%feature("pythonprepend") tracer_get_kappa %{
-    if z_source<0:
-        raise CCLError("Source redshift cannot be negative")
-%}
-
-%inline %{
-
-ccl_cl_tracer_t *tracer_get_kappa(ccl_cosmology *cosmo,double z_source,
-				  int *status)
-{
-  ccl_cl_tracer_t *t=ccl_kappa_tracer_new(cosmo,z_source,100,status);
-  return t;
-}
-
 %}

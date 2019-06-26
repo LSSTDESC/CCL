@@ -37,8 +37,9 @@ from .power import linear_matter_power, nonlin_matter_power, sigmaR, \
 # Halo mass function
 from .massfunction import massfunc, massfunc_m2r, sigmaM, halo_bias
 
-from .tracers import Tracer, NumberCountsTracer, WeakLensingTracer, CMBLensingTracer
-## Cl's and tracers
+# Cl's and tracers
+from .tracers import Tracer, NumberCountsTracer, WeakLensingTracer, CMBLensingTracer, \
+    get_density_kernel, get_kappa_kernel, get_lensing_kernel
 from .cls import angular_cl
 
 # Useful constants and unit conversions

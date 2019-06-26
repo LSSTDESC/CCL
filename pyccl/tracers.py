@@ -1,9 +1,47 @@
 from . import ccllib as lib
 from .core import check
+from .background import comoving_radial_distance, growth_rate
 import numpy as np
 import collections
 
 NoneArr = np.array([])
+
+def get_density_kernel(cosmo, dndz):
+    z_n, n = _check_array_params(dndz)
+    chi = comoving_radial_distance(cosmo, 1./(1.+z_n))
+    status = 0
+    wchi, status = lib.get_number_counts_kernel_wrapper(cosmo.cosmo, z_n, n, len(z_n), status)
+    check(status)
+    return chi, wchi
+
+def get_lensing_kernel(cosmo, dndz, mag_bias=None):
+    z_n, n = _check_array_params(dndz)
+    has_magbias = mag_bias is not None
+    z_s, s = _check_array_params(mag_bias)
+
+    # Calculate number of samples in chi
+    nchi = lib.get_nchi_lensing_kernel_wrapper(z_n)
+    # Compute array of chis
+    status = 0
+    chi, status = lib.get_chis_lensing_kernel_wrapper(cosmo.cosmo, z_n[-1],
+                                                      nchi, status)
+    # Compute kernel
+    wchi, status = lib.get_lensing_kernel_wrapper(cosmo.cosmo,
+                                                  z_n, n, z_n[-1],
+                                                  int(has_magbias), z_s, s,
+                                                  chi, nchi, status)
+    check(status)
+    return chi, wchi
+
+def get_kappa_kernel(cosmo, z_source, nsamples):
+    chi_source = comoving_radial_distance(cosmo, 1./(1.+z_source))
+    chi = np.linspace(0, chi_source, nsamples)
+    
+    status = 0
+    wchi, status = lib.get_kappa_kernel_wrapper(cosmo.cosmo, chi_source,
+                                                chi, nsamples, status)
+    check(status)
+    return chi, wchi
 
 class Tracer(object):
     def __init__(self):
@@ -61,42 +99,55 @@ class Tracer(object):
 class NumberCountsTracer(Tracer):
     def __init__(self, cosmo, has_rsd, dndz, bias, mag_bias=None):
         self.trc=[]
-        z_n, n = _check_array_params(dndz)
-        z_b, b = _check_array_params(bias)
-        z_s, s = _check_array_params(mag_bias)
+
+        kernel_d = None
         if bias is not None:  # Has density term
-            status = 0
-            ret = lib.tracer_get_nc_dens(cosmo.cosmo, z_n, n, z_b, b, status)
-            self.trc.append(check_returned_tracer(ret))
+            # Kernel
+            if kernel_d is None:
+                kernel_d = get_density_kernel(cosmo, dndz)
+            # Transfer
+            z_b, b = _check_array_params(bias)
+            # Reverse order for increasing a
+            t_a = (1./(1+z_b[::-1]), b[::-1]) 
+            self.add_tracer(cosmo, kernel=kernel_d, transfer_a=t_a)
         if has_rsd:  # Has RSDs
-            status = 0
-            ret = lib.tracer_get_nc_rsd(cosmo.cosmo, z_n, n, status)
-            self.trc.append(check_returned_tracer(ret))
+            # Kernel
+            if kernel_d is None:
+                kernel_d = get_density_kernel(cosmo, dndz)
+            # Transfer (growth rate)
+            a_s = 1./(1+z_b[::-1])
+            t_a = (a_s, -growth_rate(cosmo, a_s))
+            self.add_tracer(cosmo, kernel=kernel_d, transfer_a=t_a, der_bessel=2)
         if mag_bias is not None:  # Has magnification bias
-            status = 0
-            ret = lib.tracer_get_nc_mag(cosmo.cosmo, z_n, n, z_s, s, status)
-            self.trc.append(check_returned_tracer(ret))
+            # Kernel
+            chi,w = get_lensing_kernel(cosmo, dndz, mag_bias=mag_bias)
+            # Multiply by -2 for magnification
+            kernel_m=(chi, -2 * w)
+            self.add_tracer(cosmo, kernel=kernel_m, der_bessel=-1, der_angles=1)
 
 class WeakLensingTracer(Tracer):
     def __init__(self, cosmo, dndz, has_shear=True, ia_bias=None):
         self.trc=[]
-        z_n, n = _check_array_params(dndz)
-        z_a, a = _check_array_params(ia_bias)
-        if has_shear:  # Has RSDs 
-            status = 0
-            ret = lib.tracer_get_wl_shear(cosmo.cosmo, z_n, n, status)
-            self.trc.append(check_returned_tracer(ret))
+        if has_shear:
+            # Kernel
+            kernel_l = get_lensing_kernel(cosmo, dndz)
+            self.add_tracer(cosmo, kernel=kernel_l, der_bessel=-1, der_angles=2)
         if ia_bias is not None:  # Has magnification bias
             status = 0
-            ret = lib.tracer_get_wl_ia(cosmo.cosmo, z_n, n, z_a, a, status)
-            self.trc.append(check_returned_tracer(ret))
+            # Kernel
+            kernel_i = get_density_kernel(cosmo, dndz)
+            # Transfer
+            z_a, a = _check_array_params(ia_bias)
+            # Reverse order for increasing a
+            t_a = (1./(1+z_a[::-1]), a[::-1])
+            self.add_tracer(cosmo, kernel=kernel_i, transfer_a=t_a,
+                            der_bessel=-1, der_angles=2)
 
 class CMBLensingTracer(Tracer):
-    def __init__(self, cosmo, z_source):
+    def __init__(self, cosmo, z_source, n_samples=100):
         self.trc=[]
-        status = 0
-        ret = lib.tracer_get_kappa(cosmo.cosmo, z_source, status)
-        self.trc.append(check_returned_tracer(ret))
+        kernel = get_kappa_kernel(cosmo, z_source, n_samples)
+        self.add_tracer(cosmo, kernel=kernel, der_bessel=-1, der_angles=1)
 
 def check_returned_tracer(return_val):
     if (isinstance(return_val, int)):

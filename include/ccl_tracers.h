@@ -39,9 +39,38 @@ double ccl_cl_tracer_t_get_kernel(ccl_cl_tracer_t *tr,double chi,int *status);
 
 double ccl_cl_tracer_t_get_transfer(ccl_cl_tracer_t *tr,double lk,double a,int *status);
 				 
-double ccl_cl_tracer_t_get_cl_contribution(ccl_cl_tracer_t *tr,
-					   double ell,double chi,double lk,double a,
-					   int *status);
+void ccl_get_number_counts_kernel(ccl_cosmology *cosmo,
+				  int nz,double *z_arr,double *nz_arr,
+				  int normalize_nz,
+				  double *pchi_arr,int *status);
+int ccl_get_nchi_lensing_kernel(int nz,double *z_arr,int *status);
+void ccl_get_chis_lensing_kernel(ccl_cosmology *cosmo,
+				 int nchi,double z_max,
+				 double *chis,int *status);
+void ccl_get_lensing_mag_kernel(ccl_cosmology *cosmo,
+				int nz,double *z_arr,double *nz_arr,
+				int normalize_nz,double z_max,
+				int nz_s,double *zs_arr,double *sz_arr,
+				int nchi,double *chi_arr,double *wL_arr,int *status);
+void ccl_get_kappa_kernel(ccl_cosmology *cosmo,
+			  double chi_source,
+			  int nchi,double *chi_arr,
+			  double *wchi,int *status);
+
+
+typedef struct {
+  int n_tracers;
+  ccl_cl_tracer_t **ts;
+} ccl_cl_tracer_collection_t;
+
+ccl_cl_tracer_collection_t *ccl_cl_tracer_collection_t_new(int *status);
+
+void ccl_cl_tracer_collection_t_free(ccl_cl_tracer_collection_t *trc);
+
+void ccl_add_cl_tracer_to_collection(ccl_cl_tracer_collection_t *trc,ccl_cl_tracer_t *tr);
+
+
+
 
 ccl_cl_tracer_t *ccl_nc_dens_tracer_new(ccl_cosmology *cosmo,
 					int nz_n,double *z_n,double *n,
@@ -68,18 +97,6 @@ ccl_cl_tracer_t *ccl_wl_ia_tracer_new(ccl_cosmology *cosmo,
 				      int *status);
 ccl_cl_tracer_t *ccl_kappa_tracer_new(ccl_cosmology *cosmo,double z_source,
 				      int nchi,int *status);
-
-
-typedef struct {
-  int n_tracers;
-  ccl_cl_tracer_t **ts;
-} ccl_cl_tracer_collection_t;
-
-ccl_cl_tracer_collection_t *ccl_cl_tracer_collection_t_new(int *status);
-
-void ccl_cl_tracer_collection_t_free(ccl_cl_tracer_collection_t *trc);
-
-void ccl_add_cl_tracer_to_collection(ccl_cl_tracer_collection_t *trc,ccl_cl_tracer_t *tr);
 
 CCL_END_DECLS
 
