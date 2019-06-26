@@ -331,6 +331,7 @@ ccl_cl_tracer_t *ccl_nc_dens_tracer_new(ccl_cosmology *cosmo,
 			   NULL, //fka_arr
 			   NULL, //fk_arr
 			   b_b, //fa_arr
+			   0, //is_fka_log
 			   1, //is_factorizable
 			   0, 0, //extrap_order_lok, extrap_order_hik
 			   status);
@@ -386,6 +387,7 @@ ccl_cl_tracer_t *ccl_nc_mag_tracer_new(ccl_cosmology *cosmo,
 			   NULL, //fka_arr
 			   NULL, //fk_arr
 			   NULL, //fa_arr
+			   0, //is_fka_log
 			   1, //is_factorizable
 			   0, 0, //extrap_order_lok, extrap_order_hik
 			   status);
@@ -444,6 +446,7 @@ ccl_cl_tracer_t *ccl_nc_rsd_tracer_new(ccl_cosmology *cosmo,
 			   NULL, //fka_arr
 			   NULL, //fk_arr
 			   mf, //fa_arr
+			   0, //is_fka_log
 			   1, //is_factorizable
 			   0, 0, //extrap_order_lok, extrap_order_hik
 			   status);
@@ -498,6 +501,7 @@ ccl_cl_tracer_t *ccl_wl_shear_tracer_new(ccl_cosmology *cosmo,
 			   NULL, //fka_arr
 			   NULL, //fk_arr
 			   NULL, //fa_arr
+			   0, //is_fka_log
 			   1, //is_factorizable
 			   0, 0, //extrap_order_lok, extrap_order_hik
 			   status);
@@ -544,6 +548,7 @@ ccl_cl_tracer_t *ccl_wl_ia_tracer_new(ccl_cosmology *cosmo,
 			   NULL, //fka_arr
 			   NULL, //fk_arr
 			   aia_b, //fa_arr
+			   0, //is_fka_log
 			   1, //is_factorizable
 			   0, 0, //extrap_order_lok, extrap_order_hik
 			   status);
@@ -587,14 +592,14 @@ ccl_cl_tracer_t *ccl_kappa_tracer_new(ccl_cosmology *cosmo,double z_source,
   if(*status==0) {
     //Compute kernel
     int ichi;
-    double lens_prefac=get_lensing_prefactor(cosmo,status)/chi_source;
+    double lens_prefac=get_lensing_prefactor(cosmo,status)/ccl_sinn(cosmo,chi_source,status);
     double dchi=chi_source/(nchi-1);
     for(ichi=0;ichi<nchi;ichi++) {
       double chi=ichi*dchi;
       double a=ccl_scale_factor_of_chi(cosmo,chi,status);
       chi_arr[ichi]=chi;
       // 3H0^2Om/2 * chi * (chi_s - chi) / chi_s / a
-      wchi_arr[ichi]=lens_prefac*(chi_source-chi)*chi/a;
+      wchi_arr[ichi]=lens_prefac*(ccl_sinn(cosmo,chi_source-chi,status))*chi/a;
     }
   }
 
@@ -608,6 +613,7 @@ ccl_cl_tracer_t *ccl_kappa_tracer_new(ccl_cosmology *cosmo,double z_source,
 			   NULL, //fka_arr,
 			   NULL, //fk_arr
 			   NULL, //fa_arr
+			   0, //is_fka_log
 			   1, //is_factorizable
 			   0, 0, //extrap_order_lok, extrap_order_hik
 			   status);
@@ -633,6 +639,7 @@ ccl_cl_tracer_t *ccl_cl_tracer_t_new(ccl_cosmology *cosmo,
 				     double *fka_arr,
 				     double *fk_arr,
 				     double *fa_arr,
+				     int is_fka_log,
 				     int is_factorizable,
 				     int extrap_order_lok,
 				     int extrap_order_hik,
@@ -728,7 +735,7 @@ ccl_cl_tracer_t *ccl_cl_tracer_t_new(ccl_cosmology *cosmo,
 				 extrap_order_lok, //extrap_order_lok
 				 extrap_order_hik, //extrap_order_hik
 				 ccl_f2d_constantgrowth, //extrap_linear_growth
-				 0, //is_fka_log
+				 is_fka_log, //is_fka_log
 				 NULL, //growth (function)
 				 1, //growth_factor_0 -> will assume constant transfer function
 				 0, //growth_exponent

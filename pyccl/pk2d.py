@@ -40,11 +40,11 @@ class Pk2D(object):
              enough to sample the main features in the power spectrum).
              For reference, CCL will use bicubic interpolation to evaluate
              the power spectrum at any intermediate point in k and a.
-        interp_order_lok (int): extrapolation order to be used on k-values
+        extrap_order_lok (int): extrapolation order to be used on k-values
              below the minimum of the splines (use 0, 1 or 2). Note that
              the extrapolation will be done in either log(P(k)) or P(k),
              depending on the value of `is_logp`.
-        interp_order_hik (int): extrapolation order to be used on k-values
+        extrap_order_hik (int): extrapolation order to be used on k-values
              above the maximum of the splines (use 0, 1 or 2). Note that
              the extrapolation will be done in either log(P(k)) or P(k),
              depending on the value of `is_logp`.
@@ -58,7 +58,7 @@ class Pk2D(object):
              wavenumber.
     """
     def __init__(self, pkfunc=None, a_arr=None, lk_arr=None, pk_arr=None,
-                 is_logp=True, interp_order_lok=1, interp_order_hik=2,
+                 is_logp=True, extrap_order_lok=1, extrap_order_hik=2,
                  cosmo=None):
 
         status = 0
@@ -98,8 +98,8 @@ class Pk2D(object):
             pkflat = pkflat.flatten()
 
         self.psp, status = lib.set_p2d_new_from_arrays(lk_arr, a_arr, pkflat,
-                                                       int(interp_order_lok),
-                                                       int(interp_order_hik),
+                                                       int(extrap_order_lok),
+                                                       int(extrap_order_hik),
                                                        int(is_logp), status)
         check(status)
         self.has_psp = True
