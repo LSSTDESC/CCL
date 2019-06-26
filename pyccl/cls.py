@@ -2,11 +2,11 @@ from . import ccllib as lib
 from .core import check
 from .pk2d import Pk2D
 import numpy as np
-import collections
 
 # Define symbolic 'None' type for arrays, to allow proper handling by swig
 # wrapper
 NoneArr = np.array([])
+
 
 def angular_cl(cosmo, cltracer1, cltracer2, ell, p_of_k_a=None,
                l_limber=-1.):
@@ -42,8 +42,8 @@ def angular_cl(cosmo, cltracer1, cltracer2, ell, p_of_k_a=None,
 
     # Create tracer colections
     status = 0
-    clt1, status=lib.cl_tracer_collection_t_new(status)
-    clt2, status=lib.cl_tracer_collection_t_new(status)
+    clt1, status = lib.cl_tracer_collection_t_new(status)
+    clt2, status = lib.cl_tracer_collection_t_new(status)
     for t in cltracer1.trc:
         status = lib.add_cl_tracer_to_collection(clt1, t, status)
     for t in cltracer2.trc:
