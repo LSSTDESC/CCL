@@ -41,7 +41,6 @@ set(TEST_SRC
 
     # now power spectra stuff in order of use roughly
     benchmarks/ccl_test_f2d.c
-    benchmarks/ccl_test_cls.c
     benchmarks/ccl_test_bbks.c benchmarks/ccl_test_eh.c
     benchmarks/ccl_test_sigmaM.c
     benchmarks/ccl_test_bcm.c

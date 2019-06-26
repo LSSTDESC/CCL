@@ -69,35 +69,6 @@ void ccl_cl_tracer_collection_t_free(ccl_cl_tracer_collection_t *trc);
 
 void ccl_add_cl_tracer_to_collection(ccl_cl_tracer_collection_t *trc,ccl_cl_tracer_t *tr);
 
-
-
-
-ccl_cl_tracer_t *ccl_nc_dens_tracer_new(ccl_cosmology *cosmo,
-					int nz_n,double *z_n,double *n,
-					int nz_b,double *z_b,double *b,
-					int normalize_nz,
-					int *status);
-ccl_cl_tracer_t *ccl_nc_mag_tracer_new(ccl_cosmology *cosmo,
-				       int nz_n,double *z_n,double *n,
-				       int nz_s,double *z_s,double *s,
-				       int normalize_nz,
-				       int *status);
-ccl_cl_tracer_t *ccl_nc_rsd_tracer_new(ccl_cosmology *cosmo,
-				       int nz_n,double *z_n,double *n,
-				       int normalize_nz,
-				       int *status);
-ccl_cl_tracer_t *ccl_wl_shear_tracer_new(ccl_cosmology *cosmo,
-					 int nz_n,double *z_n,double *n,
-					 int normalize_nz,
-					 int *status);
-ccl_cl_tracer_t *ccl_wl_ia_tracer_new(ccl_cosmology *cosmo,
-				      int nz_n,double *z_n,double *n,
-				      int nz_aia,double *z_aia,double *aia,
-				      int normalize_nz,
-				      int *status);
-ccl_cl_tracer_t *ccl_kappa_tracer_new(ccl_cosmology *cosmo,double z_source,
-				      int nchi,int *status);
-
 CCL_END_DECLS
 
 #endif

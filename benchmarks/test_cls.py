@@ -56,7 +56,6 @@ def set_up(request):
     else:
         raise ValueError("Wrong Nz type " + nztyp)
     bz = np.ones_like(pz1)
-    rz = np.ones_like(pz1)
 
     # Initialize tracers
     trc = {}
@@ -70,12 +69,10 @@ def set_up(request):
     trc['l2'] = ccl.WeakLensingTracer(cosmo, (z2, pz2))
     trc['i1'] = ccl.WeakLensingTracer(cosmo, (z1, pz1),
                                       has_shear=False,
-                                      ia_bias=(z1, a1),
-                                      red_frac=(z1, rz))
+                                      ia_bias=(z1, a1))
     trc['i2'] = ccl.WeakLensingTracer(cosmo, (z2, pz2),
                                       has_shear=False,
-                                      ia_bias=(z2, a2),
-                                      red_frac=(z2, rz))
+                                      ia_bias=(z2, a2))
     trc['ct'] = ccl.CMBLensingTracer(cosmo, 1100.)
 
     # Read benchmarks
