@@ -180,8 +180,10 @@ double ccl_angular_cl_limber(ccl_cosmology *cosmo,
   // Test if a round-off error occured in the evaluation of the integral
   // If so, try another integration function, more robust but potentially slower
   if(gslstatus == GSL_EROUND) {
-    ccl_raise_gsl_warning(gslstatus, "ccl_cls.c: ccl_angular_cl_limber(): Default GSL integration failure, attempting backup method.");
-    gsl_integration_cquad_workspace *w_cquad=gsl_integration_cquad_workspace_alloc(cosmo->gsl_params.N_ITERATION);
+    ccl_raise_gsl_warning(gslstatus, "ccl_cls.c: ccl_angular_cl_limber(): "
+			  "Default GSL integration failure, attempting backup method.");
+    gsl_integration_cquad_workspace *w_cquad= \
+      gsl_integration_cquad_workspace_alloc(cosmo->gsl_params.N_ITERATION);
     size_t nevals=0;
     gslstatus=gsl_integration_cquad(&F, lkmin, lkmax, 0,
 				    cosmo->gsl_params.INTEGRATION_LIMBER_EPSREL,
@@ -193,7 +195,8 @@ double ccl_angular_cl_limber(ccl_cosmology *cosmo,
     // If an error status was already set, don't overwrite it.
     if(*status == 0){
         *status=CCL_ERROR_INTEG;
-        ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: ccl_angular_cl_limber(): error integrating over k\n");
+        ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: ccl_angular_cl_limber(): "
+					 "error integrating over k\n");
     }
     return -1;
   }
@@ -203,13 +206,14 @@ double ccl_angular_cl_limber(ccl_cosmology *cosmo,
   return result/(l+0.5);
 }
 
-double ccl_angular_cls_nonlimber(ccl_cosmology *cosmo,
-				 ccl_cl_tracer_collection_t *trc1,
-				 ccl_cl_tracer_collection_t *trc2,
-				 ccl_f2d_t *psp,
-				 int nl_out,int *l_out,double *cl_out,
-				 int *status)
+void ccl_angular_cls_nonlimber(ccl_cosmology *cosmo,
+			       ccl_cl_tracer_collection_t *trc1,
+			       ccl_cl_tracer_collection_t *trc2,
+			       ccl_f2d_t *psp,
+			       int nl_out,int *l_out,double *cl_out,
+			       int *status)
 {
   *status=CCL_ERROR_INCONSISTENT;
-  ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: ccl_angular_cls_nonlimber(); non-Limber integrator not implemented yet\n");
+  ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: ccl_angular_cls_nonlimber(); "
+				   "non-Limber integrator not implemented yet\n");
 }
