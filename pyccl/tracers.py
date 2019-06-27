@@ -2,11 +2,33 @@ from . import ccllib as lib
 from .core import check
 from .background import comoving_radial_distance, growth_rate
 import numpy as np
+import collections
 
 NoneArr = np.array([])
 
 
 def get_density_kernel(cosmo, dndz):
+    """This convenience function returns the radial kernel for
+    galaxy-clustering-like tracers. Given an unnormalized
+    redshift distribution, it returns two arrays: chi, w(chi),
+    where chi is an array of radial distances in units of
+    Mpc and w(chi) = p(z) * H(z), where H(z) is the expansion
+    rate in units of Mpc^-1 and p(z) is the normalized
+    redshift distribution.
+
+    Args:
+        cosmo (:obj:`Cosmology`): cosmology object used to
+            transform redshifts into distances.
+        dndz (tulple of arrays): A tuple of arrays (z, N(z))
+            giving the redshift distribution of the objects.
+            The units are arbitrary; N(z) will be normalized
+            to unity.
+    """
+    if ((not isinstance(dndz, collections.Iterable))
+        or (len(dndz) != 2)
+        or (not (isinstance(dndz[0], collections.Iterable)
+                 and isinstance(dndz[1], collections.Iterable)))):
+        raise ValueError("dndz needs to be a tuple of two arrays.")
     z_n, n = _check_array_params(dndz)
     chi = comoving_radial_distance(cosmo, 1./(1.+z_n))
     status = 0
@@ -19,6 +41,29 @@ def get_density_kernel(cosmo, dndz):
 
 
 def get_lensing_kernel(cosmo, dndz, mag_bias=None):
+    """This convenience function returns the radial kernel for
+    weak-lensing-like. Given an unnormalized redshift distribution
+    and an optional magnification bias function, it returns
+    two arrays: chi, w(chi), where chi is an array of radial
+    distances in units of Mpc and w(chi) is the lensing shear
+    kernel (or the magnification one if `mag_bias` is not `None`).
+
+    Args:
+        cosmo (:obj:`Cosmology`): cosmology object used to
+            transform redshifts into distances.
+        dndz (tulple of arrays): A tuple of arrays (z, N(z))
+            giving the redshift distribution of the objects.
+            The units are arbitrary; N(z) will be normalized
+            to unity.
+        mag_bias (tuple of arrays, optional): A tuple of arrays (z, s(z))
+            giving the magnification bias as a function of redshift. If
+            `None`, s=0 will be assumed
+    """
+    if ((not isinstance(dndz, collections.Iterable))
+        or (len(dndz) != 2)
+        or (not (isinstance(dndz[0], collections.Iterable)
+                 and isinstance(dndz[1], collections.Iterable)))):
+        raise ValueError("dndz needs to be a tuple of two arrays.")
     z_n, n = _check_array_params(dndz)
     has_magbias = mag_bias is not None
     z_s, s = _check_array_params(mag_bias)
@@ -39,6 +84,17 @@ def get_lensing_kernel(cosmo, dndz, mag_bias=None):
 
 
 def get_kappa_kernel(cosmo, z_source, nsamples):
+    """This convenience function returns the radial kernel for
+    CMB-lensing-like tracers.
+
+    Args:
+        cosmo (:obj:`Cosmology`): Cosmology object.
+        z_source (float): Redshift of source plane for CMB lensing.
+        nsamples (int): number of samples over which the kernel
+            is desired. These will be equi-spaced in radial distance.
+            The kernel is quite smooth, so usually O(100) samples
+            is enough.
+    """
     chi_source = comoving_radial_distance(cosmo, 1./(1.+z_source))
     chi = np.linspace(0, chi_source, nsamples)
 
@@ -50,7 +106,32 @@ def get_kappa_kernel(cosmo, z_source, nsamples):
 
 
 class Tracer(object):
+    """Tracers contain the information necessary to describe the
+    contribution of a given sky observable to its cross-power spectrum
+    with any other tracer. Tracers are composed of 4 main ingredients:
+
+    * A radial kernel: this expresses the support in redshift/distance
+      over which this tracer extends.
+
+    * A transfer function: this is a function of wavenumber and
+      scale factor that describes the connection between the tracer
+      and the power spectrum on different scales and at different
+      cosmic times.
+
+    * An ell-dependent prefactor: normally associated with angular
+      derivatives of a given fundamental quantity.
+
+    * The order of the derivative of the Bessel functions with which
+      they enter the computation of the angular power spectrum.
+
+    A `Tracer` object will in reality be a list of different such
+    tracers that get combined linearly when computing power spectra.
+    Further details can be found in the CCL note.
+    """
     def __init__(self):
+        """By default this `Tracer` object will contain no actual
+        tracers
+        """
         # Do nothing, just initialize list of tracers
         self.trc = []
 
@@ -58,6 +139,88 @@ class Tracer(object):
                    transfer_ka=None, transfer_k=None, transfer_a=None,
                    der_bessel=0, der_angles=0,
                    is_logt=False, extrap_order_lok=0, extrap_order_hik=2):
+        """Adds one more tracer to the list contained in this `Tracer`.
+
+        Args:
+            cosmo (:obj:`Cosmology`): cosmology object.
+            kernel (tulple of arrays, optional): A tuple of arrays
+                (`chi`, `w_chi`) describing the radial kernel of this
+                tracer. `chi` should contain values of the comoving
+                radial distance in increasing order, and `w_chi` should
+                contain the values of the kernel at those values of the
+                radial distance. The kernel will be assumed to be zero
+                outside the range of distances covered by `chi`. If
+                `kernel` is `None` a constant kernel w(chi)=1 will be
+                assumed everywhere.
+            transfer_ka (tuple of arrays, optional): a tuple of arrays
+                (`a`,`lk`,`t_ka`) describing the most general transfer
+                function for a tracer. `a` should be an array of scale
+                factor values in increasing order. `lk` should be an
+                array of values of the natural logarithm of the wave
+                number (in units of inverse Mpc) in increasing order.
+                `t_ka` should be an array of shape `(na,nk)`, where
+                `na` and `nk` are the sizes of `a` and `lk` respectively.
+                `t_ka` should hold the values of the transfer function at
+                the corresponding values of `a` and `lk`. If your transfer
+                function is factorizable (i.e. T(a,k) = A(a) * K(k)), it is
+                more efficient to set this to `None` and use `transfer_k`
+                and `transfer_a` to describe K and A respectively. The
+                transfer function will be assumed continuous and constant
+                outside the range of scale factors covered by `a`. It will
+                be extrapolated using polynomials of order `extrap_order_lok`
+                and `extrap_order_hik` below and above the range of
+                wavenumbers covered by `lk` respectively. If this argument
+                is not `None`, the values of `transfer_k` and `transfer_a`
+                will be ignored.
+            transfer_k (tuple of arrays, optional): a tuple of arrays
+                (`lk`,`t_k`) describing the scale-dependent part of a
+                factorizable transfer function. `lk` should be an
+                array of values of the natural logarithm of the wave
+                number (in units of inverse Mpc) in increasing order.
+                `t_k ` should be an array of the same size holding the
+                values of the k-dependent part of the transfer function
+                at those wavenumbers. It will be extrapolated using
+                polynomials of order `extrap_order_lok` and `extrap_order_hik`
+                below and above the range of wavenumbers covered by `lk`
+                respectively. If `None`, the k-dependent part of the transfer
+                function will be set to 1 everywhere.
+            transfer_a (tuple of arrays, optional): a tuple of arrays
+                (`a`,`t_a`) describing the time-dependent part of a
+                factorizable transfer function. `a` should be an array of
+                scale factor values in increasing order. `t_a` should
+                contain the time-dependent part of the transfer function
+                at those values of the scale factor. The time dependence
+                will be assumed continuous and constant outside the range
+                covered by `a`. If `None`, the time-dependent part of the
+                transfer function will be set to 1 everywhere.
+            der_bessel (int): order of the derivative of the Bessel
+                functions with which this tracer enters the calculation
+                of the power spectrum. Allowed values are -1, 0, 1 and 2.
+                0, 1 and 2 correspond to the raw functions, their first
+                derivatives or their second derivatives. -1 corresponds to
+                the raw functions divided by the square of their argument.
+                We enable this special value because this type of dependence
+                is ubiquitous for many common tracers (lensing, IAs), and
+                makes the corresponding transfer functions more stables
+                for small k or chi.
+            der_angles (int): integer describing the ell-dependent prefactor
+                associated with this tracer. Allowed values are 0, 1 and 2.
+                0 means no prefactor. 1 means a prefactor ell*(ell+1),
+                associated with the angular laplacian and used e.g. for
+                lensing convergence and magnification. 2 means a prefactor
+                sqrt((ell+2)!/(ell-2)!), associated with the angular
+                derivatives of spin-2 fields (e.g. cosmic shear, IAs).
+            is_logt (bool): if `True`, `transfer_ka`, `transfer_k` and
+                `transfer_a` will contain the natural logarithm of the
+                transfer function (or their factorizable parts). Default is
+                `False`.
+            extrap_order_lok (int): polynomial order used to extrapolate the
+                transfer functions for low wavenumbers not covered by the
+                input arrays.
+            extrap_order_hik (int): polynomial order used to extrapolate the
+                transfer functions for high wavenumbers not covered by the
+                input arrays.
+        """
         is_factorizable = transfer_ka is None
         is_k_constant = (transfer_ka is None) and (transfer_k is None)
         is_a_constant = (transfer_ka is None) and (transfer_a is None)
@@ -107,6 +270,25 @@ class Tracer(object):
 
 
 class NumberCountsTracer(Tracer):
+    """Specific `Tracer` associated to galaxy clustering with linear
+    scale-independent bias, including redshift-space distortions and
+    magnification.
+
+    Args:
+        cosmo (:obj:`Cosmology`): Cosmology object.
+        has_rsd (bool): Flag for whether the tracer has a
+            redshift-space distortion term.
+        dndz (tuple of arrays): A tuple of arrays (z, N(z))
+            giving the redshift distribution of the objects. The units are
+            arbitrary; N(z) will be normalized to unity.
+        bias (tuple of arrays): A tuple of arrays (z, b(z))
+            giving the galaxy bias. If `None`, this tracer won't include
+            a term proportional to the matter density contrast.
+        mag_bias (tuple of arrays, optional): A tuple of arrays (z, s(z))
+            giving the magnification bias as a function of redshift. If
+            `None`, the tracer is assumed to not have magnification bias
+            terms. Defaults to None.
+    """
     def __init__(self, cosmo, has_rsd, dndz, bias, mag_bias=None):
         self.trc = []
 
@@ -139,6 +321,21 @@ class NumberCountsTracer(Tracer):
 
 
 class WeakLensingTracer(Tracer):
+    """Specific `Tracer` associated to galaxy shape distortions including
+    lensing shear and intrinsic alignments within the L-NLA model.
+
+    Args:
+        cosmo (:obj:`Cosmology`): Cosmology object.
+        dndz (tuple of arrays): A tuple of arrays (z, N(z))
+            giving the redshift distribution of the objects. The units are
+            arbitrary; N(z) will be normalized to unity.
+        has_shear (bool): set to `False` if you want to omit the lensing shear
+            contribution from this tracer.
+        ia_bias (tuple of arrays, optional): A tuple of arrays
+            (z, b_IA(z)) giving the intrinsic alignment amplitude b_IA(z).
+            If `None`, the tracer is assumped to not have intrinsic
+            alignments. Defaults to None.
+    """
     def __init__(self, cosmo, dndz, has_shear=True, ia_bias=None):
         self.trc = []
         if has_shear:
@@ -158,6 +355,15 @@ class WeakLensingTracer(Tracer):
 
 
 class CMBLensingTracer(Tracer):
+    """A Tracer for CMB lensing.
+    Args:
+        cosmo (:obj:`Cosmology`): Cosmology object.
+        z_source (float): Redshift of source plane for CMB lensing.
+        nsamples (int): number of samples over which the kernel
+            is desired. These will be equi-spaced in radial distance.
+            The kernel is quite smooth, so usually O(100) samples
+            is enough.
+    """
     def __init__(self, cosmo, z_source, n_samples=100):
         self.trc = []
         kernel = get_kappa_kernel(cosmo, z_source, n_samples)
@@ -165,6 +371,8 @@ class CMBLensingTracer(Tracer):
 
 
 def check_returned_tracer(return_val):
+    """Wrapper to catch exceptions when tracers are spawned from C.
+    """
     if (isinstance(return_val, int)):
         check(return_val)
         tr = None

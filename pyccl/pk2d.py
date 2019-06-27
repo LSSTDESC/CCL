@@ -129,12 +129,13 @@ class Pk2D(object):
         if isinstance(k, int):
             k = float(k)
         if isinstance(k, float):
-            f, status = lib.p2d_eval_single(self.psp, np.log(k), a, cospass,
-                                            status)
+            f, status = lib.pk2d_eval_single(self.psp, np.log(k), a, cospass,
+                                             status)
         else:
             k_use = np.atleast_1d(k)
-            f, status = lib.p2d_eval_multi(self.psp, np.log(k_use), a, cospass,
-                                           k_use.size, status)
+            f, status = lib.pk2d_eval_multi(self.psp, np.log(k_use),
+                                            a, cospass,
+                                            k_use.size, status)
         check(status, cosmo)
 
         return f

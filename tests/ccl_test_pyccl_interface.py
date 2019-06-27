@@ -516,7 +516,7 @@ def check_cls(cosmo):
 
     # ClTracer test objects
     lens1 = ccl.WeakLensingTracer(cosmo, (z, n))
-    lens2 = ccl.WeakLensingTracer(cosmo, dndz=(z,n), ia_bias=(z, n), red_frac=(z,n))
+    lens2 = ccl.WeakLensingTracer(cosmo, dndz=(z,n), ia_bias=(z, n))
     nc1 = ccl.NumberCountsTracer(cosmo, False, dndz=(z,n), bias=(z,b))
     nc2 = ccl.NumberCountsTracer(cosmo, True, dndz=(z,n), bias=(z,b))
     nc3 = ccl.NumberCountsTracer(cosmo, True, dndz=(z,n), bias=(z,b), mag_bias=(z,b))
@@ -588,7 +588,7 @@ def check_cls_nu(cosmo):
 
     # ClTracer test objects
     lens1 = ccl.WeakLensingTracer(cosmo, dndz=(z,n))
-    lens2 = ccl.WeakLensingTracer(cosmo, dndz=(z,n), ia_bias=(z,n), red_frac=(z,n))
+    lens2 = ccl.WeakLensingTracer(cosmo, dndz=(z,n), ia_bias=(z,n))
     nc1 = ccl.NumberCountsTracer(cosmo, False, dndz=(z,n), bias=(z,b))
 
     # Check that for massive neutrinos including rsd raises an error (not yet implemented)
@@ -619,20 +619,9 @@ def check_cls_nu(cosmo):
     assert_( all_finite(ccl.angular_cl(cosmo, nc1, lens1, ell_arr)) )
     assert_( all_finite(ccl.angular_cl(cosmo, nc1, lens2, ell_arr)) )
 
-    # Check get_internal_function()
-    a_scl = 0.5
-    a_lst = [0.2, 0.4, 0.6, 0.8, 1.]
-    a_arr = np.linspace(0.2, 1., 5)
-    assert_( all_finite(nc1.get_internal_function(cosmo, 'dndz', a_scl)) )
-    assert_( all_finite(nc1.get_internal_function(cosmo, 'dndz', a_lst)) )
-    assert_( all_finite(nc1.get_internal_function(cosmo, 'dndz', a_arr)) )
-
     # Check that invalid options raise errors
-    assert_raises(ValueError, nc1.get_internal_function, cosmo, 'x', a_arr)
     assert_raises(CCLError, ccl.NumberCountsTracer, cosmo, True,
                   dndz=(z,n), bias=(z,b))
-    assert_raises(ValueError, ccl.WeakLensingTracer, cosmo,
-                  dndz=(z,n), ia_bias=(z,n))
 
 
 def check_corr(cosmo):
@@ -643,7 +632,7 @@ def check_corr(cosmo):
 
     # ClTracer test objects
     lens1 = ccl.WeakLensingTracer(cosmo, dndz=(z, n))
-    lens2 = ccl.WeakLensingTracer(cosmo, dndz=(z,n), ia_bias=(z,n), red_frac=(z,n))
+    lens2 = ccl.WeakLensingTracer(cosmo, dndz=(z,n), ia_bias=(z,n))
 
     ells = np.arange(3000)
     cls = ccl.angular_cl(cosmo, lens1, lens2, ells)

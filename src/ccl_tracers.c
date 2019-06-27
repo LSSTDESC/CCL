@@ -34,7 +34,8 @@ void ccl_cl_tracer_collection_t_free(ccl_cl_tracer_collection_t *trc)
   }
 }
 
-void ccl_add_cl_tracer_to_collection(ccl_cl_tracer_collection_t *trc,ccl_cl_tracer_t *tr,int *status)
+void ccl_add_cl_tracer_to_collection(ccl_cl_tracer_collection_t *trc,
+				     ccl_cl_tracer_t *tr,int *status)
 {
   if(trc->n_tracers>=100) {
     *status=CCL_ERROR_MEMORY;
@@ -49,8 +50,10 @@ void ccl_add_cl_tracer_to_collection(ccl_cl_tracer_collection_t *trc,ccl_cl_trac
 //and returns an array of a values and the corresponding a-dependent values.
 //The order of the original arrays is assumed to be ascending in z, and
 //the order of the returned arrays is swapped (so it has ascending a).
-static void from_z_to_a(ccl_cosmology *cosmo,int nz,double *z_arr,double *fz_arr,
-			double **a_arr,double **fa_arr,int *status)
+static void from_z_to_a(ccl_cosmology *cosmo,
+			int nz,double *z_arr,double *fz_arr,
+			double **a_arr,double **fa_arr,
+			int *status)
 {
   *a_arr=malloc(nz*sizeof(double));
   *fa_arr=malloc(nz*sizeof(double));
@@ -69,6 +72,7 @@ static void from_z_to_a(ccl_cosmology *cosmo,int nz,double *z_arr,double *fz_arr
   }
 }
 
+//Integrand for N(z) integrator
 static double nz_integrand(double z,void *pars)
 {
   ccl_f1d_t *nz_f=(ccl_f1d_t *)pars;
@@ -76,6 +80,7 @@ static double nz_integrand(double z,void *pars)
   return ccl_f1d_t_eval(nz_f,z);
 }
 
+// Gets area of N(z) curve
 static double get_nz_norm(ccl_cosmology *cosmo,ccl_f1d_t *nz_f,double z0,double zf,
 			  int *status)
 {
@@ -87,14 +92,16 @@ static double get_nz_norm(ccl_cosmology *cosmo,ccl_f1d_t *nz_f,double z0,double 
   F.function=&nz_integrand;
   F.params=nz_f;
   int gslstatus=gsl_integration_qag(&F,z0,zf,0,
-				    cosmo->gsl_params.INTEGRATION_EPSREL, cosmo->gsl_params.N_ITERATION,
+				    cosmo->gsl_params.INTEGRATION_EPSREL,
+				    cosmo->gsl_params.N_ITERATION,
 				    cosmo->gsl_params.INTEGRATION_GAUSS_KRONROD_POINTS,
 				    w, &nz_norm, &nz_enorm);
   gsl_integration_workspace_free(w);
   if(gslstatus!=GSL_SUCCESS) {
     ccl_raise_gsl_warning(gslstatus, "ccl_tracers.c: get_nz_norm():");
     *status=CCL_ERROR_INTEG;
-    ccl_cosmology_set_status_message(cosmo, "ccl_tracers.c: get_nz_norm(): integration error when normalizing N(z)\n");
+    ccl_cosmology_set_status_message(cosmo, "ccl_tracers.c: get_nz_norm(): "
+				     "integration error when normalizing N(z)\n");
   }
 
   return nz_norm;
@@ -118,7 +125,8 @@ void ccl_get_number_counts_kernel(ccl_cosmology *cosmo,
   ccl_f1d_t *nz_f=ccl_f1d_t_new(nz,z_arr,nz_arr,0,0);
   if(nz_f==NULL) {
     *status=CCL_ERROR_SPLINE;
-    ccl_cosmology_set_status_message(cosmo, "ccl_tracers.c: ccl_get_number_counts_kernel: error initializing spline\n");
+    ccl_cosmology_set_status_message(cosmo, "ccl_tracers.c: ccl_get_number_counts_kernel: "
+				     "error initializing spline\n");
   }
 
   //Get N(z) normalization
@@ -143,7 +151,7 @@ void ccl_get_number_counts_kernel(ccl_cosmology *cosmo,
   ccl_f1d_t_free(nz_f);
 }
 
-
+//3 H0^2 Omega_M / 2
 static double get_lensing_prefactor(ccl_cosmology *cosmo,int *status)
 {
   double hub=cosmo->params.h*ccl_h_over_h0(cosmo,1.,status)/ccl_constants.CLIGHT_HMPC;
@@ -161,6 +169,8 @@ typedef struct {
   int *status;
 } integ_lensing_pars;
 
+//Integrand for lensing kernel.
+//Returns N(z) * (1 - 5*s(z)/2) * (chi(z)-chi) / chi(z)
 static double lensing_kernel_integrand(double z,void *pars)
 {
   integ_lensing_pars *p=(integ_lensing_pars *)pars;
@@ -179,10 +189,10 @@ static double lensing_kernel_integrand(double z,void *pars)
   }
 }
 
+//Returns
+//Integral[ p(z) * (1-5s(z)/2) * chi_end * (chi(z)-chi_end)/chi(z) , {z',z_end,z_max} ]
 static double lensing_kernel_integrate(ccl_cosmology *cosmo,integ_lensing_pars *pars)
 {
-  // Returns
-  // Integral[ p(z') * (1-5s(z')/2) * chi_end * (chi'-chi_end)/chi' , {z',z_end,z_max} ]
   int gslstatus=0;
   double result,eresult;
   gsl_function F;
@@ -190,7 +200,8 @@ static double lensing_kernel_integrate(ccl_cosmology *cosmo,integ_lensing_pars *
   F.function=&lensing_kernel_integrand;
   F.params=pars;
   gslstatus=gsl_integration_qag(&F, pars->z_end, pars->z_max, 0,
-				cosmo->gsl_params.INTEGRATION_EPSREL, cosmo->gsl_params.N_ITERATION,
+				cosmo->gsl_params.INTEGRATION_EPSREL,
+				cosmo->gsl_params.N_ITERATION,
 				cosmo->gsl_params.INTEGRATION_GAUSS_KRONROD_POINTS,
 				w, &result, &eresult);
   gsl_integration_workspace_free(w);
@@ -202,15 +213,22 @@ static double lensing_kernel_integrate(ccl_cosmology *cosmo,integ_lensing_pars *
   return result*pars->i_nz_norm*pars->chi_end;
 }
 
+//Returns number of divisions on which
+//the lensing kernel should be calculated
 int ccl_get_nchi_lensing_kernel(int nz,double *z_arr,int *status)
 {
   int nchi;
   double dz=-1,z_max=-1;
+  //Compute redshift step
   dz=(z_arr[nz-1]-z_arr[0])/(nz-1);
 
+  //How many steps to z=0?
   return (int)(z_arr[nz-1]/dz+0.5);
 }
 
+//Return array with the values of chi at
+//the which the lensing kernel will be
+//calculated.
 void ccl_get_chis_lensing_kernel(ccl_cosmology *cosmo,
 				 int nchi,double z_max,
 				 double *chis,int *status)
@@ -224,6 +242,10 @@ void ccl_get_chis_lensing_kernel(ccl_cosmology *cosmo,
   }
 }
 
+//Returns array with lensing kernel:
+//3 * H0^2 * Omega_M / 2 / a *
+// Integral[ p(z) * (1-5s(z)/2) * chi_end * (chi(z)-chi_end)/chi(z) ,
+//          {z',z_end,z_max} ]
 void ccl_get_lensing_mag_kernel(ccl_cosmology *cosmo,
 				int nz,double *z_arr,double *nz_arr,
 				int normalize_nz,double z_max,
@@ -234,7 +256,8 @@ void ccl_get_lensing_mag_kernel(ccl_cosmology *cosmo,
   ccl_f1d_t *nz_f=ccl_f1d_t_new(nz,z_arr,nz_arr,0,0);
   if(nz_f==NULL) {
     *status=CCL_ERROR_SPLINE;
-    ccl_cosmology_set_status_message(cosmo, "ccl_tracers.c: get_lensing_mag_kernel: error initializing spline\n");
+    ccl_cosmology_set_status_message(cosmo, "ccl_tracers.c: get_lensing_mag_kernel: "
+				     "error initializing spline\n");
   }
 
   //Get N(z) normalization
@@ -253,7 +276,8 @@ void ccl_get_lensing_mag_kernel(ccl_cosmology *cosmo,
       sz_f=ccl_f1d_t_new(nz_s,zs_arr,sz_arr,sz_arr[0],sz_arr[nz_s-1]);
       if(sz_f==NULL) {
 	*status=CCL_ERROR_SPLINE;
-	ccl_cosmology_set_status_message(cosmo, "ccl_tracers.c: get_lensing_mag_kernel: error initializing spline\n");
+	ccl_cosmology_set_status_message(cosmo, "ccl_tracers.c: get_lensing_mag_kernel: "
+					 "error initializing spline\n");
       }
     }
   }
@@ -263,7 +287,8 @@ void ccl_get_lensing_mag_kernel(ccl_cosmology *cosmo,
     ipar=malloc(sizeof(integ_lensing_pars));
     if(ipar==NULL) {
       *status=CCL_ERROR_MEMORY;
-      ccl_cosmology_set_status_message(cosmo, "ccl_tracers.c: get_lensing_mag_kernel(): memory allocation error\n");
+      ccl_cosmology_set_status_message(cosmo, "ccl_tracers.c: get_lensing_mag_kernel(): "
+				       "memory allocation error\n");
     }
   }
 
@@ -284,7 +309,7 @@ void ccl_get_lensing_mag_kernel(ccl_cosmology *cosmo,
       ipar->status=status;
       ipar->z_end=z;
       ipar->chi_end=chi;
-      wL_arr[ichi]=lensing_kernel_integrate(cosmo,ipar)*(1+z)*lens_prefac; // divide by scale factor
+      wL_arr[ichi]=lensing_kernel_integrate(cosmo,ipar)*(1+z)*lens_prefac;
     }
   }
 
@@ -292,6 +317,8 @@ void ccl_get_lensing_mag_kernel(ccl_cosmology *cosmo,
   ccl_f1d_t_free(sz_f);
 }
 
+//Returns kernel for CMB lensing
+// 3H0^2Om/2 * chi * (chi_s - chi) / chi_s / a
 void ccl_get_kappa_kernel(ccl_cosmology *cosmo,
 			  double chi_source,
 			  int nchi,double *chi_arr,
@@ -303,7 +330,6 @@ void ccl_get_kappa_kernel(ccl_cosmology *cosmo,
   for(ichi=0;ichi<nchi;ichi++) {
     double chi=chi_arr[ichi];
     double a=ccl_scale_factor_of_chi(cosmo,chi,status);
-    // 3H0^2Om/2 * chi * (chi_s - chi) / chi_s / a
     wchi[ichi]=lens_prefac*(ccl_sinn(cosmo,chi_source-chi,status))*chi/a;
   }
 }
@@ -325,6 +351,7 @@ ccl_cl_tracer_t *ccl_cl_tracer_t_new(ccl_cosmology *cosmo,
 {
   ccl_cl_tracer_t *tr=NULL;
 
+  //Check der_bessel and der_angles are sensible
   if((der_angles<0) || (der_angles>2)) {
     *status=CCL_ERROR_INCONSISTENT;
     ccl_cosmology_set_status_message(cosmo, "ccl_tracers.c: ccl_cl_tracer_new: "
@@ -342,6 +369,7 @@ ccl_cl_tracer_t *ccl_cl_tracer_t_new(ccl_cosmology *cosmo,
       *status=CCL_ERROR_MEMORY;
   }
 
+  //Initialize everythin
   if(*status==0) {
     tr->der_angles=der_angles;
     tr->der_bessel=der_bessel;
@@ -355,7 +383,7 @@ ccl_cl_tracer_t *ccl_cl_tracer_t_new(ccl_cosmology *cosmo,
     //Initialize radial kernel
     if((n_w>0) && (chi_w!=NULL) && (w_w!=NULL)) {
       tr->kernel=ccl_f1d_t_new(n_w,chi_w,w_w,0,0);
-      if(tr->kernel==NULL) //CHECK IF THIS IS EXPECTED
+      if(tr->kernel==NULL)
 	*status=CCL_ERROR_MEMORY;
     }
   }
@@ -419,7 +447,7 @@ ccl_cl_tracer_t *ccl_cl_tracer_t_new(ccl_cosmology *cosmo,
 				 0, //growth_exponent
 				 ccl_f2d_3, //interp_type
 				 status);
-      if(tr->transfer==NULL) //CHECK IF THIS IS EXPECTED
+      if(tr->transfer==NULL)
 	*status=CCL_ERROR_MEMORY;
     }
   }
@@ -450,7 +478,7 @@ double ccl_cl_tracer_t_get_f_ell(ccl_cl_tracer_t *tr,double ell,int *status)
       else {
 	double lp1h=ell+0.5;
 	double lp1h2=lp1h*lp1h;
-	if(ell<=1000)  //This is accurate to 5E-5 for l<=1000
+	if(ell<=1000)  //This is accurate to 5E-5 for l>10
 	  return lp1h2*(1-1.25/lp1h2);
 	else //This is accurate to 1E-6 for l>1000
 	  return lp1h2;
