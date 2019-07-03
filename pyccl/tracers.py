@@ -307,6 +307,7 @@ class NumberCountsTracer(Tracer):
             if kernel_d is None:
                 kernel_d = get_density_kernel(cosmo, dndz)
             # Transfer (growth rate)
+            z_b, _ = _check_array_params(dndz)
             a_s = 1./(1+z_b[::-1])
             t_a = (a_s, -growth_rate(cosmo, a_s))
             self.add_tracer(cosmo, kernel=kernel_d,
