@@ -210,7 +210,6 @@ int main(int argc,char **argv)
   config.transfer_function_method=ccl_boltzmann_class;
   ccl_parameters params = ccl_parameters_create(OC, OB, OK, NREL, NMAS, MNU, W0, WA, HH,
   		 	  			NORMPS, NS,-1,-1,-1,-1,NULL,NULL, &status);
-  //printf("in sample run w0=%1.12f, wa=%1.12f\n", W0, WA);
 
   // Initialize cosmology object given cosmo params
   ccl_cosmology *cosmo=ccl_cosmology_create(params,config);
