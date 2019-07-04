@@ -22,6 +22,7 @@ ccl_f1d_t *ccl_f1d_t_new(int n,double *x,double *y,double y0,double yf)
   int parstatus=gsl_spline_init(spl->spline,x,y,n);
   if(parstatus) {
     gsl_spline_free(spl->spline);
+    free(spl);
     return NULL;
   }
 

@@ -133,7 +133,7 @@ class Tracer(object):
         tracers
         """
         # Do nothing, just initialize list of tracers
-        self.trc = []
+        self._trc = []
 
     def add_tracer(self, cosmo, kernel=None,
                    transfer_ka=None, transfer_k=None, transfer_a=None,
@@ -261,11 +261,11 @@ class Tracer(object):
                                           int(extrap_order_lok),
                                           int(extrap_order_hik),
                                           status)
-        self.trc.append(check_returned_tracer(ret))
+        self._trc.append(_check_returned_tracer(ret))
 
     def __del__(self):
-        if hasattr(self, 'trc'):
-            for t in self.trc:
+        if hasattr(self, '_trc'):
+            for t in self._trc:
                 lib.cl_tracer_t_free(t)
 
 
@@ -290,7 +290,7 @@ class NumberCountsTracer(Tracer):
             terms. Defaults to None.
     """
     def __init__(self, cosmo, has_rsd, dndz, bias, mag_bias=None):
-        self.trc = []
+        self._trc = []
 
         kernel_d = None
         if bias is not None:  # Has density term
@@ -338,13 +338,13 @@ class WeakLensingTracer(Tracer):
             alignments. Defaults to None.
     """
     def __init__(self, cosmo, dndz, has_shear=True, ia_bias=None):
-        self.trc = []
+        self._trc = []
         if has_shear:
             # Kernel
             kernel_l = get_lensing_kernel(cosmo, dndz)
             self.add_tracer(cosmo, kernel=kernel_l,
                             der_bessel=-1, der_angles=2)
-        if ia_bias is not None:  # Has magnification bias
+        if ia_bias is not None:  # Has intrinsic alignments
             # Kernel
             kernel_i = get_density_kernel(cosmo, dndz)
             # Transfer
@@ -360,18 +360,18 @@ class CMBLensingTracer(Tracer):
     Args:
         cosmo (:obj:`Cosmology`): Cosmology object.
         z_source (float): Redshift of source plane for CMB lensing.
-        nsamples (int): number of samples over which the kernel
+        nsamples (int, optional): number of samples over which the kernel
             is desired. These will be equi-spaced in radial distance.
             The kernel is quite smooth, so usually O(100) samples
             is enough.
     """
     def __init__(self, cosmo, z_source, n_samples=100):
-        self.trc = []
+        self._trc = []
         kernel = get_kappa_kernel(cosmo, z_source, n_samples)
         self.add_tracer(cosmo, kernel=kernel, der_bessel=-1, der_angles=1)
 
 
-def check_returned_tracer(return_val):
+def _check_returned_tracer(return_val):
     """Wrapper to catch exceptions when tracers are spawned from C.
     """
     if (isinstance(return_val, int)):

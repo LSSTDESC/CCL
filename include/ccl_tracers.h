@@ -5,6 +5,11 @@
 
 CCL_BEGIN_DECLS
 
+//This is used to determine the limits of integration along
+//the radial direction for a given tracer.
+//The limits are given by the lowest and highest radial
+//distances at which the radial kernel is CCL_FRAC_RELEVANT
+//times smaller than its maximum.
 #define CCL_FRAC_RELEVANT 5E-4
 
 typedef struct {
@@ -19,8 +24,8 @@ typedef struct {
 /**
  * Constructor for a ccl_cl_tracer_t. See CCL note for a description of how tracers are used to compute power spectra.
  * @param cosmo Cosmology structure.
- * @param der_bessel Bessel function derivative order (-1, 0, 1 or 2).
- * @param der_angles ell-dependent prefactor type (0, 1 or 2)
+ * @param der_bessel Bessel function derivative order (-1, 0, 1 or 2). For 0, 1 and 2 this is just the derivative order. For -1, the tracer uses j_l(k*chi)/(k*chi)^2 instead of j_l(k*chi).
+ * @param der_angles ell-dependent prefactor type (0, 1 or 2). 0 -> 1, 1 -> l*(l+1), 2 -> sqrt((l+2)!/(l-2)!).
  * @param n_w number of array elements in radial kernel.
  * @param chi_w values of the radial comoving distance for the radial kernel.
  * @param w_w corresponding values of the radial kernel.
@@ -157,6 +162,9 @@ void ccl_get_kappa_kernel(ccl_cosmology *cosmo,
 			  int nchi,double *chi_arr,
 			  double *wchi,int *status);
 
+
+//Maximum number of tracers per collection
+#define CCL_MAX_TRACERS_PER_COLLECTION 100
 
 typedef struct {
   int n_tracers; //Number of tracers in this collection

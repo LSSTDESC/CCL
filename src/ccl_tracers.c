@@ -15,9 +15,9 @@ ccl_cl_tracer_collection_t *ccl_cl_tracer_collection_t_new(int *status)
 
   if(*status==0) {
     trc->n_tracers=0;
-    //Currently this is hard-coded.
+    //Currently CCL_MAX_TRACERS_PER_COLLECTION is hard-coded to 100.
     //It should be enough for any practical application with minimal memory overhead 
-    trc->ts=malloc(100*sizeof(ccl_cl_tracer_t *));
+    trc->ts=malloc(CCL_MAX_TRACERS_PER_COLLECTION*sizeof(ccl_cl_tracer_t *));
     if(trc->ts==NULL)
       *status=CCL_ERROR_MEMORY;
   }
@@ -37,7 +37,7 @@ void ccl_cl_tracer_collection_t_free(ccl_cl_tracer_collection_t *trc)
 void ccl_add_cl_tracer_to_collection(ccl_cl_tracer_collection_t *trc,
 				     ccl_cl_tracer_t *tr,int *status)
 {
-  if(trc->n_tracers>=100) {
+  if(trc->n_tracers>=CCL_MAX_TRACERS_PER_COLLECTION) {
     *status=CCL_ERROR_MEMORY;
     return;
   }
@@ -154,7 +154,7 @@ void ccl_get_number_counts_kernel(ccl_cosmology *cosmo,
 //3 H0^2 Omega_M / 2
 static double get_lensing_prefactor(ccl_cosmology *cosmo,int *status)
 {
-  double hub=cosmo->params.h*ccl_h_over_h0(cosmo,1.,status)/ccl_constants.CLIGHT_HMPC;
+  double hub=cosmo->params.h/ccl_constants.CLIGHT_HMPC;
   return 1.5*hub*hub*cosmo->params.Omega_m;
 }
 

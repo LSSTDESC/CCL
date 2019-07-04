@@ -19,9 +19,6 @@
     (double* tka_s, int ntka),
     (double* tk_s, int ntk),
     (double* ta_s, int nta)}
-//%apply (double* IN_ARRAY1, int DIM1) {
-//    (double* ell, int nell),
-//    (double* aarr, int na)};
 %apply (int DIM1, double* ARGOUT_ARRAY1) {(int nout, double* output)};
 
 %inline %{

@@ -44,9 +44,9 @@ def angular_cl(cosmo, cltracer1, cltracer2, ell, p_of_k_a=None,
     status = 0
     clt1, status = lib.cl_tracer_collection_t_new(status)
     clt2, status = lib.cl_tracer_collection_t_new(status)
-    for t in cltracer1.trc:
+    for t in cltracer1._trc:
         status = lib.add_cl_tracer_to_collection(clt1, t, status)
-    for t in cltracer2.trc:
+    for t in cltracer2._trc:
         status = lib.add_cl_tracer_to_collection(clt2, t, status)
 
     ell_use = np.atleast_1d(ell)
