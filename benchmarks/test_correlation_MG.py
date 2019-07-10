@@ -3,12 +3,11 @@ import numpy as np
 import pyccl as ccl
 from scipy.interpolate import interp1d
 import pytest
-import matplotlib.pyplot as plt
 
 
 @pytest.fixture(scope='module', params=['fftlog', 'bessel'])
 def corr_method(request):
-    errfacs = {'fftlog': 0.2, 'bessel': 0.1}
+    errfacs = {'fftlog': 0.2, 'bessel': 0.2}
     return request.param, errfacs[request.param]
 
 
@@ -19,7 +18,7 @@ def set_up(request):
     logA = 3.05  # log(10^10 A_s)
     cosmo = ccl.Cosmology(Omega_c=0.12/h0**2, Omega_b=0.0221/h0**2, Omega_k=0,
                           h=h0, A_s=np.exp(logA)/10**10, n_s=0.96, Neff=3.046,
-                          m_nu=0.0, w0=-1, wa=0, mu_0=0.1, sigma_0=0.,
+                          m_nu=0.0, w0=-1, wa=0, mu_0=0.1, sigma_0=0.1,
                           transfer_function='boltzmann_class',
                           matter_power_spectrum='linear')
 
@@ -57,18 +56,18 @@ def set_up(request):
 
     # Read benchmarks
     bms = {}
-    bms['dd_11'] = np.loadtxt(dirdat+'/wtheta_corr_MG.dat')[0:15]
-    bms['dd_22'] = np.loadtxt(dirdat+'/wtheta_corr_MG.dat')[15:]
-    bms['dl_11'] = np.loadtxt(dirdat+'/gammat_corr_MG.dat')[0:15]
-    bms['dl_12'] = np.loadtxt(dirdat+'/gammat_corr_MG.dat')[15:30]
-    bms['dl_21'] = np.loadtxt(dirdat+'/gammat_corr_MG.dat')[30:45]
-    bms['dl_22'] = np.loadtxt(dirdat+'/gammat_corr_MG.dat')[45:]
-    bms['ll_11_p'] = np.loadtxt(dirdat+'/xip_corr_MG.dat')[0:15]
-    bms['ll_12_p'] = np.loadtxt(dirdat+'/xip_corr_MG.dat')[15:30]
-    bms['ll_22_p'] = np.loadtxt(dirdat+'/xip_corr_MG.dat')[30:]
-    bms['ll_11_m'] = np.loadtxt(dirdat+'/xim_corr_MG.dat')[0:15]
-    bms['ll_12_m'] = np.loadtxt(dirdat+'/xim_corr_MG.dat')[15:30]
-    bms['ll_22_m'] = np.loadtxt(dirdat+'/xim_corr_MG.dat')[30:]
+    bms['dd_11'] = np.loadtxt(dirdat+'/wtheta_mu_0p1_Sigma_0p1.dat')[0:15]
+    bms['dd_22'] = np.loadtxt(dirdat+'/wtheta_mu_0p1_Sigma_0p1.dat')[15:]
+    bms['dl_11'] = np.loadtxt(dirdat+'/gammat_mu_0p1_Sigma_0p1.dat')[0:15]
+    bms['dl_12'] = np.loadtxt(dirdat+'/gammat_mu_0p1_Sigma_0p1.dat')[15:30]
+    bms['dl_21'] = np.loadtxt(dirdat+'/gammat_mu_0p1_Sigma_0p1.dat')[30:45]
+    bms['dl_22'] = np.loadtxt(dirdat+'/gammat_mu_0p1_Sigma_0p1.dat')[45:]
+    bms['ll_11_p'] = np.loadtxt(dirdat+'/xip_mu_0p1_Sigma_0p1.dat')[0:14]
+    bms['ll_12_p'] = np.loadtxt(dirdat+'/xip_mu_0p1_Sigma_0p1.dat')[14:28]
+    bms['ll_22_p'] = np.loadtxt(dirdat+'/xip_mu_0p1_Sigma_0p1.dat')[28:]
+    bms['ll_11_m'] = np.loadtxt(dirdat+'/xim_mu_0p1_Sigma_0p1.dat')[0:15]
+    bms['ll_12_m'] = np.loadtxt(dirdat+'/xim_mu_0p1_Sigma_0p1.dat')[15:30]
+    bms['ll_22_m'] = np.loadtxt(dirdat+'/xim_mu_0p1_Sigma_0p1.dat')[30:]
     theta = np.loadtxt(dirdat+'/theta_corr_MG.dat')
     bms['theta'] = theta
 
@@ -98,24 +97,26 @@ def set_up(request):
                             bounds_error=False)(theta)
     d = np.loadtxt("benchmarks/data/sigma_xi+_Nbin5",
                    unpack=True)
+    # We cut the largest theta angle from xip because of issues
+    # with the benchmark.
     ers['ll_11_p'] = interp1d(d[0], d[1],
                               fill_value=d[1][0],
-                              bounds_error=False)(theta)
-    ers['ll_22_p'] = interp1d(d[0] , d[2],
+                              bounds_error=False)(theta[0:14])
+    ers['ll_22_p'] = interp1d(d[0], d[2],
                               fill_value=d[2][0],
-                              bounds_error=False)(theta)
-    ers['ll_12_p'] = interp1d(d[0] , d[3],
+                              bounds_error=False)(theta[0:14])
+    ers['ll_12_p'] = interp1d(d[0], d[3],
                               fill_value=d[3][0],
-                              bounds_error=False)(theta)
+                              bounds_error=False)(theta[0:14])
     d = np.loadtxt("benchmarks/data/sigma_xi-_Nbin5",
                    unpack=True)
     ers['ll_11_m'] = interp1d(d[0], d[1],
                               fill_value=d[1][0],
                               bounds_error=False)(theta)
-    ers['ll_22_m'] = interp1d(d[0] , d[2],
+    ers['ll_22_m'] = interp1d(d[0], d[2],
                               fill_value=d[2][0],
                               bounds_error=False)(theta)
-    ers['ll_12_m'] = interp1d(d[0] , d[3],
+    ers['ll_12_m'] = interp1d(d[0], d[3],
                               fill_value=d[3][0],
                               bounds_error=False)(theta)
     return cosmo, trc, bms, ers, fl
@@ -147,19 +148,14 @@ def test_xi(set_up, corr_method, t1, t2, bm, er, kind, pref):
     # Our benchmarks have theta in arcmin
     # but CCL requires it in degrees:
     theta_deg = bms['theta'] / 60.
-    xi = ccl.correlation(cosmo, ell, cli, theta_deg,
-                         corr_type=kind, method=method)
+    # We cut the largest theta value for xi+ because of issues with the
+    # benchmarks.
+    if kind == 'l+':
+        xi = ccl.correlation(cosmo, ell, cli, theta_deg[0:14],
+                             corr_type=kind, method=method)
+    else:
+        xi = ccl.correlation(cosmo, ell, cli, theta_deg,
+                             corr_type=kind, method=method)
     xi *= pref
-    
-    np.savetxt('./corr_'+t1+'_'+t2+'.txt', xi)
-
-    plt.figure()
-    plt.loglog(bms['theta'], bms[bm], label='benchmark')
-    plt.loglog(bms['theta'], xi, label='CCL')
-    plt.title(t1+'_'+t2)
-    plt.legend()
-    plt.savefig('./corr_'+t1+'_'+t2+'.png')
-    plt.show()
-    plt.close()
 
     assert np.all(np.fabs(xi - bms[bm]) < ers[er] * errfac)
