@@ -2,7 +2,7 @@ var searchData=
 [
   ['a',['a',['../structhf__model__match__data.html#a6e2a75be95742216b960653da32bb96f',1,'hf_model_match_data::a()'],['../structhf__int__data.html#a2a074ee1419717adc156906a4790da40',1,'hf_int_data::a()'],['../struct_int__one__halo___par.html#a23af468385a7645030d646f4874dc72c',1,'Int_one_halo_Par::a()'],['../struct_int__two__halo___par.html#a05cb880a3c368cc0d3e67c594d5c5692',1,'Int_two_halo_Par::a()']]],
   ['a_5fmin_5femu',['A_MIN_EMU',['../ccl__emu17_8h.html#a605b961a751fa528c986559d81b65640',1,'ccl_emu17.h']]],
-  ['a_5fs',['A_s',['../structccl__parameters.html#a315b41a853e710ee2cb280f35e65c191',1,'ccl_parameters::A_s()'],['../ccl__test__correlation__3dbis_8c.html#a5254db3d693bd2886cd02e9b722c817d',1,'A_S():&#160;ccl_test_correlation_3dbis.c'],['../pxi__fidtest_8c.html#a5254db3d693bd2886cd02e9b722c817d',1,'A_S():&#160;pxi_fidtest.c'],['../pxi__test_8c.html#a5254db3d693bd2886cd02e9b722c817d',1,'A_S():&#160;pxi_test.c'],['../namespaceccl__test__distances.html#a4fee99b90c7ad9e42ac56246005f2f99',1,'ccl_test_distances.A_s()'],['../namespaceccl__test__growth.html#ae7c040656adf879c79a4f0266f35e7e7',1,'ccl_test_growth.A_s()']]],
+  ['a_5fs',['A_s',['../structccl__parameters.html#a315b41a853e710ee2cb280f35e65c191',1,'ccl_parameters::A_s()'],['../namespaceccl__test__distances.html#a4fee99b90c7ad9e42ac56246005f2f99',1,'ccl_test_distances.A_s()'],['../namespaceccl__test__growth.html#ae7c040656adf879c79a4f0266f35e7e7',1,'ccl_test_growth.A_s()']]],
   ['a_5fspline_5fmax',['A_SPLINE_MAX',['../structccl__spline__params.html#aa227bbd087fee06f845b9de60ff09556',1,'ccl_spline_params']]],
   ['a_5fspline_5fmin',['A_SPLINE_MIN',['../structccl__spline__params.html#a43f7b575552fac8d54fd75bd60e42cc7',1,'ccl_spline_params']]],
   ['a_5fspline_5fmin_5fpk',['A_SPLINE_MIN_PK',['../structccl__spline__params.html#a800c10517429ab9b35ffccf3bff5f1f0',1,'ccl_spline_params']]],
@@ -22,6 +22,5 @@ var searchData=
   ['amax',['amax',['../structccl__p2d__t.html#af090a647ddaaa73a69aadf73d6ae2bb5',1,'ccl_p2d_t']]],
   ['amin',['amin',['../structccl__p2d__t.html#a9dd0557e6139d5560deb590157df53e3',1,'ccl_p2d_t']]],
   ['args',['args',['../namespacerun__tests.html#a5b1510476d0793c7c91a6e0f733d7c29',1,'run_tests']]],
-  ['argv',['argv',['../namespaceccl__test__power.html#a1b5fdf14c4f06d4a8722a7c41d8dbe1a',1,'ccl_test_power.argv()'],['../namespacerun__tests.html#a8a7b00d6f8aa6bda446535ba55c777fe',1,'run_tests.argv()']]],
-  ['avec',['avec',['../namespacetest__neutrino3p04__emu.html#ab8c4bce75a1656e3bd59c06088e516eb',1,'test_neutrino3p04_emu']]]
+  ['argv',['argv',['../namespaceccl__test__power.html#a1b5fdf14c4f06d4a8722a7c41d8dbe1a',1,'ccl_test_power.argv()'],['../namespacerun__tests.html#a8a7b00d6f8aa6bda446535ba55c777fe',1,'run_tests.argv()']]]
 ];

@@ -1,7 +1,6 @@
 var searchData=
 [
   ['t_5fcmb',['T_CMB',['../structccl__physical__constants.html#affc661a686b33da5e62b875d17a31a40',1,'ccl_physical_constants::T_CMB()'],['../structccl__parameters.html#a3015eb317a0a8fe96512b2c58b7a5965',1,'ccl_parameters::T_CMB()']]],
-  ['test3p04_5fpkemu_2ec',['test3p04_pkemu.c',['../test3p04__pkemu_8c.html',1,'']]],
   ['test_5fbackground',['test_background',['../namespaceccl__test__pyccl__interface.html#ac8e0f5304f7823f08dd48bd16736cbde',1,'ccl_test_pyccl_interface']]],
   ['test_5fcclerror_5fnot_5fequal',['test_cclerror_not_equal',['../namespaceccl__test__cclerror.html#afff946ac141db9569726348d56b88cd1',1,'ccl_test_cclerror']]],
   ['test_5fcclerror_5frepr',['test_cclerror_repr',['../namespaceccl__test__cclerror.html#a376e68906fd92e328d238f8bd5d7fb11',1,'ccl_test_cclerror']]],
@@ -76,8 +75,6 @@ var searchData=
   ['test_5fmassfunc',['test_massfunc',['../namespaceccl__test__pyccl__interface.html#a7aa32506e6319a810450e886106d3207',1,'ccl_test_pyccl_interface']]],
   ['test_5fmgrowth',['test_mgrowth',['../namespaceccl__test__growth.html#afedd7b6f40c09a4284691b608ca9326f',1,'ccl_test_growth']]],
   ['test_5fmusig',['test_muSig',['../namespaceccl__test__power.html#ad55d8b292007bcc38f3654e024211574',1,'ccl_test_power']]],
-  ['test_5fneutrino3p04_5femu',['test_neutrino3p04_emu',['../namespacetest__neutrino3p04__emu.html',1,'']]],
-  ['test_5fneutrino3p04_5femu_2epy',['test_neutrino3p04_emu.py',['../test__neutrino3p04__emu_8py.html',1,'']]],
   ['test_5fneutrinos',['test_neutrinos',['../namespaceccl__test__pyccl__interface.html#ae4c580c07c1b1ff62524d160ea8d6756',1,'ccl_test_pyccl_interface']]],
   ['test_5fnonlin_5fpower_5fspectrum_5femu_5fonly',['test_nonlin_power_spectrum_emu_only',['../namespaceccl__test__power.html#a8d91ea890e8e45915700d1467dd11984',1,'ccl_test_power']]],
   ['test_5fnonlin_5fpower_5fspectrum_5fhalofit_5fslow',['test_nonlin_power_spectrum_halofit_slow',['../namespaceccl__test__power.html#a050922793db7934bbd53d31e87dd1ff1',1,'ccl_test_power']]],

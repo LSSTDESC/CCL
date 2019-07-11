@@ -20,6 +20,5 @@ var searchData=
   ['amax',['amax',['../structccl__p2d__t.html#af090a647ddaaa73a69aadf73d6ae2bb5',1,'ccl_p2d_t']]],
   ['amin',['amin',['../structccl__p2d__t.html#a9dd0557e6139d5560deb590157df53e3',1,'ccl_p2d_t']]],
   ['args',['args',['../namespacerun__tests.html#a5b1510476d0793c7c91a6e0f733d7c29',1,'run_tests']]],
-  ['argv',['argv',['../namespaceccl__test__power.html#a1b5fdf14c4f06d4a8722a7c41d8dbe1a',1,'ccl_test_power.argv()'],['../namespacerun__tests.html#a8a7b00d6f8aa6bda446535ba55c777fe',1,'run_tests.argv()']]],
-  ['avec',['avec',['../namespacetest__neutrino3p04__emu.html#ab8c4bce75a1656e3bd59c06088e516eb',1,'test_neutrino3p04_emu']]]
+  ['argv',['argv',['../namespaceccl__test__power.html#a1b5fdf14c4f06d4a8722a7c41d8dbe1a',1,'ccl_test_power.argv()'],['../namespacerun__tests.html#a8a7b00d6f8aa6bda446535ba55c777fe',1,'run_tests.argv()']]]
 ];

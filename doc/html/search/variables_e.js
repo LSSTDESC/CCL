@@ -1,10 +1,5 @@
 var searchData=
 [
-  ['p1',['p1',['../namespacetest__neutrino3p04__emu.html#aba118a45ebd63ce00b0cf57a7d24cb47',1,'test_neutrino3p04_emu']]],
-  ['p2',['p2',['../namespacetest__neutrino3p04__emu.html#ae38bd5e89826b602a0e4afa45e901cf2',1,'test_neutrino3p04_emu']]],
-  ['p3',['p3',['../namespacetest__neutrino3p04__emu.html#abc3174dd87e66d5848d9388b72778e8d',1,'test_neutrino3p04_emu']]],
-  ['p3p04',['p3p04',['../namespacetest__neutrino3p04__emu.html#a5a60bda8e1cc737d68ac73e9627c03b0',1,'test_neutrino3p04_emu']]],
-  ['p3p046',['p3p046',['../namespacetest__neutrino3p04__emu.html#a047f6b27f49c4776e73967b3ca976bae',1,'test_neutrino3p04_emu']]],
   ['p_5flin',['p_lin',['../structccl__data.html#aa2daa15d06d8739adae5a45be494c2c5',1,'ccl_data']]],
   ['p_5fnl',['p_nl',['../structccl__data.html#ad5cbffe11bc08c851293f7b72b6a2f90',1,'ccl_data']]],
   ['params',['params',['../structccl__cosmology.html#ad58413720be45a206716254d9c1cc923',1,'ccl_cosmology']]],
