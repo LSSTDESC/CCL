@@ -28,6 +28,7 @@
 - Changed TCMB to T_CMB everywhere (#615)	
 - Fixed a small bug in the w_tophat expression and increased precision (#607)
 - Deprecated the use of GSL spline accelerators (#626)
+- Added support for modified gravity via mu / Sigma parameterisation (#442)
 
 ## Python library
 - Improved error reporting for `angular_cl` computations (#567).
@@ -49,6 +50,7 @@
 - Added custom Halofit code (#611).
 - Added `has_density` and `has_shear` tags to `Tracer` constructors.
 - Changed TCMB to T_CMB everywhere (#615)
+- Added support for modified gravity via mu / Sigma parameterisation (#442)
 	
 # v 1.0 API changes :
 
