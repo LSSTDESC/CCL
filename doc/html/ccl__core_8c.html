@@ -121,8 +121,8 @@ Functions</h2></td></tr>
 <tr class="separator:abe4eaf6cda07cabc127eb4f59b46e559"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1174397224ff9801de529e682bbac895"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__core_8c.html#a1174397224ff9801de529e682bbac895">ccl_parameters_fill_initial</a> (<a class="el" href="structccl__parameters.html">ccl_parameters</a> *params, int *status)</td></tr>
 <tr class="separator:a1174397224ff9801de529e682bbac895"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6a35ee485eac121317f33a30968eab65"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structccl__parameters.html">ccl_parameters</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__core_8c.html#a6a35ee485eac121317f33a30968eab65">ccl_parameters_create</a> (double Omega_c, double Omega_b, double Omega_k, double Neff, double *mnu, <a class="el" href="ccl__core_8h.html#a8c23ee4dd2faea6685776fc39c32104b">ccl_mnu_convention</a> mnu_type, double w0, double wa, double h, double norm_pk, double n_s, double bcm_log10Mc, double bcm_etab, double bcm_ks, int nz_mgrowth, double *zarr_mgrowth, double *dfarr_mgrowth, int *status)</td></tr>
-<tr class="separator:a6a35ee485eac121317f33a30968eab65"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa0386253e874bf6d30748ff81f8dda73"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structccl__parameters.html">ccl_parameters</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__core_8c.html#aa0386253e874bf6d30748ff81f8dda73">ccl_parameters_create</a> (double Omega_c, double Omega_b, double Omega_k, double Neff, double *mnu, <a class="el" href="ccl__core_8h.html#a8c23ee4dd2faea6685776fc39c32104b">ccl_mnu_convention</a> mnu_type, double w0, double wa, double h, double norm_pk, double n_s, double bcm_log10Mc, double bcm_etab, double bcm_ks, double mu_0, double sigma_0, int nz_mgrowth, double *zarr_mgrowth, double *dfarr_mgrowth, int *status)</td></tr>
+<tr class="separator:aa0386253e874bf6d30748ff81f8dda73"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a68e6abf3d4e77945174c0ef86745bb8a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structccl__parameters.html">ccl_parameters</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__core_8c.html#a68e6abf3d4e77945174c0ef86745bb8a">ccl_parameters_create_flat_lcdm</a> (double Omega_c, double Omega_b, double h, double norm_pk, double n_s, int *status)</td></tr>
 <tr class="separator:a68e6abf3d4e77945174c0ef86745bb8a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7a38624ef91f501786d287e5739c0324"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__core_8c.html#a7a38624ef91f501786d287e5739c0324">ccl_parameters_write_yaml</a> (<a class="el" href="structccl__parameters.html">ccl_parameters</a> *params, const char *filename, int *status)</td></tr>
@@ -593,8 +593,8 @@ Variables</h2></td></tr>
 
 </div>
 </div>
-<a id="a6a35ee485eac121317f33a30968eab65"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a6a35ee485eac121317f33a30968eab65">&#9670;&nbsp;</a></span>ccl_parameters_create()</h2>
+<a id="aa0386253e874bf6d30748ff81f8dda73"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa0386253e874bf6d30748ff81f8dda73">&#9670;&nbsp;</a></span>ccl_parameters_create()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -682,6 +682,18 @@ Variables</h2></td></tr>
           <td></td>
           <td class="paramtype">double&#160;</td>
           <td class="paramname"><em>bcm_ks</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>mu_0</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>sigma_0</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -950,12 +962,12 @@ Variables</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<b>Initial value:</b><div class="fragment"><div class="line">= {</div><div class="line">  <a class="code" href="ccl__config_8h.html#a8746e6d3648e86a8233d4c2813415e15a2b9083c5271eb911d72cc8dc0553fec0">ccl_boltzmann_class</a>, <a class="code" href="ccl__config_8h.html#a33c02fcf871bde5a88799d19418fb615a37d2e0996d26b30ebc58c6d0ca7ec13a">ccl_halofit</a>, <a class="code" href="ccl__config_8h.html#a834a8dab508cb785c7fdcc3b6353a013afceb68dd5a80a8523d88026d2f67cfbf">ccl_nobaryons</a>,</div><div class="line">  <a class="code" href="ccl__config_8h.html#ad544e91cedc9b0865dba11bf4c652091aa92ddafbaf0d6d9b13a46ff8a1fafda3">ccl_tinker10</a>, <a class="code" href="ccl__config_8h.html#a62567120aeaafb79d8467612498cc7eda72b97eb2dd7e345168ec5fc1110fd18f">ccl_duffy2008</a>, <a class="code" href="ccl__config_8h.html#ac78b0a571f13119cf2bd5a3ff4b85192aa20214f37e1dd2d7ee91acac5f4cb732">ccl_emu_strict</a>}</div><div class="ttc" id="ccl__config_8h_html_a8746e6d3648e86a8233d4c2813415e15a2b9083c5271eb911d72cc8dc0553fec0"><div class="ttname"><a href="ccl__config_8h.html#a8746e6d3648e86a8233d4c2813415e15a2b9083c5271eb911d72cc8dc0553fec0">ccl_boltzmann_class</a></div><div class="ttdef"><b>Definition:</b> ccl_config.h:28</div></div>
-<div class="ttc" id="ccl__config_8h_html_ad544e91cedc9b0865dba11bf4c652091aa92ddafbaf0d6d9b13a46ff8a1fafda3"><div class="ttname"><a href="ccl__config_8h.html#ad544e91cedc9b0865dba11bf4c652091aa92ddafbaf0d6d9b13a46ff8a1fafda3">ccl_tinker10</a></div><div class="ttdef"><b>Definition:</b> ccl_config.h:76</div></div>
-<div class="ttc" id="ccl__config_8h_html_a33c02fcf871bde5a88799d19418fb615a37d2e0996d26b30ebc58c6d0ca7ec13a"><div class="ttname"><a href="ccl__config_8h.html#a33c02fcf871bde5a88799d19418fb615a37d2e0996d26b30ebc58c6d0ca7ec13a">ccl_halofit</a></div><div class="ttdef"><b>Definition:</b> ccl_config.h:45</div></div>
-<div class="ttc" id="ccl__config_8h_html_ac78b0a571f13119cf2bd5a3ff4b85192aa20214f37e1dd2d7ee91acac5f4cb732"><div class="ttname"><a href="ccl__config_8h.html#ac78b0a571f13119cf2bd5a3ff4b85192aa20214f37e1dd2d7ee91acac5f4cb732">ccl_emu_strict</a></div><div class="ttdef"><b>Definition:</b> ccl_config.h:100</div></div>
-<div class="ttc" id="ccl__config_8h_html_a62567120aeaafb79d8467612498cc7eda72b97eb2dd7e345168ec5fc1110fd18f"><div class="ttname"><a href="ccl__config_8h.html#a62567120aeaafb79d8467612498cc7eda72b97eb2dd7e345168ec5fc1110fd18f">ccl_duffy2008</a></div><div class="ttdef"><b>Definition:</b> ccl_config.h:88</div></div>
-<div class="ttc" id="ccl__config_8h_html_a834a8dab508cb785c7fdcc3b6353a013afceb68dd5a80a8523d88026d2f67cfbf"><div class="ttname"><a href="ccl__config_8h.html#a834a8dab508cb785c7fdcc3b6353a013afceb68dd5a80a8523d88026d2f67cfbf">ccl_nobaryons</a></div><div class="ttdef"><b>Definition:</b> ccl_config.h:60</div></div>
+<b>Initial value:</b><div class="fragment"><div class="line">= {</div><div class="line">  <a class="code" href="ccl__config_8h.html#a8746e6d3648e86a8233d4c2813415e15a2b9083c5271eb911d72cc8dc0553fec0">ccl_boltzmann_class</a>, <a class="code" href="ccl__config_8h.html#a33c02fcf871bde5a88799d19418fb615a37d2e0996d26b30ebc58c6d0ca7ec13a">ccl_halofit</a>, <a class="code" href="ccl__config_8h.html#a834a8dab508cb785c7fdcc3b6353a013afceb68dd5a80a8523d88026d2f67cfbf">ccl_nobaryons</a>,</div><div class="line">  <a class="code" href="ccl__config_8h.html#ad544e91cedc9b0865dba11bf4c652091aa92ddafbaf0d6d9b13a46ff8a1fafda3">ccl_tinker10</a>, <a class="code" href="ccl__config_8h.html#a62567120aeaafb79d8467612498cc7eda72b97eb2dd7e345168ec5fc1110fd18f">ccl_duffy2008</a>, <a class="code" href="ccl__config_8h.html#ac78b0a571f13119cf2bd5a3ff4b85192aa20214f37e1dd2d7ee91acac5f4cb732">ccl_emu_strict</a>}</div><div class="ttc" id="ccl__config_8h_html_a8746e6d3648e86a8233d4c2813415e15a2b9083c5271eb911d72cc8dc0553fec0"><div class="ttname"><a href="ccl__config_8h.html#a8746e6d3648e86a8233d4c2813415e15a2b9083c5271eb911d72cc8dc0553fec0">ccl_boltzmann_class</a></div><div class="ttdef"><b>Definition:</b> ccl_config.h:21</div></div>
+<div class="ttc" id="ccl__config_8h_html_ad544e91cedc9b0865dba11bf4c652091aa92ddafbaf0d6d9b13a46ff8a1fafda3"><div class="ttname"><a href="ccl__config_8h.html#ad544e91cedc9b0865dba11bf4c652091aa92ddafbaf0d6d9b13a46ff8a1fafda3">ccl_tinker10</a></div><div class="ttdef"><b>Definition:</b> ccl_config.h:64</div></div>
+<div class="ttc" id="ccl__config_8h_html_a33c02fcf871bde5a88799d19418fb615a37d2e0996d26b30ebc58c6d0ca7ec13a"><div class="ttname"><a href="ccl__config_8h.html#a33c02fcf871bde5a88799d19418fb615a37d2e0996d26b30ebc58c6d0ca7ec13a">ccl_halofit</a></div><div class="ttdef"><b>Definition:</b> ccl_config.h:36</div></div>
+<div class="ttc" id="ccl__config_8h_html_ac78b0a571f13119cf2bd5a3ff4b85192aa20214f37e1dd2d7ee91acac5f4cb732"><div class="ttname"><a href="ccl__config_8h.html#ac78b0a571f13119cf2bd5a3ff4b85192aa20214f37e1dd2d7ee91acac5f4cb732">ccl_emu_strict</a></div><div class="ttdef"><b>Definition:</b> ccl_config.h:88</div></div>
+<div class="ttc" id="ccl__config_8h_html_a62567120aeaafb79d8467612498cc7eda72b97eb2dd7e345168ec5fc1110fd18f"><div class="ttname"><a href="ccl__config_8h.html#a62567120aeaafb79d8467612498cc7eda72b97eb2dd7e345168ec5fc1110fd18f">ccl_duffy2008</a></div><div class="ttdef"><b>Definition:</b> ccl_config.h:76</div></div>
+<div class="ttc" id="ccl__config_8h_html_a834a8dab508cb785c7fdcc3b6353a013afceb68dd5a80a8523d88026d2f67cfbf"><div class="ttname"><a href="ccl__config_8h.html#a834a8dab508cb785c7fdcc3b6353a013afceb68dd5a80a8523d88026d2f67cfbf">ccl_nobaryons</a></div><div class="ttdef"><b>Definition:</b> ccl_config.h:49</div></div>
 </div><!-- fragment --><p>The default configuration object In the default configuration, defined in <a class="el" href="ccl__core_8c.html">ccl_core.c</a> CCL runs with: default_config = {ccl_boltzmann_class, ccl_halofit, ccl_nobaryons, ccl_tinker10, ccl_duffy2008, ccl_emu_strict} </p>
 
 </div>

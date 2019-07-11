@@ -7,6 +7,8 @@ def \mbox{\hyperlink{namespaceccl__test__pyccl__interface_af12cc81b73f2b986dbddf
 \item 
 def \mbox{\hyperlink{namespaceccl__test__pyccl__interface_a2d1bcf258dbc29d3e39ce74e3dff711e}{reference\+\_\+models\+\_\+nu}} ()
 \item 
+def \mbox{\hyperlink{namespaceccl__test__pyccl__interface_a0fa0a0827887914d36a7e277eb03589d}{reference\+\_\+models\+\_\+mg}} ()
+\item 
 def \mbox{\hyperlink{namespaceccl__test__pyccl__interface_aecd07d8c3c95bccf7dad21e068684ad0}{all\+\_\+finite}} (vals)
 \item 
 def \mbox{\hyperlink{namespaceccl__test__pyccl__interface_abeb0e16edb05cf5ed17fd43254ea2d4b}{check\+\_\+background}} (cosmo)
@@ -15,11 +17,17 @@ def \mbox{\hyperlink{namespaceccl__test__pyccl__interface_afd5e77929d503c6eaed00
 \item 
 def \mbox{\hyperlink{namespaceccl__test__pyccl__interface_a0e14d8cd4b51c38207fa38e5ca127e38}{check\+\_\+power}} (cosmo)
 \item 
+def \mbox{\hyperlink{namespaceccl__test__pyccl__interface_a7d06b60d91970b9d503c60804f42b1e0}{check\+\_\+power\+\_\+\+MG}} (cosmo)
+\item 
 def \mbox{\hyperlink{namespaceccl__test__pyccl__interface_af18b1262baf153cf44e7cd4fe4ebf02f}{check\+\_\+massfunc}} (cosmo)
 \item 
 def \mbox{\hyperlink{namespaceccl__test__pyccl__interface_ade98af8ec8a8309c2012c63e9a3766ae}{check\+\_\+massfunc\+\_\+nu}} (cosmo)
 \item 
+def \mbox{\hyperlink{namespaceccl__test__pyccl__interface_a694d4068ccc8aba45f1fdf9772bf89cd}{check\+\_\+massfunc\+\_\+\+MG}} (cosmo)
+\item 
 def \mbox{\hyperlink{namespaceccl__test__pyccl__interface_a54fc00031b869f3aa6aa6f383d0aeec8}{check\+\_\+halomod}} (cosmo)
+\item 
+def \mbox{\hyperlink{namespaceccl__test__pyccl__interface_abe190d7efeea2a7b5c34ed0659a16c75}{check\+\_\+haloprofile}} (cosmo)
 \item 
 def \mbox{\hyperlink{namespaceccl__test__pyccl__interface_a45d1e6f91fd168f5b48149bfdfa6aa8b}{check\+\_\+neutrinos}} ()
 \item 
@@ -33,8 +41,6 @@ def \mbox{\hyperlink{namespaceccl__test__pyccl__interface_a1ad832016b388d40507aa
 \item 
 def \mbox{\hyperlink{namespaceccl__test__pyccl__interface_aa8e3694e3fffe81ea6217b51f7d6cec5}{check\+\_\+corr\+\_\+3d\+R\+SD}} (cosmo)
 \item 
-def \mbox{\hyperlink{namespaceccl__test__pyccl__interface_a64e29dd68981ffe884100ab216146869}{test\+\_\+valid\+\_\+transfer\+\_\+combos}} ()
-\item 
 def \mbox{\hyperlink{namespaceccl__test__pyccl__interface_ac8e0f5304f7823f08dd48bd16736cbde}{test\+\_\+background}} ()
 \item 
 def \mbox{\hyperlink{namespaceccl__test__pyccl__interface_aa0fa1e5e5f099cfa4e0c55e8cc80f585}{test\+\_\+power}} ()
@@ -42,6 +48,8 @@ def \mbox{\hyperlink{namespaceccl__test__pyccl__interface_aa0fa1e5e5f099cfa4e0c5
 def \mbox{\hyperlink{namespaceccl__test__pyccl__interface_a7aa32506e6319a810450e886106d3207}{test\+\_\+massfunc}} ()
 \item 
 def \mbox{\hyperlink{namespaceccl__test__pyccl__interface_a1936b759676e55f5a5c9a339af0bba48}{test\+\_\+halomod}} ()
+\item 
+def \mbox{\hyperlink{namespaceccl__test__pyccl__interface_a32790ac592e2c16a4bda518f9c026137}{test\+\_\+haloprofile}} ()
 \item 
 def \mbox{\hyperlink{namespaceccl__test__pyccl__interface_ae4c580c07c1b1ff62524d160ea8d6756}{test\+\_\+neutrinos}} ()
 \item 
@@ -121,11 +129,27 @@ exit gracefully in functions with massive neutrinos (not implemented yet).
 
 \begin{DoxyVerb}Check that halo model functions can be run.
 \end{DoxyVerb}
+ \mbox{\Hypertarget{namespaceccl__test__pyccl__interface_abe190d7efeea2a7b5c34ed0659a16c75}\label{namespaceccl__test__pyccl__interface_abe190d7efeea2a7b5c34ed0659a16c75}} 
+\index{ccl\+\_\+test\+\_\+pyccl\+\_\+interface@{ccl\+\_\+test\+\_\+pyccl\+\_\+interface}!check\+\_\+haloprofile@{check\+\_\+haloprofile}}
+\index{check\+\_\+haloprofile@{check\+\_\+haloprofile}!ccl\+\_\+test\+\_\+pyccl\+\_\+interface@{ccl\+\_\+test\+\_\+pyccl\+\_\+interface}}
+\subsubsection{\texorpdfstring{check\+\_\+haloprofile()}{check\_haloprofile()}}
+{\footnotesize\ttfamily def ccl\+\_\+test\+\_\+pyccl\+\_\+interface.\+check\+\_\+haloprofile (\begin{DoxyParamCaption}\item[{}]{cosmo }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Check that halo profile functions can be run.
+\end{DoxyVerb}
  \mbox{\Hypertarget{namespaceccl__test__pyccl__interface_af18b1262baf153cf44e7cd4fe4ebf02f}\label{namespaceccl__test__pyccl__interface_af18b1262baf153cf44e7cd4fe4ebf02f}} 
 \index{ccl\+\_\+test\+\_\+pyccl\+\_\+interface@{ccl\+\_\+test\+\_\+pyccl\+\_\+interface}!check\+\_\+massfunc@{check\+\_\+massfunc}}
 \index{check\+\_\+massfunc@{check\+\_\+massfunc}!ccl\+\_\+test\+\_\+pyccl\+\_\+interface@{ccl\+\_\+test\+\_\+pyccl\+\_\+interface}}
 \subsubsection{\texorpdfstring{check\+\_\+massfunc()}{check\_massfunc()}}
 {\footnotesize\ttfamily def ccl\+\_\+test\+\_\+pyccl\+\_\+interface.\+check\+\_\+massfunc (\begin{DoxyParamCaption}\item[{}]{cosmo }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Check that mass function and supporting functions can be run.
+\end{DoxyVerb}
+ \mbox{\Hypertarget{namespaceccl__test__pyccl__interface_a694d4068ccc8aba45f1fdf9772bf89cd}\label{namespaceccl__test__pyccl__interface_a694d4068ccc8aba45f1fdf9772bf89cd}} 
+\index{ccl\+\_\+test\+\_\+pyccl\+\_\+interface@{ccl\+\_\+test\+\_\+pyccl\+\_\+interface}!check\+\_\+massfunc\+\_\+\+MG@{check\+\_\+massfunc\+\_\+\+MG}}
+\index{check\+\_\+massfunc\+\_\+\+MG@{check\+\_\+massfunc\+\_\+\+MG}!ccl\+\_\+test\+\_\+pyccl\+\_\+interface@{ccl\+\_\+test\+\_\+pyccl\+\_\+interface}}
+\subsubsection{\texorpdfstring{check\+\_\+massfunc\+\_\+\+M\+G()}{check\_massfunc\_MG()}}
+{\footnotesize\ttfamily def ccl\+\_\+test\+\_\+pyccl\+\_\+interface.\+check\+\_\+massfunc\+\_\+\+MG (\begin{DoxyParamCaption}\item[{}]{cosmo }\end{DoxyParamCaption})}
 
 \begin{DoxyVerb}Check that mass function and supporting functions can be run.
 \end{DoxyVerb}
@@ -153,6 +177,14 @@ exit gracefully in functions with massive neutrinos (not implemented yet).
 
 \begin{DoxyVerb}Check that power spectrum and sigma functions can be run.
 \end{DoxyVerb}
+ \mbox{\Hypertarget{namespaceccl__test__pyccl__interface_a7d06b60d91970b9d503c60804f42b1e0}\label{namespaceccl__test__pyccl__interface_a7d06b60d91970b9d503c60804f42b1e0}} 
+\index{ccl\+\_\+test\+\_\+pyccl\+\_\+interface@{ccl\+\_\+test\+\_\+pyccl\+\_\+interface}!check\+\_\+power\+\_\+\+MG@{check\+\_\+power\+\_\+\+MG}}
+\index{check\+\_\+power\+\_\+\+MG@{check\+\_\+power\+\_\+\+MG}!ccl\+\_\+test\+\_\+pyccl\+\_\+interface@{ccl\+\_\+test\+\_\+pyccl\+\_\+interface}}
+\subsubsection{\texorpdfstring{check\+\_\+power\+\_\+\+M\+G()}{check\_power\_MG()}}
+{\footnotesize\ttfamily def ccl\+\_\+test\+\_\+pyccl\+\_\+interface.\+check\+\_\+power\+\_\+\+MG (\begin{DoxyParamCaption}\item[{}]{cosmo }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Check that power spectrum and sigma functions can be run.
+\end{DoxyVerb}
  \mbox{\Hypertarget{namespaceccl__test__pyccl__interface_af12cc81b73f2b986dbddf49f0b57759a}\label{namespaceccl__test__pyccl__interface_af12cc81b73f2b986dbddf49f0b57759a}} 
 \index{ccl\+\_\+test\+\_\+pyccl\+\_\+interface@{ccl\+\_\+test\+\_\+pyccl\+\_\+interface}!reference\+\_\+models@{reference\+\_\+models}}
 \index{reference\+\_\+models@{reference\+\_\+models}!ccl\+\_\+test\+\_\+pyccl\+\_\+interface@{ccl\+\_\+test\+\_\+pyccl\+\_\+interface}}
@@ -161,6 +193,14 @@ exit gracefully in functions with massive neutrinos (not implemented yet).
 
 \begin{DoxyVerb}Create a set of reference Cosmology() objects.
 \end{DoxyVerb}
+ \mbox{\Hypertarget{namespaceccl__test__pyccl__interface_a0fa0a0827887914d36a7e277eb03589d}\label{namespaceccl__test__pyccl__interface_a0fa0a0827887914d36a7e277eb03589d}} 
+\index{ccl\+\_\+test\+\_\+pyccl\+\_\+interface@{ccl\+\_\+test\+\_\+pyccl\+\_\+interface}!reference\+\_\+models\+\_\+mg@{reference\+\_\+models\+\_\+mg}}
+\index{reference\+\_\+models\+\_\+mg@{reference\+\_\+models\+\_\+mg}!ccl\+\_\+test\+\_\+pyccl\+\_\+interface@{ccl\+\_\+test\+\_\+pyccl\+\_\+interface}}
+\subsubsection{\texorpdfstring{reference\+\_\+models\+\_\+mg()}{reference\_models\_mg()}}
+{\footnotesize\ttfamily def ccl\+\_\+test\+\_\+pyccl\+\_\+interface.\+reference\+\_\+models\+\_\+mg (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Create a set of reference cosmological models with the mu / Sigma
+parameterisation of modified gravity. \end{DoxyVerb}
  \mbox{\Hypertarget{namespaceccl__test__pyccl__interface_a2d1bcf258dbc29d3e39ce74e3dff711e}\label{namespaceccl__test__pyccl__interface_a2d1bcf258dbc29d3e39ce74e3dff711e}} 
 \index{ccl\+\_\+test\+\_\+pyccl\+\_\+interface@{ccl\+\_\+test\+\_\+pyccl\+\_\+interface}!reference\+\_\+models\+\_\+nu@{reference\+\_\+models\+\_\+nu}}
 \index{reference\+\_\+models\+\_\+nu@{reference\+\_\+models\+\_\+nu}!ccl\+\_\+test\+\_\+pyccl\+\_\+interface@{ccl\+\_\+test\+\_\+pyccl\+\_\+interface}}
@@ -211,6 +251,14 @@ for massive neutrino cosmologies so will throw errors.
 
 \begin{DoxyVerb}Test halo model and supporting functions.
 \end{DoxyVerb}
+ \mbox{\Hypertarget{namespaceccl__test__pyccl__interface_a32790ac592e2c16a4bda518f9c026137}\label{namespaceccl__test__pyccl__interface_a32790ac592e2c16a4bda518f9c026137}} 
+\index{ccl\+\_\+test\+\_\+pyccl\+\_\+interface@{ccl\+\_\+test\+\_\+pyccl\+\_\+interface}!test\+\_\+haloprofile@{test\+\_\+haloprofile}}
+\index{test\+\_\+haloprofile@{test\+\_\+haloprofile}!ccl\+\_\+test\+\_\+pyccl\+\_\+interface@{ccl\+\_\+test\+\_\+pyccl\+\_\+interface}}
+\subsubsection{\texorpdfstring{test\+\_\+haloprofile()}{test\_haloprofile()}}
+{\footnotesize\ttfamily def ccl\+\_\+test\+\_\+pyccl\+\_\+interface.\+test\+\_\+haloprofile (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Test halo profile functions.
+\end{DoxyVerb}
  \mbox{\Hypertarget{namespaceccl__test__pyccl__interface_a7aa32506e6319a810450e886106d3207}\label{namespaceccl__test__pyccl__interface_a7aa32506e6319a810450e886106d3207}} 
 \index{ccl\+\_\+test\+\_\+pyccl\+\_\+interface@{ccl\+\_\+test\+\_\+pyccl\+\_\+interface}!test\+\_\+massfunc@{test\+\_\+massfunc}}
 \index{test\+\_\+massfunc@{test\+\_\+massfunc}!ccl\+\_\+test\+\_\+pyccl\+\_\+interface@{ccl\+\_\+test\+\_\+pyccl\+\_\+interface}}
@@ -234,14 +282,5 @@ for massive neutrino cosmologies so will throw errors.
 {\footnotesize\ttfamily def ccl\+\_\+test\+\_\+pyccl\+\_\+interface.\+test\+\_\+power (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
 
 \begin{DoxyVerb}Test power spectrum and sigma functions in ccl.power.
-\end{DoxyVerb}
- \mbox{\Hypertarget{namespaceccl__test__pyccl__interface_a64e29dd68981ffe884100ab216146869}\label{namespaceccl__test__pyccl__interface_a64e29dd68981ffe884100ab216146869}} 
-\index{ccl\+\_\+test\+\_\+pyccl\+\_\+interface@{ccl\+\_\+test\+\_\+pyccl\+\_\+interface}!test\+\_\+valid\+\_\+transfer\+\_\+combos@{test\+\_\+valid\+\_\+transfer\+\_\+combos}}
-\index{test\+\_\+valid\+\_\+transfer\+\_\+combos@{test\+\_\+valid\+\_\+transfer\+\_\+combos}!ccl\+\_\+test\+\_\+pyccl\+\_\+interface@{ccl\+\_\+test\+\_\+pyccl\+\_\+interface}}
-\subsubsection{\texorpdfstring{test\+\_\+valid\+\_\+transfer\+\_\+combos()}{test\_valid\_transfer\_combos()}}
-{\footnotesize\ttfamily def ccl\+\_\+test\+\_\+pyccl\+\_\+interface.\+test\+\_\+valid\+\_\+transfer\+\_\+combos (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
-
-\begin{DoxyVerb}Check that invalid transfer_function <-> matter_power_spectrum pairs raise
-an error.
 \end{DoxyVerb}
  

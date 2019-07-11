@@ -15,5 +15,6 @@ var searchData=
   ['read_5fgrowth_5fallz_5fbenchmark_5ffile',['read_growth_allz_benchmark_file',['../namespaceccl__test__growth.html#a2f8c205fa1a57bf8d2b31752e4798701',1,'ccl_test_growth']]],
   ['read_5fgrowth_5flowz_5fbenchmark_5ffile',['read_growth_lowz_benchmark_file',['../namespaceccl__test__growth.html#ac1171a8ec4ef57387a5b8ada42d58d7a',1,'ccl_test_growth']]],
   ['reference_5fmodels',['reference_models',['../namespaceccl__test__pyccl__interface.html#af12cc81b73f2b986dbddf49f0b57759a',1,'ccl_test_pyccl_interface']]],
+  ['reference_5fmodels_5fmg',['reference_models_mg',['../namespaceccl__test__pyccl__interface.html#a0fa0a0827887914d36a7e277eb03589d',1,'ccl_test_pyccl_interface']]],
   ['reference_5fmodels_5fnu',['reference_models_nu',['../namespaceccl__test__pyccl__interface.html#a2d1bcf258dbc29d3e39ce74e3dff711e',1,'ccl_test_pyccl_interface']]]
 ];

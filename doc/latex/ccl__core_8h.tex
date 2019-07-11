@@ -70,7 +70,7 @@ enum \mbox{\hyperlink{ccl__core_8h_a8c23ee4dd2faea6685776fc39c32104b}{ccl\+\_\+m
 \item 
 void \mbox{\hyperlink{ccl__core_8h_a52529d5da0d886523c86b13174e6d373}{ccl\+\_\+cosmology\+\_\+set\+\_\+status\+\_\+message}} (\mbox{\hyperlink{structccl__cosmology}{ccl\+\_\+cosmology}} $\ast$cosmo, const char $\ast$status\+\_\+message,...)
 \item 
-\mbox{\hyperlink{structccl__parameters}{ccl\+\_\+parameters}} \mbox{\hyperlink{ccl__core_8h_a6a35ee485eac121317f33a30968eab65}{ccl\+\_\+parameters\+\_\+create}} (double Omega\+\_\+c, double Omega\+\_\+b, double Omega\+\_\+k, double Neff, double $\ast$mnu, \mbox{\hyperlink{ccl__core_8h_a8c23ee4dd2faea6685776fc39c32104b}{ccl\+\_\+mnu\+\_\+convention}} mnu\+\_\+type, double w0, double wa, double h, double norm\+\_\+pk, double n\+\_\+s, double bcm\+\_\+log10\+Mc, double bcm\+\_\+etab, double bcm\+\_\+ks, int nz\+\_\+mgrowth, double $\ast$zarr\+\_\+mgrowth, double $\ast$dfarr\+\_\+mgrowth, int $\ast$status)
+\mbox{\hyperlink{structccl__parameters}{ccl\+\_\+parameters}} \mbox{\hyperlink{ccl__core_8h_aa0386253e874bf6d30748ff81f8dda73}{ccl\+\_\+parameters\+\_\+create}} (double Omega\+\_\+c, double Omega\+\_\+b, double Omega\+\_\+k, double Neff, double $\ast$mnu, \mbox{\hyperlink{ccl__core_8h_a8c23ee4dd2faea6685776fc39c32104b}{ccl\+\_\+mnu\+\_\+convention}} mnu\+\_\+type, double w0, double wa, double h, double norm\+\_\+pk, double n\+\_\+s, double bcm\+\_\+log10\+Mc, double bcm\+\_\+etab, double bcm\+\_\+ks, double mu\+\_\+0, double sigma\+\_\+0, int nz\+\_\+mgrowth, double $\ast$zarr\+\_\+mgrowth, double $\ast$dfarr\+\_\+mgrowth, int $\ast$status)
 \item 
 \mbox{\hyperlink{structccl__parameters}{ccl\+\_\+parameters}} \mbox{\hyperlink{ccl__core_8h_a68e6abf3d4e77945174c0ef86745bb8a}{ccl\+\_\+parameters\+\_\+create\+\_\+flat\+\_\+lcdm}} (double Omega\+\_\+c, double Omega\+\_\+b, double h, double norm\+\_\+pk, double n\+\_\+s, int $\ast$status)
 \item 
@@ -272,11 +272,11 @@ void
 \subsubsection{\texorpdfstring{ccl\+\_\+get\+\_\+pk\+\_\+spline\+\_\+nk()}{ccl\_get\_pk\_spline\_nk()}}
 {\footnotesize\ttfamily int ccl\+\_\+get\+\_\+pk\+\_\+spline\+\_\+nk (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structccl__cosmology}{ccl\+\_\+cosmology}} $\ast$}]{cosmo }\end{DoxyParamCaption})}
 
-\mbox{\Hypertarget{ccl__core_8h_a6a35ee485eac121317f33a30968eab65}\label{ccl__core_8h_a6a35ee485eac121317f33a30968eab65}} 
+\mbox{\Hypertarget{ccl__core_8h_aa0386253e874bf6d30748ff81f8dda73}\label{ccl__core_8h_aa0386253e874bf6d30748ff81f8dda73}} 
 \index{ccl\+\_\+core.\+h@{ccl\+\_\+core.\+h}!ccl\+\_\+parameters\+\_\+create@{ccl\+\_\+parameters\+\_\+create}}
 \index{ccl\+\_\+parameters\+\_\+create@{ccl\+\_\+parameters\+\_\+create}!ccl\+\_\+core.\+h@{ccl\+\_\+core.\+h}}
 \subsubsection{\texorpdfstring{ccl\+\_\+parameters\+\_\+create()}{ccl\_parameters\_create()}}
-{\footnotesize\ttfamily \mbox{\hyperlink{structccl__parameters}{ccl\+\_\+parameters}} ccl\+\_\+parameters\+\_\+create (\begin{DoxyParamCaption}\item[{double}]{Omega\+\_\+c,  }\item[{double}]{Omega\+\_\+b,  }\item[{double}]{Omega\+\_\+k,  }\item[{double}]{Neff,  }\item[{double $\ast$}]{mnu,  }\item[{\mbox{\hyperlink{ccl__core_8h_a8c23ee4dd2faea6685776fc39c32104b}{ccl\+\_\+mnu\+\_\+convention}}}]{mnu\+\_\+type,  }\item[{double}]{w0,  }\item[{double}]{wa,  }\item[{double}]{h,  }\item[{double}]{norm\+\_\+pk,  }\item[{double}]{n\+\_\+s,  }\item[{double}]{bcm\+\_\+log10\+Mc,  }\item[{double}]{bcm\+\_\+etab,  }\item[{double}]{bcm\+\_\+ks,  }\item[{int}]{nz\+\_\+mgrowth,  }\item[{double $\ast$}]{zarr\+\_\+mgrowth,  }\item[{double $\ast$}]{dfarr\+\_\+mgrowth,  }\item[{int $\ast$}]{status }\end{DoxyParamCaption})}
+{\footnotesize\ttfamily \mbox{\hyperlink{structccl__parameters}{ccl\+\_\+parameters}} ccl\+\_\+parameters\+\_\+create (\begin{DoxyParamCaption}\item[{double}]{Omega\+\_\+c,  }\item[{double}]{Omega\+\_\+b,  }\item[{double}]{Omega\+\_\+k,  }\item[{double}]{Neff,  }\item[{double $\ast$}]{mnu,  }\item[{\mbox{\hyperlink{ccl__core_8h_a8c23ee4dd2faea6685776fc39c32104b}{ccl\+\_\+mnu\+\_\+convention}}}]{mnu\+\_\+type,  }\item[{double}]{w0,  }\item[{double}]{wa,  }\item[{double}]{h,  }\item[{double}]{norm\+\_\+pk,  }\item[{double}]{n\+\_\+s,  }\item[{double}]{bcm\+\_\+log10\+Mc,  }\item[{double}]{bcm\+\_\+etab,  }\item[{double}]{bcm\+\_\+ks,  }\item[{double}]{mu\+\_\+0,  }\item[{double}]{sigma\+\_\+0,  }\item[{int}]{nz\+\_\+mgrowth,  }\item[{double $\ast$}]{zarr\+\_\+mgrowth,  }\item[{double $\ast$}]{dfarr\+\_\+mgrowth,  }\item[{int $\ast$}]{status }\end{DoxyParamCaption})}
 
 Create a cosmology 
 \begin{DoxyParams}{Parameters}

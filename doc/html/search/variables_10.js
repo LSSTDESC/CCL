@@ -1,8 +1,9 @@
 var searchData=
 [
-  ['setup',['setup',['../structctest.html#a5d7683856aab7a122f28bf4c56244bc1',1,'ctest']]],
+  ['sig0_5fvals',['Sig0_vals',['../namespaceccl__test__growth.html#a917391583cc5f328ef9ab45e2669b6cc',1,'ccl_test_growth']]],
+  ['sigma2',['sigma2',['../structhalofit__struct.html#a4dd097d7511013393f6a93b8689442ef',1,'halofit_struct']]],
   ['sigma8',['sigma8',['../structccl__parameters.html#a4d439ea97dad5c5e651fa8943b074fbd',1,'ccl_parameters::sigma8()'],['../namespaceccl__test__power.html#a1db9a0e452c2ccc904f3a1828f1143a8',1,'ccl_test_power.sigma8()']]],
-  ['skip',['skip',['../structctest.html#aa370fc3a1ca838de6bf4e3fa3a12d605',1,'ctest']]],
+  ['sigma_5f0',['sigma_0',['../structccl__parameters.html#af8ab57a5503219697c9f23ed699226e8',1,'ccl_parameters::sigma_0()'],['../namespaceccl__test__distances.html#a24a6625698e8ac04b4cb42e2eecec798',1,'ccl_test_distances.sigma_0()'],['../namespaceccl__test__power.html#abe8d1d5ac9e677eea2c65a3b98c75276',1,'ccl_test_power.sigma_0()']]],
   ['solar_5fmass',['SOLAR_MASS',['../structccl__physical__constants.html#a9e82da2bed7910922196d428e9d19ade',1,'ccl_physical_constants']]],
   ['spl_5fba',['spl_ba',['../struct_c_c_l___cl_tracer.html#a6465ff884a3b359995b014a9165738cf',1,'CCL_ClTracer']]],
   ['spl_5fbz',['spl_bz',['../struct_c_c_l___cl_tracer.html#a8efd94b42acc38fdbde6006537232cd5',1,'CCL_ClTracer']]],
@@ -15,8 +16,7 @@ var searchData=
   ['spline',['spline',['../struct_spl_par.html#ae8f88172b1b5531e97049f3996734d61',1,'SplPar']]],
   ['spline_5fparams',['spline_params',['../structccl__cosmology.html#a9bd12a07ba9c3244d5171ee7fb484e06',1,'ccl_cosmology']]],
   ['sqrtk',['sqrtk',['../structccl__parameters.html#a9fecdefe2eef4ffa7ac866d9e64497cf',1,'ccl_parameters']]],
-  ['ssname',['ssname',['../structctest.html#a22c00ac32556a836ad36a1c6e884031d',1,'ctest']]],
-  ['status',['status',['../structchipar.html#a035d74baeb5c41b4835481658cf1fd12',1,'chipar::status()'],['../struct_fpar.html#adce795808a394aa0004e3d6c9e03d041',1,'Fpar::status()'],['../struct_int_lens_par.html#a618ab6203724fe7e8a5dc83bd8955b37',1,'IntLensPar::status()'],['../struct_int_mag_par.html#a95e214626b6a1bc822ede29ce1b8743d',1,'IntMagPar::status()'],['../struct_int_cl_par.html#abc2ccba43ee24664930d4471badeba83',1,'IntClPar::status()'],['../struct_int__one__halo___par.html#ac2929000623f3dfd983b5bab45d02a8c',1,'Int_one_halo_Par::status()'],['../struct_int__two__halo___par.html#a4cf1dbf22fee89b7595dd9adda2c44a8',1,'Int_two_halo_Par::status()'],['../struct_sigma_r__pars.html#ac844a04f7d5a92c27afdb351d7055dd3',1,'SigmaR_pars::status()'],['../struct_sigma_v__pars.html#a81f5bd1b0ecf3b2e17ae4e49228b3a43',1,'SigmaV_pars::status()'],['../structccl__cosmology.html#a6de30ecc78151cd63260547adc344e78',1,'ccl_cosmology::status()']]],
+  ['status',['status',['../structchipar.html#a035d74baeb5c41b4835481658cf1fd12',1,'chipar::status()'],['../struct_fpar.html#adce795808a394aa0004e3d6c9e03d041',1,'Fpar::status()'],['../struct_int_lens_par.html#a618ab6203724fe7e8a5dc83bd8955b37',1,'IntLensPar::status()'],['../struct_int_mag_par.html#a95e214626b6a1bc822ede29ce1b8743d',1,'IntMagPar::status()'],['../struct_int_cl_par.html#abc2ccba43ee24664930d4471badeba83',1,'IntClPar::status()'],['../structhf__model__match__data.html#ae30994cfc59a6a73875e67c51495adcd',1,'hf_model_match_data::status()'],['../structhf__int__data.html#a582dbcc1fc57ecff72089cdd20bb36e1',1,'hf_int_data::status()'],['../struct_int__one__halo___par.html#ac2929000623f3dfd983b5bab45d02a8c',1,'Int_one_halo_Par::status()'],['../struct_int__two__halo___par.html#a4cf1dbf22fee89b7595dd9adda2c44a8',1,'Int_two_halo_Par::status()'],['../struct_sigma_r__pars.html#ac844a04f7d5a92c27afdb351d7055dd3',1,'SigmaR_pars::status()'],['../struct_sigma_v__pars.html#a81f5bd1b0ecf3b2e17ae4e49228b3a43',1,'SigmaV_pars::status()'],['../structccl__cosmology.html#a6de30ecc78151cd63260547adc344e78',1,'ccl_cosmology::status()']]],
   ['status_5fmessage',['status_message',['../structccl__cosmology.html#ade6f0b525e23bd7c719a46fe0e083a5e',1,'ccl_cosmology']]],
   ['stboltz',['STBOLTZ',['../structccl__physical__constants.html#a3c5543d40090d72be6bdf246d9749577',1,'ccl_physical_constants']]],
   ['sum_5fnu_5fmasses',['sum_nu_masses',['../structccl__parameters.html#aac77d1ee31cd42cd284a582e0cb1db0a',1,'ccl_parameters']]]
