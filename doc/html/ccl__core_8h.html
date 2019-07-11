@@ -147,8 +147,8 @@ Functions</h2></td></tr>
 <tr class="separator:abe4eaf6cda07cabc127eb4f59b46e559"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a52529d5da0d886523c86b13174e6d373"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__core_8h.html#a52529d5da0d886523c86b13174e6d373">ccl_cosmology_set_status_message</a> (<a class="el" href="structccl__cosmology.html">ccl_cosmology</a> *cosmo, const char *status_message,...)</td></tr>
 <tr class="separator:a52529d5da0d886523c86b13174e6d373"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6a35ee485eac121317f33a30968eab65"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structccl__parameters.html">ccl_parameters</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__core_8h.html#a6a35ee485eac121317f33a30968eab65">ccl_parameters_create</a> (double Omega_c, double Omega_b, double Omega_k, double Neff, double *mnu, <a class="el" href="ccl__core_8h.html#a8c23ee4dd2faea6685776fc39c32104b">ccl_mnu_convention</a> mnu_type, double w0, double wa, double h, double norm_pk, double n_s, double bcm_log10Mc, double bcm_etab, double bcm_ks, int nz_mgrowth, double *zarr_mgrowth, double *dfarr_mgrowth, int *status)</td></tr>
-<tr class="separator:a6a35ee485eac121317f33a30968eab65"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa0386253e874bf6d30748ff81f8dda73"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structccl__parameters.html">ccl_parameters</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__core_8h.html#aa0386253e874bf6d30748ff81f8dda73">ccl_parameters_create</a> (double Omega_c, double Omega_b, double Omega_k, double Neff, double *mnu, <a class="el" href="ccl__core_8h.html#a8c23ee4dd2faea6685776fc39c32104b">ccl_mnu_convention</a> mnu_type, double w0, double wa, double h, double norm_pk, double n_s, double bcm_log10Mc, double bcm_etab, double bcm_ks, double mu_0, double sigma_0, int nz_mgrowth, double *zarr_mgrowth, double *dfarr_mgrowth, int *status)</td></tr>
+<tr class="separator:aa0386253e874bf6d30748ff81f8dda73"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a68e6abf3d4e77945174c0ef86745bb8a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structccl__parameters.html">ccl_parameters</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__core_8h.html#a68e6abf3d4e77945174c0ef86745bb8a">ccl_parameters_create_flat_lcdm</a> (double Omega_c, double Omega_b, double h, double norm_pk, double n_s, int *status)</td></tr>
 <tr class="separator:a68e6abf3d4e77945174c0ef86745bb8a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5e4b1876b0a4afa24af5e71f8aaff1f3"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__core_8h.html#a5e4b1876b0a4afa24af5e71f8aaff1f3">ccl_parameters_free</a> (<a class="el" href="structccl__parameters.html">ccl_parameters</a> *params)</td></tr>
@@ -572,8 +572,8 @@ Variables</h2></td></tr>
 
 </div>
 </div>
-<a id="a6a35ee485eac121317f33a30968eab65"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a6a35ee485eac121317f33a30968eab65">&#9670;&nbsp;</a></span>ccl_parameters_create()</h2>
+<a id="aa0386253e874bf6d30748ff81f8dda73"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa0386253e874bf6d30748ff81f8dda73">&#9670;&nbsp;</a></span>ccl_parameters_create()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -661,6 +661,18 @@ Variables</h2></td></tr>
           <td></td>
           <td class="paramtype">double&#160;</td>
           <td class="paramname"><em>bcm_ks</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>mu_0</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>sigma_0</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>

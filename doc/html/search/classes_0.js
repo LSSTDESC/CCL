@@ -11,6 +11,5 @@ var searchData=
   ['ccl_5fphysical_5fconstants',['ccl_physical_constants',['../structccl__physical__constants.html',1,'']]],
   ['ccl_5fspline_5fparams',['ccl_spline_params',['../structccl__spline__params.html',1,'']]],
   ['chipar',['chipar',['../structchipar.html',1,'']]],
-  ['corr_5fint_5fpar',['corr_int_par',['../structcorr__int__par.html',1,'']]],
-  ['ctest',['ctest',['../structctest.html',1,'']]]
+  ['corr_5fint_5fpar',['corr_int_par',['../structcorr__int__par.html',1,'']]]
 ];

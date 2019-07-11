@@ -14,16 +14,12 @@
 \subsection*{Data Structures}
 \begin{DoxyCompactItemize}
 \item 
-struct \mbox{\hyperlink{structeh__struct}{eh\+\_\+struct}}
-\item 
 struct \mbox{\hyperlink{struct_sigma_r__pars}{Sigma\+R\+\_\+pars}}
 \item 
 struct \mbox{\hyperlink{struct_sigma_v__pars}{Sigma\+V\+\_\+pars}}
 \end{DoxyCompactItemize}
 \subsection*{Functions}
 \begin{DoxyCompactItemize}
-\item 
-double \mbox{\hyperlink{ccl__power_8c_af61e4cfbd50af0e9c32dac18ff77764c}{ccl\+\_\+bcm\+\_\+model\+\_\+fka}} (\mbox{\hyperlink{structccl__cosmology}{ccl\+\_\+cosmology}} $\ast$cosmo, double k, double a, int $\ast$status)
 \item 
 void \mbox{\hyperlink{ccl__power_8c_a63464fa52a7a72554028a32d274cd092}{ccl\+\_\+cosmology\+\_\+compute\+\_\+power}} (\mbox{\hyperlink{structccl__cosmology}{ccl\+\_\+cosmology}} $\ast$cosmo, int $\ast$status)
 \item 
@@ -40,26 +36,6 @@ double \mbox{\hyperlink{ccl__power_8c_a719bbbcaf0c6275c709247b87baaeee9}{ccl\+\_
 
 
 \subsection{Function Documentation}
-\mbox{\Hypertarget{ccl__power_8c_af61e4cfbd50af0e9c32dac18ff77764c}\label{ccl__power_8c_af61e4cfbd50af0e9c32dac18ff77764c}} 
-\index{ccl\+\_\+power.\+c@{ccl\+\_\+power.\+c}!ccl\+\_\+bcm\+\_\+model\+\_\+fka@{ccl\+\_\+bcm\+\_\+model\+\_\+fka}}
-\index{ccl\+\_\+bcm\+\_\+model\+\_\+fka@{ccl\+\_\+bcm\+\_\+model\+\_\+fka}!ccl\+\_\+power.\+c@{ccl\+\_\+power.\+c}}
-\subsubsection{\texorpdfstring{ccl\+\_\+bcm\+\_\+model\+\_\+fka()}{ccl\_bcm\_model\_fka()}}
-{\footnotesize\ttfamily double ccl\+\_\+bcm\+\_\+model\+\_\+fka (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structccl__cosmology}{ccl\+\_\+cosmology}} $\ast$}]{cosmo,  }\item[{double}]{k,  }\item[{double}]{a,  }\item[{int $\ast$}]{status }\end{DoxyParamCaption})}
-
-Correction for the impact of baryonic physics on the matter power spectrum. Returns f(k,a) \mbox{[}dimensionless\mbox{]} for given cosmology, using the method specified for the baryonic transfer function. f(k,a) is the fractional change in the nonlinear matter power spectrum from the Baryon Correction Model (B\+CM) of Schenider \& Teyssier (2015). The parameters of the model are passed as part of the cosmology class. 
-\begin{DoxyParams}{Parameters}
-{\em cosmo} & Cosmology parameters and configurations, including baryonic parameters. \\
-\hline
-{\em k} & Fourier mode, in \mbox{[}1/\+Mpc\mbox{]} units \\
-\hline
-{\em a} & scale factor, normalized to 1 for today \\
-\hline
-{\em status} & Status flag. 0 if there are no errors, nonzero otherwise. For specific cases see documentation for \mbox{\hyperlink{ccl__error_8c}{ccl\+\_\+error.\+c}} \\
-\hline
-\end{DoxyParams}
-\begin{DoxyReturn}{Returns}
-f(k,a). 
-\end{DoxyReturn}
 \mbox{\Hypertarget{ccl__power_8c_a63464fa52a7a72554028a32d274cd092}\label{ccl__power_8c_a63464fa52a7a72554028a32d274cd092}} 
 \index{ccl\+\_\+power.\+c@{ccl\+\_\+power.\+c}!ccl\+\_\+cosmology\+\_\+compute\+\_\+power@{ccl\+\_\+cosmology\+\_\+compute\+\_\+power}}
 \index{ccl\+\_\+cosmology\+\_\+compute\+\_\+power@{ccl\+\_\+cosmology\+\_\+compute\+\_\+power}!ccl\+\_\+power.\+c@{ccl\+\_\+power.\+c}}

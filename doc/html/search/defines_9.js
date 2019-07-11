@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['invsigma_5ftolerance',['INVSIGMA_TOLERANCE',['../ccl__test__massfunc_8c.html#af046df18b4925960064f23a140a0ae4d',1,'ccl_test_massfunc.c']]]
+  ['string',['STRING',['../ccl__core_8c.html#a8f7bd5242b15da973671df869db5fe85',1,'ccl_core.c']]]
 ];

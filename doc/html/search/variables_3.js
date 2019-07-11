@@ -1,7 +1,8 @@
 var searchData=
 [
   ['d_5fspline_5ftype',['D_SPLINE_TYPE',['../structccl__spline__params.html#a2561d961fffd4a95d0f8276162747f1d',1,'ccl_spline_params']]],
-  ['data',['data',['../structccl__cosmology.html#a672d3fab40334e3a5da4324604715370',1,'ccl_cosmology::data()'],['../structctest.html#a6a274c4182b5ed85ce47d6922e50ccdf',1,'ctest::data()']]],
+  ['data',['data',['../structccl__cosmology.html#a672d3fab40334e3a5da4324604715370',1,'ccl_cosmology']]],
+  ['deeff',['deeff',['../structhalofit__struct.html#a9c4b15ef8c85529c4a46ffdff4922df8',1,'halofit_struct']]],
   ['default_5fconfig',['default_config',['../ccl__core_8c.html#a71e38b37263fd3d61ba6e6885769e6f1',1,'default_config():&#160;ccl_core.c'],['../ccl__config_8h.html#a71e38b37263fd3d61ba6e6885769e6f1',1,'default_config():&#160;ccl_core.c']]],
   ['default_5fgsl_5fparams',['default_gsl_params',['../ccl__core_8c.html#a51a81788c4b417668a0db77918d90b39',1,'default_gsl_params():&#160;ccl_core.c'],['../ccl__core_8h.html#a51a81788c4b417668a0db77918d90b39',1,'default_gsl_params():&#160;ccl_core.c']]],
   ['default_5fspline_5fparams',['default_spline_params',['../ccl__core_8c.html#a62833ca45c5ab0c9c93758deb6d8bc5c',1,'default_spline_params():&#160;ccl_core.c'],['../ccl__core_8h.html#a62833ca45c5ab0c9c93758deb6d8bc5c',1,'default_spline_params():&#160;ccl_core.c']]],

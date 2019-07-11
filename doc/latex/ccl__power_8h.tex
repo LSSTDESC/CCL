@@ -3,9 +3,7 @@
 \subsection*{Functions}
 \begin{DoxyCompactItemize}
 \item 
-\mbox{\hyperlink{ccl__defs_8h_ae8d446df269cba1dff8f88922459a7d4}{C\+C\+L\+\_\+\+B\+E\+G\+I\+N\+\_\+\+D\+E\+C\+LS}} double \mbox{\hyperlink{ccl__power_8h_a7e3db13164f47429f429a7ec62ebac58}{ccl\+\_\+bcm\+\_\+model\+\_\+fka}} (\mbox{\hyperlink{structccl__cosmology}{ccl\+\_\+cosmology}} $\ast$cosmo, double k, double a, int $\ast$status)
-\item 
-double \mbox{\hyperlink{ccl__power_8h_a4a4453e1433b557d74fd1936366fb6da}{ccl\+\_\+linear\+\_\+matter\+\_\+power}} (\mbox{\hyperlink{structccl__cosmology}{ccl\+\_\+cosmology}} $\ast$cosmo, double k, double a, int $\ast$status)
+\mbox{\hyperlink{ccl__defs_8h_ae8d446df269cba1dff8f88922459a7d4}{C\+C\+L\+\_\+\+B\+E\+G\+I\+N\+\_\+\+D\+E\+C\+LS}} double \mbox{\hyperlink{ccl__power_8h_a16bc373ffe704af8a68040b20b58162f}{ccl\+\_\+linear\+\_\+matter\+\_\+power}} (\mbox{\hyperlink{structccl__cosmology}{ccl\+\_\+cosmology}} $\ast$cosmo, double k, double a, int $\ast$status)
 \item 
 double \mbox{\hyperlink{ccl__power_8h_aade0e22dd71d65253d0c27b7408d00d4}{ccl\+\_\+nonlin\+\_\+matter\+\_\+power}} (\mbox{\hyperlink{structccl__cosmology}{ccl\+\_\+cosmology}} $\ast$cosmo, double k, double a, int $\ast$status)
 \item 
@@ -20,26 +18,6 @@ double \mbox{\hyperlink{ccl__power_8h_a719bbbcaf0c6275c709247b87baaeee9}{ccl\+\_
 
 
 \subsection{Function Documentation}
-\mbox{\Hypertarget{ccl__power_8h_a7e3db13164f47429f429a7ec62ebac58}\label{ccl__power_8h_a7e3db13164f47429f429a7ec62ebac58}} 
-\index{ccl\+\_\+power.\+h@{ccl\+\_\+power.\+h}!ccl\+\_\+bcm\+\_\+model\+\_\+fka@{ccl\+\_\+bcm\+\_\+model\+\_\+fka}}
-\index{ccl\+\_\+bcm\+\_\+model\+\_\+fka@{ccl\+\_\+bcm\+\_\+model\+\_\+fka}!ccl\+\_\+power.\+h@{ccl\+\_\+power.\+h}}
-\subsubsection{\texorpdfstring{ccl\+\_\+bcm\+\_\+model\+\_\+fka()}{ccl\_bcm\_model\_fka()}}
-{\footnotesize\ttfamily \mbox{\hyperlink{ccl__defs_8h_ae8d446df269cba1dff8f88922459a7d4}{C\+C\+L\+\_\+\+B\+E\+G\+I\+N\+\_\+\+D\+E\+C\+LS}} double ccl\+\_\+bcm\+\_\+model\+\_\+fka (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structccl__cosmology}{ccl\+\_\+cosmology}} $\ast$}]{cosmo,  }\item[{double}]{k,  }\item[{double}]{a,  }\item[{int $\ast$}]{status }\end{DoxyParamCaption})}
-
-Correction for the impact of baryonic physics on the matter power spectrum. Returns f(k,a) \mbox{[}dimensionless\mbox{]} for given cosmology, using the method specified for the baryonic transfer function. f(k,a) is the fractional change in the nonlinear matter power spectrum from the Baryon Correction Model (B\+CM) of Schenider \& Teyssier (2015). The parameters of the model are passed as part of the cosmology class. 
-\begin{DoxyParams}{Parameters}
-{\em cosmo} & Cosmology parameters and configurations, including baryonic parameters. \\
-\hline
-{\em k} & Fourier mode, in \mbox{[}1/\+Mpc\mbox{]} units \\
-\hline
-{\em a} & scale factor, normalized to 1 for today \\
-\hline
-{\em status} & Status flag. 0 if there are no errors, nonzero otherwise. For specific cases see documentation for \mbox{\hyperlink{ccl__error_8c}{ccl\+\_\+error.\+c}} \\
-\hline
-\end{DoxyParams}
-\begin{DoxyReturn}{Returns}
-f(k,a). 
-\end{DoxyReturn}
 \mbox{\Hypertarget{ccl__power_8h_a63464fa52a7a72554028a32d274cd092}\label{ccl__power_8h_a63464fa52a7a72554028a32d274cd092}} 
 \index{ccl\+\_\+power.\+h@{ccl\+\_\+power.\+h}!ccl\+\_\+cosmology\+\_\+compute\+\_\+power@{ccl\+\_\+cosmology\+\_\+compute\+\_\+power}}
 \index{ccl\+\_\+cosmology\+\_\+compute\+\_\+power@{ccl\+\_\+cosmology\+\_\+compute\+\_\+power}!ccl\+\_\+power.\+h@{ccl\+\_\+power.\+h}}
@@ -56,11 +34,11 @@ Compute the power spectrum and create a 2d spline P(k,z) to be stored in the cos
 \begin{DoxyReturn}{Returns}
 void 
 \end{DoxyReturn}
-\mbox{\Hypertarget{ccl__power_8h_a4a4453e1433b557d74fd1936366fb6da}\label{ccl__power_8h_a4a4453e1433b557d74fd1936366fb6da}} 
+\mbox{\Hypertarget{ccl__power_8h_a16bc373ffe704af8a68040b20b58162f}\label{ccl__power_8h_a16bc373ffe704af8a68040b20b58162f}} 
 \index{ccl\+\_\+power.\+h@{ccl\+\_\+power.\+h}!ccl\+\_\+linear\+\_\+matter\+\_\+power@{ccl\+\_\+linear\+\_\+matter\+\_\+power}}
 \index{ccl\+\_\+linear\+\_\+matter\+\_\+power@{ccl\+\_\+linear\+\_\+matter\+\_\+power}!ccl\+\_\+power.\+h@{ccl\+\_\+power.\+h}}
 \subsubsection{\texorpdfstring{ccl\+\_\+linear\+\_\+matter\+\_\+power()}{ccl\_linear\_matter\_power()}}
-{\footnotesize\ttfamily double ccl\+\_\+linear\+\_\+matter\+\_\+power (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structccl__cosmology}{ccl\+\_\+cosmology}} $\ast$}]{cosmo,  }\item[{double}]{k,  }\item[{double}]{a,  }\item[{int $\ast$}]{status }\end{DoxyParamCaption})}
+{\footnotesize\ttfamily \mbox{\hyperlink{ccl__defs_8h_ae8d446df269cba1dff8f88922459a7d4}{C\+C\+L\+\_\+\+B\+E\+G\+I\+N\+\_\+\+D\+E\+C\+LS}} double ccl\+\_\+linear\+\_\+matter\+\_\+power (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structccl__cosmology}{ccl\+\_\+cosmology}} $\ast$}]{cosmo,  }\item[{double}]{k,  }\item[{double}]{a,  }\item[{int $\ast$}]{status }\end{DoxyParamCaption})}
 
 Linear matter power spectrum. Returns P\+\_\+lin(k,a) \mbox{[}Mpc$^\wedge$3\mbox{]} for given cosmology, using the method specified in cosmo-\/$>$config.\+transfer\+\_\+function\+\_\+method. 
 \begin{DoxyParams}{Parameters}

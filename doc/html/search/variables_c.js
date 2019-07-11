@@ -1,5 +1,6 @@
 var searchData=
 [
+  ['n_5feff',['n_eff',['../structhalofit__struct.html#a8634d18f71fe143fa423ed0e007cce0c',1,'halofit_struct']]],
   ['n_5fell_5fcorr',['N_ELL_CORR',['../structccl__spline__params.html#ae38764273f047b530ffbc5ccb1935428',1,'ccl_spline_params']]],
   ['n_5fiteration',['N_ITERATION',['../structccl__gsl__params.html#a3d4b0770fae9aee9532d1eec1a746e29',1,'ccl_gsl_params']]],
   ['n_5fk',['N_K',['../structccl__spline__params.html#aaded1b8452c591250ef44051fa8681a8',1,'ccl_spline_params']]],
