@@ -31,6 +31,7 @@ set(TEST_SRC
     benchmarks/ccl_test_cosmology.c
     benchmarks/ccl_test_params.c
     benchmarks/ccl_test_params_mnu.c
+    benchmarks/ccl_test_MG.c
 
     # now the distances
     benchmarks/ccl_test_distances_class_allz.c benchmarks/ccl_test_distances_cosmomad_hiz.c
@@ -46,6 +47,7 @@ set(TEST_SRC
     benchmarks/ccl_test_emu.c benchmarks/ccl_test_emu_nu.c
     benchmarks/ccl_test_power_nu.c
     benchmarks/ccl_test_halomod.c
+    benchmarks/ccl_test_power_MG.c
 
     # Cls and correlation functions
     benchmarks/ccl_test_angpow.c

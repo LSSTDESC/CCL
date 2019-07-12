@@ -51,7 +51,7 @@ typedef enum baryons_power_spectrum_t
   // even more kinds ...
 } baryons_power_spectrum_t;
 
-/**
+/** 
  * Mass function typedef
  * Contains all information that describes a specific
  * mass function. This is basically a switch that chooses

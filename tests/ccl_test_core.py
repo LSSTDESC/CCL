@@ -28,12 +28,17 @@ def test_parameters_valid_input():
     # Check that kwarg order doesn't matter
     assert_no_warnings(ccl.Cosmology, h=0.7, Omega_c=0.25, Omega_b=0.05,
                                        A_s=2.1e-9, n_s=0.96)
-
+                     
+    # Try a set of parameters with non-zero mu0 / Sig0                                   
+    assert_no_warnings(ccl.Cosmology, h=0.7, Omega_c=0.25, Omega_b = 0.05,
+                                       A_s=2.1e-9, n_s=0.96, mu_0=0.1, sigma_0=0.1)
+    
 def test_parameters_missing():
     """
     Check that errors are raised when compulsory parameters are missing, but
     not when non-compulsory ones are.
     """
+
     assert_raises(ValueError, ccl.Cosmology, Omega_c=0.25)
 
     # Check that a single missing compulsory parameter is noticed

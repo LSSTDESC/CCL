@@ -19,6 +19,8 @@ CTEST_DATA(power_nu) {
   double Omega_k;
   double w_0[3];
   double w_a[3];
+  double mu_0;
+  double sigma_0;
 };
 
 CTEST_SETUP(power_nu) {
@@ -30,6 +32,8 @@ CTEST_SETUP(power_nu) {
   data->sigma8=0.8;
   data->Neff=3.046;
   data->mnu_type =ccl_mnu_list;
+  data->mu_0=0.;
+  data->sigma_0=0.;
 
   double mnu0[3]	= 	{0.04, 0., 0.};
   double mnu1[3]	= 	{0.05, 0.01, 0.};
@@ -73,6 +77,8 @@ CTEST_DATA(power_nu_nl) {
   double Omega_k;
   double w_0[3];
   double w_a[3];
+  double mu_0;
+  double sigma_0;
 };
 
 CTEST_SETUP(power_nu_nl) {
@@ -84,6 +90,8 @@ CTEST_SETUP(power_nu_nl) {
   data->sigma8=0.8;
   data->Neff=3.046;
   data->mnu_type =ccl_mnu_list;
+  data->mu_0=0.;
+  data->sigma_0=0.;
 
   double mnu0[3]	= 	{0.04, 0., 0.};
   double mnu1[3]	= 	{0.05, 0.01, 0.};
@@ -140,7 +148,7 @@ static void compare_power_nu(int i_model,struct power_nu_data * data)
   params = ccl_parameters_create(data->Omega_c, data->Omega_b, data->Omega_k,data->Neff,
 		    i_model==1 ? data->mnu0 : i_model==2 ? data->mnu1 : data->mnu2,
 		    data->mnu_type,data->w_0[i_model-1], data->w_a[i_model-1],
-		    data->h, data->A_s, data->n_s,-1,-1,-1,-1,NULL,NULL, &status);
+		    data->h, data->A_s, data->n_s,-1,-1,-1,data->mu_0, data->sigma_0,-1,NULL,NULL, &status);
 
   ccl_cosmology * cosmo_linear = ccl_cosmology_create(params, config_linear);
   ASSERT_NOT_NULL(cosmo_linear);
@@ -194,17 +202,17 @@ static void compare_power_nu_nl(int i_model,struct power_nu_nl_data * data)
       params = ccl_parameters_create(data->Omega_c, data->Omega_b, data->Omega_k,
 						data->Neff, data->mnu0, data-> mnu_type,
 						data->w_0[i_model-1], data->w_a[i_model-1],
-						data->h, data->A_s, data->n_s,-1,-1,-1,-1,NULL,NULL, &status);
+						data->h, data->A_s, data->n_s,-1,-1,-1,data->mu_0, data->sigma_0,-1,NULL,NULL, &status);
   } else if (i_model==2){
 	  params = ccl_parameters_create(data->Omega_c, data->Omega_b, data->Omega_k,
 						data->Neff, data->mnu1, data->mnu_type,
 						data->w_0[i_model-1], data->w_a[i_model-1],
-						data->h, data->A_s, data->n_s,-1,-1,-1,-1,NULL,NULL, &status);
+						data->h, data->A_s, data->n_s,-1,-1,-1,data->mu_0, data->sigma_0,-1,NULL,NULL, &status);
   } else if (i_model==3){
 	 params = ccl_parameters_create(data->Omega_c, data->Omega_b, data->Omega_k,
 						data->Neff, data->mnu2, data->mnu_type,
 						data->w_0[i_model-1], data->w_a[i_model-1],
-						data->h, data->A_s, data->n_s,-1,-1,-1,-1,NULL,NULL, &status);
+						data->h, data->A_s, data->n_s,-1,-1,-1,data->mu_0, data->sigma_0,-1,NULL,NULL, &status);
   }
 
   ccl_cosmology * cosmo_nonlin = ccl_cosmology_create(params, config_nonlinear);

@@ -140,6 +140,10 @@ Functions</h2></td></tr>
 <tr class="separator:a540759d4a037a8eaba82e27d4792bb45"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af3b85210a1e622bf179aa7ca7d9fae5f"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__background_8h.html#af3b85210a1e622bf179aa7ca7d9fae5f">ccl_omega_x</a> (<a class="el" href="structccl__cosmology.html">ccl_cosmology</a> *cosmo, double a, <a class="el" href="ccl__background_8h.html#a3ab9842523d3f98e1ab5c57f0249a15d">ccl_species_x_label</a> label, int *status)</td></tr>
 <tr class="separator:af3b85210a1e622bf179aa7ca7d9fae5f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5252a5b9cdcdcde572295e6b167fa352"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__background_8h.html#a5252a5b9cdcdcde572295e6b167fa352">ccl_Sig_MG</a> (<a class="el" href="structccl__cosmology.html">ccl_cosmology</a> *cosmo, double a, int *status)</td></tr>
+<tr class="separator:a5252a5b9cdcdcde572295e6b167fa352"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af62251733c6c5effd26a7008b7c43d50"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__background_8h.html#af62251733c6c5effd26a7008b7c43d50">ccl_mu_MG</a> (<a class="el" href="structccl__cosmology.html">ccl_cosmology</a> *cosmo, double a, int *status)</td></tr>
+<tr class="separator:af62251733c6c5effd26a7008b7c43d50"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af21330051310e934cf528b61a4111fad"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__background_8h.html#af21330051310e934cf528b61a4111fad">ccl_cosmology_compute_distances</a> (<a class="el" href="structccl__cosmology.html">ccl_cosmology</a> *cosmo, int *status)</td></tr>
 <tr class="separator:af21330051310e934cf528b61a4111fad"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a22d956ec6240c12227b263845941093a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__background_8h.html#a22d956ec6240c12227b263845941093a">ccl_cosmology_compute_growth</a> (<a class="el" href="structccl__cosmology.html">ccl_cosmology</a> *cosmo, int *status)</td></tr>
@@ -1057,6 +1061,49 @@ Functions</h2></td></tr>
 
 </div>
 </div>
+<a id="af62251733c6c5effd26a7008b7c43d50"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af62251733c6c5effd26a7008b7c43d50">&#9670;&nbsp;</a></span>ccl_mu_MG()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double ccl_mu_MG </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structccl__cosmology.html">ccl_cosmology</a> *&#160;</td>
+          <td class="paramname"><em>cosmo</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>a</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>status</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>mu(z) in the mu / Sigma parameterisation of modified gravity at a given redshift. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">cosmo</td><td>Cosmological parameters </td></tr>
+    <tr><td class="paramname">a</td><td>scale factor, normalized to 1 for today </td></tr>
+    <tr><td class="paramname">status</td><td>0 if there are no errors, nonzero otherwise. For specific cases see documentation for <a class="el" href="ccl__error_8c.html">ccl_error.c</a> </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>mu(z), function of the mu / Sigma parameterisation of modified gravity. </dd></dl>
+
+</div>
+</div>
 <a id="af3b85210a1e622bf179aa7ca7d9fae5f"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#af3b85210a1e622bf179aa7ca7d9fae5f">&#9670;&nbsp;</a></span>ccl_omega_x()</h2>
 
@@ -1261,6 +1308,49 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>void </dd></dl>
+
+</div>
+</div>
+<a id="a5252a5b9cdcdcde572295e6b167fa352"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5252a5b9cdcdcde572295e6b167fa352">&#9670;&nbsp;</a></span>ccl_Sig_MG()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double ccl_Sig_MG </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structccl__cosmology.html">ccl_cosmology</a> *&#160;</td>
+          <td class="paramname"><em>cosmo</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>a</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>status</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Sigma(z) in the mu / Sigma parameterisation of modified gravity at a given redshift. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">cosmo</td><td>Cosmological parameters </td></tr>
+    <tr><td class="paramname">a</td><td>scale factor, normalized to 1 for today </td></tr>
+    <tr><td class="paramname">status</td><td>0 if there are no errors, nonzero otherwise. For specific cases see documentation for <a class="el" href="ccl__error_8c.html">ccl_error.c</a> </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Sigma(z), function of the mu / Sigma parameterisation of modified gravity. </dd></dl>
 
 </div>
 </div>

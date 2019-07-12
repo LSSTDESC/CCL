@@ -24,6 +24,8 @@ CTEST_DATA(halomod){
   double h[3];
   double sigma_8[3];
   double n_s[3];
+  double mu_0;
+  double sigma_0;
 
   // Arrays for power-spectrum data
   double k[3][2][NUMK];
@@ -87,6 +89,8 @@ CTEST_SETUP(halomod){
   data->mnu_type = ccl_mnu_sum;
   data->w_0 = -1.00;
   data->w_a = 0.00;
+  data->mu_0 = 0.;
+  data->sigma_0 = 0.;
 
   // Cosmological parameters that are different for different tests
   double Omega_c[3] = { 0.2500, 0.2265, 0.2685 };
@@ -120,7 +124,7 @@ static void compare_halomod(int model, struct halomod_data * data)
   // Set the cosmology
   ccl_parameters params = ccl_parameters_create(data->Omega_c[model], data->Omega_b[model],data->Omega_k,
 						data->Neff, data->mnu, data->mnu_type, data->w_0,
-						data->w_a, data->h[model],data->sigma_8[model], data->n_s[model],
+						data->w_a, data->h[model],data->sigma_8[model], data->n_s[model], data->mu_0, data->sigma_0,
 						-1, -1, -1, -1, NULL, NULL, status);
 
   // Set the default configuration, but with Eisenstein & Hu linear P(k) and Sheth & Tormen mass function and Duffy (2008) halo concentrations

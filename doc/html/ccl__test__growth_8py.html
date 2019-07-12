@@ -85,8 +85,8 @@ Functions</h2></td></tr>
 <tr class="separator:ac1171a8ec4ef57387a5b8ada42d58d7a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2f8c205fa1a57bf8d2b31752e4798701"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceccl__test__growth.html#a2f8c205fa1a57bf8d2b31752e4798701">ccl_test_growth.read_growth_allz_benchmark_file</a> ()</td></tr>
 <tr class="separator:a2f8c205fa1a57bf8d2b31752e4798701"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aba020a4d3272ed9d9b03b9c6a1ffb452"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceccl__test__growth.html#aba020a4d3272ed9d9b03b9c6a1ffb452">ccl_test_growth.compare_growth</a> (z, gfac_bench, Omega_v, w0, wa)</td></tr>
-<tr class="separator:aba020a4d3272ed9d9b03b9c6a1ffb452"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a27927b78f1df23384bee9dca46f09ad1"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceccl__test__growth.html#a27927b78f1df23384bee9dca46f09ad1">ccl_test_growth.compare_growth</a> (z, gfac_bench, Omega_v, w0, wa, mu_0, sigma_0)</td></tr>
+<tr class="separator:a27927b78f1df23384bee9dca46f09ad1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a37838dca6429b3ad372cb6f4e1607f02"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceccl__test__growth.html#a37838dca6429b3ad372cb6f4e1607f02">ccl_test_growth.test_growth_lowz_model_0</a> ()</td></tr>
 <tr class="separator:a37838dca6429b3ad372cb6f4e1607f02"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a62a2adfaaf52c3522dad85aa3b077878"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceccl__test__growth.html#a62a2adfaaf52c3522dad85aa3b077878">ccl_test_growth.test_growth_lowz_model_1</a> ()</td></tr>
@@ -128,12 +128,16 @@ Variables</h2></td></tr>
 <tr class="separator:ae7c040656adf879c79a4f0266f35e7e7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aefd3ff5bb306877374f5351d2df5f8fc"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceccl__test__growth.html#aefd3ff5bb306877374f5351d2df5f8fc">ccl_test_growth.n_s</a> = 0.96</td></tr>
 <tr class="separator:aefd3ff5bb306877374f5351d2df5f8fc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4abfc4891b595cd9d894d978c4ce89f0"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceccl__test__growth.html#a4abfc4891b595cd9d894d978c4ce89f0">ccl_test_growth.Omega_v_vals</a> = np.array([0.7, 0.7, 0.7, 0.65, 0.75])</td></tr>
+<tr class="memitem:a4abfc4891b595cd9d894d978c4ce89f0"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceccl__test__growth.html#a4abfc4891b595cd9d894d978c4ce89f0">ccl_test_growth.Omega_v_vals</a> = np.array([0.7, 0.7, 0.7, 0.65, 0.75, 0.7, 0.7, 0.7, 0.7])</td></tr>
 <tr class="separator:a4abfc4891b595cd9d894d978c4ce89f0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab846706326cba20d21f5963cbe5af568"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceccl__test__growth.html#ab846706326cba20d21f5963cbe5af568">ccl_test_growth.w0_vals</a> = np.array([-1.0, -0.9, -0.9, -0.9, -0.9])</td></tr>
+<tr class="memitem:ab846706326cba20d21f5963cbe5af568"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceccl__test__growth.html#ab846706326cba20d21f5963cbe5af568">ccl_test_growth.w0_vals</a> = np.array([-1.0, -0.9, -0.9, -0.9, -0.9, -0.9, -0.9, -0.9, -0.9])</td></tr>
 <tr class="separator:ab846706326cba20d21f5963cbe5af568"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3b5a7ad847705c7a11bd75b81a268e5f"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceccl__test__growth.html#a3b5a7ad847705c7a11bd75b81a268e5f">ccl_test_growth.wa_vals</a> = np.array([0.0, 0.0, 0.1, 0.1, 0.1])</td></tr>
+<tr class="memitem:a3b5a7ad847705c7a11bd75b81a268e5f"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceccl__test__growth.html#a3b5a7ad847705c7a11bd75b81a268e5f">ccl_test_growth.wa_vals</a> = np.array([0.0, 0.0, 0.1, 0.1, 0.1, 0.0, 0.0, 0.0, 0.0])</td></tr>
 <tr class="separator:a3b5a7ad847705c7a11bd75b81a268e5f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2d2d3c3f2739df97770cb8dcc023466b"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceccl__test__growth.html#a2d2d3c3f2739df97770cb8dcc023466b">ccl_test_growth.mu0_vals</a> = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.1, -0.1, 0.1, -0.1])</td></tr>
+<tr class="separator:a2d2d3c3f2739df97770cb8dcc023466b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a917391583cc5f328ef9ab45e2669b6cc"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceccl__test__growth.html#a917391583cc5f328ef9ab45e2669b6cc">ccl_test_growth.Sig0_vals</a> = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.1, -0.1, -0.1, 0.1])</td></tr>
+<tr class="separator:a917391583cc5f328ef9ab45e2669b6cc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 <!-- start footer part -->

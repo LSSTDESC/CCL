@@ -420,7 +420,6 @@ void ccl_cosmology_compute_linpower_class(ccl_cosmology* cosmo, int* status) {
     ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_cosmology_compute_power_class(): "
              "parser init error:%s\n", errmsg);
   }
-
   if(*status==0) {
     init_parser=1;
     ccl_fill_class_parameters(cosmo,&fc,parser_length, status);
@@ -489,22 +488,96 @@ void ccl_cosmology_compute_linpower_class(ccl_cosmology* cosmo, int* status) {
     // After this loop lk will contain log(k), lpk_ln will contain log(P_lin), all in Mpc, not Mpc/h units!
     double psout_l;
     s=0;
-    for (int i=0; i<nk; i++) {
-      for (int j = 0; j < na; j++) {
-  //The 2D interpolation routines access the function values pk_{k_ia_j} with the following ordering:
-  //pk_ij = pk[j*N_k + i]
-  //with i = 0,...,N_k-1 and j = 0,...,N_a-1.
-  s |= spectra_pk_at_k_and_z(&ba, &pm, &sp,lk[i],1./aa[j]-1.+1e-10, &psout_l,&ic);
-  lpk_ln[j*nk+i] = log(psout_l);
-      }
-      lk[i] = log(lk[i]);
-    }
+    
+      // If scale-independent mu / Sigma modified gravity is in use 
+      // and mu ! = 0 : get the unnormalized growth factor in MG and for 
+      // corresponding GR case, to rescale CLASS power spectrum
+    if ( fabs(cosmo->params.mu_0)>1e-14){
+	    // Set up another cosmology which is exactly the same as the 
+	    // current one but with mu_0 and Sigma_0=0, for scaling P(k)
+	  
+	    // Get a list of the three neutrino masses already calculated
+	    double *mnu_list = NULL;
+	    mnu_list = malloc(3*sizeof(double));
+	    for (int i=0; i< cosmo->params.N_nu_mass; i=i+1){
+		    mnu_list[i] = cosmo->params.mnu[i];
+       }
+	    if (cosmo->params.N_nu_mass<3){
+		    for (int j=cosmo->params.N_nu_mass; j<3; j=j+1){
+			    mnu_list[j] = 0.;
+		    }
+	    }
+	    
+	    double norm_pk;
+	    if (isfinite(cosmo->params.A_s)){
+			norm_pk = cosmo->params.A_s;
+	    } else if(isfinite(cosmo->params.sigma8)){
+			norm_pk = cosmo->params.sigma8;
+	    } else {
+			 *status = CCL_ERROR_PARAMETERS;
+			 strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power_class(): neither A_s nor sigma8 defined.\n");
+	    }
+	    //printf("before create GR cosmo, power\n");
+	    ccl_parameters params_GR = ccl_parameters_create(cosmo->params.Omega_c,
+	               cosmo->params.Omega_b, cosmo->params.Omega_k, 
+	               cosmo->params.Neff, mnu_list, ccl_mnu_list, 
+	               cosmo->params.w0, cosmo->params.wa, cosmo->params.h, 
+	               norm_pk, cosmo->params.n_s, 
+	               cosmo->params.bcm_log10Mc, cosmo->params.bcm_etab,
+	               cosmo->params.bcm_ks, 0., 0., cosmo->params.nz_mgrowth,
+	               cosmo->params.z_mgrowth, cosmo->params.df_mgrowth, status);
+	    ccl_cosmology* cosmo_GR = ccl_cosmology_create(params_GR,
+	               cosmo->config);       
+	    //printf("after create GR cosmo, power\n");   
+	    
+	    double * D_mu = malloc(na * sizeof(double)); 
+	    double * D_GR = malloc(na * sizeof(double));          
+	  
+	    //printf("before growth rate MG\n");
+	    for (int i=0; i<na; i++){
+	        D_mu[i] = ccl_growth_factor_unnorm(cosmo, aa[i], status);
+	    }
+	    //printf("after growth rate MG\n");
+	    //printf("before growth rate GR\n");
+	    for (int i=0; i<na; i++){
+	        D_GR[i] = ccl_growth_factor_unnorm(cosmo_GR, aa[i], status);
+	    }
+	    //printf("after growth rate GR\n");
+    
+        for (int i=0; i<nk; i++) {
+            for (int j = 0; j < na; j++) {
+                //The 2D interpolation routines access the function values pk_{k_ia_j} with the following ordering:
+                //pk_ij = pk[j*N_k + i]
+                //with i = 0,...,N_k-1 and j = 0,...,N_a-1.
+                s |= spectra_pk_at_k_and_z(&ba, &pm, &sp,lk[i],1./aa[j]-1.+1e-10, &psout_l,&ic);
+                lpk_ln[j*nk+i] = log(psout_l) + 2 * log(D_mu[j]) - 2 * log(D_GR[j]);
+                }
+            lk[i] = log(lk[i]);
+            }
+            free(D_mu);
+            free(D_GR);
+            free(cosmo_GR);
+        } 
+        else{
+            // This is the normal GR case.
+            for (int i=0; i<nk; i++) {
+                for (int j = 0; j < na; j++) {
+                    //The 2D interpolation routines access the function values pk_{k_ia_j} with the following ordering:
+                    //pk_ij = pk[j*N_k + i]
+                    //with i = 0,...,N_k-1 and j = 0,...,N_a-1.
+                    s |= spectra_pk_at_k_and_z(&ba, &pm, &sp,lk[i],1./aa[j]-1.+1e-10, &psout_l,&ic);
+                    lpk_ln[j*nk+i] = log(psout_l);
+                    }
+                lk[i] = log(lk[i]);
+                }
+            }
+        }         
     if(s) {
       *status = CCL_ERROR_CLASS;
       ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_cosmology_compute_power_class(): "
                "Error computing CLASS power spectrum\n");
     }
-  }
+  
 
   if(*status==0)
     cosmo->data.p_lin=ccl_p2d_t_new(na,aa,nk,lk,lpk_ln,1,2,ccl_p2d_cclgrowth,1,NULL,0,ccl_p2d_3,status);

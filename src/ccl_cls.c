@@ -150,6 +150,7 @@ static double integrand_wl(double chip,void *params)
 //spl_pz  -> normalized N(z) spline
 //chi_max -> maximum comoving distance to which the integral is computed
 //win     -> result is stored here
+
 static int window_lensing(double chi,ccl_cosmology *cosmo,SplPar *spl_pz,double chi_max,double *win)
 {
   int gslstatus =0, status =0;
@@ -183,7 +184,7 @@ static int window_lensing(double chi,ccl_cosmology *cosmo,SplPar *spl_pz,double 
   return 0;
 }
 
-//Params for lensing kernel integrand
+//Params for magnification kernel integrand
 typedef struct {
   double chi;
   SplPar *spl_pz;
@@ -311,6 +312,7 @@ static void clt_init_nz(CCL_ClTracer *clt,ccl_cosmology *cosmo,
   free(nz_normalized);
 }
 
+
 static void clt_init_bz(CCL_ClTracer *clt,ccl_cosmology *cosmo,
 			int nz_b,double *z_b,double *b,int *status)
 {
@@ -364,12 +366,22 @@ static void clt_init_wM(CCL_ClTracer *clt,ccl_cosmology *cosmo,
 
   if(*status==0) {
     int clstatus=0;
-    for(int j=0;j<nchi;j++)
+    for(int j=0;j<nchi;j++){
       clstatus|=window_magnification(x[j],cosmo,clt->spl_nz,clt->spl_sz,chimax,&(y[j]));
+      // If mu / Sigma parameterisation of modified gravity is in effect,
+	  // add appropriate factors of Sigma before splining:
+      if ( fabs(cosmo->params.sigma_0) ){
+		    y[j] = y[j] * (1. + ccl_Sig_MG(cosmo,ccl_scale_factor_of_chi(cosmo,x[j], status), status));
+	     }
+	  }
     if(clstatus) {
       *status=CCL_ERROR_INTEG;
       ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: clt_init_wM(): error computing lensing window\n");
     }
+    if(*status){
+	  ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: clt_init_wM(): error computing MG factor\n");	
+	}
+    
   }
 
   if(*status==0) {
@@ -406,6 +418,8 @@ static void clt_nc_init(CCL_ClTracer *clt,ccl_cosmology *cosmo,
   if(clt->has_density)
     clt_init_bz(clt,cosmo,nz_b,z_b,b,status);
   if(clt->has_magnification)
+    // If magnification is present within mu / Sigma parameterisation
+    // of modified gravity, that is accounted for in this function.
     clt_init_wM(clt,cosmo,nz_s,z_s,s,status);
 }
 
@@ -442,12 +456,21 @@ static void clt_init_wL(CCL_ClTracer *clt,ccl_cosmology *cosmo,
 
   if(*status==0) {
     int clstatus=0;
-    for(int j=0;j<nchi;j++)
+    for(int j=0;j<nchi;j++){
       clstatus|=window_lensing(x[j],cosmo,clt->spl_nz,chimax,&(y[j]));
+      // If mu / Sigma parameterisation of modified gravity is in effect,
+	  // add appropriate factors of Sigma before splining:
+      if ( fabs(cosmo->params.sigma_0) ){
+		    y[j] = y[j] * (1. + ccl_Sig_MG(cosmo,ccl_scale_factor_of_chi(cosmo,x[j], status), status));
+	     }
+	  }
     if(clstatus) {
       *status=CCL_ERROR_INTEG;
       ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: clt_init_wL(): error computing lensing window\n");
     }
+    if(*status){
+	  ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: clt_init_wL(): error computing MG factor\n"); 	
+      }
   }
 
   if(*status==0) {
@@ -577,15 +600,16 @@ static CCL_ClTracer *cl_tracer(ccl_cosmology *cosmo,int tracer_type,
 //b    -> corresponding b(z)-values.
 //        b(z) will be assumed constant outside the range covered by z_n
 CCL_ClTracer *ccl_cl_tracer(ccl_cosmology *cosmo,int tracer_type,
-			    int has_density,int has_rsd,int has_magnification,
-			    int has_shear,int has_intrinsic_alignment,
-			    int nz_n,double *z_n,double *n,
-			    int nz_b,double *z_b,double *b,
-			    int nz_s,double *z_s,double *s,
-			    int nz_ba,double *z_ba,double *ba,
-			    int nz_rf,double *z_rf,double *rf,
-			    double z_source, int * status)
-{
+                            int has_density,int has_rsd,int has_magnification,
+			                int has_shear,int has_intrinsic_alignment,
+			                int nz_n,double *z_n,double *n,
+			                int nz_b,double *z_b,double *b,
+			                int nz_s,double *z_s,double *s,
+			                int nz_ba,double *z_ba,double *ba,
+			                int nz_rf,double *z_rf,double *rf,
+			                double z_source, int * status)
+{	  	  
+
   CCL_ClTracer *clt=cl_tracer(cosmo,tracer_type,has_density,has_rsd,has_magnification,
 			      has_shear,has_intrinsic_alignment,
 			      nz_n,z_n,n,nz_b,z_b,b,nz_s,z_s,s,
@@ -719,6 +743,8 @@ static double transfer_nc(double l,double k,
       double chi1=x1/k;
       if(chi1<=clt->chimax) {
 	double a1=ccl_scale_factor_of_chi(cosmo,chi1,status);
+	// if mu / Sigma parameterisation of modified gravity is in effect,
+	// pk0 and pk1 will be modified power spectra affected mu0
 	double pk0=ccl_nonlin_matter_power(cosmo,k,a0,status);
 	double pk1=ccl_nonlin_matter_power(cosmo,k,a1,status);
 	double fg0=f_rsd(a0,cosmo,clt,status);
@@ -739,7 +765,7 @@ static double f_lensing(double a,double chi,ccl_cosmology *cosmo,CCL_ClTracer *c
   double wL=ccl_spline_eval(chi,clt->spl_wL);
 
   if(wL<=0)
-    return 0;
+    return 0; 
   else
     return clt->prefac_lensing*wL/(a*chi);
 }
@@ -793,6 +819,15 @@ static double transfer_cmblens(int l,double k,ccl_cosmology *cosmo,CCL_ClTracer 
   if(chi<=clt->chimax) {
     double a=ccl_scale_factor_of_chi(cosmo,chi,status);
     double w=1-chi/clt->chi_source;
+    // If muSigma parameterisation of gravity is in effect and 
+    // Sigma0>0, add the relevant factor here.
+    if (fabs(cosmo->params.sigma_0)>1e-15){
+        w = w * (1. + ccl_Sig_MG(cosmo,ccl_scale_factor_of_chi(cosmo,chi, status), status)); 
+    }
+    if (*status){
+		ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: transfer_cmblens: error computing MG factor\n"); 	
+      }
+		       
     return clt->prefac_lensing*l*(l+1.)*w/(a*chi*k*k);
   }
   return 0;
@@ -925,6 +960,8 @@ double ccl_angular_cl_limber(ccl_cosmology *cosmo,
     if (!cosmo->computed_power) ccl_cosmology_compute_power(cosmo, status);
     // Return if compilation failed
     if (!cosmo->computed_power) return NAN;
+    // If muSigma modification to gravity is in effect, this p(k)
+    // will be modified by mu_0.
     psp_use=cosmo->data.p_nl;
   }
   else
@@ -1039,7 +1076,7 @@ void ccl_angular_cls_nonlimber(ccl_cosmology *cosmo,double l_logstep,int l_linst
     ccl_angular_cls_angpow(cosmo,w,clt1,clt2,cl_nodes,status);
     ccl_check_status(cosmo,status);
   }
-
+    
   if(*status==0) {
     //Interpolate into ells requested by user
     spcl_nodes=ccl_spline_init(w->n_ls,l_nodes,cl_nodes,0,0);
@@ -1047,7 +1084,7 @@ void ccl_angular_cls_nonlimber(ccl_cosmology *cosmo,double l_logstep,int l_linst
       *status=CCL_ERROR_MEMORY;
       ccl_cosmology_set_status_message(cosmo, "ccl_cls.c: ccl_cl_angular_cls(); memory allocation\n");
     }
-  }
+  }  
   
   if(*status==0) {
     //Interpolate into input multipoles

@@ -1,0 +1,30 @@
+\hypertarget{ccl__bcm_8h}{}\section{ccl\+\_\+bcm.\+h File Reference}
+\label{ccl__bcm_8h}\index{ccl\+\_\+bcm.\+h@{ccl\+\_\+bcm.\+h}}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{ccl__defs_8h_ae8d446df269cba1dff8f88922459a7d4}{C\+C\+L\+\_\+\+B\+E\+G\+I\+N\+\_\+\+D\+E\+C\+LS}} double \mbox{\hyperlink{ccl__bcm_8h_a7e3db13164f47429f429a7ec62ebac58}{ccl\+\_\+bcm\+\_\+model\+\_\+fka}} (\mbox{\hyperlink{structccl__cosmology}{ccl\+\_\+cosmology}} $\ast$cosmo, double k, double a, int $\ast$status)
+\end{DoxyCompactItemize}
+
+
+\subsection{Function Documentation}
+\mbox{\Hypertarget{ccl__bcm_8h_a7e3db13164f47429f429a7ec62ebac58}\label{ccl__bcm_8h_a7e3db13164f47429f429a7ec62ebac58}} 
+\index{ccl\+\_\+bcm.\+h@{ccl\+\_\+bcm.\+h}!ccl\+\_\+bcm\+\_\+model\+\_\+fka@{ccl\+\_\+bcm\+\_\+model\+\_\+fka}}
+\index{ccl\+\_\+bcm\+\_\+model\+\_\+fka@{ccl\+\_\+bcm\+\_\+model\+\_\+fka}!ccl\+\_\+bcm.\+h@{ccl\+\_\+bcm.\+h}}
+\subsubsection{\texorpdfstring{ccl\+\_\+bcm\+\_\+model\+\_\+fka()}{ccl\_bcm\_model\_fka()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{ccl__defs_8h_ae8d446df269cba1dff8f88922459a7d4}{C\+C\+L\+\_\+\+B\+E\+G\+I\+N\+\_\+\+D\+E\+C\+LS}} double ccl\+\_\+bcm\+\_\+model\+\_\+fka (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structccl__cosmology}{ccl\+\_\+cosmology}} $\ast$}]{cosmo,  }\item[{double}]{k,  }\item[{double}]{a,  }\item[{int $\ast$}]{status }\end{DoxyParamCaption})}
+
+Correction for the impact of baryonic physics on the matter power spectrum. Returns f(k,a) \mbox{[}dimensionless\mbox{]} for given cosmology, using the method specified for the baryonic transfer function. f(k,a) is the fractional change in the nonlinear matter power spectrum from the Baryon Correction Model (B\+CM) of Schenider \& Teyssier (2015). The parameters of the model are passed as part of the cosmology class. 
+\begin{DoxyParams}{Parameters}
+{\em cosmo} & Cosmology parameters and configurations, including baryonic parameters. \\
+\hline
+{\em k} & Fourier mode, in \mbox{[}1/\+Mpc\mbox{]} units \\
+\hline
+{\em a} & scale factor, normalized to 1 for today \\
+\hline
+{\em status} & Status flag. 0 if there are no errors, nonzero otherwise. For specific cases see documentation for \mbox{\hyperlink{ccl__error_8c}{ccl\+\_\+error.\+c}} \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+f(k,a). 
+\end{DoxyReturn}

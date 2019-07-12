@@ -19,6 +19,8 @@ CTEST_DATA(bcm) {
   double Neff;
   double* m_nu;
   ccl_mnu_convention mnu_type;
+  double mu_0;
+  double sigma_0;
 };
 
 CTEST_SETUP(bcm) {
@@ -31,6 +33,8 @@ CTEST_SETUP(bcm) {
   double mnuval = 0.;
   data->m_nu= &mnuval;
   data-> mnu_type = ccl_mnu_sum;
+  data->mu_0 = 0.;
+  data->sigma_0 = 0.;
 
   double Omega_v[1]={0.7};
   double w_0[1] = {-1.0};
@@ -70,7 +74,7 @@ static void compare_bcm(int i_model,struct bcm_data * data)
     data->Omega_c,data->Omega_b,data->Omega_k[i_model-1],
     data->Neff, data->m_nu, data-> mnu_type,
     data->w_0[i_model-1],data->w_a[i_model-1],
-    data->h,data->A_s,data->n_s,14,-1,-1,-1,NULL,NULL, &status);
+    data->h,data->A_s,data->n_s,14,-1,-1,data->mu_0, data->sigma_0,-1,NULL,NULL, &status);
 
   params.Omega_l=params.Omega_l+params.Omega_g;
   params.Omega_g=0;
@@ -81,9 +85,10 @@ static void compare_bcm(int i_model,struct bcm_data * data)
     data->Omega_c,data->Omega_b,data->Omega_k[i_model-1],
     data->Neff, data->m_nu, data->mnu_type,
     data->w_0[i_model-1],data->w_a[i_model-1],
-    data->h,data->A_s,data->n_s,-1,-1,-1,-1,NULL,NULL, &status);
+    data->h,data->A_s,data->n_s,-1,-1,-1,data->mu_0, data->sigma_0,-1,NULL,NULL, &status);
 
   //params.sigma_8=data->sigma_8;
+
   params_nobar.Omega_l=params_nobar.Omega_l+params_nobar.Omega_g;
   params_nobar.Omega_g=0;
   ccl_cosmology * cosmo_nobar = ccl_cosmology_create(params_nobar, config_nobar);

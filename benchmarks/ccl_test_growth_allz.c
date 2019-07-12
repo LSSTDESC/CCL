@@ -22,6 +22,8 @@ CTEST_DATA(growth_allz) {
   double w_0[N_MODEL];
   double w_a[N_MODEL];
   ccl_mnu_convention mnu_type;
+  double mu_0;
+  double sigma_0;
   
   double z[N_Z];
   double gf[N_Z][N_MODEL];
@@ -70,6 +72,8 @@ CTEST_SETUP(growth_allz) {
   double mnuval = 0.;
   data->mnu= &mnuval;
   data-> mnu_type = ccl_mnu_sum;
+  data->mu_0 =0.;
+  data->sigma_0 = 0.;
   
   
   // Values that are different for the different models
@@ -98,7 +102,7 @@ static void compare_growth(int model, struct growth_allz_data * data)
                                                 data->Neff, data->mnu, data->mnu_type, 
                                                 data->w_0[model], data->w_a[model], 
                                                 data->h, data->A_s, data->n_s,
-                                                -1,-1,-1,-1,NULL,NULL, &status);
+                                                -1,-1,-1,data->mu_0, data->sigma_0, -1,NULL,NULL, &status);
   params.Omega_g=0;
   // Make a cosmology object from the parameters with the default configuration
   ccl_cosmology * cosmo = ccl_cosmology_create(params, default_config);

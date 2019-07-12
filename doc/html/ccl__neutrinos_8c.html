@@ -97,10 +97,10 @@ Macros</h2></td></tr>
 Functions</h2></td></tr>
 <tr class="memitem:a4cca2a68898f67a6fdadd21cd3df23a0"><td class="memItemLeft" align="right" valign="top">gsl_spline *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__neutrinos_8c.html#a4cca2a68898f67a6fdadd21cd3df23a0">calculate_nu_phasespace_spline</a> (int *status)</td></tr>
 <tr class="separator:a4cca2a68898f67a6fdadd21cd3df23a0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5adb5270bfe6998ffea34d76ea5d96ca"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__neutrinos_8c.html#a5adb5270bfe6998ffea34d76ea5d96ca">nu_phasespace_intg</a> (gsl_interp_accel *accel, double mnuOT, int *status)</td></tr>
-<tr class="separator:a5adb5270bfe6998ffea34d76ea5d96ca"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a357e6d2fa80790cf56face5d9c01eac9"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__neutrinos_8c.html#a357e6d2fa80790cf56face5d9c01eac9">ccl_Omeganuh2</a> (double a, int N_nu_mass, double *mnu, double T_CMB, gsl_interp_accel *accel, int *status)</td></tr>
-<tr class="separator:a357e6d2fa80790cf56face5d9c01eac9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a54d408d7bcbe61c4fee277a3980a0655"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__neutrinos_8c.html#a54d408d7bcbe61c4fee277a3980a0655">nu_phasespace_intg</a> (double mnuOT, int *status)</td></tr>
+<tr class="separator:a54d408d7bcbe61c4fee277a3980a0655"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af46f7413db8805be542e7a7c0be084e0"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__neutrinos_8c.html#af46f7413db8805be542e7a7c0be084e0">ccl_Omeganuh2</a> (double a, int N_nu_mass, double *mnu, double T_CMB, int *status)</td></tr>
+<tr class="separator:af46f7413db8805be542e7a7c0be084e0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a54081eb2475d7371d695156b07212779"><td class="memItemLeft" align="right" valign="top">double *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__neutrinos_8c.html#a54081eb2475d7371d695156b07212779">ccl_nu_masses</a> (double OmNuh2, <a class="el" href="ccl__neutrinos_8h.html#a123045c726e0b48e6cc308e48554ec44">ccl_neutrino_mass_splits</a> mass_split, double T_CMB, int *status)</td></tr>
 <tr class="separator:a54081eb2475d7371d695156b07212779"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
@@ -224,7 +224,6 @@ Variables</h2></td></tr>
     <tr><td class="paramname">Neff</td><td>The effective number of species with neutrino mass mnu. </td></tr>
     <tr><td class="paramname">OmNuh2</td><td>Fractional energy density of neutrions with mass mnu, multiplied by h squared. (can be 0). </td></tr>
     <tr><td class="paramname">T_CMB</td><td>Temperature of the CMB </td></tr>
-    <tr><td class="paramname">accel</td><td>- Interpolation accelerator to be used with phasespace spline. If not set yet, pass NULL. </td></tr>
     <tr><td class="paramname">status</td><td>Status flag. 0 if there are no errors, nonzero otherwise. For specific cases see documentation for <a class="el" href="ccl__error_8c.html">ccl_error.c</a> </td></tr>
   </table>
   </dd>
@@ -233,8 +232,8 @@ Variables</h2></td></tr>
 
 </div>
 </div>
-<a id="a357e6d2fa80790cf56face5d9c01eac9"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a357e6d2fa80790cf56face5d9c01eac9">&#9670;&nbsp;</a></span>ccl_Omeganuh2()</h2>
+<a id="af46f7413db8805be542e7a7c0be084e0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af46f7413db8805be542e7a7c0be084e0">&#9670;&nbsp;</a></span>ccl_Omeganuh2()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -266,12 +265,6 @@ Variables</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">gsl_interp_accel *&#160;</td>
-          <td class="paramname"><em>accel</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
           <td class="paramtype">int *&#160;</td>
           <td class="paramname"><em>status</em>&#160;</td>
         </tr>
@@ -288,7 +281,6 @@ Variables</h2></td></tr>
     <tr><td class="paramname">Neff</td><td>The effective number of species with neutrino mass mnu. </td></tr>
     <tr><td class="paramname">mnu</td><td>Pointer to array containing neutrino mass (can be 0). </td></tr>
     <tr><td class="paramname">T_CMB</td><td>Temperature of the CMB </td></tr>
-    <tr><td class="paramname">accel</td><td>- Interpolation accelerator to be used with phasespace spline. If not set yet, pass NULL. </td></tr>
     <tr><td class="paramname">status</td><td>Status flag. 0 if there are no errors, nonzero otherwise. For specific cases see documentation for <a class="el" href="ccl__error_8c.html">ccl_error.c</a> </td></tr>
   </table>
   </dd>
@@ -297,8 +289,8 @@ Variables</h2></td></tr>
 
 </div>
 </div>
-<a id="a5adb5270bfe6998ffea34d76ea5d96ca"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5adb5270bfe6998ffea34d76ea5d96ca">&#9670;&nbsp;</a></span>nu_phasespace_intg()</h2>
+<a id="a54d408d7bcbe61c4fee277a3980a0655"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a54d408d7bcbe61c4fee277a3980a0655">&#9670;&nbsp;</a></span>nu_phasespace_intg()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -306,12 +298,6 @@ Variables</h2></td></tr>
         <tr>
           <td class="memname">double nu_phasespace_intg </td>
           <td>(</td>
-          <td class="paramtype">gsl_interp_accel *&#160;</td>
-          <td class="paramname"><em>accel</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
           <td class="paramtype">double&#160;</td>
           <td class="paramname"><em>mnuOT</em>, </td>
         </tr>

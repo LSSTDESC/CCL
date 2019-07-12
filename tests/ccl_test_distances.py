@@ -23,6 +23,11 @@ A_s = 2.1e-9
 n_s = 0.96
 Neff = 0.
 
+# Introduce non-zero values of mu_0 and sigma_0 (mu / Sigma 
+# parameterisation of modified gravity) for some of the tests
+mu_0 = 0.1
+sigma_0 = 0.1
+
 # Values that are different for the different models
 Omega_v_vals = np.array([0.7, 0.7, 0.7, 0.65, 0.75])
 w0_vals = np.array([-1.0, -0.9, -0.9, -0.9, -0.9])
@@ -406,6 +411,54 @@ def compare_class_distances(z, chi_bench, dm_bench, Neff=3.0, m_nu=0.0,
     a_not_one = a != 1
     dm = ccl.distance_modulus(cosmo, a[a_not_one])
     assert_allclose(dm, dm_bench[a_not_one], rtol=DISTANCES_TOLERANCE_CLASS)
+    
+def compare_distances_muSig(z, chi_bench,dm_bench, Omega_v, w0, wa):
+    """
+    Compare distances calculated by pyccl with the distances in the benchmark 
+    file, for a ccl cosmology with mu / Sigma parameterisation of gravity.
+    Nonzero mu / Sigma should NOT affect distances so we compare to the same
+    benchmarks as the mu = Sigma = 0 case deliberately.
+    """
+    # Set Omega_K in a consistent way
+    Omega_k = 1.0 - Omega_c - Omega_b - Omega_v    
+    
+    # Create new Parameters and Cosmology objects
+    cosmo = ccl.Cosmology(Omega_c=Omega_c, Omega_b=Omega_b, Neff = Neff, 
+                       h=h, A_s=A_s, n_s=n_s, Omega_k=Omega_k,
+                       w0=w0, wa=wa, mu_0=mu_0, sigma_0=sigma_0, Omega_g = 0.)
+    
+    # Calculate distance using pyccl
+    a = 1. / (1. + z)
+    chi = ccl.comoving_radial_distance(cosmo, a) * h
+    # Compare to benchmark data
+    assert_allclose(chi, chi_bench, atol=1e-12, rtol=DISTANCES_TOLERANCE)
+
+    #compare distance moudli where a!=1
+    a_not_one = (a!=1).nonzero()
+    dm = ccl.distance_modulus(cosmo,a[a_not_one])
+
+    assert_allclose(dm, dm_bench[a_not_one], atol=1e-3, rtol = DISTANCES_TOLERANCE*10)
+
+def compare_distances_hiz_muSig(z, chi_bench, Omega_v, w0, wa):
+    """
+    Compare distances calculated by pyccl with the distances in the benchmark 
+    file, for a ccl cosmology with mu / Sigma parameterisation of gravity.
+    Nonzero mu / Sigma should NOT affect distances so we compare to the same
+    benchmarks as the mu = Sigma = 0 case deliberately.
+    """
+    # Set Omega_K in a consistent way
+    Omega_k = 1.0 - Omega_c - Omega_b - Omega_v    
+    
+    # Create new Parameters and Cosmology objects
+    cosmo = ccl.Cosmology(Omega_c=Omega_c, Omega_b=Omega_b, Neff=Neff, 
+                       h=h, A_s=A_s, n_s=n_s, Omega_k=Omega_k,
+                       w0=w0, wa=wa, mu_0=mu_0, sigma_0=sigma_0, Omega_g = 0.)
+    
+    # Calculate distance using pyccl
+    a = 1. / (1. + z)
+    chi = ccl.comoving_radial_distance(cosmo, a) * h
+    # Compare to benchmark data
+    assert_allclose(chi, chi_bench, atol=1e-12, rtol=DISTANCES_TOLERANCE)
 
 
 def test_distance_model_0():
@@ -547,6 +600,47 @@ def test_class_allz_distance_model_ccl8():
 def test_class_allz_distance_model_ccl9():
     i = 7
     compare_class_distances(z_class_allz, chi_class_allz[i], dm_class_allz[i], **class_models["CCL9"])
+
+def test_class_allz_distance_model_ccl10():
+    i = 8
+    compare_class_distances(z_class_allz, chi_class_allz[i], dm_class_allz[i], **class_models["CCL10"])
+
+def test_class_allz_distance_model_ccl11():
+    i = 9
+    compare_class_distances(z_class_allz, chi_class_allz[i], dm_class_allz[i], **class_models["CCL11"])
+
+    
+def test_distance_muSig_model_0():
+    i = 0
+    compare_distances_muSig(z, chi[i],dm[i], Omega_v_vals[i], w0_vals[i], wa_vals[i])
+
+def test_distance_muSig_model_1():
+    i = 1
+    compare_distances_muSig(z, chi[i],dm[i], Omega_v_vals[i], w0_vals[i], wa_vals[i])
+
+def test_distance_muSig_model_2():
+    i = 2
+    compare_distances_muSig(z, chi[i],dm[i], Omega_v_vals[i], w0_vals[i], wa_vals[i])
+
+def test_distance_muSig_model_3():
+    i = 3
+    compare_distances_muSig(z, chi[i],dm[i], Omega_v_vals[i], w0_vals[i], wa_vals[i])
+
+def test_distance_muSig_model_4():
+    i = 4
+    compare_distances_muSig(z, chi[i],dm[i], Omega_v_vals[i], w0_vals[i], wa_vals[i])
+
+def test_distance_hiz_muSig_model_0():
+    i = 0
+    compare_distances_hiz_muSig(zhi, chi_hiz[i], Omega_v_vals[i], w0_vals[i], wa_vals[i])
+
+def test_distance_hiz_muSig_model_1():
+    i = 1
+    compare_distances_hiz_muSig(zhi, chi_hiz[i], Omega_v_vals[i], w0_vals[i], wa_vals[i])
+
+def test_distance_hiz_muSig_model_2():
+    i = 2
+    compare_distances_hiz_muSig(zhi, chi_hiz[i], Omega_v_vals[i], w0_vals[i], wa_vals[i])
 
 def test_class_allz_distance_model_ccl10():
     i = 8

@@ -19,6 +19,8 @@ CTEST_DATA(eh) {
   double Neff;
   double* m_nu;
   ccl_mnu_convention mnu_type;
+  double mu_0;
+  double sigma_0;
 };
 
 CTEST_SETUP(eh) {
@@ -32,6 +34,8 @@ CTEST_SETUP(eh) {
   double mnuval = 0.;
   data->m_nu= &mnuval;
   data-> mnu_type = ccl_mnu_sum;
+  data->mu_0 = 0.;
+  data->sigma_0 = 0.;
 
   double Omega_v[1]={0.7};
   double w_0[1] = {-1.0};
@@ -70,7 +74,7 @@ static void compare_eh(int i_model,struct eh_data * data)
   ccl_parameters params = ccl_parameters_create(data->Omega_c,data->Omega_b,data->Omega_k[i_model-1],
 						data->Neff, data->m_nu, data->mnu_type,
 						data->w_0[i_model-1],data->w_a[i_model-1],
-						data->h,data->A_s,data->n_s,-1,-1,-1,-1,NULL,NULL, &status);
+						data->h,data->A_s,data->n_s,-1,-1,-1,data->mu_0, data->sigma_0, -1,NULL,NULL, &status);
   params.sigma8=data->sigma8;
   params.Omega_g=0;
   params.Omega_l=data->Omega_v[i_model-1];

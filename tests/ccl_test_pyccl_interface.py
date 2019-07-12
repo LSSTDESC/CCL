@@ -78,9 +78,23 @@ def reference_models_nu():
     # Emulator Pk with neutrinos, force equalize
     #p2 = ccl.Parameters(Omega_c=0.27, Omega_b=0.022/0.67**2, h=0.67, sigma8=0.8,
     #                    n_s=0.96, Neff=3.04, m_nu=0.11)
-    #cosmo2 = ccl.Cosmology(p1, transfer_function='emulator',
-    #                       matter_power_spectrum='emu', emulator_neutrinos='equalize')
-
+    #cosmo2 = ccl.Cosmology(p1, transfer_function='emulator', 
+    #                       matter_power_spectrum='emu', emulator_neutrinos='equalize') 
+    
+    return [cosmo1]  
+    
+def reference_models_mg():
+    """ Create a set of reference cosmological models with the mu / Sigma
+    parameterisation of modified gravity. """
+	
+	# Ask for linear matter power spectrum because that is what is implemented
+	# for mu / Sigma.                                       
+    cosmo1 = ccl.Cosmology(Omega_c = 0.27, Omega_b = 0.022/0.67**2, h = 0.67, sigma8 = 0.8,
+                         n_s = 0.96, mu_0 = 0.1, sigma_0 = 0.1, matter_power_spectrum='linear')
+    # And ask for halofit to make sure we can throw an error if this is called.
+    cosmo2 = ccl.Cosmology(Omega_c = 0.27, Omega_b = 0.022/0.67**2, h = 0.67, sigma8 = 0.8,
+                         n_s = 0.96, mu_0 = 0.1, sigma_0 = 0.1, matter_power_spectrum='halofit')
+    
     return [cosmo1]
 
 def all_finite(vals):
@@ -164,6 +178,16 @@ def check_background(cosmo):
     assert_( all_finite(ccl.rho_x(cosmo, a_scl, 'matter', is_comoving)) )
     assert_( all_finite(ccl.rho_x(cosmo, a_lst, 'matter', is_comoving)) )
     assert_( all_finite(ccl.rho_x(cosmo, a_arr, 'matter', is_comoving)) )
+    
+    # mu 
+    assert_( all_finite(ccl.background.mu_MG(cosmo, a_scl)) )
+    assert_( all_finite(ccl.mu_MG(cosmo, a_lst)) )
+    assert_( all_finite(ccl.mu_MG(cosmo, a_arr)) )
+    
+    # Sig
+    assert_( all_finite(ccl.Sig_MG(cosmo, a_scl)) )
+    assert_( all_finite(ccl.Sig_MG(cosmo, a_lst)) )
+    assert_( all_finite(ccl.Sig_MG(cosmo, a_arr)) )
 
 
 def check_background_nu(cosmo):
@@ -215,8 +239,17 @@ def check_background_nu(cosmo):
     assert_( all_finite(ccl.omega_x(cosmo, a_scl, 'matter')) )
     assert_( all_finite(ccl.omega_x(cosmo, a_lst, 'matter')) )
     assert_( all_finite(ccl.omega_x(cosmo, a_arr, 'matter')) )
-
-
+    
+    # mu 
+    assert_( all_finite(ccl.mu_MG(cosmo, a_scl)) )
+    assert_( all_finite(ccl.mu_MG(cosmo, a_lst)) )
+    assert_( all_finite(ccl.mu_MG(cosmo, a_arr)) )
+    
+    # Sig
+    assert_( all_finite(ccl.Sig_MG(cosmo, a_scl)) )
+    assert_( all_finite(ccl.Sig_MG(cosmo, a_lst)) )
+    assert_( all_finite(ccl.Sig_MG(cosmo, a_arr)) )
+   
 def check_power(cosmo):
     """
     Check that power spectrum and sigma functions can be run.
@@ -263,6 +296,58 @@ def check_power(cosmo):
     assert_( all_finite(ccl.sigmaV(cosmo, R_lst)) )
     assert_( all_finite(ccl.sigmaV(cosmo, R_arr)) )
 
+    # sigma8
+    assert_( all_finite(ccl.sigma8(cosmo)) )
+    
+def check_power_MG(cosmo):
+    """
+    Check that power spectrum and sigma functions can be run.
+    """
+    # Types of scale factor
+    a = 0.9
+    a_arr = np.linspace(0.2, 1., 5.)
+    
+    # Types of wavenumber input (scalar, list, array)
+    k_scl = 1e-1
+    k_lst = [1e-4, 1e-3, 1e-2, 1e-1, 1e0]
+    k_arr = np.logspace(-4., 0., 5)
+    
+    # Types of smoothing scale, R
+    R_scl = 8.
+    R_lst = [1., 5., 10., 20., 50., 100.]
+    R_arr = np.array([1., 5., 10., 20., 50., 100.])
+    
+    # linear_matter_power
+    assert_( all_finite(ccl.linear_matter_power(cosmo, k_scl, a)) )
+    assert_( all_finite(ccl.linear_matter_power(cosmo, k_lst, a)) )
+    assert_( all_finite(ccl.linear_matter_power(cosmo, k_arr, a)) )
+    
+    assert_raises(TypeError, ccl.linear_matter_power, cosmo, k_scl, a_arr)
+    assert_raises(TypeError, ccl.linear_matter_power, cosmo, k_lst, a_arr)
+    assert_raises(TypeError, ccl.linear_matter_power, cosmo, k_arr, a_arr)
+    
+    # nonlin_matter_power
+    ### Changes mean that this check of whether the power spectrum tag is 
+    ### linear or not doesn't work anymore. Need to fix this. 
+    """if (cosmo.__getitem__(matter_power_spectrum)== 'linear'):
+        assert_( all_finite(ccl.nonlin_matter_power(cosmo, k_scl, a)) )
+        assert_( all_finite(ccl.nonlin_matter_power(cosmo, k_lst, a)) )
+        assert_( all_finite(ccl.nonlin_matter_power(cosmo, k_arr, a)) )
+    else:
+        print cosmo.__getitem__(matter_power_spectrum)
+        assert_raises(RuntimeError, ccl.nonlin_matter_power, cosmo, k_scl, a)
+        assert_raises(RuntimeError, ccl.nonlin_matter_power, cosmo, k_lst, a)
+        assert_raises(RuntimeError, ccl.nonlin_matter_power, cosmo, k_arr, a)"""
+    
+    assert_raises(TypeError, ccl.nonlin_matter_power, cosmo, k_scl, a_arr)
+    assert_raises(TypeError, ccl.nonlin_matter_power, cosmo, k_lst, a_arr)
+    assert_raises(TypeError, ccl.nonlin_matter_power, cosmo, k_arr, a_arr)
+
+    # sigmaR
+    assert_( all_finite(ccl.sigmaR(cosmo, R_scl)) )
+    assert_( all_finite(ccl.sigmaR(cosmo, R_lst)) )
+    assert_( all_finite(ccl.sigmaR(cosmo, R_arr)) )
+    
     # sigma8
     assert_( all_finite(ccl.sigma8(cosmo)) )
 
@@ -351,6 +436,51 @@ def check_massfunc_nu(cosmo):
     assert_raises(TypeError, ccl.sigmaM, cosmo, mhalo_lst, a_arr)
     assert_raises(TypeError, ccl.sigmaM, cosmo, mhalo_arr, a_arr)
 
+def check_massfunc_MG(cosmo):
+    """
+    Check that mass function and supporting functions can be run.
+    """
+
+    z = 0.
+    z_arr = np.linspace(0., 2., 10)
+    a = 1.
+    a_arr = 1. / (1.+z_arr)
+    mhalo_scl = 1e13
+    mhalo_lst = [1e11, 1e12, 1e13, 1e14, 1e15, 1e16]
+    mhalo_arr = np.array([1e11, 1e12, 1e13, 1e14, 1e15, 1e16])
+    odelta = 200.
+    
+    # massfunc
+    assert_raises( RuntimeError, ccl.massfunc, cosmo, mhalo_scl, a, odelta)
+    assert_raises( RuntimeError, ccl.massfunc, cosmo, mhalo_lst, a, odelta)
+    assert_raises( RuntimeError, ccl.massfunc, cosmo, mhalo_arr, a, odelta)
+    
+    assert_raises(TypeError, ccl.massfunc, cosmo, mhalo_scl, a_arr, odelta)
+    assert_raises(TypeError, ccl.massfunc, cosmo, mhalo_lst, a_arr, odelta)
+    assert_raises(TypeError, ccl.massfunc, cosmo, mhalo_arr, a_arr, odelta)
+    
+    # Check whether odelta out of bounds
+    assert_raises(RuntimeError, ccl.massfunc, cosmo, mhalo_scl, a, 199.)
+    assert_raises(RuntimeError, ccl.massfunc, cosmo, mhalo_scl, a, 5000.)
+    
+    # massfunc_m2r
+    assert_( all_finite(ccl.massfunc_m2r(cosmo, mhalo_scl)) )
+    assert_( all_finite(ccl.massfunc_m2r(cosmo, mhalo_lst)) )
+    assert_( all_finite(ccl.massfunc_m2r(cosmo, mhalo_arr)) )
+    
+    # sigmaM
+    assert_( all_finite(ccl.sigmaM(cosmo, mhalo_scl, a)) )
+    assert_( all_finite(ccl.sigmaM(cosmo, mhalo_lst, a)) )
+    assert_( all_finite(ccl.sigmaM(cosmo, mhalo_arr, a)) )
+    
+    assert_raises(TypeError, ccl.sigmaM, cosmo, mhalo_scl, a_arr)
+    assert_raises(TypeError, ccl.sigmaM, cosmo, mhalo_lst, a_arr)
+    assert_raises(TypeError, ccl.sigmaM, cosmo, mhalo_arr, a_arr)
+    
+    # halo_bias
+    assert_raises( RuntimeError, ccl.halo_bias, cosmo, mhalo_scl, a)
+    assert_raises( RuntimeError, ccl.halo_bias, cosmo, mhalo_lst, a)
+    assert_raises( RuntimeError, ccl.halo_bias, cosmo, mhalo_arr, a)
 
 def check_halomod(cosmo):
     """
@@ -690,7 +820,6 @@ def check_corr_3d(cosmo):
     assert_( all_finite(corr2))
     assert_( all_finite(corr3))
 
-
 def check_corr_3dRSD(cosmo):
 
     # Scale factor
@@ -743,30 +872,42 @@ def check_corr_3dRSD(cosmo):
     assert_( all_finite(corr12))
 
 def test_background():
+    
     """
     Test background and growth functions in ccl.background.
     """
+
     for cosmo in reference_models():
         yield check_background, cosmo
 
     for cosmo_nu in reference_models_nu():
         yield check_background_nu, cosmo_nu
+        
+    for cosmo_mg in reference_models_mg():
+        yield check_background, cosmo_mg
 
 def test_power():
+    
     """
     Test power spectrum and sigma functions in ccl.power.
     """
+    
     for cosmo in reference_models():
         yield check_power, cosmo
 
     for cosmo_nu in reference_models_nu():
         yield check_power, cosmo_nu
+        
+    for cosmo_mg in reference_models_mg():
+        yield check_power_MG, cosmo_mg
 
 @decorators.slow
 def test_massfunc():
+    
     """
     Test mass function and supporting functions.
     """
+    
     for cosmo in reference_models():
         yield check_massfunc, cosmo
 
@@ -777,8 +918,12 @@ def test_halomod():
     """
     Test halo model and supporting functions.
     """
+    
     for cosmo in reference_models():
         yield check_halomod, cosmo
+
+    for cosmo_mg in reference_models_mg():
+        yield check_massfunc_MG, cosmo_mg
 
 def test_haloprofile():
     """
@@ -789,26 +934,34 @@ def test_haloprofile():
 
 @decorators.slow
 def test_neutrinos():
-    """
+    """ 
     Test neutrino-related functions.
     """
+    
     yield check_neutrinos
 
 @decorators.slow
 def test_cls():
+    
     """
     Test top-level functions in pyccl.cls module.
     """
+    
     for cosmo in reference_models():
         yield check_cls, cosmo
 
     for cosmo_nu in reference_models_nu():
         yield check_cls_nu, cosmo_nu
-
+        
+    for cosmo_mg in reference_models_mg():
+        yield check_cls, cosmo_mg
+	
 def test_corr():
+
     """
     Test top-level functions in pyccl.correlation module.
     """
+
     for cosmo in reference_models():
         yield check_corr, cosmo
 
@@ -820,6 +973,12 @@ def test_corr():
 
     for cosmo_nu in reference_models_nu():
         yield check_corr_3d, cosmo_nu
+        
+    for cosmo_mg in reference_models_mg():
+        yield check_corr, cosmo_mg
+		
+    for cosmo_mg in reference_models_mg():
+        yield check_corr_3d, cosmo_mg
 
     for cosmo in reference_models():
         yield check_corr_3dRSD, cosmo
@@ -828,9 +987,11 @@ def test_corr():
         yield check_corr_3dRSD, cosmo_nu
 
 def test_debug_mode():
+
     """
     Test that debug mode can be toggled.
     """
+
     ccl.debug_mode(True)
     ccl.debug_mode(False)
 

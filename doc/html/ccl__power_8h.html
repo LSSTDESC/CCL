@@ -76,10 +76,8 @@ $(function() {
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a7e3db13164f47429f429a7ec62ebac58"><td class="memItemLeft" align="right" valign="top"><a class="el" href="ccl__defs_8h.html#ae8d446df269cba1dff8f88922459a7d4">CCL_BEGIN_DECLS</a> double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__power_8h.html#a7e3db13164f47429f429a7ec62ebac58">ccl_bcm_model_fka</a> (<a class="el" href="structccl__cosmology.html">ccl_cosmology</a> *cosmo, double k, double a, int *status)</td></tr>
-<tr class="separator:a7e3db13164f47429f429a7ec62ebac58"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4a4453e1433b557d74fd1936366fb6da"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__power_8h.html#a4a4453e1433b557d74fd1936366fb6da">ccl_linear_matter_power</a> (<a class="el" href="structccl__cosmology.html">ccl_cosmology</a> *cosmo, double k, double a, int *status)</td></tr>
-<tr class="separator:a4a4453e1433b557d74fd1936366fb6da"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a16bc373ffe704af8a68040b20b58162f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="ccl__defs_8h.html#ae8d446df269cba1dff8f88922459a7d4">CCL_BEGIN_DECLS</a> double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__power_8h.html#a16bc373ffe704af8a68040b20b58162f">ccl_linear_matter_power</a> (<a class="el" href="structccl__cosmology.html">ccl_cosmology</a> *cosmo, double k, double a, int *status)</td></tr>
+<tr class="separator:a16bc373ffe704af8a68040b20b58162f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aade0e22dd71d65253d0c27b7408d00d4"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__power_8h.html#aade0e22dd71d65253d0c27b7408d00d4">ccl_nonlin_matter_power</a> (<a class="el" href="structccl__cosmology.html">ccl_cosmology</a> *cosmo, double k, double a, int *status)</td></tr>
 <tr class="separator:aade0e22dd71d65253d0c27b7408d00d4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a63464fa52a7a72554028a32d274cd092"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ccl__power_8h.html#a63464fa52a7a72554028a32d274cd092">ccl_cosmology_compute_power</a> (<a class="el" href="structccl__cosmology.html">ccl_cosmology</a> *cosmo, int *status)</td></tr>
@@ -92,56 +90,6 @@ Functions</h2></td></tr>
 <tr class="separator:a719bbbcaf0c6275c709247b87baaeee9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Function Documentation</h2>
-<a id="a7e3db13164f47429f429a7ec62ebac58"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a7e3db13164f47429f429a7ec62ebac58">&#9670;&nbsp;</a></span>ccl_bcm_model_fka()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="ccl__defs_8h.html#ae8d446df269cba1dff8f88922459a7d4">CCL_BEGIN_DECLS</a> double ccl_bcm_model_fka </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="structccl__cosmology.html">ccl_cosmology</a> *&#160;</td>
-          <td class="paramname"><em>cosmo</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">double&#160;</td>
-          <td class="paramname"><em>k</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">double&#160;</td>
-          <td class="paramname"><em>a</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">int *&#160;</td>
-          <td class="paramname"><em>status</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<p>Correction for the impact of baryonic physics on the matter power spectrum. Returns f(k,a) [dimensionless] for given cosmology, using the method specified for the baryonic transfer function. f(k,a) is the fractional change in the nonlinear matter power spectrum from the Baryon Correction Model (BCM) of Schenider &amp; Teyssier (2015). The parameters of the model are passed as part of the cosmology class. </p><dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">cosmo</td><td>Cosmology parameters and configurations, including baryonic parameters. </td></tr>
-    <tr><td class="paramname">k</td><td>Fourier mode, in [1/Mpc] units </td></tr>
-    <tr><td class="paramname">a</td><td>scale factor, normalized to 1 for today </td></tr>
-    <tr><td class="paramname">status</td><td>Status flag. 0 if there are no errors, nonzero otherwise. For specific cases see documentation for <a class="el" href="ccl__error_8c.html">ccl_error.c</a> </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>f(k,a). </dd></dl>
-
-</div>
-</div>
 <a id="a63464fa52a7a72554028a32d274cd092"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a63464fa52a7a72554028a32d274cd092">&#9670;&nbsp;</a></span>ccl_cosmology_compute_power()</h2>
 
@@ -178,14 +126,14 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="a4a4453e1433b557d74fd1936366fb6da"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a4a4453e1433b557d74fd1936366fb6da">&#9670;&nbsp;</a></span>ccl_linear_matter_power()</h2>
+<a id="a16bc373ffe704af8a68040b20b58162f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a16bc373ffe704af8a68040b20b58162f">&#9670;&nbsp;</a></span>ccl_linear_matter_power()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">double ccl_linear_matter_power </td>
+          <td class="memname"><a class="el" href="ccl__defs_8h.html#ae8d446df269cba1dff8f88922459a7d4">CCL_BEGIN_DECLS</a> double ccl_linear_matter_power </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="structccl__cosmology.html">ccl_cosmology</a> *&#160;</td>
           <td class="paramname"><em>cosmo</em>, </td>
