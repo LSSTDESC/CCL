@@ -225,7 +225,7 @@ TASK: Outputs fitting function for use in halo mass function calculation;
     ccl_angulo (arxiv 1203.3216 )
     ccl_watson (arxiv 1212.0095 )
     ccl_shethtormen (arxiv 9901122)
-*/
+-*/
 static double massfunc_f(ccl_cosmology *cosmo, double halomass, double a, double odelta, int *status)
 {
   double fit_A, fit_a, fit_b, fit_c, fit_d, fit_p, overdensity_delta;
@@ -572,6 +572,12 @@ double ccl_massfunc(ccl_cosmology *cosmo, double halomass, double a, double odel
 	  *status = CCL_ERROR_NOT_IMPLEMENTED;
 	  ccl_cosmology_set_status_message(cosmo, "ccl_background.c: ccl_cosmology_compute_growth(): Support for the halo mass function in cosmologies with massive neutrinos is not yet implemented.\n");
 	  return NAN;
+  }
+
+  if (halomass > 1e17 || halomass < 1e6){
+          *status = CCL_ERROR_HMF_INTERP;
+          ccl_cosmology_set_status_message(cosmo, "ccl_massfunc(): The specified halo mass is outside of the range.");
+          return NAN;
   }
   
   if (fabs(cosmo->params.mu_0)>1e-14 || fabs(cosmo->params.sigma_0)>1e-14){
