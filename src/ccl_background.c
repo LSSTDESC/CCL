@@ -934,6 +934,58 @@ void ccl_comoving_angular_distances(ccl_cosmology * cosmo, int na, double a[],
   }
 }
 
+
+double ccl_comoving_angular_diameter_distance(ccl_cosmology * cosmo, double a1, double a2, int* status)
+{
+  if(a1>1. || a2>1.) {
+    *status = CCL_ERROR_COMPUTECHI;
+    ccl_cosmology_set_status_message(cosmo, "ccl_background.c: scale factor cannot be larger than 1.\n");
+    ccl_check_status(cosmo,status);
+    return NAN;
+  } else {
+    if(cosmo->params.Omega_k<0.){
+      *status = CCL_ERROR_COMPUTECHI;
+      ccl_cosmology_set_status_message(cosmo, "ccl_background.c: Omega_k cannot be negative for angular diameter distance.\n");
+      ccl_check_status(cosmo,status);
+      return NAN;
+    } else {
+      if (!cosmo->computed_distances) {
+	ccl_cosmology_compute_distances(cosmo, status);
+	ccl_check_status(cosmo, status);
+      }
+      double chi1,chi2;
+      int gslstatus = gsl_spline_eval_e(cosmo->data.chi, a1, NULL, &chi1);
+      if(gslstatus != GSL_SUCCESS) {
+	ccl_raise_gsl_warning(gslstatus, "ccl_background.c: ccl_comoving_angular_distance():");
+	*status |= gslstatus;
+	ccl_cosmology_set_status_message(cosmo, "ccl_background.c: ccl_comoving_angular_distance(): Scale factor outside interpolation range.\n");
+	return NAN;
+      }
+      gslstatus = gsl_spline_eval_e(cosmo->data.chi, a2, NULL, &chi2);
+      if(gslstatus != GSL_SUCCESS) {
+	ccl_raise_gsl_warning(gslstatus, "ccl_background.c: ccl_comoving_angular_distance():");
+	*status |= gslstatus;
+	ccl_cosmology_set_status_message(cosmo, "ccl_background.c: ccl_comoving_angular_distance(): Scale factor outside interpolation range.\n");
+	return NAN;
+      }
+      double sinn1,sinn2,dm1,dm2,dh;
+      dh=cosmo->params.h/ccl_constants.CLIGHT_HMPC;
+      sinn1=ccl_sinn(cosmo,chi1,status);
+      ccl_check_status(cosmo, status);
+      sinn2=ccl_sinn(cosmo,chi2,status);
+      ccl_check_status(cosmo, status);
+      dm1=sinn1*sqrt(1+cosmo->params.Omega_k*sinn2*sinn2/dh/dh);
+      dm2=sinn2*sqrt(1+cosmo->params.Omega_k*sinn1*sinn1/dh/dh);
+      if(a1 > a2) {
+	return a2*(dm2-dm1);
+      } else {
+	return a1*(dm1-dm2);
+      }
+    }
+  }
+}
+
+
 double ccl_luminosity_distance(ccl_cosmology * cosmo, double a, int* status)
 {
   return ccl_comoving_angular_distance(cosmo, a, status) / a;
