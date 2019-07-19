@@ -495,7 +495,7 @@ double ccl_cl_tracer_t_get_kernel(ccl_cl_tracer_t *tr,double chi,int *status)
 {
   if(tr!=NULL) {
     if(tr->kernel!=NULL)
-      ccl_f1d_t_eval(tr->kernel,chi);
+      return ccl_f1d_t_eval(tr->kernel,chi);
     else
       return 1;
   }
