@@ -1,12 +1,21 @@
 var searchData=
 [
-  ['fftlog_2ec',['fftlog.c',['../fftlog_8c.html',1,'']]],
-  ['fftlog_2eh',['fftlog.h',['../fftlog_8h.html',1,'']]],
-  ['fftlog_5fcomputexi2d',['fftlog_ComputeXi2D',['../fftlog_8c.html#a268c1a29622fea9b03b13afc5e7d0c48',1,'fftlog_ComputeXi2D(double bessel_order, int N, const double l[], const double cl[], double th[], double xi[]):&#160;fftlog.c'],['../fftlog_8h.html#a268c1a29622fea9b03b13afc5e7d0c48',1,'fftlog_ComputeXi2D(double bessel_order, int N, const double l[], const double cl[], double th[], double xi[]):&#160;fftlog.c']]],
-  ['fftlog_5fcomputexilm',['fftlog_ComputeXiLM',['../fftlog_8c.html#ac653459a71b0793a0f78255d1a28bce6',1,'fftlog_ComputeXiLM(double l, double m, int N, const double k[], const double pk[], double r[], double xi[]):&#160;fftlog.c'],['../fftlog_8h.html#ac653459a71b0793a0f78255d1a28bce6',1,'fftlog_ComputeXiLM(double l, double m, int N, const double k[], const double pk[], double r[], double xi[]):&#160;fftlog.c']]],
-  ['fftlog_5fh',['FFTLOG_H',['../fftlog_8h.html#ab0c8eae6e05cb580cebba9631a1b1466',1,'fftlog.h']]],
-  ['fftlogfactor',['fftlogfactor',['../ccl__test__correlation_8c.html#ad1a80e321792d1cee99d1453c5101a47',1,'ccl_test_correlation.c']]],
-  ['fgrowth',['fgrowth',['../structccl__data.html#a4669cf3ca24eb93d4007a463f1a68db5',1,'ccl_data']]],
-  ['fht',['fht',['../fftlog_8c.html#a878323021756e834675a5e725f150132',1,'fht(int N, const double r[], const double complex a[], double k[], double complex b[], double mu, double q, double kcrc, int noring, double complex *u):&#160;fftlog.c'],['../fftlog_8h.html#a878323021756e834675a5e725f150132',1,'fht(int N, const double r[], const double complex a[], double k[], double complex b[], double mu, double q, double kcrc, int noring, double complex *u):&#160;fftlog.c']]],
-  ['fpar',['Fpar',['../struct_fpar.html',1,'']]]
+  ['gammahmf',['gammahmf',['../structccl__data.html#a2d1c80d82e2d5373ca8c142d09853842',1,'ccl_data']]],
+  ['gnewt',['GNEWT',['../structccl__physical__constants.html#ab084addac340a33bd51797cabc440f83',1,'ccl_physical_constants']]],
+  ['growth',['growth',['../structccl__p2d__t.html#a3150bc4701ad47e331b7c4c4ef7e4948',1,'ccl_p2d_t::growth()'],['../structccl__data.html#a38f6caf298ee71f62260082c28323bec',1,'ccl_data::growth()']]],
+  ['growth0',['growth0',['../structccl__data.html#a358d6ef796c6498a702840d987c888c8',1,'ccl_data']]],
+  ['growth_5ffactor_5f0',['growth_factor_0',['../structccl__p2d__t.html#ae156c393da391e76c120937182c52580',1,'ccl_p2d_t']]],
+  ['growth_5ftolerance',['GROWTH_TOLERANCE',['../namespaceccl__test__growth.html#a2cd407292b4e5880bcd20380e4378960',1,'ccl_test_growth']]],
+  ['grw',['grw',['../namespaceccl__test__p2d.html#aeebfc76bbb716616e6f0460877f92b4a',1,'ccl_test_p2d']]],
+  ['gsl_5fepsabs_5fnu',['GSL_EPSABS_NU',['../ccl__neutrinos_8c.html#aad6145144eccd081bf3f6a919f798c7c',1,'ccl_neutrinos.c']]],
+  ['gsl_5fepsrel',['GSL_EPSREL',['../ccl__core_8c.html#ae3628da4026daea1dc6e0e4cb62e24ee',1,'ccl_core.c']]],
+  ['gsl_5fepsrel_5fdist',['GSL_EPSREL_DIST',['../ccl__core_8c.html#a21c3b7c07529ee2acaf9ee8375c253ea',1,'ccl_core.c']]],
+  ['gsl_5fepsrel_5fdndz',['GSL_EPSREL_DNDZ',['../ccl__core_8c.html#aea1294a700276280c0c080220c888cd9',1,'ccl_core.c']]],
+  ['gsl_5fepsrel_5fgrowth',['GSL_EPSREL_GROWTH',['../ccl__core_8c.html#ac832e4c5330968a496f4acb40545f313',1,'ccl_core.c']]],
+  ['gsl_5fepsrel_5fnu',['GSL_EPSREL_NU',['../ccl__neutrinos_8c.html#ae20ff840c19e36575e72b50ad5da8983',1,'ccl_neutrinos.c']]],
+  ['gsl_5fepsrel_5fsigmar',['GSL_EPSREL_SIGMAR',['../ccl__core_8c.html#a0c14aa96b52b122e4b0795c0314b0139',1,'ccl_core.c']]],
+  ['gsl_5fintegration_5fgauss_5fkronrod_5fpoints',['GSL_INTEGRATION_GAUSS_KRONROD_POINTS',['../ccl__core_8c.html#a7d7c3cd0548be2bb016b6d0ffb84423f',1,'ccl_core.c']]],
+  ['gsl_5fn_5fiteration',['GSL_N_ITERATION',['../ccl__core_8c.html#acffe6aeb31ce6d8f9435c9351dd27051',1,'ccl_core.c']]],
+  ['gsl_5fn_5fiteration_5fnu',['GSL_N_ITERATION_NU',['../ccl__neutrinos_8c.html#ae88db5e07a19fe2044883b9ddfef2668',1,'ccl_neutrinos.c']]],
+  ['gsl_5fparams',['gsl_params',['../structccl__cosmology.html#aaf7a9afcf1b7d73f9d1bfe16531c47dd',1,'ccl_cosmology']]]
 ];

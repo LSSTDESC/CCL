@@ -322,6 +322,15 @@ INPUT: cosmology, wavenumber [Mpc^-1], scale factor
 TASK: Computes the halo model power spectrum by summing the two- and one-halo terms
 */
 double ccl_halomodel_matter_power(ccl_cosmology *cosmo, double k, double a, int *status){
+	
+	
+  // This matter power spectrum method doesn't work if mu / Sigma parameterisation of modified gravity
+  // Is turned on: 
+  if (fabs(cosmo->params.mu_0)>1e-14 || fabs(cosmo->params.sigma_0)>1e-14){
+	  *status = CCL_ERROR_NOT_IMPLEMENTED;
+	  strcpy(cosmo->status_message,"ccl_halofmod.c: ccl_halomodel_matter_power(): The halo model power spectrum is not implemented the mu / Sigma modified gravity parameterisation.\n");
+	  return NAN;
+  }	
 
   // Standard sum of two- and one-halo terms
   return ccl_twohalo_matter_power(cosmo, k, a, status)+ccl_onehalo_matter_power(cosmo, k, a, status);

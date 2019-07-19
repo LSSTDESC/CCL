@@ -18,6 +18,8 @@ CTEST_DATA(corrs_3d) {
   double Omega_k[5];
   double w_0[5];
   double w_a[5];
+  double mu_0;
+  double sigma_0;
 };
 
 CTEST_SETUP(corrs_3d) {
@@ -31,6 +33,8 @@ CTEST_SETUP(corrs_3d) {
   double mnuval = 0.;
   data->mnu= &mnuval;
   data->mnu_type = ccl_mnu_sum;
+  data->mu_0=0.;
+  data->sigma_0=0.;
 
   double Omega_v[5]={0.7, 0.7, 0.7, 0.65, 0.75};
   double w_0[5] = {-1.0, -0.9, -0.9, -0.9, -0.9};
@@ -67,7 +71,7 @@ static void compare_correlation_3d(int i_model,struct corrs_3d_data * data)
   config.transfer_function_method = ccl_boltzmann_class;
   ccl_parameters params = ccl_parameters_create(data->Omega_c,data->Omega_b,data->Omega_k[i_model-1],
 		data->Neff, data->mnu, data->mnu_type, data->w_0[i_model-1],data->w_a[i_model-1],
-		data->h,data->A_s,data->n_s,-1, -1, -1, -1,NULL,NULL, &status);
+		data->h,data->A_s,data->n_s,-1, -1, -1, data->mu_0, data-> sigma_0,-1,NULL,NULL, &status);
   params.Omega_g=0.0;
   params.Omega_l=data->Omega_v[i_model-1];
   params.sigma8=data->sigma8;

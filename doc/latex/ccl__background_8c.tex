@@ -24,6 +24,12 @@ double \mbox{\hyperlink{ccl__background_8c_af3b85210a1e622bf179aa7ca7d9fae5f}{cc
 \item 
 double \mbox{\hyperlink{ccl__background_8c_a540759d4a037a8eaba82e27d4792bb45}{ccl\+\_\+rho\+\_\+x}} (\mbox{\hyperlink{structccl__cosmology}{ccl\+\_\+cosmology}} $\ast$cosmo, double a, \mbox{\hyperlink{ccl__background_8h_a3ab9842523d3f98e1ab5c57f0249a15d}{ccl\+\_\+species\+\_\+x\+\_\+label}} label, int is\+\_\+comoving, int $\ast$status)
 \item 
+double \mbox{\hyperlink{ccl__background_8c_af62251733c6c5effd26a7008b7c43d50}{ccl\+\_\+mu\+\_\+\+MG}} (\mbox{\hyperlink{structccl__cosmology}{ccl\+\_\+cosmology}} $\ast$cosmo, double a, int $\ast$status)
+\item 
+double \mbox{\hyperlink{ccl__background_8c_a5252a5b9cdcdcde572295e6b167fa352}{ccl\+\_\+\+Sig\+\_\+\+MG}} (\mbox{\hyperlink{structccl__cosmology}{ccl\+\_\+cosmology}} $\ast$cosmo, double a, int $\ast$status)
+\item 
+void \mbox{\hyperlink{ccl__background_8c_aa2fae8b7cc4d75436d5b8ed46fa77a52}{compute\+\_\+chi}} (double a, \mbox{\hyperlink{structccl__cosmology}{ccl\+\_\+cosmology}} $\ast$cosmo, double $\ast$chi, int $\ast$stat)
+\item 
 void \mbox{\hyperlink{ccl__background_8c_af21330051310e934cf528b61a4111fad}{ccl\+\_\+cosmology\+\_\+compute\+\_\+distances}} (\mbox{\hyperlink{structccl__cosmology}{ccl\+\_\+cosmology}} $\ast$cosmo, int $\ast$status)
 \item 
 void \mbox{\hyperlink{ccl__background_8c_a22d956ec6240c12227b263845941093a}{ccl\+\_\+cosmology\+\_\+compute\+\_\+growth}} (\mbox{\hyperlink{structccl__cosmology}{ccl\+\_\+cosmology}} $\ast$cosmo, int $\ast$status)
@@ -421,6 +427,24 @@ Comoving luminosity distances in Mpc to scale factors as given in array a\mbox{[
 \begin{DoxyReturn}{Returns}
 void 
 \end{DoxyReturn}
+\mbox{\Hypertarget{ccl__background_8c_af62251733c6c5effd26a7008b7c43d50}\label{ccl__background_8c_af62251733c6c5effd26a7008b7c43d50}} 
+\index{ccl\+\_\+background.\+c@{ccl\+\_\+background.\+c}!ccl\+\_\+mu\+\_\+\+MG@{ccl\+\_\+mu\+\_\+\+MG}}
+\index{ccl\+\_\+mu\+\_\+\+MG@{ccl\+\_\+mu\+\_\+\+MG}!ccl\+\_\+background.\+c@{ccl\+\_\+background.\+c}}
+\subsubsection{\texorpdfstring{ccl\+\_\+mu\+\_\+\+M\+G()}{ccl\_mu\_MG()}}
+{\footnotesize\ttfamily double ccl\+\_\+mu\+\_\+\+MG (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structccl__cosmology}{ccl\+\_\+cosmology}} $\ast$}]{cosmo,  }\item[{double}]{a,  }\item[{int $\ast$}]{status }\end{DoxyParamCaption})}
+
+mu(z) in the mu / Sigma parameterisation of modified gravity at a given redshift. 
+\begin{DoxyParams}{Parameters}
+{\em cosmo} & Cosmological parameters \\
+\hline
+{\em a} & scale factor, normalized to 1 for today \\
+\hline
+{\em status} & 0 if there are no errors, nonzero otherwise. For specific cases see documentation for \mbox{\hyperlink{ccl__error_8c}{ccl\+\_\+error.\+c}} \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+mu(z), function of the mu / Sigma parameterisation of modified gravity. 
+\end{DoxyReturn}
 \mbox{\Hypertarget{ccl__background_8c_af3b85210a1e622bf179aa7ca7d9fae5f}\label{ccl__background_8c_af3b85210a1e622bf179aa7ca7d9fae5f}} 
 \index{ccl\+\_\+background.\+c@{ccl\+\_\+background.\+c}!ccl\+\_\+omega\+\_\+x@{ccl\+\_\+omega\+\_\+x}}
 \index{ccl\+\_\+omega\+\_\+x@{ccl\+\_\+omega\+\_\+x}!ccl\+\_\+background.\+c@{ccl\+\_\+background.\+c}}
@@ -503,6 +527,24 @@ Scale factors for a given array of comoving distances chi\mbox{[}0..nchi-\/1\mbo
 \begin{DoxyReturn}{Returns}
 void 
 \end{DoxyReturn}
+\mbox{\Hypertarget{ccl__background_8c_a5252a5b9cdcdcde572295e6b167fa352}\label{ccl__background_8c_a5252a5b9cdcdcde572295e6b167fa352}} 
+\index{ccl\+\_\+background.\+c@{ccl\+\_\+background.\+c}!ccl\+\_\+\+Sig\+\_\+\+MG@{ccl\+\_\+\+Sig\+\_\+\+MG}}
+\index{ccl\+\_\+\+Sig\+\_\+\+MG@{ccl\+\_\+\+Sig\+\_\+\+MG}!ccl\+\_\+background.\+c@{ccl\+\_\+background.\+c}}
+\subsubsection{\texorpdfstring{ccl\+\_\+\+Sig\+\_\+\+M\+G()}{ccl\_Sig\_MG()}}
+{\footnotesize\ttfamily double ccl\+\_\+\+Sig\+\_\+\+MG (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structccl__cosmology}{ccl\+\_\+cosmology}} $\ast$}]{cosmo,  }\item[{double}]{a,  }\item[{int $\ast$}]{status }\end{DoxyParamCaption})}
+
+Sigma(z) in the mu / Sigma parameterisation of modified gravity at a given redshift. 
+\begin{DoxyParams}{Parameters}
+{\em cosmo} & Cosmological parameters \\
+\hline
+{\em a} & scale factor, normalized to 1 for today \\
+\hline
+{\em status} & 0 if there are no errors, nonzero otherwise. For specific cases see documentation for \mbox{\hyperlink{ccl__error_8c}{ccl\+\_\+error.\+c}} \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Sigma(z), function of the mu / Sigma parameterisation of modified gravity. 
+\end{DoxyReturn}
 \mbox{\Hypertarget{ccl__background_8c_ae1cafa2f119062c65d6dc680aa9210bb}\label{ccl__background_8c_ae1cafa2f119062c65d6dc680aa9210bb}} 
 \index{ccl\+\_\+background.\+c@{ccl\+\_\+background.\+c}!ccl\+\_\+sinn@{ccl\+\_\+sinn}}
 \index{ccl\+\_\+sinn@{ccl\+\_\+sinn}!ccl\+\_\+background.\+c@{ccl\+\_\+background.\+c}}
@@ -521,3 +563,9 @@ Transforms between radial and transverse comoving distances Calculate the comovi
 \begin{DoxyReturn}{Returns}
 chi\+\_\+t, the transverse comoving distance 
 \end{DoxyReturn}
+\mbox{\Hypertarget{ccl__background_8c_aa2fae8b7cc4d75436d5b8ed46fa77a52}\label{ccl__background_8c_aa2fae8b7cc4d75436d5b8ed46fa77a52}} 
+\index{ccl\+\_\+background.\+c@{ccl\+\_\+background.\+c}!compute\+\_\+chi@{compute\+\_\+chi}}
+\index{compute\+\_\+chi@{compute\+\_\+chi}!ccl\+\_\+background.\+c@{ccl\+\_\+background.\+c}}
+\subsubsection{\texorpdfstring{compute\+\_\+chi()}{compute\_chi()}}
+{\footnotesize\ttfamily void compute\+\_\+chi (\begin{DoxyParamCaption}\item[{double}]{a,  }\item[{\mbox{\hyperlink{structccl__cosmology}{ccl\+\_\+cosmology}} $\ast$}]{cosmo,  }\item[{double $\ast$}]{chi,  }\item[{int $\ast$}]{stat }\end{DoxyParamCaption})}
+

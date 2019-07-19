@@ -94,7 +94,7 @@ static void compare_haloprofile(int model, struct haloprofile_data * data)
   ccl_parameters params = ccl_parameters_create(data->Omega_c, data->Omega_b,data->Omega_k,
 						data->Neff, data->mnu, data->mnu_type, data->w_0,
 						data->w_a, data->h,data->sigma_8, data->n_s,
-						-1, -1, -1, -1, NULL, NULL, status);
+						-1, -1, -1, 0., 0., -1, NULL, NULL, status);
 
   // Set the default configuration, but with Eisenstein & Hu linear P(k) and Sheth & Tormen mass function and Duffy (2008) halo concentrations
   ccl_configuration config = default_config;

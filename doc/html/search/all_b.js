@@ -1,18 +1,16 @@
 var searchData=
 [
-  ['l_5farr',['l_arr',['../struct_c_c_l___cl_workspace.html#af029601c9f7021df0ee80551d065bf71',1,'CCL_ClWorkspace']]],
-  ['l_5flimber',['l_limber',['../struct_c_c_l___cl_workspace.html#a725ffa9818f7778bec8ebeccc7dbcd06',1,'CCL_ClWorkspace']]],
-  ['l_5flinstep',['l_linstep',['../struct_c_c_l___cl_workspace.html#aafdd1e870574aae96b12b3b5aebd9037',1,'CCL_ClWorkspace']]],
-  ['l_5flogstep',['l_logstep',['../struct_c_c_l___cl_workspace.html#a05ec77f2e9b5ee512ea3bf669f7f8da4',1,'CCL_ClWorkspace']]],
-  ['l_5fspline_5ftype',['L_SPLINE_TYPE',['../ccl__test__correlation_8c.html#a53925cc799bef148e8a0386da4b81468',1,'ccl_test_correlation.c']]],
-  ['lkmax',['lkmax',['../structccl__p2d__t.html#aa95658067bf981859e38846ae8231f8f',1,'ccl_p2d_t']]],
-  ['lkmin',['lkmin',['../structccl__p2d__t.html#a955661f32b72852c9bc7dfee5428c759',1,'ccl_p2d_t']]],
-  ['lmax',['lmax',['../struct_c_c_l___cl_workspace.html#a2c001bf25523d5cb48cc9b3c62ee8e41',1,'CCL_ClWorkspace']]],
-  ['logm_5fspline_5fdelta',['LOGM_SPLINE_DELTA',['../structccl__spline__params.html#a9c3639db1ee0c3f352886b0d2cfe7b74',1,'ccl_spline_params']]],
-  ['logm_5fspline_5fmax',['LOGM_SPLINE_MAX',['../structccl__spline__params.html#a26242a0b357c4ccbd5f01b9c5044334a',1,'ccl_spline_params']]],
-  ['logm_5fspline_5fmin',['LOGM_SPLINE_MIN',['../structccl__spline__params.html#a8f5efa2b6b537e4bb668d91c93363c0f',1,'ccl_spline_params']]],
-  ['logm_5fspline_5fnm',['LOGM_SPLINE_NM',['../structccl__spline__params.html#a2208a54444d524ccb5fd9de56f548078',1,'ccl_spline_params']]],
-  ['logsigma',['logsigma',['../structccl__data.html#a8b877a586de0aa78c7585338730b3139',1,'ccl_data']]],
-  ['loop_5fover_5fparams',['loop_over_params',['../namespaceccl__test__power.html#a6a72c958a22a41eee6524ff79a2c68b1',1,'ccl_test_power']]],
-  ['lpk2d',['lpk2d',['../namespaceccl__test__p2d.html#ae34b4286b9d1f9419a5dd925011be309',1,'ccl_test_p2d']]]
+  ['m_5fnu',['m_nu',['../namespaceccl__test__growth.html#aba28f9096317c4a2166ec5fd9a483373',1,'ccl_test_growth']]],
+  ['m_5fpi',['M_PI',['../fftlog_8c.html#ae71449b1cc6e6250b91f539153a7a0d3',1,'M_PI():&#160;fftlog.c'],['../ccl__defs_8h.html#ae71449b1cc6e6250b91f539153a7a0d3',1,'M_PI():&#160;ccl_defs.h']]],
+  ['m_5fspline_5ftype',['M_SPLINE_TYPE',['../structccl__spline__params.html#a488c1778d23bed9662e0b1af5cac0f12',1,'ccl_spline_params']]],
+  ['mass_5ffunction_5fmethod',['mass_function_method',['../structccl__configuration.html#abf81fb40ac4629c1a91bf90775dbcbc1',1,'ccl_configuration']]],
+  ['mass_5ffunction_5ft',['mass_function_t',['../ccl__config_8h.html#ad544e91cedc9b0865dba11bf4c652091',1,'mass_function_t():&#160;ccl_config.h'],['../ccl__config_8h.html#a8254626f06896ae23ce945320108b732',1,'mass_function_t():&#160;ccl_config.h']]],
+  ['matter_5fpower_5fspectrum_5fmethod',['matter_power_spectrum_method',['../structccl__configuration.html#a9768940f8bac8bfdeccc56e986a5d1d0',1,'ccl_configuration']]],
+  ['matter_5fpower_5fspectrum_5ft',['matter_power_spectrum_t',['../ccl__config_8h.html#a33c02fcf871bde5a88799d19418fb615',1,'matter_power_spectrum_t():&#160;ccl_config.h'],['../ccl__config_8h.html#a0afb851df176a731e4a6198ed09d871b',1,'matter_power_spectrum_t():&#160;ccl_config.h']]],
+  ['mnu',['mnu',['../structccl__parameters.html#a3d1b57e1adfc67db58b090f48e73b749',1,'ccl_parameters::mnu()'],['../namespaceccl__test__distances.html#a8e0e0198ea990e29a05cea77a670f0ab',1,'ccl_test_distances.mnu()']]],
+  ['mnu_5flist',['mnu_list',['../namespaceccl__test__power.html#abb3b81930a5b96dad621f66bd6931c78',1,'ccl_test_power']]],
+  ['mnu_5fsum',['mnu_sum',['../namespaceccl__test__power.html#a8041706a448167dfed239ef392310710',1,'ccl_test_power']]],
+  ['mpc_5fto_5fmeter',['MPC_TO_METER',['../structccl__physical__constants.html#a56a2796740bd82659582fb73cd877bf8',1,'ccl_physical_constants']]],
+  ['mu0_5fvals',['mu0_vals',['../namespaceccl__test__growth.html#a2d2d3c3f2739df97770cb8dcc023466b',1,'ccl_test_growth']]],
+  ['mu_5f0',['mu_0',['../structccl__parameters.html#a96b8acaa20e3c1b8994439986697eba3',1,'ccl_parameters::mu_0()'],['../namespaceccl__test__distances.html#abc8984952fe15413ffa2455954c99084',1,'ccl_test_distances.mu_0()'],['../namespaceccl__test__power.html#aa636b77ad20e41c0d89cd7483070bf57',1,'ccl_test_power.mu_0()']]]
 ];

@@ -131,6 +131,32 @@ double ccl_rho_x(ccl_cosmology * cosmo, double a, ccl_species_x_label label, int
   return rhocrit * ccl_omega_x(cosmo, a, label, status);
 }
 
+/* --------- ROUTINE: ccl_mu_MG ---------
+INPUT: cosmology object, scale factor
+TASK: Compute mu(a) where mu is one of the the parameterizating functions 
+of modifications to GR in the quasistatic approximation. 
+*/
+
+double ccl_mu_MG(ccl_cosmology * cosmo, double a, int *status)
+{   
+	// This function can be extended to include other 
+	// z-dependences for mu in the future.
+	return cosmo->params.mu_0 * ccl_omega_x(cosmo, a, ccl_species_l_label, status) / cosmo->params.Omega_l;
+}
+
+/* --------- ROUTINE: ccl_Sig_MG ---------
+INPUT: cosmology object, scale factor
+TASK: Compute Sigma(a) where Sigma is one of the the parameterizating functions 
+of modifications to GR in the quasistatic approximation. 
+*/
+
+double ccl_Sig_MG(ccl_cosmology * cosmo, double a, int *status)
+{   
+	// This function can be extended to include other 
+	// z-dependences for Sigma in the future.
+	return cosmo->params.sigma_0 * ccl_omega_x(cosmo, a, ccl_species_l_label, status) / cosmo->params.Omega_l;
+}
+
 // Structure to hold parameters of chi_integrand
 typedef struct {
   ccl_cosmology *cosmo;
@@ -160,9 +186,30 @@ static int growth_ode_system(double a,const double y[],double dydt[],void *param
 
   double hnorm=h_over_h0(a,cosmo, &status);
   double om=ccl_omega_x(cosmo, a, ccl_species_m_label, &status);
-
-  dydt[0]=y[1]/(a*a*a*hnorm);
+  
   dydt[1]=1.5*hnorm*a*om*y[0];
+  dydt[0]=y[1]/(a*a*a*hnorm);
+
+  return status;
+}
+
+/* --------- ROUTINE: growth_ode_system_muSig ---------
+INPUT: scale factor
+TASK: Define the ODE system to be solved in order to compute the growth (of the density)
+* in the case in which we use the mu / Sigma quasistatic parameterisation of modified gravity
+*/
+static int growth_ode_system_muSig(double a,const double y[],double dydt[],void *params)
+{
+  int status = 0;
+  ccl_cosmology * cosmo = params;
+  
+  double hnorm=h_over_h0(a,cosmo, &status);
+  double om=ccl_omega_x(cosmo, a, ccl_species_m_label, &status);
+  
+  double mu = ccl_mu_MG(cosmo, a, &status);
+  dydt[1]=1.5*hnorm*a*om*y[0]*(1. + mu);
+ 
+  dydt[0]=y[1]/(a*a*a*hnorm);
 
   return status;
 }
@@ -198,28 +245,58 @@ static int  growth_factor_and_growth_rate(double a,double *gf,double *fg,ccl_cos
     int gslstatus;
     double y[2];
     double ainit=cosmo->gsl_params.EPS_SCALEFAC_GROWTH;
-    gsl_odeiv2_system sys={growth_ode_system,NULL,2,cosmo};
-    gsl_odeiv2_driver *d=
-      gsl_odeiv2_driver_alloc_y_new(
-        &sys,gsl_odeiv2_step_rkck,
-        0.1*cosmo->gsl_params.EPS_SCALEFAC_GROWTH,0,cosmo->gsl_params.ODE_GROWTH_EPSREL);
 
-    y[0]=cosmo->gsl_params.EPS_SCALEFAC_GROWTH;
-    y[1]=cosmo->gsl_params.EPS_SCALEFAC_GROWTH*cosmo->gsl_params.EPS_SCALEFAC_GROWTH*cosmo->gsl_params.EPS_SCALEFAC_GROWTH*
+    // if mu0 == 0, call normal growth_ode_system, otherwise call growth_ode_system_muSig
+    
+    if (cosmo->params.mu_0>1e-12 || cosmo->params.mu_0<-1e-12) {  
+		gsl_odeiv2_system sys = {growth_ode_system_muSig,NULL,2,cosmo};
+		
+		gsl_odeiv2_driver *d=
+            gsl_odeiv2_driver_alloc_y_new(
+            &sys,gsl_odeiv2_step_rkck,
+            0.1*cosmo->gsl_params.EPS_SCALEFAC_GROWTH,0,cosmo->gsl_params.ODE_GROWTH_EPSREL);
+
+        y[0]=cosmo->gsl_params.EPS_SCALEFAC_GROWTH;
+        y[1]=cosmo->gsl_params.EPS_SCALEFAC_GROWTH*cosmo->gsl_params.EPS_SCALEFAC_GROWTH*cosmo->gsl_params.EPS_SCALEFAC_GROWTH*
       h_over_h0(cosmo->gsl_params.EPS_SCALEFAC_GROWTH,cosmo, stat);
 
-    gslstatus=gsl_odeiv2_driver_apply(d,&ainit,a,y);
-    gsl_odeiv2_driver_free(d);
+        gslstatus=gsl_odeiv2_driver_apply(d,&ainit,a,y);
+        gsl_odeiv2_driver_free(d);
 
-    if(gslstatus != GSL_SUCCESS) {
-      ccl_raise_gsl_warning(gslstatus, "ccl_background.c: growth_factor_and_growth_rate():");
-      return NAN;
-    }
+        if(gslstatus != GSL_SUCCESS) {
+          ccl_raise_gsl_warning(gslstatus, "ccl_background.c: growth_factor_and_growth_rate():");
+          return NAN;
+          }
+    
+        *gf=y[0];
+        *fg=y[1]/(a*a*h_over_h0(a,cosmo, stat)*y[0]);
+        
+         return 0;
+    } else {
+        gsl_odeiv2_system sys = {growth_ode_system,NULL,2,cosmo};
+        
+        gsl_odeiv2_driver *d=
+            gsl_odeiv2_driver_alloc_y_new(
+            &sys,gsl_odeiv2_step_rkck,
+            0.1*cosmo->gsl_params.EPS_SCALEFAC_GROWTH,0,cosmo->gsl_params.ODE_GROWTH_EPSREL);
 
-    *gf=y[0];
-    *fg=y[1]/(a*a*h_over_h0(a,cosmo, stat)*y[0]);
-    return 0;
-  }
+        y[0]=cosmo->gsl_params.EPS_SCALEFAC_GROWTH;
+        y[1]=cosmo->gsl_params.EPS_SCALEFAC_GROWTH*cosmo->gsl_params.EPS_SCALEFAC_GROWTH*cosmo->gsl_params.EPS_SCALEFAC_GROWTH*
+          h_over_h0(cosmo->gsl_params.EPS_SCALEFAC_GROWTH,cosmo, stat);
+
+        gslstatus=gsl_odeiv2_driver_apply(d,&ainit,a,y);
+        gsl_odeiv2_driver_free(d);
+
+        if(gslstatus != GSL_SUCCESS) {
+          ccl_raise_gsl_warning(gslstatus, "ccl_background.c: growth_factor_and_growth_rate():");
+          return NAN;
+          }
+    
+        *gf=y[0];
+        *fg=y[1]/(a*a*h_over_h0(a,cosmo, stat)*y[0]);
+         return 0;
+      }
+   }
 }
 
 
@@ -512,7 +589,7 @@ INPUT: cosmology
 TASK: if not already there, make a table of growth function and growth rate
       normalize growth to input parameter growth0
 */
-
+// MUSIG
 void ccl_cosmology_compute_growth(ccl_cosmology * cosmo, int * status)
 {
 
@@ -527,7 +604,6 @@ void ccl_cosmology_compute_growth(ccl_cosmology * cosmo, int * status)
 
   if(cosmo->computed_growth)
     return;
-
   // Create logarithmically and then linearly-spaced values of the scale factor
   int  chistatus = 0, na = cosmo->spline_params.A_SPLINE_NA+cosmo->spline_params.A_SPLINE_NLOG-1;
   double * a = ccl_linlog_spacing(
@@ -549,6 +625,7 @@ void ccl_cosmology_compute_growth(ccl_cosmology * cosmo, int * status)
   gsl_integration_cquad_workspace * workspace=NULL;
   gsl_function F;
   gsl_spline *df_a_spline=NULL;
+  
   if(cosmo->params.has_mgrowth) {
     double *df_arr=malloc(na*sizeof(double));
     if(df_arr==NULL) {
@@ -610,7 +687,6 @@ void ccl_cosmology_compute_growth(ccl_cosmology * cosmo, int * status)
     F.function=&df_integrand;
     F.params=df_a_spline;
   }
-
   // allocate space for y, which will be all three
   // of E(a), chi(a), D(a) and f(a) in turn.
   int  status_mg=0, gslstatus;
@@ -630,10 +706,11 @@ void ccl_cosmology_compute_growth(ccl_cosmology * cosmo, int * status)
     ccl_cosmology_set_status_message(cosmo, "ccl_background.c: ccl_cosmology_compute_distances(): ran out of memory\n");
     return;
   }
-
+  // Get the growth factor and growth rate at z=0
   chistatus|=growth_factor_and_growth_rate(1.,&growth0,&fgrowth0,cosmo, status);
+  // Get the growth factor and growth rate at other redshifts
   for(int i=0; i<na; i++) {
-    chistatus|=growth_factor_and_growth_rate(a[i],&(y[i]),&(y2[i]),cosmo, status);
+    chistatus|=growth_factor_and_growth_rate(a[i],&(y[i]),&(y2[i]),cosmo, status); 
     if(cosmo->params.has_mgrowth) {
       if(a[i]>0) {
 	double df,integ;
@@ -653,7 +730,7 @@ void ccl_cosmology_compute_growth(ccl_cosmology * cosmo, int * status)
   y[i]*=exp(-integ);
       }
     }
-    y[i]/=growth0;
+    y[i]/=growth0; // Normalizing to the growth factor to the growth today 
   }
   if(chistatus || status_mg || *status) {
     free(a);
@@ -952,17 +1029,17 @@ void ccl_scale_factor_of_chis(ccl_cosmology * cosmo, int nchi, double chi[], dou
 
 double ccl_growth_factor(ccl_cosmology * cosmo, double a, int * status)
 {
-  if(a==1.){
+  if(a==1.){ 
     return 1.;
   }
-  else if(a>1.) {
+  else if(a>1.) { 
     *status = CCL_ERROR_COMPUTECHI;
     ccl_cosmology_set_status_message(cosmo, "ccl_background.c: scale factor cannot be larger than 1.\n");
     ccl_check_status(cosmo,status);
     return NAN;
   }
   else {
-    if (!cosmo->computed_growth) {
+    if (!cosmo->computed_growth){
       ccl_cosmology_compute_growth(cosmo, status);
       ccl_check_status(cosmo, status);
     }

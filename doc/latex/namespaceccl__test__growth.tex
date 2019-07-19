@@ -7,7 +7,7 @@ def \mbox{\hyperlink{namespaceccl__test__growth_ac1171a8ec4ef57387a5b8ada42d58d7
 \item 
 def \mbox{\hyperlink{namespaceccl__test__growth_a2f8c205fa1a57bf8d2b31752e4798701}{read\+\_\+growth\+\_\+allz\+\_\+benchmark\+\_\+file}} ()
 \item 
-def \mbox{\hyperlink{namespaceccl__test__growth_aba020a4d3272ed9d9b03b9c6a1ffb452}{compare\+\_\+growth}} (z, gfac\+\_\+bench, Omega\+\_\+v, w0, wa)
+def \mbox{\hyperlink{namespaceccl__test__growth_a27927b78f1df23384bee9dca46f09ad1}{compare\+\_\+growth}} (z, gfac\+\_\+bench, Omega\+\_\+v, w0, wa, mu\+\_\+0, sigma\+\_\+0)
 \item 
 def \mbox{\hyperlink{namespaceccl__test__growth_a37838dca6429b3ad372cb6f4e1607f02}{test\+\_\+growth\+\_\+lowz\+\_\+model\+\_\+0}} ()
 \item 
@@ -50,20 +50,24 @@ float \mbox{\hyperlink{namespaceccl__test__growth_ae7c040656adf879c79a4f0266f35e
 \item 
 float \mbox{\hyperlink{namespaceccl__test__growth_aefd3ff5bb306877374f5351d2df5f8fc}{n\+\_\+s}} = 0.\+96
 \item 
-\mbox{\hyperlink{namespaceccl__test__growth_a4abfc4891b595cd9d894d978c4ce89f0}{Omega\+\_\+v\+\_\+vals}} = np.\+array(\mbox{[}0.\+7, 0.\+7, 0.\+7, 0.\+65, 0.\+75\mbox{]})
+\mbox{\hyperlink{namespaceccl__test__growth_a4abfc4891b595cd9d894d978c4ce89f0}{Omega\+\_\+v\+\_\+vals}} = np.\+array(\mbox{[}0.\+7, 0.\+7, 0.\+7, 0.\+65, 0.\+75, 0.\+7, 0.\+7, 0.\+7, 0.\+7\mbox{]})
 \item 
-\mbox{\hyperlink{namespaceccl__test__growth_ab846706326cba20d21f5963cbe5af568}{w0\+\_\+vals}} = np.\+array(\mbox{[}-\/1.\+0, -\/0.\+9, -\/0.\+9, -\/0.\+9, -\/0.\+9\mbox{]})
+\mbox{\hyperlink{namespaceccl__test__growth_ab846706326cba20d21f5963cbe5af568}{w0\+\_\+vals}} = np.\+array(\mbox{[}-\/1.\+0, -\/0.\+9, -\/0.\+9, -\/0.\+9, -\/0.\+9, -\/0.\+9, -\/0.\+9, -\/0.\+9, -\/0.\+9\mbox{]})
 \item 
-\mbox{\hyperlink{namespaceccl__test__growth_a3b5a7ad847705c7a11bd75b81a268e5f}{wa\+\_\+vals}} = np.\+array(\mbox{[}0.\+0, 0.\+0, 0.\+1, 0.\+1, 0.\+1\mbox{]})
+\mbox{\hyperlink{namespaceccl__test__growth_a3b5a7ad847705c7a11bd75b81a268e5f}{wa\+\_\+vals}} = np.\+array(\mbox{[}0.\+0, 0.\+0, 0.\+1, 0.\+1, 0.\+1, 0.\+0, 0.\+0, 0.\+0, 0.\+0\mbox{]})
+\item 
+\mbox{\hyperlink{namespaceccl__test__growth_a2d2d3c3f2739df97770cb8dcc023466b}{mu0\+\_\+vals}} = np.\+array(\mbox{[}0.\+0, 0.\+0, 0.\+0, 0.\+0, 0.\+0, 0.\+1, -\/0.\+1, 0.\+1, -\/0.\+1\mbox{]})
+\item 
+\mbox{\hyperlink{namespaceccl__test__growth_a917391583cc5f328ef9ab45e2669b6cc}{Sig0\+\_\+vals}} = np.\+array(\mbox{[}0.\+0, 0.\+0, 0.\+0, 0.\+0, 0.\+0, 0.\+1, -\/0.\+1, -\/0.\+1, 0.\+1\mbox{]})
 \end{DoxyCompactItemize}
 
 
 \subsection{Function Documentation}
-\mbox{\Hypertarget{namespaceccl__test__growth_aba020a4d3272ed9d9b03b9c6a1ffb452}\label{namespaceccl__test__growth_aba020a4d3272ed9d9b03b9c6a1ffb452}} 
+\mbox{\Hypertarget{namespaceccl__test__growth_a27927b78f1df23384bee9dca46f09ad1}\label{namespaceccl__test__growth_a27927b78f1df23384bee9dca46f09ad1}} 
 \index{ccl\+\_\+test\+\_\+growth@{ccl\+\_\+test\+\_\+growth}!compare\+\_\+growth@{compare\+\_\+growth}}
 \index{compare\+\_\+growth@{compare\+\_\+growth}!ccl\+\_\+test\+\_\+growth@{ccl\+\_\+test\+\_\+growth}}
 \subsubsection{\texorpdfstring{compare\+\_\+growth()}{compare\_growth()}}
-{\footnotesize\ttfamily def ccl\+\_\+test\+\_\+growth.\+compare\+\_\+growth (\begin{DoxyParamCaption}\item[{}]{z,  }\item[{}]{gfac\+\_\+bench,  }\item[{}]{Omega\+\_\+v,  }\item[{}]{w0,  }\item[{}]{wa }\end{DoxyParamCaption})}
+{\footnotesize\ttfamily def ccl\+\_\+test\+\_\+growth.\+compare\+\_\+growth (\begin{DoxyParamCaption}\item[{}]{z,  }\item[{}]{gfac\+\_\+bench,  }\item[{}]{Omega\+\_\+v,  }\item[{}]{w0,  }\item[{}]{wa,  }\item[{}]{mu\+\_\+0,  }\item[{}]{sigma\+\_\+0 }\end{DoxyParamCaption})}
 
 \begin{DoxyVerb}Compare growth factor calculated by pyccl with the values in the benchmark
 file. This test only works if radiation is explicitly set to 0.
@@ -180,6 +184,12 @@ result for a particular modification of the growth rate.
 \subsubsection{\texorpdfstring{m\+\_\+nu}{m\_nu}}
 {\footnotesize\ttfamily int ccl\+\_\+test\+\_\+growth.\+m\+\_\+nu = 0.}
 
+\mbox{\Hypertarget{namespaceccl__test__growth_a2d2d3c3f2739df97770cb8dcc023466b}\label{namespaceccl__test__growth_a2d2d3c3f2739df97770cb8dcc023466b}} 
+\index{ccl\+\_\+test\+\_\+growth@{ccl\+\_\+test\+\_\+growth}!mu0\+\_\+vals@{mu0\+\_\+vals}}
+\index{mu0\+\_\+vals@{mu0\+\_\+vals}!ccl\+\_\+test\+\_\+growth@{ccl\+\_\+test\+\_\+growth}}
+\subsubsection{\texorpdfstring{mu0\+\_\+vals}{mu0\_vals}}
+{\footnotesize\ttfamily ccl\+\_\+test\+\_\+growth.\+mu0\+\_\+vals = np.\+array(\mbox{[}0.\+0, 0.\+0, 0.\+0, 0.\+0, 0.\+0, 0.\+1, -\/0.\+1, 0.\+1, -\/0.\+1\mbox{]})}
+
 \mbox{\Hypertarget{namespaceccl__test__growth_aefd3ff5bb306877374f5351d2df5f8fc}\label{namespaceccl__test__growth_aefd3ff5bb306877374f5351d2df5f8fc}} 
 \index{ccl\+\_\+test\+\_\+growth@{ccl\+\_\+test\+\_\+growth}!n\+\_\+s@{n\+\_\+s}}
 \index{n\+\_\+s@{n\+\_\+s}!ccl\+\_\+test\+\_\+growth@{ccl\+\_\+test\+\_\+growth}}
@@ -208,17 +218,23 @@ result for a particular modification of the growth rate.
 \index{ccl\+\_\+test\+\_\+growth@{ccl\+\_\+test\+\_\+growth}!Omega\+\_\+v\+\_\+vals@{Omega\+\_\+v\+\_\+vals}}
 \index{Omega\+\_\+v\+\_\+vals@{Omega\+\_\+v\+\_\+vals}!ccl\+\_\+test\+\_\+growth@{ccl\+\_\+test\+\_\+growth}}
 \subsubsection{\texorpdfstring{Omega\+\_\+v\+\_\+vals}{Omega\_v\_vals}}
-{\footnotesize\ttfamily ccl\+\_\+test\+\_\+growth.\+Omega\+\_\+v\+\_\+vals = np.\+array(\mbox{[}0.\+7, 0.\+7, 0.\+7, 0.\+65, 0.\+75\mbox{]})}
+{\footnotesize\ttfamily ccl\+\_\+test\+\_\+growth.\+Omega\+\_\+v\+\_\+vals = np.\+array(\mbox{[}0.\+7, 0.\+7, 0.\+7, 0.\+65, 0.\+75, 0.\+7, 0.\+7, 0.\+7, 0.\+7\mbox{]})}
+
+\mbox{\Hypertarget{namespaceccl__test__growth_a917391583cc5f328ef9ab45e2669b6cc}\label{namespaceccl__test__growth_a917391583cc5f328ef9ab45e2669b6cc}} 
+\index{ccl\+\_\+test\+\_\+growth@{ccl\+\_\+test\+\_\+growth}!Sig0\+\_\+vals@{Sig0\+\_\+vals}}
+\index{Sig0\+\_\+vals@{Sig0\+\_\+vals}!ccl\+\_\+test\+\_\+growth@{ccl\+\_\+test\+\_\+growth}}
+\subsubsection{\texorpdfstring{Sig0\+\_\+vals}{Sig0\_vals}}
+{\footnotesize\ttfamily ccl\+\_\+test\+\_\+growth.\+Sig0\+\_\+vals = np.\+array(\mbox{[}0.\+0, 0.\+0, 0.\+0, 0.\+0, 0.\+0, 0.\+1, -\/0.\+1, -\/0.\+1, 0.\+1\mbox{]})}
 
 \mbox{\Hypertarget{namespaceccl__test__growth_ab846706326cba20d21f5963cbe5af568}\label{namespaceccl__test__growth_ab846706326cba20d21f5963cbe5af568}} 
 \index{ccl\+\_\+test\+\_\+growth@{ccl\+\_\+test\+\_\+growth}!w0\+\_\+vals@{w0\+\_\+vals}}
 \index{w0\+\_\+vals@{w0\+\_\+vals}!ccl\+\_\+test\+\_\+growth@{ccl\+\_\+test\+\_\+growth}}
 \subsubsection{\texorpdfstring{w0\+\_\+vals}{w0\_vals}}
-{\footnotesize\ttfamily ccl\+\_\+test\+\_\+growth.\+w0\+\_\+vals = np.\+array(\mbox{[}-\/1.\+0, -\/0.\+9, -\/0.\+9, -\/0.\+9, -\/0.\+9\mbox{]})}
+{\footnotesize\ttfamily ccl\+\_\+test\+\_\+growth.\+w0\+\_\+vals = np.\+array(\mbox{[}-\/1.\+0, -\/0.\+9, -\/0.\+9, -\/0.\+9, -\/0.\+9, -\/0.\+9, -\/0.\+9, -\/0.\+9, -\/0.\+9\mbox{]})}
 
 \mbox{\Hypertarget{namespaceccl__test__growth_a3b5a7ad847705c7a11bd75b81a268e5f}\label{namespaceccl__test__growth_a3b5a7ad847705c7a11bd75b81a268e5f}} 
 \index{ccl\+\_\+test\+\_\+growth@{ccl\+\_\+test\+\_\+growth}!wa\+\_\+vals@{wa\+\_\+vals}}
 \index{wa\+\_\+vals@{wa\+\_\+vals}!ccl\+\_\+test\+\_\+growth@{ccl\+\_\+test\+\_\+growth}}
 \subsubsection{\texorpdfstring{wa\+\_\+vals}{wa\_vals}}
-{\footnotesize\ttfamily ccl\+\_\+test\+\_\+growth.\+wa\+\_\+vals = np.\+array(\mbox{[}0.\+0, 0.\+0, 0.\+1, 0.\+1, 0.\+1\mbox{]})}
+{\footnotesize\ttfamily ccl\+\_\+test\+\_\+growth.\+wa\+\_\+vals = np.\+array(\mbox{[}0.\+0, 0.\+0, 0.\+1, 0.\+1, 0.\+1, 0.\+0, 0.\+0, 0.\+0, 0.\+0\mbox{]})}
 

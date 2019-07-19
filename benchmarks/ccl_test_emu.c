@@ -31,6 +31,8 @@ CTEST_DATA(emu) {
   double h[6];
   double w_0[6];
   double w_a[6];
+  double mu_0;
+  double sigma_0;
 };
 
 CTEST_SETUP(emu) {
@@ -42,6 +44,8 @@ CTEST_SETUP(emu) {
   double mnuval = 0.;
   data->mnu=&mnuval;
   data->mnu_type=ccl_mnu_sum;
+  data->mu_0 = 0.;
+  data->sigma_0 = 0.;
 
   int status=0;
   char fname[256],str[1024];
@@ -101,7 +105,7 @@ static void compare_emu(int i_model,struct emu_data * data)
   ccl_parameters params = ccl_parameters_create(data->Omega_c[i_model-1],data->Omega_b[i_model-1],0.0,data->Neff,
 						data->mnu, data->mnu_type, data->w_0[i_model-1],data->w_a[i_model-1],
 						data->h[i_model-1],data->sigma8[i_model-1],data->n_s[i_model-1],
-						-1,-1,-1,-1,NULL,NULL, &status);
+						-1,-1,-1,data->mu_0, data->sigma_0,-1,NULL,NULL, &status);
   params.Omega_l=params.Omega_l+params.Omega_g;
   params.Omega_g=0;
   ccl_cosmology * cosmo = ccl_cosmology_create(params, config);

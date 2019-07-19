@@ -15,19 +15,21 @@ CTEST_DATA(growth_lowz) {
   double n_s;
   double Neff;
   double* mnu;
-  double Omega_v[5];
-  double Omega_k[5];
-  double w_0[5];
-  double w_a[5];
+  double Omega_v[9];
+  double Omega_k[9];
+  double w_0[9];
+  double w_a[9];
   ccl_mnu_convention mnu_type;
+  double mu_0[9];
+  double sigma_0[9];
   
   double z[6];
-  double gf[5][6];
+  double gf[9][6];
 };
 
 // Read the fixed format file containing all the growth factor
 // benchmarks
-static void read_growth_test_file(double z[6], double gf[5][6])
+static void read_growth_test_file(double z[6], double gf[9][6])
 {
   //Growth is normalized to ~a at early times
   FILE * f = fopen("./benchmarks/data/growth_model1-5.txt", "r");
@@ -64,16 +66,20 @@ CTEST_SETUP(growth_lowz) {
   
   
   // Values that are different for the different models
-  double Omega_v[5] = {  0.7,  0.7,  0.7,  0.65, 0.75 };
-  double w_0[5]     = { -1.0, -0.9, -0.9, -0.9, -0.9  };
-  double w_a[5]     = {  0.0,  0.0,  0.1,  0.1,  0.1  };
+  double Omega_v[9] = {  0.7,  0.7,  0.7,  0.65, 0.75, 0.7, 0.7, 0.7, 0.7 };
+  double w_0[9]     = { -1.0, -0.9, -0.9, -0.9, -0.9, -0.9, -0.9 -0.9, -0.9 };
+  double w_a[9]     = {  0.0,  0.0,  0.1,  0.1,  0.1, 0., 0., 0., 0.  };
+  double mu_0[9]    = {0., 0., 0., 0., 0., 0.1, -0.1, 0.1, -0.1};
+  double sigma_0[9] = {0., 0., 0., 0., 0., 0.1, -0.1, -0.1, 0.1};
   
   // Fill in the values from these constant arrays.
-  for (int i=0; i<5; i++) {
+  for (int i=0; i<9; i++) {
     data->Omega_v[i] = Omega_v[i];
     data->w_0[i]     = w_0[i];
     data->w_a[i]     = w_a[i];
     data->Omega_k[i] = 1.0 - data->Omega_c - data->Omega_b - data->Omega_v[i];
+    data->mu_0[i] = mu_0[i];
+    data->sigma_0[i] = sigma_0[i];
   }
 
   // The file of benchmark data.
@@ -85,8 +91,8 @@ static void compare_growth(int model, struct growth_lowz_data * data)
   int status=0; 	
   // Make the parameter set from the input data
   // Values of some parameters depend on the model index
-  ccl_parameters params = ccl_parameters_create(data->Omega_c, data->Omega_b, data->Omega_k[model], data->Neff, data->mnu, data->mnu_type, data->w_0[model], data->w_a[model], data->h, data->A_s, data->n_s,-1,-1,-1,-1,NULL,NULL, &status);
-  params.Omega_g=0;//enforce no radiation
+  ccl_parameters params = ccl_parameters_create(data->Omega_c, data->Omega_b, data->Omega_k[model], data->Neff, data->mnu, data->mnu_type, data->w_0[model], data->w_a[model], data->h, data->A_s, data->n_s,-1,-1,-1,data->mu_0[model], data->sigma_0[model],-1,NULL,NULL, &status);
+  params.Omega_g=0; //enforce no radiation
   params.Omega_l = 1.-params.Omega_m-params.Omega_k; //recompute Omega_l without radiation
   // Make a cosmology object from the parameters with the default configuration
   ccl_cosmology * cosmo = ccl_cosmology_create(params, default_config);
@@ -122,9 +128,8 @@ static void check_mgrowth(void)
   }
   double mnuval = 0;
   
-  
-  params1=ccl_parameters_create(0.25,0.05,0,0,&mnuval, 1, -1,0,0.7,2.1E-9,0.96,-1,-1,-1,-1,NULL,NULL, &status);
-  params2=ccl_parameters_create(0.25,0.05,0,0,&mnuval, 1, -1,0,0.7,2.1E-9,0.96,-1,-1,-1,nz_mg,z_mg,df_mg, &status);
+  params1=ccl_parameters_create(0.25, 0.05, 0, 0, &mnuval, 1, -1, 0, 0.7, 2.1E-9, 0.96, -1, -1, -1, 0., 0., -1, NULL, NULL, &status);
+  params2=ccl_parameters_create(0.25,0.05,0,0,&mnuval, 1, -1,0,0.7,2.1E-9,0.96,-1,-1,-1,0., 0., nz_mg,z_mg,df_mg, &status);
   params1.Omega_g=0; //enforce no radiation
   params1.Omega_l = 1.-params1.Omega_m-params1.Omega_k; //reomcpute Omega_l without radiation
   params2.Omega_g=0; //enforce no radiation
@@ -178,6 +183,6 @@ CTEST2(growth_lowz, model_5) {
   compare_growth(model, data);
 }
 
-CTEST2(growth_lowz, mgrowth) {
+CTEST2(growth_lowz, mgrowth){
   check_mgrowth();
 }

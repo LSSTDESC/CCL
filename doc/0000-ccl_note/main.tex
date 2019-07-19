@@ -329,6 +329,13 @@ To use \ccl, the first step is to create a {\tt ccl$\_$cosmology} structure, con
  \end{itemize}
 The argument ${\tt norm\_pk}$ can be used to specify the power spectrum normalization in terms of either $\sigma_8$ or $A_\mathrm{s}$. The {\tt ccl$\_$parameters$\_$create} functions assume $\sigma_8$ normalization if ${\tt norm\_pk > 1.0e-5}$ and $A_{\mathrm s}$ normalization otherwise.
 
+The arguments ${\tt mu\_0}$ ($\mu_0$) and ${\tt Sigma\_0}$ ($\Sigma_0$) are the parameters governing the amplitude of modifications to the cosmological Poisson equation for massive and massless particles respectively (see sections \ref{sec:growth} and \ref{sec:cl} below for more details). We currently assume the functional forms \citep{Ferreira2010}
+\begin{equation}
+\mu(z) = \mu_0 \frac{\Omega_\Lambda(z)}{\Omega_\Lambda(z=0)}\, , \,\,\, \Sigma(z) = \Sigma_0 \frac{\Omega_\Lambda(z)}{\Omega_\Lambda(z=0)}
+\label{muSigform}
+\end{equation}
+but expect to introduce functionality for a broader range of functional forms in time.
+
 {\tt ccl$\_$configuration} objects contain information about the prescriptions to be used to compute transfer functions, power spectra, mass functions, etc. A default {\tt ccl$\_$configuration} object is made available as {\tt default$\_$config}, which specifies that CLASS will be used to compute transfer functions, HaloFit will be used to calculate the matter power spectrum, there will be no impact of baryons included and the Tinker 2010 prescription will be used to compute the halo mass function.
 
 After initializing instances of {\tt ccl$\_$parameters} and {\tt ccl$\_$configuration}, use the function {\tt ccl$\_$cosmology$\_$create(ccl$\_$parameters, ccl$\_$configuration)} to return a pointer to a {\tt ccl$\_$cosmology} structure. You will need to pass this pointer around to every CCL function.
@@ -459,7 +466,15 @@ In doing this, \ccl simultaneously computes the growth rate $f(a)$, defined as:
 
 Note that the above is strictly valid for a Universe containing only dust-like matter components. A scale-independent growth rate is, for example, ill-defined in the presence of massive neutrinos; therefore \ccl will raise an error if the user attempts to calculate the growth rate or growth factor in a cosmology with massive neutrinos.
 
-Currently \ccl allows for an alternative `modified gravity' cosmological model defined by a regular background $(w_0+w_a)$CDM (with arbitrary $K$) as well as a user-defined $\Delta f(a)$, such that the true growth rate in this model is given by $f(a)=f_0(a)+\Delta f(a)$, where $f_0(a)$ is the growth rate in the background model. Note that this model is only consistently implemented with regards to the computation of the linear growth factor and growth rates (which will also scale the linear power spectrum). All other \ccl functions (including the non-linear power spectrum) will ignore these modifications. This model, and the interpretation of the predictions given by \ccl, should therefore be used with care.
+Currently, \ccl allows for two version of alternative `modified gravity' cosmological models. The first is defined by a regular background $(w_0+w_a)$CDM (with arbitrary $K$) as well as a user-defined $\Delta f(a)$, such that the true growth rate in this model is given by $f(a)=f_0(a)+\Delta f(a)$, where $f_0(a)$ is the growth rate in the background model. Note that this implementation of `modified gravity' is only consistently implemented with regards to the computation of the linear growth factor and growth rates (which will also scale the linear power spectrum). All other \ccl functions (including the non-linear power spectrum) will ignore these modifications. This model, and the interpretation of the predictions given by \ccl, should therefore be used with care.
+
+The second model for deviations from General Relativity supported by \ccl is the quasistatic parameterization, with parameterizing functions $\mu(a)$ (the change to the Poisson equation for massive particles) and $\Sigma(a)$ (the change to the same for massless particles), with functional form assumed to be given as in equation \ref{muSigform}. The background is once again allowed to be defined by $(w_0+w_a)$CDM (with arbitrary $K$). 
+
+The growth factor and growth rate are altered when ${\tt mu\_0} \ne 0$, with the above equation becoming
+\begin{equation}
+  \frac{d}{da}\left(a^3H(a)\frac{dD}{da}\right)=\frac{3}{2}\Omega_M(a)aH(a)(1 + \mu(a))D.
+\end{equation}
+As usual, the resulting growth factor can be returned normalized to $D(a=1)=1$ or to $D(a\ll1)\rightarrow a$. The second normalization is used in returning the matter power spectrum with appropriate modification in this model, as discussed in section \ref{sec:power}.
 
 \subsection{Matter power spectrum}
 \label{sec:power}
@@ -567,6 +582,18 @@ The main consequences of baryonic processes are: to suppress the power spectrum 
 If the BCM parameters are not specified and the user sets \ccl to compute the power spectrum with baryonic feedback included, \ccl will assume the default parameters of \citet{Schneider15}. The user may pass these explicitly if desired.
 
 Other baryonic impact models might be incorporated in the future as they become available.
+
+\subsubsection{Modified gravity ($\mu, \Sigma$)}
+\ccl supports the quasistatic parameterization of modified gravity with scale-independent deviations from GR which arise at late times (currently with functional form given in equation \ref{muSigform}). Under these conditions, the matter power spectrum in a modified gravity scenario can be computed simply by re-scaling the GR matter power spectrum with the modified gravity growth factor.
+
+For each power spectrum calculation method above, we first compute the power spectrum in GR at a grid in $a$ and $k$ as usual, in preparation for producing splines in these variables. If ${\tt mu\_0} \ne 0$, we then take the ratio of the growth factor $D$ at the given value of ${\tt mu\_0}$ to the GR (${\tt mu\_0}=0$) growth factor, and multiply the GR power spectrum by this ratio squared:
+\begin{equation}
+P(k,z) = \left(\frac{D^{\mu}(z)}{D^{\rm GR}(z)}\right)^2 P^{\rm GR}(k,z).
+\label{Pkmu}
+\end{equation}
+We then set up splines for the power spectrum as usual. 
+
+Note that the $\mu, \Sigma$ quasistatic parameterization of deviations from GR is technically only valid in the linear regime and at sub-horizon scales. We allow the user to do this re-scaling for the non-linear power spectrum, but issue a warning. Computing the matter power spectrum under this paramterisation of modified gravity will not produce physically meaningful results on very large or small scales. 
 
 \subsubsection{Spline parameters}
 
@@ -712,7 +739,6 @@ Three important things must be noted about them:
 
 \subsubsection*{Transfer functions}
 In the most general case, {\tt CCL} accepts transfer functions as generic functions of $k$ and $a$. For simplicity and speed it also supports the simpler case where these are factorisable: $T_\alpha(k,a)=K_\alpha(k)\,A_\alpha(a)$.
-
 
 \subsubsection*{$\ell$ prefactors}
 We provide 3 options for these, encoded in a parameter that we will call $d_\theta$ here:

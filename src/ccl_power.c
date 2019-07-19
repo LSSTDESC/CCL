@@ -104,6 +104,7 @@ static void ccl_cosmology_compute_linpower_analytic(
                "memory allocation\n");
     }
   }
+
   if(*status==0) {
     y2d = malloc(nk * na * sizeof(double));
     if(y2d==NULL) {
@@ -431,6 +432,12 @@ TASK: compute power spectrum
 void ccl_cosmology_compute_power(ccl_cosmology* cosmo, int* status)
 {
 
+  if ( (cosmo->config.transfer_function_method != ccl_boltzmann_class) && (fabs(cosmo->params.mu_0)>1e-14 || fabs(cosmo->params.sigma_0)>1e-14)){
+	  *status = CCL_ERROR_NOT_IMPLEMENTED;
+	  strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power(): The power spectrum in the mu / Sigma modified gravity parameterisation is only implemented with the ccl_boltzmann_class power spectrum method.\n");
+	  return;
+  }
+
   if (cosmo->computed_power) return;
 
   // get linear P(k)
@@ -474,6 +481,12 @@ void ccl_cosmology_compute_power(ccl_cosmology* cosmo, int* status)
         break;
 
       case ccl_halofit: {
+        if (fabs(cosmo->params.mu_0)>1e-14 || fabs(cosmo->params.sigma_0)>1e-14){
+	       *status = CCL_ERROR_NOT_IMPLEMENTED;
+	       strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power(): The power spectrum in the mu / Sigma modified gravity parameterisation is only implemented with the linear power spectrum.\n");
+	       return;
+        }
+        
         // temporarily set computed_power to true
         cosmo->computed_power = true;
         halofit_struct *hf = NULL;
@@ -485,6 +498,13 @@ void ccl_cosmology_compute_power(ccl_cosmology* cosmo, int* status)
         break;
 
       case ccl_halo_model: {
+      
+      if (fabs(cosmo->params.mu_0)>1e-14 || fabs(cosmo->params.sigma_0)>1e-14){
+	       *status = CCL_ERROR_NOT_IMPLEMENTED;
+	       strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power(): The power spectrum in the mu / Sigma modified gravity parameterisation is only implemented with the linear power spectrum.\n");
+	       return;
+        }
+      
         // temporarily set computed_power to true
         cosmo->computed_power = true;
         ccl_cosmology_spline_nonlinpower(cosmo, halomodel_power, NULL, status);
@@ -492,6 +512,13 @@ void ccl_cosmology_compute_power(ccl_cosmology* cosmo, int* status)
         break;
 
       case ccl_emu:
+      
+        if (fabs(cosmo->params.mu_0)>1e-14 || fabs(cosmo->params.sigma_0)>1e-14){
+	       *status = CCL_ERROR_NOT_IMPLEMENTED;
+	       strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power(): The power spectrum in the mu / Sigma modified gravity parameterisation is only implemented with the linear power spectrum.\n");
+	       return;
+        }
+      
         // special case due to parameter handling and ranges
         ccl_cosmology_compute_power_emu(cosmo, status);
         break;
@@ -520,6 +547,7 @@ TASK: compute the linear power spectrum at a given redshift
 double ccl_linear_matter_power(ccl_cosmology* cosmo, double k, double a, int* status)
 {
   if (!cosmo->computed_power) ccl_cosmology_compute_power(cosmo, status);
+
   // Return if compilation failed
   if (!cosmo->computed_power) return NAN;
 
@@ -545,6 +573,7 @@ typedef struct {
   double R;
   int* status;
 } SigmaR_pars;
+
 
 typedef struct {
   ccl_cosmology *cosmo;
@@ -666,6 +695,7 @@ INPUT: cosmology
 TASK: compute sigma8, the variance in the *linear* density field at a=1
 smoothed with a tophat filter of comoving size 8 Mpc/h
 */
+
 double ccl_sigma8(ccl_cosmology *cosmo, int *status)
 {
   return ccl_sigmaR(cosmo,8/cosmo->params.h, 1.,status);

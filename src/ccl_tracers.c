@@ -306,10 +306,13 @@ void ccl_get_lensing_mag_kernel(ccl_cosmology *cosmo,
       double chi=chi_arr[ichi];
       double a=ccl_scale_factor_of_chi(cosmo,chi,status);
       double z=1./a-1;
+      double mgfac=1;
+      if ( fabs(cosmo->params.sigma_0) ) //Add MG correction if needed
+	mgfac+=ccl_Sig_MG(cosmo,a, status);
       ipar->status=status;
       ipar->z_end=z;
       ipar->chi_end=chi;
-      wL_arr[ichi]=lensing_kernel_integrate(cosmo,ipar)*(1+z)*lens_prefac;
+      wL_arr[ichi]=lensing_kernel_integrate(cosmo,ipar)*(1+z)*lens_prefac*mgfac;
     }
   }
 
@@ -330,7 +333,10 @@ void ccl_get_kappa_kernel(ccl_cosmology *cosmo,
   for(ichi=0;ichi<nchi;ichi++) {
     double chi=chi_arr[ichi];
     double a=ccl_scale_factor_of_chi(cosmo,chi,status);
-    wchi[ichi]=lens_prefac*(ccl_sinn(cosmo,chi_source-chi,status))*chi/a;
+    double mgfac=1;
+    if ( fabs(cosmo->params.sigma_0) ) //Add MG correction if needed
+      mgfac+=ccl_Sig_MG(cosmo,a, status);
+    wchi[ichi]=lens_prefac*(ccl_sinn(cosmo,chi_source-chi,status))*chi*mgfac/a;
   }
 }
 

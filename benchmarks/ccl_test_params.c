@@ -19,6 +19,8 @@ CTEST_DATA(parameters) {
   double bcm_log10Mc;
   double bcm_etab;
   double bcm_ks;
+  double mu_0;
+  double sigma_0;
   int status;
 };
 
@@ -43,6 +45,8 @@ CTEST_SETUP(parameters) {
   data->bcm_etab = 80.0;
   data->bcm_ks = 1.1,
   data->status=0;
+  data->mu_0 = 0.;
+  data->sigma_0 = 0.;
 }
 
 // The 2 on the end of CTEST2_SKIP means that for this test we use
@@ -163,6 +167,8 @@ CTEST2(parameters, create_general_nu_list) {
       data->bcm_log10Mc,
       data->bcm_etab,
       data->bcm_ks,
+      data->mu_0,
+      data->sigma_0,
       -1,
       NULL,
       NULL,
@@ -198,6 +204,8 @@ CTEST2(parameters, create_general_nu_sum) {
       data->bcm_log10Mc,
       data->bcm_etab,
       data->bcm_ks,
+      data->mu_0,
+      data->sigma_0,
       -1,
       NULL,
       NULL,
@@ -230,6 +238,8 @@ CTEST2(parameters, create_general_nu_sum_inverted) {
       data->bcm_log10Mc,
       data->bcm_etab,
       data->bcm_ks,
+      data->mu_0,
+      data->sigma_0,
       -1,
       NULL,
       NULL,
@@ -262,6 +272,8 @@ CTEST2(parameters, create_general_nu_sum_equal) {
       data->bcm_log10Mc,
       data->bcm_etab,
       data->bcm_ks,
+      data->mu_0,
+      data->sigma_0,
       -1,
       NULL,
       NULL,

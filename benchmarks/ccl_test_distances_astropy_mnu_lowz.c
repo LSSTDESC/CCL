@@ -27,6 +27,8 @@ CTEST_DATA(distances_astropy_mnu_lowz) {
   double z[5];
   double chi[5][5];
   double dm[5][5];
+  double mu_0;
+  double sigma_0;
 };
 
 // Read the fixed format file containing all the radial comoving
@@ -81,6 +83,8 @@ CTEST_SETUP(distances_astropy_mnu_lowz) {
   data->A_s = 2.1e-9;
   data->n_s = 0.96;
   data->mnu_type = ccl_mnu_list;
+  data->mu_0=0.;
+  data->sigma_0=0.;
 
   // Values that are different for the different models
   double Omega_v[5] = {  0.7,  0.7,  0.7,  0.65, 0.75 };
@@ -146,27 +150,27 @@ static void compare_distances_mnu(int model, struct distances_astropy_mnu_lowz_d
   params = ccl_parameters_create(data->Omega_c, data->Omega_b, data->Omega_k[model],
 						data->Neff[model], data->mnu0, data-> mnu_type, 
 						data->w_0[model], data->w_a[model],
-						data->h, data->A_s, data->n_s,-1,-1,-1,-1,NULL,NULL, &status);
+						data->h, data->A_s, data->n_s,-1,-1,-1,data->mu_0, data->sigma_0,-1,NULL,NULL, &status);
   } else if (model==1){
 	  params = ccl_parameters_create(data->Omega_c, data->Omega_b, data->Omega_k[model],
 						data->Neff[model], data->mnu1, data->mnu_type,
 						data->w_0[model], data->w_a[model],
-						data->h, data->A_s, data->n_s,-1,-1,-1,-1,NULL,NULL, &status);
+						data->h, data->A_s, data->n_s,-1,-1,-1,data->mu_0, data->sigma_0,-1,NULL,NULL, &status);
   } else if (model==2){
 	 params = ccl_parameters_create(data->Omega_c, data->Omega_b, data->Omega_k[model],
 						data->Neff[model], data->mnu2, data->mnu_type,
 						data->w_0[model], data->w_a[model],
-						data->h, data->A_s, data->n_s,-1,-1,-1,-1,NULL,NULL, &status);
+						data->h, data->A_s, data->n_s,-1,-1,-1,data->mu_0, data->sigma_0,-1,NULL,NULL, &status);
   } else if (model ==3){
 	params = ccl_parameters_create(data->Omega_c, data->Omega_b, data->Omega_k[model],
 						data->Neff[model], data->mnu3, data->mnu_type,
 						data->w_0[model], data->w_a[model],
-						data->h, data->A_s, data->n_s,-1,-1,-1,-1,NULL,NULL, &status);
+						data->h, data->A_s, data->n_s,-1,-1,-1,data->mu_0, data->sigma_0,-1,NULL,NULL, &status);
   }else if (model ==4){
 	  params = ccl_parameters_create(data->Omega_c, data->Omega_b, data->Omega_k[model],
 						data->Neff[model], data->mnu4, data->mnu_type,
 						data->w_0[model], data->w_a[model],
-						data->h, data->A_s, data->n_s,-1,-1,-1,-1,NULL,NULL, &status);
+						data->h, data->A_s, data->n_s,-1,-1,-1,data->mu_0, data->sigma_0,-1,NULL,NULL, &status);
   }
   
   // Make a cosmology object from the parameters with the default configuration

@@ -25,16 +25,10 @@ typedef struct \mbox{\hyperlink{structccl__configuration}{ccl\+\_\+configuration
 \subsection*{Enumerations}
 \begin{DoxyCompactItemize}
 \item 
-enum \mbox{\hyperlink{ccl__config_8h_a8746e6d3648e86a8233d4c2813415e15}{transfer\+\_\+function\+\_\+t}} \{ \newline
-\mbox{\hyperlink{ccl__config_8h_a8746e6d3648e86a8233d4c2813415e15a5a7bbc705ff820dc4d88ee48a5c45fae}{ccl\+\_\+emulator}} = 0, 
-\mbox{\hyperlink{ccl__config_8h_a8746e6d3648e86a8233d4c2813415e15a46d822cbfbe6510b84beb65811e4acc2}{ccl\+\_\+none}} = 0, 
-\mbox{\hyperlink{ccl__config_8h_a8746e6d3648e86a8233d4c2813415e15afb906e8bd266414e8588683d2db7d4ee}{ccl\+\_\+fitting\+\_\+function}} = 1, 
+enum \mbox{\hyperlink{ccl__config_8h_a8746e6d3648e86a8233d4c2813415e15}{transfer\+\_\+function\+\_\+t}} \{ \mbox{\hyperlink{ccl__config_8h_a8746e6d3648e86a8233d4c2813415e15aaa0cf93f571e6e226fe14892748ff82c}{ccl\+\_\+transfer\+\_\+none}} = 0, 
 \mbox{\hyperlink{ccl__config_8h_a8746e6d3648e86a8233d4c2813415e15a0aba562d960017a68b411095ef8e1344}{ccl\+\_\+eisenstein\+\_\+hu}} = 1, 
-\newline
 \mbox{\hyperlink{ccl__config_8h_a8746e6d3648e86a8233d4c2813415e15a950fe48832d5de84108410186216c083}{ccl\+\_\+bbks}} = 2, 
-\mbox{\hyperlink{ccl__config_8h_a8746e6d3648e86a8233d4c2813415e15abe0a265ef1434d85a9363e99149b8c12}{ccl\+\_\+boltzmann}} = 3, 
-\mbox{\hyperlink{ccl__config_8h_a8746e6d3648e86a8233d4c2813415e15a2b9083c5271eb911d72cc8dc0553fec0}{ccl\+\_\+boltzmann\+\_\+class}} = 3, 
-\mbox{\hyperlink{ccl__config_8h_a8746e6d3648e86a8233d4c2813415e15a7630657ff747621b606c67e6736f6810}{ccl\+\_\+boltzmann\+\_\+camb}} = 4
+\mbox{\hyperlink{ccl__config_8h_a8746e6d3648e86a8233d4c2813415e15a2b9083c5271eb911d72cc8dc0553fec0}{ccl\+\_\+boltzmann\+\_\+class}} = 3
  \}
 \item 
 enum \mbox{\hyperlink{ccl__config_8h_a33c02fcf871bde5a88799d19418fb615}{matter\+\_\+power\+\_\+spectrum\+\_\+t}} \{ \mbox{\hyperlink{ccl__config_8h_a33c02fcf871bde5a88799d19418fb615a5fbafa25ea2afdc670fd2997693ff51f}{ccl\+\_\+linear}} = 0, 
@@ -229,16 +223,8 @@ ccl\+\_\+emu&\\
 {\footnotesize\ttfamily enum \mbox{\hyperlink{ccl__config_8h_a8746e6d3648e86a8233d4c2813415e15}{transfer\+\_\+function\+\_\+t}}}
 
 Transfer function typedef. Contains all information that describes a specific transfer function. This includes whether there is an emulator being used (Note\+: not implemented yet), if there is a fitting function (E\&H is the only option right now), whether to use the B\+B\+KS transfer function, and what boltzmann code to use. \begin{DoxyEnumFields}{Enumerator}
-\raisebox{\heightof{T}}[0pt][0pt]{\index{ccl\+\_\+emulator@{ccl\+\_\+emulator}!ccl\+\_\+config.\+h@{ccl\+\_\+config.\+h}}\index{ccl\+\_\+config.\+h@{ccl\+\_\+config.\+h}!ccl\+\_\+emulator@{ccl\+\_\+emulator}}}\mbox{\Hypertarget{ccl__config_8h_a8746e6d3648e86a8233d4c2813415e15a5a7bbc705ff820dc4d88ee48a5c45fae}\label{ccl__config_8h_a8746e6d3648e86a8233d4c2813415e15a5a7bbc705ff820dc4d88ee48a5c45fae}} 
-ccl\+\_\+emulator&\\
-\hline
-
-\raisebox{\heightof{T}}[0pt][0pt]{\index{ccl\+\_\+none@{ccl\+\_\+none}!ccl\+\_\+config.\+h@{ccl\+\_\+config.\+h}}\index{ccl\+\_\+config.\+h@{ccl\+\_\+config.\+h}!ccl\+\_\+none@{ccl\+\_\+none}}}\mbox{\Hypertarget{ccl__config_8h_a8746e6d3648e86a8233d4c2813415e15a46d822cbfbe6510b84beb65811e4acc2}\label{ccl__config_8h_a8746e6d3648e86a8233d4c2813415e15a46d822cbfbe6510b84beb65811e4acc2}} 
-ccl\+\_\+none&\\
-\hline
-
-\raisebox{\heightof{T}}[0pt][0pt]{\index{ccl\+\_\+fitting\+\_\+function@{ccl\+\_\+fitting\+\_\+function}!ccl\+\_\+config.\+h@{ccl\+\_\+config.\+h}}\index{ccl\+\_\+config.\+h@{ccl\+\_\+config.\+h}!ccl\+\_\+fitting\+\_\+function@{ccl\+\_\+fitting\+\_\+function}}}\mbox{\Hypertarget{ccl__config_8h_a8746e6d3648e86a8233d4c2813415e15afb906e8bd266414e8588683d2db7d4ee}\label{ccl__config_8h_a8746e6d3648e86a8233d4c2813415e15afb906e8bd266414e8588683d2db7d4ee}} 
-ccl\+\_\+fitting\+\_\+function&\\
+\raisebox{\heightof{T}}[0pt][0pt]{\index{ccl\+\_\+transfer\+\_\+none@{ccl\+\_\+transfer\+\_\+none}!ccl\+\_\+config.\+h@{ccl\+\_\+config.\+h}}\index{ccl\+\_\+config.\+h@{ccl\+\_\+config.\+h}!ccl\+\_\+transfer\+\_\+none@{ccl\+\_\+transfer\+\_\+none}}}\mbox{\Hypertarget{ccl__config_8h_a8746e6d3648e86a8233d4c2813415e15aaa0cf93f571e6e226fe14892748ff82c}\label{ccl__config_8h_a8746e6d3648e86a8233d4c2813415e15aaa0cf93f571e6e226fe14892748ff82c}} 
+ccl\+\_\+transfer\+\_\+none&\\
 \hline
 
 \raisebox{\heightof{T}}[0pt][0pt]{\index{ccl\+\_\+eisenstein\+\_\+hu@{ccl\+\_\+eisenstein\+\_\+hu}!ccl\+\_\+config.\+h@{ccl\+\_\+config.\+h}}\index{ccl\+\_\+config.\+h@{ccl\+\_\+config.\+h}!ccl\+\_\+eisenstein\+\_\+hu@{ccl\+\_\+eisenstein\+\_\+hu}}}\mbox{\Hypertarget{ccl__config_8h_a8746e6d3648e86a8233d4c2813415e15a0aba562d960017a68b411095ef8e1344}\label{ccl__config_8h_a8746e6d3648e86a8233d4c2813415e15a0aba562d960017a68b411095ef8e1344}} 
@@ -249,16 +235,8 @@ ccl\+\_\+eisenstein\+\_\+hu&\\
 ccl\+\_\+bbks&\\
 \hline
 
-\raisebox{\heightof{T}}[0pt][0pt]{\index{ccl\+\_\+boltzmann@{ccl\+\_\+boltzmann}!ccl\+\_\+config.\+h@{ccl\+\_\+config.\+h}}\index{ccl\+\_\+config.\+h@{ccl\+\_\+config.\+h}!ccl\+\_\+boltzmann@{ccl\+\_\+boltzmann}}}\mbox{\Hypertarget{ccl__config_8h_a8746e6d3648e86a8233d4c2813415e15abe0a265ef1434d85a9363e99149b8c12}\label{ccl__config_8h_a8746e6d3648e86a8233d4c2813415e15abe0a265ef1434d85a9363e99149b8c12}} 
-ccl\+\_\+boltzmann&\\
-\hline
-
 \raisebox{\heightof{T}}[0pt][0pt]{\index{ccl\+\_\+boltzmann\+\_\+class@{ccl\+\_\+boltzmann\+\_\+class}!ccl\+\_\+config.\+h@{ccl\+\_\+config.\+h}}\index{ccl\+\_\+config.\+h@{ccl\+\_\+config.\+h}!ccl\+\_\+boltzmann\+\_\+class@{ccl\+\_\+boltzmann\+\_\+class}}}\mbox{\Hypertarget{ccl__config_8h_a8746e6d3648e86a8233d4c2813415e15a2b9083c5271eb911d72cc8dc0553fec0}\label{ccl__config_8h_a8746e6d3648e86a8233d4c2813415e15a2b9083c5271eb911d72cc8dc0553fec0}} 
 ccl\+\_\+boltzmann\+\_\+class&\\
-\hline
-
-\raisebox{\heightof{T}}[0pt][0pt]{\index{ccl\+\_\+boltzmann\+\_\+camb@{ccl\+\_\+boltzmann\+\_\+camb}!ccl\+\_\+config.\+h@{ccl\+\_\+config.\+h}}\index{ccl\+\_\+config.\+h@{ccl\+\_\+config.\+h}!ccl\+\_\+boltzmann\+\_\+camb@{ccl\+\_\+boltzmann\+\_\+camb}}}\mbox{\Hypertarget{ccl__config_8h_a8746e6d3648e86a8233d4c2813415e15a7630657ff747621b606c67e6736f6810}\label{ccl__config_8h_a8746e6d3648e86a8233d4c2813415e15a7630657ff747621b606c67e6736f6810}} 
-ccl\+\_\+boltzmann\+\_\+camb&\\
 \hline
 
 \end{DoxyEnumFields}

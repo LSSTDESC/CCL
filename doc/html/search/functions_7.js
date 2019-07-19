@@ -1,5 +1,6 @@
 var searchData=
 [
-  ['neff_5ffrom_5fn_5fur_5fn_5fncdm',['Neff_from_N_ur_N_ncdm',['../namespaceccl__test__distances.html#a0da11106f7f601d1ac8c71852fb35270',1,'ccl_test_distances']]],
-  ['nu_5fphasespace_5fintg',['nu_phasespace_intg',['../ccl__neutrinos_8c.html#a5adb5270bfe6998ffea34d76ea5d96ca',1,'ccl_neutrinos.c']]]
+  ['pk1d',['pk1d',['../namespaceccl__test__p2d.html#a5536c01ff72aab390eae110e38415afc',1,'ccl_test_p2d']]],
+  ['pk2d',['pk2d',['../namespaceccl__test__p2d.html#a648a656c59c9e119022f605e71fd01d1',1,'ccl_test_p2d']]],
+  ['pk2xi',['pk2xi',['../fftlog_8c.html#a7ed666792a587e29a9387f50f841d6f6',1,'pk2xi(int N, const double k[], const double pk[], double r[], double xi[]):&#160;fftlog.c'],['../fftlog_8h.html#a7ed666792a587e29a9387f50f841d6f6',1,'pk2xi(int N, const double k[], const double pk[], double r[], double xi[]):&#160;fftlog.c']]]
 ];

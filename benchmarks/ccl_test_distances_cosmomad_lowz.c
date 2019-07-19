@@ -20,7 +20,8 @@ CTEST_DATA(distances_cosmomad_lowz) {
   double Omega_k[5];
   double w_0[5];
   double w_a[5];
-
+  double mu_0;
+  double sigma_0;
   double z[6];
   double chi[5][6];
   double dm[5][6];
@@ -81,7 +82,8 @@ CTEST_SETUP(distances_cosmomad_lowz) {
   double mnuval = 0.;
   data->mnu= &mnuval;
   data->mnu_type = ccl_mnu_sum;
-
+  data->mu_0 = 0.;
+  data->sigma_0 = 0.;
 
   // Values that are different for the different models
   double Omega_v[5] = {  0.7,  0.7,  0.7,  0.65, 0.75 };
@@ -109,7 +111,7 @@ static void compare_distances(int model, struct distances_cosmomad_lowz_data * d
   ccl_parameters params = ccl_parameters_create(data->Omega_c, data->Omega_b, data->Omega_k[model],
 						data->Neff, data->mnu, data->mnu_type,
 						data->w_0[model], data->w_a[model],
-						data->h, data->A_s, data->n_s,-1,-1,-1,-1,NULL,NULL, &status);
+						data->h, data->A_s, data->n_s,-1,-1,-1,data-> mu_0, data->sigma_0,-1,NULL,NULL, &status);
 
   params.Omega_g=0; //enforce no radiation
   params.Omega_l = 1.-params.Omega_m-params.Omega_k; //reomcpute Omega_l without radiation

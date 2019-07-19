@@ -1,0 +1,136 @@
+\hypertarget{ccl__haloprofile_8h}{}\section{ccl\+\_\+haloprofile.\+h File Reference}
+\label{ccl__haloprofile_8h}\index{ccl\+\_\+haloprofile.\+h@{ccl\+\_\+haloprofile.\+h}}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{ccl__defs_8h_ae8d446df269cba1dff8f88922459a7d4}{C\+C\+L\+\_\+\+B\+E\+G\+I\+N\+\_\+\+D\+E\+C\+LS}} void \mbox{\hyperlink{ccl__haloprofile_8h_ad747775155989f51b0abe829739e4487}{ccl\+\_\+halo\+\_\+profile\+\_\+nfw}} (\mbox{\hyperlink{structccl__cosmology}{ccl\+\_\+cosmology}} $\ast$cosmo, double c, double halomass, double massdef\+\_\+delta\+\_\+m, double a, double $\ast$r, int nr, double $\ast$rho\+\_\+r, int $\ast$status)
+\item 
+void \mbox{\hyperlink{ccl__haloprofile_8h_ac01a59b4e5f308d7426501053ac7010e}{ccl\+\_\+projected\+\_\+halo\+\_\+profile\+\_\+nfw}} (\mbox{\hyperlink{structccl__cosmology}{ccl\+\_\+cosmology}} $\ast$cosmo, double c, double halomass, double massdef\+\_\+delta\+\_\+m, double a, double $\ast$rp, int nr, double $\ast$sigma\+\_\+r, int $\ast$status)
+\item 
+void \mbox{\hyperlink{ccl__haloprofile_8h_a5ec9a129cd08b5d58a5207e22ca314b2}{ccl\+\_\+halo\+\_\+profile\+\_\+einasto}} (\mbox{\hyperlink{structccl__cosmology}{ccl\+\_\+cosmology}} $\ast$cosmo, double c, double halomass, double massdef\+\_\+delta\+\_\+m, double a, double $\ast$r, int nr, double $\ast$rho\+\_\+r, int $\ast$status)
+\item 
+void \mbox{\hyperlink{ccl__haloprofile_8h_abae568ab2fb114f38c7f2e1f29a466a9}{ccl\+\_\+halo\+\_\+profile\+\_\+hernquist}} (\mbox{\hyperlink{structccl__cosmology}{ccl\+\_\+cosmology}} $\ast$cosmo, double c, double halomass, double massdef\+\_\+delta\+\_\+m, double a, double $\ast$r, int nr, double $\ast$rho\+\_\+r, int $\ast$status)
+\end{DoxyCompactItemize}
+
+
+\subsection{Function Documentation}
+\mbox{\Hypertarget{ccl__haloprofile_8h_a5ec9a129cd08b5d58a5207e22ca314b2}\label{ccl__haloprofile_8h_a5ec9a129cd08b5d58a5207e22ca314b2}} 
+\index{ccl\+\_\+haloprofile.\+h@{ccl\+\_\+haloprofile.\+h}!ccl\+\_\+halo\+\_\+profile\+\_\+einasto@{ccl\+\_\+halo\+\_\+profile\+\_\+einasto}}
+\index{ccl\+\_\+halo\+\_\+profile\+\_\+einasto@{ccl\+\_\+halo\+\_\+profile\+\_\+einasto}!ccl\+\_\+haloprofile.\+h@{ccl\+\_\+haloprofile.\+h}}
+\subsubsection{\texorpdfstring{ccl\+\_\+halo\+\_\+profile\+\_\+einasto()}{ccl\_halo\_profile\_einasto()}}
+{\footnotesize\ttfamily void ccl\+\_\+halo\+\_\+profile\+\_\+einasto (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structccl__cosmology}{ccl\+\_\+cosmology}} $\ast$}]{cosmo,  }\item[{double}]{c,  }\item[{double}]{halomass,  }\item[{double}]{massdef\+\_\+delta\+\_\+m,  }\item[{double}]{a,  }\item[{double $\ast$}]{r,  }\item[{int}]{nr,  }\item[{double $\ast$}]{rho\+\_\+r,  }\item[{int $\ast$}]{status }\end{DoxyParamCaption})}
+
+Computes mass density at given radius for a Einasto halo profile 
+\begin{DoxyParams}{Parameters}
+{\em cosmo} & cosmology object containing parameters \\
+\hline
+{\em c} & halo concentration consistent with halo size definition \\
+\hline
+{\em halomass} & halo mass \\
+\hline
+{\em massdef\+\_\+delta\+\_\+m} & overdensity relative to matter density for halo size definition \\
+\hline
+{\em a} & scale factor normalised to a=1 today \\
+\hline
+{\em r} & radii at which to calculate output \\
+\hline
+{\em nr} & number of radii at which to calculate output \\
+\hline
+{\em rho\+\_\+r} & array to store mass density at given radius for a Einasto halo profile, in units of Msun/\+Mpc$^\wedge$\{3\} \\
+\hline
+{\em status} & Status flag\+: 0 if there are no errors, non-\/zero otherwise \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+void 
+\end{DoxyReturn}
+\mbox{\Hypertarget{ccl__haloprofile_8h_abae568ab2fb114f38c7f2e1f29a466a9}\label{ccl__haloprofile_8h_abae568ab2fb114f38c7f2e1f29a466a9}} 
+\index{ccl\+\_\+haloprofile.\+h@{ccl\+\_\+haloprofile.\+h}!ccl\+\_\+halo\+\_\+profile\+\_\+hernquist@{ccl\+\_\+halo\+\_\+profile\+\_\+hernquist}}
+\index{ccl\+\_\+halo\+\_\+profile\+\_\+hernquist@{ccl\+\_\+halo\+\_\+profile\+\_\+hernquist}!ccl\+\_\+haloprofile.\+h@{ccl\+\_\+haloprofile.\+h}}
+\subsubsection{\texorpdfstring{ccl\+\_\+halo\+\_\+profile\+\_\+hernquist()}{ccl\_halo\_profile\_hernquist()}}
+{\footnotesize\ttfamily void ccl\+\_\+halo\+\_\+profile\+\_\+hernquist (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structccl__cosmology}{ccl\+\_\+cosmology}} $\ast$}]{cosmo,  }\item[{double}]{c,  }\item[{double}]{halomass,  }\item[{double}]{massdef\+\_\+delta\+\_\+m,  }\item[{double}]{a,  }\item[{double $\ast$}]{r,  }\item[{int}]{nr,  }\item[{double $\ast$}]{rho\+\_\+r,  }\item[{int $\ast$}]{status }\end{DoxyParamCaption})}
+
+Computes mass density at given radius for a Hernquist halo profile 
+\begin{DoxyParams}{Parameters}
+{\em cosmo} & cosmology object containing parameters \\
+\hline
+{\em c} & halo concentration consistent with halo size definition \\
+\hline
+{\em halomass} & halo mass \\
+\hline
+{\em massdef\+\_\+delta\+\_\+m} & overdensity relative to matter density for halo size definition \\
+\hline
+{\em a} & scale factor normalised to a=1 today \\
+\hline
+{\em r} & radii at which to calculate output \\
+\hline
+{\em nr} & number of radii at which to calculate output \\
+\hline
+{\em rho\+\_\+r} & array to store mass density at given radius for a Hernquist halo profile, in units of Msun/\+Mpc$^\wedge$\{3\} \\
+\hline
+{\em status} & Status flag\+: 0 if there are no errors, non-\/zero otherwise \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+void 
+\end{DoxyReturn}
+\mbox{\Hypertarget{ccl__haloprofile_8h_ad747775155989f51b0abe829739e4487}\label{ccl__haloprofile_8h_ad747775155989f51b0abe829739e4487}} 
+\index{ccl\+\_\+haloprofile.\+h@{ccl\+\_\+haloprofile.\+h}!ccl\+\_\+halo\+\_\+profile\+\_\+nfw@{ccl\+\_\+halo\+\_\+profile\+\_\+nfw}}
+\index{ccl\+\_\+halo\+\_\+profile\+\_\+nfw@{ccl\+\_\+halo\+\_\+profile\+\_\+nfw}!ccl\+\_\+haloprofile.\+h@{ccl\+\_\+haloprofile.\+h}}
+\subsubsection{\texorpdfstring{ccl\+\_\+halo\+\_\+profile\+\_\+nfw()}{ccl\_halo\_profile\_nfw()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{ccl__defs_8h_ae8d446df269cba1dff8f88922459a7d4}{C\+C\+L\+\_\+\+B\+E\+G\+I\+N\+\_\+\+D\+E\+C\+LS}} void ccl\+\_\+halo\+\_\+profile\+\_\+nfw (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structccl__cosmology}{ccl\+\_\+cosmology}} $\ast$}]{cosmo,  }\item[{double}]{c,  }\item[{double}]{halomass,  }\item[{double}]{massdef\+\_\+delta\+\_\+m,  }\item[{double}]{a,  }\item[{double $\ast$}]{r,  }\item[{int}]{nr,  }\item[{double $\ast$}]{rho\+\_\+r,  }\item[{int $\ast$}]{status }\end{DoxyParamCaption})}
+
+Computes mass density at given radius for a N\+FW halo profile 
+\begin{DoxyParams}{Parameters}
+{\em cosmo} & cosmology object containing parameters \\
+\hline
+{\em c} & halo concentration consistent with halo size definition \\
+\hline
+{\em halomass} & halo mass \\
+\hline
+{\em massdef\+\_\+delta\+\_\+m} & overdensity relative to matter density for halo size definition \\
+\hline
+{\em a} & scale factor normalised to a=1 today \\
+\hline
+{\em r} & radii at which to calculate output \\
+\hline
+{\em nr} & number of radii at which to calculate output \\
+\hline
+{\em rho\+\_\+r} & array to store mass density at given radius for a N\+FW halo profile, in units of Msun/\+Mpc$^\wedge$\{3\} \\
+\hline
+{\em status} & Status flag\+: 0 if there are no errors, non-\/zero otherwise \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+void 
+\end{DoxyReturn}
+\mbox{\Hypertarget{ccl__haloprofile_8h_ac01a59b4e5f308d7426501053ac7010e}\label{ccl__haloprofile_8h_ac01a59b4e5f308d7426501053ac7010e}} 
+\index{ccl\+\_\+haloprofile.\+h@{ccl\+\_\+haloprofile.\+h}!ccl\+\_\+projected\+\_\+halo\+\_\+profile\+\_\+nfw@{ccl\+\_\+projected\+\_\+halo\+\_\+profile\+\_\+nfw}}
+\index{ccl\+\_\+projected\+\_\+halo\+\_\+profile\+\_\+nfw@{ccl\+\_\+projected\+\_\+halo\+\_\+profile\+\_\+nfw}!ccl\+\_\+haloprofile.\+h@{ccl\+\_\+haloprofile.\+h}}
+\subsubsection{\texorpdfstring{ccl\+\_\+projected\+\_\+halo\+\_\+profile\+\_\+nfw()}{ccl\_projected\_halo\_profile\_nfw()}}
+{\footnotesize\ttfamily void ccl\+\_\+projected\+\_\+halo\+\_\+profile\+\_\+nfw (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structccl__cosmology}{ccl\+\_\+cosmology}} $\ast$}]{cosmo,  }\item[{double}]{c,  }\item[{double}]{halomass,  }\item[{double}]{massdef\+\_\+delta\+\_\+m,  }\item[{double}]{a,  }\item[{double $\ast$}]{rp,  }\item[{int}]{nr,  }\item[{double $\ast$}]{sigma\+\_\+r,  }\item[{int $\ast$}]{status }\end{DoxyParamCaption})}
+
+Computes projected mass density at given radius for a N\+FW halo profile 
+\begin{DoxyParams}{Parameters}
+{\em cosmo} & cosmology object containing parameters \\
+\hline
+{\em c} & halo concentration consistent with halo size definition \\
+\hline
+{\em halomass} & halo mass \\
+\hline
+{\em massdef\+\_\+delta\+\_\+m} & overdensity relative to matter density for halo size definition \\
+\hline
+{\em a} & scale factor normalised to a=1 today \\
+\hline
+{\em rp} & radii at which to calculate output \\
+\hline
+{\em nr} & number of radii at which to calculate output \\
+\hline
+{\em sigma\+\_\+r} & array to store projected mass density at given radius for a N\+FW halo profile, in units of Msun/\+Mpc$^\wedge$\{2\} \\
+\hline
+{\em status} & Status flag\+: 0 if there are no errors, non-\/zero otherwise \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+void 
+\end{DoxyReturn}

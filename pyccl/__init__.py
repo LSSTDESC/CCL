@@ -25,7 +25,7 @@ from .core import Cosmology
 from .background import growth_factor, growth_factor_unnorm, \
     growth_rate, comoving_radial_distance, comoving_angular_distance, \
     h_over_h0, luminosity_distance, distance_modulus, scale_factor_of_chi, \
-    omega_x, rho_x
+    omega_x, rho_x, mu_MG, Sig_MG
 
 # Generalized power spectra
 from .pk2d import Pk2D

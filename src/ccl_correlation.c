@@ -462,9 +462,9 @@ void ccl_correlation_3d(ccl_cosmology *cosmo, double a,
     return;
   }
 
-  for (i=0; i<N_ARR; i++)
+  for (i=0; i<N_ARR; i++){
     pk_arr[i] = ccl_nonlin_matter_power(cosmo, k_arr[i], a, status);
-
+  }
   if (do_taper_pk)
     taper_cl(N_ARR,k_arr,pk_arr,taper_pk_limits);
 

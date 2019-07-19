@@ -207,6 +207,10 @@ baryons_power_spectrum_types = {
     'bcm':         lib.bcm
 }
 
+# List which transfer functions can be used with the muSigma_MG
+# parameterisation of modified gravity
+valid_muSig_transfers = {'boltzmann_class', 'class'}
+
 mass_function_types = {
     'angulo':      lib.angulo,
     'tinker':      lib.tinker,
@@ -341,7 +345,7 @@ class Cosmology(object):
             sigma8=None, A_s=None,
             Omega_k=0., Omega_g=None, Neff=3.046, m_nu=0., mnu_type=None,
             w0=-1., wa=0., bcm_log10Mc=np.log10(1.2e14), bcm_etab=0.5,
-            bcm_ks=55., z_mg=None, df_mg=None,
+            bcm_ks=55., mu_0=0., sigma_0=0., z_mg=None, df_mg=None,
             transfer_function='boltzmann_class',
             matter_power_spectrum='halofit',
             baryons_power_spectrum='nobaryons',
@@ -354,7 +358,8 @@ class Cosmology(object):
             Omega_c=Omega_c, Omega_b=Omega_b, h=h, n_s=n_s, sigma8=sigma8,
             A_s=A_s, Omega_k=Omega_k, Omega_g=Omega_g, Neff=Neff, m_nu=m_nu,
             mnu_type=mnu_type, w0=w0, wa=wa, bcm_log10Mc=bcm_log10Mc,
-            bcm_etab=bcm_etab, bcm_ks=bcm_ks, z_mg=z_mg, df_mg=df_mg)
+            bcm_etab=bcm_etab, bcm_ks=bcm_ks, mu_0=mu_0, sigma_0=sigma_0,
+            z_mg=z_mg, df_mg=df_mg)
 
         self._config_init_kwargs = dict(
             transfer_function=transfer_function,
@@ -397,7 +402,6 @@ class Cosmology(object):
     @classmethod
     def read_yaml(cls, filename):
         """Read the parameters from a YAML file.
-
         Args:
             filename (:obj:`str`) Filename to read parameters from.
         """
@@ -419,7 +423,9 @@ class Cosmology(object):
             wa=params['wa'],
             bcm_log10Mc=params['bcm_log10Mc'],
             bcm_etab=params['bcm_etab'],
-            bcm_ks=params['bcm_ks'])
+            bcm_ks=params['bcm_ks'],
+            mu_0=params['mu_0'],
+            sigma_0=params['sigma_0'])
         if 'z_mg' in params:
             inits['z_mg'] = params['z_mg']
             inits['df_mg'] = params['df_mg']
@@ -508,7 +514,7 @@ class Cosmology(object):
             self, Omega_c=None, Omega_b=None, h=None, n_s=None, sigma8=None,
             A_s=None, Omega_k=None, Neff=None, m_nu=None, mnu_type=None,
             w0=None, wa=None, bcm_log10Mc=None, bcm_etab=None, bcm_ks=None,
-            z_mg=None, df_mg=None, Omega_g=None):
+            mu_0=None, sigma_0=None, z_mg=None, df_mg=None, Omega_g=None):
         """Build a ccl_parameters struct"""
 
         # Set nz_mg (no. of redshift bins for modified growth fns.)
@@ -580,10 +586,10 @@ class Cosmology(object):
                              "length 3.")
 
         # Check if any compulsory parameters are not set
-        compul = [Omega_c, Omega_b, Omega_k, w0, wa, h, norm_pk, n_s]
+        compul = [Omega_c, Omega_b, Omega_k, w0, wa, h, norm_pk,
+                  n_s]
         names = ['Omega_c', 'Omega_b', 'Omega_k', 'w0', 'wa',
                  'h', 'norm_pk', 'n_s']
-
         for nm, item in zip(names, compul):
             if item is None:
                 raise ValueError("Necessary parameter '%s' was not set "
@@ -595,23 +601,23 @@ class Cosmology(object):
         status = 0
         if nz_mg == -1:
             # Create ccl_parameters without modified growth
+
             self._params, status = lib.parameters_create_nu(
-                Omega_c, Omega_b, Omega_k, Neff,
-                w0, wa, h, norm_pk,
-                n_s, bcm_log10Mc, bcm_etab, bcm_ks,
-                mnu_types[mnu_type], m_nu, status)
+               Omega_c, Omega_b, Omega_k, Neff,
+               w0, wa, h, norm_pk,
+               n_s, bcm_log10Mc, bcm_etab, bcm_ks,
+               mu_0, sigma_0, mnu_types[mnu_type],
+               m_nu, status)
         else:
             # Create ccl_parameters with modified growth arrays
             self._params, status = lib.parameters_create_nu_vec(
-                Omega_c, Omega_b, Omega_k, Neff,
-                w0, wa, h, norm_pk,
-                n_s, bcm_log10Mc, bcm_etab, bcm_ks,
-                z_mg, df_mg, mnu_types[mnu_type], m_nu, status)
+               Omega_c, Omega_b, Omega_k, Neff,
+               w0, wa, h, norm_pk,
+               n_s, bcm_log10Mc, bcm_etab, bcm_ks,
+               mu_0, sigma_0, z_mg, df_mg,
+               mnu_types[mnu_type], m_nu, status)
         check(status)
 
-        # we cannot set omega_g via the C code directly. Thus we set it by hand
-        # and then put any difference into omega_l, which follows the
-        # what the C code does.
         if Omega_g is not None:
             total = self._params.Omega_g + self._params.Omega_l
             self._params.Omega_g = Omega_g
@@ -679,7 +685,6 @@ class Cosmology(object):
         >>> cosmo = pyccl.Cosmology(...)
         >>> cosmo2 = eval(repr(cosmo))
         """
-
         string = "pyccl.Cosmology("
         string += ", ".join(
             "%s=%s" % (k, v)
