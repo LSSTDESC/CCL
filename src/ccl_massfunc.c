@@ -574,7 +574,9 @@ double ccl_massfunc(ccl_cosmology *cosmo, double halomass, double a, double odel
 	  return NAN;
   }
 
-  if (log10(halomass) > cosmo->spline_params.LOGM_SPLINE_MAX || log10(halomass) < cosmo->spline_params.LOGM_SPLINE_MIN){
+  double logmass;
+  logmass = log10(halomass);
+  if (logmass > cosmo->spline_params.LOGM_SPLINE_MAX || logmass < cosmo->spline_params.LOGM_SPLINE_MIN){
           *status = CCL_ERROR_HMF_INTERP;
           ccl_cosmology_set_status_message(cosmo, "ccl_massfunc(): The specified halo mass is outside of the range.");
           return NAN;
