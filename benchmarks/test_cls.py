@@ -43,20 +43,26 @@ def set_up(request):
         sigz_1 = 0.15
         zmean_2 = 1.5
         sigz_2 = 0.15
-        z1, a1 = np.loadtxt(dirdat + "ia_amp_analytic_1.txt", unpack=True)
-        z2, a2 = np.loadtxt(dirdat + "ia_amp_analytic_2.txt", unpack=True)
+        z1, tmp_a1 = np.loadtxt(dirdat + "ia_amp_analytic_1.txt", unpack=True)
+        z2, tmp_a2 = np.loadtxt(dirdat + "ia_amp_analytic_2.txt", unpack=True)
         pz1 = np.exp(-0.5 * ((z1 - zmean_1) / sigz_1)**2)
         pz2 = np.exp(-0.5 * ((z2 - zmean_2) / sigz_2)**2)
     elif nztyp == 'histo':
         # Histogram case
         z1, pz1 = np.loadtxt(dirdat + "bin1_histo.txt", unpack=True)[:, 1:]
-        _, a1 = np.loadtxt(dirdat + "ia_amp_histo_1.txt", unpack=True)
+        _, tmp_a1 = np.loadtxt(dirdat + "ia_amp_histo_1.txt", unpack=True)
         z2, pz2 = np.loadtxt(dirdat + "bin2_histo.txt",  unpack=True)[:, 1:]
-        _, a2 = np.loadtxt(dirdat + "ia_amp_histo_2.txt", unpack=True)
+        _, tmp_a2 = np.loadtxt(dirdat + "ia_amp_histo_2.txt", unpack=True)
     else:
         raise ValueError("Wrong Nz type " + nztyp)
     bz = np.ones_like(pz1)
 
+    # Renormalize the IA amplitude to be consistent with A_IA
+    D1 = ccl.growth_factor(cosmo, 1./(1+z1))
+    D2 = ccl.growth_factor(cosmo, 1./(1+z2))
+    a1 = - tmp_a1 * D1 / (5e-14 * ccl.physical_constants.RHO_CRITICAL * cosmo['Omega_m'])
+    a2 = - tmp_a2 * D2 / (5e-14 * ccl.physical_constants.RHO_CRITICAL * cosmo['Omega_m'])
+    
     # Initialize tracers
     trc = {}
     trc['g1'] = ccl.NumberCountsTracer(cosmo, False,

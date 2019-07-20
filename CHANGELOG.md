@@ -1,6 +1,8 @@
 # Unreleased
 
 ## C library
+- Changed IA bias normalization to be consistent with A_IA=1 (#630).
+- Implemented generalized models for tracers (#630)
 - Fixed memory leak in CLASS power spectrum computations (#561, #562).
 - Fixed a bug where CLASS would crash due to small rounding errors at z = 0
   when evaluating power spectra (#563, #564).

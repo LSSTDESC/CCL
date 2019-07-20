@@ -1,6 +1,6 @@
 from . import ccllib as lib
 from .core import check
-from .background import comoving_radial_distance, growth_rate
+from .background import comoving_radial_distance, growth_rate, growth_factor
 import numpy as np
 import collections
 
@@ -333,7 +333,7 @@ class WeakLensingTracer(Tracer):
         has_shear (bool): set to `False` if you want to omit the lensing shear
             contribution from this tracer.
         ia_bias (tuple of arrays, optional): A tuple of arrays
-            (z, b_IA(z)) giving the intrinsic alignment amplitude b_IA(z).
+            (z, A_IA(z)) giving the intrinsic alignment amplitude A_IA(z).
             If `None`, the tracer is assumped to not have intrinsic
             alignments. Defaults to None.
     """
@@ -345,10 +345,13 @@ class WeakLensingTracer(Tracer):
             self.add_tracer(cosmo, kernel=kernel_l,
                             der_bessel=-1, der_angles=2)
         if ia_bias is not None:  # Has intrinsic alignments
+            z_a, tmp_a = _check_array_params(ia_bias)
             # Kernel
             kernel_i = get_density_kernel(cosmo, dndz)
+            # Normalize so that A_IA=1
+            D = growth_factor(cosmo, 1./(1+z_a))
             # Transfer
-            z_a, a = _check_array_params(ia_bias)
+            a = - tmp_a * 5e-14 * lib.cvar.constants.RHO_CRITICAL * cosmo['Omega_m'] / D
             # Reverse order for increasing a
             t_a = (1./(1+z_a[::-1]), a[::-1])
             self.add_tracer(cosmo, kernel=kernel_i, transfer_a=t_a,
