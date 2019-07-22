@@ -986,6 +986,19 @@ double ccl_comoving_angular_diameter_distance(ccl_cosmology * cosmo, double a1, 
 }
 
 
+void ccl_comoving_angular_diameter_distances(ccl_cosmology * cosmo, int na, double a1[], double a2[],
+                                    double output[], int* status)
+{
+  int _status;
+
+  for (int i=0; i < na; i++) {
+    _status = 0;
+    output[i] = ccl_comoving_angular_diameter_distance(cosmo, a1[i], a2[i], &_status);
+    *status |= _status;
+  }
+}
+
+
 double ccl_luminosity_distance(ccl_cosmology * cosmo, double a, int* status)
 {
   return ccl_comoving_angular_distance(cosmo, a, status) / a;

@@ -88,6 +88,7 @@ double ccl_sinn(ccl_cosmology *cosmo,double chi, int *status);
  */
 double ccl_comoving_angular_distance(ccl_cosmology * cosmo, double a, int* status);
 
+
 /**
  * Comoving angular distances in Mpc to scale factors as given in array a[0..na-1]
  * NOTE this quantity is otherwise known as the transverse comoving distance, and is NOT angular diameter
@@ -115,6 +116,25 @@ void ccl_comoving_angular_distances(ccl_cosmology * cosmo, int na, double a[], d
  * @return comoving_angular_diameter_distance, the angular diameter distance between a1 and a2 in Mpc
  */
 double ccl_comoving_angular_diameter_distance(ccl_cosmology * cosmo, double a1, double a2, int* status);
+
+
+/**
+ * Comoving angular diameter distance in Mpc from scale factor a1[0..na-1] to scale factor a2[0..na-1]
+ * NOTE this is Eq. (19) of astro-ph/9905116
+ * NOTE this quantity is otherwise known as the transverse comoving distance, and is NOT angular diameter
+ * distance or angular separation
+ * @param cosmo Cosmological parameters
+ * @param na Number of scale factors in a
+ * @param a1 array of scale factors, normalized to 1 for today
+ * @param a2 array of scale factors, normalized to 1 for today
+ * @param output array of length na to store the results of the calculation. The entry at index i stores the
+ * distance for a1[i], a2[i].
+ * @param status Status flag. 0 if there are no errors, nonzero otherwise.
+ * For specific cases see documentation for ccl_error.c
+ * @return void
+ */
+void ccl_comoving_angular_diameter_distances(ccl_cosmology * cosmo, int na, double a1[], double a2[], double output[], int* status);
+
 
 /**
  * Comoving luminosity distance in Mpc from today to scale factor a
