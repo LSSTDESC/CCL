@@ -351,7 +351,8 @@ class WeakLensingTracer(Tracer):
             # Normalize so that A_IA=1
             D = growth_factor(cosmo, 1./(1+z_a))
             # Transfer
-            a = - tmp_a * 5e-14 * lib.cvar.constants.RHO_CRITICAL * cosmo['Omega_m'] / D
+            rho_m = lib.cvar.constants.RHO_CRITICAL * cosmo['Omega_m']
+            a = - tmp_a * 5e-14 * rho_m / D
             # Reverse order for increasing a
             t_a = (1./(1+z_a[::-1]), a[::-1])
             self.add_tracer(cosmo, kernel=kernel_i, transfer_a=t_a,
