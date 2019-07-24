@@ -718,7 +718,11 @@ def check_cls_nu(cosmo):
 
     # ClTracer test objects
     lens1 = ccl.WeakLensingTracer(cosmo, dndz=(z,n))
-    lens2 = ccl.WeakLensingTracer(cosmo, dndz=(z,n), ia_bias=(z,n))
+    if cosmo.cosmo.params.N_nu_mass>0:
+        # We need to avoid IAs if we have neutrinos
+        lens2 = lens1
+    else:
+        lens2 = ccl.WeakLensingTracer(cosmo, dndz=(z,n), ia_bias=(z,n))
     nc1 = ccl.NumberCountsTracer(cosmo, False, dndz=(z,n), bias=(z,b))
 
     # Check that for massive neutrinos including rsd raises an error (not yet implemented)
