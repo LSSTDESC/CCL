@@ -762,7 +762,11 @@ def check_corr(cosmo):
 
     # ClTracer test objects
     lens1 = ccl.WeakLensingTracer(cosmo, dndz=(z, n))
-    lens2 = ccl.WeakLensingTracer(cosmo, dndz=(z,n), ia_bias=(z,n))
+    if cosmo.cosmo.params.N_nu_mass>0:
+        # We need to avoid IAs if we have neutrinos
+        lens2 = lens1
+    else:
+        lens2 = ccl.WeakLensingTracer(cosmo, dndz=(z,n), ia_bias=(z,n))
 
     ells = np.arange(3000)
     cls = ccl.angular_cl(cosmo, lens1, lens2, ells)
