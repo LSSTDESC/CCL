@@ -61,9 +61,10 @@ def set_up(request):
     # Renormalize the IA amplitude to be consistent with A_IA
     D1 = ccl.growth_factor(cosmo, 1./(1+z1))
     D2 = ccl.growth_factor(cosmo, 1./(1+z2))
-    a1 = - tmp_a1 * D1 / (5e-14 * ccl.physical_constants.RHO_CRITICAL * cosmo['Omega_m'])
-    a2 = - tmp_a2 * D2 / (5e-14 * ccl.physical_constants.RHO_CRITICAL * cosmo['Omega_m'])
-    
+    rho_m = ccl.physical_constants.RHO_CRITICAL * cosmo['Omega_m']
+    a1 = - tmp_a1 * D1 / (5e-14 * rho_m)
+    a2 = - tmp_a2 * D2 / (5e-14 * rho_m)
+
     # Initialize tracers
     trc = {}
     trc['g1'] = ccl.NumberCountsTracer(cosmo, False,
