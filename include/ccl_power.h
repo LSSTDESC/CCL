@@ -1,4 +1,4 @@
-/* @file */
+/** @file */
 
 #ifndef __CCL_POWER_H_INCLUDED__
 #define __CCL_POWER_H_INCLUDED__

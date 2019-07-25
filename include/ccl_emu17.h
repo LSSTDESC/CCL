@@ -1,3 +1,4 @@
+/** @file */
 #ifndef __CCL_EMU17_INCLUDED__
 #define __CCL_EMU17_INCLUDED__
 
@@ -19,4 +20,5 @@ CCL_BEGIN_DECLS
 void ccl_pkemu(double *xstarin, int nkemu, double *Pkemu, int *status, ccl_cosmology* cosmo);
 
 CCL_END_DECLS
+
 #endif

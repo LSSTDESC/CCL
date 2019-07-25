@@ -7,6 +7,7 @@ from ccl_test_growth import *
 from ccl_test_core import *
 from ccl_test_power import *
 from ccl_test_cclerror import *
+from ccl_test_pk2d import  *
 
 # Overall interface functionality tests
 from ccl_test_pyccl_interface import *

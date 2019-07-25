@@ -40,11 +40,11 @@ class Pk2D(object):
              enough to sample the main features in the power spectrum).
              For reference, CCL will use bicubic interpolation to evaluate
              the power spectrum at any intermediate point in k and a.
-        interp_order_lok (int): extrapolation order to be used on k-values
+        extrap_order_lok (int): extrapolation order to be used on k-values
              below the minimum of the splines (use 0, 1 or 2). Note that
              the extrapolation will be done in either log(P(k)) or P(k),
              depending on the value of `is_logp`.
-        interp_order_hik (int): extrapolation order to be used on k-values
+        extrap_order_hik (int): extrapolation order to be used on k-values
              above the maximum of the splines (use 0, 1 or 2). Note that
              the extrapolation will be done in either log(P(k)) or P(k),
              depending on the value of `is_logp`.
@@ -58,7 +58,7 @@ class Pk2D(object):
              wavenumber.
     """
     def __init__(self, pkfunc=None, a_arr=None, lk_arr=None, pk_arr=None,
-                 is_logp=True, interp_order_lok=1, interp_order_hik=2,
+                 is_logp=True, extrap_order_lok=1, extrap_order_hik=2,
                  cosmo=None):
 
         status = 0
@@ -97,10 +97,10 @@ class Pk2D(object):
                 pkflat[ia, :] = pkfunc(k=np.exp(lk_arr), a=a)
             pkflat = pkflat.flatten()
 
-        self.psp, status = lib.set_p2d_new_from_arrays(lk_arr, a_arr, pkflat,
-                                                       int(interp_order_lok),
-                                                       int(interp_order_hik),
-                                                       int(is_logp), status)
+        self.psp, status = lib.set_pk2d_new_from_arrays(lk_arr, a_arr, pkflat,
+                                                        int(extrap_order_lok),
+                                                        int(extrap_order_hik),
+                                                        int(is_logp), status)
         check(status)
         self.has_psp = True
 
@@ -129,12 +129,13 @@ class Pk2D(object):
         if isinstance(k, int):
             k = float(k)
         if isinstance(k, float):
-            f, status = lib.p2d_eval_single(self.psp, np.log(k), a, cospass,
-                                            status)
+            f, status = lib.pk2d_eval_single(self.psp, np.log(k), a, cospass,
+                                             status)
         else:
             k_use = np.atleast_1d(k)
-            f, status = lib.p2d_eval_multi(self.psp, np.log(k_use), a, cospass,
-                                           k_use.size, status)
+            f, status = lib.pk2d_eval_multi(self.psp, np.log(k_use),
+                                            a, cospass,
+                                            k_use.size, status)
         check(status, cosmo)
 
         return f
@@ -144,4 +145,4 @@ class Pk2D(object):
         """
         if hasattr(self, 'has_psp'):
             if self.has_psp and hasattr(self, 'psp'):
-                lib.p2d_t_free(self.psp)
+                lib.f2d_t_free(self.psp)

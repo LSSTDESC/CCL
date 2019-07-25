@@ -10,39 +10,10 @@
 #include <gsl/gsl_const_mksa.h>
 
 #include "ccl_utils.h"
+#include "ccl_f1d.h"
+#include "ccl_f2d.h"
 
 CCL_BEGIN_DECLS
-
-
-//p2d extrapolation types for early times
-typedef enum ccl_p2d_extrap_growth_t
-{
-  ccl_p2d_cclgrowth = 401, //Use CCL's linear growth
-  ccl_p2d_customgrowth = 402, //Use a custom growth function
-  ccl_p2d_constantgrowth = 403, //Use a constant growth factor
-  ccl_p2d_no_extrapol = 404, //Do not extrapolate, just throw an exception
-} ccl_p2d_extrap_growth_t;
-
-//p2d interpolation types
-typedef enum ccl_p2d_interp_t
-{
-  ccl_p2d_3 = 303, //Bicubic interpolation
-} ccl_p2d_interp_t;
-
-/**
- * Struct containing a 2D power spectrum
- */
-typedef struct {
-  double lkmin,lkmax; /**< Edges in log(k)*/
-  double amin,amax; /**< Edges in a*/
-  int extrap_order_lok; /**< Order of extrapolating polynomial in log(k) for low k (0, 1 or 2)*/
-  int extrap_order_hik; /**< Order of extrapolating polynomial in log(k) for high k (0, 1 or 2)*/
-  ccl_p2d_extrap_growth_t extrap_linear_growth;  /**< Extrapolation type at high redshifts*/
-  int is_log; /**< Do I hold the values of log(P(k,a))?*/
-  double (*growth)(double); /**< Custom extrapolating growth function*/
-  double growth_factor_0; /**< Constant extrapolating growth factor*/
-  gsl_spline2d *pk; /**< Spline holding the values of P(k,a)*/
-} ccl_p2d_t;
 
 /**
  * Struct to hold physical constants.
@@ -306,11 +277,11 @@ typedef struct ccl_data {
   gsl_spline * etahmf;
 
   // power spectrum splines
-  ccl_p2d_t * p_lin;
-  ccl_p2d_t * p_nl;
+  ccl_f2d_t * p_lin;
+  ccl_f2d_t * p_nl;
 
   // real-space splines for RSD
-  SplPar* rsd_splines[3];
+  ccl_f1d_t* rsd_splines[3];
   double rsd_splines_scalefactor;
 } ccl_data;
 

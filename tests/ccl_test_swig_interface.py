@@ -21,24 +21,14 @@ def test_swig_tracer():
         pyccl.WeakLensingTracer,
         PYCOSMO,
         dndz=(z, dNdz[0:2]),
-        ia_bias=(z, bias_ia),
-        red_frac=(z, f_red))
+        ia_bias=(z, bias_ia))
 
     assert_raises(
-        CCLError,
+        ValueError,
         pyccl.WeakLensingTracer,
         PYCOSMO,
         dndz=(z, dNdz),
-        ia_bias=(z, bias_ia[0:2]),
-        red_frac=(z, f_red))
-
-    assert_raises(
-        CCLError,
-        pyccl.WeakLensingTracer,
-        PYCOSMO,
-        dndz=(z, dNdz),
-        ia_bias=(z, bias_ia),
-        red_frac=(z, f_red[0:2]))
+        ia_bias=(z, bias_ia[0:2]))
 
 
 def test_swig_background():
@@ -93,42 +83,28 @@ def test_swig_cls():
     base_args = [
         [0.0, 1.0],
         [0.0, 1.0],
+        [0.0, 1.0, 2.0, 3.0],
         [0.0, 1.0, 2.0],
+        [0.0],
         [0.0, 1.0, 2.0],
         [0.0, 1.0, 2.0, 3.0],
-        [0.0, 1.0, 2.0, 3.0],
-        [0.0, 1.0, 2.0, 3.0, 4.0],
-        [0.0, 1.0, 2.0, 3.0, 4.0],
-        [0.0, 1.0, 2.0, 3.0, 4.0, 5.0],
-        [0.0, 1.0, 2.0, 3.0, 4.0, 5.0],
-        1.0,
+        0, 1, 0, 0, 0, 0, 2,
         status]
-    for i in range(5):
-        args = copy.deepcopy(base_args)
-        args[i*2] = [1.0] * 8
-        assert_raises(
-            CCLError,
-            ccllib.cl_tracer_new_wrapper,
-            COSMO, 0,
-            0, 0, 0, 0, 0,
-            *args)
+    args = copy.deepcopy(base_args)
+    args[1] = [1.0] * 8
+    assert_raises(
+        CCLError,
+        ccllib.cl_tracer_t_new_wrapper,
+        COSMO, 0, 0,
+        *args)
 
     assert_raises(
         CCLError,
         ccllib.angular_cl_vec,
         COSMO,
         None, None, None,
-        1, 1, 1,
-        0,
+        1, 0,
         "none",
-        status)
-
-    assert_raises(
-        CCLError,
-        ccllib.clt_fa_vec,
-        COSMO, None, 0,
-        [0, 1, 2],
-        2,
         status)
 
 def test_swig_core():

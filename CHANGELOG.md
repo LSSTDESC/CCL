@@ -1,6 +1,7 @@
 # Unreleased
 
 ## C library
+- Implemented generalized models for tracers (#630)
 - Fixed memory leak in CLASS power spectrum computations (#561, #562).
 - Fixed a bug where CLASS would crash due to small rounding errors at z = 0
   when evaluating power spectra (#563, #564).
@@ -31,6 +32,8 @@
 - Added support for modified gravity via mu / Sigma (scale-independent) parameterisation (#442)
 
 ## Python library
+- Changed IA bias normalization to be consistent with A_IA=1 (#630).
+- Implemented generalized models for tracers (#630)
 - Improved error reporting for `angular_cl` computations (#567).
 - Deprecated the `pyccl.redshifts` module (#579).
 - Remove global splines for RSD correlation functions. These are now stored
@@ -51,7 +54,7 @@
 - Added `has_density` and `has_shear` tags to `Tracer` constructors.
 - Changed TCMB to T_CMB everywhere (#615)
 - Added support for modified gravity via mu / Sigma (scale-independent) parameterisation (#442)
-	
+
 # v 1.0 API changes :
 
 ## C library
