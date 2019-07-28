@@ -974,8 +974,8 @@ double ccl_comoving_angular_diameter_distance(ccl_cosmology * cosmo, double a1, 
       ccl_check_status(cosmo, status);
       sinn2=ccl_sinn(cosmo,chi2,status);
       ccl_check_status(cosmo, status);
-      dm1=sinn1*sqrt(1+cosmo->params.Omega_k*sinn2*sinn2/dh/dh);
-      dm2=sinn2*sqrt(1+cosmo->params.Omega_k*sinn1*sinn1/dh/dh);
+      dm1=sinn1*sqrt(1+cosmo->params.Omega_k*sinn2*sinn2*dh*dh);
+      dm2=sinn2*sqrt(1+cosmo->params.Omega_k*sinn1*sinn1*dh*dh);
       if(a1 > a2) {
 	return a2*(dm2-dm1);
       } else {
