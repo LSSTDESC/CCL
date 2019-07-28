@@ -13,7 +13,7 @@ CCL defines seven species types:
 These strings define the `species` inputs to the functions below.
 """
 from . import ccllib as lib
-from .pyutils import _vectorize_fn, _vectorize_fn3, _vectorize_fn4
+from .pyutils import _vectorize_fn, _vectorize_fn3, _vectorize_fn4, _vectorize_fn5
 
 species_types = {
     'critical':                   lib.species_crit_label,
@@ -105,6 +105,24 @@ def comoving_angular_distance(cosmo, a):
     """
     return _vectorize_fn(lib.comoving_angular_distance,
                          lib.comoving_angular_distance_vec, cosmo, a)
+
+
+def comoving_angular_diameter_distance(cosmo, a1, a2):
+    """Comoving angular diameter distance.
+
+   .. note:: The comovoing angular diameter distance in Mpc from scale factor a1 to scale factor a2. This is Eq. (19) of astro-ph/9905116.
+
+    Args:
+        cosmo (:obj:`Cosmology`): Cosmological parameters.
+        a1 (float or array_like): Scale factor(s), normalized to 1 today.
+        a2 (float or array_like): Scale factor(s), normalized to 1 today.
+
+    Returns:
+        float or array_like: Comoving angular distance; Mpc.
+    """
+    return _vectorize_fn5(lib.comoving_angular_diameter_distance,
+                          lib.comoving_angular_diameter_distance_vec, cosmo, a1, a2)
+
 
 
 def h_over_h0(cosmo, a):
