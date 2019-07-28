@@ -968,14 +968,14 @@ double ccl_comoving_angular_diameter_distance(ccl_cosmology * cosmo, double a1, 
 	ccl_cosmology_set_status_message(cosmo, "ccl_background.c: ccl_comoving_angular_distance(): Scale factor outside interpolation range.\n");
 	return NAN;
       }
-      double sinn1,sinn2,dm1,dm2,dh;
-      dh=cosmo->params.h/ccl_constants.CLIGHT_HMPC;
+      double sinn1,sinn2,dm1,dm2,sqrtk2;
+      sqrtk2=cosmo->params.sqrtk*cosmo->params.sqrtk;
       sinn1=ccl_sinn(cosmo,chi1,status);
       ccl_check_status(cosmo, status);
       sinn2=ccl_sinn(cosmo,chi2,status);
       ccl_check_status(cosmo, status);
-      dm1=sinn1*sqrt(1+cosmo->params.Omega_k*sinn2*sinn2*dh*dh);
-      dm2=sinn2*sqrt(1+cosmo->params.Omega_k*sinn1*sinn1*dh*dh);
+      dm1=sinn1*sqrt(1+sqrtk2*sinn2*sinn2);
+      dm2=sinn2*sqrt(1+sqrtk2*sinn1*sinn1);
       if(a1 > a2) {
 	return a2*(dm2-dm1);
       } else {
