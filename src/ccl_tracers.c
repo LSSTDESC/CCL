@@ -403,12 +403,12 @@ ccl_cl_tracer_t *ccl_cl_tracer_t_new(ccl_cosmology *cosmo,
     }
     else {
       int ichi;
-      double w_max=w_w[0];
+      double w_max=fabs(w_w[0]);
 
       //Find maximum of radial kernel
       for(ichi=0;ichi<n_w;ichi++) {
-	if(w_w[ichi]>=w_max)
-	  w_max=w_w[ichi];
+	if(fabs(w_w[ichi])>=w_max)
+	  w_max=fabs(w_w[ichi]);
       }
 
       //Multiply by fraction
@@ -420,7 +420,7 @@ ccl_cl_tracer_t *ccl_cl_tracer_t_new(ccl_cosmology *cosmo,
 
       //Find minimum
       for(ichi=0;ichi<n_w;ichi++) {
-	if(w_w[ichi]>=w_max) {
+	if(fabs(w_w[ichi])>=w_max) {
 	  tr->chi_min=chi_w[ichi];
 	  break;
 	}
@@ -428,7 +428,7 @@ ccl_cl_tracer_t *ccl_cl_tracer_t_new(ccl_cosmology *cosmo,
 
       //Find maximum
       for(ichi=n_w-1;ichi>=0;ichi--) {
-	if(w_w[ichi]>=w_max) {
+	if(fabs(w_w[ichi])>=w_max) {
 	  tr->chi_max=chi_w[ichi];
 	  break;
 	}
