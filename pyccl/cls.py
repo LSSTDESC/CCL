@@ -1,5 +1,5 @@
 from . import ccllib as lib
-from .core import check
+from .pyutils import check
 from .pk2d import Pk2D
 import numpy as np
 
@@ -27,6 +27,9 @@ def angular_cl(cosmo, cltracer1, cltracer2, ell, p_of_k_a=None,
             :math:`C_\\ell`, for the pair of tracers, as a function of
             :math:`\\ell`.
     """
+    if not cosmo.has_power():
+        cosmo.compute_power()
+
     # Access ccl_cosmology object
     cosmo_in = cosmo
     cosmo = cosmo.cosmo

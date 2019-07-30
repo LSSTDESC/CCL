@@ -186,6 +186,9 @@ import yaml
 
 from . import ccllib as lib
 from .errors import CCLError
+from ._types import error_types
+from .boltzmann import get_class_pk_lin
+from .pyutils import check
 
 # Configuration types
 transfer_function_types = {
@@ -235,25 +238,6 @@ mnu_types = {
     'sum': lib.mnu_sum,
     'sum_inverted': lib.mnu_sum_inverted,
     'sum_equal': lib.mnu_sum_equal,
-}
-
-# Error types
-error_types = {
-    lib.CCL_ERROR_MEMORY:              'CCL_ERROR_MEMORY',
-    lib.CCL_ERROR_LINSPACE:            'CCL_ERROR_LINSPACE',
-    lib.CCL_ERROR_INCONSISTENT:        'CCL_ERROR_INCONSISTENT',
-    lib.CCL_ERROR_SPLINE:              'CCL_ERROR_SPLINE',
-    lib.CCL_ERROR_SPLINE_EV:           'CCL_ERROR_SPLINE_EV',
-    lib.CCL_ERROR_INTEG:               'CCL_ERROR_INTEG',
-    lib.CCL_ERROR_ROOT:                'CCL_ERROR_ROOT',
-    lib.CCL_ERROR_CLASS:               'CCL_ERROR_CLASS',
-    lib.CCL_ERROR_COMPUTECHI:          'CCL_ERROR_COMPUTECHI',
-    lib.CCL_ERROR_MF:                  'CCL_ERROR_MF',
-    lib.CCL_ERROR_HMF_INTERP:          'CCL_ERROR_HMF_INTERP',
-    lib.CCL_ERROR_PARAMETERS:          'CCL_ERROR_PARAMETERS',
-    lib.CCL_ERROR_NU_INT:	           'CCL_ERROR_NU_INT',
-    lib.CCL_ERROR_EMULATOR_BOUND:      'CCL_ERROR_EMULATOR_BOUND',
-    lib.CCL_ERROR_MISSING_CONFIG_FILE: 'CCL_ERROR_MISSING_CONFIG_FILE',
 }
 
 
@@ -727,19 +711,26 @@ class Cosmology(object):
         """Compute the distance splines."""
         status = 0
         status = lib.cosmology_compute_distances(self.cosmo, status)
-        check(status, self.cosmo)
+        check(status, self)
 
     def compute_growth(self):
         """Compute the growth function."""
         status = 0
         status = lib.cosmology_compute_growth(self.cosmo, status)
-        check(status, self.cosmo)
+        check(status, self)
 
     def compute_power(self):
         """Compute the power spectrum."""
+
+        if self._config_init_kwargs['transfer_function'] == 'boltzmann_class':
+            pk_lin = get_class_pk_lin(self)
+            psp = pk_lin.psp
+        else:
+            psp = None
+
         status = 0
-        status = lib.cosmology_compute_power(self.cosmo, status)
-        check(status, self.cosmo)
+        status = lib.cosmology_compute_power(self.cosmo, psp, status)
+        check(status, self)
 
     def has_distances(self):
         """Checks if the distances have been precomputed.
@@ -792,30 +783,3 @@ class Cosmology(object):
 
         # Return status information
         return "status(%s): %s" % (status, msg)
-
-
-def check(status, cosmo=None):
-    """Check the status returned by a ccllib function.
-
-    Args:
-        status (int or :obj:`core.error_types`): Flag or error describing the
-                                                 success of a function.
-        cosmo (:obj:`Cosmology`, optional): A Cosmology object.
-    """
-    # Check for normal status (no action required)
-    if status == 0:
-        return
-
-    # Get status message from Cosmology object, if there is one
-    if cosmo is not None:
-        msg = cosmo.cosmo.status_message
-    else:
-        msg = ""
-
-    # Check for known error status
-    if status in error_types.keys():
-        raise CCLError("Error %s: %s" % (error_types[status], msg))
-
-    # Check for unknown error
-    if status != 0:
-        raise CCLError("Error %d: %s" % (status, msg))

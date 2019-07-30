@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
+#include <assert.h>
 
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_integration.h>
@@ -65,7 +66,7 @@ static double transfer_limber_single(ccl_cl_tracer_t *tr,
   double w=ccl_cl_tracer_t_get_kernel(tr,chi_l,status);
   double t=ccl_cl_tracer_t_get_transfer(tr,lk,a_l,status);
   double fl=ccl_cl_tracer_t_get_f_ell(tr,l,status);
-  
+
   if(tr->der_bessel<1) { //We don't need l+1
     dd=w*t;
     if(tr->der_bessel==-1) { //If we divide by (chi*k)^2
@@ -79,7 +80,7 @@ static double transfer_limber_single(ccl_cl_tracer_t *tr,
     double lp3h=l+1.5;
     double chi_lp=lp3h/k;
     double a_lp=ccl_scale_factor_of_chi(cosmo,chi_lp,status);
-    
+
     //Compute power spectrum ratio there
     double pk_ratio=fabs(ccl_f2d_t_eval(psp,lk,a_lp,cosmo,status)/
 			 ccl_f2d_t_eval(psp,lk,a_l,cosmo,status));
@@ -141,9 +142,8 @@ double ccl_angular_cl_limber(ccl_cosmology *cosmo,
   //Figure out which power spectrum to use
   ccl_f2d_t *psp_use;
   if(psp==NULL) {
-    if (!cosmo->computed_power) ccl_cosmology_compute_power(cosmo, status);
-    // Return if computation failed
-    if (!cosmo->computed_power) return NAN;
+    // FIXME - this assert is really bad
+    assert(cosmo->computed_power);
     psp_use=cosmo->data.p_nl;
   }
   else

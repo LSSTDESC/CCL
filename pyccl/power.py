@@ -13,6 +13,9 @@ def linear_matter_power(cosmo, k, a):
     Returns:
         float or array_like: Linear matter power spectrum; Mpc^3.
     """
+    if not cosmo.has_power():
+        cosmo.compute_power()
+
     return _vectorize_fn2(lib.linear_matter_power,
                           lib.linear_matter_power_vec, cosmo, k, a)
 
@@ -28,6 +31,9 @@ def nonlin_matter_power(cosmo, k, a):
     Returns:
         float or array_like: Nonlinear matter power spectrum; Mpc^3.
     """
+    if not cosmo.has_power():
+        cosmo.compute_power()
+
     return _vectorize_fn2(lib.nonlin_matter_power,
                           lib.nonlin_matter_power_vec, cosmo, k, a)
 
@@ -44,6 +50,9 @@ def sigmaR(cosmo, R, a=1.):
         float or array_like: RMS variance in the density field in top-hat
                              sphere; Mpc.
     """
+    if not cosmo.has_power():
+        cosmo.compute_power()
+
     return _vectorize_fn2(lib.sigmaR, lib.sigmaR_vec, cosmo, R, a)
 
 
@@ -60,6 +69,9 @@ def sigmaV(cosmo, R, a=1.):
         sigmaV (float or array_like): RMS variance in the displacement field in
                                       top-hat sphere.
     """
+    if not cosmo.has_power():
+        cosmo.compute_power()
+
     return _vectorize_fn2(lib.sigmaV, lib.sigmaV_vec, cosmo, R, a)
 
 
@@ -74,4 +86,7 @@ def sigma8(cosmo):
     Returns:
         float: RMS variance in top-hat sphere of radius 8 Mpc/h.
     """
+    if not cosmo.has_power():
+        cosmo.compute_power()
+
     return sigmaR(cosmo, 8.0 / cosmo['h'])
