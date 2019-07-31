@@ -638,7 +638,10 @@ class Cosmology(object):
     def __getitem__(self, key):
         """Access parameter values by name."""
         try:
-            val = getattr(self._params, key)
+            if key == 'mnu':
+                val = lib.parameters_get_nu_masses(self._params, 3)
+            else:
+                val = getattr(self._params, key)
         except AttributeError:
             raise KeyError("Parameter '%s' not recognized." % key)
         return val
