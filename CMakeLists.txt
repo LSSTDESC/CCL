@@ -29,7 +29,6 @@ set(CCL_SRC
 set(TEST_SRC
     # test core code first
     benchmarks/ccl_test.c benchmarks/ccl_test_utils.c
-    benchmarks/ccl_test_cosmology.c
     benchmarks/ccl_test_params.c
     benchmarks/ccl_test_params_mnu.c
     benchmarks/ccl_test_MG.c
