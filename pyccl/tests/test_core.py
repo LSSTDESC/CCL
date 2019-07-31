@@ -1,9 +1,9 @@
-from __future__ import print_function
 import pickle
 import tempfile
 import numpy as np
-from numpy.testing import assert_raises, assert_warns, assert_no_warnings, \
-                          assert_, run_module_suite, assert_almost_equal
+from numpy.testing import (
+    assert_raises, assert_no_warnings,
+    assert_, assert_almost_equal)
 import pyccl as ccl
 
 
@@ -12,27 +12,28 @@ def test_parameters_valid_input():
     Check that valid parameter arguments are accepted.
     """
     assert_no_warnings(ccl.Cosmology, Omega_c=0.25, Omega_b=0.05, h=0.7,
-                                       A_s=2.1e-9, n_s=0.96)
+                       A_s=2.1e-9, n_s=0.96)
     assert_no_warnings(ccl.Cosmology, Omega_c=0.25, Omega_b=0.05, h=0.7,
-                                       A_s=2.1e-9, n_s=0.96, Omega_k=0.05)
+                       A_s=2.1e-9, n_s=0.96, Omega_k=0.05)
     assert_no_warnings(ccl.Cosmology, Omega_c=0.25, Omega_b=0.05, h=0.7,
-                                       A_s=2.1e-9, n_s=0.96, Neff=2.046)
+                       A_s=2.1e-9, n_s=0.96, Neff=2.046)
     assert_no_warnings(ccl.Cosmology, Omega_c=0.25, Omega_b=0.05, h=0.7,
-                                       A_s=2.1e-9, n_s=0.96, Neff=3.046, m_nu=0.06)
+                       A_s=2.1e-9, n_s=0.96, Neff=3.046, m_nu=0.06)
 
     assert_no_warnings(ccl.Cosmology, Omega_c=0.25, Omega_b=0.05, h=0.7,
-                                       A_s=2.1e-9, n_s=0.96, w0=-0.9)
+                       A_s=2.1e-9, n_s=0.96, w0=-0.9)
     assert_no_warnings(ccl.Cosmology, Omega_c=0.25, Omega_b=0.05, h=0.7,
-                                       A_s=2.1e-9, n_s=0.96, w0=-0.9, wa=0.1)
+                       A_s=2.1e-9, n_s=0.96, w0=-0.9, wa=0.1)
 
     # Check that kwarg order doesn't matter
     assert_no_warnings(ccl.Cosmology, h=0.7, Omega_c=0.25, Omega_b=0.05,
-                                       A_s=2.1e-9, n_s=0.96)
-                     
-    # Try a set of parameters with non-zero mu0 / Sig0                                   
-    assert_no_warnings(ccl.Cosmology, h=0.7, Omega_c=0.25, Omega_b = 0.05,
-                                       A_s=2.1e-9, n_s=0.96, mu_0=0.1, sigma_0=0.1)
-    
+                       A_s=2.1e-9, n_s=0.96)
+
+    # Try a set of parameters with non-zero mu0 / Sig0
+    assert_no_warnings(ccl.Cosmology, h=0.7, Omega_c=0.25, Omega_b=0.05,
+                       A_s=2.1e-9, n_s=0.96, mu_0=0.1, sigma_0=0.1)
+
+
 def test_parameters_missing():
     """
     Check that errors are raised when compulsory parameters are missing, but
@@ -43,15 +44,15 @@ def test_parameters_missing():
 
     # Check that a single missing compulsory parameter is noticed
     assert_raises(ValueError, ccl.Cosmology, Omega_c=0.25, Omega_b=0.05,
-                                              h=0.7, A_s=2.1e-9)
+                  h=0.7, A_s=2.1e-9)
     assert_raises(ValueError, ccl.Cosmology, Omega_c=0.25, Omega_b=0.05,
-                                              h=0.7, n_s=0.96)
+                  h=0.7, n_s=0.96)
     assert_raises(ValueError, ccl.Cosmology, Omega_c=0.25, Omega_b=0.05,
-                                              A_s=2.1e-9, n_s=0.96)
+                  A_s=2.1e-9, n_s=0.96)
     assert_raises(ValueError, ccl.Cosmology, Omega_c=0.25,
-                                              h=0.7, A_s=2.1e-9, n_s=0.96)
+                  h=0.7, A_s=2.1e-9, n_s=0.96)
     assert_raises(ValueError, ccl.Cosmology, Omega_b=0.05,
-                                              h=0.7, A_s=2.1e-9, n_s=0.96)
+                  h=0.7, A_s=2.1e-9, n_s=0.96)
 
     # Make sure that compulsory parameters are compulsory
     assert_raises(
@@ -95,14 +96,15 @@ def test_parameters_set():
     """
     Check that a Cosmology object doesn't let parameters be set.
     """
-    params = ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9,
-                            n_s=0.96)
+    params = ccl.Cosmology(
+        Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9,
+        n_s=0.96)
 
     # Check that values of sigma8 and A_s won't be misinterpreted by the C code
     assert_raises(ValueError, ccl.Cosmology, Omega_c=0.25, Omega_b=0.05,
-                                              h=0.7, A_s=2e-5, n_s=0.96)
+                  h=0.7, A_s=2e-5, n_s=0.96)
     assert_raises(ValueError, ccl.Cosmology, Omega_c=0.25, Omega_b=0.05,
-                                              h=0.7, sigma8=9e-6, n_s=0.96)
+                  h=0.7, sigma8=9e-6, n_s=0.96)
 
     # Check that error is raised when unrecognized parameter requested
     assert_raises(KeyError, lambda: params['wibble'])
@@ -115,7 +117,9 @@ def test_parameters_mgrowth():
     """
     zarr = np.linspace(0., 1., 15)
     dfarr = 0.1 * np.ones(15)
-    f_func = lambda z: 0.1 * z
+
+    def f_func(z):
+        return 0.1 * z
 
     # Valid constructions
     for omega_g in [None, 0.0, 0.1]:
@@ -309,7 +313,8 @@ def test_cosmology_repr():
 
 
 def test_cosmology_context():
-    """Check that using a Cosmology object in a context manager frees C resources properly."""
+    """Check that using a Cosmology object in a context manager
+    frees C resources properly."""
     with ccl.Cosmology(
             Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
             m_nu=np.array([0.02, 0.1, 0.05]), mnu_type='list',
@@ -323,26 +328,23 @@ def test_cosmology_context():
     assert_(not hasattr(cosmo, "cosmo"))
     assert_(not hasattr(cosmo, "_params"))
     assert_raises(AttributeError, cosmo.has_growth)
-    
+
+
 def test_cosmology_neutrinos():
     """ Make sure an error is raised if inconsistent neutrino options /
     parameters are passed."""
-	
+
     assert_raises(
         ValueError, ccl.Cosmology,
         Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
         m_nu=0.05)
-        
+
     assert_raises(
         ValueError, ccl.Cosmology,
         Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
         m_nu=0.05, mnu_type='sum')
-        
+
     assert_raises(
         ValueError, ccl.Cosmology,
         Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
-        m_nu=0.08, mnu_type='sum_inverted')     
-
-
-if __name__ == '__main__':
-    run_module_suite()
+        m_nu=0.08, mnu_type='sum_inverted')

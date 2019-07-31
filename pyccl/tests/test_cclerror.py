@@ -1,5 +1,4 @@
-from __future__ import print_function
-from numpy.testing import run_module_suite, assert_
+from numpy.testing import assert_
 import pyccl
 
 
@@ -18,7 +17,3 @@ def test_cclerror_not_equal():
     assert_(e is not e2)
     assert_(e != e2)
     assert_(hash(e) != hash(e2))
-
-
-if __name__ == '__main__':
-    run_module_suite()

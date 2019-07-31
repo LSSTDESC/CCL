@@ -1,6 +1,6 @@
 import copy
 import numpy as np
-from numpy.testing import assert_raises, run_module_suite
+from numpy.testing import assert_raises
 import pyccl
 from pyccl import ccllib
 from pyccl import CCLError
@@ -13,7 +13,6 @@ COSMO = PYCOSMO.cosmo
 def test_swig_tracer():
     z = np.linspace(0, 1, 10)
     bias_ia = z * 2
-    f_red = z / 1
     dNdz = z * 8
 
     assert_raises(
@@ -107,12 +106,13 @@ def test_swig_cls():
         "none",
         status)
 
+
 def test_swig_core():
     status = 0
     assert_raises(
         CCLError,
         ccllib.parameters_create_nu_vec,
-        0.25, 0.05, 0.0, 3.0, -1.0, 0.0, 0.7, 2e-9, 0.95, 1, 0.0, 0.0, 
+        0.25, 0.05, 0.0, 3.0, -1.0, 0.0, 0.7, 2e-9, 0.95, 1, 0.0, 0.0,
         0.0, 0.0, [1.0, 2.0],
         [0.0, 0.3, 0.5],
         0,
@@ -254,6 +254,7 @@ def test_swig_power():
             3,
             status)
 
+
 def test_swig_haloprofile():
     status = 0
     for func in [ccllib.halo_profile_nfw_vec,
@@ -271,6 +272,3 @@ def test_swig_haloprofile():
             [1.0, 10.0],
             4,
             status)
-
-if __name__ == '__main__':
-    run_module_suite()

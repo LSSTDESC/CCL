@@ -1,5 +1,5 @@
 import numpy as np
-from numpy.testing import assert_allclose, run_module_suite
+from numpy.testing import assert_allclose
 import pyccl as ccl
 # Set tolerances
 GROWTH_TOLERANCE = 1e-4
@@ -21,37 +21,42 @@ wa_vals = np.array([0.0, 0.0, 0.1, 0.1, 0.1, 0.0, 0.0, 0.0, 0.0])
 mu0_vals = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.1, -0.1, 0.1, -0.1])
 Sig0_vals = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.1, -0.1, -0.1, 0.1])
 
+
 def read_growth_lowz_benchmark_file():
     """
     Read the file containing growth factor benchmarks for the low redshifts.
     """
     # Load data from file
     dat = np.genfromtxt("benchmarks/data/growth_model1-5.txt").T
-    assert(dat.shape == (6,6))
+    assert(dat.shape == (6, 6))
 
     # Split into redshift column and growth(z) columns
     z = dat[0]
     gfac = dat[1:]
     return z, gfac
+
 
 def read_growth_allz_benchmark_file():
     """
-    Read the file containing growth factor benchmarks for the whole redshift range.
+    Read the file containing growth factor benchmarks for
+    the whole redshift range.
     """
     # Load data from file
     dat = np.genfromtxt("benchmarks/data/growth_cosmomad_allz.txt").T
-    assert(dat.shape == (6,10))
+    assert(dat.shape == (6, 10))
 
     # Split into redshift column and growth(z) columns
     z = dat[0]
-    #gfac = np.column_stack((dat[1:], dat_MG[1:]))
+    # gfac = np.column_stack((dat[1:], dat_MG[1:]))
     gfac = dat[1:]
-    
+
     return z, gfac
+
 
 # Set-up test data
 z_lowz, gfac_lowz = read_growth_lowz_benchmark_file()
 z_allz, gfac_allz = read_growth_allz_benchmark_file()
+
 
 def compare_growth(z, gfac_bench, Omega_v, w0, wa, mu_0, sigma_0):
     """
@@ -62,9 +67,10 @@ def compare_growth(z, gfac_bench, Omega_v, w0, wa, mu_0, sigma_0):
     # Set Omega_K in a consistent way
     Omega_k = 1.0 - Omega_c - Omega_b - Omega_v
 
-    cosmo = ccl.Cosmology(Omega_c=Omega_c, Omega_b=Omega_b, Neff=Neff, m_nu=m_nu,
-                       h=h, A_s=A_s, n_s=n_s, Omega_k=Omega_k,Omega_g=0,
-                       w0=w0, wa=wa, mu_0=mu_0, sigma_0 = sigma_0)                 
+    cosmo = ccl.Cosmology(
+        Omega_c=Omega_c, Omega_b=Omega_b, Neff=Neff, m_nu=m_nu,
+        h=h, A_s=A_s, n_s=n_s, Omega_k=Omega_k, Omega_g=0,
+        w0=w0, wa=wa, mu_0=mu_0, sigma_0=sigma_0)
 
     # Calculate distance using pyccl
     a = 1. / (1. + z)
@@ -76,47 +82,66 @@ def compare_growth(z, gfac_bench, Omega_v, w0, wa, mu_0, sigma_0):
 
 def test_growth_lowz_model_0():
     i = 0
-    compare_growth(z_lowz, gfac_lowz[i], Omega_v_vals[i], w0_vals[i], wa_vals[i], mu0_vals[i], Sig0_vals[i])
+    compare_growth(z_lowz, gfac_lowz[i], Omega_v_vals[i], w0_vals[i],
+                   wa_vals[i], mu0_vals[i], Sig0_vals[i])
 
 
 def test_growth_lowz_model_1():
     i = 1
-    compare_growth(z_lowz, gfac_lowz[i], Omega_v_vals[i], w0_vals[i], wa_vals[i], mu0_vals[i], Sig0_vals[i])
+    compare_growth(z_lowz, gfac_lowz[i], Omega_v_vals[i], w0_vals[i],
+                   wa_vals[i], mu0_vals[i], Sig0_vals[i])
+
 
 def test_growth_lowz_model_2():
     i = 2
-    compare_growth(z_lowz, gfac_lowz[i], Omega_v_vals[i], w0_vals[i], wa_vals[i], mu0_vals[i], Sig0_vals[i])
+    compare_growth(z_lowz, gfac_lowz[i], Omega_v_vals[i], w0_vals[i],
+                   wa_vals[i], mu0_vals[i], Sig0_vals[i])
+
 
 def test_growth_lowz_model_3():
     i = 3
-    compare_growth(z_lowz, gfac_lowz[i], Omega_v_vals[i], w0_vals[i], wa_vals[i], mu0_vals[i], Sig0_vals[i])
+    compare_growth(z_lowz, gfac_lowz[i], Omega_v_vals[i], w0_vals[i],
+                   wa_vals[i], mu0_vals[i], Sig0_vals[i])
+
 
 def test_growth_lowz_model_4():
     i = 4
-    compare_growth(z_lowz, gfac_lowz[i], Omega_v_vals[i], w0_vals[i], wa_vals[i], mu0_vals[i], Sig0_vals[i])
+    compare_growth(z_lowz, gfac_lowz[i], Omega_v_vals[i], w0_vals[i],
+                   wa_vals[i], mu0_vals[i], Sig0_vals[i])
+
 
 # 0.01 < z < 1000 tests
 def test_growth_allz_model_0():
     i = 0
-    compare_growth(z_allz, gfac_allz[i], Omega_v_vals[i], w0_vals[i], wa_vals[i], mu0_vals[i], Sig0_vals[i])
+    compare_growth(z_allz, gfac_allz[i], Omega_v_vals[i], w0_vals[i],
+                   wa_vals[i], mu0_vals[i], Sig0_vals[i])
+
 
 def test_growth_allz_model_1():
     i = 1
-    compare_growth(z_allz, gfac_allz[i], Omega_v_vals[i], w0_vals[i], wa_vals[i], mu0_vals[i], Sig0_vals[i])
+    compare_growth(z_allz, gfac_allz[i], Omega_v_vals[i], w0_vals[i],
+                   wa_vals[i], mu0_vals[i], Sig0_vals[i])
+
 
 def test_growth_allz_model_2():
     i = 2
-    compare_growth(z_allz, gfac_allz[i], Omega_v_vals[i], w0_vals[i], wa_vals[i], mu0_vals[i], Sig0_vals[i])
+    compare_growth(z_allz, gfac_allz[i], Omega_v_vals[i], w0_vals[i],
+                   wa_vals[i], mu0_vals[i], Sig0_vals[i])
+
 
 def test_growth_allz_model_3():
     i = 3
-    compare_growth(z_allz, gfac_allz[i], Omega_v_vals[i], w0_vals[i], wa_vals[i], mu0_vals[i], Sig0_vals[i])
+    compare_growth(z_allz, gfac_allz[i], Omega_v_vals[i], w0_vals[i],
+                   wa_vals[i], mu0_vals[i], Sig0_vals[i])
+
 
 def test_growth_allz_model_4():
     i = 4
-    compare_growth(z_allz, gfac_allz[i], Omega_v_vals[i], w0_vals[i], wa_vals[i], mu0_vals[i], Sig0_vals[i])
+    compare_growth(z_allz, gfac_allz[i], Omega_v_vals[i], w0_vals[i],
+                   wa_vals[i], mu0_vals[i], Sig0_vals[i])
 
-def test_mgrowth():
+
+def test_growth_mg():
     """
     Compare the modified growth function computed by CCL against the exact
     result for a particular modification of the growth rate.
@@ -129,12 +154,15 @@ def test_mgrowth():
         z_mg[i] = 4. * (i + 0.0) / (nz_mg - 1.)
         df_mg[i] = 0.1 / (1. + z_mg[i])
 
-    # Define two test cosmologies, without and with modified growth respectively
-    cosmo1 = ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, Omega_k=0., Neff=0., m_nu=0.,
-                        w0=-1., wa=0., h=0.7, A_s=2.1e-9, n_s=0.96)
-    cosmo2 = ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, Omega_k=0., Neff=0., m_nu=0.,
-                        w0=-1., wa=0., h=0.7, A_s=2.1e-9, n_s=0.96,
-                        z_mg=z_mg, df_mg=df_mg)
+    # Define two test cosmologies, without and with modified growth
+    # respectively
+    cosmo1 = ccl.Cosmology(
+        Omega_c=0.25, Omega_b=0.05, Omega_k=0., Neff=0., m_nu=0.,
+        w0=-1., wa=0., h=0.7, A_s=2.1e-9, n_s=0.96)
+    cosmo2 = ccl.Cosmology(
+        Omega_c=0.25, Omega_b=0.05, Omega_k=0., Neff=0., m_nu=0.,
+        w0=-1., wa=0., h=0.7, A_s=2.1e-9, n_s=0.96,
+        z_mg=z_mg, df_mg=df_mg)
 
     # We have included a growth modification \delta f = K*a, with K==0.1
     # (arbitrarily). This case has an analytic solution, given by
@@ -153,7 +181,3 @@ def test_mgrowth():
     # Check that ratio of calculated and analytic results is within tolerance
     assert_allclose(d2r, d2, rtol=GROWTH_TOLERANCE)
     assert_allclose(f2r, f2, rtol=GROWTH_TOLERANCE)
-
-
-if __name__ == "__main__":
-    run_module_suite()

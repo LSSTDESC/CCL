@@ -31,9 +31,8 @@ script:
   - ./build/check_ccl
   - rm -rf build
   - python setup.py install
-  - nosetests tests/run_tests.py --all --debug --detailed-errors --verbose --process-restartworker
-    --with-coverage --cover-package=pyccl
-  - pytest -vv benchmarks
+  - pytest -vv pyccl --cov=pyccl
+  - pytest -vv benchmarks --cov=pyccl
 
 after_success:
   - coveralls
