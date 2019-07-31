@@ -578,7 +578,7 @@ class Cosmology(object):
 
         else:
             try:
-                m_nu - float(m_nu)
+                m_nu = float(m_nu)
             except Exception:
                 raise ValueError(
                     "m_nu must be a float or array-like object with "
