@@ -77,7 +77,6 @@ def test_parametes_nu(mnu_type):
         assert np.allclose(
             cosmo['mnu'][2]**2 - cosmo['mnu'][0]**2,
             ccl.physical_constants.DELTAM13_sq_neg, atol=1e-4, rtol=0)
-        pass
     else:
         assert np.allclose(
             cosmo['mnu'][2]**2 - cosmo['mnu'][0]**2,
