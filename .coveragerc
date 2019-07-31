@@ -1,2 +1,3 @@
 [report]
-omit=*ccllib.py
+omit =
+    *ccllib.py
