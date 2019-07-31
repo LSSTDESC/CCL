@@ -1,7 +1,10 @@
 import numpy as np
 from numpy.testing import assert_allclose
+import pytest
+
 import pyccl as ccl
-# Set tolerances
+
+GROWTH_HIZ_TOLERANCE = 6.0e-6
 GROWTH_TOLERANCE = 1e-4
 
 # Set up the cosmological parameters to be used in each of the models
@@ -36,6 +39,20 @@ def read_growth_lowz_benchmark_file():
     return z, gfac
 
 
+def read_growth_highz_benchmark_file():
+    """
+    Read the file containing growth factor benchmarks for the high redshifts.
+    """
+    # Load data from file
+    dat = np.genfromtxt("benchmarks/data/growth_hiz_model1-3.txt").T
+    assert(dat.shape == (4, 7))
+
+    # Split into redshift column and growth(z) columns
+    z = dat[0]
+    gfac = dat[1:]
+    return z, gfac
+
+
 def read_growth_allz_benchmark_file():
     """
     Read the file containing growth factor benchmarks for
@@ -55,10 +72,12 @@ def read_growth_allz_benchmark_file():
 
 # Set-up test data
 z_lowz, gfac_lowz = read_growth_lowz_benchmark_file()
+z_highz, gfac_highz = read_growth_highz_benchmark_file()
 z_allz, gfac_allz = read_growth_allz_benchmark_file()
 
 
-def compare_growth(z, gfac_bench, Omega_v, w0, wa, mu_0, sigma_0):
+def compare_growth(
+        z, gfac_bench, Omega_v, w0, wa, mu_0, sigma_0, high_tol=False):
     """
     Compare growth factor calculated by pyccl with the values in the benchmark
     file. This test only works if radiation is explicitly set to 0.
@@ -77,66 +96,28 @@ def compare_growth(z, gfac_bench, Omega_v, w0, wa, mu_0, sigma_0):
     gfac = ccl.growth_factor_unnorm(cosmo, a)
 
     # Compare to benchmark data
-    assert_allclose(gfac, gfac_bench, atol=1e-12, rtol=GROWTH_TOLERANCE)
+    if high_tol:
+        assert_allclose(
+            gfac, gfac_bench, atol=1e-12, rtol=GROWTH_HIZ_TOLERANCE)
+    else:
+        assert_allclose(gfac, gfac_bench, atol=1e-12, rtol=GROWTH_TOLERANCE)
 
 
-def test_growth_lowz_model_0():
-    i = 0
+@pytest.mark.parametrize('i', list(range(5)))
+def test_growth_lowz_model(i):
     compare_growth(z_lowz, gfac_lowz[i], Omega_v_vals[i], w0_vals[i],
                    wa_vals[i], mu0_vals[i], Sig0_vals[i])
 
 
-def test_growth_lowz_model_1():
-    i = 1
-    compare_growth(z_lowz, gfac_lowz[i], Omega_v_vals[i], w0_vals[i],
-                   wa_vals[i], mu0_vals[i], Sig0_vals[i])
-
-
-def test_growth_lowz_model_2():
-    i = 2
-    compare_growth(z_lowz, gfac_lowz[i], Omega_v_vals[i], w0_vals[i],
-                   wa_vals[i], mu0_vals[i], Sig0_vals[i])
-
-
-def test_growth_lowz_model_3():
-    i = 3
-    compare_growth(z_lowz, gfac_lowz[i], Omega_v_vals[i], w0_vals[i],
-                   wa_vals[i], mu0_vals[i], Sig0_vals[i])
-
-
-def test_growth_lowz_model_4():
-    i = 4
-    compare_growth(z_lowz, gfac_lowz[i], Omega_v_vals[i], w0_vals[i],
-                   wa_vals[i], mu0_vals[i], Sig0_vals[i])
+@pytest.mark.parametrize('i', list(range(3)))
+def test_growth_highz_model(i):
+    compare_growth(z_highz, gfac_highz[i], Omega_v_vals[i], w0_vals[i],
+                   wa_vals[i], mu0_vals[i], Sig0_vals[i], high_tol=True)
 
 
 # 0.01 < z < 1000 tests
-def test_growth_allz_model_0():
-    i = 0
-    compare_growth(z_allz, gfac_allz[i], Omega_v_vals[i], w0_vals[i],
-                   wa_vals[i], mu0_vals[i], Sig0_vals[i])
-
-
-def test_growth_allz_model_1():
-    i = 1
-    compare_growth(z_allz, gfac_allz[i], Omega_v_vals[i], w0_vals[i],
-                   wa_vals[i], mu0_vals[i], Sig0_vals[i])
-
-
-def test_growth_allz_model_2():
-    i = 2
-    compare_growth(z_allz, gfac_allz[i], Omega_v_vals[i], w0_vals[i],
-                   wa_vals[i], mu0_vals[i], Sig0_vals[i])
-
-
-def test_growth_allz_model_3():
-    i = 3
-    compare_growth(z_allz, gfac_allz[i], Omega_v_vals[i], w0_vals[i],
-                   wa_vals[i], mu0_vals[i], Sig0_vals[i])
-
-
-def test_growth_allz_model_4():
-    i = 4
+@pytest.mark.parametrize('i', list(range(5)))
+def test_growth_allz_model(i):
     compare_growth(z_allz, gfac_allz[i], Omega_v_vals[i], w0_vals[i],
                    wa_vals[i], mu0_vals[i], Sig0_vals[i])
 

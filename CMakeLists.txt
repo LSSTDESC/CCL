@@ -35,7 +35,6 @@ set(TEST_SRC
     benchmarks/ccl_test_distances_class_allz.c benchmarks/ccl_test_distances_cosmomad_hiz.c
     benchmarks/ccl_test_distances_cosmomad_lowz.c
     benchmarks/ccl_test_distances_astropy_mnu_lowz.c benchmarks/ccl_test_distances_astropy_mnu_hiz.c
-    benchmarks/ccl_test_growth_lowz.c benchmarks/ccl_test_growth_hiz.c benchmarks/ccl_test_growth_allz.c
 
     # now power spectra stuff in order of use roughly
     benchmarks/ccl_test_f2d.c
