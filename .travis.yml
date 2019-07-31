@@ -28,7 +28,7 @@ script:
   - flake8 pyccl
   - flake8 --exclude=data benchmarks
   - mkdir -p build && cd build && cmake .. && make && cd ..
-  - export CLASS_PARAM_DIR=./build/extern/share/class/ ./build/check_ccl
+  - CLASS_PARAM_DIR=./build/extern/share/class/ ./build/check_ccl
   - rm -rf build
   - python setup.py build
   - python setup.py develop
