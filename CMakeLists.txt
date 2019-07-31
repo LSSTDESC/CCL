@@ -42,7 +42,6 @@ set(TEST_SRC
     # Cls and correlation functions
     # Uncomment below when we bring ANGPOW back
     #benchmarks/ccl_test_angpow.c
-    benchmarks/ccl_test_correlation_3dRSD.c
 
     # halo profiles
     benchmarks/ccl_test_haloprofile.c
