@@ -24,12 +24,11 @@ set(CCL_SRC
     src/ccl_tracers.c
     src/fftlog.c)
 
-# Defines list of CCL tests src files
-# ! Add new tests to this list
+# Defines list of CCL C test src files
+# ! Add new tests of the C code to this list
 set(TEST_SRC
     # test core code first
     benchmarks/ccl_test.c benchmarks/ccl_test_utils.c
-    benchmarks/ccl_test_MG.c
 
     # now power spectra stuff in order of use roughly
     benchmarks/ccl_test_f2d.c
@@ -37,8 +36,7 @@ set(TEST_SRC
     benchmarks/ccl_test_power_nu.c
     benchmarks/ccl_test_power_MG.c
 
-    # Cls and correlation functions
-    # Uncomment below when we bring ANGPOW back
+    # Move to python when we bring ANGPOW back
     #benchmarks/ccl_test_angpow.c
 )
 

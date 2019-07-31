@@ -321,6 +321,10 @@ class Cosmology(object):
             model. Defaults to 0.5.
         bcm_ks (:obj:`float`, optional): One of the parameters of the BCM
             model. Defaults to 55.0.
+        mu_0 (:obj:`float`, optional): One of the parameters of the mu-Sigma
+            modified gravity model. Defaults to 0.0
+        sigma_0 (:obj:`float`, optional): One of the parameters of the mu-Sigma
+            modified gravity model. Defaults to 0.0
         df_mg (array_like, optional): Perturbations to the GR growth rate as
             a function of redshift :math:`\\Delta f`. Used to implement simple
             modified growth scenarios.
