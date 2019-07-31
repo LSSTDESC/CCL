@@ -31,11 +31,6 @@ set(TEST_SRC
     benchmarks/ccl_test.c benchmarks/ccl_test_utils.c
     benchmarks/ccl_test_MG.c
 
-    # now the distances
-    benchmarks/ccl_test_distances_class_allz.c benchmarks/ccl_test_distances_cosmomad_hiz.c
-    benchmarks/ccl_test_distances_cosmomad_lowz.c
-    benchmarks/ccl_test_distances_astropy_mnu_lowz.c benchmarks/ccl_test_distances_astropy_mnu_hiz.c
-
     # now power spectra stuff in order of use roughly
     benchmarks/ccl_test_f2d.c
     benchmarks/ccl_test_bcm.c
@@ -47,7 +42,6 @@ set(TEST_SRC
     # Cls and correlation functions
     # Uncomment below when we bring ANGPOW back
     #benchmarks/ccl_test_angpow.c
-    benchmarks/ccl_test_correlation_3d.c
     benchmarks/ccl_test_correlation_3dRSD.c
 
     # halo profiles
