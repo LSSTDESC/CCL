@@ -6,12 +6,8 @@ try:
 except ImportError:
     HAVE_CLASS = False
 
-try:
-    import camb
-    HAVE_CAMB = True
-except ImportError:
-    HAVE_CAMB = False
-
+from . import ccllib as lib
+from .pyutils import check
 from .pk2d import Pk2D
 
 
@@ -61,9 +57,7 @@ def get_class_pk_lin(cosmo):
     # massive neutrinos
     if cosmo["N_nu_mass"] > 0:
         params["N_ncdm"] = cosmo["N_nu_mass"]
-        masses = []
-        for i in range(cosmo["N_nu_mass"]):
-            masses.append(cosmo["mnu"][i])
+        masses = lib.parameters_get_nu_masses(cosmo._params, 3)
         params["m_ncdm"] = ", ".join(["%g" % m for m in masses])
 
     params["T_cmb"] = cosmo["T_CMB"]
@@ -75,7 +69,6 @@ def get_class_pk_lin(cosmo):
         assert np.isfinite(cosmo["sigma8"])
         A_s_fid = 2.43e-9 * (cosmo["sigma8"] / 0.87659)**2
         params["A_s"] = A_s_fid
-        params["P_k_max_1/Mpc"] = 10.0
 
     model = None
     try:
@@ -96,7 +89,27 @@ def get_class_pk_lin(cosmo):
             model.set(params)
             model.compute()
 
-        p_k_and_z, k_arr, z_arr = model.get_pk_and_k_and_z()
+        # Set k and a sampling from CCL parameters
+        nk = lib.get_pk_spline_nk(cosmo.cosmo)
+        na = lib.get_pk_spline_na(cosmo.cosmo)
+        status = 0
+        a_arr, status = lib.get_pk_spline_a(cosmo.cosmo, na, status)
+        check(status)
+        lk_arr, status = lib.get_pk_spline_lk(cosmo.cosmo, nk, status)
+        check(status)
+
+        # we need to cut this to the max value used for calling CLASS
+        msk = lk_arr < np.log(cosmo.cosmo.spline_params.K_MAX_SPLINE)
+        nk = int(np.sum(msk))
+        lk_arr = lk_arr[msk]
+
+        # now do interp by hand
+        ln_p_k_and_z = np.zeros((na, nk), dtype=np.float64)
+        for aind in range(na):
+            z = 1.0 / a_arr[aind] - 1 + 1e-10
+            for kind in range(nk):
+                ln_p_k_and_z[aind, kind] = np.log(
+                    model.pk_lin(np.exp(lk_arr[kind]), z))
     finally:
         if model is not None:
             model.struct_cleanup()
@@ -104,21 +117,11 @@ def get_class_pk_lin(cosmo):
 
     params["P_k_max_1/Mpc"] = cosmo.cosmo.spline_params.K_MAX_SPLINE
 
-    # current shape is [nk, nz] and we want [na, nk]
-    # so we transpose
-    p_k_and_z = p_k_and_z.T
-
-    # convert to log
-    ln_p_k_and_z = np.log(p_k_and_z)
-
-    # convert z to a
-    a_arr = 1.0 / (1.0 + z_arr)
-
     # make the Pk2D object
     pk_lin = Pk2D(
         pkfunc=None,
         a_arr=a_arr,
-        lk_arr=np.log(k_arr),
+        lk_arr=lk_arr,
         pk_arr=ln_p_k_and_z,
         is_logp=True,
         extrap_order_lok=1,
