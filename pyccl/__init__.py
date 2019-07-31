@@ -34,6 +34,9 @@ from .pk2d import Pk2D
 from .power import linear_matter_power, nonlin_matter_power, sigmaR, \
     sigmaV, sigma8
 
+# BCM stuff
+from .bcm import bcm_model_fka
+
 # Halo mass function
 from .massfunction import massfunc, massfunc_m2r, sigmaM, halo_bias
 
