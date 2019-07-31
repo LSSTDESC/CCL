@@ -559,7 +559,27 @@ class Cosmology(object):
             raise ValueError("sigma8 must be greater than 1e-5.")
 
         # Make sure the neutrino parameters are consistent.
-        if isinstance(m_nu, float):
+        if hasattr(m_nu, "__len__"):
+            if (len(m_nu) != 3):
+                raise ValueError("m_nu must be a float or array-like object "
+                                 "with length 3.")
+            elif ((mnu_type == 'sum') or
+                    (mnu_type == 'sum_inverted') or
+                    (mnu_type == 'sum_equal')):
+                raise ValueError(
+                    "mnu type '%s' cannot be passed with a list "
+                    "of neutrino masses, only with a sum." % mnu_type)
+            elif mnu_type is None:
+                mnu_type = 'list'  # False
+
+        else:
+            try:
+                m_nu - float(m_nu)
+            except Exception:
+                raise ValueError(
+                    "m_nu must be a float or array-like object with "
+                    "length 3.")
+
             if mnu_type is None:
                 mnu_type = 'sum'
             m_nu = [m_nu]
@@ -575,21 +595,6 @@ class Cosmology(object):
                 raise ValueError("if mnu_type= sum_inverted, we are using the "
                                  "inverted hierarchy and so m_nu must "
                                  "be less than (~)0.0978")
-        elif hasattr(m_nu, "__len__"):
-            if (len(m_nu) != 3):
-                raise ValueError("m_nu must be a float or array-like object "
-                                 "with length 3.")
-            elif ((mnu_type == 'sum') or
-                    (mnu_type == 'sum_inverted') or
-                    (mnu_type == 'sum_equal')):
-                raise ValueError(
-                    "mnu type '%s' cannot be passed with a list "
-                    "of neutrino masses, only with a sum." % mnu_type)
-            elif mnu_type is None:
-                mnu_type = 'list'  # False
-        else:
-            raise ValueError("m_nu must be a float or array-like object with "
-                             "length 3.")
 
         # Check if any compulsory parameters are not set
         compul = [Omega_c, Omega_b, Omega_k, w0, wa, h, norm_pk,
