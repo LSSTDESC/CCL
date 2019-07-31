@@ -35,15 +35,11 @@ set(TEST_SRC
     benchmarks/ccl_test_f2d.c
     benchmarks/ccl_test_emu.c benchmarks/ccl_test_emu_nu.c
     benchmarks/ccl_test_power_nu.c
-    benchmarks/ccl_test_halomod.c
     benchmarks/ccl_test_power_MG.c
 
     # Cls and correlation functions
     # Uncomment below when we bring ANGPOW back
     #benchmarks/ccl_test_angpow.c
-
-    # halo profiles
-    benchmarks/ccl_test_haloprofile.c
 )
 
 
