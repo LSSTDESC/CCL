@@ -28,11 +28,11 @@ set(CCL_SRC
 # ! Add new tests of the C code to this list
 set(TEST_SRC
     # test core code first
-    benchmarks/ccl_test.c benchmarks/ccl_test_utils.c
+    benchmarks/ccl_test.c
+    benchmarks/ccl_test_utils.c
+    benchmarks/ccl_test_f2d.c
 
     # now power spectra stuff in order of use roughly
-    benchmarks/ccl_test_f2d.c
-    benchmarks/ccl_test_emu.c benchmarks/ccl_test_emu_nu.c
     benchmarks/ccl_test_power_nu.c
     benchmarks/ccl_test_power_MG.c
 
