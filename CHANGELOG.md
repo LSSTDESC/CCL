@@ -1,6 +1,7 @@
 # Unreleased
 
 ## C library
+- Added function for comoving angular diameter distance (#645).
 - Fixed memory leak in CLASS power spectrum computations (#561, #562).
 - Fixed a bug where CLASS would crash due to small rounding errors at z = 0
   when evaluating power spectra (#563, #564).
