@@ -603,9 +603,6 @@ def check_neutrinos():
                   h=0.67, A_s=1e-10, n_s=0.96,
                   m_nu=[0.1, 0.2, 0.3],
                   mnu_type="sum")
-    assert_raises(ValueError, ccl.Cosmology, Omega_c=0.27, Omega_b=0.045,
-                  h=0.67, A_s=1e-10, n_s=0.96,
-                  m_nu=42)
 
 
 def check_cls(cosmo):
