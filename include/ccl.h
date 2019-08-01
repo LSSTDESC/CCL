@@ -1,4 +1,4 @@
-/* @file */
+/** @file */
 
 #ifndef __CCL_H_INCLUDED__
 #define __CCL_H_INCLUDED__
@@ -22,11 +22,13 @@
 
 #include "ccl_defs.h"
 #include "ccl_utils.h"
+#include "ccl_f1d.h"
+#include "ccl_f2d.h"
 #include "ccl_config.h"
 #include "ccl_core.h"
 #include "ccl_error.h"
-#include "ccl_p2d.h"
 #include "ccl_power.h"
+#include "ccl_tracers.h"
 #include "ccl_cls.h"
 #include "ccl_background.h"
 #include "ccl_correlation.h"

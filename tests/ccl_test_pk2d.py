@@ -21,7 +21,7 @@ def all_finite(vals):
     """
     return np.all( np.isfinite(vals) )
 
-def test_p2d_init():
+def test_pk2d_init():
     """
     Test initialization of Pk2D objects
     """
@@ -45,7 +45,7 @@ def test_p2d_init():
     psp=ccl.Pk2D(a_arr=aarr, lk_arr=lkarr, pk_arr=pkarr)
     assert_(not np.isnan(psp.eval(1E-2,0.5,cosmo)))
 
-def test_p2d_function():
+def test_pk2d_function():
     """
     Test evaluation of Pk2D objects
     """
@@ -79,7 +79,7 @@ def test_p2d_function():
     phere=psp.eval(ktest,atest,cosmo)
     assert_allclose(phere,ptrue,rtol=1E-6)
 
-def test_p2d_cls():
+def test_pk2d_cls():
     """
     Test interplay between Pk2D and the Limber integrator
     """

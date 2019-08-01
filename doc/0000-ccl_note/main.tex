@@ -710,117 +710,128 @@ In the {\tt python} implementation, {\tt CCL} allows for either $\sigma_8$ or {\
 \subsection{Angular power spectra}
 \label{sec:cl}
 
-In this section we will distinguish between {\sl observables} (quantities observed on the sky, such as number counts in a redshift bin, shear or CMB temperature fluctuations) and {\sl contributions} to the total observed fluctuations of these observables (such as the biased matter density term in number counts, redshift-space distortions, magnification, ISW, etc.).
-The routines described in this subsection are implemented in {\tt ccl$\_$cls.cc}.
-
-\subsubsection{Exact expressions}
-The angular power spectrum between two observables $a$ and $b$ can be written as:
+Angular power spectra between two quantities $\alpha$ and $\beta$ will in general take the form:
 \begin{equation}
- C^{ab}_\ell=4\pi\int_0^\infty \frac{dk}{k}\,\mathcal{P}_\Phi(k)\Delta^a_\ell(k)\Delta^b_\ell(k),
+  C^{\alpha\beta}_\ell=\frac{2}{\pi}\int d\chi_1\,d\chi_2\,dk\,k^2 P_{\alpha\beta}(k,\chi_1,\chi_2)\,\Delta^\alpha_\ell(k,\chi_1)\,\Delta^\beta_\ell(k,\chi_2).
 \end{equation}
-where $\mathcal{P}_\Phi(k)$ is the dimensionless power spectrum of the primordial curvature perturbations, and $\Delta^a$ and $\Delta^b$ are, using the terminology of CLASS, the transfer functions corresponding to these observables. Each transfer function will receive contributions from different terms. Currently \ccl supports two observables (also labelled ``tracers''), number counts and galaxy shape distortions, with the following contributions:
-\paragraph{\bf Number counts.} The transfer function for number counts can be decomposed into three terms: $\Delta^{\rm NC}=\Delta^{\rm D}+\Delta^{\rm RSD}+\Delta^{\rm M}$, where
+
+Here $P_{\alpha\beta}$ will be a generalized power spectrum, and the functions $\Delta^\alpha_\ell(k,\chi)$ will in general be a sum over
+different contributions, all of which take the form:
+\begin{equation}\label{eq:generalized_tracer}
+  \Delta^\alpha_\ell(k,\chi)=f^\alpha_\ell\,W_\alpha(\chi)\,T_\alpha(k,\chi)\,j^{(n_\alpha)}_\ell(k\chi),
+\end{equation}
+where we have defined the quantities:
+\begin{enumerate}
+ \item $f^\alpha_\ell$: the \emph{$\ell$-dependent prefactor}, usually associated with angular derivatives.
+ \item $W_\alpha(\chi)$: the \emph{radial kernel}, dependent only on redshift/distance.
+ \item $T_\alpha(k,\chi)$: the \emph{transfer function}, dependent on both $k$ and $z/\chi$.
+ \item $j^{(n)}_\ell(x)$: generalized versions of the spherical Bessel functions, associated with radial derivatives or inverse laplacians.
+\end{enumerate}
+Let us describe these in more details.
+
+\subsubsection*{Radial kernels}
+Three important things must be noted about them:
 \begin{itemize}
-  \item $\Delta^{\rm D}$ is the standard density term proportional to the matter density:
-        \begin{equation}
-          \Delta^{\rm D}_\ell(k)=\int dz\,p_z(z)\,b(z)\,T_\delta(k,z)\,j_\ell(k\chi(z)),
-        \end{equation}
-        where $T_\delta$ is the matter transfer function. Note that \ccl currently does not support non-linear or scale-dependent bias. Here, $p_z(z)$ is the normalized distribution of sources in redshift (selection function). Thus \ccl understands each individual redshift bin as a separate ``observable''. Note also that if ${\tt mu\_0 \ne 0}$, the matter transfer function is altered accordingly.
-  \item $\Delta^{\rm RSD}$ is the linear contribution from redshift-space distortions:
-        \begin{equation}
-          \Delta^{\rm RSD}_\ell(k)=\int dz\,p_z(z)\frac{(1+z) p_z(z)}{H(z)}T_\theta(k,z) j_\ell''(k\chi(z)),
-        \end{equation}
-where $T_\theta(k,z)$ is the transfer function of $\theta$, the divergence of the comoving velocity field. $T_\theta(k,z)$ depends on the growth, which \ccl does not compute for massive neutrino cosmologies; therefore at this time an attempt to create a number count tracer in a cosmology with massive neutrinos will cause \ccl to raise an error. $C_\ell$ is instead computed assuming a linear-theory relation between the matter overdensity and peculiar velocity fields. While this should not be problematic for wide photometric redshift bins, users should exercise care when interpreting results for narrow window functions. Note also that if the growth is affected by modifications to gravity, this is reflected here.
-
-  \item $\Delta^{\rm M}$ is the contribution from magnification lensing:
-        \begin{equation}
-          \Delta_\ell^{\rm M}(k)=-\ell(\ell+1)\int \frac{dz}{H(z)} W^{\rm M}(z) T_{\phi+\psi}(k,z) j_\ell(k\chi(z)),
-          \label{eq:deltaM}
-        \end{equation}
-        where $T_{\phi+\psi}$ is the transfer function for the Newtonian-gauge scalar metric perturbations, and $W^{\rm M}$ is the magnification window function:
-        \begin{equation}
-           W^{\rm M}(z)\equiv\int_z^\infty dz' p_z(z')\frac{2-5s(z')}{2}\frac{r(\chi(z')-\chi(z))}{r(\chi(z'))}.
-        \end{equation}
-        Here $s(z)$ is the magnification bias, given as the logarithmic derivative of the number of sources with magnitude limit, and $r(\chi)$ is the angular comoving distance (see Eq. \ref{eq:angdist}).
-        
-        In the case where the quasistatic parameterization of modified gravity is in use and ${\tt sigma\_0} \ne 0$, equation \ref{eq:deltaM} becomes
-        \begin{equation}
-          \Delta_\ell^{\rm M}(k)=-\ell(\ell+1)\int \frac{dz}{H(z)} W^{\rm M}(z) (1 + \Sigma(z)) T_{\phi+\psi}(k,z) j_\ell(k\chi(z)),
-          \label{eq:deltaM_MG}
-        \end{equation}
-and there is dependence on $\mu(z)$ via modifications to $T_{\phi+\psi}(k,z)$.
-
-        Note that \ccl currently does not compute relativistic corrections to number counts \cite{2011PhRvD..84d3516C,2011PhRvD..84f3505B}. Although these should be included in the future, their contribution to the total fluctuation is largely subdominant (see \cite{GReffects} and the two references above), and therefore it is safe to work without them in most cases.
+ \item Line-of-sight integrals will be carried out over the variable $\chi$, so it is important that the input arrays defining $W_\alpha(\chi)$ sample the kernel sufficiently well in that variable.
+ \item {\tt CCL} automatically determines the range of $\chi$ over which it will carry out any line-of-sight integral. These are determined as the lowest and highest value of $\chi$ in the input arrays defining $W_\alpha(\chi)$ at which the value of $W_\alpha(\chi)$ reaches $0.05\%$ of its maximum value.
+ \item If no input is passed, $W_\alpha(\chi)$ defaults to 1 everywhere.
 \end{itemize}
 
-\paragraph{\bf Galaxy shape distortions.} The transfer function for shape distortions is currently decomposed into two terms: $\Delta^{\rm SH}=\Delta^{\rm WL}+\Delta^{\rm IA}$, where
+\subsubsection*{Transfer functions}
+In the most general case, {\tt CCL} accepts transfer functions as generic functions of $k$ and $a$. For simplicity and speed it also supports the simpler case where these are factorisable: $T_\alpha(k,a)=K_\alpha(k)\,A_\alpha(a)$.
+
+\subsubsection*{$\ell$ prefactors}
+We provide 3 options for these, encoded in a parameter that we will call $d_\theta$ here:
 \begin{itemize}
-  \item $\Delta^{\rm L}$ is the standard lensing contribution:
-        \begin{equation} \label{eq:transfer_lensing}
-          \Delta_\ell^{\rm L}(k)=-\frac{1}{2}\sqrt{\frac{(\ell+2)!}{(\ell-2)!}}\int \frac{dz}{H(z)} W^{\rm L}(z) T_{\phi+\psi}(k,z) j_\ell(k\chi(z)),
-        \end{equation}
-        where $W^{\rm L}$ is the lensing kernel, given by
-        \begin{equation}
-          W^L(z)\equiv\int_z^\infty dz' p_z(z')\frac{r(\chi(z')-\chi(z))}{r(\chi(z'))}.
-        \end{equation}
-        
-  When the quasistatic parameterization of modified gravity is in use, we have instead         
-       \begin{equation} \label{eq:transfer_lensing_MG}
-          \Delta_\ell^{\rm L}(k)=-\frac{1}{2}\sqrt{\frac{(\ell+2)!}{(\ell-2)!}}\int \frac{dz}{H(z)} W^{\rm L}(z) (1 + \Sigma(z))T_{\phi+\psi}(k,z) j_\ell(k\chi(z)).
-        \end{equation} 
-  \item $\Delta^{\rm IA}$ is the transfer function for intrinsic galaxy alignments. \ccl currently supports the so-called ``non-linear alignment model'', according to which the galaxy inertia tensor is proportional the local tidal tensor \cite{2004PhRvD..70f3526H,2007MNRAS.381.1197H}.
-        \begin{equation}
-          \Delta_\ell^{\rm IA}(k)=\sqrt{\frac{(\ell+2)!}{(\ell-2)!}}\int dz\,p_z(z)\,b_{\rm IA}(z)\,f_{\rm red}(z)\,T_\delta(k,z)\,\frac{j_\ell(k\chi(z))}{(k\chi(z))^2}.
-        \end{equation}
-        Note that $\Delta_\ell^{\rm IA}(k)$ is unchanged under modified gravity other than via the matter transfer function.
+ \item $d_\theta=0$: $f_\ell=1$.
+ \item $d_\theta=1$: $=1$: $f_\ell=\ell(\ell+1)$. This corresponds to taking the angular laplacian $\nabla^2$.
+ \item $d_\theta=2$: $f_\ell=\sqrt{(\ell+2)!/(\ell-2)!}$, corresponding to the second angular derivatives of spin-2 quantities. To avoid computing the square root we make use of the following approximation:
+   \begin{equation}
+     \sqrt{\frac{(\ell+2)!}{(\ell-2)!}}\simeq \ell_{1/2}^2\left(1-\frac{5}{4}\ell_{1/2}^{-2}+{\cal O}(\ell_{1/2}^{-4})\right),
+   \end{equation}
+   where $\ell_{1/2}=\ell+1/2$. This approximation is accurate at the level of $5\times10^{-5}$ for $\ell=10$, and for $\ell>1000$ the ${\cal O}(\ell_{1/2}^{-2})$ term can be dropped altogether with an accuracy of $\sim10^{-6}$.
 \end{itemize}
 
-It is worth noting that the equations above should be modified for non-flat cosmologies by replacing the spherical Bessel functions $j_\ell$ with their hyperspherical counterparts \cite{1994ApJ...432....7K}. Since the library currently only uses the Limber approximation (documented below), this is not currently an issue. It will be revisited in future versions of \ccl.
+\subsubsection*{Bessel functions}
+  For $n\ge0$, $j^{(n)}_\ell(x)$ represents the $n$-th derivative of the spherical bessel functions with respect to their argument. We allow values $n=0,\,1$ and 2, encoded in the variable {\tt der\_bessel}, and use the following identities:
+  \begin{align}
+    &j^{(1)}_\ell(x)=\frac{\ell\,j_\ell(x)-x\,j_{\ell+1}(x)}{x}\\
+    &j^{(2)}_\ell(x)=\frac{[\ell(\ell-1)-x^2]j_\ell(x)+2xj_{\ell+1}(x)}{x^2}.
+  \end{align}
+  We also allow a special value $n=-1$, for which:
+  \begin{equation}
+    j^{(-1)}_\ell(x)=\frac{j_\ell(x)}{x^2}.
+  \end{equation}
+  This case is quite ubiquitous (see next section).
 
-\paragraph{\bf CMB lensing.} The transfer function lensing convergence from a source at redshift $z_{\rm S}$ is given by:
-\begin{equation} \label{eq:transfer_cmb_lensing}
-  \Delta_\ell^{\rm C}(k)=-\frac{\ell(\ell+1)}{2}\int_0^{\chi_{\rm S}} d\chi\,\frac{r(\chi_{\rm S})-r(\chi)}{r(\chi)r(\chi_{\rm S})}T_{\phi+\psi}(k,\chi) j_\ell(k\chi),
-\end{equation}
-where $\chi_{\rm S}\equiv\chi(z_{\rm S})$. Once again under the quasistatic parameterization of modified gravity we have
-\begin{equation} \label{eq:transfer_cmb_lensing_MG}
-  \Delta_\ell^{\rm C}(k)=-\frac{\ell(\ell+1)}{2}\int_0^{\chi_{\rm S}} d\chi\,\frac{r(\chi_{\rm S})-r(\chi)}{r(\chi)r(\chi_{\rm S})}(1+\Sigma(z))T_{\phi+\psi}(k,\chi) j_\ell(k\chi),
-\end{equation}
-with dependence on $\mu(z)$ via modifications to $T_{\phi+\psi}(k,\chi)$.
+\subsubsection*{Tracer combinations}
+  {\tt CCL} also provides a way to generalize all the expressions in this sections to combinations of tracers. This is useful in many cases, such as galaxy number counts or cosmic shear, in which the actual physical observable (galaxy number overdensity or galaxy shape distortions) is made up of a combination of different effects. It is therefore possible to combine several tracers into a single one, such that the total $\Delta^X_\ell(k,\chi)$ of that tracer is the sum of the corresponding functions for all the tracers in the combination.
+  
+\subsubsection*{Standard tracers}
+  {\tt CCL} provides specific functionality (besides its generic features) to define the following types of tracers:
+  \begin{table*}[h]
+    \centering
+    \begin{tabular}{|c|c|c|c|c|c|}
+      \hline
+      Tracer & \(\displaystyle W_\alpha(\chi) \) & \(\displaystyle K_\alpha(k) \) & \(\displaystyle A_\alpha(a) \) & $d_\theta^\alpha$ & $n_\alpha$ \\
+      \hline
+      N.C., dens. & \(\displaystyle H(z)\,N(z)\)                                                                                                   & 1        & $b(z)$          & 0 &  0 \\
+      N.C., RSD   & \(\displaystyle H(z)\,N(z)\)                                                                                                   & 1        & $-f(z)$         & 0 &  2 \\
+      N.C., mag.  & \(\displaystyle -\frac{3H_0^2\Omega_M}{a}\chi\int_z^\infty dz'\,N(z')\left[1-\frac{5s(z')}{2}\right]\frac{\chi'-\chi}{\chi'}\) & 1        & 1               & 1 & -1 \\
+      W.L., shear & \(\displaystyle \frac{3H_0^2\Omega_M}{2a}\chi\int_z^\infty dz'\,N(z')\frac{\chi'-\chi}{\chi'}\)                                & 1        & 1               & 2 & -1 \\
+      W.L., I.A.  & \(\displaystyle H(z)\,N(z)\)                                                                                                   & 1        & $b_{\rm IA}(z)$ & 2 & -1 \\
+      CMB $\kappa$ & \(\displaystyle \frac{3H_0^2\Omega_M}{2a}\chi\frac{\chi_s-\chi}{\chi_s}\)                                                      & 1        & 1               & 1 & -1 \\
+      %CMB$\dot{\phi}$ & \(\displaystyle 3H_0^2\Omega_M\Theta(\chi;0,\chi_s)H(\chi)[1-f(\chi)]\)                                                    & $k^{-2}$ & 1               & 0 & 0  \\
+      \hline
+    \end{tabular}
+    \caption{Description of the standard tracers supported by {\tt CCL} in terms of the framework introduced in Eq. \ref{eq:generalized_tracer}. Note that, for modified gravity theories in the $\mu-\Sigma$ parametrization, the radial kernels for shear, magnification and CMB lensing take an extra multiplicative factor of $1+\Sigma(z)$.}
+  \end{table*}
 
-\subsubsection{The Limber approximation}
-As shown above, computing each transfer function involves a radial projection (i.e. an integral over redshift or $\chi$), and thus computing full power spectrum consists of a triple integral for each $\ell$. This can be computationally intensive, but can be significantly simplified in certain regimes by using the Limber approximation, given by:
-\begin{equation}
- j_\ell(x)\simeq\sqrt{\frac{\pi}{2\ell+1}}\,\delta\left(\ell+\frac{1}{2}-x\right).
-\end{equation}
-Thus for each $k$ and $\ell$ we can define a radial distance $\chi_\ell\equiv(\ell+1/2)/k$, with corresponding redshift $z_\ell$. This approximation works best for wide radial kernels and high multipoles.
+  Here N.C. stands for ``number counts'', W.L. stands for ``weak lensing'' and CMB $\kappa$ is the CMB lensing convergence. $s(z)$ is the magnification bias, given as the logarithmic derivative of the number of sources with magnitude limit, and $r(\chi)$ is the angular comoving distance (see Eq. \ref{eq:angdist}). $f$ is the growth rate, which \ccl does not compute for massive neutrino cosmologies; therefore at this time an attempt to create a number count tracer in a cosmology with massive neutrinos will cause \ccl to raise an error. $C_\ell$ is instead computed assuming a linear-theory relation between the matter overdensity and peculiar velocity fields. While this should not be problematic for wide photometric redshift bins, users should exercise care when interpreting results for narrow window functions. For intrinsic alignments, (I.A. in the table), \ccl currently supports the so-called ``non-linear alignment model'', according to which the galaxy inertia tensor is proportional the local tidal tensor \cite{2004PhRvD..70f3526H,2007MNRAS.381.1197H}. $\chi_s$ is the distance to the source plane for CMB lensing. $b_{\rm IA}$ is the corresponding alignment bias. Notice that in the \ccl implementation, the normalization of this bias is chosen to coincide with the parameter $A_{\rm IA}$ used in current weak lensing analyses, i.e., the user is expected to pass $A_{\rm IA}$ to the routine, and this is connected to $b_{\rm IA}$ by the following expression\cite[Eq. 6]{Joachimi11}:
+  \begin{equation}
+    b_{\rm IA} = - A_{\rm IA} \frac{C_1 \Omega_{\rm m} \rho_{\rm crit}}{D(z)}
+  \end{equation}
+where $\rho_{\rm crit}$ is in the default \ccl units and $C_1= 5\times 10^{-14} (Mpc/h)^3 / (M_\odot/h)$ \citep{Brown02,Bridle07}. Note that although $\Omega_{\rm m}$ should in principle include non-relativistic neutrinos, this is not the case in \ccl at this point. 
 
-Substituting this in the expressions above, the simplified versions become:
-\begin{equation}\label{eq:limber}
- C^{ab}_\ell=\frac{2}{2\ell+1}\int_0^\infty dk\,P_\delta\left(k,z_\ell\right)
- \tilde{\Delta}^a_\ell(k)\tilde{\Delta}^b_\ell(k).
-\end{equation}
-where
-\begin{align}
- &\tilde{\Delta}_\ell^{\rm D}(k)=p_z(z_\ell)\,b(z_\ell)\,H(z_\ell)\\
- &\tilde{\Delta}_\ell^{\rm RSD}(k)=
- \frac{1+8\ell}{(2\ell+1)^2}\,p_z(z_\ell)\,f(z_\ell)\,H(z_\ell)-\\
- &\hspace{48pt}\frac{4}{2\ell+3}\sqrt{\frac{2\ell+1}{2\ell+3}}p_z(z_{\ell+1})\,f(z_{\ell+1})\,H(z_{\ell+1})\\
- &\tilde{\Delta}_\ell^{\rm M}(k)=3\Omega_{M,0}H_0^2\frac{\ell(\ell+1)}{k^2}\,
- \frac{(1+z_\ell)}{r(\chi_\ell)}W^{\rm M}(z_\ell)\\
- &\tilde{\Delta}_\ell^{\rm L}(k)=\frac{3}{2}\Omega_{M,0}H_0^2\sqrt{\frac{(\ell+2)!}{(\ell-2)}}\frac{1}{k^2}\,
- \frac{1+z_\ell}{r(\chi_\ell)}W^{\rm L}(z_\ell)\\
- &\tilde{\Delta}_\ell^{\rm IA}(k)=\sqrt{\frac{(\ell+2)!}{(\ell-2)!}}\frac{p_z(z_\ell)\,b_{\rm IA}(z_\ell)f_{\rm red}(z_\ell)H(z_\ell)}{(\ell+1/2)^2}\\
- &\tilde{\Delta}_\ell^{\rm C}(k)=\frac{3}{2}\Omega_{M,0}H_0^2\,\ell(\ell+1)\frac{1+z_\ell}{k^2}\,\frac{r(\chi_{\rm S})-r(\chi_\ell)}{r(\chi_\ell)r(\chi_{\rm S})}\,\Theta(\chi_\ell;0,\chi_{\rm S}).
-\end{align}
-Here ($\Theta(x;x_i,x_f)$) is a top-hat function (1 for $x\in[x_i,x_f]$ and 0 otherwise). Of course, in the case where gravity is modified from GR, the Limber calculation proceeds similarly with the appropriately modified transfer functions where applicable (see equations \ref{eq:deltaM_MG}, \ref{eq:transfer_lensing_MG}, \ref{eq:transfer_cmb_lensing_MG}).
 
-%----------------------------------------------------------------
-%
-%      Begin of the Angpow section currently under development
-%
-%----------------------------------------------------------------
+  Note that \ccl currently does not compute relativistic corrections to number counts \cite{2011PhRvD..84d3516C,2011PhRvD..84f3505B}. Although these should be included in the future, their contribution to the total fluctuation is largely subdominant (see \cite{GReffects} and the two references above), and therefore it is safe to work without them in most cases.
 
-\subsubsection{Beyond limber}
+  It is also worth noting that the equations above should be modified for non-flat cosmologies by replacing the spherical Bessel functions $j_\ell$ with their hyperspherical counterparts \cite{1994ApJ...432....7K}. This will be revisited in future versions of \ccl.
+  
+\subsubsection*{Limber integrals}
+  In the Limber approximation:
+  \begin{equation}
+    j_\ell(k\chi)\simeq\sqrt{\frac{\pi}{2\ell_{1/2}}} \delta(k\chi-\ell_{1/2})
+  \end{equation}
+  Defining $\chi_\ell\equiv \ell_{1/2}/k$ and $k_\ell\equiv\ell_{1/2}/\chi$, the power spectra can now be calculated through a single integral as:
+  \begin{equation}
+    C^{\alpha\beta}_\ell=\ell_{1/2}^{-1}\int dk\,P_{\alpha\beta}(k,\chi_\ell,\chi_\ell)\tilde{\Delta}^\alpha_\ell(k)\tilde{\Delta}^\beta_\ell(k),
+  \end{equation}
+  where the $\tilde{\Delta}^\alpha$s depend on the value of $n_\alpha$:
+  \begin{itemize}
+    \item $n_\alpha=0$:
+    \begin{equation}
+      \tilde{\Delta}^\alpha_\ell(k)=f^\alpha_\ell\,W_\alpha(\chi_\ell)T_\alpha(k,\chi_\ell).
+    \end{equation}
+    \item $n_\alpha=1$:
+    \begin{align}\nonumber
+     \tilde{\Delta}^\alpha_\ell(k)=f^\alpha_\ell&\left[\frac{2\ell}{2\ell+1}\,W_\alpha(\chi_\ell)T_\alpha(k,\chi_\ell)-\right.\\
+     &\hspace{5pt}\left.\sqrt{\frac{2\ell+1}{2\ell+3}}\,W_\alpha(\chi_{\ell+1})T_\alpha(k,\chi_{\ell+1})\right]
+    \end{align}
+    \item $n_\alpha=2$:
+    \begin{align}\nonumber
+     \tilde{\Delta}^\alpha_\ell(k)=f^\alpha_\ell&\left[\sqrt{\frac{2\ell+1}{2\ell+3}}\frac{4}{2\ell+3}W_\alpha(\chi_{\ell+1})T_\alpha(k,\chi_{\ell+1})-\right.\\
+     &\hspace{5pt}\left.\frac{1+8\ell}{(2\ell+1)^2}W_\alpha(\chi_\ell)T_\alpha(k,\chi_\ell)\right]
+    \end{align}
+    \item $n_\alpha=-1$:
+    \begin{equation}
+      \tilde{\Delta}^\alpha_\ell(k)=\frac{f^\alpha_\ell\,W_\alpha(\chi_\ell)T_\alpha(k,\chi_\ell)}{(\ell+1/2)^2}.
+    \end{equation}
+  \end{itemize}
+
+
+
+\subsubsection*{Beyond limber}
 
 {\bf Native CCL computation.}
 

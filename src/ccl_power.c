@@ -135,7 +135,9 @@ static void ccl_cosmology_compute_linpower_analytic(
   }
 
   if(*status==0) {
-    cosmo->data.p_lin=ccl_p2d_t_new(na,z,nk,x,y2d,1,2,ccl_p2d_cclgrowth,1,NULL,0,ccl_p2d_3,status);
+    cosmo->data.p_lin=ccl_f2d_t_new(na,z,nk,x,y2d,NULL,NULL,0,
+				    1,2,ccl_f2d_cclgrowth,1,NULL,0,2,
+				    ccl_f2d_3,status);
     cosmo->computed_power=true;
     sigma8 = ccl_sigma8(cosmo,status);
     cosmo->computed_power=false;
@@ -152,8 +154,10 @@ static void ccl_cosmology_compute_linpower_analytic(
   if(*status==0) {
     // Free the previous P(k,a) spline, and allocate a new one to store the
     // properly-normalized P(k,a)
-    ccl_p2d_t_free(cosmo->data.p_lin);
-    cosmo->data.p_lin=ccl_p2d_t_new(na,z,nk,x,y2d,1,2,ccl_p2d_cclgrowth,1,NULL,0,ccl_p2d_3,status);
+    ccl_f2d_t_free(cosmo->data.p_lin);
+    cosmo->data.p_lin=ccl_f2d_t_new(na,z,nk,x,y2d,NULL,NULL,0,
+				    1,2,ccl_f2d_cclgrowth,1,NULL,0,2,
+				    ccl_f2d_3,status);
   }
 
   free(x);
@@ -324,8 +328,9 @@ static void ccl_cosmology_compute_power_emu(ccl_cosmology * cosmo, int * status)
   }
 
   if(*status==0) {
-    cosmo->data.p_nl=ccl_p2d_t_new(na,aemu,NK_EMU,lk,lpk_nl,1,2,ccl_p2d_no_extrapol,
-           1,NULL,0,ccl_p2d_3,status);
+    cosmo->data.p_nl=ccl_f2d_t_new(na,aemu,NK_EMU,lk,lpk_nl,NULL,NULL,0,
+				   1,2,ccl_f2d_no_extrapol,
+				   1,NULL,0,2,ccl_f2d_3,status);
   }
 
   free(lpk_1a);
@@ -411,8 +416,9 @@ static void ccl_cosmology_spline_nonlinpower(
   }
 
   if(*status == 0)
-    cosmo->data.p_nl = ccl_p2d_t_new(
-      na, z, nk, x, y2d, 1, 2, ccl_p2d_cclgrowth, 1, NULL, 0, ccl_p2d_3, status);
+    cosmo->data.p_nl = ccl_f2d_t_new(na, z, nk, x, y2d, NULL, NULL, 0,
+				     1, 2, ccl_f2d_cclgrowth, 1, NULL,
+				     0, 2, ccl_f2d_3, status);
 
   free(x);
   free(z);
@@ -545,7 +551,7 @@ double ccl_linear_matter_power(ccl_cosmology* cosmo, double k, double a, int* st
   // Return if compilation failed
   if (!cosmo->computed_power) return NAN;
 
-  return ccl_p2d_t_eval(cosmo->data.p_lin,log(k),a,cosmo,status);
+  return ccl_f2d_t_eval(cosmo->data.p_lin,log(k),a,cosmo,status);
 }
 
 /*------ ROUTINE: ccl_nonlin_matter_power -----
@@ -558,7 +564,7 @@ double ccl_nonlin_matter_power(ccl_cosmology* cosmo, double k, double a, int* st
   // Return if compilation failed
   if (!cosmo->computed_power) return NAN;
 
-  return ccl_p2d_t_eval(cosmo->data.p_nl,log(k),a,cosmo,status);
+  return ccl_f2d_t_eval(cosmo->data.p_nl,log(k),a,cosmo,status);
 }
 
 // Params for sigma(R) integrand
