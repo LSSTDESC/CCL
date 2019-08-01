@@ -33,7 +33,6 @@ set(TEST_SRC
     benchmarks/ccl_test_f2d.c
 
     # now power spectra stuff in order of use roughly
-    benchmarks/ccl_test_power_nu.c
     benchmarks/ccl_test_power_MG.c
 
     # Move to python when we bring ANGPOW back
