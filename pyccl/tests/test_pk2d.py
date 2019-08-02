@@ -43,6 +43,9 @@ def test_pk2d_init():
     assert_raises(ValueError, ccl.Pk2D, pkfunc=pk1d)
     ccl.Pk2D(pkfunc=lpk2d, cosmo=cosmo)
 
+    # Input function but no cosmo
+    assert_raises(ValueError, ccl.Pk2D, pkfunc=lpk2d)
+
     # Input arrays have incorrect sizes
     lkarr = -4.+6*np.arange(100)/99.
     aarr = 0.05+0.95*np.arange(100)/99.
@@ -74,6 +77,12 @@ def test_pk2d_function():
 
     # Test at single point
     ktest = 1E-2
+    atest = 0.5
+    ptrue = pk2d(ktest, atest)
+    phere = psp.eval(ktest, atest, cosmo)
+    assert_almost_equal(np.fabs(phere/ptrue), 1., 6)
+
+    ktest = 1
     atest = 0.5
     ptrue = pk2d(ktest, atest)
     phere = psp.eval(ktest, atest, cosmo)

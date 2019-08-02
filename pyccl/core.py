@@ -664,10 +664,14 @@ class Cosmology(object):
         """Free the C memory this object is managing as it is being garbage
         collected (hopefully)."""
         if hasattr(self, "cosmo"):
-            if self.cosmo is not None:
+            if (self.cosmo is not None and
+                    hasattr(lib, 'cosmology_free') and
+                    lib.cosmology_free is not None):
                 lib.cosmology_free(self.cosmo)
         if hasattr(self, "_params"):
-            if self._params is not None:
+            if (self._params is not None and
+                    hasattr(lib, 'parameters_free') and
+                    lib.parameters_free is not None):
                 lib.parameters_free(self._params)
 
         # finally delete some attributes we don't want to be around for safety

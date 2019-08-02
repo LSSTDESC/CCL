@@ -53,7 +53,9 @@ from .correlation import (
     correlation_3dRsd_avgmu, correlation_pi_sigma)
 
 # Properties of haloes
-from .halomodel import halomodel_matter_power, halo_concentration
+from .halomodel import (
+    halomodel_matter_power, halo_concentration,
+    onehalo_matter_power, twohalo_matter_power)
 
 # Halo density profiles
 from .haloprofile import nfw_profile_3d, einasto_profile_3d, hernquist_profile_3d, nfw_profile_2d
