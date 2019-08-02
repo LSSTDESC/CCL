@@ -27,7 +27,7 @@ install:
 script:
   - flake8 pyccl
   - flake8 --exclude=data benchmarks
-  - [[ `grep "$(printf '\t')" pyccl/*.py` == "" ]]  # no tabs in python
+  - "[[ `grep \"$(printf '\t')\" pyccl/*.py` == \"\" ]]"  # no tabs in python
   - mkdir -p build && cd build && cmake .. && make && cd ..
   - CLASS_PARAM_DIR=./build/extern/share/class/ ./build/check_ccl
   - rm -rf build
