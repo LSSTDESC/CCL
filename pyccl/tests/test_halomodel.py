@@ -39,3 +39,13 @@ def test_halo_concentration(m):
     c = ccl.halo_concentration(COSMO, m, a)
     assert np.all(np.isfinite(c))
     assert np.shape(c) == np.shape(m)
+
+
+def test_halomodel_power_consistent():
+    a = 0.8
+    k = np.logspace(-1, 1, 10)
+    tot = ccl.halomodel_matter_power(COSMO, k, a)
+    one = ccl.onehalo_matter_power(COSMO, k, a)
+    two = ccl.twohalo_matter_power(COSMO, k, a)
+
+    assert np.allclose(one + two, tot)
