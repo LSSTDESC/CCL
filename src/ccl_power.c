@@ -431,45 +431,66 @@ TASK: compute power spectrum
 */
 void ccl_cosmology_compute_power(ccl_cosmology* cosmo, int* status)
 {
-
-  if ( (cosmo->config.transfer_function_method != ccl_boltzmann_class) && (fabs(cosmo->params.mu_0)>1e-14 || fabs(cosmo->params.sigma_0)>1e-14)){
+  if ((cosmo->config.transfer_function_method != ccl_boltzmann_class) &&
+      (fabs(cosmo->params.mu_0)>1e-14 || fabs(cosmo->params.sigma_0)>1e-14)) {
+    #pragma omp atomic write
 	  *status = CCL_ERROR_NOT_IMPLEMENTED;
-	  strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power(): The power spectrum in the mu / Sigma modified gravity parameterisation is only implemented with the ccl_boltzmann_class power spectrum method.\n");
+	  strcpy(
+      cosmo->status_message,
+      "ccl_power.c: ccl_cosmology_compute_power(): The power spectrum in the "
+      "mu / Sigma modified gravity parameterisation is only implemented with "
+      "the ccl_boltzmann_class power spectrum method.\n");
 	  return;
   }
-
   if (cosmo->computed_power) return;
 
-  // get linear P(k)
-  switch (cosmo->config.transfer_function_method) {
-    case ccl_transfer_none:
-      break;
+#pragma omp single
+{
+  if (*status == 0) {
+    // get linear P(k)
+    switch (cosmo->config.transfer_function_method) {
+      case ccl_transfer_none:
+        break;
 
-    case ccl_bbks:
-      ccl_cosmology_compute_linpower_analytic(cosmo, NULL, bbks_power, status);
-      break;
+      case ccl_bbks:
+        ccl_cosmology_compute_linpower_analytic(cosmo, NULL, bbks_power, status);
+        break;
 
-    case ccl_eisenstein_hu: {
-        eh_struct *eh = ccl_eh_struct_new(&(cosmo->params),1);
-        ccl_cosmology_compute_linpower_analytic(cosmo, eh, eh_power, status);
-        free(eh);}
-      break;
+      case ccl_eisenstein_hu: {
+          eh_struct *eh = NULL;
+          eh = ccl_eh_struct_new(&(cosmo->params),1);
+          if (eh != NULL) {
+            ccl_cosmology_compute_linpower_analytic(cosmo, eh, eh_power, status);
+          }
+          free(eh);}
+        break;
 
-    case ccl_boltzmann_class:
-      ccl_cosmology_compute_linpower_class(cosmo, status);
-      break;
+      case ccl_boltzmann_class:
+        ccl_cosmology_compute_linpower_class(cosmo, status);
+        break;
 
-    default:
-      *status = CCL_ERROR_INCONSISTENT;
-      ccl_cosmology_set_status_message(
-        cosmo,
-        "ccl_power.c: ccl_cosmology_compute_power(): "
-        "Unknown or non-implemented transfer function method: %d \n",
-        cosmo->config.transfer_function_method);
+      default: {
+        *status = CCL_ERROR_INCONSISTENT;
+        ccl_cosmology_set_status_message(
+          cosmo,
+          "ccl_power.c: ccl_cosmology_compute_power(): "
+          "Unknown or non-implemented transfer function method: %d \n",
+          cosmo->config.transfer_function_method);
+        }
+    }
   }
-
   // if everything is OK, get the non-linear P(K)
   ccl_check_status(cosmo, status);
+
+  if ((fabs(cosmo->params.mu_0)>1e-14 || fabs(cosmo->params.sigma_0)>1e-14) &&
+      cosmo->config.matter_power_spectrum_method != ccl_linear) {
+	  *status = CCL_ERROR_NOT_IMPLEMENTED;
+	  strcpy(cosmo->status_message,
+      "ccl_power.c: ccl_cosmology_compute_power(): The power spectrum in the "
+      "mu / Sigma modified gravity parameterisation is only implemented with "
+      "the linear power spectrum.\n");
+  }
+
   if (*status == 0) {
     switch (cosmo->config.matter_power_spectrum_method) {
 
@@ -481,61 +502,45 @@ void ccl_cosmology_compute_power(ccl_cosmology* cosmo, int* status)
         break;
 
       case ccl_halofit: {
-        if (fabs(cosmo->params.mu_0)>1e-14 || fabs(cosmo->params.sigma_0)>1e-14){
-	       *status = CCL_ERROR_NOT_IMPLEMENTED;
-	       strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power(): The power spectrum in the mu / Sigma modified gravity parameterisation is only implemented with the linear power spectrum.\n");
-	       return;
-        }
-        
         // temporarily set computed_power to true
         cosmo->computed_power = true;
         halofit_struct *hf = NULL;
         hf = ccl_halofit_struct_new(cosmo, status);
-        if (*status == 0)
+        if (*status == 0 && hf != NULL)
           ccl_cosmology_spline_nonlinpower(cosmo, halofit_power, (void*)hf, status);
         ccl_halofit_struct_free(hf);
         cosmo->computed_power = false;}
         break;
 
       case ccl_halo_model: {
-      
-      if (fabs(cosmo->params.mu_0)>1e-14 || fabs(cosmo->params.sigma_0)>1e-14){
-	       *status = CCL_ERROR_NOT_IMPLEMENTED;
-	       strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power(): The power spectrum in the mu / Sigma modified gravity parameterisation is only implemented with the linear power spectrum.\n");
-	       return;
-        }
-      
         // temporarily set computed_power to true
         cosmo->computed_power = true;
         ccl_cosmology_spline_nonlinpower(cosmo, halomodel_power, NULL, status);
         cosmo->computed_power = false;}
         break;
 
-      case ccl_emu:
-      
-        if (fabs(cosmo->params.mu_0)>1e-14 || fabs(cosmo->params.sigma_0)>1e-14){
-	       *status = CCL_ERROR_NOT_IMPLEMENTED;
-	       strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power(): The power spectrum in the mu / Sigma modified gravity parameterisation is only implemented with the linear power spectrum.\n");
-	       return;
-        }
-      
+      case ccl_emu: {
         // special case due to parameter handling and ranges
-        ccl_cosmology_compute_power_emu(cosmo, status);
+        ccl_cosmology_compute_power_emu(cosmo, status);}
         break;
 
-    default:
+    default: {
       *status = CCL_ERROR_INCONSISTENT;
       ccl_cosmology_set_status_message(
         cosmo,
         "ccl_power.c: ccl_cosmology_compute_power(): "
         "Unknown or non-implemented matter power spectrum method: %d \n",
         cosmo->config.matter_power_spectrum_method);
+      }
     }
   }
 
   ccl_check_status(cosmo, status);
   if (*status == 0)
     cosmo->computed_power = true;
+}
+#pragma omp flush
+
   return;
 }
 

@@ -133,26 +133,26 @@ double ccl_rho_x(ccl_cosmology * cosmo, double a, ccl_species_x_label label, int
 
 /* --------- ROUTINE: ccl_mu_MG ---------
 INPUT: cosmology object, scale factor
-TASK: Compute mu(a) where mu is one of the the parameterizating functions 
-of modifications to GR in the quasistatic approximation. 
+TASK: Compute mu(a) where mu is one of the the parameterizating functions
+of modifications to GR in the quasistatic approximation.
 */
 
 double ccl_mu_MG(ccl_cosmology * cosmo, double a, int *status)
-{   
-	// This function can be extended to include other 
+{
+	// This function can be extended to include other
 	// z-dependences for mu in the future.
 	return cosmo->params.mu_0 * ccl_omega_x(cosmo, a, ccl_species_l_label, status) / cosmo->params.Omega_l;
 }
 
 /* --------- ROUTINE: ccl_Sig_MG ---------
 INPUT: cosmology object, scale factor
-TASK: Compute Sigma(a) where Sigma is one of the the parameterizating functions 
-of modifications to GR in the quasistatic approximation. 
+TASK: Compute Sigma(a) where Sigma is one of the the parameterizating functions
+of modifications to GR in the quasistatic approximation.
 */
 
 double ccl_Sig_MG(ccl_cosmology * cosmo, double a, int *status)
-{   
-	// This function can be extended to include other 
+{
+	// This function can be extended to include other
 	// z-dependences for Sigma in the future.
 	return cosmo->params.sigma_0 * ccl_omega_x(cosmo, a, ccl_species_l_label, status) / cosmo->params.Omega_l;
 }
@@ -186,7 +186,7 @@ static int growth_ode_system(double a,const double y[],double dydt[],void *param
 
   double hnorm=h_over_h0(a,cosmo, &status);
   double om=ccl_omega_x(cosmo, a, ccl_species_m_label, &status);
-  
+
   dydt[1]=1.5*hnorm*a*om*y[0];
   dydt[0]=y[1]/(a*a*a*hnorm);
 
@@ -202,13 +202,13 @@ static int growth_ode_system_muSig(double a,const double y[],double dydt[],void 
 {
   int status = 0;
   ccl_cosmology * cosmo = params;
-  
+
   double hnorm=h_over_h0(a,cosmo, &status);
   double om=ccl_omega_x(cosmo, a, ccl_species_m_label, &status);
-  
+
   double mu = ccl_mu_MG(cosmo, a, &status);
   dydt[1]=1.5*hnorm*a*om*y[0]*(1. + mu);
- 
+
   dydt[0]=y[1]/(a*a*a*hnorm);
 
   return status;
@@ -247,10 +247,10 @@ static int  growth_factor_and_growth_rate(double a,double *gf,double *fg,ccl_cos
     double ainit=cosmo->gsl_params.EPS_SCALEFAC_GROWTH;
 
     // if mu0 == 0, call normal growth_ode_system, otherwise call growth_ode_system_muSig
-    
-    if (cosmo->params.mu_0>1e-12 || cosmo->params.mu_0<-1e-12) {  
+
+    if (cosmo->params.mu_0>1e-12 || cosmo->params.mu_0<-1e-12) {
 		gsl_odeiv2_system sys = {growth_ode_system_muSig,NULL,2,cosmo};
-		
+
 		gsl_odeiv2_driver *d=
             gsl_odeiv2_driver_alloc_y_new(
             &sys,gsl_odeiv2_step_rkck,
@@ -267,14 +267,14 @@ static int  growth_factor_and_growth_rate(double a,double *gf,double *fg,ccl_cos
           ccl_raise_gsl_warning(gslstatus, "ccl_background.c: growth_factor_and_growth_rate():");
           return NAN;
           }
-    
+
         *gf=y[0];
         *fg=y[1]/(a*a*h_over_h0(a,cosmo, stat)*y[0]);
-        
+
          return 0;
     } else {
         gsl_odeiv2_system sys = {growth_ode_system,NULL,2,cosmo};
-        
+
         gsl_odeiv2_driver *d=
             gsl_odeiv2_driver_alloc_y_new(
             &sys,gsl_odeiv2_step_rkck,
@@ -291,7 +291,7 @@ static int  growth_factor_and_growth_rate(double a,double *gf,double *fg,ccl_cos
           ccl_raise_gsl_warning(gslstatus, "ccl_background.c: growth_factor_and_growth_rate():");
           return NAN;
           }
-    
+
         *gf=y[0];
         *fg=y[1]/(a*a*h_over_h0(a,cosmo, stat)*y[0]);
          return 0;
@@ -423,17 +423,19 @@ TASK: if not already there, make a table of comoving distances and of E(a)
 
 void ccl_cosmology_compute_distances(ccl_cosmology * cosmo, int *status)
 {
-
   //Do nothing if everything is computed already
   if(cosmo->computed_distances)
     return;
 
   if(cosmo->spline_params.A_SPLINE_MAX>1.) {
+    #pragma omp atomic write
     *status = CCL_ERROR_COMPUTECHI;
     ccl_cosmology_set_status_message(cosmo, "ccl_background.c: scale factor cannot be larger than 1.\n");
     return;
   }
 
+#pragma omp single
+{
   // Create logarithmically and then linearly-spaced values of the scale factor
   int na = cosmo->spline_params.A_SPLINE_NA+cosmo->spline_params.A_SPLINE_NLOG-1;
   double * a = ccl_linlog_spacing(
@@ -573,14 +575,17 @@ void ccl_cosmology_compute_distances(ccl_cosmology * cosmo, int *status)
     gsl_spline_free(E); //Note: you are allowed to call gsl_free() on NULL
     gsl_spline_free(chi);
     gsl_spline_free(achi);
-    return;
   }
 
-  //If there were no errors, attach the splines to the cosmo struct and end the function.
-  cosmo->data.E             = E;
-  cosmo->data.chi           = chi;
-  cosmo->data.achi          = achi;
-  cosmo->computed_distances = true;
+  if (*status == 0) {
+    //If there were no errors, attach the splines to the cosmo struct and end the function.
+    cosmo->data.E             = E;
+    cosmo->data.chi           = chi;
+    cosmo->data.achi          = achi;
+    cosmo->computed_distances = true;
+  }
+}
+#pragma omp flush
 }
 
 
@@ -590,11 +595,11 @@ TASK: if not already there, make a table of growth function and growth rate
       normalize growth to input parameter growth0
 */
 // MUSIG
-void ccl_cosmology_compute_growth(ccl_cosmology * cosmo, int * status)
+void ccl_cosmology_compute_growth(ccl_cosmology* cosmo, int* status)
 {
-
   // This is not valid for massive neutrinos; if we have massive neutrinos, exit.
-  if (cosmo->params.N_nu_mass>0){
+  if (cosmo->params.N_nu_mass > 0) {
+    #pragma omp atomic write
 	  *status = CCL_ERROR_NOT_IMPLEMENTED;
 	  ccl_cosmology_set_status_message(
       cosmo, "ccl_background.c: ccl_cosmology_compute_growth(): Support for the growth "
@@ -602,196 +607,247 @@ void ccl_cosmology_compute_growth(ccl_cosmology * cosmo, int * status)
 	  return;
   }
 
-  if(cosmo->computed_growth)
+  if (cosmo->computed_growth)
     return;
+
+#pragma omp single
+{
   // Create logarithmically and then linearly-spaced values of the scale factor
-  int  chistatus = 0, na = cosmo->spline_params.A_SPLINE_NA+cosmo->spline_params.A_SPLINE_NLOG-1;
-  double * a = ccl_linlog_spacing(
-    cosmo->spline_params.A_SPLINE_MINLOG, cosmo->spline_params.A_SPLINE_MIN,
-    cosmo->spline_params.A_SPLINE_MAX, cosmo->spline_params.A_SPLINE_NLOG,
-    cosmo->spline_params.A_SPLINE_NA);
-  if (a==NULL ||
-      (fabs(a[0]-cosmo->spline_params.A_SPLINE_MINLOG)>1e-5) ||
-      (fabs(a[na-1]-cosmo->spline_params.A_SPLINE_MAX)>1e-5) ||
-      (a[na-1]>1.0)
-      ) {
-    free(a);
-    *status = CCL_ERROR_LINSPACE;
-    ccl_cosmology_set_status_message(
-      cosmo, "ccl_background.c: ccl_cosmology_compute_growth(): Error creating logarithmically and then linear spacing in a\n");
-    return;
+  int chistatus = 0, na = cosmo->spline_params.A_SPLINE_NA+cosmo->spline_params.A_SPLINE_NLOG-1;
+  double *a = NULL;
+  gsl_integration_cquad_workspace * workspace = NULL;
+  gsl_function F;
+  gsl_spline *df_a_spline = NULL;
+  double *df_arr = NULL;
+  gsl_spline *df_z_spline = NULL;
+  int status_mg = 0, gslstatus;
+  double growth0, fgrowth0;
+  double *y = NULL;
+  double *y2 = NULL;
+	double df, integ;
+
+  if (*status == 0) {
+    a = ccl_linlog_spacing(
+      cosmo->spline_params.A_SPLINE_MINLOG, cosmo->spline_params.A_SPLINE_MIN,
+      cosmo->spline_params.A_SPLINE_MAX, cosmo->spline_params.A_SPLINE_NLOG,
+      cosmo->spline_params.A_SPLINE_NA);
+
+    if (a == NULL ||
+        (fabs(a[0]-cosmo->spline_params.A_SPLINE_MINLOG) > 1e-5) ||
+        (fabs(a[na-1]-cosmo->spline_params.A_SPLINE_MAX) > 1e-5) ||
+        (a[na-1] > 1.0)) {
+      *status = CCL_ERROR_LINSPACE;
+      ccl_cosmology_set_status_message(
+        cosmo,
+        "ccl_background.c: ccl_cosmology_compute_growth(): "
+        "Error creating logarithmically and then linear spacing in a\n");
+    }
   }
 
-  gsl_integration_cquad_workspace * workspace=NULL;
-  gsl_function F;
-  gsl_spline *df_a_spline=NULL;
-  
   if(cosmo->params.has_mgrowth) {
-    double *df_arr=malloc(na*sizeof(double));
-    if(df_arr==NULL) {
-      free(a);
-      *status=CCL_ERROR_MEMORY;
-      ccl_cosmology_set_status_message(cosmo, "ccl_background.c: ccl_cosmology_compute_distances(): ran out of memory\n");
-      return;
-    }
-    //Generate spline for Delta f(z) that we will then interpolate into an array of a
-    gsl_spline *df_z_spline=gsl_spline_alloc(cosmo->spline_params.A_SPLINE_TYPE,cosmo->params.nz_mgrowth);
-    chistatus=gsl_spline_init(df_z_spline,cosmo->params.z_mgrowth,cosmo->params.df_mgrowth,
-			      cosmo->params.nz_mgrowth);
+    if (*status == 0) {
+      df_arr = malloc(na*sizeof(double));
 
-    if(chistatus) {
-      free(a);
-      free(df_arr);
-      gsl_spline_free(df_z_spline);
-      *status = CCL_ERROR_SPLINE;
-      ccl_cosmology_set_status_message(cosmo, "ccl_background.c: ccl_cosmology_compute_growth(): Error creating Delta f(z) spline\n");
-      return;
-    }
-    for (int i=0; i<na; i++) {
-      if(a[i]>0) {
-        double z=1./a[i]-1.;
-
-        if(z<=cosmo->params.z_mgrowth[0])
-          df_arr[i]=cosmo->params.df_mgrowth[0];
-        else if(z>cosmo->params.z_mgrowth[cosmo->params.nz_mgrowth-1])
-          df_arr[i]=cosmo->params.df_mgrowth[cosmo->params.nz_mgrowth-1];
-        else
-	       chistatus |= gsl_spline_eval_e(df_z_spline,z,NULL,&df_arr[i]);
-      } else {
-	     df_arr[i]=0;
+      if(df_arr == NULL) {
+        *status = CCL_ERROR_MEMORY;
+        ccl_cosmology_set_status_message(
+          cosmo, "ccl_background.c: ccl_cosmology_compute_distances(): ran out of memory\n");
       }
     }
-    if(chistatus) {
-      free(a);
-      free(df_arr);
-      gsl_spline_free(df_z_spline);
-      *status = CCL_ERROR_SPLINE;
-      ccl_cosmology_set_status_message(cosmo, "ccl_background.c: ccl_cosmology_compute_growth(): Error evaluating Delta f(z) spline\n");
-      return;
-    }
-    gsl_spline_free(df_z_spline);
 
-    //Generate Delta(f) spline
-    df_a_spline=gsl_spline_alloc(cosmo->spline_params.A_SPLINE_TYPE,na);
-    chistatus=gsl_spline_init(df_a_spline,a,df_arr,na);
-    free(df_arr);
-    if (chistatus) {
-      free(a);
-      gsl_spline_free(df_a_spline);
-      *status = CCL_ERROR_SPLINE;
-      ccl_cosmology_set_status_message(cosmo, "ccl_background.c: ccl_cosmology_compute_growth(): Error creating Delta f(a) spline\n");
-      return;
+    // Generate spline for Delta f(z) that we will then interpolate into an array of a
+    if (*status == 0) {
+      df_z_spline = gsl_spline_alloc(cosmo->spline_params.A_SPLINE_TYPE, cosmo->params.nz_mgrowth);
+      if (df_z_spline == NULL) {
+        *status = CCL_ERROR_MEMORY;
+        ccl_cosmology_set_status_message(
+          cosmo, "ccl_background.c: ccl_cosmology_compute_distances(): ran out of memory\n");
+      }
     }
 
-    workspace=gsl_integration_cquad_workspace_alloc(cosmo->gsl_params.N_ITERATION);
-    F.function=&df_integrand;
-    F.params=df_a_spline;
+    if (*status == 0) {
+      chistatus = gsl_spline_init(df_z_spline,cosmo->params.z_mgrowth,
+                                  cosmo->params.df_mgrowth,
+                                  cosmo->params.nz_mgrowth);
+
+      if(chistatus) {
+        *status = CCL_ERROR_SPLINE;
+        ccl_cosmology_set_status_message(
+          cosmo, "ccl_background.c: ccl_cosmology_compute_growth(): Error creating Delta f(z) spline\n");
+      }
+    }
+
+    if (*status == 0) {
+      for (int i=0; i<na; i++) {
+        if(a[i]>0) {
+          double z=1./a[i]-1.;
+
+          if(z<=cosmo->params.z_mgrowth[0])
+            df_arr[i]=cosmo->params.df_mgrowth[0];
+          else if(z>cosmo->params.z_mgrowth[cosmo->params.nz_mgrowth-1])
+            df_arr[i]=cosmo->params.df_mgrowth[cosmo->params.nz_mgrowth-1];
+          else
+  	       chistatus |= gsl_spline_eval_e(df_z_spline,z,NULL,&df_arr[i]);
+        } else {
+  	     df_arr[i]=0;
+        }
+      }
+      if(chistatus) {
+        *status = CCL_ERROR_SPLINE;
+        ccl_cosmology_set_status_message(
+          cosmo, "ccl_background.c: ccl_cosmology_compute_growth(): Error evaluating Delta f(z) spline\n");
+      }
+    }
+
+    // Generate Delta(f) spline
+    if (*status == 0) {
+      df_a_spline = gsl_spline_alloc(cosmo->spline_params.A_SPLINE_TYPE,na);
+
+      if (df_a_spline == NULL) {
+        *status = CCL_ERROR_MEMORY;
+        ccl_cosmology_set_status_message(
+          cosmo, "ccl_background.c: ccl_cosmology_compute_distances(): ran out of memory\n");
+      }
+    }
+
+    if (*status == 0) {
+      chistatus = gsl_spline_init(df_a_spline, a, df_arr, na);
+
+      if (chistatus) {
+        *status = CCL_ERROR_SPLINE;
+        ccl_cosmology_set_status_message(
+          cosmo, "ccl_background.c: ccl_cosmology_compute_growth(): Error creating Delta f(a) spline\n");
+      }
+    }
+
+    if (*status == 0) {
+      workspace = gsl_integration_cquad_workspace_alloc(cosmo->gsl_params.N_ITERATION);
+      F.function = &df_integrand;
+      F.params = df_a_spline;
+    }
   }
+
   // allocate space for y, which will be all three
   // of E(a), chi(a), D(a) and f(a) in turn.
-  int  status_mg=0, gslstatus;
-  double growth0,fgrowth0;
-  double *y = malloc(sizeof(double)*na);
-  if(y==NULL) {
-    free(a);
-    *status=CCL_ERROR_MEMORY;
-    ccl_cosmology_set_status_message(cosmo, "ccl_background.c: ccl_cosmology_compute_distances(): ran out of memory\n");
-    return;
+  if (*status == 0) {
+    y = malloc(sizeof(double)*na);
+    if (y == NULL) {
+      *status = CCL_ERROR_MEMORY;
+      ccl_cosmology_set_status_message(
+          cosmo, "ccl_background.c: ccl_cosmology_compute_distances(): ran out of memory\n");
+    }
   }
-  double *y2 = malloc(sizeof(double)*na);
-  if(y2==NULL) {
-    free(a);
-    free(y);
-    *status=CCL_ERROR_MEMORY;
-    ccl_cosmology_set_status_message(cosmo, "ccl_background.c: ccl_cosmology_compute_distances(): ran out of memory\n");
-    return;
+
+  if (*status == 0) {
+    y2 = malloc(sizeof(double)*na);
+    if (y2 == NULL) {
+      *status = CCL_ERROR_MEMORY;
+      ccl_cosmology_set_status_message(
+          cosmo, "ccl_background.c: ccl_cosmology_compute_distances(): ran out of memory\n");
+    }
   }
-  // Get the growth factor and growth rate at z=0
-  chistatus|=growth_factor_and_growth_rate(1.,&growth0,&fgrowth0,cosmo, status);
-  // Get the growth factor and growth rate at other redshifts
-  for(int i=0; i<na; i++) {
-    chistatus|=growth_factor_and_growth_rate(a[i],&(y[i]),&(y2[i]),cosmo, status); 
-    if(cosmo->params.has_mgrowth) {
-      if(a[i]>0) {
-	double df,integ;
-	//Add modification to f
-	gslstatus = gsl_spline_eval_e(df_a_spline,a[i],NULL,&df);
-  if(gslstatus != GSL_SUCCESS) {
-    ccl_raise_gsl_warning(gslstatus, "ccl_background.c: ccl_cosmology_compute_growth():");
-    status_mg |= gslstatus;
-  }
-	y2[i]+=df;
-	//Multiply D by exp(-int(df))
-	gslstatus = gsl_integration_cquad(&F,a[i],1.0,0.0,cosmo->gsl_params.INTEGRATION_DISTANCE_EPSREL,workspace,&integ,NULL,NULL);
-	if(gslstatus != GSL_SUCCESS) {
-    ccl_raise_gsl_warning(gslstatus, "ccl_background.c: ccl_cosmology_compute_growth():");
-    status_mg |= gslstatus;
-  }
-  y[i]*=exp(-integ);
+
+  if (*status == 0) {
+    // Get the growth factor and growth rate at z=0
+    chistatus |= growth_factor_and_growth_rate(1., &growth0, &fgrowth0, cosmo, status);
+
+    // Get the growth factor and growth rate at other redshifts
+    for(int i=0; i<na; i++) {
+      chistatus |= growth_factor_and_growth_rate(a[i], &(y[i]), &(y2[i]), cosmo, status);
+
+      if(cosmo->params.has_mgrowth) {
+        if(a[i]>0) {
+          // Add modification to f
+          gslstatus = gsl_spline_eval_e(df_a_spline, a[i], NULL, &df);
+          if (gslstatus != GSL_SUCCESS) {
+            ccl_raise_gsl_warning(gslstatus, "ccl_background.c: ccl_cosmology_compute_growth():");
+            status_mg |= gslstatus;
+          }
+          y2[i] += df;
+
+          // Multiply D by exp(-int(df))
+          gslstatus = gsl_integration_cquad(
+            &F, a[i], 1.0, 0.0, cosmo->gsl_params.INTEGRATION_DISTANCE_EPSREL,
+            workspace, &integ, NULL, NULL);
+  	      if (gslstatus != GSL_SUCCESS) {
+            ccl_raise_gsl_warning(gslstatus, "ccl_background.c: ccl_cosmology_compute_growth():");
+            status_mg |= gslstatus;
+          }
+          y[i] *= exp(-integ);
+        }
+      }
+      // Normalizing to the growth factor to the growth today
+      y[i] /= growth0;
+    }
+
+    if (chistatus || status_mg || *status) {
+      if (chistatus) {
+        *status = CCL_ERROR_INTEG;
+        ccl_cosmology_set_status_message(
+          cosmo, "ccl_background.c: ccl_cosmology_compute_growth(): integral for linear growth factor didn't converge\n");
+      }
+      if(status_mg) {
+        *status = CCL_ERROR_INTEG;
+        ccl_cosmology_set_status_message(
+          cosmo, "ccl_background.c: ccl_cosmology_compute_growth(): integral for MG growth factor didn't converge\n");
       }
     }
-    y[i]/=growth0; // Normalizing to the growth factor to the growth today 
   }
-  if(chistatus || status_mg || *status) {
-    free(a);
-    free(y);
-    free(y2);
-    if(df_a_spline!=NULL)
-      gsl_spline_free(df_a_spline);
-    if(workspace!=NULL)
-      gsl_integration_cquad_workspace_free(workspace);
+
+  gsl_spline *growth = NULL;
+  gsl_spline *fgrowth = NULL;
+
+  if (*status == 0) {
+    growth = gsl_spline_alloc(cosmo->spline_params.A_SPLINE_TYPE, na);
+    fgrowth = gsl_spline_alloc(cosmo->spline_params.A_SPLINE_TYPE, na);
+
+    if (growth == NULL || fgrowth == NULL) {
+      *status = CCL_ERROR_MEMORY;
+      ccl_cosmology_set_status_message(
+          cosmo, "ccl_background.c: ccl_cosmology_compute_distances(): ran out of memory\n");
+    }
+  }
+
+  if (*status == 0) {
+    chistatus = gsl_spline_init(growth, a, y, na);
+
     if (chistatus) {
-      *status = CCL_ERROR_INTEG;
+      *status = CCL_ERROR_SPLINE;
       ccl_cosmology_set_status_message(
-        cosmo, "ccl_background.c: ccl_cosmology_compute_growth(): integral for linear growth factor didn't converge\n");
+        cosmo, "ccl_background.c: ccl_cosmology_compute_growth(): Error creating D(a) spline\n");
     }
-    if(status_mg) {
-      *status = CCL_ERROR_INTEG;
+  }
+
+  if (*status == 0) {
+    chistatus = gsl_spline_init(fgrowth, a, y2, na);
+    if (chistatus) {
+      *status = CCL_ERROR_SPLINE;
       ccl_cosmology_set_status_message(
-        cosmo, "ccl_background.c: ccl_cosmology_compute_growth(): integral for MG growth factor didn't converge\n");
+        cosmo, "ccl_background.c: ccl_cosmology_compute_growth(): Error creating f(a) spline\n");
     }
-    return;
   }
 
-  if(cosmo->params.has_mgrowth) {
-    gsl_spline_free(df_a_spline);
-    gsl_integration_cquad_workspace_free(workspace);
+  if (*status == 0) {
+    // assign all the splines we've just made to the structure.
+    cosmo->data.growth = growth;
+    cosmo->data.fgrowth = fgrowth;
+    cosmo->data.growth0 = growth0;
+    cosmo->computed_growth = true;
   }
-
-  gsl_spline * growth = gsl_spline_alloc(cosmo->spline_params.A_SPLINE_TYPE, na);
-  chistatus = gsl_spline_init(growth, a, y, na);
-  if(chistatus) {
-    free(a);
-    free(y);
-    free(y2);
-    gsl_spline_free(growth);
-    *status = CCL_ERROR_SPLINE;
-    ccl_cosmology_set_status_message(cosmo, "ccl_background.c: ccl_cosmology_compute_growth(): Error creating D(a) spline\n");
-    return;
-  }
-
-  gsl_spline * fgrowth = gsl_spline_alloc(cosmo->spline_params.A_SPLINE_TYPE, na);
-  chistatus = gsl_spline_init(fgrowth, a, y2, na);
-  if(chistatus) {
-    free(a);
-    free(y);
-    free(y2);
+  else {
     gsl_spline_free(growth);
     gsl_spline_free(fgrowth);
-    *status = CCL_ERROR_SPLINE;
-    ccl_cosmology_set_status_message(cosmo, "ccl_background.c: ccl_cosmology_compute_growth(): Error creating f(a) spline\n");
-    return;
   }
-
-  // assign all the splines we've just made to the structure.
-  cosmo->data.growth = growth;
-  cosmo->data.fgrowth = fgrowth;
-  cosmo->data.growth0 = growth0;
-  cosmo->computed_growth = true;
 
   free(a);
   free(y);
   free(y2);
+  free(df_arr);
+  gsl_spline_free(df_z_spline);
+  gsl_spline_free(df_a_spline);
+  gsl_integration_cquad_workspace_free(workspace);
+}
+#pragma omp flush
 
   return;
 }
@@ -1029,10 +1085,10 @@ void ccl_scale_factor_of_chis(ccl_cosmology * cosmo, int nchi, double chi[], dou
 
 double ccl_growth_factor(ccl_cosmology * cosmo, double a, int * status)
 {
-  if(a==1.){ 
+  if(a==1.){
     return 1.;
   }
-  else if(a>1.) { 
+  else if(a>1.) {
     *status = CCL_ERROR_COMPUTECHI;
     ccl_cosmology_set_status_message(cosmo, "ccl_background.c: scale factor cannot be larger than 1.\n");
     ccl_check_status(cosmo,status);
