@@ -21,15 +21,17 @@ install:
   - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then export CONDA_BUILD_SYSROOT=/; fi
   - export PATH=$HOME/miniconda/bin:$PATH
   - source activate test-environment
+  - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then conda install -y llvm-openmp; fi
   # this is a hack for conda osx compilers
   - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then export DYLD_FALLBACK_LIBRARY_PATH=${CONDA_PREFIX}/lib; fi
 
 script:
   - flake8 pyccl
   - flake8 --exclude=data benchmarks
-  - mkdir -p build && cd build && cmake .. && make && sudo make install && cd ..
+  - mkdir -p build && cd build && cmake -DFORCE_OPENMP=YES .. && make && sudo make install && cd ..
   - ./build/check_ccl
   - rm -rf build
+  - mkdir -p build && cd build && cmake -DFORCE_OPENMP=YES .. && cd ..
   - python setup.py install
   - nosetests tests/run_tests.py --all --debug --detailed-errors --verbose --process-restartworker
     --with-coverage --cover-package=pyccl

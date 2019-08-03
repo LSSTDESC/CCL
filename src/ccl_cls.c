@@ -172,7 +172,8 @@ void ccl_angular_cl_limber(ccl_cosmology *cosmo,
 
   #pragma omp parallel private(lind, clastatus, ipar, lkmin, lkmax, result, \
                                eresult, gslstatus, w, w_cquad, nevals, l, F) \
-                       shared(cosmo, psp_use, trc1, trc2, l_out, cl_out, tot_status) \
+                       shared(cosmo, psp_use, trc1, trc2, l_out, cl_out, \
+                              tot_status, nl_out) \
                        default(none)
   {
     w = gsl_integration_workspace_alloc(cosmo->gsl_params.N_ITERATION);
