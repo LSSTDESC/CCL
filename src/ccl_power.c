@@ -431,16 +431,17 @@ TASK: compute power spectrum
 */
 void ccl_cosmology_compute_power(ccl_cosmology* cosmo, int* status)
 {
-  if ((cosmo->config.transfer_function_method != ccl_boltzmann_class) &&
-      (fabs(cosmo->params.mu_0)>1e-14 || fabs(cosmo->params.sigma_0)>1e-14)) {
+  if ((cosmo->config.transfer_function_method != ccl_boltzmann_class &&
+       cosmo->config.transfer_function_method != ccl_transfer_none) &&
+      (fabs(cosmo->params.mu_0) > 1e-14 || fabs(cosmo->params.sigma_0) > 1e-14)) {
     #pragma omp atomic write
-	  *status = CCL_ERROR_NOT_IMPLEMENTED;
-	  strcpy(
-      cosmo->status_message,
+    *status = CCL_ERROR_NOT_IMPLEMENTED;
+    ccl_cosmology_set_status_message(
+      cosmo,
       "ccl_power.c: ccl_cosmology_compute_power(): The power spectrum in the "
       "mu / Sigma modified gravity parameterisation is only implemented with "
       "the ccl_boltzmann_class power spectrum method.\n");
-	  return;
+      return;
   }
   if (cosmo->computed_power) return;
 
@@ -479,19 +480,20 @@ void ccl_cosmology_compute_power(ccl_cosmology* cosmo, int* status)
         }
     }
   }
+
   // if everything is OK, get the non-linear P(K)
-  ccl_check_status(cosmo, status);
-
-  if ((fabs(cosmo->params.mu_0)>1e-14 || fabs(cosmo->params.sigma_0)>1e-14) &&
-      cosmo->config.matter_power_spectrum_method != ccl_linear) {
-	  *status = CCL_ERROR_NOT_IMPLEMENTED;
-	  strcpy(cosmo->status_message,
-      "ccl_power.c: ccl_cosmology_compute_power(): The power spectrum in the "
-      "mu / Sigma modified gravity parameterisation is only implemented with "
-      "the linear power spectrum.\n");
-  }
-
   if (*status == 0) {
+
+    if ((fabs(cosmo->params.mu_0)>1e-14 || fabs(cosmo->params.sigma_0)>1e-14) &&
+        cosmo->config.matter_power_spectrum_method != ccl_linear) {
+      *status = CCL_ERROR_NOT_IMPLEMENTED;
+      ccl_cosmology_set_status_message(
+        cosmo,
+        "ccl_power.c: ccl_cosmology_compute_power(): The power spectrum in the "
+        "mu / Sigma modified gravity parameterisation is only implemented with "
+        "the linear power spectrum.\n");
+    }
+
     switch (cosmo->config.matter_power_spectrum_method) {
 
       case ccl_linear: {
@@ -535,11 +537,13 @@ void ccl_cosmology_compute_power(ccl_cosmology* cosmo, int* status)
     }
   }
 
-  ccl_check_status(cosmo, status);
   if (*status == 0)
     cosmo->computed_power = true;
 }
 #pragma omp flush
+
+  // the flush above should sync everything to a consistent memory view
+  ccl_check_status(cosmo, status);
 
   return;
 }
