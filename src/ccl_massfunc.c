@@ -301,12 +301,13 @@ static void ccl_cosmology_compute_hmfparams(ccl_cosmology *cosmo, int *status)
   }
   #pragma omp flush
 
-  gsl_spline_free(alphahmf);
-  gsl_spline_free(betahmf);
-  gsl_spline_free(gammahmf);
-  gsl_spline_free(phihmf);
-  gsl_spline_free(etahmf);
-
+  if (*status) {
+    gsl_spline_free(alphahmf);
+    gsl_spline_free(betahmf);
+    gsl_spline_free(gammahmf);
+    gsl_spline_free(phihmf);
+    gsl_spline_free(etahmf);
+  }
 }
 
 //TODO: some of these are unused, many are included in ccl.h
