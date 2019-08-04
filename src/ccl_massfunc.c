@@ -69,7 +69,7 @@ static void ccl_cosmology_compute_hmfparams(ccl_cosmology *cosmo, int *status)
   gsl_spline* phihmf = NULL;
   gsl_spline* etahmf = NULL;
 
-  #pragma omp master
+  #pragma omp single
   {
   // declare parameter splines on case-by-case basis
   switch(cosmo->config.mass_function_method) {
@@ -523,7 +523,7 @@ void ccl_cosmology_compute_sigma(ccl_cosmology *cosmo, int *status)
   if(cosmo->computed_sigma)
     return;
 
-  #pragma omp master
+  #pragma omp single
   {
   // create linearly-spaced values of the mass.
   int nm=cosmo->spline_params.LOGM_SPLINE_NM;

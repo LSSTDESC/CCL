@@ -10,7 +10,7 @@ list(APPEND CMAKE_MODULE_PATH  "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
 project(ccl VERSION 0.2.1)
 
-option(FORCE_OPENMP "Forcibly use OpenMP " ON)
+option(FORCE_OPENMP "Forcibly use OpenMP " NO)
 
 # Defines list of CCL src files
 set(CCL_SRC
