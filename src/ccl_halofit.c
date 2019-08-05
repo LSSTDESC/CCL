@@ -134,31 +134,36 @@ static double get_w0eff(double a, struct hf_model_match_data data) {
 
   T = gsl_root_fsolver_brent;
   s = gsl_root_fsolver_alloc(T);
-  gsl_root_fsolver_set(s, &F, w0eff_low, w0eff_high);
+  if (s == NULL) {
+    *(data.status) = CCL_ERROR_MEMORY;
+  }
+  else {
+    gsl_root_fsolver_set(s, &F, w0eff_low, w0eff_high);
 
-  itr = 0;
-  do {
-    itr++;
-    gsl_status = gsl_root_fsolver_iterate(s);
-    if (gsl_status == GSL_EBADFUNC)
-      break;
+    itr = 0;
+    do {
+      itr++;
+      gsl_status = gsl_root_fsolver_iterate(s);
+      if (gsl_status == GSL_EBADFUNC)
+        break;
 
-    w0eff = gsl_root_fsolver_root(s);
-    w0eff_low = gsl_root_fsolver_x_lower(s);
-    w0eff_high = gsl_root_fsolver_x_upper(s);
+      w0eff = gsl_root_fsolver_root(s);
+      w0eff_low = gsl_root_fsolver_x_lower(s);
+      w0eff_high = gsl_root_fsolver_x_upper(s);
 
-    gsl_status = gsl_root_test_interval(
-      w0eff_low, w0eff_high,
-      1e-6,
-      1e-6);
-  } while (gsl_status == GSL_CONTINUE && itr < max_itr);
+      gsl_status = gsl_root_test_interval(
+        w0eff_low, w0eff_high,
+        1e-6,
+        1e-6);
+    } while (gsl_status == GSL_CONTINUE && itr < max_itr);
 
-  gsl_root_fsolver_free(s);
+    gsl_root_fsolver_free(s);
 
-  if (gsl_status != GSL_SUCCESS || itr >= max_itr) {
-    ccl_raise_gsl_warning(
-      gsl_status, "ccl_halofit.c: get_w0eff: error in root finding for the halofit matching cosmology\n");
-    *(data.status) |= gsl_status;
+    if (gsl_status != GSL_SUCCESS || itr >= max_itr) {
+      ccl_raise_gsl_warning(
+        gsl_status, "ccl_halofit.c: get_w0eff: error in root finding for the halofit matching cosmology\n");
+      *(data.status) |= gsl_status;
+    }
   }
 
   return w0eff;
@@ -268,31 +273,36 @@ static double get_rsigma(double a, struct hf_int_data data) {
 
   T = gsl_root_fsolver_brent;
   s = gsl_root_fsolver_alloc(T);
-  gsl_root_fsolver_set(s, &F, rlow, rhigh);
+  if (s == NULL) {
+    *(data.status) = CCL_ERROR_MEMORY;
+  }
+  else {
+    gsl_root_fsolver_set(s, &F, rlow, rhigh);
 
-  itr = 0;
-  do {
-    itr++;
-    gsl_status = gsl_root_fsolver_iterate(s);
-    if (gsl_status == GSL_EBADFUNC)
-      break;
+    itr = 0;
+    do {
+      itr++;
+      gsl_status = gsl_root_fsolver_iterate(s);
+      if (gsl_status == GSL_EBADFUNC)
+        break;
 
-    rsigma = gsl_root_fsolver_root(s);
-    rlow = gsl_root_fsolver_x_lower(s);
-    rhigh = gsl_root_fsolver_x_upper(s);
+      rsigma = gsl_root_fsolver_root(s);
+      rlow = gsl_root_fsolver_x_lower(s);
+      rhigh = gsl_root_fsolver_x_upper(s);
 
-    gsl_status = gsl_root_test_interval(
-      rlow, rhigh,
-      data.cosmo->gsl_params.INTEGRATION_SIGMAR_EPSREL,
-      data.cosmo->gsl_params.INTEGRATION_SIGMAR_EPSREL);
-  } while (gsl_status == GSL_CONTINUE && itr < max_itr);
+      gsl_status = gsl_root_test_interval(
+        rlow, rhigh,
+        data.cosmo->gsl_params.INTEGRATION_SIGMAR_EPSREL,
+        data.cosmo->gsl_params.INTEGRATION_SIGMAR_EPSREL);
+    } while (gsl_status == GSL_CONTINUE && itr < max_itr);
 
-  gsl_root_fsolver_free(s);
+    gsl_root_fsolver_free(s);
 
-  if (gsl_status != GSL_SUCCESS || itr >= max_itr) {
-    ccl_raise_gsl_warning(
-      gsl_status, "ccl_halofit.c: get_rsigma: error in root finding for the halofit non-linear scale\n");
-    *(data.status) |= gsl_status;
+    if (gsl_status != GSL_SUCCESS || itr >= max_itr) {
+      ccl_raise_gsl_warning(
+        gsl_status, "ccl_halofit.c: get_rsigma: error in root finding for the halofit non-linear scale\n");
+      *(data.status) |= gsl_status;
+    }
   }
 
   return rsigma;

@@ -24,7 +24,6 @@ static double h_over_h0(double a, ccl_cosmology * cosmo, int *status)
     Om_mass_nu = ccl_Omeganuh2(
       a, cosmo->params.N_nu_mass, cosmo->params.mnu, cosmo->params.T_CMB,
       status) / (cosmo->params.h) / (cosmo->params.h);
-    ccl_check_status(cosmo, status);
   }
   else {
     Om_mass_nu = 0;
@@ -68,7 +67,6 @@ double ccl_omega_x(ccl_cosmology * cosmo, double a, ccl_species_x_label label, i
     // Call the massive neutrino density function just once at this redshift.
     OmNuh2 = ccl_Omeganuh2(a, cosmo->params.N_nu_mass, cosmo->params.mnu,
 		       cosmo->params.T_CMB, status);
-    ccl_check_status(cosmo, status);
   }
   else {
     OmNuh2 = 0.;
@@ -859,7 +857,6 @@ double ccl_h_over_h0(ccl_cosmology * cosmo, double a, int* status)
 
   if(!cosmo->computed_distances) {
     ccl_cosmology_compute_distances(cosmo,status);
-    ccl_check_status(cosmo, status);
   }
 
   double h_over_h0;
@@ -895,13 +892,11 @@ double ccl_comoving_radial_distance(ccl_cosmology * cosmo, double a, int * statu
   else if(a>1.) {
     *status = CCL_ERROR_COMPUTECHI;
     ccl_cosmology_set_status_message(cosmo, "ccl_background.c: scale factor cannot be larger than 1.\n");
-    ccl_check_status(cosmo,status);
     return NAN;
   }
   else {
     if(!cosmo->computed_distances) {
       ccl_cosmology_compute_distances(cosmo, status);
-      ccl_check_status(cosmo,status);
     }
 
     double crd;
@@ -957,13 +952,11 @@ double ccl_comoving_angular_distance(ccl_cosmology * cosmo, double a, int* statu
   else if(a>1.) {
     *status = CCL_ERROR_COMPUTECHI;
     ccl_cosmology_set_status_message(cosmo, "ccl_background.c: scale factor cannot be larger than 1.\n");
-    ccl_check_status(cosmo,status);
     return NAN;
   }
   else {
     if (!cosmo->computed_distances) {
       ccl_cosmology_compute_distances(cosmo, status);
-      ccl_check_status(cosmo, status);
     }
 
     double chi;
@@ -1011,17 +1004,14 @@ double ccl_distance_modulus(ccl_cosmology * cosmo, double a, int* status)
   if((a > (1.0 - 1.e-8)) && (a<=1.0)) {
     *status = CCL_ERROR_COMPUTECHI;
     ccl_cosmology_set_status_message(cosmo, "ccl_background.c: distance_modulus undefined for a=1.\n");
-    ccl_check_status(cosmo,status);
     return NAN;
   } else if(a>1.) {
     *status = CCL_ERROR_COMPUTECHI;
     ccl_cosmology_set_status_message(cosmo, "ccl_background.c: scale factor cannot be larger than 1.\n");
-    ccl_check_status(cosmo,status);
     return NAN;
   } else {
     if (!cosmo->computed_distances) {
       ccl_cosmology_compute_distances(cosmo, status);
-      ccl_check_status(cosmo, status);
     }
     /* distance modulus = 5 * log10(d) - 5
        Since d in CCL is in Mpc, you get
@@ -1053,13 +1043,11 @@ double ccl_scale_factor_of_chi(ccl_cosmology * cosmo, double chi, int * status)
   else if(chi<0.) {
     *status = CCL_ERROR_COMPUTECHI;
     ccl_cosmology_set_status_message(cosmo, "ccl_background.c: distance cannot be smaller than 0.\n");
-    ccl_check_status(cosmo,status);
     return NAN;
   }
   else {
     if (!cosmo->computed_distances) {
       ccl_cosmology_compute_distances(cosmo,status);
-      ccl_check_status(cosmo,status);
     }
     double a;
     int gslstatus = gsl_spline_eval_e(cosmo->data.achi, chi, NULL, &a);
@@ -1091,13 +1079,11 @@ double ccl_growth_factor(ccl_cosmology * cosmo, double a, int * status)
   else if(a>1.) {
     *status = CCL_ERROR_COMPUTECHI;
     ccl_cosmology_set_status_message(cosmo, "ccl_background.c: scale factor cannot be larger than 1.\n");
-    ccl_check_status(cosmo,status);
     return NAN;
   }
   else {
     if (!cosmo->computed_growth){
       ccl_cosmology_compute_growth(cosmo, status);
-      ccl_check_status(cosmo, status);
     }
     if (*status!= CCL_ERROR_NOT_IMPLEMENTED) {
       double D;
@@ -1132,7 +1118,6 @@ double ccl_growth_factor_unnorm(ccl_cosmology * cosmo, double a, int * status)
 
   if (!cosmo->computed_growth) {
     ccl_cosmology_compute_growth(cosmo, status);
-    ccl_check_status(cosmo, status);
   }
 
   if (*status != CCL_ERROR_NOT_IMPLEMENTED) {
@@ -1158,12 +1143,10 @@ double ccl_growth_rate(ccl_cosmology * cosmo, double a, int * status)
   if(a>1.) {
     *status = CCL_ERROR_COMPUTECHI;
     ccl_cosmology_set_status_message(cosmo, "ccl_background.c: scale factor cannot be larger than 1.\n");
-    ccl_check_status(cosmo,status);
     return NAN;
   } else {
     if (!cosmo->computed_growth) {
       ccl_cosmology_compute_growth(cosmo, status);
-      ccl_check_status(cosmo, status);
     }
     if(*status != CCL_ERROR_NOT_IMPLEMENTED) {
       double g;

@@ -20,9 +20,6 @@ from .errors import CCLError
 %include "numpy.i"
 %init %{
     import_array();
-    // Tell CCL library not to quit when an error is thrown (to let Python
-    // exception handler take over)
-    ccl_set_error_policy(CCL_ERROR_POLICY_CONTINUE);
     // Tell CCL to not print to stdout/stderr for debugging.
     ccl_set_debug_policy(CCL_DEBUG_MODE_OFF);
 %}

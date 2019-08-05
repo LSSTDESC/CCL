@@ -20,7 +20,7 @@ typedef struct{
 static void get_k_interval(ccl_cosmology *cosmo,
                            ccl_cl_tracer_collection_t *trc1,
                            ccl_cl_tracer_collection_t *trc2,
-                           double l,double *lkmin,double *lkmax) {
+                           double l, double *lkmin, double *lkmax) {
   int itr;
 
   // Loop through all tracers and find distance bounds
@@ -81,7 +81,7 @@ static double transfer_limber_single(ccl_cl_tracer_t *tr, double l, double lk,
     double a_lp = ccl_scale_factor_of_chi(cosmo, chi_lp, status);
 
     // Compute power spectrum ratio there
-    double pk_ratio = fabs(ccl_f2d_t_eval(psp, lk, a_lp, cosmo, status)/
+    double pk_ratio = fabs(ccl_f2d_t_eval(psp, lk, a_lp, cosmo, status) /
                            ccl_f2d_t_eval(psp, lk, a_l, cosmo, status));
 
     // Compute kernel and trasfer at chi_{l+1}
@@ -143,7 +143,7 @@ void ccl_angular_cl_limber(ccl_cosmology *cosmo,
                              ccl_f2d_t *psp,
                              int nl_out, double *l_out, double *cl_out,
                              int *status) {
-  int tot_status;
+  int local_status;
   int clastatus, lind;
   integ_cl_par ipar;
   gsl_function F;
@@ -168,86 +168,101 @@ void ccl_angular_cl_limber(ccl_cosmology *cosmo,
   else
     psp_use = psp;
 
-  tot_status = 0;
-
   #pragma omp parallel private(lind, clastatus, ipar, lkmin, lkmax, result, \
-                               eresult, gslstatus, w, w_cquad, nevals, l, F) \
+                               eresult, gslstatus, w, w_cquad, nevals, l, F, \
+                               local_status) \
                        shared(cosmo, psp_use, trc1, trc2, l_out, cl_out, \
-                              tot_status, nl_out) \
+                              nl_out, status) \
                        default(none)
   {
-    w = gsl_integration_workspace_alloc(cosmo->gsl_params.N_ITERATION);
-
-    // Set up integrating function
-    ipar.cosmo = cosmo;
-    ipar.trc1 = trc1;
-    ipar.trc2 = trc2;
-    ipar.psp = psp_use;
-    ipar.status = &clastatus;
-    F.function = &cl_integrand;
-    F.params = &ipar;
-
+    local_status = *status;
     w_cquad = NULL;
+    w = NULL;
+
+    if (local_status == 0) {
+      w = gsl_integration_workspace_alloc(cosmo->gsl_params.N_ITERATION);
+      if (w == NULL) {
+        local_status = CCL_ERROR_MEMORY;
+      }
+    }
+
+    if (local_status == 0) {
+      // Set up integrating function
+      ipar.cosmo = cosmo;
+      ipar.trc1 = trc1;
+      ipar.trc2 = trc2;
+      ipar.psp = psp_use;
+      ipar.status = &clastatus;
+      F.function = &cl_integrand;
+      F.params = &ipar;
+    }
 
     #pragma omp for nowait
     for (lind=0; lind < nl_out; ++lind) {
-      l = l_out[lind];
-      clastatus = 0;
-      ipar.l = l;
+      if (local_status == 0) {
+        l = l_out[lind];
+        clastatus = 0;
+        ipar.l = l;
 
-      // Get integration limits
-      get_k_interval(cosmo, trc1, trc2, l, &lkmin, &lkmax);
+        // Get integration limits
+        get_k_interval(cosmo, trc1, trc2, l, &lkmin, &lkmax);
 
-      // Integrate
-      gslstatus = gsl_integration_qag(&F, lkmin, lkmax, 0,
-                                      cosmo->gsl_params.INTEGRATION_LIMBER_EPSREL,
-                                      cosmo->gsl_params.N_ITERATION,
-                                      cosmo->gsl_params.INTEGRATION_LIMBER_GAUSS_KRONROD_POINTS,
-                                      w, &result, &eresult);
+        // Integrate
+        gslstatus = gsl_integration_qag(&F, lkmin, lkmax, 0,
+                                        cosmo->gsl_params.INTEGRATION_LIMBER_EPSREL,
+                                        cosmo->gsl_params.N_ITERATION,
+                                        cosmo->gsl_params.INTEGRATION_LIMBER_GAUSS_KRONROD_POINTS,
+                                        w, &result, &eresult);
 
-      // Test if a round-off error occured in the evaluation of the integral
-      // If so, try another integration function, more robust but potentially slower
-      if (gslstatus == GSL_EROUND) {
-        ccl_raise_gsl_warning(
-            gslstatus,
-            "ccl_cls.c: ccl_angular_cl_limber(): "
-            "Default GSL integration failure, attempting backup method.");
+        // Test if a round-off error occured in the evaluation of the integral
+        // If so, try another integration function, more robust but potentially slower
+        if (gslstatus == GSL_EROUND) {
+          ccl_raise_gsl_warning(
+              gslstatus,
+              "ccl_cls.c: ccl_angular_cl_limber(): "
+              "Default GSL integration failure, attempting backup method.");
 
-        if (w_cquad == NULL)
-          w_cquad = gsl_integration_cquad_workspace_alloc(cosmo->gsl_params.N_ITERATION);
-        nevals = 0;
-        gslstatus = gsl_integration_cquad(
-          &F, lkmin, lkmax, 0,
-          cosmo->gsl_params.INTEGRATION_LIMBER_EPSREL,
-          w_cquad, &result, &eresult, &nevals);
-      }
+          if (w_cquad == NULL) {
+            w_cquad = gsl_integration_cquad_workspace_alloc(cosmo->gsl_params.N_ITERATION);
+            if (w_cquad == NULL) {
+              local_status = CCL_ERROR_MEMORY;
+            }
+          }
 
-      if (gslstatus == GSL_SUCCESS && (*ipar.status == 0)) {
-        cl_out[lind] = result / (l+0.5);
-      }
-      else {
-        ccl_raise_gsl_warning(gslstatus, "ccl_cls.c: ccl_angular_cl_limber():");
-        cl_out[lind] = NAN;
-        #pragma omp atomic write
-        tot_status = CCL_ERROR_INTEG;
+          if (local_status == 0) {
+            nevals = 0;
+            gslstatus = gsl_integration_cquad(
+              &F, lkmin, lkmax, 0,
+              cosmo->gsl_params.INTEGRATION_LIMBER_EPSREL,
+              w_cquad, &result, &eresult, &nevals);
+          }
+        }
+
+        if (gslstatus == GSL_SUCCESS && (*ipar.status == 0) && local_status == 0) {
+          cl_out[lind] = result / (l+0.5);
+        }
+        else {
+          ccl_raise_gsl_warning(gslstatus, "ccl_cls.c: ccl_angular_cl_limber():");
+          cl_out[lind] = NAN;
+          local_status = CCL_ERROR_INTEG;
+        }
       }
     }
 
     gsl_integration_workspace_free(w);
     gsl_integration_cquad_workspace_free(w_cquad);
-  }
 
-  if (tot_status) {
-    // If an error status was already set, don't overwrite it.
-    if (*status == 0){
-        *status = CCL_ERROR_INTEG;
-        ccl_cosmology_set_status_message(
-          cosmo,
-          "ccl_cls.c: ccl_angular_cl_limber(): error integrating over k\n");
+    if (local_status) {
+      #pragma omp atomic write
+      *status = local_status;
     }
   }
 
-  ccl_check_status(cosmo, status);
+  if (*status) {
+    ccl_cosmology_set_status_message(
+      cosmo,
+      "ccl_cls.c: ccl_angular_cls_limber(); integration error\n");
+  }
 }
 
 void ccl_angular_cls_nonlimber(ccl_cosmology *cosmo,

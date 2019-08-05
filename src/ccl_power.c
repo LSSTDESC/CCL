@@ -16,12 +16,12 @@
 // helper function for BCM corrections
 static void correct_bcm(ccl_cosmology *cosmo, int na, double *a_arr, int nk,
                         double *lk_arr,double *pk2d, int *status) {
-  for(int ii=0;ii<na;ii++) {
-    double a=a_arr[ii];
-    for(int jj=0;jj<nk;jj++) {
-      double k=exp(lk_arr[jj]);
-      double fbcm=ccl_bcm_model_fka(cosmo,k,a,status);
-      pk2d[jj+nk*ii]+=log(fbcm);
+  for (int ii=0; ii < na; ii++) {
+    double a = a_arr[ii];
+    for(int jj=0; jj < nk; jj++) {
+      double k = exp(lk_arr[jj]);
+      double fbcm = ccl_bcm_model_fka(cosmo, k, a, status);
+      pk2d[jj+nk*ii] += log(fbcm);
     }
   }
 }
@@ -136,8 +136,10 @@ static void ccl_cosmology_compute_linpower_analytic(
 
   if(*status==0) {
     cosmo->data.p_lin=ccl_f2d_t_new(na,z,nk,x,y2d,NULL,NULL,0,
-				    1,2,ccl_f2d_cclgrowth,1,NULL,0,2,
-				    ccl_f2d_3,status);
+      1,2,ccl_f2d_cclgrowth,1,NULL,0,2,
+      ccl_f2d_3,status);
+  }
+  if(*status==0) {
     cosmo->computed_power=true;
     sigma8 = ccl_sigma8(cosmo,status);
     cosmo->computed_power=false;
@@ -155,9 +157,10 @@ static void ccl_cosmology_compute_linpower_analytic(
     // Free the previous P(k,a) spline, and allocate a new one to store the
     // properly-normalized P(k,a)
     ccl_f2d_t_free(cosmo->data.p_lin);
-    cosmo->data.p_lin=ccl_f2d_t_new(na,z,nk,x,y2d,NULL,NULL,0,
-				    1,2,ccl_f2d_cclgrowth,1,NULL,0,2,
-				    ccl_f2d_3,status);
+    cosmo->data.p_lin = ccl_f2d_t_new(
+      na,z,nk,x,y2d,NULL,NULL,0,
+      1,2,ccl_f2d_cclgrowth,1,NULL,0,2,
+      ccl_f2d_3,status);
   }
 
   free(x);
@@ -329,8 +332,8 @@ static void ccl_cosmology_compute_power_emu(ccl_cosmology * cosmo, int * status)
 
   if(*status==0) {
     cosmo->data.p_nl=ccl_f2d_t_new(na,aemu,NK_EMU,lk,lpk_nl,NULL,NULL,0,
-				   1,2,ccl_f2d_no_extrapol,
-				   1,NULL,0,2,ccl_f2d_3,status);
+     1,2,ccl_f2d_no_extrapol,
+     1,NULL,0,2,ccl_f2d_3,status);
   }
 
   free(lpk_1a);
@@ -417,8 +420,8 @@ static void ccl_cosmology_spline_nonlinpower(
 
   if(*status == 0)
     cosmo->data.p_nl = ccl_f2d_t_new(na, z, nk, x, y2d, NULL, NULL, 0,
-				     1, 2, ccl_f2d_cclgrowth, 1, NULL,
-				     0, 2, ccl_f2d_3, status);
+       1, 2, ccl_f2d_cclgrowth, 1, NULL,
+       0, 2, ccl_f2d_3, status);
 
   free(x);
   free(z);
@@ -540,12 +543,6 @@ void ccl_cosmology_compute_power(ccl_cosmology* cosmo, int* status)
   if (*status == 0)
     cosmo->computed_power = true;
 }
-#pragma omp flush
-
-  // the flush above should sync everything to a consistent memory view
-  ccl_check_status(cosmo, status);
-
-  return;
 }
 
 /*------ ROUTINE: ccl_linear_matter_power -----
@@ -649,19 +646,25 @@ double ccl_sigmaR(ccl_cosmology *cosmo,double R,double a,int *status)
 
   par.cosmo=cosmo;
   par.R=R;
-  gsl_integration_cquad_workspace *workspace=gsl_integration_cquad_workspace_alloc(cosmo->gsl_params.N_ITERATION);
+  gsl_integration_cquad_workspace *workspace =  NULL;
   gsl_function F;
   F.function=&sigmaR_integrand;
   F.params=&par;
   double sigma_R;
-  int gslstatus = gsl_integration_cquad(&F, log10(cosmo->spline_params.K_MIN), log10(cosmo->spline_params.K_MAX),
-                                        0.0, cosmo->gsl_params.INTEGRATION_SIGMAR_EPSREL,
-                                        workspace,&sigma_R,NULL,NULL);
-  if(gslstatus != GSL_SUCCESS) {
-    ccl_raise_gsl_warning(gslstatus, "ccl_power.c: ccl_sigmaR():");
-    *status |= gslstatus;
-  }
 
+  workspace = gsl_integration_cquad_workspace_alloc(cosmo->gsl_params.N_ITERATION);
+  if (workspace == NULL) {
+    *status = CCL_ERROR_MEMORY;
+  }
+  if (*status == 0) {
+    int gslstatus = gsl_integration_cquad(&F, log10(cosmo->spline_params.K_MIN), log10(cosmo->spline_params.K_MAX),
+                                          0.0, cosmo->gsl_params.INTEGRATION_SIGMAR_EPSREL,
+                                          workspace,&sigma_R,NULL,NULL);
+    if(gslstatus != GSL_SUCCESS) {
+      ccl_raise_gsl_warning(gslstatus, "ccl_power.c: ccl_sigmaR():");
+      *status |= gslstatus;
+    }
+  }
   gsl_integration_cquad_workspace_free(workspace);
 
   return sqrt(sigma_R*M_LN10/(2*M_PI*M_PI))*ccl_growth_factor(cosmo, a, status);
@@ -680,18 +683,29 @@ double ccl_sigmaV(ccl_cosmology *cosmo,double R,double a,int *status)
 
   par.cosmo=cosmo;
   par.R=R;
-  gsl_integration_cquad_workspace *workspace=gsl_integration_cquad_workspace_alloc(cosmo->gsl_params.N_ITERATION);
+  gsl_integration_cquad_workspace *workspace = NULL;
+
+
   gsl_function F;
   F.function=&sigmaV_integrand;
   F.params=&par;
   double sigma_V;
-  int gslstatus = gsl_integration_cquad(&F, log10(cosmo->spline_params.K_MIN), log10(cosmo->spline_params.K_MAX),
-          0.0, cosmo->gsl_params.INTEGRATION_SIGMAR_EPSREL,
-          workspace,&sigma_V,NULL,NULL);
 
-  if(gslstatus != GSL_SUCCESS) {
-    ccl_raise_gsl_warning(gslstatus, "ccl_power.c: ccl_sigmaV():");
-    *status |= gslstatus;
+  workspace = gsl_integration_cquad_workspace_alloc(cosmo->gsl_params.N_ITERATION);
+
+  if (workspace == NULL) {
+    *status = CCL_ERROR_MEMORY;
+  }
+
+  if (*status == 0) {
+    int gslstatus = gsl_integration_cquad(&F, log10(cosmo->spline_params.K_MIN), log10(cosmo->spline_params.K_MAX),
+            0.0, cosmo->gsl_params.INTEGRATION_SIGMAR_EPSREL,
+            workspace,&sigma_V,NULL,NULL);
+
+    if(gslstatus != GSL_SUCCESS) {
+      ccl_raise_gsl_warning(gslstatus, "ccl_power.c: ccl_sigmaV():");
+      *status |= gslstatus;
+    }
   }
 
   gsl_integration_cquad_workspace_free(workspace);

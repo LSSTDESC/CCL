@@ -122,7 +122,6 @@ static void compare_power_MG(int i_model,struct power_MG_data * data)
 
 static void check_transfer_error(ccl_configuration config, struct power_MG_data * data)
 {
-  ccl_set_error_policy(CCL_ERROR_POLICY_CONTINUE);
   int status=0;
 
   ccl_parameters params;
@@ -152,13 +151,10 @@ static void check_transfer_error(ccl_configuration config, struct power_MG_data 
   }
 
   ccl_cosmology_free(cosmo);
-
-  ccl_set_error_policy(CCL_ERROR_POLICY_EXIT);
 }
 
 static void check_nonlin_error(struct power_MG_data * data)
 {
-  ccl_set_error_policy(CCL_ERROR_POLICY_CONTINUE);
 
   int status=0;
 
@@ -185,8 +181,6 @@ static void check_nonlin_error(struct power_MG_data * data)
              "is only implemented with the linear power spectrum.\n");
 
   ccl_cosmology_free(cosmo);
-
-  ccl_set_error_policy(CCL_ERROR_POLICY_EXIT);
 }
 
 CTEST2(power_MG, MG_emu_error) {
