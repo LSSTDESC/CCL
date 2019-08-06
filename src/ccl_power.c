@@ -437,7 +437,6 @@ void ccl_cosmology_compute_power(ccl_cosmology* cosmo, int* status)
   if ((cosmo->config.transfer_function_method != ccl_boltzmann_class &&
        cosmo->config.transfer_function_method != ccl_transfer_none) &&
       (fabs(cosmo->params.mu_0) > 1e-14 || fabs(cosmo->params.sigma_0) > 1e-14)) {
-    #pragma omp atomic write
     *status = CCL_ERROR_NOT_IMPLEMENTED;
     ccl_cosmology_set_status_message(
       cosmo,
