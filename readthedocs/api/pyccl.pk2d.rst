@@ -1,7 +1,7 @@
-pyccl.core module
+pyccl.pk2d module
 =================
 
-.. automodule:: pyccl.core
+.. automodule:: pyccl.pk2d
    :members:
    :undoc-members:
    :show-inheritance:

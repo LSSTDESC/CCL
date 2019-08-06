@@ -53,9 +53,8 @@ To install all the dependencies at once, and avoid having :code:`CMake` recompil
    $ sudo apt-get install cmake swig libgsl-dev libfftw3-dev
 
 
-
-Compile and install the CCL C library
-=====================================
+Compiling and Installing the CCL C library
+==========================================
 To download hte latest version of CCL:
 
 .. code-block:: bash
@@ -123,13 +122,9 @@ If you ever need to uninstall CCL, run the following from the :code:`build` dire
 
 You may need to prepend a :code:`sudo` if you installed CCL in a protected folder.
 
-
-
-
-
-
-Once the CLASS library is installed, `CCL` can be easily installed using an *autotools*-generated configuration file. To install `CCL`, from the base directory (the one where this file is located) run:
-
+Once the CLASS library is installed, `CCL` can be easily installed using an
+*autotools*-generated configuration file. To install `CCL`, from the base directory
+(the one where this file is located) run:
 
 Often admin privileges will be needed to install the library. If you have those just type:
 
@@ -222,37 +217,60 @@ the rest of the build process should be the same.
 Known Installation Issues
 =========================
 
-If upon running the C tests you get an error from CLASS saying it cannot find
-the file sBBN_2017.dat, it means that the CLASS parameter files are not properly
-installed on your system. Make sure you have indeed installed the C library by running:
+#. If upon running the C tests you get an error from CLASS saying it cannot find
+   the file ``sBBN_2017.dat``, it means that the CLASS parameter files are not properly
+   installed on your system. Make sure you have indeed installed the C library by running:
 
-.. code:: bash
+   .. code:: bash
 
-   $ make install
+      $ make install
 
-from the CCL/build directory.
+   from the ``CCL/build`` directory.
 
+#. If you are having issues with GSL versions linking, please try the following during the configuration step:
 
-1. If you are having issues with GSL versions linking, please try the following during the configuration step:
-````sh
-./configure CFLAGS="-I/usr/local/include" LDFLAGS="-L/usr/local/lib"
-````
-2. If you move or delete the source directory after installing CCL, some functions may fail. The source directory contains files needed by CLASS (which is contained within CCL) at run-time.
-3. If you are planning to compile your own file that calls CCL, then you should add the following to your .bashrc:
-````sh
-export LD_LIBRARY_PATH=/path/to/where/ccl/is/installed/lib:$LD_LIBRARY_PATH
-````
-4. In some Mac systems, the angpow installation script might fail on the first run with the message
-````sh
-CMake Error: The source directory "CCL/angpow" does not appear to contain CMakeLists.txt.
-Specify --help for usage, or press the help button on the CMake GUI.
-````
-If this happens, try running it a second time.
+   .. code:: bash
 
-5. In some Mac systems, depending on the XCode version of the C/C++ compiler, you can get a compilation error. For a proposed solution, see [here](https://github.com/LSSTDESC/CCL/issues/379#issuecomment-391456284).
+      ./configure CFLAGS="-I/usr/local/include" LDFLAGS="-L/usr/local/lib"
 
-6. If using a `sudo make install` for the C library and attempting to install the developer Python library, it may be necessary to include a `sudo` for your chosen Python installation.
+#. If you move or delete the source directory after installing CCL, some functions
+   may fail. The source directory contains files needed by CLASS (which is contained
+   within CCL) at run-time.
 
-7. If you are building CCL using a conda environment, be mindful of the known issues documented [here](https://github.com/LSSTDESC/CCL/issues/548).
+#. If you are planning to compile your own file that calls CCL, then you should
+   add the following to your ``.bashrc``:
 
-8. For some Mac installs, headers for homebrew have been moved, resulting in an error of `fatal error: 'stdio.h' file not found` while attempting to install CLASS. This can be resolved with the command: `sudo installer -pkg /Library/Developer/CommandLineTools/Packages/macOS_SDK_headers_for_macOS_10.14.pkg -target /`, which will install all the required headers into `/usr/include`.
+   .. code:: bash
+
+      $ export LD_LIBRARY_PATH=/path/to/where/ccl/is/installed/lib:$LD_LIBRARY_PATH
+
+#. In some Mac systems, the ``angpow`` installation script might fail on the first
+   run with the message
+
+   .. code:: bash
+
+      $ CMake Error: The source directory "CCL/angpow" does not appear to contain CMakeLists.txt.
+      $ Specify --help for usage, or press the help button on the CMake GUI.
+
+   If this happens, try running it a second time.
+
+#. In some Mac systems, depending on the XCode version of the C/C++ compiler,
+   you can get a compilation error. For a proposed solution,
+   see `here <https://github.com/LSSTDESC/CCL/issues/379#issuecomment-391456284>`_.
+
+#. If using a ``sudo make install`` for the C library and attempting to install the
+   developer Python library, it may be necessary to include a ``sudo``
+   for your chosen Python installation.
+
+#. If you are building CCL using a conda environment, be mindful of the known
+   issues documented `here <https://github.com/LSSTDESC/CCL/issues/548>`_.
+
+#. For some Mac OSX versions, the standard C headers are not in the usual spot, resulting in an
+   error of ``fatal error: 'stdio.h' file not found`` while attempting to install
+   CLASS. This can be resolved with the command:
+
+   .. code:: bash
+
+      $ sudo installer -pkg /Library/Developer/CommandLineTools/Packages/macOS_SDK_headers_for_macOS_10.14.pkg -target /
+
+   which will install all the required headers into ``/usr/include``.

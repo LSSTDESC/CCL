@@ -14,16 +14,18 @@ Submodules
    pyccl.correlation
    pyccl.errors
    pyccl.halomodel
+   pyccl.haloprofile
    pyccl.massfunction
    pyccl.neutrinos
+   pyccl.pk2d
    pyccl.power
    pyccl.pyutils
-   pyccl.redshifts
+   pyccl.tracers
 
 Module contents
 ---------------
 
 .. automodule:: pyccl
-    :members:
-    :undoc-members:
-    :show-inheritance:
+   :members:
+   :undoc-members:
+   :show-inheritance:

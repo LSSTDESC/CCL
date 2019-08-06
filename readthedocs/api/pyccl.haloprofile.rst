@@ -1,7 +1,7 @@
-pyccl.correlation module
+pyccl.haloprofile module
 ========================
 
-.. automodule:: pyccl.correlation
+.. automodule:: pyccl.haloprofile
    :members:
    :undoc-members:
    :show-inheritance:
