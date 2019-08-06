@@ -6,8 +6,6 @@
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_integration.h>
 
-#include <omp.h>
-
 #include "ccl.h"
 
 typedef struct{
@@ -157,7 +155,6 @@ void ccl_angular_cl_limber(ccl_cosmology *cosmo,
   size_t nevals;
 
   // make sure to init core things for safety
-  double t0 = omp_get_wtime();
   if (!cosmo->computed_distances) {
     ccl_cosmology_compute_distances(cosmo, status);
   }
@@ -175,7 +172,6 @@ void ccl_angular_cl_limber(ccl_cosmology *cosmo,
       *status = CCL_ERROR_INTEG;
     return;
   }
-  printf("dist+growth time: %f\n", omp_get_wtime() - t0);
 
   // Figure out which power spectrum to use
   ccl_f2d_t *psp_use;
