@@ -7,8 +7,8 @@ If you want to make changes to CCL, please follow the procedures listed here
 to make sure that they conform to our coding standards, and that all of the
 necessary files, wrappers etc. are properly updated.
 
-Developers should seek consensus with the CCL team as needed about new features 
-being incorporated (especially for API changes or additions). 
+Developers should seek consensus with the CCL team as needed about new features
+being incorporated (especially for API changes or additions).
 
 Reviewing a pull request (PR) on github
 ---------------------------------------
@@ -28,8 +28,7 @@ Reviewing a pull request (PR) on github
     implement appropriate unit tests for it.
  9. Make sure that the unit tests pass on Travis-CI.
  10. Make sure that the changes come with documentation, e.g. internally in the
-    C code and through Python docstrings, and that the doxygen documentation
-    has been regenerated. Make sure that example code in the `examples/`
+    C code and through Python docstrings. Make sure that example code in the `examples/`
     directory has been updated appropriately, and that the CCL note has been
     updated if necessary (including your affiliation and contribution in
     `authors.csv`).
@@ -41,7 +40,7 @@ Things to do if you are adding new features to the CCL C lib
  2. When adding a new source file (.c), put it in `src/`. The new file should be
     added to the `CCL_SRC` list in `CMakeLists.txt`.
  3. When adding a new header file (.h), put it in `include/`. It
-    should also have `doxygen`-compatible documentation strings.
+    should have documentation strings.
  4. When adding new unit test files, they should be listed under
     `TEST_SRC` in `CMakeLists.txt`.
  5. Any other new files that should be included with the library (e.g.
@@ -62,13 +61,8 @@ Notes on CMake:
      $ cmake ..
      $ make install
      ```
- - Once the library is compiled and installed, all unit tests are run by
+ - Once the library is compiled and installed, all C unit tests are run by
    typing `check_ccl` from the root CCL folder.
-
-To view the doxygen documentation, open any .html file in the `html/`
-directory. To refresh the docs to reflect new changes, run
-`doxygen doxygen/Doxyfile` in the directory `doc` (assuming you already have
-it installed).
 
 Adding new benchmarks
 ---------------------------------------------------------

@@ -22,7 +22,6 @@ Installation instructions can be found in [INSTALL.md](https://github.com/LSSTDE
 * in our [wiki](https://github.com/LSSTDESC/CCL/wiki) for a description of benchmarks and known installation issues,
 * in the `CCL` [readthedocs page](https://readthedocs.org/projects/ccl/) for the `python` routines,  
 * by calling `help(function name)` from within `python`, and
-* in the doxygen docs contained in the `doc` folder within the repository for the C routines.
 * There are also multiple examples in C, python and jupyter notebooks available in the `examples` folder.
 
 ## TLDR
@@ -286,7 +285,7 @@ This Dockerfile currently contains all installed C libraries and the Python wrap
 
 # Documentation
 
-`CCL` has basic [doxygen](http://www.stack.nl/~dimitri/doxygen/) documentation for its C routines. This can be found in the directory ***doc/html*** within the `CCL` repository by opening the ***index.html*** file in your browser. The python routines are documented in situ; you can view the documentation for a function by calling `help(function name)` from within `python`.
+ The python routines are documented in situ; you can view the documentation for a function by calling `help(function name)` from within `python`.
 
 This document contains basic information about used structures and functions. At the end of document is provided code which implements these basic functions (also in ***examples/ccl_sample_run.c***). More information about `CCL` functions and implementation can be found in ***doc/0000-ccl_note/0000-ccl_note.pdf***.
 
@@ -662,7 +661,7 @@ print(cls)
 For known installation issues and further information on how CCL was benchmarked during development, see our [wiki](https://github.com/LSSTDESC/CCL/wiki).
 
 # License, Credits, Feedback etc
-This code has been released by DESC, although it is still under active development. It is accompanied by a journal paper that describes the development and validation of `CCL`, which you can find on the  arxiv:[1812.05995](https://arxiv.org/abs/1812.05995). If you make use of the ideas or software here, please cite that paper and provide a link to this repository: https://github.com/LSSTDESC/CCL. You are welcome to re-use the code, which is open source and available under terms consistent with our [LICENSE](https://github.com/LSSTDESC/CCL/blob/master/LICENSE), which is a [BSD 3-Clause](https://opensource.org/licenses/BSD-3-Clause) license. 
+This code has been released by DESC, although it is still under active development. It is accompanied by a journal paper that describes the development and validation of `CCL`, which you can find on the  arxiv:[1812.05995](https://arxiv.org/abs/1812.05995). If you make use of the ideas or software here, please cite that paper and provide a link to this repository: https://github.com/LSSTDESC/CCL. You are welcome to re-use the code, which is open source and available under terms consistent with our [LICENSE](https://github.com/LSSTDESC/CCL/blob/master/LICENSE), which is a [BSD 3-Clause](https://opensource.org/licenses/BSD-3-Clause) license.
 
 External contributors and DESC members wishing to use CCL for non-DESC projects should consult with the TJP working group conveners, ideally before the work has started, but definitely before any publication or posting of the work to the arXiv.
 
