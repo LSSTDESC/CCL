@@ -14,7 +14,6 @@ from .errors import CCLError
 #define SWIG_FILE_WITH_INIT
 /* must include the file explicitly */
 #include "../include/ccl.h"
-#include <omp.h>
 %}
 
 // Enable numpy array support and Python exception handling
@@ -23,7 +22,6 @@ from .errors import CCLError
     import_array();
     // Tell CCL to not print to stdout/stderr for debugging.
     ccl_set_debug_policy(CCL_DEBUG_MODE_OFF);
-    omp_set_nested(1);
 %}
 
 // Automatically document arguments and output types of all functions
