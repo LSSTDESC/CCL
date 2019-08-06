@@ -727,19 +727,19 @@ class Cosmology(object):
         """Compute the distance splines."""
         status = 0
         status = lib.cosmology_compute_distances(self.cosmo, status)
-        check(status, self.cosmo)
+        check(status, self)
 
     def compute_growth(self):
         """Compute the growth function."""
         status = 0
         status = lib.cosmology_compute_growth(self.cosmo, status)
-        check(status, self.cosmo)
+        check(status, self)
 
     def compute_power(self):
         """Compute the power spectrum."""
         status = 0
         status = lib.cosmology_compute_power(self.cosmo, status)
-        check(status, self.cosmo)
+        check(status, self)
 
     def has_distances(self):
         """Checks if the distances have been precomputed.

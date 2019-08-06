@@ -6,6 +6,8 @@
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_integration.h>
 
+#include <omp.h>
+
 #include "ccl.h"
 
 typedef struct{
@@ -138,11 +140,11 @@ static double cl_integrand(double lk, void *params) {
 }
 
 void ccl_angular_cl_limber(ccl_cosmology *cosmo,
-                             ccl_cl_tracer_collection_t *trc1,
-                             ccl_cl_tracer_collection_t *trc2,
-                             ccl_f2d_t *psp,
-                             int nl_out, double *l_out, double *cl_out,
-                             int *status) {
+                           ccl_cl_tracer_collection_t *trc1,
+                           ccl_cl_tracer_collection_t *trc2,
+                           ccl_f2d_t *psp,
+                           int nl_out, double *l_out, double *cl_out,
+                           int *status) {
   int local_status;
   int clastatus, lind;
   integ_cl_par ipar;
@@ -154,15 +156,38 @@ void ccl_angular_cl_limber(ccl_cosmology *cosmo,
   gsl_integration_cquad_workspace *w_cquad;
   size_t nevals;
 
+  // make sure to init core things for safety
+  double t0 = omp_get_wtime();
+  if (!cosmo->computed_distances) {
+    ccl_cosmology_compute_distances(cosmo, status);
+  }
+  if (!cosmo->computed_distances) {
+    if (*status == 0)
+      *status = CCL_ERROR_INTEG;
+    return;
+  }
+
+  if (!cosmo->computed_growth) {
+    ccl_cosmology_compute_growth(cosmo, status);
+  }
+  if (!cosmo->computed_growth) {
+    if (*status == 0)
+      *status = CCL_ERROR_INTEG;
+    return;
+  }
+  printf("dist+growth time: %f\n", omp_get_wtime() - t0);
+
   // Figure out which power spectrum to use
   ccl_f2d_t *psp_use;
   if (psp == NULL) {
-    if (!cosmo->computed_power)
+    if (!cosmo->computed_power) {
       ccl_cosmology_compute_power(cosmo, status);
-
-    // Return if computation failed
-    if (!cosmo->computed_power)
+    }
+    if (!cosmo->computed_power) {
+      if (*status == 0)
+        *status = CCL_ERROR_INTEG;
       return;
+    }
     psp_use = cosmo->data.p_nl;
   }
   else
@@ -171,13 +196,13 @@ void ccl_angular_cl_limber(ccl_cosmology *cosmo,
   #pragma omp parallel private(lind, clastatus, ipar, lkmin, lkmax, result, \
                                eresult, gslstatus, w, w_cquad, nevals, l, F, \
                                local_status) \
-                       shared(cosmo, psp_use, trc1, trc2, l_out, cl_out, \
-                              nl_out, status) \
+                       shared(cosmo, trc1, trc2, l_out, cl_out, \
+                              nl_out, status, psp_use) \
                        default(none)
   {
-    local_status = *status;
     w_cquad = NULL;
     w = NULL;
+    local_status = *status;
 
     if (local_status == 0) {
       w = gsl_integration_workspace_alloc(cosmo->gsl_params.N_ITERATION);
@@ -197,7 +222,7 @@ void ccl_angular_cl_limber(ccl_cosmology *cosmo,
       F.params = &ipar;
     }
 
-    #pragma omp for nowait
+    #pragma omp for
     for (lind=0; lind < nl_out; ++lind) {
       if (local_status == 0) {
         l = l_out[lind];

@@ -146,7 +146,7 @@ static int emuInit() {
 
 // Actual emulation
 void ccl_pkemu(double *xstar, int sizeofystar, double *ystar, int* status, ccl_cosmology* cosmo) {
-  #pragma omp single
+  #pragma omp master
   {
     static double inited=0;
     int ee, i, j, k;
@@ -347,4 +347,5 @@ void ccl_pkemu(double *xstar, int sizeofystar, double *ystar, int* status, ccl_c
 
     gsl_spline_free(zinterp);
   }
+  #pragma omp flush
 }

@@ -96,6 +96,9 @@ if ((NOT "${CMAKE_C_COMPILER_ID}" MATCHES "^(Apple)?Clang$") OR FORCE_OPENMP)
     # When not using Clang and in Release mode, enabling OpenMP support
     set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -fopenmp")
     set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -fopenmp")
+    if(DEFINED ENV{CONDA_PREFIX})
+        include_directories("$ENV{CONDA_PREFIX}/include")
+    endif()
 endif()
 
 # Define include and library directories for external dependencies
