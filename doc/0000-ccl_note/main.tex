@@ -21,20 +21,31 @@
 \newcommand{\ccl}{{\tt CCL}\xspace}
 \newcommand{\CC}{C\nolinebreak\hspace{-.05em}\raisebox{.3ex}{\footnotesize +}\nolinebreak\hspace{-.10em}\raisebox{.3ex}{\footnotesize +}}
 
-%This is a paper and note template for the LSST DESC \citep{Overview,ScienceBook,WhitePaper}.
-%Eventually it will be possible to switch between various \LaTeX\xspace styles for internal notes and peer reviewed journals templates.
-%The base switch is between \code{aastex.cls} and \code{revtex.cls}; however, facilities are also provided for \code{emulateapj.cls} and \code{mnras.cls}.\footnote{The \code{mnras.cls} class file is a bit odd...}
-%Documents can be compiled using the provided \code{Makefile} with several options: \code{make apj}, \code{make apjl}, \code{make prd}, and \code{make mnras}.
-%There are some oddities when changing between templates, so please be patient while we try to work these out.
+%This is a paper and note template for the LSST DESC
+%\citep{Overview,ScienceBook,WhitePaper}. Eventually it will be possible to
+%switch between various \LaTeX\xspace styles for internal notes and peer
+%reviewed journals templates. The base switch is between \code{aastex.cls} and
+%\code{revtex.cls}; however, facilities are also provided for
+%\code{emulateapj.cls} and \code{mnras.cls}.\footnote{The \code{mnras.cls} class
+%file is a bit odd...} Documents can be compiled using the provided
+%\code{Makefile} with several options: \code{make apj}, \code{make apjl},
+%\code{make prd}, and \code{make mnras}. There are some oddities when changing
+%between templates, so please be patient while we try to work these out.
 
-%There are a number of useful \LaTeX\xspace commands predefined in \code{macros.tex}.
-%Notice that the section labels are prefixed with \code{sec:} to allow the use of the \verb=\secref= command to reference a section (\ie, \secref{intro}).
-%Figures can be referenced with the \verb=\figref= command, which assumes that the figure label is prefixed with \code{fig:}.
-%In \figref{example} we show an example figure.
-%You'll notice that the actual figure file is found in the \code{figures} directory.
-%However, because we have specified this directory in our \verb=\graphicspath= we do not need to explicitly specify the path to the image.
+%There are a number of useful \LaTeX\xspace commands predefined in
+%\code{macros.tex}. Notice that the section labels are prefixed with \code{sec:}
+%to allow the use of the \verb=\secref= command to reference a section (\ie,
+%\secref{intro}). Figures can be referenced with the \verb=\figref= command,
+%which assumes that the figure label is prefixed with \code{fig:}. In
+%\figref{example} we show an example figure. You'll notice that the actual
+%figure file is found in the \code{figures} directory. However, because we have
+%specified this directory in our \verb=\graphicspath= we do not need to
+%explicitly specify the path to the image.
 
-%The \code{macros.tex} package also contains some conventional scientific units like \angstrom, \GeV, \Msun, etc. and some editorial tools for highlighting \FIXME{issues}, \CHECK{text to be checked}, \COMMENT{comments}, and \NEW{new additions}.
+%The \code{macros.tex} package also contains some conventional scientific units
+%like \angstrom, \GeV, \Msun, etc. and some editorial tools for highlighting
+%\FIXME{issues}, \CHECK{text to be checked}, \COMMENT{comments}, and \NEW{new
+%additions}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%
 %% Start the Document %%
@@ -48,7 +59,16 @@
 
 \begin{abstract}
 
-The Core Cosmology Library (\ccl) provides routines to compute basic cosmological observables with validated numerical accuracy. These routines have been validated to an accuracy level, documented here, against the results of independent implementations. In the current version, predictions are provided for distances and background quantities, angular auto- and cross-spectra of cosmic shear, galaxy-galaxy lensing, intrinsic alignments and clustering, halo bias and the halo mass function. \ccl uses different schemes to obtain the matter power spectrum, including analytical, phenomenological and other schemes calibrated through simulations. \ccl is written in C, with a Python interface. In this note, we explain the functionality of the publicly released (\ccl v1.0.0) library.
+The Core Cosmology Library (\ccl) provides routines to compute basic
+cosmological observables with validated numerical accuracy. These routines have
+been validated to an accuracy level, documented here, against the results of
+independent implementations. In the current version, predictions are provided
+for distances and background quantities, angular auto- and cross-spectra of
+cosmic shear, galaxy-galaxy lensing, intrinsic alignments and clustering, halo
+bias and the halo mass function. \ccl uses different schemes to obtain the
+matter power spectrum, including analytical, phenomenological and other schemes
+calibrated through simulations. \ccl is written in C, with a Python interface.
+In this note, we explain the functionality of the \ccl library.
 
 \end{abstract}
 
@@ -64,237 +84,43 @@ The Core Cosmology Library (\ccl) provides routines to compute basic cosmologica
 \section{Introduction}
 \label{sec:intro}
 
-In preparation for constraining cosmology with the Large Synoptic Survey Telescope (LSST), it is necessary to be able to produce rigorous theoretical predictions for the cosmological quantities that will be measured. The Core Cosmology Library\footnote{\url{https://github.com/LSSTDESC/CCL}} (\ccl) aims to provide, in one library, a way of making predictions that are validated to a well-documented numerical accuracy, for the purpose of constraining cosmology with LSST. By constructing a cosmology library specifically with LSST in mind, it is possible to ensure that it is flexible, adaptable, and validated for all cases of interest, as well as user-friendly and appropriate for the needs of all working groups.
-
-The Core Cosmology Library is written in C and incorporates the {\tt CLASS} code \citep{class} to provide predictions for the matter power spectrum. It also incorporates emulated power spectra from the cosmic emulator of \citet{Lawrence17}.\footnote{Future versions of the library will incorporate other power-spectrum libraries and methods.} A Python wrapper is also provided for ease of use.
-
-This note describes how to install \ccl (Section \ref{sec:install}), how \ccl is documented (Section \ref{sec:doc}), its functionality (Section \ref{sec:func}), the relevant unit tests (Section \ref{sec:tests}), directions for finding a \ccl example (Section \ref{sec:example}) in C, a Python example and technical details on the Python wrapper (Section \ref{sec:python:example}), details on the Python implementation (Section \ref{sec:python:technical}), future plans (Section \ref{sec:future}), means to contact the developers (Section \ref{sec:feedback}), instructions on how to cite \ccl (and {\tt CLASS}, Section \ref{sec:cite}), and the license under which \ccl is released (Section \ref{sec:license}).
-
-
-\section{Installation}
-\label{sec:install}
-
-\subsection{General installation}
-
-\ccl is available as a Python package through PyPi. To install, simply run:
-\begin{verbatim}
-$ pip install pyccl
-\end{verbatim}
-This should work as long as {\tt CMake} is installed on your system (if it isn't, follow the detailed instructions below).
-
-\ccl comes in two forms: a C library and a Python module. These components can be installed independently of each other, instructions are provided below.
-
-{\bf For developers: Note that the installation procedure for development workflow is different than stated here. Detailed instructions are provided in the {\tt README.md} file in the main \ccl directory.}
-
-\subsection{Dependencies}
-
-\ccl requires the following software and libraries
-
-\begin{itemize}
-\item GNU Scientific Library {\tt GSL},\footnote{\url{https://www.gnu.org/software/gsl/}} {\tt GSL-2.1} or higher.
-\item {\tt FFTW3}\footnote{\url{http://www.fftw.org}} version 3.1 or above is required for computation of correlation functions.
-\item {\tt FFTlog}\footnote{\url{http://casa.colorado.edu/~ajsh/FFTLog/} and \url{https://github.com/slosar/FFTLog}} is provided within \ccl, with minor modifications.
-\item The C library associated to the {\tt CLASS} code. (Note that, if you want to use your own version of {\tt CLASS}, you should follow the steps described in Section \ref{sec:extclass} below.)
-  \item {\tt Angpow} \citep{2017arXiv170103592C} for fast computation of angular power spectra beyond the Limber approximation\footnote{\url{https://gitlab.in2p3.fr/campagne/AngPow}}.
-\end{itemize}
-
-In addition, the build system for \ccl requires
-\begin{itemize}
-\item The {\tt SWIG}\footnote{\url{http://www.swig.org/}} Python wrapper.
-\item {\tt CMake}\footnote{\url{https://cmake.org/}} version 3.2 or above. This is the only requirement that needs to be manually installed (sew below).
-\end{itemize}
-
-\subsection{Installing the dependencies}
-
-It is preferable to install {\tt GSL} and {\tt FFTW} on your system before building \ccl, but only necessary if you want to properly install the C library, otherwise {\tt CMake} will automatically download and build the missing requirements in order to compile \ccl.
-
-For {\tt CMake}, you can follow this set of instructions. On Ubuntu:
-\begin{verbatim}
-  $ sudo apt-get install cmake
-\end{verbatim}
- On MacOs X:
-\begin{itemize}
- \item Install using a {\tt DMG} package from this download page: \url{https://cmake.org/download/}.
- \item Or install using a package manager (e.g., {\tt brew}\footnote{\url{https://brew.sh/}}), MacPorts\footnote{\url{https://www.macports.org/}}, Fink\footnote{\url{http://www.finkproject.org/}}). For instance, with brew:
-\begin{verbatim}
-$ brew install cmake
-\end{verbatim}
-\end{itemize}
-
-To install all the dependencies at once, and avoid having {\tt CMake} recompiling them, for instance on Ubuntu:
-\begin{verbatim}
-$ sudo apt-get install cmake swig libgsl-dev libfftw3-dev
-\end{verbatim}
-
-\subsection{Compile and install the C library}
-
-To download the latest version of \ccl:
-\begin{verbatim}
-$ git clone https://github.com/LSSTDESC/CCL.git
-$ cd CCL
-\end{verbatim}
-or download and extract the latest stable release from \url{https://github.com/LSSTDESC/CCL/releases}. Then, from the base \ccl directory run:
-\begin{verbatim}
-$ mkdir build && cd build
-$ cmake ..
-\end{verbatim}
-This will run the configuration script, try to detect the required dependencies
-on your machine and generate a Makefile. Once CMake has been configured, to build
-and install the library simply run for the {\tt build} directory:
-\begin{verbatim}
-$ make
-$ make install
-\end{verbatim}
-Often admin privileges will be needed to install the library. If you have those just type:
-\begin{verbatim}
-$ sudo make install
-\end{verbatim}
-
-{\bf Note:} This is the default install procedure, but depending on your system
-you might want to customize the install process. Here are a few common configuration
-options:
-\begin{itemize}
-  \item {\bf C compiler}: In case you have several C compilers on your machine, you will probably
-need to specify which one to use to {\tt CMake} by setting the environment {\tt CC} like
-so, **before** running {\tt CMake}:
-\begin{verbatim}
-$ export CC=gcc
-\end{verbatim}
-  \item {\bf Install directory}: By default, {\tt CMake} will try to install \ccl in {\tt /usr/local}, if you would like to instead install \ccl in a user-defined directory (for instance if you don't have
- admin privileges), you can specify it to {\tt CMake} by running instead the following command:
-\begin{verbatim}
-$ cmake -DCMAKE_INSTALL_PREFIX=/path/to/install ..
-\end{verbatim}
-This will instruct {\tt CMake} to install \ccl in the following folders: {\tt /path/to/install/include},{\tt /path/to/install/share},{\tt /path/to/install/lib}.
-\end{itemize}
-
-Depending on where you install \ccl your might need to add the installation path
-to your to your {\tt PATH} and {\tt LD\_LIBRARY\_PATH} environment variables. In the default
-case, it will look like:
-\begin{verbatim}
-$ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
-$ export PATH=$PATH:/usr/local/bin
-\end{verbatim}
-
-To make sure that everything is working properly, you can run all unit tests after installation by running \textbf{from the root \ccl directory}:
-\begin{verbatim}
-$ ./build/check_ccl
-\end{verbatim}
-Assuming that the tests pass, you have successfully installed \ccl!
-
-If you ever need to uninstall \ccl, run the following from the {\tt build} directory:
-\begin{verbatim}
-$ make uninstall
-\end{verbatim}
-You may need to prepend a {\tt sudo} if you installed \ccl in a protected folder.
-
-\begin{comment}
-\subsection{C++ compatibility}
-
-\ccl library can be called from C++ code without any additional requirements or modifications.
-To make sure that there are no problems you can run:
-\begin{verbatim}
-$ make check-cpp
-$ ./examples/ccl_sample_run
-\end{verbatim}
-\end{comment}
-
-
-\subsection{Install the pyccl Python module}
-
-\ccl also comes with a Python wrapper, called {\tt pyccl}, which can be built and
-installed regardless of whether you install the C library. For convenience, we
-provide a PyPi hosted package which can be installed simply by running:
-\begin{verbatim}
-$ pip install pyccl
-\end{verbatim}
-(Append {\tt --user} for single user install.)
-This only assumes that {\tt CMake} is available on your system, you don't need to
-download the source yourself.
-
-You can also build and install {\tt pyccl} from the \ccl source, again {\bf without necessarily
-installing the C library}. Download the latest version of \ccl:
-\begin{verbatim}
-$ git clone https://github.com/LSSTDESC/CCL.git
-$ cd CCL
-\end{verbatim}
-or download and extract the latest stable release from \url{https://github.com/LSSTDESC/CCL/releases}. And from the root \ccl folder, simply run:
-\begin{verbatim}
-$ python setup.py install # append --user for single user install
-\end{verbatim}
-
-The {\tt pyccl} module will be installed into a sensible location in your {\tt PYTHONPATH},
-and so should be picked up automatically by your Python interpreter. You can then simply
-import the module using {\tt import pyccl}.
-
-You can quickly check whether {\tt pyccl} has been installed correctly by running
-{\tt python -c "import pyccl"} and checking that no errors are returned.
-
-For a more in-depth test to make sure everything is working, run from the root
-\ccl directory:
-\begin{verbatim}
-$ python setup.py test
-\end{verbatim}
-This will run the embedded unit tests (may take a few minutes).
-
-Whatever the install method, you can always uninstall the pyton wrapper by running:
-\begin{verbatim}
-$ pip uninstall pyccl
-\end{verbatim}
-
-For quick introduction to \ccl in Python, take a look at notebooks in {\tt examples/}.
-
-\subsection{Known installation issues}
-
-In case you have several C compilers on your system, {\tt CMake} may not default
-to the one you want to use. You can specify which C compiler will be used to compile \ccl by setting the {\tt CC} environment variable {\bf before} calling any {\tt cmake} or {\tt python setup.py} commands:
-\begin{verbatim}
-$ export CC=gcc
-\end{verbatim}
-
-If upon running the C tests you get an error from {\tt CLASS} saying it cannot find the file {\tt sBBN\_2017.dat}, it means that the {\tt CLASS} parameter files are not properly installed on your system. Make sure you have indeed installed the C library by running:
-\begin{verbatim}
-$ make install
-\end{verbatim}
-from the  {\tt CCL/build} directory.
-
-Other known installation issues are documented in the \ccl wiki within the repository.
-
-\subsection{Compiling against an external version of CLASS}
-\label{sec:extclass}
-
-The default installation procedure for \ccl implies automatically downloading and installing a tagged version of {\tt CLASS}. Optionally, you can also link \ccl against a different version of {\tt CLASS}. This is useful if you want to use a modified version of {\tt CLASS}, or a different or more up-to-date version of the standard {\tt CLASS}.
-
-To compile \ccl with an external version of {\tt CLASS}, just run the following {\tt CMake} command at the first configuration step of the install (from the {\tt build} directory, make sure it is empty to get a clean configuration):
-\begin{verbatim}
-$ cmake -DEXTERNAL_CLASS_PATH=/path/to/class ..
-\end{verbatim}
-the rest of the build process should be the same.
-
-
-\subsection{Creating a Docker Image}
-
-The Dockerfile to generate a Docker image is included in the \ccl repository as Dockerfile. This can be used to create an image that Docker can spool up as a virtual machine, allowing you to utilize \ccl on any infrastructure with minimal hassle. The details of Docker and the installation process can be found at \url{https://www.docker.com/}. Once Docker is installed, it is a simple process to create an image. In a terminal of your choosing (with Docker running), type the command {\tt docker build -t ccl .} in the \ccl directory.
-
-The resulting Docker image has two primary functionalities. The first is a CMD that will open Jupyter notebook tied to a port on your local machine. This can be used with the following run command: {\tt docker run -p 8888:8888 ccl}. You can then access the notebook in the browser of your choice at {\tt localhost:8888}. The second is to access the bash itself, which can be done using {\tt docker run -it ccl bash}.
-
-This Dockerfile currently contains all installed C libraries and the Python wrapper. It currently uses continuumio/anaconda as the base image and supports ipython and Jupyter notebook. There should be minimal slowdown due to the virtualization.
-
-\section{Documentation}
-\label{sec:doc}
-
-\ccl has basic {\tt doxygen}\footnote{\url{http://www.stack.nl/~dimitri/doxygen/}} documentation for its C routines. This can be found in the directory {\tt doc/html} within the \ccl repository by opening the {\tt index.html} file in your browser. The {\tt python} routines are documented in situ; you can view the documentation for a function by calling {\tt help(function\_name)} from within {\tt python}. A Readthedocs interface is also available, where you can browse the documentation, at: \url{https://readthedocs.org/projects/ccl/}.
+In preparation for constraining cosmology with the Large Synoptic Survey
+Telescope (LSST), it is necessary to be able to produce rigorous theoretical
+predictions for the cosmological quantities that will be measured. The Core
+Cosmology Library\footnote{\url{https://github.com/LSSTDESC/CCL}} (\ccl) aims to
+provide, in one library, a way of making predictions that are validated to a
+well-documented numerical accuracy, for the purpose of constraining cosmology
+with LSST. By constructing a cosmology library specifically with LSST in mind,
+it is possible to ensure that it is flexible, adaptable, and validated for all
+cases of interest, as well as user-friendly and appropriate for the needs of all
+working groups. This note describes the underlying equations and conventions
+of the CCL library. See the GitHub repository for installation and usage instructions.
 
 \section{Functionality}
 \label{sec:func}
 
 \subsection{Physical constants}
 \label{sec:constants}
-We have performed a comparison of the physical constants used in \ccl and included dependencies and external sources. See Table \ref{tab:constants} for absolute fractional differences of the constants between these sources. Our final choice of constants for \ccl mainly relies on CODATA 2014 \citep{CODATA14} in as much as possible, except for ${\rm M}_\odot$, where we adopt the IAU 2015 value \citep{IAU15}, and for the conversion between parsec and meters, where we take the PDG 2013\footnote{\url{http://pdg.lbl.gov/2013/}} value. Notice that NIST\footnote{\url{https://physics.nist.gov/cuu/Constants/index.html}} adopts the CODATA 2014 values.
+We have performed a comparison of the physical constants used in \ccl and
+included dependencies and external sources. See Table \ref{tab:constants} for
+absolute fractional differences of the constants between these sources. Our
+final choice of constants for \ccl mainly relies on CODATA 2014 \citep{CODATA14}
+in as much as possible, except for ${\rm M}_\odot$, where we adopt the IAU 2015
+value \citep{IAU15}, and for the conversion between parsec and meters, where we
+take the PDG 2013\footnote{\url{http://pdg.lbl.gov/2013/}} value. Notice that
+NIST\footnote{\url{https://physics.nist.gov/cuu/Constants/index.html}} adopts
+the CODATA 2014 values.
 
-Notice there are some inconsistencies with the constants adopted by {\tt CLASS}. This includes the value of the gravitational constant, the Boltzmann constant, the Planck constant, the speed of light, and the electron charge. Also, the value of $\rho_c$ is derived from other constants, while PDG 2013 fixes it to a given value (this is the reason there is only one entry for that column).
+Notice there are some inconsistencies with the constants adopted by {\tt CLASS}.
+This includes the value of the gravitational constant, the Boltzmann constant,
+the Planck constant, the speed of light, and the electron charge. Also, the
+value of $\rho_c$ is derived from other constants, while PDG 2013 fixes it to a
+given value (this is the reason there is only one entry for that column).
 
-After comparison between the physical constants used in \ccl and those of the sources mentioned above, we have found better than $0.01\%$ agreement for all constants of interest except for the gravitational constant and the value of the solar mass.
+After comparison between the physical constants used in \ccl and those of the
+sources mentioned above, we have found better than $0.01\%$ agreement for all
+constants of interest except for the gravitational constant and the value of the
+solar mass.
 
 \input{table_constants}
 
@@ -302,13 +128,15 @@ After comparison between the physical constants used in \ccl and those of the so
 \subsection{Supported cosmological models}
 
 \label{sec:cosmologies}
-Ultimately, \ccl plans to incorporate theoretical predictions for all cosmological models of interest to LSST. Currently, the following families of models are supported:
+Ultimately, \ccl plans to incorporate theoretical predictions for all
+cosmological models of interest to LSST. Currently, the following families of
+models are supported:
 \begin{itemize}
- \item Flat $\Lambda$CDM
- \item wCDM and the CPL model ($w_0+w_a$, \citealt{Chevallier01} and \citealt{Linder03})
- \item Non-zero curvature ($K$)
- \item All of the above, plus an arbitrary, user-defined modified growth function (see description in Section \ref{sec:growth})
-  \item Massive neutrinos, in combination with any of the above.
+    \item Flat $\Lambda$CDM
+    \item wCDM and the CPL model ($w_0+w_a$, \citealt{Chevallier01} and \citealt{Linder03})
+    \item Non-zero curvature ($K$)
+    \item All of the above, plus an arbitrary, user-defined modified growth function (see description in Section \ref{sec:growth})
+    \item Massive neutrinos, in combination with any of the above.
 \end{itemize}
 
 \ccl also provides support for modeling the impact of baryons on the matter power spectrum, as described in Sec. \ref{ss:baryons}.
@@ -468,7 +296,7 @@ Note that the above is strictly valid for a Universe containing only dust-like m
 
 Currently, \ccl allows for two version of alternative `modified gravity' cosmological models. The first is defined by a regular background $(w_0+w_a)$CDM (with arbitrary $K$) as well as a user-defined $\Delta f(a)$, such that the true growth rate in this model is given by $f(a)=f_0(a)+\Delta f(a)$, where $f_0(a)$ is the growth rate in the background model. Note that this implementation of `modified gravity' is only consistently implemented with regards to the computation of the linear growth factor and growth rates (which will also scale the linear power spectrum). All other \ccl functions (including the non-linear power spectrum) will ignore these modifications. This model, and the interpretation of the predictions given by \ccl, should therefore be used with care.
 
-The second model for deviations from General Relativity supported by \ccl is the quasistatic parameterization, with parameterizing functions $\mu(a)$ (the change to the Poisson equation for massive particles) and $\Sigma(a)$ (the change to the same for massless particles), with functional form assumed to be given as in equation \ref{muSigform}. The background is once again allowed to be defined by $(w_0+w_a)$CDM (with arbitrary $K$). 
+The second model for deviations from General Relativity supported by \ccl is the quasistatic parameterization, with parameterizing functions $\mu(a)$ (the change to the Poisson equation for massive particles) and $\Sigma(a)$ (the change to the same for massless particles), with functional form assumed to be given as in equation \ref{muSigform}. The background is once again allowed to be defined by $(w_0+w_a)$CDM (with arbitrary $K$).
 
 The growth factor and growth rate are altered when ${\tt mu\_0} \ne 0$, with the above equation becoming
 \begin{equation}
@@ -553,7 +381,7 @@ The allowed range of cosmological parameters is as follows:
 Actually, $w_a$ and $w_0$ are constrained jointly to be $0.3\leq (-w_0-w_a)^{1/4}$. Note that \ccl
 only allows a subregion within this parameter space. For models in which w(z) crosses $-1$ at some
 given redshift, {\tt CLASS} will crash because this value corresponds to a true cosmological
-constant, which by definition should have no perturbations.\footnote{We thank Emilio Bellini and 
+constant, which by definition should have no perturbations.\footnote{We thank Emilio Bellini and
 Miguel Zumalac\'arregui for clarifying this for us.}
 
 \paragraph{Neutrino species} The emulator is set up to consider $N_{\rm eff}=3.04$ and to allow the user to provide $\Omega_\nu h^2$ in order to set the neutrino mass, where it is assumed that the corresponding mass is split equally amongst three neutrinos. This is different from the standard {\tt CCL} configuration, which takes as input the mass(es) of neutrinos in eV, $m_{\nu}$. The assumption of an equal split of masses amongst three neutrino species is also different from the default \ccl choice to split the mass amongst species according to the normal hierarchy. For best compatibility with the emulator, we therefore include a {\tt ccl$\_$configuration} element {\tt emulator$\_$neutrinos$\_$method}, which defaults to {\tt ccl$\_$strict} but can be set to {\tt ccl$\_$equalize} if desired:
@@ -591,58 +419,10 @@ For each power spectrum calculation method above, we first compute the power spe
 P(k,z) = \left(\frac{D^{\mu}(z)}{D^{\rm GR}(z)}\right)^2 P^{\rm GR}(k,z).
 \label{Pkmu}
 \end{equation}
-We then set up splines for the power spectrum as usual. 
+We then set up splines for the power spectrum as usual.
 
-Note that the $\mu, \Sigma$ quasistatic parameterization of deviations from GR is technically only valid in the linear regime and at sub-horizon scales. We allow the user to do this re-scaling for the non-linear power spectrum, but issue a warning. Computing the matter power spectrum under this paramterisation of modified gravity will not produce physically meaningful results on very large or small scales. 
+Note that the $\mu, \Sigma$ quasistatic parameterization of deviations from GR is technically only valid in the linear regime and at sub-horizon scales. We allow the user to do this re-scaling for the non-linear power spectrum, but issue a warning. Computing the matter power spectrum under this paramterisation of modified gravity will not produce physically meaningful results on very large or small scales.
 
-\subsubsection{Spline parameters}
-
-All spline and grid parameters relevant for computing quantities such as distances, growth functions, power spectra, and halo mass functions can be set by assigning values to the members of the {\tt spline$\_$params} structure in each {\tt ccl$\_$cosmology} structure.
-The user can configure the following constants:
-
-\begin{itemize}
-\item {\tt A$\_$SPLINE$\_$NLOG}: number of points in the logarithmic part of the scale factor spline. The default is {\tt A$\_$SPLINE$\_$NLOG}$=250$.
-\item {\tt A$\_$SPLINE$\_$NA}: number of points in the linear part of the scale factor spline. The default is {\tt A$\_$SPLINE$\_$NA}$=250$.
-\item {\tt A$\_$SPLINE$\_$MINLOG}: minimum value for the scale factor spline. The default is {\tt A$\_$SPLINE$\_$MINLOG}$=0.0001$. This only applies to background quantities.
-\item {\tt A$\_$SPLINE$\_$MIN}: maximum value for the logarithmic part and minimum value for the linear part of the scale factor spline. The default is {\tt A$\_$SPLINE$\_$MIN}$=0.01$. This only applies to background quantities.
-\item {\tt A$\_$SPLINE$\_$MAX}: maximum value for the scale factor spline. The default is {\tt A$\_$SPLINE$\_$MAX}$=1$.
-\item {\tt LOGM$\_$SPLINE$\_$DELTA}: spacing of the mass function spline (logarithm). The default is {\tt LOGM$\_$SPLINE$\_$DELTA}$=0.025$.
-\item {\tt LOGM$\_$SPLINE$\_$NM}: number of points in the mass function spline (logarithm). The default is {\tt LOGM$\_$SPLINE$\_$NA}$=440$.
-\item {\tt LOGM$\_$SPLINE$\_$MIN}: minimum value for the mass function spline (logarithm). The default is {\tt LOGM$\_$SPLINE$\_$MIN}$=6$.
-\item {\tt LOGM$\_$SPLINE$\_$MAX}: maximum value for the mass function spline (logarithm). The default is {\tt LOGM$\_$SPLINE$\_$MAX}$=17$.
-\item {\tt A$\_$SPLINE$\_$NLOG$\_$PK}: number of bins for the logarithmic part of the scale factor in the case of two-dimensional splines (where the second variable is the wavenumber). The default is {\tt A$\_$SPLINE$\_$NLOG$\_$PK}$=11$.
-\item {\tt A$\_$SPLINE$\_$NA$\_$PK}: number of bins for the linear part of the scale factor in the case of two-dimensional splines (where the second variable is the wavenumber). The default is {\tt A$\_$SPLINE$\_$NA$\_$PK}$=40$. In the case of the emulator's nonlinear power spectrum, the maximum wavenumber is {\tt K$\_$MAX$\_$SPLINE}$=5/$Mpc, the interpolation is only linear and we use {\tt A$\_$SPLINE$\_$NA$\_$PK}$=40$ as default.
-\item {\tt A$\_$SPLINE$\_$MINLOG$\_$PK}: minimum value for the scale factor spline. The default is {\tt A$\_$SPLINE$\_$MINLOG$\_$PK}$=0.01$. This only applies for the 2D power spectrum splines. For the cosmic emulator and in the case of the nonlinear matter power spectrum, we use a linear spline only, adopting {\tt A$\_$SPLINE$\_$MIN\_PK}$=1/3$.
-\item {\tt A$\_$SPLINE$\_$MIN$\_$PK}: maximum value for the logarithmic part and minimum value for the linear part of the scale factor spline. The default is {\tt A$\_$SPLINE$\_$MIN$\_$PK}$=0.1$. This only applies for the 2D power spectrum splines.
-\item {\tt K$\_$MAX$\_$SPLINE}: The maximum value of wavenumber considered in the spline. This is explained in more detail in the coming subsections. The default is {\tt K$\_$MAX$\_$SPLINE}$=50/$Mpc. In the case of the emulator's nonlinear power spectrum, the maximum wavenumber is {\tt K$\_$MAX$\_$SPLINE}$=5/$Mpc.
-\item {\tt K$\_$MAX}: The maximum value of wavenumber when integrating over $k$. The default is {\tt K$\_$MAX}$=1000$/Mpc.
-\item {\tt K$\_$MIN}:  The minimum value of wavenumber when integrating over $k$. The default is {\tt K$\_$MIN}$=5 \times 10^{-5}$/Mpc.
-\item {\tt N$\_$K}: Number of bins per decade for the wavenumber. The default is {\tt N$\_$K}$=167$.
-\item {\tt N$\_$K$\_$3DCOR}: Number of bins per decade for the wavenumber in the 3d correlation function calculation.
-The default is {\tt N$\_$K$\_$3DCOR}~=~100,000.
-\end{itemize}
-
-The precision parameters of {\tt GSL} routines can be set by assigning values to the members of the {\tt gsl$\_$params} structure in each {\tt ccl$\_$cosmology} structure. The parameters are organized in a hierarchal fashion, such that more specialized parameters take precedence over more general ones. For example, there is a general tolerance parameter, a tolerance parameter for integrals, and a tolerance parameter for the Limber integral. By default all are set to the value of the general tolerance. Changing the integration tolerance changes the tolerance for all integrals but not for root-finding routines, for example, and changing the Limber integral tolerance only affects that integral and no other.
-The parameters are:
-
-\begin{itemize}
-\item {\tt GSL$\_$EPSREL}: Relative tolerance for {\tt GSL} routines. Default is $10^{-4}$.
-\item {\tt GSL$\_$N$\_$ITERATION}: Maximum number of iterations allowed for {\tt GSL} routines. This parameter also controls the size of the integration workspaces. Default is 1000.
-\item {\tt GSL$\_$INTEGRATION$\_$GAUSS$\_$KRONROD$\_$POINTS}: Number of Gauss-Kronrod points in the {\tt QAG} integration routines. Default is {\tt GSL$\_$INTEG$\_$GAUSS41} (numerical value 4).
-\item {\tt GSL$\_$INTEGRATION$\_$EPSREL}: Relative tolerance for {\tt GSL} integration routines. Default is {\tt GSL$\_$EPSREL}.
-\item {\tt GSL$\_$INTEGRATION$\_$DISTANCE$\_$EPSREL}: Relative tolerance for {\tt GSL} integration routines for distance calculations. Default is $10^{-6}$.
-\item {\tt GSL$\_$INTEGRATION$\_$DNDZ$\_$EPSREL}: Relative tolerance for {\tt GSL} integration routines for  $\frac{dN}{dz}$ calculations. Default is $10^{-6}$.
-\item {\tt GSL$\_$INTEGRATION$\_$SIGMAR$\_$EPSREL}: Relative tolerance for {\tt GSL} integration routines for  $\sigma_R$ calculations. Default is $10^{-5}$.
-\item {\tt GSL$\_$INTEGRATION$\_$NU$\_$EPSREL}: Relative tolerance for {\tt GSL} integration routines for neutrino calculations. Default is $10^{-7}$.
-\item {\tt GSL$\_$INTEGRATION$\_$NU$\_$EPSABS}: Absolute tolerance for {\tt GSL} integration routines for neutrino calculations. Default is $10^{-7}$.
-\item {\tt GSL$\_$INTEGRATION$\_$LIMBER$\_$GAUSS$\_$KRONROD$\_$POINTS}: Number of Gauss-Kronrod points in the {\tt QAG} integration routines for the Limber integral. Default is {\tt GSL$\_$INTEGRATION$\_$GAUSS$\_$KRONROD$\_$POINTS}.
-\item {\tt GSL$\_$INTEGRATION$\_$LIMBER$\_$EPSREL}: Relative tolerance for {\tt GSL} integration routines for Limber integral. Default is {\tt GSL$\_$EPSREL}.
-\item {\tt GSL$\_$ROOT$\_$EPSREL}: Relative tolerance for {\tt GSL} root-finding routines. Default is {\tt GSL$\_$EPSREL}.
-\item {\tt GSL$\_$ROOT$\_$N$\_$ITERATION}: Maximum number of iterations allowed for {\tt GSL} root-finding routines. Default is {\tt GSL$\_$N$\_$ITERATION}.
-\item {\tt GSL$\_$ODE$\_$GROWTH$\_$EPSREL}: Relative tolerance for {\tt GSL} ODE-solving routines for growth factor calculation. Default is $10^{-6}$.
-\end{itemize}
-
-For the matter power spectrum, the spline is performed in two variables: the logarithmically-spaced wavenumber and the linearly-spaced scale factor. Splining the {\tt CLASS} output leads to some precision loss (compared to direct outputs from {\tt CLASS}). We quantify this, along with the impact of extrapolation, in the following subsection.
 
 \subsubsection{Extrapolation for the nonlinear power spectrum}
 \label{sec:NLextrapol}
@@ -687,15 +467,6 @@ With the implementation described in the previous section, the power spectrum sp
 As in the previous section, the power spectrum at small wavenumber is extrapolated using a power-law. This extrapolation is performed below a fiducial value of {\tt K\_MIN\_SPLINE} that coincides with the smallest wavenumber output by {\tt CLASS}, as in the case of the nonlinear power spectrum described above.
 
 We have found that changing {\tt N$\_$A} to $200$, or changing the sampling of the wavenumber to $5000$ points, does not change the results presented in Figures \ref{fig:NLextrapol} in this section.
-
-\subsubsection{Wishlist for the future}
-\label{Pk_wishlist}
-We plan to implement the following power spectrum methods in the future:
-\begin{itemize}
- \item CAMB,
- \item other emulators,
- \item HOD.
-\end{itemize}
 
 
 \subsubsection{Normalization of the power spectrum}
@@ -766,7 +537,7 @@ We provide 3 options for these, encoded in a parameter that we will call $d_\the
 
 \subsubsection*{Tracer combinations}
   {\tt CCL} also provides a way to generalize all the expressions in this sections to combinations of tracers. This is useful in many cases, such as galaxy number counts or cosmic shear, in which the actual physical observable (galaxy number overdensity or galaxy shape distortions) is made up of a combination of different effects. It is therefore possible to combine several tracers into a single one, such that the total $\Delta^X_\ell(k,\chi)$ of that tracer is the sum of the corresponding functions for all the tracers in the combination.
-  
+
 \subsubsection*{Standard tracers}
   {\tt CCL} provides specific functionality (besides its generic features) to define the following types of tracers:
   \begin{table*}[h]
@@ -791,13 +562,13 @@ We provide 3 options for these, encoded in a parameter that we will call $d_\the
   \begin{equation}
     b_{\rm IA} = - A_{\rm IA} \frac{C_1 \Omega_{\rm m} \rho_{\rm crit}}{D(z)}
   \end{equation}
-where $\rho_{\rm crit}$ is in the default \ccl units and $C_1= 5\times 10^{-14} (Mpc/h)^3 / (M_\odot/h)$ \citep{Brown02,Bridle07}. Note that although $\Omega_{\rm m}$ should in principle include non-relativistic neutrinos, this is not the case in \ccl at this point. 
+where $\rho_{\rm crit}$ is in the default \ccl units and $C_1= 5\times 10^{-14} (Mpc/h)^3 / (M_\odot/h)$ \citep{Brown02,Bridle07}. Note that although $\Omega_{\rm m}$ should in principle include non-relativistic neutrinos, this is not the case in \ccl at this point.
 
 
   Note that \ccl currently does not compute relativistic corrections to number counts \cite{2011PhRvD..84d3516C,2011PhRvD..84f3505B}. Although these should be included in the future, their contribution to the total fluctuation is largely subdominant (see \cite{GReffects} and the two references above), and therefore it is safe to work without them in most cases.
 
   It is also worth noting that the equations above should be modified for non-flat cosmologies by replacing the spherical Bessel functions $j_\ell$ with their hyperspherical counterparts \cite{1994ApJ...432....7K}. This will be revisited in future versions of \ccl.
-  
+
 \subsubsection*{Limber integrals}
   In the Limber approximation:
   \begin{equation}
@@ -1147,7 +918,6 @@ c(M)=9\left(\frac{M}{M_*}\right)^{-0.13}\ ,
 where $\delta_\mathrm{c}/\sigma(M_*)=1$.
 Note that, in order to be consistent, one should use a value of $\Delta_\mathrm{v}$ and $c(M)$ that is consistent with the halo definition used for the halo mass function and bias.
 
-
 \section{Tests and validation}
 \label{sec:tests}
 
@@ -1156,151 +926,6 @@ Our goal is for outputs of \ccl to be validated against independent benchmark co
 For each \ccl prediction, at least one independent code was used to produce the same result. Predictions were compared and the resulting numerical accuracy, documented in the paper. (See Table 2 for a summary of these results.) Potential differences in the implementation of the relevant algorithms were discussed there as well. For specific cases, such as the matter power spectrum provided by the Cosmic Emulator, angular power spectra and projected correlation functions, we established target accuracies for \ccl to achieve, though a more detailed forecasting exercise should be pursued in the future to establish whether results are compatible with the expected requirements of LSST DESC cosmological analyses in the next decade.
 
 All benchmark codes are either made public within the \ccl repository or made available online and described in the \ccl wiki\footnote{\url{https://github.com/LSSTDESC/CCL/wiki}}.
-
-\ccl has a suite of test routines which, upon compilation, compare its outputs to the benchmarks from code comparison. These are run from the \ccl root directory with the command {\tt ./build/check\_ccl}.
-
-\section{Examples for C implementation}
-\label{sec:example}
-
-Examples of how to run \ccl are provided in the {\tt examples} sub-directory of the library. The first resource for a new user should be the {\tt ccl$\_$sample$\_$run.c} file. This starts by setting up the \ccl default configuration. Then, it creates the {\tt cosmo} structure, which contains distances and power spectra splines, for example. There are example calls for routines that output comoving radial distances, the scale factor, the growth factor and $\sigma_8$. Toy models are created for the redshift distributions of galaxies in the clustering and lensing samples, and for the bias of the clustering sample ($b(z)=1+z$). These are used for constructing the ``tracer'' structures via {\tt CCL$\_$Cltracer}, which can then be called to obtain the angular power spectra for clustering, cosmic shear and CMB lensing. All functions of redshift associated to each tracer can be retrieved at any arbitrary point using the same interpolation scheme used by \ccl internally.
-
-
-\section{Python example}
-\label{sec:python:example}
-
-A Python wrapper for \ccl is provided through a module called {\tt pyccl}. The whole \ccl interface can be accessed through regular Python functions and classes, with all of the computation happening in the background through the C code. The functions all support {\tt numpy} arrays as inputs and outputs, with any loops being performed in the C code for speed.
-
-The Python module has essentially the same functions as the C library, just presented in a more standard Python-like way. You can inspect the available functions and their arguments by using the built-in Python {\tt help()} function, as with any Python module.
-
-Below is a simple example Python script that creates a new {\tt Cosmology} object, and then uses it to calculate the $C_\ell$'s for a simple lensing cross-correlation. It should take a few seconds on a typical laptop.
-\begin{verbatim}
-import pyccl as ccl
-import numpy as np
-
-# Create new Cosmology object with a given set of parameters. This keeps track
-# of previously-computed cosmological functions
-cosmo = ccl.Cosmology(Omega_c=0.27, Omega_b=0.045, h=0.67, A_s=2e-9, n_s=0.96)
-
-# Define a simple binned galaxy number density curve as a function of redshift
-z_n = np.linspace(0., 1., 200)
-n = np.ones(z_n.shape)
-
-# Create objects to represent tracers of the weak lensing signal with this
-# number density (with has_intrinsic_alignment=False)
-lens1 = ccl.WeakLensingTracer(cosmo, dndz=(z_n, n))
-lens2 = ccl.WeakLensingTracer(cosmo, dndz=(z_n, n))
-
-# Calculate the angular cross-spectrum of the two tracers as a function of ell
-ell = np.arange(2, 10)
-cls = ccl.angular_cl(cosmo, lens1, lens2, ell)
-print cls
-\end{verbatim}
-
-Further examples are collected in several Jupyter notebooks available in the {\tt examples/} directory. These are:
-\begin{verbatim}
-Correlation.ipynb,
-
-Distance Calculations Example.ipynb,
-
-HMFexample.ipynb,
-
-Lensing angular power spectrum.ipynb,
-
-MCMC Likelihood Analysis.ipynb,
-
-Photo-z example.ipynb,
-
-Correlation_3d.ipynb,
-
-Power spectrum example.ipynb
-\end{verbatim}
-
-Note that the likelihood analysis in the last notebook is not intended to be realistic, but it gives an operational example of how {\tt CCL} can be integrated into such an analysis. In particular, the notebook only considers cosmic shear over one wide redshift bin and the covariance matrix adopted solely includes a contribution from cosmic variance. The ``data vector'' is simply a simulated using {\tt CCL} theoretical predictions. For speed, theoretical predictions use the BBKS power spectrum implementation.
-
-
-\section{Technical notes on how the Python wrapper is implemented}
-\label{sec:python:technical}
-
-The Python wrapper is built using the {\tt swig} tool, which automatically scans the \ccl C headers and builds a matching interface in Python. The default autogenerated {\tt swig} interface can be accessed through the {\tt pyccl.lib} module if necessary. A more user-friendly wrapper has been written on top of this to provide more structure to the module, allow {\tt numpy} vectorization, and provide more natural Python objects to use (instead of opaque {\tt swig}-generated objects).
-
-The key parts of the wrapper are as follows:
-\paragraph{{\tt setup.py}} This instructs {\tt swig} and other build tools on how to find the right source files and set compile-time variables correctly. Most of this information is provided by header files and SWIG interface files that are included through the {\tt pyccl/ccl.i} interface file.
-
-Note that certain compiler flags, like {\tt -fopenmp}, are also set in {\tt setup.py}. If you are not using {\tt gcc}, you may need to modify these flags (see the {\tt extra$\_$compile$\_$args} argument of the {\tt setup()} function).
-
-\paragraph{Interface ({\tt .i}) files} These are kept in the {\tt pyccl/} directory, and tell {\tt swig} which functions to extract from the C headers. There are also commands in these files to generate basic function argument documentation, and remove the {\tt ccl$\_$} prefix from function names.
-
-The interface files also contain code that tells {\tt swig} how to convert C array arguments to {\tt numpy} arrays. For certain functions, this code may also contain a simple loop to effectively vectorize the function.
-
-The main interface file is {\tt pyccl/ccl.i}, which imports all of the other interface files. Most of the \ccl source files (e.g. {\tt core.c}) have their own interface file too. For other files, mostly containing support/utility functions, {\tt swig} only needs the C header ({\tt .h}) file to be specified in the main {\tt ccl.i} file, however. (The C source file must also be added to the list in {\tt setup.py} for it to be compiled successfully.)
-
-\paragraph{Python module files} The structure of the Python module, as seen by the user, is organized through the {\tt pyccl/$\_$$\_$init$\_$$\_$.py} file, which imports only the parts of the {\tt swig} wrapper that are useful to the user. The complete autogenerated {\tt swig} interface can be accessed through the {\tt pyccl.lib} sub-module if necessary.
-
-Individual sub-modules from \ccl are wrapped in their own Python scripts (e.g. {\tt power.py}), which typically provide a nicer ``Pythonic'' interface to the underlying \ccl functions and objects. This includes automatically choosing whether to use the vectorized C function or not, as well as some conversions from Python objects to the autogenerated {\tt swig} objects. Most of the core Python objects, like {\tt Cosmology}, are defined in {\tt core.py}. These objects also do some basic memory management, like calling the corresponding {\tt ccl$\_$free$\_$*} C function when the Python object is destroyed.
-
-\paragraph{Auto-generated wrapper files} The {\tt swig} command is triggered when you run {\tt setup.py}, and automatically generates a number of C and Python wrapper files in the {\tt pyccl/} directory. These typically have names like {\tt ccl$\_$*.c} and {\tt ccl$\_$*.py}, and should not be edited directly, as {\tt swig} will overwrite them when it next runs.
-
-\paragraph{{\tt pyccl/pyutils.py}} This file contains several generic helper functions for passing {\tt numpy} arrays in and out of Python functions in a convenient way, and for performing error checking and some type conversions.
-
-The build process will also create a {\tt pyccl/ccllib.py} file, which is the raw autogenerated Python interface, and {\tt $\_$ccllib.so}, which is a C library containing all of the C functions and their Python bindings. A {\tt build/} directory and {\tt pyccl.egg-info/} directory will also be created in the same directory as {\tt setup.py} when you compile {\tt pyccl}. These (plus the {\tt pyccl/$\_$ccllib.so} file) should be removed if you want to do a clean recompilation. Running {\tt python setup.py clean --all} will remove some, but not all, of the generated files.
-
-
-\section{Future functionality to be included}
-\label{sec:future}
-
-In the future, we hope that \ccl will include other functionalities. Functionalities which are currently under development:
-\begin{itemize}
-\item further CMB observable predictions (beyond CMB lensing)\footnote{\url{https://github.com/LSSTDESC/CCL/issues/428}},
-\item support for non-linear biasing models\footnote{\url{https://github.com/LSSTDESC/CCL/pull/444}}\citep[e.g.][]{FASTPT},
-\item halo density profiles\footnote{\url{https://github.com/LSSTDESC/CCL/issues/407}},
-\item velocity correlation function\footnote{\url{https://github.com/LSSTDESC/CCL/issues/429}},
-\item mass function emulators\footnote{\url{https://github.com/LSSTDESC/CCL/issues/235}},
-\item and more power spectrum methods (see \ref{Pk_wishlist}).
-\end{itemize}
-
-\section{Feedback}
-\label{sec:feedback}
-
-If you would like to provide feedback on \ccl or contact the administrators, please do so through the \ccl github repository located at \url{https://github.com/LSSTDESC/CCL}. We welcome users opening github issues.
-
-\section{Citing \& using \ccl}
-\label{sec:cite}
-
-This software is a publicly released LSST DESC product which was developed within the LSST DESC using LSST DESC resources. DESC users should use it in accordance with the LSST DESC publication policy\footnote{\url{http://lsstdesc.org/Collaborators}}. External users are welcome to use the code outside DESC in accordance with the licensing information below.
-
-This code has been released by DESC, although it is still under active development. It is accompanied by a journal paper that describes the development and validation of the library, which you can find the in the {\tt doc/ccl\_paper} folder. You are welcome to re-use the code, which is open source and available under terms consistent with our LICENSE\footnote{\url{https://github.com/LSSTDESC/CCL/blob/master/LICENSE}}, which is a BSD 3-Clause\footnote{\url{https://opensource.org/licenses/BSD-3-Clause}} license.
-
-For free use of the {\tt CLASS} library, the {\tt CLASS} developers require that the {\tt CLASS} paper be cited: {\it  CLASS II: Approximation schemes}, D. Blas, J. Lesgourgues, T. Tram, arXiv:1104.2933, JCAP 1107 (2011) 034. The {\tt CLASS} repository can be found in \url{http://class-code.net}.
-
-\section{License}
-\label{sec:license}
-
-Copyright \textcopyright 2016-2018, the LSST DESC \ccl contributors (https://github.com/LSSTDESC/CCL/graphs/contributors). The repository can be found at \url{https://github.com/LSSTDESC/CCL}. All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met:
-
-\begin{itemize}
-\item Redistributions of source code must retain the above copyright notice, this
-  list of conditions and the following disclaimer.
-\item Redistributions in binary form must reproduce the above copyright notice,
-  this list of conditions and the following disclaimer in the documentation
-  and/or other materials provided with the distribution.
-\item Neither the name of \ccl (\url{https://github.com/LSSTDESC/CCL}) nor the names of its
-  contributors may be used to endorse or promote products derived from
-  this software without specific prior written permission.
-\end{itemize}
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS ``AS IS''
-AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
-FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 \input{acknowledgments}
 
