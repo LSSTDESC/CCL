@@ -215,7 +215,7 @@ static void ccl_tracer_corr_bessel(ccl_cosmology *cosmo,
 
   #pragma omp parallel default(none) \
                        shared(cosmo, status, wtheta, n_ell, ell, cls, \
-                              corr_type, cl_spl, theta) \
+                              corr_type, cl_spl, theta, n_theta) \
                        private(w, F, result, eresult, local_status, ith, \
                                gslstatus, cp)
   {
