@@ -339,7 +339,6 @@ void compute_chi(double a, ccl_cosmology *cosmo, double * chi, int * stat)
     gslstatus=gsl_integration_cquad(
       &F, a, 1.0, 0.0, cosmo->gsl_params.INTEGRATION_DISTANCE_EPSREL, workspace, &result, NULL, NULL);
     *chi=result/cosmo->params.h;
-    gsl_integration_cquad_workspace_free(workspace);
 
     if (gslstatus != GSL_SUCCESS) {
       ccl_raise_gsl_warning(gslstatus, "ccl_background.c: compute_chi():");
@@ -347,7 +346,7 @@ void compute_chi(double a, ccl_cosmology *cosmo, double * chi, int * stat)
     }
   }
 
-  free(workspace);
+  gsl_integration_cquad_workspace_free(workspace);
 }
 
 
@@ -526,6 +525,8 @@ void ccl_cosmology_compute_distances(ccl_cosmology * cosmo, int *status)
     if (*status){ //If there was an error, free the GSL splines and return
       gsl_spline_free(E); // Note: you are allowed to call gsl_free() on NULL
       gsl_spline_free(chi);
+      E = NULL;
+      chi = NULL;
     }
 
     // Set up the boundaries for the a(chi) spline
@@ -542,6 +543,9 @@ void ccl_cosmology_compute_distances(ccl_cosmology * cosmo, int *status)
     free(a); //Free these, in preparation for making a(chi) splines
     free(E_a);
     free(chi_a);
+    a = NULL;
+    E_a = NULL;
+    chi_a = NULL;
     //Note: you are allowed to call free() on NULL
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
