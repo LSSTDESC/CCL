@@ -164,15 +164,6 @@ void ccl_angular_cl_limber(ccl_cosmology *cosmo,
     return;
   }
 
-  if (!cosmo->computed_growth) {
-    ccl_cosmology_compute_growth(cosmo, status);
-  }
-  if (!cosmo->computed_growth) {
-    if (*status == 0)
-      *status = CCL_ERROR_INTEG;
-    return;
-  }
-
   // Figure out which power spectrum to use
   ccl_f2d_t *psp_use;
   if (psp == NULL) {
