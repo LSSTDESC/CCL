@@ -58,8 +58,7 @@ double r_delta(ccl_cosmology *cosmo, double halomass, double a, double odelta, i
 
 // This checks to make sure all necessary halo mass function parameters have been set-up,
 // as well as associated splines.
-static void ccl_cosmology_compute_hmfparams(ccl_cosmology *cosmo, int *status)
-{
+void ccl_cosmology_compute_hmfparams(ccl_cosmology *cosmo, int *status) {
   if(cosmo->computed_hmfparams)
     return;
 

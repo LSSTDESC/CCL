@@ -233,11 +233,11 @@ typedef struct ccl_parameters {
   double bcm_log10Mc;
   double bcm_etab;
   double bcm_ks;
-  
+
   // mu / Sigma quasistatica parameterisation of modified gravity params
   double mu_0;
   double sigma_0;
-  
+
   // Derived parameters
   double sigma8;
   double Omega_l;
@@ -297,7 +297,8 @@ typedef struct ccl_cosmology {
 
   bool computed_distances;
   bool computed_growth;
-  bool computed_power;
+  bool computed_linear_power;
+  bool computed_nonlin_power;
   bool computed_sigma;
   bool computed_hmfparams;
 

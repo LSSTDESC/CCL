@@ -98,6 +98,7 @@ if ((NOT "${CMAKE_C_COMPILER_ID}" MATCHES "^(Apple)?Clang$") OR FORCE_OPENMP)
     set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -fopenmp")
     if(DEFINED ENV{CONDA_PREFIX})
         include_directories("$ENV{CONDA_PREFIX}/include")
+        add_link_options("LINKER:-rpath,$ENV{CONDA_PREFIX}/lib")
     endif()
 endif()
 

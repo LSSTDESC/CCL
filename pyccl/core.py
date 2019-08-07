@@ -735,48 +735,80 @@ class Cosmology(object):
         status = lib.cosmology_compute_growth(self.cosmo, status)
         check(status, self)
 
-    def compute_power(self):
-        """Compute the power spectrum."""
+    def compute_linear_power(self):
+        """Compute the linear power spectrum."""
+        # unless we have massive eneutrinos, we always compute the
+        # growth function here
+        # sometimes this is not needed, but this computation is fast
+        # enough that the logic below is easier and more bug proof
+        if self['N_nu_mass'] == 0 and not self.has_growth:
+            self.compute_growth()
+
+        # first do the linear matter power
         status = 0
-        status = lib.cosmology_compute_power(self.cosmo, status)
+        status = lib.cosmology_compute_linear_power(self.cosmo, status)
         check(status, self)
 
-    def has_distances(self):
-        """Checks if the distances have been precomputed.
+    def compute_nonlin_power(self):
+        """Compute the non-linear power spectrum."""
+        # for the halo model we need to init the mass function stuff
+        if (self._config_init_kwargs['matter_power_spectrum'] == 'halo_model'
+                and not self.has_sigma):
+            self.compute_sigma()
 
-        Returns:
-            bool: True if precomputed, False otherwise.
-        """
+        # needed for halofit, halomodel and linear options
+        if (self._config_init_kwargs['matter_power_spectrum'] != 'emu' and
+                not self.has_linear_power):
+            self.compute_linear_power()
+
+        status = 0
+        status = lib.cosmology_compute_nonlin_power(self.cosmo, status)
+        check(status, self)
+
+    def compute_sigma(self):
+        """Compute the sigma(M) and mass function splines."""
+        # we need these things before building the mass function splines
+        if not self.has_growth:
+            self.compute_growth()
+        if not self.has_linear_power:
+            self.compute_linear_power()
+        status = 0
+        status = lib.cosmology_compute_sigma(self.cosmo, status)
+        status = lib.cosmology_compute_hmfparams(self.cosmo, status)
+        check(status, self)
+
+    @property
+    def has_distances(self):
+        """Checks if the distances have been precomputed."""
         return bool(self.cosmo.computed_distances)
 
+    @property
     def has_growth(self):
-        """Checks if the growth function has been precomputed.
-
-        Returns:
-            bool: True if precomputed, False otherwise.
-        """
+        """Checks if the growth function has been precomputed."""
         return bool(self.cosmo.computed_growth)
 
-    def has_power(self):
-        """Checks if the power spectra have been precomputed.
+    @property
+    def has_linear_power(self):
+        """Checks if the linear power spectra have been precomputed."""
+        return bool(self.cosmo.computed_linear_power)
 
-        Returns:
-            bool: True if precomputed, False otherwise.
-        """
-        return bool(self.cosmo.computed_power)
+    @property
+    def has_nonlin_power(self):
+        """Checks if the non-linear power spectra have been precomputed."""
+        return bool(self.cosmo.computed_nonlin_power)
 
+    @property
     def has_sigma(self):
-        """Checks if sigma8 has been computed.
-
-        Returns:
-            bool: True if precomputed, False otherwise.
-        """
-        return bool(self.cosmo.computed_sigma)
+        """Checks if sigma(M) and mass function splines are precomputed."""
+        return (
+            bool(self.cosmo.computed_sigma) and
+            bool(self.cosmo.computed_hmfparams))
 
     def status(self):
         """Get error status of the ccl_cosmology object.
 
-        .. note:: error statuses are currently under development.
+        .. note:: The error statuses are currently under development and
+                  may not be fully descriptive.
 
         Returns:
             :obj:`str` containing the status message.
@@ -814,8 +846,8 @@ def check(status, cosmo=None):
 
     # Check for known error status
     if status in error_types.keys():
-        raise CCLError("Error %s: %s" % (error_types[status], msg))
+        raise CCLError("ERROR %s: %s" % (error_types[status], msg))
 
     # Check for unknown error
     if status != 0:
-        raise CCLError("Error %d: %s" % (status, msg))
+        raise CCLError("ERROR %d: %s" % (status, msg))

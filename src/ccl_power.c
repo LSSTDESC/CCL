@@ -140,9 +140,9 @@ static void ccl_cosmology_compute_linpower_analytic(
       ccl_f2d_3,status);
   }
   if(*status==0) {
-    cosmo->computed_power=true;
+    cosmo->computed_linear_power=true;
     sigma8 = ccl_sigma8(cosmo,status);
-    cosmo->computed_power=false;
+    cosmo->computed_linear_power=false;
   }
 
   if(*status==0) {
@@ -430,9 +430,9 @@ static void ccl_cosmology_spline_nonlinpower(
 
 /*------ ROUTINE: ccl_cosmology_compute_power -----
 INPUT: ccl_cosmology * cosmo
-TASK: compute power spectrum
+TASK: compute linear power spectrum
 */
-void ccl_cosmology_compute_power(ccl_cosmology* cosmo, int* status) {
+void ccl_cosmology_compute_linear_power(ccl_cosmology* cosmo, int* status) {
   if ((cosmo->config.transfer_function_method != ccl_boltzmann_class &&
        cosmo->config.transfer_function_method != ccl_transfer_none) &&
       (fabs(cosmo->params.mu_0) > 1e-14 || fabs(cosmo->params.sigma_0) > 1e-14)) {
@@ -444,7 +444,7 @@ void ccl_cosmology_compute_power(ccl_cosmology* cosmo, int* status) {
       "the ccl_boltzmann_class power spectrum method.\n");
     return;
   }
-  if (cosmo->computed_power) return;
+  if (cosmo->computed_linear_power) return;
 
   #pragma omp master
   {
@@ -482,6 +482,25 @@ void ccl_cosmology_compute_power(ccl_cosmology* cosmo, int* status) {
       }
     }
 
+    if (*status == 0)
+      cosmo->computed_linear_power = true;
+  }
+  #pragma omp flush
+}
+
+
+/*------ ROUTINE: ccl_cosmology_compute_power -----
+INPUT: ccl_cosmology * cosmo
+TASK: compute linear power spectrum
+*/
+void ccl_cosmology_compute_nonlin_power(ccl_cosmology* cosmo, int* status) {
+  if (cosmo->computed_nonlin_power) return;
+
+  if (!cosmo->computed_linear_power)
+    ccl_cosmology_compute_linear_power(cosmo, status);
+
+  #pragma omp master
+  {
     // if everything is OK, get the non-linear P(K)
     if (*status == 0) {
 
@@ -499,27 +518,21 @@ void ccl_cosmology_compute_power(ccl_cosmology* cosmo, int* status) {
 
         case ccl_linear: {
           // temporarily set computed_power to true
-          cosmo->computed_power = true;
-          ccl_cosmology_spline_nonlinpower(cosmo, linear_power, NULL, status);
-          cosmo->computed_power = false;}
+          ccl_cosmology_spline_nonlinpower(cosmo, linear_power, NULL, status);}
           break;
 
         case ccl_halofit: {
           // temporarily set computed_power to true
-          cosmo->computed_power = true;
           halofit_struct *hf = NULL;
           hf = ccl_halofit_struct_new(cosmo, status);
           if (*status == 0 && hf != NULL)
             ccl_cosmology_spline_nonlinpower(cosmo, halofit_power, (void*)hf, status);
-          ccl_halofit_struct_free(hf);
-          cosmo->computed_power = false;}
+          ccl_halofit_struct_free(hf);}
           break;
 
         case ccl_halo_model: {
           // temporarily set computed_power to true
-          cosmo->computed_power = true;
-          ccl_cosmology_spline_nonlinpower(cosmo, halomodel_power, NULL, status);
-          cosmo->computed_power = false;}
+          ccl_cosmology_spline_nonlinpower(cosmo, halomodel_power, NULL, status);}
           break;
 
         case ccl_emu: {
@@ -539,7 +552,7 @@ void ccl_cosmology_compute_power(ccl_cosmology* cosmo, int* status) {
     }
 
     if (*status == 0)
-      cosmo->computed_power = true;
+      cosmo->computed_nonlin_power = true;
   }
   #pragma omp flush
 }
@@ -551,10 +564,10 @@ TASK: compute the linear power spectrum at a given redshift
 */
 double ccl_linear_matter_power(ccl_cosmology* cosmo, double k, double a, int* status)
 {
-  if (!cosmo->computed_power) ccl_cosmology_compute_power(cosmo, status);
+  if (!cosmo->computed_linear_power) ccl_cosmology_compute_linear_power(cosmo, status);
 
   // Return if compilation failed
-  if (!cosmo->computed_power) return NAN;
+  if (!cosmo->computed_linear_power) return NAN;
 
   return ccl_f2d_t_eval(cosmo->data.p_lin,log(k),a,cosmo,status);
 }
@@ -565,9 +578,9 @@ TASK: compute the nonlinear power spectrum at a given redshift
 */
 double ccl_nonlin_matter_power(ccl_cosmology* cosmo, double k, double a, int* status)
 {
-  if (!cosmo->computed_power) ccl_cosmology_compute_power(cosmo, status);
+  if (!cosmo->computed_nonlin_power) ccl_cosmology_compute_nonlin_power(cosmo, status);
   // Return if compilation failed
-  if (!cosmo->computed_power) return NAN;
+  if (!cosmo->computed_nonlin_power) return NAN;
 
   return ccl_f2d_t_eval(cosmo->data.p_nl,log(k),a,cosmo,status);
 }

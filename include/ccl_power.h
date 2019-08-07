@@ -31,14 +31,24 @@ double ccl_linear_matter_power(ccl_cosmology * cosmo, double k, double a,int * s
 double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double k, double a,int * status);
 
 /**
- * Compute the power spectrum and create a 2d spline P(k,z) to be stored
+ * Compute the linear power spectrum and create a 2d spline P(k,z) to be stored
  * in the cosmology structure.
  * @param cosmo Cosmological parameters
  * @param status Status flag. 0 if there are no errors, nonzero otherwise.
  * For specific cases see documentation for ccl_error.c
  * @return void
  */
-void ccl_cosmology_compute_power(ccl_cosmology * cosmo, int* status);
+void ccl_cosmology_compute_linear_power(ccl_cosmology * cosmo, int* status);
+
+/**
+ * Compute the non-linear power spectrum and create a 2d spline P(k,z) to be stored
+ * in the cosmology structure.
+ * @param cosmo Cosmological parameters
+ * @param status Status flag. 0 if there are no errors, nonzero otherwise.
+ * For specific cases see documentation for ccl_error.c
+ * @return void
+ */
+void ccl_cosmology_compute_nonlin_power(ccl_cosmology * cosmo, int* status);
 
 /**
  * Variance of the matter density field with (top-hat) smoothing scale R [Mpc].

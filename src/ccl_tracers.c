@@ -91,26 +91,36 @@ static double get_nz_norm(ccl_cosmology *cosmo, ccl_f1d_t *nz_f,
 
   // Get N(z) norm
   gsl_function F;
-  gsl_integration_workspace *w = gsl_integration_workspace_alloc(cosmo->gsl_params.N_ITERATION);
+  gsl_integration_workspace *w = NULL;
   F.function = &nz_integrand;
   F.params = nz_f;
 
-  int gslstatus = gsl_integration_qag(
-    &F, z0, zf, 0,
-    cosmo->gsl_params.INTEGRATION_EPSREL,
-    cosmo->gsl_params.N_ITERATION,
-    cosmo->gsl_params.INTEGRATION_GAUSS_KRONROD_POINTS,
-    w, &nz_norm, &nz_enorm);
-  gsl_integration_workspace_free(w);
+  w = gsl_integration_workspace_alloc(cosmo->gsl_params.N_ITERATION);
 
-  if (gslstatus != GSL_SUCCESS) {
-    ccl_raise_gsl_warning(gslstatus, "ccl_tracers.c: get_nz_norm():");
-    *status = CCL_ERROR_INTEG;
+  if (w == NULL) {
+    *status = CCL_ERROR_MEMORY;
     ccl_cosmology_set_status_message(
-      cosmo,
-      "ccl_tracers.c: get_nz_norm(): "
-      "integration error when normalizing N(z)\n");
+      cosmo, "ccl_tracers.c: get_nz_norm(): out of memory");
   }
+  else {
+    int gslstatus = gsl_integration_qag(
+      &F, z0, zf, 0,
+      cosmo->gsl_params.INTEGRATION_EPSREL,
+      cosmo->gsl_params.N_ITERATION,
+      cosmo->gsl_params.INTEGRATION_GAUSS_KRONROD_POINTS,
+      w, &nz_norm, &nz_enorm);
+
+    if (gslstatus != GSL_SUCCESS) {
+      ccl_raise_gsl_warning(gslstatus, "ccl_tracers.c: get_nz_norm():");
+      *status = CCL_ERROR_INTEG;
+      ccl_cosmology_set_status_message(
+        cosmo,
+        "ccl_tracers.c: get_nz_norm(): "
+        "integration error when normalizing N(z)\n");
+    }
+  }
+
+  gsl_integration_workspace_free(w);
 
   return nz_norm;
 }

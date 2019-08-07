@@ -13,6 +13,15 @@ CCL_BEGIN_DECLS
  */
 void ccl_cosmology_compute_sigma(ccl_cosmology *cosmo, int *status);
 
+/*
+ * Computes the mass function parameter splines
+ * The result is attached to the cosmology object
+ * @param cosmo Cosmological parameters
+ * @param status Status flag. 0 if there are no errors, nonzero otherwise.
+ * For specific cases see documentation for ccl_error.
+ */
+void ccl_cosmology_compute_hmfparams(ccl_cosmology *cosmo, int *status);
+
 // TODO: smooth_mass is not really correct in this function, tho it makes sense in compute_sigma
 /*
  * Compute halo mass function at a given mass for a given cosmology as dn/ dlog10(M)

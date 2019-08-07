@@ -891,7 +891,11 @@ double ccl_h_over_h0(ccl_cosmology * cosmo, double a, int* status)
 {
 
   if(!cosmo->computed_distances) {
-    ccl_cosmology_compute_distances(cosmo,status);
+    *status = CCL_ERROR_DISTANCES_INIT;
+    ccl_cosmology_set_status_message(
+      cosmo,
+      "ccl_background.c: ccl_h_over_h0(): distance splines have not been prcomputed!");
+    return NAN;
   }
 
   double h_over_h0;
@@ -931,7 +935,11 @@ double ccl_comoving_radial_distance(ccl_cosmology * cosmo, double a, int * statu
   }
   else {
     if(!cosmo->computed_distances) {
-      ccl_cosmology_compute_distances(cosmo, status);
+      *status = CCL_ERROR_DISTANCES_INIT;
+      ccl_cosmology_set_status_message(
+        cosmo,
+        "ccl_background.c: ccl_comoving_radial_distance(): distance splines have not been prcomputed!");
+      return NAN;
     }
 
     double crd;
@@ -991,7 +999,11 @@ double ccl_comoving_angular_distance(ccl_cosmology * cosmo, double a, int* statu
   }
   else {
     if (!cosmo->computed_distances) {
-      ccl_cosmology_compute_distances(cosmo, status);
+      *status = CCL_ERROR_DISTANCES_INIT;
+      ccl_cosmology_set_status_message(
+        cosmo,
+        "ccl_background.c: ccl_comoving_angular_distance(): distance splines have not been prcomputed!");
+      return NAN;
     }
 
     double chi;
@@ -1046,7 +1058,11 @@ double ccl_distance_modulus(ccl_cosmology * cosmo, double a, int* status)
     return NAN;
   } else {
     if (!cosmo->computed_distances) {
-      ccl_cosmology_compute_distances(cosmo, status);
+      *status = CCL_ERROR_DISTANCES_INIT;
+      ccl_cosmology_set_status_message(
+        cosmo,
+        "ccl_background.c: ccl_distance_modulus(): distance splines have not been prcomputed!");
+      return NAN;
     }
     /* distance modulus = 5 * log10(d) - 5
        Since d in CCL is in Mpc, you get
@@ -1082,7 +1098,11 @@ double ccl_scale_factor_of_chi(ccl_cosmology * cosmo, double chi, int * status)
   }
   else {
     if (!cosmo->computed_distances) {
-      ccl_cosmology_compute_distances(cosmo,status);
+      *status = CCL_ERROR_DISTANCES_INIT;
+      ccl_cosmology_set_status_message(
+        cosmo,
+        "ccl_background.c: ccl_scale_factor_of_chi(): distance splines have not been prcomputed!");
+      return NAN;
     }
     double a;
     int gslstatus = gsl_spline_eval_e(cosmo->data.achi, chi, NULL, &a);
@@ -1113,20 +1133,26 @@ double ccl_growth_factor(ccl_cosmology * cosmo, double a, int * status)
   }
   else if(a>1.) {
     *status = CCL_ERROR_COMPUTECHI;
-    ccl_cosmology_set_status_message(cosmo, "ccl_background.c: scale factor cannot be larger than 1.\n");
+    ccl_cosmology_set_status_message(
+      cosmo, "ccl_background.c: scale factor cannot be larger than 1.");
     return NAN;
   }
   else {
     if (!cosmo->computed_growth){
-      ccl_cosmology_compute_growth(cosmo, status);
+      *status = CCL_ERROR_GROWTH_INIT;
+      ccl_cosmology_set_status_message(
+        cosmo,
+        "ccl_background.c: ccl_growth_factor(): growth factor splines have not been prcomputed!");
+      return NAN;
     }
-    if (*status!= CCL_ERROR_NOT_IMPLEMENTED) {
+    if (*status != CCL_ERROR_NOT_IMPLEMENTED) {
       double D;
       int gslstatus = gsl_spline_eval_e(cosmo->data.growth, a, NULL, &D);
       if(gslstatus != GSL_SUCCESS) {
         ccl_raise_gsl_warning(gslstatus, "ccl_background.c: ccl_growth_factor():");
         *status |= gslstatus;
-        ccl_cosmology_set_status_message(cosmo, "ccl_background.c: ccl_growth_factor(): Scale factor outside interpolation range.\n");
+        ccl_cosmology_set_status_message(
+          cosmo, "ccl_background.c: ccl_growth_factor(): Scale factor outside interpolation range.");
         return NAN;
       }
       return D;
@@ -1152,7 +1178,10 @@ double ccl_growth_factor_unnorm(ccl_cosmology * cosmo, double a, int * status)
 {
 
   if (!cosmo->computed_growth) {
-    ccl_cosmology_compute_growth(cosmo, status);
+    *status = CCL_ERROR_GROWTH_INIT;
+    ccl_cosmology_set_status_message(
+      cosmo,
+      "ccl_background.c: ccl_growth_factor_unnorm(): growth factor splines have not been prcomputed!");
   }
 
   if (*status != CCL_ERROR_NOT_IMPLEMENTED) {
@@ -1181,7 +1210,10 @@ double ccl_growth_rate(ccl_cosmology * cosmo, double a, int * status)
     return NAN;
   } else {
     if (!cosmo->computed_growth) {
-      ccl_cosmology_compute_growth(cosmo, status);
+      *status = CCL_ERROR_GROWTH_INIT;
+      ccl_cosmology_set_status_message(
+        cosmo,
+        "ccl_background.c: ccl_growth_rate(): growth factor splines have not been prcomputed!");
     }
     if(*status != CCL_ERROR_NOT_IMPLEMENTED) {
       double g;
