@@ -562,12 +562,14 @@ INPUT: ccl_cosmology * cosmo, k [1/Mpc],a
 TASK: compute the linear power spectrum at a given redshift
       by rescaling using the growth function
 */
-double ccl_linear_matter_power(ccl_cosmology* cosmo, double k, double a, int* status)
-{
-  if (!cosmo->computed_linear_power) ccl_cosmology_compute_linear_power(cosmo, status);
-
-  // Return if compilation failed
-  if (!cosmo->computed_linear_power) return NAN;
+double ccl_linear_matter_power(ccl_cosmology* cosmo, double k, double a, int* status) {
+  if (!cosmo->computed_linear_power) {
+    *status = CCL_ERROR_LINEAR_POWER_INIT;
+    ccl_cosmology_set_status_message(
+      cosmo,
+      "ccl_power.c: ccl_linear_matter_power(): linear power spctrum has not been computed!");
+    return NAN;
+  }
 
   return ccl_f2d_t_eval(cosmo->data.p_lin,log(k),a,cosmo,status);
 }
@@ -576,11 +578,14 @@ double ccl_linear_matter_power(ccl_cosmology* cosmo, double k, double a, int* st
 INPUT: ccl_cosmology * cosmo, a, k [1/Mpc]
 TASK: compute the nonlinear power spectrum at a given redshift
 */
-double ccl_nonlin_matter_power(ccl_cosmology* cosmo, double k, double a, int* status)
-{
-  if (!cosmo->computed_nonlin_power) ccl_cosmology_compute_nonlin_power(cosmo, status);
-  // Return if compilation failed
-  if (!cosmo->computed_nonlin_power) return NAN;
+double ccl_nonlin_matter_power(ccl_cosmology* cosmo, double k, double a, int* status) {
+  if (!cosmo->computed_nonlin_power) {
+    *status = CCL_ERROR_NONLIN_POWER_INIT;
+    ccl_cosmology_set_status_message(
+      cosmo,
+      "ccl_power.c: ccl_nonlin_matter_power(): non-linear power spctrum has not been computed!");
+    return NAN;
+  }
 
   return ccl_f2d_t_eval(cosmo->data.p_nl,log(k),a,cosmo,status);
 }
@@ -603,8 +608,7 @@ typedef struct {
 INPUT: kR, ususally a wavenumber multiplied by a smoothing radius
 TASK: Output W(x)=[sin(x)-x*cos(x)]*(3/x)^3
 */
-static double w_tophat(double kR)
-{
+static double w_tophat(double kR) {
   double w;
   double kR2 = kR*kR;
 
@@ -621,8 +625,7 @@ static double w_tophat(double kR)
 }
 
 // Integrand for sigmaR integral
-static double sigmaR_integrand(double lk,void *params)
-{
+static double sigmaR_integrand(double lk,void *params) {
   SigmaR_pars *par=(SigmaR_pars *)params;
 
   double k=pow(10.,lk);
@@ -634,8 +637,7 @@ static double sigmaR_integrand(double lk,void *params)
 }
 
 // Integrand for sigmaV integral
-static double sigmaV_integrand(double lk,void *params)
-{
+static double sigmaV_integrand(double lk,void *params) {
   SigmaV_pars *par=(SigmaV_pars *)params;
 
   double k=pow(10.,lk);
@@ -651,8 +653,22 @@ INPUT: cosmology, comoving smoothing radius, scale factor
 TASK: compute sigmaR, the variance in the *linear* density field
 smoothed with a tophat filter of comoving size R
 */
-double ccl_sigmaR(ccl_cosmology *cosmo,double R,double a,int *status)
-{
+double ccl_sigmaR(ccl_cosmology *cosmo,double R,double a,int *status) {
+  if (!cosmo->computed_linear_power) {
+    *status = CCL_ERROR_LINEAR_POWER_INIT;
+    ccl_cosmology_set_status_message(
+      cosmo,
+      "ccl_power.c: ccl_sigmaR(): linear power spctrum has not been computed!");
+    return NAN;
+  }
+  if (!cosmo->computed_growth){
+    *status = CCL_ERROR_GROWTH_INIT;
+    ccl_cosmology_set_status_message(
+      cosmo,
+      "ccl_power.c: ccl_sigmaR(): growth factor splines have not been prcomputed!");
+    return NAN;
+  }
+
   SigmaR_pars par;
   par.status = status;
 
@@ -688,8 +704,22 @@ TASK: compute sigmaV, the variance in the *linear* displacement field
 smoothed with a tophat filter of comoving size R
 The linear displacement field is the gradient of the linear density field
 */
-double ccl_sigmaV(ccl_cosmology *cosmo,double R,double a,int *status)
-{
+double ccl_sigmaV(ccl_cosmology *cosmo,double R,double a,int *status) {
+  if (!cosmo->computed_linear_power) {
+    *status = CCL_ERROR_LINEAR_POWER_INIT;
+    ccl_cosmology_set_status_message(
+      cosmo,
+      "ccl_power.c: ccl_sigmaV(): linear power spctrum has not been computed!");
+    return NAN;
+  }
+  if (!cosmo->computed_growth){
+    *status = CCL_ERROR_GROWTH_INIT;
+    ccl_cosmology_set_status_message(
+      cosmo,
+      "ccl_power.c: ccl_sigmaV(): growth factor splines have not been prcomputed!");
+    return NAN;
+  }
+
   SigmaV_pars par;
   par.status = status;
 
@@ -731,7 +761,6 @@ TASK: compute sigma8, the variance in the *linear* density field at a=1
 smoothed with a tophat filter of comoving size 8 Mpc/h
 */
 
-double ccl_sigma8(ccl_cosmology *cosmo, int *status)
-{
-  return ccl_sigmaR(cosmo,8/cosmo->params.h, 1.,status);
+double ccl_sigma8(ccl_cosmology *cosmo, int *status) {
+  return ccl_sigmaR(cosmo, 8/cosmo->params.h, 1., status);
 }

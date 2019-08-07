@@ -156,11 +156,10 @@ void ccl_angular_cl_limber(ccl_cosmology *cosmo,
 
   // make sure to init core things for safety
   if (!cosmo->computed_distances) {
-    ccl_cosmology_compute_distances(cosmo, status);
-  }
-  if (!cosmo->computed_distances) {
-    if (*status == 0)
-      *status = CCL_ERROR_INTEG;
+    *status = CCL_ERROR_DISTANCES_INIT;
+    ccl_cosmology_set_status_message(
+      cosmo,
+      "ccl_cls.c: ccl_angular_cl_limber(): distance splines have not been prcomputed!");
     return;
   }
 
@@ -168,11 +167,10 @@ void ccl_angular_cl_limber(ccl_cosmology *cosmo,
   ccl_f2d_t *psp_use;
   if (psp == NULL) {
     if (!cosmo->computed_nonlin_power) {
-      ccl_cosmology_compute_nonlin_power(cosmo, status);
-    }
-    if (!cosmo->computed_nonlin_power) {
-      if (*status == 0)
-        *status = CCL_ERROR_INTEG;
+      *status = CCL_ERROR_NONLIN_POWER_INIT;
+      ccl_cosmology_set_status_message(
+        cosmo,
+        "ccl_cls.c: ccl_angular_cl_limber(): non-linear power spctrum has not been computed!");
       return;
     }
     psp_use = cosmo->data.p_nl;

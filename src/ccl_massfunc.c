@@ -364,9 +364,6 @@ static double massfunc_f(ccl_cosmology *cosmo, double halomass, double a, double
 
     // Compute HMF parameter (alpha, beta, gamma, phi) splines if they haven't
     // been computed already
-    if (!cosmo->computed_hmfparams) {
-      ccl_cosmology_compute_hmfparams(cosmo, status);
-    }
     gslstatus = gsl_spline_eval_e(cosmo->data.alphahmf, log10(odelta), NULL, &fit_A);
     gslstatus |= gsl_spline_eval_e(cosmo->data.betahmf, log10(odelta), NULL, &fit_a);
     gslstatus |= gsl_spline_eval_e(cosmo->data.gammahmf, log10(odelta), NULL, &fit_b);
@@ -395,9 +392,6 @@ static double massfunc_f(ccl_cosmology *cosmo, double halomass, double a, double
       return 0;
     }
 
-    if (!cosmo->computed_hmfparams) {
-        ccl_cosmology_compute_hmfparams(cosmo, status);
-    }
     //critical collapse overdensity assumed in this model
     delta_c_Tinker = 1.686;
     nu = delta_c_Tinker/(sigma);
@@ -663,12 +657,16 @@ static double ccl_dlninvsig_dlogm(ccl_cosmology *cosmo, double halomass, int*sta
 	  return NAN;
   }
 
+  // Check if sigma has already been calculated
   if (!cosmo->computed_sigma) {
-    ccl_cosmology_compute_sigma(cosmo, status);
+    *status = CCL_ERROR_SIGMA_INIT;
+    ccl_cosmology_set_status_message(
+      cosmo,
+      "ccl_massfunc.c: ccl_dlninvsig_dlogm(): linear power spctrum has not been computed!");
+    return NAN;
   }
 
   double val, logmass;
-
   logmass = log10(halomass);
 
   int gslstatus = gsl_spline_eval_e(cosmo->data.dlnsigma_dlogm, logmass, NULL, &val);
@@ -706,6 +704,14 @@ double ccl_massfunc(ccl_cosmology *cosmo, double halomass, double a, double odel
 	  return NAN;
   }
 
+  if (!cosmo->computed_hmfparams) {
+    *status = CCL_ERROR_HMF_INIT;
+    ccl_cosmology_set_status_message(
+      cosmo,
+      "ccl_massfunc.c: ccl_massfunc(): mass function parameters splines have not been computed!");
+    return NAN;
+  }
+
   double f, rho_m;
 
   rho_m = ccl_constants.RHO_CRITICAL*cosmo->params.Omega_m*cosmo->params.h*cosmo->params.h;
@@ -730,10 +736,6 @@ double ccl_halo_bias(ccl_cosmology *cosmo, double halomass, double a, double ode
 	  *status = CCL_ERROR_NOT_IMPLEMENTED;
 	  strcpy(cosmo->status_message,"ccl_massfunc.c: ccl_halobias(): The halo bias is not implemented the mu / Sigma modified gravity parameterisation.\n");
 	  return NAN;
-  }
-
-  if (!cosmo->computed_sigma) {
-    ccl_cosmology_compute_sigma(cosmo, status);
   }
 
   double f;
@@ -774,7 +776,18 @@ double ccl_sigmaM(ccl_cosmology *cosmo, double halomass, double a, int *status)
   double sigmaM;
   // Check if sigma has already been calculated
   if (!cosmo->computed_sigma) {
-    ccl_cosmology_compute_sigma(cosmo, status);
+    *status = CCL_ERROR_SIGMA_INIT;
+    ccl_cosmology_set_status_message(
+      cosmo,
+      "ccl_massfunc.c: ccl_sigmaM(): linear power spctrum has not been computed!");
+    return NAN;
+  }
+  if (!cosmo->computed_growth){
+    *status = CCL_ERROR_GROWTH_INIT;
+    ccl_cosmology_set_status_message(
+      cosmo,
+      "ccl_massfunc.c: ccl_sigmaM(): growth factor splines have not been prcomputed!");
+    return NAN;
   }
 
   double lgsigmaM;

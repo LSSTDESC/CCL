@@ -343,7 +343,9 @@ double ccl_halomodel_matter_power(ccl_cosmology *cosmo, double k, double a, int 
   // Is turned on:
   if (fabs(cosmo->params.mu_0)>1e-14 || fabs(cosmo->params.sigma_0)>1e-14){
 	  *status = CCL_ERROR_NOT_IMPLEMENTED;
-	  strcpy(cosmo->status_message,"ccl_halofmod.c: ccl_halomodel_matter_power(): The halo model power spectrum is not implemented the mu / Sigma modified gravity parameterisation.\n");
+	  strcpy(cosmo->status_message,
+           "ccl_halofmod.c: ccl_halomodel_matter_power(): The halo model power spectrum "
+           "is not implemented the mu / Sigma modified gravity parameterisation.\n");
 	  return NAN;
   }
 

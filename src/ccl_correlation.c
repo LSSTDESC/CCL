@@ -461,6 +461,14 @@ void ccl_correlation_3d(ccl_cosmology *cosmo, double a,
   int i,N_ARR;
   double *k_arr,*pk_arr,*r_arr,*xi_arr;
 
+  if (!cosmo->computed_nonlin_power) {
+    *status = CCL_ERROR_NONLIN_POWER_INIT;
+    ccl_cosmology_set_status_message(
+      cosmo,
+      "ccl_correlation.c: ccl_correlation_3d(): non-linear power spctrum has not been computed!");
+    return;
+  }
+
   //number of data points for k and pk array
   N_ARR=(int)(cosmo->spline_params.N_K_3DCOR*log10(cosmo->spline_params.K_MAX/cosmo->spline_params.K_MIN));
 
@@ -545,6 +553,14 @@ void ccl_correlation_multipole(ccl_cosmology *cosmo, double a, double beta,
                                int *status) {
   int i, N_ARR;
   double *k_arr, *pk_arr, *s_arr, *xi_arr, *xi_arr0;
+
+  if (!cosmo->computed_nonlin_power) {
+    *status = CCL_ERROR_NONLIN_POWER_INIT;
+    ccl_cosmology_set_status_message(
+      cosmo,
+      "ccl_correlation.c: ccl_correlation_multipole(): non-linear power spctrum has not been computed!");
+    return;
+  }
 
   N_ARR = (int)(cosmo->spline_params.N_K_3DCOR * log10(cosmo->spline_params.K_MAX / cosmo->spline_params.K_MIN));
 
@@ -655,6 +671,14 @@ void ccl_correlation_multipole_spline(ccl_cosmology *cosmo, double a,
                                       int *status) {
   int i, N_ARR;
   double *k_arr, *pk_arr, *s_arr, *xi_arr, *xi_arr0, *xi_arr2, *xi_arr4;
+
+  if (!cosmo->computed_nonlin_power) {
+    *status = CCL_ERROR_NONLIN_POWER_INIT;
+    ccl_cosmology_set_status_message(
+      cosmo,
+      "ccl_correlation.c: ccl_correlation_multipole_spline(): non-linear power spctrum has not been computed!");
+    return;
+  }
 
   N_ARR = (int)(cosmo->spline_params.N_K_3DCOR * log10(cosmo->spline_params.K_MAX / cosmo->spline_params.K_MIN));
 
@@ -841,6 +865,14 @@ void ccl_correlation_3dRsd(ccl_cosmology *cosmo, double a, int n_s, double *s,
   int i;
   double *xi_arr0, *xi_arr2, *xi_arr4;
 
+  if (!cosmo->computed_nonlin_power) {
+    *status = CCL_ERROR_NONLIN_POWER_INIT;
+    ccl_cosmology_set_status_message(
+      cosmo,
+      "ccl_correlation.c: ccl_correlation_3dRsd(): non-linear power spctrum has not been computed!");
+    return;
+  }
+
   if (use_spline == 0) {
     xi_arr0 = malloc(sizeof(double) * n_s);
     if (xi_arr0 == NULL) {
@@ -930,6 +962,14 @@ void ccl_correlation_pi_sigma(ccl_cosmology *cosmo, double a, double beta,
                               int use_spline, int *status) {
   int i;
   double *mu_arr, *s_arr, *xi_arr;
+
+  if (!cosmo->computed_nonlin_power) {
+    *status = CCL_ERROR_NONLIN_POWER_INIT;
+    ccl_cosmology_set_status_message(
+      cosmo,
+      "ccl_correlation.c: ccl_correlation_pi_sigma(): non-linear power spctrum has not been computed!");
+    return;
+  }
 
   mu_arr = malloc(sizeof(double) * n_sig);
   if (mu_arr == NULL) {

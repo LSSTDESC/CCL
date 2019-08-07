@@ -23,7 +23,9 @@ static double helper_fx(double x){
 //nr: number of radii for calculation
 //rho_r: stores densities at r
 //returns void
-void ccl_halo_profile_nfw(ccl_cosmology *cosmo, double c, double halomass, double massdef_delta_m, double a, double *r, int nr, double *rho_r, int *status){
+void ccl_halo_profile_nfw(ccl_cosmology *cosmo, double c, double halomass,
+                          double massdef_delta_m, double a, double *r, int nr,
+                          double *rho_r, int *status) {
 
     //haloradius: halo radius for mass definition
     //rs: scale radius
@@ -55,7 +57,10 @@ void ccl_halo_profile_nfw(ccl_cosmology *cosmo, double c, double halomass, doubl
 //nr: number of radii for calculation
 //sigma_r: stores surface mass density (integrated along line of sight) at given projected rp
 //returns void
-void ccl_projected_halo_profile_nfw(ccl_cosmology *cosmo, double c, double halomass, double massdef_delta_m, double a, double *rp, int nr, double *sigma_r, int *status){
+void ccl_projected_halo_profile_nfw(ccl_cosmology *cosmo, double c,
+                                    double halomass, double massdef_delta_m,
+                                    double a, double *rp, int nr, double *sigma_r,
+                                    int *status) {
 
     //haloradius: halo radius for mass definition
     //rs: scale radius
@@ -210,7 +215,9 @@ static double integrate_einasto(ccl_cosmology *cosmo, double R, double alpha, do
 //nr: number of radii for calculation
 //rho_r: stores densities at r
 //returns void
-void ccl_halo_profile_einasto(ccl_cosmology *cosmo, double c, double halomass, double massdef_delta_m, double a, double *r, int nr, double *rho_r, int *status){
+void ccl_halo_profile_einasto(ccl_cosmology *cosmo, double c, double halomass,
+                              double massdef_delta_m, double a, double *r, int nr,
+                              double *rho_r, int *status) {
 
     //haloradius: halo radius for mass definition
     //rs: scale radius
@@ -320,7 +327,9 @@ static double integrate_hernquist(ccl_cosmology *cosmo, double R, double rs, int
 //nr: number of radii for calculation
 //rho_r: stores densities at r
 //returns void
-void ccl_halo_profile_hernquist(ccl_cosmology *cosmo, double c, double halomass, double massdef_delta_m, double a, double *r, int nr, double *rho_r, int *status){
+void ccl_halo_profile_hernquist(ccl_cosmology *cosmo, double c, double halomass,
+                                double massdef_delta_m, double a, double *r, int nr,
+                                double *rho_r, int *status) {
 
     //haloradius: halo radius for mass definition
     //rs: scale radius
