@@ -28,14 +28,15 @@ install:
 script:
   - flake8 pyccl
   - flake8 --exclude=data benchmarks
-  - mkdir -p build && cd build && cmake -DFORCE_OPENMP=YES -DCMAKE_VERBOSE_MAKEFILE=ON .. && make && sudo make install && cd ..
-  - OMP_NUM_THREADS=2 ./build/check_ccl
+  - "[[ `grep \"$(printf '\t')\" pyccl/*.py` == \"\" ]]"  # no tabs in python
+  - mkdir -p build && cd build && cmake -DFORCE_OPENMP=YES -DCMAKE_VERBOSE_MAKEFILE=ON .. && make && cd ..
+  - CLASS_PARAM_DIR=./build/extern/share/class/ OMP_NUM_THREADS=2 ./build/check_ccl
   - rm -rf build
   - mkdir -p build && cd build && cmake -DFORCE_OPENMP=YES -DCMAKE_VERBOSE_MAKEFILE=ON .. && cd ..
-  - python setup.py install
-  - OMP_NUM_THREADS=2 nosetests tests/run_tests.py --all --debug --detailed-errors --verbose --process-restartworker
-    --with-coverage --cover-package=pyccl
-  - OMP_NUM_THREADS=2 pytest -vv benchmarks
+  - python setup.py build
+  - python setup.py develop
+  - OMP_NUM_THREADS=2 pytest -vv pyccl --cov=pyccl
+  - OMP_NUM_THREADS=2 pytest -vv benchmarks --cov=pyccl --cov-append
 
 after_success:
   - coveralls
