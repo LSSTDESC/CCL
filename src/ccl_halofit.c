@@ -95,6 +95,7 @@ static double w0eff_func(double w0eff, void *p) {
     return NAN;
   }
 
+  ccl_parameters_free(&(cosmo_w0eff->params));
   ccl_cosmology_free(cosmo_w0eff);
   return chi_drag_w0eff - hfd->chi_drag;
 }
@@ -119,6 +120,7 @@ static double get_w0eff(double a, struct hf_model_match_data data) {
       data.cosmo,
       "ccl_halofit.c: ccl_halofit_struct_new(): "
       "could not compute chi_drag for cosmology\n");
+    return NAN;
   }
 
   F.function = &w0eff_func;
@@ -452,6 +454,7 @@ halofit_struct* ccl_halofit_struct_new(ccl_cosmology *cosmo, int *status) {
           ccl_omega_x(cosmo_w0eff, a_vec[i], ccl_species_nu_label, status);
         vals_de[i] = ccl_omega_x(cosmo_w0eff, a_vec[i], ccl_species_l_label, status);
 
+        ccl_parameters_free(&(cosmo_w0eff->params));
         ccl_cosmology_free(cosmo_w0eff);
         cosmo_w0eff = NULL;
 
@@ -813,8 +816,10 @@ halofit_struct* ccl_halofit_struct_new(ccl_cosmology *cosmo, int *status) {
   free(vals);
   free(vals_om);
   free(vals_de);
-  if (cosmo_w0eff != NULL)
+  if (cosmo_w0eff != NULL) {
+    ccl_parameters_free(&(cosmo_w0eff->params));
     ccl_cosmology_free(cosmo_w0eff);
+  }
 
   return hf;
 }

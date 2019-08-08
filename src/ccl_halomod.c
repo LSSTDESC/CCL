@@ -12,7 +12,7 @@
 
 // Analytic FT of NFW profile, from Cooray & Sheth (2002; Section 3 of https://arxiv.org/abs/astro-ph/0206508)
 // Normalised such that U(k=0)=1
-static double u_nfw_c(ccl_cosmology *cosmo, double rv, double c, double k, int *status){
+static double u_nfw_c(ccl_cosmology *cosmo, double rv, double c, double k, int *status) {
 
   double rs, ks;
   double f1, f2, f3, fc;
@@ -47,7 +47,8 @@ static double u_nfw_c(ccl_cosmology *cosmo, double rv, double c, double k, int *
 INPUT: cosmology, a halo mass [Msun], scale factor, halo definition, concentration model label
 TASK: Computes halo concentration; the ratio of virial raidus to scale radius for an NFW halo.
 */
-double ccl_halo_concentration(ccl_cosmology *cosmo, double halomass, double a, double odelta, int *status){
+double ccl_halo_concentration(ccl_cosmology *cosmo, double halomass,
+                              double a, double odelta, int *status) {
 
   double gz, g0, nu, delta_c, a_form;
   double Mpiv, A, B, C;
@@ -96,7 +97,10 @@ double ccl_halo_concentration(ccl_cosmology *cosmo, double halomass, double a, d
     } else {
 
       *status = CCL_ERROR_CONC_DV;
-      ccl_cosmology_set_status_message(cosmo, "ccl_halomod.c: halo_concentration(): Duffy (2008) virial concentration only valid for virial Delta_v or 200\n");
+      ccl_cosmology_set_status_message(
+        cosmo,
+        "ccl_halomod.c: halo_concentration(): Duffy (2008) virial "
+        "concentration only valid for virial Delta_v or 200\n");
       return NAN;
 
     }
@@ -117,8 +121,9 @@ double ccl_halo_concentration(ccl_cosmology *cosmo, double halomass, double a, d
 }
 
 // Fourier Transforms of halo profiles
-static double window_function(ccl_cosmology *cosmo, double m, double k, double a, double odelta, ccl_win_label label, int *status){
-
+static double window_function(ccl_cosmology *cosmo, double m, double k,
+                              double a, double odelta, ccl_win_label label,
+                              int *status) {
   double rho_matter, c, rv;
 
   switch(label){
@@ -235,7 +240,7 @@ static double two_halo_integrand(double log10mass, void *params){
   double odelta = Dv_BryanNorman(p->cosmo, p->a, p->status); // Virial density for haloes
 
   // The normalised Fourier Transform of a halo density profile
-  double wk = window_function(p->cosmo,halomass, p->k, p->a, odelta, ccl_nfw, p->status);
+  double wk = window_function(p->cosmo, halomass, p->k, p->a, odelta, ccl_nfw, p->status);
 
   // Fairly sure that there should be no ln(10) factor should be here since the integration is being specified in log10 range
   double dn_dlogM = ccl_massfunc(p->cosmo, halomass, p->a, odelta, p->status);

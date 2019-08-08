@@ -339,7 +339,8 @@ static double massfunc_f(ccl_cosmology *cosmo, double halomass, double a, double
     // Check if odelta is outside the interpolated range
     if (odelta != Dv_BryanNorman(cosmo, a, status)) {
       *status = CCL_ERROR_HMF_DV;
-      ccl_cosmology_set_status_message(cosmo, "ccl_massfunc.c: massfunc_f(): Sheth-Tormen called with not virial Delta_v\n");
+      ccl_cosmology_set_status_message(
+        cosmo, "ccl_massfunc.c: massfunc_f(): Sheth-Tormen called with not virial Delta_v\n");
       return NAN;
     }
 
@@ -358,7 +359,18 @@ static double massfunc_f(ccl_cosmology *cosmo, double halomass, double a, double
     // Check if odelta is outside the interpolated range
     if ((odelta < 200) || (odelta > 3200)) {
       *status = CCL_ERROR_HMF_INTERP;
-      ccl_cosmology_set_status_message(cosmo, "ccl_massfunc.c: massfunc_f(): Tinker 2008 only supported in range of Delta = 200 to Delta = 3200.\n");
+      ccl_cosmology_set_status_message(
+        cosmo,
+        "ccl_massfunc.c: massfunc_f(): Tinker 2008 only "
+        "supported in range of Delta = 200 to Delta = 3200.\n");
+      return NAN;
+    }
+
+    if (!cosmo->computed_hmfparams) {
+      *status = CCL_ERROR_HMF_INIT;
+      ccl_cosmology_set_status_message(
+        cosmo,
+        "ccl_massfunc.c: massfunc_f(): mass function parameters splines have not been computed!");
       return NAN;
     }
 
@@ -374,9 +386,10 @@ static double massfunc_f(ccl_cosmology *cosmo, double halomass, double a, double
     fit_a = fit_a*pow(a, 0.06);
     fit_b = fit_b*pow(a, fit_d);
     if(gslstatus != GSL_SUCCESS) {
-      ccl_raise_gsl_warning(gslstatus, "ccl_massfunc.c: ccl_massfunc_f():");
+      ccl_raise_gsl_warning(gslstatus, "ccl_massfunc.c: massfunc_f():");
       *status |= gslstatus;
-      ccl_cosmology_set_status_message(cosmo, "ccl_massfunc.c: ccl_massfunc_f(): interpolation error for Tinker MF\n");
+      ccl_cosmology_set_status_message(
+        cosmo, "ccl_massfunc.c: massfunc_f(): interpolation error for Tinker MF\n");
       return NAN;
     }
     return fit_A*(pow(sigma/fit_b,-fit_a)+1.0)*exp(-fit_c/sigma/sigma);
@@ -388,13 +401,24 @@ static double massfunc_f(ccl_cosmology *cosmo, double halomass, double a, double
     // Check if odelta is outside the interpolated range
     if ((odelta < 200) || (odelta > 3200)) {
       *status = CCL_ERROR_HMF_INTERP;
-      ccl_cosmology_set_status_message(cosmo, "ccl_massfunc.c: massfunc_f(): Tinker 2010 only supported in range of Delta = 200 to Delta = 3200.\n");
+      ccl_cosmology_set_status_message(
+        cosmo,
+        "ccl_massfunc.c: massfunc_f(): Tinker 2010 only "
+        "supported in range of Delta = 200 to Delta = 3200.\n");
       return 0;
     }
 
     //critical collapse overdensity assumed in this model
     delta_c_Tinker = 1.686;
     nu = delta_c_Tinker/(sigma);
+
+    if (!cosmo->computed_hmfparams) {
+      *status = CCL_ERROR_HMF_INIT;
+      ccl_cosmology_set_status_message(
+        cosmo,
+        "ccl_massfunc.c: massfunc_f(): mass function parameters splines have not been computed!");
+      return NAN;
+    }
 
     gslstatus = gsl_spline_eval_e(cosmo->data.alphahmf, log10(odelta), NULL, &fit_A); //alpha in Eq. 8
     gslstatus |= gsl_spline_eval_e(cosmo->data.etahmf, log10(odelta), NULL, &fit_a); //eta in Eq. 8
@@ -407,9 +431,10 @@ static double massfunc_f(ccl_cosmology *cosmo, double halomass, double a, double
     fit_c *=pow(a, 0.01);
     fit_d *=pow(a, 0.08);
     if(gslstatus != GSL_SUCCESS) {
-      ccl_raise_gsl_warning(gslstatus, "ccl_massfunc.c: ccl_massfunc_f():");
+      ccl_raise_gsl_warning(gslstatus, "ccl_massfunc.c: massfunc_f():");
       *status |= gslstatus;
-      ccl_cosmology_set_status_message(cosmo, "ccl_massfunc.c: ccl_massfunc_f(): interpolation error for Tinker 2010 MF\n");
+      ccl_cosmology_set_status_message(
+        cosmo, "ccl_massfunc.c: massfunc_f(): interpolation error for Tinker 2010 MF\n");
       return NAN;
     }
     return nu*fit_A*(1.+pow(fit_b*nu,-2.*fit_d))*pow(nu, 2.*fit_a)*exp(-0.5*fit_c*nu*nu);
@@ -418,7 +443,8 @@ static double massfunc_f(ccl_cosmology *cosmo, double halomass, double a, double
   case ccl_watson:
     if(odelta!=200.) {
       *status = CCL_ERROR_HMF_INTERP;
-      ccl_cosmology_set_status_message(cosmo, "ccl_massfunc.c: ccl_massfunc_f(): Watson HMF only supported for Delta = 200.\n");
+      ccl_cosmology_set_status_message(
+        cosmo, "ccl_massfunc.c: massfunc_f(): Watson HMF only supported for Delta = 200.\n");
       return NAN;
     }
     // these parameters from: Angulo et al 2012 (arxiv 1203.3216 )
@@ -433,7 +459,8 @@ static double massfunc_f(ccl_cosmology *cosmo, double halomass, double a, double
   case ccl_angulo:
     if(odelta!=200.) {
       *status = CCL_ERROR_HMF_INTERP;
-      ccl_cosmology_set_status_message(cosmo, "ccl_massfunc.c: ccl_massfunc_f(): Angulo HMF only supported for Delta = 200.\n");
+      ccl_cosmology_set_status_message(
+        cosmo, "ccl_massfunc.c: massfunc_f(): Angulo HMF only supported for Delta = 200.\n");
       return NAN;
     }
     // these parameters from: Watson et al 2012 (arxiv 1212.0095 )
@@ -447,7 +474,7 @@ static double massfunc_f(ccl_cosmology *cosmo, double halomass, double a, double
   default:
     *status = CCL_ERROR_MF;
     ccl_cosmology_set_status_message(cosmo ,
-	    "ccl_massfunc.c: ccl_massfunc(): Unknown or non-implemented mass function method: %d \n",
+	    "ccl_massfunc.c: massfunc_f(): Unknown or non-implemented mass function method: %d \n",
 	    cosmo->config.mass_function_method);
     return NAN;
   }
@@ -468,7 +495,8 @@ static double ccl_halo_b1(ccl_cosmology *cosmo, double halomass, double a, doubl
     // Check if Delta_v is the virial Delta_v
     if (odelta != Dv_BryanNorman(cosmo, a, status)) {
       *status = CCL_ERROR_HMF_DV;
-      ccl_cosmology_set_status_message(cosmo, "ccl_massfunc.c: halo_b1(): Sheth-Tormen called with not virial Delta_v\n");
+      ccl_cosmology_set_status_message(
+        cosmo, "ccl_massfunc.c: halo_b1(): Sheth-Tormen called with not virial Delta_v\n");
       return NAN;
     }
 
@@ -693,23 +721,15 @@ double ccl_massfunc(ccl_cosmology *cosmo, double halomass, double a, double odel
   double logmass;
   logmass = log10(halomass);
   if (logmass > cosmo->spline_params.LOGM_SPLINE_MAX || logmass < cosmo->spline_params.LOGM_SPLINE_MIN){
-          *status = CCL_ERROR_HMF_INTERP;
-          ccl_cosmology_set_status_message(cosmo, "ccl_massfunc(): The specified halo mass is outside of the range.");
-          return NAN;
+    *status = CCL_ERROR_HMF_INTERP;
+    ccl_cosmology_set_status_message(cosmo, "ccl_massfunc(): The specified halo mass is outside of the range.");
+    return NAN;
   }
 
   if (fabs(cosmo->params.mu_0)>1e-14 || fabs(cosmo->params.sigma_0)>1e-14){
 	  *status = CCL_ERROR_NOT_IMPLEMENTED;
 	  strcpy(cosmo->status_message,"ccl_massfunc.c: ccl_massfunc(): The halo mass funcion is not implemented the mu / Sigma modified gravity parameterisation.\n");
 	  return NAN;
-  }
-
-  if (!cosmo->computed_hmfparams) {
-    *status = CCL_ERROR_HMF_INIT;
-    ccl_cosmology_set_status_message(
-      cosmo,
-      "ccl_massfunc.c: ccl_massfunc(): mass function parameters splines have not been computed!");
-    return NAN;
   }
 
   double f, rho_m;

@@ -494,35 +494,31 @@ INPUT: ccl_cosmology * cosmo
 TASK: compute linear power spectrum
 */
 void ccl_cosmology_compute_nonlin_power(ccl_cosmology* cosmo, int* status) {
-  if (cosmo->computed_nonlin_power) return;
+  if ((fabs(cosmo->params.mu_0)>1e-14 || fabs(cosmo->params.sigma_0)>1e-14) &&
+      cosmo->config.matter_power_spectrum_method != ccl_linear) {
+    *status = CCL_ERROR_NOT_IMPLEMENTED;
+    ccl_cosmology_set_status_message(
+      cosmo,
+      "ccl_power.c: ccl_cosmology_compute_power(): The power spectrum in the "
+      "mu / Sigma modified gravity parameterisation is only implemented with "
+      "the linear power spectrum.\n");
+    return;
+  }
 
-  if (!cosmo->computed_linear_power)
-    ccl_cosmology_compute_linear_power(cosmo, status);
+  if (cosmo->computed_nonlin_power) return;
 
   #pragma omp master
   {
     // if everything is OK, get the non-linear P(K)
     if (*status == 0) {
 
-      if ((fabs(cosmo->params.mu_0)>1e-14 || fabs(cosmo->params.sigma_0)>1e-14) &&
-          cosmo->config.matter_power_spectrum_method != ccl_linear) {
-        *status = CCL_ERROR_NOT_IMPLEMENTED;
-        ccl_cosmology_set_status_message(
-          cosmo,
-          "ccl_power.c: ccl_cosmology_compute_power(): The power spectrum in the "
-          "mu / Sigma modified gravity parameterisation is only implemented with "
-          "the linear power spectrum.\n");
-      }
-
       switch (cosmo->config.matter_power_spectrum_method) {
 
         case ccl_linear: {
-          // temporarily set computed_power to true
           ccl_cosmology_spline_nonlinpower(cosmo, linear_power, NULL, status);}
           break;
 
         case ccl_halofit: {
-          // temporarily set computed_power to true
           halofit_struct *hf = NULL;
           hf = ccl_halofit_struct_new(cosmo, status);
           if (*status == 0 && hf != NULL)
@@ -531,12 +527,10 @@ void ccl_cosmology_compute_nonlin_power(ccl_cosmology* cosmo, int* status) {
           break;
 
         case ccl_halo_model: {
-          // temporarily set computed_power to true
           ccl_cosmology_spline_nonlinpower(cosmo, halomodel_power, NULL, status);}
           break;
 
         case ccl_emu: {
-          // special case due to parameter handling and ranges
           ccl_cosmology_compute_power_emu(cosmo, status);}
           break;
 
@@ -571,7 +565,15 @@ double ccl_linear_matter_power(ccl_cosmology* cosmo, double k, double a, int* st
     return NAN;
   }
 
-  return ccl_f2d_t_eval(cosmo->data.p_lin,log(k),a,cosmo,status);
+  if (cosmo->config.transfer_function_method != ccl_transfer_none)
+    return ccl_f2d_t_eval(cosmo->data.p_lin,log(k),a,cosmo,status);
+  else {
+    *status = CCL_ERROR_INCONSISTENT;
+    ccl_cosmology_set_status_message(
+      cosmo,
+      "ccl_power.c: ccl_linear_matter_power(): linear power spctrum is None!");
+    return NAN;
+  }
 }
 
 /*------ ROUTINE: ccl_nonlin_matter_power -----

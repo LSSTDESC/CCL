@@ -2,6 +2,8 @@ from __future__ import print_function
 import pickle
 import tempfile
 
+import pytest
+
 import numpy as np
 from numpy.testing import assert_raises, assert_, assert_no_warnings
 
@@ -66,18 +68,23 @@ def test_cosmology_output():
     assert_no_warnings(print, cosmo)
 
     # Test status methods for different precomputable quantities
-    assert_(cosmo.has_distances() is False)
-    assert_(cosmo.has_growth() is False)
-    assert_(cosmo.has_power() is False)
-    assert_(cosmo.has_sigma() is False)
+    assert_(cosmo.has_distances is False)
+    assert_(cosmo.has_growth is False)
+    assert_(cosmo.has_linear_power is False)
+    assert_(cosmo.has_nonlin_power is False)
+    assert_(cosmo.has_sigma is False)
 
     # Check that quantities can be precomputed
     assert_no_warnings(cosmo.compute_distances)
     assert_no_warnings(cosmo.compute_growth)
-    assert_no_warnings(cosmo.compute_power)
-    assert_(cosmo.has_distances() is True)
-    assert_(cosmo.has_growth() is True)
-    assert_(cosmo.has_power() is True)
+    assert_no_warnings(cosmo.compute_linear_power)
+    assert_no_warnings(cosmo.compute_nonlin_power)
+    assert_no_warnings(cosmo.compute_sigma)
+    assert_(cosmo.has_distances is True)
+    assert_(cosmo.has_growth is True)
+    assert_(cosmo.has_linear_power is True)
+    assert_(cosmo.has_nonlin_power is True)
+    assert_(cosmo.has_sigma is True)
 
 
 def test_cosmology_pickles():
@@ -142,11 +149,13 @@ def test_cosmology_context():
             m_nu=np.array([0.02, 0.1, 0.05]), mnu_type='list',
             z_mg=np.array([0.0, 1.0]), df_mg=np.array([0.01, 0.0])) as cosmo:
         # make sure it works
-        assert not cosmo.has_distances()
+        assert not cosmo.has_distances
         ccl.comoving_radial_distance(cosmo, 0.5)
-        assert cosmo.has_distances()
+        assert cosmo.has_distances
 
     # make sure it does not!
     assert_(not hasattr(cosmo, "cosmo"))
     assert_(not hasattr(cosmo, "_params"))
-    assert_raises(AttributeError, cosmo.has_growth)
+
+    with pytest.raises(AttributeError):
+        cosmo.has_growth

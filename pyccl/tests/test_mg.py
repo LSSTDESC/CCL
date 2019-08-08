@@ -49,4 +49,4 @@ def test_mu_sigma_matter_power_err(mp):
             transfer_function=None,
             matter_power_spectrum=mp
         )
-        ccl.linear_matter_power(cosmo, 1, 1)
+        ccl.nonlin_matter_power(cosmo, 1, 1)
