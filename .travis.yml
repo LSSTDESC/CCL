@@ -27,13 +27,14 @@ install:
 script:
   - flake8 pyccl
   - flake8 --exclude=data benchmarks
-  - mkdir -p build && cd build && cmake .. && make && sudo make install && cd ..
-  - ./build/check_ccl
+  - "[[ `grep \"$(printf '\t')\" pyccl/*.py` == \"\" ]]"  # no tabs in python
+  - mkdir -p build && cd build && cmake .. && make && cd ..
+  - CLASS_PARAM_DIR=./build/extern/share/class/ ./build/check_ccl
   - rm -rf build
-  - python setup.py install
-  - nosetests tests/run_tests.py --all --debug --detailed-errors --verbose --process-restartworker
-    --with-coverage --cover-package=pyccl
-  - pytest -vv benchmarks
+  - python setup.py build
+  - python setup.py develop
+  - pytest -vv pyccl --cov=pyccl
+  - pytest -vv benchmarks --cov=pyccl --cov-append
 
 after_success:
   - coveralls

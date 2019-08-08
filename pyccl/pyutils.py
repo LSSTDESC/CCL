@@ -27,44 +27,44 @@ def debug_mode(debug):
 
 # This function is not used anymore so we don't want Coveralls to
 # include it, but we keep it in case it is needed at some point.
-def _vectorize_fn_simple(fn, fn_vec, x,
-                         returns_status=True):  # pragma: no cover
-    """Generic wrapper to allow vectorized (1D array) access to CCL functions with
-    one vector argument (but no dependence on cosmology).
-
-    Args:
-        fn (callable): Function with a single argument.
-        fn_vec (callable): Function that has a vectorized implementation in
-                           a .i file.
-        x (float or array_like): Argument to fn.
-        returns_stats (bool): Indicates whether fn returns a status.
-
-    """
-    status = 0
-    if isinstance(x, int):
-        x = float(x)
-    if isinstance(x, float):
-        # Use single-value function
-        if returns_status:
-            f, status = fn(x, status)
-        else:
-            f = fn(x)
-    elif isinstance(x, np.ndarray):
-        # Use vectorised function
-        if returns_status:
-            f, status = fn_vec(x, x.size, status)
-        else:
-            f = fn_vec(x, x.size)
-    else:
-        # Use vectorised function
-        if returns_status:
-            f, status = fn_vec(x, len(x), status)
-        else:
-            f = fn_vec(x, len(x))
-
-    # Check result and return
-    check(status)
-    return f
+# def _vectorize_fn_simple(fn, fn_vec, x,
+#                          returns_status=True):  # pragma: no cover
+#     """Generic wrapper to allow vectorized (1D array) access to CCL
+#     functions with one vector argument (but no dependence on cosmology).
+#
+#     Args:
+#         fn (callable): Function with a single argument.
+#         fn_vec (callable): Function that has a vectorized implementation in
+#                            a .i file.
+#         x (float or array_like): Argument to fn.
+#         returns_stats (bool): Indicates whether fn returns a status.
+#
+#     """
+#     status = 0
+#     if isinstance(x, int):
+#         x = float(x)
+#     if isinstance(x, float):
+#         # Use single-value function
+#         if returns_status:
+#             f, status = fn(x, status)
+#         else:
+#             f = fn(x)
+#     elif isinstance(x, np.ndarray):
+#         # Use vectorised function
+#         if returns_status:
+#             f, status = fn_vec(x, x.size, status)
+#         else:
+#             f = fn_vec(x, x.size)
+#     else:
+#         # Use vectorised function
+#         if returns_status:
+#             f, status = fn_vec(x, len(x), status)
+#         else:
+#             f = fn_vec(x, len(x))
+#
+#     # Check result and return
+#     check(status)
+#     return f
 
 
 def _vectorize_fn(fn, fn_vec, cosmo, x, returns_status=True):

@@ -7,8 +7,8 @@ If you want to make changes to CCL, please follow the procedures listed here
 to make sure that they conform to our coding standards, and that all of the
 necessary files, wrappers etc. are properly updated.
 
-Developers should seek consensus with the CCL team as needed about new features 
-being incorporated (especially for API changes or additions). 
+Developers should seek consensus with the CCL team as needed about new features
+being incorporated (especially for API changes or additions).
 
 Reviewing a pull request (PR) on github
 ---------------------------------------
@@ -18,18 +18,19 @@ Reviewing a pull request (PR) on github
     the root directory).
  4. Make sure the C unit tests pass (i.e. run `build/check_ccl` from the root
     directory successfully).
- 5. Make sure the python tests pass (i.e. run `python setup.py test` from the
+ 5. Make sure the python tests pass (i.e. run `pytest -vv pyccl` from the
     root directory successfully).
- 6. Make sure flake8 is not generating any warnings on pyccl (i.e., run `flake8 pyccl`).
- 7. Look at the code (see "Files changed" on the top of the GitHub pull request
+ 6. Make sure the benchmarks pass (i.e. run `pytest -vv benchmarks` from the
+   root directory successfully).
+ 7. Make sure flake8 is not generating any warnings on pyccl (i.e., run `flake8 pyccl`).
+ 8. Look at the code (see "Files changed" on the top of the GitHub pull request
     page) and check that the changes make sense to you.
- 8. If new science has been implemented, and if possible, try to compare the
+ 9. If new science has been implemented, and if possible, try to compare the
     output of the code against your own predictions. Ask the developer to
     implement appropriate unit tests for it.
- 9. Make sure that the unit tests pass on Travis-CI.
- 10. Make sure that the changes come with documentation, e.g. internally in the
-    C code and through Python docstrings, and that the doxygen documentation
-    has been regenerated. Make sure that example code in the `examples/`
+ 10. Make sure that the unit tests pass on Travis-CI.
+ 11. Make sure that the changes come with documentation, e.g. internally in the
+    C code and through Python docstrings. Make sure that example code in the `examples/`
     directory has been updated appropriately, and that the CCL note has been
     updated if necessary (including your affiliation and contribution in
     `authors.csv`).
@@ -40,8 +41,7 @@ Things to do if you are adding new features to the CCL C lib
     you don't need to do any of this.
  2. When adding a new source file (.c), put it in `src/`. The new file should be
     added to the `CCL_SRC` list in `CMakeLists.txt`.
- 3. When adding a new header file (.h), put it in `include/`. It
-    should also have `doxygen`-compatible documentation strings.
+ 3. When adding a new header file (.h), put it in `include/`.
  4. When adding new unit test files, they should be listed under
     `TEST_SRC` in `CMakeLists.txt`.
  5. Any other new files that should be included with the library (e.g.
@@ -52,8 +52,6 @@ Things to do if you are adding new features to the CCL C lib
     in `doc/0000-ccl_note/`. You will need to edit `main.tex`, compile with `make`,
     and commit your changes, including the updated PDF file. Make sure you update
     your institution and your contribution in `authors.csv` as well.
- 8. If your changes break the CCL API, observe the guidelines in the relevant
-    section below.
 
 Notes on CMake:
  - To install the library, users will run:
@@ -140,15 +138,17 @@ $ python setup.py build
 from the root `CCL` directory.
 
 Once you have finished making changes to the wrapper, check to make sure
-everything is operational by running the Python unit tests in the `tests/`
-directory. From the top-level directory of the CCL sources, and assuming that
+everything is operational by running the Python unit tests.
+From the top-level directory of the CCL sources, and assuming that
 you have recompiled and reinstalled the C library and the Python wrapper, run:
-  `$ python setup.py test`
+  `$ pytest -vv pyccl`
 This may take some time to run in its entirety. If you changed the API, you may
 have to modify the tests to account for this. You should also add your own
 tests for any new functions or behaviors that were added.
 
-The python syntax can be checked with `flake8 pyccl`. You should run this command as part of the tests while developing `pyccl` features. More information on the capabilities of `flake8` can be found in http://flake8.pycqa.org/en/latest/manpage.html.
+The python syntax can be checked with `flake8 pyccl`. You should run this
+command as part of the tests while developing `pyccl` features. More information
+on the capabilities of `flake8` can be found in http://flake8.pycqa.org/en/latest/manpage.html.
 
 Occasionally, modifications made correctly as described above will still not
 function properly. This might be due to multiple `pyccl` installation files not being
@@ -182,7 +182,7 @@ $ python setup.py build
 Debug mode in Python
 --------------------------------------------
 Because of the way the Python wrapper handles exceptions that occur inside the C code, by default
-users will only see error messages for the most recent error to occur. If multiple errors occured
+users will only see error messages for the most recent error to occur. If multiple errors occurred
 during a CCL function call, all but the most recent error message will be overwritten. This can
 make it difficult to debug the root cause of a problem.
 

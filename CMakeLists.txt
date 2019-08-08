@@ -24,40 +24,16 @@ set(CCL_SRC
     src/ccl_tracers.c
     src/fftlog.c)
 
-# Defines list of CCL tests src files
-# ! Add new tests to this list
+# Defines list of CCL C test src files
+# ! Add new tests of the C code to this list
 set(TEST_SRC
     # test core code first
-    benchmarks/ccl_test.c benchmarks/ccl_test_utils.c
-    benchmarks/ccl_test_cosmology.c
-    benchmarks/ccl_test_params.c
-    benchmarks/ccl_test_params_mnu.c
-    benchmarks/ccl_test_MG.c
-
-    # now the distances
-    benchmarks/ccl_test_distances_class_allz.c benchmarks/ccl_test_distances_cosmomad_hiz.c
-    benchmarks/ccl_test_distances_cosmomad_lowz.c
-    benchmarks/ccl_test_distances_astropy_mnu_lowz.c benchmarks/ccl_test_distances_astropy_mnu_hiz.c
-    benchmarks/ccl_test_growth_lowz.c benchmarks/ccl_test_growth_hiz.c benchmarks/ccl_test_growth_allz.c
-
-    # now power spectra stuff in order of use roughly
+    benchmarks/ccl_test.c
+    benchmarks/ccl_test_utils.c
     benchmarks/ccl_test_f2d.c
-    benchmarks/ccl_test_bbks.c benchmarks/ccl_test_eh.c
-    benchmarks/ccl_test_sigmaM.c
-    benchmarks/ccl_test_bcm.c
-    benchmarks/ccl_test_emu.c benchmarks/ccl_test_emu_nu.c
-    benchmarks/ccl_test_power_nu.c
-    benchmarks/ccl_test_halomod.c
-    benchmarks/ccl_test_power_MG.c
 
-    # Cls and correlation functions
-    # Uncomment below when we bring ANGPOW back
+    # Move to python when we bring ANGPOW back
     #benchmarks/ccl_test_angpow.c
-    benchmarks/ccl_test_correlation_3d.c
-    benchmarks/ccl_test_correlation_3dRSD.c
-
-    # halo profiles
-    benchmarks/ccl_test_haloprofile.c
 )
 
 
