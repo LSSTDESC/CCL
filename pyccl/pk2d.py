@@ -124,8 +124,7 @@ class Pk2D(object):
             float or array_like: value(s) of the power spectrum.
         """
         # make sure we have growth factors for extrapolation
-        if not cosmo.has_growth:
-            cosmo.compute_growth()
+        cosmo.compute_growth()
 
         status = 0
         cospass = cosmo.cosmo

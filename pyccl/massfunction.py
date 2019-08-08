@@ -14,8 +14,7 @@ def massfunc(cosmo, halo_mass, a, overdensity=200):
     Returns:
         float or array_like: Halo mass function; dn/dlog10M.
     """
-    if not cosmo.has_sigma:
-        cosmo.compute_sigma()
+    cosmo.compute_sigma()
     return _vectorize_fn4(lib.massfunc,
                           lib.massfunc_vec, cosmo, halo_mass, a, overdensity)
 
@@ -49,8 +48,7 @@ def sigmaM(cosmo, halo_mass, a):
     Returns:
         float or array_like: RMS variance of halo mass.
     """
-    if not cosmo.has_sigma:
-        cosmo.compute_sigma()
+    cosmo.compute_sigma()
     return _vectorize_fn2(lib.sigmaM,
                           lib.sigmaM_vec, cosmo, halo_mass, a)
 
@@ -67,7 +65,6 @@ def halo_bias(cosmo, halo_mass, a, overdensity=200):
     Returns:
         float or array_like: Halo bias.
     """
-    if not cosmo.has_sigma:
-        cosmo.compute_sigma()
+    cosmo.compute_sigma()
     return _vectorize_fn4(lib.halo_bias,
                           lib.halo_bias_vec, cosmo, halo_mass, a, overdensity)

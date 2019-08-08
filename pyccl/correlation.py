@@ -93,8 +93,7 @@ def correlation_3d(cosmo, a, r):
     Returns:
         Value(s) of the correlation function at the input distance(s).
     """
-    if not cosmo.has_nonlin_power:
-        cosmo.compute_nonlin_power()
+    cosmo.compute_nonlin_power()
 
     cosmo_in = cosmo
     cosmo = cosmo.cosmo
@@ -128,8 +127,7 @@ def correlation_multipole(cosmo, a, beta, l, s):
     Returns:
         Value(s) of the correlation function at the input distance(s).
     """
-    if not cosmo.has_nonlin_power:
-        cosmo.compute_nonlin_power()
+    cosmo.compute_nonlin_power()
 
     cosmo_in = cosmo
     cosmo = cosmo.cosmo
@@ -169,8 +167,7 @@ def correlation_3dRsd(cosmo, a, s, mu, beta, use_spline=True):
     Returns:
         Value(s) of the correlation function at the input distance(s) & angle.
     """
-    if not cosmo.has_nonlin_power:
-        cosmo.compute_nonlin_power()
+    cosmo.compute_nonlin_power()
 
     cosmo_in = cosmo
     cosmo = cosmo.cosmo
@@ -205,8 +202,7 @@ def correlation_3dRsd_avgmu(cosmo, a, s, beta):
     Returns:
         Value(s) of the correlation function at the input distance(s) & angle.
     """
-    if not cosmo.has_nonlin_power:
-        cosmo.compute_nonlin_power()
+    cosmo.compute_nonlin_power()
 
     cosmo_in = cosmo
     cosmo = cosmo.cosmo
@@ -242,8 +238,7 @@ def correlation_pi_sigma(cosmo, a, beta, pi, sig, use_spline=True):
     Returns:
         Value(s) of the correlation function at the input pi and sigma.
     """
-    if not cosmo.has_nonlin_power:
-        cosmo.compute_nonlin_power()
+    cosmo.compute_nonlin_power()
 
     cosmo_in = cosmo
     cosmo = cosmo.cosmo

@@ -67,8 +67,7 @@ def get_lensing_kernel(cosmo, dndz, mag_bias=None):
         raise ValueError("dndz needs to be a tuple of two arrays.")
 
     # we need the distance functions at the C layer
-    if not cosmo.has_distances:
-        cosmo.compute_distances()
+    cosmo.compute_distances()
 
     z_n, n = _check_array_params(dndz)
     has_magbias = mag_bias is not None
@@ -300,8 +299,7 @@ class NumberCountsTracer(Tracer):
         self._trc = []
 
         # we need the distance functions at the C layer
-        if not cosmo.has_distances:
-            cosmo.compute_distances()
+        cosmo.compute_distances()
 
         kernel_d = None
         if bias is not None:  # Has density term
@@ -352,8 +350,7 @@ class WeakLensingTracer(Tracer):
         self._trc = []
 
         # we need the distance functions at the C layer
-        if not cosmo.has_distances:
-            cosmo.compute_distances()
+        cosmo.compute_distances()
 
         if has_shear:
             # Kernel
@@ -391,8 +388,7 @@ class CMBLensingTracer(Tracer):
         self._trc = []
 
         # we need the distance functions at the C layer
-        if not cosmo.has_distances:
-            cosmo.compute_distances()
+        cosmo.compute_distances()
 
         kernel = get_kappa_kernel(cosmo, z_source, n_samples)
         self.add_tracer(cosmo, kernel=kernel, der_bessel=-1, der_angles=1)

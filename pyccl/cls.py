@@ -28,8 +28,7 @@ def angular_cl(cosmo, cltracer1, cltracer2, ell, p_of_k_a=None,
             :math:`\\ell`.
     """
     # we need the distances for the integrals
-    if not cosmo.has_distances:
-        cosmo.compute_distances()
+    cosmo.compute_distances()
 
     # Access ccl_cosmology object
     cosmo_in = cosmo
@@ -45,8 +44,7 @@ def angular_cl(cosmo, cltracer1, cltracer2, ell, p_of_k_a=None,
         psp = None
         # if a power spectrum was not passed, we need the non-linear one
         # at the C level
-        if not cosmo_in.has_nonlin_power:
-            cosmo_in.compute_nonlin_power()
+        cosmo_in.compute_nonlin_power()
 
     # Create tracer colections
     status = 0

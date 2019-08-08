@@ -779,17 +779,14 @@ class Cosmology(object):
 
     def compute_nonlin_power(self):
         """Compute the non-linear power spectrum."""
-        if not self.has_distances:
-            self.compute_distances()
+        self.compute_distances()
 
         # needed for halofit, halomodel and linear options
-        if (self._config_init_kwargs['matter_power_spectrum'] != 'emu' and
-                not self.has_linear_power):
+        if self._config_init_kwargs['matter_power_spectrum'] != 'emu':
             self.compute_linear_power()
 
         # for the halo model we need to init the mass function stuff
-        if (self._config_init_kwargs['matter_power_spectrum'] == 'halo_model'
-                and not self.has_sigma):
+        if self._config_init_kwargs['matter_power_spectrum'] == 'halo_model':
             self.compute_sigma()
 
         status = 0
@@ -799,15 +796,11 @@ class Cosmology(object):
     def compute_sigma(self):
         """Compute the sigma(M) and mass function splines."""
         # we need these things before building the mass function splines
-        if not self.has_growth:
-            self.compute_growth()
-        if not self.has_linear_power:
-            self.compute_linear_power()
+        self.compute_growth()
+        self.compute_linear_power()
         status = 0
-        if not bool(self.cosmo.computed_sigma):
-            status = lib.cosmology_compute_sigma(self.cosmo, status)
-        if not bool(self.cosmo.computed_hmfparams):
-            status = lib.cosmology_compute_hmfparams(self.cosmo, status)
+        status = lib.cosmology_compute_sigma(self.cosmo, status)
+        status = lib.cosmology_compute_hmfparams(self.cosmo, status)
         check(status, self)
 
     @property
