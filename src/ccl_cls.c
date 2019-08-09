@@ -159,7 +159,7 @@ void ccl_angular_cl_limber(ccl_cosmology *cosmo,
     *status = CCL_ERROR_DISTANCES_INIT;
     ccl_cosmology_set_status_message(
       cosmo,
-      "ccl_cls.c: ccl_angular_cl_limber(): distance splines have not been prcomputed!");
+      "ccl_cls.c: ccl_angular_cl_limber(): distance splines have not been precomputed!");
     return;
   }
 

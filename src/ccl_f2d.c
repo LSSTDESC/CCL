@@ -280,7 +280,7 @@ double ccl_f2d_t_eval(ccl_f2d_t *f2d,double lk,double a,void *cosmo, int *status
         *status = CCL_ERROR_GROWTH_INIT;
         ccl_cosmology_set_status_message(
           csm,
-          "ccl_f2d.c: ccl_f2d_t_eval(): growth factor splines have not been prcomputed!");
+          "ccl_f2d.c: ccl_f2d_t_eval(): growth factor splines have not been precomputed!");
         return NAN;
       }
       gz = (

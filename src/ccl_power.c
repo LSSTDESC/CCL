@@ -446,46 +446,42 @@ void ccl_cosmology_compute_linear_power(ccl_cosmology* cosmo, int* status) {
   }
   if (cosmo->computed_linear_power) return;
 
-  #pragma omp master
-  {
-    if (*status == 0) {
-      // get linear P(k)
-      switch (cosmo->config.transfer_function_method) {
-        case ccl_transfer_none:
-          break;
+  if (*status == 0) {
+    // get linear P(k)
+    switch (cosmo->config.transfer_function_method) {
+      case ccl_transfer_none:
+        break;
 
-        case ccl_bbks:
-          ccl_cosmology_compute_linpower_analytic(cosmo, NULL, bbks_power, status);
-          break;
+      case ccl_bbks:
+        ccl_cosmology_compute_linpower_analytic(cosmo, NULL, bbks_power, status);
+        break;
 
-        case ccl_eisenstein_hu: {
-            eh_struct *eh = NULL;
-            eh = ccl_eh_struct_new(&(cosmo->params),1);
-            if (eh != NULL) {
-              ccl_cosmology_compute_linpower_analytic(cosmo, eh, eh_power, status);
-            }
-            free(eh);}
-          break;
-
-        case ccl_boltzmann_class:
-          ccl_cosmology_compute_linpower_class(cosmo, status);
-          break;
-
-        default: {
-          *status = CCL_ERROR_INCONSISTENT;
-          ccl_cosmology_set_status_message(
-            cosmo,
-            "ccl_power.c: ccl_cosmology_compute_power(): "
-            "Unknown or non-implemented transfer function method: %d \n",
-            cosmo->config.transfer_function_method);
+      case ccl_eisenstein_hu: {
+          eh_struct *eh = NULL;
+          eh = ccl_eh_struct_new(&(cosmo->params),1);
+          if (eh != NULL) {
+            ccl_cosmology_compute_linpower_analytic(cosmo, eh, eh_power, status);
           }
-      }
-    }
+          free(eh);}
+        break;
 
-    if (*status == 0)
-      cosmo->computed_linear_power = true;
+      case ccl_boltzmann_class:
+        ccl_cosmology_compute_linpower_class(cosmo, status);
+        break;
+
+      default: {
+        *status = CCL_ERROR_INCONSISTENT;
+        ccl_cosmology_set_status_message(
+          cosmo,
+          "ccl_power.c: ccl_cosmology_compute_power(): "
+          "Unknown or non-implemented transfer function method: %d \n",
+          cosmo->config.transfer_function_method);
+        }
+    }
   }
-  #pragma omp flush
+
+  if (*status == 0)
+    cosmo->computed_linear_power = true;
 }
 
 
@@ -507,48 +503,44 @@ void ccl_cosmology_compute_nonlin_power(ccl_cosmology* cosmo, int* status) {
 
   if (cosmo->computed_nonlin_power) return;
 
-  #pragma omp master
-  {
-    // if everything is OK, get the non-linear P(K)
-    if (*status == 0) {
+  // if everything is OK, get the non-linear P(K)
+  if (*status == 0) {
 
-      switch (cosmo->config.matter_power_spectrum_method) {
+    switch (cosmo->config.matter_power_spectrum_method) {
 
-        case ccl_linear: {
-          ccl_cosmology_spline_nonlinpower(cosmo, linear_power, NULL, status);}
-          break;
+      case ccl_linear: {
+        ccl_cosmology_spline_nonlinpower(cosmo, linear_power, NULL, status);}
+        break;
 
-        case ccl_halofit: {
-          halofit_struct *hf = NULL;
-          hf = ccl_halofit_struct_new(cosmo, status);
-          if (*status == 0 && hf != NULL)
-            ccl_cosmology_spline_nonlinpower(cosmo, halofit_power, (void*)hf, status);
-          ccl_halofit_struct_free(hf);}
-          break;
+      case ccl_halofit: {
+        halofit_struct *hf = NULL;
+        hf = ccl_halofit_struct_new(cosmo, status);
+        if (*status == 0 && hf != NULL)
+          ccl_cosmology_spline_nonlinpower(cosmo, halofit_power, (void*)hf, status);
+        ccl_halofit_struct_free(hf);}
+        break;
 
-        case ccl_halo_model: {
-          ccl_cosmology_spline_nonlinpower(cosmo, halomodel_power, NULL, status);}
-          break;
+      case ccl_halo_model: {
+        ccl_cosmology_spline_nonlinpower(cosmo, halomodel_power, NULL, status);}
+        break;
 
-        case ccl_emu: {
-          ccl_cosmology_compute_power_emu(cosmo, status);}
-          break;
+      case ccl_emu: {
+        ccl_cosmology_compute_power_emu(cosmo, status);}
+        break;
 
-      default: {
-        *status = CCL_ERROR_INCONSISTENT;
-        ccl_cosmology_set_status_message(
-          cosmo,
-          "ccl_power.c: ccl_cosmology_compute_power(): "
-          "Unknown or non-implemented matter power spectrum method: %d \n",
-          cosmo->config.matter_power_spectrum_method);
-        }
+    default: {
+      *status = CCL_ERROR_INCONSISTENT;
+      ccl_cosmology_set_status_message(
+        cosmo,
+        "ccl_power.c: ccl_cosmology_compute_power(): "
+        "Unknown or non-implemented matter power spectrum method: %d \n",
+        cosmo->config.matter_power_spectrum_method);
       }
     }
-
-    if (*status == 0)
-      cosmo->computed_nonlin_power = true;
   }
-  #pragma omp flush
+
+  if (*status == 0)
+    cosmo->computed_nonlin_power = true;
 }
 
 /*------ ROUTINE: ccl_linear_matter_power -----
@@ -667,7 +659,7 @@ double ccl_sigmaR(ccl_cosmology *cosmo,double R,double a,int *status) {
     *status = CCL_ERROR_GROWTH_INIT;
     ccl_cosmology_set_status_message(
       cosmo,
-      "ccl_power.c: ccl_sigmaR(): growth factor splines have not been prcomputed!");
+      "ccl_power.c: ccl_sigmaR(): growth factor splines have not been precomputed!");
     return NAN;
   }
 
@@ -718,7 +710,7 @@ double ccl_sigmaV(ccl_cosmology *cosmo,double R,double a,int *status) {
     *status = CCL_ERROR_GROWTH_INIT;
     ccl_cosmology_set_status_message(
       cosmo,
-      "ccl_power.c: ccl_sigmaV(): growth factor splines have not been prcomputed!");
+      "ccl_power.c: ccl_sigmaV(): growth factor splines have not been precomputed!");
     return NAN;
   }
 
