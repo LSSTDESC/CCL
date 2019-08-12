@@ -41,7 +41,8 @@ Things to do if you are adding new features to the CCL C lib
     you don't need to do any of this.
  2. When adding a new source file (.c), put it in `src/`. The new file should be
     added to the `CCL_SRC` list in `CMakeLists.txt`.
- 3. When adding a new header file (.h), put it in `include/`.
+ 3. When adding a new header file (.h), put it in `include/`. It
+    should have documentation strings.
  4. When adding new unit test files, they should be listed under
     `TEST_SRC` in `CMakeLists.txt`.
  5. Any other new files that should be included with the library (e.g.
@@ -60,13 +61,8 @@ Notes on CMake:
      $ cmake ..
      $ make install
      ```
- - Once the library is compiled and installed, all unit tests are run by
+ - Once the library is compiled and installed, all C unit tests are run by
    typing `check_ccl` from the root CCL folder.
-
-To view the doxygen documentation, open any .html file in the `html/`
-directory. To refresh the docs to reflect new changes, run
-`doxygen doxygen/Doxyfile` in the directory `doc` (assuming you already have
-it installed).
 
 Adding new benchmarks
 ---------------------------------------------------------
