@@ -96,7 +96,7 @@ $ sudo make install
 ```
 
 **Note:** This is the default install procedure, but depending on your system
-you might want to customize the intall process. Here are a few common configuration
+you might want to customize the install process. Here are a few common configuration
 options:
   - *C compiler*: In case you have several C compilers on your machine, you will probably
 need to specify which one to use to `CMake` by setting the environment `CC` like
@@ -260,9 +260,9 @@ Here are a few common steps when working on the Python module:
   - Running the tests after a modification of the C library:
   ```sh
   $ python setup.py build
-  $ python setup.py test
+  $ pytest -vv pyccl
+  $ pytest -vv benchmarks
   ```
-
 
 ## Compiling against an external version of CLASS
 

@@ -251,7 +251,7 @@ error_types = {
     lib.CCL_ERROR_MF:                  'CCL_ERROR_MF',
     lib.CCL_ERROR_HMF_INTERP:          'CCL_ERROR_HMF_INTERP',
     lib.CCL_ERROR_PARAMETERS:          'CCL_ERROR_PARAMETERS',
-    lib.CCL_ERROR_NU_INT:	           'CCL_ERROR_NU_INT',
+    lib.CCL_ERROR_NU_INT:              'CCL_ERROR_NU_INT',
     lib.CCL_ERROR_EMULATOR_BOUND:      'CCL_ERROR_EMULATOR_BOUND',
     lib.CCL_ERROR_MISSING_CONFIG_FILE: 'CCL_ERROR_MISSING_CONFIG_FILE',
 }
@@ -312,12 +312,19 @@ class Cosmology(object):
             of state. Defaults to -1.
         wa (:obj:`float`, optional): Second order term of dark energy equation
             of state. Defaults to 0.
+        T_CMB (:obj:`float`): The CMB temperature today. The default of
+            ``None`` uses the global CCL value in
+            ``pyccl.physical_constants.T_CMB``.
         bcm_log10Mc (:obj:`float`, optional): One of the parameters of the
             BCM model. Defaults to `np.log10(1.2e14)`.
         bcm_etab (:obj:`float`, optional): One of the parameters of the BCM
             model. Defaults to 0.5.
         bcm_ks (:obj:`float`, optional): One of the parameters of the BCM
             model. Defaults to 55.0.
+        mu_0 (:obj:`float`, optional): One of the parameters of the mu-Sigma
+            modified gravity model. Defaults to 0.0
+        sigma_0 (:obj:`float`, optional): One of the parameters of the mu-Sigma
+            modified gravity model. Defaults to 0.0
         df_mg (array_like, optional): Perturbations to the GR growth rate as
             a function of redshift :math:`\\Delta f`. Used to implement simple
             modified growth scenarios.
@@ -344,7 +351,8 @@ class Cosmology(object):
             self, Omega_c=None, Omega_b=None, h=None, n_s=None,
             sigma8=None, A_s=None,
             Omega_k=0., Omega_g=None, Neff=3.046, m_nu=0., mnu_type=None,
-            w0=-1., wa=0., bcm_log10Mc=np.log10(1.2e14), bcm_etab=0.5,
+            w0=-1., wa=0., T_CMB=None,
+            bcm_log10Mc=np.log10(1.2e14), bcm_etab=0.5,
             bcm_ks=55., mu_0=0., sigma_0=0., z_mg=None, df_mg=None,
             transfer_function='boltzmann_class',
             matter_power_spectrum='halofit',
@@ -357,7 +365,8 @@ class Cosmology(object):
         self._params_init_kwargs = dict(
             Omega_c=Omega_c, Omega_b=Omega_b, h=h, n_s=n_s, sigma8=sigma8,
             A_s=A_s, Omega_k=Omega_k, Omega_g=Omega_g, Neff=Neff, m_nu=m_nu,
-            mnu_type=mnu_type, w0=w0, wa=wa, bcm_log10Mc=bcm_log10Mc,
+            mnu_type=mnu_type, w0=w0, wa=wa, T_CMB=T_CMB,
+            bcm_log10Mc=bcm_log10Mc,
             bcm_etab=bcm_etab, bcm_ks=bcm_ks, mu_0=mu_0, sigma_0=sigma_0,
             z_mg=z_mg, df_mg=df_mg)
 
@@ -406,7 +415,7 @@ class Cosmology(object):
             filename (:obj:`str`) Filename to read parameters from.
         """
         with open(filename, 'r') as fp:
-            params = yaml.load(fp)
+            params = yaml.load(fp, Loader=yaml.Loader)
 
         # Now we assemble an init for the object since the CCL YAML has
         # extra info we don't need and different formatting.
@@ -513,7 +522,8 @@ class Cosmology(object):
     def _build_parameters(
             self, Omega_c=None, Omega_b=None, h=None, n_s=None, sigma8=None,
             A_s=None, Omega_k=None, Neff=None, m_nu=None, mnu_type=None,
-            w0=None, wa=None, bcm_log10Mc=None, bcm_etab=None, bcm_ks=None,
+            w0=None, wa=None, T_CMB=None,
+            bcm_log10Mc=None, bcm_etab=None, bcm_ks=None,
             mu_0=None, sigma_0=None, z_mg=None, df_mg=None, Omega_g=None):
         """Build a ccl_parameters struct"""
 
@@ -553,7 +563,27 @@ class Cosmology(object):
             raise ValueError("sigma8 must be greater than 1e-5.")
 
         # Make sure the neutrino parameters are consistent.
-        if isinstance(m_nu, float):
+        if hasattr(m_nu, "__len__"):
+            if (len(m_nu) != 3):
+                raise ValueError("m_nu must be a float or array-like object "
+                                 "with length 3.")
+            elif ((mnu_type == 'sum') or
+                    (mnu_type == 'sum_inverted') or
+                    (mnu_type == 'sum_equal')):
+                raise ValueError(
+                    "mnu type '%s' cannot be passed with a list "
+                    "of neutrino masses, only with a sum." % mnu_type)
+            elif mnu_type is None:
+                mnu_type = 'list'  # False
+
+        else:
+            try:
+                m_nu = float(m_nu)
+            except Exception:
+                raise ValueError(
+                    "m_nu must be a float or array-like object with "
+                    "length 3.")
+
             if mnu_type is None:
                 mnu_type = 'sum'
             m_nu = [m_nu]
@@ -569,21 +599,6 @@ class Cosmology(object):
                 raise ValueError("if mnu_type= sum_inverted, we are using the "
                                  "inverted hierarchy and so m_nu must "
                                  "be less than (~)0.0978")
-        elif hasattr(m_nu, "__len__"):
-            if (len(m_nu) != 3):
-                raise ValueError("m_nu must be a float or array-like object "
-                                 "with length 3.")
-            elif ((mnu_type == 'sum') or
-                    (mnu_type == 'sum_inverted') or
-                    (mnu_type == 'sum_equal')):
-                raise ValueError(
-                    "mnu type '%s' cannot be passed with a list "
-                    "of neutrino masses, only with a sum." % mnu_type)
-            elif mnu_type is None:
-                mnu_type = 'list'  # False
-        else:
-            raise ValueError("m_nu must be a float or array-like object with "
-                             "length 3.")
 
         # Check if any compulsory parameters are not set
         compul = [Omega_c, Omega_b, Omega_k, w0, wa, h, norm_pk,
@@ -598,25 +613,31 @@ class Cosmology(object):
         # Create new instance of ccl_parameters object
         # Create an internal status variable; needed to check massive neutrino
         # integral.
-        status = 0
-        if nz_mg == -1:
-            # Create ccl_parameters without modified growth
+        T_CMB_old = lib.cvar.constants.T_CMB
+        try:
+            if T_CMB is not None:
+                lib.cvar.constants.T_CMB = T_CMB
+            status = 0
+            if nz_mg == -1:
+                # Create ccl_parameters without modified growth
 
-            self._params, status = lib.parameters_create_nu(
-               Omega_c, Omega_b, Omega_k, Neff,
-               w0, wa, h, norm_pk,
-               n_s, bcm_log10Mc, bcm_etab, bcm_ks,
-               mu_0, sigma_0, mnu_types[mnu_type],
-               m_nu, status)
-        else:
-            # Create ccl_parameters with modified growth arrays
-            self._params, status = lib.parameters_create_nu_vec(
-               Omega_c, Omega_b, Omega_k, Neff,
-               w0, wa, h, norm_pk,
-               n_s, bcm_log10Mc, bcm_etab, bcm_ks,
-               mu_0, sigma_0, z_mg, df_mg,
-               mnu_types[mnu_type], m_nu, status)
-        check(status)
+                self._params, status = lib.parameters_create_nu(
+                   Omega_c, Omega_b, Omega_k, Neff,
+                   w0, wa, h, norm_pk,
+                   n_s, bcm_log10Mc, bcm_etab, bcm_ks,
+                   mu_0, sigma_0, mnu_types[mnu_type],
+                   m_nu, status)
+            else:
+                # Create ccl_parameters with modified growth arrays
+                self._params, status = lib.parameters_create_nu_vec(
+                   Omega_c, Omega_b, Omega_k, Neff,
+                   w0, wa, h, norm_pk,
+                   n_s, bcm_log10Mc, bcm_etab, bcm_ks,
+                   mu_0, sigma_0, z_mg, df_mg,
+                   mnu_types[mnu_type], m_nu, status)
+            check(status)
+        finally:
+            lib.cvar.constants.T_CMB = T_CMB_old
 
         if Omega_g is not None:
             total = self._params.Omega_g + self._params.Omega_l
@@ -626,7 +647,10 @@ class Cosmology(object):
     def __getitem__(self, key):
         """Access parameter values by name."""
         try:
-            val = getattr(self._params, key)
+            if key == 'mnu':
+                val = lib.parameters_get_nu_masses(self._params, 3)
+            else:
+                val = getattr(self._params, key)
         except AttributeError:
             raise KeyError("Parameter '%s' not recognized." % key)
         return val
@@ -640,10 +664,14 @@ class Cosmology(object):
         """Free the C memory this object is managing as it is being garbage
         collected (hopefully)."""
         if hasattr(self, "cosmo"):
-            if self.cosmo is not None:
+            if (self.cosmo is not None and
+                    hasattr(lib, 'cosmology_free') and
+                    lib.cosmology_free is not None):
                 lib.cosmology_free(self.cosmo)
         if hasattr(self, "_params"):
-            if self._params is not None:
+            if (self._params is not None and
+                    hasattr(lib, 'parameters_free') and
+                    lib.parameters_free is not None):
                 lib.parameters_free(self._params)
 
         # finally delete some attributes we don't want to be around for safety

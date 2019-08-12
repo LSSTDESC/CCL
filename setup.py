@@ -61,8 +61,6 @@ setup(
     use_scm_version=True,
     setup_requires=['setuptools_scm'],
     install_requires=['numpy', 'pyyaml'],
-    test_suite='nose.collector',
-    tests_require=['nose'],
     cmdclass={'build_py': build},
     classifiers=[
         'Development Status :: 4 - Beta',
