@@ -12,7 +12,7 @@ The core functions of this package include:
  * Correlation functions :math:`C_\ell` for arbitrary combinations of tracers including galaxies, shear and number counts
  * Halo mass function :math:`{\rm d}n/{\rm d}M` and halo bias :math:`b(M)`
  * Approximate baryonic modifications to the matter power spectra :math:`\Delta^2_{\rm baryons}`
- * Simple modified gravity extensions :math:`\Delta f(z)`
+ * Simple modified gravity extensions :math:`\Delta f(z)` and :math:`\mu-\Sigma`
 
 The source code is available on github at https://github.com/LSSTDESC/CCL.
 
@@ -29,11 +29,10 @@ The source code is available on github at https://github.com/LSSTDESC/CCL.
 ..   :caption: For Developers
 
 ..   source/navigating_the_code
-	     
+
 .. toctree::
    :maxdepth: 1
    :caption: Reference
 
    pyCCL Reference/API<api/modules>
-   Doxygen C Library Documentation<source/doxygen_files.rst>
    Citing CCL<source/citation.rst>

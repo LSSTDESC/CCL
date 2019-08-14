@@ -34,6 +34,9 @@ from .pk2d import Pk2D
 from .power import linear_matter_power, nonlin_matter_power, sigmaR, \
     sigmaV, sigma8
 
+# BCM stuff
+from .bcm import bcm_model_fka
+
 # Halo mass function
 from .massfunction import massfunc, massfunc_m2r, sigmaM, halo_bias
 
@@ -50,7 +53,9 @@ from .correlation import (
     correlation_3dRsd_avgmu, correlation_pi_sigma)
 
 # Properties of haloes
-from .halomodel import halomodel_matter_power, halo_concentration
+from .halomodel import (
+    halomodel_matter_power, halo_concentration,
+    onehalo_matter_power, twohalo_matter_power)
 
 # Halo density profiles
 from .haloprofile import nfw_profile_3d, einasto_profile_3d, hernquist_profile_3d, nfw_profile_2d

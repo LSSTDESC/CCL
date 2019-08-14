@@ -1,6 +1,7 @@
 # Unreleased
 
 ## C library
+- Removed all benchmarks from C and kept only the C unit tests in C (#653).
 - Implemented generalized models for tracers (#630)
 - Fixed memory leak in CLASS power spectrum computations (#561, #562).
 - Fixed a bug where CLASS would crash due to small rounding errors at z = 0
@@ -26,12 +27,13 @@
 - Separated Limber and Non-Limber C_ell calculations (#614)
 - Added `has_density` and `has_shear` flags to ClTracers (#614)
 - Simplified C_ell unit tests (#614)
-- Changed TCMB to T_CMB everywhere (#615)	
+- Changed TCMB to T_CMB everywhere (#615)
 - Fixed a small bug in the w_tophat expression and increased precision (#607)
 - Deprecated the use of GSL spline accelerators (#626)
 - Added support for modified gravity via mu / Sigma (scale-independent) parameterisation (#442)
 
 ## Python library
+- Moved all benchmarks and tests to python (#653).
 - Changed IA bias normalization to be consistent with A_IA=1 (#630).
 - Implemented generalized models for tracers (#630)
 - Improved error reporting for `angular_cl` computations (#567).
