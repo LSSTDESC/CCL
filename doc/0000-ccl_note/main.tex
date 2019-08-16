@@ -392,10 +392,12 @@ other uses as it is only accurate to a few percent.
 \ccl also provides an approximation to the transfer function as implemented by
 \citet{1998ApJ...496..605E} (E\&H; we refer the reader to this paper for a detailed
 discussion of the fitting formulae).\footnote{
-  Note that the implementation in \ccl modifies Eq. 5 of \citet{1998ApJ...496..605E}
-  using $a^{-1}=1+z$ instead of the approximation $a^{-1}\sim z$. The difference
+  Note that the implementation in \ccl is different from that in \citet{1998ApJ...496..605E}
+  in two places. First, \ccl modifies Eq. 5 of \citet{1998ApJ...496..605E} using
+  $a^{-1}=1+z$ instead of the approximation $a^{-1}\sim z$. The difference
   in the resulting power spectra is negligible, but larger than 1 part
-  in $10^4$ for $k<10\,h\,{\rm Mpc}^{-1}$.}
+  in $10^4$ for $k<10\,h\,{\rm Mpc}^{-1}$. Second, \ccl modifies the argument of
+  $G$ in Eq. 14 to be $zeq/(1+zd)$ instead of $(1+zeq)/(1+zd)$.}
 
 The Eisenstein \& Hu approximation is also not very accurate (generally only
 to within a few percent), and so should not be used to derive
