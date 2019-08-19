@@ -103,6 +103,9 @@ def einasto_profile_3d(cosmo, concentration, halo_mass, odelta, a, r):
     Returns:
         float or array_like: 3D NFW density at r, in units of Msun/Mpc^3.
     """
+    # needed for part of the parameters
+    cosmo.compute_sigma()
+
     status = 0
     scalar = True if np.ndim(r) == 0 else False
 

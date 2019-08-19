@@ -10,6 +10,8 @@ list(APPEND CMAKE_MODULE_PATH  "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
 project(ccl VERSION 0.2.1)
 
+option(FORCE_OPENMP "Forcibly use OpenMP " NO)
+
 # Defines list of CCL src files
 set(CCL_SRC
     src/ccl_background.c src/ccl_core.c src/ccl_error.c
@@ -24,40 +26,16 @@ set(CCL_SRC
     src/ccl_tracers.c
     src/fftlog.c)
 
-# Defines list of CCL tests src files
-# ! Add new tests to this list
+# Defines list of CCL C test src files
+# ! Add new tests of the C code to this list
 set(TEST_SRC
     # test core code first
-    benchmarks/ccl_test.c benchmarks/ccl_test_utils.c
-    benchmarks/ccl_test_cosmology.c
-    benchmarks/ccl_test_params.c
-    benchmarks/ccl_test_params_mnu.c
-    benchmarks/ccl_test_MG.c
-
-    # now the distances
-    benchmarks/ccl_test_distances_class_allz.c benchmarks/ccl_test_distances_cosmomad_hiz.c
-    benchmarks/ccl_test_distances_cosmomad_lowz.c
-    benchmarks/ccl_test_distances_astropy_mnu_lowz.c benchmarks/ccl_test_distances_astropy_mnu_hiz.c
-    benchmarks/ccl_test_growth_lowz.c benchmarks/ccl_test_growth_hiz.c benchmarks/ccl_test_growth_allz.c
-
-    # now power spectra stuff in order of use roughly
+    benchmarks/ccl_test.c
+    benchmarks/ccl_test_utils.c
     benchmarks/ccl_test_f2d.c
-    benchmarks/ccl_test_bbks.c benchmarks/ccl_test_eh.c
-    benchmarks/ccl_test_sigmaM.c
-    benchmarks/ccl_test_bcm.c
-    benchmarks/ccl_test_emu.c benchmarks/ccl_test_emu_nu.c
-    benchmarks/ccl_test_power_nu.c
-    benchmarks/ccl_test_halomod.c
-    benchmarks/ccl_test_power_MG.c
 
-    # Cls and correlation functions
-    # Uncomment below when we bring ANGPOW back
+    # Move to python when we bring ANGPOW back
     #benchmarks/ccl_test_angpow.c
-    benchmarks/ccl_test_correlation_3d.c
-    benchmarks/ccl_test_correlation_3dRSD.c
-
-    # halo profiles
-    benchmarks/ccl_test_haloprofile.c
 )
 
 
@@ -78,10 +56,14 @@ include(BuildGSL)
 # Compilation flags
 set(CMAKE_C_FLAGS_RELEASE "-O3 -fomit-frame-pointer -fno-common -fPIC -std=gnu99 -DHAVE_ANGPOW -D__CCL_DATA_DIR__=${CMAKE_INSTALL_PREFIX}/share/ccl")
 set(CMAKE_C_FLAGS_DEBUG   "-Og -fomit-frame-pointer -fno-common -fPIC -std=gnu99 -DHAVE_ANGPOW -D__CCL_DATA_DIR__=${CMAKE_INSTALL_PREFIX}/share/ccl")
-if (NOT "${CMAKE_C_COMPILER_ID}" MATCHES "^(Apple)?Clang$")
+if ((NOT "${CMAKE_C_COMPILER_ID}" MATCHES "^(Apple)?Clang$") OR FORCE_OPENMP)
     # When not using Clang and in Release mode, enabling OpenMP support
     set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -fopenmp")
     set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -fopenmp")
+    if(DEFINED ENV{CONDA_PREFIX})
+        include_directories("$ENV{CONDA_PREFIX}/include")
+        add_link_options("LINKER:-rpath,$ENV{CONDA_PREFIX}/lib")
+    endif()
 endif()
 
 # Define include and library directories for external dependencies

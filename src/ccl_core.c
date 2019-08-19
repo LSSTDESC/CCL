@@ -280,7 +280,8 @@ ccl_cosmology * ccl_cosmology_create(ccl_parameters params, ccl_configuration co
   cosmo->data.p_nl = NULL;
   cosmo->computed_distances = false;
   cosmo->computed_growth = false;
-  cosmo->computed_power = false;
+  cosmo->computed_linear_power = false;
+  cosmo->computed_nonlin_power = false;
   cosmo->computed_sigma = false;
   cosmo->computed_hmfparams = false;
   cosmo->status = 0;
@@ -331,7 +332,6 @@ void ccl_parameters_fill_initial(ccl_parameters * params, int *status)
   if((params->N_nu_mass)>0) {
     params->Omega_n_mass = ccl_Omeganuh2(
       1.0, params->N_nu_mass, params->mnu, params->T_CMB, status) / ((params->h)*(params->h));
-    ccl_check_status_nocosmo(status);
   }
   else{
     params->Omega_n_mass = 0.;
@@ -379,8 +379,8 @@ ccl_parameters ccl_parameters_create(
                      double Omega_c, double Omega_b, double Omega_k,
 				     double Neff, double* mnu, ccl_mnu_convention mnu_type,
 				     double w0, double wa, double h, double norm_pk,
-				     double n_s, double bcm_log10Mc, double bcm_etab, 
-				     double bcm_ks, double mu_0, double sigma_0, 
+				     double n_s, double bcm_log10Mc, double bcm_etab,
+				     double bcm_ks, double mu_0, double sigma_0,
 				     int nz_mgrowth, double *zarr_mgrowth,
 				     double *dfarr_mgrowth, int *status)
 {
@@ -412,7 +412,7 @@ ccl_parameters ccl_parameters_create(
       params.sum_nu_masses = *mnu;
 
 	  mnu_in = malloc(3*sizeof(double));
-	  
+
 	  // Check if the sum is zero
 	  if (*mnu<1e-15){
 		  mnu_in[0] = 0.;
@@ -429,7 +429,10 @@ ccl_parameters ccl_parameters_create(
 	      sum_check = mnu_in[0] + mnu_in[1] + mnu_in[2];
 	      if (*mnu < sum_check){
 		      *status = CCL_ERROR_MNU_UNPHYSICAL;
-		      ccl_check_status_nocosmo(status);
+          ccl_raise_warning(
+              *status,
+              "CCL_ERROR_MNU_UNPHYSICAL: Sum of neutrinos masses for this Omeganu "
+              "value is incompatible with the requested mass hierarchy.");
           }
           double dsdm1;
           // This is the Newton's method
@@ -467,7 +470,10 @@ ccl_parameters ccl_parameters_create(
 	      sum_check = mnu_in[0] + mnu_in[1] + mnu_in[2];
 	      if (*mnu < sum_check){
 		      *status = CCL_ERROR_MNU_UNPHYSICAL;
-		      ccl_check_status_nocosmo(status);
+          ccl_raise_warning(
+              *status,
+              "CCL_ERROR_MNU_UNPHYSICAL: Sum of neutrinos masses for this Omeganu "
+              "value is incompatible with the requested mass hierarchy.");
           }
           double dsdm1;
           // This is the Newton's method
@@ -499,9 +505,6 @@ ccl_parameters ccl_parameters_create(
   } else {
 	  *status = CCL_ERROR_NOT_IMPLEMENTED;
   }
-
-  // Check for errors in the neutrino set up (e.g. unphysical mnu)
-  ccl_check_status_nocosmo(status);
 
   // Check which of the neutrino species are non-relativistic today
   int N_nu_mass = 0;
@@ -560,11 +563,11 @@ ccl_parameters ccl_parameters_create(
     params.bcm_ks=55.0;
   else
     params.bcm_ks=bcm_ks;
-    
+
   // Params of the mu / Sigma parameterisation of MG
   params.mu_0 = mu_0;
   params.sigma_0 = sigma_0;
-  
+
   // Set remaining standard and easily derived parameters
   ccl_parameters_fill_initial(&params, status);
 
@@ -605,7 +608,7 @@ ccl_parameters ccl_parameters_create_flat_lcdm(double Omega_c, double Omega_b, d
   ccl_mnu_convention mnu_type = ccl_mnu_sum;
   double mu_0 = 0.;
   double sigma_0 = 0.;
-  
+
   ccl_parameters params = ccl_parameters_create(Omega_c, Omega_b, Omega_k, Neff,
 						mnu, mnu_type, w0, wa, h, norm_pk, n_s, -1, -1, -1, mu_0, sigma_0, -1, NULL, NULL, status);
   return params;
@@ -675,7 +678,7 @@ void ccl_parameters_write_yaml(ccl_parameters * params, const char * filename, i
   WRITE_DOUBLE(bcm_log10Mc);
   WRITE_DOUBLE(bcm_etab);
   WRITE_DOUBLE(bcm_ks);
-  
+
   // Modified gravity parameters
   WRITE_DOUBLE(mu_0);
   WRITE_DOUBLE(sigma_0);
@@ -706,7 +709,6 @@ void ccl_parameters_write_yaml(ccl_parameters * params, const char * filename, i
 #undef WRITE_INT
 
   fclose(f);
-
 }
 
 /**
@@ -715,14 +717,13 @@ void ccl_parameters_write_yaml(ccl_parameters * params, const char * filename, i
  * @param f FILE* pointer opened for reading
  * @return void
  */
-ccl_parameters ccl_parameters_read_yaml(const char * filename, int *status)
-{
+ccl_parameters ccl_parameters_read_yaml(const char * filename, int *status) {
   FILE * f = fopen(filename, "r");
 
-  if (!f){
+  if (!f) {
     *status = CCL_ERROR_FILE_READ;
     ccl_parameters bad_params;
-    ccl_raise_exception(CCL_ERROR_FILE_READ, "ccl_core.c: Failed to read parameters from file.");
+    ccl_raise_warning(CCL_ERROR_FILE_READ, "ccl_core.c: Failed to read parameters from file.");
 
     return bad_params;
   }
@@ -775,7 +776,7 @@ ccl_parameters ccl_parameters_read_yaml(const char * filename, int *status)
   READ_DOUBLE(bcm_log10Mc);
   READ_DOUBLE(bcm_etab);
   READ_DOUBLE(bcm_ks);
-  
+
   // Modified gravity parameters
   READ_DOUBLE(mu_0);
   READ_DOUBLE(sigma_0);
@@ -817,11 +818,11 @@ ccl_parameters ccl_parameters_read_yaml(const char * filename, int *status)
 
   fclose(f);
 
-
-  if (status){
-    char msg[256];
-    snprintf(msg, 256, "ccl_core.c: Structure of YAML file incorrect: %s", filename);
-    ccl_raise_exception(*status, msg);
+  if (*status) {
+    ccl_raise_warning(
+      *status,
+      "ccl_core.c: Structure of YAML file incorrect: %s",
+      filename);
   }
 
   double norm_pk;
@@ -843,9 +844,8 @@ ccl_parameters ccl_parameters_read_yaml(const char * filename, int *status)
 
   if(z_mgrowth) free(z_mgrowth);
   if (df_mgrowth) free(df_mgrowth);
-  
-  return params;
 
+  return params;
 }
 
 
@@ -854,8 +854,7 @@ ccl_parameters ccl_parameters_read_yaml(const char * filename, int *status)
 INPUT: ccl_data
 TASK: free the input data
 */
-void ccl_data_free(ccl_data * data)
-{
+void ccl_data_free(ccl_data * data) {
   //We cannot assume that all of these have been allocated
   //TODO: it would actually make more sense to do this within ccl_cosmology_free,
   //where we could make use of the flags "computed_distances" etc. to figure out
@@ -883,24 +882,26 @@ void ccl_data_free(ccl_data * data)
 INPUT: ccl_cosmology struct, status_string
 TASK: set the status message safely.
 */
-void ccl_cosmology_set_status_message(ccl_cosmology * cosmo, const char * message, ...)
-{
+void ccl_cosmology_set_status_message(ccl_cosmology * cosmo, const char * message, ...) {
   const int trunc = 480; /* must be < 500 - 4 */
-  va_list va;
-  va_start(va, message);
-  vsnprintf(cosmo->status_message, trunc, message, va);
-  va_end(va);
 
-  /* if truncation happens, message[trunc - 1] is not NULL, ... will show up. */
-  strcpy(&cosmo->status_message[trunc], "...");
+  #pragma omp critical
+  {
+    va_list va;
+    va_start(va, message);
+    vsnprintf(cosmo->status_message, trunc, message, va);
+    va_end(va);
+
+    /* if truncation happens, message[trunc - 1] is not NULL, ... will show up. */
+    strcpy(&cosmo->status_message[trunc], "...");
+  }
 }
 
 /* ------- ROUTINE: ccl_parameters_free --------
 INPUT: ccl_parameters struct
 TASK: free allocated quantities in the parameters struct
 */
-void ccl_parameters_free(ccl_parameters * params)
-{
+void ccl_parameters_free(ccl_parameters * params) {
   if (params->mnu != NULL){
     free(params->mnu);
     params->mnu = NULL;
@@ -920,55 +921,51 @@ void ccl_parameters_free(ccl_parameters * params)
 INPUT: ccl_cosmology struct
 TASK: free the input data and the cosmology struct
 */
-void ccl_cosmology_free(ccl_cosmology * cosmo)
-{
+void ccl_cosmology_free(ccl_cosmology * cosmo) {
   ccl_data_free(&cosmo->data);
   free(cosmo);
 }
 
-int ccl_get_pk_spline_na(ccl_cosmology *cosmo)
-{
+int ccl_get_pk_spline_na(ccl_cosmology *cosmo) {
   return cosmo->spline_params.A_SPLINE_NA_PK + cosmo->spline_params.A_SPLINE_NLOG_PK - 1;
 }
 
-void ccl_get_pk_spline_a_array(ccl_cosmology *cosmo,int ndout,double* doutput,int *status)
-{
-  double *d;
-  if(ndout!=ccl_get_pk_spline_na(cosmo))
-    *status=CCL_ERROR_INCONSISTENT;
-  if(*status==0) {
-    d=ccl_linlog_spacing(cosmo->spline_params.A_SPLINE_MINLOG_PK,
-			 cosmo->spline_params.A_SPLINE_MIN_PK,
-			 cosmo->spline_params.A_SPLINE_MAX,
-			 cosmo->spline_params.A_SPLINE_NLOG_PK,
-			 cosmo->spline_params.A_SPLINE_NA_PK);
-    if(d==NULL)
-      *status=CCL_ERROR_MEMORY;
+void ccl_get_pk_spline_a_array(ccl_cosmology *cosmo,int ndout,double* doutput,int *status) {
+  double *d = NULL;
+  if (ndout != ccl_get_pk_spline_na(cosmo))
+    *status = CCL_ERROR_INCONSISTENT;
+  if (*status == 0) {
+    d = ccl_linlog_spacing(cosmo->spline_params.A_SPLINE_MINLOG_PK,
+      cosmo->spline_params.A_SPLINE_MIN_PK,
+      cosmo->spline_params.A_SPLINE_MAX,
+      cosmo->spline_params.A_SPLINE_NLOG_PK,
+      cosmo->spline_params.A_SPLINE_NA_PK);
+    if (d == NULL)
+      *status = CCL_ERROR_MEMORY;
   }
   if(*status==0)
-    memcpy(doutput,d,ndout*sizeof(double));
+    memcpy(doutput, d, ndout*sizeof(double));
+
   free(d);
 }
 
-int ccl_get_pk_spline_nk(ccl_cosmology *cosmo)
-{
+int ccl_get_pk_spline_nk(ccl_cosmology *cosmo) {
   double ndecades = log10(cosmo->spline_params.K_MAX) - log10(cosmo->spline_params.K_MIN);
   return (int)ceil(ndecades*cosmo->spline_params.N_K);
 }
 
-void ccl_get_pk_spline_lk_array(ccl_cosmology *cosmo,int ndout,double* doutput,int *status)
-{
-  double *d;
-  if(ndout!=ccl_get_pk_spline_nk(cosmo))
-    *status=CCL_ERROR_INCONSISTENT;
-  if(*status==0) {
-    d=ccl_log_spacing(cosmo->spline_params.K_MIN,cosmo->spline_params.K_MAX,ndout);
-    if(d==NULL)
-      *status=CCL_ERROR_MEMORY;
+void ccl_get_pk_spline_lk_array(ccl_cosmology *cosmo,int ndout,double* doutput,int *status) {
+  double *d = NULL;
+  if (ndout != ccl_get_pk_spline_nk(cosmo))
+    *status = CCL_ERROR_INCONSISTENT;
+  if (*status == 0) {
+    d = ccl_log_spacing(cosmo->spline_params.K_MIN, cosmo->spline_params.K_MAX, ndout);
+    if (d == NULL)
+      *status = CCL_ERROR_MEMORY;
   }
-  if(*status==0) {
-    for(int ii=0;ii<ndout;ii++)
-      doutput[ii]=log(d[ii]);
+  if (*status == 0) {
+    for(int ii=0; ii < ndout; ii++)
+      doutput[ii] = log(d[ii]);
   }
   free(d);
 }
