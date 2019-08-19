@@ -70,7 +70,7 @@ void angular_cl_vec(ccl_cosmology * cosmo,
     for (int i=index_nonlimber_last+1; i < nell; i++)
       _ell[i - (index_nonlimber_last+1)] = ell[i];
 
-    ccl_angular_cl_limber(cosmo, clt1, clt2, pspec, (nell - (index_nonlimber_last+1)), _ell, _cl_ell, status);
+    ccl_angular_cls_limber(cosmo, clt1, clt2, pspec, (nell - (index_nonlimber_last+1)), _ell, _cl_ell, status);
 
     for (int i=index_nonlimber_last+1; i < nell; i++)
       output[i] = _cl_ell[i - (index_nonlimber_last+1)];

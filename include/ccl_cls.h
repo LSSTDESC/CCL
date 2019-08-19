@@ -17,7 +17,7 @@ CCL_BEGIN_DECLS
  * @param status Status flag. 0 if there are no errors, nonzero otherwise.
  * For specific cases see documentation for ccl_error.c
  */
-void ccl_angular_cl_limber(ccl_cosmology *cosmo,
+void ccl_angular_cls_limber(ccl_cosmology *cosmo,
        ccl_cl_tracer_collection_t *trc1,
        ccl_cl_tracer_collection_t *trc2,
        ccl_f2d_t *psp,
