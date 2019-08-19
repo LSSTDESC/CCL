@@ -24,6 +24,12 @@ install:
   - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then export DYLD_FALLBACK_LIBRARY_PATH=${CONDA_PREFIX}/lib; fi
   - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then export CONDA_BUILD_SYSROOT=/; fi
 
+  # install CLASS into the env
+  - git clone https://github.com/lesgourg/class_public.git
+  - cd class_public && git co v2.7.2 && cd ..
+  - cd class_public && mkdir build && cd build && cmake .. && make && cd ..
+  - cd python && python setup.py install && cd ..
+
 script:
   - flake8 pyccl
   - flake8 --exclude=data benchmarks
