@@ -146,206 +146,202 @@ static int emuInit() {
 
 // Actual emulation
 void ccl_pkemu(double *xstar, int sizeofystar, double *ystar, int* status, ccl_cosmology* cosmo) {
-  #pragma omp master
-  {
-    static double inited=0;
-    int ee, i, j, k;
-    double wstar[peta[0]+peta[1]];
-    double Sigmastar[2][peta[1]][m[0]];
-    double ystaremu[neta];
-    double ybyz[rs];
-    double logc;
-    double xstarstd[p];
-    int zmatch;
-    gsl_spline *zinterp = NULL;
+  static double inited=0;
+  int ee, i, j, k;
+  double wstar[peta[0]+peta[1]];
+  double Sigmastar[2][peta[1]][m[0]];
+  double ystaremu[neta];
+  double ybyz[rs];
+  double logc;
+  double xstarstd[p];
+  int zmatch;
+  gsl_spline *zinterp = NULL;
 
-    if (*status == 0) {
-      zinterp = gsl_spline_alloc(gsl_interp_cspline, rs);
-      if (zinterp == NULL) {
-        *status = CCL_ERROR_MEMORY;
-        ccl_cosmology_set_status_message(
-          cosmo,
-          "ccl_pkemu(): could not allocatd memory for zinterp");
-        ccl_raise_warning(*status, cosmo->status_message);
-      }
-    }
-    if (sizeofystar != NK_EMU) {
+  if (*status == 0) {
+    zinterp = gsl_spline_alloc(gsl_interp_cspline, rs);
+    if (zinterp == NULL) {
       *status = CCL_ERROR_MEMORY;
       ccl_cosmology_set_status_message(
         cosmo,
-        "ccl_pkemu(): must pass an array with %d elements to populate\n",
-        NK_EMU);
+        "ccl_pkemu(): could not allocatd memory for zinterp");
       ccl_raise_warning(*status, cosmo->status_message);
     }
-
-    // Initialize if necessary
-    if (*status == 0 && inited == 0) {
-      if (emuInit() != 0) {
-        *status = CCL_ERROR_MEMORY;
-        ccl_raise_warning(*status, "ccl_pkemu(): could not init the EMU");
-      } else {
-        inited = 1;
-      }
-    }
-
-    if (*status == 0) {
-      // Transform w_a into (-w_0-w_a)^(1/4)
-      xstar[6] = pow(-xstar[5]-xstar[6], 0.25);
-      // Check the inputs to make sure we're interpolating.
-      for(i=0; i<p; i++) {
-          if((xstar[i] < xmin[i]) || (xstar[i] > xmax[i])) {
-              switch(i) {
-                  case 0:
-                      ccl_cosmology_set_status_message(cosmo,
-                              "ccl_pkemu(): omega_m must be between %f and %f.\n",
-                              xmin[i], xmax[i]);
-                      break;
-                  case 1:
-                      ccl_cosmology_set_status_message(cosmo,
-                              "ccl_pkemu(): omega_b must be between %f and %f.\n",
-                              xmin[i], xmax[i]);
-                      break;
-                  case 2:
-                      ccl_cosmology_set_status_message(cosmo,
-                              "ccl_pkemu(): sigma8 must be between %f and %f.\n",
-                              xmin[i], xmax[i]);
-                      break;
-                  case 3:
-                      ccl_cosmology_set_status_message(cosmo,
-                              "ccl_pkemu(): h must be between %f and %f.\n",
-                              xmin[i], xmax[i]);
-                      break;
-                  case 4:
-                      ccl_cosmology_set_status_message(cosmo,
-                              "ccl_pkemu(): n_s must be between %f and %f.\n",
-                              xmin[i], xmax[i]);
-                      break;
-                  case 5:
-                      ccl_cosmology_set_status_message(cosmo,
-                              "ccl_pkemu(): w_0 must be between %f and %f.\n",
-                              xmin[i], xmax[i]);
-                      break;
-                  case 6:
-                      ccl_cosmology_set_status_message(cosmo,
-                              "ccl_pkemu(): (-w_0-w_a)^(1/4) must be between %f and %f.\n",
-                              xmin[i], xmax[i]);
-                      break;
-                  case 7:
-                      ccl_cosmology_set_status_message(cosmo,
-                              "ccl_pkemu(): omega_nu must be between %f and %f.\n",
-                              xmin[i], xmax[i]);
-                      break;
-              }
-              *status = CCL_ERROR_EMULATOR_BOUND;
-              ccl_raise_warning(*status, cosmo->status_message);
-          }
-      } // for(i=0; i<p; i++)
-    }
-
-    if (*status == 0) {
-      if((xstar[p] < z[0]) || (xstar[p] > z[rs-1])) {
-          ccl_cosmology_set_status_message(cosmo,
-                  "ccl_pkemu(): z must be between %f and %f.\n",
-                  z[0], z[rs-1]);
-          *status = CCL_ERROR_EMULATOR_BOUND;
-          ccl_raise_warning(*status, cosmo->status_message);
-      }
-    }
-
-    if (*status == 0) {
-      // Standardize the inputs
-      for(i=0; i<p; i++) {
-          xstarstd[i] = (xstar[i] - xmin[i]) / xrange[i];
-      }
-
-      // compute the covariances between the new input and sims for all the PCs.
-      for(ee=0; ee<2; ee++) {
-          for(i=0; i<peta[ee]; i++) {
-              for(j=0; j<m[ee]; j++) {
-                  logc = 0.0;
-                  for(k=0; k<p; k++) {
-                      logc -= beta[ee][i][k]*pow(x[j][k] - xstarstd[k], 2.0);
-                  }
-                  Sigmastar[ee][i][j] = exp(logc) / lamz[ee][i];
-              }
-          }
-      }
-
-      // Compute wstar for the first chunk.
-      for(i=0; i<peta[0]; i++) {
-          wstar[i]=0.0;
-          for(j=0; j<m[0]; j++) {
-              wstar[i] += Sigmastar[0][i][j] * KrigBasis[0][i][j];
-          }
-      }
-      // Compute wstar for the second chunk.
-      for(i=0; i<peta[1]; i++) {
-          wstar[peta[0]+i]=0.0;
-          for(j=0; j<m[1]; j++) {
-              wstar[peta[0]+i] += Sigmastar[1][i][j] * KrigBasis[1][i][j];
-          }
-      }
-
-      /*
-      for(i=0; i<peta[0]+peta[1]; i++) {
-          printf("%f\n", wstar[i]);
-      }
-       */
-
-      // Compute ystar, the new output
-      for(i=0; i<neta; i++) {
-          ystaremu[i] = 0.0;
-          for(j=0; j<peta[0]+peta[1]; j++) {
-              ystaremu[i] += K[i][j]*wstar[j];
-          }
-          ystaremu[i] = ystaremu[i]*sd + mean[i];
-
-          // Convert to P(k)
-          //ystaremu[i] = ystaremu[i] - 1.5*log10(mode[i % NK_EMU]);
-          //ystaremu[i] = 2*M_PI*M_PI*pow(10, ystaremu[i]);
-      }
-
-      // Interpolate to the desired redshift
-      // Natural cubic spline interpolation over z.
-
-      // First check to see if the requested z is one of the training z.
-      zmatch = -1;
-      for(i=0; i<rs; i++) {
-          if(xstar[p] == z[i]) {
-              zmatch = rs-i-1;
-          }
-      }
-
-      // z doesn't match a training z, interpolate
-      if(zmatch == -1) {
-        for(i=0; i<NK_EMU; i++) {
-          if(*status == 0) {
-            for(j=0; j<rs; j++) {
-              ybyz[rs-j-1] = ystaremu[j*NK_EMU+i];
-            }
-            if (gsl_spline_init(zinterp, z, ybyz, rs) != GSL_SUCCESS) {
-              *status = CCL_ERROR_SPLINE;
-            } else {
-              ystar[i] = gsl_spline_eval(zinterp, xstar[p], NULL);
-            }
-          }
-        }
-      } else { //otherwise, copy in the emulated z without interpolating
-        for(i=0; i<NK_EMU; i++) {
-          ystar[i] = ystaremu[zmatch*NK_EMU + i];
-        }
-      }
-    }
-
-    if (*status == 0) {
-      // Convert to P(k)
-      for(i=0; i<NK_EMU; i++) {
-        ystar[i] = ystar[i] - 1.5*log10(mode[i]) + log10(2) + 2*log10(M_PI);
-        ystar[i] = pow(10, ystar[i]);
-      }
-    }
-
-    gsl_spline_free(zinterp);
   }
-  #pragma omp flush
+  if (sizeofystar != NK_EMU) {
+    *status = CCL_ERROR_MEMORY;
+    ccl_cosmology_set_status_message(
+      cosmo,
+      "ccl_pkemu(): must pass an array with %d elements to populate\n",
+      NK_EMU);
+    ccl_raise_warning(*status, cosmo->status_message);
+  }
+
+  // Initialize if necessary
+  if (*status == 0 && inited == 0) {
+    if (emuInit() != 0) {
+      *status = CCL_ERROR_MEMORY;
+      ccl_raise_warning(*status, "ccl_pkemu(): could not init the EMU");
+    } else {
+      inited = 1;
+    }
+  }
+
+  if (*status == 0) {
+    // Transform w_a into (-w_0-w_a)^(1/4)
+    xstar[6] = pow(-xstar[5]-xstar[6], 0.25);
+    // Check the inputs to make sure we're interpolating.
+    for(i=0; i<p; i++) {
+        if((xstar[i] < xmin[i]) || (xstar[i] > xmax[i])) {
+            switch(i) {
+                case 0:
+                    ccl_cosmology_set_status_message(cosmo,
+                            "ccl_pkemu(): omega_m must be between %f and %f.\n",
+                            xmin[i], xmax[i]);
+                    break;
+                case 1:
+                    ccl_cosmology_set_status_message(cosmo,
+                            "ccl_pkemu(): omega_b must be between %f and %f.\n",
+                            xmin[i], xmax[i]);
+                    break;
+                case 2:
+                    ccl_cosmology_set_status_message(cosmo,
+                            "ccl_pkemu(): sigma8 must be between %f and %f.\n",
+                            xmin[i], xmax[i]);
+                    break;
+                case 3:
+                    ccl_cosmology_set_status_message(cosmo,
+                            "ccl_pkemu(): h must be between %f and %f.\n",
+                            xmin[i], xmax[i]);
+                    break;
+                case 4:
+                    ccl_cosmology_set_status_message(cosmo,
+                            "ccl_pkemu(): n_s must be between %f and %f.\n",
+                            xmin[i], xmax[i]);
+                    break;
+                case 5:
+                    ccl_cosmology_set_status_message(cosmo,
+                            "ccl_pkemu(): w_0 must be between %f and %f.\n",
+                            xmin[i], xmax[i]);
+                    break;
+                case 6:
+                    ccl_cosmology_set_status_message(cosmo,
+                            "ccl_pkemu(): (-w_0-w_a)^(1/4) must be between %f and %f.\n",
+                            xmin[i], xmax[i]);
+                    break;
+                case 7:
+                    ccl_cosmology_set_status_message(cosmo,
+                            "ccl_pkemu(): omega_nu must be between %f and %f.\n",
+                            xmin[i], xmax[i]);
+                    break;
+            }
+            *status = CCL_ERROR_EMULATOR_BOUND;
+            ccl_raise_warning(*status, cosmo->status_message);
+        }
+    } // for(i=0; i<p; i++)
+  }
+
+  if (*status == 0) {
+    if((xstar[p] < z[0]) || (xstar[p] > z[rs-1])) {
+        ccl_cosmology_set_status_message(cosmo,
+                "ccl_pkemu(): z must be between %f and %f.\n",
+                z[0], z[rs-1]);
+        *status = CCL_ERROR_EMULATOR_BOUND;
+        ccl_raise_warning(*status, cosmo->status_message);
+    }
+  }
+
+  if (*status == 0) {
+    // Standardize the inputs
+    for(i=0; i<p; i++) {
+        xstarstd[i] = (xstar[i] - xmin[i]) / xrange[i];
+    }
+
+    // compute the covariances between the new input and sims for all the PCs.
+    for(ee=0; ee<2; ee++) {
+        for(i=0; i<peta[ee]; i++) {
+            for(j=0; j<m[ee]; j++) {
+                logc = 0.0;
+                for(k=0; k<p; k++) {
+                    logc -= beta[ee][i][k]*pow(x[j][k] - xstarstd[k], 2.0);
+                }
+                Sigmastar[ee][i][j] = exp(logc) / lamz[ee][i];
+            }
+        }
+    }
+
+    // Compute wstar for the first chunk.
+    for(i=0; i<peta[0]; i++) {
+        wstar[i]=0.0;
+        for(j=0; j<m[0]; j++) {
+            wstar[i] += Sigmastar[0][i][j] * KrigBasis[0][i][j];
+        }
+    }
+    // Compute wstar for the second chunk.
+    for(i=0; i<peta[1]; i++) {
+        wstar[peta[0]+i]=0.0;
+        for(j=0; j<m[1]; j++) {
+            wstar[peta[0]+i] += Sigmastar[1][i][j] * KrigBasis[1][i][j];
+        }
+    }
+
+    /*
+    for(i=0; i<peta[0]+peta[1]; i++) {
+        printf("%f\n", wstar[i]);
+    }
+     */
+
+    // Compute ystar, the new output
+    for(i=0; i<neta; i++) {
+        ystaremu[i] = 0.0;
+        for(j=0; j<peta[0]+peta[1]; j++) {
+            ystaremu[i] += K[i][j]*wstar[j];
+        }
+        ystaremu[i] = ystaremu[i]*sd + mean[i];
+
+        // Convert to P(k)
+        //ystaremu[i] = ystaremu[i] - 1.5*log10(mode[i % NK_EMU]);
+        //ystaremu[i] = 2*M_PI*M_PI*pow(10, ystaremu[i]);
+    }
+
+    // Interpolate to the desired redshift
+    // Natural cubic spline interpolation over z.
+
+    // First check to see if the requested z is one of the training z.
+    zmatch = -1;
+    for(i=0; i<rs; i++) {
+        if(xstar[p] == z[i]) {
+            zmatch = rs-i-1;
+        }
+    }
+
+    // z doesn't match a training z, interpolate
+    if(zmatch == -1) {
+      for(i=0; i<NK_EMU; i++) {
+        if(*status == 0) {
+          for(j=0; j<rs; j++) {
+            ybyz[rs-j-1] = ystaremu[j*NK_EMU+i];
+          }
+          if (gsl_spline_init(zinterp, z, ybyz, rs) != GSL_SUCCESS) {
+            *status = CCL_ERROR_SPLINE;
+          } else {
+            ystar[i] = gsl_spline_eval(zinterp, xstar[p], NULL);
+          }
+        }
+      }
+    } else { //otherwise, copy in the emulated z without interpolating
+      for(i=0; i<NK_EMU; i++) {
+        ystar[i] = ystaremu[zmatch*NK_EMU + i];
+      }
+    }
+  }
+
+  if (*status == 0) {
+    // Convert to P(k)
+    for(i=0; i<NK_EMU; i++) {
+      ystar[i] = ystar[i] - 1.5*log10(mode[i]) + log10(2) + 2*log10(M_PI);
+      ystar[i] = pow(10, ystar[i]);
+    }
+  }
+
+  gsl_spline_free(zinterp);
 }

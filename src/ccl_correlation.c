@@ -264,7 +264,7 @@ static void ccl_tracer_corr_bessel(ccl_cosmology *cosmo,
     F.function = &corr_bessel_integrand;
     F.params = &cp;
 
-    #pragma omp for
+    #pragma omp for schedule(dynamic)
     for(ith=0; ith < n_theta; ith++) {
       if (local_status == 0) {
         cp.th = theta[ith]*M_PI/180;

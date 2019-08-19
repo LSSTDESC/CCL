@@ -207,7 +207,7 @@ void ccl_angular_cl_limber(ccl_cosmology *cosmo,
       F.params = &ipar;
     }
 
-    #pragma omp for
+    #pragma omp for schedule(dynamic)
     for (lind=0; lind < nl_out; ++lind) {
       if (local_status == 0) {
         l = l_out[lind];

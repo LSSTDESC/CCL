@@ -680,7 +680,7 @@ void ccl_cosmology_compute_growth(ccl_cosmology* cosmo, int* status)
       if(df_arr == NULL) {
         *status = CCL_ERROR_MEMORY;
         ccl_cosmology_set_status_message(
-          cosmo, "ccl_background.c: ccl_cosmology_compute_distances(): ran out of memory\n");
+          cosmo, "ccl_background.c: ccl_cosmology_compute_growth(): ran out of memory\n");
       }
     }
 
@@ -690,7 +690,7 @@ void ccl_cosmology_compute_growth(ccl_cosmology* cosmo, int* status)
       if (df_z_spline == NULL) {
         *status = CCL_ERROR_MEMORY;
         ccl_cosmology_set_status_message(
-          cosmo, "ccl_background.c: ccl_cosmology_compute_distances(): ran out of memory\n");
+          cosmo, "ccl_background.c: ccl_cosmology_compute_growth(): ran out of memory\n");
       }
     }
 
@@ -735,7 +735,7 @@ void ccl_cosmology_compute_growth(ccl_cosmology* cosmo, int* status)
       if (df_a_spline == NULL) {
         *status = CCL_ERROR_MEMORY;
         ccl_cosmology_set_status_message(
-          cosmo, "ccl_background.c: ccl_cosmology_compute_distances(): ran out of memory\n");
+          cosmo, "ccl_background.c: ccl_cosmology_compute_growth(): ran out of memory\n");
       }
     }
 
@@ -763,7 +763,7 @@ void ccl_cosmology_compute_growth(ccl_cosmology* cosmo, int* status)
     if (y == NULL) {
       *status = CCL_ERROR_MEMORY;
       ccl_cosmology_set_status_message(
-          cosmo, "ccl_background.c: ccl_cosmology_compute_distances(): ran out of memory\n");
+          cosmo, "ccl_background.c: ccl_cosmology_compute_growth(): ran out of memory\n");
     }
   }
 
@@ -772,7 +772,7 @@ void ccl_cosmology_compute_growth(ccl_cosmology* cosmo, int* status)
     if (y2 == NULL) {
       *status = CCL_ERROR_MEMORY;
       ccl_cosmology_set_status_message(
-          cosmo, "ccl_background.c: ccl_cosmology_compute_distances(): ran out of memory\n");
+          cosmo, "ccl_background.c: ccl_cosmology_compute_growth(): ran out of memory\n");
     }
   }
 
@@ -833,7 +833,7 @@ void ccl_cosmology_compute_growth(ccl_cosmology* cosmo, int* status)
     if (growth == NULL || fgrowth == NULL) {
       *status = CCL_ERROR_MEMORY;
       ccl_cosmology_set_status_message(
-          cosmo, "ccl_background.c: ccl_cosmology_compute_distances(): ran out of memory\n");
+          cosmo, "ccl_background.c: ccl_cosmology_compute_growth(): ran out of memory\n");
     }
   }
 
