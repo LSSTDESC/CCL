@@ -3,7 +3,7 @@ import pytest
 
 import pyccl as ccl
 
-POWER_NU_TOL = 1.0E-3
+POWER_NU_TOL = 2.0E-2
 
 
 @pytest.mark.parametrize('model', list(range(3)))
