@@ -19,6 +19,10 @@ ccl_f1d_t *ccl_f1d_t_new(int n,double *x,double *y,double y0,double yf)
     return NULL;
 
   spl->spline=gsl_spline_alloc(gsl_interp_cspline,n);
+  if (spl->spline == NULL) {
+    free(spl);
+    return NULL;
+  }
   int parstatus=gsl_spline_init(spl->spline,x,y,n);
   if(parstatus) {
     gsl_spline_free(spl->spline);

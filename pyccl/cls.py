@@ -27,6 +27,9 @@ def angular_cl(cosmo, cltracer1, cltracer2, ell, p_of_k_a=None,
             :math:`C_\\ell`, for the pair of tracers, as a function of
             :math:`\\ell`.
     """
+    # we need the distances for the integrals
+    cosmo.compute_distances()
+
     # Access ccl_cosmology object
     cosmo_in = cosmo
     cosmo = cosmo.cosmo
@@ -39,6 +42,9 @@ def angular_cl(cosmo, cltracer1, cltracer2, ell, p_of_k_a=None,
                              "pyccl.Pk2D object or None")
     else:
         psp = None
+        # if a power spectrum was not passed, we need the non-linear one
+        # at the C level
+        cosmo_in.compute_nonlin_power()
 
     # Create tracer colections
     status = 0

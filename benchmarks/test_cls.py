@@ -1,11 +1,14 @@
 import numpy as np
 import pyccl as ccl
+import time
 import os
 import pytest
 
 
 @pytest.fixture(scope='module', params=['analytic', 'histo'])
 def set_up(request):
+    t0 = time.time()
+
     nztyp = request.param
     dirdat = os.path.dirname(__file__) + '/data/'
     cosmo = ccl.Cosmology(Omega_c=0.30, Omega_b=0.00, Omega_g=0, Omega_k=0,
@@ -113,6 +116,7 @@ def set_up(request):
     bms['ii_12'] = read_bm(pre + 'b1b2' + post + 'ii.txt')
     bms['ii_22'] = read_bm(pre + 'b2b2' + post + 'ii.txt')
     bms['cc'] = read_bm(pre + 'log_cl_cc.txt')
+    print('init and i/o time:', time.time() - t0)
 
     return cosmo, trc, lfacs, bms
 

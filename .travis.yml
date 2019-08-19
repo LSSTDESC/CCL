@@ -17,24 +17,25 @@ matrix:
 
 install:
   - "./.travis/install.sh"
-  # this is a hack for conda osx compilers
-  - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then export CONDA_BUILD_SYSROOT=/; fi
   - export PATH=$HOME/miniconda/bin:$PATH
   - source activate test-environment
+  - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then conda install -y llvm-openmp clang=4.0.1; fi
   # this is a hack for conda osx compilers
   - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then export DYLD_FALLBACK_LIBRARY_PATH=${CONDA_PREFIX}/lib; fi
+  - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then export CONDA_BUILD_SYSROOT=/; fi
 
 script:
   - flake8 pyccl
   - flake8 --exclude=data benchmarks
   - "[[ `grep \"$(printf '\t')\" pyccl/*.py` == \"\" ]]"  # no tabs in python
-  - mkdir -p build && cd build && cmake .. && make && cd ..
-  - CLASS_PARAM_DIR=./build/extern/share/class/ ./build/check_ccl
+  - mkdir -p build && cd build && cmake -DFORCE_OPENMP=YES -DCMAKE_VERBOSE_MAKEFILE=ON .. && make && cd ..
+  - CLASS_PARAM_DIR=./build/extern/share/class/ OMP_NUM_THREADS=2 ./build/check_ccl
   - rm -rf build
+  - mkdir -p build && cd build && cmake -DFORCE_OPENMP=YES -DCMAKE_VERBOSE_MAKEFILE=ON .. && cd ..
   - python setup.py build
   - python setup.py develop
-  - pytest -vv pyccl --cov=pyccl
-  - pytest -vv benchmarks --cov=pyccl --cov-append
+  - OMP_NUM_THREADS=2 pytest -vv pyccl --cov=pyccl
+  - OMP_NUM_THREADS=2 pytest -vv benchmarks --cov=pyccl --cov-append
 
 after_success:
   - coveralls

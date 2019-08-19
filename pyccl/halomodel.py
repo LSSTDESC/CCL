@@ -14,6 +14,7 @@ def halo_concentration(cosmo, halo_mass, a, odelta=200):
     Returns:
         float or array_like: Dimensionless halo concentration, ratio rv/rs
     """
+    cosmo.compute_sigma()
     return _vectorize_fn4(
         lib.halo_concentration,
         lib.halo_concentration_vec, cosmo, halo_mass, a, odelta)
@@ -30,6 +31,7 @@ def onehalo_matter_power(cosmo, k, a):
         onehalo_matter_power (float or array_like): one-halo term for matter
                                                     power spectrum
     """
+    cosmo.compute_sigma()
     return _vectorize_fn2(lib.onehalo_matter_power,
                           lib.onehalo_matter_power_vec,
                           cosmo, k, a)
@@ -47,6 +49,7 @@ def twohalo_matter_power(cosmo, k, a):
                                                               for matter power
                                                               spectrum
     """
+    cosmo.compute_sigma()
     return _vectorize_fn2(
         lib.twohalo_matter_power,
         lib.twohalo_matter_power_vec,
@@ -64,6 +67,7 @@ def halomodel_matter_power(cosmo, k, a):
         halomodel_matter_power (float or array_like): matter power spectrum
                                                       from halo model
     """
+    cosmo.compute_sigma()
     return _vectorize_fn2(
         lib.halomodel_matter_power,
         lib.halomodel_matter_power_vec,

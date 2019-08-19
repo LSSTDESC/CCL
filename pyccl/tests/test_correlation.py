@@ -7,7 +7,8 @@ COSMO = ccl.Cosmology(
     transfer_function='bbks', matter_power_spectrum='linear')
 
 
-def test_correlation_smoke():
+@pytest.mark.parametrize('method', ['bessel', 'legendre', 'fftlog'])
+def test_correlation_smoke(method):
     z = np.linspace(0., 1., 200)
     n = np.ones(z.shape)
     lens = ccl.WeakLensingTracer(COSMO, dndz=(z, n))
@@ -22,7 +23,7 @@ def test_correlation_smoke():
 
     for tval in [t_arr, t_lst, t_scl, t_int]:
         corr = ccl.correlation(
-            COSMO, ell, cl, tval, corr_type='L+', method='FFTLog')
+            COSMO, ell, cl, tval, corr_type='gg', method=method)
         assert np.all(np.isfinite(corr))
         assert np.shape(corr) == np.shape(tval)
 
