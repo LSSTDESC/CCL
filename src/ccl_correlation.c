@@ -389,25 +389,40 @@ static void ccl_tracer_corr_legendre(ccl_cosmology *cosmo,
       *status=taper_cl((int)(cosmo->spline_params.ELL_MAX_CORR)+1,l_arr,cl_arr,taper_cl_limits);
   }
 
-  if(*status==0) {
-    Pl_theta=malloc(sizeof(double)*((int)(cosmo->spline_params.ELL_MAX_CORR)+1));
-    if(Pl_theta==NULL) {
-      *status=CCL_ERROR_MEMORY;
-      ccl_cosmology_set_status_message(cosmo, "ccl_correlation.c: ccl_tracer_corr_legendre ran out of memory\n");
-    }
-  }
+  int local_status, i_L;
 
-  if(*status==0) {
-    for (int i=0;i<n_theta;i++) {
-      wtheta[i]=0;
-      ccl_compute_legendre_polynomial(corr_type,theta[i],(int)(cosmo->spline_params.ELL_MAX_CORR),Pl_theta);
-      for(int i_L=1;i_L<(int)(cosmo->spline_params.ELL_MAX_CORR);i_L+=1)
-        wtheta[i]+=cl_arr[i_L]*Pl_theta[i_L];
-      wtheta[i]/=(M_PI*4);
-    }
-  }
+#pragma omp parallel default(none) \
+                     shared(cosmo, theta, cl_arr, wtheta, n_theta, status, corr_type) \
+                     private(Pl_theta, i, i_L, local_status)
+  {
+    Pl_theta = NULL;
+    local_status = *status;
 
-  free(Pl_theta);
+    if (local_status == 0) {
+      Pl_theta = malloc(sizeof(double)*((int)(cosmo->spline_params.ELL_MAX_CORR)+1));
+      if (Pl_theta == NULL) {
+        local_status = CCL_ERROR_MEMORY;
+      }
+    }
+
+    #pragma omp for schedule(dynamic)
+    for (int i=0; i < n_theta; i++) {
+      if (local_status == 0) {
+        wtheta[i] = 0;
+        ccl_compute_legendre_polynomial(corr_type, theta[i], (int)(cosmo->spline_params.ELL_MAX_CORR), Pl_theta);
+        for (i_L=1; i_L < (int)(cosmo->spline_params.ELL_MAX_CORR); i_L+=1)
+          wtheta[i] += cl_arr[i_L]*Pl_theta[i_L];
+        wtheta[i] /= (M_PI*4);
+      }
+    }
+
+    if (local_status) {
+      #pragma omp atomic write
+      *status = local_status;
+    }
+
+    free(Pl_theta);
+  }
   free(l_arr);
   free(cl_arr);
 }
