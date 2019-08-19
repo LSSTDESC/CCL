@@ -12,8 +12,6 @@ sed -i.bak -e 's/^OPTFLAG =/OPTFLAG = -I${CONDA_PREFIX}\/include/g' Makefile
 sed -i.bak -e 's/^#CCFLAG +=/CCFLAG +=/g' Makefile
 sed -i.bak -e 's/^#CCFLAG =/CCFLAG =/g' Makefile
 
-cat Makefile
-
 make
 
 # at this point the make file leaves you in the python dir
