@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include <assert.h>
 
 #include <gsl/gsl_integration.h>
 #include <gsl/gsl_interp.h>

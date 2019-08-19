@@ -756,6 +756,9 @@ class Cosmology(object):
         if self['N_nu_mass'] == 0 and not self.has_growth:
             self.compute_growth()
 
+        if self['mu_0'] > 0 or self['sigma_0'] > 0:
+            self.compute_growth()
+
         if self._config_init_kwargs['transfer_function'] == 'boltzmann_class':
             pk_lin = get_class_pk_lin(self)
             psp = pk_lin.psp

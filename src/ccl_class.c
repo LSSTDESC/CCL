@@ -21,6 +21,15 @@ void ccl_cosmology_spline_linpower_musigma(ccl_cosmology* cosmo, ccl_f2d_t *psp,
   double kmin,kmax,ndecades,amin,amax,ic;
   int nk,na,s;
   double *lk = NULL, *aa = NULL, *lpk_ln = NULL, *lpk_nl = NULL;
+  double norm_pk;
+  double *mnu_list = NULL;
+  ccl_parameters params_GR;
+  params_GR.mnu = NULL;
+  params_GR.z_mgrowth = NULL;
+  params_GR.df_mgrowth = NULL;
+  ccl_cosmology * cosmo_GR = NULL;
+  double *D_mu = NULL;
+  double *D_GR = NULL;
 
   if (*status == 0) {
     //CLASS calculations done - now allocate CCL splines
@@ -36,7 +45,7 @@ void ccl_cosmology_spline_linpower_musigma(ccl_cosmology* cosmo, ccl_f2d_t *psp,
     // The lk array is initially k, but will later
     // be overwritten with log(k)
     lk = ccl_log_spacing(kmin, kmax, nk);
-    if(lk==NULL) {
+    if (lk == NULL) {
       *status = CCL_ERROR_MEMORY;
       ccl_cosmology_set_status_message(
           cosmo,
@@ -49,7 +58,7 @@ void ccl_cosmology_spline_linpower_musigma(ccl_cosmology* cosmo, ccl_f2d_t *psp,
         amin, cosmo->spline_params.A_SPLINE_MIN_PK,
         amax, cosmo->spline_params.A_SPLINE_NLOG_PK,
         cosmo->spline_params.A_SPLINE_NA_PK);
-    if (aa==NULL) {
+    if (aa == NULL) {
       *status = CCL_ERROR_MEMORY;
       ccl_cosmology_set_status_message(
         cosmo,
@@ -91,63 +100,106 @@ void ccl_cosmology_spline_linpower_musigma(ccl_cosmology* cosmo, ccl_f2d_t *psp,
       // current one but with mu_0 and Sigma_0=0, for scaling P(k)
 
       // Get a list of the three neutrino masses already calculated
-      double *mnu_list = NULL;
       mnu_list = malloc(3*sizeof(double));
-      for (int i=0; i< cosmo->params.N_nu_mass; i=i+1) {
-        mnu_list[i] = cosmo->params.mnu[i];
+      if (mnu_list == NULL) {
+        *status = CCL_ERROR_MEMORY;
+        ccl_cosmology_set_status_message(
+          cosmo,
+          "ccl_power.c: ccl_cosmology_spline_linpower_musigma(): memory allocation\n");
       }
-      if (cosmo->params.N_nu_mass < 3) {
-        for (int j=cosmo->params.N_nu_mass; j<3; j=j+1) {
-          mnu_list[j] = 0.;
+
+      if (*status == 0) {
+        for (int i=0; i< cosmo->params.N_nu_mass; i=i+1) {
+          mnu_list[i] = cosmo->params.mnu[i];
+        }
+        if (cosmo->params.N_nu_mass < 3) {
+          for (int j=cosmo->params.N_nu_mass; j<3; j=j+1) {
+            mnu_list[j] = 0.;
+          }
+        }
+
+        if (isfinite(cosmo->params.A_s)) {
+          norm_pk = cosmo->params.A_s;
+        }
+        else if (isfinite(cosmo->params.sigma8)) {
+          norm_pk = cosmo->params.sigma8;
+        }
+        else {
+          *status = CCL_ERROR_PARAMETERS;
+          strcpy(
+            cosmo->status_message,
+            "ccl_power.c: ccl_cosmology_spline_linpower_musigma(): neither A_s nor sigma8 defined.\n");
         }
       }
 
-      double norm_pk;
-      if (isfinite(cosmo->params.A_s)) {
-        norm_pk = cosmo->params.A_s;
-      }
-      else if (isfinite(cosmo->params.sigma8)) {
-        norm_pk = cosmo->params.sigma8;
-      }
-      else {
-        *status = CCL_ERROR_PARAMETERS;
-        strcpy(
-          cosmo->status_message,
-          "ccl_power.c: ccl_cosmology_spline_linpower_musigma(): neither A_s nor sigma8 defined.\n");
-      }
+      if (*status == 0) {
+        params_GR = ccl_parameters_create(
+          cosmo->params.Omega_c, cosmo->params.Omega_b, cosmo->params.Omega_k,
+          cosmo->params.Neff, mnu_list, ccl_mnu_list,
+          cosmo->params.w0, cosmo->params.wa, cosmo->params.h,
+          norm_pk, cosmo->params.n_s,
+          cosmo->params.bcm_log10Mc, cosmo->params.bcm_etab,
+          cosmo->params.bcm_ks, 0., 0., cosmo->params.nz_mgrowth,
+          cosmo->params.z_mgrowth, cosmo->params.df_mgrowth, status);
 
-      ccl_parameters params_GR = ccl_parameters_create(
-        cosmo->params.Omega_c, cosmo->params.Omega_b, cosmo->params.Omega_k,
-        cosmo->params.Neff, mnu_list, ccl_mnu_list,
-        cosmo->params.w0, cosmo->params.wa, cosmo->params.h,
-        norm_pk, cosmo->params.n_s,
-        cosmo->params.bcm_log10Mc, cosmo->params.bcm_etab,
-        cosmo->params.bcm_ks, 0., 0., cosmo->params.nz_mgrowth,
-        cosmo->params.z_mgrowth, cosmo->params.df_mgrowth, status);
-      ccl_cosmology* cosmo_GR = ccl_cosmology_create(params_GR, cosmo->config);
-
-      double *D_mu = malloc(na * sizeof(double));
-      double *D_GR = malloc(na * sizeof(double));
-
-      for (int i=0; i<na; i++) {
-        D_mu[i] = ccl_growth_factor_unnorm(cosmo, aa[i], status);
-        D_GR[i] = ccl_growth_factor_unnorm(cosmo_GR, aa[i], status);
-      }
-
-      for (int i=0; i<nk; i++) {
-        lk[i] = log(lk[i]);
-        for (int j = 0; j < na; j++) {
-          //The 2D interpolation routines access the function values pk_{k_ia_j} with the following ordering:
-          //pk_ij = pk[j*N_k + i]
-          //with i = 0,...,N_k-1 and j = 0,...,N_a-1.
-          psout_l = ccl_f2d_t_eval(psp, lk[i], aa[j], cosmo, status);
-          lpk_ln[j*nk+i] = log(psout_l) + 2 * log(D_mu[j]) - 2 * log(D_GR[j]);
+        if (*status) {
+          *status = CCL_ERROR_PARAMETERS;
+          strcpy(
+            cosmo->status_message,
+            "ccl_power.c: ccl_cosmology_spline_linpower_musigma(): could not make MG params.\n");
         }
       }
 
-      free(D_mu);
-      free(D_GR);
-      free(cosmo_GR);
+      if (*status == 0) {
+        cosmo_GR = ccl_cosmology_create(params_GR, cosmo->config);
+        D_mu = malloc(na * sizeof(double));
+        D_GR = malloc(na * sizeof(double));
+
+        if (cosmo_GR == NULL || D_mu == NULL || D_GR == NULL) {
+          *status = CCL_ERROR_MEMORY;
+          ccl_cosmology_set_status_message(
+            cosmo,
+            "ccl_power.c: ccl_cosmology_spline_linpower_musigma(): memory allocation\n");
+        }
+      }
+
+      if (*status == 0) {
+        ccl_cosmology_compute_growth(cosmo_GR, status);
+
+        if (*status) {
+          *status = CCL_ERROR_PARAMETERS;
+          strcpy(
+            cosmo->status_message,
+            "ccl_power.c: ccl_cosmology_spline_linpower_musigma(): could not init GR growth.\n");
+        }
+      }
+
+      if (*status == 0) {
+        for (int i=0; i<na; i++) {
+          D_mu[i] = ccl_growth_factor_unnorm(cosmo, aa[i], status);
+          D_GR[i] = ccl_growth_factor_unnorm(cosmo_GR, aa[i], status);
+        }
+
+        if (*status) {
+          *status = CCL_ERROR_PARAMETERS;
+          strcpy(
+            cosmo->status_message,
+            "ccl_power.c: ccl_cosmology_spline_linpower_musigma(): could not make MG and GR growth.\n");
+        }
+      }
+
+      if (*status == 0) {
+        for (int i=0; i<nk; i++) {
+          lk[i] = log(lk[i]);
+          for (int j = 0; j < na; j++) {
+            //The 2D interpolation routines access the function values pk_{k_ia_j} with the following ordering:
+            //pk_ij = pk[j*N_k + i]
+            //with i = 0,...,N_k-1 and j = 0,...,N_a-1.
+            psout_l = ccl_f2d_t_eval(psp, lk[i], aa[j], cosmo, status);
+            lpk_ln[j*nk+i] = log(psout_l) + 2 * log(D_mu[j]) - 2 * log(D_GR[j]);
+          }
+        }
+      }
     }
     else {
       // This is the normal GR case.
@@ -164,13 +216,13 @@ void ccl_cosmology_spline_linpower_musigma(ccl_cosmology* cosmo, ccl_f2d_t *psp,
     }
   }
 
-  if(*status) {
-    *status = CCL_ERROR_CLASS;
-    ccl_cosmology_set_status_message(
-        cosmo,
-        "ccl_power.c: ccl_cosmology_spline_linpower_musigma(): "
-        "Error splining CLASS power spectrum\n");
-  }
+  // if(*status) {
+  //   *status = CCL_ERROR_CLASS;
+  //   ccl_cosmology_set_status_message(
+  //       cosmo,
+  //       "ccl_power.c: ccl_cosmology_spline_linpower_musigma(): "
+  //       "Error splining CLASS power spectrum\n");
+  // }
 
   if(*status==0)
     cosmo->data.p_lin = ccl_f2d_t_new(
@@ -178,6 +230,11 @@ void ccl_cosmology_spline_linpower_musigma(ccl_cosmology* cosmo, ccl_f2d_t *psp,
       1, 2, ccl_f2d_cclgrowth, 1, NULL, 0, 2,
       ccl_f2d_3,status);
 
+  free(D_mu);
+  free(D_GR);
+  free(mnu_list);
+  ccl_parameters_free(&params_GR);
+  ccl_cosmology_free(cosmo_GR);
   free(lk);
   free(aa);
   free(lpk_nl);

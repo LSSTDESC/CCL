@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
-#include <assert.h>
 
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_integration.h>
