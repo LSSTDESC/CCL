@@ -6,6 +6,4 @@ git checkout v2.7.2
 make
 
 # at this point the make file leaves you in the python dir
-python setup.py install
-
 cd ..
