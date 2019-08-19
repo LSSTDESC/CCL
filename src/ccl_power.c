@@ -431,7 +431,7 @@ static void ccl_cosmology_spline_nonlinpower(
 INPUT: ccl_cosmology * cosmo
 TASK: compute linear power spectrum
 */
-void ccl_cosmology_compute_linear_power(ccl_cosmology* cosmo, int* status) {
+void ccl_cosmology_compute_linear_power(ccl_cosmology* cosmo, ccl_f2d_t *psp, int* status) {
   if ((cosmo->config.transfer_function_method != ccl_boltzmann_class &&
        cosmo->config.transfer_function_method != ccl_transfer_none) &&
       (fabs(cosmo->params.mu_0) > 1e-14 || fabs(cosmo->params.sigma_0) > 1e-14)) {
@@ -465,7 +465,7 @@ void ccl_cosmology_compute_linear_power(ccl_cosmology* cosmo, int* status) {
         break;
 
       case ccl_boltzmann_class:
-        ccl_cosmology_compute_linpower_class(cosmo, status);
+        ccl_cosmology_spline_linpower_musigma(cosmo, psp, status);
         break;
 
       default: {
