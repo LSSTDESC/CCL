@@ -9,4 +9,3 @@ make
 python setup.py install
 
 cd ..
-rm -rf class_public
