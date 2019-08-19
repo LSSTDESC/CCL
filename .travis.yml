@@ -25,10 +25,8 @@ install:
   - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then export CONDA_BUILD_SYSROOT=/; fi
 
   # install CLASS into the env
-  - git clone https://github.com/lesgourg/class_public.git
-  - cd class_public && git checkout v2.7.2 && cd ..
-  - cd class_public && make && cd ..
-  - cd python && python setup.py install && cd ..
+  - if [[ $TRAVIS_OS_NAME != 'osx' ]]; then "./.travis/install_class_linux.sh"; fi
+  - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then "./.travis/install_class_osx.sh"; fi
 
 script:
   - flake8 pyccl
