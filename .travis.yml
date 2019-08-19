@@ -27,7 +27,7 @@ install:
   # install CLASS into the env
   - git clone https://github.com/lesgourg/class_public.git
   - cd class_public && git checkout v2.7.2 && cd ..
-  - cd class_public && mkdir build && cd build && cmake .. && make && cd ..
+  - cd class_public && make && cd ..
   - cd python && python setup.py install && cd ..
 
 script:
