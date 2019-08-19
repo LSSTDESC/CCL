@@ -216,14 +216,6 @@ void ccl_cosmology_spline_linpower_musigma(ccl_cosmology* cosmo, ccl_f2d_t *psp,
     }
   }
 
-  // if(*status) {
-  //   *status = CCL_ERROR_CLASS;
-  //   ccl_cosmology_set_status_message(
-  //       cosmo,
-  //       "ccl_power.c: ccl_cosmology_spline_linpower_musigma(): "
-  //       "Error splining CLASS power spectrum\n");
-  // }
-
   if(*status==0)
     cosmo->data.p_lin = ccl_f2d_t_new(
       na, aa, nk, lk, lpk_ln, NULL, NULL, 0,
