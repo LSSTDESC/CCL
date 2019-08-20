@@ -96,8 +96,13 @@ def get_class_pk_lin(cosmo):
         status = 0
         a_arr, status = lib.get_pk_spline_a(cosmo.cosmo, na, status)
         check(status)
-        lk_arr, status = lib.get_pk_spline_lk(cosmo.cosmo, nk, status)
-        check(status)
+
+        # FIXME - getting the lowest CLASS k value from the python interface
+        # appears to be broken - setting to 1e-5 which is close to the
+        # old value
+        lk_arr = np.log(np.logspace(
+            -5,
+            np.log10(cosmo.cosmo.spline_params.K_MAX_SPLINE), nk))
 
         # we need to cut this to the max value used for calling CLASS
         msk = lk_arr < np.log(cosmo.cosmo.spline_params.K_MAX_SPLINE)
@@ -107,7 +112,7 @@ def get_class_pk_lin(cosmo):
         # now do interp by hand
         ln_p_k_and_z = np.zeros((na, nk), dtype=np.float64)
         for aind in range(na):
-            z = 1.0 / a_arr[aind] - 1 + 1e-10
+            z = max(1.0 / a_arr[aind] - 1, 1e-10)
             for kind in range(nk):
                 ln_p_k_and_z[aind, kind] = np.log(
                     model.pk_lin(np.exp(lk_arr[kind]), z))

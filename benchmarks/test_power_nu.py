@@ -3,10 +3,10 @@ import pytest
 
 import pyccl as ccl
 
-POWER_NU_TOL = 2.0E-2
+POWER_NU_TOL = 1.0E-3
 
 
-@pytest.mark.parametrize('model', list(range(3)))
+@pytest.mark.parametrize('model', [0, 1, 2])
 def test_power_nu(model):
     mnu = [[0.04, 0., 0.],
            [0.05, 0.01, 0.],

@@ -759,7 +759,8 @@ class Cosmology(object):
         if self['mu_0'] > 0 or self['sigma_0'] > 0:
             self.compute_growth()
 
-        if self._config_init_kwargs['transfer_function'] == 'boltzmann_class':
+        if ((self._config_init_kwargs['transfer_function'] ==
+                'boltzmann_class') and not self.has_linear_power):
             pk_lin = get_class_pk_lin(self)
             psp = pk_lin.psp
         else:
