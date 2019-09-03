@@ -94,7 +94,9 @@ with LSST. By constructing a cosmology library specifically with LSST in mind,
 it is possible to ensure that it is flexible, adaptable, and validated for all
 cases of interest, as well as user-friendly and appropriate for the needs of all
 working groups. This note describes the underlying equations and conventions
-of the CCL library. See the GitHub repository for installation and usage instructions.
+of the CCL library \citep[see also the CCL paper,][]{Chisari2019}.
+The GitHub repository\footnote{\url{https://github.com/LSSTDESC/CCL}} has
+installation and usage instructions.
 
 \section{Functionality}
 \label{sec:func}
@@ -137,6 +139,7 @@ models are supported:
     \item Non-zero curvature ($K$)
     \item All of the above, plus an arbitrary, user-defined modified growth function (see description in Section \ref{sec:growth})
     \item Massive neutrinos, in combination with any of the above.
+    \item $\mu-\Sigma$ modified gravity in combination with the models above
 \end{itemize}
 
 \ccl also provides support for modeling the impact of baryons on the matter
@@ -816,82 +819,82 @@ where the $\tilde{\Delta}^\alpha$s depend on the value of $n_\alpha$:
 \end{equation}
 \end{itemize}
 
-\subsubsection*{Beyond limber}
-
-\ccl uses \texttt{Angpow} \citep{2017arXiv170103592C} to compute the angular
-power spectra  $C_{\ell}^{ab}$ without any Limber numerical approximation.
-\ccl has been linked to the \texttt{Angpow} code, which is briefly described here.
-
-The angular power spectrum for two shells $C_{\ell}^{ab}$ is computed in
-\texttt{Angpow} according to the following expression
-\begin{equation}
-  C_{\ell}^{ab} = \iint_0^\infty \mathrm{d} z \mathrm{d} z^\prime  p_{z_1}(z_1) p_{z_2}(z^\prime) \times \int_0^\infty \mathrm{d} k\ f_{\ell}(z, k) f_{\ell}(z^\prime, k).
-  \label{eq-clz1z2-obs}
-\end{equation}
-The auxiliary function $f_\ell(z,k)$ can be defined without loss of generality as
-\begin{equation}
-f_\ell(z,k) \equiv  \sqrt{\frac{2}{\pi}}\  k \sqrt{P(k,z)}\ \widetilde{\Delta}_\ell(z,k)\label{eq-fell-func}
-\end{equation}
-with
-\begin{itemize}
-\item  $P(k,z)$ : the matter power spectrum at redshift $z$
-\item $\widetilde{\Delta}_\ell(z,k)$: a function describing the physical processes
-  such as matter density fluctuations, redshift-space distortions as described
-  for instance in references \citet{2008cmb..book.....D,2009PhRvD..80h3514Y,2010PhRvD..82h3508Y, 2011PhRvD..84d3516C,2011PhRvD..84f3505B}. Currently, the \texttt{Angpow}
-  version delivered with \ccl only can deal with galaxy clustering tracers (no
-  lensing) and this without magnification effects.
-  The incorporation of those transfer functions is left for future work, but in
-  principle \texttt{Angpow} has already the capability to treat them. For now,
-  for galaxy clustering tracers we defined $\widetilde{\Delta}_\ell(z,k)$ as
-  \begin{equation}
-     \widetilde{\Delta}_\ell(z,k) \approx b j_\ell(k \chi(z)) - f(z) j_\ell^{\prime\prime}(k \chi(z))
-  \end{equation}
-  with $j_\ell(x)$ and $j_\ell^{\prime\prime}(x)$ the spherical Bessel function
-  of order $\ell$ and its second derivative, and $f(a)$ the growth rate as defined
-  subsection~\ref{sec:growth} (derivative of the growth function with respect to the scale factor $a$).
-\end{itemize}
-
-To proceed to a numerical evaluation of equation \ref{eq-clz1z2-obs},
-\texttt{Angpow} first conducts inside the rectangle
-$ [z_{1\mrm{min}},z_{1\mrm{max}}] \times [z_{2\mrm{min}},z_{2\mrm{max}}]$ given
-by the $p_z(z)$ selection functions a Cartesian product of one-dimensional (1D) quadrature
-defined by the set of sample nodes $z_i$ and weights $w_i$. In practice,
-the Clenshaw-Curtis quadrature is used. The corresponding sampling points
-$(z_{1i},z_{2j})$ are weighted by the product $w_i w_j$ using the 1D quadrature
-sample points and weights on both redshift regions with
-$i=0,\dots, N_{\mrm{z}_1}-1$ and $j=0,\dots,N_{\mrm{z}_2}-1$. Then, one gets the
-following approximation:
-\begin{equation}
-C_{\ell}^{ab} \approx  \sum_{i=0}^{N_{\mrm{z}_1}-1}\sum_{j=0}^{N_{\mrm{z}_2}-1} w_i w_j p_{z_1}(z_i)p_{z_2}(z_j) \widehat{P}_\ell(\chi_i,\chi_j)
-\label{eq-cross-zquadra}
-\end{equation}
-with the notations
-$z_i = z_{1i}$, $z_j = z_{2j}$ and  $\chi_i = \chi(z_{1i})$, $\chi_j = \chi(z_{2j})$ and
-\begin{equation}
-\widehat{P}_\ell(z_i,z_j) =   \int_0^\infty dk\ f_\ell(z_i,k) f_\ell(z_j,k)
-\label{eq-Pellzizj}
-,\end{equation}
-To conduct the computation of such integral of highly oscillating functions we
-use the 3C-algorithm described in details in reference \citep{2017arXiv170103592C}.
-In brief this algorithm proceeds the following way:
-\begin{enumerate}
-\item the total integration $k$ interval (eg. $[k_\mathrm{min}, k_\mathrm{max}]$)
-  in equation (\ref{eq-Pellzizj}) is cut on several $k$-sub-intervals;
-\item  on each sub-interval the functions $f_{i\, \ell}(k) = f_\ell(z_i,k) $
-  and $f_{j\, \ell}(k) = f_\ell(z_j,k)$ are projected onto Chebyshev series of order $2^N$;
-\item the product of the two Chebyshev series is performed with a $2^{2N}$ Chebyshev series;
-\item then, the integral on the sub-interval is computed thanks to the Clenshaw-Curtis quadrature.
-\end{enumerate}
-All the Chebyshev expansions and the Clenshaw-Curtis quadrature are performed via the DCT-I fast transform of FFTW.
-
-Thanks to the 3C-algorithm, the \texttt{Angpow} is able to compute the
-$C_{\ell}^{ab}$ in a fast and accurate way. It was tested against
-\texttt{CLASS} and can performed the computation an order of magnitude faster,
-which is more suitable for an extensive exploration of the cosmological parameter
-space ($\mathcal{O}(1s)$). Note that \texttt{Angpow} is written in C++ with OpenMP,
-to distribute the computation of a single $C_\ell$ on a single thread.
-The computation can also be switch by the user to the faster Limber
-approximation setting a threshold multipole $\ell$.
+% \subsubsection*{Beyond limber}
+%
+% \ccl uses \texttt{Angpow} \citep{2017arXiv170103592C} to compute the angular
+% power spectra  $C_{\ell}^{ab}$ without any Limber numerical approximation.
+% \ccl has been linked to the \texttt{Angpow} code, which is briefly described here.
+%
+% The angular power spectrum for two shells $C_{\ell}^{ab}$ is computed in
+% \texttt{Angpow} according to the following expression
+% \begin{equation}
+%   C_{\ell}^{ab} = \iint_0^\infty \mathrm{d} z \mathrm{d} z^\prime  p_{z_1}(z_1) p_{z_2}(z^\prime) \times \int_0^\infty \mathrm{d} k\ f_{\ell}(z, k) f_{\ell}(z^\prime, k).
+%   \label{eq-clz1z2-obs}
+% \end{equation}
+% The auxiliary function $f_\ell(z,k)$ can be defined without loss of generality as
+% \begin{equation}
+% f_\ell(z,k) \equiv  \sqrt{\frac{2}{\pi}}\  k \sqrt{P(k,z)}\ \widetilde{\Delta}_\ell(z,k)\label{eq-fell-func}
+% \end{equation}
+% with
+% \begin{itemize}
+% \item  $P(k,z)$ : the matter power spectrum at redshift $z$
+% \item $\widetilde{\Delta}_\ell(z,k)$: a function describing the physical processes
+%   such as matter density fluctuations, redshift-space distortions as described
+%   for instance in references \citet{2008cmb..book.....D,2009PhRvD..80h3514Y,2010PhRvD..82h3508Y, 2011PhRvD..84d3516C,2011PhRvD..84f3505B}. Currently, the \texttt{Angpow}
+%   version delivered with \ccl only can deal with galaxy clustering tracers (no
+%   lensing) and this without magnification effects.
+%   The incorporation of those transfer functions is left for future work, but in
+%   principle \texttt{Angpow} has already the capability to treat them. For now,
+%   for galaxy clustering tracers we defined $\widetilde{\Delta}_\ell(z,k)$ as
+%   \begin{equation}
+%      \widetilde{\Delta}_\ell(z,k) \approx b j_\ell(k \chi(z)) - f(z) j_\ell^{\prime\prime}(k \chi(z))
+%   \end{equation}
+%   with $j_\ell(x)$ and $j_\ell^{\prime\prime}(x)$ the spherical Bessel function
+%   of order $\ell$ and its second derivative, and $f(a)$ the growth rate as defined
+%   subsection~\ref{sec:growth} (derivative of the growth function with respect to the scale factor $a$).
+% \end{itemize}
+%
+% To proceed to a numerical evaluation of equation \ref{eq-clz1z2-obs},
+% \texttt{Angpow} first conducts inside the rectangle
+% $ [z_{1\mrm{min}},z_{1\mrm{max}}] \times [z_{2\mrm{min}},z_{2\mrm{max}}]$ given
+% by the $p_z(z)$ selection functions a Cartesian product of one-dimensional (1D) quadrature
+% defined by the set of sample nodes $z_i$ and weights $w_i$. In practice,
+% the Clenshaw-Curtis quadrature is used. The corresponding sampling points
+% $(z_{1i},z_{2j})$ are weighted by the product $w_i w_j$ using the 1D quadrature
+% sample points and weights on both redshift regions with
+% $i=0,\dots, N_{\mrm{z}_1}-1$ and $j=0,\dots,N_{\mrm{z}_2}-1$. Then, one gets the
+% following approximation:
+% \begin{equation}
+% C_{\ell}^{ab} \approx  \sum_{i=0}^{N_{\mrm{z}_1}-1}\sum_{j=0}^{N_{\mrm{z}_2}-1} w_i w_j p_{z_1}(z_i)p_{z_2}(z_j) \widehat{P}_\ell(\chi_i,\chi_j)
+% \label{eq-cross-zquadra}
+% \end{equation}
+% with the notations
+% $z_i = z_{1i}$, $z_j = z_{2j}$ and  $\chi_i = \chi(z_{1i})$, $\chi_j = \chi(z_{2j})$ and
+% \begin{equation}
+% \widehat{P}_\ell(z_i,z_j) =   \int_0^\infty dk\ f_\ell(z_i,k) f_\ell(z_j,k)
+% \label{eq-Pellzizj}
+% ,\end{equation}
+% To conduct the computation of such integral of highly oscillating functions we
+% use the 3C-algorithm described in details in reference \citep{2017arXiv170103592C}.
+% In brief this algorithm proceeds the following way:
+% \begin{enumerate}
+% \item the total integration $k$ interval (eg. $[k_\mathrm{min}, k_\mathrm{max}]$)
+%   in equation (\ref{eq-Pellzizj}) is cut on several $k$-sub-intervals;
+% \item  on each sub-interval the functions $f_{i\, \ell}(k) = f_\ell(z_i,k) $
+%   and $f_{j\, \ell}(k) = f_\ell(z_j,k)$ are projected onto Chebyshev series of order $2^N$;
+% \item the product of the two Chebyshev series is performed with a $2^{2N}$ Chebyshev series;
+% \item then, the integral on the sub-interval is computed thanks to the Clenshaw-Curtis quadrature.
+% \end{enumerate}
+% All the Chebyshev expansions and the Clenshaw-Curtis quadrature are performed via the DCT-I fast transform of FFTW.
+%
+% Thanks to the 3C-algorithm, the \texttt{Angpow} is able to compute the
+% $C_{\ell}^{ab}$ in a fast and accurate way. It was tested against
+% \texttt{CLASS} and can performed the computation an order of magnitude faster,
+% which is more suitable for an extensive exploration of the cosmological parameter
+% space ($\mathcal{O}(1s)$). Note that \texttt{Angpow} is written in C++ with OpenMP,
+% to distribute the computation of a single $C_\ell$ on a single thread.
+% The computation can also be switch by the user to the faster Limber
+% approximation setting a threshold multipole $\ell$.
 
 {\bf Precision tests.}
 
@@ -1258,7 +1261,7 @@ for the halo mass function and bias.
 \label{sec:tests}
 
 Our goal is for outputs of \ccl to be validated against independent benchmark codes.
-This process is documented in the \ccl paper that can be found in the {\tt doc/ccl\_paper} folder.
+This process is documented in the \ccl paper \citep{Chisari2019}.
 
 For each \ccl prediction, at least one independent code was used to produce the same
 result. Predictions were compared and the resulting numerical accuracy, documented
