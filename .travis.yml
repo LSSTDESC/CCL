@@ -24,6 +24,10 @@ install:
   - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then export DYLD_FALLBACK_LIBRARY_PATH=${CONDA_PREFIX}/lib; fi
   - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then export CONDA_BUILD_SYSROOT=/; fi
 
+  # install CLASS into the env
+  - if [[ $TRAVIS_OS_NAME != 'osx' ]]; then "./.travis/install_class_linux.sh"; fi
+  - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then "./.travis/install_class_osx.sh"; fi
+
 script:
   - flake8 pyccl
   - flake8 --exclude=data benchmarks

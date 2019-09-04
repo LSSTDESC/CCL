@@ -1,5 +1,5 @@
 from . import ccllib as lib
-from .core import check
+from .pyutils import check
 from .pk2d import Pk2D
 import numpy as np
 

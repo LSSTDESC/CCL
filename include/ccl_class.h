@@ -5,11 +5,12 @@
 CCL_BEGIN_DECLS
 
 /*
- * Compute the power spectrum using CLASS
+ * Spline the linear power spectrum for mu-Sigma MG cosmologies.
  * @param cosmo Cosmological parameters
+ ^ @param psp The linear power spectrum to spline.
  * @param status, integer indicating the status
  */
-void ccl_cosmology_compute_linpower_class(ccl_cosmology* cosmo, int* status);
+void ccl_cosmology_spline_linpower_musigma(ccl_cosmology* cosmo, ccl_f2d_t *psp, int* status);
 
 CCL_END_DECLS
 

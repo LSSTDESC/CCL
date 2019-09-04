@@ -47,18 +47,6 @@ set(EXTRA_DIST_DIRS)
 include(BuildFFTW)
 include(BuildGSL)
 
-# If a CLASS installation folder is provided, use it,
-# otherwise download and compile CLASS
-if(EXTERNAL_CLASS_PATH)
-    message("Using external install of CLASS")
-    set(CLASS_LIBRARY_DIRS ${EXTERNAL_CLASS_PATH})
-    set(CLASS_INCLUDE_DIRS ${EXTERNAL_CLASS_PATH}/include)
-    set(CLASS_LIBRARIES -lclass)
-    set(CLASS_EXTERNAL True)
-else(EXTERNAL_CLASS_PATH)
-    include(BuildCLASS)
-endif(EXTERNAL_CLASS_PATH)
-
 # Uncomment below when we bring ANGPOW back
 # Builds Angpow
 # TODO: the same mechanism as for CLASS could be used here to provide the
@@ -66,8 +54,8 @@ endif(EXTERNAL_CLASS_PATH)
 #include(BuildAngpow)
 
 # Compilation flags
-set(CMAKE_C_FLAGS_RELEASE "-O3 -fomit-frame-pointer -fno-common -fPIC -std=gnu99 -DHAVE_ANGPOW -D__CCL_DATA_DIR__=${CMAKE_INSTALL_PREFIX}/share/ccl")
-set(CMAKE_C_FLAGS_DEBUG   "-Og -fomit-frame-pointer -fno-common -fPIC -std=gnu99 -DHAVE_ANGPOW -D__CCL_DATA_DIR__=${CMAKE_INSTALL_PREFIX}/share/ccl")
+set(CMAKE_C_FLAGS_RELEASE "-O3 -fomit-frame-pointer -fno-common -fPIC -std=gnu99 -DHAVE_ANGPOW")
+set(CMAKE_C_FLAGS_DEBUG   "-Og -fomit-frame-pointer -fno-common -fPIC -std=gnu99 -DHAVE_ANGPOW")
 if ((NOT "${CMAKE_C_COMPILER_ID}" MATCHES "^(Apple)?Clang$") OR FORCE_OPENMP)
     # When not using Clang and in Release mode, enabling OpenMP support
     set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -fopenmp")
@@ -79,8 +67,8 @@ if ((NOT "${CMAKE_C_COMPILER_ID}" MATCHES "^(Apple)?Clang$") OR FORCE_OPENMP)
 endif()
 
 # Define include and library directories for external dependencies
-include_directories(${CLASS_INCLUDE_DIRS} ${GSL_INCLUDE_DIRS} ${FFTW_INCLUDES} ${ANGPOW_INCLUDE_DIRS})
-link_directories(${CLASS_LIBRARY_DIRS} ${GSL_LIBRARY_DIRS} ${FFTW_LIBRARY_DIRS} ${ANGPOW_LIBRARY_DIRS})
+include_directories(${GSL_INCLUDE_DIRS} ${FFTW_INCLUDES} ${ANGPOW_INCLUDE_DIRS})
+link_directories(${GSL_LIBRARY_DIRS} ${FFTW_LIBRARY_DIRS} ${ANGPOW_LIBRARY_DIRS})
 # Adds path to CCL include folder
 include_directories(include)
 
@@ -93,9 +81,6 @@ add_library(objlib OBJECT ${CCL_SRC})
 # Make sure the external projects are correclty built
 # Uncomment below when we bring ANGPOW back
 #add_dependencies(objlib ANGPOW)
-if(NOT CLASS_EXTERNAL)
-    add_dependencies(objlib CLASS)
-endif()
 if(NOT GSL_FOUND)
     add_dependencies(objlib GSL)
 # Uncomment below when we bring ANGPOW back

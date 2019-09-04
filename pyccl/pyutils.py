@@ -1,8 +1,36 @@
 """Utility functions to analyze status and error messages passed from CCL, as
 well as wrappers to automatically vectorize functions."""
 from . import ccllib as lib
+from ._types import error_types
+from .errors import CCLError
 import numpy as np
-from .core import check
+
+
+def check(status, cosmo=None):
+    """Check the status returned by a ccllib function.
+
+    Args:
+        status (int or :obj:`core.error_types`): Flag or error describing the
+                                                 success of a function.
+        cosmo (:obj:`Cosmology`, optional): A Cosmology object.
+    """
+    # Check for normal status (no action required)
+    if status == 0:
+        return
+
+    # Get status message from Cosmology object, if there is one
+    if cosmo is not None:
+        msg = cosmo.cosmo.status_message
+    else:
+        msg = ""
+
+    # Check for known error status
+    if status in error_types.keys():
+        raise CCLError("Error %s: %s" % (error_types[status], msg))
+
+    # Check for unknown error
+    if status != 0:
+        raise CCLError("Error %d: %s" % (status, msg))
 
 
 def debug_mode(debug):
