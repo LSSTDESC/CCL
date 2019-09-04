@@ -371,7 +371,7 @@ class Cosmology(object):
         """Raise warnings for various model inconsistencies"""
 
         # massive neutrinos
-        if self._params_init_kwargs['m_nu'] > 0:
+        if np.sum(self._params_init_kwargs['m_nu']) > 0:
             # these are not consistent with anything - fun
             warnings.warn(
                 "All of the halo mass function models in CCL are not properly "
