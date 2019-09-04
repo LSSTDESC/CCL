@@ -1,7 +1,7 @@
-pyccl.pyutils module
+pyccl.tracers module
 ====================
 
-.. automodule:: pyccl.pyutils
+.. automodule:: pyccl.tracers
    :members:
    :undoc-members:
    :show-inheritance:

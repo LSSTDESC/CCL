@@ -6,15 +6,6 @@ readthedocs/_build
 readthedocs/*~
 readthedocs/source/*~
 
-# Ignore autoconf build files.
-Makefile
-config.h
-config.log
-config.status
-libtool
-stamp-h1
-install-record.txt
-
 # Ignore compile and link build files.
 *.o
 *.a
@@ -29,21 +20,9 @@ class/build
 class/
 autom4te.cache/
 
-# Ignore test outputs
-tests/ccl_test_distances
-tests/ccl_test_power
-tests/ccl_test_utils
-tests/check_ccl
-tests/ccl_sample_pkemu
-tests/ccl_sample_pkemu.cpp
-tests/ccl_sample_run
-tests/ccl_sample_run.cpp
-tests/ccl_test_halomod
-tests/specs_example_tomo_clu.out
-tests/specs_example_tomo_lens.out
-
 # Ignores compiled examples
 examples/CMakeFiles
+examples/Makefile
 examples/cmake_install.cmake
 examples/ccl_sample_baryons
 examples/ccl_sample_neutrinos
