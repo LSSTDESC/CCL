@@ -44,6 +44,7 @@ be installed independently of each other, instructions are provided below.
   * [CLASS](http://class-code.net/) version 2.6.3 or above
   * [Angpow](https://gitlab.in2p3.fr/campagne/AngPow)
   * FFTlog([here](http://casa.colorado.edu/~ajsh/FFTLog/) and [here](https://github.com/slosar/FFTLog))is provided within `CCL`, with minor modifications.
+  * [CLASS](https://github.com/lesgourg/class_public), specifically the python wrapper for version 2.7 or greater
 
 In addition, the build system for `CCL` relies on the following software:
   * [CMake](https://cmake.org/) version 3.2 or above
@@ -70,6 +71,13 @@ To install all the dependencies at once, and avoid having `CMake` recompiling th
   ```sh
   $ sudo apt-get install cmake swig libgsl-dev libfftw3-dev
   ```
+
+**Installing CLASS**
+
+In order to use CCL with CLASS, you need to install the CLASS python wrapper `classy`. See their instructions 
+[here](https://github.com/lesgourg/class_public/wiki/Python-wrapper). Note that you may need to edit the `Makefile` in the 
+CLASS repo to work with your system. Please report any installation issues to the CLASS developers on their 
+[issues tracker](https://github.com/lesgourg/class_public/issues).
 
 ## Compile and install the CCL C library
 
