@@ -65,3 +65,6 @@ ccl_parameters parameters_create_nu_vec(
 }
 
 %}
+
+/* The directive gets carried between files, so we reset it at the end. */
+%feature("pythonprepend") %{ %}

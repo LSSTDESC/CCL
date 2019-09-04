@@ -32,14 +32,6 @@ class build(_build):
             raise Exception("Could not find python module, "
                             "SWIG must have failed.")
 
-        # Copy files required by CLASS
-        if call(["cp", "-r", "build/extern/share/class/bbn", "pyccl/"]) != 0:
-            raise Exception("Could not copy the CLASS BBN fikes, "
-                            "CLASS compilation must have failed.")
-        if call(["cp", "-r", "build/extern/share/class/hyrec", "pyccl/"]) != 0:
-            raise Exception("Could not copy the CLASS BBN fikes, CLASS "
-                            "compilation must have failed.")
-
         _build.run(self)
 
 
@@ -56,7 +48,7 @@ setup(
     url="https://github.com/LSSTDESC/CCL",
     packages=['pyccl'],
     provides=['pyccl'],
-    package_data={'pyccl': ['_ccllib.so', 'bbn/*', 'hyrec/*']},
+    package_data={'pyccl': ['_ccllib.so']},
     include_package_data=True,
     use_scm_version=True,
     setup_requires=['setuptools_scm'],

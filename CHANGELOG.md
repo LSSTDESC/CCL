@@ -1,6 +1,8 @@
 # Unreleased
 
 ## C library
+- Moved class interface to python (#652).
+- Added OpenMP (#651).
 - Removed all benchmarks from C and kept only the C unit tests in C (#653).
 - Implemented generalized models for tracers (#630)
 - Fixed memory leak in CLASS power spectrum computations (#561, #562).
@@ -33,6 +35,7 @@
 - Added support for modified gravity via mu / Sigma (scale-independent) parameterisation (#442)
 
 ## Python library
+- Moved class interface to python (#652).
 - Moved all benchmarks and tests to python (#653).
 - Changed IA bias normalization to be consistent with A_IA=1 (#630).
 - Implemented generalized models for tracers (#630)

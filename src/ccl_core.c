@@ -922,7 +922,8 @@ INPUT: ccl_cosmology struct
 TASK: free the input data and the cosmology struct
 */
 void ccl_cosmology_free(ccl_cosmology * cosmo) {
-  ccl_data_free(&cosmo->data);
+  if (cosmo != NULL)
+    ccl_data_free(&cosmo->data);
   free(cosmo);
 }
 

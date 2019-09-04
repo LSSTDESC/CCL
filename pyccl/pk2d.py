@@ -1,6 +1,6 @@
 from . import ccllib as lib
 
-from .core import check
+from .pyutils import check
 import numpy as np
 
 
