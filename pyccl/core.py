@@ -181,11 +181,12 @@ neutrino mass splittings
   - DELTAM13_sq_neg: squared mass difference between eigenstates 3 and 1 for
     the inverted hierarchy.
 """
+import warnings
 import numpy as np
 import yaml
 
 from . import ccllib as lib
-from .errors import CCLError
+from .errors import CCLError, CCLWarning
 
 # Configuration types
 transfer_function_types = {
@@ -378,7 +379,92 @@ class Cosmology(object):
             halo_concentration=halo_concentration,
             emulator_neutrinos=emulator_neutrinos)
 
+        self._raise_warnings()
+
         self._build_cosmo()
+
+    def _raise_warnings(self):
+        """Raise warnings for various model inconsistencies"""
+
+        # massive neutrinos
+        if self._params_init_kwargs['m_nu'] > 0:
+            # these are not consistent with anything - fun
+            warnings.warn(
+                "All of the halo mass function models in CCL are not properly "
+                "calibrated for cosmological models with massive neutrinos!",
+                category=CCLWarning)
+            warnings.warn(
+                "All of the halo bias models in CCL are not properly "
+                "calibrated for cosmological models with massive neutrinos!",
+                category=CCLWarning)
+            warnings.warn(
+                "All of the halo concentration models in CCL are not properly "
+                "calibrated for cosmological models with massive neutrinos!",
+                category=CCLWarning)
+            warnings.warn(
+                "CCL does not properly compute the linear growth rate in "
+                "cosmological models with massive neutrinos!",
+                category=CCLWarning)
+
+            if (self._config_init_kwargs['baryons_power_spectrum'] ==
+                    'bcm'):
+                warnings.warn(
+                    "The BCM baryonic correction model's default parameters "
+                    " were not calibration for cosmological models with "
+                    "massive neutrinos!",
+                    category=CCLWarning)
+
+            if self._params_init_kwargs['df_mg'] is not None:
+                warnings.warn(
+                    "Modified growth rates via the `df_mg` keyword argument "
+                    "cannot be consistently combined with cosmological models "
+                    "with massive neutrinos in CCL!",
+                    category=CCLWarning)
+
+            if (self._params_init_kwargs['mu0'] != 0 or
+                    self._params_init_kwargs['sigma0'] != 0):
+                warnings.warn(
+                    "mu-Sigma modified cosmologies "
+                    "cannot be consistently combined with cosmological models "
+                    "with massive neutrinos in CCL!",
+                    category=CCLWarning)
+
+        if self._config_init_kwargs['matter_power_spectrum'] == 'halofit':
+            if self._params_init_kwargs['df_mg'] is not None:
+                warnings.warn(
+                    "Modified growth rates via the `df_mg` keyword argument "
+                    "cannot be consistently combined with HALOFIT when "
+                    "computing the non-linear power spectrum!",
+                    category=CCLWarning)
+
+            if (self._params_init_kwargs['mu0'] != 0 or
+                    self._params_init_kwargs['sigma0'] != 0):
+                warnings.warn(
+                    "mu-Sigma modified cosmologies "
+                    "cannot be consistently combined with HALOFIT "
+                    "when computing the non-linear power spectrum!",
+                    category=CCLWarning)
+
+        if self._config_init_kwargs['baryons_power_spectrum'] != 'nobaryons':
+            warnings.warn(
+                "All of the halo mass function models in CCL are not properly "
+                "adjusted for baryons even if the power spectrum is!",
+                category=CCLWarning)
+            warnings.warn(
+                "All of the halo bias models in CCL are not properly "
+                "adjusted for baryons even if the power spectrum is!",
+                category=CCLWarning)
+            warnings.warn(
+                "All of the halo concentration models in CCL are not properly "
+                "adjusted for baryons even if the power spectrum is!",
+                category=CCLWarning)
+
+        if self._config_init_kwargs['matter_power_spectrum'] == 'emu':
+            warnings.warn(
+                "None of the linear power spectrum models in CCL are "
+                "consistent with that implictly used in the emulated "
+                "non-linear power spectrum!",
+                category=CCLWarning)
 
     def _build_cosmo(self):
         """Assemble all of the input data into a valid ccl_cosmology object."""
