@@ -405,8 +405,8 @@ class Cosmology(object):
                     "with massive neutrinos in CCL!",
                     category=CCLWarning)
 
-            if (self._params_init_kwargs['mu0'] != 0 or
-                    self._params_init_kwargs['sigma0'] != 0):
+            if (self._params_init_kwargs['mu_0'] != 0 or
+                    self._params_init_kwargs['sigma_0'] != 0):
                 warnings.warn(
                     "mu-Sigma modified cosmologies "
                     "cannot be consistently combined with cosmological models "
@@ -421,8 +421,8 @@ class Cosmology(object):
                     "computing the non-linear power spectrum!",
                     category=CCLWarning)
 
-            if (self._params_init_kwargs['mu0'] != 0 or
-                    self._params_init_kwargs['sigma0'] != 0):
+            if (self._params_init_kwargs['mu_0'] != 0 or
+                    self._params_init_kwargs['sigma_0'] != 0):
                 warnings.warn(
                     "mu-Sigma modified cosmologies "
                     "cannot be consistently combined with HALOFIT "
