@@ -184,7 +184,6 @@ neutrino mass splittings
 import warnings
 import numpy as np
 import yaml
-import inspect
 
 from . import ccllib as lib
 from .errors import CCLError, CCLWarning
@@ -365,8 +364,6 @@ class Cosmology(object):
             emulator_neutrinos=emulator_neutrinos)
 
         self._build_cosmo()
-
-        self.__warningregistry__ = {}
 
     def _build_cosmo(self):
         """Assemble all of the input data into a valid ccl_cosmology object."""
@@ -753,34 +750,25 @@ class Cosmology(object):
             return
 
         if np.sum(self._params_init_kwargs['m_nu']) > 0:
-            warnings.warn_explicit(
+            warnings.warn(
                 "CCL does not properly compute the linear growth rate in "
                 "cosmological models with massive neutrinos!",
-                CCLWarning,
-                __name__,
-                _lineno(),
-                registry=self.__warningregistry__)
+                category=CCLWarning)
 
             if self._params_init_kwargs['df_mg'] is not None:
-                warnings.warn_explicit(
+                warnings.warn(
                     "Modified growth rates via the `df_mg` keyword argument "
                     "cannot be consistently combined with cosmological models "
                     "with massive neutrinos in CCL!",
-                    CCLWarning,
-                    __name__,
-                    _lineno(),
-                    registry=self.__warningregistry__)
+                    category=CCLWarning)
 
             if (self._params_init_kwargs['mu_0'] > 0 or
                     self._params_init_kwargs['sigma_0'] > 0):
-                warnings.warn_explicit(
+                warnings.warn(
                     "Modified growth rates via the mu-Sigma model "
                     "cannot be consistently combined with cosmological models "
                     "with massive neutrinos in CCL!",
-                    CCLWarning,
-                    __name__,
-                    _lineno(),
-                    registry=self.__warningregistry__)
+                    category=CCLWarning)
 
         status = 0
         status = lib.cosmology_compute_growth(self.cosmo, status)
@@ -792,14 +780,11 @@ class Cosmology(object):
             return
 
         if self._config_init_kwargs['matter_power_spectrum'] == 'emu':
-            warnings.warn_explicit(
+            warnings.warn(
                 "None of the linear power spectrum models in CCL are "
                 "consistent with that implictly used in the emulated "
                 "non-linear power spectrum!",
-                CCLWarning,
-                __name__,
-                _lineno(),
-                registry=self.__warningregistry__)
+                category=CCLWarning)
 
         # unless we have massive eneutrinos, we always compute the
         # growth function here
@@ -830,38 +815,29 @@ class Cosmology(object):
 
         if self._config_init_kwargs['matter_power_spectrum'] != 'linear':
             if self._params_init_kwargs['df_mg'] is not None:
-                warnings.warn_explicit(
+                warnings.warn(
                     "Modified growth rates via the `df_mg` keyword argument "
                     "cannot be consistently combined with '%s' for "
                     "computing the non-linear power spectrum!" %
                     self._config_init_kwargs['matter_power_spectrum'],
-                    CCLWarning,
-                    __name__,
-                    _lineno(),
-                    registry=self.__warningregistry__)
+                    category=CCLWarning)
 
             if (self._params_init_kwargs['mu_0'] != 0 or
                     self._params_init_kwargs['sigma_0'] != 0):
-                warnings.warn_explicit(
+                warnings.warn(
                     "mu-Sigma modified cosmologies "
                     "cannot be consistently combined with '%s' "
                     "for computing the non-linear power spectrum!" %
                     self._config_init_kwargs['matter_power_spectrum'],
-                    CCLWarning,
-                    __name__,
-                    _lineno(),
-                    registry=self.__warningregistry__)
+                    category=CCLWarning)
 
         if (np.sum(self._params_init_kwargs['m_nu']) > 0 and
                 self._config_init_kwargs['baryons_power_spectrum'] == 'bcm'):
-            warnings.warn_explicit(
+            warnings.warn(
                 "The BCM baryonic correction model's default parameters "
                 "were not calibrated for cosmological models with "
                 "massive neutrinos!",
-                CCLWarning,
-                __name__,
-                _lineno(),
-                registry=self.__warningregistry__)
+                category=CCLWarning)
 
         self.compute_distances()
 
@@ -885,24 +861,18 @@ class Cosmology(object):
         # we need these things before building the mass function splines
         if np.sum(self._params_init_kwargs['m_nu']) > 0:
             # these are not consistent with anything - fun
-            warnings.warn_explicit(
+            warnings.warn(
                 "All of the halo mass function, concentration, and bias "
                 "models in CCL are not properly calibrated for cosmological "
                 "models with massive neutrinos!",
-                CCLWarning,
-                __name__,
-                _lineno(),
-                registry=self.__warningregistry__)
+                category=CCLWarning)
 
         if self._config_init_kwargs['baryons_power_spectrum'] != 'nobaryons':
-            warnings.warn_explicit(
+            warnings.warn(
                 "All of the halo mass function, concentration, and bias "
                 "models in CCL are not consistently adjusted for baryons "
                 "when the power spectrum is via the BCM model!",
-                CCLWarning,
-                __name__,
-                _lineno(),
-                registry=self.__warningregistry__)
+                category=CCLWarning)
 
         self.compute_growth()
         self.compute_linear_power()
@@ -958,8 +928,3 @@ class Cosmology(object):
 
         # Return status information
         return "status(%s): %s" % (status, msg)
-
-
-def _lineno():
-    """Returns the current line number in our program."""
-    return inspect.currentframe().f_back.f_lineno
