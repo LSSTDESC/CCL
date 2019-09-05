@@ -762,7 +762,7 @@ class Cosmology(object):
                 registry=self.__warningregistry__)
 
             if self._params_init_kwargs['df_mg'] is not None:
-                warnings.warn(
+                warnings.warn_explicit(
                     "Modified growth rates via the `df_mg` keyword argument "
                     "cannot be consistently combined with cosmological models "
                     "with massive neutrinos in CCL!",
@@ -773,7 +773,7 @@ class Cosmology(object):
 
             if (self._params_init_kwargs['mu_0'] > 0 or
                     self._params_init_kwargs['sigma_0'] > 0):
-                warnings.warn(
+                warnings.warn_explicit(
                     "Modified growth rates via the mu-Sigma model "
                     "cannot be consistently combined with cosmological models "
                     "with massive neutrinos in CCL!",
@@ -792,7 +792,7 @@ class Cosmology(object):
             return
 
         if self._config_init_kwargs['matter_power_spectrum'] == 'emu':
-            warnings.warn(
+            warnings.warn_explicit(
                 "None of the linear power spectrum models in CCL are "
                 "consistent with that implictly used in the emulated "
                 "non-linear power spectrum!",
@@ -830,7 +830,7 @@ class Cosmology(object):
 
         if self._config_init_kwargs['matter_power_spectrum'] != 'linear':
             if self._params_init_kwargs['df_mg'] is not None:
-                warnings.warn(
+                warnings.warn_explicit(
                     "Modified growth rates via the `df_mg` keyword argument "
                     "cannot be consistently combined with '%s' for "
                     "computing the non-linear power spectrum!" %
@@ -842,7 +842,7 @@ class Cosmology(object):
 
             if (self._params_init_kwargs['mu_0'] != 0 or
                     self._params_init_kwargs['sigma_0'] != 0):
-                warnings.warn(
+                warnings.warn_explicit(
                     "mu-Sigma modified cosmologies "
                     "cannot be consistently combined with '%s' "
                     "for computing the non-linear power spectrum!" %
@@ -854,7 +854,7 @@ class Cosmology(object):
 
         if (np.sum(self._params_init_kwargs['m_nu']) > 0 and
                 self._config_init_kwargs['baryons_power_spectrum'] == 'bcm'):
-            warnings.warn(
+            warnings.warn_explicit(
                 "The BCM baryonic correction model's default parameters "
                 "were not calibrated for cosmological models with "
                 "massive neutrinos!",
@@ -885,7 +885,7 @@ class Cosmology(object):
         # we need these things before building the mass function splines
         if np.sum(self._params_init_kwargs['m_nu']) > 0:
             # these are not consistent with anything - fun
-            warnings.warn(
+            warnings.warn_explicit(
                 "All of the halo mass function, concentration, and bias "
                 "models in CCL are not properly calibrated for cosmological "
                 "models with massive neutrinos!",
@@ -895,7 +895,7 @@ class Cosmology(object):
                 registry=self.__warningregistry__)
 
         if self._config_init_kwargs['baryons_power_spectrum'] != 'nobaryons':
-            warnings.warn(
+            warnings.warn_explicit(
                 "All of the halo mass function, concentration, and bias "
                 "models in CCL are not consistently adjusted for baryons "
                 "when the power spectrum is via the BCM model!",
