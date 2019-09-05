@@ -133,6 +133,8 @@ double ccl_rho_x(ccl_cosmology * cosmo, double a, ccl_species_x_label label, int
 INPUT: cosmology object, scale factor
 TASK: Compute mu(a) where mu is one of the the parameterizating functions
 of modifications to GR in the quasistatic approximation.
+
+MI: tag to get started 
 */
 
 double ccl_mu_MG(ccl_cosmology * cosmo, double a, int *status)
@@ -146,6 +148,8 @@ double ccl_mu_MG(ccl_cosmology * cosmo, double a, int *status)
 INPUT: cosmology object, scale factor
 TASK: Compute Sigma(a) where Sigma is one of the the parameterizating functions
 of modifications to GR in the quasistatic approximation.
+
+MI: tag to get started 
 */
 
 double ccl_Sig_MG(ccl_cosmology * cosmo, double a, int *status)
@@ -195,6 +199,8 @@ static int growth_ode_system(double a,const double y[],double dydt[],void *param
 INPUT: scale factor
 TASK: Define the ODE system to be solved in order to compute the growth (of the density)
 * in the case in which we use the mu / Sigma quasistatic parameterisation of modified gravity
+
+MI: tag to get started 
 */
 static int growth_ode_system_muSig(double a,const double y[],double dydt[],void *params)
 {
