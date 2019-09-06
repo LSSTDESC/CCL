@@ -786,15 +786,8 @@ class Cosmology(object):
                 "non-linear power spectrum!",
                 category=CCLWarning)
 
-        # unless we have massive eneutrinos, we always compute the
-        # growth function here
-        # sometimes this is not needed, but this computation is fast
-        # enough that the logic below is easier and more bug proof
-        if self['N_nu_mass'] == 0 and not self.has_growth:
-            self.compute_growth()
-
-        if self['mu_0'] > 0 or self['sigma_0'] > 0:
-            self.compute_growth()
+        # needed to init some models
+        self.compute_growth()
 
         if ((self._config_init_kwargs['transfer_function'] ==
                 'boltzmann_class') and not self.has_linear_power):
