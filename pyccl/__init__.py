@@ -66,4 +66,4 @@ from .neutrinos import Omeganuh2, nu_masses
 # Expose function to toggle debug mode
 from .pyutils import debug_mode
 
-from .errors import CCLError
+from .errors import CCLError, CCLWarning

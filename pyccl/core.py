@@ -779,6 +779,15 @@ class Cosmology(object):
         if self.has_linear_power:
             return
 
+        if (np.sum(self._params_init_kwargs['m_nu']) > 0 and
+                self._config_init_kwargs['transfer_function'] in
+                ['bbks', 'eisenstein_hu']):
+            warnings.warn(
+                "The '%s' linear power spectrum model does not properly "
+                "account for massive neutrinos!" %
+                self._config_init_kwargs['transfer_function'],
+                category=CCLWarning)
+
         if self._config_init_kwargs['matter_power_spectrum'] == 'emu':
             warnings.warn(
                 "None of the linear power spectrum models in CCL are "
