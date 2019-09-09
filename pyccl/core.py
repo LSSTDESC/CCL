@@ -749,7 +749,7 @@ class Cosmology(object):
         if self.has_growth:
             return
 
-        if np.sum(self._params_init_kwargs['m_nu']) > 0:
+        if self['N_nu_mass'] > 0:
             warnings.warn(
                 "CCL does not properly compute the linear growth rate in "
                 "cosmological models with massive neutrinos!",
@@ -779,7 +779,7 @@ class Cosmology(object):
         if self.has_linear_power:
             return
 
-        if (np.sum(self._params_init_kwargs['m_nu']) > 0 and
+        if (self['N_nu_mass'] > 0 and
                 self._config_init_kwargs['transfer_function'] in
                 ['bbks', 'eisenstein_hu']):
             warnings.warn(
@@ -833,7 +833,7 @@ class Cosmology(object):
                     self._config_init_kwargs['matter_power_spectrum'],
                     category=CCLWarning)
 
-        if (np.sum(self._params_init_kwargs['m_nu']) > 0 and
+        if (self['N_nu_mass'] > 0 and
                 self._config_init_kwargs['baryons_power_spectrum'] == 'bcm'):
             warnings.warn(
                 "The BCM baryonic correction model's default parameters "
@@ -861,7 +861,7 @@ class Cosmology(object):
             return
 
         # we need these things before building the mass function splines
-        if np.sum(self._params_init_kwargs['m_nu']) > 0:
+        if self['N_nu_mass'] > 0:
             # these are not consistent with anything - fun
             warnings.warn(
                 "All of the halo mass function, concentration, and bias "
