@@ -82,20 +82,28 @@ def test_transfer_matter_power_nu_raises(tf, pk, m_nu):
         ccl.nonlin_matter_power(cosmo, 1, 1)
 
 
-@pytest.mark.parametrize('tf,pk', [
-    ('bbks', 'linear'),
-    ('eisenstein_hu', 'linear'),
-    ('bbks', 'halofit'),
-    ('eisenstein_hu', 'halofit'),
-    (None, 'emu'),
-])
-def test_transfer_matter_power_mu_sigma_raises(tf, pk):
+@pytest.mark.parametrize('tf', [
+    'boltzmann_class', 'boltzmann_camb'])
+def test_power_sigma8norm_norms_consistent(tf):
+    # make a cosmo with A_s
     cosmo = ccl.Cosmology(
-        Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96,
-        transfer_function=tf, matter_power_spectrum=pk, mu_0=0.1, sigma_0=0.1)
+        Omega_c=0.27, Omega_b=0.045, h=0.67, A_s=2e-9, n_s=0.96,
+        transfer_function=tf)
+    sigma8 = ccl.sigma8(cosmo)
 
-    with pytest.raises(CCLError):
-        ccl.linear_matter_power(cosmo, 1, 1)
+    # remake same but now give sigma8
+    cosmo_s8 = ccl.Cosmology(
+        Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=sigma8, n_s=0.96,
+        transfer_function=tf)
 
-    with pytest.raises(CCLError):
-        ccl.nonlin_matter_power(cosmo, 1, 1)
+    # make sure they come out the same-ish
+    assert np.allclose(ccl.sigma8(cosmo), ccl.sigma8(cosmo_s8))
+
+    # and that the power spectra look right
+    a = 0.8
+    gfac = (
+        ccl.growth_factor(cosmo, a) / ccl.growth_factor(cosmo_s8, a))**2
+    pk_rat = (
+        ccl.linear_matter_power(cosmo, 1e-4, a) /
+        ccl.linear_matter_power(cosmo_s8, 1e-4, a))
+    assert np.allclose(pk_rat, gfac)

@@ -14,7 +14,7 @@ CORR_TOLERANCE2 = 0.10
 
 
 @pytest.mark.parametrize('model', list(range(3)))
-def test_correlation_3d(model):
+def test_correlation_3drsd(model):
     Omega_v = [0.7, 0.7, 0.7, 0.65, 0.75]
     w_0 = [-1.0, -0.9, -0.9, -0.9, -0.9]
     w_a = [0.0, 0.0, 0.1, 0.1, 0.1]

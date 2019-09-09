@@ -7,10 +7,10 @@ import pytest
 # FIXME: these are not real standards
 # tolerence on abs difference in r^2 xi(r) for the range
 # r = 0.1 - 100 Mpc (40 points in r) for z=0,1,2,3,4,5
-CORR_TOLERANCE1 = [5.0e-2, 5.0e-2, 5.0e-2, 5.0e-2, 5.0e-2, 5.0e-2]
+CORR_TOLERANCE1 = [3.0e-2, 3.0e-2, 3.0e-2, 3.0e-2, 3.0e-2, 3.0e-2]
 # tolerence on abs difference in r^2 xi(r) for the range
 # r = 50 - 250 Mpc (100 points in r) for z=0,1,2,3,4,5
-CORR_TOLERANCE2 = [5.0e-2, 5.0e-2, 5.0e-2, 5.0e-2, 5.0e-2, 5.0e-2]
+CORR_TOLERANCE2 = [3.0e-2, 3.0e-2, 3.0e-2, 3.0e-2, 3.0e-2, 3.0e-2]
 
 
 @pytest.mark.parametrize('model', list(range(3)))
@@ -31,7 +31,7 @@ def test_correlation_3d(model):
         Omega_k=1.0 - 0.25 - 0.05 - Omega_v[model],
         w0=w_0[model],
         wa=w_a[model],
-        transfer_function='boltzmann_class',
+        transfer_function='bbks',
         matter_power_spectrum='halofit')
 
     data = np.loadtxt("./benchmarks/data/model%d_xi.txt" % (model+1))

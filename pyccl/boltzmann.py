@@ -16,6 +16,7 @@ except ImportError:
 from . import ccllib as lib
 from .pyutils import check
 from .pk2d import Pk2D
+from .errors import CCLError
 
 
 def get_camb_pk_lin(cosmo):
@@ -63,10 +64,16 @@ def get_camb_pk_lin(cosmo):
 
     if np.isfinite(cosmo["A_s"]):
         kwargs["As"] = cosmo["A_s"]
-    else:
-        assert np.isfinite(cosmo["sigma8"])
+    elif np.isfinite(cosmo["sigma8"]):
+        # in this case, CCL will internally normalize for us when we init
+        # the linear power spectrum - so we just get close
         A_s_fid = 2.43e-9 * (cosmo["sigma8"] / 0.87659)**2
         kwargs["As"] = A_s_fid
+    else:
+        raise CCLError(
+            "Could not normalize the linear power spectrum! "
+            "A_s = %f, sigma8 = %f" % (
+                cosmo['A_s'], cosmo['sigma8']))
 
     camb_params = camb.set_params(**kwargs)
     camb_res = camb.get_results(camb_params)
@@ -76,13 +83,6 @@ def get_camb_pk_lin(cosmo):
     # convert to non-h inverse units
     k *= cosmo['h']
     pk /= (h2 * cosmo['h'])
-
-    # make sure to deal with sigma8 if needed
-    if np.isfinite(cosmo["sigma8"]):
-        fac = (cosmo['sigma8'] / camb_res.get_sigma8()[-1])**2
-    else:
-        fac = 1
-    pk *= fac
 
     # now build interpolant
     nk = k.shape[0]
@@ -161,24 +161,25 @@ def get_class_pk_lin(cosmo):
 
     params["T_cmb"] = cosmo["T_CMB"]
 
-    # if w have sigma8, we need to find A_s
+    # if we have sigma8, we need to find A_s
     if np.isfinite(cosmo["A_s"]):
         params["A_s"] = cosmo["A_s"]
-    else:
-        assert np.isfinite(cosmo["sigma8"])
+    elif np.isfinite(cosmo["sigma8"]):
+        # in this case, CCL will internally normalize for us when we init
+        # the linear power spectrum - so we just get close
         A_s_fid = 2.43e-9 * (cosmo["sigma8"] / 0.87659)**2
         params["A_s"] = A_s_fid
+    else:
+        raise CCLError(
+            "Could not normalize the linear power spectrum! "
+            "A_s = %f, sigma8 = %f" % (
+                cosmo['A_s'], cosmo['sigma8']))
 
     model = None
     try:
         model = classy.Class()
         model.set(params)
         model.compute()
-
-        if np.isfinite(cosmo["sigma8"]):
-            fac = (cosmo['sigma8'] / model.sigma8())**2
-        else:
-            fac = 1.0
 
         # Set k and a sampling from CCL parameters
         nk = lib.get_pk_spline_nk(cosmo.cosmo)
@@ -205,7 +206,7 @@ def get_class_pk_lin(cosmo):
             z = max(1.0 / a_arr[aind] - 1, 1e-10)
             for kind in range(nk):
                 ln_p_k_and_z[aind, kind] = np.log(
-                    model.pk_lin(np.exp(lk_arr[kind]), z) * fac)
+                    model.pk_lin(np.exp(lk_arr[kind]), z))
     finally:
         if model is not None:
             model.struct_cleanup()
