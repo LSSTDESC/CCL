@@ -467,6 +467,10 @@ void ccl_cosmology_compute_linear_power(ccl_cosmology* cosmo, ccl_f2d_t *psp, in
         ccl_cosmology_spline_linpower_musigma(cosmo, psp, status);
         break;
 
+      case ccl_boltzmann_camb:
+        ccl_cosmology_spline_linpower_musigma(cosmo, psp, status);
+        break;
+
       default: {
         *status = CCL_ERROR_INCONSISTENT;
         ccl_cosmology_set_status_message(

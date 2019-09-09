@@ -32,7 +32,7 @@ void ccl_cosmology_spline_linpower_musigma(ccl_cosmology* cosmo, ccl_f2d_t *psp,
   double *D_GR = NULL;
 
   if (*status == 0) {
-    //CLASS calculations done - now allocate CCL splines
+    //calculations done - now allocate CCL splines
     kmin = 2*exp(psp->lkmin);
     kmax = cosmo->spline_params.K_MAX_SPLINE;
     //Compute nk from number of decades and N_K = # k per decade
