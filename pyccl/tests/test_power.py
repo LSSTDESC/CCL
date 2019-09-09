@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 
 import pyccl as ccl
-from pyccl import CCLError
+from pyccl import CCLError, CCLWarning
 
 
 COSMO = ccl.Cosmology(
@@ -64,8 +64,6 @@ def test_sigma8_consistent():
 
 
 @pytest.mark.parametrize('tf,pk,m_nu', [
-    ('bbks', 'linear', 0.06),
-    ('eisenstein_hu', 'linear', 0.06),
     # ('boltzmann_class', 'emu', 0.06), - this case is slow and not needed
     (None, 'emu', 0.06),
     ('bbks', 'emu', 0.06),
@@ -76,8 +74,9 @@ def test_transfer_matter_power_nu_raises(tf, pk, m_nu):
         Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96,
         transfer_function=tf, matter_power_spectrum=pk, m_nu=m_nu)
 
-    with pytest.raises(CCLError):
-        ccl.linear_matter_power(cosmo, 1, 1)
+    if tf is not None:
+        with pytest.warns(CCLWarning):
+            ccl.linear_matter_power(cosmo, 1, 1)
 
     with pytest.raises(CCLError):
         ccl.nonlin_matter_power(cosmo, 1, 1)

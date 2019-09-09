@@ -181,11 +181,12 @@ neutrino mass splittings
   - DELTAM13_sq_neg: squared mass difference between eigenstates 3 and 1 for
     the inverted hierarchy.
 """
+import warnings
 import numpy as np
 import yaml
 
 from . import ccllib as lib
-from .errors import CCLError
+from .errors import CCLError, CCLWarning
 from ._types import error_types
 from .boltzmann import get_class_pk_lin
 from .pyutils import check
@@ -737,27 +738,65 @@ class Cosmology(object):
 
     def compute_distances(self):
         """Compute the distance splines."""
+        if self.has_distances:
+            return
         status = 0
         status = lib.cosmology_compute_distances(self.cosmo, status)
         check(status, self)
 
     def compute_growth(self):
         """Compute the growth function."""
+        if self.has_growth:
+            return
+
+        if self['N_nu_mass'] > 0:
+            warnings.warn(
+                "CCL does not properly compute the linear growth rate in "
+                "cosmological models with massive neutrinos!",
+                category=CCLWarning)
+
+            if self._params_init_kwargs['df_mg'] is not None:
+                warnings.warn(
+                    "Modified growth rates via the `df_mg` keyword argument "
+                    "cannot be consistently combined with cosmological models "
+                    "with massive neutrinos in CCL!",
+                    category=CCLWarning)
+
+            if (self._params_init_kwargs['mu_0'] > 0 or
+                    self._params_init_kwargs['sigma_0'] > 0):
+                warnings.warn(
+                    "Modified growth rates via the mu-Sigma model "
+                    "cannot be consistently combined with cosmological models "
+                    "with massive neutrinos in CCL!",
+                    category=CCLWarning)
+
         status = 0
         status = lib.cosmology_compute_growth(self.cosmo, status)
         check(status, self)
 
     def compute_linear_power(self):
         """Compute the linear power spectrum."""
-        # unless we have massive eneutrinos, we always compute the
-        # growth function here
-        # sometimes this is not needed, but this computation is fast
-        # enough that the logic below is easier and more bug proof
-        if self['N_nu_mass'] == 0 and not self.has_growth:
-            self.compute_growth()
+        if self.has_linear_power:
+            return
 
-        if self['mu_0'] > 0 or self['sigma_0'] > 0:
-            self.compute_growth()
+        if (self['N_nu_mass'] > 0 and
+                self._config_init_kwargs['transfer_function'] in
+                ['bbks', 'eisenstein_hu']):
+            warnings.warn(
+                "The '%s' linear power spectrum model does not properly "
+                "account for massive neutrinos!" %
+                self._config_init_kwargs['transfer_function'],
+                category=CCLWarning)
+
+        if self._config_init_kwargs['matter_power_spectrum'] == 'emu':
+            warnings.warn(
+                "None of the linear power spectrum models in CCL are "
+                "consistent with that implictly used in the emulated "
+                "non-linear power spectrum!",
+                category=CCLWarning)
+
+        # needed to init some models
+        self.compute_growth()
 
         if ((self._config_init_kwargs['transfer_function'] ==
                 'boltzmann_class') and not self.has_linear_power):
@@ -773,6 +812,35 @@ class Cosmology(object):
 
     def compute_nonlin_power(self):
         """Compute the non-linear power spectrum."""
+        if self.has_nonlin_power:
+            return
+
+        if self._config_init_kwargs['matter_power_spectrum'] != 'linear':
+            if self._params_init_kwargs['df_mg'] is not None:
+                warnings.warn(
+                    "Modified growth rates via the `df_mg` keyword argument "
+                    "cannot be consistently combined with '%s' for "
+                    "computing the non-linear power spectrum!" %
+                    self._config_init_kwargs['matter_power_spectrum'],
+                    category=CCLWarning)
+
+            if (self._params_init_kwargs['mu_0'] != 0 or
+                    self._params_init_kwargs['sigma_0'] != 0):
+                warnings.warn(
+                    "mu-Sigma modified cosmologies "
+                    "cannot be consistently combined with '%s' "
+                    "for computing the non-linear power spectrum!" %
+                    self._config_init_kwargs['matter_power_spectrum'],
+                    category=CCLWarning)
+
+        if (self['N_nu_mass'] > 0 and
+                self._config_init_kwargs['baryons_power_spectrum'] == 'bcm'):
+            warnings.warn(
+                "The BCM baryonic correction model's default parameters "
+                "were not calibrated for cosmological models with "
+                "massive neutrinos!",
+                category=CCLWarning)
+
         self.compute_distances()
 
         # needed for halofit, halomodel and linear options
@@ -789,7 +857,25 @@ class Cosmology(object):
 
     def compute_sigma(self):
         """Compute the sigma(M) and mass function splines."""
+        if self.has_sigma:
+            return
+
         # we need these things before building the mass function splines
+        if self['N_nu_mass'] > 0:
+            # these are not consistent with anything - fun
+            warnings.warn(
+                "All of the halo mass function, concentration, and bias "
+                "models in CCL are not properly calibrated for cosmological "
+                "models with massive neutrinos!",
+                category=CCLWarning)
+
+        if self._config_init_kwargs['baryons_power_spectrum'] != 'nobaryons':
+            warnings.warn(
+                "All of the halo mass function, concentration, and bias "
+                "models in CCL are not consistently adjusted for baryons "
+                "when the power spectrum is via the BCM model!",
+                category=CCLWarning)
+
         self.compute_growth()
         self.compute_linear_power()
         status = 0
