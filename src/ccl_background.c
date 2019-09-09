@@ -629,15 +629,6 @@ TASK: if not already there, make a table of growth function and growth rate
 // MUSIG
 void ccl_cosmology_compute_growth(ccl_cosmology* cosmo, int* status)
 {
-  // This is not valid for massive neutrinos; if we have massive neutrinos, exit.
-  if (cosmo->params.N_nu_mass > 0) {
-    *status = CCL_ERROR_NOT_IMPLEMENTED;
-    ccl_cosmology_set_status_message(
-      cosmo, "ccl_background.c: ccl_cosmology_compute_growth(): Support for the growth "
-             "rate in cosmologies with massive neutrinos is not yet implemented.\n");
-    return;
-  }
-
   if (cosmo->computed_growth)
     return;
 
