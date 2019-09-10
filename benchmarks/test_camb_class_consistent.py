@@ -11,7 +11,7 @@ import pyccl as ccl
     dict(m_nu=0.5, Neff=4.046),
     dict(w0=-0.8, wa=0.2),
     dict()])
-def testcamb_class_consistent(kwargs):
+def test_camb_class_consistent(kwargs):
     c_camb = ccl.Cosmology(
         Omega_c=0.25, Omega_b=0.05, h=0.7, n_s=0.95, A_s=2e-9,
         transfer_function='boltzmann_camb', **kwargs)
