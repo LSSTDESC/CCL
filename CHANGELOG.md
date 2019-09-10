@@ -7,6 +7,8 @@
 - Enabled the mu-Sigma modified gravity model for any linear power spectrum (#677).
 - Refactored the power spectrum normalization routines to only run CAMB/CLASS once
   when using sigma8 (#677).
+- Fixed a bug where the power spectrum normalization was not being set
+  accurately when using sigma8 (#677).
 - Added warnings for inconsistent models (#676).
 - Moved CLASS interface to python (#652).
 - Moved all benchmarks and tests to python (#653).
