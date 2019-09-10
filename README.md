@@ -79,6 +79,14 @@ In order to use CCL with CLASS, you need to install the CLASS python wrapper `cl
 CLASS repo to work with your system. Please report any installation issues to the CLASS developers on their 
 [issues tracker](https://github.com/lesgourg/class_public/issues).
 
+**Installing CAMB**
+
+To use CCL with CAMB, you need to install the python wrapper for CAMB. The best way to do this is to use `conda` via
+  ```sh
+  $ conda install -c conda-forge camb
+  ```
+A plain installation with `pip` should work as well. See the [CAMB](https://github.com/cmbant/CAMB) repo for more details.
+
 ## Compile and install the CCL C library
 
 To download the latest version of `CCL`:
