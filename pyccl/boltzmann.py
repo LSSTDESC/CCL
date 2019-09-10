@@ -69,7 +69,7 @@ def get_camb_pk_lin(cosmo):
         # neutrinos
         omnuh2=cosmo['Omega_n_mass'] * h2,
         nnu=cosmo['Neff'],
-        standard_neutrino_neff=cosmo['Neff'],
+        standard_neutrino_neff=3.046,
         # CAMB and CLASS do slightly different things here
         # CLASS has extra factors in the relationship between the CMB and
         # neutrino temperature, which causes cosmo['N_nu_rel'] to not be
