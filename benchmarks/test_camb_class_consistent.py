@@ -8,6 +8,7 @@ import pyccl as ccl
     dict(m_nu=[0.2, 0.1, 0.5], w0=-0.8, wa=0.2),
     dict(m_nu=[0.2, 0.1, 0.0]),
     dict(m_nu=0.5),
+    dict(m_nu=0.5, Neff=4.046),
     dict(w0=-0.8, wa=0.2),
     dict()])
 def testcamb_class_consistent(kwargs):
