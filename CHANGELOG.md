@@ -2,7 +2,12 @@
 
 ## Python library
 - Enabled CAMB (#677)
-- Added warnings for inconsistent models (#676)
+- Fixed bug when normalizing the linear power spectrum using sigma8 and
+  the mu-Sigma modified gravity model (#677).
+- Enabled the mu-Sigma modified gravity model for any linear power spectrum (#677).
+- Refactored the power spectrum normalization routines to only run CAMB/CLASS once
+  when using sigma8 (#677).
+- Added warnings for inconsistent models (#676).
 - Moved CLASS interface to python (#652).
 - Moved all benchmarks and tests to python (#653).
 - Changed IA bias normalization to be consistent with A_IA=1 (#630).
