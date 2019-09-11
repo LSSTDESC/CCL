@@ -79,34 +79,37 @@ def get_camb_pk_lin(cosmo):
     cp.TCMB = cosmo['T_CMB']
 
     # neutrinos
-    if True:
-        # we fudge Neff and N_nu_rel for CAMB to get a better agreement
-        # with CLASS
-        Neff = cosmo['Neff']
-        Neff_standard = 3.046
-        num_nu_massless = Neff - cosmo['N_nu_mass']
-    else:
-        # this would seem to be a more consistent way to set Neff w/ CAMB
-        # however, the output power spectra have a worse agreement with CLASS
-        Neff = cosmo['N_nu_rel'] + cosmo['N_nu_mass']
-        num_nu_massless = cosmo['N_nu_rel']
-        Neff_standard = cosmo['N_nu_mass'] + (
-            3.046 -
-            (np.power(lib.cvar.constants.TNCDM, 4) *
-             np.power(4.0/11, -4.0/3) * cosmo['N_nu_mass']))
+    # We maually setup the CAMB neutrinos to match the adjustments CLASS
+    # makes to their temperatures.
+    cp.share_delta_neff = False
     cp.omnuh2 = cosmo['Omega_n_mass'] * h2
-    cp.share_delta_neff = True
-    cp.num_nu_massless = num_nu_massless
+    cp.num_nu_massless = cosmo['N_nu_rel']
     cp.num_nu_massive = int(cosmo['N_nu_mass'])
     cp.nu_mass_eigenstates = int(cosmo['N_nu_mass'])
+
+    delta_neff = cosmo['Neff'] - 3.046  # used for BBN YHe comps
+
+    # CAMB defines a neutrino degeneracy factor as T_i = g^(1/4)*T_nu
+    # where T_nu is the standard neutrino temperature from first order
+    # computations
+    # CLASS defines the temperature of each neutrino species to be
+    # T_i_eff = TNCDM * T_cmb where TNCDM is a fudge factor to get the
+    # total mass in terms of eV to match second-order computations of the
+    # relationship between m_nu and Omega_nu.
+    # We are trying to get both codes to use the same neutrino temperature.
+    # thus we set T_i_eff = T_i = g^(1/4) * T_nu and solve for the right
+    # value of g for CAMB. We get g = (TNCDM / (11/4)^(-1/3))^4
+    g = np.power(
+        lib.cvar.constants.TNCDM / np.power(11.0/4.0, -1.0/3.0),
+        4.0)
+
     if cosmo['N_nu_mass'] > 0:
         nu_mass_fracs = cosmo['mnu'][:cosmo['N_nu_mass']]
         nu_mass_fracs = nu_mass_fracs / np.sum(nu_mass_fracs)
 
         cp.nu_mass_numbers = np.ones(cosmo['N_nu_mass'], dtype=np.int)
         cp.nu_mass_fractions = nu_mass_fracs
-        cp.nu_mass_degeneracies = (
-            np.ones(int(cosmo['N_nu_mass'])) * Neff / int(Neff))
+        cp.nu_mass_degeneracies = np.ones(int(cosmo['N_nu_mass'])) * g
     else:
         cp.nu_mass_numbers = []
         cp.nu_mass_fractions = []
@@ -116,7 +119,7 @@ def get_camb_pk_lin(cosmo):
     cp.bbn_predictor = camb.bbn.get_predictor()
     cp.YHe = cp.bbn_predictor.Y_He(
         cp.ombh2 * (camb.constants.COBE_CMBTemp / cp.TCMB) ** 3,
-        Neff - Neff_standard)
+        delta_neff)
 
     cp.set_classes(
         dark_energy_model=camb.dark_energy.DarkEnergyFluid

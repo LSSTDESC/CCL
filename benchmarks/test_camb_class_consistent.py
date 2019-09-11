@@ -36,7 +36,7 @@ def test_camb_class_consistent_smoke(kwargs=None, pkerr=1e-3):
     dict(m_nu=[0.2, 0.1, 0.0]),
     dict(m_nu=0.5, Neff=4.046)])
 def test_camb_class_consistent_nu(kwargs):
-    test_camb_class_consistent_smoke(kwargs=kwargs, pkerr=1e-2)
+    test_camb_class_consistent_smoke(kwargs=kwargs, pkerr=6e-3)
 
 
 @pytest.mark.parametrize('kwargs', [
@@ -49,4 +49,4 @@ def test_camb_class_consistent_de(kwargs):
 @pytest.mark.parametrize('kwargs', [
     dict(m_nu=[0.2, 0.1, 0.5], w0=-0.9, wa=-0.1)])
 def test_camb_class_consistent_de_nu(kwargs):
-    test_camb_class_consistent_smoke(kwargs=kwargs, pkerr=1e-2)
+    test_camb_class_consistent_smoke(kwargs=kwargs, pkerr=8e-3)
