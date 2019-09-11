@@ -79,7 +79,7 @@ def get_camb_pk_lin(cosmo):
     cp.TCMB = cosmo['T_CMB']
 
     # neutrinos
-    if False:
+    if True:
         Neff = cosmo['Neff']
         Neff_standard = 3.046
         num_nu_massless = Neff - cosmo['N_nu_mass']
