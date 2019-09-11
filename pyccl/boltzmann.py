@@ -80,10 +80,14 @@ def get_camb_pk_lin(cosmo):
 
     # neutrinos
     if True:
+        # we fudge Neff and N_nu_rel for CAMB to get a better agreement
+        # with CLASS
         Neff = cosmo['Neff']
         Neff_standard = 3.046
         num_nu_massless = Neff - cosmo['N_nu_mass']
     else:
+        # this would seem to be a more consistent way to set Neff w/ CAMB
+        # however, the output power spectra have a worse agreement with CLASS
         Neff = cosmo['N_nu_rel'] + cosmo['N_nu_mass']
         num_nu_massless = cosmo['N_nu_rel']
         Neff_standard = cosmo['N_nu_mass'] + (
