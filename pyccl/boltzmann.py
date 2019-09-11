@@ -58,76 +58,80 @@ def get_camb_pk_lin(cosmo):
                 cosmo['A_s'], cosmo['sigma8']))
 
     # init camb params
+    cp = camb.model.CAMBparams()
+
+    # turn some stuff off
+    cp.WantCls = False
+    cp.DoLensing = False
+    cp.Want_CMB = False
+    cp.Want_CMB_lensing = False
+    cp.Want_cl_2D_array = False
+    cp.WantTransfer = True
+
+    # basic background stuff
     h2 = cosmo['h']**2
-    kwargs = dict(
-        # basic background stuff
-        H0=cosmo['h'] * 100,
-        ombh2=cosmo['Omega_b'] * h2,
-        omch2=cosmo['Omega_c'] * h2,
-        omk=cosmo['Omega_k'],
+    cp.H0 = cosmo['h'] * 100
+    cp.ombh2 = cosmo['Omega_b'] * h2
+    cp.omch2 = cosmo['Omega_c'] * h2
+    cp.omk = cosmo['Omega_k']
 
-        # neutrinos
-        omnuh2=cosmo['Omega_n_mass'] * h2,
-        nnu=cosmo['Neff'],
-        standard_neutrino_neff=3.046,
-        # CAMB and CLASS do slightly different things here
-        # CLASS has extra factors in the relationship between the CMB and
-        # neutrino temperature, which causes cosmo['N_nu_rel'] to not be
-        # exactly cosmo['Neff'] - cosmo['N_nu_mass'].
-        # CAMB internally does not do this, so we are left with having
-        # to fudge things a bit here. :/
-        num_nu_massless=cosmo['Neff'] - cosmo['N_nu_mass'],
-        num_nu_massive=int(cosmo['N_nu_mass']),
-        share_delta_neff=True,
+    # "constants"
+    cp.TCMB = cosmo['T_CMB']
 
-        # dark energy
-        dark_energy_model='fluid',
-        w=cosmo['w0'],
-        wa=cosmo['wa'],
-
-        # matter P(k) outputs
-        redshifts=[_z for _z in zs],
-        kmax=10,
-        nonlinear=False,  # no halofit
-        WantTransfer=True,  # compute the matter transfer function
-
-        # ICs
-        As=A_s_fid,
-        ns=cosmo['n_s'],
-
-        # "constants"
-        TCMB=cosmo['T_CMB'],
-    )
-
+    # neutrinos
+    if False:
+        Neff = cosmo['Neff']
+        Neff_standard = 3.046
+        num_nu_massless = Neff - cosmo['N_nu_mass']
+    else:
+        Neff = cosmo['N_nu_rel'] + cosmo['N_nu_mass']
+        num_nu_massless = cosmo['N_nu_rel']
+        Neff_standard = cosmo['N_nu_mass'] + (
+            3.046 -
+            (np.power(lib.cvar.constants.TNCDM, 4) *
+             np.power(4.0/11, -4.0/3) * cosmo['N_nu_mass']))
+    cp.omnuh2 = cosmo['Omega_n_mass'] * h2
+    cp.share_delta_neff = True
+    cp.num_nu_massless = num_nu_massless
+    cp.num_nu_massive = int(cosmo['N_nu_mass'])
+    cp.nu_mass_eigenstates = int(cosmo['N_nu_mass'])
     if cosmo['N_nu_mass'] > 0:
         nu_mass_fracs = cosmo['mnu'][:cosmo['N_nu_mass']]
         nu_mass_fracs = nu_mass_fracs / np.sum(nu_mass_fracs)
-        kwargs['nu_mass_eigenstates'] = int(cosmo['N_nu_mass'])
-        kwargs['nu_mass_numbers'] = np.ones(cosmo['N_nu_mass'], dtype=np.int)
-        kwargs['nu_mass_fractions'] = nu_mass_fracs
-        kwargs['nu_mass_degeneracies'] = (
-            np.ones(int(cosmo['N_nu_mass'])) *
-            cosmo['Neff'] / int(cosmo['Neff']))
 
-    cp = camb.set_params(**kwargs)
-
-    # internally CAMB will try to set these using some default
-    # assumptions that we do not want
-    # thus we reset them here
-    if cosmo['N_nu_mass'] > 0:
-        cp.nu_mass_degeneracies = (
-            np.ones(int(cosmo['N_nu_mass'])) *
-            cosmo['Neff'] / int(cosmo['Neff']))
-        nu_mass_fracs = cosmo['mnu'][:cosmo['N_nu_mass']]
-        nu_mass_fracs = nu_mass_fracs / np.sum(nu_mass_fracs)
-        cp.nu_mass_eigenstates = int(cosmo['N_nu_mass'])
         cp.nu_mass_numbers = np.ones(cosmo['N_nu_mass'], dtype=np.int)
         cp.nu_mass_fractions = nu_mass_fracs
+        cp.nu_mass_degeneracies = (
+            np.ones(int(cosmo['N_nu_mass'])) * Neff / int(Neff))
     else:
-        cp.nu_mass_eigenstates = 0
         cp.nu_mass_numbers = []
         cp.nu_mass_fractions = []
         cp.nu_mass_degeneracies = []
+
+    # get YHe from BBN
+    cp.bbn_predictor = camb.bbn.get_predictor()
+    cp.YHe = cp.bbn_predictor.Y_He(
+        cp.ombh2 * (camb.constants.COBE_CMBTemp / cp.TCMB) ** 3,
+        Neff - Neff_standard)
+
+    cp.set_classes(
+        dark_energy_model=camb.dark_energy.DarkEnergyFluid
+    )
+    cp.DarkEnergy.set_params(
+        w=cosmo['w0'],
+        wa=cosmo['wa']
+    )
+    # cp.set_cosmology()
+    cp.set_matter_power(
+        redshifts=[_z for _z in zs],
+        kmax=10,
+        nonlinear=False)
+    assert cp.NonLinear == camb.model.NonLinear_none
+
+    cp.set_for_lmax(5000)
+    cp.InitPower.set_params(
+        As=A_s_fid,
+        ns=cosmo['n_s'])
 
     # run CAMB and get results
     camb_res = camb.get_results(cp)
