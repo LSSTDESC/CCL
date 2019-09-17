@@ -431,17 +431,6 @@ INPUT: ccl_cosmology * cosmo
 TASK: compute linear power spectrum
 */
 void ccl_cosmology_compute_linear_power(ccl_cosmology* cosmo, ccl_f2d_t *psp, int* status) {
-  if ((cosmo->config.transfer_function_method != ccl_boltzmann_class &&
-       cosmo->config.transfer_function_method != ccl_transfer_none) &&
-      (fabs(cosmo->params.mu_0) > 1e-14 || fabs(cosmo->params.sigma_0) > 1e-14)) {
-    *status = CCL_ERROR_NOT_IMPLEMENTED;
-    ccl_cosmology_set_status_message(
-      cosmo,
-      "ccl_power.c: ccl_cosmology_compute_power(): The power spectrum in the "
-      "mu / Sigma modified gravity parameterisation is only implemented with "
-      "the ccl_boltzmann_class power spectrum method.\n");
-    return;
-  }
   if (cosmo->computed_linear_power) return;
 
   if (*status == 0) {
@@ -464,6 +453,10 @@ void ccl_cosmology_compute_linear_power(ccl_cosmology* cosmo, ccl_f2d_t *psp, in
         break;
 
       case ccl_boltzmann_class:
+        ccl_cosmology_spline_linpower_musigma(cosmo, psp, status);
+        break;
+
+      case ccl_boltzmann_camb:
         ccl_cosmology_spline_linpower_musigma(cosmo, psp, status);
         break;
 

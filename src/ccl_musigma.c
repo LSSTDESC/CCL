@@ -18,8 +18,8 @@
  * @param status, integer indicating the status
  */
 void ccl_cosmology_spline_linpower_musigma(ccl_cosmology* cosmo, ccl_f2d_t *psp, int* status) {
-  double kmin,kmax,ndecades,amin,amax,ic;
-  int nk,na,s;
+  double kmin, kmax, ndecades, amin, amax, ic, sigma8, log_sigma8;
+  int nk, na, s;
   double *lk = NULL, *aa = NULL, *lpk_ln = NULL, *lpk_nl = NULL;
   double norm_pk;
   double *mnu_list = NULL;
@@ -32,7 +32,7 @@ void ccl_cosmology_spline_linpower_musigma(ccl_cosmology* cosmo, ccl_f2d_t *psp,
   double *D_GR = NULL;
 
   if (*status == 0) {
-    //CLASS calculations done - now allocate CCL splines
+    //calculations done - now allocate CCL splines
     kmin = 2*exp(psp->lkmin);
     kmax = cosmo->spline_params.K_MAX_SPLINE;
     //Compute nk from number of decades and N_K = # k per decade
@@ -90,7 +90,7 @@ void ccl_cosmology_spline_linpower_musigma(ccl_cosmology* cosmo, ccl_f2d_t *psp,
     // After this loop lk will contain log(k),
     // lpk_ln will contain log(P_lin), all in Mpc, not Mpc/h units!
     double psout_l;
-    s=0;
+    s = 0;
 
     // If scale-independent mu / Sigma modified gravity is in use
     // and mu ! = 0 : get the unnormalized growth factor in MG and for
@@ -216,11 +216,39 @@ void ccl_cosmology_spline_linpower_musigma(ccl_cosmology* cosmo, ccl_f2d_t *psp,
     }
   }
 
-  if(*status==0)
+  if (*status == 0) {
     cosmo->data.p_lin = ccl_f2d_t_new(
       na, aa, nk, lk, lpk_ln, NULL, NULL, 0,
       1, 2, ccl_f2d_cclgrowth, 1, NULL, 0, 2,
       ccl_f2d_3,status);
+  }
+
+  // if desried, renomalize to a given sigma8
+  if (isfinite(cosmo->params.sigma8) && (!isfinite(cosmo->params.A_s))) {
+    if (*status == 0) {
+      cosmo->computed_linear_power = true;
+      sigma8 = ccl_sigma8(cosmo, status);
+      cosmo->computed_linear_power = false;
+    }
+
+    if (*status == 0) {
+      // Calculate normalization factor using computed value of sigma8, then
+      // recompute P(k, a) using this normalization
+      log_sigma8 = 2*(log(cosmo->params.sigma8) - log(sigma8));
+      for(int j = 0; j<na*nk; j++)
+        lpk_ln[j] += log_sigma8;
+    }
+
+    if (*status == 0) {
+      // Free the previous P(k,a) spline, and allocate a new one to store the
+      // properly-normalized P(k,a)
+      ccl_f2d_t_free(cosmo->data.p_lin);
+      cosmo->data.p_lin = ccl_f2d_t_new(
+        na, aa, nk, lk, lpk_ln, NULL, NULL, 0,
+        1, 2, ccl_f2d_cclgrowth, 1, NULL, 0, 2,
+        ccl_f2d_3,status);
+    }
+  }
 
   free(D_mu);
   free(D_GR);

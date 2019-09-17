@@ -15,6 +15,7 @@ transfer_function options
   - 'eisenstein_hu': the Eisenstein and Hu (1998) fitting function
   - 'bbks': the BBKS approximation
   - 'boltzmann_class': use CLASS to compute the transfer function
+  - 'boltzmann_camb': use CAMB to compute the transfer function
 
 matter_power_spectrum options
   - 'halo_model': use a halo model
@@ -188,7 +189,7 @@ import yaml
 from . import ccllib as lib
 from .errors import CCLError, CCLWarning
 from ._types import error_types
-from .boltzmann import get_class_pk_lin
+from .boltzmann import get_class_pk_lin, get_camb_pk_lin
 from .pyutils import check
 
 # Configuration types
@@ -197,6 +198,7 @@ transfer_function_types = {
     'eisenstein_hu':    lib.eisenstein_hu,
     'bbks':             lib.bbks,
     'boltzmann_class':  lib.boltzmann_class,
+    'boltzmann_camb':   lib.boltzmann_camb,
 }
 
 matter_power_spectrum_types = {
@@ -802,8 +804,19 @@ class Cosmology(object):
                 'boltzmann_class') and not self.has_linear_power):
             pk_lin = get_class_pk_lin(self)
             psp = pk_lin.psp
+        elif ((self._config_init_kwargs['transfer_function'] ==
+                'boltzmann_camb') and not self.has_linear_power):
+            pk_lin = get_camb_pk_lin(self)
+            psp = pk_lin.psp
         else:
             psp = None
+
+        if (psp is None and not self.has_linear_power and (
+                self._config_init_kwargs['transfer_function'] in
+                ['boltzmann_camb', 'boltzmann_class'])):
+            raise CCLError("Either the CAMB or CLASS computation "
+                           "failed silently! CCL could not compute the "
+                           "transfer function!")
 
         # first do the linear matter power
         status = 0
