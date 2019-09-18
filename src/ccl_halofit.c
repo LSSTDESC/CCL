@@ -882,8 +882,7 @@ double ccl_halofit_power(ccl_cosmology *cosmo, double k, double a, halofit_struc
   C = gsl_spline_eval(hf->C, a, NULL);
 
   weffa = cosmo->params.w0;
-  omegaMz = ccl_omega_x(cosmo, a, ccl_species_m_label, status) +
-    ccl_omega_x(cosmo, a, ccl_species_nu_label, status);
+  omegaMz = ccl_omega_x(cosmo, a, ccl_species_m_label, status);
   omegaDEwz = ccl_omega_x(cosmo, a, ccl_species_l_label, status);
 
   // not using these to match CLASS better - might be a bug in CLASS
