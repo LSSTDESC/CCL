@@ -99,7 +99,7 @@ def test_parameters_nu_list():
 
     assert np.allclose(cosmo['Omega_c'], 0.25)
     assert np.allclose(cosmo['Omega_b'], 0.05)
-    assert np.allclose(cosmo['Omega_m'], 0.30)
+    assert np.allclose(cosmo['Omega_m'] - cosmo['Omega_nu_mass'], 0.30)
     assert np.allclose(cosmo['Omega_k'], 0)
     assert np.allclose(cosmo['sqrtk'], 0)
     assert np.allclose(cosmo['k_sign'], 0)
@@ -129,7 +129,7 @@ def test_parameters_nu_list():
     #     Omega_l
     assert np.allclose(
         cosmo['Omega_l'] + cosmo['Omega_m'] + cosmo['Omega_g'] +
-        cosmo['Omega_nu_rel'] + cosmo['Omega_nu_mass'] + cosmo['Omega_k'],
+        cosmo['Omega_nu_rel'] + cosmo['Omega_k'],
         1)
 
     assert np.allclose(cosmo['Neff'], 3.046)
@@ -150,7 +150,7 @@ def test_parameters_nu_normal():
 
     assert np.allclose(cosmo['Omega_c'], 0.25)
     assert np.allclose(cosmo['Omega_b'], 0.05)
-    assert np.allclose(cosmo['Omega_m'], 0.30)
+    assert np.allclose(cosmo['Omega_m'] - cosmo['Omega_nu_mass'], 0.30)
     assert np.allclose(cosmo['Omega_k'], 0)
     assert np.allclose(cosmo['sqrtk'], 0)
     assert np.allclose(cosmo['k_sign'], 0)
@@ -180,7 +180,7 @@ def test_parameters_nu_normal():
     #     Omega_l
     assert np.allclose(
         cosmo['Omega_l'] + cosmo['Omega_m'] + cosmo['Omega_g'] +
-        cosmo['Omega_nu_rel'] + cosmo['Omega_nu_mass'] + cosmo['Omega_k'],
+        cosmo['Omega_nu_rel'] + cosmo['Omega_k'],
         1)
 
     assert np.allclose(cosmo['Neff'], 3.046)
@@ -200,7 +200,7 @@ def test_parameters_nu_inverted():
 
     assert np.allclose(cosmo['Omega_c'], 0.25)
     assert np.allclose(cosmo['Omega_b'], 0.05)
-    assert np.allclose(cosmo['Omega_m'], 0.30)
+    assert np.allclose(cosmo['Omega_m'] - cosmo['Omega_nu_mass'], 0.30)
     assert np.allclose(cosmo['Omega_k'], 0)
     assert np.allclose(cosmo['sqrtk'], 0)
     assert np.allclose(cosmo['k_sign'], 0)
@@ -230,7 +230,7 @@ def test_parameters_nu_inverted():
     #     Omega_l
     assert np.allclose(
         cosmo['Omega_l'] + cosmo['Omega_m'] + cosmo['Omega_g'] +
-        cosmo['Omega_nu_rel'] + cosmo['Omega_nu_mass'] + cosmo['Omega_k'],
+        cosmo['Omega_nu_rel'] + cosmo['Omega_k'],
         1)
 
     assert np.allclose(cosmo['Neff'], 3.046)
@@ -250,7 +250,7 @@ def test_parameters_nu_equal():
 
     assert np.allclose(cosmo['Omega_c'], 0.25)
     assert np.allclose(cosmo['Omega_b'], 0.05)
-    assert np.allclose(cosmo['Omega_m'], 0.30)
+    assert np.allclose(cosmo['Omega_m'] - cosmo['Omega_nu_mass'], 0.30)
     assert np.allclose(cosmo['Omega_k'], 0)
     assert np.allclose(cosmo['sqrtk'], 0)
     assert np.allclose(cosmo['k_sign'], 0)
@@ -280,7 +280,7 @@ def test_parameters_nu_equal():
     #     Omega_l
     assert np.allclose(
         cosmo['Omega_l'] + cosmo['Omega_m'] + cosmo['Omega_g'] +
-        cosmo['Omega_nu_rel'] + cosmo['Omega_nu_mass'] + cosmo['Omega_k'],
+        cosmo['Omega_nu_rel'] + cosmo['Omega_k'],
         1)
 
     assert np.allclose(cosmo['Neff'], 3.046)
