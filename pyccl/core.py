@@ -43,11 +43,11 @@ mnu_type options
   This parameter specifies the model for massive
   neutrinos.
     - 'list': specify each mass yourself in eV
-    - 'sum': use the normal hierarchy to convert total mass to individual
+    - 'normal': use the normal hierarchy to convert total mass to individual
       masses
-    - 'sum_inverted': use the inverted hierarchy to convert total mass to
+    - 'inverted': use the inverted hierarchy to convert total mass to
       individual masses
-    - 'sum_equal': assume equal masses when converting the total mass to
+    - 'equal': assume equal masses when converting the total mass to
       individual masses
 
 emulator_neutrinos options
@@ -294,7 +294,9 @@ class Cosmology(object):
             neutrinos present. Defaults to 3.046.
         m_nu (:obj:`float`, optional): Total mass in eV of the massive
             neutrinos present. Defaults to 0.
-        mnu_type (:obj:`str`, optional): The type of massive neutrinos.
+        mnu_type (:obj:`str`, optional): The type of massive neutrinos. Should
+            be one of 'inverted', 'normal', 'equal' or 'list'. The default
+            of None is the same as 'normal'.
         w0 (:obj:`float`, optional): First order term of dark energy equation
             of state. Defaults to -1.
         wa (:obj:`float`, optional): Second order term of dark energy equation
@@ -330,7 +332,7 @@ class Cosmology(object):
             the power spectrum, specified treatment of unequal neutrinos.
             Options are 'strict', which will raise an error and quit if the
             user fails to pass either a set of three equal masses or a sum with
-            mnu_type = 'sum_equal', and 'equalize', which will redistribute
+            mnu_type = 'equal', and 'equalize', which will redistribute
             masses to be equal right before calling the emualtor but results in
             internal inconsistencies. Defaults to 'strict'.
     """
