@@ -1,6 +1,7 @@
 # Unreleased
 
 ## Python library
+- Chamged neutrino API options to be intuitive and consistent (#681).
 - Enabled CAMB (#677)
 - Fixed bug when normalizing the linear power spectrum using sigma8 and
   the mu-Sigma modified gravity model (#677).
