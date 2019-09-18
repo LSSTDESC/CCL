@@ -901,7 +901,7 @@ double ccl_halofit_power(ccl_cosmology *cosmo, double k, double a, halofit_struc
   // compute the present day neutrino massive neutrino fraction
   // uses all neutrinos even if they are moving fast
   om_nu = cosmo->params.sum_nu_masses / 93.14 / cosmo->params.h / cosmo->params.h;
-  fnu = om_nu / (cosmo->params.Omega_m + om_nu);
+  fnu = om_nu / (cosmo->params.Omega_m);
 
   // eqns A6 - A13 of Takahashi et al.
   an = pow(
@@ -954,7 +954,7 @@ double ccl_halofit_power(ccl_cosmology *cosmo, double k, double a, halofit_struc
   DeltakH = DeltakHprime / (1.0 + mun/y + nun/y2);
 
   // correction to DeltakH from Bird et al., eqn A6-A7
-  Qnu = fnu * (0.977 - 18.015 * (cosmo->params.Omega_m + om_nu - 0.3));
+  Qnu = fnu * (0.977 - 18.015 * (cosmo->params.Omega_m - 0.3));
   DeltakH *= (1.0 + Qnu);
 
   DeltakNL = DeltakQ + DeltakH;

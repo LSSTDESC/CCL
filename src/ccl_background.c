@@ -37,7 +37,7 @@ static double h_over_h0(double a, ccl_cosmology * cosmo, int *status)
              Om_mass_nu
   */
   return sqrt(
-    (cosmo->params.Omega_m +
+    (cosmo->params.Omega_b + cosmo->params.Omega_b +
      cosmo->params.Omega_l *
        pow(a,-3*(cosmo->params.w0+cosmo->params.wa)) *
        exp(3*cosmo->params.wa*(a-1)) +
