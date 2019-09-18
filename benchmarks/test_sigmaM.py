@@ -22,7 +22,7 @@ def test_sigmaM(model, w0, wa):
         w0=w0,
         wa=wa,
         T_CMB=2.7,
-        mnu_type='sum',
+        m_nu_type='normal',
         Omega_g=0,
         Omega_k=0,
         transfer_function='bbks',

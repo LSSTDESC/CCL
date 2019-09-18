@@ -25,7 +25,7 @@ def test_power_nu(model):
         w0=w_0[model],
         wa=w_a[model],
         m_nu=mnu[model],
-        mnu_type='list')
+        m_nu_type='list')
 
     a = 1
 

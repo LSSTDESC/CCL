@@ -213,13 +213,10 @@ typedef struct ccl_parameters {
   double Neff; // Effective number of relativistic neutrino species in the early universe.
   int N_nu_mass; // Number of species of neutrinos which are nonrelativistic today
   double N_nu_rel;  // Number of species of neutrinos which are relativistic  today
-  double *mnu;  // total mass of massive neutrinos (This is a pointer so that it can hold multiple masses.)
+  double *m_nu;  // total mass of massive neutrinos (This is a pointer so that it can hold multiple masses.)
   double sum_nu_masses; // sum of the neutrino masses.
-  double Omega_n_mass; // Omega_nu for MASSIVE neutrinos
-  double Omega_n_rel; // Omega_nu for MASSLESS neutrinos
-
-  //double Neff_partial[CCL_MAX_NU_SPECIES];
-  //double mnu[CCL_MAX_NU_SPECIES];
+  double Omega_nu_mass; // Omega_nu for MASSIVE neutrinos
+  double Omega_nu_rel; // Omega_nu for MASSLESS neutrinos
 
   // Primordial power spectra
   double A_s;

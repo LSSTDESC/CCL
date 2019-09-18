@@ -33,8 +33,8 @@ def test_parameters_lcdm_defaults():
     assert cosmo['N_nu_mass'] == 0
     assert np.allclose(cosmo['N_nu_rel'], 3.046)
     assert np.allclose(cosmo['sum_nu_masses'], 0)
-    assert np.allclose(cosmo['mnu'], 0)
-    assert np.allclose(cosmo['Omega_n_mass'], 0)
+    assert np.allclose(cosmo['m_nu'], 0)
+    assert np.allclose(cosmo['Omega_nu_mass'], 0)
     assert np.allclose(cosmo['T_CMB'], ccl.physical_constants.T_CMB)
 
     assert np.allclose(cosmo['bcm_ks'], 55.0)
@@ -48,17 +48,17 @@ def test_parameters_lcdm_defaults():
 
     # these are defined in the code via some constants so
     # going to test the total
-    #     Omega_n_rel
+    #     Omega_nu_rel
     #     Omega_g
     #     Omega_l
     assert np.allclose(
         cosmo['Omega_l'] + cosmo['Omega_m'] + cosmo['Omega_g'] +
-        cosmo['Omega_n_rel'] + cosmo['Omega_n_mass'] + cosmo['Omega_k'],
+        cosmo['Omega_nu_rel'] + cosmo['Omega_nu_mass'] + cosmo['Omega_k'],
         1)
 
 
-@pytest.mark.parametrize('mnu_type', ['sum', 'sum_inverted'])
-def test_parametes_nu(mnu_type):
+@pytest.mark.parametrize('m_nu_type', ['normal', 'inverted'])
+def test_parametes_nu(m_nu_type):
     cosmo = ccl.Cosmology(
         Omega_c=0.25,
         Omega_b=0.05,
@@ -70,20 +70,20 @@ def test_parametes_nu(mnu_type):
         Neff=3.046,
         Omega_k=0.0,
         m_nu=0.15,
-        mnu_type=mnu_type
+        m_nu_type=m_nu_type
     )
 
     assert np.allclose(
-        cosmo['mnu'][1]**2 - cosmo['mnu'][0]**2,
+        cosmo['m_nu'][1]**2 - cosmo['m_nu'][0]**2,
         ccl.physical_constants.DELTAM12_sq, atol=1e-4, rtol=0)
 
-    if mnu_type == 'sum_inverted':
+    if m_nu_type == 'inverted':
         assert np.allclose(
-            cosmo['mnu'][2]**2 - cosmo['mnu'][0]**2,
+            cosmo['m_nu'][2]**2 - cosmo['m_nu'][0]**2,
             ccl.physical_constants.DELTAM13_sq_neg, atol=1e-4, rtol=0)
-    else:
+    elif m_nu_type == 'normal':
         assert np.allclose(
-            cosmo['mnu'][2]**2 - cosmo['mnu'][0]**2,
+            cosmo['m_nu'][2]**2 - cosmo['m_nu'][0]**2,
             ccl.physical_constants.DELTAM13_sq_pos, atol=1e-4, rtol=0)
 
 
@@ -95,7 +95,7 @@ def test_parameters_nu_list():
         A_s=2.1e-9,
         n_s=0.96,
         m_nu=[0.1, 0.01, 0.003],
-        mnu_type='list')
+        m_nu_type='list')
 
     assert np.allclose(cosmo['Omega_c'], 0.25)
     assert np.allclose(cosmo['Omega_b'], 0.05)
@@ -124,21 +124,21 @@ def test_parameters_nu_list():
 
     # these are defined in the code via some constants so
     # going to test the total
-    #     Omega_n_rel
+    #     Omega_nu_rel
     #     Omega_g
     #     Omega_l
     assert np.allclose(
         cosmo['Omega_l'] + cosmo['Omega_m'] + cosmo['Omega_g'] +
-        cosmo['Omega_n_rel'] + cosmo['Omega_n_mass'] + cosmo['Omega_k'],
+        cosmo['Omega_nu_rel'] + cosmo['Omega_nu_mass'] + cosmo['Omega_k'],
         1)
 
     assert np.allclose(cosmo['Neff'], 3.046)
     assert cosmo['N_nu_mass'] == 3
     assert np.allclose(cosmo['sum_nu_masses'], 0.1 + 0.01 + 0.003)
-    assert np.allclose(cosmo['mnu'], [0.1, 0.01, 0.003])
+    assert np.allclose(cosmo['m_nu'], [0.1, 0.01, 0.003])
 
 
-def test_parameters_nu_sum():
+def test_parameters_nu_normal():
     cosmo = ccl.Cosmology(
         Omega_c=0.25,
         Omega_b=0.05,
@@ -146,7 +146,7 @@ def test_parameters_nu_sum():
         A_s=2.1e-9,
         n_s=0.96,
         m_nu=0.3,
-        mnu_type='sum')
+        m_nu_type='normal')
 
     assert np.allclose(cosmo['Omega_c'], 0.25)
     assert np.allclose(cosmo['Omega_b'], 0.05)
@@ -175,12 +175,12 @@ def test_parameters_nu_sum():
 
     # these are defined in the code via some constants so
     # going to test the total
-    #     Omega_n_rel
+    #     Omega_nu_rel
     #     Omega_g
     #     Omega_l
     assert np.allclose(
         cosmo['Omega_l'] + cosmo['Omega_m'] + cosmo['Omega_g'] +
-        cosmo['Omega_n_rel'] + cosmo['Omega_n_mass'] + cosmo['Omega_k'],
+        cosmo['Omega_nu_rel'] + cosmo['Omega_nu_mass'] + cosmo['Omega_k'],
         1)
 
     assert np.allclose(cosmo['Neff'], 3.046)
@@ -188,7 +188,7 @@ def test_parameters_nu_sum():
     assert np.allclose(cosmo['sum_nu_masses'], 0.3)
 
 
-def test_parameters_nu_sum_inverted():
+def test_parameters_nu_inverted():
     cosmo = ccl.Cosmology(
         Omega_c=0.25,
         Omega_b=0.05,
@@ -196,7 +196,7 @@ def test_parameters_nu_sum_inverted():
         A_s=2.1e-9,
         n_s=0.96,
         m_nu=0.3,
-        mnu_type='sum_inverted')
+        m_nu_type='inverted')
 
     assert np.allclose(cosmo['Omega_c'], 0.25)
     assert np.allclose(cosmo['Omega_b'], 0.05)
@@ -225,12 +225,12 @@ def test_parameters_nu_sum_inverted():
 
     # these are defined in the code via some constants so
     # going to test the total
-    #     Omega_n_rel
+    #     Omega_nu_rel
     #     Omega_g
     #     Omega_l
     assert np.allclose(
         cosmo['Omega_l'] + cosmo['Omega_m'] + cosmo['Omega_g'] +
-        cosmo['Omega_n_rel'] + cosmo['Omega_n_mass'] + cosmo['Omega_k'],
+        cosmo['Omega_nu_rel'] + cosmo['Omega_nu_mass'] + cosmo['Omega_k'],
         1)
 
     assert np.allclose(cosmo['Neff'], 3.046)
@@ -238,7 +238,7 @@ def test_parameters_nu_sum_inverted():
     assert np.allclose(cosmo['sum_nu_masses'], 0.3)
 
 
-def test_parameters_nu_sum_equal():
+def test_parameters_nu_equal():
     cosmo = ccl.Cosmology(
         Omega_c=0.25,
         Omega_b=0.05,
@@ -246,7 +246,7 @@ def test_parameters_nu_sum_equal():
         A_s=2.1e-9,
         n_s=0.96,
         m_nu=0.3,
-        mnu_type='sum_equal')
+        m_nu_type='equal')
 
     assert np.allclose(cosmo['Omega_c'], 0.25)
     assert np.allclose(cosmo['Omega_b'], 0.05)
@@ -275,21 +275,21 @@ def test_parameters_nu_sum_equal():
 
     # these are defined in the code via some constants so
     # going to test the total
-    #     Omega_n_rel
+    #     Omega_nu_rel
     #     Omega_g
     #     Omega_l
     assert np.allclose(
         cosmo['Omega_l'] + cosmo['Omega_m'] + cosmo['Omega_g'] +
-        cosmo['Omega_n_rel'] + cosmo['Omega_n_mass'] + cosmo['Omega_k'],
+        cosmo['Omega_nu_rel'] + cosmo['Omega_nu_mass'] + cosmo['Omega_k'],
         1)
 
     assert np.allclose(cosmo['Neff'], 3.046)
     assert cosmo['N_nu_mass'] == 3
     assert np.allclose(cosmo['sum_nu_masses'], 0.3)
-    assert np.allclose(cosmo['mnu'], 0.1)
+    assert np.allclose(cosmo['m_nu'], 0.1)
 
 
-@pytest.mark.parametrize('m_nu,kind', [(0.05, 'sum'), (0.09, 'sum_inverted')])
+@pytest.mark.parametrize('m_nu,kind', [(0.05, 'normal'), (0.09, 'inverted')])
 def test_parameters_nu_unphysical_raises(m_nu, kind):
     with pytest.raises(ValueError):
         ccl.Cosmology(
@@ -299,7 +299,7 @@ def test_parameters_nu_unphysical_raises(m_nu, kind):
             A_s=2.1e-9,
             n_s=0.96,
             m_nu=m_nu,
-            mnu_type=kind)
+            m_nu_type=kind)
 
 
 def test_parameters_valid_input():
@@ -470,7 +470,7 @@ def test_parameters_read_write():
     """Check that Cosmology objects can be read and written"""
     params = ccl.Cosmology(
         Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
-        m_nu=[0.02, 0.1, 0.05], mnu_type='list',
+        m_nu=[0.02, 0.1, 0.05], m_nu_type='list',
         z_mg=[0.0, 1.0], df_mg=[0.01, 0.0])
 
     # Make a temporary file name
