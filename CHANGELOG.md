@@ -1,6 +1,7 @@
 # Unreleased
 
 ## Python library
+- Added a function for the angular diameter distance (#645)
 - Enabled CAMB (#677)
 - Fixed bug when normalizing the linear power spectrum using sigma8 and
   the mu-Sigma modified gravity model (#677).
@@ -70,34 +71,6 @@
 - Deprecated the use of GSL spline accelerators (#626)
 - Added support for modified gravity via mu / Sigma (scale-independent) parameterisation (#442)
 
-<<<<<<< HEAD
-## Python library
-- Added a function for the angular diameter distance (#645)	
-- Changed IA bias normalization to be consistent with A_IA=1 (#630).
-- Implemented generalized models for tracers (#630)
-- Improved error reporting for `angular_cl` computations (#567).
-- Deprecated the `pyccl.redshifts` module (#579).
-- Remove global splines for RSD correlation functions. These are now stored
-  per cosmology. Further, they are now rebuilt on-the-fly for a given
-  cosmology if a new scale factor is requested. (#582)
-- Allow spline, numerical and constant parameters to be set from Python (#557).
-- Deprecated transfer function options 'ccl_emulator', 'ccl_fitting_function'
-  'ccl_boltzmann', 'ccl_boltzmann_class' and 'ccl_boltzmann_camb' (#610). These
-  were either not implemented or aliases for another option.
-- Renamed transfer function option 'ccl_none' to 'ccl_transfer_none' to avoid
-  ambiguity (#610).
-- Refactored transfer function and matter power spectrum options to allow
-  any combination, even unphysical ones (#610).
-- Added capability to use the halo model power spectrum as the primary
-  non-linear power spectrum in the code (#610).
-- Fixed infinite loop bug in splitting sum of neutrino masses into individual masses (#605).
-- Added custom Halofit code (#611).
-- Added `has_density` and `has_shear` tags to `Tracer` constructors.
-- Changed TCMB to T_CMB everywhere (#615)
-- Added support for modified gravity via mu / Sigma (scale-independent) parameterisation (#442)
-
-=======
->>>>>>> master
 # v 1.0 API changes :
 
 ## C library
