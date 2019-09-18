@@ -24,7 +24,7 @@ void compute_chi(double a, ccl_cosmology *cosmo, double * chi, int * stat);
 
 static double zdrag_eh(ccl_parameters *params) {
   // eqn 4 of Eisenstein & Hu 1998
-  double OMh2 = params->Omega_m * params->h * params->h;
+  double OMh2 = (params->Omega_c + params->Omega_b) * params->h * params->h;
   double OBh2 = params->Omega_b * params->h * params->h;
   double b1 = 0.313 * pow(OMh2, -0.419) * (1 + 0.607*pow(OMh2, 0.674));
   double b2 = 0.238 * pow(OMh2, 0.223);
