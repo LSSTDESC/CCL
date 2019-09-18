@@ -82,7 +82,7 @@ def get_camb_pk_lin(cosmo):
     # We maually setup the CAMB neutrinos to match the adjustments CLASS
     # makes to their temperatures.
     cp.share_delta_neff = False
-    cp.omnuh2 = cosmo['Omega_n_mass'] * h2
+    cp.omnuh2 = cosmo['Omega_nu_mass'] * h2
     cp.num_nu_massless = cosmo['N_nu_rel']
     cp.num_nu_massive = int(cosmo['N_nu_mass'])
     cp.nu_mass_eigenstates = int(cosmo['N_nu_mass'])
@@ -104,7 +104,7 @@ def get_camb_pk_lin(cosmo):
         4.0)
 
     if cosmo['N_nu_mass'] > 0:
-        nu_mass_fracs = cosmo['mnu'][:cosmo['N_nu_mass']]
+        nu_mass_fracs = cosmo['m_nu'][:cosmo['N_nu_mass']]
         nu_mass_fracs = nu_mass_fracs / np.sum(nu_mass_fracs)
 
         cp.nu_mass_numbers = np.ones(cosmo['N_nu_mass'], dtype=np.int)

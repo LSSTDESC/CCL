@@ -22,7 +22,7 @@ void parameters_get_nu_masses(ccl_parameters *params, int nout, double* output) 
     output[2] = 0;
 
     for (int i=0; i<params->N_nu_mass; ++i) {
-        output[i] = params->mnu[i];
+        output[i] = params->m_nu[i];
     }
 }
 

@@ -24,7 +24,7 @@ void ccl_cosmology_spline_linpower_musigma(ccl_cosmology* cosmo, ccl_f2d_t *psp,
   double norm_pk;
   double *mnu_list = NULL;
   ccl_parameters params_GR;
-  params_GR.mnu = NULL;
+  params_GR.m_nu = NULL;
   params_GR.z_mgrowth = NULL;
   params_GR.df_mgrowth = NULL;
   ccl_cosmology * cosmo_GR = NULL;
@@ -110,7 +110,7 @@ void ccl_cosmology_spline_linpower_musigma(ccl_cosmology* cosmo, ccl_f2d_t *psp,
 
       if (*status == 0) {
         for (int i=0; i< cosmo->params.N_nu_mass; i=i+1) {
-          mnu_list[i] = cosmo->params.mnu[i];
+          mnu_list[i] = cosmo->params.m_nu[i];
         }
         if (cosmo->params.N_nu_mass < 3) {
           for (int j=cosmo->params.N_nu_mass; j<3; j=j+1) {

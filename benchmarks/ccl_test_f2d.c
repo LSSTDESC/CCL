@@ -285,7 +285,7 @@ CTEST2(f2d,pk) {
   params.T_CMB=2.7;
   params.Omega_k=0;
   params.Omega_g=0;
-  params.Omega_n_rel=0;
+  params.Omega_nu_rel=0;
   params.Omega_l = 1.0 - params.Omega_m;
   params.sigma8=data->sigma8;
   ccl_cosmology * cosmo = ccl_cosmology_create(params, config);
