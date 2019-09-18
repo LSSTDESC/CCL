@@ -1018,41 +1018,38 @@ double ccl_comoving_angular_diameter_distance(ccl_cosmology * cosmo, double a1, 
 {
   if(a1>1. || a2>1.) {
     *status = CCL_ERROR_COMPUTECHI;
-    ccl_cosmology_set_status_message(cosmo, "ccl_background.c: scale factor cannot be larger than 1.\n");
-    ccl_check_status(cosmo,status);
+    ccl_raise_warning(*status,"CCL_ERROR_COMPUTECHI: scale factor cannot be larger than 1.");
     return NAN;
   } else {
     if(cosmo->params.Omega_k<0.){
       *status = CCL_ERROR_COMPUTECHI;
-      ccl_cosmology_set_status_message(cosmo, "ccl_background.c: Omega_k cannot be negative for angular diameter distance.\n");
-      ccl_check_status(cosmo,status);
+      ccl_raise_warning(*status,"CCL_ERROR_COMPUTECHI: Omega_k cannot be negative for angular diameter distance.");
       return NAN;
     } else {
       if (!cosmo->computed_distances) {
-	ccl_cosmology_compute_distances(cosmo, status);
-	ccl_check_status(cosmo, status);
+	*status = CCL_ERROR_DISTANCES_INIT;
+	ccl_cosmology_set_status_message(cosmo,"ccl_background.c: ccl_h_over_h0(): distance splines have not been precomputed!");
+	return NAN;
       }
       double chi1,chi2;
       int gslstatus = gsl_spline_eval_e(cosmo->data.chi, a1, NULL, &chi1);
       if(gslstatus != GSL_SUCCESS) {
 	ccl_raise_gsl_warning(gslstatus, "ccl_background.c: ccl_comoving_angular_distance():");
 	*status |= gslstatus;
-	ccl_cosmology_set_status_message(cosmo, "ccl_background.c: ccl_comoving_angular_distance(): Scale factor outside interpolation range.\n");
+	ccl_raise_warning(*status,"ccl_comoving_angular_distance(): Scale factor outside interpolation range.\n");
 	return NAN;
       }
       gslstatus = gsl_spline_eval_e(cosmo->data.chi, a2, NULL, &chi2);
       if(gslstatus != GSL_SUCCESS) {
 	ccl_raise_gsl_warning(gslstatus, "ccl_background.c: ccl_comoving_angular_distance():");
 	*status |= gslstatus;
-	ccl_cosmology_set_status_message(cosmo, "ccl_background.c: ccl_comoving_angular_distance(): Scale factor outside interpolation range.\n");
+	ccl_raise_warning(*status,"ccl_comoving_angular_distance(): Scale factor outside interpolation range.\n");
 	return NAN;
       }
       double sinn1,sinn2,dm1,dm2,sqrtk2;
       sqrtk2=cosmo->params.sqrtk*cosmo->params.sqrtk;
       sinn1=ccl_sinn(cosmo,chi1,status);
-      ccl_check_status(cosmo, status);
       sinn2=ccl_sinn(cosmo,chi2,status);
-      ccl_check_status(cosmo, status);
       dm1=sinn1*sqrt(1+sqrtk2*sinn2*sinn2);
       dm2=sinn2*sqrt(1+sqrtk2*sinn1*sinn1);
       if(a1 > a2) {
