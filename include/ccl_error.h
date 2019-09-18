@@ -40,23 +40,17 @@ CCL_BEGIN_DECLS
 #define CCL_ERROR_LOWMNU 1055
 #define CCL_ERROR_PROFILE_INT 1056
 #define CCL_ERROR_PROFILE_ROOT 1057
-
-typedef enum {
-  CCL_ERROR_POLICY_EXIT = 0,
-  CCL_ERROR_POLICY_CONTINUE = 1,
-} CCLErrorPolicy;
+#define CCL_ERROR_GROWTH_INIT 1058
+#define CCL_ERROR_DISTANCES_INIT 1059
+#define CCL_ERROR_NONLIN_POWER_INIT 1060
+#define CCL_ERROR_LINEAR_POWER_INIT 1061
+#define CCL_ERROR_SIGMA_INIT 1062
+#define CCL_ERROR_HMF_INIT 1063
 
 typedef enum {
   CCL_DEBUG_MODE_OFF = 0,
   CCL_DEBUG_MODE_ON = 1,
-  CCL_DEBUG_MODE_WARNING = 2,
 } CCLDebugModePolicy;
-
-/** Raise an exception
- * Given a status, give an error message.
- * @return void
- */
-void ccl_raise_exception(int err, const char* msg, ...);
 
 /** Raise a warning
  * Given a status, give a warning message.
@@ -71,30 +65,10 @@ void ccl_raise_warning(int err, const char* msg, ...);
 void ccl_raise_gsl_warning(int gslstatus, const char* msg, ...);
 
 /** Set the error policy
- * @oaram error_policy the error policy
- * @return void
- */
-void ccl_set_error_policy(CCLErrorPolicy error_policy);
-
-/** Set the error policy
  * @oaram debug_policy the debug mode policy
  * @return void
  */
 void ccl_set_debug_policy(CCLDebugModePolicy debug_policy);
-
-/** Check the error status
- * Given a status, check if any errors have occurred,
- * based on the CCL_ERRORs defined so far.
- * @return void
- */
-void ccl_check_status(ccl_cosmology *cosmo, int* status);
-
-/** Check the error status - no cosmology
- * Given a status, check if any errors have occurred,
- * based on the CCL_ERRORs defined so far.
- * @return void
- */
-void ccl_check_status_nocosmo(int* status);
 
 CCL_END_DECLS
 

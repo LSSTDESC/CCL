@@ -30,6 +30,7 @@ def get_density_kernel(cosmo, dndz):
                  and isinstance(dndz[1], collections.Iterable)))):
         raise ValueError("dndz needs to be a tuple of two arrays.")
     z_n, n = _check_array_params(dndz)
+    # this call inits the distance splines neded by the kernel functions
     chi = comoving_radial_distance(cosmo, 1./(1.+z_n))
     status = 0
     wchi, status = lib.get_number_counts_kernel_wrapper(cosmo.cosmo,
@@ -64,6 +65,10 @@ def get_lensing_kernel(cosmo, dndz, mag_bias=None):
         or (not (isinstance(dndz[0], collections.Iterable)
                  and isinstance(dndz[1], collections.Iterable)))):
         raise ValueError("dndz needs to be a tuple of two arrays.")
+
+    # we need the distance functions at the C layer
+    cosmo.compute_distances()
+
     z_n, n = _check_array_params(dndz)
     has_magbias = mag_bias is not None
     z_s, s = _check_array_params(mag_bias)
@@ -95,6 +100,7 @@ def get_kappa_kernel(cosmo, z_source, nsamples):
             The kernel is quite smooth, so usually O(100) samples
             is enough.
     """
+    # this call inits the distance splines neded by the kernel functions
     chi_source = comoving_radial_distance(cosmo, 1./(1.+z_source))
     chi = np.linspace(0, chi_source, nsamples)
 
@@ -292,6 +298,9 @@ class NumberCountsTracer(Tracer):
     def __init__(self, cosmo, has_rsd, dndz, bias, mag_bias=None):
         self._trc = []
 
+        # we need the distance functions at the C layer
+        cosmo.compute_distances()
+
         kernel_d = None
         if bias is not None:  # Has density term
             # Kernel
@@ -339,6 +348,10 @@ class WeakLensingTracer(Tracer):
     """
     def __init__(self, cosmo, dndz, has_shear=True, ia_bias=None):
         self._trc = []
+
+        # we need the distance functions at the C layer
+        cosmo.compute_distances()
+
         if has_shear:
             # Kernel
             kernel_l = get_lensing_kernel(cosmo, dndz)
@@ -373,6 +386,10 @@ class CMBLensingTracer(Tracer):
     """
     def __init__(self, cosmo, z_source, n_samples=100):
         self._trc = []
+
+        # we need the distance functions at the C layer
+        cosmo.compute_distances()
+
         kernel = get_kappa_kernel(cosmo, z_source, n_samples)
         self.add_tracer(cosmo, kernel=kernel, der_bessel=-1, der_angles=1)
 

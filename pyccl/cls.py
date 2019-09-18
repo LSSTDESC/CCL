@@ -1,7 +1,11 @@
-from . import ccllib as lib
-from .core import check
-from .pk2d import Pk2D
+import warnings
+
 import numpy as np
+
+from .errors import CCLWarning
+from . import ccllib as lib
+from .pyutils import check
+from .pk2d import Pk2D
 
 # Define symbolic 'None' type for arrays, to allow proper handling by swig
 # wrapper
@@ -27,6 +31,15 @@ def angular_cl(cosmo, cltracer1, cltracer2, ell, p_of_k_a=None,
             :math:`C_\\ell`, for the pair of tracers, as a function of
             :math:`\\ell`.
     """
+    if cosmo['Omega_k'] != 0:
+        warnings.warn(
+            "CCL does not properly use the hyperspherical Bessel functions "
+            "when computing angular power spectra in non-flat cosmologies!",
+            category=CCLWarning)
+
+    # we need the distances for the integrals
+    cosmo.compute_distances()
+
     # Access ccl_cosmology object
     cosmo_in = cosmo
     cosmo = cosmo.cosmo
@@ -39,6 +52,9 @@ def angular_cl(cosmo, cltracer1, cltracer2, ell, p_of_k_a=None,
                              "pyccl.Pk2D object or None")
     else:
         psp = None
+        # if a power spectrum was not passed, we need the non-linear one
+        # at the C level
+        cosmo_in.compute_nonlin_power()
 
     # Create tracer colections
     status = 0

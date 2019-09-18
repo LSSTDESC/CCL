@@ -119,7 +119,7 @@ CTEST2(f2d,constant) {
   ASSERT_TRUE(status==0);
   ASSERT_DBL_NEAR(1,fka/k_function(exp(lktest)));
   ccl_f2d_t_free(psp);
-  
+
   //Constant in k and a
   status=0;
   psp=ccl_f2d_t_new(-1,NULL,
@@ -138,7 +138,7 @@ CTEST2(f2d,constant) {
   fka=ccl_f2d_t_eval(psp,lktest,atest,NULL,&status);
   ASSERT_TRUE(status==0);
   ASSERT_DBL_NEAR(1,fka);
-  
+
   ccl_f2d_t_free(psp);
 }
 
@@ -154,7 +154,7 @@ CTEST2(f2d,a_overflow) {
   psp=ccl_f2d_t_new(data->n_a,data->a_arr,
   		    data->n_k,data->lk_arr,
   		    data->fka_arr,
-		    NULL, NULL, 0, 
+		    NULL, NULL, 0,
   		    2, //extrap_lok
 		    2, //extrap_hik
   		    ccl_f2d_customgrowth, //extrap_growth
@@ -184,7 +184,7 @@ CTEST2(f2d,sanity) {
   psp=ccl_f2d_t_new(data->n_a,data->a_arr,
   		    data->n_k,data->lk_arr,
   		    data->fka_arr,
-		    NULL, NULL, 0, 
+		    NULL, NULL, 0,
   		    2, //extrap_lok
 		    2, //extrap_hik
   		    ccl_f2d_customgrowth, //extrap_growth
@@ -195,7 +195,7 @@ CTEST2(f2d,sanity) {
   ASSERT_TRUE(status==0);
 
   //Now put some sensible numbers within the redshift and k range
-  fka=ccl_f2d_t_eval(psp,lktest,atest,NULL,&status); 
+  fka=ccl_f2d_t_eval(psp,lktest,atest,NULL,&status);
   ASSERT_TRUE(status==0);
   ASSERT_DBL_NEAR(1,fka/fka_model_analytical(exp(lktest),atest));
 
@@ -232,7 +232,7 @@ CTEST2(f2d,factorize) {
   psp=ccl_f2d_t_new(data->n_a,data->a_arr,
   		    data->n_k,data->lk_arr,
   		    NULL,
-		    data->fk_arr,data->fa_arr,1, 
+		    data->fk_arr,data->fa_arr,1,
   		    2, //extrap_lok
 		    2, //extrap_hik
   		    ccl_f2d_customgrowth, //extrap_growth
@@ -243,7 +243,7 @@ CTEST2(f2d,factorize) {
   ASSERT_TRUE(status==0);
 
   //Now put some sensible numbers within the redshift and k range
-  fka=ccl_f2d_t_eval(psp,lktest,atest,NULL,&status); 
+  fka=ccl_f2d_t_eval(psp,lktest,atest,NULL,&status);
   ASSERT_TRUE(status==0);
   ASSERT_DBL_NEAR(1,fka/fka_model_analytical(exp(lktest),atest));
 
@@ -291,6 +291,8 @@ CTEST2(f2d,pk) {
   ccl_cosmology * cosmo = ccl_cosmology_create(params, config);
   ASSERT_NOT_NULL(cosmo);
   //Compute growth factor to earliest redshift
+  ccl_cosmology_compute_growth(cosmo, &status);
+  ASSERT_TRUE(status==0);
   gz=ccl_growth_factor(cosmo,alo,&status)/ccl_growth_factor(cosmo,data->a_arr[0],&status);
 
   //Initialize f2d struct
@@ -299,7 +301,7 @@ CTEST2(f2d,pk) {
   psp=ccl_f2d_t_new(data->n_a,data->a_arr,
   		    data->n_k,data->lk_arr,
   		    data->fka_arr,
-		    NULL, NULL, 0, 
+		    NULL, NULL, 0,
   		    2, //extrap_lok
 		    2, //extrap_hik
   		    ccl_f2d_cclgrowth, //extrap_growth
@@ -317,6 +319,7 @@ CTEST2(f2d,pk) {
   ASSERT_DBL_NEAR(1,fka/(fka0*gz*gz));
 
   ccl_f2d_t_free(psp);
-  
+
+  ccl_parameters_free(&(cosmo->params));
   ccl_cosmology_free(cosmo);
 }

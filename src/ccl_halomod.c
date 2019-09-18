@@ -12,7 +12,7 @@
 
 // Analytic FT of NFW profile, from Cooray & Sheth (2002; Section 3 of https://arxiv.org/abs/astro-ph/0206508)
 // Normalised such that U(k=0)=1
-static double u_nfw_c(ccl_cosmology *cosmo, double rv, double c, double k, int *status){
+static double u_nfw_c(ccl_cosmology *cosmo, double rv, double c, double k, int *status) {
 
   double rs, ks;
   double f1, f2, f3, fc;
@@ -47,7 +47,8 @@ static double u_nfw_c(ccl_cosmology *cosmo, double rv, double c, double k, int *
 INPUT: cosmology, a halo mass [Msun], scale factor, halo definition, concentration model label
 TASK: Computes halo concentration; the ratio of virial raidus to scale radius for an NFW halo.
 */
-double ccl_halo_concentration(ccl_cosmology *cosmo, double halomass, double a, double odelta, int *status){
+double ccl_halo_concentration(ccl_cosmology *cosmo, double halomass,
+                              double a, double odelta, int *status) {
 
   double gz, g0, nu, delta_c, a_form;
   double Mpiv, A, B, C;
@@ -59,7 +60,10 @@ double ccl_halo_concentration(ccl_cosmology *cosmo, double halomass, double a, d
 
     if (odelta != 200.) {
       *status = CCL_ERROR_CONC_DV;
-      ccl_cosmology_set_status_message(cosmo, "ccl_halomod.c: halo_concentration(): Bhattacharya (2011) concentration relation only valid for Delta_v = 200 \n");
+      ccl_cosmology_set_status_message(
+        cosmo,
+        "ccl_halomod.c: halo_concentration(): Bhattacharya (2011) concentration "
+        "relation only valid for Delta_v = 200");
       return NAN;
     }
 
@@ -93,7 +97,10 @@ double ccl_halo_concentration(ccl_cosmology *cosmo, double halomass, double a, d
     } else {
 
       *status = CCL_ERROR_CONC_DV;
-      ccl_cosmology_set_status_message(cosmo, "ccl_halomod.c: halo_concentration(): Duffy (2008) virial concentration only valid for virial Delta_v or 200\n");
+      ccl_cosmology_set_status_message(
+        cosmo,
+        "ccl_halomod.c: halo_concentration(): Duffy (2008) virial "
+        "concentration only valid for virial Delta_v or 200\n");
       return NAN;
 
     }
@@ -107,15 +114,16 @@ double ccl_halo_concentration(ccl_cosmology *cosmo, double halomass, double a, d
   default:
 
     *status = CCL_ERROR_HALOCONC;
-    ccl_raise_exception(*status, "ccl_halomod.c: concentration-mass relation specified incorrectly");
+    ccl_raise_gsl_warning(*status, "ccl_halomod.c: concentration-mass relation specified incorrectly");
     return NAN;
 
   }
 }
 
 // Fourier Transforms of halo profiles
-static double window_function(ccl_cosmology *cosmo, double m, double k, double a, double odelta, ccl_win_label label, int *status){
-
+static double window_function(ccl_cosmology *cosmo, double m, double k,
+                              double a, double odelta, ccl_win_label label,
+                              int *status) {
   double rho_matter, c, rv;
 
   switch(label){
@@ -138,7 +146,7 @@ static double window_function(ccl_cosmology *cosmo, double m, double k, double a
   default:
 
     *status = CCL_ERROR_HALOWIN;
-    ccl_raise_exception(*status, "ccl_halomod.c: Window function specified incorrectly");
+    ccl_raise_warning(*status, "ccl_halomod.c: Window function specified incorrectly");
     return NAN;
 
   }
@@ -177,38 +185,44 @@ static double one_halo_integral(ccl_cosmology *cosmo, double k, double a, int *s
   double log10mmax = log10(cosmo->gsl_params.HM_MMAX);
   Int_one_halo_Par ipar;
   gsl_function F;
-  gsl_integration_workspace *w = gsl_integration_workspace_alloc(cosmo->gsl_params.HM_LIMIT);
+  gsl_integration_workspace *w = NULL;
 
-  // Structure required for the gsl integration
-  ipar.cosmo = cosmo;
-  ipar.k = k;
-  ipar.a = a;
-  ipar.status = &one_halo_integral_status;
-  F.function = &one_halo_integrand;
-  F.params = &ipar;
+  w = gsl_integration_workspace_alloc(cosmo->gsl_params.HM_LIMIT);
+  if (w == NULL) {
+    *status = CCL_ERROR_MEMORY;
+  }
 
-  // Actually does the integration
-  qagstatus = gsl_integration_qag(
-    &F, log10mmin, log10mmax,
-    cosmo->gsl_params.HM_EPSABS,
-    cosmo->gsl_params.HM_EPSREL,
-    cosmo->gsl_params.HM_LIMIT,
-    cosmo->gsl_params.HM_INT_METHOD, w,
-    &result, &eresult);
+  if (*status == 0) {
+    // Structure required for the gsl integration
+    ipar.cosmo = cosmo;
+    ipar.k = k;
+    ipar.a = a;
+    ipar.status = &one_halo_integral_status;
+    F.function = &one_halo_integrand;
+    F.params = &ipar;
+
+    // Actually does the integration
+    qagstatus = gsl_integration_qag(
+      &F, log10mmin, log10mmax,
+      cosmo->gsl_params.HM_EPSABS,
+      cosmo->gsl_params.HM_EPSREL,
+      cosmo->gsl_params.HM_LIMIT,
+      cosmo->gsl_params.HM_INT_METHOD, w,
+      &result, &eresult);
+
+    // Check for errors
+    if (qagstatus != GSL_SUCCESS) {
+      ccl_raise_gsl_warning(qagstatus, "ccl_halomod.c: one_halo_integral():");
+      *status = CCL_ERROR_ONE_HALO_INT;
+      ccl_cosmology_set_status_message(cosmo, "ccl_halomod.c: one_halo_integral(): Integration failure\n");
+      result = NAN;
+    }
+  }
 
   // Clean up
   gsl_integration_workspace_free(w);
 
-  // Check for errors
-  if (qagstatus != GSL_SUCCESS) {
-    ccl_raise_gsl_warning(qagstatus, "ccl_halomod.c: one_halo_integral():");
-    *status = CCL_ERROR_ONE_HALO_INT;
-    ccl_cosmology_set_status_message(cosmo, "ccl_halomod.c: one_halo_integral(): Integration failure\n");
-    return NAN;
-  } else {
-    return result;
-  }
-
+  return result;
 }
 
 // Parameters structure for the two-halo integrand
@@ -226,7 +240,7 @@ static double two_halo_integrand(double log10mass, void *params){
   double odelta = Dv_BryanNorman(p->cosmo, p->a, p->status); // Virial density for haloes
 
   // The normalised Fourier Transform of a halo density profile
-  double wk = window_function(p->cosmo,halomass, p->k, p->a, odelta, ccl_nfw, p->status);
+  double wk = window_function(p->cosmo, halomass, p->k, p->a, odelta, ccl_nfw, p->status);
 
   // Fairly sure that there should be no ln(10) factor should be here since the integration is being specified in log10 range
   double dn_dlogM = ccl_massfunc(p->cosmo, halomass, p->a, odelta, p->status);
@@ -246,38 +260,44 @@ static double two_halo_integral(ccl_cosmology *cosmo, double k, double a, int *s
   double log10mmax = log10(cosmo->gsl_params.HM_MMAX);
   Int_two_halo_Par ipar;
   gsl_function F;
-  gsl_integration_workspace *w = gsl_integration_workspace_alloc(cosmo->gsl_params.HM_LIMIT);
+  gsl_integration_workspace *w = NULL;
 
-  // Structure required for the gsl integration
-  ipar.cosmo = cosmo;
-  ipar.k = k;
-  ipar.a = a;
-  ipar.status = &two_halo_integral_status;
-  F.function = &two_halo_integrand;
-  F.params = &ipar;
+  w = gsl_integration_workspace_alloc(cosmo->gsl_params.HM_LIMIT);
+  if (w == NULL) {
+    *status = CCL_ERROR_MEMORY;
+  }
 
-  // Actually does the integration
-  qagstatus = gsl_integration_qag(
-    &F, log10mmin, log10mmax,
-    cosmo->gsl_params.HM_EPSABS,
-    cosmo->gsl_params.HM_EPSREL,
-    cosmo->gsl_params.HM_LIMIT,
-    cosmo->gsl_params.HM_INT_METHOD, w,
-    &result, &eresult);
+  if (*status == 0) {
+    // Structure required for the gsl integration
+    ipar.cosmo = cosmo;
+    ipar.k = k;
+    ipar.a = a;
+    ipar.status = &two_halo_integral_status;
+    F.function = &two_halo_integrand;
+    F.params = &ipar;
+
+    // Actually does the integration
+    qagstatus = gsl_integration_qag(
+      &F, log10mmin, log10mmax,
+      cosmo->gsl_params.HM_EPSABS,
+      cosmo->gsl_params.HM_EPSREL,
+      cosmo->gsl_params.HM_LIMIT,
+      cosmo->gsl_params.HM_INT_METHOD, w,
+      &result, &eresult);
+
+    // Check for errors
+    if (qagstatus != GSL_SUCCESS) {
+      ccl_raise_gsl_warning(qagstatus, "ccl_halomod.c: two_halo_integral():");
+      *status = CCL_ERROR_TWO_HALO_INT;
+      ccl_cosmology_set_status_message(cosmo, "ccl_halomod.c: two_halo_integral(): Integration failure\n");
+      result = NAN;
+    }
+  }
 
   // Clean up
   gsl_integration_workspace_free(w);
 
-  // Check for errors
-  if (qagstatus != GSL_SUCCESS) {
-    ccl_raise_gsl_warning(qagstatus, "ccl_halomod.c: two_halo_integral():");
-    *status = CCL_ERROR_TWO_HALO_INT;
-    ccl_cosmology_set_status_message(cosmo, "ccl_halomod.c: two_halo_integral(): Integration failure\n");
-    return NAN;
-  } else {
-    return result;
-  }
-
+  return result;
 }
 
 /*----- ROUTINE: ccl_twohalo_matter_power -----
@@ -322,15 +342,17 @@ INPUT: cosmology, wavenumber [Mpc^-1], scale factor
 TASK: Computes the halo model power spectrum by summing the two- and one-halo terms
 */
 double ccl_halomodel_matter_power(ccl_cosmology *cosmo, double k, double a, int *status){
-	
-	
+
+
   // This matter power spectrum method doesn't work if mu / Sigma parameterisation of modified gravity
-  // Is turned on: 
+  // Is turned on:
   if (fabs(cosmo->params.mu_0)>1e-14 || fabs(cosmo->params.sigma_0)>1e-14){
 	  *status = CCL_ERROR_NOT_IMPLEMENTED;
-	  strcpy(cosmo->status_message,"ccl_halofmod.c: ccl_halomodel_matter_power(): The halo model power spectrum is not implemented the mu / Sigma modified gravity parameterisation.\n");
+	  strcpy(cosmo->status_message,
+           "ccl_halofmod.c: ccl_halomodel_matter_power(): The halo model power spectrum "
+           "is not implemented the mu / Sigma modified gravity parameterisation.\n");
 	  return NAN;
-  }	
+  }
 
   // Standard sum of two- and one-halo terms
   return ccl_twohalo_matter_power(cosmo, k, a, status)+ccl_onehalo_matter_power(cosmo, k, a, status);

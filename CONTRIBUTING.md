@@ -7,8 +7,8 @@ If you want to make changes to CCL, please follow the procedures listed here
 to make sure that they conform to our coding standards, and that all of the
 necessary files, wrappers etc. are properly updated.
 
-Developers should seek consensus with the CCL team as needed about new features 
-being incorporated (especially for API changes or additions). 
+Developers should seek consensus with the CCL team as needed about new features
+being incorporated (especially for API changes or additions).
 
 Reviewing a pull request (PR) on github
 ---------------------------------------
@@ -18,18 +18,19 @@ Reviewing a pull request (PR) on github
     the root directory).
  4. Make sure the C unit tests pass (i.e. run `build/check_ccl` from the root
     directory successfully).
- 5. Make sure the python tests pass (i.e. run `python setup.py test` from the
+ 5. Make sure the python tests pass (i.e. run `pytest -vv pyccl` from the
     root directory successfully).
- 6. Make sure flake8 is not generating any warnings on pyccl (i.e., run `flake8 pyccl`).
- 7. Look at the code (see "Files changed" on the top of the GitHub pull request
+ 6. Make sure the benchmarks pass (i.e. run `pytest -vv benchmarks` from the
+   root directory successfully).
+ 7. Make sure flake8 is not generating any warnings on pyccl (i.e., run `flake8 pyccl`).
+ 8. Look at the code (see "Files changed" on the top of the GitHub pull request
     page) and check that the changes make sense to you.
- 8. If new science has been implemented, and if possible, try to compare the
+ 9. If new science has been implemented, and if possible, try to compare the
     output of the code against your own predictions. Ask the developer to
     implement appropriate unit tests for it.
- 9. Make sure that the unit tests pass on Travis-CI.
- 10. Make sure that the changes come with documentation, e.g. internally in the
-    C code and through Python docstrings, and that the doxygen documentation
-    has been regenerated. Make sure that example code in the `examples/`
+ 10. Make sure that the unit tests pass on Travis-CI.
+ 11. Make sure that the changes come with documentation, e.g. internally in the
+    C code and through Python docstrings. Make sure that example code in the `examples/`
     directory has been updated appropriately, and that the CCL note has been
     updated if necessary (including your affiliation and contribution in
     `authors.csv`).
@@ -41,7 +42,7 @@ Things to do if you are adding new features to the CCL C lib
  2. When adding a new source file (.c), put it in `src/`. The new file should be
     added to the `CCL_SRC` list in `CMakeLists.txt`.
  3. When adding a new header file (.h), put it in `include/`. It
-    should also have `doxygen`-compatible documentation strings.
+    should have documentation strings.
  4. When adding new unit test files, they should be listed under
     `TEST_SRC` in `CMakeLists.txt`.
  5. Any other new files that should be included with the library (e.g.
@@ -52,8 +53,6 @@ Things to do if you are adding new features to the CCL C lib
     in `doc/0000-ccl_note/`. You will need to edit `main.tex`, compile with `make`,
     and commit your changes, including the updated PDF file. Make sure you update
     your institution and your contribution in `authors.csv` as well.
- 8. If your changes break the CCL API, observe the guidelines in the relevant
-    section below.
 
 Notes on CMake:
  - To install the library, users will run:
@@ -62,13 +61,8 @@ Notes on CMake:
      $ cmake ..
      $ make install
      ```
- - Once the library is compiled and installed, all unit tests are run by
+ - Once the library is compiled and installed, all C unit tests are run by
    typing `check_ccl` from the root CCL folder.
-
-To view the doxygen documentation, open any .html file in the `html/`
-directory. To refresh the docs to reflect new changes, run
-`doxygen doxygen/Doxyfile` in the directory `doc` (assuming you already have
-it installed).
 
 Adding new benchmarks
 ---------------------------------------------------------
@@ -140,15 +134,17 @@ $ python setup.py build
 from the root `CCL` directory.
 
 Once you have finished making changes to the wrapper, check to make sure
-everything is operational by running the Python unit tests in the `tests/`
-directory. From the top-level directory of the CCL sources, and assuming that
+everything is operational by running the Python unit tests.
+From the top-level directory of the CCL sources, and assuming that
 you have recompiled and reinstalled the C library and the Python wrapper, run:
-  `$ python setup.py test`
+  `$ pytest -vv pyccl`
 This may take some time to run in its entirety. If you changed the API, you may
 have to modify the tests to account for this. You should also add your own
 tests for any new functions or behaviors that were added.
 
-The python syntax can be checked with `flake8 pyccl`. You should run this command as part of the tests while developing `pyccl` features. More information on the capabilities of `flake8` can be found in http://flake8.pycqa.org/en/latest/manpage.html.
+The python syntax can be checked with `flake8 pyccl`. You should run this
+command as part of the tests while developing `pyccl` features. More information
+on the capabilities of `flake8` can be found in http://flake8.pycqa.org/en/latest/manpage.html.
 
 Occasionally, modifications made correctly as described above will still not
 function properly. This might be due to multiple `pyccl` installation files not being
@@ -182,7 +178,7 @@ $ python setup.py build
 Debug mode in Python
 --------------------------------------------
 Because of the way the Python wrapper handles exceptions that occur inside the C code, by default
-users will only see error messages for the most recent error to occur. If multiple errors occured
+users will only see error messages for the most recent error to occur. If multiple errors occurred
 during a CCL function call, all but the most recent error message will be overwritten. This can
 make it difficult to debug the root cause of a problem.
 
@@ -289,3 +285,40 @@ to PyPi, the procedure is as follows:
   ```
   Make sure your `twine` and `setuptools` are up to date, otherwise the markdown
   formatting of the README.md will not be correctly processed on the CCL PyPi page.
+
+
+Technical Notes on the Python Wrapper
+-------------------------------------
+
+The Python wrapper is built using the `swig` tool, which automatically scans
+the `CCL` C headers and builds a matching interface in Python. The
+autogenerated `swig` interface can be accessed through the `pyccl.lib` module.
+A more user-friendly wrapper has been written on top of
+this to provide more structure to the module, allowing `numpy` vectorization,
+and providing more natural Python classes.
+
+The key parts/conventions of the wrapper are as follows:
+
+- Interface `.i` files: These are kept in the `pyccl/` directory, and tell
+  `swig` which functions to extract from the C headers. There are also commands
+  in these files to generate basic function argument documentation, and
+  to remove the `ccl_` prefix from function names. The interface files also
+  contain code that tells `swig` how to convert C array arguments to `numpy`
+  arrays. For certain functions, this code may also contain a simple loop
+  to vectorize the function.
+
+- Main interface file `pyccl/ccl.i`: This file imports all of the other interface
+  files. Most of the `CCL` source files (e.g. `core.c`) have their own interface
+  file too. For other files, mostly containing support/utility functions, `swig`
+  only needs the C header (`.h`) file to be specified in the main `ccl.i` file,
+  however.
+
+- Internal CCL C-level state: All global state in the `CCL` library
+  (e.g., whether or not the power spectra splines are initialized and calling the
+  function to initialize them) is controlled by the python code. This ensures that
+  when the C code is running, all data needed already exists. It also allows us
+  to more easily use OpenMP in the C layer, avoiding the problem of having to manage
+  the global state from more than one thread. In practice, this means that before
+  you call the `CCL` C library from python, you need to check to make sure that
+  any internal C data you need has been initialized. The `pyccl.Cosmology` object
+  has methods to help with this (e.g., `compute_distances()`).

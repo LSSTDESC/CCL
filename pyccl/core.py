@@ -15,6 +15,7 @@ transfer_function options
   - 'eisenstein_hu': the Eisenstein and Hu (1998) fitting function
   - 'bbks': the BBKS approximation
   - 'boltzmann_class': use CLASS to compute the transfer function
+  - 'boltzmann_camb': use CAMB to compute the transfer function
 
 matter_power_spectrum options
   - 'halo_model': use a halo model
@@ -181,11 +182,15 @@ neutrino mass splittings
   - DELTAM13_sq_neg: squared mass difference between eigenstates 3 and 1 for
     the inverted hierarchy.
 """
+import warnings
 import numpy as np
 import yaml
 
 from . import ccllib as lib
-from .errors import CCLError
+from .errors import CCLError, CCLWarning
+from ._types import error_types
+from .boltzmann import get_class_pk_lin, get_camb_pk_lin
+from .pyutils import check
 
 # Configuration types
 transfer_function_types = {
@@ -193,6 +198,7 @@ transfer_function_types = {
     'eisenstein_hu':    lib.eisenstein_hu,
     'bbks':             lib.bbks,
     'boltzmann_class':  lib.boltzmann_class,
+    'boltzmann_camb':   lib.boltzmann_camb,
 }
 
 matter_power_spectrum_types = {
@@ -235,25 +241,6 @@ mnu_types = {
     'sum': lib.mnu_sum,
     'sum_inverted': lib.mnu_sum_inverted,
     'sum_equal': lib.mnu_sum_equal,
-}
-
-# Error types
-error_types = {
-    lib.CCL_ERROR_MEMORY:              'CCL_ERROR_MEMORY',
-    lib.CCL_ERROR_LINSPACE:            'CCL_ERROR_LINSPACE',
-    lib.CCL_ERROR_INCONSISTENT:        'CCL_ERROR_INCONSISTENT',
-    lib.CCL_ERROR_SPLINE:              'CCL_ERROR_SPLINE',
-    lib.CCL_ERROR_SPLINE_EV:           'CCL_ERROR_SPLINE_EV',
-    lib.CCL_ERROR_INTEG:               'CCL_ERROR_INTEG',
-    lib.CCL_ERROR_ROOT:                'CCL_ERROR_ROOT',
-    lib.CCL_ERROR_CLASS:               'CCL_ERROR_CLASS',
-    lib.CCL_ERROR_COMPUTECHI:          'CCL_ERROR_COMPUTECHI',
-    lib.CCL_ERROR_MF:                  'CCL_ERROR_MF',
-    lib.CCL_ERROR_HMF_INTERP:          'CCL_ERROR_HMF_INTERP',
-    lib.CCL_ERROR_PARAMETERS:          'CCL_ERROR_PARAMETERS',
-    lib.CCL_ERROR_NU_INT:	           'CCL_ERROR_NU_INT',
-    lib.CCL_ERROR_EMULATOR_BOUND:      'CCL_ERROR_EMULATOR_BOUND',
-    lib.CCL_ERROR_MISSING_CONFIG_FILE: 'CCL_ERROR_MISSING_CONFIG_FILE',
 }
 
 
@@ -312,12 +299,19 @@ class Cosmology(object):
             of state. Defaults to -1.
         wa (:obj:`float`, optional): Second order term of dark energy equation
             of state. Defaults to 0.
+        T_CMB (:obj:`float`): The CMB temperature today. The default of
+            ``None`` uses the global CCL value in
+            ``pyccl.physical_constants.T_CMB``.
         bcm_log10Mc (:obj:`float`, optional): One of the parameters of the
             BCM model. Defaults to `np.log10(1.2e14)`.
         bcm_etab (:obj:`float`, optional): One of the parameters of the BCM
             model. Defaults to 0.5.
         bcm_ks (:obj:`float`, optional): One of the parameters of the BCM
             model. Defaults to 55.0.
+        mu_0 (:obj:`float`, optional): One of the parameters of the mu-Sigma
+            modified gravity model. Defaults to 0.0
+        sigma_0 (:obj:`float`, optional): One of the parameters of the mu-Sigma
+            modified gravity model. Defaults to 0.0
         df_mg (array_like, optional): Perturbations to the GR growth rate as
             a function of redshift :math:`\\Delta f`. Used to implement simple
             modified growth scenarios.
@@ -344,7 +338,8 @@ class Cosmology(object):
             self, Omega_c=None, Omega_b=None, h=None, n_s=None,
             sigma8=None, A_s=None,
             Omega_k=0., Omega_g=None, Neff=3.046, m_nu=0., mnu_type=None,
-            w0=-1., wa=0., bcm_log10Mc=np.log10(1.2e14), bcm_etab=0.5,
+            w0=-1., wa=0., T_CMB=None,
+            bcm_log10Mc=np.log10(1.2e14), bcm_etab=0.5,
             bcm_ks=55., mu_0=0., sigma_0=0., z_mg=None, df_mg=None,
             transfer_function='boltzmann_class',
             matter_power_spectrum='halofit',
@@ -357,7 +352,8 @@ class Cosmology(object):
         self._params_init_kwargs = dict(
             Omega_c=Omega_c, Omega_b=Omega_b, h=h, n_s=n_s, sigma8=sigma8,
             A_s=A_s, Omega_k=Omega_k, Omega_g=Omega_g, Neff=Neff, m_nu=m_nu,
-            mnu_type=mnu_type, w0=w0, wa=wa, bcm_log10Mc=bcm_log10Mc,
+            mnu_type=mnu_type, w0=w0, wa=wa, T_CMB=T_CMB,
+            bcm_log10Mc=bcm_log10Mc,
             bcm_etab=bcm_etab, bcm_ks=bcm_ks, mu_0=mu_0, sigma_0=sigma_0,
             z_mg=z_mg, df_mg=df_mg)
 
@@ -406,7 +402,7 @@ class Cosmology(object):
             filename (:obj:`str`) Filename to read parameters from.
         """
         with open(filename, 'r') as fp:
-            params = yaml.load(fp)
+            params = yaml.load(fp, Loader=yaml.Loader)
 
         # Now we assemble an init for the object since the CCL YAML has
         # extra info we don't need and different formatting.
@@ -513,7 +509,8 @@ class Cosmology(object):
     def _build_parameters(
             self, Omega_c=None, Omega_b=None, h=None, n_s=None, sigma8=None,
             A_s=None, Omega_k=None, Neff=None, m_nu=None, mnu_type=None,
-            w0=None, wa=None, bcm_log10Mc=None, bcm_etab=None, bcm_ks=None,
+            w0=None, wa=None, T_CMB=None,
+            bcm_log10Mc=None, bcm_etab=None, bcm_ks=None,
             mu_0=None, sigma_0=None, z_mg=None, df_mg=None, Omega_g=None):
         """Build a ccl_parameters struct"""
 
@@ -553,7 +550,27 @@ class Cosmology(object):
             raise ValueError("sigma8 must be greater than 1e-5.")
 
         # Make sure the neutrino parameters are consistent.
-        if isinstance(m_nu, float):
+        if hasattr(m_nu, "__len__"):
+            if (len(m_nu) != 3):
+                raise ValueError("m_nu must be a float or array-like object "
+                                 "with length 3.")
+            elif ((mnu_type == 'sum') or
+                    (mnu_type == 'sum_inverted') or
+                    (mnu_type == 'sum_equal')):
+                raise ValueError(
+                    "mnu type '%s' cannot be passed with a list "
+                    "of neutrino masses, only with a sum." % mnu_type)
+            elif mnu_type is None:
+                mnu_type = 'list'  # False
+
+        else:
+            try:
+                m_nu = float(m_nu)
+            except Exception:
+                raise ValueError(
+                    "m_nu must be a float or array-like object with "
+                    "length 3.")
+
             if mnu_type is None:
                 mnu_type = 'sum'
             m_nu = [m_nu]
@@ -569,21 +586,6 @@ class Cosmology(object):
                 raise ValueError("if mnu_type= sum_inverted, we are using the "
                                  "inverted hierarchy and so m_nu must "
                                  "be less than (~)0.0978")
-        elif hasattr(m_nu, "__len__"):
-            if (len(m_nu) != 3):
-                raise ValueError("m_nu must be a float or array-like object "
-                                 "with length 3.")
-            elif ((mnu_type == 'sum') or
-                    (mnu_type == 'sum_inverted') or
-                    (mnu_type == 'sum_equal')):
-                raise ValueError(
-                    "mnu type '%s' cannot be passed with a list "
-                    "of neutrino masses, only with a sum." % mnu_type)
-            elif mnu_type is None:
-                mnu_type = 'list'  # False
-        else:
-            raise ValueError("m_nu must be a float or array-like object with "
-                             "length 3.")
 
         # Check if any compulsory parameters are not set
         compul = [Omega_c, Omega_b, Omega_k, w0, wa, h, norm_pk,
@@ -598,25 +600,31 @@ class Cosmology(object):
         # Create new instance of ccl_parameters object
         # Create an internal status variable; needed to check massive neutrino
         # integral.
-        status = 0
-        if nz_mg == -1:
-            # Create ccl_parameters without modified growth
+        T_CMB_old = lib.cvar.constants.T_CMB
+        try:
+            if T_CMB is not None:
+                lib.cvar.constants.T_CMB = T_CMB
+            status = 0
+            if nz_mg == -1:
+                # Create ccl_parameters without modified growth
 
-            self._params, status = lib.parameters_create_nu(
-               Omega_c, Omega_b, Omega_k, Neff,
-               w0, wa, h, norm_pk,
-               n_s, bcm_log10Mc, bcm_etab, bcm_ks,
-               mu_0, sigma_0, mnu_types[mnu_type],
-               m_nu, status)
-        else:
-            # Create ccl_parameters with modified growth arrays
-            self._params, status = lib.parameters_create_nu_vec(
-               Omega_c, Omega_b, Omega_k, Neff,
-               w0, wa, h, norm_pk,
-               n_s, bcm_log10Mc, bcm_etab, bcm_ks,
-               mu_0, sigma_0, z_mg, df_mg,
-               mnu_types[mnu_type], m_nu, status)
-        check(status)
+                self._params, status = lib.parameters_create_nu(
+                   Omega_c, Omega_b, Omega_k, Neff,
+                   w0, wa, h, norm_pk,
+                   n_s, bcm_log10Mc, bcm_etab, bcm_ks,
+                   mu_0, sigma_0, mnu_types[mnu_type],
+                   m_nu, status)
+            else:
+                # Create ccl_parameters with modified growth arrays
+                self._params, status = lib.parameters_create_nu_vec(
+                   Omega_c, Omega_b, Omega_k, Neff,
+                   w0, wa, h, norm_pk,
+                   n_s, bcm_log10Mc, bcm_etab, bcm_ks,
+                   mu_0, sigma_0, z_mg, df_mg,
+                   mnu_types[mnu_type], m_nu, status)
+            check(status)
+        finally:
+            lib.cvar.constants.T_CMB = T_CMB_old
 
         if Omega_g is not None:
             total = self._params.Omega_g + self._params.Omega_l
@@ -626,7 +634,10 @@ class Cosmology(object):
     def __getitem__(self, key):
         """Access parameter values by name."""
         try:
-            val = getattr(self._params, key)
+            if key == 'mnu':
+                val = lib.parameters_get_nu_masses(self._params, 3)
+            else:
+                val = getattr(self._params, key)
         except AttributeError:
             raise KeyError("Parameter '%s' not recognized." % key)
         return val
@@ -640,10 +651,14 @@ class Cosmology(object):
         """Free the C memory this object is managing as it is being garbage
         collected (hopefully)."""
         if hasattr(self, "cosmo"):
-            if self.cosmo is not None:
+            if (self.cosmo is not None and
+                    hasattr(lib, 'cosmology_free') and
+                    lib.cosmology_free is not None):
                 lib.cosmology_free(self.cosmo)
         if hasattr(self, "_params"):
-            if self._params is not None:
+            if (self._params is not None and
+                    hasattr(lib, 'parameters_free') and
+                    lib.parameters_free is not None):
                 lib.parameters_free(self._params)
 
         # finally delete some attributes we don't want to be around for safety
@@ -725,58 +740,194 @@ class Cosmology(object):
 
     def compute_distances(self):
         """Compute the distance splines."""
+        if self.has_distances:
+            return
         status = 0
         status = lib.cosmology_compute_distances(self.cosmo, status)
-        check(status, self.cosmo)
+        check(status, self)
 
     def compute_growth(self):
         """Compute the growth function."""
+        if self.has_growth:
+            return
+
+        if self['N_nu_mass'] > 0:
+            warnings.warn(
+                "CCL does not properly compute the linear growth rate in "
+                "cosmological models with massive neutrinos!",
+                category=CCLWarning)
+
+            if self._params_init_kwargs['df_mg'] is not None:
+                warnings.warn(
+                    "Modified growth rates via the `df_mg` keyword argument "
+                    "cannot be consistently combined with cosmological models "
+                    "with massive neutrinos in CCL!",
+                    category=CCLWarning)
+
+            if (self._params_init_kwargs['mu_0'] > 0 or
+                    self._params_init_kwargs['sigma_0'] > 0):
+                warnings.warn(
+                    "Modified growth rates via the mu-Sigma model "
+                    "cannot be consistently combined with cosmological models "
+                    "with massive neutrinos in CCL!",
+                    category=CCLWarning)
+
         status = 0
         status = lib.cosmology_compute_growth(self.cosmo, status)
-        check(status, self.cosmo)
+        check(status, self)
 
-    def compute_power(self):
-        """Compute the power spectrum."""
+    def compute_linear_power(self):
+        """Compute the linear power spectrum."""
+        if self.has_linear_power:
+            return
+
+        if (self['N_nu_mass'] > 0 and
+                self._config_init_kwargs['transfer_function'] in
+                ['bbks', 'eisenstein_hu']):
+            warnings.warn(
+                "The '%s' linear power spectrum model does not properly "
+                "account for massive neutrinos!" %
+                self._config_init_kwargs['transfer_function'],
+                category=CCLWarning)
+
+        if self._config_init_kwargs['matter_power_spectrum'] == 'emu':
+            warnings.warn(
+                "None of the linear power spectrum models in CCL are "
+                "consistent with that implictly used in the emulated "
+                "non-linear power spectrum!",
+                category=CCLWarning)
+
+        # needed to init some models
+        self.compute_growth()
+
+        if ((self._config_init_kwargs['transfer_function'] ==
+                'boltzmann_class') and not self.has_linear_power):
+            pk_lin = get_class_pk_lin(self)
+            psp = pk_lin.psp
+        elif ((self._config_init_kwargs['transfer_function'] ==
+                'boltzmann_camb') and not self.has_linear_power):
+            pk_lin = get_camb_pk_lin(self)
+            psp = pk_lin.psp
+        else:
+            psp = None
+
+        if (psp is None and not self.has_linear_power and (
+                self._config_init_kwargs['transfer_function'] in
+                ['boltzmann_camb', 'boltzmann_class'])):
+            raise CCLError("Either the CAMB or CLASS computation "
+                           "failed silently! CCL could not compute the "
+                           "transfer function!")
+
+        # first do the linear matter power
         status = 0
-        status = lib.cosmology_compute_power(self.cosmo, status)
-        check(status, self.cosmo)
+        status = lib.cosmology_compute_linear_power(self.cosmo, psp, status)
+        check(status, self)
 
+    def compute_nonlin_power(self):
+        """Compute the non-linear power spectrum."""
+        if self.has_nonlin_power:
+            return
+
+        if self._config_init_kwargs['matter_power_spectrum'] != 'linear':
+            if self._params_init_kwargs['df_mg'] is not None:
+                warnings.warn(
+                    "Modified growth rates via the `df_mg` keyword argument "
+                    "cannot be consistently combined with '%s' for "
+                    "computing the non-linear power spectrum!" %
+                    self._config_init_kwargs['matter_power_spectrum'],
+                    category=CCLWarning)
+
+            if (self._params_init_kwargs['mu_0'] != 0 or
+                    self._params_init_kwargs['sigma_0'] != 0):
+                warnings.warn(
+                    "mu-Sigma modified cosmologies "
+                    "cannot be consistently combined with '%s' "
+                    "for computing the non-linear power spectrum!" %
+                    self._config_init_kwargs['matter_power_spectrum'],
+                    category=CCLWarning)
+
+        if (self['N_nu_mass'] > 0 and
+                self._config_init_kwargs['baryons_power_spectrum'] == 'bcm'):
+            warnings.warn(
+                "The BCM baryonic correction model's default parameters "
+                "were not calibrated for cosmological models with "
+                "massive neutrinos!",
+                category=CCLWarning)
+
+        self.compute_distances()
+
+        # needed for halofit, halomodel and linear options
+        if self._config_init_kwargs['matter_power_spectrum'] != 'emu':
+            self.compute_linear_power()
+
+        # for the halo model we need to init the mass function stuff
+        if self._config_init_kwargs['matter_power_spectrum'] == 'halo_model':
+            self.compute_sigma()
+
+        status = 0
+        status = lib.cosmology_compute_nonlin_power(self.cosmo, status)
+        check(status, self)
+
+    def compute_sigma(self):
+        """Compute the sigma(M) and mass function splines."""
+        if self.has_sigma:
+            return
+
+        # we need these things before building the mass function splines
+        if self['N_nu_mass'] > 0:
+            # these are not consistent with anything - fun
+            warnings.warn(
+                "All of the halo mass function, concentration, and bias "
+                "models in CCL are not properly calibrated for cosmological "
+                "models with massive neutrinos!",
+                category=CCLWarning)
+
+        if self._config_init_kwargs['baryons_power_spectrum'] != 'nobaryons':
+            warnings.warn(
+                "All of the halo mass function, concentration, and bias "
+                "models in CCL are not consistently adjusted for baryons "
+                "when the power spectrum is via the BCM model!",
+                category=CCLWarning)
+
+        self.compute_growth()
+        self.compute_linear_power()
+        status = 0
+        status = lib.cosmology_compute_sigma(self.cosmo, status)
+        status = lib.cosmology_compute_hmfparams(self.cosmo, status)
+        check(status, self)
+
+    @property
     def has_distances(self):
-        """Checks if the distances have been precomputed.
-
-        Returns:
-            bool: True if precomputed, False otherwise.
-        """
+        """Checks if the distances have been precomputed."""
         return bool(self.cosmo.computed_distances)
 
+    @property
     def has_growth(self):
-        """Checks if the growth function has been precomputed.
-
-        Returns:
-            bool: True if precomputed, False otherwise.
-        """
+        """Checks if the growth function has been precomputed."""
         return bool(self.cosmo.computed_growth)
 
-    def has_power(self):
-        """Checks if the power spectra have been precomputed.
+    @property
+    def has_linear_power(self):
+        """Checks if the linear power spectra have been precomputed."""
+        return bool(self.cosmo.computed_linear_power)
 
-        Returns:
-            bool: True if precomputed, False otherwise.
-        """
-        return bool(self.cosmo.computed_power)
+    @property
+    def has_nonlin_power(self):
+        """Checks if the non-linear power spectra have been precomputed."""
+        return bool(self.cosmo.computed_nonlin_power)
 
+    @property
     def has_sigma(self):
-        """Checks if sigma8 has been computed.
-
-        Returns:
-            bool: True if precomputed, False otherwise.
-        """
-        return bool(self.cosmo.computed_sigma)
+        """Checks if sigma(M) and mass function splines are precomputed."""
+        return (
+            bool(self.cosmo.computed_sigma) and
+            bool(self.cosmo.computed_hmfparams))
 
     def status(self):
         """Get error status of the ccl_cosmology object.
 
-        .. note:: error statuses are currently under development.
+        .. note:: The error statuses are currently under development and
+                  may not be fully descriptive.
 
         Returns:
             :obj:`str` containing the status message.
@@ -792,30 +943,3 @@ class Cosmology(object):
 
         # Return status information
         return "status(%s): %s" % (status, msg)
-
-
-def check(status, cosmo=None):
-    """Check the status returned by a ccllib function.
-
-    Args:
-        status (int or :obj:`core.error_types`): Flag or error describing the
-                                                 success of a function.
-        cosmo (:obj:`Cosmology`, optional): A Cosmology object.
-    """
-    # Check for normal status (no action required)
-    if status == 0:
-        return
-
-    # Get status message from Cosmology object, if there is one
-    if cosmo is not None:
-        msg = cosmo.cosmo.status_message
-    else:
-        msg = ""
-
-    # Check for known error status
-    if status in error_types.keys():
-        raise CCLError("Error %s: %s" % (error_types[status], msg))
-
-    # Check for unknown error
-    if status != 0:
-        raise CCLError("Error %d: %s" % (status, msg))

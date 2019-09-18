@@ -23,7 +23,9 @@ static double helper_fx(double x){
 //nr: number of radii for calculation
 //rho_r: stores densities at r
 //returns void
-void ccl_halo_profile_nfw(ccl_cosmology *cosmo, double c, double halomass, double massdef_delta_m, double a, double *r, int nr, double *rho_r, int *status){
+void ccl_halo_profile_nfw(ccl_cosmology *cosmo, double c, double halomass,
+                          double massdef_delta_m, double a, double *r, int nr,
+                          double *rho_r, int *status) {
 
     //haloradius: halo radius for mass definition
     //rs: scale radius
@@ -55,7 +57,10 @@ void ccl_halo_profile_nfw(ccl_cosmology *cosmo, double c, double halomass, doubl
 //nr: number of radii for calculation
 //sigma_r: stores surface mass density (integrated along line of sight) at given projected rp
 //returns void
-void ccl_projected_halo_profile_nfw(ccl_cosmology *cosmo, double c, double halomass, double massdef_delta_m, double a, double *rp, int nr, double *sigma_r, int *status){
+void ccl_projected_halo_profile_nfw(ccl_cosmology *cosmo, double c,
+                                    double halomass, double massdef_delta_m,
+                                    double a, double *rp, int nr, double *sigma_r,
+                                    int *status) {
 
     //haloradius: halo radius for mass definition
     //rs: scale radius
@@ -111,30 +116,35 @@ static double solve_cvir(ccl_cosmology *cosmo, double rhs, double initial_guess,
 
     T = gsl_root_fsolver_brent;
     s = gsl_root_fsolver_alloc (T);
-    gsl_root_fsolver_set (s, &F, c_lo, c_hi);
+    if (s != NULL) {
+      gsl_root_fsolver_set (s, &F, c_lo, c_hi);
 
-    do
-      {
-        iter++;
-        gsl_root_fsolver_iterate (s);
-        cvir = gsl_root_fsolver_root (s);
-        c_lo = gsl_root_fsolver_x_lower (s);
-        c_hi = gsl_root_fsolver_x_upper (s);
-        rootstatus = gsl_root_test_interval (c_lo, c_hi, 0, 0.0001);
+      do
+        {
+          iter++;
+          gsl_root_fsolver_iterate (s);
+          cvir = gsl_root_fsolver_root (s);
+          c_lo = gsl_root_fsolver_x_lower (s);
+          c_hi = gsl_root_fsolver_x_upper (s);
+          rootstatus = gsl_root_test_interval (c_lo, c_hi, 0, 0.0001);
+        }
+      while (rootstatus == GSL_CONTINUE && iter < max_iter);
+
+      gsl_root_fsolver_free(s);
+
+      // Check for errors
+      if (rootstatus != GSL_SUCCESS) {
+          ccl_raise_gsl_warning(rootstatus, "ccl_haloprofile.c: solve_cvir():");
+          *status = CCL_ERROR_PROFILE_ROOT;
+          ccl_cosmology_set_status_message(cosmo, "ccl_haloprofile.c: solve_cvir(): Root finding failure\n");
+          return NAN;
+      } else {
+          return cvir;
       }
-    while (rootstatus == GSL_CONTINUE && iter < max_iter);
-
-    gsl_root_fsolver_free (s);
-
-
-    // Check for errors
-    if (rootstatus != GSL_SUCCESS) {
-        ccl_raise_gsl_warning(rootstatus, "ccl_haloprofile.c: solve_cvir():");
-        *status = CCL_ERROR_PROFILE_ROOT;
-        ccl_cosmology_set_status_message(cosmo, "ccl_haloprofile.c: solve_cvir(): Root finding failure\n");
-        return NAN;
-    } else {
-        return cvir;
+    }
+    else {
+      *status = CCL_ERROR_MEMORY;
+      return NAN;
     }
 }
 
@@ -159,32 +169,40 @@ static double integrate_einasto(ccl_cosmology *cosmo, double R, double alpha, do
     double result = 0, eresult;
     Int_Einasto_Par ipar;
     gsl_function F;
-    gsl_integration_workspace *w = gsl_integration_workspace_alloc(1000);
+    gsl_integration_workspace *w = NULL;
 
-    // Structure required for the gsl integration
-    ipar.cosmo = cosmo;
-    ipar.alpha = alpha;
-    ipar.rs = rs;
-    F.function = &integrand_einasto;
-    F.params = &ipar;
+    w = gsl_integration_workspace_alloc(1000);
 
-    // Actually does the integration
-    qagstatus = gsl_integration_qag(
-      &F, 0, R, 0, 0.0001, 1000, 3, w,
-      &result, &eresult);
-
-    // Clean up
-    gsl_integration_workspace_free(w);
-
-    // Check for errors
-    if (qagstatus != GSL_SUCCESS) {
-      ccl_raise_gsl_warning(qagstatus, "ccl_haloprofile.c: integrate_einasto():");
-      *status = CCL_ERROR_PROFILE_INT;
-      ccl_cosmology_set_status_message(cosmo, "ccl_haloprofile.c: integrate_einasto(): Integration failure\n");
-      return NAN;
-    } else {
-      return result;
+    if (w == NULL) {
+      *status = CCL_ERROR_MEMORY;
     }
+
+    if (*status == 0) {
+      // Structure required for the gsl integration
+      ipar.cosmo = cosmo;
+      ipar.alpha = alpha;
+      ipar.rs = rs;
+      F.function = &integrand_einasto;
+      F.params = &ipar;
+
+      // Actually does the integration
+      qagstatus = gsl_integration_qag(
+        &F, 0, R, 0, 0.0001, 1000, 3, w,
+        &result, &eresult);
+
+      // Check for errors
+      if (qagstatus != GSL_SUCCESS) {
+        ccl_raise_gsl_warning(qagstatus, "ccl_haloprofile.c: integrate_einasto():");
+        *status = CCL_ERROR_PROFILE_INT;
+        ccl_cosmology_set_status_message(cosmo, "ccl_haloprofile.c: integrate_einasto(): Integration failure\n");
+        result = NAN;
+      }
+    }
+
+  // Clean up
+  gsl_integration_workspace_free(w);
+
+  return result;
 }
 
 
@@ -197,7 +215,9 @@ static double integrate_einasto(ccl_cosmology *cosmo, double R, double alpha, do
 //nr: number of radii for calculation
 //rho_r: stores densities at r
 //returns void
-void ccl_halo_profile_einasto(ccl_cosmology *cosmo, double c, double halomass, double massdef_delta_m, double a, double *r, int nr, double *rho_r, int *status){
+void ccl_halo_profile_einasto(ccl_cosmology *cosmo, double c, double halomass,
+                              double massdef_delta_m, double a, double *r, int nr,
+                              double *rho_r, int *status) {
 
     //haloradius: halo radius for mass definition
     //rs: scale radius
@@ -262,31 +282,39 @@ static double integrate_hernquist(ccl_cosmology *cosmo, double R, double rs, int
     double result = 0, eresult;
     Int_Hernquist_Par ipar;
     gsl_function F;
-    gsl_integration_workspace *w = gsl_integration_workspace_alloc(1000);
+    gsl_integration_workspace *w = NULL;
 
-    // Structure required for the gsl integration
-    ipar.cosmo = cosmo;
-    ipar.rs = rs;
-    F.function = &integrand_hernquist;
-    F.params = &ipar;
+    w = gsl_integration_workspace_alloc(1000);
 
-    // Actually does the integration
-    qagstatus = gsl_integration_qag(
-      &F, 0, R, 0, 0.0001, 1000, 3, w,
-      &result, &eresult);
+    if (w == NULL) {
+      *status = CCL_ERROR_MEMORY;
+    }
+
+    if (*status == 0) {
+      // Structure required for the gsl integration
+      ipar.cosmo = cosmo;
+      ipar.rs = rs;
+      F.function = &integrand_hernquist;
+      F.params = &ipar;
+
+      // Actually does the integration
+      qagstatus = gsl_integration_qag(
+        &F, 0, R, 0, 0.0001, 1000, 3, w,
+        &result, &eresult);
+
+      // Check for errors
+      if (qagstatus != GSL_SUCCESS) {
+        ccl_raise_gsl_warning(qagstatus, "ccl_haloprofile.c: integrate_hernquist():");
+        *status = CCL_ERROR_PROFILE_INT;
+        ccl_cosmology_set_status_message(cosmo, "ccl_haloprofile.c: integrate_hernquist(): Integration failure\n");
+        result = NAN;
+      }
+    }
 
     // Clean up
     gsl_integration_workspace_free(w);
 
-    // Check for errors
-    if (qagstatus != GSL_SUCCESS) {
-      ccl_raise_gsl_warning(qagstatus, "ccl_haloprofile.c: integrate_hernquist():");
-      *status = CCL_ERROR_PROFILE_INT;
-      ccl_cosmology_set_status_message(cosmo, "ccl_haloprofile.c: integrate_hernquist(): Integration failure\n");
-      return NAN;
-    } else {
-      return result;
-    }
+    return result;
 }
 
 
@@ -299,7 +327,9 @@ static double integrate_hernquist(ccl_cosmology *cosmo, double R, double rs, int
 //nr: number of radii for calculation
 //rho_r: stores densities at r
 //returns void
-void ccl_halo_profile_hernquist(ccl_cosmology *cosmo, double c, double halomass, double massdef_delta_m, double a, double *r, int nr, double *rho_r, int *status){
+void ccl_halo_profile_hernquist(ccl_cosmology *cosmo, double c, double halomass,
+                                double massdef_delta_m, double a, double *r, int nr,
+                                double *rho_r, int *status) {
 
     //haloradius: halo radius for mass definition
     //rs: scale radius

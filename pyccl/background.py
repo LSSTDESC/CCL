@@ -37,6 +37,7 @@ def growth_factor(cosmo, a):
     Returns:
         float or array_like: Growth factor, normalized to unity today.
     """
+    cosmo.compute_growth()
     return _vectorize_fn(lib.growth_factor,
                          lib.growth_factor_vec, cosmo, a)
 
@@ -52,6 +53,7 @@ def growth_factor_unnorm(cosmo, a):
         float or array_like: Unnormalized growth factor, normalized to the
                              scale factor at early times.
     """
+    cosmo.compute_growth()
     return _vectorize_fn(lib.growth_factor_unnorm,
                          lib.growth_factor_unnorm_vec, cosmo, a)
 
@@ -68,6 +70,7 @@ def growth_rate(cosmo, a):
         float or array_like: Growth rate.
 
     """
+    cosmo.compute_growth()
     return _vectorize_fn(lib.growth_rate,
                          lib.growth_rate_vec, cosmo, a)
 
@@ -82,6 +85,7 @@ def comoving_radial_distance(cosmo, a):
     Returns:
         float or array_like: Comoving radial distance; Mpc.
     """
+    cosmo.compute_distances()
     return _vectorize_fn(lib.comoving_radial_distance,
                          lib.comoving_radial_distance_vec, cosmo, a)
 
@@ -104,6 +108,7 @@ def comoving_angular_distance(cosmo, a):
     Returns:
         float or array_like: Comoving angular distance; Mpc.
     """
+    cosmo.compute_distances()
     return _vectorize_fn(lib.comoving_angular_distance,
                          lib.comoving_angular_distance_vec, cosmo, a)
 
@@ -137,6 +142,7 @@ def h_over_h0(cosmo, a):
     Returns:
         float or array_like: H(a)/H0.
     """
+    cosmo.compute_distances()
     return _vectorize_fn(lib.h_over_h0,
                          lib.h_over_h0_vec, cosmo, a)
 
@@ -151,6 +157,7 @@ def luminosity_distance(cosmo, a):
     Returns:
         float or array_like: Luminosity distance; Mpc.
     """
+    cosmo.compute_distances()
     return _vectorize_fn(lib.luminosity_distance,
                          lib.luminosity_distance_vec, cosmo, a)
 
@@ -169,6 +176,7 @@ def distance_modulus(cosmo, a):
     Returns:
         float or array_like: Distance modulus at a.
     """
+    cosmo.compute_distances()
     return _vectorize_fn(lib.distance_modulus,
                          lib.distance_modulus_vec, cosmo, a)
 
@@ -183,6 +191,7 @@ def scale_factor_of_chi(cosmo, chi):
     Returns:
         float or array_like: Scale factor(s), normalized to 1 today.
     """
+    cosmo.compute_distances()
     return _vectorize_fn(lib.scale_factor_of_chi,
                          lib.scale_factor_of_chi_vec, cosmo, chi)
 
@@ -246,31 +255,33 @@ def rho_x(cosmo, a, species, is_comoving=False):
 
 
 def Sig_MG(cosmo, a):
-    """ Redshift-dependent modification to Poisson equation for massless particles
-    under modified gravity.
+    """Redshift-dependent modification to Poisson equation for massless
+    particles under modified gravity.
+
     Args:
         cosmo (:obj:`ccl.cosmology`): Cosmological parameters.
         a (float or array_like): Scale factor(s), normalized to 1 today.
     Returns:
         Sig_MG (float or array_like): Modification to Poisson equation
-        under modified gravity at scale factor a.
-        Sig_MG is assumed to be proportional to Omega_Lambda(z),
-        see e.g. Abbott et al. 2018, 1810.02499, Eq. 9.
+            under modified gravity at scale factor a.
+            Sig_MG is assumed to be proportional to Omega_Lambda(z),
+            see e.g. Abbott et al. 2018, 1810.02499, Eq. 9.
         """
-
     return _vectorize_fn(lib.Sig_MG, lib.Sig_MG_vec, cosmo, a)
 
 
 def mu_MG(cosmo, a):
-    """ Redshift-dependent modification to Poisson equation under modified gravity.
+    """Redshift-dependent modification to Poisson equation under modified
+    gravity.
+
     Args:
         cosmo (:obj:`ccl.cosmology`): Cosmological parameters.
         a (float or array_like): Scale factor(s), normalized to 1 today.
+
     Returns:
         mu_MG (float or array_like): Modification to Poisson equation
-        under modified gravity at a scale factor.
-        mu_MG is assumed to be proportional to Omega_Lambda(z),
-        see e.g. Abbott et al. 2018, 1810.02499, Eq. 9.
+            under modified gravity at a scale factor.
+            mu_MG is assumed to be proportional to Omega_Lambda(z),
+            see e.g. Abbott et al. 2018, 1810.02499, Eq. 9.
     """
-
     return _vectorize_fn(lib.mu_MG, lib.mu_MG_vec, cosmo, a)

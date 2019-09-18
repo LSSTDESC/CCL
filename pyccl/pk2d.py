@@ -1,6 +1,6 @@
 from . import ccllib as lib
 
-from .core import check
+from .pyutils import check
 import numpy as np
 
 
@@ -123,6 +123,9 @@ class Pk2D(object):
         Returns:
             float or array_like: value(s) of the power spectrum.
         """
+        # make sure we have growth factors for extrapolation
+        cosmo.compute_growth()
+
         status = 0
         cospass = cosmo.cosmo
 

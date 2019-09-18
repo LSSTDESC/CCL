@@ -1,8 +1,12 @@
 import os
+import time
 import numpy as np
 import pyccl as ccl
 from scipy.interpolate import interp1d
 import pytest
+
+T0 = 0.0
+T0_CLS = 0.0
 
 
 @pytest.fixture(scope='module', params=['fftlog', 'bessel'])
@@ -13,14 +17,14 @@ def corr_method(request):
 
 @pytest.fixture(scope='module', params=['analytic', 'histo'])
 def set_up(request):
+    t0 = time.time()
     nztyp = request.param
     dirdat = os.path.dirname(__file__) + '/data/'
     cosmo = ccl.Cosmology(Omega_c=0.30, Omega_b=0.00, Omega_g=0, Omega_k=0,
                           h=0.7, sigma8=0.8, n_s=0.96, Neff=0, m_nu=0.0,
-                          w0=-1, wa=0, transfer_function='bbks',
+                          w0=-1, wa=0, T_CMB=2.7, transfer_function='bbks',
                           mass_function='tinker',
                           matter_power_spectrum='linear')
-    cosmo.cosmo.params.T_CMB = 2.7
     cosmo.cosmo.gsl_params.INTEGRATION_LIMBER_EPSREL = 2.5E-5
     cosmo.cosmo.gsl_params.INTEGRATION_EPSREL = 2.5E-5
 
@@ -168,6 +172,7 @@ def set_up(request):
     ers['ll_12_m'] = interp1d(d[0] / 60., d[3],
                               fill_value=d[3][0],
                               bounds_error=False)(theta)
+    print('setup time:', time.time() - t0)
     return cosmo, trc, bms, ers, fl
 
 
@@ -205,10 +210,23 @@ def set_up(request):
 def test_xi(set_up, corr_method, t1, t2, bm, er, kind, pref):
     cosmo, trcs, bms, ers, fls = set_up
     method, errfac = corr_method
+
+    global T0_CLS
+    t0 = time.time()
     cl = ccl.angular_cl(cosmo, trcs[t1], trcs[t2], fls['ells'])
+    T0_CLS += (time.time() - t0)
+
     ell = np.arange(fls['lmax'])
     cli = interp1d(fls['ells'], cl, kind='cubic')(ell)
+
+    global T0
+    t0 = time.time()
     xi = ccl.correlation(cosmo, ell, cli, bms['theta'],
                          corr_type=kind, method=method)
+    T0 += (time.time() - t0)
+
     xi *= pref
     assert np.all(np.fabs(xi - bms[bm]) < ers[er] * errfac)
+
+    print("time:", T0)
+    print("time cls:", T0_CLS)

@@ -52,10 +52,9 @@ To install all the dependencies at once, and avoid having :code:`CMake` recompil
 
    $ sudo apt-get install cmake swig libgsl-dev libfftw3-dev
 
-  
 
-Compile and install the CCL C library
-=====================================
+Compiling and Installing the CCL C library
+==========================================
 To download hte latest version of CCL:
 
 .. code-block:: bash
@@ -123,18 +122,14 @@ If you ever need to uninstall CCL, run the following from the :code:`build` dire
 
 You may need to prepend a :code:`sudo` if you installed CCL in a protected folder.
 
-
-
-
-
-
-Once the CLASS library is installed, `CCL` can be easily installed using an *autotools*-generated configuration file. To install `CCL`, from the base directory (the one where this file is located) run:
-
+Once the CLASS library is installed, `CCL` can be easily installed using an
+*autotools*-generated configuration file. To install `CCL`, from the base directory
+(the one where this file is located) run:
 
 Often admin privileges will be needed to install the library. If you have those just type:
 
 .. code:: bash
-	  
+
    sudo make install
 
 If you don't have admin privileges, you can still install the library in a user-defined directory by running
@@ -144,7 +139,7 @@ If you don't have admin privileges, you can still install the library in a user-
    ./configure --prefix=/path/to/install
    make
    make install
-   
+
 where ``/path/to/install`` is the absolute path to the directory where you want the library to be installed. If non-existing, this will create two directories, ``/path/to/install/include`` and ``/path/to/install/lib``, and the library and header files will be installed there. Note that, in order to use `CCL` with your own scripts you'll have to add ``/path/to/install/lib`` to your ``LD_LIBRARY_PATH``. `CCL` has been successfully installed on several different Linux and Mac OS X systems.
 
 To make sure that everything is working properly, you can run all unit tests after installation by running
@@ -158,7 +153,7 @@ Assuming that the tests pass, you can then move on to installing the Python wrap
 After pulling a new version of `CCL` from the `GitHub repository <https://github.com/LSSTDESC/CCL>`_, you can recompile the library by running:
 
 .. code:: bash
-	  
+
    make clean; make uninstall
    make
    make install
@@ -193,7 +188,7 @@ You can quickly check whether pyccl has been installed correctly by running :cod
 For a more in-depth test to make sure everything is working, run from the root CCL directory:
 
 .. code:: bash
-	  
+
    python setup.py test
 
 This will run the embedded unit tests (may take a few minutes).
@@ -219,11 +214,63 @@ To compile CCL with an external version of CLASS, just run the following :code:`
 
 the rest of the build process should be the same.
 
-Docker image installation
+Known Installation Issues
 =========================
 
-The Dockerfile to generate a Docker image is included in the CCL repository as Dockerfile. This can be used to create an image that Docker can spool up as a virtual machine, allowing you to utilize CCL on any infrastructure with minimal hassle. The details of Docker and the installation process can be found at `this link <https://www.docker.com/>`_. Once Docker is installed, it is a simple process to create an image! In a terminal of your choosing (with Docker running), type the command :code:`docker build -t ccl .` in the CCL directory.
+#. If upon running the C tests you get an error from CLASS saying it cannot find
+   the file ``sBBN_2017.dat``, it means that the CLASS parameter files are not properly
+   installed on your system. Make sure you have indeed installed the C library by running:
 
-The resulting Docker image has two primary functionalities. The first is a CMD that will open Jupyter notebook tied to a port on your local machine. This can be used with the following run command: :code:`docker run -p 8888:8888 ccl`. You can then access the notebook in the browser of your choice at :code:`localhost:8888`. The second is to access the bash itself, which can be done using :code:`docker run -it ccl bash`.
+   .. code:: bash
 
-This Dockerfile currently contains all installed C libraries and the Python wrapper. It currently uses continuumio/anaconda as the base image and supports ipython and Jupyter notebook. There should be minimal slowdown due to the virtualization.
+      $ make install
+
+   from the ``CCL/build`` directory.
+
+#. If you are having issues with GSL versions linking, please try the following during the configuration step:
+
+   .. code:: bash
+
+      ./configure CFLAGS="-I/usr/local/include" LDFLAGS="-L/usr/local/lib"
+
+#. If you move or delete the source directory after installing CCL, some functions
+   may fail. The source directory contains files needed by CLASS (which is contained
+   within CCL) at run-time.
+
+#. If you are planning to compile your own file that calls CCL, then you should
+   add the following to your ``.bashrc``:
+
+   .. code:: bash
+
+      $ export LD_LIBRARY_PATH=/path/to/where/ccl/is/installed/lib:$LD_LIBRARY_PATH
+
+#. In some Mac systems, the ``angpow`` installation script might fail on the first
+   run with the message
+
+   .. code:: bash
+
+      $ CMake Error: The source directory "CCL/angpow" does not appear to contain CMakeLists.txt.
+      $ Specify --help for usage, or press the help button on the CMake GUI.
+
+   If this happens, try running it a second time.
+
+#. In some Mac systems, depending on the XCode version of the C/C++ compiler,
+   you can get a compilation error. For a proposed solution,
+   see `here <https://github.com/LSSTDESC/CCL/issues/379#issuecomment-391456284>`_.
+
+#. If using a ``sudo make install`` for the C library and attempting to install the
+   developer Python library, it may be necessary to include a ``sudo``
+   for your chosen Python installation.
+
+#. If you are building CCL using a conda environment, be mindful of the known
+   issues documented `here <https://github.com/LSSTDESC/CCL/issues/548>`_.
+
+#. For some Mac OSX versions, the standard C headers are not in the usual spot, resulting in an
+   error of ``fatal error: 'stdio.h' file not found`` while attempting to install
+   CLASS. This can be resolved with the command:
+
+   .. code:: bash
+
+      $ sudo installer -pkg /Library/Developer/CommandLineTools/Packages/macOS_SDK_headers_for_macOS_10.14.pkg -target /
+
+   which will install all the required headers into ``/usr/include``.
