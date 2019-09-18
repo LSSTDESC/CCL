@@ -18,7 +18,7 @@ def test_haloprofile(model):
         w0=-1,
         wa=0,
         m_nu=0,
-        mnu_type='sum',
+        m_nu_type='normal',
         Neff=3.046,
         Omega_k=0,
         transfer_function='eisenstein_hu',

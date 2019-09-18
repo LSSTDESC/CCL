@@ -22,7 +22,7 @@ static double h_over_h0(double a, ccl_cosmology * cosmo, int *status)
   double Om_mass_nu;
   if ((cosmo->params.N_nu_mass)>1e-12) {
     Om_mass_nu = ccl_Omeganuh2(
-      a, cosmo->params.N_nu_mass, cosmo->params.mnu, cosmo->params.T_CMB,
+      a, cosmo->params.N_nu_mass, cosmo->params.m_nu, cosmo->params.T_CMB,
       status) / (cosmo->params.h) / (cosmo->params.h);
   }
   else {
@@ -33,7 +33,7 @@ static double h_over_h0(double a, ccl_cosmology * cosmo, int *status)
     E(a)^2 = Omega_m a^-3 +
              Omega_l a^(-3*(1+w0+wa)) exp(3*wa*(a-1)) +
              Omega_k a^-2 +
-             (Omega_g + Omega_n_rel) a^-4 +
+             (Omega_g + Omega_nu_rel) a^-4 +
              Om_mass_nu
   */
   return sqrt(
@@ -42,7 +42,7 @@ static double h_over_h0(double a, ccl_cosmology * cosmo, int *status)
        pow(a,-3*(cosmo->params.w0+cosmo->params.wa)) *
        exp(3*cosmo->params.wa*(a-1)) +
      cosmo->params.Omega_k * a +
-     (cosmo->params.Omega_g + cosmo->params.Omega_n_rel) / a +
+     (cosmo->params.Omega_g + cosmo->params.Omega_nu_rel) / a +
      Om_mass_nu * a*a*a) / (a*a*a));
 }
 
@@ -65,7 +65,7 @@ double ccl_omega_x(ccl_cosmology * cosmo, double a, ccl_species_x_label label, i
   double OmNuh2;
   if ((cosmo->params.N_nu_mass) > 0.0001) {
     // Call the massive neutrino density function just once at this redshift.
-    OmNuh2 = ccl_Omeganuh2(a, cosmo->params.N_nu_mass, cosmo->params.mnu,
+    OmNuh2 = ccl_Omeganuh2(a, cosmo->params.N_nu_mass, cosmo->params.m_nu,
 		       cosmo->params.T_CMB, status);
   }
   else {
@@ -89,7 +89,7 @@ double ccl_omega_x(ccl_cosmology * cosmo, double a, ccl_species_x_label label, i
     case ccl_species_k_label :
       return cosmo->params.Omega_k / (a*a) / hnorm / hnorm;
     case ccl_species_ur_label :
-      return cosmo->params.Omega_n_rel / (a*a*a*a) / hnorm / hnorm;
+      return cosmo->params.Omega_nu_rel / (a*a*a*a) / hnorm / hnorm;
     case ccl_species_nu_label :
       return OmNuh2 / (cosmo->params.h) / (cosmo->params.h) / hnorm / hnorm;
     default:

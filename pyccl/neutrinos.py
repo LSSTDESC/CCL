@@ -10,7 +10,7 @@ neutrino_mass_splits = {
 }
 
 
-def Omeganuh2(a, mnu, T_CMB=None):
+def Omeganuh2(a, m_nu, T_CMB=None):
     """Calculate Omega_nu * h^2 at a given scale factor given the sum of the
     neutrino masses.
 
@@ -18,7 +18,7 @@ def Omeganuh2(a, mnu, T_CMB=None):
 
     Args:
         a (float or array-like): Scale factor, normalized to 1 today.
-        mnu (float or array-like): Neutrino mass (in eV)
+        m_nu (float or array-like): Neutrino mass (in eV)
         T_CMB (float, optional): Temperature of the CMB (K). Default: 2.725.
 
     Returns:
@@ -33,14 +33,14 @@ def Omeganuh2(a, mnu, T_CMB=None):
     # Convert to array if it's not already an array
     if not isinstance(a, np.ndarray):
         a = np.array([a, ]).flatten()
-    if not isinstance(mnu, np.ndarray):
-        mnu = np.array([mnu, ]).flatten()
+    if not isinstance(m_nu, np.ndarray):
+        m_nu = np.array([m_nu, ]).flatten()
 
-    N_nu_mass = len(mnu)
+    N_nu_mass = len(m_nu)
 
     # Call function
     OmNuh2, status = lib.Omeganuh2_vec(N_nu_mass, T_CMB,
-                                       a, mnu, a.size, status)
+                                       a, m_nu, a.size, status)
 
     # Check status and return
     check(status)

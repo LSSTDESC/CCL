@@ -39,15 +39,15 @@ halo_concentration options
   - 'duffy2008': Duffy et al. (2008) relation
   - 'constant_concentration': use a constant concentration
 
-mnu_type options
+m_nu_type options
   This parameter specifies the model for massive
   neutrinos.
     - 'list': specify each mass yourself in eV
-    - 'sum': use the normal hierarchy to convert total mass to individual
+    - 'normal': use the normal hierarchy to convert total mass to individual
       masses
-    - 'sum_inverted': use the inverted hierarchy to convert total mass to
+    - 'inverted': use the inverted hierarchy to convert total mass to
       individual masses
-    - 'sum_equal': assume equal masses when converting the total mass to
+    - 'equal': assume equal masses when converting the total mass to
       individual masses
 
 emulator_neutrinos options
@@ -236,11 +236,11 @@ emulator_neutrinos_types = {
     'equalize': lib.emu_equalize
 }
 
-mnu_types = {
+m_nu_types = {
     'list': lib.mnu_list,
-    'sum': lib.mnu_sum,
-    'sum_inverted': lib.mnu_sum_inverted,
-    'sum_equal': lib.mnu_sum_equal,
+    'normal': lib.mnu_sum,
+    'inverted': lib.mnu_sum_inverted,
+    'equal': lib.mnu_sum_equal,
 }
 
 
@@ -294,7 +294,9 @@ class Cosmology(object):
             neutrinos present. Defaults to 3.046.
         m_nu (:obj:`float`, optional): Total mass in eV of the massive
             neutrinos present. Defaults to 0.
-        mnu_type (:obj:`str`, optional): The type of massive neutrinos.
+        m_nu_type (:obj:`str`, optional): The type of massive neutrinos. Should
+            be one of 'inverted', 'normal', 'equal' or 'list'. The default
+            of None is the same as 'normal'.
         w0 (:obj:`float`, optional): First order term of dark energy equation
             of state. Defaults to -1.
         wa (:obj:`float`, optional): Second order term of dark energy equation
@@ -330,14 +332,14 @@ class Cosmology(object):
             the power spectrum, specified treatment of unequal neutrinos.
             Options are 'strict', which will raise an error and quit if the
             user fails to pass either a set of three equal masses or a sum with
-            mnu_type = 'sum_equal', and 'equalize', which will redistribute
+            m_nu_type = 'equal', and 'equalize', which will redistribute
             masses to be equal right before calling the emualtor but results in
             internal inconsistencies. Defaults to 'strict'.
     """
     def __init__(
             self, Omega_c=None, Omega_b=None, h=None, n_s=None,
             sigma8=None, A_s=None,
-            Omega_k=0., Omega_g=None, Neff=3.046, m_nu=0., mnu_type=None,
+            Omega_k=0., Omega_g=None, Neff=3.046, m_nu=0., m_nu_type=None,
             w0=-1., wa=0., T_CMB=None,
             bcm_log10Mc=np.log10(1.2e14), bcm_etab=0.5,
             bcm_ks=55., mu_0=0., sigma_0=0., z_mg=None, df_mg=None,
@@ -352,7 +354,7 @@ class Cosmology(object):
         self._params_init_kwargs = dict(
             Omega_c=Omega_c, Omega_b=Omega_b, h=h, n_s=n_s, sigma8=sigma8,
             A_s=A_s, Omega_k=Omega_k, Omega_g=Omega_g, Neff=Neff, m_nu=m_nu,
-            mnu_type=mnu_type, w0=w0, wa=wa, T_CMB=T_CMB,
+            m_nu_type=m_nu_type, w0=w0, wa=wa, T_CMB=T_CMB,
             bcm_log10Mc=bcm_log10Mc,
             bcm_etab=bcm_etab, bcm_ks=bcm_ks, mu_0=mu_0, sigma_0=sigma_0,
             z_mg=z_mg, df_mg=df_mg)
@@ -426,9 +428,9 @@ class Cosmology(object):
             inits['z_mg'] = params['z_mg']
             inits['df_mg'] = params['df_mg']
 
-        if 'mnu' in params:
-            inits['m_nu'] = params['mnu']
-            inits['mnu_type'] = 'list'
+        if 'm_nu' in params:
+            inits['m_nu'] = params['m_nu']
+            inits['m_nu_type'] = 'list'
 
         return cls(**inits)
 
@@ -508,7 +510,7 @@ class Cosmology(object):
 
     def _build_parameters(
             self, Omega_c=None, Omega_b=None, h=None, n_s=None, sigma8=None,
-            A_s=None, Omega_k=None, Neff=None, m_nu=None, mnu_type=None,
+            A_s=None, Omega_k=None, Neff=None, m_nu=None, m_nu_type=None,
             w0=None, wa=None, T_CMB=None,
             bcm_log10Mc=None, bcm_etab=None, bcm_ks=None,
             mu_0=None, sigma_0=None, z_mg=None, df_mg=None, Omega_g=None):
@@ -554,14 +556,12 @@ class Cosmology(object):
             if (len(m_nu) != 3):
                 raise ValueError("m_nu must be a float or array-like object "
                                  "with length 3.")
-            elif ((mnu_type == 'sum') or
-                    (mnu_type == 'sum_inverted') or
-                    (mnu_type == 'sum_equal')):
+            elif m_nu_type in ['normal', 'inverted', 'equal']:
                 raise ValueError(
-                    "mnu type '%s' cannot be passed with a list "
-                    "of neutrino masses, only with a sum." % mnu_type)
-            elif mnu_type is None:
-                mnu_type = 'list'  # False
+                    "m_nu_type '%s' cannot be passed with a list "
+                    "of neutrino masses, only with a sum." % m_nu_type)
+            elif m_nu_type is None:
+                m_nu_type = 'list'  # False
 
         else:
             try:
@@ -571,21 +571,22 @@ class Cosmology(object):
                     "m_nu must be a float or array-like object with "
                     "length 3.")
 
-            if mnu_type is None:
-                mnu_type = 'sum'
+            if m_nu_type is None:
+                m_nu_type = 'normal'
             m_nu = [m_nu]
-            if (mnu_type == 'sum'
+            if (m_nu_type == 'normal'
                     and m_nu[0] < (np.sqrt(7.62E-5) + np.sqrt(2.55E-3))
                     and (m_nu[0] > 1e-15)):
-                raise ValueError("if mnu_type= sum, we are using the "
+                raise ValueError("if m_nu_type is 'normal', we are using the "
                                  "normal hierarchy and so m_nu must "
                                  "be less than (~)0.0592")
-            elif (mnu_type == 'sum_inverted' and
+            elif (m_nu_type == 'inverted' and
                   m_nu[0] < (np.sqrt(2.43e-3 - 7.62e-5) + np.sqrt(2.43e-3))
                   and (m_nu[0] > 1e-15)):
-                raise ValueError("if mnu_type= sum_inverted, we are using the "
-                                 "inverted hierarchy and so m_nu must "
-                                 "be less than (~)0.0978")
+                raise ValueError(
+                    "if m_nu_type is 'inverted', we are using the "
+                    "inverted hierarchy and so m_nu must "
+                    "be less than (~)0.0978")
 
         # Check if any compulsory parameters are not set
         compul = [Omega_c, Omega_b, Omega_k, w0, wa, h, norm_pk,
@@ -612,7 +613,7 @@ class Cosmology(object):
                    Omega_c, Omega_b, Omega_k, Neff,
                    w0, wa, h, norm_pk,
                    n_s, bcm_log10Mc, bcm_etab, bcm_ks,
-                   mu_0, sigma_0, mnu_types[mnu_type],
+                   mu_0, sigma_0, m_nu_types[m_nu_type],
                    m_nu, status)
             else:
                 # Create ccl_parameters with modified growth arrays
@@ -621,7 +622,7 @@ class Cosmology(object):
                    w0, wa, h, norm_pk,
                    n_s, bcm_log10Mc, bcm_etab, bcm_ks,
                    mu_0, sigma_0, z_mg, df_mg,
-                   mnu_types[mnu_type], m_nu, status)
+                   m_nu_types[m_nu_type], m_nu, status)
             check(status)
         finally:
             lib.cvar.constants.T_CMB = T_CMB_old
@@ -634,7 +635,7 @@ class Cosmology(object):
     def __getitem__(self, key):
         """Access parameter values by name."""
         try:
-            if key == 'mnu':
+            if key == 'm_nu':
                 val = lib.parameters_get_nu_masses(self._params, 3)
             else:
                 val = getattr(self._params, key)
@@ -704,7 +705,7 @@ class Cosmology(object):
         string += ", ".join(
             "%s=%s" % (k, v)
             for k, v in self._params_init_kwargs.items()
-            if k not in ['m_nu', 'mnu_type', 'z_mg', 'df_mg'])
+            if k not in ['m_nu', 'm_nu_type', 'z_mg', 'df_mg'])
 
         if hasattr(self._params_init_kwargs['m_nu'], '__len__'):
             string += ", m_nu=[%s, %s, %s]" % tuple(
@@ -712,10 +713,11 @@ class Cosmology(object):
         else:
             string += ', m_nu=%s' % self._params_init_kwargs['m_nu']
 
-        if self._params_init_kwargs['mnu_type'] is not None:
-            string += ", mnu_type='%s'" % self._params_init_kwargs['mnu_type']
+        if self._params_init_kwargs['m_nu_type'] is not None:
+            string += (
+                ", m_nu_type='%s'" % self._params_init_kwargs['m_nu_type'])
         else:
-            string += ', mnu_type=None'
+            string += ', m_nu_type=None'
 
         if self._params_init_kwargs['z_mg'] is not None:
             vals = ", ".join(

@@ -26,7 +26,7 @@ def test_emu_nu(model):
         w0=cosmos[model, 5],
         wa=cosmos[model, 6],
         m_nu=mnu,
-        mnu_type='list',
+        m_nu_type='list',
         Neff=3.04,
         Omega_g=0,
         Omega_k=0,

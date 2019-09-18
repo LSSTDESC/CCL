@@ -49,7 +49,7 @@ static ccl_cosmology *create_w0eff_cosmo(double w0eff, ccl_cosmology *cosmo, int
   for(i=0; i<3; ++i)
     mnu[i] = 0;
   for(i=0; i<cosmo->params.N_nu_mass; ++i)
-    mnu[i] = cosmo->params.mnu[i];
+    mnu[i] = cosmo->params.m_nu[i];
 
   if (isnan(cosmo->params.A_s))
     norm_pk = cosmo->params.sigma8;
