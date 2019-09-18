@@ -238,9 +238,9 @@ emulator_neutrinos_types = {
 
 mnu_types = {
     'list': lib.mnu_list,
-    'sum': lib.mnu_sum,
-    'sum_inverted': lib.mnu_sum_inverted,
-    'sum_equal': lib.mnu_sum_equal,
+    'normal': lib.mnu_sum,
+    'inverted': lib.mnu_sum_inverted,
+    'equal': lib.mnu_sum_equal,
 }
 
 
@@ -554,9 +554,7 @@ class Cosmology(object):
             if (len(m_nu) != 3):
                 raise ValueError("m_nu must be a float or array-like object "
                                  "with length 3.")
-            elif ((mnu_type == 'sum') or
-                    (mnu_type == 'sum_inverted') or
-                    (mnu_type == 'sum_equal')):
+            elif mnu_type in ['normal', 'inverted', 'equal']:
                 raise ValueError(
                     "mnu type '%s' cannot be passed with a list "
                     "of neutrino masses, only with a sum." % mnu_type)
@@ -572,18 +570,18 @@ class Cosmology(object):
                     "length 3.")
 
             if mnu_type is None:
-                mnu_type = 'sum'
+                mnu_type = 'normal'
             m_nu = [m_nu]
-            if (mnu_type == 'sum'
+            if (mnu_type == 'normal'
                     and m_nu[0] < (np.sqrt(7.62E-5) + np.sqrt(2.55E-3))
                     and (m_nu[0] > 1e-15)):
-                raise ValueError("if mnu_type= sum, we are using the "
+                raise ValueError("if mnu_type is 'normal', we are using the "
                                  "normal hierarchy and so m_nu must "
                                  "be less than (~)0.0592")
-            elif (mnu_type == 'sum_inverted' and
+            elif (mnu_type == 'inverted' and
                   m_nu[0] < (np.sqrt(2.43e-3 - 7.62e-5) + np.sqrt(2.43e-3))
                   and (m_nu[0] > 1e-15)):
-                raise ValueError("if mnu_type= sum_inverted, we are using the "
+                raise ValueError("if mnu_type is 'inverted', we are using the "
                                  "inverted hierarchy and so m_nu must "
                                  "be less than (~)0.0978")
 

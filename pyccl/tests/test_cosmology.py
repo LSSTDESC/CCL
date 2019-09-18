@@ -21,7 +21,7 @@ def test_cosmology_critical_init():
         m_nu=0.0,
         w0=-1.0,
         wa=0.0,
-        mnu_type='sum',
+        mnu_type='normal',
         Omega_g=0,
         Omega_k=0)
     assert np.allclose(cosmo.cosmo.data.growth0, 1)
