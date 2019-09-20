@@ -1,6 +1,3 @@
-"""The pyccl package contains all of the submodules that are implemented in
-individual files in CCL.
-"""
 # flake8: noqa
 from pkg_resources import get_distribution, DistributionNotFound
 try:

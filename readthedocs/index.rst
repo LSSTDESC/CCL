@@ -21,18 +21,29 @@ The source code is available on github at https://github.com/LSSTDESC/CCL.
    :caption: Getting Started
 
    source/installation
-   source/installation_for_developers
+   source/quickstart
+   source/citation
    source/reporting_bugs
 
-.. toctree:
-..   :maxdepth: 1
-..   :caption: For Developers
+.. toctree::
+   :maxdepth: 1
+   :caption: Developer Guide
+   :name: devguide
 
-..   source/navigating_the_code
+   source/terms
+   source/api
+   source/navigating_the_code
+   source/understanding_the_python_c_interface
+   source/developer_installation
+   source/development_workflow
+   source/writing_and_running_unit_tests
+   source/writing_and_running_benchmarks
 
 .. toctree::
    :maxdepth: 1
    :caption: Reference
+   :name: apiref
 
-   pyCCL Reference/API<api/modules>
-   Citing CCL<source/citation.rst>
+   source/notation_and_other_cosmological_conventions.rst
+   API Documentation<api/modules>
+   source/changelog

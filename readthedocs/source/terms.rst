@@ -1,15 +1,18 @@
-Core Cosmology Library: Terms of reference
----------------------------------------
+*********************************************
+Terms of Reference and Development Principles
+*********************************************
 
 This document lays out terms of reference for CCL developers and contributors in the wider TJP and LSST DESC context.
 
+----------
 Background
----------------------------------------
+----------
 
-CCL was created to provide theoretical predictions of large-scale structure statistics for DESC cosmological analyses but it has also become a publicly available tool. 
+CCL was created to provide theoretical predictions of large-scale structure statistics for DESC cosmological analyses but it has also become a publicly available tool.
 
+-----
 Scope
----------------------------------------
+-----
 
 CCL has a commitment to support key DESC analyses. In this regard, CCL aims to
 
@@ -41,15 +44,16 @@ Boundaries of CCL (with respect to other TJP software)
 
 - CCL development should also proceed in a manner to avoid significant duplication of effort within the collaboration.
 
+------------------------------------------------------------------
 Standards to establish the quality of code that can be part of CCL
----------------------------------------
+------------------------------------------------------------------
 
 - Contributions to CCL should be well-documented in python (only doc-string level docs are required, readthedocs does the rest). C code is expected to be commented, though not documented.
 
 - Features added to CCL should pass required tests.
 
-	1. one (publicly available) benchmark with an independent prediction should be provided to test the specific feature that has been added. The benchmark code can use CCL input as long as that is not affecting the validation procedure. 
-	   
+	1. one (publicly available) benchmark with an independent prediction should be provided to test the specific feature that has been added. The benchmark code can use CCL input as long as that is not affecting the validation procedure.
+
 	2. Tests should run in continuous integration scheme used for CCL.
 
 	3. Unit tests should be written following the suggestions of the PR reviewers.
@@ -60,16 +64,17 @@ Standards to establish the quality of code that can be part of CCL
 
 - We should aim to tag new versions with bug fixes on a monthly basis with the expectation that no release is made if no new bugs have been fixed.
 
-- Critical bug fixes should be released almost immediately via bump of the micro version and a new release. 
+- Critical bug fixes should be released almost immediately via bump of the micro version and a new release.
 
+-------------------------------
 Guidelines towards contribution
----------------------------------------
+-------------------------------
 
-- Contributions should be made via PRs, and such PRs should be reviewed as described above.  
+- Contributions should be made via PRs, and such PRs should be reviewed as described above.
 
-- Response to code review requests should be prompt and happen within a few days of being requested on github by the author of the PR. Code review by members of the CCL development team should happen within a week of the request being accepted. 
+- Response to code review requests should be prompt and happen within a few days of being requested on github by the author of the PR. Code review by members of the CCL development team should happen within a week of the request being accepted.
 
-- CONTRIBUTING file should be consulted by those making PRs.
+- The CCL :ref:`devguide` should be consulted by those making PRs.
 
 - Developers should use standard DESC channels to interact with the team (e.g., Slack, telecons, etc.).
 

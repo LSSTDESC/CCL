@@ -182,14 +182,14 @@ def omega_x(cosmo, a, species):
     Args:
         cosmo (:obj:`Cosmology`): Cosmological parameters.
         a (float or array_like): Scale factor(s), normalized to 1 today.
-        species (string): species type. Available:
-            'matter': cold dark matter and baryons
-            'dark_energy': cosmological constant or otherwise
-            'radiation': relativistic species besides massless neutrinos (i.e.,
-                only photons)
-            'curvature': curvature density
-            'neutrinos_rel': relativistic neutrinos
-            'neutrinos_massive': massive neutrinos
+        species (string): species type. Should be one of
+
+            - 'matter': cold dark matter, massive neutrinos, and baryons
+            - 'dark_energy': cosmological constant or otherwise
+            - 'radiation': relativistic species besides massless neutrinos
+            - 'curvature': curvature density
+            - 'neutrinos_rel': relativistic neutrinos
+            - 'neutrinos_massive': massive neutrinos
 
     Returns:
         float or array_like: Density fraction of a given species at a
@@ -210,13 +210,15 @@ def rho_x(cosmo, a, species, is_comoving=False):
     Args:
         cosmo (:obj:`Cosmology`): Cosmological parameters.
         a (float or array_like): Scale factor(s), normalized to 1 today.
-        species (string): species type. Available:
-            'matter': cold dark matter and baryons
-            'dark_energy': cosmological constant or otherwise
-            'radiation': relativistic species besides massless neutrinos
-            'curvature': curvature density
-            'neutrinos_rel': relativistic neutrinos
-            'neutrinos_massive': massive neutrinos
+        species (string): species type. Should be one of
+
+            - 'matter': cold dark matter, massive neutrinos, and baryons
+            - 'dark_energy': cosmological constant or otherwise
+            - 'radiation': relativistic species besides massless neutrinos
+            - 'curvature': curvature density
+            - 'neutrinos_rel': relativistic neutrinos
+            - 'neutrinos_massive': massive neutrinos
+
         is_comoving (bool): either physical (False, default) or comoving (True)
 
     Returns:
