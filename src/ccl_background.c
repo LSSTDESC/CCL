@@ -78,7 +78,8 @@ double ccl_omega_x(ccl_cosmology * cosmo, double a, ccl_species_x_label label, i
     case ccl_species_crit_label :
       return 1.;
     case ccl_species_m_label :
-      return cosmo->params.Omega_m / (a*a*a) / hnorm / hnorm;
+      return (cosmo->params.Omega_c + cosmo->params.Omega_b) / (a*a*a) / hnorm / hnorm + 
+	      OmNuh2 / (cosmo->params.h) / (cosmo->params.h) / hnorm / hnorm;
     case ccl_species_l_label :
       return
         cosmo->params.Omega_l *
