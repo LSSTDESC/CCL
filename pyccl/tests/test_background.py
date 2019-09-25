@@ -58,7 +58,10 @@ def test_background_omega_x(a, kind):
 
     if np.all(a == 1):
         if kind == 'matter':
-            val_z0 = COSMO_NU['Omega_b'] + COSMO_NU['Omega_c']
+            val_z0 = (
+                COSMO_NU['Omega_b'] +
+                COSMO_NU['Omega_c'] +
+                COSMO_NU['Omega_nu_mass'])
         elif kind == 'dark_energy':
             val_z0 = COSMO_NU['Omega_l']
         elif kind == 'radiation':

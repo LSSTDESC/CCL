@@ -337,8 +337,8 @@ void ccl_parameters_fill_initial(ccl_parameters * params, int *status)
     params->Omega_nu_mass = 0.;
   }
 
-  params->Omega_m = params->Omega_b + params-> Omega_c;
-  params->Omega_l = 1.0 - params->Omega_m - params->Omega_g - params->Omega_nu_rel -params->Omega_nu_mass- params->Omega_k;
+  params->Omega_m = params->Omega_b + params-> Omega_c + params->Omega_nu_mass;
+  params->Omega_l = 1.0 - params->Omega_m - params->Omega_g - params->Omega_nu_rel - params->Omega_k;
   // Initially undetermined parameters - set to nan to trigger
   // problems if they are mistakenly used.
   if (isfinite(params->A_s)) {params->sigma8 = NAN;}
