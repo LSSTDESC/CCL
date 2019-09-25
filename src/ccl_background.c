@@ -37,7 +37,7 @@ static double h_over_h0(double a, ccl_cosmology * cosmo, int *status)
              Om_mass_nu
   */
   return sqrt(
-    (cosmo->params.Omega_m +
+    (cosmo->params.Omega_c + cosmo->params.Omega_b +
      cosmo->params.Omega_l *
        pow(a,-3*(cosmo->params.w0+cosmo->params.wa)) *
        exp(3*cosmo->params.wa*(a-1)) +
@@ -78,7 +78,8 @@ double ccl_omega_x(ccl_cosmology * cosmo, double a, ccl_species_x_label label, i
     case ccl_species_crit_label :
       return 1.;
     case ccl_species_m_label :
-      return cosmo->params.Omega_m / (a*a*a) / hnorm / hnorm;
+      return (cosmo->params.Omega_c + cosmo->params.Omega_b) / (a*a*a) / hnorm / hnorm + 
+	      OmNuh2 / (cosmo->params.h) / (cosmo->params.h) / hnorm / hnorm;
     case ccl_species_l_label :
       return
         cosmo->params.Omega_l *

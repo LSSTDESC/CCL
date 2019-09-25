@@ -1,6 +1,7 @@
 # Unreleased
 
 ## Python library
+- Added massive neutrinos to Omega_m (#680).
 - Chamged neutrino API options to be intuitive and consistent (#681).
 - Enabled CAMB (#677)
 - Fixed bug when normalizing the linear power spectrum using sigma8 and
@@ -37,6 +38,7 @@
 - Added support for modified gravity via mu / Sigma (scale-independent) parameterisation (#442)
 
 ## C library
+- Added massive neutrinos to Omega_m (#680).
 - Moved CLASS interface to python (#652).
 - Added OpenMP (#651).
 - Removed all benchmarks from C and kept only the C unit tests in C (#653).
