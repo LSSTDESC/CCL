@@ -61,7 +61,7 @@ import numpy as np
 # Create new Cosmology object with a given set of parameters. This keeps track
 # of previously-computed cosmological functions
 cosmo = ccl.Cosmology(
-    Omega_c=0.27, Omega_b=0.045, h=0.67, sigma_8=0.8, n_s=0.96, 
+    Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96, 
     transfer_function='bbks')
 
 # Define a simple binned galaxy number density curve as a function of redshift
