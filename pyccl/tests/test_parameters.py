@@ -86,10 +86,12 @@ def test_parameters_nu(m_nu_type):
             cosmo['m_nu'][2]**2 - cosmo['m_nu'][0]**2,
             ccl.physical_constants.DELTAM13_sq_pos, atol=1e-4, rtol=0)
 
+
 def test_parameters_nu_Nnurel_neg():
-    assert_raises(ValueError, ccl.Cosmology, Omega_c = 0.27, Omega_b = 0.049, 
-        h = 0.67, sigma8 = 0.8, n_s = 0.96, m_nu=[0.03, 0.02, 0.04], 
-        Neff = 3., m_nu_type = 'list')
+    assert_raises(ValueError, ccl.Cosmology, Omega_c=0.27, Omega_b=0.049,
+                  h=0.67, sigma8=0.8, n_s=0.96, m_nu=[0.03, 0.02, 0.04],
+                  Neff=3., m_nu_type='list')
+
 
 def test_parameters_nu_list():
     cosmo = ccl.Cosmology(
