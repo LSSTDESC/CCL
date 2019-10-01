@@ -236,21 +236,6 @@ emulator_neutrinos_types = {
     'equalize': lib.emu_equalize
 }
 
-"""m_nu_types = {
-    'list': lib.mnu_list,
-    'normal': lib.mnu_sum,
-    'inverted': lib.mnu_sum_inverted,
-    'equal': lib.mnu_sum_equal,
-}"""
-
-m_nu_types = {
-    'list': 0,
-    'normal': 1,
-    'inverted': 2,
-    'equal': 3,
-}
-
-
 class Cosmology(object):
     """A cosmology including parameters and associated data.
 
@@ -381,7 +366,6 @@ class Cosmology(object):
         # We have to make all of the C stuff that goes into a cosmology
         # and then we make the cosmology.
         self._build_parameters(**self._params_init_kwargs)
-
         self._build_config(**self._config_init_kwargs)
         self.cosmo = lib.cosmology_create(self._params, self._config)
 

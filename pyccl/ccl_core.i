@@ -33,7 +33,6 @@ ccl_parameters parameters_create_nu(
                         double bcm_etab, double bcm_ks, double mu_0,
                         double sigma_0, double* m_nu, int n_m, int* status)
 {
-    printf("n_m=%d\n", n_m);
     return ccl_parameters_create(
                         Omega_c, Omega_b, Omega_k, Neff, m_nu, n_m,
                         w0, wa, h, norm_pk, n_s, bcm_log10Mc, bcm_etab,
