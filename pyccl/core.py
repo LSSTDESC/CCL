@@ -556,7 +556,7 @@ class Cosmology(object):
             elif m_nu_type is None:
                 m_nu_type = 'list'  # False
             mnu_list = [0]*3
-            for i in range(0,3):
+            for i in range(0, 3):
                 mnu_list[i] = m_nu[i]
 
         else:
@@ -572,13 +572,14 @@ class Cosmology(object):
             m_nu = [m_nu]
             if (m_nu_type == 'normal'):
                 if (m_nu[0] < (np.sqrt(7.62E-5) + np.sqrt(2.55E-3))
-                    and (m_nu[0] > 1e-15)):
-                    raise ValueError("if m_nu_type is 'normal', we are using the "
-                                 "normal hierarchy and so m_nu must "
-                                 "be greater than (~)0.0592 (or zero)")
-                
+                        and (m_nu[0] > 1e-15)):
+                    raise ValueError("if m_nu_type is 'normal', we are "
+                                     "using the normal hierarchy and so "
+                                     "m_nu must be greater than (~)0.0592 "
+                                     "(or zero)")
+
                 # Split the sum into 3 masses under normal hierarchy.
-                if (m_nu[0]>1e-15):
+                if (m_nu[0] > 1e-15):
                     mnu_list = [0]*3
                     # This is a starting guess.
                     mnu_list[0] = 0.
@@ -599,13 +600,13 @@ class Cosmology(object):
 
             elif (m_nu_type == 'inverted'):
                 if (m_nu[0] < (np.sqrt(2.43e-3 - 7.62e-5) + np.sqrt(2.43e-3))
-                  and (m_nu[0] > 1e-15)):
-                    raise ValueError(
-                    "if m_nu_type is 'inverted', we are using the "
-                    "inverted hierarchy and so m_nu must "
-                    "be greater than (~)0.0978 (or zero)")
+                        and (m_nu[0] > 1e-15)):
+                    raise ValueError("if m_nu_type is 'inverted', we "
+                                     "are using the inverted hierarchy "
+                                     "and so m_nu must be greater than "
+                                     "(~)0.0978 (or zero)")
                 # Split the sum into 3 masses under inverted hierarchy.
-                if (m_nu[0]>1e-15):
+                if (m_nu[0] > 1e-15):
                     mnu_list = [0]*3
                     mnu_list[0] = 0.  # This is a starting guess.
                     mnu_list[1] = np.sqrt(2.43e-3 - 7.62E-5)
@@ -639,19 +640,19 @@ class Cosmology(object):
                 raise ValueError("Neff and m_nu must result in a number "
                                  "of relativistic neutrino species greater "
                                  "than or equal to zero.")
-    
+
         # Fill an array with the non-relativistic neutrino masses
-        if N_nu_mass>0:
-            mnu_final_list=[0]*N_nu_mass
+        if N_nu_mass > 0:
+            mnu_final_list = [0]*N_nu_mass
             relativistic = [0]*3
             for i in range(0, N_nu_mass):
-                for j in range(0,3):
-                    if (mnu_list[j]>0.00017 and relativistic[j]==0):
-				        relativistic[j]=1
-				        mnu_final_list[i] = mnu_list[j]
-				        break
+                for j in range(0, 3):
+                    if (mnu_list[j] > 0.00017 and relativistic[j] == 0):
+                        relativistic[j] = 1
+                        mnu_final_list[i] = mnu_list[j]
+                        break
         else:
-            mnu_final_list =[0.]
+            mnu_final_list = [0.]
 
         # Check if any compulsory parameters are not set
         compul = [Omega_c, Omega_b, Omega_k, w0, wa, h, norm_pk,
