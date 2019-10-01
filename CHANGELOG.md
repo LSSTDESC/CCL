@@ -1,7 +1,7 @@
 # Unreleased
 
 ## Python library
-- Made CAMB the default Boltzmann code (#).
+- Made CAMB the default Boltzmann code (#685).
 - Added massive neutrinos to Omega_m (#680).
 - Chamged neutrino API options to be intuitive and consistent (#681).
 - Enabled CAMB (#677)
