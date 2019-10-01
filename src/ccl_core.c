@@ -377,7 +377,7 @@ n_s: index of the primordial PS
  */
 ccl_parameters ccl_parameters_create(
                      double Omega_c, double Omega_b, double Omega_k,
-				     double Neff, double* mnu, ccl_mnu_convention mnu_type,
+				     double Neff, double* mnu, int n_mnu,
 				     double w0, double wa, double h, double norm_pk,
 				     double n_s, double bcm_log10Mc, double bcm_etab,
 				     double bcm_ks, double mu_0, double sigma_0,
@@ -399,8 +399,22 @@ ccl_parameters ccl_parameters_create(
   params.Omega_b = Omega_b;
   params.Omega_k = Omega_k;
   params.Neff = Neff;
+  params.m_nu = malloc(n_mnu*sizeof(double));
+  params.sum_nu_masses = 0.;
+  for(int i = 0; i<n_mnu; i=i+1){
+     params.m_nu[i] = mnu[i];
+     params.sum_nu_masses = params.sum_nu_masses + mnu[i];
+  }
 
-    double *mnu_in = NULL;
+  if(params.sum_nu_masses<1e-15){
+    params.N_nu_mass = 0;
+  }else{
+    params.N_nu_mass = n_mnu;
+   } 
+  
+     
+
+    /*double *mnu_in = NULL;
 
   // Decide how to split sum of neutrino masses between 3 neutrinos. We use
   // a Newton's rule numerical solution (thanks M. Jarvis).
@@ -533,7 +547,7 @@ ccl_parameters ccl_parameters_create(
 	  params.m_nu[0] = 0.;
   }
   // Free mnu_in
-  if (mnu_in != NULL) free(mnu_in);
+  if (mnu_in != NULL) free(mnu_in);*/
 
   // Dark Energy
   params.w0 = w0;
@@ -605,12 +619,11 @@ ccl_parameters ccl_parameters_create_flat_lcdm(double Omega_c, double Omega_b, d
   double *mnu;
   double mnuval = 0.;  // a pointer to the variable is not kept past the lifetime of this function
   mnu = &mnuval;
-  ccl_mnu_convention mnu_type = ccl_mnu_sum;
   double mu_0 = 0.;
   double sigma_0 = 0.;
 
   ccl_parameters params = ccl_parameters_create(Omega_c, Omega_b, Omega_k, Neff,
-						mnu, mnu_type, w0, wa, h, norm_pk, n_s, -1, -1, -1, mu_0, sigma_0, -1, NULL, NULL, status);
+						mnu, 0, w0, wa, h, norm_pk, n_s, -1, -1, -1, mu_0, sigma_0, -1, NULL, NULL, status);
   return params;
 
 }
@@ -836,7 +849,7 @@ ccl_parameters ccl_parameters_read_yaml(const char * filename, int *status) {
 
   ccl_parameters params = ccl_parameters_create(
     Omega_c, Omega_b, Omega_k,
-    Neff, mnu, ccl_mnu_list,
+    Neff, mnu, N_nu_mass,
     w0, wa, h, norm_pk,
     n_s, bcm_log10Mc, bcm_etab,
     bcm_ks, mu_0, sigma_0, nz_mgrowth, z_mgrowth,
