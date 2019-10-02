@@ -1,6 +1,7 @@
 # Unreleased
 
 ## Python library
+- Made CAMB the default Boltzmann code (#685).
 - Added check to ensure the number of relativistic neutrinos is positive (#684).
 - Added massive neutrinos to Omega_m (#680).
 - Chamged neutrino API options to be intuitive and consistent (#681).

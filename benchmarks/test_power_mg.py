@@ -21,7 +21,8 @@ def test_power_mg(model):
         mu_0=mu_0[model],
         sigma_0=sigma_0[model],
         Omega_k=0,
-        matter_power_spectrum='linear')
+        matter_power_spectrum='linear',
+        transfer_function='boltzmann_class')
 
     data = np.loadtxt("./benchmarks/data/model%d_pk_MG.dat" % model)
 
