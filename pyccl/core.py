@@ -236,13 +236,6 @@ emulator_neutrinos_types = {
     'equalize': lib.emu_equalize
 }
 
-m_nu_types = {
-    'list': lib.mnu_list,
-    'normal': lib.mnu_sum,
-    'inverted': lib.mnu_sum_inverted,
-    'equal': lib.mnu_sum_equal,
-}
-
 
 class Cosmology(object):
     """A cosmology including parameters and associated data.
@@ -551,7 +544,8 @@ class Cosmology(object):
         if norm_pk < 1e-5 and sigma8 is not None:
             raise ValueError("sigma8 must be greater than 1e-5.")
 
-        # Make sure the neutrino parameters are consistent.
+        # Make sure the neutrino parameters are consistent
+        # and if a sum is given for mass, split into three masses.
         if hasattr(m_nu, "__len__"):
             if (len(m_nu) != 3):
                 raise ValueError("m_nu must be a float or array-like object "
@@ -562,6 +556,9 @@ class Cosmology(object):
                     "of neutrino masses, only with a sum." % m_nu_type)
             elif m_nu_type is None:
                 m_nu_type = 'list'  # False
+            mnu_list = [0]*3
+            for i in range(0, 3):
+                mnu_list[i] = m_nu[i]
 
         else:
             try:
@@ -574,19 +571,89 @@ class Cosmology(object):
             if m_nu_type is None:
                 m_nu_type = 'normal'
             m_nu = [m_nu]
-            if (m_nu_type == 'normal'
-                    and m_nu[0] < (np.sqrt(7.62E-5) + np.sqrt(2.55E-3))
-                    and (m_nu[0] > 1e-15)):
-                raise ValueError("if m_nu_type is 'normal', we are using the "
-                                 "normal hierarchy and so m_nu must "
-                                 "be less than (~)0.0592")
-            elif (m_nu_type == 'inverted' and
-                  m_nu[0] < (np.sqrt(2.43e-3 - 7.62e-5) + np.sqrt(2.43e-3))
-                  and (m_nu[0] > 1e-15)):
-                raise ValueError(
-                    "if m_nu_type is 'inverted', we are using the "
-                    "inverted hierarchy and so m_nu must "
-                    "be less than (~)0.0978")
+            if (m_nu_type == 'normal'):
+                if (m_nu[0] < (np.sqrt(7.62E-5) + np.sqrt(2.55E-3))
+                        and (m_nu[0] > 1e-15)):
+                    raise ValueError("if m_nu_type is 'normal', we are "
+                                     "using the normal hierarchy and so "
+                                     "m_nu must be greater than (~)0.0592 "
+                                     "(or zero)")
+
+                # Split the sum into 3 masses under normal hierarchy.
+                if (m_nu[0] > 1e-15):
+                    mnu_list = [0]*3
+                    # This is a starting guess.
+                    mnu_list[0] = 0.
+                    mnu_list[1] = np.sqrt(7.62E-5)
+                    mnu_list[2] = np.sqrt(2.55E-3)
+                    sum_check = mnu_list[0] + mnu_list[1] + mnu_list[2]
+                    # This is the Newton's method
+                    while (np.abs(m_nu[0] - sum_check) > 1e-15):
+                        dsdm1 = (1. + mnu_list[0] / mnu_list[1]
+                                 + mnu_list[0] / mnu_list[2])
+                        mnu_list[0] = mnu_list[0] - (sum_check
+                                                     - m_nu[0]) / dsdm1
+                        mnu_list[1] = np.sqrt(mnu_list[0]*mnu_list[0]
+                                              + 7.62E-5)
+                        mnu_list[2] = np.sqrt(mnu_list[0]*mnu_list[0]
+                                              + 2.55E-3)
+                        sum_check = mnu_list[0] + mnu_list[1] + mnu_list[2]
+
+            elif (m_nu_type == 'inverted'):
+                if (m_nu[0] < (np.sqrt(2.43e-3 - 7.62e-5) + np.sqrt(2.43e-3))
+                        and (m_nu[0] > 1e-15)):
+                    raise ValueError("if m_nu_type is 'inverted', we "
+                                     "are using the inverted hierarchy "
+                                     "and so m_nu must be greater than "
+                                     "(~)0.0978 (or zero)")
+                # Split the sum into 3 masses under inverted hierarchy.
+                if (m_nu[0] > 1e-15):
+                    mnu_list = [0]*3
+                    mnu_list[0] = 0.  # This is a starting guess.
+                    mnu_list[1] = np.sqrt(2.43e-3 - 7.62E-5)
+                    mnu_list[2] = np.sqrt(2.43e-3)
+                    sum_check = mnu_list[0] + mnu_list[1] + mnu_list[2]
+                    # This is the Newton's method
+                    while (np.abs(m_nu[0] - sum_check) > 1e-15):
+                        dsdm1 = (1. + (mnu_list[0] / mnu_list[1])
+                                 + (mnu_list[0] / mnu_list[2]))
+                        mnu_list[0] = mnu_list[0] - (sum_check
+                                                     - m_nu[0]) / dsdm1
+                        mnu_list[1] = np.sqrt(mnu_list[0]*mnu_list[0]
+                                              + 7.62E-5)
+                        mnu_list[2] = np.sqrt(mnu_list[0]*mnu_list[0]
+                                              - 2.43e-3)
+                        sum_check = mnu_list[0] + mnu_list[1] + mnu_list[2]
+            elif (m_nu_type == 'equal'):
+                mnu_list = [0]*3
+                mnu_list[0] = m_nu[0]/3.
+                mnu_list[1] = m_nu[0]/3.
+                mnu_list[2] = m_nu[0]/3.
+
+        # Check which of the neutrino species are non-relativistic today
+        N_nu_mass = 0
+        if (np.abs(np.amax(m_nu) > 1e-15)):
+            for i in range(0, 3):
+                if (mnu_list[i] > 0.00017):  # Lesgourges et al. 2012
+                    N_nu_mass = N_nu_mass + 1
+            N_nu_rel = Neff - (N_nu_mass * 0.71611**4 * (4./11.)**(-4./3.))
+            if N_nu_rel < 0.:
+                raise ValueError("Neff and m_nu must result in a number "
+                                 "of relativistic neutrino species greater "
+                                 "than or equal to zero.")
+
+        # Fill an array with the non-relativistic neutrino masses
+        if N_nu_mass > 0:
+            mnu_final_list = [0]*N_nu_mass
+            relativistic = [0]*3
+            for i in range(0, N_nu_mass):
+                for j in range(0, 3):
+                    if (mnu_list[j] > 0.00017 and relativistic[j] == 0):
+                        relativistic[j] = 1
+                        mnu_final_list[i] = mnu_list[j]
+                        break
+        else:
+            mnu_final_list = [0.]
 
         # Check if any compulsory parameters are not set
         compul = [Omega_c, Omega_b, Omega_k, w0, wa, h, norm_pk,
@@ -608,21 +675,18 @@ class Cosmology(object):
             status = 0
             if nz_mg == -1:
                 # Create ccl_parameters without modified growth
-
                 self._params, status = lib.parameters_create_nu(
                    Omega_c, Omega_b, Omega_k, Neff,
                    w0, wa, h, norm_pk,
                    n_s, bcm_log10Mc, bcm_etab, bcm_ks,
-                   mu_0, sigma_0, m_nu_types[m_nu_type],
-                   m_nu, status)
+                   mu_0, sigma_0, mnu_final_list, status)
             else:
                 # Create ccl_parameters with modified growth arrays
                 self._params, status = lib.parameters_create_nu_vec(
                    Omega_c, Omega_b, Omega_k, Neff,
                    w0, wa, h, norm_pk,
                    n_s, bcm_log10Mc, bcm_etab, bcm_ks,
-                   mu_0, sigma_0, z_mg, df_mg,
-                   m_nu_types[m_nu_type], m_nu, status)
+                   mu_0, sigma_0, z_mg, df_mg, mnu_final_list, status)
             check(status)
         finally:
             lib.cvar.constants.T_CMB = T_CMB_old
@@ -752,7 +816,6 @@ class Cosmology(object):
         """Compute the growth function."""
         if self.has_growth:
             return
-
         if self['N_nu_mass'] > 0:
             warnings.warn(
                 "CCL does not properly compute the linear growth rate in "
