@@ -312,7 +312,7 @@ class Cosmology(object):
             modified growth scenarios.
         z_mg (array_like, optional): Array of redshifts corresponding to df_mg.
         transfer_function (:obj:`str`, optional): The transfer function to
-            use. Defaults to 'boltzmann_class'.
+            use. Defaults to 'boltzmann_camb'.
         matter_power_spectrum (:obj:`str`, optional): The matter power
             spectrum to use. Defaults to 'halofit'.
         baryons_power_spectrum (:obj:`str`, optional): The correction from
@@ -336,7 +336,7 @@ class Cosmology(object):
             w0=-1., wa=0., T_CMB=None,
             bcm_log10Mc=np.log10(1.2e14), bcm_etab=0.5,
             bcm_ks=55., mu_0=0., sigma_0=0., z_mg=None, df_mg=None,
-            transfer_function='boltzmann_class',
+            transfer_function='boltzmann_camb',
             matter_power_spectrum='halofit',
             baryons_power_spectrum='nobaryons',
             mass_function='tinker10',
