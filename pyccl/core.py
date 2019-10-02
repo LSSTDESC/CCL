@@ -236,6 +236,7 @@ emulator_neutrinos_types = {
     'equalize': lib.emu_equalize
 }
 
+
 class Cosmology(object):
     """A cosmology including parameters and associated data.
 

@@ -118,6 +118,7 @@ def test_swig_core():
         [0.02, 0.01, 0.2],
         status)
 
+
 def test_swig_correlation():
     status = 0
     assert_raises(
