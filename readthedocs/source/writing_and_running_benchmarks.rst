@@ -29,7 +29,9 @@ Writing a Benchmark
 Benchmarks in CCL follow the ``pytest`` conventions for the CCL unit tests,
 but are located in the ``benchmarks/`` directory. Any data needed for the
 benchmark should be added to the ``benchmarks/data`` directory. Code to
-produce the benchmark data can be put in ``benchmarks/data/code``.
+produce the benchmark data can be put in ``benchmarks/data/code``. If it cannot
+be included in the repository, then a link on the `wiki <https://github.com/LSSTDESC/CCL/wiki/Benchmarks>`_
+is acceptable.
 
 The benchmark itself should read the data in the benchmarks data directory and
 then compare to the same computation done in CCL. Here is an example benchmark

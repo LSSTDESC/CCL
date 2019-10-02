@@ -134,8 +134,8 @@ Travis-CI is a continuous integration service that reads the file ``.travis.yml`
 file in the repository and then runs the benchmarks/unit tests. More details on
 Travis-CI can be found here: https://docs.travis-ci.com/user/getting-started/.
 
-Every time you make a commit, Travis-CI will automatically try to build the
-libraries with your new changes and run the benchmakr/unit tests. You can check the
+Every time you push a commit, Travis-CI will automatically try to build the
+libraries with your new changes and run the benchmark/unit tests. You can check the
 status of your builds by following the links from the pull request page. If your
 build errors or fails, you can scroll through the log to find out what went wrong.
 Warnings from ``flake8`` will result in the tests not passing. If your additions

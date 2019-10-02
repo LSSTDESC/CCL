@@ -65,7 +65,8 @@ If you are working in a ``conda`` environment, then ``CAMB`` is available via
    $ conda install -c conda-forge camb
 
 An installation with ``pip`` should work as well. See the `CAMB <https://github.com/cmbant/CAMB>`_
-repo for more details.
+repo for more details. Note that if you installed CCL with ``conda``, ``camb``
+should already be in your environment.
 
 
 .. _getting-cmake:

@@ -61,7 +61,7 @@ import numpy as np
 # Create new Cosmology object with a given set of parameters. This keeps track
 # of previously-computed cosmological functions
 cosmo = ccl.Cosmology(
-    Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96, 
+    Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96,
     transfer_function='bbks')
 
 # Define a simple binned galaxy number density curve as a function of redshift
@@ -97,6 +97,10 @@ started, but definitely before any publication or posting of the work to the arX
 For free use of the `CLASS` library, the `CLASS` developers require that the `CLASS`
 paper be cited: CLASS II: Approximation schemes, D. Blas, J. Lesgourgues, T. Tram, arXiv:1104.2933, JCAP 1107 (2011) 034.
 The `CLASS` repository can be found in http://class-code.net.
+
+The `CAMB` developers have released `CAMB` under the LGPL license with a few
+additional restrictions. Please read their [LICENSE](https://github.com/cmbant/CAMB/blob/master/LICENCE.txt)
+for more information.
 
 # Contact
 

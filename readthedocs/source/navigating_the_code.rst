@@ -43,7 +43,7 @@ for various reasons.
 - ``ccl_musigma.c``: code to properly normalize input linear power spectra for the
   ``mu-Sigma`` modified gravity model
 - ``ccl_cls.c``: code to compute angular power spectra from 3-d power spectra
-- ``ccl_massfunct.c``: code for the halo mass function and halo bias models, also
+- ``ccl_massfunc.c``: code for the halo mass function and halo bias models, also
   contains code to spline the linear power spectrum variance in top-hat windows
   ``sigma(R)``
 - `ccl_neutrinos.c``: code to compute the neutrino masses from their cosmological

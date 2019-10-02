@@ -130,7 +130,7 @@ accuracy for integration by executing
 ``c = Cosmology(...); c.cosmo.gsl_params.INTEGRATION_EPSREL = 1e-5``. The
 default values for these parameters are located in ``src/ccl_core.c``.
 
-The intrnal splines are controlled by the following
+The internal splines are controlled by the following
 parameters.
 
   - A_SPLINE_NLOG: the number of logarithmically spaced bins between
@@ -220,7 +220,9 @@ The values of physical constants are set globally. These can be changed by
 assigning a new value to the attributes of ``pyccl.physical_constants``.
 The following constants are defined and their default values are located
 in ``src/ccl_core.c``. Note that the neutrino mass splittings are taken
-from Lesgourgues & Pastor (2012; 1212.6154).
+from Lesgourgues & Pastor (2012; 1212.6154). Also, see the
+`CCL note <https://github.com/LSSTDESC/CCL/blob/master/doc/0000-ccl_note/0000-ccl_note.pdf>`_
+for a discussion of the values of these constants from different sources.
 
 basic physical constants
 
