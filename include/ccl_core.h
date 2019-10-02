@@ -306,15 +306,6 @@ typedef struct ccl_cosmology {
   // other flags?
 } ccl_cosmology;
 
-// Label for whether you are passing a pointer to a sum of neutrino masses or a pointer to a list of 3 masses.
-typedef enum ccl_mnu_convention {
-  ccl_mnu_list = 0,   // you pass a list of three neutrino masses
-  ccl_mnu_sum = 1,  // sum, defaults to splitting with normal hierarchy
-  ccl_mnu_sum_inverted = 2, //sum, split with inverted hierarchy
-  ccl_mnu_sum_equal = 3, //sum, split into equal masses
-  // More options could be added here
-} ccl_mnu_convention;
-
 // Initialization and life cycle of objects
 ccl_cosmology * ccl_cosmology_create(ccl_parameters params, ccl_configuration config);
 
@@ -346,7 +337,7 @@ void ccl_cosmology_set_status_message(ccl_cosmology * cosmo, const char * status
  * @return void
  */
 ccl_parameters ccl_parameters_create(double Omega_c, double Omega_b, double Omega_k,
-				     double Neff, double* mnu, ccl_mnu_convention mnu_type,
+				     double Neff, double* mnu, int n_mnu,
 				     double w0, double wa, double h, double norm_pk,
 				     double n_s, double bcm_log10Mc, double bcm_etab, double bcm_ks,
 				     double mu_0, double sigma_0, int nz_mgrowth, double *zarr_mgrowth,
