@@ -7,9 +7,9 @@ Submodules
 .. toctree::
 
    pyccl.background
-   pyccl.ccllib
+   pyccl.bcm
+   pyccl.boltzmann
    pyccl.cls
-   pyccl.constants
    pyccl.core
    pyccl.correlation
    pyccl.errors
