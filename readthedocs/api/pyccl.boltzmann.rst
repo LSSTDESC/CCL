@@ -1,7 +1,7 @@
-pyccl.constants module
+pyccl.boltzmann module
 ======================
 
-.. automodule:: pyccl.constants
+.. automodule:: pyccl.boltzmann
    :members:
    :undoc-members:
    :show-inheritance:
