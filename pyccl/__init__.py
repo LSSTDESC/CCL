@@ -60,6 +60,16 @@ from .haloprofile import nfw_profile_3d, einasto_profile_3d, hernquist_profile_3
 # Specific to massive neutrinos
 from .neutrinos import Omeganuh2, nu_masses
 
+# Halo concentration
+from .concentration import (
+    concentration_duffy08_200mat,
+    concentration_duffy08_200crit,
+    concentration_bhattacharya11_200mat,
+    concentration_bhattacharya11_200crit)
+
+# Halo mass definitions
+from .massdef import HMDef, HMDef200mat, HMDef200crit
+
 # Expose function to toggle debug mode
 from .pyutils import debug_mode
 

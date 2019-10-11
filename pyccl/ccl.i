@@ -51,6 +51,7 @@ from .errors import CCLError
 %include "ccl_neutrinos.i"
 %include "ccl_halomod.i"
 %include "ccl_haloprofile.i"
+%include "ccl_mass_conversion.i"
 
 /* list header files not yet having a .i file here */
 %include "../include/ccl_config.h"
