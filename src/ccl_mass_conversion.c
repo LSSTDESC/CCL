@@ -90,7 +90,8 @@ static int get_new_concentration_single(double d_factor, double c_old,
   return status;
 }
 
-void ccl_get_new_concentration(double delta_old, int nc, double c_old[],
+void ccl_get_new_concentration(ccl_cosmology *cosmo,
+			       double delta_old, int nc, double c_old[],
 			       double delta_new, double c_new[],int *status)
 {
   if(nc<=0)
@@ -102,7 +103,7 @@ void ccl_get_new_concentration(double delta_old, int nc, double c_old[],
     double c_new_h;
     st=get_new_concentration_single(d_factor, c_old[ii], &(c_new[ii]), c_old[ii]);
     if(st!=GSL_SUCCESS) {
-      *status=blah;
+      *status=CCL_ERROR_ROOT;
       ccl_cosmology_set_status_message(cosmo,
 				       "ccl_mass_conversion.c: NR solver failed to find a root\n");
       return;
