@@ -24,7 +24,8 @@ def get_new_concentration_py(cosmo, c_old, Delta_old, Delta_new):
     """
     status = 0
     c_old_use = np.atleast_1d(c_old)
-    c_new, status = lib.get_new_concentration_vec(cosmo, Delta_old, c_old_use,
+    c_new, status = lib.get_new_concentration_vec(cosmo.cosmo,
+                                                  Delta_old, c_old_use,
                                                   Delta_new, c_old_use.size,
                                                   status)
     if np.isscalar(c_old):
@@ -138,7 +139,7 @@ class HMDef(object):
                 c_this = self.get_concentration(cosmo, M, a)
                 R_this = self.get_radius(cosmo, M, a)
                 D_new = m_def_other.Delta * omega_x(cosmo, a, m_def_other.rho_type)
-                c_new = get_new_concentration_py(cosmo.cosmo, c_this, D_this, D_new)
+                c_new = get_new_concentration_py(cosmo, c_this, D_this, D_new)
                 R_new = c_new * R_this / c_this
                 return m_def_other.get_mass(cosmo, R_new, a)
 

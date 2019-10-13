@@ -9,11 +9,19 @@ cosmo = cosmology.setCosmology('myCosmo', params)
 Ms = np.array([1E12, 1E13, 1E14])
 Rs_200m = mass_so.M_to_R(Ms * h, 0.0, '200m')/h*0.001
 Rs_500c = mass_so.M_to_R(Ms * h, 0.0, '500c')/h*0.001
-cs_200m = concentration.concentration(Ms * h, '200m',
-                                      0.0, model = 'duffy08')
-Ms_500c, _, _ = mass_defs.changeMassDefinition(Ms * h, cs_200m,
+cs_200m_d = concentration.concentration(Ms * h, '200m',
+                                        0.0, model = 'duffy08')
+cs_200m_b = concentration.concentration(Ms * h, '200m',
+                                        0.0, model = 'bhattacharya13')
+cs_200c_d = concentration.concentration(Ms * h, '200c',
+                                        0.0, model = 'duffy08')
+cs_200c_b = concentration.concentration(Ms * h, '200c',
+                                        0.0, model = 'bhattacharya13')
+Ms_500c, _, _ = mass_defs.changeMassDefinition(Ms * h, cs_200m_d,
                                                0., '200m', '500c')
 Ms_500c /= h
 
 np.savetxt("../mdef_bm.txt",
-           np.transpose([Ms, Rs_200m, Rs_500c, cs_200m, Ms_500c]))
+           np.transpose([Ms, Rs_200m, Rs_500c, Ms_500c]))
+np.savetxt("../conc_bm.txt",
+           np.transpose([Ms, cs_200m_d, cs_200c_d, cs_200m_b, cs_200c_b]))
