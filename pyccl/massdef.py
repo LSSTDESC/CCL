@@ -109,7 +109,7 @@ class HMDef(object):
         Returns:
             float or array_like: halo concentration.
         """
-         if self.concentration is None:
+        if self.concentration is None:
             raise RuntimeError("This mass definition doesn't have an associated"
                                "c(M) relation")
         else:
