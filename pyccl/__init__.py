@@ -69,7 +69,13 @@ from .concentration import (
 
 # Halo mass definitions
 from .massdef import HMDef, HMDef200mat, HMDef200crit
-from .mfunc import MassFunc, MassFuncShethTormen
+from .hmfunc import (
+    MassFunc, MassFuncShethTormen,
+    MassFuncTinker08, MassFuncTinker10,
+    MassFuncWatson, MassFuncAngulo)
+from .hbias import (
+    HBiasFunc, HBiasFuncShethTormen,
+    HBiasFuncTinker10)
 
 # Expose function to toggle debug mode
 from .pyutils import debug_mode
