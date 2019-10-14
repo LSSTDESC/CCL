@@ -58,9 +58,14 @@ class HBiasFuncShethTormen(HBiasFunc):
         self.p = 0.3;
         self.a = 0.707;
 
+    def _check_mdef(self, mdef):
+        if mdef.Delta != 'fof':
+            return True
+        return False
+
     def get_bsigma(self, cosmo, sigM, a):
         status = 0
-        delta_c, status = lib.deltac_NakamuraSuto(cosmo.cosmo, a, status)
+        delta_c, status = lib.dc_NakamuraSuto(cosmo.cosmo, a, status)
         check(status);
 
         nu = delta_c/sigM

@@ -97,18 +97,5 @@ void dlnsigM_dlogM_vec(ccl_cosmology * cosmo,
 
 %}
 
-%feature("pythonprepend") %{ %}
-%inline %{
-double deltac_NakamuraSuto(ccl_cosmology *cosmo, double a, int *status)
-{
-  double Om_mz = ccl_omega_x(cosmo, a, ccl_species_m_label, status);
-  double dc0 = (3./20.)*pow(12.*M_PI,2./3.);
-  double dc = dc0*(1.+0.012299*log10(Om_mz));
-
-  return dc;
-}
-
-%}
-
 /* The directive gets carried between files, so we reset it at the end. */
 %feature("pythonprepend") %{ %}

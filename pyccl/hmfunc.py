@@ -36,7 +36,7 @@ class MassFunc(object):
         if self._check_mdef(mass_def):
             raise ValueError("Mass function " + name +
                              " is not compatible with mass definition" +
-                             " Delta = %.1lf, " % (mass_def.Delta) +
+                             " Delta = %s, " % (mass_def.Delta) +
                              " rho = " + mass_def.rho_type)
         self.mdef = mass_def
         self._setup(cosmo)
@@ -92,9 +92,14 @@ class MassFuncShethTormen(MassFunc):
         self.p = 0.3;
         self.a = 0.707;
 
+    def _check_mdef(self, mdef):
+        if mdef.Delta!='fof':
+            return True
+        return False
+
     def get_fsigma(self, cosmo, sigM, a):
         status = 0
-        delta_c, status = lib.deltac_NakamuraSuto(cosmo.cosmo, a, status)
+        delta_c, status = lib.dc_NakamuraSuto(cosmo.cosmo, a, status)
         check(status);
 
         nu = delta_c/sigM

@@ -65,7 +65,7 @@ from .concentration import (
     concentration_bhattacharya11_200crit)
 
 # Halo mass definitions
-from .massdef import massfunc_m2r, HMDef, HMDef200mat, HMDef200crit
+from .massdef import mass2radius_lagrangian, HMDef, HMDef200mat, HMDef200crit
 from .hmfunc import (
     sigmaM, MassFunc, MassFuncShethTormen,
     MassFuncTinker08, MassFuncTinker10,

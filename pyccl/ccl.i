@@ -45,7 +45,6 @@ from .errors import CCLError
 %include "ccl_power.i"
 %include "ccl_bcm.i"
 %include "ccl_correlation.i"
-%include "ccl_massfunc.i"
 %include "ccl_tracers.i"
 %include "ccl_cls.i"
 %include "ccl_neutrinos.i"

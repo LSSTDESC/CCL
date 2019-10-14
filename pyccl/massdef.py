@@ -5,7 +5,7 @@ from .background import species_types, rho_x, omega_x
 import numpy as np
 
 
-def massfunc_m2r(cosmo, M):
+def mass2radius_lagrangian(cosmo, M):
     return (M / (4.18879020479 * rho_x(cosmo, a, self.rho_type)))**(1./3.)
 
 
@@ -38,6 +38,7 @@ def get_new_concentration_py(cosmo, c_old, Delta_old, Delta_new):
     check(status)
     return c_new
 
+
 class HMDef(object):
     """Halo mass definition. Halo masses are defined in terms of an overdensity
     parameter Delta and an associated density X (either the matter density or
@@ -48,7 +49,8 @@ class HMDef(object):
     if a concentration-mass relation is provided.
 
     Args:
-        Delta (float): overdensity parameter.
+        Delta (float): overdensity parameter. Pass 'vir' if using virial
+            overdensity.
         rho_type (string): either 'critical' or 'matter'.
         c_m_relation (function, optional): concentration-mass relation.
             Provided as a function with signature c(cosmo, M, a), where
@@ -73,6 +75,17 @@ class HMDef(object):
     def __eq__(self, other):
         return (self.Delta == other.Delta) and (self.rho_type == other.rho_type)
 
+    def get_Delta(self, cosmo, a):
+        if self.Delta == 'vir':
+            status = 0
+            D, status = lib.Dv_BryanNorman(cosmo.cosmo, a, status)
+            return D
+        elif self.Delta == 'fof':
+            raise ValueError("FoF masses don't have an associated overdensity."
+                             "Nor can they be translated into other masses")
+        else:
+            return self.Delta
+
     def get_mass(self, cosmo, R, a):
         """ Translates a halo radius into a mass
             M =  (4 * pi / 3) * rho_X * Delta * R^3
@@ -86,7 +99,8 @@ class HMDef(object):
         Returns:
             float or array_like: halo mass in units of M_sun.
         """
-        return 4.18879020479 * rho_x(cosmo, a, self.rho_type) * self.Delta * R**3
+        Delta = self.get_Delta(cosmo, a)
+        return 4.18879020479 * rho_x(cosmo, a, self.rho_type) * Delta * R**3
 
     def get_radius(self, cosmo, M, a): 
         """ Translates a halo mass into a radius
@@ -101,7 +115,8 @@ class HMDef(object):
             float or array_like: halo radius in units of Mpc (physical, not
                 comoving).
         """
-        return (M / (4.18879020479 * self.Delta * rho_x(cosmo, a, self.rho_type)))**(1./3.)
+        Delta = self.get_Delta(cosmo, a)
+        return (M / (4.18879020479 * Delta * rho_x(cosmo, a, self.rho_type)))**(1./3.)
 
     def get_concentration(self, cosmo, M, a):
         """ Returns concentration for this mass definition.
@@ -139,10 +154,10 @@ class HMDef(object):
                 raise RuntimeError("This mass definition doesn't have an associated"
                                    "c(M) relation")
             else:
-                D_this = self.Delta * omega_x(cosmo, a, self.rho_type)
+                D_this = self.get_Delta(cosmo, a) * omega_x(cosmo, a, self.rho_type)
                 c_this = self.get_concentration(cosmo, M, a)
                 R_this = self.get_radius(cosmo, M, a)
-                D_new = m_def_other.Delta * omega_x(cosmo, a, m_def_other.rho_type)
+                D_new = m_def_other.get_Delta(cosmo,a a) * omega_x(cosmo, a, m_def_other.rho_type)
                 c_new = get_new_concentration_py(cosmo, c_this, D_this, D_new)
                 R_new = c_new * R_this / c_this
                 return m_def_other.get_mass(cosmo, R_new, a)

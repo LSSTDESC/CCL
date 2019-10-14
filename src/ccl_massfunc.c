@@ -41,7 +41,6 @@ double Dv_BryanNorman(ccl_cosmology *cosmo, double a, int *status){
   double Dv = (Dv0+82.*x-39.*pow(x,2))/Om_mz;
 
   return Dv;
-
 }
 
 /*----- ROUTINE: r_delta -----
