@@ -5,6 +5,7 @@ import numpy as np
 
 class MassFunc(object):
     def __init__(self, name, cosmo, mass_def):
+        cosmo.compute_sigma()
         self.name = name
         if self._check_mdef(mass_def):
             raise ValueError("Mass function " + name +
