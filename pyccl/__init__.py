@@ -34,9 +34,6 @@ from .power import linear_matter_power, nonlin_matter_power, sigmaR, \
 # BCM stuff
 from .bcm import bcm_model_fka
 
-# Halo mass function
-from .massfunction import massfunc, massfunc_m2r, sigmaM, halo_bias
-
 # Cl's and tracers
 from .tracers import Tracer, NumberCountsTracer, WeakLensingTracer, CMBLensingTracer, \
     get_density_kernel, get_kappa_kernel, get_lensing_kernel
@@ -68,9 +65,9 @@ from .concentration import (
     concentration_bhattacharya11_200crit)
 
 # Halo mass definitions
-from .massdef import HMDef, HMDef200mat, HMDef200crit
+from .massdef import massfunc_m2r, HMDef, HMDef200mat, HMDef200crit
 from .hmfunc import (
-    MassFunc, MassFuncShethTormen,
+    sigmaM, MassFunc, MassFuncShethTormen,
     MassFuncTinker08, MassFuncTinker10,
     MassFuncWatson, MassFuncAngulo)
 from .hbias import (

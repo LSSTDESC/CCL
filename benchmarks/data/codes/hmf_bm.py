@@ -1,6 +1,6 @@
 import numpy as np
 from colossus.cosmology import cosmology
-from colossus.lss import mass_function
+from colossus.lss import mass_function, bias
 
 h = 0.7
 my_cosmo = {'flat': True, 'H0': 100 * h, 'Om0': 0.30, 'Ob0': 0.05, 'sigma8': 0.8, 'ns': 0.96}
@@ -21,3 +21,17 @@ def get_mfs(model, mdef):
 
 get_mfs('tinker08', '200m')
 get_mfs('sheth99', 'fof')
+
+def get_hbs(model, mdef):
+    m_arr=np.geomspace(1E11,1E15,9) 
+    z_arr=np.array([0., 0.5, 1.])
+    d_out = []
+    d_out.append(m_arr)
+    normfac = h**3 * np.log(10)
+    for z in z_arr:
+        d_out.append(bias.haloBias(m_arr * h, z = z,
+                                   mdef = mdef,
+                                   model = model))
+    np.savetxt("../hbf_" + model + ".txt", np.transpose(d_out))
+
+get_hbs('tinker10', '200m')

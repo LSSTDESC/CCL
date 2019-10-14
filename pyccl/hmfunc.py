@@ -3,6 +3,32 @@ from .core import check
 from .background import species_types, rho_x, omega_x
 import numpy as np
 
+
+def sigmaM(cosmo, M, a):
+    """Root mean squared variance for the given halo mass of the linear power
+    spectrum; Msun.
+
+    Args:
+        cosmo (:obj:`Cosmology`): Cosmological parameters.
+        M (float or array_like): Halo masses; Msun.
+        a (float): scale factor.
+
+    Returns:
+        float or array_like: RMS variance of halo mass.
+    """
+    cosmo.compute_sigma()
+
+    # sigma(M)
+    logM = np.log10(np.atleast_1d(M))
+    status = 0
+    sigM, status = lib.sigM_vec(cosmo.cosmo, a, logM,
+                                len(logM), status)
+    check(status)
+    if np.isscalar(M):
+        sigM = sigM[0]
+    return sigM
+
+
 class MassFunc(object):
     def __init__(self, name, cosmo, mass_def):
         cosmo.compute_sigma()

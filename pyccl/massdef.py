@@ -5,6 +5,10 @@ from .background import species_types, rho_x, omega_x
 import numpy as np
 
 
+def massfunc_m2r(cosmo, M):
+    return (M / (4.18879020479 * rho_x(cosmo, a, self.rho_type)))**(1./3.)
+
+
 def get_new_concentration_py(cosmo, c_old, Delta_old, Delta_new):
     """ Computes the concentration parameter for a different mass definition.
     This is done assuming an NFW profile. The output concentration `c_new` is
