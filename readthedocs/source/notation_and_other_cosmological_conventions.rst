@@ -65,24 +65,24 @@ quantities (e.g., the transfer function). The various options are as follows.
   - 'eisenstein_hu': the Eisenstein and Hu (1998) fitting function
   - 'bbks': the BBKS approximation
   - 'boltzmann_class': use CLASS to compute the transfer function
-  - 'boltzmann_camb': use CAMB to compute the transfer function
+  - 'boltzmann_camb': use CAMB to compute the transfer function (default)
 
 ``matter_power_spectrum`` options
 
   - 'halo_model': use a halo model
-  - 'halofit': use HALOFIT
+  - 'halofit': use HALOFIT (default)
   - 'linear': neglect non-linear power spectrum contributions
   - 'emu': use the Cosmic Emu
 
 ``baryons_power_spectrum`` options
 
-  - 'nobaryons': neglect baryonic contributions to the power spectrum
+  - 'nobaryons': neglect baryonic contributions to the power spectrum (default)
   - 'bcm': use the baryonic correction model
 
 ``mass_function`` options
 
   - 'tinker': the Tinker et al. (2008) mass function
-  - 'tinker10': the Tinker et al. (2010) mass function
+  - 'tinker10': the Tinker et al. (2010) mass function (default)
   - 'watson': the Watson et al. mass function
   - 'angulo': the Angulo et al. mass function
   - 'shethtormen': the Sheth and Tormen mass function
@@ -90,7 +90,7 @@ quantities (e.g., the transfer function). The various options are as follows.
 ``halo_concentration`` options
 
   - 'bhattacharya2011': Bhattacharya et al. (2011) relation
-  - 'duffy2008': Duffy et al. (2008) relation
+  - 'duffy2008': Duffy et al. (2008) relation (default)
   - 'constant_concentration': use a constant concentration
 
 .. _mnutype:
@@ -102,7 +102,7 @@ quantities (e.g., the transfer function). The various options are as follows.
 
   - 'list': specify each mass yourself in eV
   - 'normal': use the normal hierarchy to convert total mass to individual
-    masses
+    masses (default)
   - 'inverted': use the inverted hierarchy to convert total mass to
     individual masses
   - 'equal': assume equal masses when converting the total mass to
@@ -113,7 +113,7 @@ quantities (e.g., the transfer function). The various options are as follows.
   This parameter specifies how to handle inconsistencies in the treatment of
   neutrinos between the Cosmic Emu (equal masses) and other models.
 
-  - 'strict': fail unless things are absolutely consistent
+  - 'strict': fail unless things are absolutely consistent (default)
   - 'equalize': redistribute the total mass equaly before using the Cosmic
     Emu. This option may result in slight internal inconsistencies in the
     physical model assumed for neutrinos.
