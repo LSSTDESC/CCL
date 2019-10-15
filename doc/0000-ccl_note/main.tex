@@ -407,8 +407,15 @@ to within a few percent), and so should not be used to derive
 precise cosmological constraints.
 
 \subsubsection{CLASS}
-The fiducial configuration calls the {\tt CLASS} software \citep{class} within
-\ccl to obtain the linear matter power spectrum at given redshift. On
+\ccl can call the {\tt CLASS} software package \citep{class}
+to obtain the linear matter power spectrum at given redshift. On
+initializing the cosmology object, we construct a bi-dimensional spline in $k$
+and the scale-factor which is then evaluated by the relevant routines to obtain
+the matter power spectrum at the desired wavenumber and redshift.
+
+\subsubsection{CAMB}
+The fiducial configuration calls the {\tt CAMB} package \citep{camb}
+to obtain the linear matter power spectrum at given redshift. On
 initializing the cosmology object, we construct a bi-dimensional spline in $k$
 and the scale-factor which is then evaluated by the relevant routines to obtain
 the matter power spectrum at the desired wavenumber and redshift.
