@@ -45,7 +45,7 @@ and installation instructions.
 `CCL` is available as a Python package through PyPi or conda. To install, simply run:
 
 ```
-$ conda -c conda-forge install pyccl
+$ conda install -c conda-forge pyccl
 ```
 
 or
