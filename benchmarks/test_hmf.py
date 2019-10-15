@@ -10,25 +10,44 @@ cosmo = ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, Omega_g=0, Omega_k=0,
 # Read data
 dirdat = os.path.dirname(__file__) + '/data/'
 d_hmf = {}
-for model in ['tinker08', 'sheth99']:
+for model in ['press74', 'jenkins01', 'tinker08', 'sheth99']:
     d_hmf[model] = np.loadtxt(dirdat + 'hmf_' + model + '.txt',
                               unpack=True)
-# Set mass definition
-hmd_200m = ccl.HMDef200mat()
+# Redshifts
 zs = np.array([0., 0.5, 1.])
 
 def test_hmf_tinker08():
-    mf=ccl.MassFuncTinker08(cosmo,hmd_200m)
+    hmd = ccl.HMDef200mat()
+    mf=ccl.MassFuncTinker08(cosmo,hmd)
     m = d_hmf['tinker08'][0]
     for iz, z in enumerate(zs):
         nm_d = d_hmf['tinker08'][iz+1]
         nm_h = mf.get_mass_function(cosmo, m, 1./(1+z))
         assert np.all(np.fabs(nm_h/nm_d-1) < 0.01)
 
+def test_hmf_press74():
+    hmd = ccl.HMDef('fof', 'matter')
+    mf=ccl.MassFuncPress74(cosmo,hmd)
+    m = d_hmf['press74'][0]
+    for iz, z in enumerate(zs):
+        nm_d = d_hmf['press74'][iz+1]
+        nm_h = mf.get_mass_function(cosmo, m, 1./(1+z))
+        assert np.all(np.fabs(nm_h/nm_d-1) < 0.05)
+
 def test_hmf_sheth99():
-    mf=ccl.MassFuncShethTormen(cosmo,hmd_200m)
+    hmd = ccl.HMDef('fof', 'matter')
+    mf=ccl.MassFuncSheth99(cosmo,hmd)
     m = d_hmf['sheth99'][0]
     for iz, z in enumerate(zs):
         nm_d = d_hmf['sheth99'][iz+1]
         nm_h = mf.get_mass_function(cosmo, m, 1./(1+z))
-        assert np.all(np.fabs(nm_h/nm_d-1) < 0.04)
+        assert np.all(np.fabs(nm_h/nm_d-1) < 0.05)
+
+def test_hmf_jenkins01():
+    hmd = ccl.HMDef('fof', 'matter')
+    mf=ccl.MassFuncJenkins01(cosmo,hmd)
+    m = d_hmf['jenkins01'][0]
+    for iz, z in enumerate(zs):
+        nm_d = d_hmf['jenkins01'][iz+1]
+        nm_h = mf.get_mass_function(cosmo, m, 1./(1+z))
+        assert np.all(np.fabs(nm_h/nm_d-1) < 0.01)

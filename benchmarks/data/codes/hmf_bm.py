@@ -20,7 +20,9 @@ def get_mfs(model, mdef):
     np.savetxt("../hmf_" + model + ".txt", np.transpose(d_out))
 
 get_mfs('tinker08', '200m')
+get_mfs('press74', 'fof')
 get_mfs('sheth99', 'fof')
+get_mfs('jenkins01', 'fof')
 
 def get_hbs(model, mdef):
     m_arr=np.geomspace(1E11,1E15,9) 

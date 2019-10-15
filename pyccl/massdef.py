@@ -61,8 +61,9 @@ class HMDef(object):
     """
     def __init__(self, Delta, rho_type, c_m_relation=None):
         # Check it makes sense
-        if Delta <= 0:
-            raise ValueError("Delta must be a positive number")
+        if (Delta != 'fof') and (Delta != 'vir'):
+            if Delta <= 0:
+                raise ValueError("Delta must be a positive number")
         self.Delta = Delta
         # Can only be matter or critical
         if rho_type not in ['matter','critical']:
@@ -157,7 +158,7 @@ class HMDef(object):
                 D_this = self.get_Delta(cosmo, a) * omega_x(cosmo, a, self.rho_type)
                 c_this = self.get_concentration(cosmo, M, a)
                 R_this = self.get_radius(cosmo, M, a)
-                D_new = m_def_other.get_Delta(cosmo,a a) * omega_x(cosmo, a, m_def_other.rho_type)
+                D_new = m_def_other.get_Delta(cosmo, a) * omega_x(cosmo, a, m_def_other.rho_type)
                 c_new = get_new_concentration_py(cosmo, c_this, D_this, D_new)
                 R_new = c_new * R_this / c_this
                 return m_def_other.get_mass(cosmo, R_new, a)

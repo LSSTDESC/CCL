@@ -81,11 +81,34 @@ class MassFunc(object):
         raise NotImplementedError("Use one of the non-default MassFunction classes")
 
 
-class MassFuncShethTormen(MassFunc):
+class MassFuncPress74(MassFunc):
     def __init__(self, cosmo, mass_def):
-        super(MassFuncShethTormen, self).__init__("S&T",
-                                                  cosmo,
-                                                  mass_def)
+        super(MassFuncPress74, self).__init__("Press74",
+                                              cosmo,
+                                              mass_def)
+
+    def _setup(self, cosmo):
+        self.norm = np.sqrt(2/np.pi)
+
+    def _check_mdef(self, mdef):
+        if mdef.Delta!='fof':
+            return True
+        return False
+
+    def get_fsigma(self, cosmo, sigM, a):
+        status = 0
+        delta_c, status = lib.dc_NakamuraSuto(cosmo.cosmo, a, status)
+        check(status);
+
+        nu = delta_c/sigM
+        return self.norm * nu * np.exp(-0.5 * nu**2)
+
+
+class MassFuncSheth99(MassFunc):
+    def __init__(self, cosmo, mass_def):
+        super(MassFuncSheth99, self).__init__("Sheth99",
+                                              cosmo,
+                                              mass_def)
 
     def _setup(self, cosmo):
         self.A = 0.21616;
@@ -104,6 +127,26 @@ class MassFuncShethTormen(MassFunc):
 
         nu = delta_c/sigM
         return nu*self.A*(1.+(self.a*nu**2)**(-self.p))*np.exp(-self.a*nu**2/2.);
+
+
+class MassFuncJenkins01(MassFunc):
+    def __init__(self, cosmo, mass_def):
+        super(MassFuncJenkins01, self).__init__("Jenkins01",
+                                                cosmo,
+                                                mass_def)
+
+    def _setup(self, cosmo):
+        self.A = 0.315
+        self.b = 0.61
+        self.q = 3.8
+
+    def _check_mdef(self, mdef):
+        if mdef.Delta!='fof':
+            return True
+        return False
+
+    def get_fsigma(self, cosmo, sigM, a):
+        return self.A * np.exp(-np.fabs(-np.log(sigM) + self.b)**self.q)
 
 
 class MassFuncTinker08(MassFunc):
