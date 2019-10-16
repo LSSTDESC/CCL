@@ -70,7 +70,7 @@ from .hmfunc import (
     sigmaM, MassFunc, MassFuncPress74,
     MassFuncSheth99, MassFuncJenkins01,
     MassFuncTinker08, MassFuncTinker10,
-    MassFuncWatson, MassFuncAngulo,
+    MassFuncWatson13, MassFuncAngulo12,
     MassFuncDespali16, MassFuncBocquet16)
 from .hbias import (
     HBiasFunc, HBiasFuncShethTormen,

@@ -396,38 +396,59 @@ class MassFuncBocquet16(MassFunc):
         return f
 
 
-class MassFuncWatson(MassFunc):
+class MassFuncWatson13(MassFunc):
     def __init__(self, cosmo, mass_def):
-        super(MassFuncWatson, self).__init__("Watson",
-                                             cosmo,
-                                             mass_def)
+        super(MassFuncWatson13, self).__init__("Watson13",
+                                               cosmo,
+                                               mass_def)
  
     def _setup(self, cosmo):
-        self.A = [0.990, 3.216, 0.074]
-        self.a = [5.907, 3.599, 2.344]
-        self.b = [3.136, 3.058, 2.349]
-        self.c = 1.318
+        self.is_fof = self.mdef.Delta == 'fof'
 
     def _check_mdef(self, mdef):
-        if (np.fabs(mdef.Delta - 200.) > 1E-4) or (mdef.rho_type!='matter'):
+        if mdef.Delta == 'vir':
             return True
         return False
 
     def get_fsigma(self, cosmo, sigM, a, lnM):
-        om = omega_x(cosmo, a, "matter")
+        if self.is_fof:
+            pA = 0.282
+            pa = 2.163
+            pb = 1.406
+            pc = 1.210
+            return pA * ((pb / sigM)**pa + 1.) * np.exp(-pc / sigM**2)
+        else:
+            om = omega_x(cosmo, a, "matter")
+            Delta_178 = self.mdef.Delta / 178.0
+            
+            if a==1.0:
+                pA = 0.194
+                pa = 1.805
+                pb = 2.267
+                pc = 1.287
+            elif a<0.14285714285714285:  # z>6
+                pA = 0.563
+                pa = 3.810
+                pb = 0.874
+                pc = 1.453
+            else:
+                pA = om * (1.097 * a**3.216 + 0.074)
+                pa = om * (5.907 * a**3.058 + 2.349)
+                pb = om * (3.136 * a**3.599 + 2.344)
+                pc = 1.318
 
-        pA = om * (self.A[0] * a**self.A[1] + self.A[2])
-        pa = om * (self.a[0] * a**self.a[1] + self.a[2])
-        pb = om * (self.b[0] * a**self.b[1] + self.b[2])
+            f_178 = pA * ((pb / sigM)**pa + 1.) * np.exp(-pc / sigM**2)
+            C = np.exp(0.023 * (Delta_178 - 1.0))
+            d = -0.456 * om - 0.139
+            Gamma = C * Delta_178**d * np.exp(0.072 * (1.0 - Delta_178) / sigM**2.130)
+            return f_178 * Gamma
 
-        return pA * ((pb / sigM)**pa + 1.) * np.exp(-self.c / sigM**2)
 
-
-class MassFuncAngulo(MassFunc):
+class MassFuncAngulo12(MassFunc):
     def __init__(self, cosmo, mass_def):
-        super(MassFuncAngulo, self).__init__("Angulo",
-                                             cosmo,
-                                             mass_def)
+        super(MassFuncAngulo12, self).__init__("Angulo12",
+                                               cosmo,
+                                               mass_def)
  
     def _setup(self, cosmo):
         self.A = 0.201
@@ -436,9 +457,9 @@ class MassFuncAngulo(MassFunc):
         self.c = 1.172
 
     def _check_mdef(self, mdef):
-        if (np.fabs(mdef.Delta - 200.) > 1E-4) or (mdef.rho_type!='matter'):
+        if mdef.Delta != 'fof':
             return True
         return False
 
     def get_fsigma(self, cosmo, sigM, a, lnM):
-        return self.A * (self.a / sigM + 1.)**self.b * np.exp(-self.c / sigM**2)
+        return self.A * ((self.a / sigM)**self.b + 1.) * np.exp(-self.c / sigM**2)
