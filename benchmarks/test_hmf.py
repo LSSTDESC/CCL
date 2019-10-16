@@ -10,11 +10,30 @@ cosmo = ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, Omega_g=0, Omega_k=0,
 # Read data
 dirdat = os.path.dirname(__file__) + '/data/'
 d_hmf = {}
-for model in ['press74', 'jenkins01', 'tinker08', 'sheth99']:
+for model in ['press74', 'jenkins01', 'tinker08', 'sheth99',
+              'despali16', 'bocquet16']:
     d_hmf[model] = np.loadtxt(dirdat + 'hmf_' + model + '.txt',
                               unpack=True)
 # Redshifts
 zs = np.array([0., 0.5, 1.])
+
+def test_hmf_despali16():
+    hmd = ccl.HMDef('vir','critical')
+    mf=ccl.MassFuncDespali16(cosmo,hmd)
+    m = d_hmf['despali16'][0]
+    for iz, z in enumerate(zs):
+        nm_d = d_hmf['despali16'][iz+1]
+        nm_h = mf.get_mass_function(cosmo, m, 1./(1+z))
+        assert np.all(np.fabs(nm_h/nm_d-1) < 0.01)
+
+def test_hmf_bocquet16():
+    hmd = ccl.HMDef200mat()
+    mf=ccl.MassFuncBocquet16(cosmo,hmd)
+    m = d_hmf['bocquet16'][0]
+    for iz, z in enumerate(zs):
+        nm_d = d_hmf['bocquet16'][iz+1]
+        nm_h = mf.get_mass_function(cosmo, m, 1./(1+z))
+        assert np.all(np.fabs(nm_h/nm_d-1) < 0.01)
 
 def test_hmf_tinker08():
     hmd = ccl.HMDef200mat()
