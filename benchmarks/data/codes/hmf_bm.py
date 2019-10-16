@@ -24,7 +24,7 @@ get_mfs('press74', 'fof')
 get_mfs('sheth99', 'fof')
 get_mfs('jenkins01', 'fof')
 get_mfs('despali16', 'vir')
-get_mfs('bocquet16', '200m')
+get_mfs('bocquet16', '200c')
 
 def get_hbs(model, mdef):
     m_arr=np.geomspace(1E11,1E15,9) 

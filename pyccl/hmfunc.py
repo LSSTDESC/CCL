@@ -371,6 +371,7 @@ class MassFuncBocquet16(MassFunc):
         f = AA * ((sigM / bb)**-aa + 1.0) * np.exp(-cc / sigM**2)
 
         if self.mdef_type == '200c':
+            z = 1./a-1
             Omega_m = omega_x(cosmo, a, "matter")
             gamma0 = 3.54E-2 + Omega_m**0.09
             gamma1 = 4.56E-2 + 2.68E-2 / Omega_m
@@ -383,6 +384,7 @@ class MassFuncBocquet16(MassFunc):
             M200c_M200m = gamma + delta * lnM
             f *= M200c_M200m
         elif self.mdef_type == '500c':
+            z = 1./a-1
             Omega_m = omega_x(cosmo, a, "matter")
             alpha0 = 0.880 + 0.329 * Omega_m
             alpha1 = 1.00 + 4.31E-2 / Omega_m

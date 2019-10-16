@@ -27,7 +27,7 @@ def test_hmf_despali16():
         assert np.all(np.fabs(nm_h/nm_d-1) < 0.01)
 
 def test_hmf_bocquet16():
-    hmd = ccl.HMDef200mat()
+    hmd = ccl.HMDef200crit()
     mf=ccl.MassFuncBocquet16(cosmo,hmd)
     m = d_hmf['bocquet16'][0]
     for iz, z in enumerate(zs):
