@@ -34,8 +34,7 @@ def test_hmf_bocquet16():
         assert np.all(np.fabs(nm_h/nm_d-1) < 0.01)
 
 def test_hmf_watson13():
-    hmd = ccl.HMDef200mat()
-    mf=ccl.MassFuncWatson13(cosmo,hmd)
+    mf=ccl.MassFuncWatson13(cosmo)
     d_hmf = np.loadtxt(dirdat + 'hmf_watson13.txt', unpack=True)
     m = d_hmf[0]
     for iz, z in enumerate(zs):
@@ -44,8 +43,7 @@ def test_hmf_watson13():
         assert np.all(np.fabs(nm_h/nm_d-1) < 0.01)
 
 def test_hmf_tinker08():
-    hmd = ccl.HMDef200mat()
-    mf=ccl.MassFuncTinker08(cosmo,hmd)
+    mf=ccl.MassFuncTinker08(cosmo)
     d_hmf = np.loadtxt(dirdat + 'hmf_tinker08.txt', unpack=True)
     m = d_hmf[0]
     for iz, z in enumerate(zs):
@@ -54,8 +52,7 @@ def test_hmf_tinker08():
         assert np.all(np.fabs(nm_h/nm_d-1) < 0.01)
 
 def test_hmf_press74():
-    hmd = ccl.HMDef('fof', 'matter')
-    mf=ccl.MassFuncPress74(cosmo,hmd)
+    mf=ccl.MassFuncPress74(cosmo)
     d_hmf = np.loadtxt(dirdat + 'hmf_press74.txt', unpack=True)
     m = d_hmf[0]
     for iz, z in enumerate(zs):
@@ -64,8 +61,7 @@ def test_hmf_press74():
         assert np.all(np.fabs(nm_h/nm_d-1) < 0.05)
 
 def test_hmf_angulo12():
-    hmd = ccl.HMDef('fof', 'matter')
-    mf=ccl.MassFuncAngulo12(cosmo,hmd)
+    mf=ccl.MassFuncAngulo12(cosmo)
     d_hmf = np.loadtxt(dirdat + 'hmf_angulo12.txt', unpack=True)
     m = d_hmf[0]
     for iz, z in enumerate(zs):
@@ -74,8 +70,7 @@ def test_hmf_angulo12():
         assert np.all(np.fabs(nm_h/nm_d-1) < 0.05)
 
 def test_hmf_sheth99():
-    hmd = ccl.HMDef('fof', 'matter')
-    mf=ccl.MassFuncSheth99(cosmo,hmd)
+    mf=ccl.MassFuncSheth99(cosmo)
     d_hmf = np.loadtxt(dirdat + 'hmf_sheth99.txt', unpack=True)
     m = d_hmf[0]
     for iz, z in enumerate(zs):
@@ -84,8 +79,7 @@ def test_hmf_sheth99():
         assert np.all(np.fabs(nm_h/nm_d-1) < 0.05)
 
 def test_hmf_jenkins01():
-    hmd = ccl.HMDef('fof', 'matter')
-    mf=ccl.MassFuncJenkins01(cosmo,hmd)
+    mf=ccl.MassFuncJenkins01(cosmo)
     d_hmf = np.loadtxt(dirdat + 'hmf_jenkins01.txt', unpack=True)
     m = d_hmf[0]
     for iz, z in enumerate(zs):

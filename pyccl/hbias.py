@@ -1,6 +1,7 @@
 from . import ccllib as lib
 from .core import check
 import numpy as np
+from .massdef import HMDef, HMDef200mat
 
 
 class HBiasFunc(object):
@@ -20,16 +21,25 @@ class HBiasFunc(object):
             the mass definition used by this mass function
             parametrization.
     """
-    def __init__(self, name, cosmo, mass_def):
+    def __init__(self, name, cosmo, mass_def=None):
         cosmo.compute_sigma()
         self.name = name
-        if self._check_mdef(mass_def):
-            raise ValueError("Mass function " + name +
-                             " is not compatible with mass definition" +
-                             " Delta = %.1lf, " % (mass_def.Delta) +
-                             " rho = " + mass_def.rho_type)
-        self.mdef = mass_def
+        if mass_def is not None:
+            if self._check_mdef(mass_def):
+                raise ValueError("Mass function " + name +
+                                 " is not compatible with mass definition" +
+                                 " Delta = %.1lf, " % (mass_def.Delta) +
+                                 " rho = " + mass_def.rho_type)
+            self.mdef = mass_def
+        else:
+            self._default_mdef()    
         self._setup(cosmo)
+
+    def _default_mdef(self):
+        """ Assigns a default mass definition for this object if
+        none is passed at initialization.
+        """
+        self.mdef = HMDef('fof', 'matter')
 
     def _setup(self, cosmo):
         """ Use this function to initialize any internal attributes
@@ -129,10 +139,11 @@ class HBiasFuncSheth99(HBiasFunc):
         mass_def (:obj:`HMDef`): a mass definition object.
             this parametrization only accepts 'fof' masses.
     """
-    def __init__(self, cosmo, mass_def):
+    def __init__(self, cosmo):
+        hmd = HMDef('fof', 'matter')
         super(HBiasFuncSheth99, self).__init__("Sheth99",
                                                cosmo,
-                                               mass_def)
+                                               hmd)
 
     def _setup(self, cosmo):
         self.p = 0.3
@@ -158,10 +169,11 @@ class HBiasFuncSheth01(HBiasFunc):
         mass_def (:obj:`HMDef`): a mass definition object.
             this parametrization only accepts 'fof' masses.
     """
-    def __init__(self, cosmo, mass_def):
+    def __init__(self, cosmo):
+        hmd = HMDef('fof', 'matter')
         super(HBiasFuncSheth01, self).__init__("Sheth01",
                                                cosmo,
-                                               mass_def)
+                                               hmd)
 
     def _setup(self, cosmo):
         self.a = 0.707
@@ -192,10 +204,11 @@ class HBiasFuncBhattacharya11(HBiasFunc):
         mass_def (:obj:`HMDef`): a mass definition object.
             this parametrization only accepts 'fof' masses.
     """
-    def __init__(self, cosmo, mass_def):
+    def __init__(self, cosmo):
+        hmd = HMDef('fof', 'matter')
         super(HBiasFuncBhattacharya11, self).__init__("Bhattacharya11",
                                                       cosmo,
-                                                      mass_def)
+                                                      hmd)
 
     def _setup(self, cosmo):
         self.a = 0.788
@@ -225,10 +238,13 @@ class HBiasFuncTinker10(HBiasFunc):
             this parametrization accepts SO masses with
             200 < Delta < 3200 with respect to the matter density.
     """
-    def __init__(self, cosmo, mass_def):
+    def __init__(self, cosmo, mass_def=None):
         super(HBiasFuncTinker10, self).__init__("Tinker10",
                                                 cosmo,
                                                 mass_def)
+
+    def _default_mdef(self):
+        self.mdef = HMDef200mat()
 
     def _setup(self, cosmo):
         ld = np.log10(self.mdef.Delta)

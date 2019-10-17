@@ -2,6 +2,7 @@ from . import ccllib as lib
 from .core import check
 from .background import omega_x
 import numpy as np
+from .massdef import HMDef, HMDef200mat
 
 
 def sigmaM(cosmo, M, a):
@@ -46,16 +47,29 @@ class MassFunc(object):
             the mass definition used by this mass function
             parametrization.
     """
-    def __init__(self, name, cosmo, mass_def):
+    def __init__(self, name, cosmo, mass_def=None):
+        # Initialize sigma(M) splines if needed
         cosmo.compute_sigma()
+        # Assign name
         self.name = name
-        if self._check_mdef(mass_def):
-            raise ValueError("Mass function " + name +
-                             " is not compatible with mass definition" +
-                             " Delta = %s, " % (mass_def.Delta) +
-                             " rho = " + mass_def.rho_type)
-        self.mdef = mass_def
+        # Check if mass function was provided and check that it's
+        # sensible.
+        if mass_def is not None:
+            if self._check_mdef(mass_def):
+                raise ValueError("Mass function " + name +
+                                 " is not compatible with mass definition" +
+                                 " Delta = %s, " % (mass_def.Delta) +
+                                 " rho = " + mass_def.rho_type)
+            self.mdef = mass_def
+        else:
+            self._default_mdef()
         self._setup(cosmo)
+
+    def _default_mdef(self):
+        """ Assigns a default mass definition for this object if
+        none is passed at initialization.
+        """
+        self.mdef = HMDef('fof', 'matter')
 
     def _setup(self, cosmo):
         """ Use this function to initialize any internal attributes
@@ -169,10 +183,11 @@ class MassFuncPress74(MassFunc):
         mass_def (:obj:`HMDef`): a mass definition object.
             this parametrization only accepts 'fof' masses.
     """
-    def __init__(self, cosmo, mass_def):
+    def __init__(self, cosmo):
+        hmd = HMDef('fof', 'matter')
         super(MassFuncPress74, self).__init__("Press74",
                                               cosmo,
-                                              mass_def)
+                                              hmd)
 
     def _setup(self, cosmo):
         self.norm = np.sqrt(2/np.pi)
@@ -199,10 +214,11 @@ class MassFuncSheth99(MassFunc):
         mass_def (:obj:`HMDef`): a mass definition object.
             this parametrization only accepts 'fof' masses.
     """
-    def __init__(self, cosmo, mass_def):
+    def __init__(self, cosmo):
+        hmd = HMDef('fof', 'matter')
         super(MassFuncSheth99, self).__init__("Sheth99",
                                               cosmo,
-                                              mass_def)
+                                              hmd)
 
     def _setup(self, cosmo):
         self.A = 0.21615998645
@@ -232,10 +248,11 @@ class MassFuncJenkins01(MassFunc):
         mass_def (:obj:`HMDef`): a mass definition object.
             this parametrization only accepts 'fof' masses.
     """
-    def __init__(self, cosmo, mass_def):
+    def __init__(self, cosmo):
+        hmd = HMDef('fof', 'matter')
         super(MassFuncJenkins01, self).__init__("Jenkins01",
                                                 cosmo,
-                                                mass_def)
+                                                hmd)
 
     def _setup(self, cosmo):
         self.A = 0.315
@@ -260,10 +277,13 @@ class MassFuncTinker08(MassFunc):
             this parametrization accepts SO masses with
             200 < Delta < 3200 with respect to the matter density.
     """
-    def __init__(self, cosmo, mass_def):
+    def __init__(self, cosmo, mass_def=None):
         super(MassFuncTinker08, self).__init__("Tinker08",
                                                cosmo,
                                                mass_def)
+
+    def _default_mdef(self):
+        self.mdef = HMDef200mat()
 
     def _setup(self, cosmo):
         from scipy.interpolate import interp1d
@@ -307,11 +327,14 @@ class MassFuncDespali16(MassFunc):
         mass_def (:obj:`HMDef`): a mass definition object.
             this parametrization accepts any SO masses.
     """
-    def __init__(self, cosmo, mass_def, ellipsoidal=False):
+    def __init__(self, cosmo, mass_def=None, ellipsoidal=False):
         super(MassFuncDespali16, self).__init__("Despali16",
                                                 cosmo,
                                                 mass_def)
         self.ellipsoidal = ellipsoidal
+
+    def _default_mdef(self):
+        self.mdef = HMDef200mat()
 
     def _setup(self, cosmo):
         pass
@@ -357,10 +380,13 @@ class MassFuncTinker10(MassFunc):
             this parametrization accepts SO masses with
             200 < Delta < 3200 with respect to the matter density.
     """
-    def __init__(self, cosmo, mass_def):
+    def __init__(self, cosmo, mass_def=None):
         super(MassFuncTinker10, self).__init__("Tinker10",
                                                cosmo,
                                                mass_def)
+
+    def _default_mdef(self):
+        self.mdef = HMDef200mat()
 
     def _setup(self, cosmo):
         from scipy.interpolate import interp1d
@@ -413,11 +439,14 @@ class MassFuncBocquet16(MassFunc):
             this parametrization accepts SO masses with
             Delta = 200 (matter, critical) and 500 (critical).
     """
-    def __init__(self, cosmo, mass_def, hydro=True):
+    def __init__(self, cosmo, mass_def=None, hydro=True):
         self.hydro = hydro
         super(MassFuncBocquet16, self).__init__("Bocquet16",
                                                 cosmo,
                                                 mass_def)
+
+    def _default_mdef(self):
+        self.mdef = HMDef200mat()
 
     def _setup(self, cosmo):
         if self.mdef_type == '200m':
@@ -538,10 +567,13 @@ class MassFuncWatson13(MassFunc):
         mass_def (:obj:`HMDef`): a mass definition object.
             this parametrization accepts fof and any SO masses.
     """
-    def __init__(self, cosmo, mass_def):
+    def __init__(self, cosmo, mass_def=None):
         super(MassFuncWatson13, self).__init__("Watson13",
                                                cosmo,
                                                mass_def)
+
+    def _default_mdef(self):
+        self.mdef = HMDef200mat()
 
     def _setup(self, cosmo):
         self.is_fof = self.mdef.Delta == 'fof'
@@ -594,10 +626,11 @@ class MassFuncAngulo12(MassFunc):
         mass_def (:obj:`HMDef`): a mass definition object.
             this parametrization only accepts fof masses.
     """
-    def __init__(self, cosmo, mass_def):
+    def __init__(self, cosmo):
+        hmd = HMDef('fof', 'matter')
         super(MassFuncAngulo12, self).__init__("Angulo12",
                                                cosmo,
-                                               mass_def)
+                                               hmd)
 
     def _setup(self, cosmo):
         self.A = 0.201

@@ -16,8 +16,7 @@ zs = np.array([0., 0.5, 1.])
 def test_hbf_tinker10():
     d_hbf = np.loadtxt(dirdat + 'hbf_tinker10.txt',
                        unpack=True)
-    hmd = ccl.HMDef200mat()
-    mf=ccl.HBiasFuncTinker10(cosmo,hmd)
+    mf=ccl.HBiasFuncTinker10(cosmo)
     m = d_hbf[0]
     for iz, z in enumerate(zs):
         hb_d = d_hbf[iz+1]
@@ -27,8 +26,7 @@ def test_hbf_tinker10():
 def test_hbf_sheth01():
     d_hbf = np.loadtxt(dirdat + 'hbf_sheth01.txt',
                        unpack=True)
-    hmd = ccl.HMDef('fof','matter')
-    mf=ccl.HBiasFuncSheth01(cosmo,hmd)
+    mf=ccl.HBiasFuncSheth01(cosmo)
     m = d_hbf[0]
     for iz, z in enumerate(zs):
         hb_d = d_hbf[iz+1]
@@ -38,8 +36,7 @@ def test_hbf_sheth01():
 def test_hbf_bhattacharya11():
     d_hbf = np.loadtxt(dirdat + 'hbf_bhattacharya11.txt',
                        unpack=True)
-    hmd = ccl.HMDef('fof','matter')
-    mf=ccl.HBiasFuncBhattacharya11(cosmo,hmd)
+    mf=ccl.HBiasFuncBhattacharya11(cosmo)
     m = d_hbf[0]
     for iz, z in enumerate(zs):
         hb_d = d_hbf[iz+1]
