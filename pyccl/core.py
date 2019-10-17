@@ -218,7 +218,7 @@ class Cosmology(object):
             filename (:obj:`str`) Filename to read parameters from.
         """
         with open(filename, 'r') as fp:
-            params = yaml.load(fp, Loader=yaml.Loader)
+            params = yaml.safe_load(fp)
 
         # Now we assemble an init for the object since the CCL YAML has
         # extra info we don't need and different formatting.
