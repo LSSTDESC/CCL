@@ -73,8 +73,9 @@ from .hmfunc import (
     MassFuncWatson13, MassFuncAngulo12,
     MassFuncDespali16, MassFuncBocquet16)
 from .hbias import (
-    HBiasFunc, HBiasFuncShethTormen,
-    HBiasFuncTinker10)
+    HBiasFunc, HBiasFuncSheth99,
+    HBiasFuncSheth01, HBiasFuncTinker10,
+    HBiasFuncBhattacharya11)
 
 # Expose function to toggle debug mode
 from .pyutils import debug_mode

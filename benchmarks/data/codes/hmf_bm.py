@@ -41,3 +41,5 @@ def get_hbs(model, mdef):
     np.savetxt("../hbf_" + model + ".txt", np.transpose(d_out))
 
 get_hbs('tinker10', '200m')
+get_hbs('sheth01', 'fof')
+get_hbs('bhattacharya11', 'fof')

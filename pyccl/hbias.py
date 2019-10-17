@@ -48,15 +48,16 @@ class HBiasFunc(object):
         raise NotImplementedError("Use one of the non-default HBiasFunc classes")
 
 
-class HBiasFuncShethTormen(HBiasFunc):
+class HBiasFuncSheth99(HBiasFunc):
     def __init__(self, cosmo, mass_def):
-        super(HBiasFuncShethTormen, self).__init__("S&T",
-                                                   cosmo,
-                                                   mass_def)
+        super(HBiasFuncSheth99, self).__init__("Sheth99",
+                                               cosmo,
+                                               mass_def)
 
     def _setup(self, cosmo):
         self.p = 0.3;
         self.a = 0.707;
+        self.dc = 1.68647
 
     def _check_mdef(self, mdef):
         if mdef.Delta != 'fof':
@@ -64,12 +65,60 @@ class HBiasFuncShethTormen(HBiasFunc):
         return False
 
     def get_bsigma(self, cosmo, sigM, a):
-        status = 0
-        delta_c, status = lib.dc_NakamuraSuto(cosmo.cosmo, a, status)
-        check(status);
+        nu = self.dc/sigM
+        anu2 = self.a * nu**2
+        return 1. + (anu2 - 1. + 2. * self.p / (1. + anu2**self.p))/self.dc;
 
-        nu = delta_c/sigM
-        return 1. + (self.a * nu**2 - 1. + 2. * self.p / (1. + (self.a * nu**2)**self.p))/delta_c;
+
+class HBiasFuncSheth01(HBiasFunc):
+    def __init__(self, cosmo, mass_def):
+        super(HBiasFuncSheth01, self).__init__("Sheth01",
+                                               cosmo,
+                                               mass_def)
+
+    def _setup(self, cosmo):
+        self.a = 0.707;
+        self.sqrta = 0.84083292038
+        self.b = 0.5
+        self.c = 0.6
+        self.dc = 1.68647
+
+    def _check_mdef(self, mdef):
+        if mdef.Delta != 'fof':
+            return True
+        return False
+
+    def get_bsigma(self, cosmo, sigM, a):
+        nu = self.dc/sigM
+        anu2 = self.a * nu**2
+        anu2c = anu2**self.c
+        t1 = self.b * (1.0 - self.c) * (1.0 - 0.5 * self.c)
+        return 1. + (self.sqrta * anu2 * (1 + self.b / anu2c) - anu2c / (anu2c + t1)) / (self.sqrta * self.dc)
+
+
+class HBiasFuncBhattacharya11(HBiasFunc):
+    def __init__(self, cosmo, mass_def):
+        super(HBiasFuncBhattacharya11, self).__init__("Bhattacharya11",
+                                                      cosmo,
+                                                      mass_def)
+
+    def _setup(self, cosmo):
+        self.a = 0.788
+        self.az = 0.01
+        self.p = 0.807
+        self.q = 1.795
+        self.dc = 1.68647
+
+    def _check_mdef(self, mdef):
+        if mdef.Delta != 'fof':
+            return True
+        return False
+
+    def get_bsigma(self, cosmo, sigM, a):
+        nu = self.dc / sigM
+        a = self.a * a**self.az
+        anu2 = a * nu**2
+        return 1. + (anu2 - self.q + 2*self.p / (1 + anu2**self.p)) / self.dc
 
 
 class HBiasFuncTinker10(HBiasFunc):
@@ -87,6 +136,7 @@ class HBiasFuncTinker10(HBiasFunc):
         self.b = 1.5
         self.C = 0.019 + 0.107 * ld + 0.19*xp
         self.c = 2.4
+        self.dc = 1.68647
 
     def _check_mdef(self, mdef):
         if (mdef.Delta<200.) or (mdef.Delta>3200.) or (mdef.rho_type!='matter'):
@@ -94,9 +144,8 @@ class HBiasFuncTinker10(HBiasFunc):
         return False
 
     def get_bsigma(self, cosmo, sigM, a):
-        delta_c = 1.686
-        nu = delta_c / sigM
+        nu = self.dc / sigM
         nupa=nu**self.a
         
-        return 1. - self.A * nupa / (nupa + delta_c**self.a) + \
+        return 1. - self.A * nupa / (nupa + self.dc**self.a) + \
             self.B * nu**self.b + self.C * nu**self.c
