@@ -133,11 +133,10 @@ class HBiasFunc(object):
 
 class HBiasFuncSheth99(HBiasFunc):
     """ Implements halo bias described in 1999MNRAS.308..119S
+    This parametrization is only valid for 'fof' masses.
 
     Args:
         cosmo (:obj:`Cosmology`): A Cosmology object.
-        mass_def (:obj:`HMDef`): a mass definition object.
-            this parametrization only accepts 'fof' masses.
     """
     def __init__(self, cosmo):
         hmd = HMDef('fof', 'matter')
@@ -163,11 +162,10 @@ class HBiasFuncSheth99(HBiasFunc):
 
 class HBiasFuncSheth01(HBiasFunc):
     """ Implements halo bias described in 2001MNRAS.323....1S
+    This parametrization is only valid for 'fof' masses.
 
     Args:
         cosmo (:obj:`Cosmology`): A Cosmology object.
-        mass_def (:obj:`HMDef`): a mass definition object.
-            this parametrization only accepts 'fof' masses.
     """
     def __init__(self, cosmo):
         hmd = HMDef('fof', 'matter')
@@ -198,11 +196,10 @@ class HBiasFuncSheth01(HBiasFunc):
 
 class HBiasFuncBhattacharya11(HBiasFunc):
     """ Implements halo bias described in 2011ApJ...732..122B
+    This parametrization is only valid for 'fof' masses.
 
     Args:
         cosmo (:obj:`Cosmology`): A Cosmology object.
-        mass_def (:obj:`HMDef`): a mass definition object.
-            this parametrization only accepts 'fof' masses.
     """
     def __init__(self, cosmo):
         hmd = HMDef('fof', 'matter')
@@ -237,6 +234,7 @@ class HBiasFuncTinker10(HBiasFunc):
         mass_def (:obj:`HMDef`): a mass definition object.
             this parametrization accepts SO masses with
             200 < Delta < 3200 with respect to the matter density.
+            If `None`, Delta = 200 (matter) will be used.
     """
     def __init__(self, cosmo, mass_def=None):
         super(HBiasFuncTinker10, self).__init__("Tinker10",

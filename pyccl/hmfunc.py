@@ -177,11 +177,10 @@ class MassFunc(object):
 
 class MassFuncPress74(MassFunc):
     """ Implements mass function described in 1974ApJ...187..425P.
+    This parametrization is only valid for 'fof' masses.
 
     Args:
         cosmo (:obj:`Cosmology`): A Cosmology object.
-        mass_def (:obj:`HMDef`): a mass definition object.
-            this parametrization only accepts 'fof' masses.
     """
     def __init__(self, cosmo):
         hmd = HMDef('fof', 'matter')
@@ -208,11 +207,10 @@ class MassFuncPress74(MassFunc):
 
 class MassFuncSheth99(MassFunc):
     """ Implements mass function described in 1999MNRAS.308..119S
+    This parametrization is only valid for 'fof' masses.
 
     Args:
         cosmo (:obj:`Cosmology`): A Cosmology object.
-        mass_def (:obj:`HMDef`): a mass definition object.
-            this parametrization only accepts 'fof' masses.
     """
     def __init__(self, cosmo):
         hmd = HMDef('fof', 'matter')
@@ -242,11 +240,10 @@ class MassFuncSheth99(MassFunc):
 
 class MassFuncJenkins01(MassFunc):
     """ Implements mass function described in 2001MNRAS.321..372J
+    This parametrization is only valid for 'fof' masses.
 
     Args:
         cosmo (:obj:`Cosmology`): A Cosmology object.
-        mass_def (:obj:`HMDef`): a mass definition object.
-            this parametrization only accepts 'fof' masses.
     """
     def __init__(self, cosmo):
         hmd = HMDef('fof', 'matter')
@@ -276,6 +273,7 @@ class MassFuncTinker08(MassFunc):
         mass_def (:obj:`HMDef`): a mass definition object.
             this parametrization accepts SO masses with
             200 < Delta < 3200 with respect to the matter density.
+            If `None`, Delta = 200 (matter) will be used.
     """
     def __init__(self, cosmo, mass_def=None):
         super(MassFuncTinker08, self).__init__("Tinker08",
@@ -326,6 +324,7 @@ class MassFuncDespali16(MassFunc):
         cosmo (:obj:`Cosmology`): A Cosmology object.
         mass_def (:obj:`HMDef`): a mass definition object.
             this parametrization accepts any SO masses.
+            If `None`, Delta = 200 (matter) will be used.
     """
     def __init__(self, cosmo, mass_def=None, ellipsoidal=False):
         super(MassFuncDespali16, self).__init__("Despali16",
@@ -379,6 +378,7 @@ class MassFuncTinker10(MassFunc):
         mass_def (:obj:`HMDef`): a mass definition object.
             this parametrization accepts SO masses with
             200 < Delta < 3200 with respect to the matter density.
+            If `None`, Delta = 200 (matter) will be used.
     """
     def __init__(self, cosmo, mass_def=None):
         super(MassFuncTinker10, self).__init__("Tinker10",
@@ -438,6 +438,7 @@ class MassFuncBocquet16(MassFunc):
         mass_def (:obj:`HMDef`): a mass definition object.
             this parametrization accepts SO masses with
             Delta = 200 (matter, critical) and 500 (critical).
+            If `None`, Delta = 200 (matter) will be used.
     """
     def __init__(self, cosmo, mass_def=None, hydro=True):
         self.hydro = hydro
@@ -566,6 +567,7 @@ class MassFuncWatson13(MassFunc):
         cosmo (:obj:`Cosmology`): A Cosmology object.
         mass_def (:obj:`HMDef`): a mass definition object.
             this parametrization accepts fof and any SO masses.
+            If `None`, Delta = 200 (matter) will be used.
     """
     def __init__(self, cosmo, mass_def=None):
         super(MassFuncWatson13, self).__init__("Watson13",
@@ -620,11 +622,10 @@ class MassFuncWatson13(MassFunc):
 
 class MassFuncAngulo12(MassFunc):
     """ Implements mass function described in 2012MNRAS.426.2046A
+    This parametrization is only valid for 'fof' masses.
 
     Args:
         cosmo (:obj:`Cosmology`): A Cosmology object.
-        mass_def (:obj:`HMDef`): a mass definition object.
-            this parametrization only accepts fof masses.
     """
     def __init__(self, cosmo):
         hmd = HMDef('fof', 'matter')
