@@ -450,6 +450,14 @@ class MassFuncBocquet16(MassFunc):
         self.mdef = HMDef200mat()
 
     def _setup(self, cosmo):
+        if np.fabs(self.mdef.Delta - 200.) < 1E-4:
+            if self.mdef.rho_type == 'matter':
+                self.mdef_type = '200m'
+            elif self.mdef.rho_type == 'critical':
+                self.mdef_type = '200c'
+        elif np.fabs(self.mdef.Delta - 500.) < 1E-4:
+            if self.mdef.rho_type == 'critical':
+                self.mdef_type = '500c'
         if self.mdef_type == '200m':
             if self.hydro:
                 self.A0 = 0.228
@@ -510,20 +518,15 @@ class MassFuncBocquet16(MassFunc):
 
     def _check_mdef(self, mdef):
         if np.fabs(mdef.Delta - 200.) < 1E-4:
-            if mdef.rho_type == 'matter':
-                self.mdef_type = '200m'
-            elif mdef.rho_type == 'critical':
-                self.mdef_type = '200c'
-            else:
-                return True
+            if (mdef.rho_type != 'matter') and \
+               (mdef.rho_type != 'critical'):
+                return False
         elif np.fabs(mdef.Delta - 500.) < 1E-4:
             if mdef.rho_type == 'critical':
-                self.mdef_type = '500c'
-            else:
-                return True
+                return False
         else:
-            return True
-        return False
+            return False
+        return True
 
     def get_fsigma(self, cosmo, sigM, a, lnM):
         zp1 = 1./a
