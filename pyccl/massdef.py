@@ -6,6 +6,17 @@ import numpy as np
 
 
 def mass2radius_lagrangian(cosmo, M):
+    """ Returns Lagrangian radius for a halo of mass M.
+    The lagrangian radius is defined as that enclosing
+    the mass of the halo assuming a homogeneous Universe.
+
+    Args:
+        cosmo (:obj:`Cosmology`): A Cosmology object.
+        M (float or array_like): halo mass in units of M_sun.
+
+    Returns:
+        float or array_like: lagrangian radius in Mpc
+    """
     return (M / (4.18879020479 * rho_x(cosmo, 1, 'matter')))**(1./3.)
 
 
@@ -77,10 +88,22 @@ class HMDef(object):
         self.concentration = c_m_relation
 
     def __eq__(self, other):
+        """ Allows you to compare two mass definitions
+        """
         return (self.Delta == other.Delta) and \
             (self.rho_type == other.rho_type)
 
     def get_Delta(self, cosmo, a):
+        """ Gets overdensity parameter associated to this mass
+        definition.
+
+        Args:
+            cosmo (:obj:`Cosmology`): A Cosmology object.
+            a (float): scale factor
+
+        Returns:
+            float : value of the overdensity parameter.
+        """
         if self.Delta == 'vir':
             status = 0
             D, status = lib.Dv_BryanNorman(cosmo.cosmo, a, status)
