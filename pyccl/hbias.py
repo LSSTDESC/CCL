@@ -1,7 +1,7 @@
 from . import ccllib as lib
 from .core import check
-from .background import species_types, rho_x, omega_x
 import numpy as np
+
 
 class HBiasFunc(object):
     def __init__(self, name, cosmo, mass_def):
@@ -37,7 +37,7 @@ class HBiasFunc(object):
         status = 0
         sigM, status = lib.sigM_vec(cosmo.cosmo, a, logM,
                                     len(logM), status)
-        check(status);
+        check(status)
 
         b = self.get_bsigma(cosmo, sigM, a)
         if np.isscalar(M):
@@ -45,7 +45,8 @@ class HBiasFunc(object):
         return b
 
     def get_bsigma(self, cosmo, sigM, a):
-        raise NotImplementedError("Use one of the non-default HBiasFunc classes")
+        raise NotImplementedError("Use one of the non-default "
+                                  "HBiasFunc classes")
 
 
 class HBiasFuncSheth99(HBiasFunc):
@@ -55,8 +56,8 @@ class HBiasFuncSheth99(HBiasFunc):
                                                mass_def)
 
     def _setup(self, cosmo):
-        self.p = 0.3;
-        self.a = 0.707;
+        self.p = 0.3
+        self.a = 0.707
         self.dc = 1.68647
 
     def _check_mdef(self, mdef):
@@ -67,7 +68,7 @@ class HBiasFuncSheth99(HBiasFunc):
     def get_bsigma(self, cosmo, sigM, a):
         nu = self.dc/sigM
         anu2 = self.a * nu**2
-        return 1. + (anu2 - 1. + 2. * self.p / (1. + anu2**self.p))/self.dc;
+        return 1. + (anu2 - 1. + 2. * self.p / (1. + anu2**self.p))/self.dc
 
 
 class HBiasFuncSheth01(HBiasFunc):
@@ -77,7 +78,7 @@ class HBiasFuncSheth01(HBiasFunc):
                                                mass_def)
 
     def _setup(self, cosmo):
-        self.a = 0.707;
+        self.a = 0.707
         self.sqrta = 0.84083292038
         self.b = 0.5
         self.c = 0.6
@@ -93,7 +94,8 @@ class HBiasFuncSheth01(HBiasFunc):
         anu2 = self.a * nu**2
         anu2c = anu2**self.c
         t1 = self.b * (1.0 - self.c) * (1.0 - 0.5 * self.c)
-        return 1. + (self.sqrta * anu2 * (1 + self.b / anu2c) - anu2c / (anu2c + t1)) / (self.sqrta * self.dc)
+        return 1. + (self.sqrta * anu2 * (1 + self.b / anu2c) -
+                     anu2c / (anu2c + t1)) / (self.sqrta * self.dc)
 
 
 class HBiasFuncBhattacharya11(HBiasFunc):
@@ -126,10 +128,10 @@ class HBiasFuncTinker10(HBiasFunc):
         super(HBiasFuncTinker10, self).__init__("Tinker10",
                                                 cosmo,
                                                 mass_def)
- 
+
     def _setup(self, cosmo):
         ld = np.log10(self.mdef.Delta)
-        xp = np.exp(-(4./ld)**4.);
+        xp = np.exp(-(4./ld)**4.)
         self.A = 1.0 + 0.24 * ld * xp
         self.a = 0.44 * ld - 0.88
         self.B = 0.183
@@ -139,13 +141,14 @@ class HBiasFuncTinker10(HBiasFunc):
         self.dc = 1.68647
 
     def _check_mdef(self, mdef):
-        if (mdef.Delta<200.) or (mdef.Delta>3200.) or (mdef.rho_type!='matter'):
+        if (mdef.Delta < 200.) or (mdef.Delta > 3200.) or \
+           (mdef.rho_type != 'matter'):
             return True
         return False
 
     def get_bsigma(self, cosmo, sigM, a):
         nu = self.dc / sigM
-        nupa=nu**self.a
-        
+        nupa = nu**self.a
+
         return 1. - self.A * nupa / (nupa + self.dc**self.a) + \
             self.B * nu**self.b + self.C * nu**self.c

@@ -1,6 +1,6 @@
 from . import ccllib as lib
 from .core import check
-from .background import species_types, rho_x, omega_x
+from .background import omega_x
 import numpy as np
 
 
@@ -63,22 +63,24 @@ class MassFunc(object):
         status = 0
         sigM, status = lib.sigM_vec(cosmo.cosmo, a, logM,
                                     len(logM), status)
-        check(status);
+        check(status)
         # dlogsigma(M)/dlog10(M)
         dlns_dlogM, status = lib.dlnsigM_dlogM_vec(cosmo.cosmo, logM,
                                                    len(logM), status)
         check(status)
 
-        rho = lib.cvar.constants.RHO_CRITICAL * cosmo['Omega_m'] * cosmo['h']**2
+        rho = (lib.cvar.constants.RHO_CRITICAL *
+               cosmo['Omega_m'] * cosmo['h']**2)
         f = self.get_fsigma(cosmo, sigM, a, 2.302585092994046 * logM)
         mf = f * rho * dlns_dlogM / M_use
-        
+
         if np.isscalar(M):
             mf = mf[0]
         return mf
 
     def get_fsigma(self, cosmo, sigM, a, lnM):
-        raise NotImplementedError("Use one of the non-default MassFunction classes")
+        raise NotImplementedError("Use one of the non-default "
+                                  "MassFunction classes")
 
 
 class MassFuncPress74(MassFunc):
@@ -91,14 +93,14 @@ class MassFuncPress74(MassFunc):
         self.norm = np.sqrt(2/np.pi)
 
     def _check_mdef(self, mdef):
-        if mdef.Delta!='fof':
+        if mdef.Delta != 'fof':
             return True
         return False
 
     def get_fsigma(self, cosmo, sigM, a, lnM):
         status = 0
         delta_c, status = lib.dc_NakamuraSuto(cosmo.cosmo, a, status)
-        check(status);
+        check(status)
 
         nu = delta_c/sigM
         return self.norm * nu * np.exp(-0.5 * nu**2)
@@ -116,17 +118,18 @@ class MassFuncSheth99(MassFunc):
         self.a = 0.707
 
     def _check_mdef(self, mdef):
-        if mdef.Delta!='fof':
+        if mdef.Delta != 'fof':
             return True
         return False
 
     def get_fsigma(self, cosmo, sigM, a, lnM):
         status = 0
         delta_c, status = lib.dc_NakamuraSuto(cosmo.cosmo, a, status)
-        check(status);
+        check(status)
 
         nu = delta_c/sigM
-        return nu*self.A*(1.+(self.a*nu**2)**(-self.p))*np.exp(-self.a*nu**2/2.);
+        return nu * self.A * (1. + (self.a * nu**2)**(-self.p)) * \
+            np.exp(-self.a * nu**2/2.)
 
 
 class MassFuncJenkins01(MassFunc):
@@ -141,7 +144,7 @@ class MassFuncJenkins01(MassFunc):
         self.q = 3.8
 
     def _check_mdef(self, mdef):
-        if mdef.Delta!='fof':
+        if mdef.Delta != 'fof':
             return True
         return False
 
@@ -160,7 +163,6 @@ class MassFuncTinker08(MassFunc):
 
         delta = np.array([200.0, 300.0, 400.0, 600.0, 800.0,
                           1200.0, 1600.0, 2400.0, 3200.0])
-        
         alpha = np.array([0.186, 0.200, 0.212, 0.218, 0.248,
                           0.255, 0.260, 0.260, 0.260])
         beta = np.array([1.47, 1.52, 1.56, 1.61, 1.87,
@@ -178,7 +180,8 @@ class MassFuncTinker08(MassFunc):
         self.pc = interp1d(ldelta, phi)(ld)
 
     def _check_mdef(self, mdef):
-        if (mdef.Delta<200.) or (mdef.Delta>3200.) or (mdef.rho_type!='matter'):
+        if (mdef.Delta < 200.) or (mdef.Delta > 3200.) or \
+           (mdef.rho_type != 'matter'):
             return True
         return False
 
@@ -207,7 +210,7 @@ class MassFuncDespali16(MassFunc):
     def get_fsigma(self, cosmo, sigM, a, lnM):
         status = 0
         delta_c, status = lib.dc_NakamuraSuto(cosmo.cosmo, a, status)
-        check(status);
+        check(status)
 
         Dv, status = lib.Dv_BryanNorman(cosmo.cosmo, a, status)
         check(status)
@@ -227,7 +230,8 @@ class MassFuncDespali16(MassFunc):
         nu = delta_c/sigM
         nu_p = a * nu**2
 
-        return 2.0 * A * np.sqrt(nu_p / 2.0 / np.pi) * np.exp(-0.5 * nu_p) * (1.0 + nu_p**-p)
+        return 2.0 * A * np.sqrt(nu_p / 2.0 / np.pi) * \
+            np.exp(-0.5 * nu_p) * (1.0 + nu_p**-p)
 
 
 class MassFuncTinker10(MassFunc):
@@ -235,13 +239,12 @@ class MassFuncTinker10(MassFunc):
         super(MassFuncTinker10, self).__init__("Tinker10",
                                                cosmo,
                                                mass_def)
- 
+
     def _setup(self, cosmo):
         from scipy.interpolate import interp1d
 
         delta = np.array([200.0, 300.0, 400.0, 600.0, 800.0,
                           1200.0, 1600.0, 2400.0, 3200.0])
-
         delta = np.array([200.0, 300.0, 400.0, 600.0, 800.0,
                           1200.0, 1600.0, 2400.0, 3200.0])
         alpha = np.array([0.368, 0.363, 0.385, 0.389, 0.393,
@@ -264,7 +267,8 @@ class MassFuncTinker10(MassFunc):
         self.pd0 = interp1d(ldelta, phi)(ld)
 
     def _check_mdef(self, mdef):
-        if (mdef.Delta<200.) or (mdef.Delta>3200.) or (mdef.rho_type!='matter'):
+        if (mdef.Delta < 200.) or (mdef.Delta > 3200.) or \
+           (mdef.rho_type != 'matter'):
             return True
         return False
 
@@ -286,7 +290,7 @@ class MassFuncBocquet16(MassFunc):
                                                 mass_def)
 
     def _setup(self, cosmo):
-        if self.mdef_type=='200m':
+        if self.mdef_type == '200m':
             if self.hydro:
                 self.A0 = 0.228
                 self.a0 = 2.15
@@ -305,7 +309,7 @@ class MassFuncBocquet16(MassFunc):
                 self.az = -0.040
                 self.bz = -0.194
                 self.cz = -0.021
-        elif self.mdef_type=='200c':
+        elif self.mdef_type == '200c':
             if self.hydro:
                 self.A0 = 0.202
                 self.a0 = 2.21
@@ -324,7 +328,7 @@ class MassFuncBocquet16(MassFunc):
                 self.az = 0.321
                 self.bz = -0.621
                 self.cz = -0.153
-        elif self.mdef_type=='500c':
+        elif self.mdef_type == '500c':
             if self.hydro:
                 self.A0 = 0.180
                 self.a0 = 2.29
@@ -345,16 +349,16 @@ class MassFuncBocquet16(MassFunc):
                 self.cz = -0.310
 
     def _check_mdef(self, mdef):
-        if np.fabs(mdef.Delta-200.)<1E-4:
-            if mdef.rho_type=='matter':
-                self.mdef_type='200m'
-            elif mdef.rho_type=='critical':
-                self.mdef_type='200c'
+        if np.fabs(mdef.Delta - 200.) < 1E-4:
+            if mdef.rho_type == 'matter':
+                self.mdef_type = '200m'
+            elif mdef.rho_type == 'critical':
+                self.mdef_type = '200c'
             else:
                 return True
-        elif np.fabs(mdef.Delta-500.)<1E-4:
-            if mdef.rho_type=='critical':
-                self.mdef_type='500c'
+        elif np.fabs(mdef.Delta - 500.) < 1E-4:
+            if mdef.rho_type == 'critical':
+                self.mdef_type = '500c'
             else:
                 return True
         else:
@@ -401,7 +405,7 @@ class MassFuncWatson13(MassFunc):
         super(MassFuncWatson13, self).__init__("Watson13",
                                                cosmo,
                                                mass_def)
- 
+
     def _setup(self, cosmo):
         self.is_fof = self.mdef.Delta == 'fof'
 
@@ -420,13 +424,13 @@ class MassFuncWatson13(MassFunc):
         else:
             om = omega_x(cosmo, a, "matter")
             Delta_178 = self.mdef.Delta / 178.0
-            
-            if a==1.0:
+
+            if a == 1.0:
                 pA = 0.194
                 pa = 1.805
                 pb = 2.267
                 pc = 1.287
-            elif a<0.14285714285714285:  # z>6
+            elif a < 0.14285714285714285:  # z>6
                 pA = 0.563
                 pa = 3.810
                 pb = 0.874
@@ -440,7 +444,8 @@ class MassFuncWatson13(MassFunc):
             f_178 = pA * ((pb / sigM)**pa + 1.) * np.exp(-pc / sigM**2)
             C = np.exp(0.023 * (Delta_178 - 1.0))
             d = -0.456 * om - 0.139
-            Gamma = C * Delta_178**d * np.exp(0.072 * (1.0 - Delta_178) / sigM**2.130)
+            Gamma = (C * Delta_178**d *
+                     np.exp(0.072 * (1.0 - Delta_178) / sigM**2.130))
             return f_178 * Gamma
 
 
@@ -449,7 +454,7 @@ class MassFuncAngulo12(MassFunc):
         super(MassFuncAngulo12, self).__init__("Angulo12",
                                                cosmo,
                                                mass_def)
- 
+
     def _setup(self, cosmo):
         self.A = 0.201
         self.a = 2.08
@@ -462,4 +467,5 @@ class MassFuncAngulo12(MassFunc):
         return False
 
     def get_fsigma(self, cosmo, sigM, a, lnM):
-        return self.A * ((self.a / sigM)**self.b + 1.) * np.exp(-self.c / sigM**2)
+        return self.A * ((self.a / sigM)**self.b + 1.) * \
+            np.exp(-self.c / sigM**2)

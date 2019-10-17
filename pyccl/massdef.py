@@ -1,12 +1,12 @@
 from . import ccllib as lib
 from .core import check
-from .concentration import *
+from . import concentration as cnc
 from .background import species_types, rho_x, omega_x
 import numpy as np
 
 
 def mass2radius_lagrangian(cosmo, M):
-    return (M / (4.18879020479 * rho_x(cosmo, a, self.rho_type)))**(1./3.)
+    return (M / (4.18879020479 * rho_x(cosmo, 1, 'matter')))**(1./3.)
 
 
 def get_new_concentration_py(cosmo, c_old, Delta_old, Delta_new):
@@ -19,12 +19,14 @@ def get_new_concentration_py(cosmo, c_old, Delta_old, Delta_new):
     Args:
         cosmo (:obj:`Cosmology`): A Cosmology object.
         c_old (float or array_like): concentration to translate from.
-        Delta_old (float): Delta parameter associated to the input concentration.
-            See description of the HMDef class.
-        Delta_new (float): Delta parameter associated to the output concentration.
+        Delta_old (float): Delta parameter associated to the input
+            concentration. See description of the HMDef class.
+        Delta_new (float): Delta parameter associated to the output
+            concentration.
 
     Returns:
-        float or array_like: concentration parameter for the new mass definition.
+        float or array_like: concentration parameter for the new
+        mass definition.
     """
     status = 0
     c_old_use = np.atleast_1d(c_old)
@@ -66,15 +68,17 @@ class HMDef(object):
                 raise ValueError("Delta must be a positive number")
         self.Delta = Delta
         # Can only be matter or critical
-        if rho_type not in ['matter','critical']:
-            raise ValueError("rho_type must be either \'matter\' or \'critical\'")
+        if rho_type not in ['matter', 'critical']:
+            raise ValueError("rho_type must be either \'matter\' "
+                             "or \'critical\'")
         self.rho_type = rho_type
         self.species = species_types[rho_type]
         # c(M) relation
         self.concentration = c_m_relation
 
     def __eq__(self, other):
-        return (self.Delta == other.Delta) and (self.rho_type == other.rho_type)
+        return (self.Delta == other.Delta) and \
+            (self.rho_type == other.rho_type)
 
     def get_Delta(self, cosmo, a):
         if self.Delta == 'vir':
@@ -103,7 +107,7 @@ class HMDef(object):
         Delta = self.get_Delta(cosmo, a)
         return 4.18879020479 * rho_x(cosmo, a, self.rho_type) * Delta * R**3
 
-    def get_radius(self, cosmo, M, a): 
+    def get_radius(self, cosmo, M, a):
         """ Translates a halo mass into a radius
             M =  (4 * pi / 3) * rho_X * Delta * R^3
 
@@ -117,7 +121,8 @@ class HMDef(object):
                 comoving).
         """
         Delta = self.get_Delta(cosmo, a)
-        return (M / (4.18879020479 * Delta * rho_x(cosmo, a, self.rho_type)))**(1./3.)
+        return (M / (4.18879020479 * Delta *
+                     rho_x(cosmo, a, self.rho_type)))**(1./3.)
 
     def get_concentration(self, cosmo, M, a):
         """ Returns concentration for this mass definition.
@@ -131,8 +136,8 @@ class HMDef(object):
             float or array_like: halo concentration.
         """
         if self.concentration is None:
-            raise RuntimeError("This mass definition doesn't have an associated"
-                               "c(M) relation")
+            raise RuntimeError("This mass definition doesn't have "
+                               "an associated c(M) relation")
         else:
             return self.concentration(cosmo, M, a)
 
@@ -152,13 +157,15 @@ class HMDef(object):
             return M
         else:
             if self.concentration is None:
-                raise RuntimeError("This mass definition doesn't have an associated"
-                                   "c(M) relation")
+                raise RuntimeError("This mass definition doesn't have "
+                                   "an associated c(M) relation")
             else:
-                D_this = self.get_Delta(cosmo, a) * omega_x(cosmo, a, self.rho_type)
+                om_this = omega_x(cosmo, a, self.rho_type)
+                D_this = self.get_Delta(cosmo, a) * om_this
                 c_this = self.get_concentration(cosmo, M, a)
                 R_this = self.get_radius(cosmo, M, a)
-                D_new = m_def_other.get_Delta(cosmo, a) * omega_x(cosmo, a, m_def_other.rho_type)
+                om_new = omega_x(cosmo, a, m_def_other.rho_type)
+                D_new = m_def_other.get_Delta(cosmo, a) * om_new
                 c_new = get_new_concentration_py(cosmo, c_this, D_this, D_new)
                 R_new = c_new * R_this / c_this
                 return m_def_other.get_mass(cosmo, R_new, a)
@@ -175,15 +182,15 @@ class HMDef200mat(HMDef):
     """
     def __init__(self, c_m='Duffy08'):
         if c_m == 'Duffy08':
-            c_m_f = concentration_duffy08_200mat
+            c_m_f = cnc.concentration_duffy08_200mat
         elif c_m == 'Bhattacharya11':
-            c_m_f = concentration_bhattacharya11_200mat
+            c_m_f = cnc.concentration_bhattacharya11_200mat
         else:
             raise NotImplementedError("Unknwon c(M) relation " + c_m)
 
         super(HMDef200mat, self).__init__(200,
                                           'matter',
-                                          c_m_relation = c_m_f)
+                                          c_m_relation=c_m_f)
 
 
 class HMDef200crit(HMDef):
@@ -197,12 +204,12 @@ class HMDef200crit(HMDef):
     """
     def __init__(self, c_m='Duffy08'):
         if c_m == 'Duffy08':
-            c_m_f = concentration_duffy08_200crit
+            c_m_f = cnc.concentration_duffy08_200crit
         elif c_m == 'Bhattacharya11':
-            c_m_f = concentration_bhattacharya11_200crit
+            c_m_f = cnc.concentration_bhattacharya11_200crit
         else:
             raise NotImplementedError("Unknwon c(M) relation " + c_m)
 
         super(HMDef200crit, self).__init__(200,
                                            'critical',
-                                           c_m_relation = c_m_f)
+                                           c_m_relation=c_m_f)
