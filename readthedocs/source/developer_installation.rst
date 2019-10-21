@@ -20,7 +20,9 @@ To install CCL using a ``pip`` developer installation, you can execute
 
 from the top-level directory in the repository. You will need ``CMake`` in
 order to install CCL in this way. See :ref:`getting-cmake` for help installing
-``CMake`` if you do not already have it.
+``CMake`` if you do not already have it. In order to run the tests,
+you will need both ``CAMB`` and ``CLASS`` installed. See the instructions for
+:ref:`boltzmann-codes` for details.
 
 
 C-layer Dependencies and Requirements
@@ -37,3 +39,13 @@ These dependencies are
 * `FFTW3 <http://www.fftw.org/>`_ version 3.1 or above
 * `CLASS <http://class-code.net/>`_ version 2.6.3 or above
 * `SWIG <http://www.swig.org/>`_
+
+
+Uninstalling ``CCL`` in Developer Mode
+======================================
+
+To uninstall ``CCL`` in developer mode, simply type
+
+.. code-block:: bash
+
+   $ pip uninstall pyccl
