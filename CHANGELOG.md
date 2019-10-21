@@ -1,4 +1,4 @@
-# Unreleased
+# v 2.0 Changes
 
 ## Python library
 - Made CAMB the default Boltzmann code (#685).

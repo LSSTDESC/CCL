@@ -111,3 +111,17 @@ Known Installation Issues
       $ sudo installer -pkg /Library/Developer/CommandLineTools/Packages/macOS_SDK_headers_for_macOS_10.14.pkg -target /
 
    which will install all the required headers into ``/usr/include``.
+
+
+.. _uninstalling:
+
+Uninstalling ``CCL``
+====================
+
+``CCL`` can be uninstalled using the uninstallation functionality of the
+package manager (i.e., ``conda`` or ``pip``) you used to install it. When in doubt,
+first try with ``conda`` and then try with ``pip``. In either case, the command is
+
+.. code-block:: bash
+
+   $ [conda|pip] uninstall pyccl
