@@ -8,7 +8,7 @@ MESSAGE( STATUS "CMAKE_BUILD_TYPE: " ${CMAKE_BUILD_TYPE} )
 # Adding customized cmake module
 list(APPEND CMAKE_MODULE_PATH  "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
-project(ccl VERSION 0.2.1)
+project(ccl VERSION 2.0.0)
 
 option(FORCE_OPENMP "Forcibly use OpenMP " NO)
 
@@ -16,7 +16,7 @@ option(FORCE_OPENMP "Forcibly use OpenMP " NO)
 set(CCL_SRC
     src/ccl_background.c src/ccl_core.c src/ccl_error.c
     src/ccl_bbks.c src/ccl_f1d.c src/ccl_f2d.c src/ccl_power.c src/ccl_bcm.c
-    src/ccl_eh.c src/ccl_class.c
+    src/ccl_eh.c src/ccl_musigma.c
     src/ccl_utils.c src/ccl_cls.c src/ccl_massfunc.c
     src/ccl_neutrinos.c
     src/ccl_emu17.c src/ccl_correlation.c

@@ -18,9 +18,8 @@ typedef enum transfer_function_t
   ccl_transfer_none     = 0,
   ccl_eisenstein_hu     = 1,
   ccl_bbks              = 2,
-  ccl_boltzmann_class   = 3
-  // not implemented - left here to reserve it for later
-  // ccl_boltzmann_camb    = 4,
+  ccl_boltzmann_class   = 3,
+  ccl_boltzmann_camb    = 4,
 } transfer_function_t;
 
 /**
@@ -51,7 +50,7 @@ typedef enum baryons_power_spectrum_t
   // even more kinds ...
 } baryons_power_spectrum_t;
 
-/** 
+/**
  * Mass function typedef
  * Contains all information that describes a specific
  * mass function. This is basically a switch that chooses

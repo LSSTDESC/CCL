@@ -213,13 +213,10 @@ typedef struct ccl_parameters {
   double Neff; // Effective number of relativistic neutrino species in the early universe.
   int N_nu_mass; // Number of species of neutrinos which are nonrelativistic today
   double N_nu_rel;  // Number of species of neutrinos which are relativistic  today
-  double *mnu;  // total mass of massive neutrinos (This is a pointer so that it can hold multiple masses.)
+  double *m_nu;  // total mass of massive neutrinos (This is a pointer so that it can hold multiple masses.)
   double sum_nu_masses; // sum of the neutrino masses.
-  double Omega_n_mass; // Omega_nu for MASSIVE neutrinos
-  double Omega_n_rel; // Omega_nu for MASSLESS neutrinos
-
-  //double Neff_partial[CCL_MAX_NU_SPECIES];
-  //double mnu[CCL_MAX_NU_SPECIES];
+  double Omega_nu_mass; // Omega_nu for MASSIVE neutrinos
+  double Omega_nu_rel; // Omega_nu for MASSLESS neutrinos
 
   // Primordial power spectra
   double A_s;
@@ -309,15 +306,6 @@ typedef struct ccl_cosmology {
   // other flags?
 } ccl_cosmology;
 
-// Label for whether you are passing a pointer to a sum of neutrino masses or a pointer to a list of 3 masses.
-typedef enum ccl_mnu_convention {
-  ccl_mnu_list = 0,   // you pass a list of three neutrino masses
-  ccl_mnu_sum = 1,  // sum, defaults to splitting with normal hierarchy
-  ccl_mnu_sum_inverted = 2, //sum, split with inverted hierarchy
-  ccl_mnu_sum_equal = 3, //sum, split into equal masses
-  // More options could be added here
-} ccl_mnu_convention;
-
 // Initialization and life cycle of objects
 ccl_cosmology * ccl_cosmology_create(ccl_parameters params, ccl_configuration config);
 
@@ -349,7 +337,7 @@ void ccl_cosmology_set_status_message(ccl_cosmology * cosmo, const char * status
  * @return void
  */
 ccl_parameters ccl_parameters_create(double Omega_c, double Omega_b, double Omega_k,
-				     double Neff, double* mnu, ccl_mnu_convention mnu_type,
+				     double Neff, double* mnu, int n_mnu,
 				     double w0, double wa, double h, double norm_pk,
 				     double n_s, double bcm_log10Mc, double bcm_etab, double bcm_ks,
 				     double mu_0, double sigma_0, int nz_mgrowth, double *zarr_mgrowth,

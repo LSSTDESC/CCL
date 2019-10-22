@@ -58,7 +58,10 @@ def test_background_omega_x(a, kind):
 
     if np.all(a == 1):
         if kind == 'matter':
-            val_z0 = COSMO_NU['Omega_b'] + COSMO_NU['Omega_c']
+            val_z0 = (
+                COSMO_NU['Omega_b'] +
+                COSMO_NU['Omega_c'] +
+                COSMO_NU['Omega_nu_mass'])
         elif kind == 'dark_energy':
             val_z0 = COSMO_NU['Omega_l']
         elif kind == 'radiation':
@@ -66,9 +69,9 @@ def test_background_omega_x(a, kind):
         elif kind == 'curvature':
             val_z0 = COSMO_NU['Omega_k']
         elif kind == 'neutrinos_rel':
-            val_z0 = COSMO_NU['Omega_n_rel']
+            val_z0 = COSMO_NU['Omega_nu_rel']
         elif kind == 'neutrinos_massive':
-            val_z0 = COSMO_NU['Omega_n_mass']
+            val_z0 = COSMO_NU['Omega_nu_mass']
 
         assert np.allclose(val, val_z0)
 

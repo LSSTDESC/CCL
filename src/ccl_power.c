@@ -192,11 +192,11 @@ static void ccl_cosmology_compute_power_emu(ccl_cosmology * cosmo, int * status)
     if(cosmo->params.N_nu_mass>0) {
       if (cosmo->config.emulator_neutrinos_method == ccl_emu_strict){
   if (cosmo->params.N_nu_mass==3){
-    if (cosmo->params.mnu[0] != cosmo->params.mnu[1] || cosmo->params.mnu[0] != cosmo->params.mnu[2] || cosmo->params.mnu[1] != cosmo->params.mnu[2]){
+    if (cosmo->params.m_nu[0] != cosmo->params.m_nu[1] || cosmo->params.m_nu[0] != cosmo->params.m_nu[2] || cosmo->params.m_nu[1] != cosmo->params.m_nu[2]){
       *status = CCL_ERROR_INCONSISTENT;
       ccl_cosmology_set_status_message(cosmo,
                "ccl_power.c: ccl_cosmology_compute_power_emu(): In the default configuration, you must pass a list of 3 "
-               "equal neutrino masses or pass a sum and set mnu_type = ccl_mnu_sum_equal. If you wish to over-ride this, "
+               "equal neutrino masses or pass a sum and set m_nu_type = 'equal'. If you wish to over-ride this, "
                "set config->emulator_neutrinos_method = 'ccl_emu_equalize'. This will force the neutrinos to be of equal "
                "mass but will result in internal inconsistencies.\n");
     }
@@ -204,7 +204,7 @@ static void ccl_cosmology_compute_power_emu(ccl_cosmology * cosmo, int * status)
     *status = CCL_ERROR_INCONSISTENT;
     ccl_cosmology_set_status_message(cosmo,
              "ccl_power.c: ccl_cosmology_compute_power_emu(): In the default configuration, you must pass a list of 3 "
-             "equal neutrino masses or pass a sum and set mnu_type = ccl_mnu_sum_equal. If you wish to over-ride this, "
+             "equal neutrino masses or pass a sum and set m_nu_type = 'equal'. If you wish to over-ride this, "
              "set config->emulator_neutrinos_method = 'ccl_emu_equalize'. This will force the neutrinos to be of equal "
              "mass but will result in internal inconsistencies.\n");
   }
@@ -233,7 +233,7 @@ static void ccl_cosmology_compute_power_emu(ccl_cosmology * cosmo, int * status)
   }
 
   if(*status==0) {
-    if(cosmo->params.Omega_n_mass*cosmo->params.h*cosmo->params.h>0.01){
+    if(cosmo->params.Omega_nu_mass*cosmo->params.h*cosmo->params.h>0.01){
       *status=CCL_ERROR_INCONSISTENT;
       ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_cosmology_compute_power_emu(): "
                "Omega_nu does not satisfy the emulator bound\n");
@@ -305,7 +305,7 @@ static void ccl_cosmology_compute_power_emu(ccl_cosmology * cosmo, int * status)
       if ((cosmo->params.N_nu_mass>0) && (cosmo->config.emulator_neutrinos_method == ccl_emu_equalize)){
   emu_par[7] = Omeganuh2_eq;
       }else{
-  emu_par[7] = cosmo->params.Omega_n_mass*cosmo->params.h*cosmo->params.h;
+  emu_par[7] = cosmo->params.Omega_nu_mass*cosmo->params.h*cosmo->params.h;
       }
       emu_par[8] = 1./aemu[j]-1;
       //Need to have this here because otherwise overwritten by emu in each loop
@@ -431,17 +431,6 @@ INPUT: ccl_cosmology * cosmo
 TASK: compute linear power spectrum
 */
 void ccl_cosmology_compute_linear_power(ccl_cosmology* cosmo, ccl_f2d_t *psp, int* status) {
-  if ((cosmo->config.transfer_function_method != ccl_boltzmann_class &&
-       cosmo->config.transfer_function_method != ccl_transfer_none) &&
-      (fabs(cosmo->params.mu_0) > 1e-14 || fabs(cosmo->params.sigma_0) > 1e-14)) {
-    *status = CCL_ERROR_NOT_IMPLEMENTED;
-    ccl_cosmology_set_status_message(
-      cosmo,
-      "ccl_power.c: ccl_cosmology_compute_power(): The power spectrum in the "
-      "mu / Sigma modified gravity parameterisation is only implemented with "
-      "the ccl_boltzmann_class power spectrum method.\n");
-    return;
-  }
   if (cosmo->computed_linear_power) return;
 
   if (*status == 0) {
@@ -464,6 +453,10 @@ void ccl_cosmology_compute_linear_power(ccl_cosmology* cosmo, ccl_f2d_t *psp, in
         break;
 
       case ccl_boltzmann_class:
+        ccl_cosmology_spline_linpower_musigma(cosmo, psp, status);
+        break;
+
+      case ccl_boltzmann_camb:
         ccl_cosmology_spline_linpower_musigma(cosmo, psp, status);
         break;
 

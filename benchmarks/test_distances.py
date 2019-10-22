@@ -35,7 +35,7 @@ w0_vals = np.array([-1.0, -0.9, -0.9, -0.9, -0.9])
 wa_vals = np.array([0.0, 0.0, 0.1, 0.1, 0.1])
 
 mnu = [
-    [0.04, 0., 0.], [0.05, 0.01, 0.], [0.03, 0.02, 0.04], [0.05, 0., 0.],
+    [0.04, 0., 0.], [0.05, 0.01, 0.], [0.05, 0., 0.],
     [0.03, 0.02, 0.]]
 # For tests with massive neutrinos, we require N_nu_rel + N_nu_mass = 3
 # Because we compare with astropy for benchmarks
@@ -514,14 +514,14 @@ def test_distance_hiz_model(i):
         zhi, chi_hiz[i], Omega_v_vals[i], w0_vals[i], wa_vals[i])
 
 
-@pytest.mark.parametrize('i', list(range(5)))
+@pytest.mark.parametrize('i', list(range(4)))
 def test_distance_mnu_model(i):
     compare_distances_mnu(
         znu, chi_nu[i], dm_nu[i], Omega_v_vals[i], w0_vals[i],
         wa_vals[i], Neff, mnu[i])
 
 
-@pytest.mark.parametrize('i', list(range(5)))
+@pytest.mark.parametrize('i', list(range(4)))
 def test_distance_mnu_hiz_model(i):
     compare_distances_mnu(znuhi, chi_nu_hiz[i], dm_nu_hiz[i], Omega_v_vals[i],
                           w0_vals[i], wa_vals[i], Neff, mnu[i])

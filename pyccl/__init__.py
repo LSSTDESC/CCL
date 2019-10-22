@@ -1,6 +1,3 @@
-"""The pyccl package contains all of the submodules that are implemented in
-individual files in CCL.
-"""
 # flake8: noqa
 from pkg_resources import get_distribution, DistributionNotFound
 try:
@@ -66,4 +63,4 @@ from .neutrinos import Omeganuh2, nu_masses
 # Expose function to toggle debug mode
 from .pyutils import debug_mode
 
-from .errors import CCLError
+from .errors import CCLError, CCLWarning

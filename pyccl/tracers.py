@@ -376,6 +376,7 @@ class WeakLensingTracer(Tracer):
 
 class CMBLensingTracer(Tracer):
     """A Tracer for CMB lensing.
+
     Args:
         cosmo (:obj:`Cosmology`): Cosmology object.
         z_source (float): Redshift of source plane for CMB lensing.
