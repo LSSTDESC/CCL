@@ -1,3 +1,9 @@
+# v2.0.1 Changes
+
+## Bug Fixes
+- Fixed a PyPi installation bug where the proper files for `CMAKE` were not
+  included in the source distribution.
+
 # v 2.0 Changes
 
 ## Python library
