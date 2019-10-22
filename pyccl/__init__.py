@@ -13,7 +13,7 @@ if environ.get("CLASS_PARAM_DIR") is None:
     environ["CLASS_PARAM_DIR"] = path.dirname(path.abspath(__file__))
 
 from . import ccllib as lib
-from . import core, constants, background, power, massfunction, halomodel, pk2d, haloprofile
+from . import core, constants, background, power, halomodel, pk2d, haloprofile
 
 # Core data structures
 from .core import Cosmology

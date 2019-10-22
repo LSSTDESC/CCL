@@ -32,7 +32,7 @@ class HBiasFunc(object):
                                  " rho = " + mass_def.rho_type)
             self.mdef = mass_def
         else:
-            self._default_mdef()    
+            self._default_mdef()
         self._setup(cosmo)
 
     def _default_mdef(self):

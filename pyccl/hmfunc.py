@@ -520,13 +520,13 @@ class MassFuncBocquet16(MassFunc):
         if np.fabs(mdef.Delta - 200.) < 1E-4:
             if (mdef.rho_type != 'matter') and \
                (mdef.rho_type != 'critical'):
-                return False
+                return True
         elif np.fabs(mdef.Delta - 500.) < 1E-4:
             if mdef.rho_type == 'critical':
-                return False
+                return True
         else:
-            return False
-        return True
+            return True
+        return False
 
     def get_fsigma(self, cosmo, sigM, a, lnM):
         zp1 = 1./a
