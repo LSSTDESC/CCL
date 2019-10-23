@@ -273,7 +273,7 @@ double ccl_omega_x(ccl_cosmology * cosmo, double a, ccl_species_x_label label, i
  *  For specific cases see documentation for ccl_error.c
  * @return Sigma(z), function of the mu / Sigma parameterisation of modified gravity.
 */
-double ccl_Sig_MG(ccl_cosmology * cosmo, double a, int *status);
+double ccl_Sig_MG(ccl_cosmology * cosmo, double a, double k, int *status);
 
 /**
  * mu(z) in the mu / Sigma parameterisation of modified gravity at a given redshift.
@@ -283,7 +283,7 @@ double ccl_Sig_MG(ccl_cosmology * cosmo, double a, int *status);
  *  For specific cases see documentation for ccl_error.c
  * @return mu(z), function of the mu / Sigma parameterisation of modified gravity.
 */
-double ccl_mu_MG(ccl_cosmology * cosmo, double a, int *status);
+double ccl_mu_MG(ccl_cosmology * cosmo, double a, double k, int *status);
 
 /**
  * Compute comoving distances and spline to be stored

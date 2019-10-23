@@ -138,11 +138,15 @@ of modifications to GR in the quasistatic approximation.
 MI: tag to get started 
 */
 
-double ccl_mu_MG(ccl_cosmology * cosmo, double a, int *status)
+double ccl_mu_MG(ccl_cosmology * cosmo, double a, double k, int *status)
 {
 	// This function can be extended to include other
 	// z-dependences for mu in the future.
-	return cosmo->params.mu_0 * ccl_omega_x(cosmo, a, ccl_species_l_label, status) / cosmo->params.Omega_l;
+	double hnorm = h_over_h0(a, cosmo, status);
+/* MI: check again units and k  */
+	double s2_k = (cosmo->params.lambda*(hnorm*cosmo->params.h/a)/k/(ccl_constants.CLIGHT/1000));
+	double s1_k = (1.0+cosmo->params.c1*s2_k*s2_k)/(1.0+s2_k*s2_k);
+	return cosmo->params.mu_0 * ccl_omega_x(cosmo, a, ccl_species_l_label, status) / cosmo->params.Omega_l * sk_1;
 }
 
 /* --------- ROUTINE: ccl_Sig_MG ---------
@@ -153,11 +157,15 @@ of modifications to GR in the quasistatic approximation.
 MI: tag to get started 
 */
 
-double ccl_Sig_MG(ccl_cosmology * cosmo, double a, int *status)
+double ccl_Sig_MG(ccl_cosmology * cosmo, double a, double k, int *status)
 {
 	// This function can be extended to include other
 	// z-dependences for Sigma in the future.
-	return cosmo->params.sigma_0 * ccl_omega_x(cosmo, a, ccl_species_l_label, status) / cosmo->params.Omega_l;
+	double hnorm = h_over_h0(a, cosmo, status);
+/* MI: check again units and k  */
+	double s2_k = (cosmo->params.lambda*(hnorm*cosmo->params.h/a)/k/(ccl_constants.CLIGHT/1000));
+	double s1_k = (1.0+cosmo->params.c2*s2_k*s2_k)/(1.0+s2_k*s2_k);
+	return cosmo->params.sigma_0 * ccl_omega_x(cosmo, a, ccl_species_l_label, status) / cosmo->params.Omega_l * sk_1;
 }
 
 // Structure to hold parameters of chi_integrand
