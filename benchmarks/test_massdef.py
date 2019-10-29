@@ -18,11 +18,6 @@ hmd_200c_b = ccl.HMDef200crit('Bhattacharya11')
 hmd_500c = ccl.HMDef(500, 'critical')
 
 
-def test_mdef_eq():
-    hmd_200m_b = ccl.HMDef(200, 'matter')
-    assert hmd_200m == hmd_200m_b
-
-
 def test_mdef_get_radius():
     Rs_200m_h = hmd_200m.get_radius(cosmo, Ms, 1.)
     Rs_500c_h = hmd_500c.get_radius(cosmo, Ms, 1.)
