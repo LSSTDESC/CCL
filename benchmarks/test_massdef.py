@@ -4,17 +4,30 @@ import pyccl as ccl
 
 cosmo = ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, Omega_g=0, Omega_k=0,
                       h=0.7, sigma8=0.8, n_s=0.96, Neff=0, m_nu=0.0,
-                      w0=-1, wa=0, T_CMB=2.7)
+                      w0=-1, wa=0, T_CMB=2.7255,
+                      transfer_function='eisenstein_hu')
 dirdat = os.path.dirname(__file__) + '/data/'
 Ms, Rs_200m, Rs_500c, Ms_500c = np.loadtxt(dirdat + 'mdef_bm.txt',
                                            unpack=True)
-Ms, cs_200m_d, cs_200c_d, cs_200m_b, cs_200c_b = np.loadtxt(dirdat +
-                                                            'conc_bm.txt',
-                                                            unpack=True)
+dc = np.loadtxt(dirdat + 'conc_bm.txt', unpack=True)
+Ms = dc[0]
+cs_200m_d = dc[1]
+cs_200c_d = dc[2]
+cs_200m_b = dc[3]
+cs_200c_b = dc[4]
+cs_vir_k = dc[5]
+cs_vir_b = dc[6]
+cs_200c_p = dc[7]
+cs_200c_di = dc[8]
+
+hmd_vir = ccl.halos.MassDefVir()
+hmd_vir_b = ccl.halos.MassDefVir('Bhattacharya13')
 hmd_200m = ccl.halos.MassDef200mat()
-hmd_200m_b = ccl.halos.MassDef200mat('Bhattacharya11')
+hmd_200m_b = ccl.halos.MassDef200mat('Bhattacharya13')
 hmd_200c = ccl.halos.MassDef200crit()
-hmd_200c_b = ccl.halos.MassDef200crit('Bhattacharya11')
+hmd_200c_b = ccl.halos.MassDef200crit('Bhattacharya13')
+hmd_200c_p = ccl.halos.MassDef200crit('Prada12')
+hmd_200c_di = ccl.halos.MassDef200crit('Diemer15')
 hmd_500c = ccl.halos.MassDef(500, 'critical')
 
 
@@ -33,14 +46,30 @@ def test_mdef_get_mass():
 
 
 def test_mdef_concentration():
+    # Duffy 200 matter
     cs_200m_dh = hmd_200m.get_concentration(cosmo, Ms, 1.)
+    # Bhattacharya 200 matter
     cs_200m_bh = hmd_200m_b.get_concentration(cosmo, Ms, 1.)
+    # Duffy 200 critical
     cs_200c_dh = hmd_200c.get_concentration(cosmo, Ms, 1.)
+    # Bhattacharya 200 critical
     cs_200c_bh = hmd_200c_b.get_concentration(cosmo, Ms, 1.)
+    # Klypin virial
+    cs_vir_kh = hmd_vir.get_concentration(cosmo, Ms, 1.)
+    # Bhattacharya virial
+    cs_vir_bh = hmd_vir_b.get_concentration(cosmo, Ms, 1.)
+    # Prada 200 critical
+    cs_200c_ph = hmd_200c_p.get_concentration(cosmo, Ms, 1.)
+    # Diemer 200 critical
+    cs_200c_dih = hmd_200c_di.get_concentration(cosmo, Ms, 1.)
     assert np.all(np.fabs(cs_200m_dh/cs_200m_d-1) < 1E-6)
     assert np.all(np.fabs(cs_200c_dh/cs_200c_d-1) < 1E-6)
     assert np.all(np.fabs(cs_200m_bh/cs_200m_b-1) < 3E-2)
     assert np.all(np.fabs(cs_200c_bh/cs_200c_b-1) < 3E-2)
+    assert np.all(np.fabs(cs_200c_ph/cs_200c_p-1) < 3E-2)
+    assert np.all(np.fabs(cs_200c_dih/cs_200c_di-1) < 3E-2)
+    assert np.all(np.fabs(cs_vir_kh/cs_vir_k-1) < 3E-2)
+    assert np.all(np.fabs(cs_vir_bh/cs_vir_b-1) < 3E-2)
 
 
 def test_mdef_translate_mass():

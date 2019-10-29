@@ -17,6 +17,14 @@ cs_200c_d = concentration.concentration(Ms * h, '200c',
                                         0.0, model = 'duffy08')
 cs_200c_b = concentration.concentration(Ms * h, '200c',
                                         0.0, model = 'bhattacharya13')
+cs_vir_k = concentration.concentration(Ms * h, 'vir',
+                                       0.0, model = 'klypin11')
+cs_vir_b = concentration.concentration(Ms * h, 'vir',
+                                       0.0, model = 'bhattacharya13')
+cs_200c_p = concentration.concentration(Ms * h, '200c',
+                                        0.0, model = 'prada12')
+cs_200c_di = concentration.concentration(Ms * h, '200c',
+                                         0.0, model = 'diemer15')
 Ms_500c, _, _ = mass_defs.changeMassDefinition(Ms * h, cs_200m_d,
                                                0., '200m', '500c')
 Ms_500c /= h
@@ -24,4 +32,8 @@ Ms_500c /= h
 np.savetxt("../mdef_bm.txt",
            np.transpose([Ms, Rs_200m, Rs_500c, Ms_500c]))
 np.savetxt("../conc_bm.txt",
-           np.transpose([Ms, cs_200m_d, cs_200c_d, cs_200m_b, cs_200c_b]))
+           np.transpose([Ms,
+                         cs_200m_d, cs_200c_d,
+                         cs_200m_b, cs_200c_b,
+                         cs_vir_k, cs_vir_b,
+                         cs_200c_p, cs_200c_di]))

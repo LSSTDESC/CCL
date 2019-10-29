@@ -198,7 +198,7 @@ class MassDef200mat(MassDef):
     """`MassDef` class for the mass definition with Delta=200 times the matter
     density. Available concentration-mass relations (values for `c_m`):
       * 'Duffy08': concentration-mass relation in arXiv:0804.2486.
-      * 'Bhattacharya11': c(M) relation in arXiv:1112.5479.
+      * 'Bhattacharya13': c(M) relation in arXiv:1112.5479.
 
     Args:
         c_m (string): concentration-mass relation.
@@ -206,8 +206,8 @@ class MassDef200mat(MassDef):
     def __init__(self, c_m='Duffy08'):
         if c_m == 'Duffy08':
             c_m_f = cnc.concentration_duffy08_200mat
-        elif c_m == 'Bhattacharya11':
-            c_m_f = cnc.concentration_bhattacharya11_200mat
+        elif c_m == 'Bhattacharya13':
+            c_m_f = cnc.concentration_bhattacharya13_200mat
         else:
             raise NotImplementedError("Unknwon c(M) relation " + c_m)
 
@@ -220,7 +220,9 @@ class MassDef200crit(MassDef):
     """`MassDef` class for the mass definition with Delta=200 times the critical
     density. Available concentration-mass relations (values for `c_m`):
       * 'Duffy08': concentration-mass relation in arXiv:0804.2486.
-      * 'Bhattacharya11': c(M) relation in arXiv:1112.5479.
+      * 'Prada12': c(M) relation in arXiv:1104.5130
+      * 'Bhattacharya13': c(M) relation in arXiv:1112.5479.
+      * 'Diemer15': c(M) relation in arXiv:1809.07326 (updated from 1407.4730).
 
     Args:
         c_m (string): concentration-mass relation.
@@ -228,11 +230,38 @@ class MassDef200crit(MassDef):
     def __init__(self, c_m='Duffy08'):
         if c_m == 'Duffy08':
             c_m_f = cnc.concentration_duffy08_200crit
-        elif c_m == 'Bhattacharya11':
-            c_m_f = cnc.concentration_bhattacharya11_200crit
+        elif c_m == 'Bhattacharya13':
+            c_m_f = cnc.concentration_bhattacharya13_200crit
+        elif c_m == 'Prada12':
+            c_m_f = cnc.concentration_prada12_200crit
+        elif c_m == 'Diemer15':
+            c_m_f = cnc.concentration_diemer15_200crit
         else:
             raise NotImplementedError("Unknwon c(M) relation " + c_m)
 
         super(MassDef200crit, self).__init__(200,
                                              'critical',
                                              c_m_relation=c_m_f)
+
+
+class MassDefVir(MassDef):
+    """`MassDef` class for the mass definition with Delta=Delta_vir times the
+    critical density. Available concentration-mass relations
+    (values for `c_m`):
+      * 'Klypin11': concentration-mass relation in arXiv:1002.3660
+      * 'Bhattacharya13': c(M) relation in arXiv:1112.5479.
+
+    Args:
+        c_m (string): concentration-mass relation.
+    """
+    def __init__(self, c_m='Klypin11'):
+        if c_m == 'Bhattacharya13':
+            c_m_f = cnc.concentration_bhattacharya13_vir
+        elif c_m == 'Klypin11':
+            c_m_f = cnc.concentration_klypin11_vir
+        else:
+            raise NotImplementedError("Unknown c(M) relation " + c_m)
+
+        super(MassDefVir, self).__init__('vir',
+                                         'critical',
+                                         c_m_relation=c_m_f)

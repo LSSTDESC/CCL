@@ -1,20 +1,30 @@
 # Halo concentration
-from .concentration import (
+from .concentration import (  # noqa
+    concentration_prada12_200crit,
+    concentration_klypin11_vir,
     concentration_duffy08_200mat,
     concentration_duffy08_200crit,
-    concentration_bhattacharya11_200mat,
-    concentration_bhattacharya11_200crit)
+    concentration_bhattacharya13_200mat,
+    concentration_bhattacharya13_200crit,
+    concentration_bhattacharya13_vir,
+    concentration_diemer15_200crit)
 
 # Halo mass definitions
-from .massdef import mass2radius_lagrangian, MassDef, MassDef200mat, MassDef200crit
-from .hmfunc import (
+from .massdef import (  # noqa
+    mass2radius_lagrangian, MassDef,
+    MassDef200mat, MassDef200crit,
+    MassDefVir)
+
+# Halo mass functions
+from .hmfunc import (  # noqa
     sigmaM, MassFunc, MassFuncPress74,
     MassFuncSheth99, MassFuncJenkins01,
     MassFuncTinker08, MassFuncTinker10,
     MassFuncWatson13, MassFuncAngulo12,
     MassFuncDespali16, MassFuncBocquet16)
-from .hbias import (
+
+# Halo bias
+from .hbias import (  # noqa
     HaloBias, HaloBiasSheth99,
     HaloBiasSheth01, HaloBiasTinker10,
     HaloBiasBhattacharya11)
-
