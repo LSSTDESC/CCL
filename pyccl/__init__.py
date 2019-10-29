@@ -13,7 +13,7 @@ if environ.get("CLASS_PARAM_DIR") is None:
     environ["CLASS_PARAM_DIR"] = path.dirname(path.abspath(__file__))
 
 from . import ccllib as lib
-from . import core, constants, background, power, halomodel, pk2d, haloprofile
+from . import core, constants, background, power, halomodel, pk2d, haloprofile, halos
 
 # Core data structures
 from .core import Cosmology
@@ -56,26 +56,6 @@ from .haloprofile import nfw_profile_3d, einasto_profile_3d, hernquist_profile_3
 
 # Specific to massive neutrinos
 from .neutrinos import Omeganuh2, nu_masses
-
-# Halo concentration
-from .concentration import (
-    concentration_duffy08_200mat,
-    concentration_duffy08_200crit,
-    concentration_bhattacharya11_200mat,
-    concentration_bhattacharya11_200crit)
-
-# Halo mass definitions
-from .massdef import mass2radius_lagrangian, HMDef, HMDef200mat, HMDef200crit
-from .hmfunc import (
-    sigmaM, MassFunc, MassFuncPress74,
-    MassFuncSheth99, MassFuncJenkins01,
-    MassFuncTinker08, MassFuncTinker10,
-    MassFuncWatson13, MassFuncAngulo12,
-    MassFuncDespali16, MassFuncBocquet16)
-from .hbias import (
-    HBiasFunc, HBiasFuncSheth99,
-    HBiasFuncSheth01, HBiasFuncTinker10,
-    HBiasFuncBhattacharya11)
 
 # Expose function to toggle debug mode
 from .pyutils import debug_mode

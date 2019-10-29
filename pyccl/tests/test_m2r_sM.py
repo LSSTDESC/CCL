@@ -14,7 +14,7 @@ COSMO = ccl.Cosmology(
     [1e14, 1e15],
     np.array([1e14, 1e15])])
 def test_massfunc_m2r_smoke(m):
-    r = ccl.mass2radius_lagrangian(COSMO, np.array(m))
+    r = ccl.halos.mass2radius_lagrangian(COSMO, np.array(m))
     assert np.all(np.isfinite(r))
     assert np.shape(r) == np.shape(m)
 
@@ -26,6 +26,6 @@ def test_massfunc_m2r_smoke(m):
     np.array([1e14, 1e15])])
 def test_sigmaM_smoke(m):
     a = 0.8
-    s = ccl.sigmaM(COSMO, m, a)
+    s = ccl.halos.sigmaM(COSMO, m, a)
     assert np.all(np.isfinite(s))
     assert np.shape(s) == np.shape(m)

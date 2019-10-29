@@ -31,7 +31,7 @@ def get_new_concentration_py(cosmo, c_old, Delta_old, Delta_new):
         cosmo (:obj:`Cosmology`): A Cosmology object.
         c_old (float or array_like): concentration to translate from.
         Delta_old (float): Delta parameter associated to the input
-            concentration. See description of the HMDef class.
+            concentration. See description of the MassDef class.
         Delta_new (float): Delta parameter associated to the output
             concentration.
 
@@ -52,7 +52,7 @@ def get_new_concentration_py(cosmo, c_old, Delta_old, Delta_new):
     return c_new
 
 
-class HMDef(object):
+class MassDef(object):
     """Halo mass definition. Halo masses are defined in terms of an overdensity
     parameter Delta and an associated density X (either the matter density or
     the critical density):
@@ -171,7 +171,7 @@ class HMDef(object):
             cosmo (:obj:`Cosmology`): A Cosmology object.
             M (float or array_like): halo mass in units of M_sun.
             a (float): scale factor.
-            m_def_other (:obj:`HMDef`): another mass definition.
+            m_def_other (:obj:`MassDef`): another mass definition.
 
         Returns:
             float or array_like: halo masses in new definition.
@@ -194,8 +194,8 @@ class HMDef(object):
                 return m_def_other.get_mass(cosmo, R_new, a)
 
 
-class HMDef200mat(HMDef):
-    """`HMDef` class for the mass definition with Delta=200 times the matter
+class MassDef200mat(MassDef):
+    """`MassDef` class for the mass definition with Delta=200 times the matter
     density. Available concentration-mass relations (values for `c_m`):
       * 'Duffy08': concentration-mass relation in arXiv:0804.2486.
       * 'Bhattacharya11': c(M) relation in arXiv:1112.5479.
@@ -211,13 +211,13 @@ class HMDef200mat(HMDef):
         else:
             raise NotImplementedError("Unknwon c(M) relation " + c_m)
 
-        super(HMDef200mat, self).__init__(200,
-                                          'matter',
-                                          c_m_relation=c_m_f)
+        super(MassDef200mat, self).__init__(200,
+                                            'matter',
+                                            c_m_relation=c_m_f)
 
 
-class HMDef200crit(HMDef):
-    """`HMDef` class for the mass definition with Delta=200 times the critical
+class MassDef200crit(MassDef):
+    """`MassDef` class for the mass definition with Delta=200 times the critical
     density. Available concentration-mass relations (values for `c_m`):
       * 'Duffy08': concentration-mass relation in arXiv:0804.2486.
       * 'Bhattacharya11': c(M) relation in arXiv:1112.5479.
@@ -233,6 +233,6 @@ class HMDef200crit(HMDef):
         else:
             raise NotImplementedError("Unknwon c(M) relation " + c_m)
 
-        super(HMDef200crit, self).__init__(200,
-                                           'critical',
-                                           c_m_relation=c_m_f)
+        super(MassDef200crit, self).__init__(200,
+                                             'critical',
+                                             c_m_relation=c_m_f)

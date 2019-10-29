@@ -2,7 +2,7 @@ from . import ccllib as lib
 from .core import check
 from .background import omega_x
 import numpy as np
-from .massdef import HMDef, HMDef200mat
+from .massdef import MassDef, MassDef200mat
 
 
 def sigmaM(cosmo, M, a):
@@ -43,7 +43,7 @@ class MassFunc(object):
     Args:
         name (str): a name for this mass function object.
         cosmo (:obj:`Cosmology`): A Cosmology object.
-        mass_def (:obj:`HMDef`): a mass definition object that fixes
+        mass_def (:obj:`MassDef`): a mass definition object that fixes
             the mass definition used by this mass function
             parametrization.
     """
@@ -69,7 +69,7 @@ class MassFunc(object):
         """ Assigns a default mass definition for this object if
         none is passed at initialization.
         """
-        self.mdef = HMDef('fof', 'matter')
+        self.mdef = MassDef('fof', 'matter')
 
     def _setup(self, cosmo):
         """ Use this function to initialize any internal attributes
@@ -88,7 +88,7 @@ class MassFunc(object):
         start of the constructor call.
 
         Args:
-            mdef (:obj:`HMDef`): a mass definition object.
+            mdef (:obj:`MassDef`): a mass definition object.
 
         Returns:
             bool: True if the mass definition is not compatible with
@@ -105,7 +105,7 @@ class MassFunc(object):
             cosmo (:obj:`Cosmology`): A Cosmology object.
             M (float or array_like): halo mass in units of M_sun.
             a (float): scale factor.
-            mdef_other (:obj:`HMDef`): a mass definition object.
+            mdef_other (:obj:`MassDef`): a mass definition object.
 
         Returns:
             float or array_like: mass according to this object's
@@ -124,7 +124,7 @@ class MassFunc(object):
             cosmo (:obj:`Cosmology`): A Cosmology object.
             M (float or array_like): halo mass in units of M_sun.
             a (float): scale factor.
-            mdef_other (:obj:`HMDef`): the mass definition object
+            mdef_other (:obj:`MassDef`): the mass definition object
                 that defines M.
 
         Returns:
@@ -183,7 +183,7 @@ class MassFuncPress74(MassFunc):
         cosmo (:obj:`Cosmology`): A Cosmology object.
     """
     def __init__(self, cosmo):
-        hmd = HMDef('fof', 'matter')
+        hmd = MassDef('fof', 'matter')
         super(MassFuncPress74, self).__init__("Press74",
                                               cosmo,
                                               hmd)
@@ -213,7 +213,7 @@ class MassFuncSheth99(MassFunc):
         cosmo (:obj:`Cosmology`): A Cosmology object.
     """
     def __init__(self, cosmo):
-        hmd = HMDef('fof', 'matter')
+        hmd = MassDef('fof', 'matter')
         super(MassFuncSheth99, self).__init__("Sheth99",
                                               cosmo,
                                               hmd)
@@ -246,7 +246,7 @@ class MassFuncJenkins01(MassFunc):
         cosmo (:obj:`Cosmology`): A Cosmology object.
     """
     def __init__(self, cosmo):
-        hmd = HMDef('fof', 'matter')
+        hmd = MassDef('fof', 'matter')
         super(MassFuncJenkins01, self).__init__("Jenkins01",
                                                 cosmo,
                                                 hmd)
@@ -270,7 +270,7 @@ class MassFuncTinker08(MassFunc):
 
     Args:
         cosmo (:obj:`Cosmology`): A Cosmology object.
-        mass_def (:obj:`HMDef`): a mass definition object.
+        mass_def (:obj:`MassDef`): a mass definition object.
             this parametrization accepts SO masses with
             200 < Delta < 3200 with respect to the matter density.
             If `None`, Delta = 200 (matter) will be used.
@@ -281,7 +281,7 @@ class MassFuncTinker08(MassFunc):
                                                mass_def)
 
     def _default_mdef(self):
-        self.mdef = HMDef200mat()
+        self.mdef = MassDef200mat()
 
     def _setup(self, cosmo):
         from scipy.interpolate import interp1d
@@ -322,7 +322,7 @@ class MassFuncDespali16(MassFunc):
 
     Args:
         cosmo (:obj:`Cosmology`): A Cosmology object.
-        mass_def (:obj:`HMDef`): a mass definition object.
+        mass_def (:obj:`MassDef`): a mass definition object.
             this parametrization accepts any SO masses.
             If `None`, Delta = 200 (matter) will be used.
     """
@@ -333,7 +333,7 @@ class MassFuncDespali16(MassFunc):
         self.ellipsoidal = ellipsoidal
 
     def _default_mdef(self):
-        self.mdef = HMDef200mat()
+        self.mdef = MassDef200mat()
 
     def _setup(self, cosmo):
         pass
@@ -375,7 +375,7 @@ class MassFuncTinker10(MassFunc):
 
     Args:
         cosmo (:obj:`Cosmology`): A Cosmology object.
-        mass_def (:obj:`HMDef`): a mass definition object.
+        mass_def (:obj:`MassDef`): a mass definition object.
             this parametrization accepts SO masses with
             200 < Delta < 3200 with respect to the matter density.
             If `None`, Delta = 200 (matter) will be used.
@@ -386,7 +386,7 @@ class MassFuncTinker10(MassFunc):
                                                mass_def)
 
     def _default_mdef(self):
-        self.mdef = HMDef200mat()
+        self.mdef = MassDef200mat()
 
     def _setup(self, cosmo):
         from scipy.interpolate import interp1d
@@ -435,7 +435,7 @@ class MassFuncBocquet16(MassFunc):
 
     Args:
         cosmo (:obj:`Cosmology`): A Cosmology object.
-        mass_def (:obj:`HMDef`): a mass definition object.
+        mass_def (:obj:`MassDef`): a mass definition object.
             this parametrization accepts SO masses with
             Delta = 200 (matter, critical) and 500 (critical).
             If `None`, Delta = 200 (matter) will be used.
@@ -447,7 +447,7 @@ class MassFuncBocquet16(MassFunc):
                                                 mass_def)
 
     def _default_mdef(self):
-        self.mdef = HMDef200mat()
+        self.mdef = MassDef200mat()
 
     def _setup(self, cosmo):
         if np.fabs(self.mdef.Delta - 200.) < 1E-4:
@@ -568,7 +568,7 @@ class MassFuncWatson13(MassFunc):
 
     Args:
         cosmo (:obj:`Cosmology`): A Cosmology object.
-        mass_def (:obj:`HMDef`): a mass definition object.
+        mass_def (:obj:`MassDef`): a mass definition object.
             this parametrization accepts fof and any SO masses.
             If `None`, Delta = 200 (matter) will be used.
     """
@@ -578,7 +578,7 @@ class MassFuncWatson13(MassFunc):
                                                mass_def)
 
     def _default_mdef(self):
-        self.mdef = HMDef200mat()
+        self.mdef = MassDef200mat()
 
     def _setup(self, cosmo):
         self.is_fof = self.mdef.Delta == 'fof'
@@ -631,7 +631,7 @@ class MassFuncAngulo12(MassFunc):
         cosmo (:obj:`Cosmology`): A Cosmology object.
     """
     def __init__(self, cosmo):
-        hmd = HMDef('fof', 'matter')
+        hmd = MassDef('fof', 'matter')
         super(MassFuncAngulo12, self).__init__("Angulo12",
                                                cosmo,
                                                hmd)

@@ -15,8 +15,8 @@ zs = np.array([0., 0.5, 1.])
 
 
 def test_hmf_despali16():
-    hmd = ccl.HMDef('vir', 'critical')
-    mf = ccl.MassFuncDespali16(cosmo, hmd)
+    hmd = ccl.halos.MassDef('vir', 'critical')
+    mf = ccl.halos.MassFuncDespali16(cosmo, hmd)
     d_hmf = np.loadtxt(dirdat + 'hmf_despali16.txt', unpack=True)
     m = d_hmf[0]
     for iz, z in enumerate(zs):
@@ -26,8 +26,8 @@ def test_hmf_despali16():
 
 
 def test_hmf_bocquet16():
-    hmd = ccl.HMDef200crit()
-    mf = ccl.MassFuncBocquet16(cosmo, hmd)
+    hmd = ccl.halos.MassDef200crit()
+    mf = ccl.halos.MassFuncBocquet16(cosmo, hmd)
     d_hmf = np.loadtxt(dirdat + 'hmf_bocquet16.txt', unpack=True)
     m = d_hmf[0]
     for iz, z in enumerate(zs):
@@ -37,7 +37,7 @@ def test_hmf_bocquet16():
 
 
 def test_hmf_watson13():
-    mf = ccl.MassFuncWatson13(cosmo)
+    mf = ccl.halos.MassFuncWatson13(cosmo)
     d_hmf = np.loadtxt(dirdat + 'hmf_watson13.txt', unpack=True)
     m = d_hmf[0]
     for iz, z in enumerate(zs):
@@ -47,7 +47,7 @@ def test_hmf_watson13():
 
 
 def test_hmf_tinker08():
-    mf = ccl.MassFuncTinker08(cosmo)
+    mf = ccl.halos.MassFuncTinker08(cosmo)
     d_hmf = np.loadtxt(dirdat + 'hmf_tinker08.txt', unpack=True)
     m = d_hmf[0]
     for iz, z in enumerate(zs):
@@ -57,7 +57,7 @@ def test_hmf_tinker08():
 
 
 def test_hmf_press74():
-    mf = ccl.MassFuncPress74(cosmo)
+    mf = ccl.halos.MassFuncPress74(cosmo)
     d_hmf = np.loadtxt(dirdat + 'hmf_press74.txt', unpack=True)
     m = d_hmf[0]
     for iz, z in enumerate(zs):
@@ -67,7 +67,7 @@ def test_hmf_press74():
 
 
 def test_hmf_angulo12():
-    mf = ccl.MassFuncAngulo12(cosmo)
+    mf = ccl.halos.MassFuncAngulo12(cosmo)
     d_hmf = np.loadtxt(dirdat + 'hmf_angulo12.txt', unpack=True)
     m = d_hmf[0]
     for iz, z in enumerate(zs):
@@ -77,7 +77,7 @@ def test_hmf_angulo12():
 
 
 def test_hmf_sheth99():
-    mf = ccl.MassFuncSheth99(cosmo)
+    mf = ccl.halos.MassFuncSheth99(cosmo)
     d_hmf = np.loadtxt(dirdat + 'hmf_sheth99.txt', unpack=True)
     m = d_hmf[0]
     for iz, z in enumerate(zs):
@@ -87,7 +87,7 @@ def test_hmf_sheth99():
 
 
 def test_hmf_jenkins01():
-    mf = ccl.MassFuncJenkins01(cosmo)
+    mf = ccl.halos.MassFuncJenkins01(cosmo)
     d_hmf = np.loadtxt(dirdat + 'hmf_jenkins01.txt', unpack=True)
     m = d_hmf[0]
     for iz, z in enumerate(zs):

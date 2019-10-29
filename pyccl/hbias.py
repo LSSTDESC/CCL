@@ -1,10 +1,10 @@
 from . import ccllib as lib
 from .core import check
 import numpy as np
-from .massdef import HMDef, HMDef200mat
+from .massdef import MassDef, MassDef200mat
 
 
-class HBiasFunc(object):
+class HaloBias(object):
     """ This class enables the calculation of halo bias functions.
     We currently assume that all mass functions can be written as
     functions that depend on M only through sigma_M (where
@@ -17,7 +17,7 @@ class HBiasFunc(object):
     Args:
         name (str): a name for this mass function object.
         cosmo (:obj:`Cosmology`): A Cosmology object.
-        mass_def (:obj:`HMDef`): a mass definition object that fixes
+        mass_def (:obj:`MassDef`): a mass definition object that fixes
             the mass definition used by this mass function
             parametrization.
     """
@@ -39,7 +39,7 @@ class HBiasFunc(object):
         """ Assigns a default mass definition for this object if
         none is passed at initialization.
         """
-        self.mdef = HMDef('fof', 'matter')
+        self.mdef = MassDef('fof', 'matter')
 
     def _setup(self, cosmo):
         """ Use this function to initialize any internal attributes
@@ -58,7 +58,7 @@ class HBiasFunc(object):
         start of the constructor call.
 
         Args:
-            mdef (:obj:`HMDef`): a mass definition object.
+            mdef (:obj:`MassDef`): a mass definition object.
 
         Returns:
             bool: True if the mass definition is not compatible with
@@ -75,7 +75,7 @@ class HBiasFunc(object):
             cosmo (:obj:`Cosmology`): A Cosmology object.
             M (float or array_like): halo mass in units of M_sun.
             a (float): scale factor.
-            mdef_other (:obj:`HMDef`): a mass definition object.
+            mdef_other (:obj:`MassDef`): a mass definition object.
 
         Returns:
             float or array_like: mass according to this object's
@@ -94,7 +94,7 @@ class HBiasFunc(object):
             cosmo (:obj:`Cosmology`): A Cosmology object.
             M (float or array_like): halo mass in units of M_sun.
             a (float): scale factor.
-            mdef_other (:obj:`HMDef`): the mass definition object
+            mdef_other (:obj:`MassDef`): the mass definition object
                 that defines M.
 
         Returns:
@@ -128,10 +128,10 @@ class HBiasFunc(object):
             float or array_like: f(sigma_M) function.
         """
         raise NotImplementedError("Use one of the non-default "
-                                  "HBiasFunc classes")
+                                  "HaloBias classes")
 
 
-class HBiasFuncSheth99(HBiasFunc):
+class HaloBiasSheth99(HaloBias):
     """ Implements halo bias described in 1999MNRAS.308..119S
     This parametrization is only valid for 'fof' masses.
 
@@ -139,10 +139,10 @@ class HBiasFuncSheth99(HBiasFunc):
         cosmo (:obj:`Cosmology`): A Cosmology object.
     """
     def __init__(self, cosmo):
-        hmd = HMDef('fof', 'matter')
-        super(HBiasFuncSheth99, self).__init__("Sheth99",
-                                               cosmo,
-                                               hmd)
+        hmd = MassDef('fof', 'matter')
+        super(HaloBiasSheth99, self).__init__("Sheth99",
+                                              cosmo,
+                                              hmd)
 
     def _setup(self, cosmo):
         self.p = 0.3
@@ -160,7 +160,7 @@ class HBiasFuncSheth99(HBiasFunc):
         return 1. + (anu2 - 1. + 2. * self.p / (1. + anu2**self.p))/self.dc
 
 
-class HBiasFuncSheth01(HBiasFunc):
+class HaloBiasSheth01(HaloBias):
     """ Implements halo bias described in 2001MNRAS.323....1S
     This parametrization is only valid for 'fof' masses.
 
@@ -168,10 +168,10 @@ class HBiasFuncSheth01(HBiasFunc):
         cosmo (:obj:`Cosmology`): A Cosmology object.
     """
     def __init__(self, cosmo):
-        hmd = HMDef('fof', 'matter')
-        super(HBiasFuncSheth01, self).__init__("Sheth01",
-                                               cosmo,
-                                               hmd)
+        hmd = MassDef('fof', 'matter')
+        super(HaloBiasSheth01, self).__init__("Sheth01",
+                                              cosmo,
+                                              hmd)
 
     def _setup(self, cosmo):
         self.a = 0.707
@@ -194,7 +194,7 @@ class HBiasFuncSheth01(HBiasFunc):
                      anu2c / (anu2c + t1)) / (self.sqrta * self.dc)
 
 
-class HBiasFuncBhattacharya11(HBiasFunc):
+class HaloBiasBhattacharya11(HaloBias):
     """ Implements halo bias described in 2011ApJ...732..122B
     This parametrization is only valid for 'fof' masses.
 
@@ -202,10 +202,10 @@ class HBiasFuncBhattacharya11(HBiasFunc):
         cosmo (:obj:`Cosmology`): A Cosmology object.
     """
     def __init__(self, cosmo):
-        hmd = HMDef('fof', 'matter')
-        super(HBiasFuncBhattacharya11, self).__init__("Bhattacharya11",
-                                                      cosmo,
-                                                      hmd)
+        hmd = MassDef('fof', 'matter')
+        super(HaloBiasBhattacharya11, self).__init__("Bhattacharya11",
+                                                     cosmo,
+                                                     hmd)
 
     def _setup(self, cosmo):
         self.a = 0.788
@@ -226,23 +226,23 @@ class HBiasFuncBhattacharya11(HBiasFunc):
         return 1. + (anu2 - self.q + 2*self.p / (1 + anu2**self.p)) / self.dc
 
 
-class HBiasFuncTinker10(HBiasFunc):
+class HaloBiasTinker10(HaloBias):
     """ Implements mass function described in 2010ApJ...724..878T
 
     Args:
         cosmo (:obj:`Cosmology`): A Cosmology object.
-        mass_def (:obj:`HMDef`): a mass definition object.
+        mass_def (:obj:`MassDef`): a mass definition object.
             this parametrization accepts SO masses with
             200 < Delta < 3200 with respect to the matter density.
             If `None`, Delta = 200 (matter) will be used.
     """
     def __init__(self, cosmo, mass_def=None):
-        super(HBiasFuncTinker10, self).__init__("Tinker10",
-                                                cosmo,
-                                                mass_def)
+        super(HaloBiasTinker10, self).__init__("Tinker10",
+                                               cosmo,
+                                               mass_def)
 
     def _default_mdef(self):
-        self.mdef = HMDef200mat()
+        self.mdef = MassDef200mat()
 
     def _setup(self, cosmo):
         ld = np.log10(self.mdef.Delta)

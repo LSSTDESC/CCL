@@ -11,11 +11,11 @@ Ms, Rs_200m, Rs_500c, Ms_500c = np.loadtxt(dirdat + 'mdef_bm.txt',
 Ms, cs_200m_d, cs_200c_d, cs_200m_b, cs_200c_b = np.loadtxt(dirdat +
                                                             'conc_bm.txt',
                                                             unpack=True)
-hmd_200m = ccl.HMDef200mat()
-hmd_200m_b = ccl.HMDef200mat('Bhattacharya11')
-hmd_200c = ccl.HMDef200crit()
-hmd_200c_b = ccl.HMDef200crit('Bhattacharya11')
-hmd_500c = ccl.HMDef(500, 'critical')
+hmd_200m = ccl.halos.MassDef200mat()
+hmd_200m_b = ccl.halos.MassDef200mat('Bhattacharya11')
+hmd_200c = ccl.halos.MassDef200crit()
+hmd_200c_b = ccl.halos.MassDef200crit('Bhattacharya11')
+hmd_500c = ccl.halos.MassDef(500, 'critical')
 
 
 def test_mdef_get_radius():

@@ -4,8 +4,8 @@ import pyccl as ccl
 
 
 def test_mdef_eq():
-    hmd_200m = ccl.HMDef200mat()
-    hmd_200m_b = ccl.HMDef(200, 'matter')
+    hmd_200m = ccl.halos.MassDef200mat()
+    hmd_200m_b = ccl.halos.MassDef(200, 'matter')
     assert hmd_200m == hmd_200m_b
 
 
