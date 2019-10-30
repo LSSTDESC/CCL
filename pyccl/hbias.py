@@ -6,8 +6,8 @@ from .massdef import MassDef, MassDef200mat
 
 class HaloBias(object):
     """ This class enables the calculation of halo bias functions.
-    We currently assume that all mass functions can be written as
-    functions that depend on M only through sigma_M (where
+    We currently assume that all halo bias functions can be written
+    as functions that depend on M only through sigma_M (where
     sigma_M^2 is the overdensity variance on spheres with a
     radius given by the Lagrangian radius for mass M).
     All sub-classes implementing specific parametrizations
@@ -15,18 +15,20 @@ class HaloBias(object):
     get_bsigma method.
 
     Args:
-        name (str): a name for this mass function object.
+        name (str): a name for this halo bias object.
         cosmo (:obj:`Cosmology`): A Cosmology object.
         mass_def (:obj:`MassDef`): a mass definition object that fixes
-            the mass definition used by this mass function
+            the mass definition used by this halo bias
             parametrization.
     """
+    name = "default"
+
     def __init__(self, name, cosmo, mass_def=None):
         cosmo.compute_sigma()
         self.name = name
         if mass_def is not None:
             if self._check_mdef(mass_def):
-                raise ValueError("Mass function " + name +
+                raise ValueError("Halo bias " + name +
                                  " is not compatible with mass definition" +
                                  " Delta = %.1lf, " % (mass_def.Delta) +
                                  " rho = " + mass_def.rho_type)
@@ -53,7 +55,7 @@ class HaloBias(object):
 
     def _check_mdef(self, mdef):
         """ Return False if the input mass definition agrees with
-        the definitions for which this mass function parametrization
+        the definitions for which this parametrization
         works. True otherwise. This function gets called at the
         start of the constructor call.
 
@@ -62,7 +64,7 @@ class HaloBias(object):
 
         Returns:
             bool: True if the mass definition is not compatible with
-                this mass function parametrization. False otherwise.
+                this parametrization. False otherwise.
         """
         return False
 
@@ -88,7 +90,7 @@ class HaloBias(object):
         return np.log10(M_use)
 
     def get_halo_bias(self, cosmo, M, a, mdef_other=None):
-        """ Returns the hmass function for input parameters.
+        """ Returns the halo bias for input parameters.
 
         Args:
             cosmo (:obj:`Cosmology`): A Cosmology object.
@@ -138,6 +140,8 @@ class HaloBiasSheth99(HaloBias):
     Args:
         cosmo (:obj:`Cosmology`): A Cosmology object.
     """
+    name = "Sheth99"
+
     def __init__(self, cosmo):
         hmd = MassDef('fof', 'matter')
         super(HaloBiasSheth99, self).__init__("Sheth99",
@@ -167,6 +171,8 @@ class HaloBiasSheth01(HaloBias):
     Args:
         cosmo (:obj:`Cosmology`): A Cosmology object.
     """
+    name = "Sheth01"
+
     def __init__(self, cosmo):
         hmd = MassDef('fof', 'matter')
         super(HaloBiasSheth01, self).__init__("Sheth01",
@@ -201,6 +207,8 @@ class HaloBiasBhattacharya11(HaloBias):
     Args:
         cosmo (:obj:`Cosmology`): A Cosmology object.
     """
+    name = "Bhattacharya11"
+
     def __init__(self, cosmo):
         hmd = MassDef('fof', 'matter')
         super(HaloBiasBhattacharya11, self).__init__("Bhattacharya11",
@@ -227,7 +235,7 @@ class HaloBiasBhattacharya11(HaloBias):
 
 
 class HaloBiasTinker10(HaloBias):
-    """ Implements mass function described in 2010ApJ...724..878T
+    """ Implements halo bias described in 2010ApJ...724..878T
 
     Args:
         cosmo (:obj:`Cosmology`): A Cosmology object.
@@ -236,6 +244,8 @@ class HaloBiasTinker10(HaloBias):
             200 < Delta < 3200 with respect to the matter density.
             If `None`, Delta = 200 (matter) will be used.
     """
+    name = "Tinker10"
+
     def __init__(self, cosmo, mass_def=None):
         super(HaloBiasTinker10, self).__init__("Tinker10",
                                                cosmo,
@@ -267,3 +277,19 @@ class HaloBiasTinker10(HaloBias):
 
         return 1. - self.A * nupa / (nupa + self.dc**self.a) + \
             self.B * nu**self.b + self.C * nu**self.c
+
+
+def halo_bias_from_name(name):
+    """ Returns halo bias subclass from name string
+
+    Args:
+        name (string): a halo bias name
+
+    Returns:
+        HaloBias subclass corresponding to the input name.
+    """
+    bias_functions = {c.name: c for c in HaloBias.__subclasses__()}
+    if name in bias_functions:
+        return bias_functions[name]
+    else:
+        raise ValueError("Halo bias parametrization %s not implemented")

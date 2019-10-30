@@ -1,13 +1,12 @@
 # Halo concentration
 from .concentration import (  # noqa
-    concentration_prada12_200crit,
-    concentration_klypin11_vir,
-    concentration_duffy08_200mat,
-    concentration_duffy08_200crit,
-    concentration_bhattacharya13_200mat,
-    concentration_bhattacharya13_200crit,
-    concentration_bhattacharya13_vir,
-    concentration_diemer15_200crit)
+    Concentration,
+    ConcentrationDiemer15,
+    ConcentrationBhattacharya13,
+    ConcentrationPrada12,
+    ConcentrationKlypin11,
+    ConcentrationDuffy08,
+    concentration_from_name)
 
 # Halo mass definitions
 from .massdef import (  # noqa
@@ -21,10 +20,12 @@ from .hmfunc import (  # noqa
     MassFuncSheth99, MassFuncJenkins01,
     MassFuncTinker08, MassFuncTinker10,
     MassFuncWatson13, MassFuncAngulo12,
-    MassFuncDespali16, MassFuncBocquet16)
+    MassFuncDespali16, MassFuncBocquet16,
+    mass_function_from_name)
 
 # Halo bias
 from .hbias import (  # noqa
     HaloBias, HaloBiasSheth99,
     HaloBiasSheth01, HaloBiasTinker10,
-    HaloBiasBhattacharya11)
+    HaloBiasBhattacharya11,
+    halo_bias_from_name)

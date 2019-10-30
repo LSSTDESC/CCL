@@ -47,6 +47,8 @@ class MassFunc(object):
             the mass definition used by this mass function
             parametrization.
     """
+    name = 'default'
+
     def __init__(self, name, cosmo, mass_def=None):
         # Initialize sigma(M) splines if needed
         cosmo.compute_sigma()
@@ -182,6 +184,8 @@ class MassFuncPress74(MassFunc):
     Args:
         cosmo (:obj:`Cosmology`): A Cosmology object.
     """
+    name = 'Press74'
+
     def __init__(self, cosmo):
         hmd = MassDef('fof', 'matter')
         super(MassFuncPress74, self).__init__("Press74",
@@ -212,6 +216,8 @@ class MassFuncSheth99(MassFunc):
     Args:
         cosmo (:obj:`Cosmology`): A Cosmology object.
     """
+    name = 'Sheth99'
+
     def __init__(self, cosmo):
         hmd = MassDef('fof', 'matter')
         super(MassFuncSheth99, self).__init__("Sheth99",
@@ -245,6 +251,8 @@ class MassFuncJenkins01(MassFunc):
     Args:
         cosmo (:obj:`Cosmology`): A Cosmology object.
     """
+    name = 'Jenkins01'
+
     def __init__(self, cosmo):
         hmd = MassDef('fof', 'matter')
         super(MassFuncJenkins01, self).__init__("Jenkins01",
@@ -275,6 +283,8 @@ class MassFuncTinker08(MassFunc):
             200 < Delta < 3200 with respect to the matter density.
             If `None`, Delta = 200 (matter) will be used.
     """
+    name = 'Tinker08'
+
     def __init__(self, cosmo, mass_def=None):
         super(MassFuncTinker08, self).__init__("Tinker08",
                                                cosmo,
@@ -326,6 +336,8 @@ class MassFuncDespali16(MassFunc):
             this parametrization accepts any SO masses.
             If `None`, Delta = 200 (matter) will be used.
     """
+    name = 'Despali16'
+
     def __init__(self, cosmo, mass_def=None, ellipsoidal=False):
         super(MassFuncDespali16, self).__init__("Despali16",
                                                 cosmo,
@@ -380,6 +392,8 @@ class MassFuncTinker10(MassFunc):
             200 < Delta < 3200 with respect to the matter density.
             If `None`, Delta = 200 (matter) will be used.
     """
+    name = 'Tinker10'
+
     def __init__(self, cosmo, mass_def=None):
         super(MassFuncTinker10, self).__init__("Tinker10",
                                                cosmo,
@@ -440,6 +454,8 @@ class MassFuncBocquet16(MassFunc):
             Delta = 200 (matter, critical) and 500 (critical).
             If `None`, Delta = 200 (matter) will be used.
     """
+    name = 'Bocquet16'
+
     def __init__(self, cosmo, mass_def=None, hydro=True):
         self.hydro = hydro
         super(MassFuncBocquet16, self).__init__("Bocquet16",
@@ -572,6 +588,8 @@ class MassFuncWatson13(MassFunc):
             this parametrization accepts fof and any SO masses.
             If `None`, Delta = 200 (matter) will be used.
     """
+    name = 'Watson13'
+
     def __init__(self, cosmo, mass_def=None):
         super(MassFuncWatson13, self).__init__("Watson13",
                                                cosmo,
@@ -630,6 +648,8 @@ class MassFuncAngulo12(MassFunc):
     Args:
         cosmo (:obj:`Cosmology`): A Cosmology object.
     """
+    name = 'Angulo12'
+
     def __init__(self, cosmo):
         hmd = MassDef('fof', 'matter')
         super(MassFuncAngulo12, self).__init__("Angulo12",
@@ -650,3 +670,19 @@ class MassFuncAngulo12(MassFunc):
     def get_fsigma(self, cosmo, sigM, a, lnM):
         return self.A * ((self.a / sigM)**self.b + 1.) * \
             np.exp(-self.c / sigM**2)
+
+
+def mass_function_from_name(name):
+    """ Returns mass function subclass from name string
+
+    Args:
+        name (string): a mass function name
+
+    Returns:
+        MassFunc subclass corresponding to the input name.
+    """
+    mass_functions = {c.name: c for c in MassFunc.__subclasses__()}
+    if name in mass_functions:
+        return mass_functions[name]
+    else:
+        raise ValueError("Mass function %s not implemented")

@@ -1,6 +1,6 @@
 from . import ccllib as lib
 from .core import check
-from . import concentration as cnc
+from . import halos as hal
 from .background import species_types, rho_x, omega_x
 import numpy as np
 
@@ -66,11 +66,10 @@ class MassDef(object):
             overdensity.
         rho_type (string): either 'critical' or 'matter'.
         c_m_relation (function, optional): concentration-mass relation.
-            Provided as a function with signature c(cosmo, M, a), where
-            'cosmo' is a Cosmology object, 'M' is halo mass and 'a' is
-            scale factor. If `None`, no c(M) relation will be attached to
-            this mass definition (and hence one can't translate into other
-            definitions).
+            Provided as a `Concentration` object, or a string corresponding
+            to one of the supported concentration-mass relations.
+            If `None`, no c(M) relation will be attached to this mass
+            definition (and hence one can't translate into other definitions).
     """
     def __init__(self, Delta, rho_type, c_m_relation=None):
         # Check it makes sense
@@ -85,7 +84,18 @@ class MassDef(object):
         self.rho_type = rho_type
         self.species = species_types[rho_type]
         # c(M) relation
-        self.concentration = c_m_relation
+        if c_m_relation is None:
+            self.concentration = None
+        elif isinstance(c_m_relation, hal.Concentration):
+            self.concentration = c_m_relation
+        elif isinstance(c_m_relation, str):
+            # Grab class
+            conc_class = hal.concentration_from_name(c_m_relation)
+            # instantiate with this mass definition
+            self.concentration = conc_class(mdef=self)
+        else:
+            raise ValueError("c_m_relation must be `None`, "
+                             " a string or a `Concentration` object")
 
     def __eq__(self, other):
         """ Allows you to compare two mass definitions
@@ -162,7 +172,7 @@ class MassDef(object):
             raise RuntimeError("This mass definition doesn't have "
                                "an associated c(M) relation")
         else:
-            return self.concentration(cosmo, M, a)
+            return self.concentration.get_concentration(cosmo, M, a)
 
     def translate_mass(self, cosmo, M, a, m_def_other):
         """ Translate halo mass in this definition into another definition
@@ -196,72 +206,38 @@ class MassDef(object):
 
 class MassDef200mat(MassDef):
     """`MassDef` class for the mass definition with Delta=200 times the matter
-    density. Available concentration-mass relations (values for `c_m`):
-      * 'Duffy08': concentration-mass relation in arXiv:0804.2486.
-      * 'Bhattacharya13': c(M) relation in arXiv:1112.5479.
+    density.
 
     Args:
         c_m (string): concentration-mass relation.
     """
     def __init__(self, c_m='Duffy08'):
-        if c_m == 'Duffy08':
-            c_m_f = cnc.concentration_duffy08_200mat
-        elif c_m == 'Bhattacharya13':
-            c_m_f = cnc.concentration_bhattacharya13_200mat
-        else:
-            raise NotImplementedError("Unknwon c(M) relation " + c_m)
-
         super(MassDef200mat, self).__init__(200,
                                             'matter',
-                                            c_m_relation=c_m_f)
+                                            c_m_relation=c_m)
 
 
 class MassDef200crit(MassDef):
     """`MassDef` class for the mass definition with Delta=200 times the critical
-    density. Available concentration-mass relations (values for `c_m`):
-      * 'Duffy08': concentration-mass relation in arXiv:0804.2486.
-      * 'Prada12': c(M) relation in arXiv:1104.5130
-      * 'Bhattacharya13': c(M) relation in arXiv:1112.5479.
-      * 'Diemer15': c(M) relation in arXiv:1809.07326 (updated from 1407.4730).
+    density.
 
     Args:
         c_m (string): concentration-mass relation.
     """
     def __init__(self, c_m='Duffy08'):
-        if c_m == 'Duffy08':
-            c_m_f = cnc.concentration_duffy08_200crit
-        elif c_m == 'Bhattacharya13':
-            c_m_f = cnc.concentration_bhattacharya13_200crit
-        elif c_m == 'Prada12':
-            c_m_f = cnc.concentration_prada12_200crit
-        elif c_m == 'Diemer15':
-            c_m_f = cnc.concentration_diemer15_200crit
-        else:
-            raise NotImplementedError("Unknwon c(M) relation " + c_m)
-
         super(MassDef200crit, self).__init__(200,
                                              'critical',
-                                             c_m_relation=c_m_f)
+                                             c_m_relation=c_m)
 
 
 class MassDefVir(MassDef):
     """`MassDef` class for the mass definition with Delta=Delta_vir times the
-    critical density. Available concentration-mass relations
-    (values for `c_m`):
-      * 'Klypin11': concentration-mass relation in arXiv:1002.3660
-      * 'Bhattacharya13': c(M) relation in arXiv:1112.5479.
+    critical density.
 
     Args:
         c_m (string): concentration-mass relation.
     """
     def __init__(self, c_m='Klypin11'):
-        if c_m == 'Bhattacharya13':
-            c_m_f = cnc.concentration_bhattacharya13_vir
-        elif c_m == 'Klypin11':
-            c_m_f = cnc.concentration_klypin11_vir
-        else:
-            raise NotImplementedError("Unknown c(M) relation " + c_m)
-
         super(MassDefVir, self).__init__('vir',
                                          'critical',
-                                         c_m_relation=c_m_f)
+                                         c_m_relation=c_m)
