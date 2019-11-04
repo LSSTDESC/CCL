@@ -65,12 +65,12 @@ def test_mdef_concentration():
     cs_200c_dih = hmd_200c_di.get_concentration(cosmo, Ms, 1.)
     assert np.all(np.fabs(cs_200m_dh/cs_200m_d-1) < 1E-6)
     assert np.all(np.fabs(cs_200c_dh/cs_200c_d-1) < 1E-6)
-    assert np.all(np.fabs(cs_200m_bh/cs_200m_b-1) < 3E-2)
-    assert np.all(np.fabs(cs_200c_bh/cs_200c_b-1) < 3E-2)
-    assert np.all(np.fabs(cs_200c_ph/cs_200c_p-1) < 3E-2)
-    assert np.all(np.fabs(cs_200c_dih/cs_200c_di-1) < 3E-2)
-    assert np.all(np.fabs(cs_vir_kh/cs_vir_k-1) < 3E-2)
-    assert np.all(np.fabs(cs_vir_bh/cs_vir_b-1) < 3E-2)
+    assert np.all(np.fabs(cs_200m_bh/cs_200m_b-1) < 3E-3)
+    assert np.all(np.fabs(cs_200c_bh/cs_200c_b-1) < 3E-3)
+    assert np.all(np.fabs(cs_200c_ph/cs_200c_p-1) < 1E-3)
+    assert np.all(np.fabs(cs_200c_dih/cs_200c_di-1) < 1E-2)
+    assert np.all(np.fabs(cs_vir_kh/cs_vir_k-1) < 1E-3)
+    assert np.all(np.fabs(cs_vir_bh/cs_vir_b-1) < 3E-3)
 
 
 def test_mdef_translate_mass():
