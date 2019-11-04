@@ -197,9 +197,7 @@ class MassFuncPress74(MassFunc):
         return False
 
     def get_fsigma(self, cosmo, sigM, a, lnM):
-        status = 0
-        delta_c, status = lib.dc_NakamuraSuto(cosmo.cosmo, a, status)
-        check(status)
+        delta_c = 1.68647
 
         nu = delta_c/sigM
         return self.norm * nu * np.exp(-0.5 * nu**2)
@@ -230,9 +228,7 @@ class MassFuncSheth99(MassFunc):
         return False
 
     def get_fsigma(self, cosmo, sigM, a, lnM):
-        status = 0
-        delta_c, status = lib.dc_NakamuraSuto(cosmo.cosmo, a, status)
-        check(status)
+        delta_c = 1.68647
 
         nu = delta_c/sigM
         return nu * self.A * (1. + (self.a * nu**2)**(-self.p)) * \

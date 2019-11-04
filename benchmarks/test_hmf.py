@@ -48,7 +48,6 @@ def test_hmf_watson13():
         nm_h = mf.get_mass_function(cosmo, m, 1. / (1 + z))
         assert np.all(np.fabs(nm_h / nm_d - 1) < 0.01)
 
-
 def test_hmf_tinker08():
     mf = ccl.halos.MassFuncTinker08(cosmo)
     d_hmf = np.loadtxt(os.path.join(dirdat, 'hmf_tinker08.txt'),
@@ -68,7 +67,7 @@ def test_hmf_press74():
     for iz, z in enumerate(zs):
         nm_d = d_hmf[iz+1]
         nm_h = mf.get_mass_function(cosmo, m, 1. / (1 + z))
-        assert np.all(np.fabs(nm_h / nm_d - 1) < 0.05)
+        assert np.all(np.fabs(nm_h / nm_d - 1) < 0.01)
 
 
 def test_hmf_angulo12():
@@ -79,7 +78,7 @@ def test_hmf_angulo12():
     for iz, z in enumerate(zs):
         nm_d = d_hmf[iz+1]
         nm_h = mf.get_mass_function(cosmo, m, 1. / (1 + z))
-        assert np.all(np.fabs(nm_h / nm_d - 1) < 0.05)
+        assert np.all(np.fabs(nm_h / nm_d - 1) < 0.01)
 
 
 def test_hmf_sheth99():
@@ -90,7 +89,7 @@ def test_hmf_sheth99():
     for iz, z in enumerate(zs):
         nm_d = d_hmf[iz+1]
         nm_h = mf.get_mass_function(cosmo, m, 1. / (1 + z))
-        assert np.all(np.fabs(nm_h / nm_d - 1) < 0.05)
+        assert np.all(np.fabs(nm_h / nm_d - 1) < 0.01)
 
 
 def test_hmf_jenkins01():
