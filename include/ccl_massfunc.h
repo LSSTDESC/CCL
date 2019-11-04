@@ -25,49 +25,49 @@ void ccl_cosmology_compute_hmfparams(ccl_cosmology *cosmo, int *status);
 /**
  * Compute halo mass function at a given mass for a given cosmology as dn/ dlog10(M)
  * @param cosmo Cosmological parameters
- * @param smooth_mass Mass to compute at, in units of Msun
+ * @param halomass Mass to compute at, in units of Msun
  * @param a Scale factor, normalized to a=1 today
  * @param odelta choice of Delta
  * @param status Status flag. 0 if there are no errors, nonzero otherwise.
  * For specific cases see documentation for ccl_error.
  * @return massfunc, the value of the mass function at the specified parameters
  */
-double ccl_massfunc(ccl_cosmology *cosmo, double smooth_mass, double a, double odelta, int *status);
+double ccl_massfunc(ccl_cosmology *cosmo, double halomass, double a, double odelta, int *status);
 
 /**
  * Compute the linear halo bias for a cosmology and mass scale
  * @param cosmo Cosmological parameters
- * @param smooth_mass Mass to compute at, in units of Msun
+ * @param halomass Mass to compute at, in units of Msun
  * @param a Scale factor, normalized to a=1 today
  * @param status Status flag. 0 if there are no errors, nonzero otherwise.
  * For specific cases see documentation for ccl_error.
  * @return hb, the halo bias at the specified parameters
  */
-double ccl_halo_bias(ccl_cosmology *cosmo, double smooth_mass, double a, double odelta, int *status);
+double ccl_halo_bias(ccl_cosmology *cosmo, double halomass, double a, double odelta, int *status);
 
 /**
  * Convert smoothing halo mass in units of Msun to smoothing halo radius in units of Mpc.
  * @param cosmo Cosmological parameters
- * @param smooth_mass Mass to compute at, in units of Msun
+ * @param halo_mass Mass to compute at, in units of Msun
  * @param a Scale factor, normalized to a=1 today
  * @param odelta choice of Delta
  * @param status Status flag. 0 if there are no errors, nonzero otherwise.
  * For specific cases see documentation for ccl_error.
- * @return smooth_radius, the equivalent tophat smoothing radius corresponding to smooth_mass
+ * @return smooth_radius, the equivalent tophat smoothing radius corresponding to halo_mass
  */
-double ccl_massfunc_m2r(ccl_cosmology *cosmo, double smooth_mass, int *status);
+double ccl_massfunc_m2r(ccl_cosmology *cosmo, double halo_mass, int *status);
 
 /**
  * Calculate the standard deviation of density at smoothing mass M via interpolation.
  * Return sigma from the sigmaM interpolation. Also computes the sigma interpolation if necessary.
  * @param cosmo Cosmological parameters
- * @param smooth_mass Mass to compute at, in units of Msun
+ * @param halomass Mass to compute at, in units of Msun
  * @param a Scale factor, normalized to a=1 today
  * @param status Status flag. 0 if there are no errors, nonzero otherwise.
  * For specific cases see documentation for ccl_error.
  * @return sigmaM, the standard deviation of density at mass scale M
  */
-double ccl_sigmaM(ccl_cosmology *cosmo, double smooth_mass, double a, int *status);
+double ccl_sigmaM(ccl_cosmology *cosmo, double halomass, double a, int *status);
 
 /**
  * Fitting function for the spherical-model critical linear density for collapse
