@@ -6,10 +6,11 @@ cosmo = ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, Omega_g=0, Omega_k=0,
                       h=0.7, sigma8=0.8, n_s=0.96, Neff=0, m_nu=0.0,
                       w0=-1, wa=0, T_CMB=2.7255,
                       transfer_function='eisenstein_hu')
-dirdat = os.path.dirname(__file__) + '/data/'
-Ms, Rs_200m, Rs_500c, Ms_500c = np.loadtxt(dirdat + 'mdef_bm.txt',
+dirdat = os.path.join(os.path.dirname(__file__), 'data')
+Ms, Rs_200m, Rs_500c, Ms_500c = np.loadtxt(os.path.join(dirdat,
+                                                        'mdef_bm.txt'),
                                            unpack=True)
-dc = np.loadtxt(dirdat + 'conc_bm.txt', unpack=True)
+dc = np.loadtxt(os.path.join(dirdat, 'conc_bm.txt'), unpack=True)
 Ms = dc[0]
 cs_200m_d = dc[1]
 cs_200c_d = dc[2]

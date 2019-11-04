@@ -41,7 +41,6 @@ class MassFunc(object):
     get_fsigma method.
 
     Args:
-        name (str): a name for this mass function object.
         cosmo (:obj:`Cosmology`): A Cosmology object.
         mass_def (:obj:`MassDef`): a mass definition object that fixes
             the mass definition used by this mass function
@@ -49,16 +48,14 @@ class MassFunc(object):
     """
     name = 'default'
 
-    def __init__(self, name, cosmo, mass_def=None):
+    def __init__(self, cosmo, mass_def=None):
         # Initialize sigma(M) splines if needed
         cosmo.compute_sigma()
-        # Assign name
-        self.name = name
         # Check if mass function was provided and check that it's
         # sensible.
         if mass_def is not None:
             if self._check_mdef(mass_def):
-                raise ValueError("Mass function " + name +
+                raise ValueError("Mass function " + self.name +
                                  " is not compatible with mass definition" +
                                  " Delta = %s, " % (mass_def.Delta) +
                                  " rho = " + mass_def.rho_type)
@@ -188,8 +185,7 @@ class MassFuncPress74(MassFunc):
 
     def __init__(self, cosmo):
         hmd = MassDef('fof', 'matter')
-        super(MassFuncPress74, self).__init__("Press74",
-                                              cosmo,
+        super(MassFuncPress74, self).__init__(cosmo,
                                               hmd)
 
     def _setup(self, cosmo):
@@ -220,8 +216,7 @@ class MassFuncSheth99(MassFunc):
 
     def __init__(self, cosmo):
         hmd = MassDef('fof', 'matter')
-        super(MassFuncSheth99, self).__init__("Sheth99",
-                                              cosmo,
+        super(MassFuncSheth99, self).__init__(cosmo,
                                               hmd)
 
     def _setup(self, cosmo):
@@ -255,8 +250,7 @@ class MassFuncJenkins01(MassFunc):
 
     def __init__(self, cosmo):
         hmd = MassDef('fof', 'matter')
-        super(MassFuncJenkins01, self).__init__("Jenkins01",
-                                                cosmo,
+        super(MassFuncJenkins01, self).__init__(cosmo,
                                                 hmd)
 
     def _setup(self, cosmo):
@@ -286,8 +280,7 @@ class MassFuncTinker08(MassFunc):
     name = 'Tinker08'
 
     def __init__(self, cosmo, mass_def=None):
-        super(MassFuncTinker08, self).__init__("Tinker08",
-                                               cosmo,
+        super(MassFuncTinker08, self).__init__(cosmo,
                                                mass_def)
 
     def _default_mdef(self):
@@ -339,8 +332,7 @@ class MassFuncDespali16(MassFunc):
     name = 'Despali16'
 
     def __init__(self, cosmo, mass_def=None, ellipsoidal=False):
-        super(MassFuncDespali16, self).__init__("Despali16",
-                                                cosmo,
+        super(MassFuncDespali16, self).__init__(cosmo,
                                                 mass_def)
         self.ellipsoidal = ellipsoidal
 
@@ -395,8 +387,7 @@ class MassFuncTinker10(MassFunc):
     name = 'Tinker10'
 
     def __init__(self, cosmo, mass_def=None):
-        super(MassFuncTinker10, self).__init__("Tinker10",
-                                               cosmo,
+        super(MassFuncTinker10, self).__init__(cosmo,
                                                mass_def)
 
     def _default_mdef(self):
@@ -458,8 +449,7 @@ class MassFuncBocquet16(MassFunc):
 
     def __init__(self, cosmo, mass_def=None, hydro=True):
         self.hydro = hydro
-        super(MassFuncBocquet16, self).__init__("Bocquet16",
-                                                cosmo,
+        super(MassFuncBocquet16, self).__init__(cosmo,
                                                 mass_def)
 
     def _default_mdef(self):
@@ -591,8 +581,7 @@ class MassFuncWatson13(MassFunc):
     name = 'Watson13'
 
     def __init__(self, cosmo, mass_def=None):
-        super(MassFuncWatson13, self).__init__("Watson13",
-                                               cosmo,
+        super(MassFuncWatson13, self).__init__(cosmo,
                                                mass_def)
 
     def _default_mdef(self):
@@ -652,8 +641,7 @@ class MassFuncAngulo12(MassFunc):
 
     def __init__(self, cosmo):
         hmd = MassDef('fof', 'matter')
-        super(MassFuncAngulo12, self).__init__("Angulo12",
-                                               cosmo,
+        super(MassFuncAngulo12, self).__init__(cosmo,
                                                hmd)
 
     def _setup(self, cosmo):

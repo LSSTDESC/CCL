@@ -8,14 +8,14 @@ cosmo = ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, Omega_g=0, Omega_k=0,
                       w0=-1, wa=0, T_CMB=2.7255,
                       transfer_function='eisenstein_hu')
 # Read data
-dirdat = os.path.dirname(__file__) + '/data/'
+dirdat = os.path.join(os.path.dirname(__file__), 'data')
 
 # Redshifts
 zs = np.array([0., 0.5, 1.])
 
 
 def test_hbf_tinker10():
-    d_hbf = np.loadtxt(dirdat + 'hbf_tinker10.txt',
+    d_hbf = np.loadtxt(os.path.join(dirdat, 'hbf_tinker10.txt'),
                        unpack=True)
     mf = ccl.halos.HaloBiasTinker10(cosmo)
     m = d_hbf[0]
@@ -26,7 +26,7 @@ def test_hbf_tinker10():
 
 
 def test_hbf_sheth01():
-    d_hbf = np.loadtxt(dirdat + 'hbf_sheth01.txt',
+    d_hbf = np.loadtxt(os.path.join(dirdat, 'hbf_sheth01.txt'),
                        unpack=True)
     mf = ccl.halos.HaloBiasSheth01(cosmo)
     m = d_hbf[0]
@@ -37,7 +37,7 @@ def test_hbf_sheth01():
 
 
 def test_hbf_bhattacharya11():
-    d_hbf = np.loadtxt(dirdat + 'hbf_bhattacharya11.txt',
+    d_hbf = np.loadtxt(os.path.join(dirdat, 'hbf_bhattacharya11.txt'),
                        unpack=True)
     mf = ccl.halos.HaloBiasBhattacharya11(cosmo)
     m = d_hbf[0]

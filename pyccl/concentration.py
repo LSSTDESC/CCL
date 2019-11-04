@@ -11,18 +11,16 @@ class Concentration(object):
     """ This class enables the calculation of halo concentrations.
 
     Args:
-        name (str): a name for this c(M) object.
         mass_def (:obj:`MassDef`): a mass definition object that fixes
             the mass definition used by this c(M)
             parametrization.
     """
     name = 'default'
 
-    def __init__(self, name, mass_def=None):
-        self.name = name
+    def __init__(self, mass_def=None):
         if mass_def is not None:
             if self._check_mdef(mass_def):
-                raise ValueError("c(M) relation " + name +
+                raise ValueError("c(M) relation " + self.name +
                                  " is not compatible with mass definition" +
                                  " Delta = %s, " % (mass_def.Delta) +
                                  " rho = " + mass_def.rho_type)
@@ -107,8 +105,7 @@ class ConcentrationDiemer15(Concentration):
     name = 'Diemer15'
 
     def __init__(self, mdef=None):
-        super(ConcentrationDiemer15, self).__init__("Diemer15",
-                                                    mdef)
+        super(ConcentrationDiemer15, self).__init__(mdef)
 
     def _default_mdef(self):
         self.mdef = MassDef(200, 'critical')
@@ -160,8 +157,7 @@ class ConcentrationBhattacharya13(Concentration):
     name = 'Bhattacharya13'
 
     def __init__(self, mdef=None):
-        super(ConcentrationBhattacharya13, self).__init__("Bhattacharya13",
-                                                          mdef)
+        super(ConcentrationBhattacharya13, self).__init__(mdef)
 
     def _default_mdef(self):
         self.mdef = MassDef(200, 'critical')
@@ -200,8 +196,7 @@ class ConcentrationPrada12(Concentration):
     name = 'Prada12'
 
     def __init__(self, mdef=None):
-        super(ConcentrationPrada12, self).__init__("Prada12",
-                                                   mdef)
+        super(ConcentrationPrada12, self).__init__(mdef)
 
     def _default_mdef(self):
         self.mdef = MassDef(200, 'critical')
@@ -248,8 +243,7 @@ class ConcentrationKlypin11(Concentration):
     name = 'Klypin11'
 
     def __init__(self, mdef=None):
-        super(ConcentrationKlypin11, self).__init__("Klypin11",
-                                                    mdef)
+        super(ConcentrationKlypin11, self).__init__(mdef)
 
     def _default_mdef(self):
         self.mdef = MassDef('vir', 'critical')
@@ -268,8 +262,7 @@ class ConcentrationDuffy08(Concentration):
     name = 'Duffy08'
 
     def __init__(self, mdef=None):
-        super(ConcentrationDuffy08, self).__init__("Duffy08",
-                                                   mdef)
+        super(ConcentrationDuffy08, self).__init__(mdef)
 
     def _default_mdef(self):
         self.mdef = MassDef(200, 'critical')

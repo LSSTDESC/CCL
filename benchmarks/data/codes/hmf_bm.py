@@ -17,7 +17,9 @@ def get_mfs(model, mdef):
                                                 mdef = mdef,
                                                 model = model,
                                                 q_out = 'dndlnM') * normfac)
-    np.savetxt("../hmf_" + model + ".txt", np.transpose(d_out))
+    np.savetxt("../hmf_" + model + ".txt",
+               np.transpose(d_out),
+               header = 'M nM(z=0) nM(z=0.5) nM(z=1)')
 
 get_mfs('tinker08', '200m')
 get_mfs('press74', 'fof')
@@ -38,7 +40,9 @@ def get_hbs(model, mdef):
         d_out.append(bias.haloBias(m_arr * h, z = z,
                                    mdef = mdef,
                                    model = model))
-    np.savetxt("../hbf_" + model + ".txt", np.transpose(d_out))
+    np.savetxt("../hbf_" + model + ".txt",
+               np.transpose(d_out),
+               header = 'M bh(z=0) bh(z=0.5) bh(z=1)')
 
 get_hbs('tinker10', '200m')
 get_hbs('sheth01', 'fof')

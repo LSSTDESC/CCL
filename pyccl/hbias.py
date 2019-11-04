@@ -15,7 +15,6 @@ class HaloBias(object):
     get_bsigma method.
 
     Args:
-        name (str): a name for this halo bias object.
         cosmo (:obj:`Cosmology`): A Cosmology object.
         mass_def (:obj:`MassDef`): a mass definition object that fixes
             the mass definition used by this halo bias
@@ -23,12 +22,11 @@ class HaloBias(object):
     """
     name = "default"
 
-    def __init__(self, name, cosmo, mass_def=None):
+    def __init__(self, cosmo, mass_def=None):
         cosmo.compute_sigma()
-        self.name = name
         if mass_def is not None:
             if self._check_mdef(mass_def):
-                raise ValueError("Halo bias " + name +
+                raise ValueError("Halo bias " + self.name +
                                  " is not compatible with mass definition" +
                                  " Delta = %.1lf, " % (mass_def.Delta) +
                                  " rho = " + mass_def.rho_type)
@@ -144,8 +142,7 @@ class HaloBiasSheth99(HaloBias):
 
     def __init__(self, cosmo):
         hmd = MassDef('fof', 'matter')
-        super(HaloBiasSheth99, self).__init__("Sheth99",
-                                              cosmo,
+        super(HaloBiasSheth99, self).__init__(cosmo,
                                               hmd)
 
     def _setup(self, cosmo):
@@ -175,8 +172,7 @@ class HaloBiasSheth01(HaloBias):
 
     def __init__(self, cosmo):
         hmd = MassDef('fof', 'matter')
-        super(HaloBiasSheth01, self).__init__("Sheth01",
-                                              cosmo,
+        super(HaloBiasSheth01, self).__init__(cosmo,
                                               hmd)
 
     def _setup(self, cosmo):
@@ -211,8 +207,7 @@ class HaloBiasBhattacharya11(HaloBias):
 
     def __init__(self, cosmo):
         hmd = MassDef('fof', 'matter')
-        super(HaloBiasBhattacharya11, self).__init__("Bhattacharya11",
-                                                     cosmo,
+        super(HaloBiasBhattacharya11, self).__init__(cosmo,
                                                      hmd)
 
     def _setup(self, cosmo):
@@ -247,8 +242,7 @@ class HaloBiasTinker10(HaloBias):
     name = "Tinker10"
 
     def __init__(self, cosmo, mass_def=None):
-        super(HaloBiasTinker10, self).__init__("Tinker10",
-                                               cosmo,
+        super(HaloBiasTinker10, self).__init__(cosmo,
                                                mass_def)
 
     def _default_mdef(self):
