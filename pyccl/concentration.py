@@ -131,6 +131,9 @@ class ConcentrationDiemer15(Concentration):
         # Compute power spectrum slope
         R = mass2radius_lagrangian(cosmo, M_use)
         lk_R = np.log10(2.0 * np.pi / R * self.kappa)
+        # Using spline interpolation
+        # TODO: it'd be worth getting C to return the
+        #       spline derivative.
         lkmin = np.amin(lk_R-0.05)
         lkmax = np.amax(lk_R+0.05)
         logk = np.arange(lkmin, lkmax, 0.01)
