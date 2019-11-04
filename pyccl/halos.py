@@ -16,7 +16,7 @@ from .massdef import (  # noqa
 
 # Halo mass functions
 from .hmfunc import (  # noqa
-    sigmaM, MassFunc, MassFuncPress74,
+    MassFunc, MassFuncPress74,
     MassFuncSheth99, MassFuncJenkins01,
     MassFuncTinker08, MassFuncTinker10,
     MassFuncWatson13, MassFuncAngulo12,

@@ -1,6 +1,6 @@
 from . import ccllib as lib
 from .background import growth_factor
-from .hmfunc import sigmaM
+from .power import sigmaM
 from .massdef import MassDef, mass2radius_lagrangian
 import numpy as np
 from .power import linear_matter_power

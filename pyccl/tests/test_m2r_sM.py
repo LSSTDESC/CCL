@@ -26,6 +26,6 @@ def test_massfunc_m2r_smoke(m):
     np.array([1e14, 1e15])])
 def test_sigmaM_smoke(m):
     a = 0.8
-    s = ccl.halos.sigmaM(COSMO, m, a)
+    s = ccl.sigmaM(COSMO, m, a)
     assert np.all(np.isfinite(s))
     assert np.shape(s) == np.shape(m)

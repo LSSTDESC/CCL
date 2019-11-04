@@ -5,31 +5,6 @@ import numpy as np
 from .massdef import MassDef, MassDef200mat
 
 
-def sigmaM(cosmo, M, a):
-    """Root mean squared variance for the given halo mass of the linear power
-    spectrum; Msun.
-
-    Args:
-        cosmo (:obj:`Cosmology`): Cosmological parameters.
-        M (float or array_like): Halo masses; Msun.
-        a (float): scale factor.
-
-    Returns:
-        float or array_like: RMS variance of halo mass.
-    """
-    cosmo.compute_sigma()
-
-    # sigma(M)
-    logM = np.log10(np.atleast_1d(M))
-    status = 0
-    sigM, status = lib.sigM_vec(cosmo.cosmo, a, logM,
-                                len(logM), status)
-    check(status)
-    if np.isscalar(M):
-        sigM = sigM[0]
-    return sigM
-
-
 class MassFunc(object):
     """ This class enables the calculation of halo mass functions.
     We currently assume that all mass functions can be written as

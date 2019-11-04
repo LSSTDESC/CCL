@@ -32,6 +32,6 @@ def test_sigmaM(model, w0, wa):
 
     for i in range(data.shape[0]):
         m = data[i, 0] / cosmo['h']
-        sm = ccl.halos.sigmaM(cosmo, m, 1)
+        sm = ccl.sigmaM(cosmo, m, 1)
         err = sm / data[i, 1] - 1
         np.allclose(err, 0, rtol=0, atol=SIGMAM_TOLERANCE)

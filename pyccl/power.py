@@ -1,5 +1,7 @@
 from . import ccllib as lib
 from .pyutils import _vectorize_fn2
+import numpy as np
+from .core import check
 
 
 def linear_matter_power(cosmo, k, a):
@@ -32,6 +34,31 @@ def nonlin_matter_power(cosmo, k, a):
     cosmo.compute_nonlin_power()
     return _vectorize_fn2(lib.nonlin_matter_power,
                           lib.nonlin_matter_power_vec, cosmo, k, a)
+
+
+def sigmaM(cosmo, M, a):
+    """Root mean squared variance for the given halo mass of the linear power
+    spectrum; Msun.
+
+    Args:
+        cosmo (:obj:`Cosmology`): Cosmological parameters.
+        M (float or array_like): Halo masses; Msun.
+        a (float): scale factor.
+
+    Returns:
+        float or array_like: RMS variance of halo mass.
+    """
+    cosmo.compute_sigma()
+
+    # sigma(M)
+    logM = np.log10(np.atleast_1d(M))
+    status = 0
+    sigM, status = lib.sigM_vec(cosmo.cosmo, a, logM,
+                                len(logM), status)
+    check(status)
+    if np.isscalar(M):
+        sigM = sigM[0]
+    return sigM
 
 
 def sigmaR(cosmo, R, a=1.):

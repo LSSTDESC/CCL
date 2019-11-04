@@ -29,7 +29,7 @@ from .pk2d import Pk2D
 
 # Power spectrum calculations and sigma8
 from .power import linear_matter_power, nonlin_matter_power, sigmaR, \
-    sigmaV, sigma8
+    sigmaV, sigma8, sigmaM
 
 # BCM stuff
 from .bcm import bcm_model_fka
