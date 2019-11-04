@@ -23,25 +23,12 @@ void sigM_vec(ccl_cosmology * cosmo, double a,
 	      double *logM, int nM,
 	      int nout, double* output, int *status)
 {
-  if (cosmo->params.N_nu_mass>0){
-	  *status = CCL_ERROR_NOT_IMPLEMENTED;
-	  ccl_cosmology_set_status_message(cosmo, "ccl_background.c: ccl_cosmology_compute_growth(): Support for the sigma(M) function in cosmologies with massive neutrinos is not yet implemented.\n");
-	  return;
-  }
-
   // Check if sigma has already been calculated
   if (!cosmo->computed_sigma) {
     *status = CCL_ERROR_SIGMA_INIT;
     ccl_cosmology_set_status_message(
       cosmo,
       "ccl_massfunc.c: ccl_sigmaM(): linear power spctrum has not been computed!");
-    return;
-  }
-  if (!cosmo->computed_growth){
-    *status = CCL_ERROR_GROWTH_INIT;
-    ccl_cosmology_set_status_message(
-      cosmo,
-      "ccl_massfunc.c: ccl_sigmaM(): growth factor splines have not been precomputed!");
     return;
   }
 
@@ -61,19 +48,6 @@ void dlnsigM_dlogM_vec(ccl_cosmology * cosmo,
 		       double *logM, int nM,
 		       int nout, double* output, int *status)
 {
-  if (cosmo->params.N_nu_mass>0){
-	  *status = CCL_ERROR_NOT_IMPLEMENTED;
-	  ccl_cosmology_set_status_message(cosmo, "ccl_background.c: ccl_cosmology_compute_growth(): Support for the sigma(M) function in cosmologies with massive neutrinos is not yet implemented.\n");
-	  return;
-  }
-
-  // Raise an error if we have mu / Sigma modifcation to gravity turned on
-  if (fabs(cosmo->params.mu_0)>1e-14 || fabs(cosmo->params.sigma_0)>1e-14){
-	  *status = CCL_ERROR_NOT_IMPLEMENTED;
-	  strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power(): The mass function is not implemented the mu / Sigma modified gravity parameterisation.\n");
-	  return;
-  }
-
   // Check if sigma has already been calculated
   if (!cosmo->computed_sigma) {
     *status = CCL_ERROR_SIGMA_INIT;
