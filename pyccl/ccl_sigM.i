@@ -32,16 +32,8 @@ void sigM_vec(ccl_cosmology * cosmo, double a,
     return;
   }
 
-  for(int i=0; i<nM; i++) {
-    double lgsigmaM;
-    int gslstatus = gsl_spline_eval_e(cosmo->data.logsigma, logM[i], NULL, &lgsigmaM);
-    if(gslstatus) {
-      ccl_raise_gsl_warning(gslstatus, "ccl_massfunc.c: ccl_sigmaM():");
-      *status |= gslstatus;
-      return;
-    }
-    output[i] = pow(10,lgsigmaM)*ccl_growth_factor(cosmo, a, status);
-  }
+  for(int i=0; i<nM; i++)
+    output[i] = ccl_sigmaM(cosmo, logM[i], a, status);
 }
 
 void dlnsigM_dlogM_vec(ccl_cosmology * cosmo,
@@ -57,16 +49,8 @@ void dlnsigM_dlogM_vec(ccl_cosmology * cosmo,
     return;
   }
 
-  for(int i=0; i<nM; i++) {
-    double val;
-    int gslstatus = gsl_spline_eval_e(cosmo->data.dlnsigma_dlogm, logM[i], NULL, &val);
-    if(gslstatus) { 
-      ccl_raise_gsl_warning(gslstatus, "ccl_massfunc.c: ccl_sigmaM():");
-      *status |= gslstatus;
-      return;
-    }
-    output[i] = val;
-  }
+  for(int i=0; i<nM; i++)
+    output[i] = ccl_dlnsigM_dlogM(cosmo, logM[i], status);
 }
 
 %}

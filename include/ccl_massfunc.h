@@ -59,15 +59,26 @@ double ccl_massfunc_m2r(ccl_cosmology *cosmo, double halo_mass, int *status);
 
 /**
  * Calculate the standard deviation of density at smoothing mass M via interpolation.
- * Return sigma from the sigmaM interpolation. Also computes the sigma interpolation if necessary.
+ * Return sigma from the sigmaM interpolation.
  * @param cosmo Cosmological parameters
- * @param halomass Mass to compute at, in units of Msun
+ * @param log_halomass log10(Mass) to compute at, in units of Msun
  * @param a Scale factor, normalized to a=1 today
  * @param status Status flag. 0 if there are no errors, nonzero otherwise.
  * For specific cases see documentation for ccl_error.
  * @return sigmaM, the standard deviation of density at mass scale M
  */
-double ccl_sigmaM(ccl_cosmology *cosmo, double halomass, double a, int *status);
+double ccl_sigmaM(ccl_cosmology *cosmo, double log_halomass, double a, int *status);
+
+/**
+ * Calculate the logarithmic derivative of the standard deviation of density at smoothing mass M
+ * via interpolation.
+ * @param cosmo Cosmological parameters
+ * @param log_halomass log10(Mass) to compute at, in units of Msun
+ * @param status Status flag. 0 if there are no errors, nonzero otherwise.
+ * For specific cases see documentation for ccl_error.
+ * @return sigmaM, the standard deviation of density at mass scale M
+ */
+double ccl_dlnsigM_dlogM(ccl_cosmology *cosmo, double log_halomass, int *status);
 
 /**
  * Fitting function for the spherical-model critical linear density for collapse
