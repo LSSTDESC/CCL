@@ -14,7 +14,7 @@ CCL_BEGIN_DECLS
  * @param c_new output concentration.
  * @param status Status flat. 0 if everything went well.
  */
-void ccl_get_new_concentration(ccl_cosmology *cosmo,
+void ccl_convert_concentration(ccl_cosmology *cosmo,
 			       double delta_old, int nc, double c_old[],
 			       double delta_new, double c_new[],int *status);
 

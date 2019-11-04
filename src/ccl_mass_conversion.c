@@ -57,7 +57,7 @@ static void nfw_fdf(double x,void *params,
   }
 }
 
-static int get_new_concentration_single(double d_factor, double c_old,
+static int convert_concentration_single(double d_factor, double c_old,
 					double *c_new, double c_start)
 {
   double c0, offset = d_factor * nfw_fx(c_old);
@@ -90,7 +90,7 @@ static int get_new_concentration_single(double d_factor, double c_old,
   return status;
 }
 
-void ccl_get_new_concentration(ccl_cosmology *cosmo,
+void ccl_convert_concentration(ccl_cosmology *cosmo,
 			       double delta_old, int nc, double c_old[],
 			       double delta_new, double c_new[],int *status)
 {
@@ -101,7 +101,7 @@ void ccl_get_new_concentration(ccl_cosmology *cosmo,
   double d_factor = delta_old/delta_new;
   for(ii=0;ii<nc;ii++) {
     double c_new_h;
-    st=get_new_concentration_single(d_factor, c_old[ii], &(c_new[ii]), c_old[ii]);
+    st=convert_concentration_single(d_factor, c_old[ii], &(c_new[ii]), c_old[ii]);
     if(st!=GSL_SUCCESS) {
       *status=CCL_ERROR_ROOT;
       ccl_cosmology_set_status_message(cosmo,

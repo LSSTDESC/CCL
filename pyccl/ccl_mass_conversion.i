@@ -17,14 +17,14 @@
 
 %inline %{
 
-  void get_new_concentration_vec(ccl_cosmology *cosmo,
+  void convert_concentration_vec(ccl_cosmology *cosmo,
 			       double delta_old,
 			       double* c_in, int nc,
 			       double delta_new,
 			       int nout, double *output,
 			       int *status) {
   *status=0;
-  ccl_get_new_concentration(cosmo, delta_old, nc, c_in,
+  ccl_convert_concentration(cosmo, delta_old, nc, c_in,
 			    delta_new, output,status);
 }
 %}

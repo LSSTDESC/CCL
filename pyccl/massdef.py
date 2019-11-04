@@ -20,7 +20,7 @@ def mass2radius_lagrangian(cosmo, M):
     return (M / (4.18879020479 * rho_x(cosmo, 1, 'matter')))**(1./3.)
 
 
-def get_new_concentration_py(cosmo, c_old, Delta_old, Delta_new):
+def convert_concentration_py(cosmo, c_old, Delta_old, Delta_new):
     """ Computes the concentration parameter for a different mass definition.
     This is done assuming an NFW profile. The output concentration `c_new` is
     found by solving the equation:
@@ -41,7 +41,7 @@ def get_new_concentration_py(cosmo, c_old, Delta_old, Delta_new):
     """
     status = 0
     c_old_use = np.atleast_1d(c_old)
-    c_new, status = lib.get_new_concentration_vec(cosmo.cosmo,
+    c_new, status = lib.convert_concentration_vec(cosmo.cosmo,
                                                   Delta_old, c_old_use,
                                                   Delta_new, c_old_use.size,
                                                   status)
@@ -199,7 +199,7 @@ class MassDef(object):
                 R_this = self.get_radius(cosmo, M, a)
                 om_new = omega_x(cosmo, a, m_def_other.rho_type)
                 D_new = m_def_other.get_Delta(cosmo, a) * om_new
-                c_new = get_new_concentration_py(cosmo, c_this, D_this, D_new)
+                c_new = convert_concentration_py(cosmo, c_this, D_this, D_new)
                 R_new = c_new * R_this / c_this
                 return m_def_other.get_mass(cosmo, R_new, a)
 
