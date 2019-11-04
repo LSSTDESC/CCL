@@ -23,7 +23,6 @@
 			       double delta_new,
 			       int nout, double *output,
 			       int *status) {
-  *status=0;
   ccl_convert_concentration(cosmo, delta_old, nc, c_in,
 			    delta_new, output,status);
 }
