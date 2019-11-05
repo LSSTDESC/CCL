@@ -18,15 +18,15 @@ def test_concentration_translation():
 
     # No change expected
     Delta_new = 200.
-    c_new = ccl.massdef.convert_concentration_py(cosmo,
-                                                 c_old, Delta_old,
-                                                 Delta_new)
+    c_new = ccl.halos.massdef.convert_concentration_py(cosmo,
+                                                       c_old, Delta_old,
+                                                       Delta_new)
     assert np.all(c_old == c_new)
 
     # Test against numerical solutions from Mathematica.
     Delta_new = 500.
-    c_new = ccl.massdef.convert_concentration_py(cosmo,
-                                                 c_old, Delta_old,
-                                                 Delta_new)
+    c_new = ccl.halos.massdef.convert_concentration_py(cosmo,
+                                                       c_old, Delta_old,
+                                                       Delta_new)
     c_new_expected = np.array([6.12194, 6.82951, 7.53797])
     assert np.all(np.fabs(c_new/c_new_expected-1) < 1E-4)

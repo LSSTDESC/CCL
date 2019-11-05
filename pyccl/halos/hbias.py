@@ -1,7 +1,7 @@
-from . import ccllib as lib
-from .core import check
-import numpy as np
+from .. import ccllib as lib
+from ..core import check
 from .massdef import MassDef, MassDef200mat
+import numpy as np
 
 
 class HaloBias(object):

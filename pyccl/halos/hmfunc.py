@@ -1,8 +1,8 @@
-from . import ccllib as lib
-from .core import check
-from .background import omega_x
-import numpy as np
+from .. import ccllib as lib
+from ..core import check
+from ..background import omega_x
 from .massdef import MassDef, MassDef200mat
+import numpy as np
 
 
 class MassFunc(object):

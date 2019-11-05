@@ -1,7 +1,6 @@
-from . import ccllib as lib
-from .core import check
-from . import halos as hal
-from .background import species_types, rho_x, omega_x
+from .. import ccllib as lib
+from ..core import check
+from ..background import species_types, rho_x, omega_x
 import numpy as np
 
 
@@ -86,16 +85,8 @@ class MassDef(object):
         # c(M) relation
         if c_m_relation is None:
             self.concentration = None
-        elif isinstance(c_m_relation, hal.Concentration):
-            self.concentration = c_m_relation
-        elif isinstance(c_m_relation, str):
-            # Grab class
-            conc_class = hal.concentration_from_name(c_m_relation)
-            # instantiate with this mass definition
-            self.concentration = conc_class(mdef=self)
         else:
-            raise ValueError("c_m_relation must be `None`, "
-                             " a string or a `Concentration` object")
+            self._concentration_init(c_m_relation)
 
     def __eq__(self, other):
         """ Allows you to compare two mass definitions
@@ -103,6 +94,19 @@ class MassDef(object):
         return (self.Delta == other.Delta) and \
             (self.rho_type == other.rho_type)
 
+    def _concentration_init(self, c_m_relation):
+        from .concentration import Concentration, concentration_from_name
+        if isinstance(c_m_relation, Concentration):
+            self.concentration = c_m_relation
+        elif isinstance(c_m_relation, str):
+            # Grab class
+            conc_class = concentration_from_name(c_m_relation)
+            # instantiate with this mass definition
+            self.concentration = conc_class(mdef=self)
+        else:
+            raise ValueError("c_m_relation must be `None`, "
+                             " a string or a `Concentration` object")
+        
     def get_Delta(self, cosmo, a):
         """ Gets overdensity parameter associated to this mass
         definition.

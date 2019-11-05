@@ -57,7 +57,7 @@ setup(
     long_description_content_type='text/markdown',
     author="LSST DESC",
     url="https://github.com/LSSTDESC/CCL",
-    packages=['pyccl'],
+    packages=['pyccl','pyccl.halos'],
     provides=['pyccl'],
     package_data={'pyccl': ['_ccllib.so']},
     include_package_data=True,

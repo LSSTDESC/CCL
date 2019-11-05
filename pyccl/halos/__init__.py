@@ -1,3 +1,9 @@
+# Halo mass definitions
+from .massdef import (  # noqa
+    mass2radius_lagrangian, MassDef,
+    MassDef200mat, MassDef200crit,
+    MassDefVir)
+
 # Halo concentration
 from .concentration import (  # noqa
     Concentration,
@@ -7,12 +13,6 @@ from .concentration import (  # noqa
     ConcentrationKlypin11,
     ConcentrationDuffy08,
     concentration_from_name)
-
-# Halo mass definitions
-from .massdef import (  # noqa
-    mass2radius_lagrangian, MassDef,
-    MassDef200mat, MassDef200crit,
-    MassDefVir)
 
 # Halo mass functions
 from .hmfunc import (  # noqa

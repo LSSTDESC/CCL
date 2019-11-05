@@ -1,9 +1,8 @@
-from . import ccllib as lib
-from .background import growth_factor
-from .power import sigmaM
+from .. import ccllib as lib
+from ..background import growth_factor
 from .massdef import MassDef, mass2radius_lagrangian
+from ..power import linear_matter_power, sigmaM
 import numpy as np
-from .power import linear_matter_power
 
 
 class Concentration(object):
