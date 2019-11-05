@@ -4,7 +4,6 @@ from .power import sigmaM
 from .massdef import MassDef, mass2radius_lagrangian
 import numpy as np
 from .power import linear_matter_power
-from scipy.interpolate import InterpolatedUnivariateSpline
 
 
 class Concentration(object):
