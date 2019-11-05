@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from setuptools.command.build_py import build_py as _build
 from setuptools.command.develop import develop as _develop
-from setuptools import setup
+from setuptools import setup, find_packages
 from subprocess import call
 from io import open
 import os
@@ -57,7 +57,7 @@ setup(
     long_description_content_type='text/markdown',
     author="LSST DESC",
     url="https://github.com/LSSTDESC/CCL",
-    packages=['pyccl','pyccl.halos'],
+    packages=find_packages(),
     provides=['pyccl'],
     package_data={'pyccl': ['_ccllib.so']},
     include_package_data=True,
