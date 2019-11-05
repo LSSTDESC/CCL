@@ -106,7 +106,7 @@ class MassDef(object):
         else:
             raise ValueError("c_m_relation must be `None`, "
                              " a string or a `Concentration` object")
-        
+
     def get_Delta(self, cosmo, a):
         """ Gets overdensity parameter associated to this mass
         definition.
