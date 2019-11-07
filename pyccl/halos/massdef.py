@@ -19,7 +19,7 @@ def mass2radius_lagrangian(cosmo, M):
     return (M / (4.18879020479 * rho_x(cosmo, 1, 'matter')))**(1./3.)
 
 
-def convert_concentration_py(cosmo, c_old, Delta_old, Delta_new):
+def convert_concentration(cosmo, c_old, Delta_old, Delta_new):
     """ Computes the concentration parameter for a different mass definition.
     This is done assuming an NFW profile. The output concentration `c_new` is
     found by solving the equation:
@@ -203,12 +203,12 @@ class MassDef(object):
                 R_this = self.get_radius(cosmo, M, a)
                 om_new = omega_x(cosmo, a, m_def_other.rho_type)
                 D_new = m_def_other.get_Delta(cosmo, a) * om_new
-                c_new = convert_concentration_py(cosmo, c_this, D_this, D_new)
+                c_new = convert_concentration(cosmo, c_this, D_this, D_new)
                 R_new = c_new * R_this / c_this
                 return m_def_other.get_mass(cosmo, R_new, a)
 
 
-class MassDef200mat(MassDef):
+class MassDef200m(MassDef):
     """`MassDef` class for the mass definition with Delta=200 times the matter
     density.
 
@@ -216,12 +216,12 @@ class MassDef200mat(MassDef):
         c_m (string): concentration-mass relation.
     """
     def __init__(self, c_m='Duffy08'):
-        super(MassDef200mat, self).__init__(200,
-                                            'matter',
-                                            c_m_relation=c_m)
+        super(MassDef200m, self).__init__(200,
+                                          'matter',
+                                          c_m_relation=c_m)
 
 
-class MassDef200crit(MassDef):
+class MassDef200c(MassDef):
     """`MassDef` class for the mass definition with Delta=200 times the critical
     density.
 
@@ -229,9 +229,9 @@ class MassDef200crit(MassDef):
         c_m (string): concentration-mass relation.
     """
     def __init__(self, c_m='Duffy08'):
-        super(MassDef200crit, self).__init__(200,
-                                             'critical',
-                                             c_m_relation=c_m)
+        super(MassDef200c, self).__init__(200,
+                                          'critical',
+                                          c_m_relation=c_m)
 
 
 class MassDefVir(MassDef):

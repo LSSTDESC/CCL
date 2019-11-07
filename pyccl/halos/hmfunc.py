@@ -1,7 +1,7 @@
 from .. import ccllib as lib
 from ..core import check
 from ..background import omega_x
-from .massdef import MassDef, MassDef200mat
+from .massdef import MassDef, MassDef200m
 import numpy as np
 
 
@@ -255,7 +255,7 @@ class MassFuncTinker08(MassFunc):
                                                mass_def)
 
     def _default_mdef(self):
-        self.mdef = MassDef200mat()
+        self.mdef = MassDef200m()
 
     def _setup(self, cosmo):
         from scipy.interpolate import interp1d
@@ -308,7 +308,7 @@ class MassFuncDespali16(MassFunc):
         self.ellipsoidal = ellipsoidal
 
     def _default_mdef(self):
-        self.mdef = MassDef200mat()
+        self.mdef = MassDef200m()
 
     def _setup(self, cosmo):
         pass
@@ -362,7 +362,7 @@ class MassFuncTinker10(MassFunc):
                                                mass_def)
 
     def _default_mdef(self):
-        self.mdef = MassDef200mat()
+        self.mdef = MassDef200m()
 
     def _setup(self, cosmo):
         from scipy.interpolate import interp1d
@@ -424,7 +424,7 @@ class MassFuncBocquet16(MassFunc):
                                                 mass_def)
 
     def _default_mdef(self):
-        self.mdef = MassDef200mat()
+        self.mdef = MassDef200m()
 
     def _setup(self, cosmo):
         if np.fabs(self.mdef.Delta - 200.) < 1E-4:
@@ -556,7 +556,7 @@ class MassFuncWatson13(MassFunc):
                                                mass_def)
 
     def _default_mdef(self):
-        self.mdef = MassDef200mat()
+        self.mdef = MassDef200m()
 
     def _setup(self, cosmo):
         self.is_fof = self.mdef.Delta == 'fof'

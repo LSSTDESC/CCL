@@ -230,11 +230,11 @@ class ConcentrationPrada12(Concentration):
         self.cnorm = 1. / self.cmin(1.393)
         self.inorm = 1. / self.imin(1.393)
 
-    def cmin(self, x):
+    def _cmin(self, x):
         return self.c0 + (self.c1 - self.c0) * \
             (np.arctan(self.al * (x - self.x0)) / np.pi + 0.5)
 
-    def imin(self, x):
+    def _imin(self, x):
         return self.i0 + (self.i1 - self.i0) * \
             (np.arctan(self.be * (x - self.x1)) / np.pi + 0.5)
 
@@ -243,8 +243,8 @@ class ConcentrationPrada12(Concentration):
         om = cosmo.cosmo.params.Omega_m
         ol = cosmo.cosmo.params.Omega_l
         x = a * (ol / om)**(1. / 3.)
-        B0 = self.cmin(x) * self.cnorm
-        B1 = self.imin(x) * self.inorm
+        B0 = self._cmin(x) * self.cnorm
+        B1 = self._imin(x) * self.inorm
         sig_p = B1 * sig
         Cc = 2.881 * ((sig_p / 1.257)**1.022 + 1) * np.exp(0.060 / sig_p**2)
         return B0 * Cc

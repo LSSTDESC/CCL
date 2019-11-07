@@ -1,6 +1,6 @@
 from .. import ccllib as lib
 from ..core import check
-from .massdef import MassDef, MassDef200mat
+from .massdef import MassDef, MassDef200m
 import numpy as np
 
 
@@ -246,7 +246,7 @@ class HaloBiasTinker10(HaloBias):
                                                mass_def)
 
     def _default_mdef(self):
-        self.mdef = MassDef200mat()
+        self.mdef = MassDef200m()
 
     def _setup(self, cosmo):
         ld = np.log10(self.mdef.Delta)
