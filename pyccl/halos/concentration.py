@@ -100,6 +100,10 @@ class Concentration(object):
 
 
 class ConcentrationDiemer15(Concentration):
+    """ Concentration-mass relation by Diemer & Kravtsov 2015
+    (arXiv:1407.4730). This parametrization is only valid for
+    S.O. masses with Delta = 200-critical.
+    """
     name = 'Diemer15'
 
     def __init__(self, mdef=None):
@@ -152,6 +156,11 @@ class ConcentrationDiemer15(Concentration):
 
 
 class ConcentrationBhattacharya13(Concentration):
+    """ Concentration-mass relation by Bhattacharya et al. 2013
+    (arXiv:1112.5479). This parametrization is only valid for
+    S.O. masses with Delta = Delta_vir, 200-matter and 200-critical.
+    By default it will be initialized for Delta = 200-critical.
+    """
     name = 'Bhattacharya13'
 
     def __init__(self, mdef=None):
@@ -191,6 +200,10 @@ class ConcentrationBhattacharya13(Concentration):
 
 
 class ConcentrationPrada12(Concentration):
+    """ Concentration-mass relation by Prada et al. 2012
+    (arXiv:1104.5130). This parametrization is only valid for
+    S.O. masses with Delta = 200-critical.
+    """
     name = 'Prada12'
 
     def __init__(self, mdef=None):
@@ -238,6 +251,10 @@ class ConcentrationPrada12(Concentration):
 
 
 class ConcentrationKlypin11(Concentration):
+    """ Concentration-mass relation by Klypin et al. 2011
+    (arXiv:1002.3660). This parametrization is only valid for
+    S.O. masses with Delta = Delta_vir.
+    """
     name = 'Klypin11'
 
     def __init__(self, mdef=None):
@@ -257,6 +274,11 @@ class ConcentrationKlypin11(Concentration):
 
 
 class ConcentrationDuffy08(Concentration):
+    """ Concentration-mass relation by Duffy et al. 2008
+    (arXiv:0804.2486). This parametrization is only valid for
+    S.O. masses with Delta = Delta_vir, 200-matter and 200-critical.
+    By default it will be initialized for Delta = 200-critical.
+    """
     name = 'Duffy08'
 
     def __init__(self, mdef=None):

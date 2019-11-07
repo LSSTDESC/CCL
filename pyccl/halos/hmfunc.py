@@ -179,7 +179,7 @@ class MassFuncPress74(MassFunc):
 
 
 class MassFuncSheth99(MassFunc):
-    """ Implements mass function described in 1999MNRAS.308..119S
+    """ Implements mass function described in arXiv:astro-ph/9901122
     This parametrization is only valid for 'fof' masses.
 
     Args:
@@ -211,7 +211,7 @@ class MassFuncSheth99(MassFunc):
 
 
 class MassFuncJenkins01(MassFunc):
-    """ Implements mass function described in 2001MNRAS.321..372J
+    """ Implements mass function described in astro-ph/0005260.
     This parametrization is only valid for 'fof' masses.
 
     Args:
@@ -239,7 +239,7 @@ class MassFuncJenkins01(MassFunc):
 
 
 class MassFuncTinker08(MassFunc):
-    """ Implements mass function described in 2008ApJ...688..709T
+    """ Implements mass function described in arXiv:0803.2706.
 
     Args:
         cosmo (:obj:`Cosmology`): A Cosmology object.
@@ -292,7 +292,7 @@ class MassFuncTinker08(MassFunc):
 
 
 class MassFuncDespali16(MassFunc):
-    """ Implements mass function described in 2016MNRAS.456.2486D
+    """ Implements mass function described in arXiv:1507.05627.
 
     Args:
         cosmo (:obj:`Cosmology`): A Cosmology object.
@@ -346,7 +346,7 @@ class MassFuncDespali16(MassFunc):
 
 
 class MassFuncTinker10(MassFunc):
-    """ Implements mass function described in 2010ApJ...724..878T
+    """ Implements mass function described in arXiv:1001.3162.
 
     Args:
         cosmo (:obj:`Cosmology`): A Cosmology object.
@@ -407,7 +407,7 @@ class MassFuncTinker10(MassFunc):
 
 
 class MassFuncBocquet16(MassFunc):
-    """ Implements mass function described in 2016MNRAS.456.2361B
+    """ Implements mass function described in arXiv:1502.07357.
 
     Args:
         cosmo (:obj:`Cosmology`): A Cosmology object.
@@ -541,7 +541,7 @@ class MassFuncBocquet16(MassFunc):
 
 
 class MassFuncWatson13(MassFunc):
-    """ Implements mass function described in 2013MNRAS.433.1230W
+    """ Implements mass function described in arXiv:1212.0095.
 
     Args:
         cosmo (:obj:`Cosmology`): A Cosmology object.
@@ -602,7 +602,7 @@ class MassFuncWatson13(MassFunc):
 
 
 class MassFuncAngulo12(MassFunc):
-    """ Implements mass function described in 2012MNRAS.426.2046A
+    """ Implements mass function described in arXiv:1203.3216.
     This parametrization is only valid for 'fof' masses.
 
     Args:

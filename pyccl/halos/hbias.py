@@ -162,7 +162,7 @@ class HaloBiasSheth99(HaloBias):
 
 
 class HaloBiasSheth01(HaloBias):
-    """ Implements halo bias described in 2001MNRAS.323....1S
+    """ Implements halo bias described in arXiv:astro-ph/9907024.
     This parametrization is only valid for 'fof' masses.
 
     Args:
@@ -197,7 +197,7 @@ class HaloBiasSheth01(HaloBias):
 
 
 class HaloBiasBhattacharya11(HaloBias):
-    """ Implements halo bias described in 2011ApJ...732..122B
+    """ Implements halo bias described in arXiv:1005.2239.
     This parametrization is only valid for 'fof' masses.
 
     Args:
@@ -230,7 +230,7 @@ class HaloBiasBhattacharya11(HaloBias):
 
 
 class HaloBiasTinker10(HaloBias):
-    """ Implements halo bias described in 2010ApJ...724..878T
+    """ Implements halo bias described in arXiv:1001.3162.
 
     Args:
         cosmo (:obj:`Cosmology`): A Cosmology object.
