@@ -23,15 +23,6 @@ void sigM_vec(ccl_cosmology * cosmo, double a,
 	      double *logM, int nM,
 	      int nout, double* output, int *status)
 {
-  // Check if sigma has already been calculated
-  if (!cosmo->computed_sigma) {
-    *status = CCL_ERROR_SIGMA_INIT;
-    ccl_cosmology_set_status_message(
-      cosmo,
-      "ccl_massfunc.c: ccl_sigmaM(): linear power spctrum has not been computed!");
-    return;
-  }
-
   for(int i=0; i<nM; i++)
     output[i] = ccl_sigmaM(cosmo, logM[i], a, status);
 }
@@ -40,15 +31,6 @@ void dlnsigM_dlogM_vec(ccl_cosmology * cosmo,
 		       double *logM, int nM,
 		       int nout, double* output, int *status)
 {
-  // Check if sigma has already been calculated
-  if (!cosmo->computed_sigma) {
-    *status = CCL_ERROR_SIGMA_INIT;
-    ccl_cosmology_set_status_message(
-      cosmo,
-      "ccl_massfunc.c: ccl_sigmaM(): linear power spctrum has not been computed!");
-    return;
-  }
-
   for(int i=0; i<nM; i++)
     output[i] = ccl_dlnsigM_dlogM(cosmo, logM[i], status);
 }
