@@ -13,7 +13,7 @@ class MassFunc(object):
     radius given by the Lagrangian radius for mass M.
     All sub-classes implementing specific mass function parametrizations
     can therefore be simply created by replacing this class'
-    get_fsigma method.
+    _get_fsigma method.
 
     Args:
         cosmo (:obj:`Cosmology`): A Cosmology object.
@@ -121,14 +121,14 @@ class MassFunc(object):
 
         rho = (lib.cvar.constants.RHO_CRITICAL *
                cosmo['Omega_m'] * cosmo['h']**2)
-        f = self.get_fsigma(cosmo, sigM, a, 2.302585092994046 * logM)
+        f = self._get_fsigma(cosmo, sigM, a, 2.302585092994046 * logM)
         mf = f * rho * dlns_dlogM / M_use
 
         if np.ndim(M) == 0:
             mf = mf[0]
         return mf
 
-    def get_fsigma(self, cosmo, sigM, a, lnM):
+    def _get_fsigma(self, cosmo, sigM, a, lnM):
         """ Get the f(sigma_M) function for this mass function
         object (see description of this class for details).
 
@@ -171,7 +171,7 @@ class MassFuncPress74(MassFunc):
             return True
         return False
 
-    def get_fsigma(self, cosmo, sigM, a, lnM):
+    def _get_fsigma(self, cosmo, sigM, a, lnM):
         delta_c = 1.68647
 
         nu = delta_c/sigM
@@ -202,7 +202,7 @@ class MassFuncSheth99(MassFunc):
             return True
         return False
 
-    def get_fsigma(self, cosmo, sigM, a, lnM):
+    def _get_fsigma(self, cosmo, sigM, a, lnM):
         delta_c = 1.68647
 
         nu = delta_c/sigM
@@ -234,7 +234,7 @@ class MassFuncJenkins01(MassFunc):
             return True
         return False
 
-    def get_fsigma(self, cosmo, sigM, a, lnM):
+    def _get_fsigma(self, cosmo, sigM, a, lnM):
         return self.A * np.exp(-np.fabs(-np.log(sigM) + self.b)**self.q)
 
 
@@ -284,7 +284,7 @@ class MassFuncTinker08(MassFunc):
             return True
         return False
 
-    def get_fsigma(self, cosmo, sigM, a, lnM):
+    def _get_fsigma(self, cosmo, sigM, a, lnM):
         pA = self.pA0 * a**0.14
         pa = self.pa0 * a**0.06
         pb = self.pb0 * a**self.pd
@@ -318,7 +318,7 @@ class MassFuncDespali16(MassFunc):
             return True
         return False
 
-    def get_fsigma(self, cosmo, sigM, a, lnM):
+    def _get_fsigma(self, cosmo, sigM, a, lnM):
         status = 0
         delta_c, status = lib.dc_NakamuraSuto(cosmo.cosmo, a, status)
         check(status)
@@ -396,7 +396,7 @@ class MassFuncTinker10(MassFunc):
             return True
         return False
 
-    def get_fsigma(self, cosmo, sigM, a, lnM):
+    def _get_fsigma(self, cosmo, sigM, a, lnM):
         nu = 1.686 / sigM
         pa = self.pa0 * a**(-0.27)
         pb = self.pb0 * a**(-0.20)
@@ -505,7 +505,7 @@ class MassFuncBocquet16(MassFunc):
             return True
         return False
 
-    def get_fsigma(self, cosmo, sigM, a, lnM):
+    def _get_fsigma(self, cosmo, sigM, a, lnM):
         zp1 = 1./a
         AA = self.A0 * zp1**self.Az
         aa = self.a0 * zp1**self.az
@@ -566,7 +566,7 @@ class MassFuncWatson13(MassFunc):
             return True
         return False
 
-    def get_fsigma(self, cosmo, sigM, a, lnM):
+    def _get_fsigma(self, cosmo, sigM, a, lnM):
         if self.is_fof:
             pA = 0.282
             pa = 2.163
@@ -626,7 +626,7 @@ class MassFuncAngulo12(MassFunc):
             return True
         return False
 
-    def get_fsigma(self, cosmo, sigM, a, lnM):
+    def _get_fsigma(self, cosmo, sigM, a, lnM):
         return self.A * ((self.a / sigM)**self.b + 1.) * \
             np.exp(-self.c / sigM**2)
 

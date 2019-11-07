@@ -12,7 +12,7 @@ class HaloBias(object):
     radius given by the Lagrangian radius for mass M).
     All sub-classes implementing specific parametrizations
     can therefore be simply created by replacing this class'
-    get_bsigma method.
+    _get_bsigma method.
 
     Args:
         cosmo (:obj:`Cosmology`): A Cosmology object.
@@ -110,12 +110,12 @@ class HaloBias(object):
                                     len(logM), status)
         check(status)
 
-        b = self.get_bsigma(cosmo, sigM, a)
+        b = self._get_bsigma(cosmo, sigM, a)
         if np.ndim(M) == 0:
             b = b[0]
         return b
 
-    def get_bsigma(self, cosmo, sigM, a):
+    def _get_bsigma(self, cosmo, sigM, a):
         """ Get the halo bias as a function of sigmaM.
 
         Args:
@@ -155,7 +155,7 @@ class HaloBiasSheth99(HaloBias):
             return True
         return False
 
-    def get_bsigma(self, cosmo, sigM, a):
+    def _get_bsigma(self, cosmo, sigM, a):
         nu = self.dc/sigM
         anu2 = self.a * nu**2
         return 1. + (anu2 - 1. + 2. * self.p / (1. + anu2**self.p))/self.dc
@@ -187,7 +187,7 @@ class HaloBiasSheth01(HaloBias):
             return True
         return False
 
-    def get_bsigma(self, cosmo, sigM, a):
+    def _get_bsigma(self, cosmo, sigM, a):
         nu = self.dc/sigM
         anu2 = self.a * nu**2
         anu2c = anu2**self.c
@@ -222,7 +222,7 @@ class HaloBiasBhattacharya11(HaloBias):
             return True
         return False
 
-    def get_bsigma(self, cosmo, sigM, a):
+    def _get_bsigma(self, cosmo, sigM, a):
         nu = self.dc / sigM
         a = self.a * a**self.az
         anu2 = a * nu**2
@@ -265,7 +265,7 @@ class HaloBiasTinker10(HaloBias):
             return True
         return False
 
-    def get_bsigma(self, cosmo, sigM, a):
+    def _get_bsigma(self, cosmo, sigM, a):
         nu = self.dc / sigM
         nupa = nu**self.a
 
