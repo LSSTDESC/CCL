@@ -94,7 +94,7 @@ class Concentration(object):
                                           a, mdef_other)
 
         c = self.concentration(cosmo, M_use, a)
-        if np.isscalar(M):
+        if np.ndim(M) == 0:
             c = c[0]
         return c
 
@@ -145,7 +145,7 @@ class ConcentrationDiemer15(Concentration):
         nu0 = self.eta_0 + n * self.eta_1
         c = 0.5 * floor * ((nu0 / nu)**self.alpha +
                            (nu / nu0)**self.beta)
-        if np.isscalar(M):
+        if np.ndim(M) == 0:
             c = c[0]
 
         return c

@@ -56,7 +56,7 @@ def sigmaM(cosmo, M, a):
     sigM, status = lib.sigM_vec(cosmo.cosmo, a, logM,
                                 len(logM), status)
     check(status)
-    if np.isscalar(M):
+    if np.ndim(M) == 0:
         sigM = sigM[0]
     return sigM
 

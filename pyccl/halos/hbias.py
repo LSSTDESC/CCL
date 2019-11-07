@@ -111,7 +111,7 @@ class HaloBias(object):
         check(status)
 
         b = self.get_bsigma(cosmo, sigM, a)
-        if np.isscalar(M):
+        if np.ndim(M) == 0:
             b = b[0]
         return b
 

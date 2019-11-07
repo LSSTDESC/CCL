@@ -124,7 +124,7 @@ class MassFunc(object):
         f = self.get_fsigma(cosmo, sigM, a, 2.302585092994046 * logM)
         mf = f * rho * dlns_dlogM / M_use
 
-        if np.isscalar(M):
+        if np.ndim(M) == 0:
             mf = mf[0]
         return mf
 
