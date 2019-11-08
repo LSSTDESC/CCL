@@ -44,7 +44,7 @@ def test_nM_mdef_raises(nM_pair):
 
 @pytest.mark.parametrize('nM_class', [ccl.halos.MassFuncTinker08,
                                       ccl.halos.MassFuncTinker10])
-def test_nM_mdef_raises2(nM_class):
+def test_nM_mdef_bad_delta(nM_class):
     with pytest.raises(ValueError):
         nM_class(COSMO, M100)
 
