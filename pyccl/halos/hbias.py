@@ -137,13 +137,18 @@ class HaloBiasSheth99(HaloBias):
 
     Args:
         cosmo (:obj:`Cosmology`): A Cosmology object.
+        mass_def (:obj:`MassDef`): a mass definition object.
+            this parametrization accepts FoF masses only.
+            If `None`, FoF masses will be used.
     """
     name = "Sheth99"
 
-    def __init__(self, cosmo):
-        hmd = MassDef('fof', 'matter')
+    def __init__(self, cosmo, mass_def=None):
         super(HaloBiasSheth99, self).__init__(cosmo,
-                                              hmd)
+                                              mass_def)
+
+    def _default_mdef(self):
+        self.mdef = MassDef('fof', 'matter')
 
     def _setup(self, cosmo):
         self.p = 0.3
@@ -167,13 +172,18 @@ class HaloBiasSheth01(HaloBias):
 
     Args:
         cosmo (:obj:`Cosmology`): A Cosmology object.
+        mass_def (:obj:`MassDef`): a mass definition object.
+            this parametrization accepts FoF masses only.
+            If `None`, FoF masses will be used.
     """
     name = "Sheth01"
 
-    def __init__(self, cosmo):
-        hmd = MassDef('fof', 'matter')
+    def __init__(self, cosmo, mass_def=None):
         super(HaloBiasSheth01, self).__init__(cosmo,
-                                              hmd)
+                                              mass_def)
+
+    def _default_mdef(self):
+        self.mdef = MassDef('fof', 'matter')
 
     def _setup(self, cosmo):
         self.a = 0.707
@@ -202,13 +212,18 @@ class HaloBiasBhattacharya11(HaloBias):
 
     Args:
         cosmo (:obj:`Cosmology`): A Cosmology object.
+        mass_def (:obj:`MassDef`): a mass definition object.
+            this parametrization accepts FoF masses only.
+            If `None`, FoF masses will be used.
     """
     name = "Bhattacharya11"
 
-    def __init__(self, cosmo):
-        hmd = MassDef('fof', 'matter')
+    def __init__(self, cosmo, mass_def=None):
         super(HaloBiasBhattacharya11, self).__init__(cosmo,
-                                                     hmd)
+                                                     mass_def)
+
+    def _default_mdef(self):
+        self.mdef = MassDef('fof', 'matter')
 
     def _setup(self, cosmo):
         self.a = 0.788

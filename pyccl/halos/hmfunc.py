@@ -155,13 +155,18 @@ class MassFuncPress74(MassFunc):
 
     Args:
         cosmo (:obj:`Cosmology`): A Cosmology object.
+        mass_def (:obj:`MassDef`): a mass definition object.
+            this parametrization accepts FoF masses only.
+            If `None`, FoF masses will be used.
     """
     name = 'Press74'
 
-    def __init__(self, cosmo):
-        hmd = MassDef('fof', 'matter')
+    def __init__(self, cosmo, mass_def=None):
         super(MassFuncPress74, self).__init__(cosmo,
-                                              hmd)
+                                              mass_def)
+
+    def _default_mdef(self):
+        self.mdef = MassDef('fof', 'matter')
 
     def _setup(self, cosmo):
         self.norm = np.sqrt(2/np.pi)
@@ -184,13 +189,18 @@ class MassFuncSheth99(MassFunc):
 
     Args:
         cosmo (:obj:`Cosmology`): A Cosmology object.
+        mass_def (:obj:`MassDef`): a mass definition object.
+            this parametrization accepts FoF masses only.
+            If `None`, FoF masses will be used.
     """
     name = 'Sheth99'
 
-    def __init__(self, cosmo):
-        hmd = MassDef('fof', 'matter')
+    def __init__(self, cosmo, mass_def=None):
         super(MassFuncSheth99, self).__init__(cosmo,
-                                              hmd)
+                                              mass_def)
+
+    def _default_mdef(self):
+        self.mdef = MassDef('fof', 'matter')
 
     def _setup(self, cosmo):
         self.A = 0.21615998645
@@ -216,13 +226,18 @@ class MassFuncJenkins01(MassFunc):
 
     Args:
         cosmo (:obj:`Cosmology`): A Cosmology object.
+        mass_def (:obj:`MassDef`): a mass definition object.
+            this parametrization accepts FoF masses only.
+            If `None`, FoF masses will be used.
     """
     name = 'Jenkins01'
 
-    def __init__(self, cosmo):
-        hmd = MassDef('fof', 'matter')
+    def __init__(self, cosmo, mass_def=None):
         super(MassFuncJenkins01, self).__init__(cosmo,
-                                                hmd)
+                                                mass_def=None)
+
+    def _default_mdef(self):
+        self.mdef = MassDef('fof', 'matter')
 
     def _setup(self, cosmo):
         self.A = 0.315
@@ -613,13 +628,18 @@ class MassFuncAngulo12(MassFunc):
 
     Args:
         cosmo (:obj:`Cosmology`): A Cosmology object.
+        mass_def (:obj:`MassDef`): a mass definition object.
+            this parametrization accepts FoF masses only.
+            If `None`, FoF masses will be used.
     """
     name = 'Angulo12'
 
-    def __init__(self, cosmo):
-        hmd = MassDef('fof', 'matter')
+    def __init__(self, cosmo, mass_def=None):
         super(MassFuncAngulo12, self).__init__(cosmo,
-                                               hmd)
+                                               mass_def)
+
+    def _default_mdef(self):
+        self.mdef = MassDef('fof', 'matter')
 
     def _setup(self, cosmo):
         self.A = 0.201
