@@ -28,7 +28,7 @@ class HaloBias(object):
             if self._check_mdef(mass_def):
                 raise ValueError("Halo bias " + self.name +
                                  " is not compatible with mass definition" +
-                                 " Delta = %.1lf, " % (mass_def.Delta) +
+                                 " Delta = %s, " % (mass_def.Delta) +
                                  " rho = " + mass_def.rho_type)
             self.mdef = mass_def
         else:
@@ -260,8 +260,10 @@ class HaloBiasTinker10(HaloBias):
         self.dc = 1.68647
 
     def _check_mdef(self, mdef):
-        if (mdef.Delta < 200.) or (mdef.Delta > 3200.) or \
-           (mdef.rho_type != 'matter'):
+        if isinstance(mdef.Delta, str):
+            return True
+        elif (mdef.Delta < 200.) or (mdef.Delta > 3200.) or \
+             (mdef.rho_type != 'matter'):
             return True
         return False
 

@@ -279,8 +279,10 @@ class MassFuncTinker08(MassFunc):
         self.pc = interp1d(ldelta, phi)(ld)
 
     def _check_mdef(self, mdef):
-        if (mdef.Delta < 200.) or (mdef.Delta > 3200.) or \
-           (mdef.rho_type != 'matter'):
+        if isinstance(mdef.Delta, str):
+            return True
+        elif (mdef.Delta < 200.) or (mdef.Delta > 3200.) or \
+             (mdef.rho_type != 'matter'):
             return True
         return False
 
@@ -391,8 +393,10 @@ class MassFuncTinker10(MassFunc):
         self.pd0 = interp1d(ldelta, phi)(ld)
 
     def _check_mdef(self, mdef):
-        if (mdef.Delta < 200.) or (mdef.Delta > 3200.) or \
-           (mdef.rho_type != 'matter'):
+        if isinstance(mdef.Delta, str):
+            return True
+        elif (mdef.Delta < 200.) or (mdef.Delta > 3200.) or \
+             (mdef.rho_type != 'matter'):
             return True
         return False
 
@@ -494,12 +498,14 @@ class MassFuncBocquet16(MassFunc):
                 self.cz = -0.310
 
     def _check_mdef(self, mdef):
-        if np.fabs(mdef.Delta - 200.) < 1E-4:
+        if isinstance(mdef.Delta, str):
+            return True
+        elif np.fabs(mdef.Delta - 200.) < 1E-4:
             if (mdef.rho_type != 'matter') and \
                (mdef.rho_type != 'critical'):
                 return True
         elif np.fabs(mdef.Delta - 500.) < 1E-4:
-            if mdef.rho_type == 'critical':
+            if mdef.rho_type != 'critical':
                 return True
         else:
             return True

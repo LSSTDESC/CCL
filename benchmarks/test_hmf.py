@@ -27,7 +27,7 @@ def test_hmf_despali16():
 
 
 def test_hmf_bocquet16():
-    hmd = ccl.halos.MassDef200crit()
+    hmd = ccl.halos.MassDef200c()
     mf = ccl.halos.MassFuncBocquet16(cosmo, hmd)
     d_hmf = np.loadtxt(os.path.join(dirdat, 'hmf_bocquet16.txt'),
                        unpack=True)

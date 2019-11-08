@@ -122,8 +122,10 @@ class ConcentrationDiemer15(Concentration):
         self.beta = 1.77
 
     def _check_mdef(self, mdef):
-        if (np.fabs(mdef.Delta - 200.) > 1E-4) and \
-           (mdef.rho_type != 'critical'):
+        if isinstance(mdef.Delta, str):
+            return True
+        elif (np.fabs(mdef.Delta - 200.) > 1E-4) and \
+             (mdef.rho_type != 'critical'):
             return True
         return False
 
@@ -171,7 +173,9 @@ class ConcentrationBhattacharya13(Concentration):
 
     def _check_mdef(self, mdef):
         if mdef.Delta != 'vir':
-            if np.fabs(mdef.Delta - 200.) > 1E-4:
+            if isinstance(mdef.Delta, str):
+                return True
+            elif np.fabs(mdef.Delta - 200.) > 1E-4:
                 return True
         return False
 
@@ -213,8 +217,10 @@ class ConcentrationPrada12(Concentration):
         self.mdef = MassDef(200, 'critical')
 
     def _check_mdef(self, mdef):
-        if (np.fabs(mdef.Delta - 200.) > 1E-4) and \
-           (mdef.rho_type != 'critical'):
+        if isinstance(mdef.Delta, str):
+            return True
+        elif (np.fabs(mdef.Delta - 200.) > 1E-4) and \
+             (mdef.rho_type != 'critical'):
             return True
         return False
 
@@ -227,8 +233,8 @@ class ConcentrationPrada12(Concentration):
         self.i1 = 1.646
         self.be = 7.386
         self.x1 = 0.526
-        self.cnorm = 1. / self.cmin(1.393)
-        self.inorm = 1. / self.imin(1.393)
+        self.cnorm = 1. / self._cmin(1.393)
+        self.inorm = 1. / self._imin(1.393)
 
     def _cmin(self, x):
         return self.c0 + (self.c1 - self.c0) * \
@@ -289,7 +295,9 @@ class ConcentrationDuffy08(Concentration):
 
     def _check_mdef(self, mdef):
         if mdef.Delta != 'vir':
-            if np.fabs(mdef.Delta - 200.) > 1E-4:
+            if isinstance(mdef.Delta, str):
+                return True
+            elif np.fabs(mdef.Delta - 200.) > 1E-4:
                 return True
         return False
 
