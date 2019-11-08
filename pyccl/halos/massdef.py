@@ -14,7 +14,7 @@ def mass2radius_lagrangian(cosmo, M):
         M (float or array_like): halo mass in units of M_sun.
 
     Returns:
-        float or array_like: lagrangian radius in Mpc
+        float or array_like: lagrangian radius in comoving Mpc.
     """
     return (M / (4.18879020479 * rho_x(cosmo, 1, 'matter')))**(1./3.)
 
