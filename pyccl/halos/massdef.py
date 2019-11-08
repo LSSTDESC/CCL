@@ -73,6 +73,8 @@ class MassDef(object):
     def __init__(self, Delta, rho_type, c_m_relation=None):
         # Check it makes sense
         if (Delta != 'fof') and (Delta != 'vir'):
+            if isinstance(Delta, str):
+                raise ValueError("Unknown Delta type " + Delta)
             if Delta <= 0:
                 raise ValueError("Delta must be a positive number")
         self.Delta = Delta
@@ -141,8 +143,12 @@ class MassDef(object):
         Returns:
             float or array_like: halo mass in units of M_sun.
         """
+        R_use = np.atleast_1d(R)
         Delta = self.get_Delta(cosmo, a)
-        return 4.18879020479 * rho_x(cosmo, a, self.rho_type) * Delta * R**3
+        M = 4.18879020479 * rho_x(cosmo, a, self.rho_type) * Delta * R_use**3
+        if np.ndim(R) == 0:
+            M = M[0]
+        return M
 
     def get_radius(self, cosmo, M, a):
         """ Translates a halo mass into a radius
@@ -157,11 +163,15 @@ class MassDef(object):
             float or array_like: halo radius in units of Mpc (physical, not
                 comoving).
         """
+        M_use = np.atleast_1d(M)
         Delta = self.get_Delta(cosmo, a)
-        return (M / (4.18879020479 * Delta *
-                     rho_x(cosmo, a, self.rho_type)))**(1./3.)
+        R = (M_use / (4.18879020479 * Delta *
+                      rho_x(cosmo, a, self.rho_type)))**(1./3.)
+        if np.ndim(M) == 0:
+            R = R[0]
+        return R
 
-    def get_concentration(self, cosmo, M, a):
+    def _get_concentration(self, cosmo, M, a):
         """ Returns concentration for this mass definition.
 
         Args:
@@ -199,7 +209,7 @@ class MassDef(object):
             else:
                 om_this = omega_x(cosmo, a, self.rho_type)
                 D_this = self.get_Delta(cosmo, a) * om_this
-                c_this = self.get_concentration(cosmo, M, a)
+                c_this = self._get_concentration(cosmo, M, a)
                 R_this = self.get_radius(cosmo, M, a)
                 om_new = omega_x(cosmo, a, m_def_other.rho_type)
                 D_new = m_def_other.get_Delta(cosmo, a) * om_new
