@@ -24,9 +24,33 @@ def test_cM_subclasses_smoke(cM_class):
     for m in MS:
         c = cM.get_concentration(COSMO, m, 0.9)
         assert np.all(np.isfinite(c))
+        assert np.shape(c) == np.shape(m)
+
+
+def test_cM_duffy_extra():
+    md =ccl.halos.MassDef('vir', 'critical')
+    cM = ccl.halos.ConcentrationDuffy08(md)
+    for m in MS:
+        c = cM.get_concentration(COSMO, m, 0.9)
+        assert np.all(np.isfinite(c))
+        assert np.shape(c) == np.shape(m)
 
 
 @pytest.mark.parametrize('cM_class', CONCS)
 def test_cM_mdef_raises(cM_class):
     with pytest.raises(ValueError):
         cM_class(MDEF)
+
+@pytest.mark.parametrize('name', ['Duffy08', 'Diemer15'])
+def test_cM_from_string(name):
+    cM_class = ccl.halos.concentration_from_name(name)
+    cM = cM_class()
+    for m in MS:
+        c = cM.get_concentration(COSMO, m, 0.9)
+        assert np.all(np.isfinite(c))
+        assert np.shape(c) == np.shape(m)
+
+
+def test_cM_from_string_raises():
+    with pytest.raises(ValueError):
+        ccl.halos.concentration_from_name('Duffman08')
