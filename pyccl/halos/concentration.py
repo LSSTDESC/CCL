@@ -93,7 +93,7 @@ class Concentration(object):
                                           np.atleast_1d(M),
                                           a, mdef_other)
 
-        c = self.concentration(cosmo, M_use, a)
+        c = self._concentration(cosmo, M_use, a)
         if np.ndim(M) == 0:
             c = c[0]
         return c
@@ -103,6 +103,11 @@ class ConcentrationDiemer15(Concentration):
     """ Concentration-mass relation by Diemer & Kravtsov 2015
     (arXiv:1407.4730). This parametrization is only valid for
     S.O. masses with Delta = 200-critical.
+
+    Args:
+        mdef (:obj:`MassDef`): a mass definition object that fixes
+            the mass definition used by this c(M)
+            parametrization.
     """
     name = 'Diemer15'
 
@@ -129,7 +134,7 @@ class ConcentrationDiemer15(Concentration):
             return True
         return False
 
-    def concentration(self, cosmo, M, a):
+    def _concentration(self, cosmo, M, a):
         M_use = np.atleast_1d(M)
 
         # Compute power spectrum slope
@@ -162,6 +167,11 @@ class ConcentrationBhattacharya13(Concentration):
     (arXiv:1112.5479). This parametrization is only valid for
     S.O. masses with Delta = Delta_vir, 200-matter and 200-critical.
     By default it will be initialized for Delta = 200-critical.
+
+    Args:
+        mdef (:obj:`MassDef`): a mass definition object that fixes
+            the mass definition used by this c(M)
+            parametrization.
     """
     name = 'Bhattacharya13'
 
@@ -194,7 +204,7 @@ class ConcentrationBhattacharya13(Concentration):
                 self.B = 0.54
                 self.C = -0.35
 
-    def concentration(self, cosmo, M, a):
+    def _concentration(self, cosmo, M, a):
         gz = growth_factor(cosmo, a)
         status = 0
         delta_c, status = lib.dc_NakamuraSuto(cosmo.cosmo, a, status)
@@ -207,6 +217,11 @@ class ConcentrationPrada12(Concentration):
     """ Concentration-mass relation by Prada et al. 2012
     (arXiv:1104.5130). This parametrization is only valid for
     S.O. masses with Delta = 200-critical.
+
+    Args:
+        mdef (:obj:`MassDef`): a mass definition object that fixes
+            the mass definition used by this c(M)
+            parametrization.
     """
     name = 'Prada12'
 
@@ -244,7 +259,7 @@ class ConcentrationPrada12(Concentration):
         return self.i0 + (self.i1 - self.i0) * \
             (np.arctan(self.be * (x - self.x1)) / np.pi + 0.5)
 
-    def concentration(self, cosmo, M, a):
+    def _concentration(self, cosmo, M, a):
         sig = sigmaM(cosmo, M, a)
         om = cosmo.cosmo.params.Omega_m
         ol = cosmo.cosmo.params.Omega_l
@@ -260,6 +275,11 @@ class ConcentrationKlypin11(Concentration):
     """ Concentration-mass relation by Klypin et al. 2011
     (arXiv:1002.3660). This parametrization is only valid for
     S.O. masses with Delta = Delta_vir.
+
+    Args:
+        mdef (:obj:`MassDef`): a mass definition object that fixes
+            the mass definition used by this c(M)
+            parametrization.
     """
     name = 'Klypin11'
 
@@ -274,7 +294,7 @@ class ConcentrationKlypin11(Concentration):
             return True
         return False
 
-    def concentration(self, cosmo, M, a):
+    def _concentration(self, cosmo, M, a):
         M_pivot_inv = cosmo.cosmo.params.h * 1E-12
         return 9.6 * (M * M_pivot_inv)**-0.075
 
@@ -284,6 +304,11 @@ class ConcentrationDuffy08(Concentration):
     (arXiv:0804.2486). This parametrization is only valid for
     S.O. masses with Delta = Delta_vir, 200-matter and 200-critical.
     By default it will be initialized for Delta = 200-critical.
+
+    Args:
+        mdef (:obj:`MassDef`): a mass definition object that fixes
+            the mass definition used by this c(M)
+            parametrization.
     """
     name = 'Duffy08'
 
@@ -316,7 +341,7 @@ class ConcentrationDuffy08(Concentration):
                 self.B = -0.084
                 self.C = -0.47
 
-    def concentration(self, cosmo, M, a):
+    def _concentration(self, cosmo, M, a):
         M_pivot_inv = cosmo.cosmo.params.h * 5E-13
         return self.A * (M * M_pivot_inv)**self.B * a**(-self.C)
 
