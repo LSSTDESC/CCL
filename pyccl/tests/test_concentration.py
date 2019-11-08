@@ -28,7 +28,7 @@ def test_cM_subclasses_smoke(cM_class):
 
 
 def test_cM_duffy_extra():
-    md =ccl.halos.MassDef('vir', 'critical')
+    md = ccl.halos.MassDef('vir', 'critical')
     cM = ccl.halos.ConcentrationDuffy08(md)
     for m in MS:
         c = cM.get_concentration(COSMO, m, 0.9)
@@ -40,6 +40,7 @@ def test_cM_duffy_extra():
 def test_cM_mdef_raises(cM_class):
     with pytest.raises(ValueError):
         cM_class(MDEF)
+
 
 @pytest.mark.parametrize('name', ['Duffy08', 'Diemer15'])
 def test_cM_from_string(name):

@@ -124,7 +124,7 @@ class ConcentrationDiemer15(Concentration):
     def _check_mdef(self, mdef):
         if isinstance(mdef.Delta, str):
             return True
-        elif (np.fabs(mdef.Delta - 200.) > 1E-4) and \
+        elif (int(mdef.Delta) != 200) and \
              (mdef.rho_type != 'critical'):
             return True
         return False
@@ -175,7 +175,7 @@ class ConcentrationBhattacharya13(Concentration):
         if mdef.Delta != 'vir':
             if isinstance(mdef.Delta, str):
                 return True
-            elif np.fabs(mdef.Delta - 200.) > 1E-4:
+            elif int(mdef.Delta) != 200:
                 return True
         return False
 
@@ -219,7 +219,7 @@ class ConcentrationPrada12(Concentration):
     def _check_mdef(self, mdef):
         if isinstance(mdef.Delta, str):
             return True
-        elif (np.fabs(mdef.Delta - 200.) > 1E-4) and \
+        elif (int(mdef.Delta) != 200) and \
              (mdef.rho_type != 'critical'):
             return True
         return False
@@ -297,7 +297,7 @@ class ConcentrationDuffy08(Concentration):
         if mdef.Delta != 'vir':
             if isinstance(mdef.Delta, str):
                 return True
-            elif np.fabs(mdef.Delta - 200.) > 1E-4:
+            elif int(mdef.Delta) != 200:
                 return True
         return False
 

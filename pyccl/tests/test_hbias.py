@@ -23,6 +23,7 @@ def test_bM_subclasses_smoke(bM_class):
         assert np.all(np.isfinite(b))
         assert np.shape(b) == np.shape(m)
 
+
 def test_bM_mdef_raises():
     bM_class = ccl.halos.HaloBiasTinker10
     with pytest.raises(ValueError):

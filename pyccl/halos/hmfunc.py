@@ -431,12 +431,12 @@ class MassFuncBocquet16(MassFunc):
         self.mdef = MassDef200m()
 
     def _setup(self, cosmo):
-        if np.fabs(self.mdef.Delta - 200.) < 1E-4:
+        if int(self.mdef.Delta) == 200:
             if self.mdef.rho_type == 'matter':
                 self.mdef_type = '200m'
             elif self.mdef.rho_type == 'critical':
                 self.mdef_type = '200c'
-        elif np.fabs(self.mdef.Delta - 500.) < 1E-4:
+        elif int(self.mdef.Delta) == 500:
             if self.mdef.rho_type == 'critical':
                 self.mdef_type = '500c'
         if self.mdef_type == '200m':
@@ -500,11 +500,11 @@ class MassFuncBocquet16(MassFunc):
     def _check_mdef(self, mdef):
         if isinstance(mdef.Delta, str):
             return True
-        elif np.fabs(mdef.Delta - 200.) < 1E-4:
+        elif int(mdef.Delta) == 200:
             if (mdef.rho_type != 'matter') and \
                (mdef.rho_type != 'critical'):
                 return True
-        elif np.fabs(mdef.Delta - 500.) < 1E-4:
+        elif int(mdef.Delta) == 500:
             if mdef.rho_type != 'critical':
                 return True
         else:
