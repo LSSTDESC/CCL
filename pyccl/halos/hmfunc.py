@@ -234,7 +234,7 @@ class MassFuncJenkins01(MassFunc):
 
     def __init__(self, cosmo, mass_def=None):
         super(MassFuncJenkins01, self).__init__(cosmo,
-                                                mass_def=None)
+                                                mass_def=mass_def)
 
     def _default_mdef(self):
         self.mdef = MassDef('fof', 'matter')

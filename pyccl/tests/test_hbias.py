@@ -13,6 +13,8 @@ HBFS = [ccl.halos.HaloBiasSheth99,
         ccl.halos.HaloBiasBhattacharya11]
 MS = [1E13, [1E12, 1E15], np.array([1E12, 1E15])]
 MFOF = ccl.halos.MassDef('fof', 'matter')
+MVIR = ccl.halos.MassDef('vir', 'critical')
+MDFS = [MVIR, MVIR, MFOF, MVIR]
 
 
 @pytest.mark.parametrize('bM_class', HBFS)
@@ -24,11 +26,15 @@ def test_bM_subclasses_smoke(bM_class):
         assert np.shape(b) == np.shape(m)
 
 
-def test_bM_mdef_raises():
-    bM_class = ccl.halos.HaloBiasTinker10
+@pytest.mark.parametrize('bM_pair', zip(HBFS, MDFS))
+def test_bM_mdef_raises(bM_pair):
+    bM_class, mdef = bM_pair
     with pytest.raises(ValueError):
-        bM_class(COSMO, MFOF)
+        bM_class(COSMO, mdef)
 
+
+def test_bM_Tinker10_extra():
+    bM_class = ccl.halos.HaloBiasTinker10
     with pytest.raises(ValueError):
         bM_class(COSMO, ccl.halos.MassDef(100, 'matter'))
 
@@ -46,3 +52,14 @@ def test_bM_from_string(name):
 def test_bM_from_string_raises():
     with pytest.raises(ValueError):
         ccl.halos.halo_bias_from_name('Tanker10')
+
+
+def test_bM_default():
+    bM = ccl.halos.HaloBias(COSMO)
+    with pytest.raises(NotImplementedError):
+        bM._get_bsigma(COSMO, 1., 1.)
+
+    M_in = 1E12
+    lM_out = bM._get_consistent_mass(COSMO,
+                                     M_in, 1., bM.mdef)
+    assert np.fabs(np.log10(M_in) - lM_out) < 1E-10
