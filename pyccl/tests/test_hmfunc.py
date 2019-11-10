@@ -60,9 +60,10 @@ def test_nM_despali_extra():
         assert np.shape(n) == np.shape(m)
 
 
-def test_nM_watson_extra():
+@pytest.mark.parametrize('mdef', [MFOF, M200m])
+def test_nM_watson_extra(mdef):
     nM = ccl.halos.MassFuncWatson13(COSMO,
-                                    MFOF)
+                                    mdef)
     for m in MS:
         n = nM.get_mass_function(COSMO, m, 0.9)
         assert np.all(np.isfinite(n))
@@ -76,13 +77,11 @@ def test_nM_watson_extra():
 @pytest.mark.parametrize('with_hydro', [True, False])
 def test_nM_bocquet_extra(with_hydro):
     with pytest.raises(ValueError):
-        ccl.halos.MassFuncBocquet16(COSMO,
-                                    M500m,
+        ccl.halos.MassFuncBocquet16(COSMO, M500m,
                                     hydro=with_hydro)
 
     for md in [M500c, M200c, M200m]:
-        nM = ccl.halos.MassFuncBocquet16(COSMO,
-                                         M500c,
+        nM = ccl.halos.MassFuncBocquet16(COSMO, md,
                                          hydro=with_hydro)
         for m in MS:
             n = nM.get_mass_function(COSMO, m, 0.9)
