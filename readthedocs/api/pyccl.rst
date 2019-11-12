@@ -1,6 +1,13 @@
 pyccl package
 =============
 
+Subpackages
+-----------
+
+.. toctree::
+
+    pyccl.halos
+
 Submodules
 ----------
 
@@ -15,7 +22,6 @@ Submodules
    pyccl.errors
    pyccl.halomodel
    pyccl.haloprofile
-   pyccl.massfunction
    pyccl.neutrinos
    pyccl.pk2d
    pyccl.power
@@ -26,6 +32,6 @@ Module contents
 ---------------
 
 .. automodule:: pyccl
-   :members:
-   :undoc-members:
-   :show-inheritance:
+    :members:
+    :undoc-members:
+    :show-inheritance:

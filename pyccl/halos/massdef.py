@@ -23,7 +23,7 @@ def convert_concentration(cosmo, c_old, Delta_old, Delta_new):
     """ Computes the concentration parameter for a different mass definition.
     This is done assuming an NFW profile. The output concentration `c_new` is
     found by solving the equation:
-        f(c_old) * D_old = f(c_new) * D_new
+    f(c_old) * D_old = f(c_new) * D_new
     where f(x) = x^3/[ln(1+x) - x/(1+x)].
 
     Args:
@@ -55,7 +55,7 @@ class MassDef(object):
     """Halo mass definition. Halo masses are defined in terms of an overdensity
     parameter Delta and an associated density X (either the matter density or
     the critical density):
-        M = 4 * pi * Delta * rho_X * R^3 / 3
+    M = 4 * pi * Delta * rho_X * R^3 / 3
     where R is the halo radius. This object also holds methods to translate
     between R and M, and to translate masses between different definitions
     if a concentration-mass relation is provided.

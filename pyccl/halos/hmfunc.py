@@ -8,7 +8,7 @@ import numpy as np
 class MassFunc(object):
     """ This class enables the calculation of halo mass functions.
     We currently assume that all mass functions can be written as
-       dn/dM = f(sigma_M) * rho_matter * d(log sigma_M)/d(log10 M) / M
+    dn/dM = f(sigma_M) * rho_matter * d(log sigma_M)/d(log10 M) / M
     where sigma_M^2 is the overdensity variance on spheres with a
     radius given by the Lagrangian radius for mass M.
     All sub-classes implementing specific mass function parametrizations

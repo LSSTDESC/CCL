@@ -1,7 +1,7 @@
-pyccl.haloprofile module
+pyccl.halos.hbias module
 ========================
 
-.. automodule:: pyccl.haloprofile
+.. automodule:: pyccl.halos.hbias
     :members:
     :undoc-members:
     :show-inheritance:
