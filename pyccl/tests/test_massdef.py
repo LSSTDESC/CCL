@@ -111,6 +111,6 @@ def test_translate_mass_raises():
 @pytest.mark.parametrize('scls', [ccl.halos.MassDef200m,
                                   ccl.halos.MassDef200c,
                                   ccl.halos.MassDefVir])
-def test_subclasses(scls):
+def test_subclasses_smoke(scls):
     hmd = scls()
     assert np.isfinite(hmd.get_Delta(COSMO, 1.))

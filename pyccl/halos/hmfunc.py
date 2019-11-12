@@ -434,6 +434,9 @@ class MassFuncBocquet16(MassFunc):
             this parametrization accepts SO masses with
             Delta = 200 (matter, critical) and 500 (critical).
             If `None`, Delta = 200 (matter) will be used.
+        hydro (bool): if `False`, use the parametrization found
+            using dark-matter-only simulations. Otherwise, include
+            baryonic effects (default).
     """
     name = 'Bocquet16'
 

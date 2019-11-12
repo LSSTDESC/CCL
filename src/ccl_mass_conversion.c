@@ -8,6 +8,24 @@
 
 #include "ccl.h"
 
+/*
+ * convert_concentration_single finds the concentration c'
+ * for a mass definition with overdensity Delta' given
+ * the concentration c for a mass definition with overdensity
+ * Delta assuming an NFW density profile.
+ *
+ * To do so, it solves the following equation numerically:
+ *    c^3 * f(c) = Delta' f(c')
+ * where f(x) = x^3 * (x + 1) / ((1+x) * log(x + 1) - x).
+ * 
+ * The equation is solved using a Newton-Raphson approach.
+ * The functions nfw_fx, nfw_f, nfw_df and nfw_fdf implement
+ * the function whose zero we try to find and its derivative.
+ *
+ * ccl_convert_concentration does the same thing for an
+ * array of input concentrations.
+ */
+
 static double nfw_fx(double x)
 {
   if(x>0.01) {

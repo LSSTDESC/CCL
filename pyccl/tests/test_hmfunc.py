@@ -51,7 +51,7 @@ def test_nM_mdef_bad_delta(nM_class):
         nM_class(COSMO, M100)
 
 
-def test_nM_despali_extra():
+def test_nM_despali_smoke():
     nM = ccl.halos.MassFuncDespali16(COSMO,
                                      ellipsoidal=True)
     for m in MS:
@@ -61,7 +61,7 @@ def test_nM_despali_extra():
 
 
 @pytest.mark.parametrize('mdef', [MFOF, M200m])
-def test_nM_watson_extra(mdef):
+def test_nM_watson_smoke(mdef):
     nM = ccl.halos.MassFuncWatson13(COSMO,
                                     mdef)
     for m in MS:
@@ -75,7 +75,7 @@ def test_nM_watson_extra(mdef):
 
 
 @pytest.mark.parametrize('with_hydro', [True, False])
-def test_nM_bocquet_extra(with_hydro):
+def test_nM_bocquet_smoke(with_hydro):
     with pytest.raises(ValueError):
         ccl.halos.MassFuncBocquet16(COSMO, M500m,
                                     hydro=with_hydro)
@@ -102,7 +102,7 @@ def test_nM_from_string(name):
 
 def test_nM_from_string_raises():
     with pytest.raises(ValueError):
-        ccl.halos.mass_function_from_name('Tanker08')
+        ccl.halos.mass_function_from_name('Tinker09')
 
 
 def test_nM_default():

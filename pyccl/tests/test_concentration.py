@@ -27,7 +27,7 @@ def test_cM_subclasses_smoke(cM_class):
         assert np.shape(c) == np.shape(m)
 
 
-def test_cM_duffy_extra():
+def test_cM_duffy_smoke():
     md = ccl.halos.MassDef('vir', 'critical')
     cM = ccl.halos.ConcentrationDuffy08(md)
     for m in MS:
@@ -54,4 +54,4 @@ def test_cM_from_string(name):
 
 def test_cM_from_string_raises():
     with pytest.raises(ValueError):
-        ccl.halos.concentration_from_name('Duffman08')
+        ccl.halos.concentration_from_name('Duffy09')

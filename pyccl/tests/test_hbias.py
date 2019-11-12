@@ -33,7 +33,7 @@ def test_bM_mdef_raises(bM_pair):
         bM_class(COSMO, mdef)
 
 
-def test_bM_Tinker10_extra():
+def test_bM_Tinker10_smoke():
     bM_class = ccl.halos.HaloBiasTinker10
     with pytest.raises(ValueError):
         bM_class(COSMO, ccl.halos.MassDef(100, 'matter'))
@@ -51,7 +51,7 @@ def test_bM_from_string(name):
 
 def test_bM_from_string_raises():
     with pytest.raises(ValueError):
-        ccl.halos.halo_bias_from_name('Tanker10')
+        ccl.halos.halo_bias_from_name('Tinker11')
 
 
 def test_bM_default():
