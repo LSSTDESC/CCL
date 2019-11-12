@@ -2,6 +2,11 @@
 
 ## Python library
 - Improved implementation of halo model quantities (n(M), b(M), c(M)) (#668, #655, #656, #657, #636).
+
+# v2.0
+
+## Python library
+- Improved implementation of halo model quantities (n(M), b(M), c(M)) (#668, #655, #656, #657, #636).
 - Made CAMB the default Boltzmann code (#685).
 - Added check to ensure the number of relativistic neutrinos is positive (#684).
 - Added massive neutrinos to Omega_m (#680).
