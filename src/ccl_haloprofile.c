@@ -245,7 +245,7 @@ void ccl_halo_profile_einasto(ccl_cosmology *cosmo, double c, double halomass,
         Mvir = halomass*helper_fx(solve_cvir(cosmo, rhs, c, status))/helper_fx(c);
     }
 
-    nu = 1.686/ccl_sigmaM(cosmo, Mvir, a, status); //delta_c_Tinker
+    nu = 1.686/ccl_sigmaM(cosmo, log10(Mvir), a, status); //delta_c_Tinker
     alpha = 0.155 + 0.0095*nu*nu;
 
     //rhos: scale density

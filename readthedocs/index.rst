@@ -10,8 +10,8 @@ The core functions of this package include:
  * Hubble constant :math:`H(z)` as well as comoving distances :math:`\chi(z)` and distance moduli :math:`\mu(z)`
  * Growth of structure :math:`D(z)` and :math:`f`
  * Angular power spectra :math:`C_\ell` and correlation functions :math:`\xi` for arbitrary
-   combinations of tracers including galaxies, shear and number counts
- * Halo mass function :math:`{\rm d}n/{\rm d}M` and halo bias :math:`b(M)`
+   combinations of tracers including number counts, shear and CMB lensing.
+ * Halo mass function :math:`{\rm d}n/{\rm d}M`, halo bias :math:`b(M)`, concentration-mass relations :math:`c(M)`.
  * Approximate baryonic modifications to the matter power spectra :math:`\Delta^2_{\rm baryons}`
  * Simple modified gravity extensions :math:`\Delta f(z)` and :math:`\mu-\Sigma`
 

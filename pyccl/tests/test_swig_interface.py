@@ -178,36 +178,6 @@ def test_swig_halomod():
         status)
 
 
-def test_swig_massfunc():
-    status = 0
-    for func in [ccllib.massfunc_vec, ccllib.halo_bias_vec]:
-        assert_raises(
-            CCLError,
-            func,
-            COSMO,
-            1.0, 200.0,
-            [1e13, 1e14],
-            4,
-            status)
-
-    assert_raises(
-        CCLError,
-        ccllib.massfunc_m2r_vec,
-        COSMO,
-        [1e13, 1e14],
-        4,
-        status)
-
-    assert_raises(
-        CCLError,
-        ccllib.sigmaM_vec,
-        COSMO,
-        1.0,
-        [1e13, 1e14],
-        4,
-        status)
-
-
 def test_swig_neurtinos():
     status = 0
     assert_raises(
