@@ -75,7 +75,7 @@ def angular_cl(cosmo, cltracer1, cltracer2, ell, p_of_k_a=None,
     cl, status = lib.angular_cl_vec(
         cosmo, clt1, clt2, psp, l_limber,
         ell_use, ell_use.size, status)
-    if np.isscalar(ell):
+    if np.ndim(ell) == 0:
         cl = cl[0]
 
     # Free up tracer collections
