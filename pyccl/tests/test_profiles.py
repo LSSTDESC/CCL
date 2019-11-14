@@ -50,3 +50,14 @@ def test_profile_nfw_smoke():
     c = ccl.halos.ConcentrationDuffy08(M200)
     p = ccl.halos.HaloProfileNFW(c)
     smoke_assert_prof_real(p)
+
+
+def test_profile_gaussian_smoke():
+    def r_s(cosmo, M, a, mdef):
+        return mdef.get_radius(cosmo, M, a)
+
+    def rho0(cosmo, M, a, mdef):
+        return M
+
+    p = ccl.halos.HaloProfileGaussian(rho0, r_s)
+    smoke_assert_prof_real(p)

@@ -33,7 +33,31 @@ class HaloProfile(object):
         return f_k
 
 
-class HaloProfileNFW(object):
+class HaloProfileGaussian(HaloProfile):
+    def __init__(self, rho0, r_scale):
+        self.rho_0 = rho0
+        self.r_s = r_scale
+
+    def _profile_real(self, cosmo, r, M, a, mass_def):
+        r_use = np.atleast_1d(r)
+        M_use = np.atleast_1d(M)
+
+        # Compute scale
+        rs = self.r_s(cosmo, M_use, a, mass_def)
+        # Compute normalization
+        rho0 = self.rho_0(cosmo, M_use, a, mass_def)
+        # Form factor
+        prof = np.exp(-(r_use[:, None] / rs[None, :])**2)
+        prof = prof * rho0[None, :]
+
+        if np.ndim(M) == 0:
+            prof = np.squeeze(prof, axis=-1)
+        if np.ndim(r) == 0:
+            prof = np.squeeze(prof, axis=0)
+        return prof
+
+
+class HaloProfileNFW(HaloProfile):
     def __init__(self, c_M_relation):
         if not isinstance(c_M_relation, Concentration):
             raise TypeError("c_M_relation must be of type `Concentration`)")
