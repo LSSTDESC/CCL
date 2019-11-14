@@ -1,6 +1,7 @@
 from . import halos as hal
 from .pyutils import deprecated
 from .errors import CCLError
+from .power import sigmaM  # noqa
 
 
 @deprecated(hal.MassFunc)
@@ -48,7 +49,7 @@ def halo_bias(cosmo, halo_mass, a, overdensity=200):
     if mf_par == 'tinker10':
         bf = hal.HaloBiasTinker10(cosmo, mdef)
     elif mf_par == 'shethtormen':
-        bf = hal.HaloBiasSheth99(cosmo)        
+        bf = hal.HaloBiasSheth99(cosmo)
     else:
         raise CCLError("No b(M) fitting function implemented for "
                        "mass_function_method: "+mf_par)
