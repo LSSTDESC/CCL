@@ -16,7 +16,7 @@ MF_TYPES = sorted(list(MF_EQUIV.keys()))
 
 
 @pytest.mark.parametrize('mf_type', MF_TYPES)
-def test_massfunc_smoke(mf_type):
+def test_massfunc_models_smoke(mf_type):
     cosmo = ccl.Cosmology(
         Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96,
         transfer_function='bbks', matter_power_spectrum='linear',
@@ -32,29 +32,21 @@ def test_massfunc_smoke(mf_type):
                       np.array(nm_new))
 
 
-def test_halo_bias_smoke():
+@pytest.mark.parametrize('mf_type', ['tinker10', 'shethtormen'])
+def test_halo_bias_models_smoke(mf_type):
     cosmo = ccl.Cosmology(
         Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96,
         transfer_function='bbks', matter_power_spectrum='linear',
-        mass_function='tinker10')
-    hmf = ccl.halos.HaloBiasTinker10(cosmo)
+        mass_function=mf_type)
+    hbf_cls = ccl.halos.halo_bias_from_name(MF_EQUIV[mf_type])
+    hbf = hbf_cls(cosmo)
     for m in MS:
         bm_old = ccl.halo_bias(cosmo, m, 1.)
-        bm_new = hmf.get_halo_bias(cosmo, m, 1.)
+        bm_new = hbf.get_halo_bias(cosmo, m, 1.)
         assert np.all(np.isfinite(bm_old))
         assert np.shape(bm_old) == np.shape(m)
         assert np.all(np.array(bm_old) ==
                       np.array(bm_new))
-
-
-def test_m2r_smoke():
-    for m in MS:
-        r_old = ccl.massfunc_m2r(COSMO, m)
-        r_new = ccl.halos.mass2radius_lagrangian(COSMO, m)
-        assert np.all(np.isfinite(r_old))
-        assert np.shape(r_old) == np.shape(m)
-        assert np.all(np.array(r_old) ==
-                      np.array(r_new))
 
 
 @pytest.mark.parametrize('m', [
