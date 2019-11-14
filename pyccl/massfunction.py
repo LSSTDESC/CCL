@@ -23,7 +23,7 @@ def massfunc(cosmo, halo_mass, a, overdensity=200):
         mf = hal.MassFuncSheth99(cosmo)
     elif mf_par == 'angulo':
         mf = hal.MassFuncAngulo12(cosmo)
-    
+
     return mf.get_mass_function(cosmo,
                                 halo_mass,
                                 a)
