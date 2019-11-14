@@ -7,11 +7,13 @@ from .power import sigmaM  # noqa
 @deprecated(hal.MassFunc)
 def massfunc(cosmo, halo_mass, a, overdensity=200):
     """Halo mass function, dn/dlog10M.
+
     Args:
         cosmo (:obj:`Cosmology`): Cosmological parameters.
         halo_mass (float or array_like): Halo masses; Msun.
         a (float): scale factor.
         overdensity (float): overdensity parameter (default: 200)
+
     Returns:
         float or array_like: Halo mass function; dn/dlog10M.
     """
@@ -35,12 +37,14 @@ def massfunc(cosmo, halo_mass, a, overdensity=200):
 
 @deprecated(hal.HaloBias)
 def halo_bias(cosmo, halo_mass, a, overdensity=200):
-    """Tinker et al. (2010) halo bias
+    """Halo bias
+
     Args:
         cosmo (:obj:`Cosmology`): Cosmological parameters.
         halo_mass (float or array_like): Halo masses; Msun.
         a (float): Scale factor.
         overdensity (float): Overdensity parameter (default: 200).
+
     Returns:
         float or array_like: Halo bias.
     """
@@ -63,9 +67,11 @@ def massfunc_m2r(cosmo, halo_mass):
     """Converts smoothing halo mass into smoothing halo radius.
     .. note:: This is R=(3M/(4*pi*rho_m))^(1/3), where rho_m is the mean
     matter density.
+
     Args:
         cosmo (:obj:`Cosmology`): Cosmological parameters.
         halo_mass (float or array_like): Halo masses; Msun.
+
     Returns:
         float or array_like: Smoothing halo radius; Mpc.
     """
