@@ -1,6 +1,8 @@
 from . import halos as hal
+from .pyutils import deprecated
 
 
+@deprecated(hal.MassFunc)
 def massfunc(cosmo, halo_mass, a, overdensity=200):
     """Halo mass function, dn/dlog10M.
     Args:
@@ -29,6 +31,7 @@ def massfunc(cosmo, halo_mass, a, overdensity=200):
                                 a)
 
 
+@deprecated(hal.HaloBias)
 def halo_bias(cosmo, halo_mass, a, overdensity=200):
     """Tinker et al. (2010) halo bias
     Args:
@@ -51,6 +54,7 @@ def halo_bias(cosmo, halo_mass, a, overdensity=200):
                                   "mass_function_method: "+mf_par)
 
 
+@deprecated(hal.mass2radius_lagrangian)
 def massfunc_m2r(cosmo, halo_mass):
     """Converts smoothing halo mass into smoothing halo radius.
     .. note:: This is R=(3M/(4*pi*rho_m))^(1/3), where rho_m is the mean
