@@ -29,3 +29,7 @@ from .hbias import (  # noqa
     HaloBiasSheth01, HaloBiasTinker10,
     HaloBiasBhattacharya11,
     halo_bias_from_name)
+
+# Halo profiles
+from .profiles import (  # noqa
+    HaloProfile)
