@@ -54,7 +54,7 @@ def halo_bias(cosmo, halo_mass, a, overdensity=200):
 def massfunc_m2r(cosmo, halo_mass):
     """Converts smoothing halo mass into smoothing halo radius.
     .. note:: This is R=(3M/(4*pi*rho_m))^(1/3), where rho_m is the mean
-              matter density.
+    matter density.
     Args:
         cosmo (:obj:`Cosmology`): Cosmological parameters.
         halo_mass (float or array_like): Halo masses; Msun.
