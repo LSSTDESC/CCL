@@ -16,7 +16,11 @@ def mass2radius_lagrangian(cosmo, M):
     Returns:
         float or array_like: lagrangian radius in comoving Mpc.
     """
-    return (M / (4.18879020479 * rho_x(cosmo, 1, 'matter')))**(1./3.)
+    M_use = np.atleast_1d(M)
+    R = (M_use / (4.18879020479 * rho_x(cosmo, 1, 'matter')))**(1./3.)
+    if np.ndim(M) == 0:
+        R = R[0]
+    return R
 
 
 def convert_concentration(cosmo, c_old, Delta_old, Delta_new):
