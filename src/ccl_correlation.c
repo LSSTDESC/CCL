@@ -145,15 +145,6 @@ static void ccl_tracer_corr_fftlog(ccl_cosmology *cosmo,
 }
 
 typedef struct {
-  int nell;
-  double ell0;
-  double ellf;
-  double cl0;
-  double clf;
-  int extrapol_0;
-  int extrapol_f;
-  double tilt0;
-  double tiltf;
   ccl_f1d_t *cl_spl;
   int i_bessel;
   double th;
@@ -165,20 +156,7 @@ static double corr_bessel_integrand(double l,void *params)
   corr_int_par *p=(corr_int_par *)params;
   double x=l*p->th;
 
-  if(l<p->ell0) {
-    if(p->extrapol_0)
-      cl=p->cl0*pow(l/p->ell0,p->tilt0);
-    else
-      cl=0;
-  }
-  else if(l>p->ellf) {
-    if(p->extrapol_f)
-      cl=p->clf*pow(l/p->ellf,p->tiltf);
-    else
-      cl=0;
-  }
-  else
-    cl=ccl_f1d_t_eval(p->cl_spl,l);
+  cl=ccl_f1d_t_eval(p->cl_spl,l);
 
   jbes=gsl_sf_bessel_Jn(p->i_bessel,x);
 
@@ -192,7 +170,8 @@ static void ccl_tracer_corr_bessel(ccl_cosmology *cosmo,
   corr_int_par cp;
   ccl_f1d_t *cl_spl = NULL;
   cl_spl = ccl_f1d_t_new(n_ell, ell, cls, cls[0], 0,
-			 ccl_f1d_extrap_0,ccl_f1d_extrap_0);
+			 ccl_f1d_extrap_logx_logy,
+			 ccl_f1d_extrap_logx_logy);
   if(cl_spl == NULL) {
     *status = CCL_ERROR_MEMORY;
     ccl_cosmology_set_status_message(
@@ -207,19 +186,14 @@ static void ccl_tracer_corr_bessel(ccl_cosmology *cosmo,
   gsl_integration_workspace *w = NULL;
   int local_status;
 
-  #pragma omp parallel default(none) \
-                       shared(cosmo, status, wtheta, n_ell, ell, cls, \
-                              corr_type, cl_spl, theta, n_theta) \
-                       private(w, F, result, eresult, local_status, ith, \
-                               gslstatus, cp)
+#pragma omp parallel default(none)				      \
+  shared(cosmo, status, wtheta, n_ell, ell, cls,		      \
+	 corr_type, cl_spl, theta, n_theta)				\
+  private(w, F, result, eresult, local_status, ith,			\
+	  gslstatus, cp)
   {
     local_status = *status;
 
-    cp.nell = n_ell;
-    cp.ell0 = ell[0];
-    cp.ellf = ell[n_ell-1];
-    cp.cl0 = cls[0];
-    cp.clf = cls[n_ell-1];
     switch(corr_type) {
       case CCL_CORR_GG:
         cp.i_bessel = 0;
@@ -235,19 +209,6 @@ static void ccl_tracer_corr_bessel(ccl_cosmology *cosmo,
         break;
     }
 
-    if (cls[0]*cls[1] <= 0)
-      cp.extrapol_0 = 0;
-    else {
-      cp.extrapol_0 = 1;
-      cp.tilt0 = log10(cls[1]/cls[0])/log10(ell[1]/ell[0]);
-    }
-
-    if (cls[n_ell-2]*cls[n_ell-1] <= 0)
-      cp.extrapol_f = 0;
-    else {
-      cp.extrapol_f = 1;
-      cp.tiltf = log10(cls[n_ell-1]/cls[n_ell-2])/log10(ell[n_ell-1]/ell[n_ell-2]);
-    }
     cp.cl_spl = cl_spl;
 
     w = gsl_integration_workspace_alloc(cosmo->gsl_params.N_ITERATION);
@@ -265,7 +226,8 @@ static void ccl_tracer_corr_bessel(ccl_cosmology *cosmo,
         //TODO: Split into intervals between first bessel zeros before integrating
         //This will help both speed and accuracy of the integral.
         gslstatus = gsl_integration_qag(&F, 0, cosmo->spline_params.ELL_MAX_CORR, 0,
-                                        cosmo->gsl_params.INTEGRATION_EPSREL, cosmo->gsl_params.N_ITERATION,
+                                        cosmo->gsl_params.INTEGRATION_EPSREL,
+					cosmo->gsl_params.N_ITERATION,
                                         cosmo->gsl_params.INTEGRATION_GAUSS_KRONROD_POINTS,
                                         w, &result, &eresult);
         if(gslstatus != GSL_SUCCESS) {
