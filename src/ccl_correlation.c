@@ -314,7 +314,8 @@ static void ccl_tracer_corr_legendre(ccl_cosmology *cosmo,
   if(*status==0) {
     //Interpolate input Cl into
     cl_spl=ccl_f1d_t_new(n_ell,ell,cls,cls[0],0,
-			 ccl_f1d_extrap_0,ccl_f1d_extrap_0);
+			 ccl_f1d_extrap_0,
+			 ccl_f1d_extrap_logx_logy);
     if(cl_spl==NULL) {
       *status=CCL_ERROR_MEMORY;
       ccl_cosmology_set_status_message(cosmo, "ccl_correlation.c: ccl_tracer_corr_legendre ran out of memory\n");
@@ -322,23 +323,10 @@ static void ccl_tracer_corr_legendre(ccl_cosmology *cosmo,
   }
 
   if(*status==0) {
-    double cl_tilt,l_edge,cl_edge;
-    l_edge=ell[n_ell-1];
-    if((cls[n_ell-1]*cls[n_ell-2]<0) || (cls[n_ell-2]==0)) {
-      cl_tilt=0;
-      cl_edge=0;
-    }
-    else {
-      cl_tilt=log(cls[n_ell-1]/cls[n_ell-2])/log(ell[n_ell-1]/ell[n_ell-2]);
-      cl_edge=cls[n_ell-1];
-    }
     for(i=0;i<=(int)(cosmo->spline_params.ELL_MAX_CORR);i++) {
       double l=(double)i;
       l_arr[i]=l;
-      if(l>=l_edge)
-        cl_arr[i]=cl_edge*pow(l/l_edge,cl_tilt);
-      else
-        cl_arr[i]=ccl_f1d_t_eval(cl_spl,l);
+      cl_arr[i]=ccl_f1d_t_eval(cl_spl,l);
     }
     ccl_f1d_t_free(cl_spl);
 
@@ -347,10 +335,9 @@ static void ccl_tracer_corr_legendre(ccl_cosmology *cosmo,
   }
 
   int local_status, i_L;
-
 #pragma omp parallel default(none) \
-                     shared(cosmo, theta, cl_arr, wtheta, n_theta, status, corr_type) \
-                     private(Pl_theta, i, i_L, local_status)
+  shared(cosmo, theta, cl_arr, wtheta, n_theta, status, corr_type)	\
+  private(Pl_theta, i, i_L, local_status)
   {
     Pl_theta = NULL;
     local_status = *status;
