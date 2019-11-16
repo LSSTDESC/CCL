@@ -12,7 +12,9 @@
 //x     -> x-axis
 //y     -> f(x)-axis
 //y0,yf -> values of f(x) to use beyond the interpolation range
-ccl_f1d_t *ccl_f1d_t_new(int n,double *x,double *y,double y0,double yf)
+ccl_f1d_t *ccl_f1d_t_new(int n,double *x,double *y,double y0,double yf,
+			 ccl_f1d_extrap_t extrap_lo_type,
+			 ccl_f1d_extrap_t extrap_hi_type)
 {
   ccl_f1d_t *spl=malloc(sizeof(ccl_f1d_t));
   if(spl==NULL)
@@ -30,21 +32,103 @@ ccl_f1d_t *ccl_f1d_t_new(int n,double *x,double *y,double y0,double yf)
     return NULL;
   }
 
-  spl->x0=x[0];
-  spl->xf=x[n-1];
   spl->y0=y0;
   spl->yf=yf;
+  spl->x_ini=x[0];
+  spl->x_end=x[n-1];
+  spl->y_ini=y[0];
+  spl->y_end=y[n-1];
+  spl->extrap_lo_type=extrap_lo_type;
+  spl->extrap_hi_type=extrap_hi_type;
 
+  // Compute derivatives
+  // Low-end
+  if(spl->extrap_lo_type == ccl_f1d_extrap_0) {
+    spl->der_lo = 0;
+  } 
+  else if(spl->extrap_lo_type == ccl_f1d_extrap_linx_liny) {
+    spl->der_lo = (y[1]-y[0])/(x[1]-x[0]);
+  }
+  else if(spl->extrap_lo_type == ccl_f1d_extrap_linx_logy) {
+    spl->der_lo = log(y[1]/y[0])/(x[1]-x[0]);
+  }
+  else if(spl->extrap_lo_type == ccl_f1d_extrap_logx_liny) {
+    spl->der_lo = (y[1]-y[0])/log(x[1]/x[0]);
+  }
+  else if(spl->extrap_lo_type == ccl_f1d_extrap_linx_liny) {
+    spl->der_lo = log(y[1]/y[0])/log(x[1]/x[0]);
+  }
+  // High-end
+  if(spl->extrap_hi_type == ccl_f1d_extrap_0) {
+    spl->der_hi = 0;
+  } 
+  else if(spl->extrap_hi_type == ccl_f1d_extrap_linx_liny) {
+    spl->der_hi = (y[n-1]-y[n-2])/(x[n-1]-x[n-2]);
+  }
+  else if(spl->extrap_hi_type == ccl_f1d_extrap_linx_logy) {
+    spl->der_hi = log(y[n-1]/y[n-2])/(x[n-1]-x[n-2]);
+  }
+  else if(spl->extrap_hi_type == ccl_f1d_extrap_logx_liny) {
+    spl->der_hi = (y[n-1]-y[n-2])/log(x[n-1]/x[n-2]);
+  }
+  else if(spl->extrap_hi_type == ccl_f1d_extrap_linx_liny) {
+    spl->der_hi = log(y[n-1]/y[n-2])/log(x[n-1]/x[n-2]);
+  }
   return spl;
 }
 
 //Evaluates spline at x checking for bound errors
 double ccl_f1d_t_eval(ccl_f1d_t *spl,double x)
 {
-  if(x<=spl->x0)
-    return spl->y0;
-  else if(x>=spl->xf)
-    return spl->yf;
+  // Extrapolation
+  // Lin_x, lin_y
+  // f(x) = f_n + (x-x_n) * der
+  //   der = (f_n - f_{n-1}) / (x_n - x_{n-1})
+  //   
+
+  // Log_x, lin_y
+  // f(x) = f_n + log(x/x_n) * der
+  // der = (f_n - f_{n-1}) / log(x_n/x_{n-1})
+
+  // Lin_x, log_y
+  // f(x) = f_n * exp[ (x - x_n) * der ]
+  // der = log(f_n/f_{n-1})/(x_n-x_{n-1})
+
+  // Log_x, log_y
+  // f(x) = f_n * exp[ log(x/x_n) * der ]
+  // der = log(f_n/f_{n-1})/log(x_n/x_{n-1})
+  if(x<=spl->x_ini) {
+    if(spl->extrap_lo_type==ccl_f1d_extrap_0)
+      return spl->y0;
+    else if(spl->extrap_lo_type==ccl_f1d_extrap_linx_liny) {
+      return spl->y_ini + spl->der_lo * (x - spl->x_ini);
+    }
+    else if(spl->extrap_lo_type==ccl_f1d_extrap_logx_liny) {
+      return spl->y_ini + spl->der_lo * log(x/spl->x_ini);
+    }
+    else if(spl->extrap_lo_type==ccl_f1d_extrap_linx_logy) {
+      return spl->y_ini * exp(spl->der_lo * (x - spl->x_ini));
+    }
+    else if(spl->extrap_lo_type==ccl_f1d_extrap_logx_logy) {
+      return spl->y_ini * pow(x/spl->x_ini, spl->der_lo);
+    }
+  }
+  else if(x>=spl->x_end) {
+    if(spl->extrap_hi_type==ccl_f1d_extrap_0)
+      return spl->yf;
+    else if(spl->extrap_hi_type==ccl_f1d_extrap_linx_liny) {
+      return spl->y_end + spl->der_hi * (x - spl->x_end);
+    }
+    else if(spl->extrap_hi_type==ccl_f1d_extrap_logx_liny) {
+      return spl->y_end + spl->der_hi * log(x/spl->x_end);
+    }
+    else if(spl->extrap_hi_type==ccl_f1d_extrap_linx_logy) {
+      return spl->y_end * exp(spl->der_hi * (x - spl->x_end));
+    }
+    else if(spl->extrap_hi_type==ccl_f1d_extrap_logx_logy) {
+      return spl->y_end * pow(x/spl->x_end, spl->der_hi);
+    }
+  }
   else {
     double y;
     int stat=gsl_spline_eval_e(spl->spline,x,NULL,&y);
