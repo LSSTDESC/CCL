@@ -70,31 +70,19 @@ static void ccl_tracer_corr_fftlog(ccl_cosmology *cosmo,
 
   //Interpolate input Cl into array needed for FFTLog
   ccl_f1d_t *cl_spl=ccl_f1d_t_new(n_ell,ell,cls,cls[0],0,
-				  ccl_f1d_extrap_0,ccl_f1d_extrap_0);
+				  ccl_f1d_extrap_0,ccl_f1d_extrap_logx_logy);
   if(cl_spl==NULL) {
     free(l_arr);
     free(cl_arr);
     *status=CCL_ERROR_MEMORY;
-    ccl_cosmology_set_status_message(cosmo, "ccl_correlation.c: ccl_tracer_corr_fftlog ran out of memory\n");
+    ccl_cosmology_set_status_message(cosmo,
+				     "ccl_correlation.c: ccl_tracer_corr_fftlog "
+				     "ran out of memory\n");
     return;
   }
 
-  double cl_tilt,l_edge,cl_edge;
-  l_edge=ell[n_ell-1];
-  if((cls[n_ell-1]*cls[n_ell-2]<0) || (cls[n_ell-2]==0)) {
-    cl_tilt=0;
-    cl_edge=0;
-  }
-  else {
-    cl_tilt=log(cls[n_ell-1]/cls[n_ell-2])/log(ell[n_ell-1]/ell[n_ell-2]);
-    cl_edge=cls[n_ell-1];
-  }
-  for(i=0;i<cosmo->spline_params.N_ELL_CORR;i++) {
-    if(l_arr[i]>=l_edge)
-      cl_arr[i]=cl_edge*pow(l_arr[i]/l_edge,cl_tilt);
-    else
-      cl_arr[i]=ccl_f1d_t_eval(cl_spl,l_arr[i]);
-  }
+  for(i=0;i<cosmo->spline_params.N_ELL_CORR;i++)
+    cl_arr[i]=ccl_f1d_t_eval(cl_spl,l_arr[i]);
   ccl_f1d_t_free(cl_spl);
 
   if (do_taper_cl)
