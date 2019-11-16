@@ -25,50 +25,21 @@ These are the C++ bindings
 
 *****************************************************************/
 
-/* Compute the correlation function xi(r) from a power spectrum P(k), sampled
- * at logarithmically spaced points k[j]. */
-void pk2xi(int N,  const double k[],  const double pk[], double r[], double xi[]);
-
-/* Compute the power spectrum P(k) from a correlation function xi(r), sampled
- * at logarithmically spaced points r[i]. */
-void xi2pk(int N,  const double r[],  const double xi[], double k[], double pk[]);
-
 /* Compute the function
- *   \xi_l^m(r) = \int_0^\infty \frac{dk}{2\pi^2} k^m j_l(kr) P(k)
- * Note that the usual 2-point correlation function xi(r) is just xi_0^2(r)
- * in this notation.  The input k-values must be logarithmically spaced.  The
- * resulting xi_l^m(r) will be evaluated at the dual r-values
- *   r[0] = 1/k[N-1], ..., r[N-1] = 1/k[0]. */
-void fftlog_ComputeXiLM(double l, double m, int N, const double k[],  const double pk[],
-			double r[], double xi[]);
-
-/* Compute the function
- *   \xi_\alpha(\theta) = \int_0^\infty \frac{d\ell}{2\pi} \ell J_\alpha(\ell\theta) C_\ell
- * The input l-values must be logarithmically spaced.  The
- * resulting xi_alpha(th) will be evaluated at the dual th-values
- *   th[0] = 1/l[N-1], ..., th[N-1] = 1/l[0]. */
-void fftlog_ComputeXi2D(double bessel_order,int N,const double l[],const double cl[],
+ *   \xi_\mu(\theta) = \int \frac{d\ell}{2\pi} \ell J_\mu(\ell\theta)\,C_\ell
+ * C_\ell will be multiplied by ell^{1-\epsilon}, so \epsilon can be used to minimize ringing.
+ */
+void fftlog_ComputeXi2D(double mu,double epsilon,
+			int N, const double l[],const double cl[],
 			double th[], double xi[]);
-#include <complex.h>
 
-/* Compute the discrete Hankel transform of the function a(r).  See the FFTLog
- * documentation (or the Fortran routine of the same name in the FFTLog
- * sources) for a description of exactly what this function computes.
- * If u is NULL, the transform coefficients will be computed anew and discarded
- * afterwards.  If you plan on performing many consecutive transforms, it is
- * more efficient to pre-compute the u coefficients. */
-void fht(int N,  const double r[],  const double complex a[], double k[], double complex b[], double mu,
-         double q, double kcrc, int noring, double complex* u);
-//         double q = 0, double kcrc = 1, bool noring = true, double complex* u = NULL);
-
-/* Pre-compute the coefficients that appear in the FFTLog implementation of
- * the discrete Hankel transform.  The parameters N, mu, and q here are the
- * same as for the function fht().  The parameter L is defined (for whatever
- * reason) to be N times the logarithmic spacing of the input array, i.e.
- *   L = N * log(r[N-1]/r[0])/(N-1) */
-void compute_u_coefficients(int N, double mu, double q, double L, double kcrc, double complex u[]);
-
-
+/* Compute the function
+ *   \xi_\ell(r) = \int \frac{dk k^2}{2\pi^2} P_k j_\ell(kr)
+ * P(k) will be multiplied by k^{3/2-\epsilon}, so \epsilon can be used to minimize ringing.
+ */
+void fftlog_ComputeXi3D(double l, double epsilon,
+			int N, const double k[], const double pk[],
+			double r[], double xi[]);
 #endif // FFTLOG_H
 
 #ifdef __cplusplus

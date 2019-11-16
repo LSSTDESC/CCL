@@ -126,7 +126,9 @@ static void ccl_tracer_corr_fftlog(ccl_cosmology *cosmo,
   if(corr_type==CCL_CORR_GL) i_bessel=2;
   if(corr_type==CCL_CORR_LP) i_bessel=0;
   if(corr_type==CCL_CORR_LM) i_bessel=4;
-  fftlog_ComputeXi2D(i_bessel,cosmo->spline_params.N_ELL_CORR,l_arr,cl_arr,th_arr,wth_arr);
+  fftlog_ComputeXi2D(i_bessel,0,
+		     cosmo->spline_params.N_ELL_CORR,l_arr,cl_arr,
+		     th_arr,wth_arr);
 
   // Interpolate to output values of theta
   ccl_f1d_t *wth_spl=ccl_f1d_t_new(cosmo->spline_params.N_ELL_CORR,th_arr,wth_arr,wth_arr[0],0);
@@ -529,7 +531,7 @@ void ccl_correlation_3d(ccl_cosmology *cosmo, double a,
   for(i=0;i<N_ARR;i++)
     r_arr[i]=0;
 
-  pk2xi(N_ARR,k_arr,pk_arr,r_arr,xi_arr);
+  fftlog_ComputeXi3D(0, 0, N_ARR, k_arr, pk_arr, r_arr, xi_arr);
 
   // Interpolate to output values of r
   ccl_f1d_t *xi_spl=ccl_f1d_t_new(N_ARR,r_arr,xi_arr,xi_arr[0],0);
@@ -635,15 +637,15 @@ void ccl_correlation_multipole(ccl_cosmology *cosmo, double a, double beta,
   // Calculate multipoles
 
   if (l == 0) {
-    fftlog_ComputeXiLM(0, 2, N_ARR, k_arr, pk_arr, s_arr, xi_arr0);
+    fftlog_ComputeXi3D(0, 0, N_ARR, k_arr, pk_arr, s_arr, xi_arr0);
     for (i = 0; i < N_ARR; i++)
       xi_arr[i] = (1. + 2. / 3 * beta + 1. / 5 * beta * beta) * xi_arr0[i];
   } else if (l == 2) {
-    fftlog_ComputeXiLM(2, 2, N_ARR, k_arr, pk_arr, s_arr, xi_arr0);
+    fftlog_ComputeXi3D(2, 0, N_ARR, k_arr, pk_arr, s_arr, xi_arr0);
     for (i = 0; i < N_ARR; i++)
       xi_arr[i] = -(4. / 3 * beta + 4. / 7 * beta * beta) * xi_arr0[i];
   } else if (l == 4) {
-    fftlog_ComputeXiLM(4, 2, N_ARR, k_arr, pk_arr, s_arr, xi_arr0);
+    fftlog_ComputeXi3D(4, 0, N_ARR, k_arr, pk_arr, s_arr, xi_arr0);
     for (i = 0; i < N_ARR; i++) xi_arr[i] = 8. / 35 * beta * beta * xi_arr0[i];
   } else {
     strcpy(cosmo->status_message, "unavailable value of l\n");
@@ -783,9 +785,9 @@ void ccl_correlation_multipole_spline(ccl_cosmology *cosmo, double a,
   for (i = 0; i < N_ARR; i++) s_arr[i] = 0;
 
   // Calculate multipoles
-  fftlog_ComputeXiLM(0, 2, N_ARR, k_arr, pk_arr, s_arr, xi_arr0);
-  fftlog_ComputeXiLM(2, 2, N_ARR, k_arr, pk_arr, s_arr, xi_arr2);
-  fftlog_ComputeXiLM(4, 2, N_ARR, k_arr, pk_arr, s_arr, xi_arr4);
+  fftlog_ComputeXi3D(0, 0, N_ARR, k_arr, pk_arr, s_arr, xi_arr0);
+  fftlog_ComputeXi3D(2, 0, N_ARR, k_arr, pk_arr, s_arr, xi_arr2);
+  fftlog_ComputeXi3D(4, 0, N_ARR, k_arr, pk_arr, s_arr, xi_arr4);
 
   // free any memory that may have been allocated
   ccl_f1d_t_free(cosmo->data.rsd_splines[0]);
