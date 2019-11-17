@@ -9,7 +9,8 @@ CCL_BEGIN_DECLS
 
 
 typedef enum ccl_f1d_extrap_t {
-  ccl_f1d_extrap_0 = 0,  // Constant extrapolation
+  ccl_f1d_extrap_0 = 0,  // No extrapolation
+  ccl_f1d_extrap_const = 410,  // Constant extrapolation
   ccl_f1d_extrap_linx_liny = 411,  // Linear x, linear y
   ccl_f1d_extrap_linx_logy = 412,  // Linear x, log y
   ccl_f1d_extrap_logx_liny = 413,  // Log x, linear y
