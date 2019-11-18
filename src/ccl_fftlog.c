@@ -6,7 +6,7 @@
 #include <gsl/gsl_sf_result.h>
 #include <gsl/gsl_sf_gamma.h>
 #include <complex.h>
-#include "fftlog.h"
+#include "ccl_fftlog.h"
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -60,7 +60,7 @@ static double goodkr(int N, double mu, double q, double L, double kr)
  * same as for the function fht().  The parameter L is defined (for whatever
  * reason) to be N times the logarithmic spacing of the input array, i.e.
  *   L = N * log(r[N-1]/r[0])/(N-1) */
-void compute_u_coefficients(int N, double mu, double q, double L, double kcrc, double complex u[])
+static void compute_u_coefficients(int N, double mu, double q, double L, double kcrc, double complex u[])
 {
   double y = M_PI/L;
   double k0r0 = kcrc * exp(-L);
@@ -137,9 +137,9 @@ void fht(int N, const double r[], const double complex a[], double k[], double c
   free(ulocal);
 }
 
-void fftlog_xi_dim(double dim, double mu, double epsilon,
-		   int N, const double k[], const double pk[],
-		   double r[], double xi[])
+static void fftlog_xi_dim(double dim, double mu, double epsilon,
+			  int N, const double k[], const double pk[],
+			  double r[], double xi[])
 {
   double complex* a = malloc(sizeof(complex double)*N);
   double complex* b = malloc(sizeof(complex double)*N);
@@ -156,16 +156,16 @@ void fftlog_xi_dim(double dim, double mu, double epsilon,
   free(b);
 }
  
-void fftlog_ComputeXi2D(double mu,double epsilon,
-			int N, const double l[],const double cl[],
-			double th[], double xi[])
+void ccl_fftlog_ComputeXi2D(double mu,double epsilon,
+			    int N, const double l[],const double cl[],
+			    double th[], double xi[])
 {
   fftlog_xi_dim(2, mu, epsilon, N, l, cl, th, xi);
 }
 
-void fftlog_ComputeXi3D(double l, double epsilon,
-			int N, const double k[], const double pk[],
-			double r[], double xi[])
+void ccl_fftlog_ComputeXi3D(double l, double epsilon,
+			    int N, const double k[], const double pk[],
+			    double r[], double xi[])
 {
   fftlog_xi_dim(3., l+0.5, epsilon, N, k, pk, r, xi);
 }
