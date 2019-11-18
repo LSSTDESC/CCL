@@ -5,24 +5,33 @@ import pyccl as ccl
 
 @pytest.mark.parametrize('dim', [2, 3])
 @pytest.mark.parametrize('mu', [0, 2])
-def test_fftlog_exact(dim, mu):
-    # The d-D Hankel transform of k^{-d/2} is
-    # (2 * \pi * r)^{-d/2}
+@pytest.mark.parametrize('alpha', [1.2, 1.5, 1.8])
+def test_fftlog_plaw(dim, mu, alpha):
+    # The d-D Hankel transform of k^{-alpha} is
+    # \Gamma[(d - \alpha + \mu) / 2] /
+    # \Gamma[(\alpha + \mu) / 2] /
+    # (\pi^{d/2} * 2^\alpha * r^{d-\alpha}) 
+    from scipy.special import gamma
+
     def f(k):
-        return k**(-dim / 2.)
+        return k**(-alpha)
 
     def fr(r):
-        return (2 * np.pi * r)**(-dim / 2.)
+        g1 = gamma(0.5 * (dim - alpha + mu))
+        g2 = gamma(0.5 * (alpha + mu))
+        den = np.pi**(dim/2.) * 2**alpha
+        return g1 / (g2 * den * r**(dim - alpha))
 
+    epsilon = dim / 2 - alpha
     nk = 1024
     k_arr = np.logspace(-4, 4, nk)
     fk_arr = f(k_arr)
 
     status = 0
     result, status = ccl.ccllib.fftlog_transform(k_arr, fk_arr,
-                                                 dim, mu, 0,
+                                                 dim, mu, epsilon,
                                                  2 * k_arr.size, status)
     r_arr, fr_arr = result.reshape([2, k_arr.size])
     fr_arr_pred = fr(r_arr)
     res = np.fabs(fr_arr / fr_arr_pred -1)
-    assert np.all(res < 1E-10)
+    assert np.all(res < 1E-10)    
