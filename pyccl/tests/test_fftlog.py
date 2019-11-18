@@ -4,7 +4,8 @@ import pyccl as ccl
 
 
 @pytest.mark.parametrize('dim', [2, 3])
-def test_fftlog_exact(dim):
+@pytest.mark.parametrize('mu', [0, 2])
+def test_fftlog_exact(dim, mu):
     # The d-D Hankel transform of k^{-d/2} is
     # (2 * \pi * r)^{-d/2}
     def f(k):
@@ -19,8 +20,8 @@ def test_fftlog_exact(dim):
 
     status = 0
     result, status = ccl.ccllib.fftlog_transform(k_arr, fk_arr,
-                                                 dim, 2 * k_arr.size,
-                                                 status)
+                                                 dim, mu, 0,
+                                                 2 * k_arr.size, status)
     r_arr, fr_arr = result.reshape([2, k_arr.size])
     fr_arr_pred = fr(r_arr)
     res = np.fabs(fr_arr / fr_arr_pred -1)
