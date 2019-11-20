@@ -146,7 +146,7 @@ double ccl_mu_MG(ccl_cosmology * cosmo, double a, double k, int *status)
 /* MI: check again units and k  */
 	double s2_k = (cosmo->params.lambda*(hnorm*cosmo->params.h/a)/k/(ccl_constants.CLIGHT/1000));
 	double s1_k = (1.0+cosmo->params.c1*s2_k*s2_k)/(1.0+s2_k*s2_k);
-	return cosmo->params.mu_0 * ccl_omega_x(cosmo, a, ccl_species_l_label, status) / cosmo->params.Omega_l * sk_1;
+	return cosmo->params.mu_0 * ccl_omega_x(cosmo, a, ccl_species_l_label, status)/cosmo->params.Omega_l*s1_k;
 }
 
 /* --------- ROUTINE: ccl_Sig_MG ---------
@@ -165,7 +165,7 @@ double ccl_Sig_MG(ccl_cosmology * cosmo, double a, double k, int *status)
 /* MI: check again units and k  */
 	double s2_k = (cosmo->params.lambda*(hnorm*cosmo->params.h/a)/k/(ccl_constants.CLIGHT/1000));
 	double s1_k = (1.0+cosmo->params.c2*s2_k*s2_k)/(1.0+s2_k*s2_k);
-	return cosmo->params.sigma_0 * ccl_omega_x(cosmo, a, ccl_species_l_label, status) / cosmo->params.Omega_l * sk_1;
+	return cosmo->params.sigma_0 * ccl_omega_x(cosmo, a, ccl_species_l_label, status) / cosmo->params.Omega_l * s1_k;
 }
 
 // Structure to hold parameters of chi_integrand
@@ -214,12 +214,14 @@ MI: tag to get started
 static int growth_ode_system_muSig(double a,const double y[],double dydt[],void *params)
 {
   int status = 0;
+/* for MG mu(a,k) we set k=0 since it is large scales */
+  double k = 0; 
   ccl_cosmology * cosmo = params;
 
   double hnorm=h_over_h0(a,cosmo, &status);
   double om=ccl_omega_x(cosmo, a, ccl_species_m_label, &status);
 
-  double mu = ccl_mu_MG(cosmo, a, &status);
+  double mu = ccl_mu_MG(cosmo, a, k, &status);
   dydt[1]=1.5*hnorm*a*om*y[0]*(1. + mu);
 
   dydt[0]=y[1]/(a*a*a*hnorm);
