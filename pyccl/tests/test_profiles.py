@@ -9,6 +9,13 @@ COSMO = ccl.Cosmology(
 M200 = ccl.halos.MassDef(200, 'critical')
 
 
+def one_f(cosmo, M, a, mdef):
+    if np.ndim(M) == 0:
+        return 1
+    else:
+        return np.ones(M.size)
+
+
 def smoke_assert_prof_real(profile):
     sizes = [(0, 0),
              (2, 0),
@@ -52,24 +59,18 @@ def test_profile_nfw_smoke():
     smoke_assert_prof_real(p)
 
 
-def test_profile_gaussian_smoke():
+@pytest.mark.parametrize('prof_class',
+                         [ccl.halos.HaloProfileGaussian,
+                          ccl.halos.HaloProfilePowerLaw])
+def test_profile_simple_smoke(prof_class):
     def r_s(cosmo, M, a, mdef):
         return mdef.get_radius(cosmo, M, a)
 
-    def rho0(cosmo, M, a, mdef):
-        return M
-
-    p = ccl.halos.HaloProfileGaussian(rho0, r_s)
+    p = prof_class(r_s, one_f)
     smoke_assert_prof_real(p)
 
 
 def test_profile_gaussian_accuracy():
-    def one_f(cosmo, M, a, mdef):
-        if np.ndim(M) == 0:
-            return 1
-        else:
-            return np.ones(M.size)
-
     def fk(k):
         return np.pi**1.5 * np.exp(-k**2 / 4)
 
@@ -93,17 +94,11 @@ def test_profile_plaw_accuracy(alpha):
               gamma((3 + alpha) / 2) /
               gamma(-alpha / 2))
 
-    def one_f(cosmo, M, a, mdef):
-        if np.ndim(M) == 0:
-            return 1
-        else:
-            return np.ones(M.size)
+    def fk(k):
+        return prefac / k**(3 + alpha)
 
     def alpha_f(cosmo, M, a, mdef):
         return alpha * one_f(cosmo, M, a, mdef)
-
-    def fk(k):
-        return prefac / k**(3 + alpha)
 
     p = ccl.halos.HaloProfilePowerLaw(one_f, alpha_f)
     p.update_precision_fftlog(epsilon=1.5 + alpha)
@@ -112,4 +107,33 @@ def test_profile_plaw_accuracy(alpha):
     fk_arr = p.profile_fourier(COSMO, k_arr, 1., 1.)
     fk_arr_pred = fk(k_arr)
     res = np.fabs(fk_arr / fk_arr_pred - 1)
+    assert np.all(res < 5E-3)
+
+
+def test_profile_nfw_accuracy():
+    from scipy.special import sici
+
+    cM = ccl.halos.ConcentrationDuffy08(M200)
+    p = ccl.halos.HaloProfileNFW(cM)
+    M = 1E14
+    a = 0.5
+    c = cM.get_concentration(COSMO, M, a)
+    r_Delta = M200.get_radius(COSMO, M, a) / a
+    r_s = r_Delta / c
+
+    def fk(k):
+        x = k * r_s
+        Si1, Ci1 = sici((1 + c) * x)
+        Si2, Ci2 = sici(x)
+        P1 = 1 / (np.log(1+c) - c / (1 + c))
+        P2 = np.sin(x) * (Si1 - Si2) + np.cos(x) * (Ci1 - Ci2)
+        P3 = np.sin(c * x)/((1 + c) * x)
+        return M * P1 * (P2 - P3)
+
+    p.update_precision_fftlog(fac_hi=10000.,
+                              n_per_decade=1000)
+    k_arr = np.logspace(-2, 2, 256) / r_Delta
+    fk_arr = p.profile_fourier(COSMO, k_arr, M, a, M200)
+    fk_arr_pred = fk(k_arr)
+    res = np.fabs((fk_arr - fk_arr_pred) / M)
     assert np.all(res < 5E-3)

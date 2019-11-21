@@ -85,7 +85,7 @@ class HaloProfile(object):
 
 
 class HaloProfileGaussian(HaloProfile):
-    def __init__(self, rho0, r_scale):
+    def __init__(self, r_scale, rho0):
         self.rho_0 = rho0
         self.r_s = r_scale
         super(HaloProfileGaussian, self).__init__()
@@ -133,12 +133,11 @@ class HaloProfilePowerLaw(HaloProfile):
 
 
 class HaloProfileNFW(HaloProfile):
-    def __init__(self, c_M_relation, truncate=True):
+    def __init__(self, c_M_relation):
         if not isinstance(c_M_relation, Concentration):
             raise TypeError("c_M_relation must be of type `Concentration`)")
 
         self.cM = c_M_relation
-        self.truncate = truncate
         super(HaloProfileNFW, self).__init__()
 
     def _get_cM(self, cosmo, M, a, mdef=None):
@@ -152,14 +151,14 @@ class HaloProfileNFW(HaloProfile):
         r_use = np.atleast_1d(r)
         M_use = np.atleast_1d(M)
 
-        R_M = mass_def.get_radius(cosmo, M_use, a)
+        # Comoving virial radius
+        R_M = mass_def.get_radius(cosmo, M_use, a) / a
         c_M = self._get_cM(cosmo, M, a, mdef=mass_def)
         R_s = R_M / c_M
 
         x = r_use[:, None] / R_s[None, :]
         prof = 1./(x * (1 + x)**2)
-        if self.truncate:
-            prof[r_use[:, None] > R_M[None, :]] = 0
+        prof[r_use[:, None] > R_M[None, :]] = 0
 
         norm = self._norm(M_use, R_s, c_M)
         prof = prof[:, :] * norm[None, :]
