@@ -10,7 +10,7 @@ def test_fftlog_plaw(dim, mu, alpha):
     # The d-D Hankel transform of k^{-alpha} is
     # \Gamma[(d - \alpha + \mu) / 2] /
     # \Gamma[(\alpha + \mu) / 2] /
-    # (\pi^{d/2} * 2^\alpha * r^{d-\alpha}) 
+    # (\pi^{d/2} * 2^\alpha * r^{d-\alpha})
     from scipy.special import gamma
 
     def f(k):
@@ -31,7 +31,8 @@ def test_fftlog_plaw(dim, mu, alpha):
     result, status = ccl.ccllib.fftlog_transform(k_arr, fk_arr,
                                                  dim, mu, epsilon,
                                                  2 * k_arr.size, status)
+    assert status == 0
     r_arr, fr_arr = result.reshape([2, k_arr.size])
     fr_arr_pred = fr(r_arr)
-    res = np.fabs(fr_arr / fr_arr_pred -1)
-    assert np.all(res < 1E-10)    
+    res = np.fabs(fr_arr / fr_arr_pred - 1)
+    assert np.all(res < 1E-10)

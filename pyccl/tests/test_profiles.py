@@ -61,3 +61,55 @@ def test_profile_gaussian_smoke():
 
     p = ccl.halos.HaloProfileGaussian(rho0, r_s)
     smoke_assert_prof_real(p)
+
+
+def test_profile_gaussian_accuracy():
+    def one_f(cosmo, M, a, mdef):
+        if np.ndim(M) == 0:
+            return 1
+        else:
+            return np.ones(M.size)
+
+    def fk(k):
+        return np.pi**1.5 * np.exp(-k**2 / 4)
+
+    p = ccl.halos.HaloProfileGaussian(one_f, one_f)
+    p.update_precision_fftlog(fac_lo=0.01,
+                              fac_hi=100.,
+                              n_per_decade=10000)
+
+    k_arr = np.logspace(-3, 2, 1024)
+    fk_arr = p.profile_fourier(COSMO, k_arr, 1., 1.)
+    fk_arr_pred = fk(k_arr)
+    res = np.fabs(fk_arr - fk_arr_pred)
+    assert np.all(res < 5E-3)
+
+
+@pytest.mark.parametrize('alpha', [-1.2, -2., -2.8])
+def test_profile_plaw_accuracy(alpha):
+    from scipy.special import gamma
+
+    prefac = (2.**(3+alpha) * np.pi**1.5 *
+              gamma((3 + alpha) / 2) /
+              gamma(-alpha / 2))
+
+    def one_f(cosmo, M, a, mdef):
+        if np.ndim(M) == 0:
+            return 1
+        else:
+            return np.ones(M.size)
+
+    def alpha_f(cosmo, M, a, mdef):
+        return alpha * one_f(cosmo, M, a, mdef)
+
+    def fk(k):
+        return prefac / k**(3 + alpha)
+
+    p = ccl.halos.HaloProfilePowerLaw(one_f, alpha_f)
+    p.update_precision_fftlog(epsilon=1.5 + alpha)
+
+    k_arr = np.logspace(-3, 2, 1024)
+    fk_arr = p.profile_fourier(COSMO, k_arr, 1., 1.)
+    fk_arr_pred = fk(k_arr)
+    res = np.fabs(fk_arr / fk_arr_pred - 1)
+    assert np.all(res < 5E-3)
