@@ -4,7 +4,6 @@ import pytest
 import pyccl as ccl
 
 HALOPROFILE_TOLERANCE = 1E-3
-M200 = ccl.halos.MassDef(200, 'matter')
 
 COSMO = ccl.Cosmology(
     Omega_b=0.0486,
@@ -20,6 +19,32 @@ COSMO = ccl.Cosmology(
     Omega_k=0,
     transfer_function='eisenstein_hu',
     mass_function='shethtormen')
+
+
+def test_profile_Einasto():
+    data = np.loadtxt("./benchmarks/data/haloprofile_einasto_colossus.txt")
+    a = 1.0
+    halomass = 6e13
+    concentration = 5
+    mDelta = 200
+    rmin = 0.01
+    rmax = 100
+    r = np.exp(
+        np.log(rmin) +
+        np.log(rmax/rmin) * np.arange(data.shape[0]) / (data.shape[0]-1))
+    
+
+    mdef = ccl.halos.MassDef(mDelta, 'matter')
+    c = ccl.halos.ConcentrationConstant(c=concentration, mdef=mdef)
+    mdef = ccl.halos.MassDef(mDelta, 'matter',
+                             c_m_relation=c)
+    p = ccl.halos.HaloProfileEinasto(c, truncated=False)
+
+    prof = p.profile_real(COSMO, r, halomass, a, mdef)
+
+    tol = np.clip(np.abs(HALOPROFILE_TOLERANCE * data[:, 1]), 1e-12, np.inf)
+    err = np.abs(prof - data[:, 1])
+    assert np.all(err <= tol)
 
 
 def test_profile_NFW():
@@ -43,6 +68,7 @@ def test_profile_NFW():
     tol = np.clip(np.abs(HALOPROFILE_TOLERANCE * data[:, 1]), 1e-12, np.inf)
     err = np.abs(prof - data[:, 1])
     assert np.all(err <= tol)
+
 
 @pytest.mark.parametrize(
     'model', ['nfw', 'projected_nfw', 'einasto', 'hernquist'])

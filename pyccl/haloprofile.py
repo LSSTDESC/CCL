@@ -71,6 +71,7 @@ def nfw_profile_2d(cosmo, concentration, halo_mass, odelta, a, r):
     return sigma_r
 
 
+@deprecated(hal.HaloProfileEinasto)
 def einasto_profile_3d(cosmo, concentration, halo_mass, odelta, a, r):
     """Calculate the 3D Einasto halo profile
     at a given radius or an array of radii,
@@ -91,29 +92,13 @@ def einasto_profile_3d(cosmo, concentration, halo_mass, odelta, a, r):
     Returns:
         float or array_like: 3D NFW density at r, in units of Msun/Mpc^3.
     """
-    # needed for part of the parameters
-    cosmo.compute_sigma()
-
-    status = 0
-    scalar = True if np.ndim(r) == 0 else False
-
-    # Convert to array if it's not already an array
-    if not isinstance(r, np.ndarray):
-        r = np.array([r, ]).flatten()
-
-    nr = len(r)
-
-    cosmo = cosmo.cosmo
-    # Call function
-    rho_r, status = lib.halo_profile_einasto_vec(
-        cosmo, concentration, halo_mass,
-        odelta, a, r, nr, status)
-
-    # Check status and return
-    check(status, cosmo)
-    if scalar:
-        return rho_r[0]
-    return rho_r
+    mdef = hal.MassDef(odelta, 'matter')
+    c = hal.ConcentrationConstant(c=concentration,
+                                  mdef=mdef)
+    mdef = hal.MassDef(odelta, 'matter',
+                       c_m_relation=c)
+    p = hal.HaloProfileEinasto(c, truncated=False)
+    return p.profile_real(cosmo, r, halo_mass, a, mdef)
 
 
 def hernquist_profile_3d(cosmo, concentration, halo_mass, odelta, a, r):

@@ -6,6 +6,20 @@
 CCL_BEGIN_DECLS
 
 
+/**
+ * Computes the normalization of the Einasto profile.
+ * @param cosmo: cosmology object containing parameters
+ * @param n_m: number of elements of the input and output arrays.
+ * @param r_s: scale radius
+ * @param r_delta: virial radius
+ * @param alpha: index
+ * @param norm_out: output array
+ * @param status: Status flag: 0 if there are no errors, non-zero otherwise
+ * @return void
+ */
+void ccl_einasto_norm_integral(int n_m, double *r_s, double *r_delta, double *alpha,
+			       double *norm_out,int *status);
+
   /**
    * Computes mass density at given radius for a NFW halo profile
    * @param cosmo: cosmology object containing parameters
