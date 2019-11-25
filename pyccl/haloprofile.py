@@ -1,8 +1,11 @@
 from . import ccllib as lib
+from . import halos as hal
+from .pyutils import deprecated
 import numpy as np
 from .core import check
 
 
+@deprecated(hal.HaloProfileNFW)
 def nfw_profile_3d(cosmo, concentration, halo_mass, odelta, a, r):
     """Calculate the 3D NFW halo profile at a given radius or an array of radii,
     for a halo with a given mass, mass definition, and concentration,
@@ -20,26 +23,11 @@ def nfw_profile_3d(cosmo, concentration, halo_mass, odelta, a, r):
     Returns:
         float or array_like: 3D NFW density at r, in units of Msun/Mpc^3.
     """
-    status = 0
-    scalar = True if np.ndim(r) == 0 else False
-
-    # Convert to array if it's not already an array
-    if not isinstance(r, np.ndarray):
-        r = np.array([r, ]).flatten()
-
-    nr = len(r)
-
-    cosmo = cosmo.cosmo
-    # Call function
-    rho_r, status = lib.halo_profile_nfw_vec(
-        cosmo, concentration, halo_mass,
-        odelta, a, r, nr, status)
-
-    # Check status and return
-    check(status, cosmo)
-    if scalar:
-        return rho_r[0]
-    return rho_r
+    mdef = hal.MassDef(odelta, 'matter')
+    c = hal.ConcentrationConstant(c=concentration,
+                                  mdef=mdef)
+    p = hal.HaloProfileNFW(c, truncated=False)
+    return p.profile_real(cosmo, r, halo_mass, a, mdef)
 
 
 def nfw_profile_2d(cosmo, concentration, halo_mass, odelta, a, r):
