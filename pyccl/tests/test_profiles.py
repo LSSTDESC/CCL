@@ -147,20 +147,18 @@ def test_profile_f2r():
     # We force p2 to compute the real-space profile
     # by FFT-ing the Fourier-space one.
     p2 = ccl.halos.HaloProfileNFW(cM, fourier_analytic=True)
-    p2._profile_real=None
+    p2._profile_real = None
     p2.update_precision_fftlog(fac_hi=10000.,
                                n_per_decade=1000)
 
     M = 1E14
     a = 0.5
-    c = cM.get_concentration(COSMO, M, a)
     r_Delta = M200.get_radius(COSMO, M, a) / a
-    r_s = r_Delta / c
 
     r_arr = np.logspace(-2, 1, ) * r_Delta
     pr_1 = p1.profile_real(COSMO, r_arr, M, a, M200)
     pr_2 = p2.profile_real(COSMO, r_arr, M, a, M200)
-    
+
     id_good = r_arr < r_Delta  # Profile is 0 otherwise
-    res = np.fabs(pr_2[id_good] / pr_1[id_good] -1)
+    res = np.fabs(pr_2[id_good] / pr_1[id_good] - 1)
     assert np.all(res < 0.01)
