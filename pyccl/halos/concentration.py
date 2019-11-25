@@ -355,7 +355,7 @@ class ConcentrationConstant(Concentration):
             the mass definition used by this c(M)
             parametrization. In this case it's arbitrary.
     """
-    name = 'Duffy08'
+    name = 'Constant'
 
     def __init__(self, c=1, mdef=None):
         self.c = c
