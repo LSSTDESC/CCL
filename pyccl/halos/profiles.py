@@ -3,6 +3,7 @@ from ..core import check
 from ..pyutils import resample_array
 from .concentration import Concentration
 import numpy as np
+from scipy.special import sici
 
 
 class HaloProfile(object):
@@ -22,8 +23,8 @@ class HaloProfile(object):
         if getattr(self, '_profile_real', None):
             f_r = self._profile_real(cosmo, r, M, a, mass_def)
         elif getattr(self, '_profile_fourier', None):
-            f_r = _profile_fourier_to_real(self._profile_fourier,  # noqa
-                                           cosmo, r, M, a, mass_def)
+            f_r = self._profile_fftlog_wrap(cosmo, r, M, a, mass_def,
+                                            fourier_out=False)
         else:
             raise NotImplementedError("Profiles must have at least "
                                       " either a _profile_real or a "
@@ -34,14 +35,20 @@ class HaloProfile(object):
         if getattr(self, '_profile_fourier', None):
             f_k = self._profile_fourier(cosmo, k, M, a, mass_def)
         elif getattr(self, '_profile_real', None):
-            f_k = self._profile_real_to_fourier(cosmo, k, M, a, mass_def)
+            f_k = self._profile_fftlog_wrap(cosmo, k, M, a, mass_def,
+                                            fourier_out=True)
         else:
             raise NotImplementedError("Profiles must have at least "
                                       " either a _profile_real or a "
                                       " _profile_fourier method.")
         return f_k
 
-    def _profile_real_to_fourier(self, cosmo, k, M, a, mass_def):
+    def _profile_fftlog_wrap(self, cosmo, k, M, a, mass_def,
+                             fourier_out=False):
+        if fourier_out:
+            p_func = self._profile_real
+        else:
+            p_func = self._profile_fourier
         k_use = np.atleast_1d(k)
         M_use = np.atleast_1d(M)
         lk_use = np.log(k_use)
@@ -50,13 +57,12 @@ class HaloProfile(object):
         k_max = self.precision_fftlog['fac_hi'] * np.amax(k_use)
         n_k = (int(np.log10(k_max / k_min)) *
                self.precision_fftlog['n_per_decade'])
-        twopicubed = (2 * np.pi)**3
         r_arr = np.geomspace(k_min, k_max, n_k)
 
         p_k_out = np.zeros([M_use.size, k_use.size])
         for im, mass in enumerate(M_use):
             # Compute real profile values
-            p_real = self._profile_real(cosmo, r_arr, mass, a, mass_def)
+            p_real = p_func(cosmo, r_arr, mass, a, mass_def)
 
             # Compute Fourier profile through fftlog
             status = 0
@@ -74,7 +80,10 @@ class HaloProfile(object):
                                        self.precision_fftlog['extrapol'],
                                        self.precision_fftlog['extrapol'],
                                        0, 0)
-            p_k_out[im, :] = p_fourier * twopicubed
+            p_k_out[im, :] = p_fourier
+
+        if fourier_out:
+            p_k_out *= (2 * np.pi)**3
 
         p_k_out = p_k_out.T
         if np.ndim(M) == 0:
@@ -133,11 +142,13 @@ class HaloProfilePowerLaw(HaloProfile):
 
 
 class HaloProfileNFW(HaloProfile):
-    def __init__(self, c_M_relation):
+    def __init__(self, c_M_relation, fourier_analytic=False):
         if not isinstance(c_M_relation, Concentration):
             raise TypeError("c_M_relation must be of type `Concentration`)")
 
         self.cM = c_M_relation
+        if fourier_analytic:
+            self._profile_fourier = self._profile_fourier_analytic
         super(HaloProfileNFW, self).__init__()
 
     def _get_cM(self, cosmo, M, a, mdef=None):
@@ -153,7 +164,7 @@ class HaloProfileNFW(HaloProfile):
 
         # Comoving virial radius
         R_M = mass_def.get_radius(cosmo, M_use, a) / a
-        c_M = self._get_cM(cosmo, M, a, mdef=mass_def)
+        c_M = self._get_cM(cosmo, M_use, a, mdef=mass_def)
         R_s = R_M / c_M
 
         x = r_use[:, None] / R_s[None, :]
@@ -166,5 +177,28 @@ class HaloProfileNFW(HaloProfile):
         if np.ndim(M) == 0:
             prof = np.squeeze(prof, axis=-1)
         if np.ndim(r) == 0:
+            prof = np.squeeze(prof, axis=0)
+        return prof
+
+    def _profile_fourier_analytic(self, cosmo, k, M, a, mass_def):
+        M_use = np.atleast_1d(M)
+        k_use = np.atleast_1d(k)
+
+        # Comoving virial radius
+        R_M = mass_def.get_radius(cosmo, M_use, a) / a
+        c_M = self._get_cM(cosmo, M_use, a, mdef=mass_def)
+        R_s = R_M / c_M
+
+        x = k_use[:, None] * R_s[None, :]
+        Si1, Ci1 = sici((1 + c_M[None, :]) * x)
+        Si2, Ci2 = sici(x)
+        P1 = 1. / (np.log(1 + c_M) - c_M / (1 + c_M))
+        P2 = np.sin(x) * (Si1 - Si2) + np.cos(x) * (Ci1 - Ci2)
+        P3 = np.sin(c_M[None, :] * x) / ((1 + c_M[None, :]) * x)
+        prof = M * P1[None, :] * (P2 - P3)
+
+        if np.ndim(M) == 0:
+            prof = np.squeeze(prof, axis=-1)
+        if np.ndim(k) == 0:
             prof = np.squeeze(prof, axis=0)
         return prof

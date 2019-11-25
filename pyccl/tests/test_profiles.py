@@ -110,11 +110,13 @@ def test_profile_plaw_accuracy(alpha):
     assert np.all(res < 5E-3)
 
 
-def test_profile_nfw_accuracy():
+@pytest.mark.parametrize("use_analytic", [True, False])
+def test_profile_nfw_accuracy(use_analytic):
     from scipy.special import sici
 
+    tol = 1E-10 if use_analytic else 5E-3
     cM = ccl.halos.ConcentrationDuffy08(M200)
-    p = ccl.halos.HaloProfileNFW(cM)
+    p = ccl.halos.HaloProfileNFW(cM, fourier_analytic=use_analytic)
     M = 1E14
     a = 0.5
     c = cM.get_concentration(COSMO, M, a)
@@ -136,4 +138,4 @@ def test_profile_nfw_accuracy():
     fk_arr = p.profile_fourier(COSMO, k_arr, M, a, M200)
     fk_arr_pred = fk(k_arr)
     res = np.fabs((fk_arr - fk_arr_pred) / M)
-    assert np.all(res < 5E-3)
+    assert np.all(res < tol)
