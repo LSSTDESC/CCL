@@ -4,6 +4,25 @@ import pytest
 import pyccl as ccl
 
 HALOPROFILE_TOLERANCE = 1E-3
+M200 = ccl.halos.MassDef(200, 'matter')
+
+# We need a custom-made concentration object
+class ConcentrationConstant(ccl.halos.Concentration):
+    def __init__(self, c, mdef=None):
+        self.c = c
+        super(ConcentrationConstant, self).__init__(mdef)
+
+    def _default_mdef(self):
+        self.mdef = M200
+
+    def _check_mdef(self, mdef):
+        return False
+
+    def _concentration(self, cosmo, M, a):
+        if np.ndim(M) == 0:
+            return self.c
+        else:
+            return self.c * np.ones(M.size)
 
 
 @pytest.mark.parametrize(
@@ -36,7 +55,11 @@ def test_haloprofile(model):
         np.log(rmax/rmin) * np.arange(data.shape[0]) / (data.shape[0]-1))
 
     if model == 'nfw':
-        prof_func = ccl.nfw_profile_3d
+        c = ConcentrationConstant(concentration)
+        p = ccl.halos.HaloProfileNFW(c, truncated=False)
+        def prof_func(csm, cnc, m, hmd, a, r):
+            return p.profile_real(csm, r, m, a, M200)
+        #prof_func = ccl.nfw_profile_3d
     elif model == 'projected_nfw':
         prof_func = ccl.nfw_profile_2d
     elif model == 'einasto':

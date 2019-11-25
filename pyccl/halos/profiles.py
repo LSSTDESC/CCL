@@ -142,11 +142,13 @@ class HaloProfilePowerLaw(HaloProfile):
 
 
 class HaloProfileNFW(HaloProfile):
-    def __init__(self, c_M_relation, fourier_analytic=False):
+    def __init__(self, c_M_relation, fourier_analytic=False,
+                 truncated=True):
         if not isinstance(c_M_relation, Concentration):
             raise TypeError("c_M_relation must be of type `Concentration`)")
 
         self.cM = c_M_relation
+        self.truncated = truncated
         if fourier_analytic:
             self._profile_fourier = self._profile_fourier_analytic
         super(HaloProfileNFW, self).__init__()
@@ -169,7 +171,8 @@ class HaloProfileNFW(HaloProfile):
 
         x = r_use[:, None] / R_s[None, :]
         prof = 1./(x * (1 + x)**2)
-        prof[r_use[:, None] > R_M[None, :]] = 0
+        if self.truncated:
+            prof[r_use[:, None] > R_M[None, :]] = 0
 
         norm = self._norm(M_use, R_s, c_M)
         prof = prof[:, :] * norm[None, :]
