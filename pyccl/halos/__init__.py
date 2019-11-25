@@ -35,4 +35,4 @@ from .hbias import (  # noqa
 from .profiles import (  # noqa
     HaloProfile, HaloProfileGaussian,
     HaloProfilePowerLaw, HaloProfileNFW,
-    HaloProfileEinasto)
+    HaloProfileEinasto, HaloProfileHernquist)

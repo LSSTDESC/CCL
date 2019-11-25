@@ -256,3 +256,41 @@ class HaloProfileEinasto(HaloProfile):
         if np.ndim(r) == 0:
             prof = np.squeeze(prof, axis=0)
         return prof
+
+
+class HaloProfileHernquist(HaloProfile):
+    def __init__(self, c_M_relation, truncated=True):
+        if not isinstance(c_M_relation, Concentration):
+            raise TypeError("c_M_relation must be of type `Concentration`)")
+
+        self.cM = c_M_relation
+        self.truncated = truncated
+        super(HaloProfileHernquist, self).__init__()
+
+    def _get_cM(self, cosmo, M, a, mdef=None):
+        return self.cM.get_concentration(cosmo, M, a, mdef_other=mdef)
+
+    def _profile_real(self, cosmo, r, M, a, mass_def):
+        r_use = np.atleast_1d(r)
+        M_use = np.atleast_1d(M)
+
+        # Comoving virial radius
+        R_M = mass_def.get_radius(cosmo, M_use, a) / a
+        c_M = self._get_cM(cosmo, M_use, a, mdef=mass_def)
+        R_s = R_M / c_M
+
+        status = 0
+        norm, status = lib.hernquist_norm(R_s, R_M, M_use.size, status)
+        check(status)
+        norm = M_use / norm
+
+        x = r_use[:, None] / R_s[None, :]
+        prof = norm[None, :] / (x * (1 + x)**3)
+        if self.truncated:
+            prof[r_use[:, None] > R_M[None, :]] = 0
+
+        if np.ndim(M) == 0:
+            prof = np.squeeze(prof, axis=-1)
+        if np.ndim(r) == 0:
+            prof = np.squeeze(prof, axis=0)
+        return prof

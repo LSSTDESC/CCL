@@ -29,6 +29,22 @@ void einasto_norm(double *rs,int nrs,
 }
 %}
 
+%feature("pythonprepend") hernquist_norm %{
+    if numpy.shape(rs) != numpy.shape(rd):
+        raise CCLError("Input shape for `rs` must match `rd`!")
+    if numpy.shape(rs) != (nout,):
+        raise CCLError("Input shape for `rs` must match `(nout,)`!")
+%}
+%inline %{
+void hernquist_norm(double *rs,int nrs,
+		    double *rd,int nrd,
+		    int nout,double *output,
+		    int *status)
+{
+  ccl_hernquist_norm_integral(nrs,rs,rd,output,status);
+}
+%}
+
 /* The python code here will be executed before all of the functions that
    follow this directive. */
 %feature("pythonprepend") %{
@@ -41,11 +57,6 @@ void einasto_norm(double *rs,int nrs,
 void projected_halo_profile_nfw_vec(ccl_cosmology *cosmo, double c, double halomass, double massdef_delta_m, double a,
                                 double* r, int nr, int nout, double* output, int *status){
         ccl_projected_halo_profile_nfw(cosmo, c, halomass, massdef_delta_m, a, r, nr, output, status);
-}
-
-void halo_profile_hernquist_vec(ccl_cosmology *cosmo, double c, double halomass, double massdef_delta_m, double a,
-                                double* r, int nr, int nout, double* output, int *status) {
-        ccl_halo_profile_hernquist(cosmo, c, halomass, massdef_delta_m, a, r, nr, output, status);
 }
 
 %}
