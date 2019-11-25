@@ -22,6 +22,7 @@ Submodules
    pyccl.errors
    pyccl.halomodel
    pyccl.haloprofile
+   pyccl.massfunction
    pyccl.neutrinos
    pyccl.pk2d
    pyccl.power
