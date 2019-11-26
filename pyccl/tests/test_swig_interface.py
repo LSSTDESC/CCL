@@ -226,18 +226,14 @@ def test_swig_power():
 
 def test_swig_haloprofile():
     status = 0
-    for func in [ccllib.halo_profile_nfw_vec,
-                 ccllib.halo_profile_einasto_vec,
-                 ccllib.halo_profile_hernquist_vec,
-                 ccllib.projected_halo_profile_nfw_vec]:
-        assert_raises(
-            CCLError,
-            func,
-            COSMO,
-            5.0,
-            1E12,
-            200.,
-            1.,
-            [1.0, 10.0],
-            4,
-            status)
+    assert_raises(CCLError,
+                  ccllib.einasto_norm,
+                  [0.1, 1.0],
+                  [0.1, 1.0],
+                  [0.1, 1.0],
+                  4, status)
+    assert_raises(CCLError,
+                  ccllib.hernquist_norm,
+                  [0.1, 1.0],
+                  [0.1, 1.0],
+                  4, status)
