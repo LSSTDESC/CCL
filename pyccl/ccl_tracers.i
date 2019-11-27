@@ -101,6 +101,25 @@ void get_number_counts_kernel_wrapper(ccl_cosmology *cosmo,
 }
 %}
 
+%feature("pythonprepend") cl_tracer_get_kernel %{
+    if chi_s.size != nout:
+        raise CCLError("Input shape for `chi_s` must match `nout`")
+%}
+
+%inline %{
+void cl_tracer_get_kernel(ccl_cl_tracer_t *tr,
+			  double *chi_s, int nchi,
+			  int nout, double *output,
+			  int *status)
+{
+  int ii;
+  for(ii=0; ii<nchi; ii++) {
+    output[ii] = ccl_cl_tracer_t_get_kernel(tr, chi_s[ii],
+					    status);
+  }
+}
+%}
+
 %feature("pythonprepend") cl_tracer_t_new_wrapper %{
     if numpy.shape(chi_s) != numpy.shape(wchi_s):
         raise CCLError("Input shape for `chi_s` must match `wchi_s`!")

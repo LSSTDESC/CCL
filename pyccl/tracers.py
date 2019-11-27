@@ -141,6 +141,24 @@ class Tracer(object):
         # Do nothing, just initialize list of tracers
         self._trc = []
 
+    def get_kernel(self, chi):
+        if not hasattr(self, '_trc'):
+            return []
+
+        chi_use = np.atleast_1d(chi)
+        kernels = []
+        for t in self._trc:
+            status = 0
+            w, status = lib.cl_tracer_get_kernel(t, chi_use,
+                                                 chi_use.size,
+                                                 status)
+            check(status)
+            kernels.append(w)
+        kernels = np.array(kernels)
+        if np.ndim(chi) == 0:
+            kernels = np.squeeze(kernels, axis=-1)
+        return kernels
+
     def add_tracer(self, cosmo, kernel=None,
                    transfer_ka=None, transfer_k=None, transfer_a=None,
                    der_bessel=0, der_angles=0,
