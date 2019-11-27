@@ -28,12 +28,13 @@
 
 void fftlog_transform(double *k_in, int n_in_k,
 		      double *fk_in, int n_in_f,
-		      int dim, double mu, double epsilon,
+		      int dim, double mu, double plaw_index,
 		      int nout, double *output,
 		      int *status)
 {
   double *r_out = &(output[0]);
   double *fr_out = &(output[n_in_k]);
+  double epsilon = 0.5*dim+plaw_index;
   if(dim==3)
     ccl_fftlog_ComputeXi3D(mu, epsilon, n_in_k, k_in, fk_in, r_out, fr_out);
   else if(dim==2)

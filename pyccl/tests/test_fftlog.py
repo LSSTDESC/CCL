@@ -22,14 +22,13 @@ def test_fftlog_plaw(dim, mu, alpha):
         den = np.pi**(dim/2.) * 2**alpha
         return g1 / (g2 * den * r**(dim - alpha))
 
-    epsilon = dim / 2 - alpha
     nk = 1024
     k_arr = np.logspace(-4, 4, nk)
     fk_arr = f(k_arr)
 
     status = 0
     result, status = ccl.ccllib.fftlog_transform(k_arr, fk_arr,
-                                                 dim, mu, epsilon,
+                                                 dim, mu, -alpha,
                                                  2 * k_arr.size, status)
     assert status == 0
     r_arr, fr_arr = result.reshape([2, k_arr.size])

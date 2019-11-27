@@ -16,7 +16,7 @@ class HaloProfile(object):
                                  'fac_hi': 10.,
                                  'n_per_decade': 1000,
                                  'extrapol': 'linx_liny',
-                                 'epsilon': 0}
+                                 'plaw_index': -1.5}
 
     def update_precision_fftlog(self, **kwargs):
         self.precision_fftlog.update(kwargs)
@@ -45,6 +45,50 @@ class HaloProfile(object):
                                       " _profile_fourier method.")
         return f_k
 
+    def profile_projected(self, cosmo, r_t, M, a, mass_def=None):
+        if getattr(self, '_profile_projected', None):
+            s_r_t = self._profile_projected(cosmo, r_t, M, a, mass_def)
+        else:
+            s_r_t = self._profile_projected_fftlog_wrap(cosmo, r_t, M,
+                                                        a, mass_def)
+        return s_r_t
+
+    def _profile_projected_fftlog_wrap(self, cosmo, r_t, M, a, mass_def):
+        r_t_use = np.atleast_1d(r_t)
+        M_use = np.atleast_1d(M)
+        lr_t_use = np.log(r_t_use)
+        r_t_min = self.precision_fftlog['fac_lo'] * np.amin(r_t_use)
+        r_t_max = self.precision_fftlog['fac_hi'] * np.amax(r_t_use)
+        n_r_t = (int(np.log10(r_t_max / r_t_min)) *
+                 self.precision_fftlog['n_per_decade'])
+
+        k_arr = np.geomspace(r_t_min, r_t_max, n_r_t)
+        sig_r_t_out = np.zeros([M_use.size, r_t_use.size])
+        for im, mass in enumerate(M_use):
+            p_fourier = self.profile_fourier(cosmo, k_arr, M, a, mass_def=None)
+
+            status = 0
+            plaw_index = -3 - self.precision_fftlog['plaw_index']
+            result, status = lib.fftlog_transform(k_arr, p_fourier,
+                                                  2, 0, plaw_index,
+                                                  2 * k_arr.size, status)
+            check(status)
+            r_t_arr, sig_r_t_arr = result.reshape([2, k_arr.size])
+
+            sig_r_t = resample_array(np.log(r_t_arr), sig_r_t_arr,
+                                     lr_t_use,
+                                     self.precision_fftlog['extrapol'],
+                                     self.precision_fftlog['extrapol'],
+                                     0, 0)
+            sig_r_t_out[im, :] = sig_r_t
+        sig_r_t_out = sig_r_t_out.T
+
+        if np.ndim(M) == 0:
+            sig_r_t_out = np.squeeze(sig_r_t_out, axis=-1)
+        if np.ndim(r_t) == 0:
+            sig_r_t_out = np.squeeze(sig_r_t_out, axis=0)
+        return sig_r_t_out
+
     def _profile_fftlog_wrap(self, cosmo, k, M, a, mass_def,
                              fourier_out=False):
         if fourier_out:
@@ -70,9 +114,9 @@ class HaloProfile(object):
             status = 0
             # TODO: we could probably benefit from precomputing all
             #       the FFTLog Gamma functions only once.
-            epsilon = self.precision_fftlog['epsilon']
+            plaw_index = self.precision_fftlog['plaw_index']
             result, status = lib.fftlog_transform(r_arr, p_real,
-                                                  3, 0, epsilon,
+                                                  3, 0, plaw_index,
                                                   2 * r_arr.size, status)
             check(status)
             k_arr, p_k_arr = result.reshape([2, r_arr.size])

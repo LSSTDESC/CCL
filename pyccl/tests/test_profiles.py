@@ -87,6 +87,29 @@ def test_profile_gaussian_accuracy():
 
 
 @pytest.mark.parametrize('alpha', [-1.2, -2., -2.8])
+def test_profile_projected_plaw(alpha):
+    from scipy.special import gamma
+
+    prefac = (np.pi**0.5 * gamma(-(alpha + 1) / 2) /
+              gamma(-alpha / 2))
+
+    def s_r_t(rt):
+        return prefac * rt**(1 + alpha)
+
+    def alpha_f(cosmo, M, a, mdef):
+        return alpha * one_f(cosmo, M, a, mdef)
+
+    p = ccl.halos.HaloProfilePowerLaw(one_f, alpha_f)
+    p.update_precision_fftlog(plaw_index=alpha)
+
+    rt_arr = np.logspace(-3, 2, 1024)
+    srt_arr = p.profile_projected(COSMO, rt_arr, 1., 1.)
+    srt_arr_pred = s_r_t(rt_arr)
+    res = np.fabs(srt_arr / srt_arr_pred - 1)
+    assert np.all(res < 5E-3)
+
+
+@pytest.mark.parametrize('alpha', [-1.2, -2., -2.8])
 def test_profile_plaw_accuracy(alpha):
     from scipy.special import gamma
 
@@ -101,7 +124,7 @@ def test_profile_plaw_accuracy(alpha):
         return alpha * one_f(cosmo, M, a, mdef)
 
     p = ccl.halos.HaloProfilePowerLaw(one_f, alpha_f)
-    p.update_precision_fftlog(epsilon=1.5 + alpha)
+    p.update_precision_fftlog(plaw_index=alpha)
 
     k_arr = np.logspace(-3, 2, 1024)
     fk_arr = p.profile_fourier(COSMO, k_arr, 1., 1.)
