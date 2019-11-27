@@ -204,6 +204,12 @@ class Tracer(object):
                     transfers = np.squeeze(transfers, axis=-2)
         return transfers
 
+    def get_bessel_derivative(self):
+        if not hasattr(self, '_trc'):
+            return []
+
+        return np.array([t.der_bessel for t in self._trc])
+
     def add_tracer(self, cosmo, kernel=None,
                    transfer_ka=None, transfer_k=None, transfer_a=None,
                    der_bessel=0, der_angles=0,

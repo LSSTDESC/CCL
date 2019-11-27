@@ -47,6 +47,23 @@ def test_tracer_kernel_smoke(tracer_type):
 
 
 @pytest.mark.parametrize('tracer_type', ['nc', 'wl', 'cl', 'not'])
+def test_tracer_der_bessel_smoke(tracer_type):
+    tr, ntr = get_tracer(tracer_type)
+
+    if tracer_type == 'nc':
+        dd = np.array([0, 2, -1])
+    elif tracer_type == 'wl':
+        dd = np.array([-1, -1])
+    elif tracer_type == 'cl':
+        dd = np.array([-1])
+    else:
+        dd = np.array([])
+
+    d = tr.get_bessel_derivative()
+    assert np.all(d == dd)
+
+
+@pytest.mark.parametrize('tracer_type', ['nc', 'wl', 'cl', 'not'])
 def test_tracer_f_ell_smoke(tracer_type):
     tr, ntr = get_tracer(tracer_type)
     for ell in [np.linspace(0., 3000., 128),
