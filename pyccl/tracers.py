@@ -156,8 +156,34 @@ class Tracer(object):
             kernels.append(w)
         kernels = np.array(kernels)
         if np.ndim(chi) == 0:
-            kernels = np.squeeze(kernels, axis=-1)
+            if kernels.shape != (0,):
+                kernels = np.squeeze(kernels, axis=-1)
         return kernels
+
+    def get_transfer(self, lk, a):
+        if not hasattr(self, '_trc'):
+            return []
+
+        lk_use = np.atleast_1d(lk)
+        a_use = np.atleast_1d(a)
+        transfers = []
+        for t in self._trc:
+            status = 0
+            t, status = lib.cl_tracer_get_transfer(t, lk_use, a_use,
+                                                   lk_use.size * a_use.size,
+                                                   status)
+            check(status)
+            transfers.append(t.reshape([lk_use.size, a_use.size]))
+        transfers = np.array(transfers)
+        if transfers.shape != (0,):
+            if np.ndim(a) == 0:
+                transfers = np.squeeze(transfers, axis=-1)
+                if np.ndim(lk) == 0:
+                    transfers = np.squeeze(transfers, axis=-1)
+            else:
+                if np.ndim(lk) == 0:
+                    transfers = np.squeeze(transfers, axis=-2)
+        return transfers
 
     def add_tracer(self, cosmo, kernel=None,
                    transfer_ka=None, transfer_k=None, transfer_a=None,

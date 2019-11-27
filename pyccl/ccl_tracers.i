@@ -120,6 +120,32 @@ void cl_tracer_get_kernel(ccl_cl_tracer_t *tr,
 }
 %}
 
+%feature("pythonprepend") cl_tracer_get_transfer %{
+    if a_s.size * lk_s.size != nout:
+        raise CCLError("`nout` must match the shapes of `k_s` times `a_s`")
+%}
+
+%inline %{
+void cl_tracer_get_transfer(ccl_cl_tracer_t *tr,
+			    double *lk_s, int nlk,
+			    double *a_s, int na,
+			    int nout, double *output,
+			    int *status)
+{
+  int ik;
+  for(ik=0; ik<nlk; ik++) {
+    int ia;
+    double lk = lk_s[ik];
+    for(ia=0; ia<na; ia++) {
+      double a = a_s[ia];
+      int ii = ia + na * ik;
+      output[ii] = ccl_cl_tracer_t_get_transfer(tr, lk, a,
+						status);
+    }
+  }
+}
+%}
+
 %feature("pythonprepend") cl_tracer_t_new_wrapper %{
     if numpy.shape(chi_s) != numpy.shape(wchi_s):
         raise CCLError("Input shape for `chi_s` must match `wchi_s`!")
