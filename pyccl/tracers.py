@@ -142,6 +142,19 @@ class Tracer(object):
         self._trc = []
 
     def get_kernel(self, chi):
+        """Get the radial kernels for all tracers contained
+        in this `Tracer`.
+
+        Args:
+            chi (float or array_like): values of the comoving
+                radial distance in increasing order and in Mpc.
+
+        Returns:
+            array_like: list of radial kernels for each tracer.
+                The shape will be `(n_tracer, chi.size)`, where
+                `n_tracer` is the number of tracers. The last dimension
+                will be squeezed if the input is a scalar.
+        """
         if not hasattr(self, '_trc'):
             return []
 
@@ -161,6 +174,18 @@ class Tracer(object):
         return kernels
 
     def get_f_ell(self, ell):
+        """Get the ell-dependent prefactors for all tracers
+        contained in this `Tracer`.
+
+        Args:
+            ell (float or array_like): angular multipole values.
+
+        Returns:
+            array_like: list of prefactors for each tracer.
+                The shape will be `(n_tracer, ell.size)`, where
+                `n_tracer` is the number of tracers. The last dimension
+                will be squeezed if the input is a scalar.
+        """
         if not hasattr(self, '_trc'):
             return []
 
@@ -180,6 +205,21 @@ class Tracer(object):
         return f_ells
 
     def get_transfer(self, lk, a):
+        """Get the transfer functions for all tracers contained
+        in this `Tracer`.
+
+        Args:
+            lk (float or array_like): values of the natural logarithm of
+                the wave number (in units of inverse Mpc) in increasing
+                order.
+             a (float or array_like): values of the scale factor.
+
+        Returns:
+            array_like: list of transfer functions for each tracer.
+                The shape will be `(n_tracer, lk.size, a.size)`, where
+                `n_tracer` is the number of tracers. The other dimensions
+                will be squeezed if the inputs are scalars.
+        """
         if not hasattr(self, '_trc'):
             return []
 
@@ -205,6 +245,12 @@ class Tracer(object):
         return transfers
 
     def get_bessel_derivative(self):
+        """Get Bessel function derivative orders for all tracers contained
+        in this `Tracer`.
+
+        Returns:
+            array_like: list of Bessel derivative orders for each tracer.
+        """
         if not hasattr(self, '_trc'):
             return []
 
