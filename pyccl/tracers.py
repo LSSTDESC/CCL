@@ -160,6 +160,25 @@ class Tracer(object):
                 kernels = np.squeeze(kernels, axis=-1)
         return kernels
 
+    def get_f_ell(self, ell):
+        if not hasattr(self, '_trc'):
+            return []
+
+        ell_use = np.atleast_1d(ell)
+        f_ells = []
+        for t in self._trc:
+            status = 0
+            f, status = lib.cl_tracer_get_f_ell(t, ell_use,
+                                                ell_use.size,
+                                                status)
+            check(status)
+            f_ells.append(f)
+        f_ells = np.array(f_ells)
+        if np.ndim(ell) == 0:
+            if f_ells.shape != (0,):
+                f_ells = np.squeeze(f_ells, axis=-1)
+        return f_ells
+
     def get_transfer(self, lk, a):
         if not hasattr(self, '_trc'):
             return []

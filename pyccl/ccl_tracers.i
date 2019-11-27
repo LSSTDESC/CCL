@@ -12,6 +12,7 @@
     (double* z_b, int nz_b),
     (double* n, int nn),
     (double* b, int nb),
+    (double* ell_s, int nell),
     (double* chi_s, int nchi),
     (double* wchi_s, int nwchi),
     (double* lk_s, int nlk),
@@ -116,6 +117,25 @@ void cl_tracer_get_kernel(ccl_cl_tracer_t *tr,
   for(ii=0; ii<nchi; ii++) {
     output[ii] = ccl_cl_tracer_t_get_kernel(tr, chi_s[ii],
 					    status);
+  }
+}
+%}
+
+%feature("pythonprepend") cl_tracer_get_f_ell %{
+    if ell_s.size != nout:
+        raise CCLError("Input shape for `ell_s` must match `nout`")
+%}
+
+%inline %{
+void cl_tracer_get_f_ell(ccl_cl_tracer_t *tr,
+			 double *ell_s, int nell,
+			 int nout, double *output,
+			 int *status)
+{
+  int ii;
+  for(ii=0; ii<nell; ii++) {
+    output[ii] = ccl_cl_tracer_t_get_f_ell(tr, ell_s[ii],
+					   status);
   }
 }
 %}

@@ -47,6 +47,20 @@ def test_tracer_kernel_smoke(tracer_type):
 
 
 @pytest.mark.parametrize('tracer_type', ['nc', 'wl', 'cl', 'not'])
+def test_tracer_f_ell_smoke(tracer_type):
+    tr, ntr = get_tracer(tracer_type)
+    for ell in [np.linspace(0., 3000., 128),
+                [100., 1000.],
+                100.]:
+        fl = tr.get_f_ell(ell)
+
+        assert fl.shape[0] == ntr
+        if ntr > 0:
+            for f in fl:
+                assert np.shape(f) == np.shape(ell)
+
+
+@pytest.mark.parametrize('tracer_type', ['nc', 'wl', 'cl', 'not'])
 def test_tracer_transfer_smoke(tracer_type):
     tr, ntr = get_tracer(tracer_type)
     for lk in [np.linspace(-3., 1., 10),
