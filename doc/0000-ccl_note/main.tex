@@ -1270,6 +1270,8 @@ for the halo mass function and bias.
 In this section we describe the several models of halo density profiles that are implemented, 
 including the NFW profile \citep{Navarro1997}, the Hernquist profile \citep{Hernquist1990}, 
 and the Einasto profile \citep{Einasto1965,Einasto1969,Diemer2014}.
+Besides the 3D profiles listed above, the 2D projected NFW profile is also implemented 
+\citep{Bartelmann1996,Wright2000}.
 Including halo profiles in \ccl adds to the completeness of our description of the matter 
 distribution of the universe, and is nessary for modelling halos in many cluster analyses.
 For example, having a model for the dark matter profile within each halo enables a calculation 
@@ -1281,6 +1283,15 @@ the distance from the halo center. The NFW profile has the form
   \rho_{\rm NFW}(r)=\frac{\rho_s}{(r/r_s)(1+r/r_s)^2},  
 \end{equation}
 where $\rho_s$ and $r_s$ are the inner density and the scale radius, that vary from halo to halo.
+We also include the NFW profile projected in 2D, for lensing analyses,
+\begin{equation}
+\Sigma_{\rm NFW}(x)=\left\{\begin{matrix}
+\frac{2\rho_s r_s}{x^2-1}\left [ 1-\frac{2}{\sqrt{1-x^2}}\rm{arctanh}\sqrt{\frac{1-x}{1+x}} \right ],\hspace{20pt} x<1\\ 
+\frac{2\rho_s r_s}{3},\hspace{300pt} x=1\\ 
+\frac{2\rho_s r_s}{x^2-1}\left [ 1-\frac{2}{\sqrt{x^2-1}}\rm{arctan}\sqrt{\frac{x-1}{1+x}} \right ],\hspace{35pt} x>1
+\end{matrix}\right.
+\end{equation}
+where $x=r/r_s$.
 The NFW profile is one of the simplest halo profiles and is frequently adopted in theoretical analyses.
 
 The Hernquist profile has a similar form, but is steeper at larger radii,
