@@ -8,6 +8,8 @@ you want to use CCL with Boltzmann codes like ``CLASS`` or ``CAMB``, you will
 need to make sure the ``Python`` wrappers for these packages are installed
 as well. See the instructions for :ref:`boltzmann-codes` below.
 
+CCL works on Linux or Mac OS. Windows installation is not supported.
+
 Once installed, you can take CCL for a spin by following the :ref:`quickstart`
 instructions.
 

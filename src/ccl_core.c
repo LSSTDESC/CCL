@@ -381,7 +381,7 @@ ccl_parameters ccl_parameters_create(
 				     double w0, double wa, double h, double norm_pk,
 				     double n_s, double bcm_log10Mc, double bcm_etab,
 				     double bcm_ks, double mu_0, double sigma_0,
-				     double c1, double c2, double lambda,
+				     double c1_mg, double c2_mg, double lambda_mg,
 				     int nz_mgrowth, double *zarr_mgrowth,
 				     double *dfarr_mgrowth, int *status)
 {
@@ -445,9 +445,9 @@ ccl_parameters ccl_parameters_create(
   // Params of the mu / Sigma parameterisation of MG
   params.mu_0 = mu_0;
   params.sigma_0 = sigma_0;
-  params.c1 = c1;
-  params.c2 = c2;
-  params.lambda = lambda;
+  params.c1_mg = c1_mg;
+  params.c2_mg = c2_mg;
+  params.lambda_mg = lambda_mg;
 
   // Set remaining standard and easily derived parameters
   ccl_parameters_fill_initial(&params, status);
@@ -488,12 +488,12 @@ ccl_parameters ccl_parameters_create_flat_lcdm(double Omega_c, double Omega_b, d
   mnu = &mnuval;
   double mu_0 = 0.;
   double sigma_0 = 0.;
-  double c1 = 0.;
-  double c2 = 0.;
-  double lambda = 0.;
+  double c1_mg = 0.;
+  double c2_mg = 0.;
+  double lambda_mg = 0.;
 
   ccl_parameters params = ccl_parameters_create(Omega_c, Omega_b, Omega_k, Neff,
-						mnu, 0, w0, wa, h, norm_pk, n_s, -1, -1, -1, mu_0, sigma_0, c1, c2, lambda, -1, NULL, NULL, status);
+						mnu, 0, w0, wa, h, norm_pk, n_s, -1, -1, -1, mu_0, sigma_0, c1_mg, c2_mg, lambda_mg, -1, NULL, NULL, status);
   return params;
 
 }
@@ -565,9 +565,9 @@ void ccl_parameters_write_yaml(ccl_parameters * params, const char * filename, i
   // Modified gravity parameters
   WRITE_DOUBLE(mu_0);
   WRITE_DOUBLE(sigma_0);
-  WRITE_DOUBLE(c1);
-  WRITE_DOUBLE(c2);
-  WRITE_DOUBLE(lambda);
+  WRITE_DOUBLE(c1_mg);
+  WRITE_DOUBLE(c2_mg);
+  WRITE_DOUBLE(lambda_mg);
 
   // Derived parameters
   WRITE_DOUBLE(sigma8);
@@ -666,9 +666,9 @@ ccl_parameters ccl_parameters_read_yaml(const char * filename, int *status) {
   // Modified gravity parameters
   READ_DOUBLE(mu_0);
   READ_DOUBLE(sigma_0);
-  READ_DOUBLE(c1);
-  READ_DOUBLE(c2);
-  READ_DOUBLE(lambda);
+  READ_DOUBLE(c1_mg);
+  READ_DOUBLE(c2_mg);
+  READ_DOUBLE(lambda_mg);
 
   // Derived parameters
   READ_DOUBLE(sigma8);
@@ -728,7 +728,7 @@ ccl_parameters ccl_parameters_read_yaml(const char * filename, int *status) {
     Neff, mnu, N_nu_mass,
     w0, wa, h, norm_pk,
     n_s, bcm_log10Mc, bcm_etab,
-    bcm_ks, mu_0, sigma_0, c1, c2, lambda, nz_mgrowth, z_mgrowth,
+    bcm_ks, mu_0, sigma_0, c1_mg, c2_mg, lambda_mg, nz_mgrowth, z_mgrowth,
     df_mgrowth, status);
 
   if(z_mgrowth) free(z_mgrowth);

@@ -2,7 +2,9 @@
 well as wrappers to automatically vectorize functions."""
 from . import ccllib as lib
 from ._types import error_types
-from .errors import CCLError
+from .errors import CCLError, CCLWarning
+import functools
+import warnings
 import numpy as np
 
 
@@ -280,3 +282,21 @@ def _vectorize_fn4(fn, fn_vec, cosmo, x, a, d, returns_status=True):
     # Check result and return
     check(status, cosmo_in)
     return f
+
+
+def deprecated(new_function=None):
+    """This is a decorator which can be used to mark functions
+    as deprecated. It will result in a warning being emitted
+    when the function is used. If there is a replacement function,
+    pass it as `new_function`.
+    """
+    def _depr_decorator(func):
+        @functools.wraps(func)
+        def new_func(*args, **kwargs):
+            s = "The function {} is deprecated.".format(func.__name__)
+            if new_function:
+                s += " Use {} instead.".format(new_function.__name__)
+            warnings.warn(s, CCLWarning)
+            return func(*args, **kwargs)
+        return new_func
+    return _depr_decorator

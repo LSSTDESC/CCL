@@ -155,7 +155,8 @@ class Cosmology(object):
             Omega_k=0., Omega_g=None, Neff=3.046, m_nu=0., m_nu_type=None,
             w0=-1., wa=0., T_CMB=None,
             bcm_log10Mc=np.log10(1.2e14), bcm_etab=0.5,
-            bcm_ks=55., mu_0=0., sigma_0=0., z_mg=None, df_mg=None,
+            bcm_ks=55., mu_0=0., sigma_0=0., 
+            c1_mg=0., c2_mg=0., lambda_mg=0., z_mg=None, df_mg=None,
             transfer_function='boltzmann_camb',
             matter_power_spectrum='halofit',
             baryons_power_spectrum='nobaryons',
@@ -170,6 +171,7 @@ class Cosmology(object):
             m_nu_type=m_nu_type, w0=w0, wa=wa, T_CMB=T_CMB,
             bcm_log10Mc=bcm_log10Mc,
             bcm_etab=bcm_etab, bcm_ks=bcm_ks, mu_0=mu_0, sigma_0=sigma_0,
+            c1_mg=c1_mg, c2_mg=c2_mg, lambda_mg=lambda_mg,
             z_mg=z_mg, df_mg=df_mg)
 
         self._config_init_kwargs = dict(
@@ -237,7 +239,10 @@ class Cosmology(object):
             bcm_etab=params['bcm_etab'],
             bcm_ks=params['bcm_ks'],
             mu_0=params['mu_0'],
-            sigma_0=params['sigma_0'])
+            sigma_0=params['sigma_0'],
+            c1_mg=params['c1_mg'],
+            c2_mg=params['c2_mg'],
+            lambda_mg=params['lambda_mg'])
         if 'z_mg' in params:
             inits['z_mg'] = params['z_mg']
             inits['df_mg'] = params['df_mg']
@@ -327,7 +332,8 @@ class Cosmology(object):
             A_s=None, Omega_k=None, Neff=None, m_nu=None, m_nu_type=None,
             w0=None, wa=None, T_CMB=None,
             bcm_log10Mc=None, bcm_etab=None, bcm_ks=None,
-            mu_0=None, sigma_0=None, z_mg=None, df_mg=None, Omega_g=None):
+            mu_0=None, sigma_0=None, c1_mg=None, c2_mg=None, lambda_mg=None,
+            z_mg=None, df_mg=None, Omega_g=None):
         """Build a ccl_parameters struct"""
 
         # Set nz_mg (no. of redshift bins for modified growth fns.)
@@ -500,14 +506,14 @@ class Cosmology(object):
                    Omega_c, Omega_b, Omega_k, Neff,
                    w0, wa, h, norm_pk,
                    n_s, bcm_log10Mc, bcm_etab, bcm_ks,
-                   mu_0, sigma_0, mnu_final_list, status)
+                   mu_0, sigma_0, c1_mg, c2_mg, lambda_mg, mnu_final_list, status)
             else:
                 # Create ccl_parameters with modified growth arrays
                 self._params, status = lib.parameters_create_nu_vec(
                    Omega_c, Omega_b, Omega_k, Neff,
                    w0, wa, h, norm_pk,
                    n_s, bcm_log10Mc, bcm_etab, bcm_ks,
-                   mu_0, sigma_0, z_mg, df_mg, mnu_final_list, status)
+                   mu_0, sigma_0, c1_mg, c2_mg, lambda_mg, z_mg, df_mg, mnu_final_list, status)
             check(status)
         finally:
             lib.cvar.constants.T_CMB = T_CMB_old

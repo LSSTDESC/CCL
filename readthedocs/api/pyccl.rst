@@ -1,6 +1,13 @@
 pyccl package
 =============
 
+Subpackages
+-----------
+
+.. toctree::
+
+    pyccl.halos
+
 Submodules
 ----------
 
@@ -26,6 +33,6 @@ Module contents
 ---------------
 
 .. automodule:: pyccl
-   :members:
-   :undoc-members:
-   :show-inheritance:
+    :members:
+    :undoc-members:
+    :show-inheritance:

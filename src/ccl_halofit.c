@@ -62,7 +62,7 @@ static ccl_cosmology *create_w0eff_cosmo(double w0eff, ccl_cosmology *cosmo, int
     w0eff, 0, cosmo->params.h, norm_pk,
     cosmo->params.n_s, cosmo->params.bcm_log10Mc, cosmo->params.bcm_etab,
     cosmo->params.bcm_ks, cosmo->params.mu_0, cosmo->params.sigma_0, 
-    cosmo->params.c1, cosmo->params.c2, cosmo->params.lambda, 
+    cosmo->params.c1_mg, cosmo->params.c2_mg, cosmo->params.lambda_mg, 
     cosmo->params.nz_mgrowth,
     cosmo->params.z_mgrowth, cosmo->params.df_mgrowth, status);
 
