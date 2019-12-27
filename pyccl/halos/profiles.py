@@ -65,7 +65,8 @@ class HaloProfile(object):
         k_arr = np.geomspace(r_t_min, r_t_max, n_r_t)
         sig_r_t_out = np.zeros([M_use.size, r_t_use.size])
         for im, mass in enumerate(M_use):
-            p_fourier = self.profile_fourier(cosmo, k_arr, M, a, mass_def=None)
+            p_fourier = self.profile_fourier(cosmo, k_arr, M, a,
+                                             mass_def=mass_def)
 
             status = 0
             plaw_index = -3 - self.precision_fftlog['plaw_index']
@@ -189,6 +190,7 @@ class HaloProfilePowerLaw(HaloProfile):
 
 class HaloProfileNFW(HaloProfile):
     def __init__(self, c_M_relation, fourier_analytic=False,
+                 projected_analytic=False,
                  truncated=True):
         if not isinstance(c_M_relation, Concentration):
             raise TypeError("c_M_relation must be of type `Concentration`)")
@@ -197,6 +199,8 @@ class HaloProfileNFW(HaloProfile):
         self.truncated = truncated
         if fourier_analytic:
             self._profile_fourier = self._profile_fourier_analytic
+        if projected_analytic:
+            self._profile_projected = self._profile_projected_analytic
         super(HaloProfileNFW, self).__init__()
 
     def _get_cM(self, cosmo, M, a, mdef=None):
@@ -221,6 +225,47 @@ class HaloProfileNFW(HaloProfile):
             prof[r_use[:, None] > R_M[None, :]] = 0
 
         norm = self._norm(M_use, R_s, c_M)
+        prof = prof[:, :] * norm[None, :]
+
+        if np.ndim(M) == 0:
+            prof = np.squeeze(prof, axis=-1)
+        if np.ndim(r) == 0:
+            prof = np.squeeze(prof, axis=0)
+        return prof
+
+    def _fx_projected(self, x):
+
+        def f1(xx):
+            x2m1 = xx * xx -1
+            return (1 -
+                    2 * np.arctanh(np.sqrt(np.fabs((1 - xx) /
+                                                   (1 + xx)))) /
+                    np.sqrt(np.fabs(x2m1))) / x2m1
+
+        def f2(xx):
+            x2m1 = xx * xx -1
+            return (1 -
+                    2 * np.arctan(np.sqrt(np.fabs((1 - xx) /
+                                                  (1 + xx)))) /
+                    np.sqrt(np.fabs(x2m1))) / x2m1
+
+        xf = x.flatten()
+        return np.piecewise(xf,
+                            [xf<1, xf>1],
+                            [f1, f2, 1./3.]).reshape(x.shape)
+
+    def _profile_projected_analytic(self, cosmo, r, M, a, mass_def):
+        r_use = np.atleast_1d(r)
+        M_use = np.atleast_1d(M)
+
+        # Comoving virial radius
+        R_M = mass_def.get_radius(cosmo, M_use, a) / a
+        c_M = self._get_cM(cosmo, M_use, a, mdef=mass_def)
+        R_s = R_M / c_M
+
+        x = r_use[:, None] / R_s[None, :]
+        prof = self._fx_projected(x)
+        norm = 2 * R_s * self._norm(M_use, R_s, c_M)
         prof = prof[:, :] * norm[None, :]
 
         if np.ndim(M) == 0:

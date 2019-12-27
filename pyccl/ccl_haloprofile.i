@@ -45,22 +45,5 @@ void hernquist_norm(double *rs,int nrs,
 }
 %}
 
-/* The python code here will be executed before all of the functions that
-   follow this directive. */
-%feature("pythonprepend") %{
-    if numpy.shape(r) != (nout,):
-        raise CCLError("Input shape for `r` must match `(nout,)`!")
-%}
-
-%inline %{
-
-void projected_halo_profile_nfw_vec(ccl_cosmology *cosmo, double c, double halomass, double massdef_delta_m, double a,
-                                double* r, int nr, int nout, double* output, int *status){
-        ccl_projected_halo_profile_nfw(cosmo, c, halomass, massdef_delta_m, a, r, nr, output, status);
-}
-
-%}
-
-
 /* The directive gets carried between files, so we reset it at the end. */
 %feature("pythonprepend") %{ %}

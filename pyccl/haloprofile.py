@@ -86,6 +86,7 @@ def hernquist_profile_3d(cosmo, concentration, halo_mass, odelta, a, r):
     return p.profile_real(cosmo, r, halo_mass, a, mdef)
 
 
+@deprecated(hal.HaloProfileNFW)
 def nfw_profile_2d(cosmo, concentration, halo_mass, odelta, a, r):
     """Calculate the 2D projected NFW halo profile
     at a given radius or an array of radii,
@@ -105,23 +106,9 @@ def nfw_profile_2d(cosmo, concentration, halo_mass, odelta, a, r):
         float or array_like: 2D projected NFW density at r,
          in units of Msun/Mpc^2.
     """
-    status = 0
-    scalar = True if np.ndim(r) == 0 else False
-
-    # Convert to array if it's not already an array
-    if not isinstance(r, np.ndarray):
-        r = np.array([r, ]).flatten()
-
-    nr = len(r)
-
-    cosmo = cosmo.cosmo
-    # Call function
-    sigma_r, status = lib.projected_halo_profile_nfw_vec(
-        cosmo, concentration,
-        halo_mass, odelta, a, r, nr, status)
-
-    # Check status and return
-    check(status, cosmo)
-    if scalar:
-        return sigma_r[0]
-    return sigma_r
+    mdef = hal.MassDef(odelta, 'matter')
+    c = hal.ConcentrationConstant(c=concentration,
+                                  mdef=mdef)
+    p = hal.HaloProfileNFW(c, truncated=False,
+                           projected_analytic=True)
+    return p.profile_projected(cosmo, r, halo_mass, a, mdef)
