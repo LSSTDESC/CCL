@@ -37,7 +37,7 @@ def test_profile_Hernquist():
     c = ccl.halos.ConcentrationConstant(c=concentration, mdef=mdef)
     p = ccl.halos.HaloProfileHernquist(c, truncated=False)
 
-    prof = p.profile_real(COSMO, r, halomass, a, mdef)
+    prof = p.real(COSMO, r, halomass, a, mdef)
 
     tol = np.clip(np.abs(HALOPROFILE_TOLERANCE * data[:, 1]), 1e-12, np.inf)
     err = np.abs(prof - data[:, 1])
@@ -62,7 +62,7 @@ def test_profile_Einasto():
                              c_m_relation=c)
     p = ccl.halos.HaloProfileEinasto(c, truncated=False)
 
-    prof = p.profile_real(COSMO, r, halomass, a, mdef)
+    prof = p.real(COSMO, r, halomass, a, mdef)
 
     tol = np.clip(np.abs(HALOPROFILE_TOLERANCE * data[:, 1]), 1e-12, np.inf)
     err = np.abs(prof - data[:, 1])
@@ -85,7 +85,7 @@ def test_profile_NFW():
     c = ccl.halos.ConcentrationConstant(c=concentration, mdef=mdef)
     p = ccl.halos.HaloProfileNFW(c, truncated=False)
 
-    prof = p.profile_real(COSMO, r, halomass, a, mdef)
+    prof = p.real(COSMO, r, halomass, a, mdef)
 
     tol = np.clip(np.abs(HALOPROFILE_TOLERANCE * data[:, 1]), 1e-12, np.inf)
     err = np.abs(prof - data[:, 1])

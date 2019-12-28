@@ -17,17 +17,19 @@ class HaloProfile(object):
                                  'padding_hi_fftlog': 10.,
                                  'padding_hi_extra': 10.,
                                  'large_padding_2D': False,
-                                 'n_per_decade': 1000,
-                                 'extrapol': 'linx_liny'}
+                                 'n_per_decade': 100,
+                                 'extrapol': 'linx_liny',
+                                 'plaw_fourier': -1.5,
+                                 'plaw_projected': -1.}
 
     def update_precision_fftlog(self, **kwargs):
         self.precision_fftlog.update(kwargs)
 
     def _get_plaw_fourier(self, cosmo, M, a, mass_def):
-        return -1.5
+        return self.precision_fftlog['plaw_fourier']
 
     def _get_plaw_projected(self, cosmo, M, a, mass_def):
-        return -1.
+        return self.precision_fftlog['plaw_projected']
 
     def real(self, cosmo, r, M, a, mass_def=None):
         if getattr(self, '_real', None):
@@ -304,8 +306,10 @@ class HaloProfileNFW(HaloProfile):
                                  "`cumul2d_analytic` to `False`.")
             self._cumul2d = self._cumul2d_analytic
         super(HaloProfileNFW, self).__init__()
-        self.update_precision_fftlog(padding_hi_fftlog=2E4,
-                                     padding_lo_fftlog=1E-2)
+        self.update_precision_fftlog(padding_hi_fftlog=1E2,
+                                     padding_lo_fftlog=1E-2,
+                                     n_per_decade=1000,
+                                     plaw_fourier=-2.)
 
     def _get_cM(self, cosmo, M, a, mdef=None):
         return self.cM.get_concentration(cosmo, M, a, mdef_other=mdef)
@@ -445,8 +449,10 @@ class HaloProfileEinasto(HaloProfile):
         self.cM = c_M_relation
         self.truncated = truncated
         super(HaloProfileEinasto, self).__init__()
-        self.update_precision_fftlog(padding_hi_fftlog=2E4,
-                                     padding_lo_fftlog=1E-2)
+        self.update_precision_fftlog(padding_hi_fftlog=1E2,
+                                     padding_lo_fftlog=1E-2,
+                                     n_per_decade=1000,
+                                     plaw_fourier=-2.)
 
     def _get_cM(self, cosmo, M, a, mdef=None):
         return self.cM.get_concentration(cosmo, M, a, mdef_other=mdef)
@@ -496,8 +502,10 @@ class HaloProfileHernquist(HaloProfile):
         self.cM = c_M_relation
         self.truncated = truncated
         super(HaloProfileHernquist, self).__init__()
-        self.update_precision_fftlog(padding_hi_fftlog=2E4,
-                                     padding_lo_fftlog=1E-2)
+        self.update_precision_fftlog(padding_hi_fftlog=1E2,
+                                     padding_lo_fftlog=1E-2,
+                                     n_per_decade=1000,
+                                     plaw_fourier=-2.)
 
     def _get_cM(self, cosmo, M, a, mdef=None):
         return self.cM.get_concentration(cosmo, M, a, mdef_other=mdef)

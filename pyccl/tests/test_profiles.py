@@ -176,7 +176,7 @@ def test_f2r():
     # by FFT-ing the Fourier-space one.
     p2 = ccl.halos.HaloProfileNFW(cM, fourier_analytic=True)
     p2._real = None
-    p2.update_precision_fftlog(padding_hi_fftlog=1E4)
+    p2.update_precision_fftlog(padding_hi_fftlog=1E3)
 
     M = 1E14
     a = 0.5
@@ -197,7 +197,7 @@ def test_nfw_projected_accuracy(fourier_analytic):
     # Analytic projected profile
     p1 = ccl.halos.HaloProfileNFW(cM, truncated=False,
                                   projected_analytic=True)
-    # Analytic fourier profile, but not projected
+    # FFTLog
     p2 = ccl.halos.HaloProfileNFW(cM, truncated=False,
                                   fourier_analytic=fourier_analytic)
 
@@ -211,38 +211,21 @@ def test_nfw_projected_accuracy(fourier_analytic):
     assert np.all(res2 < 5E-3)
 
 
-#@pytest.mark.parametrize('fourier_analytic', [True, False])
-def test_nfw_cumul2d_accuracy():#fourier_analytic):
+@pytest.mark.parametrize('fourier_analytic', [True, False])
+def test_nfw_cumul2d_accuracy(fourier_analytic):
     cM = ccl.halos.ConcentrationDuffy08(M200)
     # Analytic cumul2d profile
     p1 = ccl.halos.HaloProfileNFW(cM, truncated=False,
                                   cumul2d_analytic=True)
-    # Analytic fourier profile, but not cumul2d
+    # FFTLog
     p2 = ccl.halos.HaloProfileNFW(cM, truncated=False,
-                                  fourier_analytic=False)
-    # Analytic fourier profile, but not cumul2d
-    p3 = ccl.halos.HaloProfileNFW(cM, truncated=False,
-                                  fourier_analytic=False)
-    p3.update_precision_fftlog(padding_hi_fftlog=2E5,
-                               padding_lo_fftlog=1E-4)
+                                  fourier_analytic=fourier_analytic)
 
     M = 1E14
     a = 1.0
     rt = np.logspace(-3, 2, 1024)
     srt1 = p1.cumul2d(COSMO, rt, M, a, M200)
     srt2 = p2.cumul2d(COSMO, rt, M, a, M200)
-    srt3 = p3.cumul2d(COSMO, rt, M, a, M200)
-
-    import matplotlib.pyplot as plt
-    #plt.plot(rt,srt2/srt1,'r-')
-    plt.plot(rt,srt3/srt1, 'b-')
-    #plt.plot(rt,srt2,'b-')
-    #plt.plot(rt,srt1,'b-')
-    #plt.plot(rt,np.fabs(srt3/srt1-1),'b-')
-    #plt.plot(rt,np.fabs(srt2/srt1-1),'r-')
-    #plt.plot(rt,np.fabs(srt1/srt1-1),'k--')
-    #plt.loglog()
-    plt.show()
     
     res2 = np.fabs(srt2/srt1-1)
     assert np.all(res2 < 5E-3)
