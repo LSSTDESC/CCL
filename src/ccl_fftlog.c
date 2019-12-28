@@ -80,7 +80,7 @@ static void compute_u_coefficients(int N, double mu, double q, double L, double 
     double lnrp, phip, lnrm, phim;
     for(int m = 0; m <= N/2; m++) {
       lngamma_4(xp, m*y, &lnrp, &phip);
-      lngamma_4(xm, m*y, &lnrm, &phim);
+      lngamma_4(xm,-m*y, &lnrm, &phim);
       u[m] = polar(exp(q*M_LN2 + lnrp - lnrm), m*t + phip - phim);
     }
   }

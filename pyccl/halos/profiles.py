@@ -16,7 +16,7 @@ class HaloProfile(object):
                                  'padding_lo_extra': 0.1,
                                  'padding_hi_fftlog': 10.,
                                  'padding_hi_extra': 10.,
-                                 'large_padding_projected': False,
+                                 'large_padding_2D': False,
                                  'n_per_decade': 1000,
                                  'extrapol': 'linx_liny'}
 
@@ -29,39 +29,47 @@ class HaloProfile(object):
     def _get_plaw_projected(self, cosmo, M, a, mass_def):
         return -1.
 
-    def profile_real(self, cosmo, r, M, a, mass_def=None):
-        if getattr(self, '_profile_real', None):
-            f_r = self._profile_real(cosmo, r, M, a, mass_def)
-        elif getattr(self, '_profile_fourier', None):
-            f_r = self._profile_fftlog_wrap(cosmo, r, M, a, mass_def,
-                                            fourier_out=False)
+    def real(self, cosmo, r, M, a, mass_def=None):
+        if getattr(self, '_real', None):
+            f_r = self._real(cosmo, r, M, a, mass_def)
+        elif getattr(self, '_fourier', None):
+            f_r = self._fftlog_wrap(cosmo, r, M, a, mass_def,
+                                    fourier_out=False)
         else:
             raise NotImplementedError("Profiles must have at least "
-                                      " either a _profile_real or a "
-                                      " _profile_fourier method.")
+                                      " either a _real or a "
+                                      " _fourier method.")
         return f_r
 
-    def profile_fourier(self, cosmo, k, M, a, mass_def=None):
-        if getattr(self, '_profile_fourier', None):
-            f_k = self._profile_fourier(cosmo, k, M, a, mass_def)
-        elif getattr(self, '_profile_real', None):
-            f_k = self._profile_fftlog_wrap(cosmo, k, M, a, mass_def,
-                                            fourier_out=True)
+    def fourier(self, cosmo, k, M, a, mass_def=None):
+        if getattr(self, '_fourier', None):
+            f_k = self._fourier(cosmo, k, M, a, mass_def)
+        elif getattr(self, '_real', None):
+            f_k = self._fftlog_wrap(cosmo, k, M, a, mass_def,
+                                    fourier_out=True)
         else:
             raise NotImplementedError("Profiles must have at least "
-                                      " either a _profile_real or a "
-                                      " _profile_fourier method.")
+                                      " either a _real or a "
+                                      " _fourier method.")
         return f_k
 
-    def profile_projected(self, cosmo, r_t, M, a, mass_def=None):
-        if getattr(self, '_profile_projected', None):
-            s_r_t = self._profile_projected(cosmo, r_t, M, a, mass_def)
+    def projected(self, cosmo, r_t, M, a, mass_def=None):
+        if getattr(self, '_projected', None):
+            s_r_t = self._projected(cosmo, r_t, M, a, mass_def)
         else:
-            s_r_t = self._profile_projected_fftlog_wrap(cosmo, r_t, M,
-                                                        a, mass_def)
+            s_r_t = self._projected_fftlog_wrap(cosmo, r_t, M,
+                                                a, mass_def)
         return s_r_t
 
-    def _profile_projected_fftlog_wrap(self, cosmo, r_t, M, a, mass_def):
+    def cumul2d(self, cosmo, r_t, M, a, mass_def=None):
+        if getattr(self, '_cumul2d', None):
+            s_r_t = self._cumul2d(cosmo, r_t, M, a, mass_def)
+        else:
+            s_r_t = self._cumul2d_fftlog_wrap(cosmo, r_t, M,
+                                              a, mass_def)
+        return s_r_t
+
+    def _cumul2d_fftlog_wrap(self, cosmo, r_t, M, a, mass_def):
         r_t_use = np.atleast_1d(r_t)
         M_use = np.atleast_1d(M)
         lr_t_use = np.log(r_t_use)
@@ -73,17 +81,66 @@ class HaloProfile(object):
         k_arr = np.geomspace(r_t_min, r_t_max, n_r_t)
         sig_r_t_out = np.zeros([M_use.size, r_t_use.size])
         for im, mass in enumerate(M_use):
-            if getattr(self, '_profile_fourier', None):
-                p_fourier = self._profile_fourier(cosmo, k_arr, mass,
-                                                  a, mass_def)
+            if getattr(self, '_fourier', None):
+                p_fourier = self._fourier(cosmo, k_arr, mass,
+                                          a, mass_def)
             else:
-                lpad = self.precision_fftlog['large_padding_projected']
-                p_fourier = self._profile_fftlog_wrap(cosmo,
-                                                      k_arr,
-                                                      mass, a,
-                                                      mass_def,
-                                                      fourier_out=True,
-                                                      large_padding=lpad)
+                lpad = self.precision_fftlog['large_padding_2D']
+                p_fourier = self._fftlog_wrap(cosmo,
+                                              k_arr,
+                                              mass, a,
+                                              mass_def,
+                                              fourier_out=True,
+                                              large_padding=lpad)
+            p_fourier *= 2 / k_arr
+
+            status = 0
+            plaw_index = self._get_plaw_projected(cosmo, mass,
+                                                  a, mass_def) - 1
+            result, status = lib.fftlog_transform(k_arr, p_fourier,
+                                                  2, 1, plaw_index,
+                                                  2 * k_arr.size, status)
+            check(status)
+            r_t_arr, sig_r_t_arr = result.reshape([2, k_arr.size])
+            sig_r_t_arr /= r_t_arr
+
+            sig_r_t = resample_array(np.log(r_t_arr), sig_r_t_arr,
+                                     lr_t_use,
+                                     self.precision_fftlog['extrapol'],
+                                     self.precision_fftlog['extrapol'],
+                                     0, 0)
+            sig_r_t_out[im, :] = sig_r_t
+        sig_r_t_out = sig_r_t_out.T
+
+        if np.ndim(M) == 0:
+            sig_r_t_out = np.squeeze(sig_r_t_out, axis=-1)
+        if np.ndim(r_t) == 0:
+            sig_r_t_out = np.squeeze(sig_r_t_out, axis=0)
+        return sig_r_t_out
+
+    def _projected_fftlog_wrap(self, cosmo, r_t, M, a, mass_def):
+        r_t_use = np.atleast_1d(r_t)
+        M_use = np.atleast_1d(M)
+        lr_t_use = np.log(r_t_use)
+        r_t_min = self.precision_fftlog['padding_lo_fftlog'] * np.amin(r_t_use)
+        r_t_max = self.precision_fftlog['padding_hi_fftlog'] * np.amax(r_t_use)
+        n_r_t = (int(np.log10(r_t_max / r_t_min)) *
+                 self.precision_fftlog['n_per_decade'])
+
+        k_arr = np.geomspace(r_t_min, r_t_max, n_r_t)
+        sig_r_t_out = np.zeros([M_use.size, r_t_use.size])
+        for im, mass in enumerate(M_use):
+            if getattr(self, '_fourier', None):
+                p_fourier = self._fourier(cosmo, k_arr, mass,
+                                          a, mass_def)
+            else:
+                lpad = self.precision_fftlog['large_padding_2D']
+                p_fourier = self._fftlog_wrap(cosmo,
+                                              k_arr,
+                                              mass, a,
+                                              mass_def,
+                                              fourier_out=True,
+                                              large_padding=lpad)
 
             status = 0
             plaw_index = self._get_plaw_projected(cosmo, mass,
@@ -108,13 +165,13 @@ class HaloProfile(object):
             sig_r_t_out = np.squeeze(sig_r_t_out, axis=0)
         return sig_r_t_out
 
-    def _profile_fftlog_wrap(self, cosmo, k, M, a, mass_def,
-                             fourier_out=False,
-                             large_padding=True):
+    def _fftlog_wrap(self, cosmo, k, M, a, mass_def,
+                     fourier_out=False,
+                     large_padding=True):
         if fourier_out:
-            p_func = self._profile_real
+            p_func = self._real
         else:
-            p_func = self._profile_fourier
+            p_func = self._fourier
         k_use = np.atleast_1d(k)
         M_use = np.atleast_1d(M)
         lk_use = np.log(k_use)
@@ -174,7 +231,7 @@ class HaloProfileGaussian(HaloProfile):
                                      padding_hi_fftlog=100.,
                                      n_per_decade=10000)
 
-    def _profile_real(self, cosmo, r, M, a, mass_def):
+    def _real(self, cosmo, r, M, a, mass_def):
         r_use = np.atleast_1d(r)
         M_use = np.atleast_1d(M)
 
@@ -205,7 +262,7 @@ class HaloProfilePowerLaw(HaloProfile):
     def _get_plaw_projected(self, cosmo, M, a, mass_def):
         return -3 - self.tilt(cosmo, M, a, mass_def)
 
-    def _profile_real(self, cosmo, r, M, a, mass_def):
+    def _real(self, cosmo, r, M, a, mass_def):
         r_use = np.atleast_1d(r)
         M_use = np.atleast_1d(M)
 
@@ -225,6 +282,7 @@ class HaloProfilePowerLaw(HaloProfile):
 class HaloProfileNFW(HaloProfile):
     def __init__(self, c_M_relation, fourier_analytic=False,
                  projected_analytic=False,
+                 cumul2d_analytic=False,
                  truncated=True):
         if not isinstance(c_M_relation, Concentration):
             raise TypeError("c_M_relation must be of type `Concentration`)")
@@ -232,13 +290,19 @@ class HaloProfileNFW(HaloProfile):
         self.cM = c_M_relation
         self.truncated = truncated
         if fourier_analytic:
-            self._profile_fourier = self._profile_fourier_analytic
+            self._fourier = self._fourier_analytic
         if projected_analytic:
             if truncated:
                 raise ValueError("Analytic projected profile not supported "
                                  "for truncated NFW. Set `truncated` or "
                                  "`projected_analytic` to `False`.")
-            self._profile_projected = self._profile_projected_analytic
+            self._projected = self._projected_analytic
+        if cumul2d_analytic:
+            if truncated:
+                raise ValueError("Analytic cumuative 2d profile not supported "
+                                 "for truncated NFW. Set `truncated` or "
+                                 "`cumul2d_analytic` to `False`.")
+            self._cumul2d = self._cumul2d_analytic
         super(HaloProfileNFW, self).__init__()
         self.update_precision_fftlog(padding_hi_fftlog=2E4,
                                      padding_lo_fftlog=1E-2)
@@ -250,7 +314,7 @@ class HaloProfileNFW(HaloProfile):
         # NFW normalization from mass, radius and concentration
         return M / (4 * np.pi * Rs**3 * (np.log(1+c) - c/(1+c)))
 
-    def _profile_real(self, cosmo, r, M, a, mass_def):
+    def _real(self, cosmo, r, M, a, mass_def):
         r_use = np.atleast_1d(r)
         M_use = np.atleast_1d(M)
 
@@ -288,7 +352,7 @@ class HaloProfileNFW(HaloProfile):
                             [xf < 1, xf > 1],
                             [f1, f2, 1./3.]).reshape(x.shape)
 
-    def _profile_projected_analytic(self, cosmo, r, M, a, mass_def):
+    def _projected_analytic(self, cosmo, r, M, a, mass_def):
         r_use = np.atleast_1d(r)
         M_use = np.atleast_1d(M)
 
@@ -308,7 +372,44 @@ class HaloProfileNFW(HaloProfile):
             prof = np.squeeze(prof, axis=0)
         return prof
 
-    def _profile_fourier_analytic(self, cosmo, k, M, a, mass_def):
+    def _fx_cumul2d(self, x):
+
+        def f1(xx):
+            sqx2m1 = np.sqrt(np.fabs(xx * xx - 1))
+            return np.log(0.5 * xx) + np.arccosh(1 / xx) / sqx2m1
+
+        def f2(xx):
+            sqx2m1 = np.sqrt(np.fabs(xx * xx - 1))
+            return np.log(0.5 * xx) + np.arccos(1 / xx) / sqx2m1
+
+        xf = x.flatten()
+        omln2 = 0.3068528194400547  # 1-Log[2]
+        f = np.piecewise(xf,
+                         [xf < 1, xf > 1],
+                         [f1, f2, omln2]).reshape(x.shape)
+        return 2 * f / x**2
+
+    def _cumul2d_analytic(self, cosmo, r, M, a, mass_def):
+        r_use = np.atleast_1d(r)
+        M_use = np.atleast_1d(M)
+
+        # Comoving virial radius
+        R_M = mass_def.get_radius(cosmo, M_use, a) / a
+        c_M = self._get_cM(cosmo, M_use, a, mdef=mass_def)
+        R_s = R_M / c_M
+
+        x = r_use[:, None] / R_s[None, :]
+        prof = self._fx_cumul2d(x)
+        norm = 2 * R_s * self._norm(M_use, R_s, c_M)
+        prof = prof[:, :] * norm[None, :]
+
+        if np.ndim(M) == 0:
+            prof = np.squeeze(prof, axis=-1)
+        if np.ndim(r) == 0:
+            prof = np.squeeze(prof, axis=0)
+        return prof
+
+    def _fourier_analytic(self, cosmo, k, M, a, mass_def):
         M_use = np.atleast_1d(M)
         k_use = np.atleast_1d(k)
 
@@ -358,7 +459,7 @@ class HaloProfileEinasto(HaloProfile):
         alpha = 0.155 + 0.0095 * nu * nu
         return alpha
 
-    def _profile_real(self, cosmo, r, M, a, mass_def):
+    def _real(self, cosmo, r, M, a, mass_def):
         r_use = np.atleast_1d(r)
         M_use = np.atleast_1d(M)
 
@@ -401,7 +502,7 @@ class HaloProfileHernquist(HaloProfile):
     def _get_cM(self, cosmo, M, a, mdef=None):
         return self.cM.get_concentration(cosmo, M, a, mdef_other=mdef)
 
-    def _profile_real(self, cosmo, r, M, a, mass_def):
+    def _real(self, cosmo, r, M, a, mass_def):
         r_use = np.atleast_1d(r)
         M_use = np.atleast_1d(M)
 
