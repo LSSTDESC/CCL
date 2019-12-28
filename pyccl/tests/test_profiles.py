@@ -191,26 +191,21 @@ def test_profile_f2r():
     assert np.all(res < 0.01)
 
 
-def test_profile_nfw_projected_accuracy():
+@pytest.mark.parametrize('fourier_analytic', [True, False])
+def test_profile_nfw_projected_accuracy(fourier_analytic):
     cM = ccl.halos.ConcentrationDuffy08(M200)
     # Analytic projected profile
     p1 = ccl.halos.HaloProfileNFW(cM, truncated=False,
                                   projected_analytic=True)
     # Analytic fourier profile, but not projected
     p2 = ccl.halos.HaloProfileNFW(cM, truncated=False,
-                                  fourier_analytic=True)
-    # FFTLog for everything
-    p3 = ccl.halos.HaloProfileNFW(cM, truncated=False)
+                                  fourier_analytic=fourier_analytic)
 
     M = 1E14
     a = 0.5
     rt = np.logspace(-3, 2, 1024)
     srt1 = p1.profile_projected(COSMO, rt, M, a, M200)
     srt2 = p2.profile_projected(COSMO, rt, M, a, M200)
-    srt3 = p3.profile_projected(COSMO, rt, M, a, M200)
 
     res2 = np.fabs(srt2/srt1-1)
     assert np.all(res2 < 5E-3)
-
-    res3 = np.fabs(srt3/srt1-1)
-    assert np.all(res3 < 5E-3)
