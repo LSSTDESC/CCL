@@ -6,7 +6,7 @@ import pyccl as ccl
 COSMO = ccl.Cosmology(
     Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96,
     transfer_function='bbks', matter_power_spectrum='linear')
-M200 = ccl.halos.MassDef(200, 'critical')
+M200 = ccl.halos.MassDef200c()
 
 
 def one_f(cosmo, M, a, mdef):
@@ -50,12 +50,22 @@ def test_profile_defaults():
         p.profile_fourier(None, None, None, None)
 
 
-def test_profile_nfw_smoke():
-    with pytest.raises(TypeError):
-        p = ccl.halos.HaloProfileNFW(None)
-
+@pytest.mark.parametrize('prof_class',
+                         [ccl.halos.HaloProfileNFW,
+                          ccl.halos.HaloProfileHernquist,
+                          ccl.halos.HaloProfileEinasto])
+def test_profile_empirical_smoke(prof_class):
     c = ccl.halos.ConcentrationDuffy08(M200)
-    p = ccl.halos.HaloProfileNFW(c)
+    with pytest.raises(TypeError):
+        p = prof_class(None)
+
+    if prof_class == ccl.halos.HaloProfileNFW:
+        with pytest.raises(ValueError):
+            p = prof_class(c,
+                           projected_analytic=True,
+                           truncated=True)
+
+    p = prof_class(c)
     smoke_assert_prof_real(p)
 
 
@@ -75,9 +85,6 @@ def test_profile_gaussian_accuracy():
         return np.pi**1.5 * np.exp(-k**2 / 4)
 
     p = ccl.halos.HaloProfileGaussian(one_f, one_f)
-    p.update_precision_fftlog(fac_lo=0.01,
-                              fac_hi=100.,
-                              n_per_decade=10000)
 
     k_arr = np.logspace(-3, 2, 1024)
     fk_arr = p.profile_fourier(COSMO, k_arr, 1., 1.)
@@ -155,8 +162,6 @@ def test_profile_nfw_accuracy(use_analytic):
         P3 = np.sin(c * x)/((1 + c) * x)
         return M * P1 * (P2 - P3)
 
-    p.update_precision_fftlog(fac_hi=10000.,
-                              n_per_decade=1000)
     k_arr = np.logspace(-2, 2, 256) / r_Delta
     fk_arr = p.profile_fourier(COSMO, k_arr, M, a, M200)
     fk_arr_pred = fk(k_arr)
@@ -171,8 +176,7 @@ def test_profile_f2r():
     # by FFT-ing the Fourier-space one.
     p2 = ccl.halos.HaloProfileNFW(cM, fourier_analytic=True)
     p2._profile_real = None
-    p2.update_precision_fftlog(fac_hi=10000.,
-                               n_per_decade=1000)
+    p2.update_precision_fftlog(padding_hi_fftlog=1E4)
 
     M = 1E14
     a = 0.5
@@ -185,3 +189,28 @@ def test_profile_f2r():
     id_good = r_arr < r_Delta  # Profile is 0 otherwise
     res = np.fabs(pr_2[id_good] / pr_1[id_good] - 1)
     assert np.all(res < 0.01)
+
+
+def test_profile_nfw_projected_accuracy():
+    cM = ccl.halos.ConcentrationDuffy08(M200)
+    # Analytic projected profile
+    p1 = ccl.halos.HaloProfileNFW(cM, truncated=False,
+                                  projected_analytic=True)
+    # Analytic fourier profile, but not projected
+    p2 = ccl.halos.HaloProfileNFW(cM, truncated=False,
+                                  fourier_analytic=True)
+    # FFTLog for everything
+    p3 = ccl.halos.HaloProfileNFW(cM, truncated=False)
+
+    M = 1E14
+    a = 0.5
+    rt = np.logspace(-3, 2, 1024)
+    srt1 = p1.profile_projected(COSMO, rt, M, a, M200)
+    srt2 = p2.profile_projected(COSMO, rt, M, a, M200)
+    srt3 = p3.profile_projected(COSMO, rt, M, a, M200)
+
+    res2 = np.fabs(srt2/srt1-1)
+    assert np.all(res2 < 5E-3)
+
+    res3 = np.fabs(srt3/srt1-1)
+    assert np.all(res3 < 5E-3)

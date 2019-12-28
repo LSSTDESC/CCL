@@ -12,14 +12,22 @@ class HaloProfile(object):
     name = 'default'
 
     def __init__(self):
-        self.precision_fftlog = {'fac_lo': 0.1,
-                                 'fac_hi': 10.,
+        self.precision_fftlog = {'padding_lo_fftlog': 0.1,
+                                 'padding_lo_extra': 0.1,
+                                 'padding_hi_fftlog': 10.,
+                                 'padding_hi_extra': 10.,
+                                 'large_padding_projected': False,
                                  'n_per_decade': 1000,
-                                 'extrapol': 'linx_liny',
-                                 'plaw_index': -1.5}
+                                 'extrapol': 'linx_liny'}
 
     def update_precision_fftlog(self, **kwargs):
         self.precision_fftlog.update(kwargs)
+
+    def _get_plaw_fourier(self, cosmo, M, a, mass_def):
+        return -1.5
+
+    def _get_plaw_projected(self, cosmo, M, a, mass_def):
+        return -1.
 
     def profile_real(self, cosmo, r, M, a, mass_def=None):
         if getattr(self, '_profile_real', None):
@@ -57,19 +65,29 @@ class HaloProfile(object):
         r_t_use = np.atleast_1d(r_t)
         M_use = np.atleast_1d(M)
         lr_t_use = np.log(r_t_use)
-        r_t_min = self.precision_fftlog['fac_lo'] * np.amin(r_t_use)
-        r_t_max = self.precision_fftlog['fac_hi'] * np.amax(r_t_use)
+        r_t_min = self.precision_fftlog['padding_lo_fftlog'] * np.amin(r_t_use)
+        r_t_max = self.precision_fftlog['padding_hi_fftlog'] * np.amax(r_t_use)
         n_r_t = (int(np.log10(r_t_max / r_t_min)) *
                  self.precision_fftlog['n_per_decade'])
 
         k_arr = np.geomspace(r_t_min, r_t_max, n_r_t)
         sig_r_t_out = np.zeros([M_use.size, r_t_use.size])
         for im, mass in enumerate(M_use):
-            p_fourier = self.profile_fourier(cosmo, k_arr, M, a,
-                                             mass_def=mass_def)
+            if getattr(self, '_profile_fourier', None):
+                p_fourier = self._profile_fourier(cosmo, k_arr, mass,
+                                                  a, mass_def)
+            else:
+                lpad = self.precision_fftlog['large_padding_projected']
+                p_fourier = self._profile_fftlog_wrap(cosmo,
+                                                      k_arr,
+                                                      mass, a,
+                                                      mass_def,
+                                                      fourier_out=True,
+                                                      large_padding=lpad)
 
             status = 0
-            plaw_index = -3 - self.precision_fftlog['plaw_index']
+            plaw_index = self._get_plaw_projected(cosmo, mass,
+                                                  a, mass_def)
             result, status = lib.fftlog_transform(k_arr, p_fourier,
                                                   2, 0, plaw_index,
                                                   2 * k_arr.size, status)
@@ -91,7 +109,8 @@ class HaloProfile(object):
         return sig_r_t_out
 
     def _profile_fftlog_wrap(self, cosmo, k, M, a, mass_def,
-                             fourier_out=False):
+                             fourier_out=False,
+                             large_padding=True):
         if fourier_out:
             p_func = self._profile_real
         else:
@@ -100,8 +119,13 @@ class HaloProfile(object):
         M_use = np.atleast_1d(M)
         lk_use = np.log(k_use)
 
-        k_min = self.precision_fftlog['fac_lo'] * np.amin(k_use)
-        k_max = self.precision_fftlog['fac_hi'] * np.amax(k_use)
+        if large_padding:
+            k_min = self.precision_fftlog['padding_lo_fftlog'] * np.amin(k_use)
+            k_max = self.precision_fftlog['padding_hi_fftlog'] * np.amax(k_use)
+        else:
+            k_min = self.precision_fftlog['padding_lo_extra'] * np.amin(k_use)
+            k_max = self.precision_fftlog['padding_hi_extra'] * np.amax(k_use)
+
         n_k = (int(np.log10(k_max / k_min)) *
                self.precision_fftlog['n_per_decade'])
         r_arr = np.geomspace(k_min, k_max, n_k)
@@ -115,7 +139,8 @@ class HaloProfile(object):
             status = 0
             # TODO: we could probably benefit from precomputing all
             #       the FFTLog Gamma functions only once.
-            plaw_index = self.precision_fftlog['plaw_index']
+            plaw_index = self._get_plaw_fourier(cosmo, mass,
+                                                a, mass_def)
             result, status = lib.fftlog_transform(r_arr, p_real,
                                                   3, 0, plaw_index,
                                                   2 * r_arr.size, status)
@@ -145,6 +170,9 @@ class HaloProfileGaussian(HaloProfile):
         self.rho_0 = rho0
         self.r_s = r_scale
         super(HaloProfileGaussian, self).__init__()
+        self.update_precision_fftlog(padding_lo_fftlog=0.01,
+                                     padding_hi_fftlog=100.,
+                                     n_per_decade=10000)
 
     def _profile_real(self, cosmo, r, M, a, mass_def):
         r_use = np.atleast_1d(r)
@@ -170,6 +198,12 @@ class HaloProfilePowerLaw(HaloProfile):
         self.r_s = r_scale
         self.tilt = tilt
         super(HaloProfilePowerLaw, self).__init__()
+
+    def _get_plaw_fourier(self, cosmo, M, a, mass_def):
+        return self.tilt(cosmo, M, a, mass_def)
+
+    def _get_plaw_projected(self, cosmo, M, a, mass_def):
+        return -3 - self.tilt(cosmo, M, a, mass_def)
 
     def _profile_real(self, cosmo, r, M, a, mass_def):
         r_use = np.atleast_1d(r)
@@ -200,8 +234,14 @@ class HaloProfileNFW(HaloProfile):
         if fourier_analytic:
             self._profile_fourier = self._profile_fourier_analytic
         if projected_analytic:
+            if truncated:
+                raise ValueError("Analytic projected profile not supported "
+                                 "for truncated NFW. Set `truncated` or "
+                                 "`projected_analytic` to `False`.")
             self._profile_projected = self._profile_projected_analytic
         super(HaloProfileNFW, self).__init__()
+        self.update_precision_fftlog(padding_hi_fftlog=2E4,
+                                     padding_lo_fftlog=1E-2)
 
     def _get_cM(self, cosmo, M, a, mdef=None):
         return self.cM.get_concentration(cosmo, M, a, mdef_other=mdef)
@@ -236,22 +276,16 @@ class HaloProfileNFW(HaloProfile):
     def _fx_projected(self, x):
 
         def f1(xx):
-            x2m1 = xx * xx -1
-            return (1 -
-                    2 * np.arctanh(np.sqrt(np.fabs((1 - xx) /
-                                                   (1 + xx)))) /
-                    np.sqrt(np.fabs(x2m1))) / x2m1
+            x2m1 = xx * xx - 1
+            return 1 / x2m1 + np.arccosh(1 / xx) / np.fabs(x2m1)**1.5
 
         def f2(xx):
-            x2m1 = xx * xx -1
-            return (1 -
-                    2 * np.arctan(np.sqrt(np.fabs((1 - xx) /
-                                                  (1 + xx)))) /
-                    np.sqrt(np.fabs(x2m1))) / x2m1
+            x2m1 = xx * xx - 1
+            return 1 / x2m1 - np.arccos(1 / xx) / np.fabs(x2m1)**1.5
 
         xf = x.flatten()
         return np.piecewise(xf,
-                            [xf<1, xf>1],
+                            [xf < 1, xf > 1],
                             [f1, f2, 1./3.]).reshape(x.shape)
 
     def _profile_projected_analytic(self, cosmo, r, M, a, mass_def):
@@ -284,12 +318,16 @@ class HaloProfileNFW(HaloProfile):
         R_s = R_M / c_M
 
         x = k_use[:, None] * R_s[None, :]
-        Si1, Ci1 = sici((1 + c_M[None, :]) * x)
         Si2, Ci2 = sici(x)
-        P1 = 1. / (np.log(1 + c_M) - c_M / (1 + c_M))
-        P2 = np.sin(x) * (Si1 - Si2) + np.cos(x) * (Ci1 - Ci2)
-        P3 = np.sin(c_M[None, :] * x) / ((1 + c_M[None, :]) * x)
-        prof = M * P1[None, :] * (P2 - P3)
+        P1 = M / (np.log(1 + c_M) - c_M / (1 + c_M))
+        if self.truncated:
+            Si1, Ci1 = sici((1 + c_M[None, :]) * x)
+            P2 = np.sin(x) * (Si1 - Si2) + np.cos(x) * (Ci1 - Ci2)
+            P3 = np.sin(c_M[None, :] * x) / ((1 + c_M[None, :]) * x)
+            prof = P1[None, :] * (P2 - P3)
+        else:
+            P2 = np.sin(x) * (0.5 * np.pi - Si2) - np.cos(x) * Ci2
+            prof = P1[None, :] * P2
 
         if np.ndim(M) == 0:
             prof = np.squeeze(prof, axis=-1)
@@ -306,6 +344,8 @@ class HaloProfileEinasto(HaloProfile):
         self.cM = c_M_relation
         self.truncated = truncated
         super(HaloProfileEinasto, self).__init__()
+        self.update_precision_fftlog(padding_hi_fftlog=2E4,
+                                     padding_lo_fftlog=1E-2)
 
     def _get_cM(self, cosmo, M, a, mdef=None):
         return self.cM.get_concentration(cosmo, M, a, mdef_other=mdef)
@@ -355,6 +395,8 @@ class HaloProfileHernquist(HaloProfile):
         self.cM = c_M_relation
         self.truncated = truncated
         super(HaloProfileHernquist, self).__init__()
+        self.update_precision_fftlog(padding_hi_fftlog=2E4,
+                                     padding_lo_fftlog=1E-2)
 
     def _get_cM(self, cosmo, M, a, mdef=None):
         return self.cM.get_concentration(cosmo, M, a, mdef_other=mdef)
