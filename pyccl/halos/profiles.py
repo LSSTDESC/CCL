@@ -26,7 +26,7 @@ class HaloProfile(object):
     allow the automatic calculation of the Fourier-space
     and projected profiles, as well as the cumulative
     mass density, based on the real-space profile using
-    FFTLog to carry out fast Hankel transforms. See the 
+    FFTLog to carry out fast Hankel transforms. See the
     CCL note for details. Alternatively, you can implement
     a `_fourier` method for the Fourier-space profile, and
     all other quantities will be computed from it. It is
@@ -181,8 +181,8 @@ class HaloProfile(object):
         scale factor.
 
         .. math::
-           \\rho(k)=\\frac{1}{2\pi^2} \\int dr\\, r^2\\,
-            \\rho(r)\\, j_0(k r)
+           \\rho(k)=\\frac{1}{2\\pi^2} \\int dr\\, r^2\\,
+           \\rho(r)\\, j_0(k r)
 
         Args:
             cosmo (:obj:`Cosmology`): a Cosmology object.
@@ -444,6 +444,21 @@ class HaloProfile(object):
 
 
 class HaloProfileGaussian(HaloProfile):
+    """ Gaussian profile
+
+    .. math::
+        \\rho(r) = \\rho_0\\, e^{-(r/r_s)^2}
+
+    Args:
+        r_scale (:obj:`function`): the width of the profile.
+            The signature of this function should be
+            `f(cosmo, M, a, mdef)`, where `cosmo` is a
+            :obj:`Cosmology` object, `M` is a halo mass in
+            units of M_sun, `a` is the scale factor and `mdef`
+            is a :obj:`MassDef` object.
+        rho0 (:obj:`function`): the amplitude of the profile.
+            It should have the same signature as `r_scale`.
+    """
     name = 'Gaussian'
 
     def __init__(self, r_scale, rho0):
@@ -474,6 +489,22 @@ class HaloProfileGaussian(HaloProfile):
 
 
 class HaloProfilePowerLaw(HaloProfile):
+    """ Power-law profile
+
+    .. math::
+        \\rho(r) = (r/r_s)^\\alpha
+
+    Args:
+        r_scale (:obj:`function`): the correlation length of
+            the profile. The signature of this function
+            should be `f(cosmo, M, a, mdef)`, where `cosmo`
+            is a :obj:`Cosmology` object, `M` is a halo mass
+            in units of M_sun, `a` is the scale factor and
+            `mdef` is a :obj:`MassDef` object.
+        tilt (:obj:`function`): the power law index of the
+            profile. It should have the same signature as
+            `r_scale`.
+    """
     name = 'PowerLaw'
 
     def __init__(self, r_scale, tilt):
@@ -482,9 +513,13 @@ class HaloProfilePowerLaw(HaloProfile):
         super(HaloProfilePowerLaw, self).__init__()
 
     def _get_plaw_fourier(self, cosmo, M, a, mass_def):
+        # This is the optimal value for a pure power law
+        # profile.
         return self.tilt(cosmo, M, a, mass_def)
 
     def _get_plaw_projected(self, cosmo, M, a, mass_def):
+        # This is the optimal value for a pure power law
+        # profile.
         return -3 - self.tilt(cosmo, M, a, mass_def)
 
     def _real(self, cosmo, r, M, a, mass_def):
@@ -505,9 +540,44 @@ class HaloProfilePowerLaw(HaloProfile):
 
 
 class HaloProfileNFW(HaloProfile):
+    """ Navarro-Frenk-White (astro-ph:astro-ph/9508025) profile.
+
+    .. math::
+       \\rho(r) = \\frac{\\rho_0}
+       {\\frac{r}{r_s}\\left(1+\\frac{r}{r_s}\\right)^2}
+
+    where :math:`r_s` is related to the spherical overdensity
+    halo radius :math:`R_\\Delta(M)` through the concentration
+    parameter :math:`c(M)` as
+
+    .. math::
+       R_\\Delta(M) = c(M)\\,r_s
+
+    and the normalization :math:`\\rho_0` is
+
+    .. math::
+       \\rho_0 = \\frac{M}{4\\pi\\,r_s^3\\,[\\log(1+c) - c/(1+c)]}
+
+    Args:
+        c_M_relation (:obj:`Concentration`): concentration-mass
+            relation to use with this profile.
+        fourier_analytic (bool): set to `True` if you want to compute
+            the Fourier profile analytically (and not through FFTLog).
+            Default: `False`.
+        projected_analytic (bool): set to `True` if you want to
+            compute the 2D projected profile analytically (and not
+            through FFTLog). Default: `False`.
+        cumul2d_analytic (bool): set to `True` if you want to
+            compute the 2D cumulative surface density analytically
+            (and not through FFTLog). Default: `False`.
+        truncated (bool): set to `True` if the profile should be
+            truncated at :math:`r = R_\\Delta` (i.e. zero at larger
+            radii.
+    """
     name = 'NFW'
 
-    def __init__(self, c_M_relation, fourier_analytic=False,
+    def __init__(self, c_M_relation,
+                 fourier_analytic=False,
                  projected_analytic=False,
                  cumul2d_analytic=False,
                  truncated=True):

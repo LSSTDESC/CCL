@@ -1,8 +1,5 @@
-from . import ccllib as lib
 from . import halos as hal
 from .pyutils import deprecated
-import numpy as np
-from .core import check
 
 
 @deprecated(hal.HaloProfileNFW)

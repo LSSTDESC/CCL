@@ -226,6 +226,6 @@ def test_nfw_cumul2d_accuracy(fourier_analytic):
     rt = np.logspace(-3, 2, 1024)
     srt1 = p1.cumul2d(COSMO, rt, M, a, M200)
     srt2 = p2.cumul2d(COSMO, rt, M, a, M200)
-    
+
     res2 = np.fabs(srt2/srt1-1)
     assert np.all(res2 < 5E-3)
