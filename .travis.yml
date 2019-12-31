@@ -8,12 +8,12 @@ matrix:
 #  - os: linux
 #    sudo: required
 #    env: TOXENV=py36
-#  - os: osx
-#    osx_image: xcode9.4
-#    env: TOXENV=py27
   - os: osx
     osx_image: xcode9.4
-    env: TOXENV=py36
+    env: TOXENV=py27
+#  - os: osx
+#    osx_image: xcode9.4
+#    env: TOXENV=py36
 
 install:
   - "./.travis/install.sh"
