@@ -16,6 +16,7 @@ PKC = ccl.halos.ProfileCovar()
 KK = np.geomspace(1E-3, 10, 32)
 MM = np.geomspace(1E11, 1E15, 16)
 AA = 1.0
+PK2D = ccl.Pk2D(cosmo=COSMO, pkfunc=lambda k, a: a / k)
 
 
 def test_profcovar_smoke():
@@ -71,24 +72,104 @@ def smoke_assert_pkhm_real(func):
         p = func(k, a)
         assert np.shape(p) == sh
 
-@pytest.mark.parametrize('func', ['mean_profile',
-                                  'bias', 'pk'])
-def test_pkhm_smoke(func):
+
+@pytest.mark.parametrize('norm', [True, False])
+def test_pkhm_mean_profile_smoke(norm):
+    hmc = ccl.halos.HMCalculator(nl10M=2)
+
+    def f(k, a):
+        return hmc.mean_profile(COSMO, k, a, HMF,
+                                P1, normprof=norm,
+                                mdef=M200)
+    smoke_assert_pkhm_real(f)
+
+
+@pytest.mark.parametrize('norm', [True, False])
+def test_pkhm_bias_smoke(norm):
+    hmc = ccl.halos.HMCalculator(nl10M=2)
+
+    def f(k, a):
+        return hmc.bias(COSMO, k, a, HMF, HBF, P1,
+                        normprof=norm, mdef=M200)
+    smoke_assert_pkhm_real(f)
+
+
+@pytest.mark.parametrize('pars',
+                         [{'cv': None, 'norm': True,
+                           'pk': 'linear', 'h1': True,
+                           'h2': True, 'p2': None},
+                          {'cv': PKC, 'norm': True,
+                           'pk': 'linear', 'h1': True,
+                           'h2': True, 'p2': None},
+                          {'cv': None, 'norm': False,
+                           'pk': 'linear', 'h1': True,
+                           'h2': True, 'p2': None},
+                          {'cv': None, 'norm': True,
+                           'pk': 'nonlinear', 'h1': True,
+                           'h2': True, 'p2': None},
+                          {'cv': None, 'norm': True,
+                           'pk': PK2D, 'h1': True,
+                           'h2': True, 'p2': None},
+                          {'cv': None, 'norm': True,
+                           'pk': None, 'h1': True,
+                           'h2': True, 'p2': None},
+                          {'cv': None, 'norm': True,
+                           'pk': 'linear', 'h1': False,
+                           'h2': True, 'p2': None},
+                          {'cv': None, 'norm': True,
+                           'pk': 'linear', 'h1': True,
+                           'h2': False, 'p2': None},
+                          {'cv': None, 'norm': True,
+                           'pk': 'linear', 'h1': False,
+                           'h2': False, 'p2': None},
+                          {'cv': None, 'norm': True,
+                           'pk': 'linear', 'h1': True,
+                           'h2': True, 'p2': P2}])
+def test_pkhm_pk_smoke(pars):
+    hmc = ccl.halos.HMCalculator(nl10M=2)
+
+    def f(k, a):
+        return hmc.pk(COSMO, k, a, HMF, HBF, P1,
+                      covprof=pars['cv'],
+                      normprof=pars['norm'],
+                      p_of_k_a=pars['pk'],
+                      prof_2=pars['p2'],
+                      mdef=M200,
+                      get_1h=pars['h1'],
+                      get_2h=pars['h2'])
+    smoke_assert_pkhm_real(f)
+
+
+def test_pkhm_errors():
+    # Wrong integration
+    with pytest.raises(NotImplementedError):
+        ccl.halos.HMCalculator(integration_method_M='Sampson')
+
     hmc = ccl.halos.HMCalculator()
 
-    if func == 'mean_profile':
-        def f(k, a):
-            return hmc.mean_profile(COSMO, k, a,
-                                    HMF, P1, normprof=True,
-                                    mdef=M200)
-    elif func == 'bias':
-        def f(k, a):
-            return hmc.bias(COSMO, k, a, HMF, HBF, P1,
-                            normprof=True, mdef=M200)
-    elif func == 'pk':
-        def f(k, a):
-            return hmc.pk(COSMO, k, a, HMF, HBF, P1,
-                          covprof=PKC, prof_2=P2,
-                          p_of_k_a='linear', normprof=True,
-                          mdef=M200, get_1h=True, get_2h=True)
-    smoke_assert_pkhm_real(f)
+    # Wrong hmf
+    with pytest.raises(TypeError):
+        hmc.pk(COSMO, KK, AA, None, HBF, P1)
+
+    # Wrong hbf
+    with pytest.raises(TypeError):
+        hmc.pk(COSMO, KK, AA, HMF, None, P1)
+
+    # Wrong profile
+    with pytest.raises(TypeError):
+        hmc.pk(COSMO, KK, AA, HMF, HBF, None)
+
+    # Wrong prof2
+    with pytest.raises(TypeError):
+        hmc.pk(COSMO, KK, AA, HMF, HBF, P1,
+               prof_2=KK)
+
+    # Wrong covprof
+    with pytest.raises(TypeError):
+        hmc.pk(COSMO, KK, AA, HMF, HBF, P1,
+               covprof=KK)
+
+    # Wrong pk2d
+    with pytest.raises(TypeError):
+        hmc.pk(COSMO, KK, AA, HMF, HBF, P1,
+               p_of_k_a=KK)

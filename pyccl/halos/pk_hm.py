@@ -162,7 +162,7 @@ class HMCalculator(object):
                             "`ProfileCovar` or `None`")
         # Power spectrum
         if isinstance(p_of_k_a, Pk2D):
-            def pkf(sf): return p_of_k_a(k_use, sf, cosmo)
+            def pkf(sf): return p_of_k_a.eval(k_use, sf, cosmo)
         elif (p_of_k_a is None) or (p_of_k_a == 'linear'):
             def pkf(sf): return linear_matter_power(cosmo, k_use, sf)
         elif p_of_k_a == 'nonlinear':
