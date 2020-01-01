@@ -39,4 +39,4 @@ from .profiles import (  # noqa
 
 # Halo model power spectrum
 from .pk_hm import (  # noqa
-    ProfileCovar)
+    ProfileCovar, HMCalculator)
