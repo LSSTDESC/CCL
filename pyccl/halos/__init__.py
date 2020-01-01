@@ -36,3 +36,7 @@ from .profiles import (  # noqa
     HaloProfile, HaloProfileGaussian,
     HaloProfilePowerLaw, HaloProfileNFW,
     HaloProfileEinasto, HaloProfileHernquist)
+
+# Halo model power spectrum
+from .pk_hm import (  # noqa
+    ProfileCovar)
