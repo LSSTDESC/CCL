@@ -117,31 +117,26 @@ class HaloProfile(object):
         """
         self.precision_fftlog.update(kwargs)
 
-    def _get_plaw_fourier(self, cosmo, M, a, mass_def):
+    def _get_plaw_fourier(self, cosmo, a):
         """ This controls the value of `plaw_fourier` to be used
-        as a function of cosmology, halo mass, and scale factor.
+        as a function of cosmology and scale factor.
 
         Args:
             cosmo (:obj:`Cosmology`): a Cosmology object.
-            M (float): halo mass in units of M_sun.
             a (float): scale factor.
-            mass_def (:obj:`MassDef`): a mass definition object.
 
         Returns:
             float: power law index to be used with FFTLog.
         """
         return self.precision_fftlog['plaw_fourier']
 
-    def _get_plaw_projected(self, cosmo, M, a, mass_def):
+    def _get_plaw_projected(self, cosmo, a):
         """ This controls the value of `plaw_projected` to be
-        used as a function of cosmology, halo mass, and scale
-        factor.
+        used as a function of cosmology and scale factor.
 
         Args:
             cosmo (:obj:`Cosmology`): a Cosmology object.
-            M (float): halo mass in units of M_sun.
             a (float): scale factor.
-            mass_def (:obj:`MassDef`): a mass definition object.
 
         Returns:
             float: power law index to be used with FFTLog.
@@ -292,16 +287,14 @@ class HaloProfile(object):
         r_arr = np.geomspace(k_min, k_max, n_k)
 
         p_k_out = np.zeros([M_use.size, k_use.size])
+        # Compute real profile values
+        p_real_M = p_func(cosmo, r_arr, M_use, a, mass_def).T
+        # Power-law index to pass to FFTLog.
+        plaw_index = self._get_plaw_fourier(cosmo, a)
         for im, mass in enumerate(M_use):
-            # Compute real profile values
-            p_real = p_func(cosmo, r_arr, mass, a, mass_def)
-
-            # Power-law index to pass to FFTLog.
-            plaw_index = self._get_plaw_fourier(cosmo, mass,
-                                                a, mass_def)
             # Compute Fourier profile through fftlog
             status = 0
-            result, status = lib.fftlog_transform(r_arr, p_real,
+            result, status = lib.fftlog_transform(r_arr, p_real_M[im],
                                                   3, 0, plaw_index,
                                                   2 * r_arr.size, status)
             check(status)
@@ -339,28 +332,26 @@ class HaloProfile(object):
         k_arr = np.geomspace(r_t_min, r_t_max, n_r_t)
 
         sig_r_t_out = np.zeros([M_use.size, r_t_use.size])
+        # Compute Fourier-space profile
+        if getattr(self, '_fourier', None):
+            # Compute from `_fourier` if available.
+            p_fourier = self._fourier(cosmo, k_arr, M_use,
+                                      a, mass_def).T
+        else:
+            # Compute with FFTLog otherwise.
+            lpad = self.precision_fftlog['large_padding_2D']
+            p_fourier = self._fftlog_wrap(cosmo,
+                                          k_arr,
+                                          M_use, a,
+                                          mass_def,
+                                          fourier_out=True,
+                                          large_padding=lpad).T
+        # Power-law index to pass to FFTLog.
+        plaw_index = self._get_plaw_projected(cosmo, a)
         for im, mass in enumerate(M_use):
-            # Compute Fourier-space profile
-            if getattr(self, '_fourier', None):
-                # Compute from `_fourier` if available.
-                p_fourier = self._fourier(cosmo, k_arr, mass,
-                                          a, mass_def)
-            else:
-                # Compute with FFTLog otherwise.
-                lpad = self.precision_fftlog['large_padding_2D']
-                p_fourier = self._fftlog_wrap(cosmo,
-                                              k_arr,
-                                              mass, a,
-                                              mass_def,
-                                              fourier_out=True,
-                                              large_padding=lpad)
-
-            # Power-law index to pass to FFTLog.
-            plaw_index = self._get_plaw_projected(cosmo, mass,
-                                                  a, mass_def)
             # Compute projected profile through fftlog
             status = 0
-            result, status = lib.fftlog_transform(k_arr, p_fourier,
+            result, status = lib.fftlog_transform(k_arr, p_fourier[im],
                                                   2, 0, plaw_index,
                                                   2 * k_arr.size, status)
             check(status)
@@ -396,31 +387,29 @@ class HaloProfile(object):
         k_arr = np.geomspace(r_t_min, r_t_max, n_r_t)
 
         sig_r_t_out = np.zeros([M_use.size, r_t_use.size])
+        # Compute Fourier-space profile
+        if getattr(self, '_fourier', None):
+            # Compute from `_fourier` if available.
+            p_fourier = self._fourier(cosmo, k_arr, M_use,
+                                      a, mass_def).T
+        else:
+            # Compute with FFTLog otherwise.
+            lpad = self.precision_fftlog['large_padding_2D']
+            p_fourier = self._fftlog_wrap(cosmo,
+                                          k_arr,
+                                          M_use, a,
+                                          mass_def,
+                                          fourier_out=True,
+                                          large_padding=lpad).T
+        # The cumulative profile involves a factor 1/(k R) in
+        # the integrand.
+        p_fourier *= 2 / k_arr[None, :]
+        # Power-law index to pass to FFTLog.
+        plaw_index = self._get_plaw_projected(cosmo, a) - 1
         for im, mass in enumerate(M_use):
-            # Compute Fourier-space profile
-            if getattr(self, '_fourier', None):
-                # Compute from `_fourier` if available.
-                p_fourier = self._fourier(cosmo, k_arr, mass,
-                                          a, mass_def)
-            else:
-                # Compute with FFTLog otherwise.
-                lpad = self.precision_fftlog['large_padding_2D']
-                p_fourier = self._fftlog_wrap(cosmo,
-                                              k_arr,
-                                              mass, a,
-                                              mass_def,
-                                              fourier_out=True,
-                                              large_padding=lpad)
-            # The cumulative profile involves a factor 1/(k R) in
-            # the integrand.
-            p_fourier *= 2 / k_arr
-
-            # Power-law index to pass to FFTLog.
-            plaw_index = self._get_plaw_projected(cosmo, mass,
-                                                  a, mass_def) - 1
             # Compute cumulative surface density through fftlog
             status = 0
-            result, status = lib.fftlog_transform(k_arr, p_fourier,
+            result, status = lib.fftlog_transform(k_arr, p_fourier[im],
                                                   2, 1, plaw_index,
                                                   2 * k_arr.size, status)
             check(status)
@@ -502,8 +491,8 @@ class HaloProfilePowerLaw(HaloProfile):
             in units of M_sun, `a` is the scale factor and
             `mdef` is a :obj:`MassDef` object.
         tilt (:obj:`function`): the power law index of the
-            profile. It should have the same signature as
-            `r_scale`.
+            profile. The signature of this function should
+            be `f(cosmo, a)`.
     """
     name = 'PowerLaw'
 
@@ -512,15 +501,15 @@ class HaloProfilePowerLaw(HaloProfile):
         self.tilt = tilt
         super(HaloProfilePowerLaw, self).__init__()
 
-    def _get_plaw_fourier(self, cosmo, M, a, mass_def):
+    def _get_plaw_fourier(self, cosmo, a):
         # This is the optimal value for a pure power law
         # profile.
-        return self.tilt(cosmo, M, a, mass_def)
+        return self.tilt(cosmo, a)
 
-    def _get_plaw_projected(self, cosmo, M, a, mass_def):
+    def _get_plaw_projected(self, cosmo, a):
         # This is the optimal value for a pure power law
         # profile.
-        return -3 - self.tilt(cosmo, M, a, mass_def)
+        return -3 - self.tilt(cosmo, a)
 
     def _real(self, cosmo, r, M, a, mass_def):
         r_use = np.atleast_1d(r)
@@ -528,9 +517,9 @@ class HaloProfilePowerLaw(HaloProfile):
 
         # Compute scale
         rs = self.r_s(cosmo, M_use, a, mass_def)
-        tilt = self.tilt(cosmo, M_use, a, mass_def)
+        tilt = self.tilt(cosmo, a)
         # Form factor
-        prof = (r_use[:, None] / rs[None, :])**tilt[None, :]
+        prof = (r_use[:, None] / rs[None, :])**tilt
 
         if np.ndim(M) == 0:
             prof = np.squeeze(prof, axis=-1)
