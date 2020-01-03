@@ -226,7 +226,8 @@ class HaloProfile(object):
             s_r_t = self._projected(cosmo, r_t, M, a, mass_def)
         else:
             s_r_t = self._projected_fftlog_wrap(cosmo, r_t, M,
-                                                a, mass_def)
+                                                a, mass_def,
+                                                is_cumul2d=False)
         return s_r_t
 
     def cumul2d(self, cosmo, r_t, M, a, mass_def=None):
@@ -253,8 +254,9 @@ class HaloProfile(object):
         if getattr(self, '_cumul2d', None):
             s_r_t = self._cumul2d(cosmo, r_t, M, a, mass_def)
         else:
-            s_r_t = self._cumul2d_fftlog_wrap(cosmo, r_t, M,
-                                              a, mass_def)
+            s_r_t = self._projected_fftlog_wrap(cosmo, r_t, M,
+                                                a, mass_def,
+                                                is_cumul2d=True)
         return s_r_t
 
     def _fftlog_wrap(self, cosmo, k, M, a, mass_def,
@@ -274,6 +276,7 @@ class HaloProfile(object):
         k_use = np.atleast_1d(k)
         M_use = np.atleast_1d(M)
         lk_use = np.log(k_use)
+        nM = len(M_use)
 
         # k/r ranges to be used with FFTLog and its sampling.
         if large_padding:
@@ -286,43 +289,46 @@ class HaloProfile(object):
                self.precision_fftlog['n_per_decade'])
         r_arr = np.geomspace(k_min, k_max, n_k)
 
-        p_k_out = np.zeros([M_use.size, k_use.size])
+        p_k_out = np.zeros([nM, k_use.size])
         # Compute real profile values
-        p_real_M = p_func(cosmo, r_arr, M_use, a, mass_def).T
+        p_real_M = p_func(cosmo, r_arr, M_use, a, mass_def).T.flatten()
         # Power-law index to pass to FFTLog.
         plaw_index = self._get_plaw_fourier(cosmo, a)
-        for im, mass in enumerate(M_use):
-            # Compute Fourier profile through fftlog
-            status = 0
-            result, status = lib.fftlog_transform(r_arr, p_real_M[im],
-                                                  3, 0, plaw_index,
-                                                  2 * r_arr.size, status)
-            check(status)
-            k_arr, p_k_arr = result.reshape([2, r_arr.size])
 
+        # Compute Fourier profile through fftlog
+        status = 0
+        result, status = lib.fftlog_transform(nM, r_arr, p_real_M,
+                                              3, 0, plaw_index,
+                                              (nM + 1) * n_k, status)
+        check(status)
+        result = result.reshape([nM + 1, n_k])
+        lk_arr = np.log(result[0])
+        p_fourier_M = result[1:]
+        for im, p_k_arr in enumerate(p_fourier_M):
             # Resample into input k values
-            p_fourier = resample_array(np.log(k_arr), p_k_arr, lk_use,
+            p_fourier = resample_array(lk_arr, p_k_arr, lk_use,
                                        self.precision_fftlog['extrapol'],
                                        self.precision_fftlog['extrapol'],
                                        0, 0)
             p_k_out[im, :] = p_fourier
-
         if fourier_out:
             p_k_out *= (2 * np.pi)**3
-
         p_k_out = p_k_out.T
+
         if np.ndim(M) == 0:
             p_k_out = np.squeeze(p_k_out, axis=-1)
         if np.ndim(k) == 0:
             p_k_out = np.squeeze(p_k_out, axis=0)
         return p_k_out
 
-    def _projected_fftlog_wrap(self, cosmo, r_t, M, a, mass_def):
+    def _projected_fftlog_wrap(self, cosmo, r_t, M, a, mass_def,
+                               is_cumul2d=False):
         # This computes Sigma(<R) from the Fourier-space profile as:
         # Sigma(R) = \frac{1}{2\pi} \int dk k J_0(k R) \rho(k)
         r_t_use = np.atleast_1d(r_t)
         M_use = np.atleast_1d(M)
         lr_t_use = np.log(r_t_use)
+        nM = len(M_use)
 
         # k/r range to be used with FFTLog and its sampling.
         r_t_min = self.precision_fftlog['padding_lo_fftlog'] * np.amin(r_t_use)
@@ -346,78 +352,34 @@ class HaloProfile(object):
                                           mass_def,
                                           fourier_out=True,
                                           large_padding=lpad).T
+        if is_cumul2d:
+            # The cumulative profile involves a factor 1/(k R) in
+            # the integrand.
+            p_fourier *= 2 / k_arr[None, :]
+        p_fourier = p_fourier.flatten()
         # Power-law index to pass to FFTLog.
-        plaw_index = self._get_plaw_projected(cosmo, a)
-        for im, mass in enumerate(M_use):
-            # Compute projected profile through fftlog
-            status = 0
-            result, status = lib.fftlog_transform(k_arr, p_fourier[im],
-                                                  2, 0, plaw_index,
-                                                  2 * k_arr.size, status)
-            check(status)
-            r_t_arr, sig_r_t_arr = result.reshape([2, k_arr.size])
-
-            # Resample into input r_t values
-            sig_r_t = resample_array(np.log(r_t_arr), sig_r_t_arr,
-                                     lr_t_use,
-                                     self.precision_fftlog['extrapol'],
-                                     self.precision_fftlog['extrapol'],
-                                     0, 0)
-            sig_r_t_out[im, :] = sig_r_t
-        sig_r_t_out = sig_r_t_out.T
-
-        if np.ndim(M) == 0:
-            sig_r_t_out = np.squeeze(sig_r_t_out, axis=-1)
-        if np.ndim(r_t) == 0:
-            sig_r_t_out = np.squeeze(sig_r_t_out, axis=0)
-        return sig_r_t_out
-
-    def _cumul2d_fftlog_wrap(self, cosmo, r_t, M, a, mass_def):
-        # This computes Sigma(<R) from the Fourier-space profile as:
-        # Sigma(<R) = \frac{1}{2\pi} \int dk k 2 J_1(k R)/(k R) \rho(k)
-        r_t_use = np.atleast_1d(r_t)
-        M_use = np.atleast_1d(M)
-        lr_t_use = np.log(r_t_use)
-
-        # k/r range to be used with FFTLog and its sampling.
-        r_t_min = self.precision_fftlog['padding_lo_fftlog'] * np.amin(r_t_use)
-        r_t_max = self.precision_fftlog['padding_hi_fftlog'] * np.amax(r_t_use)
-        n_r_t = (int(np.log10(r_t_max / r_t_min)) *
-                 self.precision_fftlog['n_per_decade'])
-        k_arr = np.geomspace(r_t_min, r_t_max, n_r_t)
-
-        sig_r_t_out = np.zeros([M_use.size, r_t_use.size])
-        # Compute Fourier-space profile
-        if getattr(self, '_fourier', None):
-            # Compute from `_fourier` if available.
-            p_fourier = self._fourier(cosmo, k_arr, M_use,
-                                      a, mass_def).T
+        if is_cumul2d:
+            i_bessel = 1
+            plaw_index = self._get_plaw_projected(cosmo, a) - 1
         else:
-            # Compute with FFTLog otherwise.
-            lpad = self.precision_fftlog['large_padding_2D']
-            p_fourier = self._fftlog_wrap(cosmo,
-                                          k_arr,
-                                          M_use, a,
-                                          mass_def,
-                                          fourier_out=True,
-                                          large_padding=lpad).T
-        # The cumulative profile involves a factor 1/(k R) in
-        # the integrand.
-        p_fourier *= 2 / k_arr[None, :]
-        # Power-law index to pass to FFTLog.
-        plaw_index = self._get_plaw_projected(cosmo, a) - 1
-        for im, mass in enumerate(M_use):
-            # Compute cumulative surface density through fftlog
-            status = 0
-            result, status = lib.fftlog_transform(k_arr, p_fourier[im],
-                                                  2, 1, plaw_index,
-                                                  2 * k_arr.size, status)
-            check(status)
-            r_t_arr, sig_r_t_arr = result.reshape([2, k_arr.size])
-            sig_r_t_arr /= r_t_arr
+            i_bessel = 0
+            plaw_index = self._get_plaw_projected(cosmo, a)
 
+        # Compute projected profile through fftlog
+        status = 0
+        result, status = lib.fftlog_transform(nM, k_arr, p_fourier,
+                                              2, i_bessel, plaw_index,
+                                              (nM + 1) * n_r_t, status)
+        check(status)
+        result = result.reshape([nM + 1, n_r_t])
+        sig_r_t_M = result[1:]
+        lr_t_arr = np.log(result[0])
+        if is_cumul2d:
+            r_t_arr = result[0]
+            sig_r_t_M /= r_t_arr[None, :]
+        for im, sig_r_t_arr in enumerate(sig_r_t_M):
             # Resample into input r_t values
-            sig_r_t = resample_array(np.log(r_t_arr), sig_r_t_arr,
+            sig_r_t = resample_array(lr_t_arr, sig_r_t_arr,
                                      lr_t_use,
                                      self.precision_fftlog['extrapol'],
                                      self.precision_fftlog['extrapol'],

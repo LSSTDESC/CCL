@@ -30,16 +30,16 @@ These are the C++ bindings
  * C_\ell will be multiplied by ell^{1-\epsilon}, so \epsilon can be used to minimize ringing.
  */
 void ccl_fftlog_ComputeXi2D(double mu,double epsilon,
-			    int N, const double l[],const double cl[],
-			    double th[], double xi[]);
+			    int npk, int N, double *l,double **cl,
+			    double *th, double **xi, int *status);
 
 /* Compute the function
  *   \xi_\ell(r) = \int \frac{dk k^2}{2\pi^2} P_k j_\ell(kr)
  * P(k) will be multiplied by k^{3/2-\epsilon}, so \epsilon can be used to minimize ringing.
  */
 void ccl_fftlog_ComputeXi3D(double l, double epsilon,
-			    int N, const double k[], const double pk[],
-			    double r[], double xi[]);
+			    int npk, int N, double *k, double **pk,
+			    double *r, double **xi, int *status);
 #endif // FFTLOG_H
 
 #ifdef __cplusplus
