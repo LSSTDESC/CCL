@@ -156,7 +156,7 @@ class HaloProfile(object):
 
         Returns:
             float or array_like: halo profile. The shape of the
-            output will be `(N_r, N_M)` where `N_r` and `N_m` are
+            output will be `(N_M, N_r)` where `N_r` and `N_m` are
             the sizes of `r` and `M` respectively.
         """
         if getattr(self, '_real', None):
@@ -188,7 +188,7 @@ class HaloProfile(object):
 
         Returns:
             float or array_like: halo profile. The shape of the
-            output will be `(N_k, N_M)` where `N_k` and `N_m` are
+            output will be `(N_M, N_k)` where `N_k` and `N_m` are
             the sizes of `k` and `M` respectively.
         """
         if getattr(self, '_fourier', None):
@@ -219,7 +219,7 @@ class HaloProfile(object):
 
         Returns:
             float or array_like: halo profile. The shape of the
-            output will be `(N_r, N_M)` where `N_r` and `N_m` are
+            output will be `(N_M, N_r)` where `N_r` and `N_m` are
             the sizes of `r` and `M` respectively.
         """
         if getattr(self, '_projected', None):
@@ -248,7 +248,7 @@ class HaloProfile(object):
 
         Returns:
             float or array_like: halo profile. The shape of the
-            output will be `(N_r, N_M)` where `N_r` and `N_m` are
+            output will be `(N_M, N_r)` where `N_r` and `N_m` are
             the sizes of `r` and `M` respectively.
         """
         if getattr(self, '_cumul2d', None):
@@ -291,7 +291,7 @@ class HaloProfile(object):
 
         p_k_out = np.zeros([nM, k_use.size])
         # Compute real profile values
-        p_real_M = p_func(cosmo, r_arr, M_use, a, mass_def).T.flatten()
+        p_real_M = p_func(cosmo, r_arr, M_use, a, mass_def).flatten()
         # Power-law index to pass to FFTLog.
         plaw_index = self._get_plaw_fourier(cosmo, a)
 
@@ -313,17 +313,16 @@ class HaloProfile(object):
             p_k_out[im, :] = p_fourier
         if fourier_out:
             p_k_out *= (2 * np.pi)**3
-        p_k_out = p_k_out.T
 
-        if np.ndim(M) == 0:
-            p_k_out = np.squeeze(p_k_out, axis=-1)
         if np.ndim(k) == 0:
+            p_k_out = np.squeeze(p_k_out, axis=-1)
+        if np.ndim(M) == 0:
             p_k_out = np.squeeze(p_k_out, axis=0)
         return p_k_out
 
     def _projected_fftlog_wrap(self, cosmo, r_t, M, a, mass_def,
                                is_cumul2d=False):
-        # This computes Sigma(<R) from the Fourier-space profile as:
+        # This computes Sigma(R) from the Fourier-space profile as:
         # Sigma(R) = \frac{1}{2\pi} \int dk k J_0(k R) \rho(k)
         r_t_use = np.atleast_1d(r_t)
         M_use = np.atleast_1d(M)
@@ -342,7 +341,7 @@ class HaloProfile(object):
         if getattr(self, '_fourier', None):
             # Compute from `_fourier` if available.
             p_fourier = self._fourier(cosmo, k_arr, M_use,
-                                      a, mass_def).T
+                                      a, mass_def)
         else:
             # Compute with FFTLog otherwise.
             lpad = self.precision_fftlog['large_padding_2D']
@@ -351,7 +350,7 @@ class HaloProfile(object):
                                           M_use, a,
                                           mass_def,
                                           fourier_out=True,
-                                          large_padding=lpad).T
+                                          large_padding=lpad)
         if is_cumul2d:
             # The cumulative profile involves a factor 1/(k R) in
             # the integrand.
@@ -385,11 +384,10 @@ class HaloProfile(object):
                                      self.precision_fftlog['extrapol'],
                                      0, 0)
             sig_r_t_out[im, :] = sig_r_t
-        sig_r_t_out = sig_r_t_out.T
 
-        if np.ndim(M) == 0:
-            sig_r_t_out = np.squeeze(sig_r_t_out, axis=-1)
         if np.ndim(r_t) == 0:
+            sig_r_t_out = np.squeeze(sig_r_t_out, axis=-1)
+        if np.ndim(M) == 0:
             sig_r_t_out = np.squeeze(sig_r_t_out, axis=0)
         return sig_r_t_out
 
@@ -429,12 +427,12 @@ class HaloProfileGaussian(HaloProfile):
         # Compute normalization
         rho0 = self.rho_0(cosmo, M_use, a, mass_def)
         # Form factor
-        prof = np.exp(-(r_use[:, None] / rs[None, :])**2)
-        prof = prof * rho0[None, :]
+        prof = np.exp(-(r_use[None, :] / rs[:, None])**2)
+        prof = prof * rho0[:, None]
 
-        if np.ndim(M) == 0:
-            prof = np.squeeze(prof, axis=-1)
         if np.ndim(r) == 0:
+            prof = np.squeeze(prof, axis=-1)
+        if np.ndim(M) == 0:
             prof = np.squeeze(prof, axis=0)
         return prof
 
@@ -481,11 +479,11 @@ class HaloProfilePowerLaw(HaloProfile):
         rs = self.r_s(cosmo, M_use, a, mass_def)
         tilt = self.tilt(cosmo, a)
         # Form factor
-        prof = (r_use[:, None] / rs[None, :])**tilt
+        prof = (r_use[None, :] / rs[:, None])**tilt
 
-        if np.ndim(M) == 0:
-            prof = np.squeeze(prof, axis=-1)
         if np.ndim(r) == 0:
+            prof = np.squeeze(prof, axis=-1)
+        if np.ndim(M) == 0:
             prof = np.squeeze(prof, axis=0)
         return prof
 
@@ -573,17 +571,17 @@ class HaloProfileNFW(HaloProfile):
         c_M = self._get_cM(cosmo, M_use, a, mdef=mass_def)
         R_s = R_M / c_M
 
-        x = r_use[:, None] / R_s[None, :]
+        x = r_use[None, :] / R_s[:, None]
         prof = 1./(x * (1 + x)**2)
         if self.truncated:
-            prof[r_use[:, None] > R_M[None, :]] = 0
+            prof[r_use[None, :] > R_M[:, None]] = 0
 
         norm = self._norm(M_use, R_s, c_M)
-        prof = prof[:, :] * norm[None, :]
+        prof = prof[:, :] * norm[:, None]
 
-        if np.ndim(M) == 0:
-            prof = np.squeeze(prof, axis=-1)
         if np.ndim(r) == 0:
+            prof = np.squeeze(prof, axis=-1)
+        if np.ndim(M) == 0:
             prof = np.squeeze(prof, axis=0)
         return prof
 
@@ -611,14 +609,14 @@ class HaloProfileNFW(HaloProfile):
         c_M = self._get_cM(cosmo, M_use, a, mdef=mass_def)
         R_s = R_M / c_M
 
-        x = r_use[:, None] / R_s[None, :]
+        x = r_use[None, :] / R_s[:, None]
         prof = self._fx_projected(x)
         norm = 2 * R_s * self._norm(M_use, R_s, c_M)
-        prof = prof[:, :] * norm[None, :]
+        prof = prof[:, :] * norm[:, None]
 
-        if np.ndim(M) == 0:
-            prof = np.squeeze(prof, axis=-1)
         if np.ndim(r) == 0:
+            prof = np.squeeze(prof, axis=-1)
+        if np.ndim(M) == 0:
             prof = np.squeeze(prof, axis=0)
         return prof
 
@@ -648,14 +646,14 @@ class HaloProfileNFW(HaloProfile):
         c_M = self._get_cM(cosmo, M_use, a, mdef=mass_def)
         R_s = R_M / c_M
 
-        x = r_use[:, None] / R_s[None, :]
+        x = r_use[None, :] / R_s[:, None]
         prof = self._fx_cumul2d(x)
         norm = 2 * R_s * self._norm(M_use, R_s, c_M)
-        prof = prof[:, :] * norm[None, :]
+        prof = prof[:, :] * norm[:, None]
 
-        if np.ndim(M) == 0:
-            prof = np.squeeze(prof, axis=-1)
         if np.ndim(r) == 0:
+            prof = np.squeeze(prof, axis=-1)
+        if np.ndim(M) == 0:
             prof = np.squeeze(prof, axis=0)
         return prof
 
@@ -668,21 +666,21 @@ class HaloProfileNFW(HaloProfile):
         c_M = self._get_cM(cosmo, M_use, a, mdef=mass_def)
         R_s = R_M / c_M
 
-        x = k_use[:, None] * R_s[None, :]
+        x = k_use[None, :] * R_s[:, None]
         Si2, Ci2 = sici(x)
         P1 = M / (np.log(1 + c_M) - c_M / (1 + c_M))
         if self.truncated:
-            Si1, Ci1 = sici((1 + c_M[None, :]) * x)
+            Si1, Ci1 = sici((1 + c_M[:, None]) * x)
             P2 = np.sin(x) * (Si1 - Si2) + np.cos(x) * (Ci1 - Ci2)
-            P3 = np.sin(c_M[None, :] * x) / ((1 + c_M[None, :]) * x)
-            prof = P1[None, :] * (P2 - P3)
+            P3 = np.sin(c_M[:, None] * x) / ((1 + c_M[:, None]) * x)
+            prof = P1[:, None] * (P2 - P3)
         else:
             P2 = np.sin(x) * (0.5 * np.pi - Si2) - np.cos(x) * Ci2
-            prof = P1[None, :] * P2
+            prof = P1[:, None] * P2
 
-        if np.ndim(M) == 0:
-            prof = np.squeeze(prof, axis=-1)
         if np.ndim(k) == 0:
+            prof = np.squeeze(prof, axis=-1)
+        if np.ndim(M) == 0:
             prof = np.squeeze(prof, axis=0)
         return prof
 
@@ -729,15 +727,15 @@ class HaloProfileEinasto(HaloProfile):
         check(status)
         norm = M_use / norm
 
-        x = r_use[:, None] / R_s[None, :]
-        prof = norm[None, :] * np.exp(-2. * (x**alpha[None, :] - 1) /
-                                      alpha[None, :])
+        x = r_use[None, :] / R_s[:, None]
+        prof = norm[:, None] * np.exp(-2. * (x**alpha[:, None] - 1) /
+                                      alpha[:, None])
         if self.truncated:
-            prof[r_use[:, None] > R_M[None, :]] = 0
+            prof[r_use[None, :] > R_M[:, None]] = 0
 
-        if np.ndim(M) == 0:
-            prof = np.squeeze(prof, axis=-1)
         if np.ndim(r) == 0:
+            prof = np.squeeze(prof, axis=-1)
+        if np.ndim(M) == 0:
             prof = np.squeeze(prof, axis=0)
         return prof
 
@@ -774,13 +772,13 @@ class HaloProfileHernquist(HaloProfile):
         check(status)
         norm = M_use / norm
 
-        x = r_use[:, None] / R_s[None, :]
-        prof = norm[None, :] / (x * (1 + x)**3)
+        x = r_use[None, :] / R_s[:, None]
+        prof = norm[:, None] / (x * (1 + x)**3)
         if self.truncated:
-            prof[r_use[:, None] > R_M[None, :]] = 0
+            prof[r_use[None, :] > R_M[:, None]] = 0
 
-        if np.ndim(M) == 0:
-            prof = np.squeeze(prof, axis=-1)
         if np.ndim(r) == 0:
+            prof = np.squeeze(prof, axis=-1)
+        if np.ndim(M) == 0:
             prof = np.squeeze(prof, axis=0)
         return prof

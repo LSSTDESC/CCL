@@ -29,7 +29,7 @@ def smoke_assert_prof_real(profile):
               (2, 3),
               (1, 3),
               (3, 1)]
-    for (sr, sm), sh in zip(sizes, shapes):
+    for (sm, sr), sh in zip(sizes, shapes):
         if sr == 0:
             r = 0.5
         else:
