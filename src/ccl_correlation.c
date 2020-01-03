@@ -10,8 +10,6 @@
 #include <gsl/gsl_sf_bessel.h>
 #include <gsl/gsl_sf_legendre.h>
 
-#include "ccl_fftlog.h"
-
 #include "ccl.h"
 
 /*--------ROUTINE: taper_cl ------
