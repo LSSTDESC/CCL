@@ -27,7 +27,7 @@ def test_fftlog_plaw(dim, mu, alpha):
     fk_arr = f(k_arr)
 
     status = 0
-    result, status = ccl.ccllib.fftlog_transform(k_arr, fk_arr,
+    result, status = ccl.ccllib.fftlog_transform(1, k_arr, fk_arr,
                                                  dim, mu, -alpha,
                                                  2 * k_arr.size, status)
     assert status == 0

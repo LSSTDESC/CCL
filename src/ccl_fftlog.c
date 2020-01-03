@@ -6,7 +6,7 @@
 #include <gsl/gsl_sf_result.h>
 #include <gsl/gsl_sf_gamma.h>
 #include <complex.h>
-#include "ccl_fftlog.h"
+#include "ccl.h"
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -60,7 +60,7 @@ static double goodkr(int N, double mu, double q, double L, double kr)
  * same as for the function fht().  The parameter L is defined (for whatever
  * reason) to be N times the logarithmic spacing of the input array, i.e.
  *   L = N * log(r[N-1]/r[0])/(N-1) */
-static void compute_u_coefficients(int N, double mu, double q, double L, double kcrc, double complex u[])
+static void compute_u_coefficients(int N, double mu, double q, double L, double kcrc, double complex *u)
 {
   double y = M_PI/L;
   double k0r0 = kcrc * exp(-L);
@@ -97,75 +97,117 @@ static void compute_u_coefficients(int N, double mu, double q, double L, double 
  * If u is NULL, the transform coefficients will be computed anew and discarded
  * afterwards.  If you plan on performing many consecutive transforms, it is
  * more efficient to pre-compute the u coefficients. */
-void fht(int N, const double r[], const double complex a[], double k[], double complex b[], double mu,
-         double q, double kcrc, int noring, double complex* u)
+static void fht(int npk, int N,
+		double *k, double **pk,
+		double *r, double **xi,
+		double dim, double mu, double q, double kcrc,
+		int noring, double complex* u, int *status)
 {
-  double L = log(r[N-1]/r[0]) * N/(N-1.);
+  double L = log(k[N-1]/k[0]) * N/(N-1.);
   double complex* ulocal = NULL;
   if(u == NULL) {
     if(noring)
       kcrc = goodkr(N, mu, q, L, kcrc);
+
     ulocal = malloc (sizeof(complex double)*N);
-    compute_u_coefficients(N, mu, q, L, kcrc, ulocal);
-    u = ulocal;
+    if(ulocal==NULL)
+      *status=CCL_ERROR_MEMORY;
+
+    if(*status == 0) {
+      compute_u_coefficients(N, mu, q, L, kcrc, ulocal);
+      u = ulocal;
+    }
   }
 
-  /* Compute the convolution b = a*u using FFTs */
-  fftw_plan forward_plan = fftw_plan_dft_1d(N, (fftw_complex*) a, (fftw_complex*) b,  -1, FFTW_ESTIMATE);
-  fftw_plan reverse_plan = fftw_plan_dft_1d(N, (fftw_complex*) b, (fftw_complex*) b, +1, FFTW_ESTIMATE);
-  fftw_execute(forward_plan);
-  for(int m = 0; m < N; m++)
-    b[m] *= u[m] / (double)(N);       // divide by N since FFTW doesn't normalize the inverse FFT
-  fftw_execute(reverse_plan);
-  fftw_destroy_plan(forward_plan);
-  fftw_destroy_plan(reverse_plan);
-
-  /* Reverse b array */
-  double complex tmp;
-  for(int n = 0; n < N/2; n++) {
-    tmp = b[n];
-    b[n] = b[N-n-1];
-    b[N-n-1] = tmp;
+  double complex* a;
+  double complex* b;
+  if(*status == 0) {
+    a = malloc(sizeof(complex double)*N);
+    if(a==NULL)
+      *status=CCL_ERROR_MEMORY;
+  }
+  if(*status == 0) {
+    b = malloc(sizeof(complex double)*N);
+    if(b==NULL)
+      *status=CCL_ERROR_MEMORY;
   }
 
-  /* Compute k's corresponding to input r's */
-  double k0r0 = kcrc * exp(-L);
-  k[0] = k0r0/r[0];
-  for(int n = 1; n < N; n++)
-    k[n] = k[0] * exp(n*L/N);
+  double *prefac_pk;
+  if(*status == 0) {
+    prefac_pk = malloc(N*sizeof(double));
+    if(prefac_pk==NULL)
+      *status=CCL_ERROR_MEMORY;
+  }
+
+  double *prefac_xi;
+  if(*status == 0) {
+    prefac_xi = malloc(N*sizeof(double));
+    if(prefac_xi==NULL)
+      *status=CCL_ERROR_MEMORY;
+  }
+
+  if(*status == 0) {
+    for(int i = 0; i < N; i++)
+      prefac_pk[i] = pow(k[i], dim/2-q);
+
+    /* Compute k's corresponding to input r's */
+    double k0r0 = kcrc * exp(-L);
+    r[0] = k0r0/k[0];
+    for(int n = 1; n < N; n++)
+      r[n] = r[0] * exp(n*L/N);
+
+    double one_over_2pi_dhalf = pow(2*M_PI,-dim/2);
+    for(int i = 0; i < N; i++)
+      prefac_xi[i] = one_over_2pi_dhalf * pow(r[i], -dim/2-q);
+
+    /* Compute the convolution b = a*u using FFTs */
+    fftw_plan forward_plan = fftw_plan_dft_1d(N, (fftw_complex*) a, (fftw_complex*) b,
+					      -1, FFTW_ESTIMATE);
+    fftw_plan reverse_plan = fftw_plan_dft_1d(N, (fftw_complex*) b, (fftw_complex*) b,
+					      +1, FFTW_ESTIMATE);
+
+    for(int j = 0; j < npk; j++) {
+      for(int i = 0; i < N; i++)
+	a[i] = prefac_pk[i] * pk[j][i];
+
+      fftw_execute(forward_plan);
+      for(int m = 0; m < N; m++)
+	b[m] *= u[m] / (double)(N);       // divide by N since FFTW doesn't normalize the inverse FFT
+      fftw_execute(reverse_plan);
+
+      /* Reverse b array */
+      double complex tmp;
+      for(int n = 0; n < N/2; n++) {
+	tmp = b[n];
+	b[n] = b[N-n-1];
+	b[N-n-1] = tmp;
+      }
+
+      for(int i = 0; i < N; i++)
+	xi[j][i] = prefac_xi[i] * creal(b[i]);
+    }
+
+    fftw_destroy_plan(forward_plan);
+    fftw_destroy_plan(reverse_plan);
+  }
 
   free(ulocal);
-}
-
-static void fftlog_xi_dim(double dim, double mu, double epsilon,
-			  int N, const double k[], const double pk[],
-			  double r[], double xi[])
-{
-  double complex* a = malloc(sizeof(complex double)*N);
-  double complex* b = malloc(sizeof(complex double)*N);
-
-  for(int i = 0; i < N; i++)
-    a[i] = pow(k[i], dim/2-epsilon) * pk[i];
-  double one_over_2pi_dhalf = pow(2*M_PI,-dim/2);
-  //  N, r, fr, k, fk,mu, q,    kcrc, noring,*u_return
-  fht(N, k, a,  r, b, mu, epsilon, 1, 1, NULL);
-  for(int i = 0; i < N; i++)
-    xi[i] = one_over_2pi_dhalf * pow(r[i], -dim/2-epsilon) * creal(b[i]);
-
   free(a);
   free(b);
+  free(prefac_pk);
+  free(prefac_xi);
 }
  
-void ccl_fftlog_ComputeXi2D(double mu,double epsilon,
-			    int N, const double l[],const double cl[],
-			    double th[], double xi[])
+void ccl_fftlog_ComputeXi2D(double mu, double epsilon,
+			    int npk, int N, double *l,double **cl,
+			    double *th, double **xi, int *status)
 {
-  fftlog_xi_dim(2, mu, epsilon, N, l, cl, th, xi);
+  fht(npk, N, l, cl, th, xi, 2., mu, epsilon, 1, 1, NULL, status);
 }
 
 void ccl_fftlog_ComputeXi3D(double l, double epsilon,
-			    int N, const double k[], const double pk[],
-			    double r[], double xi[])
+			    int npk, int N, double *k, double **pk,
+			    double *r, double **xi, int *status)
 {
-  fftlog_xi_dim(3., l+0.5, epsilon, N, k, pk, r, xi);
+  fht(npk, N, k, pk, r, xi, 3., l+0.5, epsilon, 1, 1, NULL, status);
 }

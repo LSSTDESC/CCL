@@ -9,7 +9,7 @@ COSMO = ccl.Cosmology(
 M200 = ccl.halos.MassDef200c()
 
 
-def one_f(cosmo, M, a, mdef):
+def one_f(cosmo, M, a=None, mdef=None):
     if np.ndim(M) == 0:
         return 1
     else:
@@ -29,7 +29,7 @@ def smoke_assert_prof_real(profile):
               (2, 3),
               (1, 3),
               (3, 1)]
-    for (sr, sm), sh in zip(sizes, shapes):
+    for (sm, sr), sh in zip(sizes, shapes):
         if sr == 0:
             r = 0.5
         else:
@@ -103,8 +103,8 @@ def test_projected_plaw(alpha):
     def s_r_t(rt):
         return prefac * rt**(1 + alpha)
 
-    def alpha_f(cosmo, M, a, mdef):
-        return alpha * one_f(cosmo, M, a, mdef)
+    def alpha_f(cosmo, a):
+        return alpha
 
     p = ccl.halos.HaloProfilePowerLaw(one_f, alpha_f)
     p.update_precision_fftlog(plaw_index=alpha)
@@ -127,8 +127,8 @@ def test_plaw_accuracy(alpha):
     def fk(k):
         return prefac / k**(3 + alpha)
 
-    def alpha_f(cosmo, M, a, mdef):
-        return alpha * one_f(cosmo, M, a, mdef)
+    def alpha_f(cosmo, a):
+        return alpha
 
     p = ccl.halos.HaloProfilePowerLaw(one_f, alpha_f)
     p.update_precision_fftlog(plaw_index=alpha)

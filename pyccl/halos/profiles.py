@@ -117,31 +117,26 @@ class HaloProfile(object):
         """
         self.precision_fftlog.update(kwargs)
 
-    def _get_plaw_fourier(self, cosmo, M, a, mass_def):
+    def _get_plaw_fourier(self, cosmo, a):
         """ This controls the value of `plaw_fourier` to be used
-        as a function of cosmology, halo mass, and scale factor.
+        as a function of cosmology and scale factor.
 
         Args:
             cosmo (:obj:`Cosmology`): a Cosmology object.
-            M (float): halo mass in units of M_sun.
             a (float): scale factor.
-            mass_def (:obj:`MassDef`): a mass definition object.
 
         Returns:
             float: power law index to be used with FFTLog.
         """
         return self.precision_fftlog['plaw_fourier']
 
-    def _get_plaw_projected(self, cosmo, M, a, mass_def):
+    def _get_plaw_projected(self, cosmo, a):
         """ This controls the value of `plaw_projected` to be
-        used as a function of cosmology, halo mass, and scale
-        factor.
+        used as a function of cosmology and scale factor.
 
         Args:
             cosmo (:obj:`Cosmology`): a Cosmology object.
-            M (float): halo mass in units of M_sun.
             a (float): scale factor.
-            mass_def (:obj:`MassDef`): a mass definition object.
 
         Returns:
             float: power law index to be used with FFTLog.
@@ -161,7 +156,7 @@ class HaloProfile(object):
 
         Returns:
             float or array_like: halo profile. The shape of the
-            output will be `(N_r, N_M)` where `N_r` and `N_m` are
+            output will be `(N_M, N_r)` where `N_r` and `N_m` are
             the sizes of `r` and `M` respectively.
         """
         if getattr(self, '_real', None):
@@ -193,7 +188,7 @@ class HaloProfile(object):
 
         Returns:
             float or array_like: halo profile. The shape of the
-            output will be `(N_k, N_M)` where `N_k` and `N_m` are
+            output will be `(N_M, N_k)` where `N_k` and `N_m` are
             the sizes of `k` and `M` respectively.
         """
         if getattr(self, '_fourier', None):
@@ -224,14 +219,15 @@ class HaloProfile(object):
 
         Returns:
             float or array_like: halo profile. The shape of the
-            output will be `(N_r, N_M)` where `N_r` and `N_m` are
+            output will be `(N_M, N_r)` where `N_r` and `N_m` are
             the sizes of `r` and `M` respectively.
         """
         if getattr(self, '_projected', None):
             s_r_t = self._projected(cosmo, r_t, M, a, mass_def)
         else:
             s_r_t = self._projected_fftlog_wrap(cosmo, r_t, M,
-                                                a, mass_def)
+                                                a, mass_def,
+                                                is_cumul2d=False)
         return s_r_t
 
     def cumul2d(self, cosmo, r_t, M, a, mass_def=None):
@@ -252,14 +248,15 @@ class HaloProfile(object):
 
         Returns:
             float or array_like: halo profile. The shape of the
-            output will be `(N_r, N_M)` where `N_r` and `N_m` are
+            output will be `(N_M, N_r)` where `N_r` and `N_m` are
             the sizes of `r` and `M` respectively.
         """
         if getattr(self, '_cumul2d', None):
             s_r_t = self._cumul2d(cosmo, r_t, M, a, mass_def)
         else:
-            s_r_t = self._cumul2d_fftlog_wrap(cosmo, r_t, M,
-                                              a, mass_def)
+            s_r_t = self._projected_fftlog_wrap(cosmo, r_t, M,
+                                                a, mass_def,
+                                                is_cumul2d=True)
         return s_r_t
 
     def _fftlog_wrap(self, cosmo, k, M, a, mass_def,
@@ -279,6 +276,7 @@ class HaloProfile(object):
         k_use = np.atleast_1d(k)
         M_use = np.atleast_1d(M)
         lk_use = np.log(k_use)
+        nM = len(M_use)
 
         # k/r ranges to be used with FFTLog and its sampling.
         if large_padding:
@@ -291,45 +289,45 @@ class HaloProfile(object):
                self.precision_fftlog['n_per_decade'])
         r_arr = np.geomspace(k_min, k_max, n_k)
 
-        p_k_out = np.zeros([M_use.size, k_use.size])
-        for im, mass in enumerate(M_use):
-            # Compute real profile values
-            p_real = p_func(cosmo, r_arr, mass, a, mass_def)
+        p_k_out = np.zeros([nM, k_use.size])
+        # Compute real profile values
+        p_real_M = p_func(cosmo, r_arr, M_use, a, mass_def).flatten()
+        # Power-law index to pass to FFTLog.
+        plaw_index = self._get_plaw_fourier(cosmo, a)
 
-            # Power-law index to pass to FFTLog.
-            plaw_index = self._get_plaw_fourier(cosmo, mass,
-                                                a, mass_def)
-            # Compute Fourier profile through fftlog
-            status = 0
-            result, status = lib.fftlog_transform(r_arr, p_real,
-                                                  3, 0, plaw_index,
-                                                  2 * r_arr.size, status)
-            check(status)
-            k_arr, p_k_arr = result.reshape([2, r_arr.size])
-
+        # Compute Fourier profile through fftlog
+        status = 0
+        result, status = lib.fftlog_transform(nM, r_arr, p_real_M,
+                                              3, 0, plaw_index,
+                                              (nM + 1) * n_k, status)
+        check(status)
+        result = result.reshape([nM + 1, n_k])
+        lk_arr = np.log(result[0])
+        p_fourier_M = result[1:]
+        for im, p_k_arr in enumerate(p_fourier_M):
             # Resample into input k values
-            p_fourier = resample_array(np.log(k_arr), p_k_arr, lk_use,
+            p_fourier = resample_array(lk_arr, p_k_arr, lk_use,
                                        self.precision_fftlog['extrapol'],
                                        self.precision_fftlog['extrapol'],
                                        0, 0)
             p_k_out[im, :] = p_fourier
-
         if fourier_out:
             p_k_out *= (2 * np.pi)**3
 
-        p_k_out = p_k_out.T
-        if np.ndim(M) == 0:
-            p_k_out = np.squeeze(p_k_out, axis=-1)
         if np.ndim(k) == 0:
+            p_k_out = np.squeeze(p_k_out, axis=-1)
+        if np.ndim(M) == 0:
             p_k_out = np.squeeze(p_k_out, axis=0)
         return p_k_out
 
-    def _projected_fftlog_wrap(self, cosmo, r_t, M, a, mass_def):
-        # This computes Sigma(<R) from the Fourier-space profile as:
+    def _projected_fftlog_wrap(self, cosmo, r_t, M, a, mass_def,
+                               is_cumul2d=False):
+        # This computes Sigma(R) from the Fourier-space profile as:
         # Sigma(R) = \frac{1}{2\pi} \int dk k J_0(k R) \rho(k)
         r_t_use = np.atleast_1d(r_t)
         M_use = np.atleast_1d(M)
         lr_t_use = np.log(r_t_use)
+        nM = len(M_use)
 
         # k/r range to be used with FFTLog and its sampling.
         r_t_min = self.precision_fftlog['padding_lo_fftlog'] * np.amin(r_t_use)
@@ -339,106 +337,57 @@ class HaloProfile(object):
         k_arr = np.geomspace(r_t_min, r_t_max, n_r_t)
 
         sig_r_t_out = np.zeros([M_use.size, r_t_use.size])
-        for im, mass in enumerate(M_use):
-            # Compute Fourier-space profile
-            if getattr(self, '_fourier', None):
-                # Compute from `_fourier` if available.
-                p_fourier = self._fourier(cosmo, k_arr, mass,
-                                          a, mass_def)
-            else:
-                # Compute with FFTLog otherwise.
-                lpad = self.precision_fftlog['large_padding_2D']
-                p_fourier = self._fftlog_wrap(cosmo,
-                                              k_arr,
-                                              mass, a,
-                                              mass_def,
-                                              fourier_out=True,
-                                              large_padding=lpad)
-
-            # Power-law index to pass to FFTLog.
-            plaw_index = self._get_plaw_projected(cosmo, mass,
-                                                  a, mass_def)
-            # Compute projected profile through fftlog
-            status = 0
-            result, status = lib.fftlog_transform(k_arr, p_fourier,
-                                                  2, 0, plaw_index,
-                                                  2 * k_arr.size, status)
-            check(status)
-            r_t_arr, sig_r_t_arr = result.reshape([2, k_arr.size])
-
-            # Resample into input r_t values
-            sig_r_t = resample_array(np.log(r_t_arr), sig_r_t_arr,
-                                     lr_t_use,
-                                     self.precision_fftlog['extrapol'],
-                                     self.precision_fftlog['extrapol'],
-                                     0, 0)
-            sig_r_t_out[im, :] = sig_r_t
-        sig_r_t_out = sig_r_t_out.T
-
-        if np.ndim(M) == 0:
-            sig_r_t_out = np.squeeze(sig_r_t_out, axis=-1)
-        if np.ndim(r_t) == 0:
-            sig_r_t_out = np.squeeze(sig_r_t_out, axis=0)
-        return sig_r_t_out
-
-    def _cumul2d_fftlog_wrap(self, cosmo, r_t, M, a, mass_def):
-        # This computes Sigma(<R) from the Fourier-space profile as:
-        # Sigma(<R) = \frac{1}{2\pi} \int dk k 2 J_1(k R)/(k R) \rho(k)
-        r_t_use = np.atleast_1d(r_t)
-        M_use = np.atleast_1d(M)
-        lr_t_use = np.log(r_t_use)
-
-        # k/r range to be used with FFTLog and its sampling.
-        r_t_min = self.precision_fftlog['padding_lo_fftlog'] * np.amin(r_t_use)
-        r_t_max = self.precision_fftlog['padding_hi_fftlog'] * np.amax(r_t_use)
-        n_r_t = (int(np.log10(r_t_max / r_t_min)) *
-                 self.precision_fftlog['n_per_decade'])
-        k_arr = np.geomspace(r_t_min, r_t_max, n_r_t)
-
-        sig_r_t_out = np.zeros([M_use.size, r_t_use.size])
-        for im, mass in enumerate(M_use):
-            # Compute Fourier-space profile
-            if getattr(self, '_fourier', None):
-                # Compute from `_fourier` if available.
-                p_fourier = self._fourier(cosmo, k_arr, mass,
-                                          a, mass_def)
-            else:
-                # Compute with FFTLog otherwise.
-                lpad = self.precision_fftlog['large_padding_2D']
-                p_fourier = self._fftlog_wrap(cosmo,
-                                              k_arr,
-                                              mass, a,
-                                              mass_def,
-                                              fourier_out=True,
-                                              large_padding=lpad)
+        # Compute Fourier-space profile
+        if getattr(self, '_fourier', None):
+            # Compute from `_fourier` if available.
+            p_fourier = self._fourier(cosmo, k_arr, M_use,
+                                      a, mass_def)
+        else:
+            # Compute with FFTLog otherwise.
+            lpad = self.precision_fftlog['large_padding_2D']
+            p_fourier = self._fftlog_wrap(cosmo,
+                                          k_arr,
+                                          M_use, a,
+                                          mass_def,
+                                          fourier_out=True,
+                                          large_padding=lpad)
+        if is_cumul2d:
             # The cumulative profile involves a factor 1/(k R) in
             # the integrand.
-            p_fourier *= 2 / k_arr
+            p_fourier *= 2 / k_arr[None, :]
+        p_fourier = p_fourier.flatten()
+        # Power-law index to pass to FFTLog.
+        if is_cumul2d:
+            i_bessel = 1
+            plaw_index = self._get_plaw_projected(cosmo, a) - 1
+        else:
+            i_bessel = 0
+            plaw_index = self._get_plaw_projected(cosmo, a)
 
-            # Power-law index to pass to FFTLog.
-            plaw_index = self._get_plaw_projected(cosmo, mass,
-                                                  a, mass_def) - 1
-            # Compute cumulative surface density through fftlog
-            status = 0
-            result, status = lib.fftlog_transform(k_arr, p_fourier,
-                                                  2, 1, plaw_index,
-                                                  2 * k_arr.size, status)
-            check(status)
-            r_t_arr, sig_r_t_arr = result.reshape([2, k_arr.size])
-            sig_r_t_arr /= r_t_arr
-
+        # Compute projected profile through fftlog
+        status = 0
+        result, status = lib.fftlog_transform(nM, k_arr, p_fourier,
+                                              2, i_bessel, plaw_index,
+                                              (nM + 1) * n_r_t, status)
+        check(status)
+        result = result.reshape([nM + 1, n_r_t])
+        sig_r_t_M = result[1:]
+        lr_t_arr = np.log(result[0])
+        if is_cumul2d:
+            r_t_arr = result[0]
+            sig_r_t_M /= r_t_arr[None, :]
+        for im, sig_r_t_arr in enumerate(sig_r_t_M):
             # Resample into input r_t values
-            sig_r_t = resample_array(np.log(r_t_arr), sig_r_t_arr,
+            sig_r_t = resample_array(lr_t_arr, sig_r_t_arr,
                                      lr_t_use,
                                      self.precision_fftlog['extrapol'],
                                      self.precision_fftlog['extrapol'],
                                      0, 0)
             sig_r_t_out[im, :] = sig_r_t
-        sig_r_t_out = sig_r_t_out.T
 
-        if np.ndim(M) == 0:
-            sig_r_t_out = np.squeeze(sig_r_t_out, axis=-1)
         if np.ndim(r_t) == 0:
+            sig_r_t_out = np.squeeze(sig_r_t_out, axis=-1)
+        if np.ndim(M) == 0:
             sig_r_t_out = np.squeeze(sig_r_t_out, axis=0)
         return sig_r_t_out
 
@@ -478,12 +427,12 @@ class HaloProfileGaussian(HaloProfile):
         # Compute normalization
         rho0 = self.rho_0(cosmo, M_use, a, mass_def)
         # Form factor
-        prof = np.exp(-(r_use[:, None] / rs[None, :])**2)
-        prof = prof * rho0[None, :]
+        prof = np.exp(-(r_use[None, :] / rs[:, None])**2)
+        prof = prof * rho0[:, None]
 
-        if np.ndim(M) == 0:
-            prof = np.squeeze(prof, axis=-1)
         if np.ndim(r) == 0:
+            prof = np.squeeze(prof, axis=-1)
+        if np.ndim(M) == 0:
             prof = np.squeeze(prof, axis=0)
         return prof
 
@@ -502,8 +451,8 @@ class HaloProfilePowerLaw(HaloProfile):
             in units of M_sun, `a` is the scale factor and
             `mdef` is a :obj:`MassDef` object.
         tilt (:obj:`function`): the power law index of the
-            profile. It should have the same signature as
-            `r_scale`.
+            profile. The signature of this function should
+            be `f(cosmo, a)`.
     """
     name = 'PowerLaw'
 
@@ -512,15 +461,15 @@ class HaloProfilePowerLaw(HaloProfile):
         self.tilt = tilt
         super(HaloProfilePowerLaw, self).__init__()
 
-    def _get_plaw_fourier(self, cosmo, M, a, mass_def):
+    def _get_plaw_fourier(self, cosmo, a):
         # This is the optimal value for a pure power law
         # profile.
-        return self.tilt(cosmo, M, a, mass_def)
+        return self.tilt(cosmo, a)
 
-    def _get_plaw_projected(self, cosmo, M, a, mass_def):
+    def _get_plaw_projected(self, cosmo, a):
         # This is the optimal value for a pure power law
         # profile.
-        return -3 - self.tilt(cosmo, M, a, mass_def)
+        return -3 - self.tilt(cosmo, a)
 
     def _real(self, cosmo, r, M, a, mass_def):
         r_use = np.atleast_1d(r)
@@ -528,13 +477,13 @@ class HaloProfilePowerLaw(HaloProfile):
 
         # Compute scale
         rs = self.r_s(cosmo, M_use, a, mass_def)
-        tilt = self.tilt(cosmo, M_use, a, mass_def)
+        tilt = self.tilt(cosmo, a)
         # Form factor
-        prof = (r_use[:, None] / rs[None, :])**tilt[None, :]
+        prof = (r_use[None, :] / rs[:, None])**tilt
 
-        if np.ndim(M) == 0:
-            prof = np.squeeze(prof, axis=-1)
         if np.ndim(r) == 0:
+            prof = np.squeeze(prof, axis=-1)
+        if np.ndim(M) == 0:
             prof = np.squeeze(prof, axis=0)
         return prof
 
@@ -622,17 +571,17 @@ class HaloProfileNFW(HaloProfile):
         c_M = self._get_cM(cosmo, M_use, a, mdef=mass_def)
         R_s = R_M / c_M
 
-        x = r_use[:, None] / R_s[None, :]
+        x = r_use[None, :] / R_s[:, None]
         prof = 1./(x * (1 + x)**2)
         if self.truncated:
-            prof[r_use[:, None] > R_M[None, :]] = 0
+            prof[r_use[None, :] > R_M[:, None]] = 0
 
         norm = self._norm(M_use, R_s, c_M)
-        prof = prof[:, :] * norm[None, :]
+        prof = prof[:, :] * norm[:, None]
 
-        if np.ndim(M) == 0:
-            prof = np.squeeze(prof, axis=-1)
         if np.ndim(r) == 0:
+            prof = np.squeeze(prof, axis=-1)
+        if np.ndim(M) == 0:
             prof = np.squeeze(prof, axis=0)
         return prof
 
@@ -660,14 +609,14 @@ class HaloProfileNFW(HaloProfile):
         c_M = self._get_cM(cosmo, M_use, a, mdef=mass_def)
         R_s = R_M / c_M
 
-        x = r_use[:, None] / R_s[None, :]
+        x = r_use[None, :] / R_s[:, None]
         prof = self._fx_projected(x)
         norm = 2 * R_s * self._norm(M_use, R_s, c_M)
-        prof = prof[:, :] * norm[None, :]
+        prof = prof[:, :] * norm[:, None]
 
-        if np.ndim(M) == 0:
-            prof = np.squeeze(prof, axis=-1)
         if np.ndim(r) == 0:
+            prof = np.squeeze(prof, axis=-1)
+        if np.ndim(M) == 0:
             prof = np.squeeze(prof, axis=0)
         return prof
 
@@ -697,14 +646,14 @@ class HaloProfileNFW(HaloProfile):
         c_M = self._get_cM(cosmo, M_use, a, mdef=mass_def)
         R_s = R_M / c_M
 
-        x = r_use[:, None] / R_s[None, :]
+        x = r_use[None, :] / R_s[:, None]
         prof = self._fx_cumul2d(x)
         norm = 2 * R_s * self._norm(M_use, R_s, c_M)
-        prof = prof[:, :] * norm[None, :]
+        prof = prof[:, :] * norm[:, None]
 
-        if np.ndim(M) == 0:
-            prof = np.squeeze(prof, axis=-1)
         if np.ndim(r) == 0:
+            prof = np.squeeze(prof, axis=-1)
+        if np.ndim(M) == 0:
             prof = np.squeeze(prof, axis=0)
         return prof
 
@@ -717,21 +666,21 @@ class HaloProfileNFW(HaloProfile):
         c_M = self._get_cM(cosmo, M_use, a, mdef=mass_def)
         R_s = R_M / c_M
 
-        x = k_use[:, None] * R_s[None, :]
+        x = k_use[None, :] * R_s[:, None]
         Si2, Ci2 = sici(x)
         P1 = M / (np.log(1 + c_M) - c_M / (1 + c_M))
         if self.truncated:
-            Si1, Ci1 = sici((1 + c_M[None, :]) * x)
+            Si1, Ci1 = sici((1 + c_M[:, None]) * x)
             P2 = np.sin(x) * (Si1 - Si2) + np.cos(x) * (Ci1 - Ci2)
-            P3 = np.sin(c_M[None, :] * x) / ((1 + c_M[None, :]) * x)
-            prof = P1[None, :] * (P2 - P3)
+            P3 = np.sin(c_M[:, None] * x) / ((1 + c_M[:, None]) * x)
+            prof = P1[:, None] * (P2 - P3)
         else:
             P2 = np.sin(x) * (0.5 * np.pi - Si2) - np.cos(x) * Ci2
-            prof = P1[None, :] * P2
+            prof = P1[:, None] * P2
 
-        if np.ndim(M) == 0:
-            prof = np.squeeze(prof, axis=-1)
         if np.ndim(k) == 0:
+            prof = np.squeeze(prof, axis=-1)
+        if np.ndim(M) == 0:
             prof = np.squeeze(prof, axis=0)
         return prof
 
@@ -778,15 +727,15 @@ class HaloProfileEinasto(HaloProfile):
         check(status)
         norm = M_use / norm
 
-        x = r_use[:, None] / R_s[None, :]
-        prof = norm[None, :] * np.exp(-2. * (x**alpha[None, :] - 1) /
-                                      alpha[None, :])
+        x = r_use[None, :] / R_s[:, None]
+        prof = norm[:, None] * np.exp(-2. * (x**alpha[:, None] - 1) /
+                                      alpha[:, None])
         if self.truncated:
-            prof[r_use[:, None] > R_M[None, :]] = 0
+            prof[r_use[None, :] > R_M[:, None]] = 0
 
-        if np.ndim(M) == 0:
-            prof = np.squeeze(prof, axis=-1)
         if np.ndim(r) == 0:
+            prof = np.squeeze(prof, axis=-1)
+        if np.ndim(M) == 0:
             prof = np.squeeze(prof, axis=0)
         return prof
 
@@ -823,13 +772,13 @@ class HaloProfileHernquist(HaloProfile):
         check(status)
         norm = M_use / norm
 
-        x = r_use[:, None] / R_s[None, :]
-        prof = norm[None, :] / (x * (1 + x)**3)
+        x = r_use[None, :] / R_s[:, None]
+        prof = norm[:, None] / (x * (1 + x)**3)
         if self.truncated:
-            prof[r_use[:, None] > R_M[None, :]] = 0
+            prof[r_use[None, :] > R_M[:, None]] = 0
 
-        if np.ndim(M) == 0:
-            prof = np.squeeze(prof, axis=-1)
         if np.ndim(r) == 0:
+            prof = np.squeeze(prof, axis=-1)
+        if np.ndim(M) == 0:
             prof = np.squeeze(prof, axis=0)
         return prof
