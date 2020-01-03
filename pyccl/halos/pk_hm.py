@@ -92,12 +92,12 @@ class HMCalculator(object):
         for ia, aa in enumerate(a_use):
             mf = self._hmf(massfunc, cosmo, aa, mdef=mdef)
             uk = prof.fourier(cosmo, k_use, self.mass, aa,
-                              mass_def=mdef)
+                              mass_def=mdef).T
             if normprof:
                 uk0 = prof.fourier(cosmo,
                                    self.precision['k_min'],
                                    self.mass, aa,
-                                   mass_def=mdef)
+                                   mass_def=mdef).T
                 norm = 1. / self._u_k_from_arrays(mf, uk0)
             else:
                 norm = 1.
@@ -126,12 +126,12 @@ class HMCalculator(object):
             mf = self._hmf(massfunc, cosmo, aa, mdef=mdef)
             bf = self._hbf(hbias, cosmo, aa, mdef=mdef)
             uk = prof.fourier(cosmo, k_use, self.mass, aa,
-                              mass_def=mdef)
+                              mass_def=mdef).T
             if normprof:
                 uk0 = prof.fourier(cosmo,
                                    self.precision['k_min'],
                                    self.mass, aa,
-                                   mass_def=mdef)
+                                   mass_def=mdef).T
                 norm = 1. / self._u_k_from_arrays(mf, uk0)
             else:
                 norm = 1.
@@ -182,7 +182,7 @@ class HMCalculator(object):
                 uk01 = prof.fourier(cosmo,
                                     self.precision['k_min'],
                                     self.mass, aa,
-                                    mass_def=mdef)
+                                    mass_def=mdef).T
                 norm1 = 1. / self._u_k_from_arrays(mf, uk01)
             else:
                 norm1 = 1.
@@ -193,7 +193,7 @@ class HMCalculator(object):
                     uk02 = prof_2.fourier(cosmo,
                                           self.precision['k_min'],
                                           self.mass, aa,
-                                          mass_def=mdef)
+                                          mass_def=mdef).T
                     norm2 = 1. / self._u_k_from_arrays(mf, uk02)
                 else:
                     norm2 = 1.
@@ -203,7 +203,7 @@ class HMCalculator(object):
                 bf = self._hbf(hbias, cosmo, aa, mdef=mdef)
                 # Compute first bias factor
                 uk_1 = prof.fourier(cosmo, k_use, self.mass, aa,
-                                    mass_def=mdef)
+                                    mass_def=mdef).T
                 bk_1 = self._b_k_from_arrays(mf, bf, uk_1)
 
                 # Compute second bias factor
@@ -211,7 +211,7 @@ class HMCalculator(object):
                     bk_2 = bk_1
                 else:
                     uk_2 = prof_2.fourier(cosmo, k_use, self.mass, aa,
-                                          mass_def=mdef)
+                                          mass_def=mdef).T
                     bk_2 = self._b_k_from_arrays(mf, bf, uk_2)
 
                 # Compute power spectrum
@@ -224,7 +224,7 @@ class HMCalculator(object):
                 uk2 = covprof.fourier_covar(prof, cosmo, k_use,
                                             self.mass, aa,
                                             prof_2=prof_2,
-                                            mass_def=mdef)
+                                            mass_def=mdef).T
                 pk_1h = self._u_k_from_arrays(mf, uk2)
             else:
                 pk_1h = 0.
