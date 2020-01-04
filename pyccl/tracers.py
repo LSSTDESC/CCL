@@ -141,6 +141,24 @@ class Tracer(object):
         # Do nothing, just initialize list of tracers
         self._trc = []
 
+    def _dndz(self, z):
+        raise NotImplementedError("`get_dndz` not implemented for "
+                                  "this `Tracer` type.")
+
+    def get_dndz(self, z):
+        """Get the redshift distribution for this tracer.
+        Only available for some tracers (`NumberCountsTracer` and
+        `WeakLensingTracer`).
+
+        Args:
+            z (float or array_like): redshift values.
+
+        Returns:
+            array_like: redshift distribution evaluated at the
+                input values of `z`.
+        """
+        return self._dndz(z)
+
     def get_kernel(self, chi):
         """Get the radial kernels for all tracers contained
         in this `Tracer`.
@@ -416,6 +434,11 @@ class NumberCountsTracer(Tracer):
         # we need the distance functions at the C layer
         cosmo.compute_distances()
 
+        from scipy.interpolate import interp1d
+        z_n, n = _check_array_params(dndz)
+        self._dndz = interp1d(z_n, n, bounds_error=False,
+                              fill_value=0)
+
         kernel_d = None
         if bias is not None:  # Has density term
             # Kernel
@@ -466,6 +489,11 @@ class WeakLensingTracer(Tracer):
 
         # we need the distance functions at the C layer
         cosmo.compute_distances()
+
+        from scipy.interpolate import interp1d
+        z_n, n = _check_array_params(dndz)
+        self._dndzf = interp1d(z_n, n, bounds_error=False,
+                               fill_value=0)
 
         if has_shear:
             # Kernel
