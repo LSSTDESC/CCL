@@ -7,9 +7,13 @@ COSMO = ccl.Cosmology(
     transfer_function='bbks', matter_power_spectrum='linear')
 
 
+def dndz(z):
+    return np.exp(-((z-0.5)/0.1)**2)
+
+
 def get_tracer(tracer_type):
-    z = np.linspace(0., 1., 200)
-    n = np.exp(-((z-0.5)/0.1)**2)
+    z = np.linspace(0., 1., 2000)
+    n = dndz(z)
     b = np.sqrt(1. + z)
 
     if tracer_type == 'nc':
@@ -30,6 +34,23 @@ def get_tracer(tracer_type):
         ntr = 0
         tr = ccl.Tracer()
     return tr, ntr
+
+
+@pytest.mark.parametrize('tracer_type', ['nc', 'wl'])
+def test_tracer_dndz_smoke(tracer_type):
+    tr, _ = get_tracer(tracer_type)
+    for z in [np.linspace(0.5, 0.6, 10),
+              0.5]:
+        n1 = dndz(z)
+        n2 = tr.get_dndz(z)
+        assert np.all(np.fabs(n1 / n2 - 1) < 1E-5)
+
+
+@pytest.mark.parametrize('tracer_type', ['cl', 'not'])
+def test_tracer_dndz_errors(tracer_type):
+    tr, _ = get_tracer(tracer_type)
+    with pytest.raises(NotImplementedError):
+        tr.get_dndz(0.5)
 
 
 @pytest.mark.parametrize('tracer_type', ['nc', 'wl', 'cl', 'not'])

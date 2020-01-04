@@ -492,8 +492,8 @@ class WeakLensingTracer(Tracer):
 
         from scipy.interpolate import interp1d
         z_n, n = _check_array_params(dndz)
-        self._dndzf = interp1d(z_n, n, bounds_error=False,
-                               fill_value=0)
+        self._dndz = interp1d(z_n, n, bounds_error=False,
+                              fill_value=0)
 
         if has_shear:
             # Kernel
