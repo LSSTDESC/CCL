@@ -57,19 +57,19 @@ ccl_f1d_t *ccl_f1d_t_new(int n,double *x,double *y,double y0,double yf,
   }
   else if(spl->extrap_lo_type == ccl_f1d_extrap_linx_logy) {
     if(y[1]*y[0]<=0)
-      *status=CCL_ERROR_SPLINE;
+      spl->extrap_lo_type=ccl_f1d_extrap_0;
     else
       spl->der_lo = log(y[1]/y[0])/(x[1]-x[0]);
   }
   else if(spl->extrap_lo_type == ccl_f1d_extrap_logx_liny) {
     if(x[1]*x[0]<=0)
-      *status=CCL_ERROR_SPLINE;
+      spl->extrap_lo_type=ccl_f1d_extrap_0;
     else
       spl->der_lo = (y[1]-y[0])/log(x[1]/x[0]);
   }
   else if(spl->extrap_lo_type == ccl_f1d_extrap_logx_logy) {
     if((y[1]*y[0]<=0) || (x[1]*x[0]<=0))
-      *status=CCL_ERROR_SPLINE;
+      spl->extrap_lo_type=ccl_f1d_extrap_0;
     else
       spl->der_lo = log(y[1]/y[0])/log(x[1]/x[0]);
   }
@@ -85,19 +85,19 @@ ccl_f1d_t *ccl_f1d_t_new(int n,double *x,double *y,double y0,double yf,
   }
   else if(spl->extrap_hi_type == ccl_f1d_extrap_linx_logy) {
     if(y[n-1]*y[n-2]<=0)
-      *status=CCL_ERROR_SPLINE;
+      spl->extrap_hi_type=ccl_f1d_extrap_0;
     else
       spl->der_hi = log(y[n-1]/y[n-2])/(x[n-1]-x[n-2]);
   }
   else if(spl->extrap_hi_type == ccl_f1d_extrap_logx_liny) {
     if(x[n-1]*x[n-2]<=0)
-      *status=CCL_ERROR_SPLINE;
+      spl->extrap_hi_type=ccl_f1d_extrap_0;
     else
       spl->der_hi = (y[n-1]-y[n-2])/log(x[n-1]/x[n-2]);
   }
   else if(spl->extrap_hi_type == ccl_f1d_extrap_logx_logy) {
     if((y[n-1]*y[n-2]<=0) || (x[n-1]*x[n-2]<=0))
-      *status=CCL_ERROR_SPLINE;
+      spl->extrap_hi_type=ccl_f1d_extrap_0;
     else
       spl->der_hi = log(y[n-1]/y[n-2])/log(x[n-1]/x[n-2]);
   }
