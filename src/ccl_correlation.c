@@ -70,7 +70,9 @@ static void ccl_tracer_corr_fftlog(ccl_cosmology *cosmo,
 
   //Interpolate input Cl into array needed for FFTLog
   ccl_f1d_t *cl_spl=ccl_f1d_t_new(n_ell,ell,cls,cls[0],0,
-				  ccl_f1d_extrap_const,ccl_f1d_extrap_logx_logy);
+				  ccl_f1d_extrap_const,
+				  ccl_f1d_extrap_logx_logy,
+				  status);
   if(cl_spl==NULL) {
     free(l_arr);
     free(cl_arr);
@@ -120,7 +122,8 @@ static void ccl_tracer_corr_fftlog(ccl_cosmology *cosmo,
   // Interpolate to output values of theta
   ccl_f1d_t *wth_spl=ccl_f1d_t_new(cosmo->spline_params.N_ELL_CORR,th_arr,
 				   wth_arr,wth_arr[0],0,
-				   ccl_f1d_extrap_const,ccl_f1d_extrap_const);
+				   ccl_f1d_extrap_const,
+				   ccl_f1d_extrap_const, status);
   if (wth_spl == NULL) {
     free(l_arr);
     free(cl_arr);
@@ -169,7 +172,7 @@ static void ccl_tracer_corr_bessel(ccl_cosmology *cosmo,
   ccl_f1d_t *cl_spl = NULL;
   cl_spl = ccl_f1d_t_new(n_ell, ell, cls, cls[0], 0,
 			 ccl_f1d_extrap_logx_logy,
-			 ccl_f1d_extrap_logx_logy);
+			 ccl_f1d_extrap_logx_logy, status);
   if(cl_spl == NULL) {
     *status = CCL_ERROR_MEMORY;
     ccl_cosmology_set_status_message(
@@ -184,11 +187,11 @@ static void ccl_tracer_corr_bessel(ccl_cosmology *cosmo,
   gsl_integration_workspace *w = NULL;
   int local_status;
 
-#pragma omp parallel default(none)				      \
-  shared(cosmo, status, wtheta, n_ell, ell, cls,		      \
-	 corr_type, cl_spl, theta, n_theta)				\
-  private(w, F, result, eresult, local_status, ith,			\
-	  gslstatus, cp)
+#pragma omp parallel default(none) \
+                     shared(cosmo, status, wtheta, n_ell, ell, cls, \
+			    corr_type, cl_spl, theta, n_theta)	\
+                     private(w, F, result, eresult, local_status, ith, \
+			     gslstatus, cp)
   {
     local_status = *status;
 
@@ -224,8 +227,7 @@ static void ccl_tracer_corr_bessel(ccl_cosmology *cosmo,
         //TODO: Split into intervals between first bessel zeros before integrating
         //This will help both speed and accuracy of the integral.
         gslstatus = gsl_integration_qag(&F, 0, cosmo->spline_params.ELL_MAX_CORR, 0,
-                                        cosmo->gsl_params.INTEGRATION_EPSREL,
-					cosmo->gsl_params.N_ITERATION,
+                                        cosmo->gsl_params.INTEGRATION_EPSREL, cosmo->gsl_params.N_ITERATION,
                                         cosmo->gsl_params.INTEGRATION_GAUSS_KRONROD_POINTS,
                                         w, &result, &eresult);
         if(gslstatus != GSL_SUCCESS) {
@@ -313,7 +315,7 @@ static void ccl_tracer_corr_legendre(ccl_cosmology *cosmo,
     //Interpolate input Cl into
     cl_spl=ccl_f1d_t_new(n_ell,ell,cls,cls[0],0,
 			 ccl_f1d_extrap_const,
-			 ccl_f1d_extrap_logx_logy);
+			 ccl_f1d_extrap_logx_logy, status);
     if(cl_spl==NULL) {
       *status=CCL_ERROR_MEMORY;
       ccl_cosmology_set_status_message(cosmo, "ccl_correlation.c: ccl_tracer_corr_legendre ran out of memory\n");
@@ -334,8 +336,8 @@ static void ccl_tracer_corr_legendre(ccl_cosmology *cosmo,
 
   int local_status, i_L;
 #pragma omp parallel default(none) \
-  shared(cosmo, theta, cl_arr, wtheta, n_theta, status, corr_type)	\
-  private(Pl_theta, i, i_L, local_status)
+                     shared(cosmo, theta, cl_arr, wtheta, n_theta, status, corr_type) \
+                     private(Pl_theta, i, i_L, local_status)
   {
     Pl_theta = NULL;
     local_status = *status;
@@ -475,7 +477,8 @@ void ccl_correlation_3d(ccl_cosmology *cosmo, double a,
 
   // Interpolate to output values of r
   ccl_f1d_t *xi_spl=ccl_f1d_t_new(N_ARR,r_arr,xi_arr,xi_arr[0],0,
-				  ccl_f1d_extrap_const,ccl_f1d_extrap_const);
+				  ccl_f1d_extrap_const,
+				  ccl_f1d_extrap_const, status);
   if (xi_spl == NULL) {
     free(k_arr);
     free(pk_arr);
@@ -595,7 +598,8 @@ void ccl_correlation_multipole(ccl_cosmology *cosmo, double a, double beta,
 
   // Interpolate to output values of s
   ccl_f1d_t *xi_spl = ccl_f1d_t_new(N_ARR, s_arr, xi_arr, xi_arr[0], 0,
-				    ccl_f1d_extrap_const,ccl_f1d_extrap_const);
+				    ccl_f1d_extrap_const,
+				    ccl_f1d_extrap_const, status);
   if (xi_spl == NULL) {
     free(k_arr);
     free(pk_arr);
@@ -741,7 +745,8 @@ void ccl_correlation_multipole_spline(ccl_cosmology *cosmo, double a,
 
   // Interpolate to output values of s
   cosmo->data.rsd_splines[0] = ccl_f1d_t_new(N_ARR, s_arr, xi_arr0, xi_arr0[0], 0,
-					     ccl_f1d_extrap_const, ccl_f1d_extrap_const);
+					     ccl_f1d_extrap_const,
+					     ccl_f1d_extrap_const, status);
   if (cosmo->data.rsd_splines[0] == NULL) {
     free(k_arr);
     free(pk_arr);
@@ -758,7 +763,8 @@ void ccl_correlation_multipole_spline(ccl_cosmology *cosmo, double a,
   }
 
   cosmo->data.rsd_splines[1] = ccl_f1d_t_new(N_ARR, s_arr, xi_arr2, xi_arr2[0], 0,
-					     ccl_f1d_extrap_const,ccl_f1d_extrap_const);
+					     ccl_f1d_extrap_const,
+					     ccl_f1d_extrap_const, status);
   if (cosmo->data.rsd_splines[1] == NULL) {
     free(k_arr);
     free(pk_arr);
@@ -777,7 +783,8 @@ void ccl_correlation_multipole_spline(ccl_cosmology *cosmo, double a,
   }
 
   cosmo->data.rsd_splines[2] = ccl_f1d_t_new(N_ARR, s_arr, xi_arr4, xi_arr4[0], 0,
-					     ccl_f1d_extrap_const,ccl_f1d_extrap_const);
+					     ccl_f1d_extrap_const,
+					     ccl_f1d_extrap_const, status);
   if (cosmo->data.rsd_splines[2] == NULL) {
     free(k_arr);
     free(pk_arr);

@@ -36,7 +36,7 @@ typedef struct {
 
 ccl_f1d_t *ccl_f1d_t_new(int n,double *x,double *y,double y0,double yf,
 			 ccl_f1d_extrap_t extrap_lo_type,
-			 ccl_f1d_extrap_t extrap_hi_type);
+			 ccl_f1d_extrap_t extrap_hi_type, int *status);
 
 double ccl_f1d_t_eval(ccl_f1d_t *spl,double x);
 
