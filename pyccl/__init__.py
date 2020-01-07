@@ -61,6 +61,6 @@ from .haloprofile import nfw_profile_3d, einasto_profile_3d, hernquist_profile_3
 from .neutrinos import Omeganuh2, nu_masses
 
 # Expose function to toggle debug mode
-from .pyutils import debug_mode
+from .pyutils import debug_mode, resample_array
 
 from .errors import CCLError, CCLWarning

@@ -9,7 +9,7 @@ class Pk2D(object):
     arbitrary function of wavenumber and scale factor.
 
     Args:
-        pkfunc (:obj:function): a function returning a floating point
+        pkfunc (:obj:`function`): a function returning a floating point
              number or numpy array with the signature `f(k,a)`, where k
              is a wavenumber (in units of Mpc^-1) and a is the scale
              factor. The function must able to take numpy arrays as `k`.

@@ -139,7 +139,9 @@ void ccl_get_number_counts_kernel(ccl_cosmology *cosmo,
   // Prepare N(z) spline
   ccl_f1d_t *nz_f = NULL;
 
-  nz_f = ccl_f1d_t_new(nz, z_arr, nz_arr, 0, 0);
+  nz_f = ccl_f1d_t_new(nz, z_arr, nz_arr, 0, 0,
+		       ccl_f1d_extrap_const,
+		       ccl_f1d_extrap_const, status);
   if (nz_f == NULL) {
     *status = CCL_ERROR_SPLINE;
     ccl_cosmology_set_status_message(
@@ -277,7 +279,9 @@ void ccl_get_lensing_mag_kernel(ccl_cosmology *cosmo,
   int local_status;
 
   // Prepare N(z) spline
-  nz_f = ccl_f1d_t_new(nz, z_arr, nz_arr, 0, 0);
+  nz_f = ccl_f1d_t_new(nz, z_arr, nz_arr, 0, 0,
+		       ccl_f1d_extrap_const,
+		       ccl_f1d_extrap_const, status);
   if (nz_f == NULL) {
     *status = CCL_ERROR_SPLINE;
     ccl_cosmology_set_status_message(
@@ -297,7 +301,9 @@ void ccl_get_lensing_mag_kernel(ccl_cosmology *cosmo,
   // Prepare magnification bias spline if needed
   if (*status == 0) {
     if ((nz_s > 0) && (zs_arr != NULL) && (sz_arr != NULL)) {
-      sz_f = ccl_f1d_t_new(nz_s, zs_arr, sz_arr, sz_arr[0], sz_arr[nz_s-1]);
+      sz_f = ccl_f1d_t_new(nz_s, zs_arr, sz_arr, sz_arr[0], sz_arr[nz_s-1],
+			   ccl_f1d_extrap_const,
+			   ccl_f1d_extrap_const, status);
       if (sz_f == NULL) {
         *status = CCL_ERROR_SPLINE;
         ccl_cosmology_set_status_message(
@@ -430,7 +436,9 @@ ccl_cl_tracer_t *ccl_cl_tracer_t_new(ccl_cosmology *cosmo,
   if (*status == 0) {
     // Initialize radial kernel
     if ((n_w > 0) && (chi_w != NULL) && (w_w != NULL)) {
-      tr->kernel = ccl_f1d_t_new(n_w,chi_w,w_w,0,0);
+      tr->kernel = ccl_f1d_t_new(n_w,chi_w,w_w,0,0,
+				 ccl_f1d_extrap_const,
+				 ccl_f1d_extrap_const, status);
       if (tr->kernel == NULL)
         *status=CCL_ERROR_MEMORY;
     }
