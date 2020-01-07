@@ -171,7 +171,7 @@ static void ccl_tracer_corr_bessel(ccl_cosmology *cosmo,
   corr_int_par cp;
   ccl_f1d_t *cl_spl = NULL;
   cl_spl = ccl_f1d_t_new(n_ell, ell, cls, cls[0], 0,
-			 ccl_f1d_extrap_logx_logy,
+			 ccl_f1d_extrap_const,
 			 ccl_f1d_extrap_logx_logy, status);
   if(cl_spl == NULL) {
     *status = CCL_ERROR_MEMORY;
