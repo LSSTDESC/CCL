@@ -294,6 +294,26 @@ def _vectorize_fn4(fn, fn_vec, cosmo, x, a, d, returns_status=True):
 def resample_array(x_in, y_in, x_out,
                    extrap_lo='none', extrap_hi='none',
                    fill_value_lo=0, fill_value_hi=0):
+    """ Interpolates an input y array onto a set of x values.
+
+    Args:
+        x_in (array_like): input x-values.
+        y_in (array_like): input y-values.
+        x_out (array_like): x-values for output array.
+        extrap_lo (string): type of extrapolation for x-values below the
+            range of `x_in`. 'none' (for no interpolation), 'constant',
+            'linx_liny' (linear in x and y), 'linx_logy', 'logx_liny' and
+            'logx_logy'.
+        extrap_hi (string): type of extrapolation for x-values above the
+            range of `x_in`.
+        fill_value_lo (float): constant value if `extrap_lo` is
+            'constant'.
+        fill_value_hi (float): constant value if `extrap_hi` is
+            'constant'.
+    Returns:
+        array_like: output array.
+    """
+
     if extrap_lo not in extrap_types.keys():
         raise ValueError("'%s' is not a valid extrapolation type. "
                          "Available options are: %s"
