@@ -20,8 +20,8 @@ matrix:
       name: OSX (Python2.7)
 
   allow_failures:
-    - name: linux (Python 2.7)
-    - name: OSX (Python 2.7)
+    - name: linux (Python2.7)
+    - name: OSX (Python2.7)
   fast_finish: true
 
 install:
