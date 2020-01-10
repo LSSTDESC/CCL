@@ -349,3 +349,34 @@ def deprecated(new_function=None):
             return func(*args, **kwargs)
         return new_func
     return _depr_decorator
+
+
+def _fftlog_transform(rs, frs,
+                      dim, mu, power_law_index):
+    if np.ndim(rs) != 1:
+        raise ValueError("rs should be a 1D array")
+    if np.ndim(frs) < 1 or np.ndim(frs) > 2:
+        raise ValueError("frs should be a 1D or 2D array")
+    if np.ndim(frs) == 1:
+        n_transforms = 1
+        n_r = len(frs)
+    else:
+        n_transforms, n_r = frs.shape
+
+    if len(rs) != n_r:
+        raise ValueError("rs should have %d elements" % n_r)
+
+    status = 0
+    result, status = lib.fftlog_transform(n_transforms,
+                                          rs, frs.flatten(),
+                                          dim, mu, power_law_index,
+                                          (n_transforms + 1) * n_r,
+                                          status)
+    check(status)
+    result = result.reshape([n_transforms + 1, n_r])
+    ks = result[0]
+    fks = result[1:]
+    if np.ndim(frs) == 1:
+        fks = fks.squeeze()
+
+    return ks, fks

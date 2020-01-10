@@ -1,4 +1,4 @@
-%module ccl_f1d
+%module ccl_fftlog
 
 %{
 /* put additional #include here */
