@@ -227,8 +227,7 @@ static void ccl_tracer_corr_bessel(ccl_cosmology *cosmo,
         //TODO: Split into intervals between first bessel zeros before integrating
         //This will help both speed and accuracy of the integral.
         gslstatus = gsl_integration_qag(&F, 0, cosmo->spline_params.ELL_MAX_CORR, 0,
-                                        cosmo->gsl_params.INTEGRATION_EPSREL,
-					cosmo->gsl_params.N_ITERATION,
+                                        cosmo->gsl_params.INTEGRATION_EPSREL, cosmo->gsl_params.N_ITERATION,
                                         cosmo->gsl_params.INTEGRATION_GAUSS_KRONROD_POINTS,
                                         w, &result, &eresult);
         if(gslstatus != GSL_SUCCESS) {
@@ -337,8 +336,8 @@ static void ccl_tracer_corr_legendre(ccl_cosmology *cosmo,
 
   int local_status, i_L;
 #pragma omp parallel default(none) \
-  shared(cosmo, theta, cl_arr, wtheta, n_theta, status, corr_type)	\
-  private(Pl_theta, i, i_L, local_status)
+                     shared(cosmo, theta, cl_arr, wtheta, n_theta, status, corr_type) \
+                     private(Pl_theta, i, i_L, local_status)
   {
     Pl_theta = NULL;
     local_status = *status;

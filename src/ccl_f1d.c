@@ -69,7 +69,7 @@ ccl_f1d_t *ccl_f1d_t_new(int n,double *x,double *y,double y0,double yf,
   }
   else if(spl->extrap_lo_type == ccl_f1d_extrap_logx_logy) {
     if((y[1]*y[0]<=0) || (x[1]*x[0]<=0))
-      *status=CCL_ERROR_SPLINE;
+      *status = CCL_ERROR_SPLINE;
     else
       spl->der_lo = log(y[1]/y[0])/log(x[1]/x[0]);
   }
