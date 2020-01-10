@@ -22,6 +22,7 @@
 
 #include "ccl_defs.h"
 #include "ccl_utils.h"
+#include "ccl_fftlog.h"
 #include "ccl_f1d.h"
 #include "ccl_f2d.h"
 #include "ccl_config.h"
