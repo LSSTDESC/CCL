@@ -1,11 +1,11 @@
 import numpy as np
 import pytest
-import pyccl as ccl
 from pyccl.pyutils import _fftlog_transform
 
 
 def fk(k, alpha, mu, dim):
     return k**(-alpha)
+
 
 def fr(r, alpha, mu, dim):
     from scipy.special import gamma
@@ -13,6 +13,7 @@ def fr(r, alpha, mu, dim):
     g2 = gamma(0.5 * (alpha + mu))
     den = np.pi**(dim/2.) * 2**alpha
     return g1 / (g2 * den * r**(dim - alpha))
+
 
 @pytest.mark.parametrize('dim', [2, 3])
 @pytest.mark.parametrize('mu', [0, 2])
