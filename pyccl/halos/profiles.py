@@ -1,7 +1,7 @@
 from .. import ccllib as lib
 from ..core import check
 from ..power import sigmaM
-from ..pyutils import resample_array
+from ..pyutils import resample_array, _fftlog_transform
 from .concentration import Concentration
 from .massdef import MassDef
 import numpy as np
@@ -291,19 +291,15 @@ class HaloProfile(object):
 
         p_k_out = np.zeros([nM, k_use.size])
         # Compute real profile values
-        p_real_M = p_func(cosmo, r_arr, M_use, a, mass_def).flatten()
+        p_real_M = p_func(cosmo, r_arr, M_use, a, mass_def)
         # Power-law index to pass to FFTLog.
         plaw_index = self._get_plaw_fourier(cosmo, a)
 
         # Compute Fourier profile through fftlog
-        status = 0
-        result, status = lib.fftlog_transform(nM, r_arr, p_real_M,
-                                              3, 0, plaw_index,
-                                              (nM + 1) * n_k, status)
-        check(status)
-        result = result.reshape([nM + 1, n_k])
-        lk_arr = np.log(result[0])
-        p_fourier_M = result[1:]
+        k_arr, p_fourier_M = _fftlog_transform(r_arr, p_real_M,
+                                               3, 0, plaw_index)
+        lk_arr = np.log(k_arr)
+
         for im, p_k_arr in enumerate(p_fourier_M):
             # Resample into input k values
             p_fourier = resample_array(lk_arr, p_k_arr, lk_use,
@@ -355,7 +351,7 @@ class HaloProfile(object):
             # The cumulative profile involves a factor 1/(k R) in
             # the integrand.
             p_fourier *= 2 / k_arr[None, :]
-        p_fourier = p_fourier.flatten()
+
         # Power-law index to pass to FFTLog.
         if is_cumul2d:
             i_bessel = 1
@@ -365,16 +361,12 @@ class HaloProfile(object):
             plaw_index = self._get_plaw_projected(cosmo, a)
 
         # Compute projected profile through fftlog
-        status = 0
-        result, status = lib.fftlog_transform(nM, k_arr, p_fourier,
-                                              2, i_bessel, plaw_index,
-                                              (nM + 1) * n_r_t, status)
-        check(status)
-        result = result.reshape([nM + 1, n_r_t])
-        sig_r_t_M = result[1:]
-        lr_t_arr = np.log(result[0])
+        r_t_arr, sig_r_t_M = _fftlog_transform(k_arr, p_fourier,
+                                               2, i_bessel,
+                                               plaw_index)
+        lr_t_arr = np.log(r_t_arr)
+
         if is_cumul2d:
-            r_t_arr = result[0]
             sig_r_t_M /= r_t_arr[None, :]
         for im, sig_r_t_arr in enumerate(sig_r_t_M):
             # Resample into input r_t values
@@ -686,6 +678,31 @@ class HaloProfileNFW(HaloProfile):
 
 
 class HaloProfileEinasto(HaloProfile):
+    """ Einasto profile (1965TrAlm...5...87E).
+
+    .. math::
+       \\rho(r) = \\rho_0\\,\\exp(-2 ((r/r_s)^\\alpha-1) / \\alpha)
+
+    where :math:`r_s` is related to the spherical overdensity
+    halo radius :math:`R_\\Delta(M)` through the concentration
+    parameter :math:`c(M)` as
+
+    .. math::
+       R_\\Delta(M) = c(M)\\,r_s
+
+    and the normalization :math:`\\rho_0` is the mean density
+    within the :math:`R_\\Delta(M)` of the halo. The index
+    :math:`\\alpha` depends on halo mass and redshift, and we
+    use the parameterization of Diemer & Kravtsov
+    (arXiv:1401.1216).
+
+    Args:
+        c_M_relation (:obj:`Concentration`): concentration-mass
+            relation to use with this profile.
+        truncated (bool): set to `True` if the profile should be
+            truncated at :math:`r = R_\\Delta` (i.e. zero at larger
+            radii.
+    """
     name = 'Einasto'
 
     def __init__(self, c_M_relation, truncated=True):
@@ -741,6 +758,29 @@ class HaloProfileEinasto(HaloProfile):
 
 
 class HaloProfileHernquist(HaloProfile):
+    """ Hernquist (1990ApJ...356..359H).
+
+    .. math::
+       \\rho(r) = \\frac{\\rho_0}
+       {\\frac{r}{r_s}\\left(1+\\frac{r}{r_s}\\right)^3}
+
+    where :math:`r_s` is related to the spherical overdensity
+    halo radius :math:`R_\\Delta(M)` through the concentration
+    parameter :math:`c(M)` as
+
+    .. math::
+       R_\\Delta(M) = c(M)\\,r_s
+
+    and the normalization :math:`\\rho_0` is the mean density
+    within the :math:`R_\\Delta(M)` of the halo.
+
+    Args:
+        c_M_relation (:obj:`Concentration`): concentration-mass
+            relation to use with this profile.
+        truncated (bool): set to `True` if the profile should be
+            truncated at :math:`r = R_\\Delta` (i.e. zero at larger
+            radii.
+    """
     name = 'Hernquist'
 
     def __init__(self, c_M_relation, truncated=True):
