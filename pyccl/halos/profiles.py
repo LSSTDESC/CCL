@@ -332,7 +332,7 @@ class HaloProfile(object):
                  self.precision_fftlog['n_per_decade'])
         k_arr = np.geomspace(r_t_min, r_t_max, n_r_t)
 
-        sig_r_t_out = np.zeros([M_use.size, r_t_use.size])
+        sig_r_t_out = np.zeros([nM, r_t_use.size])
         # Compute Fourier-space profile
         if getattr(self, '_fourier', None):
             # Compute from `_fourier` if available.
