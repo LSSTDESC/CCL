@@ -52,68 +52,71 @@ class HaloProfile(object):
         FFTLog to compute Hankel transforms. The available
         parameters are:
 
-        * `padding_lo_fftlog`: when computing a Hankel
-          transform we often need to extend the range of the
-          input (e.g. the r-range for the real-space profile
-          when computing the Fourier-space one) to avoid
-          aliasing and boundary effects. This parameter
-          controls the factor by which we multiply the lower
-          end of the range (e.g. a value of 0.1 implies that
-          we will extend the range by one decade on the
-          left). Note that FFTLog works in logarithmic
-          space. Default value: 0.1.
-        * `padding_hi_fftlog`: same as `padding_lo_fftlog`
-          for the upper end of the range (e.g. a value of
-          10 implies extending the range by one decade on
-          the right). Default value: 10.
-        * `n_per_decade`: number of samples of the profile
-          taken per decade when computing Hankel transforms.
-        * `padding_lo_extra`: when computing the projected
-          2D profile or the 2D cumulative density,
-          sometimes two Hankel transforms are needed (from
-          3D real-space to Fourier, then from Fourier to
-          2D real-space). This parameter controls the k range
-          of the intermediate transform. The logic here is to
-          avoid the range twice by `padding_lo_fftlog` (which
-          can be overkill and slow down the calculation).
-          Default value: 0.1.
-        * `padding_hi_extra`: same as `padding_lo_extra` for
-          the upper end of the range. Default value: 10.
-        * `large_padding_2D`: if set to `True`, the
-          intermediate Hankel transform in the calculation of
-          the 2D projected profile and cumulative mass
-          density will use `padding_lo_fftlog` and
-          `padding_hi_fftlog` instead of `padding_lo_extra`
-          and `padding_hi_extra` to extend the range of the
-          intermediate Hankel transform.
-        * `extrapol`: type of extrapolation used in the uncommon
-          scenario that FFTLog returns a profile on a range that
-          does not cover the intended output range. Pass
-          `linx_liny` if you want to extrapolate linearly in the
-          profile and `linx_logy` if you want to extrapolate
-          linearly in its logarithm. Default value: `linx_liny`.
-        * `plaw_fourier`: FFTLog is able to perform more
-          accurate Hankel transforms by prewhitening its arguments
-          (essentially making them flatter over the range of
-          integration to avoid aliasing). This parameter
-          corresponds to a guess of what the tilt of the profile
-          is (i.e. profile(r) = r^tilt), which FFTLog uses to
-          prewhiten it. This parameter is used when computing the
-          real <-> Fourier transforms. The methods
-          `_get_plaw_fourier` allows finer control over this
-          parameter. The default value allows for a slightly faster
-          (but potentially less accurate) FFTLog transform. Some
-          level of experimentation with this parameter is
-          recommended when implementing a new profile.
-          Default value: -1.5.
-        * `plaw_projected`: same as `plaw_fourier` for the
-          calculation of the 2D projected and cumulative density
-          profiles. Finer control can be achieved with the
-          `_get_plaw_projected`. The default value allows for a
-          slightly faster (but potentially less accurate) FFTLog
-          transform.  Some level of experimentation with this
-          parameter is recommended when implementing a new profile.
-          Default value: -1.
+        Args:
+            padding_lo_fftlog (float): when computing a Hankel
+                transform we often need to extend the range of the
+                input (e.g. the r-range for the real-space profile
+                when computing the Fourier-space one) to avoid
+                aliasing and boundary effects. This parameter
+                controls the factor by which we multiply the lower
+                end of the range (e.g. a value of 0.1 implies that
+                we will extend the range by one decade on the
+                left). Note that FFTLog works in logarithmic
+                space. Default value: 0.1.
+            padding_hi_fftlog (float): same as `padding_lo_fftlog`
+                for the upper end of the range (e.g. a value of
+                10 implies extending the range by one decade on
+                the right). Default value: 10.
+            n_per_decade (float): number of samples of the
+                profile taken per decade when computing Hankel
+                transforms.
+            padding_lo_extra (float): when computing the projected
+                2D profile or the 2D cumulative density,
+                sometimes two Hankel transforms are needed (from
+                3D real-space to Fourier, then from Fourier to
+                2D real-space). This parameter controls the k range
+                of the intermediate transform. The logic here is to
+                avoid the range twice by `padding_lo_fftlog` (which
+                can be overkill and slow down the calculation).
+                Default value: 0.1.
+            padding_hi_extra (float): same as `padding_lo_extra`
+                for the upper end of the range. Default value: 10.
+                large_padding_2D (bool): if set to `True`, the
+                intermediate Hankel transform in the calculation of
+                the 2D projected profile and cumulative mass
+                density will use `padding_lo_fftlog` and
+                `padding_hi_fftlog` instead of `padding_lo_extra`
+                and `padding_hi_extra` to extend the range of the
+                intermediate Hankel transform.
+            extrapol (string): type of extrapolation used in the
+                uncommon scenario that FFTLog returns a profile on a
+                range that does not cover the intended output range.
+                Pass `linx_liny` if you want to extrapolate linearly
+                in the profile and `linx_logy` if you want to
+                extrapolate linearly in its logarithm.
+                Default value: `linx_liny`.
+            plaw_fourier (float): FFTLog is able to perform more
+                accurate Hankel transforms by prewhitening its arguments
+                (essentially making them flatter over the range of
+                integration to avoid aliasing). This parameter
+                corresponds to a guess of what the tilt of the profile
+                is (i.e. profile(r) = r^tilt), which FFTLog uses to
+                prewhiten it. This parameter is used when computing the
+                real <-> Fourier transforms. The methods
+                `_get_plaw_fourier` allows finer control over this
+                parameter. The default value allows for a slightly faster
+                (but potentially less accurate) FFTLog transform. Some
+                level of experimentation with this parameter is
+                recommended when implementing a new profile.
+                Default value: -1.5.
+            plaw_projected (float): same as `plaw_fourier` for the
+                calculation of the 2D projected and cumulative density
+                profiles. Finer control can be achieved with the
+                `_get_plaw_projected`. The default value allows for a
+                slightly faster (but potentially less accurate) FFTLog
+                transform.  Some level of experimentation with this
+                parameter is recommended when implementing a new profile.
+                Default value: -1.
         """
         self.precision_fftlog.update(kwargs)
 
@@ -157,7 +160,9 @@ class HaloProfile(object):
         Returns:
             float or array_like: halo profile. The shape of the
             output will be `(N_M, N_r)` where `N_r` and `N_m` are
-            the sizes of `r` and `M` respectively.
+            the sizes of `r` and `M` respectively. If `r` or `M`
+            are scalars, the corresponding dimension will be
+            squeezed out on output.
         """
         if getattr(self, '_real', None):
             f_r = self._real(cosmo, r, M, a, mass_def)
@@ -189,7 +194,9 @@ class HaloProfile(object):
         Returns:
             float or array_like: halo profile. The shape of the
             output will be `(N_M, N_k)` where `N_k` and `N_m` are
-            the sizes of `k` and `M` respectively.
+            the sizes of `k` and `M` respectively. If `k` or `M`
+            are scalars, the corresponding dimension will be
+            squeezed out on output.
         """
         if getattr(self, '_fourier', None):
             f_k = self._fourier(cosmo, k, M, a, mass_def)
@@ -220,7 +227,9 @@ class HaloProfile(object):
         Returns:
             float or array_like: halo profile. The shape of the
             output will be `(N_M, N_r)` where `N_r` and `N_m` are
-            the sizes of `r` and `M` respectively.
+            the sizes of `r` and `M` respectively. If `r` or `M`
+            are scalars, the corresponding dimension will be
+            squeezed out on output.
         """
         if getattr(self, '_projected', None):
             s_r_t = self._projected(cosmo, r_t, M, a, mass_def)
@@ -249,7 +258,9 @@ class HaloProfile(object):
         Returns:
             float or array_like: halo profile. The shape of the
             output will be `(N_M, N_r)` where `N_r` and `N_m` are
-            the sizes of `r` and `M` respectively.
+            the sizes of `r` and `M` respectively. If `r` or `M`
+            are scalars, the corresponding dimension will be
+            squeezed out on output.
         """
         if getattr(self, '_cumul2d', None):
             s_r_t = self._cumul2d(cosmo, r_t, M, a, mass_def)
@@ -499,6 +510,8 @@ class HaloProfileNFW(HaloProfile):
     .. math::
        \\rho_0 = \\frac{M}{4\\pi\\,r_s^3\\,[\\log(1+c) - c/(1+c)]}
 
+    By default, this profile is truncated at :math:`r = R_\\Delta(M)`.
+
     Args:
         c_M_relation (:obj:`Concentration`): concentration-mass
             relation to use with this profile.
@@ -696,6 +709,8 @@ class HaloProfileEinasto(HaloProfile):
     use the parameterization of Diemer & Kravtsov
     (arXiv:1401.1216).
 
+    By default, this profile is truncated at :math:`r = R_\\Delta(M)`.
+
     Args:
         c_M_relation (:obj:`Concentration`): concentration-mass
             relation to use with this profile.
@@ -773,6 +788,8 @@ class HaloProfileHernquist(HaloProfile):
 
     and the normalization :math:`\\rho_0` is the mean density
     within the :math:`R_\\Delta(M)` of the halo.
+
+    By default, this profile is truncated at :math:`r = R_\\Delta(M)`.
 
     Args:
         c_M_relation (:obj:`Concentration`): concentration-mass
