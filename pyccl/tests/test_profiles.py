@@ -94,7 +94,7 @@ def test_gaussian_accuracy():
 
 
 @pytest.mark.parametrize('alpha', [-1.2, -2., -2.8])
-def test_projected_plaw(alpha):
+def test_projected_plaw_accuracy(alpha):
     from scipy.special import gamma
 
     prefac = (np.pi**0.5 * gamma(-(alpha + 1) / 2) /
@@ -165,6 +165,7 @@ def test_nfw_accuracy(use_analytic):
     k_arr = np.logspace(-2, 2, 256) / r_Delta
     fk_arr = p.fourier(COSMO, k_arr, M, a, M200)
     fk_arr_pred = fk(k_arr)
+    # Normalize to  1 at low k
     res = np.fabs((fk_arr - fk_arr_pred) / M)
     assert np.all(res < tol)
 

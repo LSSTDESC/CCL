@@ -518,7 +518,7 @@ class HaloProfileNFW(HaloProfile):
     name = 'NFW'
 
     def __init__(self, c_M_relation,
-                 fourier_analytic=False,
+                 fourier_analytic=True,
                  projected_analytic=False,
                  cumul2d_analytic=False,
                  truncated=True):

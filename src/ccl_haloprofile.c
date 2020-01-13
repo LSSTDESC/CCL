@@ -20,13 +20,15 @@ void ccl_einasto_norm_integral(int n_m, double *r_s, double *r_delta, double *al
   shared(n_m, r_s, r_delta, alpha, norm_out, status)
   {
     int ii;
+    int status_this=0;
     gsl_function F;
     gsl_integration_workspace *w = gsl_integration_workspace_alloc(1000);
     
     if (w == NULL)
-      *status = CCL_ERROR_MEMORY;
+      status_this = CCL_ERROR_MEMORY;
     
-    if(*status == 0) {
+    if(status_this == 0) {
+#pragma omp for
       for(ii=0;ii<n_m;ii++) {
 	int qagstatus;
 	double result, eresult;
@@ -38,15 +40,19 @@ void ccl_einasto_norm_integral(int n_m, double *r_s, double *r_delta, double *al
 					w, &result, &eresult);
 	if(qagstatus != GSL_SUCCESS) {
 	  ccl_raise_gsl_warning(qagstatus, "ccl_haloprofile.c: ccl_einasto_norm_integral():");
-	  *status = CCL_ERROR_INTEG;
+	  status_this = CCL_ERROR_INTEG;
 	  result = NAN;
-	  break;
 	}
 	norm_out[ii] = 4 * M_PI * r_s[ii] * r_s[ii] * r_s[ii] * result;
       }
     } //end omp for
   
     gsl_integration_workspace_free(w);
+#pragma omp critical
+    {
+      if(status_this)
+	*status = status_this;
+    }
   } //end omp parallel
 }
 
@@ -63,13 +69,15 @@ void ccl_hernquist_norm_integral(int n_m, double *r_s, double *r_delta,
   shared(n_m, r_s, r_delta, norm_out, status)
   {
     int ii;
+    int status_this=0;
     gsl_function F;
     gsl_integration_workspace *w = gsl_integration_workspace_alloc(1000);
     
     if (w == NULL)
-      *status = CCL_ERROR_MEMORY;
+      status_this = CCL_ERROR_MEMORY;
     
-    if(*status == 0) {
+    if(status_this == 0) {
+#pragma omp for
       for(ii=0;ii<n_m;ii++) {
 	int qagstatus;
 	double result, eresult;
@@ -81,14 +89,18 @@ void ccl_hernquist_norm_integral(int n_m, double *r_s, double *r_delta,
 					w, &result, &eresult);
 	if(qagstatus != GSL_SUCCESS) {
 	  ccl_raise_gsl_warning(qagstatus, "ccl_haloprofile.c: ccl_hernquist_norm_integral():");
-	  *status = CCL_ERROR_INTEG;
+	  status_this = CCL_ERROR_INTEG;
 	  result = NAN;
-	  break;
 	}
 	norm_out[ii] = 4 * M_PI * r_s[ii] * r_s[ii] * r_s[ii] * result;
       }
     } //end omp for
   
     gsl_integration_workspace_free(w);
+#pragma omp critical
+    {
+      if(status_this)
+	*status = status_this;
+    }
   } //end omp parallel
 }
