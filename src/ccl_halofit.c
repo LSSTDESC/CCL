@@ -24,7 +24,7 @@ void compute_chi(double a, ccl_cosmology *cosmo, double * chi, int * stat);
 
 static double zdrag_eh(ccl_parameters *params) {
   // eqn 4 of Eisenstein & Hu 1998
-  double OMh2 = params->Omega_m * params->h * params->h;
+  double OMh2 = (params->Omega_c + params->Omega_b) * params->h * params->h;
   double OBh2 = params->Omega_b * params->h * params->h;
   double b1 = 0.313 * pow(OMh2, -0.419) * (1 + 0.607*pow(OMh2, 0.674));
   double b2 = 0.238 * pow(OMh2, 0.223);
@@ -49,7 +49,7 @@ static ccl_cosmology *create_w0eff_cosmo(double w0eff, ccl_cosmology *cosmo, int
   for(i=0; i<3; ++i)
     mnu[i] = 0;
   for(i=0; i<cosmo->params.N_nu_mass; ++i)
-    mnu[i] = cosmo->params.mnu[i];
+    mnu[i] = cosmo->params.m_nu[i];
 
   if (isnan(cosmo->params.A_s))
     norm_pk = cosmo->params.sigma8;
@@ -58,7 +58,7 @@ static ccl_cosmology *create_w0eff_cosmo(double w0eff, ccl_cosmology *cosmo, int
 
   params_w0eff = ccl_parameters_create(
     cosmo->params.Omega_c, cosmo->params.Omega_b, cosmo->params.Omega_k,
-    cosmo->params.Neff, mnu, ccl_mnu_list,
+    cosmo->params.Neff, mnu, cosmo->params.N_nu_mass,
     w0eff, 0, cosmo->params.h, norm_pk,
     cosmo->params.n_s, cosmo->params.bcm_log10Mc, cosmo->params.bcm_etab,
     cosmo->params.bcm_ks, cosmo->params.mu_0, cosmo->params.sigma_0, cosmo->params.nz_mgrowth,
@@ -882,8 +882,7 @@ double ccl_halofit_power(ccl_cosmology *cosmo, double k, double a, halofit_struc
   C = gsl_spline_eval(hf->C, a, NULL);
 
   weffa = cosmo->params.w0;
-  omegaMz = ccl_omega_x(cosmo, a, ccl_species_m_label, status) +
-    ccl_omega_x(cosmo, a, ccl_species_nu_label, status);
+  omegaMz = ccl_omega_x(cosmo, a, ccl_species_m_label, status);
   omegaDEwz = ccl_omega_x(cosmo, a, ccl_species_l_label, status);
 
   // not using these to match CLASS better - might be a bug in CLASS
@@ -901,7 +900,7 @@ double ccl_halofit_power(ccl_cosmology *cosmo, double k, double a, halofit_struc
   // compute the present day neutrino massive neutrino fraction
   // uses all neutrinos even if they are moving fast
   om_nu = cosmo->params.sum_nu_masses / 93.14 / cosmo->params.h / cosmo->params.h;
-  fnu = om_nu / (cosmo->params.Omega_m + om_nu);
+  fnu = om_nu / (cosmo->params.Omega_m);
 
   // eqns A6 - A13 of Takahashi et al.
   an = pow(
@@ -954,7 +953,7 @@ double ccl_halofit_power(ccl_cosmology *cosmo, double k, double a, halofit_struc
   DeltakH = DeltakHprime / (1.0 + mun/y + nun/y2);
 
   // correction to DeltakH from Bird et al., eqn A6-A7
-  Qnu = fnu * (0.977 - 18.015 * (cosmo->params.Omega_m + om_nu - 0.3));
+  Qnu = fnu * (0.977 - 18.015 * (cosmo->params.Omega_m - 0.3));
   DeltakH *= (1.0 + Qnu);
 
   DeltakNL = DeltakQ + DeltakH;

@@ -8,7 +8,7 @@ MESSAGE( STATUS "CMAKE_BUILD_TYPE: " ${CMAKE_BUILD_TYPE} )
 # Adding customized cmake module
 list(APPEND CMAKE_MODULE_PATH  "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
-project(ccl VERSION 0.2.1)
+project(ccl VERSION 2.0.0)
 
 option(FORCE_OPENMP "Forcibly use OpenMP " NO)
 
@@ -24,7 +24,8 @@ set(CCL_SRC
     src/ccl_halofit.c
     src/ccl_haloprofile.c
     src/ccl_tracers.c
-    src/fftlog.c)
+    src/ccl_mass_conversion.c
+    src/ccl_fftlog.c)
 
 # Defines list of CCL C test src files
 # ! Add new tests of the C code to this list

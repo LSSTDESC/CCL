@@ -45,12 +45,15 @@ from .errors import CCLError
 %include "ccl_power.i"
 %include "ccl_bcm.i"
 %include "ccl_correlation.i"
-%include "ccl_massfunc.i"
 %include "ccl_tracers.i"
 %include "ccl_cls.i"
 %include "ccl_neutrinos.i"
 %include "ccl_halomod.i"
 %include "ccl_haloprofile.i"
+%include "ccl_mass_conversion.i"
+%include "ccl_sigM.i"
+%include "ccl_f1d.i"
+%include "ccl_fftlog.i"
 
 /* list header files not yet having a .i file here */
 %include "../include/ccl_config.h"

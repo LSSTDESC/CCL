@@ -70,7 +70,7 @@ double ccl_halo_concentration(ccl_cosmology *cosmo, double halomass,
     gz = ccl_growth_factor(cosmo,a,status);
     g0 = ccl_growth_factor(cosmo,1.0,status);
     delta_c = 1.686;
-    nu = delta_c/ccl_sigmaM(cosmo, halomass, a, status);
+    nu = delta_c/ccl_sigmaM(cosmo, log10(halomass), a, status);
     return 9.*pow(nu,-0.29)*pow(gz/g0,1.15);
 
     // Duffy et al. (2008; 0804.2486; Table 1)

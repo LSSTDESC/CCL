@@ -41,7 +41,6 @@ double Dv_BryanNorman(ccl_cosmology *cosmo, double a, int *status){
   double Dv = (Dv0+82.*x-39.*pow(x,2))/Om_mz;
 
   return Dv;
-
 }
 
 /*----- ROUTINE: r_delta -----
@@ -323,7 +322,7 @@ static double massfunc_f(ccl_cosmology *cosmo, double halomass, double a, double
   double Omega_m_a;
   double delta_c_Tinker, nu;
 
-  double sigma=ccl_sigmaM(cosmo, halomass, a, status);
+  double sigma=ccl_sigmaM(cosmo, log10(halomass), a, status);
   int gslstatus;
 
   switch(cosmo->config.mass_function_method) {
@@ -346,7 +345,7 @@ static double massfunc_f(ccl_cosmology *cosmo, double halomass, double a, double
     fit_a = 0.707;
 
     // nu = delta_c(z) / sigma(M)
-    nu = dc_NakamuraSuto(cosmo, a, status)/ccl_sigmaM(cosmo, halomass, a, status);
+    nu = dc_NakamuraSuto(cosmo, a, status)/ccl_sigmaM(cosmo, log10(halomass), a, status);
 
     return nu*fit_A*(1.+pow(fit_a*pow(nu,2),-fit_p))*exp(-fit_a*pow(nu,2)/2.);
 
@@ -480,7 +479,7 @@ static double ccl_halo_b1(ccl_cosmology *cosmo, double halomass, double a, doubl
 {
   double fit_A, fit_B, fit_C, fit_a, fit_b, fit_c, fit_p, overdensity_delta, y;
   double delta_c_Tinker, nu;
-  double sigma=ccl_sigmaM(cosmo,halomass,a, status);
+  double sigma=ccl_sigmaM(cosmo,log10(halomass),a, status);
   switch(cosmo->config.mass_function_method) {
 
   // Equation (12) in  arXiv: 9901122
@@ -502,7 +501,7 @@ static double ccl_halo_b1(ccl_cosmology *cosmo, double halomass, double a, doubl
 
     // Cosmology dependent delta_c and nu
     double delta_c = dc_NakamuraSuto(cosmo, a, status);
-    nu = delta_c/ccl_sigmaM(cosmo, halomass, a, status);
+    nu = delta_c/ccl_sigmaM(cosmo, log10(halomass), a, status);
 
     return 1.+(fit_a*pow(nu,2)-1.+2.*fit_p/(1.+pow(fit_a*pow(nu,2),fit_p)))/delta_c;
 
@@ -572,7 +571,7 @@ void ccl_cosmology_compute_sigma(ccl_cosmology *cosmo, int *status)
   if (*status == 0) {
     for (int i=0; i<nm; i++) {
       smooth_radius = ccl_massfunc_m2r(cosmo, pow(10,m[i]), status);
-      y[i] = log10(ccl_sigmaR(cosmo, smooth_radius, 1., status));
+      y[i] = log(ccl_sigmaR(cosmo, smooth_radius, 1., status));
     }
     logsigma = gsl_spline_alloc(cosmo->spline_params.M_SPLINE_TYPE, nm);
     if (logsigma == NULL) {
@@ -596,20 +595,17 @@ void ccl_cosmology_compute_sigma(ccl_cosmology *cosmo, int *status)
       if(i==0) {
         gslstatus |= gsl_spline_eval_e(logsigma, m[i], NULL,&na);
         gslstatus |= gsl_spline_eval_e(logsigma, m[i]+cosmo->spline_params.LOGM_SPLINE_DELTA/2., NULL,&nb);
-        y[i] = (na-nb)*log(10.);
-        y[i] = 2.*y[i] / cosmo->spline_params.LOGM_SPLINE_DELTA;
+        y[i] = 2.*(na-nb)*y[i] / cosmo->spline_params.LOGM_SPLINE_DELTA;
       }
       else if (i==nm-1) {
         gslstatus |= gsl_spline_eval_e(logsigma, m[i]-cosmo->spline_params.LOGM_SPLINE_DELTA/2., NULL,&na);
         gslstatus |= gsl_spline_eval_e(logsigma, m[i], NULL,&nb);
-        y[i] = (na-nb)*log(10.);
-        y[i] = 2.*y[i] / cosmo->spline_params.LOGM_SPLINE_DELTA;
+        y[i] = 2.*(na-nb)*y[i] / cosmo->spline_params.LOGM_SPLINE_DELTA;
       }
       else {
         gslstatus |= gsl_spline_eval_e(logsigma, m[i]-cosmo->spline_params.LOGM_SPLINE_DELTA/2., NULL,&na);
         gslstatus |= gsl_spline_eval_e(logsigma, m[i]+cosmo->spline_params.LOGM_SPLINE_DELTA/2., NULL,&nb);
-        y[i] = (na-nb)*log(10.);
-        y[i] = y[i] / cosmo->spline_params.LOGM_SPLINE_DELTA;
+        y[i] = (na-nb) / cosmo->spline_params.LOGM_SPLINE_DELTA;
       }
     }
 
@@ -654,48 +650,6 @@ void ccl_cosmology_compute_sigma(ccl_cosmology *cosmo, int *status)
   free(y);
 }
 
-/*----- ROUTINE: ccl_dlninvsig_dlogm -----
-INPUT: ccl_cosmology *cosmo, double halo mass in units of Msun
-TASK: returns the value of the derivative of ln(sigma^-1) with respect to log10 in halo mass.
-*/
-
-static double ccl_dlninvsig_dlogm(ccl_cosmology *cosmo, double halomass, int*status)
-{
-
-  if (cosmo->params.N_nu_mass>0){
-	  *status = CCL_ERROR_NOT_IMPLEMENTED;
-	  strcpy(cosmo->status_message,"ccl_background.c: ccl_cosmology_compute_growth(): Support for the halo mass function in cosmologies with massive neutrinos is not yet implemented.\n");
-	  return NAN;
-  }
-
-  // Raise an error if we have mu / Sigma modifcation to gravity turned on
-  if (fabs(cosmo->params.mu_0)>1e-14 || fabs(cosmo->params.sigma_0)>1e-14){
-	  *status = CCL_ERROR_NOT_IMPLEMENTED;
-	  strcpy(cosmo->status_message,"ccl_power.c: ccl_cosmology_compute_power(): The mass function is not implemented the mu / Sigma modified gravity parameterisation.\n");
-	  return NAN;
-  }
-
-  // Check if sigma has already been calculated
-  if (!cosmo->computed_sigma) {
-    *status = CCL_ERROR_SIGMA_INIT;
-    ccl_cosmology_set_status_message(
-      cosmo,
-      "ccl_massfunc.c: ccl_dlninvsig_dlogm(): linear power spctrum has not been computed!");
-    return NAN;
-  }
-
-  double val, logmass;
-  logmass = log10(halomass);
-
-  int gslstatus = gsl_spline_eval_e(cosmo->data.dlnsigma_dlogm, logmass, NULL, &val);
-  if(gslstatus != GSL_SUCCESS) {
-    ccl_raise_gsl_warning(gslstatus, "ccl_massfunc.c: ccl_massfunc():");
-    *status |= gslstatus;
-  }
-
-  return val;
-}
-
 /*----- ROUTINE: ccl_massfunc -----
 INPUT: ccl_cosmology * cosmo, double halo mass in units of Msun, double scale factor
 TASK: returns halo mass function as dn/dlog10(m) in comoving Msun^-1 Mpc^-3 (haloes per mass interval per volume)
@@ -727,7 +681,7 @@ double ccl_massfunc(ccl_cosmology *cosmo, double halomass, double a, double odel
   rho_m = ccl_constants.RHO_CRITICAL*cosmo->params.Omega_m*cosmo->params.h*cosmo->params.h;
   f=massfunc_f(cosmo,halomass,a,odelta,status);
 
-  return f*rho_m*ccl_dlninvsig_dlogm(cosmo,halomass,status)/halomass;
+  return f*rho_m*ccl_dlnsigM_dlogM(cosmo,logmass,status)/halomass;
 }
 
 /*----- ROUTINE: ccl_halob1 -----
@@ -775,14 +729,8 @@ INPUT: ccl_cosmology * cosmo, double halo mass in units of Msun, double scale fa
 TASK: returns sigma from the sigmaM interpolation. Also computes the sigma interpolation if
 necessary.
 */
-double ccl_sigmaM(ccl_cosmology *cosmo, double halomass, double a, int *status)
+double ccl_sigmaM(ccl_cosmology *cosmo, double log_halomass, double a, int *status)
 {
-  if (cosmo->params.N_nu_mass>0){
-	  *status = CCL_ERROR_NOT_IMPLEMENTED;
-	  ccl_cosmology_set_status_message(cosmo, "ccl_background.c: ccl_cosmology_compute_growth(): Support for the sigma(M) function in cosmologies with massive neutrinos is not yet implemented.\n");
-	  return NAN;
-  }
-
   double sigmaM;
   // Check if sigma has already been calculated
   if (!cosmo->computed_sigma) {
@@ -792,17 +740,10 @@ double ccl_sigmaM(ccl_cosmology *cosmo, double halomass, double a, int *status)
       "ccl_massfunc.c: ccl_sigmaM(): linear power spctrum has not been computed!");
     return NAN;
   }
-  if (!cosmo->computed_growth){
-    *status = CCL_ERROR_GROWTH_INIT;
-    ccl_cosmology_set_status_message(
-      cosmo,
-      "ccl_massfunc.c: ccl_sigmaM(): growth factor splines have not been precomputed!");
-    return NAN;
-  }
 
   double lgsigmaM;
 
-  int gslstatus = gsl_spline_eval_e(cosmo->data.logsigma, log10(halomass), NULL, &lgsigmaM);
+  int gslstatus = gsl_spline_eval_e(cosmo->data.logsigma, log_halomass, NULL, &lgsigmaM);
 
   if(gslstatus != GSL_SUCCESS) {
     ccl_raise_gsl_warning(gslstatus, "ccl_massfunc.c: ccl_sigmaM():");
@@ -810,6 +751,31 @@ double ccl_sigmaM(ccl_cosmology *cosmo, double halomass, double a, int *status)
   }
 
   // Interpolate to get sigma
-  sigmaM = pow(10,lgsigmaM)*ccl_growth_factor(cosmo, a, status);
+  sigmaM = exp(lgsigmaM)*ccl_growth_factor(cosmo, a, status);
   return sigmaM;
+}
+
+/*----- ROUTINE: ccl_dlnsigM_dlogM -----
+INPUT: ccl_cosmology *cosmo, double halo mass in units of Msun
+TASK: returns the value of the derivative of ln(sigma^-1) with respect to log10 in halo mass.
+*/
+double ccl_dlnsigM_dlogM(ccl_cosmology *cosmo, double log_halomass, int *status)
+{
+  // Check if sigma has already been calculated
+  if (!cosmo->computed_sigma) {
+    *status = CCL_ERROR_SIGMA_INIT;
+    ccl_cosmology_set_status_message(
+      cosmo,
+      "ccl_massfunc.c: ccl_sigmaM(): linear power spctrum has not been computed!");
+    return NAN;
+  }
+  
+  double dlsdlgm;
+  int gslstatus = gsl_spline_eval_e(cosmo->data.dlnsigma_dlogm,
+				    log_halomass, NULL, &dlsdlgm);
+  if(gslstatus) { 
+    ccl_raise_gsl_warning(gslstatus, "ccl_massfunc.c: ccl_dlnsigM_dlogM():");
+    *status |= gslstatus;
+  }
+  return dlsdlgm;
 }

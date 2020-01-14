@@ -2,8 +2,17 @@
 well as wrappers to automatically vectorize functions."""
 from . import ccllib as lib
 from ._types import error_types
-from .errors import CCLError
+from .errors import CCLError, CCLWarning
+import functools
+import warnings
 import numpy as np
+
+extrap_types = {'none': lib.f1d_extrap_0,
+                'constant': lib.f1d_extrap_const,
+                'linx_liny': lib.f1d_extrap_linx_liny,
+                'linx_logy': lib.f1d_extrap_linx_logy,
+                'logx_liny': lib.f1d_extrap_logx_liny,
+                'logx_logy': lib.f1d_extrap_logx_logy}
 
 
 def check(status, cosmo=None):
@@ -282,6 +291,7 @@ def _vectorize_fn4(fn, fn_vec, cosmo, x, a, d, returns_status=True):
     return f
 
 
+
 def _vectorize_fn5(fn, fn_vec, cosmo, x1, x2, returns_status=True):
 
     """Generic wrapper to allow vectorized (1D array) access to CCL
@@ -330,3 +340,93 @@ def _vectorize_fn5(fn, fn_vec, cosmo, x1, x2, returns_status=True):
     # Check result and return
     check(status, cosmo_in)
     return f
+
+def resample_array(x_in, y_in, x_out,
+                   extrap_lo='none', extrap_hi='none',
+                   fill_value_lo=0, fill_value_hi=0):
+    """ Interpolates an input y array onto a set of x values.
+
+    Args:
+        x_in (array_like): input x-values.
+        y_in (array_like): input y-values.
+        x_out (array_like): x-values for output array.
+        extrap_lo (string): type of extrapolation for x-values below the
+            range of `x_in`. 'none' (for no interpolation), 'constant',
+            'linx_liny' (linear in x and y), 'linx_logy', 'logx_liny' and
+            'logx_logy'.
+        extrap_hi (string): type of extrapolation for x-values above the
+            range of `x_in`.
+        fill_value_lo (float): constant value if `extrap_lo` is
+            'constant'.
+        fill_value_hi (float): constant value if `extrap_hi` is
+            'constant'.
+    Returns:
+        array_like: output array.
+    """
+
+    if extrap_lo not in extrap_types.keys():
+        raise ValueError("'%s' is not a valid extrapolation type. "
+                         "Available options are: %s"
+                         % (extrap_lo, extrap_types.keys()))
+    if extrap_hi not in extrap_types.keys():
+        raise ValueError("'%s' is not a valid extrapolation type. "
+                         "Available options are: %s"
+                         % (extrap_hi, extrap_types.keys()))
+
+    status = 0
+    y_out, status = lib.array_1d_resample(x_in, y_in, x_out,
+                                          fill_value_lo, fill_value_hi,
+                                          extrap_types[extrap_lo],
+                                          extrap_types[extrap_hi],
+                                          x_out.size, status)
+    check(status)
+    return y_out
+
+
+def deprecated(new_function=None):
+    """This is a decorator which can be used to mark functions
+    as deprecated. It will result in a warning being emitted
+    when the function is used. If there is a replacement function,
+    pass it as `new_function`.
+    """
+    def _depr_decorator(func):
+        @functools.wraps(func)
+        def new_func(*args, **kwargs):
+            s = "The function {} is deprecated.".format(func.__name__)
+            if new_function:
+                s += " Use {} instead.".format(new_function.__name__)
+            warnings.warn(s, CCLWarning)
+            return func(*args, **kwargs)
+        return new_func
+    return _depr_decorator
+
+
+def _fftlog_transform(rs, frs,
+                      dim, mu, power_law_index):
+    if np.ndim(rs) != 1:
+        raise ValueError("rs should be a 1D array")
+    if np.ndim(frs) < 1 or np.ndim(frs) > 2:
+        raise ValueError("frs should be a 1D or 2D array")
+    if np.ndim(frs) == 1:
+        n_transforms = 1
+        n_r = len(frs)
+    else:
+        n_transforms, n_r = frs.shape
+
+    if len(rs) != n_r:
+        raise ValueError("rs should have %d elements" % n_r)
+
+    status = 0
+    result, status = lib.fftlog_transform(n_transforms,
+                                          rs, frs.flatten(),
+                                          dim, mu, power_law_index,
+                                          (n_transforms + 1) * n_r,
+                                          status)
+    check(status)
+    result = result.reshape([n_transforms + 1, n_r])
+    ks = result[0]
+    fks = result[1:]
+    if np.ndim(frs) == 1:
+        fks = fks.squeeze()
+
+    return ks, fks

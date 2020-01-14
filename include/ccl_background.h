@@ -341,4 +341,3 @@ void ccl_cosmology_compute_growth(ccl_cosmology * cosmo, int * status);
 CCL_END_DECLS
 
 #endif
-

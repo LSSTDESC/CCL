@@ -1,15 +1,22 @@
 pyccl package
 =============
 
+Subpackages
+-----------
+
+.. toctree::
+
+    pyccl.halos
+
 Submodules
 ----------
 
 .. toctree::
 
    pyccl.background
-   pyccl.ccllib
+   pyccl.bcm
+   pyccl.boltzmann
    pyccl.cls
-   pyccl.constants
    pyccl.core
    pyccl.correlation
    pyccl.errors
@@ -26,6 +33,6 @@ Module contents
 ---------------
 
 .. automodule:: pyccl
-   :members:
-   :undoc-members:
-   :show-inheritance:
+    :members:
+    :undoc-members:
+    :show-inheritance:

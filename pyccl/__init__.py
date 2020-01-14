@@ -1,6 +1,3 @@
-"""The pyccl package contains all of the submodules that are implemented in
-individual files in CCL.
-"""
 # flake8: noqa
 from pkg_resources import get_distribution, DistributionNotFound
 try:
@@ -16,7 +13,7 @@ if environ.get("CLASS_PARAM_DIR") is None:
     environ["CLASS_PARAM_DIR"] = path.dirname(path.abspath(__file__))
 
 from . import ccllib as lib
-from . import core, constants, background, power, massfunction, halomodel, pk2d, haloprofile
+from . import core, constants, background, power, halomodel, pk2d, haloprofile, halos, massfunction
 
 # Core data structures
 from .core import Cosmology
@@ -32,13 +29,13 @@ from .pk2d import Pk2D
 
 # Power spectrum calculations and sigma8
 from .power import linear_matter_power, nonlin_matter_power, sigmaR, \
-    sigmaV, sigma8
+    sigmaV, sigma8, sigmaM
 
 # BCM stuff
 from .bcm import bcm_model_fka
 
-# Halo mass function
-from .massfunction import massfunc, massfunc_m2r, sigmaM, halo_bias
+# Old halo mass function
+from .massfunction import massfunc, halo_bias, massfunc_m2r
 
 # Cl's and tracers
 from .tracers import Tracer, NumberCountsTracer, WeakLensingTracer, CMBLensingTracer, \
@@ -64,6 +61,6 @@ from .haloprofile import nfw_profile_3d, einasto_profile_3d, hernquist_profile_3
 from .neutrinos import Omeganuh2, nu_masses
 
 # Expose function to toggle debug mode
-from .pyutils import debug_mode
+from .pyutils import debug_mode, resample_array
 
 from .errors import CCLError, CCLWarning

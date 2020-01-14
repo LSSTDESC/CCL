@@ -3,7 +3,8 @@ recursive-include include *
 recursive-include src *
 recursive-include pyccl *.i CMakeLists.txt
 recursive-exclude examples *.ipynb
-prune benchmarks
+recursive-include benchmarks *.c
+recursive-include benchmarks *.h
 include CMakeLists.txt
 include pyccl/CMakeLists.txt
 include LICENSE

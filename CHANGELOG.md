@@ -1,7 +1,25 @@
 # Unreleased
-
 ## Python library
 - Added a function for the angular diameter distance (#645)
+- Improved implementation of halo model quantities (n(M), b(M), c(M)) (#668, #655, #656, #657, #636).
+
+## C library
+- Improved implementation of halo model quantities (n(M), b(M), c(M)) (#668, #655, #656, #657, #636).
+
+# v2.0.1 Changes
+
+## Bug Fixes
+- Fixed a PyPi installation bug where the proper files for `CMAKE` were not
+  included in the source distribution.
+
+# v2.0 API changes
+
+## Python library
+- Made CAMB the default Boltzmann code (#685).
+- Added check to ensure the number of relativistic neutrinos is positive (#684).
+- Added massive neutrinos to Omega_m (#680).
+- Chamged neutrino API options to be intuitive and consistent (#681).
+
 - Enabled CAMB (#677)
 - Fixed bug when normalizing the linear power spectrum using sigma8 and
   the mu-Sigma modified gravity model (#677).
@@ -34,10 +52,15 @@
 - Added custom Halofit code (#611).
 - Added `has_density` and `has_shear` tags to `Tracer` constructors.
 - Changed TCMB to T_CMB everywhere (#615)
+- Deprecate Angpow (#571)
 - Added support for modified gravity via mu / Sigma (scale-independent) parameterisation (#442)
 
 ## C library
+<<<<<<< HEAD
 - Added function for comoving angular diameter distance (#645)
+=======
+- Added massive neutrinos to Omega_m (#680).
+>>>>>>> master
 - Moved CLASS interface to python (#652).
 - Added OpenMP (#651).
 - Removed all benchmarks from C and kept only the C unit tests in C (#653).
@@ -69,6 +92,7 @@
 - Changed TCMB to T_CMB everywhere (#615)
 - Fixed a small bug in the w_tophat expression and increased precision (#607)
 - Deprecated the use of GSL spline accelerators (#626)
+- Deprecate Angpow (#571)
 - Added support for modified gravity via mu / Sigma (scale-independent) parameterisation (#442)
 
 # v 1.0 API changes :

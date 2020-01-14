@@ -16,7 +16,7 @@ def test_swig_tracer():
     dNdz = z * 8
 
     assert_raises(
-        CCLError,
+        ValueError,
         pyccl.WeakLensingTracer,
         PYCOSMO,
         dndz=(z, dNdz[0:2]),
@@ -115,7 +115,6 @@ def test_swig_core():
         0.25, 0.05, 0.0, 3.0, -1.0, 0.0, 0.7, 2e-9, 0.95, 1, 0.0, 0.0,
         0.0, 0.0, [1.0, 2.0],
         [0.0, 0.3, 0.5],
-        0,
         [0.02, 0.01, 0.2],
         status)
 
@@ -179,36 +178,6 @@ def test_swig_halomod():
         status)
 
 
-def test_swig_massfunc():
-    status = 0
-    for func in [ccllib.massfunc_vec, ccllib.halo_bias_vec]:
-        assert_raises(
-            CCLError,
-            func,
-            COSMO,
-            1.0, 200.0,
-            [1e13, 1e14],
-            4,
-            status)
-
-    assert_raises(
-        CCLError,
-        ccllib.massfunc_m2r_vec,
-        COSMO,
-        [1e13, 1e14],
-        4,
-        status)
-
-    assert_raises(
-        CCLError,
-        ccllib.sigmaM_vec,
-        COSMO,
-        1.0,
-        [1e13, 1e14],
-        4,
-        status)
-
-
 def test_swig_neurtinos():
     status = 0
     assert_raises(
@@ -257,18 +226,14 @@ def test_swig_power():
 
 def test_swig_haloprofile():
     status = 0
-    for func in [ccllib.halo_profile_nfw_vec,
-                 ccllib.halo_profile_einasto_vec,
-                 ccllib.halo_profile_hernquist_vec,
-                 ccllib.projected_halo_profile_nfw_vec]:
-        assert_raises(
-            CCLError,
-            func,
-            COSMO,
-            5.0,
-            1E12,
-            200.,
-            1.,
-            [1.0, 10.0],
-            4,
-            status)
+    assert_raises(CCLError,
+                  ccllib.einasto_norm,
+                  [0.1, 1.0],
+                  [0.1, 1.0],
+                  [0.1, 1.0],
+                  4, status)
+    assert_raises(CCLError,
+                  ccllib.hernquist_norm,
+                  [0.1, 1.0],
+                  [0.1, 1.0],
+                  4, status)
