@@ -16,7 +16,7 @@ def test_swig_tracer():
     dNdz = z * 8
 
     assert_raises(
-        CCLError,
+        ValueError,
         pyccl.WeakLensingTracer,
         PYCOSMO,
         dndz=(z, dNdz[0:2]),

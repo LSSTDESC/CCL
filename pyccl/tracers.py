@@ -141,6 +141,139 @@ class Tracer(object):
         # Do nothing, just initialize list of tracers
         self._trc = []
 
+    def _dndz(self, z):
+        raise NotImplementedError("`get_dndz` not implemented for "
+                                  "this `Tracer` type.")
+
+    def get_dndz(self, z):
+        """Get the redshift distribution for this tracer.
+        Only available for some tracers (`NumberCountsTracer` and
+        `WeakLensingTracer`).
+
+        Args:
+            z (float or array_like): redshift values.
+
+        Returns:
+            array_like: redshift distribution evaluated at the
+                input values of `z`.
+        """
+        return self._dndz(z)
+
+    def get_kernel(self, chi):
+        """Get the radial kernels for all tracers contained
+        in this `Tracer`.
+
+        Args:
+            chi (float or array_like): values of the comoving
+                radial distance in increasing order and in Mpc.
+
+        Returns:
+            array_like: list of radial kernels for each tracer.
+                The shape will be `(n_tracer, chi.size)`, where
+                `n_tracer` is the number of tracers. The last dimension
+                will be squeezed if the input is a scalar.
+        """
+        if not hasattr(self, '_trc'):
+            return []
+
+        chi_use = np.atleast_1d(chi)
+        kernels = []
+        for t in self._trc:
+            status = 0
+            w, status = lib.cl_tracer_get_kernel(t, chi_use,
+                                                 chi_use.size,
+                                                 status)
+            check(status)
+            kernels.append(w)
+        kernels = np.array(kernels)
+        if np.ndim(chi) == 0:
+            if kernels.shape != (0,):
+                kernels = np.squeeze(kernels, axis=-1)
+        return kernels
+
+    def get_f_ell(self, ell):
+        """Get the ell-dependent prefactors for all tracers
+        contained in this `Tracer`.
+
+        Args:
+            ell (float or array_like): angular multipole values.
+
+        Returns:
+            array_like: list of prefactors for each tracer.
+                The shape will be `(n_tracer, ell.size)`, where
+                `n_tracer` is the number of tracers. The last dimension
+                will be squeezed if the input is a scalar.
+        """
+        if not hasattr(self, '_trc'):
+            return []
+
+        ell_use = np.atleast_1d(ell)
+        f_ells = []
+        for t in self._trc:
+            status = 0
+            f, status = lib.cl_tracer_get_f_ell(t, ell_use,
+                                                ell_use.size,
+                                                status)
+            check(status)
+            f_ells.append(f)
+        f_ells = np.array(f_ells)
+        if np.ndim(ell) == 0:
+            if f_ells.shape != (0,):
+                f_ells = np.squeeze(f_ells, axis=-1)
+        return f_ells
+
+    def get_transfer(self, lk, a):
+        """Get the transfer functions for all tracers contained
+        in this `Tracer`.
+
+        Args:
+            lk (float or array_like): values of the natural logarithm of
+                the wave number (in units of inverse Mpc) in increasing
+                order.
+             a (float or array_like): values of the scale factor.
+
+        Returns:
+            array_like: list of transfer functions for each tracer.
+                The shape will be `(n_tracer, lk.size, a.size)`, where
+                `n_tracer` is the number of tracers. The other dimensions
+                will be squeezed if the inputs are scalars.
+        """
+        if not hasattr(self, '_trc'):
+            return []
+
+        lk_use = np.atleast_1d(lk)
+        a_use = np.atleast_1d(a)
+        transfers = []
+        for t in self._trc:
+            status = 0
+            t, status = lib.cl_tracer_get_transfer(t, lk_use, a_use,
+                                                   lk_use.size * a_use.size,
+                                                   status)
+            check(status)
+            transfers.append(t.reshape([lk_use.size, a_use.size]))
+        transfers = np.array(transfers)
+        if transfers.shape != (0,):
+            if np.ndim(a) == 0:
+                transfers = np.squeeze(transfers, axis=-1)
+                if np.ndim(lk) == 0:
+                    transfers = np.squeeze(transfers, axis=-1)
+            else:
+                if np.ndim(lk) == 0:
+                    transfers = np.squeeze(transfers, axis=-2)
+        return transfers
+
+    def get_bessel_derivative(self):
+        """Get Bessel function derivative orders for all tracers contained
+        in this `Tracer`.
+
+        Returns:
+            array_like: list of Bessel derivative orders for each tracer.
+        """
+        if not hasattr(self, '_trc'):
+            return []
+
+        return np.array([t.der_bessel for t in self._trc])
+
     def add_tracer(self, cosmo, kernel=None,
                    transfer_ka=None, transfer_k=None, transfer_a=None,
                    der_bessel=0, der_angles=0,
@@ -301,6 +434,11 @@ class NumberCountsTracer(Tracer):
         # we need the distance functions at the C layer
         cosmo.compute_distances()
 
+        from scipy.interpolate import interp1d
+        z_n, n = _check_array_params(dndz)
+        self._dndz = interp1d(z_n, n, bounds_error=False,
+                              fill_value=0)
+
         kernel_d = None
         if bias is not None:  # Has density term
             # Kernel
@@ -351,6 +489,11 @@ class WeakLensingTracer(Tracer):
 
         # we need the distance functions at the C layer
         cosmo.compute_distances()
+
+        from scipy.interpolate import interp1d
+        z_n, n = _check_array_params(dndz)
+        self._dndz = interp1d(z_n, n, bounds_error=False,
+                              fill_value=0)
 
         if has_shear:
             # Kernel

@@ -12,6 +12,7 @@
     (double* z_b, int nz_b),
     (double* n, int nn),
     (double* b, int nb),
+    (double* ell_s, int nell),
     (double* chi_s, int nchi),
     (double* wchi_s, int nwchi),
     (double* lk_s, int nlk),
@@ -98,6 +99,70 @@ void get_number_counts_kernel_wrapper(ccl_cosmology *cosmo,
 				      int *status)
 {
   ccl_get_number_counts_kernel(cosmo,nz_n,z_n,n,1,output,status);
+}
+%}
+
+%feature("pythonprepend") cl_tracer_get_kernel %{
+    if chi_s.size != nout:
+        raise CCLError("Input shape for `chi_s` must match `nout`")
+%}
+
+%inline %{
+void cl_tracer_get_kernel(ccl_cl_tracer_t *tr,
+			  double *chi_s, int nchi,
+			  int nout, double *output,
+			  int *status)
+{
+  int ii;
+  for(ii=0; ii<nchi; ii++) {
+    output[ii] = ccl_cl_tracer_t_get_kernel(tr, chi_s[ii],
+					    status);
+  }
+}
+%}
+
+%feature("pythonprepend") cl_tracer_get_f_ell %{
+    if ell_s.size != nout:
+        raise CCLError("Input shape for `ell_s` must match `nout`")
+%}
+
+%inline %{
+void cl_tracer_get_f_ell(ccl_cl_tracer_t *tr,
+			 double *ell_s, int nell,
+			 int nout, double *output,
+			 int *status)
+{
+  int ii;
+  for(ii=0; ii<nell; ii++) {
+    output[ii] = ccl_cl_tracer_t_get_f_ell(tr, ell_s[ii],
+					   status);
+  }
+}
+%}
+
+%feature("pythonprepend") cl_tracer_get_transfer %{
+    if a_s.size * lk_s.size != nout:
+        raise CCLError("`nout` must match the shapes of `k_s` times `a_s`")
+%}
+
+%inline %{
+void cl_tracer_get_transfer(ccl_cl_tracer_t *tr,
+			    double *lk_s, int nlk,
+			    double *a_s, int na,
+			    int nout, double *output,
+			    int *status)
+{
+  int ik;
+  for(ik=0; ik<nlk; ik++) {
+    int ia;
+    double lk = lk_s[ik];
+    for(ia=0; ia<na; ia++) {
+      double a = a_s[ia];
+      int ii = ia + na * ik;
+      output[ii] = ccl_cl_tracer_t_get_transfer(tr, lk, a,
+						status);
+    }
+  }
 }
 %}
 
