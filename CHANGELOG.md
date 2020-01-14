@@ -1,6 +1,6 @@
 # Unreleased
 ## Python library
-- Added a function for the angular diameter distance (#645)
+- Added a function for the angular diameter distance difference between two scale factors (#645)
 - Improved implementation of halo model quantities (n(M), b(M), c(M)) (#668, #655, #656, #657, #636).
 
 ## C library
@@ -18,8 +18,7 @@
 - Made CAMB the default Boltzmann code (#685).
 - Added check to ensure the number of relativistic neutrinos is positive (#684).
 - Added massive neutrinos to Omega_m (#680).
-- Chamged neutrino API options to be intuitive and consistent (#681).
-
+- Changed neutrino API options to be intuitive and consistent (#681).
 - Enabled CAMB (#677)
 - Fixed bug when normalizing the linear power spectrum using sigma8 and
   the mu-Sigma modified gravity model (#677).
