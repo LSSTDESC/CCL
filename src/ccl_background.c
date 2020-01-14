@@ -972,6 +972,7 @@ double ccl_sinn(ccl_cosmology *cosmo, double chi, int *status)
 }
 
 double ccl_comoving_angular_distance(ccl_cosmology * cosmo, double a, int* status)
+//Implements Eq. (16) of Hogg, astro-ph/9905116.
 {
   if((a > (1.0 - 1.e-8)) && (a<=1.0)) {
     return 0.;
@@ -1018,9 +1019,9 @@ void ccl_comoving_angular_distances(ccl_cosmology * cosmo, int na, double a[],
 double ccl_angular_diameter_distance(ccl_cosmology * cosmo, double a1, double a2, int* status)
 //Implements Eq. (19) of Hogg, astro-ph/9905116.
 {
-  if(a1>1. || a2>1.) {
+  if(a1>1. || a2>1. || a1<a2) {
     *status = CCL_ERROR_COMPUTECHI;
-    ccl_cosmology_set_status_message(cosmo,"ccl_background.c: ccl_angular_diameter_distance(): scale factor cannot be larger than 1.");
+    ccl_cosmology_set_status_message(cosmo,"ccl_background.c: ccl_angular_diameter_distance(): error on input scale factor.");
     return NAN;
   } else {
     if(cosmo->params.Omega_k<0.){
@@ -1048,17 +1049,7 @@ double ccl_angular_diameter_distance(ccl_cosmology * cosmo, double a1, double a2
 	ccl_cosmology_set_status_message(cosmo,"ccl_background.c: ccl_angular_diameter_distance(): Scale factor outside interpolation range.\n");
 	return NAN;
       }
-      double sinn1,sinn2,dm1,dm2,sqrtk2;
-      sqrtk2=cosmo->params.sqrtk*cosmo->params.sqrtk;
-      sinn1=ccl_sinn(cosmo,chi1,status);
-      sinn2=ccl_sinn(cosmo,chi2,status);
-      dm1=sinn1*sqrt(1+sqrtk2*sinn2*sinn2);
-      dm2=sinn2*sqrt(1+sqrtk2*sinn1*sinn1);
-      if(a1 > a2) {
-	return a2*(dm2-dm1);
-      } else {
-	return a1*(dm1-dm2);
-      }
+	    return a2*ccl_sinn(cosmo,chi2-chi1,status);
     }
   }
 }
