@@ -289,10 +289,9 @@ def _vectorize_fn4(fn, fn_vec, cosmo, x, a, d, returns_status=True):
     # Check result and return
     check(status, cosmo_in)
     return f
-    
+
 
 def _vectorize_fn5(fn, fn_vec, cosmo, x1, x2, returns_status=True):
-
     """Generic wrapper to allow vectorized (1D array) access to CCL
     functions with two vector arguments of the same length,
     with a cosmology dependence.
