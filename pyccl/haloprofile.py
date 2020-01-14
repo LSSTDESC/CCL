@@ -7,6 +7,8 @@ def nfw_profile_3d(cosmo, concentration, halo_mass, odelta, a, r):
     """Calculate the 3D NFW halo profile at a given radius or an array of radii,
     for a halo with a given mass, mass definition, and concentration,
     at a given scale factor, with a cosmology dependence.
+    Note that this function is deprecated. Please use the functionality in
+    :py:mod:`pyccl.halos.profiles`.
 
     Args:
         cosmo (:obj:`Cosmology`): cosmological parameters.
@@ -35,6 +37,8 @@ def einasto_profile_3d(cosmo, concentration, halo_mass, odelta, a, r):
     at a given scale factor, with a cosmology dependence.
     The alpha parameter is calibrated using the relation with peak height in
     https://arxiv.org/pdf/1401.1216.pdf eqn5, assuming virial mass.
+    Note that this function is deprecated. Please use the functionality in
+    :py:mod:`pyccl.halos.profiles`.
 
     Args:
         cosmo (:obj:`Cosmology`): cosmological parameters.
@@ -63,6 +67,8 @@ def hernquist_profile_3d(cosmo, concentration, halo_mass, odelta, a, r):
     at a given radius or an array of radii,
     for a halo with a given mass, mass definition, and concentration,
     at a given scale factor, with a cosmology dependence.
+    Note that this function is deprecated. Please use the functionality in
+    :py:mod:`pyccl.halos.profiles`.
 
     Args:
         cosmo (:obj:`Cosmology`): cosmological parameters.
@@ -89,6 +95,8 @@ def nfw_profile_2d(cosmo, concentration, halo_mass, odelta, a, r):
     at a given radius or an array of radii,
     for a halo with a given mass, mass definition, and concentration,
     at a given scale factor, with a cosmology dependence.
+    Note that this function is deprecated. Please use the functionality in
+    :py:mod:`pyccl.halos.profiles`.
 
     Args:
         cosmo (:obj:`Cosmology`): cosmological parameters.
