@@ -114,9 +114,9 @@ def comoving_angular_distance(cosmo, a):
 
 
 def angular_diameter_distance(cosmo, a1, a2):
-    """Comoving angular diameter distance.
+    """Angular diameter distance.
 
-   .. note:: The comovoing angular diameter distance in Mpc from scale factor
+   .. note:: The angular diameter distance in Mpc from scale factor
     a1 to scale factor a2. This is Eq. (19) of astro-ph/9905116.
 
     Args:
@@ -125,7 +125,7 @@ def angular_diameter_distance(cosmo, a1, a2):
         a2 (float or array_like): Scale factor(s), normalized to 1 today.
 
     Returns:
-        float or array_like: Comoving angular distance; Mpc.
+        float or array_like: angular diameter distance; Mpc.
     """
     cosmo.compute_distances()
     return _vectorize_fn5(lib.angular_diameter_distance,

@@ -106,7 +106,7 @@ void ccl_comoving_angular_distances(ccl_cosmology * cosmo, int na, double a[], d
 
 
 /**
- * Comoving angular diameter distance in Mpc from scale factor a1 to scale factor a2
+ * Angular diameter distance in Mpc from scale factor a1 to scale factor a2
  * NOTE this is Eq. (19) of astro-ph/9905116, it gives the ratio of the physical
  * transverse size of an object to its angular size in radians.
  * @param cosmo Cosmological parameters

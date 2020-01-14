@@ -4,6 +4,7 @@
 - Improved implementation of halo model quantities (n(M), b(M), c(M)) (#668, #655, #656, #657, #636).
 
 ## C library
+- Added function for the angular diameter distance difference between two scale factors (#645)
 - Improved implementation of halo model quantities (n(M), b(M), c(M)) (#668, #655, #656, #657, #636).
 
 # v2.0.1 Changes
@@ -55,11 +56,7 @@
 - Added support for modified gravity via mu / Sigma (scale-independent) parameterisation (#442)
 
 ## C library
-<<<<<<< HEAD
-- Added function for comoving angular diameter distance (#645)
-=======
 - Added massive neutrinos to Omega_m (#680).
->>>>>>> master
 - Moved CLASS interface to python (#652).
 - Added OpenMP (#651).
 - Removed all benchmarks from C and kept only the C unit tests in C (#653).
