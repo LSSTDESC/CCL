@@ -712,7 +712,7 @@ We provide 3 options for these, encoded in a parameter that we will call $d_\the
 \end{itemize}
 
 \subsubsection*{Bessel functions}
-  For $n\ge0$, $j^{(n)}_\ell(x)$ represents the $n$-th derivative of the spherical bessel functions with respect to their argument. We allow values $n=0,\,1$ and 2, encoded in the variable {\tt der\_bessel}, and use the following identities:
+  For $n\ge0$, $j^{(n)}_\ell(x)$ represents the $n$-th derivative of the spherical Bessel functions with respect to their argument. We allow values $n=0,\,1$ and 2, encoded in the variable {\tt der\_bessel}, and use the following identities:
   \begin{align}
     &j^{(1)}_\ell(x)=\frac{\ell\,j_\ell(x)-x\,j_{\ell+1}(x)}{x}\\
     &j^{(2)}_\ell(x)=\frac{[\ell(\ell-1)-x^2]j_\ell(x)+2xj_{\ell+1}(x)}{x^2}.
@@ -1267,49 +1267,77 @@ for the halo mass function and bias.
 \subsection{Halo profiles}
 \label{sec:halo_profiles}
 
-In this section we describe the several models of halo density profiles that are implemented, 
-including the NFW profile \citep{Navarro1997}, the Hernquist profile \citep{Hernquist1990}, 
-and the Einasto profile \citep{Einasto1965,Einasto1969,Diemer2014}.
-Besides the 3D profiles listed above, the 2D projected NFW profile is also implemented 
-\citep{Bartelmann1996,Wright2000}.
-Including halo profiles in \ccl adds to the completeness of our description of the matter 
-distribution of the universe, and is nessary for modelling halos in many cluster analyses.
-For example, having a model for the dark matter profile within each halo enables a calculation 
-of the galaxy--matter correlation, which is the origin of weak lensing signals.
+\ccl provides a generic formalism to work with halo profiles. Halo profiles describe the distribution of a given quantity (most commonly the matter density) around halos of different masses at different redshifts. Due to statistical isotropy, the average halo profile is spherically symmetric. For this reason, the basic quantity associated with halo profiles is the value of the profile as a function of the comoving distance $r$ to its center, $\rho(r)$. There is also a number of derived quantities that are of interest for different cosmological analyses:
+\begin{itemize}
+ \item {\bf Fourier-space profile:} the Fourier transform $\rho(k)$ of a spherically symmetric profile is given by:
+ \begin{equation}\label{eq:prof.fourier}
+   \rho(k)\equiv4\pi\int_0^\infty dr\,r^2\,j_0(k\,r)\,\rho(r),
+ \end{equation}
+ where $j_0(kr)$ is the order-0 spherical Bessel function.
+ \item {\bf Projected 2D profile:} this is the profile integrated along the line-of-sight direction:
+ \begin{equation}\label{eq:prof.projected}
+   \Sigma(R)\equiv\int_{-\infty}^\infty dr_\parallel\,\rho(\sqrt{r_\parallel^2+R^2}).
+ \end{equation}
+ Note that this can be rewritten in terms of the Fourier-space profile:
+ \begin{equation}\label{eq:prof.projected.fourier}
+   \Sigma(R)=\frac{1}{2\pi}\int_0^\infty dk\,k\,J_0(kR)\,\rho(k),
+ \end{equation}
+ where $J_n$ is the order-$n$ cylindrical (or standard) Bessel function.
+ \item {\bf Cumulative surface density:} this is the average projected profile within a circle of radius $R$ around the center of the halo:
+ \begin{equation}\label{eq:prof.cumul2d}
+  \Sigma(<R)\equiv\frac{2}{R^2}\int_0^RdR'\,R'\,\Sigma(R').
+ \end{equation}
+ This can also be rewritten in terms of the Fourier profile as:
+ \begin{equation}\label{eq:prof.cumul2d.fourier}
+  \Sigma(<R)=\frac{1}{2\pi}\int_0^\infty dk\,k\,\frac{2J_1(kR)}{kR}\rho(k). 
+ \end{equation}
+\end{itemize}
 
-Halo profiles are mathematically characterized in terms of the density of dark matter as a function of 
-the distance from the halo center. The NFW profile has the form
-\begin{equation}
-  \rho_{\rm NFW}(r)=\frac{\rho_s}{(r/r_s)(1+r/r_s)^2},  
-\end{equation}
-where $\rho_s$ and $r_s$ are the inner density and the scale radius, that vary from halo to halo.
-We also include the NFW profile projected in 2D, for lensing analyses,
-\begin{equation}
-\Sigma_{\rm NFW}(x)=\left\{\begin{matrix}
-\frac{2\rho_s r_s}{x^2-1}\left [ 1-\frac{2}{\sqrt{1-x^2}}\rm{arctanh}\sqrt{\frac{1-x}{1+x}} \right ],\hspace{20pt} x<1\\ 
-\frac{2\rho_s r_s}{3},\hspace{300pt} x=1\\ 
-\frac{2\rho_s r_s}{x^2-1}\left [ 1-\frac{2}{\sqrt{x^2-1}}\rm{arctan}\sqrt{\frac{x-1}{1+x}} \right ],\hspace{35pt} x>1
-\end{matrix}\right.
-\end{equation}
-where $x=r/r_s$.
-The NFW profile is one of the simplest halo profiles and is frequently adopted in theoretical analyses.
+Although in certain cases analytical solutions to the integrals above exist, in general they must be solved numerically. In order to do so using $O(N\log N)$ operations (as opposed to $O(N^2)$), where $N$ is the number of samples of the corresponding quantity, we make use of the Fourier-space versions of these integrals (Eqs. \ref{eq:prof.fourier}, \ref{eq:prof.projected.fourier} and \ref{eq:prof.cumul2d.fourier}), and solve them using {\tt FFTlog}\footnote{\url{http://casa.colorado.edu/~ajsh/FFTLog/}}
+\citep{Hamilton2000,Talman2009}.
 
-The Hernquist profile has a similar form, but is steeper at larger radii,
-\begin{equation}
-  \rho_{\rm Hernquist}(r)=\frac{\rho_s}{(r/r_s)(1+r/r_s)^3}.
-\end{equation}
+The following profile models are currently implemented in \ccl:
+\begin{itemize}
+  \item {\bf Navarro-Frenk-White (NFW) \citep{Navarro1997}}: the NFW profile has the form
+  \begin{equation}
+    \rho_{\rm NFW}(r)=\frac{\rho_s}{(r/r_s)(1+r/r_s)^2},  
+  \end{equation}
+  where $\rho_s$ and $r_s$ are the inner density and the scale radius. The latter is related to the spherical overdensity radius $R_\Delta$ through the concentration parameter ($R_\Delta=c\,r_s$). The mass of the NFW profile is not well defined, since its integral diverges at large $r$. For this reason it is common to consider the \emph{truncated} profile, which is assumed to be zero for $r>R_\Delta$. In that case, the normalization $\rho_s$ is given by:
+  \begin{equation}
+    \rho_s(M) = \frac{M}{4\pi\,r_s^3\,[\log(1+c) - c/(1+c)]}.
+  \end{equation}
 
-The Einasto profile has three parameters, with an additional parameter $\alpha$, 
-besides $\rho_s$ and $r_s$:
-\begin{equation}
-\rho_{\rm Einasto}(r)=\rho_s\exp(-\frac{2}{\alpha}\left [  \left (  \frac{r}{r_s}\right )^\alpha-1\right ]),
-\end{equation}
-where $\alpha$ has a calibrated relation with the halo peak height $\nu$ \citep{Gao2008},
-\begin{equation}
-\alpha(\nu)=0.155+0.0095\nu^2.
-\end{equation}
+  Analytical solutions exist for $\rho(k)$, $\Sigma(R)$ and $\Sigma(<R)$ in the case of the NFW profile. \ccl includes the possibility of using these as an alternative to FFTLog.
+  \item {\bf Hernquist \citep{Hernquist1990}}: the Hernquist profile has a similar form, but is steeper at larger radii,
+  \begin{equation}
+    \rho_{\rm Hernquist}(r)=\frac{\rho_s}{(r/r_s)(1+r/r_s)^3}.
+  \end{equation}
 
-Other profiles that have been proposed remain to be added to \ccl.
+  \item {\bf Einasto \citep{Einasto1965,Diemer2014}}: the Einasto profile has three parameters, with an additional parameter $\alpha$, besides $\rho_s$ and $r_s$:
+  \begin{equation}
+    \rho_{\rm Einasto}(r)=\rho_s\exp(-\frac{2}{\alpha}\left [  \left (  \frac{r}{r_s}\right )^\alpha-1\right ]),
+  \end{equation}
+  where $\alpha$ has a calibrated relation with the halo peak height $\nu$ \citep{Gao2008},
+  \begin{equation}
+    \alpha(\nu)=0.155+0.0095\nu^2.
+  \end{equation}
+\end{itemize}
+
+We also provide two additional profiles to be used as toy models:
+\begin{itemize}
+ \item {\bf Power-law profile}: in this case
+ \begin{equation}
+  \rho_{\rm power-law}(r) = (r/r_s)^\alpha,
+ \end{equation}
+ where $r_s$ is a free function of halo mass $M$ and scale factor $a$, and $\alpha$ is a free function of $a$.
+ \item {\bf Gaussian profile}: in this case
+   \begin{equation}
+    \rho_{\rm Gaussian}(r) = \rho_0\, e^{-(r/r_s)^2},
+   \end{equation}
+   where both $\rho_0$ and $r_s$ are free functions of halo mass and scale factor.
+\end{itemize}
+
+The halo profile API implemented in \ccl makes it very easy for users to define new profiles in terms of their $\rho(r)$. Other relevant halo profile models will be incorporated into \ccl in the future.
 
 
 \section{Tests and validation}
