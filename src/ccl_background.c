@@ -78,7 +78,7 @@ double ccl_omega_x(ccl_cosmology * cosmo, double a, ccl_species_x_label label, i
     case ccl_species_crit_label :
       return 1.;
     case ccl_species_m_label :
-      return (cosmo->params.Omega_c + cosmo->params.Omega_b) / (a*a*a) / hnorm / hnorm + 
+      return (cosmo->params.Omega_c + cosmo->params.Omega_b) / (a*a*a) / hnorm / hnorm +
 	      OmNuh2 / (cosmo->params.h) / (cosmo->params.h) / hnorm / hnorm;
     case ccl_species_l_label :
       return
@@ -1019,17 +1019,17 @@ double ccl_comoving_angular_diameter_distance(ccl_cosmology * cosmo, double a1, 
 {
   if(a1>1. || a2>1.) {
     *status = CCL_ERROR_COMPUTECHI;
-    ccl_raise_warning(*status,"CCL_ERROR_COMPUTECHI: scale factor cannot be larger than 1.");
+    ccl_cosmology_set_status_message(cosmo,"ccl_background.c: ccl_comoving_angular_diameter_distance(): scale factor cannot be larger than 1.");
     return NAN;
   } else {
     if(cosmo->params.Omega_k<0.){
       *status = CCL_ERROR_COMPUTECHI;
-      ccl_raise_warning(*status,"CCL_ERROR_COMPUTECHI: Omega_k cannot be negative for angular diameter distance.");
+      ccl_cosmology_set_status_message(cosmo,"ccl_background.c: ccl_comoving_angular_diameter_distance(): Omega_k cannot be negative for angular diameter distance.");
       return NAN;
     } else {
       if (!cosmo->computed_distances) {
 	*status = CCL_ERROR_DISTANCES_INIT;
-	ccl_cosmology_set_status_message(cosmo,"ccl_background.c: ccl_h_over_h0(): distance splines have not been precomputed!");
+	ccl_cosmology_set_status_message(cosmo,"ccl_background.c: ccl_comoving_angular_diameter_distance(): distance splines have not been precomputed!");
 	return NAN;
       }
       double chi1,chi2;
@@ -1037,14 +1037,14 @@ double ccl_comoving_angular_diameter_distance(ccl_cosmology * cosmo, double a1, 
       if(gslstatus != GSL_SUCCESS) {
 	ccl_raise_gsl_warning(gslstatus, "ccl_background.c: ccl_comoving_angular_distance():");
 	*status |= gslstatus;
-	ccl_raise_warning(*status,"ccl_comoving_angular_distance(): Scale factor outside interpolation range.\n");
+	ccl_cosmology_set_status_message(cosmo,"ccl_background.c: ccl_comoving_angular_diameter_distance(): Scale factor outside interpolation range.\n");
 	return NAN;
       }
       gslstatus = gsl_spline_eval_e(cosmo->data.chi, a2, NULL, &chi2);
       if(gslstatus != GSL_SUCCESS) {
 	ccl_raise_gsl_warning(gslstatus, "ccl_background.c: ccl_comoving_angular_distance():");
 	*status |= gslstatus;
-	ccl_raise_warning(*status,"ccl_comoving_angular_distance(): Scale factor outside interpolation range.\n");
+	ccl_cosmology_set_status_message(cosmo,"ccl_background.c: ccl_comoving_angular_diameter_distance(): Scale factor outside interpolation range.\n");
 	return NAN;
       }
       double sinn1,sinn2,dm1,dm2,sqrtk2;

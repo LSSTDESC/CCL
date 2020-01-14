@@ -127,6 +127,7 @@ def comoving_angular_diameter_distance(cosmo, a1, a2):
     Returns:
         float or array_like: Comoving angular distance; Mpc.
     """
+    cosmo.compute_distances()
     return _vectorize_fn5(lib.comoving_angular_diameter_distance,
                           lib.comoving_angular_diameter_distance_vec,
                           cosmo, a1, a2)
