@@ -109,11 +109,11 @@ def comoving_angular_distance(cosmo, a):
         float or array_like: Comoving angular distance; Mpc.
     """
     cosmo.compute_distances()
-    return _vectorize_fn(lib.comoving_angular_distance,
-                         lib.comoving_angular_distance_vec, cosmo, a)
+    return _vectorize_fn(lib.angular_distance,
+                         lib.angular_distance_vec, cosmo, a)
 
 
-def comoving_angular_diameter_distance(cosmo, a1, a2):
+def angular_diameter_distance(cosmo, a1, a2):
     """Comoving angular diameter distance.
 
    .. note:: The comovoing angular diameter distance in Mpc from scale factor
@@ -128,8 +128,8 @@ def comoving_angular_diameter_distance(cosmo, a1, a2):
         float or array_like: Comoving angular distance; Mpc.
     """
     cosmo.compute_distances()
-    return _vectorize_fn5(lib.comoving_angular_diameter_distance,
-                          lib.comoving_angular_diameter_distance_vec,
+    return _vectorize_fn5(lib.angular_diameter_distance,
+                          lib.angular_diameter_distance_vec,
                           cosmo, a1, a2)
 
 

@@ -122,11 +122,11 @@ void scale_factor_of_chi_vec(ccl_cosmology * cosmo, double* chi, int nchi,
 
 %inline %{
 
-  void comoving_angular_diameter_distance_vec(ccl_cosmology * cosmo, double* a1, int na1, double* a2, int na2,
+  void angular_diameter_distance_vec(ccl_cosmology * cosmo, double* a1, int na1, double* a2, int na2,
 					    int nout, double* output, int *status) {
-    ccl_comoving_angular_diameter_distances(cosmo, na1, a1, a2, output, status);
+    ccl_angular_diameter_distances(cosmo, na1, a1, a2, output, status);
   }
-  
+
 %}
 
 

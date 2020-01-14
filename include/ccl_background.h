@@ -107,7 +107,8 @@ void ccl_comoving_angular_distances(ccl_cosmology * cosmo, int na, double a[], d
 
 /**
  * Comoving angular diameter distance in Mpc from scale factor a1 to scale factor a2
- * NOTE this is Eq. (19) of astro-ph/9905116
+ * NOTE this is Eq. (19) of astro-ph/9905116, it gives the ratio of the physical
+ * transverse size of an object to its angular size in radians.
  * @param cosmo Cosmological parameters
  * @param a1 scale factor, normalized to 1 for today
  * @param a2 scale factor, normalized to 1 for today
@@ -115,14 +116,13 @@ void ccl_comoving_angular_distances(ccl_cosmology * cosmo, int na, double a[], d
  * For specific cases see documentation for ccl_error.c
  * @return comoving_angular_diameter_distance, the angular diameter distance between a1 and a2 in Mpc
  */
-double ccl_comoving_angular_diameter_distance(ccl_cosmology * cosmo, double a1, double a2, int* status);
+double ccl_angular_diameter_distance(ccl_cosmology * cosmo, double a1, double a2, int* status);
 
 
 /**
- * Comoving angular diameter distance in Mpc from scale factor a1[0..na-1] to scale factor a2[0..na-1]
- * NOTE this is Eq. (19) of astro-ph/9905116
- * NOTE this quantity is otherwise known as the transverse comoving distance, and is NOT angular diameter
- * distance or angular separation
+ * Angular diameter distance in Mpc from scale factor a1[0..na-1] to scale factor a2[0..na-1]
+ * NOTE this is Eq. (19) of astro-ph/9905116, it gives the ratio of the physical
+ * transverse size of an object to its angular size in radians.
  * @param cosmo Cosmological parameters
  * @param na Number of scale factors in a
  * @param a1 array of scale factors, normalized to 1 for today
@@ -133,7 +133,7 @@ double ccl_comoving_angular_diameter_distance(ccl_cosmology * cosmo, double a1, 
  * For specific cases see documentation for ccl_error.c
  * @return void
  */
-void ccl_comoving_angular_diameter_distances(ccl_cosmology * cosmo, int na, double a1[], double a2[], double output[], int* status);
+void ccl_angular_diameter_distances(ccl_cosmology * cosmo, int na, double a1[], double a2[], double output[], int* status);
 
 
 /**
