@@ -12,6 +12,7 @@ from .concentration import (  # noqa
     ConcentrationPrada12,
     ConcentrationKlypin11,
     ConcentrationDuffy08,
+    ConcentrationConstant,
     concentration_from_name)
 
 # Halo mass functions
@@ -29,3 +30,9 @@ from .hbias import (  # noqa
     HaloBiasSheth01, HaloBiasTinker10,
     HaloBiasBhattacharya11,
     halo_bias_from_name)
+
+# Halo profiles
+from .profiles import (  # noqa
+    HaloProfile, HaloProfileGaussian,
+    HaloProfilePowerLaw, HaloProfileNFW,
+    HaloProfileEinasto, HaloProfileHernquist)

@@ -10,6 +10,7 @@ Submodules
    pyccl.halos.hbias
    pyccl.halos.hmfunc
    pyccl.halos.massdef
+   pyccl.halos.profiles
 
 Module contents
 ---------------

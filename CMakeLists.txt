@@ -25,7 +25,7 @@ set(CCL_SRC
     src/ccl_haloprofile.c
     src/ccl_tracers.c
     src/ccl_mass_conversion.c
-    src/fftlog.c)
+    src/ccl_fftlog.c)
 
 # Defines list of CCL C test src files
 # ! Add new tests of the C code to this list
