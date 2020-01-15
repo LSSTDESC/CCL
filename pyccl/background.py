@@ -136,9 +136,14 @@ def angular_diameter_distance(cosmo, a1, a2=None):
                             lib.angular_diameter_distance_vec,
                             cosmo, a1, a2)
     else:
-        return _vectorize_fn5(lib.angular_diameter_distance,
-                            lib.angular_diameter_distance_vec,
-                            cosmo, np.ones(len(a1)), a1)
+        if(isinstance(a1,float) or isinstance(a1,int)):
+            return _vectorize_fn5(lib.angular_diameter_distance,
+                                lib.angular_diameter_distance_vec,
+                                cosmo, 1., a1)
+        else:
+            return _vectorize_fn5(lib.angular_diameter_distance,
+                                lib.angular_diameter_distance_vec,
+                                cosmo, np.ones(len(a1)), a1)
 
 
 def h_over_h0(cosmo, a):

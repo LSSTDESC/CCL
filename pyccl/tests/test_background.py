@@ -28,6 +28,7 @@ AVALS = [
     ccl.scale_factor_of_chi,
     ccl.comoving_angular_distance,
     ccl.comoving_radial_distance,
+    ccl.angular_diameter_distance,
     ccl.luminosity_distance,
     ccl.h_over_h0,
     ccl.distance_modulus,
