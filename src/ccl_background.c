@@ -1022,11 +1022,6 @@ double ccl_angular_diameter_distance(ccl_cosmology * cosmo, double a1, double a2
     ccl_cosmology_set_status_message(cosmo,"ccl_background.c: ccl_angular_diameter_distance(): error on input scale factor.");
     return NAN;
   } else {
-    if(cosmo->params.Omega_k<0.){
-      *status = CCL_ERROR_COMPUTECHI;
-      ccl_cosmology_set_status_message(cosmo,"ccl_background.c: ccl_angular_diameter_distance(): Omega_k cannot be negative for angular diameter distance.");
-      return NAN;
-    } else {
       if (!cosmo->computed_distances) {
 	*status = CCL_ERROR_DISTANCES_INIT;
 	ccl_cosmology_set_status_message(cosmo,"ccl_background.c: ccl_angular_diameter_distance(): distance splines have not been precomputed!");
@@ -1048,7 +1043,6 @@ double ccl_angular_diameter_distance(ccl_cosmology * cosmo, double a1, double a2
 	return NAN;
       }
 	    return a2*ccl_sinn(cosmo,chi2-chi1,status);
-    }
   }
 }
 
