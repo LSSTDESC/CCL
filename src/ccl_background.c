@@ -972,7 +972,6 @@ double ccl_sinn(ccl_cosmology *cosmo, double chi, int *status)
 }
 
 double ccl_comoving_angular_distance(ccl_cosmology * cosmo, double a, int* status)
-//Implements Eq. (16) of Hogg, astro-ph/9905116.
 {
   if((a > (1.0 - 1.e-8)) && (a<=1.0)) {
     return 0.;
@@ -1017,7 +1016,6 @@ void ccl_comoving_angular_distances(ccl_cosmology * cosmo, int na, double a[],
 
 
 double ccl_angular_diameter_distance(ccl_cosmology * cosmo, double a1, double a2, int* status)
-//Implements Eq. (19) of Hogg, astro-ph/9905116.
 {
   if(a1>1. || a2>1. || a1<a2) {
     *status = CCL_ERROR_COMPUTECHI;
