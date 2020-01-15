@@ -28,6 +28,7 @@ AVALS = [
     ccl.scale_factor_of_chi,
     ccl.comoving_angular_distance,
     ccl.comoving_radial_distance,
+    ccl.angular_diameter_distance,
     ccl.luminosity_distance,
     ccl.h_over_h0,
     ccl.distance_modulus,
@@ -41,6 +42,17 @@ def test_background_a_interface(a, func):
         val = func(COSMO, a)
         assert np.all(np.isfinite(val))
         assert np.shape(val) == np.shape(a)
+        if(func is ccl.angular_diameter_distance):
+            val = func(COSMO, a, a)
+            assert np.all(np.isfinite(val))
+            assert np.shape(val) == np.shape(a)
+            if(isinstance(a, float) or isinstance(a, int)):
+                val1 = ccl.angular_diameter_distance(COSMO, 1., a)
+                val2 = ccl.comoving_angular_distance(COSMO, a)*a
+            else:
+                val1 = ccl.angular_diameter_distance(COSMO, np.ones(len(a)), a)
+                val2 = ccl.comoving_angular_distance(COSMO, a)*a
+            assert np.allclose(val1, val2)
 
 
 @pytest.mark.parametrize('a', AVALS)

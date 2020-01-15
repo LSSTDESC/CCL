@@ -20,7 +20,7 @@ from .core import Cosmology
 
 # Background cosmology functions and growth functions
 from .background import growth_factor, growth_factor_unnorm, \
-    growth_rate, comoving_radial_distance, comoving_angular_distance, \
+    growth_rate, comoving_radial_distance, angular_diameter_distance, comoving_angular_distance, \
     h_over_h0, luminosity_distance, distance_modulus, scale_factor_of_chi, \
     omega_x, rho_x, mu_MG, Sig_MG
 

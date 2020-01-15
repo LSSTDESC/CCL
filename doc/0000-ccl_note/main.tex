@@ -250,7 +250,8 @@ The transverse comoving distance is computed in terms of the radial comoving dis
                 \end{array}\right.
 \end{equation}
 
-The angular diameter distance is $d_A=a\,r(a)$, and the luminosity distance is
+The angular diameter distance between two scale factors is
+$d_A(a_1,a_2)=a_2\,r[\chi(a_2)-\chi(a_1)]$ where $a_1>a_2$, and the luminosity distance is
 $d_L=r(a)/a$.
 
 \ccl can also compute the distance modulus, defined as,
@@ -1289,7 +1290,7 @@ for the halo mass function and bias.
  \end{equation}
  This can also be rewritten in terms of the Fourier profile as:
  \begin{equation}\label{eq:prof.cumul2d.fourier}
-  \Sigma(<R)=\frac{1}{2\pi}\int_0^\infty dk\,k\,\frac{2J_1(kR)}{kR}\rho(k). 
+  \Sigma(<R)=\frac{1}{2\pi}\int_0^\infty dk\,k\,\frac{2J_1(kR)}{kR}\rho(k).
  \end{equation}
 \end{itemize}
 
@@ -1300,7 +1301,7 @@ The following profile models are currently implemented in \ccl:
 \begin{itemize}
   \item {\bf Navarro-Frenk-White (NFW) \citep{Navarro1997}}: the NFW profile has the form
   \begin{equation}
-    \rho_{\rm NFW}(r)=\frac{\rho_s}{(r/r_s)(1+r/r_s)^2},  
+    \rho_{\rm NFW}(r)=\frac{\rho_s}{(r/r_s)(1+r/r_s)^2},
   \end{equation}
   where $\rho_s$ and $r_s$ are the inner density and the scale radius. The latter is related to the spherical overdensity radius $R_\Delta$ through the concentration parameter ($R_\Delta=c\,r_s$). The mass of the NFW profile is not well defined, since its integral diverges at large $r$. For this reason it is common to consider the \emph{truncated} profile, which is assumed to be zero for $r>R_\Delta$. In that case, the normalization $\rho_s$ is given by:
   \begin{equation}
