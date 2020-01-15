@@ -102,9 +102,6 @@ target_link_libraries(ccl ${GSL_LIBRARIES} ${FFTW_LIBRARIES} ${CLASS_LIBRARIES} 
 add_executable(check_ccl ${TEST_SRC})
 target_link_libraries(check_ccl ccl)
 
-# Builds example folder in place, make this optional
-add_subdirectory(examples "${CMAKE_CURRENT_SOURCE_DIR}/examples" EXCLUDE_FROM_ALL)
-
 # Builds pkgconfig file for CCL
 SET(PROJECT_DESCRIPTION "DESC Core Cosmology Library: cosmology routines with validated numerical accuracy")
 SET(PKG_CONFIG_LIBDIR "${CMAKE_INSTALL_PREFIX}/lib")

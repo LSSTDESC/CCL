@@ -1,10 +1,18 @@
 # Unreleased
 ## Python library
 - Added a function for the angular diameter distance difference between two scale factors (#645)
+- Extended implementation of halo profiles (#722).
+- Improved FFTLog API (#722).
+- Functionality to resample 1D arrays including extrapolation (#720).
+- Methods to retrieve internal tracer functions (#713).
 - Improved implementation of halo model quantities (n(M), b(M), c(M)) (#668, #655, #656, #657, #636).
 
 ## C library
 - Added function for the angular diameter distance difference between two scale factors (#645)
+- Removed old C/C++ examples (#725)
+- Extended implementation of halo profiles (#722).
+- Improved FFTLog API (#722).
+- Functionality to resample 1D arrays including extrapolation (#720).
 - Improved implementation of halo model quantities (n(M), b(M), c(M)) (#668, #655, #656, #657, #636).
 
 # v2.0.1 Changes
