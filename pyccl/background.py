@@ -12,6 +12,7 @@ CCL defines seven species types:
 
 These strings define the `species` inputs to the functions below.
 """
+import numpy as np
 from . import ccllib as lib
 from .pyutils import _vectorize_fn, _vectorize_fn3
 from .pyutils import _vectorize_fn4, _vectorize_fn5
@@ -113,24 +114,31 @@ def comoving_angular_distance(cosmo, a):
                          lib.comoving_angular_distance_vec, cosmo, a)
 
 
-def angular_diameter_distance(cosmo, a1, a2):
+def angular_diameter_distance(cosmo, a1, a2=None):
     """Angular diameter distance.
 
    .. note:: The angular diameter distance in Mpc from scale factor
-    a1 to scale factor a2. This is Eq. (19) of astro-ph/9905116.
+    a1 to scale factor a2. If a2 is not provided, it is assumed that
+    the distance will be calculated between 1 and a1.
+    This routine correspondes to Eq. (19) of astro-ph/9905116.
 
     Args:
         cosmo (:obj:`Cosmology`): Cosmological parameters.
         a1 (float or array_like): Scale factor(s), normalized to 1 today.
-        a2 (float or array_like): Scale factor(s), normalized to 1 today.
+        a2 (float or array_like): Scale factor(s), normalized to 1 today, optional.
 
     Returns:
         float or array_like: angular diameter distance; Mpc.
     """
     cosmo.compute_distances()
-    return _vectorize_fn5(lib.angular_diameter_distance,
-                          lib.angular_diameter_distance_vec,
-                          cosmo, a1, a2)
+    if(a2 is not None):
+        return _vectorize_fn5(lib.angular_diameter_distance,
+                            lib.angular_diameter_distance_vec,
+                            cosmo, a1, a2)
+    else:
+        return _vectorize_fn5(lib.angular_diameter_distance,
+                            lib.angular_diameter_distance_vec,
+                            cosmo, np.ones(len(a1)), a1)
 
 
 def h_over_h0(cosmo, a):
