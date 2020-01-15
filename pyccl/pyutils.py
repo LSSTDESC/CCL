@@ -339,6 +339,7 @@ def _vectorize_fn5(fn, fn_vec, cosmo, x1, x2, returns_status=True):
     check(status, cosmo_in)
     return f
 
+
 def resample_array(x_in, y_in, x_out,
                    extrap_lo='none', extrap_hi='none',
                    fill_value_lo=0, fill_value_hi=0):

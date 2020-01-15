@@ -124,7 +124,8 @@ def angular_diameter_distance(cosmo, a1, a2=None):
     Args:
         cosmo (:obj:`Cosmology`): Cosmological parameters.
         a1 (float or array_like): Scale factor(s), normalized to 1 today.
-        a2 (float or array_like): Scale factor(s), normalized to 1 today, optional.
+        a2 (float or array_like): Scale factor(s), normalized to 1 today,
+        optional.
 
     Returns:
         float or array_like: angular diameter distance; Mpc.
@@ -132,17 +133,17 @@ def angular_diameter_distance(cosmo, a1, a2=None):
     cosmo.compute_distances()
     if(a2 is not None):
         return _vectorize_fn5(lib.angular_diameter_distance,
-                            lib.angular_diameter_distance_vec,
-                            cosmo, a1, a2)
+                              lib.angular_diameter_distance_vec,
+                              cosmo, a1, a2)
     else:
-        if(isinstance(a1,float) or isinstance(a1,int)):
+        if(isinstance(a1, float) or isinstance(a1, int)):
             return _vectorize_fn5(lib.angular_diameter_distance,
-                                lib.angular_diameter_distance_vec,
-                                cosmo, 1., a1)
+                                  lib.angular_diameter_distance_vec,
+                                  cosmo, 1., a1)
         else:
             return _vectorize_fn5(lib.angular_diameter_distance,
-                                lib.angular_diameter_distance_vec,
-                                cosmo, np.ones(len(a1)), a1)
+                                  lib.angular_diameter_distance_vec,
+                                  cosmo, np.ones(len(a1)), a1)
 
 
 def h_over_h0(cosmo, a):
