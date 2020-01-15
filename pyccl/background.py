@@ -119,7 +119,8 @@ def angular_diameter_distance(cosmo, a1, a2=None):
 
    .. note:: The angular diameter distance in Mpc from scale factor
     a1 to scale factor a2. If a2 is not provided, it is assumed that
-    the distance will be calculated between 1 and a1.
+    the distance will be calculated between 1 and a1. Note that a2
+    has to be smaller than a1.
 
     Args:
         cosmo (:obj:`Cosmology`): Cosmological parameters.
