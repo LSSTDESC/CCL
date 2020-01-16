@@ -48,10 +48,9 @@ void ccl_einasto_norm_integral(int n_m, double *r_s, double *r_delta, double *al
     } //end omp for
   
     gsl_integration_workspace_free(w);
-#pragma omp critical
-    {
-      if(status_this)
-	*status = status_this;
+    if(status_this) {
+      #pragma omp atomic write
+      *status = status_this;
     }
   } //end omp parallel
 }
@@ -97,10 +96,9 @@ void ccl_hernquist_norm_integral(int n_m, double *r_s, double *r_delta,
     } //end omp for
   
     gsl_integration_workspace_free(w);
-#pragma omp critical
-    {
-      if(status_this)
-	*status = status_this;
+    if(status_this) {
+      #pragma omp atomic write
+      *status = status_this;
     }
   } //end omp parallel
 }

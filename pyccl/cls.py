@@ -4,7 +4,7 @@ import numpy as np
 
 from .errors import CCLWarning
 from . import ccllib as lib
-from .pyutils import check
+from .pyutils import check, integ_types
 from .pk2d import Pk2D
 
 # Define symbolic 'None' type for arrays, to allow proper handling by swig
@@ -13,7 +13,7 @@ NoneArr = np.array([])
 
 
 def angular_cl(cosmo, cltracer1, cltracer2, ell, p_of_k_a=None,
-               l_limber=-1.):
+               l_limber=-1., limber_integration_method='qag_quad'):
     """Calculate the angular (cross-)power spectrum for a pair of tracers.
 
     Args:
@@ -25,6 +25,10 @@ def angular_cl(cosmo, cltracer1, cltracer2, ell, p_of_k_a=None,
             the non-linear matter power spectrum will be used.
         l_limber (float) : Angular wavenumber beyond which Limber's
             approximation will be used. Defaults to -1.
+        limber_integration_method (string) : integration method to be used
+            for the Limber integrals. Possibilities: 'qag_quad' (GSL's `qag`
+            method backed up by `quad` when it fails) and 'spline' (the
+            integrand is splined and then integrated analytically).
 
     Returns:
         float or array_like: Angular (cross-)power spectrum values,
@@ -36,6 +40,10 @@ def angular_cl(cosmo, cltracer1, cltracer2, ell, p_of_k_a=None,
             "CCL does not properly use the hyperspherical Bessel functions "
             "when computing angular power spectra in non-flat cosmologies!",
             category=CCLWarning)
+
+    if limber_integration_method not in ['qag_quad', 'spline']:
+        raise ValueError("Integration method %s not supported" %
+                         limber_integration_method)
 
     # we need the distances for the integrals
     cosmo.compute_distances()
@@ -74,7 +82,8 @@ def angular_cl(cosmo, cltracer1, cltracer2, ell, p_of_k_a=None,
     # Return Cl values, according to whether ell is an array or not
     cl, status = lib.angular_cl_vec(
         cosmo, clt1, clt2, psp, l_limber,
-        ell_use, ell_use.size, status)
+        ell_use, integ_types[limber_integration_method],
+        ell_use.size, status)
     if np.ndim(ell) == 0:
         cl = cl[0]
 
