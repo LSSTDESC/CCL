@@ -102,7 +102,7 @@ def test_swig_cls():
         ccllib.angular_cl_vec,
         COSMO,
         None, None, None,
-        1, 0,
+        1, 0, 501,
         "none",
         status)
 
