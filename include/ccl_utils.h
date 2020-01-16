@@ -42,6 +42,19 @@ double * ccl_log_spacing(double xmin, double xmax, int N);
 double ccl_j_bessel(int l,double x);
 //Spherical Bessel function of order l (adapted from CAMB)
 
+/**
+ * Compute spline integral.
+ * @param n number of elements in input array.
+ * @param x input x-values.
+ * @param y input y-values.
+ * @param a lower end of integration range.
+ * @param b upper end of integration range (use b<a if you just want to integrate over all of y).
+ * @return spline integral
+ */
+double ccl_integ_spline(int n,double *x,double *y,
+			double a, double b,
+			gsl_interp_type *T, int *status);
+
 CCL_END_DECLS
 
 #endif
