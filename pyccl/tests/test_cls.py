@@ -7,6 +7,9 @@ COSMO = ccl.Cosmology(
     Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96,
     transfer_function='bbks', matter_power_spectrum='linear')
 PKA = ccl.Pk2D(lambda k, a: np.log(a/k), cosmo=COSMO)
+ZZ = np.linspace(0., 1., 200)
+NN = np.exp(-((ZZ-0.5)/0.1)**2)
+LENS = ccl.WeakLensingTracer(COSMO, (ZZ, NN))
 
 
 @pytest.mark.parametrize('p_of_k_a', [None, PKA])
@@ -46,19 +49,18 @@ def test_cls_smoke(p_of_k_a):
 
 @pytest.mark.parametrize('ells', [[3, 2, 1], [1, 3, 2], [2, 3, 1]])
 def test_cls_raise_ell_reversed(ells):
-    z = np.linspace(0., 1., 200)
-    n = np.exp(-((z-0.5)/0.1)**2)
-    lens = ccl.WeakLensingTracer(COSMO, (z, n))
-
     with pytest.raises(ValueError):
-        ccl.angular_cl(COSMO, lens, lens, ells)
+        ccl.angular_cl(COSMO, LENS, LENS, ells)
+
+
+def test_cls_raise_integ_method():
+    ells = [10, 11]
+    with pytest.raises(ValueError):
+        ccl.angular_cl(COSMO, LENS, LENS, ells,
+                       limber_integration_method='guad')
 
 
 def test_cls_raise_weird_pk():
-    z = np.linspace(0., 1., 200)
-    n = np.exp(-((z-0.5)/0.1)**2)
-    lens = ccl.WeakLensingTracer(COSMO, (z, n))
     ells = [10, 11]
-
     with pytest.raises(ValueError):
-        ccl.angular_cl(COSMO, lens, lens, ells, p_of_k_a=lambda k, a: 10)
+        ccl.angular_cl(COSMO, LENS, LENS, ells, p_of_k_a=lambda k, a: 10)
