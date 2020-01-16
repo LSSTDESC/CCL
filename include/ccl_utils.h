@@ -10,7 +10,7 @@
 CCL_BEGIN_DECLS
 
 typedef enum ccl_integration_t {
-  ccl_integration_quad = 500,  // GSL's quad
+  ccl_integration_qag_quad = 500,  // GSL's quad
   ccl_integration_spline = 501,  // Spline integral
 } ccl_integration_t;
 
@@ -58,7 +58,7 @@ double ccl_j_bessel(int l,double x);
  */
 double ccl_integ_spline(int n,double *x,double *y,
                         double a, double b,
-                        gsl_interp_type *T, int *status);
+                        const gsl_interp_type *T, int *status);
 
 CCL_END_DECLS
 

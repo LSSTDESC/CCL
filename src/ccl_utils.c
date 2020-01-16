@@ -267,7 +267,7 @@ double ccl_j_bessel(int l,double x)
 
 double ccl_integ_spline(int n,double *x,double *y,
 			double a, double b,
-			gsl_interp_type *T, int *status)
+			const gsl_interp_type *T, int *status)
 {
   gsl_spline *s = NULL;
   double result = NAN;

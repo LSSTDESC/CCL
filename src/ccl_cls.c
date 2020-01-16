@@ -175,12 +175,12 @@ static void integ_cls_limber_spline(ccl_cosmology *cosmo,
   free(lk_arr);
 }
 
-static void integ_cls_limber_quad(ccl_cosmology *cosmo,
-				  gsl_function *F,
-				  double lkmin, double lkmax,
-				  gsl_integration_workspace *w,
-				  double *result, double *eresult,
-				  int *status) {
+static void integ_cls_limber_qag_quad(ccl_cosmology *cosmo,
+				      gsl_function *F,
+				      double lkmin, double lkmax,
+				      gsl_integration_workspace *w,
+				      double *result, double *eresult,
+				      int *status) {
   int gslstatus;
   size_t nevals;
   gsl_integration_cquad_workspace *w_cquad = NULL;
@@ -265,7 +265,7 @@ void ccl_angular_cls_limber(ccl_cosmology *cosmo,
       ipar.status = &clastatus;
     }
 
-    if(integration_method == ccl_integration_quad) {
+    if(integration_method == ccl_integration_qag_quad) {
       if (local_status == 0) {
 	w = gsl_integration_workspace_alloc(cosmo->gsl_params.N_ITERATION);
 	if (w == NULL) {
@@ -291,9 +291,9 @@ void ccl_angular_cls_limber(ccl_cosmology *cosmo,
         get_k_interval(cosmo, trc1, trc2, l, &lkmin, &lkmax);
 
 	// Integrate
-	if(integration_method == ccl_integration_quad) {
-	  integ_cls_limber_quad(cosmo, &F, lkmin, lkmax, w,
-				&result, &eresult, &local_status);
+	if(integration_method == ccl_integration_qag_quad) {
+	  integ_cls_limber_qag_quad(cosmo, &F, lkmin, lkmax, w,
+				    &result, &eresult, &local_status);
 	}
 	else if(integration_method == ccl_integration_spline) {
 	  integ_cls_limber_spline(cosmo, &ipar, lkmin, lkmax,
@@ -313,8 +313,7 @@ void ccl_angular_cls_limber(ccl_cosmology *cosmo,
       }
     }
 
-    if(integration_method == ccl_integration_quad)
-      gsl_integration_workspace_free(w);
+    gsl_integration_workspace_free(w);
 
     if (local_status) {
       #pragma omp atomic write

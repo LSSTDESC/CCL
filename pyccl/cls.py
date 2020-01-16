@@ -13,7 +13,7 @@ NoneArr = np.array([])
 
 
 def angular_cl(cosmo, cltracer1, cltracer2, ell, p_of_k_a=None,
-               l_limber=-1., limber_integration_method='quad'):
+               l_limber=-1., limber_integration_method='qag_quad'):
     """Calculate the angular (cross-)power spectrum for a pair of tracers.
 
     Args:
@@ -26,9 +26,9 @@ def angular_cl(cosmo, cltracer1, cltracer2, ell, p_of_k_a=None,
         l_limber (float) : Angular wavenumber beyond which Limber's
             approximation will be used. Defaults to -1.
         limber_integration_method (string) : integration method to be used
-            for the Limber integrals. Possibilities: 'quad' (GSL's `quad`
-            method) and 'spline' (the integrand is splined and then
-            integrated analytically).
+            for the Limber integrals. Possibilities: 'qag_quad' (GSL's `qag`
+            method backed up by `quad` when it fails) and 'spline' (the
+            integrand is splined and then integrated analytically).
 
     Returns:
         float or array_like: Angular (cross-)power spectrum values,
@@ -41,7 +41,7 @@ def angular_cl(cosmo, cltracer1, cltracer2, ell, p_of_k_a=None,
             "when computing angular power spectra in non-flat cosmologies!",
             category=CCLWarning)
 
-    if limber_integration_method not in ['quad', 'spline']:
+    if limber_integration_method not in ['qag_quad', 'spline']:
         raise ValueError("Integration method %s not supported" %
                          limber_integration_method)
 

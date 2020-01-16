@@ -7,7 +7,7 @@ import functools
 import warnings
 import numpy as np
 
-integ_types = {'quad': lib.integration_quad,
+integ_types = {'qag_quad': lib.integration_qag_quad,
                'spline': lib.integration_spline}
 
 extrap_types = {'none': lib.f1d_extrap_0,
