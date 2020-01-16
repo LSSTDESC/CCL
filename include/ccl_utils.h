@@ -57,8 +57,8 @@ double ccl_j_bessel(int l,double x);
  * @return spline integral
  */
 double ccl_integ_spline(int n,double *x,double *y,
-			double a, double b,
-			gsl_interp_type *T, int *status);
+                        double a, double b,
+                        gsl_interp_type *T, int *status);
 
 CCL_END_DECLS
 

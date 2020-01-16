@@ -140,8 +140,7 @@ static double cl_integrand(double lk, void *params) {
 static void integ_cls_limber_spline(ccl_cosmology *cosmo,
 				    integ_cl_par *ipar,
 				    double lkmin, double lkmax,
-				    double *result, int *status)
-{
+				    double *result, int *status) {
   int ik;
   int nk = (int)(fmax((lkmax - lkmin) / cosmo->spline_params.DLOGK_INTEGRATION + 0.5,
 		      1))+1;
@@ -181,8 +180,7 @@ static void integ_cls_limber_quad(ccl_cosmology *cosmo,
 				  double lkmin, double lkmax,
 				  gsl_integration_workspace *w,
 				  double *result, double *eresult,
-				  int *status)
-{
+				  int *status) {
   int gslstatus;
   size_t nevals;
   gsl_integration_cquad_workspace *w_cquad = NULL;
