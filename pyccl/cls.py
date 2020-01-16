@@ -26,7 +26,9 @@ def angular_cl(cosmo, cltracer1, cltracer2, ell, p_of_k_a=None,
         l_limber (float) : Angular wavenumber beyond which Limber's
             approximation will be used. Defaults to -1.
         limber_integration_method (string) : integration method to be used
-            for the Limber integrals. Possibilities: 'quad'.
+            for the Limber integrals. Possibilities: 'quad' (GSL's `quad`
+            method) and 'spline' (the integrand is splined and then
+            integrated analytically).
 
     Returns:
         float or array_like: Angular (cross-)power spectrum values,
@@ -39,7 +41,7 @@ def angular_cl(cosmo, cltracer1, cltracer2, ell, p_of_k_a=None,
             "when computing angular power spectra in non-flat cosmologies!",
             category=CCLWarning)
 
-    if limber_integration_method not in ['quad']:
+    if limber_integration_method not in ['quad', 'spline']:
         raise ValueError("Integration method %s not supported" %
                          limber_integration_method)
 

@@ -137,6 +137,45 @@ static double cl_integrand(double lk, void *params) {
   return k*pk*d1*d2;
 }
 
+static void integ_cls_limber_spline(ccl_cosmology *cosmo,
+				    integ_cl_par *ipar,
+				    double lkmin, double lkmax,
+				    double *result, int *status)
+{
+  int ik;
+  int nk = (int)(fmax((lkmax - lkmin) / cosmo->spline_params.DLOGK_INTEGRATION + 0.5,
+		      1))+1;
+  double *fk_arr = NULL;
+  double *lk_arr = NULL;
+  lk_arr = ccl_linear_spacing(lkmin, lkmax, nk);
+  if(lk_arr == NULL)
+    *status = CCL_ERROR_LOGSPACE;
+
+  if(*status == 0) {
+    fk_arr = malloc(nk * sizeof(double));
+    if(fk_arr == NULL)
+      *status = CCL_ERROR_MEMORY;
+  }
+
+  if(*status == 0) {
+    for(ik=0; ik<nk; ik++) {
+      fk_arr[ik] = cl_integrand(lk_arr[ik], ipar);
+      if(*(ipar->status)) {
+	*status = *(ipar->status);
+	break;
+      }
+    }
+  }
+
+  if(*status == 0) {
+    *result = ccl_integ_spline(nk, lk_arr, fk_arr,
+			       1, -1, gsl_interp_akima,
+			       status);
+  }
+  free(fk_arr);
+  free(lk_arr);
+}
+
 static void integ_cls_limber_quad(ccl_cosmology *cosmo,
 				  gsl_function *F,
 				  double lkmin, double lkmax,
@@ -254,8 +293,16 @@ void ccl_angular_cls_limber(ccl_cosmology *cosmo,
         get_k_interval(cosmo, trc1, trc2, l, &lkmin, &lkmax);
 
 	// Integrate
-	integ_cls_limber_quad(cosmo, &F, lkmin, lkmax, w,
-			      &result, &eresult, &local_status);
+	if(integration_method == ccl_integration_quad) {
+	  integ_cls_limber_quad(cosmo, &F, lkmin, lkmax, w,
+				&result, &eresult, &local_status);
+	}
+	else if(integration_method == ccl_integration_spline) {
+	  integ_cls_limber_spline(cosmo, &ipar, lkmin, lkmax,
+				  &result, &local_status);
+	}
+	else
+	  local_status = CCL_ERROR_NOT_IMPLEMENTED;
 
         if ((*ipar.status == 0) && (local_status == 0)) {
           cl_out[lind] = result / (l+0.5);

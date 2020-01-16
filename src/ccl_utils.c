@@ -275,11 +275,11 @@ double ccl_integ_spline(int n,double *x,double *y,
     return 0;
   }
   if(b<a) {
-    b=y[n-1];
-    a=y[0];
+    b=x[n-1];
+    a=x[0];
   }
 
-  if((b>y[n-1]) || (a<y[0])) {
+  if((b>x[n-1]) || (a<x[0])) {
     ccl_raise_warning(CCL_ERROR_SPLINE,
 		      "ERROR: integration limits beyond interpolated range\n");
     *status = CCL_ERROR_SPLINE;
