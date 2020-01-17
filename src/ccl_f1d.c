@@ -14,32 +14,38 @@
 //y0,yf -> values of f(x) to use beyond the interpolation range
 ccl_f1d_t *ccl_f1d_t_new(int n,double *x,double *y,double y0,double yf,
 			 ccl_f1d_extrap_t extrap_lo_type,
-			 ccl_f1d_extrap_t extrap_hi_type)
+			 ccl_f1d_extrap_t extrap_hi_type, int *status)
 {
   ccl_f1d_t *spl=malloc(sizeof(ccl_f1d_t));
-  if(spl==NULL)
+  if(spl==NULL) {
+    *status = CCL_ERROR_MEMORY;
     return NULL;
+  }
 
   spl->spline=gsl_spline_alloc(gsl_interp_akima,n);
   if (spl->spline == NULL) {
+    *status = CCL_ERROR_MEMORY;
     free(spl);
     return NULL;
   }
   int parstatus=gsl_spline_init(spl->spline,x,y,n);
   if(parstatus) {
+    *status = CCL_ERROR_SPLINE;
     gsl_spline_free(spl->spline);
     free(spl);
     return NULL;
   }
 
-  spl->y0=y0;
-  spl->yf=yf;
-  spl->x_ini=x[0];
-  spl->x_end=x[n-1];
-  spl->y_ini=y[0];
-  spl->y_end=y[n-1];
-  spl->extrap_lo_type=extrap_lo_type;
-  spl->extrap_hi_type=extrap_hi_type;
+  if(*status==0) {
+    spl->y0=y0;
+    spl->yf=yf;
+    spl->x_ini=x[0];
+    spl->x_end=x[n-1];
+    spl->y_ini=y[0];
+    spl->y_end=y[n-1];
+    spl->extrap_lo_type=extrap_lo_type;
+    spl->extrap_hi_type=extrap_hi_type;
+  }
 
   // Compute derivatives
   // Low-end
@@ -50,13 +56,22 @@ ccl_f1d_t *ccl_f1d_t_new(int n,double *x,double *y,double y0,double yf,
     spl->der_lo = (y[1]-y[0])/(x[1]-x[0]);
   }
   else if(spl->extrap_lo_type == ccl_f1d_extrap_linx_logy) {
-    spl->der_lo = log(y[1]/y[0])/(x[1]-x[0]);
+    if(y[1]*y[0]<=0)
+      *status = CCL_ERROR_SPLINE;
+    else
+      spl->der_lo = log(y[1]/y[0])/(x[1]-x[0]);
   }
   else if(spl->extrap_lo_type == ccl_f1d_extrap_logx_liny) {
-    spl->der_lo = (y[1]-y[0])/log(x[1]/x[0]);
+    if(x[1]*x[0]<=0)
+      *status = CCL_ERROR_SPLINE;
+    else
+      spl->der_lo = (y[1]-y[0])/log(x[1]/x[0]);
   }
   else if(spl->extrap_lo_type == ccl_f1d_extrap_logx_logy) {
-    spl->der_lo = log(y[1]/y[0])/log(x[1]/x[0]);
+    if((y[1]*y[0]<=0) || (x[1]*x[0]<=0))
+      *status = CCL_ERROR_SPLINE;
+    else
+      spl->der_lo = log(y[1]/y[0])/log(x[1]/x[0]);
   }
   else // No extrapolation
     spl->der_lo = 0;
@@ -69,13 +84,22 @@ ccl_f1d_t *ccl_f1d_t_new(int n,double *x,double *y,double y0,double yf,
     spl->der_hi = (y[n-1]-y[n-2])/(x[n-1]-x[n-2]);
   }
   else if(spl->extrap_hi_type == ccl_f1d_extrap_linx_logy) {
-    spl->der_hi = log(y[n-1]/y[n-2])/(x[n-1]-x[n-2]);
+    if(y[n-1]*y[n-2]<=0)
+      *status = CCL_ERROR_SPLINE;
+    else
+      spl->der_hi = log(y[n-1]/y[n-2])/(x[n-1]-x[n-2]);
   }
   else if(spl->extrap_hi_type == ccl_f1d_extrap_logx_liny) {
-    spl->der_hi = (y[n-1]-y[n-2])/log(x[n-1]/x[n-2]);
+    if(x[n-1]*x[n-2]<=0)
+      *status = CCL_ERROR_SPLINE;
+    else
+      spl->der_hi = (y[n-1]-y[n-2])/log(x[n-1]/x[n-2]);
   }
   else if(spl->extrap_hi_type == ccl_f1d_extrap_logx_logy) {
-    spl->der_hi = log(y[n-1]/y[n-2])/log(x[n-1]/x[n-2]);
+    if((y[n-1]*y[n-2]<=0) || (x[n-1]*x[n-2]<=0))
+      *status = CCL_ERROR_SPLINE;
+    else
+      spl->der_hi = log(y[n-1]/y[n-2])/log(x[n-1]/x[n-2]);
   }
   else // No extrapolation
     spl->der_hi = 0;

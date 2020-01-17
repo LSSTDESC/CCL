@@ -32,7 +32,8 @@ void array_1d_resample(double *x_in, int n_in_x,
 		       int *status)
 {
   int ii;
-  ccl_f1d_t *spl=ccl_f1d_t_new(n_in_x, x_in, f_in, f0, ff, extrap_hi, extrap_lo);
+  ccl_f1d_t *spl=ccl_f1d_t_new(n_in_x, x_in, f_in, f0, ff,
+			       extrap_hi, extrap_lo, status);
   if(spl==NULL)
     *status=CCL_ERROR_MEMORY;
 

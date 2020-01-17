@@ -8,6 +8,27 @@
 #include <complex.h>
 #include "ccl.h"
 
+
+/****************************************************************
+
+This is the famous FFTLog.
+
+First imlplemented by the living legend Andrew Hamilton:
+
+http://casa.colorado.edu/~ajsh/FFTLog/
+
+This version is a C version that was adapted from the C++ version found
+in Copter JWG Carlson, another big loss for the cosmology community.
+
+https://github.com/jwgcarlson/Copter
+
+I've transformed this from C++ to C99 as the lowest common denominator
+and provided bindings for C++ and python.
+
+These are the C++ bindings
+
+*****************************************************************/
+
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif

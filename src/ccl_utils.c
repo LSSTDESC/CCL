@@ -264,3 +264,51 @@ double ccl_j_bessel(int l,double x)
 
   return jl;
 }
+
+double ccl_integ_spline(int n,double *x,double *y,
+			double a, double b,
+			const gsl_interp_type *T, int *status)
+{
+  gsl_spline *s = NULL;
+  double result = NAN;
+  if(b==a) {
+    return 0;
+  }
+  if(b<a) {
+    b=x[n-1];
+    a=x[0];
+  }
+
+  if((b>x[n-1]) || (a<x[0])) {
+    ccl_raise_warning(CCL_ERROR_SPLINE,
+		      "ERROR: integration limits beyond interpolated range\n");
+    *status = CCL_ERROR_SPLINE;
+    return NAN;
+  }
+
+  if(*status==0) {
+    s = gsl_spline_alloc(T, n);
+    if(s == NULL) {
+      *status = CCL_ERROR_MEMORY;
+      result = NAN;
+    }
+  }
+
+  if(*status==0) {
+    if(gsl_spline_init(s, x, y, n)) {
+      *status = CCL_ERROR_SPLINE;
+      result = NAN;
+    }
+  }
+
+  if(*status==0) {
+    int sstat = gsl_spline_eval_integ_e(s, a, b, NULL, &result);
+    if(sstat) {
+      *status = CCL_ERROR_SPLINE_EV;
+      result = NAN;
+    }
+  }
+
+  gsl_spline_free(s);
+  return result;
+}

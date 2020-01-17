@@ -7,6 +7,9 @@ import functools
 import warnings
 import numpy as np
 
+integ_types = {'qag_quad': lib.integration_qag_quad,
+               'spline': lib.integration_spline}
+
 extrap_types = {'none': lib.f1d_extrap_0,
                 'constant': lib.f1d_extrap_const,
                 'linx_liny': lib.f1d_extrap_linx_liny,
@@ -291,9 +294,78 @@ def _vectorize_fn4(fn, fn_vec, cosmo, x, a, d, returns_status=True):
     return f
 
 
+def _vectorize_fn5(fn, fn_vec, cosmo, x1, x2, returns_status=True):
+    """Generic wrapper to allow vectorized (1D array) access to CCL
+    functions with two vector arguments of the same length,
+    with a cosmology dependence.
+
+    Args:
+        fn (callable): Function with a single argument.
+        fn_vec (callable): Function that has a vectorized implementation in
+                           a .i file.
+        cosmo (ccl_cosmology or Cosmology): The input cosmology which gets
+                                            converted to a ccl_cosmology.
+        x1 (float or array_like): Argument to fn.
+        x2 (float or array_like): Argument to fn.
+        returns_stats (bool): Indicates whether fn returns a status.
+
+    """
+    # Access ccl_cosmology object
+    cosmo_in = cosmo
+    cosmo = cosmo.cosmo
+    status = 0
+
+    # If a scalar was passed, convert to an array
+    if isinstance(x1, int):
+        x1 = float(x1)
+        x2 = float(x2)
+    if isinstance(x1, float):
+        # Use single-value function
+        if returns_status:
+            f, status = fn(cosmo, x1, x2, status)
+        else:
+            f = fn(cosmo, x1, x2)
+    elif isinstance(x1, np.ndarray):
+        # Use vectorised function
+        if returns_status:
+            f, status = fn_vec(cosmo, x1, x2, x1.size, status)
+        else:
+            f = fn_vec(cosmo, x1, x2, x1.size)
+    else:
+        # Use vectorised function
+        if returns_status:
+            f, status = fn_vec(cosmo, x1, x2, len(x2), status)
+        else:
+            f = fn_vec(cosmo, x1, x2, len(x2))
+
+    # Check result and return
+    check(status, cosmo_in)
+    return f
+
+
 def resample_array(x_in, y_in, x_out,
                    extrap_lo='none', extrap_hi='none',
                    fill_value_lo=0, fill_value_hi=0):
+    """ Interpolates an input y array onto a set of x values.
+
+    Args:
+        x_in (array_like): input x-values.
+        y_in (array_like): input y-values.
+        x_out (array_like): x-values for output array.
+        extrap_lo (string): type of extrapolation for x-values below the
+            range of `x_in`. 'none' (for no interpolation), 'constant',
+            'linx_liny' (linear in x and y), 'linx_logy', 'logx_liny' and
+            'logx_logy'.
+        extrap_hi (string): type of extrapolation for x-values above the
+            range of `x_in`.
+        fill_value_lo (float): constant value if `extrap_lo` is
+            'constant'.
+        fill_value_hi (float): constant value if `extrap_hi` is
+            'constant'.
+    Returns:
+        array_like: output array.
+    """
+
     if extrap_lo not in extrap_types.keys():
         raise ValueError("'%s' is not a valid extrapolation type. "
                          "Available options are: %s"
@@ -329,3 +401,34 @@ def deprecated(new_function=None):
             return func(*args, **kwargs)
         return new_func
     return _depr_decorator
+
+
+def _fftlog_transform(rs, frs,
+                      dim, mu, power_law_index):
+    if np.ndim(rs) != 1:
+        raise ValueError("rs should be a 1D array")
+    if np.ndim(frs) < 1 or np.ndim(frs) > 2:
+        raise ValueError("frs should be a 1D or 2D array")
+    if np.ndim(frs) == 1:
+        n_transforms = 1
+        n_r = len(frs)
+    else:
+        n_transforms, n_r = frs.shape
+
+    if len(rs) != n_r:
+        raise ValueError("rs should have %d elements" % n_r)
+
+    status = 0
+    result, status = lib.fftlog_transform(n_transforms,
+                                          rs, frs.flatten(),
+                                          dim, mu, power_law_index,
+                                          (n_transforms + 1) * n_r,
+                                          status)
+    check(status)
+    result = result.reshape([n_transforms + 1, n_r])
+    ks = result[0]
+    fks = result[1:]
+    if np.ndim(frs) == 1:
+        fks = fks.squeeze()
+
+    return ks, fks

@@ -16,7 +16,7 @@ def test_swig_tracer():
     dNdz = z * 8
 
     assert_raises(
-        CCLError,
+        ValueError,
         pyccl.WeakLensingTracer,
         PYCOSMO,
         dndz=(z, dNdz[0:2]),
@@ -102,7 +102,7 @@ def test_swig_cls():
         ccllib.angular_cl_vec,
         COSMO,
         None, None, None,
-        1, 0,
+        1, 0, pyccl.pyutils.integ_types['spline'],
         "none",
         status)
 
