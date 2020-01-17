@@ -49,16 +49,19 @@ double ccl_j_bessel(int l,double x);
 
 /**
  * Compute spline integral.
- * @param n number of elements in input array.
+ * @param nx number of elements in input array.
+ * @param ny number of y arrays.
  * @param x input x-values.
- * @param y input y-values.
+ * @param y input y-values (ny arrays with nx elements).
  * @param a lower end of integration range.
  * @param b upper end of integration range (use b<a if you just want to integrate over all of y).
- * @return spline integral
+ * @param result array of output spline integral values.
+ * @param T spline type.
+ * @param status status flag.
  */
-double ccl_integ_spline(int n,double *x,double *y,
-                        double a, double b,
-                        const gsl_interp_type *T, int *status);
+void ccl_integ_spline(int ny, int nx,double *x,double **y,
+                      double a, double b, double *result,
+                      const gsl_interp_type *T, int *status);
 
 CCL_END_DECLS
 
