@@ -307,6 +307,7 @@ void ccl_integ_spline(int ny, int nx,double *x,double **y,
       }
 
       if(!local_status) {
+        #pragma omp for
         for(iy=0; iy<ny; iy++) {
           if(!local_status) {
             if(gsl_spline_init(s, x, y[iy], nx)) {
