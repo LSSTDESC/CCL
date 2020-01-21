@@ -266,8 +266,8 @@ double ccl_j_bessel(int l,double x)
 }
 
 void ccl_integ_spline(int ny, int nx,double *x,double **y,
-		      double a, double b, double *result,
-		      const gsl_interp_type *T, int *status)
+                      double a, double b, double *result,
+                      const gsl_interp_type *T, int *status)
 {
   if(b==a) {
     int iyy;
