@@ -1,11 +1,11 @@
 #include <stdlib.h>
 #include <math.h>
 
+#include <complex.h>
 #include <fftw3.h>
 
 #include <gsl/gsl_sf_result.h>
 #include <gsl/gsl_sf_gamma.h>
-#include <complex.h>
 #include "ccl.h"
 
 
@@ -124,6 +124,7 @@ static void fht(int npk, int N,
 		double dim, double mu, double q, double kcrc,
 		int noring, double complex* u, int *status)
 {
+  fftw_plan forward_plan, reverse_plan;
   double L = log(k[N-1]/k[0]) * N/(N-1.);
   double complex* ulocal = NULL;
   if(u == NULL) {
@@ -140,83 +141,126 @@ static void fht(int npk, int N,
     }
   }
 
-  double complex* a;
-  double complex* b;
+  fftw_complex* a_tmp;
+  fftw_complex* b_tmp;
   if(*status == 0) {
-    a = malloc(sizeof(complex double)*N);
-    if(a==NULL)
+    a_tmp = fftw_alloc_complex(N);
+    if(a_tmp==NULL)
       *status=CCL_ERROR_MEMORY;
   }
   if(*status == 0) {
-    b = malloc(sizeof(complex double)*N);
-    if(b==NULL)
-      *status=CCL_ERROR_MEMORY;
-  }
-
-  double *prefac_pk;
-  if(*status == 0) {
-    prefac_pk = malloc(N*sizeof(double));
-    if(prefac_pk==NULL)
-      *status=CCL_ERROR_MEMORY;
-  }
-
-  double *prefac_xi;
-  if(*status == 0) {
-    prefac_xi = malloc(N*sizeof(double));
-    if(prefac_xi==NULL)
+    b_tmp = fftw_alloc_complex(N);
+    if(b_tmp==NULL)
       *status=CCL_ERROR_MEMORY;
   }
 
   if(*status == 0) {
-    for(int i = 0; i < N; i++)
-      prefac_pk[i] = pow(k[i], dim/2-q);
-
-    /* Compute k's corresponding to input r's */
-    double k0r0 = kcrc * exp(-L);
-    r[0] = k0r0/k[0];
-    for(int n = 1; n < N; n++)
-      r[n] = r[0] * exp(n*L/N);
-
-    double one_over_2pi_dhalf = pow(2*M_PI,-dim/2);
-    for(int i = 0; i < N; i++)
-      prefac_xi[i] = one_over_2pi_dhalf * pow(r[i], -dim/2-q);
-
     /* Compute the convolution b = a*u using FFTs */
-    fftw_plan forward_plan = fftw_plan_dft_1d(N, (fftw_complex*) a, (fftw_complex*) b,
-					      -1, FFTW_ESTIMATE);
-    fftw_plan reverse_plan = fftw_plan_dft_1d(N, (fftw_complex*) b, (fftw_complex*) b,
-					      +1, FFTW_ESTIMATE);
+    forward_plan = fftw_plan_dft_1d(N,
+                                    (fftw_complex*) a_tmp,
+                                    (fftw_complex*) b_tmp,
+                                    -1, FFTW_ESTIMATE);
+    reverse_plan = fftw_plan_dft_1d(N,
+                                    (fftw_complex*) b_tmp,
+                                    (fftw_complex*) b_tmp,
+                                    +1, FFTW_ESTIMATE);
+  }
 
-    for(int j = 0; j < npk; j++) {
-      for(int i = 0; i < N; i++)
-	a[i] = prefac_pk[i] * pk[j][i];
+  if(*status == 0) {
+    #pragma omp parallel default(none) \
+                         shared(npk, N, k, pk, r, xi, \
+                                dim, mu, q, kcrc, u, status, \
+                                forward_plan, reverse_plan, \
+                                L, ulocal)
+    {
+      int local_status = 0;
 
-      fftw_execute(forward_plan);
-      for(int m = 0; m < N; m++)
-	b[m] *= u[m] / (double)(N);       // divide by N since FFTW doesn't normalize the inverse FFT
-      fftw_execute(reverse_plan);
-
-      /* Reverse b array */
-      double complex tmp;
-      for(int n = 0; n < N/2; n++) {
-	tmp = b[n];
-	b[n] = b[N-n-1];
-	b[N-n-1] = tmp;
+      double *prefac_pk=NULL;
+      if(local_status == 0) {
+        prefac_pk = malloc(N*sizeof(double));
+        if(prefac_pk==NULL)
+          local_status=CCL_ERROR_MEMORY;
       }
 
-      for(int i = 0; i < N; i++)
-	xi[j][i] = prefac_xi[i] * creal(b[i]);
-    }
+      double *prefac_xi=NULL;
+      if(local_status == 0) {
+        prefac_xi = malloc(N*sizeof(double));
+        if(prefac_xi==NULL)
+          local_status=CCL_ERROR_MEMORY;
+      }
 
+      fftw_complex* a=NULL;
+      fftw_complex* b=NULL;
+      if(local_status == 0) {
+        a = fftw_alloc_complex(N);
+        if(a==NULL)
+        local_status=CCL_ERROR_MEMORY;
+      }
+
+      if(local_status == 0) {
+        b = fftw_alloc_complex(N);
+        if(b==NULL)
+          local_status=CCL_ERROR_MEMORY;
+      }
+
+      if(local_status == 0) {
+        for(int i = 0; i < N; i++)
+          prefac_pk[i] = pow(k[i], dim/2-q);
+
+        /* Compute k's corresponding to input r's */
+        double k0r0 = kcrc * exp(-L);
+        r[0] = k0r0/k[0];
+        for(int n = 1; n < N; n++)
+          r[n] = r[0] * exp(n*L/N);
+
+        double one_over_2pi_dhalf = pow(2*M_PI,-dim/2);
+        for(int i = 0; i < N; i++)
+          prefac_xi[i] = one_over_2pi_dhalf * pow(r[i], -dim/2-q);
+
+        #pragma omp for
+        for(int j = 0; j < npk; j++) {
+          for(int i = 0; i < N; i++)
+            a[i] = prefac_pk[i] * pk[j][i];
+
+          fftw_execute_dft(forward_plan,a,b);
+          for(int m = 0; m < N; m++)
+            b[m] *= u[m] / (double)(N);       // divide by N since FFTW doesn't normalize the inverse FFT
+          fftw_execute_dft(reverse_plan,b,b);
+
+          /* Reverse b array */
+          double complex tmp;
+          for(int n = 0; n < N/2; n++) {
+            tmp = b[n];
+            b[n] = b[N-n-1];
+            b[N-n-1] = tmp;
+          }
+
+          for(int i = 0; i < N; i++)
+            xi[j][i] = prefac_xi[i] * creal(b[i]);
+        }
+      }
+
+      free(prefac_pk);
+      free(prefac_xi);
+      fftw_free(a);
+      fftw_free(b);
+
+      if (local_status) {
+        #pragma omp atomic write
+        *status = local_status;
+      }
+    } //end omp parallel
+  }
+
+  if(*status == 0) {
     fftw_destroy_plan(forward_plan);
     fftw_destroy_plan(reverse_plan);
   }
 
   free(ulocal);
-  free(a);
-  free(b);
-  free(prefac_pk);
-  free(prefac_xi);
+  //TODO: free this up
+  fftw_free(a_tmp);
+  fftw_free(b_tmp);
 }
  
 void ccl_fftlog_ComputeXi2D(double mu, double epsilon,
