@@ -12,7 +12,7 @@ except ImportError:
     HAVE_FASTPT = False
 
 
-def PTTracer(object):
+class PTTracer(object):
     def __init_(self):
         self.biases = {}
         self.type = None
@@ -43,7 +43,7 @@ def PTTracer(object):
                             fill_value=b[-1])
 
 
-def PTNumberCountsTracer(PTTracer):
+class PTNumberCountsTracer(PTTracer):
     def __init__(self, b1, b2=None, bs=None):
         self.biases = {}
         self.type = 'NC'
@@ -54,9 +54,19 @@ def PTNumberCountsTracer(PTTracer):
         self.biases['b2'] = self._get_bias_function(b2)
         # Initialize bs
         self.biases['bs'] = self._get_bias_function(bs)
+    
+    @property
+    def b1(self):
+        return self.biases['b1']
+    @property
+    def b2(self):
+        return self.biases['b2']
+    @property
+    def bs(self):
+        return self.biases['bs']
 
 
-def PTIntrinsicAlignmentTracer(PTTracer):
+class PTIntrinsicAlignmentTracer(PTTracer):
     def __init__(self, c1, c2=None, cdelta=None):
 
         self.biases = {}
@@ -81,7 +91,7 @@ def get_pt_pk(cosmo, k, a, tracer_1, tracer_2=None,
             "You must have the `fast-pt` python package "
             "installed to run CCL with FASTPT!")
         to_do = []
-        type1=tracer1.type
+        type1=tracer_1.type
         if tracer_2 is None:
             tracer_2 = tracer_1
         if (tracer_1.type == 'NC') or (tracer_2.type == 'NC'):
@@ -104,7 +114,7 @@ def get_pt_pk(cosmo, k, a, tracer_1, tracer_2=None,
         #is the input k already logspaced?
         #is it sufficiently high resoluton for the calculation
         dk = np.diff(np.log(k))
-        delta_L = (log(k[-1]) - log(k[0])) / (k.size - 1)
+        delta_L = (np.log(k[-1]) - np.log(k[0])) / (k.size - 1)
         dk_test = np.ones_like(dk) * delta_L
         try:
             np.testing.assert_array_almost_equal(dk, dk_test, decimal=4, err_msg=log_sample_test, verbose=False)
@@ -130,39 +140,41 @@ def get_pt_pk(cosmo, k, a, tracer_1, tracer_2=None,
     else:
         Pd1d1 = np.array([linear_matter_power(cosmo,ks,a_i) for a_i in a])
     #We also need the growth factor
-        ga = growth_factor(cosmo,a)
+    ga = growth_factor(cosmo,a)
     #NOTE: we should add an option that does PT at every a value. This isn't hard, it just takes longer.
     
-        if (tracer_1.type == NC) and (tracer_2.type == NC):
-            b1_1=tracer1.b1
-            b1_2=tracer2.b1
-            b2_1=tracer1.b2
-            b2_2=tracer2.b2
-            bs_1=tracer1.bs
-            bs_2=tracer2.bs
-            
-            bias_fpt = pt_object.one_loop_dd_bias(pk_lin_z0,P_window=P_window,C_window=C_window)
-            
-            Pd1d2 = np.array([g ** 4 * bias_fpt[2] for g in ga]) #replace with np.outer?
-            Pd2d2 = np.array([g ** 4 * bias_fpt[3] for g in ga])
-            Pd1s2 = np.array([g ** 4 * bias_fpt[4] for g in ga])
-            Pd2s2 = np.array([g ** 4 * bias_fpt[5] for g in ga])
-            Ps2s2 = np.array([g ** 4 * bias_fpt[6] for g in ga])
-            sig4ka = 0.
-            if sub_lowk:
-                sig4ka = np.array([g ** 4 * bias_fpt[7] * np.ones_like(bias_fpt[0]) for g in ga])
-            p_gg = (b1_1*b1_2*Pd1d1 + (1./2)*(b1_1*b2_2+b1_2*b2_1)*Pd1d2 + (1./4)*b2_1*b2_2*(Pd2d2-2.*sig4ka) + (1./2)*(b1_1*bs_2+b1_2*bs_1)*Pd1s2 +
-                        (1./4)*(b2_1*bs_2+b2_2*bs_1)*(Pd2s2-4./3*sig4ka) + (1./4)*bs_1*bs_2*(Ps2s2-8./9*sig4ka))    
-            p_pt = p_gg
-            
-        elif (tracer_1.type == NC) and (tracer_2.type == IA):
-            p_pt = Pd1d1 #placeholder
-        elif (tracer_1.type == IA) and (tracer_2.type == NC):
-            p_pt = Pd1d1 #placeholder
-        elif (tracer_1.type == IA) and (tracer_2.type == NC):
-            p_pt = Pd1d1 #placeholder
-        else:
-            raise ValueError('Combination of PTTracer %s and %s types not supported.' % (tracer_1.type,tracer_2.type))
+    if (tracer_1.type == 'NC') and (tracer_2.type == 'NC'):
+        #note that the bias is returned as a function of z. To get a single value, you need to put in a z value
+        # is it looking for z, or scale factor?
+        b1_1=tracer_1.b1(0)
+        b1_2=tracer_2.b1(0)
+        b2_1=tracer_1.b2(0)
+        b2_2=tracer_2.b2(0)
+        bs_1=tracer_1.bs(0)
+        bs_2=tracer_2.bs(0)
+        
+        bias_fpt = pt_object.one_loop_dd_bias(pk_lin_z0,P_window=P_window,C_window=C_window)
+        
+        Pd1d2 = np.array([g ** 4 * bias_fpt[2] for g in ga]) #replace with np.outer?
+        Pd2d2 = np.array([g ** 4 * bias_fpt[3] for g in ga])
+        Pd1s2 = np.array([g ** 4 * bias_fpt[4] for g in ga])
+        Pd2s2 = np.array([g ** 4 * bias_fpt[5] for g in ga])
+        Ps2s2 = np.array([g ** 4 * bias_fpt[6] for g in ga])
+        sig4ka = 0.
+        if sub_lowk:
+            sig4ka = np.array([g ** 4 * bias_fpt[7] * np.ones_like(bias_fpt[0]) for g in ga])
+        p_gg = (b1_1*b1_2*Pd1d1 + (1./2)*(b1_1*b2_2+b1_2*b2_1)*Pd1d2 + (1./4)*b2_1*b2_2*(Pd2d2-2.*sig4ka) + (1./2)*(b1_1*bs_2+b1_2*bs_1)*Pd1s2 +
+                    (1./4)*(b2_1*bs_2+b2_2*bs_1)*(Pd2s2-4./3*sig4ka) + (1./4)*bs_1*bs_2*(Ps2s2-8./9*sig4ka))    
+        p_pt = p_gg
+        
+    elif (tracer_1.type == 'NC') and (tracer_2.type == 'IA'):
+        p_pt = Pd1d1 #placeholder
+    elif (tracer_1.type == 'IA') and (tracer_2.type == 'NC'):
+        p_pt = Pd1d1 #placeholder
+    elif (tracer_1.type == 'IA') and (tracer_2.type == 'NC'):
+        p_pt = Pd1d1 #placeholder
+    else:
+        raise ValueError('Combination of PTTracer %s and %s types not supported.' % (tracer_1.type,tracer_2.type))
 
     
 
