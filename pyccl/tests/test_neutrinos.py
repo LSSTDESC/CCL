@@ -19,7 +19,7 @@ def test_omnuh2_smoke(a, m):
 
 
 @pytest.mark.parametrize('split', ['normal', 'inverted', 'equal', 'sum',
-                         'single'])
+                                   'single'])
 def test_nu_masses_smoke(split):
     m = ccl.nu_masses(0.1, split)
     if split == 'sum':
