@@ -432,3 +432,33 @@ def _fftlog_transform(rs, frs,
         fks = fks.squeeze()
 
     return ks, fks
+
+
+def _spline_integrate(x, ys, a, b):
+    if np.ndim(x) != 1:
+        raise ValueError("x should be a 1D array")
+    if np.ndim(ys) < 1 or np.ndim(ys) > 2:
+        raise ValueError("ys should be 1D or a 2D array")
+    if np.ndim(ys) == 1:
+        n_integ = 1
+        n_x = len(ys)
+    else:
+        n_integ, n_x = ys.shape
+
+    if len(x) != n_x:
+        raise ValueError("x should have %d elements" % n_x)
+
+    if np.ndim(a) > 0 or np.ndim(b) > 0:
+        raise TypeError("Integration limits should be scalar")
+
+    status = 0
+    result, status = lib.spline_integrate(n_integ,
+                                          x, ys.flatten(),
+                                          a, b, n_integ,
+                                          status)
+    check(status)
+
+    if np.ndim(ys) == 1:
+        result = result[0]
+
+    return result

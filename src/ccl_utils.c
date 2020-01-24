@@ -265,50 +265,74 @@ double ccl_j_bessel(int l,double x)
   return jl;
 }
 
-double ccl_integ_spline(int n,double *x,double *y,
-			double a, double b,
-			const gsl_interp_type *T, int *status)
+void ccl_integ_spline(int ny, int nx,double *x,double **y,
+                      double a, double b, double *result,
+                      const gsl_interp_type *T, int *status)
 {
-  gsl_spline *s = NULL;
-  double result = NAN;
   if(b==a) {
-    return 0;
+    int iyy;
+    for(iyy=0; iyy<ny; iyy++)
+      result[iyy]=0;
+    return;
   }
   if(b<a) {
-    b=x[n-1];
+    b=x[nx-1];
     a=x[0];
   }
 
-  if((b>x[n-1]) || (a<x[0])) {
+  if((b>x[nx-1]) || (a<x[0])) {
     ccl_raise_warning(CCL_ERROR_SPLINE,
 		      "ERROR: integration limits beyond interpolated range\n");
     *status = CCL_ERROR_SPLINE;
-    return NAN;
+    return;
   }
 
   if(*status==0) {
-    s = gsl_spline_alloc(T, n);
-    if(s == NULL) {
-      *status = CCL_ERROR_MEMORY;
-      result = NAN;
-    }
-  }
+    #pragma omp parallel default(none) \
+                         shared(nx, ny, x, y, a, b, result, T, status)
+    {
+      int iy;
+      int local_status=0;
+      gsl_interp_accel *ia = NULL;
+      gsl_spline *s = NULL;
 
-  if(*status==0) {
-    if(gsl_spline_init(s, x, y, n)) {
-      *status = CCL_ERROR_SPLINE;
-      result = NAN;
-    }
-  }
+      s = gsl_spline_alloc(T, nx);
+      if(s == NULL)
+        local_status = CCL_ERROR_MEMORY;
 
-  if(*status==0) {
-    int sstat = gsl_spline_eval_integ_e(s, a, b, NULL, &result);
-    if(sstat) {
-      *status = CCL_ERROR_SPLINE_EV;
-      result = NAN;
-    }
-  }
+      if(!local_status) {
+        ia = gsl_interp_accel_alloc();
+        if(ia == NULL)
+          local_status = CCL_ERROR_MEMORY;
+      }
 
-  gsl_spline_free(s);
-  return result;
+      if(!local_status) {
+        #pragma omp for
+        for(iy=0; iy<ny; iy++) {
+          if(!local_status) {
+            if(gsl_spline_init(s, x, y[iy], nx)) {
+              local_status = CCL_ERROR_SPLINE;
+              result[iy] = NAN;
+	    }
+	  }
+
+	  if(!local_status) {
+	    int sstat = gsl_spline_eval_integ_e(s, a, b, ia, &(result[iy]));
+	    if(sstat) {
+              local_status = CCL_ERROR_SPLINE_EV;
+              result[iy] = NAN;
+	    }
+	  }
+	}
+      }
+
+      gsl_spline_free(s);
+      gsl_interp_accel_free(ia);
+
+      if (local_status) {
+        #pragma omp atomic write
+        *status = local_status;
+      }
+    } //end omp parallel
+  }
 }

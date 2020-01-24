@@ -167,9 +167,9 @@ static void integ_cls_limber_spline(ccl_cosmology *cosmo,
   }
 
   if(*status == 0) {
-    *result = ccl_integ_spline(nk, lk_arr, fk_arr,
-			       1, -1, gsl_interp_akima,
-			       status);
+    ccl_integ_spline(1, nk, lk_arr, &fk_arr,
+                     1, -1, result, gsl_interp_akima,
+                     status);
   }
   free(fk_arr);
   free(lk_arr);

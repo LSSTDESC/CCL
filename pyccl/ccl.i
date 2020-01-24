@@ -54,8 +54,8 @@ from .errors import CCLError
 %include "ccl_sigM.i"
 %include "ccl_f1d.i"
 %include "ccl_fftlog.i"
+%include "ccl_utils.i"
 
 /* list header files not yet having a .i file here */
 %include "../include/ccl_config.h"
 %include "../include/ccl_error.h"
-%include "../include/ccl_utils.h"
