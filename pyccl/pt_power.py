@@ -84,4 +84,7 @@ def get_pt_pk(cosmo, k, a, tracer_1, tracer_2=None,
                  is_logp=True)  # ?
     # (see pk2d.py for other options).
 
-    return pt_pk
+    if return_pt_object:
+        return pt_pk, pt_object
+    else:
+        return pt_pk
