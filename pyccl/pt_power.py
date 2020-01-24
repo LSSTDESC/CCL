@@ -1,13 +1,21 @@
 import numpy as np
 from scipy.interpolate import interp1d
 from .pyutils import _check_array_params
-import fastpt as fpt
 from .pk2d import Pk2D
+from .power import *
+from .background import comoving_radial_distance, growth_rate, growth_factor
+
+try:
+    import fastpt as fpt
+    HAVE_FASTPT = True
+except ImportError:
+    HAVE_FASTPT = False
 
 
 def PTTracer(object):
     def __init_(self):
         self.biases = {}
+        self.type = None
         pass
 
     def get_bias(self, bias_name, z):
@@ -38,6 +46,7 @@ def PTTracer(object):
 def PTNumberCountsTracer(PTTracer):
     def __init__(self, b1, b2=None, bs=None):
         self.biases = {}
+        self.type = 'NC'
 
         # Initialize b1
         self.biases['b1'] = self._get_bias_function(b1)
@@ -51,6 +60,7 @@ def PTIntrinsicAlignmentTracer(PTTracer):
     def __init__(self, c1, c2=None, cdelta=None):
 
         self.biases = {}
+        self.type = 'IA'
 
         # Initialize b1
         self.biases['c1'] = self._get_bias_function(c1)
@@ -61,27 +71,118 @@ def PTIntrinsicAlignmentTracer(PTTracer):
 
 
 def get_pt_pk(cosmo, k, a, tracer_1, tracer_2=None,
-              pt_object=None, return_pt_object=False):
+              pt_object=None, return_pt_object=False, sub_lowk=True, use_nonlin=True):
     # First initialize the pt_object if needed
+    if pt_object is not None:
+        # we will need to check that the input k was the same used to generate the input pt_object
+        ks = k
     if pt_object is None:
+        assert HAVE_FASTPT, (
+            "You must have the `fast-pt` python package "
+            "installed to run CCL with FASTPT!")
+        to_do = []
+        type1=tracer1.type
+        if tracer_2 is None:
+            tracer_2 = tracer_1
+        if (tracer_1.type == 'NC') or (tracer_2.type == 'NC'):
+            to_do.append('dd_bias')
+        if (tracer_1.type == 'IA') or (tracer_2.type == 'IA'):
+            to_do.append('IA')
+            
+        #other functionality (e.g. RSD) can be added here for FASTPT.
+        #Ideally, the initialization happens once per likelihood evaluation, or even once per chain.
+        #Hard code some accuracy settings. These should be passable at some point.
+        pad_factor=1
+        low_extrap=-5
+        high_extrap=3
+        P_window=None
+        C_window=.75
+        
+        # we need a k array and the linear power spectrum at z=0.
+        # could eventually run this at any z and avoid requiring growth factor multiplication. Save this for later dev.
+        
+        #is the input k already logspaced?
+        #is it sufficiently high resoluton for the calculation
+        dk = np.diff(np.log(k))
+        delta_L = (log(k[-1]) - log(k[0])) / (k.size - 1)
+        dk_test = np.ones_like(dk) * delta_L
+        try:
+            np.testing.assert_array_almost_equal(dk, dk_test, decimal=4, err_msg=log_sample_test, verbose=False)
+            ks = k
+        except:
+            #create a new k array
+            # should eventually check that the range is enough, etc.
+            ks=np.logspace(np.log(k[0]),np.log(k[-1]),(np.log(k[-1])-np.log(k[0]))*20)
+        pk_lin_z0 = linear_matter_power(cosmo,ks,1)    
+        
+        # actually do the initialization
+        n_pad = pad_factor*len(ks)
         pt_object = fpt.FASTPT(ks,to_do=to_do,
                                low_extrap=low_extrap,
                                high_extrap=high_extrap,
                                n_pad=n_pad)
 
-    # Now compute the Pk however it is that FASTPT does it
+    # Now compute the Pk using FASTPT
+    # First, get P_d1d1 (the delta delta correlation), which could be linear or nonlinear.
+    # We will eventually want options here, e.g. to use pert theory instead of halofit.
+    if use_nonlin:
+        Pd1d1 = np.array([nonlin_matter_power(cosmo,ks,a_i) for a_i in a])
+    else:
+        Pd1d1 = np.array([linear_matter_power(cosmo,ks,a_i) for a_i in a])
+    #We also need the growth factor
+        ga = growth_factor(cosmo,a)
+    #NOTE: we should add an option that does PT at every a value. This isn't hard, it just takes longer.
+    
+        if (tracer_1.type == NC) and (tracer_2.type == NC):
+            b1_1=tracer1.b1
+            b1_2=tracer2.b1
+            b2_1=tracer1.b2
+            b2_2=tracer2.b2
+            bs_1=tracer1.bs
+            bs_2=tracer2.bs
+            
+            bias_fpt = pt_object.one_loop_dd_bias(pk_lin_z0,P_window=P_window,C_window=C_window)
+            
+            Pd1d2 = np.array([g ** 4 * bias_fpt[2] for g in ga]) #replace with np.outer?
+            Pd2d2 = np.array([g ** 4 * bias_fpt[3] for g in ga])
+            Pd1s2 = np.array([g ** 4 * bias_fpt[4] for g in ga])
+            Pd2s2 = np.array([g ** 4 * bias_fpt[5] for g in ga])
+            Ps2s2 = np.array([g ** 4 * bias_fpt[6] for g in ga])
+            sig4ka = 0.
+            if sub_lowk:
+                sig4ka = np.array([g ** 4 * bias_fpt[7] * np.ones_like(bias_fpt[0]) for g in ga])
+            p_gg = (b1_1*b1_2*Pd1d1 + (1./2)*(b1_1*b2_2+b1_2*b2_1)*Pd1d2 + (1./4)*b2_1*b2_2*(Pd2d2-2.*sig4ka) + (1./2)*(b1_1*bs_2+b1_2*bs_1)*Pd1s2 +
+                        (1./4)*(b2_1*bs_2+b2_2*bs_1)*(Pd2s2-4./3*sig4ka) + (1./4)*bs_1*bs_2*(Ps2s2-8./9*sig4ka))    
+            p_pt = p_gg
+            
+        elif (tracer_1.type == NC) and (tracer_2.type == IA):
+            p_pt = Pd1d1 #placeholder
+        elif (tracer_1.type == IA) and (tracer_2.type == NC):
+            p_pt = Pd1d1 #placeholder
+        elif (tracer_1.type == IA) and (tracer_2.type == NC):
+            p_pt = Pd1d1 #placeholder
+        else:
+            raise ValueError('Combination of PTTracer %s and %s types not supported.' % (tracer_1.type,tracer_2.type))
+
+    
 
     # I've initialized the tracers to None, assuming that,
     # if tracer_2 is None, then the assumption is that
     # it is the same as tracer_1.
+    
+    # for matter cross correlation, we will use (for now) a PTNumberCounts tracer with b1=1 and all other bias = 0
+
+    #at some point, do we want to store an spline array for these pt power? 
+    
+    #nonlinear bias cross-terms with IA are currently missing from here and from FASTPT
+    #come back to this.
 
     # Once you have created the 2-dimensional P(k) array,
     # then generate a Pk2D object as described in pk2d.py.
-
-    pt_pk = Pk2D(a_arr=a_array,
-                 lk_arr=logk_array,
-                 pk_arr=pk_array,
-                 is_logp=True)  # ?
+    pt_pk = Pk2D(a_arr=a,
+                 lk_arr=np.log(ks),
+                 pk_arr=p_pt,
+                 is_logp=False)  # ?
     # (see pk2d.py for other options).
 
     if return_pt_object:
