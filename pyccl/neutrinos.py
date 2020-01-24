@@ -7,6 +7,7 @@ neutrino_mass_splits = {
     'inverted': lib.nu_inverted,
     'equal':   lib.nu_equal,
     'sum':   lib.nu_sum,
+    'single': lib.nu_single,
 }
 
 
@@ -74,10 +75,10 @@ def nu_masses(OmNuh2, mass_split, T_CMB=None):
             % (mass_split, neutrino_mass_splits.keys()))
 
     # Call function
-    if mass_split in ['normal', 'inverted', 'equal', 'sum', 'single']:
+    if mass_split in ['normal', 'inverted', 'equal']:
         mnu, status = lib.nu_masses_vec(
             OmNuh2, neutrino_mass_splits[mass_split], T_CMB, 3, status)
-    elif mass_split == 'sum':
+    elif mass_split in ['sum', 'single']:
         mnu, status = lib.nu_masses_vec(
             OmNuh2, neutrino_mass_splits[mass_split], T_CMB, 1, status)
         mnu = mnu[0]
