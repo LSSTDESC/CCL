@@ -75,7 +75,8 @@ def nu_masses(OmNuh2, mass_split, T_CMB=None):
 
     # Call function
     if ((mass_split == 'normal') or
-            (mass_split == 'inverted') or (mass_split == 'equal')):
+            (mass_split == 'inverted') or (mass_split == 'equal') or
+            (mass_slit=='single'):
         mnu, status = lib.nu_masses_vec(
             OmNuh2, neutrino_mass_splits[mass_split], T_CMB, 3, status)
     elif mass_split == 'sum':

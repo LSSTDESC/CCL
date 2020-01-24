@@ -18,7 +18,8 @@ def test_omnuh2_smoke(a, m):
     assert np.shape(om) == np.shape(a)
 
 
-@pytest.mark.parametrize('split', ['normal', 'inverted', 'equal', 'sum'])
+@pytest.mark.parametrize('split', ['normal', 'inverted', 'equal', 'sum',
+                         'single'])
 def test_nu_masses_smoke(split):
     m = ccl.nu_masses(0.1, split)
     if split == 'sum':
@@ -36,7 +37,7 @@ def test_neutrinos_raises():
 @pytest.mark.parametrize('a', [
     1,
     1.])
-@pytest.mark.parametrize('split', ['normal', 'inverted', 'equal'])
+@pytest.mark.parametrize('split', ['normal', 'inverted', 'equal', 'single'])
 def test_nu_mass_consistency(a, split):
     m = ccl.nu_masses(0.1, split)
     assert np.allclose(ccl.Omeganuh2(a, m), 0.1, rtol=0, atol=1e-4)

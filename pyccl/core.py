@@ -108,8 +108,8 @@ class Cosmology(object):
         m_nu (:obj:`float`, optional): Total mass in eV of the massive
             neutrinos present. Defaults to 0.
         m_nu_type (:obj:`str`, optional): The type of massive neutrinos. Should
-            be one of 'inverted', 'normal', 'equal', 'single', or 'list'. The default
-            of None is the same as 'normal'.
+            be one of 'inverted', 'normal', 'equal', 'single', or 'list'.
+            The default of None is the same as 'normal'.
         w0 (:obj:`float`, optional): First order term of dark energy equation
             of state. Defaults to -1.
         wa (:obj:`float`, optional): Second order term of dark energy equation
