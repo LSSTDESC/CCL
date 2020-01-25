@@ -75,7 +75,7 @@ def smoke_assert_pkhm_real(func):
 
 @pytest.mark.parametrize('norm', [True, False])
 def test_pkhm_mean_profile_smoke(norm):
-    hmc = ccl.halos.HMCalculator(nl10M=2)
+    hmc = ccl.halos.HMCalculator(COSMO, nl10M=2)
 
     def f(k, a):
         return hmc.mean_profile(COSMO, k, a, HMF,
@@ -86,7 +86,7 @@ def test_pkhm_mean_profile_smoke(norm):
 
 @pytest.mark.parametrize('norm', [True, False])
 def test_pkhm_bias_smoke(norm):
-    hmc = ccl.halos.HMCalculator(nl10M=2)
+    hmc = ccl.halos.HMCalculator(COSMO, nl10M=2)
 
     def f(k, a):
         return hmc.bias(COSMO, k, a, HMF, HBF, P1,
@@ -126,12 +126,13 @@ def test_pkhm_bias_smoke(norm):
                            'pk': 'linear', 'h1': True,
                            'h2': True, 'p2': P2}])
 def test_pkhm_pk_smoke(pars):
-    hmc = ccl.halos.HMCalculator(nl10M=2)
+    hmc = ccl.halos.HMCalculator(COSMO, nl10M=2)
 
     def f(k, a):
         return hmc.pk(COSMO, k, a, HMF, HBF, P1,
                       covprof=pars['cv'],
-                      normprof=pars['norm'],
+                      normprof_1=pars['norm'],
+                      normprof_2=pars['norm'],
                       p_of_k_a=pars['pk'],
                       prof_2=pars['p2'],
                       mdef=M200,
@@ -140,12 +141,40 @@ def test_pkhm_pk_smoke(pars):
     smoke_assert_pkhm_real(f)
 
 
+def test_pkhm_pk2d():
+    hmc = ccl.halos.HMCalculator(COSMO)
+    k_arr = KK
+    a_arr = np.linspace(0.1, 1, 10)
+    pk_arr = hmc.pk(COSMO, k_arr, a_arr,
+                    HMF, HBF, P1, mdef=M200,
+                    normprof_1=True,
+                    normprof_2=True)
+
+    # Input sampling
+    pk2d = hmc.get_Pk2D(COSMO, HMF, HBF, P1,
+                        mdef=M200, lk_arr=np.log(k_arr),
+                        a_arr=a_arr, normprof_1=True)
+    pk_arr_2 = np.array([pk2d.eval(k_arr, a, COSMO)
+                         for a in a_arr])
+    assert np.all(np.fabs((pk_arr / pk_arr_2 - 1)).flatten()
+                  < 1E-10)
+
+    # Standard sampling
+    pk2d = hmc.get_Pk2D(COSMO, HMF, HBF, P1,
+                        mdef=M200, normprof_1=True)
+    pk_arr_2 = np.array([pk2d.eval(k_arr, a, COSMO)
+                         for a in a_arr])
+    assert np.all(np.fabs((pk_arr / pk_arr_2 - 1)).flatten()
+                  < 1E-10)
+
+
 def test_pkhm_errors():
     # Wrong integration
     with pytest.raises(NotImplementedError):
-        ccl.halos.HMCalculator(integration_method_M='Sampson')
+        ccl.halos.HMCalculator(COSMO,
+                               integration_method_M='Sampson')
 
-    hmc = ccl.halos.HMCalculator()
+    hmc = ccl.halos.HMCalculator(COSMO)
 
     # Wrong hmf
     with pytest.raises(TypeError):

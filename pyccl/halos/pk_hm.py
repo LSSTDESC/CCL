@@ -1,6 +1,8 @@
+from .. import ccllib as lib
 from .hmfunc import MassFunc
 from .hbias import HaloBias
 from .profiles import HaloProfile
+from ..core import check
 from ..pk2d import Pk2D
 from ..power import linear_matter_power, nonlin_matter_power
 from ..background import rho_x
@@ -265,3 +267,32 @@ class HMCalculator(object):
         if np.ndim(k) == 0:
             out = np.squeeze(out, axis=-1)
         return out
+
+    def get_Pk2D(self, cosmo, massfunc, hbias, prof,
+                 covprof=None, prof_2=None, p_of_k_a=None,
+                 normprof_1=False, normprof_2=False,
+                 mdef=None, get_1h=True, get_2h=True,
+                 lk_arr=None, a_arr=None,
+                 extrap_order_lok=1, extrap_order_hik=2):
+        if lk_arr is None:
+            status = 0
+            nk = lib.get_pk_spline_nk(cosmo.cosmo)
+            lk_arr, status = lib.get_pk_spline_lk(cosmo.cosmo, nk, status)
+            check(status)
+        if a_arr is None:
+            status = 0
+            na = lib.get_pk_spline_na(cosmo.cosmo)
+            a_arr, status = lib.get_pk_spline_a(cosmo.cosmo, na, status)
+            check(status)
+
+        pk_arr = self.pk(cosmo, np.exp(lk_arr), a_arr,
+                         massfunc, hbias, prof, covprof=covprof,
+                         prof_2=prof_2, p_of_k_a=p_of_k_a,
+                         normprof_1=normprof_1, normprof_2=normprof_2,
+                         mdef=mdef, get_1h=get_1h, get_2h=get_2h)
+
+        pk2d = Pk2D(a_arr=a_arr, lk_arr=lk_arr, pk_arr=pk_arr,
+                    extrap_order_lok=extrap_order_lok,
+                    extrap_order_hik=extrap_order_hik,
+                    cosmo=cosmo, is_logp=False)
+        return pk2d
