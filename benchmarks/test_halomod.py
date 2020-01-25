@@ -37,17 +37,14 @@ def test_halomod(model):
                                     mass_def_strict=False)
     cM = ccl.halos.ConcentrationDuffy08(mdef=mdef)
     prf = ccl.halos.HaloProfileNFW(cM)
-    hmc = ccl.halos.HMCalculator(cosmo,
-                                 l10M_min=6.5,
-                                 nl10M=2048,
-                                 integration_method_M='spline')
+    hmc = ccl.halos.HMCalculator(cosmo)
 
     z = 0.
     k = data_z0[:, 0] * cosmo['h']
     pk = data_z0[:, -1] / (cosmo['h']**3)
     pk_ccl = hmc.pk(cosmo, k, 1./(1+z),
                     hmf, hbf, prf, mdef=mdef,
-                    normprof=True)
+                    normprof_1=True)
     tol = pk * HALOMOD_TOLERANCE
     err = np.abs(pk_ccl - pk)
     assert np.all(err <= tol)
@@ -57,7 +54,7 @@ def test_halomod(model):
     pk = data_z1[:, -1] / (cosmo['h']**3)
     pk_ccl = hmc.pk(cosmo, k, 1./(1+z),
                     hmf, hbf, prf, mdef=mdef,
-                    normprof=True)
+                    normprof_1=True)
     tol = pk * HALOMOD_TOLERANCE
     err = np.abs(pk_ccl - pk)
     assert np.all(err <= tol)

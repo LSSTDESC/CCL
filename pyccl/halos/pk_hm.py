@@ -166,7 +166,8 @@ class HMCalculator(object):
 
     def pk(self, cosmo, k, a, massfunc, hbias, prof,
            covprof=None, prof_2=None, p_of_k_a=None,
-           normprof=False, mdef=None, get_1h=True, get_2h=True):
+           normprof_1=False, normprof_2=False,
+           mdef=None, get_1h=True, get_2h=True):
         a_use = np.atleast_1d(a)
         k_use = np.atleast_1d(k)
 
@@ -202,7 +203,7 @@ class HMCalculator(object):
                                    self.lmass)) / self.m0
 
             # Compute normalization
-            if normprof:
+            if normprof_1:
                 uk01 = prof.fourier(cosmo,
                                     self.precision['k_min'],
                                     self.mass, aa,
@@ -213,7 +214,7 @@ class HMCalculator(object):
             if prof_2 is None:
                 norm2 = norm1
             else:
-                if normprof:
+                if normprof_2:
                     uk02 = prof_2.fourier(cosmo,
                                           self.precision['k_min'],
                                           self.mass, aa,
