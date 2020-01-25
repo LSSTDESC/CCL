@@ -3,6 +3,8 @@ from .hbias import HaloBias
 from .profiles import HaloProfile
 from ..pk2d import Pk2D
 from ..power import linear_matter_power, nonlin_matter_power
+from ..background import rho_x
+from ..pyutils import _spline_integrate
 import numpy as np
 
 
@@ -29,24 +31,32 @@ class ProfileCovar(object):
 
 
 class HMCalculator(object):
-    def __init__(self, **kwargs):
+    def __init__(self, cosmo, **kwargs):
+        self.rho0 = rho_x(cosmo, 1., 'matter', is_comoving=True)
         self.precision = {'l10M_min': 8.,
                           'l10M_max': 16.,
                           'nl10M': 128,
-                          'integration_method_M': 'Simpson',
+                          'integration_method_M': 'simpson',
                           'k_min': 1E-5}
         self.precision.update(kwargs)
         self.lmass = np.linspace(self.precision['l10M_min'],
                                  self.precision['l10M_max'],
                                  self.precision['nl10M'])
         self.mass = 10.**self.lmass
+        self.m0 = self.mass[0]
 
-        if self.precision['integration_method_M'] == 'Simpson':
+        if self.precision['integration_method_M'] not in ['spline',
+                                                          'simpson']:
+            raise NotImplementedError("Only \'simpson\' and 'spline' "
+                                      "supported as integration methods")
+        elif self.precision['integration_method_M'] == 'simpson':
             from scipy.integrate import simps
             self.integrator = simps
         else:
-            raise NotImplementedError("Only \'Simpson\' supported "
-                                      "as integration method")
+            self.integrator = self._integ_spline
+
+    def _integ_spline(self, fM, lM):
+        return _spline_integrate(lM, fM, lM[0], lM[-1])
 
     def _hmf(self, hmf, cosmo, a, mdef=None):
         return hmf.get_mass_function(cosmo, self.mass,
@@ -56,14 +66,15 @@ class HMCalculator(object):
         return hbf.get_halo_bias(cosmo, self.mass,
                                  a, mdef_other=mdef)
 
-    def _u_k_from_arrays(self, hmf_a, uk_a):
-        # TODO: M=0 limit
-        return self.integrator(hmf_a[..., :] * uk_a,
-                               self.lmass)
+    def _u_k_from_arrays(self, hmf_a, hmf0, uk_a):
+        i1 = self.integrator(hmf_a[..., :] * uk_a,
+                             self.lmass)
+        return i1 + hmf0 * uk_a[..., 0]
 
-    def _b_k_from_arrays(self, hmf_a, hbf_a, uk_a):
-        return self.integrator((hmf_a * hbf_a)[..., :] * uk_a,
-                               self.lmass)
+    def _b_k_from_arrays(self, hmf_a, hbf_a, hmf0, uk_a):
+        i1 = self.integrator((hmf_a * hbf_a)[..., :] * uk_a,
+                             self.lmass)
+        return i1 + hmf0 * uk_a[..., 0]
 
     def _check_massfunc(self, massfunc):
         if not isinstance(massfunc, MassFunc):
@@ -91,6 +102,9 @@ class HMCalculator(object):
         out = np.zeros([na, nk])
         for ia, aa in enumerate(a_use):
             mf = self._hmf(massfunc, cosmo, aa, mdef=mdef)
+            mf0 = (self.rho0 -
+                   self.integrator(mf * self.mass,
+                                   self.lmass)) / self.m0
             uk = prof.fourier(cosmo, k_use, self.mass, aa,
                               mass_def=mdef).T
             if normprof:
@@ -98,10 +112,10 @@ class HMCalculator(object):
                                    self.precision['k_min'],
                                    self.mass, aa,
                                    mass_def=mdef).T
-                norm = 1. / self._u_k_from_arrays(mf, uk0)
+                norm = 1. / self._u_k_from_arrays(mf, mf0, uk0)
             else:
                 norm = 1.
-            out[ia, :] = self._u_k_from_arrays(mf, uk) * norm
+            out[ia, :] = self._u_k_from_arrays(mf, mf0, uk) * norm
 
         if np.ndim(a) == 0:
             out = np.squeeze(out, axis=0)
@@ -125,17 +139,24 @@ class HMCalculator(object):
         for ia, aa in enumerate(a_use):
             mf = self._hmf(massfunc, cosmo, aa, mdef=mdef)
             bf = self._hbf(hbias, cosmo, aa, mdef=mdef)
+            mbf0 = (self.rho0 -
+                    self.integrator(mf * bf * self.mass,
+                                    self.lmass)) / self.m0
             uk = prof.fourier(cosmo, k_use, self.mass, aa,
                               mass_def=mdef).T
             if normprof:
+                mf0 = (self.rho0 -
+                       self.integrator(mf * self.mass,
+                                       self.lmass)) / self.m0
                 uk0 = prof.fourier(cosmo,
                                    self.precision['k_min'],
                                    self.mass, aa,
                                    mass_def=mdef).T
-                norm = 1. / self._u_k_from_arrays(mf, uk0)
+                norm = 1. / self._u_k_from_arrays(mf, mf0, uk0)
             else:
                 norm = 1.
-            out[ia, :] = self._b_k_from_arrays(mf, bf, uk) * norm
+            out[ia, :] = self._b_k_from_arrays(mf, bf,
+                                               mbf0, uk) * norm
 
         if np.ndim(a) == 0:
             out = np.squeeze(out, axis=0)
@@ -176,6 +197,9 @@ class HMCalculator(object):
         out = np.zeros([na, nk])
         for ia, aa in enumerate(a_use):
             mf = self._hmf(massfunc, cosmo, aa, mdef=mdef)
+            mf0 = (self.rho0 -
+                   self.integrator(mf * self.mass,
+                                   self.lmass)) / self.m0
 
             # Compute normalization
             if normprof:
@@ -183,7 +207,7 @@ class HMCalculator(object):
                                     self.precision['k_min'],
                                     self.mass, aa,
                                     mass_def=mdef).T
-                norm1 = 1. / self._u_k_from_arrays(mf, uk01)
+                norm1 = 1. / self._u_k_from_arrays(mf, mf0, uk01)
             else:
                 norm1 = 1.
             if prof_2 is None:
@@ -194,7 +218,7 @@ class HMCalculator(object):
                                           self.precision['k_min'],
                                           self.mass, aa,
                                           mass_def=mdef).T
-                    norm2 = 1. / self._u_k_from_arrays(mf, uk02)
+                    norm2 = 1. / self._u_k_from_arrays(mf, mf0, uk02)
                 else:
                     norm2 = 1.
             norm = norm1 * norm2
@@ -202,9 +226,12 @@ class HMCalculator(object):
             if get_2h:
                 bf = self._hbf(hbias, cosmo, aa, mdef=mdef)
                 # Compute first bias factor
+                mbf0 = (self.rho0 -
+                        self.integrator(mf * bf * self.mass,
+                                        self.lmass)) / self.m0
                 uk_1 = prof.fourier(cosmo, k_use, self.mass, aa,
                                     mass_def=mdef).T
-                bk_1 = self._b_k_from_arrays(mf, bf, uk_1)
+                bk_1 = self._b_k_from_arrays(mf, bf, mbf0, uk_1)
 
                 # Compute second bias factor
                 if prof_2 is None:
@@ -212,7 +239,7 @@ class HMCalculator(object):
                 else:
                     uk_2 = prof_2.fourier(cosmo, k_use, self.mass, aa,
                                           mass_def=mdef).T
-                    bk_2 = self._b_k_from_arrays(mf, bf, uk_2)
+                    bk_2 = self._b_k_from_arrays(mf, bf, mbf0, uk_2)
 
                 # Compute power spectrum
                 pk_2h = pkf(aa) * bk_1 * bk_2
@@ -225,7 +252,7 @@ class HMCalculator(object):
                                             self.mass, aa,
                                             prof_2=prof_2,
                                             mass_def=mdef).T
-                pk_1h = self._u_k_from_arrays(mf, uk2)
+                pk_1h = self._u_k_from_arrays(mf, mf0, uk2)
             else:
                 pk_1h = 0.
 

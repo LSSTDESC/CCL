@@ -206,6 +206,7 @@ class MassFuncSheth99(MassFunc):
         self.A = 0.21615998645
         self.p = 0.3
         self.a = 0.707
+        self.delta_c = 1.68647
 
     def _check_mdef(self, mdef):
         if mdef.Delta != 'fof':
@@ -213,9 +214,7 @@ class MassFuncSheth99(MassFunc):
         return False
 
     def _get_fsigma(self, cosmo, sigM, a, lnM):
-        delta_c = 1.68647
-
-        nu = delta_c/sigM
+        nu = self.delta_c/sigM
         return nu * self.A * (1. + (self.a * nu**2)**(-self.p)) * \
             np.exp(-self.a * nu**2/2.)
 
