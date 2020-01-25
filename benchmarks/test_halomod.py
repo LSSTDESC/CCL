@@ -29,7 +29,7 @@ def test_halomod(model):
     data_z0 = np.loadtxt("./benchmarks/data/pk_hm_c%d_z0.txt" % (model+1))
     data_z1 = np.loadtxt("./benchmarks/data/pk_hm_c%d_z1.txt" % (model+1))
 
-    mdef = ccl.halos.MassDef('vir','matter')
+    mdef = ccl.halos.MassDef('vir', 'matter')
     hmf = ccl.halos.MassFuncSheth99(cosmo, mass_def=mdef,
                                     mass_def_strict=False,
                                     use_delta_c_fit=True)
