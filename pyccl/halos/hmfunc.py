@@ -192,10 +192,19 @@ class MassFuncSheth99(MassFunc):
         mass_def (:obj:`MassDef`): a mass definition object.
             this parametrization accepts FoF masses only.
             If `None`, FoF masses will be used.
+        mass_def_strict (bool): if False, consistency of the mass
+            definition will be ignored.
+        use_delta_c_fit (bool): if True, use delta_crit given by
+            the fit of Nakamura & Suto 1997. Otherwise use
+            delta_crit = 1.68647.
     """
     name = 'Sheth99'
 
-    def __init__(self, cosmo, mass_def=None):
+    def __init__(self, cosmo, mass_def=None,
+                 mass_def_strict=True,
+                 use_delta_c_fit=False):
+        self.mass_def_strict = mass_def_strict
+        self.use_delta_c_fit = use_delta_c_fit
         super(MassFuncSheth99, self).__init__(cosmo,
                                               mass_def)
 
@@ -206,15 +215,22 @@ class MassFuncSheth99(MassFunc):
         self.A = 0.21615998645
         self.p = 0.3
         self.a = 0.707
-        self.delta_c = 1.68647
 
     def _check_mdef(self, mdef):
-        if mdef.Delta != 'fof':
-            return True
+        if self.mass_def_strict:
+            if mdef.Delta != 'fof':
+                return True
         return False
 
     def _get_fsigma(self, cosmo, sigM, a, lnM):
-        nu = self.delta_c/sigM
+        if self.use_delta_c_fit:
+            status = 0
+            delta_c, status = lib.dc_NakamuraSuto(cosmo.cosmo, a, status)
+            check(status)
+        else:
+            delta_c = 1.68647
+
+        nu = delta_c / sigM
         return nu * self.A * (1. + (self.a * nu**2)**(-self.p)) * \
             np.exp(-self.a * nu**2/2.)
 

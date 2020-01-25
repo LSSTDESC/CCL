@@ -140,10 +140,19 @@ class HaloBiasSheth99(HaloBias):
         mass_def (:obj:`MassDef`): a mass definition object.
             this parametrization accepts FoF masses only.
             If `None`, FoF masses will be used.
+        mass_def_strict (bool): if False, consistency of the mass
+            definition will be ignored.
+        use_delta_c_fit (bool): if True, use delta_crit given by
+            the fit of Nakamura & Suto 1997. Otherwise use
+            delta_crit = 1.68647.
     """
     name = "Sheth99"
 
-    def __init__(self, cosmo, mass_def=None):
+    def __init__(self, cosmo, mass_def=None,
+                 mass_def_strict=True,
+                 use_delta_c_fit=False):
+        self.mass_def_strict = mass_def_strict
+        self.use_delta_c_fit = use_delta_c_fit
         super(HaloBiasSheth99, self).__init__(cosmo,
                                               mass_def)
 
@@ -153,17 +162,24 @@ class HaloBiasSheth99(HaloBias):
     def _setup(self, cosmo):
         self.p = 0.3
         self.a = 0.707
-        self.dc = 1.68647
 
     def _check_mdef(self, mdef):
-        if mdef.Delta != 'fof':
-            return True
+        if self.mass_def_strict:
+            if mdef.Delta != 'fof':
+                return True
         return False
 
     def _get_bsigma(self, cosmo, sigM, a):
-        nu = self.dc/sigM
+        if self.use_delta_c_fit:
+            status = 0
+            delta_c, status = lib.dc_NakamuraSuto(cosmo.cosmo, a, status)
+            check(status)
+        else:
+            delta_c = 1.68647
+
+        nu = delta_c / sigM
         anu2 = self.a * nu**2
-        return 1. + (anu2 - 1. + 2. * self.p / (1. + anu2**self.p))/self.dc
+        return 1. + (anu2 - 1. + 2. * self.p / (1. + anu2**self.p))/delta_c
 
 
 class HaloBiasSheth01(HaloBias):
