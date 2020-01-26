@@ -157,7 +157,7 @@ def test_pkhm_pk2d():
     pk_arr_2 = np.array([pk2d.eval(k_arr, a, COSMO)
                          for a in a_arr])
     assert np.all(np.fabs((pk_arr / pk_arr_2 - 1)).flatten()
-                  < 1E-10)
+                  < 1E-4)
 
     # Standard sampling
     pk2d = hmc.get_Pk2D(COSMO, HMF, HBF, P1,
@@ -165,7 +165,7 @@ def test_pkhm_pk2d():
     pk_arr_2 = np.array([pk2d.eval(k_arr, a, COSMO)
                          for a in a_arr])
     assert np.all(np.fabs((pk_arr / pk_arr_2 - 1)).flatten()
-                  < 1E-10)
+                  < 1E-4)
 
 
 def test_pkhm_errors():
