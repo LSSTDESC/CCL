@@ -116,13 +116,14 @@ def get_pt_pk(cosmo, k, a, tracer_1, tracer_2=None,
         dk = np.diff(np.log(k))
         delta_L = (np.log(k[-1]) - np.log(k[0])) / (k.size - 1)
         dk_test = np.ones_like(dk) * delta_L
+        log_sample_test = 'FASTPT will not work if your in put (k,Pk) values are not sampled evenly in log space. Creating a new array of k values now.'
         try:
             np.testing.assert_array_almost_equal(dk, dk_test, decimal=4, err_msg=log_sample_test, verbose=False)
             ks = k
         except:
             #create a new k array
             # should eventually check that the range is enough, etc.
-            ks=np.logspace(np.log(k[0]),np.log(k[-1]),(np.log(k[-1])-np.log(k[0]))*20)
+            ks=np.logspace(np.log10(k[0]),np.log10(k[-1]),(np.log10(k[-1])-np.log10(k[0]))*20)
         pk_lin_z0 = linear_matter_power(cosmo,ks,1)    
         
         # actually do the initialization
