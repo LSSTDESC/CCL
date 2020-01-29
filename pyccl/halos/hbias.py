@@ -12,11 +12,12 @@ class HaloBias(object):
     radius given by the Lagrangian radius for mass M).
     All sub-classes implementing specific parametrizations
     can therefore be simply created by replacing this class'
-    _get_bsigma method.
+    `_get_bsigma method`.
 
     Args:
-        cosmo (:obj:`Cosmology`): A Cosmology object.
-        mass_def (:obj:`MassDef`): a mass definition object that fixes
+        cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
+        mass_def (:class:`~pyccl.halos.massdef.MassDef`): a mass
+            definition object that fixes
             the mass definition used by this halo bias
             parametrization.
     """
@@ -47,7 +48,7 @@ class HaloBias(object):
         constructor call.
 
         Args:
-            cosmo (:obj:`Cosmology`): A Cosmology object.
+            cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
         """
         pass
 
@@ -58,7 +59,8 @@ class HaloBias(object):
         start of the constructor call.
 
         Args:
-            mdef (:obj:`MassDef`): a mass definition object.
+            mdef (:class:`~pyccl.halos.massdef.MassDef`):
+                a mass definition object.
 
         Returns:
             bool: True if the mass definition is not compatible with
@@ -72,10 +74,11 @@ class HaloBias(object):
         this object.
 
         Args:
-            cosmo (:obj:`Cosmology`): A Cosmology object.
+            cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
             M (float or array_like): halo mass in units of M_sun.
             a (float): scale factor.
-            mdef_other (:obj:`MassDef`): a mass definition object.
+            mdef_other (:class:`~pyccl.halos.massdef.MassDef`):
+                a mass definition object.
 
         Returns:
             float or array_like: mass according to this object's
@@ -91,11 +94,11 @@ class HaloBias(object):
         """ Returns the halo bias for input parameters.
 
         Args:
-            cosmo (:obj:`Cosmology`): A Cosmology object.
+            cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
             M (float or array_like): halo mass in units of M_sun.
             a (float): scale factor.
-            mdef_other (:obj:`MassDef`): the mass definition object
-                that defines M.
+            mdef_other (:class:`~pyccl.halos.massdef.MassDef`):
+                the mass definition object that defines M.
 
         Returns:
             float or array_like: halo bias.
@@ -119,7 +122,7 @@ class HaloBias(object):
         """ Get the halo bias as a function of sigmaM.
 
         Args:
-            cosmo (:obj:`Cosmology`): A Cosmology object.
+            cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
             sigM (float or array_like): standard deviation in the
                 overdensity field on the scale of this halo.
             a (float): scale factor.
@@ -136,8 +139,9 @@ class HaloBiasSheth99(HaloBias):
     This parametrization is only valid for 'fof' masses.
 
     Args:
-        cosmo (:obj:`Cosmology`): A Cosmology object.
-        mass_def (:obj:`MassDef`): a mass definition object.
+        cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
+        mass_def (:class:`~pyccl.halos.massdef.MassDef`):
+            a mass definition object.
             this parametrization accepts FoF masses only.
             If `None`, FoF masses will be used.
     """
@@ -171,8 +175,9 @@ class HaloBiasSheth01(HaloBias):
     This parametrization is only valid for 'fof' masses.
 
     Args:
-        cosmo (:obj:`Cosmology`): A Cosmology object.
-        mass_def (:obj:`MassDef`): a mass definition object.
+        cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
+        mass_def (:class:`~pyccl.halos.massdef.MassDef`):
+            a mass definition object.
             this parametrization accepts FoF masses only.
             If `None`, FoF masses will be used.
     """
@@ -211,8 +216,9 @@ class HaloBiasBhattacharya11(HaloBias):
     This parametrization is only valid for 'fof' masses.
 
     Args:
-        cosmo (:obj:`Cosmology`): A Cosmology object.
-        mass_def (:obj:`MassDef`): a mass definition object.
+        cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
+        mass_def (:class:`~pyccl.halos.massdef.MassDef`):
+            a mass definition object.
             this parametrization accepts FoF masses only.
             If `None`, FoF masses will be used.
     """
@@ -248,8 +254,9 @@ class HaloBiasTinker10(HaloBias):
     """ Implements halo bias described in arXiv:1001.3162.
 
     Args:
-        cosmo (:obj:`Cosmology`): A Cosmology object.
-        mass_def (:obj:`MassDef`): a mass definition object.
+        cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
+        mass_def (:class:`~pyccl.halos.massdef.MassDef`):
+            a mass definition object.
             this parametrization accepts SO masses with
             200 < Delta < 3200 with respect to the matter density.
             If `None`, Delta = 200 (matter) will be used.
