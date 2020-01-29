@@ -80,7 +80,7 @@ def test_pkhm_mean_profile_smoke(norm):
     def f(k, a):
         return hmc.mean_profile(COSMO, k, a, HMF,
                                 P1, normprof=norm,
-                                mdef=M200)
+                                mass_def=M200)
     smoke_assert_pkhm_real(f)
 
 
@@ -90,7 +90,7 @@ def test_pkhm_bias_smoke(norm):
 
     def f(k, a):
         return hmc.bias(COSMO, k, a, HMF, HBF, P1,
-                        normprof=norm, mdef=M200)
+                        normprof=norm, mass_def=M200)
     smoke_assert_pkhm_real(f)
 
 
@@ -135,7 +135,7 @@ def test_pkhm_pk_smoke(pars):
                       normprof_2=pars['norm'],
                       p_of_k_a=pars['pk'],
                       prof_2=pars['p2'],
-                      mdef=M200,
+                      mass_def=M200,
                       get_1h=pars['h1'],
                       get_2h=pars['h2'])
     smoke_assert_pkhm_real(f)
@@ -146,13 +146,13 @@ def test_pkhm_pk2d():
     k_arr = KK
     a_arr = np.linspace(0.1, 1, 10)
     pk_arr = hmc.pk(COSMO, k_arr, a_arr,
-                    HMF, HBF, P1, mdef=M200,
+                    HMF, HBF, P1, mass_def=M200,
                     normprof_1=True,
                     normprof_2=True)
 
     # Input sampling
     pk2d = hmc.get_Pk2D(COSMO, HMF, HBF, P1,
-                        mdef=M200, lk_arr=np.log(k_arr),
+                        mass_def=M200, lk_arr=np.log(k_arr),
                         a_arr=a_arr, normprof_1=True)
     pk_arr_2 = np.array([pk2d.eval(k_arr, a, COSMO)
                          for a in a_arr])
@@ -161,7 +161,7 @@ def test_pkhm_pk2d():
 
     # Standard sampling
     pk2d = hmc.get_Pk2D(COSMO, HMF, HBF, P1,
-                        mdef=M200, normprof_1=True)
+                        mass_def=M200, normprof_1=True)
     pk_arr_2 = np.array([pk2d.eval(k_arr, a, COSMO)
                          for a in a_arr])
     assert np.all(np.fabs((pk_arr / pk_arr_2 - 1)).flatten()

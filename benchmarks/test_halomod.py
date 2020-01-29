@@ -29,13 +29,13 @@ def test_halomod(model):
     data_z0 = np.loadtxt("./benchmarks/data/pk_hm_c%d_z0.txt" % (model+1))
     data_z1 = np.loadtxt("./benchmarks/data/pk_hm_c%d_z1.txt" % (model+1))
 
-    mdef = ccl.halos.MassDef('vir', 'matter')
-    hmf = ccl.halos.MassFuncSheth99(cosmo, mass_def=mdef,
+    mass_def = ccl.halos.MassDef('vir', 'matter')
+    hmf = ccl.halos.MassFuncSheth99(cosmo, mass_def=mass_def,
                                     mass_def_strict=False,
                                     use_delta_c_fit=True)
-    hbf = ccl.halos.HaloBiasSheth99(cosmo, mass_def=mdef,
+    hbf = ccl.halos.HaloBiasSheth99(cosmo, mass_def=mass_def,
                                     mass_def_strict=False)
-    cM = ccl.halos.ConcentrationDuffy08(mdef=mdef)
+    cM = ccl.halos.ConcentrationDuffy08(mdef=mass_def)
     prf = ccl.halos.HaloProfileNFW(cM)
     hmc = ccl.halos.HMCalculator(cosmo)
 
@@ -43,7 +43,7 @@ def test_halomod(model):
     k = data_z0[:, 0] * cosmo['h']
     pk = data_z0[:, -1] / (cosmo['h']**3)
     pk_ccl = hmc.pk(cosmo, k, 1./(1+z),
-                    hmf, hbf, prf, mdef=mdef,
+                    hmf, hbf, prf, mass_def=mass_def,
                     normprof_1=True)
     tol = pk * HALOMOD_TOLERANCE
     err = np.abs(pk_ccl - pk)
@@ -53,7 +53,7 @@ def test_halomod(model):
     k = data_z1[:, 0] * cosmo['h']
     pk = data_z1[:, -1] / (cosmo['h']**3)
     pk_ccl = hmc.pk(cosmo, k, 1./(1+z),
-                    hmf, hbf, prf, mdef=mdef,
+                    hmf, hbf, prf, mass_def=mass_def,
                     normprof_1=True)
     tol = pk * HALOMOD_TOLERANCE
     err = np.abs(pk_ccl - pk)
