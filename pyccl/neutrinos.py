@@ -11,10 +11,11 @@ neutrino_mass_splits = {
 
 
 def Omeganuh2(a, m_nu, T_CMB=None):
-    """Calculate Omega_nu * h^2 at a given scale factor given the sum of the
-    neutrino masses.
+    """Calculate :math:`\\Omega_\\nu\\,h^2` at a given scale factor given
+    the sum of the neutrino masses.
 
-    .. note:: for all practical purposes, Neff is simply N_nu_mass.
+    .. note:: for all practical purposes, :math:`N_{\\rm eff}` is simply
+        `N_nu_mass`.
 
     Args:
         a (float or array-like): Scale factor, normalized to 1 today.

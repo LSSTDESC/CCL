@@ -32,7 +32,7 @@ def growth_factor(cosmo, a):
     """Growth factor.
 
     Args:
-        cosmo (:obj:`Cosmology`): Cosmological parameters.
+        cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.
         a (float or array_like): Scale factor(s), normalized to 1 today.
 
     Returns:
@@ -47,12 +47,12 @@ def growth_factor_unnorm(cosmo, a):
     """Unnormalized growth factor.
 
     Args:
-        cosmo (:obj:`Cosmology`): Cosmological parameters.
+        cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.
         a (float or array_like): Scale factor(s), normalized to 1 today.
 
     Returns:
-        float or array_like: Unnormalized growth factor, normalized to the
-                             scale factor at early times.
+        float or array_like: Unnormalized growth factor, normalized to \
+            the scale factor at early times.
     """
     cosmo.compute_growth()
     return _vectorize_fn(lib.growth_factor_unnorm,
@@ -64,7 +64,7 @@ def growth_rate(cosmo, a):
     growth factor, dlnD/dlna.
 
     Args:
-        cosmo (:obj:`Cosmology`): Cosmological parameters.
+        cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.
         a (float or array_like): Scale factor(s), normalized to 1 today.
 
     Returns:
@@ -80,7 +80,7 @@ def comoving_radial_distance(cosmo, a):
     """Comoving radial distance.
 
     Args:
-        cosmo (:obj:`Cosmology`): Cosmological parameters.
+        cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.
         a (float or array_like): Scale factor(s), normalized to 1 today.
 
     Returns:
@@ -96,14 +96,14 @@ def comoving_angular_distance(cosmo, a):
 
     .. note:: This quantity is otherwise known as the transverse
               comoving distance, and is NOT angular diameter
-              distance or angular separation. The comovoing angular distance
+              distance or angular separation. The comoving angular distance
               is defined such that the comoving distance between
               two objects at a fixed scale factor separated by an angle
-              :math:`\theta` is :math:`\theta D_{T}(a)` where :math:`D_{T}(a)`
-              is the comoving angular distance.
+              :math:`\\theta` is :math:`\\theta r_{A}(a)` where
+              :math:`r_{A}(a)` is the comoving angular distance.
 
     Args:
-        cosmo (:obj:`Cosmology`): Cosmological parameters.
+        cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.
         a (float or array_like): Scale factor(s), normalized to 1 today.
 
     Returns:
@@ -117,13 +117,13 @@ def comoving_angular_distance(cosmo, a):
 def angular_diameter_distance(cosmo, a1, a2=None):
     """Angular diameter distance.
 
-   .. note:: The angular diameter distance in Mpc from scale factor
-    a1 to scale factor a2. If a2 is not provided, it is assumed that
-    the distance will be calculated between 1 and a1. Note that a2
-    has to be smaller than a1.
+    .. note:: The angular diameter distance in Mpc from scale factor
+              a1 to scale factor a2. If a2 is not provided, it is assumed that
+              the distance will be calculated between 1 and a1. Note that a2
+              has to be smaller than a1.
 
     Args:
-        cosmo (:obj:`Cosmology`): Cosmological parameters.
+        cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.
         a1 (float or array_like): Scale factor(s), normalized to 1 today.
         a2 (float or array_like): Scale factor(s), normalized to 1 today,
         optional.
@@ -151,7 +151,7 @@ def h_over_h0(cosmo, a):
     """Ratio of Hubble constant at `a` over Hubble constant today.
 
     Args:
-        cosmo (:obj:`Cosmology`): Cosmological parameters.
+        cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.
         a (float or array_like): Scale factor(s), normalized to 1 today.
 
     Returns:
@@ -166,7 +166,7 @@ def luminosity_distance(cosmo, a):
     """Luminosity distance.
 
     Args:
-        cosmo (:obj:`Cosmology`): Cosmological parameters.
+        cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.
         a (float or array_like): Scale factor(s), normalized to 1 today.
 
     Returns:
@@ -178,14 +178,14 @@ def luminosity_distance(cosmo, a):
 
 
 def distance_modulus(cosmo, a):
-    """Distance Modulus, defined as 5 * log(luminosity distance / 10 pc).
+    """Distance Modulus, defined as 5 * log10(luminosity distance / 10 pc).
 
     .. note :: The distance modulus can be used to convert between apparent
                and absolute magnitudes via m = M + distance modulus, where m
                is the apparent magnitude and M is the absolute magnitude.
 
     Args:
-        cosmo (:obj:`Cosmology`): Cosmological parameters.
+        cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.
         a (float or array_like): Scale factor(s), normalized to 1 today.
 
     Returns:
@@ -200,7 +200,7 @@ def scale_factor_of_chi(cosmo, chi):
     """Scale factor, a, at a comoving radial distance chi.
 
     Args:
-        cosmo (:obj:`Cosmology`): Cosmological parameters.
+        cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.
         chi (float or array_like): Comoving radial distance(s); Mpc.
 
     Returns:
@@ -215,7 +215,7 @@ def omega_x(cosmo, a, species):
     """Density fraction of a given species at a redshift different than z=0.
 
     Args:
-        cosmo (:obj:`Cosmology`): Cosmological parameters.
+        cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.
         a (float or array_like): Scale factor(s), normalized to 1 today.
         species (string): species type. Should be one of
 
@@ -227,7 +227,7 @@ def omega_x(cosmo, a, species):
             - 'neutrinos_massive': massive neutrinos
 
     Returns:
-        float or array_like: Density fraction of a given species at a
+        float or array_like: Density fraction of a given species at a \
                              scale factor.
     """
     if species not in species_types.keys():
@@ -243,7 +243,7 @@ def rho_x(cosmo, a, species, is_comoving=False):
     """Physical or comoving density as a function of scale factor.
 
     Args:
-        cosmo (:obj:`Cosmology`): Cosmological parameters.
+        cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.
         a (float or array_like): Scale factor(s), normalized to 1 today.
         species (string): species type. Should be one of
 
@@ -276,14 +276,15 @@ def Sig_MG(cosmo, a):
     particles under modified gravity.
 
     Args:
-        cosmo (:obj:`ccl.cosmology`): Cosmological parameters.
+        cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
         a (float or array_like): Scale factor(s), normalized to 1 today.
+
     Returns:
-        Sig_MG (float or array_like): Modification to Poisson equation
-            under modified gravity at scale factor a.
-            Sig_MG is assumed to be proportional to Omega_Lambda(z),
+        float or array_like: Modification to Poisson equation under \
+            modified gravity at scale factor a. \
+            Sig_MG is assumed to be proportional to Omega_Lambda(z), \
             see e.g. Abbott et al. 2018, 1810.02499, Eq. 9.
-        """
+    """
     return _vectorize_fn(lib.Sig_MG, lib.Sig_MG_vec, cosmo, a)
 
 
@@ -292,13 +293,13 @@ def mu_MG(cosmo, a):
     gravity.
 
     Args:
-        cosmo (:obj:`ccl.cosmology`): Cosmological parameters.
+        cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.
         a (float or array_like): Scale factor(s), normalized to 1 today.
 
     Returns:
-        mu_MG (float or array_like): Modification to Poisson equation
-            under modified gravity at a scale factor.
-            mu_MG is assumed to be proportional to Omega_Lambda(z),
+        float or array_like: Modification to Poisson equation \
+            under modified gravity at a scale factor. \
+            mu_MG is assumed to be proportional to Omega_Lambda(z), \
             see e.g. Abbott et al. 2018, 1810.02499, Eq. 9.
     """
     return _vectorize_fn(lib.mu_MG, lib.mu_MG_vec, cosmo, a)

@@ -23,12 +23,13 @@ def get_camb_pk_lin(cosmo):
     """Run CAMB and return the linear power spectrum.
 
     Args:
-        cosmo (:obj:`Cosmology`): Cosmological parameters.
-            The cosmological parameters with which to run CAMB.
+        cosmo (:class:`~pyccl.core.Cosmology`): Cosmological
+            parameters. The cosmological parameters with
+            which to run CAMB.
 
     Returns:
-        pk_lin (:obj:`Pk2D`): power spectrum object
-            The linear power spectrum.
+        :class:`~pyccl.pk2d.Pk2D`: Power spectrum \
+            object. The linear power spectrum.
     """
 
     assert HAVE_CAMB, (
@@ -177,11 +178,12 @@ def get_class_pk_lin(cosmo):
     """Run CLASS and return the linear power spectrum.
 
     Args:
-        cosmo (:obj:`Cosmology`): Cosmological parameters.
-            The cosmological parameters with which to run CLASS.
+        cosmo (:class:`~pyccl.core.Cosmology`): Cosmological
+            parameters. The cosmological parameters with
+            which to run CLASS.
 
     Returns:
-        pk_lin (:obj:`Pk2D`): power spectrum object
+        :class:`~pyccl.pk2d.Pk2D`: Power spectrum object.\
             The linear power spectrum.
     """
 
