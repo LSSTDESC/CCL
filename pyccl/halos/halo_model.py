@@ -115,7 +115,7 @@ class HMCalculator(object):
     def _mbf0(self, mf, bf):
         # Returns (rho_M - \int dM * n(M) * b(M) * M) / M_min
         return (self.rho0 -
-                self.integrator(mf *bf * self.mass,
+                self.integrator(mf * bf * self.mass,
                                 self.lmass)) / self.m0
 
     def _profile_norm(self, mf, mf0, cosmo, prof,
@@ -393,7 +393,7 @@ def halomod_power_spectrum(cosmo, hmc, k, a, massfunc, hbias, prof,
             norm2 = norm1
         else:
             norm2 = hmc._profile_norm(mf, mf0, cosmo, prof2,
-                                       aa, mass_def, normprof2)
+                                      aa, mass_def, normprof2)
         norm = norm1 * norm2
 
         if get_2h:
