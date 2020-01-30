@@ -73,15 +73,17 @@ def test_parameters_nu(m_nu_type):
         m_nu_type=m_nu_type
     )
 
-    assert np.allclose(
+    if m_nu_type == 'inverted':
+        assert np.allclose(
         cosmo['m_nu'][1]**2 - cosmo['m_nu'][0]**2,
         ccl.physical_constants.DELTAM12_sq, atol=1e-4, rtol=0)
-
-    if m_nu_type == 'inverted':
         assert np.allclose(
             cosmo['m_nu'][2]**2 - cosmo['m_nu'][0]**2,
             ccl.physical_constants.DELTAM13_sq_neg, atol=1e-4, rtol=0)
     elif m_nu_type == 'normal':
+        assert np.allclose(
+        cosmo['m_nu'][1]**2 - cosmo['m_nu'][0]**2,
+        ccl.physical_constants.DELTAM12_sq, atol=1e-4, rtol=0)
         assert np.allclose(
             cosmo['m_nu'][2]**2 - cosmo['m_nu'][0]**2,
             ccl.physical_constants.DELTAM13_sq_pos, atol=1e-4, rtol=0)
