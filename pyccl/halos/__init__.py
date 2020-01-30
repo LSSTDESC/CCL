@@ -37,6 +37,14 @@ from .profiles import (  # noqa
     HaloProfilePowerLaw, HaloProfileNFW,
     HaloProfileEinasto, HaloProfileHernquist)
 
+# Halo profile 2-point cumulants
+from .profiles_2pt import (  # noqa
+    Profile2pt)
+
 # Halo model power spectrum
-from .pk_hm import (  # noqa
-    ProfileCovar, HMCalculator)
+from .halo_model import (  # noqa
+    HMCalculator,
+    halomod_mean_profile_1pt,
+    halomod_bias_1pt,
+    halomod_power_spectrum,
+    halomod_Pk2D)
