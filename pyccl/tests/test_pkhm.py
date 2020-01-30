@@ -31,7 +31,7 @@ def test_profcovar_smoke():
 
     # Covariance
     cv_NE = PKC.fourier_covar(P1, COSMO, KK, MM, AA,
-                              prof_2=P2, mass_def=M200)
+                              prof2=P2, mass_def=M200)
     assert np.all(np.fabs((cv_NE - uk_NFW * uk_EIN)) < 1E-10)
 
 
@@ -39,12 +39,12 @@ def test_profcovar_errors():
     # Wrong first profile
     with pytest.raises(TypeError):
         PKC.fourier_covar(None, COSMO, KK, MM, AA,
-                          prof_2=None, mass_def=M200)
+                          prof2=None, mass_def=M200)
 
     # Wrong second profile
     with pytest.raises(TypeError):
         PKC.fourier_covar(P1, COSMO, KK, MM, AA,
-                          prof_2=M200, mass_def=M200)
+                          prof2=M200, mass_def=M200)
 
 
 def smoke_assert_pkhm_real(func):
@@ -75,7 +75,7 @@ def smoke_assert_pkhm_real(func):
 
 @pytest.mark.parametrize('norm', [True, False])
 def test_pkhm_mean_profile_smoke(norm):
-    hmc = ccl.halos.HMCalculator(COSMO, nl10M=2)
+    hmc = ccl.halos.HMCalculator(COSMO, nlog10M=2)
 
     def f(k, a):
         return hmc.mean_profile(COSMO, k, a, HMF,
@@ -86,7 +86,7 @@ def test_pkhm_mean_profile_smoke(norm):
 
 @pytest.mark.parametrize('norm', [True, False])
 def test_pkhm_bias_smoke(norm):
-    hmc = ccl.halos.HMCalculator(COSMO, nl10M=2)
+    hmc = ccl.halos.HMCalculator(COSMO, nlog10M=2)
 
     def f(k, a):
         return hmc.bias(COSMO, k, a, HMF, HBF, P1,
@@ -126,15 +126,15 @@ def test_pkhm_bias_smoke(norm):
                            'pk': 'linear', 'h1': True,
                            'h2': True, 'p2': P2}])
 def test_pkhm_pk_smoke(pars):
-    hmc = ccl.halos.HMCalculator(COSMO, nl10M=2)
+    hmc = ccl.halos.HMCalculator(COSMO, nlog10M=2)
 
     def f(k, a):
         return hmc.pk(COSMO, k, a, HMF, HBF, P1,
                       covprof=pars['cv'],
-                      normprof_1=pars['norm'],
-                      normprof_2=pars['norm'],
+                      normprof1=pars['norm'],
+                      normprof2=pars['norm'],
                       p_of_k_a=pars['pk'],
-                      prof_2=pars['p2'],
+                      prof2=pars['p2'],
                       mass_def=M200,
                       get_1h=pars['h1'],
                       get_2h=pars['h2'])
@@ -147,13 +147,13 @@ def test_pkhm_pk2d():
     a_arr = np.linspace(0.1, 1, 10)
     pk_arr = hmc.pk(COSMO, k_arr, a_arr,
                     HMF, HBF, P1, mass_def=M200,
-                    normprof_1=True,
-                    normprof_2=True)
+                    normprof1=True,
+                    normprof2=True)
 
     # Input sampling
     pk2d = hmc.get_Pk2D(COSMO, HMF, HBF, P1,
                         mass_def=M200, lk_arr=np.log(k_arr),
-                        a_arr=a_arr, normprof_1=True)
+                        a_arr=a_arr, normprof1=True)
     pk_arr_2 = np.array([pk2d.eval(k_arr, a, COSMO)
                          for a in a_arr])
     assert np.all(np.fabs((pk_arr / pk_arr_2 - 1)).flatten()
@@ -161,7 +161,7 @@ def test_pkhm_pk2d():
 
     # Standard sampling
     pk2d = hmc.get_Pk2D(COSMO, HMF, HBF, P1,
-                        mass_def=M200, normprof_1=True)
+                        mass_def=M200, normprof1=True)
     pk_arr_2 = np.array([pk2d.eval(k_arr, a, COSMO)
                          for a in a_arr])
     assert np.all(np.fabs((pk_arr / pk_arr_2 - 1)).flatten()
@@ -191,7 +191,7 @@ def test_pkhm_errors():
     # Wrong prof2
     with pytest.raises(TypeError):
         hmc.pk(COSMO, KK, AA, HMF, HBF, P1,
-               prof_2=KK)
+               prof2=KK)
 
     # Wrong covprof
     with pytest.raises(TypeError):

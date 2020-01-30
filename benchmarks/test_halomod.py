@@ -44,7 +44,7 @@ def test_halomod(model):
     pk = data_z0[:, -1] / (cosmo['h']**3)
     pk_ccl = hmc.pk(cosmo, k, 1./(1+z),
                     hmf, hbf, prf, mass_def=mass_def,
-                    normprof_1=True)
+                    normprof1=True)
     tol = pk * HALOMOD_TOLERANCE
     err = np.abs(pk_ccl - pk)
     assert np.all(err <= tol)
@@ -54,7 +54,7 @@ def test_halomod(model):
     pk = data_z1[:, -1] / (cosmo['h']**3)
     pk_ccl = hmc.pk(cosmo, k, 1./(1+z),
                     hmf, hbf, prf, mass_def=mass_def,
-                    normprof_1=True)
+                    normprof1=True)
     tol = pk * HALOMOD_TOLERANCE
     err = np.abs(pk_ccl - pk)
     assert np.all(err <= tol)
