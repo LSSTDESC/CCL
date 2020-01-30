@@ -22,7 +22,7 @@ class ProfileCovar(object):
         pass
 
     def fourier_covar(self, prof, cosmo, k, M, a,
-                      prof_2=None, mass_def=None):
+                      prof2=None, mass_def=None):
         """ Returns the Fourier-space two-point moment between
         two profiles:
 
@@ -37,10 +37,10 @@ class ProfileCovar(object):
             k (float or array_like): comoving wavenumber in Mpc^-1.
             M (float or array_like): halo mass in units of M_sun.
             a (float): scale factor.
-            prof_2 (:class:`~pyccl.halos.profiles.HaloProfile`):
+            prof2 (:class:`~pyccl.halos.profiles.HaloProfile`):
                 second halo profile for which the second-order moment
                 is desired. If `None`, the assumption is that you want
-                an auto-correlation, and `prof` will be used as `prof_2`.
+                an auto-correlation, and `prof` will be used as `prof2`.
             mass_def (:obj:`~pyccl.halos.massdef.MassDef`): a mass
                 definition object.
 
@@ -55,14 +55,14 @@ class ProfileCovar(object):
             raise TypeError("prof must be of type `HaloProfile`")
         uk1 = prof.fourier(cosmo, k, M, a, mass_def=mass_def)
 
-        if prof_2 is None:
+        if prof2 is None:
             uk2 = uk1
         else:
-            if not isinstance(prof_2, HaloProfile):
-                raise TypeError("prof_2 must be of type "
+            if not isinstance(prof2, HaloProfile):
+                raise TypeError("prof2 must be of type "
                                 "`HaloProfile` or `None`")
 
-            uk2 = prof_2.fourier(cosmo, k, M, a, mass_def=mass_def)
+            uk2 = prof2.fourier(cosmo, k, M, a, mass_def=mass_def)
 
         return uk1 * uk2
 
@@ -80,13 +80,13 @@ class HMCalculator(object):
 
     Args:
         cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
-        l10M_min (float): logarithmic mass (in units of solar mass)
+        log10M_min (float): logarithmic mass (in units of solar mass)
             corresponding to the lower bound of the integrals in
             mass. Default: 8.
-        l10M_max (float): logarithmic mass (in units of solar mass)
+        log10M_max (float): logarithmic mass (in units of solar mass)
             corresponding to the upper bound of the integrals in
             mass. Default: 16.
-        nl10M (int): number of samples in log(Mass) to be used in
+        nlog10M (int): number of samples in log(Mass) to be used in
             the mass integrals. Default: 128.
         integration_method_M (string): integration method to use
             in the mass integrals. Options: "simpson" and "spline".
@@ -97,17 +97,18 @@ class HMCalculator(object):
             determines what is considered a "very large" scale.
             Default: 1E-5.
     """
-    def __init__(self, cosmo, **kwargs):
+    def __init__(self, cosmo, log10M_min=8., log10M_max=16.,
+                 nlog10M=128, integration_method_M='simpson',
+                 k_min=1E-5):
         self.rho0 = rho_x(cosmo, 1., 'matter', is_comoving=True)
-        self.precision = {'l10M_min': 8.,
-                          'l10M_max': 16.,
-                          'nl10M': 128,
-                          'integration_method_M': 'simpson',
-                          'k_min': 1E-5}
-        self.precision.update(kwargs)
-        self.lmass = np.linspace(self.precision['l10M_min'],
-                                 self.precision['l10M_max'],
-                                 self.precision['nl10M'])
+        self.precision = {'log10M_min': log10M_min,
+                          'log10M_max': log10M_max,
+                          'nlog10M': nlog10M,
+                          'integration_method_M': integration_method_M,
+                          'k_min': k_min}
+        self.lmass = np.linspace(self.precision['log10M_min'],
+                                 self.precision['log10M_max'],
+                                 self.precision['nlog10M'])
         self.mass = 10.**self.lmass
         self.m0 = self.mass[0]
 
@@ -313,8 +314,8 @@ class HMCalculator(object):
         return out
 
     def pk(self, cosmo, k, a, massfunc, hbias, prof,
-           covprof=None, prof_2=None, p_of_k_a=None,
-           normprof_1=False, normprof_2=False,
+           covprof=None, prof2=None, p_of_k_a=None,
+           normprof1=False, normprof2=False,
            mass_def=None, get_1h=True, get_2h=True):
         """ Computes the halo model power spectrum for two
         quantities defined by their respective halo profiles.
@@ -352,20 +353,20 @@ class HMCalculator(object):
                 being correlated. If `None`, the default second moment
                 will be used, corresponding to the products of the means
                 of both profiles.
-            prof_2 (:class:`~pyccl.halos.profiles.HaloProfile`): a
+            prof2 (:class:`~pyccl.halos.profiles.HaloProfile`): a
                 second halo profile. If `None`, `prof` will be used as
-                `prof_2`.
+                `prof2`.
             p_of_k_a (:class:`~pyccl.pk2d.Pk2D`): a `Pk2D` object to
                 be used as the linear matter power spectrum. If `None`,
                 the power spectrum stored within `cosmo` will be used.
-            normprof_1 (bool): if `True`, this integral will be
+            normprof1 (bool): if `True`, this integral will be
                 normalized by :math:`I^1_0(k\\rightarrow 0,a|u)`
                 (see :meth:`~HMCalculator.mean_profile`), where
                 :math:`u` is the profile represented by `prof`.
-            normprof_2 (bool): if `True`, this integral will be
+            normprof2 (bool): if `True`, this integral will be
                 normalized by :math:`I^1_0(k\\rightarrow 0,a|v)`
                 (see :meth:`~HMCalculator.mean_profile`), where
-                :math:`v` is the profile represented by `prof_2`.
+                :math:`v` is the profile represented by `prof2`.
             mass_def (:class:`~pyccl.halos.massdef.MassDef`): a mass
                 definition object.
             get_1h (bool): if `False`, the 1-halo term (i.e. the first
@@ -387,8 +388,8 @@ class HMCalculator(object):
         self._check_massfunc(massfunc)
         self._check_hbias(hbias)
         self._check_prof(prof)
-        if (prof_2 is not None) and (not isinstance(prof_2, HaloProfile)):
-            raise TypeError("prof_2 must be of type `HaloProfile` or `None`")
+        if (prof2 is not None) and (not isinstance(prof2, HaloProfile)):
+            raise TypeError("prof2 must be of type `HaloProfile` or `None`")
         if covprof is None:
             covprof = ProfileCovar()
         elif not isinstance(covprof, ProfileCovar):
@@ -415,7 +416,7 @@ class HMCalculator(object):
                                    self.lmass)) / self.m0
 
             # Compute normalization
-            if normprof_1:
+            if normprof1:
                 uk01 = prof.fourier(cosmo,
                                     self.precision['k_min'],
                                     self.mass, aa,
@@ -423,11 +424,11 @@ class HMCalculator(object):
                 norm1 = 1. / self._u_k_from_arrays(mf, mf0, uk01)
             else:
                 norm1 = 1.
-            if prof_2 is None:
+            if prof2 is None:
                 norm2 = norm1
             else:
-                if normprof_2:
-                    uk02 = prof_2.fourier(cosmo,
+                if normprof2:
+                    uk02 = prof2.fourier(cosmo,
                                           self.precision['k_min'],
                                           self.mass, aa,
                                           mass_def=mass_def).T
@@ -447,10 +448,10 @@ class HMCalculator(object):
                 bk_1 = self._b_k_from_arrays(mf, bf, mbf0, uk_1)
 
                 # Compute second bias factor
-                if prof_2 is None:
+                if prof2 is None:
                     bk_2 = bk_1
                 else:
-                    uk_2 = prof_2.fourier(cosmo, k_use, self.mass, aa,
+                    uk_2 = prof2.fourier(cosmo, k_use, self.mass, aa,
                                           mass_def=mass_def).T
                     bk_2 = self._b_k_from_arrays(mf, bf, mbf0, uk_2)
 
@@ -463,7 +464,7 @@ class HMCalculator(object):
                 # 1-halo term
                 uk2 = covprof.fourier_covar(prof, cosmo, k_use,
                                             self.mass, aa,
-                                            prof_2=prof_2,
+                                            prof2=prof2,
                                             mass_def=mass_def).T
                 pk_1h = self._u_k_from_arrays(mf, mf0, uk2)
             else:
@@ -479,8 +480,8 @@ class HMCalculator(object):
         return out
 
     def get_Pk2D(self, cosmo, massfunc, hbias, prof,
-                 covprof=None, prof_2=None, p_of_k_a=None,
-                 normprof_1=False, normprof_2=False,
+                 covprof=None, prof2=None, p_of_k_a=None,
+                 normprof1=False, normprof2=False,
                  mass_def=None, get_1h=True, get_2h=True,
                  lk_arr=None, a_arr=None,
                  extrap_order_lok=1, extrap_order_hik=2):
@@ -502,20 +503,20 @@ class HMCalculator(object):
                 being correlated. If `None`, the default second moment
                 will be used, corresponding to the products of the means
                 of both profiles.
-            prof_2 (:class:`~pyccl.halos.profiles.HaloProfile`): a
+            prof2 (:class:`~pyccl.halos.profiles.HaloProfile`): a
                 second halo profile. If `None`, `prof` will be used as
-                `prof_2`.
+                `prof2`.
             p_of_k_a (:class:`~pyccl.pk2d.Pk2D`): a `Pk2D` object to
                 be used as the linear matter power spectrum. If `None`,
                 the power spectrum stored within `cosmo` will be used.
-            normprof_1 (bool): if `True`, this integral will be
+            normprof1 (bool): if `True`, this integral will be
                 normalized by :math:`I^1_0(k\\rightarrow 0,a|u)`
                 (see :meth:`~HMCalculator.mean_profile`), where
                 :math:`u` is the profile represented by `prof`.
-            normprof_2 (bool): if `True`, this integral will be
+            normprof2 (bool): if `True`, this integral will be
                 normalized by :math:`I^1_0(k\\rightarrow 0,a|v)`
                 (see :meth:`~HMCalculator.mean_profile`), where
-                :math:`v` is the profile represented by `prof_2`.
+                :math:`v` is the profile represented by `prof2`.
             mass_def (:class:`~pyccl.halos.massdef.MassDef`): a mass
                 definition object.
             get_1h (bool): if `False`, the 1-halo term (i.e. the first
@@ -558,8 +559,8 @@ class HMCalculator(object):
 
         pk_arr = self.pk(cosmo, np.exp(lk_arr), a_arr,
                          massfunc, hbias, prof, covprof=covprof,
-                         prof_2=prof_2, p_of_k_a=p_of_k_a,
-                         normprof_1=normprof_1, normprof_2=normprof_2,
+                         prof2=prof2, p_of_k_a=p_of_k_a,
+                         normprof1=normprof1, normprof2=normprof2,
                          mass_def=mass_def, get_1h=get_1h, get_2h=get_2h)
 
         pk2d = Pk2D(a_arr=a_arr, lk_arr=lk_arr, pk_arr=pk_arr,
