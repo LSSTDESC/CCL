@@ -429,9 +429,9 @@ class HMCalculator(object):
             else:
                 if normprof2:
                     uk02 = prof2.fourier(cosmo,
-                                          self.precision['k_min'],
-                                          self.mass, aa,
-                                          mass_def=mass_def).T
+                                         self.precision['k_min'],
+                                         self.mass, aa,
+                                         mass_def=mass_def).T
                     norm2 = 1. / self._u_k_from_arrays(mf, mf0, uk02)
                 else:
                     norm2 = 1.
@@ -452,7 +452,7 @@ class HMCalculator(object):
                     bk_2 = bk_1
                 else:
                     uk_2 = prof2.fourier(cosmo, k_use, self.mass, aa,
-                                          mass_def=mass_def).T
+                                         mass_def=mass_def).T
                     bk_2 = self._b_k_from_arrays(mf, bf, mbf0, uk_2)
 
                 # Compute power spectrum
