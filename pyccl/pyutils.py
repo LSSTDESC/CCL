@@ -22,9 +22,10 @@ def check(status, cosmo=None):
     """Check the status returned by a ccllib function.
 
     Args:
-        status (int or :obj:`core.error_types`): Flag or error describing the
-                                                 success of a function.
-        cosmo (:obj:`Cosmology`, optional): A Cosmology object.
+        status (int or :obj:`~pyccl.core.error_types`):
+            Flag or error describing the success of a function.
+        cosmo (:class:`~pyccl.core.Cosmology`, optional):
+            A Cosmology object.
     """
     # Check for normal status (no action required)
     if status == 0:

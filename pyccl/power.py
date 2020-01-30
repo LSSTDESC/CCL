@@ -8,7 +8,7 @@ def linear_matter_power(cosmo, k, a):
     """The linear matter power spectrum; Mpc^3.
 
     Args:
-        cosmo (:obj:`Cosmology`): Cosmological parameters.
+        cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.
         k (float or array_like): Wavenumber; Mpc^-1.
         a (float): Scale factor.
 
@@ -24,7 +24,7 @@ def nonlin_matter_power(cosmo, k, a):
     """The nonlinear matter power spectrum; Mpc^3.
 
     Args:
-        cosmo (:obj:`Cosmology`): Cosmological parameters.
+        cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.
         k (float or array_like): Wavenumber; Mpc^-1.
         a (float): Scale factor.
 
@@ -41,7 +41,7 @@ def sigmaM(cosmo, M, a):
     spectrum; Msun.
 
     Args:
-        cosmo (:obj:`Cosmology`): Cosmological parameters.
+        cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.
         M (float or array_like): Halo masses; Msun.
         a (float): scale factor.
 
@@ -65,13 +65,13 @@ def sigmaR(cosmo, R, a=1.):
     """RMS variance in a top-hat sphere of radius R in Mpc.
 
     Args:
-        cosmo (:obj:`Cosmology`): Cosmological parameters.
+        cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.
         R (float or array_like): Radius; Mpc.
         a (float): optional scale factor; defaults to a=1
 
     Returns:
-        float or array_like: RMS variance in the density field in top-hat
-                             sphere; Mpc.
+        float or array_like: RMS variance in the density field in top-hat \
+            sphere; Mpc.
     """
     cosmo.compute_linear_power()
     return _vectorize_fn2(lib.sigmaR, lib.sigmaR_vec, cosmo, R, a)
@@ -82,13 +82,13 @@ def sigmaV(cosmo, R, a=1.):
     The linear displacement field is the gradient of the linear density field.
 
     Args:
-        cosmo (:obj:`Cosmology`): Cosmological parameters.
+        cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.
         R (float or array_like): Radius; Mpc.
         a (float): optional scale factor; defaults to a=1
 
     Returns:
-        sigmaV (float or array_like): RMS variance in the displacement field in
-                                      top-hat sphere.
+        sigmaV (float or array_like): RMS variance in the displacement field \
+            in top-hat sphere.
     """
     cosmo.compute_linear_power()
     return _vectorize_fn2(lib.sigmaV, lib.sigmaV_vec, cosmo, R, a)
@@ -97,10 +97,11 @@ def sigmaV(cosmo, R, a=1.):
 def sigma8(cosmo):
     """RMS variance in a top-hat sphere of radius 8 Mpc/h.
 
-    .. note:: 8 Mpc/h is rescaled based on the Hubble constant.
+    .. note:: 8 Mpc/h is rescaled based on the chosen value of the Hubble
+              constant within `cosmo`.
 
     Args:
-        cosmo (:obj:`Cosmology`): Cosmological parameters.
+        cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.
 
     Returns:
         float: RMS variance in top-hat sphere of radius 8 Mpc/h.

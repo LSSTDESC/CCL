@@ -17,7 +17,7 @@ def get_density_kernel(cosmo, dndz):
     redshift distribution.
 
     Args:
-        cosmo (:obj:`Cosmology`): cosmology object used to
+        cosmo (:class:`~pyccl.core.Cosmology`): cosmology object used to
             transform redshifts into distances.
         dndz (tulple of arrays): A tuple of arrays (z, N(z))
             giving the redshift distribution of the objects.
@@ -50,7 +50,7 @@ def get_lensing_kernel(cosmo, dndz, mag_bias=None):
     kernel (or the magnification one if `mag_bias` is not `None`).
 
     Args:
-        cosmo (:obj:`Cosmology`): cosmology object used to
+        cosmo (:class:`~pyccl.core.Cosmology`): cosmology object used to
             transform redshifts into distances.
         dndz (tulple of arrays): A tuple of arrays (z, N(z))
             giving the redshift distribution of the objects.
@@ -93,7 +93,7 @@ def get_kappa_kernel(cosmo, z_source, nsamples):
     CMB-lensing-like tracers.
 
     Args:
-        cosmo (:obj:`Cosmology`): Cosmology object.
+        cosmo (:class:`~pyccl.core.Cosmology`): Cosmology object.
         z_source (float): Redshift of source plane for CMB lensing.
         nsamples (int): number of samples over which the kernel
             is desired. These will be equi-spaced in radial distance.
@@ -147,14 +147,14 @@ class Tracer(object):
 
     def get_dndz(self, z):
         """Get the redshift distribution for this tracer.
-        Only available for some tracers (`NumberCountsTracer` and
-        `WeakLensingTracer`).
+        Only available for some tracers (:class:`NumberCountsTracer` and
+        :class:`WeakLensingTracer`).
 
         Args:
             z (float or array_like): redshift values.
 
         Returns:
-            array_like: redshift distribution evaluated at the
+            array_like: redshift distribution evaluated at the \
                 input values of `z`.
         """
         return self._dndz(z)
@@ -168,10 +168,11 @@ class Tracer(object):
                 radial distance in increasing order and in Mpc.
 
         Returns:
-            array_like: list of radial kernels for each tracer.
-                The shape will be `(n_tracer, chi.size)`, where
-                `n_tracer` is the number of tracers. The last dimension
-                will be squeezed if the input is a scalar.
+            array_like: list of radial kernels for each tracer. \
+                The shape will be `(n_tracer, chi.size)`, where \
+                `n_tracer` is the number of tracers. The last \
+                dimension will be squeezed if the input is a \
+                scalar.
         """
         if not hasattr(self, '_trc'):
             return []
@@ -199,10 +200,11 @@ class Tracer(object):
             ell (float or array_like): angular multipole values.
 
         Returns:
-            array_like: list of prefactors for each tracer.
-                The shape will be `(n_tracer, ell.size)`, where
-                `n_tracer` is the number of tracers. The last dimension
-                will be squeezed if the input is a scalar.
+            array_like: list of prefactors for each tracer. \
+                The shape will be `(n_tracer, ell.size)`, where \
+                `n_tracer` is the number of tracers. The last \
+                dimension will be squeezed if the input is a \
+                scalar.
         """
         if not hasattr(self, '_trc'):
             return []
@@ -230,13 +232,13 @@ class Tracer(object):
             lk (float or array_like): values of the natural logarithm of
                 the wave number (in units of inverse Mpc) in increasing
                 order.
-             a (float or array_like): values of the scale factor.
+            a (float or array_like): values of the scale factor.
 
         Returns:
-            array_like: list of transfer functions for each tracer.
-                The shape will be `(n_tracer, lk.size, a.size)`, where
-                `n_tracer` is the number of tracers. The other dimensions
-                will be squeezed if the inputs are scalars.
+            array_like: list of transfer functions for each tracer. \
+                The shape will be `(n_tracer, lk.size, a.size)`, where \
+                `n_tracer` is the number of tracers. The other \
+                dimensions will be squeezed if the inputs are scalars.
         """
         if not hasattr(self, '_trc'):
             return []
@@ -281,7 +283,7 @@ class Tracer(object):
         """Adds one more tracer to the list contained in this `Tracer`.
 
         Args:
-            cosmo (:obj:`Cosmology`): cosmology object.
+            cosmo (:class:`~pyccl.core.Cosmology`): cosmology object.
             kernel (tulple of arrays, optional): A tuple of arrays
                 (`chi`, `w_chi`) describing the radial kernel of this
                 tracer. `chi` should contain values of the comoving
@@ -414,7 +416,7 @@ class NumberCountsTracer(Tracer):
     magnification.
 
     Args:
-        cosmo (:obj:`Cosmology`): Cosmology object.
+        cosmo (:class:`~pyccl.core.Cosmology`): Cosmology object.
         has_rsd (bool): Flag for whether the tracer has a
             redshift-space distortion term.
         dndz (tuple of arrays): A tuple of arrays (z, N(z))
@@ -473,7 +475,7 @@ class WeakLensingTracer(Tracer):
     lensing shear and intrinsic alignments within the L-NLA model.
 
     Args:
-        cosmo (:obj:`Cosmology`): Cosmology object.
+        cosmo (:class:`~pyccl.core.Cosmology`): Cosmology object.
         dndz (tuple of arrays): A tuple of arrays (z, N(z))
             giving the redshift distribution of the objects. The units are
             arbitrary; N(z) will be normalized to unity.
@@ -521,7 +523,7 @@ class CMBLensingTracer(Tracer):
     """A Tracer for CMB lensing.
 
     Args:
-        cosmo (:obj:`Cosmology`): Cosmology object.
+        cosmo (:class:`~pyccl.core.Cosmology`): Cosmology object.
         z_source (float): Redshift of source plane for CMB lensing.
         nsamples (int, optional): number of samples over which the kernel
             is desired. These will be equi-spaced in radial distance.

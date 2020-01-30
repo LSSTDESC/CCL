@@ -8,16 +8,21 @@ import numpy as np
 class MassFunc(object):
     """ This class enables the calculation of halo mass functions.
     We currently assume that all mass functions can be written as
-    dn/dM = f(sigma_M) * rho_matter * d(log sigma_M)/d(log10 M) / M
-    where sigma_M^2 is the overdensity variance on spheres with a
+
+    .. math::
+        \\frac{dn}{d\\log_{10}M} = f(\\sigma_M)\\,\\frac{\\rho_M}{M}\\,
+        \\frac{d\\log \\sigma_M}{d\\log_{10} M}
+
+    where :math:`\\sigma_M^2` is the overdensity variance on spheres with a
     radius given by the Lagrangian radius for mass M.
     All sub-classes implementing specific mass function parametrizations
     can therefore be simply created by replacing this class'
-    _get_fsigma method.
+    `_get_fsigma` method.
 
     Args:
-        cosmo (:obj:`Cosmology`): A Cosmology object.
-        mass_def (:obj:`MassDef`): a mass definition object that fixes
+        cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
+        mass_def (:class:`~pyccl.halos.massdef.MassDef`):
+            a mass definition object that fixes
             the mass definition used by this mass function
             parametrization.
     """
@@ -51,7 +56,7 @@ class MassFunc(object):
         constructor call.
 
         Args:
-            cosmo (:obj:`Cosmology`): A Cosmology object.
+            cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
         """
         pass
 
@@ -62,10 +67,11 @@ class MassFunc(object):
         start of the constructor call.
 
         Args:
-            mdef (:obj:`MassDef`): a mass definition object.
+            mdef (:class:`~pyccl.halos.massdef.MassDef`):
+                a mass definition object.
 
         Returns:
-            bool: True if the mass definition is not compatible with
+            bool: True if the mass definition is not compatible with \
                 this mass function parametrization. False otherwise.
         """
         return False
@@ -76,14 +82,15 @@ class MassFunc(object):
         this object.
 
         Args:
-            cosmo (:obj:`Cosmology`): A Cosmology object.
+            cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
             M (float or array_like): halo mass in units of M_sun.
             a (float): scale factor.
-            mdef_other (:obj:`MassDef`): a mass definition object.
+            mdef_other (:class:`~pyccl.halos.massdef.MassDef`):
+                a mass definition object.
 
         Returns:
-            float or array_like: mass according to this object's
-            mass definition.
+            float or array_like: mass according to this object's \
+                mass definition.
         """
         if mdef_other is not None:
             M_use = mdef_other.translate_mass(cosmo, M, a, self.mdef)
@@ -95,15 +102,15 @@ class MassFunc(object):
         """ Returns the mass function for input parameters.
 
         Args:
-            cosmo (:obj:`Cosmology`): A Cosmology object.
+            cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
             M (float or array_like): halo mass in units of M_sun.
             a (float): scale factor.
-            mdef_other (:obj:`MassDef`): the mass definition object
-                that defines M.
+            mdef_other (:class:`~pyccl.halos.massdef.MassDef`):
+                the mass definition object that defines M.
 
         Returns:
-            float or array_like: mass function d(n)/d(log10(M))
-                in units of Mpc^-3.
+            float or array_like: mass function \
+                :math:`dn/d\\log_{10}M` in units of Mpc^-3.
         """
         M_use = np.atleast_1d(M)
         logM = self._get_consistent_mass(cosmo, M_use,
@@ -129,11 +136,11 @@ class MassFunc(object):
         return mf
 
     def _get_fsigma(self, cosmo, sigM, a, lnM):
-        """ Get the f(sigma_M) function for this mass function
+        """ Get the :math:`f(\\sigma_M)` function for this mass function
         object (see description of this class for details).
 
         Args:
-            cosmo (:obj:`Cosmology`): A Cosmology object.
+            cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
             sigM (float or array_like): standard deviation in the
                 overdensity field on the scale of this halo.
             a (float): scale factor.
@@ -143,7 +150,7 @@ class MassFunc(object):
                 parametrizations).
 
         Returns:
-            float or array_like: f(sigma_M) function.
+            float or array_like: :math:`f(\\sigma_M)` function.
         """
         raise NotImplementedError("Use one of the non-default "
                                   "MassFunction classes")
@@ -154,8 +161,9 @@ class MassFuncPress74(MassFunc):
     This parametrization is only valid for 'fof' masses.
 
     Args:
-        cosmo (:obj:`Cosmology`): A Cosmology object.
-        mass_def (:obj:`MassDef`): a mass definition object.
+        cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
+        mass_def (:class:`~pyccl.halos.massdef.MassDef`):
+            a mass definition object.
             this parametrization accepts FoF masses only.
             If `None`, FoF masses will be used.
     """
@@ -188,8 +196,9 @@ class MassFuncSheth99(MassFunc):
     This parametrization is only valid for 'fof' masses.
 
     Args:
-        cosmo (:obj:`Cosmology`): A Cosmology object.
-        mass_def (:obj:`MassDef`): a mass definition object.
+        cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
+        mass_def (:class:`~pyccl.halos.massdef.MassDef`):
+            a mass definition object.
             this parametrization accepts FoF masses only.
             If `None`, FoF masses will be used.
     """
@@ -225,8 +234,9 @@ class MassFuncJenkins01(MassFunc):
     This parametrization is only valid for 'fof' masses.
 
     Args:
-        cosmo (:obj:`Cosmology`): A Cosmology object.
-        mass_def (:obj:`MassDef`): a mass definition object.
+        cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
+        mass_def (:class:`~pyccl.halos.massdef.MassDef`):
+            a mass definition object.
             this parametrization accepts FoF masses only.
             If `None`, FoF masses will be used.
     """
@@ -257,8 +267,9 @@ class MassFuncTinker08(MassFunc):
     """ Implements mass function described in arXiv:0803.2706.
 
     Args:
-        cosmo (:obj:`Cosmology`): A Cosmology object.
-        mass_def (:obj:`MassDef`): a mass definition object.
+        cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
+        mass_def (:class:`~pyccl.halos.massdef.MassDef`):
+            a mass definition object.
             this parametrization accepts SO masses with
             200 < Delta < 3200 with respect to the matter density.
             If `None`, Delta = 200 (matter) will be used.
@@ -312,8 +323,9 @@ class MassFuncDespali16(MassFunc):
     """ Implements mass function described in arXiv:1507.05627.
 
     Args:
-        cosmo (:obj:`Cosmology`): A Cosmology object.
-        mass_def (:obj:`MassDef`): a mass definition object.
+        cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
+        mass_def (:class:`~pyccl.halos.massdef.MassDef`):
+            a mass definition object.
             this parametrization accepts any SO masses.
             If `None`, Delta = 200 (matter) will be used.
     """
@@ -366,8 +378,9 @@ class MassFuncTinker10(MassFunc):
     """ Implements mass function described in arXiv:1001.3162.
 
     Args:
-        cosmo (:obj:`Cosmology`): A Cosmology object.
-        mass_def (:obj:`MassDef`): a mass definition object.
+        cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
+        mass_def (:class:`~pyccl.halos.massdef.MassDef`):
+            a mass definition object.
             this parametrization accepts SO masses with
             200 < Delta < 3200 with respect to the matter density.
             If `None`, Delta = 200 (matter) will be used.
@@ -429,8 +442,9 @@ class MassFuncBocquet16(MassFunc):
     """ Implements mass function described in arXiv:1502.07357.
 
     Args:
-        cosmo (:obj:`Cosmology`): A Cosmology object.
-        mass_def (:obj:`MassDef`): a mass definition object.
+        cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
+        mass_def (:class:`~pyccl.halos.massdef.MassDef`):
+            a mass definition object.
             this parametrization accepts SO masses with
             Delta = 200 (matter, critical) and 500 (critical).
             If `None`, Delta = 200 (matter) will be used.
@@ -568,8 +582,9 @@ class MassFuncWatson13(MassFunc):
     """ Implements mass function described in arXiv:1212.0095.
 
     Args:
-        cosmo (:obj:`Cosmology`): A Cosmology object.
-        mass_def (:obj:`MassDef`): a mass definition object.
+        cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
+        mass_def (:class:`~pyccl.halos.massdef.MassDef`):
+            a mass definition object.
             this parametrization accepts fof and any SO masses.
             If `None`, Delta = 200 (matter) will be used.
     """
@@ -630,8 +645,9 @@ class MassFuncAngulo12(MassFunc):
     This parametrization is only valid for 'fof' masses.
 
     Args:
-        cosmo (:obj:`Cosmology`): A Cosmology object.
-        mass_def (:obj:`MassDef`): a mass definition object.
+        cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
+        mass_def (:class:`~pyccl.halos.massdef.MassDef`):
+            a mass definition object.
             this parametrization accepts FoF masses only.
             If `None`, FoF masses will be used.
     """
