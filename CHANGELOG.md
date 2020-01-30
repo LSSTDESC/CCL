@@ -7,7 +7,7 @@
 - Functionality to resample 1D arrays including extrapolation (#720).
 - Methods to retrieve internal tracer functions (#713).
 - Improved implementation of halo model quantities (n(M), b(M), c(M)) (#668, #655, #656, #657, #636).
-- Add straightforward single massive neutrino option.
+- Add straightforward single massive neutrino option (#730).
 
 ## C library
 - Added a "spline" integration method to carry out Limber integrals.
