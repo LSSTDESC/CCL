@@ -106,6 +106,33 @@ class HMCalculator(object):
                              self.lmass)
         return i1 + hmf0 * uk_a[..., 0]
 
+    def _mf0(self, mf):
+        # Returns (rho_M - \int dM * n(M) * M) / M_min
+        return (self.rho0 -
+                self.integrator(mf * self.mass,
+                                self.lmass)) / self.m0
+
+    def _mbf0(self, mf, bf):
+        # Returns (rho_M - \int dM * n(M) * b(M) * M) / M_min
+        return (self.rho0 -
+                self.integrator(mf *bf * self.mass,
+                                self.lmass)) / self.m0
+
+    def _profile_norm(self, mf, mf0, cosmo, prof,
+                      aa, mass_def, normprof):
+        if normprof:
+            # Computes [ \int dM * n(M) * <u(k->0|M)> ]^{-1}
+            uk01 = self._eval_profile(cosmo, prof,
+                                      self.precision['k_min'],
+                                      aa, mass_def=mass_def)
+            norm = 1. / self._I_0_1_from_arrays(mf, mf0, uk01)
+        else:
+            norm = 1.
+        return norm
+
+    def _eval_profile(self, cosmo, prof, k, a, mass_def):
+        return prof.fourier(cosmo, k, self.mass, a, mass_def=mass_def).T
+
     def _check_massfunc(self, massfunc):
         if not isinstance(massfunc, MassFunc):
             raise TypeError("massfunc must be of type `MassFunc`")
@@ -162,20 +189,16 @@ def halomod_mean_profile_1pt(cosmo, hmc, k, a, massfunc, prof,
     nk = len(k_use)
     out = np.zeros([na, nk])
     for ia, aa in enumerate(a_use):
+        # Evaluate mass function
         mf = hmc._hmf(massfunc, cosmo, aa, mass_def=mass_def)
-        mf0 = (hmc.rho0 -
-               hmc.integrator(mf * hmc.mass,
-                              hmc.lmass)) / hmc.m0
-        uk = prof.fourier(cosmo, k_use, hmc.mass, aa,
-                          mass_def=mass_def).T
-        if normprof:
-            uk0 = prof.fourier(cosmo,
-                               hmc.precision['k_min'],
-                               hmc.mass, aa,
-                               mass_def=mass_def).T
-            norm = 1. / hmc._I_0_1_from_arrays(mf, mf0, uk0)
-        else:
-            norm = 1.
+        # Evaluate offset for mass function integral
+        mf0 = hmc._mf0(mf)
+        # Evaluate profile
+        uk = hmc._eval_profile(cosmo, prof, k_use, aa, mass_def)
+        # Compute profile normalization
+        norm = hmc._profile_norm(mf, mf0, cosmo, prof, aa,
+                                 mass_def, normprof)
+        # Compute integral
         out[ia, :] = hmc._I_0_1_from_arrays(mf, mf0, uk) * norm
 
     if np.ndim(a) == 0:
@@ -234,24 +257,21 @@ def halomod_bias_1pt(cosmo, hmc, k, a, massfunc, hbias, prof,
     nk = len(k_use)
     out = np.zeros([na, nk])
     for ia, aa in enumerate(a_use):
+        # Evaluate mass function
         mf = hmc._hmf(massfunc, cosmo, aa, mass_def=mass_def)
+        # Evaluate halo bias
         bf = hmc._hbf(hbias, cosmo, aa, mass_def=mass_def)
-        mbf0 = (hmc.rho0 -
-                hmc.integrator(mf * bf * hmc.mass,
-                               hmc.lmass)) / hmc.m0
-        uk = prof.fourier(cosmo, k_use, hmc.mass, aa,
-                          mass_def=mass_def).T
+        # Evaluate offset for halo bias integral
+        mbf0 = hmc._mbf0(mf, bf)
+        # Evaluate profile
+        uk = hmc._eval_profile(cosmo, prof, k_use, aa, mass_def)
+        # Compute profile normalization
+        mf0 = 1
         if normprof:
-            mf0 = (hmc.rho0 -
-                   hmc.integrator(mf * hmc.mass,
-                                  hmc.lmass)) / hmc.m0
-            uk0 = prof.fourier(cosmo,
-                               hmc.precision['k_min'],
-                               hmc.mass, aa,
-                               mass_def=mass_def).T
-            norm = 1. / hmc._I_0_1_from_arrays(mf, mf0, uk0)
-        else:
-            norm = 1.
+            mf0 = hmc._mf0(mf)
+        norm = hmc._profile_norm(mf, mf0, cosmo, prof,
+                                 aa, mass_def, normprof)
+        # Compute integral
         out[ia, :] = hmc._I_1_1_from_arrays(mf, bf,
                                             mbf0, uk) * norm
 
@@ -360,67 +380,60 @@ def halomod_power_spectrum(cosmo, hmc, k, a, massfunc, hbias, prof,
     nk = len(k_use)
     out = np.zeros([na, nk])
     for ia, aa in enumerate(a_use):
+        # Evaluate mass function
         mf = hmc._hmf(massfunc, cosmo, aa, mass_def=mass_def)
-        mf0 = (hmc.rho0 -
-               hmc.integrator(mf * hmc.mass,
-                              hmc.lmass)) / hmc.m0
+        # Evaluate offset for mass function integral
+        mf0 = hmc._mf0(mf)
 
-        # Compute normalization
-        if normprof1:
-            uk01 = prof.fourier(cosmo,
-                                hmc.precision['k_min'],
-                                hmc.mass, aa,
-                                mass_def=mass_def).T
-            norm1 = 1. / hmc._I_0_1_from_arrays(mf, mf0, uk01)
-        else:
-            norm1 = 1.
+        # Compute first profile normalization
+        norm1 = hmc._profile_norm(mf, mf0, cosmo, prof,
+                                  aa, mass_def, normprof1)
+        # Compute second profile normalization
         if prof2 is None:
             norm2 = norm1
         else:
-            if normprof2:
-                uk02 = prof2.fourier(cosmo,
-                                     hmc.precision['k_min'],
-                                     hmc.mass, aa,
-                                     mass_def=mass_def).T
-                norm2 = 1. / hmc._I_0_1_from_arrays(mf, mf0, uk02)
-            else:
-                norm2 = 1.
+            norm2 = hmc._profile_norm(mf, mf0, cosmo, prof2,
+                                       aa, mass_def, normprof2)
         norm = norm1 * norm2
 
         if get_2h:
+            # Evaluate halo bias
             bf = hmc._hbf(hbias, cosmo, aa, mass_def=mass_def)
-            # Compute first bias factor
-            mbf0 = (hmc.rho0 -
-                    hmc.integrator(mf * bf * hmc.mass,
-                                   hmc.lmass)) / hmc.m0
-            uk_1 = prof.fourier(cosmo, k_use, hmc.mass, aa,
-                                mass_def=mass_def).T
+            # Evaluate offset for halo bias integral
+            mbf0 = hmc._mbf0(mf, bf)
+            # Evaluate first profile
+            uk_1 = hmc._eval_profile(cosmo, prof, k_use, aa,
+                                     mass_def)
+            # Compute integral
             bk_1 = hmc._I_1_1_from_arrays(mf, bf, mbf0, uk_1)
 
             # Compute second bias factor
             if prof2 is None:
                 bk_2 = bk_1
             else:
-                uk_2 = prof2.fourier(cosmo, k_use, hmc.mass, aa,
-                                     mass_def=mass_def).T
+                # Evaluate second profile
+                uk_2 = hmc._eval_profile(cosmo, prof2, k_use, aa,
+                                         mass_def)
+                # Compute integral
                 bk_2 = hmc._I_1_1_from_arrays(mf, bf, mbf0, uk_2)
 
-            # Compute power spectrum
+            # Compute 2-halo power spectrum
             pk_2h = pkf(aa) * bk_1 * bk_2
         else:
             pk_2h = 0.
 
         if get_1h:
-            # 1-halo term
+            # 2-point profile cumulant
             uk2 = prof_2pt.fourier_2pt(prof, cosmo, k_use,
                                        hmc.mass, aa,
                                        prof2=prof2,
                                        mass_def=mass_def).T
+            # Compute integral
             pk_1h = hmc._I_0_1_from_arrays(mf, mf0, uk2)
         else:
             pk_1h = 0.
 
-        # 2-halo term
+        # Total power spectrum
         out[ia, :] = (pk_1h + pk_2h) * norm
 
     if np.ndim(a) == 0:
