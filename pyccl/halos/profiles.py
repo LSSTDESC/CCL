@@ -125,7 +125,7 @@ class HaloProfile(object):
         as a function of cosmology and scale factor.
 
         Args:
-            cosmo (:obj:`Cosmology`): a Cosmology object.
+            cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
             a (float): scale factor.
 
         Returns:
@@ -138,7 +138,7 @@ class HaloProfile(object):
         used as a function of cosmology and scale factor.
 
         Args:
-            cosmo (:obj:`Cosmology`): a Cosmology object.
+            cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
             a (float): scale factor.
 
         Returns:
@@ -151,11 +151,12 @@ class HaloProfile(object):
         function of cosmology, radius, halo mass and scale factor.
 
         Args:
-            cosmo (:obj:`Cosmology`): a Cosmology object.
+            cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
             r (float or array_like): comoving radius in Mpc.
             M (float or array_like): halo mass in units of M_sun.
             a (float): scale factor.
-            mass_def (:obj:`MassDef`): a mass definition object.
+            mass_def (:class:`~pyccl.halos.massdef.MassDef`):
+                a mass definition object.
 
         Returns:
             float or array_like: halo profile. The shape of the
@@ -185,11 +186,12 @@ class HaloProfile(object):
            \\rho(r)\\, j_0(k r)
 
         Args:
-            cosmo (:obj:`Cosmology`): a Cosmology object.
+            cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
             k (float or array_like): comoving wavenumber in Mpc^-1.
             M (float or array_like): halo mass in units of M_sun.
             a (float): scale factor.
-            mass_def (:obj:`MassDef`): a mass definition object.
+            mass_def (:class:`~pyccl.halos.massdef.MassDef`):
+                a mass definition object.
 
         Returns:
             float or array_like: halo profile. The shape of the
@@ -218,11 +220,12 @@ class HaloProfile(object):
            \\rho(\\sqrt{r_\\parallel^2 + R^2})
 
         Args:
-            cosmo (:obj:`Cosmology`): a Cosmology object.
+            cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
             r (float or array_like): comoving radius in Mpc.
             M (float or array_like): halo mass in units of M_sun.
             a (float): scale factor.
-            mass_def (:obj:`MassDef`): a mass definition object.
+            mass_def (:class:`~pyccl.halos.massdef.MassDef`):
+                a mass definition object.
 
         Returns:
             float or array_like: halo profile. The shape of the
@@ -249,11 +252,12 @@ class HaloProfile(object):
            \\Sigma(R')
 
         Args:
-            cosmo (:obj:`Cosmology`): a Cosmology object.
+            cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
             r (float or array_like): comoving radius in Mpc.
             M (float or array_like): halo mass in units of M_sun.
             a (float): scale factor.
-            mass_def (:obj:`MassDef`): a mass definition object.
+            mass_def (:class:`~pyccl.halos.massdef.MassDef`):
+                a mass definition object.
 
         Returns:
             float or array_like: halo profile. The shape of the
@@ -405,9 +409,9 @@ class HaloProfileGaussian(HaloProfile):
         r_scale (:obj:`function`): the width of the profile.
             The signature of this function should be
             `f(cosmo, M, a, mdef)`, where `cosmo` is a
-            :obj:`Cosmology` object, `M` is a halo mass in
+            :class:`~pyccl.core.Cosmology` object, `M` is a halo mass in
             units of M_sun, `a` is the scale factor and `mdef`
-            is a :obj:`MassDef` object.
+            is a :class:`~pyccl.halos.massdef.MassDef` object.
         rho0 (:obj:`function`): the amplitude of the profile.
             It should have the same signature as `r_scale`.
     """
@@ -450,9 +454,9 @@ class HaloProfilePowerLaw(HaloProfile):
         r_scale (:obj:`function`): the correlation length of
             the profile. The signature of this function
             should be `f(cosmo, M, a, mdef)`, where `cosmo`
-            is a :obj:`Cosmology` object, `M` is a halo mass
+            is a :class:`~pyccl.core.Cosmology` object, `M` is a halo mass
             in units of M_sun, `a` is the scale factor and
-            `mdef` is a :obj:`MassDef` object.
+            `mdef` is a :class:`~pyccl.halos.massdef.MassDef` object.
         tilt (:obj:`function`): the power law index of the
             profile. The signature of this function should
             be `f(cosmo, a)`.

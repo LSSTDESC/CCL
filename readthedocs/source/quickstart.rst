@@ -7,14 +7,14 @@ Quickstart
 CCL is structured around :class:`~pyccl.core.Cosmology` objects which hold the cosmological
 parameters and any tabulated data associated with a given cosmology. The
 library then provides functions to compute specific quantities of interest.
-See the :mod:`pyccl` module and submodules for more details.
+See the full API documentation through the :mod:`pyccl` module and submodules for more details.
 
 Further, CCL follows the following conventions:
 
   - all units are non-h-inverse (e.g., Mpc as opposed to Mpc/h)
-  - the scale factor ``a`` is preferred over redshift ``z``
+  - the scale factor ``a`` is preferred over redshift ``z`` as a time coordinate.
   - the :class:`~pyccl.core.Cosmology` object always comes first in
-    function calls
+    most function calls
   - argument ordering for power spectra is ``(k, a)``
 
 This example computes the comoving distance and HALOFIT non-linear
@@ -36,3 +36,6 @@ power spectrum using the BBKS transfer function:
 
 See :ref:`models` for more details on the supported models for various cosmological
 quantities (e.g., the power spectrum) and the specification of the cosmological parameters.
+
+A comprehensive set of examples showcasing the different types of functionality
+implemented in CCL can be found `here <https://github.com/LSSTDESC/CCLX>`_.

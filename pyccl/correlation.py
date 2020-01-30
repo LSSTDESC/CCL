@@ -29,7 +29,7 @@ def correlation(cosmo, ell, C_ell, theta, corr_type='gg', method='fftlog'):
     """Compute the angular correlation function.
 
     Args:
-        cosmo (:obj:`Cosmology`): A Cosmology object.
+        cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
         ell (array_like): Multipoles corresponding to the input angular power
                           spectrum.
         C_ell (array_like): Input angular power spectrum.
@@ -43,12 +43,12 @@ def correlation(cosmo, ell, C_ell, theta, corr_type='gg', method='fftlog'):
         method (string, optional): Method to compute the correlation function.
                                    Choices: 'Bessel' (direct integration over
                                    Bessel function), 'FFTLog' (fast
-                                   integration with FFTLog), 'Legendre' (
-                                   brute-force sum over Legendre polynomials).
+                                   integration with FFTLog), 'Legendre'
+                                   (brute-force sum over Legendre polynomials).
 
     Returns:
-        float or array_like: Value(s) of the correlation function at the input
-            angular separations.
+        float or array_like: Value(s) of the correlation function at the \
+            input angular separations.
     """
     cosmo_in = cosmo
     cosmo = cosmo.cosmo
@@ -85,7 +85,7 @@ def correlation_3d(cosmo, a, r):
     """Compute the 3D correlation function.
 
     Args:
-        cosmo (:obj:`Cosmology`): A Cosmology object.
+        cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
         a (float): scale factor.
         r (float or array_like): distance(s) at which to calculate the 3D
                                  correlation function (in Mpc).
@@ -117,7 +117,7 @@ def correlation_multipole(cosmo, a, beta, l, s):
     """Compute the correlation multipoles.
 
     Args:
-        cosmo (:obj:`Cosmology`): A Cosmology object.
+        cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
         a (float): scale factor.
         beta (float): growth rate divided by galaxy bias.
         l (int) : the desired multipole
@@ -154,7 +154,7 @@ def correlation_3dRsd(cosmo, a, s, mu, beta, use_spline=True):
     with multipoles.
 
     Args:
-        cosmo (:obj:`Cosmology`): A Cosmology object.
+        cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
         a (float): scale factor.
         s (float or array_like): distance(s) at which to calculate the
                                  3DRsd correlation function (in Mpc).
@@ -193,7 +193,7 @@ def correlation_3dRsd_avgmu(cosmo, a, s, beta):
     Compute the 3DRsd correlation function averaged over mu at constant s.
 
     Args:
-        cosmo (:obj:`Cosmology`): A Cosmology object.
+        cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
         a (float): scale factor.
         s (float or array_like): distance(s) at which to calculate the 3DRsd
                                  correlation function (in Mpc).
@@ -228,7 +228,7 @@ def correlation_pi_sigma(cosmo, a, beta, pi, sig, use_spline=True):
     Compute the 3DRsd correlation in pi-sigma space.
 
     Args:
-        cosmo (:obj:`Cosmology`): A Cosmology object.
+        cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
         a (float): scale factor.
         pi (float): distance times cosine of the angle (in Mpc).
         sig (float or array-like): distance(s) times sine of the angle
