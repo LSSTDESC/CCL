@@ -116,6 +116,18 @@ class HMCalculator(object):
         return i1 + self.mbf0 * array_2[..., 0]
 
     def profile_norm(self, cosmo, a, prof):
+        """ Returns :math:`I^0_1(k\\rightarrow0,a|u)`
+        (see :meth:`HMCalculator.I_0_1`).
+
+        Args:
+            cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
+            a (float): scale factor.
+            prof (:class:`~pyccl.halos.profiles.HaloProfile`): halo
+                profile.
+
+        Returns:
+            float or array_like: integral value.
+        """
         # Compute mass function
         self._get_ingredients(a, cosmo, False)
         uk0 = prof.fourier(cosmo, self.precision['k_min'],
