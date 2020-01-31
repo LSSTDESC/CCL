@@ -75,22 +75,23 @@ def smoke_assert_pkhm_real(func):
 
 @pytest.mark.parametrize('norm', [True, False])
 def test_pkhm_mean_profile_smoke(norm):
-    hmc = ccl.halos.HMCalculator(COSMO, nlog10M=2)
+    hmc = ccl.halos.HMCalculator(COSMO, HMF, HBF, mass_def=M200,
+                                 nlog10M=2)
 
     def f(k, a):
-        return ccl.halos.halomod_mean_profile_1pt(COSMO, hmc, k, a, HMF,
-                                                  P1, normprof=norm,
-                                                  mass_def=M200)
+        return ccl.halos.halomod_mean_profile_1pt(COSMO, hmc, k, a,
+                                                  P1, normprof=norm)
     smoke_assert_pkhm_real(f)
 
 
 @pytest.mark.parametrize('norm', [True, False])
 def test_pkhm_bias_smoke(norm):
-    hmc = ccl.halos.HMCalculator(COSMO, nlog10M=2)
+    hmc = ccl.halos.HMCalculator(COSMO, HMF, HBF, mass_def=M200,
+                                 nlog10M=2)
 
     def f(k, a):
-        return ccl.halos.halomod_bias_1pt(COSMO, hmc, k, a, HMF, HBF, P1,
-                                          normprof=norm, mass_def=M200)
+        return ccl.halos.halomod_bias_1pt(COSMO, hmc, k, a,
+                                          P1, normprof=norm)
     smoke_assert_pkhm_real(f)
 
 
@@ -126,33 +127,32 @@ def test_pkhm_bias_smoke(norm):
                            'pk': 'linear', 'h1': True,
                            'h2': True, 'p2': P2}])
 def test_pkhm_pk_smoke(pars):
-    hmc = ccl.halos.HMCalculator(COSMO, nlog10M=2)
+    hmc = ccl.halos.HMCalculator(COSMO, HMF, HBF, mass_def=M200,
+                                 nlog10M=2)
 
     def f(k, a):
-        return ccl.halos.halomod_power_spectrum(COSMO, hmc, k, a, HMF, HBF, P1,
+        return ccl.halos.halomod_power_spectrum(COSMO, hmc, k, a, P1,
                                                 prof_2pt=pars['cv'],
                                                 normprof1=pars['norm'],
                                                 normprof2=pars['norm'],
                                                 p_of_k_a=pars['pk'],
                                                 prof2=pars['p2'],
-                                                mass_def=M200,
                                                 get_1h=pars['h1'],
                                                 get_2h=pars['h2'])
     smoke_assert_pkhm_real(f)
 
 
 def test_pkhm_pk2d():
-    hmc = ccl.halos.HMCalculator(COSMO)
+    hmc = ccl.halos.HMCalculator(COSMO, HMF, HBF, mass_def=M200)
     k_arr = KK
     a_arr = np.linspace(0.1, 1, 10)
     pk_arr = ccl.halos.halomod_power_spectrum(COSMO, hmc, k_arr, a_arr,
-                                              HMF, HBF, P1, mass_def=M200,
-                                              normprof1=True,
+                                              P1, normprof1=True,
                                               normprof2=True)
 
     # Input sampling
-    pk2d = ccl.halos.halomod_Pk2D(COSMO, hmc, HMF, HBF, P1,
-                                  mass_def=M200, lk_arr=np.log(k_arr),
+    pk2d = ccl.halos.halomod_Pk2D(COSMO, hmc, P1,
+                                  lk_arr=np.log(k_arr),
                                   a_arr=a_arr, normprof1=True)
     pk_arr_2 = np.array([pk2d.eval(k_arr, a, COSMO)
                          for a in a_arr])
@@ -160,8 +160,8 @@ def test_pkhm_pk2d():
                   < 1E-4)
 
     # Standard sampling
-    pk2d = ccl.halos.halomod_Pk2D(COSMO, hmc, HMF, HBF, P1,
-                                  mass_def=M200, normprof1=True)
+    pk2d = ccl.halos.halomod_Pk2D(COSMO, hmc, P1,
+                                  normprof1=True)
     pk_arr_2 = np.array([pk2d.eval(k_arr, a, COSMO)
                          for a in a_arr])
     assert np.all(np.fabs((pk_arr / pk_arr_2 - 1)).flatten()
@@ -171,34 +171,34 @@ def test_pkhm_pk2d():
 def test_pkhm_errors():
     # Wrong integration
     with pytest.raises(NotImplementedError):
-        ccl.halos.HMCalculator(COSMO,
+        ccl.halos.HMCalculator(COSMO, HMF, HBF, mass_def=M200,
                                integration_method_M='Sampson')
-
-    hmc = ccl.halos.HMCalculator(COSMO)
 
     # Wrong hmf
     with pytest.raises(TypeError):
-        ccl.halos.halomod_power_spectrum(COSMO, hmc, KK, AA, None, HBF, P1)
+        ccl.halos.HMCalculator(COSMO, None, HBF, mass_def=M200)
 
     # Wrong hbf
     with pytest.raises(TypeError):
-        ccl.halos.halomod_power_spectrum(COSMO, hmc, KK, AA, HMF, None, P1)
+        ccl.halos.HMCalculator(COSMO, HMF, None, mass_def=M200)
+
+    hmc = ccl.halos.HMCalculator(COSMO, HMF, HBF, mass_def=M200)
 
     # Wrong profile
     with pytest.raises(TypeError):
-        ccl.halos.halomod_power_spectrum(COSMO, hmc, KK, AA, HMF, HBF, None)
+        ccl.halos.halomod_power_spectrum(COSMO, hmc, KK, AA, None)
 
     # Wrong prof2
     with pytest.raises(TypeError):
-        ccl.halos.halomod_power_spectrum(COSMO, hmc, KK, AA, HMF, HBF, P1,
+        ccl.halos.halomod_power_spectrum(COSMO, hmc, KK, AA, P1,
                                          prof2=KK)
 
     # Wrong prof_2pt
     with pytest.raises(TypeError):
-        ccl.halos.halomod_power_spectrum(COSMO, hmc, KK, AA, HMF, HBF, P1,
+        ccl.halos.halomod_power_spectrum(COSMO, hmc, KK, AA, P1,
                                          prof_2pt=KK)
 
     # Wrong pk2d
     with pytest.raises(TypeError):
-        ccl.halos.halomod_power_spectrum(COSMO, hmc, KK, AA, HMF, HBF, P1,
+        ccl.halos.halomod_power_spectrum(COSMO, hmc, KK, AA, P1,
                                          p_of_k_a=KK)

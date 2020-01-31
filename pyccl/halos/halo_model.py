@@ -24,6 +24,12 @@ class HMCalculator(object):
 
     Args:
         cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
+        massfunc (:class:`~pyccl.halos.hmfunc.MassFunc`): a mass
+            function object.
+        hbias (:class:`~pyccl.halos.hbias.HaloBias`): a halo bias
+            object.
+        mass_def (:class:`~pyccl.halos.massdef.MassDef`): a mass
+            definition object.
         log10M_min (float): logarithmic mass (in units of solar mass)
             corresponding to the lower bound of the integrals in
             mass. Default: 8.
@@ -41,10 +47,18 @@ class HMCalculator(object):
             determines what is considered a "very large" scale.
             Default: 1E-5.
     """
-    def __init__(self, cosmo, log10M_min=8., log10M_max=16.,
+    def __init__(self, cosmo, massfunc, hbias, mass_def,
+                 log10M_min=8., log10M_max=16.,
                  nlog10M=128, integration_method_M='simpson',
                  k_min=1E-5):
         self.rho0 = rho_x(cosmo, 1., 'matter', is_comoving=True)
+        if not isinstance(massfunc, MassFunc):
+            raise TypeError("massfunc must be of type `MassFunc`")
+        self.massfunc = massfunc
+        if not isinstance(hbias, HaloBias):
+            raise TypeError("hbias must be of type `HaloBias`")
+        self.hbias = hbias
+        self.mass_def = mass_def
         self.precision = {'log10M_min': log10M_min,
                           'log10M_max': log10M_max,
                           'nlog10M': nlog10M,
@@ -66,88 +80,77 @@ class HMCalculator(object):
         else:
             self.integrator = self._integ_spline
 
+        self.a_current_mf = -1
+        self.a_current_bf = -1
+
     def _integ_spline(self, fM, lM):
         # Spline integrator
         return _spline_integrate(lM, fM, lM[0], lM[-1])
 
-    def _hmf(self, hmf, cosmo, a, mass_def=None):
-        # Evaluates halo mass function at the correct mass
-        # values.
-        return hmf.get_mass_function(cosmo, self.mass,
-                                     a, mdef_other=mass_def)
+    def _get_ingredients(self, a, cosmo, get_bf):
+        if a != self.a_current_mf:
+            self.mf = self.massfunc.get_mass_function(cosmo, self.mass, a,
+                                                      mdef_other=self.mass_def)
+            self.mf0 = (self.rho0 -
+                        self.integrator(self.mf * self.mass,
+                                        self.lmass)) / self.m0
+            self.a_current_mf = a
 
-    def _hbf(self, hbf, cosmo, a, mass_def=None):
-        # Evaluates halo bias at the correct mass values.
-        return hbf.get_halo_bias(cosmo, self.mass,
-                                 a, mdef_other=mass_def)
+        if get_bf:
+            if a != self.a_current_bf:
+                self.bf = self.hbias.get_halo_bias(cosmo, self.mass, a,
+                                                   mdef_other=self.mass_def)
+                self.mbf0 = (self.rho0 -
+                             self.integrator(self.mf * self.bf * self.mass,
+                                             self.lmass)) / self.m0
+            self.a_current_bf = a
 
-    def _I_0_1_from_arrays(self, hmf_a, hmf0, uk_a):
-        # Solves the integral:
-        #   \int dM n(M,a) * u(k,a|M)
-        # - hmf_a is an array of halo mass function values.
-        # - hmf0 is the value of the halo mass function at
-        #       a very low mass.
-        # - uk_a is the halo profile evaluated at the same
-        #       masses.
-        i1 = self.integrator(hmf_a[..., :] * uk_a,
+    def _integrate_over_mf(self, array_2):
+        i1 = self.integrator(self.mf[..., :] * array_2,
                              self.lmass)
-        return i1 + hmf0 * uk_a[..., 0]
+        return i1 + self.mf0 * array_2[..., 0]
 
-    def _I_1_1_from_arrays(self, hmf_a, hbf_a, hmf0, uk_a):
-        # Solves the integral:
-        #   \int n(M,a) * b(M,a) * u(k,a|M)
-        # - hmf_a is an array of halo mass function values.
-        # - hbf_a is an array of halo bias values.
-        # - hmf0 is the value of the halo mass function at
-        #       a very low mass.
-        # - uk_a is the halo profile evaluated at the same
-        #       masses.
-        i1 = self.integrator((hmf_a * hbf_a)[..., :] * uk_a,
+    def _integrate_over_mbf(self, array_2):
+        i1 = self.integrator((self.mf * self.bf)[..., :] * array_2,
                              self.lmass)
-        return i1 + hmf0 * uk_a[..., 0]
+        return i1 + self.mbf0 * array_2[..., 0]
 
-    def _mf0(self, mf):
-        # Returns (rho_M - \int dM * n(M) * M) / M_min
-        return (self.rho0 -
-                self.integrator(mf * self.mass,
-                                self.lmass)) / self.m0
-
-    def _mbf0(self, mf, bf):
-        # Returns (rho_M - \int dM * n(M) * b(M) * M) / M_min
-        return (self.rho0 -
-                self.integrator(mf * bf * self.mass,
-                                self.lmass)) / self.m0
-
-    def _profile_norm(self, mf, mf0, cosmo, prof,
-                      aa, mass_def, normprof):
-        if normprof:
-            # Computes [ \int dM * n(M) * <u(k->0|M)> ]^{-1}
-            uk01 = self._eval_profile(cosmo, prof,
-                                      self.precision['k_min'],
-                                      aa, mass_def=mass_def)
-            norm = 1. / self._I_0_1_from_arrays(mf, mf0, uk01)
-        else:
-            norm = 1.
+    def profile_norm(self, cosmo, a, prof):
+        # Compute mass function
+        self._get_ingredients(a, cosmo, False)
+        uk0 = prof.fourier(cosmo, self.precision['k_min'],
+                           self.mass, a, mass_def=self.mass_def).T
+        norm = 1. / self._integrate_over_mf(uk0)
         return norm
 
-    def _eval_profile(self, cosmo, prof, k, a, mass_def):
-        return prof.fourier(cosmo, k, self.mass, a, mass_def=mass_def).T
+    def I_0_1(self, cosmo, k, a, prof):
+        # Compute mass function
+        self._get_ingredients(a, cosmo, False)
+        uk = prof.fourier(cosmo, k, self.mass, a,
+                          mass_def=self.mass_def).T
+        i01 = self._integrate_over_mf(uk)
+        return i01
 
-    def _check_massfunc(self, massfunc):
-        if not isinstance(massfunc, MassFunc):
-            raise TypeError("massfunc must be of type `MassFunc`")
+    def I_1_1(self, cosmo, k, a, prof):
+        # Compute mass function and halo bias
+        self._get_ingredients(a, cosmo, True)
+        uk = prof.fourier(cosmo, k, self.mass, a,
+                          mass_def=self.mass_def).T
+        i11 = self._integrate_over_mbf(uk)
+        return i11
 
-    def _check_hbias(self, hbias):
-        if not isinstance(hbias, HaloBias):
-            raise TypeError("hbias must be of type `HaloBias`")
+    def I_0_2(self, cosmo, k, a, prof_2pt, prof1, prof2):
+        # Compute mass function
+        self._get_ingredients(a, cosmo, False)
+        uk = prof_2pt.fourier_2pt(prof1, cosmo, k, self.mass, a,
+                                  prof2=prof2,
+                                  mass_def=self.mass_def).T
+        i02 = self._integrate_over_mf(uk)
+        return i02
 
-    def _check_prof(self, prof):
-        if not isinstance(prof, HaloProfile):
-            raise TypeError("prof must be of type `HaloProfile`")
 
-
-def halomod_mean_profile_1pt(cosmo, hmc, k, a, massfunc, prof,
-                             normprof=False, mass_def=None):
+def halomod_mean_profile_1pt(cosmo, hmc, k, a, prof,
+                             normprof=False):
     """ Solves the integral:
 
     .. math::
@@ -162,14 +165,10 @@ def halomod_mean_profile_1pt(cosmo, hmc, k, a, massfunc, prof,
         hmc (:class:`HMCalculator`): a halo model calculator.
         k (float or array_like): comoving wavenumber in Mpc^-1.
         a (float or array_like): scale factor.
-        massfunc (:class:`~pyccl.halos.hmfunc.MassFunc`): a mass
-            function object.
         prof (:class:`~pyccl.halos.profiles.HaloProfile`): halo
             profile.
         normprof (bool): if `True`, this integral will be
             normalized by :math:`I^1_0(k\\rightarrow 0,a|u)`.
-        mass_def (:class:`~pyccl.halos.massdef.MassDef`): a mass
-            definition object.
 
     Returns:
         float or array_like: integral values evaluated at each
@@ -182,24 +181,18 @@ def halomod_mean_profile_1pt(cosmo, hmc, k, a, massfunc, prof,
     k_use = np.atleast_1d(k)
 
     # Check inputs
-    hmc._check_massfunc(massfunc)
-    hmc._check_prof(prof)
+    if not isinstance(prof, HaloProfile):
+        raise TypeError("prof must be of type `HaloProfile`")
 
     na = len(a_use)
     nk = len(k_use)
     out = np.zeros([na, nk])
     for ia, aa in enumerate(a_use):
-        # Evaluate mass function
-        mf = hmc._hmf(massfunc, cosmo, aa, mass_def=mass_def)
-        # Evaluate offset for mass function integral
-        mf0 = hmc._mf0(mf)
-        # Evaluate profile
-        uk = hmc._eval_profile(cosmo, prof, k_use, aa, mass_def)
-        # Compute profile normalization
-        norm = hmc._profile_norm(mf, mf0, cosmo, prof, aa,
-                                 mass_def, normprof)
-        # Compute integral
-        out[ia, :] = hmc._I_0_1_from_arrays(mf, mf0, uk) * norm
+        i01 = hmc.I_0_1(cosmo, k_use, aa, prof)
+        if normprof:
+            norm = hmc.profile_norm(cosmo, aa, prof)
+            i01 *= norm
+        out[ia, :] = i01
 
     if np.ndim(a) == 0:
         out = np.squeeze(out, axis=0)
@@ -208,8 +201,7 @@ def halomod_mean_profile_1pt(cosmo, hmc, k, a, massfunc, prof,
     return out
 
 
-def halomod_bias_1pt(cosmo, hmc, k, a, massfunc, hbias, prof,
-                     normprof=False, mass_def=None):
+def halomod_bias_1pt(cosmo, hmc, k, a, prof, normprof=False):
     """ Solves the integral:
 
     .. math::
@@ -226,17 +218,11 @@ def halomod_bias_1pt(cosmo, hmc, k, a, massfunc, hbias, prof,
         hmc (:class:`HMCalculator`): a halo model calculator.
         k (float or array_like): comoving wavenumber in Mpc^-1.
         a (float or array_like): scale factor.
-        massfunc (:class:`~pyccl.halos.hmfunc.MassFunc`): a mass
-            function object.
-        hbias (:class:`~pyccl.halos.hbias.HaloBias`): a halo bias
-            object.
         prof (:class:`~pyccl.halos.profiles.HaloProfile`): halo
             profile.
         normprof (bool): if `True`, this integral will be
             normalized by :math:`I^1_0(k\\rightarrow 0,a|u)`
             (see :meth:`~HMCalculator.mean_profile`).
-        mass_def (:class:`~pyccl.halos.massdef.MassDef`): a mass
-            definition object.
 
     Returns:
         float or array_like: integral values evaluated at each
@@ -249,31 +235,18 @@ def halomod_bias_1pt(cosmo, hmc, k, a, massfunc, hbias, prof,
     k_use = np.atleast_1d(k)
 
     # Check inputs
-    hmc._check_massfunc(massfunc)
-    hmc._check_hbias(hbias)
-    hmc._check_prof(prof)
+    if not isinstance(prof, HaloProfile):
+        raise TypeError("prof must be of type `HaloProfile`")
 
     na = len(a_use)
     nk = len(k_use)
     out = np.zeros([na, nk])
     for ia, aa in enumerate(a_use):
-        # Evaluate mass function
-        mf = hmc._hmf(massfunc, cosmo, aa, mass_def=mass_def)
-        # Evaluate halo bias
-        bf = hmc._hbf(hbias, cosmo, aa, mass_def=mass_def)
-        # Evaluate offset for halo bias integral
-        mbf0 = hmc._mbf0(mf, bf)
-        # Evaluate profile
-        uk = hmc._eval_profile(cosmo, prof, k_use, aa, mass_def)
-        # Compute profile normalization
-        mf0 = 1
+        i11 = hmc.I_1_1(cosmo, k_use, aa, prof)
         if normprof:
-            mf0 = hmc._mf0(mf)
-        norm = hmc._profile_norm(mf, mf0, cosmo, prof,
-                                 aa, mass_def, normprof)
-        # Compute integral
-        out[ia, :] = hmc._I_1_1_from_arrays(mf, bf,
-                                            mbf0, uk) * norm
+            norm = hmc.profile_norm(cosmo, aa, prof)
+            i11 *= norm
+        out[ia, :] = i11
 
     if np.ndim(a) == 0:
         out = np.squeeze(out, axis=0)
@@ -282,10 +255,10 @@ def halomod_bias_1pt(cosmo, hmc, k, a, massfunc, hbias, prof,
     return out
 
 
-def halomod_power_spectrum(cosmo, hmc, k, a, massfunc, hbias, prof,
+def halomod_power_spectrum(cosmo, hmc, k, a, prof,
                            prof_2pt=None, prof2=None, p_of_k_a=None,
                            normprof1=False, normprof2=False,
-                           mass_def=None, get_1h=True, get_2h=True):
+                           get_1h=True, get_2h=True):
     """ Computes the halo model power spectrum for two
     quantities defined by their respective halo profiles.
     The halo model power spectrum for two profiles
@@ -312,10 +285,6 @@ def halomod_power_spectrum(cosmo, hmc, k, a, massfunc, hbias, prof,
         hmc (:class:`HMCalculator`): a halo model calculator.
         k (float or array_like): comoving wavenumber in Mpc^-1.
         a (float or array_like): scale factor.
-        massfunc (:class:`~pyccl.halos.hmfunc.MassFunc`): a mass
-            function object.
-        hbias (:class:`~pyccl.halos.hbias.HaloBias`): a halo bias
-            object.
         prof (:class:`~pyccl.halos.profiles.HaloProfile`): halo
             profile.
         prof_2pt (:class:`Profile2pt`): a profile covariance object
@@ -337,8 +306,6 @@ def halomod_power_spectrum(cosmo, hmc, k, a, massfunc, hbias, prof,
             normalized by :math:`I^1_0(k\\rightarrow 0,a|v)`
             (see :meth:`~HMCalculator.mean_profile`), where
             :math:`v` is the profile represented by `prof2`.
-        mass_def (:class:`~pyccl.halos.massdef.MassDef`): a mass
-            definition object.
         get_1h (bool): if `False`, the 1-halo term (i.e. the first
             term in the first equation above) won't be computed.
         get_2h (bool): if `False`, the 2-halo term (i.e. the second
@@ -355,9 +322,8 @@ def halomod_power_spectrum(cosmo, hmc, k, a, massfunc, hbias, prof,
     k_use = np.atleast_1d(k)
 
     # Check inputs
-    hmc._check_massfunc(massfunc)
-    hmc._check_hbias(hbias)
-    hmc._check_prof(prof)
+    if not isinstance(prof, HaloProfile):
+        raise TypeError("prof must be of type `HaloProfile`")
     if (prof2 is not None) and (not isinstance(prof2, HaloProfile)):
         raise TypeError("prof2 must be of type `HaloProfile` or `None`")
     if prof_2pt is None:
@@ -380,56 +346,39 @@ def halomod_power_spectrum(cosmo, hmc, k, a, massfunc, hbias, prof,
     nk = len(k_use)
     out = np.zeros([na, nk])
     for ia, aa in enumerate(a_use):
-        # Evaluate mass function
-        mf = hmc._hmf(massfunc, cosmo, aa, mass_def=mass_def)
-        # Evaluate offset for mass function integral
-        mf0 = hmc._mf0(mf)
-
         # Compute first profile normalization
-        norm1 = hmc._profile_norm(mf, mf0, cosmo, prof,
-                                  aa, mass_def, normprof1)
+        if normprof1:
+            norm1 = hmc.profile_norm(cosmo, aa, prof)
+        else:
+            norm1 = 1
         # Compute second profile normalization
         if prof2 is None:
             norm2 = norm1
         else:
-            norm2 = hmc._profile_norm(mf, mf0, cosmo, prof2,
-                                      aa, mass_def, normprof2)
+            if normprof2:
+                norm2 = hmc.profile_norm(cosmo, aa, prof2)
+            else:
+                norm2 = 1
         norm = norm1 * norm2
 
         if get_2h:
-            # Evaluate halo bias
-            bf = hmc._hbf(hbias, cosmo, aa, mass_def=mass_def)
-            # Evaluate offset for halo bias integral
-            mbf0 = hmc._mbf0(mf, bf)
-            # Evaluate first profile
-            uk_1 = hmc._eval_profile(cosmo, prof, k_use, aa,
-                                     mass_def)
-            # Compute integral
-            bk_1 = hmc._I_1_1_from_arrays(mf, bf, mbf0, uk_1)
+            # Compute first bias factor
+            i11_1 = hmc.I_1_1(cosmo, k_use, aa, prof)
 
             # Compute second bias factor
             if prof2 is None:
-                bk_2 = bk_1
+                i11_2 = i11_1
             else:
-                # Evaluate second profile
-                uk_2 = hmc._eval_profile(cosmo, prof2, k_use, aa,
-                                         mass_def)
-                # Compute integral
-                bk_2 = hmc._I_1_1_from_arrays(mf, bf, mbf0, uk_2)
+                i11_2 = hmc.I_1_1(cosmo, k_use, aa, prof2)
 
             # Compute 2-halo power spectrum
-            pk_2h = pkf(aa) * bk_1 * bk_2
+            pk_2h = pkf(aa) * i11_1 * i11_2
         else:
             pk_2h = 0.
 
         if get_1h:
-            # 2-point profile cumulant
-            uk2 = prof_2pt.fourier_2pt(prof, cosmo, k_use,
-                                       hmc.mass, aa,
-                                       prof2=prof2,
-                                       mass_def=mass_def).T
-            # Compute integral
-            pk_1h = hmc._I_0_1_from_arrays(mf, mf0, uk2)
+            pk_1h = hmc.I_0_2(cosmo, k_use, aa, prof_2pt,
+                              prof, prof2)
         else:
             pk_1h = 0.
 
@@ -443,10 +392,10 @@ def halomod_power_spectrum(cosmo, hmc, k, a, massfunc, hbias, prof,
     return out
 
 
-def halomod_Pk2D(cosmo, hmc, massfunc, hbias, prof,
+def halomod_Pk2D(cosmo, hmc, prof,
                  prof_2pt=None, prof2=None, p_of_k_a=None,
                  normprof1=False, normprof2=False,
-                 mass_def=None, get_1h=True, get_2h=True,
+                 get_1h=True, get_2h=True,
                  lk_arr=None, a_arr=None,
                  extrap_order_lok=1, extrap_order_hik=2):
     """ Returns a :class:`~pyccl.pk2d.Pk2D` object containing
@@ -457,10 +406,6 @@ def halomod_Pk2D(cosmo, hmc, massfunc, hbias, prof,
     Args:
         cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
         hmc (:class:`HMCalculator`): a halo model calculator.
-        massfunc (:class:`~pyccl.halos.hmfunc.MassFunc`): a mass
-            function object.
-        hbias (:class:`~pyccl.halos.hbias.HaloBias`): a halo bias
-            object.
         prof (:class:`~pyccl.halos.profiles.HaloProfile`): halo
             profile.
         prof_2pt (:class:`Profile2pt`): a profile covariance object
@@ -482,8 +427,6 @@ def halomod_Pk2D(cosmo, hmc, massfunc, hbias, prof,
             normalized by :math:`I^1_0(k\\rightarrow 0,a|v)`
             (see :meth:`~HMCalculator.mean_profile`), where
             :math:`v` is the profile represented by `prof2`.
-        mass_def (:class:`~pyccl.halos.massdef.MassDef`): a mass
-            definition object.
         get_1h (bool): if `False`, the 1-halo term (i.e. the first
             term in the first equation above) won't be computed.
         get_2h (bool): if `False`, the 2-halo term (i.e. the second
@@ -523,10 +466,9 @@ def halomod_Pk2D(cosmo, hmc, massfunc, hbias, prof,
         check(status)
 
     pk_arr = halomod_power_spectrum(cosmo, hmc, np.exp(lk_arr), a_arr,
-                                    massfunc, hbias, prof, prof_2pt=prof_2pt,
+                                    prof, prof_2pt=prof_2pt,
                                     prof2=prof2, p_of_k_a=p_of_k_a,
                                     normprof1=normprof1, normprof2=normprof2,
-                                    mass_def=mass_def,
                                     get_1h=get_1h, get_2h=get_2h)
 
     pk2d = Pk2D(a_arr=a_arr, lk_arr=lk_arr, pk_arr=pk_arr,
