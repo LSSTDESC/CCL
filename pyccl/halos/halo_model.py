@@ -117,7 +117,7 @@ class HMCalculator(object):
 
     def profile_norm(self, cosmo, a, prof):
         """ Returns :math:`I^0_1(k\\rightarrow0,a|u)`
-        (see :meth:`HMCalculator.I_0_1`).
+        (see :meth:`~HMCalculator.I_0_1`).
 
         Args:
             cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
