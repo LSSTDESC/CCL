@@ -51,68 +51,70 @@ class HMCalculator(object):
                  log10M_min=8., log10M_max=16.,
                  nlog10M=128, integration_method_M='simpson',
                  k_min=1E-5):
-        self.rho0 = rho_x(cosmo, 1., 'matter', is_comoving=True)
+        self._rho0 = rho_x(cosmo, 1., 'matter', is_comoving=True)
         if not isinstance(massfunc, MassFunc):
             raise TypeError("massfunc must be of type `MassFunc`")
-        self.massfunc = massfunc
+        self._massfunc = massfunc
         if not isinstance(hbias, HaloBias):
             raise TypeError("hbias must be of type `HaloBias`")
-        self.hbias = hbias
-        self.mass_def = mass_def
-        self.precision = {'log10M_min': log10M_min,
-                          'log10M_max': log10M_max,
-                          'nlog10M': nlog10M,
-                          'integration_method_M': integration_method_M,
-                          'k_min': k_min}
-        self.lmass = np.linspace(self.precision['log10M_min'],
-                                 self.precision['log10M_max'],
-                                 self.precision['nlog10M'])
-        self.mass = 10.**self.lmass
-        self.m0 = self.mass[0]
+        self._hbias = hbias
+        self._mdef = mass_def
+        self._prec = {'log10M_min': log10M_min,
+                      'log10M_max': log10M_max,
+                      'nlog10M': nlog10M,
+                      'integration_method_M': integration_method_M,
+                      'k_min': k_min}
+        self._lmass = np.linspace(self._prec['log10M_min'],
+                                  self._prec['log10M_max'],
+                                  self._prec['nlog10M'])
+        self._mass = 10.**self._lmass
+        self._m0 = self._mass[0]
 
-        if self.precision['integration_method_M'] not in ['spline',
-                                                          'simpson']:
+        if self._prec['integration_method_M'] not in ['spline',
+                                                      'simpson']:
             raise NotImplementedError("Only \'simpson\' and 'spline' "
                                       "supported as integration methods")
-        elif self.precision['integration_method_M'] == 'simpson':
+        elif self._prec['integration_method_M'] == 'simpson':
             from scipy.integrate import simps
-            self.integrator = simps
+            self._integrator = simps
         else:
-            self.integrator = self._integ_spline
+            self._integrator = self._integ_spline
 
-        self.a_current_mf = -1
-        self.a_current_bf = -1
+        self._a_current_mf = -1
+        self._a_current_bf = -1
 
     def _integ_spline(self, fM, lM):
         # Spline integrator
         return _spline_integrate(lM, fM, lM[0], lM[-1])
 
     def _get_ingredients(self, a, cosmo, get_bf):
-        if a != self.a_current_mf:
-            self.mf = self.massfunc.get_mass_function(cosmo, self.mass, a,
-                                                      mdef_other=self.mass_def)
-            self.mf0 = (self.rho0 -
-                        self.integrator(self.mf * self.mass,
-                                        self.lmass)) / self.m0
-            self.a_current_mf = a
+        # Compute mass function and bias (if needed) at a new
+        # value of the scale factor.
+        if a != self._a_current_mf:
+            self.mf = self._massfunc.get_mass_function(cosmo, self._mass, a,
+                                                       mdef_other=self._mdef)
+            self.mf0 = (self._rho0 -
+                        self._integrator(self.mf * self._mass,
+                                         self._lmass)) / self._m0
+            self._a_current_mf = a
 
         if get_bf:
-            if a != self.a_current_bf:
-                self.bf = self.hbias.get_halo_bias(cosmo, self.mass, a,
-                                                   mdef_other=self.mass_def)
-                self.mbf0 = (self.rho0 -
-                             self.integrator(self.mf * self.bf * self.mass,
-                                             self.lmass)) / self.m0
-            self.a_current_bf = a
+            if a != self._a_current_bf:
+                self.bf = self._hbias.get_halo_bias(cosmo, self._mass, a,
+                                                    mdef_other=self._mdef)
+                self.mbf0 = (self._rho0 -
+                             self._integrator(self.mf * self.bf * self._mass,
+                                              self._lmass)) / self._m0
+            self._a_current_bf = a
 
     def _integrate_over_mf(self, array_2):
-        i1 = self.integrator(self.mf[..., :] * array_2,
-                             self.lmass)
+        i1 = self._integrator(self.mf[..., :] * array_2,
+                              self._lmass)
         return i1 + self.mf0 * array_2[..., 0]
 
     def _integrate_over_mbf(self, array_2):
-        i1 = self.integrator((self.mf * self.bf)[..., :] * array_2,
-                             self.lmass)
+        i1 = self._integrator((self.mf * self.bf)[..., :] * array_2,
+                              self._lmass)
         return i1 + self.mbf0 * array_2[..., 0]
 
     def profile_norm(self, cosmo, a, prof):
@@ -130,8 +132,8 @@ class HMCalculator(object):
         """
         # Compute mass function
         self._get_ingredients(a, cosmo, False)
-        uk0 = prof.fourier(cosmo, self.precision['k_min'],
-                           self.mass, a, mass_def=self.mass_def).T
+        uk0 = prof.fourier(cosmo, self._prec['k_min'],
+                           self._mass, a, mass_def=self._mdef).T
         norm = 1. / self._integrate_over_mf(uk0)
         return norm
 
@@ -158,8 +160,8 @@ class HMCalculator(object):
         """
         # Compute mass function
         self._get_ingredients(a, cosmo, False)
-        uk = prof.fourier(cosmo, k, self.mass, a,
-                          mass_def=self.mass_def).T
+        uk = prof.fourier(cosmo, k, self._mass, a,
+                          mass_def=self._mdef).T
         i01 = self._integrate_over_mf(uk)
         return i01
 
@@ -188,12 +190,12 @@ class HMCalculator(object):
         """
         # Compute mass function and halo bias
         self._get_ingredients(a, cosmo, True)
-        uk = prof.fourier(cosmo, k, self.mass, a,
-                          mass_def=self.mass_def).T
+        uk = prof.fourier(cosmo, k, self._mass, a,
+                          mass_def=self._mdef).T
         i11 = self._integrate_over_mbf(uk)
         return i11
 
-    def I_0_2(self, cosmo, k, a, prof_2pt, prof1, prof2):
+    def I_0_2(self, cosmo, k, a, prof1, prof_2pt, prof2=None):
         """ Solves the integral:
 
         .. math::
@@ -213,9 +215,7 @@ class HMCalculator(object):
             prof_2pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
                 a profile covariance object
                 returning the the two-point moment of the two profiles
-                being correlated. If `None`, the default second moment
-                will be used, corresponding to the products of the means
-                of both profiles.
+                being correlated.
             prof2 (:class:`~pyccl.halos.profiles.HaloProfile`): a
                 second halo profile. If `None`, `prof` will be used as
                 `prof2`.
@@ -226,9 +226,9 @@ class HMCalculator(object):
         """
         # Compute mass function
         self._get_ingredients(a, cosmo, False)
-        uk = prof_2pt.fourier_2pt(prof1, cosmo, k, self.mass, a,
+        uk = prof_2pt.fourier_2pt(prof1, cosmo, k, self._mass, a,
                                   prof2=prof2,
-                                  mass_def=self.mass_def).T
+                                  mass_def=self._mdef).T
         i02 = self._integrate_over_mf(uk)
         return i02
 
@@ -455,8 +455,8 @@ def halomod_power_spectrum(cosmo, hmc, k, a, prof,
             pk_2h = 0.
 
         if get_1h:
-            pk_1h = hmc.I_0_2(cosmo, k_use, aa, prof_2pt,
-                              prof, prof2)
+            pk_1h = hmc.I_0_2(cosmo, k_use, aa, prof,
+                              prof_2pt, prof2)
         else:
             pk_1h = 0.
 

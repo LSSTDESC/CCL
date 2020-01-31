@@ -71,6 +71,7 @@ def smoke_assert_pkhm_real(func):
             a = np.linspace(0.5, 1., sa)
         p = func(k, a)
         assert np.shape(p) == sh
+        assert np.all(np.isfinite(p))
 
 
 @pytest.mark.parametrize('norm', [True, False])
