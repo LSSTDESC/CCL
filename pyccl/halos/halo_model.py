@@ -124,6 +124,26 @@ class HMCalculator(object):
         return norm
 
     def I_0_1(self, cosmo, k, a, prof):
+        """ Solves the integral:
+
+        .. math::
+            I^0_1(k,a|u) = \\int dM\\,n(M,a)\\,\\langle u(k,a|M)\\rangle,
+
+        where :math:`n(M,a)` is the halo mass function, and
+        :math:`\\langle u(k,a|M)\\rangle` is the halo profile as a
+        function of scale, scale factor and halo mass.
+
+        Args:
+            cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
+            k (float or array_like): comoving wavenumber in Mpc^-1.
+            a (float): scale factor.
+            prof (:class:`~pyccl.halos.profiles.HaloProfile`): halo
+                profile.
+
+        Returns:
+            float or array_like: integral values evaluated at each
+            value of `k`.
+        """
         # Compute mass function
         self._get_ingredients(a, cosmo, False)
         uk = prof.fourier(cosmo, k, self.mass, a,
@@ -132,6 +152,28 @@ class HMCalculator(object):
         return i01
 
     def I_1_1(self, cosmo, k, a, prof):
+        """ Solves the integral:
+
+        .. math::
+            I^1_1(k,a|u) = \\int dM\\,n(M,a)\\,b(M,a)\\,
+            \\langle u(k,a|M)\\rangle,
+
+        where :math:`n(M,a)` is the halo mass function,
+        :math:`b(M,a)` is the halo bias, and
+        :math:`\\langle u(k,a|M)\\rangle` is the halo profile as a
+        function of scale, scale factor and halo mass.
+
+        Args:
+            cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
+            k (float or array_like): comoving wavenumber in Mpc^-1.
+            a (float): scale factor.
+            prof (:class:`~pyccl.halos.profiles.HaloProfile`): halo
+                profile.
+
+        Returns:
+            float or array_like: integral values evaluated at each
+            value of `k`.
+        """
         # Compute mass function and halo bias
         self._get_ingredients(a, cosmo, True)
         uk = prof.fourier(cosmo, k, self.mass, a,
@@ -140,6 +182,36 @@ class HMCalculator(object):
         return i11
 
     def I_0_2(self, cosmo, k, a, prof_2pt, prof1, prof2):
+        """ Solves the integral:
+
+        .. math::
+            I^0_2(k,a|u,v) = \\int dM\\,n(M,a)\\,
+            \\langle u(k,a|M) v(k,a|M)\\rangle,
+
+        where :math:`n(M,a)` is the halo mass function, and
+        :math:`\\langle u(k,a|M) v(k,a|M)\\rangle` is the two-point
+        moment of the two halo profiles.
+
+        Args:
+            cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
+            k (float or array_like): comoving wavenumber in Mpc^-1.
+            a (float): scale factor.
+            prof (:class:`~pyccl.halos.profiles.HaloProfile`): halo
+                profile.
+            prof_2pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
+                a profile covariance object
+                returning the the two-point moment of the two profiles
+                being correlated. If `None`, the default second moment
+                will be used, corresponding to the products of the means
+                of both profiles.
+            prof2 (:class:`~pyccl.halos.profiles.HaloProfile`): a
+                second halo profile. If `None`, `prof` will be used as
+                `prof2`.
+
+        Returns:
+             float or array_like: integral values evaluated at each
+             value of `k`.
+        """
         # Compute mass function
         self._get_ingredients(a, cosmo, False)
         uk = prof_2pt.fourier_2pt(prof1, cosmo, k, self.mass, a,
@@ -151,10 +223,10 @@ class HMCalculator(object):
 
 def halomod_mean_profile_1pt(cosmo, hmc, k, a, prof,
                              normprof=False):
-    """ Solves the integral:
+    """ Returns the mass-weighted mean halo profile.
 
     .. math::
-        I^1_0(k,a|u) = \\int dM\\,n(M,a)\\,\\langle u(k,a|M)\\rangle,
+        I^0_1(k,a|u) = \\int dM\\,n(M,a)\\,\\langle u(k,a|M)\\rangle,
 
     where :math:`n(M,a)` is the halo mass function, and
     :math:`\\langle u(k,a|M)\\rangle` is the halo profile as a
@@ -168,7 +240,7 @@ def halomod_mean_profile_1pt(cosmo, hmc, k, a, prof,
         prof (:class:`~pyccl.halos.profiles.HaloProfile`): halo
             profile.
         normprof (bool): if `True`, this integral will be
-            normalized by :math:`I^1_0(k\\rightarrow 0,a|u)`.
+            normalized by :math:`I^0_1(k\\rightarrow 0,a|u)`.
 
     Returns:
         float or array_like: integral values evaluated at each
@@ -202,7 +274,7 @@ def halomod_mean_profile_1pt(cosmo, hmc, k, a, prof,
 
 
 def halomod_bias_1pt(cosmo, hmc, k, a, prof, normprof=False):
-    """ Solves the integral:
+    """ Returns the mass-and-bias-weighted mean halo profile.
 
     .. math::
         I^1_1(k,a|u) = \\int dM\\,n(M,a)\\,b(M,a)\\,
@@ -221,8 +293,8 @@ def halomod_bias_1pt(cosmo, hmc, k, a, prof, normprof=False):
         prof (:class:`~pyccl.halos.profiles.HaloProfile`): halo
             profile.
         normprof (bool): if `True`, this integral will be
-            normalized by :math:`I^1_0(k\\rightarrow 0,a|u)`
-            (see :meth:`~HMCalculator.mean_profile`).
+            normalized by :math:`I^0_1(k\\rightarrow 0,a|u)`
+            (see :meth:`~HMCalculator.I_0_1`).
 
     Returns:
         float or array_like: integral values evaluated at each
@@ -270,15 +342,8 @@ def halomod_power_spectrum(cosmo, hmc, k, a, prof,
 
     where :math:`P_{\\rm lin}(k,a)` is the linear matter
     power spectrum, :math:`I^1_1` is defined in the documentation
-    of :meth:`~HMCalculator.bias`, and
-
-    .. math::
-        I^2_0(k,a|u) = \\int dM\\,n(M,a)\\,
-        \\langle u(k,a|M) v(k,a|M)\\rangle,
-
-    where :math:`n(M,a)` is the halo mass function, and
-    :math:`\\langle u(k,a|M) v(k,a|M)\\rangle` is the two-point
-    moment of the two halo profiles.
+    of :meth:`~HMCalculator.I_1_1`, and :math:`I^0_2` is defined
+    in the documentation of :meth:`~HMCalculator.I_0_2`.
 
     Args:
         cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
@@ -287,7 +352,8 @@ def halomod_power_spectrum(cosmo, hmc, k, a, prof,
         a (float or array_like): scale factor.
         prof (:class:`~pyccl.halos.profiles.HaloProfile`): halo
             profile.
-        prof_2pt (:class:`Profile2pt`): a profile covariance object
+        prof_2pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
+            a profile covariance object
             returning the the two-point moment of the two profiles
             being correlated. If `None`, the default second moment
             will be used, corresponding to the products of the means
@@ -299,12 +365,12 @@ def halomod_power_spectrum(cosmo, hmc, k, a, prof,
             be used as the linear matter power spectrum. If `None`,
             the power spectrum stored within `cosmo` will be used.
         normprof1 (bool): if `True`, this integral will be
-            normalized by :math:`I^1_0(k\\rightarrow 0,a|u)`
-            (see :meth:`~HMCalculator.mean_profile`), where
+            normalized by :math:`I^0_1(k\\rightarrow 0,a|u)`
+            (see :meth:`~HMCalculator.I_0_1`), where
             :math:`u` is the profile represented by `prof`.
         normprof2 (bool): if `True`, this integral will be
-            normalized by :math:`I^1_0(k\\rightarrow 0,a|v)`
-            (see :meth:`~HMCalculator.mean_profile`), where
+            normalized by :math:`I^0_1(k\\rightarrow 0,a|v)`
+            (see :meth:`~HMCalculator.I_0_1`), where
             :math:`v` is the profile represented by `prof2`.
         get_1h (bool): if `False`, the 1-halo term (i.e. the first
             term in the first equation above) won't be computed.
@@ -408,7 +474,8 @@ def halomod_Pk2D(cosmo, hmc, prof,
         hmc (:class:`HMCalculator`): a halo model calculator.
         prof (:class:`~pyccl.halos.profiles.HaloProfile`): halo
             profile.
-        prof_2pt (:class:`Profile2pt`): a profile covariance object
+        prof_2pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
+            a profile covariance object
             returning the the two-point moment of the two profiles
             being correlated. If `None`, the default second moment
             will be used, corresponding to the products of the means
@@ -420,12 +487,12 @@ def halomod_Pk2D(cosmo, hmc, prof,
             be used as the linear matter power spectrum. If `None`,
             the power spectrum stored within `cosmo` will be used.
         normprof1 (bool): if `True`, this integral will be
-            normalized by :math:`I^1_0(k\\rightarrow 0,a|u)`
-            (see :meth:`~HMCalculator.mean_profile`), where
+            normalized by :math:`I^0_1(k\\rightarrow 0,a|u)`
+            (see :meth:`~HMCalculator.I_0_1`), where
             :math:`u` is the profile represented by `prof`.
         normprof2 (bool): if `True`, this integral will be
-            normalized by :math:`I^1_0(k\\rightarrow 0,a|v)`
-            (see :meth:`~HMCalculator.mean_profile`), where
+            normalized by :math:`I^0_1(k\\rightarrow 0,a|v)`
+            (see :meth:`~HMCalculator.I_0_1`), where
             :math:`v` is the profile represented by `prof2`.
         get_1h (bool): if `False`, the 1-halo term (i.e. the first
             term in the first equation above) won't be computed.

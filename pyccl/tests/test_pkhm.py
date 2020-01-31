@@ -98,34 +98,48 @@ def test_pkhm_bias_smoke(norm):
 @pytest.mark.parametrize('pars',
                          [{'cv': None, 'norm': True,
                            'pk': 'linear', 'h1': True,
-                           'h2': True, 'p2': None},
+                           'h2': True, 'itg': 'simpson',
+                           'p2': None},
                           {'cv': PKC, 'norm': True,
                            'pk': 'linear', 'h1': True,
-                           'h2': True, 'p2': None},
+                           'h2': True, 'itg': 'simpson',
+                           'p2': None},
                           {'cv': None, 'norm': False,
                            'pk': 'linear', 'h1': True,
-                           'h2': True, 'p2': None},
+                           'h2': True, 'itg': 'simpson',
+                           'p2': None},
                           {'cv': None, 'norm': True,
                            'pk': 'nonlinear', 'h1': True,
-                           'h2': True, 'p2': None},
+                           'h2': True, 'itg': 'simpson',
+                           'p2': None},
                           {'cv': None, 'norm': True,
                            'pk': PK2D, 'h1': True,
-                           'h2': True, 'p2': None},
+                           'h2': True, 'itg': 'simpson',
+                           'p2': None},
                           {'cv': None, 'norm': True,
                            'pk': None, 'h1': True,
-                           'h2': True, 'p2': None},
+                           'h2': True, 'itg': 'simpson',
+                           'p2': None},
                           {'cv': None, 'norm': True,
                            'pk': 'linear', 'h1': False,
-                           'h2': True, 'p2': None},
+                           'h2': True, 'itg': 'simpson',
+                           'p2': None},
                           {'cv': None, 'norm': True,
                            'pk': 'linear', 'h1': True,
-                           'h2': False, 'p2': None},
+                           'h2': False, 'itg': 'simpson',
+                           'p2': None},
                           {'cv': None, 'norm': True,
                            'pk': 'linear', 'h1': False,
-                           'h2': False, 'p2': None},
+                           'h2': False, 'itg': 'simpson',
+                           'p2': None},
                           {'cv': None, 'norm': True,
                            'pk': 'linear', 'h1': True,
-                           'h2': True, 'p2': P2}])
+                           'h2': True, 'itg': 'spline',
+                           'p2': None},
+                          {'cv': None, 'norm': True,
+                           'pk': 'linear', 'h1': True,
+                           'h2': True, 'itg': 'simpson',
+                           'p2': P2}])
 def test_pkhm_pk_smoke(pars):
     hmc = ccl.halos.HMCalculator(COSMO, HMF, HBF, mass_def=M200,
                                  nlog10M=2)
@@ -185,6 +199,10 @@ def test_pkhm_errors():
     hmc = ccl.halos.HMCalculator(COSMO, HMF, HBF, mass_def=M200)
 
     # Wrong profile
+    with pytest.raises(TypeError):
+        ccl.halos.halomod_mean_profile_1pt(COSMO, hmc, KK, AA, None)
+    with pytest.raises(TypeError):
+        ccl.halos.halomod_bias_1pt(COSMO, hmc, KK, AA, None)
     with pytest.raises(TypeError):
         ccl.halos.halomod_power_spectrum(COSMO, hmc, KK, AA, None)
 
