@@ -300,7 +300,7 @@ double* ccl_nu_masses(double OmNuh2, ccl_neutrino_mass_splits mass_split,
       mnu[2] = sumnu/3.;
     }
   }
-  else if (mass_split == ccl_nu_sum) {
+  else if ((mass_split == ccl_nu_sum) || (mass_split == ccl_nu_single)) {
     mnu = malloc(sizeof(double));
     if (mnu == NULL) {
       *status = CCL_ERROR_MEMORY;
