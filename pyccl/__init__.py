@@ -32,7 +32,9 @@ from .power import linear_matter_power, nonlin_matter_power, sigmaR, \
     sigmaV, sigma8, sigmaM
     
 # Pert Theory stuff
-from .pt_power import PTTracer, PTNumberCountsTracer, PTIntrinsicAlignmentTracer, get_pt_pk
+from .pt_power import (  # noqa
+    PTTracer, PTNumberCountsTracer, PTIntrinsicAlignmentTracer,
+    PTWorkspace, get_pt_pk)
 
 # BCM stuff
 from .bcm import bcm_model_fka
