@@ -35,7 +35,7 @@ from .power import linear_matter_power, nonlin_matter_power, sigmaR, \
 from .pt_power import (  # noqa
     PTTracer, PTMatterTracer,
     PTNumberCountsTracer, PTIntrinsicAlignmentTracer,
-    PTWorkspace, get_pt_pk)
+    PTWorkspace, get_pt_pk2d)
 
 # BCM stuff
 from .bcm import bcm_model_fka
