@@ -13,7 +13,7 @@ except ImportError:
 
 
 class PTTracer(object):
-    def __init_(self):
+    def __init__(self):
         self.biases = {}
         self.type = None
         pass
@@ -31,6 +31,7 @@ class PTTracer(object):
         # If it's a scalar, then assume it's a constant function
         if np.ndim(b) == 0:
             def _const(z):
+                print("AHAHAHAHAHAH")
                 if np.ndim(z) == 0:
                     return b
                 else:
@@ -41,6 +42,12 @@ class PTTracer(object):
             z, b = _check_array_params(b)
             return interp1d(z, b, bounds_error=False,
                             fill_value=b[-1])
+
+
+class PTMatterTracer(PTTracer):
+    def __init__(self):
+        self.biases = {}
+        self.type = 'M'
 
 
 class PTNumberCountsTracer(PTTracer):
@@ -101,11 +108,11 @@ class PTWorkspace(object):
         self.with_NC = with_NC
         self.with_IA = with_IA
 
-        to_do = []
-        if self.with_IA:
-            to_do.append('IA')
+        to_do = ['one_loop_dd']
         if self.with_NC:
             to_do.append('dd_bias')
+        if self.with_IA:
+            to_do.append('IA')
 
         nk_total = int((log10k_max - log10k_min) * nk_per_decade)
         self.ks = np.logspace(log10k_min, log10k_max, nk_total)

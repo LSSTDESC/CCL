@@ -33,7 +33,8 @@ from .power import linear_matter_power, nonlin_matter_power, sigmaR, \
     
 # Pert Theory stuff
 from .pt_power import (  # noqa
-    PTTracer, PTNumberCountsTracer, PTIntrinsicAlignmentTracer,
+    PTTracer, PTMatterTracer,
+    PTNumberCountsTracer, PTIntrinsicAlignmentTracer,
     PTWorkspace, get_pt_pk)
 
 # BCM stuff
