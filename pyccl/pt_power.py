@@ -129,9 +129,42 @@ class PTWorkspace(object):
                                     n_pad=n_pad)
 
     def get_dd_bias(self, pk):
+        # TODO: should we use one_loop_dd_bias_b3nl instead of this?
         return self.pt_object.one_loop_dd_bias(pk,
                                                P_window=self.P_window,
                                                C_window=self.C_window)
+
+    def get_pgg(self, bias_fpt, Pd1d1, g4, b11, b21, bs1, b12, b22, bs2,
+                sub_lowk):
+        Pd1d2 = g4[None, :] * bias_fpt[2][:, None]
+        Pd2d2 = g4[None, :] * bias_fpt[3][:, None]
+        Pd1s2 = g4[None, :] * bias_fpt[4][:, None]
+        Pd2s2 = g4[None, :] * bias_fpt[5][:, None]
+        Ps2s2 = g4[None, :] * bias_fpt[6][:, None]
+
+        s4 = 0.
+        if sub_lowk:
+            s4 = g4 * bias_fpt[7]
+            s4 = s4[None, :]
+
+        # TODO: someone else should check this
+        pgg = ((b11*b12)[None, :] * Pd1d1 +
+               0.5*(b11*b22 + b12*b21)[None, :] * Pd1d2 +
+               0.25*(b21*b22)[None, :] * (Pd2d2 - 2.*s4) +
+               0.5*(b11*b22 + b12*bs1)[None, :] * Pd1s2 +
+               0.25*(b21*bs2 + b22*bs1)[None, :] * (Pd2s2 - (4./3.)*s4) +
+               0.25*(bs1*bs2)[None, :] * (Ps2s2 - (8./9.)*s4))
+        return pgg
+
+    def get_pgm(self, bias_fpt, Pd1d1, g4, b1, b2, bs):
+        Pd1d2 = g4[None, :] * bias_fpt[2][:, None]
+        Pd1s2 = g4[None, :] * bias_fpt[4][:, None]
+
+        # TODO: someone else should check this
+        pgm = (b1[None, :] * Pd1d1 +
+               0.5 * b2[None, :] * Pd1d2 +
+               0.5 * bs[None, :] * Pd1s2)
+        return pgm
 
 
 def get_pt_pk2d(cosmo, w, tracer1, tracer2=None,
@@ -193,27 +226,29 @@ def get_pt_pk2d(cosmo, w, tracer1, tracer2=None,
             bs2 = tracer2.b2(z_arr)
 
             bias_fpt = w.get_dd_bias(pk_lin_z0)
-
-            Pd1d2 = ga4[None, :] * bias_fpt[2][:, None]
-            Pd2d2 = ga4[None, :] * bias_fpt[3][:, None]
-            Pd1s2 = ga4[None, :] * bias_fpt[4][:, None]
-            Pd2s2 = ga4[None, :] * bias_fpt[5][:, None]
-            Ps2s2 = ga4[None, :] * bias_fpt[6][:, None]
-            s4 = 0.
-            if sub_lowk:
-                s4 = ga4 * bias_fpt[7]
-                s4 = s4[None, :]
-
-            p_gg = ((b11*b12)[None, :] * Pd1d1 +
-                    0.5*(b11*b22 + b12*b21)[None, :] * Pd1d2 +
-                    0.25*(b21*b22)[None, :] * (Pd2d2 - 2.*s4) +
-                    0.5*(b11*b22 + b12*bs1)[None, :] * Pd1s2 +
-                    0.25*(b21*bs2 + b22*bs1)[None, :] * (Pd2s2 - (4./3.)*s4) +
-                    0.25*(bs1*bs2)[None, :] * (Ps2s2 - (8./9.)*s4))
-            p_pt = p_gg
+            # TODO: we're not using the 1-loop calculation at all
+            #   (i.e. bias_fpt[0]).
+            # Should we allow users to select that as Pd1d1?
+            p_pt = w.get_pgg(bias_fpt, Pd1d1, ga4,
+                             b11, b21, bs1, b12, b22, bs2,
+                             sub_lowk)
+        elif (tracer2.type == 'M'):
+            bias_fpt = w.get_dd_bias(pk_lin_z0)
+            p_pt = w.get_pgm(bias_fpt, Pd1d1, ga4,
+                             b11, b21, bs1)
         else:
             raise NotImplementedError("Combination %s-%s not implemented yet" %
                                       (tracer1.type, tracer2.type))
+    elif (tracer1.type == 'M'):
+        if (tracer2.type == 'NC'):
+            b12 = tracer2.b1(z_arr)
+            b22 = tracer2.b2(z_arr)
+            bs2 = tracer2.b2(z_arr)
+            bias_fpt = w.get_dd_bias(pk_lin_z0)
+            p_pt = w.get_pgm(bias_fpt, Pd1d1, ga4,
+                             b12, b22, bs2)
+        elif (tracer2.type == 'M'):
+            p_pt = Pd1d1
     else:
         raise NotImplementedError("Combination %s-%s not implemented yet" %
                                   (tracer1.type, tracer2.type))

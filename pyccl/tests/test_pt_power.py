@@ -9,6 +9,9 @@ BZ = BZ_C * np.ones(NZ)
 COSMO = ccl.Cosmology(
     Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96,
     transfer_function='bbks', matter_power_spectrum='linear')
+TRS = {'TG': ccl.PTNumberCountsTracer((ZZ, BZ)),
+       'TM': ccl.PTMatterTracer()}
+WW = ccl.PTWorkspace()
 
 
 def test_pt_tracer_smoke():
@@ -61,8 +64,11 @@ def test_pt_workspace_smoke():
     assert len(w.ks) == 40
 
 
-def test_pt_get_pk2d_smoke():
-    w = ccl.PTWorkspace()
-    t1 = ccl.PTNumberCountsTracer((ZZ, BZ))
-    ccl.get_pt_pk2d(COSMO, w, t1)
-
+@pytest.mark.parametrize('tracers', [['TG', 'TG'],
+                                     ['TG', 'TM'],
+                                     ['TM', 'TG'],
+                                     ['TM', 'TM']])
+def test_pt_get_pk2d_smoke(tracers):
+    ccl.get_pt_pk2d(COSMO, WW,
+                    TRS[tracers[0]],
+                    TRS[tracers[1]])
