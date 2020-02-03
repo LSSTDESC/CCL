@@ -134,6 +134,18 @@ class PTWorkspace(object):
                                                P_window=self.P_window,
                                                C_window=self.C_window)
 
+    def get_ia_bias(self, pk):
+        ta = self.pt_object.IA_ta(pk,
+                                  P_window=self.P_window,
+                                  C_window=self.C_window)
+        tt = self.pt_object.IA_tt(pk,
+                                  P_window=self.P_window,
+                                  C_window=self.C_window)
+        mix = self.pt_object.IA_mix(pk,
+                                    P_window=self.P_window,
+                                    C_window=self.C_window)
+        return ta, tt, mix
+
     def get_pgg(self, bias_fpt, Pd1d1, g4, b11, b21, bs1, b12, b22, bs2,
                 sub_lowk):
         Pd1d2 = g4[None, :] * bias_fpt[2][:, None]
@@ -166,10 +178,42 @@ class PTWorkspace(object):
                0.5 * bs[None, :] * Pd1s2)
         return pgm
 
+    def get_pim(self, ta_fpt, mix_fpt, Pd1d1,
+                g4, c1, c2, cd):
+        a00e, c00e, a0e0e, a0b0b = ta_fpt
+        a0e2, b0e2, d0ee2, d0bb2 = mix_fpt
+
+        # TODO: someone else should check this
+        pim = (c1[None, :] * Pd1d1 +
+               (g4*cd)[None, :] * (a00e + c00e)[:, None] +
+               (g4*c2)[None, :] * (a0e2 + b0e2)[:, None])
+
+        return pim
+
+    def get_pii(self, tt_fpt, ta_fpt, mix_fpt, Pd1d1,
+                g4, c11, c21, cd1, c12, c22, cd2, return_bb=False):
+        a00e, c00e, a0e0e, a0b0b = ta_fpt
+        ae2e2, ab2b2 = tt_fpt
+        a0e2, b0e2, d0ee2, d0bb2 = mix_fpt
+
+        if return_bb:
+            pii = ((cd1*cd2)[None, :] * a0b0b[:, None] +
+                   (cd1*c22*g4)[None, :] * ab2b2[:, None] +
+                   ((cd1*c22 + cd1*c21)*g4)[None, :] * d0bb2[:, None])
+        else:
+            pii = ((c11*c12*g4)[None, :] * Pd1d1 +
+                   ((c11*cd2 + c12*cd1)*g4)[None, :] * (a00e + c00e)[:, None] +
+                   (cd1*cd2*g4)[None, :] * a0e0e[:, None] +
+                   (c21*c22*g4)[None, :] * ae2e2[:, None] +
+                   ((c11*c22 + c21*c12)*g4)[None, :] * (a0e2 + b0e2)[:, None] +
+                   ((cd1*c22 + cd2*c21)*g4)[None, :] * d0ee2[:, None])
+        return pii
+
 
 def get_pt_pk2d(cosmo, w, tracer1, tracer2=None,
                 sub_lowk=False, use_nonlin=True, a_arr=None,
-                extrap_order_lok=1, extrap_order_hik=2):
+                extrap_order_lok=1, extrap_order_hik=2,
+                return_ia_bb=False):
 
     if a_arr is None:
         status = 0
@@ -220,12 +264,12 @@ def get_pt_pk2d(cosmo, w, tracer1, tracer2=None,
         b11 = tracer1.b1(z_arr)
         b21 = tracer1.b2(z_arr)
         bs1 = tracer1.b2(z_arr)
+        bias_fpt = w.get_dd_bias(pk_lin_z0)
         if (tracer2.type == 'NC'):
             b12 = tracer2.b1(z_arr)
             b22 = tracer2.b2(z_arr)
             bs2 = tracer2.b2(z_arr)
 
-            bias_fpt = w.get_dd_bias(pk_lin_z0)
             # TODO: we're not using the 1-loop calculation at all
             #   (i.e. bias_fpt[0]).
             # Should we allow users to select that as Pd1d1?
@@ -233,9 +277,26 @@ def get_pt_pk2d(cosmo, w, tracer1, tracer2=None,
                              b11, b21, bs1, b12, b22, bs2,
                              sub_lowk)
         elif (tracer2.type == 'M'):
-            bias_fpt = w.get_dd_bias(pk_lin_z0)
             p_pt = w.get_pgm(bias_fpt, Pd1d1, ga4,
                              b11, b21, bs1)
+        else:
+            raise NotImplementedError("Combination %s-%s not implemented yet" %
+                                      (tracer1.type, tracer2.type))
+    elif (tracer1.type == 'IA'):
+        c11 = tracer1.c1(z_arr)
+        c21 = tracer1.c2(z_arr)
+        cd1 = tracer1.cdelta(z_arr)
+        ta_fpt, tt_fpt, mix_fpt = w.get_ia_bias(pk_lin_z0)
+        if (tracer2.type == 'IA'):
+            c12 = tracer2.c1(z_arr)
+            c22 = tracer2.c2(z_arr)
+            cd2 = tracer2.cdelta(z_arr)
+            p_pt = w.get_pii(tt_fpt, ta_fpt, mix_fpt, Pd1d1, ga4,
+                             c11, c21, cd1, c12, c22, cd2,
+                             return_bb=return_ia_bb)
+        elif (tracer2.type == 'M'):
+            p_pt = w.get_pim(ta_fpt, mix_fpt, Pd1d1, ga4,
+                             c11, c21, cd1)
         else:
             raise NotImplementedError("Combination %s-%s not implemented yet" %
                                       (tracer1.type, tracer2.type))
@@ -247,8 +308,18 @@ def get_pt_pk2d(cosmo, w, tracer1, tracer2=None,
             bias_fpt = w.get_dd_bias(pk_lin_z0)
             p_pt = w.get_pgm(bias_fpt, Pd1d1, ga4,
                              b12, b22, bs2)
+        elif (tracer2.type == 'IA'):
+            c12 = tracer2.c1(z_arr)
+            c22 = tracer2.c2(z_arr)
+            cd2 = tracer2.cdelta(z_arr)
+            ta_fpt, tt_fpt, mix_fpt = w.get_ia_bias(pk_lin_z0)
+            p_pt = w.get_pim(ta_fpt, mix_fpt, Pd1d1, ga4,
+                             c12, c22, cd2)
         elif (tracer2.type == 'M'):
             p_pt = Pd1d1
+        else:
+            raise NotImplementedError("Combination %s-%s not implemented yet" %
+                                      (tracer1.type, tracer2.type))
     else:
         raise NotImplementedError("Combination %s-%s not implemented yet" %
                                   (tracer1.type, tracer2.type))
