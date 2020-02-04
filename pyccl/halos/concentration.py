@@ -337,7 +337,7 @@ class ConcentrationDuffy08(Concentration):
         if self.mdef.Delta == 'vir':
             self.A = 7.85
             self.B = -0.081
-            self.C = -0.47
+            self.C = -0.71
         else:  # Now Delta has to be 200
             if self.mdef.rho_type == 'matter':
                 self.A = 10.14
