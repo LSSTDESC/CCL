@@ -109,7 +109,7 @@ class PTWorkspace(object):
                  P_window=None, C_window=.75):
         self.with_NC = with_NC
         self.with_IA = with_IA
-        # TODO: what is this?
+        # TODO: what is this? (JAB: These are fastpt settings that determine how smoothing is done at the edges to avoid ringing, etc)
         self.P_window = P_window
         self.C_window = C_window
 
@@ -163,7 +163,7 @@ class PTWorkspace(object):
         pgg = ((b11*b12)[None, :] * Pd1d1 +
                0.5*(b11*b22 + b12*b21)[None, :] * Pd1d2 +
                0.25*(b21*b22)[None, :] * (Pd2d2 - 2.*s4) +
-               0.5*(b11*b22 + b12*bs1)[None, :] * Pd1s2 +
+               0.5*(b11*bs2 + b12*bs1)[None, :] * Pd1s2 +
                0.25*(b21*bs2 + b22*bs1)[None, :] * (Pd2s2 - (4./3.)*s4) +
                0.25*(bs1*bs2)[None, :] * (Ps2s2 - (8./9.)*s4))
         return pgg
@@ -209,7 +209,9 @@ class PTWorkspace(object):
                    ((cd1*c22 + cd2*c21)*g4)[None, :] * d0ee2[:, None])
         return pii
 
-
+#TODO: Do we definitely want to split these into two steps? Is there a way to do this in a single call.
+# The nice thing about the old way, other than simplicity, was that the PTTracers contained the info about what needed to be initialized.
+# The nice thing about separating is that it is (probably) easier to store the PTworkspace to avoid re-initializing.
 def get_pt_pk2d(cosmo, w, tracer1, tracer2=None,
                 sub_lowk=False, use_nonlin=True, a_arr=None,
                 extrap_order_lok=1, extrap_order_hik=2,
