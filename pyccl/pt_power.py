@@ -107,6 +107,7 @@ class PTWorkspace(object):
                  log10k_min=-4, log10k_max=2, nk_per_decade=20,
                  pad_factor=1, low_extrap=-5, high_extrap=3,
                  P_window=None, C_window=.75):
+        #TODO: JAB: I think we want to restore the option to pass in a k_array and let the workspace perform the check. Then we can also pass in the corresponding power spectrum, if desired, in get_pt_pk2d
         self.with_NC = with_NC
         self.with_IA = with_IA
         # TODO: what is this? (JAB: These are fastpt settings that determine how smoothing is done at the edges to avoid ringing, etc)
@@ -216,6 +217,7 @@ def get_pt_pk2d(cosmo, w, tracer1, tracer2=None,
                 sub_lowk=False, use_nonlin=True, a_arr=None,
                 extrap_order_lok=1, extrap_order_hik=2,
                 return_ia_bb=False):
+                #TODO: Restore ability to pass in pk. Could be useful for custom cases where interpolated Plin isn't needed. And could help with speed-up in some cases.
 
     if a_arr is None:
         status = 0
