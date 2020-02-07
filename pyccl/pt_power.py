@@ -1,3 +1,4 @@
+import warnings
 import numpy as np
 from scipy.interpolate import interp1d
 from . import ccllib as lib
@@ -107,10 +108,22 @@ class PTWorkspace(object):
                  log10k_min=-4, log10k_max=2, nk_per_decade=20,
                  pad_factor=1, low_extrap=-5, high_extrap=3,
                  P_window=None, C_window=.75):
-        #TODO: JAB: I think we want to restore the option to pass in a k_array and let the workspace perform the check. Then we can also pass in the corresponding power spectrum, if desired, in get_pt_pk2d
+        # TODO: JAB: I think we want to restore the option to pass
+        # in a k_array and let the workspace perform the check.
+        # Then we can also pass in the corresponding power spectrum,
+        # if desired, in get_pt_pk2d
+        # DAM: hmmm, what's the point of this? We know that FastPT
+        # will only work for logarithmically spaced ks, right? In that
+        # in that case we should force it on the users so that
+        # nothing unexpected happens. Note that this doesn't limit
+        # at all what ks you can evaluate the power spectra at,
+        # since everything gets interpolated at the end.
         self.with_NC = with_NC
         self.with_IA = with_IA
-        # TODO: what is this? (JAB: These are fastpt settings that determine how smoothing is done at the edges to avoid ringing, etc)
+        # TODO: what is this?
+        # (JAB: These are fastpt settings that determine how smoothing
+        # is done at the edges to avoid ringing, etc)
+        # OK, we need to document this.
         self.P_window = P_window
         self.C_window = C_window
 
@@ -191,6 +204,24 @@ class PTWorkspace(object):
 
         return pim
 
+    def get_pgi(self, ta_fpt, mix_fpt, Pd1d1,
+                g4, b1, c1, c2, cd):
+        warnings.warn(
+            "The full non-linear model for the cross-correlation "
+            "between number counts and intrinsic alignments is "
+            "still work in progress in FastPT. As a workaround "
+            "CCL assumes a non-linear treatment of IAs, but only "
+            "linearly biased number counts.")
+        a00e, c00e, a0e0e, a0b0b = ta_fpt
+        a0e2, b0e2, d0ee2, d0bb2 = mix_fpt
+
+        # TODO: someone else should check this
+        pim = b1[None, :] * (c1[None, :] * Pd1d1 +
+                             (g4*cd)[None, :] * (a00e + c00e)[:, None] +
+                             (g4*c2)[None, :] * (a0e2 + b0e2)[:, None])
+
+        return pim
+
     def get_pii(self, tt_fpt, ta_fpt, mix_fpt, Pd1d1,
                 g4, c11, c21, cd1, c12, c22, cd2, return_bb=False):
         a00e, c00e, a0e0e, a0b0b = ta_fpt
@@ -210,14 +241,26 @@ class PTWorkspace(object):
                    ((cd1*c22 + cd2*c21)*g4)[None, :] * d0ee2[:, None])
         return pii
 
-#TODO: Do we definitely want to split these into two steps? Is there a way to do this in a single call.
-# The nice thing about the old way, other than simplicity, was that the PTTracers contained the info about what needed to be initialized.
-# The nice thing about separating is that it is (probably) easier to store the PTworkspace to avoid re-initializing.
+
+# TODO: Do we definitely want to split these into two steps?
+# Is there a way to do this in a single call.
+# The nice thing about the old way, other than simplicity.
+# was that the PTTracers contained the info about what needed
+# to be initialized.
+# The nice thing about separating is that it is (probably)
+# easier to store the PTworkspace to avoid re-initializing.
+# DAM: we can have the best of both worlds. Make w an optional
+# argument that defaults to None. If you don't pass it, then it
+# gets initialized based on the input tracers.
 def get_pt_pk2d(cosmo, w, tracer1, tracer2=None,
                 sub_lowk=False, use_nonlin=True, a_arr=None,
                 extrap_order_lok=1, extrap_order_hik=2,
                 return_ia_bb=False):
-                #TODO: Restore ability to pass in pk. Could be useful for custom cases where interpolated Plin isn't needed. And could help with speed-up in some cases.
+    # TODO: Restore ability to pass in pk.
+    # Could be useful for custom cases where
+    # interpolated Plin isn't needed.
+    # And could help with speed-up in some cases.
+    # DAM: Can you describe a case when this is useful?
 
     if a_arr is None:
         status = 0
@@ -280,6 +323,13 @@ def get_pt_pk2d(cosmo, w, tracer1, tracer2=None,
             p_pt = w.get_pgg(bias_fpt, Pd1d1, ga4,
                              b11, b21, bs1, b12, b22, bs2,
                              sub_lowk)
+        elif (tracer2.type == 'IA'):
+            c12 = tracer2.c1(z_arr)
+            c22 = tracer2.c2(z_arr)
+            cd2 = tracer2.cdelta(z_arr)
+            ta_fpt, tt_fpt, mix_fpt = w.get_ia_bias(pk_lin_z0)
+            p_pt = w.get_pgi(ta_fpt, mix_fpt, Pd1d1, ga4,
+                             b11, c12, c22, cd2)
         elif (tracer2.type == 'M'):
             p_pt = w.get_pgm(bias_fpt, Pd1d1, ga4,
                              b11, b21, bs1)
@@ -298,6 +348,13 @@ def get_pt_pk2d(cosmo, w, tracer1, tracer2=None,
             p_pt = w.get_pii(tt_fpt, ta_fpt, mix_fpt, Pd1d1, ga4,
                              c11, c21, cd1, c12, c22, cd2,
                              return_bb=return_ia_bb)
+        elif (tracer2.type == 'NC'):
+            b12 = tracer2.b1(z_arr)
+            b22 = tracer2.b2(z_arr)
+            bs2 = tracer2.b2(z_arr)
+
+            p_pt = w.get_pgi(ta_fpt, mix_fpt, Pd1d1, ga4,
+                             b12, c11, c21, cd1)
         elif (tracer2.type == 'M'):
             p_pt = w.get_pim(ta_fpt, mix_fpt, Pd1d1, ga4,
                              c11, c21, cd1)

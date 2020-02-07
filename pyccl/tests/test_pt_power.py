@@ -70,7 +70,9 @@ def test_pt_workspace_smoke():
 
 
 @pytest.mark.parametrize('tracers', [['TG', 'TG', False],
+                                     ['TG', 'TI', False],
                                      ['TG', 'TM', False],
+                                     ['TI', 'TG', False],
                                      ['TI', 'TI', False],
                                      ['TI', 'TI', True],
                                      ['TI', 'TM', False],
