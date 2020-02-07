@@ -108,6 +108,9 @@ class PTWorkspace(object):
                  log10k_min=-4, log10k_max=2, nk_per_decade=20,
                  pad_factor=1, low_extrap=-5, high_extrap=3,
                  P_window=None, C_window=.75):
+        assert HAVE_FASTPT, (
+                "You must have the `FASTPT` python package "
+                "installed to use CCL to get PT power spectra!")
         # TODO: JAB: I think we want to restore the option to pass
         # in a k_array and let the workspace perform the check.
         # Then we can also pass in the corresponding power spectrum,
