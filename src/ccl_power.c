@@ -476,6 +476,16 @@ void ccl_cosmology_compute_linear_power(ccl_cosmology* cosmo, ccl_f2d_t *psp, in
 }
 
 
+/*------ ROUTINE: ccl_cosmology_compute_nonlin_power_from_f2d -----
+INPUT: ccl_cosmology * cosmo
+TASK: compute linear power spectrum
+*/
+void ccl_cosmology_compute_nonlin_power_from_f2d(ccl_cosmology *cosmo,
+                                                 ccl_f2d_t *psp, int *status)
+{
+  cosmo->data.p_nl = ccl_f2d_copy(psp, status);
+}
+
 /*------ ROUTINE: ccl_cosmology_compute_power -----
 INPUT: ccl_cosmology * cosmo
 TASK: compute linear power spectrum
