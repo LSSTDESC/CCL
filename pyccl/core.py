@@ -818,7 +818,6 @@ class Cosmology(object):
         self.compute_linear_power()
         status = 0
         status = lib.cosmology_compute_sigma(self.cosmo, status)
-        status = lib.cosmology_compute_hmfparams(self.cosmo, status)
         check(status, self)
 
     @property
@@ -843,10 +842,8 @@ class Cosmology(object):
 
     @property
     def has_sigma(self):
-        """Checks if sigma(M) and mass function splines are precomputed."""
-        return (
-            bool(self.cosmo.computed_sigma) and
-            bool(self.cosmo.computed_hmfparams))
+        """Checks if sigma(M) is precomputed."""
+        return bool(self.cosmo.computed_sigma)
 
     def status(self):
         """Get error status of the ccl_cosmology object.

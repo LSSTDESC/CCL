@@ -22,7 +22,7 @@ COSMO_HM = ccl.Cosmology(
 ])
 def test_nonlin_power_halomod(k):
     a = 0.8
-    pk = ccl.nonlin_matter_power(COSMO_HM, 1., a)
+    pk = ccl.nonlin_matter_power(COSMO_HM, k, a)
     assert np.all(np.isfinite(pk))
     assert np.shape(pk) == np.shape(k)
 

@@ -35,10 +35,6 @@ static double eh_power(ccl_parameters *params, void *p, double k) {
 }
 
 // helper functions for non-linear power tabulation
-static double halomodel_power(ccl_cosmology* cosmo, double k, double a, void *p, int* status) {
-  return ccl_halomodel_matter_power(cosmo, k, a, status);
-}
-
 static double linear_power(ccl_cosmology* cosmo, double k, double a, void *p, int* status) {
   return ccl_linear_matter_power(cosmo, k, a, status);
 }
