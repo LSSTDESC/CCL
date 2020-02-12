@@ -434,6 +434,7 @@ void ccl_cosmology_compute_linear_power(ccl_cosmology* cosmo, ccl_f2d_t *psp, in
   if (cosmo->computed_linear_power) return;
 
   if (*status == 0) {
+     int isitgr_flag = 0;
     // get linear P(k)
     switch (cosmo->config.transfer_function_method) {
       case ccl_transfer_none:
@@ -453,11 +454,16 @@ void ccl_cosmology_compute_linear_power(ccl_cosmology* cosmo, ccl_f2d_t *psp, in
         break;
 
       case ccl_boltzmann_class:
-        ccl_cosmology_spline_linpower_musigma(cosmo, psp, status);
+        ccl_cosmology_spline_linpower_musigma(cosmo, psp, isitgr_flag, status);
         break;
 
       case ccl_boltzmann_camb:
-        ccl_cosmology_spline_linpower_musigma(cosmo, psp, status);
+        ccl_cosmology_spline_linpower_musigma(cosmo, psp, isitgr_flag, status);
+        break;
+
+      case ccl_boltzmann_isitgr:
+	isitgr_flag = 1; 
+        ccl_cosmology_spline_linpower_musigma(cosmo, psp, isitgr_flag, status);
         break;
 
       default: {
