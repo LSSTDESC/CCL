@@ -47,7 +47,17 @@ def test_nM_mdef_raises(nM_pair):
                                       ccl.halos.MassFuncTinker10])
 def test_nM_mdef_bad_delta(nM_class):
     with pytest.raises(ValueError):
-        nM_class(COSMO, M100)
+        nM_class(COSMO, MFOF)
+
+
+@pytest.mark.parametrize('nM_class', [ccl.halos.MassFuncTinker08,
+                                      ccl.halos.MassFuncTinker10])
+def test_nM_SO_allgood(nM_class):
+    nM = nM_class(COSMO, MVIR)
+    for m in MS:
+        n = nM.get_mass_function(COSMO, m, 0.9)
+        assert np.all(np.isfinite(n))
+        assert np.shape(n) == np.shape(m)
 
 
 def test_nM_despali_smoke():

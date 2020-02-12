@@ -32,12 +32,6 @@ def test_bM_mdef_raises(bM_pair):
         bM_class(COSMO, mdef)
 
 
-def test_bM_Tinker10_smoke():
-    bM_class = ccl.halos.HaloBiasTinker10
-    with pytest.raises(ValueError):
-        bM_class(COSMO, ccl.halos.MassDef(100, 'matter'))
-
-
 @pytest.mark.parametrize('name', ['Tinker10', 'Sheth99'])
 def test_bM_from_string(name):
     bM_class = ccl.halos.halo_bias_from_name(name)

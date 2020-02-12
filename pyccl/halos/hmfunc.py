@@ -315,6 +315,15 @@ class MassFuncTinker08(MassFunc):
     def _pd(self, ld):
         return 10.**(-(0.75/(ld - 1.8750612633))**1.2)
 
+    def _get_Delta_m(self, cosmo, a):
+        delta = self.mdef.get_Delta(cosmo, a)
+        if self.mdef.rho_type == 'matter':
+            return delta
+        else:
+            om_this = omega_x(cosmo, a, self.mdef.rho_type)
+            om_matt = omega_x(cosmo, a, 'matter')
+            return delta * om_this / om_matt
+
     def _setup(self, cosmo):
         from scipy.interpolate import interp1d
 
@@ -335,15 +344,12 @@ class MassFuncTinker08(MassFunc):
         self.pc = interp1d(ldelta, phi)
 
     def _check_mdef_strict(self, mdef):
-        if isinstance(mdef.Delta, str):
-            return True
-        elif (mdef.Delta < 200.) or (mdef.Delta > 3200.) or \
-             (mdef.rho_type != 'matter'):
+        if mdef.Delta == 'fof':
             return True
         return False
 
     def _get_fsigma(self, cosmo, sigM, a, lnM):
-        ld = np.log10(self.mdef.Delta)
+        ld = np.log10(self._get_Delta_m(cosmo, a))
         pA = self.pA0(ld) * a**0.14
         pa = self.pa0(ld) * a**0.06
         pb = self.pb0(ld) * a**self._pd(ld)
@@ -432,6 +438,15 @@ class MassFuncTinker10(MassFunc):
     def _default_mdef(self):
         self.mdef = MassDef200m()
 
+    def _get_Delta_m(self, cosmo, a):
+        delta = self.mdef.get_Delta(cosmo, a)
+        if self.mdef.rho_type == 'matter':
+            return delta
+        else:
+            om_this = omega_x(cosmo, a, self.mdef.rho_type)
+            om_matt = omega_x(cosmo, a, 'matter')
+            return delta * om_this / om_matt
+
     def _setup(self, cosmo):
         from scipy.interpolate import interp1d
 
@@ -458,15 +473,12 @@ class MassFuncTinker10(MassFunc):
         self.pd0 = interp1d(ldelta, phi)
 
     def _check_mdef_strict(self, mdef):
-        if isinstance(mdef.Delta, str):
-            return True
-        elif (mdef.Delta < 200.) or (mdef.Delta > 3200.) or \
-             (mdef.rho_type != 'matter'):
+        if mdef.Delta == 'fof':
             return True
         return False
 
     def _get_fsigma(self, cosmo, sigM, a, lnM):
-        ld = np.log10(self.mdef.Delta)
+        ld = np.log10(self._get_Delta_m(cosmo, a))
         nu = 1.686 / sigM
         pa = self.pa0(ld) * a**(-0.27)
         pb = self.pb0(ld) * a**(-0.20)
