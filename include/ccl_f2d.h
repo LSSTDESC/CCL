@@ -104,7 +104,7 @@ void ccl_f2d_t_free(ccl_f2d_t *fka);
  * @param f2d_o old ccl_f2d_t structure.
  * @param status Status flag. 0 if there are no errors, nonzero otherwise.
  */
-ccl_f2d_t *ccl_f2d_copy(ccl_f2d_t *f2d_o, int *status);
+ccl_f2d_t *ccl_f2d_t_copy(ccl_f2d_t *f2d_o, int *status);
 
 CCL_END_DECLS
 

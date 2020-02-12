@@ -8,7 +8,7 @@
 
 #include "ccl.h"
 
-ccl_f2d_t *ccl_f2d_copy(ccl_f2d_t *f2d_o, int *status)
+ccl_f2d_t *ccl_f2d_t_copy(ccl_f2d_t *f2d_o, int *status)
 {
   int s2dstatus=0;
   ccl_f2d_t *f2d = malloc(sizeof(ccl_f2d_t));

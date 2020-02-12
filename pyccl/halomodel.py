@@ -71,7 +71,8 @@ def onehalo_matter_power(cosmo, k, a):
     hmc = hal.HMCalculator(cosmo, hmf, hbf, mdef)
 
     return hal.halomod_power_spectrum(cosmo, hmc, k, a,
-                                      prf, get_2h=False)
+                                      prf, normprof1=True,
+                                      get_2h=False)
 
 
 @deprecated(hal.halomod_power_spectrum)
@@ -92,7 +93,8 @@ def twohalo_matter_power(cosmo, k, a):
     prf = hal.HaloProfileNFW(c)
     hmc = hal.HMCalculator(cosmo, hmf, hbf, mdef)
 
-    return hal.halomod_power_spectrum(cosmo, hmc, k, a, prf,
+    return hal.halomod_power_spectrum(cosmo, hmc, k, a,
+                                      prf, normprof1=True,
                                       get_1h=False)
 
 
@@ -114,4 +116,5 @@ def halomodel_matter_power(cosmo, k, a):
     prf = hal.HaloProfileNFW(c)
     hmc = hal.HMCalculator(cosmo, hmf, hbf, mdef)
 
-    return hal.halomod_power_spectrum(cosmo, hmc, k, a, prf)
+    return hal.halomod_power_spectrum(cosmo, hmc, k, a,
+                                      prf, normprof1=True)

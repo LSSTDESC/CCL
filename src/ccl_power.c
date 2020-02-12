@@ -8,6 +8,7 @@
 #include <gsl/gsl_errno.h>
 
 #include "ccl.h"
+#include "ccl_f2d.h"
 #include "ccl_emu17.h"
 #include "ccl_emu17_params.h"
 
@@ -475,22 +476,18 @@ void ccl_cosmology_compute_linear_power(ccl_cosmology* cosmo, ccl_f2d_t *psp, in
     cosmo->computed_linear_power = true;
 }
 
-
-/*------ ROUTINE: ccl_cosmology_compute_nonlin_power_from_f2d -----
-INPUT: ccl_cosmology * cosmo
-TASK: compute linear power spectrum
-*/
 void ccl_cosmology_compute_nonlin_power_from_f2d(ccl_cosmology *cosmo,
                                                  ccl_f2d_t *psp, int *status)
 {
-  cosmo->data.p_nl = ccl_f2d_copy(psp, status);
+  cosmo->data.p_nl = ccl_f2d_t_copy(psp, status);
 }
 
 /*------ ROUTINE: ccl_cosmology_compute_power -----
 INPUT: ccl_cosmology * cosmo
 TASK: compute linear power spectrum
 */
-void ccl_cosmology_compute_nonlin_power(ccl_cosmology* cosmo, int* status) {
+void ccl_cosmology_compute_nonlin_power(ccl_cosmology* cosmo, ccl_f2d_t *psp_o,
+                                        int* status) {
   if ((fabs(cosmo->params.mu_0)>1e-14 || fabs(cosmo->params.sigma_0)>1e-14) &&
       cosmo->config.matter_power_spectrum_method != ccl_linear) {
     *status = CCL_ERROR_NOT_IMPLEMENTED;
@@ -522,7 +519,7 @@ void ccl_cosmology_compute_nonlin_power(ccl_cosmology* cosmo, int* status) {
         break;
 
       case ccl_halo_model: {
-        ccl_cosmology_spline_nonlinpower(cosmo, halomodel_power, NULL, status);}
+        ccl_cosmology_compute_nonlin_power_from_f2d(cosmo, psp_o, status);}
         break;
 
       case ccl_emu: {

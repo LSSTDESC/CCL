@@ -8,8 +8,26 @@ from pyccl import CCLError, CCLWarning
 COSMO = ccl.Cosmology(
     Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96,
     transfer_function='bbks', matter_power_spectrum='halofit')
+COSMO_HM = ccl.Cosmology(
+    Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96,
+    transfer_function='bbks', matter_power_spectrum='halo_model',
+    mass_function='shethtormen')
 
 
+@pytest.mark.parametrize('k', [
+    1,
+#    1.0,
+#    [0.3, 0.5, 10],
+#    np.array([0.3, 0.5, 10])
+])
+def test_nonlin_power_halomod(k):
+    a = 0.8
+    pk = ccl.nonlin_matter_power(COSMO_HM, 1., a)
+    #assert np.all(np.isfinite(pk))
+    #assert np.shape(pk) == np.shape(k)
+    assert False
+
+'''
 @pytest.mark.parametrize('k', [
     1,
     1.0,
@@ -107,3 +125,4 @@ def test_power_sigma8norm_norms_consistent(tf):
         ccl.linear_matter_power(cosmo, 1e-4, a) /
         ccl.linear_matter_power(cosmo_s8, 1e-4, a))
     assert np.allclose(pk_rat, gfac)
+'''
