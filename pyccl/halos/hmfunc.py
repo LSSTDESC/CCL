@@ -312,6 +312,9 @@ class MassFuncTinker08(MassFunc):
     def _default_mdef(self):
         self.mdef = MassDef200m()
 
+    def _pd(self, ld):
+        return 10.**(-(0.75/(ld - 1.8750612633))**1.2)
+
     def _setup(self, cosmo):
         from scipy.interpolate import interp1d
 
@@ -326,12 +329,10 @@ class MassFuncTinker08(MassFunc):
         phi = np.array([1.19, 1.27, 1.34, 1.45, 1.58,
                         1.80, 1.97, 2.24, 2.44])
         ldelta = np.log10(delta)
-        ld = np.log10(self.mdef.Delta)
-        self.pA0 = interp1d(ldelta, alpha)(ld)
-        self.pa0 = interp1d(ldelta, beta)(ld)
-        self.pd = 10.**(-(0.75/np.log10(self.mdef.Delta/75.))**1.2)
-        self.pb0 = interp1d(ldelta, gamma)(ld)
-        self.pc = interp1d(ldelta, phi)(ld)
+        self.pA0 = interp1d(ldelta, alpha)
+        self.pa0 = interp1d(ldelta, beta)
+        self.pb0 = interp1d(ldelta, gamma)
+        self.pc = interp1d(ldelta, phi)
 
     def _check_mdef_strict(self, mdef):
         if isinstance(mdef.Delta, str):
@@ -342,10 +343,11 @@ class MassFuncTinker08(MassFunc):
         return False
 
     def _get_fsigma(self, cosmo, sigM, a, lnM):
-        pA = self.pA0 * a**0.14
-        pa = self.pa0 * a**0.06
-        pb = self.pb0 * a**self.pd
-        return pA * ((pb / sigM)**pa + 1) * np.exp(-self.pc/sigM**2)
+        ld = np.log10(self.mdef.Delta)
+        pA = self.pA0(ld) * a**0.14
+        pa = self.pa0(ld) * a**0.06
+        pb = self.pb0(ld) * a**self._pd(ld)
+        return pA * ((pb / sigM)**pa + 1) * np.exp(-self.pc(ld)/sigM**2)
 
 
 class MassFuncDespali16(MassFunc):
@@ -449,12 +451,11 @@ class MassFuncTinker10(MassFunc):
                         -0.301, -0.301, -0.319, -0.336])
 
         ldelta = np.log10(delta)
-        ld = np.log10(self.mdef.Delta)
-        self.pA0 = interp1d(ldelta, alpha)(ld)
-        self.pa0 = interp1d(ldelta, eta)(ld)
-        self.pb0 = interp1d(ldelta, beta)(ld)
-        self.pc0 = interp1d(ldelta, gamma)(ld)
-        self.pd0 = interp1d(ldelta, phi)(ld)
+        self.pA0 = interp1d(ldelta, alpha)
+        self.pa0 = interp1d(ldelta, eta)
+        self.pb0 = interp1d(ldelta, beta)
+        self.pc0 = interp1d(ldelta, gamma)
+        self.pd0 = interp1d(ldelta, phi)
 
     def _check_mdef_strict(self, mdef):
         if isinstance(mdef.Delta, str):
@@ -465,12 +466,13 @@ class MassFuncTinker10(MassFunc):
         return False
 
     def _get_fsigma(self, cosmo, sigM, a, lnM):
+        ld = np.log10(self.mdef.Delta)
         nu = 1.686 / sigM
-        pa = self.pa0 * a**(-0.27)
-        pb = self.pb0 * a**(-0.20)
-        pc = self.pc0 * a**0.01
-        pd = self.pd0 * a**0.08
-        return nu * self.pA0 * (1 + (pb * nu)**(-2 * pd)) * \
+        pa = self.pa0(ld) * a**(-0.27)
+        pb = self.pb0(ld) * a**(-0.20)
+        pc = self.pc0(ld) * a**0.01
+        pd = self.pd0(ld) * a**0.08
+        return nu * self.pA0(ld) * (1 + (pb * nu)**(-2 * pd)) * \
             nu**(2 * pa) * np.exp(-0.5 * pc * nu**2)
 
 
