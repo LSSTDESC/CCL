@@ -786,6 +786,10 @@ class Cosmology(object):
         # for the halo model we need to init the mass function stuff
         psp = None
         if self._config_init_kwargs['matter_power_spectrum'] == 'halo_model':
+            warnings.warn(
+                "The halo model option for the internal CCL matter power "
+                "spectrum is deprecated. Use the more general functionality "
+                "in the `halos` module.", category=CCLWarning)
             psp_py = self._get_halo_model_nonlin_power()
             psp = psp_py.psp
 
