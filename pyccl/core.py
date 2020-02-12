@@ -717,19 +717,22 @@ class Cosmology(object):
     def _get_halo_model_nonlin_power(self):
         from . import halos as hal
         mdef = hal.MassDef('vir', 'matter')
-        if self._config.halo_concentration_method == lib.bhattacharya2011:
+        conc = self._config.halo_concentration_method
+        mfm = self._config.mass_function_method
+
+        if conc == lib.bhattacharya2011:
             c = hal.ConcentrationBhattacharya13(mdef=mdef)
-        elif self._config.halo_concentration_method == lib.duffy2008:
+        elif conc == lib.duffy2008:
             c = hal.ConcentrationDuffy08(mdef=mdef)
-        elif self._config.halo_concentration_method == lib.constant_concentration:
+        elif conc == lib.constant_concentration:
             c = hal.ConcentrationConstant(c=4., mdef=mdef)
 
-        if self._config.mass_function_method == lib.tinker10:
+        if mfm == lib.tinker10:
             hmf = hal.MassFuncTinker10(self, mass_def=mdef,
                                        mass_def_strict=False)
             hbf = hal.HaloBiasTinker10(self, mass_def=mdef,
                                        mass_def_strict=False)
-        elif self._config.mass_function_method == lib.shethtormen:
+        elif mfm == lib.shethtormen:
             hmf = hal.MassFuncSheth99(self, mass_def=mdef,
                                       mass_def_strict=False,
                                       use_delta_c_fit=True)

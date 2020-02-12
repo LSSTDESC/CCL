@@ -16,18 +16,17 @@ COSMO_HM = ccl.Cosmology(
 
 @pytest.mark.parametrize('k', [
     1,
-#    1.0,
-#    [0.3, 0.5, 10],
-#    np.array([0.3, 0.5, 10])
+    1.0,
+    [0.3, 0.5, 10],
+    np.array([0.3, 0.5, 10])
 ])
 def test_nonlin_power_halomod(k):
     a = 0.8
     pk = ccl.nonlin_matter_power(COSMO_HM, 1., a)
-    #assert np.all(np.isfinite(pk))
-    #assert np.shape(pk) == np.shape(k)
-    assert False
+    assert np.all(np.isfinite(pk))
+    assert np.shape(pk) == np.shape(k)
 
-'''
+
 @pytest.mark.parametrize('k', [
     1,
     1.0,
@@ -125,4 +124,3 @@ def test_power_sigma8norm_norms_consistent(tf):
         ccl.linear_matter_power(cosmo, 1e-4, a) /
         ccl.linear_matter_power(cosmo_s8, 1e-4, a))
     assert np.allclose(pk_rat, gfac)
-'''

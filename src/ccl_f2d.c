@@ -44,6 +44,8 @@ ccl_f2d_t *ccl_f2d_t_copy(ccl_f2d_t *f2d_o, int *status)
           *status = CCL_ERROR_SPLINE;
       }
     }
+    else
+      f2d->fk = NULL;
   }
 
   if(*status==0) {
@@ -60,6 +62,8 @@ ccl_f2d_t *ccl_f2d_t_copy(ccl_f2d_t *f2d_o, int *status)
           *status = CCL_ERROR_SPLINE;
       }
     }
+    else
+      f2d->fa = NULL;
   }
 
   if(*status==0) {
@@ -79,6 +83,8 @@ ccl_f2d_t *ccl_f2d_t_copy(ccl_f2d_t *f2d_o, int *status)
           *status = CCL_ERROR_SPLINE;
       }
     }
+    else
+      f2d->fka = NULL;
   }
 
   return f2d;

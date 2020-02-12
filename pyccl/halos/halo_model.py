@@ -550,10 +550,8 @@ def halomod_Pk2D(cosmo, hmc, prof,
                                     normprof1=normprof1, normprof2=normprof2,
                                     get_1h=get_1h, get_2h=get_2h)
 
-    print("..",lk_arr,a_arr)
     pk2d = Pk2D(a_arr=a_arr, lk_arr=lk_arr, pk_arr=pk_arr,
                 extrap_order_lok=extrap_order_lok,
                 extrap_order_hik=extrap_order_hik,
                 cosmo=cosmo, is_logp=False)
-    print(pk2d.psp.lkmin, pk2d.psp.lkmax)
     return pk2d
