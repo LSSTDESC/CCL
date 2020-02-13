@@ -9,29 +9,29 @@ BZ = BZ_C * np.ones(NZ)
 COSMO = ccl.Cosmology(
     Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96,
     transfer_function='bbks', matter_power_spectrum='linear')
-TRS = {'TG': ccl.PTNumberCountsTracer((ZZ, BZ),
-                                      (ZZ, BZ),
-                                      (ZZ, BZ)),
-       'TI': ccl.PTIntrinsicAlignmentTracer((ZZ, BZ),
+TRS = {'TG': ccl.nl_pt.PTNumberCountsTracer((ZZ, BZ),
                                             (ZZ, BZ),
                                             (ZZ, BZ)),
-       'TM': ccl.PTMatterTracer()}
-WW = ccl.PTWorkspace()
+       'TI': ccl.nl_pt.PTIntrinsicAlignmentTracer((ZZ, BZ),
+                                                  (ZZ, BZ),
+                                                  (ZZ, BZ)),
+       'TM': ccl.nl_pt.PTMatterTracer()}
+WW = ccl.nl_pt.PTCalculator()
 
 
 def test_pt_tracer_smoke():
-    ccl.PTTracer()
+    ccl.nl_pt.PTTracer()
 
 
 def test_pt_tracer_m_smoke():
-    ccl.PTMatterTracer()
+    ccl.nl_pt.PTMatterTracer()
 
 
 @pytest.mark.parametrize('b2', [(ZZ, BZ), BZ_C, None])
 def test_pt_tracer_nc_smoke(b2):
-    pt_tr = ccl.PTNumberCountsTracer((ZZ, BZ),
-                                     b2=b2,
-                                     bs=(ZZ, BZ))
+    pt_tr = ccl.nl_pt.PTNumberCountsTracer((ZZ, BZ),
+                                           b2=b2,
+                                           bs=(ZZ, BZ))
 
     # Test b1 and bs do the right thing
     for b in [pt_tr.b1, pt_tr.bs]:
@@ -46,9 +46,9 @@ def test_pt_tracer_nc_smoke(b2):
 
 @pytest.mark.parametrize('c2', [(ZZ, BZ), BZ_C, None])
 def test_pt_tracer_ia_smoke(c2):
-    pt_tr = ccl.PTIntrinsicAlignmentTracer((ZZ, BZ),
-                                           c2=c2,
-                                           cdelta=(ZZ, BZ))
+    pt_tr = ccl.nl_pt.PTIntrinsicAlignmentTracer((ZZ, BZ),
+                                                 c2=c2,
+                                                 cdelta=(ZZ, BZ))
 
     # Test c1 and cdelta do the right thing
     for b in [pt_tr.c1, pt_tr.cdelta]:
@@ -62,10 +62,10 @@ def test_pt_tracer_ia_smoke(c2):
 
 
 def test_pt_workspace_smoke():
-    w = ccl.PTWorkspace(log10k_min=-3,
-                        log10k_max=1,
-                        nk_per_decade=10,
-                        pad_factor=2)
+    w = ccl.nl_pt.PTCalculator(log10k_min=-3,
+                               log10k_max=1,
+                               nk_per_decade=10,
+                               pad_factor=2)
     assert len(w.ks) == 40
 
 
@@ -80,6 +80,6 @@ def test_pt_workspace_smoke():
                                      ['TM', 'TI', False],
                                      ['TM', 'TM', False]])
 def test_pt_get_pk2d_smoke(tracers):
-    ccl.get_pt_pk2d(COSMO, WW,
-                    TRS[tracers[0]],
-                    TRS[tracers[1]])
+    ccl.nl_pt.get_pt_pk2d(COSMO, WW,
+                          TRS[tracers[0]],
+                          TRS[tracers[1]])

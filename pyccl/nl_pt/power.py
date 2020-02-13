@@ -19,9 +19,44 @@ class PTCalculator(object):
                  log10k_min=-4, log10k_max=2, nk_per_decade=20,
                  pad_factor=1, low_extrap=-5, high_extrap=3,
                  P_window=None, C_window=.75):
+        """ This class implements a set of methods that can be
+        used to compute the various components needed to estimate
+        perturbation theory correlations. These calculations are
+        currently based on FAST-PT
+        (https://github.com/JoeMcEwen/FAST-PT).
+
+        Args:
+            with_NC (bool): set to True if you'll want to use
+                this calculator to compute correlations involving
+                number counts. 
+            with_IA(bool): set to True if you'll want to use
+                this calculator to compute correlations involving
+                intrinsic alignments.
+            log10k_min (float): decimal logarithm of the minimum
+                Fourier scale (in Mpc^-1) for which you want to
+                calculate perturbation theory quantities.
+            log10k_max (float): decimal logarithm of the maximum
+                Fourier scale (in Mpc^-1) for which you want to
+                calculate perturbation theory quantities.
+            pad_factor (float): fraction of the log(k) interval
+                you want to add as padding for FFTLog calculations
+                within FAST-PT.
+            low_extrap (float): decimal logaritm of the minimum
+                Fourier scale (in Mpc^-1) for which FAST-PT will
+                extrapolate.
+            high_extrap (float): decimal logaritm of the maximum
+                Fourier scale (in Mpc^-1) for which FAST-PT will
+                extrapolate.
+            P_window (array_like or None): 2-element array describing
+                the tapering window used by FAST-PT. See FAST-PT
+                documentation for more details.
+            C_window (float): `C_window` parameter used by FAST-PT
+                to smooth the edges and avoid ringing. See FAST-PT
+                documentation for more details.
+        """
         assert HAVE_FASTPT, (
                 "You must have the `FASTPT` python package "
-                "installed to use CCL to get PT power spectra!")
+                "installed to use CCL to get PT observables!")
         # TODO: JAB: I think we want to restore the option to pass
         # in a k_array and let the workspace perform the check.
         # Then we can also pass in the corresponding power spectrum,
