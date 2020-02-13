@@ -1,5 +1,7 @@
 # Unreleased
 ## Python library
+- Generalized Tinker mass function to all SO mass definitions (#736)
+- Deprecated old halo model (#736)
 - Halo model power spectra #717
 - Fixed bug in Duffy 2008 concentration-mass relation #717
 - Added a "spline" integration method to carry out Limber integrals.
@@ -12,6 +14,7 @@
 - Add straightforward single massive neutrino option (#730).
 
 ## C library
+- Deprecated old halo model (#736)
 - Added a "spline" integration method to carry out Limber integrals.
 - Added function for the angular diameter distance difference between two scale factors (#645)
 - Removed old C/C++ examples (#725)

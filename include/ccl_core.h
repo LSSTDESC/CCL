@@ -267,13 +267,6 @@ typedef struct ccl_data {
   gsl_spline * logsigma;
   gsl_spline * dlnsigma_dlogm;
 
-  // splines for halo mass function
-  gsl_spline * alphahmf;
-  gsl_spline * betahmf;
-  gsl_spline * gammahmf;
-  gsl_spline * phihmf;
-  gsl_spline * etahmf;
-
   // power spectrum splines
   ccl_f2d_t * p_lin;
   ccl_f2d_t * p_nl;
@@ -298,7 +291,6 @@ typedef struct ccl_cosmology {
   bool computed_linear_power;
   bool computed_nonlin_power;
   bool computed_sigma;
-  bool computed_hmfparams;
 
   int status;
   //this is optional - less tedious than tracking all numerical values for status in error handler function
