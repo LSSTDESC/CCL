@@ -43,4 +43,4 @@ py36)
   ;;
 esac;
 
-pip install https://github.com/JoeMcEwen/FAST-PT/archive/v3.0.2.tar.gz --user
+pip install https://github.com/JoeMcEwen/FAST-PT/archive/v3.0.2.tar.gz --no-deps
