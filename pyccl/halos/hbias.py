@@ -1,5 +1,6 @@
 from .. import ccllib as lib
 from ..core import check
+from ..background import omega_x
 from .massdef import MassDef, MassDef200m
 import numpy as np
 
