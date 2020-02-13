@@ -32,6 +32,14 @@ def test_bM_mdef_raises(bM_pair):
         bM_class(COSMO, mdef)
 
 
+def test_bM_SO_allgood():
+    bM = ccl.halos.HaloBiasTinker10(COSMO, MVIR)
+    for m in MS:
+        b = bM.get_halo_bias(COSMO, m, 0.9)
+        assert np.all(np.isfinite(b))
+        assert np.shape(b) == np.shape(m)
+
+
 @pytest.mark.parametrize('name', ['Tinker10', 'Sheth99'])
 def test_bM_from_string(name):
     bM_class = ccl.halos.halo_bias_from_name(name)

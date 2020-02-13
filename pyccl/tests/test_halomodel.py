@@ -42,6 +42,35 @@ def test_halo_concentration(m):
     assert np.shape(c) == np.shape(m)
 
 
+@pytest.mark.parametrize('mf_c', [['shethtormen', 'bhattacharya2011'],
+                                  ['shethtormen', 'duffy2008'],
+                                  ['shethtormen', 'constant_concentration'],
+                                  ['tinker10', 'constant_concentration']])
+def test_halomodel_choices_smoke(mf_c):
+    mf, c = mf_c
+    cosmo = ccl.Cosmology(
+        Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96,
+        transfer_function='bbks', matter_power_spectrum='linear',
+        mass_function=mf, halo_concentration=c)
+    a = 0.8
+    k = np.geomspace(1E-2, 1, 10)
+    p = ccl.twohalo_matter_power(cosmo, k, a)
+
+    assert np.all(np.isfinite(p))
+
+
+def test_halomodel_choices_raises():
+    cosmo = ccl.Cosmology(
+        Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96,
+        transfer_function='bbks', matter_power_spectrum='linear',
+        mass_function='tinker')
+    a = 0.8
+    k = np.geomspace(1E-2, 1, 10)
+
+    with pytest.raises(ValueError):
+        ccl.twohalo_matter_power(cosmo, k, a)
+
+
 def test_halomodel_power_consistent():
     a = 0.8
     k = np.logspace(-1, 1, 10)
