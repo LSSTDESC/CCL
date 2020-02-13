@@ -304,7 +304,7 @@ class HaloBiasTinker10(HaloBias):
     def _default_mdef(self):
         self.mdef = MassDef200m()
 
-    def _AC(self, ld): 
+    def _AC(self, ld):
         xp = np.exp(-(4./ld)**4.)
         A = 1.0 + 0.24 * ld * xp
         C = 0.019 + 0.107 * ld + 0.19*xp
