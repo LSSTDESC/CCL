@@ -23,6 +23,21 @@ COSMO_HM = ccl.Cosmology(
 def test_nonlin_power_halomod(k):
     a = 0.8
     pk = ccl.nonlin_matter_power(COSMO_HM, k, a)
+
+    # New implementation
+    mdef = ccl.halos.MassDef('vir', 'matter')
+    hmf = ccl.halos.MassFuncSheth99(COSMO_HM, mdef,
+                                    mass_def_strict=False,
+                                    use_delta_c_fit=True)
+    hbf = ccl.halos.HaloBiasSheth99(COSMO_HM, mass_def=mdef,
+                                    mass_def_strict=False)
+    cc = ccl.halos.ConcentrationDuffy08(mdef)
+    prf = ccl.halos.HaloProfileNFW(cc)
+    hmc = ccl.halos.HMCalculator(COSMO_HM, hmf, hbf, mdef)
+    pkb = ccl.halos.halomod_power_spectrum(COSMO_HM, hmc, k, a,
+                                           prf, normprof1=True)
+
+    assert np.allclose(pk, pkb)
     assert np.all(np.isfinite(pk))
     assert np.shape(pk) == np.shape(k)
 
