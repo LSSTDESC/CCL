@@ -17,12 +17,16 @@ def angular_cl(cosmo, cltracer1, cltracer2, ell, p_of_k_a=None,
     """Calculate the angular (cross-)power spectrum for a pair of tracers.
 
     Args:
-        cosmo (:obj:`Cosmology`): A Cosmology object.
-        cltracer1, cltracer2 (:obj:`Tracer`): Tracer objects, of any kind.
+        cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
+        cltracer1 (:class:`~pyccl.tracers.Tracer`): a `Tracer` object,
+            of any kind.
+        cltracer2 (:class:`~pyccl.tracers.Tracer`): a second `Tracer` object,
+            of any kind.
         ell (float or array_like): Angular wavenumber(s) at which to evaluate
             the angular power spectrum.
-        p_of_k_a (:obj:`Pk2D` or None): 3D Power spectrum to project. If None,
-            the non-linear matter power spectrum will be used.
+        p_of_k_a (:class:`~pyccl.pk2d.Pk2D` or None): 3D Power spectrum to
+            project. If `None`, the non-linear matter power spectrum will be
+            used.
         l_limber (float) : Angular wavenumber beyond which Limber's
             approximation will be used. Defaults to -1.
         limber_integration_method (string) : integration method to be used
@@ -31,8 +35,8 @@ def angular_cl(cosmo, cltracer1, cltracer2, ell, p_of_k_a=None,
             integrand is splined and then integrated analytically).
 
     Returns:
-        float or array_like: Angular (cross-)power spectrum values,
-            :math:`C_\\ell`, for the pair of tracers, as a function of
+        float or array_like: Angular (cross-)power spectrum values, \
+            :math:`C_\\ell`, for the pair of tracers, as a function of \
             :math:`\\ell`.
     """
     if cosmo['Omega_k'] != 0:

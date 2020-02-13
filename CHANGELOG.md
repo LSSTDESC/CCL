@@ -1,5 +1,7 @@
 # Unreleased
 ## Python library
+- Halo model power spectra #717
+- Fixed bug in Duffy 2008 concentration-mass relation #717
 - Added a "spline" integration method to carry out Limber integrals.
 - Added a function for the angular diameter distance difference between two scale factors (#645)
 - Extended implementation of halo profiles (#722).
@@ -7,6 +9,7 @@
 - Functionality to resample 1D arrays including extrapolation (#720).
 - Methods to retrieve internal tracer functions (#713).
 - Improved implementation of halo model quantities (n(M), b(M), c(M)) (#668, #655, #656, #657, #636).
+- Add straightforward single massive neutrino option (#730).
 
 ## C library
 - Added a "spline" integration method to carry out Limber integrals.

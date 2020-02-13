@@ -6,14 +6,18 @@ The Core Cosmology Library (CCL) is a standardized library of routines to calcul
 
 The core functions of this package include:
 
- * Matter power spectra :math:`P(k)` from numerous models including CLASS, the Mira-Titan Emulator  and halofit
- * Hubble constant :math:`H(z)` as well as comoving distances :math:`\chi(z)` and distance moduli :math:`\mu(z)`
- * Growth of structure :math:`D(z)` and :math:`f`
- * Angular power spectra :math:`C_\ell` and correlation functions :math:`\xi` for arbitrary
-   combinations of tracers including number counts, shear and CMB lensing.
- * Halo mass function :math:`{\rm d}n/{\rm d}M`, halo bias :math:`b(M)`, concentration-mass relations :math:`c(M)`.
+ * Background quantities (Hubble parameter :math:`H(z)`, distances etc.).
+ * Linear growth factor :math:`D(z)` and growth rate :math:`f(z)`.
+ * Linear matter power spectra :math:`P(k)` from Boltzmann codes (CLASS, CAMB) and approximate fitting functions.
+ * Non-linear matter power power spectra using HaloFit and the Mira-Titan Emulator.
  * Approximate baryonic modifications to the matter power spectra :math:`\Delta^2_{\rm baryons}`
- * Simple modified gravity extensions :math:`\Delta f(z)` and :math:`\mu-\Sigma`
+ * Angular power spectra :math:`C_\ell` and correlation functions :math:`\xi` for arbitrary
+   combinations of tracers including number counts, shear and CMB lensing, as well as custom-made tracers.
+ * A comprehensive halo model framework able to combine different prescription for the halo mass function :math:`{\rm d}n/{\rm d}M`,
+   halo bias :math:`b(M)`, concentration-mass relation :math:`c(M)`, mass definitions, and halo profiles, as well as to provide
+   predictions for the halo-model power spectrum of arbitrary quantities.
+ * Support for :math:`\Lambda` CDM, and :math:`w_0-w_a` CDM cosmologies with curvature, as well as simple
+   modified gravity extensions (:math:`\Delta f(z)` and :math:`\mu-\Sigma`).
 
 The source code is available on github at https://github.com/LSSTDESC/CCL.
 

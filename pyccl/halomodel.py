@@ -6,7 +6,7 @@ def halo_concentration(cosmo, halo_mass, a, odelta=200):
     """Halo mass concentration relation
 
     Args:
-        cosmo (:obj:`Cosmology`): Cosmological parameters.
+        cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.
         halo_mass (float or array_like): Halo masses; Msun.
         a (float): scale factor.
         odelta (float): overdensity parameter (default: 200)
@@ -22,14 +22,15 @@ def halo_concentration(cosmo, halo_mass, a, odelta=200):
 
 def onehalo_matter_power(cosmo, k, a):
     """One-halo term for matter power spectrum assuming NFW density profiles
+
     Args:
-        cosmo (:obj:`Cosmology`): Cosmological parameters.
-        a (float): scale factor.
+        cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.
         k (float or array_like): wavenumber
+        a (float): scale factor.
 
     Returns:
-        onehalo_matter_power (float or array_like): one-halo term for matter
-                                                    power spectrum
+        float or array_like: one-halo term for matter \
+            power spectrum
     """
     cosmo.compute_sigma()
     return _vectorize_fn2(lib.onehalo_matter_power,
@@ -39,15 +40,14 @@ def onehalo_matter_power(cosmo, k, a):
 
 def twohalo_matter_power(cosmo, k, a):
     """Two-halo term for matter power spectrum assuming NFW density profiles
+
     Args:
-        cosmo (:obj:`Cosmology`): Cosmological parameters.
-        a (float): scale factor.
+        cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.
         k (float or array_like): wavenumber
+        a (float): scale factor.
 
     Returns:
-        two-halo matter power spectrum (float or array_Like): two-halo term
-                                                              for matter power
-                                                              spectrum
+        float or array_like: two-halo term for matter power spectrum.
     """
     cosmo.compute_sigma()
     return _vectorize_fn2(
@@ -58,14 +58,14 @@ def twohalo_matter_power(cosmo, k, a):
 
 def halomodel_matter_power(cosmo, k, a):
     """Matter power spectrum from halo model assuming NFW density profiles
+
     Args:
-        cosmo (:obj:`Cosmology`): Cosmological parameters.
-        a (float): scale factor.
+        cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.
         k (float or array_like): wavenumber
+        a (float): scale factor.
 
     Returns:
-        halomodel_matter_power (float or array_like): matter power spectrum
-                                                      from halo model
+        float or array_like: matter power spectrum from halo model
     """
     cosmo.compute_sigma()
     return _vectorize_fn2(

@@ -12,18 +12,22 @@ class HaloBias(object):
     radius given by the Lagrangian radius for mass M).
     All sub-classes implementing specific parametrizations
     can therefore be simply created by replacing this class'
-    _get_bsigma method.
+    `_get_bsigma method`.
 
     Args:
-        cosmo (:obj:`Cosmology`): A Cosmology object.
-        mass_def (:obj:`MassDef`): a mass definition object that fixes
+        cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
+        mass_def (:class:`~pyccl.halos.massdef.MassDef`): a mass
+            definition object that fixes
             the mass definition used by this halo bias
             parametrization.
+        mass_def_strict (bool): if False, consistency of the mass
+            definition will be ignored.
     """
     name = "default"
 
-    def __init__(self, cosmo, mass_def=None):
+    def __init__(self, cosmo, mass_def=None, mass_def_strict=True):
         cosmo.compute_sigma()
+        self.mass_def_strict = mass_def_strict
         if mass_def is not None:
             if self._check_mdef(mass_def):
                 raise ValueError("Halo bias " + self.name +
@@ -47,9 +51,12 @@ class HaloBias(object):
         constructor call.
 
         Args:
-            cosmo (:obj:`Cosmology`): A Cosmology object.
+            cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
         """
         pass
+
+    def _check_mdef_strict(self, mdef):
+        return False
 
     def _check_mdef(self, mdef):
         """ Return False if the input mass definition agrees with
@@ -58,12 +65,15 @@ class HaloBias(object):
         start of the constructor call.
 
         Args:
-            mdef (:obj:`MassDef`): a mass definition object.
+            mdef (:class:`~pyccl.halos.massdef.MassDef`):
+                a mass definition object.
 
         Returns:
             bool: True if the mass definition is not compatible with
                 this parametrization. False otherwise.
         """
+        if self.mass_def_strict:
+            return self._check_mdef_strict(mdef)
         return False
 
     def _get_consistent_mass(self, cosmo, M, a, mdef_other):
@@ -72,10 +82,11 @@ class HaloBias(object):
         this object.
 
         Args:
-            cosmo (:obj:`Cosmology`): A Cosmology object.
+            cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
             M (float or array_like): halo mass in units of M_sun.
             a (float): scale factor.
-            mdef_other (:obj:`MassDef`): a mass definition object.
+            mdef_other (:class:`~pyccl.halos.massdef.MassDef`):
+                a mass definition object.
 
         Returns:
             float or array_like: mass according to this object's
@@ -91,11 +102,11 @@ class HaloBias(object):
         """ Returns the halo bias for input parameters.
 
         Args:
-            cosmo (:obj:`Cosmology`): A Cosmology object.
+            cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
             M (float or array_like): halo mass in units of M_sun.
             a (float): scale factor.
-            mdef_other (:obj:`MassDef`): the mass definition object
-                that defines M.
+            mdef_other (:class:`~pyccl.halos.massdef.MassDef`):
+                the mass definition object that defines M.
 
         Returns:
             float or array_like: halo bias.
@@ -119,7 +130,7 @@ class HaloBias(object):
         """ Get the halo bias as a function of sigmaM.
 
         Args:
-            cosmo (:obj:`Cosmology`): A Cosmology object.
+            cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
             sigM (float or array_like): standard deviation in the
                 overdensity field on the scale of this halo.
             a (float): scale factor.
@@ -136,16 +147,26 @@ class HaloBiasSheth99(HaloBias):
     This parametrization is only valid for 'fof' masses.
 
     Args:
-        cosmo (:obj:`Cosmology`): A Cosmology object.
-        mass_def (:obj:`MassDef`): a mass definition object.
+        cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
+        mass_def (:class:`~pyccl.halos.massdef.MassDef`):
+            a mass definition object.
             this parametrization accepts FoF masses only.
             If `None`, FoF masses will be used.
+        mass_def_strict (bool): if False, consistency of the mass
+            definition will be ignored.
+        use_delta_c_fit (bool): if True, use delta_crit given by
+            the fit of Nakamura & Suto 1997. Otherwise use
+            delta_crit = 1.68647.
     """
     name = "Sheth99"
 
-    def __init__(self, cosmo, mass_def=None):
+    def __init__(self, cosmo, mass_def=None,
+                 mass_def_strict=True,
+                 use_delta_c_fit=False):
+        self.use_delta_c_fit = use_delta_c_fit
         super(HaloBiasSheth99, self).__init__(cosmo,
-                                              mass_def)
+                                              mass_def,
+                                              mass_def_strict)
 
     def _default_mdef(self):
         self.mdef = MassDef('fof', 'matter')
@@ -153,17 +174,24 @@ class HaloBiasSheth99(HaloBias):
     def _setup(self, cosmo):
         self.p = 0.3
         self.a = 0.707
-        self.dc = 1.68647
 
-    def _check_mdef(self, mdef):
-        if mdef.Delta != 'fof':
-            return True
+    def _check_mdef_strict(self, mdef):
+        if self.mass_def_strict:
+            if mdef.Delta != 'fof':
+                return True
         return False
 
     def _get_bsigma(self, cosmo, sigM, a):
-        nu = self.dc/sigM
+        if self.use_delta_c_fit:
+            status = 0
+            delta_c, status = lib.dc_NakamuraSuto(cosmo.cosmo, a, status)
+            check(status)
+        else:
+            delta_c = 1.68647
+
+        nu = delta_c / sigM
         anu2 = self.a * nu**2
-        return 1. + (anu2 - 1. + 2. * self.p / (1. + anu2**self.p))/self.dc
+        return 1. + (anu2 - 1. + 2. * self.p / (1. + anu2**self.p))/delta_c
 
 
 class HaloBiasSheth01(HaloBias):
@@ -171,16 +199,20 @@ class HaloBiasSheth01(HaloBias):
     This parametrization is only valid for 'fof' masses.
 
     Args:
-        cosmo (:obj:`Cosmology`): A Cosmology object.
-        mass_def (:obj:`MassDef`): a mass definition object.
+        cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
+        mass_def (:class:`~pyccl.halos.massdef.MassDef`):
+            a mass definition object.
             this parametrization accepts FoF masses only.
             If `None`, FoF masses will be used.
+        mass_def_strict (bool): if False, consistency of the mass
+            definition will be ignored.
     """
     name = "Sheth01"
 
-    def __init__(self, cosmo, mass_def=None):
+    def __init__(self, cosmo, mass_def=None, mass_def_strict=True):
         super(HaloBiasSheth01, self).__init__(cosmo,
-                                              mass_def)
+                                              mass_def,
+                                              mass_def_strict)
 
     def _default_mdef(self):
         self.mdef = MassDef('fof', 'matter')
@@ -192,7 +224,7 @@ class HaloBiasSheth01(HaloBias):
         self.c = 0.6
         self.dc = 1.68647
 
-    def _check_mdef(self, mdef):
+    def _check_mdef_strict(self, mdef):
         if mdef.Delta != 'fof':
             return True
         return False
@@ -211,16 +243,20 @@ class HaloBiasBhattacharya11(HaloBias):
     This parametrization is only valid for 'fof' masses.
 
     Args:
-        cosmo (:obj:`Cosmology`): A Cosmology object.
-        mass_def (:obj:`MassDef`): a mass definition object.
+        cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
+        mass_def (:class:`~pyccl.halos.massdef.MassDef`):
+            a mass definition object.
             this parametrization accepts FoF masses only.
             If `None`, FoF masses will be used.
+        mass_def_strict (bool): if False, consistency of the mass
+            definition will be ignored.
     """
     name = "Bhattacharya11"
 
-    def __init__(self, cosmo, mass_def=None):
+    def __init__(self, cosmo, mass_def=None, mass_def_strict=True):
         super(HaloBiasBhattacharya11, self).__init__(cosmo,
-                                                     mass_def)
+                                                     mass_def,
+                                                     mass_def_strict)
 
     def _default_mdef(self):
         self.mdef = MassDef('fof', 'matter')
@@ -232,7 +268,7 @@ class HaloBiasBhattacharya11(HaloBias):
         self.q = 1.795
         self.dc = 1.68647
 
-    def _check_mdef(self, mdef):
+    def _check_mdef_strict(self, mdef):
         if mdef.Delta != 'fof':
             return True
         return False
@@ -248,17 +284,21 @@ class HaloBiasTinker10(HaloBias):
     """ Implements halo bias described in arXiv:1001.3162.
 
     Args:
-        cosmo (:obj:`Cosmology`): A Cosmology object.
-        mass_def (:obj:`MassDef`): a mass definition object.
+        cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
+        mass_def (:class:`~pyccl.halos.massdef.MassDef`):
+            a mass definition object.
             this parametrization accepts SO masses with
             200 < Delta < 3200 with respect to the matter density.
             If `None`, Delta = 200 (matter) will be used.
+        mass_def_strict (bool): if False, consistency of the mass
+            definition will be ignored.
     """
     name = "Tinker10"
 
-    def __init__(self, cosmo, mass_def=None):
+    def __init__(self, cosmo, mass_def=None, mass_def_strict=True):
         super(HaloBiasTinker10, self).__init__(cosmo,
-                                               mass_def)
+                                               mass_def,
+                                               mass_def_strict)
 
     def _default_mdef(self):
         self.mdef = MassDef200m()
@@ -274,7 +314,7 @@ class HaloBiasTinker10(HaloBias):
         self.c = 2.4
         self.dc = 1.68647
 
-    def _check_mdef(self, mdef):
+    def _check_mdef_strict(self, mdef):
         if isinstance(mdef.Delta, str):
             return True
         elif (mdef.Delta < 200.) or (mdef.Delta > 3200.) or \
