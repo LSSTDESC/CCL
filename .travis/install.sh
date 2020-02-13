@@ -42,3 +42,5 @@ py36)
     cython "camb>=1"
   ;;
 esac;
+
+pip install https://github.com/JoeMcEwen/FAST-PT/archive/v3.0.2.tar.gz --user
