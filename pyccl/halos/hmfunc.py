@@ -106,6 +106,20 @@ class MassFunc(object):
             M_use = M
         return np.log10(M_use)
 
+    def _get_Delta_m(self, cosmo, a):
+        """ For SO-based mass definitions, this returns the corresponding
+        value of Delta for a rho_matter-based definition. This is useful
+        mostly for the Tinker mass functions, which are defined for any
+        SO mass in general, but explicitly only for Delta_matter.
+        """
+        delta = self.mdef.get_Delta(cosmo, a)
+        if self.mdef.rho_type == 'matter':
+            return delta
+        else:
+            om_this = omega_x(cosmo, a, self.mdef.rho_type)
+            om_matt = omega_x(cosmo, a, 'matter')
+            return delta * om_this / om_matt
+
     def get_mass_function(self, cosmo, M, a, mdef_other=None):
         """ Returns the mass function for input parameters.
 
@@ -315,15 +329,6 @@ class MassFuncTinker08(MassFunc):
     def _pd(self, ld):
         return 10.**(-(0.75/(ld - 1.8750612633))**1.2)
 
-    def _get_Delta_m(self, cosmo, a):
-        delta = self.mdef.get_Delta(cosmo, a)
-        if self.mdef.rho_type == 'matter':
-            return delta
-        else:
-            om_this = omega_x(cosmo, a, self.mdef.rho_type)
-            om_matt = omega_x(cosmo, a, 'matter')
-            return delta * om_this / om_matt
-
     def _setup(self, cosmo):
         from scipy.interpolate import interp1d
 
@@ -437,15 +442,6 @@ class MassFuncTinker10(MassFunc):
 
     def _default_mdef(self):
         self.mdef = MassDef200m()
-
-    def _get_Delta_m(self, cosmo, a):
-        delta = self.mdef.get_Delta(cosmo, a)
-        if self.mdef.rho_type == 'matter':
-            return delta
-        else:
-            om_this = omega_x(cosmo, a, self.mdef.rho_type)
-            om_matt = omega_x(cosmo, a, 'matter')
-            return delta * om_this / om_matt
 
     def _setup(self, cosmo):
         from scipy.interpolate import interp1d

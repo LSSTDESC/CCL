@@ -99,6 +99,20 @@ class HaloBias(object):
             M_use = M
         return np.log10(M_use)
 
+    def _get_Delta_m(self, cosmo, a):
+        """ For SO-based mass definitions, this returns the corresponding
+        value of Delta for a rho_matter-based definition. This is useful
+        mostly for the Tinker mass functions, which are defined for any
+        SO mass in general, but explicitly only for Delta_matter.
+        """
+        delta = self.mdef.get_Delta(cosmo, a)
+        if self.mdef.rho_type == 'matter':
+            return delta
+        else:
+            om_this = omega_x(cosmo, a, self.mdef.rho_type)
+            om_matt = omega_x(cosmo, a, 'matter')
+            return delta * om_this / om_matt
+
     def get_halo_bias(self, cosmo, M, a, mdef_other=None):
         """ Returns the halo bias for input parameters.
 
@@ -323,15 +337,6 @@ class HaloBiasTinker10(HaloBias):
         if mdef.Delta == 'fof':
             return True
         return False
-
-    def _get_Delta_m(self, cosmo, a):
-        delta = self.mdef.get_Delta(cosmo, a)
-        if self.mdef.rho_type == 'matter':
-            return delta
-        else:
-            om_this = omega_x(cosmo, a, self.mdef.rho_type)
-            om_matt = omega_x(cosmo, a, 'matter')
-            return delta * om_this / om_matt
 
     def _get_bsigma(self, cosmo, sigM, a):
         nu = self.dc / sigM
