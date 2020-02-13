@@ -91,19 +91,19 @@ class PTNumberCountsTracer(PTTracer):
 
     @property
     def b1(self):
-        """Returns the internal first-order bias function.
+        """Internal first-order bias function.
         """
         return self.biases['b1']
 
     @property
     def b2(self):
-        """Returns the internal second-order bias function.
+        """Internal second-order bias function.
         """
         return self.biases['b2']
 
     @property
     def bs(self):
-        """Returns the internal tidal bias function.
+        """Internal tidal bias function.
         """
         return self.biases['bs']
 
@@ -139,18 +139,18 @@ class PTIntrinsicAlignmentTracer(PTTracer):
 
     @property
     def c1(self):
-        """Returns the internal first-order bias function.
+        """Internal first-order bias function.
         """
         return self.biases['c1']
 
     @property
     def c2(self):
-        """Returns the internal second-order bias function.
+        """Internal second-order bias function.
         """
         return self.biases['c2']
 
     @property
     def cdelta(self):
-        """Returns the internal overdensity bias function.
+        """Internal overdensity bias function.
         """
         return self.biases['cdelta']

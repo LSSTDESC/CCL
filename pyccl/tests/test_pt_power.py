@@ -16,7 +16,7 @@ TRS = {'TG': ccl.nl_pt.PTNumberCountsTracer((ZZ, BZ),
                                                   (ZZ, BZ),
                                                   (ZZ, BZ)),
        'TM': ccl.nl_pt.PTMatterTracer()}
-WW = ccl.nl_pt.PTCalculator()
+PTC = ccl.nl_pt.PTCalculator()
 
 
 def test_pt_tracer_smoke():
@@ -80,6 +80,7 @@ def test_pt_workspace_smoke():
                                      ['TM', 'TI', False],
                                      ['TM', 'TM', False]])
 def test_pt_get_pk2d_smoke(tracers):
-    ccl.nl_pt.get_pt_pk2d(COSMO, WW,
+    ccl.nl_pt.get_pt_pk2d(COSMO,
                           TRS[tracers[0]],
-                          TRS[tracers[1]])
+                          tracer2=TRS[tracers[1]],
+                          ptc=PTC)

@@ -28,7 +28,7 @@ class PTCalculator(object):
         Args:
             with_NC (bool): set to True if you'll want to use
                 this calculator to compute correlations involving
-                number counts. 
+                number counts.
             with_IA(bool): set to True if you'll want to use
                 this calculator to compute correlations involving
                 intrinsic alignments.
@@ -86,40 +86,86 @@ class PTCalculator(object):
         self.ks = np.logspace(log10k_min, log10k_max, nk_total)
         n_pad = pad_factor * len(self.ks)
 
-        self.pt_object = fpt.FASTPT(self.ks, to_do=to_do,
-                                    low_extrap=low_extrap,
-                                    high_extrap=high_extrap,
-                                    n_pad=n_pad)
+        self.pt = fpt.FASTPT(self.ks, to_do=to_do,
+                             low_extrap=low_extrap,
+                             high_extrap=high_extrap,
+                             n_pad=n_pad)
+        self.dd_bias = None
+        self.ia_ta = None
+        self.ia_tt = None
+        self.ia_mix = None
 
-    def get_dd_bias(self, pk):
+    def update_pk(self, pk):
+        if pk.shape != self.ks.shape:
+            raise ValueError("Input spectrum has wrong shape")
+        if self.with_NC:
+            self._get_dd_bias(pk)
+        if self.with_IA:
+            self._get_ia_bias(pk)
+
+    def _get_dd_bias(self, pk):
+        # Precompute quantities needed for number counts
+        # power spectra.
         # TODO: should we use one_loop_dd_bias_b3nl instead of this?
-        return self.pt_object.one_loop_dd_bias(pk,
-                                               P_window=self.P_window,
-                                               C_window=self.C_window)
+        self.dd_bias = self.pt.one_loop_dd_bias(pk,
+                                                P_window=self.P_window,
+                                                C_window=self.C_window)
 
-    def get_ia_bias(self, pk):
-        ta = self.pt_object.IA_ta(pk,
-                                  P_window=self.P_window,
-                                  C_window=self.C_window)
-        tt = self.pt_object.IA_tt(pk,
-                                  P_window=self.P_window,
-                                  C_window=self.C_window)
-        mix = self.pt_object.IA_mix(pk,
-                                    P_window=self.P_window,
-                                    C_window=self.C_window)
-        return ta, tt, mix
+    def _get_ia_bias(self, pk):
+        # Precompute quantities needed for intrinsic alignment
+        # power spectra.
+        self.ia_ta = self.pt.IA_ta(pk,
+                                   P_window=self.P_window,
+                                   C_window=self.C_window)
+        self.ia_tt = self.pt.IA_tt(pk,
+                                   P_window=self.P_window,
+                                   C_window=self.C_window)
+        self.ia_mix = self.pt.IA_mix(pk,
+                                     P_window=self.P_window,
+                                     C_window=self.C_window)
 
-    def get_pgg(self, bias_fpt, Pd1d1, g4, b11, b21, bs1, b12, b22, bs2,
+    def get_pgg(self, Pd1d1, g4,
+                b11, b21, bs1, b12, b22, bs2,
                 sub_lowk):
-        Pd1d2 = g4[None, :] * bias_fpt[2][:, None]
-        Pd2d2 = g4[None, :] * bias_fpt[3][:, None]
-        Pd1s2 = g4[None, :] * bias_fpt[4][:, None]
-        Pd2s2 = g4[None, :] * bias_fpt[5][:, None]
-        Ps2s2 = g4[None, :] * bias_fpt[6][:, None]
+        """ Get the number counts auto-spectrum at the internal
+        set of wavenumbers (given by this object's `ks` attribute)
+        and a number of redshift values.
+
+        Args:
+            Pd1d1 (array_like): 1-loop matter power spectrum at the
+                wavenumber values given by this object's `ks` list.
+            g4 (array_like): fourth power of the growth factor at
+                a number of redshifts.
+            b11 (array_like): 1-st order bias for the first tracer
+                being correlated at the same set of input redshifts.
+            b21 (array_like): 2-nd order bias for the first tracer
+                being correlated at the same set of input redshifts.
+            bs1 (array_like): tidal bias for the first tracer
+                being correlated at the same set of input redshifts.
+            b12 (array_like): 1-st order bias for the second tracer
+                being correlated at the same set of input redshifts.
+            b22 (array_like): 2-nd order bias for the second tracer
+                being correlated at the same set of input redshifts.
+            bs2 (array_like): tidal bias for the second tracer
+                being correlated at the same set of input redshifts.
+            sub_lowk (bool): if True, the small-scale white noise
+                contribution will be subtracted.
+
+        Returns:
+            array_like: 2D array of shape `(N_k, N_z)`, where `N_k` \
+                is the size of this object's `ks` attribute, and \
+                `N_z` is the size of the input redshift-dependent \
+                biases and growth factor.
+        """
+        Pd1d2 = g4[None, :] * self.dd_bias[2][:, None]
+        Pd2d2 = g4[None, :] * self.dd_bias[3][:, None]
+        Pd1s2 = g4[None, :] * self.dd_bias[4][:, None]
+        Pd2s2 = g4[None, :] * self.dd_bias[5][:, None]
+        Ps2s2 = g4[None, :] * self.dd_bias[6][:, None]
 
         s4 = 0.
         if sub_lowk:
-            s4 = g4 * bias_fpt[7]
+            s4 = g4 * self.dd_bias[7]
             s4 = s4[None, :]
 
         # TODO: someone else should check this
@@ -131,9 +177,34 @@ class PTCalculator(object):
                0.25*(bs1*bs2)[None, :] * (Ps2s2 - (8./9.)*s4))
         return pgg
 
-    def get_pgm(self, bias_fpt, Pd1d1, g4, b1, b2, bs):
-        Pd1d2 = g4[None, :] * bias_fpt[2][:, None]
-        Pd1s2 = g4[None, :] * bias_fpt[4][:, None]
+    def get_pgm(self, Pd1d1, g4, b1, b2, bs):
+        """ Get the number counts - matter cross-spectrum at the
+        internal set of wavenumbers (given by this object's `ks`
+        attribute) and a number of redshift values.
+
+        Args:
+            Pd1d1 (array_like): 1-loop matter power spectrum at the
+                wavenumber values given by this object's `ks` list.
+            g4 (array_like): fourth power of the growth factor at
+                a number of redshifts.
+            b1 (array_like): 1-st order bias for the number counts
+                tracer being correlated at the same set of input
+                redshifts.
+            b2 (array_like): 2-nd order bias for the number counts
+                tracer being correlated at the same set of input
+                redshifts.
+            bs (array_like): tidal bias for the number counts
+                tracer being correlated at the same set of input
+                redshifts.
+
+        Returns:
+            array_like: 2D array of shape `(N_k, N_z)`, where `N_k` \
+                is the size of this object's `ks` attribute, and \
+                `N_z` is the size of the input redshift-dependent \
+                biases and growth factor.
+        """
+        Pd1d2 = g4[None, :] * self.dd_bias[2][:, None]
+        Pd1s2 = g4[None, :] * self.dd_bias[4][:, None]
 
         # TODO: someone else should check this
         pgm = (b1[None, :] * Pd1d1 +
@@ -141,10 +212,34 @@ class PTCalculator(object):
                0.5 * bs[None, :] * Pd1s2)
         return pgm
 
-    def get_pim(self, ta_fpt, mix_fpt, Pd1d1,
-                g4, c1, c2, cd):
-        a00e, c00e, a0e0e, a0b0b = ta_fpt
-        a0e2, b0e2, d0ee2, d0bb2 = mix_fpt
+    def get_pim(self, Pd1d1, g4, c1, c2, cd):
+        """ Get the intrinsic alignment - matter cross-spectrum at
+        the internal set of wavenumbers (given by this object's `ks`
+        attribute) and a number of redshift values.
+
+        Args:
+            Pd1d1 (array_like): 1-loop matter power spectrum at the
+                wavenumber values given by this object's `ks` list.
+            g4 (array_like): fourth power of the growth factor at
+                a number of redshifts.
+            c1 (array_like): 1-st order bias for the IA
+                tracer being correlated at the same set of input
+                redshifts.
+            c2 (array_like): 2-nd order bias for the IA
+                tracer being correlated at the same set of input
+                redshifts.
+            cd (array_like): overdensity bias for the IA
+                tracer being correlated at the same set of input
+                redshifts.
+
+        Returns:
+            array_like: 2D array of shape `(N_k, N_z)`, where `N_k` \
+                is the size of this object's `ks` attribute, and \
+                `N_z` is the size of the input redshift-dependent \
+                biases and growth factor.
+        """
+        a00e, c00e, a0e0e, a0b0b = self.ia_ta
+        a0e2, b0e2, d0ee2, d0bb2 = self.ia_mix
 
         # TODO: someone else should check this
         pim = (c1[None, :] * Pd1d1 +
@@ -153,16 +248,43 @@ class PTCalculator(object):
 
         return pim
 
-    def get_pgi(self, ta_fpt, mix_fpt, Pd1d1,
-                g4, b1, c1, c2, cd):
+    def get_pgi(self, Pd1d1, g4, b1, b2, bs, c1, c2, cd):
+        """ Get the number counts - IA cross-spectrum at the
+        internal set of wavenumbers (given by this object's
+        `ks` attribute) and a number of redshift values.
+
+        Args:
+            Pd1d1 (array_like): 1-loop matter power spectrum at the
+                wavenumber values given by this object's `ks` list.
+            g4 (array_like): fourth power of the growth factor at
+                a number of redshifts.
+            b1 (array_like): 1-st order bias for the number counts
+                being correlated at the same set of input redshifts.
+            b2 (array_like): 2-nd order bias for the number counts
+                being correlated at the same set of input redshifts.
+            bs (array_like): tidal bias for the number counts
+                being correlated at the same set of input redshifts.
+            c1 (array_like): 1-st order bias for the IA tracer
+                being correlated at the same set of input redshifts.
+            c2 (array_like): 2-nd order bias for the IA tracer
+                being correlated at the same set of input redshifts.
+            cd (array_like): overdensity bias for the IA tracer
+                being correlated at the same set of input redshifts.
+
+        Returns:
+            array_like: 2D array of shape `(N_k, N_z)`, where `N_k` \
+                is the size of this object's `ks` attribute, and \
+                `N_z` is the size of the input redshift-dependent \
+                biases and growth factor.
+        """
         warnings.warn(
             "The full non-linear model for the cross-correlation "
             "between number counts and intrinsic alignments is "
             "still work in progress in FastPT. As a workaround "
             "CCL assumes a non-linear treatment of IAs, but only "
             "linearly biased number counts.")
-        a00e, c00e, a0e0e, a0b0b = ta_fpt
-        a0e2, b0e2, d0ee2, d0bb2 = mix_fpt
+        a00e, c00e, a0e0e, a0b0b = self.ia_ta
+        a0e2, b0e2, d0ee2, d0bb2 = self.ia_mix
 
         # TODO: someone else should check this
         pim = b1[None, :] * (c1[None, :] * Pd1d1 +
@@ -171,11 +293,39 @@ class PTCalculator(object):
 
         return pim
 
-    def get_pii(self, tt_fpt, ta_fpt, mix_fpt, Pd1d1,
-                g4, c11, c21, cd1, c12, c22, cd2, return_bb=False):
-        a00e, c00e, a0e0e, a0b0b = ta_fpt
-        ae2e2, ab2b2 = tt_fpt
-        a0e2, b0e2, d0ee2, d0bb2 = mix_fpt
+    def get_pii(self, Pd1d1, g4, c11, c21, cd1,
+                c12, c22, cd2, return_bb=False):
+        """ Get the intrinsic alignment auto-spectrum at the internal
+        set of wavenumbers (given by this object's `ks` attribute)
+        and a number of redshift values.
+
+        Args:
+            Pd1d1 (array_like): 1-loop matter power spectrum at the
+                wavenumber values given by this object's `ks` list.
+            g4 (array_like): fourth power of the growth factor at
+                a number of redshifts.
+            c11 (array_like): 1-st order bias for the first tracer
+                being correlated at the same set of input redshifts.
+            c21 (array_like): 2-nd order bias for the first tracer
+                being correlated at the same set of input redshifts.
+            cd1 (array_like): overdensity bias for the first tracer
+                being correlated at the same set of input redshifts.
+            c12 (array_like): 1-st order bias for the second tracer
+                being correlated at the same set of input redshifts.
+            c22 (array_like): 2-nd order bias for the second tracer
+                being correlated at the same set of input redshifts.
+            cd2 (array_like): overdensity bias for the second tracer
+                being correlated at the same set of input redshifts.
+
+        Returns:
+            array_like: 2D array of shape `(N_k, N_z)`, where `N_k` \
+                is the size of this object's `ks` attribute, and \
+                `N_z` is the size of the input redshift-dependent \
+                biases and growth factor.
+        """
+        a00e, c00e, a0e0e, a0b0b = self.ia_ta
+        ae2e2, ab2b2 = self.ia_tt
+        a0e2, b0e2, d0ee2, d0bb2 = self.ia_mix
 
         if return_bb:
             pii = ((cd1*cd2)[None, :] * a0b0b[:, None] +
@@ -198,13 +348,50 @@ class PTCalculator(object):
 # to be initialized.
 # The nice thing about separating is that it is (probably)
 # easier to store the PTworkspace to avoid re-initializing.
-# DAM: we can have the best of both worlds. Make w an optional
+# DAM: we can have the best of both worlds. Make ptc an optional
 # argument that defaults to None. If you don't pass it, then it
 # gets initialized based on the input tracers.
-def get_pt_pk2d(cosmo, w, tracer1, tracer2=None,
+def get_pt_pk2d(cosmo, tracer1, ptc=None, tracer2=None,
                 sub_lowk=False, use_nonlin=True, a_arr=None,
                 extrap_order_lok=1, extrap_order_hik=2,
                 return_ia_bb=False):
+    """Returns a :class:`~pyccl.pk2d.Pk2D` object containing
+    the PT power spectrum for two quantities defined by
+    two :class:`~pyccl.nl_pt.tracers.PTTracer` objects.
+
+    Args:
+        cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
+        tracer1 (:class:`~pyccl.nl_pt.tracers.PTTracer`): the first
+            tracer being correlated.
+        ptc (:class:`PTCalculator`): a perturbation theory
+            calculator.
+        tracer2 (:class:`~pyccl.nl_pt.tracers.PTTracer`): the second
+            tracer being correlated. If `None`, the auto-correlation
+            of the first tracer will be returned.
+        sub_lowk (bool): if True, the small-scale white noise
+            contribution will be subtracted for number counts
+            auto-correlations.
+        use_nonlin (bool): if True, use the non-linear matter power
+            spectrum as the 1-loop power spectrum. Otherwise the
+            linear matter power spectrum will be used.
+        a_arr (array): an array holding values of the scale factor
+            at which the halo model power spectrum should be
+            calculated for interpolation. If `None`, the internal
+            values used by `cosmo` will be used.
+        extrap_order_lok (int): extrapolation order to be used on
+            k-values below the minimum of the splines. See
+            :class:`~pyccl.pk2d.Pk2D`.
+        extrap_order_hik (int): extrapolation order to be used on
+            k-values above the maximum of the splines. See
+            :class:`~pyccl.pk2d.Pk2D`.
+        return_ia_bb (bool): if `True`, the B-mode power spectrum
+            for intrinsic alignments will be returned (if both
+            input tracers are of type
+            :class:`~pyccl.nl_pt.tracers.PTIntrinsicAlignmentTracer`).
+
+    Returns:
+        :class:`~pyccl.pk2d.Pk2D`: PT power spectrum.
+    """
     # TODO: Restore ability to pass in pk.
     # Could be useful for custom cases where
     # interpolated Plin isn't needed.
@@ -224,19 +411,26 @@ def get_pt_pk2d(cosmo, w, tracer1, tracer2=None,
     if not isinstance(tracer2, PTTracer):
         raise TypeError("tracer2 must be of type `PTTracer`")
 
+    if ptc is None:
+        ptc = PTCalculator()
+    if not isinstance(ptc, PTCalculator):
+        raise TypeError("ptc should be of type `PTCalculator`")
+
     if (tracer1.type == 'NC') or (tracer2.type == 'NC'):
-        if not w.with_NC:
+        if not ptc.with_NC:
             raise ValueError("Need number counts bias, "
                              "but workspace didn't compute it")
     if (tracer1.type == 'IA') or (tracer2.type == 'IA'):
-        if not w.with_IA:
+        if not ptc.with_IA:
             raise ValueError("Need intrinsic alignment bias, "
                              "but workspace didn't compute it")
 
     # z
     z_arr = 1. / a_arr - 1
     # P_lin(k) at z=0
-    pk_lin_z0 = linear_matter_power(cosmo, w.ks, 1.)
+    pk_lin_z0 = linear_matter_power(cosmo, ptc.ks, 1.)
+    ptc.update_pk(pk_lin_z0)
+
     # Linear growth factor
     ga = growth_factor(cosmo, a_arr)
     ga2 = ga**2
@@ -250,17 +444,16 @@ def get_pt_pk2d(cosmo, w, tracer1, tracer2=None,
     # We will eventually want options here, e.g. to use pert theory
     # instead of halofit.
     if use_nonlin:
-        Pd1d1 = np.array([nonlin_matter_power(cosmo, w.ks, a)
+        Pd1d1 = np.array([nonlin_matter_power(cosmo, ptc.ks, a)
                           for a in a_arr]).T
     else:
-        Pd1d1 = np.array([linear_matter_power(cosmo, w.ks, a)
+        Pd1d1 = np.array([linear_matter_power(cosmo, ptc.ks, a)
                           for a in a_arr]).T
 
     if (tracer1.type == 'NC'):
         b11 = tracer1.b1(z_arr)
         b21 = tracer1.b2(z_arr)
         bs1 = tracer1.b2(z_arr)
-        bias_fpt = w.get_dd_bias(pk_lin_z0)
         if (tracer2.type == 'NC'):
             b12 = tracer2.b1(z_arr)
             b22 = tracer2.b2(z_arr)
@@ -269,19 +462,18 @@ def get_pt_pk2d(cosmo, w, tracer1, tracer2=None,
             # TODO: we're not using the 1-loop calculation at all
             #   (i.e. bias_fpt[0]).
             # Should we allow users to select that as Pd1d1?
-            p_pt = w.get_pgg(bias_fpt, Pd1d1, ga4,
-                             b11, b21, bs1, b12, b22, bs2,
-                             sub_lowk)
+            p_pt = ptc.get_pgg(Pd1d1, ga4,
+                               b11, b21, bs1, b12, b22, bs2,
+                               sub_lowk)
         elif (tracer2.type == 'IA'):
             c12 = tracer2.c1(z_arr)
             c22 = tracer2.c2(z_arr)
             cd2 = tracer2.cdelta(z_arr)
-            ta_fpt, tt_fpt, mix_fpt = w.get_ia_bias(pk_lin_z0)
-            p_pt = w.get_pgi(ta_fpt, mix_fpt, Pd1d1, ga4,
-                             b11, c12, c22, cd2)
+            p_pt = ptc.get_pgi(Pd1d1, ga4,
+                               b11, b21, bs1, c12, c22, cd2)
         elif (tracer2.type == 'M'):
-            p_pt = w.get_pgm(bias_fpt, Pd1d1, ga4,
-                             b11, b21, bs1)
+            p_pt = ptc.get_pgm(Pd1d1, ga4,
+                               b11, b21, bs1)
         else:
             raise NotImplementedError("Combination %s-%s not implemented yet" %
                                       (tracer1.type, tracer2.type))
@@ -289,24 +481,22 @@ def get_pt_pk2d(cosmo, w, tracer1, tracer2=None,
         c11 = tracer1.c1(z_arr)
         c21 = tracer1.c2(z_arr)
         cd1 = tracer1.cdelta(z_arr)
-        ta_fpt, tt_fpt, mix_fpt = w.get_ia_bias(pk_lin_z0)
         if (tracer2.type == 'IA'):
             c12 = tracer2.c1(z_arr)
             c22 = tracer2.c2(z_arr)
             cd2 = tracer2.cdelta(z_arr)
-            p_pt = w.get_pii(tt_fpt, ta_fpt, mix_fpt, Pd1d1, ga4,
-                             c11, c21, cd1, c12, c22, cd2,
-                             return_bb=return_ia_bb)
+            p_pt = ptc.get_pii(Pd1d1, ga4,
+                               c11, c21, cd1, c12, c22, cd2,
+                               return_bb=return_ia_bb)
         elif (tracer2.type == 'NC'):
             b12 = tracer2.b1(z_arr)
             b22 = tracer2.b2(z_arr)
             bs2 = tracer2.b2(z_arr)
-
-            p_pt = w.get_pgi(ta_fpt, mix_fpt, Pd1d1, ga4,
-                             b12, c11, c21, cd1)
+            p_pt = ptc.get_pgi(Pd1d1, ga4,
+                               b12, b22, bs2, c11, c21, cd1)
         elif (tracer2.type == 'M'):
-            p_pt = w.get_pim(ta_fpt, mix_fpt, Pd1d1, ga4,
-                             c11, c21, cd1)
+            p_pt = ptc.get_pim(Pd1d1, ga4,
+                               c11, c21, cd1)
         else:
             raise NotImplementedError("Combination %s-%s not implemented yet" %
                                       (tracer1.type, tracer2.type))
@@ -315,16 +505,14 @@ def get_pt_pk2d(cosmo, w, tracer1, tracer2=None,
             b12 = tracer2.b1(z_arr)
             b22 = tracer2.b2(z_arr)
             bs2 = tracer2.b2(z_arr)
-            bias_fpt = w.get_dd_bias(pk_lin_z0)
-            p_pt = w.get_pgm(bias_fpt, Pd1d1, ga4,
-                             b12, b22, bs2)
+            p_pt = ptc.get_pgm(Pd1d1, ga4,
+                               b12, b22, bs2)
         elif (tracer2.type == 'IA'):
             c12 = tracer2.c1(z_arr)
             c22 = tracer2.c2(z_arr)
             cd2 = tracer2.cdelta(z_arr)
-            ta_fpt, tt_fpt, mix_fpt = w.get_ia_bias(pk_lin_z0)
-            p_pt = w.get_pim(ta_fpt, mix_fpt, Pd1d1, ga4,
-                             c12, c22, cd2)
+            p_pt = ptc.get_pim(Pd1d1, ga4,
+                               c12, c22, cd2)
         elif (tracer2.type == 'M'):
             p_pt = Pd1d1
         else:
@@ -350,7 +538,7 @@ def get_pt_pk2d(cosmo, w, tracer1, tracer2=None,
     # Once you have created the 2-dimensional P(k) array,
     # then generate a Pk2D object as described in pk2d.py.
     pt_pk = Pk2D(a_arr=a_arr,
-                 lk_arr=np.log(w.ks),
+                 lk_arr=np.log(ptc.ks),
                  pk_arr=p_pt.T,
                  is_logp=False)
 
