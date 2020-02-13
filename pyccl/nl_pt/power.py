@@ -1,11 +1,11 @@
 import warnings
 import numpy as np
-from . import ccllib as lib
-from .core import check
-from .pk2d import Pk2D
-from .pt_tracers import PTTracer
-from .power import linear_matter_power, nonlin_matter_power
-from .background import growth_factor
+from .. import ccllib as lib
+from ..core import check
+from ..pk2d import Pk2D
+from ..power import linear_matter_power, nonlin_matter_power
+from ..background import growth_factor
+from .tracers import PTTracer
 
 try:
     import fastpt as fpt

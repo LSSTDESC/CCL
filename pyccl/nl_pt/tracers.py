@@ -1,6 +1,6 @@
 import numpy as np
 from scipy.interpolate import interp1d
-from .pyutils import _check_array_params
+from ..pyutils import _check_array_params
 
 
 class PTTracer(object):
