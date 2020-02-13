@@ -1,5 +1,7 @@
 # Unreleased
 ## Python library
+- Generalized Tinker mass function to all SO mass definitions (#736)
+- Deprecated old halo model (#736)
 - Added a "spline" integration method to carry out Limber integrals.
 - Added a function for the angular diameter distance difference between two scale factors (#645)
 - Extended implementation of halo profiles (#722).
@@ -9,6 +11,7 @@
 - Improved implementation of halo model quantities (n(M), b(M), c(M)) (#668, #655, #656, #657, #636).
 
 ## C library
+- Deprecated old halo model (#736)
 - Added a "spline" integration method to carry out Limber integrals.
 - Added function for the angular diameter distance difference between two scale factors (#645)
 - Removed old C/C++ examples (#725)
