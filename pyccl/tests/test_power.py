@@ -14,6 +14,37 @@ COSMO_HM = ccl.Cosmology(
     mass_function='shethtormen')
 
 
+def test_halomod_f2d_copy():
+    mdef = ccl.halos.MassDef('vir', 'matter')
+    hmf = ccl.halos.MassFuncSheth99(COSMO_HM, mdef,
+                                    mass_def_strict=False,
+                                    use_delta_c_fit=True)
+    hbf = ccl.halos.HaloBiasSheth99(COSMO_HM, mass_def=mdef,
+                                    mass_def_strict=False)
+    cc = ccl.halos.ConcentrationDuffy08(mdef)
+    prf = ccl.halos.HaloProfileNFW(cc)
+    hmc = ccl.halos.HMCalculator(COSMO_HM, hmf, hbf, mdef)
+    pk2d = ccl.halos.halomod_Pk2D(COSMO_HM, hmc, prf, normprof1=True)
+    psp_new = pk2d.psp
+    # This just triggers the internal calculation
+    pk_old = ccl.nonlin_matter_power(COSMO_HM, 1., 0.8)
+    pk_new = pk2d.eval(1., 0.8, COSMO_HM)
+    psp_old = COSMO_HM.cosmo.data.p_nl
+    assert psp_new.lkmin == psp_old.lkmin
+    assert psp_new.lkmax == psp_old.lkmax
+    assert psp_new.amin == psp_old.amin
+    assert psp_new.amax == psp_old.amax
+    assert psp_new.is_factorizable == psp_old.is_factorizable
+    assert psp_new.is_k_constant == psp_old.is_k_constant
+    assert psp_new.is_a_constant == psp_old.is_a_constant
+    assert psp_new.is_log == psp_old.is_log
+    assert psp_new.growth_factor_0 == psp_old.growth_factor_0
+    assert psp_new.growth_exponent == psp_old.growth_exponent
+    assert psp_new.extrap_order_lok == psp_old.extrap_order_lok
+    assert psp_new.extrap_order_hik == psp_old.extrap_order_hik
+    assert pk_old == pk_new
+
+
 @pytest.mark.parametrize('k', [
     1,
     1.0,
