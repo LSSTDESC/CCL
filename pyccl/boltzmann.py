@@ -310,7 +310,7 @@ def get_isitgr_pk_lin(cosmo):
 
     # run ISITGR and get results
     isitgr_res = isitgr.get_results(cp)
-    k, z, pk = isitgr.get_linear_matter_power_spectrum(
+    k, z, pk = isitgr_res.get_linear_matter_power_spectrum(
         hubble_units=True, nonlinear=False)
 
     # convert to non-h inverse units
