@@ -198,11 +198,14 @@ void ccl_cosmology_spline_linpower_musigma(ccl_cosmology* cosmo, ccl_f2d_t *psp,
             psout_l = ccl_f2d_t_eval(psp, lk[i], aa[j], cosmo, status);
 	    if (isitgr_flag == 1) {
             lpk_ln[j*nk+i] = log(psout_l) ;
-	    printf("isitgr no rescaled %d", isitgr_flag);
+//	    printf("isitgr no-rescaling %d", isitgr_flag); 
+//	    printf("mu ---> %f\n", cosmo->params.mu_0); 
+//	    printf("sigma ---> %f\n", cosmo->params.sigma_0); 
+//	    printf("sigma ---> %d\n", cosmo->config.transfer_function_method); 
 	    }
 	    else {
             lpk_ln[j*nk+i] = log(psout_l) + 2 * log(D_mu[j]) - 2 * log(D_GR[j]);
-	    printf("rescaled %d", isitgr_flag);
+//	    printf("rescaling matter spectrum %d", isitgr_flag); 
 	    }
 
           }
