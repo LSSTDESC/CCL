@@ -57,22 +57,9 @@ class PTCalculator(object):
         assert HAVE_FASTPT, (
                 "You must have the `FASTPT` python package "
                 "installed to use CCL to get PT observables!")
-        # TODO: JAB: I think we want to restore the option to pass
-        # in a k_array and let the workspace perform the check.
-        # Then we can also pass in the corresponding power spectrum,
-        # if desired, in get_pt_pk2d
-        # DAM: hmmm, what's the point of this? We know that FastPT
-        # will only work for logarithmically spaced ks, right? In that
-        # in that case we should force it on the users so that
-        # nothing unexpected happens. Note that this doesn't limit
-        # at all what ks you can evaluate the power spectra at,
-        # since everything gets interpolated at the end.
+                
         self.with_NC = with_NC
         self.with_IA = with_IA
-        # TODO: what is this?
-        # (JAB: These are fastpt settings that determine how smoothing
-        # is done at the edges to avoid ringing, etc)
-        # OK, we need to document this.
         self.P_window = P_window
         self.C_window = C_window
 
@@ -106,7 +93,6 @@ class PTCalculator(object):
     def _get_dd_bias(self, pk):
         # Precompute quantities needed for number counts
         # power spectra.
-        # TODO: should we use one_loop_dd_bias_b3nl instead of this?
         self.dd_bias = self.pt.one_loop_dd_bias(pk,
                                                 P_window=self.P_window,
                                                 C_window=self.C_window)
@@ -168,7 +154,6 @@ class PTCalculator(object):
             s4 = g4 * self.dd_bias[7]
             s4 = s4[None, :]
 
-        # TODO: someone else should check this
         pgg = ((b11*b12)[None, :] * Pd1d1 +
                0.5*(b11*b22 + b12*b21)[None, :] * Pd1d2 +
                0.25*(b21*b22)[None, :] * (Pd2d2 - 2.*s4) +
@@ -206,7 +191,6 @@ class PTCalculator(object):
         Pd1d2 = g4[None, :] * self.dd_bias[2][:, None]
         Pd1s2 = g4[None, :] * self.dd_bias[4][:, None]
 
-        # TODO: someone else should check this
         pgm = (b1[None, :] * Pd1d1 +
                0.5 * b2[None, :] * Pd1d2 +
                0.5 * bs[None, :] * Pd1s2)
@@ -241,7 +225,6 @@ class PTCalculator(object):
         a00e, c00e, a0e0e, a0b0b = self.ia_ta
         a0e2, b0e2, d0ee2, d0bb2 = self.ia_mix
 
-        # TODO: someone else should check this
         pim = (c1[None, :] * Pd1d1 +
                (g4*cd)[None, :] * (a00e + c00e)[:, None] +
                (g4*c2)[None, :] * (a0e2 + b0e2)[:, None])
@@ -286,7 +269,6 @@ class PTCalculator(object):
         a00e, c00e, a0e0e, a0b0b = self.ia_ta
         a0e2, b0e2, d0ee2, d0bb2 = self.ia_mix
 
-        # TODO: someone else should check this
         pim = b1[None, :] * (c1[None, :] * Pd1d1 +
                              (g4*cd)[None, :] * (a00e + c00e)[:, None] +
                              (g4*c2)[None, :] * (a0e2 + b0e2)[:, None])
@@ -340,17 +322,6 @@ class PTCalculator(object):
                    ((cd1*c22 + cd2*c21)*g4)[None, :] * d0ee2[:, None])
         return pii
 
-
-# TODO: Do we definitely want to split these into two steps?
-# Is there a way to do this in a single call.
-# The nice thing about the old way, other than simplicity.
-# was that the PTTracers contained the info about what needed
-# to be initialized.
-# The nice thing about separating is that it is (probably)
-# easier to store the PTworkspace to avoid re-initializing.
-# DAM: we can have the best of both worlds. Make ptc an optional
-# argument that defaults to None. If you don't pass it, then it
-# gets initialized based on the input tracers.
 def get_pt_pk2d(cosmo, tracer1, ptc=None, tracer2=None,
                 sub_lowk=False, use_nonlin=True, a_arr=None,
                 extrap_order_lok=1, extrap_order_hik=2,
@@ -387,16 +358,12 @@ def get_pt_pk2d(cosmo, tracer1, ptc=None, tracer2=None,
         return_ia_bb (bool): if `True`, the B-mode power spectrum
             for intrinsic alignments will be returned (if both
             input tracers are of type
-            :class:`~pyccl.nl_pt.tracers.PTIntrinsicAlignmentTracer`).
+            :class:`~pyccl.nl_pt.tracers.PTIntrinsicAlignmentTracer`)
+            If `False` (default) E-mode power spectrum is returned.
 
     Returns:
         :class:`~pyccl.pk2d.Pk2D`: PT power spectrum.
     """
-    # TODO: Restore ability to pass in pk.
-    # Could be useful for custom cases where
-    # interpolated Plin isn't needed.
-    # And could help with speed-up in some cases.
-    # DAM: Can you describe a case when this is useful?
 
     if a_arr is None:
         status = 0
@@ -419,11 +386,11 @@ def get_pt_pk2d(cosmo, tracer1, ptc=None, tracer2=None,
     if (tracer1.type == 'NC') or (tracer2.type == 'NC'):
         if not ptc.with_NC:
             raise ValueError("Need number counts bias, "
-                             "but workspace didn't compute it")
+                             "but calculator didn't compute it")
     if (tracer1.type == 'IA') or (tracer2.type == 'IA'):
         if not ptc.with_IA:
             raise ValueError("Need intrinsic alignment bias, "
-                             "but workspace didn't compute it")
+                             "but calculator didn't compute it")
 
     # z
     z_arr = 1. / a_arr - 1
@@ -435,14 +402,10 @@ def get_pt_pk2d(cosmo, tracer1, ptc=None, tracer2=None,
     ga = growth_factor(cosmo, a_arr)
     ga2 = ga**2
     ga4 = ga2**2
-    # NOTE: we should add an option that does PT at every a value.
-    # This isn't hard, it just takes longer.
 
     # Now compute the Pk using FASTPT
     # First, get P_d1d1 (the delta delta correlation), which could
     # be linear or nonlinear.
-    # We will eventually want options here, e.g. to use pert theory
-    # instead of halofit.
     if use_nonlin:
         Pd1d1 = np.array([nonlin_matter_power(cosmo, ptc.ks, a)
                           for a in a_arr]).T
@@ -521,19 +484,6 @@ def get_pt_pk2d(cosmo, tracer1, ptc=None, tracer2=None,
     else:
         raise NotImplementedError("Combination %s-%s not implemented yet" %
                                   (tracer1.type, tracer2.type))
-
-    # I've initialized the tracers to None, assuming that,
-    # if tracer2 is None, then the assumption is that
-    # it is the same as tracer_1.
-
-    # for matter cross correlation, we will use (for now) a
-    # PTNumberCounts tracer with b1=1 and all other bias = 0
-
-    # at some point, do we want to store an spline array for these
-    # pt power?
-
-    # nonlinear bias cross-terms with IA are currently missing from
-    # here and from FASTPT come back to this.
 
     # Once you have created the 2-dimensional P(k) array,
     # then generate a Pk2D object as described in pk2d.py.
