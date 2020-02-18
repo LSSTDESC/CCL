@@ -322,7 +322,7 @@ class PTCalculator(object):
                    ((cd1*c22 + cd2*c21)*g4)[None, :] * d0ee2[:, None])
         return pii
 
-def get_pt_pk2d(cosmo, tracer1, ptc=None, tracer2=None,
+def get_pt_pk2d(cosmo, tracer1, tracer2=None, ptc=None,
                 sub_lowk=False, use_nonlin=True, a_arr=None,
                 extrap_order_lok=1, extrap_order_hik=2,
                 return_ia_bb=False):
