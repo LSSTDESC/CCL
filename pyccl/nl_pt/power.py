@@ -310,11 +310,11 @@ class PTCalculator(object):
         a0e2, b0e2, d0ee2, d0bb2 = self.ia_mix
 
         if return_bb:
-            pii = ((cd1*cd2)[None, :] * a0b0b[:, None] +
-                   (cd1*c22*g4)[None, :] * ab2b2[:, None] +
-                   ((cd1*c22 + cd1*c21)*g4)[None, :] * d0bb2[:, None])
+            pii = ((cd1*cd2*g4)[None, :] * a0b0b[:, None] +
+                   (c21*c22*g4)[None, :] * ab2b2[:, None] +
+                   ((cd1*c22 + c21*cd2)*g4)[None, :] * d0bb2[:, None])
         else:
-            pii = ((c11*c12*g4)[None, :] * Pd1d1 +
+            pii = ((c11*c12)[None, :] * Pd1d1 +
                    ((c11*cd2 + c12*cd1)*g4)[None, :] * (a00e + c00e)[:, None] +
                    (cd1*cd2*g4)[None, :] * a0e0e[:, None] +
                    (c21*c22*g4)[None, :] * ae2e2[:, None] +
