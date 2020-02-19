@@ -459,8 +459,6 @@ def get_pt_pk2d(cosmo, tracer1, tracer2=None, ptc=None,
             Pd1d1 = np.array([nonlin_matter_power(cosmo, ptc.ks, a)
                               for a in a_arr]).T
         elif nonlin_type == 'spt':
-            # Pass linear Pk here.
-			# The one_loop contribution will be added once it is calculated by FAST-PT.
             Pd1d1_lin = np.array([linear_matter_power(cosmo, ptc.ks, a)
                                       for a in a_arr]).T
             Pd1d1 = ptc.get_pmm(Pd1d1_lin,ga4)
